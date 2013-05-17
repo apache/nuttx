@@ -1,5 +1,20 @@
+NuttX Release Notes
+===================
+
+This file contaions are the release notes for the NuttX (and apps) packages
+for every release.  The text is just as was written at the time of release
+(with perhaps some corrected typos).  Over the course of time, NuttX has
+used several different repositiories:  CVS, two SVN repositories, and
+currently a GIT repository.  Therefore, revision information specific to an
+older repository may not be meaningful today.
+
+To make it easier to track there older versions in the current GIT
+repository, a GIT lightweight tag has been applied for each release.  The
+tag name is the release name (for example, the release 6.27 has tag name
+"nuttx-6.27").
+
 NuttX-0.1.0
-^^^^^^^^^^^
+-----------
 
 This is the initial.  This initial includes the complete NuttX RTOS
 with support for the Linux user mode simulation and the TI TMS320C5471
@@ -12,7 +27,7 @@ for the C5471 can be found in arch/c5471/doc/test-results.txt.
 This tarball contains a complete CVS snapshot from March 9,2007.
 
 NuttX-0.1.1
-^^^^^^^^^^^
+-----------
 
 This is the second release of NuttX.  This release includes the following.
 See the ChangeLog for more detailed description of the changes.
@@ -34,11 +49,11 @@ is performed.
 This tarball contains a complete CVS snapshot from March 14, 2007.
 
 NuttX-0.1.2
-^^^^^^^^^^^
+-----------
 
 This is the third release of NuttX.  This release is
 primarily a bugfix release with minimal new features.  See
-the ChangeLog for a more detailed description of the 
+the ChangeLog for a more detailed description of the
 changes.
 
 (1) Several important OS and ARM7 bugfixes,
@@ -48,14 +63,14 @@ changes.
 (5) Added 'ls' command to NuttShell (nsh)
 (6) Added a test of the round robin scheduler
 
-This release has been verified on the Linux user-mode 
+This release has been verified on the Linux user-mode
 platform, the  Spectrum Digital TMS320C5471 EVM using the
 test program under examples/ostest.
 
 This tarball contains a CVS snapshot from March 19, 2007.
 
 NuttX-0.2.1
-^^^^^^^^^^^
+-----------
 
 This is the fourth release of NuttX.  This release adds adds
 support for a new platform, restructures many header files,
@@ -67,8 +82,8 @@ and adds a few new features:
 (4) Added POSIX timers
 (5) bugfixes and documentation updates
 
-This release has been verified on the Linux user-mode 
-platform, the  Spectrum Digital TMS320C5471 EVM, and the 
+This release has been verified on the Linux user-mode
+platform, the  Spectrum Digital TMS320C5471 EVM, and the
 Neuros OSD  using the test program under examples/ostest.  Because
 of the stability of these tests, the project status
 has been upgraded to 'beta.'
@@ -76,7 +91,7 @@ has been upgraded to 'beta.'
 This tarball contains a complete CVS snapshot from March 22, 2007.
 
 NuttX-0.2.2
-^^^^^^^^^^^^
+------------
 
 This is the fifth release of NuttX.  There is no major new
 functionality in this release.  This release adds support
@@ -97,7 +112,7 @@ This tarball contains a complete CVS snapshot from
 March 26, 2007.
 
 NuttX-0.2.3
-^^^^^^^^^^^^
+------------
 
 This is the sixth release of NuttX.  This release is
 primarily a bugfix release.  Numerous problems were fixed
@@ -106,7 +121,7 @@ support for timed message queues.
 
 See the ChangeLog for a complete list of changes.
 
-This release has been verified on the Linux user-mode 
+This release has been verified on the Linux user-mode
 platform and the Neuros OSD using the test program under
 examples/ostest. The results of the testing is available in
 the source tree under configs/ntosd-dm320/doc/test-results.
@@ -118,7 +133,7 @@ This tarball contains a complete CVS snapshot from March 29,
 2007.
 
 NuttX-0.2.4
-^^^^^^^^^^^^
+------------
 
 This is the 7th release of NuttX.  This release is only to roll out
 build changes to better support different SoC's that use the same
@@ -139,17 +154,17 @@ remains at 'beta' status pending further test and evaluation.
 This tarball contains a complete CVS snapshot from April 28, 2007.
 
 NuttX-0.2.5
-^^^^^^^^^^^^
+------------
 
 This is the 8th release of NuttX.  This release includes:
 
 (1) Several bug fixes
 (2) Initial support for FAT filesystems.  Testing has not
     been exhaustive and some functionality is missing
-   (mkdir, stat, unlink chmod, and rename functionality is 
+   (mkdir, stat, unlink chmod, and rename functionality is
     not yet implemented).
 (3) Support for the NXP lpc2148 processor is included but
-    is untested as of this writing.  The current 
+    is untested as of this writing.  The current
     implementation includes only support for serial console
     and timer interrupt.
 
@@ -162,7 +177,7 @@ This tarball contains a complete CVS snapshot from May 19,
 2007.
 
 NuttX-0.2.6
-^^^^^^^^^^^
+-----------
 
 This is the 9th release of NuttX.  This is primarily a
 bugfix release to correct a number of problems introduced
@@ -180,7 +195,7 @@ This release has been verified only on the Linux user-mode platform.
 This tarball contains a complete CVS snapshot from May 26, 2007.
 
 NuttX-0.2.7
-^^^^^^^^^^^
+-----------
 
 This is the 10th release of NuttX.  This is primarily a bugfix
 release to correct a number of problems reported to me (thanks
@@ -196,7 +211,7 @@ This release has been verified only on the Linux user-mode platform.
 This tarball contains a complete CVS snapshot from June 9, 2007.
 
 NuttX-0.2.8
-^^^^^^^^^^^
+-----------
 
 This is the 11th release of NuttX.  This release:
 (1) corrects important bugs in opendir() and realloc()
@@ -211,7 +226,7 @@ This release has been verified only on the Linux user-mode platform.
 This tarball contains a complete CVS snapshot from July 2, 2007.
 
 NuttX-0.3.0
-^^^^^^^^^^^
+-----------
 
 This is the 12th release of NuttX.  This release includes the initial
 integration of a network subsystem and the uIP TCP/IP stack into NuttX
@@ -235,7 +250,7 @@ platform using the DM90x0 driver.
 This tarball contains a complete CVS snapshot from November 6, 2007.
 
 NuttX-0.3.1
-^^^^^^^^^^^
+-----------
 
 This is the 13th release of NuttX and the second release containing
 the integration of a network subsystem and the uIP TCP/IP, UDP, and
@@ -259,7 +274,7 @@ platform using the DM90x0 driver.
 This tarball contains a complete CVS snapshot from November 19, 2007.
 
 NuttX-0.3.2
-^^^^^^^^^^^
+-----------
 
 This is the 14th release of NuttX and the 3rd release containing
 the integration of a network subsystem and the uIP TCP/IP, UDP, and
@@ -287,7 +302,7 @@ platform using the DM90x0 driver.
 This tarball contains a complete CVS snapshot from November 23, 2007.
 
 NuttX-0.3.3
-^^^^^^^^^^^
+-----------
 
 This is the 15th release of NuttX and the 4th release containing
 the integration of a network subsystem and the uIP TCP/IP, UDP, and
@@ -319,7 +334,7 @@ reliability/performance would be greatly appreciated.
 This tarball contains a complete CVS snapshot from November 28, 2007.
 
 NuttX-0.3.4
-^^^^^^^^^^^
+-----------
 
 This is the 16th release of NuttX and the 5th release containing
 the integration of a network subsystem and the uIP TCP/IP, UDP, and
@@ -349,7 +364,7 @@ greatly appreciated.
 This tarball contains a complete CVS snapshot from December 10, 2007.
 
 NuttX-0.3.5
-^^^^^^^^^^^
+-----------
 
 This is the 17th release of NuttX this release is primarily a bug-fix
 release and intended to synchronize with the current CVS contents.  See
@@ -362,7 +377,7 @@ improvement would be greatly appreciated.
 This tarball contains a complete CVS snapshot from December 18, 2007.
 
 NuttX-0.3.6
-^^^^^^^^^^^
+-----------
 
 This is the 18th release of NuttX.  This release contains on a few
 changes.  The primary purpose of this release is to synchronize with
@@ -390,7 +405,7 @@ tarball was patched to include the fix.  Make sure that you download
 the nuttx-0.3.6.1.tar.gz version to avoid this problem.
 
 NuttX-0.3.7
-^^^^^^^^^^^
+-----------
 
 This is the 19th release of NuttX.  This release includes the
 preliminary port of NuttX to the ZiLOG z16f 16-bit microcontroller.
@@ -420,7 +435,7 @@ or suggestions for improvement would be greatly appreciated.
 This tarball contains a complete CVS snapshot from January 31, 2008.
 
 NuttX-0.3.8
-^^^^^^^^^^^
+-----------
 
 This is the 20th release of NuttX.  This is a minor bugfix release.
 It corrects a few minor problems, adds a few minor features, and
@@ -430,7 +445,7 @@ add-on.  This release is synchronized with the release of Pascal-0.1.2.
 This tarball contains a complete CVS snapshot from February 10, 2008.
 
 NuttX-0.3.9
-^^^^^^^^^^^
+-----------
 
 This is the 21st release of NuttX.  This is a minor future enhancement
 release.  This release includes support for the ZiLOG Z8Encore! micro-
@@ -443,7 +458,7 @@ chip simulation.
 This tarball contains a complete CVS snapshot from March 9, 2008.
 
 NuttX-0.3.10
-^^^^^^^^^^^^
+------------
 
 This is the 22nd release of NuttX.  This is an important bug fix
 release.  This release incorporates fixes to correct critical list
@@ -454,7 +469,7 @@ chip) and configurations for the ZiLOG z8f64200100kit (Z8F6423) and
 ez80f0910200kitg (EZ80F091) development kit.
 
 NuttX-0.3.11
-^^^^^^^^^^^^
+------------
 
 This is the 23rd release of NuttX.  This is another important bugfix
 release.  This releases fixes several bugs:
@@ -477,7 +492,7 @@ Please report any errors to me.
 This tarball contains a complete CVS snapshot from June 1, 2008.
 
 NuttX-0.3.12
-^^^^^^^^^^^^
+------------
 
 This is the 24th release of NuttX.  This release includes some minor
 bugfixes as well as a few new features.  Bugs fixed include:
@@ -499,7 +514,7 @@ Please report any errors to me.
 This tarball contains a complete CVS snapshot from August 10, 2008.
 
 NuttX-0.3.13
-^^^^^^^^^^^^
+------------
 
 This is the 25th release of NuttX.  This release includes some
 important bugfixes as well as a few new features.  Bugs fixed
@@ -542,7 +557,7 @@ any errors to me.
 This tarball contains a complete CVS snapshot from September 1, 2008.
 
 nutt-0.3.14
-^^^^^^^^^^^
+-----------
 
 This is the 26th release of NuttX.  This release includes some
 important bugfixes as well as a few new features.  Critical bugs
@@ -584,7 +599,7 @@ report any errors to me.
 This tarball contains a complete CVS snapshot from September 8, 2008.
 
 nutt-0.3.15
-^^^^^^^^^^^
+-----------
 
 This is the 27th release of NuttX.  This release includes some new features:
 
@@ -603,7 +618,7 @@ board.  Please report any errors to me.
 This tarball contains a complete CVS snapshot from September 20, 2008.
 
 nutt-0.3.16
-^^^^^^^^^^^
+-----------
 
 This is the 28th release of NuttX.  This release includes the first
 support for USB in NuttX.  A set of USB APIs were added to support
@@ -641,7 +656,7 @@ using with a Linux host.  Please report any errors to me.
 This tarball contains a complete CVS snapshot from October 10, 2008.
 
 UPDATE
-^^^^^^
+------
 This release does not build for the ARM target when USB is disabled.
 Here is the fix:
 
@@ -664,7 +679,7 @@ diff -u -r1.13 up_internal.h
  #endif /* __ASSEMBLY__ */
 
 NuttX-0.3.17
-^^^^^^^^^^^^
+------------
 
 This is the 29th release of NuttX.  This release includes the
 additional support for USB in NuttX.  The following new features
@@ -694,7 +709,7 @@ to me.
 This tarball contains a complete CVS snapshot from October 28, 2008.
 
 NuttX-0.3.18
-^^^^^^^^^^^^
+------------
 
 This is the 30th release of NuttX.  This release includes two
 partially completed ports, several new features, and a couple of
@@ -741,7 +756,7 @@ to me.
 This tarball contains a complete CVS snapshot from November 16, 2008.
 
 NuttX-0.3.19
-^^^^^^^^^^^^
+------------
 
 This is the 31st release of NuttX.  This release includes the
 following new feature:
@@ -781,7 +796,7 @@ Linux development environment. Please report any errors to me.
 This tarball contains a complete CVS snapshot from November 26, 2008.
 
 NuttX-0.4.0
-^^^^^^^^^^^
+-----------
 
 This is the 32nd release of NuttX.  This release adds graphics
 support and a tiny windowing subsystem.  That new graphics subsystem
@@ -803,7 +818,7 @@ and architecture ports.
 This tarball contains a complete CVS snapshot from December 6, 2008.
 
 NuttX-0.4.1
-^^^^^^^^^^^
+-----------
 
 This is the 33rd release of NuttX.  This is a minor bugfix release.
 The primary reason for this release is to correct numerous build
@@ -822,7 +837,7 @@ Please report any errors to me.
 This tarball contains a complete CVS snapshot from February 6, 2009.
 
 NuttX-0.4.2
-^^^^^^^^^^^
+-----------
 
 This is the 34th release of NuttX.  This release adds no new OS
 features but does include support for two new architectures:
@@ -846,7 +861,7 @@ board. Please report any errors to me.
 This tarball contains a complete CVS snapshot from February 28, 2009.
 
 NuttX-0.4.3
-^^^^^^^^^^^
+-----------
 
 This is the 35th release of NuttX.  This release one important new
 OS feature and corrects and extends the eZ80 port:
@@ -869,7 +884,7 @@ Please report any errors to me.
 This tarball contains a complete CVS snapshot from March 13, 2009.
 
 NuttX-0.4.4
-^^^^^^^^^^^
+-----------
 
 This is the 36th release of NuttX.  This release focuses on bugfixes
 and extending and verifying certain networking features.
@@ -890,7 +905,7 @@ report any errors to me.
 This tarball contains a complete CVS snapshot from March 29, 2009.
 
 NuttX-0.4.5
-^^^^^^^^^^^
+-----------
 
 This is the 37th release of NuttX.  This release focuses on a few new features.
 
@@ -909,7 +924,7 @@ See the Changelog for a detailed description of these changes.
 This tarball contains a complete CVS snapshot from April 19, 2009.
 
 NuttX-0.4.6
-^^^^^^^^^^^
+-----------
 
 This is the 38th release of NuttX.  The release features support
 for the Micromint Eagle-100 development board.  This board is based
@@ -931,7 +946,7 @@ bugs were fixed (see the ChangeLog for a complete list of changes).
 This tarball contains a complete CVS snapshot from May 19, 2009.
 
 NuttX-0.4.7
-^^^^^^^^^^^
+-----------
 
 This is the 39th release of NuttX.  This release focuses on cleaning
 up and extending the Eagle100/LM3S6918 port released in nuttx-0.4.6
@@ -951,7 +966,7 @@ FAT32.  See the ChangeLog for details of these bugfixes.
 This tarball contains a complete CVS snapshot from May 29, 2009.
 
 NuttX-0.4.8
-^^^^^^^^^^^
+-----------
 
 This is the 40th release of NuttX.  This release adds:
 
@@ -973,11 +988,11 @@ This is the 40th release of NuttX.  This release adds:
 This tarball contains a complete CVS snapshot from June 13, 2009.
 
 NuttX-0.4.9
-^^^^^^^^^^^
+-----------
 
 This is the 41st release of NuttX.  This release adds:
 
-  * Support for a new binary format call NXFLAT that can be used to 
+  * Support for a new binary format call NXFLAT that can be used to
     execute separately linked programs in place in a file system.
     See http://www.nuttx.org/NuttXNxFlat.html.
 
@@ -987,7 +1002,7 @@ This is the 41st release of NuttX.  This release adds:
 This tarball contains a complete CVS snapshot from June 26, 2009.
 
 NuttX-0.4.10
-^^^^^^^^^^^
+-----------
 
 This is the 42nd release of NuttX.  This released focused on the
 port of Jeff Poskanzer's THTTPD HTTP server (see
@@ -1008,7 +1023,7 @@ related bug-fixes and functional additions for THTTPD were added:
 This tarball contains a complete CVS snapshot from August 8, 2009.
 
 NuttX-0.4.11
-^^^^^^^^^^^^
+------------
 
 This is the 43rd release of NuttX. This release of NuttX incorporates
 the verified port of Jeff Poskanzer's THTTPD HTTP server (see
@@ -1036,7 +1051,7 @@ should consider upgrading to this release.
 This tarball contains a complete CVS snapshot from September 16, 2009
 
 NuttX-0.4.12
-^^^^^^^^^^^^
+------------
 
 This is the 44th release of NuttX.  This release adds basic support
 for the STMicro STM32, Cortex-M3 MCU.  The specific port is to the
@@ -1060,7 +1075,7 @@ included in this 0.4.12 release, but is not yet tested.
 This tarball contains a complete CVS snapshot from October 17, 2009
 
 NuttX-0.4.13
-^^^^^^^^^^^^
+------------
 
 This is the 45th release of NuttX.  The release extends the support
 for the STMicro STM32 microcontroller.  Minimal support for the
@@ -1092,7 +1107,7 @@ This release also corrects some important bugs in the early STM32 release:
 This tarball contains a complete CVS snapshot from November 4, 2009
 
 NuttX-4.14
-^^^^^^^^^^
+----------
 
 This is the 46th release of NuttX.  The release extends the support
 for the STMicro STM32 microcontroller.  Minimal support for the
@@ -1139,7 +1154,7 @@ as many others have done to avoid such confusion.
 This tarball contains a complete CVS snapshot from December 2, 2009
 
 NuttX-5.0
-^^^^^^^^^
+---------
 
 This is 47th release of NuttX and the successor to nuttx-4.14.  This
 major revision number has been incremented to indicate that an
@@ -1197,7 +1212,7 @@ ports are very incomplete as of this writing.
 This tarball contains a complete CVS snapshot from December 21, 2009
 
 NuttX-5.1
-^^^^^^^^^
+---------
 
 This is the 48th release of NuttX.  This release adds support for
 two new MCU architectures in various states of development:
@@ -1237,7 +1252,7 @@ A few additional features and bugfixes of a minor nature were also
 incorporated as detailed in the ChangeLog.
 
 NuttX-5.2
-^^^^^^^^^
+---------
 
 This is the 49th release of NuttX.  This release completes the
 verification of the basic port for the NXP LPC3131 MCU on the
@@ -1251,7 +1266,7 @@ An extended release will follow and should include SDIO-based SD
 card support and device USB.
 
 NuttX-5.3
-^^^^^^^^^
+---------
 
 This is the 50th release of NuttX.  This release support for one new
 architecture:
@@ -1275,7 +1290,7 @@ Two important bugfix was also included:
   * A serious error in the AT91SAM3U PIO handling was fixed.
 
 NuttX-5.4
-^^^^^^^^^
+---------
 
 This is the 51st release of NuttX.  This release includes one new,
 important extension to th NX graphics system (See
@@ -1297,7 +1312,7 @@ extensions plus a driver for the HX8347, 16-bit parallel LCD.  This
 LCD supports 16-bit RGB (5:6:5).
 
 NuttX-5.5
-^^^^^^^^^
+---------
 
 This is the 52nd release of NuttX.  This release includes one new
 port, some new drivers and some important bugfixes:
@@ -1335,7 +1350,7 @@ port, some new drivers and some important bugfixes:
     error.
 
 NuttX-5.6
-^^^^^^^^^
+---------
 
 This is the 53rd release of NuttX.  This release includes one several
 new drivers for existing NuttX ports:
@@ -1361,7 +1376,7 @@ LPC1768 MCU.  However, it is too early for that port to be useful
 port).
 
 NuttX-5.7
-^^^^^^^^^
+---------
 
 This is the 54th release of NuttX.  This release adds basic support
 for one new ARM Cortex-M3 architecture:
@@ -1386,7 +1401,7 @@ Watch for announcement of the completed LPC1768 port expected in
 NuttX-5.8.
 
 NuttX-5.8
-^^^^^^^^^
+---------
 
 This is the 55th release of NuttX.  This includes several important
 bugfixes:
@@ -1422,7 +1437,7 @@ been blocked for a variety of issues:
     with the receipt of multicast packets are likely.
 
 NuttX-5.9
-^^^^^^^^^
+---------
 
 This is the 56th release of NuttX.  This release is difficult to
 categorize; NuttX-5.9 was really released because there were too
@@ -1463,7 +1478,7 @@ This includes several important bugfixes:
     ChangeLog: Warnings, cornercase compilation problems, etc.
 
 NuttX-5.10
-^^^^^^^^^^
+----------
 
 This is the 57th release of NuttX.  This release includes a combination
 of some new features as well as several bugfixes.  New features
@@ -1515,7 +1530,7 @@ include:
     some warnings.  See the ChangeLog for details.
 
 NuttX-5.11
-^^^^^^^^^^
+----------
 
 This is the 58th release of NuttX.  This is a bugfix release.
 
@@ -1534,7 +1549,7 @@ include:
   * A driver for the Atmel AT45DB161D 4Mbit SPI FLASH part
 
 NuttX-5.12
-^^^^^^^^^^
+----------
 
 This is the 59th release of NuttX.  This is a critical bugfix release.
 
@@ -1560,7 +1575,7 @@ Other notable changes in NuttX-5.12:
     ChangeLog.
 
 NuttX-5.13
-^^^^^^^^^^
+----------
 
 This is the 60th release of NuttX.  Headlines for this release
 include:
@@ -1600,7 +1615,7 @@ include:
   * Additional changes and bugfixes as detailed in the ChangeLog.
 
 NuttX-5.14
-^^^^^^^^^^
+----------
 
 The 61st release of NuttX, NuttX-5.14, was made on November 27,
 2010.  This release includes multiple, important bugfixes as well
@@ -1646,7 +1661,7 @@ for NuttX-5.15 (and beyond) include: (1) Verified USB support, (2)
 SD card support, and (3) LCD support.
 
 NuttX-5.15
-^^^^^^^^^^
+----------
 
 The 62nd release of NuttX, NuttX-5.15, was made on December 12,
 2010.  This release includes several bugfixes as well as feature
@@ -1690,7 +1705,7 @@ And feature enhancements:
     configuration have been verified as of the this release.
 
 NuttX-5.16
-^^^^^^^^^^
+----------
 
 The 63rd release of NuttX, Version 5.16, was made on January 10,
 2010 and is available for download from the SourceForge website.
@@ -1777,7 +1792,7 @@ from the NuttX Porting Guide:
        in the file drivers/usbhost/usbhost_storage.c.
 
 NuttX-5.17
-^^^^^^^^^^
+----------
 
 The 64th release of NuttX, Version 5.17, was made on January 19,
 2011 and is available for download from the SourceForge website.
@@ -1796,7 +1811,7 @@ extends the USB host capabilities first introduced in that version.
 And other changes as detailed in the ChangeLog.
 
 NuttX-5.18
-^^^^^^^^^^
+----------
 
 The 65th release of NuttX, Version 5.18, was made on February 27,
 2011 and is available for download from the SourceForge website.
@@ -1819,7 +1834,7 @@ ChangeLog.  Headlines include:
   * Various bugfix as detailed in the ChangeLog
 
 NuttX-5.19
-^^^^^^^^^^
+----------
 
 The 66th release of NuttX, Version 5.19, was made on March 12, 2011
 and is available for download from the SourceForge website.  This
@@ -1861,7 +1876,7 @@ and maturity:
   * Additional bugfixes: pipes, stdint.h, STM32 SDIO and SPI drivers
 
 NuttX-6.0
-^^^^^^^^^
+---------
 
 The 67th release of NuttX, Version 6.0, was made on March 21, 2011
 and is available for download from the SourceForge website.  The
@@ -1908,7 +1923,7 @@ features and some important bugfixes.  These include:
 Please see the ChangeLog for details.
 
 NuttX-6.1
-^^^^^^^^^
+---------
 
 The 68th release of NuttX, Version 6.1, was made on April 10, 2011
 and is available for download from the SourceForge website.  The
@@ -1959,7 +1974,7 @@ And several bugfix associated with SD drivers, opendir(), signed
 details.
 
 NuttX-6.2
-^^^^^^^^^
+---------
 
 The 69th release of NuttX, Version 6.2, was made on May 6, 2011 and
 is available for download from the SourceForge website.  The 6.2
@@ -1987,7 +2002,7 @@ GPIO interrupts, LPC17xx UART2/3, the FAT file system, build issues,
 and strrch().  See the ChangeLog for more details.
 
 NuttX-6.3
-^^^^^^^^^
+---------
 
 The 70th release of NuttX follows only a nines days after the release
 of version 6.2.  It was released on May 15, 2011.  This special
@@ -2008,7 +2023,7 @@ error handling, NX graphics color mapping, and problems with C
 standard I/O buffer flushing.  See the ChangeLog for further details.
 
 NuttX-6.4
-^^^^^^^^^
+---------
 
 The 71st release of NuttX, Version 6.4, was made on June 6, 2011
 and is available for download from the SourceForge website.  The
@@ -2041,7 +2056,7 @@ Additional miscellaneous enhancements and bug fixes to task_delete(),
 recvfrom(), and other changes as noted in the ChangeLog.
 
 NuttX-6.5
-^^^^^^^^^
+---------
 
 The 72nd release of NuttX, Version 6.5, was made on June 21, 2011
 and is available for download from the SourceForge website.  The
@@ -2125,7 +2140,7 @@ things would need to be done:
    strings that reside in FLASH (or EEPROM).
 
 NuttX-6.6
-^^^^^^^^^
+---------
 
 The 73rd release of NuttX, Version 6.6, was made on July 11, 2011
 and is available for download from the SourceForge website.  The
@@ -2168,7 +2183,7 @@ Minor features:
 See the ChangeLog for a detailed description of these changes.
 
 NuttX-6.7
-^^^^^^^^^
+---------
 
 The 74th release of NuttX, Version 6.7, was made on August 2, 2011
 and is available for download from the SourceForge website.  Note
@@ -2204,7 +2219,7 @@ below:
     driver errors (Paul Osmialowski)
 
 NuttX-6.8
-^^^^^^^^^
+---------
 
 The 75th release of NuttX, Version 6.8, was made on August 19, 2011
 and is available for download from the SourceForge website.  Note
@@ -2232,7 +2247,7 @@ below:
 See the Changelog for additional changes included in this release.
 
 NuttX-6.9
-^^^^^^^^^
+---------
 
 The 76th release of NuttX, Version 6.9, was made on September 11, 2011
 and is available for download from the SourceForge website.  Note
@@ -2302,7 +2317,7 @@ Bugfixes, order roughly on decreasing criticality include:
     is used
 
 NuttX-6.10
-^^^^^^^^^^
+----------
 
 The 77th release of NuttX, Version 6.10, was made on October 6, 2011
 and is available for download from the SourceForge website.  Note
@@ -2368,7 +2383,7 @@ Bugfixes, order roughly on decreasing criticality include:
   * STM32 SDHC driver.  Interrupts were being left disabled.
 
 NuttX-6.11
-^^^^^^^^^^
+----------
 
 The 78th release of NuttX, Version 6.11, was made on November 12, 2011
 and is available for download from the SourceForge website.  Note
@@ -2406,7 +2421,7 @@ Bugfixes, order roughly on decreasing criticality include:
 See the change log for more detailed information.
 
 NuttX-6.12
-^^^^^^^^^^
+----------
 
 The 79th release of NuttX, Version 6.12, was made on December 6, 2011
 and is available for download from the SourceForge website.  Note
@@ -2435,7 +2450,7 @@ Bugfixes, order roughly on decreasing criticality include:
     * C Library. wchar_t is a built-in type for C++
 
 NuttX-6.13
-^^^^^^^^^^
+----------
 
 The 80th release of NuttX, Version 6.13, was made on December 26, 2011
 and is available for download from the SourceForge website.  Note
@@ -2473,7 +2488,7 @@ Bugfixes, order roughly on decreasing criticality include:
 And several others.  See the ChangeLog for more details.
 
 NuttX-6.14
-^^^^^^^^^^
+----------
 
 The 81st release of NuttX, Version 6.14, was made on January 15, 2012,
 and is available for download from the SourceForge website.  Note
@@ -2499,7 +2514,7 @@ New features in this release include:
 
     * STM3240G-EVAL.  Add support for user control of LEDs.
 
-    * LPC17xx.  Add support for loopback mode to CAN driver.  CAN TX done 
+    * LPC17xx.  Add support for loopback mode to CAN driver.  CAN TX done
       perations are now interrupt driver.  Now supports configurable CAN bit
       rate.
 
@@ -2537,7 +2552,7 @@ Bugfixes include:
 And several others.  See the ChangeLog for more details.
 
 NuttX-6.15
-^^^^^^^^^^
+----------
 
 The 82nd release of NuttX, Version 6.15, was made on February 12, 2012,
 and is available for download from the SourceForge website.  Note
@@ -2582,7 +2597,7 @@ New features and extended functionality:
     * PIC32 Drivers. The PIC32 Ethernet driver is code complete (but still
       untested).
 
-    * FTPD.  Add a new FTP server daemon.  This is based loosely on 
+    * FTPD.  Add a new FTP server daemon.  This is based loosely on
       the hwport_ftpd library provided by Jaehyuk Cho.
 
     * Library:  Add support for on_exit().  Implemented tcsetattr() and
@@ -2613,7 +2628,7 @@ Additional bugfixes, name changes, and other differences as detailed in the
 ChangeLog.
 
 NuttX-6.16
-^^^^^^^^^^
+----------
 
 The 83rd release of NuttX, Version 6.16, was made on March 10, 2012,
 and is available for download from the SourceForge website.  Note
@@ -2681,7 +2696,7 @@ Additional bugfixes, name changes, and other differences as detailed in the
 ChangeLog.
 
 NuttX-6.17
-^^^^^^^^^^
+----------
 
 The 84th release of NuttX, Version 6.17, was made on April 14, 2012,
 and is available for download from the SourceForge website.  Note
@@ -2776,7 +2791,7 @@ Bugfixes:
       (abort()).
 
 NuttX-6.18
-^^^^^^^^^^
+----------
 
 The 85th release of NuttX, Version 6.18, was made on May 19, 2012,
 and is available for download from the SourceForge website.  Note
@@ -2860,7 +2875,7 @@ Bugfixes (see the change log for details) :
     * on_exit():  Fix compilation errors if CONFIG_SCHED_ONEXIT is enabled.
 
 NuttX-6.19
-^^^^^^^^^^
+----------
 
 The 86th release of NuttX, Version 6.19, was made on June 15, 2012,
 and is available for download from the SourceForge website.  Note
@@ -2942,7 +2957,7 @@ Bugfixes (see the change log for details) :
 As well as other, less critical bugs (see the ChangeLog for details)
 
 NuttX-6.20
-^^^^^^^^^^
+----------
 
 The 87th release of NuttX, Version 6.20, was made on July 12, 2012,
 and is available for download from the SourceForge website.  Note
@@ -2955,7 +2970,7 @@ This release corresponds with SVN release number: r4937
 Additional new features and extended functionality:
 
     * Power Management:  An evolving power management example is being
-      created by Diego Sanchez.  This effort currently involves on the 
+      created by Diego Sanchez.  This effort currently involves on the
       STM32 F1 but clearly demonstrates the NuttX power management
       system which will automatically drive the system to lower power
       usage states due to lack of use.
@@ -3005,7 +3020,7 @@ Bugfixes (see the change log for details) :
 As well as other, less critical bugs (see the ChangeLog for details)
 
 NuttX-6.21
-^^^^^^^^^^
+----------
 
 The 88th release of NuttX, Version 6.21, was made on August 25, 2012,
 and is available for download from the SourceForge website.  Note
@@ -3040,12 +3055,12 @@ Additional new features and extended functionality:
     * Library:  cfsetispeed(), cfsetospeed(), tcflush(), memchr(), and
       memccpy().
     * Applications:  Port of freemodbus-v1.5.0. Add support for testing
-      devices with multiple ADC, PWM, and QE devices.  
+      devices with multiple ADC, PWM, and QE devices.
       NSH: NSH 'mount' command (with no arguments) will now show mounted
       volumes.  Add new NSH 'df' command.  Extended 'help' support. NSH
       now catches the return value from spawned applications (provided
       by Mike Smith).
-    * Build System: mkconfig will not define CONFIG_DRAM_END.  A lot of 
+    * Build System: mkconfig will not define CONFIG_DRAM_END.  A lot of
       progress has been made on the automated NuttX configuration logic
       (Thanks go to Richard Cochran).
     * Documentation: Document ways to customize the behavior of NSH.
@@ -3069,7 +3084,7 @@ Bugfixes (see the change log for details) :
 As well as other, less critical bugs (see the ChangeLog for details)
 
 NuttX-6.22
-^^^^^^^^^^
+----------
 
 The 89th release of NuttX, Version 6.22, was made on September 29, 2012,
 and is available for download from the SourceForge website.  Note
@@ -3173,7 +3188,7 @@ Bugfixes (see the change log for details).  Some of these are very important
 As well as other, less critical bugs (see the ChangeLog for details)
 
 NuttX-6.23
-^^^^^^^^^^
+----------
 
 The 90th release of NuttX, Version 6.23, was made on November 5, 2012,
 and is available for download from the SourceForge website.  Note
@@ -3219,16 +3234,16 @@ Additional new features and extended functionality:
 
       Add support for ferror(), feof(), and clearerror().   Add support for
       __cxa_atexit().
- 
+
       Math Library:  Port of the math library from Rhombus OS by Nick Johnson
       (Darcy Gong).
 
     * Applications: New NSH commands:  ifup, ifdown, urlencode, urldecode,
       base64enc, bas64dec, md5 (Darcy Gong).  Add support for NSH telnet login
       (Darcy Gong).  Enancements to NSH ping command to support pinging hosts
-      with very long round-trip times.  Extensions to the ifconfig command 
+      with very long round-trip times.  Extensions to the ifconfig command
       Darcy Gong),
-      
+
       Many extensions to the webclient/wget and DNS resolver logic from Darcy
       Gong.  JSON, Base64, URL encoding, and MD5 libraries contributed by Darcy
       Gong.
@@ -3251,7 +3266,7 @@ Bugfixes (see the change log for details).  Some of these are very important
 As well as other, less critical bugs (see the ChangeLog for details)
 
 NuttX-6.24
-^^^^^^^^^^
+----------
 
 The 91st release of NuttX, Version 6.24, was made on December 20, 2012,
 and is available for download from the SourceForge website.  Note
@@ -3387,7 +3402,7 @@ Additional new features and extended functionality:
         used to manage toolchains in a more configurable way (most of this
         contributed by Mike Smith).
 
-    * Build tools: 
+    * Build tools:
 
       - Renamed tools/winlink.sh to tools/copydir.sh.
       - Several new tools/scripts to support the Windows native build:
@@ -3442,7 +3457,7 @@ Bugfixes (see the change log for details).  Some of these are very important
 As well as other, less critical bugs (see the ChangeLog for details)
 
 NuttX-6.25
-^^^^^^^^^^
+----------
 
 The 92nd release of NuttX, Version 6.25, was made on February 1, 2013,
 and is available for download from the SourceForge website.  Note
@@ -3513,7 +3528,7 @@ Additional new features and extended functionality:
         is enabled.
 
     * File System
- 
+
       - dup() and dup2() can new be used with opened files in a mounted file
         system.  This supports re-direction of output in NSH to files.
       - The binfs file system was moved from apps/builtin to fs/binfs.  The
@@ -3532,7 +3547,7 @@ Additional new features and extended functionality:
         execl(), or posix_spawn().
 
     * Drivers:
- 
+
       - Added logic to marshal and serialized "out-of-band" keyboard
         commands (such as cursor controls and key release events) intermixed
         with normal ASCII keypress data.  The encoding is partially integrated
@@ -3573,7 +3588,7 @@ Additional new features and extended functionality:
          (this is still a work in progress).
 
     * LM3S Boards
- 
+
        - Added scripts and documentation to use OpenOCD with the LM3S (from
          Jose Pablo Carballo).
 
@@ -3589,14 +3604,14 @@ Additional new features and extended functionality:
         This is still a work in progress by Rommel Marcelo.
 
     * LPC2148 Boards:
- 
+
       - Add basic support for the The0.net ZP213x/4xPA board (with the LPC2148
         and the UG_2864AMBAG01 OLED).
       - Add an nxlines configuration for the ZP213x/4xPA (with the LPC2148
         and the UG_2864AMBAG01).
- 
+
     * Simulator:
- 
+
       - Add an nxlines configuration for the simulator.
 
     * Networking:
@@ -3662,7 +3677,7 @@ Additional new features and extended functionality:
     * Applications:
 
       - New and modified examples:
-      
+
         apps/examples/wlan: Remove non-functional example.
         apps/examples/ostest: Added a test of vfork(). Extend signal
           handler test to catch death-of-child signals (SIGCHLD). Add a
@@ -3744,7 +3759,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
 
       - fread() could hang on certain error conditions.
       - Can't handle SYSLOG output to a character device from  the IDLE task
-        (because the IDLE task can't block). 
+        (because the IDLE task can't block).
 
     * Build System:
 
@@ -3762,7 +3777,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
         apps/examples.
 
 NuttX-6.26
-^^^^^^^^^^
+----------
 
 The 93rd release of NuttX, Version 6.26, was made on March 15, 2013,
 and is available for download from the SourceForge website.  Note
@@ -3845,15 +3860,15 @@ Additional new features and extended functionality:
         that the MMC/SD SPI has the bus locked. (from Petteri Aimonen).
 
     * ARMv6-M (Cortex-M0):
- 
+
        - Added support for the ARM Cortex-M0 family.
 
     * nuvoTon NUC120:
- 
+
        - Added support for the nuvoTon NUC120 MCU (Cortex-M0).
 
     * nuvoTon NUC120 Boards:
- 
+
        - Added basic support for the nuvoTon NuTiny-SDK-NUC120 board (Cortex-M0).
 
     * LPC17xx:
@@ -3889,7 +3904,7 @@ Additional new features and extended functionality:
         from Jose Pablo Carballo).
 
     * Stellaris LM4F Boards
- 
+
       - Add support for the LM4F120 LaunchPad (untested).
 
     * Networking:
@@ -4002,7 +4017,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
         file.
 
 NuttX-6.27
-^^^^^^^^^^
+----------
 
 The 94th release of NuttX, Version 6.27, was made on April 28, 2013,
 and is available for download from the SourceForge website.  Note
@@ -4054,11 +4069,11 @@ Additional new features and extended functionality:
       - Added support for modifiable interrupt vectors in RAM
 
     * nuvoTon NUC1xx:
- 
+
       - Added kernel build support
 
     * Freescale Kinetis:
- 
+
       - Add kernel build support
       - Add support for the Kinetis L family of Cortex-M0+ MCUs.  Contributed
         by Alan Carvalho de Assis.
@@ -4096,7 +4111,7 @@ Additional new features and extended functionality:
       - Re-design of the GPIO logic for the LPC178x family by Rommel Marcelo.
 
     * LPC43xx:
- 
+
       - Added kernel build support
 
     * STM32:
@@ -4122,7 +4137,7 @@ Additional new features and extended functionality:
       - The basic for the Stellaris LM4F120 Launchpad is complete.  This
         includes support for OS test and NSH configurations.  Additional
         driver development is needed.
- 
+
     * Build System:
 
       - Directories where the same sources files are used to build different

@@ -80,7 +80,7 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
 #endif
 
 #ifdef CONFIG_SCHED_ONEXIT
-  SYSCALL_LOOKUP(on_exit,                 2, STUB_onexit)
+  SYSCALL_LOOKUP(on_exit,                 2, STUB_on_exit)
 #endif
 
 #ifdef CONFIG_SCHED_WAITPID
