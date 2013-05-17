@@ -468,10 +468,10 @@ HY-Mini specific Configuration Options
   STM32F103V specific device driver settings
 
     CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=1,2,3) or UART
-           m (m=4,5) for the console and ttys0 (default is the USART1).
+       m (m=4,5) for the console and ttys0 (default is the USART1).
 
-           Note: USART1 is connected to a PL2303 serial to USB converter.
-           So USART1 is available through USB port labeled CN3 on the board.
+       Note: USART1 is connected to a PL2303 serial to USB converter.
+       So USART1 is available through USB port labeled CN3 on the board.
 
     CONFIG_U[S]ARTn_RXBUFSIZE - Characters are buffered as received.
        This specific the size of the receive buffer
@@ -517,7 +517,13 @@ HY-Mini specific Configuration Options
     CONFIG_CAN_REGDEBUG - If CONFIG_DEBUG is set, this will generate an
       dump of all CAN registers.
 
-  HY-MiniSTM32V LCD Hardware Configuration  (SSD1289 controler)
+  HY-MiniSTM32V LCD Hardware Configuration.  The HY-Mini board may be delivered with
+  either an SSD1289 or an R61505U LCD controller.
+
+    CONFIG_LCD_R61505U - Selects the R61505U LCD controller.
+    CONFIG_LCD_SSD1289 - Selects the SSD1289 LCD controller.
+
+  The following options apply for either LCD controller:
 
     CONFIG_NX_LCDDRIVER - To be defined to include LCD driver
     CONFIG_LCD_LANDSCAPE - Define for 320x240 display "landscape"
@@ -535,7 +541,6 @@ HY-Mini specific Configuration Options
     CONFIG_LCD_BACKLIGHT - Define to support an adjustable backlight
       using timer 3.  The granularity of the settings is determined
       by CONFIG_LCD_MAXPOWER.  Requires CONFIG_STM32_TIM3.
-
 
 Configurations
 ==============
