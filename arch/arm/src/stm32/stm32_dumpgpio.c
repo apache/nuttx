@@ -147,7 +147,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
             g_portchar[port], getreg32(STM32_RCC_APB2ENR));
     }
 
-#elif defined(CONFIG_STM32_STM32F30XX)
+#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F30XX)
 
   DEBUGASSERT(port < STM32_NGPIO_PORTS);
 
@@ -167,7 +167,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
         getreg32(base + STM32_GPIO_BSRR_OFFSET),
         getreg32(base + STM32_GPIO_LCKR_OFFSET));
   lldbg(" AFRH: %08x  AFRL: %08x   BRR: %04x\n",
-        getreg32(base + STM32_GPIO_ARFH_OFFSET),
+        getreg32(base + STM32_GPIO_AFRH_OFFSET),
         getreg32(base + STM32_GPIO_AFRL_OFFSET),
         getreg32(base + STM32_GPIO_BRR_OFFSET));
 
@@ -191,7 +191,7 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
             getreg32(base + STM32_GPIO_BSRR_OFFSET),
             getreg32(base + STM32_GPIO_LCKR_OFFSET));
       lldbg(" AFRH: %08x  AFRL: %08x\n",
-            getreg32(base + STM32_GPIO_ARFH_OFFSET),
+            getreg32(base + STM32_GPIO_AFRH_OFFSET),
             getreg32(base + STM32_GPIO_AFRL_OFFSET));
     }
   else

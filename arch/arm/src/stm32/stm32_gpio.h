@@ -53,7 +53,9 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#if defined(CONFIG_STM32_STM32L15XX)
+#  include "chip/stm32l15xxx_gpio.h"
+#elif defined(CONFIG_STM32_STM32F10XX)
 #  include "chip/stm32f10xxx_gpio.h"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "chip/stm32f20xxx_gpio.h"
@@ -198,7 +200,8 @@
 #define GPIO_PIN14                    (14 << GPIO_PIN_SHIFT)
 #define GPIO_PIN15                    (15 << GPIO_PIN_SHIFT)
 
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
 
 /* Each port bit of the general-purpose I/O (GPIO) ports can be individually configured
  * by software in several modes:
@@ -288,11 +291,18 @@
 
 #define GPIO_SPEED_SHIFT              (10)                       /* Bits 10-11: GPIO frequency selection */
 #define GPIO_SPEED_MASK               (3 << GPIO_SPEED_SHIFT)
+#if define(CONFIG_STM32_STM32L15XX)
+#  define GPIO_SPEED_400KHz           (0 << GPIO_SPEED_SHIFT)     /* 400 kHz Very low speed output */
+#  define GPIO_SPEED_2MHz             (1 << GPIO_SPEED_SHIFT)     /* 2 MHz Low speed output */
+#  define GPIO_SPEED_10MHz            (2 << GPIO_SPEED_SHIFT)     /* 10 MHz Medium speed output */
+#  define GPIO_SPEED_40MHz            (3 << GPIO_SPEED_SHIFT)     /* 40 MHz High speed output */
+#else
 #  define GPIO_SPEED_2MHz             (0 << GPIO_SPEED_SHIFT)     /* 2 MHz Low speed output */
 #  define GPIO_SPEED_25MHz            (1 << GPIO_SPEED_SHIFT)     /* 25 MHz Medium speed output */
 #  define GPIO_SPEED_50MHz            (2 << GPIO_SPEED_SHIFT)     /* 50 MHz Fast speed output  */
 #ifndef CONFIG_STM32_STM32F30XX
 #  define GPIO_SPEED_100MHz           (3 << GPIO_SPEED_SHIFT)     /* 100 MHz High speed output */
+#endif
 #endif
 
 /* Output/Alt function type selection:

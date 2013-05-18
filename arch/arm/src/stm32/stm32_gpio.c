@@ -54,8 +54,8 @@
 #include "chip.h"
 #include "stm32_gpio.h"
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || \
-    defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32_syscfg.h"
 #endif
 
@@ -399,10 +399,11 @@ int stm32_configgpio(uint32_t cfgset)
 #endif
 
 /****************************************************************************
- * Name: stm32_configgpio (for the STM2F20xxx and STM32F40xxx family)
+ * Name: stm32_configgpio (for the STM32L15xxx, STM32F20xxx and STM32F40xxx family)
  ****************************************************************************/
 
-#if defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
+    defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
 int stm32_configgpio(uint32_t cfgset)
 {
   uintptr_t base;
@@ -512,7 +513,7 @@ int stm32_configgpio(uint32_t cfgset)
     }
   else
     {
-      regoffset = STM32_GPIO_ARFH_OFFSET;
+      regoffset = STM32_GPIO_AFRH_OFFSET;
       pos       = pin - 8;
     }
 
@@ -527,6 +528,24 @@ int stm32_configgpio(uint32_t cfgset)
     {
       switch (cfgset & GPIO_SPEED_MASK)
         {
+#if define(CONFIG_STM32_STM32L15XX)
+          default:
+          case GPIO_SPEED_400KHz:    /* 400 kHz Very low speed ouput */
+            setting = GPIO_OSPEED_400KHz;
+            break;
+
+          case GPIO_SPEED_2MHz:   /* 2 MHz Low speed ouput */
+            setting = GPIO_OSPEED_2MHz;
+            break;
+
+          case GPIO_SPEED_10MHz:   /* 10 MHz Medium speed ouput  */
+            setting = GPIO_OSPEED_10MHz;
+            break;
+
+          case GPIO_SPEED_40MHz:   /* 40 MHz High speed ouput */
+            setting = GPIO_OSPEED_40MHz;
+            break;
+#else
           default:
           case GPIO_SPEED_2MHz:    /* 2 MHz Low speed output */
             setting = GPIO_OSPEED_2MHz;
@@ -544,6 +563,7 @@ int stm32_configgpio(uint32_t cfgset)
           case GPIO_SPEED_100MHz:   /* 100 MHz High speed output */
             setting = GPIO_OSPEED_100MHz;
             break;
+#endif
 #endif
         }
     }
@@ -642,7 +662,8 @@ int stm32_unconfiggpio(uint32_t cfgset)
   cfgset &= GPIO_PORT_MASK | GPIO_PIN_MASK;
 #if defined(CONFIG_STM32_STM32F10XX)
   cfgset |= GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT;
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
   cfgset |= GPIO_INPUT | GPIO_FLOAT;
 #else
 # error "Unsupported STM32 chip"
@@ -666,7 +687,8 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
   uint32_t base;
 #if defined(CONFIG_STM32_STM32F10XX)
   uint32_t offset;
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
   uint32_t bit;
 #endif
   unsigned int port;
@@ -698,7 +720,8 @@ void stm32_gpiowrite(uint32_t pinset, bool value)
 
       putreg32((1 << pin), base + offset);
 
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
 
       if (value)
         {
