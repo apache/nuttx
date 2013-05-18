@@ -10,6 +10,159 @@ choice
 	default ARCH_CHIP_STM32F103ZET6
 	depends on ARCH_CHIP_STM32
 
+config ARCH_CHIP_STM32L151C6
+	bool "STM32L151C6"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 48-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM
+
+config ARCH_CHIP_STM32L151C8
+	bool "STM32L151C8"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 48-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM
+
+config ARCH_CHIP_STM32L151CB
+	bool "STM32L151CB"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 48-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM
+
+config ARCH_CHIP_STM32L151R6
+	bool "STM32L151R6"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 64-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM
+
+config ARCH_CHIP_STM32L151R8
+	bool "STM32L151R8"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 64-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM
+
+config ARCH_CHIP_STM32L151RB
+	bool "STM32L151RB"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 64-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM
+
+config ARCH_CHIP_STM32L151V6
+	bool "STM32L151V6"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 100-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM
+
+config ARCH_CHIP_STM32L151V8
+	bool "STM32L151V8"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 100-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM
+
+config ARCH_CHIP_STM32L151VB
+	bool "STM32L151VB"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 100-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM
+
+config ARCH_CHIP_STM32L152C6
+	bool "STM32L152C6"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 48-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		4x16 LCD interface
+
+config ARCH_CHIP_STM32L152C8
+	bool "STM32L152C8"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 48-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		4x16 LCD interface
+
+config ARCH_CHIP_STM32L152CB
+	bool "STM32L152CB"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 48-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM with
+		4x16 LCD interface
+
+config ARCH_CHIP_STM32L152R6
+	bool "STM32L152R6"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 64-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		4x32/8x28 LCD interface
+
+config ARCH_CHIP_STM32L152R8
+	bool "STM32L152R8"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 64-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		4x32/8x28 LCD interface
+
+config ARCH_CHIP_STM32L152RB
+	bool "STM32L152RB"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 64-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM with
+		4x32/8x28 LCD interface
+
+config ARCH_CHIP_STM32L152V6
+	bool "STM32L152V6"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 100-pin EnergyLite, 32KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		4x44/8x40 LCD interface
+
+config ARCH_CHIP_STM32L152V8
+	bool "STM32L152V8"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 100-pin EnergyLite, 64KB FLASH, 10KB SRAM, 4KB EEPRROM with
+		4x44/8x40 LCD interface
+
+config ARCH_CHIP_STM32L152VB
+	bool "STM32L152VB"
+	select ARCH_CORTEXM3
+	select STM32_STM32L15XX
+	select STM32_ENERGYLITE
+	---help---
+		STM32L 100-pin EnergyLite, 128KB FLASH, 16KB SRAM, 4KB EEPRROM with
+		4x44/8x40 LCD interface
+
 config ARCH_CHIP_STM32F100C8
 	bool "STM32F100C8"
 	select ARCH_CORTEXM3
@@ -254,26 +407,41 @@ config ARCH_CHIP_STM32F427I
 
 endchoice
 
+config STM32_STM32L15XX
+	bool
+	default n
+
+config STM32_ENERGYLITE
+	bool
+	default n
+
 config STM32_STM32F10XX
 	bool
+	default n
 
 config STM32_VALUELINE
 	bool
+	default n
 
 config STM32_HIGHDENSITY
 	bool
+	default n
 
 config STM32_CONNECTIVITYLINE
 	bool
+	default n
 
 config STM32_STM32F20XX
 	bool
+	default n
 
 config STM32_STM32F30XX
 	bool
+	default n
 
 config STM32_STM32F40XX
 	bool
+	default n
 
 # This is really 427/437, but we treat the two the same.
 config STM32_STM32F427
