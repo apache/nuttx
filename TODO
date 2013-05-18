@@ -422,6 +422,20 @@ o Kernel Build
                unless incrementing the count unblocks a task; similarly, down
                decrements the count and does not call into the the kernel unless
                the count becomes negative the caller must be blocked.
+
+               Update:
+               "I am thinking that there should be a "magic" global, user-accessible 
+                variable that holds the PID of the currently executing thread;
+                basically the PID of the task at the head of the ready-to-run list.
+                This variable would have to be reset each time the head of the ready-
+                to-run list changes.
+
+               "Then getpid() could be implemented in user space with no system call
+                by simply reading this variable.
+
+               "This one would be easy: Just a change to include/nuttx/userspace.h,
+                configs/*/kernel/up_userspace.c, libc/, sched/sched_addreadytorun.c, and
+                sched/sched_removereadytorun.c. That would eliminate 59% of the syscalls."
   Status:      Open
   Priority:    Low-Medium.  Right now, I do not know if these syscalls are a
                real performance issue or not.

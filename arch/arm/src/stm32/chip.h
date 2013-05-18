@@ -48,9 +48,21 @@
 
 /* Include the chip pin configuration file */
 
+/* STM32L EnergyLite Line ***********************************************************/
+
+#if defined(CONFIG_STM32_ENERGYLITE)
+
+/* STM32L15xx family */
+
+#  if defined(CONFIG_STM32_STM32L15XX)
+#    include "chip/stm32l15xxx_pinmap.h"
+#  else
+#    error "Unsupported EnergyLite chip"
+#  endif
+
 /* STM32 F1 Family ******************************************************************/
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#elif defined(CONFIG_STM32_STM32F10XX)
 
 /* STM32F100 Value Line */
 
@@ -112,7 +124,9 @@
  */
 
 #ifdef CONFIG_ARMV7M_CMNVECTOR
-#  if defined(CONFIG_STM32_STM32F10XX)
+#  if defined(CONFIG_STM32_STM32L15XX)
+#    include "chip/stm32l15xxx_vectors.h"
+#  elif defined(CONFIG_STM32_STM32F10XX)
 #    include "chip/stm32f10xxx_vectors.h"
 #  elif defined(CONFIG_STM32_STM32F20XX)
 #    include "chip/stm32f20xxx_vectors.h"

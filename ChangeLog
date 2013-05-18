@@ -4727,3 +4727,5 @@
 	* configs/mikroe-stm32f4/kernel/, kostest/ and scripts/:  Add kernel build
 	  support and kernel mode OS test example for the the MikroElektronkia
 	  MultiMedia STM32 M4 board.  From Ken Pettit (2013-5-17).
+	* arch/arm/include/stm32/chip.h and arch/arm/src/stme32/chip/stm32l15xxx_pinmap.h:
+	  Beginning of support for the STM32L15X family. (2013-5-18).
