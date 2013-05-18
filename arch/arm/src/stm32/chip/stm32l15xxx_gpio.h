@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/chip/stm32f40xxx_gpio.h
+ * arch/arm/src/stm32/chip/stm32l15xxx_gpio.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_GPIO_H
-#define __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_GPIO_H
+#ifndef __ARCH_ARM_SRC_STM32_CHIP_STM32L15XXX_GPIO_H
+#define __ARCH_ARM_SRC_STM32_CHIP_STM32L15XXX_GPIO_H
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -226,10 +226,10 @@
 
 /* GPIO port output speed register */
 
-#define GPIO_OSPEED_2MHz           (0) /* 2 MHz Low speed */
-#define GPIO_OSPEED_25MHz          (1) /* 25 MHz Medium speed */
-#define GPIO_OSPEED_50MHz          (2) /* 50 MHz Fast speed */
-#define GPIO_OSPEED_100MHz         (3) /* 100 MHz High speed on 30 pF (80 MHz Output max speed on 15 pF) */
+#define GPIO_OSPEED_400KHz         (0) /* 400 kHz Very low speed */
+#define GPIO_OSPEED_2MHz           (1) /* 2 MHz Low speed */
+#define GPIO_OSPEED_10MHz          (2) /* 10 MHz Medium speed */
+#define GPIO_OSPEED_40MHz          (3) /* 40 MHz High speed */
 
 #define GPIO_OSPEED_SHIFT(n)       ((n) << 1)
 #define GPIO_OSPEED_MASK(n)        (3 << GPIO_OSPEED_SHIFT(n))
@@ -366,5 +366,4 @@
 #define GPIO_AFRH15_SHIFT          (28)
 #define GPIO_AFRH15_MASK           (15 << GPIO_AFRH15_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_GPIO_H */
-
+#endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32L15XXX_GPIO_H */

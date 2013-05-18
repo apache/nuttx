@@ -4731,3 +4731,5 @@
 	  Beginning of support for the STM32L15X family (2013-5-18).
 	* arch/arm/include/stm32/stm32l15xxx_irq.h and arch/arm/src/stm32/chip/stm32l15xxx_vectors.h:
 	  Support for STM32L15X interrupt vectors (2013-5-18).
+	* arch/arm/src/stm32/chip/stm32l15xxx_gpio.h and related STM32 GPIO files:
+	  Add GPIO support for the STM32L215X
