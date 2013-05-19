@@ -428,14 +428,18 @@
                                               /* Bits 2-7: Reserved */
 #define RCC_CSR_LSEON               (1 << 8)  /* Bit 8:  External Low Speed oscillator enable */
 #define RCC_CSR_LSERDY              (1 << 9)  /* Bit 9:  External Low Speed oscillator Ready */
-#define RCC_CSR_LSEBYP              (1 << 10) /* Bit 10: External Low Speed oscillator Ready */
-#define RCC_CSR_LSECSSON            (1 << 11) /* Bit 11: External Low Speed oscillator Ready */
-#define RCC_CSR_LSECSSD             (1 << 12) /* Bit 12: External Low Speed oscillator Ready */
+#define RCC_CSR_LSEBYP              (1 << 10) /* Bit 10: External low-speed oscillator bypass */
+#define RCC_CSR_LSECSSON            (1 << 11) /* Bit 11: CSS on LSE enable */
+#define RCC_CSR_LSECSSD             (1 << 12) /* Bit 12: CSS on LSE failure Detection */
                                               /* Bits 13-15: Reserved */
-#define RCC_CSR_RTCSEL_SHIFT        (16)      /* Bits 16-17:  */
+#define RCC_CSR_RTCSEL_SHIFT        (16)      /* Bits 16-17: RTC and LCD clock source selection */
 #define RCC_CSR_RTCSEL_MASK         (3 << RCC_CSR_RTCSEL_SHIFT)
-#define RCC_CSR_RTCEN               (1 << 22) /* Bit 22:  */
-#define RCC_CSR_RTCRST              (1 << 23) /* Bit 23:  */
+#  define RCC_CSR_RTCSEL_NONE       (0 << RCC_CSR_RTCSEL_SHIFT) /* 00: No clock */
+#  define RCC_CSR_RTCSEL_LSE        (1 << RCC_CSR_RTCSEL_SHIFT) /* 01: LSE oscillator clock is RTC/LCD clock */
+#  define RCC_CSR_RTCSEL_LSI        (2 << RCC_CSR_RTCSEL_SHIFT) /* 10: LSI oscillator clock is RTC/LCD clock */
+#  define RCC_CSR_RTCSEL_HSE        (3 << RCC_CSR_RTCSEL_SHIFT) /* 11: Divided HSE oscillator clock is RTC/LCD clock */
+#define RCC_CSR_RTCEN               (1 << 22) /* Bit 22: RTC clock enable */
+#define RCC_CSR_RTCRST              (1 << 23) /* Bit 23: RTC software reset */
 #define RCC_CSR_RMVF                (1 << 24) /* Bit 24: Remove reset flag */
 #define RCC_CSR_OBLRSTF             (1 << 25) /* Bit 25: Option byte loader reset flag */
 #define RCC_CSR_PINRSTF             (1 << 26) /* Bit 26: PIN reset flag */
