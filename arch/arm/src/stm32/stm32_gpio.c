@@ -528,7 +528,7 @@ int stm32_configgpio(uint32_t cfgset)
     {
       switch (cfgset & GPIO_SPEED_MASK)
         {
-#if define(CONFIG_STM32_STM32L15XX)
+#if defined(CONFIG_STM32_STM32L15XX)
           default:
           case GPIO_SPEED_400KHz:    /* 400 kHz Very low speed ouput */
             setting = GPIO_OSPEED_400KHz;

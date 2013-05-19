@@ -47,6 +47,18 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+/* The STM32L15XX family has no BDSR register.  The equivalent settings are
+ * in the CSR register for those chips.
+ */
+
+#ifdef CONFIG_STM32_STM32L15XX
+#  define STM32_RCC_BDCR       STM32_RCC_CSR
+#  define RCC_BDCR_LSEON       RCC_CSR_LSEON
+#  define RCC_BDCR_LSERDY      RCC_CSR_LSERDY
+#  define RCC_BDCR_RTCSEL_MASK RCC_CSR_RTCSEL_MASK
+#  define RCC_BDCR_RTCSEL_LSE  RCC_CSR_RTCSEL_LSE
+#  define RCC_BDCR_RTCEN       RCC_CSR_RTCEN
+#endif
 
 /****************************************************************************
  * Private Data

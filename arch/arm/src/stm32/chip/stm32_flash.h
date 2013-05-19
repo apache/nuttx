@@ -40,21 +40,36 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#if defined(CONFIG_STM32_LOWDENSITY)
+#if defined(CONFIG_STM32_STM32L15XX)
+/* The STM32 L15xx/L16xx can support up to 384KB of FLASH.  (In reality, supported
+ * L15xx parts have no more than 128KB). The program memory block is divided into
+ * 96 sectors of 4 Kbytes each, and each sector is further split up into 16 pages of
+ * 256 bytes each. The sector is the write protection granularity. In total, the
+ * program memory block contains 1536 pages.
+ */
+#  define STM32_FLASH_NPAGES        1536
+#  define STM32_FLASH_PAGESIZE      256
+
+#elif defined(CONFIG_STM32_LOWDENSITY)
 #  define STM32_FLASH_NPAGES        32
 #  define STM32_FLASH_PAGESIZE      1024
+
 #elif  defined(CONFIG_STM32_MEDIUMDENSITY)
 #  define STM32_FLASH_NPAGES        128
 #  define STM32_FLASH_PAGESIZE      1024
+
 #elif  defined(CONFIG_STM32_CONNECTIVITYLINE)
 #  define STM32_FLASH_NPAGES        128
 #  define STM32_FLASH_PAGESIZE      2048
+
 #elif defined(CONFIG_STM32_HIGHDENSITY)
 #  define STM32_FLASH_NPAGES        256
 #  define STM32_FLASH_PAGESIZE      2048
+
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  define STM32_FLASH_NPAGES        128
 #  define STM32_FLASH_PAGESIZE      (2*1024)
+
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define STM32_FLASH_NPAGES        8
 #  define STM32_FLASH_PAGESIZE      (128*1024)
@@ -78,6 +93,7 @@
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define STM32_FLASH_OPTCR_OFFSET 0x0014
 #endif
+
 #if defined(CONFIG_STM32_STM32F427)
 #  define STM32_FLASH_OPTCR1_OFFSET 0x0018
 #endif
@@ -104,30 +120,38 @@
 /* Register Bitfield Definitions ****************************************************/
 /* Flash Access Control Register (ACR) */
 
-#define FLASH_ACR_LATENCY_SHIFT     (0)
-#define FLASH_ACR_LATENCY_MASK      (7 << FLASH_ACR_LATENCY_SHIFT)
-#  define FLASH_ACR_LATENCY(n)      ((n) << FLASH_ACR_LATENCY_SHIFT)  /* n wait states */
-#  define FLASH_ACR_LATENCY_0       (0 << FLASH_ACR_LATENCY_SHIFT)    /* 000: Zero wait states */
-#  define FLASH_ACR_LATENCY_1       (1 << FLASH_ACR_LATENCY_SHIFT)    /* 001: One wait state */
-#  define FLASH_ACR_LATENCY_2       (2 << FLASH_ACR_LATENCY_SHIFT)    /* 010: Two wait states */
-#  define FLASH_ACR_LATENCY_3       (3 << FLASH_ACR_LATENCY_SHIFT)    /* 011: Three wait states */
-#  define FLASH_ACR_LATENCY_4       (4 << FLASH_ACR_LATENCY_SHIFT)    /* 100: Four wait states */
-#  define FLASH_ACR_LATENCY_5       (5 << FLASH_ACR_LATENCY_SHIFT)    /* 101: Five wait states */
-#  define FLASH_ACR_LATENCY_6       (6 << FLASH_ACR_LATENCY_SHIFT)    /* 110: Six wait states */
-#  define FLASH_ACR_LATENCY_7       (7 << FLASH_ACR_LATENCY_SHIFT)    /* 111: Seven wait states */
+#if defined(CONFIG_STM32_STM32L15XX)
+#  define FLASH_ACR_LATENCY         (1 << 0)  /* Bit 0: Latency */
+#  define FLASH_ACR_PRFTEN          (1 << 1)  /* Bit 1: Prefetch enable */
+#  define FLASH_ACR_ACC64           (1 << 2)  /* Bit 2: 64-bit access */
+#  define FLASH_ACR_SLEEP_PD        (1 << 3)  /* Bit 3: Flash mode during Sleep */
+#  define FLASH_ACR_RUN_PD          (1 << 4)  /* Bit 4: Flash mode during Run */
+#else
+#  define FLASH_ACR_LATENCY_SHIFT   (0)
+#  define FLASH_ACR_LATENCY_MASK    (7 << FLASH_ACR_LATENCY_SHIFT)
+#    define FLASH_ACR_LATENCY(n)    ((n) << FLASH_ACR_LATENCY_SHIFT)  /* n wait states */
+#    define FLASH_ACR_LATENCY_0     (0 << FLASH_ACR_LATENCY_SHIFT)    /* 000: Zero wait states */
+#    define FLASH_ACR_LATENCY_1     (1 << FLASH_ACR_LATENCY_SHIFT)    /* 001: One wait state */
+#    define FLASH_ACR_LATENCY_2     (2 << FLASH_ACR_LATENCY_SHIFT)    /* 010: Two wait states */
+#    define FLASH_ACR_LATENCY_3     (3 << FLASH_ACR_LATENCY_SHIFT)    /* 011: Three wait states */
+#    define FLASH_ACR_LATENCY_4     (4 << FLASH_ACR_LATENCY_SHIFT)    /* 100: Four wait states */
+#    define FLASH_ACR_LATENCY_5     (5 << FLASH_ACR_LATENCY_SHIFT)    /* 101: Five wait states */
+#    define FLASH_ACR_LATENCY_6     (6 << FLASH_ACR_LATENCY_SHIFT)    /* 110: Six wait states */
+#    define FLASH_ACR_LATENCY_7     (7 << FLASH_ACR_LATENCY_SHIFT)    /* 111: Seven wait states */
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
-#  define FLASH_ACR_HLFCYA          (1 << 3)  /* Bit 3: FLASH half cycle access */
-#  define FLASH_ACR_PRTFBE          (1 << 4)  /* Bit 4: FLASH prefetch enable */
-#  ifdef CONFIG_STM32_STM32F30XX
-#    define FLASH_ACR_PRFTBS        (1 << 5)  /* Bit 5: FLASH prefetch buffer status */
+#  if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
+#    define FLASH_ACR_HLFCYA        (1 << 3)  /* Bit 3: FLASH half cycle access */
+#    define FLASH_ACR_PRTFBE        (1 << 4)  /* Bit 4: FLASH prefetch enable */
+#    ifdef CONFIG_STM32_STM32F30XX
+#      define FLASH_ACR_PRFTBS      (1 << 5)  /* Bit 5: FLASH prefetch buffer status */
+#    endif
+#  elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
+#    define FLASH_ACR_PRFTEN        (1 << 8)  /* FLASH prefetch enable */
+#    define FLASH_ACR_ICEN          (1 << 9)  /* Bit 9: Instruction cache enable */
+#    define FLASH_ACR_DCEN          (1 << 10) /* Bit 10: Data cache enable */
+#    define FLASH_ACR_ICRST         (1 << 11) /* Bit 11: Instruction cache reset */
+#    define FLASH_ACR_DCRST         (1 << 12) /* Bit 12: Data cache reset */
 #  endif
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
-#  define FLASH_ACR_PRFTEN          (1 << 8)  /* FLASH prefetch enable */
-#  define FLASH_ACR_ICEN            (1 << 9)  /* Bit 9: Instruction cache enable */
-#  define FLASH_ACR_DCEN            (1 << 10) /* Bit 10: Data cache enable */
-#  define FLASH_ACR_ICRST           (1 << 11) /* Bit 11: Instruction cache reset */
-#  define FLASH_ACR_DCRST           (1 << 12) /* Bit 12: Data cache reset */
 #endif
 
 /* Flash Status Register (SR) */
