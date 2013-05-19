@@ -291,7 +291,7 @@
 
 #define GPIO_SPEED_SHIFT              (10)                       /* Bits 10-11: GPIO frequency selection */
 #define GPIO_SPEED_MASK               (3 << GPIO_SPEED_SHIFT)
-#if define(CONFIG_STM32_STM32L15XX)
+#if defined(CONFIG_STM32_STM32L15XX)
 #  define GPIO_SPEED_400KHz           (0 << GPIO_SPEED_SHIFT)     /* 400 kHz Very low speed output */
 #  define GPIO_SPEED_2MHz             (1 << GPIO_SPEED_SHIFT)     /* 2 MHz Low speed output */
 #  define GPIO_SPEED_10MHz            (2 << GPIO_SPEED_SHIFT)     /* 10 MHz Medium speed output */

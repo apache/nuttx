@@ -43,7 +43,9 @@
 #include <nuttx/config.h>
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32F20XX)
+#if defined(CONFIG_STM32_STM32L15XX)
+#  include "chip/stm32l15xxx_syscfg.h"
+#elif defined(CONFIG_STM32_STM32F20XX)
 #  include "chip/stm32f20xxx_syscfg.h"
 #elif defined(CONFIG_STM32_STM32F30XX)
 #  include "chip/stm32f30xxx_syscfg.h"

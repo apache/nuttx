@@ -53,7 +53,7 @@
 #elif defined(CONFIG_STM32_STM32F40XX)
 #  include "chip/stm32f40xxx_uart.h"
 #else
-#  error "Unsupported STM32 memory map"
+#  error "Unsupported STM32 UART"
 #endif
 
 /************************************************************************************

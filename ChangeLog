@@ -4735,5 +4735,8 @@
 	  Add GPIO support for the STM32L215X (2013-5-18).
 	* arch/arm/src/stm32/chip/stm32l15xxx_memorymap.h: STM32L215X memory map
 	 (2013-5-18).
-	* arch/arm/src/stm32/chip/stm32_pwr.h and stm32fl15xxx_rcc.h:  More updates
-	  for the STM32L152 (2013-5-19).
+	* arch/arm/src/stm32/chip/stm32_pwr.h, stm32fl15xxx_rcc.h, and stm32l15xxx_syscfg.h:
+	  More updates for the STM32L152 (2013-5-19).
+	* configs/stm32ldiscovey: Configuration for the STM32L-Discovery board.
+	  Still does not build on initial check-in (2013-5-19)
+
