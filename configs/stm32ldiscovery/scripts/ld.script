@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32f3discovery/scripts/ld.script
+ * configs/stm32fldiscovery/scripts/ld.script
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-/* The STM32F303VCT has 256Kb of FLASH beginning at address 0x0800:0000 and
- * 40Kb of SRAM. 
+/* The STM32L152RBT6 has 128KB of FLASH beginning at address 0x0800:0000 and
+ * 16Kb of SRAM at address 0x20000000.
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in
@@ -43,8 +43,8 @@
 
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08000000, LENGTH = 256K
-    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 40K
+    flash (rx) : ORIGIN = 0x08000000, LENGTH = 128K
+    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 16K
 }
 
 OUTPUT_ARCH(arm)

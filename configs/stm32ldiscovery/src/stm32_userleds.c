@@ -106,7 +106,7 @@ void stm32_ledinit(void)
 
 void stm32_setled(int led, bool ledon)
 {
-  uint16_t ledcfg;
+  uint32_t ledcfg;
 
   if (led == BOARD_LED1)
     {

@@ -546,7 +546,8 @@ void stm32_lowsetup(void)
 #endif /* HAVE_UART */
 }
 
-#elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
+#elif defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F20XX) || \
+      defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F40XX)
 
 void stm32_lowsetup(void)
 {

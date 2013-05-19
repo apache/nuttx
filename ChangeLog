@@ -4741,4 +4741,5 @@
 	  Still does not build on initial check-in (2013-5-19)
 	* STM32L15X:  Add DMA and UART start.  Correctly initialize the heap
 	  (2013-5-19).
-
+	* arch/arm/src/stm32/stm32l15xxx_rcc.c chip/stm32_flash.h:  Add RCC PLL
+	  and FLASH configuration logic for the STM32L152X (2013-5-19).
