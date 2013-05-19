@@ -79,10 +79,10 @@
  *
  */
 
-#define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN7)
-#define GPIO_LED2       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN6)
+#define GPIO_LED1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_10MHz | \
+                         GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN7)
+#define GPIO_LED2       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_10MHz | \
+                         GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN6)
 
 /* Button definitions *******************************************************************************/
 /* The STM32L-Discovery supports two buttons; only one button is controllable by
@@ -98,14 +98,7 @@
 #define MAX_IRQBUTTON   BUTTON_USER
 #define NUM_IRQBUTTONS  1
 
-#define GPIO_BTN_USER   (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN0)
-
-/* SPI - There is a ST MEMS L3GD20 device on SPI1 using these pins: */
-
-#define GPIO_MEMS_CS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN3)
-#define GPIO_MEMS_INT1  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN0)
-#define GPIO_MEMS_INT2  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTE|GPIO_PIN1)
+#define GPIO_BTN_USER   (GPIO_INPUT | GPIO_FLOAT | GPIO_EXTI | GPIO_PORTA | GPIO_PIN0)
 
 /****************************************************************************************************
  * Public Types

@@ -85,23 +85,38 @@
 /* PLL Configuration
  *
  *   - PLL source is HSE/1    -> 8MHz input
- *   - PLL multipler is 8     -> 64MHz PLL output
- *   - PLL output divider 2   -> 32MHz divided PLL output 
+ *   - PLL multipler is 8     -> 64MHz PLL VCO clock output
+ *   - PLL output divider 2   -> 32MHz divided down PLL VCO clock output
  *
- * PLL frequency is 8MHz (XTAL) x 8 / 2 = 32MHz
+ * Resulting SYSCLK frequency is 8MHz (XTAL) x 8 / 2 = 32MHz
+ *
+ * USB/SDIO:
+ *   If the USB or SDIO interface is used in the application, the PLL VCO
+ *   clock (defined by STM32_CFGR_PLLMUL) must be programmed to output a 96
+ *   MHz frequency. This is required to provide a 48 MHz clock to the USB or
+ *   SDIO (SDIOCLK or USBCLK = PLLVCO/2).
+ * SYSCLK
+ *   The system clock is derived from the PLL VCO divided by the output division factor.
+ * Limitations:
+ *   96 MHz as PLLVCO when the product is in range 1 (1.8V),
+ *   48 MHz as PLLVCO when the product is in range 2 (1.5V),
+ *   24 MHz when the product is in range 3 (1.2V).
+ *   Output division to avoid exceeding 32 MHz as SYSCLK.
+ *   The minimum input clock frequency for PLL is 2 MHz (when using HSE as PLL source).
  */
 
-#define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC
-#define STM32_CFGR_PLLXTPRE     0
-#define STM32_CFGR_PLLMUL       RCC_CFGR_PLLMUL_CLKx8
-#define STM32_CFGR_PLLDIV       RCC_CFGR_PLLDIV_2
-#define STM32_PLL_FREQUENCY     (8*STM32_BOARD_XTAL/2)
+#define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC         /* Source is 8MHz HSE */
+#define STM32_CFGR_PLLMUL       RCC_CFGR_PLLMUL_CLKx8   /* PLLMUL = 8 */
+#define STM32_CFGR_PLLDIV       RCC_CFGR_PLLDIV_2       /* PLLDIV = 2 */
+#define STM32_PLL_FREQUENCY     (8*STM32_BOARD_XTAL)    /* PLL VCO Frequency is 64MHz */
 
-/* Use the PLL and set the SYSCLK source to be the PLL */
+/* Use the PLL and set the SYSCLK source to be the diveded down PLL VCO output
+ * frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
+ */
 
-#define STM32_SYSCLK_SW         RCC_CFGR_SW_PLL
+#define STM32_SYSCLK_SW         RCC_CFGR_SW_PLL         /* Use the PLL as the SYSCLK */
 #define STM32_SYSCLK_SWS        RCC_CFGR_SWS_PLL
-#define STM32_SYSCLK_FREQUENCY  STM32_PLL_FREQUENCY
+#define STM32_SYSCLK_FREQUENCY  (STM32_PLL_FREQUENCY/2) /* SYSCLK frequence is 64MHz/PLLDIV = 32MHz */
 
 /* AHB clock (HCLK) is SYSCLK (32MHz) */
 
