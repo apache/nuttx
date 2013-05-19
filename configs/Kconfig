@@ -542,7 +542,7 @@ config ARCH_BOARD_STM32F3_DISCOVERY
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		STMicro STM32F3-Discovery board based on the STMicro ARCH_CHIP_STM32F303VCT6 MCU.
+		STMicro STM32F3-Discovery board based on the STMicro STM32F303VCT6 MCU.
 
 config ARCH_BOARD_STM32F4_DISCOVERY
 	bool "STMicro STM32F4-Discovery board"
@@ -552,6 +552,15 @@ config ARCH_BOARD_STM32F4_DISCOVERY
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		STMicro STM32F4-Discovery board based on the STMicro STM32F407VGT6 MCU.
+
+config ARCH_BOARD_STM32L_DISCOVERY
+	bool "STMicro STM32L-Discovery board"
+	depends on ARCH_CHIP_STM32L152RB
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		STMicro STM32L-Discovery board based on the STMicro STM32L152RB MCU.
 
 config ARCH_BOARD_MIKROE_STM32F4
 	bool "MikroElektronika Mikromedia for STM32F4 board"
@@ -762,6 +771,7 @@ config ARCH_BOARD
 	default "stm32f100rc_generic" if ARCH_BOARD_STM32F100RC_GENERIC
 	default "stm32f3discovery"    if ARCH_BOARD_STM32F3_DISCOVERY
 	default "stm32f4discovery"    if ARCH_BOARD_STM32F4_DISCOVERY
+	default "stm32ldiscovery"     if ARCH_BOARD_STM32L_DISCOVERY
 	default "mikroe-stm32f4"      if ARCH_BOARD_MIKROE_STM32F4
 	default "sure-pic32mx"        if ARCH_BOARD_SUREPIC32MX
 	default "teensy"              if ARCH_BOARD_TEENSY
@@ -992,6 +1002,9 @@ source "configs/stm32f100rc_generic/Kconfig"
 endif
 if ARCH_BOARD_STM32F4_DISCOVERY
 source "configs/stm32f4discovery/Kconfig"
+endif
+if ARCH_BOARD_STM32L_DISCOVERY
+source "configs/stm32ldiscovery/Kconfig"
 endif
 if ARCH_BOARD_SUREPIC32MX
 source "configs/sure-pic32mx/Kconfig"
