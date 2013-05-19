@@ -1,6 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip/stm32l15xxx_memorymap.h
- * For STM32L100xx, STM32L151xx, STM32L152xx and STM32L162xx advanced ARM-based 32-bit MCUs
+ * For STM32L100xx, STM32L151xx, STM32L152xx and STM32L162xx advanced ARM-based
+ * 32-bit MCUs
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
