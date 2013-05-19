@@ -71,7 +71,8 @@
  * channels.
  */
 
-#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
+#if defined(CONFIG_STM32_STM32L15XX) || defined(CONFIG_STM32_STM32F10XX) || \
+    defined(CONFIG_STM32_STM32F30XX)
 #  include "stm32f10xxx_dma.c"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "stm32f20xxx_dma.c"

@@ -92,12 +92,37 @@
 #  undef CONFIG_STM32_FSMC_SRAM
 #endif
 
-/* For the STM312F10xxx family, all internal SRAM is in one contiguous block
- * starting at g_idle_topstack and extending through CONFIG_DRAM_END (my apologies for
- * the bad naming).  In addition, external FSMC SRAM may be available.
+/* The STM32L15xxx family has only internal SRAM.  The heap is in one contiguous
+ * block starting at g_idle_topstack and extending through CONFIG_DRAM_END.
  */
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#if defined(CONFIG_STM32_STM32L15XX)
+
+   /* Set the end of system SRAM */
+
+#  define SRAM1_END CONFIG_DRAM_END
+
+   /* There is no FSMC (Other EnergyLite STM32's do have an FSMC, but not the STM32L15X */
+
+#  undef CONFIG_STM32_FSMC_SRAM
+
+   /* The STM32L EnergyLite family has no CCM SRAM */
+
+#  undef CONFIG_STM32_CCMEXCLUDE
+#  define CONFIG_STM32_CCMEXCLUDE 1
+
+   /* Only one memory region can be support (internal SRAM) */
+ 
+#  if CONFIG_MM_REGIONS > 1
+#    error "CONFIG_MM_REGIONS > 1.  The STM32L15X has only one memory region."
+#  endif
+
+/* For the STM312F10xxx family, all internal SRAM is in one contiguous block
+ * starting at g_idle_topstack and extending through CONFIG_DRAM_END (my apologies
+ * for the bad naming).  In addition, external FSMC SRAM may be available.
+ */
+
+#elif defined(CONFIG_STM32_STM32F10XX)
 
    /* Set the end of system SRAM */
 
