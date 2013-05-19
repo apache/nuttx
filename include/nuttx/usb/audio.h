@@ -2,7 +2,7 @@
  * include/nuttx/usb/audio.h
  * Audio Device Class (ADC) definitions
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:  This header file is based on information provided by the
@@ -742,7 +742,7 @@ struct adc_interm_desc_s
   uint8_t it_nchan;             /* 8: Number of logical output channels */
   uint8_t it_config[4];         /* 9: The spatial location of the logical channels */
   uint8_t it_names;             /* 13: Index of name string of first logical channel */
-  uint8_t it_controls{2];       /* 14: Bits 0-1: Copy protect control,
+  uint8_t it_controls[2];       /* 14: Bits 0-1: Copy protect control,
                                  *     Bits 2-3: Converter control
                                  *     Bits 4-5: Overload control
                                  *     Bits 6-7: Cluster control
@@ -765,7 +765,7 @@ struct adc_outterm_desc_s
   uint8_t ot_interm;            /* 6: ID of the associated input terminal */
   uint8_t ot_srcid;             /* 7: ID of unit/terminal to which terminal is connnected */
   uint8_t ot_csrcid;            /* 8: ID of clock entity to whcih terminal is connected */
-  uint8_t ot_controls{2];       /* 9: Bits 0-1: Copy protect control,
+  uint8_t ot_controls[2];       /* 9: Bits 0-1: Copy protect control,
                                  *    Bits 2-3: Connector control
                                  *    Bits 4-5: Overload control
                                  *    Bits 6-7: Underflow control
@@ -858,9 +858,9 @@ struct adc_featunit_desc_s
 };
 
 #define fu_controls(n)    fu_variable[4*(n)]
-#define fu_feature(nchan) fu_variable[4*((nchan)+1]
+#define fu_feature(nchan) fu_variable[4*((nchan)+1)]
 
-#define USB_SIZEOF_ADC_FEATUNIT_DESC(nchan) (6+4*((nchan)+1)))
+#define USB_SIZEOF_ADC_FEATUNIT_DESC(nchan) (6+4*((nchan)+1))
 
 /* Sampling Rate Converter Descriptor */
 
@@ -887,7 +887,7 @@ struct adc_effectunit_desc_s
   uint8_t ef_unitid;            /* 3: Identifies unit in audio function */
   uint8_t ef_eftype[2];         /* 4: Effect type */
   uint8_t ef_srcid;             /* 6: ID of unit/terminal to which unit is connected */
-  unit8_t ef_variable[1];       /* 7-(7+4*(nchan+1)): ef_controls[n]
+  uint8_t ef_variable[1];       /* 7-(7+4*(nchan+1)): ef_controls[n]
                                  * Controls for channel n, n=0,..,nchan
                                  *   Bits 0-31: Effect-specific allocation */
                                 /* 15+4*nchan: ef_effects=String index to the effect unit name */
@@ -965,7 +965,7 @@ struct adc_procunit_desc_s
   uint8_t pu_unitid;            /* 3: Identifies unit in audio function */
   uint8_t pu_putype[2];         /* 4: Processing unit type */
   uint8_t pu_npins;             /* 6: Number of input pins of this unit */
-  unit8_t pu_variable[1];       /* 7-(7+(npins11)): pu_srcid[n]
+  uint8_t pu_variable[1];       /* 7-(7+(npins11)): pu_srcid[n]
                                  *   ID of unit/terminal input is connected to, n=1,..,npins */
                                 /* 7+npins: pu_nchan: Number of logic output channels */
                                 /* 8+npins: pu_config: Spatial location of channels */
@@ -997,7 +997,7 @@ struct adc_updownunit_desc_s
   uint8_t ud_unitid;            /* 3: Identifies unit in audio function */
   uint8_t ud_putype[2];         /* 4: Processing unit type (ADC_PROCESS_UPDOWNMIX) */
   uint8_t ud_npins;             /* 6: Number of input pins of this unit (1) */
-  unit8_t ud_srcid;             /* 7: ID of unit/terminal input is connected to */
+  uint8_t ud_srcid;             /* 7: ID of unit/terminal input is connected to */
   uint8_t ud_nchan;             /* 8: Number of logic output channels */
   uint8_t ud_config[4];         /* 9: Spatial location of channels */
   uint8_t ud_names;             /* 13: String index to first channel name */
@@ -1025,7 +1025,7 @@ struct adc_dolbyunit_desc_s
   uint8_t dp_unitid;            /* 3: Identifies unit in audio function */
   uint8_t dp_putype[2];         /* 4: Processing unit type (ADC_PROCESS_DOLBY_PROLOGIC) */
   uint8_t dp_npins;             /* 6: Number of input pins of this unit (1) */
-  unit8_t dp_srcid;             /* 7: ID of unit/terminal input is connected to */
+  uint8_t dp_srcid;             /* 7: ID of unit/terminal input is connected to */
   uint8_t dp_nchan;             /* 8: Number of logic output channels */
   uint8_t dp_config[4];         /* 9: Spatial location of channels */
   uint8_t dp_names;             /* 13: String index to first channel name */
@@ -1053,7 +1053,7 @@ struct adc_stextunit_desc_s
   uint8_t st_unitid;            /* 3: Identifies unit in audio function */
   uint8_t st_putype[2];         /* 4: Processing unit type (ADC_PROCESS_STEREO_EXTENDER) */
   uint8_t st_npins;             /* 6: Number of input pins of this unit (1) */
-  unit8_t st_srcid;             /* 7: ID of unit/terminal input is connected to */
+  uint8_t st_srcid;             /* 7: ID of unit/terminal input is connected to */
   uint8_t st_nchan;             /* 8: Number of logic output channels */
   uint8_t st_config[4];         /* 9: Spatial location of channels */
   uint8_t st_names;             /* 13: String index to first channel name */
@@ -1149,7 +1149,7 @@ struct adc_encoder_desc_s
                                  *    Bits 28-20: Param8 Control
                                  *    Bits 30-31: Reserved */
   uint8_t as_param[8];          /* 12: String index of purpose of parameter n-1, n=1-8 */
-  uint8_t as_encoder:           /* 20: String index to the name of the encoder */
+  uint8_t as_encoder_name;      /* 20: String index to the name of the encoder */
 };
 
 #define USB_SIZEOF_ADC_ENCODER_DESC 21
@@ -1193,7 +1193,7 @@ struct adc_mpeg_decoder_desc_s
                                  *    Bits 2-3: Overflow control
                                  *    Bits 4-5: Decoder error control
                                  *    Bits 6-7: Reserved */
-  uint8_t md_decoder;           /* 9: String index to the name of the decoder */
+  uint8_t md_decoder_name;      /* 9: String index to the name of the decoder */
 };
 
 #define USB_SIZEOF_ADC_MPEG_DECODER_DESC 10
@@ -1224,7 +1224,7 @@ struct adc_ac3_decoder_desc_s
                                  *    Bits 2-3: Overflow control
                                  *    Bits 4-5: Decoder error control
                                  *    Bits 6-7: Reserved */
-  uint8_t ad_decoder;           /* 9: String index to the name of the decoder */
+  uint8_t ad_decodername;       /* 9: String index to the name of the decoder */
 };
 
 #define USB_SIZEOF_ADC_AC3_DECODER_DESC 12
@@ -1256,7 +1256,7 @@ struct adc_wma_decoder_desc_s
                                  *    Bits 2-3: Overflow control
                                  *    Bits 4-5: Decoder error control
                                  *    Bits 6-7: Reserved */
-  uint8_t wd_decoder;           /* 9: String index to the name of the decoder */
+  uint8_t wd_decodername;       /* 9: String index to the name of the decoder */
 };
 
 #define USB_SIZEOF_ADC_WMA_DECODER_DESC 9
@@ -1282,7 +1282,7 @@ struct adc_dts_decoder_desc_s
                                  *    Bits 2-3: Overflow control
                                  *    Bits 4-5: Decoder error control
                                  *    Bits 6-7: Reserved */
-  uint8_t dd_decoder;           /* 9: String index to the name of the decoder */
+  uint8_t dd_decodername;       /* 9: String index to the name of the decoder */
 };
 
 #define USB_SIZEOF_ADC_DTS_DECODER_DESC 8
@@ -1321,18 +1321,18 @@ struct adc_l1_curparm_s
 
 /* Layout 1, Control RANGE Parameter Block */
 
-struct adc_l1_subrange_s packed_struct
+struct adc_l1_subrange_s
 {
    uint8_t l1_min;              /* 0: MIN attribute */
    uint8_t l1_max;              /* 1: MAX attribute */
    uint8_t l1_res;              /* 2: RES attribute */
-};
+} packed_struct;
 
-struct adc_l1_rangeparm_s packed_struct
+struct adc_l1_rangeparm_s
 {
    uint8_t l1_nranges;          /* 0: Number of sub-ranges */
    struct adc_l1_subrange_s l1_subrange[1];
-};
+} packed_struct;
 
 #define USB_SIZEOF_ADC_LI_RANGEPARM(nranges) (1+3*(nranges))
 
@@ -1415,25 +1415,25 @@ struct adc_connctrl_curparm_s
 struct adc_equalizer_curparm_s
 {
   uint8_t eq_bands[4];          /* 0: A set bit indicates that the band is present */
-  uint8_t eq_cur[[1];           /* 4: Setting for the band in bands bitset */
+  uint8_t eq_cur[1];            /* 4: Setting for the band in bands bitset */
 }; 
 
 #define USB_SIZEOF_ADC_CONNCTRL_CURPARM(nbands) (4+(nbands))
 
 /* Graphic Equalizer Control RANGE Parameter Block */
 
-struct adc_eq_subrange_s packed_struct
+struct adc_eq_subrange_s
 {
    uint8_t eq_min;              /* 0: MIN attribute */
    uint8_t eq_max;              /* 1: MAX attribute */
    uint8_t eq_res;              /* 2: RES attribute */
-};
+} packed_struct;
 
-struct adc_equalizer_rangeparm_s packed_struct
+struct adc_equalizer_rangeparm_s
 {
    uint8_t eq_nranges;          /* 0: Number of sub-ranges */
    struct adc_eq_subrange_s eq_subrange[1];
-};
+} packed_struct;
 
 #define USB_SIZEOF_ADC_EQUALIZER_RANGEPARM(nranges) (1+3*(nranges))
 
@@ -1442,7 +1442,7 @@ struct adc_equalizer_rangeparm_s packed_struct
 struct adc_altsettings_curparm_s
 {
   uint8_t as_nsettings;         /* 0: Number of alternate settings */
-  uint8_t as_settings[1];       /* 1-: Altnating setting n, n-1,..., nsettings */
+  uint8_t as_settings[1];       /* 1-: Alternate setting n, n-1,..., nsettings */
 };
 
 #define USB_SIZEOF_ADC_ALTSETTINGS_CURPARM(nsettings) (1+(nsettings))
@@ -1457,18 +1457,18 @@ struct adc_hilo_curparm_s
 
 /* High/Low Scaling Control RANGE Parameter Block */
 
-struct adc_hl_subrange_s packed_struct
+struct adc_hl_subrange_s
 {
    uint8_t hl_min;              /* 0: MIN attribute */
    uint8_t hl_max;              /* 1: MAX attribute */
    uint8_t hl_res;              /* 2: RES attribute */
-};
+} packed_struct;
 
-struct adc_hilo_rangeparm_s packed_struct
+struct adc_hilo_rangeparm_s
 {
    uint8_t hl_nranges[2];       /* 0: Number of sub-ranges */
    struct adc_hl_subrange_s hl_subrange[1];
-};
+} packed_struct;
 
 #define USB_SIZEOF_ADC_HILO_RANGEPARM(nranges) (2+3*(nranges))
 
