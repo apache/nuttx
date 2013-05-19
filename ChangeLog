@@ -4739,4 +4739,6 @@
 	  More updates for the STM32L152 (2013-5-19).
 	* configs/stm32ldiscovey: Configuration for the STM32L-Discovery board.
 	  Still does not build on initial check-in (2013-5-19)
+	* STM32L15X:  Add DMA and UART start.  Correctly initialize the heap
+	  (2013-5-19).
 

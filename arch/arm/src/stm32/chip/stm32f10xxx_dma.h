@@ -269,7 +269,7 @@
 /* DMA channel number of data register */
 
 #define DMA_CNDTR_NDT_SHIFT       (0)       /* Bits 15-0: Number of data to Transfer */
-#define DMA_CNDTR_NDT_MASK       (0xffff << DMA_CNDTR_NDT_SHIFT)
+#define DMA_CNDTR_NDT_MASK        (0xffff << DMA_CNDTR_NDT_SHIFT)
 
 /* DMA Channel mapping.  Each DMA channel has a mapping to several possible
  * sources/sinks of data.  The requests from peripherals assigned to a channel
@@ -295,7 +295,70 @@
 #define STM32_DMA2_CHAN4          (10)
 #define STM32_DMA2_CHAN5          (11)
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#if defined(CONFIG_STM32_STM32L15XX)
+
+#  define DMACHAN_ADC1            STM32_DMA1_CHAN1
+#  define DMACHAN_TIM2_CH3        STM32_DMA1_CHAN1
+#  define DMACHAN_TIM4_CH1        STM32_DMA1_CHAN1
+
+#  define DMACHAN_SPI1_RX         STM32_DMA1_CHAN2
+#  define DMACHAN_USART3_TX       STM32_DMA1_CHAN2
+#  define DMACHAN_TIM2_UP         STM32_DMA1_CHAN2
+#  define DMACHAN_TIM3_CH3        STM32_DMA1_CHAN2
+#  define DMACHAN_TIM6_UP         STM32_DMA1_CHAN2
+#  define DMACHAN_DAC_CHAN1       STM32_DMA1_CHAN2
+
+#  define DMACHAN_SPI1_TX         STM32_DMA1_CHAN3
+#  define DMACHAN_USART3_RX       STM32_DMA1_CHAN3
+#  define DMACHAN_TIM3_CH4        STM32_DMA1_CHAN3
+#  define DMACHAN_TIM3_UP         STM32_DMA1_CHAN3
+#  define DMACHAN_TIM7_UP         STM32_DMA1_CHAN3
+#  define DMACHAN_DAC_CHAN2       STM32_DMA1_CHAN3
+
+#  define DMACHAN_SPI2_RX         STM32_DMA1_CHAN4
+#  define DMACHAN_USART1_TX       STM32_DMA1_CHAN4
+#  define DMACHAN_I2C2_TX         STM32_DMA1_CHAN4
+#  define DMACHAN_TIM4_CH2        STM32_DMA1_CHAN4
+
+#  define DMACHAN_SPI2_TX         STM32_DMA1_CHAN5
+#  define DMACHAN_USART1_RX       STM32_DMA1_CHAN5
+#  define DMACHAN_I2C2_RX         STM32_DMA1_CHAN5
+#  define DMACHAN_TIM2_CH1        STM32_DMA1_CHAN5
+#  define DMACHAN_TIM4_CH3        STM32_DMA1_CHAN5
+
+#  define DMACHAN_USART2_RX       STM32_DMA1_CHAN6
+#  define DMACHAN_I2C1_TX         STM32_DMA1_CHAN6
+#  define DMACHAN_TIM3_CH1        STM32_DMA1_CHAN6
+#  define DMACHAN_TIM3_TRIG       STM32_DMA1_CHAN6
+
+#  define DMACHAN_USART2_TX       STM32_DMA1_CHAN7
+#  define DMACHAN_I2C1_RX         STM32_DMA1_CHAN7
+#  define DMACHAN_TIM2_CH2        STM32_DMA1_CHAN7
+#  define DMACHAN_TIM2_CH4        STM32_DMA1_CHAN7
+#  define DMACHAN_TIM4_UP         STM32_DMA1_CHAN7
+
+#  define DMACHAN_SPI3_RX         STM32_DMA2_CHAN1
+#  define DMACHAN_USART5_TX       STM32_DMA2_CHAN1
+#  define DMACHAN_TIM5_CH4        STM32_DMA2_CHAN1
+#  define DMACHAN_TIM5_TRIG       STM32_DMA2_CHAN1
+#  define DMACHAN_TIM5_COM        STM32_DMA2_CHAN1
+
+#  define DMACHAN_SPI3_TX         STM32_DMA2_CHAN2
+#  define DMACHAN_USART5_RX       STM32_DMA2_CHAN2
+#  define DMACHAN_TIM5_CH3        STM32_DMA2_CHAN2
+#  define DMACHAN_TIM5_UP         STM32_DMA2_CHAN2
+
+#  define DMACHAN_UART4_RX        STM32_DMA2_CHAN3
+#  define DMACHAN_AES_OUT         STM32_DMA2_CHAN3
+
+#  define DMACHAN_TIM5_CH2        STM32_DMA2_CHAN4
+#  define DMACHAN_SDIO            STM32_DMA2_CHAN4
+
+#  define DMACHAN_UART4_TX        STM32_DMA2_CHAN5
+#  define DMACHAN_TIM5_CH1        STM32_DMA2_CHAN5
+#  define DMACHAN_AES_IN          STM32_DMA2_CHAN5
+
+#elif defined(CONFIG_STM32_STM32F10XX)
 
 #  define DMACHAN_ADC1            STM32_DMA1_CHAN1
 #  define DMACHAN_TIM2_CH3        STM32_DMA1_CHAN1
@@ -352,7 +415,6 @@
 #  define DMACHAN_SPI3_TX         STM32_DMA2_CHAN2
 #  define DMACHAN_I2S3_TX         STM32_DMA2_CHAN2
 #  define DMACHAN_TIM5_CH3        STM32_DMA2_CHAN2
-#  define DMACHAN_TIM5_UP         STM32_DMA2_CHAN2
 #  define DMACHAN_TIM5_UP         STM32_DMA2_CHAN2
 #  define DMACHAN_TIM8_TRIG       STM32_DMA2_CHAN2
 #  define DMACHAN_TIM8_COM        STM32_DMA2_CHAN2
