@@ -4735,3 +4735,5 @@
 	  Add GPIO support for the STM32L215X (2013-5-18).
 	* arch/arm/src/stm32/chip/stm32l15xxx_memorymap.h: STM32L215X memory map
 	 (2013-5-18).
+	* arch/arm/src/stm32/chip/stm32_pwr.h and stm32fl15xxx_rcc.h:  More updates
+	  for the STM32L152 (2013-5-19).

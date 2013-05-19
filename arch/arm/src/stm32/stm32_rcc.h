@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_rcc.h
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.orgr>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,9 @@
 #include "up_arch.h"
 #include "chip.h"
 
-#if defined(CONFIG_STM32_STM32F10XX)
+#if defined(CONFIG_STM32_STM32L15XX)
+#  include "chip/stm32l15xxx_rcc.h"
+#elif defined(CONFIG_STM32_STM32F10XX)
 #  include "chip/stm32f10xxx_rcc.h"
 #elif defined(CONFIG_STM32_STM32F20XX)
 #  include "chip/stm32f20xxx_rcc.h"
