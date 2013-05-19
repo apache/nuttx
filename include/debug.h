@@ -284,6 +284,18 @@
 # define lllvdbg(x...)
 #endif
 
+#ifdef CONFIG_DEBUG_AUDIO
+# define auddbg(format, arg...)    dbg(format, ##arg)
+# define audlldbg(format, arg...)  lldbg(format, ##arg)
+# define audvdbg(format, arg...)   vdbg(format, ##arg)
+# define audllvdbg(format, arg...) llvdbg(format, ##arg)
+#else
+# define auddbg(x...)
+# define audlldbg(x...)
+# define audvdbg(x...)
+# define audllvdbg(x...)
+#endif
+
 #else /* CONFIG_CPP_HAVE_VARARGS */
 
 /* Variable argument macros NOT supported */
@@ -453,6 +465,18 @@
 # define lllvdbg (void)
 #endif
 
+#ifdef CONFIG_DEBUG_AUDIO
+# define auddbg    dbg
+# define audlldbg  lldbg
+# define audvdbg   vdbg
+# define audllvdbg llvdbg
+#else
+# define auddbg    (void)
+# define audlldbg  (void)
+# define audvdbg   (void)
+# define audllvdbg (void)
+#endif
+
 #endif /* CONFIG_CPP_HAVE_VARARGS */
 
 /* Buffer dumping macros do not depend on varargs */
@@ -557,6 +581,14 @@
 #else
 #  define ldbgdumpbuffer(m,b,n)
 #  define lvdbgdumpbuffer(m,b,n)
+#endif
+
+#ifdef CONFIG_DEBUG_AUDIO
+#  define auddbgdumpbuffer(m,b,n)  dbgdumpbuffer(m,b,n)
+#  define audvdbgdumpbuffer(m,b,n) vdbgdumpbuffer(m,b,n)
+#else
+#  define auddbgdumpbuffer(m,b,n)
+#  define audvdbgdumpbuffer(m,b,n)
 #endif
 
 /****************************************************************************

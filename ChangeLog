@@ -4743,5 +4743,9 @@
 	  (2013-5-19).
 	* arch/arm/src/stm32/stm32l15xxx_rcc.c chip/stm32_flash.h:  Add RCC PLL
 	  and FLASH configuration logic for the STM32L152X (2013-5-19).
-	* nuttx/include/nuttx/usb/audio.h:  Typo- and bug-fixes from Ken Pettit
+	* include/nuttx/usb/audio.h:  Typo- and bug-fixes from Ken Pettit
 	  (2013-5-19)
+	* audio/, drivers/audio, include/nuttx/audio.h:  Add a new audio subsystem
+	  and jVS1053 driver to NuttX.  Contributed by Ken Pettit (2013-5-19).
+	* configs/miroe-stm32f4/:  Add audio logic to NSH configuration.  From Ken
+	  Petty (2013-5-19).

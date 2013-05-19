@@ -1,8 +1,8 @@
 ############################################################################
-# drivers/Makefile
+# audio/Makefile
 #
-#   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
-#   Author: Gregory Nutt <gnutt@nuttx.org>
+#   Copyright (C) 2013 Ken Pettit. All rights reserved.
+#   Author: Ken Pettit <pettitkd@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -42,49 +42,27 @@ endif
 
 DEPPATH = --dep-path .
 ASRCS =
-CSRCS =
+CSRCS = audio.c buffer.c
 VPATH = .
 
 # Include support for various drivers.  Each Make.defs file will add its
 # files to the source file list, add its DEPPATH info, and will add
 # the appropriate paths to the VPATH variable
 
-include analog$(DELIM)Make.defs
-include audio$(DELIM)Make.defs
-include bch$(DELIM)Make.defs
-include input$(DELIM)Make.defs
-include lcd$(DELIM)Make.defs
-include mmcsd$(DELIM)Make.defs
-include mtd$(DELIM)Make.defs
-include net$(DELIM)Make.defs
-include pipes$(DELIM)Make.defs
-include power$(DELIM)Make.defs
-include sensors$(DELIM)Make.defs
-include sercomm$(DELIM)Make.defs
-include serial$(DELIM)Make.defs
-include syslog$(DELIM)Make.defs
-include usbdev$(DELIM)Make.defs
-include usbhost$(DELIM)Make.defs
-include wireless$(DELIM)Make.defs
-
-ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
-  CSRCS += dev_null.c dev_zero.c loop.c
-
-ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-  CSRCS += ramdisk.c rwbuffer.c
+ifeq ($(CONFIG_AUDIO_FORMAT_PCM),y)
+  CSRCS += pcm.c
 endif
 
-ifeq ($(CONFIG_CAN),y)
-  CSRCS += can.c
+ifeq ($(CONFIG_AUDIO_MIXER),y)
+  CSRCS += mixer.c
 endif
 
-ifeq ($(CONFIG_PWM),y)
-  CSRCS += pwm.c
+ifeq ($(CONFIG_AUDIO_MIDI_SYNTH),y)
+  CSRCS += midisynth.c
 endif
 
-ifeq ($(CONFIG_WATCHDOG),y)
-  CSRCS += watchdog.c
-endif
+ifeq ($(CONFIG_AUDIO_FONT),y)
+  CSRCS += audio_font.c
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
@@ -93,7 +71,7 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
-BIN = libdrivers$(LIBEXT)
+BIN = libaudio$(LIBEXT)
 
 all: $(BIN)
 

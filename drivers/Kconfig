@@ -257,6 +257,19 @@ if ANALOG
 source drivers/analog/Kconfig
 endif
 
+menuconfig AUDIO_DEVICES
+	bool "Audio Device Support"
+	default n
+	---help---
+		This directory holds implementations of audio device drivers.
+		This includes drivers for MP3, WMA and Ogg Vorbis encoding,
+		decoding, as well as drivers for interfacing with external
+		DSP chips to perform custom audio functions.
+
+if AUDIO_DEVICES
+source drivers/audio/Kconfig
+endif
+
 menuconfig BCH
 	bool "Block-to-Character (BCH) Support"
 	default n

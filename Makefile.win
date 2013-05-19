@@ -133,6 +133,12 @@ else
 OTHERDIRS += graphics
 endif
 
+ifeq ($(CONFIG_AUDIO),y)
+NONFSDIRS += audio
+else
+OTHERDIRS += audio
+endif
+
 # CLEANDIRS are the directories that will clean in.  These are
 #   all directories that we know about.
 # KERNDEPDIRS are the directories in which we will build target dependencies.
@@ -243,6 +249,12 @@ endif
 
 ifeq ($(CONFIG_NX),y)
 NUTTXLIBS += lib\libgraphics$(LIBEXT)
+endif
+
+# Add libraries for the Audio sub-system
+
+ifeq ($(CONFIG_AUDIO),y)
+NUTTXLIBS += lib\libaudio$(LIBEXT)
 endif
 
 # LINKLIBS derives from NUTTXLIBS and is simply the same list with the subdirectory removed
@@ -523,6 +535,12 @@ graphics\libgraphics$(LIBEXT): context
 
 lib\libgraphics$(LIBEXT): graphics\libgraphics$(LIBEXT)
 	$(Q) install graphics\libgraphics$(LIBEXT) lib\libgraphics$(LIBEXT)
+
+audio\libaudio$(LIBEXT): context
+	$(Q) $(MAKE) -C audio TOPDIR="$(TOPDIR)" libaudio$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+lib\libaudio$(LIBEXT): audio\libaudio$(LIBEXT)
+	$(Q) install audio\libaudio$(LIBEXT) lib\libaudio$(LIBEXT)
 
 syscall\libstubs$(LIBEXT): context
 	$(Q) $(MAKE) -C syscall TOPDIR="$(TOPDIR)" libstubs$(LIBEXT) EXTRADEFINES=$(KDEFINE)

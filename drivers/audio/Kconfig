@@ -1,0 +1,14 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config VS1053
+	bool "VS1053 codec chip"
+	default n
+	---help---
+		Select to enable support for the VS1053 Audio codec by VLSI Solutions.
+		This chip provides encoding and decoding of MP3, WMA, AAC and Ogg
+		Vorbis format audio.  It also has a general DSP which is user
+		programmable to perform special audio (or any DSP) functions.
+

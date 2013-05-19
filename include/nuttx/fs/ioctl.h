@@ -66,6 +66,7 @@
 #define _CAIOCBASE      (0x0d00) /* CDC/ACM ioctl commands */
 #define _BATIOCBASE     (0x0e00) /* Battery driver ioctl commands */
 #define _QEIOCBASE      (0x0f00) /* Quadrature encoder ioctl commands */
+#define _AUDIOIOCBASE   (0x1000) /* Audio ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -231,6 +232,12 @@
 
 #define _QEIOCVALID(c)    (_IOC_TYPE(c)==_QEIOCBASE)
 #define _QEIOC(nr)        _IOC(_QEIOCBASE,nr)
+
+/* NuttX Audio driver ioctol definitions ***********************/
+/* (see nuttx/audio/audio.h) */
+
+#define _AUDIOIOCVALID(c)  (_IOC_TYPE(c)==_AUDIOIOCBASE)
+#define _AUDIOIOC(nr)      _IOC(_AUDIOIOCBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions

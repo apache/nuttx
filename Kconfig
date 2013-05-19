@@ -492,6 +492,14 @@ config DEBUG_WATCHDOG
 		Support for this debug option is architecgture-specific and may not
 		be available for some MCUs.
 
+config DEBUG_AUDIO
+	bool "Enable Audio Device Debug Output"
+	default n
+	---help---
+		Enable low level debug SYSLOG output from the audio subsystem and
+		device drivers. (disabled by default).  Support for this debug option 
+		is architecgture-specific and may not be available for some MCUs.
+
 endif
 
 config DEBUG_SYMBOLS
@@ -536,6 +544,10 @@ endmenu
 
 menu "Memory Management"
 source mm/Kconfig
+endmenu
+
+menu "Audio Support"
+source audio/Kconfig
 endmenu
 
 menu "Binary Formats"
