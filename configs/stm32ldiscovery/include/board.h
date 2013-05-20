@@ -60,7 +60,8 @@
  * - HSI high-speed internal oscillator clock
  *   Generated from an internal 16 MHz RC oscillator
  * - HSE high-speed external oscillator clock
- *   Driven by the 8MHz crystal (X1) on the OSC_IN and OSC_OUT pins
+ *   Normally driven by an external crystal (X3).  However, this crystal is not fitted
+ *   on the STM32L-Discovery board.
  * - PLL clock
  * - MSI multispeed internal oscillator clock
  *   The MSI clock signal is generated from an internal RC oscillator. Seven frequency
@@ -74,7 +75,7 @@
  *   Driven by 32.768KHz crystal (X2) on the OSC32_IN and OSC32_OUT pins.
  */
 
-#define STM32_BOARD_XTAL        8000000ul        /* X1 on board */
+#define STM32_BOARD_XTAL        8000000ul        /* X3 on board (not fitted)*/
 
 #define STM32_HSI_FREQUENCY     16000000ul       /* Approximately 16MHz */
 #define STM32_HSE_FREQUENCY     STM32_BOARD_XTAL
@@ -84,11 +85,11 @@
 
 /* PLL Configuration
  *
- *   - PLL source is HSE/1    -> 8MHz input
- *   - PLL multipler is 8     -> 64MHz PLL VCO clock output
+ *   - PLL source is HSI      -> 16MHz input (nominal)
+ *   - PLL multipler is 4     -> 64MHz PLL VCO clock output
  *   - PLL output divider 2   -> 32MHz divided down PLL VCO clock output
  *
- * Resulting SYSCLK frequency is 8MHz (XTAL) x 8 / 2 = 32MHz
+ * Resulting SYSCLK frequency is 16MHz x 4 / 2 = 32MHz
  *
  * USB/SDIO:
  *   If the USB or SDIO interface is used in the application, the PLL VCO
@@ -105,10 +106,10 @@
  *   The minimum input clock frequency for PLL is 2 MHz (when using HSE as PLL source).
  */
 
-#define STM32_CFGR_PLLSRC       RCC_CFGR_PLLSRC         /* Source is 8MHz HSE */
-#define STM32_CFGR_PLLMUL       RCC_CFGR_PLLMUL_CLKx8   /* PLLMUL = 8 */
+#define STM32_CFGR_PLLSRC       0                       /* Source is 16MHz HSI */
+#define STM32_CFGR_PLLMUL       RCC_CFGR_PLLMUL_CLKx4   /* PLLMUL = 4 */
 #define STM32_CFGR_PLLDIV       RCC_CFGR_PLLDIV_2       /* PLLDIV = 2 */
-#define STM32_PLL_FREQUENCY     (8*STM32_BOARD_XTAL)    /* PLL VCO Frequency is 64MHz */
+#define STM32_PLL_FREQUENCY     (4*STM32_HSE_FREQUENCY) /* PLL VCO Frequency is 64MHz */
 
 /* Use the PLL and set the SYSCLK source to be the diveded down PLL VCO output
  * frequency (STM32_PLL_FREQUENCY divided by the PLLDIV value).
@@ -292,7 +293,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void stm32_boardinitialize(void);
+void stm32_boardinitialize(void);
 
 /************************************************************************************
  * Name:  stm32_ledinit, stm32_setled, and stm32_setleds
@@ -305,9 +306,9 @@ EXTERN void stm32_boardinitialize(void);
  ************************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-EXTERN void stm32_ledinit(void);
-EXTERN void stm32_setled(int led, bool ledon);
-EXTERN void stm32_setleds(uint8_t ledset);
+void stm32_ledinit(void);
+void stm32_setled(int led, bool ledon);
+void stm32_setleds(uint8_t ledset);
 #endif
 
 /************************************************************************************
@@ -334,10 +335,10 @@ EXTERN void stm32_setleds(uint8_t ledset);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-EXTERN void up_buttoninit(void);
-EXTERN uint8_t up_buttons(void);
+void up_buttoninit(void);
+uint8_t up_buttons(void);
 #ifdef CONFIG_ARCH_IRQBUTTONS
-EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
+xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 #endif
 

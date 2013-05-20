@@ -90,6 +90,12 @@
                                               /* Bits 19-23: Reserved */
 #define RCC_CR_PLLON                (1 << 24) /* Bit 24: PLL enable */
 #define RCC_CR_PLLRDY               (1 << 25) /* Bit 25: PLL clock ready flag */
+                                              /* Bits 26-27: Reserved */
+#define RCC_CR_CSSON                (1 << 28) /* Bit 16: Clock security system enable */
+#define RCC_CR_RTCPRE_SHIFT         (29)      /* Bits 29-30: RTC/LCD prescaler */
+#define RCC_CR_RTCPRE_MASK          (3 << RCC_CR_RTCPRE_SHIFT)
+                                              /* Bit 31: Reserved */
+#define RCC_CR_RSTVAL               0x00000300
 
 /* Internal clock sources calibration register */
 

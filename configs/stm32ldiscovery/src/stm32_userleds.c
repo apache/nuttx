@@ -112,7 +112,7 @@ void stm32_setled(int led, bool ledon)
     {
       ledcfg = GPIO_LED1;
     }
-  else if (led == BOARD_LED1)
+  else if (led == BOARD_LED2)
     {
       ledcfg = GPIO_LED2;
     }

@@ -67,6 +67,7 @@
 
 static inline void rcc_reset(void)
 {
+#if 0 /* None of this is necessary if only called from power up */
   uint32_t regval;
 
   /* Make sure that all devices are out of reset */
@@ -82,9 +83,14 @@ static inline void rcc_reset(void)
   putreg32(0, STM32_RCC_APB1ENR);           /* Disable APB1 Peripheral Clock */
 
   /* Set the Internal clock sources calibration register to its reset value.
-   * MSI to the default frequency (nomially 2.097MHz), MSITRIM=0, HSITRIM=0x10 */
+   * MSI to the default frequency (nominally 2.097MHz), MSITRIM=0, HSITRIM=0x10.
+   * Preserve the factory HSICAL and MSICAL settings.
+   */
 
-  putreg32(RCC_ICSR_RSTVAL, STM32_RCC_ICSCR);
+  regval  = getreg32(STM32_RCC_ICSCR);
+  regval &= (RCC_ICSCR_HSICAL_MASK | RCC_ICSCR_MSICAL_MASK);
+  regval |= (RCC_ICSR_RSTVAL & ~(RCC_ICSCR_HSICAL_MASK | RCC_ICSCR_MSICAL_MASK));
+  putreg32(regval, STM32_RCC_ICSCR);
 
   /* Enable the internal MSI */
 
@@ -106,12 +112,12 @@ static inline void rcc_reset(void)
 
   while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_MSI);
 
-  /* Now we can disable the alternative clock sources: HSE, HSI, and PLL. Also,
-   * reset the HSE bypass.
+  /* Now we can disable the alternative clock sources: HSE, HSI, PLL, CSS and RTCPRE. Also,
+   * reset the HSE bypass.  This restores the RCC CR to its reset state.
    */
 
   regval  = getreg32(STM32_RCC_CR);         /* Disable the HSE and the PLL */
-  regval &= ~(RCC_CR_HSION | RCC_CR_HSEON | RCC_CR_PLLON);
+  regval &= ~(RCC_CR_HSION | RCC_CR_HSEON | RCC_CR_PLLON | RCC_CR_CSSON | RCC_CR_RTCPRE_MASK);
   putreg32(regval, STM32_RCC_CR);
 
   regval  = getreg32(STM32_RCC_CR);         /* Reset HSEBYP bit */
@@ -146,6 +152,7 @@ static inline void rcc_reset(void)
   putreg32(regval, STM32_FLASH_ACR);
 
   /* Check that 32-bit access is taken into account by reading FLASH_ACR */
+#endif
 }
 
 /****************************************************************************
@@ -483,19 +490,40 @@ static void stm32_stdclockconfig(void)
 {
   uint32_t regval;
 
-  /* If the PLL is using the HSE, or the HSE is the system clock */
+  /* First, enable the source clock only the PLL (via HSE or HSI), HSE, and HSI
+   * are supported in this implementation.
+   */
 
 #if (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE)
-  /* Enable HSE clocking */
+  /* The PLL is using the HSE, or the HSE is the system clock.  In either
+   * case, we need to enable HSE clocking.
+   */
 
   if (!stm32_rcc_enablehse())
     {
       /* In the case of a timeout starting the HSE, we really don't have a
-       * strategy.  This is almost always a hardware failure or misconfiguration.
+       * strategy.  This is almost always a hardware failure or
+       * misconfiguration (for example, if no crystal is fitted on the board.
        */
 
       return;
     }
+
+#elif (STM32_CFGR_PLLSRC == 0) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSI)
+  /* The PLL is using the HSI, or the HSI is the system clock.  In either
+   * case, we need to enable HSI clocking.
+   */
+
+  regval  = getreg32(STM32_RCC_CR);   /* Enable the HSI */
+  regval |= RCC_CR_HSION;
+  putreg32(regval, STM32_RCC_CR);
+
+  /* Wait until the HSI clock is ready.  Since this is an internal clock, no
+   * timeout is expected
+   */
+
+  while ((getreg32(STM32_RCC_CR) & RCC_CR_HSIRDY) == 0);
+
 #endif
 
   /* Increasing the CPU frequency (in the same voltage range):
