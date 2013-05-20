@@ -4749,3 +4749,7 @@
 	  and jVS1053 driver to NuttX.  Contributed by Ken Pettit (2013-5-19).
 	* configs/miroe-stm32f4/:  Add audio logic to NSH configuration.  From Ken
 	  Petty (2013-5-19).
+	* nuttx/arch/arm/src/lm/chip/lm_flash.h and nuttx/arch/arm/src/lm/lm_flash.c:
+	  Add support for TI/Stellaris internal FLASH MTD driver.  From Max
+	  Holtzberg (2013-5-20).
+

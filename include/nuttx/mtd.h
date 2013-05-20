@@ -138,7 +138,7 @@ struct mtd_dev_s
    *  - MTDIOC_GEOMETRY:  Get MTD geometry
    *  - MTDIOC_XIPBASE:   Convert block to physical address for eXecute-In-Place
    *  - MTDIOC_BULKERASE: Erase the entire device
-   * (see include/nuttx/fs/ioctl.h) 
+   * (see include/nuttx/fs/ioctl.h)
    */
 
   int (*ioctl)(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
@@ -317,6 +317,16 @@ FAR struct mtd_dev_s *sst39vf_initialize(void);
 FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
 
 FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev);
+
+/****************************************************************************
+ * Name: up_flashinitialize
+ *
+ * Description:
+ *   Create an initialized MTD device instance for internal flash.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *up_flashinitialize(void);
 
 #undef EXTERN
 #ifdef __cplusplus

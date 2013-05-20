@@ -46,6 +46,18 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
+/* FLASH dimensions ****************************************************************/
+
+#if defined(CONFIG_ARCH_CHIP_LM3S6965)
+#  define LM_FLASH_NPAGES        256
+#  define LM_FLASH_PAGESIZE      1024
+#else
+#  error "No flash dimensions defined for selected chip."
+#endif
+
+#define LM_FLASH_SIZE            (LM_FLASH_NPAGES * LM_FLASH_PAGESIZE)
+
+
 /* FLASH register offsets ***********************************************************/
 
 /* The FMA, FMD, FMC, FCRIS, FCIM, and FCMISC registers are relative to the Flash
@@ -111,7 +123,24 @@
 #define LM_FLASH_FMPPE3           (LM_SYSCON_BASE + LM_FLASH_FMPPE3_OFFSET)
 
 /* FLASH register bit defitiions ****************************************************/
-/* To be provided */
+
+#define FLASH_FMA_OFFSET_SHIFT     0         /* Bits 17-0: Address Offset */
+#define FLASH_FMA_OFFSET_MASK      (0x0003ffff << FLASH_FMA_OFFSET_SHIFT)
+
+#define FLASH_FMC_WRITE            (1 << 0)  /* Write a Word into Flash Memory */
+#define FLASH_FMC_ERASE            (1 << 1)  /* Erase a Page of Flash Memory */
+#define FLASH_FMC_MERASE           (1 << 2)  /* Mass Erase Flash Memory */
+#define FLASH_FMC_COMT             (1 << 3)  /* Commit Register Value */
+
+/* This field contains a write key, which is used to minimize the incidence
+ * of accidental flash writes. The value 0xA442 must be written into this
+ * field for a write to occur. Writes to the FMC register without this WRKEY
+ * value are ignored. A read of this field returns the value 0
+ */
+#define FLASH_FMC_WRKEY_SHIFT      16         /* Bits 16-31:  Flash Write Key */
+#define FLASH_FMC_WRKEY_MASK       (0xffff << FLASH_FMC_WRKEY_SHIFT)
+#define FLASH_FMC_WRKEY            (0xa442 << FLASH_FMC_WRKEY_SHIFT) /* Magic write key */
+
 
 /************************************************************************************
  * Public Types

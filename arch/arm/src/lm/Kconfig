@@ -122,6 +122,12 @@ config LM_ETHERNET
 	---help---
 		This must be set (along with NET) to build the Stellaris Ethernet driver.
 
+config LM_FLASH
+	bool "Stellaris internal FLASH"
+	default n
+	---help---
+		Enable MTD driver support for internal FLASH.
+
 endmenu
 
 menu "Disable GPIO Interrupts"
@@ -245,4 +251,14 @@ config SSI_TXLIMIT
 endmenu
 endif
 
+if LM_FLASH
+menu "Stellaris Internal Flash Driver Configuration"
 
+config LM_FLASH_STARTPAGE
+	int "First page accessible by the MTD driver"
+	default 250
+	---help---
+		To prevent accessing FLASH sections where code is stored.
+
+endmenu
+endif
