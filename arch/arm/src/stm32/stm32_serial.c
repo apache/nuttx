@@ -1214,6 +1214,7 @@ static void up_setspeed(struct uart_dev_s *dev)
 static int up_setup(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
+
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   uint32_t regval;
 

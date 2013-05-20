@@ -621,5 +621,3 @@ void stm32_lowsetup(void)
 #else
 #  error "Unsupported STM32 chip"
 #endif
-
-

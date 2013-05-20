@@ -108,9 +108,9 @@
 #  define PWR_CR_ULP           (1 << 9)  /* Ultralow power mode */
 #  define PWR_CR_FWU           (1 << 10) /* Low power run mode */
 #  define PWR_CR_VOS_MASK      (3 << 11) /* Bits 11-12: Regulator voltage scaling output selection */
-#  define PWR_CR_VOS_SCALE_1   (1 << 11) /* 1.8 V (range 1) */
-#  define PWR_CR_VOS_SCALE_2   (2 << 11) /* 1.5 V (range 2) */
-#  define PWR_CR_VOS_SCALE_3   (3 << 11) /* 1.2 V (range 3) */
+#  define PWR_CR_VOS_SCALE_1   (1 << 11) /* 1.8 V (range 1) PLL VCO Max = 96MHz */
+#  define PWR_CR_VOS_SCALE_2   (2 << 11) /* 1.5 V (range 2) PLL VCO Max = 64MHz */
+#  define PWR_CR_VOS_SCALE_3   (3 << 11) /* 1.2 V (range 3) PLL VCO Max = 24MHz */
 #  define PWR_CR_LPRUN         (1 << 14) /* Low power run mode */
 #endif
 
