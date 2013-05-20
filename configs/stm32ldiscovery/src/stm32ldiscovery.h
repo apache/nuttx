@@ -63,20 +63,19 @@
 #endif
 
 /* STM32L-Discovery GPIOs ***************************************************************************/
-/* The STM32L-Discovery board has four LEDs.  Two of these are controlled by
- * logic on the board and are not available for software control:
+/* The STM32L-Discovery board has four LEDs.  Two of these are controlled by logic on the board and
+ * are not available for software control:
  *
- * LD1 COM:   LD2 default status is red. LD2 turns to green to indicate that
- *            communications are in progress between the PC and the ST-LINK/V2.
+ * LD1 COM:   LD2 default status is red. LD2 turns to green to indicate that communications are in
+ *            progress between the PC and the ST-LINK/V2.
  * LD2 PWR:   Red LED indicates that the board is powered.
  *
  * And two LEDs can be controlled by software:
  *
- * User LD3:  Green LED is a user LED connected to the I/O PB7 of the STM32L152
- *            MCU.
- * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the STM32L152
- *            MCU.
+ * User LD3:  Green LED is a user LED connected to the I/O PB7 of the STM32L152 MCU.
+ * User LD4:  Blue LED is a user LED connected to the I/O PB6 of the STM32L152 MCU.
  *
+ * The other side of the LED connects to ground so high value will illuminate the LED.
  */
 
 #define GPIO_LED1       (GPIO_OUTPUT | GPIO_PUSHPULL | GPIO_SPEED_10MHz | \
@@ -85,8 +84,7 @@
                          GPIO_OUTPUT_CLEAR | GPIO_PORTB | GPIO_PIN6)
 
 /* Button definitions *******************************************************************************/
-/* The STM32L-Discovery supports two buttons; only one button is controllable by
- * software:
+/* The STM32L-Discovery supports two buttons; only one button is controllable by software:
  *
  *   B1 USER: user and wake-up button connected to the I/O PA0 of the STM32F303VCT6.
  *   B2 RESET: pushbutton connected to NRST is used to RESET the STM32F303VCT6.

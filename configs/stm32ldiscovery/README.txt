@@ -444,6 +444,11 @@ GND and (external) 5V are available on both P1 and P2.  Note:  These signals
 may be at lower voltage levels and, hence, may not properly drive an external
 RS-232 transceiver.
 
+NOTE:  The crystal X3 is not installed on the STM32L3-Discovery.  As a
+result, the HSE clock is not availabled and the less acurate HSI must be
+used.  This may limit the accuracy of the computed baud, especially at
+higher BAUD.
+
 A USB serial console is another option.
 
 Debugging
@@ -706,6 +711,8 @@ Where <subdir> is one of the following:
        Therefore, you will need an external RS232 driver or TTL serial-to-
        USB converter.  The UART1 TX and RX pins should be available on
        PA9 and PA10, respectively.
+
+       The serial console is configured for 57600 8N1
 
     3. Support for NSH built-in applications is *not* enabled.
 
