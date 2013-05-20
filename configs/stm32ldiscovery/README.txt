@@ -161,7 +161,7 @@ GNU Toolchain Options
   toolchain options.
 
   1. The CodeSourcery GNU toolchain,
-  2. The Atollic Toolchain, 
+  2. The Atollic Toolchain,
   3. The devkitARM GNU toolchain,
   4. Raisonance GNU toolchain, or
   5. The NuttX buildroot Toolchain (see below).
@@ -240,7 +240,7 @@ GNU Toolchain Options
   In order to compile successfully.  Otherwise, you will get errors like:
 
     "C++ Compiler only available in TrueSTUDIO Professional"
-  
+
   The make may then fail in some of the post link processing because of some of
   the other missing tools.  The Make.defs file replaces the ar and nm with
   the default system x86 tool versions and these seem to work okay.  Disable all
@@ -262,7 +262,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -359,7 +359,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -440,6 +440,10 @@ used if either the LCD or the on-board LEDs are disabled.
   PC10  USART3_TX LCD SEG22        P2, pin 15
   PC11  USART3_RX LCD SEG23        P2, pin 14
 
+GND and (external) 5V are available on both P1 and P2.  Note:  These signals
+may be at lower voltage levels and, hence, may not properly drive an external
+RS-232 transceiver.
+
 A USB serial console is another option.
 
 Debugging
@@ -501,7 +505,7 @@ STM32L-Discovery-specific Configuration Options
        configuration features.
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
- 
+
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
@@ -562,7 +566,7 @@ STM32L-Discovery-specific Configuration Options
     CONFIG_STM32_FLITF
     CONFIG_STM32_DMA1
     CONFIG_STM32_DMA2
- 
+
     APB2
     ----
     CONFIG_STM32_SYSCFG
@@ -613,7 +617,7 @@ STM32L-Discovery-specific Configuration Options
   configuration settings:
 
     CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
- 
+
   NOTE: The STM32 timers are each capable of generating different signals on
   each of the four channels with different duty cycles.  That capability is
   not supported by this driver:  Only one output channel per timer.
@@ -685,13 +689,10 @@ Where <subdir> is one of the following:
 
   nsh:
   ---
-    Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on UART2.  Support for
-    builtin applications is enabled, but in the base configuration no
-    builtin applications are selected (see NOTES below).
+    Configures the NuttShell (nsh) located at apps/examples/nsh.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -701,7 +702,14 @@ Where <subdir> is one of the following:
        b. Execute 'make menuconfig' in nuttx/ in order to start the
           reconfiguration process.
 
-    2. By default, this configuration uses the CodeSourcery toolchain
+    2. The serial console is on UART1 and NuttX LED support is enabled.
+       Therefore, you will need an external RS232 driver or TTL serial-to-
+       USB converter.  The UART1 TX and RX pins should be available on
+       PA9 and PA10, respectively.
+
+    3. Support for NSH built-in applications is *not* enabled.
+
+    4. By default, this configuration uses the CodeSourcery toolchain
        for Windows and builds under Cygwin (or probably MSYS).  That
        can easily be reconfigured, of course.
 
@@ -709,7 +717,14 @@ Where <subdir> is one of the following:
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
-    3. This configuration includes USB Support (CDC/ACM device)
+    5. This configuration can support USB (CDC/ACM device)
+
+       a) Enable NSH builtin application support
+
+       CONFIG_BUILTIN=y
+       CONFIG_NSH_BUILTIN_APPS=y
+
+       b) Enable USB device and CDC/ACM class support
 
        CONFIG_STM32_USB=y            : STM32 USB device support
        CONFIG_USBDEV=y               : USB device support must be enabled
@@ -717,14 +732,16 @@ Where <subdir> is one of the following:
        CONFIG_NSH_BUILTIN_APPS=y     : NSH built-in application support must be enabled
        CONFIG_NSH_ARCHINIT=y         : To perform USB initialization
 
-       The CDC/ACM example is included as two NSH "built-in" commands.\
- 
+       c) Enable the CDC/ACM example
+
+       The CDC/ACM example is included as two NSH "built-in" commands.
+
        CONFIG_EXAMPLES_CDCACM=y      : Enable apps/examples/cdcacm
-  
+
        The two commands are:
- 
+
        sercon : Connect the serial device a create /dev/ttyACM0
-       serdis : Disconnect the serial device.        
+       serdis : Disconnect the serial device.
 
        NOTE:  The serial connections/disconnections do not work as advertised.
        This is because the STM32L-Discovery board does not provide circuitry for
@@ -735,25 +752,8 @@ Where <subdir> is one of the following:
        1) Start NSH with USB disconnected
        2) enter to 'sercon' command to start the CDC/ACM device, then
        3) Connect the USB device to the host.
- 
+
        and to close the connection:
 
        4) Disconnect the USB device from the host
        5) Enter the 'serdis' command
-
-    4. This example can support the watchdog timer test (apps/examples/watchdog)
-       but this must be enabled by selecting:
-
-       CONFIG_EXAMPLES_WATCHDOG=y : Enable the apps/examples/watchdog
-       CONFIG_WATCHDOG=y          : Enables watchdog timer driver support
-       CONFIG_STM32_WWDG=y        : Enables the WWDG timer facility, OR
-       CONFIG_STM32_IWDG=y        : Enables the IWDG timer facility (but not both)
-
-       The WWDG watchdog is driven off the (fast) 42MHz PCLK1 and, as result,
-       has a maximum timeout value of 49 milliseconds.  for WWDG watchdog, you
-       should also add the fillowing to the configuration file:
-
-       CONFIG_EXAMPLES_WATCHDOG_PINGDELAY=20
-       CONFIG_EXAMPLES_WATCHDOG_TIMEOUT=49
-
-       The IWDG timer has a range of about 35 seconds and should not be an issue.
