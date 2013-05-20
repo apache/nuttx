@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/stm32_pwr.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,30 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void stm32_pwr_enablebkp(void);
+void stm32_pwr_enablebkp(void);
+
+/************************************************************************************
+ * Name: stm32_pwr_setvos
+ *
+ * Description:
+ *   Set voltage scaling for EneryLite devices.
+ *
+ * Input Parameters:
+ *   vos - Properly aligned voltage scaling select bits for the PWR_CR register.
+ *
+ * Returned Values:
+ *   None
+ *
+ * Assumptions:
+ *   At present, this function is called only from initialization logic.  If used
+ *   for any other purpose that protection to assure that its operation is atomic
+ *   will be required.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM32_ENERGYLITE
+void stm32_pwr_setvos(uint16_t vos);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

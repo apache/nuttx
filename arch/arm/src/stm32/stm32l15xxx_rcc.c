@@ -1,5 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32l15xxx_rcc.c
+ * For STM32L100xx, STM32L151xx, STM32L152xx and STM32L162xx advanced ARM-
+ * based 32-bit MCUs
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -134,7 +136,11 @@ static inline void rcc_reset(void)
 
   putreg32(0, STM32_RCC_CIR);               /* Disable all interrupts */
 
-  /* Rest the FLASH controller to 32-bit mode, no wait states.
+  /* Go to the (default) voltage range 2 */
+
+  stm32_pwr_setvos(PWR_CR_VOS_SCALE_2);
+
+  /* Reset the FLASH controller to 32-bit mode, no wait states.
    *
    * First, program the new number of WS to the LATENCY bit in Flash access
    * control register (FLASH_ACR)
@@ -490,8 +496,21 @@ static void stm32_stdclockconfig(void)
 {
   uint32_t regval;
 
-  /* First, enable the source clock only the PLL (via HSE or HSI), HSE, and HSI
-   * are supported in this implementation.
+  /* Go to the high performance voltage range 1 if necessary.  In this mode,
+   * the PLL VCO frequency can be up to 96MHz.  USB and SDIO can be supported.
+   *
+   * Range 1: PLLVCO up to 96MHz in range 1 (1.8V)
+   * Range 2: PLLVCO up to 48MHz in range 2 (1.5V)
+   * Range 3: PLLVCO up to 24MHz in range 3 (1.2V)
+   */
+
+#if STM32_PLL_FREQUENCY > 48000000
+  stm32_pwr_setvos(PWR_CR_VOS_SCALE_1);
+#endif
+
+  /* Enable the source clock for the PLL (via HSE or HSI), HSE, and HSI.
+   * NOTE that only PLL, HSE, or HSI are supported for the system clock
+   * in this implementation
    */
 
 #if (STM32_CFGR_PLLSRC == RCC_CFGR_PLLSRC) || (STM32_SYSCLK_SW == RCC_CFGR_SW_HSE)
