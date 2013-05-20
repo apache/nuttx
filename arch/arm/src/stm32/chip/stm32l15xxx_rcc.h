@@ -111,6 +111,8 @@
 #define RCC_ICSCR_MSITRIM_SHIFT     (24)      /* Bits 24-31:  MSI clock trimming */
 #define RCC_ICSCR_MSITRIM_MASK      (0xff << RCC_ICSCR_MSITRIM_SHIFT)
 
+#define RCC_ICSR_RSTVAL             0x0000b000
+
 /* Clock configuration register */
 
 #define RCC_CFGR_SW_SHIFT           (0)       /* Bits 0-1: System clock Switch */
@@ -188,6 +190,8 @@
 #  define RCC_CFGR_MCOPRE_DIV8      (3 << RCC_CFGR_MCOPRE_SHIFT) /* 011: MCO is divided by 8 */
 #  define RCC_CFGR_MCOPRE_DIV16     (4 << RCC_CFGR_MCOPRE_SHIFT) /* 100: MCO is divided by 16 */
                                               /* Bit 31: Reserved */
+#define RCC_CFGR_RESET              0x00000000
+
 /* Clock interrupt register */
 
 #define RCC_CIR_LSIRDYF             (1 << 0)  /* Bit 0: LSI ready interrupt flag */
@@ -286,6 +290,7 @@
 
 /* AHB Peripheral Clock enable register */
 
+#define RCC_AHBENR_GPIOEN(n)        (1 << (n))
 #define RCC_AHBENR_GPIOPAEN         (1 << 0)  /* Bit 0:  I/O port A clock enable */
 #define RCC_AHBENR_GPIOPBEN         (1 << 1)  /* Bit 1:  I/O port B clock enable */
 #define RCC_AHBENR_GPIOPCEN         (1 << 2)  /* Bit 2:  I/O port C clock enable */

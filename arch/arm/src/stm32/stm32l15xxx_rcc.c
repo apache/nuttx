@@ -69,34 +69,83 @@ static inline void rcc_reset(void)
 {
   uint32_t regval;
 
+  /* Make sure that all devices are out of reset */
+
+  putreg32(0, STM32_RCC_AHBRSTR);           /* Disable AHB Peripheral Reset */
   putreg32(0, STM32_RCC_APB2RSTR);          /* Disable APB2 Peripheral Reset */
   putreg32(0, STM32_RCC_APB1RSTR);          /* Disable APB1 Peripheral Reset */
+
+  /* Disable all clocking (other than to FLASH) */
+
   putreg32(RCC_AHBENR_FLITFEN, STM32_RCC_AHBENR); /* FLITF Clock ON */
   putreg32(0, STM32_RCC_APB2ENR);           /* Disable APB2 Peripheral Clock */
   putreg32(0, STM32_RCC_APB1ENR);           /* Disable APB1 Peripheral Clock */
 
-  regval  = getreg32(STM32_RCC_CR);         /* Enable the HSI */
-  regval |= RCC_CR_HSION;
+  /* Set the Internal clock sources calibration register to its reset value.
+   * MSI to the default frequency (nomially 2.097MHz), MSITRIM=0, HSITRIM=0x10 */
+
+  putreg32(RCC_ICSR_RSTVAL, STM32_RCC_ICSCR);
+
+  /* Enable the internal MSI */
+
+  regval  = getreg32(STM32_RCC_CR);         /* Enable the MSI */
+  regval |= RCC_CR_MSION;
   putreg32(regval, STM32_RCC_CR);
 
-  regval  = getreg32(STM32_RCC_CFGR);       /* Reset SW, HPRE, PPRE1, PPRE2, and MCO bits */
+  /* Set the CFGR register to its reset value: Reset SW, HPRE, PPRE1, PPRE2,
+   * and MCO bits.  Resetting SW selects the MSI clock as the system clock
+   * source. We do not clear PLL values yet because the PLL may be providing
+   * the SYSCLK and we want the PLL to be stable through the transition.
+   */
+
   regval &= ~(RCC_CFGR_SW_MASK | RCC_CFGR_HPRE_MASK | RCC_CFGR_PPRE1_MASK |
               RCC_CFGR_PPRE2_MASK | RCC_CFGR_MCOSEL_MASK | RCC_CFGR_MCOPRE_MASK);
   putreg32(regval, STM32_RCC_CFGR);
 
+  /* Make sure that the selected MSI source is used as the system clock source */
+
+  while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_MSI);
+
+  /* Now we can disable the alternative clock sources: HSE, HSI, and PLL. Also,
+   * reset the HSE bypass.
+   */
+
   regval  = getreg32(STM32_RCC_CR);         /* Disable the HSE and the PLL */
-  regval &= ~(RCC_CR_HSEON | RCC_CR_PLLON);
+  regval &= ~(RCC_CR_HSION | RCC_CR_HSEON | RCC_CR_PLLON);
   putreg32(regval, STM32_RCC_CR);
 
   regval  = getreg32(STM32_RCC_CR);         /* Reset HSEBYP bit */
   regval &= ~RCC_CR_HSEBYP;
   putreg32(regval, STM32_RCC_CR);
 
-  regval  = getreg32(STM32_RCC_CFGR);       /* Reset PLLSRC, PLLXTPRE, PLLMUL, and PLLDIV bits */
+  /* Now we can reset the CFGR PLL fields to their reset value */
+
+  regval  = getreg32(STM32_RCC_CFGR);       /* Reset PLLSRC, PLLMUL, and PLLDIV bits */
   regval &= ~(RCC_CFGR_PLLSRC | RCC_CFGR_PLLMUL_MASK | RCC_CFGR_PLLDIV_MASK);
   putreg32(regval, STM32_RCC_CFGR);
 
+  /* Make sure that all interrupts are disabled */
+
   putreg32(0, STM32_RCC_CIR);               /* Disable all interrupts */
+
+  /* Rest the FLASH controller to 32-bit mode, no wait states.
+   *
+   * First, program the new number of WS to the LATENCY bit in Flash access
+   * control register (FLASH_ACR)
+   */
+
+  regval  = getreg32(STM32_FLASH_ACR);
+  regval &= ~FLASH_ACR_LATENCY;             /* No wait states */
+  putreg32(regval, STM32_FLASH_ACR);
+
+  /* Check that the new number of WS is taken into account by reading FLASH_ACR */
+
+  /* Program the 32-bit access by clearing ACC64 in FLASH_ACR */
+
+  regval &= ~FLASH_ACR_ACC64;             /* 32-bit access mode */
+  putreg32(regval, STM32_FLASH_ACR);
+
+  /* Check that 32-bit access is taken into account by reading FLASH_ACR */
 }
 
 /****************************************************************************
@@ -400,13 +449,13 @@ static inline bool stm32_rcc_enablehse(void)
 
   for (timeout = HSERDY_TIMEOUT; timeout > 0; timeout--)
     {
-      /* Check if the HSERDY flag is the set in the CR */
+      /* Check if the HSERDY flag is set in the CR */
 
       if ((getreg32(STM32_RCC_CR) & RCC_CR_HSERDY) != 0)
         {
-          /* If so, then break-out with timeout > 0 */
+          /* If so, then return TRUE */
 
-          break;
+          return true;
         }
     }
 
@@ -414,7 +463,7 @@ static inline bool stm32_rcc_enablehse(void)
    * strategy.  This is almost always a hardware failure or misconfiguration.
    */
 
-  return timeout > 0;
+  return false;
 }
 #endif
 
@@ -471,7 +520,7 @@ static void stm32_stdclockconfig(void)
    *     bits) or/and the AHB prescaler value (HPRE bits), respectively, in the
    *     RCC_CFGR register
    */
- 
+
   regval = getreg32(STM32_FLASH_ACR);
   regval |= FLASH_ACR_ACC64;          /* 64-bit access mode */
   putreg32(regval, STM32_FLASH_ACR);
@@ -509,10 +558,13 @@ static void stm32_stdclockconfig(void)
 
 #if STM32_SYSCLK_SW == RCC_CFGR_SW_PLL
 
-  /* Set the PLL divider and multipler */
+  /* Set the PLL divider and multipler.  NOTE:  The PLL needs to be disabled
+   * to do these operation.  We know this is the case here because pll_reset()
+   * was previously called by stm32_clockconfig().
+   */
 
-  regval = getreg32(STM32_RCC_CFGR);
-  regval &= ~(RCC_CFGR_PLLSRC | RCC_CFGR_PLLMUL_MASK);
+  regval  = getreg32(STM32_RCC_CFGR);
+  regval &= ~(RCC_CFGR_PLLSRC | RCC_CFGR_PLLMUL_MASK | RCC_CFGR_PLLDIV_MASK);
   regval |= (STM32_CFGR_PLLSRC | STM32_CFGR_PLLMUL | STM32_CFGR_PLLDIV);
   putreg32(regval, STM32_RCC_CFGR);
 
