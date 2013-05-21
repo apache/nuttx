@@ -4758,4 +4758,6 @@
 	  controlled incorrectly (2013-5-21).
 	* arch/arm/src/stm32/chip/stm32_lcd.h: Add definitions for STM32L15X
 	  segment LCD (2013-5-21).
-
+	* configs/lm3s6965-ek/discover: Add an example configuration for UDP
+	  discovery tool on the lm3s6965-ek board.  From Max Holtberg
+	  (2013-5-21).
