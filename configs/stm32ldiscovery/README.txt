@@ -447,9 +447,17 @@ RS-232 transceiver.
 NOTE:  The crystal X3 is not installed on the STM32L3-Discovery.  As a
 result, the HSE clock is not availabled and the less acurate HSI must be
 used.  This may limit the accuracy of the computed baud, especially at
-higher BAUD.
+higher BAUD.  The HSI is supposedly calibrated in the factory to within 1%
+at room temperatures so perhaps this not a issue.
 
-A USB serial console is another option.
+I have had no problems using the USART1 with PA9 and PA10 with a 3.3-5V
+RS-232 transceiver module at 57600 baud.  I have not tried higher baud rates.
+
+There is no support for a USB serial connector on the STM32L-Discovery board.
+The STM32L152 does support USB, but the USB pins are "free I/O" on the board
+and no USB connector is provided. So the use of a USB console is not option.
+If you need console output, you will need to disable either LCD (and use any
+USART) or the LEDs (and use USART1)
 
 Debugging
 =========
@@ -712,7 +720,7 @@ Where <subdir> is one of the following:
        USB converter.  The UART1 TX and RX pins should be available on
        PA9 and PA10, respectively.
 
-       The serial console is configured for 57600 8N1
+       The serial console is configured for 57600 8N1 by default.
 
     3. Support for NSH built-in applications is *not* enabled.
 
@@ -723,44 +731,3 @@ Where <subdir> is one of the following:
        CONFIG_HOST_WINDOWS=y                   : Builds under Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
-
-    5. This configuration can support USB (CDC/ACM device)
-
-       a) Enable NSH builtin application support
-
-       CONFIG_BUILTIN=y
-       CONFIG_NSH_BUILTIN_APPS=y
-
-       b) Enable USB device and CDC/ACM class support
-
-       CONFIG_STM32_USB=y            : STM32 USB device support
-       CONFIG_USBDEV=y               : USB device support must be enabled
-       CONFIG_CDCACM=y               : The CDC/ACM driver must be built
-       CONFIG_NSH_BUILTIN_APPS=y     : NSH built-in application support must be enabled
-       CONFIG_NSH_ARCHINIT=y         : To perform USB initialization
-
-       c) Enable the CDC/ACM example
-
-       The CDC/ACM example is included as two NSH "built-in" commands.
-
-       CONFIG_EXAMPLES_CDCACM=y      : Enable apps/examples/cdcacm
-
-       The two commands are:
-
-       sercon : Connect the serial device a create /dev/ttyACM0
-       serdis : Disconnect the serial device.
-
-       NOTE:  The serial connections/disconnections do not work as advertised.
-       This is because the STM32L-Discovery board does not provide circuitry for
-       control of the "soft connect" USB pullup.  As a result, the host PC
-       does not know the USB has been logically connected or disconnected.  You
-       have to follow these steps to use USB:
-
-       1) Start NSH with USB disconnected
-       2) enter to 'sercon' command to start the CDC/ACM device, then
-       3) Connect the USB device to the host.
-
-       and to close the connection:
-
-       4) Disconnect the USB device from the host
-       5) Enter the 'serdis' command

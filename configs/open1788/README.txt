@@ -520,10 +520,11 @@ CONFIGURATION
     6. This configuration has been used for verifying the touchscreen on
        on the 4.3" LCD module.
 
-       a) As of this writing, this touchscreen is still not function.
-          Rommel Marcelo has tracked this problem done to noise on the
+       a) As of this writing, this touchscreen is still not functional.
+          Rommel Marcelo has tracked this problem down to noise on the
           PENIRQ interrupt.  There are so many false interrupts that
           the NuttX interrupt-driven touchscreen driver cannot be used.
+          Other compatible LCDs, however, may not have this issue.
 
        b) You can enable the touchscreen by modifying the configuration
           in the following ways:

@@ -4756,3 +4756,6 @@
 	  vector definition file, the STM32L-Discovery NSH port now seems to be
 	  fully functional.  Also fixed an error that was causing the LEDs to be
 	  controlled incorrectly (2013-5-21).
+	* arch/arm/src/stm32/chip/stm32_lcd.h: Add definitions for STM32L15X
+	  segment LCD (2013-5-21).
+
