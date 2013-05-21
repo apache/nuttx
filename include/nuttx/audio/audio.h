@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/audio.h
+ * include/nuttx/audio/audio.h
  *
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_AUDIO_H
-#define __INCLUDE_NUTTX_AUDIO_H
+#ifndef __INCLUDE_NUTTX_AUDIO_AUDIO_H
+#define __INCLUDE_NUTTX_AUDIO_AUDIO_H
 
 /* For the purposes of this driver, an Audio device is any device that 
  * generates, records, mixes, or otherwise modifies audio data in any format,
@@ -56,6 +56,7 @@
 #include <nuttx/compiler.h>
 
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/spi.h>
 
 #ifdef CONFIG_AUDIO
 
@@ -165,6 +166,12 @@
 #define AUDIO_RATE_192K             0x08
 #define AUDIO_RATE_320K             0x09
 
+/* Audio Callback Reasons ***************************************************/
+
+#define AUDIO_CALLBACK_UNDEF        0x00
+#define AUDIO_CALLBACK_DEQUEUE      0x01
+#define AUDIO_CALLBACK_IOERR        0x02
+
 /* Audio Pipeline Buffer (AP Buffer) flags **********************************/
 
 #define AUDIO_ABP_ALIGNMENT         0x000F  /* Mask to define buffer alignment */
@@ -226,6 +233,11 @@ struct ap_buffer_s
   uint8_t               samp[0];    /* Offset of the first sample */
 } packed_struct;
 
+/* Typedef for lower-level to upper-level callback for buffer dequeuing */
+
+typedef CODE void (*audio_callback_t)(FAR void *priv, uint16_t reason,
+        FAR struct ap_buffer_s *apb, uint16_t status);
+
 /* This structure is a set a callback functions used to call from the upper-
  * half, generic Audo driver into lower-half, platform-specific logic that
  * supports the low-level functionality.
@@ -245,15 +257,17 @@ struct audio_ops_s
   CODE int (*getcaps)(FAR struct audio_lowerhalf_s *dev, int type, 
       FAR struct audio_caps_s *pCaps);
 
-  /* This method is called to configure the driver for a specific mode of
+  /* This method is called to bind the lower-level driver to the upper-level
+   * driver and to configure the driver for a specific mode of
    * operation defined by the parameters selected in supplied device caps
-   * strucure.  The lower-level device should perform any initialization 
+   * structure.  The lower-level device should perform any initialization 
    * needed to prepare for operations in the specified mode.  It should not, 
    * however, process any audio data until the start method is called.
    */
 
   CODE int (*configure)(FAR struct audio_lowerhalf_s *dev, 
-      FAR const struct audio_caps_s *pCaps);
+      FAR const struct audio_caps_s *pCaps,
+      audio_callback_t upper, FAR void *priv);
 
   /* This method is called when the driver is closed.  The lower half driver
    * should stop processing audio data, including terminating any active
@@ -280,7 +294,7 @@ struct audio_ops_s
 
   /* Enqueue a buffer for processing.  This is a non-blocking enqueue operation. 
    * If the lower-half driver's buffer queue is full, then it should return an 
-   * error code of -ENOMEM, and the upper-half driver can decide to either block
+  j* error code of -ENOMEM, and the upper-half driver can decide to either block
    * the calling thread or deal with it in a non-blocking manner.  
    
    * For each call to enqueuebuffer, the lower-half driver must call 
@@ -291,6 +305,11 @@ struct audio_ops_s
    */
 
   CODE int (*enqueuebuffer)(FAR struct audio_lowerhalf_s *dev,
+          FAR struct ap_buffer_s *apb);
+
+  /* Cancel a previously enqueued buffer. */
+
+  CODE int (*cancelbuffer)(FAR struct audio_lowerhalf_s *dev,
           FAR struct ap_buffer_s *apb);
 
   /* Lower-half logic may support platform-specific ioctl commands */
@@ -318,6 +337,16 @@ struct audio_lowerhalf_s
    */
 
   FAR const struct audio_ops_s *ops;
+
+  /* The bind data to the upper-half driver used for callbacks of dequeuing
+   * buffer, reporting asynchronous event, reporting errors, etc.
+   */
+
+  FAR audio_callback_t  upper;
+
+  /* The private opaque pointer to be passed to upper-layer during callbacks */
+
+  FAR void *priv;
 
   /* The custom Audio device state structure may include additional fields 
    * after the pointer to the Audio callback structure.
@@ -435,28 +464,10 @@ EXTERN void apb_reference(FAR struct ap_buffer_s *apb);
  * Platform-Dependent "Lower-Half" Audio Driver Interfaces
  ****************************************************************************/
 
-/****************************************************************************
- * Name: vs1053_initialize
- *
- * Description:
- *   This function initializes the driver for the VS1053 codec chip
- *
- * Input parameters:
- *   spi - This is a placeholder for now.  Actual init parameters will be
- *         determined once the audio interface is "finalized".
- *
- * Returned Value:
- *   Zero on success; a negated errno value on failure.
- *
- ****************************************************************************/
-#ifdef CONFIG_VS1053
-EXTERN FAR struct audio_lowerhalf_s *vs1053_initialize(int spidevice);
-#endif
-
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* CONFIG_AUDIO */
-#endif /* __INCLUDE_NUTTX_AUDIO_H */
+#endif /* __INCLUDE_NUTTX_AUDIO_AUDIO_H */

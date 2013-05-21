@@ -4761,3 +4761,9 @@
 	* configs/lm3s6965-ek/discover: Add an example configuration for UDP
 	  discovery tool on the lm3s6965-ek board.  From Max Holtberg
 	  (2013-5-21).
+	* audio/, drivers/audio, include/nuttx/audio:  Added a callback interface
+	  to the Audio upperhalf driver for dequeueing, reporting async events,
+	  etc. Also included is some initial work for the VS1053 driver.  From
+	  Ken Pettit (2013-5-21).
+	* include/nuttx/audio/audio.h:  Moved from include/nuttx/ to include/nuttx/audio.
+	  (2013-5-21).

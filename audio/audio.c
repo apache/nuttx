@@ -59,7 +59,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
-#include <nuttx/audio.h>
+#include <nuttx/audio/audio.h>
 
 #include <arch/irq.h>
 
@@ -94,12 +94,14 @@ struct audio_upperhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     audio_open(FAR struct file *filep);
-static int     audio_close(FAR struct file *filep);
-static ssize_t audio_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
-static ssize_t audio_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
-static int     audio_start(FAR struct audio_upperhalf_s *upper, unsigned int oflags);
-static int     audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int      audio_open(FAR struct file *filep);
+static int      audio_close(FAR struct file *filep);
+static ssize_t  audio_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
+static ssize_t  audio_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
+static int      audio_start(FAR struct audio_upperhalf_s *upper, unsigned int oflags);
+static int      audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static void     audio_callback(FAR void *priv, uint16_t reason,
+                    FAR struct ap_buffer_s *apb, uint16_t status);
 
 /****************************************************************************
  * Private Data
@@ -169,7 +171,7 @@ static int audio_open(FAR struct file *filep)
 
 errout_with_sem:
   sem_post(&upper->exclsem);
-  
+
 errout:
   return ret;
 }
@@ -226,7 +228,7 @@ static int audio_close(FAR struct file *filep)
 
 //errout_with_sem:
   sem_post(&upper->exclsem);
-  
+
 errout:
   return ret;
 }
@@ -264,7 +266,7 @@ static ssize_t audio_write(FAR struct file *filep, FAR const char *buffer, size_
  *
  * Description:
  *   Handle the AUDIOIOC_START ioctl command
- *   
+ *
  ************************************************************************************/
 
 static int audio_start(FAR struct audio_upperhalf_s *upper, unsigned int oflags)
@@ -302,7 +304,7 @@ static int audio_start(FAR struct audio_upperhalf_s *upper, unsigned int oflags)
  *
  * Description:
  *   The standard ioctl method.  This is where ALL of the Audio work is done.
- *   
+ *
  ************************************************************************************/
 
 static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
@@ -351,7 +353,8 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audvdbg("AUDIOIOC_INITIALIZE: Device=%d", caps->ac_type);
 
           /* Call the lower-half driver configure handler */
-          ret = lower->ops->configure(lower, caps);
+
+          ret = lower->ops->configure(lower, caps, &audio_callback, upper);
         }
         break;
 
@@ -374,7 +377,7 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_START:
         {
-          audvdbg("AUDIOIOC_START\n"); 
+          audvdbg("AUDIOIOC_START\n");
           DEBUGASSERT(lower->ops->start != NULL);
 
           /* Start the pulse train */
@@ -434,8 +437,8 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  * Input parameters:
  *   path - The full path to the driver to be registers in the NuttX pseudo-
  *     filesystem.  The recommended convention is to name Audio drivers
- *     based on the function they provide, such as "/dev/pcm0", "/dev/mp31", 
- *     etc. 
+ *     based on the function they provide, such as "/dev/pcm0", "/dev/mp31",
+ *     etc.
  *   dev - A pointer to an instance of lower half audio driver.  This instance
  *     is bound to the Audio driver and must persists as long as the driver
  *     persists.
@@ -450,7 +453,13 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
   FAR struct audio_upperhalf_s *upper;
   char  path[AUDIO_MAX_DEVICE_PATH];
   static bool dev_audio_created = false;
+#ifndef CONFIG_AUDIO_CUSTOM_DEV_PATH
   const char* devname = "/dev/audio";
+#elif !defined(CONFIG_AUDIO_DEV_ROOT)
+  const char* devname = CONFIG_AUDIO_DEV_PATH;
+  const char* ptr;
+  char*       pathptr;
+#endif
 
   /* Allocate the upper-half data structure */
 
@@ -465,6 +474,80 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
 
   sem_init(&upper->exclsem, 0, 1);
   upper->dev = dev;
+
+#ifdef CONFIG_AUDIO_CUSTOM_DEV_PATH
+
+#ifdef CONFIG_AUDIO_DEV_ROOT
+
+  /* This is the simple case ... No need to make a directory */
+
+  strcpy(path, "/dev/");
+  strcat(path, name);
+
+#else
+  /* Ensure the path begins with "/dev" as we don't support placing device
+   * anywhere but in the /dev directory
+   */
+
+  DEBUGASSERT(strncmp(devname, "/dev", 4) == 0);
+
+  /* Create a /dev/audio directory. */
+
+  if (!dev_audio_created)
+    {
+      /* Get path name after "/dev" */
+
+      ptr = &devname[4];
+      if (*ptr == '/')
+        {
+          ptr++;
+        }
+
+      strcpy(path, "/dev/");
+      pathptr = &path[5];
+
+      /* Do mkdir for each segment of the path */
+
+      while (*ptr != '\0')
+        {
+          /* Build next path segment into path variable */
+
+          while (*ptr != '/' && *ptr != '\0')
+            {
+              *pathptr++ = *ptr++;
+            }
+          *pathptr = '\0';
+
+          /* Make this level of directory */
+
+          mkdir(path, 0644);
+
+          /* Check for another level */
+
+          *pathptr++ = '/';
+          if (*ptr == '/')
+            {
+              ptr++;
+            }
+        }
+
+      /* Indicate we have created the audio dev path */
+
+      dev_audio_created = true;
+    }
+
+  /* Now build the path for registration */
+
+  strcpy(path, devname);
+  if (devname[sizeof(devname)-1] != '/')
+    {
+      strcat(path, "/");
+    }
+  strcat(path, name);
+
+#endif /* CONFIG_AUDIO_DEV_PATH=="/dev" */
+
+#else  /* CONFIG_AUDIO_CUSTOM_DEV_PATH */
 
   /* Create a /dev/audio directory. */
 
@@ -485,6 +568,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
   strcpy(path, devname);
   strcat(path, "/");
   strncat(path, name, AUDIO_MAX_DEVICE_PATH - 11);
+#endif
 
   audvdbg("Registering %s\n", path);
   return register_driver(path, &g_audioops, 0666, upper);
@@ -496,7 +580,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
  * Description:
  *   Dequeues a previously enqueued Audio Pipeline Buffer.
  *
- *   1. The upper half driver calls the enqueuebuffer method, providing the 
+ *   1. The upper half driver calls the enqueuebuffer method, providing the
  *      lower half driver with the ab_buffer to process.
  *   2. The lower half driver's enqueuebuffer will either processes the
  *      buffer directly, or more likely add it to a queue for processing
@@ -505,13 +589,14 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
  *      ab_buffer, it will call this routine to indicated processing of the
  *      buffer is complete.
  *   4. When this routine is called, it will check if any threads are waiting
- *      to enqueue additional buffers and "wake them up" for further 
+ *      to enqueue additional buffers and "wake them up" for further
  *      processing.
  *
  * Input parameters:
  *   handle - This is the handle that was provided to the lower-half
  *     start() method.
  *   apb - A pointer to the previsously enqueued ap_buffer_s
+ *   status - Status of the dequeue operation
  *
  * Returned Value:
  *   None
@@ -521,14 +606,66 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-void audio_dequeuebuffer(FAR void *handle, FAR struct ap_buffer_s *apb)
+static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status)
 {
-  //FAR struct audio_upperhalf_s *upper = (FAR struct audio_upperhalf_s *)handle;
-
   audllvdbg("Entry\n");
 
   /* TODO:  Implement the logic */
 
+}
+
+/****************************************************************************
+ * Name: audio_callback
+ *
+ * Description:
+ *   Provides a callback interface for lower-half drivers to call to the
+ *   upper-half for buffer dequeueing, error reporting, etc.
+ *
+ * Input parameters:
+ *   priv - Private context data owned by the upper-half
+ *   reason - The reason code for the callback
+ *   apb - A pointer to the previsously enqueued ap_buffer_s
+ *   status - Status information associated with the callback
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+static void audio_callback(FAR void *handle, uint16_t reason,
+        FAR struct ap_buffer_s *apb, uint16_t status)
+{
+  FAR struct audio_upperhalf_s *upper = (FAR struct audio_upperhalf_s *)handle;
+
+  audllvdbg("Entry\n");
+
+  /* Perform operation based on reason code */
+
+  switch (reason)
+    {
+      case AUDIO_CALLBACK_DEQUEUE:
+        {
+          /* Call the dequeue routine */
+
+          audio_dequeuebuffer(upper, apb, status);
+          break;
+        }
+
+      case AUDIO_CALLBACK_IOERR:
+        {
+        }
+        break;
+
+      default:
+        {
+          auddbg("Unknown callback reason code %d\n", reason);
+          break;
+        }
+    }
 }
 
 #endif /* CONFIG_AUDIO */

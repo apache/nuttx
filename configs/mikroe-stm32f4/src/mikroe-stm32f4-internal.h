@@ -92,7 +92,9 @@
                          GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN3)
 #define GPIO_CS_FLASH   (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN7)
-#define GPIO_CS_MP3     (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+#define GPIO_CS_MP3_DATA (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN9)
+#define GPIO_CS_MP3_CMD (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN8)
 #define GPIO_CS_EXP_SPI3 (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTD|GPIO_PIN0)
@@ -182,6 +184,13 @@
 
 #define GPIO_TP_XL      (GPIO_ANALOG|GPIO_PORTB|GPIO_PIN1)
 
+/* MP3 Codec control pins */
+
+#define GPIO_VS1053_RST (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
+                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN7)
+#define GPIO_VS1053_DREQ (GPIO_INPUT|GPIO_SPEED_50MHz|GPIO_PORTC|GPIO_PIN6)
+
+
 /****************************************************************************************************
  * Public Types
  ****************************************************************************************************/
@@ -256,6 +265,18 @@ void stm32_lcdinitialize(void);
 
 #ifdef CONFIG_LCD_MIO283QT2
 int up_lcdinitialize(void);
+#endif
+
+/****************************************************************************************************
+ * Name:  up_vs1053initialize
+ *
+ * Description:
+ *   Initialize the VS1053 Audio CODEC hardware.
+ *
+ ****************************************************************************************************/
+
+#ifdef CONFIG_VS1053
+void up_vs1053initialize(FAR struct spi_dev_s *spi);
 #endif
 
 #endif /* __ASSEMBLY__ */

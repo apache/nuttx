@@ -55,11 +55,18 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/audio.h>
+#include <nuttx/audio/audio.h>
+#include <nuttx/audio/vs1053.h>
+
+#include "vs1053.h"
 
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
+
+#ifndef CONFIG_VS1053_SPIMODE
+#  define CONFIG_VS1053_SPIMODE SPIDEV_MODE0
+#endif
 
 /****************************************************************************
  * Private Types
@@ -70,7 +77,7 @@ struct vs1053_struct_s
   FAR struct audio_lowerhalf_s lower;     /* We derive the Audio lower half */
 
   /* Our specific driver data goes here */
-  int spidevice;                          /* Placeholder device data */
+  FAR struct spi_dev_s *spi;              /* Pointer to the SPI bus */
 
 };
 
@@ -81,13 +88,16 @@ struct vs1053_struct_s
 static int     vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
                  FAR struct audio_caps_s *pCaps);
 static int     vs1053_configure(FAR struct audio_lowerhalf_s *lower,
-                 FAR const struct audio_caps_s *pCaps);
+                 FAR const struct audio_caps_s *pCaps, audio_callback_t upper,
+                 FAR void *priv);
 static int     vs1053_shutdown(FAR struct audio_lowerhalf_s *lower);
-static int     vs1053_start(FAR struct audio_lowerhalf_s *lower); 
+static int     vs1053_start(FAR struct audio_lowerhalf_s *lower);
 static int     vs1053_stop(FAR struct audio_lowerhalf_s *lower);
-static int     vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower, 
+static int     vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
                  FAR struct ap_buffer_s *apb);
-static int     vs1053_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd, 
+static int     vs1053_cancelbuffer(FAR struct audio_lowerhalf_s *lower,
+                 FAR struct ap_buffer_s *apb);
+static int     vs1053_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
                  unsigned long arg);
 
 /****************************************************************************
@@ -102,12 +112,80 @@ static const struct audio_ops_s g_audioops =
   vs1053_start,         /* start          */
   vs1053_stop,          /* stop           */
   vs1053_enqueuebuffer, /* enqueue_buffer */
+  vs1053_cancelbuffer,  /* cancel_buffer  */
   vs1053_ioctl          /* ioctl          */
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/************************************************************************************
+ * Name: vs1053_spi_lock
+ ************************************************************************************/
+
+static void vs1053_spi_lock(FAR struct spi_dev_s *dev)
+{
+  /* On SPI busses where there are multiple devices, it will be necessary to
+   * lock SPI to have exclusive access to the busses for a sequence of
+   * transfers.  The bus should be locked before the chip is selected.
+   *
+   * This is a blocking call and will not return until we have exclusiv access to
+   * the SPI buss.  We will retain that exclusive access until the bus is unlocked.
+   */
+
+  (void)SPI_LOCK(dev, true);
+
+  /* After locking the SPI bus, the we also need call the setfrequency, setbits, and
+   * setmode methods to make sure that the SPI is properly configured for the device.
+   * If the SPI buss is being shared, then it may have been left in an incompatible
+   * state.
+   */
+
+  SPI_SETMODE(dev, CONFIG_VS1053_SPIMODE);
+  SPI_SETBITS(dev, 8);
+  (void)SPI_SETFREQUENCY(dev, 20000000);
+}
+
+/************************************************************************************
+ * Name: vs1053_spi_unlock
+ ************************************************************************************/
+
+static inline void vs1053_spi_unlock(FAR struct spi_dev_s *dev)
+{
+  (void)SPI_LOCK(dev, false);
+}
+
+/************************************************************************************
+ * Name: vs1053_readreg - Read the specified 16-bit register from the
+ *                        VS1053 device.  Caller must hold the SPI lock.
+ ************************************************************************************/
+
+static uint16_t vs1053_readreg(FAR struct vs1053_struct_s *dev, uint16_t reg)
+{
+  uint16_t ret;
+  FAR struct spi_dev_s *spi = dev->spi;
+
+  /* Select the AUDIO_CTRL device on the SPI bus */
+
+  SPI_SELECT(spi, SPIDEV_AUDIO_CTRL, true);
+
+  /* Send the WRITE command followed by the address */
+
+  SPI_SEND(spi, VS1053_OPCODE_READ);
+  SPI_SEND(spi, reg);
+
+  /* Now read the 16-bit value */
+
+  ret = SPI_SEND(spi, 0xFF) << 8;
+  ret |= SPI_SEND(spi, 0xFF);
+
+  /* Deselect the CODEC */
+
+  SPI_SELECT(spi, SPIDEV_AUDIO_CTRL, false);
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: vs1053_getcaps
@@ -126,15 +204,24 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 /****************************************************************************
  * Name: vs1053_configure
  *
- * Description: Configure the audio device for the specified  mode of 
+ * Description: Configure the audio device for the specified  mode of
  *              operation.
  *
  ****************************************************************************/
 
 static int vs1053_configure(FAR struct audio_lowerhalf_s *lower,
-            FAR const struct audio_caps_s *pCaps)
+            FAR const struct audio_caps_s *pCaps, audio_callback_t upper,
+            FAR void *priv)
 {
   audvdbg("Entry\n");
+
+  /* Save the binding to the upper level operations and private data */
+
+  lower->upper = upper;
+  lower->priv = priv;
+
+  /* Now process the configure operation */
+
   return OK;
 }
 
@@ -163,7 +250,7 @@ static int vs1053_shutdown(FAR struct audio_lowerhalf_s *lower)
 static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
 {
   //struct vs1053_struct_s *dev = (struct vs1053_struct_s *) lower;
-  
+
   /* Perform the start */
 
   return OK;
@@ -191,7 +278,20 @@ static int vs1053_stop(FAR struct audio_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower, 
+static int vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
+                 FAR struct ap_buffer_s *apb )
+{
+  return OK;
+}
+
+/****************************************************************************
+ * Name: vs1053_cancelbuffer
+ *
+ * Description: Called when an enqueued buffer is being cancelled.
+ *
+ ****************************************************************************/
+
+static int vs1053_cancelbuffer(FAR struct audio_lowerhalf_s *lower,
                  FAR struct ap_buffer_s *apb )
 {
   return OK;
@@ -204,7 +304,7 @@ static int vs1053_enqueuebuffer(FAR struct audio_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int vs1053_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd, 
+static int vs1053_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
                   unsigned long arg)
 {
   return OK;
@@ -226,18 +326,19 @@ static int vs1053_ioctl(FAR struct audio_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-struct audio_lowerhalf_s *vs1053_initialize(int spidevice)
+struct audio_lowerhalf_s *vs1053_initialize(FAR struct spi_dev_s *spi,
+                            FAR const struct vs1053_lower_s *lower,
+                            unsigned int devno)
 {
   struct vs1053_struct_s *dev;
+  uint16_t                status;
+  uint8_t                 id;
 
   /* Sanity check */
 
-#ifdef CONFIG_DEBUG
-  if (spidevice < 0 || spidevice > 3) 
-    {
-      return NULL;
-    }
-#endif
+  DEBUGASSERT(spi != NULL);
+  DEBUGASSERT(lower != NULL);
+  DEBUGASSERT(lower->reset != NULL);
 
   /* Allocate a VS1053 device structure */
 
@@ -247,10 +348,32 @@ struct audio_lowerhalf_s *vs1053_initialize(int spidevice)
       /* Initialize the SMART device structure */
 
       dev->lower.ops = &g_audioops;
+      dev->lower.upper = NULL;
+      dev->lower.priv = NULL;
 
       /* Save our specific device data */
 
-      dev->spidevice = spidevice;
+      dev->spi = spi;
+
+      /* Reset the VS1053 chip */
+
+      lower->reset(lower, false);
+      up_udelay(4000);
+      lower->reset(lower, true);
+
+      /* Do device detection to validate the chip is there.
+       * We have to hold the SPI lock during reads / writes.
+       */
+
+      vs1053_spi_lock(spi);
+      status = vs1053_readreg(dev, VS1053_SCI_STATUS);
+      vs1053_spi_unlock(spi);
+
+      id = (status & VS1053_SS_VER) >> VS1053_VER_SHIFT;
+      if (id != VS1053_VER_VS1053)
+        {
+          auddbg("Unexpected VER bits: 0x%0X\n", id);
+        }
     }
 
   return &dev->lower;

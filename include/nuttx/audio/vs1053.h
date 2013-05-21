@@ -1,5 +1,5 @@
 /****************************************************************************
- * audio/pcm.c
+ * include/nuttx/audio/vs1053.h
  *
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
@@ -33,62 +33,90 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_NET_VS1053_H
+#define __INCLUDE_NUTTX_NET_VS1053_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
-#include <semaphore.h>
-#include <errno.h>
-#include <debug.h>
-
-#include <nuttx/kmalloc.h>
-#include <nuttx/audio/audio.h>
-
-#if defined(CONFIG_AUDIO) && defined(CONFIG_AUDIO_FORMAT_PCM)
+ 
+#include <nuttx/irq.h>
 
 /****************************************************************************
- * Preprocessor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: audio_pcm_init
+/* VS1053 Configuration Settings:
  *
- * Initialized the Audio PCM library.
- *
+ * CONFIG_VS1053 - Enabled VS1053 support
+ * CONFIG_VS1053_SPIMODE - Controls the SPI mode
+ */
+
+/****************************************************************************
+ * Public Types
  ****************************************************************************/
 
-int audio_pcm_initialize(void)
+/* The VS1053 provides Data Request (DREQ) interrupts to the MCU via a GPIO 
+ * pin and also has a chip reset GPIO.  The following structure provides an 
+ * MCU-independent mechanism for controlling the VS1053 GPIOs.
+ */
+
+struct vs1053_lower_s
 {
-  /* Initialze the Audio PCM routines */
+  int  (*attach)(FAR const struct vs1053_lower_s *lower, xcpt_t handler);
+  void (*enable)(FAR const struct vs1053_lower_s *lower);
+  void (*disable)(FAR const struct vs1053_lower_s *lower);
+  void (*reset)(FAR const struct vs1053_lower_s *lower, bool state);
+};
 
-  return OK;
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function: vs1053_initialize
+ *
+ * Description:
+ *   Initialize the VS1053 driver.  This will perform a chip reset of the 
+ *   device as part of initialization.
+ *
+ * Parameters:
+ *   spi   - A reference to the platform's SPI driver for the VS1053
+ *   lower - The MCU-specific interrupt used to control low-level MCU
+ *           functions (i.e., VS1053 GPIO interrupts).
+ *   devno - If more than one VS1053 is supported, then this is the
+ *           zero based number that identifies the VS1053;
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+struct spi_dev_s; /* see nuttx/spi.h */
+struct audio_lowerhalf_s; /* see nutt/audio.h */
+EXTERN FAR struct audio_lowerhalf_s *vs1053_initialize(FAR struct spi_dev_s *spi,
+                          FAR const struct vs1053_lower_s *lower,
+                          unsigned int devno);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* CONFIG_AUDIO && CONFIG_AUDIO_FORMAT_PCM */
-
+#endif /* __INCLUDE_NUTTX_NET_VS1053_H */

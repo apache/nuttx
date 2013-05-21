@@ -27,6 +27,36 @@ config AUDIO_LARGE_BUFFERS
 		32-bit max sample count for increased samples / buffer capability.
 		channel capability.
 
+config AUDIO_CUSTOM_DEV_PATH
+	bool "Use custom device path"
+	default n
+	---help---
+		By default, all audio devices on the target are are registered in the
+		/dev/audio directory.  Select this option to change the default location
+		for the device registration.
+
+if AUDIO_CUSTOM_DEV_PATH
+
+config AUDIO_DEV_ROOT
+	bool "Place audio devices in /dev"
+	default n
+	---help---
+		This option causes all device entries to appear in /dev with all the
+		other device entries.  This option generates the smallest code and
+		RAM footprint.
+
+if !AUDIO_DEV_ROOT
+
+config AUDIO_DEV_PATH
+	string "Base path for Audio devices"
+	default "/dev/audio"
+	---help---
+		The path on the target where audio devices are registered.  The default
+		is to place all audio devices in the /dev/audio/ directory.
+
+endif
+endif
+
 menu "Supported Audio Formats"
 
 config AUDIO_FORMAT_PCM
@@ -55,7 +85,7 @@ config AUDIO_FORMAT_OGG_VORBIS
 
 endmenu
 
-# These are here as placeholders of what could be added 
+# These are here as placeholders of what could be added
 
 if CONFIG_AUDIO_PLANNED
 

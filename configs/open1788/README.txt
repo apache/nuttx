@@ -120,7 +120,7 @@ FPU
   If you are using a toolchain other than the Atollic toolchain, then to use the FPU
   you will also have to modify the CFLAGS to enable compiler support for the ARMv7-M
   FPU.  As of this writing, there are not many GCC toolchains that will support the
-  ARMv7-M FPU.  
+  ARMv7-M FPU.
 
   As a minimum you will need to add CFLAG options to (1) enable hardware floating point
   code generation, and to (2) select the FPU implementation.  You might try the same
@@ -211,7 +211,7 @@ Using OpenOCD with the Olimex ARM-USB-OCD
 
     I have been using the Olimex ARM-USB-OCD debugger.  OpenOCD
     requires a configuration file.  I keep the one I used last here:
-    
+
       configs/open1788/tools/open1788.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
@@ -240,7 +240,7 @@ Using OpenOCD with the Olimex ARM-USB-OCD
     NOTE:  These files could also be located under /usr/share in some
     installations.  They could be most anywhwere if you are using a
     windows version of OpenOCD.
- 
+
       configs/open1788/tools/open1788.cfg
         This is simply openocd-usb.cfg, lpc1788.cfg, and lpc17xx.cfg
         concatenated into one file for convenience.  Don't use it
@@ -249,7 +249,7 @@ Using OpenOCD with the Olimex ARM-USB-OCD
     There is also a script on the tools/ directory that I use to start
     the OpenOCD daemon on my system called oocd.sh.  That script will
     probably require some modifications to work in another environment:
-  
+
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
       configs/open1788/tools/open1788.cfg
@@ -283,7 +283,7 @@ Using OpenOCD with the Olimex ARM-USB-OCD
     use the 'monitor' (or simply 'mon') command to invoke these sub-
     commands. These GDB commands will send comments to the OpenOCD monitor.
     Here are a couple that you will need to use:
-  
+
      (gdb) monitor reset
      (gdb) monitor halt
 
@@ -309,17 +309,17 @@ Using OpenOCD with the Olimex ARM-USB-OCD
 
     3. I find that there are often undetected write failures when using
        the Olimex ARM-USB-OCD debugber and that if you start the program
-       with a bad FLASH failure, it will lock up OpenOCD.  I usually 
+       with a bad FLASH failure, it will lock up OpenOCD.  I usually
        oad nuttx twice, restarting OpenOCD in between in order to assure
        good FLASH contents:
- 
+
       (gdb) mon halt
       (gdb) load nuttx
       (gdb) mon reset
 
       Exit GDB, kill the OpenOCD server, recycle power on the board,
       restart the OpenOCD server and GDB, then:
- 
+
       (gdb) mon halt
       (gdb) load nuttx
       (gdb) mon reset
@@ -340,12 +340,12 @@ CONFIGURATION
 =============
 
   ostest
-  ------ 
+  ------
     This configuration directory, performs a simple OS test using
     apps/examples/ostest.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -377,7 +377,7 @@ CONFIGURATION
     binaries (pass2)
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -475,7 +475,7 @@ CONFIGURATION
     Configuration enables only the serial NSH interface.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -539,7 +539,7 @@ CONFIGURATION
           System Type:
             CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
             CONFIG_LPC17_SSP1=y               : Enable support for SSP1
- 
+
           Applicaton Configuration:
             CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
             CONFIG_EXAMPLES_TOUCHSCREEN_BUILTIN=y
@@ -596,7 +596,7 @@ CONFIGURATION
         CONFIG_EXAMPLES_BUTTONS_NAME5="JOYSTICK_C"
         CONFIG_EXAMPLES_BUTTONS_NAME6="JOYSTICK_D"
         CONFIG_EXAMPLES_BUTTONS_NAME7="JOYSTICK_CTR"
-       
+
   nxlines
   -------
     Configures the graphics example located at examples/nsh.  This
@@ -605,7 +605,7 @@ CONFIGURATION
     panel.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 

@@ -114,8 +114,10 @@ void weak_function stm32_spiinitialize(void)
 #endif
 
 #ifdef CONFIG_AUDIO_MP3_CODEC
-  (void)stm32_configgpio(GPIO_CS_MP3);      /* MP3 codec chip select */
-  stm32_gpiowrite(GPIO_CS_MP3, 1);          /* Ensure the CS is inactive */
+  (void)stm32_configgpio(GPIO_CS_MP3_DATA); /* MP3 codec chip select for DATA */
+  (void)stm32_configgpio(GPIO_CS_MP3_CMD);  /* MP3 codec chip select for CMD */
+  stm32_gpiowrite(GPIO_CS_MP3_DATA, 1);     /* Ensure the CS is inactive */
+  stm32_gpiowrite(GPIO_CS_MP3_CMD, 1);      /* Ensure the CS is inactive */
 #endif
 
   /* Configure the EXP I/O cs for SPI3 */
@@ -172,11 +174,16 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
 #endif
 
 #if defined(CONFIG_AUDIO_MP3_CODEC)
-  if (devid == SPIDEV_AUDIO)
+  if (devid == SPIDEV_AUDIO_DATA)
     {
-      stm32_gpiowrite(GPIO_CS_MP3, !selected);
+      stm32_gpiowrite(GPIO_CS_MP3_DATA, !selected);
+    }
+  else if (devid == SPIDEV_AUDIO_CTRL)
+    {
+      stm32_gpiowrite(GPIO_CS_MP3_CMD, !selected);
     }
   else
+
 #endif
  
   /* Must be the expansion header device */

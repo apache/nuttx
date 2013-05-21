@@ -50,7 +50,7 @@
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
-#include <nuttx/audio.h>
+#include <nuttx/audio/audio.h>
 #include <nuttx/usb/audio.h>
 
 #if defined(CONFIG_AUDIO)

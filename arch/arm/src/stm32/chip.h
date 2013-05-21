@@ -87,7 +87,7 @@
 /* STM32F103ZC, STM32F103ZD, and STM32F103ZE are all provided in 144 pin packages and differ
  * only in the available FLASH and SRAM.
  */
-#  elif defined(CONFIG_ARCH_CHIP_STM32F103ZET6) 
+#  elif defined(CONFIG_ARCH_CHIP_STM32F103ZET6)
 #    include "chip/stm32f103ze_pinmap.h"
 
 /* STM32 F105/F107 Connectivity Line */
