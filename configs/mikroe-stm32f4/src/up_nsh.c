@@ -64,7 +64,7 @@
 #endif
 
 #ifdef CONFIG_AUDIO
-#  include "nuttx/audio.h"
+#  include "nuttx/audio/audio.h"
 #endif
 
 #include "stm32.h"
@@ -181,9 +181,6 @@ int nsh_archinitialize(void)
 #ifdef CONFIG_STM32_SPI3
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
-#endif
-#ifdef CONFIG_AUDIO
-  FAR struct audio_lowerhalf_s *pVs1053;
 #endif
   int ret;
 
@@ -351,21 +348,13 @@ int nsh_archinitialize(void)
 
 #endif
 
-  /* Configure the Audio sub-system if enabled */
+  /* Configure the Audio sub-system if enabled and bind it to SPI 3 */
 
 #ifdef CONFIG_AUDIO
-  pVs1053 = vs1053_initialize(0);
-  if (pVs1053 == NULL)
-    {
-      message("nsh_archinitialize: Failed to initialize VS1053 Audio module\n");
-    }
-  else
-    {
-      /* Bind the vs1053 to the audio upper-half driver */
 
-      audio_register("mp30", pVs1053);
-    }
+  up_vs1053initialize(spi);
 
-#endif  /* CONFIG_AUDIO */
+#endif
+
   return OK;
 }
