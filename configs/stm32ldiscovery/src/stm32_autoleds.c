@@ -60,7 +60,7 @@
  * controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
- *                                                   LED3     LED4
+ *                                                   LED1     LED2
  *   -------------------  -----------------------  -------- --------
  *   LED_STARTED          NuttX has been started     OFF      OFF
  *   LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
@@ -146,8 +146,11 @@ void up_ledon(int led)
 
 void up_ledoff(int led)
 {
-  stm32_gpiowrite(GPIO_LED1, false);
-  stm32_gpiowrite(GPIO_LED2, false);
+  if (led != 2)
+    {
+      stm32_gpiowrite(GPIO_LED1, false);
+      stm32_gpiowrite(GPIO_LED2, false);
+    }
 }
 
 #endif /* CONFIG_ARCH_LEDS */

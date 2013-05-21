@@ -518,50 +518,57 @@ CONFIGURATION
        0xa000:0000 (CS0).
 
     6. This configuration has been used for verifying the touchscreen on
-       on the 4.3" LCD module by modifying the configuration in the
-       following ways:
+       on the 4.3" LCD module.
 
-       Drivers:
-         CONFIG_INPUT=y                    : Enable support for input devices
-         CONFIG_INPUT_ADS7843E=y           : Enable support for the XPT2048
-         CONFIG_ADS7843E_SPIDEV=1          : Use SSP1 for communication
-         CONFIG_SPI=y                      : Enable SPI support
-         CONFIG_SPI_EXCHANGE=n             : exchange() method is not supported
+       a) As of this writing, this touchscreen is still not function.
+          Rommel Marcelo has tracked this problem done to noise on the
+          PENIRQ interrupt.  There are so many false interrupts that
+          the NuttX interrupt-driven touchscreen driver cannot be used.
 
-       System Type:
-         CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
-         CONFIG_LPC17_SSP1=y               : Enable support for SSP1
+       b) You can enable the touchscreen by modifying the configuration
+          in the following ways:
+
+          Drivers:
+            CONFIG_INPUT=y                    : Enable support for input devices
+            CONFIG_INPUT_ADS7843E=y           : Enable support for the XPT2048
+            CONFIG_ADS7843E_SPIDEV=1          : Use SSP1 for communication
+            CONFIG_SPI=y                      : Enable SPI support
+            CONFIG_SPI_EXCHANGE=n             : exchange() method is not supported
+
+          System Type:
+            CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
+            CONFIG_LPC17_SSP1=y               : Enable support for SSP1
  
-       Applicaton Configuration:
-         CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
-         CONFIG_EXAMPLES_TOUCHSCREEN_BUILTIN=y
+          Applicaton Configuration:
+            CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
+            CONFIG_EXAMPLES_TOUCHSCREEN_BUILTIN=y
 
-       Defaults should be okay for related touchscreen settings.
+          Defaults should be okay for related touchscreen settings.
 
-       You will also have to disable SD card support to use this test.  The
-       SD card detect (CD) signal is on P0[13].  This signal is shared.  It
-       is also used for MOSI1 and USB_UP_LED.  The CD pin may be disconnected.
-       There is a jumper on board that enables the CD pin.  OR, you can simply
-       remove the SD module so that it does not drive the CD pin.
+       c) You will also have to disable SD card support to use this test.  The
+          SD card detect (CD) signal is on P0[13].  This signal is shared.  It
+          is also used for MOSI1 and USB_UP_LED.  The CD pin may be disconnected.
+          There is a jumper on board that enables the CD pin.  OR, you can simply
+          remove the SD module so that it does not drive the CD pin.
 
-       Drivers:
-         CONFIG_MMCSD=n                    : No MMC/SD driver support
+          Drivers:
+            CONFIG_MMCSD=n                    : No MMC/SD driver support
 
-       System Type:
-         CONFIG_LPC17_GPDMA=n              : No DMA
-         CONFIG_LPC17_SDCARD=n             : No SD card driver
-         CONFIG_SDIO_DMA=n                 : No SD card DMA
-         CONFIG_ARCH_DMA=n
+          System Type:
+            CONFIG_LPC17_GPDMA=n              : No DMA
+            CONFIG_LPC17_SDCARD=n             : No SD card driver
+            CONFIG_SDIO_DMA=n                 : No SD card DMA
+            CONFIG_ARCH_DMA=n
 
-       File Systems:
-         CONFIG_FS_FAT=n                   : No FAT file system support
+          File Systems:
+            CONFIG_FS_FAT=n                   : No FAT file system support
 
-       For touchscreen debug output:
+          For touchscreen debug output:
 
-       Build Setup:
-         CONFIG_DEBUG=y
-         CONFIG_DEBUG_VERBOSE=y
-         CONFIG_DEBUG_INPUT=y
+          Build Setup:
+            CONFIG_DEBUG=y
+            CONFIG_DEBUG_VERBOSE=y
+            CONFIG_DEBUG_INPUT=y
 
     7. The button test (apps/examples/buttons) can be built-in by adding
        the following options.  See apps/examples/README.txt for further

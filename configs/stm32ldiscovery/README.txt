@@ -15,8 +15,8 @@ Both boards feature:
   - LCD (24 segments, 4 commons),
   - LEDs,
   - Pushbuttons,
-  - A  linear touch sensor, and
-  - four touchkeys.
+  - A linear touch sensor, and
+  - Four touchkeys.
 
 Contents
 ========
