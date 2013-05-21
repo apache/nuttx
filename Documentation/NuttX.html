@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 6, 2013</p>
+      <p>Last Updated: May 21, 2013</p>
     </td>
   </tr>
 </table>
@@ -1554,7 +1554,7 @@
       <li><a href="#arm920t">ARM920T</a> (1) </li>
       <li><a href="#arm926ejs">ARM926EJS</a> (3) </li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (2)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (17)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (18)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (7)</li>
     </ul>
   <li>Atmel AVR
@@ -1906,7 +1906,7 @@ $ size nuttx
 </pre></ul>
       <p>
         NuttX, the NSH application, and GCC libraries use 34.2KB of FLASH leaving 93.8KB of FLASH (72%) free from additional application development.
-        Static SRAM usage is about 1.2KB (&lt;4%) and leaves 13.8KB (86%) available for heap at runtime.
+        Static SRAM usage is about 1.2KB (&lt;4%) and leaves 14.8KB (86%) available for heap at runtime.
         SRAM usage at run-time can be shown with the NSH <code>free</code> command:
       </p>
       <ul><pre>
@@ -2093,6 +2093,69 @@ nsh>
      </ul>
   </td>
 </tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <b>STMicro STM32L152 (STM32L &quot;EnergyLite&quot; Line)</b>.
+      This is a port of NuttX to the STMicro STM32L-Discovery development board.
+      The STM32L-Discovery board is based on the STM32L152RBT6 MCU (128KB FLASH and 16KB of SRAM).
+    </p>
+    <ul>
+      <p>
+        The STM32L-Discovery and 32L152CDISCOVERY kits are functionally equivalent.
+        The difference is the internal Flash memory size (STM32L152RBT6 with 128 Kbytes or STM32L152RCT6 with 256 Kbytes).
+        Both boards feature:
+      </p>
+      <ul>
+        <li>An ST-LINK/V2 embedded debug tool interface,</li>
+        <li>LCD (24 segments, 4 commons),</li>
+        <li>LEDs,</li>
+        <li>Pushbuttons,</li>
+        <li>A linear touch sensor, and</li>
+        <li>Four touchkeys.</li>
+      </ul>
+      <p>
+        <b>STATUS</b>.
+        Initial support for the STM32L-Discovery was released in NuttX-6.28.
+        This initial support is very minimal:
+        There is a configuration using the NuttShell (<a href="NuttShell.html">NSH</a>) that might be the basis for an application development.
+        As of this writing, more device drivers are needed to make this a more complete port.
+      </p>
+      <p>
+        <b>Memory Usage</b>.
+        For a full-featured RTOS such as NuttX, providing support in a usable and meaningful way within the tiny memories of the STM32L152RBT6 demonstrates the scalability of NuttX.  The STM32L152RBT6 comes in a 64-pin package and has 128KB FLASH and 16KB of SRAM.
+      </p>
+      <p>
+        Static memory usage can be shown with <code>size</code> command:
+      </p>
+      <ul><pre>
+$ size nuttx
+   text    data     bss     dec     hex filename
+  39664     132    1124   40920    9fd8 nuttx
+</pre></ul>
+      <p>
+        NuttX, the NSH application, and GCC libraries use 38.7KB of FLASH leaving 89.3B of FLASH (70%) free from additional application development.
+        Static SRAM usage is about 1.2KB (&lt;4%) and leaves 14.8KB (86%) available for heap at runtime.
+      </p>
+        SRAM usage at run-time can be shown with the NSH <code>free</code> command:
+      <ul><pre>
+NuttShell (NSH) NuttX-6.27
+nsh> free
+             total       used       free    largest
+Mem:         14096       3928      10168      10168
+nsh>
+</pre></ul>
+    <p>
+      You can see that 9.9KB (62%) of SRAM heap is staill available for further application development while NSH is running.
+    </p>
+  </td>
+</tr>
+
 <tr>
   <td><br></td>
   <td><hr></td>
