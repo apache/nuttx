@@ -500,7 +500,7 @@ static void stm32_stdclockconfig(void)
    * the PLL VCO frequency can be up to 96MHz.  USB and SDIO can be supported.
    *
    * Range 1: PLLVCO up to 96MHz in range 1 (1.8V)
-   * Range 2: PLLVCO up to 48MHz in range 2 (1.5V)
+   * Range 2: PLLVCO up to 48MHz in range 2 (1.5V) (default)
    * Range 3: PLLVCO up to 24MHz in range 3 (1.2V)
    */
 
