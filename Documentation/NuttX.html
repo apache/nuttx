@@ -2124,7 +2124,7 @@ nsh>
         Initial support for the STM32L-Discovery was released in NuttX-6.28.
         This initial support is very minimal:
         There is a configuration using the NuttShell (<a href="NuttShell.html">NSH</a>) that might be the basis for an application development.
-        As of this writing, more device drivers are needed to make this a more complete port.
+        As of this writing, a few more things are needed to make this a more complete port:  1) Verfication of more device drivers, and 2) logic that actually uses the low-power consumption modes of the EnergyLite part.
       </p>
       <p>
         <b>Memory Usage</b>.
@@ -4371,6 +4371,7 @@ pascal-3.0 2011-05-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
   <li>Cygwin is a trademark of Red Hat, Incorporated.</li>
   <li>Linux is a registered trademark of Linus Torvalds.</li>
   <li>Eagle-100 is a trademark of <a href=" http://www.micromint.com/">Micromint USA, LLC</a>.
+  <li>EnergyLite is a trademark of STMicroelectronics.</li>
   <li>LPC2148 is a trademark of NXP Semiconductors.</li>
   <li>TI is a tradename of Texas Instruments Incorporated.</li>
   <li>UNIX is a registered trademark of The Open Group.</li>
@@ -4378,8 +4379,8 @@ pascal-3.0 2011-05-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
   <li>ZDS, ZNEO, Z16F, Z80, and Zilog are a registered trademark of Zilog, Inc.</li>
 </ul>
 <p>
-  NOTE: NuttX is <i>not</i> licensed to use the POSIX trademark.  NuttX uses the POSIX
-  standard as a development guideline only.
+  NOTE: NuttX is <i>not</i> licensed to use the POSIX trademark.
+  NuttX uses the POSIX standard as a development guideline only.
 </p>
 </small>
 
