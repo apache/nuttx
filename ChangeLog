@@ -4752,4 +4752,7 @@
 	* nuttx/arch/arm/src/lm/chip/lm_flash.h and nuttx/arch/arm/src/lm/lm_flash.c:
 	  Add support for TI/Stellaris internal FLASH MTD driver.  From Max
 	  Holtzberg (2013-5-20).
-
+	* arm/src/stm32/chip/stm32l15xxx_vectors.h:  After correcting errors in the
+	  vector definition file, the STM32L-Discovery NSH port now seems to be
+	  fully functional.  Also fixed an error that was causing the LEDs to be
+	  controlled incorrectly (2013-5-21).

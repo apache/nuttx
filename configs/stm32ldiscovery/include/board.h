@@ -195,7 +195,7 @@
  * STM32L-Discovery.  The following definitions describe how NuttX controls the LEDs:
  *
  *   SYMBOL                Meaning                 LED state
- *                                                   LED3     LED4
+ *                                                   LED1     LED2
  *   -------------------  -----------------------  -------- --------
  *   LED_STARTED          NuttX has been started     OFF      OFF
  *   LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
@@ -253,25 +253,25 @@
 #if !defined(CONFIG_STM32_LCD)
 /* Select PA9 and PA10 if the LCD is not enabled */
 
-#  define GPIO_USART1_RX         GPIO_USART1_RX_1
-#  define GPIO_USART1_TX         GPIO_USART1_TX_1
+#  define GPIO_USART1_RX         GPIO_USART1_RX_1 /* PA10 */
+#  define GPIO_USART1_TX         GPIO_USART1_TX_1 /* PA9 */
 
 /* This there are no other options for USART1 on this part */
 
-#  define GPIO_USART2_RX         GPIO_USART2_RX_1
-#  define GPIO_USART2_TX         GPIO_USART2_TX_1
+#  define GPIO_USART2_RX         GPIO_USART2_RX_1 /* PA3 */
+#  define GPIO_USART2_TX         GPIO_USART2_TX_1 /* PA2 */
 
 /* Arbirtrarily select PB10 and PB11 */
 
-#  define GPIO_USART3_RX         GPIO_USART3_RX_1
-#  define GPIO_USART3_TX         GPIO_USART3_TX_1
+#  define GPIO_USART3_RX         GPIO_USART3_RX_1 /* PB11 */
+#  define GPIO_USART3_TX         GPIO_USART3_TX_1 /* PB10 */
 
 #elif !defined(CONFIG_ARCH_LEDS)
 
 /* Select PB6 and PB7 if the LEDs are not enabled */
 
-#  define GPIO_USART1_RX         GPIO_USART1_RX_2
-#  define GPIO_USART1_TX         GPIO_USART1_TX_2
+#  define GPIO_USART1_RX         GPIO_USART1_RX_2 /* PB7 */
+#  define GPIO_USART1_TX         GPIO_USART1_TX_2 /* PB6 */
 
 #endif
 
