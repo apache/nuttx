@@ -554,6 +554,32 @@ sub-directory and can be selected as follow:
 
 Where <subdir> is one of the following:
 
+  discover:
+    A configuration for the UDP discovery tool at apps/examples/discover.
+    Contributed by Max Holtzberg.
+
+    NOTES:
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Default platform/toolchain:
+
+       CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
+       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
+       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : The older OABI version
+       CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
+
+    3. As it is configured now, you MUST have a network connected.
+       Otherwise, the NSH prompt will not come up because the Ethernet
+       driver is waiting for the network to come up.  That is probably
+       a bug in the Ethernet driver behavior!
+
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables both the serial and telnetd NSH interfaces.
@@ -624,3 +650,29 @@ Where <subdir> is one of the following:
        CONFIG_HOST_LINUX=y                 : Linux (Cygwin under Windows okay too).
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot (arm-nuttx-elf-gcc)
        CONFIG_RAW_BINARY=y                 : Output formats: ELF and raw binary
+
+  tcpecho:
+    This configuration builds the simple TCP echo example based on W.Richard
+    Steven UNIX Programming book to ensure correct usage of the socket API.
+    Contributed by Max Holtzberg.
+
+    NOTES:
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Default platform/toolchain:
+
+       CONFIG_HOST_LINUX=y                     : Linux
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y : Codesourcery for Linux
+       CONFIG_RAW_BINARY=y                     : Output formats: ELF and raw binary
+
+    3. As it is configured now, you MUST have a network connected.
+       Otherwise, the NSH prompt will not come up because the Ethernet
+       driver is waiting for the network to come up.  That is probably
+       a bug in the Ethernet driver behavior!
