@@ -2667,7 +2667,7 @@ int main(int argc, char **argv, char **envp)
   output("</table>\n");
 
   output("<p>\n");
-  output("  This appendex holds internal configurations variables that are not visible to the user.\n");
+  output("  This appendix holds internal configurations variables that are not visible to the user.\n");
   output("  These settings are presented out-of-context because they cannot be directly controlled by the user.\n");
   output("  Many of these settings are selected automatically and indirectly when other, visible configuration variables are selected.\n");
   output("  One purpose of these hidden configuration variables is to control menuing in the kconfig-frontends configuration tool.\n");
