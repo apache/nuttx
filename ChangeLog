@@ -4767,3 +4767,6 @@
 	  Ken Pettit (2013-5-21).
 	* include/nuttx/audio/audio.h:  Moved from include/nuttx/ to include/nuttx/audio.
 	  (2013-5-21).
+	* configs/lm3s6965-ek/tcpecho: This configuration builds the simple TCP
+	  echo example based on W.Richard Steven UNIX Programming book to ensure
+	  correct usage of the socket API. Contributed by Max Holtzberg (2013-5-22).
