@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 21, 2013</p>
+      <p>Last Updated: May 22, 2013</p>
     </td>
   </tr>
 </table>
@@ -1538,16 +1538,16 @@
   </tr>
 </table>
 
-<p>
-  The short story (Number of ports follow in parentheses).
+<p><b>Supported Platforms by CPU core</b>.
+  The number of ports to this CPU follow in parentheses.
   The state of the various ports vary from board-to-board.
   Follow the links for the details:
 </p>
 <center><table width="90%">
 <ul>
   <tr>
-  <td bgcolor="#e4e4e4" valign="top">
-  <li><a href="#linuxusermode">Linux user mode simulation</a> (1)</li>
+  <td bgcolor="#e4e4e4" valign="top" width="34%">
+  <li><a href="#linuxusermode">Linux/Cygwin user mode simulation</a> (1)</li>
   <li>ARM
     <ul>
       <li><a href="#arm7tdmi">ARM7TDMI</b></a> (5)</li>
@@ -1564,23 +1564,31 @@
     </ul>
   </li>
   </td>
-  <td bgcolor="#e4e4e4" valign="top">
-  <li>Freescale <a href="#m68hcs12">M68HCS12</a> (2) </li>
+  <td bgcolor="#e4e4e4" valign="top" width="33%">
+  <li>Freescale
+    <ul>
+      <li><a href="#m68hcs12">M68HCS12</a> (2)</li>
+    </ul>
+  </li>
   <li>Intel
     <ul>
-      <li><a href="#8052">Intel 8052 Microcontroller</a> (1)</li>
+      <li><a href="#80x52">Intel 80x52 Microcontroller</a> (1)</li>
       <li><a href="#80x86">Intel 80x86</a> (2)</li>
     </ul>
   </li>
-  <li>MicroChip <a href="#pic32mips">PIC32MX</a> (MIPS) (4)</li>
+  <li>MicroChip
+    <ul>
+      <li><a href="#pic32mips">PIC32MX</a> (MIPS) (4)</li>
+    </ul>
+  </li>
+  </td>
+  <td bgcolor="#e4e4e4" valign="top" width="33%">
   <li>Renesas/Hitachi:
     <ul>
         <li><a href="#superh">Renesas/Hitachi SuperH</a> (1/2)</li>
         <li><a href="#m16c">Renesas M16C/26</a> (1/2)</li>
     </ul>
   </li>
-  </td>
-  <td bgcolor="#e4e4e4" valign="top">
   <li>ZiLOG
     <ul>
         <li><a href="#zilogz16f">ZiLOG Z16F</a> (1)</li>
@@ -1590,7 +1598,121 @@
         <li><a href="#zilogz80">ZiLOG Z80</a> (2)</li>
     </ul>
   </li>
-</ul>
+  </td>
+  </tr>
+</table></center>
+
+<p><b>Supported Platforms by Manufacturer/MCU Family</b>.
+  CPU core type follows in parentheses.
+  The state of the various ports vary from MCU to MCU.
+  Follow the links for the details:
+</p>
+<center><table width="90%">
+<ul>
+  <tr>
+  <td bgcolor="#e4e4e4" valign="top" width="34%">
+  <li>Atmel
+    <ul>
+      <li><a href="#avratmega128">AVR ATMega128</a> <small>(8-bit AVR)</small></li>
+      <li><a href="#avrat90usbxxx">AVR AT90USB64x and AT90USB6128x</a> <small>(8-bit AVR)</small></li>
+      <li><a href="#at32uc3bxxx">AVR32 AT32UC3BXXX</a> <small>(32-bit AVR32)</small></li>
+      <li><a href="#at91sam3u">Atmel AT91SAM3U</a> <small>(ARM Cortex-M3)</small></li>
+    </ul>
+  </li>
+  <li>Freescale
+    <ul>
+      <li><a href="#m68hcs12">M68HCS12</a></li>
+      <li><a href="#freescaleimx1">Freescale i.MX1</a> <small>(ARM920-T)</small></li>
+      <li><a href="#freescalekl25z">FreeScale KL25Z</a> <small>(ARM Cortex-M0+)</small></li>
+      <li><a href="#kinetisk40">FreeScale Kinetis K40</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#kinetisk60">FreeScale Kinetis K60</a> <small>(ARM Cortex-M4)</small></li>
+    </ul>
+  </li>
+  <li>Host PC based simulations
+    <ul>
+      <li><a href="#linuxusermode">Linux/Cygwin user mode simulation</a></li>
+    </ul>
+  </li>
+  <li>Intel
+    <ul>
+      <li><a href="#80x52">Intel 80x52</a></li>
+      <li><a href="#80x86">Intel 80x86</a></li>
+    </ul>
+  </li>
+  <li>MicroChip
+    <ul>
+      <li><a href="#pic32mx2xx">PIC32MX2xx Family</a> <small>(Modified MIPS32)</small></li>
+      <li><a href="#pic32mx4xx">PIC32MX4xx Family</a> <small>(Modified MIPS32)</small></li>
+      <li><a href="#pic32mx7xx">PIC32MX7xx Family</a> <small>(Modified MIPS32)</small></a>
+    </ul>
+  </li>
+  </td>
+  <td bgcolor="#e4e4e4" valign="top" width="33%">
+  <li>nuvoTon
+    <ul>
+      <li><a href="#nuvotonnu120">nuvoTon NUC120</a> <small>(ARM Cortex-M0)</small></li>
+    </ul>
+  </li>
+  <li>NXP
+    <ul>
+      <li><a href="#nxplpc214x">NXP LPC214x</a> <small>(ARM7TDMI)</small></li>
+      <li><a href="#nxplpc2378">NXP LPC2378</a> <small>(ARM7TDMI)</small></li>
+      <li><a href="#nxplpc3131">NXP LPC3131</a> <small>(ARM9E6JS)</small></li>
+      <li><a href="#nxplpc315x">NXP LPC315x</a> <small>(ARM9E6JS)</small></li>
+      <li><a href="#nxplpc176x">NXP LPC176x</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#nxplpc178x">NXP LPC178x</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#nxplpc43xx">NXP LPC43xx</a> <small>(ARM Cortex-M4)</small></li>
+    </ul>
+  </li>
+  <li>Renesas/Hitachi:
+    <ul>
+      <li><a href="#superh">Renesas/Hitachi SuperH</a></li>
+      <li><a href="#m16c">Renesas M16C/26</a></li>
+    </ul>
+  </li>
+  <li>STMicroelectronics
+    <ul>
+      <li><a href="#str71x">STMicro STR71x</a> <small>(ARM7TDMI)</small></li>
+      <li><a href="#stm32l152">STMicro STM32L152</a> <small>(STM32 L &quot;EnergyLite&quot; Line, ARM Cortex-M3)</small></li>
+      <li><a href="#stm32f100x">STMicro STM32F100x</a> <small>(STM32 F1 &quot;Value Line&quot;Family, ARM Cortex-M3)</small></li>
+      <li><a href="#stm32f103x">STMicro STM32F103x</a> <small>(STM32 F1 Family, ARM Cortex-M3)</small></li>
+      <li><a href="#stm32f107x">STMicro STM32F107x</a> <small>(STM32 F1 &quot;Connectivity Line&quot; family, ARM Cortex-M3)</small></li>
+      <li><a href="#stm32f207x">STMicro STM32F207x</a> <small>(STM32 F2 family, ARM Cortex-M3)</small></li>
+      <li><a href="#stm32303x">STMicro STM32F303x <small>(STM32 F3 family, ARM Cortex-M4)</small></b>.</a></li>
+      <li><a href="#stm32f407x">STMicro STM32F407x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32f427x">STMicro STM32 F427/437</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
+    </ul>
+  </li>
+  </td>
+  <td bgcolor="#e4e4e4" valign="top" width="33%">
+  <li>Texas Instruments (some formerly Luminary)
+    <ul>
+      <li><a href="#tms320c5471">TI TMS320-C5471</a> <small>(ARM7TDMI)</small></li>
+      <li><a href="#ticalypso">TI Calypso</a> <small>(ARM7TDMI)</small></li<>
+      <li><a href="#titms320dm320">TI TMS320-DM320</a> <small>(ARM9E6JS)</small></li>
+      <li><a href="#tilms6432">TI/Stellaris LM3S6432</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#tilm3s6432s2e">TI/Stellaris LM3S6432S2E</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#tilms6918">TI/Stellaris LM3S6918</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#tilms6965">TI/Stellaris LM3S6965</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#tilms8962">TI/Stellaris LM3S8962</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#tilms9b96">TI/Stellaris LM3S9B96</a> <small>(ARM Cortex-M3)</small></li>
+      <li><a href="#tilm4f120x">TI/Stellaris LM4F120x</a> <small>(ARM Cortex-M4)</small></li>
+    </ul>
+  </li>
+  <li>ZiLOG
+    <ul>
+      <li><a href="#zilogz16f">ZiLOG Z16F</a></li>
+      <li><a href="#zilogez80acclaim">ZiLOG eZ80 Acclaim!</a></li>
+      <li><a href="#zilogz8encore">ZiLOG Z8Encore!</a></li>
+      <li><a href="#zilogz180">ZiLOG Z180</a></li>
+      <li><a href="#zilogz80">ZiLOG Z80</a></li>
+    </ul>
+  </li>
+  </td>
+  <td bgcolor="#e4e4e4" valign="top">
+  </td>
+  <td bgcolor="#e4e4e4" valign="top">
+  </td>
   </tr>
 </table></center>
 
@@ -1628,7 +1750,8 @@
   <td><br></td>
   <td>
     <p>
-      <b>TI TMS320C5471</b> (also called <b>C5471</b> or <b>TMS320DA180</b> or <b>DA180</b>).
+      <a name="tms320c5471"><b>TI TMS320C5471</b></a>
+      (also called <b>C5471</b> or <b>TMS320DA180</b> or <b>DA180</b>).
       NuttX operates on the ARM7 of this dual core processor.
       This port uses the <a href="http://www.spectrumdigital.com/">Spectrum Digital</a>
       evaluation board with a GNU arm-nuttx-elf toolchain* under Linux or Cygwin.
@@ -1649,7 +1772,7 @@
   <td><br></td>
   <td>
     <p>
-      <b>TI Calypso</b>.
+      <a name="ticalypso"><b>TI Calypso</b>.</a>
       This port supports the TI &quot;Calypso&quot; MCU used in various cell phones (and, in particular,
       by the <a href="http://bb.osmocom.org/trac/">Osmocom-bb project</a>).
       Like the c5471, NuttX operates on the  ARM7 of this dual core processor.
@@ -1672,7 +1795,7 @@
   <td><br></td>
   <td>
     <p>
-      <b>NXP LPC214x</b>.
+      <a name="nxplpc214x"><b>NXP LPC214x</b>.</a>
       Support is provided for the NXP LPC214x family of processors.  In particular,
       support is provided for (1) the mcu123.com lpc214x evaluation board (LPC2148)
       and (1) the The0.net ZPA213X/4XPA development board (with the The0.net UG-2864AMBAG01 OLED)
@@ -1706,7 +1829,7 @@
   <td><br></td>
   <td>
     <p>
-      <b>NXP LPC2378</b>.
+      <a name="nxplpc2378"><b>NXP LPC2378</b></a>.
       Support is provided for the NXP LPC2378 MCU.  In particular,
       support is provided for the Olimex-LPC2378 development board.
       This port was contributed by Rommel Marcelo is was first released in NuttX-5.3.
@@ -1734,7 +1857,7 @@
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STR71x</b>.
+      <a name="str71x"><b>STMicro STR71x</b>.</a>
       Support is provided for the STMicro STR71x family of processors.  In particular,
       support is provided for the Olimex STR-P711 evaluation board.
       This port also used the GNU arm-nuttx-elf toolchain* under Linux or Cygwin.
@@ -1773,7 +1896,7 @@
   <td><br></td>
   <td>
     <p>
-      <b>Freescale MC9328MX1</b> or <b>i.MX1</b>.
+      <a name="freescaleimx1"><b>Freescale MC9328MX1</b> or <b>i.MX1</b>.</a>
       This port uses the Freescale MX1ADS development board with a GNU arm-nuttx-elf toolchain*
       under either Linux or Cygwin.
     </p>
@@ -1796,7 +1919,8 @@
   <td><br></td>
   <td>
     <p>
-      <b>TI TMS320DM320</b> (also called <b>DM320</b>).
+      <a name="titms320dm320"><b>TI TMS320DM320</b></a>
+      (also called <b>DM320</b>).
       NuttX operates on the ARM9 of this dual core processor.
       This port uses the
       <a href="http://wiki.neurostechnology.com/index.php/Developer_Welcome">Neuros OSD</a>
@@ -1820,8 +1944,8 @@
 <tr>
   <td><br></td>
   <td>
-    <b>NXP <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC3131</a></b>.
-    The port for the NXP LPC3131 on the <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a>
+    <a name="nxplpc3131"><b>NXP LPC3131</b>.</a>
+    The port for the NXP <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC3131</a> on the <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a>
     development board was first released in NuttX-5.1 with a GNU arm-nuttx-elf or arm-eabi toolchain* under Linux or Cygwin
     (but was not functional until NuttX-5.2).
     </p>
@@ -1851,8 +1975,8 @@
 <tr>
   <td><br></td>
   <td>
-    <b>NXP <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC315x</a></b>.
-    Support for the NXP LPC315x family has been incorporated into the code base as of NuttX-6.4.
+    <a name="nxplpc315x"><b>NXP LPC315x</b>.</a>
+    Support for the NXP <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC315x</a> family has been incorporated into the code base as of NuttX-6.4.
     Support has added for the Embedded Artists EA3152 board in NuttX-6.11.
     </p>
     <ul>
@@ -1879,8 +2003,8 @@
   <td><br></td>
   <td>
     <p>
-      <b>NuvoTon NUC120</b>.
-      This is a port of NuttX to the Nuvoton NuTiny-SDK-NUC120 that features the NUC120LE3AN MCU.
+      <a name="nuvotonnu120"><b>nuvoTon NUC120</b>.</a>
+      This is a port of NuttX to the nuvoTon NuTiny-SDK-NUC120 that features the NUC120LE3AN MCU.
     </p>
     <ul>
       <p>
@@ -1936,7 +2060,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>FreeScale Freedom KL25Z</b>.
+      <a name="freescalekl25z"><b>FreeScale Freedom KL25Z</b>.</a>
       This is a port of NuttX to the Freedom KL25Z board that features the MKL25Z128 Cortex-M0+ MCU, 128KB of FLASH and 16KB of SRAM.
       See the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=FRDM-KL25Z&tid=vanFRDM-KL25Z">Freescale</a> website for further information about this board.
     </p>
@@ -1961,7 +2085,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>TI Stellaris LM3S6432</b>.
+      <a name="tilms6432"><b>TI/Stellaris LM3S6432</b>.</a>
       This is a port of NuttX to the Stellaris RDK-S2E Reference Design Kit and the MDL-S2E Ethernet to Serial module
       (contributed by Mike Smith).
     </p>
@@ -1975,7 +2099,30 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>Luminary/TI Stellaris LM3S6918</b>.
+      <a name="tilm3s6432s2e"><b>TI/Stellaris LM3S6432S2E</b>.</a>
+      This port uses Serial-to-Ethernet Reference Design Kit (<a href="http://www.ti.com/tool/rdk-s2e">RDK-S2E</a>) and has similar support as for the other Stellaris family members.
+      Configurations are available for the OS test and for the NuttShell (NSH)
+      (see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
+      The NSH configuration including networking support with a Telnet NSH console.
+      This port was contributed by Mike Smith.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+          This port was will be released in NuttX 6.14.
+      </p>
+     </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="tilms6918"><b>TI/Stellaris LM3S6918</b>.</a>
       This port uses the <a href=" http://www.micromint.com/">Micromint</a> Eagle-100 development
       board with a GNU arm-nuttx-elf toolchain* under either Linux or Cygwin.
     </p>
@@ -2006,7 +2153,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>Luminary/TI Stellaris LM3S6965</b>.
+      <a name="tilms6965"><b>TI/Stellaris LM3S6965</b>.</a>
       This port uses the Stellaris LM3S6965 Ethernet Evalution Kit with a GNU arm-nuttx-elf toolchain*
       under either Linux or Cygwin.
     </p>
@@ -2040,7 +2187,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>Luminary/TI Stellaris LM3S8962</b>.
+      <a name="tilms8962"><b>TI/Stellaris LM3S8962</b>.</a>
       This port uses the Stellaris EKC-LM3S8962 Ethernet+CAN Evalution Kit with a GNU arm-nuttx-elf toolchain*
       under either Linux or Cygwin.
       Contributed by Larry Arnold.
@@ -2062,10 +2209,10 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>Luminary/TI Stellaris LM3S9B96</b>.
+      <a name="tilms9b96"><b>TI/Stellaris LM3S9B96</b>.</a>
       Header file support was contributed by Tiago Maluta for this part.
-      Jose Pablo Rojas V. is currently using those header file changes to port NuttX to the TI/Stellaris EKK-LM3S9B96.
-      With any luck, that port should be working and available in the NuttX-6.20 release.
+      Jose Pablo Rojas V. is used those header file changes to port NuttX to the TI/Stellaris EKK-LM3S9B96.
+      That port was available in the NuttX-6.20 release.
     </p>
   </td>
 </tr>
@@ -2077,31 +2224,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>TI Stellaris LM3S6432S2E</b>.
-      This port uses Serial-to-Ethernet Reference Design Kit (<a href="http://www.ti.com/tool/rdk-s2e">RDK-S2E</a>)
-      and has similar support as for the other Stellaris family members.
-      Configurations are available for the OS test and for the NuttShell (NSH)
-      (see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
-      The NSH configuration including networking support with a Telnet NSH console.
-      This port was contributed by Mike Smith.
-    </p>
-    <ul>
-      <p>
-        <b>STATUS:</b>
-          This port was will be released in NuttX 6.14.
-      </p>
-     </ul>
-  </td>
-</tr>
-<tr>
-  <td><br></td>
-  <td><hr></td>
-</tr>
-<tr>
-  <td><br></td>
-  <td>
-    <p>
-      <b>STMicro STM32L152 (STM32L &quot;EnergyLite&quot; Line)</b>.
+      <a name="stm32l152"><b>STMicro STM32L152 (STM32L &quot;EnergyLite&quot; Line)</b>.</a>
       This is a port of NuttX to the STMicro STM32L-Discovery development board.
       The STM32L-Discovery board is based on the STM32L152RBT6 MCU (128KB FLASH and 16KB of SRAM).
     </p>
@@ -2164,7 +2287,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM32F100x (STM32 F1 &quot;Value Line&quot;Family)</b>.
+      <a name="stm32f100x"><b>STMicro STM32F100x (STM32 F1 &quot;Value Line&quot;Family)</b>.</a>
       Chip support for these STM32 &quot;Value Line&quot; family was contributed by Mike Smith and users have reported that they have successful brought up NuttX on there proprietary boards using this logic.
       This logic was extended to support the <i>high density</i> STM32F100RC chips by Freddie Chopin
       However, there is <i>no</i> specific board support for this chip families in the NuttX source tree.
@@ -2179,7 +2302,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM32F103x (STM32 F1 Family)</b>.
+      <a name="stm32f103x"><b>STMicro STM32F103x (STM32 F1 Family)</b>.</a>
       Support for four MCUs and four board configurations are available.
       MCU support includes all of the high density and connectivity line families.
       Board supported is available specifically for: STM32F103ZET6, STM32F103RET6, STM32F103VCT, and STM32F103VET6.
@@ -2256,7 +2379,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM32F107x (STM32 F1 &quot;Connectivity Line&quot; family)</b>.
+      <a name="stm32f107x"><b>STMicro STM32F107x (STM32 F1 &quot;Connectivity Line&quot; family)</b>.</a>
       Chip support for the STM32 F1 &quot;Connectivity Line&quot; family has been present in NuttX for some time and users have reported that they have successful brought up NuttX on there proprietary boards using this logic.
     </p>
     <p>
@@ -2291,7 +2414,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM32F207IG (STM32 F2 family)</b>.
+      <a name="stm32f207x"><b>STMicro STM32F207IG (STM32 F2 family)</b>.</a>
       Support for the STMicro STM3220G-EVAL development board was contributed by Gary Teravskis and first released in NuttX-6.16.
     </p>
     <ul>
@@ -2309,7 +2432,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>Atmel AT91SAM3U</b>.
+      <a name="at91sam3u"><b>Atmel AT91SAM3U</b>.</a>
       This port uses the <a href="http://www.atmel.com/">Atmel</a> SAM3U-EK
       development board that features the AT91SAM3U4E MCU.
       This port uses a GNU arm-nuttx-elf or arm-eabi toolchain* under either Linux or Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
@@ -2350,7 +2473,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>NXP LPC1766, LPC1768, and LPC1769</b>.
+      <a name="nxplpc176x"><b>NXP LPC1766, LPC1768, and LPC1769</b>.</a>
       Drivers are available for CAN, DAC, Ethernet, GPIO, GPIO interrupts, I2C, UARTs, SPI, SSP, USB host, and USB device.
       Verified LPC17xx onfigurations are available for three boards.
       <ul>
@@ -2498,7 +2621,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>NXP LPC1788</b>.
+      <a name="nxplpc178x"><b>NXP LPC1788</b>.</a>
       The port of NuttX to the WaveShare Open1788 is a collaborative effort between Rommel Marcelo and myself
       (with Rommel being the leading contributor and I claiming only a support role).
       You can get more information at the Open1788 board from the WaveShare <a href="http://www.wvshare.com/product/Open1788-Standard.htm">website</a>.
@@ -2524,7 +2647,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>FreeScale Kinetis K40</b>.
+      <a name="kinetisk40"><b>FreeScale Kinetis K40</b>.</a>
       This port uses the Freescale Kinetis KwikStik K40.
       Refer to the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=KWIKSTIK-K40">Freescale web site</a> for further information about this board.
       The Kwikstik is used with the FreeScale Tower System (mostly just to provide a simple UART connection)
@@ -2551,7 +2674,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>FreeScale Kinetis K60</b>.
+      <a name="kinetisk60"><b>FreeScale Kinetis K60</b>.</a>
       This port uses the Freescale Kinetis TWR-K60N512 tower system.
       Refer to the <a href="http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=TWR-K60N512-KIT">Freescale web site</a> for further information about this board.
       The TWR-K60N51 includes with the FreeScale Tower System which provides (among other things) a DBP UART connection.
@@ -2580,7 +2703,33 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM3240G-EVAL (STM32 F4 family)</b>.
+      <a name="stm32303x"><b>STMicro STM32F3-Discovery (STM32 F3 family)</b>.</a>
+      This port uses the STMicro STM32F3-Discovery board featuring the STM32F303VCT6 MCU (STM32 F3 family).
+      Refer to the <a href="http://www.st.com/internet/evalboard/product/254044.jsp">STMicro web site</a> for further information about this board.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS:</b>
+        The basic port for the STM32F3-Discover was first released in NuttX-6.26.
+        Many of the drivers previously released for the STM32 F1, Value Line, and F2 and F4 may be usable on this plaform as well.
+        New drivers will be required for ADC and I2C which are very different on this platform.
+      </p>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32f407x"><b>STMicro STM32407x (STM32 F4 family)</b>.</a>
+    <p>
+    <ul>
+    <p>
+      <b>STMicro STM3240G-EVAL</b>.
       This port uses the STMicro STM3240G-EVAL board featuring the STM32F407IGH6 MCU.
       Refer to the <a href="http://www.st.com/internet/evalboard/product/252216.jsp">STMicro web site</a> for further information about this board.
     </p>
@@ -2611,18 +2760,10 @@ nsh>
         <li><b>NuttX-6.21</b>
           A USB OTG host controller driver was added in NuttX 6.21.
         </li>
-      </p>
-  </td>
-</tr>
-<tr>
-  <td><br></td>
-  <td><hr></td>
-</tr>
-<tr>
-  <td><br></td>
-  <td>
+      </ul>
+    </p>
     <p>
-      <b>STMicro STM32F4-Discovery (STM32 F4 family)</b>.
+      <b>STMicro STM32F4-Discovery</b>.
       This port uses the STMicro STM32F4-Discovery board featuring the STM32F407VGT6 MCU.
       The STM32F407VGT6 is a 168MHz Cortex-M4 operation with 1Mbit Flash memory and 128kbytes.
       The board features:
@@ -2646,15 +2787,6 @@ nsh>
         All drivers listed for the STM3240G-EVAL are usable on this plaform as well.
       </p>
     </ul>
-  </td>
-</tr>
-<tr>
-  <td><br></td>
-  <td><hr></td>
-</tr>
-<tr>
-  <td><br></td>
-  <td>
     <p>
       <b>MikroElektronika Mikromedia for STM32F4</b>.
       This is another board supported by NuttX that uses the same STM32F407VGT6 MCU as does the STM32F4-Discovery board.
@@ -2688,7 +2820,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM32 F427/437</b>.
+      <a name="stm32f427x"><b>STMicro STM32 F427/437</b>.</a>
       General architectural support was provided for the F427/437 family in NuttX 4.27.
       Specific support includes the STM32F427I, STM32F427Z, and STM32F427V chips.
       This is <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but not support for any publically available boards is included..
@@ -2707,29 +2839,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>STMicro STM32F3-Discovery (STM32 F3 family)</b>.
-      This port uses the STMicro STM32F3-Discovery board featuring the STM32F303VCT6 MCU (STM32 F3 family).
-      Refer to the <a href="http://www.st.com/internet/evalboard/product/254044.jsp">STMicro web site</a> for further information about this board.
-    </p>
-    <ul>
-      <p>
-        <b>STATUS:</b>
-        The basic port for the STM32F3-Discover was first released in NuttX-6.26.
-        Many of the drivers previously released for the STM32 F1, Value Line, and F2 and F4 may be usable on this plaform as well.
-        New drivers will be required for ADC and I2C which are very different on this platform.
-      </p>
-    </ul>
-  </td>
-</tr>
-<tr>
-  <td><br></td>
-  <td><hr></td>
-</tr>
-<tr>
-  <td><br></td>
-  <td>
-    <p>
-      <b>NXG Technologies LPC4330-Xplorer</b>.
+      <a name="nxplpc43xx"><b>NXG Technologies LPC4330-Xplorer</b>.</a>
       This NuttX port is for the LPC4330-Xplorer board from NGX Technologies featuring the NXP LPC4330FET100 MCU.
       See the <a href="http://shop.ngxtechnologies.com/product_info.php?cPath=21_37&products_id=104">NXG website</a> for further information about this board.
     </p>
@@ -2782,7 +2892,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>TI Stellaris LM4F120</b>.
+      <a name="tilm4f120x"><b>TI Stellaris LM4F120</b>.</a>
       This port uses the TI Stellaris LM4F120 LaunchPad.
       Jose Pablo Carballo and I are doing this port.
     </p>
@@ -2822,7 +2932,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>SoC Robotics ATMega128</b>.
+      <a name="avratmega128"><b>SoC Robotics ATMega128</b>.</a>
       This port of NuttX to the Amber Web Server from <a href="http://www.soc-robotics.com/index.htm">SoC Robotics</a>
       is partially completed.
       The Amber Web Server is based on an Atmel ATMega128.
@@ -2844,6 +2954,10 @@ nsh>
   <td><br></td>
   <td>
     <p>
+      <a name="avrat90usbxxx"><b>AVR AT90USB64x</b> and <b>AT90USB6128x</b>.</a>
+    </p>
+    <ul>
+    <p>
       <b>Micropendous 3 AT90USB64x</b> and <b>AT90USB6128x</b>.
       This port of NuttX to the Opendous Micropendous 3 board. The Micropendous3 is
       may be populated with an AT90USB646, 647, 1286, or 1287.  I have only the AT90USB647
@@ -2858,15 +2972,6 @@ nsh>
          creation of a simple task, and serial console output.
       </p>
     </ul>
-  </td>
-</tr>
-<tr>
-  <td><br></td>
-  <td><hr></td>
-</tr>
-<tr>
-  <td><br></td>
-  <td>
     <p>
       <b>PJRC Teensy++ 2.0 AT90USB1286</b>.
       This is a port of NuttX to the PJRC Teensy++ 2.0 board.
@@ -2888,7 +2993,6 @@ nsh>
          fully debugged as of the NuttX-6.5 release.
       </p>
     </ul>
-  </td>
 </tr>
 <tr>
   <td><br></td>
@@ -2920,6 +3024,10 @@ nsh>
 </tr>
 <tr>
   <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
   <td>
       <p>
         <b>Development Environments:</b>
@@ -2945,7 +3053,7 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>AV32DEV1</b>.
+      <a name="at32uc3bxxx"><b>AV32DEV1</b>.</a>
       This port uses the www.mcuzone.com AVRDEV1 board based on the Atmel AT32UC3B0256 MCU.
       This port requires a special GNU avr32 toolchain available from atmel.com website.
       This is a windows native toolchain and so can be used only under Cygwin on Windows.
@@ -3017,7 +3125,7 @@ nsh>
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <a name="8052"><b>Intel 8052 Microcontroller</b>.</a>
+    <a name="80x52"><b>Intel 80C52 Microcontroller</b>.</a>
   </td>
 </tr>
 <tr>
@@ -3101,7 +3209,8 @@ nsh>
 <tr>
   <td><br></td>
   <td>
-    <p><b>PIC32MX250F128D</b>.
+    <p>
+      <a name="pic32mx2xx"><b>PIC32MX250F128D</b>.</a>
       A port is in progress from the DTX1-4000L &quot;Mirtoo&quot; module from <a href="http://www.dimitech.com/" >Dimitech</a>.
       This module uses MicroChip PIC32MX250F128D and the Dimitech DTX1-4000L EV-kit1 V2.
       See the <a href="http://www.dimitech.com/">Dimitech</a> website for further information.
@@ -3129,7 +3238,34 @@ nsh>
 <tr>
   <td><br></td>
   <td>
-   <p><b>PIC32MX460F512L</b>.  There one two board ports using this chip:</p>
+   <p>
+     <a name="pic32mx4xx"><b>PIC32MX4xx Family</b>.</a>
+   </p>
+   <ul>
+    <p>
+      <b>PIC32MX440F512H</b>.
+        This port uses the &quot;Advanced USB Storage Demo Board,&quot; Model DB-DP11215, from <a href="http://www.sureelectronics.net">Sure Electronics</a>.
+        This board features the MicroChip PIC32MX440F512H.
+        See the <a href="http://www.sureelectronics.net/goods.php?id=1168">Sure website</a> for further information about the DB-DP11215 board.
+        (I believe that that the DB-DP11215 may be obsoleted now but replaced with the very similar, DB-DP11212.
+        The DB-DP11212 board differs, I believe, only in its serial port configuration.)
+    </p>
+    <ul>
+      <p>
+       <b>STATUS:</b>
+       This NuttX port is code complete and has considerable test testing.
+       The port for this board was completed in NuttX 6.11, but still required a few bug fixes before it will be ready for prime time.
+       The fully verified port first appeared in NuttX 6.13.
+       Available configurations include the OS test and the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
+       An untested USB device-side driver is available in the source tree.
+       A more complete port would include support of the USB OTG port and of the LCD display on this board.
+       Those drivers are not yet available as of this writing.
+       </p>
+    </ul>
+   <p>
+     <b>PIC32MX460F512L</b>.
+     There one two board ports using this chip:
+   </p>
    <ul>
     <li><b>PIC32MX Board from PCB Logic Design Co</b>.
       This port is for the PIC32MX board from PCB Logic Design Co. and used the PIC32MX460F512L.
@@ -3152,35 +3288,7 @@ nsh>
       Available configurations include the OS test and the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
       USB has not yet been fully tested but on first pass appears to be functional.
     </p>
-  </ul>
-  </td>
-</tr>
-<tr>
-  <td><br></td>
-  <td><hr></td>
-</tr>
-<tr>
-  <td><br></td>
-  <td>
-    <p>
-      <b>PIC32MX440F512H</b>.
-        This port uses the &quot;Advanced USB Storage Demo Board,&quot; Model DB-DP11215, from <a href="http://www.sureelectronics.net">Sure Electronics</a>.
-        This board features the MicroChip PIC32MX440F512H.
-        See the <a href="http://www.sureelectronics.net/goods.php?id=1168">Sure website</a> for further information about the DB-DP11215 board.
-        (I believe that that the DB-DP11215 may be obsoleted now but replaced with the very similar, DB-DP11212.
-        The DB-DP11212 board differs, I believe, only in its serial port configuration.)
-    </p>
-    <ul>
-      <p>
-       <b>STATUS:</b>
-       This NuttX port is code complete and has considerable test testing.
-       The port for this board was completed in NuttX 6.11, but still required a few bug fixes before it will be ready for prime time.
-       The fully verified port first appeared in NuttX 6.13.
-       Available configurations include the OS test and the NuttShell (NSH - see the <a href="http://www.nuttx.org/Documentation/NuttShell.html">NSH User Guide</a>).
-       An untested USB device-side driver is available in the source tree.
-       A more complete port would include support of the USB OTG port and of the LCD display on this board.
-       Those drivers are not yet available as of this writing.
-       </p>
+    </ul>
     </ul>
   </td>
 </tr>
@@ -3192,8 +3300,8 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <b>PIC32MX795F512L</b>.
-        There one two board ports using this chip:
+      <a name="pic32mx7xx"><b>PIC32MX795F512L</b>.</a>
+      There one two board ports using this chip:
     </p>
     <ul>
       <li><b>Microchip PIC32 Ethernet Starter Kit</b>.
