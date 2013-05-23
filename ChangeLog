@@ -4770,3 +4770,6 @@
 	* configs/lm3s6965-ek/tcpecho: This configuration builds the simple TCP
 	  echo example based on W.Richard Steven UNIX Programming book to ensure
 	  correct usage of the socket API. Contributed by Max Holtzberg (2013-5-22).
+	* configs/stm32ldiscovery/src/stm32_lcd.c:  Framework for support of the
+	  STM32L-Discovery's segment LCD (2013-5-22).
+

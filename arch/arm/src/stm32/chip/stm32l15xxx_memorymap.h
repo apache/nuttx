@@ -65,6 +65,10 @@
 #define STM32_OPTION_BASE    0x1ff80000     /* 0x1fffc000-0x1ff8001f: Option bytes */
                                             /* 0x1ff80020-0x1fffffff: Reserved */
 
+/* SRAM Base Addresses **************************************************************/
+
+#define STM32_SRAMBB_BASE    0x22000000     /* SRAM bit-band base */
+
 /* Peripheral Base Addresses ********************************************************/
 
 #define STM32_APB1_BASE      0x40000000     /* 0x40000000-0x40007c03: APB1 */
@@ -73,6 +77,7 @@
                                             /* 0x40013c00-0x4001ffff: Reserved */
 #define STM32_AHB_BASE       0x40020000     /* 0x40020000-0xa0000fff: AHB */
                                             /* 0xa0001000-0x4fffffff: Reserved */
+#define STM32_PERIPHBB_BASE  0x42000000     /* Peripheral bit-band base */
 
 /* APB1 Base Addresses **************************************************************/
 

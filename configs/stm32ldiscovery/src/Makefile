@@ -53,23 +53,11 @@ CSRCS += stm32_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS +=  stm32_buttons.c
+CSRCS += stm32_buttons.c
 endif
 
-ifeq ($(CONFIG_STM32_USB),y)
-CSRCS += stm32_usb.c
-endif
-
-ifeq ($(CONFIG_PWM),y)
-CSRCS += stm32_pwm.c
-endif
-
-ifeq ($(CONFIG_QENCODER),y)
-CSRCS += stm32_qencoder.c
-endif
-
-ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += stm32_watchdog.c
+ifeq ($(CONFIG_STM32_LCD),y)
+CSRCS += stm32_lcd.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
