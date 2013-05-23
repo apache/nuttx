@@ -500,7 +500,7 @@ config STM32_CAN1
 	default n
 	select CAN
 	select STM32_CAN
-	depends on !STM32_VALUELINE
+	depends on !STM32_VALUELINE && !STM32_STM32L15XX
 
 config STM32_CAN2
 	bool "CAN2"
@@ -586,11 +586,6 @@ config STM32_I2C3
 	depends on STM32_STM32F20XX || STM32_STM32F40XX
 	select STM32_I2C
 
-config STM32_IWDG
-	bool "IWDG"
-	default n
-	select WATCHDOG
-
 config STM32_OTGFS
 	bool "OTG FS"
 	default n
@@ -664,6 +659,7 @@ config STM32_SYSCFG
 config STM32_TIM1
 	bool "TIM1"
 	default n
+	depends on !STM32_STM32L15XX
 
 config STM32_TIM2
 	bool "TIM2"
@@ -693,7 +689,7 @@ config STM32_TIM7
 config STM32_TIM8
 	bool "TIM8"
 	default n
-	depends on !STM32_VALUELINE
+	depends on !STM32_VALUELINE && !STM32_STM32L15XX
 
 config STM32_TIM9
 	bool "TIM9"
@@ -767,14 +763,14 @@ config STM32_USART3
 config STM32_UART4
 	bool "UART4"
 	default n
-	depends on !STM32_STM32F30XX
+	depends on !STM32_STM32F30XX &&!STM32_STM32L15XX
 	select ARCH_HAVE_UART4
 	select STM32_USART
 
 config STM32_UART5
 	bool "UART5"
 	default n
-	depends on !STM32_STM32F30XX
+	depends on !STM32_STM32F30XX &&!STM32_STM32L15XX
 	select ARCH_HAVE_UART5
 	select STM32_USART
 
@@ -804,6 +800,16 @@ config STM32_USB
 	default n
 	depends on (STM32_STM32F10XX && !STM32_VALUELINE) || STM32_STM32L15XX || STM32_STM32F30XX
 	select USBDEV
+
+config STM32_LCD
+	bool "Segment LCD"
+	default n
+	depends on STM32_STM32L15XX
+
+config STM32_IWDG
+	bool "IWDG"
+	default n
+	select WATCHDOG
 
 config STM32_WWDG
 	bool "WWDG"
