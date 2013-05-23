@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/stm32f3discovery/nsh/setenv.sh
+# configs/stm32l1discovery/nsh/setenv.sh
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

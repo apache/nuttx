@@ -66,8 +66,8 @@ enum slcdcode_e
    * ASCII BKSP and DEL values.
    */
 
-  SLCDCODE_FWDDEL,          /* DELete (forward delete) N characters moving cursor */
-  SLCDCODE_BACKDEL,         /* Backspace (backward delete) N characters */
+  SLCDCODE_FWDDEL,          /* DELete (forward delete) N characters moving text */
+  SLCDCODE_BACKDEL,         /* Backspace (backward delete) N characters  moving cursor */
   SLCDCODE_ERASE,           /* Erase N characters from the cursor position */
   SLCDCODE_ERASEEOL,        /* Erase from the cursor position to the end of line */
   SLCDCODE_CLEAR,           /* Home the cursor and erase the entire display */

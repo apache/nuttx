@@ -330,18 +330,20 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
           return slcd_reget(state, pch, parg);
         }
 
+      /* Put the character in the reget buffer because there is on more way
+       * that we can fail.
+       */
+
+      state->buf[NDX_CODE5] = (uint8_t)ch;
+      state->nch = NCH_CODE5;
+
       /* Verify the special CLCD action code */
 
       if (ch < (int)FIRST_SLCDCODE || ch > (int)LAST_SLCDCODE)
         {
-          /* Not a special command code.. put the character in the reget
-           * buffer.
+          /* Not a special command code. Return the ESC now and the rest
+           * of the characters later.
            */
-
-          state->buf[NDX_CODE5] = (uint8_t)ch;
-          state->nch = NCH_CODE5;
-
-          /* Return the ESC now and the next two characters later. */
 
           return slcd_reget(state, pch, parg);
         }
@@ -351,6 +353,15 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
       code  = CODE_RETURN(ch);
       count = slcd_nibble(state->buf[NDX_COUNTH]) << 4;
               slcd_nibble(state->buf[NDX_COUNTL]);
+
+      /* All count values must be greater than 0 or something is wrong */
+
+      if (count < 1)
+        {
+          /* Return the ESC now and the rest of the characters later. */
+
+          return slcd_reget(state, pch, parg);
+        }
     }
 
   /* We have successfully parsed the the entire escape sequence.  Return the

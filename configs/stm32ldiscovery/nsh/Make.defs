@@ -1,5 +1,5 @@
 ############################################################################
-# configs/stm32f3discovery/nsh/Make.defs
+# configs/stm32l1discovery/nsh/Make.defs
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

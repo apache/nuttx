@@ -125,7 +125,7 @@
 #  define LCD_CR_BIAS_1TO4        (0 << LCD_CR_BIAS_SHIFT) /* 00: Bias 1/4 */
 #  define LCD_CR_BIAS_1TO2        (1 << LCD_CR_BIAS_SHIFT) /* 01: Bias 1/2 */
 #  define LCD_CR_BIAS_1TO3        (2 << LCD_CR_BIAS_SHIFT) /* 10: Bias 1/3 */
-#define LCD_CR_MUX_SEG            (1 << 7)  /* Bit 7:  Mux segment enable
+#define LCD_CR_MUX_SEG            (1 << 7)  /* Bit 7:  Mux segment enable */
                                             /* Bits 8-31 Reserved */
 
 /* LCD frame control register */
@@ -181,7 +181,7 @@
 #  define LCD_FCR_PS_DIV8192      (13 << LCD_FCR_PS_SHIFT) /* 0011: ck_ps = LCDCLK/8192 */
 #  define LCD_FCR_PS_DIV16384     (14 << LCD_FCR_PS_SHIFT) /* 0011: ck_ps = LCDCLK/16384 */
 #  define LCD_FCR_PS_DIV32768     (15 << LCD_FCR_PS_SHIFT) /* 0011: ck_ps = LCDCLK/32768 */
-                                            /* Bits 26-31 Reserved
+                                            /* Bits 26-31 Reserved */
 
 /* LCD status register */
 
@@ -191,14 +191,14 @@
 #define LCD_SR_UDD                (1 << 3)  /* Bit 3: Update Display Done */
 #define LCD_SR_RDY                (1 << 4)  /* Bit 4: Ready flag */
 #define LCD_SR_FCRSF              (1 << 5)  /* Bit 5: LCD Frame Control Register Synchronization flag */
-                                            /* Bits 6-31 Reserved
+                                            /* Bits 6-31 Reserved */
 
 /* LCD clear register */
 
                                             /* Bit 0 Reserved */
 #define LCD_CLR_SOFC              (1 << 1)  /* Bit 1: Start of frame flag clear */
                                             /* Bit 2 Reserved */
-#define LCD_CLR_UDDC              (1 << 2)  /* Bit 3: Update display done clear
+#define LCD_CLR_UDDC              (1 << 2)  /* Bit 3: Update display done clear */
                                             /* Bits 31:2-31 Reserved */
 
 /* LCD display memory, COMn, S00-S31 */

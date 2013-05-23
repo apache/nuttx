@@ -150,8 +150,8 @@
 #define ASCII_LBRACKET   0x5b /* Left bracket ([) */
 #define ASCII_BACKSLASH  0x5c /* Back slash (\) */
 #define ASCII_RBRACKET   0x5d /* Right bracket (]) */
-#define ASCII_CARET      0x5c /* Caret (^) */
-#define ASCII_CIRCUMFLEX 0x5c /* Circumflex (^) */
+#define ASCII_CARET      0x5e /* Caret (^) */
+#define ASCII_CIRCUMFLEX 0x5e /* Circumflex (^) */
 #define ASCII_UNDERSCORE 0x5f /* Underscore (_) */
 
 #define ASCII_RSQUOT     0x60 /* Closing single quote */
