@@ -59,12 +59,14 @@
  *     Priority data may be read without blocking.
  *   POLLPRI
  *     High priority data may be read without blocking.
+ *
  *   POLLOUT
  *     Normal data may be written without blocking.
  *   POLLWRNORM
  *     Equivalent to POLLOUT.
  *   POLLWRBAND
  *     Priority data may be written.
+ *
  *   POLLERR
  *     An error has occurred (revents only).
  *   POLLHUP

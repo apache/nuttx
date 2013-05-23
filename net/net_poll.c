@@ -205,7 +205,7 @@ static inline int net_pollsetup(FAR struct socket *psock,
     {
       return -ENOMEM;
     }
-  
+
   /* Some of the  following must be atomic */
 
   flags = uip_lock();
@@ -250,7 +250,9 @@ static inline int net_pollsetup(FAR struct socket *psock,
   if (!sq_empty(&conn->readahead))
 #endif
     {
-      fds->revents |= (POLLOUT & fds->events);
+      /* Normal data may be read without blocking. */
+
+      fds->revents |= (POLLRDNORM & fds->events);
     }
 
   /* Check for a loss of connection events.  We need to be careful here.
@@ -415,7 +417,7 @@ int psock_poll(FAR struct socket *psock, FAR struct pollfd *fds, bool setup)
 #endif
 
   /* Check if we are setting up or tearing down the poll */
- 
+
   if (setup)
     {
       /* Perform the TCP/IP poll() setup */

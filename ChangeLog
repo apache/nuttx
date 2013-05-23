@@ -4774,4 +4774,6 @@
 	  STM32L-Discovery's segment LCD (2013-5-22).
 	* fs/fs_poll.c:  Poll setup/teardown logic should ignore invalid (i.e.,
 	  negative) file descriptors.  Max Holtzberg (2013-5-23).
-
+	* net/net_poll.c: When readahead data is availalbe, the network poll
+	  logic should set POLLIN (or POLLRDNORM), not POLLOUT.  Max Holtzberg
+	  (2013-5-23)
