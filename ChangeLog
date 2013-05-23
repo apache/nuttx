@@ -3819,8 +3819,8 @@
 	  there is a issue of ARM9 systems with low vectors and large memories
 	  that will have to be addressed in the future.
 	* libc/misc/lib_kbdencode.c and lib_kbddecode.c:  Add logic to marshal
-	  and serialized "out-of-band" keyboard commands intermixed with normal
-	  ASCII data (not yet hooked into anything).
+	  and serialize speical keyboard commands intermixed with normal ASCII
+	  data (not yet hooked into anything).
 	* drivers/usbhost/usbhost_hidkbd.c:  If CONFIG_HIDKBD_ENCODED is
 	  defined, this driver will now use libc/misc/lib_kbdencode.c to
 	  encode special function keys.
@@ -4779,3 +4779,5 @@
 	  (2013-5-23)
 	* fs/fs_poll.c:  Actually, it should not ignore invlid descriptors, it
 	  should set the POLLNVAL event and return immediately (2013-5-23).
+	* libc/misc/lib_slcdencode.c and lib_slcddecode.c:  Add logic to marshal
+	  and serialized special SLCD intermixed with normal ASCII data (2013-5-23)

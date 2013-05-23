@@ -74,8 +74,8 @@
  * Name: kbd_reget
  *
  * Description:
- *   We have unused characters from the last, unsuccessful.  Return one of
- *   these instead of the .
+ *   We have unused characters from the last, unsuccessful decode attempt. 
+ *   Return one of these instead of the new character from the stream.
  *
  * Input Parameters:
  *   stream - An instance of lib_instream_s to do the low-level get

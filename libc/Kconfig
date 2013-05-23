@@ -475,18 +475,37 @@ config LIB_KBDCODEC
 		may have an (optional) encoding/decoding layer on the data returned
 		by the character driver. A keyboard may return simple text data
 		(alphabetic, numeric, and punctuaction) or control characters
-		(enter, control-C, etc.).  We can think about this the normal
-		"in-band" keyboard data stream.  However, in addition, most
-		keyboards support actions that cannot be represented as text data.
-		Such actions include things like cursor controls (home, up arrow,
+		(enter, control-C, etc.).  However, in addition, most keyboards
+		support actions that cannot be represented as text data. Such
+		actions include things like cursor controls (home, up arrow,
 		page down, etc.), editing functions (insert, delete, etc.), volume
-		controls, (mute, volume up, etc.) and other special functions.  We
-		can think about this as special, "out-of-band" keyboard commands.
-		In this case, some special encoding may be required to multiplex
-		the in-band text data and out-of-band command streams.
+		controls, (mute, volume up, etc.) and other special functions.
+		Some special encoding may be required to multiplex these two classes
+		of data.
 
 		This option enables the functions that implement the encoding and
 		decoding of keyboard data.  These are the interfaces prototyped in
 		include/nuttx/input/kbd_codec.h.  While not correctly a part of
 		the C library, it is included here because the decoding side of this
+		interface must be accessible by end user programs.
+
+config LIB_SLCDCODEC
+	bool "Segment LCD CODEC"
+	default n
+	---help---
+		In NuttX, a character-oriented, segment LCD (SLCD) driver is simply
+		a character device that may have an (optional) encoding/decoding
+		layer on the data provided to the SLCD driver.  The application may
+		provide simple text data (alphabetic, numeric, and punctuaction) or
+		control characters (enter, control-C, etc.).  However, in addition,
+		most SLCDs support actions that cannot be represented as text data.
+		Such actions include things like cursor controls (home, up arrow,
+		page down, etc.) and other special functions (e.g., blinking).  Some
+		special encoding may be required to multiplex these two classes of
+		data.
+
+		This option enables the functions that implement the encoding and
+		decoding of SLCD data.  These are the interfaces prototyped in
+		include/nuttx/lcd/slcd_codec.h.  While not correctly a part of the C
+		library, it is included here because the encoding side of this
 		interface must be accessible by end user programs.
