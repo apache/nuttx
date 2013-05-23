@@ -67,12 +67,15 @@ GPIO Pin Usage
         TIM3_CH2/TIM1_CH1N
         /LCD_SEG4/TIM11_CH1/
   PA8   USART1_CK/MCO/        LCD glass COM0                   P2, pin 23
+        LCD_COM0
   PA9   USART1_TX/LCD_COM1    LCD glass COM1                   P2, pin 22
   PA10  USART1_RX/LCD_COM2    LCD glass COM2                   P2, pin 21
   PA11  USART1_CTS/USBDM/     ---                              P2, pin 20
         SPI1_MISO
   PA12  USART1_RTS/USBDP/     ---                              P2, pin 19
         SPI1_MOSI
+  JTDI  TIM2_CH1_ETR/PA15/    LCD_SEG12                        P2, pin 16
+        SPI1_NSS/LCD_SEG17
   ----- --------------------- -------------------------------- ----------------
   PB0   ADC_IN8/TIM3_CH3/     Linear Touch Sensor (PB0)        ---
         LCD_SEG5/COMP1_INP/
@@ -82,6 +85,11 @@ GPIO Pin Usage
         VREF_OUT
   PB2/  ---                   ---                              P1, pin 21
   BOOT1
+  JTDO  TIM2_CH2/PB3/TRACES   LCD_SEG3, SWO                    P2, pin 11
+        WO/SPI1_SCK/COMP2_I
+        NM/LCD_SEG7
+ JNTRST TIM3_CH1/PB4/SPI1_MIS SEG4                             P2, pin 10
+        O/COMP2_INP/LCD_SEG8
   PB5   I2C1_SMBAl/TIM3_CH2/  LCD SEG5                         P2, pin 9
         SPI1_MOSI/COMP2_INP/
         LCD_SEG9
@@ -98,7 +106,7 @@ GPIO Pin Usage
   PB11  I2C2_SDA/USART3_RX/   LCD SEG7                         P1, pin 23
         TIM2_CH4/LCD_SEG11
   PB12  SPI2_NSS/I2C2_SMBA/   LCD SEG8                         P1, pin 24
-        USART3_CK/LCD_SEG1
+        USART3_CK/LCD_SEG12
         2/ADC_IN18/COMP1_INP
         / TIM10_CH1
   PB13  SPI2_SCK/USART3_CTS/  LCD SEG9                         P1, pin 25
