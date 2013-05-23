@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_poll.c
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -140,6 +140,7 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
 
       ret = (int)inode->u.i_ops->poll(this_file, fds, setup);
     }
+
   return ret;
 }
 #endif
@@ -162,20 +163,26 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 
   for (i = 0; i < nfds; i++)
     {
-      /* Setup the poll descriptor */
+      /* Ignore negative descriptors */
 
-      fds[i].sem     = sem;
-      fds[i].revents = 0;
-      fds[i].priv    = NULL;
-
-      /* Set up the poll */
-
-      ret = poll_fdsetup(fds[i].fd, &fds[i], true);
-      if (ret < 0)
+      if (fds[i].fd >= 0)
         {
-          return ret;
+          /* Setup the poll descriptor */
+
+          fds[i].sem     = sem;
+          fds[i].revents = 0;
+          fds[i].priv    = NULL;
+
+          /* Set up the poll */
+
+          ret = poll_fdsetup(fds[i].fd, &fds[i], true);
+          if (ret < 0)
+            {
+              return ret;
+            }
         }
     }
+
   return OK;
 }
 #endif
@@ -201,24 +208,29 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
   *count = 0;
   for (i = 0; i < nfds; i++)
     {
-      /* Teardown the poll */
+      /* Ignore negative descriptors */
 
-      status = poll_fdsetup(fds[i].fd, &fds[i], false);
-      if (status < 0)
+      if (fds[i].fd >= 0)
         {
-          ret = status;
+          /* Teardown the poll */
+
+          status = poll_fdsetup(fds[i].fd, &fds[i], false);
+          if (status < 0)
+            {
+              ret = status;
+            }
+
+          /* Check if any events were posted */
+
+          if (fds[i].revents != 0)
+            {
+              (*count)++;
+            }
+
+          /* Un-initialize the poll structure */
+
+          fds[i].sem = NULL;
         }
-
-      /* Check if any events were posted */
-
-      if (fds[i].revents != 0)
-        {
-          (*count)++;
-        }
-
-      /* Un-initialize the poll structure */
-
-      fds[i].sem = NULL;
     }
 
   return ret;
