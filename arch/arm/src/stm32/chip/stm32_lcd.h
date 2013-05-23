@@ -58,9 +58,9 @@
 #define STM32_LCD_SR_OFFSET      0x0008 /* LCD status register */
 #define STM32_LCD_CLR_OFFSET     0x000c /* LCD clear register */
 
-#define STM32_LCD_RAM_OFFSET(n)  (0x0014+((n) << 3)) /* LCD display memory, COMn */
-#define STM32_LCD_RAML_OFFSET(n) (0x0014+((n) << 3)) /* LCD display memory, COMn, S00-S31 */
-#define STM32_LCD_RAMH_OFFSET(n) (0x0018+((n) << 3)) /* LCD display memory, COMn, S32-S39 */
+#define STM32_LCD_RAM_OFFSET(n)  (0x0014 + ((n) << 3)) /* LCD display memory, COMn */
+#define STM32_LCD_RAML_OFFSET(n) (0x0014 + ((n) << 3)) /* LCD display memory, COMn, S00-S31 */
+#define STM32_LCD_RAMH_OFFSET(n) (0x0018 + ((n) << 3)) /* LCD display memory, COMn, S32-S39 */
 
 #define STM32_LCD_RAM0L_OFFSET    0x0014 /* LCD display memory, COM0, S00-S31 */
 #define STM32_LCD_RAM0H_OFFSET    0x0018 /* LCD display memory, COM0, S32-S39 */
@@ -111,20 +111,21 @@
 
 /* LCD control register */
 
-#define LCD_CR_LCDEN              (1 << 0)  /* Bit 0: LCD controller enable */
-#define LCD_CR_VSEL               (1 << 1)  /* Bit 1: Voltage source selection */
-#define LCD_CR_DUTY_SHIFT         (2)        /* Bits 2-4: Duty selection */
+#define LCD_CR_LCDEN              (1 << 0)  /* Bit 0:  LCD controller enable */
+#define LCD_CR_VSEL               (1 << 1)  /* Bit 1:  Voltage source selection */
+#define LCD_CR_DUTY_SHIFT         (2)       /* Bits 2-4: Duty selection */
 #define LCD_CR_DUTY_MASK          (7 << LCD_CR_DUTY_SHIFT)
-# define LCD_CR_DUTY_STATIC       (7 << LCD_CR_DUTY_SHIFT) /* 000: Static duty */
-# define LCD_CR_DUTY_1TO2         (7 << LCD_CR_DUTY_SHIFT) /* 001: 1/2 duty */
-# define LCD_CR_DUTY_1TO3         (7 << LCD_CR_DUTY_SHIFT) /* 010: 1/3 duty */
-# define LCD_CR_DUTY_1TO4         (7 << LCD_CR_DUTY_SHIFT) /* 011: 1/4 duty */
-# define LCD_CR_DUTY_1TO8         (7 << LCD_CR_DUTY_SHIFT) /* 100: 1/8 duty */
+# define LCD_CR_DUTY_STATIC       (0 << LCD_CR_DUTY_SHIFT) /* 000: Static duty */
+# define LCD_CR_DUTY_1TO2         (1 << LCD_CR_DUTY_SHIFT) /* 001: 1/2 duty */
+# define LCD_CR_DUTY_1TO3         (2 << LCD_CR_DUTY_SHIFT) /* 010: 1/3 duty */
+# define LCD_CR_DUTY_1TO4         (3 << LCD_CR_DUTY_SHIFT) /* 011: 1/4 duty */
+# define LCD_CR_DUTY_1TO8         (4 << LCD_CR_DUTY_SHIFT) /* 100: 1/8 duty */
 #define LCD_CR_BIAS_SHIFT         (5)       /* Bits 5-6: Bias selector */
 #define LCD_CR_BIAS_MASK          (3 << LCD_CR_BIAS_SHIFT)
-#  define LCD_CR_BIAS_1TO4        (3 << LCD_CR_BIAS_SHIFT) /* 00: Bias 1/4 */
-#  define LCD_CR_BIAS_1TO2        (3 << LCD_CR_BIAS_SHIFT) /* 01: Bias 1/2 */
-#  define LCD_CR_BIAS_1TO3        (3 << LCD_CR_BIAS_SHIFT) /* 10: Bias 1/3 */
+#  define LCD_CR_BIAS_1TO4        (0 << LCD_CR_BIAS_SHIFT) /* 00: Bias 1/4 */
+#  define LCD_CR_BIAS_1TO2        (1 << LCD_CR_BIAS_SHIFT) /* 01: Bias 1/2 */
+#  define LCD_CR_BIAS_1TO3        (2 << LCD_CR_BIAS_SHIFT) /* 10: Bias 1/3 */
+#define LCD_CR_MUX_SEG            (1 << 7)  /* Bit 7:  Mux segment enable
                                             /* Bits 8-31 Reserved */
 
 /* LCD frame control register */
@@ -138,7 +139,7 @@
 #  define LCD_FCR_PON(n)          ((n) << LCD_FCR_PON_SHIFT) /* n=0-7 */
 #define LCD_FCR_DEAD_SHIFT        (7)       /* Bits 7-9: Dead time duration */
 #define LCD_FCR_DEAD_MASK         (7 << LCD_FCR_DEAD_SHIFT)
-#  define LCD_FCR_DEAD_NONE       (7 << LCD_FCR_DEAD_SHIFT)
+#  define LCD_FCR_DEAD_NONE       (0 << LCD_FCR_DEAD_SHIFT)
 #  define LCD_FCR_DEAD(n)         ((n) << LCD_FCR_DEAD_SHIFT) /* n=1..7 */
 #define LCD_FCR_CC_SHIFT          (10)      /* Bits 10-12: Contrast control */
 #define LCD_FCR_CC_MASK           (7 << LCD_FCR_CC_SHIFT)
