@@ -138,34 +138,119 @@
 #define SCLD_BAR3_ON          g_slcdstate.bar[0] |= 2
 #define SCLD_BAR3_OFF         g_slcdstate.bar[0] &= ~2
 
-/* These definitions support the logic of slcd_writemem() */
+/* These definitions support the logic of slcd_writemem()
+ *
+ * ---------- ----- ----- ----- ----- ------- ------ ------ ------ ------ ------- ------- -----------------------------
+ * LCD SIGNAL COM3  COM2  COM1  COM0  RAM BIT CHAR 1 CHAR 2 CHAR 3 CHAR 4 CHAR 5  CHAR 6  MASKS
+ *                                             3210   3210   3210   3210  32  10  32  10
+ * ---------- ----- ----- ----- ----- ------- ------ ------ ------ ------ --  --- --  --- -----------------------------
+ * LCD SEG0   1N    1P    1D    1E    Bit 0     1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
+ * LCD SEG1   1DP   1COL  1C    1M    Bit 1     1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
+ * LCD SEG2   2N    2P    2D    2E    Bit 2     0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
+ * LCD SEG3   2DP   2COL  2C    2M    Bit 7     0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
+ * LCD SEG4   3N    3P    3D    3E    Bit 8     0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
+ * LCD SEG5   3DP   3COL  3C    3M    Bit 9     0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
+ * LCD SEG6   4N    4P    4D    4E    Bit 10    0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
+ * LCD SEG7   4DP   4COL  4C    4M    Bit 11    0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
+ * LCD SEG8   5N    5P    5D    5E    Bit 12    0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/0xfff3efff
+ * LCD SEG9   BAR2  BAR3  5C    5M    Bit 13    0      0      0      0     0   1   0   0  CHAR 5: 0xfff3cfff/0xfff3efff
+ * LCD SEG10  6N    6P    6D    6E    Bit 14    0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/0xfffcbfff
+ * LCD SEG11  BAR0  BAR1  6C    6M    Bit 15    0      0      0      0     0   0   0   1  CHAR 6: 0xfffc3fff/0xfffcbfff
+ * LCD SEG12  6J    6K    6A    6B    Bit 16    0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/0xfffcbfff
+ * LCD SEG13  6H    6Q    6F    6G    Bit 17    0      0      0      0     0   0   1   1  CHAR 6: 0xfffc3fff/0xfffcbfff
+ * LCD SEG14  5J    5K    5A    5B    Bit 18    0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/0xfff3efff
+ * LCD SEG15  5H    5Q    5F    5G    Bit 19    0      0      0      0     1   1   0   0  CHAR 5: 0xfff3cfff/0xfff3efff
+ * LCD SEG16  4J    4K    4A    4B    Bit 20    0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
+ * LCD SEG17  4H    4Q    4F    4G    Bit 21    0      0      0      1     0   0   0   0  CHAR 4: 0xffcff3ff
+ * LCD SEG18  3J    3K    3A    3B    Bit 24    0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
+ * LCD SEG19  3H    3Q    3F    3G    Bit 25    0      0      1      0     0   0   0   0  CHAR 3: 0xfcfffcff
+ * LCD SEG20  2J    2K    2A    2B    Bit 26    0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
+ * LCD SEG21  2H    2Q    2F    2G    Bit 27    0      1      0      0     0   0   0   0  CHAR 2: 0xf3ffff7b
+ * LCD SEG22  1J    1K    1A    1B    Bit 28    1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
+ * LCD SEG23  1H    1Q    1F    1G    Bit 29    1      0      0      0     0   0   0   0  CHAR 1: 0xcffffffc
+ * ---------- ----- ----- ----- ----- ------- ------ ------ ------ ------ ------- ------- -----------------------------
+ */
 
-#define SLCD_CHAR1_MASK       0xcffffffc
-#define SLCD_CHAR1_UPDATE(s)  (((uint32_t)(s) & 0x0c) << 26) | \
+/* SLCD_CHAR1_MASK  COM0-3 0xcffffffc ..11 .... .... .... .... .... .... ..11 */
+
+#define SLCD_CHAR1_MASK0      0xcffffffc
+#define SLCD_CHAR1_MASK1      SLCD_CHAR3_MASK0
+#define SLCD_CHAR1_MASK2      SLCD_CHAR3_MASK0
+#define SLCD_CHAR1_MASK3      SLCD_CHAR3_MASK0
+#define SLCD_CHAR1_UPDATE0(s) (((uint32_t)(s) & 0x0c) << 26) | \
                               ((uint32_t)(s) & 0x03)
-#define SLCD_CHAR2_MASK       0xf3ffff03
-#define SLCD_CHAR2_UPDATE(s)  (((uint32_t)(s) & 0x0c) << 24) | \
+#define SLCD_CHAR1_UPDATE1(s) SLCD_CHAR1_UPDATE0(s)
+#define SLCD_CHAR1_UPDATE2(s) SLCD_CHAR1_UPDATE0(s)
+#define SLCD_CHAR1_UPDATE3(s) SLCD_CHAR1_UPDATE0(s)
+
+/* SLCD_CHAR2_MASK  COM0-3 0xf3ffff03 .... 22.. .... .... .... .... 2... .2.. */
+
+#define SLCD_CHAR2_MASK0      0xf3ffff7b
+#define SLCD_CHAR2_MASK1      SLCD_CHAR2_MASK0
+#define SLCD_CHAR2_MASK2      SLCD_CHAR2_MASK0
+#define SLCD_CHAR2_MASK3      SLCD_CHAR2_MASK0
+#define SLCD_CHAR2_UPDATE0(s) (((uint32_t)(s) & 0x0c) << 24) | \
                               (((uint32_t)(s) & 0x02) << 6) | \
                               (((uint32_t)(s) & 0x01) << 2)
-#define SLCD_CHAR3_MASK       0xfcfffcff
-#define SLCD_CHAR3_UPDATE(s)  (((uint32_t)(s) & 0x0c) << 22) | \
+#define SLCD_CHAR2_UPDATE1(s) SLCD_CHAR2_UPDATE0(s)
+#define SLCD_CHAR2_UPDATE2(s) SLCD_CHAR2_UPDATE0(s)
+#define SLCD_CHAR2_UPDATE3(s) SLCD_CHAR2_UPDATE0(s)
+
+/* SLCD_CHAR3_MASK  COM0-3 0xfcfffcff .... ..33 .... .... .... ..33 .... .... */
+
+#define SLCD_CHAR3_MASK0      0xfcfffcff
+#define SLCD_CHAR3_MASK1      SLCD_CHAR3_MASK0
+#define SLCD_CHAR3_MASK2      SLCD_CHAR3_MASK0
+#define SLCD_CHAR3_MASK3      SLCD_CHAR3_MASK0
+#define SLCD_CHAR3_UPDATE0(s) (((uint32_t)(s) & 0x0c) << 22) | \
                               (((uint32_t)(s) & 0x03) << 8)
-#define SLCD_CHAR4_MASK       0xffcff3ff
-#define SLCD_CHAR4_UPDATE(s)  (((uint32_t)(s) & 0x0c) << 18) | \
+#define SLCD_CHAR3_UPDATE1(s) SLCD_CHAR3_UPDATE0(s)
+#define SLCD_CHAR3_UPDATE2(s) SLCD_CHAR3_UPDATE0(s)
+#define SLCD_CHAR3_UPDATE3(s) SLCD_CHAR3_UPDATE0(s)
+
+/* SLCD_CHAR4_MASK  COM0-3 0xffcff3ff .... .... ..44 .... .... 44.. .... .... */
+
+ #define SLCD_CHAR4_MASK0      0xffcff3ff
+#define SLCD_CHAR4_MASK1      SLCD_CHAR4_MASK0
+#define SLCD_CHAR4_MASK2      SLCD_CHAR4_MASK0
+#define SLCD_CHAR4_MASK3      SLCD_CHAR4_MASK0
+#define SLCD_CHAR4_UPDATE0(s) (((uint32_t)(s) & 0x0c) << 18) | \
                               (((uint32_t)(s) & 0x03) << 10)
-#define SLCD_CHAR5_MASKA      0xfff3cfff
-#define SLCD_CHAR5_MASKB      0xfff3efff
-#define SLCD_CHAR5_UPDATEA(s) (((uint32_t)(s) & 0x0c) << 16) | \
+#define SLCD_CHAR4_UPDATE1(s) SLCD_CHAR4_UPDATE0(s)
+#define SLCD_CHAR4_UPDATE2(s) SLCD_CHAR4_UPDATE0(s)
+#define SLCD_CHAR4_UPDATE3(s) SLCD_CHAR4_UPDATE0(s)
+
+/* SLCD_CHAR5_MASK  COM0-1 0xfff3cfff .... .... .... 55.. ..55 .... .... ....
+ *                  COM2-3 0xfff3efff .... .... .... 55.. ...5 .... .... ....
+ */
+
+#define SLCD_CHAR5_MASK0      0xfff3cfff
+#define SLCD_CHAR5_MASK1      SLCD_CHAR5_MASK0
+#define SLCD_CHAR5_MASK2      0xfff3efff
+#define SLCD_CHAR5_MASK3      SLCD_CHAR5_MASK2
+#define SLCD_CHAR5_UPDATE0(s) (((uint32_t)(s) & 0x0c) << 16) | \
                               (((uint32_t)(s) & 0x03) << 12)
-#define SLCD_CHAR5_UPDATEB(s) (((uint32_t)(s) & 0x0c) << 16) | \
+#define SLCD_CHAR5_UPDATE1(s) SLCD_CHAR5_UPDATE0(s)
+#define SLCD_CHAR5_UPDATE2(s) (((uint32_t)(s) & 0x0c) << 16) | \
                               (((uint32_t)(s) & 0x01) << 12)
-#define SLCD_CHAR6_MASK       0xfffc3fff
-#define SLCD_CHAR6_UPDATEA(s) (((uint32_t)(s) & 0x04) << 15) | \
+#define SLCD_CHAR5_UPDATE3(s) SLCD_CHAR5_UPDATE2(s)
+
+/* SLCD_CHAR6_MASK  COM0-1 0xfffc3fff .... .... .... ..66 66.. .... .... ....
+ *                  COM2-3 0xfffc3fff .... .... .... ..66 .6.. .... .... ....
+ */
+
+#define SLCD_CHAR6_MASK0       0xfffc3fff
+#define SLCD_CHAR6_MASK1      SLCD_CHAR6_MASK0
+#define SLCD_CHAR6_MASK2       0xfffcbfff
+#define SLCD_CHAR6_MASK3      SLCD_CHAR6_MASK2
+#define SLCD_CHAR6_UPDATE0(s) (((uint32_t)(s) & 0x04) << 15) | \
                               (((uint32_t)(s) & 0x08) << 13) | \
                               (((uint32_t)(s) & 0x03) << 14)
-#define SLCD_CHAR6_UPDATEB(s) (((uint32_t)(s) & 0x04) << 15) | \
+#define SLCD_CHAR6_UPDATE1(s) SLCD_CHAR6_UPDATE0(s)
+#define SLCD_CHAR6_UPDATE2(s) (((uint32_t)(s) & 0x04) << 15) | \
                               (((uint32_t)(s) & 0x08) << 13) | \
                               (((uint32_t)(s) & 0x03) << 14)
+#define SLCD_CHAR6_UPDATE3(s) SLCD_CHAR6_UPDATE2(s)
 
 /* Debug ********************************************************************/
 
@@ -546,8 +631,11 @@ static inline uint16_t slcd_mapch(uint8_t ch)
 
 static inline void slcd_writemem(uint16_t bitset, int curpos)
 {
-  uint32_t regval;
   uint8_t segments[4];
+  uint32_t ram0;
+  uint32_t ram1;
+  uint32_t ram2;
+  uint32_t ram3;
   int i;
   int j;
 
@@ -569,143 +657,105 @@ static inline void slcd_writemem(uint16_t bitset, int curpos)
    * decoding the bit-mapped value
    */
 
+  ram0 = getreg32(STM32_LCD_RAM0L);
+  ram1 = getreg32(STM32_LCD_RAM1L);
+  ram2 = getreg32(STM32_LCD_RAM2L);
+  ram3 = getreg32(STM32_LCD_RAM3L);
+
   switch (curpos)
     {
     case 0:
-      regval = getreg32(STM32_LCD_RAM0L);
-      regval &= SLCD_CHAR1_MASK;
-      regval |= SLCD_CHAR1_UPDATE(segments[0]);
-      putreg32(regval, STM32_LCD_RAM0L);
+      ram0 &= SLCD_CHAR1_MASK0;
+      ram0 |= SLCD_CHAR1_UPDATE0(segments[0]);
 
-      regval = getreg32(STM32_LCD_RAM1L);
-      regval &= SLCD_CHAR1_MASK;
-      regval |= SLCD_CHAR1_UPDATE(segments[1]);
-      putreg32(regval, STM32_LCD_RAM1L);
+      ram1 &= SLCD_CHAR1_MASK1;
+      ram1 |= SLCD_CHAR1_UPDATE1(segments[1]);
 
-      regval = getreg32(STM32_LCD_RAM2L);
-      regval &= SLCD_CHAR1_MASK;
-      regval |= SLCD_CHAR1_UPDATE(segments[2]);
-      putreg32(regval, STM32_LCD_RAM2L);
+      ram2 &= SLCD_CHAR1_MASK2;
+      ram2 |= SLCD_CHAR1_UPDATE2(segments[2]);
 
-      regval = getreg32(STM32_LCD_RAM3L);
-      regval &= SLCD_CHAR1_MASK;
-      regval |= SLCD_CHAR1_UPDATE(segments[3]);
-      putreg32(regval, STM32_LCD_RAM3L);
+      ram3 &= SLCD_CHAR1_MASK3;
+      ram3 |= SLCD_CHAR1_UPDATE3(segments[3]);
       break;
 
     case 1:
-      regval = getreg32(STM32_LCD_RAM0L);
-      regval &= SLCD_CHAR2_MASK;
-      regval |= SLCD_CHAR2_UPDATE(segments[0]);
-      putreg32(regval, STM32_LCD_RAM0L);
+      ram0 &= SLCD_CHAR2_MASK0;
+      ram0 |= SLCD_CHAR2_UPDATE0(segments[0]);
 
-      regval = getreg32(STM32_LCD_RAM1L);
-      regval &= SLCD_CHAR2_MASK;
-      regval |= SLCD_CHAR2_UPDATE(segments[1]);
-      putreg32(regval, STM32_LCD_RAM1L);
+      ram1 &= SLCD_CHAR2_MASK1;
+      ram1 |= SLCD_CHAR2_UPDATE1(segments[1]);
 
-      regval = getreg32(STM32_LCD_RAM2L);
-      regval &= SLCD_CHAR2_MASK;
-      regval |= SLCD_CHAR2_UPDATE(segments[2]);
-      putreg32(regval, STM32_LCD_RAM2L);
+      ram2 &= SLCD_CHAR2_MASK2;
+      ram2 |= SLCD_CHAR2_UPDATE2(segments[2]);
 
-      regval = getreg32(STM32_LCD_RAM3L);
-      regval &= SLCD_CHAR2_MASK;
-      regval |= SLCD_CHAR2_UPDATE(segments[3]);
-      putreg32(regval, STM32_LCD_RAM3L);
+      ram3 &= SLCD_CHAR2_MASK3;
+      ram3 |= SLCD_CHAR2_UPDATE3(segments[3]);
       break;
 
     case 2:
-      regval = getreg32(STM32_LCD_RAM0L);
-      regval &= SLCD_CHAR3_MASK;
-      regval |= SLCD_CHAR3_UPDATE(segments[0]);
-      putreg32(regval, STM32_LCD_RAM0L);
+      ram0 &= SLCD_CHAR3_MASK0;
+      ram0 |= SLCD_CHAR3_UPDATE0(segments[0]);
 
-      regval = getreg32(STM32_LCD_RAM1L);
-      regval &= SLCD_CHAR3_MASK;
-      regval |= SLCD_CHAR3_UPDATE(segments[1]);
-      putreg32(regval, STM32_LCD_RAM1L);
+      ram1 &= SLCD_CHAR3_MASK1;
+      ram1 |= SLCD_CHAR3_UPDATE1(segments[1]);
 
-      regval = getreg32(STM32_LCD_RAM2L);
-      regval &= SLCD_CHAR3_MASK;
-      regval |= SLCD_CHAR3_UPDATE(segments[2]);
-      putreg32(regval, STM32_LCD_RAM2L);
+      ram2 &= SLCD_CHAR3_MASK2;
+      ram2 |= SLCD_CHAR3_UPDATE2(segments[2]);
 
-      regval = getreg32(STM32_LCD_RAM3L);
-      regval &= SLCD_CHAR3_MASK;
-      regval |= SLCD_CHAR3_UPDATE(segments[3]);
-      putreg32(regval, STM32_LCD_RAM3L);
+      ram3 &= SLCD_CHAR3_MASK3;
+      ram3 |= SLCD_CHAR3_UPDATE3(segments[3]);
       break;
 
     case 3:
-      regval = getreg32(STM32_LCD_RAM0L);
-      regval &= SLCD_CHAR4_MASK;
-      regval |= SLCD_CHAR4_UPDATE(segments[0]);
-      putreg32(regval, STM32_LCD_RAM0L);
+      ram0 &= SLCD_CHAR4_MASK0;
+      ram0 |= SLCD_CHAR4_UPDATE0(segments[0]);
 
-      regval = getreg32(STM32_LCD_RAM1L);
-      regval &= SLCD_CHAR4_MASK;
-      regval |= SLCD_CHAR4_UPDATE(segments[1]);
-      putreg32(regval, STM32_LCD_RAM1L);
+      ram1 &= SLCD_CHAR4_MASK1;
+      ram1 |= SLCD_CHAR4_UPDATE1(segments[1]);
 
-      regval = getreg32(STM32_LCD_RAM2L);
-      regval &= SLCD_CHAR4_MASK;
-      regval |= SLCD_CHAR4_UPDATE(segments[2]);
-      putreg32(regval, STM32_LCD_RAM2L);
+      ram2 &= SLCD_CHAR4_MASK2;
+      ram2 |= SLCD_CHAR4_UPDATE2(segments[2]);
 
-      regval = getreg32(STM32_LCD_RAM3L);
-      regval &= SLCD_CHAR4_MASK;
-      regval |= SLCD_CHAR4_UPDATE(segments[3]);
-      putreg32(regval, STM32_LCD_RAM3L);
+      ram3 &= SLCD_CHAR4_MASK3;
+      ram3 |= SLCD_CHAR4_UPDATE3(segments[3]);
       break;
 
     case 4:
-      regval = getreg32(STM32_LCD_RAM0L);
-      regval &= SLCD_CHAR5_MASKA;
-      regval |= SLCD_CHAR5_UPDATEA(segments[0]);
-      putreg32(regval, STM32_LCD_RAM0L);
+      ram0 &= SLCD_CHAR5_MASK0;
+      ram0 |= SLCD_CHAR5_UPDATE0(segments[0]);
 
-      regval = getreg32(STM32_LCD_RAM1L);
-      regval &= SLCD_CHAR5_MASKA;
-      regval |= SLCD_CHAR5_UPDATEA(segments[1]);
-      putreg32(regval, STM32_LCD_RAM1L);
+      ram1 &= SLCD_CHAR5_MASK1;
+      ram1 |= SLCD_CHAR5_UPDATE1(segments[1]);
 
-      regval = getreg32(STM32_LCD_RAM2L);
-      regval &= SLCD_CHAR5_MASKB;
-      regval |= SLCD_CHAR5_UPDATEB(segments[2]);
-      putreg32(regval, STM32_LCD_RAM2L);
+      ram2 &= SLCD_CHAR5_MASK2;
+      ram2 |= SLCD_CHAR5_UPDATE2(segments[2]);
 
-      regval = getreg32(STM32_LCD_RAM3L);
-      regval &= SLCD_CHAR5_MASKB;
-      regval |= SLCD_CHAR5_UPDATEB(segments[3]);
-      putreg32(regval, STM32_LCD_RAM3L);
+      ram3 &= SLCD_CHAR5_MASK3;
+      ram3 |= SLCD_CHAR5_UPDATE3(segments[3]);
       break;
 
     case 5:
-      regval = getreg32(STM32_LCD_RAM0L);
-      regval &= SLCD_CHAR6_MASK;
-      regval |= SLCD_CHAR6_UPDATEA(segments[0]);
-      putreg32(regval, STM32_LCD_RAM0L);
+      ram0 &= SLCD_CHAR6_MASK0;
+      ram0 |= SLCD_CHAR6_UPDATE0(segments[0]);
 
-      regval = getreg32(STM32_LCD_RAM1L);
-      regval &= SLCD_CHAR6_MASK;
-      regval |= SLCD_CHAR6_UPDATEA(segments[1]);
-      putreg32(regval, STM32_LCD_RAM1L);
+      ram1 &= SLCD_CHAR6_MASK1;
+      ram1 |= SLCD_CHAR6_UPDATE1(segments[1]);
 
-      regval = getreg32(STM32_LCD_RAM2L);
-      regval &= SLCD_CHAR6_MASK;
-      regval |= SLCD_CHAR6_UPDATEB(segments[2]);
-      putreg32(regval, STM32_LCD_RAM2L);
+      ram2 &= SLCD_CHAR6_MASK2;
+      ram2 |= SLCD_CHAR6_UPDATE2(segments[2]);
 
-      regval = getreg32(STM32_LCD_RAM3L);
-      regval &= SLCD_CHAR6_MASK;
-      regval |= SLCD_CHAR6_UPDATEB(segments[3]);
-      putreg32(regval, STM32_LCD_RAM3L);
+      ram3 &= SLCD_CHAR6_MASK3;
+      ram3 |= SLCD_CHAR6_UPDATE3(segments[3]);
       break;
 
     default:
       return;
   }
+
+  putreg32(ram0, STM32_LCD_RAM0L);
+  putreg32(ram1, STM32_LCD_RAM1L);
+  putreg32(ram2, STM32_LCD_RAM2L);
+  putreg32(ram3, STM32_LCD_RAM3L);
 
   /* Set the UDR bit to transfer the updated data to the second level
    * buffer.
