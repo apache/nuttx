@@ -4777,8 +4777,7 @@
 	* net/net_poll.c: When readahead data is availalbe, the network poll
 	  logic should set POLLIN (or POLLRDNORM), not POLLOUT.  Max Holtzberg
 	  (2013-5-23)
-	* fs/fs_poll.c:  Actually, it should not ignore invlid descriptors, it
-	  should set the POLLNVAL event and return immediately (2013-5-23).
+	* fs/fs_poll.c:  Actually, it should also set revents == 0. (2013-5-23).
 	* libc/misc/lib_slcdencode.c and lib_slcddecode.c:  Add logic to marshal
 	  and serialized special SLCD intermixed with normal ASCII data (2013-5-23)
 	* configs/stm32ldiscovery/src/stm32_lcd.c:  STM32L-Discovery's segment LCD

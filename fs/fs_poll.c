@@ -166,27 +166,21 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
       /* Setup the poll descriptor */
 
       fds[i].sem     = sem;
+      fds[i].revents = 0;
       fds[i].priv    = NULL;
 
-      /* Check for invalid descriptors */
+      /* Check for invalid descriptors. "If the value of fd is less than 0,
+       * events shall be ignored, and revents shall be set to 0 in that entry
+       * on return from poll()."
+       *
+       * NOTE:  There is a potential problem here.  If there is only one fd
+       * and if it is negative, then poll will hang.  From my reading of the
+       * spec, that appears to be the correct behavior.
+       */
 
-      if (fds[i].fd < 0)
-        {
-          /* Set POLLNVAL to indicate the invalid fd member */
-
-          fds[i].revents = POLLNVAL;
-
-          /* And increment the semaphore so that poll will return
-           * immediately (but with a successful return value).
-           */
-
-          sem_post(sem);
-        }
-      else
+      if (fds[i].fd >= 0)
         {
           /* Set up the poll on this valid file descriptor */
-
-          fds[i].revents = 0;
 
           ret = poll_fdsetup(fds[i].fd, &fds[i], true);
           if (ret < 0)
