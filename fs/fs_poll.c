@@ -163,17 +163,30 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 
   for (i = 0; i < nfds; i++)
     {
-      /* Ignore negative descriptors */
+      /* Setup the poll descriptor */
 
-      if (fds[i].fd >= 0)
+      fds[i].sem     = sem;
+      fds[i].priv    = NULL;
+
+      /* Check for invalid descriptors */
+
+      if (fds[i].fd < 0)
         {
-          /* Setup the poll descriptor */
+          /* Set POLLNVAL to indicate the invalid fd member */
 
-          fds[i].sem     = sem;
+          fds[i].revents = POLLNVAL;
+
+          /* And increment the semaphore so that poll will return
+           * immediately (but with a successful return value).
+           */
+
+          sem_post(sem);
+        }
+      else
+        {
+          /* Set up the poll on this valid file descriptor */
+
           fds[i].revents = 0;
-          fds[i].priv    = NULL;
-
-          /* Set up the poll */
 
           ret = poll_fdsetup(fds[i].fd, &fds[i], true);
           if (ret < 0)
@@ -219,18 +232,18 @@ static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
             {
               ret = status;
             }
-
-          /* Check if any events were posted */
-
-          if (fds[i].revents != 0)
-            {
-              (*count)++;
-            }
-
-          /* Un-initialize the poll structure */
-
-          fds[i].sem = NULL;
         }
+
+      /* Check if any events were posted */
+
+      if (fds[i].revents != 0)
+        {
+          (*count)++;
+        }
+
+      /* Un-initialize the poll structure */
+
+      fds[i].sem = NULL;
     }
 
   return ret;
