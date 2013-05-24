@@ -47,18 +47,6 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-/* The STM32L15XX family has no BDSR register.  The equivalent settings are
- * in the CSR register for those chips.
- */
-
-#ifdef CONFIG_STM32_STM32L15XX
-#  define STM32_RCC_BDCR       STM32_RCC_CSR
-#  define RCC_BDCR_LSEON       RCC_CSR_LSEON
-#  define RCC_BDCR_LSERDY      RCC_CSR_LSERDY
-#  define RCC_BDCR_RTCSEL_MASK RCC_CSR_RTCSEL_MASK
-#  define RCC_BDCR_RTCSEL_LSE  RCC_CSR_RTCSEL_LSE
-#  define RCC_BDCR_RTCEN       RCC_CSR_RTCEN
-#endif
 
 /****************************************************************************
  * Private Data
@@ -76,17 +64,58 @@
  * Name: stm32_rcc_enablelse
  *
  * Description:
- *   Enable the External Low-Speed (LSE) Oscillator and, if the RTC is
+ *   Enable the External Low-Speed (LSE) oscillator and, if the RTC is
  *   configured, setup the LSE as the RTC clock source, and enable the RTC.
+ *
+ *   For the STM32L15X family, this will also select the LSE as the clock
+ *   source of the LCD.
  *
  * Todo:
  *   Check for LSE good timeout and return with -1,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_STM32_STM32L15XX
 void stm32_rcc_enablelse(void)
 {
-  /* Enable the External Low-Speed (LSE) Oscillator by setting the LSEON bit
+  /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON bit
+   * the RCC CSR register.
+   */
+
+  modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_LSEON);
+
+  /* Wait for the LSE clock to be ready */
+
+  while ((getreg32(STM32_RCC_CSR) & RCC_CSR_LSERDY) == 0)
+    {
+      up_waste();
+    }
+
+  /* The primariy purpose of the LSE clock is to drive the RTC with an accurate
+   * clock source.  In the STM32L family, the RTC and the LCD are coupled so
+   * that must use the same clock source.  Calling this function will select
+   * the LSE will be used to drive the LCD as well.
+   */
+
+#if defined(CONFIG_STM32_LCD) || defined(CONFIG_RTC)
+  /* Select LSE as RTC/LCD Clock Source by setting the RTCSEL field of the RCC
+   * CSR register.
+   */
+
+  modifyreg32(STM32_RCC_CSR, RCC_CSR_RTCSEL_MASK, RCC_CSR_RTCSEL_LSE);
+
+#if defined(CONFIG_RTC)
+  /* Enable the RTC Clock by setting the RTCEN bit in the RCC CSR register */
+
+  modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_RTCEN);
+#endif
+#endif
+}
+#else
+
+void stm32_rcc_enablelse(void)
+{
+  /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON bit
    * the RCC BDCR register.
    */
 
@@ -98,20 +127,22 @@ void stm32_rcc_enablelse(void)
     {
       up_waste();
     }
-    
+
   /* The primariy purpose of the LSE clock is to drive the RTC.  The RTC could
    * also be driven by the LSI (but that would be very inaccurate) or by the
    * HSE (but that would prohibit low-power operation)
-   *
-   * Select LSE as RTC Clock Source by setting the RTCSEL field of the RCC BDCR
-   * register.
    */
 
 #ifdef CONFIG_RTC
+  /* Select LSE as RTC Clock Source by setting the RTCSEL field of the RCC
+   * BDCR register.
+   */
+
   modifyreg16(STM32_RCC_BDCR, RCC_BDCR_RTCSEL_MASK, RCC_BDCR_RTCSEL_LSE);
 
   /* Enable the RTC Clock by setting the RTCEN bit in the RCC BDCR register */
 
-  modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);    
+  modifyreg16(STM32_RCC_BDCR, 0, RCC_BDCR_RTCEN);
 #endif
 }
+#endif
