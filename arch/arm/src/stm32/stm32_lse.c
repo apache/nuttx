@@ -41,6 +41,7 @@
 
 #include "up_arch.h"
 
+#include "stm32_pwr.h"
 #include "stm32_rcc.h"
 #include "stm32_waste.h"
 
@@ -78,6 +79,16 @@
 #ifdef CONFIG_STM32_STM32L15XX
 void stm32_rcc_enablelse(void)
 {
+  uint16_t pwrcr;
+
+  /* The LSE is in the RTC domain and write access is denied to this domain
+   * after reset, you have to enable write access using DBP bit in the PWR CR
+   * register before to configuring the LSE.
+   */
+
+  pwrcr = getreg16(STM32_PWR_CR);
+  putreg16(pwrcr | PWR_CR_DBP, STM32_PWR_CR);
+
   /* Enable the External Low-Speed (LSE) oscillator by setting the LSEON bit
    * the RCC CSR register.
    */
@@ -110,6 +121,10 @@ void stm32_rcc_enablelse(void)
   modifyreg32(STM32_RCC_CSR, 0, RCC_CSR_RTCEN);
 #endif
 #endif
+
+  /* Restore the previous state of the DBP bit */
+
+  putreg16(pwrcr, STM32_PWR_CR);
 }
 #else
 

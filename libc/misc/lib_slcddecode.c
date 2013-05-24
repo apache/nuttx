@@ -109,7 +109,7 @@ static uint8_t slcd_nibble(uint8_t ascii)
  * Name: slcd_reget
  *
  * Description:
- *   We have unused characters from the last, unsuccessful decode attempt. 
+ *   We have unused characters from the last, unsuccessful decode attempt.
  *   Return one of these instead of the new character from the stream.
  *
  * Input Parameters:
@@ -260,9 +260,14 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 
   if (!IS_HEX(ch))
     {
+      /* Decode the value following the bracket */
+
+      code  = CODE_RETURN(ch);
+      count = 0;
+
       /* Verify the special CLCD action code */
 
-      if (ch < (int)FIRST_SLCDCODE || ch > (int)LAST_SLCDCODE)
+      if (code < (int)FIRST_SLCDCODE || code > (int)LAST_SLCDCODE)
         {
           /* Not a special command code.. put the character in the reget
            * buffer.
@@ -275,11 +280,6 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 
           return slcd_reget(state, pch, parg);
         }
-
-      /* Provide the return values */
-
-      code  = CODE_RETURN(ch);
-      count = 0;
     }
   else
     {
@@ -312,7 +312,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 
           return slcd_reget(state, pch, parg);
         }
-    
+
       /* Save the second character of the two byte hexidecimal number */
 
       state->buf[NDX_COUNTL] = (uint8_t)ch;
@@ -337,28 +337,21 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
       state->buf[NDX_CODE5] = (uint8_t)ch;
       state->nch = NCH_CODE5;
 
-      /* Verify the special CLCD action code */
-
-      if (ch < (int)FIRST_SLCDCODE || ch > (int)LAST_SLCDCODE)
-        {
-          /* Not a special command code. Return the ESC now and the rest
-           * of the characters later.
-           */
-
-          return slcd_reget(state, pch, parg);
-        }
-
-      /* Provide the return values */
+      /* Get the code and the count values. All count values must be greater
+       * than 0 or something is wrong.
+       */
 
       code  = CODE_RETURN(ch);
       count = slcd_nibble(state->buf[NDX_COUNTH]) << 4;
               slcd_nibble(state->buf[NDX_COUNTL]);
 
-      /* All count values must be greater than 0 or something is wrong */
+      /* Verify the special CLCD action code */
 
-      if (count < 1)
+      if (code < (int)FIRST_SLCDCODE || code > (int)LAST_SLCDCODE || count < 1)
         {
-          /* Return the ESC now and the rest of the characters later. */
+          /* Not a special command code. Return the ESC now and the rest
+           * of the characters later.
+           */
 
           return slcd_reget(state, pch, parg);
         }
@@ -374,4 +367,3 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
   state->nch = 0;
   return SLCDRET_SPEC;
 }
-
