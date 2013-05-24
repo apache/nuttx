@@ -148,6 +148,7 @@ struct slcd_geometry_s
 {
   uint16_t nrows;           /* Number of the rows on the SLCD */
   uint16_t ncolumns;        /* Number of characters in one row on the SLCD */
+  uint8_t  nbars;           /* Number of bars supported by the SLCD */
 };
 
 /* Working data needed by slcd_encode that must be provided and initialized

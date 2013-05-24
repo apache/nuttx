@@ -4790,4 +4790,7 @@
 	  USB device, the board does not (2013-5-24).
 	* arch/arm/src/stm32/stm32_lse.c:  Add support for the STM32L CSR register
 	  and for the LSE LCD clock source (2013-5-24).
+	* The STM32L-Discovery segment LCD is now functional and the README file
+	  includes instructions for adding the apps/examples/slcd segment LCD
+	  test as an NSH "built-in" command (2013-5-24).
 
