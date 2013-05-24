@@ -43,12 +43,52 @@
 
 #include <nuttx/config.h>
 #include <nuttx/streams.h>
+#include <nuttx/fs/ioctl.h>
 
 #ifdef CONFIG_LIB_SLCDCODEC
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* IOCTL commands that may be supported by some SLCD drivers */
+
+/* SLCDIOC_GEOMETRY:  Get the SLCD geometry (rows x characters)
+ *
+ * argument:  Pointer to struct slcd_geometry_s in which values will be
+ *            returned
+ */
+
+#define SLCDIOC_GEOMETRY    _SLCDIOC(0x0001)
+
+/* SLCDIOC_SETBAR: Set bars on a bar display
+ *
+ * argument:  32-bit bitset, with each bit corresponding to one bar.
+ */
+
+#define SLCDIOC_SETBAR      _SLCDIOC(0x0002)
+
+/* SLCDIOC_GETCONTRAST: Get the current contrast setting
+ *
+ * argument:  Pointer type int that will receive the current contrast
+ *            setting
+ */
+
+#define SLCDIOC_GETCONTRAST _SLCDIOC(0x0003)
+
+/* SLCDIOC_MAXCONTRAST: Get the maximum contrast setting
+ *
+ * argument:  Pointer type int that will receive the maximum contrast
+ *            setting
+ */
+
+#define SLCDIOC_MAXCONTRAST _SLCDIOC(0x0004)
+
+/* SLCDIOC_SETCONTRAST: Set the contrast to a new value
+ *
+ * argument:  The new contrast value
+ */
+
+#define SLCDIOC_SETCONTRAST _SLCDIOC(0x0005)
 
 /****************************************************************************
  * Public Types
@@ -102,10 +142,14 @@ enum slcdret_e
   SLCDRET_EOF               /* An EOF (or possibly an error) occurred */
 };
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
- 
+/* Used with the SLCDIOC_GEOMETRY ioctl call */
+
+struct slcd_geometry_s
+{
+  uint16_t nrows;           /* Number of the rows on the SLCD */
+  uint16_t ncolumns;        /* Number of characters in one row on the SLCD */
+};
+
 /* Working data needed by slcd_encode that must be provided and initialized
  * by the caller.
  */

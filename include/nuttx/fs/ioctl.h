@@ -67,6 +67,7 @@
 #define _BATIOCBASE     (0x0e00) /* Battery driver ioctl commands */
 #define _QEIOCBASE      (0x0f00) /* Quadrature encoder ioctl commands */
 #define _AUDIOIOCBASE   (0x1000) /* Audio ioctl commands */
+#define _SLCDIOCBASE    (0x1100) /* Segment LCD ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -227,17 +228,23 @@
 #define _BATIOCVALID(c)   (_IOC_TYPE(c)==_BATIOCBASE)
 #define _BATIOC(nr)       _IOC(_BATIOCBASE,nr)
 
-/* NuttX Quadrature Encoder driver ioctol definitions ***********************/
+/* NuttX Quadrature Encoder driver ioctl definitions ************************/
 /* (see nuttx/power/battery.h) */
 
 #define _QEIOCVALID(c)    (_IOC_TYPE(c)==_QEIOCBASE)
 #define _QEIOC(nr)        _IOC(_QEIOCBASE,nr)
 
-/* NuttX Audio driver ioctol definitions ***********************/
+/* NuttX Audio driver ioctl definitions ************************************/
 /* (see nuttx/audio/audio.h) */
 
 #define _AUDIOIOCVALID(c)  (_IOC_TYPE(c)==_AUDIOIOCBASE)
 #define _AUDIOIOC(nr)      _IOC(_AUDIOIOCBASE,nr)
+
+/* Segment LCD driver ioctl definitions ************************************/
+/* (see nuttx/include/lcd/slcd_codec.h */
+
+#define _SLCDIOCVALID(c)   (_IOC_TYPE(c)==_SLCDIOCBASE)
+#define _SLCDIOC(nr)       _IOC(_SLCDIOCBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions

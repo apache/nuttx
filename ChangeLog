@@ -4782,3 +4782,6 @@
 	  and serialized special SLCD intermixed with normal ASCII data (2013-5-23)
 	* configs/stm32ldiscovery/src/stm32_lcd.c:  STM32L-Discovery's segment LCD
 	  is code complete but completely untested (2013-5-23).
+	* include/nuttx/fs/ioctl.h, include/nuttx/lcd/slcd_codec.h, and
+	  configs/stm32ldiscovery/src/stm32_lcd.c:  Add SLCD ioctl commands to get
+	  SLCD geometry, set bars, and manage contrast (2013-5-23).

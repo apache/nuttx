@@ -351,6 +351,19 @@ xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 #endif
 
+/****************************************************************************
+ * Name: stm32_slcd_initialize
+ *
+ * Description:
+ *   Initialize the STM32L-Discovery LCD hardware and register the character
+ *   driver as /dev/slcd.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_LCD
+int stm32_slcd_initialize(void);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
