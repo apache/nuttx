@@ -120,7 +120,9 @@
 
 /* LCD characteristics */
 
+#define SLCD_NROWS            1
 #define SLCD_NCHARS           6
+#define SLCD_MAXCONTRAST      7
 
 /* An ASCII character may need to be decorated with a colon or decimal point */
 
@@ -283,9 +285,7 @@ struct stm32_slcdstate_s
   uint8_t curpos;               /* The current cursor position */
   uint8_t buffer[SLCD_NCHARS];  /* SLCD ASCII content */
   uint8_t options[SLCD_NCHARS]; /* With colon or decimal point decoration */
-#if 0 /* Not used */
   uint8_t bar[2];               /* Controls the bars on the far right of the SLCD */
-#endif
 };
 
 /****************************************************************************
@@ -295,11 +295,9 @@ struct stm32_slcdstate_s
 
 static void slcd_clear(void);
 static int slcd_getstream(FAR struct lib_instream_s *instream);
-#if 0 /* Not used */
 static uint8_t slcd_getcontrast(void);
 static int slcd_setcontrast(uint8_t contrast);
 static void slcd_writebar(void);
-#endif
 static inline uint16_t slcd_mapch(uint8_t ch);
 static inline void slcd_writemem(uint16_t bitset, int curpos);
 static void slcd_writech(uint8_t ch, uint8_t curpos, uint8_t options);
@@ -310,6 +308,7 @@ static inline void slcd_action(enum slcdcode_e code, uint8_t count);
 
 static ssize_t slcd_read(FAR struct file *, FAR char *, size_t);
 static ssize_t slcd_write(FAR struct file *, FAR const char *, size_t);
+static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
 static int slcd_poll(FAR struct file *filp, FAR struct pollfd *fds, bool setup);
 #endif
@@ -327,7 +326,7 @@ static const struct file_operations g_slcdops =
   slcd_read,     /* read */
   slcd_write,    /* write */
   0,             /* seek */
-  0              /* ioctl */
+  slcd_ioctl     /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , slcd_poll    /* poll */
 #endif
@@ -484,21 +483,18 @@ static int slcd_getstream(FAR struct lib_instream_s *instream)
  * Name: slcd_getcontrast
  ****************************************************************************/
 
-#if 0 /* Not used */
 static uint8_t slcd_getcontrast(void)
 {
   return (getreg32(STM32_LCD_FCR) & LCD_FCR_CC_MASK) >> LCD_FCR_CC_SHIFT;
 }
-#endif
 
 /****************************************************************************
  * Name: slcd_setcontrast
  ****************************************************************************/
 
-#if 0 /* Not used */
 static int slcd_setcontrast(uint8_t contrast)
 {
-  uint2_t regval;
+  uint32_t regval;
   int ret = OK;
 
   /* Make sure that the contrast setting is within range */
@@ -513,14 +509,13 @@ static int slcd_setcontrast(uint8_t contrast)
   regval &= !LCD_FCR_CC_MASK;
   regval |= contrast << LCD_FCR_CC_SHIFT;
   putreg32(regval, STM32_LCD_FCR);
+  return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: slcd_writebar
  ****************************************************************************/
 
-#if 0 /* Not used */
 static void slcd_writebar(void)
 {
   uint32_t regval;
@@ -544,14 +539,12 @@ static void slcd_writebar(void)
   regval |= (uint32_t)(g_slcdstate.bar[1] << 12);
   putreg32(regval, STM32_LCD_RAM3L);
 
-
   /* Set the UDR bit to transfer the updated data to the second level
    * buffer.
    */
 
   putreg32(1, SLCD_SR_UDR_BB);
 }
-#endif
 
 /****************************************************************************
  * Name: slcd_mapch
@@ -1124,13 +1117,139 @@ static ssize_t slcd_write(FAR struct file *filp,
  * Name: slcd_poll
  ****************************************************************************/
 
+static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
+{
+  switch (cmd)
+    {
+
+      /* SLCDIOC_GEOMETRY:  Get the SLCD geometry (rows x characters)
+       *
+       * argument:  Pointer to struct slcd_geometry_s in which values will be
+       *            returned
+       */
+
+      case SLCDIOC_GEOMETRY:
+        {
+          FAR struct slcd_geometry_s *geo = (FAR struct slcd_geometry_s *)((uintptr_t)arg);
+
+          if (!geo)
+            {
+              return -EINVAL;
+            }
+
+          geo->nrows    = SLCD_NROWS;
+          geo->ncolumns = SLCD_NCHARS;
+        }
+        break;
+
+      /* SLCDIOC_SETBAR: Set bars on a bar display
+       *
+       * argument:  32-bit bitset, with each bit corresponding to one bar.
+       */
+
+      case SLCDIOC_SETBAR:
+        {
+          /* Format the bar */
+
+          g_slcdstate.bar[0] = 0;
+          g_slcdstate.bar[1] = 0;
+
+          if ((arg & 1) != 0)
+            {
+              SCLD_BAR0_ON;
+            }
+
+          if ((arg & 2) != 0)
+            {
+              SCLD_BAR1_ON;
+            }
+
+          if ((arg & 4) != 0)
+            {
+              SCLD_BAR2_ON;
+            }
+
+          if ((arg & 8) != 0)
+            {
+              SCLD_BAR3_ON;
+            }
+
+          /* Write the bar to SLCD memory */
+
+          slcd_writebar();
+        }
+        break;
+
+      /* SLCDIOC_GETCONTRAST: Get the current contrast setting
+       *
+       * argument:  Pointer type int that will receive the current contrast
+       *            setting
+       */
+
+      case SLCDIOC_GETCONTRAST:
+        {
+          FAR int *contrast = (FAR int *)((uintptr_t)arg);
+          if (!contrast)
+            {
+              return -EINVAL;
+            }
+
+          *contrast = (int)slcd_getcontrast();
+        }
+        break;
+
+      /* SLCDIOC_MAXCONTRAST: Get the maximum contrast setting
+       *
+       * argument:  Pointer type int that will receive the maximum contrast
+       *            setting
+       */
+
+      case SLCDIOC_MAXCONTRAST:
+        {
+          FAR int *contrast = (FAR int *)((uintptr_t)arg);
+          if (!contrast)
+            {
+              return -EINVAL;
+            }
+
+          *contrast = SLCD_MAXCONTRAST;
+        }
+        break;
+
+      /* SLCDIOC_SETCONTRAST: Set the contrast to a new value
+       *
+       * argument:  The new contrast value
+       */
+
+      case SLCDIOC_SETCONTRAST:
+        {
+          if (arg > SLCD_MAXCONTRAST)
+            {
+              return -ERANGE;
+            }
+
+          return slcd_setcontrast((uint8_t)arg);
+        }
+        break;
+
+      default:
+        return -ENOTTY;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: slcd_poll
+ ****************************************************************************/
+
 #ifndef CONFIG_DISABLE_POLL
 static int slcd_poll(FAR struct file *filp, FAR struct pollfd *fds,
                         bool setup)
 {
   if (setup)
     {
-      /* Data is always avaialble to be read */
+      /* Data is always avaialble to be read / Data can always be written */
 
       fds->revents |= (fds->events & (POLLIN|POLLOUT));
       if (fds->revents != 0)
@@ -1148,11 +1267,11 @@ static int slcd_poll(FAR struct file *filp, FAR struct pollfd *fds,
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  stm32_slcd_initialize
+ * Name: stm32_slcd_initialize
  *
  * Description:
- *   Initialize the STM32L-Discovery hardware and register the character
- *   driver.
+ *   Initialize the STM32L-Discovery LCD hardware and register the character
+ *   driver as /dev/slcd.
  *
  ****************************************************************************/
 
