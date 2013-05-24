@@ -40,16 +40,10 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <stdio.h>
 #include <debug.h>
-#include <errno.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
-#endif
+#include <arch/board/board.h>
 
-#include "stm32.h"
 #include "stm32ldiscovery.h"
 
 /****************************************************************************
@@ -57,31 +51,6 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
-
-#define HAVE_USBDEV     1
-#define HAVE_USBMONITOR 1
-
-/* Can't support USB device features if the STM32 USB peripheral is not
- * enabled.
- */
-
-#ifndef CONFIG_STM32_USB
-#  undef HAVE_USBDEV
-#  undef HAVE_USBMONITOR
-#endif
-
-/* Can't support USB device is USB device is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef HAVE_USBDEV
-#  undef HAVE_USBMONITOR
-#endif
-
-/* Check if we should enable the USB monitor before starting NSH */
-
-#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_SYSTEM_USBMONITOR)
-#  undef HAVE_USBMONITOR
-#endif
 
 /* Debug ********************************************************************/
 
@@ -113,17 +82,13 @@
 
 int nsh_archinitialize(void)
 {
-#ifdef HAVE_USBMONITOR
-  int ret;
+  int ret = OK;
 
-  /* Start the USB Monitor */
+  /* Initialize the SLCD and register the SLCD device as /dev/slcd */
 
-  ret = usbmonitor_start(0, NULL);
-  if (ret != OK)
-    {
-      message("nsh_archinitialize: Start USB monitor: %d\n", ret);
-    }
+#ifdef CONFIG_STM32_LCD
+  ret = stm32_slcd_initialize();
 #endif
 
-  return OK;
+  return ret;
 }

@@ -243,19 +243,6 @@
 
 void weak_function stm32_spiinitialize(void);
 
-/****************************************************************************************************
- * Name: stm32_usbinitialize
- *
- * Description:
- *   Called from stm32_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the STM32L-Discovery board.
- *
- ****************************************************************************************************/
-
-#ifdef CONFIG_STM32_USB
-void weak_function stm32_usbinitialize(void);
-#endif
-
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_STM32F3DISCOVERY_SRC_STM32F3DISCOVERY_INTERNAL_H */
 

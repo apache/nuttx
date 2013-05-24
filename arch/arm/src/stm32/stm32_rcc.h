@@ -262,6 +262,9 @@ void stm32_clockenable(void);
  *   Enable the External Low-Speed (LSE) Oscillator and, if the RTC is
  *   configured, setup the LSE as the RTC clock source, and enable the RTC.
  *
+ *   For the STM32L15X family, this will also select the LSE as the clock source of
+ *   the LCD.
+ *
  * Input Parameters:
  *   None
  *

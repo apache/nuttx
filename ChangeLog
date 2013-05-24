@@ -4785,3 +4785,9 @@
 	* include/nuttx/fs/ioctl.h, include/nuttx/lcd/slcd_codec.h, and
 	  configs/stm32ldiscovery/src/stm32_lcd.c:  Add SLCD ioctl commands to get
 	  SLCD geometry, set bars, and manage contrast (2013-5-23).
+	* configs/stm32ldiscovery/src/stm32_usb.c:  This file and all references
+	  to USB removed for the STM32L-Discovery.  While the chip supports a
+	  USB device, the board does not (2013-5-24).
+	* arch/arm/src/stm32/stm32_lse.c:  Add support for the STM32L CSR register
+	  and for the LSE LCD clock source (2013-5-24).
+
