@@ -60,6 +60,18 @@ ifeq ($(CONFIG_STM32_LCD),y)
 CSRCS += stm32_lcd.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += up_pwm.c
+endif
+
+ifeq ($(CONFIG_QENCODER),y)
+CSRCS += up_qencoder.c
+endif
+
+ifeq ($(CONFIG_WATCHDOG),y)
+CSRCS += up_watchdog.c
+endif
+
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += stm32_nsh.c
 endif

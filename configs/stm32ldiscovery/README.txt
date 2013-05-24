@@ -743,12 +743,49 @@ Configurations
        for Windows and builds under Cygwin (or probably MSYS).  That
        can easily be reconfigured, of course.
 
-       CONFIG_HOST_WINDOWS=y                   : Builds under Windows
-       CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y                   : Builds under Windows
+         CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
+
+       System Type:
+         CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
     5. To enable SLCD support:
 
-       CONFIG_ARCH_LEDS=y                      : Disable LED support
-       CONFIG_LIB_SLCDCODEC=y                  : Enable the SLCD CODEC
-       CONFIG_STM32_LCD=y                      : Enable the SLCD
+       Board Selection:
+         CONFIG_ARCH_LEDS=y                      : Disable LED support
+
+       Library Routines:
+         CONFIG_LIB_SLCDCODEC=y                  : Enable the SLCD CODEC
+
+       System Type:
+         CONFIG_STM32_LCD=y                      : Enable the SLCD
+
+       When the LCD is enabled and the LEDs are disabled, the USART1
+       serial console will automaticall move to PB6 and PB7 (you will get
+       a compilation error if you forget to disable the LEDs).
+
+       SIGNAL FUNCTION   LED        CONNECTION
+       ------ ---------- ---------- -----------
+        PB6   USART1_TX  LED Blue   P2, pin 8
+        PB7   USART1_RX  LED Green  P2, pin 7
+
+       To enable apps/examples/slcd to test the SLCD:
+
+       Binary Formats:
+         CONFIG_BINFMT_DISABLE=n                 : Don't disable binary support
+         CONFIG_BUILTIN=y                        : Enable support for built-in binaries
+
+       Application Configuration:
+         CONFIG_NSH_BUILTIN_APPS=y               : Enable builtin apps in NSH
+         CONFIG_NSH_ARCHINIT=y                   : Needed to initialize the SLCD
+         CONFIG_EXAMPLES_SLCD=y                  : Enable apps/examples/slcd
+
+       To enable LCD debug output:
+
+       Device Drivers:
+         CONFIG_LCD=y                            : (Needed to enable LCD debug)
+
+       Build Setup:
+         CONFIG_DEBUG=y                          : Enable debug features
+         CONFIG_DEBUG_VERBOSE=y                  : Enable LCD debug
