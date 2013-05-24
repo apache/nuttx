@@ -841,7 +841,7 @@ static void slcd_writech(uint8_t ch, uint8_t curpos, uint8_t options)
     {
       segset |= 0x0002;
     }
-  else if ((options & SCLD_DP) != 0)
+  else if ((options & SCLD_COLON) != 0)
     {
       segset |= 0x0020;
     }
