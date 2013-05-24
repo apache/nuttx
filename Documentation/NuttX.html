@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: May 22, 2013</p>
+      <p>Last Updated: May 24, 2013</p>
     </td>
   </tr>
 </table>
@@ -2245,9 +2245,9 @@ nsh>
       <p>
         <b>STATUS</b>.
         Initial support for the STM32L-Discovery was released in NuttX-6.28.
-        This initial support is very minimal:
-        There is a configuration using the NuttShell (<a href="NuttShell.html">NSH</a>) that might be the basis for an application development.
-        As of this writing, a few more things are needed to make this a more complete port:  1) Verfication of more device drivers, and 2) logic that actually uses the low-power consumption modes of the EnergyLite part.
+        This initial support includes a configuration using the NuttShell (<a href="NuttShell.html">NSH</a>) that might be the basis for an application development.
+        A driver for the on-board segment LCD is included as well as an option to drive the segment LCD from an NSH &quot;built-in&quot; command.
+        As of this writing, a few more things are needed to make this a more complete port:  1) Verfication of more device drivers (timers, quadrature encoders, PWM, etc.), and 2) logic that actually uses the low-power consumption modes of the EnergyLite part.
       </p>
       <p>
         <b>Memory Usage</b>.
