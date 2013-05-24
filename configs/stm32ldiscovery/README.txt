@@ -789,3 +789,9 @@ Configurations
        Build Setup:
          CONFIG_DEBUG=y                          : Enable debug features
          CONFIG_DEBUG_VERBOSE=y                  : Enable LCD debug
+
+       NOTE:  At this point in time, testing of the SLCD is very limited because
+       there is not much in apps/examples/slcd.  Certainly there are more bugs
+       to be found.  There are also many segment-encoded glyphs in stm32_lcd.c
+       But there is a basically functional driver with a working test setup
+       that can be extended if you want a fully functional SLCD driver.

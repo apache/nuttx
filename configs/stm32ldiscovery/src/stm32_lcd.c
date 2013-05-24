@@ -127,19 +127,20 @@
 
 /* An ASCII character may need to be decorated with a colon or decimal point */
 
-#define SCLD_DP               0x01
-#define SCLD_COLON            0x02
+#define SLCD_DP               0x01
+#define SLCD_COLON            0x02
+#define SLCD_NBARS            4
 
 /* Macros used for set/reset the LCD bar */
 
-#define SCLD_BAR0_ON          g_slcdstate.bar[1] |= 8
-#define SCLD_BAR0_OFF         g_slcdstate.bar[1] &= ~8
-#define SCLD_BAR1_ON          g_slcdstate.bar[0] |= 8
-#define SCLD_BAR1_OFF         g_slcdstate.bar[0] &= ~8
-#define SCLD_BAR2_ON          g_slcdstate.bar[1] |= 2
-#define SCLD_BAR2_OFF         g_slcdstate.bar[1] &= ~2
-#define SCLD_BAR3_ON          g_slcdstate.bar[0] |= 2
-#define SCLD_BAR3_OFF         g_slcdstate.bar[0] &= ~2
+#define SLCD_BAR0_ON          g_slcdstate.bar[1] |= 8
+#define SLCD_BAR0_OFF         g_slcdstate.bar[1] &= ~8
+#define SLCD_BAR1_ON          g_slcdstate.bar[0] |= 8
+#define SLCD_BAR1_OFF         g_slcdstate.bar[0] &= ~8
+#define SLCD_BAR2_ON          g_slcdstate.bar[1] |= 2
+#define SLCD_BAR2_OFF         g_slcdstate.bar[1] &= ~2
+#define SLCD_BAR3_ON          g_slcdstate.bar[0] |= 2
+#define SLCD_BAR3_OFF         g_slcdstate.bar[0] &= ~2
 
 /* These definitions support the logic of slcd_writemem()
  *
@@ -177,9 +178,9 @@
 /* SLCD_CHAR1_MASK  COM0-3 0xcffffffc ..11 .... .... .... .... .... .... ..11 */
 
 #define SLCD_CHAR1_MASK0      0xcffffffc
-#define SLCD_CHAR1_MASK1      SLCD_CHAR3_MASK0
-#define SLCD_CHAR1_MASK2      SLCD_CHAR3_MASK0
-#define SLCD_CHAR1_MASK3      SLCD_CHAR3_MASK0
+#define SLCD_CHAR1_MASK1      SLCD_CHAR1_MASK0
+#define SLCD_CHAR1_MASK2      SLCD_CHAR1_MASK0
+#define SLCD_CHAR1_MASK3      SLCD_CHAR1_MASK0
 #define SLCD_CHAR1_UPDATE0(s) (((uint32_t)(s) & 0x0c) << 26) | \
                               ((uint32_t)(s) & 0x03)
 #define SLCD_CHAR1_UPDATE1(s) SLCD_CHAR1_UPDATE0(s)
@@ -464,7 +465,7 @@ static void slcd_dumpslcd(FAR const char *msg)
   lcdvdbg("  CR: %08x FCR: %08x SR: %08x CLR: %08x:\n",
           getreg32(STM32_LCD_CR), getreg32(STM32_LCD_FCR),
           getreg32(STM32_LCD_SR), getreg32(STM32_LCD_CLR));
-  lcdvdbg("  RAM0L: %08x RAM0L: %08x RAM0L: %08x RAM0L: %08x\n",
+  lcdvdbg("  RAM0L: %08x RAM1L: %08x RAM2L: %08x RAM3L: %08x\n",
           getreg32(STM32_LCD_RAM0L), getreg32(STM32_LCD_RAM1L),
           getreg32(STM32_LCD_RAM2L), getreg32(STM32_LCD_RAM3L));
 }
@@ -648,7 +649,7 @@ static inline uint16_t slcd_mapch(uint8_t ch)
 
   else if (ch < ASCII_LBRACKET)
     {
-      return g_slcdnummap[(int)ch - ASCII_A];
+      return g_slcdalphamap[(int)ch - ASCII_A];
     }
 
   /* Handle the next block of puncutation */
@@ -662,7 +663,7 @@ static inline uint16_t slcd_mapch(uint8_t ch)
 
   else if (ch < ASCII_LBRACE)
     {
-      return g_slcdnummap[(int)ch - ASCII_a];
+      return g_slcdalphamap[(int)ch - ASCII_a];
     }
 
   /* Handle the final block of puncutation */
@@ -837,11 +838,11 @@ static void slcd_writech(uint8_t ch, uint8_t curpos, uint8_t options)
 
   /* Check if the character should be decorated with a decimal point or colon */
 
-  if ((options & SCLD_DP) != 0)
+  if ((options & SLCD_DP) != 0)
     {
       segset |= 0x0002;
     }
-  else if ((options & SCLD_COLON) != 0)
+  else if ((options & SLCD_COLON) != 0)
     {
       segset |= 0x0020;
     }
@@ -1050,12 +1051,12 @@ static ssize_t slcd_read(FAR struct file *filp, FAR char *buffer, size_t len)
 
       if (ret < len && g_slcdstate.buffer[i] != 0)
         {
-          if ((g_slcdstate.buffer[i] & SCLD_DP) != 0)
+          if ((g_slcdstate.buffer[i] & SLCD_DP) != 0)
             {
               *buffer++ = '.';
               ret++;
             }
-          else if ((g_slcdstate.buffer[i] & SCLD_COLON) != 0)
+          else if ((g_slcdstate.buffer[i] & SLCD_COLON) != 0)
             {
               *buffer++ = ':';
               ret++;
@@ -1145,7 +1146,7 @@ static ssize_t slcd_write(FAR struct file *filp,
             {
               /* Write the previous character with the decimal point appended */
 
-              slcd_appendch(prev, SCLD_DP);
+              slcd_appendch(prev, SLCD_DP);
               prev = ' ';
               valid = false;
             }
@@ -1153,7 +1154,7 @@ static ssize_t slcd_write(FAR struct file *filp,
             {
               /* Write the previous character with the colon appended */
 
-              slcd_appendch(prev, SCLD_COLON);
+              slcd_appendch(prev, SLCD_COLON);
               prev = ' ';
               valid = false;
             }
@@ -1228,6 +1229,7 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
 
           geo->nrows    = SLCD_NROWS;
           geo->ncolumns = SLCD_NCHARS;
+          geo->nbars    = SLCD_NBARS;
         }
         break;
 
@@ -1247,22 +1249,22 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
 
           if ((arg & 1) != 0)
             {
-              SCLD_BAR0_ON;
+              SLCD_BAR0_ON;
             }
 
           if ((arg & 2) != 0)
             {
-              SCLD_BAR1_ON;
+              SLCD_BAR1_ON;
             }
 
           if ((arg & 4) != 0)
             {
-              SCLD_BAR2_ON;
+              SLCD_BAR2_ON;
             }
 
           if ((arg & 8) != 0)
             {
-              SCLD_BAR3_ON;
+              SLCD_BAR3_ON;
             }
 
           /* Write the bar to SLCD memory */
