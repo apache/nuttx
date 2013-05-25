@@ -745,7 +745,19 @@ Configurations
 
     configure.bat STM32L-Discovery\<subdir>
 
-  Where <subdir> is one of the following:
+  Where <subdir> is one of the following sub-directories.
+
+  NOTE:  These configurations use the mconf-based configuration tool.  To
+  change any of these configurations using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       and misc/tools/
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+Configuration sub-directories
+-----------------------------
 
   nsh:
   ---
@@ -753,25 +765,16 @@ Configurations
 
     NOTES:
 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. The serial console is on UART1 and NuttX LED support is enabled.
+    1. The serial console is on UART1 and NuttX LED support is enabled.
        Therefore, you will need an external RS232 driver or TTL serial-to-
        USB converter.  The UART1 TX and RX pins should be available on
        PA9 and PA10, respectively.
 
        The serial console is configured for 57600 8N1 by default.
 
-    3. Support for NSH built-in applications is *not* enabled.
+    2. Support for NSH built-in applications is *not* enabled.
 
-    4. By default, this configuration uses the CodeSourcery toolchain
+    3. By default, this configuration uses the CodeSourcery toolchain
        for Windows and builds under Cygwin (or probably MSYS).  That
        can easily be reconfigured, of course.
 
@@ -782,7 +785,7 @@ Configurations
        System Type:
          CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
-    5. To enable SLCD support:
+    4. To enable SLCD support:
 
        Board Selection:
          CONFIG_ARCH_LEDS=y                      : Disable LED support

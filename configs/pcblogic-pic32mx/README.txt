@@ -1,10 +1,10 @@
 configs/pic32mx README
 =====================
 
-This README file discusses the port of NuttX to the PIC32MX board from
-PCB Logic Design Co.  This board features the MicroChip PIC32MX460F512L.
-The board is a very simple -- little more than a carrier for the PIC32
-MCU plus voltage regulation, debug interface, and an OTG connector.
+  This README file discusses the port of NuttX to the PIC32MX board from
+  PCB Logic Design Co.  This board features the MicroChip PIC32MX460F512L.
+  The board is a very simple -- little more than a carrier for the PIC32
+  MCU plus voltage regulation, debug interface, and an OTG connector.
 
 Contents
 ========
@@ -13,6 +13,7 @@ Contents
   MAX3232 Connection
   Toolchains
   Loading NuttX with PICkit2
+  LCD1602
   PIC32MX Configuration Options
   Configurations
 
@@ -324,6 +325,35 @@ Loading NuttX with PICkit2
       mkpichex $PWD    # Convert addresses in nuttx.hex.  $PWD is the path
                        # to the top-level build directory.  It is the only
                        # required input to mkpichex.
+LCD1602
+=======
+  The LCD1602 is an HD4478OU-based LCD from Wave share.  The function
+  up_lcd1602_initialize() initializes the LCD1602 hardware and registers the
+  SLCD character driver as /dev/lcd1602.  See include/nuttx/lcd/hd4478ou.h
+
+  LCD pin mapping:
+
+    ----------------------------------- ---------- ----------------------------------
+    PIC32                               LCD1602    PCBLogic PIN
+    PIN  SIGNAL NAME                    PIN NAME(s)
+    ----------------------------------- ---------- ----------------------------------
+                                        1.  Vss    --> Powerpoint GND
+                                        2.  Vdd    --> Powerpoint USB+5V
+                                        3.  Vee    N/C To ground via 10K potentiometer
+      4  AN15/OCFB/PMALL/PMA0/CN12/RB15 4.  RS       4 PMA0, Selects registers
+     82  PMRD/CN14/RD5                  5.  RW      82 PMRD/PMWR, Selects read or write
+     81  OC5/PMWR/CN13/RD4              6.  E       81 PMENB, Starts data read/write
+     93  PMD0/RE0                       7.  D0      93 PMD0
+     94  PMD1/RE1                       8.  D1      94 PMD1
+     98  PMD2/RE2                       9.  D2      98 PMD2
+     99  PMD3/RE3                       10. D3      99 PMD3
+    100  PMD4/RE4                       11. D4     100 PMD4
+      3  PMD5/RE5                       12. D5       3 PMD5
+      4  PMD6/RE6                       13. D6       4 PMD6
+      5  PMD7/RE7                       14. D7       5 PMD7
+                                        15. A      N/C To Vcc (5V) via 10K potentiometer
+                                        16. K      --> Powerpoint GND
+    ----------------------------------- ---------- ----------------------------------
 
 PIC32MX Configuration Options
 =============================
@@ -524,20 +554,126 @@ PIC32MX Configuration Options
 Configurations
 ==============
 
-Each PIC32MX configuration is maintained in a sub-directory and can be
-selected as follow:
+  Each PIC32MX configuration is maintained in a sub-directory and can be
+  selected as follow:
 
     cd tools
     ./configure.sh pcblogic-pic32mx/<subdir>
     cd -
     . ./setenv.sh
 
-Where <subdir> is one of the following:
+  Where <subdir> is one of the following sub-directories.
+
+  NOTE:  These configurations use the mconf-based configuration tool.  To
+  change any of these configurations using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       and misc/tools/
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+Configuration sub-directories
+-----------------------------
 
   ostest:
     This configuration directory, performs a simple OS test using
     apps/examples/ostest.
 
+    NOTES:
+
+    1. The serial console is on UART1.  Therefore, you will need an external
+       RS232 driver or TTL serial-to-USB converter.  The UART1 TX and RX
+       pins are available on:
+
+           TX  -- Pin 53: U1TX/RF8
+           RX  -- Pin 52: U1RX/RF2
+
+       Power for the converter is available from the power point connector:
+
+          GND -- POWER POINT: GND
+          Vcc -- POWER POINT: Vdd (3.3V) -- Or P32_VBUS (+5V)
+                 Or +5V from a USB PC port.
+
+       The serial console is configured for 115200 8N1 by default.
+
+    2. By default, this configuration uses an older Microchip C32 toolchain
+       for Windows (the newer ones seem to be incompatible) and builds under
+       Cygwin (or probably MSYS).  That
+       can easily be reconfigured, of course.
+
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y                     : Builds under Windows
+         CONFIG_WINDOWS_CYGWIN=y                   : Using Cygwin
+
+       System Type:
+         CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE=y : Older C32 toolchain
+
   nsh:
     This configuration directory holds configuration files tht can
     be used to support the NuttShell (NSH).
+
+    NOTES:
+
+    1. The serial console is on UART1.  Therefore, you will need an external
+       RS232 driver or TTL serial-to-USB converter.  The UART1 TX and RX
+       pins are available on:
+
+           TX  -- Pin 53: U1TX/RF8
+           RX  -- Pin 52: U1RX/RF2
+
+       Power for the converter is available from the power point connector:
+
+          GND -- POWER POINT: GND
+          Vcc -- POWER POINT: Vdd (3.3V) -- Or P32_VBUS (+5V)
+                 Or +5V from a USB PC port.
+
+       The serial console is configured for 115200 8N1 by default.
+
+    2. Support for NSH built-in applications is enabled.
+
+    3. By default, this configuration uses an older Microchip C32 toolchain
+       for Windows (the newer ones seem to be incompatible) and builds under
+       Cygwin (or probably MSYS).  That
+       can easily be reconfigured, of course.
+
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y                     : Builds under Windows
+         CONFIG_WINDOWS_CYGWIN=y                   : Using Cygwin
+
+       System Type:
+         CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE=y : Older C32 toolchain
+
+    4. To enable LCD1602 support:
+
+       Device Drivers:
+         CONFIG_LCD=y                            : Enable LCD menus
+         CONFIG_LCD_LCD1602=y                    : Select LCD1602
+
+       Library Routines:
+         CONFIG_LIB_SLCDCODEC=y                  : Enable the SLCD CODEC
+
+       System Type -> PIC32MX Peripheral Support:
+         CONFIG_PIC32MX_PMP=y                    : Enable PMP support
+
+       To enable apps/examples/slcd to test the LCD:
+
+       Application Configuration:
+         CONFIG_NSH_ARCHINIT=y                   : Needed to initialize the SLCD
+         CONFIG_EXAMPLES_SLCD=y                  : Enable apps/examples/slcd use /dev/lcd1602
+         CONFIG_EXAMPLES_SLCD_DEVNAME="/dev/lcd1602"
+
+       To enable LCD debug output:
+
+       Device Drivers:
+         CONFIG_LCD=y                            : (Needed to enable LCD debug)
+
+       Build Setup:
+         CONFIG_DEBUG=y                          : Enable debug features
+         CONFIG_DEBUG_VERBOSE=y                  : Enable LCD debug
+
+       NOTE:  At this point in time, testing of the SLCD is very limited because
+       there is not much in apps/examples/slcd.  Certainly there are more bugs
+       to be found.  There are also many segment-encoded glyphs in stm32_lcd.c
+       But there is a basically functional driver with a working test setup
+       that can be extended if you want a fully functional SLCD driver.

@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/pcblogic-pic32mx/src/pcblogic-internal.h
+ * config/pcblocic-pic32mx/src/pic32mx_nsh.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,69 +33,66 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_PCBLOGIC_PIC32MX_SRC_PCBLOGIC_INTERNAL_H
-#define __CONFIGS_PCBLOGIC_PIC32MX_SRC_PCBLOGIC_INTERNAL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <debug.h>
+
+#include <nuttx/lcd/hd4478ou.h>
+#include <arch/board/board.h>
+
+#include "pcblogic-pic32mx.h"
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
 /* Configuration ************************************************************/
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#ifndef OK
+#  define OK 0
+#endif
 
-#ifndef __ASSEMBLY__
+/* Debug ********************************************************************/
 
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_DEBUG
+#    define message(...) lowsyslog(__VA_ARGS__)
+#  else
+#    define message(...) printf(__VA_ARGS__)
+#  endif
 #else
-#define EXTERN extern
+#  ifdef CONFIG_DEBUG
+#    define message lowsyslog
+#  else
+#    define message printf
+#  endif
 #endif
 
-/************************************************************************************
- * Name: pic32mx_spiinitialize
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nsh_archinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the PCB Logic board.
+ *   Perform architecture specific initialization
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-#if defined(CONFIG_PIC32MX_SPI1) || defined(CONFIG_PIC32MX_SPI2)
-EXTERN void weak_function pic32mx_spiinitialize(void);
+int nsh_archinitialize(void)
+{
+  int ret = OK;
+
+  /* Initialize the LCD1602 and register the device as /dev/lcd1602 */
+
+#ifdef CONFIG_LCD_LCD1602
+  ret = up_lcd1602_initialize();
 #endif
 
-/************************************************************************************
- * Name: pic32mx_ledinit
- *
- * Description:
- *   Configure on-board LEDs if LED support has been selected.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_LEDS
-EXTERN void pic32mx_ledinit(void);
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
+  return ret;
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_PCBLOGIC_PIC32MX_SRC_PCBLOGIC_INTERNAL_H */
