@@ -3,6 +3,8 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+comment "Common LCD Settings"
+
 config LCD_NOGETRUN
 	bool "Write-only LCD"
 	default n
@@ -35,6 +37,8 @@ config LCD_MAXPOWER
 		control is managed outside of the 6100 driver so this value has no
 		meaning to the driver.  Board-specific logic may place restrictions on
 		this value.
+
+comment "Graphic LCD Devices"
 
 config LCD_P14201
 	bool "Rit P1402 series display"
@@ -89,7 +93,9 @@ config LCD_NOKIA6100
 		nokia6100.c.  Supports the Nokia 6100 display with either the Philips
 		PCF883 or the Epson S1D15G10 display controller.  This LCD is used
 		with the Olimex LPC1766-STK (but has not been fully integrated).
+
 if LCD_NOKIA6100
+
 config NOKIA6100_NINTERFACES
 	int "Number of physical NOKIA6100 devices"
 	default 1
@@ -101,6 +107,7 @@ config NOKIA6100_NINTERFACES
 choice NOKIA6100_CONTROLLER
 	prompt "Controller Setup"
 	default NOKIA6100_S1D15G10
+
 config NOKIA6100_S1D15G10
 	bool "S1D15G10 controller"
 	---help---
@@ -110,6 +117,7 @@ config NOKIA6100_PCF8833
 	bool "PCF8833 controller"
 	---help---
 		Selects the Phillips PCF8833 display controller
+
 endchoice
 
 config NOKIA6100_SPIMODE
@@ -392,3 +400,16 @@ config LCD_RLANDSCAPE
 		tall (LCD_LANDSCAPE is the other).
 
 endchoice
+
+comment "Alphanumeric/Segment LCD Devices"
+
+config LCD_LCD1602
+	bool "LCD 1602"
+	default n
+	---help---
+		Enable support for LCD1602 devices.  LCD1602 is based on the Hitachi
+		HD44780U LCD controller.  See also include/nuttx/lcd/hd4478ou.h.
+
+		NOTE:  There is no common implementation of the LCD1602 driver.
+		Rather, there are board-by-board implementations.  See, for example,
+		configs/pcblogic-pic32mx/src/up_lcd1602.c.

@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/pcblogic-pic32mx/src/up_boot.c
- * arch/mips/src/board/up_boot.c
+ * configs/pcblogic-pic32mx/src/pic32mx_boot.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +47,7 @@
 #include "up_internal.h"
 
 #include "pic32mx-internal.h"
-#include "pcblogic-internal.h"
+#include "pcblogic-pic32mx.h"
 
 /************************************************************************************
  * Definitions

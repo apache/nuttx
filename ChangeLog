@@ -4793,4 +4793,7 @@
 	* The STM32L-Discovery segment LCD is now functional and the README file
 	  includes instructions for adding the apps/examples/slcd segment LCD
 	  test as an NSH "built-in" command (2013-5-24).
-
+	* configs/pcblogic-pic32mx:  Converted all configurations to use the
+	  kconfig-frontends tool (2013-5-25).
+	* configs/pcblogic-pic32mx/src:  Renamed files using pic32mx_ vs up_
+	  prefix.  Enable building of LCD1602 LCD (2013-5-25).

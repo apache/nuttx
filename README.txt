@@ -1137,7 +1137,7 @@ nuttx
  |   |   `- README.txt
  |   |- stm32f4discovery/
  |   |   `- README.txt
- |   |- stm32f1discovery/
+ |   |- stm32ldiscovery/
  |   |   `- README.txt
  |   |- sure-pic32mx/
  |   |   `- README.txt

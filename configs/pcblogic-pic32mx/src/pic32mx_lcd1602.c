@@ -1,8 +1,8 @@
 /****************************************************************************
- * configs/pcblocic-pic32mx/src/up_lcd1602.c
+ * configs/pcblocic-pic32mx/src/pic32mx_lcd1602.c
  *
- * This logic supports the connection of an LCD1602 LCD to the
- * STM32F4Discovery board.  The LCD1602 is based on the Hitachi HD44780U LCD
+ * This logic supports the connection of an LCD1602 LCD to the PCB Logic
+ * PIC32MX board.  The LCD1602 is based on the Hitachi HD44780U LCD
  * controller
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -76,6 +76,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/lcd/hd4478ou.h>
 
@@ -83,7 +84,7 @@
 #include "pic32mx-pmp.h"
 #include "pic32mx-int.h"
 #include "pic32mx-internal.h"
-#include "pcblogic-internal.h"
+#include "pcblogic-pic32mx.h"
 
 #ifdef CONFIG_LCD_LCD1602
 
@@ -129,7 +130,7 @@
  * Private Type Definition
  ****************************************************************************/
 
-struct lpc1620_s
+struct lcd1602_2
 {
   bool initialized; /* True: Completed initialization sequence */
 };
@@ -149,9 +150,9 @@ static int     lcd_poll(FAR struct file *filp, FAR struct pollfd *fds,
  * Private Data
  ****************************************************************************/
 
-/* This is the driver state structure (there is no retained state information) */
+/* Character driver operations */
 
-static const struct file_operations g_lcd1602 =
+static const struct file_operations g_lcdops =
 {
   0,             /* open */
   0,             /* close */
@@ -163,6 +164,10 @@ static const struct file_operations g_lcd1602 =
   , lcd_poll     /* poll */
 #endif
 };
+
+/* This is the driver state structure */
+
+static struct lcd1602_2 g_lcd1602;
 
 /****************************************************************************
  * Private Functions
@@ -288,7 +293,8 @@ static int lcd_poll(FAR struct file *filp, FAR struct pollfd *fds,
  * Name:  up_lcd1602_initialize
  *
  * Description:
- *   Initialize the LCD1602 hardware and register the character driver.
+ *   Initialize the LCD1602 hardware and register the character driver as
+ *   /dev/lcd1602.  Prototype is in include/nuttx/lcd/hd4478ou.h.
  *
  ****************************************************************************/
 
@@ -364,7 +370,7 @@ int up_lcd1602_initialize(void)
 
       /* Register the LCD device driver */
 
-      ret = register_driver("/dev/lcd1602", &g_lcd1602, 0644, &g_lcd1602);
+      ret = register_driver("/dev/lcd1602", &g_lcdops, 0644, &g_lcd1602);
       g_lcd1602.initialized = true;
     }
 

@@ -110,7 +110,11 @@ Re-usable LCD drivers reside in the drivers/lcd directory:
   st7567.c.  LCD Display Module, ST7567, Univision Technology Inc. Used
     with the LPCXpresso and Embedded Artists base board.
 
-  ug-9664hswag01.c.  OLED Display Module, UG-9664HSWAG01", Univision
+  ug-2864ambag01.c.  OLED Display Module, UUG-2864AMBAG01, Univision
+    Technology Inc.  See configs/stm32f4discovery and configs/zp214xp
+    for example usage.
+
+  ug-9664hswag01.c.  OLED Display Module, UG-9664HSWAG01, Univision
     Technology Inc.  Used with the LPC Xpresso and Embedded Artists
     base board.
 
@@ -184,10 +188,20 @@ that makes then less re-usable:
     configs/stm32f4discovery/src/up_ug2864hsweg01.c
     configs/zp214xpa/src/up_ug2864ambag01.c
 
-  Alphnumeric LCD Displays:
+  LCD controllers built-into the MCU:
+
+    arch/arm/src/lpc17xx/lpc17_lcd.c and configs/open1788/src/lpc17_lcd.c.
+      RGB LCD display panel.
+    configs/stm32ldiscovery/src/stm32_lcd.c.  1x6 segment LCD with bars
+      using the segment LCD controller built-into the STM32L15X.
+
+  Alphnumeric/segment LCD Displays:
 
     configs/skp16c26/src/up_lcd.c.  Untested alphanumeric LCD driver.
-    configs/pcblogic-pic32/src/up_lcd1602.c
+    configs/pcblogic-pic32mx/src/up_lcd1602.c. LCD1602 is based on the
+      Hitachi HD44780U LCD controller.  See also include/nuttx/lcd/hd4478ou.h.
+    configs/stm32ldiscovery/src/stm32_lcd.c.  1x6 segment LCD with bars
+      using the segment LCD controller built-into the STM32L15X.
 
 graphics/
 =========

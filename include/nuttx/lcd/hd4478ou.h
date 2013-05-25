@@ -104,8 +104,11 @@ extern "C"
  * Name:  up_lcd1602_initialize
  *
  * Description:
- *   the LCD1602 is an HD4478OU-based LCD from Wave share.  This function initializes the
+ *   The LCD1602 is an HD4478OU-based LCD from Wave share.  This function initializes the
  *   LCD1602 hardware and registers the character driver as /dev/lcd1602.
+ *
+ *  NOTE:  This common interface definition is provided, however, the underlying
+ *  implemenataton is always board-specific for this LCD.
  *
  ********************************************************************************************/
 
