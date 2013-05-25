@@ -79,6 +79,19 @@
 
 #define HD4478OU_BUSY(bf,ac)      ((bf) << 7 | (ac))
 
+/* DDRAM Addressing.
+ *
+ * Internally, the HD44780U supports a display size of up to 2x40 addressed
+ * as follows:
+ *
+ * Column  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 ... 39
+ * Row 0  00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f ... 27
+ * Ro1 1  40 41 42 43 44 45 46 47 48 49 4a 4b 4c 4d 4e 4f ... 67
+ */
+
+#define HD4478OU_DDRAM_ROW0       0x00
+#define HD4478OU_DDRAM_ROW1       0x40
+
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/

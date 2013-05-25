@@ -71,14 +71,18 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <semaphore.h>
 #include <poll.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/ascii.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/lcd/hd4478ou.h>
+#include <nuttx/lcd/slcd_ioctl.h>
+#include <nuttx/lcd/slcd_codec.h>
 
 #include "up_arch.h"
 #include "pic32mx-pmp.h"
@@ -116,6 +120,13 @@
 
 #define GPIO_LCD_RS   (GPIO_OUTPUT|GPIO_VALUE_ZERO|GPIO_PORTB|GPIO_PIN15)
 
+/* LCD **********************************************************************/
+
+
+#define LCD_NROWS        2
+#define LCD_NCOLUMNS     16
+#define LCD_NCHARS       (LCD_NROWS * LCD_NCOLUMNS)
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
@@ -130,20 +141,53 @@
  * Private Type Definition
  ****************************************************************************/
 
+/* SLCD incoming stream structure */
+
+struct lcd_instream_s
+{
+  struct lib_instream_s stream;
+  FAR const char *buffer;
+  ssize_t nbytes;
+};
+
+/* Global LCD state */
+
 struct lcd1602_2
 {
   bool initialized; /* True: Completed initialization sequence */
+  uint8_t currow;   /* Current row */
+  uint8_t curcol;   /* Current column */
 };
 
 /****************************************************************************
  * Private Function Protototypes
  ****************************************************************************/
+/* Debug */
+
+ #if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+static void lcd_dumpstate(FAR const char *msg);
+#else
+#  define lcd_dumpstate(msg)
+#endif
+
+/* Internal functions */
+
+static int lcd_getstream(FAR struct lib_instream_s *instream);
+static void lcd_wrcommand(uint8_t cmd);
+static void lcd_wrdata(uint8_t data);
+static uint8_t lcd_rddata(void);
+static uint8_t lcd_readch(uint8_t row, uint8_t column);
+static void lcd_writech(uint8_t ch, uint8_t row, uint8_t column);
+static void lcd_appendch(uint8_t ch);
+static void lcd_action(enum slcdcode_e code, uint8_t count);
+
+/* Character driver operations */
 
 static ssize_t lcd_read(FAR struct file *, FAR char *, size_t);
 static ssize_t lcd_write(FAR struct file *, FAR const char *, size_t);
+static int lcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int     lcd_poll(FAR struct file *filp, FAR struct pollfd *fds,
-                            bool setup);
+static int lcd_poll(FAR struct file *filp, FAR struct pollfd *fds, bool setup);
 #endif
 
 /****************************************************************************
@@ -159,7 +203,7 @@ static const struct file_operations g_lcdops =
   lcd_read,      /* read */
   lcd_write,     /* write */
   0,             /* seek */
-  0              /* ioctl */
+  lcd_ioctl      /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
   , lcd_poll     /* poll */
 #endif
@@ -172,6 +216,62 @@ static struct lcd1602_2 g_lcd1602;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lcd_dumpstate
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+static void lcd_dumpstate(FAR const char *msg)
+{
+  uint8_t buffer[LCD_NCOLUMNS];
+  uint8_t row;
+  uint8_t column;
+
+  lcdvdbg("%s:\n", msg);
+  lcdvdbg("  currow: %d curcol: %d\n",
+          g_lcd1602.currow, g_lcd1602.curcol);
+
+  for (row = 0, column = 0; row < LCD_NROWS; )
+    {
+      buffer[column] = lcd_readch(row, column);
+      if (++column >= LCD_NCOLUMNS)
+        {
+          lcdvdbg("  %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
+                  buffer[0],  buffer[1],  buffer[2],  buffer[3],
+                  buffer[4],  buffer[5],  buffer[6],  buffer[7],
+                  buffer[8],  buffer[9],  buffer[10], buffer[11],
+                  buffer[12], buffer[13], buffer[14], buffer[15]);
+
+          column = 0;
+          row++;
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: lcd_getstream
+ *
+ * Description:
+ *   Get one character from the keyboard.
+ *
+ ****************************************************************************/
+
+static int lcd_getstream(FAR struct lib_instream_s *instream)
+{
+  FAR struct lcd_instream_s *lcdstream = (FAR struct lcd_instream_s *)instream;
+
+  DEBUGASSERT(lcdstream && lcdstream->buffer);
+  if (lcdstream->nbytes > 0)
+    {
+      lcdstream->nbytes--;
+      lcdstream->stream.nget++;
+      return (int)*lcdstream->buffer++;
+    }
+
+  return EOF;
+}
 
 /****************************************************************************
  * Name: lcd_wrcommand
@@ -231,36 +331,485 @@ static uint8_t lcd_rddata(void)
 }
 
 /****************************************************************************
+ * Name: lcd_readch
+ ****************************************************************************/
+
+static uint8_t lcd_readch(uint8_t row, uint8_t column)
+{
+  uint8_t addr;
+
+  /* Set the cursor position.  Internally, the HD44780U supports a display
+   * size of up to 2x40 addressed as follows:
+   *
+   * Column  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 ... 39
+   * Row 0  00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f ... 27
+   * Ro1 1  40 41 42 43 44 45 46 47 48 49 4a 4b 4c 4d 4e 4f ... 67
+  */
+
+  addr = column;
+  if (row > 0)
+    {
+      addr |= HD4478OU_DDRAM_ROW1;
+    }
+
+  lcd_wrcommand(HD4478OU_DDRAM_AD(addr));
+
+  /* And write the character here */
+
+  return lcd_rddata();
+}
+
+/****************************************************************************
+ * Name: lcd_writech
+ ****************************************************************************/
+
+static void lcd_writech(uint8_t ch, uint8_t row, uint8_t column)
+{
+  uint8_t addr;
+
+  /* Set the cursor position.  Internally, the HD44780U supports a display
+   * size of up to 2x40 addressed as follows:
+   *
+   * Column  0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 ... 39
+   * Row 0  00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f ... 27
+   * Ro1 1  40 41 42 43 44 45 46 47 48 49 4a 4b 4c 4d 4e 4f ... 67
+  */
+
+  addr = column;
+  if (row > 0)
+    {
+      addr |= HD4478OU_DDRAM_ROW1;
+    }
+
+  lcd_wrcommand(HD4478OU_DDRAM_AD(addr));
+
+  /* And write the character here */
+
+  lcd_wrdata(ch);
+}
+
+/****************************************************************************
+ * Name: lcd_appendch
+ ****************************************************************************/
+
+static void lcd_appendch(uint8_t ch)
+{
+  if (g_lcd1602.curcol < LCD_NCOLUMNS)
+    {
+      lcd_writech(ch, g_lcd1602.currow, g_lcd1602.curcol);
+      g_lcd1602.curcol++;
+    }
+}
+
+/****************************************************************************
+ * Name: lcd_action
+ ****************************************************************************/
+
+static void lcd_action(enum slcdcode_e code, uint8_t count)
+{
+  lcdvdbg("Action: %d count: %d\n", code, count);
+  lcd_dumpstate("BEFORE ACTION");
+
+  switch (code)
+    {
+      /* Erasure */
+
+      case SLCDCODE_BACKDEL:         /* Backspace (backward delete) N characters */
+        {
+          /* If we are at the home position, then ignore the action */
+
+          if (g_lcd1602.curcol < 1)
+            {
+              break;
+            }
+
+          /* Otherwise, BACKDEL is like moving the cursor back one then doing a
+           * forward deletion.  Decrement the cursor position and fall through.
+           */
+
+           g_lcd1602.curcol--;
+         }
+
+      case SLCDCODE_FWDDEL:          /* DELete (forward delete) N characters moving text */
+        {
+          uint8_t ch;
+          int i;
+
+          /* Move all characters after the current cursor position left by one */
+
+          for (i = g_lcd1602.curcol + 1; i < LCD_NCOLUMNS - 1; i++)
+            {
+              ch = lcd_readch(g_lcd1602.currow, i);
+              lcd_writech(ch, g_lcd1602.currow, i - 1);
+            }
+
+          /* Erase the last character on the display */
+
+          lcd_writech(' ', g_lcd1602.currow, LCD_NCOLUMNS - 1);
+        }
+        break;
+
+      case SLCDCODE_ERASE:           /* Erase N characters from the cursor position */
+        {
+          int last;
+          int i;
+
+          /* Get the last position to clear and make sure that the last
+           * position is on the SLCD.
+           */
+
+          last = g_lcd1602.curcol + count - 1;
+          if (last >= LCD_NCOLUMNS)
+            {
+              last = LCD_NCOLUMNS - 1;
+            }
+
+          /* Erase N characters after the current cursor position left by one */
+
+          for (i = g_lcd1602.curcol; i < last; i++)
+            {
+              lcd_writech(' ', g_lcd1602.currow, i);
+            }
+        }
+        break;
+
+      case SLCDCODE_CLEAR:           /* Home the cursor and erase the entire display */
+        {
+          /* Clear the display */
+
+          lcd_wrcommand(HD4478OU_CLEAR);
+
+          /* And home the cursor */
+
+          g_lcd1602.currow = 0;
+          g_lcd1602.curcol = 0;
+        }
+        break;
+
+      case SLCDCODE_ERASEEOL:        /* Erase from the cursor position to the end of line */
+        {
+          int i;
+
+          /* Erase characters after the current cursor position to the end of the line */
+
+          for (i = g_lcd1602.curcol; i < LCD_NCOLUMNS; i++)
+            {
+              lcd_writech(' ', g_lcd1602.currow, i);
+            }
+        }
+        break;
+
+      /* Cursor movement */
+
+      case SLCDCODE_HOME:            /* Cursor home */
+        {
+          g_lcd1602.currow = 0;
+          g_lcd1602.curcol = 0;
+        }
+        break;
+
+      case SLCDCODE_END:             /* Cursor end */
+        {
+          g_lcd1602.curcol = LCD_NCOLUMNS - 1;
+        }
+        break;
+
+      case SLCDCODE_LEFT:            /* Cursor left by N characters */
+        {
+          /* Don't permit movement past the beginning of the SLCD */
+
+          if (g_lcd1602.curcol > 0)
+            {
+              g_lcd1602.curcol--;
+            }
+        }
+        break;
+
+      case SLCDCODE_RIGHT:           /* Cursor right by N characters */
+        {
+          /* Don't permit movement past the end of the SLCD */
+
+          if (g_lcd1602.curcol < (LCD_NCOLUMNS - 1))
+            {
+              g_lcd1602.curcol++;
+            }
+        }
+        break;
+
+      case SLCDCODE_UP:              /* Cursor up by N lines */
+        {
+          /* Don't permit movement past the top of the SLCD */
+
+          if (g_lcd1602.currow > 0)
+            {
+              g_lcd1602.currow--;
+            }
+        }
+        break;
+
+      case SLCDCODE_DOWN:            /* Cursor down by N lines */
+        {
+          /* Don't permit movement past the bottom of the SLCD */
+
+          if (g_lcd1602.curcol < (LCD_NCOLUMNS - 1))
+            {
+              g_lcd1602.curcol++;
+            }
+        }
+        break;
+
+      case SLCDCODE_PAGEUP:          /* Cursor up by N pages */
+      case SLCDCODE_PAGEDOWN:        /* Cursor down by N pages */
+        break;                       /* Not supportable on this SLCD */
+
+      /* Blinking */
+
+      case SLCDCODE_BLINKSTART:      /* Start blinking with current cursor position */
+      case SLCDCODE_BLINKEND:        /* End blinking after the current cursor position */
+      case SLCDCODE_BLINKOFF:        /* Turn blinking off */
+        break;                       /* Not implemented */
+
+      /* These are actually unreportable errors */
+
+      default:
+      case SLCDCODE_NORMAL:          /* Not a special keycode */
+        break;
+    }
+
+  lcd_dumpstate("AFTER ACTION");
+}
+
+/****************************************************************************
  * Name: lcd_read
  ****************************************************************************/
 
 static ssize_t lcd_read(FAR struct file *filp, FAR char *buffer, size_t len)
 {
-  int i;
+  uint8_t row;
+  uint8_t column;
+  int nread;
 
-  for (i = 0; i < len; i++)
+  /* Try to read the entire display.  Notice that the seek offset
+   * (filp->f_pos) is ignored.  It probably should be taken into account
+   * and also updated after each read and write.
+   */
+
+  row    = 0;
+  column = 0;
+
+  for (nread = 0; nread < len; nread++)
     {
-     *buffer++ = lcd_rddata();
+      *buffer++ = lcd_readch(row, column);
+      if (++column >= LCD_NCOLUMNS)
+        {
+          column = 0;
+          if (++row >= LCD_NROWS)
+            {
+              break;
+            }
+        }
     }
 
-  return len;
+  return nread;
 }
 
 /****************************************************************************
  * Name: lcd_write
  ****************************************************************************/
 
-static ssize_t lcd_write(FAR struct file *filp, FAR const char *buffer, size_t len)
+static ssize_t lcd_write(FAR struct file *filp,  FAR const char *buffer,
+                         size_t len)
 {
-  int i;
+  struct lcd_instream_s instream;
+  struct slcdstate_s state;
+  enum slcdret_e result;
+  uint8_t ch;
+  uint8_t count;
+  uint8_t prev = ' ';
+  bool valid = false;
 
-  for (i = 0; i < len; i++)
+  /* Initialize the stream for use with the SLCD CODEC */
+
+  instream.stream.get  = lcd_getstream;
+  instream.stream.nget = 0;
+  instream.buffer      = buffer;
+  instream.nbytes      = len;
+
+  /* Prime the pump */
+
+  memset(&state, 0, sizeof(struct slcdstate_s));
+  result = slcd_decode(&instream.stream, &state, &prev, &count);
+
+  lcdvdbg("slcd_decode returned result=%d char=%d count=%d\n",
+           result, prev, count);
+
+  switch (result)
     {
-      uint8_t data = *buffer++;
-      lcd_wrdata(data);
+      case SLCDRET_CHAR:
+        valid = true;
+        break;
+
+      case SLCDRET_SPEC:
+        {
+          lcd_action((enum slcdcode_e)prev, count);
+          prev = ' ';
+        }
+        break;
+
+      case SLCDRET_EOF:
+        return 0;
     }
 
-  return len;
+  /* Now decode and process every byte in the input buffer */
+
+  while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) != SLCDRET_EOF)
+    {
+      lcdvdbg("slcd_decode returned result=%d char=%d count=%d\n",
+              result, ch, count);
+
+      if (result == SLCDRET_CHAR)          /* A normal character was returned */
+        {
+          /* Check for ASCII control characters */
+
+          if (ch < ASCII_SPACE)
+            {
+              /* All are ignored except for backspace and carriage return */
+
+              if (ch == ASCII_BS)
+                {
+                  lcd_action(SLCDCODE_BACKDEL, 1);
+                }
+              else if (ch == ASCII_CR)
+                {
+                  lcd_action(SLCDCODE_HOME, 0);
+                }
+            }
+
+          /* Handle characters decoreated with a period or a colon */
+
+          else if (ch == '.')
+            {
+              /* Write the previous character with the decimal point appended */
+
+              lcd_appendch(prev);
+              prev = ' ';
+              valid = false;
+            }
+          else if (ch == ':')
+            {
+              /* Write the previous character with the colon appended */
+
+              lcd_appendch(prev);
+              prev = ' ';
+              valid = false;
+            }
+
+          /* Handle ASCII_DEL */
+
+          else if (ch == ASCII_DEL)
+            {
+              lcd_action(SLCDCODE_FWDDEL, 1);
+            }
+
+          /* The rest of the 7-bit ASCII characters are fair game */
+
+          else if (ch < 128)
+            {
+              /* Write the previous character if it valid */
+
+              if (valid)
+                {
+                  lcd_appendch(prev);
+                }
+
+              /* There is now a valid output character */
+
+              prev = ch;
+              valid = true;
+            }
+        }
+      else /* (result == SLCDRET_SPEC) */  /* A special SLCD action was returned */
+        {
+          lcd_action((enum slcdcode_e)ch, count);
+        }
+    }
+
+  /* Handle any unfinished output */
+
+  if (valid)
+    {
+      lcd_appendch(prev);
+    }
+
+  /* Assume that the entire input buffer was processed */
+
+  return (ssize_t)len;
+}
+
+/****************************************************************************
+ * Name: lcd_ioctl
+ ****************************************************************************/
+
+static int lcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
+{
+  switch (cmd)
+    {
+
+      /* SLCDIOC_GEOMETRY:  Get the SLCD geometry (rows x characters)
+       *
+       * argument:  Pointer to struct slcd_geometry_s in which values will be
+       *            returned
+       */
+
+      case SLCDIOC_GEOMETRY:
+        {
+          FAR struct slcd_geometry_s *geo = (FAR struct slcd_geometry_s *)((uintptr_t)arg);
+
+          lcdvdbg("SLCDIOC_GEOMETRY: nrows=%d ncolumns=%d\n", LCD_NROWS, LCD_NCOLUMNS);
+
+          if (!geo)
+            {
+              return -EINVAL;
+            }
+
+          geo->nrows    = LCD_NROWS;
+          geo->ncolumns = LCD_NCOLUMNS;
+          geo->nbars    = 0;
+        }
+        break;
+
+      /* SLCDIOC_CURPOS:  Get the SLCD cursor positioni (rows x characters)
+       *
+       * argument:  Pointer to struct slcd_curpos_s in which values will be
+       *            returned
+       */
+
+
+      case SLCDIOC_CURPOS:
+        {
+          FAR struct slcd_curpos_s *curpos = (FAR struct slcd_curpos_s *)((uintptr_t)arg);
+
+          lcdvdbg("SLCDIOC_CURPOS: row=%d column=%d\n", g_lcd1602.currow, g_lcd1602.curcol);
+
+          if (!curpos)
+            {
+              return -EINVAL;
+            }
+
+          curpos->row    = g_lcd1602.currow;
+          curpos->column = g_lcd1602.curcol;
+        }
+        break;
+
+      case SLCDIOC_SETBAR:      /* SLCDIOC_SETBAR: Set bars on a bar display */
+      case SLCDIOC_GETCONTRAST: /* SLCDIOC_GETCONTRAST: Get the current contrast setting */
+      case SLCDIOC_MAXCONTRAST: /* SLCDIOC_MAXCONTRAST: Get the maximum contrast setting */
+      case SLCDIOC_SETCONTRAST: /* SLCDIOC_SETCONTRAST: Set the contrast to a new value */
+      default:
+        return -ENOTTY;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -338,7 +887,7 @@ int up_lcd1602_initialize(void)
        *   Enable PMRD/PMWR, PMENB, and the PMP.
        */
 
-      
+
       regval = (PMP_CON_RDSP | PMP_CON_WRSP | PMP_CON_ALP |
                 PMP_CON_CSF_ADDR1415 | PMP_CON_PTRDEN | PMP_CON_PTWREN |
                 PMP_CON_ADRMUX_NONE | PMP_CON_ON);

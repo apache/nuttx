@@ -59,6 +59,7 @@
 #include <nuttx/ascii.h>
 #include <nuttx/streams.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/lcd/slcd_ioctl.h>
 #include <nuttx/lcd/slcd_codec.h>
 
 #include "up_arch.h"
@@ -313,8 +314,8 @@ static void slcd_writebar(void);
 static inline uint16_t slcd_mapch(uint8_t ch);
 static inline void slcd_writemem(uint16_t segset, int curpos);
 static void slcd_writech(uint8_t ch, uint8_t curpos, uint8_t options);
-static inline void slcd_appendch(uint8_t ch, uint8_t options);
-static inline void slcd_action(enum slcdcode_e code, uint8_t count);
+static void slcd_appendch(uint8_t ch, uint8_t options);
+static void slcd_action(enum slcdcode_e code, uint8_t count);
 
 /* Character driver methods */
 
@@ -999,7 +1000,7 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
 
       case SLCDCODE_RIGHT:           /* Cursor right by N characters */
         {
-          /* Don't permit movement past the lcd of the SLCD */
+          /* Don't permit movement past the end of the SLCD */
 
           if (g_slcdstate.curpos < (SLCD_NCHARS - 1))
             {
@@ -1039,6 +1040,11 @@ static ssize_t slcd_read(FAR struct file *filp, FAR char *buffer, size_t len)
 {
   int ret = 0;
   int i;
+
+  /* Try to read the entire display.  Notice that the seek offset
+   * (filp->f_pos) is ignored.  It probably should be taken into account
+   * and also updated after each read and write.
+   */
 
   for (i = 0; i < SLCD_NCHARS && ret < len; i++)
     {
@@ -1230,6 +1236,29 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
           geo->nrows    = SLCD_NROWS;
           geo->ncolumns = SLCD_NCHARS;
           geo->nbars    = SLCD_NBARS;
+        }
+        break;
+
+      /* SLCDIOC_CURPOS:  Get the SLCD cursor positioni (rows x characters)
+       *
+       * argument:  Pointer to struct slcd_curpos_s in which values will be
+       *            returned
+       */
+
+
+      case SLCDIOC_CURPOS:
+        {
+          FAR struct slcd_curpos_s *curpos = (FAR struct slcd_curpos_s *)((uintptr_t)arg);
+
+          lcdvdbg("SLCDIOC_CURPOS: row=0 column=%d\n", g_slcdstate.curpos);
+
+          if (!curpos)
+            {
+              return -EINVAL;
+            }
+
+          curpos->row    = 0;
+          curpos->column = g_slcdstate.curpos;
         }
         break;
 
@@ -1477,7 +1506,7 @@ int stm32_slcd_initialize(void)
 
       /* Register the LCD device driver */
 
-      ret = register_driver("/dev/slcd", &g_slcdops, 0644, (FAR struct file_operations *)&g_slcdops);
+      ret = register_driver("/dev/slcd", &g_slcdops, 0644, &g_slcdstate);
       g_slcdstate.initialized = true;
 
       /* Then clear the display */

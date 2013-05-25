@@ -788,7 +788,7 @@ Configuration sub-directories
     4. To enable SLCD support:
 
        Board Selection:
-         CONFIG_ARCH_LEDS=y                      : Disable LED support
+         CONFIG_ARCH_LEDS=n                      : Disable LED support
 
        Library Routines:
          CONFIG_LIB_SLCDCODEC=y                  : Enable the SLCD CODEC

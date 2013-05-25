@@ -4797,3 +4797,9 @@
 	  kconfig-frontends tool (2013-5-25).
 	* configs/pcblogic-pic32mx/src:  Renamed files using pic32mx_ vs up_
 	  prefix.  Enable building of LCD1602 LCD (2013-5-25).
+	* configs/pcblogic-pic32mx/src/pic32mx_lcd1602.c: Now uses SLCD CODEC
+	  (2013-5-25)
+	* configs/stm32ldiscovery/src/stm32_lcd.c: Now supports ioctl to get
+	  cursor position (2013-5-25).
+	* include/nuttx/lcd/slcd_ioctl.h:  Moved ioctls commands and structures
+	  from slcd_codec.h (2013-5-25)
