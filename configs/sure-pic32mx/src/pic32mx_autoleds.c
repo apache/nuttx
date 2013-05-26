@@ -1,8 +1,7 @@
 /****************************************************************************
- * configs/sure-pic32mx/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * configs/sure-pic32mx/src/pic32mx_leds.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +51,7 @@
 
 #include "pic32mx-internal.h"
 #include "pic32mx-ioport.h"
-#include "sure-internal.h"
+#include "sure-pic32mx.h"
 
 #ifdef CONFIG_ARCH_LEDS
 

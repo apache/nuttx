@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/sure-pic32mx/src/up_buttons.c
+ * configs/sure-pic32mx/src/pic32mx_buttons.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
 #include "pic32mx-internal.h"
 #include "pic32mx-ioport.h"
 #include "pic32mx-adc.h"
-#include "sure-internal.h"
+#include "sure-pic32mx.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

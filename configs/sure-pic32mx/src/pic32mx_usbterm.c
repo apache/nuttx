@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/sure-pic32mx/src/up_usbterm.c
- * arch/arm/src/board/up_usbterm.c
+ * configs/sure-pic32mx/src/pic32mx_usbterm.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -49,7 +48,7 @@
 #include <nuttx/usb/usbdev.h>
 
 #include "pic32mx-internal.h"
-#include "sure-internal.h"
+#include "sure-pic32mx.h"
 
 #if defined(CONFIG_PIC32MX_USBDEV) && defined(CONFIG_EXAMPLES_USBTERM_DEVINIT)
 

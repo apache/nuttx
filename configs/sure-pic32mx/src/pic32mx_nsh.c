@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/sure-pic32mx/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/sure-pic32mx/src/pic32mx_nsh.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,10 +46,11 @@
 
 #include <nuttx/spi.h>
 #include <nuttx/mmcsd.h>
+#include <nuttx/lcd/hd4478ou.h>
 #include <nuttx/usb/usbhost.h>
 
 #include "pic32mx-internal.h"
-#include "sure-internal.h"
+#include "sure-pic32mx.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -60,27 +60,13 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#ifdef CONFIG_ARCH_BOARD_SUREPIC32MX
-#  define NSH_HAVEMMCSD   1
-#  define NSH_HAVEUSBHOST 1
-#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 2
-#    error "The Sure PIC32MX MMC/SD is on SPI2"
-#    undef CONFIG_NSH_MMCSDSPIPORTNO
-#    define CONFIG_NSH_MMCSDSPIPORTNO 2
-#  endif
-#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "The Sure PIC32MX MMC/SD has only one slot (0)"
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
-#  ifndef CONFIG_PIC32MX_SPI2
-#    warning "CONFIG_PIC32MX_SPI2 is not enabled"
-#    undef NSH_HAVEMMCSD
-#  endif
-#else
-#  error "Unrecognized board"
+#define NSH_HAVEMMCSD   1
+#define NSH_HAVEUSBHOST 1
+
+/* Can't support MMC/SD if SPI2 is not enabled */
+
+#ifndef CONFIG_PIC32MX_SPI2
 #  undef NSH_HAVEMMCSD
-#  undef NSH_HAVEUSBHOST
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
@@ -89,21 +75,37 @@
 #  undef NSH_HAVEMMCSD
 #endif
 
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
+/* MMC/SD configuration */
+
+#ifdef NSH_HAVEMMCSD
+#  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 2
+#    warning "The Sure PIC32MX MMC/SD is on SPI2"
+#    undef CONFIG_NSH_MMCSDSPIPORTNO
+#    define CONFIG_NSH_MMCSDSPIPORTNO 2
+#  endif
+#  if !defined(CONFIG_NSH_MMCSDSLOTNO) || CONFIG_NSH_MMCSDSLOTNO != 0
+#    error "The Sure PIC32MX MMC/SD has only one slot (0)"
+#    warning CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
+#  endif
+#  ifndef CONFIG_NSH_MMCSDMINOR
+#    define CONFIG_NSH_MMCSDMINOR 0
+#  endif
 #endif
 
 /* USB Host */
 
 #ifdef CONFIG_USBHOST
 #  ifndef CONFIG_PIC32MX_USBHOST
-#    error "CONFIG_PIC32MX_USBHOST is not selected"
+#    warning "CONFIG_PIC32MX_USBHOST is not selected"
+#    undef CONFIG_USBHOST
 #  endif
 #endif
 
 #ifdef CONFIG_PIC32MX_USBHOST
 #  ifndef CONFIG_USBHOST
 #    warning "CONFIG_USBHOST is not selected"
+#    undef CONFIG_PIC32MX_USBHOST
 #  endif
 #endif
 
@@ -340,9 +342,18 @@ int nsh_archinitialize(void)
 {
   int ret;
 
-  /* Initialize SPI-based microSD */
+  /* Initialize the LCD1602 and register the device as /dev/lcd1602 */
 
-  ret = nsh_sdinitialize();
+#ifdef CONFIG_LCD_LCD1602
+  ret = up_lcd1602_initialize();
+  if (ret == OK)
+#endif
+    {
+      /* Initialize SPI-based microSD */
+
+      ret = nsh_sdinitialize();
+    }
+
   if (ret == OK)
     {
       /* Initialize USB host */
@@ -356,5 +367,6 @@ int nsh_archinitialize(void)
 
       ret = nsh_usbdevinitialize();
     }
+
   return ret;
 }

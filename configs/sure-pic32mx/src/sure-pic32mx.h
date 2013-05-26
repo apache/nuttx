@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/sure-pic32mx/src/sure-internal.h
+ * configs/sure-pic32mx/src/sure-pic32mx.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_SURE_PIC32MX_SRC_SURE_INTERNAL_H
-#define __CONFIGS_SURE_PIC32MX_SRC_SURE_INTERNAL_H
+#ifndef __CONFIGS_SURE_PIC32MX_SRC_SURE_PIC32MXL_H
+#define __CONFIGS_SURE_PIC32MX_SRC_SURE_PIC32MXL_H
 
 /****************************************************************************
  * Included Files
@@ -86,7 +86,7 @@ extern "C" {
  ************************************************************************************/
 
 #if defined(CONFIG_PIC32MX_SPI2)
-EXTERN void weak_function pic32mx_spiinitialize(void);
+void weak_function pic32mx_spiinitialize(void);
 #endif
 
 /************************************************************************************
@@ -98,7 +98,7 @@ EXTERN void weak_function pic32mx_spiinitialize(void);
  ************************************************************************************/
 
 #if defined(CONFIG_PIC32MX_USBDEV)
-EXTERN void weak_function pic32mx_usbdevinitialize(void);
+void weak_function pic32mx_usbdevinitialize(void);
 #endif
 
 /************************************************************************************
@@ -110,7 +110,7 @@ EXTERN void weak_function pic32mx_usbdevinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-EXTERN void pic32mx_ledinit(void);
+void pic32mx_ledinit(void);
 #endif
 
 #undef EXTERN
@@ -119,4 +119,4 @@ EXTERN void pic32mx_ledinit(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_SURE_PIC32MX_SRC_SURE_INTERNAL_H */
+#endif /* __CONFIGS_SURE_PIC32MX_SRC_SURE_PIC32MXL_H */
