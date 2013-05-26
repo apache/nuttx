@@ -128,13 +128,6 @@ static inline void slcd_put3(uint8_t slcdcode,
 static inline void slcd_put5(uint8_t slcdcode, uint8_t count,
                              FAR struct lib_outstream_s *stream)
 {
-  /* The minimum value of the count argument is one */
-
-  if (count < 1)
-    {
-      count = 1;
-    }
-
   /* Put the 5-byte escape sequences into the output buffer */
 
   stream->put(stream, ASCII_ESC);

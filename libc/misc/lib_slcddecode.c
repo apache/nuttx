@@ -378,14 +378,14 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
 
       /* Verify the special CLCD action code */
 
-      if (code < (int)FIRST_SLCDCODE || code > (int)LAST_SLCDCODE || count < 1)
+      if (code < (int)FIRST_SLCDCODE || code > (int)LAST_SLCDCODE)
         {
           /* Not a special command code. Return the ESC now and the rest
            * of the characters later.
            */
 
-          lcddbg("Parsing failed: ESC-L-%c-%c followed by %02x, count=%d\n",
-                 state->buf[NDX_COUNTH], state->buf[NDX_COUNTL], ch, count);
+          lcddbg("Parsing failed: ESC-L-%c-%c followed by %02x\n",
+                 state->buf[NDX_COUNTH], state->buf[NDX_COUNTL], ch);
 
           return slcd_reget(state, pch, parg);
         }
