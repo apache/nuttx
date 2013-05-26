@@ -4803,3 +4803,5 @@
 	  cursor position (2013-5-25).
 	* include/nuttx/lcd/slcd_ioctl.h:  Moved ioctls commands and structures
 	  from slcd_codec.h (2013-5-25)
+	* libc/misc/lib_slcdencode.c and lib_slcddecode.c:  Several encoding
+	  and decoding bug fixes (2013-5-26)

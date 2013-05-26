@@ -73,6 +73,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <semaphore.h>
+#include <ctype.h>
 #include <poll.h>
 #include <errno.h>
 #include <debug.h>
@@ -121,7 +122,6 @@
 #define GPIO_LCD_RS   (GPIO_OUTPUT|GPIO_VALUE_ZERO|GPIO_PORTB|GPIO_PIN15)
 
 /* LCD **********************************************************************/
-
 
 #define LCD_NROWS        2
 #define LCD_NCOLUMNS     16
@@ -225,8 +225,9 @@ static struct lcd1602_2 g_lcd1602;
 static void lcd_dumpstate(FAR const char *msg)
 {
   uint8_t buffer[LCD_NCOLUMNS];
-  uint8_t row;
-  uint8_t column;
+  uint8_t ch;
+  int row;
+  int column;
 
   lcdvdbg("%s:\n", msg);
   lcdvdbg("  currow: %d curcol: %d\n",
@@ -234,10 +235,11 @@ static void lcd_dumpstate(FAR const char *msg)
 
   for (row = 0, column = 0; row < LCD_NROWS; )
     {
-      buffer[column] = lcd_readch(row, column);
+      ch = lcd_readch(row, column);
+      buffer[column] = isprint(ch) ? ch : '.';
       if (++column >= LCD_NCOLUMNS)
         {
-          lcdvdbg("  %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c\n",
+          lcdvdbg("  [%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c]\n",
                   buffer[0],  buffer[1],  buffer[2],  buffer[3],
                   buffer[4],  buffer[5],  buffer[6],  buffer[7],
                   buffer[8],  buffer[9],  buffer[10], buffer[11],
@@ -551,9 +553,9 @@ static void lcd_action(enum slcdcode_e code, uint8_t count)
         {
           /* Don't permit movement past the bottom of the SLCD */
 
-          if (g_lcd1602.curcol < (LCD_NCOLUMNS - 1))
+          if (g_lcd1602.currow < (LCD_NCOLUMNS - 1))
             {
-              g_lcd1602.curcol++;
+              g_lcd1602.currow++;
             }
         }
         break;

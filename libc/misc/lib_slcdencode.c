@@ -70,7 +70,7 @@ static uint8_t slcd_nibble(uint8_t binary)
 {
   binary &= 0x0f;
 
-  if (binary > 9)
+  if (binary <= 9)
     {
       return '0' + binary;
     }
