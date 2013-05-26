@@ -788,13 +788,13 @@ Configuration sub-directories
     4. To enable SLCD support:
 
        Board Selection:
-         CONFIG_ARCH_LEDS=n                      : Disable LED support
+         CONFIG_ARCH_LEDS=n                      : Disable board LED support
 
        Library Routines:
          CONFIG_LIB_SLCDCODEC=y                  : Enable the SLCD CODEC
 
-       System Type:
-         CONFIG_STM32_LCD=y                      : Enable the SLCD
+       System Type -> STM32 Peripheral Support:
+         CONFIG_STM32_LCD=y                      : Enable the Segment LCD
 
        When the LCD is enabled and the LEDs are disabled, the USART1
        serial console will automaticall move to PB6 and PB7 (you will get
@@ -811,9 +811,11 @@ Configuration sub-directories
          CONFIG_BINFMT_DISABLE=n                 : Don't disable binary support
          CONFIG_BUILTIN=y                        : Enable support for built-in binaries
 
-       Application Configuration:
+       Application Configuration -> NSH Library:
          CONFIG_NSH_BUILTIN_APPS=y               : Enable builtin apps in NSH
          CONFIG_NSH_ARCHINIT=y                   : Needed to initialize the SLCD
+
+       Application Configuration -> Examples:
          CONFIG_EXAMPLES_SLCD=y                  : Enable apps/examples/slcd
 
        To enable LCD debug output:
@@ -821,7 +823,7 @@ Configuration sub-directories
        Device Drivers:
          CONFIG_LCD=y                            : (Needed to enable LCD debug)
 
-       Build Setup:
+       Build Setup -> Debug Options:
          CONFIG_DEBUG=y                          : Enable debug features
          CONFIG_DEBUG_VERBOSE=y                  : Enable LCD debug
 

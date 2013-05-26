@@ -340,7 +340,7 @@ LCD1602
                                         1.  Vss    --> Powerpoint GND
                                         2.  Vdd    --> Powerpoint USB+5V
                                         3.  Vee    N/C To ground via 10K potentiometer
-      4  AN15/OCFB/PMALL/PMA0/CN12/RB15 4.  RS       4 PMA0, Selects registers
+     44  AN15/OCFB/PMALL/PMA0/CN12/RB15 4.  RS       4 PMA0, Selects registers
      82  PMRD/CN14/RD5                  5.  RW      82 PMRD/PMWR, Selects read or write
      81  OC5/PMWR/CN13/RD4              6.  E       81 PMENB, Starts data read/write
      93  PMD0/RE0                       7.  D0      93 PMD0
@@ -669,8 +669,10 @@ Configuration sub-directories
          CONFIG_DEBUG=y                          : Enable debug features
          CONFIG_DEBUG_VERBOSE=y                  : Enable LCD debug
 
-       NOTE:  At this point in time, testing of the SLCD is very limited because
-       there is not much in apps/examples/slcd.  Certainly there are more bugs
-       to be found.  But there is a basically functional driver with a working
-       test setup that can be extended if you want a fully functional LCD1602
-       driver.
+       NOTES:
+       a. I do not have the LCD1602 working.  I may just be getting lost in the
+          tangle of wires or perhaps there is something fundamentally wrong with
+          the code.
+       b. At this point in time, testing of the SLCD is very limited because
+          there is not much in apps/examples/slcd.  Basically  driver with a working
+          test setup and ready to be tested and debugged.
