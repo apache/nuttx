@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/sure-pic32mx/src/up_boot.c
- * arch/mips/src/board/up_boot.c
+ * configs/sure-pic32mx/src/pic32mx_boot.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,7 +47,7 @@
 #include "up_internal.h"
 
 #include "pic32mx-internal.h"
-#include "sure-internal.h"
+#include "sure-pic32mx.h"
 
 /************************************************************************************
  * Definitions

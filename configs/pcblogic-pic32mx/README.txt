@@ -599,8 +599,7 @@ Configuration sub-directories
 
     2. By default, this configuration uses an older Microchip C32 toolchain
        for Windows (the newer ones seem to be incompatible) and builds under
-       Cygwin (or probably MSYS).  That
-       can easily be reconfigured, of course.
+       Cygwin (or probably MSYS).  That can easily be reconfigured, of course.
 
        Build Setup:
          CONFIG_HOST_WINDOWS=y                     : Builds under Windows
@@ -634,8 +633,7 @@ Configuration sub-directories
 
     3. By default, this configuration uses an older Microchip C32 toolchain
        for Windows (the newer ones seem to be incompatible) and builds under
-       Cygwin (or probably MSYS).  That
-       can easily be reconfigured, of course.
+       Cygwin (or probably MSYS).  That can easily be reconfigured, of course.
 
        Build Setup:
          CONFIG_HOST_WINDOWS=y                     : Builds under Windows

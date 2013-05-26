@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/sure-pic32mx/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/sure-pic32mx/src/pic32mx_spi.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +49,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "pic32mx-internal.h"
-#include "sure-internal.h"
+#include "sure-pic32mx.h"
 
 #if defined(CONFIG_PIC32MX_SPI2)
 

@@ -36,6 +36,7 @@ Contents
   PIC32MX440F512H Pin Out
   Toolchains
   Loading NuttX with PICkit2
+  LCD1602
   PIC32MX Configuration Options
   Configurations
 
@@ -391,6 +392,37 @@ Loading NuttX with PICkit2
                        # to the top-level build directory.  It is the only
                        # required input to mkpichex.
 
+LCD1602
+=======
+
+  The on-board LCD is a 2x16 segment LCD and appears to be compatible with
+  the LCD1602 and is like an LCD1602 LCD here.
+
+  LCD pin mapping (see configs/pcblogic-pic32mx/README.txt)
+
+    --------------------- ---------- ----------------------------------
+    PIC32                  Sure JP1   Sure Signal Description
+    PIN  SIGNAL NAME      PIN NAME(s)
+    --------------------- ---------- ----------------------------------
+     34  Vbus             1.  +5V    +5V VBUS device mode
+                                      To GND via capacitor
+                          2.  GND    GND
+     49  RD1              3.  Vo     Transistor circuit driven by PWM2
+     44  PMA0/AN15/RB15   4.  RS     PMA0, Selects registers
+     53  PMRD/RD5         5.  RW     PMRD/PMWR, Selects read or write
+     45  PMPCS1/RD11      6.  E      Starts data read/write
+     60  PMD0/RE0         7.  DB0    PMD0
+     61  PMD1/RE1         8.  DB1    PMD1
+     62  PMD2/RE2         9.  DB2    PMD2
+     63  PMD3/RE3         10. DB3    PMD3
+     64  PMD4/RE4         11. DB4    PMD4
+      1  PMD5/RE5         12. DB5    PMD5
+      2  PMD6/RE6         13. DB6    PMD6
+      3  PMD7/RE7         14. DB7    PMD7
+                          15. A      +5V_DUSB
+     46 INT0/RD0          16. K      Transistor circuit driven by PWM1
+    --------------------- ---------- ----------------------------------
+
 PIC32MX Configuration Options
 =============================
 
@@ -596,13 +628,27 @@ PIC32MX Configuration Options
 Configurations
 ==============
 
-Each PIC32MX configuration is maintained in a sub-directory and can be
-selected as follow:
+  Each PIC32MX configuration is maintained in a sub-directory and can be
+  selected as follow:
 
     cd tools
     ./configure.sh sure-pic32mx/<subdir>
     cd -
     . ./setenv.sh
+
+  Where <subdir> is one of the following sub-directories.
+
+  NOTE:  These configurations use the mconf-based configuration tool.  To
+  change any of these configurations using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       and misc/tools/
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+Configuration sub-directories
+-----------------------------
 
 Where <subdir> is one of the following:
 
@@ -613,6 +659,20 @@ Where <subdir> is one of the following:
     This configuration directory, performs a simple OS test using
     apps/examples/ostest.
 
+    Notes.
+    -----
+    1. By default, this configuration uses an older Microchip C32 toolchain
+       for Windows (the newer ones seem to be incompatible) and builds under
+       Cygwin (or probably MSYS).  That
+       can easily be reconfigured, of course.
+
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y                     : Builds under Windows
+         CONFIG_WINDOWS_CYGWIN=y                   : Using Cygwin
+
+       System Type:
+         CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE=y : Older C32 toolchain
+
   nsh:
   ====
     Description.
@@ -620,54 +680,122 @@ Where <subdir> is one of the following:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables only the serial NSH interface.
 
-    USB Configuations.
-    -----------------
-    Several USB device configurations can be enabled and included
-    as NSH built-in built in functions.  All require the following
-    basic setup in your .config to enable USB device support:
+    Notes.
+    -----
+    1. By default, this configuration uses an older Microchip C32 toolchain
+       for Windows (the newer ones seem to be incompatible) and builds under
+       Cygwin (or probably MSYS).  That can easily be reconfigured, of course.
+
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y    : Builds under Windows
+         CONFIG_WINDOWS_CYGWIN=y  : Using Cygwin
+
+       System Type:
+         CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE=y : Older C32 toolchain
+
+    2. USB Configuations.
+
+      Several USB device configurations can be enabled and included
+      as NSH built-in built in functions.  All require the following
+      basic setup in your .config to enable USB device support:
  
-      CONFIG_USBDEV=y         : Enable basic USB device support
-      CONFIG_PIC32MX_USBDEV=y : Enable PIC32 USB device support
+        Drivers:
+          CONFIG_USBDEV=y           : Enable basic USB device support
 
-    examples/usbterm - This option can be enabled by uncommenting
-    the following line in the appconfig file:
+       System Type -> PIC32MX Peripheral Support:
+          CONFIG_PIC32MX_USBDEV=y   : Enable PIC32 USB device support
 
-      CONFIGURED_APPS += examples/usbterm
+      examples/usbterm - This option can be enabled by uncommenting
+      the following line in the appconfig file:
 
-    And by enabling one of the USB serial devices:
+        Application Configuration->Examples:
+          CONFIG_EXAMPLES_USBTERM=y : Selects /apps/examples/usbterm
 
-      CONFIG_PL2303=y         : Enable the Prolifics PL2303 emulation
-      CONFIG_CDCACM=y         : or the CDC/ACM serial driver (not both)
+      And by enabling one of the USB serial devices:
 
-    examples/cdcacm -  The examples/cdcacm program can be included as an 
-    function by uncommenting the following line in the appconfig file:
+        Drivers->USB Device Driver Support
+          CONFIG_PL2303=y           : Enable the Prolifics PL2303 emulation
+          CONFIG_CDCACM=y           : or the CDC/ACM serial driver (not both)
+
+      examples/cdcacm -  The examples/cdcacm program can be included as an 
+      function by uncommenting the following line in the appconfig file:
     
-      CONFIGURED_APPS += examples/cdcacm
+        Application Configuration->Examples:
+          CONFIG_EXAMPLES_CDCACM=y  : Select apps/examples/cdcacm
 
-    and defining the following in your .config file:
+      and defining the following in your .config file:
 
-      CONFIG_CDCACM=y         : Enable the CDCACM device
+        Drivers->USB Device Driver Support
+          CONFIG_CDCACM=y           : Enable the CDCACM device
 
-    examples/usbstorage - There are some hooks in the appconfig file
-    to enable the USB mass storage device.  However, this device cannot
-    work until support for the SD card is also incorporated.
+      examples/usbstorage - There are some hooks in the appconfig file
+      to enable the USB mass storage class (MSC)device.  However, this device
+      cannot work until support for the SD card is also incorporated.
 
-    SD Card Support.
-    ----------------
-    Support for the on-board, SPI-based SD card is available but is
-    not yet functional (at least at the time of this writing).  SD
-    card support can be enabled for testing by simply enabling SPI2
-    support in the configuration file:
+        Drivers->USB Device Driver Support
+          CONFIG_USBMSC=y           : Enables the USB MSC class
 
-      -CONFIG_PIC32MX_SPI2=n
-      +CONFIG_PIC32MX_SPI2=y
+        Application Configuration->Examples:
+          CONFIG_EXAMPLES_USBSTORAGE=y  : Enhables apps/examples/usbstorage
+
+    3. SD Card Support.
+
+      Support for the on-board, SPI-based SD card is available but is
+      not yet functional (at least at the time of this writing).  SD
+      card support can be enabled for testing by simply enabling SPI2
+      support in the configuration file:
+
+       System Type -> PIC32MX Peripheral Support:
+         CONFIG_PIC32MX_SPI2=y      : Enable SPI2
+
+       Drivers:
+         CONFIG_MMCSD=y             : MMC/SD support
+         CONFIG_MMCSD_SPI=y         : SPI-based MMC/SD support
+
+       File Systems:
+         CONFIG_FS_FAT=y            : FAT file system
+                                  : Other FAT options
 
     Debug output for testing the SD card can be enabled using:
 
-      -CONFIG_DEBUG_FS=n
-      -CONFIG_DEBUG_SPI=n
-      +CONFIG_DEBUG_FS=y
-      +CONFIG_DEBUG_SPI=y
+       Build Setup:
+         CONFIG_DEBUG=y             : Enable debug features
+         CONFIG_DEBUG_VERBOSE=y     : Enable verbose debug output
+         CONFIG_DEBUG_FS=y          : Enable file system debug
+         CONFIG_DEBUG_SPI=y         : Enable SPI debug
+
+    4. To enable LCD1602 support:
+
+       Device Drivers:
+         CONFIG_LCD=y               : Enable LCD menus
+         CONFIG_LCD_LCD1602=y       : Select LCD1602
+
+       Library Routines:
+         CONFIG_LIB_SLCDCODEC=y     : Enable the SLCD CODEC
+
+       System Type -> PIC32MX Peripheral Support:
+         CONFIG_PIC32MX_PMP=y       : Enable PMP support
+
+       To enable apps/examples/slcd to test the LCD:
+
+       Application Configuration:
+         CONFIG_NSH_ARCHINIT=y      : Needed to initialize the SLCD
+         CONFIG_EXAMPLES_SLCD=y     : Enable apps/examples/slcd use /dev/lcd1602
+         CONFIG_EXAMPLES_SLCD_DEVNAME="/dev/lcd1602"
+
+       To enable LCD debug output:
+
+       Build Setup:
+         CONFIG_DEBUG=y             : Enable debug features
+         CONFIG_DEBUG_VERBOSE=y     : Enable LCD debug
+
+       NOTES:
+       a. I do not have the LCD1602 working.  I may just be getting lost in the
+          tangle of wires or perhaps there is something fundamentally wrong with
+          the code.
+       b. At this point in time, testing of the SLCD is very limited because
+          there is not much in apps/examples/slcd.  Basically  driver with a working
+          test setup and ready to be tested and debugged.
 
   usbnsh:
   =======
@@ -681,29 +809,42 @@ Where <subdir> is one of the following:
     "DB_DP11215 PIC32 Storage Demo Board" and has only be testing on that
     board.
 
-    Comparison to nsh
-    -----------------
-    Below summarizes the key configuration differences between the 'nsh'
-    and the 'upnsh' configurations:
+    Notes.
+    -----
+    1. By default, this configuration uses an older Microchip C32 toolchain
+       for Windows (the newer ones seem to be incompatible) and builds under
+       Cygwin (or probably MSYS).  That can easily be reconfigured, of course.
 
-      CONFIG_USBDEV=y               : NuttX USB device support is enabled
-      CONFIG_PIC32MX_USBDEV=y       : The PIC32MX USB device driver is built
-      CONFIG_UART1_SERIAL_CONSOLE=n : There is no serial console
-      CONFIG_UART2_SERIAL_CONSOLE=n :
-      CONFIG_CDCACM=y               : The CDC/ACM serial device class is enabled
-      CONFIG_CDCACM_CONSOLE=y       : The CDC/ACM serial device is the console
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y      : Builds under Windows
+         CONFIG_WINDOWS_CYGWIN=y    : Using Cygwin
 
-    Using the Prolifics PL2303 Emulation
-    ------------------------------------
-    You could also use the non-standard PL2303 serial device instead of
-    the standard CDC/ACM serial device by changing:
+       System Type:
+         CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE=y : Older C32 toolchain
 
-      CONFIG_CDCACM=y               : Disable the CDC/ACM serial device class
-      CONFIG_CDCACM_CONSOLE=y       : The CDC/ACM serial device is NOT the console
-      CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
-      CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
+    2. Comparison to nsh
 
-    Why would you want to use a non-standard USB serial driver?  You might
-    to use the PL2303 driver with a Windows host because it should
-    automatically install the PL2303 driver (you might have to go through
-    some effort to get Windows to recognize the CDC/ACM device).
+      Below summarizes the key configuration differences between the 'nsh'
+      and the 'upnsh' configurations:
+
+        CONFIG_USBDEV=y               : NuttX USB device support is enabled
+        CONFIG_PIC32MX_USBDEV=y       : The PIC32MX USB device driver is built
+        CONFIG_UART1_SERIAL_CONSOLE=n : There is no serial console
+        CONFIG_UART2_SERIAL_CONSOLE=n :
+        CONFIG_CDCACM=y               : The CDC/ACM serial device class is enabled
+        CONFIG_CDCACM_CONSOLE=y       : The CDC/ACM serial device is the console
+
+      Using the Prolifics PL2303 Emulation
+
+      You could also use the non-standard PL2303 serial device instead of
+      the standard CDC/ACM serial device by changing:
+
+        CONFIG_CDCACM=n             : Disable the CDC/ACM serial device class
+        CONFIG_CDCACM_CONSOLE=n     : The CDC/ACM serial device is NOT the console
+        CONFIG_PL2303=y             : The Prolifics PL2303 emulation is enabled
+        CONFIG_PL2303_CONSOLE=y     : The PL2303 serial device is the console
+
+      Why would you want to use a non-standard USB serial driver?  You might
+      to use the PL2303 driver with a Windows host because it should
+      automatically install the PL2303 driver (you might have to go through
+      some effort to get Windows to recognize the CDC/ACM device).

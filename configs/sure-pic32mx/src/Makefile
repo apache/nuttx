@@ -1,7 +1,7 @@
 ############################################################################
 # configs/sure-pic32mx/src/Makefile
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,48 +35,52 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= -I$(TOPDIR)/sched
+CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS		= 
-CSRCS		= up_boot.c up_spi.c
+ASRCS = 
+CSRCS = pic32mx_boot.c pic32mx_spi.c
 
 # Only the  DB_DP11215 PIC32 Storage Demo Board board has user controllable
 # LEDs
 
 ifeq ($(CONFIG_ARCH_DBDP11215),y)
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS		+= up_leds.c
+CSRCS += pic32mx_autoleds.c
 endif
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS		+= up_buttons.c
+CSRCS += pic32mx_buttons.c
 endif
 
 ifeq ($(CONFIG_PIC32MX_USBDEV),y)
-CSRCS		+= up_usbdev.c
+CSRCS += pic32mx_usbdev.c
 ifeq ($(CONFIG_EXAMPLES_USBTERM_DEVINIT),y)
-CSRCS		+= up_usbterm.c
+CSRCS += pic32mx_usbterm.c
 endif
+endif
+
+ifeq ($(CONFIG_LCD_LCD1602),y)
+CSRCS += pic32mx_lcd1602.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= up_nsh.c
+CSRCS += pic32mx_nsh.c
 endif
 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
 ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/mips32}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
+            -I "${shell cygpath -w $(ARCH_SRCDIR)/mips32}"
 else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/mips32
+  CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/mips32
 endif
 
 all: libboard$(LIBEXT)

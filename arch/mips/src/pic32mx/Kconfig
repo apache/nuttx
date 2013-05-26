@@ -499,7 +499,7 @@ config PIC32MX_UART1
 config PIC32MX_UART2
 	bool "UART2"
 	default n
-	select ARCH_HAVE_UART1
+	select ARCH_HAVE_UART2
 
 config PIC32MX_UART3
 	bool "UART3"

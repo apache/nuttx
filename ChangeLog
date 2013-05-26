@@ -4805,3 +4805,10 @@
 	  from slcd_codec.h (2013-5-25)
 	* libc/misc/lib_slcdencode.c and lib_slcddecode.c:  Several encoding
 	  and decoding bug fixes (2013-5-26)
+	* configs/sure-pic32mx:  Converted all configurations to use the
+	  kconfig-frontends tools, cleaned up the directory structure and
+	  naming to match some of the more recent configurations, and added
+	  a segment LCD driver for the board.  The initial checkin of the
+	  LCD driver is just a clone of configs/pcblogic-pic32mx/src/pic32mx_lcd1602
+	  and it not yet expected to be functional (2013-5-26).
+
