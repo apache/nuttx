@@ -94,6 +94,8 @@
 #  undef CONFIG_DEBUG_LCD
 #endif
 
+/* The ever-present MIN/MAX macros ******************************************/
+
 #ifndef MIN
 #  define MIN(a,b) (a < b ? a : b)
 #endif
@@ -896,59 +898,85 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
 
       case SLCDCODE_BACKDEL:         /* Backspace (backward delete) N characters */
         {
-          /* If we are at the home position, then ignore the action */
+          int tmp;
 
-          if (g_slcdstate.curpos < 1)
+          /* If we are at the home position or if the count is zero, then ignore the action */
+
+          if (g_slcdstate.curpos < 1 || count < 1)
             {
               break;
             }
 
-          /* Otherwise, BACKDEL is like moving the cursor back one then doing a
+          /* Otherwise, BACKDEL is like moving the cursor back N characters then doing a
            * forward deletion.  Decrement the cursor position and fall through.
            */
 
-           g_slcdstate.curpos--;
+           tmp = (int)g_slcdstate.curpos - count;
+           if (tmp < 0)
+             {
+               tmp   = 0;
+               count = g_slcdstate.curpos;
+             }
+
+           /* Save the updated cursor positions */
+
+           g_slcdstate.curpos = tmp;
          }
 
       case SLCDCODE_FWDDEL:          /* DELete (forward delete) N characters moving text */
-        {
-          int i;
+        if (count > 0)
+          {
+            int nchars;
+            int nmove;
+            int i;
 
-          /* Move all characters after the current cursor position left by one */
+            /* How many characters are to the right of the cursor position
+             * (including the one at the cursor position)?  Then get the
+             * number of characters to move.
+             */
 
-          for (i = g_slcdstate.curpos + 1; i < SLCD_NCHARS - 1; i++)
-            {
-              slcd_writech(g_slcdstate.buffer[i-1], i, g_slcdstate.options[i-1]);
-            }
+            nchars = SLCD_CHARS - g_slcdstate.curpos;
+            nmove  = MIN(nchars, count) - 1;
 
-          /* Erase the last character on the display */
+            /* Move all characters after the current cursor position left by 'nmove' characters */
 
-          slcd_writech(' ', SLCD_NCHARS - 1, 0);
-        }
+            for (i = g_slcdstate.curpos + nmove; i < SLCD_NCHARS - 1; i++)
+              {
+                slcd_writech(g_slcdstate.buffer[i-nmove], i, g_slcdstate.options[i-nmove]);
+              }
+
+            /* Erase the last 'nmove' characters on the display */
+
+            for (i = SLCD_NCHARS - nmove; i < SLCD_NCHARS; i++)
+              {
+                slcd_writech(' ', i, 0);
+              }
+          }
         break;
 
       case SLCDCODE_ERASE:           /* Erase N characters from the cursor position */
-        {
-          int last;
-          int i;
+        if (count > 0)
+          {
+            int last;
+            int i;
 
-          /* Get the last position to clear and make sure that the last
-           * position is on the SLCD.
-           */
+            /* Get the last position to clear and make sure that the last
+             * position is on the SLCD.
+             */
 
-          last = g_slcdstate.curpos + count - 1;
-          if (last >= SLCD_NCHARS)
-            {
-              last = SLCD_NCHARS - 1;
-            }
+            last = g_slcdstate.curpos + count - 1;
+            if (last >= SLCD_NCHARS)
+              {
+                last = SLCD_NCHARS - 1;
+              }
 
-          /* Erase N characters after the current cursor position left by one */
+            /* Erase N characters after the current cursor position left by one */
 
-          for (i = g_slcdstate.curpos; i < last; i++)
-            {
-              slcd_writech(' ', i, 0);
-            }
-        }
+            for (i = g_slcdstate.curpos; i < last; i++)
+              {
+                slcd_writech(' ', i, 0);
+              }
+          }
         break;
 
       case SLCDCODE_CLEAR:           /* Home the cursor and erase the entire display */
@@ -989,23 +1017,35 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
 
       case SLCDCODE_LEFT:            /* Cursor left by N characters */
         {
+          int tmp = (int)g_slcdstate.curpos - count;
+
           /* Don't permit movement past the beginning of the SLCD */
 
-          if (g_slcdstate.curpos > 0)
+          if (tmp < 0)
             {
-              g_slcdstate.curpos--;
+              tmp = 0;
             }
+
+          /* Save the new cursor position */
+
+          g_slcdstate.curpos = (uint8_t)tmp;
         }
         break;
 
       case SLCDCODE_RIGHT:           /* Cursor right by N characters */
         {
+          int tmp = (int)g_slcdstate.curpos + count;
+
           /* Don't permit movement past the end of the SLCD */
 
-          if (g_slcdstate.curpos < (SLCD_NCHARS - 1))
+          if (tmp >= SLCD_NCHARS)
             {
-              g_slcdstate.curpos++;
+              tmp = SLCD_NCHARS - 1;
             }
+
+          /* Save the new cursor position */
+
+          g_slcdstate.curpos = (uint8_t)tmp;
         }
         break;
 
@@ -1096,7 +1136,9 @@ static ssize_t slcd_write(FAR struct file *filp,
   instream.buffer      = buffer;
   instream.nbytes      = len;
 
-  /* Prime the pump */
+  /* Prime the pump.  This is messy, but necessary to handle decoration on a
+   * character based on any following period or colon.
+   */
 
   memset(&state, 0, sizeof(struct slcdstate_s));
   result = slcd_decode(&instream.stream, &state, &prev, &count);
@@ -1138,10 +1180,36 @@ static ssize_t slcd_write(FAR struct file *filp,
 
               if (ch == ASCII_BS)
                 {
+                  /* If there is a pending character, then output it now before
+                   * performing the action.
+                   */
+
+                  if (valid)
+                    {
+                      slcd_appendch(prev, 0);
+                      prev = ' ';
+                      valid = false;
+                    }
+
+                  /* Then perform the backward deletion */
+
                   slcd_action(SLCDCODE_BACKDEL, 1);
                 }
               else if (ch == ASCII_CR)
                 {
+                  /* If there is a pending character, then output it now before
+                   * performing the action.
+                   */
+
+                  if (valid)
+                    {
+                      slcd_appendch(prev, 0);
+                      prev = ' ';
+                      valid = false;
+                    }
+
+                  /* Then perform the carriage return */
+
                   slcd_action(SLCDCODE_HOME, 0);
                 }
             }
@@ -1169,6 +1237,19 @@ static ssize_t slcd_write(FAR struct file *filp,
 
           else if (ch == ASCII_DEL)
             {
+              /* If there is a pending character, then output it now before
+               * performing the action.
+               */
+
+              if (valid)
+                {
+                  slcd_appendch(prev, 0);
+                  prev = ' ';
+                  valid = false;
+                }
+
+              /* Then perform the foward deletion */
+
               slcd_action(SLCDCODE_FWDDEL, 1);
             }
 
@@ -1191,6 +1272,19 @@ static ssize_t slcd_write(FAR struct file *filp,
         }
       else /* (result == SLCDRET_SPEC) */  /* A special SLCD action was returned */
         {
+          /* If there is a pending character, then output it now before
+           * performing the action.
+           */
+
+          if (valid)
+            {
+              slcd_appendch(prev, 0);
+              prev = ' ';
+              valid = false;
+            }
+
+          /* Then perform the action */
+
           slcd_action((enum slcdcode_e)ch, count);
         }
     }

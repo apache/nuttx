@@ -116,7 +116,17 @@
 #  undef CONFIG_DEBUG_LCD
 #endif
 
-/* Pin configuratin *********************************************************/
+/* The ever-present MIN/MAX macros ******************************************/
+
+#ifndef MIN
+#  define MIN(a,b) (a < b ? a : b)
+#endif
+
+#ifndef MAX
+#  define MAX(a,b) (a > b ? a : b)
+#endif
+
+/* Pin configuration ********************************************************/
 /* RB15, RS -- High values selects data */
 
 #define GPIO_LCD_RS   (GPIO_OUTPUT|GPIO_VALUE_ZERO|GPIO_PORTB|GPIO_PIN15)
@@ -166,8 +176,11 @@ struct lcd1602_2
 
  #if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
 static void lcd_dumpstate(FAR const char *msg);
+static void lcd_dumpstream(FAR const char *msg,
+                           FAR const struct lcd_instream_s *stream);
 #else
 #  define lcd_dumpstate(msg)
+#  define lcd_dumpstream(msg, stream)
 #endif
 
 /* Internal functions */
@@ -249,6 +262,21 @@ static void lcd_dumpstate(FAR const char *msg)
           row++;
         }
     }
+}
+#endif
+
+/****************************************************************************
+ * Name: lcd_dumpstate
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG_LCD) && defined(CONFIG_DEBUG_VERBOSE)
+static void lcd_dumpstream(FAR const char *msg,
+                           FAR const struct lcd_instream_s *stream)
+{
+  lcdvdbg("%s:\n", msg);
+  lcdvdbg("  nget: %d nbytes: %d\n",
+          stream->stream.nget, stream->nbytes);
+  lib_dumpbuffer("STREAM", stream->buffer, stream->nbytes);
 }
 #endif
 
@@ -418,61 +446,86 @@ static void lcd_action(enum slcdcode_e code, uint8_t count)
 
       case SLCDCODE_BACKDEL:         /* Backspace (backward delete) N characters */
         {
-          /* If we are at the home position, then ignore the action */
+          int tmp;
 
-          if (g_lcd1602.curcol < 1)
+          /* If we are at the home position or if the count is zero, then ignore the action */
+
+          if (g_lcd1602.curcol < 1 || count < 1)
             {
               break;
             }
 
-          /* Otherwise, BACKDEL is like moving the cursor back one then doing a
+          /* Otherwise, BACKDEL is like moving the cursor back N characters then doing a
            * forward deletion.  Decrement the cursor position and fall through.
            */
 
-           g_lcd1602.curcol--;
+           tmp = (int)g_lcd1602.curcol - count;
+           if (tmp < 0)
+             {
+               tmp   = 0;
+               count = g_lcd1602.curcol;
+             }
+
+           /* Save the updated cursor positions */
+
+           g_lcd1602.curcol = tmp;
          }
 
       case SLCDCODE_FWDDEL:          /* DELete (forward delete) N characters moving text */
-        {
-          uint8_t ch;
-          int i;
+        if (count > 0)
+          {
+            int nchars;
+            int nmove;
+            int i;
 
-          /* Move all characters after the current cursor position left by one */
+            /* How many characters are to the right of the cursor position
+             * (including the one at the cursor position)?  Then get the
+             * number of characters to move.
+             */
 
-          for (i = g_lcd1602.curcol + 1; i < LCD_NCOLUMNS - 1; i++)
-            {
-              ch = lcd_readch(g_lcd1602.currow, i);
-              lcd_writech(ch, g_lcd1602.currow, i - 1);
-            }
+            nchars = LCD_NCOLUMNS - g_lcd1602.curcol;
+            nmove  = MIN(nchars, count) - 1;
 
-          /* Erase the last character on the display */
+            /* Move all characters after the current cursor position left by 'nmove' characters */
 
-          lcd_writech(' ', g_lcd1602.currow, LCD_NCOLUMNS - 1);
-        }
+            for (i = g_lcd1602.curcol + nmove; i < LCD_NCOLUMNS - 1; i++)
+              {
+                uint8_t ch = lcd_readch(g_lcd1602.currow, i);
+                lcd_writech(ch, g_lcd1602.currow, i - nmove);
+              }
+
+            /* Erase the last 'nmove' characters on the display */
+
+            for (i = LCD_NCOLUMNS - nmove; i < LCD_NCOLUMNS; i++)
+              {
+                lcd_writech(' ', i, 0);
+              }
+          }
         break;
 
       case SLCDCODE_ERASE:           /* Erase N characters from the cursor position */
-        {
-          int last;
-          int i;
+        if (count > 0)
+          {
+            int last;
+            int i;
 
-          /* Get the last position to clear and make sure that the last
-           * position is on the SLCD.
-           */
+            /* Get the last position to clear and make sure that the last
+             * position is on the SLCD.
+             */
 
-          last = g_lcd1602.curcol + count - 1;
-          if (last >= LCD_NCOLUMNS)
-            {
-              last = LCD_NCOLUMNS - 1;
-            }
+            last = g_lcd1602.curcol + count - 1;
+            if (last >= LCD_NCOLUMNS)
+              {
+                last = LCD_NCOLUMNS - 1;
+              }
 
-          /* Erase N characters after the current cursor position left by one */
+            /* Erase N characters after the current cursor position left by one */
 
-          for (i = g_lcd1602.curcol; i < last; i++)
-            {
-              lcd_writech(' ', g_lcd1602.currow, i);
-            }
-        }
+            for (i = g_lcd1602.curcol; i < last; i++)
+              {
+                lcd_writech(' ', g_lcd1602.currow, i);
+              }
+          }
         break;
 
       case SLCDCODE_CLEAR:           /* Home the cursor and erase the entire display */
@@ -518,45 +571,69 @@ static void lcd_action(enum slcdcode_e code, uint8_t count)
 
       case SLCDCODE_LEFT:            /* Cursor left by N characters */
         {
+          int tmp = (int)g_lcd1602.curcol - count;
+
           /* Don't permit movement past the beginning of the SLCD */
 
-          if (g_lcd1602.curcol > 0)
+          if (tmp < 0)
             {
-              g_lcd1602.curcol--;
+              tmp = 0;
             }
+
+          /* Save the new cursor position */
+
+          g_lcd1602.curcol = (uint8_t)tmp;
         }
         break;
 
       case SLCDCODE_RIGHT:           /* Cursor right by N characters */
         {
+          int tmp = (int)g_lcd1602.curcol + count;
+
           /* Don't permit movement past the end of the SLCD */
 
-          if (g_lcd1602.curcol < (LCD_NCOLUMNS - 1))
+          if (tmp >= LCD_NCOLUMNS)
             {
-              g_lcd1602.curcol++;
+              tmp = LCD_NCOLUMNS - 1;
             }
+
+          /* Save the new cursor position */
+
+          g_lcd1602.curcol = (uint8_t)tmp;
         }
         break;
 
       case SLCDCODE_UP:              /* Cursor up by N lines */
         {
+          int tmp = (int)g_lcd1602.currow - count;
+
           /* Don't permit movement past the top of the SLCD */
 
-          if (g_lcd1602.currow > 0)
+          if (tmp < 0)
             {
-              g_lcd1602.currow--;
+              tmp = 0;
             }
+
+          /* Save the new cursor position */
+
+          g_lcd1602.currow = (uint8_t)tmp;
         }
         break;
 
       case SLCDCODE_DOWN:            /* Cursor down by N lines */
         {
+          int tmp = (int)g_lcd1602.currow + count;
+
           /* Don't permit movement past the bottom of the SLCD */
 
-          if (g_lcd1602.currow < (LCD_NCOLUMNS - 1))
+          if (tmp >= LCD_NROWS)
             {
-              g_lcd1602.currow++;
+              tmp = LCD_NROWS - 1;
             }
+
+          /* Save the new cursor position */
+
+          g_lcd1602.currow = (uint8_t)tmp;
         }
         break;
 
@@ -627,8 +704,6 @@ static ssize_t lcd_write(FAR struct file *filp,  FAR const char *buffer,
   enum slcdret_e result;
   uint8_t ch;
   uint8_t count;
-  uint8_t prev = ' ';
-  bool valid = false;
 
   /* Initialize the stream for use with the SLCD CODEC */
 
@@ -637,33 +712,11 @@ static ssize_t lcd_write(FAR struct file *filp,  FAR const char *buffer,
   instream.buffer      = buffer;
   instream.nbytes      = len;
 
-  /* Prime the pump */
-
-  memset(&state, 0, sizeof(struct slcdstate_s));
-  result = slcd_decode(&instream.stream, &state, &prev, &count);
-
-  lcdvdbg("slcd_decode returned result=%d char=%d count=%d\n",
-           result, prev, count);
-
-  switch (result)
-    {
-      case SLCDRET_CHAR:
-        valid = true;
-        break;
-
-      case SLCDRET_SPEC:
-        {
-          lcd_action((enum slcdcode_e)prev, count);
-          prev = ' ';
-        }
-        break;
-
-      case SLCDRET_EOF:
-        return 0;
-    }
+  lcd_dumpstream("BEFORE WRITE", &instream);
 
   /* Now decode and process every byte in the input buffer */
 
+  memset(&state, 0, sizeof(struct slcdstate_s));
   while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) != SLCDRET_EOF)
     {
       lcdvdbg("slcd_decode returned result=%d char=%d count=%d\n",
@@ -679,37 +732,25 @@ static ssize_t lcd_write(FAR struct file *filp,  FAR const char *buffer,
 
               if (ch == ASCII_BS)
                 {
+                  /* Perform the backward deletion */
+
                   lcd_action(SLCDCODE_BACKDEL, 1);
                 }
               else if (ch == ASCII_CR)
                 {
-                  lcd_action(SLCDCODE_HOME, 0);
+                  /* Perform the carriage return */
+
+                  g_lcd1602.curcol = 0;
+                  lcd_action(SLCDCODE_DOWN, 1);
                 }
-            }
-
-          /* Handle characters decoreated with a period or a colon */
-
-          else if (ch == '.')
-            {
-              /* Write the previous character with the decimal point appended */
-
-              lcd_appendch(prev);
-              prev = ' ';
-              valid = false;
-            }
-          else if (ch == ':')
-            {
-              /* Write the previous character with the colon appended */
-
-              lcd_appendch(prev);
-              prev = ' ';
-              valid = false;
             }
 
           /* Handle ASCII_DEL */
 
           else if (ch == ASCII_DEL)
             {
+              /* Perform the forward deletion */
+
               lcd_action(SLCDCODE_FWDDEL, 1);
             }
 
@@ -717,34 +758,22 @@ static ssize_t lcd_write(FAR struct file *filp,  FAR const char *buffer,
 
           else if (ch < 128)
             {
-              /* Write the previous character if it valid */
+              /* Write the character if it valid */
 
-              if (valid)
-                {
-                  lcd_appendch(prev);
-                }
-
-              /* There is now a valid output character */
-
-              prev = ch;
-              valid = true;
+              lcd_appendch(ch);
             }
         }
       else /* (result == SLCDRET_SPEC) */  /* A special SLCD action was returned */
         {
+          /* Then Perform the action */
+
           lcd_action((enum slcdcode_e)ch, count);
         }
     }
 
-  /* Handle any unfinished output */
-
-  if (valid)
-    {
-      lcd_appendch(prev);
-    }
-
   /* Assume that the entire input buffer was processed */
 
+  lcd_dumpstream("AFTER WRITE", &instream);
   return (ssize_t)len;
 }
 
