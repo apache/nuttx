@@ -935,7 +935,7 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
              * number of characters to move.
              */
 
-            nchars = SLCD_CHARS - g_slcdstate.curpos;
+            nchars = SLCD_NCHARS - g_slcdstate.curpos;
             nmove  = MIN(nchars, count) - 1;
 
             /* Move all characters after the current cursor position left by 'nmove' characters */
