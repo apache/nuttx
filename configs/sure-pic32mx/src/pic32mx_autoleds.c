@@ -79,11 +79,6 @@
  * LED_PANIC              5  N/C N/C N/C   ON    N/C N/C N/C   OFF
  */
 
-#define GPIO_USB_LED   (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTD|GPIO_PIN7)
-#define GPIO_SD_LED    (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTD|GPIO_PIN6)
-#define GPIO_FLASH_LED (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTF|GPIO_PIN0)
-#define GPIO_ERROR_LED (GPIO_OUTPUT|GPIO_VALUE_ONE|GPIO_PORTF|GPIO_PIN1)
-
 /* LED Management Definitions ***********************************************/
 
 #define LED_OFF 0

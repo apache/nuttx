@@ -32,6 +32,7 @@ config LCD_MAXCONTRAST
 
 config LCD_MAXPOWER
 	int "LCD maximum power"
+	default 255 if LCD_LCD1602
 	default 1
 	range 1 255
 	---help---
@@ -91,7 +92,7 @@ config P14201_FRAMEBUFFER
 endif
 
 config LCD_NOKIA6100
-	bool "Nokia 6100 display support" 
+	bool "Nokia 6100 display support"
 	default n
 	---help---
 		nokia6100.c.  Supports the Nokia 6100 display with either the Philips
@@ -307,7 +308,7 @@ config LCD_UG2864AMBAG01
 	bool "UG-2864AMBAG01 OLED Display Module"
 	default n
 	---help---
-		OLED Display Module, UG-2864AMBAG01, Univision Technology Inc. 
+		OLED Display Module, UG-2864AMBAG01, Univision Technology Inc.
 
 		Required LCD driver settings:
 		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.

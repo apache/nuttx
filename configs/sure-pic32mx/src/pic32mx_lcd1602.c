@@ -37,7 +37,7 @@
  *
  ****************************************************************************/
 
- /* LCD pin mapping (see configs/pcblogic-pic32mx/README.txt)
+ /* LCD pin mapping (see configs/sure-pic32mx/README.txt)
  *
  *  --------------------- ---------- ----------------------------------
  *  PIC32                  Sure JP1   Sure Signal Description
@@ -61,6 +61,8 @@
  *                        15. A      +5V_DUSB
  *   46 INT0/RD0          16. K      Transistor circuit driven by PWM1
  *  --------------------- ---------- ----------------------------------
+ *
+ *  Vbus power also requires Vbuson/AN5/RB5
  */
 
 /****************************************************************************
@@ -87,7 +89,7 @@
 #include <nuttx/lcd/slcd_codec.h>
 
 #include "up_arch.h"
-#include "pic32mx-pmp.h"
+#include "pic32mx-ioport.h"
 #include "pic32mx-int.h"
 #include "pic32mx-internal.h"
 #include "sure-pic32mx.h"
@@ -98,10 +100,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-
-#ifndef CONFIG_PIC32MX_PMP
-#  error "CONFIG_PIC32MX_PMP is required to use the LCD"
-#endif
 
 #ifndef CONFIG_LCD_MAXCONTRAST
 #  define CONFIG_LCD_MAXCONTRAST 100
@@ -135,16 +133,13 @@
 #  define MAX(a,b) (a > b ? a : b)
 #endif
 
-/* Pin configuration ********************************************************/
-/* RB15, RS -- High values selects data */
-
-#define GPIO_LCD_RS   (GPIO_OUTPUT|GPIO_VALUE_ZERO|GPIO_PORTB|GPIO_PIN15)
-
 /* LCD **********************************************************************/
 
 #define LCD_NROWS        2
 #define LCD_NCOLUMNS     16
 #define LCD_NCHARS       (LCD_NROWS * LCD_NCOLUMNS)
+
+#define NOP              __asm__ __volatile__ ("nop");
 
 /* Debug ********************************************************************/
 
@@ -173,9 +168,10 @@ struct lcd_instream_s
 
 struct lcd1602_2
 {
-  bool initialized; /* True: Completed initialization sequence */
-  uint8_t currow;   /* Current row */
-  uint8_t curcol;   /* Current column */
+  bool initialized;   /* True: Completed initialization sequence */
+  uint8_t currow;     /* Current row */
+  uint8_t curcol;     /* Current column */
+  uint8_t brightness; /* Current brightness */
 };
 
 /****************************************************************************
@@ -195,9 +191,13 @@ static void lcd_dumpstream(FAR const char *msg,
 /* Internal functions */
 
 static int lcd_getstream(FAR struct lib_instream_s *instream);
+static void lcd_brightness(uint8_t brightness);
+static void lcd_shortdelay(int delay);
 static void lcd_wrcommand(uint8_t cmd);
 static void lcd_wrdata(uint8_t data);
 static uint8_t lcd_rddata(void);
+static uint8_t lcd_readstatus(void);
+static void lcd_waitbusy(void);
 static uint8_t lcd_readch(uint8_t row, uint8_t column);
 static void lcd_writech(uint8_t ch, uint8_t row, uint8_t column);
 static void lcd_appendch(uint8_t ch);
@@ -313,6 +313,66 @@ static int lcd_getstream(FAR struct lib_instream_s *instream)
 }
 
 /****************************************************************************
+ * Name: lcd_brightness
+ *
+ * Description:
+ *   Enable for disable LCD lighting.
+ *
+ ****************************************************************************/
+
+static void lcd_brightness(uint8_t brightness)
+{
+  /* The LIGHT and COMP pins are label PWM1 and PWM2 and so are obviously
+   * intended to support modulated outputs.  However, here for simplicity,
+   * they are just treated as on/off discretes outputs.
+   */
+
+  if (brightness > 0)
+    {
+      /* Turn the LCD light on */
+
+      pic32mx_gpiowrite(GPIO_LCD_LIGHT, true);
+      NOP;NOP;NOP;
+      pic32mx_gpiowrite(GPIO_LCD_COMP, true);
+      NOP;NOP;
+      pic32mx_gpiowrite(GPIO_LCD_PWR, true);
+    }
+  else
+    {
+      /* Turn the LCD light off */
+
+      pic32mx_gpiowrite(GPIO_LCD_PWR, false);
+      pic32mx_gpiowrite(GPIO_LCD_COMP, false);
+      pic32mx_gpiowrite(GPIO_LCD_LIGHT, false);
+    }
+
+  g_lcd1602.brightness = brightness;
+}
+
+/****************************************************************************
+ * Name: lcd_shortdelay
+ *
+ * Description:
+ *   Small delays are needed to make some of the LCD operations work.
+ *
+ ****************************************************************************/
+
+static void lcd_shortdelay(int delay)
+{
+  volatile int loop;
+
+  /* On a 32MHz MCU, this should amount to about 300NS per loop */
+
+  while (delay-- > 0)
+    {
+      for (loop = 0; loop < 1; loop++)
+        {
+          NOP;
+        }
+    }
+}
+
+/****************************************************************************
  * Name: lcd_wrcommand
  *
  * Description:
@@ -322,13 +382,28 @@ static int lcd_getstream(FAR struct lib_instream_s *instream)
 
 static void lcd_wrcommand(uint8_t cmd)
 {
-  /* Address bit A0 is RS.  Set the address latch to A0=0 */
+  /* Make sure that the LCD is available */
 
-  putreg32(1, PIC32MX_PMP_ADDRCLR);
+  lcd_waitbusy();
 
-  /* And write the command to the data out register */
+  /* Select DB0-15 as outputs (only DB-0-7 are actually used) */
 
-  putreg32((uint32_t)cmd, PIC32MX_PMP_DOUT);
+  putreg16(0, PIC32MX_IOPORTE_TRIS);
+
+  /* Set up to write the commond */
+
+  pic32mx_gpiowrite(GPIO_LCD_RS, false); /* Select command */
+  pic32mx_gpiowrite(GPIO_LCD_RW, false); /* Select write */
+  lcd_shortdelay(2);
+
+  pic32mx_gpiowrite(GPIO_LCD_E, true);   /* Enable transfer */
+  lcd_shortdelay(1);
+
+  /* Write the command to the LCD */
+
+  putreg16(cmd, PIC32MX_IOPORTE_PORT);
+  lcd_shortdelay(1);
+  pic32mx_gpiowrite(GPIO_LCD_E, false);
 }
 
 /****************************************************************************
@@ -341,13 +416,28 @@ static void lcd_wrcommand(uint8_t cmd)
 
 static void lcd_wrdata(uint8_t data)
 {
-  /* Address bit A0 is RS.  Set the address latch to A0=1 */
+  /* Make sure that the LCD is available */
 
-  putreg32(1, PIC32MX_PMP_ADDRSET);
+  lcd_waitbusy();
 
-  /* And write the data to the data out register */
+  /* Select DB0-15 as outputs (only DB-0-7 are actually used) */
 
-  putreg32((uint32_t)data, PIC32MX_PMP_DOUT);
+  putreg16(0, PIC32MX_IOPORTE_TRIS);
+
+  /* Set up to write the data */
+
+  pic32mx_gpiowrite(GPIO_LCD_RS, true);    /* Select data */
+  pic32mx_gpiowrite(GPIO_LCD_RW, false);   /* Select write */
+  lcd_shortdelay(2);
+
+  pic32mx_gpiowrite(GPIO_LCD_E, true);     /* Enable transfer */
+  lcd_shortdelay(1);
+
+  /* Write the data to the LCD */
+
+  putreg16(data, PIC32MX_IOPORTE_PORT);    /* Write the data */
+  lcd_shortdelay(1);
+  pic32mx_gpiowrite(GPIO_LCD_E, false);
 }
 
 /****************************************************************************
@@ -360,13 +450,69 @@ static void lcd_wrdata(uint8_t data)
 
 static uint8_t lcd_rddata(void)
 {
-  /* Address bit A0 is RS.  Set the address latch to A0=1 */
+  /* Make sure that the LCD is available */
 
-  putreg32(1, PIC32MX_PMP_ADDRSET);
+  lcd_waitbusy();
 
-  /* And read the data to the data in register */
+  /* Setup to read data */
 
-  return (uint8_t)getreg32(PIC32MX_PMP_DIN);
+  pic32mx_gpiowrite(GPIO_LCD_RS, true);    /* Select data */
+  pic32mx_gpiowrite(GPIO_LCD_RW, true);    /* Select read */
+  lcd_shortdelay(2);
+
+  pic32mx_gpiowrite(GPIO_LCD_E, true);     /* Enable transfer */
+  lcd_shortdelay(1);
+
+  putreg16(0xff, PIC32MX_IOPORTE_TRISSET); /* Set DB0-7 as inputs */
+  pic32mx_gpiowrite(GPIO_LCD_E, false);    /* Disable transfer */
+
+  /* Read the data from the LCD */
+
+  return (uint8_t)getreg16(PIC32MX_IOPORTE_PORT);
+}
+
+/****************************************************************************
+ * Name: lcd_readstatus
+ *
+ * Description:
+ *   Read the DDRAM address and busy bit.
+ *
+ ****************************************************************************/
+
+static uint8_t lcd_readstatus(void)
+{
+  uint8_t status;
+
+  /* Set up to read BUSY/AD information */
+
+  putreg16(0xff, PIC32MX_IOPORTE_TRISSET); /* Set DB0-7 as inputs */
+  pic32mx_gpiowrite(GPIO_LCD_RS, false);   /* Select command */
+  pic32mx_gpiowrite(GPIO_LCD_RW, true);    /* Select read */
+  lcd_shortdelay(2);
+
+  pic32mx_gpiowrite(GPIO_LCD_E, true);     /* Enable transfer */
+  lcd_shortdelay(1);
+
+  /* Read the status from the LCD */
+
+  status = (uint8_t)getreg16(PIC32MX_IOPORTE_PORT);
+  lcd_shortdelay(1);
+  pic32mx_gpiowrite(GPIO_LCD_E, false);
+
+  return status;
+}
+
+/****************************************************************************
+ * Name: lcd_waitbusy
+ *
+ * Description:
+ *   Check LCD status and wait until the BUSY flag is no long set.
+ *
+ ****************************************************************************/
+
+static void lcd_waitbusy(void)
+{
+  while ((lcd_readstatus() & HD4478OU_BF) != 0);
 }
 
 /****************************************************************************
@@ -843,11 +989,46 @@ static int lcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
         }
         break;
 
+      /* SLCDIOC_GETBRIGHTNESS: Get the current brightness setting
+       *
+       * argument:  Pointer type int that will receive the current brightness
+       *            setting
+       */
+
+      case SLCDIOC_GETBRIGHTNESS:
+        {
+          FAR int *brightness = (FAR int *)((uintptr_t)arg);
+          if (!brightness)
+            {
+              return -EINVAL;
+            }
+
+          *brightness = (int)g_lcd1602.brightness;
+          lcdvdbg("SLCDIOC_GETCONTRAST: brightness=%d\n", *brightness);
+        }
+        break;
+
+      /* SLCDIOC_SETBRIGHTNESS: Set the brightness to a new value
+       *
+       * argument:  The new brightness value
+       */
+
+      case SLCDIOC_SETBRIGHTNESS:
+        {
+          lcdvdbg("SLCDIOC_SETCONTRAST: arg=%ld\n", arg);
+
+          if (arg > CONFIG_LCD_MAXPOWER)
+            {
+              return -ERANGE;
+            }
+
+          lcd_brightness((uint8_t)arg);
+        }
+        break;
+
       case SLCDIOC_SETBAR:         /* SLCDIOC_SETBAR: Set bars on a bar display */
       case SLCDIOC_GETCONTRAST:    /* SLCDIOC_GETCONTRAST: Get the current contrast setting */
       case SLCDIOC_SETCONTRAST:    /* SLCDIOC_SETCONTRAST: Set the contrast to a new value */
-      case SLCDIOC_GETBRIGHTNESS:  /* Get the current brightness setting */
-      case SLCDIOC_SETBRIGHTNESS:  /* Set the brightness to a new value */
       default:
         return -ENOTTY;
     }
@@ -892,7 +1073,6 @@ static int lcd_poll(FAR struct file *filp, FAR struct pollfd *fds,
 
 int up_lcd1602_initialize(void)
 {
-  uint32_t regval;
   int ret = OK;
 
   /* Only initialize the driver once. */
@@ -901,64 +1081,69 @@ int up_lcd1602_initialize(void)
     {
       lcdvdbg("Initializing\n");
 
-      /* PMP Master mode configuration */
-      /* Make sure that interrupts are disabled */
+      /* Configure GPIO pins */
 
-      putreg32(INT_PMP, PIC32MX_INT_IEC1CLR);
+      putreg16(0, PIC32MX_IOPORTE_TRIS);       /* Set DB0-15 as outputs */
+      pic32mx_configgpio(GPIO_LCD_RS);         /* RS: Selects commnand or data */
+      pic32mx_configgpio(GPIO_LCD_RW);         /* RW: Selects read or write */
+      pic32mx_configgpio(GPIO_LCD_E);          /* E:  Starts transfer */
 
-      /* Stop and reset the PMP module and clear the mode and control registers. */
+      /* Configure LCD power in the OFF state */
 
-      putreg32(0, PIC32MX_PMP_MODE);
-      putreg32(0, PIC32MX_PMP_AEN);
-      putreg32(0, PIC32MX_PMP_CON);
-      putreg32(0, PIC32MX_PMP_ADDR);
+      pic32mx_configgpio(GPIO_LCD_LIGHT);       /* K */
+      pic32mx_configgpio(GPIO_LCD_COMP);        /* Vo */
+      pic32mx_configgpio(GPIO_LCD_PWR);         /* Vbuson/AN5/RB5 controls +5V USB */
+      g_lcd1602.brightness = 0;                 /* Remember tht the light is off */
 
-      /* Set LCD timing values, PMP master mode 3, 8-bit mode, no address
-       * increment, and no interrupts.
+      /* A small delay is necessary between when GPIO_LCD_E was set up as an
+       * output with initial value of 0 and this operation.  That delay should
+       * be well covered by the intervening GPIO configurations.
        */
 
-      regval = (PMP_MODE_WAITE_RD(0) | PMP_MODE_WAITM(3) | PMP_MODE_WAITB_1TPB |
-                PMP_MODE_MODE_MODE1 | PMP_MODE_MODE8 | PMP_MODE_INCM_NONE |
-                PMP_MODE_IRQM_NONE);
-      putreg32(regval, PIC32MX_PMP_MODE);
-
-      /* Enable the PMP for reading and writing
-       *   PMRD/PMWR is active high (1=RD; 0=WR)
-       *   PMENB is active high.
-       *   No chip selects
-       *   Address latch is active high
-       *   Enable PMRD/PMWR, PMENB, and the PMP.
-       */
-
-
-      regval = (PMP_CON_RDSP | PMP_CON_WRSP | PMP_CON_ALP |
-                PMP_CON_CSF_ADDR1415 | PMP_CON_PTRDEN | PMP_CON_PTWREN |
-                PMP_CON_ADRMUX_NONE | PMP_CON_ON);
-      putreg32(regval, PIC32MX_PMP_CON);
+      pic32mx_gpiowrite(GPIO_LCD_E, true);     /* Enable transfer */
 
       /* Configure and enable the LCD */
-      /* Wait > 15 milliseconds afer Vdd > 4.5V */
+      /* Delay for 4.1MS or more */
 
-      up_mdelay(100);
+      up_mdelay(5);
 
       /* Select the 8-bit interface. BF cannot be checked before this command.
        * This needs to be done a few times with some magic delays.
+       *
+       * Function set: 5x7 Style | N=2R | DL=8D
        */
 
-      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_DL8D | HD4478OU_FUNC_N1);
-      up_mdelay(50);
-      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_DL8D | HD4478OU_FUNC_N1);
-      up_udelay(50);
-      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_DL8D | HD4478OU_FUNC_N1);
-      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_DL8D | HD4478OU_FUNC_N1);
+      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 | HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
+      up_udelay(100);            /* Delay more than 100uS */
 
-      /* Configure the display */
+      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 | HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
+      up_udelay(40);             /* Delay more than 40uS */
+      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 | HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
+      lcd_waitbusy();
 
-      lcd_wrcommand(HD4478OU_DISPLAY);                       /* Display, cursor, and blink off */
-      lcd_wrcommand(HD4478OU_CLEAR);                         /* Clear the display */
-      lcd_wrcommand(HD4478OU_INPUT | HD4478OU_INPUT_INCR);   /* Increment mode */
-      lcd_wrcommand(HD4478OU_DISPLAY | HD4478OU_DISPLAY_ON); /* Display on, cursor and blink off */
-      lcd_wrcommand(HD4478OU_DDRAM_AD(0));                   /* Select DDRAM RAM AD=0 */
+      lcd_wrcommand(HD4478OU_FUNC | HD4478OU_FUNC_F5x7 | HD4478OU_FUNC_N1 | HD4478OU_FUNC_DL8D);
+      lcd_waitbusy();
+
+      /* Display ON, cursor OFF, blink OFF */
+
+      lcd_wrcommand(HD4478OU_DISPLAY | HD4478OU_DISPLAY_ON);
+      lcd_waitbusy();
+
+      /* Clear the display and home the cursor */
+
+      lcd_wrcommand(HD4478OU_CLEAR); /* Clear display */
+      lcd_waitbusy();
+
+      lcd_wrcommand(HD4478OU_RETURN); /* Return home: AC=0 */
+      lcd_waitbusy();
+
+      /* Entry Mode Set:
+       *
+       * - Increment address by one,
+       * - Shift cursor to right (display is not shifted)
+       */
+
+      lcd_wrcommand(HD4478OU_INPUT | HD4478OU_INPUT_INCR);
 
       /* Register the LCD device driver */
 

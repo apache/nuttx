@@ -51,7 +51,7 @@
  */
 
 #define HD4478OU_CLEAR            (0x01)     /* Screen Clear, Set AC to 0 */
-#define HD4478OU_RETURN           (0x02)     /* DDRAM AD=0, return */
+#define HD4478OU_RETURN           (0x03)     /* DDRAM AD=0, return */
 #define HD4478OU_INPUT            (0x04)     /* Set moving direction of cursor */
 #  define HD4478OU_INPUT_SHIFT    (1 << 0)   /*   Shift */
 #  define HD4478OU_INPUT_INCR     (1 << 1)   /*   Increment mode */
@@ -65,7 +65,7 @@
 #  define HD4478OU_SHIFT_LEFT     (0x00)     /*   Shift right */
 #  define HD4478OU_SHIFT_DISPLAY  (1 << 3)   /*   Display shift */
 #  define HD4478OU_SHIFT_CURSOR   (0x00)     /*   Cursor shift */
-#define HD4478OU_FUNC             (0x20)     /* Set DL, display line, font */
+#define HD4478OU_FUNC             (0x23)     /* Set DL, display line, font */
 #  define HD4478OU_FUNC_F5x10     (1 << 2)   /*   5x10 Style */
 #  define HD4478OU_FUNC_F5x7      (0x00)     /*   5x7 Style */
 #  define HD4478OU_FUNC_N1        (1 << 3)   /*   N=2R */
@@ -77,7 +77,9 @@
 
 /* RS=0 R/W=1 : Execute internal function, read AD of CT */
 
-#define HD4478OU_BUSY(bf,ac)      ((bf) << 7 | (ac))
+#define HD4478OU_BF               (1 << 7)   /* Busy flag */
+#define HD4478OU_AC_SHIFT         (0)        /* AD of CT */
+#define HD4478OU_AC_MASK          (0x7f << HD4478OU_BUSY_AC_SHIFT)
 
 /* DDRAM Addressing.
  *

@@ -4814,3 +4814,6 @@
 	* include/nuttx/lcd/slcd_ioctl.h and all SLCD drivers:  Rename geometry
 	  structure to attributes;  Move MAX contrast to attributes.  Add
 	  attribute and ioctl commands to get and set LCD brightness (2013-5-27).
+	* configs/sure-pic32mx/pic32mx_lcd1602.c:  This driver appears to
+	  fully functional (at least to the extent that it has been tested)
+	  (2013-5-27).

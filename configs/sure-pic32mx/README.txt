@@ -318,7 +318,7 @@ Toolchains
 
   Windows Native Toolchains
   -------------------------
-  
+
   NOTE:  There are several limitations to using a Windows based toolchain in a
   Cygwin environment.  The three biggest are:
 
@@ -423,6 +423,8 @@ LCD1602
      46 INT0/RD0          16. K      Transistor circuit driven by PWM1
     --------------------- ---------- ----------------------------------
 
+    Vbus power also requires Vbuson/AN5/RB5
+
 PIC32MX Configuration Options
 =============================
 
@@ -455,7 +457,7 @@ PIC32MX Configuration Options
 
        CONFIG_ARCH_BOARD=sure-pic32mx
 
-    CONFIG_ARCH_DBDP11215 Distinguishes the DB_DP11215 PIC32 Storage 
+    CONFIG_ARCH_DBDP11215 Distinguishes the DB_DP11215 PIC32 Storage
       Demo Board
 
     CONFIG_ARCH_DBDP11212 Distingustes the DB-DP11212 PIC32 General
@@ -551,7 +553,7 @@ PIC32MX Configuration Options
       CONFIG_PIC32MX_CODEWP - Default 1 (disabled)
     DEVCFG1: (All settings determined by selections in board.h)
     DEVCFG2: (All settings determined by selections in board.h)
-    DEVCFG3: 
+    DEVCFG3:
       CONFIG_PIC32MX_USBIDO - USB USBID Selection.  Default 1 if USB enabled
         (USBID pin is controlled by the USB module), but 0 (GPIO) otherwise.
       CONFIG_PIC32MX_VBUSIO - USB VBUSON Selection (Default 1 if USB enabled
@@ -698,7 +700,7 @@ Where <subdir> is one of the following:
       Several USB device configurations can be enabled and included
       as NSH built-in built in functions.  All require the following
       basic setup in your .config to enable USB device support:
- 
+
         Drivers:
           CONFIG_USBDEV=y           : Enable basic USB device support
 
@@ -717,9 +719,9 @@ Where <subdir> is one of the following:
           CONFIG_PL2303=y           : Enable the Prolifics PL2303 emulation
           CONFIG_CDCACM=y           : or the CDC/ACM serial driver (not both)
 
-      examples/cdcacm -  The examples/cdcacm program can be included as an 
+      examples/cdcacm -  The examples/cdcacm program can be included as an
       function by uncommenting the following line in the appconfig file:
-    
+
         Application Configuration->Examples:
           CONFIG_EXAMPLES_CDCACM=y  : Select apps/examples/cdcacm
 
@@ -766,28 +768,34 @@ Where <subdir> is one of the following:
 
     4. To enable LCD1602 support:
 
-       Device Drivers:
+       Device Drivers ->LCD Driver Support:
          CONFIG_LCD=y               : Enable LCD menus
          CONFIG_LCD_LCD1602=y       : Select LCD1602
+         CONFIG_LCD_MAXCONTRAST=255 : (Or any large-ish value that you prefer)
+         CONFIG_LCD_MAXPOWER=255    : (Or any large-ish value that you prefer)
 
        Library Routines:
          CONFIG_LIB_SLCDCODEC=y     : Enable the SLCD CODEC
 
-       System Type -> PIC32MX Peripheral Support:
-         CONFIG_PIC32MX_PMP=y       : Enable PMP support
+       NOTE that is is not necessary to select the PMP peripheral; this LCD
+       driver is a bit-bang driver that just happens to use the PMP pins as
+       GPIOS.
 
        To enable apps/examples/slcd to test the LCD:
 
-       Application Configuration:
+       Application Configuration -> NSH Library:
          CONFIG_NSH_ARCHINIT=y      : Needed to initialize the SLCD
+
+       Application Configuration -> Examples:
          CONFIG_EXAMPLES_SLCD=y     : Enable apps/examples/slcd use /dev/lcd1602
          CONFIG_EXAMPLES_SLCD_DEVNAME="/dev/lcd1602"
 
        To enable LCD debug output:
 
-       Build Setup:
+       Build Setup -> Debug Options:
          CONFIG_DEBUG=y             : Enable debug features
-         CONFIG_DEBUG_VERBOSE=y     : Enable LCD debug
+         CONFIG_DEBUG_VERBOSE=y     : Enable verbose debug output
+         CONFIG_DEBUG_LCD=y         : Enable LCD debug output
 
        NOTES:
        a. I do not have the LCD1602 working.  I may just be getting lost in the
