@@ -49,13 +49,13 @@
  ****************************************************************************/
 /* IOCTL commands that may be supported by some SLCD drivers */
 
-/* SLCDIOC_GEOMETRY:  Get the SLCD geometry (rows x characters)
+/* SLCDIOC_GETATTRIBUTES:  Get the attributes of the SLCD
  *
- * argument:  Pointer to struct slcd_geometry_s in which values will be
+ * argument:  Pointer to struct slcd_attributes_s in which values will be
  *            returned
  */
 
-#define SLCDIOC_GEOMETRY    _SLCDIOC(0x0001)
+#define SLCDIOC_GETATTRIBUTES  _SLCDIOC(0x0001)
 
 /* SLCDIOC_CURPOS:  Get the SLCD cursor positioni (rows x characters)
  *
@@ -63,14 +63,14 @@
  *            returned
  */
 
-#define SLCDIOC_CURPOS      _SLCDIOC(0x0002)
+#define SLCDIOC_CURPOS _SLCDIOC(0x0002)
 
 /* SLCDIOC_SETBAR: Set bars on a bar display
  *
  * argument:  32-bit bitset, with each bit corresponding to one bar.
  */
 
-#define SLCDIOC_SETBAR      _SLCDIOC(0x0003)
+#define SLCDIOC_SETBAR  _SLCDIOC(0x0003)
 
 /* SLCDIOC_GETCONTRAST: Get the current contrast setting
  *
@@ -80,32 +80,41 @@
 
 #define SLCDIOC_GETCONTRAST _SLCDIOC(0x0004)
 
-/* SLCDIOC_MAXCONTRAST: Get the maximum contrast setting
- *
- * argument:  Pointer type int that will receive the maximum contrast
- *            setting
- */
-
-#define SLCDIOC_MAXCONTRAST _SLCDIOC(0x0005)
-
 /* SLCDIOC_SETCONTRAST: Set the contrast to a new value
  *
  * argument:  The new contrast value
  */
 
-#define SLCDIOC_SETCONTRAST _SLCDIOC(0x0006)
+#define SLCDIOC_SETCONTRAST _SLCDIOC(0x0005)
+
+/* SLCDIOC_GETBRIGHTNESS: Get the current brightness setting
+ *
+ * argument:  Pointer type int that will receive the current brightness
+ *            setting
+ */
+
+#define SLCDIOC_GETBRIGHTNESS _SLCDIOC(0x0006)
+
+/* SLCDIOC_SETBRIGHTNESS: Set the brightness to a new value
+ *
+ * argument:  The new brightness value
+ */
+
+#define SLCDIOC_SETBRIGHTNESS _SLCDIOC(0x0007)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* Used with the SLCDIOC_GEOMETRY ioctl call */
+/* Used with the SLCDIOC_GETATTRIBUTES ioctl call */
 
-struct slcd_geometry_s
+struct slcd_attributes_s
 {
   uint16_t nrows;           /* Number of the rows on the SLCD */
   uint16_t ncolumns;        /* Number of characters in one row on the SLCD */
   uint8_t  nbars;           /* Number of bars supported by the SLCD */
+  uint8_t  maxcontrast;     /* Maximum contrast value */
+  uint8_t  maxbrightness;   /* Maximum brightness value */
 };
 
 /* Used with the SLCDIOC_CURPOS ioctl call */

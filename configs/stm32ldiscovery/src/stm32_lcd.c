@@ -1310,26 +1310,28 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
   switch (cmd)
     {
 
-      /* SLCDIOC_GEOMETRY:  Get the SLCD geometry (rows x characters)
+      /* SLCDIOC_GETATTRIBUTES:  Get the attributes of the SLCD
        *
-       * argument:  Pointer to struct slcd_geometry_s in which values will be
+       * argument:  Pointer to struct slcd_attributes_s in which values will be
        *            returned
        */
 
-      case SLCDIOC_GEOMETRY:
+      case SLCDIOC_GETATTRIBUTES:
         {
-          FAR struct slcd_geometry_s *geo = (FAR struct slcd_geometry_s *)((uintptr_t)arg);
+          FAR struct slcd_attributes_s *attr = (FAR struct slcd_attributes_s *)((uintptr_t)arg);
 
-          lcdvdbg("SLCDIOC_GEOMETRY: nrows=%d ncolumns=%d\n", SLCD_NROWS, SLCD_NCHARS);
+          lcdvdbg("SLCDIOC_GETATTRIBUTES:\n");
 
-          if (!geo)
+          if (!attr)
             {
               return -EINVAL;
             }
 
-          geo->nrows    = SLCD_NROWS;
-          geo->ncolumns = SLCD_NCHARS;
-          geo->nbars    = SLCD_NBARS;
+          attr->nrows         = SLCD_NROWS;
+          attr->ncolumns      = SLCD_NCHARS;
+          attr->nbars         = SLCD_NBARS;
+          attr->maxcontrast   = SLCD_MAXCONTRAST;
+          attr->maxbrightness = 0;
         }
         break;
 
@@ -1415,27 +1417,6 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
         }
         break;
 
-      /* SLCDIOC_MAXCONTRAST: Get the maximum contrast setting
-       *
-       * argument:  Pointer type int that will receive the maximum contrast
-       *            setting
-       */
-
-      case SLCDIOC_MAXCONTRAST:
-        {
-          FAR int *contrast = (FAR int *)((uintptr_t)arg);
-
-          lcdvdbg("SLCDIOC_MAXCONTRAST: contrast=%d\n", SLCD_MAXCONTRAST);
-
-          if (!contrast)
-            {
-              return -EINVAL;
-            }
-
-          *contrast = SLCD_MAXCONTRAST;
-        }
-        break;
-
       /* SLCDIOC_SETCONTRAST: Set the contrast to a new value
        *
        * argument:  The new contrast value
@@ -1454,6 +1435,8 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
         }
         break;
 
+      case SLCDIOC_GETBRIGHTNESS:  /* Get the current brightness setting */
+      case SLCDIOC_SETBRIGHTNESS:  /* Set the brightness to a new value */
       default:
         return -ENOTTY;
     }

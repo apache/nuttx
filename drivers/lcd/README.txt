@@ -199,7 +199,10 @@ that makes then less re-usable:
 
     configs/skp16c26/src/up_lcd.c.  Untested alphanumeric LCD driver.
     configs/pcblogic-pic32mx/src/up_lcd1602.c. LCD1602 is based on the
-      Hitachi HD44780U LCD controller.  See also include/nuttx/lcd/hd4478ou.h.
+      Hitachi HD44780U LCD controller (untested).  See also
+      include/nuttx/lcd/hd4478ou.h.
+    configs/sure-pic32mx/src/up_lcd1602.c. Another LCD1602-like segment
+      LCD.
     configs/stm32ldiscovery/src/stm32_lcd.c.  1x6 segment LCD with bars
       using the segment LCD controller built-into the STM32L15X.
 

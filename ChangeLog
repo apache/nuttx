@@ -4811,4 +4811,6 @@
 	  a segment LCD driver for the board.  The initial checkin of the
 	  LCD driver is just a clone of configs/pcblogic-pic32mx/src/pic32mx_lcd1602
 	  and it not yet expected to be functional (2013-5-26).
-
+	* include/nuttx/lcd/slcd_ioctl.h and all SLCD drivers:  Rename geometry
+	  structure to attributes;  Move MAX contrast to attributes.  Add
+	  attribute and ioctl commands to get and set LCD brightness (2013-5-27).

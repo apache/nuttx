@@ -23,8 +23,9 @@ config LCD_MAXCONTRAST
 	int "LCD maximum contrast"
 	default 63 if NOKIA6100_S1D15G10
 	default 127 if NOKIA6100_PCF8833
-	default 255 if LCD_P14201
+	default 255 if LCD_P14201 || LCD_LCD1602
 	default 63
+	range 1 255
 	---help---
 		must be 63 with the Epson controller and 127 with
 		the Phillips controller.
@@ -32,11 +33,14 @@ config LCD_MAXCONTRAST
 config LCD_MAXPOWER
 	int "LCD maximum power"
 	default 1
+	range 1 255
 	---help---
-		Maximum value of backlight setting.  The backlight
-		control is managed outside of the 6100 driver so this value has no
-		meaning to the driver.  Board-specific logic may place restrictions on
-		this value.
+		Maximum value of LCD power setting.  This normally equates to brightness:
+		The brighter the screen, the hight the power usage.
+
+		On LCDs that have a backlight, this value corresponds directly to that
+		backlight setting.  Board-specific logic may place restrictions on this
+		value.
 
 comment "Graphic LCD Devices"
 

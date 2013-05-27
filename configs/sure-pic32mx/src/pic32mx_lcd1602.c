@@ -103,6 +103,14 @@
 #  error "CONFIG_PIC32MX_PMP is required to use the LCD"
 #endif
 
+#ifndef CONFIG_LCD_MAXCONTRAST
+#  define CONFIG_LCD_MAXCONTRAST 100
+#endif
+
+#ifndef CONFIG_LCD_MAXPOWER
+#  define CONFIG_LCD_MAXPOWER 100
+#endif
+
 /* Define CONFIG_DEBUG_LCD to enable detailed LCD debug output. Verbose debug must
  * also be enabled.
  */
@@ -787,26 +795,28 @@ static int lcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
   switch (cmd)
     {
 
-      /* SLCDIOC_GEOMETRY:  Get the SLCD geometry (rows x characters)
+      /* SLCDIOC_GETATTRIBUTES:  Get the attributes of the SLCD
        *
-       * argument:  Pointer to struct slcd_geometry_s in which values will be
+       * argument:  Pointer to struct slcd_attributes_s in which values will be
        *            returned
        */
 
-      case SLCDIOC_GEOMETRY:
+      case SLCDIOC_GETATTRIBUTES:
         {
-          FAR struct slcd_geometry_s *geo = (FAR struct slcd_geometry_s *)((uintptr_t)arg);
+          FAR struct slcd_attributes_s *attr = (FAR struct slcd_attributes_s *)((uintptr_t)arg);
 
-          lcdvdbg("SLCDIOC_GEOMETRY: nrows=%d ncolumns=%d\n", LCD_NROWS, LCD_NCOLUMNS);
+          lcdvdbg("SLCDIOC_GETATTRIBUTES:\n");
 
-          if (!geo)
+          if (!attr)
             {
               return -EINVAL;
             }
 
-          geo->nrows    = LCD_NROWS;
-          geo->ncolumns = LCD_NCOLUMNS;
-          geo->nbars    = 0;
+          attr->nrows         = LCD_NROWS;
+          attr->ncolumns      = LCD_NCOLUMNS;
+          attr->nbars         = 0;
+          attr->maxcontrast   = CONFIG_LCD_MAXCONTRAST;
+          attr->maxbrightness = CONFIG_LCD_MAXPOWER;
         }
         break;
 
@@ -833,10 +843,11 @@ static int lcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
         }
         break;
 
-      case SLCDIOC_SETBAR:      /* SLCDIOC_SETBAR: Set bars on a bar display */
-      case SLCDIOC_GETCONTRAST: /* SLCDIOC_GETCONTRAST: Get the current contrast setting */
-      case SLCDIOC_MAXCONTRAST: /* SLCDIOC_MAXCONTRAST: Get the maximum contrast setting */
-      case SLCDIOC_SETCONTRAST: /* SLCDIOC_SETCONTRAST: Set the contrast to a new value */
+      case SLCDIOC_SETBAR:         /* SLCDIOC_SETBAR: Set bars on a bar display */
+      case SLCDIOC_GETCONTRAST:    /* SLCDIOC_GETCONTRAST: Get the current contrast setting */
+      case SLCDIOC_SETCONTRAST:    /* SLCDIOC_SETCONTRAST: Set the contrast to a new value */
+      case SLCDIOC_GETBRIGHTNESS:  /* Get the current brightness setting */
+      case SLCDIOC_SETBRIGHTNESS:  /* Set the brightness to a new value */
       default:
         return -ENOTTY;
     }
