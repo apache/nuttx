@@ -161,7 +161,7 @@ MAX3232 Connection
   GND -- POWER POINT: GND
   Vcc -- POWER POINT: Vdd (3.3V) -- Or P32_VBUS (+5V)
          Or +5V from a USB PC port.
- 
+
 Toolchains
 ==========
 
@@ -252,7 +252,7 @@ Toolchains
 
   Windows Native Toolchains
   -------------------------
-  
+
   NOTE:  There are several limitations to using a Windows based toolchain in a
   Cygwin environment.  The three biggest are:
 
@@ -478,7 +478,7 @@ PIC32MX Configuration Options
       CONFIG_PIC32MX_CODEWP - Default 1 (disabled)
     DEVCFG1: (All settings determined by selections in board.h)
     DEVCFG2: (All settings determined by selections in board.h)
-    DEVCFG3: 
+    DEVCFG3:
       CONFIG_PIC32MX_USBIDO - USB USBID Selection.  Default 1 if USB enabled
         (USBID pin is controlled by the USB module), but 0 (GPIO) otherwise.
       CONFIG_PIC32MX_VBUSIO - USB VBUSON Selection (Default 1 if USB enabled
@@ -670,7 +670,10 @@ Configuration sub-directories
        NOTES:
        a. I do not have the LCD1602 working.  I may just be getting lost in the
           tangle of wires or perhaps there is something fundamentally wrong with
-          the code.
+          the code.  If you decide to work on this, you might want to consider
+          the working, big-bang version of this driver at configs/sure-pic32mx/src/pic32mx_lcd1602.c.
+          A bit-bang driver is probably more appropriate for such a low performance
+          device (and a LOT easier to debug).
        b. At this point in time, testing of the SLCD is very limited because
           there is not much in apps/examples/slcd.  Basically  driver with a working
           test setup and ready to be tested and debugged.
