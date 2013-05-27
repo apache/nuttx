@@ -837,12 +837,13 @@ Where <subdir> is one of the following:
 
         CONFIG_USBDEV=y               : NuttX USB device support is enabled
         CONFIG_PIC32MX_USBDEV=y       : The PIC32MX USB device driver is built
+        CONFIG_DEV_CONSOLE=n          : /dev/console does not exist on power up
         CONFIG_UART1_SERIAL_CONSOLE=n : There is no serial console
         CONFIG_UART2_SERIAL_CONSOLE=n :
         CONFIG_CDCACM=y               : The CDC/ACM serial device class is enabled
         CONFIG_CDCACM_CONSOLE=y       : The CDC/ACM serial device is the console
 
-      Using the Prolifics PL2303 Emulation
+    3. Using the Prolifics PL2303 Emulation
 
       You could also use the non-standard PL2303 serial device instead of
       the standard CDC/ACM serial device by changing:
@@ -856,3 +857,64 @@ Where <subdir> is one of the following:
       to use the PL2303 driver with a Windows host because it should
       automatically install the PL2303 driver (you might have to go through
       some effort to get Windows to recognize the CDC/ACM device).
+
+    4. Since this configuration is current set for the "DB_DP11215 PIC32
+       Storage Demo Board," USART2 is available and is configured to used as
+       the SYSLOG device.  That means that all debug output will be directed
+       out USART2.  Debug output is not enabled by default, however, so these
+       settings do nothing until you enable debug ouput.
+
+        Device Drivers -> System Logging Device Options:
+          CONFIG_SYSLOG=y             : Configure SYSLOG output
+          CONFIG_SYSLOG_CHAR=y
+          CONFIG_SYSLOG_DEVPATH="/dev/ttyS0"
+
+        System Type -> PIC32MX Peripheral Support:
+          CONFIG_PIC32MX_UART2=y      : Enable UART2
+
+        Device Drivers -> Serial Driver Support:
+          CONFIG_UART2_2STOP=0        : UART2 configuration
+          CONFIG_UART2_BAUD=115200
+          CONFIG_UART2_BITS=8
+          CONFIG_UART2_PARITY=0
+          CONFIG_UART2_RXBUFSIZE=64
+          CONFIG_UART2_TXBUFSIZE=64
+
+    5. If you want to try this configuration on the DB-DP11212 PIC32 General
+       Purpose Demo Board", here are the changes that you should make:
+
+        Board Configuration:
+           CONFIG_ARCH_DBDP11215=n    : Disable the DB-DP11215
+           CONFIG_ARCH_DBDP11212=y    : Enable the DB-DP11212
+
+        System Type -> PIC32MX Peripheral Support:
+           CONFIG_PIC32MX_UART2=n     : Disable UART2
+
+        Device Drivers -> System Logging Device Options:
+           CONFIG_SYSLOG=n            : Disable SYSLOG output
+
+    6. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
+       device will save encoded trace output in in-memory buffer; if the
+       USB monitor is enabled, that trace buffer will be periodically
+       emptied and dumped to the system loggin device (UART2 in this
+       configuraion):
+
+
+        Device Drivers -> "USB Device Driver Support:
+          CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
+          CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
+
+        Application Configuration -> NSH LIbrary:
+          CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
+          CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
+
+        Application Configuration -> System NSH Add-Ons:
+          CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
+          CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+          CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+          CONFIG_SYSTEM_USBMONITOR_INTERVAL=2     : Dump trace data every 2 seconds
+          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+          CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
+          CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
+          CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
+          CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
