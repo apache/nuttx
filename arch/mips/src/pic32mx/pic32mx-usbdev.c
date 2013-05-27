@@ -283,7 +283,7 @@
  * access and BDT accesses.  Normally, this generates so much debug output
  * that USB may not even be functional.
  */
- 
+
 #ifdef CONFIG_PIC32MX_USBDEV_REGDEBUG
 
 #  undef CONFIG_PIC32MX_USBDEV_BDTDEBUG
@@ -903,7 +903,7 @@ static void pic32mx_wrcomplete(struct pic32mx_usbdev_s *priv,
   /* An outgoing IN packet has completed.  bdtin should point to the BDT
    * that just completed.
    */
- 
+
   bdtin = privep->bdtin;
   epno   = USB_EPNO(privep->ep.eplog);
 
@@ -940,7 +940,7 @@ static void pic32mx_wrcomplete(struct pic32mx_usbdev_s *priv,
     }
 
   /* Update the number of bytes transferred. */
-   
+
   privreq->req.xfrd   += privreq->inflight[0];
 #ifdef CONFIG_USBDEV_NOWRITEAHEAD
   privreq->inflight[0] = 0;
@@ -1092,7 +1092,7 @@ static int pic32mx_wrstart(struct pic32mx_usbdev_s *priv,
   epno = USB_EPNO(privep->ep.eplog);
 
   /* Decide which BDT to use.  bdtin points to the "current" BDT.  That is,
-   * the one that either (1) avaialble for next transfer, or (2) the one
+   * the one that either (1) available for next transfer, or (2) the one
    * that is currently busy with the current transfer.  If the current
    * BDT is busy, we have the option of setting up the other BDT in advance
    * in order to improve data transfer performance.
@@ -1322,7 +1322,7 @@ static int pic32mx_rdcomplete(struct pic32mx_usbdev_s *priv,
     }
 
   /* bdtout should point to the BDT that just completed */
- 
+
   bdtout = privep->bdtout;
   epno   = USB_EPNO(privep->ep.eplog);
 
@@ -1756,7 +1756,7 @@ static void pic32mx_eptransfer(struct pic32mx_usbdev_s *priv, uint8_t epno,
       if (ret == OK)
         {
           /* If that succeeds, then try to set up another OUT transfer. */
-      
+
           (void)pic32mx_rdrequest(priv, privep);
         }
 #endif
@@ -2986,7 +2986,7 @@ static void pic32mx_resume(struct pic32mx_usbdev_s *priv)
    */
 
   pic32mx_putreg(USB_INT_IDLE, PIC32MX_USBOTG_IR);
- 
+
   /* Notify the class driver of the resume event */
 
   if (priv->driver)
@@ -3103,7 +3103,7 @@ static void pic32mx_ep0configure(struct pic32mx_usbdev_s *priv)
   bdt++;
   bdt->status = 0;
   bdt->addr   = 0;
- 
+
   /* Data toggling is not used on SETUP transfers.  And IN transfer resulting
    * from a SETUP command should begin with DATA1.
    */
