@@ -494,6 +494,15 @@ config ARCH_BOARD_SKP16C26
 		uses the GNU m32c toolchain.  STATUS:  The port is complete but untested
 		due to issues with compiler internal errors.
 
+config ARCH_BOARD_STM32_TINY
+	bool "STM32-Tiny board"
+	depends on ARCH_CHIP_STM32F103C8
+	select ARCH_HAVE_LEDS
+	---help---
+		A configuration for the STM32 Tiny board. This board is based on a
+		STM32F103C8T6 micro-controller chip, and is (always ?) bundled with
+		an nRF24L01+ wireless module.
+
 config ARCH_BOARD_STM3210E_EVAL
 	bool "STMicro STM3210E-EVAL development board"
 	depends on ARCH_CHIP_STM32F103ZET6
@@ -765,6 +774,7 @@ config ARCH_BOARD
 	default "sam3u-ek"            if ARCH_BOARD_SAM3UEK
 	default "shenzhou"            if ARCH_BOARD_SHENZHOU
 	default "skp16c26"            if ARCH_BOARD_SKP16C26
+	default "stm32_tiny"          if ARCH_BOARD_STM32_TINY
 	default "stm3210e-eval"       if ARCH_BOARD_STM3210E_EVAL
 	default "stm3220g-eval"       if ARCH_BOARD_STM3220G_EVAL
 	default "stm3240g-eval"       if ARCH_BOARD_STM3240G_EVAL
@@ -987,6 +997,9 @@ source "configs/shenzhou/Kconfig"
 endif
 if ARCH_BOARD_SKP16C26
 source "configs/skp16c26/Kconfig"
+endif
+if ARCH_BOARD_STM32_TINY
+source "configs/stm32_tiny/Kconfig"
 endif
 if ARCH_BOARD_STM3210E_EVAL
 source "configs/stm3210e-eval/Kconfig"

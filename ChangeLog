@@ -4823,3 +4823,8 @@
 	  configs/sure-pic32mx/usbnsh configuration works great (2013-5-28).
 	* configs/sure-pic32mx/src/pic32mx_nsh.c:  The NSH configurations will
 	  support the USB monitor applications (2013-5-28).
+	 nuttx/arch/arm/include/stm32/chip.h, src/stm32/Kconfig, src/stm32/chip.h,
+	  and src/stm32/chip/stm32f103c_pinmap.h: STM32F103C4 and F103C8 chip
+	  support from Laurent Latil (2013-5-28)
+	* configs/stm32_tiny: Add support for the STM32 Tiny development board
+	  based on th STM32 F103C8T6 MCU (2013-5-28).
