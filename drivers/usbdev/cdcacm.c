@@ -369,7 +369,7 @@ static int cdcacm_sndpacket(FAR struct cdcacm_dev_s *priv)
     {
       /* Peek at the request in the container at the head of the list */
 
-      reqcontainer = (struct cdcacm_req_s *)sq_peek(&priv->reqlist);
+      reqcontainer = (FAR struct cdcacm_req_s *)sq_peek(&priv->reqlist);
       req          = reqcontainer->req;
 
       /* Fill the request with serial TX data */
@@ -901,16 +901,22 @@ static void cdcacm_wrcomplete(FAR struct usbdev_ep_s *ep,
   switch (req->result)
     {
     case OK: /* Normal completion */
-      usbtrace(TRACE_CLASSWRCOMPLETE, priv->nwrq);
-      cdcacm_sndpacket(priv);
+      {
+        usbtrace(TRACE_CLASSWRCOMPLETE, priv->nwrq);
+        cdcacm_sndpacket(priv);
+      }
       break;
 
     case -ESHUTDOWN: /* Disconnection */
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRSHUTDOWN), priv->nwrq);
+      {
+        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRSHUTDOWN), priv->nwrq);
+      }
       break;
 
     default: /* Some other error occurred */
-      usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRUNEXPECTED), (uint16_t)-req->result);
+      {
+        usbtrace(TRACE_CLSERROR(USBSER_TRACEERR_WRUNEXPECTED), (uint16_t)-req->result);
+      }
       break;
     }
 }
@@ -1023,6 +1029,7 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
           ret = -ENOMEM;
           goto errout;
         }
+
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = cdcacm_rdcomplete;
     }
@@ -1045,6 +1052,7 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
           ret = -ENOMEM;
           goto errout;
         }
+
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = cdcacm_wrcomplete;
 

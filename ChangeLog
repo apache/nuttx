@@ -4817,3 +4817,9 @@
 	* configs/sure-pic32mx/pic32mx_lcd1602.c:  This driver appears to
 	  fully functional (at least to the extent that it has been tested)
 	  (2013-5-27).
+	* arch/mips/src/pic32mx/pic32mx-usbdev.c:  Fix NULL packet handling in
+	  the PIC32 USB device driver.  Without this fix the CDC/ACM driver
+	  cannot be used reliably with the PIC32 USB.  With this change the
+	  configs/sure-pic32mx/usbnsh configuration works great (2013-5-28).
+	* configs/sure-pic32mx/src/pic32mx_nsh.c:  The NSH configurations will
+	  support the USB monitor applications (2013-5-28).

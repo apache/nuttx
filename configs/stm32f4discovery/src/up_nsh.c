@@ -79,7 +79,7 @@
 #  undef HAVE_USBMONITOR
 #endif
 
-/* Can't support USB device is USB device is not enabled */
+/* Can't support USB device monitor if USB device is not enabled */
 
 #ifndef CONFIG_USBDEV
 #  undef HAVE_USBDEV

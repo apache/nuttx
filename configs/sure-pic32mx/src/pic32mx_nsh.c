@@ -49,6 +49,10 @@
 #include <nuttx/lcd/hd4478ou.h>
 #include <nuttx/usb/usbhost.h>
 
+#ifdef CONFIG_SYSTEM_USBMONITOR
+#  include <apps/usbmonitor.h>
+#endif
+
 #include "pic32mx-internal.h"
 #include "sure-pic32mx.h"
 
@@ -60,24 +64,25 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#define NSH_HAVEMMCSD   1
-#define NSH_HAVEUSBHOST 1
+#define NSH_HAVE_MMCSD      1
+#define NSH_HAVE_USBHOST    1
+#define NSH_HAVE_USBMONITOR 1
 
 /* Can't support MMC/SD if SPI2 is not enabled */
 
 #ifndef CONFIG_PIC32MX_SPI2
-#  undef NSH_HAVEMMCSD
+#  undef NSH_HAVE_MMCSD
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef NSH_HAVEMMCSD
+#  undef NSH_HAVE_MMCSD
 #endif
 
 /* MMC/SD configuration */
 
-#ifdef NSH_HAVEMMCSD
+#ifdef NSH_HAVE_MMCSD
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 2
 #    warning "The Sure PIC32MX MMC/SD is on SPI2"
 #    undef CONFIG_NSH_MMCSDSPIPORTNO
@@ -110,16 +115,30 @@
 #endif
 
 #if !defined(CONFIG_USBHOST) || !defined(CONFIG_PIC32MX_USBHOST)
-#  undef NSH_HAVEUSBHOST
+#  undef NSH_HAVE_USBHOST
 #endif
 
-#ifdef NSH_HAVEUSBHOST
+#ifdef NSH_HAVE_USBHOST
 #  ifndef CONFIG_USBHOST_DEFPRIO
 #    define CONFIG_USBHOST_DEFPRIO 50
 #  endif
 #  ifndef CONFIG_USBHOST_STACKSIZE
 #    define CONFIG_USBHOST_STACKSIZE 1024
 #  endif
+#endif
+
+/* USB Monitor */
+
+/* Can't support USB device monitor if USB device is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef NSH_HAVE_USBMONITOR
+#endif
+
+/* Check if we should enable the USB monitor before starting NSH */
+
+#if !defined(CONFIG_USBDEV_TRACE) || !defined(CONFIG_SYSTEM_USBMONITOR)
+#  undef NSH_HAVE_USBMONITOR
 #endif
 
 /* Debug ********************************************************************/
@@ -142,7 +161,7 @@
  * Private Data
  ****************************************************************************/
 
-#ifdef NSH_HAVEUSBHOST
+#ifdef NSH_HAVE_USBHOST
 static struct usbhost_driver_s *g_drvr;
 #endif
 
@@ -158,7 +177,7 @@ static struct usbhost_driver_s *g_drvr;
  *
  ****************************************************************************/
 
-#ifdef NSH_HAVEUSBHOST
+#ifdef NSH_HAVE_USBHOST
 static int nsh_waiter(int argc, char *argv[])
 {
   bool connected = false;
@@ -199,7 +218,7 @@ static int nsh_waiter(int argc, char *argv[])
  *
  ****************************************************************************/
 
-#ifdef NSH_HAVEMMCSD
+#ifdef NSH_HAVE_MMCSD
 static int nsh_sdinitialize(void)
 {
   FAR struct spi_dev_s *spi;
@@ -261,7 +280,7 @@ errout:
  *
  ****************************************************************************/
 
-#ifdef NSH_HAVEUSBHOST
+#ifdef NSH_HAVE_USBHOST
 static int nsh_usbhostinitialize(void)
 {
   int pid;
@@ -367,6 +386,15 @@ int nsh_archinitialize(void)
 
       ret = nsh_usbdevinitialize();
     }
+
+#ifdef NSH_HAVE_USBMONITOR
+  if (ret == OK)
+    {
+      /* Start the USB Monitor */
+
+      ret = usbmonitor_start(0, NULL);
+    }
+#endif
 
   return ret;
 }
