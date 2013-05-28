@@ -30,6 +30,11 @@ DB-DP11212 PIC32 General Purpose Demo Board
   - Three tactile switches
   - Four user LEDs
 
+NOTE:  I see that Sure Electronics shows both of these boards at end-of-Life
+(EOL).  So I assume that these boards will no longer be generally available.
+This work should still be useful, however, for other PIC32MX4-based boards
+(2012-5-27).
+
 Contents
 ========
 
@@ -880,7 +885,40 @@ Where <subdir> is one of the following:
           CONFIG_UART2_RXBUFSIZE=64
           CONFIG_UART2_TXBUFSIZE=64
 
-    5. If you want to try this configuration on the DB-DP11212 PIC32 General
+       NOTE:  Using the SYSLOG to get debug output has limitations.  Among
+       those are that you cannot get debug output from interrupt handlers.
+       So, in particularly, debug output is not a useful way to debug the
+       USB device controller driver.  Instead, use the USB monitor with
+       USB debug off and USB trance on (see below).
+
+    5. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
+       device will save encoded trace output in in-memory buffer; if the
+       USB monitor is enabled, that trace buffer will be periodically
+       emptied and dumped to the system logging device (UART2 in this
+       configuraion):
+
+        Device Drivers -> "USB Device Driver Support:
+          CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
+          CONFIG_USBDEV_TRACE_NRECORDS=256        : Buffer 128 records in memory
+
+        Application Configuration -> NSH LIbrary:
+          CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
+          CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
+
+        Application Configuration -> System NSH Add-Ons:
+          CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
+          CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+          CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+          CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
+          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+          CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
+          CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
+          CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
+          CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+
+       NOTE: USB debug output should not be enabled in this case.
+
+    6. If you want to try this configuration on the DB-DP11212 PIC32 General
        Purpose Demo Board", here are the changes that you should make:
 
         Board Configuration:
@@ -892,29 +930,3 @@ Where <subdir> is one of the following:
 
         Device Drivers -> System Logging Device Options:
            CONFIG_SYSLOG=n            : Disable SYSLOG output
-
-    6. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
-       device will save encoded trace output in in-memory buffer; if the
-       USB monitor is enabled, that trace buffer will be periodically
-       emptied and dumped to the system loggin device (UART2 in this
-       configuraion):
-
-
-        Device Drivers -> "USB Device Driver Support:
-          CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
-          CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
-
-        Application Configuration -> NSH LIbrary:
-          CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
-          CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
-
-        Application Configuration -> System NSH Add-Ons:
-          CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
-          CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
-          CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
-          CONFIG_SYSTEM_USBMONITOR_INTERVAL=2     : Dump trace data every 2 seconds
-          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
-          CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
-          CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
-          CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
-          CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
