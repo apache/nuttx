@@ -1154,7 +1154,7 @@ static int pic32mx_wrstart(struct pic32mx_usbdev_s *priv,
 
       /* Even if the request is incomplete, transfer of all the requested
        * bytes may already been started.  NOTE: inflight[1] should be zero
-       * because we know that there is a BDT availalbe.
+       * because we know that there is a BDT available.
        */
 
 #ifdef CONFIG_USBDEV_NOWRITEAHEAD
@@ -1169,10 +1169,20 @@ static int pic32mx_wrstart(struct pic32mx_usbdev_s *priv,
           xfrd      += privreq->inflight[0];
           bytesleft -=  privreq->inflight[0];
         }
+
+      /* Do we need to send a null packet after this packet? */
+
+      else if (privep->txnullpkt)
+        {
+          /* Yes... set up for the NULL packet transfer */
+
+          xfrd      = privreq->req.len;
+          bytesleft = 0;
+        }
       else
         {
-          /* Yes.. we need to get the next request from the head of the
-           * pending request list.
+          /* No.. We are finished with this request.  We need to get the
+           * next request from the head of the pending request list.
            */
 
           privreq = NULL;
@@ -1220,7 +1230,7 @@ static int pic32mx_wrstart(struct pic32mx_usbdev_s *priv,
   /* Get the number of bytes left to be sent in the packet */
 
   nbytes = bytesleft;
-  if (nbytes > 0)
+  if (nbytes > 0 || privep->txnullpkt)
     {
       /* Either send the maxpacketsize or all of the remaining data in
        * the request.
