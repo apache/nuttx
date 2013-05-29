@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated April 10, 2013)
+NuttX TODO List (Last updated May 29, 2013)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
@@ -32,7 +32,7 @@ nuttx/
   (0)  ARM/LPC43x (arch/arm/src/lpc43xx/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (3)  ARM/LM3S6918 (arch/arm/src/lm/)
-  (6)  ARM/STM32 (arch/arm/src/stm32/)
+  (5)  ARM/STM32 (arch/arm/src/stm32/)
   (3)  AVR (arch/avr)
   (0)  Intel x86 (arch/x86)
   (5)  8051 / MCS51 (arch/8051/)
@@ -1607,21 +1607,6 @@ o ARM/STM32 (arch/arm/src/stm32/)
                SRAM.
   Status:      Open
   Priority:    Low
-
-  Title:       USB DRIVER IN STM32F3DISCVORY usbnsh CONFIGURATION
-  Description: The USB device driver is not reliable in the
-               configs/stm32f3discovery/upnsh configuration.  When a large
-               volume of serial data is sent (for example, by entering
-               'help' from the NSH command line), the driver hangs.  This
-               looks like an improperly handled output data overrun problem.
-  
-               This is a surprising since this same driver has worked with
-               the STM32 F1 for some time using the Mass Storage driver
-               which has considerably higher data rates.  So this seems to
-               be some particular issue with the way that the CDC/ACM driver
-               sends data through the driver.
-  Status:      Open
-  Priority:    Medium High
 
 o AVR (arch/avr)
   ^^^^^^^^^^^^^^

@@ -853,10 +853,11 @@ Where <subdir> is one of the following:
       You could also use the non-standard PL2303 serial device instead of
       the standard CDC/ACM serial device by changing:
 
-        CONFIG_CDCACM=n             : Disable the CDC/ACM serial device class
-        CONFIG_CDCACM_CONSOLE=n     : The CDC/ACM serial device is NOT the console
-        CONFIG_PL2303=y             : The Prolifics PL2303 emulation is enabled
-        CONFIG_PL2303_CONSOLE=y     : The PL2303 serial device is the console
+        Drivers->USB Device Driver Support
+          CONFIG_CDCACM=n             : Disable the CDC/ACM serial device class
+          CONFIG_CDCACM_CONSOLE=n     : The CDC/ACM serial device is NOT the console
+          CONFIG_PL2303=y             : The Prolifics PL2303 emulation is enabled
+          CONFIG_PL2303_CONSOLE=y     : The PL2303 serial device is the console
 
       Why would you want to use a non-standard USB serial driver?  You might
       to use the PL2303 driver with a Windows host because it should
@@ -864,9 +865,9 @@ Where <subdir> is one of the following:
       some effort to get Windows to recognize the CDC/ACM device).
 
     4. Since this configuration is current set for the "DB_DP11215 PIC32
-       Storage Demo Board," USART2 is available and is configured to used as
+       Storage Demo Board," UART2 is available and is configured to used as
        the SYSLOG device.  That means that all debug output will be directed
-       out USART2.  Debug output is not enabled by default, however, so these
+       out UART2.  Debug output is not enabled by default, however, so these
        settings do nothing until you enable debug ouput.
 
         Device Drivers -> System Logging Device Options:
@@ -916,7 +917,9 @@ Where <subdir> is one of the following:
           CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
           CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
 
-       NOTE: USB debug output should not be enabled in this case.
+       NOTE: USB debug output also be enabled in this case.  Both will appear
+       on the serial SYSLOG output.  However, the debug output will be
+       asynchronous with the trace output and, hence, difficult to interpret.
 
     6. If you want to try this configuration on the DB-DP11212 PIC32 General
        Purpose Demo Board", here are the changes that you should make:

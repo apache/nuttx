@@ -4828,3 +4828,10 @@
 	  support from Laurent Latil (2013-5-28)
 	* configs/stm32_tiny: Add support for the STM32 Tiny development board
 	  based on th STM32 F103C8T6 MCU (2013-5-28).
+	* arch/arm/src/stm32/stm32_usbdev.c:  Fix an error in NULL packet
+	  handling:  If the NULL-packet needed flag ever gets set, then
+	  it is not cleared and inifinite NULL packets result.  This only
+	  effects the CDC/ACM class and was the cause of the failure of
+	  configs/stm32f3discovery/usbnsh configureation which works great
+	  after this change (2013-5-29).
+
