@@ -1676,8 +1676,8 @@ Where <subdir> is one of the following:
     You could also use the non-standard PL2303 serial device instead of
     the standard CDC/ACM serial device by changing:
 
-      CONFIG_CDCACM=y               : Disable the CDC/ACM serial device class
-      CONFIG_CDCACM_CONSOLE=y       : The CDC/ACM serial device is NOT the console
+      CONFIG_CDCACM=n               : Disable the CDC/ACM serial device class
+      CONFIG_CDCACM_CONSOLE=n       : The CDC/ACM serial device is NOT the console
       CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
       CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
 
