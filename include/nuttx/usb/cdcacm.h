@@ -121,6 +121,10 @@
 /* Endpoint number and size (in bytes) of the CDC device-to-host (IN) data
  * bulk endpoint.  NOTE that difference sizes may be selected for full (FS)
  * or high speed (HS) modes.
+ *
+ * Ideally, the BULKOUT request size should *not* be the same size as the
+ * maxpacket size.  That is because IN transfers of exactly the maxpacket
+ * size will be followed by a NULL packet.
  */
 
 #ifndef CONFIG_CDCACM_EPBULKIN
@@ -135,9 +139,16 @@
 #  define CONFIG_CDCACM_EPBULKIN_HSSIZE 512
 #endif
 
+#ifndef CONFIG_CDCACM_BULKIN_REQLEN
+#  define CONFIG_CDCACM_BULKIN_REQLEN 96
+#endif
+
 /* Endpoint number and size (in bytes) of the CDC host-to-device (OUT) data
  * bulk endpoint.  NOTE that difference sizes may be selected for full (FS)
  * or high speed (HS) modes.
+ *
+ * NOTE:  The BULKOUT request buffer size is always the same as the
+ * maxpacket size.
  */
 
 #ifndef CONFIG_CDCACM_EPBULKOUT

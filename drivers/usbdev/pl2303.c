@@ -101,7 +101,15 @@
 #  define CONFIG_PL2303_EP0MAXPACKET 64
 #endif
 
-#undef CONFIG_PL2303_BULKREQLEN
+/* Ideally, the BULKOUT request size should *not* be the same size as the
+ * maxpacket size.  That is because IN transfers of exactly the maxpacket
+ * size will be followed by a NULL packet.  The BULKOUT request buffer
+ * size, on the other hand, is always the same as the maxpacket size.
+ */
+
+#ifndef CONFIG_PL2303_BULKIN_REQLEN
+#  define CONFIG_PL2303_BULKIN_REQLEN 96
+#endif
 
 /* Vendor and product IDs and strings */
 
@@ -608,11 +616,7 @@ static int usbclass_sndpacket(FAR struct pl2303_dev_s *priv)
 
   /* Get the maximum number of bytes that will fit into one bulk IN request */
 
-#ifdef CONFIG_PL2303_BULKREQLEN
-  reqlen = MAX(CONFIG_PL2303_BULKREQLEN, ep->maxpacket);
-#else
-  reqlen = ep->maxpacket;
-#endif
+  reqlen = max(CONFIG_PL2303_BULKIN_REQLEN, ep->maxpacket);
 
   while (!sq_empty(&priv->reqlist))
     {
@@ -1222,12 +1226,7 @@ static void usbclass_rdcomplete(FAR struct usbdev_ep_s *ep,
 
   /* Requeue the read request */
 
-#ifdef CONFIG_PL2303_BULKREQLEN
-  req->len = max(CONFIG_PL2303_BULKREQLEN, ep->maxpacket);
-#else
   req->len = ep->maxpacket;
-#endif
-
   ret      = EP_SUBMIT(ep, req);
   if (ret != OK)
     {
@@ -1384,11 +1383,7 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
 
   /* Pre-allocate read requests */
 
-#ifdef CONFIG_PL2303_BULKREQLEN
-  reqlen = max(CONFIG_PL2303_BULKREQLEN, priv->epbulkout->maxpacket);
-#else
   reqlen = priv->epbulkout->maxpacket;
-#endif
 
   for (i = 0; i < CONFIG_PL2303_NRDREQS; i++)
     {
@@ -1400,17 +1395,14 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
           ret = -ENOMEM;
           goto errout;
         }
+
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbclass_rdcomplete;
     }
 
   /* Pre-allocate write request containers and put in a free list */
 
-#ifdef CONFIG_PL2303_BULKREQLEN
-  reqlen = max(CONFIG_PL2303_BULKREQLEN, priv->epbulkin->maxpacket);
-#else
-  reqlen = priv->epbulkin->maxpacket;
-#endif
+  reqlen = max(CONFIG_PL2303_BULKIN_REQLEN, priv->epbulkin->maxpacket);
 
   for (i = 0; i < CONFIG_PL2303_NWRREQS; i++)
     {
@@ -1422,6 +1414,7 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
           ret = -ENOMEM;
           goto errout;
         }
+
       reqcontainer->req->priv     = reqcontainer;
       reqcontainer->req->callback = usbclass_wrcomplete;
 

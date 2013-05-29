@@ -181,15 +181,15 @@ config PL2303_CONSOLE
 		as the console device.
 
 config PL2303_EPINTIN
-	int "Logical endpoint numbers"
+	int "Interrupt IN endpoint number"
 	default 1
 
 config PL2303_EPBULKOUT
-	int "Endpoint Bulkout"
+	int "Bulk OUT endpoint number"
 	default 2
 
 config PL2303_EPBULKIN
-	int "Endpoint Bulkin"
+	int "Bulk IN endpoint number"
 	default 3
 
 config PL2303_EP0MAXPACKET
@@ -207,6 +207,16 @@ config PL2303_NRDREQS
 	default 4
 	---help---
 		The number of write/read requests that can be in flight
+
+config PL2303_BULKIN_REQLEN
+	int "Size of one write request buffer"
+	default 96
+	---help---
+		Ideally, the BULKOUT request size should *not* be the same size as
+		the maxpacket size.  That is because IN transfers of exactly the
+		maxpacket size will be followed by a NULL packet.  The BULKOUT,
+		on the other hand, request buffer size is always the same as the
+		maxpacket size.
 
 config PL2303_RXBUFSIZE
 	int "Receive buffer size"
@@ -290,63 +300,63 @@ config CDCACM_EP0MAXPACKET
 		Endpoint 0 max packet size. Default 64.
 
 config CDCACM_EPINTIN
-	int "Hardware endpoint that supports interrupt IN operation"
+	int "Interrupt IN endpoint number"
 	default 1
 	---help---
 		The logical 7-bit address of a hardware endpoint that supports
 		interrupt IN operation.  Default 1.
 
 config CDCACM_EPINTIN_FSSIZE
-	int "Endpoint in full speed size"
+	int "Interupt IN full speed MAXPACKET size"
 	default 64
 	---help---
 		Max package size for the interrupt IN endpoint if full speed mode.
 		Default 64.
 
 config CDCACM_EPINTIN_HSSIZE
-	int "Endpoint in high speed size"
+	int "Interupt IN high speed MAXPACKET size"
 	default 64
 	---help---
 		Max package size for the interrupt IN endpoint if high speed mode.
 		Default 64.
 
 config CDCACM_EPBULKOUT
-	int "Endpoint bulk out"
+	int "Bulk OUT endpoint number"
 	default 3
 	---help---
 		The logical 7-bit address of a hardware endpoint that supports
 		bulk OUT operation.  Default: 3
 
 config CDCACM_EPBULKOUT_FSSIZE
-	int "Endpoint bulk out full speed size"
+	int "Bulk OUT full speed  MAXPACKET size"
 	default 64
 	---help---
 		Max package size for the bulk OUT endpoint if full speed mode.
 		Default 64.
 
 config CDCACM_EPBULKOUT_HSSIZE
-	int "Endpoint bulk out high speed size"
+	int "Bulk OUT out high speed  MAXPACKET size"
 	default 512
 	---help---
 		Max package size for the bulk OUT endpoint if high speed mode.
 		Default 512.
 
 config CDCACM_EPBULKIN
-	int "Endpoint bulk in"
+	int "Bulk IN endpoint number"
 	default 2
 	---help---
 		The logical 7-bit address of a hardware endpoint that supports
 		bulk IN operation.  Default: 2
 
 config CDCACM_EPBULKIN_FSSIZE
-	int "Endpoint bulk in full speed size"
+	int "Bulk IN full speed  MAXPACKET size"
 	default 64
 	---help---
 		Max package size for the bulk IN endpoint if full speed mode.
 		Default 64.
 
 config CDCACM_EPBULKIN_HSSIZE
-	int "Endpoint bulk in high speed size"
+	int "Bulk IN high speed  MAXPACKET size"
 	default 512
 	---help---
 		Max package size for the bulk IN endpoint if high speed mode.
@@ -363,6 +373,16 @@ config CDCACM_NRDREQS
 	default 4
 	---help---
 		The number of write/read requests that can be in flight
+
+config CDCACM_BULKIN_REQLEN
+	int "Size of one write request buffer"
+	default 96
+	---help---
+		Ideally, the BULKOUT request size should *not* be the same size as
+		the maxpacket size.  That is because IN transfers of exactly the
+		maxpacket size will be followed by a NULL packet.  The BULKOUT,
+		on the other hand, request buffer size is always the same as the
+		maxpacket size.
 
 config CDCACM_RXBUFSIZE
 	int "Receive buffer size"
@@ -463,14 +483,14 @@ config USBMSC_EP0MAXPACKET
 		Max packet size for endpoint 0
 
 config USBMSC_EPBULKOUT
-	int "Endpoint bulk out"
+	int "Bulk OUT endpoint number"
 	default 0
 	---help---
 		The logical 7-bit address of a hardware endpoints that support
 		bulk OUT and IN operations
 
 config USBMSC_EPBULKIN
-	int "Endpoint bulk in"
+	int "Bulk IN endpoint number"
 	default 0
 	---help---
 		The logical 7-bit address of a hardware endpoints that support
