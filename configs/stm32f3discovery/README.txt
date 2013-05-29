@@ -323,7 +323,7 @@ the following settings in the include/board.h file:
 This can be found on the board at:
 
   TX, PA2, Connector P1, pin 14
-  RX, PA3, Connector P1, pin 9
+  RX, PA3, Connector P1, pin 11
 
 FPU
 ===
@@ -726,7 +726,7 @@ Where <subdir> is one of the following:
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on UART2.  Support for
+    Configuration enables the serial interfaces on USART2.  Support for
     builtin applications is enabled, but in the base configuration no
     builtin applications are selected (see NOTES below).
 
@@ -824,41 +824,59 @@ Where <subdir> is one of the following:
        for Windows and builds under Cygwin (or probably MSYS).  That
        can easily be reconfigured, of course.
 
-       CONFIG_HOST_WINDOWS=y                   : Builds under Windows
-       CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y                   : Builds under Windows
+         CONFIG_WINDOWS_CYGWIN=y                 : Using Cygwin
 
-    3. This configuration does have UART2 output enabled and set up as
+       System Type:
+         CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+    3. This configuration does have USART2 output enabled and set up as
        the system logging device:
 
-       CONFIG_SYSLOG=y                    : Enable output to syslog, not console
-       CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
-       CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : UART2 will be /dev/ttyS0
+       Device Drivers -> System Logging Device Options:
+         CONFIG_SYSLOG=y                    : Enable output to syslog, not console
+         CONFIG_SYSLOG_CHAR=y               : Use a character device for system logging
+         CONFIG_SYSLOG_DEVPATH="/dev/ttyS0" : USART2 will be /dev/ttyS0
 
        However, there is nothing to generate SYLOG output in the default
-       configuration so nothing should appear on UART2 unless you enable
+       configuration so nothing should appear on USART2 unless you enable
        some debug output or enable the USB monitor.
+
+       NOTE:  Using the SYSLOG to get debug output has limitations.  Among
+       those are that you cannot get debug output from interrupt handlers.
+       So, in particularly, debug output is not a useful way to debug the
+       USB device controller driver.  Instead, use the USB monitor with
+       USB debug off and USB trance on (see below).
 
     4. Enabling USB monitor SYSLOG output.  If tracing is enabled, the USB
        device will save encoded trace output in in-memory buffer; if the
        USB monitor is enabled, that trace buffer will be periodically
-       emptied and dumped to the system loggin device (UART2 in this
+       emptied and dumped to the system loggin device (USART2 in this
        configuraion):
 
-       CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
-       CONFIG_USBDEV_TRACE_NRECORDS=128        : Buffer 128 records in memory
-       CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
-       CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
-       CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
-       CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
-       CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
-       CONFIG_SYSTEM_USBMONITOR_INTERVAL=2     : Dump trace data every 2 seconds
+        Device Drivers -> "USB Device Driver Support:
+          CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
+          CONFIG_USBDEV_TRACE_NRECORDS=256        : Buffer 128 records in memory
 
-       CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
-       CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
-       CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
-       CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
-       CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+        Application Configuration -> NSH LIbrary:
+          CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
+          CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
+
+        Application Configuration -> System NSH Add-Ons:
+          CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
+          CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+          CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+          CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
+          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+          CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
+          CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
+          CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
+          CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+
+       NOTE: USB debug output also be enabled in this case.  Both will appear
+       on the serial SYSLOG output.  However, the debug output will be
+       asynchronous with the trace output and, hence, difficult to interpret.
 
     5. The STM32F3Discovery board does not provide circuitry for control of
        the "soft connect" USB pullup.  As a result, the host PC does not know
@@ -868,15 +886,13 @@ Where <subdir> is one of the following:
        1) Start NSH with USB disconnected, then
        2) Connect the USB device to the host.
  
-    5. By default, this project assumes that you are *NOT* using the DFU
-       bootloader.
+    6. Using the Prolifics PL2303 Emulation
 
-    Using the Prolifics PL2303 Emulation
-    ------------------------------------
-    You could also use the non-standard PL2303 serial device instead of
-    the standard CDC/ACM serial device by changing:
+       You could also use the non-standard PL2303 serial device instead of
+       the standard CDC/ACM serial device by changing:
 
-      CONFIG_CDCACM=y               : Disable the CDC/ACM serial device class
-      CONFIG_CDCACM_CONSOLE=y       : The CDC/ACM serial device is NOT the console
-      CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
-      CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
+       Drivers->USB Device Driver Support
+         CONFIG_CDCACM=y               : Disable the CDC/ACM serial device class
+         CONFIG_CDCACM_CONSOLE=y       : The CDC/ACM serial device is NOT the console
+         CONFIG_PL2303=y               : The Prolifics PL2303 emulation is enabled
+         CONFIG_PL2303_CONSOLE=y       : The PL2303 serial device is the console
