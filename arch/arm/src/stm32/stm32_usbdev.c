@@ -1253,7 +1253,16 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
 
 #warning "REVISIT: If the EP supports double buffering, then we can do better"
 
-  /* Send the next packet */
+  /* Either (1) we are committed to sending the null packet (because txnullpkt == 1
+   * && nbytes == 0), or (2) we have not yet send the last packet (nbytes > 0).
+   * In either case, it is appropriate to clearn txnullpkt now.
+   */
+
+  privep->txnullpkt = 0;
+
+  /* If we are not sending a NULL packet, then clip the size to maxpacket
+   * and check if we need to send a following NULL packet.
+   */
 
   if (nbytes > 0)
     {
@@ -1261,7 +1270,6 @@ static int stm32_wrrequest(struct stm32_usbdev_s *priv, struct stm32_ep_s *prive
        * the request.
        */
 
-      privep->txnullpkt = 0;
       if (nbytes >= privep->ep.maxpacket)
         {
           nbytes =  privep->ep.maxpacket;
