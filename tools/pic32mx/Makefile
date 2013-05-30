@@ -47,5 +47,5 @@ mkconfig: mkpichex.c mkpichex.c
 	@gcc $(CFLAGS) -o mkpichex mkpichex.c
 
 clean:
-	@rm -f *.o *.a *~ .*.swp
+	@rm -f *.o *.a *.dSYM *~ .*.swp
 	@rm -f mkpichex mkpichex.exe
