@@ -4834,4 +4834,8 @@
 	  effects the CDC/ACM class and was the cause of the failure of
 	  configs/stm32f3discovery/usbnsh configureation which works great
 	  after this change (2013-5-29).
-
+	* drivers/usbdev/cdcacm.c and pl2303.c and include/nuttx/usb/cdcacm.h:
+	  Change the default IN request buffer size from 64 to 96.  This will
+	  avoid requests of exactly MAXPACKET size and, hence, avoid so many
+	  NULL packets.  Also, fix the OUT request buffers size to exactly
+	  the max packet size.  It cannot be any other size (2013-5-29).

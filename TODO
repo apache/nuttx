@@ -16,7 +16,7 @@ nuttx/
  (16)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (11)  Libraries (libc/, )
-  (9)  File system/Generic drivers (fs/, drivers/)
+ (10)  File system/Generic drivers (fs/, drivers/)
   (5)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -1022,6 +1022,14 @@ o File system / Generic drivers (fs/, drivers/)
                may be an assertion that is occuring before we have a console.
   Status:      Open
   Priority:    Medium
+
+  Title :      USE VTF TO MANAGE NAMED MESSAGE QUEUES AND NAMED SEMAPHORES
+  Description: Currently redundant namespace management logic is use for named
+               message queues and semaphores.  Namesphore management should
+               be consolidated in the VFS.  Perhaps in /ipc/mqueue and /ipc/sem.
+  Status:      Open
+  Priority:    Low.  Nothing is broken.  This is an enhancement that would
+               improve the OS design and possible reduce some FLASH usage
 
 o Graphics subystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,4 +1,4 @@
-Make.dep
-.depend
-*.obj
+/Make.dep
+/.depend
+/*.obj
 

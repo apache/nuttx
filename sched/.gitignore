@@ -1,6 +1,5 @@
 /Make.dep
 /.depend
-/*.src
 /*.asm
 /*.obj
 /*.rel
@@ -8,3 +7,5 @@
 /*.sym
 /*.adb
 /*.lib
+/*.src
+/*.dSYM

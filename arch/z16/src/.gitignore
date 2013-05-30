@@ -3,9 +3,8 @@
 /board
 /chip
 /nuttx.linkcmd
-*.asm
-*.obj
-*.lib
-*.map
-*.lst
-
+/*.asm
+/*.obj
+/*.lib
+/*.map
+/*.lst
