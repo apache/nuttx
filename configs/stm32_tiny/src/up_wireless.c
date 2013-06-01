@@ -59,8 +59,6 @@
 
 static int stm32tiny_wl_irq_attach(xcpt_t isr);
 
-static void stm32tiny_wl_irq_enable(bool enable);
-
 static void stm32tiny_wl_chip_enable(bool enable);
 
 /************************************************************************************
@@ -70,7 +68,6 @@ static void stm32tiny_wl_chip_enable(bool enable);
 static FAR struct nrf24l01_config_s nrf_cfg =
 {
   .irqattach = stm32tiny_wl_irq_attach,
-  .irqenable = stm32tiny_wl_irq_enable,
   .chipenable = stm32tiny_wl_chip_enable,
 };
 
@@ -82,17 +79,10 @@ static xcpt_t g_isr;
 
 static int stm32tiny_wl_irq_attach(xcpt_t isr)
 {
-  vdbg("IRQ attached\n");
-
+  vdbg("Attach IRQ\n");
   g_isr = isr;
   stm32_gpiosetevent(GPIO_NRF24L01_IRQ, false, true, false, g_isr);
   return OK;
-}
-
-static void stm32tiny_wl_irq_enable(bool enable)
-{
-  vdbg("IRQ_enabled:%d\n", enable);
-  stm32_gpiosetevent(GPIO_NRF24L01_IRQ, false, true, false, enable? g_isr:NULL);
 }
 
 static void stm32tiny_wl_chip_enable(bool enable)
