@@ -4848,3 +4848,5 @@
 	  Latil (2013-6-1).
 	* drivers/wireless/cc1101:  Move files in the cc1101 up one directory.
 	  From Laurent Latil (2013-6-1).
+	* configs/stm32_tiny: Fix nRF24L01+ driver integration for the STM32
+	  Tiny.  From Laurent Latil (2013-6-01).
