@@ -68,6 +68,7 @@
 #define _QEIOCBASE      (0x0f00) /* Quadrature encoder ioctl commands */
 #define _AUDIOIOCBASE   (0x1000) /* Audio ioctl commands */
 #define _SLCDIOCBASE    (0x1100) /* Segment LCD ioctl commands */
+#define _WLIOCBASE      (0x1100) /* Wireless modules ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -245,6 +246,12 @@
 
 #define _SLCDIOCVALID(c)   (_IOC_TYPE(c)==_SLCDIOCBASE)
 #define _SLCDIOC(nr)       _IOC(_SLCDIOCBASE,nr)
+
+/* Wireless driver ioctl definitions ************************************/
+/* (see nuttx/include/wireless/wireless.h */
+
+#define _WLIOCVALID(c)     (_IOC_TYPE(c)==_WLIOCBASE)
+#define _WLIOC(nr)         _IOC(_WLIOCBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions

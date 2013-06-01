@@ -194,6 +194,7 @@ CONFIG_I2C=y
 # Note: this has (at the moment) nothing to do with WIFI
 #
 CONFIG_WIRELESS=y
+CONFIG_WL_CC1101=y
 
 #
 # OS support for hardware RTC

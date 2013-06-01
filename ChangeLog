@@ -4839,3 +4839,12 @@
 	  avoid requests of exactly MAXPACKET size and, hence, avoid so many
 	  NULL packets.  Also, fix the OUT request buffers size to exactly
 	  the max packet size.  It cannot be any other size (2013-5-29).
+	* .gitignore:  Clean-up of most all .gitignore files:  Make scope of
+	  ignore to be only the current directory; Ignore .dSYM files in
+	  directories where .exe's may be build.  Also, in Makefiles,
+	  clean .dSYM files in directories where .exe may be built (2013-5-30).
+	* drivers/wireless/nrf24101.c/.h and include/nuttx/wireless/nrf24101.h:
+	  Add new driver for the wireless nRF24L01+ transceiver.  From Laurent
+	  Latil (2013-6-1).
+	* drivers/wireless/cc1101:  Move files in the cc1101 up one directory.
+	  From Laurent Latil (2013-6-1).

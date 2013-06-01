@@ -2,3 +2,55 @@
 # For a description of the syntax of this configuration file,
 # see misc/tools/kconfig-language.txt.
 #
+
+config WL_CC1101
+	bool "CC1101 RF transceiver support"
+	default n
+	select SPI
+
+config WL_NRF24L01
+	bool "nRF24l01+ transceiver support"
+	default n
+	select SPI
+	---help---
+		This options adds driver support for the Nordic nRF24L01+ chip.
+
+if WL_NRF24L01
+
+config WL_NRF24L01_DFLT_ADDR_WIDTH
+	int "Default address width"
+	default 5
+	range 3 5
+	---help---
+		Default address width to be used by the nRF24l01+ driver.
+		Note that this default can be changed through the driver API.
+
+config WL_NRF24L01_CHECK_PARAMS
+	bool "Check call parameters"
+	default y
+	---help---
+		This option adds some sanity check code to parameters given in the
+		driver API functions. If this option is disabled, parameter
+		values are passed 'as is' to the module hardware registers.
+
+config WL_NRF24L01_RXSUPPORT
+	bool "Support messages reception"
+	default y
+	---help---
+		If this opion is disabled the driver supports only the transmission of messages.
+		Reception of messages will be disabled (and corresponding functions removed).
+		Note: this option is intended to reduce driver code size for 'transmission
+		only' devices.
+
+if WL_NRF24L01_RXSUPPORT
+
+config WL_NRF24L01_RXFIFO_LEN
+	int "RX fifo length"
+	default 128
+	range 34 2048
+	---help---
+		Length of the software based fifo used to store content of
+		received messages.
+
+endif
+endif
