@@ -4858,3 +4858,8 @@
 	* arch/arm/src/sam3u:  Renamed files to sam_* vs. sam3u_*.
 	  Eliminated sam3u_internal.h; instead uses individual header
 	  files for each SAM interface block (2013-6-2).
+	* arch/arm/src/stm32/stm32f20xxx_rcc.c and stm32f40xxx_rcc.c, and
+	  configs/mikroe-stm32f4/src/up_clockconfig.c.  Correct some bad
+	  conditional compilation (CONFIG_ missing from setting name).  This
+	  affects some STM32 FLASH pre-fetch settings.  From Lorenz Meier
+	  (2013-6-2).
