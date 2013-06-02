@@ -4863,3 +4863,6 @@
 	  conditional compilation (CONFIG_ missing from setting name).  This
 	  affects some STM32 FLASH pre-fetch settings.  From Lorenz Meier
 	  (2013-6-2).
+	* arch/arm/include/sam34 and arch/arm/src/sam34:  The old sam3u/
+	  directories were renamed sam34/ to make room in the namespace for
+	  the SAM4L (2013-6-2).

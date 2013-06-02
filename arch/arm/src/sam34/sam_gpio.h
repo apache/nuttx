@@ -1,0 +1,297 @@
+/************************************************************************************
+ * arch/arm/src/sam34/sam_gpio.h
+ *
+ *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ************************************************************************************/
+
+#ifndef __ARCH_ARM_SRC_SAM34_SAM_GPIO_H
+#define __ARCH_ARM_SRC_SAM34_SAM_GPIO_H
+
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
+#include <nuttx/config.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "chip.h"
+
+/************************************************************************************
+ * Definitions
+ ************************************************************************************/
+
+/* Configuration ********************************************************************/
+
+#if defined(CONFIG_GPIOA_IRQ) || defined(CONFIG_GPIOB_IRQ) || defined(CONFIG_GPIOC_IRQ)
+#  define CONFIG_GPIO_IRQ 1
+#else
+#  undef CONFIG_GPIO_IRQ
+#endif
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_GPIO
+#endif
+
+/* Bit-encoded input to sam_configgpio() ********************************************/
+
+/* 16-bit Encoding:
+ * MMCC CII. VPPB BBBB
+ */
+
+/* Input/Output mode:
+ *
+ * MM.. .... .... ....
+ */
+
+#define GPIO_MODE_SHIFT            (14)        /* Bits 14-15: GPIO mode */
+#define GPIO_MODE_MASK             (3 << GPIO_MODE_SHIFT)
+#  define GPIO_INPUT               (0 << GPIO_MODE_SHIFT) /* Input */
+#  define GPIO_OUTPUT              (1 << GPIO_MODE_SHIFT) /* Output */
+#  define GPIO_PERIPHA             (2 << GPIO_MODE_SHIFT) /* Controlled by periph A signal */
+#  define GPIO_PERIPHB             (3 << GPIO_MODE_SHIFT) /* Controlled by periph B signal */
+
+/* These bits set the configuration of the pin:
+ * ..CC C... .... ....
+ */
+
+#define GPIO_CFG_SHIFT             (11)        /* Bits 11-13: GPIO configuration bits */
+#define GPIO_CFG_MASK              (7 << GPIO_CFG_SHIFT)
+#  define GPIO_CFG_DEFAULT         (0 << GPIO_CFG_SHIFT) /* Default, no attribute */
+#  define GPIO_CFG_PULLUP          (1 << GPIO_CFG_SHIFT) /* Bit 11: Internal pull-up */
+#  define GPIO_CFG_DEGLITCH        (2 << GPIO_CFG_SHIFT) /* Bit 12: Internal glitch filter */
+#  define GPIO_CFG_OPENDRAIN       (4 << GPIO_CFG_SHIFT) /* Bit 13: Open drain */
+
+/* Additional interrupt modes:
+ * .... .II. .... ....
+ */
+
+#define GPIO_INT_SHIFT             (9)        /* Bits 9-10: GPIO configuration bits */
+#define GPIO_INT_MASK              (3 << GPIO_INT_SHIFT)
+#  define GPIO_INT_LEVEL           (1 << 10)   /* Bit 10: Level detection interrupt */
+#  define GPIO_INT_EDGE            (0)         /*        (vs. Edge detection interrupt) */
+#  define GPIO_INT_HIGHLEVEL       (1 << 9)    /* Bit 9: High level detection interrupt */
+#  define GPIO_INT_LOWLEVEL        (0)         /*        (vs. Low level detection interrupt) */
+#  define GPIO_INT_RISING          (1 << 9)    /* Bit 9: Rising edge detection interrupt */
+#  define GPIO_INT_FALLING         (0)         /*        (vs. Falling edge detection interrupt) */
+
+/* If the pin is an GPIO output, then this identifies the initial output value:
+ * .... .... V... ....
+ */
+
+#define GPIO_OUTPUT_SET            (1 << 7)    /* Bit 7: Inital value of output */
+#define GPIO_OUTPUT_CLEAR          (0)
+
+/* This identifies the GPIO port:
+ * .... .... .PP. ....
+ */
+
+#define GPIO_PORT_SHIFT            (5)         /* Bit 5-6:  Port number */
+#define GPIO_PORT_MASK             (3 << GPIO_PORT_SHIFT)
+#  define GPIO_PORT_PIOA           (0 << GPIO_PORT_SHIFT)
+#  define GPIO_PORT_PIOB           (1 << GPIO_PORT_SHIFT)
+#  define GPIO_PORT_PIOC           (2 << GPIO_PORT_SHIFT)
+
+/* This identifies the bit in the port:
+ * .... .... ...B BBBB
+ */
+
+#define GPIO_PIN_SHIFT             0        /* Bits 0-4: GPIO number: 0-31 */
+#define GPIO_PIN_MASK              (31 << GPIO_PIN_SHIFT)
+#define GPIO_PIN0                  (0  << GPIO_PIN_SHIFT)
+#define GPIO_PIN1                  (1  << GPIO_PIN_SHIFT)
+#define GPIO_PIN2                  (2  << GPIO_PIN_SHIFT)
+#define GPIO_PIN3                  (3  << GPIO_PIN_SHIFT)
+#define GPIO_PIN4                  (4  << GPIO_PIN_SHIFT)
+#define GPIO_PIN5                  (5  << GPIO_PIN_SHIFT)
+#define GPIO_PIN6                  (6  << GPIO_PIN_SHIFT)
+#define GPIO_PIN7                  (7  << GPIO_PIN_SHIFT)
+#define GPIO_PIN8                  (8  << GPIO_PIN_SHIFT)
+#define GPIO_PIN9                  (9  << GPIO_PIN_SHIFT)
+#define GPIO_PIN10                 (10 << GPIO_PIN_SHIFT)
+#define GPIO_PIN11                 (11 << GPIO_PIN_SHIFT)
+#define GPIO_PIN12                 (12 << GPIO_PIN_SHIFT)
+#define GPIO_PIN13                 (13 << GPIO_PIN_SHIFT)
+#define GPIO_PIN14                 (14 << GPIO_PIN_SHIFT)
+#define GPIO_PIN15                 (15 << GPIO_PIN_SHIFT)
+#define GPIO_PIN16                 (16 << GPIO_PIN_SHIFT)
+#define GPIO_PIN17                 (17 << GPIO_PIN_SHIFT)
+#define GPIO_PIN18                 (18 << GPIO_PIN_SHIFT)
+#define GPIO_PIN19                 (19 << GPIO_PIN_SHIFT)
+#define GPIO_PIN20                 (20 << GPIO_PIN_SHIFT)
+#define GPIO_PIN21                 (21 << GPIO_PIN_SHIFT)
+#define GPIO_PIN22                 (22 << GPIO_PIN_SHIFT)
+#define GPIO_PIN23                 (23 << GPIO_PIN_SHIFT)
+#define GPIO_PIN24                 (24 << GPIO_PIN_SHIFT)
+#define GPIO_PIN25                 (25 << GPIO_PIN_SHIFT)
+#define GPIO_PIN26                 (26 << GPIO_PIN_SHIFT)
+#define GPIO_PIN27                 (27 << GPIO_PIN_SHIFT)
+#define GPIO_PIN28                 (28 << GPIO_PIN_SHIFT)
+#define GPIO_PIN29                 (29 << GPIO_PIN_SHIFT)
+#define GPIO_PIN30                 (30 << GPIO_PIN_SHIFT)
+#define GPIO_PIN31                 (31 << GPIO_PIN_SHIFT)
+
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
+
+/************************************************************************************
+ * Name: sam_gpioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for GPIO pins.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+void sam_gpioirqinitialize(void);
+#else
+#  define sam_gpioirqinitialize()
+#endif
+
+/************************************************************************************
+ * Name: sam_configgpio
+ *
+ * Description:
+ *   Configure a GPIO pin based on bit-encoded description of the pin.
+ *
+ ************************************************************************************/
+
+int sam_configgpio(uint16_t cfgset);
+
+/************************************************************************************
+ * Name: sam_gpiowrite
+ *
+ * Description:
+ *   Write one or zero to the selected GPIO pin
+ *
+ ************************************************************************************/
+
+void sam_gpiowrite(uint16_t pinset, bool value);
+
+/************************************************************************************
+ * Name: sam_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin
+ *
+ ************************************************************************************/
+
+bool sam_gpioread(uint16_t pinset);
+
+/************************************************************************************
+ * Name: sam_gpioirq
+ *
+ * Description:
+ *   Configure an interrupt for the specified GPIO pin.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+void sam_gpioirq(uint16_t pinset);
+#else
+#  define sam_gpioirq(pinset)
+#endif
+
+/************************************************************************************
+ * Name: sam_gpioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for specified GPIO IRQ
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+void sam_gpioirqenable(int irq);
+#else
+#  define sam_gpioirqenable(irq)
+#endif
+
+/************************************************************************************
+ * Name: sam_gpioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for specified GPIO IRQ
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_GPIO_IRQ
+void sam_gpioirqdisable(int irq);
+#else
+#  define sam_gpioirqdisable(irq)
+#endif
+
+/************************************************************************************
+ * Function:  sam_dumpgpio
+ *
+ * Description:
+ *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_DEBUG_GPIO
+int sam_dumpgpio(uint32_t pinset, const char *msg);
+#else
+#  define sam_dumpgpio(p,m)
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_SAM34_SAM_GPIO_H */

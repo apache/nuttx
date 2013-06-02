@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/sam3u-ek/src/up_mmcsd.c
+ * arch/arm/include/sam34/chip.h
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,106 +33,63 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_ARM_INCLUDE_SAM34_CHIP_H
+#define __ARCH_ARM_INCLUDE_SAM34_CHIP_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <debug.h>
-
-#include "sam_gpio.h"
-#include "sam3u-ek.h"
-
-#ifdef CONFIG_SAM34_HSMCI
-
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
-/* This needs to be extended.  The card detect GPIO must be configured as an interrupt.
- * when the interrupt indicating that a card has been inserted or removed is received,
- * this function must call sio_mediachange() to handle that event.  See
- * arch/arm/src/sam34/sam_hsmci.h for more information.
- */
+/* Get customizations for each supported chip */
 
-#ifdef GPIO_MCI_CD
-#  warning "Card detect interrupt handling needed"
+#ifdef CONFIG_ARCH_CHIP_AT91SAM3U4E
+/* Internal memory */
+
+#  define CONFIG_SAM34_SRAM0_SIZE    0x00008000  /* 32Kb */
+#  define CONFIG_SAM34_SRAM1_SIZE    0x00004000  /* 16Kb */
+#  define CONFIG_SAM34_NFCSRAM_SIZE  0x00001000  /*  4Kb */
+
+/* DMA */
+
+#  define CONFIG_SAM34_NDMACHAN      4           /* 4 DMA Channels */
+
+/* Memory card interface */
+
+#  define CONFIG_SAM34_MCI2          1
+#else
+#  error "Unknown SAM3/4 chip type"
 #endif
 
+/* NVIC priority levels *************************************************************/
+/* Each priority field holds a priority value, 0-15. The lower the value, the greater
+ * the priority of the corresponding interrupt. The processor implements only
+ * bits[7:4] of each field, bits[3:0] read as zero and ignore writes.
+ */
+
+#define NVIC_SYSH_PRIORITY_MIN       0xf0 /* All bits[7:4] set is minimum priority */
+#define NVIC_SYSH_PRIORITY_DEFAULT   0x80 /* Midpoint is the default */
+#define NVIC_SYSH_PRIORITY_MAX       0x00 /* Zero is maximum priority */
+#define NVIC_SYSH_PRIORITY_STEP      0x10 /* Four bits of interrupt priority used */
+
+#define NVIC_SYSH_DISABLE_PRIORITY   (NVIC_SYSH_PRIORITY_MAX + NVIC_SYSH_PRIORITY_STEP)
+#define NVIC_SYSH_SVCALL_PRIORITY    NVIC_SYSH_PRIORITY_MAX
+
 /************************************************************************************
- * Private Functions
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
  ************************************************************************************/
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: sam_hsmciinit
- *
- * Description:
- *   Initialize HSMCI support.  This function is called very early in board
- *   initialization.
- *
- ************************************************************************************/
-
-int sam_hsmciinit(void)
-{
-#ifdef GPIO_MCI_CD
-  sam_configgpio(GPIO_MCI_CD);
-#endif
-#ifdef GPIO_MCI_WP
-  sam_configgpio(GPIO_MCI_WP);
-#endif
-  return OK;
-}
-
-/************************************************************************************
- * Name: sam_cardinserted
- *
- * Description:
- *   Check if a card is inserted into the selected HSMCI slot
- *
- ************************************************************************************/
-
-bool sam_cardinserted(unsigned char slot)
-{
-  if (slot == 0)
-    {
-#ifdef GPIO_MCI_CD
-      bool inserted = sam_gpioread(GPIO_MCI_CD);
-      fvdbg("inserted: %s\n", inserted ? "NO" : "YES");
-      return !inserted;
-#else
-      return true;
-#endif
-    }
-  return false;
-}
-
-/************************************************************************************
- * Name: sam_writeprotected
- *
- * Description:
- *   Check if a card is inserted into the selected HSMCI slot
- *
- ************************************************************************************/
-
-bool sam_writeprotected(unsigned char slot)
-{
-  if (slot == 0)
-    {
-#ifdef GPIO_MCI_WP
-      bool protected = sam_gpioread(GPIO_MCI_WP);
-      fvdbg("protected: %s\n", inserted ? "YES" : "NO");
-      return protected;
-#else
-      return false;
-#endif
-    }
-  return false;
-}
-
-#endif /* CONFIG_SAM34_HSMCI */
+#endif /* __ARCH_ARM_INCLUDE_SAM34_CHIP_H */

@@ -177,7 +177,7 @@ config ARCH_CHIP
 	default "lpc31xx"	if ARCH_CHIP_LPC31XX
 	default "lpc43xx"	if ARCH_CHIP_LPC43XX
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
-	default "sam3u"		if ARCH_CHIP_SAM34
+	default "sam34"		if ARCH_CHIP_SAM34
 	default "stm32"		if ARCH_CHIP_STM32
 	default "str71x"	if ARCH_CHIP_STR71X
 
@@ -325,7 +325,7 @@ if ARCH_CHIP_NUC1XX
 source arch/arm/src/nuc1xx/Kconfig
 endif
 if ARCH_CHIP_SAM34
-source arch/arm/src/sam3u/Kconfig
+source arch/arm/src/sam34/Kconfig
 endif
 if ARCH_CHIP_STM32
 source arch/arm/src/stm32/Kconfig
