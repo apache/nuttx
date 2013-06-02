@@ -669,7 +669,7 @@ static void stm32_stdclockconfig(void)
  
       /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
 
-#ifdef STM32_FLASH_PREFETCH
+#ifdef CONFIG_STM32_FLASH_PREFETCH
       regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN);
 #else
       regval = (FLASH_ACR_LATENCY_5 | FLASH_ACR_ICEN | FLASH_ACR_DCEN);
