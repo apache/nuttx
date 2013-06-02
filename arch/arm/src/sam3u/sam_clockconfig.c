@@ -1,6 +1,6 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_clockconfig.c
- * arch/arm/src/chip/sam3u_clockconfig.c
+ * arch/arm/src/sam3u/sam_clockconfig.c
+ * arch/arm/src/chip/sam_clockconfig.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,7 +48,8 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "sam3u_internal.h"
+
+#include "sam_clockconfig.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_eefc.h"
 #include "chip/sam_wdt.h"
@@ -92,41 +93,41 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_efcsetup
+ * Name: sam_efcsetup
  *
  * Description:
  *   Configure 2 waitstates for embedded flash access
  *
  ****************************************************************************/
 
-static inline void sam3u_efcsetup(void)
+static inline void sam_efcsetup(void)
 {
   putreg32((2 << EEFC_FMR_FWS_SHIFT), SAM_EEFC0_FMR);
   putreg32((2 << EEFC_FMR_FWS_SHIFT), SAM_EEFC1_FMR);
 }
 
 /****************************************************************************
- * Name: sam3u_wdtsetup
+ * Name: sam_wdtsetup
  *
  * Description:
  *   Disable the watchdog timer
  *
  ****************************************************************************/
 
-static inline void sam3u_wdtsetup(void)
+static inline void sam_wdtsetup(void)
 {
   putreg32(WDT_MR_WDDIS, SAM_WDT_MR);
 }
 
 /****************************************************************************
- * Name: sam3u_supcsetup
+ * Name: sam_supcsetup
  *
  * Description:
  *   Select the external slow clock
  *
  ****************************************************************************/
 
-static inline void sam3u_supcsetup(void)
+static inline void sam_supcsetup(void)
 {
   /* Check if the 32-kHz is already selected */
 
@@ -141,14 +142,14 @@ static inline void sam3u_supcsetup(void)
 }
 
 /****************************************************************************
- * Name: sam3u_pmcwait
+ * Name: sam_pmcwait
  *
  * Description:
  *   Wait for the specide PMC status bit to become "1"
  *
  ****************************************************************************/
 
-static void sam3u_pmcwait(uint32_t bit)
+static void sam_pmcwait(uint32_t bit)
 {
   uint32_t delay;
   for (delay = 0;
@@ -157,14 +158,14 @@ static void sam3u_pmcwait(uint32_t bit)
 }
 
 /****************************************************************************
- * Name: sam3u_pmcsetup
+ * Name: sam_pmcsetup
  *
  * Description:
  *   Initialize clocking
  *
  ****************************************************************************/
 
-static inline void sam3u_pmcsetup(void)
+static inline void sam_pmcsetup(void)
 {
   uint32_t regval;
 
@@ -181,7 +182,7 @@ static inline void sam3u_pmcsetup(void)
        */
 
       putreg32(BOARD_CKGR_MOR, SAM_CKGR_MOR);
-      sam3u_pmcwait(PMC_INT_MOSCXTS);
+      sam_pmcwait(PMC_INT_MOSCXTS);
     }
 
   /* "Switch to the main oscillator.  The selection is made by writing the
@@ -197,7 +198,7 @@ static inline void sam3u_pmcsetup(void)
    */
 
   putreg32((BOARD_CKGR_MOR|CKGR_MOR_MOSCSEL), SAM_CKGR_MOR);
-  sam3u_pmcwait(PMC_INT_MOSCSELS);
+  sam_pmcwait(PMC_INT_MOSCSELS);
 
   /* "Select the master clock. "The Master Clock selection is made by writing
    *  the CSS field (Clock Source Selection) in PMC_MCKR (Master Clock Register).
@@ -212,12 +213,12 @@ static inline void sam3u_pmcsetup(void)
   regval &= ~PMC_MCKR_CSS_MASK;
   regval |= PMC_MCKR_CSS_MAIN;
   putreg32(regval, SAM_PMC_MCKR);
-  sam3u_pmcwait(PMC_INT_MCKRDY);
+  sam_pmcwait(PMC_INT_MCKRDY);
 
   /* Settup PLLA and wait for LOCKA */
 
   putreg32(BOARD_CKGR_PLLAR, SAM_CKGR_PLLAR);
-  sam3u_pmcwait(PMC_INT_LOCKA);
+  sam_pmcwait(PMC_INT_LOCKA);
 
   /* Setup UTMI for USB and wait for LOCKU */
 
@@ -225,27 +226,27 @@ static inline void sam3u_pmcsetup(void)
   regval = getreg32(SAM_CKGR_UCKR);
   regval |= BOARD_CKGR_UCKR;
   putreg32(regval, SAM_CKGR_UCKR);
-  sam3u_pmcwait(PMC_INT_LOCKU);
+  sam_pmcwait(PMC_INT_LOCKU);
 #endif
 
   /* Switch to the fast clock and wait for MCKRDY */
 
   putreg32(BOARD_PMC_MCKR_FAST, SAM_PMC_MCKR);
-  sam3u_pmcwait(PMC_INT_MCKRDY);
+  sam_pmcwait(PMC_INT_MCKRDY);
 
   putreg32(BOARD_PMC_MCKR, SAM_PMC_MCKR);
-  sam3u_pmcwait(PMC_INT_MCKRDY);
+  sam_pmcwait(PMC_INT_MCKRDY);
 }
 
 /****************************************************************************
- * Name: sam3u_enabledefaultmaster and sam3u_disabledefaultmaster
+ * Name: sam_enabledefaultmaster and sam_disabledefaultmaster
  *
  * Description:
  *   Enable/disable default master access
  *
  ****************************************************************************/
 
-static inline void sam3u_enabledefaultmaster(void)
+static inline void sam_enabledefaultmaster(void)
 {
   uint32_t regval;
 
@@ -269,7 +270,7 @@ static inline void sam3u_enabledefaultmaster(void)
 }
 
 #if 0 /* Not used */
-static inline void sam3u_disabledefaultmaster(void)
+static inline void sam_disabledefaultmaster(void)
 {
   uint32_t regval;
 
@@ -298,7 +299,7 @@ static inline void sam3u_disabledefaultmaster(void)
  ****************************************************************************/
 
 /************************************************************************************
- * Name: sam3u_clockconfig
+ * Name: sam_clockconfig
  *
  * Description:
  *   Called to initialize the SAM3/4.  This does whatever setup is needed to put the
@@ -310,26 +311,26 @@ static inline void sam3u_disabledefaultmaster(void)
  *
  ************************************************************************************/
 
-void sam3u_clockconfig(void)
+void sam_clockconfig(void)
 {
   /* Configure embedded flash access */
 
-  sam3u_efcsetup();
+  sam_efcsetup();
 
   /* Configure the watchdog timer */
 
-  sam3u_wdtsetup();
+  sam_wdtsetup();
 
   /* Setup the supply controller to use the external slow clock */
 
-  sam3u_supcsetup();
+  sam_supcsetup();
 
   /* Initialize clocking */
 
-  sam3u_pmcsetup();
+  sam_pmcsetup();
 
   /* Optimize CPU setting for speed */
 
-  sam3u_enabledefaultmaster();
+  sam_enabledefaultmaster();
 }
 

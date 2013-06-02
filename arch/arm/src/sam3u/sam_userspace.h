@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/sam3u-ek/src/up_mmcsd.c
+ * arch/arm/src/sam3u/sam_userspace.h
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,106 +33,73 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAM3U_SAM_USERSPACE_H
+#define __ARCH_ARM_SRC_SAM3U_SAM_USERSPACE_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
+#include <sys/types.h>
+#include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
 
-#include "sam_gpio.h"
-#include "sam3u-ek.h"
-
-#ifdef CONFIG_SAM34_HSMCI
+#include "up_internal.h"
+#include "chip.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/* This needs to be extended.  The card detect GPIO must be configured as an interrupt.
- * when the interrupt indicating that a card has been inserted or removed is received,
- * this function must call sio_mediachange() to handle that event.  See
- * arch/arm/src/sam3u/sam_hsmci.h for more information.
- */
-
-#ifdef GPIO_MCI_CD
-#  warning "Card detect interrupt handling needed"
-#endif
-
 /************************************************************************************
- * Private Functions
+ * Public Types
  ************************************************************************************/
 
 /************************************************************************************
- * Public Functions
+ * Inline Functions
  ************************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /************************************************************************************
- * Name: sam_hsmciinit
- *
- * Description:
- *   Initialize HSMCI support.  This function is called very early in board
- *   initialization.
- *
+ * Public Data
  ************************************************************************************/
 
-int sam_hsmciinit(void)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-#ifdef GPIO_MCI_CD
-  sam_configgpio(GPIO_MCI_CD);
-#endif
-#ifdef GPIO_MCI_WP
-  sam_configgpio(GPIO_MCI_WP);
-#endif
-  return OK;
-}
-
-/************************************************************************************
- * Name: sam_cardinserted
- *
- * Description:
- *   Check if a card is inserted into the selected HSMCI slot
- *
- ************************************************************************************/
-
-bool sam_cardinserted(unsigned char slot)
-{
-  if (slot == 0)
-    {
-#ifdef GPIO_MCI_CD
-      bool inserted = sam_gpioread(GPIO_MCI_CD);
-      fvdbg("inserted: %s\n", inserted ? "NO" : "YES");
-      return !inserted;
 #else
-      return true;
+#define EXTERN extern
 #endif
-    }
-  return false;
-}
 
 /************************************************************************************
- * Name: sam_writeprotected
- *
- * Description:
- *   Check if a card is inserted into the selected HSMCI slot
- *
+ * Public Function Prototypes
  ************************************************************************************/
 
-bool sam_writeprotected(unsigned char slot)
-{
-  if (slot == 0)
-    {
-#ifdef GPIO_MCI_WP
-      bool protected = sam_gpioread(GPIO_MCI_WP);
-      fvdbg("protected: %s\n", inserted ? "YES" : "NO");
-      return protected;
-#else
-      return false;
-#endif
-    }
-  return false;
-}
+/****************************************************************************
+ * Name: sam_userspace
+ *
+ * Description:
+ *   For the case of the separate user-/kernel-space build, perform whatever
+ *   platform specific initialization of the user memory is required.
+ *   Normally this just means initializing the user space .data and .bss
+ *   segments.
+ *
+ ****************************************************************************/
 
-#endif /* CONFIG_SAM34_HSMCI */
+#ifdef CONFIG_NUTTX_KERNEL
+void sam_userspace(void);
+#endif
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_SAM3U_SAM_USERSPACE_H */

@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_start.c
- * arch/arm/src/chip/sam3u_start.c
+ * arch/arm/src/sam3u/sam_start.c
  *
- *   Copyright (C) 2009-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,7 +49,9 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "sam3u_internal.h"
+#include "sam_clockconfig.h"
+#include "sam_lowputc.h"
+#include "sam_userspace.h"
 
 /****************************************************************************
  * Private Definitions
@@ -101,8 +102,8 @@ void __start(void)
 
   /* Configure the uart so that we can get debug output as soon as possible */
 
-  sam3u_clockconfig();
-  sam3u_lowsetup();
+  sam_clockconfig();
+  sam_lowsetup();
   showprogress('A');
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
@@ -141,13 +142,13 @@ void __start(void)
    */
 
 #ifdef CONFIG_NUTTX_KERNEL
-  sam3u_userspace();
+  sam_userspace();
   showprogress('E');
 #endif
 
   /* Initialize onboard resources */
 
-  sam3u_boardinitialize();
+  sam_boardinitialize();
   showprogress('F');
 
   /* Then start NuttX */

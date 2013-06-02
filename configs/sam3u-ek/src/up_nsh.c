@@ -1,6 +1,5 @@
 /****************************************************************************
  * config/sam3u-ek/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,8 +47,8 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
-#include "sam3u_internal.h"
-#include "sam3uek_internal.h"
+#include "sam_hsmci.h"
+#include "sam3u-ek.h"
 
 #ifdef CONFIG_SAM34_HSMCI
 
@@ -152,7 +151,7 @@ int nsh_archinitialize(void)
 
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 
-   sdio_mediachange(sdio, sam3u_cardinserted(0));
+   sdio_mediachange(sdio, sam_cardinserted(0));
 #endif
   return OK;
 }

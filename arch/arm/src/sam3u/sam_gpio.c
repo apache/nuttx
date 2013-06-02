@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_pio.c
+ * arch/arm/src/sam3u/sam_gpio.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "sam3u_internal.h"
+#include "sam_gpio.h"
 #include "chip/sam_pio.h"
 
 /****************************************************************************
@@ -74,42 +74,42 @@ static const char g_portchar[4]   = { 'A', 'B', 'C', 'D' };
  * Private Function Prototypes
  ****************************************************************************/
 /****************************************************************************
- * Name: sam3u_gpiobase
+ * Name: sam_gpiobase
  *
  * Description:
  *   Return the base address of the GPIO register set
  *
  ****************************************************************************/
 
-static inline uintptr_t sam3u_gpiobase(uint16_t cfgset)
+static inline uintptr_t sam_gpiobase(uint16_t cfgset)
 {
   int port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   return SAM_PION_BASE(port);
 }
 
 /****************************************************************************
- * Name: sam3u_gpiopin
+ * Name: sam_gpiopin
  *
  * Description:
  *   Returun the base address of the GPIO register set
  *
  ****************************************************************************/
 
-static inline int sam3u_gpiopin(uint16_t cfgset)
+static inline int sam_gpiopin(uint16_t cfgset)
 {
   return 1 << ((cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
 }
 
 /****************************************************************************
- * Name: sam3u_configinput
+ * Name: sam_configinput
  *
  * Description:
  *   Configure a GPIO input pin based on bit-encoded description of the pin.
  *
  ****************************************************************************/
 
-static inline int sam3u_configinput(uintptr_t base, uint32_t pin,
-                                    uint16_t cfgset)
+static inline int sam_configinput(uintptr_t base, uint32_t pin,
+                                  uint16_t cfgset)
 {
   /* Disable interrupts on the pin */
 
@@ -144,22 +144,22 @@ static inline int sam3u_configinput(uintptr_t base, uint32_t pin,
 
   /* To-Do:  If DEGLITCH is selected, need to configure DIFSR, SCIFSR, and
    *         registers.  This would probably best be done with another, new
-   *         API... perhaps sam3u_configfilter()
+   *         API... perhaps sam_configfilter()
    */
 
  return OK;
 }
 
 /****************************************************************************
- * Name: sam3u_configoutput
+ * Name: sam_configoutput
  *
  * Description:
  *   Configure a GPIO output pin based on bit-encoded description of the pin.
  *
  ****************************************************************************/
 
-static inline int sam3u_configoutput(uintptr_t base, uint32_t pin,
-                                     uint16_t cfgset)
+static inline int sam_configoutput(uintptr_t base, uint32_t pin,
+                                   uint16_t cfgset)
 {
   /* Disable interrupts on the pin */
 
@@ -206,7 +206,7 @@ static inline int sam3u_configoutput(uintptr_t base, uint32_t pin,
 }
 
 /****************************************************************************
- * Name: sam3u_configperiph
+ * Name: sam_configperiph
  *
  * Description:
  *   Configure a GPIO pin driven by a peripheral A or B signal based on
@@ -214,8 +214,8 @@ static inline int sam3u_configoutput(uintptr_t base, uint32_t pin,
  *
  ****************************************************************************/
 
-static inline int sam3u_configperiph(uintptr_t base, uint32_t pin,
-                                     uint16_t cfgset)
+static inline int sam_configperiph(uintptr_t base, uint32_t pin,
+                                   uint16_t cfgset)
 {
   uint32_t regval;
 
@@ -258,32 +258,32 @@ static inline int sam3u_configperiph(uintptr_t base, uint32_t pin,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_configgpio
+ * Name: sam_configgpio
  *
  * Description:
  *   Configure a GPIO pin based on bit-encoded description of the pin.
  *
  ****************************************************************************/
 
-int sam3u_configgpio(uint16_t cfgset)
+int sam_configgpio(uint16_t cfgset)
 {
-  uintptr_t base = sam3u_gpiobase(cfgset);
-  uint32_t  pin  = sam3u_gpiopin(cfgset);
+  uintptr_t base = sam_gpiobase(cfgset);
+  uint32_t  pin  = sam_gpiopin(cfgset);
   int       ret;
 
   switch (cfgset & GPIO_MODE_MASK)
     {
       case GPIO_INPUT:
-        ret = sam3u_configinput(base, pin, cfgset);
+        ret = sam_configinput(base, pin, cfgset);
         break;
 
       case GPIO_OUTPUT:
-        ret = sam3u_configoutput(base, pin, cfgset);
+        ret = sam_configoutput(base, pin, cfgset);
         break;
 
       case GPIO_PERIPHA:
       case GPIO_PERIPHB:
-        ret = sam3u_configperiph(base, pin, cfgset);
+        ret = sam_configperiph(base, pin, cfgset);
         break;
 
       default:
@@ -294,17 +294,17 @@ int sam3u_configgpio(uint16_t cfgset)
 }
 
 /****************************************************************************
- * Name: sam3u_gpiowrite
+ * Name: sam_gpiowrite
  *
  * Description:
  *   Write one or zero to the selected GPIO pin
  *
  ****************************************************************************/
 
-void sam3u_gpiowrite(uint16_t pinset, bool value)
+void sam_gpiowrite(uint16_t pinset, bool value)
 {
-  uintptr_t base = sam3u_gpiobase(pinset);
-  uint32_t  pin  = sam3u_gpiopin(pinset);
+  uintptr_t base = sam_gpiobase(pinset);
+  uint32_t  pin  = sam_gpiopin(pinset);
 
   if (value)
     {
@@ -317,17 +317,17 @@ void sam3u_gpiowrite(uint16_t pinset, bool value)
 }
 
 /****************************************************************************
- * Name: sam3u_gpioread
+ * Name: sam_gpioread
  *
  * Description:
  *   Read one or zero from the selected GPIO pin
  *
  ****************************************************************************/
 
-bool sam3u_gpioread(uint16_t pinset)
+bool sam_gpioread(uint16_t pinset)
 {
-  uintptr_t base = sam3u_gpiobase(pinset);
-  uint32_t  pin  = sam3u_gpiopin(pinset);
+  uintptr_t base = sam_gpiobase(pinset);
+  uint32_t  pin  = sam_gpiopin(pinset);
   uint32_t  regval;
 
   if ((pinset & GPIO_MODE_MASK) == GPIO_OUTPUT)
@@ -343,7 +343,7 @@ bool sam3u_gpioread(uint16_t pinset)
 }
 
 /************************************************************************************
- * Function:  sam3u_dumpgpio
+ * Function:  sam_dumpgpio
  *
  * Description:
  *   Dump all GPIO registers associated with the base address of the provided pinset.
@@ -351,7 +351,7 @@ bool sam3u_gpioread(uint16_t pinset)
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO
-int sam3u_dumpgpio(uint32_t pinset, const char *msg)
+int sam_dumpgpio(uint32_t pinset, const char *msg)
 {
   irqstate_t    flags;
   uintptr_t     base;
@@ -360,7 +360,7 @@ int sam3u_dumpgpio(uint32_t pinset, const char *msg)
 
   /* Get the base address associated with the PIO port */
 
-  pin  = sam3u_gpiopin(pinset);
+  pin  = sam_gpiopin(pinset);
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   base = SAM_PION_BASE(port);
 

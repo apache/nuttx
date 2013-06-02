@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/sam3u-ek/src/up_spi.c
+ * arch/arm/src/sam3u/sam_spi.h
  *
- *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,9 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAM3U_SAM_SPI_H
+#define __ARCH_ARM_SRC_SAM3U_SAM_SPI_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
@@ -41,70 +44,39 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
-#include <errno.h>
 
-#include <nuttx/spi.h>
-#include <arch/board/board.h>
-
-#include "up_arch.h"
 #include "chip.h"
-#include "sam_gpio.h"
-#include "sam_spi.h"
-#include "sam3u-ek.h"
-
-#ifdef CONFIG_SAM34_SPI
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/* Enables debug output from this file (needs CONFIG_DEBUG too) */
-
-#undef SPI_DEBUG   /* Define to enable debug */
-#undef SPI_VERBOSE /* Define to enable verbose debug */
-
-#ifdef SPI_DEBUG
-#  define spidbg  lldbg
-#  ifdef SPI_VERBOSE
-#    define spivdbg lldbg
-#  else
-#    define spivdbg(x...)
-#  endif
-#else
-#  undef SPI_VERBOSE
-#  define spidbg(x...)
-#  define spivdbg(x...)
-#endif
-
 /************************************************************************************
- * Private Functions
+ * Public Types
  ************************************************************************************/
 
 /************************************************************************************
- * Public Functions
+ * Inline Functions
  ************************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /************************************************************************************
- * Name: sam_spiinitialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins for the SAM3U10E-EVAL board.
- *
+ * Public Data
  ************************************************************************************/
 
-void weak_function sam_spiinitialize(void)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  /* The ZigBee module connects used NPCS0.  However, there is not yet any
-   * ZigBee support.
-   */
-
-   /* The touchscreen connects using NPCS2 (PC14). */
-
-#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-   sam_configgpio(GPIO_TSC_NPCS2);
+#else
+#define EXTERN extern
 #endif
-}
+
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
 
 /****************************************************************************
  * Name:  sam_spicsnumber, sam_spiselect, sam_spistatus, and sam_spicmddata
@@ -114,12 +86,12 @@ void weak_function sam_spiinitialize(void)
  *   include:
  *
  *   o sam_spicsnumber and sam_spiselect which are helper functions to
- *     manage the board-specific aspects of the unique SAM3U chip select
+ *     manage the board-specific aspects of the unique SAM3/4 chip select
  *     architecture.
  *   o sam_spistatus and sam_spicmddata:  Implementations of the status
  *     and cmddata methods of the SPI interface defined by struct spi_ops_
  *     (see include/nuttx/spi.h). All other methods including
- *     up_spiinitialize()) are provided by common SAM3U logic.
+ *     up_spiinitialize()) are provided by common SAM3/4 logic.
  *
  *  To use this common SPI logic on your board:
  *
@@ -142,16 +114,25 @@ void weak_function sam_spiinitialize(void)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SAM34_SPI
+struct spi_dev_s;
+enum spi_dev_e;
+
 /****************************************************************************
  * Name: sam_spicsnumber
  *
  * Description:
- *   The SAM3U has 4 CS registers for controlling device features.  This
+ *   The SAM3/4 has 4 CS registers for controlling device features.  This
  *   function must be provided by board-specific code.  Given a logical device
  *   ID, this function returns a number from 0 to 3 that identifies one of
- *   these SAM3U CS resources.
+ *   these SAM3/4 CS resources.
+ *
+ *   If CONFIG_SPI_OWNBUS is not defined and the GPIO is controlled by
+ *   sam_spiselect, then the same CS register may be used to control
+ *   multiple devices.
  *
  * Input Parameters:
+ *   dev - SPI device info
  *   devid - Identifies the (logical) device
  *
  * Returned Values:
@@ -160,22 +141,7 @@ void weak_function sam_spiinitialize(void)
  *
  ****************************************************************************/
 
-int sam_spicsnumber(enum spi_dev_e devid)
-{
-  int cs = -EINVAL;
-
-#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-  if (devid == SPIDEV_TOUCHSCREEN)
-    {
-      /* Assert the CS pin to the OLED display */
-
-      cs = 2;
-    }
-#endif
-
-  spidbg("devid: %d CS: %d\n", (int)devid, cs);
-  return cs;
-}
+int sam_spicsnumber(enum spi_dev_e devid);
 
 /****************************************************************************
  * Name: sam_spiselect
@@ -194,6 +160,7 @@ int sam_spicsnumber(enum spi_dev_e devid)
  *   same as the NPCS pin normal associated with the chip select number.
  *
  * Input Parameters:
+ *   dev - SPI device info
  *   devid - Identifies the (logical) device
  *   selected - TRUE:Select the device, FALSE:De-select the device
  *
@@ -202,23 +169,7 @@ int sam_spicsnumber(enum spi_dev_e devid)
  *
  ****************************************************************************/
 
-void sam_spiselect(enum spi_dev_e devid, bool selected)
-{
-  /* The touchscreen chip select is implemented as a GPIO OUTPUT that must
-   * be controlled by this function.  This is because the ADS7843E driver
-   * must be able to sample the device BUSY GPIO input between SPI transfers.
-   * However, the AD7843E will tri-state the BUSY input whenever the chip
-   * select is de-asserted.  So the only option is to control the chip select
-   * manually and hold it low throughout the SPI transfer.
-   */
-
-#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-  if (devid == SPIDEV_TOUCHSCREEN)
-    {
-      sam_gpiowrite(GPIO_TSC_NPCS2, !selected);
-    }
-#endif
-}
+void sam_spiselect(enum spi_dev_e devid, bool selected);
 
 /****************************************************************************
  * Name: sam_spistatus
@@ -227,6 +178,7 @@ void sam_spiselect(enum spi_dev_e devid, bool selected)
  *   Return status information associated with the SPI device.
  *
  * Input Parameters:
+ *   dev - SPI device info
  *   devid - Identifies the (logical) device
  *
  * Returned Values:
@@ -234,9 +186,41 @@ void sam_spiselect(enum spi_dev_e devid, bool selected)
  *
  ****************************************************************************/
 
-uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
-{
-  return 0;
-}
+uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 
+/****************************************************************************
+ * Name: sam_spicmddata
+ *
+ * Description:
+ *   Some SPI devices require an additional control to determine if the SPI
+ *   data being sent is a command or is data.  If CONFIG_SPI_CMDDATA then
+ *   this function will be called to different be command and data transfers.
+ *
+ *   This is often needed, for example, by LCD drivers.  Some LCD hardware
+ *   may be configured to use 9-bit data transfers with the 9th bit
+ *   indicating command or data.  That same hardware may be configurable,
+ *   instead, to use 8-bit data but to require an additional, board-
+ *   specific GPIO control to distinguish command and data.  This function
+ *   would be needed in that latter case.
+ *
+ * Input Parameters:
+ *   dev - SPI device info
+ *   devid - Identifies the (logical) device
+ *
+ * Returned Values:
+ *   Zero on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_CMDDATA
+int sam_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+#endif
 #endif /* CONFIG_SAM34_SPI */
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_SAM3U_SAM_SPI_H */

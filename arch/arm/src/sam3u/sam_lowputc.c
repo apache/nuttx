@@ -1,5 +1,5 @@
 /**************************************************************************
- * arch/arm/src/sam3u/sam3u_lowputc.c
+ * arch/arm/src/sam3u/sam_lowputc.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,9 +47,11 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "sam3u_internal.h"
+#include "sam_gpio.h"
+#include "sam_lowputc.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_uart.h"
+#include "chip/sam_pinmap.h"
 
 /**************************************************************************
  * Private Definitions
@@ -228,7 +230,7 @@ void up_lowputc(char ch)
 }
 
 /**************************************************************************
- * Name: sam3u_lowsetup
+ * Name: sam_lowsetup
  *
  * Description:
  *   This performs basic initialization of the USART used for the serial
@@ -237,7 +239,7 @@ void up_lowputc(char ch)
  *
  **************************************************************************/
 
-void sam3u_lowsetup(void)
+void sam_lowsetup(void)
 {
   uint32_t regval;
 
@@ -264,44 +266,44 @@ void sam3u_lowsetup(void)
   /* Configure UART pins for all selected UART/USARTs */
 
 #ifdef CONFIG_SAM34_UART
-  (void)sam3u_configgpio(GPIO_UART_RXD);
-  (void)sam3u_configgpio(GPIO_UART_TXD);
+  (void)sam_configgpio(GPIO_UART_RXD);
+  (void)sam_configgpio(GPIO_UART_TXD);
 #endif
 #ifdef CONFIG_SAM34_USART0
-  (void)sam3u_configgpio(GPIO_USART0_RXD);
-  (void)sam3u_configgpio(GPIO_USART0_TXD);
-  (void)sam3u_configgpio(GPIO_USART0_CTS);
-  (void)sam3u_configgpio(GPIO_USART0_RTS);
+  (void)sam_configgpio(GPIO_USART0_RXD);
+  (void)sam_configgpio(GPIO_USART0_TXD);
+  (void)sam_configgpio(GPIO_USART0_CTS);
+  (void)sam_configgpio(GPIO_USART0_RTS);
 #endif
 #ifdef CONFIG_SAM34_USART1
-  (void)sam3u_configgpio(GPIO_USART1_RXD);
-  (void)sam3u_configgpio(GPIO_USART1_TXD);
-  (void)sam3u_configgpio(GPIO_USART1_CTS);
-  (void)sam3u_configgpio(GPIO_USART1_RTS);
+  (void)sam_configgpio(GPIO_USART1_RXD);
+  (void)sam_configgpio(GPIO_USART1_TXD);
+  (void)sam_configgpio(GPIO_USART1_CTS);
+  (void)sam_configgpio(GPIO_USART1_RTS);
 #endif
 #ifdef CONFIG_SAM34_USART2
-  (void)sam3u_configgpio(GPIO_USART2_RXD);
-  (void)sam3u_configgpio(GPIO_USART2_TXD);
-  (void)sam3u_configgpio(GPIO_USART2_CTS);
-  (void)sam3u_configgpio(GPIO_USART2_RTS);
+  (void)sam_configgpio(GPIO_USART2_RXD);
+  (void)sam_configgpio(GPIO_USART2_TXD);
+  (void)sam_configgpio(GPIO_USART2_CTS);
+  (void)sam_configgpio(GPIO_USART2_RTS);
 #endif
 #ifdef CONFIG_SAM34_USART3
-  (void)sam3u_configgpio(GPIO_USART3_RXD);
-  (void)sam3u_configgpio(GPIO_USART3_TXD);
-  (void)sam3u_configgpio(GPIO_USART3_CTS);
-  (void)sam3u_configgpio(GPIO_USART3_RTS);
+  (void)sam_configgpio(GPIO_USART3_RXD);
+  (void)sam_configgpio(GPIO_USART3_TXD);
+  (void)sam_configgpio(GPIO_USART3_CTS);
+  (void)sam_configgpio(GPIO_USART3_RTS);
 #endif
 
 #ifdef GPIO_CONSOLE_RXD
 #endif
 #ifdef GPIO_CONSOLE_TXD
-  (void)sam3u_configgpio(GPIO_CONSOLE_TXD);
+  (void)sam_configgpio(GPIO_CONSOLE_TXD);
 #endif
 #ifdef GPIO_CONSOLE_CTS
-  (void)sam3u_configgpio(GPIO_CONSOLE_CTS);
+  (void)sam_configgpio(GPIO_CONSOLE_CTS);
 #endif
 #ifdef GPIO_CONSOLE_RTS
-  (void)sam3u_configgpio(GPIO_CONSOLE_RTS);
+  (void)sam_configgpio(GPIO_CONSOLE_RTS);
 #endif
 
   /* Configure the console (only) */

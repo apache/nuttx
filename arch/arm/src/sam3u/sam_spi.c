@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_spi.c
+ * arch/arm/src/sam3u/sam_spi.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -55,9 +55,11 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "sam3u_internal.h"
+#include "sam_gpio.h"
+#include "sam_spi.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_spi.h"
+#include "chip/sam_pinmap.h"
 
 #ifdef CONFIG_SAM34_SPI
 
@@ -93,7 +95,7 @@
 /* The state of one chip select */
 
 #ifndef CONFIG_SPI_OWNBUS
-struct sam3u_chipselect_s
+struct sam_chipselect_s
 {
   uint32_t         frequency;  /* Requested clock frequency */
   uint32_t         actual;     /* Actual clock frequency */
@@ -104,12 +106,12 @@ struct sam3u_chipselect_s
 
 /* The overall state of the SPI interface */
 
-struct sam3u_spidev_s
+struct sam_spidev_s
 {
   struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
 #ifndef CONFIG_SPI_OWNBUS
   sem_t            exclsem;    /* Held while chip is selected for mutual exclusion */
-  struct sam3u_chipselect_s csstate[4];
+  struct sam_chipselect_s csstate[4];
 #endif
   uint8_t          cs;         /* Chip select number */
 };
@@ -127,7 +129,7 @@ static void spi_dumpregs(FAR const char *msg);
 #endif
 
 static inline void spi_flush(void);
-static inline uint32_t spi_cs2pcs(FAR struct sam3u_spidev_s *priv);
+static inline uint32_t spi_cs2pcs(FAR struct sam_spidev_s *priv);
 
 /* SPI methods */
 
@@ -164,9 +166,9 @@ static const struct spi_ops_s g_spiops =
   .setfrequency      = spi_setfrequency,
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
-  .status            = sam3u_spistatus,
+  .status            = sam_spistatus,
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = sam3u_spicmddata,
+  .cmddata           = sam_spicmddata,
 #endif
   .send              = spi_send,
 #ifdef CONFIG_SPI_EXCHANGE
@@ -180,7 +182,7 @@ static const struct spi_ops_s g_spiops =
 
 /* SPI device structure */
 
-static struct sam3u_spidev_s g_spidev =
+static struct sam_spidev_s g_spidev =
 {
   .spidev            = { &g_spiops },
 };
@@ -285,7 +287,7 @@ static inline void spi_flush(void)
  *
  ****************************************************************************/
 
-static inline uint32_t spi_cs2pcs(FAR struct sam3u_spidev_s *priv)
+static inline uint32_t spi_cs2pcs(FAR struct sam_spidev_s *priv)
 {
   return ((uint32_t)1 << (priv->cs)) - 1;
 }
@@ -314,7 +316,7 @@ static inline uint32_t spi_cs2pcs(FAR struct sam3u_spidev_s *priv)
 #ifndef CONFIG_SPI_OWNBUS
 static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 {
-  FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
+  FAR struct sam_spidev_s *priv = (FAR struct sam_spidev_s *)dev;
 
   spivdbg("lock=%d\n", lock);
   if (lock)
@@ -357,7 +359,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
  static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
  {
-  FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
+  FAR struct sam_spidev_s *priv = (FAR struct sam_spidev_s *)dev;
   uint32_t regval;
 
   /* Are we selecting or de-selecting the device? */
@@ -371,7 +373,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
       /* Get the chip select number used with this SPI device */
 
-      priv->cs = sam3u_spicsnumber(devid);
+      priv->cs = sam_spicsnumber(devid);
       spivdbg("cs=%d\n", priv->cs);
       DEBUGASSERT(priv->cs >= 0 && priv->cs <= 3);
 
@@ -389,7 +391,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
       /* At this point, we expect the chip to have already been selected */
 
 #ifdef CONFIG_DEBUG
-      int cs = sam3u_spicsnumber(devid);
+      int cs = sam_spicsnumber(devid);
       DEBUGASSERT(priv->cs == cs);
 #endif
 
@@ -402,7 +404,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
    * pins may be programmed by the board specific logic in one of two
    * different ways.  First, the pins may be programmed as SPI peripherals.
    * In that case, the pins are completely controlled by the SPI driver.
-   * This sam3u_spiselect method still needs to be provided, but it may
+   * This sam_spiselect method still needs to be provided, but it may
    * be only a stub.
    *
    * An alternative way to program the PIO chip select pins is as normal
@@ -412,7 +414,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
    * same as the NPCS pin normal associated with the chip select number.
    */
 
-  sam3u_spiselect(devid, selected);
+  sam_spiselect(devid, selected);
  }
 
 /****************************************************************************
@@ -432,7 +434,7 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
 
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
-  FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
+  FAR struct sam_spidev_s *priv = (FAR struct sam_spidev_s *)dev;
   uint32_t actual;
   uint32_t scbr;
   uint32_t dlybs;
@@ -543,7 +545,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
-  FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
+  FAR struct sam_spidev_s *priv = (FAR struct sam_spidev_s *)dev;
   uint32_t regval;
   uint32_t regaddr;
 
@@ -612,7 +614,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
-  FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
+  FAR struct sam_spidev_s *priv = (FAR struct sam_spidev_s *)dev;
   uint32_t regaddr;
   uint32_t regval;
 
@@ -709,7 +711,7 @@ static void  spi_exchange(FAR struct spi_dev_s *dev,
                           FAR const void *txbuffer, FAR void *rxbuffer,
                           size_t nwords)
 {
-  FAR struct sam3u_spidev_s *priv = (FAR struct sam3u_spidev_s *)dev;
+  FAR struct sam_spidev_s *priv = (FAR struct sam_spidev_s *)dev;
   FAR uint8_t *rxptr = (FAR uint8_t*)rxbuffer;
   FAR uint8_t *txptr = (FAR uint8_t*)txbuffer;
   uint32_t pcs;
@@ -882,7 +884,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 
 FAR struct spi_dev_s *up_spiinitialize(int port)
 {
-  FAR struct sam3u_spidev_s *priv = &g_spidev;
+  FAR struct sam_spidev_s *priv = &g_spidev;
   irqstate_t flags;
   uint32_t regval;
 
@@ -909,9 +911,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
    * must be configured by board-specific logic.
    */
 
-  sam3u_configgpio(GPIO_SPI0_MISO);
-  sam3u_configgpio(GPIO_SPI0_MOSI);
-  sam3u_configgpio(GPIO_SPI0_SPCK);
+  sam_configgpio(GPIO_SPI0_MISO);
+  sam_configgpio(GPIO_SPI0_MOSI);
+  sam_configgpio(GPIO_SPI0_SPCK);
 
   /* Disable SPI clocking */
 

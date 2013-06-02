@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/sam3uek_eval/src/sam3uek_internal.h
- * arch/arm/src/board/sam3uek_internal.n
+ * configs/sam3uek_eval/src/sam3u-ek.h
  *
  *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_SAM3U_EK_SRC_SAM3UEK_INTERNAL_H
-#define __CONFIGS_SAM3U_EK_SRC_SAM3UEK_INTERNAL_H
+#ifndef __CONFIGS_SAM3U_EK_SRC_SAM3U_EK_H
+#define __CONFIGS_SAM3U_EK_SRC_SAM3U_EK_H
 
 /************************************************************************************
  * Included Files
@@ -48,6 +47,8 @@
 
 #include <arch/irq.h>
 #include <nuttx/irq.h>
+
+#include "chip/sam_pinmap.h"
 
 /************************************************************************************
  * Definitions
@@ -191,27 +192,27 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam3u_spiinitialize
+ * Name: sam_spiinitialize
  *
  * Description:
  *   Called to configure SPI chip select GPIO pins for the SAM3U-EK board.
  *
  ************************************************************************************/
 
-extern void weak_function sam3u_spiinitialize(void);
+extern void weak_function sam_spiinitialize(void);
 
 /************************************************************************************
- * Name: sam3u_usbinitialize
+ * Name: sam_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins for the SAM3U-EK board.
  *
  ************************************************************************************/
 
-extern void weak_function sam3u_usbinitialize(void);
+extern void weak_function sam_usbinitialize(void);
 
 /****************************************************************************
- * Name: sam3u_hsmciinit
+ * Name: sam_hsmciinit
  *
  * Description:
  *   Initialize HSMCI support
@@ -219,13 +220,21 @@ extern void weak_function sam3u_usbinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SAM34_HSMCI
-extern int weak_function sam3u_hsmciinit(void);
+extern int weak_function sam_hsmciinit(void);
 #else
-# define sam3u_hsmciinit()
+# define sam_hsmciinit()
 #endif
 
 /****************************************************************************
- * Name: sam3u_cardinserted
+ * Name: up_ledinit
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+void up_ledinit(void);
+#endif
+
+/****************************************************************************
+ * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
@@ -233,13 +242,13 @@ extern int weak_function sam3u_hsmciinit(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SAM34_HSMCI
-extern bool sam3u_cardinserted(unsigned char slot);
+extern bool sam_cardinserted(unsigned char slot);
 #else
-#  define sam3u_cardinserted(slot) (false)
+#  define sam_cardinserted(slot) (false)
 #endif
 
 /****************************************************************************
- * Name: sam3u_writeprotected
+ * Name: sam_writeprotected
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
@@ -247,11 +256,11 @@ extern bool sam3u_cardinserted(unsigned char slot);
  ****************************************************************************/
 
 #ifdef CONFIG_SAM34_HSMCI
-extern bool sam3u_writeprotected(unsigned char slot);
+extern bool sam_writeprotected(unsigned char slot);
 #else
-#  define sam3u_writeprotected(slot) (false)
+#  define sam_writeprotected(slot) (false)
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_SAM3U_EK_SRC_SAM3UEK_INTERNAL_H */
+#endif /* __CONFIGS_SAM3U_EK_SRC_SAM3U_EK_H */
 

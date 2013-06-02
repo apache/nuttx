@@ -42,7 +42,6 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "sam3u_internal.h"
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
@@ -144,7 +143,7 @@ extern "C" {
  * Public Function Prototypes
  ************************************************************************************/
 /************************************************************************************
- * Name: sam3u_boardinitialize
+ * Name: sam_boardinitialize
  *
  * Description:
  *   All SAM3U architectures must provide the following entry point.  This entry point
@@ -153,7 +152,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void sam3u_boardinitialize(void);
+void sam_boardinitialize(void);
 
 /************************************************************************************
  * Name: up_buttoninit
@@ -166,7 +165,7 @@ EXTERN void sam3u_boardinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-EXTERN void up_buttoninit(void);
+void up_buttoninit(void);
 
 /************************************************************************************
  * Name: up_buttons
@@ -179,7 +178,7 @@ EXTERN void up_buttoninit(void);
  *
  ************************************************************************************/
 
-EXTERN uint8_t up_buttons(void);
+uint8_t up_buttons(void);
 
 /************************************************************************************
  * Name: up_irqbutton
@@ -193,7 +192,7 @@ EXTERN uint8_t up_buttons(void);
  ************************************************************************************/
 
 #ifdef CONFIG_GPIOA_IRQ
-EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
+xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */
 

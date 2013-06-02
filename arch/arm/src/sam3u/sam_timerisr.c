@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_timerisr.c
+ * arch/arm/src/sam3u/sam_timerisr.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,6 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "sam3u_internal.h"
 
 /****************************************************************************
  * Definitions

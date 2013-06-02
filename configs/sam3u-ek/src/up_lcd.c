@@ -125,10 +125,10 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
+#include "sam_gpio.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_smc.h"
-#include "sam3u_internal.h"
-#include "sam3uek_internal.h"
+#include "sam3u-ek.h"
 
 /**************************************************************************************
  * Pre-processor Definitions
@@ -288,7 +288,7 @@
 
 /* This structure describes the state of this driver */
 
-struct sam3u_dev_s
+struct sam_dev_s
 {
   /* Publically visible device structure */
 
@@ -305,36 +305,36 @@ struct sam3u_dev_s
 
 /* Low-level HX834x Register access */
 
-static void sam3u_putreg(uint16_t reg,  uint16_t data);
-static uint16_t sam3u_getreg(uint16_t reg);
+static void sam_putreg(uint16_t reg,  uint16_t data);
+static uint16_t sam_getreg(uint16_t reg);
 
 /* Misc. LCD Helper Functions */
 
-static void sam3u_setcursor(fb_coord_t row, fb_coord_t col);
-static inline void sam3u_wrsetup(void);
-static inline void sam3u_wrram(uint16_t color);
-static inline uint16_t sam3u_rdram(void);
-static void sam3u_lcdon(void);
-static void sam3u_lcdoff(void);
+static void sam_setcursor(fb_coord_t row, fb_coord_t col);
+static inline void sam_wrsetup(void);
+static inline void sam_wrram(uint16_t color);
+static inline uint16_t sam_rdram(void);
+static void sam_lcdon(void);
+static void sam_lcdoff(void);
 
 #ifdef CONFIG_DEBUG_GRAPHICS
-static void sam3u_dumpreg(uint8_t startreg, uint8_t endreg);
+static void sam_dumpreg(uint8_t startreg, uint8_t endreg);
 #else
-#  define sam3u_dumpreg(startreg,endreg)
+#  define sam_dumpreg(startreg,endreg)
 #endif
 
 /* LCD Data Transfer Methods */
 
-static int sam3u_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
              size_t npixels);
-static int sam3u_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
              size_t npixels);
 
 /* LCD Configuration */
 
-static int sam3u_getvideoinfo(FAR struct lcd_dev_s *dev,
+static int sam_getvideoinfo(FAR struct lcd_dev_s *dev,
              FAR struct fb_videoinfo_s *vinfo);
-static int sam3u_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
              FAR struct lcd_planeinfo_s *pinfo);
 
 /* LCD RGB Mapping */
@@ -351,10 +351,10 @@ static int sam3u_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 
 /* LCD Specific Controls */
 
-static int sam3u_getpower(struct lcd_dev_s *dev);
-static int sam3u_setpower(struct lcd_dev_s *dev, int power);
-static int sam3u_getcontrast(struct lcd_dev_s *dev);
-static int sam3u_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
+static int sam_getpower(struct lcd_dev_s *dev);
+static int sam_setpower(struct lcd_dev_s *dev, int power);
+static int sam_getcontrast(struct lcd_dev_s *dev);
+static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
 
 /**************************************************************************************
  * Private Data
@@ -387,32 +387,32 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 static const struct lcd_planeinfo_s g_planeinfo =
 {
-  .putrun = sam3u_putrun,          /* Put a run into LCD memory */
-  .getrun = sam3u_getrun,          /* Get a run from LCD memory */
+  .putrun = sam_putrun,            /* Put a run into LCD memory */
+  .getrun = sam_getrun,            /* Get a run from LCD memory */
   .buffer = (uint8_t*)g_runbuffer, /* Run scratch buffer */
   .bpp    = SAM3UEK_BPP,           /* Bits-per-pixel */
 };
 
 /* This is the standard, NuttX LCD driver object */
 
-static struct sam3u_dev_s g_lcddev_s =
+static struct sam_dev_s g_lcddev_s =
 {
   .dev =
   {
     /* LCD Configuration */
 
-    .getvideoinfo = sam3u_getvideoinfo,
-    .getplaneinfo = sam3u_getplaneinfo,
+    .getvideoinfo = sam_getvideoinfo,
+    .getplaneinfo = sam_getplaneinfo,
 
     /* LCD RGB Mapping -- Not supported */
     /* Cursor Controls -- Not supported */
 
     /* LCD Specific Controls */
 
-    .getpower     = sam3u_getpower,
-    .setpower     = sam3u_setpower,
-    .getcontrast  = sam3u_getcontrast,
-    .setcontrast  = sam3u_setcontrast,
+    .getpower     = sam_getpower,
+    .setpower     = sam_setpower,
+    .getcontrast  = sam_getcontrast,
+    .setcontrast  = sam_setcontrast,
   },
 };
 
@@ -421,14 +421,14 @@ static struct sam3u_dev_s g_lcddev_s =
  **************************************************************************************/
 
 /**************************************************************************************
- * Name:  sam3u_putreg
+ * Name:  sam_putreg
  *
  * Description:
  *   Write to a HX834x register
  *
  **************************************************************************************/
 
-static void sam3u_putreg(uint16_t reg,  uint16_t data)
+static void sam_putreg(uint16_t reg,  uint16_t data)
 {
   regdbg("base: %08x RS: %04x data: %04x\n", LCD_BASE, LCD_BASE + HX843X_LCD_RS, data);
   putreg16(reg, LCD_BASE);
@@ -436,14 +436,14 @@ static void sam3u_putreg(uint16_t reg,  uint16_t data)
 }
 
 /**************************************************************************************
- * Name:  sam3u_getreg
+ * Name:  sam_getreg
  *
  * Description:
  *   Read from a HX834x register
  *
  **************************************************************************************/
 
-static uint16_t sam3u_getreg(uint16_t reg)
+static uint16_t sam_getreg(uint16_t reg)
 {
   uint16_t data;
   putreg16(reg, LCD_BASE);
@@ -453,14 +453,14 @@ static uint16_t sam3u_getreg(uint16_t reg)
 }
 
 /**************************************************************************************
- * Name:  sam3u_setcursor
+ * Name:  sam_setcursor
  *
  * Description:
  *   Set the LCD cursor position.
  *
  **************************************************************************************/
 
-static void sam3u_setcursor(fb_coord_t row, fb_coord_t col)
+static void sam_setcursor(fb_coord_t row, fb_coord_t col)
 {
   uint8_t  x1;
   uint8_t  x2;
@@ -477,90 +477,90 @@ static void sam3u_setcursor(fb_coord_t row, fb_coord_t col)
 
   /* Then set the cursor position */
 
-  sam3u_putreg(HX8347_R02H, x2);        /* column high */
-  sam3u_putreg(HX8347_R03H, x1);        /* column low */
-  sam3u_putreg(HX8347_R06H, y2);        /* row high */
-  sam3u_putreg(HX8347_R07H, y1);        /* row low */
+  sam_putreg(HX8347_R02H, x2);        /* column high */
+  sam_putreg(HX8347_R03H, x1);        /* column low */
+  sam_putreg(HX8347_R06H, y2);        /* row high */
+  sam_putreg(HX8347_R07H, y1);        /* row low */
 }
 
 /**************************************************************************************
- * Name:  sam3u_wrsetup
+ * Name:  sam_wrsetup
  *
  * Description:
  *   Set up for a GRAM write operation.
  *
  **************************************************************************************/
 
-static inline void sam3u_wrsetup(void)
+static inline void sam_wrsetup(void)
 {
   putreg16(HX8347_R22H, LCD_BASE);
 }
 
 /**************************************************************************************
- * Name: sam3u_wrram
+ * Name: sam_wrram
  *
  * Description:
  *   Write to the 16-bit GRAM register
  *
  **************************************************************************************/
 
-static inline void sam3u_wrram(uint16_t color)
+static inline void sam_wrram(uint16_t color)
 {
   putreg16(color, LCD_BASE + HX843X_LCD_RS);
 }
 
 /**************************************************************************************
- * Name: sam3u_rdram
+ * Name: sam_rdram
  *
  * Description:
  *   Read from the 16-bit GRAM register
  *
  **************************************************************************************/
 
-static inline uint16_t sam3u_rdram(void)
+static inline uint16_t sam_rdram(void)
 {
   return getreg16(LCD_BASE + HX843X_LCD_RS);
 }
 
 /**************************************************************************************
- * Name:  sam3u_lcdon
+ * Name:  sam_lcdon
  *
  * Description:
  *   Turn the LCD on
  *
  **************************************************************************************/
 
-static void sam3u_lcdon(void)
+static void sam_lcdon(void)
 {
   /* Display ON Setting */
 
   gvdbg("ON\n");
-  sam3u_putreg(HX8347_R90H, 0x7f);      /* SAP=0111 1111 */
-  sam3u_putreg(HX8347_R26H, 0x04);      /* GON=0 DTE=0 D=01 */
+  sam_putreg(HX8347_R90H, 0x7f);      /* SAP=0111 1111 */
+  sam_putreg(HX8347_R26H, 0x04);      /* GON=0 DTE=0 D=01 */
   up_mdelay(100);
-  sam3u_putreg(HX8347_R26H, 0x24);      /* GON=1 DTE=0 D=01 */
-  sam3u_putreg(HX8347_R26H, 0x2c);      /* GON=1 DTE=0 D=11 */
+  sam_putreg(HX8347_R26H, 0x24);      /* GON=1 DTE=0 D=01 */
+  sam_putreg(HX8347_R26H, 0x2c);      /* GON=1 DTE=0 D=11 */
   up_mdelay(100);
-  sam3u_putreg(HX8347_R26H, 0x3c);      /* GON=1 DTE=1 D=11 */
+  sam_putreg(HX8347_R26H, 0x3c);      /* GON=1 DTE=1 D=11 */
 }
 
 /**************************************************************************************
- * Name:  sam3u_lcdoff
+ * Name:  sam_lcdoff
  *
  * Description:
  *   Turn the LCD off
  *
  **************************************************************************************/
 
-static void sam3u_lcdoff(void)
+static void sam_lcdoff(void)
 {
   gvdbg("OFF\n");
-  sam3u_putreg(HX8347_R90H, 0x00);      /* SAP=0000 0000 */
-  sam3u_putreg(HX8347_R26H, 0x00);      /* GON=0 DTE=0 D=00 */
+  sam_putreg(HX8347_R90H, 0x00);      /* SAP=0000 0000 */
+  sam_putreg(HX8347_R26H, 0x00);      /* GON=0 DTE=0 D=00 */
 }
 
 /**************************************************************************************
- * Name:  sam3u_dumpreg
+ * Name:  sam_dumpreg
  *
  * Description:
  *   Dump a range of LCD registers.
@@ -568,21 +568,21 @@ static void sam3u_lcdoff(void)
  **************************************************************************************/
 
 #ifdef CONFIG_DEBUG_GRAPHICS
-static void sam3u_dumpreg(uint8_t startreg, uint8_t endreg)
+static void sam_dumpreg(uint8_t startreg, uint8_t endreg)
 {
   uint16_t value;
   uint8_t  addr;
 
   for (addr = startreg; addr <= endreg; addr++)
     {
-      value = sam3u_getreg(addr);
+      value = sam_getreg(addr);
       gdbg(" %02x: %04x\n", addr, value);
     }
 }
 #endif
 
 /**************************************************************************************
- * Name:  sam3u_putrun
+ * Name:  sam_putrun
  *
  * Description:
  *   This method can be used to write a partial raster line to the LCD:
@@ -595,8 +595,8 @@ static void sam3u_dumpreg(uint8_t startreg, uint8_t endreg)
  *
  **************************************************************************************/
 
-static int sam3u_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
-                        size_t npixels)
+static int sam_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
+                      size_t npixels)
 {
   uint16_t *run = (uint16_t*)buffer;
   unsigned int i;
@@ -609,8 +609,8 @@ static int sam3u_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
 #ifdef CONFIG_LCD_PORTRAIT
   /* Set up to write the run. */
 
-  sam3u_setcursor(row, col);
-  sam3u_wrsetup();
+  sam_setcursor(row, col);
+  sam_wrsetup();
 
   /* Write the run to GRAM. */
 
@@ -618,7 +618,7 @@ static int sam3u_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
     {
       /* Write the pixel pixel to GRAM */
 
-      sam3u_wrram(*run++);
+      sam_wrram(*run++);
     }
 #else
   /* Write the run to GRAM.  Because rows and colums are swapped, we need to reset
@@ -636,19 +636,19 @@ static int sam3u_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
        *   col: 0-319 maps to y: 319-0
        */
 
-      sam3u_setcursor(col--, row);
-      sam3u_wrsetup();
+      sam_setcursor(col--, row);
+      sam_wrsetup();
 
       /* Write the pixel pixel to GRAM */
 
-      sam3u_wrram(*run++);
+      sam_wrram(*run++);
     }
 #endif
   return OK;
 }
 
 /**************************************************************************************
- * Name:  sam3u_getrun
+ * Name:  sam_getrun
  *
  * Description:
  *   This method can be used to read a partial raster line from the LCD:
@@ -661,8 +661,8 @@ static int sam3u_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffe
  *
  **************************************************************************************/
 
-static int sam3u_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                        size_t npixels)
+static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
+                      size_t npixels)
 {
   uint16_t *run = (uint16_t*)buffer;
   unsigned int i;
@@ -675,7 +675,7 @@ static int sam3u_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 #ifdef CONFIG_LCD_PORTRAIT
   /* Set up to read the run */
 
-  sam3u_setcursor(row, col);
+  sam_setcursor(row, col);
 
   /* Read the run from GRAM. */
 
@@ -683,7 +683,7 @@ static int sam3u_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
     {
       /* Read the next pixel */
 
-      *run++ = sam3u_rdram();
+      *run++ = sam_rdram();
     }
 #else
   /* Read the run from GRAM  Because rows and colums are swapped, we need to reset
@@ -701,23 +701,23 @@ static int sam3u_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
        *   col: 0-319 maps to y: 319-0
        */
 
-      sam3u_setcursor(col--, row);
-      *run++ = sam3u_rdram();
+      sam_setcursor(col--, row);
+      *run++ = sam_rdram();
     }
 #endif
   return OK;
 }
 
 /**************************************************************************************
- * Name:  sam3u_getvideoinfo
+ * Name:  sam_getvideoinfo
  *
  * Description:
  *   Get information about the LCD video controller configuration.
  *
  **************************************************************************************/
 
-static int sam3u_getvideoinfo(FAR struct lcd_dev_s *dev,
-                              FAR struct fb_videoinfo_s *vinfo)
+static int sam_getvideoinfo(FAR struct lcd_dev_s *dev,
+                            FAR struct fb_videoinfo_s *vinfo)
 {
   DEBUGASSERT(dev && vinfo);
   gvdbg("fmt: %d xres: %d yres: %d nplanes: %d\n",
@@ -727,15 +727,15 @@ static int sam3u_getvideoinfo(FAR struct lcd_dev_s *dev,
 }
 
 /**************************************************************************************
- * Name:  sam3u_getplaneinfo
+ * Name:  sam_getplaneinfo
  *
  * Description:
  *   Get information about the configuration of each LCD color plane.
  *
  **************************************************************************************/
 
-static int sam3u_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
-                              FAR struct lcd_planeinfo_s *pinfo)
+static int sam_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
+                            FAR struct lcd_planeinfo_s *pinfo)
 {
   DEBUGASSERT(dev && pinfo && planeno == 0);
   gvdbg("planeno: %d bpp: %d\n", planeno, g_planeinfo.bpp);
@@ -744,7 +744,7 @@ static int sam3u_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
 }
 
 /**************************************************************************************
- * Name:  sam3u_getpower
+ * Name:  sam_getpower
  *
  * Description:
  *   Get the LCD panel power status (0: full off - CONFIG_LCD_MAXPOWER: full on. On
@@ -752,16 +752,16 @@ static int sam3u_getplaneinfo(FAR struct lcd_dev_s *dev, unsigned int planeno,
  *
  **************************************************************************************/
 
-static int sam3u_getpower(struct lcd_dev_s *dev)
+static int sam_getpower(struct lcd_dev_s *dev)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   DEBUGASSERT(dev);
   gvdbg("power: %d\n", priv->power);
   return priv->power;
 }
 
 /**************************************************************************************
- * Name:  sam3u_setpower
+ * Name:  sam_setpower
  *
  * Description:
  *   Enable/disable LCD panel power (0: full off - CONFIG_LCD_MAXPOWERL: full on). On
@@ -775,9 +775,9 @@ static int sam3u_getpower(struct lcd_dev_s *dev)
  *
  **************************************************************************************/
 
-static int sam3u_setpower(struct lcd_dev_s *dev, int power)
+static int sam_setpower(struct lcd_dev_s *dev, int power)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   unsigned int i;
 
   gvdbg("power: %d\n", power);
@@ -785,7 +785,7 @@ static int sam3u_setpower(struct lcd_dev_s *dev, int power)
 
   /* Switch off backlight */
 
-  sam3u_gpiowrite(GPIO_LCD_BKL, false);
+  sam_gpiowrite(GPIO_LCD_BKL, false);
 
   /* For for at least 500uS to drain the charge pump */
 
@@ -795,12 +795,12 @@ static int sam3u_setpower(struct lcd_dev_s *dev, int power)
 
   for (i = 0; i < power; i++)
     {
-      sam3u_gpiowrite(GPIO_LCD_BKL, false);
-      sam3u_gpiowrite(GPIO_LCD_BKL, false);
-      sam3u_gpiowrite(GPIO_LCD_BKL, false);
-      sam3u_gpiowrite(GPIO_LCD_BKL, true);
-      sam3u_gpiowrite(GPIO_LCD_BKL, true);
-      sam3u_gpiowrite(GPIO_LCD_BKL, true);
+      sam_gpiowrite(GPIO_LCD_BKL, false);
+      sam_gpiowrite(GPIO_LCD_BKL, false);
+      sam_gpiowrite(GPIO_LCD_BKL, false);
+      sam_gpiowrite(GPIO_LCD_BKL, true);
+      sam_gpiowrite(GPIO_LCD_BKL, true);
+      sam_gpiowrite(GPIO_LCD_BKL, true);
     }
 
   /* This delay seems to be required... perhaps because of the big current jump? */
@@ -815,28 +815,28 @@ static int sam3u_setpower(struct lcd_dev_s *dev, int power)
 }
 
 /**************************************************************************************
- * Name:  sam3u_getcontrast
+ * Name:  sam_getcontrast
  *
  * Description:
  *   Get the current contrast setting (0-CONFIG_LCD_MAXCONTRAST).
  *
  **************************************************************************************/
 
-static int sam3u_getcontrast(struct lcd_dev_s *dev)
+static int sam_getcontrast(struct lcd_dev_s *dev)
 {
   gvdbg("Not implemented\n");
   return -ENOSYS;
 }
 
 /**************************************************************************************
- * Name:  sam3u_getcontrast
+ * Name:  sam_getcontrast
  *
  * Description:
  *   Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST).
  *
  **************************************************************************************/
 
-static int sam3u_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
+static int sam_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
 {
   gvdbg("contrast: %d\n", contrast);
   return -ENOSYS;
@@ -868,36 +868,36 @@ int up_lcdinitialize(void)
 
   /* Enable LCD EXTCS2 pins */
 
-  sam3u_configgpio(GPIO_LCD_NCS2);
-  sam3u_configgpio(GPIO_LCD_RS);
-  sam3u_configgpio(GPIO_LCD_NWE);
-  sam3u_configgpio(GPIO_LCD_NRD);
+  sam_configgpio(GPIO_LCD_NCS2);
+  sam_configgpio(GPIO_LCD_RS);
+  sam_configgpio(GPIO_LCD_NWE);
+  sam_configgpio(GPIO_LCD_NRD);
 
-  sam3u_configgpio(GPIO_LCD_D0);
-  sam3u_configgpio(GPIO_LCD_D1);
-  sam3u_configgpio(GPIO_LCD_D2);
-  sam3u_configgpio(GPIO_LCD_D3);
-  sam3u_configgpio(GPIO_LCD_D4);
-  sam3u_configgpio(GPIO_LCD_D5);
-  sam3u_configgpio(GPIO_LCD_D6);
-  sam3u_configgpio(GPIO_LCD_D7);
-  sam3u_configgpio(GPIO_LCD_D8);
-  sam3u_configgpio(GPIO_LCD_D9);
-  sam3u_configgpio(GPIO_LCD_D10);
-  sam3u_configgpio(GPIO_LCD_D11);
-  sam3u_configgpio(GPIO_LCD_D12);
-  sam3u_configgpio(GPIO_LCD_D13);
-  sam3u_configgpio(GPIO_LCD_D14);
-  sam3u_configgpio(GPIO_LCD_D15);
+  sam_configgpio(GPIO_LCD_D0);
+  sam_configgpio(GPIO_LCD_D1);
+  sam_configgpio(GPIO_LCD_D2);
+  sam_configgpio(GPIO_LCD_D3);
+  sam_configgpio(GPIO_LCD_D4);
+  sam_configgpio(GPIO_LCD_D5);
+  sam_configgpio(GPIO_LCD_D6);
+  sam_configgpio(GPIO_LCD_D7);
+  sam_configgpio(GPIO_LCD_D8);
+  sam_configgpio(GPIO_LCD_D9);
+  sam_configgpio(GPIO_LCD_D10);
+  sam_configgpio(GPIO_LCD_D11);
+  sam_configgpio(GPIO_LCD_D12);
+  sam_configgpio(GPIO_LCD_D13);
+  sam_configgpio(GPIO_LCD_D14);
+  sam_configgpio(GPIO_LCD_D15);
 
 #ifdef CONFIG_LCD_REGDEBUG
-  sam3u_dumpgpio(GPIO_PORT_PIOB, "PORTB");
-  sam3u_dumpgpio(GPIO_PORT_PIOC, "PORTC");
+  sam_dumpgpio(GPIO_PORT_PIOB, "PORTB");
+  sam_dumpgpio(GPIO_PORT_PIOC, "PORTC");
 #endif
 
   /* Configure LCD Backlight Pin */
 
-  sam3u_configgpio(GPIO_LCD_D15);
+  sam_configgpio(GPIO_LCD_D15);
 
   /* Enable SMC peripheral clock */
 
@@ -932,7 +932,7 @@ int up_lcdinitialize(void)
   /* Check HX8347 Chip ID */
 
 #ifdef CONFIG_DEBUG_GRAPHICS
-  hxregval = sam3u_getreg(HX8347_R67H);
+  hxregval = sam_getreg(HX8347_R67H);
   gvdbg("Chip ID: %04x\n", hxregval);
   if (hxregval != HX8347_CHIPID)
     {
@@ -945,86 +945,86 @@ int up_lcdinitialize(void)
 
   /* Start internal OSC */
 
-  sam3u_putreg(HX8347_R19H, 0x49);      /* OSCADJ=10 0000 OSD_EN=1 60Hz */
-  sam3u_putreg(HX8347_R93H, 0x0C);      /* RADJ=1100 */
+  sam_putreg(HX8347_R19H, 0x49);      /* OSCADJ=10 0000 OSD_EN=1 60Hz */
+  sam_putreg(HX8347_R93H, 0x0C);      /* RADJ=1100 */
 
   /* Power on flow */
 
-  sam3u_putreg(HX8347_R44H, 0x4D);      /* VCM=100 1101 */
-  sam3u_putreg(HX8347_R45H, 0x11);      /* VDV=1 0001 */
-  sam3u_putreg(HX8347_R20H, 0x40);      /* BT=0100 */
-  sam3u_putreg(HX8347_R1DH, 0x07);      /* VC1=111 */
-  sam3u_putreg(HX8347_R1EH, 0x00);      /* VC3=000 */
-  sam3u_putreg(HX8347_R1FH, 0x04);      /* VRH=0100 */
-  sam3u_putreg(HX8347_R1CH, 0x04);      /* AP=100 */
-  sam3u_putreg(HX8347_R1BH, 0x10);      /* GASENB=0 PON=1 DK=0 XDK=0 DDVDH_TRI=0 STB=0 */
+  sam_putreg(HX8347_R44H, 0x4D);      /* VCM=100 1101 */
+  sam_putreg(HX8347_R45H, 0x11);      /* VDV=1 0001 */
+  sam_putreg(HX8347_R20H, 0x40);      /* BT=0100 */
+  sam_putreg(HX8347_R1DH, 0x07);      /* VC1=111 */
+  sam_putreg(HX8347_R1EH, 0x00);      /* VC3=000 */
+  sam_putreg(HX8347_R1FH, 0x04);      /* VRH=0100 */
+  sam_putreg(HX8347_R1CH, 0x04);      /* AP=100 */
+  sam_putreg(HX8347_R1BH, 0x10);      /* GASENB=0 PON=1 DK=0 XDK=0 DDVDH_TRI=0 STB=0 */
   up_mdelay(50);
-  sam3u_putreg(HX8347_R43H, 0x80);      /* Set VCOMG=1 */
+  sam_putreg(HX8347_R43H, 0x80);      /* Set VCOMG=1 */
   up_mdelay(50);
 
   /* Gamma for CMO 2.8 */
 
-  sam3u_putreg(HX8347_R46H, 0x95);
-  sam3u_putreg(HX8347_R47H, 0x51);
-  sam3u_putreg(HX8347_R48H, 0x00);
-  sam3u_putreg(HX8347_R49H, 0x36);
-  sam3u_putreg(HX8347_R4AH, 0x11);
-  sam3u_putreg(HX8347_R4BH, 0x66);
-  sam3u_putreg(HX8347_R4CH, 0x14);
-  sam3u_putreg(HX8347_R4DH, 0x77);
-  sam3u_putreg(HX8347_R4EH, 0x13);
-  sam3u_putreg(HX8347_R4FH, 0x4c);
-  sam3u_putreg(HX8347_R50H, 0x46);
-  sam3u_putreg(HX8347_R51H, 0x46);
+  sam_putreg(HX8347_R46H, 0x95);
+  sam_putreg(HX8347_R47H, 0x51);
+  sam_putreg(HX8347_R48H, 0x00);
+  sam_putreg(HX8347_R49H, 0x36);
+  sam_putreg(HX8347_R4AH, 0x11);
+  sam_putreg(HX8347_R4BH, 0x66);
+  sam_putreg(HX8347_R4CH, 0x14);
+  sam_putreg(HX8347_R4DH, 0x77);
+  sam_putreg(HX8347_R4EH, 0x13);
+  sam_putreg(HX8347_R4FH, 0x4c);
+  sam_putreg(HX8347_R50H, 0x46);
+  sam_putreg(HX8347_R51H, 0x46);
 
   /* 240x320 window setting */
 
-  sam3u_putreg(HX8347_R02H, 0x00);      /* Column address start2 */
-  sam3u_putreg(HX8347_R03H, 0x00);      /* Column address start1 */
-  sam3u_putreg(HX8347_R04H, 0x00);      /* Column address end2 */
-  sam3u_putreg(HX8347_R05H, 0xef);      /* Column address end1 */
-  sam3u_putreg(HX8347_R06H, 0x00);      /* Row address start2 */
-  sam3u_putreg(HX8347_R07H, 0x00);      /* Row address start1 */
-  sam3u_putreg(HX8347_R08H, 0x01);      /* Row address end2 */
-  sam3u_putreg(HX8347_R09H, 0x3f);      /* Row address end1 */
+  sam_putreg(HX8347_R02H, 0x00);      /* Column address start2 */
+  sam_putreg(HX8347_R03H, 0x00);      /* Column address start1 */
+  sam_putreg(HX8347_R04H, 0x00);      /* Column address end2 */
+  sam_putreg(HX8347_R05H, 0xef);      /* Column address end1 */
+  sam_putreg(HX8347_R06H, 0x00);      /* Row address start2 */
+  sam_putreg(HX8347_R07H, 0x00);      /* Row address start1 */
+  sam_putreg(HX8347_R08H, 0x01);      /* Row address end2 */
+  sam_putreg(HX8347_R09H, 0x3f);      /* Row address end1 */
 
   /* Display Setting */
 
-  sam3u_putreg(HX8347_R01H, 0x06);      /* IDMON=0 INVON=1 NORON=1 PTLON=0 */
-  sam3u_putreg(HX8347_R16H, 0xc8);      /* MY=1 MX=1 MV=0 BGR=1 */
-  sam3u_putreg(HX8347_R23H, 0x95);      /* N_DC=1001 0101 */
-  sam3u_putreg(HX8347_R24H, 0x95);      /* P_DC=1001 0101 */
-  sam3u_putreg(HX8347_R25H, 0xff);      /* I_DC=1111 1111 */
-  sam3u_putreg(HX8347_R27H, 0x06);      /* N_BP=0000 0110 */
-  sam3u_putreg(HX8347_R28H, 0x06);      /* N_FP=0000 0110 */
-  sam3u_putreg(HX8347_R29H, 0x06);      /* P_BP=0000 0110 */
-  sam3u_putreg(HX8347_R2AH, 0x06);      /* P_FP=0000 0110 */
-  sam3u_putreg(HX8347_R2CH, 0x06);      /* I_BP=0000 0110 */
-  sam3u_putreg(HX8347_R2DH, 0x06);      /* I_FP=0000 0110 */
-  sam3u_putreg(HX8347_R3AH, 0x01);      /* N_RTN=0000 N_NW=001 */
-  sam3u_putreg(HX8347_R3BH, 0x01);      /* P_RTN=0000 P_NW=001 */
-  sam3u_putreg(HX8347_R3CH, 0xf0);      /* I_RTN=1111 I_NW=000 */
-  sam3u_putreg(HX8347_R3DH, 0x00);      /* DIV=00 */
-  sam3u_putreg(HX8347_R3EH, 0x38);      /* SON=38h */
-  sam3u_putreg(HX8347_R40H, 0x0f);      /* GDON=0Fh */
-  sam3u_putreg(HX8347_R41H, 0xf0);      /* GDOF=F0h */
+  sam_putreg(HX8347_R01H, 0x06);      /* IDMON=0 INVON=1 NORON=1 PTLON=0 */
+  sam_putreg(HX8347_R16H, 0xc8);      /* MY=1 MX=1 MV=0 BGR=1 */
+  sam_putreg(HX8347_R23H, 0x95);      /* N_DC=1001 0101 */
+  sam_putreg(HX8347_R24H, 0x95);      /* P_DC=1001 0101 */
+  sam_putreg(HX8347_R25H, 0xff);      /* I_DC=1111 1111 */
+  sam_putreg(HX8347_R27H, 0x06);      /* N_BP=0000 0110 */
+  sam_putreg(HX8347_R28H, 0x06);      /* N_FP=0000 0110 */
+  sam_putreg(HX8347_R29H, 0x06);      /* P_BP=0000 0110 */
+  sam_putreg(HX8347_R2AH, 0x06);      /* P_FP=0000 0110 */
+  sam_putreg(HX8347_R2CH, 0x06);      /* I_BP=0000 0110 */
+  sam_putreg(HX8347_R2DH, 0x06);      /* I_FP=0000 0110 */
+  sam_putreg(HX8347_R3AH, 0x01);      /* N_RTN=0000 N_NW=001 */
+  sam_putreg(HX8347_R3BH, 0x01);      /* P_RTN=0000 P_NW=001 */
+  sam_putreg(HX8347_R3CH, 0xf0);      /* I_RTN=1111 I_NW=000 */
+  sam_putreg(HX8347_R3DH, 0x00);      /* DIV=00 */
+  sam_putreg(HX8347_R3EH, 0x38);      /* SON=38h */
+  sam_putreg(HX8347_R40H, 0x0f);      /* GDON=0Fh */
+  sam_putreg(HX8347_R41H, 0xf0);      /* GDOF=F0h */
 
   /* Set LCD backlight to FULL off */
 
-  sam3u_setpower(&g_lcddev_s.dev, LCD_FULL_OFF);
+  sam_setpower(&g_lcddev_s.dev, LCD_FULL_OFF);
 
   /* Fill the display memory with the color BLACK */
 
-  sam3u_setcursor(0, 0);
-  sam3u_wrsetup();
+  sam_setcursor(0, 0);
+  sam_wrsetup();
   for (i = 0; i < (SAM3UEK_XRES * SAM3UEK_YRES); i++)
     {
-        sam3u_wrram(RGB16_BLACK);
+      sam_wrram(RGB16_BLACK);
     }
 
   /* Turn the LCD on (but with the backlight off) */
 
-  sam3u_lcdon();
+  sam_lcdon();
   return OK;
 }
 
@@ -1055,11 +1055,11 @@ void up_lcduninitialize(void)
 {
   /* Turn the LCD off */
 
-  sam3u_lcdoff();
+  sam_lcdoff();
 
   /* Set LCD backlight to FULL off */
 
-  sam3u_setpower(&g_lcddev_s.dev, LCD_FULL_OFF);
+  sam_setpower(&g_lcddev_s.dev, LCD_FULL_OFF);
 
   /* Disable SMC peripheral clock */
 

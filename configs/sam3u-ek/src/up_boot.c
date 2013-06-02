@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/sam3u-ek/src/up_boot.c
- * arch/arm/src/board/up_boot.c
  *
  *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +44,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "sam3uek_internal.h"
+#include "sam3u-ek.h"
 
 /************************************************************************************
  * Definitions
@@ -60,7 +59,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam3u_boardinitialize
+ * Name: sam_boardinitialize
  *
  * Description:
  *   All SAM3U architectures must provide the following entry point.  This entry point
@@ -69,28 +68,28 @@
  *
  ************************************************************************************/
 
-void sam3u_boardinitialize(void)
+void sam_boardinitialize(void)
 {
   /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * sam3u_spiinitialize() has been brought into the link.
+   * sam_spiinitialize() has been brought into the link.
    */
 
 #ifdef CONFIG_SAM34_SPI
-  if (sam3u_spiinitialize)
+  if (sam_spiinitialize)
     {
-      sam3u_spiinitialize();
+      sam_spiinitialize();
     }
 #endif
 
    /* Initialize USB if 1) USBDEV is selected, 2) the USB controller is not
-    * disabled, and 3) the weak function sam3u_usbinitialize() has been brought
+    * disabled, and 3) the weak function sam_usbinitialize() has been brought
     * into the build.
     */
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_SAM34_USB)
-  if (sam3u_usbinitialize)
+  if (sam_usbinitialize)
     {
-      sam3u_usbinitialize();
+      sam_usbinitialize();
     }
 #endif
 
@@ -101,13 +100,13 @@ void sam3u_boardinitialize(void)
 #endif
 
   /* Setup SD card-related PIOs if 1) HSMCI is selected and 2) the weak
-   * function sam3u_hsmciinit() has been brought into the build.
+   * function sam_hsmciinit() has been brought into the build.
     */
 
 #ifdef CONFIG_SAM34_HSMCI
-  if (sam3u_hsmciinit)
+  if (sam_hsmciinit)
     {
-      sam3u_hsmciinit();
+      sam_hsmciinit();
     }
 #endif
 }

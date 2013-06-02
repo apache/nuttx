@@ -114,7 +114,7 @@ IDEs
      on the command line.
 
   Startup files will probably cause you some headaches.  The NuttX startup file
-  is arch/arm/src/sam3u/sam3u_vectors.S.  You may need to build NuttX
+  is arch/arm/src/sam3u/sam_vectors.S.  You may need to build NuttX
   one time from the Cygwin command line in order to obtain the pre-built
   startup object needed by RIDE.
 
@@ -261,12 +261,14 @@ SAM3U-EK-specific Configuration Options
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
+       CONFIG_ARCH_CHIP_SAM34
+       CONFIG_ARCH_CHIP_SAM3U
        CONFIG_ARCH_CHIP_AT91SAM3U4
 
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=sam3u_ek (for the SAM3U-EK development board)
+       CONFIG_ARCH_BOARD=sam3u-ek (for the SAM3U-EK development board)
 
     CONFIG_ARCH_BOARD_name - For use in C code
 

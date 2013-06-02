@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/sam3u-ek/src/up_mmcsd.c
+ * arch/arm/src/sam3u/sam_hsmci.h
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,106 +33,111 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAM3U_SAM_HSMCI_H
+#define __ARCH_ARM_SRC_SAM3U_SAM_HSMCI_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
 
-#include "sam_gpio.h"
-#include "sam3u-ek.h"
-
-#ifdef CONFIG_SAM34_HSMCI
+#include "chip.h"
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 
-/* This needs to be extended.  The card detect GPIO must be configured as an interrupt.
- * when the interrupt indicating that a card has been inserted or removed is received,
- * this function must call sio_mediachange() to handle that event.  See
- * arch/arm/src/sam3u/sam_hsmci.h for more information.
- */
-
-#ifdef GPIO_MCI_CD
-#  warning "Card detect interrupt handling needed"
-#endif
-
 /************************************************************************************
- * Private Functions
+ * Public Types
  ************************************************************************************/
 
 /************************************************************************************
- * Public Functions
+ * Inline Functions
  ************************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /************************************************************************************
- * Name: sam_hsmciinit
- *
- * Description:
- *   Initialize HSMCI support.  This function is called very early in board
- *   initialization.
- *
+ * Public Data
  ************************************************************************************/
 
-int sam_hsmciinit(void)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-#ifdef GPIO_MCI_CD
-  sam_configgpio(GPIO_MCI_CD);
-#endif
-#ifdef GPIO_MCI_WP
-  sam_configgpio(GPIO_MCI_WP);
-#endif
-  return OK;
-}
-
-/************************************************************************************
- * Name: sam_cardinserted
- *
- * Description:
- *   Check if a card is inserted into the selected HSMCI slot
- *
- ************************************************************************************/
-
-bool sam_cardinserted(unsigned char slot)
-{
-  if (slot == 0)
-    {
-#ifdef GPIO_MCI_CD
-      bool inserted = sam_gpioread(GPIO_MCI_CD);
-      fvdbg("inserted: %s\n", inserted ? "NO" : "YES");
-      return !inserted;
 #else
-      return true;
+#define EXTERN extern
 #endif
-    }
-  return false;
-}
 
 /************************************************************************************
- * Name: sam_writeprotected
- *
- * Description:
- *   Check if a card is inserted into the selected HSMCI slot
- *
+ * Public Function Prototypes
  ************************************************************************************/
 
-bool sam_writeprotected(unsigned char slot)
-{
-  if (slot == 0)
-    {
-#ifdef GPIO_MCI_WP
-      bool protected = sam_gpioread(GPIO_MCI_WP);
-      fvdbg("protected: %s\n", inserted ? "YES" : "NO");
-      return protected;
-#else
-      return false;
-#endif
-    }
-  return false;
-}
+/****************************************************************************
+ * Name: sdio_initialize
+ *
+ * Description:
+ *   Initialize SDIO for operation.
+ *
+ * Input Parameters:
+ *   slotno - Not used.
+ *
+ * Returned Values:
+ *   A reference to an SDIO interface structure.  NULL is returned on failures.
+ *
+ ****************************************************************************/
 
-#endif /* CONFIG_SAM34_HSMCI */
+struct sdio_dev_s; /* See include/nuttx/sdio.h */
+FAR struct sdio_dev_s *sdio_initialize(int slotno);
+
+/****************************************************************************
+ * Name: sdio_mediachange
+ *
+ * Description:
+ *   Called by board-specific logic -- posssible from an interrupt handler --
+ *   in order to signal to the driver that a card has been inserted or
+ *   removed from the slot
+ *
+ * Input Parameters:
+ *   dev        - An instance of the SDIO driver device state structure.
+ *   cardinslot - true is a card has been detected in the slot; false if a
+ *                card has been removed from the slot.  Only transitions
+ *                (inserted->removed or removed->inserted should be reported)
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
+
+/****************************************************************************
+ * Name: sdio_wrprotect
+ *
+ * Description:
+ *   Called by board-specific logic to report if the card in the slot is
+ *   mechanically write protected.
+ *
+ * Input Parameters:
+ *   dev       - An instance of the SDIO driver device state structure.
+ *   wrprotect - true is a card is writeprotected.
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_SAM3U_SAM_HSMCI_H */
