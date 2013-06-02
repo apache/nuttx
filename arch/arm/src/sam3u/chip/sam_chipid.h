@@ -1,7 +1,7 @@
 /****************************************************************************************
- * arch/arm/src/sam3u/sam3u_chipid.h
+ * arch/arm/src/sam3u/chip/sam_chipid.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM3U_SAM3U_CHIPID_H
-#define __ARCH_ARM_SRC_SAM3U_SAM3U_CHIPID_H
+#ifndef __ARCH_ARM_SRC_SAM3U_CHIP_SAM_CHIPID_H
+#define __ARCH_ARM_SRC_SAM3U_CHIP_SAM_CHIPID_H
 
 /****************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "sam3u_memorymap.h"
+#include "chip/sam_memorymap.h"
 
 /****************************************************************************************
  * Pre-processor Definitions
@@ -51,13 +51,13 @@
 
 /* CHIPID register offsets **************************************************************/
 
-#define SAM3U_CHIPID_CIDR      0x00 /* Chip ID Register */
-#define SAM3U_CHIPID_EXID      0x04 /* Chip ID Extension Register */
+#define SAM_CHIPID_CIDR      0x00 /* Chip ID Register */
+#define SAM_CHIPID_EXID      0x04 /* Chip ID Extension Register */
 
 /* CHIPID register adresses *************************************************************/
 
-#define SAM3U_CHIPID_CIDR      (SAM3U_CHIPID_BASE+SAM3U_CHIPID_CIDR)
-#define SAM3U_CHIPID_EXID      (SAM3U_CHIPID_BASE+SAM3U_CHIPID_EXID)
+#define SAM_CHIPID_CIDR      (SAM_CHIPID_BASE+SAM_CHIPID_CIDR)
+#define SAM_CHIPID_EXID      (SAM_CHIPID_BASE+SAM_CHIPID_EXID)
 
 /* CHIPID register bit definitions ******************************************************/
 
@@ -164,4 +164,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM3U_SAM3U_CHIPID_H */
+#endif /* __ARCH_ARM_SRC_SAM3U_CHIP_SAM_CHIPID_H */

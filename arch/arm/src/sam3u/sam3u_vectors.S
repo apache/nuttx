@@ -106,56 +106,56 @@ sam3u_vectors:
 
 /* Processor Exceptions */
 
-	.word	IDLE_STACK			/* Vector  0: Reset stack pointer */
-	.word	__start				/* Vector  1: Reset vector */
-	.word	sam3u_nmi			/* Vector  2: Non-Maskable Interrupt (NMI) */
-	.word	sam3u_hardfault		/* Vector  3: Hard fault */
-	.word	sam3u_mpu			/* Vector  4: Memory management (MPU) */
-	.word	sam3u_busfault		/* Vector  5: Bus fault */
-	.word	sam3u_usagefault	/* Vector  6: Usage fault */
-	.word	sam3u_reserved		/* Vector  7: Reserved */
-	.word	sam3u_reserved		/* Vector  8: Reserved */
-	.word	sam3u_reserved		/* Vector  9: Reserved */
-	.word	sam3u_reserved		/* Vector 10: Reserved */
-	.word	sam3u_svcall		/* Vector 11: SVC call */
-	.word	sam3u_dbgmonitor	/* Vector 12: Debug monitor */
-	.word	sam3u_reserved		/* Vector 13: Reserved */
-	.word	sam3u_pendsv		/* Vector 14: Pendable system service request */
-	.word	sam3u_systick		/* Vector 15: System tick */
+	.word	IDLE_STACK		/* Vector  0: Reset stack pointer */
+	.word	__start			/* Vector  1: Reset vector */
+	.word	sam_nmi			/* Vector  2: Non-Maskable Interrupt (NMI) */
+	.word	sam_hardfault	/* Vector  3: Hard fault */
+	.word	sam_mpu			/* Vector  4: Memory management (MPU) */
+	.word	sam_busfault	/* Vector  5: Bus fault */
+	.word	sam_usagefault	/* Vector  6: Usage fault */
+	.word	sam_reserved	/* Vector  7: Reserved */
+	.word	sam_reserved	/* Vector  8: Reserved */
+	.word	sam_reserved	/* Vector  9: Reserved */
+	.word	sam_reserved	/* Vector 10: Reserved */
+	.word	sam_svcall		/* Vector 11: SVC call */
+	.word	sam_dbgmonitor	/* Vector 12: Debug monitor */
+	.word	sam_reserved	/* Vector 13: Reserved */
+	.word	sam_pendsv		/* Vector 14: Pendable system service request */
+	.word	sam_systick		/* Vector 15: System tick */
 
 /* External Interrupts */
 
-	.word	sam3u_supc			/* Vector 16+0:  Supply Controller */
-	.word	sam3u_rstc			/* Vector 16+1:  Reset Controller */
-	.word	sam3u_rtc			/* Vector 16+2:  Real Time Clock */
-	.word	sam3u_rtt			/* Vector 16+3:  Real Time Timer */
-	.word	sam3u_wdt			/* Vector 16+4:  Watchdog Timer */
-	.word	sam3u_pmc			/* Vector 16+5:  Power Management Controller */
-	.word	sam3u_eefc0			/* Vector 16+6:  Enhanced Embedded Flash Controller 0 */
-	.word	sam3u_eefc1			/* Vector 16+7:  Enhanced Embedded Flash Controller 1 */
-	.word	sam3u_uart			/* Vector 16+8:  Universal Asynchronous Receiver Transmitter */
-	.word	sam3u_smc			/* Vector 16+9:  Static Memory Controller */
-	.word	sam3u_pioa			/* Vector 16+10: Parallel I/O Controller A */
-	.word	sam3u_piob			/* Vector 16+11: Parallel I/O Controller B */
-	.word	sam3u_pioc			/* Vector 16+12: Parallel I/O Controller C */
-	.word	sam3u_usart0		/* Vector 16+13: USART 0 */
-	.word	sam3u_usart1		/* Vector 16+14: USART 1 */
-	.word	sam3u_usart2		/* Vector 16+15: USART 2 */
-	.word	sam3u_usart3		/* Vector 16+16: USART 3 */
-	.word	sam3u_hsmci			/* Vector 16+17: High Speed Multimedia Card Interface */
-	.word	sam3u_twi0			/* Vector 16+18: Two-Wire Interface 0 */
-	.word	sam3u_twi1			/* Vector 16+19: Two-Wire Interface 1 */
-	.word	sam3u_spi			/* Vector 16+20: Serial Peripheral Interface */
-	.word	sam3u_ssc			/* Vector 16+21: Synchronous Serial Controller */
-	.word	sam3u_tc0			/* Vector 16+22: Timer Counter 0 */
-	.word	sam3u_tc1			/* Vector 16+23: Timer Counter 1 */
-	.word	sam3u_tc2			/* Vector 16+24: Timer Counter 2 */
-	.word	sam3u_pwm			/* Vector 16+25: Pulse Width Modulation Controller */
-	.word	sam3u_adc12b		/* Vector 16+26: 12-bit ADC Controller */
-	.word	sam3u_adc			/* Vector 16+27: 10-bit ADC Controller */
-	.word	sam3u_dmac			/* Vector 16+28: DMA Controller */
-	.word	sam3u_udphs			/* Vector 16+29: USB Device High Speed */
-	.size	sam3u_vectors, .-sam3u_vectors
+	.word	sam_supc		/* Vector 16+0:  Supply Controller */
+	.word	sam_rstc		/* Vector 16+1:  Reset Controller */
+	.word	sam_rtc			/* Vector 16+2:  Real Time Clock */
+	.word	sam_rtt			/* Vector 16+3:  Real Time Timer */
+	.word	sam_wdt			/* Vector 16+4:  Watchdog Timer */
+	.word	sam_pmc			/* Vector 16+5:  Power Management Controller */
+	.word	sam_eefc0		/* Vector 16+6:  Enhanced Embedded Flash Controller 0 */
+	.word	sam_eefc1		/* Vector 16+7:  Enhanced Embedded Flash Controller 1 */
+	.word	sam_uart		/* Vector 16+8:  Universal Asynchronous Receiver Transmitter */
+	.word	sam_smc			/* Vector 16+9:  Static Memory Controller */
+	.word	sam_pioa		/* Vector 16+10: Parallel I/O Controller A */
+	.word	sam_piob		/* Vector 16+11: Parallel I/O Controller B */
+	.word	sam_pioc		/* Vector 16+12: Parallel I/O Controller C */
+	.word	sam_usart0		/* Vector 16+13: USART 0 */
+	.word	sam_usart1		/* Vector 16+14: USART 1 */
+	.word	sam_usart2		/* Vector 16+15: USART 2 */
+	.word	sam_usart3		/* Vector 16+16: USART 3 */
+	.word	sam_hsmci		/* Vector 16+17: High Speed Multimedia Card Interface */
+	.word	sam_twi0		/* Vector 16+18: Two-Wire Interface 0 */
+	.word	sam_twi1		/* Vector 16+19: Two-Wire Interface 1 */
+	.word	sam_spi			/* Vector 16+20: Serial Peripheral Interface */
+	.word	sam_ssc			/* Vector 16+21: Synchronous Serial Controller */
+	.word	sam_tc0			/* Vector 16+22: Timer Counter 0 */
+	.word	sam_tc1			/* Vector 16+23: Timer Counter 1 */
+	.word	sam_tc2			/* Vector 16+24: Timer Counter 2 */
+	.word	sam_pwm			/* Vector 16+25: Pulse Width Modulation Controller */
+	.word	sam_adc12b		/* Vector 16+26: 12-bit ADC Controller */
+	.word	sam_adc			/* Vector 16+27: 10-bit ADC Controller */
+	.word	sam_dmac		/* Vector 16+28: DMA Controller */
+	.word	sam_udphs		/* Vector 16+29: USB Device High Speed */
+	.size	sam_vectors, .-sam_vectors
 
 /************************************************************************************************
  * .text
@@ -165,47 +165,47 @@ sam3u_vectors:
 	.type	handlers, function
 	.thumb_func
 handlers:
-	HANDLER	sam3u_reserved, SAM3U_IRQ_RESERVED		/* Unexpected/reserved vector */
-	HANDLER	sam3u_nmi, SAM3U_IRQ_NMI				/* Vector  2: Non-Maskable Interrupt (NMI) */
-	HANDLER	sam3u_hardfault, SAM3U_IRQ_HARDFAULT	/* Vector  3: Hard fault */
-	HANDLER	sam3u_mpu, SAM3U_IRQ_MEMFAULT			/* Vector  4: Memory management (MPU) */
-	HANDLER	sam3u_busfault, SAM3U_IRQ_BUSFAULT		/* Vector  5: Bus fault */
-	HANDLER	sam3u_usagefault, SAM3U_IRQ_USAGEFAULT	/* Vector  6: Usage fault */
-	HANDLER	sam3u_svcall, SAM3U_IRQ_SVCALL			/* Vector 11: SVC call */
-	HANDLER	sam3u_dbgmonitor, SAM3U_IRQ_DBGMONITOR	/* Vector 12: Debug Monitor */
-	HANDLER	sam3u_pendsv, SAM3U_IRQ_PENDSV			/* Vector 14: Penable system service request */
-	HANDLER	sam3u_systick, SAM3U_IRQ_SYSTICK		/* Vector 15: System tick */
+	HANDLER	sam_reserved, SAM_IRQ_RESERVED		/* Unexpected/reserved vector */
+	HANDLER	sam_nmi, SAM_IRQ_NMI				/* Vector  2: Non-Maskable Interrupt (NMI) */
+	HANDLER	sam_hardfault, SAM_IRQ_HARDFAULT	/* Vector  3: Hard fault */
+	HANDLER	sam_mpu, SAM_IRQ_MEMFAULT			/* Vector  4: Memory management (MPU) */
+	HANDLER	sam_busfault, SAM_IRQ_BUSFAULT		/* Vector  5: Bus fault */
+	HANDLER	sam_usagefault, SAM_IRQ_USAGEFAULT	/* Vector  6: Usage fault */
+	HANDLER	sam_svcall, SAM_IRQ_SVCALL			/* Vector 11: SVC call */
+	HANDLER	sam_dbgmonitor, SAM_IRQ_DBGMONITOR	/* Vector 12: Debug Monitor */
+	HANDLER	sam_pendsv, SAM_IRQ_PENDSV			/* Vector 14: Penable system service request */
+	HANDLER	sam_systick, SAM_IRQ_SYSTICK		/* Vector 15: System tick */
 
-	HANDLER	sam3u_supc, SAM3U_IRQ_SUPC				/* Vector 16+0:  Supply Controller */
-	HANDLER	sam3u_rstc, SAM3U_IRQ_RSTC				/* Vector 16+1:  Reset Controller */
-	HANDLER	sam3u_rtc, SAM3U_IRQ_RTC				/* Vector 16+2:  Real Time Clock */
-	HANDLER	sam3u_rtt, SAM3U_IRQ_RTT				/* Vector 16+3:  Real Time Timer */
-	HANDLER	sam3u_wdt, SAM3U_IRQ_WDT				/* Vector 16+4:  Watchdog Timer */
-	HANDLER	sam3u_pmc, SAM3U_IRQ_PMC				/* Vector 16+5:  Power Management Controller */
-	HANDLER	sam3u_eefc0, SAM3U_IRQ_EEFC0			/* Vector 16+6:  Enhanced Embedded Flash Controller 0 */
-	HANDLER	sam3u_eefc1, SAM3U_IRQ_EEFC1			/* Vector 16+7:  Enhanced Embedded Flash Controller 1 */
-	HANDLER	sam3u_uart, SAM3U_IRQ_UART				/* Vector 16+8:  Universal Asynchronous Receiver Transmitter */
-	HANDLER	sam3u_smc, SAM3U_IRQ_SMC				/* Vector 16+9:  Static Memory Controller */
-	HANDLER	sam3u_pioa, SAM3U_IRQ_PIOA				/* Vector 16+10: Parallel I/O Controller A */
-	HANDLER	sam3u_piob, SAM3U_IRQ_PIOB				/* Vector 16+11: Parallel I/O Controller B */
-	HANDLER	sam3u_pioc, SAM3U_IRQ_PIOC				/* Vector 16+12: Parallel I/O Controller C */
-	HANDLER	sam3u_usart0, SAM3U_IRQ_USART0			/* Vector 16+13: USART 0 */
-	HANDLER	sam3u_usart1, SAM3U_IRQ_USART1			/* Vector 16+14: USART 1 */
-	HANDLER	sam3u_usart2, SAM3U_IRQ_USART2			/* Vector 16+15: USART 2 */
-	HANDLER	sam3u_usart3, SAM3U_IRQ_USART3			/* Vector 16+16: USART 3 */
-	HANDLER	sam3u_hsmci, SAM3U_IRQ_HSMCI			/* Vector 16+17: High Speed Multimedia Card Interface */
-	HANDLER	sam3u_twi0, SAM3U_IRQ_TWI0				/* Vector 16+18: Two-Wire Interface 0 */
-	HANDLER	sam3u_twi1, SAM3U_IRQ_TWI1				/* Vector 16+19: Two-Wire Interface 1 */
-	HANDLER	sam3u_spi, SAM3U_IRQ_SPI				/* Vector 16+20: Serial Peripheral Interface */
-	HANDLER	sam3u_ssc, SAM3U_IRQ_SSC				/* Vector 16+21: Synchronous Serial Controller */
-	HANDLER	sam3u_tc0, SAM3U_IRQ_TC0				/* Vector 16+22: Timer Counter 0 */
-	HANDLER	sam3u_tc1, SAM3U_IRQ_TC1				/* Vector 16+23: Timer Counter 1 */
-	HANDLER	sam3u_tc2, SAM3U_IRQ_TC2				/* Vector 16+24: Timer Counter 2 */
-	HANDLER	sam3u_pwm, SAM3U_IRQ_PWM				/* Vector 16+25: Pulse Width Modulation Controller */
-	HANDLER	sam3u_adc12b, SAM3U_IRQ_ADC12B			/* Vector 16+26: 12-bit ADC Controller */
-	HANDLER	sam3u_adc, SAM3U_IRQ_ADC				/* Vector 16+27: 10-bit ADC Controller */
-	HANDLER	sam3u_dmac, SAM3U_IRQ_DMAC				/* Vector 16+28: DMA Controller */
-	HANDLER	sam3u_udphs, SAM3U_IRQ_UDPHS			/* Vector 16+29: USB Device High Speed */
+	HANDLER	sam_supc, SAM_IRQ_SUPC				/* Vector 16+0:  Supply Controller */
+	HANDLER	sam_rstc, SAM_IRQ_RSTC				/* Vector 16+1:  Reset Controller */
+	HANDLER	sam_rtc, SAM_IRQ_RTC				/* Vector 16+2:  Real Time Clock */
+	HANDLER	sam_rtt, SAM_IRQ_RTT				/* Vector 16+3:  Real Time Timer */
+	HANDLER	sam_wdt, SAM_IRQ_WDT				/* Vector 16+4:  Watchdog Timer */
+	HANDLER	sam_pmc, SAM_IRQ_PMC				/* Vector 16+5:  Power Management Controller */
+	HANDLER	sam_eefc0, SAM_IRQ_EEFC0			/* Vector 16+6:  Enhanced Embedded Flash Controller 0 */
+	HANDLER	sam_eefc1, SAM_IRQ_EEFC1			/* Vector 16+7:  Enhanced Embedded Flash Controller 1 */
+	HANDLER	sam_uart, SAM_IRQ_UART				/* Vector 16+8:  Universal Asynchronous Receiver Transmitter */
+	HANDLER	sam_smc, SAM_IRQ_SMC				/* Vector 16+9:  Static Memory Controller */
+	HANDLER	sam_pioa, SAM_IRQ_PIOA				/* Vector 16+10: Parallel I/O Controller A */
+	HANDLER	sam_piob, SAM_IRQ_PIOB				/* Vector 16+11: Parallel I/O Controller B */
+	HANDLER	sam_pioc, SAM_IRQ_PIOC				/* Vector 16+12: Parallel I/O Controller C */
+	HANDLER	sam_usart0, SAM_IRQ_USART0			/* Vector 16+13: USART 0 */
+	HANDLER	sam_usart1, SAM_IRQ_USART1			/* Vector 16+14: USART 1 */
+	HANDLER	sam_usart2, SAM_IRQ_USART2			/* Vector 16+15: USART 2 */
+	HANDLER	sam_usart3, SAM_IRQ_USART3			/* Vector 16+16: USART 3 */
+	HANDLER	sam_hsmci, SAM_IRQ_HSMCI			/* Vector 16+17: High Speed Multimedia Card Interface */
+	HANDLER	sam_twi0, SAM_IRQ_TWI0				/* Vector 16+18: Two-Wire Interface 0 */
+	HANDLER	sam_twi1, SAM_IRQ_TWI1				/* Vector 16+19: Two-Wire Interface 1 */
+	HANDLER	sam_spi, SAM_IRQ_SPI				/* Vector 16+20: Serial Peripheral Interface */
+	HANDLER	sam_ssc, SAM_IRQ_SSC				/* Vector 16+21: Synchronous Serial Controller */
+	HANDLER	sam_tc0, SAM_IRQ_TC0				/* Vector 16+22: Timer Counter 0 */
+	HANDLER	sam_tc1, SAM_IRQ_TC1				/* Vector 16+23: Timer Counter 1 */
+	HANDLER	sam_tc2, SAM_IRQ_TC2				/* Vector 16+24: Timer Counter 2 */
+	HANDLER	sam_pwm, SAM_IRQ_PWM				/* Vector 16+25: Pulse Width Modulation Controller */
+	HANDLER	sam_adc12b, SAM_IRQ_ADC12B			/* Vector 16+26: 12-bit ADC Controller */
+	HANDLER	sam_adc, SAM_IRQ_ADC				/* Vector 16+27: 10-bit ADC Controller */
+	HANDLER	sam_dmac, SAM_IRQ_DMAC				/* Vector 16+28: DMA Controller */
+	HANDLER	sam_udphs, SAM_IRQ_UDPHS			/* Vector 16+29: USB Device High Speed */
 
 /* Common IRQ handling logic.  On entry here, the return stack is on either
  * the PSP or the MSP and looks like the following:

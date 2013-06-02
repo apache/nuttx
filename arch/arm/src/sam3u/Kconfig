@@ -3,52 +3,61 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-comment "AT91SAM3 Configuration Options"
+comment "AT91SAM3/SAM4 Configuration Options"
 
 choice
 	prompt "AT91SAM3 Chip Selection"
 	default ARCH_CHIP_AT91SAM3U4E
-	depends on ARCH_CHIP_SAM3U
+	depends on ARCH_CHIP_SAM34
 
 config ARCH_CHIP_AT91SAM3U4E
 	bool "AT91SAM3U4E"
+	select ARCH_CORTEXM3
+	select ARCH_CHIP_SAM3U
 
 endchoice
 
+config ARCH_CHIP_SAM3U
+	bool
+
 menu "AT91SAM3 Peripheral Support"
 
-config SAM3U_DMA
+config SAM34_DMA
 	bool "DMA"
 	default n
 	select ARCH_DMA
 
-config SAM3U_NAND
+config SAM34_NAND
 	bool "NAND support"
 	default n
 
-config SAM3U_HSMCI
+config SAM34_HSMCI
 	bool "HSMCI"
 	default n
 
-config SAM3U_UART
+config SAM34_UART
 	bool "UART"
 	default y
 	select ARCH_HAVE_UART
 
-config SAM3U_USART0
+config SAM34_USART0
 	bool "USART0"
 	default n
 
-config SAM3U_USART1
+config SAM34_USART1
 	bool "USART1"
 	default n
 
-config SAM3U_USART2
+config SAM34_USART2
 	bool "USART2"
 	default n
 
-config SAM3U_USART3
+config SAM34_USART3
 	bool "USART3"
+	default n
+
+config SAM34_SPI
+	bool "SPI"
 	default n
 
 endmenu
@@ -58,25 +67,25 @@ menu "AT91SAM3 UART Configuration"
 config USART0_ISUART
 	bool "USART0 is a UART"
 	default y
-	depends on SAM3U_USART0
+	depends on SAM34_USART0
 	select ARCH_HAVE_USART0
 
 config USART1_ISUART
 	bool "USART1 is a UART"
 	default y
-	depends on SAM3U_USART1
+	depends on SAM34_USART1
 	select ARCH_HAVE_USART1
 
 config USART2_ISUART
 	bool "USART2 is a UART"
 	default n
-	depends on SAM3U_USART2
+	depends on SAM34_USART2
 	select ARCH_HAVE_USART2
 
 config USART3_ISUART
 	bool "USART3 is a UART"
 	default y
-	depends on SAM3U_USART3
+	depends on SAM34_USART3
 	select ARCH_HAVE_USART2
 
 endmenu

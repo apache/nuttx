@@ -49,11 +49,11 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "sam3u_internal.h"
-#include "sam3u_pmc.h"
-#include "sam3u_eefc.h"
-#include "sam3u_wdt.h"
-#include "sam3u_supc.h"
-#include "sam3u_matrix.h"
+#include "chip/sam_pmc.h"
+#include "chip/sam_eefc.h"
+#include "chip/sam_wdt.h"
+#include "chip/sam_supc.h"
+#include "chip/sam_matrix.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -101,8 +101,8 @@
 
 static inline void sam3u_efcsetup(void)
 {
-  putreg32((2 << EEFC_FMR_FWS_SHIFT), SAM3U_EEFC0_FMR);
-  putreg32((2 << EEFC_FMR_FWS_SHIFT), SAM3U_EEFC1_FMR);
+  putreg32((2 << EEFC_FMR_FWS_SHIFT), SAM_EEFC0_FMR);
+  putreg32((2 << EEFC_FMR_FWS_SHIFT), SAM_EEFC1_FMR);
 }
 
 /****************************************************************************
@@ -115,7 +115,7 @@ static inline void sam3u_efcsetup(void)
 
 static inline void sam3u_wdtsetup(void)
 {
-  putreg32(WDT_MR_WDDIS, SAM3U_WDT_MR);
+  putreg32(WDT_MR_WDDIS, SAM_WDT_MR);
 }
 
 /****************************************************************************
@@ -130,12 +130,12 @@ static inline void sam3u_supcsetup(void)
 {
   /* Check if the 32-kHz is already selected */
 
-  if ((getreg32(SAM3U_SUPC_SR) & SUPC_SR_OSCSEL) == 0)
+  if ((getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0)
     {
       uint32_t delay;
-      putreg32((SUPC_CR_XTALSEL|SUPR_CR_KEY), SAM3U_SUPC_CR);
+      putreg32((SUPC_CR_XTALSEL|SUPR_CR_KEY), SAM_SUPC_CR);
       for (delay = 0;
-           (getreg32(SAM3U_SUPC_SR) & SUPC_SR_OSCSEL) == 0 && delay < UINT32_MAX;
+           (getreg32(SAM_SUPC_SR) & SUPC_SR_OSCSEL) == 0 && delay < UINT32_MAX;
            delay++);
     }
 }
@@ -152,7 +152,7 @@ static void sam3u_pmcwait(uint32_t bit)
 {
   uint32_t delay;
   for (delay = 0;
-       (getreg32(SAM3U_PMC_SR) & bit) == 0 && delay < UINT32_MAX;
+       (getreg32(SAM_PMC_SR) & bit) == 0 && delay < UINT32_MAX;
        delay++);
 }
 
@@ -170,7 +170,7 @@ static inline void sam3u_pmcsetup(void)
 
   /* Enable main oscillator (if it has not already been selected) */
 
-  if ((getreg32(SAM3U_CKGR_MOR) & CKGR_MOR_MOSCSEL) == 0)
+  if ((getreg32(SAM_CKGR_MOR) & CKGR_MOR_MOSCSEL) == 0)
     {
       /* "When the MOSCXTEN bit and the MOSCXTCNT are written in CKGR_MOR to
        *  enable the main oscillator, the MOSCXTS bit in the Power Management
@@ -180,10 +180,10 @@ static inline void sam3u_pmcsetup(void)
        *  indicating that the main clock is valid."
        */
 
-      putreg32(BOARD_CKGR_MOR, SAM3U_CKGR_MOR);
+      putreg32(BOARD_CKGR_MOR, SAM_CKGR_MOR);
       sam3u_pmcwait(PMC_INT_MOSCXTS);
     }
- 
+
   /* "Switch to the main oscillator.  The selection is made by writing the
    *  MOSCSEL bit in the Main Oscillator Register (CKGR_MOR). The switch of
    *  the Main Clock source is glitch free, so there is no need to run out
@@ -196,7 +196,7 @@ static inline void sam3u_pmcsetup(void)
    *             1 = Selection is in progress
    */
 
-  putreg32((BOARD_CKGR_MOR|CKGR_MOR_MOSCSEL), SAM3U_CKGR_MOR);
+  putreg32((BOARD_CKGR_MOR|CKGR_MOR_MOSCSEL), SAM_CKGR_MOR);
   sam3u_pmcwait(PMC_INT_MOSCSELS);
 
   /* "Select the master clock. "The Master Clock selection is made by writing
@@ -208,32 +208,32 @@ static inline void sam3u_pmcsetup(void)
    *  established.
    */
 
-  regval = getreg32(SAM3U_PMC_MCKR);
+  regval = getreg32(SAM_PMC_MCKR);
   regval &= ~PMC_MCKR_CSS_MASK;
   regval |= PMC_MCKR_CSS_MAIN;
-  putreg32(regval, SAM3U_PMC_MCKR);
+  putreg32(regval, SAM_PMC_MCKR);
   sam3u_pmcwait(PMC_INT_MCKRDY);
 
   /* Settup PLLA and wait for LOCKA */
 
-  putreg32(BOARD_CKGR_PLLAR, SAM3U_CKGR_PLLAR);
+  putreg32(BOARD_CKGR_PLLAR, SAM_CKGR_PLLAR);
   sam3u_pmcwait(PMC_INT_LOCKA);
 
   /* Setup UTMI for USB and wait for LOCKU */
 
 #ifdef CONFIG_USBDEV
-  regval = getreg32(SAM3U_CKGR_UCKR);
+  regval = getreg32(SAM_CKGR_UCKR);
   regval |= BOARD_CKGR_UCKR;
-  putreg32(regval, SAM3U_CKGR_UCKR);
+  putreg32(regval, SAM_CKGR_UCKR);
   sam3u_pmcwait(PMC_INT_LOCKU);
 #endif
 
   /* Switch to the fast clock and wait for MCKRDY */
 
-  putreg32(BOARD_PMC_MCKR_FAST, SAM3U_PMC_MCKR);
+  putreg32(BOARD_PMC_MCKR_FAST, SAM_PMC_MCKR);
   sam3u_pmcwait(PMC_INT_MCKRDY);
 
-  putreg32(BOARD_PMC_MCKR, SAM3U_PMC_MCKR);
+  putreg32(BOARD_PMC_MCKR, SAM_PMC_MCKR);
   sam3u_pmcwait(PMC_INT_MCKRDY);
 }
 
@@ -251,21 +251,21 @@ static inline void sam3u_enabledefaultmaster(void)
 
   /* Set default master: SRAM0 -> Cortex-M3 System */
 
-  regval  = getreg32(SAM3U_MATRIX_SCFG0);
+  regval  = getreg32(SAM_MATRIX_SCFG0);
   regval |= (MATRIX_SCFG0_FIXEDDEFMSTR_ARMS|MATRIX_SCFG_DEFMSTRTYPE_FIXED);
-  putreg32(regval, SAM3U_MATRIX_SCFG0);
+  putreg32(regval, SAM_MATRIX_SCFG0);
 
   /* Set default master: SRAM1 -> Cortex-M3 System */
 
-  regval  = getreg32(SAM3U_MATRIX_SCFG1);
+  regval  = getreg32(SAM_MATRIX_SCFG1);
   regval |= (MATRIX_SCFG1_FIXEDDEFMSTR_ARMS|MATRIX_SCFG_DEFMSTRTYPE_FIXED);
-  putreg32(regval, SAM3U_MATRIX_SCFG1);
+  putreg32(regval, SAM_MATRIX_SCFG1);
 
   /* Set default master: Internal flash0 -> Cortex-M3 Instruction/Data */
 
-  regval  = getreg32(SAM3U_MATRIX_SCFG3);
+  regval  = getreg32(SAM_MATRIX_SCFG3);
   regval |= (MATRIX_SCFG3_FIXEDDEFMSTR_ARMC|MATRIX_SCFG_DEFMSTRTYPE_FIXED);
-  putreg32(regval, SAM3U_MATRIX_SCFG3);
+  putreg32(regval, SAM_MATRIX_SCFG3);
 }
 
 #if 0 /* Not used */
@@ -275,21 +275,21 @@ static inline void sam3u_disabledefaultmaster(void)
 
   /* Clear default master: SRAM0 -> Cortex-M3 System */
 
-  regval  = getreg32(SAM3U_MATRIX_SCFG0);
+  regval  = getreg32(SAM_MATRIX_SCFG0);
   regval &= ~MATRIX_SCFG_DEFMSTRTYPE_MASK;
-  putreg32(regval, SAM3U_MATRIX_SCFG0);
+  putreg32(regval, SAM_MATRIX_SCFG0);
 
   /* Clear default master: SRAM1 -> Cortex-M3 System */
 
-  regval  = getreg32(SAM3U_MATRIX_SCFG1);
+  regval  = getreg32(SAM_MATRIX_SCFG1);
   regval &= ~MATRIX_SCFG_DEFMSTRTYPE_MASK;
-  putreg32(regval, SAM3U_MATRIX_SCFG1);
+  putreg32(regval, SAM_MATRIX_SCFG1);
 
   /* Clear default master: Internal flash0 -> Cortex-M3 Instruction/Data */
 
-  regval  = getreg32(SAM3U_MATRIX_SCFG3);
+  regval  = getreg32(SAM_MATRIX_SCFG3);
   regval &= ~MATRIX_SCFG_DEFMSTRTYPE_MASK;
-  putreg32(regval, SAM3U_MATRIX_SCFG3);
+  putreg32(regval, SAM_MATRIX_SCFG3);
 }
 #endif
 
@@ -301,9 +301,9 @@ static inline void sam3u_disabledefaultmaster(void)
  * Name: sam3u_clockconfig
  *
  * Description:
- *   Called to initialize the SAM3U.  This does whatever setup is needed to put the
+ *   Called to initialize the SAM3/4.  This does whatever setup is needed to put the
  *   SoC in a usable state.  This includes the initialization of clocking using the
- *   settings in board.h.  (After power-on reset, the sam3u is initiallyrunning on
+ *   settings in board.h.  (After power-on reset, the SAM3/4 is initially running on
  *   a 4MHz internal RC clock).  This function also performs other low-level chip
  *   initialization of the chip including EFC, master clock, IRQ & watchdog
  *   configuration.
@@ -319,7 +319,7 @@ void sam3u_clockconfig(void)
   /* Configure the watchdog timer */
 
   sam3u_wdtsetup();
-  
+
   /* Setup the supply controller to use the external slow clock */
 
   sam3u_supcsetup();

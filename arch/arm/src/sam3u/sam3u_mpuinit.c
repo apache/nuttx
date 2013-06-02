@@ -75,7 +75,7 @@
  * Name: sam3u_mpuinitialize
  *
  * Description:
- *   Configure the MPU to permit user-space access to only restricted SAM3U
+ *   Configure the MPU to permit user-space access to only restricted SAM3/4
  *   resources.
  *
  ****************************************************************************/

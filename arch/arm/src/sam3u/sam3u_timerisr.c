@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam3u/sam3u_timerisr.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,12 +67,12 @@
  * SysTick Control and Status register.
  */
 
-#undef CONFIG_SAM3U_SYSTICK_HCLKd8 /* Power up default is MCK, not MCK/8 */
+#undef CONFIG_SAM34_SYSTICK_HCLKd8 /* Power up default is MCK, not MCK/8 */
 
-#if CONFIG_SAM3U_SYSTICK_HCLKd8
-#  define SYSTICK_RELOAD ((SAM3U_MCK_FREQUENCY / 8 / CLK_TCK) - 1)
+#if CONFIG_SAM34_SYSTICK_HCLKd8
+#  define SYSTICK_RELOAD ((SAM_MCK_FREQUENCY / 8 / CLK_TCK) - 1)
 #else
-#  define SYSTICK_RELOAD ((SAM3U_MCK_FREQUENCY / CLK_TCK) - 1)
+#  define SYSTICK_RELOAD ((SAM_MCK_FREQUENCY / CLK_TCK) - 1)
 #endif
 
 /* The size of the reload field is 24 bits.  Verify that the reload value
@@ -136,7 +136,7 @@ void up_timerinit(void)
 
 #if 0 /* Does not work.  Comes up with HCLK source and I can't change it */
   regval = getreg32(NVIC_SYSTICK_CTRL);
-#if CONFIG_SAM3U_SYSTICK_HCLKd8
+#if CONFIG_SAM34_SYSTICK_HCLKd8
   regval &= ~NVIC_SYSTICK_CTRL_CLKSOURCE;
 #else
   regval |= NVIC_SYSTICK_CTRL_CLKSOURCE;
@@ -150,7 +150,7 @@ void up_timerinit(void)
 
   /* Attach the timer interrupt vector */
 
-  (void)irq_attach(SAM3U_IRQ_SYSTICK, (xcpt_t)up_timerisr);
+  (void)irq_attach(SAM_IRQ_SYSTICK, (xcpt_t)up_timerisr);
 
   /* Enable SysTick interrupts */
 
@@ -158,5 +158,5 @@ void up_timerinit(void)
 
   /* And enable the timer interrupt */
 
-  up_enable_irq(SAM3U_IRQ_SYSTICK);
+  up_enable_irq(SAM_IRQ_SYSTICK);
 }

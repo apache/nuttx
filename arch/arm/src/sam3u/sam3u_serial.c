@@ -56,7 +56,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "sam3u_uart.h"
+#include "chip/sam_uart.h"
 #include "up_arch.h"
 #include "up_internal.h"
 #include "os_internal.h"
@@ -72,58 +72,58 @@
  */
 
 #ifndef CONFIG_USART0_ISUART
-#  undef CONFIG_SAM3U_USART0
+#  undef CONFIG_SAM34_USART0
 #endif
 #ifndef CONFIG_USART1_ISUART
-#  undef CONFIG_SAM3U_USART1
+#  undef CONFIG_SAM34_USART1
 #endif
 #ifndef CONFIG_USART2_ISUART
-#  undef CONFIG_SAM3U_USART2
+#  undef CONFIG_SAM34_USART2
 #endif
 #ifndef CONFIG_USART3_ISUART
-#  undef CONFIG_SAM3U_USART3
+#  undef CONFIG_SAM34_USART3
 #endif
 
 /* Is there a USART/USART enabled? */
 
-#if !defined(CONFIG_SAM3U_UART)   && !defined(CONFIG_SAM3U_USART0) && \
-    !defined(CONFIG_SAM3U_USART1) && !defined(CONFIG_SAM3U_USART2) && \
-    !defined(CONFIG_SAM3U_USART3)
+#if !defined(CONFIG_SAM34_UART)   && !defined(CONFIG_SAM34_USART0) && \
+    !defined(CONFIG_SAM34_USART1) && !defined(CONFIG_SAM34_USART2) && \
+    !defined(CONFIG_SAM34_USART3)
 #  error "No USARTs enabled"
 #endif
 
-#if defined(CONFIG_SAM3U_USART0) || defined(CONFIG_SAM3U_USART1) ||\
-    defined(CONFIG_SAM3U_USART2) || defined(CONFIG_SAM3U_USART3)
+#if defined(CONFIG_SAM34_USART0) || defined(CONFIG_SAM34_USART1) ||\
+    defined(CONFIG_SAM34_USART2) || defined(CONFIG_SAM34_USART3)
 #  define HAVE_USART
 #endif
 
 /* Is there a serial console? */
 
-#if defined(CONFIG_UART_SERIAL_CONSOLE) && defined(CONFIG_SAM3U_UART)
+#if defined(CONFIG_UART_SERIAL_CONSOLE) && defined(CONFIG_SAM34_UART)
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
-#elif defined(CONFIG_USART0_SERIAL_CONSOLE) && defined(CONFIG_SAM3U_USART0)
+#elif defined(CONFIG_USART0_SERIAL_CONSOLE) && defined(CONFIG_SAM34_USART0)
 #  undef CONFIG_UART_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
-#elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_SAM3U_USART1)
+#elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_SAM34_USART1)
 #  undef CONFIG_UART_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
-#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_SAM3U_USART2)
+#elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_SAM34_USART2)
 #  undef CONFIG_UART_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
-#elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_SAM3U_USART3)
+#elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_SAM34_USART3)
 #  undef CONFIG_UART_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
@@ -150,19 +150,19 @@
 #if defined(CONFIG_UART_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_uartport      /* UART=console */
 #  define TTYS0_DEV       g_uartport      /* UART=ttyS0 */
-#  ifdef CONFIG_SAM3U_USART0
+#  ifdef CONFIG_SAM34_USART0
 #    define TTYS1_DEV     g_usart0port    /* UART=ttyS0;USART0=ttyS1 */
-#    ifdef CONFIG_SAM3U_USART1
+#    ifdef CONFIG_SAM34_USART1
 #      define TTYS2_DEV   g_usart1port    /* UART=ttyS0;USART0=ttyS1;USART1=ttyS2 */
-#      ifdef CONFIG_SAM3U_USART2
+#      ifdef CONFIG_SAM34_USART2
 #        define TTYS3_DEV   g_usart2port  /* UART=ttyS0;USART0=ttyS1;USART1=ttyS2;USART2=ttyS3 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS4_DEV g_usart3port  /* UART=ttyS0;USART0=ttyS1;USART1=ttyS2;USART2=ttyS3;USART3=ttyS4 */
 #        else
 #          undef TTYS4_DEV                /* UART=ttyS0;USART0=ttyS1;USART1=ttyS2;USART2=ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS3_DEV g_usart3port  /* UART=ttyS0;USART0=ttyS1;USART1=ttyS;USART3=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* UART=ttyS0;USART0=ttyS1;USART1=ttyS;No ttyS3;No ttyS4 */
@@ -170,16 +170,16 @@
 #        undef TTYS4_DEV                  /* No ttyS4 */
 #      endif
 #    else
-#      ifdef CONFIG_SAM3U_USART2
+#      ifdef CONFIG_SAM34_USART2
 #        define TTYS2_DEV g_usart2port    /* UART=ttyS0;USART0=ttyS1;USART2=ttys2;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS3_DEV g_usart3port  /* UART=ttyS0;USART0=ttyS1;USART2=ttys2;USART3=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* UART=ttyS0;USART0=ttyS1;USART2=ttys2;No ttyS3;No ttyS4 */
 #        endif
 #        undef TTYS4_DEV                  /* No ttyS4 */
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS2_DEV g_usart3port  /* UART=ttyS0;USART0=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* UART=ttyS0;USART0=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -189,17 +189,17 @@
 #      endif
 #    endif
 #  else
-#    ifdef CONFIG_SAM3U_USART1
+#    ifdef CONFIG_SAM34_USART1
 #      define TTYS1_DEV   g_usart1port    /* UART=ttyS0;USART1=ttyS1;No ttyS4 */
-#      ifdef CONFIG_SAM3U_USART2
+#      ifdef CONFIG_SAM34_USART2
 #        define TTYS2_DEV   g_usart2port  /* UART=ttyS0;USART1=ttyS1;USART2=ttyS2;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS3_DEV g_usart3port  /* UART=ttyS0;USART1=ttyS1;USART2=ttyS2;USART3=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* UART=ttyS0;USART1=ttyS1;USART2=ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS2_DEV g_usart3port  /* UART=ttyS0;USART1=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* UART=ttyS0;USART1=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -207,15 +207,15 @@
 #        undef TTYS3_DEV                  /* No ttyS3 */
 #      endif
 #    else
-#      ifdef CONFIG_SAM3U_USART2
+#      ifdef CONFIG_SAM34_USART2
 #        define TTYS1_DEV   g_usart2port  /* UART=ttyS0;USART2=ttyS1;No ttyS3;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS2_DEV g_usart3port  /* UART=ttyS0;USART2=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* UART=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS1_DEV g_usart3port  /* UART=ttyS0;USART3=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS1_DEV                /* UART=ttyS0;No ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -229,19 +229,19 @@
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart0port    /* USART0=console */
 #  define TTYS0_DEV       g_usart0port    /* USART0=ttyS0 */
-#  ifdef CONFIG_SAM3U_UART
+#  ifdef CONFIG_SAM34_UART
 #    define TTYS1_DEV     g_uartport      /* USART0=ttyS0;UART=ttyS1 */
-#    ifdef CONFIG_SAM3U_USART1
+#    ifdef CONFIG_SAM34_USART1
 #      define TTYS2_DEV   g_usart1port    /* USART0=ttyS0;UART=ttyS1;USART1=ttyS2 */
-#      ifdef CONFIG_SAM3U_USART2
+#      ifdef CONFIG_SAM34_USART2
 #        define TTYS3_DEV   g_usart2port  /* USART0=ttyS0;UART=ttyS1;USART1=ttyS2;USART2=ttyS3 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS4_DEV g_usart3port  /* USART0=ttyS0;UART=ttyS1;USART1=ttyS2;USART2=ttyS3;USART3=ttyS4 */
 #        else
 #          undef TTYS4_DEV                /* USART0=ttyS0;UART=ttyS1;USART1=ttyS2;USART2=ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS3_DEV g_usart3port  /* USART0=ttyS0;UART=ttyS1;USART1=ttyS;USART3=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART0=ttyS0;UART=ttyS1;USART1=ttyS;No ttyS3;No ttyS4 */
@@ -249,16 +249,16 @@
 #        undef TTYS4_DEV                  /* No ttyS4 */
 #      endif
 #    else
-#      ifdef CONFIG_SAM3U_USART2
+#      ifdef CONFIG_SAM34_USART2
 #        define TTYS2_DEV g_usart2port    /* USART0=ttyS0;UART=ttyS1;USART2=ttys2;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS3_DEV g_usart3port  /* USART0=ttyS0;UART=ttyS1;USART2=ttys2;USART3=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART0=ttyS0;UART=ttyS1;USART2=ttys2;No ttyS3;No ttyS4 */
 #        endif
 #        undef TTYS4_DEV                  /* No ttyS4 */
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS2_DEV g_usart3port  /* USART0=ttyS0;UART=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* USART0=ttyS0;UART=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -268,17 +268,17 @@
 #      endif
 #    endif
 #  else
-#    ifdef CONFIG_SAM3U_USART1
+#    ifdef CONFIG_SAM34_USART1
 #      define TTYS1_DEV   g_usart1port    /* USART0=ttyS0;USART1=ttyS1;No ttyS4 */
-#      ifdef CONFIG_SAM3U_USART2
+#      ifdef CONFIG_SAM34_USART2
 #        define TTYS2_DEV   g_usart2port  /* USART0=ttyS0;USART1=ttyS1;USART2=ttyS2;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS3_DEV g_usart3port  /* USART0=ttyS0;USART1=ttyS1;USART2=ttyS2;USART3=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART0=ttyS0;USART1=ttyS1;USART2=ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS2_DEV g_usart3port  /* USART0=ttyS0;USART1=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* USART0=ttyS0;USART1=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -286,15 +286,15 @@
 #        undef TTYS3_DEV                  /* No ttyS3 */
 #      endif
 #    else
-#      ifdef CONFIG_SAM3U_USART2
+#      ifdef CONFIG_SAM34_USART2
 #        define TTYS1_DEV   g_usart2port  /* USART0=ttyS0;USART2=ttyS1;No ttyS3;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS2_DEV g_usart3port  /* USART0=ttyS0;USART2=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART0=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS1_DEV g_usart3port  /* USART0=ttyS0;USART3=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS1_DEV                /* USART0=ttyS0;No ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -308,19 +308,19 @@
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart1port    /* USART1=console */
 #  define TTYS0_DEV       g_usart1port    /* USART1=ttyS0 */
-#  ifdef CONFIG_SAM3U_UART
+#  ifdef CONFIG_SAM34_UART
 #    define TTYS1_DEV     g_uartport      /* USART1=ttyS0;UART=ttyS1 */
-#    ifdef CONFIG_SAM3U_USART0
+#    ifdef CONFIG_SAM34_USART0
 #      define TTYS2_DEV   g_usart0port    /* USART1=ttyS0;UART=ttyS1;USART0=ttyS2 */
-#      ifdef CONFIG_SAM3U_USART2
+#      ifdef CONFIG_SAM34_USART2
 #        define TTYS3_DEV   g_usart2port  /* USART1=ttyS0;UART=ttyS1;USART0=ttyS2;USART2=ttyS3 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS4_DEV g_usart3port  /* USART1=ttyS0;UART=ttyS1;USART0=ttyS2;USART2=ttyS3;USART3=ttyS4 */
 #        else
 #          undef TTYS4_DEV                /* USART1=ttyS0;UART=ttyS1;USART0=ttyS2;USART2=ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS3_DEV g_usart3port  /* USART1=ttyS0;UART=ttyS1;USART0=ttyS;USART3=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART1=ttyS0;UART=ttyS1;USART0=ttyS;No ttyS3;No ttyS4 */
@@ -328,16 +328,16 @@
 #        undef TTYS4_DEV                  /* No ttyS4 */
 #      endif
 #    else
-#      ifdef CONFIG_SAM3U_USART2
+#      ifdef CONFIG_SAM34_USART2
 #        define TTYS2_DEV g_usart2port    /* USART1=ttyS0;UART=ttyS1;USART2=ttys2;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS3_DEV g_usart3port  /* USART1=ttyS0;UART=ttyS1;USART2=ttys2;USART3=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART1=ttyS0;UART=ttyS1;USART2=ttys2;No ttyS3;No ttyS4 */
 #        endif
 #        undef TTYS4_DEV                  /* No ttyS4 */
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS2_DEV g_usart3port  /* USART1=ttyS0;UART=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* USART1=ttyS0;UART=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -347,17 +347,17 @@
 #      endif
 #    endif
 #  else
-#    ifdef CONFIG_SAM3U_USART0
+#    ifdef CONFIG_SAM34_USART0
 #      define TTYS1_DEV   g_usart0port    /* USART1=ttyS0;USART0=ttyS1;No ttyS4 */
-#      ifdef CONFIG_SAM3U_USART2
+#      ifdef CONFIG_SAM34_USART2
 #        define TTYS2_DEV   g_usart2port  /* USART1=ttyS0;USART0=ttyS1;USART2=ttyS2;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS3_DEV g_usart3port  /* USART1=ttyS0;USART0=ttyS1;USART2=ttyS2;USART3=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART1=ttyS0;USART0=ttyS1;USART2=ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS2_DEV g_usart3port  /* USART1=ttyS0;USART0=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* USART1=ttyS0;USART0=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -365,15 +365,15 @@
 #        undef TTYS3_DEV                  /* No ttyS3 */
 #      endif
 #    else
-#      ifdef CONFIG_SAM3U_USART2
+#      ifdef CONFIG_SAM34_USART2
 #        define TTYS1_DEV   g_usart2port  /* USART1=ttyS0;USART2=ttyS1;No ttyS3;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS2_DEV g_usart3port  /* USART1=ttyS0;USART2=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART1=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS1_DEV g_usart3port  /* USART1=ttyS0;USART3=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS1_DEV                /* USART1=ttyS0;No ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -387,19 +387,19 @@
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart2port    /* USART2=console */
 #  define TTYS0_DEV       g_usart2port    /* USART2=ttyS0 */
-#  ifdef CONFIG_SAM3U_UART
+#  ifdef CONFIG_SAM34_UART
 #    define TTYS1_DEV     g_uartport      /* USART2=ttyS0;UART=ttyS1 */
-#    ifdef CONFIG_SAM3U_USART0
+#    ifdef CONFIG_SAM34_USART0
 #      define TTYS2_DEV   g_usart0port    /* USART2=ttyS0;UART=ttyS1;USART0=ttyS2 */
-#      ifdef CONFIG_SAM3U_USART1
+#      ifdef CONFIG_SAM34_USART1
 #        define TTYS3_DEV   g_usart1port  /* USART2=ttyS0;UART=ttyS1;USART0=ttyS2;USART1=ttyS3 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS4_DEV g_usart3port  /* USART2=ttyS0;UART=ttyS1;USART0=ttyS2;USART1=ttyS3;USART3=ttyS4 */
 #        else
 #          undef TTYS4_DEV                /* USART2=ttyS0;UART=ttyS1;USART0=ttyS2;USART1=ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS3_DEV g_usart3port  /* USART2=ttyS0;UART=ttyS1;USART0=ttyS;USART3=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART2=ttyS0;UART=ttyS1;USART0=ttyS;No ttyS3;No ttyS4 */
@@ -407,16 +407,16 @@
 #        undef TTYS4_DEV                  /* No ttyS4 */
 #      endif
 #    else
-#      ifdef CONFIG_SAM3U_USART1
+#      ifdef CONFIG_SAM34_USART1
 #        define TTYS2_DEV g_usart1port    /* USART2=ttyS0;UART=ttyS1;USART1=ttys2;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS3_DEV g_usart3port  /* USART2=ttyS0;UART=ttyS1;USART1=ttys2;USART3=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART2=ttyS0;UART=ttyS1;USART1=ttys2;No ttyS3;No ttyS4 */
 #        endif
 #        undef TTYS4_DEV                  /* No ttyS4 */
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS2_DEV g_usart3port  /* USART2=ttyS0;UART=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* USART2=ttyS0;UART=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -426,17 +426,17 @@
 #      endif
 #    endif
 #  else
-#    ifdef CONFIG_SAM3U_USART0
+#    ifdef CONFIG_SAM34_USART0
 #      define TTYS1_DEV   g_usart0port    /* USART2=ttyS0;USART0=ttyS1;No ttyS4 */
-#      ifdef CONFIG_SAM3U_USART1
+#      ifdef CONFIG_SAM34_USART1
 #        define TTYS2_DEV   g_usart1port  /* USART2=ttyS0;USART0=ttyS1;USART1=ttyS2;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS3_DEV g_usart3port  /* USART2=ttyS0;USART0=ttyS1;USART1=ttyS2;USART3=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART2=ttyS0;USART0=ttyS1;USART1=ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS2_DEV g_usart3port  /* USART2=ttyS0;USART0=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* USART2=ttyS0;USART0=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -444,15 +444,15 @@
 #        undef TTYS3_DEV                  /* No ttyS3 */
 #      endif
 #    else
-#      ifdef CONFIG_SAM3U_USART1
+#      ifdef CONFIG_SAM34_USART1
 #        define TTYS1_DEV   g_usart1port  /* USART2=ttyS0;USART1=ttyS1;No ttyS3;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS2_DEV g_usart3port  /* USART2=ttyS0;USART1=ttyS1;USART3=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* USART2=ttyS0;USART1=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART3
+#        ifdef CONFIG_SAM34_USART3
 #          define TTYS1_DEV g_usart3port  /* USART2=ttyS0;USART3=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS1_DEV                /* USART2=ttyS0;No ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -466,19 +466,19 @@
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart3port    /* USART3=console */
 #  define TTYS0_DEV       g_usart3port    /* USART3=ttyS0 */
-#  ifdef CONFIG_SAM3U_UART
+#  ifdef CONFIG_SAM34_UART
 #    define TTYS1_DEV     g_uartport      /* USART3=ttyS0;UART=ttyS1 */
-#    ifdef CONFIG_SAM3U_USART0
+#    ifdef CONFIG_SAM34_USART0
 #      define TTYS2_DEV   g_usart0port    /* USART3=ttyS0;UART=ttyS1;USART0=ttyS2 */
-#      ifdef CONFIG_SAM3U_USART1
+#      ifdef CONFIG_SAM34_USART1
 #        define TTYS3_DEV   g_usart1port  /* USART3=ttyS0;UART=ttyS1;USART0=ttyS2;USART1=ttyS3 */
-#        ifdef CONFIG_SAM3U_USART2
+#        ifdef CONFIG_SAM34_USART2
 #          define TTYS4_DEV g_usart2port  /* USART3=ttyS0;UART=ttyS1;USART0=ttyS2;USART1=ttyS3;USART2=ttyS4 */
 #        else
 #          undef TTYS4_DEV                /* USART3=ttyS0;UART=ttyS1;USART0=ttyS2;USART1=ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART2
+#        ifdef CONFIG_SAM34_USART2
 #          define TTYS3_DEV g_usart2port  /* USART3=ttyS0;UART=ttyS1;USART0=ttyS;USART2=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART3=ttyS0;UART=ttyS1;USART0=ttyS;No ttyS3;No ttyS4 */
@@ -486,16 +486,16 @@
 #        undef TTYS4_DEV                  /* No ttyS4 */
 #      endif
 #    else
-#      ifdef CONFIG_SAM3U_USART1
+#      ifdef CONFIG_SAM34_USART1
 #        define TTYS2_DEV g_usart1port    /* USART3=ttyS0;UART=ttyS1;USART1=ttys2;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART2
+#        ifdef CONFIG_SAM34_USART2
 #          define TTYS3_DEV g_usart2port  /* USART3=ttyS0;UART=ttyS1;USART1=ttys2;USART2=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART3=ttyS0;UART=ttyS1;USART1=ttys2;No ttyS3;No ttyS4 */
 #        endif
 #        undef TTYS4_DEV                  /* No ttyS4 */
 #      else
-#        ifdef CONFIG_SAM3U_USART2
+#        ifdef CONFIG_SAM34_USART2
 #          define TTYS2_DEV g_usart2port  /* USART3=ttyS0;UART=ttyS1;USART2=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* USART3=ttyS0;UART=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -505,17 +505,17 @@
 #      endif
 #    endif
 #  else
-#    ifdef CONFIG_SAM3U_USART0
+#    ifdef CONFIG_SAM34_USART0
 #      define TTYS1_DEV   g_usart0port    /* USART3=ttyS0;USART0=ttyS1;No ttyS4 */
-#      ifdef CONFIG_SAM3U_USART1
+#      ifdef CONFIG_SAM34_USART1
 #        define TTYS2_DEV   g_usart1port  /* USART3=ttyS0;USART0=ttyS1;USART1=ttyS2;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART2
+#        ifdef CONFIG_SAM34_USART2
 #          define TTYS3_DEV g_usart2port  /* USART3=ttyS0;USART0=ttyS1;USART1=ttyS2;USART2=ttyS3;No ttyS4 */
 #        else
 #          undef TTYS3_DEV                /* USART3=ttyS0;USART0=ttyS1;USART1=ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART2
+#        ifdef CONFIG_SAM34_USART2
 #          define TTYS2_DEV g_usart2port  /* USART3=ttyS0;USART0=ttyS1;USART2=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* USART3=ttyS0;USART0=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -523,15 +523,15 @@
 #        undef TTYS3_DEV                  /* No ttyS3 */
 #      endif
 #    else
-#      ifdef CONFIG_SAM3U_USART1
+#      ifdef CONFIG_SAM34_USART1
 #        define TTYS1_DEV   g_usart1port  /* USART3=ttyS0;USART1=ttyS1;No ttyS3;No ttyS4 */
-#        ifdef CONFIG_SAM3U_USART2
+#        ifdef CONFIG_SAM34_USART2
 #          define TTYS2_DEV g_EEEEport    /* USART3=ttyS0;USART1=ttyS1;USART2=ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS2_DEV                /* USART3=ttyS0;USART1=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        endif
 #      else
-#        ifdef CONFIG_SAM3U_USART2
+#        ifdef CONFIG_SAM34_USART2
 #          define TTYS1_DEV g_usart2port  /* USART3=ttyS0;USART2=ttyS1;No ttyS2;No ttyS3;No ttyS4 */
 #        else
 #          undef TTYS1_DEV                /* USART3=ttyS0;No ttyS1;No ttyS2;No ttyS3;No ttyS4 */
@@ -600,35 +600,35 @@ static const struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
-#ifdef CONFIG_SAM3U_UART
+#ifdef CONFIG_SAM34_UART
 static char g_uartrxbuffer[CONFIG_UART_RXBUFSIZE];
 static char g_uarttxbuffer[CONFIG_UART_TXBUFSIZE];
 #endif
-#ifdef CONFIG_SAM3U_USART0
+#ifdef CONFIG_SAM34_USART0
 static char g_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
 static char g_usart0txbuffer[CONFIG_USART0_TXBUFSIZE];
 #endif
-#ifdef CONFIG_SAM3U_USART1
+#ifdef CONFIG_SAM34_USART1
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
 #endif
-#ifdef CONFIG_SAM3U_USART2
+#ifdef CONFIG_SAM34_USART2
 static char g_usart2rxbuffer[CONFIG_USART2_RXBUFSIZE];
 static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 #endif
-#ifdef CONFIG_SAM3U_USART3
+#ifdef CONFIG_SAM34_USART3
 static char g_usart3rxbuffer[CONFIG_USART3_RXBUFSIZE];
 static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 #endif
 
-/* This describes the state of the SAM3U UART port. */
+/* This describes the state of the UART port. */
 
-#ifdef CONFIG_SAM3U_UART
+#ifdef CONFIG_SAM34_UART
 static struct up_dev_s g_uartpriv =
 {
-  .usartbase      = SAM3U_UART_BASE,
+  .usartbase      = SAM_UART_BASE,
   .baud           = CONFIG_UART_BAUD,
-  .irq            = SAM3U_IRQ_UART,
+  .irq            = SAM_IRQ_UART,
   .parity         = CONFIG_UART_PARITY,
   .bits           = CONFIG_UART_BITS,
   .stopbits2      = CONFIG_UART_2STOP,
@@ -651,14 +651,14 @@ static uart_dev_t g_uartport =
 };
 #endif
 
-/* This describes the state of the SAM3U USART1 ports. */
+/* This describes the state of the USART0 port. */
 
-#ifdef CONFIG_SAM3U_USART0
+#ifdef CONFIG_SAM34_USART0
 static struct up_dev_s g_usart0priv =
 {
-  .usartbase      = SAM3U_USART0_BASE,
+  .usartbase      = SAM_USART0_BASE,
   .baud           = CONFIG_USART0_BAUD,
-  .irq            = SAM3U_IRQ_USART0,
+  .irq            = SAM_IRQ_USART0,
   .parity         = CONFIG_USART0_PARITY,
   .bits           = CONFIG_USART0_BITS,
   .stopbits2      = CONFIG_USART0_2STOP,
@@ -681,14 +681,14 @@ static uart_dev_t g_usart0port =
 };
 #endif
 
-/* This describes the state of the SAM3U USART1 ports. */
+/* This describes the state of the USART1 port. */
 
-#ifdef CONFIG_SAM3U_USART1
+#ifdef CONFIG_SAM34_USART1
 static struct up_dev_s g_usart1priv =
 {
-  .usartbase      = SAM3U_USART1_BASE,
+  .usartbase      = SAM_USART1_BASE,
   .baud           = CONFIG_USART1_BAUD,
-  .irq            = SAM3U_IRQ_USART1,
+  .irq            = SAM_IRQ_USART1,
   .parity         = CONFIG_USART1_PARITY,
   .bits           = CONFIG_USART1_BITS,
   .stopbits2      = CONFIG_USART1_2STOP,
@@ -711,14 +711,14 @@ static uart_dev_t g_usart1port =
 };
 #endif
 
-/* This describes the state of the SAM3U USART2 port. */
+/* This describes the state of the USART2 port. */
 
-#ifdef CONFIG_SAM3U_USART2
+#ifdef CONFIG_SAM34_USART2
 static struct up_dev_s g_usart2priv =
 {
-  .usartbase      = SAM3U_USART2_BASE,
+  .usartbase      = SAM_USART2_BASE,
   .baud           = CONFIG_USART2_BAUD,
-  .irq            = SAM3U_IRQ_USART2,
+  .irq            = SAM_IRQ_USART2,
   .parity         = CONFIG_USART2_PARITY,
   .bits           = CONFIG_USART2_BITS,
   .stopbits2      = CONFIG_USART2_2STOP,
@@ -741,14 +741,14 @@ static uart_dev_t g_usart2port =
 };
 #endif
 
-/* This describes the state of the SAM3U USART3 port. */
+/* This describes the state of the USART3 port. */
 
-#ifdef CONFIG_SAM3U_USART3
+#ifdef CONFIG_SAM34_USART3
 static struct up_dev_s g_usart3priv =
 {
-  .usartbase      = SAM3U_USART3_BASE,
+  .usartbase      = SAM_USART3_BASE,
   .baud           = CONFIG_USART3_BAUD,
-  .irq            = SAM3U_IRQ_USART3,
+  .irq            = SAM_IRQ_USART3,
   .parity         = CONFIG_USART3_PARITY,
   .bits           = CONFIG_USART3_BITS,
   .stopbits2      = CONFIG_USART3_2STOP,
@@ -799,7 +799,7 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t valu
 
 static inline void up_enableint(struct up_dev_s *priv)
 {
-  up_serialout(priv, SAM3U_UART_IER_OFFSET, priv->imr);
+  up_serialout(priv, SAM_UART_IER_OFFSET, priv->imr);
 }
 
 /****************************************************************************
@@ -808,7 +808,7 @@ static inline void up_enableint(struct up_dev_s *priv)
 
 static inline void up_disableint(struct up_dev_s *priv)
 {
-  up_serialout(priv, SAM3U_UART_IDR_OFFSET, ~priv->imr);
+  up_serialout(priv, SAM_UART_IDR_OFFSET, ~priv->imr);
 }
 
 /****************************************************************************
@@ -835,7 +835,7 @@ static void up_disableallints(struct up_dev_s *priv, uint32_t *imr)
   if (imr)
     {
       /* Return the current interrupt mask */
- 
+
       *imr = priv->imr;
     }
 
@@ -889,10 +889,10 @@ static int up_setup(struct uart_dev_s *dev)
       regval |= USART_MR_CHRL_7BITS; /* 7 bits */
     }
 #ifdef HAVE_USART
-#ifdef CONFIG_SAM3U_UART
+#ifdef CONFIG_SAM34_UART
   /* UART does not support 9bit mode */
 
-  else if (priv->bits == 9 && priv->usartbase != SAM3U_UART_BASE)
+  else if (priv->bits == 9 && priv->usartbase != SAM_UART_BASE)
 #else
   else if (priv->bits == 9) /* Only USARTS */
 #endif
@@ -933,16 +933,16 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* And save the new mode register value */
 
-  up_serialout(priv, SAM3U_UART_MR_OFFSET, regval);
+  up_serialout(priv, SAM_UART_MR_OFFSET, regval);
 
   /* Configure the console baud */
 
-  regval  = (SAM3U_MCK_FREQUENCY + (priv->baud << 3))/(priv->baud << 4);
-  up_serialout(priv, SAM3U_UART_BRGR_OFFSET, regval);
+  regval  = (SAM_MCK_FREQUENCY + (priv->baud << 3))/(priv->baud << 4);
+  up_serialout(priv, SAM_UART_BRGR_OFFSET, regval);
 
   /* Enable receiver & transmitter */
 
-  up_serialout(priv, SAM3U_UART_CR_OFFSET, (UART_CR_RXEN|UART_CR_TXEN));
+  up_serialout(priv, SAM_UART_CR_OFFSET, (UART_CR_RXEN|UART_CR_TXEN));
 #endif
   return OK;
 }
@@ -962,7 +962,7 @@ static void up_shutdown(struct uart_dev_s *dev)
 
   /* Reset and disable receiver and transmitter */
 
-  up_serialout(priv, SAM3U_UART_CR_OFFSET,
+  up_serialout(priv, SAM_UART_CR_OFFSET,
                (UART_CR_RSTRX|UART_CR_RSTTX|UART_CR_RXDIS|UART_CR_TXDIS));
 
   /* Disable all interrupts */
@@ -1041,35 +1041,35 @@ static int up_interrupt(int irq, void *context)
   int                passes;
   bool               handled;
 
-#ifdef CONFIG_SAM3U_UART
+#ifdef CONFIG_SAM34_UART
   if (g_uartpriv.irq == irq)
     {
       dev = &g_uartport;
     }
   else
 #endif
-#ifdef CONFIG_SAM3U_USART0
+#ifdef CONFIG_SAM34_USART0
   if (g_usart0priv.irq == irq)
     {
       dev = &g_usart0port;
     }
   else
 #endif
-#ifdef CONFIG_SAM3U_USART1
+#ifdef CONFIG_SAM34_USART1
   if (g_usart1priv.irq == irq)
     {
       dev = &g_usart1port;
     }
   else
 #endif
-#ifdef CONFIG_SAM3U_USART2
+#ifdef CONFIG_SAM34_USART2
   if (g_usart2priv.irq == irq)
     {
       dev = &g_usart2port;
     }
   else
 #endif
-#ifdef CONFIG_SAM3U_USART3
+#ifdef CONFIG_SAM34_USART3
   if (g_usart3priv.irq == irq)
     {
       dev = &g_usart3port;
@@ -1092,7 +1092,7 @@ static int up_interrupt(int irq, void *context)
 
       /* Get the UART/USART status (we are only interested in the unmasked interrupts). */
 
-      priv->sr = up_serialin(priv, SAM3U_UART_SR_OFFSET); /* Save for error reporting */
+      priv->sr = up_serialin(priv, SAM_UART_SR_OFFSET); /* Save for error reporting */
       pending  = priv->sr & priv->imr;                      /* Mask out disabled interrupt sources */
 
       /* Handle an incoming, receive byte.  RXRDY: At least one complete character
@@ -1183,7 +1183,7 @@ static int up_receive(struct uart_dev_s *dev, uint32_t *status)
 
   /* Then return the actual received byte */
 
-  return (int)(up_serialin(priv, SAM3U_UART_RHR_OFFSET) & 0xff);
+  return (int)(up_serialin(priv, SAM_UART_RHR_OFFSET) & 0xff);
 }
 
 /****************************************************************************
@@ -1227,7 +1227,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 static bool up_rxavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return ((up_serialin(priv, SAM3U_UART_SR_OFFSET) & UART_INT_RXRDY) != 0);
+  return ((up_serialin(priv, SAM_UART_SR_OFFSET) & UART_INT_RXRDY) != 0);
 }
 
 /****************************************************************************
@@ -1241,7 +1241,7 @@ static bool up_rxavailable(struct uart_dev_s *dev)
 static void up_send(struct uart_dev_s *dev, int ch)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  up_serialout(priv, SAM3U_UART_THR_OFFSET, (uint32_t)ch);
+  up_serialout(priv, SAM_UART_THR_OFFSET, (uint32_t)ch);
 }
 
 /****************************************************************************
@@ -1296,7 +1296,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 static bool up_txready(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return ((up_serialin(priv, SAM3U_UART_SR_OFFSET) & UART_INT_TXRDY) != 0);
+  return ((up_serialin(priv, SAM_UART_SR_OFFSET) & UART_INT_TXRDY) != 0);
  }
 
 /****************************************************************************
@@ -1310,7 +1310,7 @@ static bool up_txready(struct uart_dev_s *dev)
 static bool up_txempty(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
-  return ((up_serialin(priv, SAM3U_UART_SR_OFFSET) & UART_INT_TXEMPTY) != 0);
+  return ((up_serialin(priv, SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) != 0);
 }
 
 /****************************************************************************

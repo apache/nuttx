@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam3u/sam3u_spi.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            Diego Sanchez <dsanchez@nx-engineering.com>
  *
@@ -56,10 +56,10 @@
 
 #include "chip.h"
 #include "sam3u_internal.h"
-#include "sam3u_pmc.h"
-#include "sam3u_spi.h"
+#include "chip/sam_pmc.h"
+#include "chip/sam_spi.h"
 
-#ifdef CONFIG_SAM3U_SPI
+#ifdef CONFIG_SAM34_SPI
 
 /****************************************************************************
  * Definitions
@@ -117,7 +117,7 @@ struct sam3u_spidev_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
- 
+
 /* Helpers */
 
 #if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
@@ -183,13 +183,13 @@ static const struct spi_ops_s g_spiops =
 static struct sam3u_spidev_s g_spidev =
 {
   .spidev            = { &g_spiops },
-}; 
+};
 
 /* This array maps chip select numbers (0-3) to CSR register addresses */
 
 static const uint32_t g_csraddr[4] =
 {
-  SAM3U_SPI_CSR0, SAM3U_SPI_CSR1, SAM3U_SPI_CSR2, SAM3U_SPI_CSR3
+  SAM_SPI_CSR0, SAM_SPI_CSR1, SAM_SPI_CSR2, SAM_SPI_CSR3
 };
 
 /****************************************************************************
@@ -219,13 +219,13 @@ static void spi_dumpregs(FAR const char *msg)
 {
   spivdbg("%s:\n", msg);
   spivdbg("    MR:%08x   SR:%08x  IMR:%08x\n",
-          getreg32(SAM3U_SPI_MR), getreg32(SAM3U_SPI_SR),
-          getreg32(SAM3U_SPI_IMR));
+          getreg32(SAM_SPI_MR), getreg32(SAM_SPI_SR),
+          getreg32(SAM_SPI_IMR));
   spivdbg("  CSR0:%08x CSR1:%08x CSR2:%08x CSR3:%08x\n",
-          getreg32(SAM3U_SPI_CSR0), getreg32(SAM3U_SPI_CSR1),
-          getreg32(SAM3U_SPI_CSR2), getreg32(SAM3U_SPI_CSR3));
+          getreg32(SAM_SPI_CSR0), getreg32(SAM_SPI_CSR1),
+          getreg32(SAM_SPI_CSR2), getreg32(SAM_SPI_CSR3));
   spivdbg("  WPCR:%08x WPSR:%08x\n",
-          getreg32(SAM3U_SPI_WPCR), getreg32(SAM3U_SPI_WPSR));
+          getreg32(SAM_SPI_WPCR), getreg32(SAM_SPI_WPSR));
 }
 #endif
 
@@ -247,15 +247,15 @@ static inline void spi_flush(void)
 {
   /* Make sure the no TX activity is in progress... waiting if necessary */
 
-  while ((getreg32(SAM3U_SPI_SR) & SPI_INT_TXEMPTY) == 0);
+  while ((getreg32(SAM_SPI_SR) & SPI_INT_TXEMPTY) == 0);
 
   /* Then make sure that there is no pending RX data .. reading as
    * discarding as necessary.
    */
 
-  while ((getreg32(SAM3U_SPI_SR) & SPI_INT_RDRF) != 0)
+  while ((getreg32(SAM_SPI_SR) & SPI_INT_RDRF) != 0)
     {
-       (void)getreg32(SAM3U_SPI_RDR);
+       (void)getreg32(SAM_SPI_RDR);
     }
 }
 
@@ -379,10 +379,10 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
        * in order to select a slave.
        */
 
-      regval  = getreg32(SAM3U_SPI_MR);
+      regval  = getreg32(SAM_SPI_MR);
       regval &= ~SPI_MR_PCS_MASK;
       regval |= (spi_cs2pcs(priv) << SPI_MR_PCS_SHIFT);
-      putreg32(regval, SAM3U_SPI_MR);
+      putreg32(regval, SAM_SPI_MR);
     }
   else
     {
@@ -459,7 +459,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
    *   SPCK frequency = MCK / SCBR, or SCBR = MCK / frequency
    */
 
-  scbr = SAM3U_MCK_FREQUENCY / frequency;
+  scbr = SAM_MCK_FREQUENCY / frequency;
 
   if (scbr < 8)
     {
@@ -473,7 +473,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   scbr = (scbr + 1) & ~1;
 
   /* Save the new scbr value */
-  
+
   regaddr = g_csraddr[priv->cs];
   regval  = getreg32(regaddr);
   regval &= ~(SPI_CSR_SCBR_MASK|SPI_CSR_DLYBS_MASK|SPI_CSR_DLYBCT_MASK);
@@ -491,7 +491,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
    *   DLYBS = MCK * 0.000002 = MCK / 500000
    */
 
-  dlybs   = SAM3U_MCK_FREQUENCY / 500000;
+  dlybs   = SAM_MCK_FREQUENCY / 500000;
   regval |= dlybs << SPI_CSR_DLYBS_SHIFT;
 
   /* DLYBCT: Delay Between Consecutive Transfers.  This field defines the delay
@@ -506,13 +506,13 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
    *  DLYBCT = MCK * 0.000005 / 32 = MCK / 200000 / 32
    */
 
-  dlybct  = SAM3U_MCK_FREQUENCY / 200000 / 32;
+  dlybct  = SAM_MCK_FREQUENCY / 200000 / 32;
   regval |= dlybct << SPI_CSR_DLYBCT_SHIFT;
   putreg32(regval, regaddr);
 
   /* Calculate the new actual frequency */
 
-  actual = SAM3U_MCK_FREQUENCY / scbr;
+  actual = SAM_MCK_FREQUENCY / scbr;
   spivdbg("csr[%08x]=%08x actual=%d\n", regaddr, regval, actual);
 
   /* Save the frequency setting */
@@ -566,19 +566,19 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
         {
         case SPIDEV_MODE0: /* CPOL=0; NCPHA=0 */
           break;
- 
+
         case SPIDEV_MODE1: /* CPOL=0; NCPHA=1 */
             regval |= SPI_CSR_NCPHA;
           break;
- 
+
         case SPIDEV_MODE2: /* CPOL=1; NCPHA=0 */
             regval |= SPI_CSR_CPOL;
           break;
- 
+
         case SPIDEV_MODE3: /* CPOL=1; NCPHA=1 */
           regval |= (SPI_CSR_CPOL|SPI_CSR_NCPHA);
           break;
- 
+
         default:
           DEBUGASSERT(FALSE);
           return;
@@ -720,7 +720,7 @@ static void  spi_exchange(FAR struct spi_dev_s *dev,
   /* Set up PCS bits */
 
   pcs = spi_cs2pcs(priv) << SPI_TDR_PCS_SHIFT;
-  
+
   /* Make sure that any previous transfer is flushed from the hardware */
 
   spi_flush();
@@ -786,19 +786,19 @@ static void  spi_exchange(FAR struct spi_dev_s *dev,
        * to the serializer.
        */
 
-      while ((getreg32(SAM3U_SPI_SR) & SPI_INT_TDRE) == 0);
+      while ((getreg32(SAM_SPI_SR) & SPI_INT_TDRE) == 0);
 
       /* Write the data to transmitted to the Transmit Data Register (TDR) */
 
-      putreg32(data, SAM3U_SPI_TDR);
+      putreg32(data, SAM_SPI_TDR);
 
       /* Wait for the read data to be available in the RDR */
 
-      while ((getreg32(SAM3U_SPI_SR) & SPI_INT_RDRF) == 0);
+      while ((getreg32(SAM_SPI_SR) & SPI_INT_RDRF) == 0);
 
-      /* Read the received data from the SPI Data Register */   
+      /* Read the received data from the SPI Data Register */
 
-      data = getreg32(SAM3U_SPI_RDR);
+      data = getreg32(SAM_SPI_RDR);
       if (rxptr)
         {
           *rxptr++ = (uint8_t)data;
@@ -898,12 +898,12 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   /* Apply power to the SPI block */
 
   flags = irqsave();
-  regval = getreg32(SAM3U_PMC_PCER);
-  regval |= (1 << SAM3U_PID_SPI);
-#ifdef CONFIG_SAM3U_SPIINTERRUPT
-  regval |= (1 << SAM3U_IRQ_SPI);
+  regval = getreg32(SAM_PMC_PCER);
+  regval |= (1 << SAM_PID_SPI);
+#ifdef CONFIG_SAM34_SPIINTERRUPT
+  regval |= (1 << SAM_IRQ_SPI);
 #endif
-  putreg32(regval, SAM3U_PMC_PCER);
+  putreg32(regval, SAM_PMC_PCER);
 
   /* Configure multiplexed pins as connected on the board.  Chip select pins
    * must be configured by board-specific logic.
@@ -915,27 +915,27 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   /* Disable SPI clocking */
 
-  putreg32(SPI_CR_SPIDIS, SAM3U_SPI_CR);
+  putreg32(SPI_CR_SPIDIS, SAM_SPI_CR);
 
   /* Execute a software reset of the SPI (twice) */
 
-  putreg32(SPI_CR_SWRST, SAM3U_SPI_CR);
-  putreg32(SPI_CR_SWRST, SAM3U_SPI_CR);
+  putreg32(SPI_CR_SWRST, SAM_SPI_CR);
+  putreg32(SPI_CR_SWRST, SAM_SPI_CR);
   irqrestore(flags);
 
   /* Configure the SPI mode register */
 
-  putreg32(SPI_MR_MSTR | SPI_MR_MODFDIS, SAM3U_SPI_MR);
+  putreg32(SPI_MR_MSTR | SPI_MR_MODFDIS, SAM_SPI_MR);
 
   /* And enable the SPI */
 
-  putreg32(SPI_CR_SPIEN, SAM3U_SPI_CR);
+  putreg32(SPI_CR_SPIEN, SAM_SPI_CR);
   up_mdelay(20);
 
   /* Flush any pending transfers */
 
-  (void)getreg32(SAM3U_SPI_SR);
-  (void)getreg32(SAM3U_SPI_RDR);
+  (void)getreg32(SAM_SPI_SR);
+  (void)getreg32(SAM_SPI_RDR);
 
   /* Initialize the SPI semaphore that enforces mutually exclusive access */
 
@@ -945,4 +945,4 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
   spi_dumpregs("After initialization");
   return &priv->spidev;
 }
-#endif /* CONFIG_SAM3U_SPI */
+#endif /* CONFIG_SAM34_SPI */

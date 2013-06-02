@@ -74,27 +74,27 @@ ifeq ($(CONFIG_ELF),y)
 CMN_CSRCS += up_elf.c
 endif
 
-# Required SAM3U files
+# Required SAM3/4 files
 
-CHIP_ASRCS  = 
+CHIP_ASRCS  =
 CHIP_CSRCS  = sam3u_allocateheap.c sam3u_clockconfig.c sam3u_gpioirq.c
 CHIP_CSRCS += sam3u_irq.c sam3u_lowputc.c sam3u_pio.c sam3u_serial.c
 CHIP_CSRCS += sam3u_start.c sam3u_timerisr.c
 
-# Configuration-dependent SAM3U files
+# Configuration-dependent SAM3/4 files
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += sam3u_userspace.c sam3u_mpuinit.c
 endif
 
-ifeq ($(CONFIG_SAM3U_DMA),y)
+ifeq ($(CONFIG_SAM34_DMA),y)
 CHIP_CSRCS += sam3u_dmac.c
 endif
 
-ifeq ($(CONFIG_SAM3U_HSMCI),y)
+ifeq ($(CONFIG_SAM34_HSMCI),y)
 CHIP_CSRCS += sam3u_hsmci.c
 endif
 
-ifeq ($(CONFIG_SAM3U_SPI),y)
+ifeq ($(CONFIG_SAM34_SPI),y)
 CHIP_CSRCS += sam3u_spi.c
 endif

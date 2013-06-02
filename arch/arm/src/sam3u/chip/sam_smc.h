@@ -1,7 +1,7 @@
 /****************************************************************************************
- * arch/arm/src/sam3u/sam3u_smc.h
+ * arch/arm/src/sam3u/chip/sam_smc.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM3U_SAM3U_SMC_H
-#define __ARCH_ARM_SRC_SAM3U_SAM3U_SMC_H
+#ifndef __ARCH_ARM_SRC_SAM3U_CHIP_SAM_SMC_H
+#define __ARCH_ARM_SRC_SAM3U_CHIP_SAM_SMC_H
 
 /****************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "sam3u_memorymap.h"
+#include "chip/sam_memorymap.h"
 
 /****************************************************************************************
  * Pre-processor Definitions
@@ -51,95 +51,95 @@
 
 /* SMC register offsets *****************************************************************/
 
-#define SAM3U_SMC_CFG_OFFSET         0x000 /* SMC NFC Configuration Register */
-#define SAM3U_SMC_CTRL_OFFSET        0x004 /* SMC NFC Control Register */
-#define SAM3U_SMC_SR_OFFSET          0x008 /* SMC NFC Status Register */
-#define SAM3U_SMC_IER_OFFSET         0x00c /* SMC NFC Interrupt Enable Register */
-#define SAM3U_SMC_IDR_OFFSET         0x010 /* SMC NFC Interrupt Disable Register */
-#define SAM3U_SMC_IMR_OFFSET         0x014 /* SMC NFC Interrupt Mask Register */
-#define SAM3U_SMC_ADDR_OFFSET        0x018 /* SMC NFC Address Cycle Zero Register */
-#define SAM3U_SMC_BANK_OFFSET        0x01c /* SMC Bank Address Register */
-#define SAM3U_SMC_ECCCTRL_OFFSET     0x020 /* SMC ECC Control Register */
-#define SAM3U_SMC_ECCMD_OFFSET       0x024 /* SMC ECC Mode Register */
-#define SAM3U_SMC_ECCSR1_OFFSET      0x028 /* SMC ECC Status 1 Register */
-#define SAM3U_SMC_ECCPR0_OFFSET      0x02c /* SMC ECC parity 0 Register */
-#define SAM3U_SMC_ECCPR1_OFFSET      0x030 /* SMC ECC parity 1 Register */
-#define SAM3U_SMC_ECCSR2_OFFSET      0x034 /* SMC ECC status 2 Register */
-#define SAM3U_SMC_ECCPR2_OFFSET      0x038 /* SMC ECC parity 2 Register */
-#define SAM3U_SMC_ECCPR3_OFFSET      0x03c /* SMC ECC parity 3 Register */
-#define SAM3U_SMC_ECCPR4_OFFSET      0x040 /* SMC ECC parity 4 Register */
-#define SAM3U_SMC_ECCPR5_OFFSET      0x044 /* SMC ECC parity 5 Register */
-#define SAM3U_SMC_ECCPR6_OFFSET      0x048 /* SMC ECC parity 6 Register */
-#define SAM3U_SMC_ECCPR7_OFFSET      0x04c /* SMC ECC parity 7 Register */
-#define SAM3U_SMC_ECCPR8_OFFSET      0x050 /* SMC ECC parity 8 Register */
-#define SAM3U_SMC_ECCPR9_OFFSET      0x054 /* SMC ECC parity 9 Register */
-#define SAM3U_SMC_ECCPR10_OFFSET     0x058 /* SMC ECC parity 10 Register */
-#define SAM3U_SMC_ECCPR11_OFFSET     0x05c /* SMC ECC parity 11 Register */
-#define SAM3U_SMC_ECCPR12_OFFSET     0x060 /* SMC ECC parity 12 Register */
-#define SAM3U_SMC_ECCPR13_OFFSET     0x064 /* SMC ECC parity 13 Register */
-#define SAM3U_SMC_ECCPR14_OFFSET     0x068 /* SMC ECC parity 14 Register */
-#define SAM3U_SMC_ECCPR15_OFFSET     0x06c /* SMC ECC parity 15 Register */
+#define SAM_SMC_CFG_OFFSET           0x000 /* SMC NFC Configuration Register */
+#define SAM_SMC_CTRL_OFFSET          0x004 /* SMC NFC Control Register */
+#define SAM_SMC_SR_OFFSET            0x008 /* SMC NFC Status Register */
+#define SAM_SMC_IER_OFFSET           0x00c /* SMC NFC Interrupt Enable Register */
+#define SAM_SMC_IDR_OFFSET           0x010 /* SMC NFC Interrupt Disable Register */
+#define SAM_SMC_IMR_OFFSET           0x014 /* SMC NFC Interrupt Mask Register */
+#define SAM_SMC_ADDR_OFFSET          0x018 /* SMC NFC Address Cycle Zero Register */
+#define SAM_SMC_BANK_OFFSET          0x01c /* SMC Bank Address Register */
+#define SAM_SMC_ECCCTRL_OFFSET       0x020 /* SMC ECC Control Register */
+#define SAM_SMC_ECCMD_OFFSET         0x024 /* SMC ECC Mode Register */
+#define SAM_SMC_ECCSR1_OFFSET        0x028 /* SMC ECC Status 1 Register */
+#define SAM_SMC_ECCPR0_OFFSET        0x02c /* SMC ECC parity 0 Register */
+#define SAM_SMC_ECCPR1_OFFSET        0x030 /* SMC ECC parity 1 Register */
+#define SAM_SMC_ECCSR2_OFFSET        0x034 /* SMC ECC status 2 Register */
+#define SAM_SMC_ECCPR2_OFFSET        0x038 /* SMC ECC parity 2 Register */
+#define SAM_SMC_ECCPR3_OFFSET        0x03c /* SMC ECC parity 3 Register */
+#define SAM_SMC_ECCPR4_OFFSET        0x040 /* SMC ECC parity 4 Register */
+#define SAM_SMC_ECCPR5_OFFSET        0x044 /* SMC ECC parity 5 Register */
+#define SAM_SMC_ECCPR6_OFFSET        0x048 /* SMC ECC parity 6 Register */
+#define SAM_SMC_ECCPR7_OFFSET        0x04c /* SMC ECC parity 7 Register */
+#define SAM_SMC_ECCPR8_OFFSET        0x050 /* SMC ECC parity 8 Register */
+#define SAM_SMC_ECCPR9_OFFSET        0x054 /* SMC ECC parity 9 Register */
+#define SAM_SMC_ECCPR10_OFFSET       0x058 /* SMC ECC parity 10 Register */
+#define SAM_SMC_ECCPR11_OFFSET       0x05c /* SMC ECC parity 11 Register */
+#define SAM_SMC_ECCPR12_OFFSET       0x060 /* SMC ECC parity 12 Register */
+#define SAM_SMC_ECCPR13_OFFSET       0x064 /* SMC ECC parity 13 Register */
+#define SAM_SMC_ECCPR14_OFFSET       0x068 /* SMC ECC parity 14 Register */
+#define SAM_SMC_ECCPR15_OFFSET       0x06c /* SMC ECC parity 15 Register */
 
-#define SAM3U_SMCCS_OFFSET(n)        (0x070+((n)*0x014))
-#define SAM3U_SMCCS_SETUP_OFFSET     0x000 /* SMC SETUP Register */
-#define SAM3U_SMCCS_PULSE_OFFSET     0x004 /* SMC PULSE Register */
-#define SAM3U_SMCCS_CYCLE_OFFSET     0x008 /* SMC CYCLE Register */
-#define SAM3U_SMCCS_TIMINGS_OFFSET   0x00c /* SMC TIMINGS Register */
-#define SAM3U_SMCCS_MODE_OFFSET      0x010 /* SMC MODE Register */
+#define SAM_SMCCS_OFFSET(n)          (0x070+((n)*0x014))
+#define SAM_SMCCS_SETUP_OFFSET       0x000 /* SMC SETUP Register */
+#define SAM_SMCCS_PULSE_OFFSET       0x004 /* SMC PULSE Register */
+#define SAM_SMCCS_CYCLE_OFFSET       0x008 /* SMC CYCLE Register */
+#define SAM_SMCCS_TIMINGS_OFFSET     0x00c /* SMC TIMINGS Register */
+#define SAM_SMCCS_MODE_OFFSET        0x010 /* SMC MODE Register */
 
-#define SAM3U_SMC_OCMS_OFFSET        0x110 /* SMC OCMS MODE Register */
-#define SAM3U_SMC_KEY1_OFFSET        0x114 /* SMC KEY1 Register */
-#define SAM3U_SMC_KEY2_OFFSET        0x118 /* SMC KEY2 Register */
-#define SAM3U_SMC_WPCR_OFFSET        0x1e4 /* Write Protection Control Register */
-#define SAM3U_SMC_WPSR_OFFSET        0x1e8 /* Write Protection Status Register */
+#define SAM_SMC_OCMS_OFFSET          0x110 /* SMC OCMS MODE Register */
+#define SAM_SMC_KEY1_OFFSET          0x114 /* SMC KEY1 Register */
+#define SAM_SMC_KEY2_OFFSET          0x118 /* SMC KEY2 Register */
+#define SAM_SMC_WPCR_OFFSET          0x1e4 /* Write Protection Control Register */
+#define SAM_SMC_WPSR_OFFSET          0x1e8 /* Write Protection Status Register */
 
 /* SMC register adresses ****************************************************************/
 
-#define SAM3U_SMC_CFG                (SAM3U_SMC_BASE+SAM3U_SMC_CFG_OFFSET)
-#define SAM3U_SMC_CTRL               (SAM3U_SMC_BASE+SAM3U_SMC_CTRL_OFFSET)
-#define SAM3U_SMC_SR                 (SAM3U_SMC_BASE+SAM3U_SMC_SR_OFFSET)
-#define SAM3U_SMC_IER                (SAM3U_SMC_BASE+SAM3U_SMC_IER_OFFSET)
-#define SAM3U_SMC_IDR                (SAM3U_SMC_BASE+SAM3U_SMC_IDR_OFFSET)
-#define SAM3U_SMC_IMR                (SAM3U_SMC_BASE+SAM3U_SMC_IMR_OFFSET)
-#define SAM3U_SMC_ADDR               (SAM3U_SMC_BASE+SAM3U_SMC_ADDR_OFFSET)
-#define SAM3U_SMC_BANK               (SAM3U_SMC_BASE+SAM3U_SMC_BANK_OFFSET)
-#define SAM3U_SMC_ECCCTRL            (SAM3U_SMC_BASE+SAM3U_SMC_ECCCTRL_OFFSET)
-#define SAM3U_SMC_ECCMD              (SAM3U_SMC_BASE+SAM3U_SMC_ECCMD_OFFSET)
-#define SAM3U_SMC_ECCSR1             (SAM3U_SMC_BASE+SAM3U_SMC_ECCSR1_OFFSET)
-#define SAM3U_SMC_ECCPR0             (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR0_OFFSET)
-#define SAM3U_SMC_ECCPR1             (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR1_OFFSET)
-#define SAM3U_SMC_ECCSR2             (SAM3U_SMC_BASE+SAM3U_SMC_ECCSR2_OFFSET)
-#define SAM3U_SMC_ECCPR2             (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR2_OFFSET)
-#define SAM3U_SMC_ECCPR3             (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR3_OFFSET)
-#define SAM3U_SMC_ECCPR4             (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR4_OFFSET)
-#define SAM3U_SMC_ECCPR5             (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR5_OFFSET)
-#define SAM3U_SMC_ECCPR6             (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR6_OFFSET)
-#define SAM3U_SMC_ECCPR7             (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR7_OFFSET)
-#define SAM3U_SMC_ECCPR8             (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR8_OFFSET)
-#define SAM3U_SMC_ECCPR9             (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR9_OFFSET)
-#define SAM3U_SMC_ECCPR10            (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR10_OFFSET)
-#define SAM3U_SMC_ECCPR11            (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR11_OFFSET)
-#define SAM3U_SMC_ECCPR12            (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR12_OFFSET)
-#define SAM3U_SMC_ECCPR13            (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR13_OFFSET)
-#define SAM3U_SMC_ECCPR14            (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR14_OFFSET)
-#define SAM3U_SMC_ECCPR15            (SAM3U_SMC_BASE+SAM3U_SMC_ECCPR15_OFFSET)
+#define SAM_SMC_CFG                  (SAM_SMC_BASE+SAM_SMC_CFG_OFFSET)
+#define SAM_SMC_CTRL                 (SAM_SMC_BASE+SAM_SMC_CTRL_OFFSET)
+#define SAM_SMC_SR                   (SAM_SMC_BASE+SAM_SMC_SR_OFFSET)
+#define SAM_SMC_IER                  (SAM_SMC_BASE+SAM_SMC_IER_OFFSET)
+#define SAM_SMC_IDR                  (SAM_SMC_BASE+SAM_SMC_IDR_OFFSET)
+#define SAM_SMC_IMR                  (SAM_SMC_BASE+SAM_SMC_IMR_OFFSET)
+#define SAM_SMC_ADDR                 (SAM_SMC_BASE+SAM_SMC_ADDR_OFFSET)
+#define SAM_SMC_BANK                 (SAM_SMC_BASE+SAM_SMC_BANK_OFFSET)
+#define SAM_SMC_ECCCTRL              (SAM_SMC_BASE+SAM_SMC_ECCCTRL_OFFSET)
+#define SAM_SMC_ECCMD                (SAM_SMC_BASE+SAM_SMC_ECCMD_OFFSET)
+#define SAM_SMC_ECCSR1               (SAM_SMC_BASE+SAM_SMC_ECCSR1_OFFSET)
+#define SAM_SMC_ECCPR0               (SAM_SMC_BASE+SAM_SMC_ECCPR0_OFFSET)
+#define SAM_SMC_ECCPR1               (SAM_SMC_BASE+SAM_SMC_ECCPR1_OFFSET)
+#define SAM_SMC_ECCSR2               (SAM_SMC_BASE+SAM_SMC_ECCSR2_OFFSET)
+#define SAM_SMC_ECCPR2               (SAM_SMC_BASE+SAM_SMC_ECCPR2_OFFSET)
+#define SAM_SMC_ECCPR3               (SAM_SMC_BASE+SAM_SMC_ECCPR3_OFFSET)
+#define SAM_SMC_ECCPR4               (SAM_SMC_BASE+SAM_SMC_ECCPR4_OFFSET)
+#define SAM_SMC_ECCPR5               (SAM_SMC_BASE+SAM_SMC_ECCPR5_OFFSET)
+#define SAM_SMC_ECCPR6               (SAM_SMC_BASE+SAM_SMC_ECCPR6_OFFSET)
+#define SAM_SMC_ECCPR7               (SAM_SMC_BASE+SAM_SMC_ECCPR7_OFFSET)
+#define SAM_SMC_ECCPR8               (SAM_SMC_BASE+SAM_SMC_ECCPR8_OFFSET)
+#define SAM_SMC_ECCPR9               (SAM_SMC_BASE+SAM_SMC_ECCPR9_OFFSET)
+#define SAM_SMC_ECCPR10              (SAM_SMC_BASE+SAM_SMC_ECCPR10_OFFSET)
+#define SAM_SMC_ECCPR11              (SAM_SMC_BASE+SAM_SMC_ECCPR11_OFFSET)
+#define SAM_SMC_ECCPR12              (SAM_SMC_BASE+SAM_SMC_ECCPR12_OFFSET)
+#define SAM_SMC_ECCPR13              (SAM_SMC_BASE+SAM_SMC_ECCPR13_OFFSET)
+#define SAM_SMC_ECCPR14              (SAM_SMC_BASE+SAM_SMC_ECCPR14_OFFSET)
+#define SAM_SMC_ECCPR15              (SAM_SMC_BASE+SAM_SMC_ECCPR15_OFFSET)
 
-#define SAM3U_SMCCS_BASE(n)          (SAM3U_SMC_BASE+SAM3U_SMCCS_OFFSET(n))
-#  define SAM3U_SMC_CS0_BASE         (SAM3U_SMC_BASE+SAM3U_SMCCS_OFFSET(0))
-#  define SAM3U_SMC_CS1_BASE         (SAM3U_SMC_BASE+SAM3U_SMCCS_OFFSET(1))
-#  define SAM3U_SMC_CS2_BASE         (SAM3U_SMC_BASE+SAM3U_SMCCS_OFFSET(2))
-#  define SAM3U_SMC_CS3_BASE         (SAM3U_SMC_BASE+SAM3U_SMCCS_OFFSET(3))
-#define SAM3U_SMCCS_SETUP(n)         (SAM3U_SMCCS_BASE(n)+SAM3U_SMCCS_SETUP_OFFSET)
-#define SAM3U_SMCCS_PULSE(n)         (SAM3U_SMCCS_BASE(n)+SAM3U_SMCCS_PULSE_OFFSET)
-#define SAM3U_SMCCS_CYCLE(n)         (SAM3U_SMCCS_BASE(n)+SAM3U_SMCCS_CYCLE_OFFSET)
-#define SAM3U_SMCCS_TIMINGS(n)       (SAM3U_SMCCS_BASE(n)+SAM3U_SMCCS_TIMINGS_OFFSET)
-#define SAM3U_SMCCS_MODE(n)          (SAM3U_SMCCS_BASE(n)+SAM3U_SMCCS_MODE_OFFSET)
+#define SAM_SMCCS_BASE(n)            (SAM_SMC_BASE+SAM_SMCCS_OFFSET(n))
+#  define SAM_SMC_CS0_BASE           (SAM_SMC_BASE+SAM_SMCCS_OFFSET(0))
+#  define SAM_SMC_CS1_BASE           (SAM_SMC_BASE+SAM_SMCCS_OFFSET(1))
+#  define SAM_SMC_CS2_BASE           (SAM_SMC_BASE+SAM_SMCCS_OFFSET(2))
+#  define SAM_SMC_CS3_BASE           (SAM_SMC_BASE+SAM_SMCCS_OFFSET(3))
+#define SAM_SMCCS_SETUP(n)           (SAM_SMCCS_BASE(n)+SAM_SMCCS_SETUP_OFFSET)
+#define SAM_SMCCS_PULSE(n)           (SAM_SMCCS_BASE(n)+SAM_SMCCS_PULSE_OFFSET)
+#define SAM_SMCCS_CYCLE(n)           (SAM_SMCCS_BASE(n)+SAM_SMCCS_CYCLE_OFFSET)
+#define SAM_SMCCS_TIMINGS(n)         (SAM_SMCCS_BASE(n)+SAM_SMCCS_TIMINGS_OFFSET)
+#define SAM_SMCCS_MODE(n)            (SAM_SMCCS_BASE(n)+SAM_SMCCS_MODE_OFFSET)
 
-#define SAM3U_SMC_OCMS               (SAM3U_SMC_BASE+SAM3U_SMC_OCMS_OFFSET)
-#define SAM3U_SMC_KEY1               (SAM3U_SMC_BASE+SAM3U_SMC_KEY1_OFFSET)
-#define SAM3U_SMC_KEY2               (SAM3U_SMC_BASE+SAM3U_SMC_KEY2_OFFSET)
-#define SAM3U_SMC_WPCR               (SAM3U_SMC_BASE+SAM3U_SMC_WPCR_OFFSET)
-#define SAM3U_SMC_WPSR               (SAM3U_SMC_BASE+SAM3U_SMC_WPSR_OFFSET)
+#define SAM_SMC_OCMS                 (SAM_SMC_BASE+SAM_SMC_OCMS_OFFSET)
+#define SAM_SMC_KEY1                 (SAM_SMC_BASE+SAM_SMC_KEY1_OFFSET)
+#define SAM_SMC_KEY2                 (SAM_SMC_BASE+SAM_SMC_KEY2_OFFSET)
+#define SAM_SMC_WPCR                 (SAM_SMC_BASE+SAM_SMC_WPCR_OFFSET)
+#define SAM_SMC_WPSR                 (SAM_SMC_BASE+SAM_SMC_WPSR_OFFSET)
 
 /* SMC register bit definitions *********************************************************/
 
@@ -174,7 +174,7 @@
 #define SMC_CTRL_NFCDIS              (1 << 1)  /* Bit 1:  NAND Flash Controller Disable */
 
 /* SMC NFC Status Register, SMC NFC Interrupt Enable Register, SMC NFC Interrupt
- * Disable Register, and SMC NFC Interrupt Mask Register common bit-field definitions 
+ * Disable Register, and SMC NFC Interrupt Mask Register common bit-field definitions
  */
 
 #define SMC_SR_SMCSTS                (1 << 0)  /* Bit 0:  NAND Flash Controller status (SR only) */
@@ -429,4 +429,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM3U_SAM3U_SMC_H */
+#endif /* __ARCH_ARM_SRC_SAM3U_CHIP_SAM_SMC_H */

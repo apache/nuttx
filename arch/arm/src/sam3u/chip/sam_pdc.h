@@ -1,7 +1,7 @@
 /****************************************************************************************
- * arch/arm/src/sam3u/sam3u_pdc.h
+ * arch/arm/src/sam3u/chip/sam_pdc.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM3U_SAM3U_PDC_H
-#define __ARCH_ARM_SRC_SAM3U_SAM3U_PDC_H
+#ifndef __ARCH_ARM_SRC_SAM3U_CHIP_SAM_PDC_H
+#define __ARCH_ARM_SRC_SAM3U_CHIP_SAM_PDC_H
 
 /****************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "sam3u_memorymap.h"
+#include "chip/sam_memorymap.h"
 
 /****************************************************************************************
  * Pre-processor Definitions
@@ -51,16 +51,16 @@
 
 /* PDC register offsets *****************************************************************/
 
-#define SAM3U_PDC_RPR_OFFSET         0x100 /* Receive Pointer Register */
-#define SAM3U_PDC_RCR_OFFSET         0x104 /* Receive Counter Register */
-#define SAM3U_PDC_TPR_OFFSET         0x108 /* Transmit Pointer Register */
-#define SAM3U_PDC_TCR_OFFSET         0x10c /* Transmit Counter Register */
-#define SAM3U_PDC_RNPR_OFFSET        0x110 /* Receive Next Pointer Register */
-#define SAM3U_PDC_RNCR_OFFSET        0x114 /* Receive Next Counter Register */
-#define SAM3U_PDC_TNPR_OFFSET        0x118 /* Transmit Next Pointer Register */
-#define SAM3U_PDC_TNCR_OFFSET        0x11c /* Transmit Next Counter Register */
-#define SAM3U_PDC_PTCR_OFFSET        0x120 /* Transfer Control Register */
-#define SAM3U_PDC_PTSR_OFFSET        0x124 /* Transfer Status Register */
+#define SAM_PDC_RPR_OFFSET           0x100 /* Receive Pointer Register */
+#define SAM_PDC_RCR_OFFSET           0x104 /* Receive Counter Register */
+#define SAM_PDC_TPR_OFFSET           0x108 /* Transmit Pointer Register */
+#define SAM_PDC_TCR_OFFSET           0x10c /* Transmit Counter Register */
+#define SAM_PDC_RNPR_OFFSET          0x110 /* Receive Next Pointer Register */
+#define SAM_PDC_RNCR_OFFSET          0x114 /* Receive Next Counter Register */
+#define SAM_PDC_TNPR_OFFSET          0x118 /* Transmit Next Pointer Register */
+#define SAM_PDC_TNCR_OFFSET          0x11c /* Transmit Next Counter Register */
+#define SAM_PDC_PTCR_OFFSET          0x120 /* Transfer Control Register */
+#define SAM_PDC_PTSR_OFFSET          0x124 /* Transfer Status Register */
 
 /* PDC register adresses ****************************************************************/
 
@@ -100,4 +100,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM3U_SAM3U_PDC_H */
+#endif /* __ARCH_ARM_SRC_SAM3U_CHIP_SAM_PDC_H */
