@@ -48,9 +48,9 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
-#include "sam3u_internal.h"
+#include "sam_hsmci.h"
 
-#ifdef CONFIG_SAM34_SDIO
+#ifdef CONFIG_SAM34_HSMCI
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -149,4 +149,4 @@ int usbmsc_archinitialize(void)
    return OK;
 }
 
-#endif /* CONFIG_SAM34_SDIO */
+#endif /* CONFIG_SAM34_HSMCI */

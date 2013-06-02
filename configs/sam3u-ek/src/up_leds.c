@@ -49,8 +49,8 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "sam3u_internal.h"
-#include "sam3uek_internal.h"
+#include "sam_gpio.h"
+#include "sam3u-ek.h"
 
 #ifdef CONFIG_ARCH_LEDS
 
@@ -144,7 +144,7 @@ static void up_setled(uint16_t pinset, uint8_t state)
         return;
     }
 
-  sam3u_gpiowrite(pinset, polarity);
+  sam_gpiowrite(pinset, polarity);
 }
 
 /****************************************************************************
@@ -168,9 +168,9 @@ static void up_setleds(uint8_t state)
 
 void up_ledinit(void)
 {
-  (void)sam3u_configgpio(GPIO_LED0);
-  (void)sam3u_configgpio(GPIO_LED1);
-  (void)sam3u_configgpio(GPIO_LED2);
+  (void)sam_configgpio(GPIO_LED0);
+  (void)sam_configgpio(GPIO_LED1);
+  (void)sam_configgpio(GPIO_LED2);
 }
 
 /****************************************************************************

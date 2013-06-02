@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/sam3u-ek/src/up_mmcsd.c
- * arch/arm/src/board/up_mmcsd.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -43,8 +42,8 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include "sam3u_internal.h"
-#include "sam3uek_internal.h"
+#include "sam_gpio.h"
+#include "sam3u-ek.h"
 
 #ifdef CONFIG_SAM34_HSMCI
 
@@ -55,7 +54,7 @@
 /* This needs to be extended.  The card detect GPIO must be configured as an interrupt.
  * when the interrupt indicating that a card has been inserted or removed is received,
  * this function must call sio_mediachange() to handle that event.  See
- * arch/arm/src/sam3u/sam3u_internal.h for more information.
+ * arch/arm/src/sam3u/sam_hsmci.h for more information.
  */
 
 #ifdef GPIO_MCI_CD
@@ -71,7 +70,7 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam3u_hsmciinit
+ * Name: sam_hsmciinit
  *
  * Description:
  *   Initialize HSMCI support.  This function is called very early in board
@@ -79,31 +78,31 @@
  *
  ************************************************************************************/
 
-int sam3u_hsmciinit(void)
+int sam_hsmciinit(void)
 {
 #ifdef GPIO_MCI_CD
-  sam3u_configgpio(GPIO_MCI_CD);
+  sam_configgpio(GPIO_MCI_CD);
 #endif
 #ifdef GPIO_MCI_WP
-  sam3u_configgpio(GPIO_MCI_WP);
+  sam_configgpio(GPIO_MCI_WP);
 #endif
   return OK;
 }
 
 /************************************************************************************
- * Name: sam3u_cardinserted
+ * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
  ************************************************************************************/
 
-bool sam3u_cardinserted(unsigned char slot)
+bool sam_cardinserted(unsigned char slot)
 {
   if (slot == 0)
     {
 #ifdef GPIO_MCI_CD
-      bool inserted = sam3u_gpioread(GPIO_MCI_CD);
+      bool inserted = sam_gpioread(GPIO_MCI_CD);
       fvdbg("inserted: %s\n", inserted ? "NO" : "YES");
       return !inserted;
 #else
@@ -114,19 +113,19 @@ bool sam3u_cardinserted(unsigned char slot)
 }
 
 /************************************************************************************
- * Name: sam3u_writeprotected
+ * Name: sam_writeprotected
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
  ************************************************************************************/
 
-bool sam3u_writeprotected(unsigned char slot)
+bool sam_writeprotected(unsigned char slot)
 {
   if (slot == 0)
     {
 #ifdef GPIO_MCI_WP
-      bool protected = sam3u_gpioread(GPIO_MCI_WP);
+      bool protected = sam_gpioread(GPIO_MCI_WP);
       fvdbg("protected: %s\n", inserted ? "YES" : "NO");
       return protected;
 #else

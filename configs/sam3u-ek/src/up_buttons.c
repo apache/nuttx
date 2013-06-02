@@ -46,8 +46,8 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "sam3u_internal.h"
-#include "sam3uek_internal.h"
+#include "sam_gpio.h"
+#include "sam3u-ek.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 
@@ -93,9 +93,9 @@ static xcpt_t up_irqbuttonx(int irq, xcpt_t irqhandler, xcpt_t *store)
 
   /* Configure the interrupt */
 
-  sam3u_gpioirq(irq);
+  sam_gpioirq(irq);
   (void)irq_attach(irq, irqhandler);
-  sam3u_gpioirqenable(irq);
+  sam_gpioirqenable(irq);
   irqrestore(flags);
 
   /* Return the old button handler (so that it can be restored) */
@@ -121,8 +121,8 @@ static xcpt_t up_irqbuttonx(int irq, xcpt_t irqhandler, xcpt_t *store)
 
 void up_buttoninit(void)
 {
-  (void)sam3u_configgpio(GPIO_BUTTON1);
-  (void)sam3u_configgpio(GPIO_BUTTON2);
+  (void)sam_configgpio(GPIO_BUTTON1);
+  (void)sam_configgpio(GPIO_BUTTON2);
 }
 
 /************************************************************************************
@@ -140,8 +140,8 @@ uint8_t up_buttons(void)
 {
   uint8_t retval;
 
-  retval  = sam3u_gpioread(GPIO_BUTTON1) ? 0 : GPIO_BUTTON1;
-  retval |= sam3u_gpioread(GPIO_BUTTON2) ? 0 : GPIO_BUTTON2;
+  retval  = sam_gpioread(GPIO_BUTTON1) ? 0 : GPIO_BUTTON1;
+  retval |= sam_gpioread(GPIO_BUTTON2) ? 0 : GPIO_BUTTON2;
 
   return retval;
 }

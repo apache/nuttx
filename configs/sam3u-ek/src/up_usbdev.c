@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/sam3u-ek/src/up_usbdev.c
- * arch/arm/src/board/up_usbdev.c
  *
  *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,8 +48,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
-#include "sam3u_internal.h"
-#include "sam3uek_internal.h"
+#include "sam3u-ek.h"
 
 /************************************************************************************
  * Definitions
@@ -65,46 +63,46 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam3u_usbinitialize
+ * Name: sam_usbinitialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins for the SAM3U-EK board.
  *
  ************************************************************************************/
 
-void sam3u_usbinitialize(void)
+void sam_usbinitialize(void)
 {
 }
 
 /************************************************************************************
- * Name:  sam3u_usbpullup
+ * Name:  sam_usbpullup
  *
  * Description:
  *   If USB is supported and the board supports a pullup via GPIO (for USB software
- *   connect and disconnect), then the board software must provide sam3u_pullup.
+ *   connect and disconnect), then the board software must provide sam_pullup.
  *   See include/nuttx/usb/usbdev.h for additional description of this method.
  *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
  *   NULL.
  *
  ************************************************************************************/
 
-int sam3u_usbpullup(FAR struct usbdev_s *dev, bool enable)
+int sam_usbpullup(FAR struct usbdev_s *dev, bool enable)
 {
   return 0;
 }
 
 /************************************************************************************
- * Name:  sam3u_usbsuspend
+ * Name:  sam_usbsuspend
  *
  * Description:
- *   Board logic must provide the sam3u_usbsuspend logic if the USBDEV driver is
+ *   Board logic must provide the sam_usbsuspend logic if the USBDEV driver is
  *   used.  This function is called whenever the USB enters or leaves suspend mode.
  *   This is an opportunity for the board logic to shutdown clocks, power, etc.
  *   while the USB is suspended.
  *
  ************************************************************************************/
 
-void sam3u_usbsuspend(FAR struct usbdev_s *dev, bool resume)
+void sam_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 {
   ulldbg("resume: %d\n", resume);
 }
