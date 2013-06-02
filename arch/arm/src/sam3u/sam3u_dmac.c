@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam3u-ek/sam3u_dmac.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,8 +56,8 @@
 #include "chip.h"
 
 #include "sam3u_internal.h"
-#include "sam3u_pmc.h"
-#include "sam3u_dmac.h"
+#include "chip/sam_pmc.h"
+#include "chip/sam_dmac.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -67,7 +67,7 @@
 
 /* Condition out the whole file unless DMA is selected in the configuration */
 
-#ifdef CONFIG_SAM3U_DMA
+#ifdef CONFIG_SAM34_DMA
 
 /* If AT90SAM3U support is enabled, then OS DMA support should also be enabled */
 
@@ -77,15 +77,15 @@
 
 /* Check the number of link list descriptors to allocate */
 
-#ifndef CONFIG_SAM3U_NLLDESC
-#  define CONFIG_SAM3U_NLLDESC CONFIG_SAM3U_NDMACHAN
+#ifndef CONFIG_SAM34_NLLDESC
+#  define CONFIG_SAM34_NLLDESC CONFIG_SAM34_NDMACHAN
 #endif
 
-#if CONFIG_SAM3U_NLLDESC < CONFIG_SAM3U_NDMACHAN
-#  warning "At least CONFIG_SAM3U_NDMACHAN descriptors must be allocated"
+#if CONFIG_SAM34_NLLDESC < CONFIG_SAM34_NDMACHAN
+#  warning "At least CONFIG_SAM34_NDMACHAN descriptors must be allocated"
 
-#  undef CONFIG_SAM3U_NLLDESC
-#  define CONFIG_SAM3U_NLLDESC CONFIG_SAM3U_NDMACHAN
+#  undef CONFIG_SAM34_NLLDESC
+#  define CONFIG_SAM34_NLLDESC CONFIG_SAM34_NDMACHAN
 #endif
 
 /* Register values **********************************************************/
@@ -146,40 +146,40 @@ static const uint32_t g_fifocfg[3] =
 
 /* This array describes the available link list descriptors */
 
-static struct dma_linklist_s g_linklist[CONFIG_SAM3U_NLLDESC];
+static struct dma_linklist_s g_linklist[CONFIG_SAM34_NLLDESC];
 
 /* This array describes the state of each DMA */
 
-static struct sam3u_dma_s g_dma[CONFIG_SAM3U_NDMACHAN] =
+static struct sam3u_dma_s g_dma[CONFIG_SAM34_NDMACHAN] =
 {
 #ifdef CONFIG_ARCH_CHIP_AT91SAM3U4E
   /* the AT91SAM3U4E has four DMA channels.  The FIFOs for channels 0-2 are
    * 8 bytes in size; channel 3 is 32 bytes.
    */
 
-#if CONFIG_SAM3U_NDMACHAN != 4
-#  error "Logic here assumes CONFIG_SAM3U_NDMACHAN is 4"
+#if CONFIG_SAM34_NDMACHAN != 4
+#  error "Logic here assumes CONFIG_SAM34_NDMACHAN is 4"
 #endif
 
   {
     .chan     = 0,
     .flags    = DMACH_FLAG_FIFO_8BYTES,
-    .base     = SAM3U_DMACHAN0_BASE,
+    .base     = SAM_DMACHAN0_BASE,
   },
   {
     .chan     = 1,
     .flags    = DMACH_FLAG_FIFO_8BYTES,
-    .base     = SAM3U_DMACHAN1_BASE,
+    .base     = SAM_DMACHAN1_BASE,
   },
   {
     .chan     = 2,
     .flags    = DMACH_FLAG_FIFO_8BYTES,
-    .base     = SAM3U_DMACHAN2_BASE,
+    .base     = SAM_DMACHAN2_BASE,
   },
   {
     .chan     = 3,
     .flags    = (DMACH_FLAG_FIFO_32BYTES | DMACH_FLAG_FLOWCONTROL),
-    .base     = SAM3U_DMACHAN3_BASE,
+    .base     = SAM_DMACHAN3_BASE,
   }
 #else
 #  error "Nothing is known about the DMA channels for this device"
@@ -330,7 +330,7 @@ static inline uint32_t sam3u_rxcfg(struct sam3u_dma_s *dmach)
   uint32_t regval;
 
   /* Set received (peripheral to memory) DMA channel config */
-                         
+
   regval   = (((dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT) << DMACHAN_CFG_SRCPER_SHIFT);
   regval  |=   (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMACHAN_CFG_SRCH2SEL : 0;
   regval  |= (((dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT) << DMACHAN_CFG_DSTPER_SHIFT);
@@ -426,7 +426,7 @@ static inline uint32_t sam3u_txctrla(struct sam3u_dma_s *dmach,
     {
       dmasize >>= 2;
     }
- 
+
   DEBUGASSERT(dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
   return (txctrlabits & ~DMACHAN_CTRLA_BTSIZE_MASK) | (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT);
 }
@@ -517,7 +517,7 @@ static inline uint32_t sam3u_rxctrla(struct sam3u_dma_s *dmach,
     {
       dmasize >>= 2;
     }
- 
+
   DEBUGASSERT(dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
   return (txctrlabits & ~DMACHAN_CTRLA_BTSIZE_MASK) | (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT);
 }
@@ -534,7 +534,7 @@ static inline uint32_t sam3u_rxctrla(struct sam3u_dma_s *dmach,
 static inline uint32_t sam3u_txctrlb(struct sam3u_dma_s *dmach)
 {
   uint32_t regval;
- 
+
   /* Assume that we will not be using the link list and disable the source
    * and destination descriptors.  The default will be single transfer mode.
    */
@@ -613,7 +613,7 @@ static inline uint32_t sam3u_txctrlb(struct sam3u_dma_s *dmach)
 static inline uint32_t sam3u_rxctrlb(struct sam3u_dma_s *dmach)
 {
   uint32_t regval;
- 
+
   /* Assume that we will not be using the link list and disable the source and
    * destination descriptors.  The default will be single transfer mode.
    */
@@ -722,7 +722,7 @@ sam3u_allocdesc(struct sam3u_dma_s *dmach, struct dma_linklist_s *prev,
        */
 
       sam3u_takechsem();
-      for (i = 0; i < CONFIG_SAM3U_NLLDESC; i++)
+      for (i = 0; i < CONFIG_SAM34_NLLDESC; i++)
         {
           if (g_linklist[i].src == 0)
             {
@@ -760,7 +760,7 @@ sam3u_allocdesc(struct sam3u_dma_s *dmach, struct dma_linklist_s *prev,
                    */
 
                   prev->ctrlb &= ~DMACHAN_CTRLB_BOTHDSCR;
- 
+
                   /* Link the previous tail to the new tail */
 
                   prev->next = (uint32_t)desc;
@@ -849,10 +849,10 @@ static int sam3u_txbuffer(struct sam3u_dma_s *dmach, uint32_t paddr,
     }
   else
     {
-      regval = sam3u_txctrlabits(dmach); 
+      regval = sam3u_txctrlabits(dmach);
       ctrlb  = sam3u_txctrlb(dmach);
     }
-  ctrla  = sam3u_txctrla(dmach, regval, nbytes);   
+  ctrla  = sam3u_txctrla(dmach, regval, nbytes);
 
   /* Add the new link list entry */
 
@@ -897,10 +897,10 @@ static int sam3u_rxbuffer(struct sam3u_dma_s *dmach, uint32_t paddr,
     }
   else
     {
-      regval = sam3u_rxctrlabits(dmach); 
+      regval = sam3u_rxctrlabits(dmach);
       ctrlb  = sam3u_rxctrlb(dmach);
     }
-   ctrla  = sam3u_rxctrla(dmach, regval, nbytes);   
+   ctrla  = sam3u_rxctrla(dmach, regval, nbytes);
 
   /* Add the new link list entry */
 
@@ -933,24 +933,24 @@ static inline int sam3u_single(struct sam3u_dma_s *dmach)
    * the interrupt status register.
    */
 
-  (void)getreg32(SAM3U_DMAC_EBCISR);
+  (void)getreg32(SAM_DMAC_EBCISR);
 
   /* Write the starting source address in the SADDR register */
 
   DEBUGASSERT(llhead != NULL && llhead->src != 0);
-  putreg32(llhead->src, dmach->base + SAM3U_DMACHAN_SADDR_OFFSET);
+  putreg32(llhead->src, dmach->base + SAM_DMACHAN_SADDR_OFFSET);
 
   /* Write the starting destination address in the DADDR register */
 
-  putreg32(llhead->dest, dmach->base + SAM3U_DMACHAN_DADDR_OFFSET);
+  putreg32(llhead->dest, dmach->base + SAM_DMACHAN_DADDR_OFFSET);
 
   /* Set up the CTRLA register */
 
-  putreg32(llhead->ctrla, dmach->base + SAM3U_DMACHAN_CTRLA_OFFSET);
+  putreg32(llhead->ctrla, dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
 
   /* Set up the CTRLB register */
 
-  putreg32(llhead->ctrlb, dmach->base + SAM3U_DMACHAN_CTRLA_OFFSET);
+  putreg32(llhead->ctrlb, dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
 
   /* Both the DST and SRC DSCR bits should be '1' in CTRLB */
 
@@ -958,11 +958,11 @@ static inline int sam3u_single(struct sam3u_dma_s *dmach)
 
   /* Set up the CFG register */
 
-  putreg32(dmach->cfg, dmach->base + SAM3U_DMACHAN_CFG_OFFSET);
+  putreg32(dmach->cfg, dmach->base + SAM_DMACHAN_CFG_OFFSET);
 
   /* Enable the channel by writing a ‘1’ to the CHER enable bit */
 
-  putreg32(DMAC_CHER_ENA(dmach->chan), SAM3U_DMAC_CHER);
+  putreg32(DMAC_CHER_ENA(dmach->chan), SAM_DMAC_CHER);
 
   /* The DMA has been started. Once the transfer completes, hardware sets the
    * interrupts and disables the channel.  We will received buffer complete and
@@ -973,7 +973,7 @@ static inline int sam3u_single(struct sam3u_dma_s *dmach)
    * interrupt).
    */
 
-  putreg32(DMAC_EBC_CBTCINTS(dmach->chan), SAM3U_DMAC_EBCIER);
+  putreg32(DMAC_EBC_CBTCINTS(dmach->chan), SAM_DMAC_EBCIER);
   return OK;
 }
 
@@ -1000,27 +1000,27 @@ static inline int sam3u_multiple(struct sam3u_dma_s *dmach)
    * status register
    */
 
-  (void)getreg32(SAM3U_DMAC_EBCISR);
+  (void)getreg32(SAM_DMAC_EBCISR);
 
   /* Set up the initial CTRLB register (to enable descriptors) */
 
-  putreg32(llhead->ctrlb, dmach->base + SAM3U_DMACHAN_CTRLA_OFFSET);
+  putreg32(llhead->ctrlb, dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
 
   /* Set up the CTRLB register */
 
-  putreg32(llhead->ctrlb, dmach->base + SAM3U_DMACHAN_CTRLA_OFFSET);
+  putreg32(llhead->ctrlb, dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
 
   /* Write the channel configuration information into the CFG register */
 
-  putreg32(dmach->cfg, dmach->base + SAM3U_DMACHAN_CFG_OFFSET);
+  putreg32(dmach->cfg, dmach->base + SAM_DMACHAN_CFG_OFFSET);
 
   /* Program the DSCR register with the pointer to the firstlink list entry. */
 
-  putreg32((uint32_t)llhead, dmach->base + SAM3U_DMACHAN_DSCR_OFFSET);
+  putreg32((uint32_t)llhead, dmach->base + SAM_DMACHAN_DSCR_OFFSET);
 
   /* Finally, enable the channel by writing a ‘1’ to the CHER enable */
 
-  putreg32(DMAC_CHER_ENA(dmach->chan), SAM3U_DMAC_CHER);
+  putreg32(DMAC_CHER_ENA(dmach->chan), SAM_DMAC_CHER);
 
   /* As each buffer of data is transferred, the CTRLA register is written back
    * into the link list entry.  The CTRLA contains updated BTSIZE and DONE bits.
@@ -1034,7 +1034,7 @@ static inline int sam3u_multiple(struct sam3u_dma_s *dmach)
    * just to handle stall conditions.
    */
 
-  putreg32(DMAC_EBC_CHANINTS(dmach->chan), SAM3U_DMAC_EBCIER);
+  putreg32(DMAC_EBC_CHANINTS(dmach->chan), SAM_DMAC_EBCIER);
   return OK;
 }
 
@@ -1050,14 +1050,14 @@ static void sam3u_dmaterminate(struct sam3u_dma_s *dmach, int result)
 {
   /* Disable all channel interrupts */
 
-  putreg32(DMAC_EBC_CHANINTS(dmach->chan), SAM3U_DMAC_EBCIDR);
+  putreg32(DMAC_EBC_CHANINTS(dmach->chan), SAM_DMAC_EBCIDR);
 
   /* Disable the channel by writing one to the write-only channel disable register */
- 
-  putreg32(DMAC_CHDR_DIS(dmach->chan), SAM3U_DMAC_CHDR);
-  
+
+  putreg32(DMAC_CHDR_DIS(dmach->chan), SAM_DMAC_CHDR);
+
   /* Free the linklist */
- 
+
   sam3u_freelinklist(dmach);
 
   /* Perform the DMA complete callback */
@@ -1089,7 +1089,7 @@ static int sam3u_dmainterrupt(int irq, void *context)
    * status bits.
    */
 
-  regval = getreg32(SAM3U_DMAC_EBCISR) & getreg32(SAM3U_DMAC_EBCIMR);
+  regval = getreg32(SAM_DMAC_EBCISR) & getreg32(SAM_DMAC_EBCIMR);
 
   /* Check if the any transfer has completed */
 
@@ -1097,7 +1097,7 @@ static int sam3u_dmainterrupt(int irq, void *context)
     {
       /* Yes.. Check each bit  to see which channel has interrupted */
 
-      for (chndx = 0; chndx < CONFIG_SAM3U_NDMACHAN; chndx++)
+      for (chndx = 0; chndx < CONFIG_SAM34_NDMACHAN; chndx++)
         {
           /* Are any interrupts pending for this channel? */
 
@@ -1131,7 +1131,7 @@ static int sam3u_dmainterrupt(int irq, void *context)
                 {
                   /* Write the KEEPON field to clear the STALL states */
 
-                  putreg32(DMAC_CHER_KEEP(dmach->chan), SAM3U_DMAC_CHER);
+                  putreg32(DMAC_CHER_KEEP(dmach->chan), SAM_DMAC_CHER);
                 }
             }
         }
@@ -1158,32 +1158,32 @@ void weak_function up_dmainitialize(void)
 {
   /* Enable peripheral clock */
 
-  putreg32((1 << SAM3U_PID_DMAC), SAM3U_PMC_PCER);
+  putreg32((1 << SAM_PID_DMAC), SAM_PMC_PCER);
 
   /* Disable all DMA interrupts */
 
-  putreg32(DMAC_EBC_ALLINTS, SAM3U_DMAC_EBCIDR);
+  putreg32(DMAC_EBC_ALLINTS, SAM_DMAC_EBCIDR);
 
   /* Disable all DMA channels */
 
-  putreg32(DMAC_CHDR_DIS_ALL, SAM3U_DMAC_CHDR);
+  putreg32(DMAC_CHDR_DIS_ALL, SAM_DMAC_CHDR);
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM3U_IRQ_DMAC, sam3u_dmainterrupt);
+  (void)irq_attach(SAM_IRQ_DMAC, sam3u_dmainterrupt);
 
   /* Enable the IRQ at the NVIC (still disabled at the DMA controller) */
 
-  up_enable_irq(SAM3U_IRQ_DMAC);
+  up_enable_irq(SAM_IRQ_DMAC);
 
   /* Enable the DMA controller */
 
-  putreg32(DMAC_EN_ENABLE, SAM3U_DMAC_EN);
+  putreg32(DMAC_EN_ENABLE, SAM_DMAC_EN);
 
   /* Initialize semaphores */
 
   sem_init(&g_chsem, 0, 1);
-  sem_init(&g_dsem, 0, CONFIG_SAM3U_NDMACHAN);
+  sem_init(&g_dsem, 0, CONFIG_SAM34_NDMACHAN);
 }
 
 /****************************************************************************
@@ -1222,7 +1222,7 @@ DMA_HANDLE sam3u_dmachannel(uint32_t dmach_flags)
 
   dmach = NULL;
   sam3u_takechsem();
-  for (chndx = 0; chndx < CONFIG_SAM3U_NDMACHAN; chndx++)
+  for (chndx = 0; chndx < CONFIG_SAM34_NDMACHAN; chndx++)
     {
       struct sam3u_dma_s *candidate = &g_dma[chndx];
       if (!candidate->inuse &&
@@ -1236,13 +1236,13 @@ DMA_HANDLE sam3u_dmachannel(uint32_t dmach_flags)
            * channel
            */
 
-          (void)getreg32(SAM3U_DMAC_EBCISR);
+          (void)getreg32(SAM_DMAC_EBCISR);
 
           /* Disable the channel by writing one to the write-only channel
            * disable register
            */
- 
-          putreg32(DMAC_CHDR_DIS(chndx), SAM3U_DMAC_CHDR);
+
+          putreg32(DMAC_CHDR_DIS(chndx), SAM_DMAC_CHDR);
 
           /* See the DMA channel flags, retaining the fifo size and flow
            * control settings which are inherent properties of the FIFO
@@ -1318,7 +1318,7 @@ int sam3u_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t n
           /* Increment the memory & peripheral address (if it is appropriate to
            * do do).
            */
- 
+
           if ((dmach->flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
             {
               paddr += DMACHAN_CTRLA_BTSIZE_MAX;
@@ -1368,13 +1368,13 @@ int sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t n
       if (ret == OK);
         {
           /* Decrement the number of bytes left to transfer */
- 
+
           nbytes -= DMACHAN_CTRLA_BTSIZE_MAX;
 
           /* Increment the memory & peripheral address (if it is appropriate to
            * do do).
            */
- 
+
           if ((dmach->flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
             {
               paddr += DMACHAN_CTRLA_BTSIZE_MAX;
@@ -1449,7 +1449,7 @@ void sam3u_dmastop(DMA_HANDLE handle)
 {
   struct sam3u_dma_s *dmach = (struct sam3u_dma_s *)handle;
   irqstate_t flags;
- 
+
   DEBUGASSERT(dmach != NULL);
   flags = irqsave();
   sam3u_dmaterminate(dmach, -EINTR);
@@ -1480,23 +1480,23 @@ void sam3u_dmasample(DMA_HANDLE handle, struct sam3u_dmaregs_s *regs)
    */
 
   flags        = irqsave();
-  regs->gcfg   = getreg32(SAM3U_DMAC_GCFG);
-  regs->en     = getreg32(SAM3U_DMAC_EN);
-  regs->sreq   = getreg32(SAM3U_DMAC_SREQ);
-  regs->creq   = getreg32(SAM3U_DMAC_CREQ);
-  regs->last   = getreg32(SAM3U_DMAC_LAST);
-  regs->ebcimr = getreg32(SAM3U_DMAC_EBCIMR);
-  regs->ebcisr = getreg32(SAM3U_DMAC_EBCISR);
-  regs->chsr   = getreg32(SAM3U_DMAC_CHSR);
+  regs->gcfg   = getreg32(SAM_DMAC_GCFG);
+  regs->en     = getreg32(SAM_DMAC_EN);
+  regs->sreq   = getreg32(SAM_DMAC_SREQ);
+  regs->creq   = getreg32(SAM_DMAC_CREQ);
+  regs->last   = getreg32(SAM_DMAC_LAST);
+  regs->ebcimr = getreg32(SAM_DMAC_EBCIMR);
+  regs->ebcisr = getreg32(SAM_DMAC_EBCISR);
+  regs->chsr   = getreg32(SAM_DMAC_CHSR);
 
   /* Sample channel registers */
 
-  regs->saddr  = getreg32(dmach->base + SAM3U_DMACHAN_SADDR_OFFSET);
-  regs->daddr  = getreg32(dmach->base + SAM3U_DMACHAN_DADDR_OFFSET);
-  regs->dscr   = getreg32(dmach->base + SAM3U_DMACHAN_DSCR_OFFSET);
-  regs->ctrla  = getreg32(dmach->base + SAM3U_DMACHAN_CTRLA_OFFSET);
-  regs->ctrlb  = getreg32(dmach->base + SAM3U_DMACHAN_CTRLB_OFFSET);
-  regs->cfg    = getreg32(dmach->base + SAM3U_DMACHAN_CFG_OFFSET);
+  regs->saddr  = getreg32(dmach->base + SAM_DMACHAN_SADDR_OFFSET);
+  regs->daddr  = getreg32(dmach->base + SAM_DMACHAN_DADDR_OFFSET);
+  regs->dscr   = getreg32(dmach->base + SAM_DMACHAN_DSCR_OFFSET);
+  regs->ctrla  = getreg32(dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
+  regs->ctrlb  = getreg32(dmach->base + SAM_DMACHAN_CTRLB_OFFSET);
+  regs->cfg    = getreg32(dmach->base + SAM_DMACHAN_CFG_OFFSET);
   irqrestore(flags);
 }
 #endif /* CONFIG_DEBUG_DMA */
@@ -1520,21 +1520,21 @@ void sam3u_dmadump(DMA_HANDLE handle, const struct sam3u_dmaregs_s *regs,
 
   dmadbg("%s\n", msg);
   dmadbg("  DMA Global Registers:\n");
-  dmadbg("      GCFG[%08x]: %08x\n", SAM3U_DMAC_GCFG, regs->gcfg);
-  dmadbg("        EN[%08x]: %08x\n", SAM3U_DMAC_EN, regs->en);
-  dmadbg("      SREQ[%08x]: %08x\n", SAM3U_DMAC_SREQ, regs->sreq);
-  dmadbg("      CREQ[%08x]: %08x\n", SAM3U_DMAC_CREQ, regs->creq);
-  dmadbg("      LAST[%08x]: %08x\n", SAM3U_DMAC_LAST, regs->last);
-  dmadbg("    EBCIMR[%08x]: %08x\n", SAM3U_DMAC_EBCIMR, regs->ebcimr);
-  dmadbg("    EBCISR[%08x]: %08x\n", SAM3U_DMAC_EBCISR, regs->ebcisr);
-  dmadbg("      CHSR[%08x]: %08x\n", SAM3U_DMAC_CHSR, regs->chsr);
+  dmadbg("      GCFG[%08x]: %08x\n", SAM_DMAC_GCFG, regs->gcfg);
+  dmadbg("        EN[%08x]: %08x\n", SAM_DMAC_EN, regs->en);
+  dmadbg("      SREQ[%08x]: %08x\n", SAM_DMAC_SREQ, regs->sreq);
+  dmadbg("      CREQ[%08x]: %08x\n", SAM_DMAC_CREQ, regs->creq);
+  dmadbg("      LAST[%08x]: %08x\n", SAM_DMAC_LAST, regs->last);
+  dmadbg("    EBCIMR[%08x]: %08x\n", SAM_DMAC_EBCIMR, regs->ebcimr);
+  dmadbg("    EBCISR[%08x]: %08x\n", SAM_DMAC_EBCISR, regs->ebcisr);
+  dmadbg("      CHSR[%08x]: %08x\n", SAM_DMAC_CHSR, regs->chsr);
   dmadbg("  DMA Channel Registers:\n");
-  dmadbg("     SADDR[%08x]: %08x\n", dmach->base + SAM3U_DMACHAN_SADDR_OFFSET, regs->saddr);
-  dmadbg("     DADDR[%08x]: %08x\n", dmach->base + SAM3U_DMACHAN_DADDR_OFFSET, regs->daddr);
-  dmadbg("      DSCR[%08x]: %08x\n", dmach->base + SAM3U_DMACHAN_DSCR_OFFSET, regs->dscr);
-  dmadbg("     CTRLA[%08x]: %08x\n", dmach->base + SAM3U_DMACHAN_CTRLA_OFFSET, regs->ctrla);
-  dmadbg("     CTRLB[%08x]: %08x\n", dmach->base + SAM3U_DMACHAN_CTRLB_OFFSET, regs->ctrlb);
-  dmadbg("       CFG[%08x]: %08x\n", dmach->base + SAM3U_DMACHAN_CFG_OFFSET, regs->cfg);
+  dmadbg("     SADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_SADDR_OFFSET, regs->saddr);
+  dmadbg("     DADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_DADDR_OFFSET, regs->daddr);
+  dmadbg("      DSCR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_DSCR_OFFSET, regs->dscr);
+  dmadbg("     CTRLA[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CTRLA_OFFSET, regs->ctrla);
+  dmadbg("     CTRLB[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CTRLB_OFFSET, regs->ctrlb);
+  dmadbg("       CFG[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CFG_OFFSET, regs->cfg);
 }
 #endif /* CONFIG_DEBUG_DMA */
-#endif /* CONFIG_SAM3U_DMA */
+#endif /* CONFIG_SAM34_DMA */

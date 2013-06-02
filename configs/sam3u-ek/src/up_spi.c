@@ -2,7 +2,7 @@
  * configs/sam3u-ek/src/up_spi.c
  * arch/arm/src/board/up_spi.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@
 #include "sam3u_internal.h"
 #include "sam3uek_internal.h"
 
-#ifdef CONFIG_SAM3U_SPI
+#ifdef CONFIG_SAM34_SPI
 
 /************************************************************************************
  * Definitions
@@ -137,7 +137,7 @@ void weak_function sam3u_spiinitialize(void)
  *   3. Add a call to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
+ *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
@@ -240,4 +240,4 @@ uint8_t sam3u_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
   return 0;
 }
 
-#endif /* CONFIG_SAM3U_SPI */
+#endif /* CONFIG_SAM34_SPI */

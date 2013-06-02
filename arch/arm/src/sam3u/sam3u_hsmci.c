@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/sam3u/sam3u_sdio.c
  *
- *   Copyright (C) 2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,11 +61,11 @@
 #include "up_arch.h"
 
 #include "sam3u_internal.h"
-#include "sam3u_dmac.h"
-#include "sam3u_pmc.h"
-#include "sam3u_hsmci.h"
+#include "chip/sam_dmac.h"
+#include "chip/sam_pmc.h"
+#include "chip/sam_hsmci.h"
 
-#if CONFIG_SAM3U_HSMCI
+#if CONFIG_SAM34_HSMCI
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,8 +73,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_SAM3U_DMA
-#  warning "HSMCI driver requires CONFIG_SAM3U_DMA"
+#ifndef CONFIG_SAM34_DMA
+#  warning "HSMCI driver requires CONFIG_SAM34_DMA"
 #endif
 
 #ifndef CONFIG_SCHED_WORKQUEUE
@@ -94,14 +94,14 @@
 #  undef CONFIG_HSMCI_XFRDEBUG
 #endif
 
-#ifdef CONFIG_SAM3U_HSMCI_RDPROOF
-#  ifdef CONFIG_SAM3U_HSMCI_WRPROOF
+#ifdef CONFIG_SAM34_HSMCI_RDPROOF
+#  ifdef CONFIG_SAM34_HSMCI_WRPROOF
 #    define HSMCU_PROOF_BITS (HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF)
 #  else
 #    define HSMCU_PROOF_BITS HSMCI_MR_RDPROOF
 #  endif
 #else
-#  ifdef CONFIG_SAM3U_HSMCI_WRPROOF
+#  ifdef CONFIG_SAM34_HSMCI_WRPROOF
 #    define HSMCU_PROOF_BITS HSMCI_MR_WRPROOF
 #  else
 #    define HSMCU_PROOF_BITS (0)
@@ -144,7 +144,7 @@
 #define HSMCI_STATUS_ERRORS \
   ( HSMCI_INT_UNRE  | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
     HSMCI_INT_DTOE  | HSMCI_INT_DCRCE | HSMCI_INT_RTOE    | HSMCI_INT_RENDE | \
-    HSMCI_INT_RCRCE | HSMCI_INT_RDIRE | HSMCI_INT_RINDE )  
+    HSMCI_INT_RCRCE | HSMCI_INT_RDIRE | HSMCI_INT_RINDE )
 
 /* Response errors:
  *
@@ -158,10 +158,10 @@
 
 #define HSMCI_RESPONSE_ERRORS \
   ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RCRCE | \
-    HSMCI_INT_RDIRE | HSMCI_INT_RINDE ) 
+    HSMCI_INT_RDIRE | HSMCI_INT_RINDE )
 #define HSMCI_RESPONSE_NOCRC_ERRORS \
   ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RDIRE | \
-    HSMCI_INT_RINDE ) 
+    HSMCI_INT_RINDE )
 #define HSMCI_RESPONSE_TIMEOUT_ERRORS \
   ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  )
 
@@ -250,13 +250,13 @@
  * Private Types
  ****************************************************************************/
 
-/* This structure defines the state of the SAM3U HSMCI interface */
+/* This structure defines the state of the SAM3/4 HSMCI interface */
 
 struct sam3u_dev_s
 {
   struct sdio_dev_s  dev;        /* Standard, base SDIO interface */
-  
-  /* SAM3U-specific extensions */
+
+  /* SAM3/4-specific extensions */
   /* Event support */
 
   sem_t              waitsem;    /* Implements event waiting */
@@ -547,7 +547,7 @@ static void sam3u_enablewaitints(struct sam3u_dev_s *priv, uint32_t waitmask,
   priv->waitevents = waitevents;
   priv->wkupevent  = 0;
   priv->waitmask   = waitmask;
-  putreg32(priv->xfrmask | priv->waitmask, SAM3U_HSMCI_IER);
+  putreg32(priv->xfrmask | priv->waitmask, SAM_HSMCI_IER);
   irqrestore(flags);
 }
 
@@ -579,7 +579,7 @@ static void sam3u_disablewaitints(struct sam3u_dev_s *priv,
   priv->waitevents = 0;
   priv->wkupevent  = wkupevent;
   priv->waitmask   = 0;
-  putreg32(~priv->xfrmask, SAM3U_HSMCI_IDR);
+  putreg32(~priv->xfrmask, SAM_HSMCI_IDR);
   irqrestore(flags);
 }
 
@@ -602,7 +602,7 @@ static void sam3u_enablexfrints(struct sam3u_dev_s *priv, uint32_t xfrmask)
 {
   irqstate_t flags = irqsave();
   priv->xfrmask = xfrmask;
-  putreg32(priv->xfrmask | priv->waitmask, SAM3U_HSMCI_IER);
+  putreg32(priv->xfrmask | priv->waitmask, SAM_HSMCI_IER);
   irqrestore(flags);
 }
 
@@ -625,7 +625,7 @@ static void sam3u_disablexfrints(struct sam3u_dev_s *priv)
 {
   irqstate_t flags = irqsave();
   priv->xfrmask = 0;
-  putreg32(~priv->waitmask, SAM3U_HSMCI_IDR);
+  putreg32(~priv->waitmask, SAM_HSMCI_IDR);
   irqrestore(flags);
 }
 
@@ -637,19 +637,19 @@ static void sam3u_disablexfrints(struct sam3u_dev_s *priv)
  *
  ****************************************************************************/
 
-static inline void sam3u_disable(void) 
+static inline void sam3u_disable(void)
 {
   /* Disable the MCI peripheral clock */
 
-  putreg32((1 << SAM3U_PID_HSMCI), SAM3U_PMC_PCDR);
-  
+  putreg32((1 << SAM_PID_HSMCI), SAM_PMC_PCDR);
+
   /* Disable the MCI */
 
-  putreg32(HSMCI_CR_MCIDIS, SAM3U_HSMCI_CR);
+  putreg32(HSMCI_CR_MCIDIS, SAM_HSMCI_CR);
 
   /* Disable all the interrupts */
 
-  putreg32(0xffffffff, SAM3U_HSMCI_IDR);
+  putreg32(0xffffffff, SAM_HSMCI_IDR);
 }
 
 /****************************************************************************
@@ -664,11 +664,11 @@ static inline void sam3u_enable(void)
 {
   /* Enable the MCI peripheral clock */
 
-  putreg32((1 << SAM3U_PID_HSMCI), SAM3U_PMC_PCER);
+  putreg32((1 << SAM_PID_HSMCI), SAM_PMC_PCER);
 
   /* Enable the MCI and the Power Saving */
 
-  putreg32(HSMCI_CR_MCIEN, SAM3U_HSMCI_CR);
+  putreg32(HSMCI_CR_MCIEN, SAM_HSMCI_CR);
 }
 
 /****************************************************************************
@@ -686,22 +686,22 @@ static inline void sam3u_enable(void)
 #if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
 static void sam3u_hsmcisample(struct sam3u_hsmciregs_s *regs)
 {
-  regs->mr    = getreg32(SAM3U_HSMCI_MR);
-  regs->dtor  = getreg32(SAM3U_HSMCI_DTOR);
-  regs->sdcr  = getreg32(SAM3U_HSMCI_SDCR);
-  regs->argr  = getreg32(SAM3U_HSMCI_ARGR);
-  regs->blkr  = getreg32(SAM3U_HSMCI_BLKR);
-  regs->cstor = getreg32(SAM3U_HSMCI_CSTOR);
-  regs->rsp0  = getreg32(SAM3U_HSMCI_RSPR0);
-  regs->rsp1  = getreg32(SAM3U_HSMCI_RSPR1);
-  regs->rsp2  = getreg32(SAM3U_HSMCI_RSPR2);
-  regs->rsp3  = getreg32(SAM3U_HSMCI_RSPR3);
-  regs->sr    = getreg32(SAM3U_HSMCI_SR);
-  regs->imr   = getreg32(SAM3U_HSMCI_IMR);
-  regs->dma   = getreg32(SAM3U_HSMCI_DMA);
-  regs->cfg   = getreg32(SAM3U_HSMCI_CFG);
-  regs->wpmr  = getreg32(SAM3U_HSMCI_WPMR);
-  regs->wpsr  = getreg32(SAM3U_HSMCI_WPSR);
+  regs->mr    = getreg32(SAM_HSMCI_MR);
+  regs->dtor  = getreg32(SAM_HSMCI_DTOR);
+  regs->sdcr  = getreg32(SAM_HSMCI_SDCR);
+  regs->argr  = getreg32(SAM_HSMCI_ARGR);
+  regs->blkr  = getreg32(SAM_HSMCI_BLKR);
+  regs->cstor = getreg32(SAM_HSMCI_CSTOR);
+  regs->rsp0  = getreg32(SAM_HSMCI_RSPR0);
+  regs->rsp1  = getreg32(SAM_HSMCI_RSPR1);
+  regs->rsp2  = getreg32(SAM_HSMCI_RSPR2);
+  regs->rsp3  = getreg32(SAM_HSMCI_RSPR3);
+  regs->sr    = getreg32(SAM_HSMCI_SR);
+  regs->imr   = getreg32(SAM_HSMCI_IMR);
+  regs->dma   = getreg32(SAM_HSMCI_DMA);
+  regs->cfg   = getreg32(SAM_HSMCI_CFG);
+  regs->wpmr  = getreg32(SAM_HSMCI_WPMR);
+  regs->wpsr  = getreg32(SAM_HSMCI_WPSR);
 }
 #endif
 
@@ -717,22 +717,22 @@ static void sam3u_hsmcisample(struct sam3u_hsmciregs_s *regs)
 static void sam3u_hsmcidump(struct sam3u_hsmciregs_s *regs, const char *msg)
 {
   fdbg("HSMCI Registers: %s\n", msg);
-  fdbg("     MR[%08x]: %08x\n", SAM3U_HSMCI_MR,    regs->mr);
-  fdbg("   DTOR[%08x]: %08x\n", SAM3U_HSMCI_DTOR,  regs->dtor);
-  fdbg("   SDCR[%08x]: %08x\n", SAM3U_HSMCI_SDCR,  regs->sdcr);
-  fdbg("   ARGR[%08x]: %08x\n", SAM3U_HSMCI_ARGR,  regs->argr);
-  fdbg("   BLKR[%08x]: %08x\n", SAM3U_HSMCI_BLKR,  regs->blkr);
-  fdbg("  CSTOR[%08x]: %08x\n", SAM3U_HSMCI_CSTOR, regs->cstor);
-  fdbg("  RSPR0[%08x]: %08x\n", SAM3U_HSMCI_RSPR0, regs->rsp0);
-  fdbg("  RSPR1[%08x]: %08x\n", SAM3U_HSMCI_RSPR1, regs->rsp1);
-  fdbg("  RSPR2[%08x]: %08x\n", SAM3U_HSMCI_RSPR2, regs->rsp2);
-  fdbg("  RSPR3[%08x]: %08x\n", SAM3U_HSMCI_RSPR3, regs->rsp3);
-  fdbg("     SR[%08x]: %08x\n", SAM3U_HSMCI_SR,    regs->sr);
-  fdbg("    IMR[%08x]: %08x\n", SAM3U_HSMCI_IMR,   regs->imr);
-  fdbg("    DMA[%08x]: %08x\n", SAM3U_HSMCI_DMA,   regs->dma);
-  fdbg("    CFG[%08x]: %08x\n", SAM3U_HSMCI_CFG,   regs->cfg);
-  fdbg("   WPMR[%08x]: %08x\n", SAM3U_HSMCI_WPMR,  regs->wpmr);
-  fdbg("   WPSR[%08x]: %08x\n", SAM3U_HSMCI_WPSR,  regs->wpsr);
+  fdbg("     MR[%08x]: %08x\n", SAM_HSMCI_MR,    regs->mr);
+  fdbg("   DTOR[%08x]: %08x\n", SAM_HSMCI_DTOR,  regs->dtor);
+  fdbg("   SDCR[%08x]: %08x\n", SAM_HSMCI_SDCR,  regs->sdcr);
+  fdbg("   ARGR[%08x]: %08x\n", SAM_HSMCI_ARGR,  regs->argr);
+  fdbg("   BLKR[%08x]: %08x\n", SAM_HSMCI_BLKR,  regs->blkr);
+  fdbg("  CSTOR[%08x]: %08x\n", SAM_HSMCI_CSTOR, regs->cstor);
+  fdbg("  RSPR0[%08x]: %08x\n", SAM_HSMCI_RSPR0, regs->rsp0);
+  fdbg("  RSPR1[%08x]: %08x\n", SAM_HSMCI_RSPR1, regs->rsp1);
+  fdbg("  RSPR2[%08x]: %08x\n", SAM_HSMCI_RSPR2, regs->rsp2);
+  fdbg("  RSPR3[%08x]: %08x\n", SAM_HSMCI_RSPR3, regs->rsp3);
+  fdbg("     SR[%08x]: %08x\n", SAM_HSMCI_SR,    regs->sr);
+  fdbg("    IMR[%08x]: %08x\n", SAM_HSMCI_IMR,   regs->imr);
+  fdbg("    DMA[%08x]: %08x\n", SAM_HSMCI_DMA,   regs->dma);
+  fdbg("    CFG[%08x]: %08x\n", SAM_HSMCI_CFG,   regs->cfg);
+  fdbg("   WPMR[%08x]: %08x\n", SAM_HSMCI_WPMR,  regs->wpmr);
+  fdbg("   WPSR[%08x]: %08x\n", SAM_HSMCI_WPSR,  regs->wpsr);
 }
 #endif
 
@@ -1024,8 +1024,8 @@ static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupeven
 
   /* Disable the DMA handshaking */
 
-  putreg32(0, SAM3U_HSMCI_DMA);
-  
+  putreg32(0, SAM_HSMCI_DMA);
+
   /* Is a thread wait for these data transfer complete events? */
 
   if ((priv->waitevents & wkupevent) != 0)
@@ -1053,9 +1053,9 @@ static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupeven
 
 static void sam3u_notransfer(struct sam3u_dev_s *priv)
 {
-  uint32_t regval = getreg32(SAM3U_HSMCI_MR);
+  uint32_t regval = getreg32(SAM_HSMCI_MR);
   regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF | HSMCI_MR_BLKLEN_MASK);
-  putreg32(regval, SAM3U_HSMCI_MR);
+  putreg32(regval, SAM_HSMCI_MR);
 }
 
 /****************************************************************************
@@ -1094,8 +1094,8 @@ static int sam3u_interrupt(int irq, void *context)
        * there are non-zero bits remaining, then we have work to do here.
        */
 
-      sr      = getreg32(SAM3U_HSMCI_SR);
-      enabled = sr & getreg32(SAM3U_HSMCI_IMR);
+      sr      = getreg32(SAM_HSMCI_SR);
+      enabled = sr & getreg32(SAM_HSMCI_IMR);
       if (enabled == 0)
         {
           break;
@@ -1118,7 +1118,7 @@ static int sam3u_interrupt(int irq, void *context)
                 {
                   /* Yes.. Terminate with a timeout. */
 
-                  sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);          
+                  sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
                 }
               else
                 {
@@ -1177,7 +1177,7 @@ static int sam3u_interrupt(int irq, void *context)
 
                       wkupevent = SDIOWAIT_CMDDONE|SDIOWAIT_RESPONSEDONE;
                 }
- 
+
              /* Yes.. Is there a thread waiting for this event set? */
 
              wkupevent &= priv->waitevents;
@@ -1219,44 +1219,44 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
   /* Enable the MCI clock */
 
   flags = irqsave();
-  putreg32((1 << SAM3U_PID_HSMCI), SAM3U_PMC_PCER);
-  fdbg("PCSR: %08x\n", getreg32(SAM3U_PMC_PCSR));
-  
+  putreg32((1 << SAM_PID_HSMCI), SAM_PMC_PCER);
+  fdbg("PCSR: %08x\n", getreg32(SAM_PMC_PCSR));
+
   /* Reset the MCI */
 
-  putreg32(HSMCI_CR_SWRST, SAM3U_HSMCI_CR);
-  
+  putreg32(HSMCI_CR_SWRST, SAM_HSMCI_CR);
+
   /* Disable the MCI */
 
-  putreg32(HSMCI_CR_MCIDIS | HSMCI_CR_PWSDIS, SAM3U_HSMCI_CR);
-  
+  putreg32(HSMCI_CR_MCIDIS | HSMCI_CR_PWSDIS, SAM_HSMCI_CR);
+
   /* Disable all the interrupts */
 
-  putreg32(0xffffffff, SAM3U_HSMCI_IDR);
-  
+  putreg32(0xffffffff, SAM_HSMCI_IDR);
+
   /* Set the Data Timeout Register */
 
-  putreg32(HSMCI_DTOR_DTOCYC_MAX | HSMCI_DTOR_DTOMUL_MAX, SAM3U_HSMCI_DTOR);
-  
+  putreg32(HSMCI_DTOR_DTOCYC_MAX | HSMCI_DTOR_DTOMUL_MAX, SAM_HSMCI_DTOR);
+
   /* Set the Mode Register for ID mode frequency (probably 400KHz) */
 
   sam3u_clock(dev, CLOCK_IDMODE);
 
   /* Set the SDCard Register */
 
-  putreg32(HSMCI_SDCR_SDCSEL_SLOTA | HSMCI_SDCR_SDCBUS_4BIT, SAM3U_HSMCI_SDCR);
+  putreg32(HSMCI_SDCR_SDCSEL_SLOTA | HSMCI_SDCR_SDCBUS_4BIT, SAM_HSMCI_SDCR);
 
   /* Enable the MCI controller */
 
-  putreg32(HSMCI_CR_MCIEN, SAM3U_HSMCI_CR);
+  putreg32(HSMCI_CR_MCIEN, SAM_HSMCI_CR);
 
   /* Disable the DMA interface */
 
-  putreg32(0, SAM3U_HSMCI_DMA);
-  
+  putreg32(0, SAM_HSMCI_DMA);
+
   /* Configure MCI */
 
-  putreg32(HSMCI_CFG_FIFOMODE, SAM3U_HSMCI_CFG);
+  putreg32(HSMCI_CFG_FIFOMODE, SAM_HSMCI_CFG);
 
   /* No data transfer */
 
@@ -1323,10 +1323,10 @@ static void sam3u_widebus(FAR struct sdio_dev_s *dev, bool wide)
 
   /* Set 1-bit or 4-bit bus by configuring the SDCBUS field of the SDCR register */
 
-  regval  = getreg32(SAM3U_HSMCI_SDCR);
+  regval  = getreg32(SAM_HSMCI_SDCR);
   regval &= ~HSMCI_SDCR_SDCBUS_MASK;
   regval |= wide ? HSMCI_SDCR_SDCBUS_4BIT : HSMCI_SDCR_SDCBUS_1BIT;
-  putreg32(regval, SAM3U_HSMCI_SDCR);
+  putreg32(regval, SAM_HSMCI_SDCR);
 
   /* Remember the setting */
 
@@ -1355,14 +1355,14 @@ static void sam3u_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 
   /* Fetch the current mode register and mask out the clkdiv (and pwsdiv) */
 
-  regval = getreg32(SAM3U_HSMCI_MR);
+  regval = getreg32(SAM_HSMCI_MR);
   regval &= ~(HSMCI_MR_CLKDIV_MASK | HSMCI_MR_PWSDIV_MASK);
 
  /* These clock devisor values that must be defined in the board-specific
   * board.h header file: HSMCI_INIT_CLKDIV, HSMCI_MMCXFR_CLKDIV,
   * HSMCI_SDXFR_CLKDIV, and HSMCI_SDWIDEXFR_CLKDIV.
   */
-  
+
   switch (rate)
     {
     default:
@@ -1392,7 +1392,7 @@ static void sam3u_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
    * disabled, whichever the case.
    */
 
-  putreg32(regval, SAM3U_HSMCI_MR);
+  putreg32(regval, SAM_HSMCI_MR);
   if (enable)
     {
       sam3u_enable();
@@ -1423,7 +1423,7 @@ static int sam3u_attach(FAR struct sdio_dev_s *dev)
 
   /* Attach the HSMCI interrupt handler */
 
-  ret = irq_attach(SAM3U_IRQ_HSMCI, sam3u_interrupt);
+  ret = irq_attach(SAM_IRQ_HSMCI, sam3u_interrupt);
   if (ret == OK)
     {
 
@@ -1431,18 +1431,18 @@ static int sam3u_attach(FAR struct sdio_dev_s *dev)
        * interrupt flags by reading the status register.
        */
 
-      putreg32(0xffffffff, SAM3U_HSMCI_IDR);
-      (void)getreg32(SAM3U_HSMCI_SR);
+      putreg32(0xffffffff, SAM_HSMCI_IDR);
+      (void)getreg32(SAM_HSMCI_SR);
 
       /* Enable HSMCI interrupts at the NVIC.  They can now be enabled at
        * the HSMCI controller as needed.
        */
 
-      up_enable_irq(SAM3U_IRQ_HSMCI);
+      up_enable_irq(SAM_IRQ_HSMCI);
 
       /* Set the interrrupt priority */
 
-      up_prioritize_irq(SAM3U_IRQ_HSMCI, CONFIG_HSMCI_PRI);
+      up_prioritize_irq(SAM_IRQ_HSMCI, CONFIG_HSMCI_PRI);
     }
 
   return ret;
@@ -1474,7 +1474,7 @@ static int sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 
     /* Set the HSMCI Argument value */
 
-  putreg32(arg, SAM3U_HSMCI_ARGR);
+  putreg32(arg, SAM_HSMCI_ARGR);
 
   /* Construct the command valid, starting with the command index */
 
@@ -1490,7 +1490,7 @@ static int sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
     case MMCSD_NO_RESPONSE:
       priv->cmdrmask = HSMCI_CMDRESP_INTS;
       regval |= HSMCI_CMDR_RSPTYP_NONE;
-      
+
       break;
 
     /* 48-bit response with CRC */
@@ -1509,7 +1509,7 @@ static int sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
       break;
 
     /* 48-bit response without CRC */
- 
+
     case MMCSD_R3_RESPONSE:
     case MMCSD_R7_RESPONSE:
       priv->cmdrmask = HSMCI_CMDRESP_NOCRC_INTS;
@@ -1517,7 +1517,7 @@ static int sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
       break;
 
     /* 136-bit response with CRC */
-      
+
     case MMCSD_R2_RESPONSE:
       priv->cmdrmask = HSMCI_CMDRESP_INTS;
       regval |= (HSMCI_CMDR_RSPTYP_136BIT | HSMCI_CMDR_MAXLAT);
@@ -1532,7 +1532,7 @@ static int sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
     case MMCSD_RDSTREAM: /* MMC Read stream */
       regval |= (HSMCI_CMDR_TRCMD_START | HSMCI_CMDR_TRTYP_STREAM | HSMCI_CMDR_TRDIR_READ);
       break;
- 
+
     case MMCSD_WRSTREAM: /* MMC Write stream */
       regval |= (HSMCI_CMDR_TRCMD_START | HSMCI_CMDR_TRTYP_STREAM | HSMCI_CMDR_TRDIR_WRITE);
       break;
@@ -1542,12 +1542,12 @@ static int sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
       regval |= (HSMCI_CMDR_TRCMD_START | HSMCI_CMDR_TRDIR_READ);
       regval |= (cmd & MMCSD_MULTIBLOCK) ? HSMCI_CMDR_TRTYP_MULTI : HSMCI_CMDR_TRTYP_SINGLE;
       break;
- 
-    case MMCSD_WRDATAXFR: /* Write block transfer */   
+
+    case MMCSD_WRDATAXFR: /* Write block transfer */
       regval |= (HSMCI_CMDR_TRCMD_START | HSMCI_CMDR_TRDIR_WRITE);
       regval |= (cmd & MMCSD_MULTIBLOCK) ? HSMCI_CMDR_TRTYP_MULTI : HSMCI_CMDR_TRTYP_SINGLE;
       break;
- 
+
     case MMCSD_NODATAXFR:
     default:
       if ((cmd & MMCSD_STOPXFR) != 0)
@@ -1569,7 +1569,7 @@ static int sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
   /* Write the fully decorated command to CMDR */
 
   fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
-  putreg32(regval, SAM3U_HSMCI_CMDR);
+  putreg32(regval, SAM_HSMCI_CMDR);
   sam3u_cmdsample1(SAMPLENDX_AFTER_CMDR);
   return OK;
 }
@@ -1598,18 +1598,18 @@ static void sam3u_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
 
   /* Set the block size */
 
-  regval = getreg32(SAM3U_HSMCI_MR);
+  regval = getreg32(SAM_HSMCI_MR);
   regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF | HSMCI_MR_BLKLEN_MASK);
   regval |= HSMCU_PROOF_BITS;
   regval |= (blocklen << HSMCI_MR_BLKLEN_SHIFT);
-  putreg32(regval, SAM3U_HSMCI_MR);
+  putreg32(regval, SAM_HSMCI_MR);
 
   /* Set the block count */
 
-  regval  = getreg32(SAM3U_HSMCI_BLKR);
+  regval  = getreg32(SAM_HSMCI_BLKR);
   regval &= ~HSMCI_BLKR_BCNT_MASK;
   regval |= (nblocks << HSMCI_BLKR_BCNT_SHIFT);
-  putreg32(regval, SAM3U_HSMCI_BLKR);
+  putreg32(regval, SAM_HSMCI_BLKR);
 }
 
 /****************************************************************************
@@ -1643,8 +1643,8 @@ static int sam3u_cancel(FAR struct sdio_dev_s *dev)
   sam3u_notransfer(priv);
 
   /* Clearing (most) pending interrupt status by reading the status register */
- 
-  (void)getreg32(SAM3U_HSMCI_SR);
+
+  (void)getreg32(SAM_HSMCI_SR);
 
   /* Cancel any watchdog timeout */
 
@@ -1659,8 +1659,8 @@ static int sam3u_cancel(FAR struct sdio_dev_s *dev)
 
   /* Disable the DMA handshaking */
 
-  putreg32(0, SAM3U_HSMCI_DMA);
-  
+  putreg32(0, SAM_HSMCI_DMA);
+
   return OK;
 }
 
@@ -1714,7 +1714,7 @@ static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
     {
       /* Did a Command-Response sequence termination evernt occur? */
 
-      sr = getreg32(SAM3U_HSMCI_SR);
+      sr = getreg32(SAM_HSMCI_SR);
       if ((sr & priv->cmdrmask) != 0)
         {
           sam3u_cmdsample2(SAMPLENDX_AT_WAKEUP, sr);
@@ -1864,7 +1864,7 @@ static int sam3u_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
 
   else if (rshort)
     {
-      *rshort = getreg32(SAM3U_HSMCI_RSPR0);
+      *rshort = getreg32(SAM_HSMCI_RSPR0);
     }
 
   priv->wkupevent = 0;
@@ -1895,7 +1895,7 @@ static int sam3u_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
     }
   else
 #endif
-    
+
   /* Check for timeout errors */
 
   if ((priv->wkupevent & SDIOWAIT_TIMEOUT) != 0)
@@ -1914,10 +1914,10 @@ static int sam3u_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
 
   else if (rlong)
     {
-      rlong[0] = getreg32(SAM3U_HSMCI_RSPR0);
-      rlong[1] = getreg32(SAM3U_HSMCI_RSPR1);
-      rlong[2] = getreg32(SAM3U_HSMCI_RSPR2);
-      rlong[3] = getreg32(SAM3U_HSMCI_RSPR3);
+      rlong[0] = getreg32(SAM_HSMCI_RSPR0);
+      rlong[1] = getreg32(SAM_HSMCI_RSPR1);
+      rlong[2] = getreg32(SAM_HSMCI_RSPR2);
+      rlong[3] = getreg32(SAM_HSMCI_RSPR3);
     }
 
   priv->wkupevent = 0;
@@ -1962,7 +1962,7 @@ static void sam3u_waitenable(FAR struct sdio_dev_s *dev,
 {
   struct sam3u_dev_s *priv = (struct sam3u_dev_s*)dev;
   uint32_t waitmask;
- 
+
   DEBUGASSERT(priv != NULL);
 
   /* Disable event-related interrupts */
@@ -1981,7 +1981,7 @@ static void sam3u_waitenable(FAR struct sdio_dev_s *dev,
 
   /* Enable event-related interrupts */
 
-  (void)getreg32(SAM3U_HSMCI_SR);
+  (void)getreg32(SAM_HSMCI_SR);
   sam3u_enablewaitints(priv, waitmask, eventset);
 }
 
@@ -2060,7 +2060,7 @@ static sdio_eventset_t sam3u_eventwait(FAR struct sdio_dev_s *dev,
 
       sam3u_takesem(priv);
       wkupevent = priv->wkupevent;
- 
+
       /* Check if the event has occurred.  When the event has occurred, then
        * evenset will be set to 0 and wkupevent will be set to a nonzero value.
        * When wkupevent becomes non-zero, further interrupts will have already
@@ -2208,11 +2208,11 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Configure the RX DMA */
 
   sam3u_enablexfrints(priv, HSMCI_DMARECV_INTS);
-  sam3u_dmarxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer, buflen);
+  sam3u_dmarxsetup(priv->dma, SAM_HSMCI_FIFO, (uint32_t)buffer, buflen);
 
   /* Enable DMA handshaking */
 
-  putreg32(HSMCI_DMA_DMAEN, SAM3U_HSMCI_DMA);
+  putreg32(HSMCI_DMA_DMAEN, SAM_HSMCI_DMA);
   sam3u_xfrsample(priv, SAMPLENDX_BEFORE_ENABLE);
 
   /* Start the DMA */
@@ -2256,11 +2256,11 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Configure the TX DMA */
 
-  sam3u_dmatxsetup(priv->dma, SAM3U_HSMCI_FIFO, (uint32_t)buffer, buflen);
+  sam3u_dmatxsetup(priv->dma, SAM_HSMCI_FIFO, (uint32_t)buffer, buflen);
 
   /* Enable DMA handshaking */
 
-  putreg32(HSMCI_DMA_DMAEN, SAM3U_HSMCI_DMA);
+  putreg32(HSMCI_DMA_DMAEN, SAM_HSMCI_DMA);
   sam3u_xfrsample(priv, SAMPLENDX_BEFORE_ENABLE);
 
   /* Start the DMA */
@@ -2427,7 +2427,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
  *
  * Input Parameters:
  *   dev        - An instance of the SDIO driver device state structure.
- *   cardinslot - true is a card has been detected in the slot; false if a 
+ *   cardinslot - true is a card has been detected in the slot; false if a
  *                card has been removed from the slot.  Only transitions
  *                (inserted->removed or removed->inserted should be reported)
  *
@@ -2500,4 +2500,4 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
   fvdbg("cdstatus: %02x\n", priv->cdstatus);
   irqrestore(flags);
 }
-#endif /* CONFIG_SAM3U_HSMCI */
+#endif /* CONFIG_SAM34_HSMCI */

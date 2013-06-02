@@ -41,12 +41,12 @@ GNU Toolchain Options
   add one of the following configuration options to your .config (or defconfig)
   file:
 
-    CONFIG_SAM3U_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_SAM3U_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_SAM3U_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_SAM3U_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_SAM34_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_SAM34_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_SAM34_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_SAM34_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
 
-  If you are not using CONFIG_SAM3U_BUILDROOT, then you may also have to modify
+  If you are not using CONFIG_SAM34_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
 
   NOTE: the CodeSourcery (for Windows), devkitARM, and Raisonance toolchains are
@@ -311,15 +311,15 @@ SAM3U-EK-specific Configuration Options
 
   Individual subsystems can be enabled:
 
-    CONFIG_SAM3U_DMA
-    CONFIG_SAM3U_HSMCI
-    CONFIG_SAM3U_NAND
-    CONFIG_SAM3U_SPI
-    CONFIG_SAM3U_UART
-    CONFIG_SAM3U_USART0
-    CONFIG_SAM3U_USART1
-    CONFIG_SAM3U_USART2
-    CONFIG_SAM3U_USART3
+    CONFIG_SAM34_DMA
+    CONFIG_SAM34_HSMCI
+    CONFIG_SAM34_NAND
+    CONFIG_SAM34_SPI
+    CONFIG_SAM34_UART
+    CONFIG_SAM34_USART0
+    CONFIG_SAM34_USART1
+    CONFIG_SAM34_USART2
+    CONFIG_SAM34_USART3
 
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.

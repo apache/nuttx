@@ -2,7 +2,7 @@
  * configs/sam3u-ek/src/up_boot.c
  * arch/arm/src/board/up_boot.c
  *
- *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,7 +75,7 @@ void sam3u_boardinitialize(void)
    * sam3u_spiinitialize() has been brought into the link.
    */
 
-#ifdef CONFIG_SAM3U_SPI
+#ifdef CONFIG_SAM34_SPI
   if (sam3u_spiinitialize)
     {
       sam3u_spiinitialize();
@@ -87,7 +87,7 @@ void sam3u_boardinitialize(void)
     * into the build.
     */
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_SAM3U_USB)
+#if defined(CONFIG_USBDEV) && defined(CONFIG_SAM34_USB)
   if (sam3u_usbinitialize)
     {
       sam3u_usbinitialize();
@@ -104,7 +104,7 @@ void sam3u_boardinitialize(void)
    * function sam3u_hsmciinit() has been brought into the build.
     */
 
-#ifdef CONFIG_SAM3U_HSMCI
+#ifdef CONFIG_SAM34_HSMCI
   if (sam3u_hsmciinit)
     {
       sam3u_hsmciinit();

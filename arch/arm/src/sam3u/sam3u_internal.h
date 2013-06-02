@@ -114,7 +114,7 @@
  */
 
 #define GPIO_OUTPUT_SET            (1 << 7)    /* Bit 7: Inital value of output */
-#define GPIO_OUTPUT_CLEAR          (0) 
+#define GPIO_OUTPUT_CLEAR          (0)
 
 /* This identifies the GPIO port:
  * .... .... .PP. ....
@@ -423,7 +423,7 @@ extern "C"
  * Name: sam3u_clockconfig
  *
  * Description:
- *   Called to initialize the SAM3U.  This does whatever setup is needed to put the
+ *   Called to initialize the SAM3/4.  This does whatever setup is needed to put the
  *   SoC in a usable state.  This includes the initialization of clocking using the
  *   settings in board.h.  (After power-on reset, the sam3u is initiallyrunning on
  *   a 4MHz internal RC clock).  This function also performs other low-level chip
@@ -465,7 +465,7 @@ void sam3u_userspace(void);
  * Name: sam3u_mpuinitialize
  *
  * Description:
- *   Configure the MPU to permit user-space access to only unrestricted SAM3U
+ *   Configure the MPU to permit user-space access to only unrestricted SAM3/4
  *   resources.
  *
  ****************************************************************************/
@@ -733,7 +733,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno);
  *
  * Input Parameters:
  *   dev        - An instance of the SDIO driver device state structure.
- *   cardinslot - true is a card has been detected in the slot; false if a 
+ *   cardinslot - true is a card has been detected in the slot; false if a
  *                card has been removed from the slot.  Only transitions
  *                (inserted->removed or removed->inserted should be reported)
  *
@@ -771,12 +771,12 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
  *   include:
  *
  *   o sam3u_spicsnumbe and sam3u_spiselect which are helper functions to
- *     manage the board-specific aspects of the unique SAM3U chip select
+ *     manage the board-specific aspects of the unique SAM3/4 chip select
  *     architecture.
  *   o sam3u_spistatus and sam3u_spicmddata:  Implementations of the status
  *     and cmddata methods of the SPI interface defined by struct spi_ops_
  *     (see include/nuttx/spi.h). All other methods including
- *     up_spiinitialize()) are provided by common SAM3U logic.
+ *     up_spiinitialize()) are provided by common SAM3/4 logic.
  *
  *  To use this common SPI logic on your board:
  *
@@ -793,13 +793,13 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
  *   3. Add a call to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
+ *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAM3U_SPI
+#ifdef CONFIG_SAM34_SPI
 struct spi_dev_s;
 enum spi_dev_e;
 
@@ -807,10 +807,10 @@ enum spi_dev_e;
  * Name: sam3u_spicsnumber
  *
  * Description:
- *   The SAM3U has 4 CS registers for controlling device features.  This
+ *   The SAM3/4 has 4 CS registers for controlling device features.  This
  *   function must be provided by board-specific code.  Given a logical device
  *   ID, this function returns a number from 0 to 3 that identifies one of
- *   these SAM3U CS resources.
+ *   these SAM3/4 CS resources.
  *
  *   If CONFIG_SPI_OWNBUS is not defined and the GPIO is controlled by
  *   sam3u_spiselect, then the same CS register may be used to control
@@ -900,7 +900,7 @@ uint8_t sam3u_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
 int sam3u_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
-#endif /* CONFIG_SAM3U_SPI */
+#endif /* CONFIG_SAM34_SPI */
 
 #undef EXTERN
 #if defined(__cplusplus)

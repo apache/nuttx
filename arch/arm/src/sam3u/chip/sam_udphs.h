@@ -1,7 +1,7 @@
 /****************************************************************************************
- * arch/arm/src/sam3u/sam3u_udphs.h
+ * arch/arm/src/sam3u/chip/sam_udphs.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM3U_SAM3U_UDPHS_H
-#define __ARCH_ARM_SRC_SAM3U_SAM3U_UDPHS_H
+#ifndef __ARCH_ARM_SRC_SAM3U_CHIP_SAM_UDPHS_H
+#define __ARCH_ARM_SRC_SAM3U_CHIP_SAM_UDPHS_H
 
 /****************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "sam3u_memorymap.h"
+#include "chip/sam_memorymap.h"
 
 /****************************************************************************************
  * Pre-processor Definitions
@@ -51,76 +51,76 @@
 
 /* UDPHS register offsets ***************************************************************/
 
-#define SAM3U_UDPHS_CTRL_OFFSET               0x00 /* UDPHS Control Register */
-#define SAM3U_UDPHS_FNUM_OFFSET               0x04 /* UDPHS Frame Number Register */
+#define SAM_UDPHS_CTRL_OFFSET                 0x00 /* UDPHS Control Register */
+#define SAM_UDPHS_FNUM_OFFSET                 0x04 /* UDPHS Frame Number Register */
                                                    /* 0x08-0x0C: Reserved */
-#define SAM3U_UDPHS_IEN_OFFSET                0x10 /* UDPHS Interrupt Enable Register */
-#define SAM3U_UDPHS_INTSTA_OFFSET             0x14 /* UDPHS Interrupt Status Register */
-#define SAM3U_UDPHS_CLRINT_OFFSET             0x18 /* UDPHS Clear Interrupt Register */
-#define SAM3U_UDPHS_EPTRST_OFFSET             0x1c /* UDPHS Endpoints Reset Register */
+#define SAM_UDPHS_IEN_OFFSET                  0x10 /* UDPHS Interrupt Enable Register */
+#define SAM_UDPHS_INTSTA_OFFSET               0x14 /* UDPHS Interrupt Status Register */
+#define SAM_UDPHS_CLRINT_OFFSET               0x18 /* UDPHS Clear Interrupt Register */
+#define SAM_UDPHS_EPTRST_OFFSET               0x1c /* UDPHS Endpoints Reset Register */
                                                    /* 0x20-0xcc: Reserved */
-#define SAM3U_UDPHS_TST_OFFSET                0xe0 /* UDPHS Test Register */
+#define SAM_UDPHS_TST_OFFSET                  0xe0 /* UDPHS Test Register */
                                                    /* 0xE4-0xE8: Reserved */
-#define SAM3U_UDPHS_IPNAME1_OFFSET            0xf0 /* UDPHS Name1 Register */
-#define SAM3U_UDPHS_IPNAME2_OFFSET            0xf4 /* UDPHS Name2 Register */
-#define SAM3U_UDPHS_IPFEATURES_OFFSET         0xf8 /* UDPHS Features Register */
+#define SAM_UDPHS_IPNAME1_OFFSET              0xf0 /* UDPHS Name1 Register */
+#define SAM_UDPHS_IPNAME2_OFFSET              0xf4 /* UDPHS Name2 Register */
+#define SAM_UDPHS_IPFEATURES_OFFSET           0xf8 /* UDPHS Features Register */
 
 /* Endpoint registers:  Offsets for Endpoints 0-6: 0x100, 0x120, 0x140, 0x160, 0x180,
  * 0x1a0, and 0x1c0
  */
 
-#define SAM3U_UDPHSEP_OFFSET(n)               (0x100+((n)<<5))
-#define SAM3U_UDPHSEP_CFG_OFFSET              0x00 /* UDPHS Endpoint Configuration Register */
-#define SAM3U_UDPHSEP_CTLENB_OFFSET           0x04 /* UDPHS Endpoint Control Enable Register */
-#define SAM3U_UDPHSEP_CTLDIS_OFFSET           0x08 /* UDPHS Endpoint Control Disable Register */
-#define SAM3U_UDPHSEP_CTL_OFFSET              0x0c /* UDPHS Endpoint Control Register */
+#define SAM_UDPHSEP_OFFSET(n)                 (0x100+((n)<<5))
+#define SAM_UDPHSEP_CFG_OFFSET                0x00 /* UDPHS Endpoint Configuration Register */
+#define SAM_UDPHSEP_CTLENB_OFFSET             0x04 /* UDPHS Endpoint Control Enable Register */
+#define SAM_UDPHSEP_CTLDIS_OFFSET             0x08 /* UDPHS Endpoint Control Disable Register */
+#define SAM_UDPHSEP_CTL_OFFSET                0x0c /* UDPHS Endpoint Control Register */
                                                    /* 0x10: Reserved */
-#define SAM3U_UDPHSEP_SETSTA_OFFSET           0x14 /* UDPHS Endpoint Set Status Register */
-#define SAM3U_UDPHSEP_CLRSTA_OFFSET           0x18 /* UDPHS Endpoint Clear Status Register */
-#define SAM3U_UDPHSEP_STA_OFFSET              0x1c /* UDPHS Endpoint Status Register */
+#define SAM_UDPHSEP_SETSTA_OFFSET             0x14 /* UDPHS Endpoint Set Status Register */
+#define SAM_UDPHSEP_CLRSTA_OFFSET             0x18 /* UDPHS Endpoint Clear Status Register */
+#define SAM_UDPHSEP_STA_OFFSET                0x1c /* UDPHS Endpoint Status Register */
                                                    /* 0x1e0-0x300: Reserved */
                                                    /* 0x300-0x30c: Reserved */
 /* DMA Channel Registers:  Offsets for DMA channels 1-6 0x320, 0x330, 0x340, 0x350, and
  * 0x360.  NOTE that there is no DMA channel 0.
  */
 
-#define SAM3U_UDPHSDMA_OFFSET(n)              (0x310+((n)<<4))
-#define SAM3U_UDPHSDMA_NXTDSC_OFFSET          0x00 /* UDPHS DMA Next Descriptor Address Register */
-#define SAM3U_UDPHSDMA_ADDRESS_OFFSET         0x04 /* UDPHS DMA Channel Address Register */
-#define SAM3U_UDPHSDMA_CONTROL_OFFSET         0x08 /* UDPHS DMA Channel Control Register */
-#define SAM3U_UDPHSDMA_STATUS_OFFSET)         0x0c /* UDPHS DMA Channel Status Register */
+#define SAM_UDPHSDMA_OFFSET(n)                (0x310+((n)<<4))
+#define SAM_UDPHSDMA_NXTDSC_OFFSET            0x00 /* UDPHS DMA Next Descriptor Address Register */
+#define SAM_UDPHSDMA_ADDRESS_OFFSET           0x04 /* UDPHS DMA Channel Address Register */
+#define SAM_UDPHSDMA_CONTROL_OFFSET           0x08 /* UDPHS DMA Channel Control Register */
+#define SAM_UDPHSDMA_STATUS_OFFSET)           0x0c /* UDPHS DMA Channel Status Register */
 
 /* UDPHS register adresses **************************************************************/
 
-#define SAM3U_UDPHS_CTRL                      (SAM3U_UDPHS_BASE+SAM3U_UDPHS_CTRL_OFFSET)
-#define SAM3U_UDPHS_FNUM                      (SAM3U_UDPHS_BASE+SAM3U_UDPHS_FNUM_OFFSET)
-#define SAM3U_UDPHS_IEN                       (SAM3U_UDPHS_BASE+SAM3U_UDPHS_IEN_OFFSET)
-#define SAM3U_UDPHS_INTSTA                    (SAM3U_UDPHS_BASE+SAM3U_UDPHS_INTSTA_OFFSET)
-#define SAM3U_UDPHS_CLRINT                    (SAM3U_UDPHS_BASE+ SAM3U_UDPHS_CLRINT_OFFSET)
-#define SAM3U_UDPHS_EPTRST                    (SAM3U_UDPHS_BASE+SAM3U_UDPHS_EPTRST_OFFSET)
-#define SAM3U_UDPHS_TST                       (SAM3U_UDPHS_BASE+SAM3U_UDPHS_TST_OFFSET)
-#define SAM3U_UDPHS_IPNAME1                   (SAM3U_UDPHS_BASE+SAM3U_UDPHS_IPNAME1_OFFSET)
-#define SAM3U_UDPHS_IPNAME2                   (SAM3U_UDPHS_BASE+SAM3U_UDPHS_IPNAME2_OFFSET)
-#define SAM3U_UDPHS_IPFEATURES                (SAM3U_UDPHS_BASE+SAM3U_UDPHS_IPFEATURES_OFFSET)
+#define SAM_UDPHS_CTRL                        (SAM_UDPHS_BASE+SAM_UDPHS_CTRL_OFFSET)
+#define SAM_UDPHS_FNUM                        (SAM_UDPHS_BASE+SAM_UDPHS_FNUM_OFFSET)
+#define SAM_UDPHS_IEN                         (SAM_UDPHS_BASE+SAM_UDPHS_IEN_OFFSET)
+#define SAM_UDPHS_INTSTA                      (SAM_UDPHS_BASE+SAM_UDPHS_INTSTA_OFFSET)
+#define SAM_UDPHS_CLRINT                      (SAM_UDPHS_BASE+ SAM_UDPHS_CLRINT_OFFSET)
+#define SAM_UDPHS_EPTRST                      (SAM_UDPHS_BASE+SAM_UDPHS_EPTRST_OFFSET)
+#define SAM_UDPHS_TST                         (SAM_UDPHS_BASE+SAM_UDPHS_TST_OFFSET)
+#define SAM_UDPHS_IPNAME1                     (SAM_UDPHS_BASE+SAM_UDPHS_IPNAME1_OFFSET)
+#define SAM_UDPHS_IPNAME2                     (SAM_UDPHS_BASE+SAM_UDPHS_IPNAME2_OFFSET)
+#define SAM_UDPHS_IPFEATURES                  (SAM_UDPHS_BASE+SAM_UDPHS_IPFEATURES_OFFSET)
 
 /* Endpoint registers */
 
-#define SAM3U_UDPHSEP_BASE(n))                (SAM3U_UDPHS_BASE+SAM3U_UDPHSEP_OFFSET(n))
-#define SAM3U_UDPHSEP_CFG(n)                  (SAM3U_UDPHSEP_BASE(n)+SAM3U_UDPHSEP_CFG_OFFSET)
-#define SAM3U_UDPHSEP_CTLENB(n)               (SAM3U_UDPHSEP_BASE(n)+SAM3U_UDPHSEP_CTLENB_OFFSET)
-#define SAM3U_UDPHSEP_CTLDIS(n)               (SAM3U_UDPHSEP_BASE(n)+SAM3U_UDPHSEP_CTLDIS_OFFSET)
-#define SAM3U_UDPHSEP_CTL(n)                  (SAM3U_UDPHSEP_BASE(n)+SAM3U_UDPHSEP_CTL_OFFSET)
-#define SAM3U_UDPHSEP_SETSTA(n)               (SAM3U_UDPHSEP_BASE(n)+SAM3U_UDPHSEP_SETSTA_OFFSET)
-#define SAM3U_UDPHSEP_CLRSTA(n)               (SAM3U_UDPHSEP_BASE(n)+SAM3U_UDPHSEP_CLRSTA_OFFSET)
-#define SAM3U_UDPHSEP_STA(n)                  (SAM3U_UDPHSEP_BASE(n)+SAM3U_UDPHSEP_STA_OFFSET)
+#define SAM_UDPHSEP_BASE(n))                  (SAM_UDPHS_BASE+SAM_UDPHSEP_OFFSET(n))
+#define SAM_UDPHSEP_CFG(n)                    (SAM_UDPHSEP_BASE(n)+SAM_UDPHSEP_CFG_OFFSET)
+#define SAM_UDPHSEP_CTLENB(n)                 (SAM_UDPHSEP_BASE(n)+SAM_UDPHSEP_CTLENB_OFFSET)
+#define SAM_UDPHSEP_CTLDIS(n)                 (SAM_UDPHSEP_BASE(n)+SAM_UDPHSEP_CTLDIS_OFFSET)
+#define SAM_UDPHSEP_CTL(n)                    (SAM_UDPHSEP_BASE(n)+SAM_UDPHSEP_CTL_OFFSET)
+#define SAM_UDPHSEP_SETSTA(n)                 (SAM_UDPHSEP_BASE(n)+SAM_UDPHSEP_SETSTA_OFFSET)
+#define SAM_UDPHSEP_CLRSTA(n)                 (SAM_UDPHSEP_BASE(n)+SAM_UDPHSEP_CLRSTA_OFFSET)
+#define SAM_UDPHSEP_STA(n)                    (SAM_UDPHSEP_BASE(n)+SAM_UDPHSEP_STA_OFFSET)
 
 /* DMA Channel Registers*/
 
-#define SAM3U_UDPHSDMA_BASE(n)                (SAM3U_UDPHS_BASE+SAM3U_UDPHSDMA_OFFSET(n))
-#define SAM3U_UDPHSDMA_NXTDSC(n)              (SAM3U_UDPHSDMA_BASE(n)+SAM3U_UDPHSDMA_NXTDSC_OFFSET)
-#define SAM3U_UDPHSDMA_ADDRESS(n)             (SAM3U_UDPHSDMA_BASE(n)+SAM3U_UDPHSDMA_ADDRESS_OFFSET)
-#define SAM3U_UDPHSDMA_CONTROL(n)             (SAM3U_UDPHSDMA_BASE(n)+SAM3U_UDPHSDMA_CONTROL_OFFSET)
-#define SAM3U_UDPHSDMA_STATUS(n)              (SAM3U_UDPHSDMA_BASE(n)+SAM3U_UDPHSDMA_STATUS_OFFSET)
+#define SAM_UDPHSDMA_BASE(n)                  (SAM_UDPHS_BASE+SAM_UDPHSDMA_OFFSET(n))
+#define SAM_UDPHSDMA_NXTDSC(n)                (SAM_UDPHSDMA_BASE(n)+SAM_UDPHSDMA_NXTDSC_OFFSET)
+#define SAM_UDPHSDMA_ADDRESS(n)               (SAM_UDPHSDMA_BASE(n)+SAM_UDPHSDMA_ADDRESS_OFFSET)
+#define SAM_UDPHSDMA_CONTROL(n)               (SAM_UDPHSDMA_BASE(n)+SAM_UDPHSDMA_CONTROL_OFFSET)
+#define SAM_UDPHSDMA_STATUS(n)                (SAM_UDPHSDMA_BASE(n)+SAM_UDPHSDMA_STATUS_OFFSET)
 
 /* UDPHS register bit definitions *******************************************************/
 /* UDPHS Control Register */
@@ -308,52 +308,52 @@
 #  define UDPHSEP_STA_TOGGLESQSTA_DATA1       (1 << UDPHSEP_STA_TOGGLESQSTA_SHIFT) /* Data1 */
 #  define UDPHSEP_STA_TOGGLESQSTA_DATA2       (2 << UDPHSEP_STA_TOGGLESQSTA_SHIFT) /* Data2 (High B/W Isoc EP) */
 #  define UDPHSEP_STA_TOGGLESQSTA_MDATA       (3 << UDPHSEP_STA_TOGGLESQSTA_SHIFT) /* MData (High B/W Isoc EP) */
-#define UDPHSEP_STA_ERROVFLW                 (1 << 8)  /* Bit 8:  Overflow Error */
-#define UDPHSEP_STA_RXBKRDY                  (1 << 9)  /* Bit 9:  Received OUT Data */
-#define UDPHSEP_STA_KILLBANK                 (1 << 9)  /* Bit 9:  KILL Bank */
-#define UDPHSEP_STA_TXCOMPLT                 (1 << 10) /* Bit 10: Transmitted IN Data Complete */
-#define UDPHSEP_STA_TXPKRDY                  (1 << 11) /* Bit 11: TX Packet Ready */
-#define UDPHSEP_STA_ERRTRANS                 (1 << 11) /* Bit 11: Transaction Error */
-#define UDPHSEP_STA_RXSETUP                  (1 << 12) /* Bit 12: Received SETUP */
-#define UDPHSEP_STA_ERRFLISO                 (1 << 12) /* Bit 12: Error Flow */
-#define UDPHSEP_STA_STALLSNT                 (1 << 13) /* Bit 13: Stall Sent */
-#define UDPHSEP_STA_ERRCRISO                 (1 << 13) /* Bit 13: CRC ISO Error */
-#define UDPHSEP_STA_ERRNBTRA                 (1 << 13) /* Bit 13: Number of Transaction Error */
-#define UDPHSEP_STA_NAKIN                    (1 << 14) /* Bit 14: NAK IN */
-#define UDPHSEP_STA_ERRFLUSH                 (1 << 14) /* Bit 14: Bank Flush Error */
-#define UDPHSEP_STA_NAKOUT                   (1 << 15) /* Bit 15: NAK OUT */
-#define UDPHSEP_STA_CURRENTBANK_SHIFT        (16)      /* Bits 16-17: Current Bank */
-#define UDPHSEP_STA_CURRENTBANK_MASK         (3 << UDPHSEP_STA_CURRENTBANK_MASK)
-#define UDPHSEP_STA_CONTROLDIR_SHIFT         (16)      /* Bits 16-17: Control Direction */
-#define UDPHSEP_STA_CONTROLDIR_MASK          (3 << UDPHSEP_STA_CONTROLDIR_SHIFT)
-#define UDPHSEP_STA_BUSYBANKSTA_SHIFT        (18)      /* Bits 18-19: Busy Bank Number */
-#define UDPHSEP_STA_BUSYBANKSTA_MASK         (3 << UDPHSEP_STA_BUSYBANKSTA_SHIFT)
-#define UDPHSEP_STA_BYTECOUNT_SHIFT          (20)      /* Bits 20-23: UDPHS Byte Count */
-#define UDPHSEP_STA_BYTECOUNT_MASK           (15 << UDPHSEP_STA_BYTECOUNT_SHIFT)
-#define UDPHSEP_STA_SHRTPCKT                 (1 << 31) /* Bit 31: Short Packet
+#define UDPHSEP_STA_ERROVFLW                  (1 << 8)  /* Bit 8:  Overflow Error */
+#define UDPHSEP_STA_RXBKRDY                   (1 << 9)  /* Bit 9:  Received OUT Data */
+#define UDPHSEP_STA_KILLBANK                  (1 << 9)  /* Bit 9:  KILL Bank */
+#define UDPHSEP_STA_TXCOMPLT                  (1 << 10) /* Bit 10: Transmitted IN Data Complete */
+#define UDPHSEP_STA_TXPKRDY                   (1 << 11) /* Bit 11: TX Packet Ready */
+#define UDPHSEP_STA_ERRTRANS                  (1 << 11) /* Bit 11: Transaction Error */
+#define UDPHSEP_STA_RXSETUP                   (1 << 12) /* Bit 12: Received SETUP */
+#define UDPHSEP_STA_ERRFLISO                  (1 << 12) /* Bit 12: Error Flow */
+#define UDPHSEP_STA_STALLSNT                  (1 << 13) /* Bit 13: Stall Sent */
+#define UDPHSEP_STA_ERRCRISO                  (1 << 13) /* Bit 13: CRC ISO Error */
+#define UDPHSEP_STA_ERRNBTRA                  (1 << 13) /* Bit 13: Number of Transaction Error */
+#define UDPHSEP_STA_NAKIN                     (1 << 14) /* Bit 14: NAK IN */
+#define UDPHSEP_STA_ERRFLUSH                  (1 << 14) /* Bit 14: Bank Flush Error */
+#define UDPHSEP_STA_NAKOUT                    (1 << 15) /* Bit 15: NAK OUT */
+#define UDPHSEP_STA_CURRENTBANK_SHIFT         (16)      /* Bits 16-17: Current Bank */
+#define UDPHSEP_STA_CURRENTBANK_MASK          (3 << UDPHSEP_STA_CURRENTBANK_MASK)
+#define UDPHSEP_STA_CONTROLDIR_SHIFT          (16)      /* Bits 16-17: Control Direction */
+#define UDPHSEP_STA_CONTROLDIR_MASK           (3 << UDPHSEP_STA_CONTROLDIR_SHIFT)
+#define UDPHSEP_STA_BUSYBANKSTA_SHIFT         (18)      /* Bits 18-19: Busy Bank Number */
+#define UDPHSEP_STA_BUSYBANKSTA_MASK          (3 << UDPHSEP_STA_BUSYBANKSTA_SHIFT)
+#define UDPHSEP_STA_BYTECOUNT_SHIFT           (20)      /* Bits 20-23: UDPHS Byte Count */
+#define UDPHSEP_STA_BYTECOUNT_MASK            (15 << UDPHSEP_STA_BYTECOUNT_SHIFT)
+#define UDPHSEP_STA_SHRTPCKT                  (1 << 31) /* Bit 31: Short Packet
 
 /* UDPHS DMA Channel Control Register */
 
-#define UDPHSDMA_CONTROL_CHANNENB            (1 << 0)  /* Bit 0:  Channel Enable Command */
-#define UDPHSDMA_CONTROL_LDNXTDSC            (1 << 1)  /* Bit 1:  Load Next Channel Xfr Desc Enable (Command) */
-#define UDPHSDMA_CONTROL_ENDTREN             (1 << 2)  /* Bit 2:  End of Transfer Enable (Control) */
-#define UDPHSDMA_CONTROL_ENDBEN              (1 << 3)  /* Bit 3:  End of Buffer Enable (Control) */
-#define UDPHSDMA_CONTROL_ENDTRIT             (1 << 4)  /* Bit 4:  End of Transfer Interrupt Enable */
-#define UDPHSDMA_CONTROL_ENDBUFFIT           (1 << 5)  /* Bit 5:  End of Buffer Interrupt Enable */
-#define UDPHSDMA_CONTROL_DESCLDIT            (1 << 6)  /* Bit 6:  Descriptor Loaded Interrupt Enab */
-#define UDPHSDMA_CONTROL_BURSTLCK            (1 << 7)  /* Bit 7:  Burst Lock Ena */
-#define UDPHSDMA_CONTROL_BUFFLENGTH_SHIFT    (16)      /* Bits 16-31: Buffer Byte Length (Write-only) */
-#define UDPHSDMA_CONTROL_BUFFLENGTH_MASK     (0xffff << UDPHSDMA_CONTROL_BUFFLENGTH_SHIFT)
+#define UDPHSDMA_CONTROL_CHANNENB             (1 << 0)  /* Bit 0:  Channel Enable Command */
+#define UDPHSDMA_CONTROL_LDNXTDSC             (1 << 1)  /* Bit 1:  Load Next Channel Xfr Desc Enable (Command) */
+#define UDPHSDMA_CONTROL_ENDTREN              (1 << 2)  /* Bit 2:  End of Transfer Enable (Control) */
+#define UDPHSDMA_CONTROL_ENDBEN               (1 << 3)  /* Bit 3:  End of Buffer Enable (Control) */
+#define UDPHSDMA_CONTROL_ENDTRIT              (1 << 4)  /* Bit 4:  End of Transfer Interrupt Enable */
+#define UDPHSDMA_CONTROL_ENDBUFFIT            (1 << 5)  /* Bit 5:  End of Buffer Interrupt Enable */
+#define UDPHSDMA_CONTROL_DESCLDIT             (1 << 6)  /* Bit 6:  Descriptor Loaded Interrupt Enab */
+#define UDPHSDMA_CONTROL_BURSTLCK             (1 << 7)  /* Bit 7:  Burst Lock Ena */
+#define UDPHSDMA_CONTROL_BUFFLENGTH_SHIFT     (16)      /* Bits 16-31: Buffer Byte Length (Write-only) */
+#define UDPHSDMA_CONTROL_BUFFLENGTH_MASK      (0xffff << UDPHSDMA_CONTROL_BUFFLENGTH_SHIFT)
 
 /* UDPHS DMA Channel Status Register */
 
-#define UDPHSDMA_STATUS_CHANNENB             (1 << 0)  /* Bit 0:  Channel Enable Status */
-#define UDPHSDMA_STATUS_CHANNACT             (1 << 1)  /* Bit 1:  Channel Active Status */
-#define UDPHSDMA_STATUS_ENDTRST              (1 << 4)  /* Bit 4:  End of Channel Transfer Status */
-#define UDPHSDMA_STATUS_ENDBFST              (1 << 5)  /* Bit 5:  End of Channel Buffer Status */
-#define UDPHSDMA_STATUS_DESCLDST             (1 << 6)  /* Bit 6:  Descriptor Loaded Status */
-#define UDPHSDMA_STATUS_BUFFCOUNT_SHIFT      (16)      /* Bits 16-31: Buffer Byte Count */
-#define UDPHSDMA_STATUS_BUFFCOUNT_MASK       (0xffff << UDPHSDMA_STATUS_BUFFCOUNT_SHIFT)
+#define UDPHSDMA_STATUS_CHANNENB              (1 << 0)  /* Bit 0:  Channel Enable Status */
+#define UDPHSDMA_STATUS_CHANNACT              (1 << 1)  /* Bit 1:  Channel Active Status */
+#define UDPHSDMA_STATUS_ENDTRST               (1 << 4)  /* Bit 4:  End of Channel Transfer Status */
+#define UDPHSDMA_STATUS_ENDBFST               (1 << 5)  /* Bit 5:  End of Channel Buffer Status */
+#define UDPHSDMA_STATUS_DESCLDST              (1 << 6)  /* Bit 6:  Descriptor Loaded Status */
+#define UDPHSDMA_STATUS_BUFFCOUNT_SHIFT       (16)      /* Bits 16-31: Buffer Byte Count */
+#define UDPHSDMA_STATUS_BUFFCOUNT_MASK        (0xffff << UDPHSDMA_STATUS_BUFFCOUNT_SHIFT)
 
 /****************************************************************************************
  * Public Types
@@ -367,5 +367,5 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM3U_SAM3U_UDPHS_H */
+#endif /* __ARCH_ARM_SRC_SAM3U_CHIP_SAM_UDPHS_H */
 

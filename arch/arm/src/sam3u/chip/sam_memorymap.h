@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/sam3u/chip.h
+ * arch/arm/src/sam3u/chip/sam_memorymap.h
  *
- *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,36 +33,17 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM3U_CHIP_H
-#define __ARCH_ARM_SRC_SAM3U_CHIP_H
+#ifndef __ARCH_ARM_SRC_SAM3U_CHIP_SAM_MEMORYMAP_H
+#define __ARCH_ARM_SRC_SAM3U_CHIP_SAM_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include "chip.h"
 
-/* Include the memory map and the chip definitions file.  Other chip hardware files
- * should then include this file for the proper setup.
- */
+#include "chip/sam3u_memorymap.h"
 
-#include <arch/sam3u/chip.h>
-#include "chip/sam_memorymap.h"
+#endif /* __ARCH_ARM_SRC_SAM3U_CHIP_SAM_MEMORYMAP_H */
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Public Types
- ************************************************************************************/
-
-/************************************************************************************
- * Public Data
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-#endif /* __ARCH_ARM_SRC_SAM3U_CHIP_H */

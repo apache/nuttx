@@ -1,7 +1,7 @@
 /****************************************************************************************
- * arch/arm/src/sam3u/sam3u_supc.h
+ * arch/arm/src/sam3u/chip/sam_supc.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM3U_SAM3U_SUPC_H
-#define __ARCH_ARM_SRC_SAM3U_SAM3U_SUPC_H
+#ifndef __ARCH_ARM_SRC_SAM3U_CHIP_SAM_SUPC_H
+#define __ARCH_ARM_SRC_SAM3U_CHIP_SAM_SUPC_H
 
 /****************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "sam3u_memorymap.h"
+#include "chip/sam_memorymap.h"
 
 /****************************************************************************************
  * Pre-processor Definitions
@@ -51,21 +51,21 @@
 
 /* SUPC register offsets ****************************************************************/
 
-#define SAM3U_SUPC_CR_OFFSET           0x00 /* Supply Controller Control Register */
-#define SAM3U_SUPC_SMMR_OFFSET         0x04 /* Supply Controller Supply Monitor Mode Register */
-#define SAM3U_SUPC_MR_OFFSET           0x08 /* Supply Controller Mode Register */
-#define SAM3U_SUPC_WUMR_OFFSET         0x0c /* Supply Controller Wake Up Mode Register */
-#define SAM3U_SUPC_WUIR_OFFSET         0x10 /* Supply Controller Wake Up Inputs Register */
-#define SAM3U_SUPC_SR_OFFSET           0x14 /* Supply Controller Status Register */
+#define SAM_SUPC_CR_OFFSET             0x00 /* Supply Controller Control Register */
+#define SAM_SUPC_SMMR_OFFSET           0x04 /* Supply Controller Supply Monitor Mode Register */
+#define SAM_SUPC_MR_OFFSET             0x08 /* Supply Controller Mode Register */
+#define SAM_SUPC_WUMR_OFFSET           0x0c /* Supply Controller Wake Up Mode Register */
+#define SAM_SUPC_WUIR_OFFSET           0x10 /* Supply Controller Wake Up Inputs Register */
+#define SAM_SUPC_SR_OFFSET             0x14 /* Supply Controller Status Register */
 
 /* SUPC register adresses ***************************************************************/
 
-#define SAM3U_SUPC_CR                  (SAM3U_SUPC_BASE+SAM3U_SUPC_CR_OFFSET)
-#define SAM3U_SUPC_SMMR                (SAM3U_SUPC_BASE+SAM3U_SUPC_SMMR_OFFSET)
-#define SAM3U_SUPC_MR                  (SAM3U_SUPC_BASE+SAM3U_SUPC_MR_OFFSET)
-#define SAM3U_SUPC_WUMR                (SAM3U_SUPC_BASE+SAM3U_SUPC_WUMR_OFFSET)
-#define SAM3U_SUPC_WUIR                (SAM3U_SUPC_BASE+SAM3U_SUPC_WUIR_OFFSET)
-#define SAM3U_SUPC_SR                  (SAM3U_SUPC_BASE+SAM3U_SUPC_SR_OFFSET)
+#define SAM_SUPC_CR                    (SAM_SUPC_BASE+SAM_SUPC_CR_OFFSET)
+#define SAM_SUPC_SMMR                  (SAM_SUPC_BASE+SAM_SUPC_SMMR_OFFSET)
+#define SAM_SUPC_MR                    (SAM_SUPC_BASE+SAM_SUPC_MR_OFFSET)
+#define SAM_SUPC_WUMR                  (SAM_SUPC_BASE+SAM_SUPC_WUMR_OFFSET)
+#define SAM_SUPC_WUIR                  (SAM_SUPC_BASE+SAM_SUPC_WUIR_OFFSET)
+#define SAM_SUPC_SR                    (SAM_SUPC_BASE+SAM_SUPC_SR_OFFSET)
 
 /* SUPC register bit definitions ********************************************************/
 
@@ -161,4 +161,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM3U_SAM3U_SUPC_H */
+#endif /* __ARCH_ARM_SRC_SAM3U_CHIP_SAM_SUPC_H */

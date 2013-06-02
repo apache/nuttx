@@ -62,7 +62,7 @@
  * bringup
  */
 
-#undef SAM3U_IRQ_DEBUG
+#undef SAM_IRQ_DEBUG
 
 /* Get a 32-bit version of the default priority */
 
@@ -94,7 +94,7 @@ volatile uint32_t *current_regs;
  *
  ****************************************************************************/
 
-#if defined(SAM3U_IRQ_DEBUG) && defined (CONFIG_DEBUG)
+#if defined(SAM_IRQ_DEBUG) && defined (CONFIG_DEBUG)
 static void sam3u_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
@@ -112,10 +112,10 @@ static void sam3u_dumpnvic(const char *msg, int irq)
   slldbg("  SYSH_PRIO:  %08x %08x %08x\n",
          getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
          getreg32(NVIC_SYSH12_15_PRIORITY));
-  slldbg("  IRQ PRIO:   %08x %08x %08x %08x\n", 
+  slldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
         getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
-  slldbg("              %08x %08x %08x %08x\n", 
+  slldbg("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
         getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
   irqrestore(flags);
@@ -219,16 +219,16 @@ static inline void sam3u_prioritize_syscall(int priority)
 
 static int sam3u_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
 {
-  DEBUGASSERT(irq >= SAM3U_IRQ_NMI && irq < NR_IRQS);
+  DEBUGASSERT(irq >= SAM_IRQ_NMI && irq < NR_IRQS);
 
   /* Check for external interrupt */
 
-  if (irq >= SAM3U_IRQ_EXTINT)
+  if (irq >= SAM_IRQ_EXTINT)
     {
-      if (irq < SAM3U_IRQ_NIRQS)
+      if (irq < SAM_IRQ_NIRQS)
         {
            *regaddr = NVIC_IRQ0_31_ENABLE;
-           *bit     = 1 << (irq - SAM3U_IRQ_EXTINT);
+           *bit     = 1 << (irq - SAM_IRQ_EXTINT);
         }
       else
         {
@@ -241,19 +241,19 @@ static int sam3u_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
   else
     {
        *regaddr = NVIC_SYSHCON;
-       if (irq == SAM3U_IRQ_MEMFAULT)
+       if (irq == SAM_IRQ_MEMFAULT)
         {
           *bit = NVIC_SYSHCON_MEMFAULTENA;
         }
-      else if (irq == SAM3U_IRQ_BUSFAULT)
+      else if (irq == SAM_IRQ_BUSFAULT)
         {
           *bit = NVIC_SYSHCON_BUSFAULTENA;
         }
-      else if (irq == SAM3U_IRQ_USAGEFAULT)
+      else if (irq == SAM_IRQ_USAGEFAULT)
         {
           *bit = NVIC_SYSHCON_USGFAULTENA;
         }
-      else if (irq == SAM3U_IRQ_SYSTICK)
+      else if (irq == SAM_IRQ_SYSTICK)
         {
           *regaddr = NVIC_SYSTICK_CTRL;
           *bit = NVIC_SYSTICK_CTRL_ENABLE;
@@ -318,13 +318,13 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(SAM3U_IRQ_SVCALL, up_svcall);
-  irq_attach(SAM3U_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(SAM_IRQ_SVCALL, up_svcall);
+  irq_attach(SAM_IRQ_HARDFAULT, up_hardfault);
 
   /* Set the priority of the SVCall interrupt */
 
 #ifdef CONFIG_ARCH_IRQPRIO
-/* up_prioritize_irq(SAM3U_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
+/* up_prioritize_irq(SAM_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 #ifdef CONFIG_ARMV7M_USEBASEPRI
    sam3u_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
@@ -335,32 +335,32 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_ARMV7M_MPU
-  irq_attach(SAM3U_IRQ_MEMFAULT, up_memfault);
-  up_enable_irq(SAM3U_IRQ_MEMFAULT);
+  irq_attach(SAM_IRQ_MEMFAULT, up_memfault);
+  up_enable_irq(SAM_IRQ_MEMFAULT);
 #endif
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG
-  irq_attach(SAM3U_IRQ_NMI, sam3u_nmi);
+  irq_attach(SAM_IRQ_NMI, sam3u_nmi);
 #ifndef CONFIG_ARMV7M_MPU
-  irq_attach(SAM3U_IRQ_MEMFAULT, up_memfault);
+  irq_attach(SAM_IRQ_MEMFAULT, up_memfault);
 #endif
-  irq_attach(SAM3U_IRQ_BUSFAULT, sam3u_busfault);
-  irq_attach(SAM3U_IRQ_USAGEFAULT, sam3u_usagefault);
-  irq_attach(SAM3U_IRQ_PENDSV, sam3u_pendsv);
-  irq_attach(SAM3U_IRQ_DBGMONITOR, sam3u_dbgmonitor);
-  irq_attach(SAM3U_IRQ_RESERVED, sam3u_reserved);
+  irq_attach(SAM_IRQ_BUSFAULT, sam3u_busfault);
+  irq_attach(SAM_IRQ_USAGEFAULT, sam3u_usagefault);
+  irq_attach(SAM_IRQ_PENDSV, sam3u_pendsv);
+  irq_attach(SAM_IRQ_DBGMONITOR, sam3u_dbgmonitor);
+  irq_attach(SAM_IRQ_RESERVED, sam3u_reserved);
 #endif
 
-  sam3u_dumpnvic("initial", SAM3U_IRQ_NIRQS);
+  sam3u_dumpnvic("initial", SAM_IRQ_NIRQS);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
   /* Initialize logic to support a second level of interrupt decoding for
    * GPIO pins.
    */
- 
+
 #ifdef CONFIG_GPIO_IRQ
   sam3u_gpioirqinitialize();
 #endif
@@ -469,15 +469,15 @@ int up_prioritize_irq(int irq, int priority)
   int shift;
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-  DEBUGASSERT(irq >= SAM3U_IRQ_MEMFAULT && irq < SAM3U_IRQ_NIRQS &&
+  DEBUGASSERT(irq >= SAM_IRQ_MEMFAULT && irq < SAM_IRQ_NIRQS &&
               priority >= NVIC_SYSH_DISABLE_PRIORITY &&
               priority <= NVIC_SYSH_PRIORITY_MIN);
 #else
-  DEBUGASSERT(irq >= SAM3U_IRQ_MEMFAULT && irq < SAM3U_IRQ_NIRQS &&
+  DEBUGASSERT(irq >= SAM_IRQ_MEMFAULT && irq < SAM_IRQ_NIRQS &&
               (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
 #endif
 
-  if (irq < SAM3U_IRQ_EXTINT)
+  if (irq < SAM_IRQ_EXTINT)
     {
       /* NVIC_SYSH_PRIORITY() maps {0..15} to one of three priority
        * registers (0-3 are invalid)
@@ -490,7 +490,7 @@ int up_prioritize_irq(int irq, int priority)
     {
       /* NVIC_IRQ_PRIORITY() maps {0..} to one of many priority registers */
 
-      irq    -= SAM3U_IRQ_EXTINT;
+      irq    -= SAM_IRQ_EXTINT;
       regaddr = NVIC_IRQ_PRIORITY(irq);
     }
 

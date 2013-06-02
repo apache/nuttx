@@ -1,7 +1,7 @@
 /****************************************************************************************
- * arch/arm/src/sam3u/sam3u_rstc.h
+ * arch/arm/src/sam3u/chip/sam_rtt.h
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM3U_SAM3U_RSTC_H
-#define __ARCH_ARM_SRC_SAM3U_SAM3U_RSTC_H
+#ifndef __ARCH_ARM_SRC_SAM3U_CHIP_SAM_RTT_H
+#define __ARCH_ARM_SRC_SAM3U_CHIP_SAM_RTT_H
 
 /****************************************************************************************
  * Included Files
@@ -43,49 +43,36 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "sam3u_memorymap.h"
+#include "chip/sam_memorymap.h"
 
 /****************************************************************************************
  * Pre-processor Definitions
  ****************************************************************************************/
 
-/* RSTC register offsets ****************************************************************/
+/* RTT register offsets *****************************************************************/
 
-#define SAM3U_RSTC_CR_OFFSET    0x00 /* Control Register */
-#define SAM3U_RSTC_SR_OFFSET    0x04 /* Status Register */
-#define SAM3U_RSTC_MR_OFFSET    0x08 /* Mode Register  */
+#define SAM_RTT_MR_OFFSET      0x00 /* Mode Register */
+#define SAM_RTT_AR_OFFSET      0x04 /* Alarm Register */
+#define SAM_RTT_VR_OFFSET      0x08 /* Value Register */
+#define SAM_RTT_SR_OFFSET      0x0c /* Status Register */
 
-/* RSTC register adresses ***************************************************************/
+/* RTT register adresses ***************************************************************/
 
-#define SAM3U_RSTC_CR           (SAM3U_RSTC_BASE+SAM3U_RSTC_CR_OFFSET)
-#define SAM3U_RSTC_SR           (SAM3U_RSTC_BASE+SAM3U_RSTC_SR_OFFSET)
-#define SAM3U_RSTC_MR           (SAM3U_RSTC_BASE+SAM3U_RSTC_MR_OFFSET)
+#define SAM_RTT_MR             (SAM_RTT_BASE+SAM_RTT_MR_OFFSET)
+#define SAM_RTT_AR             (SAM_RTT_BASE+SAM_RTT_AR_OFFSET)
+#define SAM_RTT_VR             (SAM_RTT_BASE+SAM_RTT_VR_OFFSET)
+#define SAM_RTT_SR             (SAM_RTT_BASE+SAM_RTT_SR_OFFSET)
 
-/* RSTC register bit definitions ********************************************************/
+/* RTT register bit definitions ********************************************************/
 
-#define RSTC_CR_PROCRST         (1 << 0)  /* Bit 0:  Processor Reset */
-#define RSTC_CR_PERRST          (1 << 2)  /* Bit 2:  Peripheral Reset */
-#define RSTC_CR_EXTRST          (1 << 3)  /* Bit 3:  External Reset */
-#define RSTC_CR_KEY_SHIFT       (24)      /* Bits 24-31:  Password */
-#define RSTC_CR_KEY_MASK        (0xff << RSTC_CR_KEY_SHIFT)
+#define RTT_MR_RTPRES_SHIFT    (0)       /* Bits 0-15:  Real-time Timer Prescaler Value */
+#define RTT_MR_RTPRES__MASK    (0xffff << RTT_MR_RTPRES_SHIFT)
+#define RTT_MR_ALMIEN          (1 << 16) /* Bit 16: Alarm Interrupt Enable */
+#define RTT_MR_RTTINCIEN       (1 << 17) /* Bit 17: Real-time Timer Increment Int Enable */
+#define RTT_MR_RTTRST          (1 << 18) /* Bit 18: Real-time Timer Restart */
 
-#define RSTC_SR_URSTS           (1 << 0)  /* Bit 0:  User Reset Status */
-#define RSTC_SR_RSTTYP_SHIFT    (8)       /* Bits 8-10:  Reset Type */
-#define RSTC_SR_RSTTYP_MASK     (7 << RSTC_SR_RSTTYP_SHIFT)
-#  define RSTC_SR_RSTTYP_PWRUP  (0 << RSTC_SR_RSTTYP_SHIFT) /* General Reset */
-#  define RSTC_SR_RSTTYP_BACKUP (1 << RSTC_SR_RSTTYP_SHIFT) /* Backup Reset */
-#  define RSTC_SR_RSTTYP_WDOG   (2 << RSTC_SR_RSTTYP_SHIFT) /* Watchdog Reset */
-#  define RSTC_SR_RSTTYP_SWRST  (3 << RSTC_SR_RSTTYP_SHIFT) /* Software Reset */
-#  define RSTC_SR_RSTTYP_NRST   (4 << RSTC_SR_RSTTYP_SHIFT) /* User Reset NRST pin */
-#define RSTC_SR_NRSTL           (1 << 16) /* Bit 16:  NRST Pin Level */
-#define RSTC_SR_SRCMP           (1 << 17) /* Bit 17:  Software Reset Command in Progress */
-
-#define RSTC_MR_URSTEN          (1 << 0)  /* Bit 0:  User Reset Enable */
-#define RSTC_MR_URSTIEN         (1 << 4)  /* Bit 4:  User Reset Interrupt Enable */
-#define RSTC_MR_ERSTL_SHIFT     (8)       /* Bits 8-11:  External Reset Length */
-#define RSTC_MR_ERSTL_MASK      (15 << RSTC_MR_ERSTL_SHIFT)
-#define RSTC_MR_KEY_SHIFT       (24)      /* Bits 24-31:  Password */
-#define RSTC_MR_KEY_MASK        (0xff << RSTC_CR_KEY_SHIFT)
+#define RTT_SR_ALMS            (1 << 0)  /* Bit 0:  Real-time Alarm Status */
+#define RTT_SR_RTTINC          (1 << 1)  /* Bit 1:  Real-time Timer Increment */
 
 /****************************************************************************************
  * Public Types
@@ -99,4 +86,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM3U_SAM3U_RSTC_H */
+#endif /* __ARCH_ARM_SRC_SAM3U_CHIP_SAM_RTT_H */

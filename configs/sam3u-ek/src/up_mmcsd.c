@@ -2,7 +2,7 @@
  * configs/sam3u-ek/src/up_mmcsd.c
  * arch/arm/src/board/up_mmcsd.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@
 #include "sam3u_internal.h"
 #include "sam3uek_internal.h"
 
-#ifdef CONFIG_SAM3U_HSMCI
+#ifdef CONFIG_SAM34_HSMCI
 
 /************************************************************************************
  * Definitions
@@ -136,4 +136,4 @@ bool sam3u_writeprotected(unsigned char slot)
   return false;
 }
 
-#endif /* CONFIG_SAM3U_HSMCI */
+#endif /* CONFIG_SAM34_HSMCI */

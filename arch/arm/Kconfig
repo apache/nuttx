@@ -110,12 +110,11 @@ config ARCH_CHIP_NUC1XX
 	---help---
 		NPX LPC43XX architectures (ARM Cortex-M4).
 
-config ARCH_CHIP_SAM3U
-	bool "Atmel AT91SAM3"
-	select ARCH_CORTEXM3
+config ARCH_CHIP_SAM34
+	bool "Atmel AT91SAM3/SAM4"
 	select ARCH_HAVE_MPU
 	---help---
-		Atmel AT91SAM3 architectures (ARM Cortex-M3)
+		Atmel AT91SAM3 (ARM Cortex-M3) and SAM4 (ARM Cortex-M4) architectures
 
 config ARCH_CHIP_STM32
 	bool "STMicro STM32"
@@ -178,7 +177,7 @@ config ARCH_CHIP
 	default "lpc31xx"	if ARCH_CHIP_LPC31XX
 	default "lpc43xx"	if ARCH_CHIP_LPC43XX
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
-	default "sam3u"		if ARCH_CHIP_SAM3U
+	default "sam3u"		if ARCH_CHIP_SAM34
 	default "stm32"		if ARCH_CHIP_STM32
 	default "str71x"	if ARCH_CHIP_STR71X
 
@@ -325,7 +324,7 @@ endif
 if ARCH_CHIP_NUC1XX
 source arch/arm/src/nuc1xx/Kconfig
 endif
-if ARCH_CHIP_SAM3U
+if ARCH_CHIP_SAM34
 source arch/arm/src/sam3u/Kconfig
 endif
 if ARCH_CHIP_STM32

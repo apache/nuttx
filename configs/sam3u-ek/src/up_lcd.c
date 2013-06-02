@@ -2,7 +2,7 @@
  * configs/sam3u-ek/src/up_lcd.c
  * arch/arm/src/board/up_lcd.c
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -125,8 +125,8 @@
 #include <arch/irq.h>
 
 #include "up_arch.h"
-#include "sam3u_pmc.h"
-#include "sam3u_smc.h"
+#include "chip/sam_pmc.h"
+#include "chip/sam_smc.h"
 #include "sam3u_internal.h"
 #include "sam3uek_internal.h"
 
@@ -385,7 +385,7 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 /* This is the standard, NuttX Plane information object */
 
-static const struct lcd_planeinfo_s g_planeinfo = 
+static const struct lcd_planeinfo_s g_planeinfo =
 {
   .putrun = sam3u_putrun,          /* Put a run into LCD memory */
   .getrun = sam3u_getrun,          /* Get a run from LCD memory */
@@ -395,12 +395,12 @@ static const struct lcd_planeinfo_s g_planeinfo =
 
 /* This is the standard, NuttX LCD driver object */
 
-static struct sam3u_dev_s g_lcddev_s = 
+static struct sam3u_dev_s g_lcddev_s =
 {
   .dev =
   {
     /* LCD Configuration */
- 
+
     .getvideoinfo = sam3u_getvideoinfo,
     .getplaneinfo = sam3u_getplaneinfo,
 
@@ -901,33 +901,33 @@ int up_lcdinitialize(void)
 
   /* Enable SMC peripheral clock */
 
-  putreg32((1 << SAM3U_PID_SMC), SAM3U_PMC_PCER);
-  regdbg("PMC PCSR: %08x SMC: %08x\n", getreg32(SAM3U_PMC_PCSR), (1 << SAM3U_PID_SMC));
+  putreg32((1 << SAM_PID_SMC), SAM_PMC_PCER);
+  regdbg("PMC PCSR: %08x SMC: %08x\n", getreg32(SAM_PMC_PCSR), (1 << SAM_PID_SMC));
 
   /* Configure SMC CS2 */
 
   regval = (4 << SMCCS_SETUP_NWESETUP_SHIFT) | (2 << SMCCS_SETUP_NCSWRSETUP_SHIFT) |
            (4 << SMCCS_SETUP_NRDSETUP_SHIFT) | (2 << SMCCS_SETUP_NCSRDSETUP_SHIFT);
-  putreg32(regval, SAM3U_SMCCS_SETUP(2));
+  putreg32(regval, SAM_SMCCS_SETUP(2));
 
   regval = (5 << SMCCS_PULSE_NWEPULSE_SHIFT) | (18 << SMCCS_PULSE_NCSWRPULSE_SHIFT) |
            (5 << SMCCS_PULSE_RDPULSE_SHIFT)  | (18 << SMCCS_PULSE_NCSRDPULSE_SHIFT);
-  putreg32(regval, SAM3U_SMCCS_PULSE(2));
+  putreg32(regval, SAM_SMCCS_PULSE(2));
 
   regval = (22 << SMCCS_CYCLE_NWECYCLE_SHIFT) | (22 << SMCCS_CYCLE_NRDCYCLE_SHIFT);
-  putreg32(regval, SAM3U_SMCCS_CYCLE(2));
+  putreg32(regval, SAM_SMCCS_CYCLE(2));
 
-  regval  = getreg32(SAM3U_SMCCS_MODE(2));
+  regval  = getreg32(SAM_SMCCS_MODE(2));
   regval &= ~(SMCCS_MODE_DBW_MASK | SMCCS_MODE_PMEN);
   regval |= (SMCCS_MODE_READMODE)  | (SMCCS_MODE_WRITEMODE) | (SMCCS_MODE_DBW_16BITS);
-  putreg32(regval, SAM3U_SMCCS_MODE(2));
+  putreg32(regval, SAM_SMCCS_MODE(2));
 
   regdbg("SMC SETUP[%08x]: %08x PULSE[%08x]: %08x\n",
-         SAM3U_SMCCS_SETUP(2), getreg32(SAM3U_SMCCS_SETUP(2)),
-         SAM3U_SMCCS_PULSE(2), getreg32(SAM3U_SMCCS_PULSE(2)));
+         SAM_SMCCS_SETUP(2), getreg32(SAM_SMCCS_SETUP(2)),
+         SAM_SMCCS_PULSE(2), getreg32(SAM_SMCCS_PULSE(2)));
   regdbg("    CYCLE[%08x]: %08x MODE[%08x]:  %08x\n",
-         SAM3U_SMCCS_CYCLE(2), getreg32(SAM3U_SMCCS_CYCLE(2)),
-         SAM3U_SMCCS_MODE(2),  getreg32(SAM3U_SMCCS_MODE(2)));
+         SAM_SMCCS_CYCLE(2), getreg32(SAM_SMCCS_CYCLE(2)),
+         SAM_SMCCS_MODE(2),  getreg32(SAM_SMCCS_MODE(2)));
 
   /* Check HX8347 Chip ID */
 
@@ -989,7 +989,7 @@ int up_lcdinitialize(void)
   sam3u_putreg(HX8347_R09H, 0x3f);      /* Row address end1 */
 
   /* Display Setting */
-  
+
   sam3u_putreg(HX8347_R01H, 0x06);      /* IDMON=0 INVON=1 NORON=1 PTLON=0 */
   sam3u_putreg(HX8347_R16H, 0xc8);      /* MY=1 MX=1 MV=0 BGR=1 */
   sam3u_putreg(HX8347_R23H, 0x95);      /* N_DC=1001 0101 */
@@ -1063,7 +1063,7 @@ void up_lcduninitialize(void)
 
   /* Disable SMC peripheral clock */
 
-  putreg32((1 << SAM3U_PID_SMC), SAM3U_PMC_PCDR);
+  putreg32((1 << SAM_PID_SMC), SAM_PMC_PCDR);
 }
 
 

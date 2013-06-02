@@ -2,7 +2,7 @@
  * config/sam3u-ek/src/up_nsh.c
  * arch/arm/src/board/up_nsh.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
 #include "sam3u_internal.h"
 #include "sam3uek_internal.h"
 
-#ifdef CONFIG_SAM3U_HSMCI
+#ifdef CONFIG_SAM34_HSMCI
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -83,7 +83,7 @@
  * is not enabled.
  */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAM3U_HSMCI)
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAM34_HSMCI)
 #  undef NSH_HAVE_MMCSD
 #endif
 
@@ -149,7 +149,7 @@ int nsh_archinitialize(void)
       return ret;
     }
   message("nsh_archinitialize: Successfully bound SDIO to the MMC/SD driver\n");
-  
+
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 
    sdio_mediachange(sdio, sam3u_cardinserted(0));

@@ -4850,3 +4850,8 @@
 	  From Laurent Latil (2013-6-1).
 	* configs/stm32_tiny: Fix nRF24L01+ driver integration for the STM32
 	  Tiny.  From Laurent Latil (2013-6-01).
+	* configs/sam3u-ek:  All remaining configurations changed to use
+	  the kconfig-frontends tools (2013-6-2).
+	* arch/arm/src/sam3u/chip:  All SAM3U register defintion files moved
+	  to this subdirectory.  Naming of registers changed from SAM3U_ to
+	  just SAM_.  This is in preparation for a SAM4L port (2013-6-2).

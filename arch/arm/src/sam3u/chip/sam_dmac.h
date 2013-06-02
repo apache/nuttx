@@ -1,7 +1,7 @@
 /****************************************************************************************
- * arch/arm/src/sam3u/sam3u_dmac.h
+ * arch/arm/src/sam3u/chip/sam_dmac.h
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM3U_SAM3U_DMAC_H
-#define __ARCH_ARM_SRC_SAM3U_SAM3U_DMAC_H
+#ifndef __ARCH_ARM_SRC_SAM3U_CHIP_SAM_DMAC_H
+#define __ARCH_ARM_SRC_SAM3U_CHIP_SAM_DMAC_H
 
 /****************************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "sam3u_memorymap.h"
+#include "chip/sam_memorymap.h"
 
 /****************************************************************************************
  * Pre-processor Definitions
@@ -53,97 +53,96 @@
 
 /* Global Registers */
 
-#define SAM3U_DMAC_GCFG_OFFSET          0x00 /* DMAC Global Configuration Register */
-#define SAM3U_DMAC_EN_OFFSET            0x04 /* DMAC Enable Register */
-#define SAM3U_DMAC_SREQ_OFFSET          0x08 /* DMAC Software Single Request Register */
-#define SAM3U_DMAC_CREQ_OFFSET          0x0c /* DMAC Software Chunk Transfer Request Register */
-#define SAM3U_DMAC_LAST_OFFSET          0x10 /* DMAC Software Last Transfer Flag Register */
-                                             /* 0x014-0x18: Reserved */
-#define SAM3U_DMAC_EBCIER_OFFSET        0x18 /* DMAC Error Enable */
-#define SAM3U_DMAC_EBCIDR_OFFSET        0x1C /* DMAC Error Disable */
-#define SAM3U_DMAC_EBCIMR_OFFSET        0x20 /* DMAC Error Mask */
-#define SAM3U_DMAC_EBCISR_OFFSET        0x24 /* DMAC Error Status */
-#define SAM3U_DMAC_CHER_OFFSET          0x28 /* DMAC Channel Handler Enable Register */
-#define SAM3U_DMAC_CHDR_OFFSET          0x2c /* DMAC Channel Handler Disable Register */
-#define SAM3U_DMAC_CHSR_OFFSET          0x30 /* DMAC Channel Handler Status Register */
-                                             /* 0x034-0x38: Reserved */
+#define SAM_DMAC_GCFG_OFFSET           0x00 /* DMAC Global Configuration Register */
+#define SAM_DMAC_EN_OFFSET             0x04 /* DMAC Enable Register */
+#define SAM_DMAC_SREQ_OFFSET           0x08 /* DMAC Software Single Request Register */
+#define SAM_DMAC_CREQ_OFFSET           0x0c /* DMAC Software Chunk Transfer Request Register */
+#define SAM_DMAC_LAST_OFFSET           0x10 /* DMAC Software Last Transfer Flag Register */
+                                            /* 0x014-0x18: Reserved */
+#define SAM_DMAC_EBCIER_OFFSET         0x18 /* DMAC Error Enable */
+#define SAM_DMAC_EBCIDR_OFFSET         0x1C /* DMAC Error Disable */
+#define SAM_DMAC_EBCIMR_OFFSET         0x20 /* DMAC Error Mask */
+#define SAM_DMAC_EBCISR_OFFSET         0x24 /* DMAC Error Status */
+#define SAM_DMAC_CHER_OFFSET           0x28 /* DMAC Channel Handler Enable Register */
+#define SAM_DMAC_CHDR_OFFSET           0x2c /* DMAC Channel Handler Disable Register */
+#define SAM_DMAC_CHSR_OFFSET           0x30 /* DMAC Channel Handler Status Register */
+                                            /* 0x034-0x38: Reserved */
 /* DMA channel registers */
 
-#define SAM3U_DMACHAN_OFFSET(n)         (0x3c+((n)*0x28))
-#define SAM3U_DMACHAN0_OFFSET           0x3c /* 0x3c-0x60: Channel 0 */
-#define SAM3U_DMACHAN1_OFFSET           0x64 /* 0x64-0x88: Channel 1 */
-#define SAM3U_DMACHAN2_OFFSET           0x8c /* 0x8c-0xb0: Channel 2 */
-#define SAM3U_DMACHAN3_OFFSET           0xb4 /* 0xb4-0xd8: Channel 3 */
+#define SAM_DMACHAN_OFFSET(n)          (0x3c+((n)*0x28))
+#define SAM_DMACHAN0_OFFSET            0x3c /* 0x3c-0x60: Channel 0 */
+#define SAM_DMACHAN1_OFFSET            0x64 /* 0x64-0x88: Channel 1 */
+#define SAM_DMACHAN2_OFFSET            0x8c /* 0x8c-0xb0: Channel 2 */
+#define SAM_DMACHAN3_OFFSET            0xb4 /* 0xb4-0xd8: Channel 3 */
 
-#define SAM3U_DMACHAN_SADDR_OFFSET      0x00 /* DMAC Channel Source Address Register */
-#define SAM3U_DMACHAN_DADDR_OFFSET      0x04 /* DMAC Channel Destination Address Register */
-#define SAM3U_DMACHAN_DSCR_OFFSET       0x08 /* DMAC Channel Descriptor Address Register */
-#define SAM3U_DMACHAN_CTRLA_OFFSET      0x0c /* DMAC Channel Control A Register */
-#define SAM3U_DMACHAN_CTRLB_OFFSET      0x10 /* DMAC Channel Control B Register */
-#define SAM3U_DMACHAN_CFG_OFFSET        0x14 /* DMAC Channel Configuration Register */
-                                             /* 0x18-0x24: Reserved */
-
-                                             /* 0x017c-0x1fc: Reserved */
+#define SAM_DMACHAN_SADDR_OFFSET       0x00 /* DMAC Channel Source Address Register */
+#define SAM_DMACHAN_DADDR_OFFSET       0x04 /* DMAC Channel Destination Address Register */
+#define SAM_DMACHAN_DSCR_OFFSET        0x08 /* DMAC Channel Descriptor Address Register */
+#define SAM_DMACHAN_CTRLA_OFFSET       0x0c /* DMAC Channel Control A Register */
+#define SAM_DMACHAN_CTRLB_OFFSET       0x10 /* DMAC Channel Control B Register */
+#define SAM_DMACHAN_CFG_OFFSET         0x14 /* DMAC Channel Configuration Register */
+                                            /* 0x18-0x24: Reserved */
+                                            /* 0x017c-0x1fc: Reserved */
 
 /* DMAC register adresses ***************************************************************/
 
 /* Global Registers */
 
-#define SAM3U_DMAC_GCFG                (SAM3U_DMAC_BASE+SAM3U_DMAC_GCFG_OFFSET)
-#define SAM3U_DMAC_EN                  (SAM3U_DMAC_BASE+SAM3U_DMAC_EN_OFFSET)
-#define SAM3U_DMAC_SREQ                (SAM3U_DMAC_BASE+SAM3U_DMAC_SREQ_OFFSET)
-#define SAM3U_DMAC_CREQ                (SAM3U_DMAC_BASE+SAM3U_DMAC_CREQ_OFFSET)
-#define SAM3U_DMAC_LAST                (SAM3U_DMAC_BASE+SAM3U_DMAC_LAST_OFFSET)
-#define SAM3U_DMAC_EBCIER              (SAM3U_DMAC_BASE+SAM3U_DMAC_EBCIER_OFFSET)
-#define SAM3U_DMAC_EBCIDR              (SAM3U_DMAC_BASE+SAM3U_DMAC_EBCIDR_OFFSET)
-#define SAM3U_DMAC_EBCIMR              (SAM3U_DMAC_BASE+SAM3U_DMAC_EBCIMR_OFFSET)
-#define SAM3U_DMAC_EBCISR              (SAM3U_DMAC_BASE+SAM3U_DMAC_EBCISR_OFFSET)
-#define SAM3U_DMAC_CHER                (SAM3U_DMAC_BASE+SAM3U_DMAC_CHER_OFFSET)
-#define SAM3U_DMAC_CHDR                (SAM3U_DMAC_BASE+SAM3U_DMAC_CHDR_OFFSET)
-#define SAM3U_DMAC_CHSR                (SAM3U_DMAC_BASE+SAM3U_DMAC_CHSR_OFFSET)
+#define SAM_DMAC_GCFG                  (SAM_DMAC_BASE+SAM_DMAC_GCFG_OFFSET)
+#define SAM_DMAC_EN                    (SAM_DMAC_BASE+SAM_DMAC_EN_OFFSET)
+#define SAM_DMAC_SREQ                  (SAM_DMAC_BASE+SAM_DMAC_SREQ_OFFSET)
+#define SAM_DMAC_CREQ                  (SAM_DMAC_BASE+SAM_DMAC_CREQ_OFFSET)
+#define SAM_DMAC_LAST                  (SAM_DMAC_BASE+SAM_DMAC_LAST_OFFSET)
+#define SAM_DMAC_EBCIER                (SAM_DMAC_BASE+SAM_DMAC_EBCIER_OFFSET)
+#define SAM_DMAC_EBCIDR                (SAM_DMAC_BASE+SAM_DMAC_EBCIDR_OFFSET)
+#define SAM_DMAC_EBCIMR                (SAM_DMAC_BASE+SAM_DMAC_EBCIMR_OFFSET)
+#define SAM_DMAC_EBCISR                (SAM_DMAC_BASE+SAM_DMAC_EBCISR_OFFSET)
+#define SAM_DMAC_CHER                  (SAM_DMAC_BASE+SAM_DMAC_CHER_OFFSET)
+#define SAM_DMAC_CHDR                  (SAM_DMAC_BASE+SAM_DMAC_CHDR_OFFSET)
+#define SAM_DMAC_CHSR                  (SAM_DMAC_BASE+SAM_DMAC_CHSR_OFFSET)
 
 /* DMA channel registers */
 
-#define SAM3U_DMACHAN_BASE(n)          (SAM3U_DMAC_BASE+SAM3U_DMACHAN_OFFSET(n))
-#define SAM3U_DMACHAN0_BASE            (SAM3U_DMAC_BASE+SAM3U_DMACHAN0_OFFSET)
-#define SAM3U_DMACHAN1_BASE            (SAM3U_DMAC_BASE+SAM3U_DMACHAN1_OFFSET)
-#define SAM3U_DMACHAN2_BASE            (SAM3U_DMAC_BASE+SAM3U_DMACHAN2_OFFSET)
-#define SAM3U_DMACHAN3_BASE            (SAM3U_DMAC_BASE+SAM3U_DMACHAN3_OFFSET)
+#define SAM_DMACHAN_BASE(n)            (SAM_DMAC_BASE+SAM_DMACHAN_OFFSET(n))
+#define SAM_DMACHAN0_BASE              (SAM_DMAC_BASE+SAM_DMACHAN0_OFFSET)
+#define SAM_DMACHAN1_BASE              (SAM_DMAC_BASE+SAM_DMACHAN1_OFFSET)
+#define SAM_DMACHAN2_BASE              (SAM_DMAC_BASE+SAM_DMACHAN2_OFFSET)
+#define SAM_DMACHAN3_BASE              (SAM_DMAC_BASE+SAM_DMACHAN3_OFFSET)
 
-#define SAM3U_DMACHAN_SADDR(n)         (SAM3U_DMACHAN_BASE(n)+SAM3U_DMACHAN_SADDR_OFFSET)
-#define SAM3U_DMACHAN_DADDR(n)         (SAM3U_DMACHAN_BASE(n)+SAM3U_DMACHAN_DADDR_OFFSET)
-#define SAM3U_DMACHAN_DSCR(n)          (SAM3U_DMACHAN_BASE(n)+SAM3U_DMACHAN_DSCR_OFFSET)
-#define SAM3U_DMACHAN_CTRLA(n)         (SAM3U_DMACHAN_BASE(n)+SAM3U_DMACHAN_CTRLA_OFFSET)
-#define SAM3U_DMACHAN_CTRLB(n)         (SAM3U_DMACHAN_BASE(n)+SAM3U_DMACHAN_CTRLB_OFFSET)
-#define SAM3U_DMACHAN_CFG(n)           (SAM3U_DMACHAN_BASE(n)+SAM3U_DMACHAN_CFG_OFFSET)
+#define SAM_DMACHAN_SADDR(n)           (SAM_DMACHAN_BASE(n)+SAM_DMACHAN_SADDR_OFFSET)
+#define SAM_DMACHAN_DADDR(n)           (SAM_DMACHAN_BASE(n)+SAM_DMACHAN_DADDR_OFFSET)
+#define SAM_DMACHAN_DSCR(n)            (SAM_DMACHAN_BASE(n)+SAM_DMACHAN_DSCR_OFFSET)
+#define SAM_DMACHAN_CTRLA(n)           (SAM_DMACHAN_BASE(n)+SAM_DMACHAN_CTRLA_OFFSET)
+#define SAM_DMACHAN_CTRLB(n)           (SAM_DMACHAN_BASE(n)+SAM_DMACHAN_CTRLB_OFFSET)
+#define SAM_DMACHAN_CFG(n)             (SAM_DMACHAN_BASE(n)+SAM_DMACHAN_CFG_OFFSET)
 
-#define SAM3U_DMACHAN0_SADDR           (SAM3U_DMACHAN0_BASE+SAM3U_DMACHAN_SADDR_OFFSET)
-#define SAM3U_DMACHAN0_DADDR           (SAM3U_DMACHAN0_BASE+SAM3U_DMACHAN_DADDR_OFFSET)
-#define SAM3U_DMACHAN0_DSCR            (SAM3U_DMACHAN0_BASE+SAM3U_DMACHAN_DSCR_OFFSET)
-#define SAM3U_DMACHAN0_CTRLA           (SAM3U_DMACHAN0_BASE+SAM3U_DMACHAN_CTRLA_OFFSET)
-#define SAM3U_DMACHAN0_CTRLB           (SAM3U_DMACHAN0_BASE+SAM3U_DMACHAN_CTRLB_OFFSET)
-#define SAM3U_DMACHAN0_CFG             (SAM3U_DMACHAN0_BASE+SAM3U_DMACHAN_CFG_OFFSET)
+#define SAM_DMACHAN0_SADDR             (SAM_DMACHAN0_BASE+SAM_DMACHAN_SADDR_OFFSET)
+#define SAM_DMACHAN0_DADDR             (SAM_DMACHAN0_BASE+SAM_DMACHAN_DADDR_OFFSET)
+#define SAM_DMACHAN0_DSCR              (SAM_DMACHAN0_BASE+SAM_DMACHAN_DSCR_OFFSET)
+#define SAM_DMACHAN0_CTRLA             (SAM_DMACHAN0_BASE+SAM_DMACHAN_CTRLA_OFFSET)
+#define SAM_DMACHAN0_CTRLB             (SAM_DMACHAN0_BASE+SAM_DMACHAN_CTRLB_OFFSET)
+#define SAM_DMACHAN0_CFG               (SAM_DMACHAN0_BASE+SAM_DMACHAN_CFG_OFFSET)
 
-#define SAM3U_DMACHAN1_SADDR           (SAM3U_DMACHAN1_BASE+SAM3U_DMACHAN_SADDR_OFFSET)
-#define SAM3U_DMACHAN1_DADDR           (SAM3U_DMACHAN1_BASE+SAM3U_DMACHAN_DADDR_OFFSET)
-#define SAM3U_DMACHAN1_DSCR            (SAM3U_DMACHAN1_BASE+SAM3U_DMACHAN_DSCR_OFFSET)
-#define SAM3U_DMACHAN1_CTRLA           (SAM3U_DMACHAN1_BASE+SAM3U_DMACHAN_CTRLA_OFFSET)
-#define SAM3U_DMACHAN1_CTRLB           (SAM3U_DMACHAN1_BASE+SAM3U_DMACHAN_CTRLB_OFFSET)
-#define SAM3U_DMACHAN1_CFG             (SAM3U_DMACHAN1_BASE+SAM3U_DMACHAN_CFG_OFFSET)
+#define SAM_DMACHAN1_SADDR             (SAM_DMACHAN1_BASE+SAM_DMACHAN_SADDR_OFFSET)
+#define SAM_DMACHAN1_DADDR             (SAM_DMACHAN1_BASE+SAM_DMACHAN_DADDR_OFFSET)
+#define SAM_DMACHAN1_DSCR              (SAM_DMACHAN1_BASE+SAM_DMACHAN_DSCR_OFFSET)
+#define SAM_DMACHAN1_CTRLA             (SAM_DMACHAN1_BASE+SAM_DMACHAN_CTRLA_OFFSET)
+#define SAM_DMACHAN1_CTRLB             (SAM_DMACHAN1_BASE+SAM_DMACHAN_CTRLB_OFFSET)
+#define SAM_DMACHAN1_CFG               (SAM_DMACHAN1_BASE+SAM_DMACHAN_CFG_OFFSET)
 
-#define SAM3U_DMACHAN2_SADDR           (SAM3U_DMACHAN2_BASE+SAM3U_DMACHAN_SADDR_OFFSET)
-#define SAM3U_DMACHAN2_DADDR           (SAM3U_DMACHAN2_BASE+SAM3U_DMACHAN_DADDR_OFFSET)
-#define SAM3U_DMACHAN2_DSCR            (SAM3U_DMACHAN2_BASE+SAM3U_DMACHAN_DSCR_OFFSET)
-#define SAM3U_DMACHAN2_CTRLA           (SAM3U_DMACHAN2_BASE+SAM3U_DMACHAN_CTRLA_OFFSET)
-#define SAM3U_DMACHAN2_CTRLB           (SAM3U_DMACHAN2_BASE+SAM3U_DMACHAN_CTRLB_OFFSET)
-#define SAM3U_DMACHAN2_CFG             (SAM3U_DMACHAN2_BASE+SAM3U_DMACHAN_CFG_OFFSET)
+#define SAM_DMACHAN2_SADDR             (SAM_DMACHAN2_BASE+SAM_DMACHAN_SADDR_OFFSET)
+#define SAM_DMACHAN2_DADDR             (SAM_DMACHAN2_BASE+SAM_DMACHAN_DADDR_OFFSET)
+#define SAM_DMACHAN2_DSCR              (SAM_DMACHAN2_BASE+SAM_DMACHAN_DSCR_OFFSET)
+#define SAM_DMACHAN2_CTRLA             (SAM_DMACHAN2_BASE+SAM_DMACHAN_CTRLA_OFFSET)
+#define SAM_DMACHAN2_CTRLB             (SAM_DMACHAN2_BASE+SAM_DMACHAN_CTRLB_OFFSET)
+#define SAM_DMACHAN2_CFG               (SAM_DMACHAN2_BASE+SAM_DMACHAN_CFG_OFFSET)
 
-#define SAM3U_DMACHAN3_SADDR           (SAM3U_DMACHAN3_BASE+SAM3U_DMACHAN_SADDR_OFFSET)
-#define SAM3U_DMACHAN3_DADDR           (SAM3U_DMACHAN3_BASE+SAM3U_DMACHAN_DADDR_OFFSET)
-#define SAM3U_DMACHAN3_DSCR            (SAM3U_DMACHAN3_BASE+SAM3U_DMACHAN_DSCR_OFFSET)
-#define SAM3U_DMACHAN3_CTRLA           (SAM3U_DMACHAN3_BASE+SAM3U_DMACHAN_CTRLA_OFFSET)
-#define SAM3U_DMACHAN3_CTRLB           (SAM3U_DMACHAN3_BASE+SAM3U_DMACHAN_CTRLB_OFFSET)
-#define SAM3U_DMACHAN3_CFG             (SAM3U_DMACHAN3_BASE+SAM3U_DMACHAN_CFG_OFFSET)
+#define SAM_DMACHAN3_SADDR             (SAM_DMACHAN3_BASE+SAM_DMACHAN_SADDR_OFFSET)
+#define SAM_DMACHAN3_DADDR             (SAM_DMACHAN3_BASE+SAM_DMACHAN_DADDR_OFFSET)
+#define SAM_DMACHAN3_DSCR              (SAM_DMACHAN3_BASE+SAM_DMACHAN_DSCR_OFFSET)
+#define SAM_DMACHAN3_CTRLA             (SAM_DMACHAN3_BASE+SAM_DMACHAN_CTRLA_OFFSET)
+#define SAM_DMACHAN3_CTRLB             (SAM_DMACHAN3_BASE+SAM_DMACHAN_CTRLB_OFFSET)
+#define SAM_DMACHAN3_CFG               (SAM_DMACHAN3_BASE+SAM_DMACHAN_CFG_OFFSET)
 
 /* DMAC register bit definitions ********************************************************/
 
@@ -198,16 +197,16 @@
 
 #define DMAC_CREQ_SCREQ_SHIFT          (0)      /* Bits 0, 2, 4, 6:   Request a source chunk transfer */
 #  define DMAC_CREQ_SCREQ(n)           (1 << (DMAC_CREQ_SCREQ_SHIFT+DMAC_CREQ_SHIFT(n)))
-#  define DMAC_CREQ_SCREQ0             (1 << (DMAC_CREQ_SCREQ_SHIFT+DMAC_CREQ0_SHIFT)
-#  define DMAC_CREQ_SCREQ1             (1 << (DMAC_CREQ_SCREQ_SHIFT+DMAC_CREQ1_SHIFT)
-#  define DMAC_CREQ_SCREQ2             (1 << (DMAC_CREQ_SCREQ_SHIFT+DMAC_CREQ2_SHIFT)
-#  define DMAC_CREQ_SCREQ3             (1 << (DMAC_CREQ_SCREQ_SHIFT+DMAC_CREQ3_SHIFT)
+#  define DMAC_CREQ_SCREQ0             (1 << (DMAC_CREQ_SCREQ_SHIFT+DMAC_CREQ0_SHIFT))
+#  define DMAC_CREQ_SCREQ1             (1 << (DMAC_CREQ_SCREQ_SHIFT+DMAC_CREQ1_SHIFT))
+#  define DMAC_CREQ_SCREQ2             (1 << (DMAC_CREQ_SCREQ_SHIFT+DMAC_CREQ2_SHIFT))
+#  define DMAC_CREQ_SCREQ3             (1 << (DMAC_CREQ_SCREQ_SHIFT+DMAC_CREQ3_SHIFT))
 #define DMAC_CREQ_DCREQ_SHIFT          (1)      /* Bits 1, 3, 5, 7:   Request a destination chunk transfer */
-#  define DMAC_CREQ_DCREQ(n)           (1 << (DMAC_CREQ_DCREQ_SHIFT+DMAC_CREQ_SHIFT(n))))
-#  define DMAC_CREQ_DCREQ0             (1 << (DMAC_CREQ_DCREQ_SHIFT+DMAC_CREQ0_SHIFT)
-#  define DMAC_CREQ_DCREQ1             (1 << (DMAC_CREQ_DCREQ_SHIFT+DMAC_CREQ1_SHIFT)
-#  define DMAC_CREQ_DCREQ2             (1 << (DMAC_CREQ_DCREQ_SHIFT+DMAC_CREQ2_SHIFT)
-#  define DMAC_CREQ_DCREQ3             (1 << (DMAC_CREQ_DCREQ_SHIFT+DMAC_CREQ3_SHIFT)
+#  define DMAC_CREQ_DCREQ(n)           (1 << (DMAC_CREQ_DCREQ_SHIFT+DMAC_CREQ_SHIFT(n)))
+#  define DMAC_CREQ_DCREQ0             (1 << (DMAC_CREQ_DCREQ_SHIFT+DMAC_CREQ0_SHIFT))
+#  define DMAC_CREQ_DCREQ1             (1 << (DMAC_CREQ_DCREQ_SHIFT+DMAC_CREQ1_SHIFT))
+#  define DMAC_CREQ_DCREQ2             (1 << (DMAC_CREQ_DCREQ_SHIFT+DMAC_CREQ2_SHIFT))
+#  define DMAC_CREQ_DCREQ3             (1 << (DMAC_CREQ_DCREQ_SHIFT+DMAC_CREQ3_SHIFT))
 
 /* DMAC Software Last Transfer Flag Register */
 
@@ -368,46 +367,46 @@
 
 /* DMAC Channel n [n = 0..3] Control B Register */
 
-#define DMACHAN_CTRLB_SRCDSCR         (1 << 16) /* Bit 16: Source buffer descriptor fetch operation disabled */
-#define DMACHAN_CTRLB_DSTDSCR         (1 << 20) /* Bit 20: Dest buffer descriptor fetch operation disabled */
-#define DMACHAN_CTRLB_FC_SHIFT        (21)      /* Bits 21-22:  Flow controller  */
-#define DMACHAN_CTRLB_FC_MASK         (3 << DMACHAN_CTRLB_FC_SHIFT)
-#  define DMACHAN_CTRLB_FC_M2M        (0 << DMACHAN_CTRLB_FC_SHIFT) /* Memory-to-Memory  */
-#  define DMACHAN_CTRLB_FC_M2P        (1 << DMACHAN_CTRLB_FC_SHIFT) /* Memory-to-Peripheral */
-#  define DMACHAN_CTRLB_FC_P2M        (2 << DMACHAN_CTRLB_FC_SHIFT) /* Peripheral-to-Memory  */
-#  define DMACHAN_CTRLB_FC_P2P        (3 << DMACHAN_CTRLB_FC_SHIFT) /* Peripheral-to-Peripheral */
-#define DMACHAN_CTRLB_SRCINCR_SHIFT   (24)      /* Bits 24-25 */
-#define DMACHAN_CTRLB_SRCINCR_MASK    (3 << DMACHAN_CTRLB_SRCINCR_SHIFT)
-#  define DMACHAN_CTRLB_SRCINCR_INCR  (0 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* Incrementing address */
-#  define DMACHAN_CTRLB_SRCINCR_FIXED (2 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* Fixed address */
-#define DMACHAN_CTRLB_DSTINCR_SHIFT   (28)      /* Bits 28-29 */  
-#define DMACHAN_CTRLB_DSTINCR_MASK    (3 << DMACHAN_CTRLB_DSTINCR_SHIFT)
-#  define DMACHAN_CTRLB_DSTINCR_INCR  (0 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* Incrementing address */
-#  define DMACHAN_CTRLB_DSTINCR_FIXED (2 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* Fixed address */
-#define DMACHAN_CTRLB_IEN             (1 << 30)  /* Bit 30:  Clear sets BTC[n] flag in EBCISR */
+#define DMACHAN_CTRLB_SRCDSCR          (1 << 16) /* Bit 16: Source buffer descriptor fetch operation disabled */
+#define DMACHAN_CTRLB_DSTDSCR          (1 << 20) /* Bit 20: Dest buffer descriptor fetch operation disabled */
+#define DMACHAN_CTRLB_FC_SHIFT         (21)      /* Bits 21-22:  Flow controller  */
+#define DMACHAN_CTRLB_FC_MASK          (3 << DMACHAN_CTRLB_FC_SHIFT)
+#  define DMACHAN_CTRLB_FC_M2M         (0 << DMACHAN_CTRLB_FC_SHIFT) /* Memory-to-Memory  */
+#  define DMACHAN_CTRLB_FC_M2P         (1 << DMACHAN_CTRLB_FC_SHIFT) /* Memory-to-Peripheral */
+#  define DMACHAN_CTRLB_FC_P2M         (2 << DMACHAN_CTRLB_FC_SHIFT) /* Peripheral-to-Memory  */
+#  define DMACHAN_CTRLB_FC_P2P         (3 << DMACHAN_CTRLB_FC_SHIFT) /* Peripheral-to-Peripheral */
+#define DMACHAN_CTRLB_SRCINCR_SHIFT    (24)      /* Bits 24-25 */
+#define DMACHAN_CTRLB_SRCINCR_MASK     (3 << DMACHAN_CTRLB_SRCINCR_SHIFT)
+#  define DMACHAN_CTRLB_SRCINCR_INCR   (0 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* Incrementing address */
+#  define DMACHAN_CTRLB_SRCINCR_FIXED  (2 << DMACHAN_CTRLB_SRCINCR_SHIFT) /* Fixed address */
+#define DMACHAN_CTRLB_DSTINCR_SHIFT    (28)      /* Bits 28-29 */  
+#define DMACHAN_CTRLB_DSTINCR_MASK     (3 << DMACHAN_CTRLB_DSTINCR_SHIFT)
+#  define DMACHAN_CTRLB_DSTINCR_INCR   (0 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* Incrementing address */
+#  define DMACHAN_CTRLB_DSTINCR_FIXED  (2 << DMACHAN_CTRLB_DSTINCR_SHIFT) /* Fixed address */
+#define DMACHAN_CTRLB_IEN              (1 << 30)  /* Bit 30:  Clear sets BTC[n] flag in EBCISR */
 
 /* DMAC Channel n [n = 0..3] Configuration Register */
 
-#define DMACHAN_CFG_SRCPER_SHIFT      (0)       /* Bits 0-3:  Channel source associated with peripheral ID */
-#define DMACHAN_CFG_SRCPER_MASK       (15 << DMACHAN_CFG_SRCPER_SHIFT)
-#define DMACHAN_CFG_DSTPER_SHIFT      (4)       /* Bits 4-7:  Channel dest associated with peripheral ID */
-#define DMACHAN_CFG_DSTPER_MASK       (15 << DMACHAN_CFG_DSTPER_SHIFT)
-#define DMACHAN_CFG_SRCH2SEL          (1 << 9)  /* Bit 9:  HW handshake triggers transfer */
-#define DMACHAN_CFG_DSTH2SEL          (1 << 13) /* Bit 13: HW handshake trigger transfer */
-#define DMACHAN_CFG_SOD               (1 << 16) /* Bit 16: Stop on done */
-#define DMACHAN_CFG_LOCKIF            (1 << 20) /* Bit 20: Enable lock interface capability */
-#define DMACHAN_CFG_LOCKB             (1 << 21) /* Bit 21: Enable AHB Bus Locking capability */
-#define DMACHAN_CFG_LOCKIFL           (1 << 22) /* Bit 22: Lock Master Interface Arbiter */
-#define DMACHAN_CFG_AHBPRO_SHIFT      (24)      /* Bits 24-26: Bus access privilege */
-#define DMACHAN_CFG_AHBPRO_MASK       (7 << DMACHAN_CFG_AHBPRO_SHIFT)
-#  define DMACHAN_CFG_AHBPRO_PRIV     (1 << DMACHAN_CFG_AHBPRO_SHIFT)
-#  define DMACHAN_CFG_AHBPRO_BUFF     (2 << DMACHAN_CFG_AHBPRO_SHIFT)
-#  define DMACHAN_CFG_AHBPRO_CACHE    (4 << DMACHAN_CFG_AHBPRO_SHIFT)
-#define DMACHAN_CFG_FIFOCFG_SHIFT     (28)      /* Bits 28-29 */
-#define DMACHAN_CFG_FIFOCFG_MASK      (3 << DMACHAN_CFG_FIFOCFG_SHIFT)
-#  define DMACHAN_CFG_FIFOCFG_LARGEST (0 << DMACHAN_CFG_FIFOCFG_SHIFT) /* Largest length AHB burst */
-#  define DMACHAN_CFG_FIFOCFG_HALF    (1 << DMACHAN_CFG_FIFOCFG_SHIFT) /* Half FIFO size */
-#  define DMACHAN_CFG_FIFOCFG_SINGLE  (2 << DMACHAN_CFG_FIFOCFG_SHIFT) /* Single AHB access */
+#define DMACHAN_CFG_SRCPER_SHIFT       (0)       /* Bits 0-3:  Channel source associated with peripheral ID */
+#define DMACHAN_CFG_SRCPER_MASK        (15 << DMACHAN_CFG_SRCPER_SHIFT)
+#define DMACHAN_CFG_DSTPER_SHIFT       (4)       /* Bits 4-7:  Channel dest associated with peripheral ID */
+#define DMACHAN_CFG_DSTPER_MASK        (15 << DMACHAN_CFG_DSTPER_SHIFT)
+#define DMACHAN_CFG_SRCH2SEL           (1 << 9)  /* Bit 9:  HW handshake triggers transfer */
+#define DMACHAN_CFG_DSTH2SEL           (1 << 13) /* Bit 13: HW handshake trigger transfer */
+#define DMACHAN_CFG_SOD                (1 << 16) /* Bit 16: Stop on done */
+#define DMACHAN_CFG_LOCKIF             (1 << 20) /* Bit 20: Enable lock interface capability */
+#define DMACHAN_CFG_LOCKB              (1 << 21) /* Bit 21: Enable AHB Bus Locking capability */
+#define DMACHAN_CFG_LOCKIFL            (1 << 22) /* Bit 22: Lock Master Interface Arbiter */
+#define DMACHAN_CFG_AHBPRO_SHIFT       (24)      /* Bits 24-26: Bus access privilege */
+#define DMACHAN_CFG_AHBPRO_MASK        (7 << DMACHAN_CFG_AHBPRO_SHIFT)
+#  define DMACHAN_CFG_AHBPRO_PRIV      (1 << DMACHAN_CFG_AHBPRO_SHIFT)
+#  define DMACHAN_CFG_AHBPRO_BUFF      (2 << DMACHAN_CFG_AHBPRO_SHIFT)
+#  define DMACHAN_CFG_AHBPRO_CACHE     (4 << DMACHAN_CFG_AHBPRO_SHIFT)
+#define DMACHAN_CFG_FIFOCFG_SHIFT      (28)      /* Bits 28-29 */
+#define DMACHAN_CFG_FIFOCFG_MASK       (3 << DMACHAN_CFG_FIFOCFG_SHIFT)
+#  define DMACHAN_CFG_FIFOCFG_LARGEST  (0 << DMACHAN_CFG_FIFOCFG_SHIFT) /* Largest length AHB burst */
+#  define DMACHAN_CFG_FIFOCFG_HALF     (1 << DMACHAN_CFG_FIFOCFG_SHIFT) /* Half FIFO size */
+#  define DMACHAN_CFG_FIFOCFG_SINGLE   (2 << DMACHAN_CFG_FIFOCFG_SHIFT) /* Single AHB access */
 
 /* DMA Peripheral IDs *******************************************************************/
 
@@ -438,4 +437,4 @@ struct dma_linklist_s
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM3U_SAM3U_DMAC_H */
+#endif /* __ARCH_ARM_SRC_SAM3U_CHIP_SAM_DMAC_H */

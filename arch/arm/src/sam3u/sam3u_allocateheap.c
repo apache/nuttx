@@ -61,21 +61,21 @@
 #  warning "CONFIG_MM_REGIONS < 2: SRAM1 not included in HEAP"
 #endif
 
-#if CONFIG_MM_REGIONS < 3 && !defined(CONFIG_SAM3U_NAND)
+#if CONFIG_MM_REGIONS < 3 && !defined(CONFIG_SAM34_NAND)
 #  warning "CONFIG_MM_REGIONS < 3: NFC SRAM not included in HEAP"
 #endif
 
-#if CONFIG_MM_REGIONS > 2 && defined(CONFIG_SAM3U_NAND)
+#if CONFIG_MM_REGIONS > 2 && defined(CONFIG_SAM34_NAND)
 #  error "CONFIG_MM_REGIONS > 3 but cannot used NFC SRAM"
 #  undef CONFIG_MM_REGIONS
 #  define CONFIG_MM_REGIONS 2
 #endif
 
-#if CONFIG_DRAM_END > (SAM3U_INTSRAM0_BASE+CONFIG_SAM3U_SRAM0_SIZE)
+#if CONFIG_DRAM_END > (SAM_INTSRAM0_BASE+CONFIG_SAM34_SRAM0_SIZE)
 #  error "CONFIG_DRAM_END is beyond the end of SRAM0"
 #  undef CONFIG_DRAM_END
-#  define CONFIG_DRAM_END (SAM3U_INTSRAM0_BASE+CONFIG_SAM3U_SRAM0_SIZE)
-#elif CONFIG_DRAM_END < (SAM3U_INTSRAM0_BASE+CONFIG_SAM3U_SRAM0_SIZE)
+#  define CONFIG_DRAM_END (SAM_INTSRAM0_BASE+CONFIG_SAM34_SRAM0_SIZE)
+#elif CONFIG_DRAM_END < (SAM_INTSRAM0_BASE+CONFIG_SAM34_SRAM0_SIZE)
 #  warning "CONFIG_DRAM_END is before end of SRAM0... not all of SRAM0 used"
 #endif
 
@@ -226,20 +226,20 @@ void up_addregion(void)
 {
   /* Allow user access to the heap memory */
 
-  sam3u_mpu_uheap(SAM3U_INTSRAM1_BASE, CONFIG_SAM3U_SRAM1_SIZE);
+  sam3u_mpu_uheap(SAM_INTSRAM1_BASE, CONFIG_SAM34_SRAM1_SIZE);
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM3U_INTSRAM1_BASE, CONFIG_SAM3U_SRAM1_SIZE);
+  kumm_addregion((FAR void*)SAM_INTSRAM1_BASE, CONFIG_SAM34_SRAM1_SIZE);
 
 #if CONFIG_MM_REGIONS > 2
   /* Allow user access to the heap memory */
 
-  sam3u_mpu_uheap(SAM3U_NFCSRAM_BASE, CONFIG_SAM3U_NFCSRAM_SIZE);
+  sam3u_mpu_uheap(SAM_NFCSRAM_BASE, CONFIG_SAM34_NFCSRAM_SIZE);
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM3U_NFCSRAM_BASE, CONFIG_SAM3U_NFCSRAM_SIZE);
+  kumm_addregion((FAR void*)SAM_NFCSRAM_BASE, CONFIG_SAM34_NFCSRAM_SIZE);
 #endif
 }
 #endif
