@@ -4866,3 +4866,5 @@
 	* arch/arm/include/sam34 and arch/arm/src/sam34:  The old sam3u/
 	  directories were renamed sam34/ to make room in the namespace for
 	  the SAM4L (2013-6-2).
+	* libc/stdio/lib_dprintd.c and lib_vdprintf.c:  Add dprintf() and
+	  vdprintf() (the latter from Andrew Tridgell, 2013-6-2).

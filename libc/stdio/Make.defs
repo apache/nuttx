@@ -1,7 +1,7 @@
 ############################################################################
 # libc/stdio/Make.defs
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@
 CSRCS += lib_fileno.c lib_printf.c lib_syslog.c lib_lowsyslog.c\
 		 lib_sprintf.c lib_asprintf.c lib_snprintf.c lib_libsprintf.c \
 		 lib_vsprintf.c lib_avsprintf.c lib_vsnprintf.c lib_libvsprintf.c \
+		 lib_dprintf.c lib_vdprintf.c \
 		 lib_meminstream.c lib_memoutstream.c lib_lowinstream.c \
 		 lib_lowoutstream.c lib_zeroinstream.c lib_nullinstream.c \
 		 lib_nulloutstream.c lib_sscanf.c

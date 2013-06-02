@@ -128,13 +128,13 @@ int    ungetc(int c, FAR FILE *stream);
 
 /* Operations on the stdout stream, buffers, paths, and the whole printf-family */
 
-int    printf(const char *format, ...);
+int    printf(FAR const char *format, ...);
 int    puts(FAR const char *s);
 int    rename(FAR const char *oldpath, FAR const char *newpath);
-int    sprintf(FAR char *buf, const char *format, ...);
-int    asprintf (FAR char **ptr, const char *fmt, ...);
-int    snprintf(FAR char *buf, size_t size, const char *format, ...);
-int    sscanf(const char *buf, const char *fmt, ...);
+int    sprintf(FAR char *buf, FAR const char *format, ...);
+int    asprintf (FAR char **ptr, FAR const char *fmt, ...);
+int    snprintf(FAR char *buf, size_t size, FAR const char *format, ...);
+int    sscanf(FAR const char *buf, FAR const char *fmt, ...);
 void   perror(FAR const char *s);
 
 int    vprintf(FAR const char *format, va_list ap);
@@ -144,9 +144,19 @@ int    avsprintf(FAR char **ptr, const char *fmt, va_list ap);
 int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
 int    vsscanf(char *buf, const char *s, va_list ap);
 
-/* POSIX-like File System Interfaces */
+/* Operations on file descriptors including:
+ *
+ * POSIX-like File System Interfaces (fdopen), and
+ * Extensions from the Open Group Technical Standard, 2006, Extended API Set
+ *   Part 1 (dprintf and vdprintf)
+ */
 
 FAR FILE *fdopen(int fd, FAR const char *type);
+int    dprintf(int fd, FAR const char *fmt, ...);
+int    vdprintf(int fd, FAR const char *fmt, va_list ap);
+
+/* Operations on paths */
+
 int    statfs(FAR const char *path, FAR struct statfs *buf);
 
 #undef EXTERN
