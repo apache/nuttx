@@ -54,7 +54,7 @@
 /* This needs to be extended.  The card detect GPIO must be configured as an interrupt.
  * when the interrupt indicating that a card has been inserted or removed is received,
  * this function must call sio_mediachange() to handle that event.  See
- * arch/arm/src/sam3u/sam_hsmci.h for more information.
+ * arch/arm/src/sam34/sam_hsmci.h for more information.
  */
 
 #ifdef GPIO_MCI_CD
