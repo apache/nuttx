@@ -1,7 +1,7 @@
 ############################################################################
 # configs/sam3u-ek/src/Makefile
 #
-#   Copyright (C) 2009-2010, 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2009-2010, 2012-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,12 +37,12 @@
 
 CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS = 
+ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = up_boot.c up_leds.c up_buttons.c up_spi.c up_usbdev.c
 
-ifeq ($(CONFIG_SAM3U_HSMCI),y)
+ifeq ($(CONFIG_SAM34_HSMCI),y)
 CSRCS += up_lcd.c
 endif
 
@@ -50,7 +50,7 @@ ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += up_nsh.c
 endif
 
-ifeq ($(CONFIG_SAM3U_HSMCI),y)
+ifeq ($(CONFIG_SAM34_HSMCI),y)
 CSRCS += up_mmcsd.c
 endif
 

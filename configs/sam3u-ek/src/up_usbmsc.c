@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam3u-ek/src/up_usbmsc.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the SAM3U MMC/SD SDIO block driver.
@@ -50,7 +50,7 @@
 
 #include "sam3u_internal.h"
 
-#ifdef CONFIG_SAM3U_SDIO
+#ifdef CONFIG_SAM34_SDIO
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -65,8 +65,8 @@
 /* SLOT number(s) could depend on the board configuration */
 
 #ifdef CONFIG_ARCH_BOARD_SAM3U10E_EVAL
-#  undef SAM3U_MMCSDSLOTNO
-#  define SAM3U_MMCSDSLOTNO 0
+#  undef SAM_MMCSDSLOTNO
+#  define SAM_MMCSDSLOTNO 0
 #else
    /* Add configuration for new SAM3U boards here */
 #  error "Unrecognized SAM3U board"
@@ -113,13 +113,13 @@ int usbmsc_archinitialize(void)
 
   message("usbmsc_archinitialize: "
           "Initializing SDIO slot %d\n",
-          SAM3U_MMCSDSLOTNO);
+          SAM_MMCSDSLOTNO);
 
-  sdio = sdio_initialize(SAM3U_MMCSDSLOTNO);
+  sdio = sdio_initialize(SAM_MMCSDSLOTNO);
   if (!sdio)
     {
       message("usbmsc_archinitialize: Failed to initialize SDIO slot %d\n",
-              SAM3U_MMCSDSLOTNO);
+              SAM_MMCSDSLOTNO);
       return -ENODEV;
     }
 
@@ -139,7 +139,7 @@ int usbmsc_archinitialize(void)
     }
   message("usbmsc_archinitialize: "
           "Successfully bound SDIO to the MMC/SD driver\n");
-  
+
   /* Then let's guess and say that there is a card in the slot.  I need to check to
    * see if the SAM3U10E-EVAL board supports a GPIO to detect if there is a card in
    * the slot.
@@ -149,4 +149,4 @@ int usbmsc_archinitialize(void)
    return OK;
 }
 
-#endif /* CONFIG_SAM3U_SDIO */
+#endif /* CONFIG_SAM34_SDIO */

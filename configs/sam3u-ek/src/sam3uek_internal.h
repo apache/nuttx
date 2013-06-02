@@ -2,7 +2,7 @@
  * configs/sam3uek_eval/src/sam3uek_internal.h
  * arch/arm/src/board/sam3uek_internal.n
  *
- *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@
 /* External Memory Usage ************************************************************/
 /* LCD on CS2 */
 
-#define LCD_BASE     SAM3U_EXTCS2_BASE
+#define LCD_BASE              SAM_EXTCS2_BASE
 
 /* Touchscreen controller (TSC) */
 
@@ -142,7 +142,7 @@
 #define GPIO_TCS_IRQ  (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN24)
 #define GPIO_TCS_BUSY (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN2)
 
-#define SAM3U_TCS_IRQ  SAM3U_IRQ_PA24
+#define SAM_TCS_IRQ   SAM_IRQ_PA24
 
 /* LEDs */
 
@@ -155,8 +155,8 @@
 #define GPIO_BUTTON1  (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_CFG_DEGLITCH|GPIO_PORT_PIOA|GPIO_PIN18)
 #define GPIO_BUTTON2  (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_CFG_DEGLITCH|GPIO_PORT_PIOA|GPIO_PIN19)
 
-#define IRQ_BUTTON1   SAM3U_IRQ_PA18
-#define IRQ_BUTTON2   SAM3U_IRQ_PA19
+#define IRQ_BUTTON1   SAM_IRQ_PA18
+#define IRQ_BUTTON2   SAM_IRQ_PA19
 
 /* SD Card Detect */
 
@@ -214,11 +214,11 @@ extern void weak_function sam3u_usbinitialize(void);
  * Name: sam3u_hsmciinit
  *
  * Description:
- *   Initialize HSMCI support 
+ *   Initialize HSMCI support
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAM3U_HSMCI
+#ifdef CONFIG_SAM34_HSMCI
 extern int weak_function sam3u_hsmciinit(void);
 #else
 # define sam3u_hsmciinit()
@@ -232,7 +232,7 @@ extern int weak_function sam3u_hsmciinit(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAM3U_HSMCI
+#ifdef CONFIG_SAM34_HSMCI
 extern bool sam3u_cardinserted(unsigned char slot);
 #else
 #  define sam3u_cardinserted(slot) (false)
@@ -246,7 +246,7 @@ extern bool sam3u_cardinserted(unsigned char slot);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAM3U_HSMCI
+#ifdef CONFIG_SAM34_HSMCI
 extern bool sam3u_writeprotected(unsigned char slot);
 #else
 #  define sam3u_writeprotected(slot) (false)
