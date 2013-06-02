@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_irq.c
- * arch/arm/src/chip/sam3u_irq.c
+ * arch/arm/src/sam3u/sam_irq.c
  *
  *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +51,10 @@
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
-#include "sam3u_internal.h"
+
+#ifdef CONFIG_GPIO_IRQ
+#  include "sam_gpio.h"
+#endif
 
 /****************************************************************************
  * Definitions
@@ -87,7 +89,7 @@ volatile uint32_t *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_dumpnvic
+ * Name: sam_dumpnvic
  *
  * Description:
  *   Dump some interesting NVIC registers
@@ -95,7 +97,7 @@ volatile uint32_t *current_regs;
  ****************************************************************************/
 
 #if defined(SAM_IRQ_DEBUG) && defined (CONFIG_DEBUG)
-static void sam3u_dumpnvic(const char *msg, int irq)
+static void sam_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
@@ -121,12 +123,12 @@ static void sam3u_dumpnvic(const char *msg, int irq)
   irqrestore(flags);
 }
 #else
-#  define sam3u_dumpnvic(msg, irq)
+#  define sam_dumpnvic(msg, irq)
 #endif
 
 /****************************************************************************
- * Name: sam3u_nmi, sam3u_busfault, sam3u_usagefault, sam3u_pendsv,
- *       sam3u_dbgmonitor, sam3u_pendsv, sam3u_reserved
+ * Name: sam_nmi, sam_busfault, sam_usagefault, sam_pendsv, sam_dbgmonitor,
+ *       sam_pendsv, sam_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -136,7 +138,7 @@ static void sam3u_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG
-static int sam3u_nmi(int irq, FAR void *context)
+static int sam_nmi(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! NMI received\n");
@@ -144,7 +146,7 @@ static int sam3u_nmi(int irq, FAR void *context)
   return 0;
 }
 
-static int sam3u_busfault(int irq, FAR void *context)
+static int sam_busfault(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! Bus fault recived\n");
@@ -152,7 +154,7 @@ static int sam3u_busfault(int irq, FAR void *context)
   return 0;
 }
 
-static int sam3u_usagefault(int irq, FAR void *context)
+static int sam_usagefault(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! Usage fault received\n");
@@ -160,7 +162,7 @@ static int sam3u_usagefault(int irq, FAR void *context)
   return 0;
 }
 
-static int sam3u_pendsv(int irq, FAR void *context)
+static int sam_pendsv(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! PendSV received\n");
@@ -168,7 +170,7 @@ static int sam3u_pendsv(int irq, FAR void *context)
   return 0;
 }
 
-static int sam3u_dbgmonitor(int irq, FAR void *context)
+static int sam_dbgmonitor(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! Debug Monitor receieved\n");
@@ -176,7 +178,7 @@ static int sam3u_dbgmonitor(int irq, FAR void *context)
   return 0;
 }
 
-static int sam3u_reserved(int irq, FAR void *context)
+static int sam_reserved(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! Reserved interrupt\n");
@@ -186,7 +188,7 @@ static int sam3u_reserved(int irq, FAR void *context)
 #endif
 
 /****************************************************************************
- * Name: sam3u_prioritize_syscall
+ * Name: sam_prioritize_syscall
  *
  * Description:
  *   Set the priority of an exception.  This function may be needed
@@ -195,7 +197,7 @@ static int sam3u_reserved(int irq, FAR void *context)
  ****************************************************************************/
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-static inline void sam3u_prioritize_syscall(int priority)
+static inline void sam_prioritize_syscall(int priority)
 {
   uint32_t regval;
 
@@ -209,7 +211,7 @@ static inline void sam3u_prioritize_syscall(int priority)
 #endif
 
 /****************************************************************************
- * Name: sam3u_irqinfo
+ * Name: sam_irqinfo
  *
  * Description:
  *   Given an IRQ number, provide the register and bit setting to enable or
@@ -217,7 +219,7 @@ static inline void sam3u_prioritize_syscall(int priority)
  *
  ****************************************************************************/
 
-static int sam3u_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
+static int sam_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
 {
   DEBUGASSERT(irq >= SAM_IRQ_NMI && irq < NR_IRQS);
 
@@ -290,7 +292,7 @@ void up_irqinitialize(void)
 #if defined(CONFIG_ARCH_RAMVECTORS)
   up_ramvec_initialize();
 #elif defined(CONFIG_STM32_DFU)
-  putreg32((uint32_t)sam3u_vectors, NVIC_VECTAB);
+  putreg32((uint32_t)sam_vectors, NVIC_VECTAB);
 #endif
 
   /* Set all interrrupts (and exceptions) to the default priority */
@@ -327,7 +329,7 @@ void up_irqinitialize(void)
 /* up_prioritize_irq(SAM_IRQ_PENDSV, NVIC_SYSH_PRIORITY_MIN); */
 #endif
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-   sam3u_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
+   sam_prioritize_syscall(NVIC_SYSH_SVCALL_PRIORITY);
 #endif
 
   /* If the MPU is enabled, then attach and enable the Memory Management
@@ -342,18 +344,18 @@ void up_irqinitialize(void)
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG
-  irq_attach(SAM_IRQ_NMI, sam3u_nmi);
+  irq_attach(SAM_IRQ_NMI, sam_nmi);
 #ifndef CONFIG_ARMV7M_MPU
   irq_attach(SAM_IRQ_MEMFAULT, up_memfault);
 #endif
-  irq_attach(SAM_IRQ_BUSFAULT, sam3u_busfault);
-  irq_attach(SAM_IRQ_USAGEFAULT, sam3u_usagefault);
-  irq_attach(SAM_IRQ_PENDSV, sam3u_pendsv);
-  irq_attach(SAM_IRQ_DBGMONITOR, sam3u_dbgmonitor);
-  irq_attach(SAM_IRQ_RESERVED, sam3u_reserved);
+  irq_attach(SAM_IRQ_BUSFAULT, sam_busfault);
+  irq_attach(SAM_IRQ_USAGEFAULT, sam_usagefault);
+  irq_attach(SAM_IRQ_PENDSV, sam_pendsv);
+  irq_attach(SAM_IRQ_DBGMONITOR, sam_dbgmonitor);
+  irq_attach(SAM_IRQ_RESERVED, sam_reserved);
 #endif
 
-  sam3u_dumpnvic("initial", SAM_IRQ_NIRQS);
+  sam_dumpnvic("initial", SAM_IRQ_NIRQS);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
@@ -362,7 +364,7 @@ void up_irqinitialize(void)
    */
 
 #ifdef CONFIG_GPIO_IRQ
-  sam3u_gpioirqinitialize();
+  sam_gpioirqinitialize();
 #endif
 
   /* And finally, enable interrupts */
@@ -385,7 +387,7 @@ void up_disable_irq(int irq)
   uint32_t regval;
   uint32_t bit;
 
-  if (sam3u_irqinfo(irq, &regaddr, &bit) == 0)
+  if (sam_irqinfo(irq, &regaddr, &bit) == 0)
     {
       /* Clear the appropriate bit in the register to enable the interrupt */
 
@@ -398,10 +400,10 @@ void up_disable_irq(int irq)
     {
       /* Maybe it is a (derived) GPIO IRQ */
 
-      sam3u_gpioirqdisable(irq);
+      sam_gpioirqdisable(irq);
     }
 #endif
-  sam3u_dumpnvic("disable", irq);
+  sam_dumpnvic("disable", irq);
 }
 
 /****************************************************************************
@@ -418,7 +420,7 @@ void up_enable_irq(int irq)
   uint32_t regval;
   uint32_t bit;
 
-  if (sam3u_irqinfo(irq, &regaddr, &bit) == 0)
+  if (sam_irqinfo(irq, &regaddr, &bit) == 0)
     {
       /* Set the appropriate bit in the register to enable the interrupt */
 
@@ -431,10 +433,10 @@ void up_enable_irq(int irq)
     {
       /* Maybe it is a (derived) GPIO IRQ */
 
-      sam3u_gpioirqenable(irq);
+      sam_gpioirqenable(irq);
     }
 #endif
-  sam3u_dumpnvic("enable", irq);
+  sam_dumpnvic("enable", irq);
 }
 
 /****************************************************************************
@@ -500,7 +502,7 @@ int up_prioritize_irq(int irq, int priority)
   regval     |= (priority << shift);
   putreg32(regval, regaddr);
 
-  sam3u_dumpnvic("prioritize", irq);
+  sam_dumpnvic("prioritize", irq);
   return OK;
 }
 #endif

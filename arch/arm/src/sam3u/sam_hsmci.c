@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_sdio.c
+ * arch/arm/src/sam3u/sam_hsmci.c
  *
  *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -60,10 +60,13 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "sam3u_internal.h"
+#include "sam_gpio.h"
+#include "sam_dmac.h"
+#include "sam_hsmci.h"
 #include "chip/sam_dmac.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_hsmci.h"
+#include "chip/sam_pinmap.h"
 
 #if CONFIG_SAM34_HSMCI
 
@@ -252,7 +255,7 @@
 
 /* This structure defines the state of the SAM3/4 HSMCI interface */
 
-struct sam3u_dev_s
+struct sam_dev_s
 {
   struct sdio_dev_s  dev;        /* Standard, base SDIO interface */
 
@@ -287,7 +290,7 @@ struct sam3u_dev_s
 /* Register logging support */
 
 #if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
-struct sam3u_hsmciregs_s
+struct sam_hsmciregs_s
 {
   uint32_t mr;    /* Mode Register */
   uint32_t dtor;  /* Data Timeout Register */
@@ -309,11 +312,11 @@ struct sam3u_hsmciregs_s
 #endif
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-struct sam3u_xfrregs_s
+struct sam_xfrregs_s
 {
-  struct sam3u_hsmciregs_s hsmci;
+  struct sam_hsmciregs_s hsmci;
 #ifdef CONFIG_DEBUG_DMA
-  struct sam3u_dmaregs_s  dma;
+  struct sam_dmaregs_s  dma;
 #endif
 };
 #endif
@@ -324,147 +327,147 @@ struct sam3u_xfrregs_s
 
 /* Low-level helpers ********************************************************/
 
-static void sam3u_takesem(struct sam3u_dev_s *priv);
-#define     sam3u_givesem(priv) (sem_post(&priv->waitsem))
-static void sam3u_enablewaitints(struct sam3u_dev_s *priv, uint32_t waitmask,
+static void sam_takesem(struct sam_dev_s *priv);
+#define     sam_givesem(priv) (sem_post(&priv->waitsem))
+static void sam_enablewaitints(struct sam_dev_s *priv, uint32_t waitmask,
               sdio_eventset_t waitevents);
-static void sam3u_disablewaitints(struct sam3u_dev_s *priv, sdio_eventset_t wkupevents);
-static void sam3u_enablexfrints(struct sam3u_dev_s *priv, uint32_t xfrmask);
-static void sam3u_disablexfrints(struct sam3u_dev_s *priv);
-static inline void sam3u_disable(void);
-static inline void sam3u_enable(void);
+static void sam_disablewaitints(struct sam_dev_s *priv, sdio_eventset_t wkupevents);
+static void sam_enablexfrints(struct sam_dev_s *priv, uint32_t xfrmask);
+static void sam_disablexfrints(struct sam_dev_s *priv);
+static inline void sam_disable(void);
+static inline void sam_enable(void);
 
 /* Register Sampling ********************************************************/
 
 #if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
-static void sam3u_hsmcisample(struct sam3u_hsmciregs_s *regs);
-static void sam3u_hsmcidump(struct sam3u_hsmciregs_s *regs, const char *msg);
+static void sam_hsmcisample(struct sam_hsmciregs_s *regs);
+static void sam_hsmcidump(struct sam_hsmciregs_s *regs, const char *msg);
 #endif
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-static void sam3u_xfrsampleinit(void);
-static void sam3u_xfrsample(struct sam3u_dev_s *priv, int index);
-static void sam3u_xfrdumpone(struct sam3u_dev_s *priv,
-              struct sam3u_xfrregs_s *regs, const char *msg);
-static void sam3u_xfrdump(struct sam3u_dev_s *priv);
+static void sam_xfrsampleinit(void);
+static void sam_xfrsample(struct sam_dev_s *priv, int index);
+static void sam_xfrdumpone(struct sam_dev_s *priv,
+              struct sam_xfrregs_s *regs, const char *msg);
+static void sam_xfrdump(struct sam_dev_s *priv);
 #else
-#  define   sam3u_xfrsampleinit()
-#  define   sam3u_xfrsample(priv,index)
-#  define   sam3u_xfrdump(priv)
+#  define   sam_xfrsampleinit()
+#  define   sam_xfrsample(priv,index)
+#  define   sam_xfrdump(priv)
 #endif
 
 #ifdef CONFIG_HSMCI_CMDDEBUG
-static void sam3u_cmdsampleinit(void);
-static inline void sam3u_cmdsample1(int index3);
-static inline void sam3u_cmdsample2(int index, uint32_t sr);
-static void sam3u_cmddump(void);
+static void sam_cmdsampleinit(void);
+static inline void sam_cmdsample1(int index3);
+static inline void sam_cmdsample2(int index, uint32_t sr);
+static void sam_cmddump(void);
 #else
-#  define   sam3u_cmdsampleinit()
-#  define   sam3u_cmdsample1(index)
-#  define   sam3u_cmdsample2(index,sr)
-#  define   sam3u_cmddump()
+#  define   sam_cmdsampleinit()
+#  define   sam_cmdsample1(index)
+#  define   sam_cmdsample2(index,sr)
+#  define   sam_cmddump()
 #endif
 
 /* DMA Helpers **************************************************************/
 
-static void sam3u_dmacallback(DMA_HANDLE handle, void *arg, int result);
+static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result);
 
 /* Data Transfer Helpers ****************************************************/
 
-static void sam3u_eventtimeout(int argc, uint32_t arg);
-static void sam3u_endwait(struct sam3u_dev_s *priv, sdio_eventset_t wkupevent);
-static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupevent);
-static void sam3u_notransfer(struct sam3u_dev_s *priv);
+static void sam_eventtimeout(int argc, uint32_t arg);
+static void sam_endwait(struct sam_dev_s *priv, sdio_eventset_t wkupevent);
+static void sam_endtransfer(struct sam_dev_s *priv, sdio_eventset_t wkupevent);
+static void sam_notransfer(struct sam_dev_s *priv);
 
 /* Interrupt Handling *******************************************************/
 
-static int  sam3u_interrupt(int irq, void *context);
+static int  sam_interrupt(int irq, void *context);
 
 /* SDIO interface methods ***************************************************/
 
 /* Initialization/setup */
 
-static void sam3u_reset(FAR struct sdio_dev_s *dev);
-static uint8_t sam3u_status(FAR struct sdio_dev_s *dev);
-static void sam3u_widebus(FAR struct sdio_dev_s *dev, bool enable);
-static void sam3u_clock(FAR struct sdio_dev_s *dev,
+static void sam_reset(FAR struct sdio_dev_s *dev);
+static uint8_t sam_status(FAR struct sdio_dev_s *dev);
+static void sam_widebus(FAR struct sdio_dev_s *dev, bool enable);
+static void sam_clock(FAR struct sdio_dev_s *dev,
               enum sdio_clock_e rate);
-static int  sam3u_attach(FAR struct sdio_dev_s *dev);
+static int  sam_attach(FAR struct sdio_dev_s *dev);
 
 /* Command/Status/Data Transfer */
 
-static int  sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  sam_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t arg);
-static void sam3u_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
+static void sam_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
               unsigned int nblocks);
-static int  sam3u_cancel(FAR struct sdio_dev_s *dev);
-static int  sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
-static int  sam3u_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  sam_cancel(FAR struct sdio_dev_s *dev);
+static int  sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
+static int  sam_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rshort);
-static int  sam3u_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t rlong[4]);
-static int  sam3u_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  sam_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd,
               uint32_t *rnotimpl);
 
 /* EVENT handler */
 
-static void sam3u_waitenable(FAR struct sdio_dev_s *dev,
+static void sam_waitenable(FAR struct sdio_dev_s *dev,
               sdio_eventset_t eventset);
 static sdio_eventset_t
-            sam3u_eventwait(FAR struct sdio_dev_s *dev, uint32_t timeout);
-static void sam3u_callbackenable(FAR struct sdio_dev_s *dev,
+            sam_eventwait(FAR struct sdio_dev_s *dev, uint32_t timeout);
+static void sam_callbackenable(FAR struct sdio_dev_s *dev,
               sdio_eventset_t eventset);
-static int  sam3u_registercallback(FAR struct sdio_dev_s *dev,
+static int  sam_registercallback(FAR struct sdio_dev_s *dev,
               worker_t callback, void *arg);
 
 /* DMA */
 
 #ifdef CONFIG_SDIO_DMA
-static bool sam3u_dmasupported(FAR struct sdio_dev_s *dev);
+static bool sam_dmasupported(FAR struct sdio_dev_s *dev);
 #endif
-static int  sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev,
+static int  sam_dmarecvsetup(FAR struct sdio_dev_s *dev,
               FAR uint8_t *buffer, size_t buflen);
-static int  sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
+static int  sam_dmasendsetup(FAR struct sdio_dev_s *dev,
               FAR const uint8_t *buffer, size_t buflen);
 
 /* Initialization/uninitialization/reset ************************************/
 
-static void sam3u_callback(void *arg);
+static void sam_callback(void *arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-struct sam3u_dev_s g_sdiodev =
+struct sam_dev_s g_sdiodev =
 {
   .dev =
   {
-    .reset            = sam3u_reset,
-    .status           = sam3u_status,
-    .widebus          = sam3u_widebus,
-    .clock            = sam3u_clock,
-    .attach           = sam3u_attach,
-    .sendcmd          = sam3u_sendcmd,
-    .blocksetup       = sam3u_blocksetup,
-    .recvsetup        = sam3u_dmarecvsetup,
-    .sendsetup        = sam3u_dmasendsetup,
-    .cancel           = sam3u_cancel,
-    .waitresponse     = sam3u_waitresponse,
-    .recvR1           = sam3u_recvshort,
-    .recvR2           = sam3u_recvlong,
-    .recvR3           = sam3u_recvshort,
-    .recvR4           = sam3u_recvnotimpl,
-    .recvR5           = sam3u_recvnotimpl,
-    .recvR6           = sam3u_recvshort,
-    .recvR7           = sam3u_recvshort,
-    .waitenable       = sam3u_waitenable,
-    .eventwait        = sam3u_eventwait,
-    .callbackenable   = sam3u_callbackenable,
-    .registercallback = sam3u_registercallback,
+    .reset            = sam_reset,
+    .status           = sam_status,
+    .widebus          = sam_widebus,
+    .clock            = sam_clock,
+    .attach           = sam_attach,
+    .sendcmd          = sam_sendcmd,
+    .blocksetup       = sam_blocksetup,
+    .recvsetup        = sam_dmarecvsetup,
+    .sendsetup        = sam_dmasendsetup,
+    .cancel           = sam_cancel,
+    .waitresponse     = sam_waitresponse,
+    .recvR1           = sam_recvshort,
+    .recvR2           = sam_recvlong,
+    .recvR3           = sam_recvshort,
+    .recvR4           = sam_recvnotimpl,
+    .recvR5           = sam_recvnotimpl,
+    .recvR6           = sam_recvshort,
+    .recvR7           = sam_recvshort,
+    .waitenable       = sam_waitenable,
+    .eventwait        = sam_eventwait,
+    .callbackenable   = sam_callbackenable,
+    .registercallback = sam_registercallback,
 #ifdef CONFIG_SDIO_DMA
-    .dmasupported     = sam3u_dmasupported,
-    .dmarecvsetup     = sam3u_dmarecvsetup,
-    .dmasendsetup     = sam3u_dmasendsetup,
+    .dmasupported     = sam_dmasupported,
+    .dmarecvsetup     = sam_dmarecvsetup,
+    .dmasendsetup     = sam_dmasendsetup,
 #endif
   },
 };
@@ -472,10 +475,10 @@ struct sam3u_dev_s g_sdiodev =
 /* Register logging support */
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-static struct sam3u_xfrregs_s   g_xfrsamples[DEBUG_NDMASAMPLES];
+static struct sam_xfrregs_s   g_xfrsamples[DEBUG_NDMASAMPLES];
 #endif
 #ifdef CONFIG_HSMCI_CMDDEBUG
-static struct sam3u_hsmciregs_s g_cmdsamples[DEBUG_NCMDSAMPLES];
+static struct sam_hsmciregs_s g_cmdsamples[DEBUG_NCMDSAMPLES];
 #endif
 #if defined(CONFIG_HSMCI_XFRDEBUG) && defined(CONFIG_HSMCI_CMDDEBUG)
 static bool                     g_xfrinitialized;
@@ -490,7 +493,7 @@ static bool                     g_cmdinitialized;
  * Low-level Helpers
  ****************************************************************************/
 /****************************************************************************
- * Name: sam3u_takesem
+ * Name: sam_takesem
  *
  * Description:
  *   Take the wait semaphore (handling false alarm wakeups due to the receipt
@@ -504,7 +507,7 @@ static bool                     g_cmdinitialized;
  *
  ****************************************************************************/
 
-static void sam3u_takesem(struct sam3u_dev_s *priv)
+static void sam_takesem(struct sam_dev_s *priv)
 {
   /* Take the semaphore (perhaps waiting) */
 
@@ -519,7 +522,7 @@ static void sam3u_takesem(struct sam3u_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: sam3u_enablewaitints
+ * Name: sam_enablewaitints
  *
  * Description:
  *   Enable HSMCI interrupts needed to suport the wait function
@@ -534,8 +537,8 @@ static void sam3u_takesem(struct sam3u_dev_s *priv)
  *
  ****************************************************************************/
 
-static void sam3u_enablewaitints(struct sam3u_dev_s *priv, uint32_t waitmask,
-                                 sdio_eventset_t waitevents)
+static void sam_enablewaitints(struct sam_dev_s *priv, uint32_t waitmask,
+                               sdio_eventset_t waitevents)
 {
   irqstate_t flags;
 
@@ -552,7 +555,7 @@ static void sam3u_enablewaitints(struct sam3u_dev_s *priv, uint32_t waitmask,
 }
 
 /****************************************************************************
- * Name: sam3u_disablewaitints
+ * Name: sam_disablewaitints
  *
  * Description:
  *   Disable HSMCI interrupts and save wakeup event.  Called
@@ -566,8 +569,8 @@ static void sam3u_enablewaitints(struct sam3u_dev_s *priv, uint32_t waitmask,
  *
  ****************************************************************************/
 
-static void sam3u_disablewaitints(struct sam3u_dev_s *priv,
-                                  sdio_eventset_t wkupevent)
+static void sam_disablewaitints(struct sam_dev_s *priv,
+                                sdio_eventset_t wkupevent)
 {
   irqstate_t flags;
 
@@ -584,7 +587,7 @@ static void sam3u_disablewaitints(struct sam3u_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: sam3u_enablexfrints
+ * Name: sam_enablexfrints
  *
  * Description:
  *   Enable HSMCI interrupts needed to support the data transfer event
@@ -598,7 +601,7 @@ static void sam3u_disablewaitints(struct sam3u_dev_s *priv,
  *
  ****************************************************************************/
 
-static void sam3u_enablexfrints(struct sam3u_dev_s *priv, uint32_t xfrmask)
+static void sam_enablexfrints(struct sam_dev_s *priv, uint32_t xfrmask)
 {
   irqstate_t flags = irqsave();
   priv->xfrmask = xfrmask;
@@ -607,7 +610,7 @@ static void sam3u_enablexfrints(struct sam3u_dev_s *priv, uint32_t xfrmask)
 }
 
 /****************************************************************************
- * Name: sam3u_disablexfrints
+ * Name: sam_disablexfrints
  *
  * Description:
  *   Disable HSMCI interrupts needed to support the data transfer event
@@ -621,7 +624,7 @@ static void sam3u_enablexfrints(struct sam3u_dev_s *priv, uint32_t xfrmask)
  *
  ****************************************************************************/
 
-static void sam3u_disablexfrints(struct sam3u_dev_s *priv)
+static void sam_disablexfrints(struct sam_dev_s *priv)
 {
   irqstate_t flags = irqsave();
   priv->xfrmask = 0;
@@ -630,14 +633,14 @@ static void sam3u_disablexfrints(struct sam3u_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: sam3u_disable
+ * Name: sam_disable
  *
  * Description:
  *   Disable the HSMCI
  *
  ****************************************************************************/
 
-static inline void sam3u_disable(void)
+static inline void sam_disable(void)
 {
   /* Disable the MCI peripheral clock */
 
@@ -653,14 +656,14 @@ static inline void sam3u_disable(void)
 }
 
 /****************************************************************************
- * Name: sam3u_enable
+ * Name: sam_enable
  *
  * Description:
  *   Enable the HSMCI
  *
  ****************************************************************************/
 
-static inline void sam3u_enable(void)
+static inline void sam_enable(void)
 {
   /* Enable the MCI peripheral clock */
 
@@ -676,7 +679,7 @@ static inline void sam3u_enable(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_hsmcisample
+ * Name: sam_hsmcisample
  *
  * Description:
  *   Sample HSMCI registers
@@ -684,7 +687,7 @@ static inline void sam3u_enable(void)
  ****************************************************************************/
 
 #if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
-static void sam3u_hsmcisample(struct sam3u_hsmciregs_s *regs)
+static void sam_hsmcisample(struct sam_hsmciregs_s *regs)
 {
   regs->mr    = getreg32(SAM_HSMCI_MR);
   regs->dtor  = getreg32(SAM_HSMCI_DTOR);
@@ -706,7 +709,7 @@ static void sam3u_hsmcisample(struct sam3u_hsmciregs_s *regs)
 #endif
 
 /****************************************************************************
- * Name: sam3u_hsmcidump
+ * Name: sam_hsmcidump
  *
  * Description:
  *   Dump one register sample
@@ -714,7 +717,7 @@ static void sam3u_hsmcisample(struct sam3u_hsmciregs_s *regs)
  ****************************************************************************/
 
 #if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
-static void sam3u_hsmcidump(struct sam3u_hsmciregs_s *regs, const char *msg)
+static void sam_hsmcidump(struct sam_hsmciregs_s *regs, const char *msg)
 {
   fdbg("HSMCI Registers: %s\n", msg);
   fdbg("     MR[%08x]: %08x\n", SAM_HSMCI_MR,    regs->mr);
@@ -737,7 +740,7 @@ static void sam3u_hsmcidump(struct sam3u_hsmciregs_s *regs, const char *msg)
 #endif
 
 /****************************************************************************
- * Name: sam3u_xfrsample
+ * Name: sam_xfrsample
  *
  * Description:
  *   Sample HSMCI/DMA registers
@@ -745,18 +748,18 @@ static void sam3u_hsmcidump(struct sam3u_hsmciregs_s *regs, const char *msg)
  ****************************************************************************/
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-static void sam3u_xfrsample(struct sam3u_dev_s *priv, int index)
+static void sam_xfrsample(struct sam_dev_s *priv, int index)
 {
-  struct sam3u_xfrregs_s *regs = &g_xfrsamples[index];
+  struct sam_xfrregs_s *regs = &g_xfrsamples[index];
 #ifdef CONFIG_DEBUG_DMA
-  sam3u_dmasample(priv->dma, &regs->dma);
+  sam_dmasample(priv->dma, &regs->dma);
 #endif
-  sam3u_hsmcisample(&regs->hsmci);
+  sam_hsmcisample(&regs->hsmci);
 }
 #endif
 
 /****************************************************************************
- * Name: sam3u_xfrsampleinit
+ * Name: sam_xfrsampleinit
  *
  * Description:
  *   Setup prior to collecting transfer samples
@@ -764,9 +767,9 @@ static void sam3u_xfrsample(struct sam3u_dev_s *priv, int index)
  ****************************************************************************/
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-static void sam3u_xfrsampleinit(void)
+static void sam_xfrsampleinit(void)
 {
-  memset(g_xfrsamples, 0xff, DEBUG_NDMASAMPLES * sizeof(struct sam3u_xfrregs_s));
+  memset(g_xfrsamples, 0xff, DEBUG_NDMASAMPLES * sizeof(struct sam_xfrregs_s));
 #ifdef CONFIG_HSMCI_CMDDEBUG
   g_xfrinitialized = true;
 #endif
@@ -774,7 +777,7 @@ static void sam3u_xfrsampleinit(void)
 #endif
 
 /****************************************************************************
- * Name: sam3u_xfrdumpone
+ * Name: sam_xfrdumpone
  *
  * Description:
  *   Dump one transfer register sample
@@ -782,18 +785,18 @@ static void sam3u_xfrsampleinit(void)
  ****************************************************************************/
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-static void sam3u_xfrdumpone(struct sam3u_dev_s *priv,
-                             struct sam3u_xfrregs_s *regs, const char *msg)
+static void sam_xfrdumpone(struct sam_dev_s *priv,
+                           struct sam_xfrregs_s *regs, const char *msg)
 {
 #ifdef CONFIG_DEBUG_DMA
-  sam3u_dmadump(priv->dma, &regs->dma, msg);
+  sam_dmadump(priv->dma, &regs->dma, msg);
 #endif
-  sam3u_hsmcidump(&regs->hsmci, msg);
+  sam_hsmcidump(&regs->hsmci, msg);
 }
 #endif
 
 /****************************************************************************
- * Name: sam3u_xfrdump
+ * Name: sam_xfrdump
  *
  * Description:
  *   Dump all transfer-related, sampled register data
@@ -801,20 +804,20 @@ static void sam3u_xfrdumpone(struct sam3u_dev_s *priv,
  ****************************************************************************/
 
 #ifdef CONFIG_HSMCI_XFRDEBUG
-static void  sam3u_xfrdump(struct sam3u_dev_s *priv)
+static void  sam_xfrdump(struct sam_dev_s *priv)
 {
 #ifdef CONFIG_HSMCI_CMDDEBUG
   if (g_xfrinitialized)
 #endif
     {
-      sam3u_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_BEFORE_SETUP], "Before setup");
+      sam_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_BEFORE_SETUP], "Before setup");
 #ifdef CONFIG_DEBUG_DMA
-      sam3u_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
+      sam_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_BEFORE_ENABLE], "Before DMA enable");
 #endif
-      sam3u_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_AFTER_SETUP], "After setup");
-      sam3u_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_END_TRANSFER], "End of transfer");
+      sam_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_AFTER_SETUP], "After setup");
+      sam_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_END_TRANSFER], "End of transfer");
 #ifdef CONFIG_DEBUG_DMA
-      sam3u_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
+      sam_xfrdumpone(priv, &g_xfrsamples[SAMPLENDX_DMA_CALLBACK], "DMA Callback");
 #endif
 #ifdef CONFIG_HSMCI_CMDDEBUG
       g_xfrinitialized = false;
@@ -824,7 +827,7 @@ static void  sam3u_xfrdump(struct sam3u_dev_s *priv)
 #endif
 
 /****************************************************************************
- * Name: sam3u_cmdsampleinit
+ * Name: sam_cmdsampleinit
  *
  * Description:
  *   Setup prior to collecting command/response samples
@@ -832,9 +835,9 @@ static void  sam3u_xfrdump(struct sam3u_dev_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_HSMCI_CMDDEBUG
-static void sam3u_cmdsampleinit(void)
+static void sam_cmdsampleinit(void)
 {
-  memset(g_cmdsamples, 0xff, DEBUG_NCMDSAMPLES * sizeof(struct sam3u_hsmciregs_s));
+  memset(g_cmdsamples, 0xff, DEBUG_NCMDSAMPLES * sizeof(struct sam_hsmciregs_s));
 #ifdef CONFIG_HSMCI_XFRDEBUG
   g_cmdinitialized = true;
 #endif
@@ -842,7 +845,7 @@ static void sam3u_cmdsampleinit(void)
 #endif
 
 /****************************************************************************
- * Name: sam3u_cmdsample1 & 2
+ * Name: sam_cmdsample1 & 2
  *
  * Description:
  *   Sample command/response registers
@@ -850,20 +853,20 @@ static void sam3u_cmdsampleinit(void)
  ****************************************************************************/
 
 #ifdef CONFIG_HSMCI_CMDDEBUG
-static inline void sam3u_cmdsample1(int index)
+static inline void sam_cmdsample1(int index)
 {
-  sam3u_hsmcisample(&g_cmdsamples[index]);
+  sam_hsmcisample(&g_cmdsamples[index]);
 }
 
-static inline void sam3u_cmdsample2(int index, uint32_t sr)
+static inline void sam_cmdsample2(int index, uint32_t sr)
 {
-  sam3u_hsmcisample(&g_cmdsamples[index]);
+  sam_hsmcisample(&g_cmdsamples[index]);
   g_cmdsamples[index].sr = sr;
 }
 #endif
 
 /****************************************************************************
- * Name: sam3u_cmddump
+ * Name: sam_cmddump
  *
  * Description:
  *   Dump all comand/response register data
@@ -871,14 +874,14 @@ static inline void sam3u_cmdsample2(int index, uint32_t sr)
  ****************************************************************************/
 
 #ifdef CONFIG_HSMCI_CMDDEBUG
-static void sam3u_cmddump(void)
+static void sam_cmddump(void)
 {
 #ifdef CONFIG_HSMCI_XFRDEBUG
   if (g_cmdinitialized)
 #endif
     {
-      sam3u_hsmcidump(&g_cmdsamples[SAMPLENDX_AFTER_CMDR], "After command setup");
-      sam3u_hsmcidump(&g_cmdsamples[SAMPLENDX_AT_WAKEUP],  "After wakeup");
+      sam_hsmcidump(&g_cmdsamples[SAMPLENDX_AFTER_CMDR], "After command setup");
+      sam_hsmcidump(&g_cmdsamples[SAMPLENDX_AT_WAKEUP],  "After wakeup");
 #ifdef CONFIG_HSMCI_XFRDEBUG
       g_cmdinitialized = false;
 #endif
@@ -891,20 +894,20 @@ static void sam3u_cmddump(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_dmacallback
+ * Name: sam_dmacallback
  *
  * Description:
  *   Called when HSMCI DMA completes
  *
  ****************************************************************************/
 
-static void sam3u_dmacallback(DMA_HANDLE handle, void *arg, int result)
+static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
 {
   /* We don't really do anything at the completion of DMA.  The termination
    * of the transfer is driven by the HSMCI interrupts.
    */
 
-  sam3u_xfrsample((struct sam3u_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
+  sam_xfrsample((struct sam_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
 }
 
 /****************************************************************************
@@ -912,7 +915,7 @@ static void sam3u_dmacallback(DMA_HANDLE handle, void *arg, int result)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_eventtimeout
+ * Name: sam_eventtimeout
  *
  * Description:
  *   The watchdog timeout setup when the event wait start has expired without
@@ -930,9 +933,9 @@ static void sam3u_dmacallback(DMA_HANDLE handle, void *arg, int result)
  *
  ****************************************************************************/
 
-static void sam3u_eventtimeout(int argc, uint32_t arg)
+static void sam_eventtimeout(int argc, uint32_t arg)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s *)arg;
+  struct sam_dev_s *priv = (struct sam_dev_s *)arg;
 
   DEBUGASSERT(argc == 1 && priv != NULL);
   DEBUGASSERT((priv->waitevents & SDIOWAIT_TIMEOUT) != 0);
@@ -943,13 +946,13 @@ static void sam3u_eventtimeout(int argc, uint32_t arg)
     {
       /* Yes.. wake up any waiting threads */
 
-      sam3u_endwait(priv, SDIOWAIT_TIMEOUT);
+      sam_endwait(priv, SDIOWAIT_TIMEOUT);
       flldbg("Timeout\n");
     }
 }
 
 /****************************************************************************
- * Name: sam3u_endwait
+ * Name: sam_endwait
  *
  * Description:
  *   Wake up a waiting thread if the waited-for event has occurred.
@@ -966,7 +969,7 @@ static void sam3u_eventtimeout(int argc, uint32_t arg)
  *
  ****************************************************************************/
 
-static void sam3u_endwait(struct sam3u_dev_s *priv, sdio_eventset_t wkupevent)
+static void sam_endwait(struct sam_dev_s *priv, sdio_eventset_t wkupevent)
 {
   /* Cancel the watchdog timeout */
 
@@ -974,15 +977,15 @@ static void sam3u_endwait(struct sam3u_dev_s *priv, sdio_eventset_t wkupevent)
 
   /* Disable event-related interrupts and save wakeup event */
 
-  sam3u_disablewaitints(priv, wkupevent);
+  sam_disablewaitints(priv, wkupevent);
 
   /* Wake up the waiting thread */
 
-  sam3u_givesem(priv);
+  sam_givesem(priv);
 }
 
 /****************************************************************************
- * Name: sam3u_endtransfer
+ * Name: sam_endtransfer
  *
  * Description:
  *   Terminate a transfer with the provided status.  This function is called
@@ -1001,26 +1004,27 @@ static void sam3u_endwait(struct sam3u_dev_s *priv, sdio_eventset_t wkupevent)
  *
  ****************************************************************************/
 
-static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupevent)
+static void sam_endtransfer(struct sam_dev_s *priv,
+                            sdio_eventset_t wkupevent)
 {
   /* Disable all transfer related interrupts */
 
-  sam3u_disablexfrints(priv);
+  sam_disablexfrints(priv);
 
   /* No data transfer */
 
-  sam3u_notransfer(priv);
+  sam_notransfer(priv);
 
   /* DMA debug instrumentation */
 
-  sam3u_xfrsample(priv, SAMPLENDX_END_TRANSFER);
+  sam_xfrsample(priv, SAMPLENDX_END_TRANSFER);
 
   /* Make sure that the DMA is stopped (it will be stopped automatically
    * on normal transfers, but not necessarily when the transfer terminates
    * on an error condition.
    */
 
-  sam3u_dmastop(priv->dma);
+  sam_dmastop(priv->dma);
 
   /* Disable the DMA handshaking */
 
@@ -1032,16 +1036,16 @@ static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupeven
     {
       /* Yes.. wake up any waiting threads */
 
-      sam3u_endwait(priv, wkupevent);
+      sam_endwait(priv, wkupevent);
     }
 }
 
 /****************************************************************************
- * Name: sam3u_notransfer
+ * Name: sam_notransfer
  *
  * Description:
  *   Setup for no transfer.  This is the default setup that is overriddden
- *   by sam3u_dmarecvsetup or sam3u_dmasendsetup
+ *   by sam_dmarecvsetup or sam_dmasendsetup
  *
  * Input Parameters:
  *   priv   - An instance of the HSMCI device interface
@@ -1051,7 +1055,7 @@ static void sam3u_endtransfer(struct sam3u_dev_s *priv, sdio_eventset_t wkupeven
  *
  ****************************************************************************/
 
-static void sam3u_notransfer(struct sam3u_dev_s *priv)
+static void sam_notransfer(struct sam_dev_s *priv)
 {
   uint32_t regval = getreg32(SAM_HSMCI_MR);
   regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF | HSMCI_MR_BLKLEN_MASK);
@@ -1063,7 +1067,7 @@ static void sam3u_notransfer(struct sam3u_dev_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_interrupt
+ * Name: sam_interrupt
  *
  * Description:
  *   HSMCI interrupt handler
@@ -1077,9 +1081,9 @@ static void sam3u_notransfer(struct sam3u_dev_s *priv)
  *
  ****************************************************************************/
 
-static int sam3u_interrupt(int irq, void *context)
+static int sam_interrupt(int irq, void *context)
 {
-  struct sam3u_dev_s *priv = &g_sdiodev;
+  struct sam_dev_s *priv = &g_sdiodev;
   uint32_t sr;
   uint32_t enabled;
   uint32_t pending;
@@ -1118,20 +1122,20 @@ static int sam3u_interrupt(int irq, void *context)
                 {
                   /* Yes.. Terminate with a timeout. */
 
-                  sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
+                  sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT);
                 }
               else
                 {
                   /* No..  Terminate with an I/O error. */
 
-                  sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
+                  sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE|SDIOWAIT_ERROR);
                 }
             }
           else
             {
               /* No.. Then the transfer must have completed successfully */
 
-              sam3u_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
+              sam_endtransfer(priv, SDIOWAIT_TRANSFERDONE);
             }
         }
 
@@ -1147,7 +1151,7 @@ static int sam3u_interrupt(int irq, void *context)
 
           if ((pending & priv->cmdrmask) != 0)
             {
-              sam3u_cmdsample2(SAMPLENDX_AT_WAKEUP, sr);
+              sam_cmdsample2(SAMPLENDX_AT_WAKEUP, sr);
 
               /* Yes.. Did the Command-Response sequence end with an error? */
 
@@ -1185,7 +1189,7 @@ static int sam3u_interrupt(int irq, void *context)
                 {
                   /* Yes.. wake the thread up */
 
-                  sam3u_endwait(priv, wkupevent);
+                  sam_endwait(priv, wkupevent);
                 }
             }
         }
@@ -1198,7 +1202,7 @@ static int sam3u_interrupt(int irq, void *context)
  * SDIO Interface Methods
  ****************************************************************************/
 /****************************************************************************
- * Name: sam3u_reset
+ * Name: sam_reset
  *
  * Description:
  *   Reset the HSMCI controller.  Undo all setup and initialization.
@@ -1211,9 +1215,9 @@ static int sam3u_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-static void sam3u_reset(FAR struct sdio_dev_s *dev)
+static void sam_reset(FAR struct sdio_dev_s *dev)
 {
-  FAR struct sam3u_dev_s *priv = (FAR struct sam3u_dev_s *)dev;
+  FAR struct sam_dev_s *priv = (FAR struct sam_dev_s *)dev;
   irqstate_t flags;
 
   /* Enable the MCI clock */
@@ -1240,7 +1244,7 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
 
   /* Set the Mode Register for ID mode frequency (probably 400KHz) */
 
-  sam3u_clock(dev, CLOCK_IDMODE);
+  sam_clock(dev, CLOCK_IDMODE);
 
   /* Set the SDCard Register */
 
@@ -1260,7 +1264,7 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
 
   /* No data transfer */
 
-  sam3u_notransfer(priv);
+  sam_notransfer(priv);
 
   /* Reset data */
 
@@ -1280,7 +1284,7 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: sam3u_status
+ * Name: sam_status
  *
  * Description:
  *   Get SDIO status.
@@ -1289,18 +1293,18 @@ static void sam3u_reset(FAR struct sdio_dev_s *dev)
  *   dev   - Device-specific state data
  *
  * Returned Value:
- *   Returns a bitset of status values (see sam3u_status_* defines)
+ *   Returns a bitset of status values (see sam_status_* defines)
  *
  ****************************************************************************/
 
-static uint8_t sam3u_status(FAR struct sdio_dev_s *dev)
+static uint8_t sam_status(FAR struct sdio_dev_s *dev)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   return priv->cdstatus;
 }
 
 /****************************************************************************
- * Name: sam3u_widebus
+ * Name: sam_widebus
  *
  * Description:
  *   Called after change in Bus width has been selected (via ACMD6).  Most
@@ -1316,9 +1320,9 @@ static uint8_t sam3u_status(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static void sam3u_widebus(FAR struct sdio_dev_s *dev, bool wide)
+static void sam_widebus(FAR struct sdio_dev_s *dev, bool wide)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t regval;
 
   /* Set 1-bit or 4-bit bus by configuring the SDCBUS field of the SDCR register */
@@ -1334,7 +1338,7 @@ static void sam3u_widebus(FAR struct sdio_dev_s *dev, bool wide)
 }
 
 /****************************************************************************
- * Name: sam3u_clock
+ * Name: sam_clock
  *
  * Description:
  *   Enable/disable SDIO clocking
@@ -1348,7 +1352,7 @@ static void sam3u_widebus(FAR struct sdio_dev_s *dev, bool wide)
  *
  ****************************************************************************/
 
-static void sam3u_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
+static void sam_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
   uint32_t regval;
   bool enable = true;
@@ -1395,16 +1399,16 @@ static void sam3u_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
   putreg32(regval, SAM_HSMCI_MR);
   if (enable)
     {
-      sam3u_enable();
+      sam_enable();
     }
   else
     {
-      sam3u_disable();
+      sam_disable();
     }
 }
 
 /****************************************************************************
- * Name: sam3u_attach
+ * Name: sam_attach
  *
  * Description:
  *   Attach and prepare interrupts
@@ -1417,13 +1421,13 @@ static void sam3u_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
  *
  ****************************************************************************/
 
-static int sam3u_attach(FAR struct sdio_dev_s *dev)
+static int sam_attach(FAR struct sdio_dev_s *dev)
 {
   int ret;
 
   /* Attach the HSMCI interrupt handler */
 
-  ret = irq_attach(SAM_IRQ_HSMCI, sam3u_interrupt);
+  ret = irq_attach(SAM_IRQ_HSMCI, sam_interrupt);
   if (ret == OK)
     {
 
@@ -1449,7 +1453,7 @@ static int sam3u_attach(FAR struct sdio_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: sam3u_sendcmd
+ * Name: sam_sendcmd
  *
  * Description:
  *   Send the SDIO command
@@ -1464,13 +1468,14 @@ static int sam3u_attach(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static int sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
+static int sam_sendcmd(FAR struct sdio_dev_s *dev,
+                       uint32_t cmd, uint32_t arg)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
   uint32_t regval;
   uint32_t cmdidx;
 
-  sam3u_cmdsampleinit();
+  sam_cmdsampleinit();
 
     /* Set the HSMCI Argument value */
 
@@ -1570,12 +1575,12 @@ static int sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
 
   fvdbg("cmd: %08x arg: %08x regval: %08x\n", cmd, arg, regval);
   putreg32(regval, SAM_HSMCI_CMDR);
-  sam3u_cmdsample1(SAMPLENDX_AFTER_CMDR);
+  sam_cmdsample1(SAMPLENDX_AFTER_CMDR);
   return OK;
 }
 
 /****************************************************************************
- * Name: sam3u_blocksetup
+ * Name: sam_blocksetup
  *
  * Description:
  *   Some hardward needs to be informed of the selected blocksize.
@@ -1589,8 +1594,8 @@ static int sam3u_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t arg)
  *
  ****************************************************************************/
 
-static void sam3u_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
-                             unsigned int nblocks)
+static void sam_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
+                           unsigned int nblocks)
 {
   uint32_t regval;
 
@@ -1613,7 +1618,7 @@ static void sam3u_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
 }
 
 /****************************************************************************
- * Name: sam3u_cancel
+ * Name: sam_cancel
  *
  * Description:
  *   Cancel the data transfer setup of HSMCI_RECVSETUP, HSMCI_SENDSETUP,
@@ -1629,18 +1634,18 @@ static void sam3u_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
  *
  ****************************************************************************/
 
-static int sam3u_cancel(FAR struct sdio_dev_s *dev)
+static int sam_cancel(FAR struct sdio_dev_s *dev)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
 
   /* Disable all transfer- and event- related interrupts */
 
-  sam3u_disablexfrints(priv);
-  sam3u_disablewaitints(priv, 0);
+  sam_disablexfrints(priv);
+  sam_disablewaitints(priv, 0);
 
   /* No data transfer */
 
-  sam3u_notransfer(priv);
+  sam_notransfer(priv);
 
   /* Clearing (most) pending interrupt status by reading the status register */
 
@@ -1655,7 +1660,7 @@ static int sam3u_cancel(FAR struct sdio_dev_s *dev)
    * on an error condition.
    */
 
-  sam3u_dmastop(priv->dma);
+  sam_dmastop(priv->dma);
 
   /* Disable the DMA handshaking */
 
@@ -1665,7 +1670,7 @@ static int sam3u_cancel(FAR struct sdio_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: sam3u_waitresponse
+ * Name: sam_waitresponse
  *
  * Description:
  *   Poll-wait for the response to the last command to be ready.
@@ -1679,9 +1684,9 @@ static int sam3u_cancel(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
+static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
   uint32_t sr;
   int32_t  timeout;
 
@@ -1717,8 +1722,8 @@ static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
       sr = getreg32(SAM_HSMCI_SR);
       if ((sr & priv->cmdrmask) != 0)
         {
-          sam3u_cmdsample2(SAMPLENDX_AT_WAKEUP, sr);
-          sam3u_cmddump();
+          sam_cmdsample2(SAMPLENDX_AT_WAKEUP, sr);
+          sam_cmddump();
 
           /* Yes.. Did the Command-Response sequence end with an error? */
 
@@ -1764,7 +1769,7 @@ static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 }
 
 /****************************************************************************
- * Name: sam3u_recvRx
+ * Name: sam_recvRx
  *
  * Description:
  *   Receive response to SDIO command.  Only the critical payload is
@@ -1785,9 +1790,10 @@ static int sam3u_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
  *
  ****************************************************************************/
 
-static int sam3u_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rshort)
+static int sam_recvshort(FAR struct sdio_dev_s *dev,
+                         uint32_t cmd, uint32_t *rshort)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
   int ret = OK;
 
   /* These responses could have CRC errors:
@@ -1871,9 +1877,9 @@ static int sam3u_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *r
   return ret;
 }
 
-static int sam3u_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong[4])
+static int sam_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlong[4])
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
   int ret = OK;
 
  /* R2  CID, CSD register (136-bit)
@@ -1926,20 +1932,21 @@ static int sam3u_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t rlo
 
 /* MMC responses not supported */
 
-static int sam3u_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t *rnotimpl)
+static int sam_recvnotimpl(FAR struct sdio_dev_s *dev,
+                           uint32_t cmd, uint32_t *rnotimpl)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
   priv->wkupevent = 0;
   return -ENOSYS;
 }
 
 /****************************************************************************
- * Name: sam3u_waitenable
+ * Name: sam_waitenable
  *
  * Description:
  *   Enable/disable of a set of SDIO wait events.  This is part of the
  *   the HSMCI_WAITEVENT sequence.  The set of to-be-waited-for events is
- *   configured before calling sam3u_eventwait.  This is done in this way
+ *   configured before calling sam_eventwait.  This is done in this way
  *   to help the driver to eliminate race conditions between the command
  *   setup and the subsequent events.
  *
@@ -1957,17 +1964,17 @@ static int sam3u_recvnotimpl(FAR struct sdio_dev_s *dev, uint32_t cmd, uint32_t 
  *
  ****************************************************************************/
 
-static void sam3u_waitenable(FAR struct sdio_dev_s *dev,
-                             sdio_eventset_t eventset)
+static void sam_waitenable(FAR struct sdio_dev_s *dev,
+                           sdio_eventset_t eventset)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
   uint32_t waitmask;
 
   DEBUGASSERT(priv != NULL);
 
   /* Disable event-related interrupts */
 
-  sam3u_disablewaitints(priv, 0);
+  sam_disablewaitints(priv, 0);
 
   /* Select the interrupt mask that will give us the appropriate wakeup
    * interrupts.
@@ -1982,16 +1989,16 @@ static void sam3u_waitenable(FAR struct sdio_dev_s *dev,
   /* Enable event-related interrupts */
 
   (void)getreg32(SAM_HSMCI_SR);
-  sam3u_enablewaitints(priv, waitmask, eventset);
+  sam_enablewaitints(priv, waitmask, eventset);
 }
 
 /****************************************************************************
- * Name: sam3u_eventwait
+ * Name: sam_eventwait
  *
  * Description:
  *   Wait for one of the enabled events to occur (or a timeout).  Note that
- *   all events enabled by HSMCI_WAITEVENTS are disabled when sam3u_eventwait
- *   returns.  HSMCI_WAITEVENTS must be called again before sam3u_eventwait
+ *   all events enabled by HSMCI_WAITEVENTS are disabled when sam_eventwait
+ *   returns.  HSMCI_WAITEVENTS must be called again before sam_eventwait
  *   can be used again.
  *
  * Input Parameters:
@@ -2006,10 +2013,10 @@ static void sam3u_waitenable(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static sdio_eventset_t sam3u_eventwait(FAR struct sdio_dev_s *dev,
-                                       uint32_t timeout)
+static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
+                                     uint32_t timeout)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
   sdio_eventset_t wkupevent = 0;
   int ret;
 
@@ -2037,7 +2044,7 @@ static sdio_eventset_t sam3u_eventwait(FAR struct sdio_dev_s *dev,
       /* Start the watchdog timer */
 
       delay = (timeout + (MSEC_PER_TICK-1)) / MSEC_PER_TICK;
-      ret   = wd_start(priv->waitwdog, delay, (wdentry_t)sam3u_eventtimeout,
+      ret   = wd_start(priv->waitwdog, delay, (wdentry_t)sam_eventtimeout,
                        1, (uint32_t)priv);
       if (ret != OK)
         {
@@ -2046,7 +2053,7 @@ static sdio_eventset_t sam3u_eventwait(FAR struct sdio_dev_s *dev,
     }
 
   /* Loop until the event (or the timeout occurs). Race conditions are avoided
-   * by calling sam3u_waitenable prior to triggering the logic that will cause
+   * by calling sam_waitenable prior to triggering the logic that will cause
    * the wait to terminate.  Under certain race conditions, the waited-for
    * may have already occurred before this function was called!
    */
@@ -2058,7 +2065,7 @@ static sdio_eventset_t sam3u_eventwait(FAR struct sdio_dev_s *dev,
        * there will be no wait.
        */
 
-      sam3u_takesem(priv);
+      sam_takesem(priv);
       wkupevent = priv->wkupevent;
 
       /* Check if the event has occurred.  When the event has occurred, then
@@ -2075,18 +2082,18 @@ static sdio_eventset_t sam3u_eventwait(FAR struct sdio_dev_s *dev,
         }
     }
 
-  sam3u_cmddump();
-  sam3u_xfrdump(priv);
+  sam_cmddump();
+  sam_xfrdump(priv);
   return wkupevent;
 }
 
 /****************************************************************************
- * Name: sam3u_callbackenable
+ * Name: sam_callbackenable
  *
  * Description:
  *   Enable/disable of a set of SDIO callback events.  This is part of the
  *   the SDIO callback sequence.  The set of events is configured to enabled
- *   callbacks to the function provided in sam3u_registercallback.
+ *   callbacks to the function provided in sam_registercallback.
  *
  *   Events are automatically disabled once the callback is performed and no
  *   further callback events will occur until they are again enabled by
@@ -2102,20 +2109,20 @@ static sdio_eventset_t sam3u_eventwait(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static void sam3u_callbackenable(FAR struct sdio_dev_s *dev,
-                                 sdio_eventset_t eventset)
+static void sam_callbackenable(FAR struct sdio_dev_s *dev,
+                               sdio_eventset_t eventset)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
 
   fvdbg("eventset: %02x\n", eventset);
   DEBUGASSERT(priv != NULL);
 
   priv->cbevents = eventset;
-  sam3u_callback(priv);
+  sam_callback(priv);
 }
 
 /****************************************************************************
- * Name: sam3u_registercallback
+ * Name: sam_registercallback
  *
  * Description:
  *   Register a callback that that will be invoked on any media status
@@ -2136,10 +2143,10 @@ static void sam3u_callbackenable(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static int sam3u_registercallback(FAR struct sdio_dev_s *dev,
-                                  worker_t callback, void *arg)
+static int sam_registercallback(FAR struct sdio_dev_s *dev,
+                                worker_t callback, void *arg)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s*)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s*)dev;
 
   /* Disable callbacks and register this callback and is argument */
 
@@ -2153,7 +2160,7 @@ static int sam3u_registercallback(FAR struct sdio_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: sam3u_dmasupported
+ * Name: sam_dmasupported
  *
  * Description:
  *   Return true if the hardware can support DMA
@@ -2167,14 +2174,14 @@ static int sam3u_registercallback(FAR struct sdio_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static bool sam3u_dmasupported(FAR struct sdio_dev_s *dev)
+static bool sam_dmasupported(FAR struct sdio_dev_s *dev)
 {
   return true;
 }
 #endif
 
 /****************************************************************************
- * Name: sam3u_dmarecvsetup
+ * Name: sam_dmarecvsetup
  *
  * Description:
  *   Setup to perform a read DMA.  If the processor supports a data cache,
@@ -2192,38 +2199,38 @@ static bool sam3u_dmasupported(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
-                              size_t buflen)
+static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+                          size_t buflen)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
   /* Setup register sampling */
 
-  sam3u_xfrsampleinit();
-  sam3u_xfrsample(priv, SAMPLENDX_BEFORE_SETUP);
+  sam_xfrsampleinit();
+  sam_xfrsample(priv, SAMPLENDX_BEFORE_SETUP);
 
   /* Configure the RX DMA */
 
-  sam3u_enablexfrints(priv, HSMCI_DMARECV_INTS);
-  sam3u_dmarxsetup(priv->dma, SAM_HSMCI_FIFO, (uint32_t)buffer, buflen);
+  sam_enablexfrints(priv, HSMCI_DMARECV_INTS);
+  sam_dmarxsetup(priv->dma, SAM_HSMCI_FIFO, (uint32_t)buffer, buflen);
 
   /* Enable DMA handshaking */
 
   putreg32(HSMCI_DMA_DMAEN, SAM_HSMCI_DMA);
-  sam3u_xfrsample(priv, SAMPLENDX_BEFORE_ENABLE);
+  sam_xfrsample(priv, SAMPLENDX_BEFORE_ENABLE);
 
   /* Start the DMA */
 
-  sam3u_dmastart(priv->dma, sam3u_dmacallback, priv);
-  sam3u_xfrsample(priv, SAMPLENDX_AFTER_SETUP);
+  sam_dmastart(priv->dma, sam_dmacallback, priv);
+  sam_xfrsample(priv, SAMPLENDX_AFTER_SETUP);
   return OK;
 }
 
 /****************************************************************************
- * Name: sam3u_dmasendsetup
+ * Name: sam_dmasendsetup
  *
  * Description:
  *   Setup to perform a write DMA.  If the processor supports a data cache,
@@ -2241,36 +2248,36 @@ static int sam3u_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
-                              FAR const uint8_t *buffer, size_t buflen)
+static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
+                          FAR const uint8_t *buffer, size_t buflen)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
   /* Setup register sampling */
 
-  sam3u_xfrsampleinit();
-  sam3u_xfrsample(priv, SAMPLENDX_BEFORE_SETUP);
+  sam_xfrsampleinit();
+  sam_xfrsample(priv, SAMPLENDX_BEFORE_SETUP);
 
   /* Configure the TX DMA */
 
-  sam3u_dmatxsetup(priv->dma, SAM_HSMCI_FIFO, (uint32_t)buffer, buflen);
+  sam_dmatxsetup(priv->dma, SAM_HSMCI_FIFO, (uint32_t)buffer, buflen);
 
   /* Enable DMA handshaking */
 
   putreg32(HSMCI_DMA_DMAEN, SAM_HSMCI_DMA);
-  sam3u_xfrsample(priv, SAMPLENDX_BEFORE_ENABLE);
+  sam_xfrsample(priv, SAMPLENDX_BEFORE_ENABLE);
 
   /* Start the DMA */
 
-  sam3u_dmastart(priv->dma, sam3u_dmacallback, priv);
-  sam3u_xfrsample(priv, SAMPLENDX_AFTER_SETUP);
+  sam_dmastart(priv->dma, sam_dmacallback, priv);
+  sam_xfrsample(priv, SAMPLENDX_AFTER_SETUP);
 
   /* Enable TX interrrupts */
 
-  sam3u_enablexfrints(priv, HSMCI_DMASEND_INTS);
+  sam_enablexfrints(priv, HSMCI_DMASEND_INTS);
   return OK;
 }
 
@@ -2278,7 +2285,7 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
  * Initialization/uninitialization/reset
  ****************************************************************************/
 /****************************************************************************
- * Name: sam3u_callback
+ * Name: sam_callback
  *
  * Description:
  *   Perform callback.
@@ -2290,9 +2297,9 @@ static int sam3u_dmasendsetup(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static void sam3u_callback(void *arg)
+static void sam_callback(void *arg)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s*)arg;
+  struct sam_dev_s *priv = (struct sam_dev_s*)arg;
 
   /* Is a callback registered? */
 
@@ -2377,7 +2384,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 {
   /* There is only one slot */
 
-  struct sam3u_dev_s *priv = &g_sdiodev;
+  struct sam_dev_s *priv = &g_sdiodev;
 
   fdbg("slotno: %d\n", slotno);
 
@@ -2389,7 +2396,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
   /* Allocate a DMA channel.  A FIFO size of 8 is sufficient. */
 
-  priv->dma = sam3u_dmachannel(DMA_FLAGS);
+  priv->dma = sam_dmachannel(DMA_FLAGS);
   DEBUGASSERT(priv->dma);
 
   /* Configure GPIOs for 4-bit, wide-bus operation.  NOTE: (1) the chip is capable of
@@ -2397,23 +2404,23 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    * GPIOs must be set up in board-specific logic.
    */
 
-  sam3u_configgpio(GPIO_MCI_DAT0);   /* Data 0 of Slot A */
-  sam3u_configgpio(GPIO_MCI_DAT1);   /* Data 1 of Slot A */
-  sam3u_configgpio(GPIO_MCI_DAT2);   /* Data 2 of Slot A */
-  sam3u_configgpio(GPIO_MCI_DAT3);   /* Data 3 of Slot A */
-  sam3u_configgpio(GPIO_MCI_CK);     /* SD clock */
-  sam3u_configgpio(GPIO_MCI_DA);     /* Command/Response */
+  sam_configgpio(GPIO_MCI_DAT0);   /* Data 0 of Slot A */
+  sam_configgpio(GPIO_MCI_DAT1);   /* Data 1 of Slot A */
+  sam_configgpio(GPIO_MCI_DAT2);   /* Data 2 of Slot A */
+  sam_configgpio(GPIO_MCI_DAT3);   /* Data 3 of Slot A */
+  sam_configgpio(GPIO_MCI_CK);     /* SD clock */
+  sam_configgpio(GPIO_MCI_DA);     /* Command/Response */
 
 #ifdef CONFIG_DEBUG_FS
-  sam3u_dumpgpio(GPIO_PORT_PIOA, "Pins: 3-8");
-  sam3u_dumpgpio(GPIO_PORT_PIOB, "Pins: 28-31");
+  sam_dumpgpio(GPIO_PORT_PIOA, "Pins: 3-8");
+  sam_dumpgpio(GPIO_PORT_PIOB, "Pins: 28-31");
 #endif
 
   /* Reset the card and assure that it is in the initial, unconfigured
    * state.
    */
 
-  sam3u_reset(&priv->dev);
+  sam_reset(&priv->dev);
   return &g_sdiodev.dev;
 }
 
@@ -2438,7 +2445,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
 void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint8_t cdstatus;
   irqstate_t flags;
 
@@ -2454,14 +2461,16 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
     {
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
+
   fvdbg("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
 
   /* Perform any requested callback if the status has changed */
 
   if (cdstatus != priv->cdstatus)
     {
-      sam3u_callback(priv);
+      sam_callback(priv);
     }
+
   irqrestore(flags);
 }
 
@@ -2483,7 +2492,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
 
 void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
 {
-  struct sam3u_dev_s *priv = (struct sam3u_dev_s *)dev;
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   irqstate_t flags;
 
   /* Update card status */
@@ -2497,6 +2506,7 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
     {
       priv->cdstatus &= ~SDIO_STATUS_WRPROTECTED;
     }
+
   fvdbg("cdstatus: %02x\n", priv->cdstatus);
   irqrestore(flags);
 }

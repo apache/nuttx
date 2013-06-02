@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_userspace.c
+ * arch/arm/src/common/sam_mpuinit.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,18 +39,26 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <assert.h>
 
 #include <nuttx/userspace.h>
 
-#include "sam3u_internal.h"
+#include "mpu.h"
+#include "sam_mpuinit.h"
 
-#ifdef CONFIG_NUTTX_KERNEL
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_ARMV7M_MPU)
 
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
+
+#ifndef MAX
+#  define MAX(a,b) a > b ? a : b
+#endif
+
+#ifndef MIN
+#  define MIN(a,b) a < b ? a : b
+#endif
 
 /****************************************************************************
  * Private Data
@@ -65,54 +73,52 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_userspace
+ * Name: sam_mpuinitialize
  *
  * Description:
- *   For the case of the separate user-/kernel-space build, perform whatever
- *   platform specific initialization of the user memory is required.
- *   Normally this just means initializing the user space .data and .bss
- *   segments.
+ *   Configure the MPU to permit user-space access to only restricted SAM3/4
+ *   resources.
  *
  ****************************************************************************/
 
-void sam3u_userspace(void)
+void sam_mpuinitialize(void)
 {
-  uint8_t *src;
-  uint8_t *dest;
-  uint8_t *end;
+  uintptr_t datastart = MIN(USERSPACE->us_datastart, USERSPACE->us_bssstart);
+  uintptr_t dataend   = MAX(USERSPACE->us_dataend,   USERSPACE->us_bssend);
 
-  /* Clear all of user-space .bss */
+  DEBUGASSERT(USERSPACE->us_textend >= USERSPACE->us_textstart &&
+              dataend >= datastart);
 
-  DEBUGASSERT(USERSPACE->us_bssstart != 0 && USERSPACE->us_bssend != 0 &&
-              USERSPACE->us_bssstart <= USERSPACE->us_bssend);
+  /* Show MPU information */
 
-  dest = (uint8_t*)USERSPACE->us_bssstart;
-  end  = (uint8_t*)USERSPACE->us_bssend;
+  mpu_showtype();
 
-  while (dest != end)
-    {
-      *dest++ = 0;
-    }
+  /* Configure user flash and SRAM space */
 
-  /* Initialize all of user-space .data */
+  mpu_userflash(USERSPACE->us_textstart,
+                USERSPACE->us_textend - USERSPACE->us_textstart);
 
-  DEBUGASSERT(USERSPACE->us_datasource != 0 &&
-              USERSPACE->us_datastart != 0 && USERSPACE->us_dataend != 0 && 
-              USERSPACE->us_datastart <= USERSPACE->us_dataend);
+  mpu_userintsram(datastart, dataend - datastart);
 
-  src  = (uint8_t*)USERSPACE->us_datasource;
-  dest = (uint8_t*)USERSPACE->us_datastart;
-  end  = (uint8_t*)USERSPACE->us_dataend;
+  /* Then enable the MPU */
 
-  while (dest != end)
-    {
-      *dest++ = *src++;
-    }
-
-  /* Configure the MPU to permit user-space access to its FLASH and RAM */
-
-  sam3u_mpuinitialize();
+  mpu_control(true, false, true);
 }
 
-#endif /* CONFIG_NUTTX_KERNEL */
+/****************************************************************************
+ * Name: sam_mpu_uheap
+ *
+ * Description:
+ *  Map the user-heap region.
+ *
+ *  This logic may need an extension to handle external SDRAM).
+ *
+ ****************************************************************************/
+
+void sam_mpu_uheap(uintptr_t start, size_t size)
+{
+  mpu_userintsram(start, size);
+}
+
+#endif /* CONFIG_NUTTX_KERNEL && CONFIG_ARMV7M_MPU */
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam3u-ek/sam3u_dmac.c
+ * arch/arm/src/sam3u-ek/sam_dmac.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +55,7 @@
 #include "os_internal.h"
 #include "chip.h"
 
-#include "sam3u_internal.h"
+#include "sam_dmac.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_dmac.h"
 
@@ -99,7 +99,7 @@
 
 /* This structure descibes one DMA channel */
 
-struct sam3u_dma_s
+struct sam_dma_s
 {
   uint8_t                chan;       /* DMA channel number (0-6) */
   bool                   inuse;      /* TRUE: The DMA channel is in use */
@@ -150,7 +150,7 @@ static struct dma_linklist_s g_linklist[CONFIG_SAM34_NLLDESC];
 
 /* This array describes the state of each DMA */
 
-static struct sam3u_dma_s g_dma[CONFIG_SAM34_NDMACHAN] =
+static struct sam_dma_s g_dma[CONFIG_SAM34_NDMACHAN] =
 {
 #ifdef CONFIG_ARCH_CHIP_AT91SAM3U4E
   /* the AT91SAM3U4E has four DMA channels.  The FIFOs for channels 0-2 are
@@ -191,14 +191,14 @@ static struct sam3u_dma_s g_dma[CONFIG_SAM34_NDMACHAN] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_takechsem() and sam3u_givechsem()
+ * Name: sam_takechsem() and sam_givechsem()
  *
  * Description:
  *   Used to get exclusive access to the DMA channel table
  *
  ****************************************************************************/
 
-static void sam3u_takechsem(void)
+static void sam_takechsem(void)
 {
   /* Take the semaphore (perhaps waiting) */
 
@@ -212,20 +212,20 @@ static void sam3u_takechsem(void)
     }
 }
 
-static inline void sam3u_givechsem(void)
+static inline void sam_givechsem(void)
 {
   (void)sem_post(&g_chsem);
 }
 
 /****************************************************************************
- * Name: sam3u_takedsem() and sam3u_givedsem()
+ * Name: sam_takedsem() and sam_givedsem()
  *
  * Description:
  *   Used to wait for availability of descriptors in the descriptor table.
  *
  ****************************************************************************/
 
-static void sam3u_takedsem(void)
+static void sam_takedsem(void)
 {
   /* Take the semaphore (perhaps waiting) */
 
@@ -239,20 +239,20 @@ static void sam3u_takedsem(void)
     }
 }
 
-static inline void sam3u_givedsem(void)
+static inline void sam_givedsem(void)
 {
   (void)sem_post(&g_dsem);
 }
 
 /****************************************************************************
- * Name: sam3u_fifosize
+ * Name: sam_fifosize
  *
  * Description:
  *  Decode the FIFO size from the flags
  *
  ****************************************************************************/
 
-static unsigned int sam3u_fifosize(uint8_t dmach_flags)
+static unsigned int sam_fifosize(uint8_t dmach_flags)
 {
   dmach_flags &= DMACH_FLAG_FIFOSIZE_MASK;
   if (dmach_flags == DMACH_FLAG_FIFO_8BYTES)
@@ -266,27 +266,27 @@ static unsigned int sam3u_fifosize(uint8_t dmach_flags)
 }
 
 /****************************************************************************
- * Name: sam3u_flowcontrol
+ * Name: sam_flowcontrol
  *
  * Description:
  *  Decode the FIFO flow control from the flags
  *
  ****************************************************************************/
 
-static inline bool sam3u_flowcontrol(uint8_t dmach_flags)
+static inline bool sam_flowcontrol(uint8_t dmach_flags)
 {
   return ((dmach_flags & DMACH_FLAG_FLOWCONTROL) != 0);
 }
 
 /****************************************************************************
- * Name: sam3u_fifocfg
+ * Name: sam_fifocfg
  *
  * Description:
  *  Decode the FIFO config from the flags
  *
  ****************************************************************************/
 
-static inline uint32_t sam3u_fifocfg(struct sam3u_dma_s *dmach)
+static inline uint32_t sam_fifocfg(struct sam_dma_s *dmach)
 {
   unsigned int ndx = (dmach->flags & DMACH_FLAG_FIFOCFG_MASK) >> DMACH_FLAG_FIFOCFG_SHIFT;
   DEBUGASSERT(ndx < 3);
@@ -294,7 +294,7 @@ static inline uint32_t sam3u_fifocfg(struct sam3u_dma_s *dmach)
 }
 
 /****************************************************************************
- * Name: sam3u_txcfg
+ * Name: sam_txcfg
  *
  * Description:
  *  Decode the the flags to get the correct CFG register bit settings for
@@ -302,7 +302,7 @@ static inline uint32_t sam3u_fifocfg(struct sam3u_dma_s *dmach)
  *
  ****************************************************************************/
 
-static inline uint32_t sam3u_txcfg(struct sam3u_dma_s *dmach)
+static inline uint32_t sam_txcfg(struct sam_dma_s *dmach)
 {
   uint32_t regval;
 
@@ -312,12 +312,12 @@ static inline uint32_t sam3u_txcfg(struct sam3u_dma_s *dmach)
   regval  |=   (dmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? DMACHAN_CFG_SRCH2SEL : 0;
   regval  |= (((dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT) << DMACHAN_CFG_DSTPER_SHIFT);
   regval  |=   (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMACHAN_CFG_DSTH2SEL : 0;
-  regval  |= sam3u_fifocfg(dmach);
+  regval  |= sam_fifocfg(dmach);
   return regval;
 }
 
 /****************************************************************************
- * Name: sam3u_rxcfg
+ * Name: sam_rxcfg
  *
  * Description:
  *  Decode the the flags to get the correct CFG register bit settings for
@@ -325,7 +325,7 @@ static inline uint32_t sam3u_txcfg(struct sam3u_dma_s *dmach)
  *
  ****************************************************************************/
 
-static inline uint32_t sam3u_rxcfg(struct sam3u_dma_s *dmach)
+static inline uint32_t sam_rxcfg(struct sam_dma_s *dmach)
 {
   uint32_t regval;
 
@@ -335,23 +335,23 @@ static inline uint32_t sam3u_rxcfg(struct sam3u_dma_s *dmach)
   regval  |=   (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMACHAN_CFG_SRCH2SEL : 0;
   regval  |= (((dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT) << DMACHAN_CFG_DSTPER_SHIFT);
   regval  |=   (dmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? DMACHAN_CFG_DSTH2SEL : 0;
-  regval  |= sam3u_fifocfg(dmach);
+  regval  |= sam_fifocfg(dmach);
   return regval;
 }
 
 /****************************************************************************
- * Name: sam3u_txctrlabits
+ * Name: sam_txctrlabits
  *
  * Description:
  *  Decode the the flags to get the correct CTRLA register bit settings for
  *  a transmit (memory to peripheral) transfer.  These are only the "fixed"
  *  CTRLA values and  need to be updated with the actual transfer size before
- *  being written to CTRLA sam3u_txctrla).
+ *  being written to CTRLA sam_txctrla).
  *
  ****************************************************************************/
 
 static inline uint32_t
-sam3u_txctrlabits(struct sam3u_dma_s *dmach)
+sam_txctrlabits(struct sam_dma_s *dmach)
 {
   uint32_t regval;
   unsigned int ndx;
@@ -404,15 +404,15 @@ sam3u_txctrlabits(struct sam3u_dma_s *dmach)
 }
 
 /****************************************************************************
- * Name: sam3u_txctrla
+ * Name: sam_txctrla
  *
  * Description:
  *  Or in the variable CTRLA bits
  *
  ****************************************************************************/
 
-static inline uint32_t sam3u_txctrla(struct sam3u_dma_s *dmach,
-                                     uint32_t dmasize, uint32_t txctrlabits)
+static inline uint32_t sam_txctrla(struct sam_dma_s *dmach,
+                                   uint32_t dmasize, uint32_t txctrlabits)
 {
   /* Set the buffer transfer size field.  This is the number of transfers to
    * be performed, that is, the number of source width transfers to perform.
@@ -432,17 +432,17 @@ static inline uint32_t sam3u_txctrla(struct sam3u_dma_s *dmach,
 }
 
 /****************************************************************************
- * Name: sam3u_rxctrlabits
+ * Name: sam_rxctrlabits
  *
  * Description:
  *  Decode the the flags to get the correct CTRLA register bit settings for
  *  a read (peripheral to memory) transfer. These are only the "fixed" CTRLA
  *  values and need to be updated with the actual transfer size before being
- *  written to CTRLA sam3u_rxctrla).
+ *  written to CTRLA sam_rxctrla).
  *
  ****************************************************************************/
 
-static inline uint32_t sam3u_rxctrlabits(struct sam3u_dma_s *dmach)
+static inline uint32_t sam_rxctrlabits(struct sam_dma_s *dmach)
 {
   uint32_t     regval;
   unsigned int ndx;
@@ -495,15 +495,15 @@ static inline uint32_t sam3u_rxctrlabits(struct sam3u_dma_s *dmach)
 }
 
 /****************************************************************************
- * Name: sam3u_rxctrla
+ * Name: sam_rxctrla
  *
  * Description:
  *  'OR' in the variable CTRLA bits
  *
  ****************************************************************************/
 
-static inline uint32_t sam3u_rxctrla(struct sam3u_dma_s *dmach,
-                                     uint32_t dmasize, uint32_t txctrlabits)
+static inline uint32_t sam_rxctrla(struct sam_dma_s *dmach,
+                                   uint32_t dmasize, uint32_t txctrlabits)
 {
   /* Set the buffer transfer size field.  This is the number of transfers to
    * be performed, that is, the number of source width transfers to perform.
@@ -523,7 +523,7 @@ static inline uint32_t sam3u_rxctrla(struct sam3u_dma_s *dmach,
 }
 
 /****************************************************************************
- * Name: sam3u_txctrlb
+ * Name: sam_txctrlb
  *
  * Description:
  *  Decode the the flags to get the correct CTRLB register bit settings for
@@ -531,7 +531,7 @@ static inline uint32_t sam3u_rxctrla(struct sam3u_dma_s *dmach,
  *
  ****************************************************************************/
 
-static inline uint32_t sam3u_txctrlb(struct sam3u_dma_s *dmach)
+static inline uint32_t sam_txctrlb(struct sam_dma_s *dmach)
 {
   uint32_t regval;
 
@@ -602,7 +602,7 @@ static inline uint32_t sam3u_txctrlb(struct sam3u_dma_s *dmach)
 }
 
 /****************************************************************************
- * Name: sam3u_rxctrlb
+ * Name: sam_rxctrlb
  *
  * Description:
  *  Decode the the flags to get the correct CTRLB register bit settings for
@@ -610,7 +610,7 @@ static inline uint32_t sam3u_txctrlb(struct sam3u_dma_s *dmach)
  *
  ****************************************************************************/
 
-static inline uint32_t sam3u_rxctrlb(struct sam3u_dma_s *dmach)
+static inline uint32_t sam_rxctrlb(struct sam_dma_s *dmach)
 {
   uint32_t regval;
 
@@ -681,7 +681,7 @@ static inline uint32_t sam3u_rxctrlb(struct sam3u_dma_s *dmach)
 }
 
 /****************************************************************************
- * Name: sam3u_allocdesc
+ * Name: sam_allocdesc
  *
  * Description:
  *  Allocate and add one descriptor to the DMA channel's link list.
@@ -695,8 +695,8 @@ static inline uint32_t sam3u_rxctrlb(struct sam3u_dma_s *dmach)
  ****************************************************************************/
 
 static struct dma_linklist_s *
-sam3u_allocdesc(struct sam3u_dma_s *dmach, struct dma_linklist_s *prev,
-                uint32_t src, uint32_t dest, uint32_t ctrla, uint32_t ctrlb)
+sam_allocdesc(struct sam_dma_s *dmach, struct dma_linklist_s *prev,
+              uint32_t src, uint32_t dest, uint32_t ctrla, uint32_t ctrlb)
 {
   struct dma_linklist_s *desc = NULL;
   int i;
@@ -713,7 +713,7 @@ sam3u_allocdesc(struct sam3u_dma_s *dmach, struct dma_linklist_s *prev,
        * is at least one free descriptor in the table and it is ours.
        */
 
-      sam3u_takedsem();
+      sam_takedsem();
 
       /* Examine each link list entry to find an available one -- i.e., one
        * with src == 0.  That src field is set to zero by the DMA transfer
@@ -721,7 +721,7 @@ sam3u_allocdesc(struct sam3u_dma_s *dmach, struct dma_linklist_s *prev,
        * that is an atomic operation.
        */
 
-      sam3u_takechsem();
+      sam_takechsem();
       for (i = 0; i < CONFIG_SAM34_NLLDESC; i++)
         {
           if (g_linklist[i].src == 0)
@@ -780,14 +780,15 @@ sam3u_allocdesc(struct sam3u_dma_s *dmach, struct dma_linklist_s *prev,
        * search loop should always be successful.
        */
 
-      sam3u_givechsem();
+      sam_givechsem();
       DEBUGASSERT(desc != NULL);
     }
+
   return desc;
 }
 
 /****************************************************************************
- * Name: sam3u_freelinklist
+ * Name: sam_freelinklist
  *
  * Description:
  *  Free all descriptors in the DMA channel's link list.
@@ -796,7 +797,7 @@ sam3u_allocdesc(struct sam3u_dma_s *dmach, struct dma_linklist_s *prev,
  *
  ****************************************************************************/
 
-static void sam3u_freelinklist(struct sam3u_dma_s *dmach)
+static void sam_freelinklist(struct sam_dma_s *dmach)
 {
   struct dma_linklist_s *desc;
   struct dma_linklist_s *next;
@@ -816,13 +817,13 @@ static void sam3u_freelinklist(struct sam3u_dma_s *dmach)
       next = (struct dma_linklist_s *)desc->next;
       DEBUGASSERT(desc->src != 0);
       memset(desc, 0, sizeof(struct dma_linklist_s));
-      sam3u_givedsem();
+      sam_givedsem();
       desc = next;
     }
 }
 
 /****************************************************************************
- * Name: sam3u_txbuffer
+ * Name: sam_txbuffer
  *
  * Description:
  *   Configure DMA for transmit of one buffer (memory to peripheral).  This
@@ -831,8 +832,8 @@ static void sam3u_freelinklist(struct sam3u_dma_s *dmach)
  *
  ****************************************************************************/
 
-static int sam3u_txbuffer(struct sam3u_dma_s *dmach, uint32_t paddr,
-                          uint32_t maddr, size_t nbytes)
+static int sam_txbuffer(struct sam_dma_s *dmach, uint32_t paddr,
+                        uint32_t maddr, size_t nbytes)
 {
   uint32_t regval;
   uint32_t ctrla;
@@ -849,14 +850,15 @@ static int sam3u_txbuffer(struct sam3u_dma_s *dmach, uint32_t paddr,
     }
   else
     {
-      regval = sam3u_txctrlabits(dmach);
-      ctrlb  = sam3u_txctrlb(dmach);
+      regval = sam_txctrlabits(dmach);
+      ctrlb  = sam_txctrlb(dmach);
     }
-  ctrla  = sam3u_txctrla(dmach, regval, nbytes);
+
+  ctrla = sam_txctrla(dmach, regval, nbytes);
 
   /* Add the new link list entry */
 
-  if (!sam3u_allocdesc(dmach, dmach->lltail, maddr, paddr, ctrla, ctrlb))
+  if (!sam_allocdesc(dmach, dmach->lltail, maddr, paddr, ctrla, ctrlb))
     {
       return -ENOMEM;
     }
@@ -865,12 +867,12 @@ static int sam3u_txbuffer(struct sam3u_dma_s *dmach, uint32_t paddr,
    * the DMA is started).
    */
 
-  dmach->cfg = sam3u_txcfg(dmach);
+  dmach->cfg = sam_txcfg(dmach);
   return OK;
 }
 
 /****************************************************************************
- * Name: sam3u_rxbuffer
+ * Name: sam_rxbuffer
  *
  * Description:
  *   Configure DMA for receipt of one buffer (peripheral to memory).  This
@@ -879,8 +881,8 @@ static int sam3u_txbuffer(struct sam3u_dma_s *dmach, uint32_t paddr,
  *
  ****************************************************************************/
 
-static int sam3u_rxbuffer(struct sam3u_dma_s *dmach, uint32_t paddr,
-                          uint32_t maddr, size_t nbytes)
+static int sam_rxbuffer(struct sam_dma_s *dmach, uint32_t paddr,
+                        uint32_t maddr, size_t nbytes)
 {
   uint32_t regval;
   uint32_t ctrla;
@@ -897,14 +899,14 @@ static int sam3u_rxbuffer(struct sam3u_dma_s *dmach, uint32_t paddr,
     }
   else
     {
-      regval = sam3u_rxctrlabits(dmach);
-      ctrlb  = sam3u_rxctrlb(dmach);
+      regval = sam_rxctrlabits(dmach);
+      ctrlb  = sam_rxctrlb(dmach);
     }
-   ctrla  = sam3u_rxctrla(dmach, regval, nbytes);
+   ctrla  = sam_rxctrla(dmach, regval, nbytes);
 
   /* Add the new link list entry */
 
-  if (!sam3u_allocdesc(dmach, dmach->lltail, paddr, maddr, ctrla, ctrlb))
+  if (!sam_allocdesc(dmach, dmach->lltail, paddr, maddr, ctrla, ctrlb))
     {
       return -ENOMEM;
     }
@@ -913,19 +915,19 @@ static int sam3u_rxbuffer(struct sam3u_dma_s *dmach, uint32_t paddr,
    * the DMA is started).
    */
 
-  dmach->cfg = sam3u_rxcfg(dmach);
+  dmach->cfg = sam_rxcfg(dmach);
   return OK;
 }
 
 /****************************************************************************
- * Name: sam3u_single
+ * Name: sam_single
  *
  * Description:
  *   Start a single buffer DMA.
  *
  ****************************************************************************/
 
-static inline int sam3u_single(struct sam3u_dma_s *dmach)
+static inline int sam_single(struct sam_dma_s *dmach)
 {
   struct dma_linklist_s *llhead = dmach->llhead;
 
@@ -978,14 +980,14 @@ static inline int sam3u_single(struct sam3u_dma_s *dmach)
 }
 
 /****************************************************************************
- * Name: sam3u_multiple
+ * Name: sam_multiple
  *
  * Description:
  *   Start a multiple buffer DMA.
  *
  ****************************************************************************/
 
-static inline int sam3u_multiple(struct sam3u_dma_s *dmach)
+static inline int sam_multiple(struct sam_dma_s *dmach)
 {
   struct dma_linklist_s *llhead = dmach->llhead;
 
@@ -1039,14 +1041,14 @@ static inline int sam3u_multiple(struct sam3u_dma_s *dmach)
 }
 
 /****************************************************************************
- * Name: sam3u_dmasterminate
+ * Name: sam_dmaterminate
  *
  * Description:
  *   Terminate the DMA transfer and disable the DMA channel
  *
  ****************************************************************************/
 
-static void sam3u_dmaterminate(struct sam3u_dma_s *dmach, int result)
+static void sam_dmaterminate(struct sam_dma_s *dmach, int result)
 {
   /* Disable all channel interrupts */
 
@@ -1058,7 +1060,7 @@ static void sam3u_dmaterminate(struct sam3u_dma_s *dmach, int result)
 
   /* Free the linklist */
 
-  sam3u_freelinklist(dmach);
+  sam_freelinklist(dmach);
 
   /* Perform the DMA complete callback */
 
@@ -1072,16 +1074,16 @@ static void sam3u_dmaterminate(struct sam3u_dma_s *dmach, int result)
 }
 
 /****************************************************************************
- * Name: sam3u_dmainterrupt
+ * Name: sam_dmainterrupt
  *
  * Description:
  *  DMA interrupt handler
  *
  ****************************************************************************/
 
-static int sam3u_dmainterrupt(int irq, void *context)
+static int sam_dmainterrupt(int irq, void *context)
 {
-  struct sam3u_dma_s *dmach;
+  struct sam_dma_s *dmach;
   unsigned int chndx;
   uint32_t regval;
 
@@ -1111,7 +1113,7 @@ static int sam3u_dmainterrupt(int irq, void *context)
                 {
                    /* Yes... Terminate the transfer with an error? */
 
-                  sam3u_dmaterminate(dmach, -EIO);
+                  sam_dmaterminate(dmach, -EIO);
                 }
 
               /* Is the transfer complete? */
@@ -1120,7 +1122,7 @@ static int sam3u_dmainterrupt(int irq, void *context)
                {
                   /* Yes.. Terminate the transfer with success */
 
-                  sam3u_dmaterminate(dmach, OK);
+                  sam_dmaterminate(dmach, OK);
                 }
 
               /* Otherwise, this must be a Bufffer Transfer Complete (BTC)
@@ -1144,7 +1146,7 @@ static int sam3u_dmainterrupt(int irq, void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_dmainitialize
+ * Name: up_dmainitialize
  *
  * Description:
  *   Initialize the DMA subsystem
@@ -1170,7 +1172,7 @@ void weak_function up_dmainitialize(void)
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_DMAC, sam3u_dmainterrupt);
+  (void)irq_attach(SAM_IRQ_DMAC, sam_dmainterrupt);
 
   /* Enable the IRQ at the NVIC (still disabled at the DMA controller) */
 
@@ -1187,7 +1189,7 @@ void weak_function up_dmainitialize(void)
 }
 
 /****************************************************************************
- * Name: sam3u_dmachannel
+ * Name: sam_dmachannel
  *
  * Description:
  *   Allocate a DMA channel.  This function sets aside a DMA channel with
@@ -1206,28 +1208,28 @@ void weak_function up_dmainitialize(void)
  *
  ****************************************************************************/
 
-DMA_HANDLE sam3u_dmachannel(uint32_t dmach_flags)
+DMA_HANDLE sam_dmachannel(uint32_t dmach_flags)
 {
-  struct sam3u_dma_s *dmach;
+  struct sam_dma_s *dmach;
   unsigned int chndx;
 
   /* Get the search parameters */
 
-  bool flowcontrol = sam3u_flowcontrol(dmach_flags);
-  unsigned int fifosize = sam3u_fifosize(dmach_flags);
+  bool flowcontrol = sam_flowcontrol(dmach_flags);
+  unsigned int fifosize = sam_fifosize(dmach_flags);
 
   /* Search for an available DMA channel with at least the requested FIFO
    * size.
    */
 
   dmach = NULL;
-  sam3u_takechsem();
+  sam_takechsem();
   for (chndx = 0; chndx < CONFIG_SAM34_NDMACHAN; chndx++)
     {
-      struct sam3u_dma_s *candidate = &g_dma[chndx];
+      struct sam_dma_s *candidate = &g_dma[chndx];
       if (!candidate->inuse &&
-          (sam3u_fifosize(candidate->flags) >= fifosize) &&
-          (!flowcontrol || sam3u_flowcontrol(dmach_flags)))
+          (sam_fifosize(candidate->flags) >= fifosize) &&
+          (!flowcontrol || sam_flowcontrol(dmach_flags)))
         {
           dmach         = candidate;
           dmach->inuse  = true;
@@ -1254,16 +1256,16 @@ DMA_HANDLE sam3u_dmachannel(uint32_t dmach_flags)
           break;
         }
     }
-  sam3u_givechsem();
+  sam_givechsem();
   return (DMA_HANDLE)dmach;
 }
 
 /****************************************************************************
- * Name: sam3u_dmafree
+ * Name: sam_dmafree
  *
  * Description:
  *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until sam3u_dmachannel() is called again to re-gain
+ *   NEVER be used again until sam_dmachannel() is called again to re-gain
  *   a valid handle.
  *
  * Returned Value:
@@ -1271,9 +1273,9 @@ DMA_HANDLE sam3u_dmachannel(uint32_t dmach_flags)
  *
  ****************************************************************************/
 
-void sam3u_dmafree(DMA_HANDLE handle)
+void sam_dmafree(DMA_HANDLE handle)
 {
-  struct sam3u_dma_s *dmach = (struct sam3u_dma_s *)handle;
+  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
 
   /* Mark the channel no longer in use.  Clearing the inuse flag is an atomic
    * operation and so should be safe.
@@ -1285,19 +1287,19 @@ void sam3u_dmafree(DMA_HANDLE handle)
 }
 
 /****************************************************************************
- * Name: sam3u_dmatxsetup
+ * Name: sam_dmatxsetup
  *
  * Description:
  *   Configure DMA for transmit of one buffer (memory to peripheral).  This
  *   function may be called multiple times to handle large and/or dis-
- *   continuous transfers.  Calls to sam3u_dmatxsetup() and sam3u_dmarxsetup()
+ *   continuous transfers.  Calls to sam_dmatxsetup() and sam_dmarxsetup()
  *   must not be intermixed on the same transfer, however.
  *
  ****************************************************************************/
 
-int sam3u_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
+int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
 {
-  struct sam3u_dma_s *dmach = (struct sam3u_dma_s *)handle;
+  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
   int ret = OK;
 
   DEBUGASSERT(dmach && dmach->llhead != NULL && dmach->lltail != 0);
@@ -1308,7 +1310,7 @@ int sam3u_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t n
     {
       /* Set up the maximum size transfer */
 
-      ret = sam3u_txbuffer(dmach, paddr, maddr, DMACHAN_CTRLA_BTSIZE_MAX);
+      ret = sam_txbuffer(dmach, paddr, maddr, DMACHAN_CTRLA_BTSIZE_MAX);
       if (ret == OK);
         {
           /* Decrement the number of bytes left to transfer */
@@ -1335,25 +1337,25 @@ int sam3u_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t n
 
   if (ret == OK && nbytes > 0)
     {
-      ret = sam3u_txbuffer(dmach, paddr, maddr, nbytes);
+      ret = sam_txbuffer(dmach, paddr, maddr, nbytes);
     }
   return ret;
 }
 
 /****************************************************************************
- * Name: sam3u_dmarxsetup
+ * Name: sam_dmarxsetup
  *
  * Description:
  *   Configure DMA for receipt of one buffer (peripheral to memory).  This
  *   function may be called multiple times to handle large and/or dis-
- *   continuous transfers.  Calls to sam3u_dmatxsetup() and sam3u_dmarxsetup()
+ *   continuous transfers.  Calls to sam_dmatxsetup() and sam_dmarxsetup()
  *   must not be intermixed on the same transfer, however.
  *
  ****************************************************************************/
 
-int sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
+int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
 {
-  struct sam3u_dma_s *dmach = (struct sam3u_dma_s *)handle;
+  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
   int ret = OK;
 
   DEBUGASSERT(dmach && dmach->llhead != NULL && dmach->lltail != 0);
@@ -1364,7 +1366,7 @@ int sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t n
     {
       /* Set up the maximum size transfer */
 
-      ret = sam3u_rxbuffer(dmach, paddr, maddr, DMACHAN_CTRLA_BTSIZE_MAX);
+      ret = sam_rxbuffer(dmach, paddr, maddr, DMACHAN_CTRLA_BTSIZE_MAX);
       if (ret == OK);
         {
           /* Decrement the number of bytes left to transfer */
@@ -1391,22 +1393,22 @@ int sam3u_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t n
 
   if (ret == OK && nbytes > 0)
     {
-      ret = sam3u_rxbuffer(dmach, paddr, maddr, nbytes);
+      ret = sam_rxbuffer(dmach, paddr, maddr, nbytes);
     }
   return ret;
 }
 
 /****************************************************************************
- * Name: sam3u_dmastart
+ * Name: sam_dmastart
  *
  * Description:
  *   Start the DMA transfer
  *
  ****************************************************************************/
 
-int sam3u_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
+int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 {
-  struct sam3u_dma_s *dmach = (struct sam3u_dma_s *)handle;
+  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
   int ret = -EINVAL;
 
   /* Verify that the DMA has been setup (i.e., at least one entry in the
@@ -1425,52 +1427,52 @@ int sam3u_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
       if (dmach->llhead == dmach->lltail)
         {
-          ret = sam3u_single(dmach);
+          ret = sam_single(dmach);
         }
       else
         {
-          ret = sam3u_multiple(dmach);
+          ret = sam_multiple(dmach);
         }
     }
   return ret;
 }
 
 /****************************************************************************
- * Name: sam3u_dmastop
+ * Name: sam_dmastop
  *
  * Description:
- *   Cancel the DMA.  After sam3u_dmastop() is called, the DMA channel is
- *   reset and sam3u_dmasetup() must be called before sam3u_dmastart() can be
+ *   Cancel the DMA.  After sam_dmastop() is called, the DMA channel is
+ *   reset and sam_dmarx/txsetup() must be called before sam_dmastart() can be
  *   called again
  *
  ****************************************************************************/
 
-void sam3u_dmastop(DMA_HANDLE handle)
+void sam_dmastop(DMA_HANDLE handle)
 {
-  struct sam3u_dma_s *dmach = (struct sam3u_dma_s *)handle;
+  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
   irqstate_t flags;
 
   DEBUGASSERT(dmach != NULL);
   flags = irqsave();
-  sam3u_dmaterminate(dmach, -EINTR);
+  sam_dmaterminate(dmach, -EINTR);
   irqrestore(flags);
 }
 
 /****************************************************************************
- * Name: sam3u_dmasample
+ * Name: sam_dmasample
  *
  * Description:
  *   Sample DMA register contents
  *
  * Assumptions:
- *   - DMA handle allocated by sam3u_dmachannel()
+ *   - DMA handle allocated by sam_dmachannel()
  *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void sam3u_dmasample(DMA_HANDLE handle, struct sam3u_dmaregs_s *regs)
+void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
 {
-  struct sam3u_dma_s *dmach = (struct sam3u_dma_s *)handle;
+  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
   irqstate_t flags;
 
   /* Sample global registers.  NOTE: reading EBCISR clears interrupts, but
@@ -1502,21 +1504,21 @@ void sam3u_dmasample(DMA_HANDLE handle, struct sam3u_dmaregs_s *regs)
 #endif /* CONFIG_DEBUG_DMA */
 
 /****************************************************************************
- * Name: sam3u_dmadump
+ * Name: sam_dmadump
  *
  * Description:
  *   Dump previously sampled DMA register contents
  *
  * Assumptions:
- *   - DMA handle allocated by sam3u_dmachannel()
+ *   - DMA handle allocated by sam_dmachannel()
  *
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void sam3u_dmadump(DMA_HANDLE handle, const struct sam3u_dmaregs_s *regs,
-                   const char *msg)
+void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
+                 const char *msg)
 {
-  struct sam3u_dma_s *dmach = (struct sam3u_dma_s *)handle;
+  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
 
   dmadbg("%s\n", msg);
   dmadbg("  DMA Global Registers:\n");

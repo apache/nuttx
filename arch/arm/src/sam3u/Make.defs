@@ -35,7 +35,7 @@
 
 # The start-up, "head", file
 
-HEAD_ASRC = sam3u_vectors.S
+HEAD_ASRC = sam_vectors.S
 
 # Common ARM and Cortex-M3 files
 
@@ -77,24 +77,24 @@ endif
 # Required SAM3/4 files
 
 CHIP_ASRCS  =
-CHIP_CSRCS  = sam3u_allocateheap.c sam3u_clockconfig.c sam3u_gpioirq.c
-CHIP_CSRCS += sam3u_irq.c sam3u_lowputc.c sam3u_pio.c sam3u_serial.c
-CHIP_CSRCS += sam3u_start.c sam3u_timerisr.c
+CHIP_CSRCS  = sam_allocateheap.c sam_clockconfig.c sam_gpioirq.c
+CHIP_CSRCS += sam_irq.c sam_lowputc.c sam_gpio.c sam_serial.c
+CHIP_CSRCS += sam_start.c sam_timerisr.c
 
 # Configuration-dependent SAM3/4 files
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
-CHIP_CSRCS += sam3u_userspace.c sam3u_mpuinit.c
+CHIP_CSRCS += sam_userspace.c sam_mpuinit.c
 endif
 
 ifeq ($(CONFIG_SAM34_DMA),y)
-CHIP_CSRCS += sam3u_dmac.c
+CHIP_CSRCS += sam_dmac.c
 endif
 
 ifeq ($(CONFIG_SAM34_HSMCI),y)
-CHIP_CSRCS += sam3u_hsmci.c
+CHIP_CSRCS += sam_hsmci.c
 endif
 
 ifeq ($(CONFIG_SAM34_SPI),y)
-CHIP_CSRCS += sam3u_spi.c
+CHIP_CSRCS += sam_spi.c
 endif

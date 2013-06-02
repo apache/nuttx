@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sam3u/chip/sam_memorymap.h
+ * arch/arm/src/sam3u/chip/sam_pinmap.h
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM3U_CHIP_SAM_MEMORYMAP_H
-#define __ARCH_ARM_SRC_SAM3U_CHIP_SAM_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_SAM3U_CHIP_SAM_PINMAP_H
+#define __ARCH_ARM_SRC_SAM3U_CHIP_SAM_PINMAP_H
 
 /************************************************************************************
  * Included Files
@@ -44,10 +44,10 @@
 #include "chip.h"
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
-#  include "chip/sam3u_memorymap.h"
+#  include "chip/sam3u_pinmap.h"
 #else
 #  Unrecognized SAM architecture
 #endif
 
-#endif /* __ARCH_ARM_SRC_SAM3U_CHIP_SAM_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_SAM3U_CHIP_SAM_PINMAP_H */
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_serial.c
+ * arch/arm/src/sam3u/sam_serial.c
  *
  *   Copyright (C) 2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,11 +55,12 @@
 #include <arch/serial.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
-#include "chip/sam_uart.h"
 #include "up_arch.h"
 #include "up_internal.h"
 #include "os_internal.h"
+
+#include "chip.h"
+#include "chip/sam_uart.h"
 
 /****************************************************************************
  * Definitions
@@ -861,7 +862,7 @@ static int up_setup(struct uart_dev_s *dev)
   uint32_t regval;
 
   /* Note: The logic here depends on the fact that that the USART module
-   * was enabled and the pins were configured in sam3u_lowsetup().
+   * was enabled and the pins were configured in sam_lowsetup().
    */
 
   /* The shutdown method will put the UART in a known, disabled state */
@@ -1132,8 +1133,10 @@ static int up_interrupt(int irq, void *context)
 
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
+#ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
   struct inode      *inode = filep->f_inode;
   struct uart_dev_s *dev   = inode->i_private;
+#endif
   int                ret    = OK;
 
   switch (cmd)
@@ -1330,7 +1333,7 @@ static bool up_txempty(struct uart_dev_s *dev)
 void up_earlyserialinit(void)
 {
   /* NOTE:  All GPIO configuration for the USARTs was performed in
-   * sam3u_lowsetup
+   * sam_lowsetup
    */
 
   /* Disable all USARTS */
@@ -1403,7 +1406,7 @@ int up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
-  uint16_t imr;
+  uint32_t imr;
 
   up_disableallints(priv, &imr);
 

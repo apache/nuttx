@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/common/sam3u_allocateheap.c
+ * arch/arm/src/common/sam_allocateheap.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +51,7 @@
 #include "mpu.h"
 #include "up_arch.h"
 #include "up_internal.h"
-#include "sam3u_internal.h"
+#include "sam_mpuinit.h"
 
 /****************************************************************************
  * Private Definitions
@@ -157,7 +157,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   /* Allow user-mode access to the user heap memory */
 
-   sam3u_mpu_uheap((uintptr_t)ubase, usize);
+   sam_mpu_uheap((uintptr_t)ubase, usize);
 #else
 
   /* Return the heap settings */
@@ -226,7 +226,7 @@ void up_addregion(void)
 {
   /* Allow user access to the heap memory */
 
-  sam3u_mpu_uheap(SAM_INTSRAM1_BASE, CONFIG_SAM34_SRAM1_SIZE);
+  sam_mpu_uheap(SAM_INTSRAM1_BASE, CONFIG_SAM34_SRAM1_SIZE);
 
   /* Add the region */
 
@@ -235,7 +235,7 @@ void up_addregion(void)
 #if CONFIG_MM_REGIONS > 2
   /* Allow user access to the heap memory */
 
-  sam3u_mpu_uheap(SAM_NFCSRAM_BASE, CONFIG_SAM34_NFCSRAM_SIZE);
+  sam_mpu_uheap(SAM_NFCSRAM_BASE, CONFIG_SAM34_NFCSRAM_SIZE);
 
   /* Add the region */
 

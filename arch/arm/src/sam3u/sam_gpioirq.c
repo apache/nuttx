@@ -1,8 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sam3u/sam3u_gpioirq.c
- * arch/arm/src/chip/sam3u_gpioirq.c
+ * arch/arm/src/sam3u/sam_gpioirq.c
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -54,7 +53,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 
-#include "sam3u_internal.h"
+#include "sam_gpio.h"
 #include "chip/sam_pio.h"
 #include "chip/sam_pmc.h"
 
@@ -77,41 +76,41 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_gpiobase
+ * Name: sam_gpiobase
  *
  * Description:
  *   Return the base address of the GPIO register set
  *
  ****************************************************************************/
 
-static inline uint32_t sam3u_gpiobase(uint16_t pinset)
+static inline uint32_t sam_gpiobase(uint16_t pinset)
 {
   int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   return SAM_PION_BASE(port >> GPIO_PORT_SHIFT);
 }
 
 /****************************************************************************
- * Name: sam3u_gpiopin
+ * Name: sam_gpiopin
  *
  * Description:
  *   Returun the base address of the GPIO register set
  *
  ****************************************************************************/
 
-static inline int sam3u_gpiopin(uint16_t pinset)
+static inline int sam_gpiopin(uint16_t pinset)
 {
   return 1 << ((pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
 }
 
 /****************************************************************************
- * Name: sam3u_irqbase
+ * Name: sam_irqbase
  *
  * Description:
  *   Return gpio information associated with this IRQ
  *
  ****************************************************************************/
 
-static int sam3u_irqbase(int irq, uint32_t *base, int *pin)
+static int sam_irqbase(int irq, uint32_t *base, int *pin)
 {
   if (irq >= SAM_IRQ_NIRQS)
     {
@@ -200,7 +199,7 @@ static int up_gpiocinterrupt(int irq, void *context)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam3u_gpioirqinitialize
+ * Name: sam_gpioirqinitialize
  *
  * Description:
  *   Initialize logic to support a second level of interrupt decoding for
@@ -208,7 +207,7 @@ static int up_gpiocinterrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-void sam3u_gpioirqinitialize(void)
+void sam_gpioirqinitialize(void)
 {
   uint32_t pcer;
 
@@ -271,17 +270,17 @@ void sam3u_gpioirqinitialize(void)
 }
 
 /************************************************************************************
- * Name: sam3u_gpioirq
+ * Name: sam_gpioirq
  *
  * Description:
  *   Configure an interrupt for the specified GPIO pin.
  *
  ************************************************************************************/
 
-void sam3u_gpioirq(uint16_t pinset)
+void sam_gpioirq(uint16_t pinset)
 {
-  uint32_t base = sam3u_gpiobase(pinset);
-  int      pin  = sam3u_gpiopin(pinset);
+  uint32_t base = sam_gpiobase(pinset);
+  int      pin  = sam_gpiopin(pinset);
 
    /* Are any additional interrupt modes selected? */
 
@@ -322,19 +321,19 @@ void sam3u_gpioirq(uint16_t pinset)
 }
 
 /************************************************************************************
- * Name: sam3u_gpioirqenable
+ * Name: sam_gpioirqenable
  *
  * Description:
  *   Enable the interrupt for specified GPIO IRQ
  *
  ************************************************************************************/
 
-void sam3u_gpioirqenable(int irq)
+void sam_gpioirqenable(int irq)
 {
   uint32_t base;
   int      pin;
 
-  if (sam3u_irqbase(irq, &base, &pin) == OK)
+  if (sam_irqbase(irq, &base, &pin) == OK)
     {
        /* Clear (all) pending interrupts and enable this pin interrupt */
 
@@ -344,19 +343,19 @@ void sam3u_gpioirqenable(int irq)
 }
 
 /************************************************************************************
- * Name: sam3u_gpioirqdisable
+ * Name: sam_gpioirqdisable
  *
  * Description:
  *   Disable the interrupt for specified GPIO IRQ
  *
  ************************************************************************************/
 
-void sam3u_gpioirqdisable(int irq)
+void sam_gpioirqdisable(int irq)
 {
   uint32_t base;
   int      pin;
 
-  if (sam3u_irqbase(irq, &base, &pin) == OK)
+  if (sam_irqbase(irq, &base, &pin) == OK)
     {
        /* Disable this pin interrupt */
 
