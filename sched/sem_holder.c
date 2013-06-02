@@ -448,11 +448,22 @@ static int sem_restoreholderprio(FAR struct semholder_s *pholder, FAR sem_t *sem
 
       if (htcb->npend_reprio < 1)
         {
-          /* No... the holder thread has only been boosted once.  Reset all
-           * priorities back to the base priority.
+          /* No... the holder thread has only been boosted once.
+           * npend_reprio should be 0 and the boosted priority should be the
+           * priority of the task that just got the semaphore
+           * (stcb->sched_priority)
+           *
+           * That latter assumption may not be true if the stcb's priority
+           * was also boosted so that it no longer matches the htcb's
+           * sched_priority.  Or if CONFIG_SEM_NNESTPRIO is too small (so
+           * that we do not have a proper record of the reprioritizations).
            */
 
-          DEBUGASSERT(htcb->sched_priority == stcb->sched_priority && htcb->npend_reprio == 0);
+          DEBUGASSERT(/* htcb->sched_priority == stcb->sched_priority && */
+                      htcb->npend_reprio == 0);
+
+          /* Reset the holder's priority back to the base priority. */
+
           sched_reprioritize(htcb, htcb->base_priority);
         }
 

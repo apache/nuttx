@@ -4868,3 +4868,5 @@
 	  the SAM4L (2013-6-2).
 	* libc/stdio/lib_dprintd.c and lib_vdprintf.c:  Add dprintf() and
 	  vdprintf() (the latter from Andrew Tridgell, 2013-6-2).
+	* sched/sem_holder.c:  Modify assertion that is reported to cause
+	  false alarm assertions (2013-6-2).

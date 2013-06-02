@@ -56,4 +56,4 @@ int vdprintf(int fd, FAR const char *fmt, va_list ap)
 
    lib_rawoutstream(&rawoutstream, fd);
    return lib_vsprintf(&rawoutstream.public, fmt, ap);
-} 
+}
