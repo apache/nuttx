@@ -41,12 +41,14 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip.h"
+#include <arch/sam34/chip.h>
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
 #  include "chip/sam3u_memorymap.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4L)
+#  include "chip/sam4l_memorymap.h"
 #else
-#  Unrecognized SAM architecture
+#  error Unrecognized SAM architecture
 #endif
 
 #endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_MEMORYMAP_H */
