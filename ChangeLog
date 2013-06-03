@@ -4873,3 +4873,7 @@
 	* arch/arm/include/sam34/sam4l_irq.h and
 	  arch/arm/src/sam34/chip/sam4l_memorymap.h: Add interrupt and memory
 	  map definitions for the AT91SAM4L (2013-6-3).
+	* arch/arm/src/sam34/chip/sam4l_vectors.h and arm/src/sam34/sam_vectors.S:
+	  Add interrupt vector support for the SAM4L family (2013-6-3).
+	* arch/include/sam34/chip.h:  Add chip definitions for the SAM4L
+	  family (2013-6-3).

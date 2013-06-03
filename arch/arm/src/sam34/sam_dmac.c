@@ -78,14 +78,14 @@
 /* Check the number of link list descriptors to allocate */
 
 #ifndef CONFIG_SAM34_NLLDESC
-#  define CONFIG_SAM34_NLLDESC CONFIG_SAM34_NDMACHAN
+#  define CONFIG_SAM34_NLLDESC SAM34_NDMACHAN
 #endif
 
-#if CONFIG_SAM34_NLLDESC < CONFIG_SAM34_NDMACHAN
-#  warning "At least CONFIG_SAM34_NDMACHAN descriptors must be allocated"
+#if CONFIG_SAM34_NLLDESC < SAM34_NDMACHAN
+#  warning "At least SAM34_NDMACHAN descriptors must be allocated"
 
 #  undef CONFIG_SAM34_NLLDESC
-#  define CONFIG_SAM34_NLLDESC CONFIG_SAM34_NDMACHAN
+#  define CONFIG_SAM34_NLLDESC SAM34_NDMACHAN
 #endif
 
 /* Register values **********************************************************/
@@ -150,15 +150,15 @@ static struct dma_linklist_s g_linklist[CONFIG_SAM34_NLLDESC];
 
 /* This array describes the state of each DMA */
 
-static struct sam_dma_s g_dma[CONFIG_SAM34_NDMACHAN] =
+static struct sam_dma_s g_dma[SAM34_NDMACHAN] =
 {
 #ifdef CONFIG_ARCH_CHIP_AT91SAM3U4E
   /* the AT91SAM3U4E has four DMA channels.  The FIFOs for channels 0-2 are
    * 8 bytes in size; channel 3 is 32 bytes.
    */
 
-#if CONFIG_SAM34_NDMACHAN != 4
-#  error "Logic here assumes CONFIG_SAM34_NDMACHAN is 4"
+#if SAM34_NDMACHAN != 4
+#  error "Logic here assumes SAM34_NDMACHAN is 4"
 #endif
 
   {
@@ -1099,7 +1099,7 @@ static int sam_dmainterrupt(int irq, void *context)
     {
       /* Yes.. Check each bit  to see which channel has interrupted */
 
-      for (chndx = 0; chndx < CONFIG_SAM34_NDMACHAN; chndx++)
+      for (chndx = 0; chndx < SAM34_NDMACHAN; chndx++)
         {
           /* Are any interrupts pending for this channel? */
 
@@ -1185,7 +1185,7 @@ void weak_function up_dmainitialize(void)
   /* Initialize semaphores */
 
   sem_init(&g_chsem, 0, 1);
-  sem_init(&g_dsem, 0, CONFIG_SAM34_NDMACHAN);
+  sem_init(&g_dsem, 0, SAM34_NDMACHAN);
 }
 
 /****************************************************************************
@@ -1224,7 +1224,7 @@ DMA_HANDLE sam_dmachannel(uint32_t dmach_flags)
 
   dmach = NULL;
   sam_takechsem();
-  for (chndx = 0; chndx < CONFIG_SAM34_NDMACHAN; chndx++)
+  for (chndx = 0; chndx < SAM34_NDMACHAN; chndx++)
     {
       struct sam_dma_s *candidate = &g_dma[chndx];
       if (!candidate->inuse &&
