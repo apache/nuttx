@@ -1962,6 +1962,9 @@ configs/rgmp
 configs/sam3u-ek
   The port of NuttX to the Atmel SAM3U-EK development board.
 
+configs/sam4l-xplained
+  The port of NuttX to the Atmel SAM4L-Xplained development board.
+
 configs/sim
   A user-mode port of NuttX to the x86 Linux platform is available.
   The purpose of this port is primarily to support OS feature development.
