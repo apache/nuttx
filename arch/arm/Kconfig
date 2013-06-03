@@ -46,6 +46,7 @@ config ARCH_CHIP_KINETIS
 	bool "Freescale Kinetis"
 	select ARCH_CORTEXM4
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FPU
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_RAMFUNCS
 	---help---
@@ -100,6 +101,7 @@ config ARCH_CHIP_LPC43XX
 	select ARCH_HAVE_CMNVECTOR
 	select ARMV7M_CMNVECTOR
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FPU
 	---help---
 		NPX LPC43XX architectures (ARM Cortex-M4).
 
@@ -205,10 +207,14 @@ config ARMV7M_CMNVECTOR
 		logic or the common vector logic.  This applies only to ARMv7-M
 		architectures.
 
+config ARCH_HAVE_FPU
+	bool
+	default n
+
 config ARCH_FPU
 	bool "FPU support"
 	default y
-	depends on ARCH_CORTEXM4
+	depends on ARCH_HAVE_FPU
 	---help---
 		Build in support for the ARM Cortex-M4 Floating Point Unit (FPU).
 		Check your chip specifications first; not all Cortex-M4 chips support the FPU.

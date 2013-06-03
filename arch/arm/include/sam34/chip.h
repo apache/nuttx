@@ -118,7 +118,8 @@
  *   Packages                TQFP/VFBGA TQFP/QFN   TQFP/QFN
  */
 
-#elif defined(CONFIG_ARCH_CHIP_AT91SAM4LC2)
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4LC2C) || defined (CONFIG_ARCH_CHIP_ATSAM4LC2B) || \
+      defined(CONFIG_ARCH_CHIP_ATSAM4LC2A)
 
 /* Internal memory */
 
@@ -137,7 +138,8 @@
 #  define SAM32_NUDPFS                1          /* 1 USB full speed device */
 #  define SAM32_NUHPFS                1          /* 1 USB full speed embedded host */
 
-#elif defined(CONFIG_ARCH_CHIP_AT91SAM4LC4)
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4LC4C) || defined (CONFIG_ARCH_CHIP_ATSAM4LC4B) || \
+      defined(CONFIG_ARCH_CHIP_ATSAM4LC4A)
 
 /* Internal memory */
 
@@ -156,7 +158,8 @@
 #  define SAM32_NUDPFS                1          /* 1 USB full speed device */
 #  define SAM32_NUHPFS                1          /* 1 USB full speed embedded host */
 
-#elif defined(CONFIG_ARCH_CHIP_AT91SAM4LS2)
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4LS2C) || defined (CONFIG_ARCH_CHIP_ATSAM4LS2B) || \
+      defined(CONFIG_ARCH_CHIP_ATSAM4LS2A)
 
 /* Internal memory */
 
@@ -175,7 +178,8 @@
 #  define SAM32_NUDPFS                1          /* 1 USB full speed device */
 #  define SAM32_NUHPFS                0          /* No USB full speed embedded host */
 
-#elif defined(CONFIG_ARCH_CHIP_AT91SAM4LS4)
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4LS4C) || defined (CONFIG_ARCH_CHIP_ATSAM4LS4B) || \
+      defined(CONFIG_ARCH_CHIP_ATSAM4LS4A)
 
 /* Internal memory */
 
@@ -193,6 +197,45 @@
 #  define SAM32_NUDPHS                0          /* No USB high speed device */
 #  define SAM32_NUDPFS                1          /* 1 USB full speed device */
 #  define SAM32_NUHPFS                0          /* No USB full speed embedded host */
+
+/* AT91SAM4S Family *****************************************************************/
+/*
+ * FEATURE       SAM4SD32C SAM4SD32B SAM4SD16C SAM4SD16B SAM4SA16C SAM4SA16B SAM4S16C SAM4S16B SAM4S8C SAM4S8B
+ * Flash         2x1MB     2x1MB     2x512KB   1x1MB     1x1MB     1x1MB     1x1MB    1x1MB    1x512KB 1x512KB
+ * SRAM          160KB     160KB     160KB     160KB     160KB     160KB     128KB    128KB    128KB   128KB
+ * HCACHE        2KB       2KB       2KB       2KB       2KB       2KB       -        -        -       -
+ * Pins          100       64        100       64        100       64        100      64       100     64
+ * No. PIOs      79        47        79        47        79        47        79       47       79      47
+ * Ext. BUS      Yes       No        Yes       No        Yes       No        Yes      No       Yes     No
+ * 12-bit ADC    16 ch     11 ch     16 ch     11 ch     16 ch     11 ch     16 ch    11 ch    16 ch   11 ch
+ * 12-bit DAC    2 ch      2 ch      2 ch      2 ch      2 ch      2 ch      2 ch     2 ch     2 ch    2 ch
+ * Timer Counter 6 ch      3 ch      6 ch      3 ch      6 ch      3 ch      6 ch     3 ch     6 ch    3 ch
+ * PDC           22 ch     22 ch     22 ch     22 ch     22 ch     22 ch     22 ch    22 ch    22 ch   22 ch
+ * USART         2         2         2         2         2         2         2        2        2       2
+ * UART          2         2         2         2         2         2         2        2        2       2
+ * HSMCI         Yes       Yes       Yes       Yes       Yes       Yes      Yes      Yes      Yes      Yes
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4SD32C)
+# error To be provided
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4SD32B)
+# error To be provided
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4SD16C)
+# error To be provided
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4SD16B)
+# error To be provided
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4SA16C)
+# error To be provided
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4SA16B)
+# error To be provided
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4S16C)
+# error To be provided
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4S16B)
+# error To be provided
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4S8C)
+# error To be provided
+#elif defined(CONFIG_ARCH_CHIP_ATSAM4S8B)
+# error To be provided
 
 #else
 #  error "Unknown SAM3/4 chip type"

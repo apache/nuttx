@@ -40,6 +40,7 @@ config ARCH_CHIP_LM4F120
 	bool "LM4F120"
 	select ARCH_CORTEXM4
 	select ARCH_CHIP_LM4F
+	select ARCH_HAVE_FPU
 
 endchoice
 
