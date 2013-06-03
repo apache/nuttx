@@ -33,8 +33,8 @@
  *
  ************************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_SAM3U_MEMORYMAP_H
-#define __ARCH_ARM_SRC_SAM34_SAM3U_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_MEMORYMAP_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_MEMORYMAP_H
 
 /************************************************************************************************
  * Included Files
@@ -142,4 +142,4 @@
  * Public Functions
  ************************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_SAM3U_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_MEMORYMAP_H */

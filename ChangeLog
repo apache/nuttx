@@ -4870,3 +4870,6 @@
 	  vdprintf() (the latter from Andrew Tridgell, 2013-6-2).
 	* sched/sem_holder.c:  Modify assertion that is reported to cause
 	  false alarm assertions (2013-6-2).
+	* arch/arm/include/sam34/sam4l_irq.h and
+	  arch/arm/src/sam34/chip/sam4l_memorymap.h: Add interrupt and memory
+	  map definitions for the AT91SAM4L (2013-6-3).
