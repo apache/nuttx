@@ -49,6 +49,21 @@
 #include <arch/sam34/chip.h>
 #include "chip/sam_memorymap.h"
 
+/* If the common ARMv7-M vector handling logic is used, then include the required
+ * vector definitions as well.
+ */
+
+#ifdef CONFIG_ARMV7M_CMNVECTOR
+#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+#    include "chip/sam3u_vectors.h"
+#  elif defined(CONFIG_ARCH_CHIP_SAM4L)
+#    include "chip/sam4l_vectors.h"
+#    include "chip/sam4l_memorymap.h"
+#  else
+#    error Unrecognized SAM architecture
+#  endif
+#endif
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/

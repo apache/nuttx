@@ -41,9 +41,6 @@
  * (upper-case) IRQ number as defined in arch/arm/include/sam/sam3u_irq.h.
  * sam_vectors.S will defined the VECTOR in different ways in order to generate
  * the interrupt vectors and handlers in their final form.
- *
- *
- * Vectors for low and medium density devices
  */
 
 /* If the common ARMv7-M vector handling is used, then all it needs is the following
