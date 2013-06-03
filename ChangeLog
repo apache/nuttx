@@ -4877,3 +4877,5 @@
 	  Add interrupt vector support for the SAM4L family (2013-6-3).
 	* arch/include/sam34/chip.h:  Add chip definitions for the SAM4L
 	  family (2013-6-3).
+	* configs/sam4l-xplained:  A partial configuration that will (eventually)
+	  support the SAM4L Xplained Pro developement board (2013-6-3).

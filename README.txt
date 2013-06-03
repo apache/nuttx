@@ -1112,6 +1112,8 @@ nuttx
  |   |   `- README.txt
  |   |- sam3u-ek/
  |   |   `- README.txt
+ |   |- sam4l-xplained/
+ |   |   `- README.txt
  |   |- sim/
  |   |   |- include/README.txt
  |   |   |- src/README.txt

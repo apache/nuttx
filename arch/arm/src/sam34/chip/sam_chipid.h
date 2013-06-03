@@ -51,13 +51,13 @@
 
 /* CHIPID register offsets **************************************************************/
 
-#define SAM_CHIPID_CIDR      0x00 /* Chip ID Register */
-#define SAM_CHIPID_EXID      0x04 /* Chip ID Extension Register */
+#define SAM_CHIPID_CIDR                 0x00 /* Chip ID Register */
+#define SAM_CHIPID_EXID                 0x04 /* Chip ID Extension Register */
 
 /* CHIPID register adresses *************************************************************/
 
-#define SAM_CHIPID_CIDR      (SAM_CHIPID_BASE+SAM_CHIPID_CIDR)
-#define SAM_CHIPID_EXID      (SAM_CHIPID_BASE+SAM_CHIPID_EXID)
+#define SAM_CHIPID_CIDR                 (SAM_CHIPID_BASE+SAM_CHIPID_CIDR)
+#define SAM_CHIPID_EXID                 (SAM_CHIPID_BASE+SAM_CHIPID_EXID)
 
 /* CHIPID register bit definitions ******************************************************/
 
@@ -70,6 +70,8 @@
 #  define CHIPID_CIDR_EPROC_CORTEXM3    (3 << CHIPID_CIDR_EPROC_SHIFT) /* Cortex-M3 */
 #  define CHIPID_CIDR_EPROC_ARM920T     (4 << CHIPID_CIDR_EPROC_SHIFT) /* ARM920T */
 #  define CHIPID_CIDR_EPROC_ARM926EJS   (5 << CHIPID_CIDR_EPROC_SHIFT) /* ARM926EJ-S */
+#  define CHIPID_CIDR_EPROC_CORTEXA5    (6 << CHIPID_CIDR_EPROC_SHIFT) /* Cortex-A5 */
+#  define CHIPID_CIDR_EPROC_CORTEXM4    (7 << CHIPID_CIDR_EPROC_SHIFT) /* Cortex-M4 */
 #define CHIPID_CIDR_NVPSIZ_SHIFT        (8)      /* Bits 8-11:  Nonvolatile Program Memory Size */
 #define CHIPID_CIDR_NVPSIZ_MASK         (15 << CHIPID_CIDR_NVPSIZ_SHIFT)
 #  define CHIPID_CIDR_NVPSIZ_NONE       (0  << CHIPID_CIDR_NVPSIZ_SHIFT) /* None */
@@ -101,6 +103,7 @@
 #  define CHIPID_CIDR_SRAMSIZ_2KB       (2  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 2K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_6KB       (3  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 6K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_112KB     (4  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 112K bytes */
+#  define CHIPID_CIDR_SRAMSIZ_24KB      (4  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 24K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_4KB       (5  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 4K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_80KB      (6  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 80K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_160KB     (7  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 160K bytes */
@@ -142,6 +145,13 @@
 #  define CHIPID_CIDR_ARCH_SAM3SXB      (0x89 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3SxB Series (64-pin version) */
 #  define CHIPID_CIDR_ARCH_SAM3SXC      (0x8a << CHIPID_CIDR_ARCH_SHIFT) /* SAM3SxC Series (100-pin version) */
 #  define CHIPID_CIDR_ARCH_AT91X92      (0x92 << CHIPID_CIDR_ARCH_SHIFT) /* AT91x92 Series */
+#  define CHIPID_CIDR_ARCH_SAM3NXA      (0x93 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3NxA Series (48-pin version) */
+#  define CHIPID_CIDR_ARCH_SAM3NXB      (0x94 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3NxB Series (64-pin version) */
+#  define CHIPID_CIDR_ARCH_SAM3NxC      (0x95 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3NxC Series (100-pin version) */
+#  define CHIPID_CIDR_ARCH_SAM3NXC      (0x99 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3SDxB SAM3SDxB Series (64-pin version) */
+#  define CHIPID_CIDR_ARCH_SAM3SDXC     (0x9a << CHIPID_CIDR_ARCH_SHIFT) /* SAM3SDxC Series (100-pin version) */
+#  define CHIPID_CIDR_ARCH_SAM5A        (0xa5 << CHIPID_CIDR_ARCH_SHIFT) /* SAM5A */
+#  define CHIPID_CIDR_ARCH_SAM4L        (0xb0 << CHIPID_CIDR_ARCH_SHIFT) /* SAM4Lxx Series */
 #  define CHIPID_CIDR_ARCH_AT75CXX      (0xf0 << CHIPID_CIDR_ARCH_SHIFT) /* AT75Cxx Series */
 #define CHIPID_CIDR_NVPTYP_SHIFT        (28)      /* Bits 28-30:  Nonvolatile Program Memory Type */
 #define CHIPID_CIDR_NVPTYP_MASK         (7 << CHIPID_CIDR_NVPTYP_SHIFT)
@@ -151,6 +161,23 @@
 #  define CHIPID_CIDR_NVPTYP EFLASH     (2 << CHIPID_CIDR_NVPTYP_SHIFT) /* Embedded Flash Memory */
 #  define CHIPID_CIDR_NVPTYP REFLASH    (3 << CHIPID_CIDR_NVPTYP_SHIFT) /* ROM and Embedded Flash Memory */
 #define CHIPID_CIDR_EXT                 (1 << 31) /* Bit 31: Extension Flag */
+
+/* Chip ID Extension Register */
+
+#ifdef CONFIG_ARCH_CHIP_SAM4L
+#  define CHIPID_EXID_AES               (1 << 0)  /* Bit 0:  AES Option */
+#  define CHIPID_EXID_USB               (1 << 1)  /* Bit 1:  USB Configuration */
+#  define CHIPID_EXID_USBFULL           (1 << 2)  /* Bit 2:  USB Option */
+#  define CHIPID_EXID_LCD               (1 << 3)  /* Bit 3:  LCD Option */
+#  define CHIPID_EXID_PACKAGE_SHIFT     (24)      /* Bits 24-26: Package Type */
+#  define CHIPID_EXID_PACKAGE_MASK      (7 << CHIPID_EXID_PACKAGE_SHIFT)
+#    define CHIPID_EXID_PACKAGE_24PIN   (0 << CHIPID_EXID_PACKAGE_SHIFT) /* 24-pin package */
+#    define CHIPID_EXID_PACKAGE_32PIN   (1 << CHIPID_EXID_PACKAGE_SHIFT) /* 32-pin package */
+#    define CHIPID_EXID_PACKAGE_48PIN   (2 << CHIPID_EXID_PACKAGE_SHIFT) /* 48-pin package */
+#    define CHIPID_EXID_PACKAGE_64PIN   (3 << CHIPID_EXID_PACKAGE_SHIFT) /* 64-pin package */
+#    define CHIPID_EXID_PACKAGE_100PIN  (4 << CHIPID_EXID_PACKAGE_SHIFT) /* 100-pin package */
+#    define CHIPID_EXID_PACKAGE_144PIN  (5 << CHIPID_EXID_PACKAGE_SHIFT) /* 144-pin package */
+#endif
 
 /****************************************************************************************
  * Public Types
