@@ -4879,3 +4879,6 @@
 	  family (2013-6-3).
 	* configs/sam4l-xplained:  A partial configuration that will (eventually)
 	  support the SAM4L Xplained Pro developement board (2013-6-3).
+	* arch/arm/src/sam34/chip/sam4l_pinmap.h:  Initial cut as SAM4L
+	  pin mapping (2013-6-3).
+

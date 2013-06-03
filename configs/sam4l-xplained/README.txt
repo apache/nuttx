@@ -15,6 +15,7 @@ Contents
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
   - LEDs
+  - Virtual COM Port
   - SAM4L Xplained Pro-specific Configuration Options
   - Configurations
 
@@ -241,6 +242,17 @@ LEDs
   Thus is LED0 is statically on, NuttX has successfully  booted and is,
   apparently, running normmally.  If LED0 is flashing at approximately
   2Hz, then a fatal error has been detected and the system has halted.
+
+Virtual COM Port
+^^^^^^^^^^^^^^^^
+
+  The SAM4L Xplained Pro contains an Embedded Debugger (EDBG) that can be
+  used to program and debug the ATSAM4LC4C using Serial Wire Debug (SWD).
+  The Embedded debugger also include a Virtual Com port interface over
+  USART1.  Virtual COM port connections:
+
+    PC26 USART1 RXD
+    PC27 USART1 TXD
 
 SAM4L Xplained Pro-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
