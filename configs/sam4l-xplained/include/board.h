@@ -156,6 +156,19 @@
 
 #define BUTTON_SW0_BIT     (1 << BUTTON_SW0)
 
+/* Alternate Function Disambiguation ************************************************/
+/* The SAM4L Xplained Pro contains an Embedded Debugger (EDBG) that can be
+ * used to program and debug the ATSAM4LC4C using Serial Wire Debug (SWD).
+ * The Embedded debugger also include a Virtual Com port interface over
+ * USART1.  Virtual COM port connections:
+ *
+ *   PC26 USART1 RXD
+ *   PC27 USART1 TXD
+ */
+
+#define GPIO_USART1_RXD    GPIO_USART1_RXD_2
+#define GPIO_USART1_TXD    GPIO_USART1_TXD_2
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
