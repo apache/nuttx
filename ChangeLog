@@ -4891,4 +4891,6 @@
 	  important for the STM32 F4 which may have SPI data buffers
 	  allocated on the stack in CCM memory which cannot support the
 	  DMA.  From Petteri Aimonen (2013-6-4).
-
+	* nuttx/arch/arm/src/sam34/sam4l_gpio.h: Created GPIO driver
+	  header file for the SAM4L.  Also renamed the SAM3U header
+	  file to sam3u_gpio.h (2013-6-4).
