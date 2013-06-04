@@ -58,10 +58,10 @@
 
 /* {PMR2, PMR1, PMR0} Selected Peripheral Function
  *
- *   000 GPIO 100 D
- *   001 A    101 E
- *   010 B    110 F
- *   011 C    111 G
+ *   000 A    100 E
+ *   001 B    101 F
+ *   010 C    110 G
+ *   011 D    111 H
  *
  * NOTE:  Labeling in the data sheet is inconsistent.  In the pin multiplexing table,
  * It shows GPIO functions A-G with 000 apparently corresponding to the GPIO.  In the
@@ -96,11 +96,7 @@
 
 /* Pin Value Register Read (4 registers)*/
 
-#define SAM_GPIO_PVR_OFFSET(n)     (0x0060 + (((n) & ~31) >> 3))
-#define SAM_GPIO_PVR0_OFFSET       0x0060 /* Pin Value Register 0 Read*/
-#define SAM_GPIO_PVR1_OFFSET       0x0064 /* Pin Value Register 1 Read*/
-#define SAM_GPIO_PVR2_OFFSET       0x0068 /* Pin Value Register 2 Read*/
-#define SAM_GPIO_PVR3_OFFSET       0x006c /* Pin Value Register 3 Read*/
+#define SAM_GPIO_PVR_OFFSET        0x0060 /* Pin Value Register Read */
 
 /* {PUER, PDER} Selected Function
  *
@@ -150,17 +146,13 @@
 
 /* Interrupt Flag Register Read (2 registers)*/
 
-#define SAM_GPIO_IFR_OFFSET(n)     (0x00d0 + (((n) & ~31) >> 3))
-#define SAM_GPIO_IFR0_OFFSET       0x00d0 /* Interrupt Flag Register 0 Read */
-#define SAM_GPIO_IFR1_OFFSET       0x00d4 /* Interrupt Flag Register 0 Read */
+#define SAM_GPIO_IFR_OFFSET        0x00d0 /* Interrupt Flag Register 0 Read */
 
 /* Interrupt Flag Register Clear (2 registers)*/
 
-#define SAM_GPIO_IFRC_OFFSET(n)    (0x00d8 + (((n) & ~31) >> 3))
-#define SAM_GPIO_IFRC0_OFFSET      0x00d8 /* Interrupt Flag Register 0 Clear */
-#define SAM_GPIO_IFRC1_OFFSET      0x00dc /* Interrupt Flag Register 1 Clear */
+#define SAM_GPIO_IFRC _OFFSET      0x00d8 /* Interrupt Flag Register 0 Clear */
 
-/* {ODCR1, ODCR0} Interrupt Mode
+/* {ODCR1, ODCR0} Output drive strength
  *
  *   00 Lowest drive strength
  *   01 ...
@@ -230,11 +222,7 @@
 
 /* Pin Value Register Read (4 registers)*/
 
-#define SAM_GPIO_PVR(n)            (SAM_GPIO_BASE+SAM_GPIO_PVR_OFFSET(n))
-#define SAM_GPIO_PVR0              (SAM_GPIO_BASE+SAM_GPIO_PVR0_OFFSET)
-#define SAM_GPIO_PVR1              (SAM_GPIO_BASE+SAM_GPIO_PVR1_OFFSET)
-#define SAM_GPIO_PVR2              (SAM_GPIO_BASE+SAM_GPIO_PVR2_OFFSET)
-#define SAM_GPIO_PVR3              (SAM_GPIO_BASE+SAM_GPIO_PVR3_OFFSET)
+#define SAM_GPIO_PVR               (SAM_GPIO_BASE+SAM_GPIO_PVR_OFFSET)
 
 #define SAM_GPIO_PUER              (SAM_GPIO_BASE+SAM_GPIO_PUER_OFFSET)
 #define SAM_GPIO_PUERS             (SAM_GPIO_BASE+SAM_GPIO_PUERS_OFFSET)
@@ -266,17 +254,13 @@
 #define SAM_GPIO_GFERC             (SAM_GPIO_BASE+SAM_GPIO_GFERC_OFFSET)
 #define SAM_GPIO_GFERT             (SAM_GPIO_BASE+SAM_GPIO_GFERT_OFFSET)
 
-/* Interrupt Flag Register Read (2 registers)*/
+/* Interrupt Flag Register Read */
 
-#define SAM_GPIO_IFR(n)            (SAM_GPIO_BASE+SAM_GPIO_IFR_OFFSET(n))
-#define SAM_GPIO_IFR0              (SAM_GPIO_BASE+SAM_GPIO_IFR0_OFFSET)
-#define SAM_GPIO_IFR1              (SAM_GPIO_BASE+SAM_GPIO_IFR1_OFFSET)
+#define SAM_GPIO_IFR               (SAM_GPIO_BASE+SAM_GPIO_IFR_OFFSET)
 
-/* Interrupt Flag Register Clear (2 registers)*/
+/* Interrupt Flag Register Clear */
 
-#define SAM_GPIO_IFRC(n)           (SAM_GPIO_BASE+SAM_GPIO_IFRC_OFFSET(n))
-#define SAM_GPIO_IFRC0             (SAM_GPIO_BASE+SAM_GPIO_IFRC0_OFFSET)
-#define SAM_GPIO_IFRC1             (SAM_GPIO_BASE+SAM_GPIO_IFRC1_OFFSET)
+#define SAM_GPIO_IFRC              (SAM_GPIO_BASE+SAM_GPIO_IFRC_OFFSET)
 
 #define SAM_GPIO_ODCR0             (SAM_GPIO_BASE+SAM_GPIO_ODCR0_OFFSET)
 #define SAM_GPIO_ODCR0S            (SAM_GPIO_BASE+SAM_GPIO_ODCR0S_OFFSET)

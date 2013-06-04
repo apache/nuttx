@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam34/sam_gpio.c
+ * arch/arm/src/sam34/sam3u_gpio.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
