@@ -224,6 +224,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
+#if CONFIG_SAM34_SRAM1_SIZE > 0
   /* Allow user access to the heap memory */
 
   sam_mpu_uheap(SAM_INTSRAM1_BASE, CONFIG_SAM34_SRAM1_SIZE);
@@ -232,7 +233,7 @@ void up_addregion(void)
 
   kumm_addregion((FAR void*)SAM_INTSRAM1_BASE, CONFIG_SAM34_SRAM1_SIZE);
 
-#if CONFIG_MM_REGIONS > 2
+#if CONFIG_MM_REGIONS > 2 && CONFIG_SAM34_NFCSRAM_SIZE > 0
   /* Allow user access to the heap memory */
 
   sam_mpu_uheap(SAM_NFCSRAM_BASE, CONFIG_SAM34_NFCSRAM_SIZE);
@@ -240,6 +241,8 @@ void up_addregion(void)
   /* Add the region */
 
   kumm_addregion((FAR void*)SAM_NFCSRAM_BASE, CONFIG_SAM34_NFCSRAM_SIZE);
-#endif
+
+#endif /* CONFIG_MM_REGIONS > 2 && CONFIG_SAM34_NFCSRAM_SIZE > 0 */
+#endif /* CONFIG_SAM34_SRAM1_SIZE > 0 */
 }
-#endif
+#endif /* CONFIG_MM_REGIONS > 1 */
