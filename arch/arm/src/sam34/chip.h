@@ -58,7 +58,8 @@
 #    include "chip/sam3u_vectors.h"
 #  elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #    include "chip/sam4l_vectors.h"
-#    include "chip/sam4l_memorymap.h"
+#  elif defined(CONFIG_ARCH_CHIP_SAM4S)
+#    include "chip/sam4s_vectors.h"
 #  else
 #    error Unrecognized SAM architecture
 #  endif
