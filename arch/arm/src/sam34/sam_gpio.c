@@ -81,7 +81,7 @@ static const char g_portchar[4]   = { 'A', 'B', 'C', 'D' };
  *
  ****************************************************************************/
 
-static inline uintptr_t sam_gpiobase(uint16_t cfgset)
+static inline uintptr_t sam_gpiobase(gpio_pinset_t cfgset)
 {
   int port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   return SAM_PION_BASE(port);
@@ -95,7 +95,7 @@ static inline uintptr_t sam_gpiobase(uint16_t cfgset)
  *
  ****************************************************************************/
 
-static inline int sam_gpiopin(uint16_t cfgset)
+static inline int sam_gpiopin(gpio_pinset_t cfgset)
 {
   return 1 << ((cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
 }
@@ -109,7 +109,7 @@ static inline int sam_gpiopin(uint16_t cfgset)
  ****************************************************************************/
 
 static inline int sam_configinput(uintptr_t base, uint32_t pin,
-                                  uint16_t cfgset)
+                                  gpio_pinset_t cfgset)
 {
   /* Disable interrupts on the pin */
 
@@ -159,7 +159,7 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
  ****************************************************************************/
 
 static inline int sam_configoutput(uintptr_t base, uint32_t pin,
-                                   uint16_t cfgset)
+                                   gpio_pinset_t cfgset)
 {
   /* Disable interrupts on the pin */
 
@@ -215,7 +215,7 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
  ****************************************************************************/
 
 static inline int sam_configperiph(uintptr_t base, uint32_t pin,
-                                   uint16_t cfgset)
+                                   gpio_pinset_t cfgset)
 {
   uint32_t regval;
 
@@ -265,7 +265,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
  *
  ****************************************************************************/
 
-int sam_configgpio(uint16_t cfgset)
+int sam_configgpio(gpio_pinset_t cfgset)
 {
   uintptr_t base = sam_gpiobase(cfgset);
   uint32_t  pin  = sam_gpiopin(cfgset);
@@ -301,7 +301,7 @@ int sam_configgpio(uint16_t cfgset)
  *
  ****************************************************************************/
 
-void sam_gpiowrite(uint16_t pinset, bool value)
+void sam_gpiowrite(gpio_pinset_t pinset, bool value)
 {
   uintptr_t base = sam_gpiobase(pinset);
   uint32_t  pin  = sam_gpiopin(pinset);
@@ -324,7 +324,7 @@ void sam_gpiowrite(uint16_t pinset, bool value)
  *
  ****************************************************************************/
 
-bool sam_gpioread(uint16_t pinset)
+bool sam_gpioread(gpio_pinset_t pinset)
 {
   uintptr_t base = sam_gpiobase(pinset);
   uint32_t  pin  = sam_gpiopin(pinset);
