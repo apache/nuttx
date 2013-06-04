@@ -1,5 +1,4 @@
 /****************************************************************************
- * arch/arm/src/sam34/sam_clockconfig.c
  * arch/arm/src/chip/sam_clockconfig.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
