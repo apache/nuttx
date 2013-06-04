@@ -1,6 +1,5 @@
 /************************************************************************************
  * configs/sam3u-ek/include/board.h
- * include/arch/board/board.h
  *
  *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

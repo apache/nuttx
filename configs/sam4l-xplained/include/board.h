@@ -115,8 +115,18 @@
  *
  * This LED is controlled by PC07 and LED0 can be activated by driving the
  * PC07 to GND.
- *
- * When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
+ */
+
+/* LED index values for use with sam_setled() */
+
+#define BOARD_LED0        0
+#define BOARD_NLEDS       1
+
+/* LED bits for use with sam_setleds() */
+
+#define BOARD_LED0_BIT    (1 << BOARD_LED0)
+
+/* When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
  * control LED0 as defined below.  Thus is LED0 is statically on, NuttX has
  * successfully booted and is, apparently, running normmally.  If LED0 is
  * flashing at approximately 2Hz, then a fatal error has been detected and the
@@ -197,6 +207,22 @@ extern "C" {
  ************************************************************************************/
 
 void sam_boardinitialize(void);
+
+/************************************************************************************
+ * Name:  sam_ledinit, sam_setled, and sam_setleds
+ *
+ * Description:
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LEDs.  If
+ *   CONFIG_ARCH_LEDS is not defined, then the following interfaces are available to
+ *   control the LEDs from user applications.
+ *
+ ************************************************************************************/
+
+#ifndef CONFIG_ARCH_LEDS
+void sam_ledinit(void);
+void sam_setled(int led, bool ledon);
+void sam_setleds(uint8_t ledset);
+#endif
 
 /************************************************************************************
  * Name: up_buttoninit

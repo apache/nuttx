@@ -40,7 +40,17 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = sam_boot.c sam_autoleds.c sam_buttons.c sam_spi.c
+CSRCS = sam_boot.c sam_spi.c
+
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += sam_autoleds.c
+else
+CSRCS += sam_userleds.c
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += sam_buttons.c
+endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
