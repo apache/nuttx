@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32f40xxx_dma.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,7 +79,7 @@
 #endif
 
 /* Convert the DMA stream base address to the DMA register block address */
- 
+
 #define DMA_BASE(ch)     (ch & 0xfffffc00)
 
 /****************************************************************************
@@ -358,7 +358,7 @@ static void stm32_dmastreamdisable(struct stm32_dma_s *dmast)
     {
       regoffset = STM32_DMA_HIFCR_OFFSET;
     }
-  
+
   dmabase_putreg(dmast, regoffset, (DMA_STREAM_MASK << dmast->shift));
 }
 
@@ -491,7 +491,7 @@ void weak_function up_dmainitialize(void)
       /* Enable the IRQ at the NVIC (still disabled at the DMA controller) */
 
       up_enable_irq(dmast->irq);
- 
+
       /* Set the interrrupt priority */
 
       up_prioritize_irq(dmast->irq, CONFIG_DMA_PRI);
@@ -634,7 +634,7 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
     {
       regoffset = STM32_DMA_HIFCR_OFFSET;
     }
-  
+
   dmabase_putreg(dmast, regoffset, (DMA_STREAM_MASK << dmast->shift));
 
   /* "Set the peripheral register address in the DMA_SPARx register. The data
@@ -692,7 +692,7 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
    *  generated when the stream is enabled, then the stream will be automatically
    *  disabled."
    *
-   * The FIFO is disabled in circular mode when transferring data from a 
+   * The FIFO is disabled in circular mode when transferring data from a
    * peripheral to memory, as in this case it is usually desirable to know that
    * every byte from the peripheral is transferred immediately to memory.  It is
    * not practical to flush the DMA FIFO, as this requires disabling the channel
@@ -776,13 +776,13 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool 
        * Interrupt Enable bit (TCIE) is set.
        */
 
-      scr |= (half ? (DMA_SCR_HTIE|DMA_SCR_TEIE) : (DMA_SCR_TCIE|DMA_SCR_TEIE));      
+      scr |= (half ? (DMA_SCR_HTIE|DMA_SCR_TEIE) : (DMA_SCR_TCIE|DMA_SCR_TEIE));
     }
   else
     {
       /* In non-stop modes, when the transfer completes it immediately resets
        * and starts again.  The transfer-complete interrupt is thus always
-       * enabled, and the half-complete interrupt can be used in circular 
+       * enabled, and the half-complete interrupt can be used in circular
        * mode to determine when the buffer is half-full, or in double-buffered
        * mode to determine when one of the two buffers is full.
        */
@@ -828,7 +828,7 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
   struct stm32_dma_s *dmast = (struct stm32_dma_s *)handle;
   uint32_t residual;
 
-  /* Fetch the count of bytes remaining to be transferred. 
+  /* Fetch the count of bytes remaining to be transferred.
    *
    * If the FIFO is enabled, this count may be inaccurate.  ST don't
    * appear to document whether this counts the peripheral or the memory
@@ -843,6 +843,49 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
 
   return (size_t)residual;
 }
+
+/****************************************************************************
+ * Name: stm32_dmacapable
+ *
+ * Description:
+ *   Check if the DMA controller can transfer data to/from given memory
+ *   address. This depends on the internal connections in the ARM bus matrix
+ *   of the processor. Note that this only applies to memory addresses, it
+ *   will return false for any peripheral address.
+ *
+ * Returned value:
+ *   True, if transfer is possible.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_DMACAPABLE
+bool stm32_dmacapable(uint32_t maddr)
+{
+  switch (maddr & STM32_REGION_MASK)
+    {
+      case STM32_FSMC_BANK1:
+      case STM32_FSMC_BANK2:
+      case STM32_FSMC_BANK3:
+      case STM32_FSMC_BANK4:
+      case STM32_SRAM_BASE:
+        /* All RAM is supported */
+        return true;
+
+      case STM32_CODE_BASE:
+        /* Everything except the CCM ram is supported */
+        if (maddr >= STM32_CCMRAM_BASE &&
+            (maddr - STM32_CCMRAM_BASE) < 65536)
+          {
+            return false;
+          }
+        return true;
+
+      default:
+        /* Everything else is unsupported by DMA */
+        return false;
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: stm32_dmasample

@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32f20xxx_dma.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -773,7 +773,7 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool 
        * Interrupt Enable bit (TCIE) is set.
        */
 
-      scr |= (half ? (DMA_SCR_HTIE|DMA_SCR_TEIE) : (DMA_SCR_TCIE|DMA_SCR_TEIE));     
+      scr |= (half ? (DMA_SCR_HTIE|DMA_SCR_TEIE) : (DMA_SCR_TCIE|DMA_SCR_TEIE));
     }
   else
     {
@@ -840,6 +840,41 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
 
   return (size_t)residual;
 }
+
+/****************************************************************************
+ * Name: stm32_dmacapable
+ *
+ * Description:
+ *   Check if the DMA controller can transfer data to/from given memory
+ *   address. This depends on the internal connections in the ARM bus matrix
+ *   of the processor. Note that this only applies to memory addresses, it
+ *   will return false for any peripheral address.
+ *
+ * Returned value:
+ *   True, if transfer is possible.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_DMACAPABLE
+bool stm32_dmacapable(uint32_t maddr)
+{
+  switch (maddr & STM32_REGION_MASK)
+    {
+      case STM32_FSMC_BANK1:
+      case STM32_FSMC_BANK2:
+      case STM32_FSMC_BANK3:
+      case STM32_FSMC_BANK4:
+      case STM32_SRAM_BASE:
+      case STM32_CODE_BASE:
+        /* All RAM and flash is supported */
+        return true;
+
+      default:
+        /* Everything else is unsupported by DMA */
+        return false;
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: stm32_dmasample

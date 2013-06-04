@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32f10xxx_dma.c
  *
- *   Copyright (C) 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@
 #endif
 
 /* Convert the DMA channel base address to the DMA register block address */
- 
+
 #define DMA_BASE(ch)     (ch & 0xfffffc00)
 
 /****************************************************************************
@@ -358,7 +358,7 @@ void weak_function up_dmainitialize(void)
       /* Enable the IRQ at the NVIC (still disabled at the DMA controller) */
 
       up_enable_irq(dmach->irq);
- 
+
       /* Set the interrrupt priority */
 
       up_prioritize_irq(dmach->irq, CONFIG_DMA_PRI);
@@ -548,7 +548,7 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool 
     {
       /* In nonstop mode, when the transfer completes it immediately resets
        * and starts again.  The transfer-complete interrupt is thus always
-       * enabled, and the half-complete interrupt can be used in circular 
+       * enabled, and the half-complete interrupt can be used in circular
        * mode to determine when the buffer is half-full, or in double-buffered
        * mode to determine when one of the two buffers is full.
        */
@@ -595,6 +595,41 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
 
   return dmachan_getreg(dmach, STM32_DMACHAN_CNDTR_OFFSET);
 }
+
+/****************************************************************************
+ * Name: stm32_dmacapable
+ *
+ * Description:
+ *   Check if the DMA controller can transfer data to/from given memory
+ *   address. This depends on the internal connections in the ARM bus matrix
+ *   of the processor. Note that this only applies to memory addresses, it
+ *   will return false for any peripheral address.
+ *
+ * Returned value:
+ *   True, if transfer is possible.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_DMACAPABLE
+bool stm32_dmacapable(uint32_t maddr)
+{
+  switch (maddr & STM32_REGION_MASK)
+    {
+      case STM32_FSMC_BANK1:
+      case STM32_FSMC_BANK2:
+      case STM32_FSMC_BANK3:
+      case STM32_FSMC_BANK4:
+      case STM32_SRAM_BASE:
+      case STM32_CODE_BASE:
+        /* All RAM and flash is supported */
+        return true;
+
+      default:
+        /* Everything else is unsupported by DMA */
+        return false;
+    }
+}
+#endif
 
 /****************************************************************************
  * Name: stm32_dmasample
