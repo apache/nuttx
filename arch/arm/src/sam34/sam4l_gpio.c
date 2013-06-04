@@ -333,8 +333,6 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
 static inline int sam_configperiph(uintptr_t base, uint32_t pin,
                                    gpio_pinset_t cfgset)
 {
- *   Peripheral:  MM.. FFFE .... IIG. .PPB BBBB
-
   gpio_pinset_t edges;
 
   /* Select the peripheral function.
@@ -414,7 +412,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
 
  /* REVISIT:  Should event generation be enabled now?  I am assuming so */
 
-  if (eges = GPIO_PERIPH_EVENTS)
+  if ((cfgset & GPIO_PERIPH_EVENTS) != 0)
     {
       /* Rising only.. disable interrrupts on the falling edge */
 
