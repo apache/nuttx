@@ -137,14 +137,14 @@
  *   Peripheral:  MM.. FFF. .... .... .... ....
  */
 
-#  define GPIO_FUNCA               (GPIO_PERIPHERAL | _GPIO_FUNCA) /* Function A */
-#  define GPIO_FUNCB               (GPIO_PERIPHERAL | _GPIO_FUNCB) /* Function B */
-#  define GPIO_FUNCC               (GPIO_PERIPHERAL | _GPIO_FUNCC) /* Function C */
-#  define GPIO_FUNCD               (GPIO_PERIPHERAL | _GPIO_FUNCD) /* Function D */
-#  define GPIO_FUNCE               (GPIO_PERIPHERAL | _GPIO_FUNCE) /* Function E */
-#  define GPIO_FUNCF               (GPIO_PERIPHERAL | _GPIO_FUNCF) /* Function F */
-#  define GPIO_FUNCG               (GPIO_PERIPHERAL | _GPIO_FUNCG) /* Function G */
-#  define GPIO_FUNCH               (GPIO_PERIPHERAL | _GPIO_FUNCH) /* Function H */
+#define GPIO_FUNCA                 (GPIO_PERIPHERAL | _GPIO_FUNCA) /* Function A */
+#define GPIO_FUNCB                 (GPIO_PERIPHERAL | _GPIO_FUNCB) /* Function B */
+#define GPIO_FUNCC                 (GPIO_PERIPHERAL | _GPIO_FUNCC) /* Function C */
+#define GPIO_FUNCD                 (GPIO_PERIPHERAL | _GPIO_FUNCD) /* Function D */
+#define GPIO_FUNCE                 (GPIO_PERIPHERAL | _GPIO_FUNCE) /* Function E */
+#define GPIO_FUNCF                 (GPIO_PERIPHERAL | _GPIO_FUNCF) /* Function F */
+#define GPIO_FUNCG                 (GPIO_PERIPHERAL | _GPIO_FUNCG) /* Function G */
+#define GPIO_FUNCH                 (GPIO_PERIPHERAL | _GPIO_FUNCH) /* Function H */
 
 /* Peripheral event control
  *
@@ -158,7 +158,7 @@
  *   Peripheral:  .... ...E .... .... .... ....
  */
 
-#define GPIO_SCHMITT_TRIGGER       (1 << 16)  /* Bit 16: Enable peripheral events */
+#define GPIO_PERIPH_EVENTS        (1 << 16)  /* Bit 16: Enable peripheral events */
 
 /* Output drive control
  *
@@ -225,6 +225,12 @@
 #  define GPIO_INT_CHANGE          (0 << GPIO_INT_SHIFT) /* Pin change */
 #  define GPIO_INT_RISING          (1 << GPIO_INT_SHIFT) /* Rising edge */
 #  define GPIO_INT_FALLING         (2 << GPIO_INT_SHIFT) /* Falling edge */
+
+/* These combinations control events.  These help to clean up pin definitions. */
+
+#define GPIO_EVENT_CHANGE          (GPIO_PERIPH_EVENTS | GPIO_INT_CHANGE) /* Pin change */
+#define GPIO_EVENT_RISING          (GPIO_PERIPH_EVENTS | GPIO_INT_RISING) /* Rising edge */
+#define GPIO_EVENT_FALLING         (GPIO_PERIPH_EVENTS | GPIO_INT_FALLING) /* Falling edge */
 
 /* Enable input/periphal glitch filter
  *

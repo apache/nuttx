@@ -4894,3 +4894,6 @@
 	* nuttx/arch/arm/src/sam34/sam4l_gpio.h: Created GPIO driver
 	  header file for the SAM4L.  Also renamed the SAM3U header
 	  file to sam3u_gpio.h (2013-6-4).
+	* nuttx/arch/arm/src/sam34/sam4l_gpio.c: Created GPIO driver for
+	  the SAM4L (2013-6-4).
+
