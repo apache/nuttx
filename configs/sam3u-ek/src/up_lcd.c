@@ -1,6 +1,5 @@
 /**************************************************************************************
  * configs/sam3u-ek/src/up_lcd.c
- * arch/arm/src/board/up_lcd.c
  *
  *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

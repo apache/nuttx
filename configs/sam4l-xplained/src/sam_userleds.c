@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam4l-xplained/src/sam_autoleds.c
+ * configs/sam4l-xplained/src/sam_userleds.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -41,22 +41,7 @@
  * PC07 to GND.
  *
  * When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
- * control LED0 as follows:
- *
- *   SYMBOL              Meaning                 LED0
- *   ------------------- ----------------------- ------
- *   LED_STARTED         NuttX has been started  OFF
- *   LED_HEAPALLOCATE    Heap has been allocated OFF
- *   LED_IRQSENABLED     Interrupts enabled      OFF
- *   LED_STACKCREATED    Idle stack created      ON
- *   LED_INIRQ           In an interrupt**       N/C
- *   LED_SIGNAL          In a signal handler***  N/C
- *   LED_ASSERTION       An assertion failed     N/C
- *   LED_PANIC           The system has crashed  FLASH
- *
- * Thus is LED0 is statically on, NuttX has successfully  booted and is,
- * apparently, running normmally.  If LED0 is flashing at approximately
- * 2Hz, then a fatal error has been detected and the system has halted.
+ * control LED0.  Otherwise, LED0 can be controlled from logic in this file.
  */
 
 /****************************************************************************
@@ -74,7 +59,7 @@
 #include "sam_gpio.h"
 #include "sam4l-xplained.h"
 
-#ifdef CONFIG_ARCH_LEDS
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -105,73 +90,52 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: sam_ledinit
+ *
+ * Description:
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then the sam_ledinit() is
+ *   available to initialize the LED0 from user application logic.
+ *
  ****************************************************************************/
 
-void up_ledinit(void)
+void sam_ledinit(void)
 {
   (void)sam_configgpio(GPIO_LED0);
 }
 
 /****************************************************************************
- * Name: up_ledon
- ****************************************************************************/
+ * Name: sam_setled
+ *
+ * Description:
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the sam_setled() is
+ *  available to control the LED0 from user application logic.
+ *
+ *****************************************************************************/
 
-void up_ledon(int led)
+void sam_setled(int led, bool ledon)
 {
-  bool ledstate = true;
-
-  switch (led)
+  if (led == BOARD_LED0)
     {
-    case LED_STARTED :        /* NuttX has been started  LED0=OFF */
-    case LED_HEAPALLOCATE:    /* Heap has been allocated LED0=OFF */
-    case LED_IRQSENABLED:     /* Interrupts enabled      LED0=OFF */
-      break;                  /* Leave ledstate == true to turn OFF */
-
-    default:
-    case LED_INIRQ:           /* In an interrupt         LED0=N/C */
-    case LED_SIGNAL:          /* In a signal handler     LED0=N/C */
-    case LED_ASSERTION:       /* An assertion failed     LED0=N/C */
-      return;
-
-    case LED_PANIC:           /* The system has crashed  LED0=FLASH */
-    case LED_STACKCREATED:    /* Idle stack created      LED0=ON */
-      ledstate = false;       /* Set ledstate == false to turn ON */
-      break;
+      sam_gpiowrite(GPIO_LED0, !ledon);
     }
-
-  sam_gpiowrite(GPIO_LED0, ledstate);
 }
 
 /****************************************************************************
- * Name: up_ledoff
- ****************************************************************************/
+ * Name: sam_setled
+ *
+ * Description:
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *  LEDs.  If CONFIG_ARCH_LEDS is not defined, then the sam_setleds() is
+ *  available to control the LED0 from user application logic.  NOTE:  since
+ *  there is only a single LED on-board, this is function is not very useful.
+ *
+ *****************************************************************************/
 
-void up_ledoff(int led)
+void sam_setleds(uint8_t ledset)
 {
-  switch (led)
-    {
-    /* These should not happen and are ignored */
-
-    default:
-    case LED_STARTED :        /* NuttX has been started  LED0=OFF */
-    case LED_HEAPALLOCATE:    /* Heap has been allocated LED0=OFF */
-    case LED_IRQSENABLED:     /* Interrupts enabled      LED0=OFF */
-    case LED_STACKCREATED:    /* Idle stack created      LED0=ON */
-
-    /* These result in no-change */
-
-    case LED_INIRQ:           /* In an interrupt         LED0=N/C */
-    case LED_SIGNAL:          /* In a signal handler     LED0=N/C */
-    case LED_ASSERTION:       /* An assertion failed     LED0=N/C */
-      return;
-
-    /* Turn LED0 off set driving the output high */
-
-    case LED_PANIC:           /* The system has crashed  LED0=FLASH */
-      sam_gpiowrite(GPIO_LED0, true);
-      break;
-    }
+  sam_setled(BOARD_LED0, (ledset & BOARD_LED0_BIT) != 0);
 }
 
-#endif /* CONFIG_ARCH_LEDS */
+#endif /* !CONFIG_ARCH_LEDS */
