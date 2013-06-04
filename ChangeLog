@@ -4881,4 +4881,8 @@
 	  support the SAM4L Xplained Pro developement board (2013-6-3).
 	* arch/arm/src/sam34/chip/sam4l_pinmap.h:  Initial cut as SAM4L
 	  pin mapping (2013-6-3).
+	* arch/arm/src/stm32/stm32*_dma.*:  Add a new interface function,
+	  stm32_dmacapable() that can be used to determine if DMA is
+	  possible from the specified memory address.  From Petteri Aimonen
+	  (2013-6-4).
 

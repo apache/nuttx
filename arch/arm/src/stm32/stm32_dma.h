@@ -146,7 +146,6 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -211,7 +210,7 @@ EXTERN DMA_HANDLE stm32_dmachannel(unsigned int chan);
  *
  ****************************************************************************/
 
-EXTERN void stm32_dmafree(DMA_HANDLE handle);
+void stm32_dmafree(DMA_HANDLE handle);
 
 /****************************************************************************
  * Name: stm32_dmasetup
@@ -221,8 +220,8 @@ EXTERN void stm32_dmafree(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-EXTERN void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                           size_t ntransfers, uint32_t ccr);
+void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+                    size_t ntransfers, uint32_t ccr);
 
 /****************************************************************************
  * Name: stm32_dmastart
@@ -236,8 +235,8 @@ EXTERN void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
  *
  ****************************************************************************/
 
-EXTERN void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
-                           void *arg, bool half);
+void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg,
+                    bool half);
 
 /****************************************************************************
  * Name: stm32_dmastop
@@ -252,7 +251,7 @@ EXTERN void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
  *
  ****************************************************************************/
 
-EXTERN void stm32_dmastop(DMA_HANDLE handle);
+void stm32_dmastop(DMA_HANDLE handle);
 
 /****************************************************************************
  * Name: stm32_dmaresidual
@@ -265,7 +264,27 @@ EXTERN void stm32_dmastop(DMA_HANDLE handle);
  *
  ****************************************************************************/
 
-EXTERN size_t stm32_dmaresidual(DMA_HANDLE handle);
+size_t stm32_dmaresidual(DMA_HANDLE handle);
+
+/****************************************************************************
+ * Name: stm32_dmacapable
+ *
+ * Description:
+ *   Check if the DMA controller can transfer data to/from given memory
+ *   address. This depends on the internal connections in the ARM bus matrix
+ *   of the processor. Note that this only applies to memory addresses, it
+ *   will return false for any peripheral address.
+ *
+ * Returned value:
+ *   True, if transfer is possible.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_DMACAPABLE
+bool stm32_dmacapable(uintptr_t maddr);
+#else
+#  define stm32_dmacapable(maddr) (true)
+#endif
 
 /****************************************************************************
  * Name: stm32_dmasample
@@ -279,7 +298,7 @@ EXTERN size_t stm32_dmaresidual(DMA_HANDLE handle);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
+void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
 #else
 #  define stm32_dmasample(handle,regs)
 #endif
@@ -296,8 +315,8 @@ EXTERN void stm32_dmasample(DMA_HANDLE handle, struct stm32_dmaregs_s *regs);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-EXTERN void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
-                          const char *msg);
+void stm32_dmadump(DMA_HANDLE handle, const struct stm32_dmaregs_s *regs,
+                   const char *msg);
 #else
 #  define stm32_dmadump(handle,regs,msg)
 #endif

@@ -1128,6 +1128,17 @@ config STM32_CCMEXCLUDE
 		and (2) it appears to be impossible to execute ELF modules from CCM
 		RAM.
 
+config STM32_DMACAPABLE
+	bool "Workaround non-DMA capable memory"
+	depends on ARCH_DMA
+	default y if STM32_STM32F40XX && !STM32_CCMEXCLUDE
+	default n if !STM32_STM32F40XX || STM32_CCMEXCLUDE
+	---help---
+		This option enables the DMA interface stm32_dmacapable that can be
+		used to check if it is possible to do DMA from the selected address.
+		Drivers then may use this information to determine if they should
+		attempt the DMA or fall back to a different transfer method.
+
 config STM32_FSMC_SRAM
 	bool "External SRAM on FSMC"
 	default n
