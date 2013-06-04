@@ -4885,4 +4885,10 @@
 	  stm32_dmacapable() that can be used to determine if DMA is
 	  possible from the specified memory address.  From Petteri Aimonen
 	  (2013-6-4).
+	* arch/arm/src/stm32/stm32_spi.c:  If CONFIG_STM32_DMACAPABLE is
+	  defined, use stm32_dmacapable() to determine if it is possible
+	  to perform DMA from the specified address.  This change is
+	  important for the STM32 F4 which may have SPI data buffers
+	  allocated on the stack in CCM memory which cannot support the
+	  DMA.  From Petteri Aimonen (2013-6-4).
 

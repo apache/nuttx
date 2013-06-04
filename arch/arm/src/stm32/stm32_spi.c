@@ -1,7 +1,7 @@
 /************************************************************************************
  * arm/arm/src/stm32/stm32_spi.c
  *
- *   Copyright (C) 2009-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -1215,7 +1215,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 }
 
 /************************************************************************************
- * Name: spi_exchange (no DMA)
+ * Name: spi_exchange (no DMA).  aka spi_exchange_nodma
  *
  * Description:
  *   Exchange a block of data on SPI without using DMA
@@ -1234,9 +1234,14 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
  *
  ************************************************************************************/
 
-#ifndef CONFIG_STM32_SPI_DMA
+#if !defined(CONFIG_STM32_SPI_DMA) || defined(CONFIG_STM32_DMACAPABLE)
+#if !defined(CONFIG_STM32_SPI_DMA)
 static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
+#else
+static void spi_exchange_nodma(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                               FAR void *rxbuffer, size_t nwords)
+#endif
 {
   FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
   DEBUGASSERT(priv && priv->spibase);
@@ -1312,7 +1317,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
         }
     }
 }
-#endif
+#endif /* !CONFIG_STM32_SPI_DMA || CONFIG_STM32_DMACAPABLE */
 
 /*************************************************************************
  * Name: spi_exchange (with DMA capability)
@@ -1338,29 +1343,41 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
 static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
                          FAR void *rxbuffer, size_t nwords)
 {
-  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
-  static uint16_t rxdummy = 0xffff;
-  static const uint16_t txdummy = 0xffff;
+#ifdef CONFIG_STM32_DMACAPABLE
+  if ((txbuffer && !stm32_dmacapable((uint32_t)txbuffer)) ||
+      (rxbuffer && !stm32_dmacapable((uint32_t)rxbuffer)))
+    {
+      /* Unsupported memory region, fall back to non-DMA method. */
 
-  spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
-  DEBUGASSERT(priv && priv->spibase);
-
-  /* Setup DMAs */
-
-  spi_dmarxsetup(priv, rxbuffer, &rxdummy, nwords);
-  spi_dmatxsetup(priv, txbuffer, &txdummy, nwords);
-
-  /* Start the DMAs */
-
-  spi_dmarxstart(priv);
-  spi_dmatxstart(priv);
-
-  /* Then wait for each to complete */
-
-  spi_dmarxwait(priv);
-  spi_dmatxwait(priv);
-}
+      spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
+    }
+  else
 #endif
+    {
+      FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+      static uint16_t rxdummy = 0xffff;
+      static const uint16_t txdummy = 0xffff;
+
+      spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+      DEBUGASSERT(priv && priv->spibase);
+
+      /* Setup DMAs */
+
+      spi_dmarxsetup(priv, rxbuffer, &rxdummy, nwords);
+      spi_dmatxsetup(priv, txbuffer, &txdummy, nwords);
+
+      /* Start the DMAs */
+
+      spi_dmarxstart(priv);
+      spi_dmatxstart(priv);
+
+      /* Then wait for each to complete */
+
+      spi_dmarxwait(priv);
+      spi_dmatxwait(priv);
+    }
+}
+#endif /* CONFIG_STM32_SPI_DMA */
 
 /*************************************************************************
  * Name: spi_sndblock
