@@ -13,7 +13,7 @@
       <h1><big><font color="#3c34ec"><i>NuttX Operating System<p>User's Manual</i></font></big></h1>
       <p><small>by</small></p>
       <p>Gregory Nutt<p>
-      <p>Last Updated: Aprill 22, 2013</p>
+      <p>Last Updated: June 4, 2013</p>
     </td>
   </tr>
 </table>
@@ -8124,15 +8124,16 @@ int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
 <ul><pre>
 #include &lt;stdio.h&gt;
 
+void   clearerr(register FILE *stream);
 int    fclose(FILE *stream);
 int    fflush(FILE *stream);
-FILE  *fdopen(int fd, const char *type);
-int    feof(FILE *stream);                               /* Prototyped but not implemented */
-int    ferror(FILE *stream);                             /* Prototyped but not implemented */
+int    feof(FILE *stream);
+int    ferror(FILE *stream);
 int    fileno(FAR FILE *stream);
 int    fgetc(FILE *stream);
 int    fgetpos(FILE *stream, fpos_t *pos);
 char  *fgets(char *s, int n, FILE *stream);
+FILE  *fdopen(int fd, const char *type);
 FILE  *fopen(const char *path, const char *type);
 int    fprintf(FILE *stream, const char *format, ...);
 int    fputc(int c, FILE *stream);
@@ -8143,19 +8144,30 @@ int    fsetpos(FILE *stream, fpos_t *pos);
 long   ftell(FILE *stream);
 size_t fwrite(const void *ptr, size_t size, size_t n_items, FILE *stream);
 char  *gets(char *s);
+int    ungetc(int c, FAR FILE *stream);
 
 int    printf(const char *format, ...);
 int    puts(const char *s);
 int    rename(const char *source, const char *target);
-int    snprintf(FAR char *buf, size_t size, const char *format, ...);
 int    sprintf(char *dest, const char *format, ...);
+int    asprintf (FAR char **ptr, FAR const char *fmt, ...);
+int    snprintf(FAR char *buf, size_t size, const char *format, ...);
 int    sscanf(const char *buf, const char *fmt, ...);
-int    ungetc(int c, FILE *stream);
+void   perror(FAR const char *s);
+int    avsprintf(FAR char **ptr, const char *fmt, va_list ap);
+
 int    vprintf(const char *s, va_list ap);
 int    vfprintf(FILE *stream, const char *s, va_list ap);
+int    vsprintf(char *buf, const char *s, va_list ap);
+int    avsprintf(FAR char **ptr, const char *fmt, va_list ap);
 int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
 int    vsscanf(char *buf, const char *s, va_list ap);
-int    vsprintf(char *buf, const char *s, va_list ap);
+
+FAR FILE *fdopen(int fd, FAR const char *type);
+int    dprintf(int fd, FAR const char *fmt, ...);
+int    vdprintf(int fd, FAR const char *fmt, va_list ap);
+
+int    statfs(FAR const char *path, FAR struct statfs *buf);
 
 #include &lt;sys/stat.h&gt;
 
