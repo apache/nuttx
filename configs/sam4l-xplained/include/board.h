@@ -78,6 +78,14 @@
 
 #define BOARD_CKGR_UCKR_UPLLCOUNT (3 << CKGR_UCKR_UPLLCOUNT_SHIFT)
 
+/* System clock dividers: Fbus = Fsys / (2 ^ BUS_div) */
+
+#define BOARD_SYSCLK_CPU_DIV       0
+#define BOARD_SYSCLK_PBA_DIV       0
+#define BOARD_SYSCLK_PBB_DIV       0
+#define BOARD_SYSCLK_PBC_DIV       0
+#define BOARD_SYSCLK_PBD_DIV       0
+
 /* Resulting frequencies */
 
 #define SAM_MAINOSC_FREQUENCY      (12000000)
