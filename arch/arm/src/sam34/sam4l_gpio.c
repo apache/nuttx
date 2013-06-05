@@ -105,6 +105,8 @@ static inline int sam_gpiopin(gpio_pinset_t cfgset)
  *
  * Description:
  *   Configure a GPIO input pin based on bit-encoded description of the pin.
+ *   This function serves the dual role of putting all pins into a known,
+ *   initial state.  Hence, it is overkill for what really needs to be done.
  *
  ****************************************************************************/
 
@@ -200,10 +202,10 @@ static inline int sam_configinterrupt(uintptr_t base, uint32_t pin,
    * falling edges.
    */
 
-  ret = sam_configinput(base, pin, cfgset)
-  if (ret = OK)
+  ret = sam_configinput(base, pin, cfgset);
+  if (ret == OK)
     {
-      /* Disable rising and falling edge interrupts as requested 
+      /* Disable rising and falling edge interrupts as requested
        * {IMR1, IMR0} Interrupt Mode
        *
        *   00 Pin Change   <-- We already have this
@@ -214,13 +216,13 @@ static inline int sam_configinterrupt(uintptr_t base, uint32_t pin,
 
       gpio_pinset_t edges = cfgset & GPIO_INT_MASK;
 
-      if (eges = GPIO_INT_RISING)
+      if (edges == GPIO_INT_RISING)
         {
           /* Rising only.. disable interrrupts on the falling edge */
 
           putreg32(pin, base + SAM_GPIO_IMR0S_OFFSET);
         }
-      else if (edges = GPIO_INT_FALLING)
+      else if (edges == GPIO_INT_FALLING)
         {
           /* Falling only.. disable interrrupts on the rising edge */
 
@@ -363,7 +365,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
       case _GPIO_FUNCC: /* Function C 010 */
         putreg32(pin, base + SAM_GPIO_PMR1S_OFFSET);
         break;
- 
+
       case _GPIO_FUNCE: /* Function E 100 */
         putreg32(pin, base + SAM_GPIO_PMR2S_OFFSET);
         break;
@@ -397,13 +399,13 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
    */
 
   edges = cfgset & GPIO_INT_MASK;
-  if (eges = GPIO_INT_RISING)
+  if (edges == GPIO_INT_RISING)
     {
       /* Rising only.. disable interrrupts on the falling edge */
 
       putreg32(pin, base + SAM_GPIO_IMR0S_OFFSET);
     }
-  else if (edges = GPIO_INT_FALLING)
+  else if (edges == GPIO_INT_FALLING)
     {
       /* Falling only.. disable interrrupts on the rising edge */
 
