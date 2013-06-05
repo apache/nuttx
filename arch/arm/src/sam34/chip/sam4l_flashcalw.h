@@ -4,6 +4,8 @@
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * This file is derived from nuttx/arch/avr/src/at32uc3/at32uc3_flashc.h.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -33,8 +35,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM4LFLASHCALW_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM4LFLASHCALW_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM4L_FLASHCALW_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM4L_FLASHCALW_H
 
 /************************************************************************************
  * Included Files
@@ -343,5 +345,5 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM4LFLASHCALW_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM4L_FLASHCALW_H */
 
