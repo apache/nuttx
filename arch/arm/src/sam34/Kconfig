@@ -141,6 +141,11 @@ config ARCH_CHIP_SAM4S
 
 menu "AT91SAM3 Peripheral Support"
 
+config SAM_PICOCACHE
+	bool "PICOCACHE"
+	depends on ARCH_CHIP_SAM4L
+	default y
+
 config SAM34_DMA
 	bool "DMA"
 	default n
