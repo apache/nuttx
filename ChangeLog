@@ -4902,4 +4902,9 @@
 	  LED interfaces (2013-6-5).
 	* arch/arm/src/sam34/sam4l_gpio.c and arch/arm/src/sam34/chip/sam4l_gpio.h:
 	  Fix GPIO port address; fix compilation errors (2013-6-5).
- 
+	* arch/arm/src/sam34/chip/sam4l_flashcalw.h:  Add header file
+	  for SAM4L FLASH and PICOCACHE definitions (2013-6-5).
+	* arch/arm/src/sam34/chip/sam4l_pm.h:  Add header file for SAM4L
+	  Power Management.  Leveraged from AVR32 (2013-6-5).
+	* arch/arm/src/sam34/sarm4l_clockconfig.c:  SAM4L clock configuration
+	  logic (leveraged from AVR32).

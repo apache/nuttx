@@ -79,10 +79,7 @@ extern "C"
  * Description:
  *   Called to initialize the SAM3/4.  This does whatever setup is needed to put the
  *   SoC in a usable state.  This includes the initialization of clocking using the
- *   settings in board.h.  (After power-on reset, the sam3u is initially running on
- *   a 4MHz internal RC clock).  This function also performs other low-level chip
- *   initialization of the chip including EFC, master clock, IRQ and watchdog
- *   configuration.
+ *   settings in board.h.
  *
  ************************************************************************************/
 
