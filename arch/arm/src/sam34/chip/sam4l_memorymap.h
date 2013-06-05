@@ -109,7 +109,7 @@
 
 #define SAM_FLASHCALW_BASE   0x400a0000 /* 0x400a0000-0x400a03ff: FLASHCALW */
 #define SAM_PICOCACHE_BASE   0x400a0400 /* 0x400a0400-0x400a0fff: PICOCACHE */
-#define SAM_HMATRIX_BASE     0x400a1000 /* 0x400a1000-0x400a1fff: PICOCACHE */
+#define SAM_HMATRIX_BASE     0x400a1000 /* 0x400a1000-0x400a1fff: HMATRIX */
 #define SAM_PDCA_BASE        0x400a2000 /* 0x400a2000-0x400a2fff: Peripheral DMA Controller */
 #define SAM_SMAP_BASE        0x400a3000 /* 0x400a3000-0x400a3fff: SMAP */
 #define SAM_CRCCU_BASE       0x400a4000 /* 0x400a4000-0x400a4fff: CRC Calculation Unit */

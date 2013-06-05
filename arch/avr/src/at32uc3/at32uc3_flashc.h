@@ -89,12 +89,12 @@
 #define FLASHC_FSR_QPRR             (1 << 5)  /* Bit 5:  Quick Page Read Result */
 #define FLASHC_FSR_FSZ_SHIFT        (13)      /* Bits 13-15: Flash Size */
 #define FLASHC_FSR_FSZ_MASK         (7 << FLASHC_FSR_FSZ_SHIFT)
-#  define FLASHC_FSR_FSZ_23KB       (0 << FLASHC_FSR_FSZ_SHIFT) /* 32 Kbytes */
+#  define FLASHC_FSR_FSZ_32KB       (0 << FLASHC_FSR_FSZ_SHIFT) /* 32 Kbytes */
 #  define FLASHC_FSR_FSZ_64KB       (1 << FLASHC_FSR_FSZ_SHIFT) /* 64 Kbytes */
 #  define FLASHC_FSR_FSZ_128KB      (2 << FLASHC_FSR_FSZ_SHIFT) /* 128 Kbytes */
 #  define FLASHC_FSR_FSZ_256KB      (3 << FLASHC_FSR_FSZ_SHIFT) /* 256 Kbytes */
 #  define FLASHC_FSR_FSZ_384KB      (4 << FLASHC_FSR_FSZ_SHIFT) /* 384 Kbytes */
-#  define FLASHC_FSR_FSZ_512KGB     (5 << FLASHC_FSR_FSZ_SHIFT) /* 512 Kbytes */
+#  define FLASHC_FSR_FSZ_512KB      (5 << FLASHC_FSR_FSZ_SHIFT) /* 512 Kbytes */
 #  define FLASHC_FSR_FSZ_768KB      (6 << FLASHC_FSR_FSZ_SHIFT) /* 768 Kbytes */
 #  define FLASHC_FSR_FSZ_1MB        (7 << FLASHC_FSR_FSZ_SHIFT) /* 1024 Kbytes */
 #define FLASHC_FSR_LOCK(n)          (1 << ((n)+16)
