@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/chip/sam_clockconfig.c
+ * arch/arm/src/chip/sam3u_clockconfig.c
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,9 +50,9 @@
 
 #include "sam_clockconfig.h"
 #include "chip/sam_pmc.h"
-#include "chip/sam_eefc.h"
+#include "chip/sam3u_eefc.h"
 #include "chip/sam_wdt.h"
-#include "chip/sam_supc.h"
+#include "chip/sam3u_supc.h"
 #include "chip/sam_matrix.h"
 
 /****************************************************************************
