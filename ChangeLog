@@ -4896,4 +4896,10 @@
 	  file to sam3u_gpio.h (2013-6-4).
 	* nuttx/arch/arm/src/sam34/sam4l_gpio.c: Created GPIO driver for
 	  the SAM4L (2013-6-4).
-
+	* nuttx/configs/sam4l-xplained/src/sam_userleds.c:  Added.
+	  (2013-6-4).
+	* configs/sam4l-xplained/src/sam_userleds.c:  Add application
+	  LED interfaces (2013-6-5).
+	* arch/arm/src/sam34/sam4l_gpio.c and arch/arm/src/sam34/chip/sam4l_gpio.h:
+	  Fix GPIO port address; fix compilation errors (2013-6-5).
+ 

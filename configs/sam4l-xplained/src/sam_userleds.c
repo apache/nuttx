@@ -41,7 +41,8 @@
  * PC07 to GND.
  *
  * When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
- * control LED0.  Otherwise, LED0 can be controlled from logic in this file.
+ * control LED0.  Otherwise, LED0 can be controlled from user applications
+ * using the logic in this file.
  */
 
 /****************************************************************************
