@@ -132,13 +132,15 @@
 /* CPU Clock Select Register Bit-field Definitions */
 
 #define PM_CPUSEL_SHIFT            (0)       /* Bits 0-2: CPU Clock Select */
-#define PM_CPUSEL_MASK             (7 << PM_CPUSEL_CPUSEL_SHIFT)
-#define PM_CPUSEL_CPUDIV           (1 << 7)  /* Bit 7:  CPU Division */
+#define PM_CPUSEL_MASK             (7 << PM_CPUSEL_SHIFT)
+#  define PM_CPUSEL(n)             ((n) << PM_CPUSEL_SHIFT)
+#define PM_CPUSEL_DIV              (1 << 7)  /* Bit 7:  CPU Division */
 
 /* PBA/PBB/PBC/PBD Clock Select Register Bit-field Definitions */
 
 #define PM_PBSEL_SHIFT             (0)       /* Bits 0-2: PBx Clock Select */
-#define PM_PBSEL_MASK              (7 << PM_PBASEL_SHIFT)
+#define PM_PBSEL_MASK              (7 << PM_PBSEL_SHIFT)
+#  define PM_PBSEL(n)              ((n) << PM_PBSEL_SHIFT)
 #define PM_PBSEL_DIV               (1 << 7)  /* Bit 7: PBx Division */
 
 /* CPU Mask Register Bit-field Definitions */
@@ -228,8 +230,10 @@
 
 #define PM_UNLOCK_ADDR_SHIFT       (0)       /* Bits 0-9: Unlock Address */
 #define PM_UNLOCK_ADDR_MASK        (0x3ff << PM_UNLOCK_ADDR_SHIFT)
+#  define PM_UNLOCK_ADDR(n)        ((n) << PM_UNLOCK_ADDR_SHIFT)
 #define PM_UNLOCK_KEY_SHIFT        (24)      /* Bits 24-31: Unlock Key */
 #define PM_UNLOCK_KEY_MASK         (0xff << PM_UNLOCK_KEY_SHIFT)
+#  define PM_UNLOCK_KEY(n)         ((n) << PM_UNLOCK_KEY_SHIFT)
 
 /* Interrupt Enable Register Bit-field Definitions */
 /* Interrupt Disable Register Bit-field Definitions */

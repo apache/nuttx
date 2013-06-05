@@ -41,6 +41,7 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -48,6 +49,8 @@
 #include "up_internal.h"
 #include "chip/sam4l_pm.h"
 #include "chip/sam4l_flashcalw.h"
+
+#include "sam_clockconfig.h"
 
 /****************************************************************************
  * Private Definitions
@@ -86,16 +89,41 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_enableosc32
+ * Name: sam_picocache
  *
  * Description:
- *   Initialiaze the 32KHz oscillaor.  This oscillaor is used by the RTC
+ *   Initialiaze the PICOCACHE.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAM_PICOCACHE
+static inline void sam_picocache(void)
+{
+  /* Enable clocking to the PICOCACHE */
+
+  sam_hsb_enableperipheral(PM_HSBMASK_HRAMC1);
+  sam_pbb_enableperipheral(PM_PBBMASK_HRAMC1);
+
+  /* Enable the PICOCACHE and wait for it to become ready */
+
+  putreg32(PICOCACHE_CTRL_CEN, SAM_PICOCACHE_CTRL);
+  while ((getreg32(SAM_PICOCACHE_SR) & PICOCACHE_SR_CSTS) == 0);
+}
+#else
+#  define sam_picocache()
+#endif
+
+/****************************************************************************
+ * Name: sam_enableosc32
+ *
+ * Description:
+ *   Initialiaze the 32KHz oscillator.  This oscillator is used by the RTC
  *   logic to provide the sysem timer.
  *
  ****************************************************************************/
 
 #ifdef SAM_CLOCK_OSC32
-static inline void up_enableosc32(void)
+static inline void sam_enableosc32(void)
 {
   uint32_t regval;
 
@@ -116,7 +144,7 @@ static inline void up_enableosc32(void)
 #endif
 
 /****************************************************************************
- * Name: up_enableosc0
+ * Name: sam_enableosc0
  *
  * Description:
  *   Initialiaze OSC0 settings per the definitions in the board.h file.
@@ -124,7 +152,7 @@ static inline void up_enableosc32(void)
  ****************************************************************************/
 
 #ifdef NEED_OSC0
-static inline void up_enableosc0(void)
+static inline void sam_enableosc0(void)
 {
   uint32_t regval;
 
@@ -165,7 +193,7 @@ static inline void up_enableosc0(void)
 #endif
 
 /****************************************************************************
- * Name: up_enableosc1
+ * Name: sam_enableosc1
  *
  * Description:
  *   Initialiaze OSC0 settings per the definitions in the board.h file.
@@ -173,7 +201,7 @@ static inline void up_enableosc0(void)
  ****************************************************************************/
 
 #ifdef NEED_OSC1
-static inline void up_enableosc1(void)
+static inline void sam_enableosc1(void)
 {
   uint32_t regval;
 
@@ -214,7 +242,7 @@ static inline void up_enableosc1(void)
 #endif
 
 /****************************************************************************
- * Name: up_enablepll0
+ * Name: sam_enablepll0
  *
  * Description:
  *   Initialiaze PLL0 settings per the definitions in the board.h file.
@@ -222,7 +250,7 @@ static inline void up_enableosc1(void)
  ****************************************************************************/
 
 #ifdef SAM_CLOCK_PLL0
-static inline void up_enablepll0(void)
+static inline void sam_enablepll0(void)
 {
   /* Setup PLL0 */
 
@@ -264,7 +292,7 @@ static inline void up_enablepll0(void)
 #endif
 
 /****************************************************************************
- * Name: up_enablepll1
+ * Name: sam_enablepll1
  *
  * Description:
  *   Initialiaze PLL1 settings per the definitions in the board.h file.
@@ -272,7 +300,7 @@ static inline void up_enablepll0(void)
  ****************************************************************************/
 
 #ifdef SAM_CLOCK_PLL1
-static inline void up_enablepll1(void)
+static inline void sam_enablepll1(void)
 {
   /* Setup PLL1 */
 
@@ -314,53 +342,84 @@ static inline void up_enablepll1(void)
 #endif
 
 /****************************************************************************
- * Name: up_clksel
+ * Name: sam_setdividers
  *
  * Description:
  *   Configure derived clocks.
  *
  ****************************************************************************/
 
-static inline void up_clksel(void)
+static inline void sam_setdividers(uint32_t cpudiv, uint32_t pbadiv,
+                                   uint32_t pbbdiv, uint32_t pbcdiv,
+                                   uint32_t pbddiv)
 {
-  uint32_t regval = 0;
+  irqstate_t flags;
+  uint32_t cpusel = 0;
+  uint32_t pbasel = 0;
+  uint32_t pbbsel = 0;
+  uint32_t pbcsel = 0;
+  uint32_t pbdsel = 0;
 
-#if SAM_CKSEL_CPUDIV != 0
-  regval |= PM_CKSEL_CPUDIV;
-  regval |= (SAM_CKSEL_CPUDIV << PM_CKSEL_CPUSEL_SHIFT)
-#endif
+  /* Get the register setting for each divider value */
 
-#if SAM_CKSEL_HSBDIV != 0
-  regval |= PM_CKSEL_HSBDIV;
-  regval |= (SAM_CKSEL_HSBDIV << PM_CKSEL_HSBSEL_SHIFT)
-#endif
+  if (cpudiv > 0)
+    {
+      cpusel = (PM_CPUSEL(cpudiv - 1)) | PM_CPUSEL_DIV;
+    }
 
-#if SAM_CKSEL_PBADIV != 0
-  regval |= PM_CKSEL_PBADIV;
-  regval |= (SAM_CKSEL_PBADIV << PM_CKSEL_PBASEL_SHIFT)
-#endif
+  if (pbadiv > 0)
+    {
+      pbasel = (PM_PBSEL(pbadiv - 1)) | PM_PBSEL_DIV;
+    }
 
-#if SAM_CKSEL_PBBDIV != 0
-  regval |= PM_CKSEL_PBBDIV;
-  regval |= (SAM_CKSEL_PBBDIV << PM_CKSEL_PBBSEL_SHIFT)
-#endif
+  if (pbbdiv > 0)
+    {
+      pbbsel = (PM_PBSEL(pbbdiv - 1)) | PM_PBSEL_DIV;
+    }
 
-  putreg32(regval, SAM_PM_CKSEL);
+  if (pbcdiv > 0)
+    {
+      pbcsel = (PM_PBSEL(pbcdiv - 1)) | PM_PBSEL_DIV;
+    }
 
-  /* Wait for CLKRDY */
+  if (pbddiv > 0)
+    {
+      pbdsel = (PM_PBSEL(pbddiv - 1)) | PM_PBSEL_DIV;
+    }
 
-  while ((getreg32(SAM_PM_POSCSR) & PM_POSCSR_CKRDY) == 0);
+  /* Then set the divider values. The following operations need to be atomic
+   * for the unlock-write sequeuences.
+   */
+
+  flags = irqsave();
+
+  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_CPUSEL_OFFSET), SAM_PM_UNLOCK);
+  putreg32(cpusel, SAM_PM_CPUSEL);
+
+  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_PBASEL_OFFSET), SAM_PM_UNLOCK);
+  putreg32(pbasel, SAM_PM_PBASEL);
+
+  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_PBBSEL_OFFSET), SAM_PM_UNLOCK);
+  putreg32(pbbsel, SAM_PM_PBBSEL);
+
+  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_PBCSEL_OFFSET), SAM_PM_UNLOCK);
+  putreg32(pbcsel, SAM_PM_PBCSEL);
+
+  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_PBDSEL_OFFSET), SAM_PM_UNLOCK);
+  putreg32(pbdsel, SAM_PM_PBDSEL);
+
+  irqrestore(flags);
 }
 
 /****************************************************************************
- * Name: up_fws
+ * Name: sam_fws
  *
  * Description:
  *   Setup FLASH wait states.
  *
  ****************************************************************************/
 
-static void up_fws(uint32_t cpuclock)
+static void sam_fws(uint32_t cpuclock)
 {
   uint32_t regval;
 
@@ -373,18 +432,19 @@ static void up_fws(uint32_t cpuclock)
     {
       regval &= ~FLASHCALW_FCR_FWS;
     }
+
   putreg32(regval, SAM_FLASHCALW_FCR);
 }
 
 /****************************************************************************
- * Name: up_mainclk
+ * Name: sam_mainclk
  *
  * Description:
  *   Select the main clock.
  *
  ****************************************************************************/
 
-static inline void up_mainclk(uint32_t mcsel)
+static inline void sam_mainclk(uint32_t mcsel)
 {
   uint32_t regval;
 
@@ -395,7 +455,7 @@ static inline void up_mainclk(uint32_t mcsel)
 }
 
 /****************************************************************************
- * Name: up_usbclock
+ * Name: sam_usbclock
  *
  * Description:
  *   Setup the USBB GCLK.
@@ -403,7 +463,7 @@ static inline void up_mainclk(uint32_t mcsel)
  ****************************************************************************/
 
 #ifdef CONFIG_USBDEV
-static inline void up_usbclock(void)
+static inline void sam_usbclock(void)
 {
   uint32_t regval = 0;
 
@@ -445,62 +505,216 @@ static inline void up_usbclock(void)
 
 void sam_clockconfig(void)
 {
+  /* Enable clocking to the PICOCACHE */
+
+  sam_picocache();
+
+  /* Configure dividers derived clocks.  These divider definitions must be
+   * provided in the board.h header file.
+   */
+
+  sam_setdividers(BOARD_SYSCLK_CPU_DIV, BOARD_SYSCLK_PBA_DIV,
+                  BOARD_SYSCLK_PBB_DIV, BOARD_SYSCLK_PBC_DIV,
+                  BOARD_SYSCLK_PBD_DIV);
+
 #ifdef SAM_CLOCK_OSC32
   /* Enable the 32KHz oscillator (need by the RTC module) */
 
-  up_enableosc32();
+  sam_enableosc32();
 #endif
 
 #ifdef NEED_OSC0
   /* Enable OSC0 using the settings in board.h */
 
-  up_enableosc0();
+  sam_enableosc0();
 
   /* Set up FLASH wait states */
 
-  up_fws(SAM_FOSC0);
+  sam_fws(SAM_FOSC0);
 
   /* Then switch the main clock to OSC0 */
 
-  up_mainclk(PM_MCCTRL_MCSEL_OSC0);
+  sam_mainclk(PM_MCCTRL_MCSEL_OSC0);
 #endif
 
 #ifdef NEED_OSC1
   /* Enable OSC1 using the settings in board.h */
 
-  up_enableosc1();
+  sam_enableosc1();
 #endif
 
 #ifdef SAM_CLOCK_PLL0
   /* Enable PLL0 using the settings in board.h */
 
-  up_enablepll0();
+  sam_enablepll0();
 
   /* Set up FLASH wait states */
 
-  up_fws(SAM_CPU_CLOCK);
+  sam_fws(SAM_CPU_CLOCK);
 
   /* Then switch the main clock to PLL0 */
 
-  up_mainclk(PM_MCCTRL_MCSEL_PLL0);
+  sam_mainclk(PM_MCCTRL_MCSEL_PLL0);
 #endif
 
 #ifdef SAM_CLOCK_PLL1
   /* Enable PLL1 using the settings in board.h */
 
-  up_enablepll1();
+  sam_enablepll1();
 #endif
-
-  /* Configure derived clocks */
-
-  up_clksel();
 
   /* Set up the USBB GCLK */
 
 #ifdef CONFIG_USBDEV
-  void up_usbclock();
+  void sam_usbclock();
 #endif
 }
 
+/****************************************************************************
+ * Name: sam_modifyperipheral
+ *
+ * Description:
+ *   This is a convenience function that is intended to be used to enable
+ *   or disable peripheral module clocking.
+ *
+ ****************************************************************************/
 
+void sam_modifyperipheral(uintptr_t regaddr, uint32_t clrbits, uint32_t setbits)
+{
+  irqstate_t flags;
+  uint32_t regval;
 
+  /* Make sure that the following operations are atomic */
+
+  flags = irqsave();
+
+  /* Enable/disabling clocking */
+
+  regval  = getreg32(regaddr);
+  regval &= ~clrbits;
+  regval |= setbits;
+  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(regaddr - SAM_PM_BASE), SAM_PM_UNLOCK);
+  putreg32(regval, regaddr);
+
+  irqrestore(flags);
+}
+
+/****************************************************************************
+ * Name: sam_pba_enableperipheral
+ *
+ * Description:
+ *   This is a convenience function to enable a peripheral on the APBA
+ *   bridge.
+ *
+ ****************************************************************************/
+
+void sam_pba_enableperipheral(uint32_t bitset)
+{
+  irqstate_t flags;
+
+  /* The following operations must be atomic */
+
+  flags = irqsave();
+
+  /* Enable the APBA bridge if necessary */
+
+  if (getreg32(SAM_PM_PBAMASK) == 0)
+    {
+      sam_hsb_enableperipheral(PM_HSBMASK_APBA);
+    }
+
+  irqrestore(flags);
+
+  /* Enable the module */
+
+  sam_enableperipheral(SAM_PM_PBAMASK, bitset);
+}
+
+/****************************************************************************
+ * Name: sam_pba_disableperipheral
+ *
+ * Description:
+ *   This is a convenience function to disable a peripheral on the APBA
+ *   bridge.
+ *
+ ****************************************************************************/
+
+void sam_pba_disableperipheral(uint32_t bitset)
+{
+  irqstate_t flags;
+
+  /* Disable clocking to the module */
+
+  sam_disableperipheral(SAM_PM_PBAMASK, bitset);
+
+  /* Disable the APBA bridge if possible */
+
+  flags = irqsave();
+
+  if (getreg32(SAM_PM_PBAMASK) == 0)
+    {
+      sam_hsb_disableperipheral(PM_HSBMASK_APBA);
+    }
+
+  irqrestore(flags);
+}
+
+/****************************************************************************
+ * Name: sam_pbb_enableperipheral
+ *
+ * Description:
+ *   This is a convenience function to enable a peripheral on the APBB
+ *   bridge.
+ *
+ ****************************************************************************/
+
+void sam_pbb_enableperipheral(uint32_t bitset)
+{
+  irqstate_t flags;
+
+  /* The following operations must be atomic */
+
+  flags = irqsave();
+
+  /* Enable the APBB bridge if necessary */
+
+  if (getreg32(SAM_PM_PBBMASK) == 0)
+    {
+      sam_hsb_enableperipheral(PM_HSBMASK_APBB);
+    }
+
+  irqrestore(flags);
+
+  /* Enable the module */
+
+  sam_enableperipheral(SAM_PM_PBBMASK, bitset);
+}
+
+/****************************************************************************
+ * Name: sam_pbb_disableperipheral
+ *
+ * Description:
+ *   This is a convenience function to disable a peripheral on the APBA
+ *   bridge.
+ *
+ ****************************************************************************/
+
+void sam_pbb_disableperipheral(uint32_t bitset)
+{
+  irqstate_t flags;
+
+  /* Disable clocking to the peripheral module */
+
+  sam_disableperipheral(SAM_PM_PBBMASK, bitset);
+
+  /* Disable the APBB bridge if possible */
+
+  flags = irqsave();
+
+  if (getreg32(SAM_PM_PBBMASK) == 0)
+    {
+      sam_hsb_disableperipheral(PM_HSBMASK_APBB);
+    }
+
+  irqrestore(flags);
+}
