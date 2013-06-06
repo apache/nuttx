@@ -54,66 +54,73 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* After power-on reset, the sam3u device is running on a 4MHz internal RC.  These
- * definitions will configure clocking with MCK = 48MHz, PLLA = 96, and CPU=48MHz.
+
+/* Select the DFLL as the source of the system clock.
+ *
+ * Options (define one):
+ *   BOARD_SYSCLK_SOURCE_RCSYS     - System RC oscillator
+ *   BOARD_SYSCLK_SOURCE_OSC0      - Oscillator 0
+ *   BOARD_SYSCLK_SOURCE_PLL0      - Phase Locked Loop 0
+ *   BOARD_SYSCLK_SOURCE_DFLL0     - Digital Frequency Locked Loop
+ *   BOARD_SYSCLK_SOURCE_RC80M     - 80 MHz RC oscillator
+ *   BOARD_SYSCLK_SOURCE_FCFAST12M - 12 MHz RC oscillator
+ *   BOARD_SYSCLK_SOURCE_FCFAST8M  - 8 MHz RC oscillator
+ *   BOARD_SYSCLK_SOURCE_FCFAST4M  - 4 MHz RC oscillator
+ *   BOARD_SYSCLK_SOURCE_RC1M      - 1 MHz RC oscillator
  */
 
-/* Main oscillator register settings */
+#define BOARD_SYSCLK_SOURCE_DFLL0  1
 
-#define BOARD_CKGR_MOR_MOSCXTST    (63 << CKGR_MOR_MOSCXTST_SHIFT) /* Start-up Time */
+/* Nominal frequencies in on-chip RC oscillators.  These are *not* configurable
+ * but appear here for use in frequency calculations.  NOTE: These may frequencies
+ * may vary with temperature changes.
+ */
 
-/* PLLA configuration */
+#define BOARD_RCSYS_FREQUENCY      115000   /* Nominal frequency of RCSYS (Hz) */
+#define BOARD_RC32K_FREQUENCY      32768    /* Nominal frequency of RC32K (Hz) */
+#define BOARD_RC80M_FREQUENCY      80000000 /* Nominal frequency of RC80M (Hz) */
+#define BOARD_RCFAST4M_FREQUENCY   4000000  /* Nominal frequency of RCFAST4M (Hz) */
+#define BOARD_RCFAST8M_FREQUENCY   8000000  /* Nominal frequency of RCFAST8M (Hz) */
+#define BOARD_RCFAST12M_FREQUENCY  12000000 /* Nominal frequency of RCFAST12M (Hz) */
+#define BOARD_RC1M_FREQUENCY       1000000  /* Nominal frequency of RC1M (Hz) */
 
-#define BOARD_CKGR_PLLAR_MULA      (7 << CKGR_PLLAR_MULA_SHIFT)
-#define BOARD_CKGR_PLLAR_STMODE    CKGR_PLLAR_STMODE_FAST
-#define BOARD_CKGR_PLLAR_PLLACOUNT (63 << CKGR_PLLAR_PLLACOUNT_SHIFT)
-#define BOARD_CKGR_PLLAR_DIVA      CKGR_PLLAR_DIVA_BYPASS
+/* On-board crystal frequencies */
 
-/* PMC master clock register settings */
+#define BOARD_OSC32_FREQUENCY      32768
 
-#define BOARD_PMC_MCKR_CSS         PMC_MCKR_CSS_PLLA
-#define BOARD_PMC_MCKR_PRES        PMC_MCKR_PRES_DIV2
+/* Digital Frequency Locked Loop configuration
+ *  Fdfll = (Fclk * DFLLmul) / DFLLdiv
+ *        = 32768 * (48000000/32760) / 1 = 48MHz
+ *
+ * DFLL0 source options (select one):
+ *   BOARD_DFLL0_SOURCE_RCSYS      - System RC oscillator
+ *   BOARD_DFLL0_SOURCE_OSC32K     - 32.768KHz oscillator
+ *   BOARD_DFLL0_SOURCE_OSC0       - Oscillator 0
+ *   BOARD_DFLL0_SOURCE_RC80M      - 80 MHz RC oscillator
+ *   BOARD_DFLL0_SOURCE_RC32K      - 32 kHz RC oscillator
+ */
 
-/* USB UTMI PLL start-up time */
+#define BOARD_DFLL0_SOURCE_OSC32K  1
+#define BOARD_FDLL0_FREQUENCY      48000000
+#define BOARD_FDLL0_MUL            (BOARD_FDLL0_FREQUENCY / BOARD_OSC32_FREQUENCY)
+#define BOARD_FDLL0_DIV            1
 
-#define BOARD_CKGR_UCKR_UPLLCOUNT (3 << CKGR_UCKR_UPLLCOUNT_SHIFT)
+/* System clock dividers: Fbus = Fsys >> BUSshift */
 
-/* System clock dividers: Fbus = Fsys / (2 ^ BUS_div) */
-
-#define BOARD_SYSCLK_CPU_DIV       0
-#define BOARD_SYSCLK_PBA_DIV       0
-#define BOARD_SYSCLK_PBB_DIV       0
-#define BOARD_SYSCLK_PBC_DIV       0
-#define BOARD_SYSCLK_PBD_DIV       0
+#define BOARD_CPU_SHIFT            0 /* Fcpu = Fsys = 48MHz */
+#define BOARD_PBA_SHIFT            0 /* Fpba = Fsys = 48MHz */
+#define BOARD_PBB_SHIFT            0 /* Fpbb = Fsys = 48MHz */
+#define BOARD_PBC_SHIFT            0 /* Fpbc = Fsys = 48MHz */
+#define BOARD_PBD_SHIFT            0 /* Fpbd = Fsys = 48MHz */
 
 /* Resulting frequencies */
 
-#define SAM_MAINOSC_FREQUENCY      (12000000)
-#define SAM_MCK_FREQUENCY          (48000000)
-#define SAM_PLLA_FREQUENCY         (96000000)
-#define SAM_CPU_FREQUENCY          (48000000)
-
-/* HSMCI clocking
- *
- * Multimedia Card Interface clock (MCCK or MCI_CK) is Master Clock (MCK)
- * divided by (2*(CLKDIV+1)).
- *
- *   MCI_SPEED = MCK / (2*(CLKDIV+1))
- *   CLKDIV = MCI / MCI_SPEED / 2 - 1
- */
-
-/* MCK = 48MHz, CLKDIV = 59, MCI_SPEED = 48MHz / 2 * (59+1) = 400 KHz */
-
-#define HSMCI_INIT_CLKDIV      (59 << HSMCI_MR_CLKDIV_SHIFT)
-
-/* MCK = 48MHz, CLKDIV = 1, MCI_SPEED = 48MHz / 2 * (1+1) = 12 MHz */
-
-#define HSMCI_MMCXFR_CLKDIV    (3 << HSMCI_MR_CLKDIV_SHIFT)
-
-/* MCK = 48MHz, CLKDIV = 0, MCI_SPEED = 48MHz / 2 * (0+1) = 24 MHz */
-
-#define HSMCI_SDXFR_CLKDIV     (0 << HSMCI_MR_CLKDIV_SHIFT)
-#define HSMCI_SDWIDEXFR_CLKDIV HSMCI_SDXFR_CLKDIV
+#define BOARD_MAIN_FREQUENCY       (12000000)
+#define BOARD_CPU_FREQUENCY        (BOARD_MAIN_FREQUENCY >> BOARD_CPU_SHIFT)
+#define BOARD_PBA_FREQUENCY        (BOARD_MAIN_FREQUENCY >> BOARD_PBA_SHIFT)
+#define BOARD_PBB_FREQUENCY        (BOARD_MAIN_FREQUENCY >> BOARD_PBB_SHIFT)
+#define BOARD_PBC_FREQUENCY        (BOARD_MAIN_FREQUENCY >> BOARD_PBC_SHIFT)
+#define BOARD_PBD_FREQUENCY        (BOARD_MAIN_FREQUENCY >> BOARD_PBD_SHIFT)
 
 /* LED definitions ******************************************************************/
 /* There are three LEDs on board the SAM4L Xplained Pro board:  The EDBG

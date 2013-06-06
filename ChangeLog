@@ -4910,4 +4910,7 @@
 	  logic (leveraged from AVR32).
 	* nuttx/arch/arm/src/sam34/sam4l_periphclks.c/h:  Add common
 	  logic to enabled/disable SAM4L peripheral clocking (2013-6-5).
-
+	* nuttx/arch/arm/src/sam34/chip/sam4l_bpm.h and sam4l_scif.h:  Add
+	  register definitions for the SAM4L BMP and SCIF blocks (2013-6-6).
+	* nuttx/arch/arm/src/sam34/sam4l_clockconfig.c:  New selects an
+	  optimal power scaling mode (2013-6-6).

@@ -333,6 +333,36 @@
 #define FLASH_CMD_HSEN              16 /* High Speed Mode Enable */
 #define FLASH_CMD_HSDIS             17 /* High Speed Mode Disable */
 
+/* Maximum CPU frequency for 0 and 1 FLASH wait states (FWS) in various modes
+ * (Table 42-30 in the big data sheet).
+ *
+ *   ------- ------------------- ---------- ----------
+ *   Power     Flash Read Mode     Flash     Maximum
+ *   Sclaing                        Wait    Operating
+ *   Mode    HSEN HSDIS FASTWKUP   States   Frequency
+ *   ------- ---- ----- -------- ---------- ----------
+ *     PS0          X       X        1        12MHz
+ *     " "          X                0        18MHz
+ *     " "          X                1        36MHz
+ *     PS1          X       X        1        12MHz
+ *     " "          X                0         8MHz
+ *     " "          X                1        12MHz
+ *     PS2     X                     0        24Mhz
+ *     " "     X                     1        48MHz
+ *   ------- ---- ----- -------- ---------- ----------
+ */
+
+#define FLASH_MAXFREQ_PS0_HSDIS_FASTWKUP_FWS1 (12000000ul)
+#define FLASH_MAXFREQ_PS0_HSDIS_FWS0          (18000000ul)
+#define FLASH_MAXFREQ_PS0_HSDIS_FWS1          (36000000ul)
+
+#define FLASH_MAXFREQ_PS1_HSDIS_FASTWKUP_FWS1 (12000000ul)
+#define FLASH_MAXFREQ_PS1_HSDIS_FWS0          (8000000ul)
+#define FLASH_MAXFREQ_PS1_HSDIS_FWS1          (12000000ul)
+
+#define FLASH_MAXFREQ_PS2_HSEN_FWS0           (24000000ul)
+#define FLASH_MAXFREQ_PS2_HSEN_FWS1           (48000000ul)
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

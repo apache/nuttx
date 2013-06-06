@@ -98,7 +98,7 @@
 static inline void up_enableosc32(void)
 {
   uint32_t regval;
- 
+
   /* Select the 32KHz oscillator crystal */
 
   regval = getreg32(AVR32_PM_OSCCTRL32);
@@ -225,7 +225,7 @@ static inline void up_enableosc1(void)
 static inline void up_enablepll0(void)
 {
   /* Setup PLL0 */
-  
+
   regval = (AVR32_PLL0_DIV << PM_PLL_PLLDIV_SHIFT) | (AVR32_PLL0_MUL << PM_PLL_PLLMUL_SHIFT) | (16 << PM_PLL_PLLCOUNT_SHIFT)
 
   /* Select PLL0/1 oscillator */
@@ -256,7 +256,7 @@ static inline void up_enablepll0(void)
   regval = getreg32(AVR32_PM_PLL0);
   regval |= PM_PLL_PLLEN;
   putreg32(regval, AVR32_PM_PLL0)
-  
+
   /* Wait for PLL0 locked. */
 
   while ((getreg32(AVR32_PM_POSCSR) & PM_POSCSR_LOCK0) == 0);
@@ -275,11 +275,11 @@ static inline void up_enablepll0(void)
 static inline void up_enablepll1(void)
 {
   /* Setup PLL1 */
-  
+
   regval = (AVR32_PLL1_DIV << PM_PLL_PLLDIV_SHIFT) | (AVR32_PLL1_MUL << PM_PLL_PLLMUL_SHIFT) | (16 << PM_PLL_PLLCOUNT_SHIFT)
 
   /* Select PLL0/1 oscillator */
- 
+
 #if AVR32_CLOCK_PLL_OSC1
   regval |= PM_PLL_PLLOSC;
 #endif
@@ -363,7 +363,7 @@ static inline void up_clksel(void)
 static void up_fws(uint32_t cpuclock)
 {
   uint32_t regval;
- 
+
   regval = getreg32(AVR32_FLASHC_FCR);
   if (cpuclock > AVR32_FLASHC_FWS0_MAXFREQ)
     {
@@ -387,7 +387,7 @@ static void up_fws(uint32_t cpuclock)
 static inline void up_mainclk(uint32_t mcsel)
 {
   uint32_t regval;
- 
+
   regval = getreg32(AVR32_PM_MCCTRL);
   regval &= ~PM_MCCTRL_MCSEL_MASK;
   regval |= mcsel;
@@ -422,7 +422,7 @@ static inline void up_usbclock(void)
   putreg32(regval, AVR32_PM_GCCTRL(AVR32_PM_GCLK_USBB))
 
   /* Enable USB GCLK */
- 
+
   regval = getreg32(AVR32_PM_GCCTRL(AVR32_PM_GCLK_USBB))
   regval |= PM_GCCTRL_CEN;
   putreg32(regval, AVR32_PM_GCCTRL(AVR32_PM_GCLK_USBB))
@@ -441,7 +441,7 @@ static inline void up_usbclock(void)
  *   file.
  *
  **************************************************************************/
- 
+
 void up_clkinitialize(void)
 {
 #ifdef AVR32_CLOCK_OSC32
@@ -458,7 +458,7 @@ void up_clkinitialize(void)
   /* Set up FLASH wait states */
 
   up_fws(AVR32_FOSC0);
- 
+
   /* Then switch the main clock to OSC0 */
 
   up_mainclk(PM_MCCTRL_MCSEL_OSC0);
@@ -474,11 +474,11 @@ void up_clkinitialize(void)
   /* Enable PLL0 using the settings in board.h */
 
   up_enablepll0();
- 
+
   /* Set up FLASH wait states */
 
   up_fws(AVR32_CPU_CLOCK);
- 
+
   /* Then switch the main clock to PLL0 */
 
   up_mainclk(PM_MCCTRL_MCSEL_PLL0);

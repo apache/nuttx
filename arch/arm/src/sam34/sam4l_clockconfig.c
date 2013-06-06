@@ -55,17 +55,22 @@
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
+/* Nominal frequencies in on-chip RC oscillators.  These may frequencies
+ * may vary with temperature changes.
+ */
+
+#define SAM_RCSYS_FREQUENCY       115000 /* Nominal frequency of RCSYS (Hz) */
+#define SAM_RC32K_FREQUENCY        32768 /* Nominal frequency of RC32K (Hz) */
+#define SAM_RC80M_FREQUENCY     80000000 /* Nominal frequency of RC80M (Hz) */
+#define SAM_RCFAST4M_FREQUENCY   4000000 /* Nominal frequency of RCFAST4M (Hz) */
+#define SAM_RCFAST8M_FREQUENCY   8000000 /* Nominal frequency of RCFAST8M (Hz) */
+#define SAM_RCFAST12M_FREQUENCY 12000000 /* Nominal frequency of RCFAST12M (Hz) */
+#define SAM_RC1M_FREQUENCY       1000000 /* Nominal frequency of RC1M (Hz) */
 
 #if defined(SAM_CLOCK_OSC0) || \
     (defined (SAM_CLOCK_PLL0) && defined(SAM_CLOCK_PLL0_OSC0)) || \
     (defined (SAM_CLOCK_PLL1) && defined(SAM_CLOCK_PLL1_OSC0))
 #  define NEED_OSC0
-#endif
-
-#if defined(SAM_CLOCK_OSC1) || \
-    (defined (SAM_CLOCK_PLL0) && defined(SAM_CLOCK_PLL0_OSC1)) || \
-    (defined (SAM_CLOCK_PLL1) && defined(SAM_CLOCK_PLL1_OSC1))
-#  define NEED_OSC1
 #endif
 
 /****************************************************************************
@@ -189,55 +194,6 @@ static inline void sam_enableosc0(void)
   /* Wait for OSC0 to be ready */
 
   while ((getreg32(SAM_PM_POSCSR) & PM_POSCSR_OSC0RDY) == 0);
-}
-#endif
-
-/****************************************************************************
- * Name: sam_enableosc1
- *
- * Description:
- *   Initialiaze OSC0 settings per the definitions in the board.h file.
- *
- ****************************************************************************/
-
-#ifdef NEED_OSC1
-static inline void sam_enableosc1(void)
-{
-  uint32_t regval;
-
-  /* Enable OSC1 in the correct crystal mode by setting the mode value in OSCCTRL1 */
-
-  regval  = getreg32(SAM_PM_OSCCTRL1);
-  regval &= ~PM_OSCCTRL_MODE_MASK;
-#if SAM_FOSC1 < 900000
-  regval |= PM_OSCCTRL_MODE_XTALp9;  /* Crystal XIN 0.4-0.9MHz */
-#elif SAM_FOSC1 < 3000000
-  regval |= PM_OSCCTRL_MODE_XTAL3;   /* Crystal XIN 0.9-3.0MHz */
-#elif SAM_FOSC1 < 8000000
-  regval |= PM_OSCCTRL_MODE_XTAL8;   /* Crystal XIN 3.0-8.0MHz */
-#else
-  regval |= PM_OSCCTRL_MODE_XTALHI;  /* Crystal XIN above 8.0MHz */
-#endif
-  putreg32(regval, SAM_PM_OSCCTRL1);
-
-  /* Enable OSC1 using the startup time provided in board.h.  This startup time
-   * is critical and depends on the characteristics of the crystal.
-   */
-
-  regval  = getreg32(SAM_PM_OSCCTRL1);
-  regval &= ~PM_OSCCTRL_STARTUP_MASK;
-  regval |= (SAM_OSC1STARTUP << PM_OSCCTRL_STARTUP_SHIFT);
-  putreg32(regval, SAM_PM_OSCCTRL1);
-
-  /* Enable OSC1 */
-
-  regval = getreg32(SAM_PM_MCCTRL);
-  regval |= PM_MCCTRL_OSC1EN;
-  putreg32(regval, SAM_PM_MCCTRL);
-
-  /* Wait for OSC1 to be ready */
-
-  while ((getreg32(SAM_PM_POSCSR) & PM_POSCSR_OSC1RDY) == 0);
 }
 #endif
 
@@ -505,17 +461,75 @@ static inline void sam_usbclock(void)
 
 void sam_clockconfig(void)
 {
+  uint32_t regval;
+  uint32_t bpmps;
+  bool fastwkup;
+
   /* Enable clocking to the PICOCACHE */
 
   sam_picocache();
 
-  /* Configure dividers derived clocks.  These divider definitions must be
-   * provided in the board.h header file.
+  /* Configure dividers for derived clocks.  These divider definitions must
+   * be provided in the board.h header file.
    */
 
-  sam_setdividers(BOARD_SYSCLK_CPU_DIV, BOARD_SYSCLK_PBA_DIV,
-                  BOARD_SYSCLK_PBB_DIV, BOARD_SYSCLK_PBC_DIV,
-                  BOARD_SYSCLK_PBD_DIV);
+  sam_setdividers(BOARD_CPU_SHIFT, BOARD_PBA_SHIFT, BOARD_PBB_SHIFT,
+                  BOARD_PBC_SHIFT, BOARD_PBD_SHIFT);
+
+
+  /* Select a power scaling mode and possible fast wakeup so that we get the
+   * best possible flash performance.  The following table shows the maximum
+   * CPU frequency for 0 and 1 FLASH wait states (FWS) in various modes
+   * (Table 42-30 in the big data sheet).
+   *
+   *   ------- ------------------- ---------- ----------
+   *   Power     Flash Read Mode     Flash     Maximum
+   *   Sclaing                        Wait    Operating
+   *   Mode    HSEN HSDIS FASTWKUP   States   Frequency
+   *   ------- ---- ----- -------- ---------- ----------
+   *     PS0          X       X        1        12MHz
+   *     " "          X                0        18MHz
+   *     " "          X                1        36MHz
+   *     PS1          X       X        1        12MHz
+   *     " "          X                0         8MHz
+   *     " "          X                1        12MHz
+   *     PS2     X                     0        24Mhz
+   *     " "     X                     1        48MHz
+   *   ------- ---- ----- -------- ---------- ----------
+   */
+
+#ifdef CONFIG_SAM_FLASH_HSEN
+  /* The high speed FLASH mode has been enabled.  Select power scaling mode 2 */
+
+  bpmps    = BPM_PMCON_PS2;
+  fastwkup = false;
+#else
+  /* Not high speed mode.  Check if we can go to power scaling mode 1. */
+
+  if (BOARD_CPU_FREQUENCY <= FLASH_MAXFREQ_PS1_HSDIS_FWS1)
+    {
+      /* Yes.. Do we also need to enable fast wakeup? */
+
+      bpmps = BPM_PMCON_PS1;
+      if (BOARD_CPU_FREQUENCY > FLASH_MAXFREQ_PS1_HSDIS_FWS0)
+        {
+          /* Yes.. enable fast wakeup */
+
+          regval  = getreg32(SAM_BPM_PMCON);
+          regval |= BPM_PMCON_FASTWKUP;
+          putreg32(BPM_UNLOCK_KEY(0xaa) | BPM_UNLOCK_ADDR(SAM_BPM_PMCON_OFFSET), SAM_BPM_UNLOCK);
+          putreg32(regval, SAM_BPM_PMCON);
+
+          /* We need to remember that we did this */
+
+          fastwkup = true;
+        }
+    }
+  else
+    {
+      bpmps = BPM_PMCON_PS0;
+    }
+#endif
 
 #ifdef SAM_CLOCK_OSC32
   /* Enable the 32KHz oscillator (need by the RTC module) */
