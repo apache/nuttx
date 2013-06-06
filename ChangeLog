@@ -4914,11 +4914,9 @@
 	  register definitions for the SAM4L BMP and SCIF blocks (2013-6-6).
 	* nuttx/arch/arm/src/sam34/sam4l_clockconfig.c:  Now selects an
 	  optimal power scaling mode (2013-6-6).
-	* modified:   nuttx/arch/arm/src/stm32/stm32_serial.c
-#       modified:   nuttx/drivers/serial/Kconfig
-#       modified:   nuttx/include/nuttx/serial/serial.h
-#       modified:   nuttx/include/termios.h
-A:wq\
-
-A
-
+	* nuttx/arch/arm/src/stm32/stm32_serial.c and nuttx/include/termios.h:
+	  Change for hardware flow control support for STM32. It also fixes
+	  incorrect operation of USART2 and UART5 in current master.  Submitted
+	  by Lorenz Meier but includes changes by Mike Smith (2013-6-6).
+	* nuttx/arch/arm/src/stm32/stm32_otgfshost.c:  A backward conditional
+	  prevent detection of disonnection events.  Reported by Scott (2013-6-6).
