@@ -1,7 +1,7 @@
 /*******************************************************************************
  * arch/arm/src/stm32/stm32_otgfshost.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -2176,7 +2176,7 @@ static void stm32_gint_disconnected(FAR struct stm32_usbhost_s *priv)
 {
   /* Were we previously connected? */
 
-  if (!priv->connected)
+  if (priv->connected)
     {
       /* Yes.. then we no longer connected */
 
