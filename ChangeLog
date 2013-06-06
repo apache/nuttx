@@ -4912,5 +4912,13 @@
 	  logic to enabled/disable SAM4L peripheral clocking (2013-6-5).
 	* nuttx/arch/arm/src/sam34/chip/sam4l_bpm.h and sam4l_scif.h:  Add
 	  register definitions for the SAM4L BMP and SCIF blocks (2013-6-6).
-	* nuttx/arch/arm/src/sam34/sam4l_clockconfig.c:  New selects an
+	* nuttx/arch/arm/src/sam34/sam4l_clockconfig.c:  Now selects an
 	  optimal power scaling mode (2013-6-6).
+	* modified:   nuttx/arch/arm/src/stm32/stm32_serial.c
+#       modified:   nuttx/drivers/serial/Kconfig
+#       modified:   nuttx/include/nuttx/serial/serial.h
+#       modified:   nuttx/include/termios.h
+A:wq\
+
+A
+

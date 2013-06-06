@@ -66,6 +66,20 @@ config 16550_UART0_TXBUFSIZE
 	---help---
 		16550 UART0 Tx buffer size.  Default: 256
 
+config 16550_UART0_IFLOWCONTROL
+	bool "16550 UART0 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable 16550 UART0 RTS flow control
+
+config 16550_UART0_OFLOWCONTROL
+	bool "16550 UART0 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable 16550 UART0 CTS flow control
+
 endif
 
 config 16550_UART1
@@ -115,6 +129,20 @@ config 16550_UART1_TXBUFSIZE
 	default 256
 	---help---
 		16550 UART1 Tx buffer size.  Default: 256
+
+config 16550_UART1_IFLOWCONTROL
+	bool "16550 UART1 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable 16550 UART1 RTS flow control
+
+config 16550_UART1_OFLOWCONTROL
+	bool "16550 UART1 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable 16550 UART1 CTS flow control
 
 endif
 
@@ -166,6 +194,20 @@ config 16550_UART2_TXBUFSIZE
 	---help---
 		16550 UART2 Tx buffer size.  Default: 256
 
+config 16550_UART2_IFLOWCONTROL
+	bool "16550 UART2 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable 16550 UART2 RTS flow control
+
+config 16550_UART2_OFLOWCONTROL
+	bool "16550 UART2 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable 16550 UART2 CTS flow control
+
 endif
 
 config 16550_UART3
@@ -215,6 +257,20 @@ config 16550_UART3_TXBUFSIZE
 	default 256
 	---help---
 		16550 UART3 Tx buffer size.  Default: 256
+
+config 16550_UART3_IFLOWCONTROL
+	bool "16550 UART3 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable 16550 UART3 RTS flow control
+
+config 16550_UART3_OFLOWCONTROL
+	bool "16550 UART3 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable 16550 UART3 CTS flow control
 
 endif
 
@@ -452,40 +508,54 @@ menu "UART Configuration"
 config UART_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config UART_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config UART_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the UART.
+	---help---
+		The configured BAUD of the UART.
 
 config UART_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config UART_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config UART_2STOP
 	int "use 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config UART_IFLOWCONTROL
+	bool "UART RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART RTS flow control
+
+config UART_OFLOWCONTROL
+	bool "UART CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART CTS flow control
 
 endmenu
 
@@ -495,40 +565,54 @@ menu "UART0 Configuration"
 config UART0_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config UART0_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config UART0_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the UART.
+	---help---
+		The configured BAUD of the UART.
 
 config UART0_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config UART0_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config UART0_2STOP
 	int "use 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config UART0_IFLOWCONTROL
+	bool "UART0 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART0 RTS flow control
+
+config UART0_OFLOWCONTROL
+	bool "UART0 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART0 CTS flow control
 
 endmenu
 
@@ -538,40 +622,54 @@ menu "USART0 Configuration"
 config USART0_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config USART0_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config USART0_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the USART.
+	---help---
+		The configured BAUD of the USART.
 
 config USART0_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config USART0_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config USART0_2STOP
 	int "use 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config USART0_IFLOWCONTROL
+	bool "USART0 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable USART0 RTS flow control
+
+config USART0_OFLOWCONTROL
+	bool "USART0 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable USART0 CTS flow control
 
 endmenu
 
@@ -581,40 +679,54 @@ menu "UART1 Configuration"
 config UART1_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config UART1_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config UART1_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the UART.
+	---help---
+		The configured BAUD of the UART.
 
 config UART1_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config UART1_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config UART1_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config UART1_IFLOWCONTROL
+	bool "UART1 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART1 RTS flow control
+
+config UART1_OFLOWCONTROL
+	bool "UART1 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART1 CTS flow control
 
 endmenu
 
@@ -624,40 +736,54 @@ menu "USART1 Configuration"
 config USART1_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config USART1_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config USART1_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the USART.
+	---help---
+		The configured BAUD of the USART.
 
 config USART1_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config USART1_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config USART1_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config USART1_IFLOWCONTROL
+	bool "USART1 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable USART1 RTS flow control
+
+config USART1_OFLOWCONTROL
+	bool "USART1 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable USART1 CTS flow control
 
 endmenu
 
@@ -667,40 +793,54 @@ menu "UART2 Configuration"
 config UART2_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config UART2_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config UART2_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the UART.
+	---help---
+		The configured BAUD of the UART.
 
 config UART2_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config UART2_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config UART2_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config UART2_IFLOWCONTROL
+	bool "UART2 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART2 RTS flow control
+
+config UART2_OFLOWCONTROL
+	bool "UART2 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART2 CTS flow control
 
 endmenu
 
@@ -710,40 +850,54 @@ menu "USART2 Configuration"
 config USART2_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config USART2_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config USART2_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the USART.
+	---help---
+		The configured BAUD of the USART.
 
 config USART2_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config USART2_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config USART2_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config USART2_IFLOWCONTROL
+	bool "USART2 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable USART2 RTS flow control
+
+config USART2_OFLOWCONTROL
+	bool "USART2 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable USART2 CTS flow control
 
 endmenu
 
@@ -753,40 +907,54 @@ menu "UART3 Configuration"
 config UART3_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config UART3_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config UART3_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the UART.
+	---help---
+		The configured BAUD of the UART.
 
 config UART3_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config UART3_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config UART3_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config UART3_IFLOWCONTROL
+	bool "UART3 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART3 RTS flow control
+
+config UART3_OFLOWCONTROL
+	bool "UART3 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART3 CTS flow control
 
 endmenu
 
@@ -796,40 +964,54 @@ menu "USART3 Configuration"
 config USART3_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config USART3_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config USART3_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the USART.
+	---help---
+		The configured BAUD of the USART.
 
 config USART3_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config USART3_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config USART3_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config USART3_IFLOWCONTROL
+	bool "USART3 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable USART3 RTS flow control
+
+config USART3_OFLOWCONTROL
+	bool "USART3 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable USART3 CTS flow control
 
 endmenu
 
@@ -839,40 +1021,54 @@ menu "UART4 Configuration"
 config UART4_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config UART4_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config UART4_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the UART.
+	---help---
+		The configured BAUD of the UART.
 
 config UART4_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config UART4_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config UART4_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config UART4_IFLOWCONTROL
+	bool "UART4 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART4 RTS flow control
+
+config UART4_OFLOWCONTROL
+	bool "UART4 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART4 CTS flow control
 
 endmenu
 
@@ -882,40 +1078,54 @@ menu "USART4 Configuration"
 config USART4_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config USART4_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config USART4_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the USART.
+	---help---
+		The configured BAUD of the USART.
 
 config USART4_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config USART4_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config USART4_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config USART4_IFLOWCONTROL
+	bool "USART4 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable USART4 RTS flow control
+
+config USART4_OFLOWCONTROL
+	bool "USART4 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable USART4 CTS flow control
 
 endmenu
 
@@ -925,40 +1135,54 @@ menu "UART5 Configuration"
 config UART5_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config UART5_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config UART5_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the UART.
+	---help---
+		The configured BAUD of the UART.
 
 config UART5_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config UART5_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config UART5_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config UART5_IFLOWCONTROL
+	bool "UART5 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART5 RTS flow control
+
+config UART5_OFLOWCONTROL
+	bool "UART5 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART5 CTS flow control
 
 endmenu
 
@@ -968,40 +1192,54 @@ menu "USART5 Configuration"
 config USART5_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config USART5_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config USART5_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the USART.
+	---help---
+		The configured BAUD of the USART.
 
 config USART5_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config USART5_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config USART5_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config USART5_IFLOWCONTROL
+	bool "USART5 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable USART5 RTS flow control
+
+config USART5_OFLOWCONTROL
+	bool "USART5 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable USART5 CTS flow control
 
 endmenu
 
@@ -1011,40 +1249,54 @@ menu "USART6 Configuration"
 config USART6_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config USART6_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config USART6_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the USART.
+	---help---
+		The configured BAUD of the USART.
 
 config USART6_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config USART6_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config USART6_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config USART6_IFLOWCONTROL
+	bool "UART6 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable USART6 RTS flow control
+
+config USART6_OFLOWCONTROL
+	bool "USART6 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable USART6 CTS flow control
 
 endmenu
 
@@ -1054,40 +1306,54 @@ menu "UART6 Configuration"
 config UART6_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config UART6_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config UART6_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the UART.
+	---help---
+		The configured BAUD of the UART.
 
 config UART6_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config UART6_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config UART6_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config UART6_IFLOWCONTROL
+	bool "UART6 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART6 RTS flow control
+
+config UART6_OFLOWCONTROL
+	bool "UART6 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART6 CTS flow control
 
 endmenu
 
@@ -1097,40 +1363,54 @@ menu "USART7 Configuration"
 config USART7_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config USART7_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config USART7_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the USART.
+	---help---
+		The configured BAUD of the USART.
 
 config USART7_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config USART7_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config USART7_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config USART7_IFLOWCONTROL
+	bool "USART7 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable USART7 RTS flow control
+
+config USART7_OFLOWCONTROL
+	bool "USART7 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable USART7 CTS flow control
 
 endmenu
 
@@ -1140,40 +1420,54 @@ menu "UART7 Configuration"
 config UART7_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config UART7_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config UART7_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the UART.
+	---help---
+		The configured BAUD of the UART.
 
 config UART7_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config UART7_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config UART7_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config UART7_IFLOWCONTROL
+	bool "UART7 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART7 RTS flow control
+
+config UART7_OFLOWCONTROL
+	bool "UART7 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART7 CTS flow control
 
 endmenu
 
@@ -1183,40 +1477,54 @@ menu "USART8 Configuration"
 config USART8_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config USART8_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config USART8_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the USART.
+	---help---
+		The configured BAUD of the USART.
 
 config USART8_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config USART8_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config USART8_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config USART8_IFLOWCONTROL
+	bool "USART8 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable USART8 RTS flow control
+
+config USART8_OFLOWCONTROL
+	bool "USART8 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable USART8 CTS flow control
 
 endmenu
 
@@ -1226,39 +1534,62 @@ menu "UART8 Configuration"
 config UART8_RXBUFSIZE
 	int "Receive buffer size"
 	default 256
-	help
-	  Characters are buffered as they are received. This specifies
-	  the size of the receive buffer.
+	---help---
+		Characters are buffered as they are received. This specifies
+		the size of the receive buffer.
 
 config UART8_TXBUFSIZE
 	int "Transmit buffer size"
 	default 256
-	help
-	  Characters are buffered before being sent.  This specifies
-	  the size of the transmit buffer.
+	---help---
+		Characters are buffered before being sent.  This specifies
+		the size of the transmit buffer.
 
 config UART8_BAUD
 	int "BAUD rate"
 	default 115200
-	help
-	  The configured BAUD of the UART.
+	---help---
+		The configured BAUD of the UART.
 
 config UART8_BITS
 	int "Character size"
 	default 8
-	help
-	  The number of bits.  Must be either 7 or 8.
+	---help---
+		The number of bits.  Must be either 7 or 8.
 
 config UART8_PARITY
 	int "Parity setting"
 	default 0
-	help
-	  0=no parity, 1=odd parity, 2=even parity
+	---help---
+		0=no parity, 1=odd parity, 2=even parity
 
 config UART8_2STOP
 	int "Uses 2 stop bits"
 	default 0
-	help
-	  1=Two stop bits
+	---help---
+		1=Two stop bits
+
+config UART8_IFLOWCONTROL
+	bool "UART8 RTS flow control"
+	default n
+	select SERIAL_IFLOWCONTROL
+	---help---
+		Enable UART8 RTS flow control
+
+config UART8_OFLOWCONTROL
+	bool "UART8 CTS flow control"
+	default n
+	select SERIAL_OFLOWCONTROL
+	---help---
+		Enable UART8 CTS flow control
 
 endmenu
+
+config SERIAL_IFLOWCONTROL
+	bool
+	default n
+
+config SERIAL_OFLOWCONTROL
+	bool
+	default n
+

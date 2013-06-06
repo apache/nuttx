@@ -736,7 +736,7 @@ static inline void lpc17_uart1config(void)
 
   lpc17_configgpio(GPIO_UART1_TXD);
   lpc17_configgpio(GPIO_UART1_RXD);
-#ifdef CONFIG_UART1_FLOWCONTROL
+#if defined(CONFIG_UART1_IFLOWCONTROL) || defined(CONFIG_UART1_OFLOWCONTROL)
   lpc17_configgpio(GPIO_UART1_CTS);
   lpc17_configgpio(GPIO_UART1_RTS);
   lpc17_configgpio(GPIO_UART1_DCD);
@@ -943,10 +943,16 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Enable Auto-RTS and Auto-CS Flow Control in the Modem Control Register */
   
-#ifdef CONFIG_UART1_FLOWCONTROL
+#if defined(CONFIG_UART1_IFLOWCONTROL) || defined(CONFIG_UART1_OFLOWCONTROL)
   if (priv->uartbase == LPC17_UART1_BASE)
     {
+#if defined(CONFIG_UART1_IFLOWCONTROL) && defined(CONFIG_UART1_OFLOWCONTROL)
       up_serialout(priv, LPC17_UART_MCR_OFFSET, (UART_MCR_RTSEN|UART_MCR_CTSEN));
+#elif defined(CONFIG_UART1_IFLOWCONTROL)
+      up_serialout(priv, LPC17_UART_MCR_OFFSET, UART_MCR_RTSEN);
+#else
+      up_serialout(priv, LPC17_UART_MCR_OFFSET, UART_MCR_CTSEN);
+#endif
     }
 #endif
 

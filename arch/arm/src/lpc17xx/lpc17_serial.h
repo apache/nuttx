@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc17xx/lpc17_serial.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,11 +96,15 @@
 
 /* Check UART flow control (Only supported by UART1) */
 
-# undef CONFIG_UART0_FLOWCONTROL
-# undef CONFIG_UART2_FLOWCONTROL
-# undef CONFIG_UART3_FLOWCONTROL
+# undef CONFIG_UART0_IFLOWCONTROL
+# undef CONFIG_UART0_OFLOWCONTROL
+# undef CONFIG_UART2_IFLOWCONTROL
+# undef CONFIG_UART2_OFLOWCONTROL
+# undef CONFIG_UART3_IFLOWCONTROL
+# undef CONFIG_UART3_OFLOWCONTROL
 #ifndef CONFIG_LPC17_UART1
-# undef CONFIG_UART1_FLOWCONTROL
+# undef CONFIG_UART1_IFLOWCONTROL
+# undef CONFIG_UART1_OFLOWCONTROL
 #endif
 
 /* We cannot allow the DLM/DLL divisor to become to small or will will lose too

@@ -278,7 +278,7 @@ void uart_recvchars(FAR uart_dev_t *dev);
  * Name: uart_datareceived
  *
  * Description:
- *   This function is called from uart_recvchars when new serial data is place in 
+ *   This function is called from uart_recvchars when new serial data is place in
  *   the driver's circular buffer.  This function will wake-up any stalled read()
  *   operations that are waiting for incoming data.
  *

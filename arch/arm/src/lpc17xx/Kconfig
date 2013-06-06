@@ -335,40 +335,12 @@ config SERIAL_TERMIOS
 		If this is not defined, then the terminal settings (baud, parity, etc).
 		are not configurable at runtime; serial streams cannot be flushed, etc..
 
-config UART0_FLOWCONTROL
-	bool "UART0 flow control"
-	depends on LPC17_UART0
-	default n
-	---help---
-		Enable UART0 flow control
-
-config UART1_FLOWCONTROL
-	bool "UART1 flow control"
-	depends on LPC17_UART1
-	default n
-	---help---
-		Enable UART1 flow control
-
 config UART1_RINGINDICATOR
 	bool "UART1 ring indicator"
 	depends on LPC17_UART1
 	default n
 	---help---
 		Enable UART1 ring indicator
-
-config UART2_FLOWCONTROL
-	bool "UART0 flow control"
-	depends on LPC17_UART2
-	default n
-	---help---
-		Enable UART2 flow control
-
-config UART3_FLOWCONTROL
-	bool "UART3 flow control"
-	depends on LPC17_UART3
-	default n
-	---help---
-		Enable UART3 flow control
 
 endmenu
 
