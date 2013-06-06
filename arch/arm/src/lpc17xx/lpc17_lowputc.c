@@ -359,7 +359,7 @@ void lpc17_lowsetup(void)
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
   lpc17_configgpio(GPIO_UART1_TXD);
   lpc17_configgpio(GPIO_UART1_RXD);
-#ifdef CONFIG_UART1_FLOWCONTROL
+#if defined(CONFIG_UART1_IFLOWCONTROL) || defined(CONFIG_UART1_OFLOWCONTROL)
   lpc17_configgpio(GPIO_UART1_CTS);
   lpc17_configgpio(GPIO_UART1_DCD);
   lpc17_configgpio(GPIO_UART1_DSR);
