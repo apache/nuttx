@@ -186,6 +186,14 @@
 #define PM_PBAMASK_TWIM3           (1 << 22) /* Bit 22: TWIM3 */
 #define PM_PBAMASK_LCDCA           (1 << 23) /* Bit 23: LCDCA*/
 
+/* These are the PBMA peripherals that use divided clocks enabled in the
+ * PBADIVMASK register.
+ */
+
+#define PM_PBAMASK_TIMERS (PM_PBAMASK_TC0 | PM_PBAMASK_TC1)
+#define PM_PBAMASK_UARTS  (PM_PBAMASK_USART0 | PM_PBAMASK_USART1 | \
+                           PM_PBAMASK_USART2 | PM_PBAMASK_USART3)
+
 /* PBB Mask Register Bit-field Definitions */
 
 #define PM_PBBMASK_FLASHCALW       (1 << 0)  /* Bit 0:  FLASHCALW */
@@ -220,6 +228,10 @@
 #define PM_PBADIVMASK_TIMER_CLOCK3 (1 << 2) /* Bit 2: TIMER_CLOCK3 (TC0-1) */
 #define PM_PBADIVMASK_TIMER_CLOCK4 (1 << 4) /* Bit 4: TIMER_CLOCK4 (TC0-1) */
 #define PM_PBADIVMASK_TIMER_CLOCK5 (1 << 6) /* Bit 5: TIMER_CLOCK5 (TC0-1) */
+
+#define PM_PBADIVMASK_TIMER_CLOCKS \
+  (PM_PBADIVMASK_TIMER_CLOCK2 | PM_PBADIVMASK_TIMER_CLOCK3 | \
+   PM_PBADIVMASK_TIMER_CLOCK4 | PM_PBADIVMASK_TIMER_CLOCK5)
 
 /* Clock Failure Detector Control */
 

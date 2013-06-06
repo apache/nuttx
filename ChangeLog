@@ -4908,3 +4908,6 @@
 	  Power Management.  Leveraged from AVR32 (2013-6-5).
 	* arch/arm/src/sam34/sarm4l_clockconfig.c:  SAM4L clock configuration
 	  logic (leveraged from AVR32).
+	* nuttx/arch/arm/src/sam34/sam4l_periphclks.c/h:  Add common
+	  logic to enabled/disable SAM4L peripheral clocking (2013-6-5).
+
