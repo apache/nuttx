@@ -176,17 +176,32 @@
 #  define SCIF_UNLOCK_KEY(n)              ((n) << SCIF_UNLOCK_KEY_SHIFT)
 
 /* Chip Specific Configuration Register */
-#define SCIF_CSCR_
-
 
 /* Oscillator Control Register */
 
 #define SCIF_OSCCTRL0_MODE                (1 << 0)  /* Bit 0:  Oscillator Mode */
 #define SCIF_OSCCTRL0_GAIN_SHIFT          (1)       /* Bits 1-2: Gain */
-#define SCIF_OSCCTRL0_GAIN_               (3 << SCIF_OSCCTRL0_GAIN_SHIFT)
+#define SCIF_OSCCTRL0_GAIN_MASK           (3 << SCIF_OSCCTRL0_GAIN_SHIFT)
+#  define SCIF_OSCCTRL0_GAIN(n)           ((n) << SCIF_OSCCTRL0_GAIN_SHIFT)
 #define SCIF_OSCCTRL0_AGC                 (1 << 3)  /* Bit 3:  Automatic Gain Control */
 #define SCIF_OSCCTRL0_STARTUP_SHIFT       (9)       /* Bits 8-11: Oscillator Start-up Time */
 #define SCIF_OSCCTRL0_STARTUP_MASK        (15 << SCIF_OSCCTRL0_STARTUP_SHIFT)
+#  define SCIF_OSCCTRL0_STARTUP_0         (0 << SCIF_OSCCTRL0_STARTUP_SHIFT)
+#  define SCIF_OSCCTRL0_STARTUP_64        (1 << SCIF_OSCCTRL0_STARTUP_SHIFT)  /* 64 557 us */
+#  define SCIF_OSCCTRL0_STARTUP_128       (2 << SCIF_OSCCTRL0_STARTUP_SHIFT)  /* 128 1.1 ms */
+#  define SCIF_OSCCTRL0_STARTUP_2K        (3 << SCIF_OSCCTRL0_STARTUP_SHIFT)  /* 2048 18 ms */
+#  define SCIF_OSCCTRL0_STARTUP_4K        (4 << SCIF_OSCCTRL0_STARTUP_SHIFT)  /* 4096 36 ms */
+#  define SCIF_OSCCTRL0_STARTUP_8K        (5 << SCIF_OSCCTRL0_STARTUP_SHIFT)  /* 8192 71 ms */
+#  define SCIF_OSCCTRL0_STARTUP_16K       (6 << SCIF_OSCCTRL0_STARTUP_SHIFT)  /* 16384 143 ms */
+#  define SCIF_OSCCTRL0_STARTUP_32K       (7 << SCIF_OSCCTRL0_STARTUP_SHIFT)  /* 32768 285 ms */
+#  define SCIF_OSCCTRL0_STARTUP_4         (8 << SCIF_OSCCTRL0_STARTUP_SHIFT)  /* 4 35 us */
+#  define SCIF_OSCCTRL0_STARTUP_8         (9 << SCIF_OSCCTRL0_STARTUP_SHIFT)  /* 8 70 us */
+#  define SCIF_OSCCTRL0_STARTUP_16        (10 << SCIF_OSCCTRL0_STARTUP_SHIFT) /* 16 139 us */
+#  define SCIF_OSCCTRL0_STARTUP_32        (11 << SCIF_OSCCTRL0_STARTUP_SHIFT) /* 32 278 us */
+#  define SCIF_OSCCTRL0_STARTUP_256       (12 << SCIF_OSCCTRL0_STARTUP_SHIFT) /* 256 2.2 ms */
+#  define SCIF_OSCCTRL0_STARTUP_512       (13 << SCIF_OSCCTRL0_STARTUP_SHIFT) /* 512 4.5 ms */
+#  define SCIF_OSCCTRL0_STARTUP_1K        (14 << SCIF_OSCCTRL0_STARTUP_SHIFT) /* 1024 8.9 ms */
+#  define SCIF_OSCCTRL0_STARTUP_32K2      (15 << SCIF_OSCCTRL0_STARTUP_SHIFT) /* 2768 285 ms */
 #define SCIF_OSCCTRL0_OSCEN               (1 << 16) /* Bit 16: Oscillator Enable */
 
 /* PLL0 Control Register */

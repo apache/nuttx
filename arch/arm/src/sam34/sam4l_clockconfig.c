@@ -67,10 +67,80 @@
 #define SAM_RCFAST12M_FREQUENCY 12000000 /* Nominal frequency of RCFAST12M (Hz) */
 #define SAM_RC1M_FREQUENCY       1000000 /* Nominal frequency of RC1M (Hz) */
 
-#if defined(SAM_CLOCK_OSC0) || \
-    (defined (SAM_CLOCK_PLL0) && defined(SAM_CLOCK_PLL0_OSC0)) || \
-    (defined (SAM_CLOCK_PLL1) && defined(SAM_CLOCK_PLL1_OSC0))
-#  define NEED_OSC0
+/* Oscillator 0.  This might be the system clock or the source clock for
+ * either PLL0 or DFPLL.
+ *
+ * By selecting CONFIG_SAM_OSC0, you can also force the clock to be enabled
+ * at boot time.
+ */
+
+#if defined(CONFIG_SAM_OSC0) || defined(BOARD_SYSCLK_SOURCE_OSC0) || \
+    defined(BOARD_DFLL0_SOURCE_OSC0) || defined(BOARD_PLL0_SOURCE_OSC0)
+#  define NEED_OSC0               1
+#endif
+
+#ifdef NEED_OSC0
+#  if !defined(BOARD_OSC0_STARTUP_US)
+#    error BOARD_OSC0_STARTUP_US is not defined
+#  if BOARD_OSC0_STARTUP_US == 0
+#    define OSC0_STARTUP_VALUE    SCIF_OSCCTRL0_STARTUP_0
+#    define OSC0_STARTUP_TIMEOUT  8
+#  elif BOARD_OSC0_STARTUP_US <= 557
+#    define OSC0_STARTUP_VALUE    SCIF_OSCCTRL0_STARTUP_64
+#    define OSC0_STARTUP_TIMEOUT  80
+#  elif BOARD_OSC0_STARTUP_US <= 1100
+#    define OSC0_STARTUP_VALUE    SCIF_OSCCTRL0_STARTUP_128
+#    define OSC0_STARTUP_TIMEOUT  160
+#  elif BOARD_OSC0_STARTUP_US <= 18000
+#    define OSC0_STARTUP_VALUE    SCIF_OSCCTRL0_STARTUP_2K
+#    define OSC0_STARTUP_TIMEOUT  2560
+#  elif BOARD_OSC0_STARTUP_US <= 36000
+#    define OSC0_STARTUP_VALUE    SCIF_OSCCTRL0_STARTUP_4K
+#    define OSC0_STARTUP_TIMEOUT  5120
+#  elif BOARD_OSC0_STARTUP_US <= 71000
+#    define OSC0_STARTUP_VALUE    SCIF_OSCCTRL0_STARTUP_8K
+#    define OSC0_STARTUP_TIMEOUT  10240
+#  elif BOARD_OSC0_STARTUP_US <= 143000
+#    define OSC0_STARTUP_VALUE    SCIF_OSCCTRL0_STARTUP_16K
+#    define OSC0_STARTUP_TIMEOUT  20480
+#  elif BOARD_OSC0_STARTUP_US <= 285000
+#    define OSC0_STARTUP_VALUE    SCIF_OSCCTRL0_STARTUP_32K
+#    define OSC0_STARTUP_TIMEOUT  40960
+#  else
+#    error BOARD_OSC0_STARTUP_US is out of range
+#  endif
+
+#  ifdef BOARD_OSC0_IS_XTAL
+#    define OSC0_MODE_VALUE       SCIF_OSCCTRL0_MODE
+#    if BOARD_OSC0_FREQUENCY < 2000000
+#      define OSC0_GAIN_VALUE     SCIF_OSCCTRL0_GAIN(0)
+#    elif BOARD_OSC0_FREQUENCY < 4000000
+#      define OSC0_GAIN_VALUE     SCIF_OSCCTRL0_GAIN(1)
+#    elif BOARD_OSC0_FREQUENCY < 8000000
+#      define OSC0_GAIN_VALUE     SCIF_OSCCTRL0_GAIN(2)
+#    elif BOARD_OSC0_FREQUENCY < 16000000
+#      define OSC0_GAIN_VALUE     SCIF_OSCCTRL0_GAIN(3)
+#    else
+#      define OSC0_GAIN_VALUE     ((0x1u << 4) | SCIF_OSCCTRL0_GAIN(0))
+#    endif
+#  else
+#    define OSC0_MODE_VALUE       0
+#    define OSC0_GAIN_VALUE       0
+#  endif
+#endif
+
+/* OSC32.  The 32K oscillator may be the source clock for DFPLL0.
+ *
+ * By selecting CONFIG_SAM_OSC32K, you can also force the clock to be
+ * enabled at boot time.  OSC32 may needed by other devices as well
+ * (AST, WDT, PICUART, RTC).
+ */
+
+#if defined(CONFIG_SAM_OSC32K) || defined(BOARD_DFLL0_SOURCE_OSC32K)
+#  define NEED_OSC32K             1
+#endif
+
+#ifdef NEED_OSC32K
 #endif
 
 /****************************************************************************
@@ -127,7 +197,7 @@ static inline void sam_picocache(void)
  *
  ****************************************************************************/
 
-#ifdef SAM_CLOCK_OSC32
+#ifdef NEED_OSC32K
 static inline void sam_enableosc32(void)
 {
   uint32_t regval;
@@ -159,41 +229,23 @@ static inline void sam_enableosc32(void)
 #ifdef NEED_OSC0
 static inline void sam_enableosc0(void)
 {
+  irqstate_t flags;
   uint32_t regval;
 
-  /* Enable OSC0 in the correct crystal mode by setting the mode value in OSCCTRL0 */
+  regval = OSC0_STARTUP_VALUE | OSC0_GAIN_VALUE | OSC0_MODE_VALUE |
+           SCIF_OSCCTRL0_OSCEN;
 
-  regval  = getreg32(SAM_PM_OSCCTRL0);
-  regval &= ~PM_OSCCTRL_MODE_MASK;
-#if SAM_FOSC0 < 900000
-  regval |= PM_OSCCTRL_MODE_XTALp9;  /* Crystal XIN 0.4-0.9MHz */
-#elif SAM_FOSC0 < 3000000
-  regval |= PM_OSCCTRL_MODE_XTAL3;   /* Crystal XIN 0.9-3.0MHz */
-#elif SAM_FOSC0 < 8000000
-  regval |= PM_OSCCTRL_MODE_XTAL8;   /* Crystal XIN 3.0-8.0MHz */
-#else
-  regval |= PM_OSCCTRL_MODE_XTALHI;  /* Crystal XIN above 8.0MHz */
-#endif
-  putreg32(regval, SAM_PM_OSCCTRL0);
+  /* The following two statements must be atomic */
 
-  /* Enable OSC0 using the startup time provided in board.h.  This startup time
-   * is critical and depends on the characteristics of the crystal.
-   */
-
-  regval  = getreg32(SAM_PM_OSCCTRL0);
-  regval &= ~PM_OSCCTRL_STARTUP_MASK;
-  regval |= (SAM_OSC0STARTUP << PM_OSCCTRL_STARTUP_SHIFT);
-  putreg32(regval, SAM_PM_OSCCTRL0);
-
-  /* Enable OSC0 */
-
-  regval = getreg32(SAM_PM_MCCTRL);
-  regval |= PM_MCCTRL_OSC0EN;
-  putreg32(regval, SAM_PM_MCCTRL);
+  flags = irqsave();
+  putreg32(SCIF_UNLOCK_KEY(0xaa) | SCIF_UNLOCK_ADDR(SAM_SCIF_OSCCTRL0_OFFSET),
+           SAM_SCIF_UNLOCK);
+  putreg32(regval, SAM_SCIF_OSCCTRL0);
+  irqrestore(flags);
 
   /* Wait for OSC0 to be ready */
 
-  while ((getreg32(SAM_PM_POSCSR) & PM_POSCSR_OSC0RDY) == 0);
+  while (getreg32(SAM_SCIF_PCLKSR) & SCIF_INT_OSC0RDY) == 0);
 }
 #endif
 
@@ -531,17 +583,35 @@ void sam_clockconfig(void)
     }
 #endif
 
-#ifdef SAM_CLOCK_OSC32
+  /* Enable clock sources:
+   *
+   * OSC0:  Might by the system clock or the source clock for PLL0 or DFLL0
+   * OSC32: Might be source clock for DFLL0
+   */
+
+#if NEED_OSC0
+  /* Enable OSC0 using the settings in board.h */
+
+  sam_enableosc0();
+#endif
+
+#ifdef NEED_OSC32K
   /* Enable the 32KHz oscillator (need by the RTC module) */
 
   sam_enableosc32();
 #endif
 
+  /* Switch to the system clock selected by the settings in the board.h
+   * header file.
+   */
+
+#if defined(BOARD_SYSCLK_SOURCE_RCSYS)
+  /* Since this function only executes at power up, we know that we are
+   * already running from RCSYS.
+   */
+#endif
+
 #ifdef NEED_OSC0
-  /* Enable OSC0 using the settings in board.h */
-
-  sam_enableosc0();
-
   /* Set up FLASH wait states */
 
   sam_fws(SAM_FOSC0);
@@ -549,12 +619,6 @@ void sam_clockconfig(void)
   /* Then switch the main clock to OSC0 */
 
   sam_mainclk(PM_MCCTRL_MCSEL_OSC0);
-#endif
-
-#ifdef NEED_OSC1
-  /* Enable OSC1 using the settings in board.h */
-
-  sam_enableosc1();
 #endif
 
 #ifdef SAM_CLOCK_PLL0
