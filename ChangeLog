@@ -4920,3 +4920,5 @@
 	  by Lorenz Meier but includes changes by Mike Smith (2013-6-6).
 	* nuttx/arch/arm/src/stm32/stm32_otgfshost.c:  A backward conditional
 	  prevent detection of disonnection events.  Reported by Scott (2013-6-6).
+	* nuttx/arch/arm/src/sam34/chip/sam4l_bscif.h: Add registers definitions
+	  for the SAM4L BSCIF module (2013-6-6).
