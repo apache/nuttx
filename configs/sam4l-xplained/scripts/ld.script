@@ -63,8 +63,6 @@ SECTIONS
 		_etext = ABSOLUTE(.);
 	} > flash
 
-	_eronly = ABSOLUTE(.);
-
 	.data : {
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
@@ -72,6 +70,16 @@ SECTIONS
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
 	} > sram AT > flash
+
+	_eronly = LOADADDR(.data);
+
+	.ramfunc ALIGN(4): {
+		_sramfuncs = ABSOLUTE(.);
+		*(.ramfunc  .ramfunc.*)
+		_eramfuncs = ABSOLUTE(.);
+	} > sram AT > flash
+
+	_framfuncs = LOADADDR(.ramfunc);
 
 	.ARM.extab : {
 		*(.ARM.extab*)

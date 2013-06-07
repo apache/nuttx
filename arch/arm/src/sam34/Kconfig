@@ -134,6 +134,7 @@ config ARCH_CHIP_SAM3U
 config ARCH_CHIP_SAM4L
 	bool
 	default n
+	select ARCH_RAMFUNCS
 
 config ARCH_CHIP_SAM4S
 	bool

@@ -115,6 +115,7 @@ config ARCH_CHIP_NUC1XX
 config ARCH_CHIP_SAM34
 	bool "Atmel AT91SAM3/SAM4"
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_RAMFUNCS
 	---help---
 		Atmel AT91SAM3 (ARM Cortex-M3) and SAM4 (ARM Cortex-M4) architectures
 
