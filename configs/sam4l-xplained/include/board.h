@@ -103,9 +103,9 @@
  */
 
 #define BOARD_DFLL0_SOURCE_OSC32K  1
-#define BOARD_FDLL0_FREQUENCY      48000000
-#define BOARD_FDLL0_MUL            (BOARD_FDLL0_FREQUENCY / BOARD_OSC32_FREQUENCY)
-#define BOARD_FDLL0_DIV            1
+#define BOARD_DFLL0_FREQUENCY      48000000
+#define BOARD_DFLL0_MUL            (BOARD_DFLL0_FREQUENCY / BOARD_OSC32_FREQUENCY)
+#define BOARD_DFLL0_DIV            1
 
 /* Phase Locked Loop configuration
  *  Fdfll = (Fclk * PLLmul) / PLLdiv
