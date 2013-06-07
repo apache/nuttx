@@ -250,9 +250,25 @@
 #define SCIF_DFLL0CONF_QLDIS              (1 << 6)  /* Bit 6:  Quick Lock Disable */
 #define SCIF_DFLL0CONF_RANGE_SHIFT        (16)      /* Bits 16-17: Range Value */
 #define SCIF_DFLL0CONF_RANGE_MASK         (3 << SCIF_DFLL0CONF_RANGE_SHIFT)
+#  define SCIF_DFLL0CONF_RANGE(n)         ((n) << SCIF_DFLL0CONF_RANGE_SHIFT)
+#  define SCIF_DFLL0CONF_RANGE0           (0 << SCIF_DFLL0CONF_RANGE_SHIFT) /* 96-150MHz */
+#  define SCIF_DFLL0CONF_RANGE1           (1 << SCIF_DFLL0CONF_RANGE_SHIFT) /* 50-110MHz */
+#  define SCIF_DFLL0CONF_RANGE2           (2 << SCIF_DFLL0CONF_RANGE_SHIFT) /* 25-55MHz */
+#  define SCIF_DFLL0CONF_RANGE3           (3 << SCIF_DFLL0CONF_RANGE_SHIFT) /* 20-30MHz */
 #define SCIF_DFLL0CONF_FCD                (1 << 23) /* Bit 23: Fuse Calibration Done */
 #define SCIF_DFLL0CONF_CALIB_SHIFT        (24)      /* Bits 24-27: Calibration Value */
 #define SCIF_DFLL0CONF_CALIB_MASK         (15 << SCIF_DFLL0CONF_CALIB_SHIFT)
+
+/* Min/max frequencies for each DFLL0 range */
+
+#define SCIF_DFLL0CONF_MAX_RANGE0   (150000000)
+#define SCIF_DFLL0CONF_MIN_RANGE0    (96000000)
+#define SCIF_DFLL0CONF_MAX_RANGE1   (110000000)
+#define SCIF_DFLL0CONF_MIN_RANGE1    (50000000)
+#define SCIF_DFLL0CONF_MAX_RANGE2    (55000000)
+#define SCIF_DFLL0CONF_MIN_RANGE2    (25000000)
+#define SCIF_DFLL0CONF_MAX_RANGE3    (30000000)
+#define SCIF_DFLL0CONF_MIN_RANGE3    (20000000)
 
 /* DFLL Value Register */
 
@@ -269,8 +285,10 @@
 
 #define SCIF_DFLL0STEP_FSTEP_SHIFT        (0)      /* Bits 0-7: Fine Maximum Step */
 #define SCIF_DFLL0STEP_FSTEP_MASK         (0xff << SCIF_DFLL0STEP_FSTEP_SHIFT)
+#  define SCIF_DFLL0STEP_FSTEP(n)         ((n) << SCIF_DFLL0STEP_FSTEP_SHIFT)
 #define SCIF_DFLL0STEP_CSTEP_SHIFT        (16)     /* Bits 16-20: Coarse Maximum Step */
 #define SCIF_DFLL0STEP_CSTEP_MASK         (31 << SCIF_DFLL0STEP_CSTEP_SHIFT)
+#  define SCIF_DFLL0STEP_CSTEP(4)         ((v) << SCIF_DFLL0STEP_CSTEP_SHIFT)
 
 /* DFLL0 Spread Spectrum Generator Control Register */
 
@@ -375,6 +393,7 @@
 #  define SCIF_GCCTRL_OSCSEL_RC32K        (13 << SCIF_GCCTRL_OSCSEL_SHIFT) /* Output from 32kHz RCOSC */
 #define SCIF_GCCTRL_DIV_SHIFT             (16)      /* Bits 16-31: Division Factor */
 #define SCIF_GCCTRL_DIV_MASK              (0xffff << SCIF_GCCTRL_DIV_SHIFT)
+#  define SCIF_GCCTRL_DIV(n)              ((n) << SCIF_GCCTRL_DIV_SHIFT)
 
 /* 4/8/12MHz RC Oscillator Version Register */
 /* Generic Clock Prescaler Version Register */

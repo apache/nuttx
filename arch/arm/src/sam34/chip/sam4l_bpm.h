@@ -110,6 +110,7 @@
 #  define BPM_PMCON_PS1              (1 << BPM_PMCON_PS_SHIFT)
 #  define BPM_PMCON_PS2              (2 << BPM_PMCON_PS_SHIFT)
 #define BPM_PMCON_PSCREQ             (1 << 2)  /* Bit 2:  Power Scaling Change Request */
+#define BPM_PMCON_PSCM               (1 << 3)  /* Bit 3:  Power Scaling Change Mode */
 #define BPM_PMCON_BKUP               (1 << 8)  /* Bit 8:  BACKUP Mode */
 #define BPM_PMCON_RET                (1 << 9)  /* Bit 9:  RETENTION Mode */
 #define BPM_PMCON_SLEEP_SHIFT        (12)      /* Bits 12-13: SLEEP mode Configuration */

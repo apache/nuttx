@@ -100,12 +100,6 @@ void __start(void)
   const uint32_t *src;
   uint32_t *dest;
 
-  /* Configure the uart so that we can get debug output as soon as possible */
-
-  sam_clockconfig();
-  sam_lowsetup();
-  showprogress('A');
-
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */
@@ -114,7 +108,6 @@ void __start(void)
     {
       *dest++ = 0;
     }
-  showprogress('B');
 
   /* Move the intialized data section from his temporary holding spot in
    * FLASH into the correct place in SRAM.  The correct place in SRAM is
@@ -126,14 +119,33 @@ void __start(void)
     {
       *dest++ = *src++;
     }
-  showprogress('C');
+
+  /* Copy any necessary code sections from FLASH to RAM.  The correct
+   * destination in SRAM is geive by _sramfuncs and _eramfuncs.  The
+   * temporary location is in flash after the data initalization code
+   * at _framfuncs.  This must be done before sam_clockconfig() can be
+   * called (at least for the SAM4L family).
+   */
+
+#ifdef CONFIG_ARCH_RAMFUNCS
+  for (src = &_framfuncs, dest = &_sramfuncs; dest < &_eramfuncs; )
+    {
+      *dest++ = *src++;
+    }
+#endif
+
+  /* Configure the uart so that we can get debug output as soon as possible */
+
+  sam_clockconfig();
+  sam_lowsetup();
+  showprogress('A');
 
   /* Perform early serial initialization */
 
 #ifdef USE_EARLYSERIALINIT
   up_earlyserialinit();
 #endif
-  showprogress('D');
+  showprogress('B');
 
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
@@ -143,13 +155,13 @@ void __start(void)
 
 #ifdef CONFIG_NUTTX_KERNEL
   sam_userspace();
-  showprogress('E');
+  showprogress('C');
 #endif
 
   /* Initialize onboard resources */
 
   sam_boardinitialize();
-  showprogress('F');
+  showprogress('D');
 
   /* Then start NuttX */
 

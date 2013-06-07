@@ -56,8 +56,14 @@
 #include "sam_clockconfig.h"
 
 /****************************************************************************
- * Private Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_ARCH_RAMFUNCS
+# error "CONFIG_ARCH_RAMFUNCS must be defined"
+#endif
+
 /* Nominal frequencies in on-chip RC oscillators.  These may frequencies
  * may vary with temperature changes.
  */
@@ -395,6 +401,23 @@
 #      define SAM_PLL0_OPTIONS       0
 #    endif
 #  endif
+
+/* DPLL0 reference clock */
+
+#  if defined(BOARD_DFLL0_SOURCE_RCSYS)
+#    define SAM_DFLLO_REFCLK         SCIF_GCCTRL_OSCSEL_RCSYS
+#  elif defined(BOARD_DFLL0_SOURCE_OSC32K)
+#    define SAM_DFLLO_REFCLK         SCIF_GCCTRL_OSCSEL_OSC32K
+#  elif define(BOARD_DFLL0_SOURCE_OSC0)
+#    define SAM_DFLLO_REFCLK         SCIF_GCCTRL_OSCSEL_OSC0
+#  elif define(BOARD_DFLL0_SOURCE_RC80M)
+#    define SAM_DFLLO_REFCLK         SCIF_GCCTRL_OSCSEL_RC80M
+#  elif define(BOARD_DFLL0_SOURCE_RC32K)
+#    define SAM_DFLLO_REFCLK         SCIF_GCCTRL_OSCSEL_RC32K
+#  else
+#    error No DFLL0 source for reference clock defined
+#  endif
+
 #endif
 
 /****************************************************************************
@@ -636,14 +659,14 @@ static inline void sam_enableglck9(void)
 #endif
 
 /****************************************************************************
- * Name: sam_enablepll0
+ * Name: sam_enablepll0 (and its helper sam_pll0putreg())
  *
  * Description:
  *   Initialiaze PLL0 settings per the definitions in the board.h file.
  *
  ****************************************************************************/
 
-#ifdef SAM_CLOCK_PLL0
+#ifdef BOARD_SYSCLK_SOURCE_PLL0
 static inline void sam_pll0putreg(uint32_t regval, uint32_t regaddr,
                                   uint32_t regoffset)
 {
@@ -672,7 +695,7 @@ static inline void sam_enablepll0(void)
   regval  = getreg32(SAM_SCIF_PLL0);
   regval &= ~(SCIF_PLL0_PLLOSC_MASK | SCIF_PLL0_PLLDIV_MASK | SCIF_PLL0_PLLMUL_MASK);
   regval |= ((SAM_PLL0_MUL - 1) << SCIF_PLL0_PLLMUL_SHIFT) |
-            (BOARD_FDLL0_DIV << SCIF_PLL0_PLLDIV_SHIFT) |
+            (BOARD_DFLL0_DIV << SCIF_PLL0_PLLDIV_SHIFT) |
             SCIF_PLL0_PLLCOUNT_MAX | SAM_PLL0_SOURCE;
   sam_pll0putreg(regval, SAM_SCIF_PLL0, SAM_SCIF_PLL0_OFFSET);
 
@@ -685,6 +708,127 @@ static inline void sam_enablepll0(void)
   /* Wait for PLL0 to become locked */
 
   while ((getreg32(SAM_SCIF_PCLKSR) & SCIF_INT_PLL0LOCK) == 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_enabledfll0 (and its helper sam_dfll0_putreg32())
+ *
+ * Description:
+ *   Initialiaze DFLL0 settings per the definitions in the board.h file.
+ *
+ ****************************************************************************/
+
+#ifdef BOARD_SYSCLK_SOURCE_DFLL0
+static inline void sam_dfll0_putreg32(uint32_t regval, uint32_t regaddr,
+                                     uint32_t regoffset)
+{
+  /* Wait until DFLL0 is completes the last setting */
+
+  while ((getreg32(SAM_SCIF_PCLKSR) & SCIF_INT_DFLL0RDY) == 0);
+
+  /* Then unlock the register and write the next value */
+
+  putreg32(SCIF_UNLOCK_KEY(0xaa) | SCIF_UNLOCK_ADDR(regoffset),
+           SAM_SCIF_UNLOCK);
+  putreg32(regval, regaddr);
+}
+
+static inline void sam_enabledfll0(void)
+{
+  uint32_t regval;
+  uint32_t conf;
+
+  /* Set up generic clock source with specified reference clock
+   * and divider.
+   */
+
+  putreg(0, SAM_SCIF_GCCTRL0);
+
+  /* Set the generic clock 0 source */
+
+  regval  = getreg32(SAM_SCIF_GCCTRL0);
+  regval &= ~SCIF_GCCTRL_OSCSEL_MASK;
+  regval |= SAM_DFLLO_REFCLK;
+  putreg32(regval, SAM_SCIF_GCCTRL0);
+
+  /* Get the generic clock 0 divider */
+
+  regval  = getreg32(SAM_SCIF_GCCTRL0);
+  regval &= ~(SCIF_GCCTRL_DIVEN | SCIF_GCCTRL_DIV_MASK);
+
+#if BOARD_DFLL0_DIV > 1
+  regval |= SCIF_GCCTRL_DIVEN;
+  regval |= SCIF_GCCTRL_DIV(((BOARD_DFLL0_DIV + 1) / 2) - 1);
+#endif
+
+  putreg32(regval, SAM_SCIF_GCCTRL0);
+
+  /* Sync before reading a dfll conf register */
+
+  putreg32(SCIF_DFLL0SYNC_SYNC, SAM_SCIF_DFLL0SYNC);
+  while (getreg32(SAM_SCIF_PCLKSR) & SCIF_INT_DFLL0RDY) == 0);
+
+  /* Select Closed Loop Mode */
+
+  conf  = getreg(SAM_SCIF_DFLL0CONF);
+  conf &= ~SCIF_DFLL0CONF_RANGE_MASK;
+  conf |= SCIF_DFLL0CONF_MODE;
+
+  /* Select the DFLL0 Frequency Range */
+
+#if BOARD_DFLL0_FREQUENCY < SCIF_DFLL0CONF_MAX_RANGE3
+  conf |= SCIF_DFLL0CONF_RANGE3;
+#elif BOARD_DFLL0_FREQUENCY < SCIF_DFLL0CONF_MAX_RANGE2
+  conf |= SCIF_DFLL0CONF_RANGE2;
+#elif BOARD_DFLL0_FREQUENCY < SCIF_DFLL0CONF_MAX_RANGE1
+  conf |= SCIF_DFLL0CONF_RANGE1;
+#else
+  conf |= SCIF_DFLL0CONF_RANGE0;
+#ednif
+
+  /* Enable the reference generic clock 0 */
+
+  regval  = getreg32(SAM_SCIF_GCCTRL0);
+  regval |= SCIF_GCCTRL_CEN;
+  putreg32(regval, SAM_SCIF_GCCTRL0);
+
+  /* Enable DFLL0.  Here we assume DFLL0RDY because the DFLL was disabled
+   * before this function was called.
+   */
+
+  putreg32(SCIF_UNLOCK_KEY(0xaa) | SCIF_UNLOCK_ADDR(SAM_SCIF_DFLL0CONF_OFFSET),
+           SAM_SCIF_UNLOCK);
+  putreg32(SCIF_DFLL0CONF_EN, SAM_SCIF_DFLL0CONF);
+
+  /* Configure DFLL0.  Note that now we do have to wait for DFLL0RDY before
+   * every write.
+   *
+   * Set the initial coarse and fine step lengths to 4. If this is set
+   * too high, DFLL0 may fail to lock.
+   */
+
+  sam_dfll0_putreg32((SCIF_DFLL0STEP_CSTEP(4) | SCIF_DFLL0STEP_FSTEP(4),
+                     SAM_SCIF_DFLL0STEP,
+                     SAM_SCIF_DFLL0STEP_OFFSET);
+
+  /* Set the DFLL0 multipler register */
+
+  sam_dfll0_putreg32(BOARD_DFLL0_MUL, SAM_SCIF_DFLL0MUL,
+                     SAM_SCIF_DFLL0MUL_OFFSET);
+
+  /* Set the multipler and spread spectrum generator control registers */
+
+  sam_dfll0_putreg32(0, SAM_SCIF_DFLL0SSG, SAM_SCIF_DFLL0SSG_OFFSET);
+
+  /* Finally, set the DFLL0 configuration */
+
+  sam_dfll0_putreg32(conf | SCIF_DFLL0CONF_EN,
+                     SAM_SCIF_DFLL0CONF, SAM_SCIF_DFLL0CONF_OFFSET);
+
+  /* Wait until we are locked on the fine value */
+
+  while ((getreg32(SAM_SCIF_PCLKSR) & SCIF_INT_DFLL0LOCKF) == 0);
 }
 #endif
 
@@ -762,7 +906,7 @@ static inline void sam_setdividers(void)
  *
  ****************************************************************************/
 
-static void sam_fws(uint32_t cpuclock)
+static inline void sam_fws(uint32_t cpuclock, uint32_t psm, bool fastwkup)
 {
   uint32_t regval;
 
@@ -794,7 +938,48 @@ static inline void sam_mainclk(uint32_t mcsel)
   regval = getreg32(SAM_PM_MCCTRL);
   regval &= ~PM_MCCTRL_MCSEL_MASK;
   regval |= mcsel;
+
+  putreg32(PM_UNLOCK_KEY(0xaa) | PM_UNLOCK_ADDR(SAM_PM_MCCTRL_OFFSET),
+           SAM_PM_UNLOCK);
   putreg32(regval, SAM_PM_MCCTRL);
+}
+
+/****************************************************************************
+ * Name: sam_setpsm (and its helper, sam_instantiatepsm())
+ *
+ * Description:
+ *   Switch to the selected power scaling mode.
+ *
+ ****************************************************************************/
+
+static __ramfunc__ void sam_instantiatepsm(Bpm *bpm, uint32_t regval)
+{
+  /* Set the BMP PCOM register (containing the new power scaling mode) */
+
+  putreg32(BPM_UNLOCK_KEY(0xaa) | BPM_UNLOCK_ADDR(SAM_BPM_PMCON_OFFSET),
+           SAM_BPM_UNLOCK);
+  putreg32(regval, SAM_BPM_PMCON);
+
+  /* Wait for new power scaling mode to become active.  There should be
+   * timeout on this wait.
+   */
+
+  while ((getreg32(SAM_BPM_SR) & BPM_INT_PSOK) == 0);
+}
+
+static inline void sam_setpsm(uint32_t psm)
+{
+  uint32_t regval;
+
+  /* Setup the PMCON register content fo the new power scaling mode */
+
+  regval  = getreg32(SAM_BPM_PMCON);
+  regval &= ~BPM_PMCON_PS_MASK;
+  regval |= (psm |  BPM_PMCON_PSCM | BPM_PMCON_PSCREQ);
+
+  /* Then call the RAMFUNC sam_setpsm() to set the new power scaling mode */
+
+  sam_instantiatepsm(bpm, regval);
 }
 
 /****************************************************************************
@@ -849,7 +1034,7 @@ static inline void sam_usbclock(void)
 void sam_clockconfig(void)
 {
   uint32_t regval;
-  uint32_t bpmps;
+  uint32_t psm;
   bool fastwkup;
 
   /* Enable clocking to the PICOCACHE */
@@ -884,9 +1069,11 @@ void sam_clockconfig(void)
    */
 
 #ifdef CONFIG_SAM_FLASH_HSEN
-  /* The high speed FLASH mode has been enabled.  Select power scaling mode 2 */
+  /* The high speed FLASH mode has been enabled.  Select power scaling
+   * mode 2, no fast wakeup.
+   */
 
-  bpmps    = BPM_PMCON_PS2;
+  psm      = BPM_PMCON_PS2;
   fastwkup = false;
 #else
   /* Not high speed mode.  Check if we can go to power scaling mode 1. */
@@ -895,7 +1082,7 @@ void sam_clockconfig(void)
     {
       /* Yes.. Do we also need to enable fast wakeup? */
 
-      bpmps = BPM_PMCON_PS1;
+      psm = BPM_PMCON_PS1;
       if (BOARD_CPU_FREQUENCY > FLASH_MAXFREQ_PS1_HSDIS_FWS0)
         {
           /* Yes.. enable fast wakeup */
@@ -912,7 +1099,7 @@ void sam_clockconfig(void)
     }
   else
     {
-      bpmps = BPM_PMCON_PS0;
+      psm = BPM_PMCON_PS0;
     }
 #endif
 
@@ -972,11 +1159,13 @@ void sam_clockconfig(void)
   /* Since this function only executes at power up, we know that we are
    * already running from RCSYS.
    */
+
+  // sam_mainclk(PM_MCCTRL_MCSEL_RCSYS);
 #elif defined(BOARD_SYSCLK_SOURCE_OSC0)
 
   /* Set up FLASH wait states */
 
-  sam_fws(SAM_FOSC0);
+  sam_fws(BOARD_CPU_FREQUENCY, psm, fastwkup);
 
   /* Then switch the main clock to OSC0 */
 
@@ -990,24 +1179,64 @@ void sam_clockconfig(void)
 
   /* Set up FLASH wait states */
 
-  sam_fws(SAM_CPU_CLOCK);
+  sam_fws(BOARD_CPU_FREQUENCY, psm, fastwkup);
 
   /* Then switch the main clock to PLL0 */
 
-  sam_mainclk(PM_MCCTRL_MCSEL_PLL0);
+  sam_mainclk(PM_MCCTRL_MCSEL_PLL);
 
 #elif defined(BOARD_SYSCLK_SOURCE_DFLL0)
-#  error Missing logic
+
+  /* Enable PLL0 using the settings in board.h */
+
+  sam_enabledfll0();
+
+  /* Set up FLASH wait states */
+
+  sam_fws(BOARD_CPU_FREQUENCY, psm, fastwkup);
+
+  /* Then switch the main clock to DFLL0 */
+
+  sam_mainclk(PM_MCCTRL_MCSEL_DFLL);
+
 #elif defined(BOARD_SYSCLK_SOURCE_RC80M)
-#  error Missing logic
+
+  /* Set up FLASH wait states */
+
+  sam_fws(BOARD_CPU_FREQUENCY, psm, fastwkup);
+
+  /* Then switch the main clock to RCM80 */
+
+  sam_mainclk(PM_MCCTRL_MCSEL_RC80M);
+
 #elif defined(BOARD_SYSCLK_SOURCE_FCFAST12M) || defined(BOARD_SYSCLK_SOURCE_FCFAST8M) || \
       defined(BOARD_SYSCLK_SOURCE_FCFAST4M)
-#  error Missing logic
+
+  /* Set up FLASH wait states */
+
+  sam_fws(BOARD_CPU_FREQUENCY, psm, fastwkup);
+
+  /* Then switch the main clock to RCFAST */
+
+  sam_mainclk(PM_MCCTRL_MCSEL_RCFAST);
+
 #elif defined(BOARD_SYSCLK_SOURCE_RC1M)
-#  error Missing logic
+
+  /* Set up FLASH wait states */
+
+  sam_fws(BOARD_CPU_FREQUENCY, psm, fastwkup);
+
+  /* Then switch the main clock to RC1M */
+
+  sam_mainclk(PM_MCCTRL_MCSEL_RC1M);
+
 #else
-#  error "No SYSCLK source frequency"
+#  error "No SYSCLK source provided"
 #endif
+
+  /* Switch to the selected power scaling mode */
+
+  sam_setpsm(psm);
 
 #ifdef CONFIG_USBDEV
   void sam_usbclock();
