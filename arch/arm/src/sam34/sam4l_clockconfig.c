@@ -48,6 +48,9 @@
 
 #include "up_internal.h"
 #include "chip/sam4l_pm.h"
+#include "chip/sam4l_scif.h"
+#include "chip/sam4l_bpm.h"
+#include "chip/sam4l_bscif.h"
 #include "chip/sam4l_flashcalw.h"
 
 #include "sam_clockconfig.h"
@@ -82,7 +85,7 @@
 #ifdef NEED_OSC0
 #  if !defined(BOARD_OSC0_STARTUP_US)
 #    error BOARD_OSC0_STARTUP_US is not defined
-#  if BOARD_OSC0_STARTUP_US == 0
+#  elif BOARD_OSC0_STARTUP_US == 0
 #    define OSC0_STARTUP_VALUE    SCIF_OSCCTRL0_STARTUP_0
 #    define OSC0_STARTUP_TIMEOUT  8
 #  elif BOARD_OSC0_STARTUP_US <= 557
@@ -141,6 +144,109 @@
 #endif
 
 #ifdef NEED_OSC32K
+#  if !defined(BOARD_OSC32_STARTUP_US)
+#    error BOARD_OSC32_STARTUP_US is not defined
+#  elif BOARD_OSC32_STARTUP_US == 0
+#    define OSC32_STARTUP_VALUE   BSCIF_OSCCTRL32_STARTUP_0
+#  elif BOARD_OSC32_STARTUP_US   <= 1100
+#    define OSC32_STARTUP_VALUE   BSCIF_OSCCTRL32_STARTUP_128
+#  elif BOARD_OSC32_STARTUP_US   <= 72300
+#    define OSC32_STARTUP_VALUE   BSCIF_OSCCTRL32_STARTUP_8K
+#  elif BOARD_OSC32_STARTUP_US   <= 143000
+#    define OSC32_STARTUP_VALUE   BSCIF_OSCCTRL32_STARTUP_16K
+#  elif BOARD_OSC32_STARTUP_US   <= 570000
+#    define OSC32_STARTUP_VALUE   BSCIF_OSCCTRL32_STARTUP_64K
+#  elif BOARD_OSC32_STARTUP_US   <= 1100000
+#    define OSC32_STARTUP_VALUE   BSCIF_OSCCTRL32_STARTUP_128K
+#  elif BOARD_OSC32_STARTUP_US   <= 2300000
+#    define OSC32_STARTUP_VALUE   BSCIF_OSCCTRL32_STARTUP_256K
+#  elif BOARD_OSC32_STARTUP_US   <= 4600000
+#    define OSC32_STARTUP_VALUE   BSCIF_OSCCTRL32_STARTUP_512K
+#  else
+#    error BOARD_OSC32_STARTUP_US is out of range
+#  endif
+
+#  ifdef BOARD_OSC32_IS_XTAL
+#    define OSC32_MODE_VALUE      BSCIF_OSCCTRL32_MODE_XTAL
+#  else
+#    define OSC32_MODE_VALUE      BSCIF_OSCCTRL32_MODE_EXTCLK
+#  endif
+
+#  ifndef BOARD_OSC32_SELCURR
+#    define BOARD_OSC32_SELCURR   BSCIF_OSCCTRL32_SELCURR_300
+#  endif
+#endif
+
+/* RC80M.  This might be the system clock or the source clock for the DFPLL.
+ *
+ * By selecting CONFIG_SAM_RC80M, you can also force the clock to be enabled
+ * at boot time.
+ */
+
+#if defined(CONFIG_SAM_RC80M) || defined(BOARD_SYSCLK_SOURCE_RC80M) || \
+    defined(BOARD_DFLL0_SOURCE_RC80M)
+#  define NEED_RC80M              1
+#endif
+
+/* RCFAST.  The 12/8/4 fast RC oscillator may be used as the system clock.
+ * If not then, it may be enabled by setting the CONFIG_SAM_RCFASTxM
+ * configuration variable.
+ */
+
+#if defined(CONFIG_SAM_RCFAST12M)
+#  undef CONFIG_SAM_RCFAST8M
+#  undef CONFIG_SAM_RCFAST4M
+#elif defined(CONFIG_SAM_RCFAST8M)
+#  undef CONFIG_SAM_RCFAST4M
+#endif
+
+#if defined(BOARD_SYSCLK_SOURCE_FCFAST12M)
+#  if defined(CONFIG_SAM_RCFAST8M) || defined(CONFIG_SAM_RCFAST4M)
+#    error BOARD_SYSCLK_SOURCE_FCFAST12M inconsistent with CONFIG_SAM_RCFAST8/4M
+#  endif
+#  define NEED_RCFAST
+#  define RCFAST_RANGE SCIF_RCFASTCFG_FRANGE_12MHZ
+#elif defined(BOARD_SYSCLK_SOURCE_FCFAST8M)
+#  if defined(CONFIG_SAM_RCFAST12M) || defined(CONFIG_SAM_RCFAST4M)
+#    error BOARD_SYSCLK_SOURCE_FCFAST8M inconsistent with CONFIG_SAM_RCFAST12/4M
+#  endif
+#  define NEED_RCFAST
+#  define RCFAST_RANGE SCIF_RCFASTCFG_FRANGE_8MHZ
+#elif defined(BOARD_SYSCLK_SOURCE_FCFAST4M)
+#  if defined(CONFIG_SAM_RCFAST12M) || defined(CONFIG_SAM_RCFAST8M)
+#    error BOARD_SYSCLK_SOURCE_FCFAST4M inconsistent with CONFIG_SAM_RCFAST12/8M
+#  endif
+#  define NEED_RCFAST
+#  define RCFAST_RANGE SCIF_RCFASTCFG_FRANGE_4MHZ
+#elif defined(CONFIG_SAM_RCFAST12M)
+#  define NEED_RCFAST
+#  define RCFAST_RANGE SCIF_RCFASTCFG_FRANGE_12MHZ
+#elif defined(CONFIG_SAM_RCFAST8M)
+#  define NEED_RCFAST
+#  define RCFAST_RANGE SCIF_RCFASTCFG_FRANGE_8MHZ
+#elif defined(CONFIG_SAM_RCFAST4M)
+#  define NEED_RCFAST
+#  define RCFAST_RANGE SCIF_RCFASTCFG_FRANGE_4MHZ
+#endif
+
+/* RC1M.  The 1M RC oscillator may be used as the system block.
+ *
+ * By selecting CONFIG_SAM_RC1M, you can also force the clock to be
+ * enabled at boot time.
+ */
+
+#if defined(CONFIG_SAM_RC1M) || defined(BOARD_SYSCLK_SOURCE_RC1M)
+#  define NEED_RC1M  1
+#endif
+
+/* RC32K.  The 32KHz RC oscillator may be used as the input to DFLL0.
+ *
+ * By selecting CONFIG_SAM_RC32K, you can also force the clock to be
+ * enabled at boot time.
+ */
+
+#if defined(CONFIG_SAM_RC32K) || defined(BOARD_DFLL0_SOURCE_RC32K)
+#  define NEED_RC32K  1
 #endif
 
 /****************************************************************************
@@ -189,36 +295,6 @@ static inline void sam_picocache(void)
 #endif
 
 /****************************************************************************
- * Name: sam_enableosc32
- *
- * Description:
- *   Initialiaze the 32KHz oscillator.  This oscillator is used by the RTC
- *   logic to provide the sysem timer.
- *
- ****************************************************************************/
-
-#ifdef NEED_OSC32K
-static inline void sam_enableosc32(void)
-{
-  uint32_t regval;
-
-  /* Select the 32KHz oscillator crystal */
-
-  regval = getreg32(SAM_PM_OSCCTRL32);
-  regval &= ~PM_OSCCTRL32_MODE_MASK;
-  regval |= PM_OSCCTRL32_MODE_XTAL;
-  putreg32(regval, SAM_PM_OSCCTRL32);
-
-  /* Enable the 32-kHz clock */
-
-  regval = getreg32(SAM_PM_OSCCTRL32);
-  regval &= ~PM_OSCCTRL32_STARTUP_MASK;
-  regval |= PM_OSCCTRL32_EN|(SAM_OSC32STARTUP << PM_OSCCTRL32_STARTUP_SHIFT);
-  putreg32(regval, SAM_PM_OSCCTRL32);
-}
-#endif
-
-/****************************************************************************
  * Name: sam_enableosc0
  *
  * Description:
@@ -246,6 +322,169 @@ static inline void sam_enableosc0(void)
   /* Wait for OSC0 to be ready */
 
   while (getreg32(SAM_SCIF_PCLKSR) & SCIF_INT_OSC0RDY) == 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_enableosc32
+ *
+ * Description:
+ *   Initialiaze the 32KHz oscillator per settings in the board.h header
+ *   file.
+ *
+ ****************************************************************************/
+
+#ifdef NEED_OSC32K
+static inline void sam_enableosc32(void)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  /* Set up the OSCCTRL32 register using settings from the board.h file.
+   * Also  enable the oscillator and provide bother the 32KHz and 1KHz output.
+   */
+
+  regval = OSC32_STARTUP_VALUE | BOARD_OSC32_SELCURR | OSC32_MODE_VALUE |
+           BSCIF_OSCCTRL32_EN1K |  BSCIF_OSCCTRL32_EN32K |
+           BSCIF_OSCCTRL32_OSC32EN;
+
+  /* The following two statements must be atomic */
+
+  flags = irqsave();
+  putreg32(BSCIF_UNLOCK_KEY(0xaa) | BSCIF_UNLOCK_ADDR(SAM_BSCIF_OSCCTRL32_OFFSET),
+           SAM_BSCIF_UNLOCK);
+  putreg32(regval, SAM_BSCIF_OSCCTRL32);
+  irqrestore(flags);
+
+  /* Wait for OSC32 to be ready */
+
+  while (getreg32(SAM_BSCIF_PCLKSR) & BSCIF_INT_OSC32RDY) == 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_enablerc80m
+ *
+ * Description:
+ *   Initialiaze the 80 MHz RC oscillator per settings in the board.h header
+ *   file.
+ *
+ ****************************************************************************/
+
+#ifdef NEED_RC80M
+static inline void sam_enablerc80m(void)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  /* The following two statements must be atomic */
+
+  flags = irqsave();
+  regval = getreg32(SAM_SCIF_RC80MCR);
+  putreg32(SCIF_UNLOCK_KEY(0xaa) | SCIF_UNLOCK_ADDR(SAM_SCIF_RC80MCR_OFFSET),
+           SAM_SCIF_UNLOCK);
+  putreg32(regval | SCIF_RC80MCR_EN, SAM_SCIF_RC80MCR);
+  irqrestore(flags);
+
+  /* Wait for OSC32 to be ready */
+
+  while (getreg32(SAM_SCIF_RC80MCR) & SCIF_RC80MCR_EN) == 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_enablerc80m
+ *
+ * Description:
+ *   Initialiaze the 12/8/4 RC fast oscillator per settings in the board.h
+ *   header file.
+ *
+ ****************************************************************************/
+
+#ifdef NEED_RCFAST
+static inline void sam_enablercfast(void)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  /* The following  must be atomic */
+
+  flags   = irqsave();
+  regval  = getreg32(SAM_SCIF_RCFASTCFG);
+  regval &= ~SCIF_RCFASTCFG_FRANGE_MASK;
+  regval |= (RCFAST_RANGE | SCIF_RCFASTCFG_EN);
+
+  putreg32(SCIF_UNLOCK_KEY(0xaa) | SCIF_UNLOCK_ADDR(SAM_SCIF_RCFASTCFG_OFFSET),
+           SAM_SCIF_UNLOCK);
+  putreg32(regval, SAM_SCIF_RCFASTCFG);
+  irqrestore(flags);
+
+  /* Wait for RCFAST to be ready */
+
+  while (getreg32(SAM_SCIF_RCFASTCFG) & SCIF_RCFASTCFG_EN) == 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_enablerc1m
+ *
+ * Description:
+ *   Initialiaze the 1M RC oscillator per settings in the board.h header
+ *   file.
+ *
+ ****************************************************************************/
+
+#ifdef NEED_RC1M
+static inline void sam_enablerc1m(void)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  /* The following  must be atomic */
+
+  flags   = irqsave();
+  regval  = getreg32(SAM_BSCIF_RC1MCR);
+  regval &= ~BSCIF_RCFASTCFG_FRANGE_MASK;
+  regval |= (RCFAST_RANGE | BSCIF_RCFASTCFG_EN);
+
+  putreg32(BSCIF_UNLOCK_KEY(0xaa) | BSCIF_UNLOCK_ADDR(SAM_BSCIF_RC1MCR_OFFSET),
+           SAM_BSCIF_UNLOCK);
+  putreg32(regval  | BSCIF_RC1MCR_CLKOEN, SAM_BSCIF_RC1MCR);
+  irqrestore(flags);
+
+  /* Wait for RCFAST to be ready */
+
+  while (getreg32(SAM_BSCIF_RC1MCR) & BSCIF_RC1MCR_CLKOEN) == 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_enablerc32k
+ *
+ * Description:
+ *   Initialiaze the 23KHz RC oscillator per settings in the board.h header
+ *   file.
+ *
+ ****************************************************************************/
+
+#ifdef NEED_RC32K
+void sam_enablerc32k(void)
+{
+  irqstate_t flags;
+  uint32_t regval;
+
+  /* The following  must be atomic */
+
+  flags   = irqsave();
+  regval  = getreg32(SAM_BSCIF_RC32KCR);
+  putreg32(BSCIF_UNLOCK_KEY(0xaa) | BSCIF_UNLOCK_ADDR(SAM_BSCIF_RC32KCR_OFFSET),
+           SAM_BSCIF_UNLOCK);
+  putreg32(regval | BSCIF_RC32KCR_EN32K | BSCIF_RC32KCR_EN, SAM_BSCIF_RC32KCR);
+  irqrestore(flags);
+
+  /* Wait for RCFAST to be ready */
+
+  while (getreg32(SAM_BSCIF_RC32KCR) & BSCIF_RC32KCR_EN) == 0);
 }
 #endif
 
@@ -596,10 +835,37 @@ void sam_clockconfig(void)
 #endif
 
 #ifdef NEED_OSC32K
-  /* Enable the 32KHz oscillator (need by the RTC module) */
+  /* Enable the 32KHz oscillator using the settings in board.h */
 
   sam_enableosc32();
 #endif
+
+#ifdef NEED_OSC32K
+  /* Enable the 32KHz oscillator using the settings in board.h */
+
+  sam_enablerc80m();
+#endif
+
+#ifdef NEED_RCFAST
+  /* Enable the 12/8/4MHz RC fast oscillator using the settings in board.h */
+
+  sam_enablercrcfast();
+#endif
+
+#ifdef NEED_RC1M
+  /* Enable the 1MHz RC oscillator using the settings in board.h */
+
+  sam_enablerc1m();
+#endif
+
+#ifdef NEED_RC32K
+  /* Enable the 32KHz RC oscillator using the settings in board.h */
+
+  sam_enablerc32k();
+#endif
+
+  /* Enable the PLL or FDLL */
+#warning Missing Logic
 
   /* Switch to the system clock selected by the settings in the board.h
    * header file.
