@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#ifdef CONFIG_ARCH_CHIP_SAM4L
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -262,83 +264,77 @@ extern "C"
  * Public Function Prototypes
  ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
+ * Name: sam_init_periphclks
+ *
+ * Description:
+ *   Called during boot to enable clocking on all selected peripherals.
+ *
+ ************************************************************************************/
+
+void sam_init_periphclks(void);
+
+/************************************************************************************
  * Name: sam_modifyperipheral
  *
  * Description:
- *   This is a convenience function that is intended to be used to enable
- *   or disable module clocking.
+ *   This is a convenience function that is intended to be used to enable or disable
+ *   module clocking.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_SAM4L
 void sam_modifyperipheral(uintptr_t regaddr, uint32_t clrbits, uint32_t setbits);
-#endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_pba_modifydivmask
  *
  * Description:
- *   This is a convenience function that is intended to be used to modify
- *   bits in the PBA divided clock (DIVMASK) register.
+ *   This is a convenience function that is intended to be used to modify bits in
+ *   the PBA divided clock (DIVMASK) register.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_SAM4L
 void sam_pba_modifydivmask(uint32_t clrbits, uint32_t setbits);
-#endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_pba_enableperipheral
  *
  * Description:
- *   This is a convenience function to enable a peripheral on the APBA
- *   bridge.
+ *   This is a convenience function to enable a peripheral on the APBA bridge.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_SAM4L
 void sam_pba_enableperipheral(uint32_t bitset);
-#endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_pba_disableperipheral
  *
  * Description:
- *   This is a convenience function to disable a peripheral on the APBA
- *   bridge.
+ *   This is a convenience function to disable a peripheral on the APBA bridge.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_SAM4L
 void sam_pba_disableperipheral(uint32_t bitset);
-#endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_pbb_enableperipheral
  *
  * Description:
- *   This is a convenience function to enable a peripheral on the APBB
- *   bridge.
+ *   This is a convenience function to enable a peripheral on the APBB bridge.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_SAM4L
 void sam_pbb_enableperipheral(uint32_t bitset);
-#endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_pbb_disableperipheral
  *
  * Description:
- *   This is a convenience function to disable a peripheral on the APBA
- *   bridge.
+ *   This is a convenience function to disable a peripheral on the APBA bridge.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-#ifdef CONFIG_ARCH_CHIP_SAM4L
 void sam_pbb_disableperipheral(uint32_t bitset);
-#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -346,4 +342,5 @@ void sam_pbb_disableperipheral(uint32_t bitset);
 #endif
 
 #endif /* __ASSEMBLY__ */
+#endif /* CONFIG_ARCH_CHIP_SAM4L */
 #endif /* __ARCH_ARM_SRC_SAM34_SAM4L_PERIPHCLKS_H */

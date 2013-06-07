@@ -3,10 +3,10 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-comment "AT91SAM3/SAM4 Configuration Options"
+comment "AT91SAM3/4 Configuration Options"
 
 choice
-	prompt "AT91SAM3 Chip Selection"
+	prompt "AT91SAM3/4 Chip Selection"
 	default ARCH_CHIP_AT91SAM3U4E
 	depends on ARCH_CHIP_SAM34
 
@@ -147,47 +147,223 @@ config SAM_PICOCACHE
 	depends on ARCH_CHIP_SAM4L
 	default y
 
-config SAM34_DMA
-	bool "DMA"
-	default n
-	select ARCH_DMA
+config SAM34_OCD
+	bool "On-chip DEBUG"
+	depends on ARCH_CHIP_SAM4L
+	default y if DEBUG_SYMBOLS
+	default n if !DEBUG_SYMBOLS
 
-config SAM34_NAND
-	bool "NAND support"
+config SAM34_APBA
+	bool "APBA bridge"
 	default n
+	depends on ARCH_CHIP_SAM4L
 
-config SAM34_HSMCI
-	bool "HSMCI"
+config SAM34_AESA
+	bool "Advanced Encryption Standard"
 	default n
+	depends on ARCH_CHIP_SAM4L
 
-config SAM34_UART
-	bool "UART"
-	default y
-	select ARCH_HAVE_UART
-
-config SAM34_USART0
-	bool "USART0"
+config SAM34_IISC
+	bool "Inter-IC Sound (I2S) Controller"
 	default n
-
-config SAM34_USART1
-	bool "USART1"
-	default n
-
-config SAM34_USART2
-	bool "USART2"
-	default n
-
-config SAM34_USART3
-	bool "USART3"
-	default n
+	depends on ARCH_CHIP_SAM4L
 
 config SAM34_SPI
 	bool "SPI"
 	default n
 
+config SAM34_TC0
+	bool "Timer/Counter 0"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_TC1
+	bool "Timer/Counter 1"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_TWIM0
+	bool "Two-wire Master Interface 0"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_TWIS0
+	bool "Two-wire Slave Interface 0"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_TWIM1
+	bool "Two-wire Master Interface 1"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_TWIS1
+	bool "Two-wire Slave Interface 1"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_TWIM2
+	bool "Two-wire Master Interface 2"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_TWIM3
+	bool "Two-wire Master Interface 3"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_UART
+	bool "UART"
+	default y
+	depends on ARCH_CHIP_SAM3U
+	select ARCH_HAVE_UART
+
+config SAM34_PICOUART
+	bool "PicoUART"
+	default n
+	depends on ARCH_CHIP_SAM4L
+	select ARCH_HAVE_UART
+
+config SAM34_USART0
+	bool "USART0"
+	default n
+	select ARCH_HAVE_USART0
+
+config SAM34_USART1
+	bool "USART1"
+	default n
+	select ARCH_HAVE_USART1
+
+config SAM34_USART2
+	bool "USART2"
+	default n
+	select ARCH_HAVE_USART2
+
+config SAM34_USART3
+	bool "USART3"
+	default n
+	select ARCH_HAVE_USART3
+
+config SAM34_ADCIFE
+	bool "ADC controller interface"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_DACC
+	bool "DAC Controller"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_ACIFC
+	bool "Analog Comparator Interface"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_GLOC
+	bool "GLOC"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_ABDACB
+	bool "Audio Bitstream DAC"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_TRNG
+	bool "True Random Number Generator"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_PARC
+	bool "Parallel Capture"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_CATB
+	bool "Capacitive Touch Module B"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_LCDCA
+	bool " LCD Controller A"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_HRAMC1
+	bool "HRAMC1 (picoCache RAM)"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_NAND
+	bool "NAND support"
+	default n
+	depends on ARCH_CHIP_SAM3U
+
+config SAM34_HMATRIX
+	bool "HMATRIX"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_PDCA
+	bool "Peripheral DMA controller"
+	default n
+	depends on ARCH_CHIP_SAM4L
+	select ARCH_DMA
+
+config SAM34_DMA
+	bool "DMA"
+	default n
+	depends on ARCH_CHIP_SAM3U
+	select ARCH_DMA
+
+config SAM34_CRCCU
+	bool "CRC Calculation Unit"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_USBC
+	bool "USB 2.0 Interface"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_PEVC
+	bool "Peripheral Event Controller"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_CHIPID
+	bool "Chip ID"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_FREQM
+	bool "Frequency Mete"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_AST
+	bool "Asynchronous Timer"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_WDT
+	bool "Watchdog Timer"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_EIC
+	bool "External Interrupt Controller"
+	default n
+	depends on ARCH_CHIP_SAM4L
+
+config SAM34_HSMCI
+	bool "HSMCI"
+	default n
+	depends on ARCH_CHIP_SAM3U
+
 endmenu
 
-menu "AT91SAM3 UART Configuration"
+menu "AT91SAM3/4 USART Configuration"
 
 config USART0_ISUART
 	bool "USART0 is a UART"
@@ -215,7 +391,7 @@ config USART3_ISUART
 
 endmenu
 
-menu "AT91SAM3 GPIO Interrupt Configuration"
+menu "AT91SAM3/4 GPIO Interrupt Configuration"
 
 config GPIOA_IRQ
 	bool "GPIOA interrupts"
