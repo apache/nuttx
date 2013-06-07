@@ -98,12 +98,39 @@
  *   BOARD_DFLL0_SOURCE_OSC0       - Oscillator 0
  *   BOARD_DFLL0_SOURCE_RC80M      - 80 MHz RC oscillator
  *   BOARD_DFLL0_SOURCE_RC32K      - 32 kHz RC oscillator
+ *
+ * NOTE: Nothing must be defined if the DFPLL is not used
  */
 
 #define BOARD_DFLL0_SOURCE_OSC32K  1
 #define BOARD_FDLL0_FREQUENCY      48000000
 #define BOARD_FDLL0_MUL            (BOARD_FDLL0_FREQUENCY / BOARD_OSC32_FREQUENCY)
 #define BOARD_FDLL0_DIV            1
+
+/* Phase Locked Loop configuration
+ *  Fdfll = (Fclk * PLLmul) / PLLdiv
+ *
+ * PLL0 source options (select one):
+ *   BOARD_PLL0_SOURCE_OSC0        - Oscillator 0
+ *   BOARD_PLL0_SOURCE_GCLK9       - General clock 9
+ *
+ *   BOARD_GLCK9_SOURCE_RCSYS      - System RC oscillator
+ *   BOARD_GLCK9_SOURCE_OSC32K     - Output from OSC32K
+ *   BOARD_GLCK9_SOURCE_DFLL0      - Output from DFLL0
+ *   BOARD_GLCK9_SOURCE_OSC0       - Output from Oscillator0
+ *   BOARD_GLCK9_SOURCE_RC80M      - Output from 80MHz RCOSC
+ *   BOARD_GLCK9_SOURCE_RCFAST     - Output from 4,8,12MHz RCFAST
+ *   BOARD_GLCK9_SOURCE_RC1M       - Output from 1MHz RC1M
+ *   BOARD_GLCK9_SOURCE_CPUCLK     - The CPU clock
+ *   BOARD_GLCK9_SOURCE_HSBCLK     - High Speed Bus clock
+ *   BOARD_GLCK9_SOURCE_PBACLK     - Peripheral Bus A clock
+ *   BOARD_GLCK9_SOURCE_PBBCLK     - Peripheral Bus B clock
+ *   BOARD_GLCK9_SOURCE_PBCCLK     - Peripheral Bus C clock
+ *   BOARD_GLCK9_SOURCE_PBDCLK     - Peripheral Bus D clock
+ *   BOARD_GLCK9_SOURCE_RC32K      - Output from 32kHz RCOSC
+ *
+ * NOTE: Nothing must be defined if the PLL0 is not used
+ */
 
 /* System clock dividers: Fbus = Fsys >> BUSshift */
 
