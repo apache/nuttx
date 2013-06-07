@@ -127,18 +127,47 @@ CONFIG_ARCH_CHIP_SAM4L=y
 # AT91SAM3 Peripheral Support
 #
 CONFIG_SAM_PICOCACHE=y
-# CONFIG_SAM34_DMA is not set
-# CONFIG_SAM34_NAND is not set
-# CONFIG_SAM34_HSMCI is not set
-# CONFIG_SAM34_UART is not set
+# CONFIG_SAM34_OCD is not set
+# CONFIG_SAM34_APBA is not set
+# CONFIG_SAM34_AESA is not set
+# CONFIG_SAM34_IISC is not set
+# CONFIG_SAM34_SPI is not set
+# CONFIG_SAM34_TC0 is not set
+# CONFIG_SAM34_TC1 is not set
+# CONFIG_SAM34_TWIM0 is not set
+# CONFIG_SAM34_TWIS0 is not set
+# CONFIG_SAM34_TWIM1 is not set
+# CONFIG_SAM34_TWIS1 is not set
+# CONFIG_SAM34_TWIM2 is not set
+# CONFIG_SAM34_TWIM3 is not set
+# CONFIG_SAM34_PICOUART is not set
 # CONFIG_SAM34_USART0 is not set
 CONFIG_SAM34_USART1=y
 # CONFIG_SAM34_USART2 is not set
 # CONFIG_SAM34_USART3 is not set
-# CONFIG_SAM34_SPI is not set
+# CONFIG_SAM34_ADCIFE is not set
+# CONFIG_SAM34_DACC is not set
+# CONFIG_SAM34_ACIFC is not set
+# CONFIG_SAM34_GLOC is not set
+# CONFIG_SAM34_ABDACB is not set
+# CONFIG_SAM34_TRNG is not set
+# CONFIG_SAM34_PARC is not set
+# CONFIG_SAM34_CATB is not set
+# CONFIG_SAM34_LCDCA is not set
+# CONFIG_SAM34_HRAMC1 is not set
+# CONFIG_SAM34_HMATRIX is not set
+# CONFIG_SAM34_PDCA is not set
+# CONFIG_SAM34_CRCCU is not set
+# CONFIG_SAM34_USBC is not set
+# CONFIG_SAM34_PEVC is not set
+# CONFIG_SAM34_CHIPID is not set
+# CONFIG_SAM34_FREQM is not set
+# CONFIG_SAM34_AST is not set
+# CONFIG_SAM34_WDT is not set
+# CONFIG_SAM34_EIC is not set
 
 #
-# AT91SAM3 UART Configuration
+# AT91SAM3/4 USART Configuration
 #
 CONFIG_USART1_ISUART=y
 
