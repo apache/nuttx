@@ -209,6 +209,8 @@
 #define SCIF_PLL0_PLLEN                   (1 << 0)  /* Bit 0:  PLL Enable */
 #define SCIF_PLL0_PLLOSC_SHIFT            (1)       /* Bits 1-2: PLL Oscillator Select */
 #define SCIF_PLL0_PLLOSC_MASK             (3 << SCIF_PLL0_PLLOSC_SHIFT)
+#  define SCIF_PLL0_PLLOSC_OSC0           (0 << SCIF_PLL0_PLLOSC_SHIFT) /* Output clock from Oscillator0 */
+#  define SCIF_PLL0_PLLOSC_GCLK9          (1 << SCIF_PLL0_PLLOSC_SHIFT) /* Generic clock 9 */
 #define SCIF_PLL0_PLLOPT_SHIFT            (3)       /* Bits 3-5: PLL Option */
 #define SCIF_PLL0_PLLOPT_MASK             (7 << SCIF_PLL0_PLLOPT_SHIFT)
 #  define SCIF_PLL0_PLLOPT_FVO            (1 << SCIF_PLL0_PLLOPT_SHIFT) /* Selects the VCO frequency range (fvco) */
@@ -220,6 +222,23 @@
 #define SCIF_PLL0_PLLMUL_MASK             (15 << SCIF_PLL0_PLLMUL_SHIFT)
 #define SCIF_PLL0_PLLCOUNT_SHIFT          (24)      /* Bits 24-24: PLL Count */
 #define SCIF_PLL0_PLLCOUNT_MASK           (63 << SCIF_PLL0_PLLCOUNT_SHIFT)
+#  define SCIF_PLL0_PLLCOUNT_MAX          (63 << SCIF_PLL0_PLLCOUNT_SHIFT)
+
+/* PLL0 operates in two frequency ranges as determined by SCIF_PLL0_PLLOPT_FVO:
+ *
+ * 0: 80MHz  < fvco < 180MHz
+ * 1: 160MHz < fvco < 240MHz
+ *
+ * These ranges and recommend threshold value are defined below:
+ */
+
+#define SCIF_PLL0_VCO_RANGE1_MINFREQ      160000000
+#define SCIF_PLL0_VCO_RANGE1_MAXFREQ      240000000
+#define SCIF_PLL0_VCO_RANGE0_MINFREQ       80000000
+#define SCIF_PLL0_VCO_RANGE0_MAXFREQ      180000000
+
+#define SAM_PLL0_VCO_RANGE_THRESHOLD \
+  ((SCIF_PLL0_VCO_RANGE1_MINFREQ + SCIF_PLL0_VCO_RANGE0_MAXFREQ) >> 1)
 
 /* DFLL0 Config Register */
 
@@ -340,6 +359,20 @@
 #define SCIF_GCCTRL_DIVEN                 (1 << 1)  /* Bit 1:  Divide Enable */
 #define SCIF_GCCTRL_OSCSEL_SHIFT          (8)       /* Bits 8-12: Oscillator Select */
 #define SCIF_GCCTRL_OSCSEL_MASK           (31 << SCIF_GCCTRL_OSCSEL_SHIFT)
+#  define SCIF_GCCTRL_OSCSEL_RCSYS        (0 << SCIF_GCCTRL_OSCSEL_SHIFT)  /* System RC oscillator */
+#  define SCIF_GCCTRL_OSCSEL_OSC32K       (1 << SCIF_GCCTRL_OSCSEL_SHIFT)  /* Output from OSC32K */
+#  define SCIF_GCCTRL_OSCSEL_DFLL0        (2 << SCIF_GCCTRL_OSCSEL_SHIFT)  /* Output from DFLL0 */
+#  define SCIF_GCCTRL_OSCSEL_OSC0         (3 << SCIF_GCCTRL_OSCSEL_SHIFT)  /* Output from Oscillator0 */
+#  define SCIF_GCCTRL_OSCSEL_RC80M        (4 << SCIF_GCCTRL_OSCSEL_SHIFT)  /* Output from 80MHz RCOSC */
+#  define SCIF_GCCTRL_OSCSEL_RCFAST       (5 << SCIF_GCCTRL_OSCSEL_SHIFT)  /* Output from 4,8,12MHz RCFAST */
+#  define SCIF_GCCTRL_OSCSEL_RC1M         (6 << SCIF_GCCTRL_OSCSEL_SHIFT)  /* Output from 1MHz RC1M */
+#  define SCIF_GCCTRL_OSCSEL_CPUCLK       (7 << SCIF_GCCTRL_OSCSEL_SHIFT)  /* The CPU clock */
+#  define SCIF_GCCTRL_OSCSEL_HSBCLK       (8 << SCIF_GCCTRL_OSCSEL_SHIFT)  /* High Speed Bus clock */
+#  define SCIF_GCCTRL_OSCSEL_PBACLK       (9 << SCIF_GCCTRL_OSCSEL_SHIFT)  /* Peripheral Bus A clock */
+#  define SCIF_GCCTRL_OSCSEL_PBBCLK       (10 << SCIF_GCCTRL_OSCSEL_SHIFT) /* Peripheral Bus B clock */
+#  define SCIF_GCCTRL_OSCSEL_PBCCLK       (11 << SCIF_GCCTRL_OSCSEL_SHIFT) /* Peripheral Bus C clock */
+#  define SCIF_GCCTRL_OSCSEL_PBDCLK       (12 << SCIF_GCCTRL_OSCSEL_SHIFT) /* Peripheral Bus D clock */
+#  define SCIF_GCCTRL_OSCSEL_RC32K        (13 << SCIF_GCCTRL_OSCSEL_SHIFT) /* Output from 32kHz RCOSC */
 #define SCIF_GCCTRL_DIV_SHIFT             (16)      /* Bits 16-31: Division Factor */
 #define SCIF_GCCTRL_DIV_MASK              (0xffff << SCIF_GCCTRL_DIV_SHIFT)
 
