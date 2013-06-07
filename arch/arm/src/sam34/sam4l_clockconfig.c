@@ -53,6 +53,7 @@
 #include "chip/sam4l_bscif.h"
 #include "chip/sam4l_flashcalw.h"
 
+#include "sam_periphclks.h"
 #include "sam_clockconfig.h"
 
 /****************************************************************************
@@ -80,11 +81,11 @@
  * either PLL0 or DFPLL.  It might also be needed if OSC0 is the source
  * clock for GCLK9.
  *
- * By selecting CONFIG_SAM_OSC0, you can also force the clock to be enabled
+ * By selecting CONFIG_SAM34_OSC0, you can also force the clock to be enabled
  * at boot time.
  */
 
-#if defined(CONFIG_SAM_OSC0) || defined(BOARD_SYSCLK_SOURCE_OSC0) || \
+#if defined(CONFIG_SAM34_OSC0) || defined(BOARD_SYSCLK_SOURCE_OSC0) || \
     defined(BOARD_DFLL0_SOURCE_OSC0) || defined(BOARD_PLL0_SOURCE_OSC0) || \
     defined(BOARD_GLCK9_SOURCE_OSC0)
 #  define NEED_OSC0                  1
@@ -143,12 +144,12 @@
 /* OSC32.  The 32K oscillator may be the source clock for DFPLL0 or
  * the source clock for GLK9 that might be used to driver PLL0.
  *
- * By selecting CONFIG_SAM_OSC32K, you can also force the clock to be
+ * By selecting CONFIG_SAM34_OSC32K, you can also force the clock to be
  * enabled at boot time.  OSC32 may needed by other devices as well
  * (AST, WDT, PICUART, RTC).
  */
 
-#if defined(CONFIG_SAM_OSC32K) || defined(BOARD_DFLL0_SOURCE_OSC32K) || \
+#if defined(CONFIG_SAM34_OSC32K) || defined(BOARD_DFLL0_SOURCE_OSC32K) || \
     defined(BOARD_GLCK9_SOURCE_OSC32K)
 #  define NEED_OSC32K                1
 #endif
@@ -190,58 +191,58 @@
 /* RC80M.  This might be the system clock or the source clock for the DFPLL
  * or it could be the source for GCLK9 that drives PLL0.
  *
- * By selecting CONFIG_SAM_RC80M, you can also force the clock to be enabled
+ * By selecting CONFIG_SAM34_RC80M, you can also force the clock to be enabled
  * at boot time.
  */
 
-#if defined(CONFIG_SAM_RC80M) || defined(BOARD_SYSCLK_SOURCE_RC80M) || \
+#if defined(CONFIG_SAM34_RC80M) || defined(BOARD_SYSCLK_SOURCE_RC80M) || \
     defined(BOARD_DFLL0_SOURCE_RC80M) || BOARD_GLCK9_SOURCE_RC80M
 #  define NEED_RC80M                 1
 #endif
 
 /* RCFAST.  The 12/8/4 fast RC oscillator may be used as the system clock
  * or as the source for GLCK9 that drives PLL0.
- * If not then, it may be enabled by setting the CONFIG_SAM_RCFASTxM
+ * If not then, it may be enabled by setting the CONFIG_SAM34_RCFASTxM
  * configuration variable.
  */
 
-#if defined(CONFIG_SAM_RCFAST12M)
-#  undef CONFIG_SAM_RCFAST8M
-#  undef CONFIG_SAM_RCFAST4M
-#elif defined(CONFIG_SAM_RCFAST8M)
-#  undef CONFIG_SAM_RCFAST4M
+#if defined(CONFIG_SAM34_RCFAST12M)
+#  undef CONFIG_SAM34_RCFAST8M
+#  undef CONFIG_SAM34_RCFAST4M
+#elif defined(CONFIG_SAM34_RCFAST8M)
+#  undef CONFIG_SAM34_RCFAST4M
 #endif
 
 #if defined(BOARD_SYSCLK_SOURCE_FCFAST12M)
-#  if defined(CONFIG_SAM_RCFAST8M) || defined(CONFIG_SAM_RCFAST4M)
-#    error BOARD_SYSCLK_SOURCE_FCFAST12M inconsistent with CONFIG_SAM_RCFAST8/4M
+#  if defined(CONFIG_SAM34_RCFAST8M) || defined(CONFIG_SAM34_RCFAST4M)
+#    error BOARD_SYSCLK_SOURCE_FCFAST12M inconsistent with CONFIG_SAM34_RCFAST8/4M
 #  endif
 #  define NEED_RCFAST                1
 #  define SAM_RCFAST_RANGE           SCIF_RCFASTCFG_FRANGE_12MHZ
 #  define SAM_RCFAST_FREQUENCY       SAM_RCFAST12M_FREQUENCY
 #elif defined(BOARD_SYSCLK_SOURCE_FCFAST8M)
-#  if defined(CONFIG_SAM_RCFAST12M) || defined(CONFIG_SAM_RCFAST4M)
-#    error BOARD_SYSCLK_SOURCE_FCFAST8M inconsistent with CONFIG_SAM_RCFAST12/4M
+#  if defined(CONFIG_SAM34_RCFAST12M) || defined(CONFIG_SAM34_RCFAST4M)
+#    error BOARD_SYSCLK_SOURCE_FCFAST8M inconsistent with CONFIG_SAM34_RCFAST12/4M
 #  endif
 #  define NEED_RCFAST                1
 #  define SAM_RCFAST_RANGE           SCIF_RCFASTCFG_FRANGE_8MHZ
 #  define SAM_RCFAST_FREQUENCY       SAM_RCFAST8M_FREQUENCY
 #elif defined(BOARD_SYSCLK_SOURCE_FCFAST4M)
-#  if defined(CONFIG_SAM_RCFAST12M) || defined(CONFIG_SAM_RCFAST8M)
-#    error BOARD_SYSCLK_SOURCE_FCFAST4M inconsistent with CONFIG_SAM_RCFAST12/8M
+#  if defined(CONFIG_SAM34_RCFAST12M) || defined(CONFIG_SAM34_RCFAST8M)
+#    error BOARD_SYSCLK_SOURCE_FCFAST4M inconsistent with CONFIG_SAM34_RCFAST12/8M
 #  endif
 #  define NEED_RCFAST                1
 #  define SAM_RCFAST_RANGE           SCIF_RCFASTCFG_FRANGE_4MHZ
 #  define SAM_RCFAST_FREQUENCY       SAM_RCFAST4M_FREQUENCY
-#elif defined(CONFIG_SAM_RCFAST12M)
+#elif defined(CONFIG_SAM34_RCFAST12M)
 #  define NEED_RCFAST                1
 #  define SAM_RCFAST_RANGE           SCIF_RCFASTCFG_FRANGE_12MHZ
 #  define SAM_RCFAST_FREQUENCY       SAM_RCFAST12M_FREQUENCY
-#elif defined(CONFIG_SAM_RCFAST8M)
+#elif defined(CONFIG_SAM34_RCFAST8M)
 #  define NEED_RCFAST                1
 #  define SAM_RCFAST_RANGE           SCIF_RCFASTCFG_FRANGE_8MHZ
 #  define SAM_RCFAST_FREQUENCY       SAM_RCFAST8M_FREQUENCY
-#elif defined(CONFIG_SAM_RCFAST4M)
+#elif defined(CONFIG_SAM34_RCFAST4M)
 #  define NEED_RCFAST                1
 #  define SAM_RCFAST_RANGE           SCIF_RCFASTCFG_FRANGE_4MHZ
 #  define SAM_RCFAST_FREQUENCY       SAM_RCFAST4M_FREQUENCY
@@ -250,11 +251,11 @@
 /* RC1M.  The 1M RC oscillator may be used as the system block or
  * may be the source clock for GLCK9 that drives PLL0
  *
- * By selecting CONFIG_SAM_RC1M, you can also force the clock to be
+ * By selecting CONFIG_SAM34_RC1M, you can also force the clock to be
  * enabled at boot time.
  */
 
-#if defined(CONFIG_SAM_RC1M) || defined(BOARD_SYSCLK_SOURCE_RC1M) || \
+#if defined(CONFIG_SAM34_RC1M) || defined(BOARD_SYSCLK_SOURCE_RC1M) || \
     defined(BOARD_GLCK9_SOURCE_RC1M)
 #  define NEED_RC1M                  1
 #endif
@@ -262,11 +263,11 @@
 /* RC32K.  The 32KHz RC oscillator may be used as the input to DFLL0
  * or as the input to GCLK9 that drives PLL0.
  *
- * By selecting CONFIG_SAM_RC32K, you can also force the clock to be
+ * By selecting CONFIG_SAM34_RC32K, you can also force the clock to be
  * enabled at boot time.
  */
 
-#if defined(CONFIG_SAM_RC32K) || defined(BOARD_DFLL0_SOURCE_RC32K) || \
+#if defined(CONFIG_SAM34_RC32K) || defined(BOARD_DFLL0_SOURCE_RC32K) || \
     defined(BOARD_GLCK9_SOURCE_RC32K)
 #  define NEED_RC32K                 1
 #endif
@@ -448,7 +449,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAM_PICOCACHE
+#ifdef CONFIG_SAM34_PICOCACHE
 static inline void sam_picocache(void)
 {
   /* Enable clocking to the PICOCACHE */
@@ -1068,7 +1069,7 @@ void sam_clockconfig(void)
    *   ------- ---- ----- -------- ---------- ----------
    */
 
-#ifdef CONFIG_SAM_FLASH_HSEN
+#ifdef CONFIG_SAM34_FLASH_HSEN
   /* The high speed FLASH mode has been enabled.  Select power scaling
    * mode 2, no fast wakeup.
    */
@@ -1237,6 +1238,10 @@ void sam_clockconfig(void)
   /* Switch to the selected power scaling mode */
 
   sam_setpsm(psm);
+
+  /* Enable all selected peripheral cloks */
+
+  sam_init_periphclks();
 
 #ifdef CONFIG_USBDEV
   void sam_usbclock();

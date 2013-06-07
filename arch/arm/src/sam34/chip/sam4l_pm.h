@@ -145,7 +145,7 @@
 
 /* CPU Mask Register Bit-field Definitions */
 
-#define PM_CPUMASK_OCD             (1 << 0)  /* Bit 0:  OCD */
+#define PM_CPUMASK_OCD             (1 << 0)  /* Bit 0:  On-Chip Debug */
 
 /* HSB Mask Register Bit-field Definitions */
 
