@@ -4922,3 +4922,7 @@
 	  prevent detection of disonnection events.  Reported by Scott (2013-6-6).
 	* nuttx/arch/arm/src/sam34/chip/sam4l_bscif.h: Add registers definitions
 	  for the SAM4L BSCIF module (2013-6-6).
+	* nuttx/arch/arm/src/sam34/sam4l_clockconfig.c and chip/sam4l_wdt.h:
+	  Finally finished the SAM4L clock configuration logic; Added a
+	  WDT register definition header file (2013-6-8).
+

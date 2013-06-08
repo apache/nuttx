@@ -285,7 +285,7 @@ config SAM34_CATB
 	depends on ARCH_CHIP_SAM4L
 
 config SAM34_LCDCA
-	bool " LCD Controller A"
+	bool "LCD Controller A"
 	default n
 	depends on ARCH_CHIP_SAM4L
 
@@ -349,7 +349,6 @@ config SAM34_AST
 config SAM34_WDT
 	bool "Watchdog Timer"
 	default n
-	depends on ARCH_CHIP_SAM4L
 
 config SAM34_EIC
 	bool "External Interrupt Controller"
@@ -363,7 +362,7 @@ config SAM34_HSMCI
 
 endmenu
 
-menu "AT91SAM3/4 USART Configuration"
+comment "AT91SAM3/4 USART Configuration"
 
 config USART0_ISUART
 	bool "USART0 is a UART"
@@ -389,9 +388,7 @@ config USART3_ISUART
 	depends on SAM34_USART3
 	select ARCH_HAVE_USART2
 
-endmenu
-
-menu "AT91SAM3/4 GPIO Interrupt Configuration"
+comment "AT91SAM3/4 GPIO Interrupt Configuration"
 
 config GPIOA_IRQ
 	bool "GPIOA interrupts"
@@ -405,4 +402,28 @@ config GPIOC_IRQ
 	bool "GPIOC interrupts"
 	default n
 
-endmenu
+if SAM34_WDT
+comment "AT91SAM3/4 Watchdog Configuration"|
+
+config WDT_ENABLED_ON_RESET
+	bool "Enabled on reset"
+	default n
+	---help---
+		The WDT can be enabled at reset. This is controlled by the WDTAUTO
+		fuse. The WDT will be set in basic mode, RCSYS is set as source for
+		CLK_CNT, and PSEL will be set to a value giving Tpsel above 100 ms
+		(SAM4L)
+
+		This setting informs that start-up logic that the watchdog is
+		enabled.
+
+config WDT_DISABLE_ON_RESET
+	bool "Disable on reset"
+	default n
+	depends on WDT_ENABLED_ON_RESET
+	---help---
+		If the WDT can be enabled at reset then this setting may be used to
+		configure and disable the watchdog timer very early in the boot
+		sequence.
+
+endif

@@ -41,6 +41,9 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
@@ -53,7 +56,7 @@
 #include "chip/sam4l_bscif.h"
 #include "chip/sam4l_flashcalw.h"
 
-#include "sam_periphclks.h"
+#include "sam4l_periphclks.h"
 #include "sam_clockconfig.h"
 
 /****************************************************************************
@@ -284,6 +287,7 @@
 
 #ifdef BOARD_PLL0_SOURCE_GCLK9
 #  define NEED_GLCK9                 1
+#endif
 
 #ifdef NEED_GLCK9
 #  if defined(BOARD_GLCK9_SOURCE_RCSYS)
@@ -410,8 +414,12 @@
 #      define SAM_PLL0_OPTIONS       0
 #    endif
 #  endif
+#endif
 
-/* DPLL0 reference clock */
+/* DFLL0 */
+
+#ifdef BOARD_SYSCLK_SOURCE_DFLL0
+/* DFLL0 reference clock */
 
 #  if defined(BOARD_DFLL0_SOURCE_RCSYS)
 #    define SAM_DFLLO_REFCLK         SCIF_GCCTRL_OSCSEL_RCSYS
@@ -529,7 +537,7 @@ static inline void sam_enableosc32(void)
 
   /* Wait for OSC32 to be ready */
 
-  while (getreg32(SAM_BSCIF_PCLKSR) & BSCIF_INT_OSC32RDY) == 0);
+  while ((getreg32(SAM_BSCIF_PCLKSR) & BSCIF_INT_OSC32RDY) == 0);
 }
 #endif
 
@@ -752,7 +760,7 @@ static inline void sam_enabledfll0(void)
    * and divider.
    */
 
-  putreg(0, SAM_SCIF_GCCTRL0);
+  putreg32(0, SAM_SCIF_GCCTRL0);
 
   /* Set the generic clock 0 source */
 
@@ -776,11 +784,11 @@ static inline void sam_enabledfll0(void)
   /* Sync before reading a dfll conf register */
 
   putreg32(SCIF_DFLL0SYNC_SYNC, SAM_SCIF_DFLL0SYNC);
-  while (getreg32(SAM_SCIF_PCLKSR) & SCIF_INT_DFLL0RDY) == 0);
+  while ((getreg32(SAM_SCIF_PCLKSR) & SCIF_INT_DFLL0RDY) == 0);
 
   /* Select Closed Loop Mode */
 
-  conf  = getreg(SAM_SCIF_DFLL0CONF);
+  conf  = getreg32(SAM_SCIF_DFLL0CONF);
   conf &= ~SCIF_DFLL0CONF_RANGE_MASK;
   conf |= SCIF_DFLL0CONF_MODE;
 
@@ -794,7 +802,7 @@ static inline void sam_enabledfll0(void)
   conf |= SCIF_DFLL0CONF_RANGE1;
 #else
   conf |= SCIF_DFLL0CONF_RANGE0;
-#ednif
+#endif
 
   /* Enable the reference generic clock 0 */
 
@@ -817,7 +825,7 @@ static inline void sam_enabledfll0(void)
    * too high, DFLL0 may fail to lock.
    */
 
-  sam_dfll0_putreg32((SCIF_DFLL0STEP_CSTEP(4) | SCIF_DFLL0STEP_FSTEP(4),
+  sam_dfll0_putreg32(SCIF_DFLL0STEP_CSTEP(4) | SCIF_DFLL0STEP_FSTEP(4),
                      SAM_SCIF_DFLL0STEP,
                      SAM_SCIF_DFLL0STEP_OFFSET);
 
@@ -1056,7 +1064,7 @@ static inline void sam_flash_config(uint32_t cpuclock, uint32_t psm, bool fastwk
             {
               /* Set one wait state */
 
-              waistate = true;
+              waitstate = true;
             }
         }
     }
@@ -1073,7 +1081,7 @@ static inline void sam_flash_config(uint32_t cpuclock, uint32_t psm, bool fastwk
         {
           /* Set one wait state */
 
-          waistate = true;
+          waitstate = true;
         }
     }
 
@@ -1117,7 +1125,7 @@ static inline void sam_mainclk(uint32_t mcsel)
  *
  ****************************************************************************/
 
-static __ramfunc__ void sam_instantiatepsm(Bpm *bpm, uint32_t regval)
+static __ramfunc__ void sam_instantiatepsm(uint32_t regval)
 {
   /* Set the BMP PCOM register (containing the new power scaling mode) */
 
@@ -1144,7 +1152,7 @@ static inline void sam_setpsm(uint32_t psm)
 
   /* Then call the RAMFUNC sam_setpsm() to set the new power scaling mode */
 
-  sam_instantiatepsm(bpm, regval);
+  sam_instantiatepsm(regval);
 }
 
 /****************************************************************************
@@ -1286,7 +1294,7 @@ void sam_clockconfig(void)
   sam_enableosc32();
 #endif
 
-#ifdef NEED_OSC32K
+#ifdef NEED_RC80M
   /* Enable the 32KHz oscillator using the settings in board.h */
 
   sam_enablerc80m();
@@ -1407,7 +1415,9 @@ void sam_clockconfig(void)
 
   sam_init_periphclks();
 
+  /* Configure clocking to the USB controller */
+
 #ifdef CONFIG_USBDEV
-  void sam_usbclock();
+  sam_usbc_enableclk();
 #endif
 }
