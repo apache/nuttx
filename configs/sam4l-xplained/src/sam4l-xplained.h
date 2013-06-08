@@ -80,7 +80,7 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-#define GPIO_LED0     (GPIO_OUTPUT | GPIO_PULL_NONE GPIO_OUTPUT_SET | \
+#define GPIO_LED0     (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
                        GPIO_PORTC | GPIO_PIN7)
 
 /* QTouch button: The SAM4L Xplained Pro kit has one QTouch button.  The connection
