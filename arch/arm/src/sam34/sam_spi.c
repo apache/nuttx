@@ -57,7 +57,7 @@
 #include "chip.h"
 #include "sam_gpio.h"
 #include "sam_spi.h"
-#include "chip/sam_pmc.h"
+#include "chip/sam3u_pmc.h"
 #include "chip/sam_spi.h"
 #include "chip/sam_pinmap.h"
 
@@ -66,6 +66,19 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+/* Select MCU-specific settings
+ *
+ * For the SAM3U, SPI is driven by the main clock.
+ * For the SAM4L, SPI driven by CLK_SPI which is the PBB clock.
+ */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define SAM_SPI_CLOCK  SAM_MCK_FREQUENCY    /* Frequency of the main clock */
+#elif defined(CONFIG_ARCH_CHIP_SAM4L)
+#  define SAM_SPI_CLOCK  BOARD_PBB_FREQUENCY  /* PBA frequency */
+#else
+#  error Unrecognized SAM architecture
+#endif
 
 /* Check if SPI debut is enabled (non-standard.. no support in
  * include/debug.h
@@ -461,7 +474,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
    *   SPCK frequency = MCK / SCBR, or SCBR = MCK / frequency
    */
 
-  scbr = SAM_MCK_FREQUENCY / frequency;
+  scbr = SAM_SPI_CLOCK / frequency;
 
   if (scbr < 8)
     {
@@ -493,7 +506,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
    *   DLYBS = MCK * 0.000002 = MCK / 500000
    */
 
-  dlybs   = SAM_MCK_FREQUENCY / 500000;
+  dlybs   = SAM_SPI_CLOCK / 500000;
   regval |= dlybs << SPI_CSR_DLYBS_SHIFT;
 
   /* DLYBCT: Delay Between Consecutive Transfers.  This field defines the delay
@@ -508,13 +521,13 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
    *  DLYBCT = MCK * 0.000005 / 32 = MCK / 200000 / 32
    */
 
-  dlybct  = SAM_MCK_FREQUENCY / 200000 / 32;
+  dlybct  = SAM_SPI_CLOCK / 200000 / 32;
   regval |= dlybct << SPI_CSR_DLYBCT_SHIFT;
   putreg32(regval, regaddr);
 
   /* Calculate the new actual frequency */
 
-  actual = SAM_MCK_FREQUENCY / scbr;
+  actual = SAM_SPI_CLOCK / scbr;
   spivdbg("csr[%08x]=%08x actual=%d\n", regaddr, regval, actual);
 
   /* Save the frequency setting */
@@ -897,15 +910,9 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   priv->cs = 0xff;
 
-  /* Apply power to the SPI block */
+  /* Enable clocking to the SPI block */
 
-  flags = irqsave();
-  regval = getreg32(SAM_PMC_PCER);
-  regval |= (1 << SAM_PID_SPI);
-#ifdef CONFIG_SAM34_SPIINTERRUPT
-  regval |= (1 << SAM_IRQ_SPI);
-#endif
-  putreg32(regval, SAM_PMC_PCER);
+  sam_spi_enableclk();
 
   /* Configure multiplexed pins as connected on the board.  Chip select pins
    * must be configured by board-specific logic.

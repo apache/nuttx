@@ -362,6 +362,15 @@ config SAM34_HSMCI
 
 endmenu
 
+config SAM32_RESET_PERIPHCLKS
+	bool "Enable all peripheral clocks on reset"
+	default n
+	depends on ARCH_CHIP_SAM4L
+	---help---
+		By default, only a few necessary peripheral clocks are enabled at
+		reset. If this setting is enabled, then all clocking will be enabled
+		to all of the selected peripherals on reset.
+
 comment "AT91SAM3/4 USART Configuration"
 
 config USART0_ISUART

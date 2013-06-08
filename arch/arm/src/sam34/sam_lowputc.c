@@ -49,12 +49,13 @@
 
 #include "sam_gpio.h"
 #include "sam_lowputc.h"
-#include "chip/sam_pmc.h"
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
 #  include "chip/sam3u_uart.h"
+#  include "sam3u_periphclks.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_usart.h"
+#  include "sam4l_periphclks.h"
 #else
 #  error Unknown UART
 #endif
@@ -125,6 +126,23 @@
 #  undef HAVE_CONSOLE
 #endif
 
+/* Select MCU-specific settings
+ *
+ * For the SAM3U, the USARTs are driven by the main clock.
+ * For the SAM4L, the USARTs are driven by CLK_USART (undivided) which is
+ *   selected by the PBADIVMASK register.
+ */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define SAM_MR_USCLKS    UART_MR_USCLKS_MCK   /* Source = Main clock */
+#  define SAM_USART_CLOCK  SAM_MCK_FREQUENCY    /* Frequency of the main clock */
+#elif defined(CONFIG_ARCH_CHIP_SAM4L)
+#  define SAM_MR_USCLKS    UART_MR_USCLKS_USART /* Source = USART_CLK (undefined) */
+#  define SAM_USART_CLOCK  BOARD_PBA_FREQUENCY  /* PBA frequency is undivided */
+#else
+#  error Unrecognized SAM architecture
+#endif
+
 /* Select USART parameters for the selected console */
 
 #if defined(CONFIG_UART_SERIAL_CONSOLE)
@@ -191,7 +209,7 @@
 #  define MR_NBSTOP_VALUE UART_MR_NBSTOP_1
 #endif
 
-#define MR_VALUE (UART_MR_MODE_NORMAL | UART_MR_USCLKS_MCK | \
+#define MR_VALUE (UART_MR_MODE_NORMAL | SAM_MR_USCLKS | \
                   MR_CHRL_VALUE | MR_PAR_VALUE | MR_NBSTOP_VALUE)
 
 /**************************************************************************
@@ -249,27 +267,23 @@ void up_lowputc(char ch)
 
 void sam_lowsetup(void)
 {
-  uint32_t regval;
-
   /* Enable clocking for all selected UART/USARTs */
 
-  regval = 0;
 #ifdef CONFIG_SAM34_UART
-  regval |= (1 << SAM_PID_UART);
+  sam_uart_enableclk();
 #endif
 #ifdef CONFIG_SAM34_USART0
-  regval |= (1 << SAM_PID_USART0);
+  sam_usart0_enableclk();
 #endif
 #ifdef CONFIG_SAM34_USART1
-  regval |= (1 << SAM_PID_USART1);
+  sam_usart1_enableclk();
 #endif
 #ifdef CONFIG_SAM34_USART2
-  regval |= (1 << SAM_PID_USART2);
+  sam_usart2_enableclk();
 #endif
 #ifdef CONFIG_SAM34_USART3
-  regval |= (1 << SAM_PID_USART3);
+  sam_usart3_enableclk();
 #endif
-  putreg32(regval, SAM_PMC_PCER);
 
   /* Configure UART pins for all selected UART/USARTs */
 
@@ -277,41 +291,49 @@ void sam_lowsetup(void)
   (void)sam_configgpio(GPIO_UART_RXD);
   (void)sam_configgpio(GPIO_UART_TXD);
 #endif
+
 #ifdef CONFIG_SAM34_USART0
   (void)sam_configgpio(GPIO_USART0_RXD);
   (void)sam_configgpio(GPIO_USART0_TXD);
+#ifdef CONFIG_USART0_OFLOWCONTROL
   (void)sam_configgpio(GPIO_USART0_CTS);
+#endif
+#ifdef CONFIG_USART0_IFLOWCONTROL
   (void)sam_configgpio(GPIO_USART0_RTS);
 #endif
+#endif
+
 #ifdef CONFIG_SAM34_USART1
   (void)sam_configgpio(GPIO_USART1_RXD);
   (void)sam_configgpio(GPIO_USART1_TXD);
+#ifdef CONFIG_USART1_OFLOWCONTROL
   (void)sam_configgpio(GPIO_USART1_CTS);
+#endif
+#ifdef CONFIG_USART1_IFLOWCONTROL
   (void)sam_configgpio(GPIO_USART1_RTS);
 #endif
+#endif
+
 #ifdef CONFIG_SAM34_USART2
   (void)sam_configgpio(GPIO_USART2_RXD);
   (void)sam_configgpio(GPIO_USART2_TXD);
+#ifdef CONFIG_USART2_OFLOWCONTROL
   (void)sam_configgpio(GPIO_USART2_CTS);
+#endif
+#ifdef CONFIG_USART2_IFLOWCONTROL
   (void)sam_configgpio(GPIO_USART2_RTS);
 #endif
+#endif
+
 #ifdef CONFIG_SAM34_USART3
   (void)sam_configgpio(GPIO_USART3_RXD);
   (void)sam_configgpio(GPIO_USART3_TXD);
+#ifdef CONFIG_USART3_OFLOWCONTROL
   (void)sam_configgpio(GPIO_USART3_CTS);
+#endif
+#ifdef CONFIG_USART3_IFLOWCONTROL
   (void)sam_configgpio(GPIO_USART3_RTS);
 #endif
-
-#ifdef GPIO_CONSOLE_RXD
-#endif
-#ifdef GPIO_CONSOLE_TXD
-  (void)sam_configgpio(GPIO_CONSOLE_TXD);
-#endif
-#ifdef GPIO_CONSOLE_CTS
-  (void)sam_configgpio(GPIO_CONSOLE_CTS);
-#endif
-#ifdef GPIO_CONSOLE_RTS
-  (void)sam_configgpio(GPIO_CONSOLE_RTS);
 #endif
 
   /* Configure the console (only) */
@@ -331,7 +353,7 @@ void sam_lowsetup(void)
 
   /* Configure the console baud */
 
-  putreg32(((SAM_MCK_FREQUENCY + (SAM_CONSOLE_BAUD << 3))/(SAM_CONSOLE_BAUD << 4)),
+  putreg32(((SAM_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) / (SAM_CONSOLE_BAUD << 4)),
            SAM_CONSOLE_BASE + SAM_UART_BRGR_OFFSET);
 
   /* Enable receiver & transmitter */

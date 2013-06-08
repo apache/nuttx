@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include "chip/sam4l_pm.h"
+
 #ifdef CONFIG_ARCH_CHIP_SAM4L
 
 /************************************************************************************
@@ -92,13 +94,13 @@
 #define sam_usart0_enableclk() \
   do { \
     sam_pba_enableperipheral(PM_PBAMASK_USART0); \
-    sam_pba_enabledivmask(PBA_DIVMASK_CLK_USART); \
+    sam_pba_enabledivmask(PM_PBADIVMASK_CLK_USART); \
   } while (0)
 
 #define sam_usart1_enableclk() \
   do { \
     sam_pba_enableperipheral(PM_PBAMASK_USART1); \
-    sam_pba_enabledivmask(PBA_DIVMASK_CLK_USART); \
+    sam_pba_enabledivmask(PM_PBADIVMASK_CLK_USART); \
   } while (0)
 
 #define sam_usart2_enableclk() \

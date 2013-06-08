@@ -551,6 +551,23 @@
 #  endif
 #endif
 
+/* Select MCU-specific settings
+ *
+ * For the SAM3U, the USARTs are driven by the main clock.
+ * For the SAM4L, the USARTs are driven by CLK_USART (undivided) which is
+ *   selected by the PBADIVMASK register.
+ */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define SAM_MR_USCLKS    UART_MR_USCLKS_MCK   /* Source = Main clock */
+#  define SAM_USART_CLOCK  SAM_MCK_FREQUENCY    /* Frequency of the main clock */
+#elif defined(CONFIG_ARCH_CHIP_SAM4L)
+#  define SAM_MR_USCLKS    UART_MR_USCLKS_USART /* Source = USART_CLK (undefined) */
+#  define SAM_USART_CLOCK  BOARD_PBA_FREQUENCY  /* PBA frequency is undivided */
+#else
+#  error Unrecognized SAM architecture
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -879,7 +896,7 @@ static int up_setup(struct uart_dev_s *dev)
    * as the timing source
    */
 
-  regval = (UART_MR_MODE_NORMAL | UART_MR_USCLKS_MCK);
+  regval = (UART_MR_MODE_NORMAL | SAM_MR_USCLKS);
 
   /* OR in settings for the selected number of bits */
 
@@ -944,7 +961,7 @@ static int up_setup(struct uart_dev_s *dev)
 
   /* Configure the console baud */
 
-  regval  = (SAM_MCK_FREQUENCY + (priv->baud << 3))/(priv->baud << 4);
+  regval  = (SAM_USART_CLOCK + (priv->baud << 3))/(priv->baud << 4);
   up_serialout(priv, SAM_UART_BRGR_OFFSET, regval);
 
   /* Enable receiver & transmitter */

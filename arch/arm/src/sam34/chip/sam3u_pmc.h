@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/src/sam34/chip/sam_pmc.h
+ * arch/arm/src/sam34/chip/sam3u_pmc.h
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_PMC_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_PMC_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_PMC_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_PMC_H
 
 /****************************************************************************************
  * Included Files
@@ -312,4 +312,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_PMC_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_PMC_H */

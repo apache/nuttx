@@ -55,6 +55,20 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+/* Select MCU-specific settings
+ *
+ * For the SAM3U, Systick is driven by the main clock.
+ * For the SAM4L, Systick is driven by the CPU clock which is just the main
+ *   clock divided down.
+ */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define SAM_SYSTICK_CLOCK  SAM_MCK_FREQUENCY    /* Frequency of the main clock */
+#elif defined(CONFIG_ARCH_CHIP_SAM4L)
+#  define SAM_SYSTICK_CLOCK  BOARD_CPU_FREQUENCY  /* PBA frequency is undivided */
+#else
+#  error Unrecognized SAM architecture
+#endif
 
 /* The desired timer interrupt frequency is provided by the definition
  * CLK_TCK (see include/time.h).  CLK_TCK defines the desired number of
@@ -69,9 +83,9 @@
 #undef CONFIG_SAM34_SYSTICK_HCLKd8 /* Power up default is MCK, not MCK/8 */
 
 #if CONFIG_SAM34_SYSTICK_HCLKd8
-#  define SYSTICK_RELOAD ((SAM_MCK_FREQUENCY / 8 / CLK_TCK) - 1)
+#  define SYSTICK_RELOAD ((SAM_SYSTICK_CLOCK / 8 / CLK_TCK) - 1)
 #else
-#  define SYSTICK_RELOAD ((SAM_MCK_FREQUENCY / CLK_TCK) - 1)
+#  define SYSTICK_RELOAD ((SAM_SYSTICK_CLOCK / CLK_TCK) - 1)
 #endif
 
 /* The size of the reload field is 24 bits.  Verify that the reload value
