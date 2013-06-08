@@ -65,6 +65,14 @@
 # error "CONFIG_ARCH_RAMFUNCS must be defined"
 #endif
 
+/* Board/Clock Setup *******************************************************/
+/* Verify dividers */
+
+#if ((BOARD_CPU_SHIFT > BOARD_PBA_SHIFT) || (BOARD_CPU_SHIFT > BOARD_PBB_SHIFT) || \
+     (BOARD_CPU_SHIFT > BOARD_PBC_SHIFT) || (BOARD_CPU_SHIFT > BOARD_PBD_SHIFT))
+#  error BOARD_PBx_SHIFT must be greater than or equal to BOARD_CPU_SHIFT
+#endif
+
 /* Nominal frequencies in on-chip RC oscillators.  These may frequencies
  * may vary with temperature changes.
  */
@@ -900,19 +908,24 @@ static inline void sam_setdividers(void)
 }
 
 /****************************************************************************
- * Name: sam_fws
+ * Name: set_flash_waitstate
  *
  * Description:
- *   Setup FLASH wait states.
+ *   Setup one or two FLASH wait states.
  *
  ****************************************************************************/
 
-static inline void sam_fws(uint32_t cpuclock, uint32_t psm, bool fastwkup)
+static inline void set_flash_waitstate(bool waitstate)
 {
   uint32_t regval;
 
+  /* Set or clear the FLASH wait state (FWS) bit in the FLASH control
+   * register (FCR).
+   */
+
   regval = getreg32(SAM_FLASHCALW_FCR);
-  if (cpuclock > SAM_FLASHCALW_FWS0_MAXFREQ)
+
+  if (waitstate)
     {
       regval |= FLASHCALW_FCR_FWS;
     }
@@ -922,6 +935,157 @@ static inline void sam_fws(uint32_t cpuclock, uint32_t psm, bool fastwkup)
     }
 
   putreg32(regval, SAM_FLASHCALW_FCR);
+}
+
+/****************************************************************************
+ * Name: sam_flash_readmode
+ *
+ * Description:
+ *   Send a FLASH command to enable to disable high speed FLASH read mode.
+ *
+ ****************************************************************************/
+
+static inline void sam_flash_readmode(uint32_t command)
+{
+  uint32_t regval;
+
+  /* Make sure that any previous FLASH operation is completed */
+
+  while ((getreg32(SAM_FLASHCALW_FSR) & FLASHCALW_FSR_FRDY) == 0);
+
+  /* Write the specified FLASH command to the FCMD register */
+
+  regval  = getreg32(SAM_FLASHCALW_FCMD);
+  regval &= ~FLASHCALW_FCMD_CMD_MASK;
+  regval |= (FLASHCALW_FCMD_KEY | command);
+  putreg32(regval, SAM_FLASHCALW_FCMD);
+
+  /* Wait for this FLASH operation to complete */
+
+  while ((getreg32(SAM_FLASHCALW_FSR) & FLASHCALW_FSR_FRDY) == 0);
+}
+
+/****************************************************************************
+ * Name: sam_flash_config
+ *
+ * Description:
+ *   Configure FLASH read mode and wait states.
+ *
+ *   Maximum CPU frequency for 0 and 1 FLASH wait states (FWS) in various modes
+ *   (Table 42-30 in the big data sheet).
+ *
+ *     ------- ------------------- ---------- ----------
+ *     Power     Flash Read Mode     Flash     Maximum
+ *     Sclaing                        Wait    Operating
+ *     Mode    HSEN HSDIS FASTWKUP   States   Frequency
+ *     ------- ---- ----- -------- ---------- ----------
+ *       PS0          X       X        1        12MHz
+ *       " "          X                0        18MHz
+ *       " "          X                1        36MHz
+ *       PS1          X       X        1        12MHz
+ *       " "          X                0         8MHz
+ *       " "          X                1        12MHz
+ *       PS2     X                     0        24Mhz
+ *       " "     X                     1        48MHz
+ *     ------- ---- ----- -------- ---------- ----------
+ *
+ ****************************************************************************/
+
+static inline void sam_flash_config(uint32_t cpuclock, uint32_t psm, bool fastwkup)
+{
+  bool waitstate;
+  uint32_t command;
+
+#ifdef CONFIG_SAM34_FLASH_HSEN
+  /* High speed flash read mode (with power scaling mode == 2).  Set one
+   * wait state if the CPU clock frequency exceeds the threshold value
+   * and enable high speed read mode.
+   */
+
+  waitstate = (cpuclock > FLASH_MAXFREQ_PS2_HSEN_FWS0);
+  command   = FLASHCALW_FCMD_CMD_HSEN;
+#else
+  /* Assume that we will select no wait states and that we will disable high-
+   * speed read mode.
+   */
+
+  waitstate = false;
+  command   = FLASHCALW_FCMD_CMD_HSDIS;
+
+  /* Handle power scaling mode == 0 FLASH configuration */
+
+  if (psm == 0)
+    {
+      /* Power scaling mode 0.  We need to set wait state the CPU clock if
+       * the CPU frequency exceeds a threshold.
+       */
+
+      if (cpuclock > FLASH_MAXFREQ_PS0_HSDIS_FWS0)
+        {
+          /* Set one wait state */
+
+          waitstate = true;
+
+          /* Enable high speed read mode if the frequency exceed the maximum
+           * for the low speed configuration.  This mode is not documented
+           * in the data sheet, but I see that they do this in some Atmel
+           * code examples.
+           */
+
+          if (cpuclock > FLASH_MAXFREQ_PS0_HSDIS_FWS1)
+            {
+              /* Enable high speed read mode. */
+
+              command = FLASHCALW_FCMD_CMD_HSEN;
+            }
+        }
+
+     /* The is below the threshold that requires one wait state.  But we
+      * have to check a few more things.
+      */
+
+      else
+        {
+          /* If FLASH wake-up mode is selected and the we are in the lower
+           * operating frequency for this mode, then set 1 waitate and
+           * disable high speed read mode.
+           */
+
+          if ((fastwkup == true) &&
+              (cpuclock <= FLASH_MAXFREQ_PS1_HSDIS_FASTWKUP_FWS1))
+            {
+              /* Set one wait state */
+
+              waistate = true;
+            }
+        }
+    }
+
+  /* Otherwise, this is power scaling mode 1 */
+
+  else /* if (psm == 1) */
+    {
+      /* If we are in the lower operating frequency range, then select
+       * zero wait states.  Otherwise, select one wait state.
+       */
+
+      if (cpuclock > FLASH_MAXFREQ_PS1_HSDIS_FWS0)
+        {
+          /* Set one wait state */
+
+          waistate = true;
+        }
+    }
+
+#endif
+
+  /* Set 0 or 1 waitstates */
+
+  set_flash_waitstate(waitstate);
+
+  /* Enable/disable the high-speed read mode. */
+
+  sam_flash_readmode(command);
 }
 
 /****************************************************************************
@@ -1164,9 +1328,9 @@ void sam_clockconfig(void)
   // sam_mainclk(PM_MCCTRL_MCSEL_RCSYS);
 #elif defined(BOARD_SYSCLK_SOURCE_OSC0)
 
-  /* Set up FLASH wait states */
+  /* Configure FLASH read mode and wait states */
 
-  sam_fws(BOARD_CPU_FREQUENCY, psm, fastwkup);
+  sam_flash_config(BOARD_CPU_FREQUENCY, psm, fastwkup);
 
   /* Then switch the main clock to OSC0 */
 
@@ -1178,9 +1342,9 @@ void sam_clockconfig(void)
 
   sam_enablepll0();
 
-  /* Set up FLASH wait states */
+  /* Configure FLASH read mode and wait states */
 
-  sam_fws(BOARD_CPU_FREQUENCY, psm, fastwkup);
+  sam_flash_config(BOARD_CPU_FREQUENCY, psm, fastwkup);
 
   /* Then switch the main clock to PLL0 */
 
@@ -1192,9 +1356,9 @@ void sam_clockconfig(void)
 
   sam_enabledfll0();
 
-  /* Set up FLASH wait states */
+  /* Configure FLASH read mode and wait states */
 
-  sam_fws(BOARD_CPU_FREQUENCY, psm, fastwkup);
+  sam_flash_config(BOARD_CPU_FREQUENCY, psm, fastwkup);
 
   /* Then switch the main clock to DFLL0 */
 
@@ -1202,9 +1366,9 @@ void sam_clockconfig(void)
 
 #elif defined(BOARD_SYSCLK_SOURCE_RC80M)
 
-  /* Set up FLASH wait states */
+  /* Configure FLASH read mode and wait states */
 
-  sam_fws(BOARD_CPU_FREQUENCY, psm, fastwkup);
+  sam_flash_config(BOARD_CPU_FREQUENCY, psm, fastwkup);
 
   /* Then switch the main clock to RCM80 */
 
@@ -1213,9 +1377,9 @@ void sam_clockconfig(void)
 #elif defined(BOARD_SYSCLK_SOURCE_FCFAST12M) || defined(BOARD_SYSCLK_SOURCE_FCFAST8M) || \
       defined(BOARD_SYSCLK_SOURCE_FCFAST4M)
 
-  /* Set up FLASH wait states */
+  /* Configure FLASH read mode and wait states */
 
-  sam_fws(BOARD_CPU_FREQUENCY, psm, fastwkup);
+  sam_flash_config(BOARD_CPU_FREQUENCY, psm, fastwkup);
 
   /* Then switch the main clock to RCFAST */
 
@@ -1223,9 +1387,9 @@ void sam_clockconfig(void)
 
 #elif defined(BOARD_SYSCLK_SOURCE_RC1M)
 
-  /* Set up FLASH wait states */
+  /* Configure FLASH read mode and wait states */
 
-  sam_fws(BOARD_CPU_FREQUENCY, psm, fastwkup);
+  sam_flash_config(BOARD_CPU_FREQUENCY, psm, fastwkup);
 
   /* Then switch the main clock to RC1M */
 
