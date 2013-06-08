@@ -52,7 +52,7 @@
 
 #include "chip.h"
 #include "sam_gpio.h"
-#include "chip/sam_pio.h"
+#include "chip/sam3u_pio.h"
 
 /****************************************************************************
  * Definitions

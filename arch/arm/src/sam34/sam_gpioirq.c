@@ -54,7 +54,7 @@
 #include "up_internal.h"
 
 #include "sam_gpio.h"
-#include "chip/sam_pio.h"
+#include "chip/sam3u_pio.h"
 #include "chip/sam_pmc.h"
 
 #ifdef CONFIG_GPIO_IRQ

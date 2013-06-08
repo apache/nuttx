@@ -288,7 +288,7 @@
 #  define SCIF_DFLL0STEP_FSTEP(n)         ((n) << SCIF_DFLL0STEP_FSTEP_SHIFT)
 #define SCIF_DFLL0STEP_CSTEP_SHIFT        (16)     /* Bits 16-20: Coarse Maximum Step */
 #define SCIF_DFLL0STEP_CSTEP_MASK         (31 << SCIF_DFLL0STEP_CSTEP_SHIFT)
-#  define SCIF_DFLL0STEP_CSTEP(4)         ((v) << SCIF_DFLL0STEP_CSTEP_SHIFT)
+#  define SCIF_DFLL0STEP_CSTEP(n)         ((n) << SCIF_DFLL0STEP_CSTEP_SHIFT)
 
 /* DFLL0 Spread Spectrum Generator Control Register */
 
@@ -391,6 +391,13 @@
 #  define SCIF_GCCTRL_OSCSEL_PBCCLK       (11 << SCIF_GCCTRL_OSCSEL_SHIFT) /* Peripheral Bus C clock */
 #  define SCIF_GCCTRL_OSCSEL_PBDCLK       (12 << SCIF_GCCTRL_OSCSEL_SHIFT) /* Peripheral Bus D clock */
 #  define SCIF_GCCTRL_OSCSEL_RC32K        (13 << SCIF_GCCTRL_OSCSEL_SHIFT) /* Output from 32kHz RCOSC */
+#  define SCIF_GCCTRL_OSCSEL_1K           (15 << SCIF_GCCTRL_OSCSEL_SHIFT) /* 1 kHz output from OSC32K */
+#  define SCIF_GCCTRL_OSCSEL_PLL0         (16 << SCIF_GCCTRL_OSCSEL_SHIFT) /* PLL0 */
+#  define SCIF_GCCTRL_OSCSEL_HRPCLK       (17 << SCIF_GCCTRL_OSCSEL_SHIFT) /* High resolution prescaler */
+#  define SCIF_GCCTRL_OSCSEL_FPCLK        (18 << SCIF_GCCTRL_OSCSEL_SHIFT) /* Fractional prescaler */
+#  define SCIF_GCCTRL_OSCSEL_GCLKIN0      (19 << SCIF_GCCTRL_OSCSEL_SHIFT) /* GCLKIN0 */
+#  define SCIF_GCCTRL_OSCSEL_GCLKIN1      (20 << SCIF_GCCTRL_OSCSEL_SHIFT) /* GCLKIN1 */
+#  define SCIF_GCCTRL_OSCSEL_GCLK11       (21 << SCIF_GCCTRL_OSCSEL_SHIFT) /* GCLK11 */
 #define SCIF_GCCTRL_DIV_SHIFT             (16)      /* Bits 16-31: Division Factor */
 #define SCIF_GCCTRL_DIV_MASK              (0xffff << SCIF_GCCTRL_DIV_SHIFT)
 #  define SCIF_GCCTRL_DIV(n)              ((n) << SCIF_GCCTRL_DIV_SHIFT)
