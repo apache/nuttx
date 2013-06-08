@@ -60,7 +60,13 @@
 #include "os_internal.h"
 
 #include "chip.h"
-#include "chip/sam_uart.h"
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  include "chip/sam3u_uart.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4L)
+#  include "chip/sam4l_usart.h"
+#else
+#  error Unknown UART
+#endif
 
 /****************************************************************************
  * Definitions
@@ -873,21 +879,21 @@ static int up_setup(struct uart_dev_s *dev)
    * as the timing source
    */
 
-  regval = (USART_MR_MODE_NORMAL|USART_MR_USCLKS_MCK);
+  regval = (UART_MR_MODE_NORMAL | UART_MR_USCLKS_MCK);
 
   /* OR in settings for the selected number of bits */
 
   if (priv->bits == 5)
     {
-      regval |= USART_MR_CHRL_5BITS; /* 5 bits */
+      regval |= UART_MR_CHRL_5BITS; /* 5 bits */
     }
   else if (priv->bits == 6)
     {
-      regval |= USART_MR_CHRL_6BITS;  /* 6 bits */
+      regval |= UART_MR_CHRL_6BITS;  /* 6 bits */
     }
   else if (priv->bits == 7)
     {
-      regval |= USART_MR_CHRL_7BITS; /* 7 bits */
+      regval |= UART_MR_CHRL_7BITS; /* 7 bits */
     }
 #ifdef HAVE_USART
 #ifdef CONFIG_SAM34_UART
@@ -898,12 +904,12 @@ static int up_setup(struct uart_dev_s *dev)
   else if (priv->bits == 9) /* Only USARTS */
 #endif
     {
-      regval |= USART_MR_MODE9; /* 9 bits */
+      regval |= UART_MR_MODE9; /* 9 bits */
     }
 #endif
   else /* if (priv->bits == 8) */
     {
-      regval |= USART_MR_CHRL_8BITS; /* 8 bits (default) */
+      regval |= UART_MR_CHRL_8BITS; /* 8 bits (default) */
     }
 
   /* OR in settings for the selected parity */
@@ -925,11 +931,11 @@ static int up_setup(struct uart_dev_s *dev)
 
   if (priv->stopbits2)
     {
-      regval |= USART_MR_NBSTOP_2;
+      regval |= UART_MR_NBSTOP_2;
     }
   else
     {
-      regval |= USART_MR_NBSTOP_1;
+      regval |= UART_MR_NBSTOP_1;
     }
 
   /* And save the new mode register value */

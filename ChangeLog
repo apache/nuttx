@@ -4925,4 +4925,6 @@
 	* nuttx/arch/arm/src/sam34/sam4l_clockconfig.c and chip/sam4l_wdt.h:
 	  Finally finished the SAM4L clock configuration logic; Added a
 	  WDT register definition header file (2013-6-8).
+	* nuttx/arch/arm/src/sam34/chip/sam4l_usart.h and sam4l_picouart.h:
+	  Add UART/USART register defintion files for the SAM4L (2013-6-8).
 
