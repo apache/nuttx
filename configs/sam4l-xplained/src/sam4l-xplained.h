@@ -80,8 +80,8 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-#define GPIO_LED0     (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_PORTC | \
-                       GPIO_OUTPUT_SET | GPIO_PIN7)
+#define GPIO_LED0     (GPIO_OUTPUT | GPIO_PULL_NONE GPIO_OUTPUT_SET | \
+                       GPIO_PORTC | GPIO_PIN7)
 
 /* QTouch button: The SAM4L Xplained Pro kit has one QTouch button.  The connection
  * to the SAM4L is:
@@ -99,8 +99,8 @@
  *   PC24 SW0
  */
 
-#define GPIO_SW0      (GPIO_INPUT | GPIO_PULL_UP | GPIO_GLITCH_FILTER | GPIO_PORTC | \
-                       GPIO_PIN24)
+#define GPIO_SW0      (GPIO_INPUT | GPIO_PULL_UP | GPIO_GLITCH_FILTER | \
+                       GPIO_PORTC | GPIO_PIN24)
 #define IRQ_SW0       SAM_IRQ_PC24
 
 /************************************************************************************
