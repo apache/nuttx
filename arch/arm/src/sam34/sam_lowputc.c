@@ -50,7 +50,15 @@
 #include "sam_gpio.h"
 #include "sam_lowputc.h"
 #include "chip/sam_pmc.h"
-#include "chip/sam_uart.h"
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  include "chip/sam3u_uart.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4L)
+#  include "chip/sam4l_usart.h"
+#else
+#  error Unknown UART
+#endif
+
 #include "chip/sam_pinmap.h"
 
 /**************************************************************************
@@ -156,15 +164,15 @@
 /* Select the settings for the mode register */
 
 #if SAM_CONSOLE_BITS == 5
-#  define MR_CHRL_VALUE USART_MR_CHRL_5BITS /* 5 bits */
+#  define MR_CHRL_VALUE UART_MR_CHRL_5BITS /* 5 bits */
 #elif SAM_CONSOLE_BITS == 6
-#  define MR_CHRL_VALUE USART_MR_CHRL_6BITS  /* 6 bits */
+#  define MR_CHRL_VALUE UART_MR_CHRL_6BITS  /* 6 bits */
 #elif SAM_CONSOLE_BITS == 7
-#  define MR_CHRL_VALUE USART_MR_CHRL_7BITS /* 7 bits */
+#  define MR_CHRL_VALUE UART_MR_CHRL_7BITS /* 7 bits */
 #elif SAM_CONSOLE_BITS == 8
-#  define MR_CHRL_VALUE USART_MR_CHRL_8BITS /* 8 bits */
+#  define MR_CHRL_VALUE UART_MR_CHRL_8BITS /* 8 bits */
 #elif SAM_CONSOLE_BITS == 9 && !defined(CONFIG_UART_SERIAL_CONSOLE)
-#  define MR_CHRL_VALUE USART_MR_MODE9
+#  define MR_CHRL_VALUE UART_MR_MODE9
 #else
 #  error "Invlaid number of bits"
 #endif
@@ -178,12 +186,12 @@
 #endif
 
 #if SAM_CONSOLE_2STOP != 0
-#  define MR_NBSTOP_VALUE USART_MR_NBSTOP_2
+#  define MR_NBSTOP_VALUE UART_MR_NBSTOP_2
 #else
-#  define MR_NBSTOP_VALUE USART_MR_NBSTOP_1
+#  define MR_NBSTOP_VALUE UART_MR_NBSTOP_1
 #endif
 
-#define MR_VALUE (USART_MR_MODE_NORMAL | USART_MR_USCLKS_MCK | \
+#define MR_VALUE (UART_MR_MODE_NORMAL | UART_MR_USCLKS_MCK | \
                   MR_CHRL_VALUE | MR_PAR_VALUE | MR_NBSTOP_VALUE)
 
 /**************************************************************************
