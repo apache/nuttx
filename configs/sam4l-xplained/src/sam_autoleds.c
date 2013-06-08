@@ -123,19 +123,19 @@ void up_ledon(int led)
 
   switch (led)
     {
-    case LED_STARTED :        /* NuttX has been started  LED0=OFF */
-    case LED_HEAPALLOCATE:    /* Heap has been allocated LED0=OFF */
-    case LED_IRQSENABLED:     /* Interrupts enabled      LED0=OFF */
+    case 0:                   /* LED_STARTED:      NuttX has been started  LED0=OFF */
+                              /* LED_HEAPALLOCATE: Heap has been allocated LED0=OFF */
+                              /* LED_IRQSENABLED:  Interrupts enabled      LED0=OFF */
       break;                  /* Leave ledstate == true to turn OFF */
 
     default:
-    case LED_INIRQ:           /* In an interrupt         LED0=N/C */
-    case LED_SIGNAL:          /* In a signal handler     LED0=N/C */
-    case LED_ASSERTION:       /* An assertion failed     LED0=N/C */
-      return;
+    case 2:                   /* LED_INIRQ:        In an interrupt         LED0=N/C */
+                              /* LED_SIGNAL:       In a signal handler     LED0=N/C */
+                              /* LED_ASSERTION:    An assertion failed     LED0=N/C */
+      return;                 /* Return to leave LED0 unchanged */
 
-    case LED_PANIC:           /* The system has crashed  LED0=FLASH */
-    case LED_STACKCREATED:    /* Idle stack created      LED0=ON */
+    case 3:                   /* LED_PANIC:        The system has crashed  LED0=FLASH */
+    case 1:                   /* LED_STACKCREATED: Idle stack created      LED0=ON */
       ledstate = false;       /* Set ledstate == false to turn ON */
       break;
     }
@@ -154,21 +154,21 @@ void up_ledoff(int led)
     /* These should not happen and are ignored */
 
     default:
-    case LED_STARTED :        /* NuttX has been started  LED0=OFF */
-    case LED_HEAPALLOCATE:    /* Heap has been allocated LED0=OFF */
-    case LED_IRQSENABLED:     /* Interrupts enabled      LED0=OFF */
-    case LED_STACKCREATED:    /* Idle stack created      LED0=ON */
+    case 0:                   /* LED_STARTED:      NuttX has been started  LED0=OFF */
+                              /* LED_HEAPALLOCATE: Heap has been allocated LED0=OFF */
+                              /* LED_IRQSENABLED:  Interrupts enabled      LED0=OFF */
+    case 1:                   /* LED_STACKCREATED: Idle stack created      LED0=ON */
 
     /* These result in no-change */
 
-    case LED_INIRQ:           /* In an interrupt         LED0=N/C */
-    case LED_SIGNAL:          /* In a signal handler     LED0=N/C */
-    case LED_ASSERTION:       /* An assertion failed     LED0=N/C */
-      return;
+    case 2:                   /* LED_INIRQ:        In an interrupt         LED0=N/C */
+                              /* LED_SIGNAL:       In a signal handler     LED0=N/C */
+                              /* LED_ASSERTION:    An assertion failed     LED0=N/C */
+      return;                 /* Return to leave LED0 unchanged */
 
     /* Turn LED0 off set driving the output high */
 
-    case LED_PANIC:           /* The system has crashed  LED0=FLASH */
+    case 3:                   /* LED_PANIC:        The system has crashed  LED0=FLASH */
       sam_gpiowrite(GPIO_LED0, true);
       break;
     }

@@ -56,7 +56,7 @@
 #include "chip.h"
 
 #include "sam_dmac.h"
-#include "chip/sam_pmc.h"
+#include "chip/sam3u_pmc.h"
 #include "chip/sam_dmac.h"
 
 /****************************************************************************
@@ -1160,7 +1160,7 @@ void weak_function up_dmainitialize(void)
 {
   /* Enable peripheral clock */
 
-  putreg32((1 << SAM_PID_DMAC), SAM_PMC_PCER);
+  sam_dmac_enableclk();
 
   /* Disable all DMA interrupts */
 

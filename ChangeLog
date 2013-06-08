@@ -4927,4 +4927,6 @@
 	  WDT register definition header file (2013-6-8).
 	* nuttx/arch/arm/src/sam34/chip/sam4l_usart.h and sam4l_picouart.h:
 	  Add UART/USART register defintion files for the SAM4L (2013-6-8).
-
+	* arm/src/sam34/chip/sam3u_periphclks.h:  More macros and definitions
+	  to generalize peripheral clocking and to hide differences between
+	  the SAM3U and the SAM4L (2013-6-8).
