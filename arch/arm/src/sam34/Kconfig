@@ -140,7 +140,7 @@ config ARCH_CHIP_SAM4S
 	bool
 	default n
 
-menu "AT91SAM3 Peripheral Support"
+menu "AT91SAM3/4 Peripheral Support"
 
 config SAM_PICOCACHE
 	bool "PICOCACHE"

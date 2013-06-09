@@ -156,7 +156,7 @@
 #define BSCIF_PCLKSR_BOD18SYNRDY          (1 << 8)  /* Bit 8 */
 #define BSCIF_PCLKSR_SSWRDY               (1 << 9)  /* Bit 9:  Buck voltage regulator has stopped switching */
 #define BSCIF_PCLKSR_VREGOK               (1 << 10) /* Bit 10 */
-#define BSCIF_PCLKSR_RC1MRDY              (1 << 10) /* Bit 11 */
+#define BSCIF_PCLKSR_RC1MRDY              (1 << 11) /* Bit 11 */
 #define BSCIF_PCLKSR_LPBGRDY              (1 << 12) /* Bit 12 */
 
 /* Unlock Register */

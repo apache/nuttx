@@ -351,7 +351,9 @@ void sam_lowsetup(void)
 
   putreg32(MR_VALUE, SAM_CONSOLE_BASE + SAM_UART_MR_OFFSET);
 
-  /* Configure the console baud */
+  /* Configure the console baud.  NOTE: Oversampling by 8 is not supported.
+   * This may limit BAUD rates for lower USART clocks.
+   */
 
   putreg32(((SAM_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) / (SAM_CONSOLE_BAUD << 4)),
            SAM_CONSOLE_BASE + SAM_UART_BRGR_OFFSET);

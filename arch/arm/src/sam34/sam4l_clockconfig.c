@@ -133,7 +133,7 @@
 #    error BOARD_OSC0_STARTUP_US is out of range
 #  endif
 
-#  ifdef BOARD_OSC0_IS_XTAL
+#  ifdef BOARD_OSC0_ISXTAL
 #    define SAM_OSC0_MODE_VALUE      SCIF_OSCCTRL0_MODE
 #    if BOARD_OSC0_FREQUENCY < 2000000
 #      define SAM_OSC0_GAIN_VALUE    SCIF_OSCCTRL0_GAIN(0)
@@ -188,8 +188,8 @@
 #    error BOARD_OSC32_STARTUP_US is out of range
 #  endif
 
-#  ifdef BOARD_OSC32_IS_XTAL
-#    define SAM_OSC32_MODE_VALUE     SCIF_OSCCTRL32_MODE_XTAL
+#  ifdef BOARD_OSC32_ISXTAL
+#    define SAM_OSC32_MODE_VALUE     BSCIF_OSCCTRL32_MODE_XTAL
 #  else
 #    define SAM_OSC32_MODE_VALUE     BSCIF_OSCCTRL32_MODE_EXTCLK
 #  endif
@@ -916,6 +916,25 @@ static inline void sam_setdividers(void)
 }
 
 /****************************************************************************
+ * Name: sam_enable_fastwakeup
+ *
+ * Description:
+ *   Enable FLASH fast wakeup mode.
+ *
+ ****************************************************************************/
+
+static inline void sam_enable_fastwakeup(void)
+{
+  uint32_t regval;
+
+  regval  = getreg32(SAM_BPM_PMCON);
+  regval |= BPM_PMCON_FASTWKUP;
+  putreg32(BPM_UNLOCK_KEY(0xaa) | BPM_UNLOCK_ADDR(SAM_BPM_PMCON_OFFSET),
+          SAM_BPM_UNLOCK);
+  putreg32(regval, SAM_BPM_PMCON);
+}
+
+/****************************************************************************
  * Name: set_flash_waitstate
  *
  * Description:
@@ -1148,7 +1167,7 @@ static inline void sam_setpsm(uint32_t psm)
 
   regval  = getreg32(SAM_BPM_PMCON);
   regval &= ~BPM_PMCON_PS_MASK;
-  regval |= (psm |  BPM_PMCON_PSCM | BPM_PMCON_PSCREQ);
+  regval |= (psm | BPM_PMCON_PSCM | BPM_PMCON_PSCREQ);
 
   /* Then call the RAMFUNC sam_setpsm() to set the new power scaling mode */
 
@@ -1206,7 +1225,6 @@ static inline void sam_usbclock(void)
 
 void sam_clockconfig(void)
 {
-  uint32_t regval;
   uint32_t psm;
   bool fastwkup;
 
@@ -1248,32 +1266,24 @@ void sam_clockconfig(void)
 
   psm      = BPM_PMCON_PS2;
   fastwkup = false;
+
+#elif BOARD_CPU_FREQUENCY <= FLASH_MAXFREQ_PS1_HSDIS_FWS1
+  /* Not high speed mode and frequency is below the thrshold.  We can go to
+   * power scaling mode 1.
+   */
+
+  psm = BPM_PMCON_PS1;
+
+#  if BOARD_CPU_FREQUENCY > FLASH_MAXFREQ_PS1_HSDIS_FWS0
+  /* We need to enable fast wakeup */
+
+  sam_enable_fastwakeup()
+  fastwkup = true;
+#  endif
 #else
-  /* Not high speed mode.  Check if we can go to power scaling mode 1. */
+  /* Power scaling mode 0, disable high speed mode, no fast wakeup */
 
-  if (BOARD_CPU_FREQUENCY <= FLASH_MAXFREQ_PS1_HSDIS_FWS1)
-    {
-      /* Yes.. Do we also need to enable fast wakeup? */
-
-      psm = BPM_PMCON_PS1;
-      if (BOARD_CPU_FREQUENCY > FLASH_MAXFREQ_PS1_HSDIS_FWS0)
-        {
-          /* Yes.. enable fast wakeup */
-
-          regval  = getreg32(SAM_BPM_PMCON);
-          regval |= BPM_PMCON_FASTWKUP;
-          putreg32(BPM_UNLOCK_KEY(0xaa) | BPM_UNLOCK_ADDR(SAM_BPM_PMCON_OFFSET), SAM_BPM_UNLOCK);
-          putreg32(regval, SAM_BPM_PMCON);
-
-          /* We need to remember that we did this */
-
-          fastwkup = true;
-        }
-    }
-  else
-    {
-      psm = BPM_PMCON_PS0;
-    }
+  psm = BPM_PMCON_PS0;
 #endif
 
   /* Enable clock sources:
