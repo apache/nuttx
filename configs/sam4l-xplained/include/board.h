@@ -84,15 +84,29 @@
 #define BOARD_RCFAST12M_FREQUENCY  12000000 /* Nominal frequency of RCFAST12M (Hz) */
 #define BOARD_RC1M_FREQUENCY       1000000  /* Nominal frequency of RC1M (Hz) */
 
+/* The SAM4L Xplained Pro has two on-board crystals:
+ *   XC100 12MHz     OSC0
+ *   XC101 32.768KHz OSC32
+ */
+
+/* OSC0 Configuration */
+
+#define BOARD_OSC0_FREQUENCY       12000000 /* 12MHz XTAL */
+
 /* OSC32 Configuration */
 
-#define BOARD_OSC32_FREQUENCY      32768
+#define BOARD_OSC32_FREQUENCY      32768    /* 32.768KHz XTAL */
 #define BOARD_OSC32_STARTUP_US     6100
 #define BOARD_OSC32_SELCURR        BSCIF_OSCCTRL32_SELCURR_300
+#define BOARD_OSC32_ISXTAL         1        /* OSC32 is a crystal */
 
 /* Digital Frequency Locked Loop configuration
  *  Fdfll = (Fclk * DFLLmul) / DFLLdiv
- *        = 32768 * (48000000/32760) / 1 = 48MHz
+ *        = 32768 * (48000000/32768) / 1 = 48MHz
+ *
+ * The actual frequency is 47.97MHz due to truncation of the multiplier.
+ * The 48MHz target value is treated as "not-to-exceed" value).  Use OSC0
+ * if you need more accuracy (12MHz with a multiplier of 4).
  *
  * DFLL0 source options (select one):
  *   BOARD_DFLL0_SOURCE_RCSYS      - System RC oscillator
@@ -105,9 +119,10 @@
  */
 
 #define BOARD_DFLL0_SOURCE_OSC32K  1
-#define BOARD_DFLL0_FREQUENCY      48000000
-#define BOARD_DFLL0_MUL            (BOARD_DFLL0_FREQUENCY / BOARD_OSC32_FREQUENCY)
+#define BOARD_DFLL0_TARGET         48000000
+#define BOARD_DFLL0_MUL            (BOARD_DFLL0_TARGET / BOARD_OSC32_FREQUENCY)
 #define BOARD_DFLL0_DIV            1
+#define BOARD_DFLL0_FREQUENCY      (BOARD_OSC32_FREQUENCY * BOARD_DFLL0_MUL / BOARD_DFLL0_DIV)
 
 /* Phase Locked Loop configuration
  *  Fdfll = (Fclk * PLLmul) / PLLdiv
@@ -134,22 +149,22 @@
  * NOTE: Nothing must be defined if the PLL0 is not used
  */
 
-/* System clock dividers: Fbus = Fsys >> BUSshift */
+/* System clock dividers: Fbus = Fmck >> BUSshift */
 
-#define BOARD_CPU_SHIFT            0 /* Fcpu = Fsys = 48MHz */
-#define BOARD_PBA_SHIFT            0 /* Fpba = Fsys = 48MHz */
-#define BOARD_PBB_SHIFT            0 /* Fpbb = Fsys = 48MHz */
-#define BOARD_PBC_SHIFT            0 /* Fpbc = Fsys = 48MHz */
-#define BOARD_PBD_SHIFT            0 /* Fpbd = Fsys = 48MHz */
+#define BOARD_CPU_SHIFT            0 /* Fcpu = Fmck = 48MHz */
+#define BOARD_PBA_SHIFT            0 /* Fpba = Fmck = 48MHz */
+#define BOARD_PBB_SHIFT            0 /* Fpbb = Fmck = 48MHz */
+#define BOARD_PBC_SHIFT            0 /* Fpbc = Fmck = 48MHz */
+#define BOARD_PBD_SHIFT            0 /* Fpbd = Fmck = 48MHz */
 
 /* Resulting frequencies */
 
-#define BOARD_MAIN_FREQUENCY       (12000000)
-#define BOARD_CPU_FREQUENCY        (BOARD_MAIN_FREQUENCY >> BOARD_CPU_SHIFT)
-#define BOARD_PBA_FREQUENCY        (BOARD_MAIN_FREQUENCY >> BOARD_PBA_SHIFT)
-#define BOARD_PBB_FREQUENCY        (BOARD_MAIN_FREQUENCY >> BOARD_PBB_SHIFT)
-#define BOARD_PBC_FREQUENCY        (BOARD_MAIN_FREQUENCY >> BOARD_PBC_SHIFT)
-#define BOARD_PBD_FREQUENCY        (BOARD_MAIN_FREQUENCY >> BOARD_PBD_SHIFT)
+#define BOARD_MCK_FREQUENCY        (BOARD_DFLL0_FREQUENCY)
+#define BOARD_CPU_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_CPU_SHIFT)
+#define BOARD_PBA_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBA_SHIFT)
+#define BOARD_PBB_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBB_SHIFT)
+#define BOARD_PBC_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBC_SHIFT)
+#define BOARD_PBD_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBD_SHIFT)
 
 /* USBC.
  *
@@ -238,10 +253,21 @@
 #define BUTTON_SW0_BIT     (1 << BUTTON_SW0)
 
 /* Alternate Function Disambiguation ************************************************/
-/* The SAM4L Xplained Pro contains an Embedded Debugger (EDBG) that can be
- * used to program and debug the ATSAM4LC4C using Serial Wire Debug (SWD).
- * The Embedded debugger also include a Virtual Com port interface over
- * USART1.  Virtual COM port connections:
+/* USART0 is also available on connectors EXT1 and EXT4:
+ *
+ * EXT1  TXT4  GPIO  Function
+ * ----  ---- ------ -----------
+ *  13    13   PB00  USART0_RXD
+ *  14    14   PB01  USART0_TXD
+ */
+
+#define GPIO_USART0_RXD    GPIO_USART0_RXD_4
+#define GPIO_USART0_TXD    GPIO_USART0_TXD_4
+
+/* The SAM4L Xplained Pro contains an Embedded Debugger (EDBG) that can be used to
+ * program and debug the ATSAM4LC4C using Serial Wire Debug (SWD).  The Embedded
+ * debugger also include a Virtual Com port interface over USART1.  Virtual COM
+ * port connections:
  *
  *   PC26 USART1 RXD
  *   PC27 USART1 TXD

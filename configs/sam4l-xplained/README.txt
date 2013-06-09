@@ -15,7 +15,7 @@ Contents
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
   - LEDs
-  - Virtual COM Port
+  - Serial Consoles
   - SAM4L Xplained Pro-specific Configuration Options
   - Configurations
 
@@ -243,8 +243,27 @@ LEDs
   apparently, running normmally.  If LED0 is flashing at approximately
   2Hz, then a fatal error has been detected and the system has halted.
 
-Virtual COM Port
-^^^^^^^^^^^^^^^^
+Serial Consoles
+^^^^^^^^^^^^^^^
+
+  USART0
+  ------
+
+  USART is available on connectors EXT1 and EXT4
+
+    EXT1  TXT4  GPIO  Function
+    ----  ---- ------ -----------
+     13    13   PB00  USART0_RXD
+     14    14   PB01  USART0_TXD
+     19    19         GND
+     20    20         VCC
+
+  If you have a TTL to RS-232 convertor then this is the most convenient
+  serial console to use.  It is the default in all of these configurations.
+  An option is to use the virtual COM port.
+
+  Virtual COM Port
+  ----------------
 
   The SAM4L Xplained Pro contains an Embedded Debugger (EDBG) that can be
   used to program and debug the ATSAM4LC4C using Serial Wire Debug (SWD).
@@ -278,8 +297,8 @@ SAM4L Xplained Pro-specific Configuration Options
        chip:
 
        CONFIG_ARCH_CHIP_SAM34
-       CONFIG_ARCH_CHIP_SAM3U
-       CONFIG_ARCH_CHIP_AT91SAM3U4
+       CONFIG_ARCH_CHIP_SAM4L
+       CONFIG_ARCH_CHIP_ATSAM4LC4C
 
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
@@ -298,7 +317,7 @@ SAM4L Xplained Pro-specific Configuration Options
 
     CONFIG_DRAM_SIZE - Describes the installed DRAM (SRAM in this case):
 
-       CONFIG_DRAM_SIZE=0x0000c000 (48Kb)
+       CONFIG_DRAM_SIZE=0x00008000 (32Kb)
 
     CONFIG_DRAM_START - The start address of installed DRAM
 
@@ -396,7 +415,7 @@ SAM4L Xplained Pro-specific Configuration Options
     CONFIG_USART2_ISUART
     CONFIG_USART3_ISUART
 
-  AT91SAM3U specific device driver settings
+  ST91SAM4L specific device driver settings
 
     CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,3) or UART
            m (m=4,5) for the console and ttys0 (default is the USART1).
@@ -408,13 +427,6 @@ SAM4L Xplained Pro-specific Configuration Options
     CONFIG_U[S]ARTn_BITS - The number of bits.  Must be either 7 or 8.
     CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
     CONFIG_U[S]ARTn_2STOP - Two stop bits
-
-  LCD Options.  Other than the standard LCD configuration options
-  (see configs/README.txt), the SAM4L Xplained Pro driver also supports:
-
-    CONFIG_LCD_PORTRAIT - Present the display in the standard 240x320
-       "Portrait" orientation.  Default:  The display is rotated to
-       support a 320x240 "Landscape" orientation.
 
 Configurations
 ^^^^^^^^^^^^^^
@@ -442,3 +454,25 @@ must be is one of the following:
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.
+
+    NOTES:
+
+    1. This configuration provides test output on USART0 which is available
+       on EXT1 or EXT4 (see the section "Serial Consoles" above).  The
+       virtual COM port could be used, instead, by reconfiguring to use
+       USART1 instead of USART0:
+
+       System Type -> AT91SAM3/4 Peripheral Support
+         CONFIG_SAM_USART0=y
+         CONFIG_SAM_USART1=n
+
+       Device Drivers -> Serial Driver Support -> Serial Console
+         CONFIG_USART0_SERIAL_CONSOLE=y
+
+       Device Drivers -> Serial Driver Support -> USART0 Configuration
+         CONFIG_USART0_2STOP=0
+         CONFIG_USART0_BAUD=115200
+         CONFIG_USART0_BITS=8
+         CONFIG_USART0_PARITY=0
+         CONFIG_USART0_RXBUFSIZE=256
+         CONFIG_USART0_TXBUFSIZE=256
