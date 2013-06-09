@@ -1283,7 +1283,8 @@ void sam_clockconfig(void)
 #else
   /* Power scaling mode 0, disable high speed mode, no fast wakeup */
 
-  psm = BPM_PMCON_PS0;
+  psm      = BPM_PMCON_PS0;
+  fastwkup = false;
 #endif
 
   /* Enable clock sources:

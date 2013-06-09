@@ -4930,3 +4930,9 @@
 	* arm/src/sam34/chip/sam3u_periphclks.h:  More macros and definitions
 	  to generalize peripheral clocking and to hide differences between
 	  the SAM3U and the SAM4L (2013-6-8).
+	* configs/sam4l-xplained/ostest:  The SAM4L now passed the OS test
+	  (2013-6-9).
+	* configs/sam4l-xplained/nsh:  Added an NSH configuration for the
+	  SAM4L Xplained Pro board (2013-6-9).
+	* configs/sam4l-xplained/src/sam_cxxinitialize.c:  Added C++ support
+	  to the SAM4L Xplained Pro board configuration (2013-6-9).

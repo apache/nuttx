@@ -452,7 +452,7 @@ The <subdir> that is provided above as an argument to the tools/configure.sh
 must be is one of the following:
 
   ostest:
-    This configuration directory, performs a simple OS test using
+    This configuration directory performs a simple OS test using
     examples/ostest.
 
     NOTES:
@@ -476,3 +476,36 @@ must be is one of the following:
          CONFIG_USART0_PARITY=0
          CONFIG_USART0_RXBUFSIZE=256
          CONFIG_USART0_TXBUFSIZE=256
+
+    2. This configuration is set up to use the NuttX OABI toolchain (see
+       above). Of course this can be reconfigured if you prefer a different
+       toolchain.
+
+  nsh:
+    This configuration directory will built the NuttShell.
+
+    NOTES:
+
+    1. This configuration provides test output on USART0 which is available
+       on EXT1 or EXT4 (see the section "Serial Consoles" above).  The
+       virtual COM port could be used, instead, by reconfiguring to use
+       USART1 instead of USART0:
+
+       System Type -> AT91SAM3/4 Peripheral Support
+         CONFIG_SAM_USART0=y
+         CONFIG_SAM_USART1=n
+
+       Device Drivers -> Serial Driver Support -> Serial Console
+         CONFIG_USART0_SERIAL_CONSOLE=y
+
+       Device Drivers -> Serial Driver Support -> USART0 Configuration
+         CONFIG_USART0_2STOP=0
+         CONFIG_USART0_BAUD=115200
+         CONFIG_USART0_BITS=8
+         CONFIG_USART0_PARITY=0
+         CONFIG_USART0_RXBUFSIZE=256
+         CONFIG_USART0_TXBUFSIZE=256
+
+    2. This configuration is set up to use the NuttX OABI toolchain (see
+       above). Of course this can be reconfigured if you prefer a different
+       toolchain.
