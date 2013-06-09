@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-/* The ATSAM4LC4C has 256Kb of FLASH beginning at address 0x0000:0000 and
- * 32Kb of SRAM beginning at address 0x2000:0000
+/* The ATSAM4LC4C has 256KB of FLASH beginning at address 0x0000:0000 and
+ * 32KB of SRAM beginning at address 0x2000:0000
  */
 
 MEMORY
