@@ -4936,3 +4936,5 @@
 	  SAM4L Xplained Pro board (2013-6-9).
 	* configs/sam4l-xplained/src/sam_cxxinitialize.c:  Added C++ support
 	  to the SAM4L Xplained Pro board configuration (2013-6-9).
+	* arm/src/sam34/chip/sam_irq.c:  Extend IRQ support to handle the
+	  larger number of NVIC interrupts used by the SAM4L (2013-6-9).
