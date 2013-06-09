@@ -221,18 +221,51 @@ static inline void sam_prioritize_syscall(int priority)
 
 static int sam_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
 {
+  unsigned int extint = irq - SAM_IRQ_EXTINT;
+
   DEBUGASSERT(irq >= SAM_IRQ_NMI && irq < NR_IRQS);
 
   /* Check for external interrupt */
 
   if (irq >= SAM_IRQ_EXTINT)
     {
-      if (irq < SAM_IRQ_NIRQS)
+#if SAM_IRQ_NEXTINT <= 32
+      if (extint < SAM_IRQ_NEXTINT)
         {
            *regaddr = NVIC_IRQ0_31_ENABLE;
-           *bit     = 1 << (irq - SAM_IRQ_EXTINT);
+           *bit     = 1 << extint;
         }
       else
+#elif SAM_IRQ_NEXTINT <= 64
+      if (extint < 32)
+        {
+           *regaddr = NVIC_IRQ0_31_ENABLE;
+           *bit     = 1 << extint;
+        }
+      else if (extint < SAM_IRQ_NEXTINT)
+        {
+           *regaddr = NVIC_IRQ32_63_ENABLE;
+           *bit     = 1 << (extint - 32);
+        }
+      else
+#elif SAM_IRQ_NEXTINT <= 96
+      if (extint < 32)
+        {
+           *regaddr = NVIC_IRQ0_31_ENABLE;
+           *bit     = 1 << extint;
+        }
+      else if (extint < 64)
+        {
+           *regaddr = NVIC_IRQ32_63_ENABLE;
+           *bit     = 1 << (extint - 32);
+        }
+      else if (extint < SAM_IRQ_NEXTINT)
+        {
+           *regaddr = NVIC_IRQ64_95_ENABLE;
+           *bit     = 1 << (extint - 64);
+        }
+      else
+#endif
         {
           return ERROR; /* Invalid interrupt */
         }
@@ -279,9 +312,32 @@ static int sam_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
 
 void up_irqinitialize(void)
 {
-  /* Disable all interrupts */
+  uintptr_t regaddr;
+  int nintlines;
+  int i;
 
-  putreg32(0, NVIC_IRQ0_31_ENABLE);
+  /* The NVIC ICTR register (bits 0-4) holds the number of of interrupt
+   * lines that the NVIC supports, defined in groups of 32. That is,
+   * the total number of interrupt lines is up to (32*(INTLINESNUM+1)).
+   *
+   *  0 -> 32 interrupt lines, 1 enable register,   8 priority registers
+   *  1 -> 64 "       " "   ", 2 enable registers, 16 priority registers
+   *  2 -> 96 "       " "   ", 3 enable regsiters, 24 priority registers
+   *  ...
+   */
+
+  nintlines = (getreg32(NVIC_ICTR) & NVIC_ICTR_INTLINESNUM_MASK) + 1;
+
+  /* Disable all interrupts.  There are nintlines interrupt enable
+   * registers.
+   */
+
+  for (i = nintlines, regaddr = NVIC_IRQ0_31_ENABLE;
+       i > 0;
+       i--, regaddr += 4)
+    {
+      putreg32(0, regaddr);
+    }
 
   /* Set up the vector table address.
    *
@@ -291,24 +347,26 @@ void up_irqinitialize(void)
 
 #if defined(CONFIG_ARCH_RAMVECTORS)
   up_ramvec_initialize();
-#elif defined(CONFIG_STM32_DFU)
+#elif defined(CONFIG_SAM_BOOTLOADER)
   putreg32((uint32_t)sam_vectors, NVIC_VECTAB);
 #endif
 
-  /* Set all interrrupts (and exceptions) to the default priority */
+  /* Set all interrupts (and exceptions) to the default priority */
 
   putreg32(DEFPRIORITY32, NVIC_SYSH4_7_PRIORITY);
   putreg32(DEFPRIORITY32, NVIC_SYSH8_11_PRIORITY);
   putreg32(DEFPRIORITY32, NVIC_SYSH12_15_PRIORITY);
 
-  putreg32(DEFPRIORITY32, NVIC_IRQ0_3_PRIORITY);
-  putreg32(DEFPRIORITY32, NVIC_IRQ4_7_PRIORITY);
-  putreg32(DEFPRIORITY32, NVIC_IRQ8_11_PRIORITY);
-  putreg32(DEFPRIORITY32, NVIC_IRQ12_15_PRIORITY);
-  putreg32(DEFPRIORITY32, NVIC_IRQ16_19_PRIORITY);
-  putreg32(DEFPRIORITY32, NVIC_IRQ20_23_PRIORITY);
-  putreg32(DEFPRIORITY32, NVIC_IRQ24_27_PRIORITY);
-  putreg32(DEFPRIORITY32, NVIC_IRQ28_31_PRIORITY);
+  /* Now set all of the interrupt lines to the default priority.  There are
+   * nintlines * 8 priority registers.
+   */
+
+  for (i = (nintlines << 3), regaddr = NVIC_IRQ0_3_PRIORITY;
+       i > 0;
+       i--, regaddr += 4)
+    {
+      putreg32(0, regaddr);
+    }
 
   /* currents_regs is non-NULL only while processing an interrupt */
 

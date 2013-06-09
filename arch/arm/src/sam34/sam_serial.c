@@ -1310,6 +1310,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       priv->imr &= ~UART_INT_TXRDY;
       up_disableint(priv);
     }
+
   irqrestore(flags);
 }
 

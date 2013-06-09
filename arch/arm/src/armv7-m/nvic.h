@@ -399,8 +399,8 @@
 
 /* Interrrupt controller type (INCTCTL_TYPE) */
 
-#define NVIC_ICTR_INTLINESNUM_SHIFT     0    /* Bits 4-0: Number of interrupt intputs / 32 */
-#define NVIC_ICTR_INTLINESNUM_MASK      (0x1f << NVIC_ICTR_INTLINESNUM_SHIFT)
+#define NVIC_ICTR_INTLINESNUM_SHIFT     0    /* Bits 0-3: Number of interrupt inputs / 32 - 1 */
+#define NVIC_ICTR_INTLINESNUM_MASK      (15 << NVIC_ICTR_INTLINESNUM_SHIFT)
 
 /* SysTick control and status register (SYSTICK_CTRL) */
 
