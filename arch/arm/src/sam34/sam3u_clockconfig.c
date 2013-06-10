@@ -53,7 +53,7 @@
 #include "chip/sam3u_eefc.h"
 #include "chip/sam3u_wdt.h"
 #include "chip/sam3u_supc.h"
-#include "chip/sam_matrix.h"
+#include "chip/sam3u_matrix.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -63,21 +63,17 @@
  * in board.h
  */
 
-#define CKGR_MOR_KEY        (0x37 << CKGR_MOR_KEY_SHIFT)
-#define SUPR_CR_KEY         (0xa5 << SUPC_CR_KEY_SHIFT)
+#define BOARD_CKGR_MOR      (PMC_CKGR_MOR_KEY | BOARD_CKGR_MOR_MOSCXTST | \
+                             PMC_CKGR_MOR_MOSCRCEN | PMC_CKGR_MOR_MOSCXTEN)
 
-#define BOARD_CKGR_MOR      (CKGR_MOR_KEY|BOARD_CKGR_MOR_MOSCXTST|\
-                             CKGR_MOR_MOSCRCEN|CKGR_MOR_MOSCXTEN)
+#define BOARD_CKGR_PLLAR    (PMC_CKGR_PLLAR_ONE | BOARD_CKGR_PLLAR_MUL | \
+                             BOARD_CKGR_PLLAR_STMODE | BOARD_CKGR_PLLAR_COUNT | \
+                             BOARD_CKGR_PLLAR_DIV)
 
-#define BOARD_CKGR_PLLAR    (CKGR_PLLAR_ONE|BOARD_CKGR_PLLAR_MULA|\
-                             BOARD_CKGR_PLLAR_STMODE|BOARD_CKGR_PLLAR_PLLACOUNT|\
-                             BOARD_CKGR_PLLAR_DIVA)
+#define BOARD_PMC_MCKR_FAST (BOARD_PMC_MCKR_PRES | PMC_MCKR_CSS_MAIN)
+#define BOARD_PMC_MCKR      (BOARD_PMC_MCKR_PRES | BOARD_PMC_MCKR_CSS)
 
-#define BOARD_PMC_MCKR_FAST (BOARD_PMC_MCKR_PRES|PMC_MCKR_CSS_MAIN)
-#define BOARD_PMC_MCKR      (BOARD_PMC_MCKR_PRES|BOARD_PMC_MCKR_CSS)
-
-#define BOARD_CKGR_UCKR     (BOARD_CKGR_UCKR_UPLLCOUNT|CKGR_UCKR_UPLLEN)
-
+#define BOARD_CKGR_UCKR     (BOARD_CKGR_UCKR_UPLLCOUNT | PMC_CKGR_UCKR_UPLLEN)
 
 /****************************************************************************
  * Public Data
@@ -170,7 +166,7 @@ static inline void sam_pmcsetup(void)
 
   /* Enable main oscillator (if it has not already been selected) */
 
-  if ((getreg32(SAM_CKGR_MOR) & CKGR_MOR_MOSCSEL) == 0)
+  if ((getreg32(SAM_PMC_CKGR_MOR) & PMC_CKGR_MOR_MOSCSEL) == 0)
     {
       /* "When the MOSCXTEN bit and the MOSCXTCNT are written in CKGR_MOR to
        *  enable the main oscillator, the MOSCXTS bit in the Power Management
@@ -180,7 +176,7 @@ static inline void sam_pmcsetup(void)
        *  indicating that the main clock is valid."
        */
 
-      putreg32(BOARD_CKGR_MOR, SAM_CKGR_MOR);
+      putreg32(BOARD_CKGR_MOR, SAM_PMC_CKGR_MOR);
       sam_pmcwait(PMC_INT_MOSCXTS);
     }
 
@@ -196,7 +192,7 @@ static inline void sam_pmcsetup(void)
    *             1 = Selection is in progress
    */
 
-  putreg32((BOARD_CKGR_MOR|CKGR_MOR_MOSCSEL), SAM_CKGR_MOR);
+  putreg32((BOARD_CKGR_MOR | PMC_CKGR_MOR_MOSCSEL), SAM_PMC_CKGR_MOR);
   sam_pmcwait(PMC_INT_MOSCSELS);
 
   /* "Select the master clock. "The Master Clock selection is made by writing
@@ -216,15 +212,15 @@ static inline void sam_pmcsetup(void)
 
   /* Settup PLLA and wait for LOCKA */
 
-  putreg32(BOARD_CKGR_PLLAR, SAM_CKGR_PLLAR);
+  putreg32(BOARD_CKGR_PLLAR, SAM_PMC_CKGR_PLLAR);
   sam_pmcwait(PMC_INT_LOCKA);
 
   /* Setup UTMI for USB and wait for LOCKU */
 
 #ifdef CONFIG_USBDEV
-  regval = getreg32(SAM_CKGR_UCKR);
+  regval = getreg32(SAM_PMC_CKGR_UCKR);
   regval |= BOARD_CKGR_UCKR;
-  putreg32(regval, SAM_CKGR_UCKR);
+  putreg32(regval, SAM_PMC_CKGR_UCKR);
   sam_pmcwait(PMC_INT_LOCKU);
 #endif
 

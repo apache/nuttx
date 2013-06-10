@@ -1,5 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam3u_pio.h
+ * Parallel Input/Output (PIO) Controller definitions for the SAM3U
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

@@ -1,5 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam3u_wdt.h
+ * Watchdog Timer (WDT) definitions for the SAM3U and SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -62,10 +63,13 @@
 #define SAM_WDT_SR                (SAM_WDT_BASE+SAM_WDT_SR_OFFSET)
 
 /* WDT register bit definitions ********************************************************/
+/* Watchdog Timer Control Register */
 
 #define WDT_CR_WDRSTT             (1 << 0)   /* Bit 0:  Watchdog Rest */
 #define WDT_CR_KEY_SHIFT          (24)       /* Bits 24-31:  Password */
 #define WDT_CR_KEY_MASK           (0xff << WDT_CR_KEY_SHIFT)
+
+/* Watchdog Timer Mode Register */
 
 #define WDT_MR_WDV_SHIFT          (0)       /* Bits 0-11:  Watchdog Counter Value */
 #define WDT_MR_WDV_MASK           (0xfff << WDT_MR_WDV_SHIFT)
@@ -73,10 +77,12 @@
 #define WDT_MR_WDRSTEN            (1 << 13) /* Bit 13: Watchdog Reset Enable */
 #define WDT_MR_WDRPROC            (1 << 14) /* Bit 14: Watchdog Reset Processor */
 #define WDT_MR_WDDIS              (1 << 15) /* Bit 15: Watchdog Disable */
-#define WDT_MR_WDD_SHIFT          (16)      /* Bits 16-17:  Watchdog Delta Value */
+#define WDT_MR_WDD_SHIFT          (16)      /* Bits 16-27:  Watchdog Delta Value */
 #define WDT_MR_WDD_MASK           (0xfff << WDT_MR_WDD_SHIFT)
 #define WDT_MR_WDDBGHLT           (1 << 28) /* Bit 28: Watchdog Debug Halt */
 #define WDT_MR_WDIDLEHLT          (1 << 29) /* Bit 29: Watchdog Idle Halt */
+
+/* Watchdog Timer Status Register */
 
 #define WDT_SR_WDUNF              (1 << 0)  /* Bit 0:  Watchdog Underflow */
 #define WDT_SR_WDERR              (1 << 1)  /* Bit 1:  Watchdog Error */

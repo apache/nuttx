@@ -1,5 +1,6 @@
 /****************************************************************************************
- * arch/arm/src/sam34/chip/sam_matric.h
+ * arch/arm/src/sam34/chip/sam_34matrix.h
+ * Bux matrix definitions for the SAM3U and SAM4S
  *
  *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +34,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_MATRIX_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_MATRIX_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_MATRIX_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_MATRIX_H
 
 /****************************************************************************************
  * Included Files
@@ -64,12 +65,16 @@
 #define SAM_MATRIX_SCFG2_OFFSET          0x0048 /* Slave Configuration Register 2 */
 #define SAM_MATRIX_SCFG3_OFFSET          0x004c /* Slave Configuration Register 3 */
 #define SAM_MATRIX_SCFG4_OFFSET          0x0050 /* Slave Configuration Register 4 */
-#define SAM_MATRIX_SCFG5_OFFSET          0x0054 /* Slave Configuration Register 5 */
-#define SAM_MATRIX_SCFG6_OFFSET          0x0058 /* Slave Configuration Register 6 */
-#define SAM_MATRIX_SCFG7_OFFSET          0x005c /* Slave Configuration Register 7 */
-#define SAM_MATRIX_SCFG8_OFFSET          0x0060 /* Slave Configuration Register 8 */
-#define SAM_MATRIX_SCFG9_OFFSET          0x0064 /* Slave Configuration Register 9 */
-                                                /* 0x0068-0x007c: Reserved */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define SAM_MATRIX_SCFG5_OFFSET        0x0054 /* Slave Configuration Register 5 */
+#  define SAM_MATRIX_SCFG6_OFFSET        0x0058 /* Slave Configuration Register 6 */
+#  define SAM_MATRIX_SCFG7_OFFSET        0x005c /* Slave Configuration Register 7 */
+#  define SAM_MATRIX_SCFG8_OFFSET        0x0060 /* Slave Configuration Register 8 */
+#  define SAM_MATRIX_SCFG9_OFFSET        0x0064 /* Slave Configuration Register 9 */
+                                                /* 0x0068-0x007c: Reserved (SAM3U) */
+#endif
+                                                /* 0x0054-0x007c: Reserved (SAM4S) */
 #define SAM_MATRIX_PRAS_OFFSET(n)        (0x0080+((n)<<3))
 #define SAM_MATRIX_PRAS0_OFFSET          0x0080 /* Priority Register A for Slave 0 */
                                                 /* 0x0084: Reserved */
@@ -80,19 +85,29 @@
 #define SAM_MATRIX_PRAS3_OFFSET          0x0098 /* Priority Register A for Slave 3 */
                                                 /* 0x009c: Reserved */
 #define SAM_MATRIX_PRAS4_OFFSET          0x00a0 /* Priority Register A for Slave 4 */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
                                                 /* 0x00a4: Reserved */
-#define SAM_MATRIX_PRAS5_OFFSET          0x00a8 /* Priority Register A for Slave 5 */
+#  define SAM_MATRIX_PRAS5_OFFSET        0x00a8 /* Priority Register A for Slave 5 */
                                                 /* 0x00ac: Reserved */
-#define SAM_MATRIX_PRAS6_OFFSET          0x00b0 /* Priority Register A for Slave 6 */
+#  define SAM_MATRIX_PRAS6_OFFSET        0x00b0 /* Priority Register A for Slave 6 */
                                                 /* 0x00b4: Reserved */
-#define SAM_MATRIX_PRAS7_OFFSET          0x00b8 /* Priority Register A for Slave 7 */
+#  define SAM_MATRIX_PRAS7_OFFSET        0x00b8 /* Priority Register A for Slave 7 */
                                                 /* 0x00bc: Reserved */
-#define SAM_MATRIX_PRAS8_OFFSET          0x00c0 /* Priority Register A for Slave 8 */
+#  define SAM_MATRIX_PRAS8_OFFSET        0x00c0 /* Priority Register A for Slave 8 */
                                                 /* 0x00c4: Reserved */
-#define SAM_MATRIX_PRAS9_OFFSET          0x00c8 /* Priority Register A for Slave 9 */
+#  define SAM_MATRIX_PRAS9_OFFSET        0x00c8 /* Priority Register A for Slave 9 */
                                                 /* 0x00cc-0x00fc: Reserved */
-#define SAM_MATRIX_MRCR_OFFSET           0x0100 /* Master Remap Control Register */
-                                                /* 0x0104-0x010c: Reserved */
+#  define SAM_MATRIX_MRCR_OFFSET         0x0100 /* Master Remap Control Register */
+                                                /* 0x0104-0x01e0: Reserved */
+#elif defined(CONFIG_ARCH_CHIP_SAM4S)
+                                                /* 0x00a4-0x110: Reserved */
+#  define SAM_MATRIX_CCFG_SYSIO_OFFSET   0x0114 /* System I/O Configuration Register */
+                                                /* 0x0118: Reserved */
+#  define SAM_MATRIX_CCFG_SMCNFCS_OFFSET 0x011c /* SMC Chip Select NAND Flash Assignment Register */
+                                                /* 0x0120-0x01e0: Reserved */
+#endif
+
 #define SAM_MATRIX_WPMR_OFFSET           0x01e4 /* Write Protect Mode Register */
 #define SAM_MATRIX_WPSR_OFFSET           0x01e8 /* Write Protect Status Register */
                                                 /* 0x0110 - 0x01fc: Reserved */
@@ -112,11 +127,13 @@
 #define SAM_MATRIX_SCFG2                 (SAM_MATRIX_BASE+SAM_MATRIX_SCFG2_OFFSET)
 #define SAM_MATRIX_SCFG3                 (SAM_MATRIX_BASE+SAM_MATRIX_SCFG3_OFFSET)
 #define SAM_MATRIX_SCFG4                 (SAM_MATRIX_BASE+SAM_MATRIX_SCFG4_OFFSET)
-#define SAM_MATRIX_SCFG5                 (SAM_MATRIX_BASE+SAM_MATRIX_SCFG5_OFFSET)
-#define SAM_MATRIX_SCFG6                 (SAM_MATRIX_BASE+SAM_MATRIX_SCFG6_OFFSET)
-#define SAM_MATRIX_SCFG7                 (SAM_MATRIX_BASE+SAM_MATRIX_SCFG7_OFFSET)
-#define SAM_MATRIX_SCFG8                 (SAM_MATRIX_BASE+SAM_MATRIX_SCFG8_OFFSET)
-#define SAM_MATRIX_SCFG9                 (SAM_MATRIX_BASE+SAM_MATRIX_SCFG9_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define SAM_MATRIX_SCFG5               (SAM_MATRIX_BASE+SAM_MATRIX_SCFG5_OFFSET)
+#  define SAM_MATRIX_SCFG6               (SAM_MATRIX_BASE+SAM_MATRIX_SCFG6_OFFSET)
+#  define SAM_MATRIX_SCFG7               (SAM_MATRIX_BASE+SAM_MATRIX_SCFG7_OFFSET)
+#  define SAM_MATRIX_SCFG8               (SAM_MATRIX_BASE+SAM_MATRIX_SCFG8_OFFSET)
+#  define SAM_MATRIX_SCFG9               (SAM_MATRIX_BASE+SAM_MATRIX_SCFG9_OFFSET)
+#endif
 
 #define SAM_MATRIX_PRAS(n)               (SAM_MATRIX_BASE+SAM_MATRIX_PRAS_OFFSET(n))
 #define SAM_MATRIX_PRAS0                 (SAM_MATRIX_BASE+SAM_MATRIX_PRAS0_OFFSET)
@@ -124,17 +141,26 @@
 #define SAM_MATRIX_PRAS2                 (SAM_MATRIX_BASE+SAM_MATRIX_PRAS2_OFFSET)
 #define SAM_MATRIX_PRAS3                 (SAM_MATRIX_BASE+SAM_MATRIX_PRAS3_OFFSET)
 #define SAM_MATRIX_PRAS4                 (SAM_MATRIX_BASE+SAM_MATRIX_PRAS4_OFFSET)
-#define SAM_MATRIX_PRAS5                 (SAM_MATRIX_BASE+SAM_MATRIX_PRAS5_OFFSET)
-#define SAM_MATRIX_PRAS6                 (SAM_MATRIX_BASE+SAM_MATRIX_PRAS6_OFFSET)
-#define SAM_MATRIX_PRAS7                 (SAM_MATRIX_BASE+SAM_MATRIX_PRAS7_OFFSET)
-#define SAM_MATRIX_PRAS8                 (SAM_MATRIX_BASE+SAM_MATRIX_PRAS8_OFFSET)
-#define SAM_MATRIX_PRAS9                 (SAM_MATRIX_BASE+SAM_MATRIX_PRAS9_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define SAM_MATRIX_PRAS5               (SAM_MATRIX_BASE+SAM_MATRIX_PRAS5_OFFSET)
+#  define SAM_MATRIX_PRAS6               (SAM_MATRIX_BASE+SAM_MATRIX_PRAS6_OFFSET)
+#  define SAM_MATRIX_PRAS7               (SAM_MATRIX_BASE+SAM_MATRIX_PRAS7_OFFSET)
+#  define SAM_MATRIX_PRAS8               (SAM_MATRIX_BASE+SAM_MATRIX_PRAS8_OFFSET)
+#  define SAM_MATRIX_PRAS9               (SAM_MATRIX_BASE+SAM_MATRIX_PRAS9_OFFSET)
+#endif
 
-#define SAM_MATRIX_MRCR                  (SAM_MATRIX_BASE+SAM_MATRIX_MRCR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define SAM_MATRIX_MRCR                (SAM_MATRIX_BASE+SAM_MATRIX_MRCR_OFFSET)
+#elif defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_MATRIX_CCFG_SYSIO          (SAM_MATRIX_BASE+SAM_MATRIX_CCFG_SYSIO_OFFSET)
+#  define SAM_MATRIX_CCFG_SMCNFCS        (SAM_MATRIX_BASE+SAM_MATRIX_CCFG_SMCNFCS_OFFSET)
+#endif
+
 #define SAM_MATRIX_WPMR                  (SAM_MATRIX_BASE+SAM_MATRIX_WPMR_OFFSET)
 #define SAM_MATRIX_WPSR                  (SAM_MATRIX_BASE+SAM_MATRIX_WPSR_OFFSET)
 
 /* MATRIX register bit definitions ******************************************************/
+/* Master Configuration Registers */
 
 #define MATRIX_MCFG_ULBT_SHIFT           (0)       /* Bits 0-2:  Undefined Length Burst Type */
 #define MATRIX_MCFG_ULBT_MASK            (7 << MATRIX_MCFG_ULBT_SHIFT)
@@ -143,6 +169,8 @@
 #  define MATRIX_MCFG_ULBT_4BEAT         (2 << MATRIX_MCFG_ULBT_SHIFT) /* Four Beat Burst */
 #  define MATRIX_MCFG_ULBT_8BEAT         (3 << MATRIX_MCFG_ULBT_SHIFT) /* Eight Beat Burst */
 #  define MATRIX_MCFG_ULBT_16BEAT        (4 << MATRIX_MCFG_ULBT_SHIFT) /* Sixteen Beat Burst */
+
+/* Bus Matrix Slave Configuration Registers */
 
 #define MATRIX_SCFG_SLOTCYCLE_SHIFT      (0)       /* Bits 0-7:  Maximum Number of Allowed Cycles for a Burst */
 #define MATRIX_SCFG_SLOTCYCLE_MASK       (0xff << MATRIX_SCFG_SLOTCYCLE_SHIFT)
@@ -165,11 +193,12 @@
 #  define MATRIX_SCFG8_FIXEDDEFMSTR_HDMA (4 << MATRIX_SCFG_FIXEDDEFMSTR_SHIFT)
 #  define MATRIX_SCFG9_FIXEDDEFMSTR_ARMS (1 << MATRIX_SCFG_FIXEDDEFMSTR_SHIFT)
 #  define MATRIX_SCFG9_FIXEDDEFMSTR_HDMA (4 << MATRIX_SCFG_FIXEDDEFMSTR_SHIFT)
-
 #define MATRIX_SCFG_ARBT_SHIFT           (24)      /* Bits 24-25:   Arbitration Type */
 #define MATRIX_SCFG_ARBT_MASK            (3 << MATRIX_SCFG_ARBT_SHIFT)
 #  define MATRIX_SCFG_ARBT_RR            (0 << MATRIX_SCFG_ARBT_SHIFT) /* Round-Robin Arbitration */
 #  define MATRIX_SCFG_ARBT_FIXED         (1 << MATRIX_SCFG_ARBT_SHIFT) /* Fixed Priority Arbitration */
+
+/* Bus Matrix Priority Registers For Slaves */
 
 #define MATRIX_PRAS_MPR_SHIFT(x)         ((n)<<2)
 #define MATRIX_PRAS_MPR_MASK(x)          (3 << MATRIX_PRAS_MPR_SHIFT(x))
@@ -184,16 +213,46 @@
 #define MATRIX_PRAS_M4PR_SHIFT           (16)      /* Bits 16-17  Master 4 Priority */
 #define MATRIX_PRAS_M4PR_MASK            (3 << MATRIX_PRAS_M4PR_SHIFT)
 
-#define MATRIX_MRCR_RCB(x)               (1 << (x))
-#define MATRIX_MRCR_RCB0                 (1 << 0)  /* Bit 0:  Remap Command Bit for AHB Master 0 */
-#define MATRIX_MRCR_RCB1                 (1 << 1)  /* Bit 1:  Remap Command Bit for AHB Master 1 */
-#define MATRIX_MRCR_RCB2                 (1 << 2)  /* Bit 2:  Remap Command Bit for AHB Master 2 */
-#define MATRIX_MRCR_RCB3                 (1 << 3)  /* Bit 3:  Remap Command Bit for AHB Master 3 */
-#define MATRIX_MRCR_RCB4                 (1 << 4)  /* Bit 4:  Remap Command Bit for AHB Master 4 */
+/* System I/O Configuration Register */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define MATRIX_CCFG_SYSIO_SYSIO4       (1 << 4)  /* Bit 4:  PB4 or TDI Assignment */
+#  define MATRIX_CCFG_SYSIO_SYSIO5       (1 << 5)  /* Bit 5:  PB5 or TDO/TRACESWO Assignment */
+#  define MATRIX_CCFG_SYSIO_SYSIO6       (1 << 6)  /* Bit 6:  PB6 or TMS/SWDIO Assignment */
+#  define MATRIX_CCFG_SYSIO_SYSIO7       (1 << 7)  /* Bit 7:  PB7 or TCK/SWCLK Assignment */
+#  define MATRIX_CCFG_SYSIO_SYSIO10      (1 << 10) /* Bit 10: PB10 or DDM Assignment */
+#  define MATRIX_CCFG_SYSIO_SYSIO11      (1 << 11) /* Bit 11: PB11 or DDP Assignment */
+#  define MATRIX_CCFG_SYSIO_SYSIO12      (1 << 12) /* Bit 12: PB12 or ERASE Assignment */
+#endif
+
+/* SMC Chip Select NAND Flash Assignment Register */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define MATRIX_CCFG_SMCNFCS_SMC_NFCS0  (1 << 0)  /* Bit 0:  SMC NAND Flash Chip Select 0 Assignment */
+#  define MATRIX_CCFG_SMCNFCS_SMC_NFCS1  (1 << 1)  /* Bit 1:  SMC NAND Flash Chip Select 2 Assignment */
+#  define MATRIX_CCFG_SMCNFCS_SMC_NFCS2  (1 << 2)  /* Bit 2:  SMC NAND Flash Chip Select 2 Assignment */
+#  define MATRIX_CCFG_SMCNFCS_SMC_NFCS3  (1 << 3)  /* Bit 3:  SMC NAND Flash Chip Select 3 Assignment */
+#endif
+
+/* Master Remap Control Register */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define MATRIX_MRCR_RCB(x)             (1 << (x))
+#  define MATRIX_MRCR_RCB0               (1 << 0)  /* Bit 0:  Remap Command Bit for AHB Master 0 */
+#  define MATRIX_MRCR_RCB1               (1 << 1)  /* Bit 1:  Remap Command Bit for AHB Master 1 */
+#  define MATRIX_MRCR_RCB2               (1 << 2)  /* Bit 2:  Remap Command Bit for AHB Master 2 */
+#  define MATRIX_MRCR_RCB3               (1 << 3)  /* Bit 3:  Remap Command Bit for AHB Master 3 */
+#  define MATRIX_MRCR_RCB4               (1 << 4)  /* Bit 4:  Remap Command Bit for AHB Master 4 */
+#endif
+
+/* Write Protect Mode Register */
 
 #define MATRIX_WPMR_WPEN                 (1 << 0)  /* Bit 0:  Write Protect Enable */
 #define MATRIX_WPMR_WPKEY_SHIFT          (8)       /* Bits 8-31:   Write Protect KEY (Write-only) */
 #define MATRIX_WPMR_WPKEY_MASK           (0x00ffffff << MATRIX_WPMR_WPKEY_SHIFT)
+#  define MATRIX_WPMR_WPKEY              (0x004d4154 << MATRIX_WPMR_WPKEY_SHIFT)
+
+/* Write Protect Status Register */
 
 #define MATRIX_WPSR_WPVS                 (1 << 0)  /* Bit 0:  Enable Write Protect */
 #define MATRIX_WPSR_WPVSRC_SHIFT         (8)       /* Bits 8-23:  Write Protect Violation Source */
@@ -211,4 +270,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_MATRIX_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_MATRIX_H */

@@ -1,5 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam3u_eefc.h
+ * Enhanced Embedded Flash Controller (EEFC) defintions for the SAM3U and SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -74,20 +75,38 @@
 #define SAM_EEFC1_FRR                (SAM_EEFC1_BASE+SAM_EEFC_FRR_OFFSET)
 
 /* EEFC register bit definitions ********************************************************/
+/* EEFC Flash Mode Register */
 
 #define EEFC_FMR_FRDY                (1 << 0)  /* Bit 0:  Ready Interrupt Enable */
 #define EEFC_FMR_FWS_SHIFT           (8)       /* Bits 8-11:  Flash Wait State */
 #define EEFC_FMR_FWS_MASK            (15 << EEFC_FMR_FWS_SHIFT)
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define EEFC_FMR_SCOD              (1 << 16) /* Bit 16: Sequential Code Optimization Disable */
+#endif
+
 #define EEFC_FMR_FAM                 (1 << 24) /* Bit 24: Flash Access Mode */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define EEFC_FMR_CLOE              (1 << 26) /* Bit 26: Code Loops Optimization Enable */
+#endif
+
+/* EEFC Flash Command Register */
 
 #define EEFC_FCR_FCMD_SHIFT          (0)       /* Bits 0-7:  Flash Command */
 #define EEFC_FCR_FCMD_MASK           (0xff << EEFC_FCR_FCMD_SHIFT)
+
 #  define EEFC_FCR_FCMD_GETD         (0  << EEFC_FCR_FCMD_SHIFT) /* Get Flash Descriptor */
 #  define EEFC_FCR_FCMD_WP           (1  << EEFC_FCR_FCMD_SHIFT) /* Write page */
 #  define EEFC_FCR_FCMD_WPL          (2  << EEFC_FCR_FCMD_SHIFT) /* Write page and lock */
 #  define EEFC_FCR_FCMD_EWP          (3  << EEFC_FCR_FCMD_SHIFT) /* Erase page and write page */
 #  define EEFC_FCR_FCMD_EWPL         (4  << EEFC_FCR_FCMD_SHIFT) /* Erase page and write page then lock */
 #  define EEFC_FCR_FCMD_EA           (5  << EEFC_FCR_FCMD_SHIFT) /* Erase all */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define EEFC_FCR_FCMD_EPA          (7  << EEFC_FCR_FCMD_SHIFT) /* Erase Pages */
+#endif
+
 #  define EEFC_FCR_FCMD_SLB          (8  << EEFC_FCR_FCMD_SHIFT) /* Set Lock Bit */
 #  define EEFC_FCR_FCMD_CLB          (9  << EEFC_FCR_FCMD_SHIFT) /* Clear Lock Bit */
 #  define EEFC_FCR_FCMD_GLB          (10 << EEFC_FCR_FCMD_SHIFT) /* Get Lock Bit */
@@ -96,14 +115,31 @@
 #  define EEFC_FCR_FCMD_GGPB         (13 << EEFC_FCR_FCMD_SHIFT) /* Get GPNVM Bit */
 #  define EEFC_FCR_FCMD_STUI         (14 << EEFC_FCR_FCMD_SHIFT) /* Start Read Unique Identifier */
 #  define EEFC_FCR_FCMD_SPUI         (15 << EEFC_FCR_FCMD_SHIFT) /* Stop Read Unique Identifier */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define EEFC_FCR_FCMD_GCALB        (16 << EEFC_FCR_FCMD_SHIFT) /* Get CALIB Bit */
+#  define EEFC_FCR_FCMD_ES           (17 << EEFC_FCR_FCMD_SHIFT) /* Erase Sector */
+#  define EEFC_FCR_FCMD_WUS          (18 << EEFC_FCR_FCMD_SHIFT) /* Write User Signature */
+#  define EEFC_FCR_FCMD_EUS          (19 << EEFC_FCR_FCMD_SHIFT) /* Erase User Signature */
+#  define EEFC_FCR_FCMD_STUS         (20 << EEFC_FCR_FCMD_SHIFT) /* Start Read User Signature */
+#  define EEFC_FCR_FCMD_SPUS         (21 << EEFC_FCR_FCMD_SHIFT) /* Stop Read User Signature */
+#endif
+
 #define EEFC_FCR_FARG_SHIFT          (8)       /* Bits 8-23:  Flash Command Argument */
 #define EEFC_FCR_FARG_MASK           (0xffff << EEFC_FCR_FARG_SHIFT)
 #define EEFC_FCR_FKEY_SHIFT          (24)      /* Bits 24-31:  Flash Writing Protection Key */
-#define EEFC_FCR_FKEY__MASK          (0xff << EEFC_FCR_FKEY_SHIFT)
+#define EEFC_FCR_FKEY_MASK           (0xff << EEFC_FCR_FKEY_SHIFT)
+#  define EEFC_FCR_FKEY_PASSWD       (0x5a << EEFC_FCR_FKEY_SHIFT)
+
+/* EEFC Flash Status Register */
 
 #define EEFC_FSR_FRDY                (1 << 0)  /* Bit 0:  Flash Ready Status */
 #define EEFC_FSR_FCMDE               (1 << 1)  /* Bit 1:  Flash Command Error Status */
 #define EEFC_FSR_FLOCKE              (1 << 2)  /* Bit 2:  Flash Lock Error Status */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define EEFC_FSR_FLERR             (1 << 3)  /* Bit 3:  Flash Error Status */
+#endif
 
 /****************************************************************************************
  * Public Types

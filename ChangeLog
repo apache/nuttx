@@ -4938,3 +4938,7 @@
 	  to the SAM4L Xplained Pro board configuration (2013-6-9).
 	* arm/src/sam34/chip/sam_irq.c:  Extend IRQ support to handle the
 	  larger number of NVIC interrupts used by the SAM4L (2013-6-9).
+	* arch/srcm/sam45/chip:  Beginning updates of SAM3U header files
+	  to include support for the SAM4S: WDT, SUPC, EEFC, MATRIX, and PMC
+	  (2013-6-10).
+
