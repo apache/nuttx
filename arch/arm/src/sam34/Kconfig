@@ -212,11 +212,17 @@ config SAM34_TWIM3
 	default n
 	depends on ARCH_CHIP_SAM4L
 
-config SAM34_UART
-	bool "UART"
+config SAM34_UART0
+	bool "UART0"
 	default y
-	depends on ARCH_CHIP_SAM3U
-	select ARCH_HAVE_UART
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM4S
+	select ARCH_HAVE_UART0
+
+config SAM43_UART1
+	bool "UART1"
+	default y
+	depends on ARCH_CHIP_SAM4S
+	select ARCH_HAVE_UART1
 
 config SAM34_PICOUART
 	bool "PicoUART"

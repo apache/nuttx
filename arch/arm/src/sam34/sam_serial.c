@@ -93,7 +93,7 @@
 
 /* Is there a USART/USART enabled? */
 
-#if !defined(CONFIG_SAM34_UART)   && !defined(CONFIG_SAM34_USART0) && \
+#if !defined(CONFIG_SAM34_UART0)  && !defined(CONFIG_SAM34_USART0) && \
     !defined(CONFIG_SAM34_USART1) && !defined(CONFIG_SAM34_USART2) && \
     !defined(CONFIG_SAM34_USART3)
 #  error "No USARTs enabled"
@@ -106,39 +106,39 @@
 
 /* Is there a serial console? */
 
-#if defined(CONFIG_UART_SERIAL_CONSOLE) && defined(CONFIG_SAM34_UART)
+#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_SAM34_UART0)
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE) && defined(CONFIG_SAM34_USART0)
-#  undef CONFIG_UART_SERIAL_CONSOLE
+#  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_SAM34_USART1)
-#  undef CONFIG_UART_SERIAL_CONSOLE
+#  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_SAM34_USART2)
-#  undef CONFIG_UART_SERIAL_CONSOLE
+#  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_SAM34_USART3)
-#  undef CONFIG_UART_SERIAL_CONSOLE
+#  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #else
 #  warning "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
-#  undef CONFIG_UART_SERIAL_CONSOLE
+#  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
@@ -154,7 +154,7 @@
 
 /* Which UART/USART with be tty0/console and which tty1? tty2? tty3? tty4? */
 
-#if defined(CONFIG_UART_SERIAL_CONSOLE)
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_uartport      /* UART=console */
 #  define TTYS0_DEV       g_uartport      /* UART=ttyS0 */
 #  ifdef CONFIG_SAM34_USART0
@@ -236,7 +236,7 @@
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart0port    /* USART0=console */
 #  define TTYS0_DEV       g_usart0port    /* USART0=ttyS0 */
-#  ifdef CONFIG_SAM34_UART
+#  ifdef CONFIG_SAM34_UART0
 #    define TTYS1_DEV     g_uartport      /* USART0=ttyS0;UART=ttyS1 */
 #    ifdef CONFIG_SAM34_USART1
 #      define TTYS2_DEV   g_usart1port    /* USART0=ttyS0;UART=ttyS1;USART1=ttyS2 */
@@ -315,7 +315,7 @@
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart1port    /* USART1=console */
 #  define TTYS0_DEV       g_usart1port    /* USART1=ttyS0 */
-#  ifdef CONFIG_SAM34_UART
+#  ifdef CONFIG_SAM34_UART0
 #    define TTYS1_DEV     g_uartport      /* USART1=ttyS0;UART=ttyS1 */
 #    ifdef CONFIG_SAM34_USART0
 #      define TTYS2_DEV   g_usart0port    /* USART1=ttyS0;UART=ttyS1;USART0=ttyS2 */
@@ -394,7 +394,7 @@
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart2port    /* USART2=console */
 #  define TTYS0_DEV       g_usart2port    /* USART2=ttyS0 */
-#  ifdef CONFIG_SAM34_UART
+#  ifdef CONFIG_SAM34_UART0
 #    define TTYS1_DEV     g_uartport      /* USART2=ttyS0;UART=ttyS1 */
 #    ifdef CONFIG_SAM34_USART0
 #      define TTYS2_DEV   g_usart0port    /* USART2=ttyS0;UART=ttyS1;USART0=ttyS2 */
@@ -473,7 +473,7 @@
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE)
 #  define CONSOLE_DEV     g_usart3port    /* USART3=console */
 #  define TTYS0_DEV       g_usart3port    /* USART3=ttyS0 */
-#  ifdef CONFIG_SAM34_UART
+#  ifdef CONFIG_SAM34_UART0
 #    define TTYS1_DEV     g_uartport      /* USART3=ttyS0;UART=ttyS1 */
 #    ifdef CONFIG_SAM34_USART0
 #      define TTYS2_DEV   g_usart0port    /* USART3=ttyS0;UART=ttyS1;USART0=ttyS2 */
@@ -624,9 +624,9 @@ static const struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
-#ifdef CONFIG_SAM34_UART
-static char g_uartrxbuffer[CONFIG_UART_RXBUFSIZE];
-static char g_uarttxbuffer[CONFIG_UART_TXBUFSIZE];
+#ifdef CONFIG_SAM34_UART0
+static char g_uartrxbuffer[CONFIG_UART0_RXBUFSIZE];
+static char g_uarttxbuffer[CONFIG_UART0_TXBUFSIZE];
 #endif
 #ifdef CONFIG_SAM34_USART0
 static char g_usart0rxbuffer[CONFIG_USART0_RXBUFSIZE];
@@ -647,27 +647,27 @@ static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 
 /* This describes the state of the UART port. */
 
-#ifdef CONFIG_SAM34_UART
+#ifdef CONFIG_SAM34_UART0
 static struct up_dev_s g_uartpriv =
 {
-  .usartbase      = SAM_UART_BASE,
-  .baud           = CONFIG_UART_BAUD,
+  .usartbase      = SAM_UART0_BASE,
+  .baud           = CONFIG_UART0_BAUD,
   .irq            = SAM_IRQ_UART,
-  .parity         = CONFIG_UART_PARITY,
-  .bits           = CONFIG_UART_BITS,
-  .stopbits2      = CONFIG_UART_2STOP,
+  .parity         = CONFIG_UART0_PARITY,
+  .bits           = CONFIG_UART0_BITS,
+  .stopbits2      = CONFIG_UART0_2STOP,
 };
 
 static uart_dev_t g_uartport =
 {
   .recv     =
   {
-    .size   = CONFIG_UART_RXBUFSIZE,
+    .size   = CONFIG_UART0_RXBUFSIZE,
     .buffer = g_uartrxbuffer,
   },
   .xmit     =
   {
-    .size   = CONFIG_UART_TXBUFSIZE,
+    .size   = CONFIG_UART0_TXBUFSIZE,
     .buffer = g_uarttxbuffer,
   },
   .ops      = &g_uart_ops,
@@ -913,7 +913,7 @@ static int up_setup(struct uart_dev_s *dev)
       regval |= UART_MR_CHRL_7BITS; /* 7 bits */
     }
 #ifdef HAVE_USART
-#ifdef CONFIG_SAM34_UART
+#ifdef CONFIG_SAM34_UART0
   /* UART does not support 9bit mode */
 
   else if (priv->bits == 9 && priv->usartbase != SAM_UART_BASE)
@@ -1067,7 +1067,7 @@ static int up_interrupt(int irq, void *context)
   int                passes;
   bool               handled;
 
-#ifdef CONFIG_SAM34_UART
+#ifdef CONFIG_SAM34_UART0
   if (g_uartpriv.irq == irq)
     {
       dev = &g_uartport;
