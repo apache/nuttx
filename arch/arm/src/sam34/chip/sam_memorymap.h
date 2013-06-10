@@ -47,6 +47,8 @@
 #  include "chip/sam3u_memorymap.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_memorymap.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4S)
+#  include "chip/sam4s_memorymap.h"
 #else
 #  error Unrecognized SAM architecture
 #endif

@@ -1,5 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/sam34/chip/sam3u_uart.h
+ * Universal Asynchronous Receiver Transmitter (UART) and Universal Synchronous Asynchronous
+ * Receiver Transmitter (USART) definitions for the SAM3U and SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,14 +58,14 @@
 #define SAM_UART_IER_OFFSET          0x0008 /* Interrupt Enable Register (Common) */
 #define SAM_UART_IDR_OFFSET          0x000c /* Interrupt Disable Register (Common) */
 #define SAM_UART_IMR_OFFSET          0x0010 /* Interrupt Mask Register (Common) */
-#define SAM_UART_SR_OFFSET           0x0014 /* Status Register (Common) */
+#define SAM_UART_SR_OFFSET           0x0014 /* [Channel] Status Register (Common) */
 #define SAM_UART_RHR_OFFSET          0x0018 /* Receive Holding Register (Common) */
 #define SAM_UART_THR_OFFSET          0x001c /* Transmit Holding Register (Common) */
 #define SAM_UART_BRGR_OFFSET         0x0020 /* Baud Rate Generator Register (Common) */
                                             /* 0x0024-0x003c: Reserved (UART) */
 #define SAM_UART_RTOR_OFFSET         0x0024 /* Receiver Time-out Register (USART only) */
 #define SAM_UART_TTGR_OFFSET         0x0028 /* Transmitter Timeguard Register (USART only) */
-                                            /* 0x002c-0x003c: Reserved (UART) */
+                                            /* 0x002c-0x003c: Reserved (USART) */
 #define SAM_UART_FIDI_OFFSET         0x0040 /* FI DI Ratio Register (USART only) */
 #define SAM_UART_NER_OFFSET          0x0044 /* Number of Errors Register ((USART only) */
                                             /* 0x0048: Reserved (USART) */
@@ -71,21 +73,31 @@
 #define SAM_UART_MAN_OFFSET          0x0050 /* Manchester Encoder Decoder Register (USART only) */
 #define SAM_UART_WPMR_OFFSET         0x00e4 /* Write Protect Mode Register (USART only) */
 #define SAM_UART_WPSR_OFFSET         0x00e8 /* Write Protect Status Register (USART only) */
-                                            /* 0x005c-0xf008: Reserved (USART) */
+                                            /* 0x005c-0xf8: Reserved (USART) */
 #define SAM_UART_VERSION_OFFSET      0x00fc /* Version Register (USART only) */
                                             /* 0x0100-0x0124: PDC Area (Common) */
 
 /* UART register adresses ***********************************************************************/
 
-#define SAM_UART_CR                  (SAM_UART_BASE+SAM_UART_CR_OFFSET)
-#define SAM_UART_MR                  (SAM_UART_BASE+SAM_UART_MR_OFFSET)
-#define SAM_UART_IER                 (SAM_UART_BASE+SAM_UART_IER_OFFSET)
-#define SAM_UART_IDR                 (SAM_UART_BASE+SAM_UART_IDR_OFFSET)
-#define SAM_UART_IMR                 (SAM_UART_BASE+SAM_UART_IMR_OFFSET)
-#define SAM_UART_SR                  (SAM_UART_BASE+SAM_UART_SR_OFFSET)
-#define SAM_UART_RHR                 (SAM_UART_BASE+SAM_UART_RHR_OFFSET)
-#define SAM_UART_THR                 (SAM_UART_BASE+SAM_UART_THR_OFFSET)
-#define SAM_UART_BRGR                (SAM_UART_BASE+SAM_UART_BRGR_OFFSET)
+#define SAM_UART0_CR                 (SAM_UART0_BASE+SAM_UART_CR_OFFSET)
+#define SAM_UART0_MR                 (SAM_UART0_BASE+SAM_UART_MR_OFFSET)
+#define SAM_UART0_IER                (SAM_UART0_BASE+SAM_UART_IER_OFFSET)
+#define SAM_UART0_IDR                (SAM_UART0_BASE+SAM_UART_IDR_OFFSET)
+#define SAM_UART0_IMR                (SAM_UART0_BASE+SAM_UART_IMR_OFFSET)
+#define SAM_UART0_SR                 (SAM_UART0_BASE+SAM_UART_SR_OFFSET)
+#define SAM_UART0_RHR                (SAM_UART0_BASE+SAM_UART_RHR_OFFSET)
+#define SAM_UART0_THR                (SAM_UART0_BASE+SAM_UART_THR_OFFSET)
+#define SAM_UART0_BRGR               (SAM_UART0_BASE+SAM_UART_BRGR_OFFSET)
+
+#define SAM_UART1_CR                 (SAM_UART1_BASE+SAM_UART_CR_OFFSET)
+#define SAM_UART1_MR                 (SAM_UART1_BASE+SAM_UART_MR_OFFSET)
+#define SAM_UART1_IER                (SAM_UART1_BASE+SAM_UART_IER_OFFSET)
+#define SAM_UART1_IDR                (SAM_UART1_BASE+SAM_UART_IDR_OFFSET)
+#define SAM_UART1_IMR                (SAM_UART1_BASE+SAM_UART_IMR_OFFSET)
+#define SAM_UART1_SR                 (SAM_UART1_BASE+SAM_UART_SR_OFFSET)
+#define SAM_UART1_RHR                (SAM_UART1_BASE+SAM_UART_RHR_OFFSET)
+#define SAM_UART1_THR                (SAM_UART1_BASE+SAM_UART_THR_OFFSET)
+#define SAM_UART1_BRGR               (SAM_UART1_BASE+SAM_UART_BRGR_OFFSET)
 
 #define SAM_USART_CR(n)              (SAM_USARTN_BASE(n)+SAM_UART_CR_OFFSET)
 #define SAM_USART_MR(n)              (SAM_USARTN_BASE(n)+SAM_UART_MR_OFFSET)
@@ -201,11 +213,11 @@
 #define UART_CR_RSTNACK              (1 << 14) /* Bit 14: Reset Non Acknowledge (USART only) */
 #define UART_CR_RETTO                (1 << 15) /* Bit 15: Rearm Time-out (USART only) */
 #define UART_CR_RTSEN                (1 << 18) /* Bit 18: Request to Send Enable (USART only) */
-#define UART_CR_FCS                  (1 << 18) /* Bit 18: Force SPI Chip Select (USART only) */
+#define UART_CR_FCS                  (1 << 18) /* Bit 18: Force SPI Chip Select (USART SPI mode only) */
 #define UART_CR_RTSDIS               (1 << 19) /* Bit 19: Request to Send Disable (USART only) */
-#define UART_CR_RCS                  (1 << 19) /* Bit 19: Release SPI Chip Select (USART only) */
+#define UART_CR_RCS                  (1 << 19) /* Bit 19: Release SPI Chip Select (USART SPI mode only) */
 
-/* UART Mode Register */
+/* UART Mode Register and USART Mode Register (UART MODE) */
 
 #define UART_MR_MODE_SHIFT           (0)       /* Bits 0-3: (USART only) */
 #define UART_MR_MODE_MASK            (15 << UART_MR_MODE_SHIFT)
@@ -215,8 +227,8 @@
 #  define UART_MR_MODE_ISO7816_0     (4  << UART_MR_MODE_SHIFT) /* IS07816 Protocol: T = 0 */
 #  define UART_MR_MODE_ISO7816_1     (6  << UART_MR_MODE_SHIFT) /* IS07816 Protocol: T = 1 */
 #  define UART_MR_MODE_IRDA          (8  << UART_MR_MODE_SHIFT) /* IrDA */
-#  define UART_MR_MODE_SPIMSTR       (14 << UART_MR_MODE_SHIFT) /* SPI Master */
-#  define UART_MR_MODE_SPISLV        (15 << UART_MR_MODE_SHIFT) /* SPI Slave */
+#  define UART_MR_MODE_SPIMSTR       (14 << UART_MR_MODE_SHIFT) /* SPI Master (SPI mode only) */
+#  define UART_MR_MODE_SPISLV        (15 << UART_MR_MODE_SHIFT) /* SPI Slave (SPI mode only) */
 #define UART_MR_USCLKS_SHIFT         (4)       /* Bits 4-5: Clock Selection (USART only) */
 #define UART_MR_USCLKS_MASK          (3 << UART_MR_USCLKS_SHIFT)
 #  define UART_MR_USCLKS_MCK         (0 << UART_MR_USCLKS_SHIFT) /* MCK */
@@ -229,7 +241,7 @@
 #  define UART_MR_CHRL_7BITS         (2 << UART_MR_CHRL_SHIFT) /* 7 bits */
 #  define UART_MR_CHRL_8BITS         (3 << UART_MR_CHRL_SHIFT) /* 8 bits */
 #define UART_MR_SYNC                 (1 << 8)  /* Bit 8: Synchronous Mode Select (USART only) */
-#define UART_MR_CPHA                 (1 << 8)  /* Bit 8: SPI Clock Phase (USART only) */
+#define UART_MR_CPHA                 (1 << 8)  /* Bit 8: SPI Clock Phase (USART SPI mode only) */
 #define UART_MR_PAR_SHIFT            (9)       /* Bits 9-11: Parity Type (Common) */
 #define UART_MR_PAR_MASK             (7 << UART_MR_PAR_SHIFT)
 #  define UART_MR_PAR_EVEN           (0 << UART_MR_PAR_SHIFT) /* Even parity (Common) */
@@ -250,11 +262,16 @@
 #  define UART_MR_CHMODE_LLPBK       (2 << UART_MR_CHMODE_SHIFT) /* Local Loopback */
 #  define UART_MR_CHMODE_RLPBK       (3 << UART_MR_CHMODE_SHIFT) /* Remote Loopback */
 #define UART_MR_MSBF                 (1 << 16) /* Bit 16: Most Significant Bit first (USART only) */
-#define UART_MR_CPOL                 (1 << 16) /* Bit 16: SPI Clock Polarity (USART only) */
+#define UART_MR_CPOL                 (1 << 16) /* Bit 16: SPI Clock Polarity (USART SPI mode only) */
 #define UART_MR_MODE9                (1 << 17) /* Bit 17: 9-bit Character Length (USART only) */
 #define UART_MR_CLKO                 (1 << 18) /* Bit 18: Clock Output Select (USART only) */
 #define UART_MR_OVER                 (1 << 19) /* Bit 19: Oversampling Mode (USART only) */
 #define UART_MR_INACK                (1 << 20) /* Bit 20: Inhibit Non Acknowledge (USART only) */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define UART_MR_WRDBT              (1 << 20) /* Bit 20: Wait Read Data Before Transfer (SPI mode only) */
+#endif
+
 #define UART_MR_DSNACK               (1 << 21) /* Bit 21: Disable Successive NACK (USART only) */
 #define UART_MR_VARSYNC              (1 << 22) /* Bit 22: Variable Synchronization of Command/Data Sync Start Frame Delimiter (USART only) */
 #define UART_MR_INVDATA              (1 << 23) /* Bit 23: INverted Data (USART only) */
@@ -280,11 +297,26 @@
 #define UART_INT_TIMEOUT             (1 << 8)  /* Bit 8:  Time-out Interrupt (USART only) */
 #define UART_INT_TXEMPTY             (1 << 9)  /* Bit 9:  TXEMPTY Interrupt (Common) */
 #define UART_INT_ITER                (1 << 10) /* Bit 10: Iteration Interrupt (USART only) */
-#define UART_INT_UNRE                (1 << 10) /* Bit 10: SPI Underrun Error Interrupt (USART only) */
+#define UART_INT_UNRE                (1 << 10) /* Bit 10: SPI Underrun Error Interrupt (USART SPI mode only) */
 #define UART_INT_TXBUFE              (1 << 11) /* Bit 11: Buffer Empty Interrupt (Common) */
 #define UART_INT_RXBUFF              (1 << 12) /* Bit 12: Buffer Full Interrupt (Common) */
 #define UART_INT_NACK                (1 << 13) /* Bit 13: Non Acknowledge Interrupt (USART only) */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define UART_INT_RIIC              (1 << 16) /* Bit 16: Ring Indicator Input Change Enable */
+#  define UART_INT_DSRIC             (1 << 17) /* Bit 17: Data Set Ready Input Change Enable */
+#  define UART_INT_DCDIC             (1 << 18) /* Bit 18: Data Carrier Detect Input Change Interrupt Enable */
+#endif
+
 #define UART_INT_CTSIC               (1 << 19) /* Bit 19: Clear to Send Input Change Interrupt (USART only) */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define UART_SR_RI                 (1 << 20) /* Bit 20: Image of RI Input */
+#  define UART_SR_DSR                (1 << 21) /* Bit 21: Image of DSR Input */
+#  define UART_SR_DCD                (1 << 22) /* Bit 22: Image of DCD Input */
+#  define UART_SR_CTS                (1 << 23) /* Bit 23: Image of CTS Input */
+#endif
+
 #define UART_INT_MANE                (1 << 24) /* Bit 24: Manchester Error Interrupt (USART only) */
 
 /* UART Receiver Holding Register */
@@ -359,6 +391,11 @@
 #  define UART_MAN_RXPP_ZEROONE      (2 << UART_MAN_RXPP_SHIFT) /* ZERO_ONE */
 #  define UART_MAN_RXPP_ONEZERO      (3 << UART_MAN_RXPP_SHIFT) /* ONE_ZERO */
 #define UART_MAN_RXMPOL              (1 << 28) /* Bit 28: Receiver Manchester Polarity (USART only) */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define UART_MAN_ONE               (1 << 29) /* Bit 29: Must Be Set to 1 */
+#endif
+
 #define UART_MAN_DRIFT               (1 << 30) /* Bit 30: Drift compensation (USART only) */
 
 /* USART Write Protect Mode Register (USART only) */
@@ -366,6 +403,7 @@
 #define UART_WPMR_WPEN               (1 << 0)  /* Bit 0: Write Protect Enable (USART only) */
 #define UART_WPMR_WPKEY_SHIFT        (8)       /* Bits 8-31: Write Protect KEY (USART only) */
 #define UART_WPMR_WPKEY_MASK         (0x00ffffff << UART_WPMR_WPKEY_SHIFT)
+#  define UART_WPMR_WPKEY            (0x00555341 << UART_WPMR_WPKEY_SHIFT)
 
 /* USART Write Protect Status Register (USART only) */
 

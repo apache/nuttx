@@ -1,5 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_chipid.h
+ * CHIPID Register Definitions for the SAM3U, SAM4S, and SAM4L
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -100,10 +101,11 @@
 #define CHIPID_CIDR_SRAMSIZ_MASK        (15 << CHIPID_CIDR_SRAMSIZ_SHIFT)
 #  define CHIPID_CIDR_SRAMSIZ_48KB      (0  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 48K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_1KB       (1  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 1K bytes */
+#  define CHIPID_CIDR_SRAMSIZ_192KB     (1  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 192K bytes (SAM4S) */
 #  define CHIPID_CIDR_SRAMSIZ_2KB       (2  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 2K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_6KB       (3  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 6K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_112KB     (4  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 112K bytes */
-#  define CHIPID_CIDR_SRAMSIZ_24KB      (4  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 24K bytes */
+#  define CHIPID_CIDR_SRAMSIZ_24KB      (4  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 24K bytes (SAM4S, SAM4L) */
 #  define CHIPID_CIDR_SRAMSIZ_4KB       (5  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 4K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_80KB      (6  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 80K bytes */
 #  define CHIPID_CIDR_SRAMSIZ_160KB     (7  << CHIPID_CIDR_SRAMSIZ_SHIFT) /* 160K bytes */
@@ -142,27 +144,32 @@
 #  define CHIPID_CIDR_ARCH_SAM3XXE      (0x85 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3XxE Series (144-pin version) */
 #  define CHIPID_CIDR_ARCH_SAM3XXG      (0x86 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3XxG Series (208/217-pin version) */
 #  define CHIPID_CIDR_ARCH_SAM3SXA      (0x88 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3SxA Series (48-pin version) */
+#  define CHIPID_CIDR_ARCH_SAM4SXA      (0x88 << CHIPID_CIDR_ARCH_SHIFT) /* SAM4SxA Series (48-pin version) */
 #  define CHIPID_CIDR_ARCH_SAM3SXB      (0x89 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3SxB Series (64-pin version) */
+#  define CHIPID_CIDR_ARCH_SAM4SXB      (0x89 << CHIPID_CIDR_ARCH_SHIFT) /* SAM34xB Series (64-pin version) */
 #  define CHIPID_CIDR_ARCH_SAM3SXC      (0x8a << CHIPID_CIDR_ARCH_SHIFT) /* SAM3SxC Series (100-pin version) */
+#  define CHIPID_CIDR_ARCH_SAM4SXC      (0x8a << CHIPID_CIDR_ARCH_SHIFT) /* SAM4SxC Series (100-pin version) */
 #  define CHIPID_CIDR_ARCH_AT91X92      (0x92 << CHIPID_CIDR_ARCH_SHIFT) /* AT91x92 Series */
 #  define CHIPID_CIDR_ARCH_SAM3NXA      (0x93 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3NxA Series (48-pin version) */
 #  define CHIPID_CIDR_ARCH_SAM3NXB      (0x94 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3NxB Series (64-pin version) */
-#  define CHIPID_CIDR_ARCH_SAM3NxC      (0x95 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3NxC Series (100-pin version) */
-#  define CHIPID_CIDR_ARCH_SAM3NXC      (0x99 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3SDxB SAM3SDxB Series (64-pin version) */
+#  define CHIPID_CIDR_ARCH_SAM3NXC      (0x95 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3NxC Series (100-pin version) */
+#  define CHIPID_CIDR_ARCH_SAM3DXB      (0x99 << CHIPID_CIDR_ARCH_SHIFT) /* SAM3SDxB SAM3SDxB Series (64-pin version) */
 #  define CHIPID_CIDR_ARCH_SAM3SDXC     (0x9a << CHIPID_CIDR_ARCH_SHIFT) /* SAM3SDxC Series (100-pin version) */
 #  define CHIPID_CIDR_ARCH_SAM5A        (0xa5 << CHIPID_CIDR_ARCH_SHIFT) /* SAM5A */
-#  define CHIPID_CIDR_ARCH_SAM4L        (0xb0 << CHIPID_CIDR_ARCH_SHIFT) /* SAM4Lxx Series */
+#  define CHIPID_CIDR_ARCH_SAM4LA       (0xb0 << CHIPID_CIDR_ARCH_SHIFT) /* SAM4LxA Series */
+#  define CHIPID_CIDR_ARCH_SAM4LB       (0xb1 << CHIPID_CIDR_ARCH_SHIFT) /* SAM4LxB Series */
+#  define CHIPID_CIDR_ARCH_SAM4LC       (0xb2 << CHIPID_CIDR_ARCH_SHIFT) /* SAM4LxC Series */
 #  define CHIPID_CIDR_ARCH_AT75CXX      (0xf0 << CHIPID_CIDR_ARCH_SHIFT) /* AT75Cxx Series */
 #define CHIPID_CIDR_NVPTYP_SHIFT        (28)      /* Bits 28-30:  Nonvolatile Program Memory Type */
 #define CHIPID_CIDR_NVPTYP_MASK         (7 << CHIPID_CIDR_NVPTYP_SHIFT)
-#  define CHIPID_CIDR_NVPTYP ROM        (0 << CHIPID_CIDR_NVPTYP_SHIFT) /* ROM */
-#  define CHIPID_CIDR_NVPTYP FLASH      (1 << CHIPID_CIDR_NVPTYP_SHIFT) /* ROMless or on-chip Flash */
-#  define CHIPID_CIDR_NVPTYP SRAM       (4 << CHIPID_CIDR_NVPTYP_SHIFT) /* SRAM emulating ROM */
-#  define CHIPID_CIDR_NVPTYP EFLASH     (2 << CHIPID_CIDR_NVPTYP_SHIFT) /* Embedded Flash Memory */
-#  define CHIPID_CIDR_NVPTYP REFLASH    (3 << CHIPID_CIDR_NVPTYP_SHIFT) /* ROM and Embedded Flash Memory */
+#  define CHIPID_CIDR_NVPTYP_ROM        (0 << CHIPID_CIDR_NVPTYP_SHIFT) /* ROM */
+#  define CHIPID_CIDR_NVPTYP_FLASH      (1 << CHIPID_CIDR_NVPTYP_SHIFT) /* ROMless or on-chip Flash */
+#  define CHIPID_CIDR_NVPTYP_SRAM       (4 << CHIPID_CIDR_NVPTYP_SHIFT) /* SRAM emulating ROM */
+#  define CHIPID_CIDR_NVPTYP_EFLASH     (2 << CHIPID_CIDR_NVPTYP_SHIFT) /* Embedded Flash Memory */
+#  define CHIPID_CIDR_NVPTYP_REFLASH    (3 << CHIPID_CIDR_NVPTYP_SHIFT) /* ROM and Embedded Flash Memory */
 #define CHIPID_CIDR_EXT                 (1 << 31) /* Bit 31: Extension Flag */
 
-/* Chip ID Extension Register */
+/* Chip ID Extension Register (32-bit value for SAM3U and SAM4S) */
 
 #ifdef CONFIG_ARCH_CHIP_SAM4L
 #  define CHIPID_EXID_AES               (1 << 0)  /* Bit 0:  AES Option */

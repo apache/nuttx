@@ -47,6 +47,8 @@
 #  include "chip/sam3u_pinmap.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_pinmap.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4S)
+#  include "chip/sam4s_pinmap.h"
 #else
 #  error Unrecognized SAM architecture
 #endif

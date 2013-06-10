@@ -91,7 +91,7 @@
 #  define SAM_SYSCTRLR_BASE    0x400e0000 /* 0x400e0000-0x400e25ff:   System controller */
                                           /* 0x400e2600-0x400fffff:   Reserved */
                                           /* 0x40100000-0x41ffffff:   Reserved */
-#  define SAM_BBPERIPH__BASE   0x42000000 /* 0x42000000-0x43ffffff:   32Mb bit-band alias */
+#  define SAM_BBPERIPH_BASE    0x42000000 /* 0x42000000-0x43ffffff:   32Mb bit-band alias */
                                           /* 0x44000000-0x5fffffff:   Reserved */
 #define   SAM_EXTSRAM_BASE     0x60000000 /* 0x60000000-0x9fffffff: External SRAM */
 #  define SAM_EXTCS_BASE       0x60000000 /* 0x60000000-0x63ffffff:   Chip selects */
@@ -111,7 +111,7 @@
 #define SAM_SMC_BASE           0x400e0000 /* 0x400e0000-0x400e01ff: Static Memory Controller */
 #define SAM_MATRIX_BASE        0x400e0200 /* 0x400e0200-0x400e03ff: MATRIX */
 #define SAM_PMC_BASE           0x400e0400 /* 0x400e0400-0x400e05ff: Power Management Controller */
-#define SAM_UART_BASE          0x400e0600 /* 0x400e0600-0x400e073f: UART */
+#define SAM_UART0_BASE         0x400e0600 /* 0x400e0600-0x400e073f: UART 0 */
 #define SAM_CHIPID_BASE        0x400e0740 /* 0x400e0740-0x400e07ff: CHIP ID */
 #define SAM_EEFC_BASE          0x400e0800 /* 0x400e0800-0x400e0bff: Enhanced Embedded Flash Controllers*/
 #  define SAM_EEFCN_BASE(n)    (0x400e0800+((n)<<9))

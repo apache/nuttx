@@ -81,6 +81,8 @@
 #  include <arch/sam34/sam3u_irq.h>
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include <arch/sam34/sam4l_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_SAM4S)
+#  include <arch/sam34/sam4s_irq.h>
 #else
 #  error Unrecognized SAM architecture
 #endif

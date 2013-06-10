@@ -70,13 +70,17 @@
 #define SAM_HSMCI_IER_OFFSET          0x0044 /* Interrupt Enable Register */
 #define SAM_HSMCI_IDR_OFFSET          0x0048 /* Interrupt Disable Register */
 #define SAM_HSMCI_IMR_OFFSET          0x004c /* Interrupt Mask Register */
-#define SAM_HSMCI_DMA_OFFSET          0x0050 /* DMA Configuration Register */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define SAM_HSMCI_DMA_OFFSET        0x0050 /* DMA Configuration Register */
+#endif
+
 #define SAM_HSMCI_CFG_OFFSET          0x0054 /* Configuration Register */
                                              /* 0x0058-0x00e0: Reserved */
 #define SAM_HSMCI_WPMR_OFFSET         0x00e4 /* Write Protection Mode Register */
 #define SAM_HSMCI_WPSR_OFFSET         0x00e8 /* Write Protection Status Register */
                                              /* 0x00ec-0x00fc: Reserved */
-                                             /* 0x0100-0x0124: Reserved */
+                                             /* 0x0100-0x0124: Reserved for PCD registers */
 #define SAM_HSMCI_FIFO_OFFSET         0x0200 /* 0x0200-0x3ffc FIFO Memory Aperture */
 
 /* HSMCI register adresses **************************************************************/
@@ -99,7 +103,11 @@
 #define SAM_HSMCI_IER                 (SAM_MCI_BASE+SAM_HSMCI_IER_OFFSET)
 #define SAM_HSMCI_IDR                 (SAM_MCI_BASE+SAM_HSMCI_IDR_OFFSET)
 #define SAM_HSMCI_IMR                 (SAM_MCI_BASE+SAM_HSMCI_IMR_OFFSET)
-#define SAM_HSMCI_DMA                 (SAM_MCI_BASE+SAM_HSMCI_DMA_OFFSET)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define SAM_HSMCI_DMA               (SAM_MCI_BASE+SAM_HSMCI_DMA_OFFSET)
+#endif
+
 #define SAM_HSMCI_CFG                 (SAM_MCI_BASE+SAM_HSMCI_CFG_OFFSET)
 #define SAM_HSMCI_WPMR                (SAM_MCI_BASE+SAM_HSMCI_WPMR_OFFSET)
 #define SAM_HSMCI_WPSR                (SAM_MCI_BASE+SAM_HSMCI_WPSR_OFFSET)
@@ -126,8 +134,15 @@
 #define HSMCI_MR_WRPROOF              (1 << 12) /* Bit 12: Write Proof Enable */
 #define HSMCI_MR_FBYTE                (1 << 13) /* Bit 13: Force Byte Transfer */
 #define HSMCI_MR_PADV                 (1 << 14) /* Bit 14: Padding Value */
-#define HSMCI_MR_BLKLEN_SHIFT         (16)      /* Bits 16-31: Data Block Length */
-#define HSMCI_MR_BLKLEN_MASK          (0xffff << HSMCI_MR_BLKLEN_SHIFT)
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define HSMCI_MR_PDCMODE            (1 << 15) /* Bit 15: PDC-oriented Mode */
+#endif
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define HSMCI_MR_BLKLEN_SHIFT       (16)      /* Bits 16-31: Data Block Length */
+#  define HSMCI_MR_BLKLEN_MASK        (0xffff << HSMCI_MR_BLKLEN_SHIFT)
+#endif
 
 /* HSMCI Data Timeout Register */
 
@@ -156,6 +171,8 @@
 #  define HSMCI_SDCR_SDCBUS_1BIT      (0 << HSMCI_SDCR_SDCBUS_SHIFT)
 #  define HSMCI_SDCR_SDCBUS_4BIT      (2 << HSMCI_SDCR_SDCBUS_SHIFT)
 #  define HSMCI_SDCR_SDCBUS_8BIT      (3 << HSMCI_SDCR_SDCBUS_SHIFT)
+
+/* HSMCI Argument Register (32-bit value) */
 
 /* HSMCI Command Register */
 
@@ -200,7 +217,7 @@
 #  define HSMCI_CMDR_IOSPCMD_SUSP     (1 << HSMCI_CMDR_IOSPCMD_SHIFT) /* SDIO Suspend Command */
 #  define HSMCI_CMDR_IOSPCMD_RESUME   (2 << HSMCI_CMDR_IOSPCMD_SHIFT) /* SDIO Resume Command */
 #define HSMCI_CMDR_ATACS              (1 << 26) /* Bit 26: ATA with Command Completion Signal */
-#define HSMCI_CMDR_BOOTACK            (1 << 17) /* Bit 27: Boot Operation Acknowledge */
+#define HSMCI_CMDR_BOOTACK            (1 << 27) /* Bit 27: Boot Operation Acknowledge */
 
 /* HSMCI Block Register */
 
@@ -224,6 +241,10 @@
 #  define HSMCI_CSTOR_CSTOMUL_65536   (6 << HSMCI_CSTOR_CSTOMUL_SHIFT)
 #  define HSMCI_CSTOR_CSTOMUL_1048576 (7 << HSMCI_CSTOR_CSTOMUL_SHIFT)
 
+/* HSMCI Response Registers (32-bit data) */
+/* HSMCI Receive Data Registers (32-bit data) */
+/* HSMCI Transmit Data Registers (32-bit data) */
+
 /* HSMCI Status Register, HSMCI Interrupt Enable Register, HSMCI Interrupt Disable
  * Register, and HSMCI Interrupt Mask Register common bit-field definitions
  */
@@ -234,9 +255,21 @@
 #define HSMCI_INT_BLKE                (1 << 3)  /* Bit 3:  Data Block Ended */
 #define HSMCI_INT_DTIP                (1 << 4)  /* Bit 4:  Data Transfer in Progress */
 #define HSMCI_INT_NOTBUSY             (1 << 5)  /* Bit 6:  HSMCI Not Busy */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define HSMCI_INT_ENDRX             (1 << 6)  /* Bit 6:  End of RX Buffer */
+#  define HSMCI_INT_ENDTX             (1 << 7)  /* Bit 7:  End of TX Buffer */
+#endif
+
 #define HSMCI_INT_SDIOIRQA            (1 << 8)  /* Bit 8:  SDIO Interrupt for Slot A */
 #define HSMCI_INT_SDIOWAIT            (1 << 12) /* Bit 12: SDIO Read Wait Operation Status */
 #define HSMCI_INT_CSRCV               (1 << 13) /* Bit 13: CE-ATA Completion Signal Received */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define HSMCI_INT_RXBUFF            (1 << 14) /* Bit 14:  RXBUFF: RX Buffer Full */
+#  define HSMCI_INT_TXBUFE            (1 << 15) /* Bit 15:  TXBUFE: TX Buffer Empty */
+#endif
+
 #define HSMCI_INT_RINDE               (1 << 16) /* Bit 16: Response Index Error */
 #define HSMCI_INT_RDIRE               (1 << 17) /* Bit 17: Response Direction Error */
 #define HSMCI_INT_RCRCE               (1 << 18) /* Bit 18: Response CRC Error */
@@ -245,8 +278,12 @@
 #define HSMCI_INT_DCRCE               (1 << 21) /* Bit 21: Data CRC Error */
 #define HSMCI_INT_DTOE                (1 << 22) /* Bit 22: Data Time-out Error */
 #define HSMCI_INT_CSTOE               (1 << 23) /* Bit 23: Completion Signal Time-out Error */
-#define HSMCI_INT_BLKOVRE             (1 << 24) /* Bit 24: DMA Block Overrun Error */
-#define HSMCI_INT_DMADONE             (1 << 25) /* Bit 25: DMA Transfer done */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define HSMCI_INT_BLKOVRE           (1 << 24) /* Bit 24: DMA Block Overrun Error */
+#  define HSMCI_INT_DMADONE           (1 << 25) /* Bit 25: DMA Transfer done */
+#endif
+
 #define HSMCI_INT_FIFOEMPTY           (1 << 26) /* Bit 26: FIFO empty flag */
 #define HSMCI_INT_XFRDONE             (1 << 27) /* Bit 27: Transfer Done flag */
 #define HSMCI_INT_ACKRCV              (1 << 28) /* Bit 28: Boot Operation Acknowledge Received */
@@ -256,11 +293,13 @@
 
 /* HSMCI DMA Configuration Register */
 
-#define HSMCI_DMA_OFFSET_SHIFT        (0)       /* Bits 0-1: DMA Write Buffer Offset */
-#define HSMCI_DMA_OFFSET_MASK         (3 << HSMCI_DMA_OFFSET_SHIFT)
-#define HSMCI_DMA_CHKSIZE             (1 << 4)  /* Bit 4:  DMA Channel Read and Write Chunk Size */
-#define HSMCI_DMA_DMAEN               (1 << 8)  /* Bit 8:  DMA Hardware Handshaking Enable */
-#define HSMCI_DMA_ROPT                (1 << 12) /* Bit 12: Read Optimization with padding */
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define HSMCI_DMA_OFFSET_SHIFT      (0)       /* Bits 0-1: DMA Write Buffer Offset */
+#  define HSMCI_DMA_OFFSET_MASK       (3 << HSMCI_DMA_OFFSET_SHIFT)
+#  define HSMCI_DMA_CHKSIZE           (1 << 4)  /* Bit 4:  DMA Channel Read and Write Chunk Size */
+#  define HSMCI_DMA_DMAEN             (1 << 8)  /* Bit 8:  DMA Hardware Handshaking Enable */
+#  define HSMCI_DMA_ROPT              (1 << 12) /* Bit 12: Read Optimization with padding */
+#endif
 
 /* HSMCI Configuration Register */
 
@@ -274,13 +313,18 @@
 #define HSMCI_WPMR_WP_EN              (1 << 0)  /* Bit 0:  Write Protection Enable */
 #define HSMCI_WPMR_WP_KEY_SHIFT       (8)       /* Bits 8-31: Write Protection Key password */
 #define HSMCI_WPMR_WP_KEY_MASK        (0x00ffffff << HSMCI_WPMR_WP_KEY_SHIFT)
+#  define HSMCI_WPMR_WP_KEY           (0x004d4349 << HSMCI_WPMR_WP_KEY_SHIFT)
 
 /* HSMCI Write Protect Status Register */
 
-#define HSMCI_WPSR_WP_VS_SHIFT        (0)       /* Bits 0-3: Write Protection Violation Status */
-#define HSMCI_WPSR_WP_VS_MASK         (15 << HSMCI_WPSR_WP_VS_SHIFT)
-#define HSMCI_WPSR_WP_VSRC_SHIFT      (8)       /* Bits 8-23: Write Protection Violation Source */
-#define HSMCI_WPSR_WP_VSRC_MASK       (0xffff << HSMCI_WPSR_WP_VSRC_SHIFT)
+#define HSMCI_WPSR_VS_SHIFT           (0)       /* Bits 0-3: Write Protection Violation Status */
+#define HSMCI_WPSR_VS_MASK            (15 << HSMCI_WPSR_VS_SHIFT)
+#  define HSMCI_WPSR_VS_NONE          (0 << HSMCI_WPSR_VS_SHIFT)
+#  define HSMCI_WPSR_VS_WRITE         (1 << HSMCI_WPSR_VS_SHIFT)
+#  define HSMCI_WPSR_VS_RESET         (2 << HSMCI_WPSR_VS_SHIFT)
+#  define HSMCI_WPSR_VS_BOTH          (3 << HSMCI_WPSR_VS_SHIFT)
+#define HSMCI_WPSR_VSRC_SHIFT         (8)       /* Bits 8-23: Write Protection Violation Source */
+#define HSMCI_WPSR_VSRC_MASK          (0xffff << HSMCI_WPSR_VSRC_SHIFT)
 
 /****************************************************************************************
  * Public Types

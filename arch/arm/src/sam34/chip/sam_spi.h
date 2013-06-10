@@ -67,7 +67,8 @@
                                        /* 0x40-0xe0: Reserved */
 #define SAM_SPI_WPCR_OFFSET       0xe4 /* Write Protection Control Register */
 #define SAM_SPI_WPSR_OFFSET       0xe8 /* Write Protection Status Register */
-                                       /* 0xec-0xf8: Reserved*/
+                                       /* 0xec-0xfc: Reserved */
+                                       /* 0x100-0x124 Reserved for PDC Registers */
 
 /* SPI register adresses ****************************************************************/
 
@@ -105,6 +106,10 @@
 #define SPI_MR_LLB                (1 << 7)  /* Bit 7:  Local Loopback Enable */
 #define SPI_MR_PCS_SHIFT          (16)      /* Bits 16-19: Peripheral Chip Select */
 #define SPI_MR_PCS_MASK           (15 << SPI_MR_PCS_SHIFT)
+#  define SPI_MR_PCS0             (0 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 1110 (w/PCSDEC=0) */
+#  define SPI_MR_PCS1             (1 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 1100 (w/PCSDEC=0) */
+#  define SPI_MR_PCS2             (3 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 1011 (w/PCSDEC=0) */
+#  define SPI_MR_PCS3             (7 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 0111 (w/PCSDEC=0) */
 #define SPI_MR_DLYBCS_SHIFT       (24)      /* Bits 24-31: Delay Between Chip Selects */
 #define SPI_MR_DLYBCS_MASK        (0xff << SPI_MR_DLYBCS_SHIFT)
 
@@ -114,6 +119,10 @@
 #define SPI_RDR_RD_MASK           (0xffff << SPI_RDR_RD_SHIFT)
 #define SPI_RDR_PCS_SHIFT         (16)      /* Bits 16-19: Peripheral Chip Select */
 #define SPI_RDR_PCS_MASK          (15 << SPI_RDR_PCS_SHIFT)
+#  define SPI_RDR_PCS0            (0 << SPI_RDR_PCS_SHIFT) /* NPCS[3:0] = 1110 (w/PCSDEC=0) */
+#  define SPI_RDR_PCS1            (1 << SPI_RDR_PCS_SHIFT) /* NPCS[3:0] = 1100 (w/PCSDEC=0) */
+#  define SPI_RDR_PCS2            (3 << SPI_RDR_PCS_SHIFT) /* NPCS[3:0] = 1011 (w/PCSDEC=0) */
+#  define SPI_RDR_PCS3            (7 << SPI_RDR_PCS_SHIFT) /* NPCS[3:0] = 0111 (w/PCSDEC=0) */
 
 /* SPI Transmit Data Register */
 
@@ -121,6 +130,10 @@
 #define SPI_TDR_TD_MASK           (0xffff << SPI_TDR_TD_SHIFT)
 #define SPI_TDR_PCS_SHIFT         (16)      /* Bits 16-19: Peripheral Chip Select */
 #define SPI_TDR_PCS_MASK          (15 << SPI_TDR_PCS_SHIFT)
+#  define SPI_TDR_PCS0            (0 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 1110 (w/PCSDEC=0) */
+#  define SPI_TDR_PCS1            (1 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 1100 (w/PCSDEC=0) */
+#  define SPI_TDR_PCS2            (3 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 1011 (w/PCSDEC=0) */
+#  define SPI_TDR_PCS3            (7 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 0111 (w/PCSDEC=0) */
 #define SPI_TDR_LASTXFER          (1 << 24) /* Bit 24: Last Transfer */
 
 /* SPI Status Register, SPI Interrupt Enable Register, SPI Interrupt Disable Register,
@@ -131,6 +144,14 @@
 #define SPI_INT_TDRE              (1 << 1)  /* Bit 1:  Transmit Data Register Empty Interrupt */
 #define SPI_INT_MODF              (1 << 2)  /* Bit 2:  Mode Fault Error Interrupt */
 #define SPI_INT_OVRES             (1 << 3)  /* Bit 3:  Overrun Error Interrupt */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SPI_INT_ENDRX           (1 << 4)  /* Bit 4:  End of RX buffer */
+#  define SPI_INT_ENDTX           (1 << 5)  /* Bit 5:  End of TX buffer */
+#  define SPI_INT_RXBUFF          (1 << 6)  /* Bit 6:  RX Buffer Full */
+#  define SPI_INT_TXBUFE          (1 << 7)  /* Bit 7:  TX Buffer Empty */
+#endif
+
 #define SPI_INT_NSSR              (1 << 8)  /* Bit 8:  NSS Rising Interrupt */
 #define SPI_INT_TXEMPTY           (1 << 9)  /* Bit 9:  Transmission Registers Empty Interrupt */
 #define SPI_INT_UNDES             (1 << 10) /* Bit 10: Underrun Error Status Interrupt (slave) */
@@ -163,16 +184,17 @@
 
 /* SPI Write Protection Control Register */
 
-#define SPI_WPCR_SPIWPEN          (1 << 0)  /* Bit 0:  SPI Write Protection Enable */
-#define SPI_WPCR_SPIWPKEY_SHIFT   (8)       /* Bits 8-31: SPI Write Protection Key Password */
-#define SPI_WPCR_SPIWPKEY_MASK    (0x00ffffff << SPI_WPCR_SPIWPKEY_SHIFT)
+#define SPI_WPCR_WPEN             (1 << 0)  /* Bit 0:  SPI Write Protection Enable */
+#define SPI_WPCR_WPKEY_SHIFT      (8)       /* Bits 8-31: SPI Write Protection Key Password */
+#define SPI_WPCR_WPKEY_MASK       (0x00ffffff << SPI_WPCR_WPKEY_SHIFT)
+#  define SPI_WPCR_WPKEY          (0x00535049 << SPI_WPCR_WPKEY_SHIFT)
 
 /* SPI Write Protection Status Register */
 
-#define SPI_WPSR_SPIWPVS_SHIFT    (0)      /* Bits 0-2: SPI Write Protection Violation Status */
-#define SPI_WPSR_SPIWPVS_MASK     (7 << SPI_WPSR_SPIWPVS_SHIFT)
-#define SPI_WPSR_SPIWPVSRC_SHIFT  (8)      /* Bits 8-15: SPI Write Protection Violation Source */
-#define SPI_WPSR_SPIWPVSRC_MASK   (0xff << SPI_WPSR_SPIWPVSRC_SHIFT)
+#define SPI_WPSR_WPVS_SHIFT       (0)      /* Bits 0-2: SPI Write Protection Violation Status */
+#define SPI_WPSR_WPVS_MASK        (7 << SPI_WPSR_WPVS_SHIFT)
+#define SPI_WPSR_WPVSRC_SHIFT     (8)      /* Bits 8-15: SPI Write Protection Violation Source */
+#define SPI_WPSR_WPVSRC_MASK      (0xff << SPI_WPSR_WPVSRC_SHIFT)
 
 /****************************************************************************************
  * Public Types

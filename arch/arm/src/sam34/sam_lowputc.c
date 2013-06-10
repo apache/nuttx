@@ -87,7 +87,7 @@
 
 /* Is there a serial console? It could be on the UART, or USARTn */
 
-#if defined(CONFIG_UART_SERIAL_CONSOLE) && defined(CONFIG_SAM34_UART)
+#if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_SAM34_UART0)
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
@@ -145,12 +145,12 @@
 
 /* Select USART parameters for the selected console */
 
-#if defined(CONFIG_UART_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_UART_BASE
-#  define SAM_CONSOLE_BAUD     CONFIG_UART_BAUD
-#  define SAM_CONSOLE_BITS     CONFIG_UART_BITS
-#  define SAM_CONSOLE_PARITY   CONFIG_UART_PARITY
-#  define SAM_CONSOLE_2STOP    CONFIG_UART_2STOP
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#  define SAM_CONSOLE_BASE     SAM_UART0_BASE
+#  define SAM_CONSOLE_BAUD     CONFIG_UART0_BAUD
+#  define SAM_CONSOLE_BITS     CONFIG_UART0_BITS
+#  define SAM_CONSOLE_PARITY   CONFIG_UART0_PARITY
+#  define SAM_CONSOLE_2STOP    CONFIG_UART0_2STOP
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE)
 #  define SAM_CONSOLE_BASE     SAM_USART0_BASE
 #  define SAM_CONSOLE_BAUD     CONFIG_USART0_BAUD
@@ -269,7 +269,7 @@ void sam_lowsetup(void)
 {
   /* Enable clocking for all selected UART/USARTs */
 
-#ifdef CONFIG_SAM34_UART
+#ifdef CONFIG_SAM34_UART0
   sam_uart_enableclk();
 #endif
 #ifdef CONFIG_SAM34_USART0
@@ -287,7 +287,7 @@ void sam_lowsetup(void)
 
   /* Configure UART pins for all selected UART/USARTs */
 
-#ifdef CONFIG_SAM34_UART
+#ifdef CONFIG_SAM34_UART0
   (void)sam_configgpio(GPIO_UART_RXD);
   (void)sam_configgpio(GPIO_UART_TXD);
 #endif
