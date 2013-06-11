@@ -114,11 +114,11 @@
 #define SAM_UART0_BASE         0x400e0600 /* 0x400e0600-0x400e073f: UART 0 */
 #define SAM_CHIPID_BASE        0x400e0740 /* 0x400e0740-0x400e07ff: CHIP ID */
 #define SAM_EEFC_BASE          0x400e0800 /* 0x400e0800-0x400e0bff: Enhanced Embedded Flash Controllers*/
-#  define SAM_EEFCN_BASE(n)    (0x400e0800+((n)<<9))
+#  define SAM_EEFCN_BASE(n)    (0x400e0800 + ((n) << 9))
 #  define SAM_EEFC0_BASE       0x400e0800 /* 0x400e0800-0x400e09ff:   Enhanced Embedded Flash Controller 0 */
 #  define SAM_EEFC1_BASE       0x400e0a00 /* 0x400e0a00-0x400e0bff:   Enhanced Embedded Flash Controller 1 */
 #define SAM_PIO_BASE           0x400e0c00 /* 0x400e0c00-0x400e11ff: Parallel I/O Controllers */
-#  define SAM_PION_BASE(n)     (0x400e0c00+((n)<<9))
+#  define SAM_PION_BASE(n)     (0x400e0c00 + ((n) << 9))
 #  define SAM_PIOA_BASE        0x400e0c00 /* 0x400e0c00-0x400e0dff:   Parallel I/O Controller A */
 #  define SAM_PIOB_BASE        0x400e0e00 /* 0x400e0e00-0x400e0fff:   Parallel I/O Controller B */
 #  define SAM_PIOC_BASE        0x400e1000 /* 0x400e1000-0x400e11ff:   Parallel I/O Controller C */

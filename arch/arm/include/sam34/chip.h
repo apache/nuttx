@@ -54,10 +54,10 @@
 
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (256*1024)    /* 256KB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (32*1024)     /*  32KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (16*1024)     /*  16KB */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (4*1024)      /*   4KB */
+#  define SAM34_FLASH_SIZE           (256*1024)    /* 256KB */
+#  define SAM34_SRAM0_SIZE           (32*1024)     /*  32KB */
+#  define SAM34_SRAM1_SIZE           (16*1024)     /*  16KB */
+#  define SAM34_NFCSRAM_SIZE         (4*1024)      /*   4KB */
 
 /* Peripherals */
 
@@ -123,10 +123,10 @@
 
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (128*1024)    /* 128KB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (32*1024)     /*  32KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (128*1024)    /* 128KB */
+#  define SAM34_SRAM0_SIZE           (32*1024)     /*  32KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -143,10 +143,10 @@
 
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (256*1024)    /* 256KB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (32*1024)     /*  32KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (256*1024)    /* 256KB */
+#  define SAM34_SRAM0_SIZE           (32*1024)     /*  32KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -163,10 +163,10 @@
 
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (128*1024)    /* 128KB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (32*1024)     /*  32KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (128*1024)    /* 128KB */
+#  define SAM34_SRAM0_SIZE           (32*1024)     /*  32KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -183,10 +183,10 @@
 
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (256*1024)    /* 256KB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (32*1024)     /*  32KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (256*1024)    /* 256KB */
+#  define SAM34_SRAM0_SIZE           (32*1024)     /*  32KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -220,10 +220,10 @@
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4SD32C)
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (2*1024*1024) /* 2x1MB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (160*1024)    /* 160KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (2*1024*1024) /* 2x1MB */
+#  define SAM34_SRAM0_SIZE           (160*1024)    /* 160KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -238,10 +238,10 @@
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4SD32B)
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (2*1024*1024) /* 2x1MB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (160*1024)    /* 160KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (2*1024*1024) /* 2x1MB */
+#  define SAM34_SRAM0_SIZE           (160*1024)    /* 160KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -256,10 +256,10 @@
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4SD16C)
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (1024*1024)   /* 2x512KB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (160*1024)    /* 160KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (1024*1024)   /* 2x512KB */
+#  define SAM34_SRAM0_SIZE           (160*1024)    /* 160KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -274,10 +274,10 @@
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4SD16B)
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (1024*1024)   /* 2x512KB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (160*1024)    /* 160KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (1024*1024)   /* 2x512KB */
+#  define SAM34_SRAM0_SIZE           (160*1024)    /* 160KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -292,10 +292,10 @@
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4SA16C)
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (1024*1024)   /* 1MB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (160*1024)    /* 160KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (1024*1024)   /* 1MB */
+#  define SAM34_SRAM0_SIZE           (160*1024)    /* 160KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -310,10 +310,10 @@
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4SA16B)
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (1024*1024)   /* 1MB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (160*1024)    /* 160KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (1024*1024)   /* 1MB */
+#  define SAM34_SRAM0_SIZE           (160*1024)    /* 160KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -328,10 +328,10 @@
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4S16C)
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (1024*1024)   /* 1MB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (128*1024)    /* 128KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (1024*1024)   /* 1MB */
+#  define SAM34_SRAM0_SIZE           (128*1024)    /* 128KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -346,10 +346,10 @@
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4S16B)
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (1024*1024)   /* 1MB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (128*1024)    /* 128KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (1024*1024)   /* 1MB */
+#  define SAM34_SRAM0_SIZE           (128*1024)    /* 128KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -364,10 +364,10 @@
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4S8C)
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (512*1024)    /* 512KB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (128*1024)    /* 128KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (512*1024)    /* 512KB */
+#  define SAM34_SRAM0_SIZE           (128*1024)    /* 128KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 
@@ -382,10 +382,10 @@
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4S8B)
 /* Internal memory */
 
-#  define CONFIG_SAM34_FLASH_SIZE    (512*1024)    /* 512KB */
-#  define CONFIG_SAM34_SRAM0_SIZE    (128*1024)    /* 128KB */
-#  define CONFIG_SAM34_SRAM1_SIZE    (0)           /* None */
-#  define CONFIG_SAM34_NFCSRAM_SIZE  (0)           /* None */
+#  define SAM34_FLASH_SIZE           (512*1024)    /* 512KB */
+#  define SAM34_SRAM0_SIZE           (128*1024)    /* 128KB */
+#  define SAM34_SRAM1_SIZE           (0)           /* None */
+#  define SAM34_NFCSRAM_SIZE         (0)           /* None */
 
 /* Peripherals */
 

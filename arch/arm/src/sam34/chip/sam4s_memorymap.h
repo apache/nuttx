@@ -64,9 +64,9 @@
                                           /* 0x00c00000-0x1fffffff: Reserved */
 /* Internal SRAM memory region */
 
+#define SAM_INTSRAM0_BASE      0x20000000 /* For SAM3U compatibility */
 #define SAM_BBSRAM_BASE        0x22000000 /* 0x22000000-0x23ffffff: 32MB bit-band region */
                                           /* 0x24000000-0x3fffffff: Undefined */
-
 /* Peripherals address region */
 
 #define SAM_HSMCI_BASE         0x40000000 /* 0x40000000-0x400003ff: High Speed Multimedia Card Interface */
@@ -113,6 +113,7 @@
 #  define SAM_EEFC0_BASE       0x400e0a00 /* 0x400e0a00-0x400e0bff:   Enhanced Embedded Flash Controller 0 */
 #  define SAM_EEFC1_BASE       0x400e0c00 /* 0x400e0c00-0x400e0dff:   Enhanced Embedded Flash Controller 1 */
 #define SAM_PIO_BASE           0x400e0e00 /* 0x400e0e00-0x400e13ff: Parallel I/O Controllers */
+#  define SAM_PION_BASE(n)     (0x400e0e00 + ((n) << 9))
 #  define SAM_PIOA_BASE        0x400e0e00 /* 0x400e0e00-0x400e0fff:   Parallel I/O Controller A */
 #  define SAM_PIOB_BASE        0x400e1000 /* 0x400e1000-0x400e11ff:   Parallel I/O Controller B */
 #  define SAM_PIOC_BASE        0x400e1200 /* 0x400e1200-0x400e13ff:   Parallel I/O Controller C */

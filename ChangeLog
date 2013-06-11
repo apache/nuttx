@@ -4951,4 +4951,4 @@
 	  definitinos (2013-6-11).
 	* arch/arm/src/sam34/sam4s_periphclks.h:  Add macros to manage SAM4S
 	  peripheral clocks (2013-6-11).
-
+	* configs/sam4s-xplained: Configuratino builds error-free (2013-6-11).

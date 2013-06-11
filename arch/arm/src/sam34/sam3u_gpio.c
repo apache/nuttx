@@ -53,7 +53,14 @@
 
 #include "chip.h"
 #include "sam_gpio.h"
-#include "chip/sam3u_pio.h"
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  include "chip/sam3u_pio.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4S)
+#  include "chip/sam4s_pio.h"
+#else
+#  error Unrecognized SAM architecture
+#endif
 
 /****************************************************************************
  * Definitions

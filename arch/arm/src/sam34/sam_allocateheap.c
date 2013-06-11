@@ -57,7 +57,7 @@
  * Private Definitions
  ****************************************************************************/
 
-#if CONFIG_MM_REGIONS < 2
+#if CONFIG_MM_REGIONS < 2 && SAM34_SRAM1_SIZE > 0
 #  warning "CONFIG_MM_REGIONS < 2: SRAM1 not included in HEAP"
 #endif
 
@@ -71,11 +71,11 @@
 #  define CONFIG_MM_REGIONS 2
 #endif
 
-#if CONFIG_DRAM_END > (SAM_INTSRAM0_BASE+CONFIG_SAM34_SRAM0_SIZE)
+#if CONFIG_DRAM_END > (SAM_INTSRAM0_BASE+SAM34_SRAM0_SIZE)
 #  error "CONFIG_DRAM_END is beyond the end of SRAM0"
 #  undef CONFIG_DRAM_END
-#  define CONFIG_DRAM_END (SAM_INTSRAM0_BASE+CONFIG_SAM34_SRAM0_SIZE)
-#elif CONFIG_DRAM_END < (SAM_INTSRAM0_BASE+CONFIG_SAM34_SRAM0_SIZE)
+#  define CONFIG_DRAM_END (SAM_INTSRAM0_BASE+SAM34_SRAM0_SIZE)
+#elif CONFIG_DRAM_END < (SAM_INTSRAM0_BASE+SAM34_SRAM0_SIZE)
 #  warning "CONFIG_DRAM_END is before end of SRAM0... not all of SRAM0 used"
 #endif
 
@@ -224,25 +224,25 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
-#if CONFIG_SAM34_SRAM1_SIZE > 0
+#if SAM34_SRAM1_SIZE > 0
   /* Allow user access to the heap memory */
 
-  sam_mpu_uheap(SAM_INTSRAM1_BASE, CONFIG_SAM34_SRAM1_SIZE);
+  sam_mpu_uheap(SAM_INTSRAM1_BASE, SAM34_SRAM1_SIZE);
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM_INTSRAM1_BASE, CONFIG_SAM34_SRAM1_SIZE);
+  kumm_addregion((FAR void*)SAM_INTSRAM1_BASE, SAM34_SRAM1_SIZE);
 
-#if CONFIG_MM_REGIONS > 2 && CONFIG_SAM34_NFCSRAM_SIZE > 0
+#if CONFIG_MM_REGIONS > 2 && SAM34_NFCSRAM_SIZE > 0
   /* Allow user access to the heap memory */
 
-  sam_mpu_uheap(SAM_NFCSRAM_BASE, CONFIG_SAM34_NFCSRAM_SIZE);
+  sam_mpu_uheap(SAM_NFCSRAM_BASE, SAM34_NFCSRAM_SIZE);
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM_NFCSRAM_BASE, CONFIG_SAM34_NFCSRAM_SIZE);
+  kumm_addregion((FAR void*)SAM_NFCSRAM_BASE, SAM34_NFCSRAM_SIZE);
 
-#endif /* CONFIG_MM_REGIONS > 2 && CONFIG_SAM34_NFCSRAM_SIZE > 0 */
-#endif /* CONFIG_SAM34_SRAM1_SIZE > 0 */
+#endif /* CONFIG_MM_REGIONS > 2 && SAM34_NFCSRAM_SIZE > 0 */
+#endif /* SAM34_SRAM1_SIZE > 0 */
 }
 #endif /* CONFIG_MM_REGIONS > 1 */

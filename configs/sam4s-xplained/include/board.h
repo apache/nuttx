@@ -72,35 +72,37 @@
 
 /* Clocking *************************************************************************/
 /* After power-on reset, the sam3u device is running on a 4MHz internal RC.  These
- * definitions will configure clocking with MCK = 48MHz, PLLA = 96, and CPU=48MHz.
+ * definitions will configure clocking with MCK = 48MHz, PLLA = 96, and CPU=120MHz.
  */
 
 /* Main oscillator register settings */
 
 #define BOARD_CKGR_MOR_MOSCXTST    (63 << PMC_CKGR_MOR_MOSCXTST_SHIFT) /* Start-up Time */
 
-/* PLLA configuration */
+/* PLLA configuration:
+ *
+ * Source: 12MHz crystall at 12MHz
+ * PLLdiv: 10
+ * PLLmul: 1 (bypassed)
+ * Fpll:   (12MHz * 10) / 1 = 120MHz
+ */
 
-#define BOARD_CKGR_PLLAR_MUL       (7 << PMC_CKGR_PLLAR_MUL_SHIFT)
-#define BOARD_CKGR_PLLAR_STMODE    PMC_CKGR_PLLAR_STMODE_FAST
-#define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)
+#define BOARD_MAINOSC_FREQUENCY    (12000000)
+#define BOARD_CKGR_PLLAR_MUL       (9 << PMC_CKGR_PLLAR_MUL_SHIFT)
 #define BOARD_CKGR_PLLAR_DIV       PMC_CKGR_PLLAR_DIV_BYPASS
+#define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)
+#define BOARD_PLLA_FREQUENCY       (10*BOARD_MAINOSC_FREQUENCY)
 
 /* PMC master clock register settings */
 
 #define BOARD_PMC_MCKR_CSS         PMC_MCKR_CSS_PLLA
-#define BOARD_PMC_MCKR_PRES        PMC_MCKR_PRES_DIV2
+#define BOARD_PMC_MCKR_PRES        PMC_MCKR_PRES_DIV1
+#define BOARD_MCK_FREQUENCY        (BOARD_PLLA_FREQUENCY/1)
+#define BOARD_CPU_FREQUENCY        (BOARD_PLLA_FREQUENCY/1)
 
 /* USB UTMI PLL start-up time */
 
-#define BOARD_CKGR_UCKR_UPLLCOUNT (3 << PMC_CKGR_UCKR_UPLLCOUNT_SHIFT)
-
-/* Resulting frequencies */
-
-#define SAM_MAINOSC_FREQUENCY      (12000000)
-#define SAM_MCK_FREQUENCY          (48000000)
-#define SAM_PLLA_FREQUENCY         (96000000)
-#define SAM_CPU_FREQUENCY          (48000000)
+#define BOARD_CKGR_UCKR_UPLLCOUNT  (3 << PMC_CKGR_UCKR_UPLLCOUNT_SHIFT)
 
 /* HSMCI clocking
  *

@@ -7,7 +7,8 @@ README
 
   The SAM4S Xplained features:
 
-    - 12MHz crystal (no 32.768KHz crystal)S
+    - 120 MHz Cortex-M4 with MPU
+    - 12MHz crystal (no 32.768KHz crystal)
     - Segger J-Link JTAG emulator on-board for program and debug
     - MICRO USB A/B connector for USB connectivity
     - IS66WV51216DBLL ISSI SRAM 8Mb 512K x 16 55ns PSRAM 2.5v-3.6v
