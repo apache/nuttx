@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 #include <arch/irq.h>
-#include "chip/sam4s_pmc.h"
+#include "chip/sam3u_pmc.h"
 
 /************************************************************************************
  * Pre-processor Definitions

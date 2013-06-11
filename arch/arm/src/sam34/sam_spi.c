@@ -73,9 +73,9 @@
  */
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
-#  define SAM_SPI_CLOCK  SAM_MCK_FREQUENCY    /* Frequency of the main clock */
+#  define SAM_SPI_CLOCK  BOARD_MCK_FREQUENCY  /* Frequency of the main clock */
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
-#  define SAM_SPI_CLOCK  BOARD_PBB_FREQUENCY  /* PBA frequency */
+#  define SAM_SPI_CLOCK  BOARD_PBB_FREQUENCY  /* PBB frequency */
 #else
 #  error Unrecognized SAM architecture
 #endif
