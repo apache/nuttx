@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/stm32ldiscovery/src/up_autoleds.c
- * arch/arm/src/board/up_autoleds.c
+ * configs/stm32ldiscovery/src/stm32_autoleds.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,7 +54,7 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
-/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 8 LEDs on
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 2 LEDs on
  * board the STM32L-Discovery.  The following definitions describe how NuttX
  * controls the LEDs:
  *

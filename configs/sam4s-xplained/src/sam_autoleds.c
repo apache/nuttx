@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32ldiscovery/src/stm32_userleds.c
+ * configs/sam4s-xplained/src/sam_autoleds.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,14 +46,31 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "stm32.h"
-#include "stm32ldiscovery.h"
+#include "sam_gpip.h"
+#include "sam4s-xplained.h"
 
-#ifndef CONFIG_ARCH_LEDS
+#ifdef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the two LEDs on
+ * board the SAM4S Xplained.  The following definitions describe how NuttX
+ * controls the LEDs:
+ *
+ *   SYMBOL                Meaning                     LED state
+ *                                                   D9     D10
+ *   -------------------  -----------------------  -------- --------
+ *   LED_STARTED          NuttX has been started     OFF      OFF
+ *   LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
+ *   LED_IRQSENABLED      Interrupts enabled         OFF      OFF
+ *   LED_STACKCREATED     Idle stack created         ON       OFF
+ *   LED_INIRQ            In an interrupt              No change
+ *   LED_SIGNAL           In a signal handler          No change
+ *   LED_ASSERTION        An assertion failed          No change
+ *   LED_PANIC            The system has crashed     OFF      Blinking
+ *   LED_IDLE             MCU is is sleep mode         Not used
+ */
 
 /* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
  * with CONFIG_DEBUG_VERBOSE too)
@@ -72,14 +89,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Protototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -88,54 +97,59 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ledinit
+ * Name: up_ledinit
  ****************************************************************************/
 
-void stm32_ledinit(void)
+void up_ledinit(void)
 {
   /* Configure LED1-2 GPIOs for output */
 
-  stm32_configgpio(GPIO_LED1);
-  stm32_configgpio(GPIO_LED2);
+  sam_configgpio(GPIO_D9);
+  sam_configgpio(GPIO_D10);
 }
 
 /****************************************************************************
- * Name: stm32_setled
+ * Name: up_ledon
  ****************************************************************************/
 
-void stm32_setled(int led, bool ledon)
+void up_ledon(int led)
 {
-  uint32_t ledcfg;
+  bool led1on = false;
+  bool led2on = false;
 
-  if (led == BOARD_LED1)
+  switch (led)
     {
-      ledcfg = GPIO_LED1;
-    }
-  else if (led == BOARD_LED2)
-    {
-      ledcfg = GPIO_LED2;
-    }
-  else
-    {
-      return;
+      case 0:  /* LED_STARTED, LED_HEAPALLOCATE, LED_IRQSENABLED */
+        break;
+
+      case 1:  /* LED_STACKCREATED */
+        led1on = true;
+        break;
+
+      default:
+      case 2:  /* LED_INIRQ, LED_SIGNAL, LED_ASSERTION */
+        return;
+
+      case 3:  /* LED_PANIC */
+        led2on = true;
+        break;
     }
 
-  stm32_gpiowrite(ledcfg, ledon);
+  sam_gpiowrite(GPIO_D9, led1on);
+  sam_gpiowrite(GPIO_D10, led2on);
 }
 
 /****************************************************************************
- * Name: stm32_setleds
+ * Name: up_ledoff
  ****************************************************************************/
 
-void stm32_setleds(uint8_t ledset)
+void up_ledoff(int led)
 {
-  bool ledon;
-
-  ledon = ((ledset & BOARD_LED1_BIT) != 0);
-  stm32_gpiowrite(GPIO_LED1, ledon);
-
-  ledon = ((ledset & BOARD_LED2_BIT) != 0);
-  stm32_gpiowrite(GPIO_LED2, ledon);
+  if (led != 2)
+    {
+      sam_gpiowrite(GPIO_D9, false);
+      sam_gpiowrite(GPIO_D10, false);
+    }
 }
 
-#endif /* !CONFIG_ARCH_LEDS */
+#endif /* CONFIG_ARCH_LEDS */
