@@ -644,7 +644,7 @@ static inline void sam_disable(void)
 {
   /* Disable the MCI peripheral clock */
 
-  putreg32((1 << SAM_PID_HSMCI), SAM_PMC_PCDR);
+  sam_hsmci_disableclk();
 
   /* Disable the MCI */
 
@@ -1224,7 +1224,6 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
 
   flags = irqsave();
   sam_hsmci_enableclk();
-  fdbg("PCSR: %08x\n", getreg32(SAM_PMC_PCSR));
 
   /* Reset the MCI */
 
