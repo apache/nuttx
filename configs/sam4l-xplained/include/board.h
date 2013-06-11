@@ -213,7 +213,7 @@
 #define BOARD_LED0_BIT    (1 << BOARD_LED0)
 
 /* When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
- * control LED0 as defined below.  Thus is LED0 is statically on, NuttX has
+ * control LED0 as defined below.  Thus if LED0 is statically on, NuttX has
  * successfully booted and is, apparently, running normmally.  If LED0 is
  * flashing at approximately 2Hz, then a fatal error has been detected and the
  * system has halted.

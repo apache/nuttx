@@ -270,8 +270,11 @@ Buttons and LEDs
   Buttons
   -------
 
-  There is one user button labeld BP2 and connected to PA5.
-
+  The SAM4S Xplained has two mechanical buttons. One button is the RESET button
+  connected to the SAM4S reset line and the other is a generic user configurable
+  button labeled BP2 and connected to GPIO PA5. When a button is pressed it
+  will drive the I/O line to GND.
+ 
   LEDs
   ----
 
@@ -302,6 +305,10 @@ Buttons and LEDs
     LED_ASSERTION        An assertion failed          No change
     LED_PANIC            The system has crashed     OFF      Blinking
     LED_IDLE             MCU is is sleep mode         Not used
+
+  Thus if D9 is statically on, NuttX has successfully booted and is,
+  apparently, running normmally.  If D10 is flashing at approximately
+  2Hz, then a fatal error has been detected and the system has halted.
 
 Serial Consoles
 ^^^^^^^^^^^^^^^

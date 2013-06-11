@@ -482,6 +482,15 @@ config ARCH_BOARD_SAM4L_XPLAINED
 	---help---
 		The port of NuttX to the Atmel SAM4L-Xplained Pro development board.
 
+config ARCH_BOARD_SAM4S_XPLAINED
+	bool "Atmel SAM4S-Xplained development board"
+	depends on ARCH_CHIP_ATSAM4S16C
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		The port of NuttX to the Atmel SAM4S-Xplained development board.
+
 config ARCH_BOARD_SHENZHOU
 	bool "Shenzhou STM32F107 board"
 	depends on ARCH_CHIP_STM32F107VC
@@ -782,6 +791,7 @@ config ARCH_BOARD
 	default "rgmp"                if ARCH_BOARD_RGMP
 	default "sam3u-ek"            if ARCH_BOARD_SAM3UEK
 	default "sam4l-xplained"      if ARCH_BOARD_SAM4L_XPLAINED
+	default "sam4s-xplained"      if ARCH_BOARD_SAM4S_XPLAINED
 	default "shenzhou"            if ARCH_BOARD_SHENZHOU
 	default "skp16c26"            if ARCH_BOARD_SKP16C26
 	default "stm32_tiny"          if ARCH_BOARD_STM32_TINY
@@ -1004,6 +1014,9 @@ source "configs/sam3u-ek/Kconfig"
 endif
 if ARCH_BOARD_SAM4L_XPLAINED
 source "configs/sam4l-xplained/Kconfig"
+endif
+if ARCH_BOARD_SAM4S_XPLAINED
+source "configs/sam4s-xplained/Kconfig"
 endif
 if ARCH_BOARD_SHENZHOU
 source "configs/shenzhou/Kconfig"

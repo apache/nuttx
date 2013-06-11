@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/sam3u-ek/include/board.h
+ * configs/sam4s-xplained/include/board.h
  *
- *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,25 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_SAM3U_EK_INCLUDE_BOARD_H
-#define __ARCH_SAM3U_EK_INCLUDE_BOARD_H
+#ifndef __CONFIGS_SAM4L_XPLAINED_INCLUDE_BOARD_H
+#define __CONFIGS_SAM4L_XPLAINED_INCLUDE_BOARD_H
+
+/************************************************************************************
+ * Included Files
+ ************************************************************************************/
+
+#include <nuttx/config.h>
+
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#  ifdef CONFIG_GPIO_IRQ
+#    include <arch/irq.h>
+#  endif
+#endif
+
+/************************************************************************************
+ * Definitions
+ ************************************************************************************/
 
 /************************************************************************************
  * Included Files
@@ -108,21 +125,65 @@
 #define HSMCI_SDWIDEXFR_CLKDIV HSMCI_SDXFR_CLKDIV
 
 /* LED definitions ******************************************************************/
+/* There are four LEDs on board the SAM4S Xplained board, two of these can be
+ * controlled by software in the SAM4S:
+ *
+ *   LED              GPIO
+ *   ---------------- -----
+ *   D9  Yellow LED   PC10
+ *   D10 Yellow LED   PC17
+ *
+ * Both can be illuminated by driving the GPIO output to ground (low).
+ */
 
-#define LED_STARTED                0 /* LED0=OFF LED1=OFF LED2=OFF */
-#define LED_HEAPALLOCATE           1 /* LED0=OFF LED1=OFF LED2=ON */
-#define LED_IRQSENABLED            2 /* LED0=OFF LED1=ON  LED2=OFF */
-#define LED_STACKCREATED           3 /* LED0=OFF LED1=ON  LED2=ON */
+/* LED index values for use with sam_setled() */
 
-#define LED_INIRQ                  4 /* LED0=XXX LED1=TOG LED2=XXX */
-#define LED_SIGNAL                 5 /* LED0=XXX LED1=XXX LED2=TOG */
-#define LED_ASSERTION              6 /* LED0=TOG LED1=XXX LED2=XXX */
-#define LED_PANIC                  7 /* LED0=TOG LED1=XXX LED2=XXX */
+#define BOARD_D9          0
+#define BOARD_D10         1
+#define BOARD_NLEDS       2
+
+/* LED bits for use with sam_setleds() */
+
+#define BOARD_D9_BIT     (1 << BOARD_D9)
+#define BOARD_D10_BIT    (1 << BOARD_D10)
+
+/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/up_leds.c. The LEDs are used to encode OS-related
+ * events as follows:
+ *
+ *   SYMBOL                Val  Meaning                      LED state
+ *                                                          D9       D10
+ * ----------------------- ---  -----------------------  -------- --------    */
+#define LED_STARTED          0 /* NuttX has been started    OFF      OFF      */
+#define LED_HEAPALLOCATE     0 /* Heap has been allocated   OFF      OFF      */
+#define LED_IRQSENABLED      0 /* Interrupts enabled        OFF      OFF      */
+#define LED_STACKCREATED     0 /* Idle stack created        ON       OFF      */
+#define LED_INIRQ            0 /* In an interrupt             No change       */
+#define LED_SIGNAL           0 /* In a signal handler         No change       */
+#define LED_ASSERTION        0 /* An assertion failed         No change       */
+#define LED_PANIC            0 /* The system has crashed    OFF      Blinking */
+#define LED_IDLE             0 /* MCU is is sleep mode        Not used        */
+
+/* Thus if D9 is statically on, NuttX has successfully booted and is,
+ * apparently, running normmally.  If D10 is flashing at approximately
+ * 2Hz, then a fatal error has been detected and the system has halted.
+ */
 
 /* Button definitions ***************************************************************/
+/* Mechanical buttons:
+ *
+ * The SAM4S Xplained has two mechanical buttons. One button is the RESET button
+ * connected to the SAM4S reset line and the other is a generic user configurable
+ * button labeled BP2. When a button is pressed it will drive the I/O line to GND.
+ *
+ *   PA5 BP2
+ */
 
-#define BUTTON1                    1 /* Bit 0: Button 1 */
-#define BUTTON2                    2 /* Bit 1: Button 2 */
+#define BUTTON_BP2         0
+#define NUM_BUTTONS        1
+
+#define BUTTON_BP2_BIT     (1 << BUTTON_BP2)
 
 /************************************************************************************
  * Public Data
@@ -152,6 +213,22 @@ extern "C" {
  ************************************************************************************/
 
 void sam_boardinitialize(void);
+
+/************************************************************************************
+ * Name:  sam_ledinit, sam_setled, and sam_setleds
+ *
+ * Description:
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LEDs.  If
+ *   CONFIG_ARCH_LEDS is not defined, then the following interfaces are available to
+ *   control the LEDs from user applications.
+ *
+ ************************************************************************************/
+
+#ifndef CONFIG_ARCH_LEDS
+void sam_ledinit(void);
+void sam_setled(int led, bool ledon);
+void sam_setleds(uint8_t ledset);
+#endif
 
 /************************************************************************************
  * Name: up_buttoninit
@@ -201,4 +278,4 @@ xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_SAM3U_EK_INCLUDE_BOARD_H */
+#endif  /* __CONFIGS_SAM4L_XPLAINED_INCLUDE_BOARD_H */
