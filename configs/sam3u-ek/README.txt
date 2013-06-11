@@ -313,15 +313,28 @@ SAM3U-EK-specific Configuration Options
 
   Individual subsystems can be enabled:
 
-    CONFIG_SAM34_DMA
-    CONFIG_SAM34_HSMCI
-    CONFIG_SAM34_NAND
-    CONFIG_SAM34_SPI
-    CONFIG_SAM34_UART0
-    CONFIG_SAM34_USART0
-    CONFIG_SAM34_USART1
-    CONFIG_SAM34_USART2
-    CONFIG_SAM34_USART3
+    CONFIG_SAM34_RTC           - Real Time Clock
+    CONFIG_SAM34_RTT           - Real Time Timer
+    CONFIG_SAM34_WDT           - Watchdog Timer
+    CONFIG_SAM34_UART0         - UART 0
+    CONFIG_SAM34_SMC           - Static Memory Controller
+    CONFIG_SAM34_USART0        - USART 0
+    CONFIG_SAM34_USART1        - USART 1
+    CONFIG_SAM34_USART2        - USART 2
+    CONFIG_SAM34_USART3        - USART 3
+    CONFIG_SAM34_HSMCI         - High Speed Multimedia Card Interface
+    CONFIG_SAM34_TWI0          - Two-Wire Interface 0
+    CONFIG_SAM34_TWI1          - Two-Wire Interface 1
+    CONFIG_SAM34_SPI           - Serial Peripheral Interface
+    CONFIG_SAM34_SSC           - Synchronous Serial Controller
+    CONFIG_SAM34_TC0           - Timer Counter 0
+    CONFIG_SAM34_TC1           - Timer Counter 1
+    CONFIG_SAM34_TC2           - Timer Counter 2
+    CONFIG_SAM34_PWM           - Pulse Width Modulation Controller
+    CONFIG_SAM34_ADC12B        - 12-bit ADC Controller
+    CONFIG_SAM34_ADC           - 10-bit ADC Controller
+    CONFIG_SAM34_DMA           - DMA Controller
+    CONFIG_SAM34_UDPHS         - USB Device High Speed
 
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.
@@ -333,6 +346,7 @@ SAM3U-EK-specific Configuration Options
     CONFIG_USART1_ISUART
     CONFIG_USART2_ISUART
     CONFIG_USART3_ISUART
+    CONFIG_SAM34_NAND          - NAND memory
 
   AT91SAM3U specific device driver settings
 
