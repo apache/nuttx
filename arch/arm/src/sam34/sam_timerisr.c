@@ -64,8 +64,8 @@
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
 #  define SAM_SYSTICK_CLOCK  SAM_MCK_FREQUENCY    /* Frequency of the main clock */
-#elif defined(CONFIG_ARCH_CHIP_SAM4L)
-#  define SAM_SYSTICK_CLOCK  BOARD_CPU_FREQUENCY  /* PBA frequency is undivided */
+#elif defined(CONFIG_ARCH_CHIP_SAM4L) || defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_SYSTICK_CLOCK  BOARD_CPU_FREQUENCY  /* CPU frequency */
 #else
 #  error Unrecognized SAM architecture
 #endif

@@ -56,9 +56,15 @@
 #define SAM_PMC_SCDR_OFFSET              0x0004 /* System Clock Disable Register */
 #define SAM_PMC_SCSR_OFFSET              0x0008 /* System Clock Status Register */
                                                 /* 0x000c: Reserved */
-#define SAM_PMC_PCER_OFFSET              0x0010 /* Peripheral Clock Enable Register */
-#define SAM_PMC_PCDR_OFFSET              0x0014 /* Peripheral Clock Disable Register */
-#define SAM_PMC_PCSR_OFFSET              0x0018 /* Peripheral Clock Status Register */
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_PMC_PCER0_OFFSET           0x0010 /* Peripheral Clock Enable Register 0 */
+#  define SAM_PMC_PCDR0_OFFSET           0x0014 /* Peripheral Clock Disable Register 0 */
+#  define SAM_PMC_PCSR0_OFFSET           0x0018 /* Peripheral Clock Status Register 0 */
+#elif defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define SAM_PMC_PCER_OFFSET            0x0010 /* Peripheral Clock Enable Register */
+#  define SAM_PMC_PCDR_OFFSET            0x0014 /* Peripheral Clock Disable Register */
+#  define SAM_PMC_PCSR_OFFSET            0x0018 /* Peripheral Clock Status Register */
+#endif
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
 #  define SAM_PMC_CKGR_UCKR_OFFSET       0x001c /* UTMI Clock Register */
@@ -111,7 +117,13 @@
 #define SAM_PMC_SCER                     (SAM_PMC_BASE+SAM_PMC_SCER_OFFSET)
 #define SAM_PMC_SCDR                     (SAM_PMC_BASE+SAM_PMC_SCDR_OFFSET)
 #define SAM_PMC_SCSR                     (SAM_PMC_BASE+SAM_PMC_SCSR_OFFSET)
-#define SAM_PMC_PCER                     (SAM_PMC_BASE+SAM_PMC_PCER_OFFSET)
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_PMC_PCER0                  (SAM_PMC_BASE+SAM_PMC_PCER0_OFFSET)
+#elif defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define SAM_PMC_PCER                   (SAM_PMC_BASE+SAM_PMC_PCER_OFFSET)
+#endif
+
 #define SAM_PMC_PCDR                     (SAM_PMC_BASE+SAM_PMC_PCDR_OFFSET)
 #define SAM_PMC_PCSR                     (SAM_PMC_BASE+SAM_PMC_PCSR_OFFSET)
 

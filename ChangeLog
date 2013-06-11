@@ -4949,4 +4949,6 @@
 	  peripheral Kconfig (2013-6-11).
 	* arch/arm/src/sam34/chip/sam4s_pinmap.h:  Add SAM4S pin configuration
 	  definitinos (2013-6-11).
+	* arch/arm/src/sam34/sam4s_periphclks.h:  Add macros to manage SAM4S
+	  peripheral clocks (2013-6-11).
 

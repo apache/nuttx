@@ -60,7 +60,7 @@
 #include "os_internal.h"
 
 #include "chip.h"
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  include "chip/sam3u_uart.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_usart.h"
@@ -314,7 +314,7 @@
  *   selected by the PBADIVMASK register.
  */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_MR_USCLKS    UART_MR_USCLKS_MCK   /* Source = Main clock */
 #  define SAM_USART_CLOCK  SAM_MCK_FREQUENCY    /* Frequency of the main clock */
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)

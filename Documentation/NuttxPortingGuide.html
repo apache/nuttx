@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: March 20, 2013</p>
+      <p>Last Updated: June 11, 2013</p>
     </td>
   </tr>
 </table>
@@ -46,7 +46,8 @@
         <a href="#boardlogic">2.4.2.1 Board Specific Logic</a><br>
         <a href="#boardconfigsubdirs">2.4.2.2 Board Specific Configuration Sub-Directories</a>
       </ul>
-      <a href="#supportedboards">2.4.3 Supported Boards</a>
+      <a href="#supportedboards">2.4.3 Supported Boards</a><br>
+      <a href="#newboardconfig">2.4.4 Adding a New Board Configuration</a>
     </ul>
     <a href="#DirStructDrivers">2.5 nuttx/drivers/</a><br>
     <a href="#DirStructFs">2.6 nuttx/fs/</a><br>
@@ -795,13 +796,13 @@
   </li>
 
   <li><code>configs/ea3131</code>:
-    Embedded Artists EA3131 Development bard.  This board is based on the 
+    Embedded Artists EA3131 Development bard.  This board is based on the
     an NXP LPC3131 MCU. This OS is built with the arm-nuttx-elf toolchain.
     STATUS:  This port is complete and mature.
   </li>
 
   <li><code>configs/eagle100</code>:
-    Micromint Eagle-100 Development board.  This board is based on the 
+    Micromint Eagle-100 Development board.  This board is based on the
     an ARM Cortex-M3 MCU, the Luminary LM3S6918. This OS is built with the
     arm-nuttx-elf toolchain.  STATUS:  This port is complete and mature.
   </li>
@@ -819,7 +820,7 @@
   </li>
 
   <li><code>configs/lm3s6965-ek</code>:
-    Stellaris LM3S6965 Evaluation Kit.  This board is based on the 
+    Stellaris LM3S6965 Evaluation Kit.  This board is based on the
     an ARM Cortex-M3 MCU, the Luminary/TI LM3S6965. This OS is built with the
     arm-nuttx-elf toolchain.  STATUS:  This port is complete and mature.
   </li>
@@ -926,7 +927,7 @@
   </li>
 
   <li><code>configs/rgmp</code>:
-    RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for 
+    RGMP stands for RTOS and GPOS on Multi-Processor.  RGMP is a project for
     running GPOS and RTOS simultaneously on multi-processor platforms. You can
     port your favorite RTOS to RGMP together with an unmodified Linux to form a
     hybrid operating system. This makes your application able to use both RTOS
@@ -978,7 +979,7 @@
 
   <li><code>configs/xtrs</code>:
     TRS80 Model 3.  This port uses a vintage computer based on the Z80.
-    An emulator for this computer is available to run TRS80 programs on a 
+    An emulator for this computer is available to run TRS80 programs on a
     Linux platform (http://www.tim-mann.org/xtrs.html).
   </li>
 
@@ -1020,6 +1021,84 @@
   * A customized version of the <a href="http://www.buildroot.org">buildroot</a>
   is available to build these toolchains under Linux or Cygwin.
 </blockquote></small></p>
+
+<h3><a name="newboardconfig">2.4.4 Adding a New Board Configuration</a></h3>
+<p>
+  Okay, so you have created a new board configuration directory.
+  Now, how do you hook this board into the configuration system so that you can select with <code>make menuconfig</code>?
+</p>
+<p>
+  You will need modify the file <code>configs/Kconfig</code>.
+  Let's look at the STM32F4-Discovery configuration in the <code>Kconfig</code> file and see how we would add a new board directory to the configuration.
+  For this configuration let's say that you new board resides in the directory <code>configs/myboard</code>;
+  It uses an MCU selected with <code>CONFIG_ARCH_CHIP_MYMCU</code>; and you want the board to be selected with <code>CONFIG_ARCH_BOARD_MYBOARD</code>.
+  Then here is how you can clone the STM32F4-Discovery configuration in <code>configs/Kconfig</code> to support your new board configuration.
+</p>
+<p>
+  In <code>configs/Kconfig</code> for the stm32f4-discovery, you will see a configuration definition like this:
+<p>
+<ul><pre>
+config ARCH_BOARD_STM32F4_DISCOVERY
+    bool "STMicro STM32F4-Discovery board"
+    depends on ARCH_CHIP_STM32F407VG
+    select ARCH_HAVE_LEDS
+    select ARCH_HAVE_BUTTONS
+    select ARCH_HAVE_IRQBUTTONS
+    ---help---
+        STMicro STM32F4-Discovery board based on the STMicro STM32F407VGT6 MCU.
+</pre></ul>
+<p>
+  The above selects the STM32F4-Discovery board.
+  The <code>select</code> lines say that the board has both LEDs and buttons and that the board can generate interrupts from the button presses.
+  You can just copy the above configuration definition to a new location (notice that they the configurations are in alphabetical order).
+  Then you should edit the configuration to support your board.
+  The final configuration definition might look something like:
+</p>
+<ul><pre>
+config ARCH_BOARD_MYBOARD
+    bool "My very own board configuration"
+    depends on ARCH_CHIP_MYMCU
+    select ARCH_HAVE_LEDS
+    select ARCH_HAVE_BUTTONS
+    select ARCH_HAVE_IRQBUTTONS
+    ---help---
+        This options selects the board configuration for my very own board
+        based on the MYMCU processor.
+</pre></ul>
+<p>
+  Later in the <code>configs/Kconfig</code> file, you will see a long, long string configuration with lots of defaults like this:
+</p>
+<ul><pre>
+config ARCH_BOARD
+    string
+    default "amber"               if ARCH_BOARD_AMBER
+    default "avr32dev1"           if ARCH_BOARD_AVR32DEV1
+    default "c5471evm"            if ARCH_BOARD_C5471EVM
+...
+    default "stm32f4discovery"    if ARCH_BOARD_STM32F4_DISCOVERY
+...
+</pre></ul>
+<p>
+  This logic will assign string value to a configuration variable called <code>CONFIG_ARCH_BOARD</code> that will name the directory where the board-specific files reside.
+  In our case, these files reside in <code>configs/myboard</code> and we add the following to the long list of defaults (again in alphabetical order):
+</p>
+<ul><pre>
+    default "myboar"              if ARCH_BOARD_MYBOARD
+</pre></ul>
+<p>
+  Now the build system knows where to find your board configuration!
+</p>
+<p>
+  And finally, add something like this near the bottom of <code>configs/myboard</code>:
+</p>
+<ul><pre>
+if ARCH_BOARD_MYBOARD
+source "configs/myboard/Kconfig"
+endif
+</pre></ul>
+<p>
+  This includes additional, board-specific configuration variabled defintion in <code>configs/myboard/Kconfig</code>.
+</p>
 
 <h2>2.5 <a name="DirStructDrivers">nuttx/drivers</a></h2>
 
@@ -1078,7 +1157,7 @@ drivers/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common USB host driver source files)</i>
-|-- wirelss/
+|-- wireless/
 |   |-- Kconfig
 |   |-- Make.defs
 |   `-- <i>(Common wireless driver source files)</i>
@@ -1666,7 +1745,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </ul>
 
 <h3><a name="upusestack">4.1.5 <code>up_use_stack()</code></a></h3>
-<p><b>Prototype</b>: 
+<p><b>Prototype</b>:
   <code>STATUS up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);</code>
 </p>
 
@@ -1864,7 +1943,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 
 <p><b>Description</b>.
   Called when the priority of a running or
-  ready-to-run task changes and the reprioritization will 
+  ready-to-run task changes and the reprioritization will
   cause a context switch.  Two cases:
 </p>
 <ol>
@@ -2146,7 +2225,7 @@ else
 <p>
 <ul><dl>
   <dt><code>CONFIG_RTC</code>
-  <dd>Enables general support for a hardware RTC. 
+  <dd>Enables general support for a hardware RTC.
       Specific architectures may require other specific settings.
   <dt><code>CONFIG_RTC_DATETIME</code>
   <dd>There are two general types of RTC:  (1) A simple battery backed counter that keeps the time when power
@@ -2164,7 +2243,7 @@ else
   <dd>If <code>CONFIG_RTC_HIRES</code> is defined, then the frequency of the high resolution RTC must be provided.
       If <code>CONFIG_RTC_HIRES</code> is not defined, <code>CONFIG_RTC_FREQUENCY</code> is assumed to be one.
   <dt><code>CONFIG_RTC_ALARM</code>
-  <dd>Enable if the RTC hardware supports setting of an alarm. 
+  <dd>Enable if the RTC hardware supports setting of an alarm.
     A callback function will be executed when the alarm goes off
 </dl></ul>
 <p>
@@ -2175,13 +2254,13 @@ else
      Initialize the hardware RTC per the selected configuration.
      This function is called once during the OS initialization sequence
   </li>
-  <li><code>up_rtc_time()</code>. 
+  <li><code>up_rtc_time()</code>.
     Get the current time in seconds.  This is similar to the standard <code>time()</code> function.
     This interface is only required if the low-resolution RTC/counter hardware implementation selected.
     It is only used by the RTOS during intialization to set up the system time when <code>CONFIG_RTC</code> is set
     but neither <code>CONFIG_RTC_HIRES</code> nor <code>CONFIG_RTC_DATETIME</code> are set.
   </li>
-  <li><code>up_rtc_gettime()</code>. 
+  <li><code>up_rtc_gettime()</code>.
     Get the current time from the high resolution RTC clock/counter.
     This interface is only supported by the hight-resolution RTC/counter hardware implementation.
     It is used to replace the system timer (<code>g_system_tick</code>).
@@ -2250,11 +2329,11 @@ else
         Returns the virtual base address of the address environment.
       </li>
       <li>
-        <a href="#up_addrenv_select">4.1.22.3 <code>up_addrenv_select()</code></a>: 
+        <a href="#up_addrenv_select">4.1.22.3 <code>up_addrenv_select()</code></a>:
         Instantiate an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_restore">4.1.22.4 <code>up_addrenv_restore()</code></a>: 
+        <a href="#up_addrenv_restore">4.1.22.4 <code>up_addrenv_restore()</code></a>:
         Restore an address environment.
       </li>
       <li>
@@ -2315,7 +2394,7 @@ else
 </ul>
 <p><b>Description</b>:</p>
 <ul>
-  Return the virtual address associated with the newly create address environment. 
+  Return the virtual address associated with the newly create address environment.
   This function is used by the binary loaders in order get an address that can be used to initialize the new task.
 </ul>
 <p><b>Input Parameters</b>:</p>
@@ -2531,9 +2610,9 @@ else
 <h3><a name="leddefinitions">4.3.2 LED Definitions</a></h3>
 
 <p>
-   The implementation of LED support is very specific to a board architecture. 
-   Some boards have several LEDS, others have only one or two. 
-   Some have none. 
+   The implementation of LED support is very specific to a board architecture.
+   Some boards have several LEDS, others have only one or two.
+   Some have none.
    Others LED matrices and show alphanumeric data, etc.
    The NuttX logic does not refer to specific LEDS, rather, it refers to an event to be shown on the LEDS
    in whatever manner is appropriate for the board;
@@ -2705,7 +2784,7 @@ extern void up_ledoff(int led);
   </ul>
   These different device driver types are discussed in the following paragraphs.
   Note: device driver support requires that the <i>in-memory</i>, <i>pseudo</i> file system
-  is enabled by setting the CONFIG_NFILE_DESCRIPTORS in the NuttX configuration file to a 
+  is enabled by setting the CONFIG_NFILE_DESCRIPTORS in the NuttX configuration file to a
   non-zero value.
 </p>
 
@@ -3451,7 +3530,7 @@ extern void up_ledoff(int led);
           <p>
             As part of its operation during the binding operation, the USB host class driver will register an instances of a standard NuttX driver under the <code>/dev</code> directory.
             To repeat the above example, the USB host mass storage class driver (<code>drivers/usbhost/usbhost_storage.c</code>) will register a standard, NuttX block driver interface (like <code>/dev/sda</code>)
-            that can be used to mount a file system just as with any other other block driver instance. 
+            that can be used to mount a file system just as with any other other block driver instance.
           </p>
           <p>
             <b>Examples</b>:
@@ -3487,7 +3566,7 @@ extern void up_ledoff(int led);
     </p>
     <p>
       <b>Examples</b>:
-      <code>arch/arm/src/dm320/dm320_usbdev.c</code>, <code>arch/arm/src/lpc17xx/lpc17_usbdev.c</code>, 
+      <code>arch/arm/src/dm320/dm320_usbdev.c</code>, <code>arch/arm/src/lpc17xx/lpc17_usbdev.c</code>,
       <code>arch/arm/src/lpc214x/lpc214x_usbdev.c</code>, <code>arch/arm/src/lpc313x/lpc313x_usbdev.c</code>, and
        <code>arch/arm/src/stm32/stm32_usbdev.c</code>.
     </p>
@@ -3914,11 +3993,11 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
             <code>stream</code>:  An instance of <code>lib_instream_s</code> to perform the actual low-level get operation.
           </li>
           <li>
-            <code>pch</code>:  The location to save the returned value. 
+            <code>pch</code>:  The location to save the returned value.
             This may be either a normal, character code or a special command (i.e., a value from <code>enum kbd_getstate_s</code>.
           </li>
           <li>
-            <code>state</code>:  A user provided buffer to support parsing. 
+            <code>state</code>:  A user provided buffer to support parsing.
             This structure should be cleared the first time that <code>kbd_decode()</code> is called.
           </li>
         </ul>
@@ -3989,12 +4068,12 @@ int kbd_decode(FAR struct lib_instream_s *stream, FAR struct kbd_getstate_s *sta
 <ul>
   <li>
     <p>
-      Reports of relevant driver or other system activity. 
+      Reports of relevant driver or other system activity.
     </p>
   </li>
   <li>
     <p>
-      Registration and callback mechanism to interface with individual device drivers. 
+      Registration and callback mechanism to interface with individual device drivers.
     </p>
   </li>
   <li>
@@ -4192,7 +4271,7 @@ int (*prepare)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
    Zero (<code>OK</code>) means the event was successfully processed and that the driver is prepared for the PM state change.
    Non-zero means that the driver is not prepared to perform the tasks needed achieve this power setting and will cause the state change to be aborted.
    NOTE:  The <code>prepare()</code> method will also be called when reverting from lower back to higher power consumption modes (say because another driver refused a lower power state change).
-   Drivers are not permitted to return non-zero values when reverting back to higher power 
+   Drivers are not permitted to return non-zero values when reverting back to higher power
    consumption modes!
 </p>
 
@@ -4391,7 +4470,7 @@ build
   If the 2 pass build option is selected, then these options configure the make system build a extra link object.
   This link object is assumed to be an incremental (relative) link object, but could be a static library (archive)
   (some modification to this Makefile would be required if CONFIG_PASS1_TARGET generates an archive).
-  Pass 1 1ncremental (relative) link objects should be put into the processor-specific source directory 
+  Pass 1 1ncremental (relative) link objects should be put into the processor-specific source directory
   where other link objects will be created - ff the pass1 obect is an archive, it could    go anywhere.
 </p>
 <ul>
@@ -4423,7 +4502,7 @@ build
   </li>
   <li>
     <code>CONFIG_PASS1_OBJECT</code>: May be used to include an extra, pass1 object into the final link.
-    This would probably be the object generated from the <code>CONFIG_PASS1_TARGET</code>. 
+    This would probably be the object generated from the <code>CONFIG_PASS1_TARGET</code>.
     It may be available at link time in the <code>arch/&lt;architecture&gt;/src</code> directory.
   </li>
 </ul>
@@ -4584,7 +4663,7 @@ build
     be disabled by setting this value to zero.
   </li>
   <li>
-    <code>CONFIG_SCHED_INSTRUMENTATION</code>: enables instrumentation in 
+    <code>CONFIG_SCHED_INSTRUMENTATION</code>: enables instrumentation in
     scheduler to monitor system performance
   </li>
   <li>
@@ -5024,7 +5103,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
     In some architectures, it may be necessary to take some memory from the end of RAM for page tables
     or other system usage.
     The configuration settings and linker directives must be cognizant of that:
-    <code>CONFIG_PAGING_NDATA</code> should be defined to prevent the data region from extending all the way to the end of memory. 
+    <code>CONFIG_PAGING_NDATA</code> should be defined to prevent the data region from extending all the way to the end of memory.
   </li>
   <li>
     <code>CONFIG_PAGING_DEFPRIO</code>:
@@ -5058,7 +5137,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
     Default: No timeouts monitored.
   </li>
   <p>
-    Some architecture-specific settings. 
+    Some architecture-specific settings.
     Defaults are architecture specific.
     If you don't know what you are doing, it is best to leave these undefined and try the system defaults:
   </p>
@@ -5198,7 +5277,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
 <ul><li>
   <code>CONFIG_MEMCPY_VIK</code>:
   Select this option to use the optimized <code>memcpy()</code> function by Daniel Vik.
-  Select this option for improved performance at the expense of increased size. 
+  Select this option for improved performance at the expense of increased size.
   See licensing information in the top-level <code>COPYING</code> file.
   Default: <code>n</code>.
 </li></ul>
@@ -5440,7 +5519,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
     <code>CONFIG_FS_NXFFS</code>: Enable NuttX FLASH file system (NXFF) support.
   </li>
   <li>
-    <code>CONFIG_NXFFS_ERASEDSTATE</code>: The erased state of FLASH. 
+    <code>CONFIG_NXFFS_ERASEDSTATE</code>: The erased state of FLASH.
     This must have one of the values of <code>0xff</code> or <code>0x00</code>.
     Default: <code>0xff</code>.
   </li>
@@ -5491,7 +5570,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
 <ul>
   <li>
     <code>CONFIG_RTC</code>:
-      Enables general support for a hardware RTC. 
+      Enables general support for a hardware RTC.
       Specific architectures may require other specific settings.
   </li>
   <li>
@@ -5517,7 +5596,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
   </li>
   <li>
     <code>CONFIG_RTC_ALARM</code>:
-      Enable if the RTC hardware supports setting of an alarm. 
+      Enable if the RTC hardware supports setting of an alarm.
       A callback function will be executed when the alarm goes off
   </li>
 </ul>
@@ -5740,7 +5819,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
   </li>
   <li>
     <code>CONFIG_STMPE811_NPOLLWAITERS</code>:
-    Maximum number of threads that can be waiting on poll() (ignored if 
+    Maximum number of threads that can be waiting on poll() (ignored if
     <code>CONFIG_DISABLE_POLL</code> is set).
   </li>
   <li>
@@ -6033,7 +6112,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
     text MIME types.
   </li>
   <li>
-    <code>CONFIG_THTTPD_IOBUFFERSIZE</code>: 
+    <code>CONFIG_THTTPD_IOBUFFERSIZE</code>:
   </li>
   <li>
     <code>CONFIG_THTTPD_INDEX_NAMES</code>: A list of index filenames to check. The
@@ -6087,7 +6166,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
     You can also leave both options undefined, and thttpd will not do
     anything special about tildes. Enabling both options is an error.
     Typical values, if they're defined, are &quot;users&quot; for
-    CONFIG_THTTPD_TILDE_MAP1 and &quot;public_html&quot; forCONFIG_THTTPD_TILDE_MAP2. 
+    CONFIG_THTTPD_TILDE_MAP1 and &quot;public_html&quot; forCONFIG_THTTPD_TILDE_MAP2.
   </li>
   <li>
     <code>CONFIG_THTTPD_GENERATE_INDICES</code>:
@@ -6157,7 +6236,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
   </li>
 </ul>
 
-<h3>USB Serial Device Class Driver (Prolific PL2303 Emulation)</h3> 
+<h3>USB Serial Device Class Driver (Prolific PL2303 Emulation)</h3>
 <ul>
   <li>
     <code>CONFIG_PL2303</code>: Enable compilation of the USB serial driver
@@ -6197,14 +6276,14 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
   </li>
   <li>
     <code>CONFIG_CDCACM_IFNOBASE</code>:
-    If the CDC driver is part of a composite device, then this may need to 
+    If the CDC driver is part of a composite device, then this may need to
     be defined to offset the CDC/ACM interface numbers so that they are
     unique and contiguous.  When used with the Mass Storage driver, the
     correct value for this offset is zero.
   </li>
   <li>
     <code>CONFIG_CDCACM_STRBASE</code>:
-    If the CDC driver is part of a composite device, then this may need to 
+    If the CDC driver is part of a composite device, then this may need to
     be defined to offset the CDC/ACM string numbers so that they are
     unique and contiguous.  When used with the Mass Storage driver, the
     correct value for this offset is four (this value actuallly only needs
@@ -6275,7 +6354,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
   </li>
   <li>
     <code>CONFIG_USBMSC_IFNOBASE</code>:
-    If the CDC driver is part of a composite device, then this may need to 
+    If the CDC driver is part of a composite device, then this may need to
     be defined to offset the mass storage interface number so that it is
     unique and contiguous.  When used with the CDC/ACM driver, the
     correct value for this offset is two (because of the two CDC/ACM
@@ -6283,7 +6362,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
   </li>
   <li>
     <code>CONFIG_USBMSC_STRBASE</code>:
-    If the CDC driver is part of a composite device, then this may need to 
+    If the CDC driver is part of a composite device, then this may need to
     be defined to offset the mass storage string numbers so that they are
     unique and contiguous.  When used with the CDC/ACM driver, the
     correct value for this offset is four (or perhaps 5 or 6, depending
