@@ -58,7 +58,7 @@
 #define SAM_PID_PMC            (5)  /* Power Management Controller */
 #define SAM_PID_EEFC0          (6)  /* Enhanced Embedded Flash Controller 0 */
 #define SAM_PID_EEFC1          (7)  /* Enhanced Embedded Flash Controller 1 */
-#define SAM_PID_UART           (8)  /* Universal Asynchronous Receiver Transmitter */
+#define SAM_PID_UART0          (8)  /* Universal Asynchronous Receiver Transmitter */
 #define SAM_PID_SMC            (9)  /* Static Memory Controller */
 #define SAM_PID_PIOA          (10)  /* Parallel I/O Controller A */
 #define SAM_PID_PIOB          (11)  /* Parallel I/O Controller B */
@@ -92,7 +92,7 @@
 #define SAM_IRQ_PMC           (SAM_IRQ_EXTINT+SAM_PID_PMC)    /* Power Management Controller */
 #define SAM_IRQ_EEFC0         (SAM_IRQ_EXTINT+SAM_PID_EEFC0)  /* Enhanced Embedded Flash Controller 0 */
 #define SAM_IRQ_EEFC1         (SAM_IRQ_EXTINT+SAM_PID_EEFC1)  /* Enhanced Embedded Flash Controller 1 */
-#define SAM_IRQ_UART          (SAM_IRQ_EXTINT+SAM_PID_UART)   /* Universal Asynchronous Receiver Transmitter */
+#define SAM_IRQ_UART0         (SAM_IRQ_EXTINT+SAM_PID_UART0)  /* Universal Asynchronous Receiver Transmitter */
 #define SAM_IRQ_SMC           (SAM_IRQ_EXTINT+SAM_PID_SMC)    /* Static Memory Controller */
 #define SAM_IRQ_PIOA          (SAM_IRQ_EXTINT+SAM_PID_PIOA)   /* Parallel I/O Controller A */
 #define SAM_IRQ_PIOB          (SAM_IRQ_EXTINT+SAM_PID_PIOB)   /* Parallel I/O Controller B */
