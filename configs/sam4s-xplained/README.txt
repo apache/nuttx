@@ -401,6 +401,30 @@ SAM4S Xplained-specific Configuration Options
 
   Individual subsystems can be enabled:
 
+    CONFIG_SAM34_RTC         - Real Time Clock
+    CONFIG_SAM34_RTT         - Real Time Timer
+    CONFIG_SAM34_WDT         - Watchdog Timer
+    CONFIG_SAM34_UART0       - UART 0
+    CONFIG_SAM34_UART1       - UART 1
+    CONFIG_SAM34_SMC         - Static Memory Controller
+    CONFIG_SAM34_USART0      - USART 0
+    CONFIG_SAM34_USART1      - USART 1
+    CONFIG_SAM34_HSMCI       - High Speed Multimedia Card Interface
+    CONFIG_SAM34_TWI0        - Two-Wire Interface 0
+    CONFIG_SAM34_TWI1        - Two-Wire Interface 1
+    CONFIG_SAM34_SSC         - Synchronous Serial Controller
+    CONFIG_SAM34_TC0         - Timer Counter 0
+    CONFIG_SAM34_TC1         - Timer Counter 1
+    CONFIG_SAM34_TC2         - Timer Counter 2
+    CONFIG_SAM34_TC3         - Timer Counter 3
+    CONFIG_SAM34_TC4         - Timer Counter 4
+    CONFIG_SAM34_TC5         - Timer Counter 5
+    CONFIG_SAM34_ADC12B      - 12-bit Analog To Digital Converter
+    CONFIG_SAM34_DACC        - Digital To Analog Converter
+    CONFIG_SAM34_PWM         - Pulse Width Modulation
+    CONFIG_SAM34_CRCCU       - CRC Calculation Unit
+    CONFIG_SAM34_ACC         - Analog Comparator
+    CONFIG_SAM34_UDP         - USB Device Port
 
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.

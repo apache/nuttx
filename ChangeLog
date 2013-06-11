@@ -4945,4 +4945,6 @@
 	  Add SAM4S memory map and interrupt definitions (2013-6-10)
 	* configs/sam4s-xplained:  Add framework for the SAM4S Xplained board.
 	  There is not much there on initial checkin (2013-6-10).
+	* arch/arm/src/sam34: SAM3S support: GPIO, chip characteristics,
+	  peripheral Kconfig (2013-6-11).
 
