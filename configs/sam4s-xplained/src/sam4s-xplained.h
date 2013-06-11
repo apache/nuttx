@@ -87,10 +87,10 @@
  */
 
 
-#define GPIO_D9     (GPIO_OUTPUT | GPIO_PULL_UP | GPIO_OUTPUT_SET | \
-                     GPIO_PORTC | GPIO_PIN10)
-#define GPIO_D10    (GPIO_OUTPUT | GPIO_PULL_UP | GPIO_OUTPUT_SET | \
-                     GPIO_PORTC | GPIO_PIN17)
+#define GPIO_D9     (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
+                     GPIO_PORT_PIOC | GPIO_PIN10)
+#define GPIO_D10    (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
+                     GPIO_PORT_PIOC | GPIO_PIN17)
 
 /* Mechanical buttons:
  *
@@ -101,9 +101,9 @@
  *   PA5 BP2
  */
 
-#define GPIO_BP2      (GPIO_INPUT | GPIO_PULL_UP | GPIO_GLITCH_FILTER | \
-                       GPIO_PORTA | GPIO_PIN5)
-#define IRQ_BP2       SAM_IRQ_PA5
+#define GPIO_BP2    (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
+                     GPIO_PORT_PIOA | GPIO_PIN5)
+#define IRQ_BP2     SAM_IRQ_PA5
 
 /************************************************************************************
  * Public Types

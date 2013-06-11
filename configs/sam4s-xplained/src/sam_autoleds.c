@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "sam_gpip.h"
+#include "sam_gpio.h"
 #include "sam4s-xplained.h"
 
 #ifdef CONFIG_ARCH_LEDS
