@@ -1,23 +1,72 @@
 README
 ^^^^^^
 
-This README discusses issues unique to NuttX configurations for the
-Atmel SAM4L Xplained Pro development board.  This board features the
-ATSAM4LC4C MCU
+  This README discusses issues unique to NuttX configurations for the
+  Atmel SAM4S Xplained  development board.  This board features the
+  ATSAM4S16C MCU with 1MB FLASH and 128KB.
+
+  The SAM4S Xplained features:
+
+    - 12MHz crystal (no 32.768KHz crystal)S
+    - Segger J-Link JTAG emulator on-board for program and debug
+    - MICRO USB A/B connector for USB connectivity
+    - IS66WV51216DBLL ISSI SRAM 8Mb 512K x 16 55ns PSRAM 2.5v-3.6v
+    - Four Atmel QTouch buttons
+    - External voltage input
+    - Four LEDs, two controllable from software
+    - Xplained expansion headers
+    - Footprint for external serial Flash (not fitted)
 
 Contents
 ^^^^^^^^
 
+  - PIO Muxing
   - Development Environment
   - GNU Toolchain Options
   - IDEs
   - NuttX EABI "buildroot" Toolchain
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
-  - LEDs
+  - Buttons and LEDs
   - Serial Consoles
-  - SAM4L Xplained Pro-specific Configuration Options
+  - SAM4S Xplained-specific Configuration Options
   - Configurations
+
+PIO Muxing
+^^^^^^^^^^
+
+  PA0   SMC_A17                  PB0   J2.3 default   PC0   SMC_D0
+  PA1   SMC_A18                  PB1   J2.4           PC1   SMC_D1
+  PA2   J3.7 default             PB2   J1.3 & J4.3    PC2   SMC_D2
+  PA3   J1.1 & J4.1              PB3   J1.4 & J4.4    PC3   SMC_D3
+  PA4   J1.2 & J4.2              PB4   JTAG           PC4   SMC_D4
+  PA5   User_button BP2          PB5   JTAG           PC5   SMC_D5
+  PA6   J3.7 optional            PB6   JTAG           PC6   SMC_D6
+  PA7   CLK_32K                  PB7   JTAG           PC7   SMC_D7
+  PA8   CLK_32K                  PB8   CLK_12M        PC8   SMC_NWE
+  PA9   RX_UART0                 PB9   CLK_12M        PC9   Power on detect
+  PA10  TX_UART0                 PB10  USB_DDM        PC10  User LED D9
+  PA11  J3.2 default             PB11  USB_DDP        PC11  SMC_NRD
+  PA12  MISO                     PB12  ERASE          PC12  J2.2
+  PA13  MOSI                     PB13  J2.3 optional  PC13  J2.7
+  PA14  SPCK                     PB14  N/A            PC14  SMC_NCS0
+  PA15  J3.5                                          PC15  SMC_NSC1
+  PA16  J3.6                                          PC16  N/A
+  PA17  J2.5                                          PC17  User LED D10
+  PA18  J3.4 & SMC_A14                                PC18  SMC_A0
+  PA19  J3.4 optional & SMC_A15                       PC19  SMC_A1
+  PA20  J3.1 & SMC_A16                                PC20  SMC_A2
+  PA21  J2.6                                          PC21  SMC_A3
+  PA22  J2.1                                          PC22  SMC_A4
+  PA23  J3.3                                          PC23  SMC_A5
+  PA24  TSLIDR_SL_SN                                  PC24  SMC_A6
+  PA25  TSLIDR_SL_SNSK                                PC25  SMC_A7
+  PA26  TSLIDR_SM_SNS                                 PC26  SMC_A8
+  PA27  TSLIDR_SM_SNSK                                PC27  SMC_A9
+  PA28  TSLIDR_SR_SNS                                 PC28  SMC_A10
+  PA29  TSLIDR_SR_SNSK                                PC29  SMC_A11
+  PA30  J4.5                                          PC30  SMC_A12
+  PA31  J1.5                                          PC31  SMC_A13
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -134,7 +183,7 @@ NuttX EABI "buildroot" Toolchain
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.shsam4l-xplained/<sub-dir>
+     ./configure.shsam4s-xplained/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -215,48 +264,50 @@ NXFLAT Toolchain
   8. Edit setenv.h, if necessary, so that the PATH variable includes
      the path to the newly builtNXFLAT binaries.
 
-LEDs
-^^^^
-  There are three LEDs on board the SAM4L Xplained Pro board:  The EDBG
-  controls two of the LEDs, a power LED and a status LED.  There is only
-  one user controllable LED, a yellow LED labeled LED0 near the SAM4L USB
-  connector.
+Buttons and LEDs
+^^^^^^^^^^^^^^^^
 
-  This LED is controlled by PC07 and LED0 can be activated by driving the
-  PC07 to GND.
+  Buttons
+  -------
 
-  When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
-  control LED0 as follows:
+  There is one user button labeld BP2 and connected to PA5.
 
-    SYMBOL              Meaning                 LED0
-    ------------------- ----------------------- ------
-    LED_STARTED         NuttX has been started  OFF
-    LED_HEAPALLOCATE    Heap has been allocated OFF
-    LED_IRQSENABLED     Interrupts enabled      OFF
-    LED_STACKCREATED    Idle stack created      ON
-    LED_INIRQ           In an interrupt         N/C
-    LED_SIGNAL          In a signal handler     N/C
-    LED_ASSERTION       An assertion failed     N/C
-    LED_PANIC           The system has crashed  FLASH
+  LEDs
+  ----
 
-  Thus is LED0 is statically on, NuttX has successfully  booted and is,
-  apparently, running normmally.  If LED0 is flashing at approximately
-  2Hz, then a fatal error has been detected and the system has halted.
+  There are four LEDs on board the SAM4X Xplained board, two of these can be
+  controlled by software in the SAM4S:
+
+      LED              GPIO
+      ---------------- -----
+      D9  Yellow LED   PC10
+      D10 Yellow LED   PC17
+ 
+  Both can be illuminated by driving the GPIO output to ground (low).
+
+  These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+  defined.  In that case, the usage by the board port is defined in
+  include/board.h and src/up_leds.c. The LEDs are used to encode OS-related
+  events as follows:
+
+    SYMBOL                Meaning                     LED state
+                                                    D9       D10
+    -------------------  -----------------------  -------- --------
+    LED_STARTED          NuttX has been started     OFF      OFF
+    LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
+    LED_IRQSENABLED      Interrupts enabled         OFF      OFF
+    LED_STACKCREATED     Idle stack created         ON       OFF
+    LED_INIRQ            In an interrupt              No change
+    LED_SIGNAL           In a signal handler          No change
+    LED_ASSERTION        An assertion failed          No change
+    LED_PANIC            The system has crashed     OFF      Blinking
+    LED_IDLE             MCU is is sleep mode         Not used
 
 Serial Consoles
 ^^^^^^^^^^^^^^^
 
   USART0
   ------
-
-  USART is available on connectors EXT1 and EXT4
-
-    EXT1  TXT4  GPIO  Function
-    ----  ---- ------ -----------
-     13    13   PB00  USART0_RXD
-     14    14   PB01  USART0_TXD
-     19    19         GND
-     20    20         VCC
 
   If you have a TTL to RS-232 convertor then this is the most convenient
   serial console to use.  It is the default in all of these configurations.
@@ -265,144 +316,91 @@ Serial Consoles
   Virtual COM Port
   ----------------
 
-  The SAM4L Xplained Pro contains an Embedded Debugger (EDBG) that can be
-  used to program and debug the ATSAM4LC4C using Serial Wire Debug (SWD).
+  The SAM4S Xplained contains an Embedded Debugger (EDBG) that can be
+  used to program and debug the ATSAM4S16C using Serial Wire Debug (SWD).
   The Embedded debugger also include a Virtual Com port interface over
   USART1.  Virtual COM port connections:
 
-    PC26 USART1 RXD
-    PC27 USART1 TXD
+  AT91SAM4S16     ATSAM3U4CAU
+  -------------- --------------
+  PA9   RX_UART0  PA9_4S PA12
+  PA10  TX_UART0  RX_3U  PA11
 
-SAM4L Xplained Pro-specific Configuration Options
+SAM4S Xplained-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
-       be set to:
+  CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
+  be set to:
 
-       CONFIG_ARCH=arm
+    CONFIG_ARCH=arm
 
-    CONFIG_ARCH_family - For use in C code:
+  CONFIG_ARCH_family - For use in C code:
 
-       CONFIG_ARCH_ARM=y
+    CONFIG_ARCH_ARM=y
 
-    CONFIG_ARCH_architecture - For use in C code:
+  CONFIG_ARCH_architecture - For use in C code:
 
-       CONFIG_ARCH_CORTEXM4=y
+    CONFIG_ARCH_CORTEXM4=y
 
-    CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
+  CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-       CONFIG_ARCH_CHIP="sam34"
+    CONFIG_ARCH_CHIP="sam34"
 
-    CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
-       chip:
+  CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
+  chip:
 
-       CONFIG_ARCH_CHIP_SAM34
-       CONFIG_ARCH_CHIP_SAM4L
-       CONFIG_ARCH_CHIP_ATSAM4LC4C
+    CONFIG_ARCH_CHIP_SAM34
+    CONFIG_ARCH_CHIP_SAM4S
+    CONFIG_ARCH_CHIP_ATSAM4S16C
 
-    CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
-       hence, the board that supports the particular chip or SoC.
+  CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
+  hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=sam4l-xplained (for the SAM4L Xplained Pro development board)
+    CONFIG_ARCH_BOARD=sam4s-xplained (for the SAM4S Xplained development board)
 
-    CONFIG_ARCH_BOARD_name - For use in C code
+  CONFIG_ARCH_BOARD_name - For use in C code
 
-       CONFIG_ARCH_BOARD_SAM4L_XPLAINED=y
+    CONFIG_ARCH_BOARD_SAM4S_XPLAINED=y
 
-    CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
-       of delay loops
+  CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
+  of delay loops
 
-    CONFIG_ENDIAN_BIG - define if big endian (default is little
-       endian)
+  CONFIG_ENDIAN_BIG - define if big endian (default is little
+  endian)
 
-    CONFIG_DRAM_SIZE - Describes the installed DRAM (SRAM in this case):
+  CONFIG_DRAM_SIZE - Describes the installed DRAM (SRAM in this case):
 
-       CONFIG_DRAM_SIZE=0x00008000 (32Kb)
+    CONFIG_DRAM_SIZE=0x00008000 (32Kb)
 
-    CONFIG_DRAM_START - The start address of installed DRAM
+  CONFIG_DRAM_START - The start address of installed DRAM
 
-       CONFIG_DRAM_START=0x20000000
+    CONFIG_DRAM_START=0x20000000
 
-    CONFIG_ARCH_IRQPRIO - The SAM3UF103Z supports interrupt prioritization
+  CONFIG_ARCH_IRQPRIO - The SAM3UF103Z supports interrupt prioritization
 
-       CONFIG_ARCH_IRQPRIO=y
+    CONFIG_ARCH_IRQPRIO=y
 
-    CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
-       have LEDs
+  CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
+  have LEDs
 
-    CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
-       stack. If defined, this symbol is the size of the interrupt
-        stack in bytes.  If not defined, the user task stacks will be
-      used during interrupt handling.
+  CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
+  stack. If defined, this symbol is the size of the interrupt
+  stack in bytes.  If not defined, the user task stacks will be
+  used during interrupt handling.
 
-    CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
+  CONFIG_ARCH_STACKDUMP - Do stack dumps after assertions
 
-    CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
+  CONFIG_ARCH_LEDS -  Use LEDs to show state. Unique to board architecture.
 
-    CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
-       cause a 100 second delay during boot-up.  This 100 second delay
-       serves no purpose other than it allows you to calibratre
-       CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
-       the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
-       the delay actually is 100 seconds.
+  CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
+  cause a 100 second delay during boot-up.  This 100 second delay
+  serves no purpose other than it allows you to calibratre
+  CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
+  the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
+  the delay actually is 100 seconds.
 
   Individual subsystems can be enabled:
 
-    CPU
-    ---
-    CONFIG_SAM34_OCD
-
-    HSB
-    ---
-    CONFIG_SAM34_APBA
-    CONFIG_SAM34_AESA
-
-    PBA
-    ---
-    CONFIG_SAM34_IISC
-    CONFIG_SAM34_SPI
-    CONFIG_SAM34_TC0
-    CONFIG_SAM34_TC1
-    CONFIG_SAM34_TWIM0
-    CONFIG_SAM34_TWIS0
-    CONFIG_SAM34_TWIM1
-    CONFIG_SAM34_TWIS1
-    CONFIG_SAM34_USART0
-    CONFIG_SAM34_USART1
-    CONFIG_SAM34_USART2
-    CONFIG_SAM34_USART3
-    CONFIG_SAM34_ADCIFE
-    CONFIG_SAM34_DACC
-    CONFIG_SAM34_ACIFC
-    CONFIG_SAM34_GLOC
-    CONFIG_SAM34_ABDACB
-    CONFIG_SAM34_TRNG
-    CONFIG_SAM34_PARC
-    CONFIG_SAM34_CATB
-    CONFIG_SAM34_TWIM2
-    CONFIG_SAM34_TWIM3
-    CONFIG_SAM34_LCDCA
-
-    PBB
-    ---
-    CONFIG_SAM34_HRAMC1
-    CONFIG_SAM34_HMATRIX
-    CONFIG_SAM34_PDCA
-    CONFIG_SAM34_CRCCU
-    CONFIG_SAM34_USBC
-    CONFIG_SAM34_PEVC
-
-    PBC
-    ---
-    CONFIG_SAM34_CHIPID
-    CONFIG_SAM34_FREQM
-
-    PBD
-    ---
-    CONFIG_SAM34_AST
-    CONFIG_SAM34_WDT
-    CONFIG_SAM34_EIC
-    CONFIG_SAM34_PICOUART
 
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.
@@ -415,7 +413,7 @@ SAM4L Xplained Pro-specific Configuration Options
     CONFIG_USART2_ISUART
     CONFIG_USART3_ISUART
 
-  ST91SAM4L specific device driver settings
+  ST91SAM4S specific device driver settings
 
     CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,3) or UART
            m (m=4,5) for the console and ttys0 (default is the USART1).
@@ -431,11 +429,11 @@ SAM4L Xplained Pro-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-  Each SAM4L Xplained Pro configuration is maintained in a sub-directory and
+  Each SAM4S Xplained configuration is maintained in a sub-directory and
   can be selected as follow:
 
     cd tools
-    ./configure.shsam4l-xplained/<subdir>
+    ./configure.shsam4s-xplained/<subdir>
     cd -
     . ./setenv.sh
 

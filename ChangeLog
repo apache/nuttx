@@ -4943,3 +4943,6 @@
 	  UARTs, USARTs, HSMCI, SPI (2013-6-10).
 	* arch/arm/src/chip/sam4s_memorymap.h, sam4s_irq.h, and sam4s_vectors.h:
 	  Add SAM4S memory map and interrupt definitions (2013-6-10)
+	* configs/sam4s-xplained:  Add framework for the SAM4S Xplained board.
+	  There is not much there on initial checkin (2013-6-10).
+

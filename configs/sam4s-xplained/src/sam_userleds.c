@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/stm32ldiscovery/src/stm32_userleds.c
+ * configs/sam4s-xplained/src/sam_userleds.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,8 +46,8 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "stm32.h"
-#include "stm32ldiscovery.h"
+#include "sam_gpio.h"
+#include "sam4s-xplained.h"
 
 #ifndef CONFIG_ARCH_LEDS
 
@@ -88,54 +88,54 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_ledinit
+ * Name: sam_ledinit
  ****************************************************************************/
 
-void stm32_ledinit(void)
+void sam_ledinit(void)
 {
   /* Configure LED1-2 GPIOs for output */
 
-  stm32_configgpio(GPIO_LED1);
-  stm32_configgpio(GPIO_LED2);
+  sam_configgpio(GPIO_D9);
+  sam_configgpio(GPIO_D10);
 }
 
 /****************************************************************************
- * Name: stm32_setled
+ * Name: sam_setled
  ****************************************************************************/
 
-void stm32_setled(int led, bool ledon)
+void sam_setled(int led, bool ledon)
 {
   uint32_t ledcfg;
 
   if (led == BOARD_LED1)
     {
-      ledcfg = GPIO_LED1;
+      ledcfg = GPIO_D9;
     }
   else if (led == BOARD_LED2)
     {
-      ledcfg = GPIO_LED2;
+      ledcfg = GPIO_D10;
     }
   else
     {
       return;
     }
 
-  stm32_gpiowrite(ledcfg, ledon);
+  sam_gpiowrite(ledcfg, ledon);
 }
 
 /****************************************************************************
- * Name: stm32_setleds
+ * Name: sam_setleds
  ****************************************************************************/
 
-void stm32_setleds(uint8_t ledset)
+void sam_setleds(uint8_t ledset)
 {
   bool ledon;
 
   ledon = ((ledset & BOARD_LED1_BIT) != 0);
-  stm32_gpiowrite(GPIO_LED1, ledon);
+  sam_gpiowrite(GPIO_D9, ledon);
 
   ledon = ((ledset & BOARD_LED2_BIT) != 0);
-  stm32_gpiowrite(GPIO_LED2, ledon);
+  sam_gpiowrite(GPIO_D10, ledon);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */
