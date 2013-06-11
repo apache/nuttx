@@ -56,6 +56,9 @@
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_usart.h"
 #  include "sam4l_periphclks.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4S)
+#  include "chip/sam3u_uart.h"
+#  include "sam4s_periphclks.h"
 #else
 #  error Unknown UART
 #endif
@@ -85,40 +88,54 @@
 #  undef CONFIG_SAM34_USART3
 #endif
 
-/* Is there a serial console? It could be on the UART, or USARTn */
+/* Is there a serial console?  It could be on UART0-1 or USART0-3 */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE) && defined(CONFIG_SAM34_UART0)
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#  undef CONFIG_USART0_SERIAL_CONSOLE
+#  undef CONFIG_USART1_SERIAL_CONSOLE
+#  undef CONFIG_USART2_SERIAL_CONSOLE
+#  undef CONFIG_USART3_SERIAL_CONSOLE
+#  define HAVE_CONSOLE 1
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE) && defined(CONFIG_SAM34_UART1)
+#  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE) && defined(CONFIG_SAM34_USART0)
-#  undef CONFIG_USART_SERIAL_CONSOLE
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE) && defined(CONFIG_SAM34_USART1)
-#  undef CONFIG_USART_SERIAL_CONSOLE
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE) && defined(CONFIG_SAM34_USART2)
-#  undef CONFIG_USART_SERIAL_CONSOLE
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART3_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE) && defined(CONFIG_SAM34_USART3)
-#  undef CONFIG_USART_SERIAL_CONSOLE
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
 #  define HAVE_CONSOLE 1
 #else
-#  undef CONFIG_USART_SERIAL_CONSOLE
+#  warning "No valid CONFIG_USARTn_SERIAL_CONSOLE Setting"
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_USART0_SERIAL_CONSOLE
 #  undef CONFIG_USART1_SERIAL_CONSOLE
 #  undef CONFIG_USART2_SERIAL_CONSOLE
@@ -151,6 +168,12 @@
 #  define SAM_CONSOLE_BITS     CONFIG_UART0_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_UART0_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_UART0_2STOP
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#  define SAM_CONSOLE_BASE     SAM_UART1_BASE
+#  define SAM_CONSOLE_BAUD     CONFIG_UART1_BAUD
+#  define SAM_CONSOLE_BITS     CONFIG_UART1_BITS
+#  define SAM_CONSOLE_PARITY   CONFIG_UART1_PARITY
+#  define SAM_CONSOLE_2STOP    CONFIG_UART1_2STOP
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE)
 #  define SAM_CONSOLE_BASE     SAM_USART0_BASE
 #  define SAM_CONSOLE_BAUD     CONFIG_USART0_BAUD
@@ -189,7 +212,8 @@
 #  define MR_CHRL_VALUE UART_MR_CHRL_7BITS /* 7 bits */
 #elif SAM_CONSOLE_BITS == 8
 #  define MR_CHRL_VALUE UART_MR_CHRL_8BITS /* 8 bits */
-#elif SAM_CONSOLE_BITS == 9 && !defined(CONFIG_UART_SERIAL_CONSOLE)
+#elif SAM_CONSOLE_BITS == 9 && !defined(CONFIG_UART0_SERIAL_CONSOLE) && \
+     !defined(CONFIG_UART1_SERIAL_CONSOLE)
 #  define MR_CHRL_VALUE UART_MR_MODE9
 #else
 #  error "Invlaid number of bits"
@@ -270,7 +294,10 @@ void sam_lowsetup(void)
   /* Enable clocking for all selected UART/USARTs */
 
 #ifdef CONFIG_SAM34_UART0
-  sam_uart_enableclk();
+  sam_uart0_enableclk();
+#endif
+#ifdef CONFIG_SAM34_UART1
+  sam_uart1_enableclk();
 #endif
 #ifdef CONFIG_SAM34_USART0
   sam_usart0_enableclk();
@@ -288,8 +315,8 @@ void sam_lowsetup(void)
   /* Configure UART pins for all selected UART/USARTs */
 
 #ifdef CONFIG_SAM34_UART0
-  (void)sam_configgpio(GPIO_UART_RXD);
-  (void)sam_configgpio(GPIO_UART_TXD);
+  (void)sam_configgpio(GPIO_UART0_RXD);
+  (void)sam_configgpio(GPIO_UART0_TXD);
 #endif
 
 #ifdef CONFIG_SAM34_USART0

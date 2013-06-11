@@ -62,7 +62,7 @@
   VECTOR(sam_pmc, SAM_IRQ_PMC)        /* Vector 16+5:  Power Management Controller */
   VECTOR(sam_eefc0, SAM_IRQ_EEFC0)    /* Vector 16+6:  Enhanced Embedded Flash Controller 0 */
   VECTOR(sam_eefc1, SAM_IRQ_EEFC1)    /* Vector 16+7:  Enhanced Embedded Flash Controller 1 */
-  VECTOR(sam_uart, SAM_IRQ_UART)      /* Vector 16+8:  Universal Asynchronous Receiver Transmitter */
+  VECTOR(sam_uart0, SAM_IRQ_UART0)    /* Vector 16+8:  Universal Asynchronous Receiver Transmitter */
   VECTOR(sam_smc, SAM_IRQ_SMC)        /* Vector 16+9:  Static Memory Controller */
   VECTOR(sam_pioa, SAM_IRQ_PIOA)      /* Vector 16+10: Parallel I/O Controller A */
   VECTOR(sam_piob, SAM_IRQ_PIOB)      /* Vector 16+11: Parallel I/O Controller B */

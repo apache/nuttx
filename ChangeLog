@@ -4947,4 +4947,6 @@
 	  There is not much there on initial checkin (2013-6-10).
 	* arch/arm/src/sam34: SAM3S support: GPIO, chip characteristics,
 	  peripheral Kconfig (2013-6-11).
+	* arch/arm/src/sam34/chip/sam4s_pinmap.h:  Add SAM4S pin configuration
+	  definitinos (2013-6-11).
 
