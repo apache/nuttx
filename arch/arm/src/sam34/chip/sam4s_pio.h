@@ -58,7 +58,7 @@
                                           /* 0x000c: Reserved */
 #define SAM_PIO_OER_OFFSET         0x0010 /* Output Enable Register */
 #define SAM_PIO_ODR_OFFSET         0x0014 /* Output Disable Register */
-#define SAM_PIO_OSR_OFFSET         0x0018 /* utput Status Register */
+#define SAM_PIO_OSR_OFFSET         0x0018 /* Output Status Register */
                                           /* 0x001c: Reserved */
 #define SAM_PIO_IFER_OFFSET        0x0020 /* Glitch Input Filter Enable Register */
 #define SAM_PIO_IFDR_OFFSET        0x0024 /* Glitch Input Filter Disable Register */
@@ -83,13 +83,13 @@
 #define SAM_PIO_ABCDSR1_OFFSET     0x0070 /* Peripheral Select Register 1 */
 #define SAM_PIO_ABCDSR2_OFFSET     0x0074 /* Peripheral Select Register 2 */
                                           /* 0x0078-0x007c: Reserved */
-#define SAM_PIO_IFSCDR_OFFSET      0x0080 /* SInput Filter Slow Clock Disable Register */
+#define SAM_PIO_IFSCDR_OFFSET      0x0080 /* Input Filter Slow Clock Disable Register */
 #define SAM_PIO_IFSCER_OFFSET      0x0084 /* Input Filter Slow Clock Enable Register */
 #define SAM_PIO_IFSCSR_OFFSET      0x0088 /* Input Filter Slow Clock Status Register */
 #define SAM_PIO_SCDR_OFFSET        0x008c /* Slow Clock Divider Debouncing Register */
-#define SAM_PIO_PPDDR_OFFSET       0x0090 /* Pad Pull-down Enable Register */
-#define SAM_PIO_PPDER_OFFSET       0x0094 /* Pad Pull-down Status Register */
-#define SAM_PIO_PPDSR_OFFSET       0x0098 /* Input Filter Slow Clock Disable Register */
+#define SAM_PIO_PPDDR_OFFSET       0x0090 /* Pad Pull Down Disable Register */
+#define SAM_PIO_PPDER_OFFSET       0x0094 /* PIO Pad Pull Down Enable Register */
+#define SAM_PIO_PPDSR_OFFSET       0x0098 /* PIO Pad Pull Down Status Register */
                                           /* 0x009c: Reserved */
 #define SAM_PIO_OWER_OFFSET        0x00a0 /* Output Write Enable */
 #define SAM_PIO_OWDR_OFFSET        0x00a4 /* Output Write Disable */

@@ -51,6 +51,8 @@
 #  include "sam3u_gpio.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "sam4l_gpio.h"
+#elif defined(CONFIG_ARCH_CHIP_SAMSL)
+#  include "sam4s_gpio.h"
 #else
 #  error Unrecognized SAM architecture
 #endif
