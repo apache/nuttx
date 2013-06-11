@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/sam4l-xplained/src/sam4l-xplained.h
+ * configs/sam3uek_eval/src/sam4s-xplained.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_SAM4L_XPLAINED_SRC_SAM4L_XPLAINED_H
-#define __CONFIGS_SAM4L_XPLAINED_SRC_SAM4L_XPLAINED_H
+#ifndef __CONFIGS_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H
+#define __CONFIGS_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H
 
 /************************************************************************************
  * Included Files
@@ -53,55 +53,57 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* LEDs: There are three LEDs on board the SAM4L Xplained Pro board:  The EDBG
- * controls two of the LEDs, a power LED and a status LED.  There is only
- * one user controllable LED, a yellow LED labeled LED0 near the SAM4L USB
- * connector.
+/* There are four LEDs on board the SAM4S Xplained board, two of these can be
+ * controlled by software in the SAM4S:
  *
- * This LED is controlled by PC07 and LED0 can be activated by driving the
- * PC07 to GND.
+ *   LED              GPIO
+ *   ---------------- -----
+ *   D9  Yellow LED   PC10
+ *   D10 Yellow LED   PC17
  *
- * When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
- * control LED0 as follows:
+ * Both can be illuminated by driving the GPIO output to ground (low).
  *
- *   SYMBOL              Meaning                 LED0
- *   ------------------- ----------------------- ------
- *   LED_STARTED         NuttX has been started  OFF
- *   LED_HEAPALLOCATE    Heap has been allocated OFF
- *   LED_IRQSENABLED     Interrupts enabled      OFF
- *   LED_STACKCREATED    Idle stack created      ON
- *   LED_INIRQ           In an interrupt         N/C
- *   LED_SIGNAL          In a signal handler     N/C
- *   LED_ASSERTION       An assertion failed     N/C
- *   LED_PANIC           The system has crashed  FLASH
+ * These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/up_leds.c. The LEDs are used to encode OS-related
+ * events as follows:
  *
- * Thus is LED0 is statically on, NuttX has successfully  booted and is,
- * apparently, running normmally.  If LED0 is flashing at approximately
+ *   SYMBOL                Meaning                     LED state
+ *                                                   D9     D10
+ *   -------------------  -----------------------  -------- --------
+ *   LED_STARTED          NuttX has been started     OFF      OFF
+ *   LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
+ *   LED_IRQSENABLED      Interrupts enabled         OFF      OFF
+ *   LED_STACKCREATED     Idle stack created         ON       OFF
+ *   LED_INIRQ            In an interrupt              No change
+ *   LED_SIGNAL           In a signal handler          No change
+ *   LED_ASSERTION        An assertion failed          No change
+ *   LED_PANIC            The system has crashed     OFF      Blinking
+ *   LED_IDLE             MCU is is sleep mode         Not used
+ *
+ * Thus if D9 is statically on, NuttX has successfully booted and is,
+ * apparently, running normmally.  If D10 is flashing at approximately
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-#define GPIO_LED0     (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
-                       GPIO_PORTC | GPIO_PIN7)
 
-/* QTouch button: The SAM4L Xplained Pro kit has one QTouch button.  The connection
- * to the SAM4L is:
- *
- *   PC13 CATB_SENSE15
- *   PC14 CATB_DIS
- */
+#define GPIO_D9     (GPIO_OUTPUT | GPIO_PULL_UP | GPIO_OUTPUT_SET | \
+                     GPIO_PORTC | GPIO_PIN10)
+#define GPIO_D10    (GPIO_OUTPUT | GPIO_PULL_UP | GPIO_OUTPUT_SET | \
+                     GPIO_PORTC | GPIO_PIN17)
 
 /* Mechanical buttons:
  *
- * The SAM4L Xplained Pro contains two mechanical buttons. One button is the
- * RESET button connected to the SAM4L reset line and the other is a generic user
- * configurable button. When a button is pressed it will drive the I/O line to GND.
+ * The SAM4S Xplained has two mechanical buttons. One button is the RESET button
+ * connected to the SAM4S reset line and the other is a generic user configurable
+ * button labeled BP2. When a button is pressed it will drive the I/O line to GND.
  *
- *   PC24 SW0
+ *   PA5 BP2
  */
 
-#define GPIO_SW0      (GPIO_INPUT | GPIO_PULL_UP | GPIO_GLITCH_FILTER | \
-                       GPIO_PORTC | GPIO_PIN24)
-#define IRQ_SW0       SAM_IRQ_PC24
+#define GPIO_BP2      (GPIO_INPUT | GPIO_PULL_UP | GPIO_GLITCH_FILTER | \
+                       GPIO_PORTA | GPIO_PIN5)
+#define IRQ_BP2       SAM_IRQ_PA5
 
 /************************************************************************************
  * Public Types
@@ -117,16 +119,6 @@
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: sam_spiinitialize
- *
- * Description:
- *   Called to configure SPI chip select GPIO pins for the SAM3U-EK board.
- *
- ************************************************************************************/
-
-void weak_function sam_spiinitialize(void);
-
 /****************************************************************************
  * Name: up_ledinit
  ****************************************************************************/
@@ -136,5 +128,5 @@ void up_ledinit(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_SAM4L_XPLAINED_SRC_SAM4L_XPLAINED_H */
+#endif /* __CONFIGS_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H */
 

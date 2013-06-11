@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/sam4l-xplained/src/sam_cxxinitialize.c
+ * configs/sam4s-xplained/src/sam_cxxinitialize.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
