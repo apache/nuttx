@@ -459,6 +459,12 @@ config USART3_ISUART
 	select ARCH_HAVE_USART2
 
 comment "AT91SAM3/4 GPIO Interrupt Configuration"
+config GPIO_IRQ
+	bool "GPIO pin interrupts"
+	---help---
+		Enable support for interrupting GPIO pins
+
+if GPIO_IRQ
 
 config GPIOA_IRQ
 	bool "GPIOA interrupts"
@@ -471,6 +477,8 @@ config GPIOB_IRQ
 config GPIOC_IRQ
 	bool "GPIOC interrupts"
 	default n
+
+endif
 
 if SAM34_WDT
 comment "AT91SAM3/4 Watchdog Configuration"|

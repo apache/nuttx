@@ -48,17 +48,15 @@
 #include "up_arch.h"
 
 #include "sam_gpio.h"
+#include "sam_periphclks.h"
 #include "sam_lowputc.h"
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
 #  include "chip/sam3u_uart.h"
-#  include "sam3u_periphclks.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_usart.h"
-#  include "sam4l_periphclks.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)
 #  include "chip/sam3u_uart.h"
-#  include "sam4s_periphclks.h"
 #else
 #  error Unknown UART
 #endif

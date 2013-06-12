@@ -155,7 +155,7 @@
 #define SAM_SMCCS_CYCLE(n)             (SAM_SMCCS_BASE(n)+SAM_SMCCS_CYCLE_OFFSET)
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
 #  define SAM_SMCCS_TIMINGS(n)         (SAM_SMCCS_BASE(n)+SAM_SMCCS_TIMINGS_OFFSET)
-#enmdif
+#endif
 #define SAM_SMCCS_MODE(n)              (SAM_SMCCS_BASE(n)+SAM_SMCCS_MODE_OFFSET)
 
 #define SAM_SMC_OCMS                   (SAM_SMC_BASE+SAM_SMC_OCMS_OFFSET)

@@ -57,6 +57,7 @@
 #include "chip.h"
 #include "sam_gpio.h"
 #include "sam_spi.h"
+#include "sam_periphclks.h"
 #include "chip/sam3u_pmc.h"
 #include "chip/sam_spi.h"
 #include "chip/sam_pinmap.h"
@@ -899,7 +900,6 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 {
   FAR struct sam_spidev_s *priv = &g_spidev;
   irqstate_t flags;
-  uint32_t regval;
 
   /* The SAM3U has only a single SPI port */
 
