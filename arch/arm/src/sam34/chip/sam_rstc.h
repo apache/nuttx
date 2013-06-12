@@ -1,5 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_rstc.h
+ * Reset Controller (RSTC) definitions for the SAM3U and SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -68,6 +69,7 @@
 #define RSTC_CR_EXTRST          (1 << 3)  /* Bit 3:  External Reset */
 #define RSTC_CR_KEY_SHIFT       (24)      /* Bits 24-31:  Password */
 #define RSTC_CR_KEY_MASK        (0xff << RSTC_CR_KEY_SHIFT)
+#  define RSTC_CR_KEY           (0xa5 << RSTC_CR_KEY_SHIFT)
 
 #define RSTC_SR_URSTS           (1 << 0)  /* Bit 0:  User Reset Status */
 #define RSTC_SR_RSTTYP_SHIFT    (8)       /* Bits 8-10:  Reset Type */
@@ -86,6 +88,7 @@
 #define RSTC_MR_ERSTL_MASK      (15 << RSTC_MR_ERSTL_SHIFT)
 #define RSTC_MR_KEY_SHIFT       (24)      /* Bits 24-31:  Password */
 #define RSTC_MR_KEY_MASK        (0xff << RSTC_CR_KEY_SHIFT)
+#  define RSTC_MR_KEY           (0xa5 << RSTC_CR_KEY_SHIFT)
 
 /****************************************************************************************
  * Public Types

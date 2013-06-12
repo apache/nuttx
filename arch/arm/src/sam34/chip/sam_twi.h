@@ -1,5 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_twi.h
+ * Two-wire Interface (TWI) definitions for the SAM3U and SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -125,13 +126,13 @@
 #  define TWI_MMR_IADRSZ_3BYTE     (2 << TWI_MMR_IADRSZ_SHIFT) /* Two-byte internal device address */
 #  define TWI_MMR_IADRSZ_3BYTE     (3 << TWI_MMR_IADRSZ_SHIFT) /* Three-byte internal device address */
 #define TWI_MMR_MREAD              (1 << 12) /* Bit 12: Master Read Direction */
-#define TWI_MMR_DADR_SHIFT         (16)      /* Bits 16-23:  Device Address */
-#define TWI_MMR_DADR_MASK          (0xff << TWI_MMR_DADR_SHIFT)
+#define TWI_MMR_DADR_SHIFT         (16)      /* Bits 16-22:  Device Address */
+#define TWI_MMR_DADR_MASK          (0x7f << TWI_MMR_DADR_SHIFT)
 
 /* TWI Slave Mode Register */
 
-#define TWI_SMR_SADR_SHIFT         (16)      /* Bits 16-23:  Slave Address */
-#define TWI_SMR_SADR_MASK          (0xff << TWI_SMR_SADR_SHIFT)
+#define TWI_SMR_SADR_SHIFT         (16)      /* Bits 16-22:  Slave Address */
+#define TWI_SMR_SADR_MASK          (0x7f << TWI_SMR_SADR_SHIFT)
 
 /* TWI Internal Address Register */
 

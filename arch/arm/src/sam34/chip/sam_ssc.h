@@ -1,5 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_ssc.h
+ * Synchronous Serial Controller (SSC) definitions for the SAM3U and SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -74,7 +75,7 @@
 #define SAM_SSC_WPMR_OFFSET        0x0e4 /* Write Protect Mode Register */
 #define SAM_SSC_WPSR_OFFSET        0x0e8 /* Write Protect Status Register */
                                            /* 0x050-0x0fc: Reserved */
-                                           /* 0x100-0x124: Reserved */
+                                           /* 0x100-0x124: Reserved for PDC registers */
 
 /* SSC register adresses ****************************************************************/
 
@@ -121,7 +122,7 @@
 #  define SSC_RCMR_CKS_RK          (2 << SSC_RCMR_CKS_SHIFT) /* RK pin */
 #define SSC_RCMR_CKO_SHIFT         (2)       /* Bits 2-4:  Receive Clock Output Mode Selection */
 #define SSC_RCMR_CKO_MASK          (7 << SSC_RCMR_CKO_SHIFT)
-#  define SSC_RCMR_CKO_ NONE       (0 << SSC_RCMR_CKO_SHIFT) /* None */
+#  define SSC_RCMR_CKO_NONE        (0 << SSC_RCMR_CKO_SHIFT) /* None */
 #  define SSC_RCMR_CKO_CONTINUOUS  (1 << SSC_RCMR_CKO_SHIFT) /* Continuous Receive Clock */
 #  define SSC_RCMR_CKO_XFERS       (2 << SSC_RCMR_CKO_SHIFT) /* Receive Clock only during data transfers */
 #define SSC_RCMR_CKI               (1 << 5)  /* Bit 5:  Receive Clock Inversion */
@@ -142,11 +143,10 @@
 #  define SSC_RCMR_START_ANYEDGE   (7 << SSC_RCMR_START_SHIFT) /* Any edge on RF signal */
 #  define SSC_RCMR_START_CMP0      (8 << SSC_RCMR_START_SHIFT) /* Compare 0 */
 #define SSC_RCMR_STOP              (1 << 12) /* Bit 12: Receive Stop Select */
-#define SSC_RCMR_STTDLY_SHIFT      (15)      /* Bits 16-23:  Receive Start Delay */
+#define SSC_RCMR_STTDLY_SHIFT      (16)      /* Bits 16-23:  Receive Start Delay */
 #define SSC_RCMR_STTDLY_MASK       (0xff << SSC_RCMR_STTDLY_SHIFT)
 #define SSC_RCMR_PERIOD_SHIFT      (24)      /* Bits 24-31:  Receive Period Divider Selection */
 #define SSC_RCMR_PERIOD_MASK       (0xff << SSC_RCMR_PERIOD_SHIFT)
-
 
 /* SSC Receive Frame Mode Register */
 
@@ -162,7 +162,7 @@
 #define SSC_RFMR_FSOS_MASK         (7 << SSC_RFMR_FSOS_SHIFT)
 #  define SSC_RFMR_FSOS_NONE       (0 << SSC_RFMR_FSOS_SHIFT) /* None */
 #  define SSC_RFMR_FSOS_NEG        (1 << SSC_RFMR_FSOS_SHIFT) /* 0x1 Negative Pulse */
-#  define SSC_RFMR_FSOS_POW        (2 << SSC_RFMR_FSOS_SHIFT) /* 0x2 Positive Pulse */
+#  define SSC_RFMR_FSOS_POS        (2 << SSC_RFMR_FSOS_SHIFT) /* 0x2 Positive Pulse */
 #  define SSC_RFMR_FSOS_LOW        (3 << SSC_RFMR_FSOS_SHIFT) /* 0x3 Driven Low during data transfer */
 #  define SSC_RFMR_FSOS_HIGH       (4 << SSC_RFMR_FSOS_SHIFT) /* 0x4 Driven High during data transfer */
 #  define SSC_RFMR_FSOS_TOGGLE     (5 << SSC_RFMR_FSOS_SHIFT) /* 0x5 Toggling at each start of data transfer */
@@ -175,11 +175,11 @@
 #define SSC_TCMR_CKS_SHIFT         (0)       /* Bits 0-1:  Transmit Clock Selection */
 #define SSC_TCMR_CKS_MASK          (3 << SSC_TCMR_CKS_SHIFT)
 #  define SSC_TCMR_CKS_DIVIDED     (0 << SSC_TCMR_CKS_SHIFT) /* Divided Clock */
-#  define SSC_TCMR_CKS_TK          (1 << SSC_TCMR_CKS_SHIFT) /* TK Clock signal */
-#  define SSC_TCMR_CKS_RK          (2 << SSC_TCMR_CKS_SHIFT) /* RK pin */
+#  define SSC_TCMR_CKS_RK          (2 << SSC_TCMR_CKS_SHIFT) /* RK Clock signal */
+#  define SSC_TCMR_CKS_TK          (1 << SSC_TCMR_CKS_SHIFT) /* TK Pin */
 #define SSC_TCMR_CKO_SHIFT         (2)       /* Bits 2-4:  Transmit Clock Output Mode Selection */
 #define SSC_TCMR_CKO_MASK          (7 << SSC_TCMR_CKO_SHIFT)
-#  define SSC_TCMR_CKO_ NONE       (0 << SSC_TCMR_CKO_SHIFT) /* None */
+#  define SSC_TCMR_CKO_NONE        (0 << SSC_TCMR_CKO_SHIFT) /* None */
 #  define SSC_TCMR_CKO_CONTINUOUS  (1 << SSC_TCMR_CKO_SHIFT) /* Continuous Transmit Clock */
 #  define SSC_TCMR_CKO_XFERS       (2 << SSC_TCMR_CKO_SHIFT) /* Transmit Clock only during data transfers */
 #define SSC_TCMR_CKI               (1 << 5)  /* Bit 5:  Transmit Clock Inversion */
@@ -217,7 +217,7 @@
 #define SSC_TFMR_FSOS_MASK         (7 << SSC_TFMR_FSOS_SHIFT)
 #  define SSC_TFMR_FSOS_NONE       (0 << SSC_TFMR_FSOS_SHIFT) /* None */
 #  define SSC_TFMR_FSOS_NEG        (1 << SSC_TFMR_FSOS_SHIFT) /* 0x1 Negative Pulse */
-#  define SSC_TFMR_FSOS_POW        (2 << SSC_TFMR_FSOS_SHIFT) /* 0x2 Positive Pulse */
+#  define SSC_TFMR_FSOS_POS        (2 << SSC_TFMR_FSOS_SHIFT) /* 0x2 Positive Pulse */
 #  define SSC_TFMR_FSOS_LOW        (3 << SSC_TFMR_FSOS_SHIFT) /* 0x3 Driven Low during data transfer */
 #  define SSC_TFMR_FSOS_HIGH       (4 << SSC_TFMR_FSOS_SHIFT) /* 0x4 Driven High during data transfer */
 #  define SSC_TFMR_FSOS_TOGGLE     (5 << SSC_TFMR_FSOS_SHIFT) /* 0x5 Toggling at each start of data transfer */
@@ -225,6 +225,8 @@
 #define SSC_TFMR_FSEDGE            (1 << 24) /* Bit 24: Frame Sync Edge Detection */
 #define SSC_TFMR_FSLENEXT_SHIFT    (28)      /* Bits 28-31:  FSLEN Field Extension */
 #define SSC_TFMR_FSLENEXT_MASK     (15 << SSC_TFMR_FSLENEXT_SHIFT)
+
+/* SSC Receive/Transmit Holding Registers (32-bit data) */
 
 /* SSC Receive Synchronization Holding Register */
 
@@ -270,6 +272,7 @@
 #define SSC_WPMR_WPEN              (1 << 0)  /* Bit 0:  Write Protect Enable */
 #define SSC_WPMR_WPKEY_SHIFT       (8)       /* Bits 8-31:  Write Protect KEY */
 #define SSC_WPMR_WPKEY_MASK        (0x00ffffff << SSC_WPMR_WPKEY_SHIFT)
+#  define SSC_WPMR_WPKEY           (0x00535343 << SSC_WPMR_WPKEY_SHIFT)
 
 /* SSC Write Protect Status Register */
 
