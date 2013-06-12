@@ -102,8 +102,8 @@
 
 static inline void sam_efcsetup(void)
 {
-  putreg32((2 << EEFC_FMR_FWS_SHIFT), SAM_EEFC0_FMR);
-  putreg32((2 << EEFC_FMR_FWS_SHIFT), SAM_EEFC1_FMR);
+  putreg32((BOARD_FWS << EEFC_FMR_FWS_SHIFT), SAM_EEFC0_FMR);
+  putreg32((BOARD_FWS << EEFC_FMR_FWS_SHIFT), SAM_EEFC1_FMR);
 }
 
 /****************************************************************************
@@ -215,7 +215,7 @@ static inline void sam_pmcsetup(void)
   putreg32(regval, SAM_PMC_MCKR);
   sam_pmcwait(PMC_INT_MCKRDY);
 
-  /* Settup PLLA and wait for LOCKA */
+  /* Setup PLLA and wait for LOCKA */
 
   putreg32(BOARD_CKGR_PLLAR, SAM_PMC_CKGR_PLLAR);
   sam_pmcwait(PMC_INT_LOCKA);

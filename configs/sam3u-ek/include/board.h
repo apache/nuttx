@@ -96,16 +96,20 @@
 
 /* MCK = 48MHz, CLKDIV = 59, MCI_SPEED = 48MHz / 2 * (59+1) = 400 KHz */
 
-#define HSMCI_INIT_CLKDIV      (59 << HSMCI_MR_CLKDIV_SHIFT)
+#define HSMCI_INIT_CLKDIV          (59 << HSMCI_MR_CLKDIV_SHIFT)
 
 /* MCK = 48MHz, CLKDIV = 1, MCI_SPEED = 48MHz / 2 * (1+1) = 12 MHz */
 
-#define HSMCI_MMCXFR_CLKDIV    (3 << HSMCI_MR_CLKDIV_SHIFT)
+#define HSMCI_MMCXFR_CLKDIV        (3 << HSMCI_MR_CLKDIV_SHIFT)
 
 /* MCK = 48MHz, CLKDIV = 0, MCI_SPEED = 48MHz / 2 * (0+1) = 24 MHz */
 
-#define HSMCI_SDXFR_CLKDIV     (0 << HSMCI_MR_CLKDIV_SHIFT)
-#define HSMCI_SDWIDEXFR_CLKDIV HSMCI_SDXFR_CLKDIV
+#define HSMCI_SDXFR_CLKDIV         (0 << HSMCI_MR_CLKDIV_SHIFT)
+#define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV
+
+/* FLASH wait states */
+
+#define BOARD_FWS                  2
 
 /* LED definitions ******************************************************************/
 

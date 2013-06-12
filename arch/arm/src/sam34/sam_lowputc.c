@@ -319,6 +319,11 @@ void sam_lowsetup(void)
   (void)sam_configgpio(GPIO_UART0_TXD);
 #endif
 
+#ifdef CONFIG_SAM34_UART1
+  (void)sam_configgpio(GPIO_UART1_RXD);
+  (void)sam_configgpio(GPIO_UART1_TXD);
+#endif
+
 #ifdef CONFIG_SAM34_USART0
   (void)sam_configgpio(GPIO_USART0_RXD);
   (void)sam_configgpio(GPIO_USART0_TXD);

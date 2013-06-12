@@ -115,16 +115,57 @@
 
 /* MCK = 48MHz, CLKDIV = 59, MCI_SPEED = 48MHz / 2 * (59+1) = 400 KHz */
 
-#define HSMCI_INIT_CLKDIV      (59 << HSMCI_MR_CLKDIV_SHIFT)
+#define HSMCI_INIT_CLKDIV          (59 << HSMCI_MR_CLKDIV_SHIFT)
 
 /* MCK = 48MHz, CLKDIV = 1, MCI_SPEED = 48MHz / 2 * (1+1) = 12 MHz */
 
-#define HSMCI_MMCXFR_CLKDIV    (3 << HSMCI_MR_CLKDIV_SHIFT)
+#define HSMCI_MMCXFR_CLKDIV        (3 << HSMCI_MR_CLKDIV_SHIFT)
 
 /* MCK = 48MHz, CLKDIV = 0, MCI_SPEED = 48MHz / 2 * (0+1) = 24 MHz */
 
-#define HSMCI_SDXFR_CLKDIV     (0 << HSMCI_MR_CLKDIV_SHIFT)
-#define HSMCI_SDWIDEXFR_CLKDIV HSMCI_SDXFR_CLKDIV
+#define HSMCI_SDXFR_CLKDIV         (0 << HSMCI_MR_CLKDIV_SHIFT)
+#define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV
+
+/* FLASH wait states:
+ *
+ * DC Characteristics
+ *
+ * Parameter              Min   Typ  Max
+ * ---------------------- ----- ----- ----
+ * Vddcore DC Supply Core 1.08V 1.2V 1.32V
+ * Vvddio  DC Supply I/Os 1.62V 3.3V 3.6V
+ *
+ *                     Wait   Maximum
+ * Vddcore   Vvddio   States Frequency (MHz)
+ * ------- ---------- ------ ---------------
+ * 1.08V   1.62-3.6V    0        16
+ * "   "   "  "-"  "    1        33
+ * "   "   "  "-"  "    2        50
+ * "   "   "  "-"  "    3        67
+ * "   "   "  "-"  "    4        84
+ * "   "   "  "-"  "    5       100
+ * 1.08V   2.7-3.6V     0        20
+ * "   "   " "-"  "     1        40
+ * "   "   " "-"  "     2        60
+ * "   "   " "-"  "     3        80
+ * "   "   " "-"  "     4       100
+ * 1.2V    1.62-3.6V    0        17
+ * "  "    " "-"  "     1        34
+ * "  "    " "-"  "     2        52
+ * "  "    " "-"  "     3        69
+ * "  "    " "-"  "     4        87
+ * "  "    " "-"  "     5       104
+ * "  "    " "-"  "     6       121
+ * 1.2V    2.7-3.6V     0        21
+ * "  "    " "-"  "     1        42
+ * "  "    " "-"  "     2        63
+ * "  "    " "-"  "     3        84
+ * "  "    " "-"  "     4       105
+ * "  "    " "-"  "     5       123 << SELECTION
+ */
+
+#define BOARD_FWS                  5
+
 
 /* LED definitions ******************************************************************/
 /* There are four LEDs on board the SAM4S Xplained board, two of these can be
@@ -140,14 +181,14 @@
 
 /* LED index values for use with sam_setled() */
 
-#define BOARD_D9          0
-#define BOARD_D10         1
-#define BOARD_NLEDS       2
+#define BOARD_D9             0
+#define BOARD_D10            1
+#define BOARD_NLEDS          2
 
 /* LED bits for use with sam_setleds() */
 
-#define BOARD_D9_BIT     (1 << BOARD_D9)
-#define BOARD_D10_BIT    (1 << BOARD_D10)
+#define BOARD_D9_BIT         (1 << BOARD_D9)
+#define BOARD_D10_BIT        (1 << BOARD_D10)
 
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
@@ -182,10 +223,10 @@
  *   PA5 BP2
  */
 
-#define BUTTON_BP2         0
-#define NUM_BUTTONS        1
+#define BUTTON_BP2           0
+#define NUM_BUTTONS          1
 
-#define BUTTON_BP2_BIT     (1 << BUTTON_BP2)
+#define BUTTON_BP2_BIT       (1 << BUTTON_BP2)
 
 /************************************************************************************
  * Public Data

@@ -33,13 +33,13 @@
  *
  ****************************************************************************/
 
-/* The ATSAM4S16C has 1MB of FLASH beginning at address 0x0000:0000 and
+/* The ATSAM4S16C has 1MB of FLASH beginning at address 0x0040:0000 and
  * 128KB of SRAM beginning at address 0x2000:0000
  */
 
 MEMORY
 {
-    flash (rx)  : ORIGIN = 0x00000000, LENGTH = 1024K
+    flash (rx)  : ORIGIN = 0x00400000, LENGTH = 1024K
     sram  (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
 }
 
