@@ -1,5 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_pwm.h
+ * Pulse Width Modulation Controller (PWM) definitions for the SAM3U and SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -83,6 +84,9 @@
 #define SAM_PWM_EL0MR_OFFSET         0x07c /* PWM Event Line 0 Mode Register */
 #define SAM_PWM_EL1MR_OFFSET         0x080 /* PWM Event Line 1 Mode Register */
                                            /* 0x084-0x0ac: Reserved */
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_PWM_SMMR_OFFSET        0x0b0 /* PWM Stepper Motor Mode Register */
+#endif
                                            /* 0x0b4-0x0e0: Reserved */
 #define SAM_PWM_WPCR_OFFSET          0x0e4 /* PWM Write Protect Control Register */
 #define SAM_PWM_WPSR_OFFSET          0x0e8 /* PWM Write Protect Status Register */
@@ -215,6 +219,10 @@
 #define SAM_PWM_FPE                  (SAM_PWM_BASE+SAM_PWM_FPE_OFFSET)
 #define SAM_PWM_EL0MR                (SAM_PWM_BASE+SAM_PWM_EL0MR_OFFSET)
 #define SAM_PWM_EL1MR                (SAM_PWM_BASE+SAM_PWM_EL1MR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_PWM_SMMR_OFFSET        0x0b0 /* PWM Stepper Motor Mode Register */
+#  define SAM_PWM_SMMR_OFFSET        0x0b0 /* PWM Stepper Motor Mode Register */
+#endif
 #define SAM_PWM_WPCR                 (SAM_PWM_BASE+SAM_PWM_WPCR_OFFSET)
 #define SAM_PWM_WPSR                 (SAM_PWM_BASE+SAM_PWM_WPSR_OFFSET)
 
@@ -517,6 +525,12 @@
 #define PWM_ELMR_CSEL5               (1 << 5)  /* Bit 5:  Comparison 5 Selection */
 #define PWM_ELMR_CSEL6               (1 << 6)  /* Bit 6:  Comparison 6 Selection */
 #define PWM_ELMR_CSEL7               (1 << 7)  /* Bit 7:  Comparison 7 Selection */
+
+/* PWM Stepper Motor Mode Register */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+# warning SAM4S not yet integrated
+#endif
 
 /* PWM Write Protect Control Register */
 

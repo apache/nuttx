@@ -1,5 +1,6 @@
 /************************************************************************************************
  * arch/arm/src/sam34/chip/sam_tc.h
+ * Timer Counter (TC) definitions for the SAM3U and SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -56,7 +57,10 @@
 #define SAM_TCN_OFFSET(n)            (0x00 + ((n)<<6)) /* 0x00, 0x40, 0x80 */
 #define SAM_TCN_CCR_OFFSET           0x00 /* Channel Control Register */
 #define SAM_TCN_CMR_OFFSET           0x04 /* Channel Mode Register */
-                                          /* 0x08 Reserved */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#define SAM_TCN_SMMR_OFFSET          0x08 /* Stepper Motor Mode Register */
+#endif
                                           /* 0x0c Reserved */
 #define SAM_TCN_CV_OFFSET            0x10 /* Counter Value */
 #define SAM_TCN_RA_OFFSET            0x14 /* Register A */
@@ -75,8 +79,11 @@
 #define SAM_TC_QIDR_OFFSET           0xcc /* QDEC Interrupt Disable Register */
 #define SAM_TC_QIMR_OFFSET           0xd0 /* QDEC Interrupt Mask Register */
 #define SAM_TC_QISR_OFFSET           0xd4 /* QDEC Interrupt Status Register */
-                                          /* 0xd8 Reserved */
-                                          /* 0xe4 Reserved */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TCN_FMR_OFFSET         0xd8 /* Fault Mode Register */
+#  define SAM_TCN_WPMR_OFFSET        0xe4 /* Write Protect Mode Register */
+#endif
 
 /* TC register adresses *************************************************************************/
 
@@ -84,6 +91,9 @@
 
 #define SAM_TC_CCR(n)                (SAM_TCN_BASE(n)+SAM_TCN_CCR_OFFSET)
 #define SAM_TC_CMR(n)                (SAM_TCN_BASE(n)+SAM_TCN_CMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TCN_SMMR(n)            (SAM_TCN_BASE(n)+SAM_TCN_SMMR_OFFSET)
+#endif
 #define SAM_TC_CV(n)                 (SAM_TCN_BASE(n)+SAM_TCN_CV_OFFSET)
 #define SAM_TC_RA(n)                 (SAM_TCN_BASE(n)+SAM_TCN_RA_OFFSET)
 #define SAM_TC_RB(n)                 (SAM_TCN_BASE(n)+SAM_TCN_RB_OFFSET)
@@ -92,9 +102,16 @@
 #define SAM_TC_IER(n)                (SAM_TCN_BASE(n)+SAM_TCN_IER_OFFSET)
 #define SAM_TC_IDR(n)                (SAM_TCN_BASE(n)+SAM_TCN_IDR_OFFSET)
 #define SAM_TC_IMR(n)                (SAM_TCN_BASE(n)+SAM_TCN_IMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TCN_FMR(n)             (SAM_TCN_BASE(n)+SAM_TCN_FMR_OFFSET)
+#  define SAM_TCN_WPMR(n)            (SAM_TCN_BASE(n)+SAM_TCN_WPMR_OFFSET)
+#endif
 
 #define SAM_TC0_CCR                  (SAM_TC0_BASE+SAM_TCN_CCR_OFFSET)
 #define SAM_TC0_CMR                  (SAM_TC0_BASE+SAM_TCN_CMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TC0_SMMR               (SAM_TC0_BASE+SAM_TCN_SMMR_OFFSET)
+#endif
 #define SAM_TC0_CV                   (SAM_TC0_BASE+SAM_TCN_CV_OFFSET)
 #define SAM_TC0_RA                   (SAM_TC0_BASE+SAM_TCN_RA_OFFSET)
 #define SAM_TC0_RB                   (SAM_TC0_BASE+SAM_TCN_RB_OFFSET)
@@ -103,9 +120,16 @@
 #define SAM_TC0_IER                  (SAM_TC0_BASE+SAM_TCN_IER_OFFSET)
 #define SAM_TC0_IDR                  (SAM_TC0_BASE+SAM_TCN_IDR_OFFSET)
 #define SAM_TC0_IMR                  (SAM_TC0_BASE+SAM_TCN_IMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TC0_FMR                (SAM_TC0_BASE+SAM_TCN_FMR_OFFSET)
+#  define SAM_TC0_WPMR               (SAM_TC0_BASE+SAM_TCN_WPMR_OFFSET)
+#endif
 
 #define SAM_TC1_CCR                  (SAM_TC1_BASE+SAM_TCN_CCR_OFFSET)
 #define SAM_TC1_CMR                  (SAM_TC1_BASE+SAM_TCN_CMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TC1_SMMR               (SAM_TC1_BASE+SAM_TCN_SMMR_OFFSET)
+#endif
 #define SAM_TC1_CV                   (SAM_TC1_BASE+SAM_TCN_CV_OFFSET)
 #define SAM_TC1_RA                   (SAM_TC1_BASE+SAM_TCN_RA_OFFSET)
 #define SAM_TC1_RB                   (SAM_TC1_BASE+SAM_TCN_RB_OFFSET)
@@ -114,9 +138,16 @@
 #define SAM_TC1_IER                  (SAM_TC1_BASE+SAM_TCN_IER_OFFSET)
 #define SAM_TC1_IDR                  (SAM_TC1_BASE+SAM_TCN_IDR_OFFSET)
 #define SAM_TC1_IMR                  (SAM_TC1_BASE+SAM_TCN_IMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TC1_FMR                (SAM_TC1_BASE+SAM_TCN_FMR_OFFSET)
+#  define SAM_TC1_WPMR               (SAM_TC1_BASE+SAM_TCN_WPMR_OFFSET)
+#endif
 
 #define SAM_TC2_CCR                  (SAM_TC2_BASE+SAM_TCN_CCR_OFFSET)
 #define SAM_TC2_CMR                  (SAM_TC2_BASE+SAM_TCN_CMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TC2_SMMR               (SAM_TC2_BASE+SAM_TCN_SMMR_OFFSET)
+#endif
 #define SAM_TC2_CV                   (SAM_TC2_BASE+SAM_TCN_CV_OFFSET)
 #define SAM_TC2_RA                   (SAM_TC2_BASE+SAM_TCN_RA_OFFSET)
 #define SAM_TC2_RB                   (SAM_TC2_BASE+SAM_TCN_RB_OFFSET)
@@ -125,6 +156,64 @@
 #define SAM_TC2_IER                  (SAM_TC2_BASE+SAM_TCN_IER_OFFSET)
 #define SAM_TC2_IDR                  (SAM_TC2_BASE+SAM_TCN_IDR_OFFSET)
 #define SAM_TC2_IMR                  (SAM_TC2_BASE+SAM_TCN_IMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TC2_FMR                (SAM_TC2_BASE+SAM_TCN_FMR_OFFSET)
+#  define SAM_TC2_WPMR               (SAM_TC2_BASE+SAM_TCN_WPMR_OFFSET)
+#endif
+
+#define SAM_TC3_CCR                  (SAM_TC3_BASE+SAM_TCN_CCR_OFFSET)
+#define SAM_TC3_CMR                  (SAM_TC3_BASE+SAM_TCN_CMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TC3_SMMR               (SAM_TC3_BASE+SAM_TCN_SMMR_OFFSET)
+#endif
+#define SAM_TC3_CV                   (SAM_TC3_BASE+SAM_TCN_CV_OFFSET)
+#define SAM_TC3_RA                   (SAM_TC3_BASE+SAM_TCN_RA_OFFSET)
+#define SAM_TC3_RB                   (SAM_TC3_BASE+SAM_TCN_RB_OFFSET)
+#define SAM_TC3_RC                   (SAM_TC3_BASE+SAM_TCN_RC_OFFSET)
+#define SAM_TC3_SR                   (SAM_TC3_BASE+SAM_TCN_SR_OFFSET)
+#define SAM_TC3_IER                  (SAM_TC3_BASE+SAM_TCN_IER_OFFSET)
+#define SAM_TC3_IDR                  (SAM_TC3_BASE+SAM_TCN_IDR_OFFSET)
+#define SAM_TC3_IMR                  (SAM_TC3_BASE+SAM_TCN_IMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TC3_FMR                (SAM_TC3_BASE+SAM_TCN_FMR_OFFSET)
+#  define SAM_TC3_WPMR               (SAM_TC3_BASE+SAM_TCN_WPMR_OFFSET)
+#endif
+
+#define SAM_TC4_CCR                  (SAM_TC4_BASE+SAM_TCN_CCR_OFFSET)
+#define SAM_TC4_CMR                  (SAM_TC4_BASE+SAM_TCN_CMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TC4_SMMR               (SAM_TC4_BASE+SAM_TCN_SMMR_OFFSET)
+#endif
+#define SAM_TC4_CV                   (SAM_TC4_BASE+SAM_TCN_CV_OFFSET)
+#define SAM_TC4_RA                   (SAM_TC4_BASE+SAM_TCN_RA_OFFSET)
+#define SAM_TC4_RB                   (SAM_TC4_BASE+SAM_TCN_RB_OFFSET)
+#define SAM_TC4_RC                   (SAM_TC4_BASE+SAM_TCN_RC_OFFSET)
+#define SAM_TC4_SR                   (SAM_TC4_BASE+SAM_TCN_SR_OFFSET)
+#define SAM_TC4_IER                  (SAM_TC4_BASE+SAM_TCN_IER_OFFSET)
+#define SAM_TC4_IDR                  (SAM_TC4_BASE+SAM_TCN_IDR_OFFSET)
+#define SAM_TC4_IMR                  (SAM_TC4_BASE+SAM_TCN_IMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TC4_FMR                (SAM_TC4_BASE+SAM_TCN_FMR_OFFSET)
+#  define SAM_TC4_WPMR               (SAM_TC4_BASE+SAM_TCN_WPMR_OFFSET)
+#endif
+
+#define SAM_TC5_CCR                  (SAM_TC5_BASE+SAM_TCN_CCR_OFFSET)
+#define SAM_TC5_CMR                  (SAM_TC5_BASE+SAM_TCN_CMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TC5_SMMR               (SAM_TC5_BASE+SAM_TCN_SMMR_OFFSET)
+#endif
+#define SAM_TC5_CV                   (SAM_TC5_BASE+SAM_TCN_CV_OFFSET)
+#define SAM_TC5_RA                   (SAM_TC5_BASE+SAM_TCN_RA_OFFSET)
+#define SAM_TC5_RB                   (SAM_TC5_BASE+SAM_TCN_RB_OFFSET)
+#define SAM_TC5_RC                   (SAM_TC5_BASE+SAM_TCN_RC_OFFSET)
+#define SAM_TC5_SR                   (SAM_TC5_BASE+SAM_TCN_SR_OFFSET)
+#define SAM_TC5_IER                  (SAM_TC5_BASE+SAM_TCN_IER_OFFSET)
+#define SAM_TC5_IDR                  (SAM_TC5_BASE+SAM_TCN_IDR_OFFSET)
+#define SAM_TC5_IMR                  (SAM_TC5_BASE+SAM_TCN_IMR_OFFSET)
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SAM_TC5_FMR                (SAM_TC5_BASE+SAM_TCN_FMR_OFFSET)
+#  define SAM_TC5_WPMR               (SAM_TC5_BASE+SAM_TCN_WPMR_OFFSET)
+#endif
 
 /* Timer common registers */
 
@@ -308,6 +397,12 @@
 #  define TCN_CMR_BSWTRG_CLEAR       (2 << TCN_CMR_BSWTRG_SHIFT)
 #  define TCN_CMR_BSWTRG_TOGGLE      (3 << TCN_CMR_BSWTRG_SHIFT)
 
+/* Stepper Motor Mode Register */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  warning SAM4S not yet integrated
+#endif
+
 /* TC Counter Value Register */
 
 #define TCN_CV_SHIFT                 (0)       /* Bits 0-15: Counter Value */
@@ -331,6 +426,18 @@
 #define TCN_INT_CLKSTA               (1 << 16) /* Bit 16: Clock Enabling (SR only) */
 #define TCN_SR_MTIOA                 (1 << 17) /* Bit 17: TIOA Mirror (SR only) */
 #define TCN_SR_MTIOB                 (1 << 18) /* Bit 18: TIOB Mirror (SR only)*/
+
+/* Fault Mode Register */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  warning SAM4S not yet integrated
+#endif
+
+/* Write Protect Mode Register */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  warning SAM4S not yet integrated
+#endif
 
 /************************************************************************************************
  * Public Types
