@@ -436,6 +436,7 @@ SAM4S Xplained-specific Configuration Options
     CONFIG_SAM34_HSMCI       - High Speed Multimedia Card Interface
     CONFIG_SAM34_TWI0        - Two-Wire Interface 0
     CONFIG_SAM34_TWI1        - Two-Wire Interface 1
+    CONFIG_SAM34_SPI         - Serial Peripheral Interface
     CONFIG_SAM34_SSC         - Synchronous Serial Controller
     CONFIG_SAM34_TC0         - Timer Counter 0
     CONFIG_SAM34_TC1         - Timer Counter 1
@@ -522,6 +523,35 @@ Configurations
          CONFIG_USART0_PARITY=0
          CONFIG_USART0_RXBUFSIZE=256
          CONFIG_USART0_TXBUFSIZE=256
+
+    2. This configuration is set up to use the NuttX OABI toolchain (see
+       above). Of course this can be reconfigured if you prefer a different
+       toolchain.
+
+  nsh:
+    This configuration directory will built the NuttShell.
+
+    NOTES:
+
+    1. This configuration provides test output on UART1 which is available
+       on J3 or J4 (see the section "Serial Consoles" above).  The
+       virtual COM port could be used, instead, by reconfiguring to use
+       UART0 instead of UART1:
+
+       System Type -> AT91SAM3/4 Peripheral Support
+         CONFIG_SAM_UART0=y
+         CONFIG_SAM_UART1=n
+
+       Device Drivers -> Serial Driver Support -> Serial Console
+         CONFIG_UART0_SERIAL_CONSOLE=y
+
+       Device Drivers -> Serial Driver Support -> USART0 Configuration
+         CONFIG_UART0_2STOP=0
+         CONFIG_UART0_BAUD=115200
+         CONFIG_UART0_BITS=8
+         CONFIG_UART0_PARITY=0
+         CONFIG_UART0_RXBUFSIZE=256
+         CONFIG_UART0_TXBUFSIZE=256
 
     2. This configuration is set up to use the NuttX OABI toolchain (see
        above). Of course this can be reconfigured if you prefer a different

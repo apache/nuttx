@@ -166,7 +166,6 @@
 
 #define BOARD_FWS                  5
 
-
 /* LED definitions ******************************************************************/
 /* There are four LEDs on board the SAM4S Xplained board, two of these can be
  * controlled by software in the SAM4S:
