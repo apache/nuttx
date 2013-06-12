@@ -171,7 +171,6 @@ config SAM34_IISC
 config SAM34_SPI
 	bool "Serial Peripheral Interface (SPI)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM4L
 
 config SAM34_SSC
 	bool "Synchronous Serial Controller (SSC)"

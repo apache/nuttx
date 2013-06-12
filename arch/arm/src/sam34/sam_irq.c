@@ -313,6 +313,9 @@ static int sam_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
 void up_irqinitialize(void)
 {
   uintptr_t regaddr;
+#if defined(CONFIG_DEBUG_SYMBOLS) && !defined(CONFIG_ARMV7M_USEBASEPRI)
+  uint32_t regval;
+#endif
   int nintlines;
   int i;
 
@@ -415,8 +418,18 @@ void up_irqinitialize(void)
 
   sam_dumpnvic("initial", SAM_IRQ_NIRQS);
 
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
+  /* If a debugger is connected, try to prevent it from catching hardfaults.
+   * If CONFIG_ARMV7M_USEBASEPRI, no hardfaults are expected in normal
+   * operation.
+   */
 
+#if defined(CONFIG_DEBUG_SYMBOLS) && !defined(CONFIG_ARMV7M_USEBASEPRI)
+  regval  = getreg32(NVIC_DEMCR);
+  regval &= ~NVIC_DEMCR_VCHARDERR;
+  putreg32(regval, NVIC_DEMCR);
+#endif
+
+#ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* Initialize logic to support a second level of interrupt decoding for
    * GPIO pins.
    */
