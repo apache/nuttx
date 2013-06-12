@@ -318,8 +318,24 @@ Serial Consoles
   ------
 
   If you have a TTL to RS-232 convertor then this is the most convenient
-  serial console to use.  It is the default in all of these configurations.
-  An option is to use the virtual COM port.
+  serial console to use.  UART1 is the default in all of these
+  configurations.
+
+    UART1 RXD  PB2   J1 pin 3   J4 pin 3
+    UART1 TXD  PB3   J1 pin 4   J4 pin 4
+    GND              J1 pin 9   J4 pin 9
+    Vdd              J1 pin 10  J4 pin 10
+
+  USART1 is another option:
+
+    USART1 RXD PA21  J2 pin 6
+    USART1 TXD PA22  J2 pin 1
+    GND              J2 pin 9
+    Vdd              J2 pin 10
+
+  Yet another option is to use UART0 and the virtual COM port.  This
+  option may be more convenient for long term development, but was
+  painful to use during board bring-up.
 
   Virtual COM Port
   ----------------
@@ -516,25 +532,25 @@ Configurations
 
     NOTES:
 
-    1. This configuration provides test output on USART0 which is available
-       on EXT1 or EXT4 (see the section "Serial Consoles" above).  The
+    1. This configuration provides test output on UART1 which is available
+       on J3 or J4 (see the section "Serial Consoles" above).  The
        virtual COM port could be used, instead, by reconfiguring to use
-       USART1 instead of USART0:
+       UART0 instead of UART1:
 
        System Type -> AT91SAM3/4 Peripheral Support
-         CONFIG_SAM_USART0=y
-         CONFIG_SAM_USART1=n
+         CONFIG_SAM_UART0=y
+         CONFIG_SAM_UART1=n
 
        Device Drivers -> Serial Driver Support -> Serial Console
-         CONFIG_USART0_SERIAL_CONSOLE=y
+         CONFIG_UART0_SERIAL_CONSOLE=y
 
        Device Drivers -> Serial Driver Support -> USART0 Configuration
-         CONFIG_USART0_2STOP=0
-         CONFIG_USART0_BAUD=115200
-         CONFIG_USART0_BITS=8
-         CONFIG_USART0_PARITY=0
-         CONFIG_USART0_RXBUFSIZE=256
-         CONFIG_USART0_TXBUFSIZE=256
+         CONFIG_UART0_2STOP=0
+         CONFIG_UART0_BAUD=115200
+         CONFIG_UART0_BITS=8
+         CONFIG_UART0_PARITY=0
+         CONFIG_UART0_RXBUFSIZE=256
+         CONFIG_UART0_TXBUFSIZE=256
 
     2. This configuration is set up to use the NuttX OABI toolchain (see
        above). Of course this can be reconfigured if you prefer a different
