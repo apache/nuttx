@@ -181,7 +181,7 @@
  * Peripheral Clock Status Register common bit-field definitions.
  */
 
-#define PMC_PID(n)                       (1 << (n))
+#define PMC_PIDL(n)                      (1 << (n))
 #define PMC_PID2                         (1 << 2)  /* Bit 2:  Peripheral Clock 2  Enable */
 #define PMC_PID3                         (1 << 3)  /* Bit 3:  Peripheral Clock 3  Enable */
 #define PMC_PID4                         (1 << 4)  /* Bit 4:  Peripheral Clock 4  Enable */
@@ -443,9 +443,10 @@
 /* Peripheral Clock Status Register 1 */
 
 #if defined(CONFIG_ARCH_CHIP_SAM4S)
-#  define PMC_PIC32                      (1 << 0)  /* Bit 0:  PID32 */
-#  define PMC_PIC33                      (1 << 1)  /* Bit 1:  PID33 */
-#  define PMC_PIC34                      (1 << 2)  /* Bit 2:  PID34 */
+#  define PMC_PIDH(n)                    (1 << ((n) - 32))
+#  define PMC_PID32                      (1 << 0)  /* Bit 0:  PID32 */
+#  define PMC_PID33                      (1 << 1)  /* Bit 1:  PID33 */
+#  define PMC_PID34                      (1 << 2)  /* Bit 2:  PID34 */
 #endif
 
 /* Oscillator Calibration Register */
