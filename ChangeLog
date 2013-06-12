@@ -3848,7 +3848,7 @@
 	* configs/olimex-lpc1766stk/wlan:  Remove non-functional
 	  configuration.
 	* configs/stm32f4discovery/src and nuttx/drivers/lcd/ug-2864hsweg01.c:
-	  Updates and correctinos for the UG-2864HSWEG01 from Darcy Gong.
+	  Updates and corrections for the UG-2864HSWEG01 from Darcy Gong.
 	* configs/lm326965-ek:  All configurations converted to use the
 	  kconfig-frontends configuration tool.
 	* configs/Kconfig: NSH_MMCSDSPIPORTNO should depend on MMCSD_SPI,
@@ -4948,7 +4948,12 @@
 	* arch/arm/src/sam34: SAM3S support: GPIO, chip characteristics,
 	  peripheral Kconfig (2013-6-11).
 	* arch/arm/src/sam34/chip/sam4s_pinmap.h:  Add SAM4S pin configuration
-	  definitinos (2013-6-11).
+	  definitions (2013-6-11).
 	* arch/arm/src/sam34/sam4s_periphclks.h:  Add macros to manage SAM4S
 	  peripheral clocks (2013-6-11).
-	* configs/sam4s-xplained: Configuratino builds error-free (2013-6-11).
+	* configs/sam4s-xplained: Configuration builds error-free (2013-6-11).
+	* configs/sam4s-xplained/nsh:  Added an NSH configuration for the
+	  SAM4S Xplained board.  Both the OS test and the NSH configurations
+	  no execute error-free.  Delay loops calibrated for both the SAM4L
+	  and SAM4S boards (2013-6-12).
+

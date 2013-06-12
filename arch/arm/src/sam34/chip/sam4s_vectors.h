@@ -54,38 +54,39 @@
 # define ARMV7M_PERIPHERAL_INTERRUPTS 35
 
 #else
-  VECTOR(sam_SUPC, SAM_IRQ_SUPC)      /* Vector 16+0: Supply Controller */
-  VECTOR(sam_RSTC, SAM_IRQ_RSTC)      /* Vector 16+1: Reset Controller */
-  VECTOR(sam_RTC, SAM_IRQ_RTC)        /* Vector 16+2: Real Time Clock */
-  VECTOR(sam_RTT, SAM_IRQ_RTT)        /* Vector 16+3: Real Time Timer */
-  VECTOR(sam_WDT, SAM_IRQ_WDT)        /* Vector 16+4: Watchdog Timer */
-  VECTOR(sam_PMC, SAM_IRQ_PMC)        /* Vector 16+5: Power Management Controller */
-  VECTOR(sam_EEFC0, SAM_IRQ_EEFC0)    /* Vector 16+6: Enhanced Embedded Flash Controller 0 */
-  VECTOR(sam_EEFC1, SAM_IRQ_EEFC1)    /* Vector 16+7: Enhanced Embedded Flash Controller 1 */
-  VECTOR(sam_UART0, SAM_IRQ_UART0)    /* Vector 16+8: Universal Asynchronous Receiver Transmitter 0 */
-  VECTOR(sam_UART1, SAM_IRQ_UART1)    /* Vector 16+9: Universal Asynchronous Receiver Transmitter 1 */
-  VECTOR(sam_SMC, SAM_IRQ_SMC)        /* Vector 16+10: Static Memory Controller */
-  VECTOR(sam_PIOA, SAM_IRQ_PIOA)      /* Vector 16+11: Parallel I/O Controller A */
-  VECTOR(sam_PIOB, SAM_IRQ_PIOB)      /* Vector 16+12: Parallel I/O Controller B */
-  VECTOR(sam_PIOB, SAM_IRQ_PIOB)      /* Vector 16+13: Parallel I/O Controller C */
-  VECTOR(sam_USART0, SAM_IRQ_USART0)  /* Vector 16+14: USART 0 */
-  VECTOR(sam_USART1, SAM_IRQ_USART0)  /* Vector 16+15: USART 1 */
+  VECTOR(sam_supc, SAM_IRQ_SUPC)      /* Vector 16+0: Supply Controller */
+  VECTOR(sam_rstc, SAM_IRQ_RSTC)      /* Vector 16+1: Reset Controller */
+  VECTOR(sam_rtc, SAM_IRQ_RTC)        /* Vector 16+2: Real Time Clock */
+  VECTOR(sam_rtt, SAM_IRQ_RTT)        /* Vector 16+3: Real Time Timer */
+  VECTOR(sam_wdt, SAM_IRQ_WDT)        /* Vector 16+4: Watchdog Timer */
+  VECTOR(sam_pmc, SAM_IRQ_PMC)        /* Vector 16+5: Power Management Controller */
+  VECTOR(sam_eefc0, SAM_IRQ_EEFC0)    /* Vector 16+6: Enhanced Embedded Flash Controller 0 */
+  VECTOR(sam_eefc1, SAM_IRQ_EEFC1)    /* Vector 16+7: Enhanced Embedded Flash Controller 1 */
+  VECTOR(sam_uart0, SAM_IRQ_UART0)    /* Vector 16+8: Universal Asynchronous Receiver Transmitter 0 */
+  VECTOR(sam_uart1, SAM_IRQ_UART1)    /* Vector 16+9: Universal Asynchronous Receiver Transmitter 1 */
+  VECTOR(sam_smc, SAM_IRQ_SMC)        /* Vector 16+10: Static Memory Controller */
+  VECTOR(sam_pioa, SAM_IRQ_PIOA)      /* Vector 16+11: Parallel I/O Controller A */
+  VECTOR(sam_piob, SAM_IRQ_PIOB)      /* Vector 16+12: Parallel I/O Controller B */
+  VECTOR(sam_pioc, SAM_IRQ_PIOC)      /* Vector 16+13: Parallel I/O Controller C */
+  VECTOR(sam_usart0, SAM_IRQ_USART0)  /* Vector 16+14: USART 0 */
+  VECTOR(sam_usart1, SAM_IRQ_USART1)  /* Vector 16+15: USART 1 */
   UNUSED(SAM_IRQ_RESERVED_16)         /* Vector 16+16: Reserved */
   UNUSED(SAM_IRQ_RESERVED_17)         /* Vector 16+17: Reserved */
-  VECTOR(sam_HSMCI, SAM_IRQ_HSMCI)    /* Vector 16+18: High Speed Multimedia Card Interface */
-  VECTOR(sam_TWI0, SAM_IRQ_TWI0)      /* Vector 16+19: Two-Wire Interface 0 */
-  VECTOR(sam_TWI1, SAM_IRQ_TWI1)      /* Vector 16+20: Two-Wire Interface 1 */
-  VECTOR(sam_SSC, SAM_IRQ_SSC)        /* Vector 16+22: Synchronous Serial Controller */
-  VECTOR(sam_TC0, SAM_IRQ_TC0)        /* Vector 16+23: Timer Counter 0 */
-  VECTOR(sam_TC1, SAM_IRQ_TC1)        /* Vector 16+24: Timer Counter 1 */
-  VECTOR(sam_TC2, SAM_IRQ_TC2)        /* Vector 16+25: Timer Counter 2 */
-  VECTOR(sam_TC3, SAM_IRQ_TC3)        /* Vector 16+26: Timer Counter 3 */
-  VECTOR(sam_TC4, SAM_IRQ_TC4)        /* Vector 16+27: Timer Counter 4 */
-  VECTOR(sam_TC5, SAM_IRQ_TC5)        /* Vector 16+28: Timer Counter 5 */
-  VECTOR(sam_ADC, SAM_IRQ_ADC)        /* Vector 16+29: Analog To Digital Converter */
-  VECTOR(sam_DACC, SAM_IRQ_DACC)      /* Vector 16+30: Digital To Analog Converter */
-  VECTOR(sam_PWM, SAM_IRQ_PWM)        /* Vector 16+31: Pulse Width Modulation */
-  VECTOR(sam_CRCCU, SAM_IRQ_CRCCU)    /* Vector 16+32: CRC Calculation Unit */
-  VECTOR(sam_ACC, SAM_IRQ_ACC)        /* Vector 16+33: Analog Comparator */
-  VECTOR(sam_UDP, SAM_IRQ_UDP)        /* Vector 16+34: USB Device Port */
+  VECTOR(sam_hsmci, SAM_IRQ_HSMCI)    /* Vector 16+18: High Speed Multimedia Card Interface */
+  VECTOR(sam_twi0, SAM_IRQ_TWI0)      /* Vector 16+19: Two-Wire Interface 0 */
+  VECTOR(sam_twi1, SAM_IRQ_TWI1)      /* Vector 16+20: Two-Wire Interface 1 */
+  VECTOR(sam_spi, SAM_PID_SPI)        /* Vector 16+21: Serial Peripheral Interface */
+  VECTOR(sam_ssc, SAM_IRQ_SSC)        /* Vector 16+22: Synchronous Serial Controller */
+  VECTOR(sam_tc0, SAM_IRQ_TC0)        /* Vector 16+23: Timer Counter 0 */
+  VECTOR(sam_tc1, SAM_IRQ_TC1)        /* Vector 16+24: Timer Counter 1 */
+  VECTOR(sam_tc2, SAM_IRQ_TC2)        /* Vector 16+25: Timer Counter 2 */
+  VECTOR(sam_tc3, SAM_IRQ_TC3)        /* Vector 16+26: Timer Counter 3 */
+  VECTOR(sam_tc4, SAM_IRQ_TC4)        /* Vector 16+27: Timer Counter 4 */
+  VECTOR(sam_tc5, SAM_IRQ_TC5)        /* Vector 16+28: Timer Counter 5 */
+  VECTOR(sam_adc, SAM_IRQ_ADC)        /* Vector 16+29: Analog To Digital Converter */
+  VECTOR(sam_dacc, SAM_IRQ_DACC)      /* Vector 16+30: Digital To Analog Converter */
+  VECTOR(sam_pwm, SAM_IRQ_PWM)        /* Vector 16+31: Pulse Width Modulation */
+  VECTOR(sam_crccu, SAM_IRQ_CRCCU)    /* Vector 16+32: CRC Calculation Unit */
+  VECTOR(sam_acc, SAM_IRQ_ACC)        /* Vector 16+33: Analog Comparator */
+  VECTOR(sam_udp, SAM_IRQ_UDP)        /* Vector 16+34: USB Device Port */
 #endif

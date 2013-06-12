@@ -48,7 +48,7 @@
  * Definitions
  ****************************************************************************************/
 
-/* SAM3U Peripheral Identifiers */
+/* SAM4S Peripheral Identifiers */
 
 #define SAM_PID_SUPC          (0)  /* Supply Controller */
 #define SAM_PID_RSTC          (1)  /* Reset Controller */
@@ -71,6 +71,7 @@
 #define SAM_PID_HSMCI        (18)  /* High Speed Multimedia Card Interface */
 #define SAM_PID_TWI0         (19)  /* Two-Wire Interface 0 */
 #define SAM_PID_TWI1         (20)  /* Two-Wire Interface 1 */
+#define SAM_PID_SPI          (21)  /* Serial Peripheral Interface */
 #define SAM_PID_SSC          (22)  /* Synchronous Serial Controller */
 #define SAM_PID_TC0          (23)  /* Timer Counter 0 */
 #define SAM_PID_TC1          (24)  /* Timer Counter 1 */
@@ -101,14 +102,15 @@
 #define SAM_IRQ_SMC          (SAM_IRQ_EXTINT+SAM_PID_SMC)         /* PID 10: Static Memory Controller */
 #define SAM_IRQ_PIOA         (SAM_IRQ_EXTINT+SAM_PID_PIOA)        /* PID 11: Parallel I/O Controller A */
 #define SAM_IRQ_PIOB         (SAM_IRQ_EXTINT+SAM_PID_PIOB)        /* PID 12: Parallel I/O Controller B */
-#define SAM_IRQ_PIOB         (SAM_IRQ_EXTINT+SAM_PID_PIOC)        /* PID 13: Parallel I/O Controller C */
+#define SAM_IRQ_PIOC         (SAM_IRQ_EXTINT+SAM_PID_PIOC)        /* PID 13: Parallel I/O Controller C */
 #define SAM_IRQ_USART0       (SAM_IRQ_EXTINT+SAM_PID_USART0)      /* PID 14: USART 0 */
-#define SAM_IRQ_USART0       (SAM_IRQ_EXTINT+SAM_PID_USART1)      /* PID 15: USART 1 */
+#define SAM_IRQ_USART1       (SAM_IRQ_EXTINT+SAM_PID_USART1)      /* PID 15: USART 1 */
 #define SAM_IRQ_RESERVED_16  (SAM_IRQ_EXTINT+SAM_PID_RESERVED_16) /* PID 16: Reserved */
 #define SAM_IRQ_RESERVED_17  (SAM_IRQ_EXTINT+SAM_PID_RESERVED_17) /* PID 17: Reserved */
 #define SAM_IRQ_HSMCI        (SAM_IRQ_EXTINT+SAM_PID_HSMCI)       /* PID 18: High Speed Multimedia Card Interface */
 #define SAM_IRQ_TWI0         (SAM_IRQ_EXTINT+SAM_PID_TWI0)        /* PID 19: Two-Wire Interface 0 */
 #define SAM_IRQ_TWI1         (SAM_IRQ_EXTINT+SAM_PID_TWI1)        /* PID 20: Two-Wire Interface 1 */
+#define SAM_IRQ_SPI          (SAM_IRQ_EXTINT+SAM_PID_SPI)         /* PIC 21: Serial Peripheral Interface */
 #define SAM_IRQ_SSC          (SAM_IRQ_EXTINT+SAM_PID_SSC)         /* PID 22: Synchronous Serial Controller */
 #define SAM_IRQ_TC0          (SAM_IRQ_EXTINT+SAM_PID_TC0)         /* PID 23: Timer Counter 0 */
 #define SAM_IRQ_TC1          (SAM_IRQ_EXTINT+SAM_PID_TC1)         /* PID 24: Timer Counter 1 */
