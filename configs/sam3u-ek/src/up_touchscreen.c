@@ -183,7 +183,9 @@ static bool tsc_busy(FAR struct ads7843e_config_s *state)
   static bool last = (bool)-1;
 #endif
 
-  /* REVISIT:  This might need to be inverted */
+  /* BUSY is high impedance when CS is high (not selected).  When CS is
+   * is low, BUSY is active high.
+   */
 
   bool busy = sam_gpioread(GPIO_TCS_BUSY);
 #if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_VERBOSE)

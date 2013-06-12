@@ -110,9 +110,9 @@ int usbmsc_archinitialize(void)
    * this case, there is nothing further to be done here.
    */
 
-#ifndef CONFIG_EXAMPLES_USBMSC_BUILTIN
+#ifndef CONFIG_NSH_BUILTIN_APPS
 #  warning "Missing logic"
-#endif /* CONFIG_EXAMPLES_USBMSC_BUILTIN */
+#endif /* CONFIG_NSH_BUILTIN_APPS */
 
    return OK;
 }

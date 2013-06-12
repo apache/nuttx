@@ -138,7 +138,12 @@
 
 #define GPIO_LCD_BKL  (GPIO_OUTPUT|GPIO_CFG_DEFAULT|GPIO_OUTPUT_CLEAR|GPIO_PORT_PIOC|GPIO_PIN19)
 
-/* Touchscreen controller (TSC) */
+/* Touchscreen controller (TSC)
+ *
+ * BUSY is high impedance when CS is high (not selected).  When CS is
+ * is low, BUSY is active high.  Since the pin is pulled up, it will appear
+ * busy if CS is not selected.
+ */
 
 #define GPIO_TCS_IRQ  (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN24)
 #define GPIO_TCS_BUSY (GPIO_INPUT|GPIO_CFG_PULLUP|GPIO_PORT_PIOA|GPIO_PIN2)

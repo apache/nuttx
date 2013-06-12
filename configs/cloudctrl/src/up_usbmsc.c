@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/cloudctrl/src/up_usbmsc.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Darcy Gong <darcy.gong@gmail.com>
  *
@@ -96,7 +96,7 @@ int usbmsc_archinitialize(void)
    * this case, there is nothing further to be done here.
    */
 
-#ifndef CONFIG_EXAMPLES_USBMSC_BUILTIN
+#ifndef CONFIG_NSH_BUILTIN_APPS
   return stm32_sdinitialize(CONFIG_EXAMPLES_USBMSC_DEVMINOR1);
 #else
   return OK;

@@ -82,7 +82,7 @@ int usbterm_devinit(void)
    * pic32mx_usbattach() will be called in nsh_archinitialize().
    */
 
-#ifndef CONFIG_EXAMPLES_USBTERM_BUILTIN
+#ifndef CONFIG_NSH_BUILTIN_APPS
   pic32mx_usbattach();
 #endif
   return OK;

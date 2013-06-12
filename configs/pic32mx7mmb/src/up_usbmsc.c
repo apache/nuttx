@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/pic32mx7mmb/src/up_usbmsc.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,9 +87,9 @@ int usbmsc_archinitialize(void)
    * this case, there is nothing further to be done here.
    */
 
-#ifndef CONFIG_EXAMPLES_USBMSC_BUILTIN
+#ifndef CONFIG_NSH_BUILTIN_APPS
 #  warning "Missing Logic"
-#endif /* CONFIG_EXAMPLES_USBMSC_BUILTIN */
+#endif /* CONFIG_NSH_BUILTIN_APPS */
 
    return 0;
 }

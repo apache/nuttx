@@ -2,7 +2,7 @@
  * configs/pic32mx7mmb/src/up_usbterm.c
  * arch/arm/src/board/up_usbterm.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ int usbterm_devinit(void)
    * pic32mx_usbattach() will be called in nsh_archinitialize().
    */
 
-#ifndef CONFIG_EXAMPLES_USBTERM_BUILTIN
+#ifndef CONFIG_NSH_BUILTIN_APPS
   pic32mx_usbattach();
 #endif
   return OK;

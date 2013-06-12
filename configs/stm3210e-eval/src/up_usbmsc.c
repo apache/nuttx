@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/stm3210e-eval/src/up_usbmsc.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the STM32 MMC/SD SDIO block driver.
@@ -114,7 +114,7 @@ int usbmsc_archinitialize(void)
    * this case, there is nothing further to be done here.
    */
 
-#ifndef CONFIG_EXAMPLES_USBMSC_BUILTIN
+#ifndef CONFIG_NSH_BUILTIN_APPS
   FAR struct sdio_dev_s *sdio;
   int ret;
 
@@ -156,7 +156,7 @@ int usbmsc_archinitialize(void)
 
    sdio_mediachange(sdio, true);
 
-#endif /* CONFIG_EXAMPLES_USBMSC_BUILTIN */
+#endif /* CONFIG_NSH_BUILTIN_APPS */
 
    return OK;
 }

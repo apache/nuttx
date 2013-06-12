@@ -50,8 +50,6 @@
 #include "sam_hsmci.h"
 #include "sam3u-ek.h"
 
-#ifdef CONFIG_SAM34_HSMCI
-
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
@@ -63,19 +61,10 @@
 #define NSH_HAVE_USBDEV 1
 #define NSH_HAVE_MMCSD  1
 
-#if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
-#  error "Only one MMC/SD slot"
-#  undef CONFIG_NSH_MMCSDSLOTNO
-#endif
+/* Can't support MMC/SD if the card interface is not enable */
 
-#ifndef CONFIG_NSH_MMCSDSLOTNO
-#  define CONFIG_NSH_MMCSDSLOTNO 0
-#endif
-
-/* Can't support USB features if USB is not enabled */
-
-#ifndef CONFIG_USBDEV
-#  undef NSH_HAVE_USBDEV
+#ifndef CONFIG_SAM34_HSMCI
+#  undef NSH_HAVE_MMCSD
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
@@ -86,8 +75,25 @@
 #  undef NSH_HAVE_MMCSD
 #endif
 
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
+#ifdef NSH_HAVE_MMCSD
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
+#    error "Only one MMC/SD slot"
+#    undef CONFIG_NSH_MMCSDSLOTNO
+#  endif
+
+#  ifndef CONFIG_NSH_MMCSDMINOR
+#    define CONFIG_NSH_MMCSDMINOR 0
+#  endif
+
+#  ifndef CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO 0
+#  endif
+#endif
+
+/* Can't support USB features if USB is not enabled */
+
+#ifndef CONFIG_USBDEV
+#  undef NSH_HAVE_USBDEV
 #endif
 
 /* Debug ********************************************************************/
@@ -155,4 +161,3 @@ int nsh_archinitialize(void)
 #endif
   return OK;
 }
-#endif
