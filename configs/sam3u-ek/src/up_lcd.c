@@ -88,7 +88,7 @@
  * other custom usage).
  *
  * The SAM3U4E communicates with the LCD through PIOB where a 16-bit parallel
- * “8080-like” protocol data bus has to be implemented by software.
+ * 8080-like protocol data bus has to be implemented by software.
  *
  * LCD backlight is made of 4 white chip LEDs in parallel, driven by an AAT3194
  * charge pump, MN4. The AAT3194 is controlled by the SAM3U4E through a single line
@@ -125,7 +125,7 @@
 
 #include "up_arch.h"
 #include "sam_gpio.h"
-#include "chip/sam_pmc.h"
+#include "chip/sam3u_pmc.h"
 #include "chip/sam_smc.h"
 #include "sam3u-ek.h"
 
@@ -910,7 +910,7 @@ int up_lcdinitialize(void)
   putreg32(regval, SAM_SMCCS_SETUP(2));
 
   regval = (5 << SMCCS_PULSE_NWEPULSE_SHIFT) | (18 << SMCCS_PULSE_NCSWRPULSE_SHIFT) |
-           (5 << SMCCS_PULSE_RDPULSE_SHIFT)  | (18 << SMCCS_PULSE_NCSRDPULSE_SHIFT);
+           (5 << SMCCS_PULSE_NRDPULSE_SHIFT)  | (18 << SMCCS_PULSE_NCSRDPULSE_SHIFT);
   putreg32(regval, SAM_SMCCS_PULSE(2));
 
   regval = (22 << SMCCS_CYCLE_NWECYCLE_SHIFT) | (22 << SMCCS_CYCLE_NRDCYCLE_SHIFT);

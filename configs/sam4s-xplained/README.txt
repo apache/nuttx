@@ -496,7 +496,19 @@ Configurations
     make
 
   The <subdir> that is provided above as an argument to the tools/configure.sh
-  must be is one of the following:
+  must be is one of the following.
+
+  NOTE:  These configurations use the mconf-based configuration tool.  To
+  change any of these configurations using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       and misc/tools/
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+Configuration sub-directories
+-----------------------------
 
   ostest:
     This configuration directory performs a simple OS test using

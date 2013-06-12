@@ -1,12 +1,9 @@
 /************************************************************************************
- * configs/sure-pic32mx/src/pic32mx_usbterm.c
+ * arch/arm/src/sam34/sam_periphclks.h
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *   - Sample code and schematics provided with the Sure Electronics PIC32 board.
- * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -36,72 +33,60 @@
  *
  ************************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAM34_SAM_PERIPHCLKS_H
+#define __ARCH_ARM_SRC_SAM34_SAM_PERIPHCLKS_H
+
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <debug.h>
-
-#include <nuttx/usb/usbdev.h>
-
-#include "pic32mx-internal.h"
-#include "sure-pic32mx.h"
-
-#if defined(CONFIG_PIC32MX_USBDEV) && defined(CONFIG_EXAMPLES_USBTERM_DEVINIT)
-
-/************************************************************************************
- * Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
-
-/****************************************************************************
- * Name:
- *
- * Description:
- *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
- *   call this user provided function as part of its initialization.
- *
- ****************************************************************************/
-
-int usbterm_devinit(void)
-{
-  /* The Sure board has no way to know when the USB is connected.  So we
-   * will fake it and tell the USB driver that the USB is connected now.
-   *
-   * If examples/usbterm is built as an NSH built-in application, then
-   * pic32mx_usbattach() will be called in nsh_archinitialize().
-   */
-
-#ifndef CONFIG_NSH_BUILTIN_APPS
-  pic32mx_usbattach();
+#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  include "sam3u_periphclks.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4L)
+#  include "sam4l_periphclks.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4S)
+#  include "sam4s_periphclks.h"
+#else
+#  error Unknown SAM chip
 #endif
-  return OK;
-}
 
-/****************************************************************************
- * Name:
- *
- * Description:
- *   If CONFIG_EXAMPLES_USBTERM_DEVINIT is defined, then the example will
- *   call this user provided function as part of its termination sequence.
- *
- ****************************************************************************/
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
 
-void usbterm_devuninit(void)
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Inline Functions
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  /* Tell the USB driver that the USB is no longer connected */
+#else
+#define EXTERN extern
+#endif
 
-  pic32mx_usbdetach();
+/************************************************************************************
+ * Public Function Prototypes
+ ************************************************************************************/
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-#endif /* CONFIG_PIC32MX_USBDEV && CONFIG_EXAMPLES_USBTERM_DEVINIT */
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_SAM34_SAM_PERIPHCLKS_H */

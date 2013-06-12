@@ -540,11 +540,22 @@ CONFIGURATION
             CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
             CONFIG_LPC17_SSP1=y               : Enable support for SSP1
 
+          RTOS Features:
+            CONFIG_DISABLE_SIGNALS=n          : Signals are required
+
+          Library Support:
+            CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
+
           Applicaton Configuration:
             CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
-            CONFIG_EXAMPLES_TOUCHSCREEN_BUILTIN=y
 
-          Defaults should be okay for related touchscreen settings.
+          Defaults should be okay for related touchscreen settings.  Touchscreen
+          debug output can be enabled with:
+
+          Build Setup:
+            CONFIG_DEBUG=y                    : Enable debug features
+            CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+            CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
        c) You will also have to disable SD card support to use this test.  The
           SD card detect (CD) signal is on P0[13].  This signal is shared.  It

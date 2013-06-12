@@ -1,8 +1,8 @@
 README
 ^^^^^^
 
-This README discusses issues unique to NuttX configurations for the
-Atmel SAM3U-EK development board.
+This README discusses issues unique to NuttX configurations for the Atmel
+SAM3U-EK development board featuring the ATAM3U
 
 Contents
 ^^^^^^^^
@@ -91,7 +91,7 @@ IDEs
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project (There is a simple RIDE project
   in the RIDE subdirectory).
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -188,7 +188,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -371,25 +371,42 @@ SAM3U-EK-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
-Each SAM3U-EK configuration is maintained in a sub-directory and
-can be selected as follow:
+  Each SAM3U-EK configuration is maintained in a sub-directory and
+  can be selected as follow:
 
     cd tools
     ./configure.sh sam3u-ek/<subdir>
     cd -
     . ./setenv.sh
 
-Before sourcing the setenv.sh file above, you should examine it and perform
-edits as necessary so that BUILDROOT_BIN is the correct path to the directory
-than holds your toolchain binaries.
+  Before sourcing the setenv.sh file above, you should examine it and perform
+  edits as necessary so that BUILDROOT_BIN is the correct path to the directory
+  than holds your toolchain binaries.
 
-And then build NuttX by simply typing the following.  At the conclusion of
-the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+  And then build NuttX by simply typing the following.  At the conclusion of
+  the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
 
     make
 
-The <subdir> that is provided above as an argument to the tools/configure.sh
-must be is one of the following:
+  The <subdir> that is provided above as an argument to the tools/configure.sh
+  must be is one of the following.
+
+  NOTES:
+
+  1. These configurations use the mconf-based configuration tool.  To
+    change any of these configurations using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       and misc/tools/
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+  2. Unless stated otherwise, all configurations generate console
+     output of UART0 (J3).
+
+Configuration sub-directories
+-----------------------------
 
   knsh:
     This is identical to the nsh configuration below except that NuttX
@@ -406,23 +423,14 @@ must be is one of the following:
     binaries (pass2)
 
     NOTES:
- 
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
 
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/README.txt.
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. Uses the older, OABI, buildroot toolchain.  But that is easily
-       reconfigured:
+    1. This configuration uses the older, OABI, buildroot toolchain.  But
+       that is easily reconfigured:
 
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
 
-    3. At the end of the build, there will be several files in the top-level
+    2. At the end of the build, there will be several files in the top-level
        NuttX build directory:
 
        PASS1:
@@ -438,7 +446,7 @@ must be is one of the following:
        The J-Link programmer will except files in .hex, .mot, .srec, and .bin
        formats.
 
-    4. Combining .hex files.  If you plan to use the .hex files with your
+    3. Combining .hex files.  If you plan to use the .hex files with your
        debugger or FLASH utility, then you may need to combine the two hex
        files into a single .hex file.  Here is how you can do that.
 
@@ -486,18 +494,71 @@ must be is one of the following:
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables both the serial and telnetd NSH interfaces.
 
+    NOTES:
+
+    1. This configuration uses the older, OABI, buildroot toolchain.  But
+       that is easily reconfigured:
+
+       System Type:
+         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+         CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+
+    2. NSH built-in applications are supported.  However, there are
+       no built-in applications built with the default configuration.
+
+       Binary Formats:
+         CONFIG_BUILTIN=y                    : Enable support for built-in programs
+
+       Applicaton Configuration:
+         CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
+
+    3. This configuration has been used for verifying the touchscreen on
+       on the SAM3U-EK LCD.  With these modifications, you can include the
+       touchscreen test program at apps/examples/touchscreen as an NSH built-in
+       application.  You can enable the touchscreen and test by modifying the
+       default configuration in the following ways:
+
+          Drivers:
+            CONFIG_INPUT=y                    : Enable support for input devices
+            CONFIG_INPUT_ADS7843E=y           : Enable support for the XPT2048
+            CONFIG_ADS7843E_SPIDEV=0          : Use SPI for communication
+            CONFIG_ADS7843E_SPIMODE=0         : Use SPI mode 0
+            CONFIG_ADS7843E_THRESHX=39        : These will probably need to be tuned
+            CONFIG_ADS7843E_THRESHY=51
+            CONFIG_SPI=y                      : Enable SPI support
+            CONFIG_SPI_EXCHANGE=n             : exchange() method is not supported
+
+          System Type:
+            CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
+            CONFIG_GPIOA_IRQ=y                : Enable GPIO interrupts from port A
+            CONFIG_SAM34_SPI=y                : Enable support for SPI
+
+          RTOS Features:
+            CONFIG_DISABLE_SIGNALS=n          : Signals are required
+
+          Library Support:
+            CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
+
+          Applicaton Configuration:
+            CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
+
+          Defaults should be okay for related touchscreen settings.  Touchscreen
+          debug output on UART0 can be enabled with:
+
+          Build Setup:
+            CONFIG_DEBUG=y                    : Enable debug features
+            CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+            CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
+
+          NOTE:
+            As of this writing, the touchscreen is not functional (no
+            interrupts).  More work is needed.
+
   nx:
-    Configures to use examples/nx using the HX834x LCD hardwar on
+    Configures to use examples/nx using the HX834x LCD hardware on
     the SAM3U-EK development board.
 
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.  By default, this project assumes that you are
     using the DFU bootloader.
-
-  touchscreen:
-    This configuration implements an NSH configuratin with several
-    built-in applications.  The configuration is called touchscreen
-    because we intend to use this configuration to develop the
-    SAM3U-EK touchscreen.  However, there is no touchscreen driver
-    in place as of this writing.

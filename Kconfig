@@ -497,7 +497,7 @@ config DEBUG_AUDIO
 	default n
 	---help---
 		Enable low level debug SYSLOG output from the audio subsystem and
-		device drivers. (disabled by default).  Support for this debug option 
+		device drivers. (disabled by default).  Support for this debug option
 		is architecgture-specific and may not be available for some MCUs.
 
 endif

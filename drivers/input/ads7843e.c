@@ -270,6 +270,11 @@ static inline void ads7843e_configspi(FAR struct spi_dev_s *spi)
 
 static inline void ads7843e_waitbusy(FAR struct ads7843e_dev_s *priv)
 {
+  /* BUSY is high impedance when the ads7843e not selected.  When the
+   * ads7843e selected, BUSY is active high.  Hence, it is necessary to have
+   * the ads7843e selected when this function is called.
+   */
+
   while (priv->config->busy(priv->config));
 }
 

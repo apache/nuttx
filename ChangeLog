@@ -4956,4 +4956,9 @@
 	  SAM4S Xplained board.  Both the OS test and the NSH configurations
 	  no execute error-free.  Delay loops calibrated for both the SAM4L
 	  and SAM4S boards (2013-6-12).
-
+	* Standardize on CONFIG_NSH_BUILTIN_APPS.  Remove all other variants
+	  of the build-as-an-NSH-application configuration settings
+	  (2013-6-12).
+	* arch/arm/src/sam34/sam_periphclks.h:  A header file that just
+	  includes the right header file.  This cleans up the messy logic
+	  in all of the C files and puts the mess in one place (2013-6-12).
