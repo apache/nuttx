@@ -579,7 +579,7 @@ Where <subdir> is one of the following:
     Uses apps/examples/buttons to exercise HY-MiniSTM32V buttons and
     button interrupts.
 
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : Generic GNU EABI toolchain
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y  : Generic GNU EABI toolchain
 
   nsh and nsh2:
   ------------

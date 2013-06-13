@@ -60,7 +60,7 @@ GNU Toolchain Options
     CONFIG_STM32_DEVKITARM=y      : devkitARM under Windows
     CONFIG_STM32_RAISONANCE=y     : Raisonance RIDE7 under Windows
     CONFIG_STM32_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI : Generic arm-none-eabi toolchain
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL : Generic arm-none-eabi toolchain
 
   If you change the default toolchain, then you may also have to modify the PATH in
   the setenv.h file if your make cannot find the tools.

@@ -424,13 +424,30 @@ Configuration sub-directories
 
     NOTES:
 
-    1. This configuration uses the older, OABI, buildroot toolchain.  But
+    1. This configuration is setup for Linux (or any other POSIX environment
+       like Cygwin under Windows):
+
+       Build Setup:
+         CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
+
+    2. This configuration uses the older, OABI, buildroot toolchain.  But
        that is easily reconfigured:
 
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+       System Type -> Toolchain:
+         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+         CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
 
-    2. At the end of the build, there will be several files in the top-level
+       If you want to use the Atmel GCC toolchain, here are the steps to
+       do so:
+
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y   : Windows
+         CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
+
+       System Type -> Toolchain:
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
+
+    3. At the end of the build, there will be several files in the top-level
        NuttX build directory:
 
        PASS1:
@@ -446,7 +463,7 @@ Configuration sub-directories
        The J-Link programmer will except files in .hex, .mot, .srec, and .bin
        formats.
 
-    3. Combining .hex files.  If you plan to use the .hex files with your
+    4. Combining .hex files.  If you plan to use the .hex files with your
        debugger or FLASH utility, then you may need to combine the two hex
        files into a single .hex file.  Here is how you can do that.
 
@@ -496,14 +513,30 @@ Configuration sub-directories
 
     NOTES:
 
-    1. This configuration uses the older, OABI, buildroot toolchain.  But
+    1. This configuration is setup for Linux (or any other POSIX environment
+       like Cygwin under Windows):
+
+       Build Setup:
+         CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
+
+    2. This configuration uses the older, OABI, buildroot toolchain.  But
        that is easily reconfigured:
 
-       System Type:
+       System Type -> Toolchain:
          CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
          CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
 
-    2. NSH built-in applications are supported.  However, there are
+       If you want to use the Atmel GCC toolchain, here are the steps to
+       do so:
+
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y   : Windows
+         CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
+
+       System Type -> Toolchain:
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
+
+    3. NSH built-in applications are supported.  However, there are
        no built-in applications built with the default configuration.
 
        Binary Formats:
@@ -512,7 +545,7 @@ Configuration sub-directories
        Applicaton Configuration:
          CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
 
-    3. This configuration has been used for verifying the touchscreen on
+    4. This configuration has been used for verifying the touchscreen on
        on the SAM3U-EK LCD.  With these modifications, you can include the
        touchscreen test program at apps/examples/touchscreen as an NSH built-in
        application.  You can enable the touchscreen and test by modifying the
@@ -558,7 +591,58 @@ Configuration sub-directories
     Configures to use examples/nx using the HX834x LCD hardware on
     the SAM3U-EK development board.
 
+    NOTES:
+
+    1. This configuration is setup for Linux (or any other POSIX environment
+       like Cygwin under Windows):
+
+       Build Setup:
+         CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
+
+    2. This configuration uses the older, OABI, buildroot toolchain.  But
+       that is easily reconfigured:
+
+       System Type -> Toolchain:
+         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+         CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+
+       If you want to use the Atmel GCC toolchain, here are the steps to
+       do so:
+
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y   : Windows
+         CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
+
+       System Type -> Toolchain:
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
+
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.  By default, this project assumes that you are
     using the DFU bootloader.
+
+    NOTES:
+
+    1. This configuration is setup for Linux (or any other POSIX environment
+       like Cygwin under Windows):
+
+       Build Setup:
+         CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
+
+    2. This configuration uses the older, OABI, buildroot toolchain.  But
+       that is easily reconfigured:
+
+       System Type -> Toolchain:
+         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+         CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+
+       If you want to use the Atmel GCC toolchain, here are the steps to
+       do so:
+
+       Build Setup:
+         CONFIG_HOST_WINDOWS=y   : Windows
+         CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
+
+       System Type -> Toolchain:
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
+

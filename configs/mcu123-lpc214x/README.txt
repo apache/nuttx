@@ -363,7 +363,7 @@ nsh:
     2. Default platform/toolchain:
 
        CONFIG_HOST_LINUX=y             : Windows
-       CONFIG_ARM_TOOLCHAIN_GNU_EABI=y : Buildroot (arm-nuttx-elf-gcc)
+       CONFIG_ARM_TOOLCHAIN_GNU_EABIL=y : Buildroot (arm-nuttx-elf-gcc)
        CONFIG_RAW_BINARY=y             : Output formats: ELF and raw binary
 
 ostest:
