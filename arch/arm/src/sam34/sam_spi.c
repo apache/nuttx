@@ -912,6 +912,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   /* Enable clocking to the SPI block */
 
+  flags = irqsave();
   sam_spi_enableclk();
 
   /* Configure multiplexed pins as connected on the board.  Chip select pins

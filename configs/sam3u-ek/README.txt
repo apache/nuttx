@@ -13,6 +13,7 @@ Contents
   - NuttX EABI "buildroot" Toolchain
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
+  - AtmelStudio6.1
   - LEDs
   - SAM3U-EK-specific Configuration Options
   - Configurations
@@ -213,12 +214,32 @@ NXFLAT Toolchain
   8. Edit setenv.h, if necessary, so that the PATH variable includes
      the path to the newly builtNXFLAT binaries.
 
+AtmelStudio6.1
+^^^^^^^^^^^^^^
+
+  You can use AtmelStudio6.1 to load and debug code.
+
+  - To load code:
+
+    Tools -> Device Programming
+
+    Configure the debugger and chip and you are in business.
+
+  - To Debug Code:
+
+    File -> Open -> Open Object File for Debugging
+
+    Select the project name, the full path to the NuttX object (called
+    just nuttx with no extension), and chip.  Take the time to resolve
+    all of the source file linkages or else you will not have source
+    level debug!
+
 LEDs
 ^^^^
 
-The SAM3U-EK board has four LEDs labeled LD1, LD2, LD3 and LD4 on the
-the board.  Usage of these LEDs is defined in include/board.h and src/up_leds.c.
-They are encoded as follows:
+  The SAM3U-EK board has four LEDs labeled LD1, LD2, LD3 and LD4 on the
+  the board.  Usage of these LEDs is defined in include/board.h and src/up_leds.c.
+  They are encoded as follows:
 
     SYMBOL              Meaning                 LED0*   LED1    LED2
     ------------------- ----------------------- ------- ------- -------
@@ -405,6 +426,42 @@ Configurations
   2. Unless stated otherwise, all configurations generate console
      output of UART0 (J3).
 
+  3. Unless otherwise stated, the configurations are setup for
+     Linux (or any other POSIX environment like Cygwin under Windows):
+
+     Build Setup:
+       CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
+
+  4. These configurations use the older, OABI, buildroot toolchain.  But
+     that is easily reconfigured:
+
+     System Type -> Toolchain:
+       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+
+     If you want to use the Atmel GCC toolchain, here are the steps to
+     do so:
+
+     Build Setup:
+       CONFIG_HOST_WINDOWS=y   : Windows
+       CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
+
+     System Type -> Toolchain:
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
+
+     This re-configuration should be done before making NuttX or else the
+     subsequent 'make' will fail.  If you have already attempted building
+     NuttX then you will have to 1) 'make distclean' to remove the old
+     configuration, 2) 'cd tools; ./configure.sh sam3u-ek/ksnh' to start
+     with a fresh configuration, and 3) perform the configuration changes
+     above.
+
+     Also, make sure that your PATH variable has the new path to your
+     Atmel tools.  Try 'which arm-none-eabi-gcc' to make sure that you
+     are selecting the right tool.  setenv.sh is available for you to
+     use to set or PATH variable.  The path in the that file may not,
+     however, be correct for your installation.
+
 Configuration sub-directories
 -----------------------------
 
@@ -424,30 +481,7 @@ Configuration sub-directories
 
     NOTES:
 
-    1. This configuration is setup for Linux (or any other POSIX environment
-       like Cygwin under Windows):
-
-       Build Setup:
-         CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
-
-    2. This configuration uses the older, OABI, buildroot toolchain.  But
-       that is easily reconfigured:
-
-       System Type -> Toolchain:
-         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-         CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
-
-       If you want to use the Atmel GCC toolchain, here are the steps to
-       do so:
-
-       Build Setup:
-         CONFIG_HOST_WINDOWS=y   : Windows
-         CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
-
-       System Type -> Toolchain:
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
-
-    3. At the end of the build, there will be several files in the top-level
+    1. At the end of the build, there will be several files in the top-level
        NuttX build directory:
 
        PASS1:
@@ -463,7 +497,7 @@ Configuration sub-directories
        The J-Link programmer will except files in .hex, .mot, .srec, and .bin
        formats.
 
-    4. Combining .hex files.  If you plan to use the .hex files with your
+    2. Combining .hex files.  If you plan to use the .hex files with your
        debugger or FLASH utility, then you may need to combine the two hex
        files into a single .hex file.  Here is how you can do that.
 
@@ -513,30 +547,7 @@ Configuration sub-directories
 
     NOTES:
 
-    1. This configuration is setup for Linux (or any other POSIX environment
-       like Cygwin under Windows):
-
-       Build Setup:
-         CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
-
-    2. This configuration uses the older, OABI, buildroot toolchain.  But
-       that is easily reconfigured:
-
-       System Type -> Toolchain:
-         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-         CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
-
-       If you want to use the Atmel GCC toolchain, here are the steps to
-       do so:
-
-       Build Setup:
-         CONFIG_HOST_WINDOWS=y   : Windows
-         CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
-
-       System Type -> Toolchain:
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
-
-    3. NSH built-in applications are supported.  However, there are
+    1. NSH built-in applications are supported.  However, there are
        no built-in applications built with the default configuration.
 
        Binary Formats:
@@ -545,7 +556,7 @@ Configuration sub-directories
        Applicaton Configuration:
          CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
 
-    4. This configuration has been used for verifying the touchscreen on
+    2. This configuration has been used for verifying the touchscreen on
        on the SAM3U-EK LCD.  With these modifications, you can include the
        touchscreen test program at apps/examples/touchscreen as an NSH built-in
        application.  You can enable the touchscreen and test by modifying the
@@ -591,58 +602,7 @@ Configuration sub-directories
     Configures to use examples/nx using the HX834x LCD hardware on
     the SAM3U-EK development board.
 
-    NOTES:
-
-    1. This configuration is setup for Linux (or any other POSIX environment
-       like Cygwin under Windows):
-
-       Build Setup:
-         CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
-
-    2. This configuration uses the older, OABI, buildroot toolchain.  But
-       that is easily reconfigured:
-
-       System Type -> Toolchain:
-         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-         CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
-
-       If you want to use the Atmel GCC toolchain, here are the steps to
-       do so:
-
-       Build Setup:
-         CONFIG_HOST_WINDOWS=y   : Windows
-         CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
-
-       System Type -> Toolchain:
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
-
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.  By default, this project assumes that you are
     using the DFU bootloader.
-
-    NOTES:
-
-    1. This configuration is setup for Linux (or any other POSIX environment
-       like Cygwin under Windows):
-
-       Build Setup:
-         CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
-
-    2. This configuration uses the older, OABI, buildroot toolchain.  But
-       that is easily reconfigured:
-
-       System Type -> Toolchain:
-         CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-         CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
-
-       If you want to use the Atmel GCC toolchain, here are the steps to
-       do so:
-
-       Build Setup:
-         CONFIG_HOST_WINDOWS=y   : Windows
-         CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
-
-       System Type -> Toolchain:
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
-
