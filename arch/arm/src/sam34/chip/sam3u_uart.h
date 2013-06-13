@@ -319,6 +319,12 @@
 
 #define UART_INT_MANE                (1 << 24) /* Bit 24: Manchester Error Interrupt (USART only) */
 
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define UART_INT_ALLINTS           0x010f3fff
+#else
+#  define UART_INT_ALLINTS           0x01083fff
+#endif
+
 /* UART Receiver Holding Register */
 
 #if 0
