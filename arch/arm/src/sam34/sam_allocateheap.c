@@ -66,7 +66,7 @@
 #endif
 
 #if CONFIG_MM_REGIONS > 2 && defined(CONFIG_SAM34_NAND)
-#  error "CONFIG_MM_REGIONS > 3 but cannot used NFC SRAM"
+#  error "CONFIG_MM_REGIONS > 2 but cannot use NFC SRAM"
 #  undef CONFIG_MM_REGIONS
 #  define CONFIG_MM_REGIONS 2
 #endif
