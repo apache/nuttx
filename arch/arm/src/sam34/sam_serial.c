@@ -332,7 +332,6 @@ struct up_dev_s
 {
   uint32_t usartbase; /* Base address of USART registers */
   uint32_t baud;      /* Configured baud */
-  uint32_t imr;       /* Saved interrupt mask bits value */
   uint32_t sr;        /* Saved status bits */
   uint8_t  irq;       /* IRQ associated with this USART */
   uint8_t  parity;    /* 0=none, 1=odd, 2=even */
@@ -608,36 +607,14 @@ static inline void up_serialout(struct up_dev_s *priv, int offset, uint32_t valu
 }
 
 /****************************************************************************
- * Name: up_enableint
- ****************************************************************************/
-
-static inline void up_enableint(struct up_dev_s *priv)
-{
-  up_serialout(priv, SAM_UART_IER_OFFSET, priv->imr);
-}
-
-/****************************************************************************
- * Name: up_disableint
- ****************************************************************************/
-
-static inline void up_disableint(struct up_dev_s *priv)
-{
-  up_serialout(priv, SAM_UART_IDR_OFFSET, ~priv->imr);
-}
-
-/****************************************************************************
  * Name: up_restoreusartint
  ****************************************************************************/
 
-static void up_restoreusartint(struct up_dev_s *priv, uint32_t imr)
+static inline void up_restoreusartint(struct up_dev_s *priv, uint32_t imr)
 {
-  /* Save the interrupt mask */
+  /* Restore the previous interrupt state */
 
-  priv->imr = imr;
-
-  /* And re-enable interrrupts previoulsy disabled by up_disableallints */
-
-  up_enableint(priv);
+  up_serialout(priv, SAM_UART_IMR_OFFSET, imr);
 }
 
 /****************************************************************************
@@ -646,17 +623,22 @@ static void up_restoreusartint(struct up_dev_s *priv, uint32_t imr)
 
 static void up_disableallints(struct up_dev_s *priv, uint32_t *imr)
 {
+  irqstate_t flags;
+
+  /* The following must be atomic */
+
+  flags = irqsave();
   if (imr)
     {
       /* Return the current interrupt mask */
 
-      *imr = priv->imr;
+      *imr = up_serialin(priv, SAM_UART_IMR_OFFSET);
     }
 
   /* Disable all interrupts */
 
-  priv->imr = 0;
-  up_disableint(priv);
+  up_serialout(priv, SAM_UART_IDR_OFFSET, UART_INT_ALLINTS);
+  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -855,6 +837,7 @@ static int up_interrupt(int irq, void *context)
   struct uart_dev_s *dev = NULL;
   struct up_dev_s   *priv;
   uint32_t           pending;
+  uint32_t           imr;
   int                passes;
   bool               handled;
 
@@ -917,8 +900,9 @@ static int up_interrupt(int irq, void *context)
 
       /* Get the UART/USART status (we are only interested in the unmasked interrupts). */
 
-      priv->sr = up_serialin(priv, SAM_UART_SR_OFFSET); /* Save for error reporting */
-      pending  = priv->sr & priv->imr;                  /* Mask out disabled interrupt sources */
+      priv->sr = up_serialin(priv, SAM_UART_SR_OFFSET);  /* Save for error reporting */
+      imr      = up_serialin(priv, SAM_UART_IMR_OFFSET); /* Interrupt mask */
+      pending  = priv->sr & imr;                        /* Mask out disabled interrupt sources */
 
       /* Handle an incoming, receive byte.  RXRDY: At least one complete character
        * has been received and US_RHR has not yet been read.
@@ -1033,14 +1017,12 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->imr |= UART_INT_RXRDY;
-      up_enableint(priv);
+      up_serialout(priv, SAM_UART_IER_OFFSET, UART_INT_RXRDY);
 #endif
     }
   else
     {
-      priv->imr &= ~UART_INT_RXRDY;
-      up_disableint(priv);
+      up_serialout(priv, SAM_UART_IDR_OFFSET, UART_INT_RXRDY);
     }
 }
 
@@ -1093,22 +1075,22 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
        */
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->imr |= UART_INT_TXRDY;
-      up_enableint(priv);
+      up_serialout(priv, SAM_UART_IER_OFFSET, UART_INT_TXRDY);
 
+#  if 0 /* Seems to be unnecessary */
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
        */
 
       uart_xmitchars(dev);
+#  endif
 #endif
     }
   else
     {
       /* Disable the TX interrupt */
 
-      priv->imr &= ~UART_INT_TXRDY;
-      up_disableint(priv);
+      up_serialout(priv, SAM_UART_IDR_OFFSET, UART_INT_TXRDY);
     }
 
   irqrestore(flags);

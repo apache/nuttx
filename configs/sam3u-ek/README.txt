@@ -38,22 +38,29 @@ GNU Toolchain Options
 
   All testing has been conducted using the NuttX buildroot toolchain.  However,
   the make system is setup to default to use the devkitARM toolchain.  To use
-  the CodeSourcery, devkitARM or Raisonance GNU toolchain, you simply need to
-  add one of the following configuration options to your .config (or defconfig)
-  file:
+  the CodeSourcery, devkitARM, Atollic, or AtmelStudio GNU toolchain, you simply
+  need to add one of the following configuration options to your .config (or
+  defconfig) file:
 
-    CONFIG_SAM34_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_SAM34_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_SAM34_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_SAM34_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windos
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y      : Generic GCC ARM EABI toolchain for Windows
 
-  If you are not using CONFIG_SAM34_BUILDROOT, then you may also have to modify
+  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.
 
-  NOTE: the CodeSourcery (for Windows), devkitARM, and Raisonance toolchains are
-  Windows native toolchains.  The CodeSourcey (for Linux) and NuttX buildroot
-  toolchains are Cygwin and/or Linux native toolchains. There are several limitations
-  to using a Windows based toolchain in a Cygwin environment.  The three biggest are:
+  NOTE about Windows native toolchains
+  ------------------------------------
+
+  The CodeSourcery (for Windows), Atollic, and devkitARM toolchains are
+  Windows native toolchains.  The CodeSourcery (for Linux), NuttX buildroot,
+  and, perhaps, the generic GCC toolchains are Cygwin and/or Linux native
+  toolchains. There are several limitations to using a Windows based
+  toolchain in a Cygwin environment.  The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
      performed automatically in the Cygwin makefiles using the 'cygpath' utility
@@ -461,6 +468,9 @@ Configurations
      are selecting the right tool.  setenv.sh is available for you to
      use to set or PATH variable.  The path in the that file may not,
      however, be correct for your installation.
+
+     See also the "NOTE about Windows native toolchains" in the section call
+     "GNU Toolchain Options" above.
 
 Configuration sub-directories
 -----------------------------
