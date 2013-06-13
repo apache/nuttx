@@ -195,6 +195,7 @@ static bool tsc_busy(FAR struct ads7843e_config_s *state)
       last = busy;
     }
 #endif
+
   return busy;
 }
 

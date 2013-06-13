@@ -151,7 +151,8 @@ static inline void sam_supcsetup(void)
 
 static void sam_pmcwait(uint32_t bit)
 {
-  uint32_t delay;
+  volatile uint32_t delay;
+
   for (delay = 0;
        (getreg32(SAM_PMC_SR) & bit) == 0 && delay < UINT32_MAX;
        delay++);
