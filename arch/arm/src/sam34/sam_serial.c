@@ -903,6 +903,7 @@ static int up_interrupt(int irq, void *context)
     {
       PANIC();
     }
+
   priv = (struct up_dev_s*)dev->priv;
 
   /* Loop until there are no characters to be transferred or, until we have
@@ -937,13 +938,14 @@ static int up_interrupt(int irq, void *context)
 
       if ((pending & UART_INT_TXRDY) != 0)
         {
-           /* Transmit data regiser empty ... process outgoing bytes */
+           /* Transmit data register empty ... process outgoing bytes */
 
            uart_xmitchars(dev);
            handled = true;
         }
     }
-    return OK;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1175,6 +1177,9 @@ void up_earlyserialinit(void)
 #ifdef TTYS4_DEV
   up_disableallints(TTYS4_DEV.priv, NULL);
 #endif
+#ifdef TTYS5_DEV
+  up_disableallints(TTYS5_DEV.priv, NULL);
+#endif
 
   /* Configuration whichever one is the console */
 
@@ -1215,6 +1220,9 @@ void up_serialinit(void)
 #endif
 #ifdef TTYS4_DEV
   (void)uart_register("/dev/ttyS4", &TTYS4_DEV);
+#endif
+#ifdef TTYS5_DEV
+  (void)uart_register("/dev/ttyS5", &TTYS5_DEV);
 #endif
 }
 
