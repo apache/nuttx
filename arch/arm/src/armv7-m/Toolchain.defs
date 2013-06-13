@@ -51,6 +51,7 @@ ifeq ($(filter y, \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= ATOLLIC
 endif
+
 ifeq ($(filter y, \
       $(CONFIG_KINETIS_BUILDROOT) \
       $(CONFIG_LM_BUILDROOT) \
@@ -62,12 +63,14 @@ ifeq ($(filter y, \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= BUILDROOT
 endif
+
 ifeq ($(filter y, \
       $(CONFIG_LPC17_CODEREDL) \
       $(CONFIG_ARMV7M_TOOLCHAIN_CODEREDL) \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= CODEREDL
 endif
+
 ifeq ($(filter y, \
       $(CONFIG_LPC17_CODEREDW) \
       $(CONFIG_LPC43_CODEREDW) \
@@ -75,6 +78,7 @@ ifeq ($(filter y, \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= CODEREDW
 endif
+
 ifeq ($(filter y, \
       $(CONFIG_KINETIS_CODESOURCERYL) \
       $(CONFIG_LM_CODESOURCERYL) \
@@ -86,6 +90,7 @@ ifeq ($(filter y, \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= CODESOURCERYL
 endif
+
 ifeq ($(filter y, \
       $(CONFIG_KINETIS_CODESOURCERYW) \
       $(CONFIG_LM_CODESOURCERYW) \
@@ -97,6 +102,7 @@ ifeq ($(filter y, \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= CODESOURCERYW
 endif
+
 ifeq ($(filter y, \
       $(CONFIG_KINETIS_DEVKITARM) \
       $(CONFIG_LM_DEVKITARM) \
@@ -108,16 +114,24 @@ ifeq ($(filter y, \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= DEVKITARM
 endif
-ifeq ($(filter y, \
-      $(CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI) \
-    ),y)
-  CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABI
-endif
+
 ifeq ($(filter y, \
       $(CONFIG_STM32_RAISONANCE) \
       $(CONFIG_ARMV7M_TOOLCHAIN_RAISONANCE) \
     ),y)
   CONFIG_ARMV7M_TOOLCHAIN ?= RAISONANCE
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL) \
+    ),y)
+  CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABIL
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW) \
+    ),y)
+  CONFIG_ARMV7M_TOOLCHAIN ?= GNU_EABIW
 endif
 
 #
@@ -130,7 +144,7 @@ endif
 # Each toolchain definition should set:
 #
 #  CROSSDEV         The GNU toolchain triple (command prefix)
-#  ARCROSSDEV       If required, an alternative prefix used when 
+#  ARCROSSDEV       If required, an alternative prefix used when
 #                   invoking ar and nm.
 #  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
 #                   FPU options, etc.
@@ -240,10 +254,10 @@ endif
 
 # Generic GNU EABI toolchain on OS X, Linux or any typical Posix system
 
-ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
+ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABIL)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION = -O3
+  MAXOPTIMIZATION = -Os
   ifeq ($(CONFIG_ARCH_CORTEXM4),y)
     ifeq ($(CONFIG_ARCH_FPU),y)
       ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfpu=fpv4-sp-d16 -mfloat-abi=hard
@@ -253,7 +267,27 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
   else ifeq ($(CONFIG_ARCH_CORTEXM3),y)
     ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
   endif
-endif  
+endif
+
+# Generic GNU EABI toolchain under Windows
+
+ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABIW)
+  CROSSDEV ?= arm-none-eabi-
+  ARCROSSDEV ?= arm-none-eabi-
+  MAXOPTIMIZATION = -Os
+  ifeq ($(CONFIG_ARCH_CORTEXM4),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+    else
+      ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfloat-abi=soft
+    endif
+  else ifeq ($(CONFIG_ARCH_CORTEXM3),y)
+    ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+  endif
+  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+    WINTOOL = y
+  endif
+endif
 
 # Raisonance RIDE7 under Windows
 

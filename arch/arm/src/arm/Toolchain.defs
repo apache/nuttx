@@ -51,6 +51,7 @@ ifeq ($(filter y, \
     ),y)
   CONFIG_ARM_TOOLCHAIN ?= BUILDROOT
 endif
+
 ifeq ($(filter y, \
       $(CONFIG_DM320_CODESOURCERYL) \
       $(CONFIG_LPC31_CODESOURCERYL) \
@@ -59,6 +60,7 @@ ifeq ($(filter y, \
     ),y)
   CONFIG_ARM_TOOLCHAIN ?= CODESOURCERYL
 endif
+
 ifeq ($(filter y, \
       $(CONFIG_DM320_CODESOURCERYW) \
       $(CONFIG_LPC31_CODESOURCERYW) \
@@ -67,6 +69,7 @@ ifeq ($(filter y, \
     ),y)
   CONFIG_ARM_TOOLCHAIN ?= CODESOURCERYW
 endif
+
 ifeq ($(filter y, \
       $(CONFIG_DM320_DEVKITARM) \
       $(CONFIG_LPC31_DEVKITARM) \
@@ -75,10 +78,17 @@ ifeq ($(filter y, \
     ),y)
   CONFIG_ARM_TOOLCHAIN ?= DEVKITARM
 endif
+
 ifeq ($(filter y, \
-      $(CONFIG_ARM_TOOLCHAIN_GNU_EABI) \
+      $(CONFIG_ARM_TOOLCHAIN_GNU_EABIL) \
     ),y)
-  CONFIG_ARM_TOOLCHAIN ?= GNU_EABI
+  CONFIG_ARM_TOOLCHAIN ?= GNU_EABIL
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_ARM_TOOLCHAIN_GNU_EABIW) \
+    ),y)
+  CONFIG_ARM_TOOLCHAIN ?= GNU_EABIW
 endif
 
 #
@@ -91,7 +101,7 @@ endif
 # Each toolchain definition should set:
 #
 #  CROSSDEV         The GNU toolchain triple (command prefix)
-#  ARCROSSDEV       If required, an alternative prefix used when 
+#  ARCROSSDEV       If required, an alternative prefix used when
 #                   invoking ar and nm.
 #  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
 #                   FPU options, etc.
@@ -143,9 +153,20 @@ endif
 
 # Generic GNU EABI toolchain on OS X, Linux or any typical Posix system
 
-ifeq ($(CONFIG_ARM_TOOLCHAIN),GNU_EABI)
+ifeq ($(CONFIG_ARM_TOOLCHAIN),GNU_EABIL)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION = -O3
-endif  
+  MAXOPTIMIZATION = -Os
+endif
+
+# Generic GNU EABI toolchain under Windows
+
+ifeq ($(CONFIG_ARM_TOOLCHAIN),GNU_EABIW)
+  CROSSDEV ?= arm-none-eabi-
+  ARCROSSDEV ?= arm-none-eabi-
+  MAXOPTIMIZATION = -Os
+  ifneq ($(CONFIG_WINDOWS_NATIVE),y)
+    WINTOOL = y
+  endif
+endif
 

@@ -48,7 +48,7 @@ GNU Toolchain Options
     CONFIG_LPC31_CODESOURCERYL=y  : CodeSourcery under Linux
     CONFIG_LPC31_DEVKITARM=y      : devkitARM under Windows
     CONFIG_LPC31_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
-    CONFIG_ARM_TOOLCHAIN_GNU_EABI : Generic arm-none-eabi toolchain
+    CONFIG_ARM_TOOLCHAIN_GNU_EABIL : Generic arm-none-eabi toolchain
 
   If you are not using CONFIG_LPC31_BUILDROOT, then you may also have to modify
   the PATH in the setenv.h file if your make cannot find the tools.

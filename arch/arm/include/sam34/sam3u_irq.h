@@ -58,7 +58,7 @@
 #define SAM_PID_PMC            (5)  /* Power Management Controller */
 #define SAM_PID_EEFC0          (6)  /* Enhanced Embedded Flash Controller 0 */
 #define SAM_PID_EEFC1          (7)  /* Enhanced Embedded Flash Controller 1 */
-#define SAM_PID_UART0          (8)  /* Universal Asynchronous Receiver Transmitter */
+#define SAM_PID_UART0          (8)  /* Universal Asynchronous Receiver Transmitter 0 */
 #define SAM_PID_SMC            (9)  /* Static Memory Controller */
 #define SAM_PID_PIOA          (10)  /* Parallel I/O Controller A */
 #define SAM_PID_PIOB          (11)  /* Parallel I/O Controller B */

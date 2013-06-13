@@ -131,33 +131,44 @@ config NXTK_BORDERWIDTH
 		Specifies with with of the border (in pixels) used with framed windows.
 		The default is 4.
 
+config NXTK_DEFAULT_BORDERCOLORS
+	bool "Use Default Border Colors"
+	default y
+	---help---
+		If this option is defined, the default system border colors will be
+		used on framed windows.  Otherwise, additional options will be
+		present so that you can define custom board colors.
+
+if !NXTK_DEFAULT_BORDERCOLORS
+
 config NXTK_BORDERCOLOR1
 	hex "Border Color"
-	default 0
+	default 0x0
 	---help---
 		Specify the colors of the border used with framed windows.
-		NXTL_BODERCOLOR is the "normal" color of the border.
+		NXTL_BORDERCOLOR1 is the "normal" color of the border.
 		NXTK_BORDERCOLOR2 is the shadow side color and so is normally darker.
 		NXTK_BORDERCOLOR3 is the shiny side color and so is normally brighter.
 
 config NXTK_BORDERCOLOR2
 	hex "Darker Border Color"
-	default 0
+	default 0x0
 	---help---
 		Specify the colors of the border used with framed windows.
-		NXTL_BODERCOLOR is the "normal" color of the border.
+		NXTL_BORDERCOLOR1 is the "normal" color of the border.
 		NXTK_BORDERCOLOR2 is the shadow side color and so is normally darker.
 		NXTK_BORDERCOLOR3 is the shiny side color and so is normally brighter.
 
 config NXTK_BORDERCOLOR3
 	hex "Brighter Border Color"
-	default 0
+	default 0x0
 	---help---
 		Specify the colors of the border used with framed windows.
-		NXTL_BODERCOLOR is the "normal" color of the border.
+		NXTL_BORDERCOLOR1 is the "normal" color of the border.
 		NXTK_BORDERCOLOR2 is the shadow side color and so is normally darker.
 		NXTK_BORDERCOLOR3 is the shiny side color and so is normally brighter.
 
+endif
 endmenu
 
 config NXTK_AUTORAISE
