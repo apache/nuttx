@@ -4636,7 +4636,7 @@
 	  out of task_delete.c into its own C file.  This should prevent
 	  dragging task_delete() into the link when it is never called.
 
-6.28 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+6.28 2013-06-14 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/lpc17xx/lpc17_i2c.c:  Interrupts were not being
 	  re-enabled in the I2C intialization function (2013-4-30).
@@ -4652,7 +4652,7 @@
 	  partitions (2013-4-30).
 	* configs/sim/mkroe-stm32f4:  Support for the MikroElektronika
 	  Mikromedia for STM32F4 development board (from Ken Pettit, 2013-4-30).
-	* fs/smartfs:  Add Ken Pettits SMART FS (2013-4-30).
+	* fs/smartfs:  Add Ken Pettit SMART FS (2013-4-30).
 	* include/nuttx/mtd.h and most MTD drivers:  Add support for
 	  (optional) method to perform byte oriented writes if so configured
 	  (2013-5-1).
@@ -4661,7 +4661,7 @@
 	  (2013-5-2).
 	* drivers/mtd/mtd_partition.c:  Fix a few bugs and add support for the
 	  (option) byte write method (2013-5-3).
-	* arch/arm/src/kl:  Repartitioning of definitions in headef files
+	* arch/arm/src/kl:  Repartitioning of definitions in header files
 	  from Alan Carvalho de Assis (2013-5-3).
 	* drivers/mtd/smart.c, fs/smart, and other files:  SMART file system
 	  now makes use of the MTD byte write capabilities when present (from
@@ -4688,7 +4688,7 @@
 	  to prevent the debug session from begin disconnected.  From Ken Pettit
 	  (2013-5-7).
 	* configs/mikroe-stm32f4/fulldemo/, nx/, nxlines/, nxtext/:  Add more
-	  configurationsf for the Mikroelektronika Multimedia STM32-M4 board.
+	  configurations for the Mikroelektronika Multimedia STM32-M4 board.
 	  From Ken Pettit (2013-5-7).
 	* configs/mikroe-stm32f4/src/up_mio283qt2.c and other files:  Integrate the
 	  MIO283QT2 display on the Mikroelektronika Multimedia STM32-M4 board.
@@ -4746,7 +4746,7 @@
 	* include/nuttx/usb/audio.h:  Typo- and bug-fixes from Ken Pettit
 	  (2013-5-19)
 	* audio/, drivers/audio, include/nuttx/audio.h:  Add a new audio subsystem
-	  and jVS1053 driver to NuttX.  Contributed by Ken Pettit (2013-5-19).
+	  and VS1053 driver to NuttX.  Contributed by Ken Pettit (2013-5-19).
 	* configs/miroe-stm32f4/:  Add audio logic to NSH configuration.  From Ken
 	  Petty (2013-5-19).
 	* nuttx/arch/arm/src/lm/chip/lm_flash.h and nuttx/arch/arm/src/lm/lm_flash.c:
@@ -4759,7 +4759,7 @@
 	* arch/arm/src/stm32/chip/stm32_lcd.h: Add definitions for STM32L15X
 	  segment LCD (2013-5-21).
 	* configs/lm3s6965-ek/discover: Add an example configuration for UDP
-	  discovery tool on the lm3s6965-ek board.  From Max Holtberg
+	  discovery tool on the lm3s6965-ek board.  From Max Holtzberg
 	  (2013-5-21).
 	* audio/, drivers/audio, include/nuttx/audio:  Added a callback interface
 	  to the Audio upperhalf driver for dequeueing, reporting async events,
@@ -4774,12 +4774,12 @@
 	  STM32L-Discovery's segment LCD (2013-5-22).
 	* fs/fs_poll.c:  Poll setup/teardown logic should ignore invalid (i.e.,
 	  negative) file descriptors.  Max Holtzberg (2013-5-23).
-	* net/net_poll.c: When readahead data is availalbe, the network poll
+	* net/net_poll.c: When readahead data is available, the network poll
 	  logic should set POLLIN (or POLLRDNORM), not POLLOUT.  Max Holtzberg
 	  (2013-5-23)
 	* fs/fs_poll.c:  Actually, it should also set revents == 0. (2013-5-23).
 	* libc/misc/lib_slcdencode.c and lib_slcddecode.c:  Add logic to marshal
-	  and serialized special SLCD intermixed with normal ASCII data (2013-5-23)
+	  and serialize special SLCD intermixed with normal ASCII data (2013-5-23)
 	* configs/stm32ldiscovery/src/stm32_lcd.c:  STM32L-Discovery's segment LCD
 	  is code complete but completely untested (2013-5-23).
 	* include/nuttx/fs/ioctl.h, include/nuttx/lcd/slcd_codec.h, and
@@ -4827,7 +4827,7 @@
 	  and src/stm32/chip/stm32f103c_pinmap.h: STM32F103C4 and F103C8 chip
 	  support from Laurent Latil (2013-5-28)
 	* configs/stm32_tiny: Add support for the STM32 Tiny development board
-	  based on th STM32 F103C8T6 MCU (2013-5-28).
+	  based on the STM32 F103C8T6 MCU (2013-5-28).
 	* arch/arm/src/stm32/stm32_usbdev.c:  Fix an error in NULL packet
 	  handling:  If the NULL-packet needed flag ever gets set, then
 	  it is not cleared and inifinite NULL packets result.  This only
@@ -4965,3 +4965,4 @@
 	* arch/arm/src/arm*/Toolchain.mk, Kconfig (and lots of configuration
 	  files):  Add support for a generic Windows EABI toolchain (2013-6-13).
 
+6.29 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>

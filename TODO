@@ -2,7 +2,9 @@ NuttX TODO List (Last updated May 29, 2013)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
-standards, things that could be improved, and ideas for enhancements.
+standards, things that could be improved, and ideas for enhancements.  See
+also individual README.txt files in the configs/ sub-directories for each
+board port.
 
 nuttx/
 
