@@ -431,7 +431,7 @@ Configurations
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output of UART0 (J3).
+     output on UART0 (J3).
 
   3. Unless otherwise stated, the configurations are setup for
      Linux (or any other POSIX environment like Cygwin under Windows):
@@ -604,13 +604,28 @@ Configuration sub-directories
             CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
             CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
-          NOTE:
-            As of this writing, the touchscreen is not functional (no
-            interrupts).  More work is needed.
+          STATUS:
+            2013-6-14: The touchscreen is not functional.  BUSY is initially
+            '0' when asserted says '1'.  The pend down GPIO inputis always
+            '1' and there seems to be many spurious interrupts (but not so
+            many as to lock up the system).
+
+            So there are GIO issues, but on the positive side, the driver
+            does appear to produce good touch data when touched but a lot
+            of clean-up is needed.
 
   nx:
     Configures to use examples/nx using the HX834x LCD hardware on
     the SAM3U-EK development board.
+
+    STATUS:
+      This configuration used to work well in an older NuttX version
+      on an older SAM3U-EK board (my old board was bricked and I got
+      another after a lapse of a couple of years).  But now it no
+      longer works!  There appears to be some bug, perhaps a memory
+      clobbering bug, that causes a variety of symptons:  Hangs on
+      UART0 or hard faults.  The LCD functionality is basically intact,
+      but not usable because of these problems.
 
   ostest:
     This configuration directory, performs a simple OS test using

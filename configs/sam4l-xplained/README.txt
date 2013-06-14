@@ -43,18 +43,25 @@ GNU Toolchain Options
   add one of the following configuration options to your .config (or defconfig)
   file:
 
-    CONFIG_SAM34_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_SAM34_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_SAM34_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_SAM34_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windos
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y      : Generic GCC ARM EABI toolchain for Windows
 
-  If you are not using CONFIG_SAM34_BUILDROOT, then you may also have to modify
-  the PATH in the setenv.h file if your make cannot find the tools.
+  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also
+  have to modify the PATH in the setenv.h file if your make cannot find the tools.
 
-  NOTE: the CodeSourcery (for Windows), devkitARM, and Raisonance toolchains are
-  Windows native toolchains.  The CodeSourcey (for Linux) and NuttX buildroot
-  toolchains are Cygwin and/or Linux native toolchains. There are several limitations
-  to using a Windows based toolchain in a Cygwin environment.  The three biggest are:
+  NOTE about Windows native toolchains
+  ------------------------------------
+
+  The CodeSourcery (for Windows), Atollic, and devkitARM toolchains are
+  Windows native toolchains.  The CodeSourcery (for Linux), NuttX buildroot,
+  and, perhaps, the generic GCC toolchains are Cygwin and/or Linux native
+  toolchains. There are several limitations to using a Windows based
+  toolchain in a Cygwin environment.  The three biggest are:
 
   1. The Windows toolchain cannot follow Cygwin paths.  Path conversions are
      performed automatically in the Cygwin makefiles using the 'cygpath' utility
@@ -93,7 +100,7 @@ IDEs
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project (There is a simple RIDE project
   in the RIDE subdirectory).
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -190,7 +197,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -249,9 +256,9 @@ Serial Consoles
   USART0
   ------
 
-  USART is available on connectors EXT1 and EXT4
+  USART0 is available on connectors EXT1 and EXT4
 
-    EXT1  TXT4  GPIO  Function
+    EXT1  EXT4  GPIO  Function
     ----  ---- ------ -----------
      13    13   PB00  USART0_RXD
      14    14   PB01  USART0_TXD
@@ -460,64 +467,85 @@ Configurations
     b. Execute 'make menuconfig' in nuttx/ in order to start the
        reconfiguration process.
 
+  NOTES:
+
+  1. These configurations use the mconf-based configuration tool.  To
+    change any of these configurations using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       and misc/tools/
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+  2. Unless stated otherwise, all configurations generate console
+     output of on USART0 which is available on EXT1 or EXT4 (see the
+     section "Serial Consoles" above).  The virtual COM port could
+     be used, instead, by reconfiguring to use USART1 instead of
+     USART0:
+
+       System Type -> AT91SAM3/4 Peripheral Support
+         CONFIG_SAM_USART0=y
+         CONFIG_SAM_USART1=n
+
+       Device Drivers -> Serial Driver Support -> Serial Console
+         CONFIG_USART0_SERIAL_CONSOLE=y
+
+       Device Drivers -> Serial Driver Support -> USART0 Configuration
+         CONFIG_USART0_2STOP=0
+         CONFIG_USART0_BAUD=115200
+         CONFIG_USART0_BITS=8
+         CONFIG_USART0_PARITY=0
+         CONFIG_USART0_RXBUFSIZE=256
+         CONFIG_USART0_TXBUFSIZE=256
+
+  3. Unless otherwise stated, the configurations are setup for
+     Linux (or any other POSIX environment like Cygwin under Windows):
+
+     Build Setup:
+       CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
+
+  4. These configurations use the older, OABI, buildroot toolchain.  But
+     that is easily reconfigured:
+
+     System Type -> Toolchain:
+       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
+       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+
+     If you want to use the Atmel GCC toolchain, here are the steps to
+     do so:
+
+     Build Setup:
+       CONFIG_HOST_WINDOWS=y   : Windows
+       CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
+
+     System Type -> Toolchain:
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
+
+     This re-configuration should be done before making NuttX or else the
+     subsequent 'make' will fail.  If you have already attempted building
+     NuttX then you will have to 1) 'make distclean' to remove the old
+     configuration, 2) 'cd tools; ./configure.sh sam3u-ek/ksnh' to start
+     with a fresh configuration, and 3) perform the configuration changes
+     above.
+
+     Also, make sure that your PATH variable has the new path to your
+     Atmel tools.  Try 'which arm-none-eabi-gcc' to make sure that you
+     are selecting the right tool.  setenv.sh is available for you to
+     use to set or PATH variable.  The path in the that file may not,
+     however, be correct for your installation.
+
+     See also the "NOTE about Windows native toolchains" in the section call
+     "GNU Toolchain Options" above.
+
 Configuration sub-directories
 -----------------------------
 
   ostest:
     This configuration directory performs a simple OS test using
-    examples/ostest.
+    examples/ostest.  See NOTES above.
 
     NOTES:
-
-    1. This configuration provides test output on USART0 which is available
-       on EXT1 or EXT4 (see the section "Serial Consoles" above).  The
-       virtual COM port could be used, instead, by reconfiguring to use
-       USART1 instead of USART0:
-
-       System Type -> AT91SAM3/4 Peripheral Support
-         CONFIG_SAM_USART0=y
-         CONFIG_SAM_USART1=n
-
-       Device Drivers -> Serial Driver Support -> Serial Console
-         CONFIG_USART0_SERIAL_CONSOLE=y
-
-       Device Drivers -> Serial Driver Support -> USART0 Configuration
-         CONFIG_USART0_2STOP=0
-         CONFIG_USART0_BAUD=115200
-         CONFIG_USART0_BITS=8
-         CONFIG_USART0_PARITY=0
-         CONFIG_USART0_RXBUFSIZE=256
-         CONFIG_USART0_TXBUFSIZE=256
-
-    2. This configuration is set up to use the NuttX OABI toolchain (see
-       above). Of course this can be reconfigured if you prefer a different
-       toolchain.
 
   nsh:
-    This configuration directory will built the NuttShell.
-
-    NOTES:
-
-    1. This configuration provides test output on USART0 which is available
-       on EXT1 or EXT4 (see the section "Serial Consoles" above).  The
-       virtual COM port could be used, instead, by reconfiguring to use
-       USART1 instead of USART0:
-
-       System Type -> AT91SAM3/4 Peripheral Support
-         CONFIG_SAM_USART0=y
-         CONFIG_SAM_USART1=n
-
-       Device Drivers -> Serial Driver Support -> Serial Console
-         CONFIG_USART0_SERIAL_CONSOLE=y
-
-       Device Drivers -> Serial Driver Support -> USART0 Configuration
-         CONFIG_USART0_2STOP=0
-         CONFIG_USART0_BAUD=115200
-         CONFIG_USART0_BITS=8
-         CONFIG_USART0_PARITY=0
-         CONFIG_USART0_RXBUFSIZE=256
-         CONFIG_USART0_TXBUFSIZE=256
-
-    2. This configuration is set up to use the NuttX OABI toolchain (see
-       above). Of course this can be reconfigured if you prefer a different
-       toolchain.
+    This configuration directory will built the NuttShell.  See NOTES above.
