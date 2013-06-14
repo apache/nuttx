@@ -284,7 +284,6 @@
  * - Bits that provide interrupts with UART_INT_
  * - Bits unique to the USART status register begin with UART_SR_
  */
-
 #define UART_INT_RXRDY               (1 << 0)  /* Bit 0:  RXRDY Interrupt */
 #define UART_INT_TXRDY               (1 << 1)  /* Bit 1:  TXRDY Interrupt */
 #define UART_INT_RXBRK               (1 << 2)  /* Bit 2:  Break Received/End of Break */
@@ -317,6 +316,8 @@
 #define UART_INT_LINSNRE             (1 << 29) /* Bit 29: LIN Slave Not Responding Error */
 #define UART_INT_LINSTE              (1 << 30) /* Bit 30: LIN Sync Tolerance Error */
 #define UART_INT_LINHTE              (1 << 31) /* Bit 31: LIN Header Time-out Error */
+
+#define UART_INT_ALLINTS             0xff0ff7e7
 
 /* USART Receiver Holding Register */
 
