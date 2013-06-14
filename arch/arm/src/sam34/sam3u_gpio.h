@@ -56,7 +56,7 @@
 
 /* 16-bit Encoding:
  *
- *   MMCC CII. VPPB BBBB
+ *   MMCC CIII VPPB BBBB
  */
 
 /* Input/Output mode:
@@ -85,17 +85,22 @@
 
 /* Additional interrupt modes:
  *
- *   .... .II. .... ....
+ *   .... .III .... ....
  */
 
-#define GPIO_INT_SHIFT             (9)         /* Bits 9-10: GPIO interrupt bits */
-#define GPIO_INT_MASK              (3 << GPIO_INT_SHIFT)
-#  define GPIO_INT_LEVEL           (1 << 10)   /* Bit 10: Level detection interrupt */
-#  define GPIO_INT_EDGE            (0)         /*        (vs. Edge detection interrupt) */
-#  define GPIO_INT_HIGHLEVEL       (1 << 9)    /* Bit 9: High level detection interrupt */
-#  define GPIO_INT_LOWLEVEL        (0)         /*        (vs. Low level detection interrupt) */
-#  define GPIO_INT_RISING          (1 << 9)    /* Bit 9: Rising edge detection interrupt */
-#  define GPIO_INT_FALLING         (0)         /*        (vs. Falling edge detection interrupt) */
+#define GPIO_INT_SHIFT             (8)         /* Bits 8-10: GPIO interrupt bits */
+#define GPIO_INT_MASK              (7 << GPIO_INT_SHIFT)
+#  define _GIO_INT_AIM             (1 << 10)   /* Bit 10: Additional Interrupt modes */
+#  define _GPIO_INT_LEVEL          (1 << 9)    /* Bit 9: Level detection interrupt */
+#  define _GPIO_INT_EDGE           (0)         /*        (vs. Edge detection interrupt) */
+#  define _GPIO_INT_RH             (1 << 8)    /* Bit 9: Rising edge/High level detection interrupt */
+#  define _GPIO_INT_FL             (0)         /*        (vs. Falling edge/Low level detection interrupt) */
+
+#  define GPIO_INT_HIGHLEVEL       (_GIO_INT_AIM | _GPIO_INT_LEVEL | _GPIO_INT_RH)
+#  define GPIO_INT_LOWLEVEL        (_GIO_INT_AIM | _GPIO_INT_LEVEL | _GPIO_INT_FL)
+#  define GPIO_INT_RISING          (_GIO_INT_AIM | _GPIO_INT_EDGE  | _GPIO_INT_RH)
+#  define GPIO_INT_FALLING         (_GIO_INT_AIM | _GPIO_INT_EDGE  | _GPIO_INT_FL)
+#  define GPIO_INT_BOTHEDGES       (0)
 
 /* If the pin is an GPIO output, then this identifies the initial output value:
  *
