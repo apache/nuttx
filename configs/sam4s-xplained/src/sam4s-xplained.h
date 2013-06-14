@@ -102,7 +102,7 @@
  */
 
 #define GPIO_BP2    (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
-                     GPIO_PORT_PIOA | GPIO_PIN5)
+                     GPIO_INT_BOTHEDGES | GPIO_PORT_PIOA | GPIO_PIN5)
 #define IRQ_BP2     SAM_IRQ_PA5
 
 /************************************************************************************
