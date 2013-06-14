@@ -280,7 +280,7 @@ void sam_gpioirq(uint16_t pinset)
 
    /* Are any additional interrupt modes selected? */
 
-   if ((pinset & GPIO_INT_MASK) != 0)
+   if ((pinset & _GIO_INT_AIM) != 0)
      {
        /* Yes.. Enable additional interrupt mode */
 
@@ -288,7 +288,7 @@ void sam_gpioirq(uint16_t pinset)
 
        /* Level or edge detected interrupt? */
 
-       if ((pinset & GPIO_INT_LEVEL) != 0)
+       if ((pinset & _GPIO_INT_LEVEL) != 0)
          {
            putreg32(pin, base + SAM_PIO_LSR_OFFSET); /* Level */
          }
@@ -299,7 +299,7 @@ void sam_gpioirq(uint16_t pinset)
 
       /* High level/rising edge or low level /falling edge? */
 
-       if ((pinset & GPIO_INT_HIGHLEVEL) != 0)
+       if ((pinset & _GPIO_INT_RH) != 0)
          {
            putreg32(pin, base + SAM_PIO_REHLSR_OFFSET); /* High level/Rising edge */
          }
