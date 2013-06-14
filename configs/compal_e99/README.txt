@@ -7,8 +7,8 @@ This port is based on patches contributed by Denis Carikli for both the
 compal e99 and e88. At the time of initial check-in, the following phones
 were tested:
 
-* motorolla c155 (compal e99) with the compalram and highram configuration
-* motorolla W220 (compal e88)
+* Motorola c155 (compal e99) with the compalram and highram configuration
+* Motorola W220 (compal e88)
 * The openmoko freerunner baseband(compal e88)
 
 The patches were made by Alan Carvalho de Assis and Denis Carikli using
