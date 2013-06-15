@@ -59,7 +59,9 @@
  * Private Data
  ****************************************************************************/
 
+#if defined(CONFIG_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 static xcpt_t g_irqsw0;
+#endif
 
 /****************************************************************************
  * Private Functions

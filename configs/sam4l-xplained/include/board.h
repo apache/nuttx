@@ -276,6 +276,17 @@
 #define GPIO_USART1_RXD    GPIO_USART1_RXD_2
 #define GPIO_USART1_TXD    GPIO_USART1_TXD_2
 
+/* SPI pins are brought out on EXT1 and EXT2 as:
+ *
+ *   PA22 SPI/MOSI
+ *   PA21 SPI/MISO
+ *   PC30 SPI/SCK
+ */
+
+#define GPIO_SPI0_MISO     GPIO_SPI0_MISO_1
+#define GPIO_SPI0_MOSI     GPIO_SPI0_MOSI_1
+#define GPIO_SPI0_SPCK     GPIO_SPI0_SPCK_4
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/

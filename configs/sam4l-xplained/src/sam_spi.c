@@ -39,7 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
 #include <errno.h>
@@ -92,14 +91,15 @@
 
 void weak_function sam_spiinitialize(void)
 {
-  /* The ZigBee module connects used NPCS0.  However, there is not yet any
-   * ZigBee support.
+  /* The I/O module containing the SD connector may or may not be installed.  And, if
+   * it is installed, it may be in connector EXT1 or EXT2.
    */
 
-   /* The touchscreen connects using NPCS2 (PC14). */
+#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+  /* TODO: enable interrupt on card detect */
 
-#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-   sam_configgpio(GPIO_TSC_NPCS2);
+   sam_configgpio(GPIO_SD_CD); /* Card detect input */
+   sam_configgpio(GPIO_SD_CS); /* Chip select output */
 #endif
 }
 
@@ -161,12 +161,12 @@ int sam_spicsnumber(enum spi_dev_e devid)
 {
   int cs = -EINVAL;
 
-#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-  if (devid == SPIDEV_TOUCHSCREEN)
+#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+  if (devid == SPIDEV_MMCSD)
     {
-      /* Assert the CS pin to the OLED display */
+      /* Return the chip select number */
 
-      cs = 2;
+      cs = SD_CSNO;
     }
 #endif
 
@@ -201,18 +201,14 @@ int sam_spicsnumber(enum spi_dev_e devid)
 
 void sam_spiselect(enum spi_dev_e devid, bool selected)
 {
-  /* The touchscreen chip select is implemented as a GPIO OUTPUT that must
-   * be controlled by this function.  This is because the ADS7843E driver
-   * must be able to sample the device BUSY GPIO input between SPI transfers.
-   * However, the AD7843E will tri-state the BUSY input whenever the chip
-   * select is de-asserted.  So the only option is to control the chip select
-   * manually and hold it low throughout the SPI transfer.
-   */
+#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+  /* Select/de-select the SD card */
 
-#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-  if (devid == SPIDEV_TOUCHSCREEN)
+  if (devid == SPIDEV_MMCSD)
     {
-      sam_gpiowrite(GPIO_TSC_NPCS2, !selected);
+      /* Active low */
+
+      sam_gpiowrite(GPIO_SD_CS, !selected);
     }
 #endif
 }
@@ -233,7 +229,23 @@ void sam_spiselect(enum spi_dev_e devid, bool selected)
 
 uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
-  return 0;
+  uint8_t ret = 0;
+
+#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+  /* Check if an SD card is present in the microSD slot */
+
+  if (devid == SPIDEV_MMCSD)
+    {
+      /* Active low */
+
+      if (!sam_gpioread(GPIO_SD_CD))
+        {
+          ret |= SPI_STATUS_PRESENT;
+        }
+    }
+#endif
+
+  return ret;
 }
 
 #endif /* CONFIG_SAM34_SPI */

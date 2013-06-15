@@ -32,7 +32,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 
-
 if [ "$_" = "$0" ] ; then
   echo "You must source this script, not run it!" 1>&2
   exit 1
@@ -48,10 +47,22 @@ if [ -z "${PATH_ORIG}" ]; then
   export PATH_ORIG="${PATH}"
 fi
 
+# This is the Cygwin path to the location where I installed the Atmel GCC
+# toolchain under Windows.  You will also have to edit this if you install
+# this toolchain in any other location
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/Atmel/Atmel Toolchain/ARM GCC/Native/4.7.3.99/arm-gnu-toolchain/bin"
+
 # This is the Cygwin path to the location where I installed the CodeSourcery
 # toolchain under windows.  You will also have to edit this if you install
 # the CodeSourcery toolchain in any other location
 #export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
+
+# These are the Cygwin paths to the locations where I installed the Atollic
+# toolchain under windows.  You will also have to edit this if you install
+# the Atollic toolchain in any other location.  /usr/bin is added before
+# the Atollic bin path because there is are binaries named gcc.exe and g++.exe
+# at those locations as well.
+#export TOOLCHAIN_BIN="/usr/bin:/cygdrive/c/Program Files (x86)/Atollic/TrueSTUDIO for ARM Pro 2.3.0/ARMTools/bin"
 
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.

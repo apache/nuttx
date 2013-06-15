@@ -213,7 +213,7 @@
  *
  ************************************************************************************/
 
-extern void weak_function sam_spiinitialize(void);
+void weak_function sam_spiinitialize(void);
 
 /************************************************************************************
  * Name: sam_usbinitialize
@@ -223,7 +223,7 @@ extern void weak_function sam_spiinitialize(void);
  *
  ************************************************************************************/
 
-extern void weak_function sam_usbinitialize(void);
+void weak_function sam_usbinitialize(void);
 
 /****************************************************************************
  * Name: sam_hsmciinit
@@ -234,7 +234,7 @@ extern void weak_function sam_usbinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SAM34_HSMCI
-extern int weak_function sam_hsmciinit(void);
+int weak_function sam_hsmciinit(void);
 #else
 # define sam_hsmciinit()
 #endif
@@ -256,7 +256,7 @@ void up_ledinit(void);
  ****************************************************************************/
 
 #ifdef CONFIG_SAM34_HSMCI
-extern bool sam_cardinserted(unsigned char slot);
+bool sam_cardinserted(unsigned char slot);
 #else
 #  define sam_cardinserted(slot) (false)
 #endif
@@ -270,7 +270,7 @@ extern bool sam_cardinserted(unsigned char slot);
  ****************************************************************************/
 
 #ifdef CONFIG_SAM34_HSMCI
-extern bool sam_writeprotected(unsigned char slot);
+bool sam_writeprotected(unsigned char slot);
 #else
 #  define sam_writeprotected(slot) (false)
 #endif

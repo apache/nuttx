@@ -99,9 +99,53 @@
  *   PC24 SW0
  */
 
-#define GPIO_SW0      (GPIO_INPUT | GPIO_PULL_UP | GPIO_GLITCH_FILTER | \
+#define GPIO_SW0      (GPIO_INTERRUPT | GPIO_PULL_UP | GPIO_GLITCH_FILTER | \
                        GPIO_PORTC | GPIO_PIN24)
 #define IRQ_SW0       SAM_IRQ_PC24
+
+/* I/O1
+ *
+ * Support for the microSD card slot on the I/O1 module.  The I/O1 requires
+ * SPI support and two GPIOs.  These two GPIOs will vary if the
+ *
+ *
+ *   PIN EXT1           EXT2            Description
+ *   --- -------------- --------------- -------------------------------------
+ *   15  PC03 SPI/NPCS0 PB11 SPI/NPCS2  Active low chip select OUTPUT, pulled
+ *                                      high on board.
+ *   10  PB13 SPI/NPCS1 10 PC09 GPIO    Active low card detect INPUT, must
+ *                                      use internal pull-up.
+ */
+
+#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+
+#  ifndef CONFIG_SAM34_SPI
+#    error CONFIG_SAM34_SPI is required to use the I/O1 module
+#  endif
+
+#  if defined(CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1)
+
+#    define GPIO_SD_CD (GPIO_INTERRUPT | GPIO_INT_CHANGE | GPIO_PULL_UP | \
+                        GPIO_GLITCH_FILTER | GPIO_PORTB | GPIO_PIN13)
+#    define IRQ_SD_CD   SAM_IRQ_PB13
+
+#    define GPIO_SD_CS (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
+                        GPIO_PORTC | GPIO_PIN3)
+#    define SD_CSNO    0
+
+#  elif defined(CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2)
+#    define GPIO_CD   (GPIO_INTERRUPT | GPIO_INT_CHANGE | GPIO_PULL_UP | \
+                       GPIO_GLITCH_FILTER | GPIO_PORTC | GPIO_PIN9)
+#    define IRQ_CD     SAM_IRQ_PC9
+
+#    define GPIO_SD_CS (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
+                        GPIO_PORTB | GPIO_PIN11)
+#    define SD_CSNO    2
+
+#  else
+#    error Which connector is the I/O1 module installed in?
+#  endif
+#endif
 
 /************************************************************************************
  * Public Types
@@ -127,9 +171,22 @@
 
 void weak_function sam_spiinitialize(void);
 
-/****************************************************************************
+/************************************************************************************
+ * Name: sam_sdinitialize
+ *
+ * Description:
+ *   Initialize the SPI-based SD card.  Requires CONFIG_SAM4L_XPLAINED_IOMODULE=y,
+ *   CONFIG_DISABLE_MOUNTPOINT=n, CONFIG_MMCSD=y, and CONFIG_SAM34_SPI=y
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+int sam_sdinitialize(int minor);
+#endif
+
+/************************************************************************************
  * Name: up_ledinit
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void);

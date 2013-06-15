@@ -3,11 +3,22 @@ README
 
 This README discusses issues unique to NuttX configurations for the
 Atmel SAM4L Xplained Pro development board.  This board features the
-ATSAM4LC4C MCU
+ATSAM4LC4C MCU.
+
+The SAM4L Xplained Pro Starter Kit is bundled with four modules:
+
+1) I/O1   - An MMC/SD card slot, PWM LED control, ADC light sensor, UART
+            loopback, TWI AT30TSE758 Temperature sensor.
+2) OLED1  - An OLED plus 3 additional switches and 3 additional LEDs
+3) SLCD1  - A segment LCD that connects directly to the "EXT5 SEGMENT LCD"
+           connector
+4) PROTO1 - A prototyping board with logic on board (other than power-related
+            logic).
 
 Contents
 ^^^^^^^^
 
+  - Modules
   - Development Environment
   - GNU Toolchain Options
   - IDEs
@@ -18,6 +29,123 @@ Contents
   - Serial Consoles
   - SAM4L Xplained Pro-specific Configuration Options
   - Configurations
+
+Modules
+^^^^^^^
+  The SAM4L Xplained Pro Starter Kit is bundled with four modules:
+
+  I/O1
+  ----
+    The primary function of this module is to provide SD card support, but
+    the full list of modules features include:
+
+    - microSD card connector (SPI interface)
+    - PWM (LED control)
+    - ADC (light sensor)
+    - UART loopback
+    - TWI AT30TSE758 Temperature sensor with EEPROM
+
+    SPI is available on two of the SAM4L Xplained connectors, EXT1 and EXT2.
+    They mate with the I/O1 connector as indicated in this table.
+
+    I/O1 Connector
+    --------------
+    I/O1              EXT1                 EXT2                 Other use of either pin
+    ----------------- -------------------- -------------------- ------------------------------------
+    1  ID             1                    1
+    2  GND            2       GND          2
+    3  LIGHTSENSOR    3  PA04 ADCIFE/AD0   3  PA07 ADCIFE/AD2
+    4  LP_OUT         4  PA05 ADCIFE/AD1   4  PB02 ADCIFE/AD3
+    5  GPIO1          5  PB12 GPIO         5  PC08 GPIO         PB12 and PC8 on EXT5
+    6  GPIO2          6  PC02 GPIO         6  PB10 GPIO         PB10 on EXT5
+    7  LED            7  PC00 TC/1/A0      7  PC04 TC/1/A2
+    8  LP_IN          8  PC01 TC/1/B0      8  PC05 TC/1/B2      PC05 on EXT5
+    9  TEMP_ALERT     9  PC25 EIC/EXTINT2  9  PC06 EIC/EXTINT8  PC25 on EXT5
+    10 microSD_DETECT 10 PB13 SPI/NPCS1    10 PC09 GPIO         PB13 on EXT5
+    11 TWI SDA        11 PA23 TWIMS/0/TWD  11 PB14 TWIMS/3/TWD  PB14 on EXT3&4, PA23 and PB14 on EXT5
+    12 TWI SCL        12 PA24 TWIMS/0/TWCK 12 PB15 TWIMS/3/TWCK PB15 on EXT3&4, PA24 and PB15 on EXT5
+    13 UART RX        13 PB00 USART/0/RXD  13 PC26 USART/1/RXD  PB00 on EXT4, PC26 on EXT3&5
+    14 UART TX        14 PB01 USART/0/TXD  14 PC27 USART/1/TXD  PB01 on EXT4, PC27 on EXT3&5
+    15 microSD_SS     15 PC03 SPI/NPCS0    15 PB11 SPI/NPCS2    PB11 on EXT5
+    16 SPI_MOSI       16 PA22 SPI/MOSI     16 PA22 SPI/MOSI     PA22 on EXT5
+    17 SPI_MISO       17 PA21 SPI/MISO     17 PA21 SPI/MISO     PA21 on EXT5
+    18 SPI_SCK        18 PC30 SPI/SCK      18 PC30 SPI/SCK      PC30 on EXT5
+    19 GND            19      GND             GND
+    20 VCC            20      VCC             VCC
+
+    The mapping between the I/O1 pins and the SD connector are shown in the
+    following table.
+
+    SD Card Connection
+    ------------------
+    I/O1 SD   PIN Description
+    ---- ---- --- -------------------------------------------------
+         D2   1   Data line 2 (not used)
+    15   D3   2   Data line 3. Active low chip select, pulled high
+    16   CMD  3   Command line, connected to SPI_MOSI.
+    20   VDD  4
+    18   CLK  5   Clock line, connected to SPI_SCK.
+    2/19 GND  6
+    17   D0   7   Data line 0, connected to SPI_MISO.
+         D1   8   Data line 1 (not used)
+    10   SW_A 9   Card detect
+    2/19 SW_B 10  GND
+
+    Card Detect
+    -----------
+    When a microSD card is put into the connector SW_A and SW_B are short-
+    circuited. SW_A is connected to the microSD_DETECT signal. To use this
+    as a card indicator remember to enable internal pullup in the target
+    device.
+
+    GPIOs
+    -----
+    So all that is required to connect the SD is configure the SPI
+
+    PIN EXT1           EXT2            Description
+    --- -------------- --------------- -------------------------------------
+    15  PC03 SPI/NPCS0 PB11 SPI/NPCS2  Active low chip select OUTPUT, pulled
+                                       high on board.
+    10  PB13 SPI/NPCS1 10 PC09 GPIO    Active low card detect INPUT, must
+                                       use internal pull-up.
+
+    Configuration Options:
+    ----------------------
+      CONFIG_SAM4L_XPLAINED_IOMODULE=y      : Informs the system that the
+                                              I/O1 module is installed
+      CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1=y : The module is installed in EXT1
+      CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2=y : The mdoule is installed in EXT2
+
+    NOTE: As of this writing, only the SD card slot is supported in the I/O1
+    module.
+
+  OLED1
+  -----
+    This module provides an OLED plus 3 additional switches and 3 additional\
+    LEDs.
+
+    Configuration Options:
+    ----------------------
+      CONFIG_SAM4L_XPLAINED_OLED1MODULE=y   : Informs the system that the
+                                              I/O1 module is installed
+
+    NOTE: As of this writing, the OLED1 module is not supported.
+
+  SLCD1
+  -----
+    This module provides a A segment LCD that connects directly to the "EXT5 SEGMENT LCD"
+           connector
+    Configuration Options:
+    ----------------------
+      CONFIG_SAM4L_XPLAINED_SLCD1MODULE=y   : Informs the system that the
+                                              I/O1 module is installed
+
+    NOTE: As of this writing, the SLCD1 module is not supported.
+
+  PROTO1
+  ------
+  A prototyping board with logic on board (other than power-related logic).
+  There is no built-in support for the PROTO1 module.
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -548,4 +676,46 @@ Configuration sub-directories
     NOTES:
 
   nsh:
-    This configuration directory will built the NuttShell.  See NOTES above.
+    This configuration directory will built the NuttShell.  See NOTES above
+    and below:
+
+    NOTE:
+    If the I/O1 module is connected to the SAM4L Xplained Pro, then support
+    for the SD card slot can be enabled by making the following changes
+    to the configuration:
+
+      File Systems:
+        CONFIG_FS_FAT=y                   : Enable the FAT file system
+        CONFIG_FAT_LCNAMES=y              : Enable upper/lower case 8.3 file names (Optional, see below)
+        CONFIG_FAT_LFN=y                  : Enable long file named (Optional, see below)
+        CONFIG_FAT_MAXFNAME=32            : Maximum supported file name length
+
+        There are issues related to patents that Microsoft holds on FAT long
+        file name technologies.  See the top level COPYING file for further
+        details.
+
+      System Type -> Peripherals:
+        CONFIG_SAM34_SPI=y                : Enable the SAM4L SPI peripheral
+
+      Board Selection -> Common Board Options
+        CONFIG_NSH_MMCSDSLOTNO=0          : Only one slot, slot 0
+        CONFIG_NSH_MMCSDSPIPORTNO=0       : Only one SPI port, port 0
+
+      Board Selection -> SAM4L Xplained Pro Modules
+        CONFIG_SAM4L_XPLAINED_IOMODULE=y      : I/O1 module is connected
+        CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1=y : In EXT1, or EXT2
+        CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2=y
+
+      Device Drivers
+        CONFIG_SPI=y                      : Enable SPI support
+        CONFIG_SPI_EXCHANGE=y             : The exchang() method is supported
+
+        CONFIG_MMCSD=y                    : Enable MMC/SD support
+        CONFIG_MMCSD_NSLOTS=1             : Only one MMC/SD card slot
+        CONFIG_MMCSD_MULTIBLOCK_DISABLE=y : I tested this way, but this may not be required
+        CONFIG_MMCSD_HAVECARDDETECT=y     : I/O1 module as a card detect GPIO
+        CONFIG_MMCSD_SPI=y                : Use the SPI interface to the MMC/SD card
+        CONFIG_MMCSD_SPICLOCK=20000000    : This is a guess for the optimal MMC/SD frequency
+
+      Application Configuration -> NSH Library
+        CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
