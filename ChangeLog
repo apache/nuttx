@@ -4966,3 +4966,15 @@
 	  files):  Add support for a generic Windows EABI toolchain (2013-6-13).
 
 6.29 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/src/sam34/chip/sam4l_pinmap.h: Change naming of some pin
+	  configurations to match names used with other SAM part (2013-6-15).
+	* arch/arm/src/sam34/sam4l_clockconfig.c: Corrected some typos
+	  (2013-6-15).
+	* configs/sam4l-xplained/src/sam_buttons.c: Eliminate a warning
+	  (2013-6-15).
+	* configs/sam4l-xplained/src/sam_mmcsd.c, sam_nsh.c, sam_spi.c,
+	  sam3u-ek.h, Kconfig, Makefile, sam4l-xplained.h,
+	  configs/sam4l-xplained/README.txt, and
+	  configs/sam4l-xplained/include/board.h:  Add support for the SPI-
+	  based SD card on the I/O1 module (2013-6-15).

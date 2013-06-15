@@ -40,7 +40,11 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = sam_boot.c sam_spi.c
+CSRCS = sam_boot.c
+
+ifeq ($(CONFIG_SAM34_SPI),y)
+CSRCS += sam_spi.c
+endif
 
 ifeq ($(CONFIG_HAVE_CXX),y)
 CSRCS += sam_cxxinitialize.c
@@ -54,6 +58,14 @@ endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += sam_buttons.c
+endif
+
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS += sam_nsh.c
+endif
+
+ifeq ($(CONFIG_SAM4L_XPLAINED_IOMODULE),y)
+CSRCS += sam_mmcsd.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

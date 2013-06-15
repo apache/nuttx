@@ -63,7 +63,6 @@ fi
 # the Atollic bin path because there is are binaries named gcc.exe and g++.exe
 # at those locations as well.
 #export TOOLCHAIN_BIN="/usr/bin:/cygdrive/c/Program Files (x86)/Atollic/TrueSTUDIO for ARM Pro 2.3.0/ARMTools/bin"
-#export TOOLCHAIN_BIN="/usr/bin:/cygdrive/c/Program Files (x86)/Atollic/TrueSTUDIO for STMicroelectronics STM32 Lite 2.3.0/ARMTools/bin"
 
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.

@@ -425,11 +425,11 @@
 #    define SAM_DFLLO_REFCLK         SCIF_GCCTRL_OSCSEL_RCSYS
 #  elif defined(BOARD_DFLL0_SOURCE_OSC32K)
 #    define SAM_DFLLO_REFCLK         SCIF_GCCTRL_OSCSEL_OSC32K
-#  elif define(BOARD_DFLL0_SOURCE_OSC0)
+#  elif defined(BOARD_DFLL0_SOURCE_OSC0)
 #    define SAM_DFLLO_REFCLK         SCIF_GCCTRL_OSCSEL_OSC0
-#  elif define(BOARD_DFLL0_SOURCE_RC80M)
+#  elif defined(BOARD_DFLL0_SOURCE_RC80M)
 #    define SAM_DFLLO_REFCLK         SCIF_GCCTRL_OSCSEL_RC80M
-#  elif define(BOARD_DFLL0_SOURCE_RC32K)
+#  elif defined(BOARD_DFLL0_SOURCE_RC32K)
 #    define SAM_DFLLO_REFCLK         SCIF_GCCTRL_OSCSEL_RC32K
 #  else
 #    error No DFLL0 source for reference clock defined
