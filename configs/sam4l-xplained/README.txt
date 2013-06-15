@@ -719,3 +719,9 @@ Configuration sub-directories
 
       Application Configuration -> NSH Library
         CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
+
+      NOTE: If you enable the I/O1 this configuration with USART0 as the
+      console and with the I/O1 module in EXT1, you *must* remove UART
+      jumper.  Otherwise, you have lookpack on USART0 and NSH will *not*
+      behave very well (since its outgoing prompts also appear as incoming
+      commands).

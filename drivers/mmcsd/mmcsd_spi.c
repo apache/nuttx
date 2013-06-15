@@ -348,7 +348,10 @@ static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
 #ifndef CONFIG_SPI_OWNBUS
   (void)SPI_LOCK(slot->spi, true);
 
-  /* Set the frequency, as some other driver could have changed it. */
+  /* Set the frequency, as some other driver could have changed it.
+   * TODO: Also need to restore mode and number-of-bits.  Those can also
+   * change from SPI device-to-device.
+   */
 
   SPI_SETFREQUENCY(slot->spi, slot->spispeed);
 #endif
@@ -694,9 +697,9 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
     }
 
   /* Store the value for future use */
-  
+
   slot->spispeed = frequency;
-    
+
   /* Set the actual SPI frequency as close as possible to that value */
 
   frequency = SPI_SETFREQUENCY(spi, frequency);
@@ -1253,7 +1256,6 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
   size_t nbytes;
   off_t  offset;
   uint8_t response;
-  int ret;
   int i;
 
   fvdbg("start_sector=%d nsectors=%d\n", start_sector, nsectors);
@@ -1394,7 +1396,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode, const unsigned char *buffer,
 
   /* Wait until the card is no longer busy */
 
-  ret = mmcsd_waitready(slot);
+  (void)mmcsd_waitready(slot);
   SPI_SELECT(spi, SPIDEV_MMCSD, false);
   SPI_SEND(spi, 0xff);
   mmcsd_semgive(slot);
