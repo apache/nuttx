@@ -86,7 +86,6 @@
 
 int sam_sdinitialize(int minor)
 {
-#ifdef HAVE_MMCSD
   FAR struct spi_dev_s *spi;
   int ret;
 
@@ -118,7 +117,6 @@ int sam_sdinitialize(int minor)
 
   fvdbg("Successfuly bound SPI port %d to MMC/SD slot %d\n",
         SAM34_MMCSDSPIPORTNO, SAM34_MMCSDSLOTNO);
-#endif
 
   return OK;
 }
