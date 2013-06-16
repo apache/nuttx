@@ -104,28 +104,25 @@ void weak_function sam_spiinitialize(void)
 }
 
 /****************************************************************************
- * Name:  sam_spicsnumber, sam_spiselect, sam_spistatus, and sam_spicmddata
+ * Name:  sam_spiselect, sam_spistatus, and sam_spicmddata
  *
  * Description:
  *   These external functions must be provided by board-specific logic.  They
  *   include:
  *
- *   o sam_spicsnumber and sam_spiselect which are helper functions to
- *     manage the board-specific aspects of the unique SAM3U chip select
- *     architecture.
+ *   o sam_spiselect is a functions tomanage the board-specific chip selects
  *   o sam_spistatus and sam_spicmddata:  Implementations of the status
  *     and cmddata methods of the SPI interface defined by struct spi_ops_
  *     (see include/nuttx/spi.h). All other methods including
- *     up_spiinitialize()) are provided by common SAM3U logic.
+ *     up_spiinitialize()) are provided by common SAM3/4 logic.
  *
  *  To use this common SPI logic on your board:
  *
  *   1. Provide logic in sam_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide sam_spicsnumber(), sam_spiselect() and sam_spistatus()
- *      functions in your board-specific logic.  These functions will perform
- *      chip selection and status operations using GPIOs in the way your board
- *      is configured.
+ *   2. Provide sam_spiselect() and sam_spistatus() functions in your board-
+ *      specific logic.  These functions will perform chip selection and
+ *      status operations using GPIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spicmddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using GPIOs in
@@ -138,41 +135,6 @@ void weak_function sam_spiinitialize(void)
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sam_spicsnumber
- *
- * Description:
- *   The SAM3U has 4 CS registers for controlling device features.  This
- *   function must be provided by board-specific code.  Given a logical device
- *   ID, this function returns a number from 0 to 3 that identifies one of
- *   these SAM3U CS resources.
- *
- * Input Parameters:
- *   devid - Identifies the (logical) device
- *
- * Returned Values:
- *   On success, a CS number from 0 to 3 is returned; A negated errno may
- *   be returned on a failure.
- *
- ****************************************************************************/
-
-int sam_spicsnumber(enum spi_dev_e devid)
-{
-  int cs = -EINVAL;
-
-#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
-  if (devid == SPIDEV_MMCSD)
-    {
-      /* Return the chip select number */
-
-      cs = SD_CSNO;
-    }
-#endif
-
-  spidbg("devid: %d CS: %d\n", (int)devid, cs);
-  return cs;
-}
 
 /****************************************************************************
  * Name: sam_spiselect

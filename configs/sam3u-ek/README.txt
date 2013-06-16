@@ -572,20 +572,24 @@ Configuration sub-directories
        application.  You can enable the touchscreen and test by modifying the
        default configuration in the following ways:
 
-          Drivers:
+          Device Drivers
+            CONFIG_SPI=y                      : Enable SPI support
+            CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
+            CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
+
             CONFIG_INPUT=y                    : Enable support for input devices
             CONFIG_INPUT_ADS7843E=y           : Enable support for the XPT2048
-            CONFIG_ADS7843E_SPIDEV=0          : Use SPI for communication
+            CONFIG_ADS7843E_SPIDEV=2          : Use SPI CS 2 for communication
             CONFIG_ADS7843E_SPIMODE=0         : Use SPI mode 0
             CONFIG_ADS7843E_THRESHX=39        : These will probably need to be tuned
             CONFIG_ADS7843E_THRESHY=51
-            CONFIG_SPI=y                      : Enable SPI support
-            CONFIG_SPI_EXCHANGE=n             : exchange() method is not supported
+
+          System Type -> Peripherals:
+            CONFIG_SAM34_SPI=y                : Enable support for SPI
 
           System Type:
             CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
             CONFIG_GPIOA_IRQ=y                : Enable GPIO interrupts from port A
-            CONFIG_SAM34_SPI=y                : Enable support for SPI
 
           RTOS Features:
             CONFIG_DISABLE_SIGNALS=n          : Signals are required

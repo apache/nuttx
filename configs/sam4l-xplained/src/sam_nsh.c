@@ -52,15 +52,14 @@
 /* Support for the SD card slot on the I/O1 module */
 /* Verify NSH PORT and SLOT settings */
 
-#  define SAM34_MMCSDSPIPORTNO 0 /* Port is SPI (there is only one port) */
 #  define SAM34_MMCSDSLOTNO    0 /* There is only one slot */
 
 #  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != SAM34_MMCSDSLOTNO
 #    error Only one MMC/SD slot:  Slot 0 (CONFIG_NSH_MMCSDSLOTNO)
 #  endif
 
-#  if defined(CONFIG_NSH_MMCSDSPIPORTNO) && CONFIG_NSH_MMCSDSPIPORTNO != SAM34_MMCSDSPIPORTNO
-#    error Only one MMC/SD port:  Port 0 (CONFIG_NSH_MMCSDSPIPORTNO)
+#  if defined(CONFIG_NSH_MMCSDSPIPORTNO) && CONFIG_NSH_MMCSDSPIPORTNO != SD_CSNO
+#    error CONFIG_NSH_MMCSDSPIPORTNO must have the same value as SD_CSNO
 #  endif
 
 /* Default MMC/SD minor number */

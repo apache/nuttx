@@ -46,6 +46,8 @@
 #include <nuttx/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "sam4l-xplained.h"
+
 #ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
 
 /****************************************************************************
@@ -65,7 +67,6 @@
 #  error MMC/SD support is required (CONFIG_MMCSD)
 #endif
 
-#define SAM34_MMCSDSPIPORTNO 0 /* Port is SPI (there is only one port) */
 #define SAM34_MMCSDSLOTNO    0 /* There is only one slot */
 
 /****************************************************************************
@@ -89,34 +90,34 @@ int sam_sdinitialize(int minor)
   FAR struct spi_dev_s *spi;
   int ret;
 
-  /* Get the SPI port */
+  /* Get the SPI driver instance for the SD chip select */
 
-  fvdbg("Initializing SPI port %d\n", SAM34_MMCSDSPIPORTNO);
+  fvdbg("Initializing SPI chip select %d\n", SD_CSNO);
 
-  spi = up_spiinitialize(SAM34_MMCSDSPIPORTNO);
+  spi = up_spiinitialize(SD_CSNO);
   if (!spi)
     {
-      fdbg("Failed to initialize SPI port %d\n", SAM34_MMCSDSPIPORTNO);
+      fdbg("Failed to initialize SPI chip select %d\n", SD_CSNO);
       return -ENODEV;
     }
 
-  fvdbg("Successfully initialized SPI port %d\n", SAM34_MMCSDSPIPORTNO);
+  fvdbg("Successfully initialized SPI chip select %d\n", SD_CSNO);
 
-  /* Bind the SPI port to the slot */
+  /* Bind the SPI device for the chip select to the slot */
 
-  fvdbg("Binding SPI port %d to MMC/SD slot %d\n",
-          SAM34_MMCSDSPIPORTNO, SAM34_MMCSDSLOTNO);
+  fvdbg("Binding SPI chip select %d to MMC/SD slot %d\n",
+          SD_CSNO, SAM34_MMCSDSLOTNO);
 
   ret = mmcsd_spislotinitialize(minor, SAM34_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      fdbg("Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
-            SAM34_MMCSDSPIPORTNO, SAM34_MMCSDSLOTNO, ret);
+      fdbg("Failed to bind SPI chip select %d to MMC/SD slot %d: %d\n",
+            SD_CSNO, SAM34_MMCSDSLOTNO, ret);
       return ret;
     }
 
-  fvdbg("Successfuly bound SPI port %d to MMC/SD slot %d\n",
-        SAM34_MMCSDSPIPORTNO, SAM34_MMCSDSLOTNO);
+  fvdbg("Successfuly bound SPI chip select %d to MMC/SD slot %d\n",
+        SD_CSNO, SAM34_MMCSDSLOTNO);
 
   return OK;
 }
