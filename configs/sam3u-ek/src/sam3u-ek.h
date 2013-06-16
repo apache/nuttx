@@ -190,6 +190,7 @@
 
 #define GPIO_TSC_NPCS2 (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
                         GPIO_PORT_PIOC | GPIO_PIN14)
+#define TSC_CSNUM      2
 
 /************************************************************************************
  * Public Types
@@ -225,13 +226,13 @@ void weak_function sam_spiinitialize(void);
 
 void weak_function sam_usbinitialize(void);
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_hsmciinit
  *
  * Description:
  *   Initialize HSMCI support
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_SAM34_HSMCI
 int weak_function sam_hsmciinit(void);
@@ -239,21 +240,21 @@ int weak_function sam_hsmciinit(void);
 # define sam_hsmciinit()
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: up_ledinit
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_SAM34_HSMCI
 bool sam_cardinserted(unsigned char slot);
@@ -261,13 +262,13 @@ bool sam_cardinserted(unsigned char slot);
 #  define sam_cardinserted(slot) (false)
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_SAM34_HSMCI
 bool sam_writeprotected(unsigned char slot);
@@ -277,4 +278,3 @@ bool sam_writeprotected(unsigned char slot);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAM3U_EK_SRC_SAM3U_EK_H */
-

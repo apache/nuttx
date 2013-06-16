@@ -698,8 +698,9 @@ Configuration sub-directories
         CONFIG_SAM34_SPI=y                : Enable the SAM4L SPI peripheral
 
       Board Selection -> Common Board Options
-        CONFIG_NSH_MMCSDSLOTNO=0          : Only one slot, slot 0
-        CONFIG_NSH_MMCSDSPIPORTNO=0       : Only one SPI port, port 0
+        CONFIG_NSH_MMCSDSLOTNO=0          : Only one MMC/SD slot, slot 0
+        CONFIG_NSH_MMCSDSPIPORTNO=0       : Use CS=0 if the I/O1 is in EXT1, OR
+        CONFIG_NSH_MMCSDSPIPORTNO=2       : Use CS=2 if the I/O1 is in EXT2
 
       Board Selection -> SAM4L Xplained Pro Modules
         CONFIG_SAM4L_XPLAINED_IOMODULE=y      : I/O1 module is connected
@@ -708,7 +709,8 @@ Configuration sub-directories
 
       Device Drivers
         CONFIG_SPI=y                      : Enable SPI support
-        CONFIG_SPI_EXCHANGE=y             : The exchang() method is supported
+        CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
+        CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
 
         CONFIG_MMCSD=y                    : Enable MMC/SD support
         CONFIG_MMCSD_NSLOTS=1             : Only one MMC/SD card slot
@@ -725,3 +727,6 @@ Configuration sub-directories
       jumper.  Otherwise, you have lookpack on USART0 and NSH will *not*
       behave very well (since its outgoing prompts also appear as incoming
       commands).
+
+      STATUS:  As of 2013-6-16, the SPI interface is not communicating with
+      the SD card.

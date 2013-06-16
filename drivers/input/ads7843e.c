@@ -104,7 +104,9 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi);
 static void ads7843e_unlock(FAR struct spi_dev_s *spi);
 #endif
 
+#if 0
 static inline void ads7843e_waitbusy(FAR struct ads7843e_dev_s *priv);
+#endif
 static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd);
 
 /* Interrupts and data sampling */
@@ -268,6 +270,7 @@ static inline void ads7843e_configspi(FAR struct spi_dev_s *spi)
  * Name: ads7843e_waitbusy
  ****************************************************************************/
 
+#if 0 /* Not used */
 static inline void ads7843e_waitbusy(FAR struct ads7843e_dev_s *priv)
 {
   /* BUSY is high impedance when the ads7843e not selected.  When the
@@ -277,9 +280,41 @@ static inline void ads7843e_waitbusy(FAR struct ads7843e_dev_s *priv)
 
   while (priv->config->busy(priv->config));
 }
+#endif
 
 /****************************************************************************
  * Name: ads7843e_sendcmd
+ *
+ * Description.
+ *   The command/data sequences is as follows:
+ *
+ *            DCLK
+ *              1  2   3   4   5    6   7   8         1   2  3  4  ...
+ *              S  A2  A1  A0 MODE SER PD1 PD0
+ *                                 DFR
+ *   START      CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+ *   CMD
+ *   Aquisition                    AAAAAAAAAAA
+ *   TIME
+ *   BUSY                                     BBBBBBBB
+ *   Reported
+ *   12-bit                                           DDDDDDDDDDDD...
+ *   response
+ *
+ *   The BUSY output is high imedance when /CS is high.  BUSY goes low when
+ *   /CS goes low (within 200ns).  BUSY goes high on the falling edge of the
+ *   8th clock (within 200ns); BUSY goes low again after the falling edge of
+ *   first clock of the 12-bit data read, at the leading edge of the MS bit
+ *   11 of the 12-bit data response.
+ *
+ *   The acquisition time is 3 clock cycles and so should be complete at the
+ *   end of the command transfer.  Other places say that this time is
+ *   nominally 2 microseconds.
+ *
+ *   So what good is this BUSY?  Many boards do not even bother to bring it
+ *   to the MCU.  It looks like busy will stick high until we read the data
+ *   so it does not really make any sense to wait on it.
+ *
  ****************************************************************************/
 
 static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
@@ -294,9 +329,18 @@ static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
   /* Send the command */
 
   (void)SPI_SEND(priv->spi, cmd);
-  ads7843e_waitbusy(priv);
 
-  /* Read the data */
+#if 1
+  /* Wait a tiny amount to make sure that the aquisition time is complete */
+
+   up_udelay(3); /* 3 microseconds */
+#else
+  /* Wait until busy is no longer asserted */
+
+  ads7843e_waitbusy(priv);
+#endif
+
+  /* Read the 12-bit data (LS 4 bits will be padded with zero) */
 
   SPI_RECVBLOCK(priv->spi, buffer, 2);
   SPI_SELECT(priv->spi, SPIDEV_TOUCHSCREEN, false);

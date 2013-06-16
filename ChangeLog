@@ -4978,3 +4978,15 @@
 	  configs/sam4l-xplained/README.txt, and
 	  configs/sam4l-xplained/include/board.h:  Add support for the SPI-
 	  based SD card on the I/O1 module (2013-6-15).
+	* arch/arm/src/sam34/sam_spi.c:  Re-architect the SAM3/4 SPI driver
+	  so that is it compatible with the SPI drivers of other MCUs
+	  (2013-6-16).
+	* configs/sam3u-ek/src/up_touchscreen.c and configs/sam4l-xplained/src/sam_mmcsd.c:
+	  Changed needed because of the above change the the SAM3/4 SPI
+	  interface (2013-6-16).
+	* drivers/input/ads7843e.c:  Remove the wait for the touchscreen busy
+	  bit.  I don't see the busy bit changing on the SAM3U-EK board.  But
+	  maybe it is not supposed to.  From my reading of the ADS7843 spec, it
+	  would not be appropriate to wait for the BUSY bit to de-asserted
+	  anyway (since it is only de-asserted when we read the data)
+	  (2013-6-16).
