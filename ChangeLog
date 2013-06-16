@@ -4990,3 +4990,6 @@
 	  would not be appropriate to wait for the BUSY bit to de-asserted
 	  anyway (since it is only de-asserted when we read the data)
 	  (2013-6-16).
+	* configs/sam3u-ek/src/up_touchscreen.c: Fix polarity of the /PENIRQ
+	  signal (it is active low) (2013-6-16).
+

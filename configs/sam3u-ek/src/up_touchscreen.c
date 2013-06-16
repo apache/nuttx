@@ -201,9 +201,9 @@ static bool tsc_busy(FAR struct ads7843e_config_s *state)
 
 static bool tsc_pendown(FAR struct ads7843e_config_s *state)
 {
-  /* REVISIT:  This might need to be inverted */
+  /* The /PENIRQ value is active low */
 
-  bool pendown = sam_gpioread(GPIO_TCS_IRQ);
+  bool pendown = !sam_gpioread(GPIO_TCS_IRQ);
   ivdbg("pendown:%d\n", pendown);
   return pendown;
 }

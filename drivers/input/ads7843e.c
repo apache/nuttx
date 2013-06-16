@@ -104,9 +104,6 @@ static void ads7843e_lock(FAR struct spi_dev_s *spi);
 static void ads7843e_unlock(FAR struct spi_dev_s *spi);
 #endif
 
-#if 0
-static inline void ads7843e_waitbusy(FAR struct ads7843e_dev_s *priv);
-#endif
 static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd);
 
 /* Interrupts and data sampling */
@@ -267,22 +264,6 @@ static inline void ads7843e_configspi(FAR struct spi_dev_s *spi)
 #endif
 
 /****************************************************************************
- * Name: ads7843e_waitbusy
- ****************************************************************************/
-
-#if 0 /* Not used */
-static inline void ads7843e_waitbusy(FAR struct ads7843e_dev_s *priv)
-{
-  /* BUSY is high impedance when the ads7843e not selected.  When the
-   * ads7843e selected, BUSY is active high.  Hence, it is necessary to have
-   * the ads7843e selected when this function is called.
-   */
-
-  while (priv->config->busy(priv->config));
-}
-#endif
-
-/****************************************************************************
  * Name: ads7843e_sendcmd
  *
  * Description.
@@ -312,8 +293,8 @@ static inline void ads7843e_waitbusy(FAR struct ads7843e_dev_s *priv)
  *   nominally 2 microseconds.
  *
  *   So what good is this BUSY?  Many boards do not even bother to bring it
- *   to the MCU.  It looks like busy will stick high until we read the data
- *   so it does not really make any sense to wait on it.
+ *   to the MCU.  Busy will stick high until we read the data so you cannot
+ *   wait on it before reading.
  *
  ****************************************************************************/
 
@@ -330,15 +311,9 @@ static uint16_t ads7843e_sendcmd(FAR struct ads7843e_dev_s *priv, uint8_t cmd)
 
   (void)SPI_SEND(priv->spi, cmd);
 
-#if 1
   /* Wait a tiny amount to make sure that the aquisition time is complete */
 
    up_udelay(3); /* 3 microseconds */
-#else
-  /* Wait until busy is no longer asserted */
-
-  ads7843e_waitbusy(priv);
-#endif
 
   /* Read the 12-bit data (LS 4 bits will be padded with zero) */
 
@@ -372,7 +347,7 @@ static void ads7843e_notify(FAR struct ads7843e_dev_s *priv)
        * is no longer available.
        */
 
-      sem_post(&priv->waitsem); 
+      sem_post(&priv->waitsem);
     }
 
   /* If there are threads waiting on poll() for ADS7843E data to become available,
@@ -484,7 +459,7 @@ static int ads7843e_waitsample(FAR struct ads7843e_dev_s *priv,
   while (ads7843e_sample(priv, sample) < 0)
     {
       /* Wait for a change in the ADS7843E state */
- 
+
       ivdbg("Waiting..\n");
       priv->nwaiters++;
       ret = sem_wait(&priv->waitsem);
@@ -1283,7 +1258,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
   ads7843e_configspi(spi);
 
   /* Enable the PEN IRQ */
-  
+
   ads7843e_sendcmd(priv, ADS7843_CMD_ENABPENIRQ);
 
   /* Unlock the bus */

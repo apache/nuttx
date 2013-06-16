@@ -447,7 +447,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
   /* Configure SPI to a frequency as close as possible to the requested frequency.
    *
-   *   SPCK frequency = MCK / SCBR, or SCBR = MCK / frequency
+   *   SPCK frequency = SPI_CLK / SCBR, or SCBR = SPI_CLK / frequency
    */
 
   scbr = SAM_SPI_CLOCK / frequency;
@@ -475,11 +475,11 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
    * transition is 1/2 the SPCK clock period. Otherwise, the following equations
    * determine the delay:
    *
-   *   Delay Before SPCK = DLYBS / MCK
+   *   Delay Before SPCK = DLYBS / SPI_CLK
    *
    * For a 2uS delay
    *
-   *   DLYBS = MCK * 0.000002 = MCK / 500000
+   *   DLYBS = SPI_CLK * 0.000002 = SPI_CLK / 500000
    */
 
   dlybs   = SAM_SPI_CLOCK / 500000;
@@ -490,11 +490,11 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
    * the chip select. The delay is always inserted after each transfer and
    * before removing the chip select if needed.
    *
-   *  Delay Between Consecutive Transfers = (32 x DLYBCT) / MCK
+   *  Delay Between Consecutive Transfers = (32 x DLYBCT) / SPI_CLK
    *
    * For a 5uS delay:
    *
-   *  DLYBCT = MCK * 0.000005 / 32 = MCK / 200000 / 32
+   *  DLYBCT = SPI_CLK * 0.000005 / 32 = SPI_CLK / 200000 / 32
    */
 
   dlybct  = SAM_SPI_CLOCK / 200000 / 32;

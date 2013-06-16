@@ -143,14 +143,19 @@
  *
  * The IRQ is active low and pulled up.
  *
+ * Pen Interrupt. Open anode output, requires 10kO to 100kO pull-up resistor
+ * externally.  There is a 100KO pull-up on the SAM3U-EK board so no additional
+ * pull-up should be required.
+ *
  * BUSY is high impedance when CS is high (not selected).  When CS is
  * is low, BUSY is active high.  Since the pin is pulled up, it will appear
- * busy if CS is not selected.
+ * busy if CS is not selected (there is no pull-up onboard).
  */
 
 #define GPIO_TCS_IRQ  (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_INT_BOTHEDGES | \
                        GPIO_PORT_PIOA | GPIO_PIN24)
-#define GPIO_TCS_BUSY (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_PORT_PIOA | GPIO_PIN2)
+#define GPIO_TCS_BUSY (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_PORT_PIOA | \
+                       GPIO_PIN2)
 
 #define SAM_TCS_IRQ   SAM_IRQ_PA24
 
@@ -165,10 +170,10 @@
 
 /* BUTTONS */
 
-#define GPIO_BUTTON1  (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | GPIO_INT_BOTHEDGES | \
-                       GPIO_PORT_PIOA | GPIO_PIN18)
-#define GPIO_BUTTON2  (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | GPIO_INT_BOTHEDGES | \
-                       GPIO_PORT_PIOA | GPIO_PIN19)
+#define GPIO_BUTTON1  (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
+                       GPIO_INT_BOTHEDGES | GPIO_PORT_PIOA | GPIO_PIN18)
+#define GPIO_BUTTON2  (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
+                       GPIO_INT_BOTHEDGES | GPIO_PORT_PIOA | GPIO_PIN19)
 
 #define IRQ_BUTTON1   SAM_IRQ_PA18
 #define IRQ_BUTTON2   SAM_IRQ_PA19

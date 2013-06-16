@@ -126,10 +126,15 @@ struct ads7843e_config_s
    * interrupts should be configured on both rising and falling edges
    * so that contact and loss-of-contact events can be detected.
    *
-   * attach  - Attach the ADS7843E interrupt handler to the GPIO interrupt
-   * enable  - Enable or disable the GPIO interrupt
-   * clear   - Acknowledge/clear any pending GPIO interrupt
-   * pendown - Return the state of the pen down GPIO input
+   *   attach  - Attach the ADS7843E interrupt handler to the GPIO interrupt
+   *   enable  - Enable or disable the GPIO interrupt
+   *   clear   - Acknowledge/clear any pending GPIO interrupt
+   *   busy    - Return the state of the BUSY GPIO input (for debug only)
+   *   pendown - Return the state of the pen down GPIO input
+   *
+   * NOTE: The busy() method is not currently used by the driver.  The BUSY
+   * signal is only an informative signal that is raised after a command has
+   * been send but before the sample data has been obtained.
    */
 
   int  (*attach)(FAR struct ads7843e_config_s *state, xcpt_t isr);
