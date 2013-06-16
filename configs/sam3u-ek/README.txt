@@ -581,6 +581,7 @@ Configuration sub-directories
             CONFIG_INPUT_ADS7843E=y           : Enable support for the XPT2048
             CONFIG_ADS7843E_SPIDEV=2          : Use SPI CS 2 for communication
             CONFIG_ADS7843E_SPIMODE=0         : Use SPI mode 0
+            CONFIG_ADS7843E_FREQUENCY=1000000 : SPI BAUD 1MHz
             CONFIG_ADS7843E_THRESHX=39        : These will probably need to be tuned
             CONFIG_ADS7843E_THRESHY=51
 
@@ -609,14 +610,11 @@ Configuration sub-directories
             CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
           STATUS:
-            2013-6-14: The touchscreen is not functional.  BUSY is initially
-            '0' when asserted says '1'.  The pend down GPIO inputis always
-            '1' and there seems to be many spurious interrupts (but not so
-            many as to lock up the system).
-
-            So there are GIO issues, but on the positive side, the driver
-            does appear to produce good touch data when touched but a lot
-            of clean-up is needed.
+            2013-6-16: The touchscreen is not functional. It seems to
+            perform good measurements but I am not getting the /PENIRQ
+            interrupt.  The interrupt is set up correctly (I can ground
+            A24 and I get the interrupt), so apparently the ADS7843E is
+            not generating interrupts.
 
   nx:
     Configures to use examples/nx using the HX834x LCD hardware on
