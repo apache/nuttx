@@ -615,20 +615,11 @@ Configuration sub-directories
             perform good measurements but I am not getting the /PENIRQ
             interrupt.  The interrupt is set up correctly (I can ground
             A24 and I get the interrupt), so apparently the ADS7843E is
-            not generating interrupts.
+            not generating interrupts.  No idea why.
 
   nx:
     Configures to use examples/nx using the HX834x LCD hardware on
     the SAM3U-EK development board.
-
-    STATUS:
-      This configuration used to work well in an older NuttX version
-      on an older SAM3U-EK board (my old board was bricked and I got
-      another after a lapse of a couple of years).  But now it no
-      longer works!  There appears to be some bug, perhaps a memory
-      clobbering bug, that causes a variety of symptons:  Hangs on
-      UART0 or hard faults.  The LCD functionality is basically intact,
-      but not usable because of these problems.
 
   ostest:
     This configuration directory, performs a simple OS test using
