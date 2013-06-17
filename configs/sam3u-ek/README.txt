@@ -2,7 +2,8 @@ README
 ^^^^^^
 
 This README discusses issues unique to NuttX configurations for the Atmel
-SAM3U-EK development board featuring the ATAM3U
+SAM3U-EK development board featuring the ATAM3U.  This board features the
+AT91SAM3U4E MCU running at 96MHz.
 
 Contents
 ^^^^^^^^
