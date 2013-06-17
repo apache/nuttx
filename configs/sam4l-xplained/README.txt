@@ -697,6 +697,19 @@ Configuration sub-directories
       System Type -> Peripherals:
         CONFIG_SAM34_SPI=y                : Enable the SAM4L SPI peripheral
 
+      Device Drivers
+        CONFIG_SPI=y                      : Enable SPI support
+        CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
+        CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
+
+        CONFIG_MMCSD=y                    : Enable MMC/SD support
+        CONFIG_MMCSD_NSLOTS=1             : Only one MMC/SD card slot
+        CONFIG_MMCSD_MULTIBLOCK_DISABLE=n : Should not need to disable multi-block transfers
+        CONFIG_MMCSD_HAVECARDDETECT=y     : I/O1 module as a card detect GPIO
+        CONFIG_MMCSD_SPI=y                : Use the SPI interface to the MMC/SD card
+        CONFIG_MMCSD_SPICLOCK=20000000    : This is a guess for the optimal MMC/SD frequency
+        CONFIG_MMCSD_SPIMODE=0            : Mode 0 is required
+
       Board Selection -> Common Board Options
         CONFIG_NSH_MMCSDSLOTNO=0          : Only one MMC/SD slot, slot 0
         CONFIG_NSH_MMCSDSPIPORTNO=0       : Use CS=0 if the I/O1 is in EXT1, OR
@@ -707,18 +720,6 @@ Configuration sub-directories
         CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1=y : In EXT1, or EXT2
         CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2=y
 
-      Device Drivers
-        CONFIG_SPI=y                      : Enable SPI support
-        CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
-        CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
-
-        CONFIG_MMCSD=y                    : Enable MMC/SD support
-        CONFIG_MMCSD_NSLOTS=1             : Only one MMC/SD card slot
-        CONFIG_MMCSD_MULTIBLOCK_DISABLE=y : I tested this way, but this may not be required
-        CONFIG_MMCSD_HAVECARDDETECT=y     : I/O1 module as a card detect GPIO
-        CONFIG_MMCSD_SPI=y                : Use the SPI interface to the MMC/SD card
-        CONFIG_MMCSD_SPICLOCK=20000000    : This is a guess for the optimal MMC/SD frequency
-
       Application Configuration -> NSH Library
         CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
 
@@ -728,5 +729,18 @@ Configuration sub-directories
       behave very well (since its outgoing prompts also appear as incoming
       commands).
 
-      STATUS:  As of 2013-6-16, the SPI interface is not communicating with
-      the SD card.
+      NOTE: If you get a compilation error like:
+
+        libxx_new.cxx:74:40: error: 'operator new' takes type 'size_t'
+                             ('unsigned int') as first parameter [-fper
+
+      Sometimes NuttX and your toolchain will disagree on the underlying
+      type of size_t; sometimes it is an 'unsigned int' and sometimes it is
+      an 'unsigned long int'.  If this error occurs, then you may need to
+      toggle the value of CONFIG_CXX_NEWLONG.
+
+      STATUS:  As of 2013-6-16, the microSD slot on the I/O1 is not working.
+      This could be an SPI communication issues, but it appears more like
+      a card interfacing problems.  The card does make some appropriate
+      responses but also reports some other issues (erase reset) and will
+      not exit IDLE most.

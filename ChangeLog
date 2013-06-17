@@ -4994,4 +4994,5 @@
 	  signal (it is active low) (2013-6-16).
 	* configs/sam3u-ek/include/board.h:  The SAM3U-EK board now runs at
 	  96MHz.  This might have broken some things? (2013-6-17).
-
+	* drivers/mmcsd/mmcsd-spi.c:  Driver need to make sure that the SPI mode
+	  and data width are correct (2013-6-17).

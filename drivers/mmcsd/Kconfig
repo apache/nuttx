@@ -43,6 +43,8 @@ config MMCSD_SPI
 	default y
 	depends on SPI
 
+if MMCSD_SPI
+
 config MMCSD_SPICLOCK
 	int "MMC/SD maximum SPI clock"
 	default 20000000
@@ -51,11 +53,20 @@ config MMCSD_SPICLOCK
 		Maximum SPI clock to drive MMC/SD card.
 		Default is 20MHz.
 
+config MMCSD_SPIMODE
+	int "MMC/SD SPI mode"
+	default 0
+	---help---
+		Should be mode 0.  However, sometimes this is useful for experimenting.
+
+endif
+
 config MMCSD_SDIO
-	bool "MMC/SD sdio transfer support"
+	bool "MMC/SD SDIO transfer support"
 	default n
 
 if MMCSD_SDIO
+
 config SDIO_DMA
 	bool "SDIO DMA support"
 	default n
