@@ -368,7 +368,8 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ****************************************************************************/
 
- static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                        bool selected)
  {
   FAR struct sam_spidev_s *priv = (FAR struct sam_spidev_s *)dev;
   uint32_t regval;

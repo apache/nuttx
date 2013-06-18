@@ -111,7 +111,7 @@
 #define SPI_MR_PCS_SHIFT          (16)      /* Bits 16-19: Peripheral Chip Select */
 #define SPI_MR_PCS_MASK           (15 << SPI_MR_PCS_SHIFT)
 #  define SPI_MR_PCS0             (0 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 1110 (w/PCSDEC=0) */
-#  define SPI_MR_PCS1             (1 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 1100 (w/PCSDEC=0) */
+#  define SPI_MR_PCS1             (1 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 1101 (w/PCSDEC=0) */
 #  define SPI_MR_PCS2             (3 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 1011 (w/PCSDEC=0) */
 #  define SPI_MR_PCS3             (7 << SPI_MR_PCS_SHIFT) /* NPCS[3:0] = 0111 (w/PCSDEC=0) */
 #define SPI_MR_DLYBCS_SHIFT       (24)      /* Bits 24-31: Delay Between Chip Selects */
@@ -124,7 +124,7 @@
 #define SPI_RDR_PCS_SHIFT         (16)      /* Bits 16-19: Peripheral Chip Select */
 #define SPI_RDR_PCS_MASK          (15 << SPI_RDR_PCS_SHIFT)
 #  define SPI_RDR_PCS0            (0 << SPI_RDR_PCS_SHIFT) /* NPCS[3:0] = 1110 (w/PCSDEC=0) */
-#  define SPI_RDR_PCS1            (1 << SPI_RDR_PCS_SHIFT) /* NPCS[3:0] = 1100 (w/PCSDEC=0) */
+#  define SPI_RDR_PCS1            (1 << SPI_RDR_PCS_SHIFT) /* NPCS[3:0] = 1101 (w/PCSDEC=0) */
 #  define SPI_RDR_PCS2            (3 << SPI_RDR_PCS_SHIFT) /* NPCS[3:0] = 1011 (w/PCSDEC=0) */
 #  define SPI_RDR_PCS3            (7 << SPI_RDR_PCS_SHIFT) /* NPCS[3:0] = 0111 (w/PCSDEC=0) */
 
@@ -135,7 +135,7 @@
 #define SPI_TDR_PCS_SHIFT         (16)      /* Bits 16-19: Peripheral Chip Select */
 #define SPI_TDR_PCS_MASK          (15 << SPI_TDR_PCS_SHIFT)
 #  define SPI_TDR_PCS0            (0 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 1110 (w/PCSDEC=0) */
-#  define SPI_TDR_PCS1            (1 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 1100 (w/PCSDEC=0) */
+#  define SPI_TDR_PCS1            (1 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 1101 (w/PCSDEC=0) */
 #  define SPI_TDR_PCS2            (3 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 1011 (w/PCSDEC=0) */
 #  define SPI_TDR_PCS3            (7 << SPI_TDR_PCS_SHIFT) /* NPCS[3:0] = 0111 (w/PCSDEC=0) */
 #define SPI_TDR_LASTXFER          (1 << 24) /* Bit 24: Last Transfer */

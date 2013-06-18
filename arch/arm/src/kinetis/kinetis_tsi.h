@@ -137,7 +137,7 @@
 #define TSI_GENCS_OUTRGF               (1 << 14) /* Bit 14: Out of Range Flag */
 #define TSI_GENCS_EOSF                 (1 << 15) /* Bit 15: End of scan flag */
 #define TSI_GENCS_PS_SHIFT             (16)      /* Bits 16-18: Electrode oscillator prescaler */
-#define TSI_GENCS_PS_MASK              (3 << TSI_GENCS_PS_SHIFT)
+#define TSI_GENCS_PS_MASK              (7 << TSI_GENCS_PS_SHIFT)
 #  define TSI_GENCS_PS_DIV1            (0 << TSI_GENCS_PS_SHIFT) /* Electrode oscillator / 1 */
 #  define TSI_GENCS_PS_DIV2            (1 << TSI_GENCS_PS_SHIFT) /* Electrode oscillator / 2 */
 #  define TSI_GENCS_PS_DIV4            (2 << TSI_GENCS_PS_SHIFT) /* Electrode oscillator / 4 */
@@ -148,7 +148,7 @@
 #  define TSI_GENCS_PS_DIV128          (7 << TSI_GENCS_PS_SHIFT) /* Electrode oscillator / 128 */
 #define TSI_GENCS_NSCN_SHIFT           (19)      /* Bits 19-23: Number of Consecutive Scans per Electrode */
 #define TSI_GENCS_NSCN_MASK            (31 << TSI_GENCS_NSCN_SHIFT)
-#  define TSI_GENCS_NSCN_TIMES(n)      (((n)-1) << TSI_GENCS_NSCN_MASK) /* n times per electrode, n=1..32 */
+#  define TSI_GENCS_NSCN_TIMES(n)      (((n)-1) << TSI_GENCS_NSCN_SHIFT) /* n times per electrode, n=1..32 */
 #define TSI_GENCS_LPSCNITV_SHIFT       (24)      /* Bits 24-27: TSI Low Power Mode Scan Interval */
 #define TSI_GENCS_LPSCNITV_MASK        (15 << TSI_GENCS_LPSCNITV_SHIFT)
 #  define TSI_GENCS_LPSCNITV_1MS       (0 << TSI_GENCS_LPSCNITV_SHIFT)  /* 1 ms scan interval */

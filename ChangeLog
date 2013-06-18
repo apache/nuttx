@@ -4996,3 +4996,6 @@
 	  96MHz.  This might have broken some things? (2013-6-17).
 	* drivers/mmcsd/mmcsd-spi.c:  Driver need to make sure that the SPI mode
 	  and data width are correct (2013-6-17).
+	* arch/arm/src/kinetis/kinetis_tsi.h:  Corrections to the Kinetis
+	  (2013-6-18)
+
