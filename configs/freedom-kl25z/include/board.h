@@ -312,6 +312,20 @@ extern "C" {
 
 void kl_boardinitialize(void);
 
+/************************************************************************************
+ * Name: kl_tsi_initialize
+ *
+ * Description:
+ *   Initialize the TSI hardware and interface for the sliders on board the Freedom
+ *   KL25Z board.  Register a character driver at /dev/tsi that may be used to read
+ *   from each sensor.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_KL_TSI
+void kl_tsi_initialize(void);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
