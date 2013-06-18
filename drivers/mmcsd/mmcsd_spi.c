@@ -158,7 +158,9 @@ struct mmcsd_slot_s
   uint32_t twrite;       /* Card write time */
   uint32_t ocr;          /* Last 4 bytes of OCR (R3) */
   uint32_t r7;           /* Last 4 bytes of R7 */
+#ifndef CONFIG_SPI_OWNBUS
   uint32_t spispeed;     /* Speed to use for SPI in data mode */
+#endif
 };
 
 struct mmcsd_cmdinfo_s
@@ -178,6 +180,12 @@ static void     mmcsd_semtake(FAR struct mmcsd_slot_s *slot);
 static void     mmcsd_semgive(FAR struct mmcsd_slot_s *slot);
 
 /* Card SPI interface *******************************************************/
+
+#ifdef CONFIG_SPI_OWNBUS
+static inline void mmcsd_spiinit(FAR struct mmcsd_slot_s *slot);
+#else
+#  define mmcsd_spiinit(slot)
+#endif
 
 static int      mmcsd_waitready(FAR struct mmcsd_slot_s *slot);
 static uint32_t mmcsd_sendcmd(FAR struct mmcsd_slot_s *slot,
@@ -417,8 +425,6 @@ static inline void mmcsd_spiinit(FAR struct mmcsd_slot_s *slot)
   SPI_SETMODE(slot->spi, CONFIG_MMCSD_SPIMODE);
   SPI_SETBITS(slot->spi, 8);
 }
-#else
-#  define mmcsd_spiinit(slot)
 #endif
 
 /****************************************************************************
@@ -728,7 +734,9 @@ static void mmcsd_decodecsd(FAR struct mmcsd_slot_s *slot, uint8_t *csd)
 
   /* Set the actual SPI frequency as close as possible to the max frequency */
 
+#ifndef CONFIG_SPI_OWNBUS
   slot->spispeed = frequency;
+#endif
   frequency = SPI_SETFREQUENCY(spi, frequency);
 
   /* Now determine the delay to access data */
@@ -1575,7 +1583,9 @@ static int mmcsd_mediainitialize(FAR struct mmcsd_slot_s *slot)
 
   /* Clock Freq. Identification Mode < 400kHz */
 
+#ifndef CONFIG_SPI_OWNBUS
   slot->spispeed = MMCSD_IDMODE_CLOCK;
+#endif
   SPI_SETFREQUENCY(spi, MMCSD_IDMODE_CLOCK);
 
   /* Set the maximum access time out */
@@ -1936,7 +1946,9 @@ int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi)
   /* Bind the SPI port to the slot */
 
   slot->spi = spi;
+#ifndef CONFIG_SPI_OWNBUS
   slot->spispeed = MMCSD_IDMODE_CLOCK;
+#endif
 
   /* Get exclusvice access to the SPI bus and make sure that SPI is properly
    * configured for the MMC/SD card
