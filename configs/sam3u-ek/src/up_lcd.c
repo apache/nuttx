@@ -906,7 +906,7 @@ int up_lcdinitialize(void)
 
   /* Configure LCD Backlight Pin */
 
-  sam_configgpio(GPIO_LCD_D15);
+  sam_configgpio(GPIO_LCD_BKL);
 
   /* Enable SMC peripheral clock */
 
