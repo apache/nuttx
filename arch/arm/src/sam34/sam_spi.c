@@ -758,7 +758,7 @@ static void  spi_exchange(FAR struct spi_dev_s *dev,
     {
       /* Get the data to send (0xff if there is no data source) */
 
-      if (rxptr)
+      if (txptr)
         {
           data = (uint32_t)*txptr++;
         }
@@ -790,11 +790,16 @@ static void  spi_exchange(FAR struct spi_dev_s *dev,
 
       putreg32(data, SAM_SPI_TDR);
 
-      /* Wait for the read data to be available in the RDR */
+      /* Wait for the read data to be available in the RDR.
+       * TODO:  Data transfer rates would be improved using the RX FIFO
+       *        (and also DMA)
+       */
 
       while ((getreg32(SAM_SPI_SR) & SPI_INT_RDRF) == 0);
 
-      /* Read the received data from the SPI Data Register */
+      /* Read the received data from the SPI Data Register..
+       * TODO: The following only works if nbits <= 8.
+       */
 
       data = getreg32(SAM_SPI_RDR);
       if (rxptr)
