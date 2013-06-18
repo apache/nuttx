@@ -5000,4 +5000,7 @@
 	  (2013-6-18)
 	* arch/arm/src/sam34/sam_spi.c:  Fix SPI mode setting.  In the SAM3/4
 	  family, the clock phase control (CPHA) is inverted (NPHA) (2013-6-18).
-
+	* arch/arm/src/kl/chip/kl_tsi.h: Freescale KL25Z TSI register
+	  definitions from Alan Carvalho de Assis (2013-6-18).
+	* configs/freedom-kl25z/src/kl_tsi.c:  Example TSI driver for the
+	  Freedom KL25Z board from Alan Carvalho de Assis (2013-6-18).
