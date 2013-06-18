@@ -547,7 +547,15 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   if (mode != priv->mode)
     {
 #endif
-      /* Yes... Set the mode appropriately */
+      /* Yes... Set the mode appropriately:
+       *
+       * SPI  CPOL NCPHA
+       * MODE
+       *  0    0    1
+       *  1    0    0
+       *  2    1    1
+       *  3    1    0
+       */
 
       regaddr = g_csraddr[priv->cs];
       regval  = getreg32(regaddr);
@@ -555,19 +563,19 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-        case SPIDEV_MODE0: /* CPOL=0; NCPHA=0 */
+        case SPIDEV_MODE0: /* CPOL=0; NCPHA=1 */
+          regval |= SPI_CSR_NCPHA;
           break;
 
-        case SPIDEV_MODE1: /* CPOL=0; NCPHA=1 */
-            regval |= SPI_CSR_NCPHA;
+        case SPIDEV_MODE1: /* CPOL=0; NCPHA=0 */
           break;
 
-        case SPIDEV_MODE2: /* CPOL=1; NCPHA=0 */
-            regval |= SPI_CSR_CPOL;
+        case SPIDEV_MODE2: /* CPOL=1; NCPHA=1 */
+          regval |= (SPI_CSR_CPOL | SPI_CSR_NCPHA);
           break;
 
-        case SPIDEV_MODE3: /* CPOL=1; NCPHA=1 */
-          regval |= (SPI_CSR_CPOL|SPI_CSR_NCPHA);
+        case SPIDEV_MODE3: /* CPOL=1; NCPHA=0 */
+          regval |= SPI_CSR_CPOL;
           break;
 
         default:
