@@ -4998,4 +4998,6 @@
 	  and data width are correct (2013-6-17).
 	* arch/arm/src/kinetis/kinetis_tsi.h:  Corrections to the Kinetis
 	  (2013-6-18)
+	* arch/arm/src/sam34/sam_spi.c:  Fix SPI mode setting.  In the SAM3/4
+	  family, the clock phase control (CPHA) is inverted (NPHA) (2013-6-18).
 

@@ -739,8 +739,18 @@ Configuration sub-directories
       an 'unsigned long int'.  If this error occurs, then you may need to
       toggle the value of CONFIG_CXX_NEWLONG.
 
-      STATUS:  As of 2013-6-16, the microSD slot on the I/O1 is not working.
-      This could be an SPI communication issues, but it appears more like
-      a card interfacing problems.  The card does make some appropriate
-      responses but also reports some other issues (erase reset) and will
-      not exit IDLE most.
+      STATUS:  As of 2013-6-18, the microSD slot on the I/O1 is marginally
+      functional but needs more TLC.  It seems to behave poorly when
+      debug output is enabled -- know idea why.  And writing to the SD card
+      does not work.  Here is some example of the bad write behavior:
+
+        NuttShell (NSH) NuttX-6.28
+        nsh> mount -t vfat /dev/mmcsd0 /mnt/stuff
+        nsh> ls /mnt/stuff
+        /mnt/stuff:
+         sharmanto.txt
+        nsh> cat /mnt/stuff/sharmanto.txt
+        Hi, from Sharmanto
+        nsh> echo "This is a test" >/mnt/stuff/atest.txt
+        nsh> ls /mnt/stuff
+        /mnt/stuff:
