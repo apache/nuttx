@@ -87,7 +87,7 @@
 # define KL_RTC_BASE       0x4003d000 /* Real time clock */
 # define KL_DAC0_BASE      0x4003f000 /* Digital-to-analog convert (DAC) 0 */
 # define KL_LPTMR_BASE     0x40040000 /* Low power timer */
-# define KL_TSI0_BASE      0x40045000 /* Touch sense interface */
+# define KL_TSI_BASE       0x40045000 /* Touch sense interface */
 # define KL_SIMLP_BASE     0x40047000 /* SIM low-power logic */
 # define KL_SIM_BASE       0x40048000 /* System integration module (SIM) */
 # define KL_PORT_BASE(n)   (0x40049000 + ((n) << 12))
