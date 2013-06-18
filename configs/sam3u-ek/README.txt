@@ -583,8 +583,8 @@ Configuration sub-directories
             CONFIG_ADS7843E_SPIDEV=2          : Use SPI CS 2 for communication
             CONFIG_ADS7843E_SPIMODE=0         : Use SPI mode 0
             CONFIG_ADS7843E_FREQUENCY=1000000 : SPI BAUD 1MHz
-            CONFIG_ADS7843E_THRESHX=39        : These will probably need to be tuned
-            CONFIG_ADS7843E_THRESHY=51
+            CONFIG_ADS7843E_THRESHX=51        : These will probably need to be tuned
+            CONFIG_ADS7843E_THRESHY=39
 
           System Type -> Peripherals:
             CONFIG_SAM34_SPI=y                : Enable support for SPI
