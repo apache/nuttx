@@ -5009,5 +5009,8 @@
 	* arch/arm/src/kl/kl_spi.c and chip/kl_spi.h:  Add SPI driver and
 	  register definitions for the Freescale KL25Z (2013-6-19).
 	* arm/src/sam34/chip/sam4l_lcdca.h:  Register definition file for
-	  the SAM4l LCD peripheral (2013-6-19).
+	  the SAM4L LCD peripheral (2013-6-19).
+	* arm/src/sam34/chip/sam_spi.h:  SPI register definition file updated
+	  to include a few differences for the SAM4L (2013-6-19)
+
 

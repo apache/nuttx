@@ -131,7 +131,7 @@ static void        spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
  ************************************************************************************/
 
 #ifdef CONFIG_KL_SPI0
-static const struct spi_ops_s g_sp0iops =
+static const struct spi_ops_s g_spi0ops =
 {
 #ifndef CONFIG_SPI_OWNBUS
   .lock              = spi_lock,
@@ -156,7 +156,7 @@ static const struct spi_ops_s g_sp0iops =
 
 static struct kl_spidev_s g_spi0dev =
 {
-  .spidev            = { &g_sp0iops },
+  .spidev            = { &g_spi0ops },
   .spibase           = KL_SPI0_BASE,
 };
 #endif
