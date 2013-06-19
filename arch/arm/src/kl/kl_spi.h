@@ -1,4 +1,4 @@
-/****************************************************************************
+/************************************************************************************
  * arch/arm/src/kl/kl_gpio.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -31,24 +31,26 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_KL_KL_SPI_H
 #define __ARCH_ARM_SRC_KL_KL_SPI_H
 
-/****************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************************/
 
 #include <nuttx/config.h>
 
-/****************************************************************************
- * Pre-processor Declarations
- ****************************************************************************/
+#if defined(CONFIG_KL_SPI0) || defined(CONFIG_KL_SPI1)
 
-/****************************************************************************
+/************************************************************************************
+ * Pre-processor Declarations
+ ************************************************************************************/
+
+/************************************************************************************
  * Public Data
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -60,9 +62,26 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Public Function Prototypes
+ ************************************************************************************/
+
+/****************************************************************************
+ * Name: kl_spiinitialize
+ *
+ * Description:
+ *   Initialize the selected SPI port.
+ *
+ * Input Parameter:
+ *   Port number (for hardware that has mutiple SPI interfaces)
+ *
+ * Returned Value:
+ *   Valid SPI device structure reference on succcess; a NULL on failure
+ *
  ****************************************************************************/
+
+struct spi_dev_s;
+FAR struct spi_dev_s *kl_spiinitialize(int port);
 
 /************************************************************************************
  * Name:  kl_spi[n]select, kl_spi[n]status, and kl_spi[n]cmddata
@@ -70,7 +89,7 @@ extern "C" {
  * Description:
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods 
+ *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods
  *   including up_spiinitialize()) are provided by common Kinetis logic.  To use
  *   this common SPI logic on your board:
  *
@@ -86,13 +105,12 @@ extern "C" {
  *   3. Add a call to up_spiinitialize() in your low level application
  *      initialization logic
  *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling 
+ *      SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ************************************************************************************/
 
-struct spi_dev_s;
 enum spi_dev_e;
 
 #ifdef CONFIG_KL_SPI0
@@ -102,6 +120,7 @@ uint8_t kl_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 int kl_spi0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
+
 #ifdef CONFIG_KL_SPI1
 void  kl_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
 uint8_t kl_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
@@ -109,34 +128,7 @@ uint8_t kl_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 int kl_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 #endif
-#ifdef CONFIG_KL_SPI2
-void  kl_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-uint8_t kl_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-#ifdef CONFIG_SPI_CMDDATA
-int kl_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
-#endif
-#endif
-
-/****************************************************************************
- * Name: ssp_flush
- *
- * Description:
- *   Flush and discard any words left in the RX fifo.  This can be called
- *   from spi[n]select after a device is deselected (if you worry about such
- *   things).
- *
- * Input Parameters:
- *   dev - Device-specific state data
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(CONFIG_KL_SPI0) || defined(CONFIG_KL_SPI0) || defined(CONFIG_KL_SPI2)
-struct spi_dev_s;
-void spi_flush(FAR struct spi_dev_s *dev);
-#endif
 
 #endif /* __ASSEMBLY__ */
+#endif /* CONFIG_KL_SPI0 || CONFIG_KL_SPI1 */
 #endif /* __ARCH_ARM_SRC_KL_KL_SPI_H */

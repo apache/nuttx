@@ -77,7 +77,6 @@
 
 /* SPI control register 1 */
 
-
 #define SPI_C1_LSBFE        (1 << 0)  /* Bit 0:  LSB first (shifter direction) */
 #define SPI_C1_SSOE         (1 << 1)  /* Bit 1:  Slave select output enable */
 #define SPI_C1_CPHA         (1 << 2)  /* Bit 2:  Clock phase */
@@ -86,7 +85,6 @@
 #define SPI_C1_SPTIE        (1 << 5)  /* Bit 5:  SPI transmit interrupt enable */
 #define SPI_C1_SPE          (1 << 6)  /* Bit 6:  SPI system enable */
 #define SPI_C1_SPIE         (1 << 7)  /* Bit 7:  SPI interrupt enable: for SPRF and MODF */
-
 
 /* SPI control register 2 */
 
@@ -102,6 +100,7 @@
 
 #define SPI_BR_SPR_SHIFT    (0)       /* Bits 0-3: SPI baud rate divisor */
 #define SPI_BR_SPR_MASK     (15 << SPI_BR_SPR_SHIFT)
+#  define SPI_BR_SPR_DIV(n) (((n)-1) << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 2^(n-1) */
 #  define SPI_BR_SPR_DIV2   (0 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 2 */
 #  define SPI_BR_SPR_DIV4   (1 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 4 */
 #  define SPI_BR_SPR_DIV8   (2 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 8 */
@@ -113,7 +112,7 @@
 #  define SPI_BR_SPR_DIV512 (8 << SPI_BR_SPR_SHIFT) /* Baud rate divisor is 512 */
 #define SPI_BR_SPPR_SHIFT   (4)       /* Bits 4-6: SPI baud rate prescale divisor */
 #define SPI_BR_SPPR_MASK    (7 << SPI_BR_SPPR_SHIFT)
-# define SPI_BR_SPPR(n)     (((n)-1) << SPI_BR_SPPR_SHIFT) /* Prescaler=n, n=1-8 */
+#  define SPI_BR_SPPR(n)    (((n)-1) << SPI_BR_SPPR_SHIFT) /* Prescaler=n, n=1-8 */
                                       /* Bit 7:  Reserved */
 /* SPI status register */
                                       /* Bits 0-3: Reserved */
