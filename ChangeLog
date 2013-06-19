@@ -5006,4 +5006,6 @@
 	  Freedom KL25Z board from Alan Carvalho de Assis (2013-6-18).
 	* arch/arm/src/sam34/sam_spi.c:  Correct an incorrect pointer test.
 	  Was checking if the wrong pointer was NULL (2013-6-18).
+	* arch/arm/src/kl/chip/kl_spi.h:  Add SPI register definitions for
+	  the Freescale KL25Z (2013-6-19).
 

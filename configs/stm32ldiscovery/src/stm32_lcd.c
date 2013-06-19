@@ -698,7 +698,16 @@ static inline void slcd_writemem(uint16_t segset, int curpos)
   lcdvdbg("segset: %04x curpos: %d\n", segset, curpos);
   slcd_dumpslcd("BEFORE WRITE");
 
-  /* Isolate the least significant bits */
+  /* Isolate the least significant bits
+   *
+   * LCD character 16-bit-encoding:
+   * { E , D , P , N, M , C , COL , DP, B , A , K , J, G , F , Q , H  }
+   *
+   * segments[0] = { E , D , P , N }
+   * segments[1] = { M , C , COL , DP }
+   * segments[2] = { B , A , K , J }
+   * segments[3] = { G , F , Q , H }
+   */
 
   for (i = 12, j = 0; j < 4; i -= 4, j++)
     {
