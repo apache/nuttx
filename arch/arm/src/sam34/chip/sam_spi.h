@@ -1,6 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam_spi.h
- * Serial Peripheral Interface (SPI) definitions for the SAM3U and SAM4S
+ * Serial Peripheral Interface (SPI) definitions for the SAM3U, SAM4S, and SAM4L
  *
  *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -55,24 +55,28 @@
 
 /* SPI register offsets *****************************************************************/
 
-#define SAM_SPI_CR_OFFSET         0x00 /* Control Register */
-#define SAM_SPI_MR_OFFSET         0x04 /* Mode Register */
-#define SAM_SPI_RDR_OFFSET        0x08 /* Receive Data Register */
-#define SAM_SPI_TDR_OFFSET        0x0c /* Transmit Data Register */
-#define SAM_SPI_SR_OFFSET         0x10 /* Status Register */
-#define SAM_SPI_IER_OFFSET        0x14 /* Interrupt Enable Register */
-#define SAM_SPI_IDR_OFFSET        0x18 /* Interrupt Disable Register */
-#define SAM_SPI_IMR_OFFSET        0x1c /* Interrupt Mask Register */
-                                       /* 0x20-0x2c: Reserved */
-#define SAM_SPI_CSR0_OFFSET       0x30 /* Chip Select Register 0 */
-#define SAM_SPI_CSR1_OFFSET       0x34 /* Chip Select Register 1 */
-#define SAM_SPI_CSR2_OFFSET       0x38 /* Chip Select Register 2 */
-#define SAM_SPI_CSR3_OFFSET       0x3c /* Chip Select Register 3 */
-                                       /* 0x40-0xe0: Reserved */
-#define SAM_SPI_WPCR_OFFSET       0xe4 /* Write Protection Control Register */
-#define SAM_SPI_WPSR_OFFSET       0xe8 /* Write Protection Status Register */
-                                       /* 0xec-0xfc: Reserved */
-                                       /* 0x100-0x124 Reserved for PDC Registers */
+#define SAM_SPI_CR_OFFSET         0x0000 /* Control Register */
+#define SAM_SPI_MR_OFFSET         0x0004 /* Mode Register */
+#define SAM_SPI_RDR_OFFSET        0x0008 /* Receive Data Register */
+#define SAM_SPI_TDR_OFFSET        0x000c /* Transmit Data Register */
+#define SAM_SPI_SR_OFFSET         0x0010 /* Status Register */
+#define SAM_SPI_IER_OFFSET        0x0014 /* Interrupt Enable Register */
+#define SAM_SPI_IDR_OFFSET        0x0018 /* Interrupt Disable Register */
+#define SAM_SPI_IMR_OFFSET        0x001c /* Interrupt Mask Register */
+                                         /* 0x20-0x2c: Reserved */
+#define SAM_SPI_CSR0_OFFSET       0x0030 /* Chip Select Register 0 */
+#define SAM_SPI_CSR1_OFFSET       0x0034 /* Chip Select Register 1 */
+#define SAM_SPI_CSR2_OFFSET       0x0038 /* Chip Select Register 2 */
+#define SAM_SPI_CSR3_OFFSET       0x003c /* Chip Select Register 3 */
+                                         /* 0x40-0xe0: Reserved */
+#define SAM_SPI_WPCR_OFFSET       0x00e4 /* Write Protection Control Register */
+#define SAM_SPI_WPSR_OFFSET       0x00e8 /* Write Protection Status Register */
+                                         /* 0xec-0xf4: Reserved */
+#ifdef CONFIG_ARCH_CHIP_SAM4L
+#  define SAM_SPI_FEATURES_OFFSET 0x00f8 /* Features Register */
+#  define SAM_SPI_VERSION_OFFSET  0x00fc /* Version Register  */
+#endif
+                                         /* 0x100-0x124 Reserved for PDC Registers */
 
 /* SPI register adresses ****************************************************************/
 
@@ -91,6 +95,11 @@
 #define SAM_SPI_WPCR              (SAM_SPI_BASE+SAM_SPI_WPCR_OFFSET) /* Write Protection Control Register */
 #define SAM_SPI_WPSR              (SAM_SPI_BASE+SAM_SPI_WPSR_OFFSET) /* Write Protection Status Register */
 
+#ifdef CONFIG_ARCH_CHIP_SAM4L
+#  define SAM_SPI_FEATURES        (SAM_SPI_BASE+SAM_SPI_FEATURES_OFFSET)
+#  define SAM_SPI_VERSION         (SAM_SPI_BASE+SAM_SPI_VERSION_OFFSET)
+#endif
+
 /* SPI register bit definitions *********************************************************/
 
 /* SPI Control Register */
@@ -98,6 +107,11 @@
 #define SPI_CR_SPIEN              (1 << 0)  /* Bit 0:  SPI Enable */
 #define SPI_CR_SPIDIS             (1 << 1)  /* Bit 1:  SPI Disable */
 #define SPI_CR_SWRST              (1 << 7)  /* Bit 7:  SPI Software Reset */
+
+#ifdef CONFIG_ARCH_CHIP_SAM4L
+#  define SPI_CR_FLUSHFIFO        (1 << 8)  /* Bit 8:  Flush Fifo Command */
+#endif
+
 #define SPI_CR_LASTXFER           (1 << 24) /* Bit 24: Last Transfer */
 
 /* SPI Mode Register */
@@ -107,6 +121,11 @@
 #define SPI_MR_PCSDEC             (1 << 2)  /* Bit 2:  Chip Select Decode */
 #define SPI_MR_MODFDIS            (1 << 4)  /* Bit 4:  Mode Fault Detection */
 #define SPI_MR_WDRBT              (1 << 5)  /* Bit 5:  Wait Data Read Before Transfer */
+
+#ifdef CONFIG_ARCH_CHIP_SAM4L
+#  define SPI_MR_RXFIFOEN         (1 << 6)  /* Bit 6: FIFO in Reception Enable */
+#endif
+
 #define SPI_MR_LLB                (1 << 7)  /* Bit 7:  Local Loopback Enable */
 #define SPI_MR_PCS_SHIFT          (16)      /* Bits 16-19: Peripheral Chip Select */
 #define SPI_MR_PCS_MASK           (15 << SPI_MR_PCS_SHIFT)
@@ -199,6 +218,34 @@
 #define SPI_WPSR_WPVS_MASK        (7 << SPI_WPSR_WPVS_SHIFT)
 #define SPI_WPSR_WPVSRC_SHIFT     (8)      /* Bits 8-15: SPI Write Protection Violation Source */
 #define SPI_WPSR_WPVSRC_MASK      (0xff << SPI_WPSR_WPVSRC_SHIFT)
+
+/* Features Register */
+
+#ifdef CONFIG_ARCH_CHIP_SAM4L
+#  define SPI_FEATURES_NCS_SHIFT      (0)       /* Bits 0-3: Number of Chip Selects */
+#  define SPI_FEATURES_NCS_MASK       (15 << SPI_FEATURES_NCS_SHIFT)
+#  define SPI_FEATURES_PCONF          (1 << 4)  /* Bit 4:  Polarity Configurable */
+#  define SPI_FEATURES_PPNCONF        (1 << 5)  /* Bit 5:  Polarity Positive if Polarity not Configurable */
+#  define SPI_FEATURES_PHCONF         (1 << 6)  /* Bit 6:  Phase Configurable */
+#  define SPI_FEATURES_PHZNCONF       (1 << 7)  /* Bit 7:  Phase is Zero if Phase not Configurable */
+#  define SPI_FEATURES_LENCONF        (1 << 8)  /* Bit 8:  Character Length Configurable */
+#  define SPI_FEATURES_LENNCONF_SHIFT (9)       /* Bits 9-15: Character Length if not Configurable */
+#  define SPI_FEATURES_LENNCONF_MASK  (0x7f << SPI_FEATURES_LENNCONF_SHIFT)
+#  define SPI_FEATURES_EXTDEC         (1 << 16) /* Bit 16: External Decoder True */
+#  define SPI_FEATURES_CSNAATIMPL     (1 << 17) /* Bit 17: CSNAAT Features Implemented */
+#  define SPI_FEATURES_BRPBHSB        (1 << 18) /* Bit 18: Bridge Type is PB to HSB */
+#  define SPI_FEATURES_FIFORIMPL      (1 << 19) /* Bit 19: FIFO in Reception Implemented */
+#  define SPI_FEATURES_SWIMPL         (1 << 20) /* Bit 20: Spurious Write Protection Implemented */
+#endif
+
+/* Version Register  */
+
+#ifdef CONFIG_ARCH_CHIP_SAM4L
+#  define SPI_VERSION_VERSION_SHIFT   (0)       /* Bits 0-11: Module version number */
+#  define SPI_VERSION_VERSION_MASK    (0xfff << SPI_VERSION_VERSION_SHIFT)
+#  define SPI_VERSION_MFN_SHIFT       (16)      /* Bits 16-18: Reserved */
+#  define SPI_VERSION_MFN_MASK        (7 << SPI_VERSION_MFN_SHIFT)
+#endif
 
 /****************************************************************************************
  * Public Types
