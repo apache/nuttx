@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/arm/src/kl/kl_start.c
- * arch/arm/src/chip/kl_start.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

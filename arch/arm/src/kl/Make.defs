@@ -33,7 +33,7 @@
 #
 ############################################################################
 
-HEAD_ASRC = 
+HEAD_ASRC =
 
 CMN_ASRCS  = up_exception.S up_saveusercontext.S up_fullcontextrestore.S
 CMN_ASRCS += up_switchcontext.S vfork.S
@@ -67,12 +67,20 @@ ifeq ($(CONFIG_DEBUG),y)
 CMN_CSRCS += up_dumpnvic.c
 endif
 
-CHIP_ASRCS  = 
+CHIP_ASRCS  =
 CHIP_CSRCS  = kl_clockconfig.c kl_gpio.c kl_idle.c kl_irq.c kl_irqprio.c
 CHIP_CSRCS += kl_lowputc.c kl_serial.c kl_start.c kl_timerisr.c kl_cfmconfig.c
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += kl_userspace.c
+endif
+
+ifeq ($(CONFIG_KL_SPI0),y)
+CHIP_CSRCS += kl_spi.c
+else
+ifeq ($(CONFIG_KL_SPI1),y)
+CHIP_CSRCS += kl_spi.c
+endif
 endif
 
 ifeq ($(CONFIG_DEBUG),y)

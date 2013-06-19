@@ -260,7 +260,7 @@
 #define SIM_SCGC4_USBOTG             (1 << 18) /* Bit 18: USB Clock Gate Control */
 #define SIM_SCGC4_CMP                (1 << 19) /* Bit 19: Comparator Clock Gate Control */
                                                /* Bits 20-21: Reserved */
-#define SIM_SCGC4_SPI10              (1 << 22) /* Bit 22: SPI0 Clock Gate Control */
+#define SIM_SCGC4_SPI0               (1 << 22) /* Bit 22: SPI0 Clock Gate Control */
 #define SIM_SCGC4_SPI1               (1 << 23) /* Bit 23: SPI1 Clock Gate Control */
                                                /* Bits 24-31: Reserved */
 /* System Clock Gating Control Register 5 */

@@ -79,12 +79,16 @@ config KL_FLEXCAN1
 config KL_SPI0
 	bool "SPI0"
 	default n
+	select SPI
+	select SPI_EXCHANGE
 	---help---
 		Support SPI0
 
 config KL_SPI1
 	bool "SPI1"
 	default n
+	select SPI
+	select SPI_EXCHANGE
 	---help---
 		Support SPI1
 
