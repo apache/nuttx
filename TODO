@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated May 29, 2013)
+NuttX TODO List (Last updated June 20, 2013)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
@@ -903,10 +903,22 @@ o Libraries (libc/)
   Status:      Open
   Priority:    Low
 
-  Title:       FERROR() AND CLEARERR()
-  Description: Not implemented: ferror() and clearerr()
+  Title:       FERROR()
+  Description: ferror(), feof(), and clearerror() are present, but the
+               implementation of ferror() is limited.  There are flags in the
+               stream structure to indicate EOF and error conditions but nothing
+               in the code currently sets the error indication.  This is a
+               trivial change to many interfaces and has not yet been done.
+               Instead, for now, ferror() is equivalent to !feof().  If an
+               interface can failure because of an error or and EOF and you
+               only want to distinguish between an error and the EOF then
+               this ferror() will work.  However, if no error is reported then
+               this ferror() cannot tell you if an error has occurred or not.
   Status:      Open
-  Priority:    Low
+  Priority:    Meidum to Low:  Some applications use ferror() and not the
+               return value to determine if an error occurred.  Those
+               applications will fail with this limited implementation of
+               ferror().
 
   Title:       CONCURRENT STREAM READ/WRITE
   Description: NuttX only supports a single file pointer so reads and writes 

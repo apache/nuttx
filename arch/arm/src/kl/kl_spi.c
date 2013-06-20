@@ -311,7 +311,6 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 
   /* Check if the requested frequence is the same as the frequency selection */
 
-  DEBUGASSERT(priv && frequency <= SPI_CLOCK / 2);
 #ifndef CONFIG_SPI_OWNBUS
   if (priv->frequency == frequency)
     {
@@ -637,7 +636,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t 
  ****************************************************************************/
 
 /****************************************************************************
- * Name: kl_spiinitialize
+ * Name: up_spiinitialize
  *
  * Description:
  *   Initialize the selected SPI port.
@@ -650,7 +649,7 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer, size_t 
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *kl_spiinitialize(int port)
+FAR struct spi_dev_s *up_spiinitialize(int port)
 {
   FAR struct kl_spidev_s *priv;
   uint32_t regval;

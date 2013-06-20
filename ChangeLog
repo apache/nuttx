@@ -5015,4 +5015,6 @@
 	* arm/src/sam34/chip/sam4l_pdca.h: Add SAM4L PDCA register definition
 	  file; also renamed sam_dmac.* files to sam3u_dmac.* to identify
 	  them as SAM4U/4S only files (2013-6-19).
-
+	* configs/freedom-lk25z/src/kl_spi.c:  Add the framework for
+	  controlling SPI-related discrete inputs and outputs.  Taken from
+	  work by Alan Carvalho de Assis (2013-6-20).
