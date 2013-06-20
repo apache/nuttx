@@ -67,7 +67,7 @@ extern "C" {
  ************************************************************************************/
 
 /****************************************************************************
- * Name: kl_spiinitialize
+ * Name: up_spiinitialize
  *
  * Description:
  *   Initialize the selected SPI port.
@@ -81,7 +81,7 @@ extern "C" {
  ****************************************************************************/
 
 struct spi_dev_s;
-FAR struct spi_dev_s *kl_spiinitialize(int port);
+FAR struct spi_dev_s *up_spiinitialize(int port);
 
 /************************************************************************************
  * Name:  kl_spi[n]select, kl_spi[n]status, and kl_spi[n]cmddata
