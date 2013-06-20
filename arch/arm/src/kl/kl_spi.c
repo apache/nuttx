@@ -676,17 +676,17 @@ FAR struct spi_dev_s *kl_spiinitialize(int port)
       /* Enable clocking */
 
       regval = getreg32(KL_SIM_SCGC4);
-      regval |= SIM_SCGC4_SPI1;
+      regval |= SIM_SCGC4_SPI0;
       putreg32(regval, KL_SIM_SCGC4);
     }
   else
 #endif
-#ifdef CONFIG_KL_SPI0
-  if (port == 0)
+#ifdef CONFIG_KL_SPI1
+  if (port == 1)
     {
       priv = &g_spi1dev;
 
-      /* Configure pins for SPI0 */
+      /* Configure pins for SPI1 */
 
       kl_configgpio(PIN_SPI1_SCK);
       kl_configgpio(PIN_SPI1_MISO);
