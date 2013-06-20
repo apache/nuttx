@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sam34-ek/sam_dmac.c
+ * arch/arm/src/sam34-ek/sam3u_dmac.c
  *
  *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -57,7 +57,7 @@
 
 #include "sam_dmac.h"
 #include "chip/sam3u_pmc.h"
-#include "chip/sam_dmac.h"
+#include "chip/sam3u_dmac.h"
 
 /****************************************************************************
  * Pre-processor Definitions

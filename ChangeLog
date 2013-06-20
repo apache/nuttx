@@ -5012,5 +5012,7 @@
 	  the SAM4L LCD peripheral (2013-6-19).
 	* arm/src/sam34/chip/sam_spi.h:  SPI register definition file updated
 	  to include a few differences for the SAM4L (2013-6-19)
-
+	* arm/src/sam34/chip/sam4l_pdca.h: Add SAM4L PDCA register definition
+	  file; also renamed sam_dmac.* files to sam3u_dmac.* to identify
+	  them as SAM4U/4S only files (2013-6-19).
 
