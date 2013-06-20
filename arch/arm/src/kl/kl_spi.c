@@ -488,7 +488,7 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t wd)
 
   /* Make sure that the transmit buffer is empty */
 
-  while ((spi_getreg(priv, KL_SPI_S_OFFSET) & SPI_S_SPTEF) != 0);
+  while ((spi_getreg(priv, KL_SPI_S_OFFSET) & SPI_S_SPTEF) == 0);
 
   /* Write the data to transmitted to the SPI Data Register */
 
@@ -555,7 +555,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
        * to the serializer.
        */
 
-      while ((spi_getreg(priv, KL_SPI_S_OFFSET) & SPI_S_SPTEF) != 0);
+      while ((spi_getreg(priv, KL_SPI_S_OFFSET) & SPI_S_SPTEF) == 0);
 
       /* Write the data to transmitted to the Transmit Data Register (TDR) */
 
@@ -675,7 +675,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       /* Enable clocking */
 
-      regval = getreg32(KL_SIM_SCGC4);
+      regval  = getreg32(KL_SIM_SCGC4);
       regval |= SIM_SCGC4_SPI0;
       putreg32(regval, KL_SIM_SCGC4);
     }
@@ -694,7 +694,7 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
       /* Enable clocking */
 
-      regval = getreg32(KL_SIM_SCGC4);
+      regval  = getreg32(KL_SIM_SCGC4);
       regval |= SIM_SCGC4_SPI1;
       putreg32(regval, KL_SIM_SCGC4);
     }
