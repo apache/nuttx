@@ -93,7 +93,11 @@ CHIP_CSRCS += sam_userspace.c sam_mpuinit.c
 endif
 
 ifeq ($(CONFIG_SAM34_DMA),y)
-CHIP_CSRCS += sam_dmac.c
+CHIP_CSRCS += sam3u_dmac.c
+endif
+
+ifeq ($(CONFIG_SAM34_PDCA),y)
+CHIP_CSRCS += sam4l_pdca.c
 endif
 
 ifeq ($(CONFIG_SAM34_HSMCI),y)

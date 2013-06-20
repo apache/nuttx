@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/src/sam34/chip/sam_dmac.h
+ * arch/arm/src/sam34/chip/sam3u_dmac.h
  *
  *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_DMAC_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_DMAC_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_DMAC_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_DMAC_H
 
 /****************************************************************************************
  * Included Files
@@ -437,4 +437,4 @@ struct dma_linklist_s
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_DMAC_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_DMAC_H */
