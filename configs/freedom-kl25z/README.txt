@@ -116,13 +116,15 @@ is configured to work with the OpenSDA USB CDC/ACM port:
   Pin 27 PTA1/TSI0_CH2/UART0_RX/FTM2_CH0 UART1_RX_TGTMCU and D0 (PTA1)
   Pin 28 PTA2/TSI0_CH3/UART0_TX/FTM2_CH1 UART1_TX_TGTMCU and D1 (PTA2)
 
-But the UART Tx/Rx signals are also available on J1:
+But the UART0 Tx/Rx signals are also available on J1:
 
   ---------------- ---------
   UART0 SIGNAL     J1 pin
   ---------------- ---------
   UART0_RX (PTA1)  J1, pin 2
   UART0_TX (PTA2)  J1, pin 4
+
+Ground is available on J2 pin 14.  3.3V is available on J3 and J4.
 
 mbed
 ====
@@ -306,16 +308,25 @@ Where <subdir> is one of the following:
        CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
     3. Serial Console.  A serial console is required to see the OS test
-       output.  The serial console is configured on UART1 which is available
-       on JP5:
+       output.  The serial console is configured on UART0 which is available
+       on J1:
 
-       UART1 RX signal (RXD1) is on PB.4, pin 8, and
-       UART1 TX signal (TXD1) is on PB.5, pin 9.
+       ---------------- ---------
+       UART0 SIGNAL     J1 pin
+       ---------------- ---------
+       UART0_RX (PTA1)  J1, pin 2
+       UART0_TX (PTA2)  J1, pin 4
+
+       Ground is available on J2 pin 14.  3.3V is available on J3 and J4.
+
+       It is possible to configure NSH to use a USB serial console instead
+       of an RS-232 serial console.  However, that configuration has not
+       been impelmented as of this writing.
 
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
-    Configuration enables the serial interfaces on UART1.  Support for
+    Configuration enables the serial interface on UART0.  Support for
     builtin applications is disabled.
 
     NOTES:
@@ -338,11 +349,16 @@ Where <subdir> is one of the following:
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
     3. Serial Console.  A serial console is necessary to interrupt with
-       NSH. The serial console is configured on UART1 which is available
-       on JP5:
+       NSH.   The serial console is configured on UART0 which is available
+       on J1:
 
-       UART1 RX signal (RXD1) is on PB.4, pin 8, and
-       UART1 TX signal (TXD1) is on PB.5, pin 9.
+       ---------------- ---------
+       UART0 SIGNAL     J1 pin
+       ---------------- ---------
+       UART0_RX (PTA1)  J1, pin 2
+       UART0_TX (PTA2)  J1, pin 4
+
+       Ground is available on J2 pin 14.  3.3V is available on J3 and J4.
 
        It is possible to configure NSH to use a USB serial console instead
        of an RS-232 serial console.  However, that configuration has not
