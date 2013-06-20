@@ -53,6 +53,7 @@
 #include "kl_spi.h"
 #include "kl_gpio.h"
 #include "chip/kl_memorymap.h"
+#include "chip/kl_sim.h"
 #include "chip/kl_spi.h"
 #include "chip/kl_pinmux.h"
 

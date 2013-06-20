@@ -83,8 +83,10 @@
 #define GPIO_LED_G (GPIO_OUTPUT | GPIO_OUTPUT_ONE | PIN_PORTB | PIN19)
 #define GPIO_LED_B (GPIO_OUTPUT | GPIO_OUTPUT_ONE | PIN_PORTD | PIN1)
 
-/* Button definitions ***************************************************************/
+/* Button definitions *******************************************************************************/
 /* The Freedom KL25Z has no buttons */
+
+/* Chip selects ************************************************************************************/
 
 /****************************************************************************************************
  * Public Types
