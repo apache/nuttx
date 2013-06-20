@@ -182,7 +182,7 @@
  * alternative.
  */
 
-#define PIN_SPI0_SCK    PIN_SPI0_SCK_2
+#define PIN_SPI0_SCK   PIN_SPI0_SCK_2
 #define PIN_SPI0_MISO  PIN_SPI0_MISO_4
 #define PIN_SPI0_MOSI  PIN_SPI0_MOSI_3
 
