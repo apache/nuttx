@@ -423,14 +423,96 @@ config SAM34_HSMCI
 
 endmenu
 
+if ARCH_CHIP_SAM4L
+menu "AT91SAM3/4 Clock Configuration"
+
 config SAM32_RESET_PERIPHCLKS
 	bool "Enable all peripheral clocks on reset"
 	default n
-	depends on ARCH_CHIP_SAM4L
 	---help---
 		By default, only a few necessary peripheral clocks are enabled at
 		reset. If this setting is enabled, then all clocking will be enabled
 		to all of the selected peripherals on reset.
+
+config SAM34_OSC0
+	bool "External oscillator 0"
+	default n
+	---help---
+		Oscillator 0 might be automatically selected for several reasons:
+		Oscillator 0 might be the system clock or the source clock for
+		either PLL0 or DFPLL.  It might also be needed if OSC0 is the source
+		clock for GCLK9.  By selecting SAM34_OSC0, you can also force the
+		clock to be enabled at boot time for other uses.
+
+config SAM34_OSC32K
+	bool "32.768KHz external oscillator"
+	default n
+	---help---
+		The 32K oscillator might be automatically selected for several
+		reasons: The 32K oscillator may be the source clock for DFPLL0 or
+		the source clock for GLK9 that might be used to driver PLL0.  By
+		selecting SAM34_OSC32K, you can also force the clock to be enabled
+		at boot time.  OSC32 may needed by other devices as well (AST, WDT,
+		PICUART, RTC).
+
+config SAM34_RC80M
+	bool "80MHz RC oscillator"
+	default n
+	---help---
+		The 80MHz RC oscillator might be automatically selected for several
+		reasons: This might be the system clock or the source clock for the
+		DFPLL or it could be the source for GCLK9 that drives PLL0. By
+		selecting SAM34_RC80M, you can also force the clock to be enabled at
+		boot time for other uses.
+
+config SAM34_RCFAST
+	bool "Fast RC oscillator"
+	default n
+	---help---
+		The fast RC oscillator might be automatically selected for several
+		reasons: The 12/8/4 fast RC oscillator may be used as the system
+		clock or as the source for GLCK9 that drives PLL0. If not then, it
+		may be enabled by setting the SAM34_RCFASTxM configuration variable.
+
+if SAM34_RCFAST
+choice
+	prompt "Fast RC Oscillator Speed"
+	default SAM34_RCFAST8M
+
+config SAM34_RCFAST12M
+	bool "12MHz"
+
+config SAM34_RCFAST8M
+	bool "8MHz"
+
+config SAM34_RCFAST4M
+	bool "4MHz
+
+endchoice
+endif
+
+config SAM34_RC1M
+	bool "1MHz RC oscillator"
+	default n
+	---help---
+		The 1MHz RC oscillator might be automatically selected for several
+		reasons: The 1MHz RC oscillator may be used as the system block or
+		may be the source clock for GLCK9 that drives PLL0.  By selecting
+		SAM34_RC1M, you can also force the clock to be enabled at boot time
+		for other purposes.
+
+config SAM34_RC32K
+	bool "32KHz RC oscillator"
+	default n
+	---help---
+		The 32KHz RC oscillator might be automatically selected for several
+		reasons: The 32KHz RC oscillator may be used as the input to DFLL0
+		or as the input to GCLK9 that drives PLL0. By selecting SAM34_RC32K,
+		you can also force the clock to be enabled at boot time for other
+		purposes.
+
+endmenu
+endif
 
 comment "AT91SAM3/4 USART Configuration"
 
@@ -459,6 +541,7 @@ config USART3_ISUART
 	select ARCH_HAVE_USART2
 
 comment "AT91SAM3/4 GPIO Interrupt Configuration"
+
 config GPIO_IRQ
 	bool "GPIO pin interrupts"
 	---help---
