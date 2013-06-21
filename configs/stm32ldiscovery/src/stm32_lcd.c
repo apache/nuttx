@@ -465,7 +465,7 @@ static void slcd_dumpstate(FAR const char *msg)
 static void slcd_dumpslcd(FAR const char *msg)
 {
   lcdvdbg("%s:\n", msg);
-  lcdvdbg("  CR: %08x FCR: %08x SR: %08x CLR: %08x:\n",
+  lcdvdbg("  CR: %08x FCR: %08x SR: %08x CLR: %08x\n",
           getreg32(STM32_LCD_CR), getreg32(STM32_LCD_FCR),
           getreg32(STM32_LCD_SR), getreg32(STM32_LCD_CLR));
   lcdvdbg("  RAM0L: %08x RAM1L: %08x RAM2L: %08x RAM3L: %08x\n",
