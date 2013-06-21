@@ -5019,4 +5019,9 @@
 	  controlling SPI-related discrete inputs and outputs.  Taken from
 	  work by Alan Carvalho de Assis (2013-6-20).
 	* arch/arm/src/kl/kl_dumpgpio.c:  Now compiles (2013-6-20).
-
+	* configs/:  Several defconfig files were changed that had 
+	  CONFIG_HAVE_CXXINITIALIZE=y.  Because of recent changes to
+	  apps/examples, these configurations may need to have
+	  CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y so that they behave as they did
+	  before, i.e., so that C++ initializers will be called when NSH starts
+	  up (2013-6-21).
