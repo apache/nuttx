@@ -707,13 +707,13 @@ FAR struct spi_dev_s *up_spiinitialize(int port)
 
   /* Configure master mode, select mode 0, MSB first.  Disable interrupts. */
 
-  spi_putreg(priv, KL_SPI_C1_OFFSET, SPI_C1_SPIE | SPI_C1_MSTR);
+  spi_putreg(priv, KL_SPI_C1_OFFSET, SPI_C1_SPE | SPI_C1_MSTR);
 
   /* Disable interrupts, DMA, bidirectional mode, stop-in-wait mode, enable
    * master mode fault detection
    */
 
-  spi_putreg(priv, KL_SPI_C1_OFFSET, 0);
+  spi_putreg(priv, KL_SPI_C2_OFFSET, 0);
 
   /* Set the initial SPI configuration */
 
