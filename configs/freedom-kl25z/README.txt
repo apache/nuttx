@@ -1,8 +1,8 @@
 README.txt
 ==========
 
-This is the README file for the port of NuttX to the Freescale Freedom KL25Z
-board.  This board has the MKL25Z128 chip with a built-in SDA debugger.
+  This is the README file for the port of NuttX to the Freescale Freedom KL25Z
+  board.  This board has the MKL25Z128 chip with a built-in SDA debugger.
 
 Contents
 ========
@@ -101,39 +101,52 @@ LEDs
 Serial Console
 ==============
 
-As with most NuttX configurations, the Freedom KL25Z configurations
-depend on having a serial console to interact with the software.  The
-Freedom KL25Z, however, has no on-board RS-232 drivers so will be
-necessary to connect the Freedom KL25Z UART pins to an external
-RS-232 driver board or TTL-to-Serial USB adaptor.
+  As with most NuttX configurations, the Freedom KL25Z configurations
+  depend on having a serial console to interact with the software.  The
+  Freedom KL25Z, however, has no on-board RS-232 drivers so will be
+  necessary to connect the Freedom KL25Z UART pins to an external
+  RS-232 driver board or TTL-to-Serial USB adaptor.
 
-By default UART0 is used as the serial console on this boards.  The UART0
-is configured to work with the OpenSDA USB CDC/ACM port:
+  By default UART0 is used as the serial console on this boards.  The UART0
+  is configured to work with the OpenSDA USB CDC/ACM port:
 
-  ------ ------------------------------- -----------------------------
-  PIN    PIN FUNCTIONS                   BOARD SIGNALS
-  ------ ------------------------------- -----------------------------
-  Pin 27 PTA1/TSI0_CH2/UART0_RX/FTM2_CH0 UART1_RX_TGTMCU and D0 (PTA1)
-  Pin 28 PTA2/TSI0_CH3/UART0_TX/FTM2_CH1 UART1_TX_TGTMCU and D1 (PTA2)
+    ------ ------------------------------- -----------------------------
+    PIN    PIN FUNCTIONS                   BOARD SIGNALS
+    ------ ------------------------------- -----------------------------
+    Pin 27 PTA1/TSI0_CH2/UART0_RX/FTM2_CH0 UART1_RX_TGTMCU and D0 (PTA1)
+    Pin 28 PTA2/TSI0_CH3/UART0_TX/FTM2_CH1 UART1_TX_TGTMCU and D1 (PTA2)
 
-But the UART0 Tx/Rx signals are also available on J1:
+  But the UART0 Tx/Rx signals are also available on J1:
 
-  ---------------- ---------
-  UART0 SIGNAL     J1 pin
-  ---------------- ---------
-  UART0_RX (PTA1)  J1, pin 2
-  UART0_TX (PTA2)  J1, pin 4
+    ---------------- ---------
+    UART0 SIGNAL     J1 pin
+    ---------------- ---------
+    UART0_RX (PTA1)  J1, pin 2
+    UART0_TX (PTA2)  J1, pin 4
 
-Ground is available on J2 pin 14.  3.3V is available on J3 and J4.
+  Ground is available on J2 pin 14.  3.3V is available on J3 and J4.
 
 mbed
 ====
 
-The Freedom KL25Z includes a built-in SDA debugger.  An alternative
-to the SDA bootloader is this boot loader from mbed:
+  The Freedom KL25Z includes a built-in SDA debugger.  An alternative
+  to the SDA bootloader is this boot loader from mbed:
 
-http://mbed.org/handbook/mbed-FRDM-KL25Z-Getting-Started
-http://mbed.org/handbook/Firmware-FRDM-KL25Z
+    http://mbed.org/handbook/mbed-FRDM-KL25Z-Getting-Started
+    http://mbed.org/handbook/Firmware-FRDM-KL25Z
+
+  Using the mbed loader:
+
+  1. Connect the KL25Z to the host PC using the USB connector labeled
+     SDA.
+  2. A new file system will appear call MBED; open it with Windows
+     Explorer (assuming that you are using Windows).
+  3. Drag and drop nuttx.bin into the MBED window.  This will load the
+     nuttx.bin binary into the the KL25Z.  the MBED window will close
+     then re-open and the KL25Z will be running the new code.
+
+  Using the Freescale SDA debugger is essentially the same.  That
+  debugger will also accept .hex file.
 
 Freedom KL25Z-specific Configuration Options
 ============================================
