@@ -141,13 +141,12 @@
 #  define LCDCA_CFG_DUTY_1TO3      (3 << LCDCA_CFG_DUTY_SHIFT) /* 1/3, 1/3, COM[0:2] */
 #define LCDCA_CFG_FCST_SHIFT       (16)      /* Bits 16-21: Fine Contrast */
 #define LCDCA_CFG_FCST_MASK        (63 << LCDCA_CFG_FCST_SHIFT)
-#  define LCDCA_CFG_FCST(n)        (((n) & 63) << LCDCA_CFG_FCST_SHIFT) /* n = -32..31 */
+#  define LCDCA_CFG_FCST(n)        (((uint32_t)(n) & 63) << LCDCA_CFG_FCST_SHIFT) /* n = -32..31 */
 #define LCDCA_CFG_NSU_SHIFT        (24)      /* Bits 24-29: Number of Segment Terminals in Use */
 #define LCDCA_CFG_NSU_MASK         (63 << LCDCA_CFG_NSU_SHIFT)
 #  define LCDCA_CFG_NSU(n)         ((n) << LCDCA_CFG_NSU_SHIFT) /* n=0-40 */
 
 /* Timing Register */
-
 
 #define LCDCA_TIM_PRESC            (1 << 0)  /* Bit 0:  LCD Prescaler Select */
 #define LCDCA_TIM_CLKDIV_SHIFT     (1)       /* Bits 1-3: LCD Clock Division */
@@ -184,11 +183,13 @@
  * memory for segments 0-31).
  */
 
+#define LCDCA_DRL_MASK             0xffffffff
+
 /* Data Register High 0-3 (8 bits data, each bit defines a segment value in display
  * memory for segments 32-39)
  */
 
-#define LCDCA_DRH0_MASK            0xff
+#define LCDCA_DRH_MASK             0xff
 
 /* Indirect Access Data Register */
 

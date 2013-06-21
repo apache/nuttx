@@ -103,6 +103,75 @@
                        GPIO_PORTC | GPIO_PIN24)
 #define IRQ_SW0       SAM_IRQ_PC24
 
+/* LCD1
+ *
+ * EXT5  SAM4L BOARD     LCD1     SHARED
+ * PIN    PIN  FUNCTION  FUNCTION WITH
+ *  1    PA09  COM3      COM3     EXT3
+ *  2    PA10  COM2      COM2     EXT3
+ *  3    PA11  COM1      COM1     EXT4
+ *  4    PA12  COM0      COM0     EXT4
+ *  5    PC15  SEG0      SEG0     EXT3
+ *  6    PC16  SEG1      SEG1     EXT3
+ *  7    PC17  SEG2      SEG2     EXT4
+ *  8    PC18  SEG3      SEG3     EXT4
+ *  9    PC19  SEG4      SEG4
+ *  10   PA13  SEG5      SEG5     EXT4
+ *  11   PA14  SEG6      SEG6
+ *  12   PA15  SEG7      SEG7     EXT4
+ *  13   PA16  SEG8      SEG8     EXT4
+ *  14   PA17  SEG9      SEG9     EXT3
+ *  15   PC20  SEG10     SEG10
+ *  16   PC21  SEG11     SEG11
+ *  17   PC22  SEG12     SEG12
+ *  18   PC23  SEG13     SEG13
+ *  19   PB08  SEG14     SEG14
+ *  20   PB09  SEG15     SEG15
+ *  21   PB10  SEG16     SEG16    EXT2
+ *  22   PB11  SEG17     SEG17    EXT2
+ *  23   PA18  SEG18     SEG18    EXT3-4
+ *  24   PA19  SEG19     SEG19    EXT3-4
+ *  25   PA20  SEG20     SEG20    EXT3-4
+ *  26   PB07  SEG21     SEG21
+ *  27   PB06  SEG22     SEG22
+ *  28   PA08  SEG23     SEG32    EXT3
+ *  29   PC24  SEG24     N/C
+ *  30   PC25  SEG25     N/C      EXT1
+ *  31   PC26  SEG26     N/C      EXT2-3
+ *  32   PC27  SEG27     N/C      EXT2-3
+ *  33   PC28  SEG28     N/C
+ *  34   PC29  SEG29     N/C
+ *  35   PC30  SEG30     N/C      EXT1-2
+ *  36   PC31  SEG31     N/C
+ *  37   PB12  SEG32     N/C      EXT1
+ *  38   PB13  SEG33     N/C      EXT1
+ *  39   PA21  SEG34     N/C      EXT1-2
+ *  40   PA22  SEG35     N/C      EXT1-2
+ *  41   PB14  SEG36     N/C      EXT2-4
+ *  42   PB15  SEG37     N/C      EXT2-4
+ *  43   PA23  SEG38     N/C      EXT1
+ *  44   PA24  SEG39     N/C      EXT1
+ *  45   ---   N/C       N/C
+ *  46   ---   N/C       N/C
+ *  47   ---   VCC_P3V3  BL V+
+ *  48   ---   GND       BL V-
+ *  49   PC05  BL        BL CTRL  EXT2
+ *  50   ---   ID        ID
+ *  51   ---   GND       GND
+ *
+ * The backlight control is active high.
+ */
+
+#ifdef CONFIG_SAM4L_XPLAINED_SLCD1MODULE
+
+#  ifndef CONFIG_SAM34_LCDCA
+#    error CONFIG_SAM34_LCDCA is required to use the LCD1 module
+#  endif
+
+#  define GPIO_LCD1_BL (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_CLEAR | \
+                        GPIO_PORTC | GPIO_PIN5)
+#endif
+
 /* I/O1
  *
  * Support for the microSD card slot on the I/O1 module.  The I/O1 requires
@@ -125,6 +194,10 @@
 
 #  if defined(CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1)
 
+#    if defined(SAM4L_XPLAINED_OLED1MODULE) && defined(SAM4L_XPLAINED_OLED1MODULE_EXT1)
+#      error I/O1 and OLED1 cannot both reside in EXT1
+#    endif
+
 #    define GPIO_SD_CD (GPIO_INTERRUPT | GPIO_INT_CHANGE | GPIO_PULL_UP | \
                         GPIO_GLITCH_FILTER | GPIO_PORTB | GPIO_PIN13)
 #    define IRQ_SD_CD   SAM_IRQ_PB13
@@ -134,6 +207,15 @@
 #    define SD_CSNO    0
 
 #  elif defined(CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2)
+
+#    ifndef CONFIG_SAM4L_XPLAINED_SLCD1MODULE
+#      error I/O1 cannot be in EXT2 if the LCD1 module is connected
+#    endif
+
+#    if defined(SAM4L_XPLAINED_OLED1MODULE) && defined(SAM4L_XPLAINED_OLED1MODULE_EXT2)
+#      error I/O1 and OLED1 cannot both reside in EXT2
+#    endif
+
 #    define GPIO_CD   (GPIO_INTERRUPT | GPIO_INT_CHANGE | GPIO_PULL_UP | \
                        GPIO_GLITCH_FILTER | GPIO_PORTC | GPIO_PIN9)
 #    define IRQ_CD     SAM_IRQ_PC9

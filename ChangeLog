@@ -5025,3 +5025,6 @@
 	  CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y so that they behave as they did
 	  before, i.e., so that C++ initializers will be called when NSH starts
 	  up (2013-6-21).
+	* configs/sam4l-xplained/src/sam_slcd.c:  Beginning of a driver for the
+	  LED1 segment LCD module.  This driver is incomplete on initial check-
+	  in (2013-6-21).
