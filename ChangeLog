@@ -5018,3 +5018,5 @@
 	* configs/freedom-lk25z/src/kl_spi.c:  Add the framework for
 	  controlling SPI-related discrete inputs and outputs.  Taken from
 	  work by Alan Carvalho de Assis (2013-6-20).
+	* arch/arm/src/kl/kl_dumpgpio.c:  Now compiles (2013-6-20).
+
