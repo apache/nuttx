@@ -666,6 +666,11 @@ CONFIG_NSH_MMCSDSLOTNO=0
 CONFIG_NSH_MMCSDMINOR=0
 
 #
+# Settings for examples/nsh
+#
+CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y
+
+#
 # Settings for examples/usbserial
 #
 CONFIG_EXAMPLES_USBSERIAL_INONLY=n
