@@ -114,9 +114,9 @@ void kl_dumpgpio(gpio_cfgset_t pinset, const char *msg)
    * address.
    */
 
-  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  DEBUGASSERT((unsigned)port <= KL_GPIO_PORTE);
-  base = KL_GPIO_CTRL_BASE(port);
+  port = (pinset & _PIN_PORT_MASK) >> _PIN_PORT_SHIFT;
+  DEBUGASSERT((unsigned)port < KL_GPIO_NPORTS);
+  base = KL_GPIO_BASE(port);
 
   /* The following requires exclusive access to the GPIO registers */
 
@@ -124,18 +124,10 @@ void kl_dumpgpio(gpio_cfgset_t pinset, const char *msg)
 
   lldbg("GPIO%c pinset: %08x base: %08x -- %s\n",
         g_portchar[port], pinset, base, msg);
-  lldbg("  PMD: %08x  OFFD: %08x  DOUT: %08x DMASK: %08x\n",
-        getreg32(base + KL_GPIO_PMD_OFFSET),
-        getreg32(base + KL_GPIO_OFFD_OFFSET),
-        getreg32(base + KL_GPIO_DOUT_OFFSET),
-        getreg32(base + KL_GPIO_DMASK_OFFSET));
-  lldbg("  PIN: %08x  DBEN: %08x   IMD: %08x   IEN: %08x\n",
-        getreg32(base + KL_GPIO_PIN_OFFSET),
-        getreg32(base + KL_GPIO_DBEN_OFFSET),
-        getreg32(base + KL_GPIO_IMD_OFFSET),
-        getreg32(base + KL_GPIO_IEN_OFFSET));
-  lldbg(" ISRC: %08x\n",
-        getreg32(base + KL_GPIO_ISRC_OFFSET));
+  lldbg("  PDOR: %08x  PDIR: %08x  PDDR: %08x\n",
+        getreg32(base + KL_GPIO_PDOR_OFFSET),
+        getreg32(base + KL_GPIO_PDIR_OFFSET),
+        getreg32(base + KL_GPIO_PDDR_OFFSET));
 
   irqrestore(flags);
 }
