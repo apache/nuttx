@@ -366,7 +366,7 @@ static struct stm32_slcdstate_s g_slcdstate;
  *              D
  *
  * LCD character 16-bit-encoding:
- * { E , D , P , N, M , C , COL , DP, B , A , K , J, G , F , Q , H   }
+ * { E , D , P , N,   M , C , COL , DP,   B , A , K , J,   G , F , Q , H }
  */
 
 #warning "Encodings for all punctuation are incomplete"
@@ -701,7 +701,7 @@ static inline void slcd_writemem(uint16_t segset, int curpos)
   /* Isolate the least significant bits
    *
    * LCD character 16-bit-encoding:
-   * { E , D , P , N, M , C , COL , DP, B , A , K , J, G , F , Q , H  }
+   * { E , D , P , N,   M , C , COL , DP,   B , A , K , J,   G , F , Q , H }
    *
    * segments[0] = { E , D , P , N }
    * segments[1] = { M , C , COL , DP }

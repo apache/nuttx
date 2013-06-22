@@ -65,7 +65,9 @@ CSRCS += sam_nsh.c
 endif
 
 ifeq ($(CONFIG_SAM34_LCDCA),y)
+ifeq ($(CONFIG_SAM4L_XPLAINED_SLCD1MODULE),y)
 CSRCS += sam_slcd.c
+endif
 endif
 
 ifeq ($(CONFIG_SAM4L_XPLAINED_IOMODULE),y)

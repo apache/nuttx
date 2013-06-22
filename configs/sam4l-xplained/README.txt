@@ -679,77 +679,104 @@ Configuration sub-directories
     This configuration directory will built the NuttShell.  See NOTES above
     and below:
 
-    NOTE:
-    If the I/O1 module is connected to the SAM4L Xplained Pro, then support
-    for the SD card slot can be enabled by making the following changes
-    to the configuration:
+    NOTES:
 
-      File Systems:
-        CONFIG_FS_FAT=y                   : Enable the FAT file system
-        CONFIG_FAT_LCNAMES=y              : Enable upper/lower case 8.3 file names (Optional, see below)
-        CONFIG_FAT_LFN=y                  : Enable long file named (Optional, see below)
-        CONFIG_FAT_MAXFNAME=32            : Maximum supported file name length
+    1. If the I/O1 module is connected to the SAM4L Xplained Pro, then
+       support for the SD card slot can be enabled by making the following
+       changes to the configuration:
 
-        There are issues related to patents that Microsoft holds on FAT long
-        file name technologies.  See the top level COPYING file for further
-        details.
+       File Systems:
+         CONFIG_FS_FAT=y                   : Enable the FAT file system
+         CONFIG_FAT_LCNAMES=y              : Enable upper/lower case 8.3 file names (Optional, see below)
+         CONFIG_FAT_LFN=y                  : Enable long file named (Optional, see below)
+         CONFIG_FAT_MAXFNAME=32            : Maximum supported file name length
 
-      System Type -> Peripherals:
-        CONFIG_SAM34_SPI=y                : Enable the SAM4L SPI peripheral
+         There are issues related to patents that Microsoft holds on FAT long
+         file name technologies.  See the top level COPYING file for further
+         details.
 
-      Device Drivers
-        CONFIG_SPI=y                      : Enable SPI support
-        CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
-        CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
+       System Type -> Peripherals:
+         CONFIG_SAM34_SPI=y                : Enable the SAM4L SPI peripheral
 
-        CONFIG_MMCSD=y                    : Enable MMC/SD support
-        CONFIG_MMCSD_NSLOTS=1             : Only one MMC/SD card slot
-        CONFIG_MMCSD_MULTIBLOCK_DISABLE=n : Should not need to disable multi-block transfers
-        CONFIG_MMCSD_HAVECARDDETECT=y     : I/O1 module as a card detect GPIO
-        CONFIG_MMCSD_SPI=y                : Use the SPI interface to the MMC/SD card
-        CONFIG_MMCSD_SPICLOCK=20000000    : This is a guess for the optimal MMC/SD frequency
-        CONFIG_MMCSD_SPIMODE=0            : Mode 0 is required
+       Device Drivers
+         CONFIG_SPI=y                      : Enable SPI support
+         CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
+         CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
 
-      Board Selection -> Common Board Options
-        CONFIG_NSH_MMCSDSLOTNO=0          : Only one MMC/SD slot, slot 0
-        CONFIG_NSH_MMCSDSPIPORTNO=0       : Use CS=0 if the I/O1 is in EXT1, OR
-        CONFIG_NSH_MMCSDSPIPORTNO=2       : Use CS=2 if the I/O1 is in EXT2
+         CONFIG_MMCSD=y                    : Enable MMC/SD support
+         CONFIG_MMCSD_NSLOTS=1             : Only one MMC/SD card slot
+         CONFIG_MMCSD_MULTIBLOCK_DISABLE=n : Should not need to disable multi-block transfers
+         CONFIG_MMCSD_HAVECARDDETECT=y     : I/O1 module as a card detect GPIO
+         CONFIG_MMCSD_SPI=y                : Use the SPI interface to the MMC/SD card
+         CONFIG_MMCSD_SPICLOCK=20000000    : This is a guess for the optimal MMC/SD frequency
+         CONFIG_MMCSD_SPIMODE=0            : Mode 0 is required
 
-      Board Selection -> SAM4L Xplained Pro Modules
-        CONFIG_SAM4L_XPLAINED_IOMODULE=y      : I/O1 module is connected
-        CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1=y : In EXT1, or EXT2
-        CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2=y
+       Board Selection -> Common Board Options
+         CONFIG_NSH_MMCSDSLOTNO=0          : Only one MMC/SD slot, slot 0
+         CONFIG_NSH_MMCSDSPIPORTNO=0       : Use CS=0 if the I/O1 is in EXT1, OR
+         CONFIG_NSH_MMCSDSPIPORTNO=2       : Use CS=2 if the I/O1 is in EXT2
 
-      Application Configuration -> NSH Library
-        CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
+       Board Selection -> SAM4L Xplained Pro Modules
+         CONFIG_SAM4L_XPLAINED_IOMODULE=y      : I/O1 module is connected
+         CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1=y : In EXT1, or EXT2
+         CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2=y
 
-      NOTE: If you enable the I/O1 this configuration with USART0 as the
-      console and with the I/O1 module in EXT1, you *must* remove UART
-      jumper.  Otherwise, you have lookpack on USART0 and NSH will *not*
-      behave very well (since its outgoing prompts also appear as incoming
-      commands).
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
 
-      NOTE: If you get a compilation error like:
+       NOTE: If you enable the I/O1 this configuration with USART0 as the
+       console and with the I/O1 module in EXT1, you *must* remove UART
+       jumper.  Otherwise, you have lookpack on USART0 and NSH will *not*
+       behave very well (since its outgoing prompts also appear as incoming
+       commands).
 
-        libxx_new.cxx:74:40: error: 'operator new' takes type 'size_t'
-                             ('unsigned int') as first parameter [-fper
+       NOTE: If you get a compilation error like:
 
-      Sometimes NuttX and your toolchain will disagree on the underlying
-      type of size_t; sometimes it is an 'unsigned int' and sometimes it is
-      an 'unsigned long int'.  If this error occurs, then you may need to
-      toggle the value of CONFIG_CXX_NEWLONG.
+         libxx_new.cxx:74:40: error: 'operator new' takes type 'size_t'
+                              ('unsigned int') as first parameter [-fper
 
-      STATUS:  As of 2013-6-18, this configuration appears completely
-      functional.  Testing, however, has been very light.  Example:
+       Sometimes NuttX and your toolchain will disagree on the underlying
+       type of size_t; sometimes it is an 'unsigned int' and sometimes it is
+       an 'unsigned long int'.  If this error occurs, then you may need to
+       toggle the value of CONFIG_CXX_NEWLONG.
 
-        NuttShell (NSH) NuttX-6.28
-        nsh> mount -t vfat /dev/mmcsd0 /mnt/stuff
-        nsh> ls /mnt/stuff
-        /mnt/stuff:
-        nsh> echo "This is a test" >/mnt/stuff/atest.txt
-        nsh> ls /mnt/stuff
-        /mnt/stuff:
-         atest.txt
-        nsh> cat /mnt/stuff/atest.txt
-        This is a test
-        nsh> 
+       STATUS:  As of 2013-6-18, this configuration appears completely
+       functional.  Testing, however, has been very light.  Example:
+
+         NuttShell (NSH) NuttX-6.28
+         nsh> mount -t vfat /dev/mmcsd0 /mnt/stuff
+         nsh> ls /mnt/stuff
+         /mnt/stuff:
+         nsh> echo "This is a test" >/mnt/stuff/atest.txt
+         nsh> ls /mnt/stuff
+         /mnt/stuff:
+          atest.txt
+         nsh> cat /mnt/stuff/atest.txt
+         This is a test
+         nsh> 
+
+    1. If the LCD1 module is connected to the SAM4L Xplained Pro, then
+       support for the SLCDt can be enabled by making the following
+       changes to the configuration:
+
+       System Type -> AT91SAM3/4 Peripheral Support
+         CONFIG_SAM34_LCDCA=y
+
+       System Type -> AT91SAM3/4 Clock Configuration
+         CONFIG_SAM34_OSC32K=y
+
+       Board Selection -> Board-Specific Options -> SAM4L Xplained Pro Modules
+         CONFIG_SAM4L_XPLAINED_SLCD1MODULE=y
+
+       Library Routines -> Non-standard Library Support
+         CONFIG_LIB_SLCDCODEC=y
+
+       The SLCD example can be enabled to verify the SLCD:
+
+       Application Configuration -> Examples
+         CONFIG_EXAMPLES_SLCD=y
+         CONFIG_EXAMPLES_SLCD_DEVNAME="/dev/slcd"
+         CONFIG_EXAMPLES_SLCD_BUFSIZE=64
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y
