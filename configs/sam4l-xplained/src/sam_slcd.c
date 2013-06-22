@@ -33,6 +33,10 @@
  *
  ****************************************************************************/
 
+/* TODO: Add support for additional pixels:  B0-B2, G0-G7, and E0-E7,
+ *       probably via ioctl calls.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -57,11 +61,11 @@
 #include "up_arch.h"
 #include "sam_gpio.h"
 #include "sam4l_periphclks.h"
-#include "chip/sam_lcdca.h"
+#include "chip/sam4l_lcdca.h"
 
 #include "sam4l-xplained.h"
 
-#ifdef CONFIG_SAM34_LCDCA
+#if defined(CONFIG_SAM34_LCDCA) && defined(CONFIG_SAM4L_XPLAINED_SLCD1MODULE)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -110,12 +114,18 @@
  */
 
 #define SLCD_NROWS             1
-#define SLCD_NCHARS            6
+#define SLCD_NCHARS            5
 #define SLCD_MAXCONTRAST       63
 
 #define BOARD_SLCD_NCOM        4
 #define BOARD_SLCD_NSEG        40
 #define SLCD_NPINS            (BOARD_SLCD_NCOM+BOARD_SLCD_NSEG+1)
+
+/* An ASCII character may need to be decorated with a preceding decimal
+ * point
+ */
+
+#define SLCD_DP                0x01
 
 /* LCD controller bias configuration. */
 
@@ -139,7 +149,7 @@
 #if BOARD_SLCD_NCOM < 2
 #  define LCD_DUTY             LCDCA_CFG_DUTY_STATIC  /* Static COM0 */
 #elif BOARD_SLCD_NCOM < 3
-#  define LCD_DUTY             LCDCA_CFG_DUTY_1TO2    /*  1/2 COM[0:1] */
+#  define LCD_DUTY             LCDCA_CFG_DUTY_1TO2    /* 1/2 COM[0:1] */
 #elif BOARD_SLCD_NCOM < 4
 #  define LCD_DUTY             LCDCA_CFG_DUTY_1TO3    /* 1/3 COM[0:2] */
 #elif BOARD_SLCD_NCOM < 5
@@ -147,6 +157,64 @@
 #else
 #  error Value of BOARD_SLCD_NCOM not supported
 #endif
+
+/* LCD Mapping
+ *
+ *              a
+ *          ---------
+ *         |\   |h  /|
+ *        f| g  |  i |b
+ *         |  \ | /  |
+ *         --j-- --k-+
+ *         |   /| \  |
+ *        e|  l |  n |c
+ *      _  | /  |m  \|  _
+ *   B | |  ---------  | | B
+ *      -       d       -
+ *
+ * ----- ---- ---- ---- ----- ----------------------------------------------
+ *       COM0 COM1 COM2 COM3  Comments
+ * ----- ---- ---- ---- ----- ----------------------------------------------
+ * SEG0  G1   G2   G4   G3    Atmel logo, 4 stage battery-, Dot-point-,
+ * SEG1  G0   G6   G7   G5    usband play indicator
+ * SEG2  E7   E5   E3   E1    4 stage wireless-, AM-, PM- Volt- and milli
+ * SEG3  E6   E4   E2   E0    voltindicator
+ * SEG4  A0-h A0-i A0-k A0-n  1st 14-segment character
+ * SEG5  B3   A0-f A0-e A0-d
+ * SEG6  A0-a A0-b A0-c B4
+ * SEG7  A0-g A0-j A0-l A0-m
+ * SEG8  A1-h A1-i A1-k A1-n  2nd 14-segment character
+ * SEG9  B2   A1-f A1-e A1-d
+ * SEG10 A1-a A1-b A1-c B5
+ * SEG11 A1-g A1-j A1-l A1-m
+ * SEG12 A2-h A2-i A2-k A2-n  3rd 14-segment character
+ * SEG13 B1   A2-f A2-e A2-d
+ * SEG14 A2-a A2-b A2-c B6
+ * SEG15 A2-g A2-j A2-l A2-m
+ * SEG16 A3-h A3-i A3-k A3-n  4th 14-segment character
+ * SEG17 B0   A3-f A3-e A3-d
+ * SEG18 A3-a A3-b A3-c B7
+ * SEG19 A3-g A3-j A3-l A3-m
+ * SEG20 A4-h A4-i A4-k A4-n  5th 14-segment character. Celsius and
+ * SEG21 B8   A4-f A4-e A4-d    Fahrenheit indicator
+ * SEG22 A4-a A4-b A4-c B9
+ * SEG23 A4-g A4-j A4-l A4-m
+ */
+
+#define SLCD_A0_STARTSEG 4
+#define SLCD_A0_ENDSEG   7
+#define SLCD_A1_STARTSEG 8
+#define SLCD_A1_ENDSEG   11
+#define SLCD_A2_STARTSEG 12
+#define SLCD_A2_ENDSEG   15
+#define SLCD_A3_STARTSEG 16
+#define SLCD_A3_ENDSEG   19
+#define SLCD_A4_STARTSEG 20
+#define SLCD_A4_ENDSEG   23
+
+#define SLCD_NB          10   /* Number of 'B' segments B0-B9 */
+#define SLCD_NG          8    /* Number of 'G' segments G0-G7 */
+#define SLCD_NE          8    /* Number of 'E' segments G0-G7 */
 
 /* Debug ********************************************************************/
 
@@ -178,6 +246,15 @@ struct sam_slcdstate_s
   bool initialized;             /* True: Completed initialization sequence */
   uint8_t curpos;               /* The current cursor position */
   uint8_t buffer[SLCD_NCHARS];  /* SLCD ASCII content */
+  uint8_t options[SLCD_NCHARS]; /* Ornamentations */
+};
+
+/* Describes one pixel */
+
+struct slcd_pixel_s
+{
+  uint8_t segment;
+  uint8_t com;
 };
 
 /****************************************************************************
@@ -195,12 +272,21 @@ static void slcd_dumpslcd(FAR const char *msg);
 
 /* Internal utilities */
 
+#if 0 /* Not used */
 static void slcd_clear(void);
+#endif
+static void slcd_setpixel(FAR const struct slcd_pixel_s *info);
+#if 0 /* Not used */
+static void slcd_clrpixel(FAR const struct slcd_pixel_s *info);
+#endif
+static void slcd_setdp(uint8_t curpos);
+#if 0 /* Not used */
+static void slcd_clrdp(uint8_t curpos);
+#endif
 static int slcd_getstream(FAR struct lib_instream_s *instream);
 static uint8_t slcd_getcontrast(void);
-static int slcd_setcontrast(int contrast);
+static int slcd_setcontrast(unsigned int contrast);
 static void slcd_writech(uint8_t ch, uint8_t curpos);
-static void slcd_appendch(uint8_t ch);
 static void slcd_action(enum slcdcode_e code, uint8_t count);
 
 /* Character driver methods */
@@ -253,6 +339,38 @@ static gpio_pinset_t g_slcdgpio[SLCD_NPINS] =
   GPIO_LCD1_BL
 };
 
+/* First segment of each character */
+
+static const uint8_t g_startseg[SLCD_NCHARS] =
+{
+  SLCD_A0_STARTSEG, SLCD_A1_STARTSEG, SLCD_A2_STARTSEG, SLCD_A3_STARTSEG,
+  SLCD_A4_STARTSEG
+};
+
+/* Pixel position for each 'B' segment */
+
+static const struct slcd_pixel_s g_binfo[SLCD_NB] =
+{
+  {17, 0}, {13, 0}, {9, 0},  {5, 0},  {6, 3},
+  {10, 3}, {14, 3}, {18, 3}, {21, 0}, {22, 3}
+};
+
+/* Pixel position for each 'G' segment */
+
+static const struct slcd_pixel_s g_ginfo[SLCD_NG] =
+{
+  {1, 0},  {0, 0},  {0, 1},  {0, 3},  {0, 2},
+  {1, 3},  {1, 1},  {1, 2}
+};
+
+/* Pixel position for each 'E' segment */
+
+static const struct slcd_pixel_s g_einfo[SLCD_NE] =
+{
+  {3, 3},  {2, 3},  {3, 2},  {2, 2},  {3, 1},
+  {2, 1},  {3, 0},  {2, 0}
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -267,9 +385,12 @@ static void slcd_dumpstate(FAR const char *msg)
   lcdvdbg("%s:\n", msg);
   lcdvdbg("  curpos: %d\n",
           g_slcdstate.curpos);
-  lcdvdbg("  Display: [%c%c%c%c%c%c]\n",
+  lcdvdbg("  Display: [%c%c%c%c%c]\n",
           g_slcdstate.buffer[0], g_slcdstate.buffer[1], g_slcdstate.buffer[2],
-          g_slcdstate.buffer[3], g_slcdstate.buffer[4], g_slcdstate.buffer[5]);
+          g_slcdstate.buffer[3], g_slcdstate.buffer[4]);
+  lcdvdbg("  Options: [%d%d%d%d%d]\n",
+          g_slcdstate.options[0], g_slcdstate.options[1], g_slcdstate.options[2],
+          g_slcdstate.options[3], g_slcdstate.options[4]);
 }
 #endif
 
@@ -303,13 +424,82 @@ static void slcd_dumpslcd(FAR const char *msg)
  * Name: slcd_clear
  ****************************************************************************/
 
+#if 0 /* Not used */
 static void slcd_clear(void)
 {
-  uint32_t regaddr;
-
   lvdbg("Clearing\n");
-#warning Missing logic
+
+  /* Clear display memory */
+
+  putreg32(LCDCA_CR_CDM, SAM_LCDCA_CR);
 }
+#endif
+
+/****************************************************************************
+ * Name: slcd_setpixel
+ ****************************************************************************/
+
+static void slcd_setpixel(FAR const struct slcd_pixel_s *info)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+
+  regaddr = info->com ? SAM_LCDCA_DRL0 : SAM_LCDCA_DRL3;
+  regval  = getreg32(regaddr);
+  regval |= (1 << info->segment);
+  putreg32(regval, regaddr);
+}
+
+/****************************************************************************
+ * Name: slcd_clrpixel
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void slcd_clrpixel(FAR const struct slcd_pixel_s *info)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+
+  regaddr = info->com ? SAM_LCDCA_DRL0 : SAM_LCDCA_DRL3;
+  regval  = getreg32(regaddr);
+  regval &= ~(1 << info->segment);
+  putreg32(regval, regaddr);
+}
+#endif
+
+/****************************************************************************
+ * Name: slcd_setdp
+ ****************************************************************************/
+
+static void slcd_setdp(uint8_t curpos)
+{
+  /* Set the decimal point before the current cursor position
+   *
+   *  B3 B4 B5 B6 B7
+   *  .O .O .O .O .O
+   */
+
+  slcd_setpixel(&g_binfo[curpos + 3]);
+  g_slcdstate.options[curpos] |= SLCD_DP;
+}
+
+/****************************************************************************
+ * Name: slcd_clrdp
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static void slcd_clrdp(uint8_t curpos)
+{
+  /* Set the decimal point before the current cursor position
+   *
+   *  B3 B4 B5 B6 B7
+   *  .O .O .O .O .O
+   */
+
+  slcd_clrpixel(&g_binfo[curpos + 3]);
+  g_slcdstate.options[curpos] &= ~SLCD_DP;
+}
+#endif
 
 /****************************************************************************
  * Name: slcd_getstream
@@ -347,7 +537,7 @@ static uint8_t slcd_getcontrast(void)
   /* Get the current contast value */
 
   regval    = getreg32(SAM_LCDCA_CFG);
-  ucontrast = (regval & LCDCA_CFG_FCST_MASK) >> LCDCA_CFG_FCST_MASK;
+  ucontrast = (regval & LCDCA_CFG_FCST_MASK) >> LCDCA_CFG_FCST_SHIFT;
 
   /* Sign extend and translate the 6 bit signed value
    *
@@ -411,37 +601,31 @@ static int slcd_setcontrast(unsigned int contrast)
 
 static void slcd_writech(uint8_t ch, uint8_t curpos)
 {
-  uint16_t segset;
+  uint8_t segment;
 
-  /* Get a set describing the segment settings */
+  /* "LCDCA handles up to four ASCII characters tables, configured in
+   *  Character Mapping Configuration register (CMCFG). Instead of handling
+   *  each segments in display memory for a selected digit, user writes ASCII
+   *  code in Character Mapping Control Register (CMCR) to display the
+   *  corresponding character.
+   *
+   * "User can then drive several digits with few operations:
+   *
+   * "1. Select the Type of Digit (CMCFG.TDG),
+   * "2. Write the Start Segment value (CMCFG.STSEG) of the first digit,
+   * "3. Select Digit Reverse Mode (CMCFG.DREV) if required. If DREV is one,
+   *     segment index is decremented,
+   * "4. Then write ASCII code in CMCR register."
+   */
 
-#warning Missing logic
-
-  /* Decode the value and write it to the SLCD segment memory */
+  segment = g_startseg[curpos];
+  putreg32(LCDCA_CMCFG_TDG_14S4C | LCDCA_CMCFG_STSEG(segment), SAM_LCDCA_CMCFG);
+  putreg32(ch, SAM_LCDCA_CMDR);
 
   /* Save these values in the state structure */
 
   g_slcdstate.buffer[curpos]  = ch;
   slcd_dumpstate("AFTER WRITE");
-}
-
-/****************************************************************************
- * Name: slcd_appendch
- ****************************************************************************/
-
-static void slcd_appendch(uint8_t ch, uint8)
-{
-  lcdvdbg("ch: %c[%02x]\n", isprint(ch) ? ch : '.', ch);
-
-  /* Write the character at the current cursor position */
-
-  slcd_writech(ch, g_slcdstate.curpos);
-  if (g_slcdstate.curpos < (SLCD_NCHARS - 1))
-    {
-      g_slcdstate.curpos++;
-    }
-
-  slcd_dumpstate("AFTER APPEND");
 }
 
 /****************************************************************************
@@ -510,7 +694,7 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
 
             for (i = SLCD_NCHARS - nmove; i < SLCD_NCHARS; i++)
               {
-                slcd_writech(' ', i, 0);
+                slcd_writech(' ', i);
               }
           }
         break;
@@ -535,7 +719,7 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
 
             for (i = g_slcdstate.curpos; i < last; i++)
               {
-                slcd_writech(' ', i, 0);
+                slcd_writech(' ', i);
               }
           }
         break;
@@ -557,7 +741,7 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
 
           for (i = g_slcdstate.curpos; i < SLCD_NCHARS; i++)
             {
-              slcd_writech(' ', i, 0);
+              slcd_writech(' ', i);
             }
         }
         break;
@@ -649,26 +833,20 @@ static ssize_t slcd_read(FAR struct file *filp, FAR char *buffer, size_t len)
 
   for (i = 0; i < SLCD_NCHARS && ret < len; i++)
     {
-      /* Return the character */
+      /* Check if the character is decorated with a preceding period */
 
-      *buffer++ = g_slcdstate.buffer[i];
-      ret++;
-
-      /* Check if the character is decorated with a folling period or colon */
-
-      if (ret < len && g_slcdstate.buffer[i] != 0)
+      if (ret < len && g_slcdstate.options[i] != 0)
         {
-          if ((g_slcdstate.buffer[i] & SLCD_DP) != 0)
+          if ((g_slcdstate.options[i] & SLCD_DP) != 0)
             {
               *buffer++ = '.';
               ret++;
             }
-          else if ((g_slcdstate.buffer[i] & SLCD_COLON) != 0)
-            {
-              *buffer++ = ':';
-              ret++;
-            }
         }
+      /* Return the character */
+
+      *buffer++ = g_slcdstate.buffer[i];
+      ret++;
     }
 
   slcd_dumpstate("READ");
@@ -685,10 +863,9 @@ static ssize_t slcd_write(FAR struct file *filp,
   struct slcd_instream_s instream;
   struct slcdstate_s state;
   enum slcdret_e result;
+  bool dotneeded;
   uint8_t ch;
   uint8_t count;
-  uint8_t prev = ' ';
-  bool valid = false;
 
   /* Initialize the stream for use with the SLCD CODEC */
 
@@ -697,35 +874,9 @@ static ssize_t slcd_write(FAR struct file *filp,
   instream.buffer      = buffer;
   instream.nbytes      = len;
 
-  /* Prime the pump.  This is messy, but necessary to handle decoration on a
-   * character based on any following period or colon.
-   */
+  /* Decode and process every byte in the input buffer */
 
-  memset(&state, 0, sizeof(struct slcdstate_s));
-  result = slcd_decode(&instream.stream, &state, &prev, &count);
-
-  lcdvdbg("slcd_decode returned result=%d char=%d count=%d\n",
-           result, prev, count);
-
-  switch (result)
-    {
-      case SLCDRET_CHAR:
-        valid = true;
-        break;
-
-      case SLCDRET_SPEC:
-        {
-          slcd_action((enum slcdcode_e)prev, count);
-          prev = ' ';
-        }
-        break;
-
-      case SLCDRET_EOF:
-        return 0;
-    }
-
-  /* Now decode and process every byte in the input buffer */
-
+  dotneeded = false;
   while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) != SLCDRET_EOF)
     {
       lcdvdbg("slcd_decode returned result=%d char=%d count=%d\n",
@@ -741,121 +892,79 @@ static ssize_t slcd_write(FAR struct file *filp,
 
               if (ch == ASCII_BS)
                 {
-                  /* If there is a pending character, then output it now before
-                   * performing the action.
-                   */
-
-                  if (valid)
-                    {
-                      slcd_appendch(prev, 0);
-                      prev = ' ';
-                      valid = false;
-                    }
-
-                  /* Then perform the backward deletion */
+                  /* Perform the backward deletion */
 
                   slcd_action(SLCDCODE_BACKDEL, 1);
                 }
               else if (ch == ASCII_CR)
                 {
-                  /* If there is a pending character, then output it now before
-                   * performing the action.
-                   */
-
-                  if (valid)
-                    {
-                      slcd_appendch(prev, 0);
-                      prev = ' ';
-                      valid = false;
-                    }
-
-                  /* Then perform the carriage return */
+                  /* Perform the carriage return */
 
                   slcd_action(SLCDCODE_HOME, 0);
                 }
+
+               /* Ignore dots before control characters (all of them?) */
+
+               dotneeded = false;
             }
 
-          /* Handle characters decoreated with a period or a colon */
+          /* Handle characters decoreated with a preceding period */
 
           else if (ch == '.')
             {
-              /* Write the previous character with the decimal point appended */
+              /* The next character will need a dot in front of it */
 
-              slcd_appendch(prev, SLCD_DP);
-              prev = ' ';
-              valid = false;
-            }
-          else if (ch == ':')
-            {
-              /* Write the previous character with the colon appended */
-
-              slcd_appendch(prev, SLCD_COLON);
-              prev = ' ';
-              valid = false;
+              dotneeded = true;
             }
 
           /* Handle ASCII_DEL */
 
           else if (ch == ASCII_DEL)
             {
-              /* If there is a pending character, then output it now before
-               * performing the action.
-               */
-
-              if (valid)
-                {
-                  slcd_appendch(prev, 0);
-                  prev = ' ';
-                  valid = false;
-                }
-
-              /* Then perform the foward deletion */
+              /* Perform the foward deletion */
 
               slcd_action(SLCDCODE_FWDDEL, 1);
+              dotneeded = false;
             }
 
           /* The rest of the 7-bit ASCII characters are fair game */
 
           else if (ch < 128)
             {
-              /* Write the previous character if it valid */
+              lcdvdbg("ch: %c[%02x]\n", ch, ch);
 
-              if (valid)
+              /* Write the character at the current cursor position */
+
+              slcd_writech(ch, g_slcdstate.curpos);
+
+              /* Check if we need to decorate the character with a preceding
+               * dot.
+               */
+
+              if (dotneeded)
                 {
-                  slcd_appendch(prev, 0);
+                  slcd_setdp(g_slcdstate.curpos);
                 }
 
-              /* There is now a valid output character */
+              /* And advance the cursor position */
 
-              prev = ch;
-              valid = true;
+              if (g_slcdstate.curpos < (SLCD_NCHARS - 1))
+                {
+                  g_slcdstate.curpos++;
+                }
+
+               slcd_dumpstate("AFTER APPEND");
             }
         }
       else /* (result == SLCDRET_SPEC) */  /* A special SLCD action was returned */
         {
-          /* If there is a pending character, then output it now before
-           * performing the action.
-           */
-
-          if (valid)
-            {
-              slcd_appendch(prev, 0);
-              prev = ' ';
-              valid = false;
-            }
-
-          /* Then perform the action */
+          /* Then Perform the action */
 
           slcd_action((enum slcdcode_e)ch, count);
         }
     }
 
-  /* Handle any unfinished output */
-
-  if (valid)
-    {
-      slcd_appendch(prev, 0);
-    }
+  /* Ignore any dots with no following characters */
 
   /* Assume that the entire input buffer was processed */
 
@@ -952,7 +1061,7 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
               return -ERANGE;
             }
 
-          return slcd_setcontrast((int)arg);
+          return slcd_setcontrast((unsigned int)arg);
         }
         break;
 
@@ -1063,7 +1172,7 @@ int sam_slcd_initialize(void)
 #endif
                LCD_DUTY |
                LCDCA_CFG_FCST(0) |
-               LCDCA_CFG_NSU(BOARD_SLCD_NSEG));
+               LCDCA_CFG_NSU(BOARD_SLCD_NSEG);
 
       putreg32(regval, SAM_LCDCA_CFG);
 
@@ -1102,8 +1211,7 @@ int sam_slcd_initialize(void)
 
       /* Make sure that blinking and circular shifting is off */
 
-      putreg32(LCDCA_CR_BSTOP | , SAM_LCDCA_CR);
-      putreg32(LCDCA_CR_CSTOP, SAM_LCDCA_CR);
+      putreg32(LCDCA_CR_BSTOP | LCDCA_CR_CSTOP, SAM_LCDCA_CR);
 
       /* Disable any automated display */
 
@@ -1136,4 +1244,4 @@ int sam_slcd_initialize(void)
   return ret;
 }
 
-#endif /* CONFIG_SAM34_LCDCA */
+#endif /* CONFIG_SAM34_LCDCA && CONFIG_SAM4L_XPLAINED_SLCD1MODULE */
