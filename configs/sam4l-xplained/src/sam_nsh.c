@@ -99,20 +99,31 @@
 
 int nsh_archinitialize(void)
 {
-#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
-  int ret;
-#endif
+#if defined(CONFIG_SAM34_LCDCA) && defined(CONFIG_SAM4L_XPLAINED_SLCD1MODULE)
+  /* Initialize the SLCD and register the SLCD device as /dev/slcd */
 
+  {
+    int ret = sam_slcd_initialize();
+    if (ret < 0)
+      {
+        message("nsh_archinitialize: Failed to initialize the LCD: %d\n",
+                ret);
+        return ret;
+      }
+  }
+#endif
+#if defined(CONFIG_SAM34_SPI) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
   /* Initialize the SPI-based MMC/SD slot */
 
-#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
-  ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);
-  if (ret < 0)
-    {
-      message("nsh_archinitialize: Failed to initialize MMC/SD slot: %d\n",
-              ret);
-      return ret;
-    }
+  {
+    int ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);
+    if (ret < 0)
+      {
+        message("nsh_archinitialize: Failed to initialize MMC/SD slot: %d\n",
+                ret);
+       return ret;
+      }
+  }
 #endif
 
   return OK;
