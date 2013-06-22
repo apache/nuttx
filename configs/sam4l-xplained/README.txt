@@ -768,6 +768,10 @@ Configuration sub-directories
        Board Selection -> Board-Specific Options -> SAM4L Xplained Pro Modules
          CONFIG_SAM4L_XPLAINED_SLCD1MODULE=y
 
+       Device Drivers
+         CONFIG_LCD=y
+         CONFIG_LCD_MAXCONTRAST=63
+
        Library Routines -> Non-standard Library Support
          CONFIG_LIB_SLCDCODEC=y
 

@@ -262,8 +262,21 @@ void weak_function sam_spiinitialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+#if defined(CONFIG_SAM34_SPI) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
 int sam_sdinitialize(int minor);
+#endif
+
+/****************************************************************************
+ * Name: sam_slcd_initialize
+ *
+ * Description:
+ *   Initialize the SAM4L Xplained Pro LCD hardware and register the character
+ *   driver as /dev/slcd.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SAM34_LCDCA) && defined(CONFIG_SAM4L_XPLAINED_SLCD1MODULE)
+int sam_slcd_initialize(void);
 #endif
 
 /************************************************************************************

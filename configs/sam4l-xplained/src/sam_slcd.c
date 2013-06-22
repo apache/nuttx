@@ -118,7 +118,7 @@
 #define SLCD_MAXCONTRAST       63
 
 #define BOARD_SLCD_NCOM        4
-#define BOARD_SLCD_NSEG        40
+#define BOARD_SLCD_NSEG        24
 #define SLCD_NPINS            (BOARD_SLCD_NCOM+BOARD_SLCD_NSEG+1)
 
 /* An ASCII character may need to be decorated with a preceding decimal
@@ -333,8 +333,6 @@ static gpio_pinset_t g_slcdgpio[SLCD_NPINS] =
   GPIO_LCDCA_SEG12, GPIO_LCDCA_SEG13, GPIO_LCDCA_SEG14, GPIO_LCDCA_SEG15,
   GPIO_LCDCA_SEG16, GPIO_LCDCA_SEG17, GPIO_LCDCA_SEG18, GPIO_LCDCA_SEG19,
   GPIO_LCDCA_SEG20, GPIO_LCDCA_SEG21, GPIO_LCDCA_SEG22, GPIO_LCDCA_SEG23,
-  GPIO_LCDCA_SEG24, GPIO_LCDCA_SEG25, GPIO_LCDCA_SEG26, GPIO_LCDCA_SEG27,
-  GPIO_LCDCA_SEG28, GPIO_LCDCA_SEG29, GPIO_LCDCA_SEG30,
 
   GPIO_LCD1_BL
 };
@@ -1238,7 +1236,9 @@ int sam_slcd_initialize(void)
       /* Turn on the backlight */
 
       sam_gpiowrite(GPIO_LCD1_BL, true);
+
       slcd_dumpstate("AFTER INITIALIZATION");
+      slcd_dumpslcd("AFTER INITIALIZATION");
     }
 
   return ret;

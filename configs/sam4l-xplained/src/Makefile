@@ -70,8 +70,10 @@ CSRCS += sam_slcd.c
 endif
 endif
 
+ifeq ($(CONFIG_SAM34_SPI),y)
 ifeq ($(CONFIG_SAM4L_XPLAINED_IOMODULE),y)
 CSRCS += sam_mmcsd.c
+endif
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
