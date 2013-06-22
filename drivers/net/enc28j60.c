@@ -156,10 +156,17 @@
 
 #define ALIGNED_BUFSIZE ((CONFIG_NET_BUFSIZE + 255) & ~255)
 
-#define PKTMEM_TX_START 0x0000           /* Start TX buffer at 0 */
-#define PKTMEM_TX_ENDP1 ALIGNED_BUFSIZE  /* Allow TX buffer for one frame */
-#define PKTMEM_RX_START PKTMEM_TX_ENDP1  /* Followed by RX buffer */
-#define PKTMEM_RX_END   PKTMEM_END       /* RX buffer goes to the end of SRAM */
+#if 0 /* Fix for Errata #5 */
+#  define PKTMEM_TX_START 0x0000           /* Start TX buffer at 0 */
+#  define PKTMEM_TX_ENDP1 ALIGNED_BUFSIZE  /* Allow TX buffer for one frame */
+#  define PKTMEM_RX_START PKTMEM_TX_ENDP1  /* Followed by RX buffer */
+#  define PKTMEM_RX_END   PKTMEM_END       /* RX buffer goes to the end of SRAM */
+#else
+#  define PKTMEM_RX_START 0x0000
+#  define PKTMEM_RX_END   (PKTMEM_END-ALIGNED_BUFSIZE)
+#  define PKTMEM_TX_START (PKTMEM_RX_END+1)
+#  define PKTMEM_TX_ENDP1 (PKTMEM_TX_START+ALIGNED_BUFSIZE)
+#endif
 
 /* Misc. Helper Macros ******************************************************/
 

@@ -5028,3 +5028,5 @@
 	* configs/sam4l-xplained/src/sam_slcd.c:  Beginning of a driver for the
 	  LED1 segment LCD module.  This driver is incomplete on initial check-
 	  in (2013-6-21).
+	* drivers/net/enc28j60.c:  Change buffer ordering to work around Errata
+	  #5.  From Dave (ziggurat29, 2013-6-22).
