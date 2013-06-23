@@ -56,6 +56,9 @@
 #define SAM_LCDCA_TIM_OFFSET       0x0008 /* Timing Register */
 #define SAM_LCDCA_SR_OFFSET        0x000c /* Status Register */
 #define SAM_LCDCA_SCR_OFFSET       0x0010 /* Status Clear Register */
+
+#define SAM_LCDCA_DRL_OFFSET(n)    (0x0014+((n)<<3))
+#define SAM_LCDCA_DRH_OFFSET(n)    (0x0018+((n)<<3))
 #define SAM_LCDCA_DRL0_OFFSET      0x0014 /* Data Register Low 0 */
 #define SAM_LCDCA_DRH0_OFFSET      0x0018 /* Data Register High 0 */
 #define SAM_LCDCA_DRL1_OFFSET      0x001c /* Data Register Low 1 */
@@ -64,6 +67,7 @@
 #define SAM_LCDCA_DRH2_OFFSET      0x0028 /* Data Register High 2 */
 #define SAM_LCDCA_DRL3_OFFSET      0x002c /* Data Register Low 3 */
 #define SAM_LCDCA_DRH3_OFFSET      0x0030 /* Data Register High 3 */
+
 #define SAM_LCDCA_IADR_OFFSET      0x0034 /* Indirect Access Data Register */
 #define SAM_LCDCA_BCFG_OFFSET      0x0038 /* Blink Configuration Register */
 #define SAM_LCDCA_CSRCFG_OFFSET    0x003c /* Circular Shift Register Configuration */
@@ -85,6 +89,9 @@
 #define SAM_LCDCA_TIM              (SAM_LCDCA_BASE+SAM_LCDCA_TIM_OFFSET)
 #define SAM_LCDCA_SR               (SAM_LCDCA_BASE+SAM_LCDCA_SR_OFFSET)
 #define SAM_LCDCA_SCR              (SAM_LCDCA_BASE+SAM_LCDCA_SCR_OFFSET)
+
+#define SAM_LCDCA_DRL(n)           (SAM_LCDCA_BASE+SAM_LCDCA_DRL_OFFSET(n))
+#define SAM_LCDCA_DRH(n)           (SAM_LCDCA_BASE+SAM_LCDCA_DRH_OFFSET(n))
 #define SAM_LCDCA_DRL0             (SAM_LCDCA_BASE+SAM_LCDCA_DRL0_OFFSET)
 #define SAM_LCDCA_DRH0             (SAM_LCDCA_BASE+SAM_LCDCA_DRH0_OFFSET)
 #define SAM_LCDCA_DRL1             (SAM_LCDCA_BASE+SAM_LCDCA_DRL1_OFFSET)
@@ -93,6 +100,7 @@
 #define SAM_LCDCA_DRH2             (SAM_LCDCA_BASE+SAM_LCDCA_DRH2_OFFSET)
 #define SAM_LCDCA_DRL3             (SAM_LCDCA_BASE+SAM_LCDCA_DRL3_OFFSET)
 #define SAM_LCDCA_DRH3             (SAM_LCDCA_BASE+SAM_LCDCA_DRH3_OFFSET)
+
 #define SAM_LCDCA_IADR             (SAM_LCDCA_BASE+SAM_LCDCA_IADR_OFFSET)
 #define SAM_LCDCA_BCFG             (SAM_LCDCA_BASE+SAM_LCDCA_BCFG_OFFSET)
 #define SAM_LCDCA_CSRCFG           (SAM_LCDCA_BASE+SAM_LCDCA_CSRCFG_OFFSET)
