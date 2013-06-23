@@ -116,31 +116,64 @@ Modules
       CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1=y : The module is installed in EXT1
       CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2=y : The mdoule is installed in EXT2
 
+    See the set-up in the discussion of the nsh configuration below for other
+    required configuration options.
+
     NOTE: As of this writing, only the SD card slot is supported in the I/O1
     module.
 
   OLED1
   -----
-    This module provides an OLED plus 3 additional switches and 3 additional\
+    This module provides an OLED plus 3 additional switches and 3 additional
     LEDs.
+
+    OLED1 Connector
+    --------------
+    OLED1             EXT1                 EXT2                 Other use of either pin
+    ----------------- -------------------- -------------------- ------------------------------------
+    1  ID             1                    1
+    2  GND            2       GND          2
+    3  BUTTON2        3  PA04 ADCIFE/AD0   3  PA07 ADCIFE/AD2
+    4  BUTTON3        4  PA05 ADCIFE/AD1   4  PB02 ADCIFE/AD3
+    5  DATA_CMD_SEL   5  PB12 GPIO         5  PC08 GPIO         PB12 and PC8 on EXT5
+    6  LED3           6  PC02 GPIO         6  PB10 GPIO         PB10 on EXT5
+    7  LED1           7  PC00 TC/1/A0      7  PC04 TC/1/A2
+    8  LED2           8  PC01 TC/1/B0      8  PC05 TC/1/B2      PC05 on EXT5
+    9  BUTTON1        9  PC25 EIC/EXTINT2  9  PC06 EIC/EXTINT8  PC25 on EXT5
+    10 DISPLAY_RESET  10 PB13 SPI/NPCS1    10 PC09 GPIO         PB13 on EXT5
+    11 N/C            11 PA23 TWIMS/0/TWD  11 PB14 TWIMS/3/TWD  PB14 on EXT3&4, PA23 and PB14 on EXT5
+    12 N/C            12 PA24 TWIMS/0/TWCK 12 PB15 TWIMS/3/TWCK PB15 on EXT3&4, PA24 and PB15 on EXT5
+    13 N/C            13 PB00 USART/0/RXD  13 PC26 USART/1/RXD  PB00 on EXT4, PC26 on EXT3&5
+    14 N/C            14 PB01 USART/0/TXD  14 PC27 USART/1/TXD  PB01 on EXT4, PC27 on EXT3&5
+    15 DISPLAY_SS     15 PC03 SPI/NPCS0    15 PB11 SPI/NPCS2    PB11 on EXT5
+    16 SPI_MOSI       16 PA22 SPI/MOSI     16 PA22 SPI/MOSI     PA22 on EXT5
+    17 N/C            17 PA21 SPI/MISO     17 PA21 SPI/MISO     PA21 on EXT5
+    18 SPI_SCK        18 PC30 SPI/SCK      18 PC30 SPI/SCK      PC30 on EXT5
+    19 GND            19      GND             GND
+    20 VCC            20      VCC             VCC
 
     Configuration Options:
     ----------------------
-      CONFIG_SAM4L_XPLAINED_OLED1MODULE=y   : Informs the system that the
-                                              I/O1 module is installed
+      CONFIG_SAM4L_XPLAINED_OLED1MODULE=y      : Informs the system that the
+                                                 I/O1 module is installed
+      CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT1=y : The module is installed in EXT1
+      CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT2=y : The mdoule is installed in EXT2
 
-    NOTE: As of this writing, the OLED1 module is not supported.
+    See the set-up in the discussion of the nsh configuration below for other
+    required configuration options.
 
   SLCD1
   -----
-    This module provides a A segment LCD that connects directly to the "EXT5 SEGMENT LCD"
-           connector
+    This module provides a A segment LCD that connects directly to the "EXT5
+    SEGMENT LCD" connector
+
     Configuration Options:
     ----------------------
       CONFIG_SAM4L_XPLAINED_SLCD1MODULE=y   : Informs the system that the
                                               I/O1 module is installed
 
-    NOTE: As of this writing, the SLCD1 module is not supported.
+    See the set-up in the discussion of the nsh configuration below for other
+    required configuration options.
 
   PROTO1
   ------
@@ -681,7 +714,17 @@ Configuration sub-directories
 
     NOTES:
 
-    1. If the I/O1 module is connected to the SAM4L Xplained Pro, then
+    1. NOTE: If you get a compilation error like:
+
+         libxx_new.cxx:74:40: error: 'operator new' takes type 'size_t'
+                              ('unsigned int') as first parameter [-fper
+
+       Sometimes NuttX and your toolchain will disagree on the underlying
+       type of size_t; sometimes it is an 'unsigned int' and sometimes it is
+       an 'unsigned long int'.  If this error occurs, then you may need to
+       toggle the value of CONFIG_CXX_NEWLONG.
+
+    2. If the I/O1 module is connected to the SAM4L Xplained Pro, then
        support for the SD card slot can be enabled by making the following
        changes to the configuration:
 
@@ -730,16 +773,6 @@ Configuration sub-directories
        behave very well (since its outgoing prompts also appear as incoming
        commands).
 
-       NOTE: If you get a compilation error like:
-
-         libxx_new.cxx:74:40: error: 'operator new' takes type 'size_t'
-                              ('unsigned int') as first parameter [-fper
-
-       Sometimes NuttX and your toolchain will disagree on the underlying
-       type of size_t; sometimes it is an 'unsigned int' and sometimes it is
-       an 'unsigned long int'.  If this error occurs, then you may need to
-       toggle the value of CONFIG_CXX_NEWLONG.
-
        STATUS:  As of 2013-6-18, this configuration appears completely
        functional.  Testing, however, has been very light.  Example:
 
@@ -755,7 +788,61 @@ Configuration sub-directories
          This is a test
          nsh> 
 
-    2. If the LCD1 module is connected to the SAM4L Xplained Pro, then
+    3. If the OLED1 module is connected to the SAM4L Xplained Pro, then
+       support for the OLED display can be enabled by making the following
+       changes to the configuration:
+
+       System Type -> Peripherals:
+         CONFIG_SAM34_SPI=y                 : Enable the SAM4L SPI peripheral
+
+       Device Drivers -> SPI
+         CONFIG_SPI=y                       : Enable SPI support
+         CONFIG_SPI_EXCHANGE=y              : The exchange() method is supported
+         CONFIG_SPI_CMDDATA=y               : CMD/DATA support is required
+         CONFIG_SPI_OWNBUS=y                : Smaller code if this is the only SPI device
+
+       Device Drivers -> LCDs
+         CONFIG_LCD=y                       : Enable LCD support
+         CONFIG_LCD_MAXCONTRAST=255         : Maximum contrast value
+         CONFIG_LCD_UG2832HSWEG04=y         : Enable support for the OLED
+         CONFIG_LCD_SSD1306_SPIMODE=0       : SPI Mode 0
+         CONFIG_LCD_SSD1306_SPIMODE=3500000 : Pick an SPI frequency
+
+       Board Selection -> SAM4L Xplained Pro Modules
+         CONFIG_SAM4L_XPLAINED_OLED1MODULE=y      : OLED1 module is connected
+         CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT1=y : In EXT1, or EXT2
+         CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT2=y
+
+       The NX graphics subsystem also needs to be configured:
+ 
+         CONFIG_NX=y                        : Enable graphics support
+         CONFIG_NX_LCDDRIVER=y              : Using an LCD driver
+         CONFIG_NX_NPLANES=1                : With a single color plane
+         CONFIG_NX_WRITEONLY=y              : This is a write only LCD
+         CONFIG_NX_DISABLE_2BPP=y           : Disable all resolutions except 1BPP
+         CONFIG_NX_DISABLE_4BPP=y
+         CONFIG_NX_DISABLE_8BPP=y
+         CONFIG_NX_DISABLE_16BPP=y
+         CONFIG_NX_DISABLE_24BPP=y
+         CONFIG_NX_DISABLE_32BPP=y
+         CONFIG_NX_PACKEDMSFIRST=y
+         CONFIG_NXTK_BORDERWIDTH=2          : Use a small border
+         CONFIG_NXTK_DEFAULT_BORDERCOLORS=y : Default border colors
+         CONFIG_NXFONTS_CHARBITS=7          : 7-bit fonts
+         CONFIG_NXFONT_SANS17X23B=y         : Pick a font (any that will fit)
+
+       Then, in order to use the OLED, you will need to build some kind of
+       graphics application or use one of the NuttX graphics examples.
+       Here, for example, is the setup for the graphic "Hello, World!"
+       example:
+
+         CONFIG_EXAMPLES_NXHELLO=y                : Enables the example
+         CONFIG_EXAMPLES_NXHELLO_DEFAULT_COLORS=y : Use default colors (monochrome)
+         CONFIG_EXAMPLES_NXHELLO_DEFAULT_FONT=y   : Use the default font
+         CONFIG_EXAMPLES_NXHELLO_BPP=1            : One bit per pixel
+         CONFIG_EXAMPLES_NXHELLO_EXTERNINIT=y     : Special initialization is required.
+
+    4. If the LCD1 module is connected to the SAM4L Xplained Pro, then
        support for the SLCDt can be enabled by making the following
        changes to the configuration:
 

@@ -205,6 +205,7 @@ config LCD_MIO283QT2
 config LCD_UG9664HSWAG01
 	bool "UG-9664HSWAG01 OLED Display Module"
 	default n
+	depends on SPI
 	---help---
 		OLED Display Module, UG-9664HSWAG01, Univision Technology Inc.  Used
 		with the LPCXpresso and Embedded Artists base board.
@@ -221,6 +222,7 @@ if LCD_UG9664HSWAG01
 config UG9664HSWAG01_SPIMODE
 	int "UG-9664HSWAG01 SPI Mode"
 	default 0
+	range 0 3
 	---help---
 		Controls the SPI mode
 
@@ -247,6 +249,68 @@ config UG9664HSWAG01_POWER
 
 endif
 
+config LCD_UG2864HSWEG01
+	bool "UG-2864HSWEG01 OLED Display Module"
+	default n
+	depends on SPI
+	select LCD_SSD1306
+	---help---
+		OLED Display Module, UG-2864HSWEG01, Univision Technology Inc based
+		on the Solomon Tech SSD1306 LCD controller.
+
+		Required LCD driver settings:
+		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+		LCD_MAXPOWER should be 1:  0=off, 1=on
+
+		Required SPI driver settings:
+		SPI_CMDDATA - Include support for cmd/data selection.
+
+
+config LCD_UG2832HSWEG04
+	bool "UG-2832HSWEG04 OLED Display Module"
+	default n
+	depends on SPI && !LCD_UG2864HSWEG01
+	select LCD_SSD1306
+	---help---
+		OLED Display Module, UG-UG2832HSWEG04, Univision Technology Inc
+		based on the Solomon Tech SSD1306 LCD controller.  Used with the
+		Atmel SAM4L Xplained Pro board on the OLED1 module.
+
+		Required LCD driver settings:
+		LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
+		LCD_MAXPOWER should be 1:  0=off, 1=on
+
+		Required SPI driver settings:
+		SPI_CMDDATA - Include support for cmd/data selection.
+
+config LCD_SSD1306
+	bool
+
+if LCD_SSD1306
+
+config SSD1306_SPIMODE
+	int "SSD1306 SPI Mode"
+	default 0
+	range 0 3
+	---help---
+		Selects the SPI mode used with the SSD1306 device
+
+config SSD1306_FREQUENCY
+	int "SSD1306 SPI Frequency"
+	default 3500000
+	---help---
+		Selects the SPI bus frequency used with the SSD1306 device
+
+#config SSD1306_NINTERFACES
+#	int "Number of SSD1306 Devices"
+#	default 1
+#	---help---
+#		Specifies the number of physical SSD1306 devices that will be
+#		supported.  NOTE:  At present, this must be undefined or defined to
+#		be 1.
+
+endif
+
 config LCD_ST7567
 	bool "ST7567 LCD Display Module"
 	default n
@@ -266,6 +330,7 @@ if LCD_ST7567
 config ST7567_SPIMODE
 	int "ST7567 SPI Mode"
 	default 0
+	range 0 3
 	---help---
 		Controls the SPI mode
 
@@ -319,9 +384,10 @@ config LCD_UG2864AMBAG01
 
 if LCD_UG2864AMBAG01
 
-	config UG2864AMBAG01_SPIMODE
+config UG2864AMBAG01_SPIMODE
 	int "UG-2864AMBAG01 SPI Mode"
 	default 3
+	range 0 3
 	---help---
 		Controls the SPI mode
 

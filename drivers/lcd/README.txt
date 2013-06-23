@@ -118,6 +118,11 @@ Re-usable LCD drivers reside in the drivers/lcd directory:
     Technology Inc.  Used with the LPC Xpresso and Embedded Artists
     base board.
 
+  ssd1306.c.  OLED Display Modules based on the SSD1306 controllers.
+    This includes the UG-2864HSWEG01 and UG2832HSWEG04, Both from Univision
+    Technology Inc.  The latter is used with the OLED1 module that comes
+    with the Atmel SAM4l Xplained Pro board.
+
 Examples: configs/
 ==================
 

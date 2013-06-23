@@ -51,12 +51,12 @@ ifeq ($(CONFIG_LCD_UG2864AMBAG01),y)
   CSRCS += ug-2864ambag01.c
 endif
 
-ifeq ($(CONFIG_LCD_UG2864HSWEG01),y)
-  CSRCS += ug-2864hsweg01.c
-endif
-
 ifeq ($(CONFIG_LCD_UG9664HSWAG01),y)
   CSRCS += ug-9664hswag01.c
+endif
+
+ifeq ($(CONFIG_LCD_SSD1306),y)
+  CSRCS += ssd1306.c
 endif
 
 ifeq ($(CONFIG_LCD_SSD1289),y)

@@ -101,6 +101,11 @@ void weak_function sam_spiinitialize(void)
    sam_configgpio(GPIO_SD_CD); /* Card detect input */
    sam_configgpio(GPIO_SD_CS); /* Chip select output */
 #endif
+
+#ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
+   sam_configgpio(GPIO_OLED_DATA); /* Command/data */
+   sam_configgpio(GPIO_OLED_CS  ); /* Card detect input */
+#endif
 }
 
 /****************************************************************************
@@ -172,6 +177,21 @@ void sam_spiselect(enum spi_dev_e devid, bool selected)
 
       sam_gpiowrite(GPIO_SD_CS, !selected);
     }
+
+#ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
+  else
+#endif
+#endif
+
+#ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
+  /* Select/de-select the OLED */
+
+  if (devid == SPIDEV_DISPLAY)
+    {
+      /* Active low */
+
+      sam_gpiowrite(GPIO_OLED_CS, !selected);
+    }
 #endif
 }
 
@@ -211,3 +231,47 @@ uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 
 #endif /* CONFIG_SAM34_SPI */
+
+/****************************************************************************
+ * Name: sam_spicmddata
+ *
+ * Description:
+ *   Some SPI devices require an additional control to determine if the SPI
+ *   data being sent is a command or is data.  If CONFIG_SPI_CMDDATA then
+ *   this function will be called to different be command and data transfers.
+ *
+ *   This is often needed, for example, by LCD drivers.  Some LCD hardware
+ *   may be configured to use 9-bit data transfers with the 9th bit
+ *   indicating command or data.  That same hardware may be configurable,
+ *   instead, to use 8-bit data but to require an additional, board-
+ *   specific GPIO control to distinguish command and data.  This function
+ *   would be needed in that latter case.
+ *
+ * Input Parameters:
+ *   dev - SPI device info
+ *   devid - Identifies the (logical) device
+ *
+ * Returned Values:
+ *   Zero on success; a negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_CMDDATA
+int sam_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+#ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
+  if (devid == SPIDEV_DISPLAY)
+    {
+      /* This is the Data/Command control pad which determines whether the
+       * data bits are data or a command.
+       *
+       * High: the inputs are treated as display data.
+       * Low:  the inputs are transferred to the command registers.
+       */
+
+      (void)sam_gpiowrite(GPIO_OLED_DATA, !cmd);
+    }
+#endif
+      return OK;
+}
+#endif

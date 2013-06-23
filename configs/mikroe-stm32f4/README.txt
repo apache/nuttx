@@ -33,7 +33,6 @@ Contents
   - FPU
   - FSMC SRAM
   - SSD1289
-  - UG-2864AMBAG01 / UG-2964SWEG01
   - Mikroe-STM32F4-specific Configuration Options
   - Configurations
 

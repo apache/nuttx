@@ -5032,3 +5032,12 @@
 	  #5.  From Dave (ziggurat29, 2013-6-22).
 	* configs/sam4l-xplained/src/sam_slcd.c:  LED1 segment LCD module is now
 	  functional (2013-6-23).
+	* drivers/lcd/ssd1306.c and include/nuttx/lcd/ssd1306.h.  Renamed
+	  ug-2864hsweg01.c and .h to ssd1306.c and .h.  Extended to support the
+	  UG-2832HSWEG04 which is very similar and also based on the SSD1306
+	  controller (2013-6-23).
+	* configs/sam4l-xplained/src/sam_ug2832hsweg04.c: Add support for the
+	  UG-2832HSWEG04 OLED on the SAM4L Xplained Pro's OLED1 module
+	  (2013-6-23).
+	* include/debug.h:  Added macro DEBUGPANIC for forces crashes when debug
+	  is enabled.

@@ -1,16 +1,18 @@
 /**************************************************************************************
  * include/nuttx/lcd/ug-2864hsweg01.h
  *
- * Driver for Univision UG-2864HSWEG01 OLED display (wih SSD1306 controller) in SPI
- * mode
+ * Driver for Univision UG-2864HSWEG01 OLED display or UG-2832HSWEG04 both with the
+ * Univision SSD1306 controller in SPI mode
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
  *   1. Product Specification (Preliminary), Part Name: OEL Display Module, Part ID:
  *      UG-2864HSWEG01, Doc No: SAS1-9046-B, Univision Technology Inc.
- *   2. SSD1306, 128 X 64 Dot Matrix OLED/PLED, Preliminary Segment/Common Driver with
+ *   2. Product Specification, Part Name: OEL Display Module, Part ID: UG-2832HSWEG04,
+ *      Doc No.: SAS1-B020-B, Univision Technology Inc.
+ *   3. SSD1306, 128 X 64 Dot Matrix OLED/PLED, Preliminary Segment/Common Driver with
  *      Controller,  Solomon Systech
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +44,8 @@
  *
  **************************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_UG_8264HSWEG01_H
-#define __INCLUDE_NUTTX_UG_8264HSWEG01_H
+#ifndef __INCLUDE_NUTTX_SSD1306_H
+#define __INCLUDE_NUTTX_SSD1306_H
 
 /**************************************************************************************
  * Included Files
@@ -55,7 +57,7 @@
 
 #include <nuttx/arch.h>
 
-#ifdef CONFIG_LCD_UG2864HSWEG01
+#ifdef CONFIG_LCD_SSD1306
 
 /**************************************************************************************
  * Pre-processor Definitions
@@ -196,7 +198,7 @@ extern "C"
  **************************************************************************************/
 
 /**************************************************************************************
- * Name:  ug2864hsweg01_initialize
+ * Name:  ssd1306initialize
  *
  * Description:
  *   Initialize the UG-2864HSWEG01 video hardware.  The initial state of the
@@ -218,11 +220,10 @@ extern "C"
 
 struct lcd_dev_s; /* See include/nuttx/lcd/lcd.h */
 struct spi_dev_s; /* See include/nuttx/spi.h */
-FAR struct lcd_dev_s *ug2864hsweg01_initialize(FAR struct spi_dev_s *spi,
-                                               unsigned int devno);
+FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *spi, unsigned int devno);
 
 /************************************************************************************************
- * Name:  ug2864hsweg01_fill
+ * Name:  ssd1306_fill
  *
  * Description:
  *   This non-standard method can be used to clear the entire display by writing one
@@ -236,11 +237,11 @@ FAR struct lcd_dev_s *ug2864hsweg01_initialize(FAR struct spi_dev_s *spi,
  *
  **************************************************************************************/
 
-void ug2864hsweg01_fill(FAR struct lcd_dev_s *dev, uint8_t color);
+void ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_LCD_UG2864HSWEG01 */
-#endif /* __INCLUDE_NUTTX_UG_8264HSWEG01_H */
+#endif /* CONFIG_LCD_SSD1306 */
+#endif /* __INCLUDE_NUTTX_SSD1306_H */
