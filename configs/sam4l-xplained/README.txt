@@ -755,7 +755,7 @@ Configuration sub-directories
          This is a test
          nsh> 
 
-    1. If the LCD1 module is connected to the SAM4L Xplained Pro, then
+    2. If the LCD1 module is connected to the SAM4L Xplained Pro, then
        support for the SLCDt can be enabled by making the following
        changes to the configuration:
 
@@ -784,3 +784,6 @@ Configuration sub-directories
 
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y
+
+       NOTE:  In order to use the segment LCD you *must* open the VLCD_A and
+       VLCD_BC jumpers or the SLD will not be powered!

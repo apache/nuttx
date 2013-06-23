@@ -115,6 +115,7 @@
 
 #define SLCD_NROWS             1
 #define SLCD_NCHARS            5
+#define SLCD_NBARS             4
 #define SLCD_MAXCONTRAST       63
 
 #define BOARD_SLCD_NCOM        4
@@ -216,6 +217,37 @@
 #define SLCD_NG          8    /* Number of 'G' segments G0-G7 */
 #define SLCD_NE          8    /* Number of 'E' segments G0-G7 */
 
+/* Named pixels */
+
+#define SLCD_MINUS       (&g_binfo[0])
+#define SLCD_H           (&g_binfo[1])
+#define SLCD_M           (&g_binfo[2])
+#define SLCD_DP0         (&g_binfo[3])
+#define SLCD_DP1         (&g_binfo[4])
+#define SLCD_DP2         (&g_binfo[5])
+#define SLCD_DP3         (&g_binfo[6])
+#define SLCD_DP4         (&g_binfo[7])
+#define SLCD_CENTIGRADE  (&g_binfo[8])
+#define SLCD_FAHRENHEIT  (&g_binfo[9])
+
+#define SLCD_ATMEL       (&g_ginfo[0])
+#define SLCD_BAR0        (&g_ginfo[1])
+#define SLCD_BAR1        (&g_ginfo[2])
+#define SLCD_BAR2        (&g_ginfo[3])
+#define SLCD_BAR3        (&g_ginfo[4])
+#define SLCD_COLON       (&g_ginfo[5])
+#define SLCD_USB         (&g_ginfo[6])
+#define SLCD_PAY         (&g_ginfo[7])
+
+#define SLCD_RNG0        (&g_einfo[0])
+#define SLCD_RNG1        (&g_einfo[1])
+#define SLCD_RNG2        (&g_einfo[2])
+#define SLCD_RNG3        (&g_einfo[3])
+#define SLCD_MV          (&g_einfo[4])
+#define SLCD_V           (&g_einfo[5])
+#define SLCD_PM          (&g_einfo[6])
+#define SLCD_AM          (&g_einfo[7])
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_DEBUG_LCD
@@ -276,17 +308,13 @@ static void slcd_dumpslcd(FAR const char *msg);
 static void slcd_clear(void);
 #endif
 static void slcd_setpixel(FAR const struct slcd_pixel_s *info);
-#if 0 /* Not used */
 static void slcd_clrpixel(FAR const struct slcd_pixel_s *info);
-#endif
-static void slcd_setdp(uint8_t curpos);
-#if 0 /* Not used */
-static void slcd_clrdp(uint8_t curpos);
-#endif
+static inline void slcd_setdp(uint8_t curpos);
+static inline void slcd_clrdp(uint8_t curpos);
 static int slcd_getstream(FAR struct lib_instream_s *instream);
 static uint8_t slcd_getcontrast(void);
 static int slcd_setcontrast(unsigned int contrast);
-static void slcd_writech(uint8_t ch, uint8_t curpos);
+static void slcd_writech(uint8_t ch, uint8_t curpos, uint8_t options);
 static void slcd_action(enum slcdcode_e code, uint8_t count);
 
 /* Character driver methods */
@@ -403,12 +431,12 @@ static void slcd_dumpslcd(FAR const char *msg)
   lcdvdbg("    CFG: %08x    TIM: %08x    SR: %08x\n",
           getreg32(SAM_LCDCA_CFG), getreg32(SAM_LCDCA_TIM),
           getreg32(SAM_LCDCA_SR));
-  lcdvdbg("    DR0: %08x %08x           DR1: %08x %08x\n",
-          getreg32(SAM_LCDCA_DRL0), getreg32(SAM_LCDCA_DRH0),
-          getreg32(SAM_LCDCA_DRL1), getreg32(SAM_LCDCA_DRH1));
-  lcdvdbg("    DR2: %08x %08x           DR3: %08x %08x\n",
-          getreg32(SAM_LCDCA_DRL2), getreg32(SAM_LCDCA_DRH2),
-          getreg32(SAM_LCDCA_DRL3), getreg32(SAM_LCDCA_DRH3));
+  lcdvdbg("    DR0: %02x %08x DR1: %02x %08x\n",
+          getreg32(SAM_LCDCA_DRH0), getreg32(SAM_LCDCA_DRL0),
+          getreg32(SAM_LCDCA_DRH1), getreg32(SAM_LCDCA_DRL1));
+  lcdvdbg("    DR2: %02x %08x DR3: %02x %08x\n",
+          getreg32(SAM_LCDCA_DRH2), getreg32(SAM_LCDCA_DRL2),
+          getreg32(SAM_LCDCA_DRH3), getreg32(SAM_LCDCA_DRL3));
   lcdvdbg("   BCFG: %08x CSRCFG: %08x CMCFG: %08x ACMCFG: %08x\n",
           getreg32(SAM_LCDCA_BCFG), getreg32(SAM_LCDCA_CSRCFG),
           getreg32(SAM_LCDCA_CMCFG), getreg32(SAM_LCDCA_ACMCFG));
@@ -442,7 +470,7 @@ static void slcd_setpixel(FAR const struct slcd_pixel_s *info)
   uintptr_t regaddr;
   uint32_t regval;
 
-  regaddr = info->com ? SAM_LCDCA_DRL0 : SAM_LCDCA_DRL3;
+  regaddr = SAM_LCDCA_DRL(info->com);
   regval  = getreg32(regaddr);
   regval |= (1 << info->segment);
   putreg32(regval, regaddr);
@@ -452,24 +480,22 @@ static void slcd_setpixel(FAR const struct slcd_pixel_s *info)
  * Name: slcd_clrpixel
  ****************************************************************************/
 
-#if 0 /* Not used */
 static void slcd_clrpixel(FAR const struct slcd_pixel_s *info)
 {
   uintptr_t regaddr;
   uint32_t regval;
 
-  regaddr = info->com ? SAM_LCDCA_DRL0 : SAM_LCDCA_DRL3;
+  regaddr = SAM_LCDCA_DRL(info->com);
   regval  = getreg32(regaddr);
   regval &= ~(1 << info->segment);
   putreg32(regval, regaddr);
 }
-#endif
 
 /****************************************************************************
  * Name: slcd_setdp
  ****************************************************************************/
 
-static void slcd_setdp(uint8_t curpos)
+static inline void slcd_setdp(uint8_t curpos)
 {
   /* Set the decimal point before the current cursor position
    *
@@ -478,15 +504,13 @@ static void slcd_setdp(uint8_t curpos)
    */
 
   slcd_setpixel(&g_binfo[curpos + 3]);
-  g_slcdstate.options[curpos] |= SLCD_DP;
 }
 
 /****************************************************************************
  * Name: slcd_clrdp
  ****************************************************************************/
 
-#if 0 /* Not used */
-static void slcd_clrdp(uint8_t curpos)
+static inline void slcd_clrdp(uint8_t curpos)
 {
   /* Set the decimal point before the current cursor position
    *
@@ -495,9 +519,7 @@ static void slcd_clrdp(uint8_t curpos)
    */
 
   slcd_clrpixel(&g_binfo[curpos + 3]);
-  g_slcdstate.options[curpos] &= ~SLCD_DP;
 }
-#endif
 
 /****************************************************************************
  * Name: slcd_getstream
@@ -597,7 +619,7 @@ static int slcd_setcontrast(unsigned int contrast)
  * Name: slcd_writech
  ****************************************************************************/
 
-static void slcd_writech(uint8_t ch, uint8_t curpos)
+static void slcd_writech(uint8_t ch, uint8_t curpos, uint8_t options)
 {
   uint8_t segment;
 
@@ -620,9 +642,21 @@ static void slcd_writech(uint8_t ch, uint8_t curpos)
   putreg32(LCDCA_CMCFG_TDG_14S4C | LCDCA_CMCFG_STSEG(segment), SAM_LCDCA_CMCFG);
   putreg32(ch, SAM_LCDCA_CMDR);
 
+  /* Check if we need to decorate the character with a preceding dot. */
+
+  if ((options & SLCD_DP) != 0)
+    {
+      slcd_setdp(curpos);
+    }
+  else
+    {
+      slcd_clrdp(curpos);
+    }
+
   /* Save these values in the state structure */
 
   g_slcdstate.buffer[curpos]  = ch;
+  g_slcdstate.options[curpos] = options;
   slcd_dumpstate("AFTER WRITE");
 }
 
@@ -681,18 +715,21 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
             nchars = SLCD_NCHARS - g_slcdstate.curpos;
             nmove  = MIN(nchars, count) - 1;
 
-            /* Move all characters after the current cursor position left by 'nmove' characters */
+            /* Move all characters after the current cursor position left by
+             * 'nmove' characters
+             */
 
             for (i = g_slcdstate.curpos + nmove; i < SLCD_NCHARS - 1; i++)
               {
-                slcd_writech(g_slcdstate.buffer[i-nmove], i);
+                slcd_writech(g_slcdstate.buffer[i-nmove], i,
+                            g_slcdstate.options[i-nmove]);
               }
 
             /* Erase the last 'nmove' characters on the display */
 
             for (i = SLCD_NCHARS - nmove; i < SLCD_NCHARS; i++)
               {
-                slcd_writech(' ', i);
+                slcd_writech(' ', i, 0);
               }
           }
         break;
@@ -717,7 +754,7 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
 
             for (i = g_slcdstate.curpos; i < last; i++)
               {
-                slcd_writech(' ', i);
+                slcd_writech(' ', i, 0);
               }
           }
         break;
@@ -739,7 +776,7 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
 
           for (i = g_slcdstate.curpos; i < SLCD_NCHARS; i++)
             {
-              slcd_writech(' ', i);
+              slcd_writech(' ', i, 0);
             }
         }
         break;
@@ -861,9 +898,9 @@ static ssize_t slcd_write(FAR struct file *filp,
   struct slcd_instream_s instream;
   struct slcdstate_s state;
   enum slcdret_e result;
-  bool dotneeded;
   uint8_t ch;
   uint8_t count;
+  uint8_t options;
 
   /* Initialize the stream for use with the SLCD CODEC */
 
@@ -872,9 +909,13 @@ static ssize_t slcd_write(FAR struct file *filp,
   instream.buffer      = buffer;
   instream.nbytes      = len;
 
+  /* Initialize the SLCD decode state buffer */
+
+  memset(&state, 0, sizeof(struct slcdstate_s));
+
   /* Decode and process every byte in the input buffer */
 
-  dotneeded = false;
+  options = 0;
   while ((result = slcd_decode(&instream.stream, &state, &ch, &count)) != SLCDRET_EOF)
     {
       lcdvdbg("slcd_decode returned result=%d char=%d count=%d\n",
@@ -903,7 +944,7 @@ static ssize_t slcd_write(FAR struct file *filp,
 
                /* Ignore dots before control characters (all of them?) */
 
-               dotneeded = false;
+               options = 0;
             }
 
           /* Handle characters decoreated with a preceding period */
@@ -912,7 +953,7 @@ static ssize_t slcd_write(FAR struct file *filp,
             {
               /* The next character will need a dot in front of it */
 
-              dotneeded = true;
+              options |= SLCD_DP;
             }
 
           /* Handle ASCII_DEL */
@@ -922,27 +963,19 @@ static ssize_t slcd_write(FAR struct file *filp,
               /* Perform the foward deletion */
 
               slcd_action(SLCDCODE_FWDDEL, 1);
-              dotneeded = false;
+              options = 0;
             }
 
           /* The rest of the 7-bit ASCII characters are fair game */
 
           else if (ch < 128)
             {
-              lcdvdbg("ch: %c[%02x]\n", ch, ch);
+              lcdvdbg("ch: %c[%02x] options: %02x\n", ch, ch, options);
 
               /* Write the character at the current cursor position */
 
-              slcd_writech(ch, g_slcdstate.curpos);
-
-              /* Check if we need to decorate the character with a preceding
-               * dot.
-               */
-
-              if (dotneeded)
-                {
-                  slcd_setdp(g_slcdstate.curpos);
-                }
+              slcd_writech(ch, g_slcdstate.curpos, options);
+              options = 0;
 
               /* And advance the cursor position */
 
@@ -997,7 +1030,7 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
 
           attr->nrows         = SLCD_NROWS;
           attr->ncolumns      = SLCD_NCHARS;
-          attr->nbars         = 0;
+          attr->nbars         = SLCD_NBARS;
           attr->maxcontrast   = SLCD_MAXCONTRAST;
           attr->maxbrightness = 0;
         }
@@ -1008,7 +1041,6 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
        * argument:  Pointer to struct slcd_curpos_s in which values will be
        *            returned
        */
-
 
       case SLCDIOC_CURPOS:
         {
@@ -1023,6 +1055,53 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
 
           curpos->row    = 0;
           curpos->column = g_slcdstate.curpos;
+        }
+        break;
+
+      /* SLCDIOC_SETBAR: Set bars on a bar display
+       *
+       * argument:  32-bit bitset, with each bit corresponding to one bar.
+       */
+
+      case SLCDIOC_SETBAR:
+        {
+          lcdvdbg("SLCDIOC_SETBAR: arg=0x%02lx\n", arg);
+
+          if ((arg & 1) != 0)
+            {
+              slcd_setpixel(SLCD_RNG0);
+            }
+          else
+            {
+              slcd_clrpixel(SLCD_RNG0);
+            }
+
+          if ((arg & 2) != 0)
+            {
+              slcd_setpixel(SLCD_RNG1);
+            }
+          else
+            {
+              slcd_clrpixel(SLCD_RNG1);
+            }
+
+          if ((arg & 4) != 0)
+            {
+              slcd_setpixel(SLCD_RNG2);
+            }
+          else
+            {
+              slcd_clrpixel(SLCD_RNG2);
+            }
+
+          if ((arg & 8) != 0)
+            {
+              slcd_clrpixel(SLCD_RNG3);
+            }
+          else
+            {
+              slcd_setpixel(SLCD_RNG3);
+            }
         }
         break;
 
@@ -1063,7 +1142,6 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
         }
         break;
 
-      case SLCDIOC_SETBAR:         /* Get bar levels */
       case SLCDIOC_GETBRIGHTNESS:  /* Get the current brightness setting */
       case SLCDIOC_SETBRIGHTNESS:  /* Set the brightness to a new value */
       default:
@@ -1219,14 +1297,18 @@ int sam_slcd_initialize(void)
 
       /* Initialize display memory */
 
-      putreg32(LCDCA_DRL_MASK, SAM_LCDCA_DRL0);
-      putreg32(LCDCA_DRH_MASK, SAM_LCDCA_DRH0);
-      putreg32(LCDCA_DRL_MASK, SAM_LCDCA_DRL1);
-      putreg32(LCDCA_DRH_MASK, SAM_LCDCA_DRH1);
-      putreg32(LCDCA_DRL_MASK, SAM_LCDCA_DRL2);
-      putreg32(LCDCA_DRH_MASK, SAM_LCDCA_DRH2);
-      putreg32(LCDCA_DRL_MASK, SAM_LCDCA_DRL3);
-      putreg32(LCDCA_DRH_MASK, SAM_LCDCA_DRH3);
+      putreg32(0, SAM_LCDCA_DRL0);
+      putreg32(0, SAM_LCDCA_DRH0);
+      putreg32(0, SAM_LCDCA_DRL1);
+      putreg32(0, SAM_LCDCA_DRH1);
+      putreg32(0, SAM_LCDCA_DRL2);
+      putreg32(0, SAM_LCDCA_DRH2);
+      putreg32(0, SAM_LCDCA_DRL3);
+      putreg32(0, SAM_LCDCA_DRH3);
+
+      /* Turn on the Atmel pixel */
+
+      slcd_setpixel(SLCD_ATMEL);
 
       /* Register the LCD device driver */
 
