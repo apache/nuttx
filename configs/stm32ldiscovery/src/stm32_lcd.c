@@ -1350,7 +1350,6 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
        *            returned
        */
 
-
       case SLCDIOC_CURPOS:
         {
           FAR struct slcd_curpos_s *curpos = (FAR struct slcd_curpos_s *)((uintptr_t)arg);

@@ -5030,3 +5030,5 @@
 	  in (2013-6-21).
 	* drivers/net/enc28j60.c:  Change buffer ordering to work around Errata
 	  #5.  From Dave (ziggurat29, 2013-6-22).
+	* configs/sam4l-xplained/src/sam_slcd.c:  LED1 segment LCD module is now
+	  functional (2013-6-23).
