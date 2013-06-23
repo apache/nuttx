@@ -365,8 +365,8 @@ static void mmcsd_semtake(FAR struct mmcsd_slot_s *slot)
    */
 
   SPI_SETFREQUENCY(slot->spi, slot->spispeed);
-  SPI_SETMODE(slot->sp, CONFIG_MMCSD_SPIMODE);
-  SPI_SETBITS(slot->sp, 8);
+  SPI_SETMODE(slot->spi, CONFIG_MMCSD_SPIMODE);
+  SPI_SETBITS(slot->spi, 8);
 #endif
 
   /* Get exclusive access to the MMC/SD device (prossibly un-necessary if

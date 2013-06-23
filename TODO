@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated June 20, 2013)
+NuttX TODO List (Last updated June 23, 2013)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with 
@@ -13,7 +13,7 @@ nuttx/
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
   (8)  Kernel Build
-  (2)  C++ Support
+  (4)  C++ Support
   (6)  Binary loaders (binfmt/)
  (16)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
@@ -511,6 +511,115 @@ o C++ Support
   Priority:    Low, depends on toolchain.  Call to gcc's built-in static
                constructor logic will probably have to be performed by
                user logic in user_start().
+
+  Title:       STATIC CONSTRUCTORS AND MULTITASKING
+  Description: The logic that calls static constructors operates on the main
+               thread of the initial user application task.  Any static
+               constructors that cache task/thread specific information such
+               as C streams or file descriptors will not work in other tasks.
+               See also UCLIBC++ AND STATIC CONSTRUCTORS below.
+  Status:      Open
+  Priority:    Low and probably will not changed.  In these case, there will
+               need to be an application specific solution.
+
+  Title:       UCLIBC++ AND STATIC CONSTRUCTORS
+               uClibc++ was designed to work in a Unix environment with
+               processes and with separately linked executables. Each process
+               has its own, separate uClibc++ state. uClibc++ would be
+               instantiated like this in Linux:
+
+               1) When the program is built, a tiny start-up function is
+                  included at the beginning of the program. Each program has
+                  its own, separate list of C++ constructors.
+
+               2) When the program is loaded into memory, space is set aside
+                  for uClibc's static objects and then this special start-up
+                  routine is called. It initializes the C library, calls all
+                  of the constructors, and calls atexit() so that the destructors
+                  will be called when the process exits.
+
+               In this way, you get a per-process uClibc++ state since there
+               is per-process storage of uClibc++ global state and per-process
+               initialization of uClibc++ state.
+
+               Compare this to how NuttX (and most embedded RTOSs) would work:
+
+               1) The entire FLASH image is built as one big blob. All of the
+                  constructors are lumped together and all called together at
+                  one time.
+
+                  This, of course, does not have to be so. We could segregate
+                  constructors by some criteria and we could use a task start
+                  up routine to call constructors separately. We could even
+                  use ELF executables that are separately linked and already
+                  have their constructors separately called when the ELF
+                  executable starts.
+
+                  But this would not do you very much good in the case of
+                  uClibc++ because:
+
+               2) NuttX does not support processes, i.e., separate address
+                  environments for each task. As a result, the scope of global
+                  data is all tasks. Any change to the global state made by
+                  one task can effect another task. There can only one
+                  uClibc++ state and it will be shared by all tasks. uClibc++
+                  apparently relies on global instances (at least for cin and
+                  cout) there is no way to to have any unique state for any
+                  "task group".
+
+                  [NuttX does not support processes because in order to have
+                  true processes, your hardware must support a memory management
+                  unit (MMU) and I am not aware of any mainstream MCU that has
+                  an MMU (or, at least an MMU that is capable enough to support
+                  processes).]
+
+                  NuttX does not have processes, but it does have "task groups".
+                  See http://www.nuttx.org/doku.php?id=wiki:nxinternal:tasksnthreads.
+                  A task group is the task plus all of the pthreads created by
+                  the task via pthread_create().  Resources like FILE streams
+                  are shared within a task group. Task groups are like a poor
+                  man's process.
+
+                  This means that if the uClibc++ static classes are initialized
+                  by one member of a task group, then cin/cout should work
+                  correctly with all threads that are members of task group. The
+                  destructors would be called when the final member of the task
+                  group exists (if registered via atexit()).
+
+                  So if you use only pthreads, uClibc++ should work very much like
+                  it does in Linux. If your NuttX usage model is like one process
+                  with many threads then you have Linux compatibility.
+
+               If you wanted to have uClibc++ work across task groups, then
+               uClibc++ and NuttX would need some extensions. I am thinking
+               along the lines of the following:
+
+               1) There is a per-task group storage are withing the RTOS (see
+                  include/nuttx/sched.h). If we add some new, nonstandard APIs
+                  then uClibc++ could get access to per-task group storage (in
+                  the spirit of pthread_getspecific() which gives you access to
+                  per-thread storage).
+
+               2) Then move all of uClibc++'s global state into per-task group
+                  storage and add a uClibc++ initialization function that would:
+                  a) allocate per-task group storage, b) call all of the static
+                  constructors, and c) register with atexit() to perform clean-
+                  up when the task group exits.
+
+               That would be a fair amount of effort. I don't really know what
+               the scope of such an effort would be. I suspect that it is not
+               large but probably complex.
+
+               NOTES:
+
+               1) See STATIC CONSTRUCTORS AND MULTITASKING
+
+               2) To my knowledge, only some uClibc++ ofstream logic is
+                  sensitive to this.  All other statically initialized classes
+                  seem to work OK across different task groups.
+  Status:      Open
+  Priority:    Low.  I have no plan to change this logic now unless there is
+               some strong demand to do so.
 
 o Binary loaders (binfmt/)
   ^^^^^^^^^^^^^^^^^^^^^^^^
