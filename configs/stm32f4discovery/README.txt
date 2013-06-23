@@ -33,7 +33,7 @@ Contents
   - FPU
   - FSMC SRAM
   - SSD1289
-  - UG-2864AMBAG01 / UG-2964SWEG01
+  - UG-2864AMBAG01 / UG-2864HSWEG01
   - STM32F4Discovery-specific Configuration Options
   - Configurations
 
@@ -707,8 +707,8 @@ The following summarize the bit banging oprations:
     WriteData(data);
   }
 
-UG-2864AMBAG01 / UG-2964SWEG01
-==============================
+UG-2864AMBAG01 / UG-2864HSWEG01
+===============================
 
 I purchased an OLED display on eBay.  The OLED is 128x64 monochrome and
 is based on an UG-2864AMBAG01 OLED controller.  The OLED can run in either
@@ -740,9 +740,9 @@ that I am using:
   (1) Required because of on-board MEMS
   -------------------------------------------------------------------------
 
-Darcy Gong recently added support for the UG-2964SWEG01 OLED which is also
+Darcy Gong recently added support for the UG-2864HSWEG01 OLED which is also
 an option with this configuratin.  I have little technical information about
-the UG-2964SWEG01 interface (see configs/stm32f4discovery/src/up_ug2864sweg01.c).
+the UG-2864HSWEG01 interface (see configs/stm32f4discovery/src/up_ug2864hsweg01.c).
 
 STM32F4Discovery-specific Configuration Options
 ===============================================
@@ -1437,7 +1437,7 @@ Where <subdir> is one of the following:
         reconfiguration process.
 
   3. This configured can be re-configured to use either the
-     UG-2864AMBAG01 or UG-2864SWEG01 0.96 inch OLEDs by adding
+     UG-2864AMBAG01 or UG-2864HSWEG01 0.96 inch OLEDs by adding
      or changing the following items in the configuration (using
      'make menuconfig'):
 

@@ -96,7 +96,7 @@
 #define GPIO_CS_MEMS    (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN3)
 
-/* USB OTG FS 
+/* USB OTG FS
  *
  * PA9  OTG_FS_VBUS VBUS sensing (also connected to the green LED)
  * PC0  OTG_FS_PowerSwitchOn
@@ -134,7 +134,7 @@
  * (1) Required because of on-board MEMS
  * -------------------------------------------------------------------------
  */
- 
+
 #if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
 #  define GPIO_OLED_RESET (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                            GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN6)

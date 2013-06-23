@@ -76,6 +76,14 @@ CSRCS += sam_mmcsd.c
 endif
 endif
 
+ifeq ($(CONFIG_SAM34_SPI),y)
+ifeq ($(CONFIG_SAM4L_XPLAINED_OLED1MODULE),y)
+ifeq ($(CONFIG_LCD_UG2832HSWEG04),y)
+CSRCS += sam_ug2832hsweg04.c
+endif
+endif
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)

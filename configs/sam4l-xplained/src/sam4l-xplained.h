@@ -175,14 +175,15 @@
 /* I/O1
  *
  * Support for the microSD card slot on the I/O1 module.  The I/O1 requires
- * SPI support and two GPIOs.  These two GPIOs will vary if the
+ * SPI support and two GPIOs.    These the GPIOs will vary if the I/O1
+ * is installed on the EXT1 or EXT2 connector:
  *
  *
  *   PIN EXT1           EXT2            Description
  *   --- -------------- --------------- -------------------------------------
  *   15  PC03 SPI/NPCS0 PB11 SPI/NPCS2  Active low chip select OUTPUT, pulled
  *                                      high on board.
- *   10  PB13 SPI/NPCS1 10 PC09 GPIO    Active low card detect INPUT, must
+ *   10  PB13 SPI/NPCS1 PC09 GPIO       Active low card detect INPUT, must
  *                                      use internal pull-up.
  */
 
@@ -194,8 +195,9 @@
 
 #  if defined(CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1)
 
-#    if defined(SAM4L_XPLAINED_OLED1MODULE) && defined(SAM4L_XPLAINED_OLED1MODULE_EXT1)
-#      error I/O1 and OLED1 cannot both reside in EXT1
+#    if defined(CONFIG_SAM4L_XPLAINED_OLED1MODULE) && \
+        defined(CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT1)
+#      error I/O1 and OLED1 modules cannot both reside in EXT1
 #    endif
 
 #    define GPIO_SD_CD (GPIO_INTERRUPT | GPIO_INT_CHANGE | GPIO_PULL_UP | \
@@ -212,8 +214,9 @@
 #      error I/O1 cannot be in EXT2 if the LCD1 module is connected
 #    endif
 
-#    if defined(SAM4L_XPLAINED_OLED1MODULE) && defined(SAM4L_XPLAINED_OLED1MODULE_EXT2)
-#      error I/O1 and OLED1 cannot both reside in EXT2
+#    if defined(CONFIG_SAM4L_XPLAINED_OLED1MODULE) && \
+        defined(CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT2)
+#      error I/O1 and OLED1 modules cannot both reside in EXT2
 #    endif
 
 #    define GPIO_CD   (GPIO_INTERRUPT | GPIO_INT_CHANGE | GPIO_PULL_UP | \
@@ -227,6 +230,82 @@
 #  else
 #    error Which connector is the I/O1 module installed in?
 #  endif
+#endif
+
+/* OLED1
+ *
+ * Support for the microSD card slot on the I/O1 module.  The I/O1 requires
+ * SPI support and three output GPIOs.  These the GPIOs will vary if the OLED1
+ * is installed on the EXT1 or EXT2 connector:
+ *
+ *
+ *   PIN EXT1           EXT2            Description
+ *   --- -------------- --------------- -------------------------------------
+ *   5   PB12 GPIO      PC08 GPIO       DATA_CMD_SEL
+ *   10  PB13 SPI/NPCS1 PC09 GPIO       DISPLAY_RESET. Active low.
+ *   15  PC03 SPI/NPCS0 PB11 SPI/NPCS2  DISPLAY_SS.  Active low.
+ */
+
+#ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
+
+#  ifndef CONFIG_SAM34_SPI
+#    error CONFIG_SAM34_SPI is required to use the OLED1 module
+#  endif
+
+#  ifndef CONFIG_SPI_CMDDATA
+#    error CONFIG_SPI_CMDDATA is required to use the OLED1 module
+#  endif
+
+#  ifndef CONFIG_LCD_SSD1306
+#    error CONFIG_LCD_SSD1306 is required to use the OLED1 module
+#  endif
+
+#  ifndef CONFIG_LCD_UG2832HSWEG04
+#    error CONFIG_LCD_UG2832HSWEG04 is required to use the OLED1 module
+#  endif
+
+#  if defined(CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT1)
+
+#    if defined(CONFIG_SAM4L_XPLAINED_IOMODULE) && \
+        defined(CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1)
+#      error OLED1 and I/O1 modules cannot both reside in EXT1
+#    endif
+
+#    define GPIO_OLED_DATA (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORTB | GPIO_PIN12)
+#    define GPIO_OLED_RST  (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORTB | GPIO_PIN13)
+#    define GPIO_OLED_CS   (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
+                            GPIO_PORTC | GPIO_PIN3)
+#    define OLED_CSNO       0
+
+#  elif defined(CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT2)
+
+#    ifndef CONFIG_SAM4L_XPLAINED_SLCD1MODULE
+#      error OLED1 cannot be in EXT2 if the LCD1 module is connected
+#    endif
+
+#    if defined(CONFIG_SAM4L_XPLAINED_IOMODULE) && \
+        defined(CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2)
+#      error OLED1 and I/O1 modules cannot both reside in EXT2
+#    endif
+
+#    define GPIO_OLED_DATA (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORTC | GPIO_PIN8)
+#    define GPIO_OLED_RST  (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_CLEAR | \
+                            GPIO_PORTc | GPIO_PIN9)
+#    define GPIO_OLED_CS   (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
+                            GPIO_PORTB | GPIO_PIN11)
+#    define OLED_CSNO      2
+
+#  else
+#    error Which connector is the OLED1 module installed in?
+#  endif
+#endif
+
+#if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
+#    define GPIO_SD_CS (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
+                        GPIO_PORTB | GPIO_PIN11)
 #endif
 
 /************************************************************************************
