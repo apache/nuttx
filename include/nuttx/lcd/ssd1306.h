@@ -177,8 +177,8 @@
 
 /* Some important "colors" */
 
-#define UG_Y1_BLACK  0
-#define UG_Y1_WHITE  1
+#define SSD1306_Y1_BLACK  0
+#define SSD1306_Y1_WHITE  1
 
 /**************************************************************************************
  * Public Types

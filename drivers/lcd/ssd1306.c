@@ -228,15 +228,17 @@
  */
 
 #if defined(CONFIG_LCD_UG2864HSWEG01)
-#  define SSD1306_DEV_NATIVE_XRES 128 /* Only 128 of 131 columns used */
-#  define SSD1306_DEV_NATIVE_YRES 64  /* 8 pages each 8 rows */
-#  define SSD1306_DEV_XOFFSET     2   /* Offset to logical column 0 */
-#  define SSD1306_DEV_PAGES       8   /* 8 pages */
+#  define SSD1306_DEV_NATIVE_XRES 128  /* Only 128 of 131 columns used */
+#  define SSD1306_DEV_NATIVE_YRES 64   /* 8 pages each 8 rows */
+#  define SSD1306_DEV_XOFFSET     2    /* Offset to logical column 0 */
+#  define SSD1306_DEV_PAGES       8    /* 8 pages */
+#  define SSD1306_DEV_CMNPAD      0x12 /* COM configuration */
 #elif defined(CONFIG_LCD_UG2832HSWEG04)
-#  define SSD1306_DEV_NATIVE_XRES 128 /* Only 128 of 131 columns used */
-#  define SSD1306_DEV_NATIVE_YRES 32  /* 4 pages each 8 rows */
-#  define SSD1306_DEV_XOFFSET     2   /* Offset to logical column 0 */
-#  define SSD1306_DEV_PAGES       4   /* 4 pages */
+#  define SSD1306_DEV_NATIVE_XRES 128  /* Only 128 of 131 columns used */
+#  define SSD1306_DEV_NATIVE_YRES 32   /* 4 pages each 8 rows */
+#  define SSD1306_DEV_XOFFSET     2    /* Offset to logical column 0 */
+#  define SSD1306_DEV_PAGES       4    /* 4 pages */
+#  define SSD1306_DEV_CMNPAD      0x02 /* COM configuration */
 #endif
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
@@ -246,6 +248,8 @@
 #  define SSD1306_DEV_XRES        SSD1306_DEV_NATIVE_YRES
 #  define SSD1306_DEV_YRES        SSD1306_DEV_NATIVE_XRES
 #endif
+
+#define SSD1306_DEV_DUTY          (SSD1306_DEV_NATIVE_YRES-1)
 
 /* Bytes per logical row and actual device row */
 
@@ -259,7 +263,7 @@
 
 /* Default contrast */
 
-#define SSD1306_DEV_CONTRAST          (128)
+#define SSD1306_DEV_CONTRAST      (128)
 
 /* The size of the shadow frame buffer or one row buffer.
  *
@@ -1080,35 +1084,35 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *spi, unsigned int
   SPI_SEND(spi, SSD1306_SETCOLH(0));      /* Set higher column address 0x10 */
   SPI_SEND(spi, SSD1306_STARTLINE(0));    /* Set display start line 0x40 */
   /* SPI_SEND(spi, SSD1306_PAGEADDR(0));*//* Set page address  (Can ignore)*/
-  SPI_SEND(spi, SSD1306_CONTRAST_MODE);   /* Contrast control 0x81*/
+  SPI_SEND(spi, SSD1306_CONTRAST_MODE);   /* Contrast control 0x81 */
   SPI_SEND(spi ,SSD1306_CONTRAST(SSD1306_DEV_CONTRAST));  /* Default contrast 0xCF */
-  SPI_SEND(spi, SSD1306_REMAPPLEFT);      /* Set segment remap left 95 to 0 | 0xa1*/
-  /* SPI_SEND(spi, SSD1306_EDISPOFF); */  /* Normal display :off  0xa4 (Can ignore)*/
+  SPI_SEND(spi, SSD1306_REMAPPLEFT);      /* Set segment remap left 95 to 0 | 0xa1 */
+  /* SPI_SEND(spi, SSD1306_EDISPOFF); */  /* Normal display off 0xa4 (Can ignore)*/
   SPI_SEND(spi, SSD1306_NORMAL);          /* Normal (un-reversed) display mode 0xa6 */
-  SPI_SEND(spi, SSD1306_MRATIO_MODE);     /* Multiplex ratio 0xa8*/
-  SPI_SEND(spi, SSD1306_MRATIO(0x3f));    /*   Duty = 1/64 */
+  SPI_SEND(spi, SSD1306_MRATIO_MODE);     /* Multiplex ratio 0xa8 */
+  SPI_SEND(spi, SSD1306_MRATIO(SSD1306_DEV_DUTY));  /* Duty = 1/64 or 1/32 */
   /* SPI_SEND(spi, SSD1306_SCANTOCOM0);*/ /* Com scan direction: Scan from COM[n-1] to COM[0] (Can ignore)*/
   SPI_SEND(spi, SSD1306_DISPOFFS_MODE);   /* Set display offset 0xd3 */
   SPI_SEND(spi, SSD1306_DISPOFFS(0));
   SPI_SEND(spi, SSD1306_CLKDIV_SET);      /* Set clock divider 0xd5*/
   SPI_SEND(spi, SSD1306_CLKDIV(8,0));     /* 0x80*/
 
-  SPI_SEND(spi, SSD1306_CHRGPER_SET);     /* ++Set pre-charge period 0xd9*/
+  SPI_SEND(spi, SSD1306_CHRGPER_SET);     /* Set pre-charge period 0xd9 */
   SPI_SEND(spi, SSD1306_CHRGPER(0x0f,1)); /* 0xf1 or 0x22 Enhanced mode */
 
   SPI_SEND(spi, SSD1306_CMNPAD_CONFIG);   /* Set common pads / set com pins hardware configuration 0xda */
-  SPI_SEND(spi, SSD1306_CMNPAD(0x12));    /* 0x12 */
+  SPI_SEND(spi, SSD1306_CMNPAD(SSD1306_DEV_CMNPAD)); /* 0x12 or 0x02 */
 
-  SPI_SEND(spi, SSD1306_VCOM_SET);        /* set vcomh 0xDB*/
+  SPI_SEND(spi, SSD1306_VCOM_SET);        /* set vcomh 0xdb*/
   SPI_SEND(spi, SSD1306_VCOM(0x40));
 
-  SPI_SEND(spi, SSD1306_CHRPUMP_SET);     /* ++Set Charge Pump enable/disable 0x8d ssd1306*/
+  SPI_SEND(spi, SSD1306_CHRPUMP_SET);     /* Set Charge Pump enable/disable 0x8d ssd1306 */
   SPI_SEND(spi, SSD1306_CHRPUMP_ON);      /* 0x14 close 0x10 */
 
-  /*SPI_SEND(spi, SSD1306_DCDC_MODE); */  /* DC/DC control mode: on (SSD1306 Not supported) */
-  /*SPI_SEND(spi, SSD1306_DCDC_ON); */
+  /* SPI_SEND(spi, SSD1306_DCDC_MODE); */ /* DC/DC control mode: on (SSD1306 Not supported) */
+  /* SPI_SEND(spi, SSD1306_DCDC_ON); */
 
-  SPI_SEND(spi, SSD1306_DISPON);          /* display ON 0xaf */
+  SPI_SEND(spi, SSD1306_DISPON);          /* Display ON 0xaf */
 
   /* De-select and unlock the device */
 
@@ -1118,7 +1122,7 @@ FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *spi, unsigned int
   /* Clear the display */
 
   up_mdelay(100);
-  ssd1306_fill(&priv->dev, UG_Y1_BLACK);
+  ssd1306_fill(&priv->dev, SSD1306_Y1_BLACK);
   return &priv->dev;
 }
 

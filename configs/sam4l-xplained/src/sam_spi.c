@@ -98,13 +98,13 @@ void weak_function sam_spiinitialize(void)
 #ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
   /* TODO: enable interrupt on card detect */
 
-   sam_configgpio(GPIO_SD_CD); /* Card detect input */
-   sam_configgpio(GPIO_SD_CS); /* Chip select output */
+   sam_configgpio(GPIO_SD_CD);     /* Card detect input */
+   sam_configgpio(GPIO_SD_CS);     /* Chip select output */
 #endif
 
 #ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
    sam_configgpio(GPIO_OLED_DATA); /* Command/data */
-   sam_configgpio(GPIO_OLED_CS  ); /* Card detect input */
+   sam_configgpio(GPIO_OLED_CS);   /* Card detect input */
 #endif
 }
 
