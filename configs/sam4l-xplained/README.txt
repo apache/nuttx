@@ -786,7 +786,7 @@ Configuration sub-directories
           atest.txt
          nsh> cat /mnt/stuff/atest.txt
          This is a test
-         nsh> 
+         nsh>
 
     3. If the OLED1 module is connected to the SAM4L Xplained Pro, then
        support for the OLED display can be enabled by making the following
@@ -804,6 +804,7 @@ Configuration sub-directories
        Device Drivers -> LCDs
          CONFIG_LCD=y                       : Enable LCD support
          CONFIG_LCD_MAXCONTRAST=255         : Maximum contrast value
+         CONFIG_LCD_LANDSCAPE=y             : Landscape orientation (see below*)
          CONFIG_LCD_UG2832HSWEG04=y         : Enable support for the OLED
          CONFIG_LCD_SSD1306_SPIMODE=0       : SPI Mode 0
          CONFIG_LCD_SSD1306_SPIMODE=3500000 : Pick an SPI frequency
@@ -814,22 +815,30 @@ Configuration sub-directories
          CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT2=y
 
        The NX graphics subsystem also needs to be configured:
- 
+
          CONFIG_NX=y                        : Enable graphics support
          CONFIG_NX_LCDDRIVER=y              : Using an LCD driver
          CONFIG_NX_NPLANES=1                : With a single color plane
-         CONFIG_NX_WRITEONLY=y              : This is a write only LCD
+         CONFIG_NX_WRITEONLY=n              : You can read from the LCD (see below**)
          CONFIG_NX_DISABLE_2BPP=y           : Disable all resolutions except 1BPP
          CONFIG_NX_DISABLE_4BPP=y
          CONFIG_NX_DISABLE_8BPP=y
          CONFIG_NX_DISABLE_16BPP=y
          CONFIG_NX_DISABLE_24BPP=y
          CONFIG_NX_DISABLE_32BPP=y
-         CONFIG_NX_PACKEDMSFIRST=y
+         CONFIG_NX_PACKEDMSFIRST=y          : LSB packed first (shouldn't matter)
          CONFIG_NXTK_BORDERWIDTH=2          : Use a small border
          CONFIG_NXTK_DEFAULT_BORDERCOLORS=y : Default border colors
          CONFIG_NXFONTS_CHARBITS=7          : 7-bit fonts
          CONFIG_NXFONT_SANS17X23B=y         : Pick a font (any that will fit)
+
+        * This orientation will put the buttons "above" the LCD.  The
+          reverse landscape configuration (CONFIG_LCD_RLANDSCAPE) should
+          "flip" the display so that the buttons are "below" the LCD.  That
+          configuration, however, is untested.
+
+       ** The hardware is write only, but the driver maintains a frame buffer
+          to support read and read-write-modiry operations on the LCD.
 
        Then, in order to use the OLED, you will need to build some kind of
        graphics application or use one of the NuttX graphics examples.
@@ -837,10 +846,14 @@ Configuration sub-directories
        example:
 
          CONFIG_EXAMPLES_NXHELLO=y                : Enables the example
-         CONFIG_EXAMPLES_NXHELLO_DEFAULT_COLORS=y : Use default colors (monochrome)
+         CONFIG_EXAMPLES_NXHELLO_DEFAULT_COLORS=y : Use default colors (see below *)
          CONFIG_EXAMPLES_NXHELLO_DEFAULT_FONT=y   : Use the default font
          CONFIG_EXAMPLES_NXHELLO_BPP=1            : One bit per pixel
          CONFIG_EXAMPLES_NXHELLO_EXTERNINIT=y     : Special initialization is required.
+
+        * The OLED is monochrome so the only "colors" are blacka nd white.
+          The default "colors" will give you while text on a black background.
+          You can override the faults it you want black text on a while background.
 
     4. If the LCD1 module is connected to the SAM4L Xplained Pro, then
        support for the SLCDt can be enabled by making the following
