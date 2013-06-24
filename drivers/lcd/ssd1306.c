@@ -158,13 +158,12 @@
 #endif
 
 #if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
-#  warning "No support yet for portrait modes"
+#  warning "No support for portrait modes"
+#  undef CONFIG_LCD_LANDSCAPE
 #  define CONFIG_LCD_LANDSCAPE 1
 #  undef CONFIG_LCD_PORTRAIT
 #  undef CONFIG_LCD_RLANDSCAPE
 #  undef CONFIG_LCD_RPORTRAIT
-#elif defined(CONFIG_LCD_RLANDSCAPE)
-#  warning "Reverse landscape mode is untested and, hence, probably buggy"
 #endif
 
 /* SSD1306 Commands *******************************************************************/
@@ -273,6 +272,26 @@
 
 #define SSD1306_DEV_FBSIZE        (SSD1306_DEV_XSTRIDE * SSD1306_DEV_YRES)
 #define SSD1306_DEV_ROWSIZE       (SSD1306_DEV_XSTRIDE)
+
+/* Orientation.  There seem to be device differences. */
+
+#if defined(CONFIG_LCD_UG2864HSWEG01)
+#  if defined(CONFIG_LCD_LANDSCAPE)
+#    undef  SSD1306_DEV_REVERSEX
+#    undef  SSD1306_DEV_REVERSEY
+#  elif defined(CONFIG_LCD_RLANDSCAPE)
+#    define SSD1306_DEV_REVERSEX  1
+#    define SSD1306_DEV_REVERSEY  1
+#  endif
+#elif defined(CONFIG_LCD_UG2832HSWEG04)
+#  if defined(CONFIG_LCD_LANDSCAPE)
+#    define SSD1306_DEV_REVERSEX  1
+#    undef  SSD1306_DEV_REVERSEY
+#  elif defined(CONFIG_LCD_RLANDSCAPE)
+#    undef  SSD1306_DEV_REVERSEX
+#    define SSD1306_DEV_REVERSEY  1
+#  endif
+#endif
 
 /* Bit helpers */
 
@@ -566,11 +585,31 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
       return OK;
     }
 
-  /* Perform coordinate conversion for reverse landscape mode */
+  /* Perform coordinate conversion for reverse landscape mode.
+   * If the rows are reversed then rows are are a mirror reflection of
+   * top to bottom.
+   */
 
-#ifdef CONFIG_LCD_RLANDSCAPE
+#ifdef SSD1306_DEV_REVERSEY
   row = (SSD1306_DEV_YRES-1) - row;
-  col = (SSD1306_DEV_XRES-1) - col;
+#endif
+
+  /* If the column is switched then the start of the run is the mirror of
+   * the end of the run.
+   *
+   *            col+pixlen-1
+   *     col    |
+   *  0  |      |                    XRES
+   *  .  S>>>>>>E                    .
+   *  .                    E<<<<<<S  .
+   *                       |      |
+   *                       |      `-(XRES-1)-col
+   *                       ` (XRES-1)-col-(pixlen-1)
+   */
+
+#ifdef SSD1306_DEV_REVERSEX
+  col  = (SSD1306_DEV_XRES-1) - col;
+  col -= (pixlen - 1);
 #endif
 
   /* Get the page number.  The range of 64 lines is divided up into eight
@@ -593,7 +632,7 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
    *     D4   |   | X |   |   |     |     |
    *     D5   |   | X |   |   |     |     |
    *     D6   |   | X |   |   |     |     |
-   *     D7   |   | X |   |   |     |     | 
+   *     D7   |   | X |   |   |     |     |
    *  --------+---+---+---+---+-...-+-----+
    *
    * So, in order to draw a white, horizontal line, at row 45. we
@@ -603,11 +642,12 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
 
   fbmask  = 1 << (row & 7);
   fbptr   = &priv->fb[page * SSD1306_DEV_XRES + col];
-#ifdef CONFIG_LCD_RLANDSCAPE
-  ptr     = fbptr + pixlen - 1;
+#ifdef SSD1306_DEV_REVERSEX
+  ptr     = fbptr + (pixlen - 1);
 #else
   ptr     = fbptr;
 #endif
+
 #ifdef CONFIG_NX_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
@@ -618,7 +658,7 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
     {
       /* Set or clear the corresponding bit */
 
-#ifdef CONFIG_LCD_RLANDSCAPE
+#ifdef SSD1306_DEV_REVERSEX
       if ((*buffer & usrmask) != 0)
         {
           *ptr-- |= fbmask;
@@ -680,7 +720,7 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
 
   /* Set the starting position for the run */
   /* Set the column address to the XOFFSET value */
-  
+
   SPI_SEND(priv->spi, SSD1306_SETCOLL(devcol & 0x0f));
   SPI_SEND(priv->spi, SSD1306_SETCOLH(devcol >> 4));
 
@@ -710,7 +750,7 @@ static int ssd1306_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buf
  * Name:  ssd1306_getrun
  *
  * Description:
- *   This method can be used to read a partial raster line from the LCD:
+ *   This method can be used to read a partial raster line from the LCD.
  *
  * Description:
  *   This method can be used to write a partial raster line to the LCD.
@@ -755,11 +795,30 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       return -EINVAL;
     }
 
-  /* Perform coordinate conversion for reverse landscape mode */
+  /* Perform coordinate conversion for reverse landscape mode.
+   * If the rows are reversed then rows are are a mirror reflection of
+   * top to bottom.
+   */
 
-#ifdef CONFIG_LCD_RLANDSCAPE
+#ifdef SSD1306_DEV_REVERSEY
   row = (SSD1306_DEV_YRES-1) - row;
-  col = (SSD1306_DEV_XRES-1) - col;
+#endif
+
+  /* If the column is switched then the start of the run is the mirror of
+   * the end of the run.
+   *
+   *            col+pixlen-1
+   *     col    |
+   *  0  |      |                    XRES
+   *  .  S>>>>>>E                    .
+   *  .                    E<<<<<<S  .
+   *                       |      |
+   *                       |      `-(XRES-1)-col
+   *                       ` (XRES-1)-col-(pixlen-1)
+   */
+
+#ifdef SSD1306_DEV_REVERSEX
+  col  = (SSD1306_DEV_XRES-1) - col;
 #endif
 
   /* Then transfer the display data from the shadow frame buffer memory */
@@ -783,7 +842,7 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
    *     D4   |   | X |   |   |     |     |
    *     D5   |   | X |   |   |     |     |
    *     D6   |   | X |   |   |     |     |
-   *     D7   |   | X |   |   |     |     | 
+   *     D7   |   | X |   |   |     |     |
    *  --------+---+---+---+---+-...-+-----+
    *
    * So, in order to draw a white, horizontal line, at row 45. we
@@ -792,11 +851,8 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
    */
 
   fbmask  = 1 << (row & 7);
-#ifdef CONFIG_LCD_RLANDSCAPE
-  fbptr   = &priv->fb[page * (SSD1306_DEV_XRES-1) + col + pixlen];
-#else
   fbptr   = &priv->fb[page * SSD1306_DEV_XRES + col];
-#endif
+
 #ifdef CONFIG_NX_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
@@ -807,8 +863,8 @@ static int ssd1306_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   for (i = 0; i < pixlen; i++)
     {
       /* Set or clear the corresponding bit */
-      
-#ifdef CONFIG_LCD_RLANDSCAPE
+
+#ifdef SSD1306_DEV_REVERSEX
       uint8_t byte = *fbptr--;
 #else
       uint8_t byte = *fbptr++;
@@ -916,7 +972,7 @@ static int ssd1306_getpower(FAR struct lcd_dev_s *dev)
  *
  **************************************************************************************/
 
-static int ssd1306_setpower(struct lcd_dev_s *dev, int power)
+static int ssd1306_setpower(FAR struct lcd_dev_s *dev, int power)
 {
   struct ssd1306_dev_s *priv = (struct ssd1306_dev_s *)dev;
   DEBUGASSERT(priv && (unsigned)power <= CONFIG_LCD_MAXPOWER && priv->spi);
@@ -939,7 +995,7 @@ static int ssd1306_setpower(struct lcd_dev_s *dev, int power)
     {
       /* Turn the display on */
 
-      (void)SPI_SEND(priv->spi, SSD1306_DISPON); /* Display on, dim mode */
+      (void)SPI_SEND(priv->spi, SSD1306_DISPON);
       priv->on = true;
     }
 
@@ -1175,7 +1231,7 @@ void ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color)
       SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
 
       /* Set the column address to the XOFFSET value */
-  
+
       SPI_SEND(priv->spi, SSD1306_SETCOLL(SSD1306_DEV_XOFFSET));
       SPI_SEND(priv->spi, SSD1306_SETCOLH(0));
 
@@ -1189,8 +1245,8 @@ void ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color)
 
       /* Transfer one page of the selected color */
 
-       (void)SPI_SNDBLOCK(priv->spi, &priv->fb[page * SSD1306_DEV_XRES],
-                          SSD1306_DEV_XRES);
+      (void)SPI_SNDBLOCK(priv->spi, &priv->fb[page * SSD1306_DEV_XRES],
+                         SSD1306_DEV_XRES);
     }
 
   /* De-select and unlock the device */

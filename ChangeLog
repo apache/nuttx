@@ -5041,3 +5041,9 @@
 	  (2013-6-23).
 	* include/debug.h:  Added macro DEBUGPANIC for forces crashes when debug
 	  is enabled.
+	* drivers/lcd/ssd1306.c:  Driver now appears to be function for the
+	  UG-2832HSWEG04 in landscape mode (2013-6-24).
+	* drivers/lcd/ug-2864ambag01.c and ug-9664hswag01.c:  Add/updated
+	  support for reverse portrait mode from lessons learned with the
+	  UG-2832HSWEG04.  Untested changes! (2013-6-24).
+

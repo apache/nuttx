@@ -73,7 +73,7 @@
  * CONFIG_UG9664HSWAG01_POWER
  *   If the hardware supports a controllable OLED a power supply, this
  *   configuration shold be defined.  (See ug_power() below).
- * 
+ *
  * Required LCD driver settings:
  * CONFIG_LCD_UG9664HSWAG01 - Enable UG-9664HSWAG01 support
  * CONFIG_LCD_MAXCONTRAST should be 255, but any value >0 and <=255 will be accepted.
@@ -111,6 +111,16 @@
 #  warning "Only a single UG-9664HSWAG01 interface is supported"
 #  undef CONFIG_UG9664HSWAG01_NINTERFACES
 #  define CONFIG_UG9664HSWAG01_NINTERFACES 1
+#endif
+
+/* Orientation */
+
+#if defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_RPORTRAIT)
+#  warning "No support for portrait modes"
+#  define CONFIG_LCD_LANDSCAPE 1
+#  undef CONFIG_LCD_PORTRAIT
+#  undef CONFIG_LCD_RLANDSCAPE
+#  undef CONFIG_LCD_RPORTRAIT
 #endif
 
 /* Verbose debug must also be enabled to use the extra OLED debug */
@@ -171,8 +181,16 @@
 
 /* Display Resolution */
 
-#define UG_XRES         96
-#define UG_YRES         64
+#define UG_LCD_XRES     96
+#define UG_LCD_YRES     64
+
+#if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
+#  define UG_XRES      UG_LCD_XRES
+#  define UG_YRES      UG_LCD_YRES
+#else
+#  define UG_XRES      UG_LCD_YRES
+#  define UG_YRES      UG_LCD_XRES
+#endif
 
 /* Color depth and format */
 
@@ -187,6 +205,16 @@
 /* The size of the shadow frame buffer */
 
 #define UG_FBSIZE       (UG_XRES * UG_YSTRIDE)
+
+/* Orientation */
+
+#if defined(CONFIG_LCD_LANDSCAPE)
+#  undef  UG_LCD_REVERSEX
+#  undef  UG_LCD_REVERSEY
+#elif defined(CONFIG_LCD_RLANDSCAPE)
+#  define UG_LCD_REVERSEX  1
+#  define UG_LCD_REVERSEY  1
+#endif
 
 /* Bit helpers */
 
@@ -307,7 +335,7 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 /* This is the standard, NuttX Plane information object */
 
-static const struct lcd_planeinfo_s g_planeinfo = 
+static const struct lcd_planeinfo_s g_planeinfo =
 {
   .putrun = ug_putrun,             /* Put a run into LCD memory */
   .getrun = ug_getrun,             /* Get a run from LCD memory */
@@ -317,12 +345,12 @@ static const struct lcd_planeinfo_s g_planeinfo =
 
 /* This is the standard, NuttX LCD driver object */
 
-static struct ug_dev_s g_ugdev = 
+static struct ug_dev_s g_ugdev =
 {
   .dev =
   {
     /* LCD Configuration */
- 
+
     .getvideoinfo = ug_getvideoinfo,
     .getplaneinfo = ug_getplaneinfo,
 
@@ -496,6 +524,33 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
       return OK;
     }
 
+  /* Perform coordinate conversion for reverse landscape mode.
+   * If the rows are reversed then rows are are a mirror reflection of
+   * top to bottom.
+   */
+
+#ifdef UG_LCD_REVERSEY
+  row = (UG_YRES-1) - row;
+#endif
+
+  /* If the column is switched then the start of the run is the mirror of
+   * the end of the run.
+   *
+   *            col+pixlen-1
+   *     col    |
+   *  0  |      |                    XRES
+   *  .  S>>>>>>E                    .
+   *  .                    E<<<<<<S  .
+   *                       |      |
+   *                       |      `-(XRES-1)-col
+   *                       ` (XRES-1)-col-(pixlen-1)
+   */
+
+#ifdef UG_LCD_REVERSEX
+  col  = (UG_XRES-1) - col;
+  col -= (pixlen - 1);
+#endif
+
   /* Get the page number.  The range of 64 lines is divided up into eight
    * pages of 8 lines each.
    */
@@ -516,7 +571,7 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
    *  Bit 4   |   | X |   |   |     |     |
    *  Bit 5   |   | X |   |   |     |     |
    *  Bit 6   |   | X |   |   |     |     |
-   *  Bit 7   |   | X |   |   |     |     | 
+   *  Bit 7   |   | X |   |   |     |     |
    *  --------+---+---+---+---+-...-+-----+
    *
    * So, in order to draw a white, horizontal line, at row 45. we
@@ -526,7 +581,12 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
 
   fbmask  = 1 << (row & 7);
   fbptr   = &priv->fb[page * UG_XRES + col];
+#ifdef UG_LCD_REVERSEX
+  ptr     = fbptr + (pixlen - 1);
+#else
   ptr     = fbptr;
+#endif
+
 #ifdef CONFIG_NX_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
@@ -537,6 +597,16 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
     {
       /* Set or clear the corresponding bit */
 
+#ifdef UG_LCD_REVERSEX
+      if ((*buffer & usrmask) != 0)
+        {
+          *ptr-- |= fbmask;
+        }
+      else
+        {
+          *ptr-- &= ~fbmask;
+        }
+#else
       if ((*buffer & usrmask) != 0)
         {
           *ptr++ |= fbmask;
@@ -545,6 +615,7 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
         {
           *ptr++ &= ~fbmask;
         }
+#endif
 
       /* Inc/Decrement to the next source pixel */
 
@@ -609,7 +680,7 @@ static int ug_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buffer,
  * Name:  ug_getrun
  *
  * Description:
- *   This method can be used to read a partial raster line from the LCD:
+ *   This method can be used to read a partial raster line from the LCD.
  *
  *  row     - Starting row to read from (range: 0 <= row < yres)
  *  col     - Starting column to read read (range: 0 <= col <= xres-npixels)
@@ -650,6 +721,32 @@ static int ug_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       return -EINVAL;
     }
 
+  /* Perform coordinate conversion for reverse landscape mode.
+   * If the rows are reversed then rows are are a mirror reflection of
+   * top to bottom.
+   */
+
+#ifdef UG_LCD_REVERSEY
+  row = (UG_YRES-1) - row;
+#endif
+
+  /* If the column is switched then the start of the run is the mirror of
+   * the end of the run.
+   *
+   *            col+pixlen-1
+   *     col    |
+   *  0  |      |                    XRES
+   *  .  S>>>>>>E                    .
+   *  .                    E<<<<<<S  .
+   *                       |      |
+   *                       |      `-(XRES-1)-col
+   *                       ` (XRES-1)-col-(pixlen-1)
+   */
+
+#ifdef UG_LCD_REVERSEX
+  col  = (UG_XRES-1) - col;
+#endif
+
   /* Then transfer the display data from the shadow frame buffer memory */
   /* Get the page number.  The range of 64 lines is divided up into eight
    * pages of 8 lines each.
@@ -671,7 +768,7 @@ static int ug_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
    *  Bit 4   |   | X |   |   |     |     |
    *  Bit 5   |   | X |   |   |     |     |
    *  Bit 6   |   | X |   |   |     |     |
-   *  Bit 7   |   | X |   |   |     |     | 
+   *  Bit 7   |   | X |   |   |     |     |
    *  --------+---+---+---+---+-...-+-----+
    *
    * So, in order to draw a white, horizontal line, at row 45. we
@@ -681,6 +778,7 @@ static int ug_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
 
   fbmask  = 1 << (row & 7);
   fbptr   = &priv->fb[page * UG_XRES + col];
+
 #ifdef CONFIG_NX_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
@@ -691,8 +789,13 @@ static int ug_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
   for (i = 0; i < pixlen; i++)
     {
       /* Set or clear the corresponding bit */
-      
+
+#ifdef UG_LCD_REVERSEX
+      uint8_t byte = *fbptr--;
+#else
       uint8_t byte = *fbptr++;
+#endif
+
       if ((byte & fbmask) != 0)
         {
           *buffer |= usrmask;
@@ -887,7 +990,7 @@ static int ug_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   (void)SPI_SEND(priv->spi, SSD1305_SETCONTRAST);  /* Set contrast control register */
   (void)SPI_SEND(priv->spi, contrast);             /* Data 1: Set 1 of 256 contrast steps */
   priv->contrast = contrast;
-  
+
   /* Unlock and de-select the device */
 
   ug_deselect(priv->spi);
@@ -972,7 +1075,7 @@ static inline void up_clear(FAR struct ug_dev_s  *priv)
 FAR struct lcd_dev_s *ug_initialize(FAR struct spi_dev_s *spi, unsigned int devno)
 {
   /* Configure and enable LCD */
- 
+
   FAR struct ug_dev_s  *priv = &g_ugdev;
 
   gvdbg("Initializing\n");

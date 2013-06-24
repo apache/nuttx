@@ -3,7 +3,7 @@
  * Driver for Univision UG-2864AMBAG01 OLED display (wih SH1101A controller) in SPI
  * mode
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -153,8 +153,6 @@
 #  undef CONFIG_LCD_PORTRAIT
 #  undef CONFIG_LCD_RLANDSCAPE
 #  undef CONFIG_LCD_RPORTRAIT
-#elif defined(CONFIG_LCD_RLANDSCAPE)
-#  warning "Reverse landscape mode is untested and, hence, probably buggy"
 #endif
 
 /* SH1101A Commands *******************************************************************/
@@ -246,6 +244,16 @@
 
 #define UG2864AMBAG01_FBSIZE       (UG2864AMBAG01_XSTRIDE * UG2864AMBAG01_YRES)
 #define UG2864AMBAG01_ROWSIZE      (UG2864AMBAG01_XSTRIDE)
+
+/* Orientation */
+
+#if defined(CONFIG_LCD_LANDSCAPE)
+#  undef  UG2864AMBAG01_DEV_REVERSEX
+#  undef  UG2864AMBAG01_DEV_REVERSEY
+#elif defined(CONFIG_LCD_RLANDSCAPE)
+#  define UG2864AMBAG01_DEV_REVERSEX 1
+#  define UG2864AMBAG01_DEV_REVERSEY 1
+#endif
 
 /* Bit helpers */
 
@@ -539,11 +547,31 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
       return OK;
     }
 
-  /* Perform coordinate conversion for reverse landscape mode */
+  /* Perform coordinate conversion for reverse landscape mode.
+   * If the rows are reversed then rows are are a mirror reflection of
+   * top to bottom.
+   */
 
-#ifdef CONFIG_LCD_RLANDSCAPE
-  row = (UG2864AMBAG01_YRES-1) - row;
-  col = (UG2864AMBAG01_XRES-1) - col;
+#ifdef UG2864AMBAG01_DEV_REVERSEY
+  row = (UG2864AMBAG01_DEV_YRES-1) - row;
+#endif
+
+  /* If the column is switched then the start of the run is the mirror of
+   * the end of the run.
+   *
+   *            col+pixlen-1
+   *     col    |
+   *  0  |      |                    XRES
+   *  .  S>>>>>>E                    .
+   *  .                    E<<<<<<S  .
+   *                       |      |
+   *                       |      `-(XRES-1)-col
+   *                       ` (XRES-1)-col-(pixlen-1)
+   */
+
+#ifdef UG2864AMBAG01_DEV_REVERSEX
+  col  = (UG2864AMBAG01_DEV_XRES-1) - col;
+  col -= (pixlen - 1);
 #endif
 
   /* Get the page number.  The range of 64 lines is divided up into eight
@@ -566,7 +594,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
    *     D4   |   | X |   |   |     |     |
    *     D5   |   | X |   |   |     |     |
    *     D6   |   | X |   |   |     |     |
-   *     D7   |   | X |   |   |     |     | 
+   *     D7   |   | X |   |   |     |     |
    *  --------+---+---+---+---+-...-+-----+
    *
    * So, in order to draw a white, horizontal line, at row 45. we
@@ -576,11 +604,12 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
 
   fbmask  = 1 << (row & 7);
   fbptr   = &priv->fb[page * UG2864AMBAG01_XRES + col];
-#ifdef CONFIG_LCD_RLANDSCAPE
-  ptr     = fbptr + pixlen - 1;
+#ifdef UG2864AMBAG01_DEV_REVERSEX
+  ptr     = fbptr + (pixlen - 1);
 #else
   ptr     = fbptr;
 #endif
+
 #ifdef CONFIG_NX_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
@@ -591,7 +620,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
     {
       /* Set or clear the corresponding bit */
 
-#ifdef CONFIG_LCD_RLANDSCAPE
+#ifdef UG2864AMBAG01_DEV_REVERSEX
       if ((*buffer & usrmask) != 0)
         {
           *ptr-- |= fbmask;
@@ -653,7 +682,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
 
   /* Set the starting position for the run */
   /* Set the column address to the XOFFSET value */
-  
+
   SPI_SEND(priv->spi, SH1101A_SETCOLL(devcol & 0x0f));
   SPI_SEND(priv->spi, SH1101A_SETCOLH(devcol >> 4));
 
@@ -683,7 +712,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
  * Name:  ug2864ambag01_getrun
  *
  * Description:
- *   This method can be used to read a partial raster line from the LCD:
+ *   This method can be used to read a partial raster line from the LCD.
  *
  * Description:
  *   This method can be used to write a partial raster line to the LCD.
@@ -698,7 +727,7 @@ static int ug2864ambag01_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
 static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
-                      size_t npixels)
+                                size_t npixels)
 {
   /* Because of this line of code, we will only be able to support a single UG device */
 
@@ -728,11 +757,30 @@ static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buf
       return -EINVAL;
     }
 
-  /* Perform coordinate conversion for reverse landscape mode */
+  /* Perform coordinate conversion for reverse landscape mode.
+   * If the rows are reversed then rows are are a mirror reflection of
+   * top to bottom.
+   */
 
-#ifdef CONFIG_LCD_RLANDSCAPE
-  row = (UG2864AMBAG01_YRES-1) - row;
-  col = (UG2864AMBAG01_XRES-1) - col;
+#ifdef UG2864AMBAG01_DEV_REVERSEY
+  row = (UG2864AMBAG01_DEV_YRES-1) - row;
+#endif
+
+  /* If the column is switched then the start of the run is the mirror of
+   * the end of the run.
+   *
+   *            col+pixlen-1
+   *     col    |
+   *  0  |      |                    XRES
+   *  .  S>>>>>>E                    .
+   *  .                    E<<<<<<S  .
+   *                       |      |
+   *                       |      `-(XRES-1)-col
+   *                       ` (XRES-1)-col-(pixlen-1)
+   */
+
+#ifdef UG2864AMBAG01_DEV_REVERSEX
+  col  = (UG2864AMBAG01_DEV_XRES-1) - col;
 #endif
 
   /* Then transfer the display data from the shadow frame buffer memory */
@@ -756,7 +804,7 @@ static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buf
    *     D4   |   | X |   |   |     |     |
    *     D5   |   | X |   |   |     |     |
    *     D6   |   | X |   |   |     |     |
-   *     D7   |   | X |   |   |     |     | 
+   *     D7   |   | X |   |   |     |     |
    *  --------+---+---+---+---+-...-+-----+
    *
    * So, in order to draw a white, horizontal line, at row 45. we
@@ -765,11 +813,8 @@ static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buf
    */
 
   fbmask  = 1 << (row & 7);
-#ifdef CONFIG_LCD_RLANDSCAPE
-  fbptr   = &priv->fb[page * (UG2864AMBAG01_XRES-1) + col + pixlen];
-#else
   fbptr   = &priv->fb[page * UG2864AMBAG01_XRES + col];
-#endif
+
 #ifdef CONFIG_NX_PACKEDMSFIRST
   usrmask = MS_BIT;
 #else
@@ -780,8 +825,8 @@ static int ug2864ambag01_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buf
   for (i = 0; i < pixlen; i++)
     {
       /* Set or clear the corresponding bit */
-      
-#ifdef CONFIG_LCD_RLANDSCAPE
+
+#ifdef UG2864AMBAG01_DEV_REVERSEX
       uint8_t byte = *fbptr--;
 #else
       uint8_t byte = *fbptr++;
@@ -912,7 +957,7 @@ static int ug2864ambag01_setpower(struct lcd_dev_s *dev, int power)
     {
       /* Turn the display on */
 
-      (void)SPI_SEND(priv->spi, SH1101A_DISPON); /* Display on, dim mode */
+      (void)SPI_SEND(priv->spi, SH1101A_DISPON);
       priv->on = true;
     }
 
@@ -1134,7 +1179,7 @@ void ug2864ambag01_fill(FAR struct lcd_dev_s *dev, uint8_t color)
       SPI_CMDDATA(priv->spi, SPIDEV_DISPLAY, true);
 
       /* Set the column address to the XOFFSET value */
-  
+
       SPI_SEND(priv->spi, SH1101A_SETCOLL(UG2864AMBAG01_DEV_XOFFSET));
       SPI_SEND(priv->spi, SH1101A_SETCOLH(0));
 
