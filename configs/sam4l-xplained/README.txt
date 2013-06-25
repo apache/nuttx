@@ -833,12 +833,12 @@ Configuration sub-directories
          CONFIG_NXFONT_SANS17X23B=y         : Pick a font (any that will fit)
 
         * This orientation will put the buttons "above" the LCD.  The
-          reverse landscape configuration (CONFIG_LCD_RLANDSCAPE) should
-          "flip" the display so that the buttons are "below" the LCD.  That
-          configuration, however, is untested.
+          reverse landscape configuration (CONFIG_LCD_RLANDSCAPE) will
+          "flip" the display so that the buttons are "below" the LCD.
 
        ** The hardware is write only, but the driver maintains a frame buffer
           to support read and read-write-modiry operations on the LCD.
+          Reading from the frame buffer is, however, untested.
 
        Then, in order to use the OLED, you will need to build some kind of
        graphics application or use one of the NuttX graphics examples.
@@ -854,6 +854,15 @@ Configuration sub-directories
         * The OLED is monochrome so the only "colors" are blacka nd white.
           The default "colors" will give you while text on a black background.
           You can override the faults it you want black text on a while background.
+
+       NOTE:  One issue that I have seen with the NXHello example when
+       running as an NSH command is that it only works the first time.
+       So, after you run the 'nxhello' command one time, you will have to
+       reset the board before you run it again.
+
+       This is clearly some issue with initializing, un-initializing, and
+       then re-initializing. If you want to fix this, patches are quite
+       welcome.
 
     4. If the LCD1 module is connected to the SAM4L Xplained Pro, then
        support for the SLCDt can be enabled by making the following

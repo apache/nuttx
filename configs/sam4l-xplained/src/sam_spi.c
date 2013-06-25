@@ -54,6 +54,12 @@
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+/* Configuration ********************************************************************/
+
+#if defined(CONFIG_SAM4L_XPLAINED_IOMODULE) && \
+    defined(CONFIG_SAM4L_XPLAINED_OLED1MODULE) && defined(CONFIG_SPI_OWNBUS)
+#  error CONFIG_SPI_OWNBUS must not defined if using both I/O1 and OLED1 modules
+#endif
 
 /* Enables debug output from this file (needs CONFIG_DEBUG too) */
 
