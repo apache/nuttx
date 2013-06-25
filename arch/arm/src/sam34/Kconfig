@@ -486,7 +486,7 @@ config SAM34_RCFAST8M
 	bool "8MHz"
 
 config SAM34_RCFAST4M
-	bool "4MHz
+	bool "4MHz"
 
 endchoice
 endif
