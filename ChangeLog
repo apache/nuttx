@@ -5054,6 +5054,7 @@
 	  for SAM4S B and C peripherals (2013-6-26)
 	* configs/sam4s-xplained/src/sam_sram.c:  Added support for on-board
 	  1MB SRAM (2013-6-26).
-	* arch/arm/src/include/sam34/chip.h and sam3x_irq.h:  Add support for
+	* arch/arm/include/sam34/chip.h and sam3x_irq.h:  Add support for
 	  SAM3X and SAM3A chips (2013-6-26).
-
+	* arch/arm/src/sam34/chip/sam3x_vectors.h:  Add support for SAM3X/3A
+	  interrupt vectros (2013-6-26).

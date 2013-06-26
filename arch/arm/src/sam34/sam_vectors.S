@@ -136,6 +136,8 @@ sam_vectors:
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
 #  include "chip/sam3u_vectors.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  include "chip/sam3x_vectors.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_vectors.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)
@@ -173,6 +175,8 @@ handlers:
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
 #  include "chip/sam3u_vectors.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  include "chip/sam3x_vectors.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_vectors.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)
