@@ -5058,3 +5058,6 @@
 	  SAM3X and SAM3A chips (2013-6-26).
 	* arch/arm/src/sam34/chip/sam3x_vectors.h:  Add support for SAM3X/3A
 	  interrupt vectros (2013-6-26).
+	* arch/arm/src/sam34/sam3x_periphclks.h:  Add peripheral clock
+	  controls for the SAM3X/3A (2013-6-26).
+

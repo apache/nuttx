@@ -56,7 +56,7 @@
 #define SAM_PMC_SCDR_OFFSET              0x0004 /* System Clock Disable Register */
 #define SAM_PMC_SCSR_OFFSET              0x0008 /* System Clock Status Register */
                                                 /* 0x000c: Reserved */
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_PMC_PCER0_OFFSET           0x0010 /* Peripheral Clock Enable Register 0 */
 #  define SAM_PMC_PCDR0_OFFSET           0x0014 /* Peripheral Clock Disable Register 0 */
 #  define SAM_PMC_PCSR0_OFFSET           0x0018 /* Peripheral Clock Status Register 0 */
@@ -66,7 +66,7 @@
 #  define SAM_PMC_PCSR_OFFSET            0x0018 /* Peripheral Clock Status Register */
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SAM_PMC_CKGR_UCKR_OFFSET       0x001c /* UTMI Clock Register */
 #endif
                                                 /* 0x001c: Reserved (SAM4S)*/
@@ -80,7 +80,7 @@
                                                 /* 0x002c: Reserved (SAM3U)*/
 #define SAM_PMC_MCKR_OFFSET              0x0030 /* Master Clock Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
                                                 /* 0x0034 Reserved */
 #  define SAM_PMC_USB_OFFSET             0x0038 /* USB Clock Register PMC_USB */
                                                 /* 0x003c Reserved */
@@ -102,12 +102,18 @@
 #define SAM_PMC_WPMR_OFFSET              0x00e4 /* Write Protect Mode Register */
 #define SAM_PMC_WPSR_OFFSET              0x00e8 /* Write Protect Status Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
                                                 /* 0x00ec-0x00fc Reserved */
 #  define SAM_PMC_PCER1_OFFSET           0x0100 /* Peripheral Clock Enable Register 1 */
 #  define SAM_PMC_PCDR1_OFFSET           0x0104 /* Peripheral Clock Disable Register 1 */
 #  define SAM_PMC_PCSR1_OFFSET           0x0108 /* Peripheral Clock Status Register 1 */
+#endif
                                                 /* 0x010c Reserved */
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define SAM_PMC_PCR_OFFSET             0x010c /* Peripheral Control Register */
+#endif
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_PMC_OCR_OFFSET             0x0110 /* Oscillator Calibration Register */
                                                 /* 0x003c Reserved */
 #endif
@@ -118,16 +124,17 @@
 #define SAM_PMC_SCDR                     (SAM_PMC_BASE+SAM_PMC_SCDR_OFFSET)
 #define SAM_PMC_SCSR                     (SAM_PMC_BASE+SAM_PMC_SCSR_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_PMC_PCER0                  (SAM_PMC_BASE+SAM_PMC_PCER0_OFFSET)
+#  define SAM_PMC_PCDR0                  (SAM_PMC_BASE+SAM_PMC_PCDR0_OFFSET)
+#  define SAM_PMC_PCSR0                  (SAM_PMC_BASE+SAM_PMC_PCSR0_OFFSET)
 #elif defined(CONFIG_ARCH_CHIP_SAM3U)
 #  define SAM_PMC_PCER                   (SAM_PMC_BASE+SAM_PMC_PCER_OFFSET)
+#  define SAM_PMC_PCDR                   (SAM_PMC_BASE+SAM_PMC_PCDR_OFFSET)
+#  define SAM_PMC_PCSR                   (SAM_PMC_BASE+SAM_PMC_PCSR_OFFSET)
 #endif
 
-#define SAM_PMC_PCDR                     (SAM_PMC_BASE+SAM_PMC_PCDR_OFFSET)
-#define SAM_PMC_PCSR                     (SAM_PMC_BASE+SAM_PMC_PCSR_OFFSET)
-
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SAM_PMC_CKGR_UCKR              (SAM_PMC_BASE+SAM_PMC_CKGR_UCKR_OFFSET)
 #endif
 
@@ -137,6 +144,9 @@
 
 #if defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_PMC_CKGR_PLLBR             (SAM_PMC_BASE+SAM_PMC_CKGR_PLLBR_OFFSET)
+#endif
+
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_PMC_USB                    (SAM_PMC_BASE+SAM_PMC_USB_OFFSET)
 #endif
 
@@ -155,10 +165,16 @@
 #define SAM_PMC_WPMR                     (SAM_PMC_BASE+SAM_PMC_WPMR_OFFSET)
 #define SAM_PMC_WPSR                     (SAM_PMC_BASE+SAM_PMC_WPSR_OFFSET)
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_PMC_PCER1                  (SAM_PMC_BASE+SAM_PMC_PCER1_OFFSET)
 #  define SAM_PMC_PCDR1                  (SAM_PMC_BASE+SAM_PMC_PCDR1_OFFSET)
 #  define SAM_PMC_PCSR1                  (SAM_PMC_BASE+SAM_PMC_PCSR1_OFFSET)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define SAM_PMC_PCR                    (SAM_PMC_BASE+SAM_PMC_PCR_OFFSET)
+#endif
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_PMC_OCR                    (SAM_PMC_BASE+SAM_PMC_OCR_OFFSET)
 #endif
 
@@ -167,6 +183,10 @@
 /* PMC System Clock Enable Register, PMC System Clock Disable Register, and PMC System
  * Clock Status Register common bit-field definitions
  */
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S) || defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define PMC_UOTGCLK                    (1 << 5)  /* Bit 5: Enable USB OTG Clock (48 MHz, USB_48M) for UTMI */
+#endif
 
 #if defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define PMC_UDP                        (1 << 7)  /* Bit 7: USB Device Port Clock Enable */
@@ -215,7 +235,7 @@
 
 /* PMC UTMI Clock Configuration Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define PMC_CKGR_UCKR_UPLLEN           (1 << 16) /* Bit 16: UTMI PLL Enable */
 #  define PMC_CKGR_UCKR_UPLLCOUNT_SHIFT  (20)      /* Bits 20-23: UTMI PLL Start-up Time */
 #  define PMC_CKGR_UCKR_UPLLCOUNT_MASK   (15 << PMC_CKGR_UCKR_UPLLCOUNT_SHIFT)
@@ -225,7 +245,11 @@
 
 #define PMC_CKGR_MOR_MOSCXTEN            (1 << 0)  /* Bit 0:  Main Crystal Oscillator Enable */
 #define PMC_CKGR_MOR_MOSCXTBY            (1 << 1)  /* Bit 1:  Main Crystal Oscillator Bypass */
-#define PMC_CKGR_MOR_WAITMODE            (1 << 2)  /* Bit 2:  Wait Mode Command */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define PMC_CKGR_MOR_WAITMODE          (1 << 2)  /* Bit 2:  Wait Mode Command */
+#endif
+
 #define PMC_CKGR_MOR_MOSCRCEN            (1 << 3)  /* Bit 3:  Main On-Chip RC Oscillator Enable */
 #define PMC_CKGR_MOR_MOSCRCF_SHIFT       (4)       /* Bits 4-6: Main On-Chip RC Oscillator Frequency Selection */
 #define PMC_CKGR_MOR_MOSCRCF_MASK        (7 << PMC_CKGR_MOR_MOSCRCF_SHIFT)
@@ -288,7 +312,7 @@
 
 /* USB Clock Register PMC_USB */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define PMC_USB_USBS                   (1 << 0)  /* Bit 0:  USB Input Clock Selection */
 #    define PMC_USB_USBS_PLLA            (0)
 #    define PMC_USB_USBS_PLLB            PMC_USB_USBS
@@ -306,7 +330,7 @@
 
 #  if defined(CONFIG_ARCH_CHIP_SAM4S)
 #    define PMC_MCKR_CSS_PLLB            (3 << PMC_MCKR_CSS_SHIFT) /* PLLB Clock */
-#  elif defined(CONFIG_ARCH_CHIP_SAM3U)
+#  elif defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
 #    define PMC_MCKR_CSS_UPLL            (3 << PMC_MCKR_CSS_SHIFT) /* UPLL Clock */
 #  endif
 
@@ -321,11 +345,14 @@
 #  define PMC_MCKR_PRES_DIV64            (6 << PMC_MCKR_PRES_SHIFT) /* Selected clock divided by 64 */
 #  define PMC_MCKR_PRES_DIV3             (7 << PMC_MCKR_PRES_SHIFT) /* Selected clock divided by 3 */
 
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define PMC_MCKR_PLLADIV2              (1 << 12) /* Bit 12: PLLA Divider */
+#endif
+
 #if defined(CONFIG_ARCH_CHIP_SAM4S)
-#  define PMC_MCKR_PLLADIV2              (1 << 13) /* Bit 13: PLLA Divider */
-#  define PMC_MCKR_PLLBDIV2              (1 << 14) /* Bit 14: PLLB Divider */
-#elif defined(CONFIG_ARCH_CHIP_SAM3U)
-#  define PMC_MCKR_UPLLDIV               (1 << 13) /* Bit 13: UPLL Divider */
+#  define PMC_MCKR_PLLBDIV2              (1 << 13) /* Bit 13: PLLB Divider */
+#elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM3U)
+#  define PMC_MCKR_UPLLDIV2              (1 << 13) /* Bit 13: UPLL Divider */
 #endif
 
 /* PMC Programmable Clock Register (0,1,2) */
@@ -338,7 +365,7 @@
 
 #if defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define PMC_PCK_CSS_PLLB               (3 << PMC_PCK_CSS_MASK) /* PLLB Clock */
-#elif defined(CONFIG_ARCH_CHIP_SAM3U)
+#elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM3U)
 #  define PMC_PCK_CSS_UPLL               (3 << PMC_PCK_CSS_MASK) /* UPLL Clock */
 #endif
 
@@ -367,7 +394,7 @@
 
 #define PMC_INT_MCKRDY                   (1 << 3)  /* Bit 3:  Master Clock Ready Interrupt */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM3U)
 #  define PMC_INT_LOCKU                  (1 << 6)  /* Bit 6:  UTMI PLL Lock Interrupt */
 #endif
 
@@ -407,7 +434,7 @@
 #define PMC_FSMR_RTCAL                   (1 << 17) /* Bit 17: RTC Alarm Enable (MR only) */
 #define PMC_FSMR_USBAL                   (1 << 18) /* Bit 18: USB Alarm Enable (MR only) */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM3U)
 #  define PMC_FSMR_LPM                   (1 << 20) /* Bit 20: Low Power Mode (MR only) */
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define PMC_FSMR_FLPM_SHIFT            (21)      /* Bit 21-22: Low Power Mode (MR only) */
@@ -442,11 +469,37 @@
 /* Peripheral Clock Disable Register 1 */
 /* Peripheral Clock Status Register 1 */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define PMC_PIDH(n)                    (1 << ((n) - 32))
 #  define PMC_PID32                      (1 << 0)  /* Bit 0:  PID32 */
 #  define PMC_PID33                      (1 << 1)  /* Bit 1:  PID33 */
 #  define PMC_PID34                      (1 << 2)  /* Bit 2:  PID34 */
+#  if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3X)
+#    define PMC_PID35                    (1 << 3)  /* Bit 3:  PID35 */
+#    define PMC_PID36                    (1 << 4)  /* Bit 4:  PID36 */
+#    define PMC_PID37                    (1 << 5)  /* Bit 5:  PID37 */
+#    define PMC_PID38                    (1 << 6)  /* Bit 6:  PID38 */
+#    define PMC_PID39                    (1 << 7)  /* Bit 7:  PID39 */
+#    define PMC_PID40                    (1 << 8)  /* Bit 8:  PID40 */
+#    define PMC_PID41                    (1 << 9)  /* Bit 9:  PID41 */
+#    define PMC_PID42                    (1 << 10) /* Bit 10: PID42 */
+#    define PMC_PID43                    (1 << 11) /* Bit 11: PID43 */
+#    define PMC_PID44                    (1 << 12) /* Bit 12: PID44 */
+#  endif
+#endif
+
+/* Peripheral Control Register */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define PMC_PCR_PID_SHIFT              (0)       /* Bits 0-5: Peripheral ID */
+#  define PMC_PCR_PID_MASK               (63 < PMC_PCR_PID_SHIFT)
+#  define PMC_PCR_CMD                    (1 << 12) /* Bit 12: Command */
+#  define PMC_PCR_DIV_SHIFT              (16)      /* Bits 16-17: Divisor Value */
+#  define PMC_PCR_DIV_MASK               (3 < PMC_PCR_DIV_SHIFT)
+#    define PMC_PCR_DIV1                 (0 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK */
+#    define PMC_PCR_DIV2                 (1 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/2 */
+#    define PMC_PCR_DIV4                 (2 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/4 */
+#  define PMC_PCR_EN                      (1 << 0)  /* Bit 0: Enable */
 #endif
 
 /* Oscillator Calibration Register */
