@@ -5050,3 +5050,8 @@
 	  heap.  This may be useful for segregating allocations for CCM (which
 	  cannot be used for DMA) for other allocations (that may be used used
 	  for DMA) (2013-6-25).
+	* arch/arm/src/sam32/sam3u_gpio.h:  Correct configuration of PIO pins
+	  for SAM4S B and C peripherals (2013-6-26)
+	* configs/sam4s-xplained/src/sam_sram.c:  Added support for on-board
+	  1MB SRAM (2013-6-26).
+
