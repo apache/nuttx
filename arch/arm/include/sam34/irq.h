@@ -79,6 +79,8 @@
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
 #  include <arch/sam34/sam3u_irq.h>
+#elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  include <arch/sam34/sam3x_irq.h>
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include <arch/sam34/sam4l_irq.h>
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)
