@@ -89,7 +89,7 @@
 #define SAM_PID_PWM           (36)  /* Pulse Width Modulation Controller */
 #define SAM_PID_ADC           (37)  /* ADC Controller */
 #define SAM_PID_DACC          (38)  /* DAC Controller */
-#define SAM_PID_DMAC          (40)  /* DMA Controller */
+#define SAM_PID_DMAC          (39)  /* DMA Controller */
 #define SAM_PID_UOTGHS        (40)  /* USB OTG High Speed */
 #define SAM_PID_TRNG          (41)  /* True Random Number Generator */
 #define SAM_PID_EMAC          (42)  /* Ethernet MAC */

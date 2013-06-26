@@ -45,6 +45,8 @@
 
 #if defined(CONFIG_ARCH_CHIP_SAM3U)
 #  include "chip/sam3u_memorymap.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  include "chip/sam3x_memorymap.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_memorymap.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)
