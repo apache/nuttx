@@ -322,9 +322,8 @@ Buttons and LEDs
 Serial Consoles
 ^^^^^^^^^^^^^^^
 
-  USART0
-  ------
-
+  UART1
+  -----
   If you have a TTL to RS-232 convertor then this is the most convenient
   serial console to use.  UART1 is the default in all of these
   configurations.
@@ -334,6 +333,8 @@ Serial Consoles
     GND              J1 pin 9   J4 pin 9
     Vdd              J1 pin 10  J4 pin 10
 
+  USART1
+  ------
   USART1 is another option:
 
     USART1 RXD PA21  J2 pin 6
@@ -341,12 +342,11 @@ Serial Consoles
     GND              J2 pin 9
     Vdd              J2 pin 10
 
+  Virtual COM Port
+  ----------------
   Yet another option is to use UART0 and the virtual COM port.  This
   option may be more convenient for long term development, but was
   painful to use during board bring-up.
-
-  Virtual COM Port
-  ----------------
 
   The SAM4S Xplained contains an Embedded Debugger (EDBG) that can be
   used to program and debug the ATSAM4S16C using Serial Wire Debug (SWD).
@@ -587,5 +587,56 @@ Configuration sub-directories
   nsh:
     This configuration directory will built the NuttShell.  See NOTES above.
 
-  nsh:
-    This configuration directory will built the NuttShell. See NOTES above.
+    NOTES:
+    1. The configuration configuration can be modified to include support
+       for the on-board SRAM (1MB).
+
+       System Type -> External Memory Configuration       
+         CONFIG_ARCH_EXTSRAM0=y              : Select SRAM on CS0
+         CONFIG_ARCH_EXTSRAM0SIZE=1048576    : Size=1MB
+
+       Now what are you going to do with the SRAM.  There are two choices:
+
+       a)  To enable the NuttX RAM test that may be used to verify the
+           external SRAM:
+
+           System Type -> External Memory Configuration       
+             CONFIG_ARCH_EXTSRAM0HEAP=n      : Don't add to heap
+
+           Application Configuration -> System NSH Add-Ons
+             CONFIG_SYSTEM_RAMTEST=y         : Enable the RAM test built-in
+
+         In this configuration, the SDRAM is not added to heap and so is
+         not excessible to the applications.  So the RAM test can be
+         freely executed against the SRAM memory beginning at address
+         0x6000:0000 (CS0).
+
+         nsh> ramtest -h
+         Usage: <noname> [-w|h|b] <hex-address> <decimal-size>
+
+         Where:
+           <hex-address> starting address of the test.
+           <decimal-size> number of memory locations (in bytes).
+           -w Sets the width of a memory location to 32-bits.
+           -h Sets the width of a memory location to 16-bits (default).
+           -b Sets the width of a memory location to 8-bits.
+
+         To test the entire external SRAM:
+
+         nsh> ramtest 60000000 1048576
+         RAMTest: Marching ones: 60000000 1048576
+         RAMTest: Marching zeroes: 60000000 1048576
+         RAMTest: Pattern test: 60000000 1048576 55555555 aaaaaaaa
+         RAMTest: Pattern test: 60000000 1048576 66666666 99999999
+         RAMTest: Pattern test: 60000000 1048576 33333333 cccccccc
+         RAMTest: Address-in-address test: 60000000 1048576
+
+        b) To add this RAM to the NuttX heap, you would need to change the
+           configuration as follows:
+
+           System Type -> External Memory Configuration       
+             CONFIG_ARCH_EXTSRAM0HEAP=y     : Add external RAM to heap
+
+           Memory Management
+             -CONFIG_MM_REGIONS=1           : Only the internal SRAM
+             +CONFIG_MM_REGIONS=2           : Also include external SRAM
