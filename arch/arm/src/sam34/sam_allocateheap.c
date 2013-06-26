@@ -47,29 +47,108 @@
 
 #include <arch/board/board.h>
 
-#include "chip.h"
 #include "mpu.h"
 #include "up_arch.h"
 #include "up_internal.h"
+
+#include "chip.h"
 #include "sam_mpuinit.h"
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM4S)
+#endif
 
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
+/* All SAM's have SRAM0.  The SAM3U family also have SRAM1 and possibly
+ * NFCSRAM.  NFCSRAM may not be used, however, if NAND support is enabled.
+ * In addition, the SAM3U and SAM4S have external SRAM at CS0 (EXTSRAM0).
+ * Support for external SRAM at CS1-3 is not fully implemented.
+ */
 
-#if CONFIG_MM_REGIONS < 2 && SAM34_SRAM1_SIZE > 0
-#  warning "CONFIG_MM_REGIONS < 2: SRAM1 not included in HEAP"
+#undef HAVE_SRAM1_REGION     /* Assume no internal SRAM1 */
+#undef HAVE_NFCSRAM_REGION   /* Assume no NFC SRAM */
+#undef HAVE_EXTSRAM0_REGION  /* Assume no external SRAM at CS0 */
+#undef HAVE_EXTSRAM1_REGION  /* Assume no external SRAM at CS1 */
+#undef HAVE_EXTSRAM2_REGION  /* Assume no external SRAM at CS2 */
+#undef HAVE_EXTSRAM3_REGION  /* Assume no external SRAM at CS3 */
+
+/* Check if external SRAM is supported and, if so, it is is intended
+ * to be used as heap.
+ */
+
+#if !defined(CONFIG_ARCH_EXTSRAM0) || !defined(CONFIG_ARCH_EXTSRAM0HEAP)
+#  undef CONFIG_ARCH_EXTSRAM0SIZE
+#  define CONFIG_ARCH_EXTSRAM0SIZE 0
 #endif
 
-#if CONFIG_MM_REGIONS < 3 && !defined(CONFIG_SAM34_NAND)
-#  warning "CONFIG_MM_REGIONS < 3: NFC SRAM not included in HEAP"
+#if !defined(CONFIG_ARCH_EXTSRAM1) || !defined(CONFIG_ARCH_EXTSRAM1HEAP)
+#  undef CONFIG_ARCH_EXTSRAM1SIZE
+#  define CONFIG_ARCH_EXTSRAM1SIZE 0
 #endif
 
-#if CONFIG_MM_REGIONS > 2 && defined(CONFIG_SAM34_NAND)
-#  error "CONFIG_MM_REGIONS > 2 but cannot use NFC SRAM"
-#  undef CONFIG_MM_REGIONS
-#  define CONFIG_MM_REGIONS 2
+#if !defined(CONFIG_ARCH_EXTSRAM2) || !defined(CONFIG_ARCH_EXTSRAM2HEAP)
+#  undef CONFIG_ARCH_EXTSRAM2SIZE
+#  define CONFIG_ARCH_EXTSRAM2SIZE 0
 #endif
+
+#if !defined(CONFIG_ARCH_EXTSRAM3) || !defined(CONFIG_ARCH_EXTSRAM3HEAP)
+#  undef CONFIG_ARCH_EXTSRAM3SIZE
+#  define CONFIG_ARCH_EXTSRAM3SIZE 0
+#endif
+
+/* SAM3U Unique memory configurations */
+
+#ifdef CONFIG_ARCH_CHIP_SAM3U
+#  ifdef CONFIG_SAM34_NAND
+#    undef SAM34_NFCSRAM_SIZE
+#    define SAM34_NFCSRAM_SIZE 0
+#  endif
+
+#  if SAM34_SRAM1_SIZE > 0
+#    if CONFIG_MM_REGIONS > 1
+#      define HAVE_SRAM1_REGION 1
+#    else
+#      warning "CONFIG_MM_REGIONS < 2: SRAM1 not included in HEAP"
+#    endif
+#  endif
+
+#  if SAM34_NFCSRAM_SIZE > 0
+#    if CONFIG_MM_REGIONS > 2
+#      define HAVE_NFCSRAM_REGION
+#    else
+#      warning "CONFIG_MM_REGIONS < 3: NFC SRAM not included in HEAP"
+#    endif
+
+#    if CONFIG_ARCH_EXTSRAM0SIZE > 0
+#      if CONFIG_MM_REGIONS > 3
+#        define HAVE_EXTSRAM0_REGION 1
+#      else
+#        warning "CONFIG_MM_REGIONS < 4: External SRAM not included in HEAP"
+#      endif
+#    endif
+
+#  elif CONFIG_ARCH_EXTSRAM0SIZE > 0
+#    if CONFIG_MM_REGIONS > 2
+#       define HAVE_EXTSRAM0_REGION 1
+#    else
+#      warning "CONFIG_MM_REGIONS < 3: External SRAM not included in HEAP"
+#    endif
+#  endif
+#else
+
+/* The SAM4S and SAM4L may have only internal SRAM0 and external SRAM0 */
+
+#  if CONFIG_ARCH_EXTSRAM0SIZE > 0
+#    if CONFIG_MM_REGIONS > 1
+#       define HAVE_EXTSRAM0_REGION 1
+#    else
+#      warning "CONFIG_MM_REGIONS < 2: External SRAM not included in HEAP"
+#    endif
+#  endif
+#endif
+
+/* Check common SRAM0 configuration */
 
 #if CONFIG_DRAM_END > (SAM_INTSRAM0_BASE+SAM34_SRAM0_SIZE)
 #  error "CONFIG_DRAM_END is beyond the end of SRAM0"
@@ -224,7 +303,11 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
-#if SAM34_SRAM1_SIZE > 0
+ /* The SAM3U also have SRAM1 and NFCSRAM,  We will add these as regions
+  * the first two additional memory regions if we have them.
+  */
+
+#ifdef HAVE_SRAM1_REGION
   /* Allow user access to the heap memory */
 
   sam_mpu_uheap(SAM_INTSRAM1_BASE, SAM34_SRAM1_SIZE);
@@ -233,7 +316,9 @@ void up_addregion(void)
 
   kumm_addregion((FAR void*)SAM_INTSRAM1_BASE, SAM34_SRAM1_SIZE);
 
-#if CONFIG_MM_REGIONS > 2 && SAM34_NFCSRAM_SIZE > 0
+#endif /* HAVE_SRAM1_REGION */
+
+#ifdef HAVE_NFCSRAM_REGION
   /* Allow user access to the heap memory */
 
   sam_mpu_uheap(SAM_NFCSRAM_BASE, SAM34_NFCSRAM_SIZE);
@@ -242,7 +327,50 @@ void up_addregion(void)
 
   kumm_addregion((FAR void*)SAM_NFCSRAM_BASE, SAM34_NFCSRAM_SIZE);
 
-#endif /* CONFIG_MM_REGIONS > 2 && SAM34_NFCSRAM_SIZE > 0 */
-#endif /* SAM34_SRAM1_SIZE > 0 */
+#endif /* HAVE_NFCSRAM_REGION */
+
+#ifdef HAVE_EXTSRAM0_REGION
+  /* Allow user access to the heap memory */
+
+  sam_mpu_uheap(SAM_EXTCS0_BASE, CONFIG_ARCH_EXTSRAM0SIZE);
+
+  /* Add the region */
+
+  kumm_addregion((FAR void*)SAM_EXTCS0_BASE, CONFIG_ARCH_EXTSRAM0SIZE);
+
+#endif /* HAVE_EXTSRAM0_REGION */
+
+#ifdef HAVE_EXTSRAM1_REGION
+  /* Allow user access to the heap memory */
+
+  sam_mpu_uheap(SAM_EXTCS1_BASE, CONFIG_ARCH_EXTSRAM1SIZE);
+
+  /* Add the region */
+
+  kumm_addregion((FAR void*)SAM_EXTCS1_BASE, CONFIG_ARCH_EXTSRAM1SIZE);
+
+#endif /* HAVE_EXTSRAM0_REGION */
+
+#ifdef HAVE_EXTSRAM2_REGION
+  /* Allow user access to the heap memory */
+
+  sam_mpu_uheap(SAM_EXTCS2_BASE, CONFIG_ARCH_EXTSRAM2SIZE);
+
+  /* Add the region */
+
+  kumm_addregion((FAR void*)SAM_EXTCS2_BASE, CONFIG_ARCH_EXTSRAM2SIZE);
+
+#endif /* HAVE_EXTSRAM0_REGION */
+
+#ifdef HAVE_EXTSRAM3_REGION
+  /* Allow user access to the heap memory */
+
+  sam_mpu_uheap(SAM_EXTCS3_BASE, CONFIG_ARCH_EXTSRAM3SIZE);
+
+  /* Add the region */
+
+  kumm_addregion((FAR void*)SAM_EXTCS3_BASE, CONFIG_ARCH_EXTSRAM3SIZE);
+
+#endif /* HAVE_EXTSRAM0_REGION */
 }
 #endif /* CONFIG_MM_REGIONS > 1 */

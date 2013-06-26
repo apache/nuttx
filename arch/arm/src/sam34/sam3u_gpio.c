@@ -388,6 +388,10 @@ int sam_configgpio(gpio_pinset_t cfgset)
 
       case GPIO_PERIPHA:
       case GPIO_PERIPHB:
+#ifdef GPIO_HAVE_PERIPHCD
+      case GPIO_PERIPHC:
+      case GPIO_PERIPHD:
+#endif
         ret = sam_configperiph(base, pin, cfgset);
         break;
 

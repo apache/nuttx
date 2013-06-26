@@ -3,7 +3,7 @@
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
- *           Based on a prototype by Petteri Amimonen
+ *           Based on a prototype by Petteri Aimonen
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

@@ -130,6 +130,10 @@ endchoice
 config ARCH_CHIP_SAM3U
 	bool
 	default n
+	select ARCH_HAVE_EXTNOR
+	select ARCH_HAVE_EXTNAND
+	select ARCH_HAVE_EXTSRAM0
+	select ARCH_HAVE_EXTSRAM1
 
 config ARCH_CHIP_SAM4L
 	bool
@@ -139,6 +143,10 @@ config ARCH_CHIP_SAM4L
 config ARCH_CHIP_SAM4S
 	bool
 	default n
+	select ARCH_HAVE_EXTNOR
+	select ARCH_HAVE_EXTNAND
+	select ARCH_HAVE_EXTSRAM0
+	select ARCH_HAVE_EXTSRAM1
 
 menu "AT91SAM3/4 Peripheral Support"
 
