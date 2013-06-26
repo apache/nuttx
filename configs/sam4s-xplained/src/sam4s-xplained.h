@@ -87,10 +87,10 @@
  */
 
 
-#define GPIO_D9     (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
-                     GPIO_PORT_PIOC | GPIO_PIN10)
-#define GPIO_D10    (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
-                     GPIO_PORT_PIOC | GPIO_PIN17)
+#define GPIO_D9      (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
+                      GPIO_PORT_PIOC | GPIO_PIN10)
+#define GPIO_D10     (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
+                      GPIO_PORT_PIOC | GPIO_PIN17)
 
 /* Mechanical buttons:
  *
@@ -101,9 +101,14 @@
  *   PA5 BP2
  */
 
-#define GPIO_BP2    (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
-                     GPIO_INT_BOTHEDGES | GPIO_PORT_PIOA | GPIO_PIN5)
-#define IRQ_BP2     SAM_IRQ_PA5
+#define GPIO_BP2     (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
+                      GPIO_INT_BOTHEDGES | GPIO_PORT_PIOA | GPIO_PIN5)
+#define IRQ_BP2      SAM_IRQ_PA5
+
+/* SRAM Enable.  EBI_NLB PC16.  Active=low; Standby=high */
+
+#define GPIO_EBI_NLB (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
+                      GPIO_PORT_PIOC | GPIO_PIN16)
 
 /************************************************************************************
  * Public Types
@@ -119,9 +124,21 @@
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
+ * Name: sam_sram_initialize
+ *
+ * Description:
+ *   Configure and enable SRAM on board the SAM4S Xplained
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_EXTSRAM0
+void sam_sram_initialize(void);
+#endif
+
+/************************************************************************************
  * Name: up_ledinit
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void);

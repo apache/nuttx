@@ -83,6 +83,11 @@
 #  define SAM_SMC_ECCPR15_OFFSET       0x006c /* SMC ECC parity 15 Register */
 
 #  define SAM_SMCCS_OFFSET(n)          (0x0070+((n)*0x014))
+#    define SAM_SMCCS0_OFFSET          0x0070 /* SMC CS0 offset */
+#    define SAM_SMCCS1_OFFSET          0x0084 /* SMC CS1 offset */
+#    define SAM_SMCCS2_OFFSET          0x0098 /* SMC CS2 offset */
+#    define SAM_SMCCS3_OFFSET          0x00ac /* SMC CS3 offset */
+
 #  define SAM_SMCCS_SETUP_OFFSET       0x0000 /* SMC Setup register */
 #  define SAM_SMCCS_PULSE_OFFSET       0x0004 /* SMC Pulse Register */
 #  define SAM_SMCCS_CYCLE_OFFSET       0x0008 /* SMC Cycle Register */
@@ -97,6 +102,11 @@
 
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_SMCCS_OFFSET(n)          ((n) << 4)
+#    define SAM_SMCCS0_OFFSET          0x0000 /* SMC CS0 offset */
+#    define SAM_SMCCS1_OFFSET          0x0010 /* SMC CS1 offset */
+#    define SAM_SMCCS2_OFFSET          0x0020 /* SMC CS2 offset */
+#    define SAM_SMCCS3_OFFSET          0x0030 /* SMC CS3 offset */
+
 #  define SAM_SMCCS_SETUP_OFFSET       0x0000 /* SMC Setup Register */
 #  define SAM_SMCCS_PULSE_OFFSET       0x0004 /* SMC Pulse Register */
 #  define SAM_SMCCS_CYCLE_OFFSET       0x0008 /* SMC Cycle Register */
@@ -146,10 +156,11 @@
 #endif
 
 #define SAM_SMCCS_BASE(n)              (SAM_SMC_BASE+SAM_SMCCS_OFFSET(n))
-#  define SAM_SMC_CS0_BASE             (SAM_SMC_BASE+SAM_SMCCS_OFFSET(0))
-#  define SAM_SMC_CS1_BASE             (SAM_SMC_BASE+SAM_SMCCS_OFFSET(1))
-#  define SAM_SMC_CS2_BASE             (SAM_SMC_BASE+SAM_SMCCS_OFFSET(2))
-#  define SAM_SMC_CS3_BASE             (SAM_SMC_BASE+SAM_SMCCS_OFFSET(3))
+#  define SAM_SMC_CS0_BASE             (SAM_SMC_BASE+SAM_SMCCS0_OFFSET)
+#  define SAM_SMC_CS1_BASE             (SAM_SMC_BASE+SAM_SMCCS1_OFFSET)
+#  define SAM_SMC_CS2_BASE             (SAM_SMC_BASE+SAM_SMCCS2_OFFSET)
+#  define SAM_SMC_CS3_BASE             (SAM_SMC_BASE+SAM_SMCCS3_OFFSET)
+
 #define SAM_SMCCS_SETUP(n)             (SAM_SMCCS_BASE(n)+SAM_SMCCS_SETUP_OFFSET)
 #define SAM_SMCCS_PULSE(n)             (SAM_SMCCS_BASE(n)+SAM_SMCCS_PULSE_OFFSET)
 #define SAM_SMCCS_CYCLE(n)             (SAM_SMCCS_BASE(n)+SAM_SMCCS_CYCLE_OFFSET)
@@ -157,6 +168,38 @@
 #  define SAM_SMCCS_TIMINGS(n)         (SAM_SMCCS_BASE(n)+SAM_SMCCS_TIMINGS_OFFSET)
 #endif
 #define SAM_SMCCS_MODE(n)              (SAM_SMCCS_BASE(n)+SAM_SMCCS_MODE_OFFSET)
+
+#  define SAM_SMCCS0_SETUP             (SAM_SMC_CS0_BASE+SAM_SMCCS_SETUP_OFFSET)
+#  define SAM_SMCCS0_PULSE             (SAM_SMC_CS0_BASE+SAM_SMCCS_PULSE_OFFSET)
+#  define SAM_SMCCS0_CYCLE             (SAM_SMC_CS0_BASE+SAM_SMCCS_CYCLE_OFFSET)
+#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+#    define SAM_SMCCS0_TIMINGS         (SAM_SMC_CS0_BASE+SAM_SMCCS_TIMINGS_OFFSET)
+#  endif
+#  define SAM_SMCCS0_MODE              (SAM_SMC_CS0_BASE+SAM_SMCCS_MODE_OFFSET)
+
+#  define SAM_SMCCS1_SETUP             (SAM_SMC_CS1_BASE+SAM_SMCCS_SETUP_OFFSET)
+#  define SAM_SMCCS1_PULSE             (SAM_SMC_CS1_BASE+SAM_SMCCS_PULSE_OFFSET)
+#  define SAM_SMCCS1_CYCLE             (SAM_SMC_CS1_BASE+SAM_SMCCS_CYCLE_OFFSET)
+#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+#    define SAM_SMCCS1_TIMINGS         (SAM_SMC_CS1_BASE+SAM_SMCCS_TIMINGS_OFFSET)
+#  endif
+#  define SAM_SMCCS1_MODE              (SAM_SMC_CS1_BASE+SAM_SMCCS_MODE_OFFSET)
+
+#  define SAM_SMCCS2_SETUP             (SAM_SMC_CS2_BASE+SAM_SMCCS_SETUP_OFFSET)
+#  define SAM_SMCCS2_PULSE             (SAM_SMC_CS2_BASE+SAM_SMCCS_PULSE_OFFSET)
+#  define SAM_SMCCS2_CYCLE             (SAM_SMC_CS2_BASE+SAM_SMCCS_CYCLE_OFFSET)
+#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+#    define SAM_SMCCS2_TIMINGS         (SAM_SMC_CS2_BASE+SAM_SMCCS_TIMINGS_OFFSET)
+#  endif
+#  define SAM_SMCCS2_MODE              (SAM_SMC_CS2_BASE+SAM_SMCCS_MODE_OFFSET)
+
+#  define SAM_SMCCS3_SETUP             (SAM_SMC_CS3_BASE+SAM_SMCCS_SETUP_OFFSET)
+#  define SAM_SMCCS3_PULSE             (SAM_SMC_CS3_BASE+SAM_SMCCS_PULSE_OFFSET)
+#  define SAM_SMCCS3_CYCLE             (SAM_SMC_CS3_BASE+SAM_SMCCS_CYCLE_OFFSET)
+#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+#    define SAM_SMCCS3_TIMINGS         (SAM_SMC_CS3_BASE+SAM_SMCCS_TIMINGS_OFFSET)
+#  endif
+#  define SAM_SMCCS3_MODE              (SAM_SMC_CS3_BASE+SAM_SMCCS_MODE_OFFSET)
 
 #define SAM_SMC_OCMS                   (SAM_SMC_BASE+SAM_SMC_OCMS_OFFSET)
 #define SAM_SMC_KEY1                   (SAM_SMC_BASE+SAM_SMC_KEY1_OFFSET)
@@ -374,30 +417,40 @@
 
 #define SMCCS_SETUP_NWESETUP_SHIFT     (0)       /* Bits 0-5: NWE Setup length */
 #define SMCCS_SETUP_NWESETUP_MASK      (63 << SMCCS_SETUP_NWESETUP_SHIFT)
+#  define SMCCS_SETUP_NWESETUP(n)      ((n) << SMCCS_SETUP_NWESETUP_SHIFT)
 #define SMCCS_SETUP_NCSWRSETUP_SHIFT   (8)       /* Bits 8-13: NCS Setup length in Write access */
 #define SMCCS_SETUP_NCSWRSETUP_MASK    (63 << SMCCS_SETUP_NCSWRSETUP_SHIFT)
+#  define SMCCS_SETUP_NCSWRSETUP(n)    ((n) << SMCCS_SETUP_NCSWRSETUP_SHIFT)
 #define SMCCS_SETUP_NRDSETUP_SHIFT     (16)      /* Bits 16-21: NRD Setup length */
 #define SMCCS_SETUP_NRDSETUP_MASK      (63 << SMCCS_SETUP_NRDSETUP_SHIFT)
+#  define SMCCS_SETUP_NRDSETUP(n)      ((n) << SMCCS_SETUP_NRDSETUP_SHIFT)
 #define SMCCS_SETUP_NCSRDSETUP_SHIFT   (24)      /* Bits 24-29: NCS Setup length in Read access */
 #define SMCCS_SETUP_NCSRDSETUP_MASK    (63 << SMCCS_SETUP_NCSRDSETUP_SHIFT)
+#  define SMCCS_SETUP_NCSRDSETUP(n)    ((n) << SMCCS_SETUP_NCSRDSETUP_SHIFT)
 
 /* SMC Pulse Register */
 
 #define SMCCS_PULSE_NWEPULSE_SHIFT     (0)       /* Bits 0-5: NWE Pulse Length */
 #define SMCCS_PULSE_NWEPULSE_MASK      (63 << SMCCS_PULSE_NWEPULSE_SHIFT)
+#  define SMCCS_PULSE_NWEPULSE(n)      ((n) << SMCCS_PULSE_NWEPULSE_SHIFT)
 #define SMCCS_PULSE_NCSWRPULSE_SHIFT   (8)       /* Bits 8-13: NCS Pulse Length in WRITE Access */
 #define SMCCS_PULSE_NCSWRPULSE_MASK    (63 << SMCCS_PULSE_NCSWRPULSE_SHIFT)
+#  define SMCCS_PULSE_NCSWRPULSE(n)    ((n) << SMCCS_PULSE_NCSWRPULSE_SHIFT)
 #define SMCCS_PULSE_NRDPULSE_SHIFT     (16)      /* Bits 16-21: NRD Pulse Length */
 #define SMCCS_PULSE_NRDPULSE_MASK      (63 << SMCCS_PULSE_NRDPULSE_SHIFT)
+#  define SMCCS_PULSE_NRDPULSE(n)      ((n) << SMCCS_PULSE_NRDPULSE_SHIFT)
 #define SMCCS_PULSE_NCSRDPULSE_SHIFT   (24)      /* Bits 24-29: NCS Pulse Length in READ Access */
 #define SMCCS_PULSE_NCSRDPULSE_MASK    (63 << SMCCS_PULSE_NCSRDPULSE_SHIFT)
+#  define SMCCS_PULSE_NCSRDPULSE(n)    ((n) << SMCCS_PULSE_NCSRDPULSE_SHIFT)
 
 /* SMC Cycle Register */
 
 #define SMCCS_CYCLE_NWECYCLE_SHIFT     (0)       /* Bits 0-8: Total Write Cycle Length */
 #define SMCCS_CYCLE_NWECYCLE_MASK      (0x1ff << SMCCS_CYCLE_NWECYCLE_SHIFT)
+#  define SMCCS_CYCLE_NWECYCLE(n)      ((n) << SMCCS_CYCLE_NWECYCLE_SHIFT)
 #define SMCCS_CYCLE_NRDCYCLE_SHIFT     (16)      /* Bits 16-24: Total Read Cycle Length */
 #define SMCCS_CYCLE_NRDCYCLE_MASK      (0x1ff << SMCCS_CYCLE_NRDCYCLE_SHIFT)
+#  define SMCCS_CYCLE_NRDCYCLE(n)      ((n) << SMCCS_CYCLE_NRDCYCLE_SHIFT)
 
 /* SMC Timings Register */
 

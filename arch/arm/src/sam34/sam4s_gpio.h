@@ -64,7 +64,7 @@
  *   MMM. .... .... .... ....
  */
 
-#define GPIO_MODE_SHIFT            (17)        /* Bits 17-23: GPIO mode */
+#define GPIO_MODE_SHIFT            (17)        /* Bits 17-19: GPIO mode */
 #define GPIO_MODE_MASK             (7 << GPIO_MODE_SHIFT)
 #  define GPIO_INPUT               (0 << GPIO_MODE_SHIFT) /* Input */
 #  define GPIO_OUTPUT              (1 << GPIO_MODE_SHIFT) /* Output */

@@ -896,7 +896,7 @@ Where <subdir> is one of the following:
        device will save encoded trace output in in-memory buffer; if the
        USB monitor is enabled, that trace buffer will be periodically
        emptied and dumped to the system logging device (UART2 in this
-       configuraion):
+       configuration):
 
         Device Drivers -> "USB Device Driver Support:
           CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
@@ -931,5 +931,29 @@ Where <subdir> is one of the following:
         System Type -> PIC32MX Peripheral Support:
            CONFIG_PIC32MX_UART2=n     : Disable UART2
 
+        The SYSLOG output on UART2 cannot by used.  You have two choices,
+        first, you can simply disable the SYSLOG device.  Then 1) debug
+        output will come the USB console, and 2) all debug output prior
+        to connecting the USB console will be lost:
+
         Device Drivers -> System Logging Device Options:
            CONFIG_SYSLOG=n            : Disable SYSLOG output
+
+        The second options is to configure a RAM SYLOG device.  This is
+        a circular buffer that accumulated debug output in memory.  The
+        contents of the circular buffer can be dumped from the NSH command
+        line using the 'dmesg' command.
+
+        Device Drivers -> System Logging Device Options:
+          CONFIG_SYSLOG=y             : Enables the System Logging feature.
+          CONFIG_RAMLOG=y             : Enable the RAM-based logging feature.
+          CONFIG_RAMLOG_CONSOLE=n     : (there is no default console device)
+          CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the
+                                        system logger.
+
+        Logging is currently can be set up to use any amount of memorym (here 8KB):
+
+          CONFIG_RAMLOG_CONSOLE_BUFSIZE=8192
+
+     7. See the notes for the nsh configuration.  Most also apply to the usbnsh
+        configuration.
