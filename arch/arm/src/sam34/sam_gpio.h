@@ -47,7 +47,8 @@
 
 #include "chip.h"
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  include "sam3u_gpio.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "sam4l_gpio.h"
