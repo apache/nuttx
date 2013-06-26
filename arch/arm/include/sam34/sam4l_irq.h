@@ -66,7 +66,7 @@
 #define SAM_PID_TWIS1_RHR      (10)  /* DIR=RX REGISTER: TWIS1 RHR */
 #define SAM_PID_ADCIFE_LCV     (11)  /* DIR=RX REGISTER: ADCIFE LCV */
 #define SAM_PID_CATB_RX        (12)  /* DIR=RX REGISTER: CATB Multiple */
-                                     /* 13: Reserved */    
+                                     /* 13: Reserved */
 #define SAM_PID_IISC0_RHR      (14)  /* DIR=RX REGISTER: IISC RHR (CH0) */
 #define SAM_PID_IISC1_RHR      (15)  /* DIR=RX REGISTER: IISC RHR (CH1) */
 #define SAM_PID_PARC_RHR       (16)  /* DIR=RX REGISTER: PARC RHR */
@@ -181,7 +181,7 @@
 /* GPIO interrupts (derived from SAM_IRQ_PIOA/B/C) */
 
 #ifdef CONFIG_GPIOA_IRQ
-#  define SAM_IRQ_GPIOA_PINS  (SAM_IRQ_EXTINT+SAM_IRQ_NEXTINT)
+#  define SAM_IRQ_GPIOA_PINS  (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT)
 #  define SAM_IRQ_PA0         (SAM_IRQ_GPIOA_PINS+0)          /* GPIOA, PIN 0 */
 #  define SAM_IRQ_PA1         (SAM_IRQ_GPIOA_PINS+1)          /* GPIOA, PIN 1 */
 #  define SAM_IRQ_PA2         (SAM_IRQ_GPIOA_PINS+2)          /* GPIOA, PIN 2 */
@@ -220,7 +220,7 @@
 #endif
 
 #ifdef CONFIG_GPIOB_IRQ
-#  define SAM_IRQ_GPIOB_PINS  (SAM_IRQ_EXTINT+SAM_IRQ_NEXTINT+SAM_IRQ_GPIOA_PINS)
+#  define SAM_IRQ_GPIOB_PINS  (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT + SAM_NGPIOAIRQS)
 #  define SAM_IRQ_PB0         (SAM_IRQ_GPIOB_PINS+0)          /* GPIOB, PIN 0 */
 #  define SAM_IRQ_PB1         (SAM_IRQ_GPIOB_PINS+1)          /* GPIOB, PIN 1 */
 #  define SAM_IRQ_PB2         (SAM_IRQ_GPIOB_PINS+2)          /* GPIOB, PIN 2 */
@@ -253,13 +253,13 @@
 #  define SAM_IRQ_PB29        (SAM_IRQ_GPIOB_PINS+29)         /* GPIOB, PIN 29 */
 #  define SAM_IRQ_PB30        (SAM_IRQ_GPIOB_PINS+30)         /* GPIOB, PIN 30 */
 #  define SAM_IRQ_PB31        (SAM_IRQ_GPIOB_PINS+31)         /* GPIOB, PIN 31 */
-#  define SAM_NGPIOAIRQS      32
+#  define SAM_NGPIOBIRQS      32
 #else
 #  define SAM_NGPIOBIRQS      0
 #endif
 
 #ifdef CONFIG_GPIOC_IRQ
-#  define SAM_IRQ_GPIOC_PINS  (SAM_IRQ_EXTINT+SAM_IRQ_NEXTINT+SAM_IRQ_GPIOA_PINS+SAM_IRQ_GPIOB_PINS)
+#  define SAM_IRQ_GPIOC_PINS  (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT + SAM_NGPIOAIRQS + SAM_NGPIOBIRQS)
 #  define SAM_IRQ_PC0         (SAM_IRQ_GPIOC_PINS+0)          /* GPIOC, PIN 0 */
 #  define SAM_IRQ_PC1         (SAM_IRQ_GPIOC_PINS+1)          /* GPIOC, PIN 1 */
 #  define SAM_IRQ_PC2         (SAM_IRQ_GPIOC_PINS+2)          /* GPIOC, PIN 2 */
@@ -292,15 +292,15 @@
 #  define SAM_IRQ_PC29        (SAM_IRQ_GPIOC_PINS+29)         /* GPIOC, PIN 29 */
 #  define SAM_IRQ_PC30        (SAM_IRQ_GPIOC_PINS+30)         /* GPIOC, PIN 30 */
 #  define SAM_IRQ_PC31        (SAM_IRQ_GPIOC_PINS+31)         /* GPIOC, PIN 31 */
-#  define SAM_NGPIOAIRQS      32
+#  define SAM_NGPIOCIRQS      32
 #else
 #  define SAM_NGPIOCIRQS      0
 #endif
 
 /* Total number of IRQ numbers */
 
-#define NR_IRQS               (SAM_IRQ_EXTINT+SAM_IRQ_NEXTINT+\
-                               SAM_NGPIOAIRQS+SAM_NGPIOBIRQS+SAM_NGPIOCIRQS)
+#define NR_IRQS               (SAM_IRQ_EXTINT + SAM_IRQ_NEXTINT + \
+                               SAM_NGPIOAIRQS + SAM_NGPIOBIRQS + SAM_NGPIOCIRQS)
 
 /****************************************************************************************
  * Public Types
