@@ -86,7 +86,6 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-
 #define GPIO_D9      (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
                       GPIO_PORT_PIOC | GPIO_PIN10)
 #define GPIO_D10     (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
