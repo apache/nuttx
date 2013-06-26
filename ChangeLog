@@ -5060,5 +5060,11 @@
 	  interrupt vectros (2013-6-26).
 	* arch/arm/src/sam34/sam3x_periphclks.h:  Add peripheral clock
 	  controls for the SAM3X/3A (2013-6-26).
-	* arch/arm/src/sam34/chip/sam3x_memorymap.h:  Add SAM3X/3Z memory map.
+	* arch/arm/src/sam34/chip/sam3x_memorymap.h:  Add SAM3X/3A memory map
+	  (2013-6-26).
+	* arch/arm/src/sam34/chip/sam3x_pinmap.h:  Add SAM3X/3A pin
+	  multi-plexing definitions (2013-6-26).
+	* arch/arm/src/sam34/sam3x_gpio.h:  Add SAM3X/3A gpio encoding
+	  macros.  These differ from the SAM3U only in because of the
+	  6 PIOs:  PIOA-PIOF (2013-6-26).
 
