@@ -92,7 +92,7 @@
                                           /* 0x40030000-0x40033fff: Reserved */
 #define SAM_UDP_BASE           0x40034000 /* 0x40034000-0x40037fff: USB 2.0 Device */
 #define SAM_ADC_BASE           0x40038000 /* 0x40038000-0x4003bfff: Analog To Digital Converter */
-#define SAM_DACCBASE           0x400cC000 /* 0x4003c000-0x4003ffff: Digital To Analog Converter */
+#define SAM_DACC_BASE          0x4003c000 /* 0x4003c000-0x4003ffff: Digital To Analog Converter */
 #define SAM_ACC_BASE           0x40040000 /* 0x40040000-0x40043fff: Analog Comparator */
 #define SAM_CRCCU_BASE         0x40044000 /* 0x40040000-0x40047fff: CRC Calculation Unit */
                                           /* 0x40048000-0x400dffff: Reserved */
