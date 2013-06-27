@@ -1,6 +1,6 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam3u_wdt.h
- * Watchdog Timer (WDT) definitions for the SAM3U and SAM4S
+ * Watchdog Timer (WDT) definitions for the SAM3U, SAM3X, SAM3A, and SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -68,6 +68,7 @@
 #define WDT_CR_WDRSTT             (1 << 0)   /* Bit 0:  Watchdog Rest */
 #define WDT_CR_KEY_SHIFT          (24)       /* Bits 24-31:  Password */
 #define WDT_CR_KEY_MASK           (0xff << WDT_CR_KEY_SHIFT)
+#  define WDT_CR_KEY              (0xa5 << WDT_CR_KEY_SHIFT)
 
 /* Watchdog Timer Mode Register */
 

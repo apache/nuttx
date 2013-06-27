@@ -63,7 +63,7 @@
 #include "chip/sam_spi.h"
 #include "chip/sam_pinmap.h"
 
-#ifdef CONFIG_SAM34_SPI0
+#if defined(CONFIG_SAM34_SPI0) || defined(CONFIG_SAM34_SPI1)
 
 /****************************************************************************
  * Definitions
@@ -71,16 +71,21 @@
 /* Configuration ************************************************************/
 /* Select MCU-specific settings
  *
- * For the SAM3U, SPI is driven by the main clock.
- * For the SAM4L, SPI driven by CLK_SPI which is the PBB clock.
+ * For the SAM3U, SAM3A, and SAM3X SPI is driven by the main clock.
+ * For the SAM4L, SPI is driven by CLK_SPI which is the PBB clock.
  */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3A) || \
+    defined(CONFIG_ARCH_CHIP_SAM3X)
 #  define SAM_SPI_CLOCK  BOARD_MCK_FREQUENCY  /* Frequency of the main clock */
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  define SAM_SPI_CLOCK  BOARD_PBB_FREQUENCY  /* PBB frequency */
 #else
 #  error Unrecognized SAM architecture
+#endif
+
+#ifdef CONFIG_SAM34_SPI1
+#  error Support for SPI1 has not yet been implemented
 #endif
 
 /* Debug *******************************************************************/

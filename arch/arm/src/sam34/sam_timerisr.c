@@ -57,12 +57,14 @@
  ****************************************************************************/
 /* Select MCU-specific settings
  *
- * For the SAM3U, Systick is driven by the main clock.
+ * For the SAM3U, SAM3A, and SAM3X, Systickis driven by the main clock
+ *   (This could be the MCK/8 but that option has not yet been necessary).
  * For the SAM4L, Systick is driven by the CPU clock which is just the main
  *   clock divided down.
  */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SAM_SYSTICK_CLOCK  BOARD_MCK_FREQUENCY  /* Frequency of the main clock */
 #elif defined(CONFIG_ARCH_CHIP_SAM4L) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_SYSTICK_CLOCK  BOARD_CPU_FREQUENCY  /* CPU frequency */

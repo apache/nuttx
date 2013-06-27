@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/sam34/chip/sam3u_uart.h
  * Universal Asynchronous Receiver Transmitter (UART) and Universal Synchronous Asynchronous
- * Receiver Transmitter (USART) definitions for the SAM3U and SAM4S
+ * Receiver Transmitter (USART) definitions for the SAM3U, SAM3X, SAM3A and SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -71,6 +71,12 @@
                                             /* 0x0048: Reserved (USART) */
 #define SAM_UART_IFR_OFFSET          0x004c /* IrDA Filter Register (USART only) */
 #define SAM_UART_MAN_OFFSET          0x0050 /* Manchester Encoder Decoder Register (USART only) */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define SAM_UART_LINMR_OFFSET      0x0054 /* LIN Mode Register (USART only) */
+#  define SAM_UART_LINIR_OFFSET      0x0058 /* LIN Identifier Register (USART only) */
+#endif
+
 #define SAM_UART_WPMR_OFFSET         0x00e4 /* Write Protect Mode Register (USART only) */
 #define SAM_UART_WPSR_OFFSET         0x00e8 /* Write Protect Status Register (USART only) */
                                             /* 0x005c-0xf8: Reserved (USART) */
@@ -114,6 +120,12 @@
 #define SAM_USART_NER(n)             (SAM_USARTN_BASE(n)+SAM_UART_NER_OFFSET)
 #define SAM_USART_IFR(n)             (SAM_USARTN_BASE(n)+SAM_UART_IFR_OFFSET)
 #define SAM_USART_MAN(n)             (SAM_USARTN_BASE(n)+SAM_UART_MAN_OFFSET)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define SAM_USART_LINMR(n)         (SAM_USARTN_BASE(n)+SAM_UART_LINMR_OFFSET)
+#  define SAM_USART_LINIR(n)         (SAM_USARTN_BASE(n)+SAM_UART_LINIR_OFFSET)
+#endif
+
 #define SAM_USART_WPMR(n)            (SAM_USARTN_BASE(n)+SAM_UART_WPMR_OFFSET)
 #define SAM_USART_WPSR(n)            (SAM_USARTN_BASE(n)+SAM_UART_WPSR_OFFSET)
 #define SAM_USART_VERSION(n)         (SAM_USARTN_BASE(n)+SAM_UART_VERSION_OFFSET)
@@ -133,6 +145,12 @@
 #define SAM_USART0_NER               (SAM_USART0_BASE+SAM_UART_NER_OFFSET)
 #define SAM_USART0_IFR               (SAM_USART0_BASE+SAM_UART_IFR_OFFSET)
 #define SAM_USART0_MAN               (SAM_USART0_BASE+SAM_UART_MAN_OFFSET)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define SAM_USART0_LINMR           (SAM_USART0_BASE+SAM_UART_LINMR_OFFSET)
+#  define SAM_USART0_LINIR           (SAM_USART0_BASE+SAM_UART_LINIR_OFFSET)
+#endif
+
 #define SAM_USART0_WPMR              (SAM_USART0_BASE+SAM_UART_WPMR_OFFSET)
 #define SAM_USART0_WPSR              (SAM_USART0_BASE+SAM_UART_WPSR_OFFSET)
 #define SAM_USART0_VERSION           (SAM_USART0_BASE+SAM_UART_VERSION_OFFSET)
@@ -152,6 +170,12 @@
 #define SAM_USART1_NER               (SAM_USART1_BASE+SAM_UART_NER_OFFSET)
 #define SAM_USART1_IFR               (SAM_USART1_BASE+SAM_UART_IFR_OFFSET)
 #define SAM_USART1_MAN               (SAM_USART1_BASE+SAM_UART_MAN_OFFSET)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define SAM_USART1_LINMR           (SAM_USART1_BASE+SAM_UART_LINMR_OFFSET)
+#  define SAM_USART1_LINIR           (SAM_USART1_BASE+SAM_UART_LINIR_OFFSET)
+#endif
+
 #define SAM_USART1_WPMR              (SAM_USART1_BASE+SAM_UART_WPMR_OFFSET)
 #define SAM_USART1_WPSR              (SAM_USART1_BASE+SAM_UART_WPSR_OFFSET)
 #define SAM_USART1_VERSION           (SAM_USART1_BASE+SAM_UART_VERSION_OFFSET)
@@ -171,6 +195,12 @@
 #define SAM_USART2_NER               (SAM_USART2_BASE+SAM_UART_NER_OFFSET)
 #define SAM_USART2_IFR               (SAM_USART2_BASE+SAM_UART_IFR_OFFSET)
 #define SAM_USART2_MAN               (SAM_USART2_BASE+SAM_UART_MAN_OFFSET)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define SAM_USART2_LINMR           (SAM_USART2_BASE+SAM_UART_LINMR_OFFSET)
+#  define SAM_USART2_LINIR           (SAM_USART2_BASE+SAM_UART_LINIR_OFFSET)
+#endif
+
 #define SAM_USART2_WPMR              (SAM_USART2_BASE+SAM_UART_WPMR_OFFSET)
 #define SAM_USART2_WPSR              (SAM_USART2_BASE+SAM_UART_WPSR_OFFSET)
 #define SAM_USART2_VERSION           (SAM_USART2_BASE+SAM_UART_VERSION_OFFSET)
@@ -190,6 +220,12 @@
 #define SAM_USART3_NER               (SAM_USART3_BASE+SAM_UART_NER_OFFSET)
 #define SAM_USART3_IFR               (SAM_USART3_BASE+SAM_UART_IFR_OFFSET)
 #define SAM_USART3_MAN               (SAM_USART3_BASE+SAM_UART_MAN_OFFSET)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define SAM_USART3_LINMR           (SAM_USART3_BASE+SAM_UART_LINMR_OFFSET)
+#  define SAM_USART3_LINIR           (SAM_USART3_BASE+SAM_UART_LINIR_OFFSET)
+#endif
+
 #define SAM_USART3_WPMR              (SAM_USART3_BASE+SAM_UART_WPMR_OFFSET)
 #define SAM_USART3_WPSR              (SAM_USART3_BASE+SAM_UART_WPSR_OFFSET)
 #define SAM_USART3_VERSION           (SAM_USART3_BASE+SAM_UART_VERSION_OFFSET)
@@ -217,6 +253,11 @@
 #define UART_CR_RTSDIS               (1 << 19) /* Bit 19: Request to Send Disable (USART only) */
 #define UART_CR_RCS                  (1 << 19) /* Bit 19: Release SPI Chip Select (USART SPI mode only) */
 
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define UART_CR_LINABT             (1 << 20) /* Bit 20: Abort LIN Transmission */
+#  define UART_CR_LINWKUP            (1 << 21) /* Bit 21: Send LIN Wakeup Signal */
+#endif
+
 /* UART Mode Register and USART Mode Register (UART MODE) */
 
 #define UART_MR_MODE_SHIFT           (0)       /* Bits 0-3: (USART only) */
@@ -227,6 +268,10 @@
 #  define UART_MR_MODE_ISO7816_0     (4  << UART_MR_MODE_SHIFT) /* IS07816 Protocol: T = 0 */
 #  define UART_MR_MODE_ISO7816_1     (6  << UART_MR_MODE_SHIFT) /* IS07816 Protocol: T = 1 */
 #  define UART_MR_MODE_IRDA          (8  << UART_MR_MODE_SHIFT) /* IrDA */
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define UART_MR_MODE_LINMSTR       (10 << UART_MR_MODE_SHIFT) /* LIN Master */
+#  define UART_MR_MODE_LINSLV        (11 << UART_MR_MODE_SHIFT) /* LIN Slave */
+#endif
 #  define UART_MR_MODE_SPIMSTR       (14 << UART_MR_MODE_SHIFT) /* SPI Master (SPI mode only) */
 #  define UART_MR_MODE_SPISLV        (15 << UART_MR_MODE_SHIFT) /* SPI Slave (SPI mode only) */
 #define UART_MR_USCLKS_SHIFT         (4)       /* Bits 4-5: Clock Selection (USART only) */
@@ -302,10 +347,16 @@
 #define UART_INT_RXBUFF              (1 << 12) /* Bit 12: Buffer Full Interrupt (Common) */
 #define UART_INT_NACK                (1 << 13) /* Bit 13: Non Acknowledge Interrupt (USART only) */
 
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define UART_INT_LINBK             (1 << 13) /* Bit 13: LIN Break Sent or Break Received Interrupt */
+#  define UART_INT_LINID             (1 << 14) /* Bit 14: LIN Identifier Sent or Identifier Received Interrupt */
+#  define UART_INT_LINTC             (1 << 15) /* Bit 15: LIN Transfer Completed Interrupt */
+#endif
+
 #if defined(CONFIG_ARCH_CHIP_SAM4S)
-#  define UART_INT_RIIC              (1 << 16) /* Bit 16: Ring Indicator Input Change Enable */
-#  define UART_INT_DSRIC             (1 << 17) /* Bit 17: Data Set Ready Input Change Enable */
-#  define UART_INT_DCDIC             (1 << 18) /* Bit 18: Data Carrier Detect Input Change Interrupt Enable */
+#  define UART_INT_RIIC              (1 << 16) /* Bit 16: Ring Indicator Input Change */
+#  define UART_INT_DSRIC             (1 << 17) /* Bit 17: Data Set Ready Input Change */
+#  define UART_INT_DCDIC             (1 << 18) /* Bit 18: Data Carrier Detect Input Change Interrupt */
 #endif
 
 #define UART_INT_CTSIC               (1 << 19) /* Bit 19: Clear to Send Input Change Interrupt (USART only) */
@@ -317,9 +368,24 @@
 #  define UART_SR_CTS                (1 << 23) /* Bit 23: Image of CTS Input */
 #endif
 
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define UART_SR_CTS                (1 << 23) /* Bit 23: Image of CTS Input */
+#  define UART_SR_LINBLS             (1 << 23) /* Bit 23: LIN Bus Line Status */
+#endif
+
 #define UART_INT_MANE                (1 << 24) /* Bit 24: Manchester Error Interrupt (USART only) */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define UART_INT_LINBE             (1 << 25) /* Bit 25: LIN Bus Error Interrupt */
+#  define UART_INT_LINISFE           (1 << 26) /* Bit 26: LIN Inconsistent Synch Field Error Interrupt */
+#  define UART_INT_LINIPE            (1 << 27) /* Bit 27: LIN Identifier Parity Interrupt */
+#  define UART_INT_LINCE             (1 << 28) /* Bit 28: LIN Checksum Error Interrupt */
+#  define UART_INT_LINSNRE           (1 << 29) /* Bit 29: LIN Slave Not Responding Error Interrupt */
+#endif
+
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define UART_INT_ALLINTS           0x3f08ffff
+#elif defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define UART_INT_ALLINTS           0x010f3fff
 #else
 #  define UART_INT_ALLINTS           0x01083fff
@@ -403,6 +469,33 @@
 #endif
 
 #define UART_MAN_DRIFT               (1 << 30) /* Bit 30: Drift compensation (USART only) */
+
+
+/* LIN Mode Register (USART only) */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define UART_LINMR_
+#  define UART_LINMR_NACT_SHIFT          (0)       /* Bits 0-1: LIN Node Action */
+#  define UART_LINMR_NACT_MASK           (3 << UART_LINMR_NACT_SHIFT)
+#    define UART_LINMR_NACT_PUBLISH      (0 << UART_LINMR_NACT_SHIFT) /* USART transmits response */
+#    define UART_LINMR_NACT_SUBSCRIBE    (1 << UART_LINMR_NACT_SHIFT) /* USART receives response */
+#    define UART_LINMR_NACT_IGNORE       (2 << UART_LINMR_NACT_SHIFT) /* USART does not transmit or receive response */
+#  define UART_LINMR_PARDIS              (1 << 2)  /* Bit 2:  Parity Disable */
+#  define UART_LINMR_CHKDIS              (1 << 3)  /* Bit 3:  Checksum Disable */
+#  define UART_LINMR_CHKTYP              (1 << 4)  /* Bit 4:  Checksum Type */
+#  define UART_LINMR_DLM                 (1 << 5)  /* Bit 5:  Data Length Mode */
+#  define UART_LINMR_FSDIS               (1 << 6)  /* Bit 6:  Frame Slot Mode Disable */
+#  define UART_LINMR_WKUPTYP             (1 << 7)  /* Bit 7:  Wakeup Signal Type */
+#  define UART_LINMR_DLC_SHIFT           (8)       /* Bits 8-15: Data Length Control */
+#  define UART_LINMR_DLC_MASK            (0xff << UART_LINMR_DLC_SHIFT)
+#  define UART_LINMR_PDCM                (1 << 0)  /* Bit 0:  PDC Mode */
+#endif
+
+/* LIN Identifier Register (USART only) */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define UART_LINIR_MASK                0xff      /* Bits 0-7: Identifier Character */
+#endif
 
 /* USART Write Protect Mode Register (USART only) */
 

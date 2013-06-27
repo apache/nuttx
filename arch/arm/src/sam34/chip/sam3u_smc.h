@@ -1,5 +1,5 @@
 /****************************************************************************************
- * arch/arm/src/sam34/chip/sam_smc.h
+ * arch/arm/src/sam34/chip/sam3u_smc.h
  * Static Memory Controller (SMC) definitions for the SAM3U and SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_SMC_H
-#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_SMC_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_SMC_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_SMC_H
 
 /****************************************************************************************
  * Included Files
@@ -52,7 +52,8 @@
 
 /* SMC register offsets *****************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SAM_SMC_CFG_OFFSET           0x0000 /* SMC NFC Configuration Register */
 #  define SAM_SMC_CTRL_OFFSET          0x0004 /* SMC NFC Control Register */
 #  define SAM_SMC_SR_OFFSET            0x0008 /* SMC NFC Status Register */
@@ -124,7 +125,8 @@
 
 /* SMC register adresses ****************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SAM_SMC_CFG                  (SAM_SMC_BASE+SAM_SMC_CFG_OFFSET)
 #  define SAM_SMC_CTRL                 (SAM_SMC_BASE+SAM_SMC_CTRL_OFFSET)
 #  define SAM_SMC_SR                   (SAM_SMC_BASE+SAM_SMC_SR_OFFSET)
@@ -164,41 +166,56 @@
 #define SAM_SMCCS_SETUP(n)             (SAM_SMCCS_BASE(n)+SAM_SMCCS_SETUP_OFFSET)
 #define SAM_SMCCS_PULSE(n)             (SAM_SMCCS_BASE(n)+SAM_SMCCS_PULSE_OFFSET)
 #define SAM_SMCCS_CYCLE(n)             (SAM_SMCCS_BASE(n)+SAM_SMCCS_CYCLE_OFFSET)
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SAM_SMCCS_TIMINGS(n)         (SAM_SMCCS_BASE(n)+SAM_SMCCS_TIMINGS_OFFSET)
 #endif
+
 #define SAM_SMCCS_MODE(n)              (SAM_SMCCS_BASE(n)+SAM_SMCCS_MODE_OFFSET)
 
 #  define SAM_SMCCS0_SETUP             (SAM_SMC_CS0_BASE+SAM_SMCCS_SETUP_OFFSET)
 #  define SAM_SMCCS0_PULSE             (SAM_SMC_CS0_BASE+SAM_SMCCS_PULSE_OFFSET)
 #  define SAM_SMCCS0_CYCLE             (SAM_SMC_CS0_BASE+SAM_SMCCS_CYCLE_OFFSET)
-#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #    define SAM_SMCCS0_TIMINGS         (SAM_SMC_CS0_BASE+SAM_SMCCS_TIMINGS_OFFSET)
 #  endif
+
 #  define SAM_SMCCS0_MODE              (SAM_SMC_CS0_BASE+SAM_SMCCS_MODE_OFFSET)
 
 #  define SAM_SMCCS1_SETUP             (SAM_SMC_CS1_BASE+SAM_SMCCS_SETUP_OFFSET)
 #  define SAM_SMCCS1_PULSE             (SAM_SMC_CS1_BASE+SAM_SMCCS_PULSE_OFFSET)
 #  define SAM_SMCCS1_CYCLE             (SAM_SMC_CS1_BASE+SAM_SMCCS_CYCLE_OFFSET)
-#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #    define SAM_SMCCS1_TIMINGS         (SAM_SMC_CS1_BASE+SAM_SMCCS_TIMINGS_OFFSET)
 #  endif
+
 #  define SAM_SMCCS1_MODE              (SAM_SMC_CS1_BASE+SAM_SMCCS_MODE_OFFSET)
 
 #  define SAM_SMCCS2_SETUP             (SAM_SMC_CS2_BASE+SAM_SMCCS_SETUP_OFFSET)
 #  define SAM_SMCCS2_PULSE             (SAM_SMC_CS2_BASE+SAM_SMCCS_PULSE_OFFSET)
 #  define SAM_SMCCS2_CYCLE             (SAM_SMC_CS2_BASE+SAM_SMCCS_CYCLE_OFFSET)
-#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #    define SAM_SMCCS2_TIMINGS         (SAM_SMC_CS2_BASE+SAM_SMCCS_TIMINGS_OFFSET)
 #  endif
+
 #  define SAM_SMCCS2_MODE              (SAM_SMC_CS2_BASE+SAM_SMCCS_MODE_OFFSET)
 
 #  define SAM_SMCCS3_SETUP             (SAM_SMC_CS3_BASE+SAM_SMCCS_SETUP_OFFSET)
 #  define SAM_SMCCS3_PULSE             (SAM_SMC_CS3_BASE+SAM_SMCCS_PULSE_OFFSET)
 #  define SAM_SMCCS3_CYCLE             (SAM_SMC_CS3_BASE+SAM_SMCCS_CYCLE_OFFSET)
-#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #    define SAM_SMCCS3_TIMINGS         (SAM_SMC_CS3_BASE+SAM_SMCCS_TIMINGS_OFFSET)
 #  endif
+
 #  define SAM_SMCCS3_MODE              (SAM_SMC_CS3_BASE+SAM_SMCCS_MODE_OFFSET)
 
 #define SAM_SMC_OCMS                   (SAM_SMC_BASE+SAM_SMC_OCMS_OFFSET)
@@ -211,13 +228,14 @@
 
 /* SMC NFC Configuration Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SMC_CFG_PAGESIZE_SHIFT       (0)       /* Bits 0-1: Page size of NAND Flash device */
 #  define SMC_CFG_PAGESIZE_MASK        (3 << SMC_CFG_PAGESIZE_SHIFT)
-#    define SMC_CFG_PAGESIZE_16 BYTES  (0 << SMC_CFG_PAGESIZE_SHIFT) /* 528 Bytes 16 byte */
-#    define SMC_CFG_PAGESIZE_ 2 BYTES  (1 << SMC_CFG_PAGESIZE_SHIFT) /* 1056 Bytes 32 bytes */
-#    define SMC_CFG_PAGESIZE_64 BYTES  (2 << SMC_CFG_PAGESIZE_SHIFT) /* 2112 Bytes 64 bytes */
-#    define SMC_CFG_PAGESIZE_128 BYTES (3 << SMC_CFG_PAGESIZE_SHIFT) /* 4224 Bytes 128 bytes */
+#    define SMC_CFG_PAGESIZE_528       (0 << SMC_CFG_PAGESIZE_SHIFT) /* 512 bytes + 16 byte spare */
+#    define SMC_CFG_PAGESIZE_1056      (1 << SMC_CFG_PAGESIZE_SHIFT) /* 1024 Bytes + 32 bytes spare */
+#    define SMC_CFG_PAGESIZE_2122      (2 << SMC_CFG_PAGESIZE_SHIFT) /* 2048 Bytes + 64 bytes spare */
+#    define SMC_CFG_PAGESIZE_4224      (3 << SMC_CFG_PAGESIZE_SHIFT) /* 4096 Bytes + 128 bytes spare */
 #  define SMC_CFG_WSPARE               (1 << 8)  /* Bit 8:  Write Spare Area */
 #  define SMC_CFG_RSPARE               (1 << 9)  /* Bit 9:  Read Spare Area */
 #  define SMC_CFG_EDGECTRL             (1 << 12) /* Bit 12: Rising/Falling Edge Detection Control */
@@ -238,7 +256,8 @@
 
 /* SMC NFC Control Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SMC_CTRL_NFCEN               (1 << 0)  /* Bit 0:  NAND Flash Controller Enable */
 #  define SMC_CTRL_NFCDIS              (1 << 1)  /* Bit 1:  NAND Flash Controller Disable */
 #endif
@@ -247,19 +266,22 @@
  * Disable Register, and SMC NFC Interrupt Mask Register common bit-field definitions
  */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SMC_SR_SMCSTS                (1 << 0)  /* Bit 0:  NAND Flash Controller status (SR only) */
 #  define SMC_INT_RBRISE               (1 << 4)  /* Bit 4:  Ready Busy Rising Edge Detection Interrupt */
 #  define SMC_INT_RBFALL               (1 << 5)  /* Bit 5:  Ready Busy Falling Edge Detection Interrupt */
 #  define SMC_SR_NFCBUSY               (1 << 8)  /* Bit 8:  NFC Busy (SR only) */
 #  define SMC_SR_NFCWR                 (1 << 11) /* Bit 11: NFC Write/Read Operation (SR only) */
-#  define SMC_SR_NFCSID                (1 << 12) /* Bit 13: NFC Chip Select ID (SR only) */
+#  define SMC_SR_NFCSID_SHIFT          (12)      /* Bits 12-14: NFC Chip Select ID (SR only) */
+#  define SMC_SR_NFCSID_MASK           (7 << SMC_SR_NFCSID_SHIFT)
 #  define SMC_INT_XFRDONE              (1 << 16) /* Bit 16: Transfer Done Interrupt */
 #  define SMC_INT_CMDDONE              (1 << 17) /* Bit 17: Command Done Interrupt */
 #  define SMC_INT_DTOE                 (1 << 20) /* Bit 20: Data Timeout Error Interrupt */
 #  define SMC_INT_UNDEF                (1 << 21) /* Bit 21: Undefined Area Access Interrupt */
 #  define SMC_INT_AWB                  (1 << 22) /* Bit 22: Accessing While Busy Interrupt */
 #  define SMC_INT_NFCASE               (1 << 23) /* Bit 23: NFC Access Size Error Interrupt */
+#ifdef CONFIG_ARCH_CHIP_SAM3U
 #  define SMC_INT_RBEDGE(n)            (1<<((n)+24))
 #  define SMC_INT_RB_EDGE0             (1 << 24) /* Bit 24: Ready/Busy Line 0 Interrupt */
 #  define SMC_INT_RB_EDGE1             (1 << 25) /* Bit 25: Ready/Busy Line 1 Interrupt */
@@ -269,48 +291,56 @@
 #  define SMC_INT_RB_EDGE5             (1 << 29) /* Bit 29: Ready/Busy Line 5 Interrupt */
 #  define SMC_INT_RB_EDGE6             (1 << 30) /* Bit 30: Ready/Busy Line 6 Interrupt */
 #  define SMC_INT_RB_EDGE7             (1 << 31) /* Bit 31: Ready/Busy Line 7 Interrupt */
+#else
+#  define SMC_INT_RB_EDGE0             (1 << 24) /* Bit 24: Ready/Busy Line 0 Interrupt */
+#endif
 #endif
 
 /* SMC NFC Address Cycle Zero Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SMC_ADDR_CYCLE0_SHIFT       (3)       /* Bits 0-7: NAND Flash Array Address cycle 0 */
 #  define SMC_ADDR_CYCLE0_MASK        (0xff << SMC_ADDR_CYCLE0_SHIFT)
 #endif
 
 /* SMC NFC Bank Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SMC_BANK_SHIFT               (0)       /* Bits 0-2: Bank identifier */
 #  define SMC_BANK_MASK                (7 << SMC_BANK_SHIFT)
 #endif
 
 /* SMC ECC Control Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SMC_ECCCTRL_RST              (1 << 0)  /* Bit 0:  Reset ECC */
 #  define SMC_ECCCTRL_SWRST            (1 << 1)  /* Bit 1:  Software Reset */
 #endif
 
 /* SMC ECC MODE Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
-#  define SMC_ECCMD_ECC_PAGESIZE_SHIFT   (0)       /* Bits 0-1 */
-#  define SMC_ECCMD_ECC_PAGESIZE_MASK    (3 << SMC_ECCMD_ECC_PAGESIZE_SHIFT)
-#    define SMC_ECCMD_ECC_PAGESIZE_528   (0 << SMC_ECCMD_ECC_PAGESIZE_SHIFT)
-#    define SMC_ECCMD_ECC_PAGESIZE_1056  (1 << SMC_ECCMD_ECC_PAGESIZE_SHIFT)
-#    define SMC_ECCMD_ECC_PAGESIZE_2112  (2 << SMC_ECCMD_ECC_PAGESIZE_SHIFT)
-#    define SMC_ECCMD_ECC_PAGESIZE_4224  (3 << SMC_ECCMD_ECC_PAGESIZE_SHIFT)
-#  define SMC_ECCMD_TYPCORREC_SHIFT      (4)      /* Bits 4-5: type of correction */
-#  define SMC_ECCMD_TYPCORREC_MASK       (3 << SMC_ECCMD_TYPCORREC_SHIFT)
-#    define SMC_ECCMD_TYPCORREC_PAGE     (0 << SMC_ECCMD_TYPCORREC_SHIFT) /* 1 bit correction for a page */
-#    define SMC_ECCMD_TYPCORREC_256      (1 << SMC_ECCMD_TYPCORREC_SHIFT) /* 1 bit correction for 256 bytes */
-#    define SMC_ECCMD_TYPCORREC_512      (2 << SMC_ECCMD_TYPCORREC_SHIFT) /* 1 bit correction for 512 bytes */
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define SMC_ECCMD_ECC_PAGESIZE_SHIFT  (0)       /* Bits 0-1 */
+#  define SMC_ECCMD_ECC_PAGESIZE_MASK   (3 << SMC_ECCMD_ECC_PAGESIZE_SHIFT)
+#    define SMC_ECCMD_ECC_PAGESIZE_528  (0 << SMC_ECCMD_ECC_PAGESIZE_SHIFT) /* 512 bytes + 16 byte spare */
+#    define SMC_ECCMD_ECC_PAGESIZE_1056 (1 << SMC_ECCMD_ECC_PAGESIZE_SHIFT) /* 1024 Bytes + 32 bytes spare */
+#    define SMC_ECCMD_ECC_PAGESIZE_2112 (2 << SMC_ECCMD_ECC_PAGESIZE_SHIFT) /* 2048 Bytes + 64 bytes spare */
+#    define SMC_ECCMD_ECC_PAGESIZE_4224 (3 << SMC_ECCMD_ECC_PAGESIZE_SHIFT) /* 4096 Bytes + 128 bytes spare */
+#  define SMC_ECCMD_TYPCORREC_SHIFT     (4)      /* Bits 4-5: type of correction */
+#  define SMC_ECCMD_TYPCORREC_MASK      (3 << SMC_ECCMD_TYPCORREC_SHIFT)
+#    define SMC_ECCMD_TYPCORREC_PAGE    (0 << SMC_ECCMD_TYPCORREC_SHIFT) /* 1 bit correction for a page */
+#    define SMC_ECCMD_TYPCORREC_256     (1 << SMC_ECCMD_TYPCORREC_SHIFT) /* 1 bit correction for 256 bytes */
+#    define SMC_ECCMD_TYPCORREC_512     (2 << SMC_ECCMD_TYPCORREC_SHIFT) /* 1 bit correction for 512 bytes */
 #endif
 
 /* SMC ECC Status Register 1 */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define _RECERR                      (0) /* Recoverable Error */
 #  define _ECCERR                      (1) /* ECC Error */
 #  define _MULERR                      (2) /* Multiple Error */
@@ -347,7 +377,8 @@
 
 /* SMC ECC Status Register 2 */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SMC_ECCSR2_RECERR(n)         (1 << ((((n)-8)<<4)+_RECERR))
 #  define SMC_ECCSR2_ECCERR(n)         (1 << ((((n)-8)<<4)+_ECCERR))
 #  define SMC_ECCSR2_MULERR(n)         (1 << ((((n)-8)<<4)+_MULERR))
@@ -381,19 +412,23 @@
 /* Registers for 1 ECC for a page of 512/1024/2048/4096 bytes */
 /* SMC_ECC_PR0 */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SMC_ECCPR0_BITADDR_SHIFT     (0)       /* Bits 0-3: Bit Address */
 #  define SMC_ECCPR0_BITADDR_MASK      (15 << SMC_ECCPR0_BITADDR_SHIFT)
 #  define SMC_ECCPR0_WORDADDR_SHIFT    (4)       /* Bits 4-15: Word Address */
 #  define SMC_ECCPR0_WORDADDR_MASK     (0xfff << SMC_ECCPR0_WORDADDR_SHIFT)
 
+#ifdef CONFIG_ARCH_CHIP_SAM3U
 #  define SMC_ECCPR1_NPARITY_SHIFT     (0)       /* Bits 0-15 */
 #  define SMC_ECCPR1_NPARITY_MASK      (0xffff << SMC_ECCPR1_NPARITY_SHIFT)
+#endif
 #endif
 
 /* Registers for 1 ECC per 512 bytes for a page of 512/2048/4096 bytes, 8-bit word */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SMC_ECCPR512_BITADDR_SHIFT   (0)       /* Bits 0-3: Bit Address */
 #  define SMC_ECCPR512_BITADDR_MASK    (15 << SMC_ECCPR512_BITADDR_SHIFT)
 #  define SMC_ECCPR512_WORDADDR_SHIFT  (4)       /* Bits 4-15: Word Address */
@@ -404,7 +439,8 @@
 
 /* Registers for 1 ECC per 256 bytes for a page of 512/2048/4096 bytes, 8-bit word */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SMC_ECCPR256_BITADDR_SHIFT   (0)       /* Bits 0-2: Bit Address */
 #  define SMC_ECCPR256_BITADDR_MASK    (7 << SMC_ECCPR256_BITADDR_SHIFT)
 #  define SMC_ECCPR256_WORDADDR_SHIFT  (4)       /* Bits 4-10: Word Address */
@@ -454,7 +490,8 @@
 
 /* SMC Timings Register */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SMCCS_TIMINGS_TCLR_SHIFT     (0)       /* Bits 0-3: CLE to REN Low Delay */
 #  define SMCCS_TIMINGS_TCLR_MASK      (15 << SMCCS_TIMINGS_TCLR_SHIFT)
 #  define SMCCS_TIMINGS_TADL_SHIFT     (4)       /* Bits 4-7: ALE to Data Start */
@@ -481,7 +518,8 @@
 #  define SMCCS_EXNWMODE_FROZEN        (2 << SMCCS_MODE_EXNWMODE_SHIFT)
 #  define SMCCS_EXNWMODE_READY         (3 << SMCCS_MODE_EXNWMODE_SHIFT)
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  define SMCCS_MODE_BAT               (1 << 8)  /* Bit 8:  Byte Access Type */
 #  define SMCCS_MODE_DBW_SHIFT         (12)      /* Bits 12-13: Data Bus Width */
 #  define SMCCS_MODE_DBW_MASK          (3 << SMCCS_MODE_DBW_SHIFT)
@@ -493,13 +531,16 @@
 #define SMCCS_MODE_TDFCYCLES_SHIFT     (16)      /* Bits 16-19: Data Float Time */
 #define SMCCS_MODE_TDFCYCLES_MASK      (15 << SMCCS_MODE_TDFCYCLES_SHIFT)
 #define SMCCS_MODE_TDFMODE             (1 << 20) /* Bit 20: TDF Optimization */
-#define SMCCS_MODE_PMEN                (1 << 24) /* Bit 24: Page Mode Enabled */
-#define SMCCS_MODE_PS_SHIFT            (28) /* Bits 28-29: Page Size */
-#define SMCCS_MODE_PS_MASK             (3 << SMCCS_MODE_PS_SHIFT)
-#  define SMCCS_MODE_PS_SIZE_4BYTES    (0 << SMCCS_MODE_PS_SHIFT) /* 4 bytes */
-#  define SMCCS_MODE_PS_SIZE_8BYTES    (1 << SMCCS_MODE_PS_SHIFT) /* 8 bytes */
-#  define SMCCS_MODE_PS_SIZE_16BYTES   (2 << SMCCS_MODE_PS_SHIFT) /* 16 bytes */
-#  define SMCCS_MODE_PS_SIZE_32BYTES   (3 << SMCCS_MODE_PS_SHIFT) /* 32 bytes */
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM4S)
+#  define SMCCS_MODE_PMEN              (1 << 24) /* Bit 24: Page Mode Enabled */
+#  define SMCCS_MODE_PS_SHIFT          (28) /* Bits 28-29: Page Size */
+#  define SMCCS_MODE_PS_MASK           (3 << SMCCS_MODE_PS_SHIFT)
+#    define SMCCS_MODE_PS_SIZE_4BYTES  (0 << SMCCS_MODE_PS_SHIFT) /* 4 bytes */
+#    define SMCCS_MODE_PS_SIZE_8BYTES  (1 << SMCCS_MODE_PS_SHIFT) /* 8 bytes */
+#    define SMCCS_MODE_PS_SIZE_16BYTES (2 << SMCCS_MODE_PS_SHIFT) /* 16 bytes */
+#    define SMCCS_MODE_PS_SIZE_32BYTES (3 << SMCCS_MODE_PS_SHIFT) /* 32 bytes */
+#endif
 
 /* SMC OCMS Mode Register */
 
@@ -525,19 +566,20 @@
 
 /* SMC Write Protection Status */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
-#  define SMC_WPSR_PVS_SHIFT          (0)       /* Bits 0-3: Write Protection Violation Status */
-#  define SMC_WPSR_PVS_MASK           (15 << SMC_WPSR_PVS_SHIFT)
-#    define SMC_WPSR_PVS_NONE         (0 << SMC_WPSR_PVS_SHIFT) /* No Write Protection Violation */
-#    define SMC_WPSR_PVS_ RCREG       (1 << SMC_WPSR_PVS_SHIFT) /* Attempt to write a control reg */
-#    define SMC_WPSR_PVS_RESET        (2 << SMC_WPSR_PVS_SHIFT) /* Software reset */
-#    define SMC_WPSR_PVS_BOTH         (3 << SMC_WPSR_PVS_SHIFT) /* Write + reset */
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
+#  define SMC_WPSR_PVS_SHIFT           (0)       /* Bits 0-3: Write Protection Violation Status */
+#  define SMC_WPSR_PVS_MASK            (15 << SMC_WPSR_PVS_SHIFT)
+#    define SMC_WPSR_PVS_NONE          (0 << SMC_WPSR_PVS_SHIFT) /* No Write Protection Violation */
+#    define SMC_WPSR_PVS_ RCREG        (1 << SMC_WPSR_PVS_SHIFT) /* Attempt to write a control reg */
+#    define SMC_WPSR_PVS_RESET         (2 << SMC_WPSR_PVS_SHIFT) /* Software reset */
+#    define SMC_WPSR_PVS_BOTH          (3 << SMC_WPSR_PVS_SHIFT) /* Write + reset */
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)
-#    define SMC_WPSR_WPVS             (1 << 0)  /* Bit 0:  Write Protect Violation Source */
+#    define SMC_WPSR_WPVS              (1 << 0)  /* Bit 0:  Write Protect Violation Source */
 #endif
 
-#define SMC_WPSR_WPVSRC_SHIFT       (8)       /* Bits 8-23: Write Protection Violation Source */
-#define SMC_WPSR_WPVSRC_MASK        (0xffff << SMC_WPSR_WPVSRC_SHIFT)
+#define SMC_WPSR_WPVSRC_SHIFT          (8)       /* Bits 8-23: Write Protection Violation Source */
+#define SMC_WPSR_WPVSRC_MASK           (0xffff << SMC_WPSR_WPVSRC_SHIFT)
 
 /****************************************************************************************
  * Public Types
@@ -551,4 +593,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_SMC_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM3U_SMC_H */

@@ -60,7 +60,9 @@
 #include "os_internal.h"
 
 #include "chip.h"
-#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM4S)
+
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  include "chip/sam3u_uart.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_usart.h"
@@ -309,12 +311,14 @@
 
 /* Select MCU-specific settings
  *
- * For the SAM3U, the USARTs are driven by the main clock.
+ * For the SAM3U, SAM3A, and SAM3X the USARTs are driven by the main clock
+ *   (This could be the MCK/8 but that option has not yet been necessary).
  * For the SAM4L, the USARTs are driven by CLK_USART (undivided) which is
  *   selected by the PBADIVMASK register.
  */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define SAM_MR_USCLKS    UART_MR_USCLKS_MCK   /* Source = Main clock */
 #  define SAM_USART_CLOCK  BOARD_MCK_FREQUENCY  /* Frequency of the main clock */
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
