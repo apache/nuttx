@@ -2,26 +2,13 @@ README
 ^^^^^^
 
   This README discusses issues unique to NuttX configurations for the
-  Atmel SAM4S Xplained development board.  This board features the
-  ATSAM4S16C MCU with 1MB FLASH and 128KB.
+  Arduion DUE board featuring the Atmel ATSAM3X8E MSU.
 
-  The SAM4S Xplained features:
-
-    - 120 MHz Cortex-M4 with MPU
-    - 12MHz crystal (no 32.768KHz crystal)
-    - Segger J-Link JTAG emulator on-board for program and debug
-    - MICRO USB A/B connector for USB connectivity
-    - IS66WV51216DBLL ISSI SRAM 8Mb 512K x 16 55ns PSRAM 2.5v-3.6v
-    - Four Atmel QTouch buttons
-    - External voltage input
-    - Four LEDs, two controllable from software
-    - Xplained expansion headers
-    - Footprint for external serial Flash (not fitted)
 
 Contents
 ^^^^^^^^
 
-  - PIO Muxing
+  - PIO Pin Usage
   - Development Environment
   - GNU Toolchain Options
   - IDEs
@@ -33,41 +20,10 @@ Contents
   - SAM4S Xplained-specific Configuration Options
   - Configurations
 
-PIO Muxing
-^^^^^^^^^^
+PIO Pin Usage
+^^^^^^^^^^^^^
 
-  PA0   SMC_A17                  PB0   J2.3 default   PC0   SMC_D0
-  PA1   SMC_A18                  PB1   J2.4           PC1   SMC_D1
-  PA2   J3.7 default             PB2   J1.3 & J4.3    PC2   SMC_D2
-  PA3   J1.1 & J4.1              PB3   J1.4 & J4.4    PC3   SMC_D3
-  PA4   J1.2 & J4.2              PB4   JTAG           PC4   SMC_D4
-  PA5   User_button BP2          PB5   JTAG           PC5   SMC_D5
-  PA6   J3.7 optional            PB6   JTAG           PC6   SMC_D6
-  PA7   CLK_32K                  PB7   JTAG           PC7   SMC_D7
-  PA8   CLK_32K                  PB8   CLK_12M        PC8   SMC_NWE
-  PA9   RX_UART0                 PB9   CLK_12M        PC9   Power on detect
-  PA10  TX_UART0                 PB10  USB_DDM        PC10  User LED D9
-  PA11  J3.2 default             PB11  USB_DDP        PC11  SMC_NRD
-  PA12  MISO                     PB12  ERASE          PC12  J2.2
-  PA13  MOSI                     PB13  J2.3 optional  PC13  J2.7
-  PA14  SPCK                     PB14  N/A            PC14  SMC_NCS0
-  PA15  J3.5                                          PC15  SMC_NSC1
-  PA16  J3.6                                          PC16  N/A
-  PA17  J2.5                                          PC17  User LED D10
-  PA18  J3.4 & SMC_A14                                PC18  SMC_A0
-  PA19  J3.4 optional & SMC_A15                       PC19  SMC_A1
-  PA20  J3.1 & SMC_A16                                PC20  SMC_A2
-  PA21  J2.6                                          PC21  SMC_A3
-  PA22  J2.1                                          PC22  SMC_A4
-  PA23  J3.3                                          PC23  SMC_A5
-  PA24  TSLIDR_SL_SN                                  PC24  SMC_A6
-  PA25  TSLIDR_SL_SNSK                                PC25  SMC_A7
-  PA26  TSLIDR_SM_SNS                                 PC26  SMC_A8
-  PA27  TSLIDR_SM_SNSK                                PC27  SMC_A9
-  PA28  TSLIDR_SR_SNS                                 PC28  SMC_A10
-  PA29  TSLIDR_SR_SNSK                                PC29  SMC_A11
-  PA30  J4.5                                          PC30  SMC_A12
-  PA31  J1.5                                          PC31  SMC_A13
+  To be provided
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -276,89 +232,14 @@ NXFLAT Toolchain
 Buttons and LEDs
 ^^^^^^^^^^^^^^^^
 
-  Buttons
-  -------
-
-  The SAM4S Xplained has two mechanical buttons. One button is the RESET button
-  connected to the SAM4S reset line and the other is a generic user configurable
-  button labeled BP2 and connected to GPIO PA5. When a button is pressed it
-  will drive the I/O line to GND.
-
-  LEDs
-  ----
-
-  There are four LEDs on board the SAM4X Xplained board, two of these can be
-  controlled by software in the SAM4S:
-
-      LED              GPIO
-      ---------------- -----
-      D9  Yellow LED   PC10
-      D10 Yellow LED   PC17
-
-  Both can be illuminated by driving the GPIO output to ground (low).
-
-  These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
-  defined.  In that case, the usage by the board port is defined in
-  include/board.h and src/up_leds.c. The LEDs are used to encode OS-related
-  events as follows:
-
-    SYMBOL                Meaning                     LED state
-                                                    D9       D10
-    -------------------  -----------------------  -------- --------
-    LED_STARTED          NuttX has been started     OFF      OFF
-    LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
-    LED_IRQSENABLED      Interrupts enabled         OFF      OFF
-    LED_STACKCREATED     Idle stack created         ON       OFF
-    LED_INIRQ            In an interrupt              No change
-    LED_SIGNAL           In a signal handler          No change
-    LED_ASSERTION        An assertion failed          No change
-    LED_PANIC            The system has crashed     OFF      Blinking
-    LED_IDLE             MCU is is sleep mode         Not used
-
-  Thus if D9 is statically on, NuttX has successfully booted and is,
-  apparently, running normmally.  If D10 is flashing at approximately
-  2Hz, then a fatal error has been detected and the system has halted.
+  To be provided
 
 Serial Consoles
 ^^^^^^^^^^^^^^^
 
-  UART1
-  -----
-  If you have a TTL to RS-232 convertor then this is the most convenient
-  serial console to use.  UART1 is the default in all of these
-  configurations.
+  To be provided
 
-    UART1 RXD  PB2   J1 pin 3   J4 pin 3
-    UART1 TXD  PB3   J1 pin 4   J4 pin 4
-    GND              J1 pin 9   J4 pin 9
-    Vdd              J1 pin 10  J4 pin 10
-
-  USART1
-  ------
-  USART1 is another option:
-
-    USART1 RXD PA21  J2 pin 6
-    USART1 TXD PA22  J2 pin 1
-    GND              J2 pin 9
-    Vdd              J2 pin 10
-
-  Virtual COM Port
-  ----------------
-  Yet another option is to use UART0 and the virtual COM port.  This
-  option may be more convenient for long term development, but was
-  painful to use during board bring-up.
-
-  The SAM4S Xplained contains an Embedded Debugger (EDBG) that can be
-  used to program and debug the ATSAM4S16C using Serial Wire Debug (SWD).
-  The Embedded debugger also include a Virtual Com port interface over
-  USART1.  Virtual COM port connections:
-
-  AT91SAM4S16     ATSAM3U4CAU
-  -------------- --------------
-  PA9   RX_UART0  PA9_4S PA12
-  PA10  TX_UART0  RX_3U  PA11
-
-SAM4S Xplained-specific Configuration Options
+Arduino DUE-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
@@ -372,7 +253,7 @@ SAM4S Xplained-specific Configuration Options
 
   CONFIG_ARCH_architecture - For use in C code:
 
-    CONFIG_ARCH_CORTEXM4=y
+    CONFIG_ARCH_CORTEXM3=y
 
   CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
@@ -382,17 +263,17 @@ SAM4S Xplained-specific Configuration Options
   chip:
 
     CONFIG_ARCH_CHIP_SAM34
-    CONFIG_ARCH_CHIP_SAM4S
-    CONFIG_ARCH_CHIP_ATSAM4S16C
+    CONFIG_ARCH_CHIP_SAM3X
+    CONFIG_ARCH_CHIP_ATSAM3X8E
 
   CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
   hence, the board that supports the particular chip or SoC.
 
-    CONFIG_ARCH_BOARD=sam4s-xplained (for the SAM4S Xplained development board)
+    CONFIG_ARCH_BOARD=arduino-due (for the Arduino Due development board)
 
   CONFIG_ARCH_BOARD_name - For use in C code
 
-    CONFIG_ARCH_BOARD_SAM4S_XPLAINED=y
+    CONFIG_ARCH_BOARD_ARDUINO_DUE=y
 
   CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
   of delay loops
@@ -437,14 +318,17 @@ SAM4S Xplained-specific Configuration Options
     CONFIG_SAM34_RTT         - Real Time Timer
     CONFIG_SAM34_WDT         - Watchdog Timer
     CONFIG_SAM34_UART0       - UART 0
-    CONFIG_SAM34_UART1       - UART 1
     CONFIG_SAM34_SMC         - Static Memory Controller
+    CONFIG_SAM34_SDRAMC      - SDRAM Controller
     CONFIG_SAM34_USART0      - USART 0
     CONFIG_SAM34_USART1      - USART 1
+    CONFIG_SAM34_USART2      - USART 2
+    CONFIG_SAM34_USART3      - USART 3
     CONFIG_SAM34_HSMCI       - High Speed Multimedia Card Interface
-    CONFIG_SAM34_TWI0        - Two-Wire Interface 0
-    CONFIG_SAM34_TWI1        - Two-Wire Interface 1
-    CONFIG_SAM34_SPI0        - Serial Peripheral Interface
+    CONFIG_SAM34_TWI0        - Two-Wire Interface 0 (master/slave)
+    CONFIG_SAM34_TWI1        - Two-Wire Interface 1 (master/slave)
+    CONFIG_SAM34_SPI0        - Serial Peripheral Interface 0
+    CONFIG_SAM34_SPI1        - Serial Peripheral Interface 1
     CONFIG_SAM34_SSC         - Synchronous Serial Controller
     CONFIG_SAM34_TC0         - Timer Counter 0
     CONFIG_SAM34_TC1         - Timer Counter 1
@@ -452,12 +336,18 @@ SAM4S Xplained-specific Configuration Options
     CONFIG_SAM34_TC3         - Timer Counter 3
     CONFIG_SAM34_TC4         - Timer Counter 4
     CONFIG_SAM34_TC5         - Timer Counter 5
+    CONFIG_SAM34_TC6         - Timer Counter 6
+    CONFIG_SAM34_TC7         - Timer Counter 7
+    CONFIG_SAM34_TC8         - Timer Counter 8
+    CONFIG_SAM34_PWM         - Pulse Width Modulation
     CONFIG_SAM34_ADC12B      - 12-bit Analog To Digital Converter
     CONFIG_SAM34_DACC        - Digital To Analog Converter
-    CONFIG_SAM34_PWM         - Pulse Width Modulation
-    CONFIG_SAM34_CRCCU       - CRC Calculation Unit
-    CONFIG_SAM34_ACC         - Analog Comparator
-    CONFIG_SAM34_UDP         - USB Device Port
+    CONFIG_SAM34_DMA         - DMA Controller
+    CONFIG_SAM34_UOTGHS      - USB OTG High Speed
+    CONFIG_SAM34_TRNG        - True Random Number Generator
+    CONFIG_SAM34_EMAC        - Ethernet MAC
+    CONFIG_SAM34_CAN0        - CAN Controller 0
+    CONFIG_SAM34_CAN1        - CAN Controller 1
 
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.
@@ -465,6 +355,9 @@ SAM4S Xplained-specific Configuration Options
     CONFIG_GPIOA_IRQ
     CONFIG_GPIOB_IRQ
     CONFIG_GPIOC_IRQ
+    CONFIG_GPIOD_IRQ
+    CONFIG_GPIOE_IRQ
+    CONFIG_GPIOF_IRQ
     CONFIG_USART0_ISUART
     CONFIG_USART1_ISUART
     CONFIG_USART2_ISUART

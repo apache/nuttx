@@ -112,7 +112,7 @@ int nsh_archinitialize(void)
       }
   }
 #endif
-#if defined(CONFIG_SAM34_SPI) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
+#if defined(CONFIG_SAM34_SPI0) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
   /* Initialize the SPI-based MMC/SD slot */
 
   {

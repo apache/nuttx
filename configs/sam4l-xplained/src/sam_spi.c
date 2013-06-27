@@ -49,7 +49,7 @@
 #include "sam_spi.h"
 #include "sam4l-xplained.h"
 
-#ifdef CONFIG_SAM34_SPI
+#ifdef CONFIG_SAM34_SPI0
 
 /************************************************************************************
  * Definitions
@@ -236,7 +236,7 @@ uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
   return ret;
 }
 
-#endif /* CONFIG_SAM34_SPI */
+#endif /* CONFIG_SAM34_SPI0 */
 
 /****************************************************************************
  * Name: sam_spicmddata

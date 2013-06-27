@@ -71,7 +71,7 @@ void sam_boardinitialize(void)
    * sam_spiinitialize() has been brought into the link.
    */
 
-#ifdef CONFIG_SAM34_SPI
+#ifdef CONFIG_SAM34_SPI0
   if (sam_spiinitialize)
     {
       sam_spiinitialize();

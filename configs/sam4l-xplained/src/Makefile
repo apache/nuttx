@@ -46,7 +46,7 @@ ifeq ($(CONFIG_HAVE_CXX),y)
 CSRCS += sam_cxxinitialize.c
 endif
 
-ifeq ($(CONFIG_SAM34_SPI),y)
+ifeq ($(CONFIG_SAM34_SPI0),y)
 CSRCS += sam_spi.c
 endif
 
@@ -70,13 +70,13 @@ CSRCS += sam_slcd.c
 endif
 endif
 
-ifeq ($(CONFIG_SAM34_SPI),y)
+ifeq ($(CONFIG_SAM34_SPI0),y)
 ifeq ($(CONFIG_SAM4L_XPLAINED_IOMODULE),y)
 CSRCS += sam_mmcsd.c
 endif
 endif
 
-ifeq ($(CONFIG_SAM34_SPI),y)
+ifeq ($(CONFIG_SAM34_SPI0),y)
 ifeq ($(CONFIG_SAM4L_XPLAINED_OLED1MODULE),y)
 ifeq ($(CONFIG_LCD_UG2832HSWEG04),y)
 CSRCS += sam_ug2832hsweg04.c

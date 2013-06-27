@@ -189,8 +189,8 @@
 
 #ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
 
-#  ifndef CONFIG_SAM34_SPI
-#    error CONFIG_SAM34_SPI is required to use the I/O1 module
+#  ifndef CONFIG_SAM34_SPI0
+#    error CONFIG_SAM34_SPI0 is required to use the I/O1 module
 #  endif
 
 #  if defined(CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1)
@@ -248,8 +248,8 @@
 
 #ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
 
-#  ifndef CONFIG_SAM34_SPI
-#    error CONFIG_SAM34_SPI is required to use the OLED1 module
+#  ifndef CONFIG_SAM34_SPI0
+#    error CONFIG_SAM34_SPI0 is required to use the OLED1 module
 #  endif
 
 #  ifndef CONFIG_SPI_CMDDATA
@@ -337,11 +337,11 @@ void weak_function sam_spiinitialize(void);
  *
  * Description:
  *   Initialize the SPI-based SD card.  Requires CONFIG_SAM4L_XPLAINED_IOMODULE=y,
- *   CONFIG_DISABLE_MOUNTPOINT=n, CONFIG_MMCSD=y, and CONFIG_SAM34_SPI=y
+ *   CONFIG_DISABLE_MOUNTPOINT=n, CONFIG_MMCSD=y, and CONFIG_SAM34_SPI0=y
  *
  ************************************************************************************/
 
-#if defined(CONFIG_SAM34_SPI) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
+#if defined(CONFIG_SAM34_SPI0) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
 int sam_sdinitialize(int minor);
 #endif
 

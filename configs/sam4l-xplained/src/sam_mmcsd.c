@@ -59,8 +59,8 @@
 #  error Mountpoints are disabled (CONFIG_DISABLE_MOUNTPOINT=y)
 #endif
 
-#ifndef CONFIG_SAM34_SPI
-#  error SPI support is required (CONFIG_SAM34_SPI)
+#ifndef CONFIG_SAM34_SPI0
+#  error SPI support is required (CONFIG_SAM34_SPI0)
 #endif
 
 #ifndef CONFIG_MMCSD
@@ -81,7 +81,7 @@
  *   - CONFIG_SAM4L_XPLAINED_IOMODULE=y,
  *   - CONFIG_DISABLE_MOUNTPOINT=n,
  *   - CONFIG_MMCSD=y, and
- *   - CONFIG_SAM34_SPI=y
+ *   - CONFIG_SAM34_SPI0=y
  *
  *****************************************************************************/
 
