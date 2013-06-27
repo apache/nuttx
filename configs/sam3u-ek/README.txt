@@ -3,7 +3,7 @@ README
 
 This README discusses issues unique to NuttX configurations for the Atmel
 SAM3U-EK development board featuring the ATAM3U.  This board features the
-AT91SAM3U4E MCU running at 96MHz.
+ATSAM3U4E MCU running at 96MHz.
 
 Contents
 ^^^^^^^^
@@ -292,7 +292,7 @@ SAM3U-EK-specific Configuration Options
 
        CONFIG_ARCH_CHIP_SAM34
        CONFIG_ARCH_CHIP_SAM3U
-       CONFIG_ARCH_CHIP_AT91SAM3U4
+       CONFIG_ARCH_CHIP_ATSAM3U4
 
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
@@ -377,7 +377,7 @@ SAM3U-EK-specific Configuration Options
     CONFIG_USART3_ISUART
     CONFIG_SAM34_NAND          - NAND memory
 
-  AT91SAM3U specific device driver settings
+  SAM3U specific device driver settings
 
     CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,3) or UART
            m (m=4,5) for the console and ttys0 (default is the USART1).

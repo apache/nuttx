@@ -1702,6 +1702,10 @@ configs/amber
   on the Atmel AVR ATMega128 MCU.  There is not much there yet and what is
   there is untested due to tool-related issues.
 
+configs/arduino-due
+  This sub-directory holds board support for the Arduino DUE board featuring
+  the Atmel ATSAM3X8E MCU running at 84 MHz.
+
 configs/avr32dev1
   This is a port of NuttX to the Atmel AVR32DEV1 board.  That board is
   based on the Atmel AT32UC3B0256 MCU and uses a specially patched

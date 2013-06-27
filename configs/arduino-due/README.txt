@@ -2,8 +2,8 @@ README
 ^^^^^^
 
   This README discusses issues unique to NuttX configurations for the
-  Arduion DUE board featuring the Atmel ATSAM3X8E MSU.
-
+  Arduino DUE board featuring the Atmel ATSAM3X8E MCU running at 84
+  MHz.
 
 Contents
 ^^^^^^^^
@@ -23,7 +23,81 @@ Contents
 PIO Pin Usage
 ^^^^^^^^^^^^^
 
-  To be provided
+  PORTA                          PORTB                          PORTC
+  ------------------------------ ------------------------------ --------------------------------
+  PIO   SIGNAL     CONN PIN      PIO   SIGNAL       CONN PIN    PIO   SIGNAL      CONN PIN
+  ----- ---------- ---- -------- ----- ------------ ---- ------ ----- ----------- ---- ---------
+  PA0   CANTX0     ADCH 8        PB0   ETX_CLK      ETH  1      PC0   ERASE       N/A
+  PA1   CANRX0     ACDH 7        PB1   ETX_EN       ETH  3      PC1   PIN33       XIO  14
+  PA2   AD7        ADCL 7        PB2   ETXD0        ETH  5      PC2   PIN34       XIO  15
+  PA3   AD6        ADCL 6        PB3   ETXD1        ETH  7      PC3   PIN35       XIO  16
+  PA4   AD5        ADCL 5        PB4   ERX_DV       ETH  10     PC4   PIN36       XIO  17
+  PA5   EEXTINT    ETH  8        PB5   ERXD0        ETH  9      PC5   PIN37       XIO  18
+  PA6   AD4        ADCL 4        PB6   ERXD1        ETH  11     PC6   PIN38       XIO  19
+  PA7   PIN31      XIO  12       PB7   ERX_ER       ETH  13     PC7   PIN39       XIO  20
+  PA8   [U]RX      PWML 1        PB8   EMDC         ETH  14     PC8   PIN40       XIO  21
+  PA9   [U]TX      PWML 2        PB9   EMDIO        ETH  12     PC9   PIN41       XIO  22
+  PA10  RXD2       COMM 6        PB10  UOTGVBOF     Vbus power  PC10  N/C         N/A
+  PA11  TXD2       COMM 5        PB11  UOTGID       USB1 4      PC11  N/C         N/A
+  PA12  RXD1       COMM 4        PB12  SDA0-3       COMM 7      PC12  PIN51       XIO  32
+  PA13  TXD1       COMM 3        PB13  SCL0-3       COMM 8      PC13  PIN50       XIO  31
+  PA14  PIN23      XIO  4        PB14  CANTX1/IO    XIO  34     PC14  PIN49       XIO  30
+  PA15  PIN24      XIO  5        PB15  DAC0(CANRX1) ADCH 5      PC15  PIN48       XIO  29
+  PA16  AD0        ADCL 0        PB16  DAC1         ADCH 6      PC16  PIN47       XIO  28
+  PA17  SDA1       PWMH 9        PB17  AD8          ADCH 1      PC17  PIN46       XIO  27
+  PA18  SCL1       PWMH 10       PB18  AD9          ADCH 2      PC18  PIN45       XIO  26
+  PA19  PIN42      XIO  23       PB19  AD10         ADCH 3      PC19  PIN44       XIO  25
+  PA20  PIN43      XIO  24       PB20  AD11(TXD3)   ADCH 4      PC20  N/C         N/A
+  PA21  TXL        TX YELLOW LED PB21  AD14(RXD3)   XIO  33     PC21  PWM9        PWMH 2
+  PA22  AD3        ADCL 3        PB22  N/C          N/A         PC22  PWM8        PWMH 1
+  PA23  AD2        ADCL 2        PB23  SS3          ???         PC23  PWM7        PWML 8
+  PA24  AD1        ADCL 1        PB24  N/C          N/A         PC24  PWM6        PWML 7
+  PA25  MISO       SPI  1        PB25  PWM2         PWML 3      PC25  PWM5        PWML 6
+  PA26  MOSI       SPI  4        PB26  PIN22        ???         PC26  SS1/PWM4    ??? (there are two)
+  PA27  SPCK       SPI  3        PB27  PWM13        PWMH 6      PC27  N/C         N/A
+  PA28  SS0/PWM10  (ETH)         PB28  JTAG_TCK     JTAG 4      PC28  PWM3        PWML 4
+  PA29  SS1/PWM4   (SD)          PB29  JTAG_TDI     JTAG 8      PC29  SS0/PWM10   ??? (there are two)
+  PA30  N/A         N/A          PB30  JTAG_TDO     JTAG 6      PC30  RXL         RX YELLOW LED
+  PA31  N/A         N/A          PB31  JTAG_TMS     JTAG 2      PC31  N/A         N/A
+  ----- ---------- ---- -------- ----- ------------ ---- ------ ----- ----------- ---- ---------
+
+  PORTA                          PORTB                          PORTC
+  ------------------------------ ------------------------------ --------------------------------
+  PIO   SIGNAL     CONN PIN      PIO   SIGNAL       CONN PIN    PIO   SIGNAL      CONN PIN
+  ----- ---------- ---- -------- ----- ------------ ---- ------ ----- ----------- ---- ---------
+  PA0   PIN25       XIO  6       PE0   N/A          N/A         PF0   N/A         N/A
+  PD1   PIN26       XIO  7       PE1   N/A          N/A         PF1   N/A         N/A
+  PD2   PIN27       XIO  8       PE2   N/A          N/A         PF2   N/A         N/A
+  PD3   PIN28       XIO  9       PE3   N/A          N/A         PF3   N/A         N/A
+  PD4   TXD0        COMM 1       PE4   N/A          N/A         PF4   N/A         N/A
+  PD5   RXD0        COMM 2       PE5   N/A          N/A         PF5   N/A         N/A
+  PD6   PIN29       XIO  10      PE6   N/A          N/A         PF6   N/A         N/A
+  PD7   PWM11       PWMH 4       PE7   N/A          N/A         PF7   N/A         N/A
+  PD8   PWM12       PWMH 5       PE8   N/A          N/A         PF8   N/A         N/A
+  PD9   PIN30       XIO  11      PE9   N/A          N/A         PF9   N/A         N/A
+  PD10  PIN32       XIO  13      PE10  N/A          N/A         PF10  N/A         N/A
+  PD11  N/A         N/A          PE11  N/A          N/A         PF11  N/A         N/A
+  PD12  N/A         N/A          PE12  N/A          N/A         PF12  N/A         N/A
+  PD13  N/A         N/A          PE13  N/A          N/A         PF13  N/A         N/A
+  PD14  N/A         N/A          PE14  N/A          N/A         PF14  N/A         N/A
+  PD15  N/A         N/A          PE15  N/A          N/A         PF15  N/A         N/A
+  PD16  N/A         N/A          PE16  N/A          N/A         PF16  N/A         N/A
+  PD17  N/A         N/A          PE17  N/A          N/A         PF17  N/A         N/A
+  PD18  N/A         N/A          PE18  N/A          N/A         PF18  N/A         N/A
+  PD19  N/A         N/A          PE19  N/A          N/A         PF19  N/A         N/A
+  PD20  N/A         N/A          PE20  N/A          N/A         PF20  N/A         N/A
+  PD21  N/A         N/A          PE21  N/A          N/A         PF21  N/A         N/A
+  PD22  N/A         N/A          PE22  N/A          N/A         PF22  N/A         N/A
+  PD23  N/A         N/A          PE23  N/A          N/A         PF23  N/A         N/A
+  PD24  N/A         N/A          PE24  N/A          N/A         PF24  N/A         N/A
+  PD25  N/A         N/A          PE25  N/A          N/A         PF25  N/A         N/A
+  PD26  N/A         N/A          PE26  N/A          N/A         PF26  N/A         N/A
+  PD27  N/A         N/A          PE27  N/A          N/A         PF27  N/A         N/A
+  PD28  N/A         N/A          PE28  N/A          N/A         PF28  N/A         N/A
+  PD29  N/A         N/A          PE29  N/A          N/A         PF29  N/A         N/A
+  PD30  N/A         N/A          PE30  N/A          N/A         PF30  N/A         N/A
+  PD31  N/A5        N/A          PE31  N/A          N/A         PF31  N/A         N/A
+  ----- ---------- ---- -------- ----- ------------ ---- ------ ----- ----------- ---- ---------
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -232,12 +306,70 @@ NXFLAT Toolchain
 Buttons and LEDs
 ^^^^^^^^^^^^^^^^
 
-  To be provided
+  Buttons
+  -------
+  There are no buttons on the Arduino Due board.
+
+  LEDs
+  ----
+  There are two user-controllable LEDs on board the Arduino Due board:
+
+      LED              GPIO
+      ---------------- -----
+      TX  Yellow LED   PA21
+      RX  Yellow LED   PC30
+
+  Both are pulled high and can be illuminated by driving the corresponding
+  GPIO output to low.
+
+  These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+  defined.  In that case, the usage by the board port is defined in
+  include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
+  events as follows:
+
+    SYMBOL                Meaning                     LED state
+                                                    RX       TX
+    -------------------  -----------------------  -------- --------
+    LED_STARTED          NuttX has been started     OFF      OFF
+    LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
+    LED_IRQSENABLED      Interrupts enabled         OFF      OFF
+    LED_STACKCREATED     Idle stack created         ON       OFF
+    LED_INIRQ            In an interrupt              No change
+    LED_SIGNAL           In a signal handler          No change
+    LED_ASSERTION        An assertion failed          No change
+    LED_PANIC            The system has crashed     OFF      Blinking
+    LED_IDLE             MCU is is sleep mode         Not used
+
+  Thus if RX is statically on, NuttX has successfully booted and is,
+  apparently, running normmally.  If TX is flashing at approximately
+  2Hz, then a fatal error has been detected and the system has halted.
+
 
 Serial Consoles
 ^^^^^^^^^^^^^^^
 
-  To be provided
+  Any of UART and USART0-3 may be used as a serial console.  By default,
+  the UART is used as the serial console in all configurations.  But that is
+  easily changed by modifying the configuration as described under
+  "Configurations" below.
+
+    ------------------------------
+    PIO   SIGNAL     CONN PIN
+    ----- ---------- ---- --------
+    PA8   [U]RX      PWML 1
+    PA9   [U]TX      PWML 2
+    PD4   TXD0       COMM 1
+    PD5   RXD0       COMM 2
+    PA12  RXD1       COMM 4
+    PA13  TXD1       COMM 3
+    PA10  RXD2       COMM 6
+    PA11  TXD2       COMM 5
+    PB20  AD11(TXD3) ADCH 4
+  PB21  AD14(RXD3) XIO  33
+
+  The outputs from these pins is 3.3V.  You will need to connect RS232
+  transceiver to get the signals to RS232 levels (or connect the pins to the
+  USB virual COM port.
 
 Arduino DUE-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -383,7 +515,7 @@ Configurations
   can be selected as follow:
 
     cd tools
-    ./configure.shsam4s-xplained/<subdir>
+    ./configure.sh arduino-due/<subdir>
     cd -
     . ./setenv.sh
 

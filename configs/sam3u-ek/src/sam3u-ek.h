@@ -67,7 +67,7 @@
 /* SAM3U-EK GPIO Pin Definitions ****************************************************/
 
 /* LCD:
- *   LCD Module Pin Out:                         AT91SAM3U PIO:
+ *   LCD Module Pin Out:                         SAM3U PIO:
  *  -------------------------------------------- --------------------------------------
  *   Pin Symbol Function                         LCD            PeriphA  PeriphB Extra
  *  ---- ------ -------------------------------- -------------- -------- ------- ------

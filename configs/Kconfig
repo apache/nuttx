@@ -20,6 +20,14 @@ config ARCH_BOARD_AMBER
 		on the Atmel AVR ATMega128 MCU.  There is not much there yet and what is
 		there is untested due to tool-related issues.
 
+config ARCH_BOARD_ARDUINO_DUE
+	bool "Arduino Due"
+	depends on ARCH_CHIP_ATSAM3X8E
+	select ARCH_HAVE_LEDS
+	---help---
+		This options selects the Arduino DUE board featuring the Atmel
+		ATSAM3X8E MCU running at 84 MHz.
+
 config ARCH_BOARD_AVR32DEV1
 	bool "Atmel AVR32DEV1 board"
 	depends on ARCH_CHIP_AT32UC3B0256
@@ -466,7 +474,7 @@ config ARCH_BOARD_RGMP
 
 config ARCH_BOARD_SAM3UEK
 	bool "Atmel SAM3U-EK development board"
-	depends on ARCH_CHIP_AT91SAM3U4E
+	depends on ARCH_CHIP_ATSAM3U4E
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
@@ -744,6 +752,7 @@ endchoice
 config ARCH_BOARD
 	string
 	default "amber"               if ARCH_BOARD_AMBER
+	default "arduino-due"         if ARCH_BOARD_ARDUINO_DUE
 	default "avr32dev1"           if ARCH_BOARD_AVR32DEV1
 	default "c5471evm"            if ARCH_BOARD_C5471EVM
 	default "compal_e88"          if ARCH_BOARD_COMPALE88
@@ -756,7 +765,7 @@ config ARCH_BOARD
 	default "ez80f910200kitg"     if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"      if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"        if ARCH_BOARD_FIRE_STM32
-	default "freedom-kl25z"        if ARCH_BOARD_FREEDOM_KL25Z
+	default "freedom-kl25z"       if ARCH_BOARD_FREEDOM_KL25Z
 	default "hymini-stm32v"       if ARCH_BOARD_HYMINI_STM32V
 	default "kwikstik-k40"        if ARCH_BOARD_KWIKSTIK_K40
 	default "lincoln60"           if ARCH_BOARD_LINCOLN60
@@ -876,6 +885,9 @@ comment "Board-Specific Options"
 
 if ARCH_BOARD_AMBER
 source "configs/amber/Kconfig"
+endif
+if ARCH_BOARD_ARDUINO_DUE
+source "configs/arduino-due/Kconfig"
 endif
 if ARCH_BOARD_AVR32DEV1
 source "configs/avr32dev1/Kconfig"
