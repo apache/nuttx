@@ -1,6 +1,7 @@
 /****************************************************************************************
  * arch/arm/src/sam34/chip/sam3u_eefc.h
- * Enhanced Embedded Flash Controller (EEFC) defintions for the SAM3U and SAM4S
+ * Enhanced Embedded Flash Controller (EEFC) defintions for the SAM3U, SAM3X, SAM3A and
+ * SAM4S
  *
  *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -80,6 +81,7 @@
 #define EEFC_FMR_FRDY                (1 << 0)  /* Bit 0:  Ready Interrupt Enable */
 #define EEFC_FMR_FWS_SHIFT           (8)       /* Bits 8-11:  Flash Wait State */
 #define EEFC_FMR_FWS_MASK            (15 << EEFC_FMR_FWS_SHIFT)
+#  define EEFC_FMR_FWS(n)            ((n) << EEFC_FMR_FWS_SHIFT)
 
 #if defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define EEFC_FMR_SCOD              (1 << 16) /* Bit 16: Sequential Code Optimization Disable */
@@ -116,8 +118,11 @@
 #  define EEFC_FCR_FCMD_STUI         (14 << EEFC_FCR_FCMD_SHIFT) /* Start Read Unique Identifier */
 #  define EEFC_FCR_FCMD_SPUI         (15 << EEFC_FCR_FCMD_SHIFT) /* Stop Read Unique Identifier */
 
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A) || defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define EEFC_FCR_FCMD_GCALB        (16 << EEFC_FCR_FCMD_SHIFT) /* Get CALIB Bit */
+#endif
+
+#if defined(CONFIG_ARCH_CHIP_SAM4S)
 #  define EEFC_FCR_FCMD_ES           (17 << EEFC_FCR_FCMD_SHIFT) /* Erase Sector */
 #  define EEFC_FCR_FCMD_WUS          (18 << EEFC_FCR_FCMD_SHIFT) /* Write User Signature */
 #  define EEFC_FCR_FCMD_EUS          (19 << EEFC_FCR_FCMD_SHIFT) /* Erase User Signature */

@@ -54,9 +54,6 @@
 #include "chip.h"
 #include "sam_mpuinit.h"
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM4S)
-#endif
-
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
@@ -97,9 +94,10 @@
 #  define CONFIG_ARCH_EXTSRAM3SIZE 0
 #endif
 
-/* SAM3U Unique memory configurations */
+/* SAM3U, SAM3X, and SAM3A Unique memory configurations */
 
-#ifdef CONFIG_ARCH_CHIP_SAM3U
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X) || \
+    defined(CONFIG_ARCH_CHIP_SAM3A)
 #  ifdef CONFIG_SAM34_NAND
 #    undef SAM34_NFCSRAM_SIZE
 #    define SAM34_NFCSRAM_SIZE 0
