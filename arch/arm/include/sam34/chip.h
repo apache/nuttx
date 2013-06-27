@@ -50,7 +50,7 @@
 
 /* AT91SAM3U Family *****************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_AT91SAM3U4E)
+#if defined(CONFIG_ARCH_CHIP_ATSAM3U4E)
 
 /* Internal memory */
 
@@ -95,7 +95,7 @@
  * HSMCI        8 bit    4 bit    8 bit    4 bit    4 bit    4 bit
  */
 
-#elif defined(CONFIG_ARCH_CHIP_AT91SAM3X8E)
+#elif defined(CONFIG_ARCH_CHIP_ATSAM3X8E)
 
 /* Internal memory */
 
@@ -115,7 +115,7 @@
 #  define SAM32_NUDPFS                0            /* No USB full speed device */
 #  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
 
-#elif defined(CONFIG_ARCH_CHIP_AT91SAM3X8C)
+#elif defined(CONFIG_ARCH_CHIP_ATSAM3X8C)
 
 /* Internal memory */
 
@@ -135,7 +135,7 @@
 #  define SAM32_NUDPFS                0            /* No USB full speed device */
 #  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
 
-#elif defined(CONFIG_ARCH_CHIP_AT91SAM3X4E)
+#elif defined(CONFIG_ARCH_CHIP_ATSAM3X4E)
 
 /* Internal memory */
 
@@ -155,7 +155,7 @@
 #  define SAM32_NUDPFS                0            /* No USB full speed device */
 #  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
 
-#elif defined(CONFIG_ARCH_CHIP_AT91SAM3X4C)
+#elif defined(CONFIG_ARCH_CHIP_ATSAM3X4C)
 
 /* Internal memory */
 
@@ -175,7 +175,7 @@
 #  define SAM32_NUDPFS                0            /* No USB full speed device */
 #  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
 
-#elif defined(CONFIG_ARCH_CHIP_AT91SAM3A8C)
+#elif defined(CONFIG_ARCH_CHIP_ATSAM3A8C)
 
 /* Internal memory */
 
@@ -195,7 +195,7 @@
 #  define SAM32_NUDPFS                0            /* No USB full speed device */
 #  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
 
-#elif defined(CONFIG_ARCH_CHIP_AT91SAM3A4C)
+#elif defined(CONFIG_ARCH_CHIP_ATSAM3A4C)
 
 /* Internal memory */
 

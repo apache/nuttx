@@ -152,7 +152,7 @@ static struct dma_linklist_s g_linklist[CONFIG_SAM34_NLLDESC];
 
 static struct sam_dma_s g_dma[SAM34_NDMACHAN] =
 {
-#ifdef CONFIG_ARCH_CHIP_AT91SAM3U4E
+#ifdef CONFIG_ARCH_CHIP_ATSAM3U4E
   /* the AT91SAM3U4E has four DMA channels.  The FIFOs for channels 0-2 are
    * 8 bytes in size; channel 3 is 32 bytes.
    */
