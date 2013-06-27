@@ -75,7 +75,7 @@
   VECTOR(sam_hsmci, SAM_IRQ_HSMCI)    /* Vector 16+18: High Speed Multimedia Card Interface */
   VECTOR(sam_twi0, SAM_IRQ_TWI0)      /* Vector 16+19: Two-Wire Interface 0 */
   VECTOR(sam_twi1, SAM_IRQ_TWI1)      /* Vector 16+20: Two-Wire Interface 1 */
-  VECTOR(sam_spi, SAM_PID_SPI)        /* Vector 16+21: Serial Peripheral Interface */
+  VECTOR(sam_spi0, SAM_IRQ_SPI0)      /* Vector 16+21: Serial Peripheral Interface */
   VECTOR(sam_ssc, SAM_IRQ_SSC)        /* Vector 16+22: Synchronous Serial Controller */
   VECTOR(sam_tc0, SAM_IRQ_TC0)        /* Vector 16+23: Timer Counter 0 */
   VECTOR(sam_tc1, SAM_IRQ_TC1)        /* Vector 16+24: Timer Counter 1 */

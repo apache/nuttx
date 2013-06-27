@@ -72,7 +72,7 @@
 
 #define sam_aesa_enableclk()         sam_hsb_enableperipheral(PM_HSBMASK_AESA)
 #define sam_iisc_enableclk()         sam_pba_enableperipheral(PM_PBAMASK_IISC)
-#define sam_spi_enableclk()          sam_pba_enableperipheral(PM_PBAMASK_SPI)
+#define sam_spi0_enableclk()         sam_pba_enableperipheral(PM_PBAMASK_SPI)
 
 #define sam_tc0_enableclk() \
   do { \
@@ -170,7 +170,7 @@
 
 #define sam_aesa_disableclk()         sam_hsb_disableperipheral(PM_HSBMASK_AESA)
 #define sam_iisc_disableclk()         sam_pba_disableperipheral(PM_PBAMASK_IISC)
-#define sam_spi_disableclk()          sam_pba_disableperipheral(PM_PBAMASK_SPI)
+#define sam_spi0_disableclk()         sam_pba_disableperipheral(PM_PBAMASK_SPI)
 #define sam_tc0_disableclk()          sam_pba_disableperipheral(PM_PBAMASK_TC0)
 #define sam_tc1_disableclk()          sam_pba_disableperipheral(PM_PBAMASK_TC1)
 #define sam_twim0_disableclk()        sam_pba_disableperipheral(PM_PBAMASK_TWIM0)

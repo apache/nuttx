@@ -104,6 +104,6 @@ ifeq ($(CONFIG_SAM34_HSMCI),y)
 CHIP_CSRCS += sam_hsmci.c
 endif
 
-ifeq ($(CONFIG_SAM34_SPI),y)
+ifeq ($(CONFIG_SAM34_SPI0),y)
 CHIP_CSRCS += sam_spi.c
 endif

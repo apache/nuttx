@@ -95,7 +95,7 @@
  * HSMCI        8 bit    4 bit    8 bit    4 bit    4 bit    4 bit
  */
 
-#if defined(CONFIG_ARCH_CHIP_AT91SAM3X8E)
+#elif defined(CONFIG_ARCH_CHIP_AT91SAM3X8E)
 
 /* Internal memory */
 

@@ -111,7 +111,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAM34_SPI
+#ifdef CONFIG_SAM34_SPI0
 struct spi_dev_s;
 enum spi_dev_e;
 
@@ -187,7 +187,7 @@ uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
 int sam_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
-#endif /* CONFIG_SAM34_SPI */
+#endif /* CONFIG_SAM34_SPI0 */
 
 #undef EXTERN
 #if defined(__cplusplus)

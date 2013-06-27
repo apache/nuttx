@@ -62,8 +62,8 @@
 #  error "Touchscreen support requires CONFIG_INPUT"
 #endif
 
-#ifndef CONFIG_SAM34_SPI
-#  error "Touchscreen support requires CONFIG_SAM34_SPI"
+#ifndef CONFIG_SAM34_SPI0
+#  error "Touchscreen support requires CONFIG_SAM34_SPI0"
 #endif
 
 #ifndef CONFIG_GPIOA_IRQ

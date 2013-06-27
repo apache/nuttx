@@ -5067,4 +5067,12 @@
 	* arch/arm/src/sam34/sam3x_gpio.h:  Add SAM3X/3A gpio encoding
 	  macros.  These differ from the SAM3U only in because of the
 	  6 PIOs:  PIOA-PIOF (2013-6-26).
+	* configs/arduino-due:  This is an empty directory now with only
+	  a README file in it but this directory will eventually hold a port
+	  for the Arduino Due (2013-6-26).
+	* arch/arm/src/sam34/Kconfig:  Add SAM3X/3A peripherals to the SAM3/4
+	  configuration logic (2013-6-26).
+	* arch/arm/src and include/ and configs/sam*/:  Large rename of all
+	  references to SPI with SPI0.  This is because all other SAMs have
+	  only SPI but the 3X/3A have SPI0 and SPI1 (2013-6-26).
 

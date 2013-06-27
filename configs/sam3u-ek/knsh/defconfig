@@ -135,7 +135,7 @@ CONFIG_ARCH_CHIP_SAM3U=y
 #
 # AT91SAM3/4 Peripheral Support
 #
-# CONFIG_SAM34_SPI is not set
+# CONFIG_SAM34_SPI0 is not set
 # CONFIG_SAM34_SSC is not set
 # CONFIG_SAM34_TC0 is not set
 # CONFIG_SAM34_TC1 is not set

@@ -70,7 +70,7 @@
 #define SAM_PID_HSMCI         (17)  /* High Speed Multimedia Card Interface */
 #define SAM_PID_TWI0          (18)  /* Two-Wire Interface 0 */
 #define SAM_PID_TWI1          (19)  /* Two-Wire Interface 1 */
-#define SAM_PID_SPI           (20)  /* Serial Peripheral Interface */
+#define SAM_PID_SPI0          (20)  /* Serial Peripheral Interface */
 #define SAM_PID_SSC           (21)  /* Synchronous Serial Controller */
 #define SAM_PID_TC0           (22)  /* Timer Counter 0 */
 #define SAM_PID_TC1           (23)  /* Timer Counter 1 */
@@ -104,7 +104,7 @@
 #define SAM_IRQ_HSMCI         (SAM_IRQ_EXTINT+SAM_PID_HSMCI)  /* High Speed Multimedia Card Interface */
 #define SAM_IRQ_TWI0          (SAM_IRQ_EXTINT+SAM_PID_TWI0)   /* Two-Wire Interface 0 */
 #define SAM_IRQ_TWI1          (SAM_IRQ_EXTINT+SAM_PID_TWI1)   /* Two-Wire Interface 1 */
-#define SAM_IRQ_SPI           (SAM_IRQ_EXTINT+SAM_PID_SPI)    /* Serial Peripheral Interface */
+#define SAM_IRQ_SPI0          (SAM_IRQ_EXTINT+SAM_PID_SPI0)   /* Serial Peripheral Interface */
 #define SAM_IRQ_SSC           (SAM_IRQ_EXTINT+SAM_PID_SSC)    /* Synchronous Serial Controller */
 #define SAM_IRQ_TC0           (SAM_IRQ_EXTINT+SAM_PID_TC0)    /* Timer Counter 0 */
 #define SAM_IRQ_TC1           (SAM_IRQ_EXTINT+SAM_PID_TC1)    /* Timer Counter 1 */

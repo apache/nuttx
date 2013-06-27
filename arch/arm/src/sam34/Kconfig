@@ -222,14 +222,19 @@ config SAM34_IISC
 	default n
 	depends on ARCH_CHIP_SAM4L
 
-config SAM34_SPI
-	bool "Serial Peripheral Interface (SPI)"
+config SAM34_SPI0
+	bool "Serial Peripheral Interface 0 (SPI0)"
 	default n
+
+config SAM34_SPI1
+	bool "Serial Peripheral Interface 1 (SPI1)"
+	default n
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
 
 config SAM34_SSC
 	bool "Synchronous Serial Controller (SSC)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
 
 config SAM34_TC0
 	bool "Timer/Counter 0 (TC0)"
@@ -242,27 +247,42 @@ config SAM34_TC1
 config SAM34_TC2
 	bool "Timer/Counter 2 (TC2)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
 
 config SAM34_TC3
 	bool "Timer/Counter 3 (TC3)"
 	default n
-	depends on ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
 
 config SAM34_TC4
 	bool "Timer/Counter 4 (TC4)"
 	default n
-	depends on ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
 
 config SAM34_TC5
 	bool "Timer/Counter 5 (TC5)"
 	default n
-	depends on ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+
+config SAM34_TC6
+	bool "Timer/Counter 6 (TC6)"
+	default n
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+
+config SAM34_TC7
+	bool "Timer/Counter 7 (TC6)"
+	default n
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+
+config SAM34_TC8
+	bool "Timer/Counter 6 (TC8)"
+	default n
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
 
 config SAM34_PWM
 	bool "Pulse Width Modulation (PWM) Controller"
 	default n
-	depends on ARCH_CHIP_SAM3U|| ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
 
 config SAM34_TWIM0
 	bool "Two-wire Master Interface 0 (TWIM0)"
@@ -293,7 +313,7 @@ config SAM34_TWIM3
 config SAM34_UART0
 	bool "UART 0"
 	default y
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
 	select ARCH_HAVE_UART0
 
 config SAM34_UART1
@@ -322,13 +342,13 @@ config SAM34_USART2
 	bool "USART 2"
 	default n
 	select ARCH_HAVE_USART2
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM4L
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4L
 
 config SAM34_USART3
 	bool "USART 3"
 	default n
 	select ARCH_HAVE_USART3
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM4L
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4L
 
 config SAM34_ADC12B
 	bool "12-bit ADC Controller"
@@ -342,7 +362,7 @@ config SAM34_ADC
 config SAM34_DACC
 	bool "Digital To Analog Converter (DAC)"
 	default n
-	depends on ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4L || ARCH_CHIP_SAM4S
 
 config SAM34_ACC
 	bool "Analog Comparator (AC)"
@@ -362,7 +382,22 @@ config SAM34_ABDACB
 config SAM34_TRNG
 	bool "True Random Number Generator (TRNG)"
 	default n
-	depends on ARCH_CHIP_SAM4L
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4L
+
+config SAM34_EMAC
+	bool "Ethernet MAC (EMAC)"
+	default n
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+
+config SAM34_CAN0
+	bool "CAN0"
+	default n
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+
+config SAM34_CAN1
+	bool "CAN1"
+	default n
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
 
 config SAM34_PARC
 	bool "Parallel Capture (PARC)"
@@ -387,7 +422,12 @@ config SAM34_HRAMC1
 config SAM34_SMC
 	bool "Static Memory Controller (SMC)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+
+config SAM34_SDRAMC
+	bool "SDRAM Controller (SDRAMC)"
+	default n
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
 
 config SAM34_NAND
 	bool "NAND support"
@@ -408,7 +448,7 @@ config SAM34_PDCA
 config SAM34_DMA
 	bool "DMA controller"
 	default n
-	depends on ARCH_CHIP_SAM3U
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
 	select ARCH_DMA
 
 config SAM34_CRCCU
@@ -420,6 +460,11 @@ config SAM34_UDPHS
 	bool "USB Device High Speed"
 	default n
 	depends on ARCH_CHIP_SAM3U
+
+config SAM34_UOTGHS
+	bool "USB OTG High Speed"
+	default n
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X
 
 config SAM34_UDP
 	bool "USB Device Full Speed"
@@ -454,12 +499,12 @@ config SAM34_AST
 config SAM34_RTC
 	bool "Real Time Clock (RTC)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
 
 config SAM34_RTT
 	bool "Real Time Timer (RTT)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
 
 config SAM34_WDT
 	bool "Watchdog Timer (WDT)"
@@ -473,7 +518,7 @@ config SAM34_EIC
 config SAM34_HSMCI
 	bool "High Speed Multimedia Card Interface (HSMCI)"
 	default n
-	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM4S
+	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
 
 endmenu
 
@@ -614,6 +659,21 @@ config GPIOB_IRQ
 config GPIOC_IRQ
 	bool "GPIOC interrupts"
 	default n
+
+config GPIOD_IRQ
+	bool "GPIOD interrupts"
+	default n
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+
+config GPIOE_IRQ
+	bool "GPIOE interrupts"
+	default n
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
+
+config GPIOF_IRQ
+	bool "GPIOF interrupts"
+	default n
+	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
 
 endif
 

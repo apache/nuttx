@@ -78,7 +78,7 @@
 /* Peripheral Bridge A */
                                         /* 0x40000000-0x40003fff: Reserved */
 #define SAM_I2SC_BASE        0x40004000 /* 0x40004000-0x40007fff: I2S Controller */
-#define SAM_SPI_BASE         0x40008000 /* 0x40008000-0x4000bfff: Serial Peripheral Interface */
+#define SAM_SPI0_BASE        0x40008000 /* 0x40008000-0x4000bfff: Serial Peripheral Interface */
                                         /* 0x4000c000-0x4000ffff: Reserved */
 #define SAM_TC0_BASE         0x40100000 /* 0x40100000-0x4013ffff: Timer Counter 0 */
 #define SAM_TC1_BASE         0x40140000 /* 0x40180000-0x4017ffff: Timer Counter 1 */

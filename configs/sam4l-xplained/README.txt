@@ -528,7 +528,7 @@ SAM4L Xplained Pro-specific Configuration Options
     PBA
     ---
     CONFIG_SAM34_IISC
-    CONFIG_SAM34_SPI
+    CONFIG_SAM34_SPI0
     CONFIG_SAM34_TC0
     CONFIG_SAM34_TC1
     CONFIG_SAM34_TWIM0
@@ -739,7 +739,7 @@ Configuration sub-directories
          details.
 
        System Type -> Peripherals:
-         CONFIG_SAM34_SPI=y                : Enable the SAM4L SPI peripheral
+         CONFIG_SAM34_SPI0=y                : Enable the SAM4L SPI peripheral
 
        Device Drivers
          CONFIG_SPI=y                      : Enable SPI support
@@ -793,7 +793,7 @@ Configuration sub-directories
        changes to the configuration:
 
        System Type -> Peripherals:
-         CONFIG_SAM34_SPI=y                 : Enable the SAM4L SPI peripheral
+         CONFIG_SAM34_SPI0=y                 : Enable the SAM4L SPI peripheral
 
        Device Drivers -> SPI
          CONFIG_SPI=y                       : Enable SPI support

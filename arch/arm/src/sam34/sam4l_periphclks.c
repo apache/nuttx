@@ -186,7 +186,7 @@ static inline void sam_init_pbamask(void)
 #ifdef CONFIG_SAM34_IISC
   mask    |= PM_PBAMASK_IISC;         /* IISC */
 #endif
-#ifdef CONFIG_SAM34_SPI
+#ifdef CONFIG_SAM34_SPI0
   mask    |= PM_PBAMASK_SPI;          /* SPI */
 #endif
 #ifdef CONFIG_SAM34_TC0

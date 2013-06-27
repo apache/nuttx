@@ -354,7 +354,7 @@ SAM3U-EK-specific Configuration Options
     CONFIG_SAM34_HSMCI         - High Speed Multimedia Card Interface
     CONFIG_SAM34_TWI0          - Two-Wire Interface 0
     CONFIG_SAM34_TWI1          - Two-Wire Interface 1
-    CONFIG_SAM34_SPI           - Serial Peripheral Interface
+    CONFIG_SAM34_SPI0           - Serial Peripheral Interface
     CONFIG_SAM34_SSC           - Synchronous Serial Controller
     CONFIG_SAM34_TC0           - Timer Counter 0
     CONFIG_SAM34_TC1           - Timer Counter 1
@@ -587,7 +587,7 @@ Configuration sub-directories
             CONFIG_ADS7843E_THRESHY=39
 
           System Type -> Peripherals:
-            CONFIG_SAM34_SPI=y                : Enable support for SPI
+            CONFIG_SAM34_SPI0=y                : Enable support for SPI
 
           System Type:
             CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
