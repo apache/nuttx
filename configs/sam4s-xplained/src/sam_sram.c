@@ -43,7 +43,7 @@
 
 #include "up_arch.h"
 #include "sam4s_periphclks.h"
-#include "chip/sam_smc.h"
+#include "chip/sam3u_smc.h"
 #include "sam4s-xplained.h"
 
 #ifdef CONFIG_ARCH_EXTSRAM0
