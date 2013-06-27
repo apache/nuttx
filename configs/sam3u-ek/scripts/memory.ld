@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 
-/* The AT91SAM3U-4 has 256KB of FLASH beginning at address 0x0008:0000,
+/* The ATSAM3U4E has 256KB of FLASH beginning at address 0x0008:0000,
  * 32KB of SRAM beginning at address 0x2000:0000, and 16Kb of SRAM beginning
  * at address 0x2008:000 (used only for heap).  When booting from FLASH,
  * FLASH memory is aliased to address 0x0000:0000 where the code expects to

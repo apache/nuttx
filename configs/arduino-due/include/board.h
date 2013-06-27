@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/sam3u-ek/include/board.h
+ * configs/arduino-due/include/board.h
  *
- *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_SAM3U_EK_INCLUDE_BOARD_H
-#define __ARCH_SAM3U_EK_INCLUDE_BOARD_H
+#ifndef __CONFIGS_ARDUINO_DUE_INCLUDE_BOARD_H
+#define __CONFIGS_ARDUINO_DUE_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -54,13 +54,13 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-/* After power-on reset, the sam3u device is running on a 4MHz internal RC.  These
+/* After power-on reset, the SAM3X device is running on a 4MHz internal RC.  These
  * definitions will configure clocking
  *
  *   MAINOSC:  Frequency = 12MHz (crysta)
- *   PLLA: PLL Divider = 1, Multiplier = 16 to generate PLLACK = 192MHz
- *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 96MHz
- *   CPU clock: 96MHz
+ *   PLLA: PLL Divider = 1, Multiplier = 14 to generate PLLACK = 168MHz
+ *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 84MHz
+ *   CPU clock: 84MHz
  */
 
 /* Main oscillator register settings.
@@ -74,10 +74,10 @@
 /* PLLA configuration.
  *
  *   Divider = 1
- *   Multipler = 16
+ *   Multipler = 14
  */
 
-#define BOARD_CKGR_PLLAR_MUL       (15 << PMC_CKGR_PLLAR_MUL_SHIFT)
+#define BOARD_CKGR_PLLAR_MUL       (13 << PMC_CKGR_PLLAR_MUL_SHIFT)
 #define BOARD_CKGR_PLLAR_STMODE    PMC_CKGR_PLLAR_STMODE_FAST
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)
 #define BOARD_CKGR_PLLAR_DIV       PMC_CKGR_PLLAR_DIV_BYPASS
@@ -98,30 +98,30 @@
 /* Resulting frequencies */
 
 #define BOARD_MAINOSC_FREQUENCY    (12000000)  /* MAINOSC: 12MHz crystal on-board */
-#define BOARD_PLLA_FREQUENCY       (192000000) /* PLLACK:  16 * 12Mhz / 1 */
-#define BOARD_MCK_FREQUENCY        (96000000)  /* MCK:     PLLACK / 2 */
-#define BOARD_CPU_FREQUENCY        (96000000)  /* CPU:     MCK */
+#define BOARD_PLLA_FREQUENCY       (168000000) /* PLLACK:  14 * 12Mhz / 1 */
+#define BOARD_MCK_FREQUENCY        (84000000)  /* MCK:     PLLACK / 2 */
+#define BOARD_CPU_FREQUENCY        (84000000)  /* CPU:     MCK */
 
 /* HSMCI clocking
  *
  * Multimedia Card Interface clock (MCCK or MCI_CK) is Master Clock (MCK)
  * divided by (2*(CLKDIV+1)).
  *
- *   MCI_SPEED = MCK / (2*(CLKDIV+1))
- *   CLKDIV = MCI / MCI_SPEED / 2 - 1
+ *   MCI_SPEED = MCCK / (2*(CLKDIV+1))
+ *   CLKDIV = MCCK / MCI_SPEED / 2 - 1
  *
  * Where CLKDIV has a range of 0-255.
  */
 
-/* MCK = 96MHz, CLKDIV = 119, MCI_SPEED = 96MHz / 2 * (119+1) = 400 KHz */
+/* MCK = 84MHz, CLKDIV = 104, MCI_SPEED = 84MHz / 2 * (104+1) = 400 KHz */
 
-#define HSMCI_INIT_CLKDIV          (119 << HSMCI_MR_CLKDIV_SHIFT)
+#define HSMCI_INIT_CLKDIV          (104 << HSMCI_MR_CLKDIV_SHIFT)
 
-/* MCK = 96MHz, CLKDIV = 3, MCI_SPEED = 96MHz / 2 * (3+1) = 12 MHz */
+/* MCK = 84MHz, CLKDIV = 2, MCI_SPEED = 84MHz / 2 * (2+1) = 14 MHz */
 
-#define HSMCI_MMCXFR_CLKDIV        (3 << HSMCI_MR_CLKDIV_SHIFT)
+#define HSMCI_MMCXFR_CLKDIV        (1 << HSMCI_MR_CLKDIV_SHIFT)
 
-/* MCK = 96MHz, CLKDIV = 1, MCI_SPEED = 96MHz / 2 * (1+1) = 24 MHz */
+/* MCK = 84MHz, CLKDIV = 1, MCI_SPEED = 84MHz / 2 * (1+1) = 21 MHz */
 
 #define HSMCI_SDXFR_CLKDIV         (1 << HSMCI_MR_CLKDIV_SHIFT)
 #define HSMCI_SDWIDEXFR_CLKDIV     HSMCI_SDXFR_CLKDIV
@@ -137,24 +137,57 @@
  *  3  84MHz 96MHz
  */
 
-#define BOARD_FWS                  3
+#define BOARD_FWS                  2
 
 /* LED definitions ******************************************************************/
+/*   There are two user-controllable LEDs on board the Arduino Due board:
+ *
+ *     LED              GPIO
+ *     ---------------- -----
+ *     TX  Yellow LED   PA21
+ *     RX  Yellow LED   PC30
+ *
+ * Both are pulled high and can be illuminated by driving the corresponding
+ * GPIO output to low.
+ */
 
-#define LED_STARTED                0 /* LED0=OFF LED1=OFF LED2=OFF */
-#define LED_HEAPALLOCATE           1 /* LED0=OFF LED1=OFF LED2=ON */
-#define LED_IRQSENABLED            2 /* LED0=OFF LED1=ON  LED2=OFF */
-#define LED_STACKCREATED           3 /* LED0=OFF LED1=ON  LED2=ON */
+/* LED index values for use with sam_setled() */
 
-#define LED_INIRQ                  4 /* LED0=XXX LED1=TOG LED2=XXX */
-#define LED_SIGNAL                 5 /* LED0=XXX LED1=XXX LED2=TOG */
-#define LED_ASSERTION              6 /* LED0=TOG LED1=XXX LED2=XXX */
-#define LED_PANIC                  7 /* LED0=TOG LED1=XXX LED2=XXX */
+#define BOARD_LED_RX      0
+#define BOARD_LED_TX      1
+#define BOARD_NLEDS       2
+
+/* LED bits for use with sam_setleds() */
+
+#define BOARD_LED_RX_BIT  (1 << BOARD_LED_RX)
+#define BOARD_LED_TX_BIT  (1 << BOARD_LED_TX)
+
+/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
+ * events as follows:
+ *
+ *   SYMBOL               Val   Meaning                     LED state
+ *                                                      RX       TX
+ *   -------------------  --- -----------------------  -------- --------- */
+#define LED_STARTED       0  /* NuttX has been started  OFF      OFF      */
+#define LED_HEAPALLOCATE  0  /* Heap has been allocated OFF      OFF      */
+#define LED_IRQSENABLED   0  /* Interrupts enabled      OFF      OFF      */
+#define LED_STACKCREATED  1  /* Idle stack created      ON       OFF      */
+#define LED_INIRQ         2  /* In an interrupt           No change       */
+#define LED_SIGNAL        2  /* In a signal handler       No change       */
+#define LED_ASSERTION     2  /* An assertion failed       No change       */
+#define LED_PANIC         3  /* The system has crashed  OFF      Blinking */
+#undef  LED_IDLE             /* MCU is is sleep mode      Not used        */
+
+/* Thus if RX is statically on, NuttX has successfully booted and is,
+ * apparently, running normmally.  If TX is flashing at approximately
+ * 2Hz, then a fatal error has been detected and the system has halted.
+ */
 
 /* Button definitions ***************************************************************/
+/*   There are no buttons on the Arduino Due board. */
 
-#define BUTTON1                    1 /* Bit 0: Button 1 */
-#define BUTTON2                    2 /* Bit 1: Button 2 */
 
 /************************************************************************************
  * Public Data
@@ -177,7 +210,7 @@ extern "C" {
  * Name: sam_boardinitialize
  *
  * Description:
- *   All SAM3U architectures must provide the following entry point.  This entry point
+ *   All SAM3X architectures must provide the following entry point.  This entry point
  *   is called early in the intitialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
@@ -186,46 +219,20 @@ extern "C" {
 void sam_boardinitialize(void);
 
 /************************************************************************************
- * Name: up_buttoninit
+ * Name:  sam_ledinit, sam_setled, and sam_setleds
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After that,
- *   up_buttons() may be called to collect the current state of all buttons or
- *   up_irqbutton() may be called to register button interrupt handlers.
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LEDs.  If
+ *   CONFIG_ARCH_LEDS is not defined, then the following interfacesare available to
+ *   control the LEDs from user applications.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_ARCH_BUTTONS
-void up_buttoninit(void);
-
-/************************************************************************************
- * Name: up_buttons
- *
- * Description:
- *   After up_buttoninit() has been called, up_buttons() may be called to collect
- *   the state of all buttons.  up_buttons() returns an 8-bit bit set with each bit
- *   associated with a button.  See the BUTTON* definitions above for the meaning of
- *   each bit in the returned value.
- *
- ************************************************************************************/
-
-uint8_t up_buttons(void);
-
-/************************************************************************************
- * Name: up_irqbutton
- *
- * Description:
- *   This function may be called to register an interrupt handler that will be
- *   called when a button is depressed or released.  The ID value is one of the
- *   BUTTON* definitions provided above. The previous interrupt handler address is
- *   returned (so that it may restored, if so desired).
- *
- ************************************************************************************/
-
-#ifdef CONFIG_GPIOA_IRQ
-xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
+#ifndef CONFIG_ARCH_LEDS
+void sam_ledinit(void);
+void sam_setled(int led, bool ledon);
+void sam_setleds(uint8_t ledset);
 #endif
-#endif /* CONFIG_ARCH_BUTTONS */
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -233,4 +240,4 @@ xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_SAM3U_EK_INCLUDE_BOARD_H */
+#endif  /* __CONFIGS_ARDUINO_DUE_INCLUDE_BOARD_H */
