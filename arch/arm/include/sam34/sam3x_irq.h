@@ -146,6 +146,7 @@
 #define SAM_IRQ_CAN0          (SAM_IRQ_EXTINT+SAM_PID_CAN0)   /* CAN Controller 0 */
 #define SAM_IRQ_CAN1          (SAM_IRQ_EXTINT+SAM_PID_CAN1)   /* CAN Controller 1 */
 
+#define SAM_IRQ_NEXTINT       NR_PIDS                         /* Number of external interrupts */
 #define SAM_IRQ_NIRQS         (SAM_IRQ_EXTINT+NR_PIDS)        /* The number of real IRQs */
 
 /* GPIO interrupts (derived from SAM_IRQ_PIOA/B/C/D/E/F) */
