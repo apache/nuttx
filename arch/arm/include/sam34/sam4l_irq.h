@@ -57,7 +57,7 @@
 #define SAM_PID_USART1_RHR     (1)   /* DIR=RX REGISTER: USART1 RHR */
 #define SAM_PID_USART2_RHR     (2)   /* DIR=RX REGISTER: USART2 RHR */
 #define SAM_PID_USART3_RHR     (3)   /* DIR=RX REGISTER: USART3 RHR */
-#define SAM_PID_SPI_RDR        (4)   /* DIR=RX REGISTER: SPI RDR */
+#define SAM_PID_SPI0_RDR       (4)   /* DIR=RX REGISTER: SPI RDR */
 #define SAM_PID_TWIM0_RHR      (5)   /* DIR=RX REGISTER: TWIM0 RHR */
 #define SAM_PID_TWIM1_RHR      (6)   /* DIR=RX REGISTER: TWIM1 RHR */
 #define SAM_PID_TWIM2_RHR      (7)   /* DIR=RX REGISTER: TWIM2 RHR */
@@ -75,7 +75,7 @@
 #define SAM_PID_USART1_THR     (19)  /* DIR=TX REGISTER: USART1 THR */
 #define SAM_PID_USART2_THR     (20)  /* DIR=TX REGISTER: USART2 THR */
 #define SAM_PID_USART3_THR     (21)  /* DIR=TX REGISTER: USART3 THR */
-#define SAM_PID_SPI_TDR        (22)  /* DIR=TX REGISTER: SPI TDR */
+#define SAM_PID_SPI0_TDR       (22)  /* DIR=TX REGISTER: SPI TDR */
 #define SAM_PID_TWIM0_THR      (23)  /* DIR=TX REGISTER: TWIM0 THR */
 #define SAM_PID_TWIM1_THR      (24)  /* DIR=TX REGISTER: TWIM1 THR */
 #define SAM_PID_TWIM2_THR      (25)  /* DIR=TX REGISTER: TWIM2 THR */
@@ -149,7 +149,7 @@
 #define SAM_IRQ_EIC7           (SAM_IRQ_EXTINT+51)   /* 51 External Interrupt Controller 7 */
 #define SAM_IRQ_EIC8           (SAM_IRQ_EXTINT+52)   /* 52 External Interrupt Controller 8 */
 #define SAM_IRQ_IISC           (SAM_IRQ_EXTINT+53)   /* 53 Inter-IC Sound (I2S) Controller */
-#define SAM_IRQ_SPI            (SAM_IRQ_EXTINT+54)   /* 54 Serial Peripheral Interface */
+#define SAM_IRQ_SPI0           (SAM_IRQ_EXTINT+54)   /* 54 Serial Peripheral Interface */
 #define SAM_IRQ_TC00           (SAM_IRQ_EXTINT+55)   /* 55 Timer/Counter 0 */
 #define SAM_IRQ_TC01           (SAM_IRQ_EXTINT+56)   /* 56 Timer/Counter 1 */
 #define SAM_IRQ_TC02           (SAM_IRQ_EXTINT+57)   /* 57 Timer/Counter 2 */

@@ -108,7 +108,7 @@
   VECTOR(sam_eic7, SAM_IRQ_EIC7)                 /* Vector 16+51:  External Interrupt Controller 7 */
   VECTOR(sam_eic8, SAM_IRQ_EIC8)                 /* Vector 16+52:  External Interrupt Controller 8 */
   VECTOR(sam_iisc, SAM_IRQ_IISC)                 /* Vector 16+53:  Inter-IC Sound (I2S) Controller */
-  VECTOR(sam_spi, SAM_IRQ_SPI)                   /* Vector 16+54:  Serial Peripheral Interface */
+  VECTOR(sam_spi0, SAM_IRQ_SPI0)                 /* Vector 16+54:  Serial Peripheral Interface */
   VECTOR(sam_tc00, SAM_IRQ_TC00)                 /* Vector 16+55:  Timer/Counter 0 */
   VECTOR(sam_tc01, SAM_IRQ_TC01)                 /* Vector 16+56:  Timer/Counter 1 */
   VECTOR(sam_tc02, SAM_IRQ_TC02)                 /* Vector 16+57:  Timer/Counter 2 */

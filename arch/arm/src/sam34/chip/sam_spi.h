@@ -80,24 +80,44 @@
 
 /* SPI register adresses ****************************************************************/
 
-#define SAM_SPI_CR                (SAM_SPI_BASE+SAM_SPI_CR_OFFSET)   /* Control Register */
-#define SAM_SPI_MR                (SAM_SPI_BASE+SAM_SPI_MR_OFFSET)   /* Mode Register */
-#define SAM_SPI_RDR               (SAM_SPI_BASE+SAM_SPI_RDR_OFFSET)  /* Receive Data Register */
-#define SAM_SPI_TDR               (SAM_SPI_BASE+SAM_SPI_TDR_OFFSET)  /* Transmit Data Register */
-#define SAM_SPI_SR                (SAM_SPI_BASE+SAM_SPI_SR_OFFSET)   /* Status Register */
-#define SAM_SPI_IER               (SAM_SPI_BASE+SAM_SPI_IER_OFFSET)  /* Interrupt Enable Register */
-#define SAM_SPI_IDR               (SAM_SPI_BASE+SAM_SPI_IDR_OFFSET)  /* Interrupt Disable Register */
-#define SAM_SPI_IMR               (SAM_SPI_BASE+SAM_SPI_IMR_OFFSET)  /* Interrupt Mask Register */
-#define SAM_SPI_CSR0              (SAM_SPI_BASE+SAM_SPI_CSR0_OFFSET) /* Chip Select Register 0 */
-#define SAM_SPI_CSR1              (SAM_SPI_BASE+SAM_SPI_CSR1_OFFSET) /* Chip Select Register 1 */
-#define SAM_SPI_CSR2              (SAM_SPI_BASE+SAM_SPI_CSR2_OFFSET) /* Chip Select Register 2 */
-#define SAM_SPI_CSR3              (SAM_SPI_BASE+SAM_SPI_CSR3_OFFSET) /* Chip Select Register 3 */
-#define SAM_SPI_WPCR              (SAM_SPI_BASE+SAM_SPI_WPCR_OFFSET) /* Write Protection Control Register */
-#define SAM_SPI_WPSR              (SAM_SPI_BASE+SAM_SPI_WPSR_OFFSET) /* Write Protection Status Register */
+#define SAM_SPI0_CR               (SAM_SPI0_BASE+SAM_SPI_CR_OFFSET)   /* Control Register */
+#define SAM_SPI0_MR               (SAM_SPI0_BASE+SAM_SPI_MR_OFFSET)   /* Mode Register */
+#define SAM_SPI0_RDR              (SAM_SPI0_BASE+SAM_SPI_RDR_OFFSET)  /* Receive Data Register */
+#define SAM_SPI0_TDR              (SAM_SPI0_BASE+SAM_SPI_TDR_OFFSET)  /* Transmit Data Register */
+#define SAM_SPI0_SR               (SAM_SPI0_BASE+SAM_SPI_SR_OFFSET)   /* Status Register */
+#define SAM_SPI0_IER              (SAM_SPI0_BASE+SAM_SPI_IER_OFFSET)  /* Interrupt Enable Register */
+#define SAM_SPI0_IDR              (SAM_SPI0_BASE+SAM_SPI_IDR_OFFSET)  /* Interrupt Disable Register */
+#define SAM_SPI0_IMR              (SAM_SPI0_BASE+SAM_SPI_IMR_OFFSET)  /* Interrupt Mask Register */
+#define SAM_SPI0_CSR0             (SAM_SPI0_BASE+SAM_SPI_CSR0_OFFSET) /* Chip Select Register 0 */
+#define SAM_SPI0_CSR1             (SAM_SPI0_BASE+SAM_SPI_CSR1_OFFSET) /* Chip Select Register 1 */
+#define SAM_SPI0_CSR2             (SAM_SPI0_BASE+SAM_SPI_CSR2_OFFSET) /* Chip Select Register 2 */
+#define SAM_SPI0_CSR3             (SAM_SPI0_BASE+SAM_SPI_CSR3_OFFSET) /* Chip Select Register 3 */
+#define SAM_SPI0_WPCR             (SAM_SPI0_BASE+SAM_SPI_WPCR_OFFSET) /* Write Protection Control Register */
+#define SAM_SPI0_WPSR             (SAM_SPI0_BASE+SAM_SPI_WPSR_OFFSET) /* Write Protection Status Register */
 
 #ifdef CONFIG_ARCH_CHIP_SAM4L
-#  define SAM_SPI_FEATURES        (SAM_SPI_BASE+SAM_SPI_FEATURES_OFFSET)
-#  define SAM_SPI_VERSION         (SAM_SPI_BASE+SAM_SPI_VERSION_OFFSET)
+#  define SAM_SPI0_FEATURES       (SAM_SPI0_BASE+SAM_SPI_FEATURES_OFFSET)
+#  define SAM_SPI0_VERSION        (SAM_SPI0_BASE+SAM_SPI_VERSION_OFFSET)
+#endif
+
+#define SAM_SPI1_CR               (SAM_SPI1_BASE+SAM_SPI_CR_OFFSET)   /* Control Register */
+#define SAM_SPI1_MR               (SAM_SPI1_BASE+SAM_SPI_MR_OFFSET)   /* Mode Register */
+#define SAM_SPI1_RDR              (SAM_SPI1_BASE+SAM_SPI_RDR_OFFSET)  /* Receive Data Register */
+#define SAM_SPI1_TDR              (SAM_SPI1_BASE+SAM_SPI_TDR_OFFSET)  /* Transmit Data Register */
+#define SAM_SPI1_SR               (SAM_SPI1_BASE+SAM_SPI_SR_OFFSET)   /* Status Register */
+#define SAM_SPI1_IER              (SAM_SPI1_BASE+SAM_SPI_IER_OFFSET)  /* Interrupt Enable Register */
+#define SAM_SPI1_IDR              (SAM_SPI1_BASE+SAM_SPI_IDR_OFFSET)  /* Interrupt Disable Register */
+#define SAM_SPI1_IMR              (SAM_SPI1_BASE+SAM_SPI_IMR_OFFSET)  /* Interrupt Mask Register */
+#define SAM_SPI1_CSR0             (SAM_SPI1_BASE+SAM_SPI_CSR0_OFFSET) /* Chip Select Register 0 */
+#define SAM_SPI1_CSR1             (SAM_SPI1_BASE+SAM_SPI_CSR1_OFFSET) /* Chip Select Register 1 */
+#define SAM_SPI1_CSR2             (SAM_SPI1_BASE+SAM_SPI_CSR2_OFFSET) /* Chip Select Register 2 */
+#define SAM_SPI1_CSR3             (SAM_SPI1_BASE+SAM_SPI_CSR3_OFFSET) /* Chip Select Register 3 */
+#define SAM_SPI1_WPCR             (SAM_SPI1_BASE+SAM_SPI_WPCR_OFFSET) /* Write Protection Control Register */
+#define SAM_SPI1_WPSR             (SAM_SPI1_BASE+SAM_SPI_WPSR_OFFSET) /* Write Protection Status Register */
+
+#ifdef CONFIG_ARCH_CHIP_SAM4L
+#  define SAM_SPI1_FEATURES       (SAM_SPI1_BASE+SAM_SPI_FEATURES_OFFSET)
+#  define SAM_SPI1_VERSION        (SAM_SPI1_BASE+SAM_SPI_VERSION_OFFSET)
 #endif
 
 /* SPI register bit definitions *********************************************************/

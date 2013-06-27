@@ -63,7 +63,7 @@
 #include "chip/sam_spi.h"
 #include "chip/sam_pinmap.h"
 
-#ifdef CONFIG_SAM34_SPI
+#ifdef CONFIG_SAM34_SPI0
 
 /****************************************************************************
  * Definitions
@@ -203,7 +203,7 @@ static bool g_spinitialized = false;
 
 static const uint32_t g_csraddr[4] =
 {
-  SAM_SPI_CSR0, SAM_SPI_CSR1, SAM_SPI_CSR2, SAM_SPI_CSR3
+  SAM_SPI0_CSR0, SAM_SPI0_CSR1, SAM_SPI0_CSR2, SAM_SPI0_CSR3
 };
 
 /****************************************************************************
@@ -233,13 +233,13 @@ static void spi_dumpregs(FAR const char *msg)
 {
   spivdbg("%s:\n", msg);
   spivdbg("    MR:%08x   SR:%08x  IMR:%08x\n",
-          getreg32(SAM_SPI_MR), getreg32(SAM_SPI_SR),
-          getreg32(SAM_SPI_IMR));
+          getreg32(SAM_SPI0_MR), getreg32(SAM_SPI0_SR),
+          getreg32(SAM_SPI0_IMR));
   spivdbg("  CSR0:%08x CSR1:%08x CSR2:%08x CSR3:%08x\n",
-          getreg32(SAM_SPI_CSR0), getreg32(SAM_SPI_CSR1),
-          getreg32(SAM_SPI_CSR2), getreg32(SAM_SPI_CSR3));
+          getreg32(SAM_SPI0_CSR0), getreg32(SAM_SPI0_CSR1),
+          getreg32(SAM_SPI0_CSR2), getreg32(SAM_SPI0_CSR3));
   spivdbg("  WPCR:%08x WPSR:%08x\n",
-          getreg32(SAM_SPI_WPCR), getreg32(SAM_SPI_WPSR));
+          getreg32(SAM_SPI0_WPCR), getreg32(SAM_SPI0_WPSR));
 }
 #endif
 
@@ -261,15 +261,15 @@ static inline void spi_flush(void)
 {
   /* Make sure the no TX activity is in progress... waiting if necessary */
 
-  while ((getreg32(SAM_SPI_SR) & SPI_INT_TXEMPTY) == 0);
+  while ((getreg32(SAM_SPI0_SR) & SPI_INT_TXEMPTY) == 0);
 
   /* Then make sure that there is no pending RX data .. reading as
    * discarding as necessary.
    */
 
-  while ((getreg32(SAM_SPI_SR) & SPI_INT_RDRF) != 0)
+  while ((getreg32(SAM_SPI0_SR) & SPI_INT_RDRF) != 0)
     {
-       (void)getreg32(SAM_SPI_RDR);
+       (void)getreg32(SAM_SPI0_RDR);
     }
 }
 
@@ -385,10 +385,10 @@ static int spi_lock(FAR struct spi_dev_s *dev, bool lock)
        * in order to select a slave.
        */
 
-      regval  = getreg32(SAM_SPI_MR);
+      regval  = getreg32(SAM_SPI0_MR);
       regval &= ~SPI_MR_PCS_MASK;
       regval |= (spi_cs2pcs(priv) << SPI_MR_PCS_SHIFT);
-      putreg32(regval, SAM_SPI_MR);
+      putreg32(regval, SAM_SPI0_MR);
     }
 
   /* Perform any board-specific chip select operations. PIO chip select
@@ -784,24 +784,24 @@ static void  spi_exchange(FAR struct spi_dev_s *dev,
        * to the serializer.
        */
 
-      while ((getreg32(SAM_SPI_SR) & SPI_INT_TDRE) == 0);
+      while ((getreg32(SAM_SPI0_SR) & SPI_INT_TDRE) == 0);
 
       /* Write the data to transmitted to the Transmit Data Register (TDR) */
 
-      putreg32(data, SAM_SPI_TDR);
+      putreg32(data, SAM_SPI0_TDR);
 
       /* Wait for the read data to be available in the RDR.
        * TODO:  Data transfer rates would be improved using the RX FIFO
        *        (and also DMA)
        */
 
-      while ((getreg32(SAM_SPI_SR) & SPI_INT_RDRF) == 0);
+      while ((getreg32(SAM_SPI0_SR) & SPI_INT_RDRF) == 0);
 
       /* Read the received data from the SPI Data Register..
        * TODO: The following only works if nbits <= 8.
        */
 
-      data = getreg32(SAM_SPI_RDR);
+      data = getreg32(SAM_SPI0_RDR);
       if (rxptr)
         {
           *rxptr++ = (uint8_t)data;
@@ -931,7 +931,7 @@ FAR struct spi_dev_s *up_spiinitialize(int cs)
       /* Enable clocking to the SPI block */
 
       flags = irqsave();
-      sam_spi_enableclk();
+      sam_spi0_enableclk();
 
       /* Configure multiplexed pins as connected on the board.  Chip select
        * pins must be configured by board-specific logic.
@@ -943,27 +943,27 @@ FAR struct spi_dev_s *up_spiinitialize(int cs)
 
       /* Disable SPI clocking */
 
-      putreg32(SPI_CR_SPIDIS, SAM_SPI_CR);
+      putreg32(SPI_CR_SPIDIS, SAM_SPI0_CR);
 
       /* Execute a software reset of the SPI (twice) */
 
-      putreg32(SPI_CR_SWRST, SAM_SPI_CR);
-      putreg32(SPI_CR_SWRST, SAM_SPI_CR);
+      putreg32(SPI_CR_SWRST, SAM_SPI0_CR);
+      putreg32(SPI_CR_SWRST, SAM_SPI0_CR);
       irqrestore(flags);
 
       /* Configure the SPI mode register */
 
-      putreg32(SPI_MR_MSTR | SPI_MR_MODFDIS, SAM_SPI_MR);
+      putreg32(SPI_MR_MSTR | SPI_MR_MODFDIS, SAM_SPI0_MR);
 
       /* And enable the SPI */
 
-      putreg32(SPI_CR_SPIEN, SAM_SPI_CR);
+      putreg32(SPI_CR_SPIEN, SAM_SPI0_CR);
       up_mdelay(20);
 
       /* Flush any pending transfers */
 
-      (void)getreg32(SAM_SPI_SR);
-      (void)getreg32(SAM_SPI_RDR);
+      (void)getreg32(SAM_SPI0_SR);
+      (void)getreg32(SAM_SPI0_RDR);
 
 #ifndef CONFIG_SPI_OWNBUS
       /* Initialize the SPI semaphore that enforces mutually exclusive
@@ -978,4 +978,4 @@ FAR struct spi_dev_s *up_spiinitialize(int cs)
 
   return &priv->spidev;
 }
-#endif /* CONFIG_SAM34_SPI */
+#endif /* CONFIG_SAM34_SPI0 */

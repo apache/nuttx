@@ -64,7 +64,7 @@
 #define SAM_PERIPHERALS_BASE   0x40000000 /* 0x40000000-0x5fffffff: Peripherals */
 #  define SAM_MCI_BASE         0x40000000 /* 0x40000000-0x400003ff:   High Speed Multimedia Card Interface */
 #  define SAM_SSC_BASE         0x40004000 /* 0x40004000-0x40007fff:   Synchronous Serial Controller */
-#  define SAM_SPI_BASE         0x40008000 /* 0x40008000-0x4000bfff:   Serial Peripheral Interface */
+#  define SAM_SPI0_BASE        0x40008000 /* 0x40008000-0x4000bfff:   Serial Peripheral Interface */
                                           /* 0x4000c000-0x4007ffff:   Reserved */
 #  define SAM_TC_BASE          0x40080000 /* 0x40080000-0x40083fff:   Timer Counters */
 #    define SAM_TCN_BASE(n)    (0x40080000+((n)<<6))
