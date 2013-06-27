@@ -984,6 +984,8 @@ nuttx
  |- configs/
  |   |- amber/
  |   |   `- README.txt
+ |   |- arduino-due/
+ |   |   `- README.txt
  |   |- avr32dev1/
  |   |   `- README.txt
  |   |- c5471evm/
