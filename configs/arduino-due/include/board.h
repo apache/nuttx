@@ -141,25 +141,30 @@
 #define BOARD_FWS                  4
 
 /* LED definitions ******************************************************************/
-/*   There are two user-controllable LEDs on board the Arduino Due board:
+/*  There are three user-controllable LEDs on board the Arduino Due board:
  *
  *     LED              GPIO
  *     ---------------- -----
+ *     L   Amber LED    PB27
  *     TX  Yellow LED   PA21
  *     RX  Yellow LED   PC30
  *
- * Both are pulled high and can be illuminated by driving the corresponding
+ * LED L is connected to ground and can be illuminated by driving the PB27
+ * output high. The TX and RX LEDs are pulled high and can be illuminated by
+ * driving the corresponding
  * GPIO output to low.
  */
 
 /* LED index values for use with sam_setled() */
 
-#define BOARD_LED_RX      0
-#define BOARD_LED_TX      1
-#define BOARD_NLEDS       2
+#define BOARD_LED_L       0
+#define BOARD_LED_RX      1
+#define BOARD_LED_TX      2
+#define BOARD_NLEDS       3
 
 /* LED bits for use with sam_setleds() */
 
+#define BOARD_LED_L_BIT   (1 << BOARD_LED_L)
 #define BOARD_LED_RX_BIT  (1 << BOARD_LED_RX)
 #define BOARD_LED_TX_BIT  (1 << BOARD_LED_TX)
 
@@ -168,22 +173,23 @@
  * include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
  * events as follows:
  *
- *   SYMBOL               Val   Meaning                     LED state
- *                                                      RX       TX
- *   -------------------  --- -----------------------  -------- --------- */
-#define LED_STARTED       0  /* NuttX has been started  OFF      OFF      */
-#define LED_HEAPALLOCATE  0  /* Heap has been allocated OFF      OFF      */
-#define LED_IRQSENABLED   0  /* Interrupts enabled      OFF      OFF      */
-#define LED_STACKCREATED  1  /* Idle stack created      ON       OFF      */
-#define LED_INIRQ         2  /* In an interrupt           No change       */
-#define LED_SIGNAL        2  /* In a signal handler       No change       */
-#define LED_ASSERTION     2  /* An assertion failed       No change       */
-#define LED_PANIC         3  /* The system has crashed  OFF      Blinking */
-#undef  LED_IDLE             /* MCU is is sleep mode      Not used        */
+ *  SYMBOL                MEANING                         LED STATE
+ *                                                         L         TX       RX
+ *  -----------------------  --------------------------  -------- -------- --------    */
+#define LED_STARTED       0  /* NuttX has been started     OFF      OFF      OFF       */
+#define LED_HEAPALLOCATE  0  /* Heap has been allocated    OFF      OFF      OFF       */
+#define LED_IRQSENABLED   0  /* Interrupts enabled         OFF      OFF      OFF       */
+#define LED_STACKCREATED  1  /* Idle stack created         ON       OFF      OFF       */
+#define LED_INIRQ         2  /* In an interrupt            N/C      GLOW     OFF       */
+#define LED_SIGNAL        2  /* In a signal handler        N/C      GLOW     OFF       */
+#define LED_ASSERTION     2  /* An assertion failed        N/C      GLOW     OFF       */
+#define LED_PANIC         3  /* The system has crashed     N/C      N/C      Blinking  */
+#define LED_PANIC         3  /* MCU is is sleep mode       ------ Not used --------    */
 
-/* Thus if RX is statically on, NuttX has successfully booted and is,
- * apparently, running normmally.  If TX is flashing at approximately
- * 2Hz, then a fatal error has been detected and the system has halted.
+/* Thus if LED L is statically on, NuttX has successfully booted and is,
+ * apparently, running normmally.  If LED RX is glowing, then NuttX is
+ * handling interupts (and also signals and assertions).  If TX is flashing
+ * at approximately 2Hz, then a fatal error has been detected and the system
  */
 
 /* Button definitions ***************************************************************/
