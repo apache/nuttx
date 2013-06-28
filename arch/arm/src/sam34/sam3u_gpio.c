@@ -252,7 +252,7 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
       putreg32(pin, base + SAM_PIO_CODR_OFFSET);
     }
 
-  /* Configure the pin as an input and enable the GPIO function */
+  /* Configure the pin as an output and enable the GPIO function */
 
   putreg32(pin, base + SAM_PIO_OER_OFFSET);
   putreg32(pin, base + SAM_PIO_PER_OFFSET);
