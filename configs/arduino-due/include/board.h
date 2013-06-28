@@ -44,6 +44,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
+#  include <stdbool.h>
 #  ifdef CONFIG_GPIO_IRQ
 #    include <arch/irq.h>
 #  endif
@@ -127,16 +128,17 @@
 
 /* FLASH wait states
  *
- * FWS Max frequency
+ * FWS MAX FREQUENCY
  *     1.62V 1.8V
  * --- ----- ------
- *  0  24MHz 27MHz
- *  1  40MHz 47MHz
- *  2  72MHz 84MHz
- *  3  84MHz 96MHz
+ *  0  17MHz 19MHz
+ *  1  45MHz 50MHz
+ *  2  58MHz 64MHz
+ *  3  70MHz 80MHz
+ *  4  78MHz 90MHz
  */
 
-#define BOARD_FWS                  2
+#define BOARD_FWS                  4
 
 /* LED definitions ******************************************************************/
 /*   There are two user-controllable LEDs on board the Arduino Due board:

@@ -58,17 +58,19 @@
 /* Code memory region */
 
 #define SAM_BOOTMEMORY_BASE    0x00000000 /* 0x00000000-0x003fffff: Boot Memory */
-#define SAM_INTFLASH0_BASE     0x00400000 /* 0x00400000-0x000fffff: Internal FLASH 0 */
-#define SAM_INTFLASH1_BASE     (0x00400000 + SAM34_FLASH_SIZE/2)
-#define SAM_INTROM_BASE        0x00800000 /* 0x00180000-0x00bfffff: Internal ROM */
-                                          /* 0x00c00000-0x1fffffff: Reserved */
+#define SAM_INTFLASH0_BASE     0x00080000 /* 0x00080000-0x000fffff: Internal FLASH 0 */
+#define SAM_INTFLASH1_BASE     (0x00080000 + SAM34_FLASH_SIZE/2)
+#define SAM_INTROM_BASE        0x00100000 /* 0x00100000-0x001fffff: Internal ROM */
+                                          /* 0x00200000-0x1fffffff: Reserved */
 /* Internal SRAM memory region */
 
 #define SAM_INTSRAM0_BASE      0x20000000 /* 0x20000000-0x2007ffff: Internal SRAM 0 */
 #define SAM_INTSRAM1_BASE      0x20080000 /* 0x20080000-0x200fffff: Internal SRAM 0 */
 #define SAM_NFCSRAM_BASE       0x20100000 /* 0x20100000-0x2017ffff: NAND FLASH controller (SRAM) */
 #define SAM_UOTGHSRAM_BASE     0x20180000 /* 0x20100000-0x201fffff: UOTGHS controller (DMA) */
-                                          /* 0x20200000-0x3fffffff: Undefined */
+                                          /* 0x20200000-0x201fffff: Undefined */
+#define SAM_BBSRAM_BASE        0x22000000 /* 0x22000000-0x23ffffff: 32Mb bit-band alias */
+                                          /* 0x24000000-0x3fffffff: Undefined */
 /* Peripherals address region */
 
 #define SAM_HSMCI_BASE         0x40000000 /* 0x40000000-0x400003ff: High Speed Multimedia Card Interface */
@@ -109,7 +111,10 @@
 #define SAM_DACC_BASE          0x400c8000 /* 0x400c8000-0x400cffff: Digital To Analog Converter */
                                           /* 0x400d0000-0x400dffff: Reserved */
 #define SAM_SYSCTRLR_BASE      0x400e0000 /* 0x400e0000-0x4007ffff: System Controller */
-                                          /* 0x40080000-0x400fffff: Reserved */
+                                          /* 0x40080000-0x40ffffff: Reserved */
+                                          /* 0x41000000-0x41ffffff: Undefined */
+#define SAM_BBPERIPH_BASE      0x42000000 /* 0x42000000-0x43ffffff: 32Mb bit-band alias */
+                                          /* 0x44000000-0x5fffffff: Undefined */
 /* System Controller Register Blocks:  0x400e0000-0x4007ffff */
 
 #define SAM_SMC_BASE           0x400e0000 /* 0x400e0000-0x400e01ff: Static Memory Controller */

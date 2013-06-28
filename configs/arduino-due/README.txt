@@ -411,113 +411,138 @@ Loading Code
 
   Uploading NuttX to the Due Using Bossa:
   ---------------------------------------
-  Generic BOSSA installation files are avaialable here:
-  http://sourceforge.net/projects/b-o-s-s-a/?source=dlp
+  Where do you get it?
+    Generic BOSSA installation files are avaialable here:
+    http://sourceforge.net/projects/b-o-s-s-a/?source=dlp
 
-  However, DUE uses a patched version of BOSSA available as source code here:
-  https://github.com/shumatech/BOSSA/tree/arduino
+    However, DUE uses a patched version of BOSSA available as source code here:
+    https://github.com/shumatech/BOSSA/tree/arduino
 
-  But, fortunately, since you already installed Arduino, you already have
-  BOSSA installed here.  In my installation, it is here:
+    But, fortunately, since you already installed Arduino, you already have
+    BOSSA installed.  In my installation, it is here:
 
-  C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools\bossac.exe
+    C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools\bossac.exe
 
-  Where is some sample output from a Windows CMD.exe shell.  NOTE that my
-  Arduino programming port shows up as COM26.  It may be different on your
-  system.
+  General Procedure
+  -----------------
 
-  To enter boot mode, set the baud to 1200 and send anything to the
-  programming port:
+    1) Erase the FLASH and put the Due in bootloader mode
+    2) Write the file to FLASH
+    3) Configure to boot from FLASH
+    4) Reset the DUE
 
-    C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools>mode com26:1200,n,8,1
+  Erase FLASH and Put the Due in Bootloader Mode
+  ----------------------------------------------
+    This is accomplished by simply configuring the programming port in 1200
+    baud and sending something on the programming port.  Here is some sample
+    output from a Windows CMD.exe shell.  NOTE that my Arduino programming
+    port shows up as COM26.  It may be different on yoursystem.
 
-    Status for device COM26:
-    ------------------------
-        Baud:            1200
-        Parity:          None
-        Data Bits:       8
-        Stop Bits:       1
-        Timeout:         ON
-        XON/XOFF:        OFF
-        CTS handshaking: OFF
-        DSR handshaking: OFF
-        DSR sensitivity: OFF
-        DTR circuit:     ON
-        RTS circuit:     ON
+    To enter boot mode, set the baud to 1200 and send anything to the
+    programming port:
 
-    C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools>bossac.exe --port=COM26 -U false -i
-    Device       : ATSAM3X8
-    Chip ID      : 285e0a60
-    Version      : v1.1 Dec 15 2010 19:25:04
-    Address      : 524288
-    Pages        : 2048
-    Page Size    : 256 bytes
-    Total Size   : 512KB
-    Planes       : 2
-    Lock Regions : 32
-    Locked       : none
-    Security     : false
-    Boot Flash   : false
+      C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools>mode com26:1200,n,8,1
 
-  In a Cygwin BaSH shell:
+      Status for device COM26:
+      ------------------------
+          Baud:            1200
+          Parity:          None
+          Data Bits:       8
+          Stop Bits:       1
+          Timeout:         ON
+          XON/XOFF:        OFF
+          CTS handshaking: OFF
+          DSR handshaking: OFF
+          DSR sensitivity: OFF
+          DTR circuit:     ON
+          RTS circuit:     ON
 
-    export PATH="/cygdrive/c/Program Files (x86)/Arduino/arduino-1.5.2/hardware/tools":$PATH
+      C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools>bossac.exe --port=COM26 -U false -i
+      Device       : ATSAM3X8
+      Chip ID      : 285e0a60
+      Version      : v1.1 Dec 15 2010 19:25:04
+      Address      : 524288
+      Pages        : 2048
+      Page Size    : 256 bytes
+      Total Size   : 512KB
+      Planes       : 2
+      Lock Regions : 32
+      Locked       : none
+      Security     : false
+      Boot Flash   : false
 
-  Erasing, writing, and verifying FLASH with bossac:
+  Writing FLASH and Setting FLASH Boot Mode
+  -----------------------------------------
+    In a Cygwin BaSH shell:
 
-    $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
-    No device found on COM26
+      export PATH="/cygdrive/c/Program Files (x86)/Arduino/arduino-1.5.2/hardware/tools":$PATH
 
-  This error means that there is code running on the Due already so the
-  bootloader cannot connect. Pressing reset and trying again
+    Erasing, writing, and verifying FLASH with bossac:
 
-    $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
-    No device found on COM26
+      $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+      Erase flash
+      Write 86588 bytes to flash
+      [==============================] 100% (339/339 pages)
+      Verify 86588 bytes of flash
+      [==============================] 100% (339/339 pages)
+      Verify successful
+      Set boot flash true
+      CPU reset.
 
-  Sill No connection because Duo does not jump to bootloader after reset.\
-  Press ERASE button and try again
+    Some things that can go wrong:
 
-    $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
-    Erase flash
-    Write 86588 bytes to flash
-    [==============================] 100% (339/339 pages)
-    Verify 86588 bytes of flash
-    [==============================] 100% (339/339 pages)
-    Verify successful
-    Set boot flash true
-    CPU reset.
+      $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+      No device found on COM26
+
+    This error means that there is code running on the Due already so the
+    bootloader cannot connect. Pressing reset and trying again
+
+      $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+      No device found on COM26
+
+    Sill No connection because Duo does not jump to bootloader after reset.
+    Press ERASE button and try again
+
+      $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+      Erase flash
+      Write 86588 bytes to flash
+      [==============================] 100% (339/339 pages)
+      Verify 86588 bytes of flash
+      [==============================] 100% (339/339 pages)
+      Verify successful
+      Set boot flash true
+      CPU reset.
 
   Other useful bossac things operations.
+  -------------------------------------
+    a) Write code to FLASH don't change boot mode and don't reset.  This lets
+       you examine the FLASH contents that you just loaded while the bootloader
+       is still active.
 
-  a) Write code to FLASH don't change boot mode and don't reset.  This lets
-     you examine the FLASH contents that you just loaded while the bootloader
-     is still active.
+       $ bossac.exe --port=COM26 -U false -e -w -v --boot=0 nuttx.bin
+       Write 64628 bytes to flash
+       [==============================] 100% (253/253 pages)
+       Verify 64628 bytes of flash
+       [==============================] 100% (253/253 pages)
+       Verify successful
 
-    $ bossac.exe --port=COM26 -U false -e -w -v nuttx.bin
-    Write 64628 bytes to flash
-    [==============================] 100% (253/253 pages)
-    Verify 64628 bytes of flash
-    [==============================] 100% (253/253 pages)
-    Verify successful
-    Set boot flash true
+    b) Verify the FLASH contents (the bootloader must be running)
 
-  Verify the FLASH contents (the bootloader must be running)
+       $ bossac.exe --port=COM26 -U false -v nuttx.bin
+       Verify 64628 bytes of flash
+       [==============================] 100% (253/253 pages)
+       Verify successful
 
-    $ bossac.exe --port=COM26 -U false -v nuttx.bin
-    Verify 64628 bytes of flash
-    [==============================] 100% (253/253 pages)
-    Verify successful
+    c) Read from FLASH to a file  (the bootloader must be running):
 
-  Read from FLASH to a file  (the bootloader must be running):
+       $ bossac.exe --port=COM26 -U false --read=4096 nuttx.dump
+       Read 4096 bytes from flash
+       [==============================] 100% (16/16 pages)
 
-    $ bossac.exe --port=COM26 -U false --read=4096 nuttx.dump
-    Read 4096 bytes from flash
-    [==============================] 100% (16/16 pages)
+    d) Change to boot from FLASH
 
-  Change to boot from FLASH
-
-    $ bossac.exe --port=COM26 -U false --boot=1
-    Set boot flash true
+       $ bossac.exe --port=COM26 -U false --boot=1
+       Set boot flash true
 
   Uploading NuttX to the Due Using JTAG:
   -------------------------------------
