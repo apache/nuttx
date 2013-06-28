@@ -5087,4 +5087,9 @@
 	  SRAM to be functional (2013-6-28).
 	* arch/arm/src/sam34/sam3u_gpio.c:  Need to disable write
 	  protection before configuring PIO pins.
+	* configs/sam3u-ek/nsh:  The touchscreen is now function.  The above
+	  fix to the sam3u_gpio.c write protection also fixed the touchscreen
+	  problem (2013-6-28).
+	* confgis/sam3u_ek/nxwm:  Created a configuration for the NxWM
+	  window manager for the SAM3U-EK board.
 
