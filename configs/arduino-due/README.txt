@@ -17,6 +17,7 @@ Contents
   - NXFLAT Toolchain
   - Buttons and LEDs
   - Serial Consoles
+  - Loading Code
   - SAM4S Xplained-specific Configuration Options
   - Configurations
 
@@ -348,28 +349,198 @@ Buttons and LEDs
 Serial Consoles
 ^^^^^^^^^^^^^^^
 
+  The SAM3X has a UART and 4 USARTS.  The Programming port uses a USB-to-
+  serial chip connected to the first UART0 of the MCU (RX0 and TX0).  The
+  output from that port is visible using the Arduino tool.
+
   Any of UART and USART0-3 may be used as a serial console.  By default,
   the UART is used as the serial console in all configurations.  But that is
   easily changed by modifying the configuration as described under
   "Configurations" below.
 
-    ------------------------------
-    PIO   SIGNAL     CONN PIN
-    ----- ---------- ---- --------
-    PA8   [U]RX      PWML 1
-    PA9   [U]TX      PWML 2
-    PD4   TXD0       COMM 1
-    PD5   RXD0       COMM 2
-    PA12  RXD1       COMM 4
-    PA13  TXD1       COMM 3
-    PA10  RXD2       COMM 6
-    PA11  TXD2       COMM 5
-    PB20  AD11(TXD3) ADCH 4
-  PB21  AD14(RXD3) XIO  33
+  Here are the UART signals available on pins.  Under signal name, the first
+  column is the name on the schematic associated with the GPIO, the second
+  comes from: http://arduino.cc/en/Hacking/PinMappingSAM3X, and the third
+  is the name of the multiplexed SAM3X UART function from the data sheet.
+  This is more than a little confusing.
+
+    ------------------------------------------------------------------
+    PIO              SIGNAL NAME                    CONNECTOR PIN
+          DUE SCHEM. PIN MAPPING    SAM3X       DUE SCHEM. BOARD LABEL
+    ----- ---------- -------------- ----------- ---------- -----------
+    PA8   [U]RX      RX0            UART0  URXD  PWML 1    RX0<-0
+    PA9   [U]TX      TX0            UART0  UTXD  PWML 2    TX0->1
+    PD5   RXD0       RX3            USART3 RXD3  COMM 2    RX3
+    PD4   TXD0       TX3            USART3 TXD3  COMM 1    TX3
+    PA12  RXD1       RX2            USART1 RXD1  COMM 4    TX2
+    PA13  TXD1       TX2            USART1 TXD1  COMM 3    RX2
+    PA10  RXD2       RX1            USART0 RXD0  COMM 6    RX1
+    PA11  TXD2       TX1            USART0 TXD0  COMM 5    TX1
+    PB21  AD14(RXD3) Digital Pin 52 USART2 RXD2  XIO  33   33
+    PB20  AD11(TXD3) Analog In 11   USART2 TXD2  ADCH 4    A11
 
   The outputs from these pins is 3.3V.  You will need to connect RS232
-  transceiver to get the signals to RS232 levels (or connect the pins to the
-  USB virual COM port.
+  transceiver to get the signals to RS232 levels (or connect to the
+  USB virual COM port in the case of UART0).
+
+Loading Code
+^^^^^^^^^^^^
+
+  Installing the Arduino USB Driver under Windows:
+  ------------------------------------------------
+  1.  Download the Windows version of the Arduino software, not the 1.0.x
+      release but the latest 1.5.x that supports the Due. When the download
+      finishes, unzip the downloaded file.
+  2. Connect the Due to your computer with a USB cable via the Programming port.
+  3. The Windows driver installation should fail.
+  4. Open the Device Manger
+  5. Look for the listing named "Ports (COM & LPT)". You should see an open
+     port named "Arduino Due Prog. Port".
+  6 Select the "Browse my computer for Driver software" option.
+  7. Right click on the "Arduino Due Prog. Port" and choose "Update Driver
+     Software".
+  8. Navigate to the folder with the Arduino IDE you downloaded and unzipped
+     earlier. Locate and select the "Drivers" folder in the main Arduino folder
+     (not the "FTDI USB Drivers" sub-directory).
+
+  Uploading NuttX to the Due Using Bossa:
+  ---------------------------------------
+  I don't think this can be done because the Arduino software is so dedicated
+  to "sketches".  However, Arduino uses BOSSA under the hood to load code and
+  you can use BOSSA outside of Arduino.
+
+  Uploading NuttX to the Due Using Bossa:
+  ---------------------------------------
+  Generic BOSSA installation files are avaialable here:
+  http://sourceforge.net/projects/b-o-s-s-a/?source=dlp
+
+  However, DUE uses a patched version of BOSSA available as source code here:
+  https://github.com/shumatech/BOSSA/tree/arduino
+
+  But, fortunately, since you already installed Arduino, you already have
+  BOSSA installed here.  In my installation, it is here:
+
+  C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools\bossac.exe
+
+  Where is some sample output from a Windows CMD.exe shell.  NOTE that my
+  Arduino programming port shows up as COM26.  It may be different on your
+  system.
+
+  To enter boot mode, set the baud to 1200 and send anything to the
+  programming port:
+
+    C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools>mode com26:1200,n,8,1
+
+    Status for device COM26:
+    ------------------------
+        Baud:            1200
+        Parity:          None
+        Data Bits:       8
+        Stop Bits:       1
+        Timeout:         ON
+        XON/XOFF:        OFF
+        CTS handshaking: OFF
+        DSR handshaking: OFF
+        DSR sensitivity: OFF
+        DTR circuit:     ON
+        RTS circuit:     ON
+
+    C:\Program Files (x86)\Arduino\arduino-1.5.2\hardware\tools>bossac.exe --port=COM26 -U false -i
+    Device       : ATSAM3X8
+    Chip ID      : 285e0a60
+    Version      : v1.1 Dec 15 2010 19:25:04
+    Address      : 524288
+    Pages        : 2048
+    Page Size    : 256 bytes
+    Total Size   : 512KB
+    Planes       : 2
+    Lock Regions : 32
+    Locked       : none
+    Security     : false
+    Boot Flash   : false
+
+  In a Cygwin BaSH shell:
+
+    export PATH="/cygdrive/c/Program Files (x86)/Arduino/arduino-1.5.2/hardware/tools":$PATH
+
+  Erasing, writing, and verifying FLASH with bossac:
+
+    $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+    No device found on COM26
+
+  This error means that there is code running on the Due already so the
+  bootloader cannot connect. Pressing reset and trying again
+
+    $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+    No device found on COM26
+
+  Sill No connection because Duo does not jump to bootloader after reset.\
+  Press ERASE button and try again
+
+    $ bossac.exe --port=COM26 -U false -e -w -v -b nuttx.bin -R
+    Erase flash
+    Write 86588 bytes to flash
+    [==============================] 100% (339/339 pages)
+    Verify 86588 bytes of flash
+    [==============================] 100% (339/339 pages)
+    Verify successful
+    Set boot flash true
+    CPU reset.
+
+  Other useful bossac things operations.
+
+  a) Write code to FLASH don't change boot mode and don't reset.  This lets
+     you examine the FLASH contents that you just loaded while the bootloader
+     is still active.
+
+    $ bossac.exe --port=COM26 -U false -e -w -v nuttx.bin
+    Write 64628 bytes to flash
+    [==============================] 100% (253/253 pages)
+    Verify 64628 bytes of flash
+    [==============================] 100% (253/253 pages)
+    Verify successful
+    Set boot flash true
+
+  Verify the FLASH contents (the bootloader must be running)
+
+    $ bossac.exe --port=COM26 -U false -v nuttx.bin
+    Verify 64628 bytes of flash
+    [==============================] 100% (253/253 pages)
+    Verify successful
+
+  Read from FLASH to a file  (the bootloader must be running):
+
+    $ bossac.exe --port=COM26 -U false --read=4096 nuttx.dump
+    Read 4096 bytes from flash
+    [==============================] 100% (16/16 pages)
+
+  Change to boot from FLASH
+
+    $ bossac.exe --port=COM26 -U false --boot=1
+    Set boot flash true
+
+  Uploading NuttX to the Due Using JTAG:
+  -------------------------------------
+
+  The JTAG/SWD signals are brought out to a 10-pin header JTAG connector:
+
+    PIN SIGNAL         JTAG STANDARD     NOTES
+    --- -------------- ----------------- --------------------------------
+     1  3.3V           VTref
+     2  JTAG_TMS       SWDIO/TMS         SAM3X pin 31, Pulled up on board
+     3  GND            GND
+     4  JTAG_TCK       SWDCLK/TCK        SAM3X pin 28, Pulled up on board
+     5  GND            GND
+     6  JTAG_TDO       SWO/EXta/TRACECTL SAM3X pin 30, ulled up on board
+     7  N/C            Key
+     8  JTAG_TDI       NC/EXTb/TDI       SAM3X pin 29, Pulled up on board
+     9  GND            GNDDetect
+     10 MASTER-RESET   nReset
+
+   You should be able to use a 10- to 20-pin adaptr to connect a SAM-ICE
+   debugger to the Arduino Due.  I have this Olimex adapter:
+   https://www.olimex.com/Products/ARM/JTAG/ARM-JTAG-20-10/ . But so far I
+   have been unable to get the get the SAM-ICE to communicate with the Due.
 
 Arduino DUE-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -616,7 +787,7 @@ Configuration sub-directories
     1. The configuration configuration can be modified to include support
        for the on-board SRAM (1MB).
 
-       System Type -> External Memory Configuration       
+       System Type -> External Memory Configuration
          CONFIG_ARCH_EXTSRAM0=y              : Select SRAM on CS0
          CONFIG_ARCH_EXTSRAM0SIZE=1048576    : Size=1MB
 
@@ -625,7 +796,7 @@ Configuration sub-directories
        a)  To enable the NuttX RAM test that may be used to verify the
            external SRAM:
 
-           System Type -> External Memory Configuration       
+           System Type -> External Memory Configuration
              CONFIG_ARCH_EXTSRAM0HEAP=n      : Don't add to heap
 
            Application Configuration -> System NSH Add-Ons
@@ -659,7 +830,7 @@ Configuration sub-directories
         b) To add this RAM to the NuttX heap, you would need to change the
            configuration as follows:
 
-           System Type -> External Memory Configuration       
+           System Type -> External Memory Configuration
              CONFIG_ARCH_EXTSRAM0HEAP=y     : Add external RAM to heap
 
            Memory Management
