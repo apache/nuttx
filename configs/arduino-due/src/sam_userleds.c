@@ -95,6 +95,7 @@ void sam_ledinit(void)
 {
   /* Configure LED1-2 GPIOs for output */
 
+  sam_configgpio(GPIO_LED_L);
   sam_configgpio(GPIO_LED_RX);
   sam_configgpio(GPIO_LED_TX);
 }
@@ -107,13 +108,19 @@ void sam_setled(int led, bool ledon)
 {
   uint32_t ledcfg;
 
-  if (led == BOARD_LED_RX)
+  if (led == BOARD_LED_L)
     {
       ledcfg = GPIO_LED_RX;
+    }
+  else if (led == BOARD_LED_RX)
+    {
+      ledcfg = GPIO_LED_RX;
+      ledon = !ledon;
     }
   else if (led == BOARD_LED_TX)
     {
       ledcfg = GPIO_LED_TX;
+      ledon = !ledon;
     }
   else
     {
@@ -130,6 +137,9 @@ void sam_setled(int led, bool ledon)
 void sam_setleds(uint8_t ledset)
 {
   bool ledon;
+
+  ledon = ((ledset & BOARD_LED_L_BIT) != 0);
+  sam_gpiowrite(GPIO_LED_L, ledon);
 
   ledon = ((ledset & BOARD_LED_RX_BIT) != 0);
   sam_gpiowrite(GPIO_LED_RX, ledon);

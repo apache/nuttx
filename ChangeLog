@@ -5078,3 +5078,10 @@
 	* configs/arduino-due:  Complete the basic board configuration and
 	  integrate this into the configuration and build system.  The Arduino
 	  Due is now ready to begin test (2013-6-17).
+	* configs/arduino-due/nsh:  Add an NSH configuration for the Arduino
+	  Due.  Both the OS test and NSH configuration are now functional
+	  (2013-6-28).
+	* configs/arduino-due/src:  Add support for the "L" LED (2013-6-28).
+	* arch/arm/src/sam34/sam_allocateheap.c:  Clocking must be applied
+	  to the SMC module for the 3X and 3A family in order for the NFC
+	  SRAM to be functional (2013-6-28).

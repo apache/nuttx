@@ -313,14 +313,17 @@ Buttons and LEDs
 
   LEDs
   ----
-  There are two user-controllable LEDs on board the Arduino Due board:
+  There are three user-controllable LEDs on board the Arduino Due board:
 
       LED              GPIO
       ---------------- -----
+      L   Amber LED    PB27
       TX  Yellow LED   PA21
       RX  Yellow LED   PC30
 
-  Both are pulled high and can be illuminated by driving the corresponding
+  LED L is connected to ground and can be illuminated by driving the PB27
+  output high. The TX and RX LEDs are pulled high and can be illuminated by
+  driving the corresponding
   GPIO output to low.
 
   These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
@@ -328,23 +331,24 @@ Buttons and LEDs
   include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
   events as follows:
 
-    SYMBOL                Meaning                     LED state
-                                                    RX       TX
-    -------------------  -----------------------  -------- --------
-    LED_STARTED          NuttX has been started     OFF      OFF
-    LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
-    LED_IRQSENABLED      Interrupts enabled         OFF      OFF
-    LED_STACKCREATED     Idle stack created         ON       OFF
-    LED_INIRQ            In an interrupt              No change
-    LED_SIGNAL           In a signal handler          No change
-    LED_ASSERTION        An assertion failed          No change
-    LED_PANIC            The system has crashed     OFF      Blinking
-    LED_IDLE             MCU is is sleep mode         Not used
+    SYMBOL                MEANING                         LED STATE
+                                                    L         TX       RX
+    -------------------  -----------------------  -------- -------- --------
+    LED_STARTED          NuttX has been started     OFF      OFF      OFF
+    LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF      OFF
+    LED_IRQSENABLED      Interrupts enabled         OFF      OFF      OFF
+    LED_STACKCREATED     Idle stack created         ON       OFF      OFF
+    LED_INIRQ            In an interrupt            N/C      GLOW     OFF
+    LED_SIGNAL           In a signal handler        N/C      GLOW     OFF
+    LED_ASSERTION        An assertion failed        N/C      GLOW     OFF
+    LED_PANIC            The system has crashed     N/C      N/C      Blinking
+    LED_IDLE             MCU is is sleep mode       ------ Not used --------
 
-  Thus if RX is statically on, NuttX has successfully booted and is,
-  apparently, running normmally.  If TX is flashing at approximately
-  2Hz, then a fatal error has been detected and the system has halted.
-
+  Thus if LED L is statically on, NuttX has successfully booted and is,
+  apparently, running normmally.  If LED RX is glowing, then NuttX is
+  handling interupts (and also signals and assertions).  If TX is flashing
+  at approximately 2Hz, then a fatal error has been detected and the system
+  has halted.
 
 Serial Consoles
 ^^^^^^^^^^^^^^^
