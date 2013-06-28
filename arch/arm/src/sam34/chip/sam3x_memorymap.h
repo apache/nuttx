@@ -65,7 +65,7 @@
 /* Internal SRAM memory region */
 
 #define SAM_INTSRAM0_BASE      0x20000000 /* 0x20000000-0x2007ffff: Internal SRAM 0 */
-#define SAM_INTSRAM1_BASE      0x20080000 /* 0x20080000-0x200fffff: Internal SRAM 0 */
+#define SAM_INTSRAM1_BASE      0x20080000 /* 0x20080000-0x200fffff: Internal SRAM 1 */
 #define SAM_NFCSRAM_BASE       0x20100000 /* 0x20100000-0x2017ffff: NAND FLASH controller (SRAM) */
 #define SAM_UOTGHSRAM_BASE     0x20180000 /* 0x20100000-0x201fffff: UOTGHS controller (DMA) */
                                           /* 0x20200000-0x201fffff: Undefined */

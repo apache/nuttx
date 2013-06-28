@@ -53,6 +53,7 @@
 
 #include "chip.h"
 #include "sam_mpuinit.h"
+#include "sam_periphclks.h"
 
 /****************************************************************************
  * Private Definitions
@@ -317,6 +318,15 @@ void up_addregion(void)
 #endif /* HAVE_SRAM1_REGION */
 
 #ifdef HAVE_NFCSRAM_REGION
+#if defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
+  /* In the 3X/3A family I note that clocking must appled to the SMC module
+   * in order for the NFCS SRAM to be functional.  I don't recall such an
+   * issue with the 3U.
+   */
+
+  sam_smc_enableclk();
+#endif
+
   /* Allow user access to the heap memory */
 
   sam_mpu_uheap(SAM_NFCSRAM_BASE, SAM34_NFCSRAM_SIZE);
