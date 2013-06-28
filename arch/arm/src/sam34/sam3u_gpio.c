@@ -377,6 +377,14 @@ int sam_configgpio(gpio_pinset_t cfgset)
   uint32_t  pin  = sam_gpiopin(cfgset);
   int       ret;
 
+  /* Enable writing to GPIO registers
+   * TODO:  This probably requires some protection against re-entry.
+   */
+
+  putreg32(PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
+
+  /* Handle the pin configuration according to pin type */
+
   switch (cfgset & GPIO_MODE_MASK)
     {
       case GPIO_INPUT:
@@ -400,6 +408,11 @@ int sam_configgpio(gpio_pinset_t cfgset)
         ret = -EINVAL;
         break;
     }
+
+  /* Enable writing to GPIO registers */
+
+  putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
+
   return ret;
 }
 

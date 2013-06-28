@@ -5085,3 +5085,6 @@
 	* arch/arm/src/sam34/sam_allocateheap.c:  Clocking must be applied
 	  to the SMC module for the 3X and 3A family in order for the NFC
 	  SRAM to be functional (2013-6-28).
+	* arch/arm/src/sam34/sam3u_gpio.c:  Need to disable write
+	  protection before configuring PIO pins.
+
