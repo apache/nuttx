@@ -58,7 +58,7 @@
                                           /* 0x000c: Reserved */
 #define SAM_PIO_OER_OFFSET         0x0010 /* Output Enable Register */
 #define SAM_PIO_ODR_OFFSET         0x0014 /* Output Disable Register */
-#define SAM_PIO_OSR_OFFSET         0x0018 /* utput Status Register */
+#define SAM_PIO_OSR_OFFSET         0x0018 /* Output Status Register */
                                           /* 0x001c: Reserved */
 #define SAM_PIO_IFER_OFFSET        0x0020 /* Glitch Input Filter Enable Register */
 #define SAM_PIO_IFDR_OFFSET        0x0024 /* Glitch Input Filter Disable Register */
@@ -444,6 +444,7 @@
 #define PIO_WPMR_WPEN              (1 << 0)  /* Bit 0:  Write Protect Enable */
 #define PIO_WPMR_WPKEY_SHIFT       (8)       /* Bits 8-31: Write Protect KEY */
 #define PIO_WPMR_WPKEY_MASK        (0xffffff << PIO_WPMR_WPKEY_SHIFT)
+#  define PIO_WPMR_WPKEY           (0x50494f << PIO_WPMR_WPKEY_SHIFT)
 
 /* PIO Write Protect Status Register */
 
