@@ -583,6 +583,7 @@ Configuration sub-directories
             CONFIG_ADS7843E_SPIDEV=2          : Use SPI CS 2 for communication
             CONFIG_ADS7843E_SPIMODE=0         : Use SPI mode 0
             CONFIG_ADS7843E_FREQUENCY=1000000 : SPI BAUD 1MHz
+            CONFIG_ADS7843E_SWAPXY=y          : If landscpe orientation
             CONFIG_ADS7843E_THRESHX=51        : These will probably need to be tuned
             CONFIG_ADS7843E_THRESHY=39
 
@@ -611,15 +612,70 @@ Configuration sub-directories
             CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
           STATUS:
-            2013-6-16: The touchscreen is not functional. It seems to
-            perform good measurements but I am not getting the /PENIRQ
-            interrupt.  The interrupt is set up correctly (I can ground
-            A24 and I get the interrupt), so apparently the ADS7843E is
-            not generating interrupts.  No idea why.
+            2013-6-28: The touchscreen is functional.
 
   nx:
     Configures to use examples/nx using the HX834x LCD hardware on
     the SAM3U-EK development board.
+
+  nxwm
+  ----
+    This is a special configuration setup for the NxWM window manager
+    UnitTest.  The NxWM window manager can be found here:
+
+      nuttx-code/NxWidgets/nxwm
+
+    The NxWM unit test can be found at:
+
+      nuttx-code/NxWidgets/UnitTests/nxwm
+
+    Documentation for installing the NxWM unit test can be found here:
+
+      nuttx-code/NxWidgets/UnitTests/README.txt
+
+    Here is the quick summary of the build steps (Assuming that all of
+    the required packages are available in a directory ~/nuttx-code):
+
+    1. Intall the nxwm configuration
+
+       $ cd ~/nuttx-code/nuttx/tools
+       $ ./configure.sh stm3240g-eval/nxwm
+
+    2. Make the build context (only)
+
+       $ cd ..
+       $ . ./setenv.sh
+       $ make context
+       ...
+
+    3. Install the nxwm unit test
+
+       $ cd ~/nuttx-code/NxWidgets
+       $ tools/install.sh ~/nuttx-code/apps nxwm
+       Creating symbolic link
+        - To ~/nuttx-code/NxWidgets/UnitTests/nxwm
+        - At ~/nuttx-code/apps/external
+
+    4. Build the NxWidgets library
+
+       $ cd ~/nuttx-code/NxWidgets/libnxwidgets
+       $ make TOPDIR=~/nuttx-code/nuttx
+       ...
+
+    5. Build the NxWM library
+
+       $ cd ~/nuttx-code/NxWidgets/nxwm
+       $ make TOPDIR=~/nuttx-code/nuttx
+       ...
+
+    6. Built NuttX with the installed unit test as the application
+
+       $ cd ~/nuttx-code/nuttx
+       $ make
+
+    STATUS:
+    2013-6-28:  Created the configuration but have not yet done
+    anything with it.
 
   ostest:
     This configuration directory, performs a simple OS test using
