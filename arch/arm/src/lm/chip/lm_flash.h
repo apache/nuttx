@@ -48,7 +48,7 @@
 
 /* FLASH dimensions ****************************************************************/
 
-#if defined(CONFIG_ARCH_CHIP_LM3S6965)
+#if defined(CONFIG_ARCH_CHIP_LM3S6965) || defined(CONFIG_ARCH_CHIP_LM4F120)
 #  define LM_FLASH_NPAGES        256
 #  define LM_FLASH_PAGESIZE      1024
 #else
