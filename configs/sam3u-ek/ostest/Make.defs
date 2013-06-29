@@ -73,7 +73,7 @@ else
 endif
 
 ARCHCFLAGS = -fno-builtin
-ARCHCXXFLAGS = -fno-builtin -fno-exceptions
+ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
 ARCHWARNINGSXX = -Wall -Wshadow
 ARCHDEFINES =

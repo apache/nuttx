@@ -42,6 +42,10 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = up_boot.c up_leds.c up_buttons.c up_spi.c up_usbdev.c
 
+ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
+CSRCS += up_cxxinitialize.c
+endif
+
 ifeq ($(CONFIG_LCD),y)
 CSRCS += up_lcd.c
 endif

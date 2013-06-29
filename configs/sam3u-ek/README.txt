@@ -400,6 +400,8 @@ SAM3U-EK-specific Configuration Options
 Configurations
 ^^^^^^^^^^^^^^
 
+  Information Common to All Configurations
+  ----------------------------------------
   Each SAM3U-EK configuration is maintained in a sub-directory and
   can be selected as follow:
 
@@ -457,6 +459,9 @@ Configurations
      System Type -> Toolchain:
        CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
 
+     Library Routines ->
+       CONFIG_CXX_NEWLONG=n                : size_t is an unsigned int, not long
+
      This re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building
      NuttX then you will have to 1) 'make distclean' to remove the old
@@ -473,8 +478,8 @@ Configurations
      See also the "NOTE about Windows native toolchains" in the section call
      "GNU Toolchain Options" above.
 
-Configuration sub-directories
------------------------------
+  Configuration sub-directories
+  -----------------------------
 
   knsh:
     This is identical to the nsh configuration below except that NuttX
@@ -613,33 +618,37 @@ Configuration sub-directories
 
           STATUS:
             2013-6-28: The touchscreen is functional.
+            2013-6-29: Hmmm... but there appear to be conditions when the
+              touchscreen driver locks up.  Looks like some issue with
+              managing the interrupts.
 
   nx:
     Configures to use examples/nx using the HX834x LCD hardware on
     the SAM3U-EK development board.
 
-  nxwm
-  ----
+  nxwm:
     This is a special configuration setup for the NxWM window manager
     UnitTest.  The NxWM window manager can be found here:
 
-      nuttx-code/NxWidgets/nxwm
+      nuttx-git/NxWidgets/nxwm
 
     The NxWM unit test can be found at:
 
-      nuttx-code/NxWidgets/UnitTests/nxwm
+      nuttx-git/NxWidgets/UnitTests/nxwm
 
     Documentation for installing the NxWM unit test can be found here:
 
-      nuttx-code/NxWidgets/UnitTests/README.txt
+      nuttx-git/NxWidgets/UnitTests/README.txt
 
-    Here is the quick summary of the build steps (Assuming that all of
-    the required packages are available in a directory ~/nuttx-code):
+    Here is the quick summary of the build steps.  These steps assume that
+    you have the entire NuttX GIT in some directory ~/nuttx-git.  You may
+    have these components installed elsewhere.  In that case, you will need
+    to adjust all of the paths in the following accordingly:
 
     1. Intall the nxwm configuration
 
-       $ cd ~/nuttx-code/nuttx/tools
-       $ ./configure.sh stm3240g-eval/nxwm
+       $ cd ~/nuttx-git/nuttx/tools
+       $ ./configure.sh sam3u-ek/nxwm
 
     2. Make the build context (only)
 
@@ -648,34 +657,44 @@ Configuration sub-directories
        $ make context
        ...
 
+       NOTE: the use of the setenv.sh file is optional.  All that it will
+       do is to adjust your PATH variable so that the build system can find
+       your tools.  If you use it, you will most likely need to modify the
+       script so that it has the correct path to your tool binaries
+       directory.
+
     3. Install the nxwm unit test
 
-       $ cd ~/nuttx-code/NxWidgets
-       $ tools/install.sh ~/nuttx-code/apps nxwm
+       $ cd ~/nuttx-git/NxWidgets
+       $ tools/install.sh ~/nuttx-git/apps nxwm
        Creating symbolic link
-        - To ~/nuttx-code/NxWidgets/UnitTests/nxwm
-        - At ~/nuttx-code/apps/external
+        - To ~/nuttx-git/NxWidgets/UnitTests/nxwm
+        - At ~/nuttx-git/apps/external
 
     4. Build the NxWidgets library
 
-       $ cd ~/nuttx-code/NxWidgets/libnxwidgets
-       $ make TOPDIR=~/nuttx-code/nuttx
+       $ cd ~/nuttx-git/NxWidgets/libnxwidgets
+       $ make TOPDIR=~/nuttx-git/nuttx
        ...
 
     5. Build the NxWM library
 
-       $ cd ~/nuttx-code/NxWidgets/nxwm
-       $ make TOPDIR=~/nuttx-code/nuttx
+       $ cd ~/nuttx-git/NxWidgets/nxwm
+       $ make TOPDIR=~/nuttx-git/nuttx
        ...
 
     6. Built NuttX with the installed unit test as the application
 
-       $ cd ~/nuttx-code/nuttx
+       $ cd ~/nuttx-git/nuttx
        $ make
 
     STATUS:
-    2013-6-28:  Created the configuration but have not yet done
-    anything with it.
+
+    1. 2013-6-28:  Created the configuration but have not yet done
+       anything with it.
+
+    2. 2013-6-29:  Various changes to get a clean build of this
+       configuration. Still untested.
 
   ostest:
     This configuration directory, performs a simple OS test using
