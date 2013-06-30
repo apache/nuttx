@@ -38,29 +38,7 @@ CONFIG_RAW_BINARY=y
 #
 # Debug Options
 #
-CONFIG_DEBUG=y
-CONFIG_DEBUG_VERBOSE=y
-
-#
-# Subsystem Debug Options
-#
-# CONFIG_DEBUG_MM is not set
-# CONFIG_DEBUG_SCHED is not set
-# CONFIG_DEBUG_FS is not set
-# CONFIG_DEBUG_LIB is not set
-# CONFIG_DEBUG_BINFMT is not set
-# CONFIG_DEBUG_GRAPHICS is not set
-
-#
-# Driver Debug Options
-#
-# CONFIG_DEBUG_LCD is not set
-# CONFIG_DEBUG_LEDS is not set
-CONFIG_DEBUG_INPUT=y
-# CONFIG_DEBUG_ANALOG is not set
-# CONFIG_DEBUG_SPI is not set
-# CONFIG_DEBUG_GPIO is not set
-# CONFIG_DEBUG_AUDIO is not set
+# CONFIG_DEBUG is not set
 # CONFIG_DEBUG_SYMBOLS is not set
 
 #
@@ -105,7 +83,6 @@ CONFIG_ARCH_CHIP="sam34"
 # CONFIG_ARCH_HAVE_FPU is not set
 CONFIG_ARCH_HAVE_MPU=y
 # CONFIG_ARMV7M_MPU is not set
-# CONFIG_DEBUG_HARDFAULT is not set
 
 #
 # ARMV7M Configuration Options
@@ -405,7 +382,6 @@ CONFIG_SERIAL=y
 CONFIG_ARCH_HAVE_UART0=y
 CONFIG_MCU_SERIAL=y
 CONFIG_STANDARD_SERIAL=y
-# CONFIG_SERIAL_TIOCSERGSTRUCT is not set
 CONFIG_UART0_SERIAL_CONSOLE=y
 # CONFIG_NO_SERIAL_CONSOLE is not set
 

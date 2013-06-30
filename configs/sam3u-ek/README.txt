@@ -442,15 +442,20 @@ Configurations
      Build Setup:
        CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
 
-  4. These configurations use the older, OABI, buildroot toolchain.  But
-     that is easily reconfigured:
+  4. All of these configurations use the older, OABI, buildroot toolchain
+     (unless stated otherwise in the description of the configuration).  That
+     toolchain selection can easily be reconfigured using 'make menuconfig'.
+     Here are the relevant current settings:
 
+     Build Setup:
+       CONFIG_HOST_LINUX=y                 : Linux or other pure POSIX invironment
+                                           : (including Cygwin)
      System Type -> Toolchain:
        CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
        CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
 
-     If you want to use the Atmel GCC toolchain, here are the steps to
-     do so:
+     If you want to use the Atmel GCC toolchain, for example, here are the
+     steps to do so:
 
      Build Setup:
        CONFIG_HOST_WINDOWS=y   : Windows
@@ -695,6 +700,14 @@ Configurations
 
     2. 2013-6-29:  Various changes to get a clean build of this
        configuration. Still untested.
+
+    3. 20113-6-30:  I cannot load this program using AtmelStudio6.1.
+       The total size with DEBUG on is 138.9 KB.  I have verified
+       that the first 128KB may have been written correctly, but then
+       the code above 128KB wraps and overwrites the code at the
+       beginning of FLASH, trashing the FLASH images.
+
+       Bottom line:  Still untested.
 
   ostest:
     This configuration directory, performs a simple OS test using
