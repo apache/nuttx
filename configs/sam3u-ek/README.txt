@@ -626,6 +626,9 @@ Configurations
             2013-6-29: Hmmm... but there appear to be conditions when the
               touchscreen driver locks up.  Looks like some issue with
               managing the interrupts.
+            2013-6-30:  Those lock-ups appear to be due to poorly placed
+              debug output statements.  If you do not enable debug output,
+              the touchscreen is rock-solid.
 
   nx:
     Configures to use examples/nx using the HX834x LCD hardware on
@@ -633,7 +636,16 @@ Configurations
 
   nxwm:
     This is a special configuration setup for the NxWM window manager
-    UnitTest.  The NxWM window manager can be found here:
+    UnitTest.  It includes support for both the HX834x LCD and the
+    ADS7843E touchscreen controller on board the SAM3U-EK board.
+
+    The NxWM window manager is a tiny window manager tailor for use
+    with smaller LCDs.  It supports a toolchain, a start window, and
+    multiple application windows.  However, to make the best use of
+    the visible LCD space, only one application window is visiable at
+    at time.
+ 
+    The NxWM window manager can be found here:
 
       nuttx-git/NxWidgets/nxwm
 
