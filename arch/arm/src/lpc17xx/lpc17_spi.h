@@ -42,7 +42,7 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 
 #include "chip/lpc17_spi.h"
 
@@ -92,7 +92,7 @@ FAR struct spi_dev_s *lpc17_spiinitialize(int port);
  * Description:
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods 
+ *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
  *   including lpc17_spiinitialize()) are provided by common LPC17xx logic.  To use
  *   this common SPI logic on your board:
  *
@@ -144,7 +144,7 @@ void spi_flush(FAR struct spi_dev_s *dev);
  *   MMC/SD drvier when an SD card is inserted or removed, then
  *   CONFIG_SPI_CALLBACK should be defined and the following function must
  *   must be implemented.  These functions implements the registercallback
- *   method of the SPI interface (see include/nuttx/spi.h for details)
+ *   method of the SPI interface (see include/nuttx/spi/spi.h for details)
  *
  * Input Parameters:
  *   dev -      Device-specific state data

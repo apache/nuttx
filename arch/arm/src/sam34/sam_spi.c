@@ -50,7 +50,7 @@
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 
 #include "up_internal.h"
 #include "up_arch.h"
@@ -193,7 +193,7 @@ static const struct spi_ops_s g_spiops =
 };
 
 #ifdef CONFIG_SPI_OWNBUS
-/* Single chip select device structure structure */
+/* Single chip select device structure */
 
 static struct sam_spidev_s g_spidev;
 

@@ -589,7 +589,7 @@ void kinetis_clrpend(int irq);
  * Description:
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods
+ *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
  *   including up_spiinitialize()) are provided by common Kinetis logic.  To use
  *   this common SPI logic on your board:
  *

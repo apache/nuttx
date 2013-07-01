@@ -45,7 +45,7 @@
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <arch/io.h>
 
 #include "up_internal.h"
