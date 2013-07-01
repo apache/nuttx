@@ -85,7 +85,7 @@
 #include <stdio.h>
 #include <debug.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/net/enc28j60.h>
 
 #include <arch/board/board.h>

@@ -44,7 +44,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/wireless/nrf24l01.h>
 #include <arch/board/board.h>
 

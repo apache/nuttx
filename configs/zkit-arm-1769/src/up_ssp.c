@@ -49,7 +49,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -126,7 +126,7 @@ void weak_function zkit_sspinitialize(void)
  *   The external functions, lpc17_ssp0/ssp1select and lpc17_ssp0/ssp1status
  *   must be provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi.h). All other methods (including lpc17_sspinitialize())
+ *   include/nuttx/spi/spi.h). All other methods (including lpc17_sspinitialize())
  *   are provided by common LPC17xx logic.  To use this common SPI logic on your
  *   board:
  *

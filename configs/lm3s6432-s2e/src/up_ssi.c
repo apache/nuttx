@@ -44,7 +44,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -112,7 +112,7 @@ void weak_function lm_ssiinitialize(void)
 /****************************************************************************
  * The external functions, lm_spiselect and lm_spistatus must be provided
  * by board-specific logic.  The are implementations of the select and status
- * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi.h).
+ * methods SPI interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
  * All othermethods (including up_spiinitialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
  *

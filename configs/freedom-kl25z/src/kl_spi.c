@@ -43,7 +43,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 
 #include "kl_gpio.h"
 #include "kl_spi.h"
@@ -108,7 +108,7 @@ void weak_function kl_spiinitialize(void)
  * Description:
  *   These external functions must be provided by board-specific logic.  They
  *   are implementations of the select, status, and cmddata methods of the SPI
- *   interface defined by struct spi_ops_s (see include/nuttx/spi.h). All
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All
  *   other methods including up_spiinitialize()) are provided by common
  *   Kinetis logic.  To use this common SPI logic on your board:
  *
@@ -183,7 +183,7 @@ void kl_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
  *   devid - Identifies the (logical) device
  *
  * Returned Values:
- *   Bit-encoded SPI status (see include/nuttx/spi.h.
+ *   Bit-encoded SPI status (see include/nuttx/spi/spi.h.
  *
  ****************************************************************************/
 
@@ -214,7 +214,7 @@ uint8_t kl_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  *   cmd - Determines where command or data should be selected.
  *
  * Returned Values:
- *   Bit-encoded SPI status (see include/nuttx/spi.h.
+ *   Bit-encoded SPI status (see include/nuttx/spi/spi.h.
  *
  ****************************************************************************/
 

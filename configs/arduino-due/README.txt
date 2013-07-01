@@ -5,10 +5,15 @@ README
   Arduino DUE board featuring the Atmel ATSAM3X8E MCU running at 84
   MHz.
 
+  Supported Shields
+  -----------------
+  - ITEAD 2.4" TFT with Touch, Arduion Shield 1.0
+
 Contents
 ^^^^^^^^
 
   - PIO Pin Usage
+  - ITEAD 2.4" TFT with Touch
   - Development Environment
   - GNU Toolchain Options
   - IDEs
@@ -99,6 +104,74 @@ PIO Pin Usage
   PD30  N/A         N/A          PE30  N/A          N/A         PF30  N/A         N/A
   PD31  N/A5        N/A          PE31  N/A          N/A         PF31  N/A         N/A
   ----- ---------- ---- -------- ----- ------------ ---- ------ ----- ----------- ---- ---------
+
+ITEAD 2.4" TFT with Touch
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  The Arduino 2.4" TFT Touch Shield is designed for all the Arduino
+  compatible boards. It works in 3.3V voltage level. It can be directly
+  plugged on the Arduino and other compatible boards. It will offer
+  display, touch and storage functions for the Arduino board
+
+  Features:
+
+    1. Compatible with 3.3/5V operation voltage level
+    2. Compatible with UTFT library
+    3. With SD Card Socket
+
+  The Arduino 2.4" TFT Touch shield uses the S6D1121 controller , it
+  supports 8-bit data interface. The touch IC is TSC2046.
+
+  Arduino       ATSAM3X                 Due        ITHEAD
+  Due PIN    GPIO FUNCTION             SIGNAL       PIN   SIGNAL     NOTES
+  PWMH
+  10  SCL1   PA18 TWCK0/A20/WKUP9        SCL1         ---   ---        SCL not available
+   9  SDA1   PA17 TWD0SPCK0              SDA1         ---   ---        SDA not available
+   8  Aref   ---  ---                    AREF         Vref  ---        ---
+   7  GND    ---  ---                    GND          GND   ---        ---
+   6  PWM13  PB27 SPI0_SPCK/A20/WKUP10   PWM13        D13   SD_SCK     SCK, also LED "L"
+   5  PWM12  PD8  A21/NANDALE/TIOB8      PWM12        D12   SD_MISO    MISO not available
+   4  PWM11  PD7  A17/BA1/TIOA8          PWM11        D11   SD_MOSI    MOSI not available
+   3  PWM10  ???  ???                    SS0/PWM10    D10   SD_CS      ???
+   2  PWM9   PC21 A0/NBS0/PWML4          PWM9         D9    Touch_IRQ  ---
+   1  PWM8   PC22 A1/PWML5               PWM8         D8    Touch_Dout ---
+  PWML
+   8  PWM7   PC23 A2/PWML6               PWM7         D7    DB15       ---
+   7  PWM6   PC24 A3/PWML7               PWM6         D6    DB14       ---
+   6  PWM5   PC25 A4/TIOA6               PWM5         D5    DB13       ---
+   5  PWM4   PC26 A5/TIOB6               SS1/PWM4     D4    DB12       ---
+   4  PWM3   PC28 A7/TIOA7               PWM3         D3    DB11       ---
+   3  PWM2   PB25 RTS0/TIOA0             PWM2         D2    DB10       ---
+   2  PWM1   PA9  UTXD/PWMH3             TX           D1    DB9        UART0 TX
+   1  PWM0   PA8  URXD/PWMH0/WKUP4       RX           D0    DB8        UART0 RX
+
+  POWER
+   1  ---    ---  ---                    ---          ---   ---        ---
+   2  IOref  ---  ---                    IOREF +3V3   ---   ---        ---
+   3  RESET  ---  ---                    MASTER_RESET RST   ---        ---
+   4  3.3V   ---  ---                    +3V3         5V    ---        ---
+   5  5V     ---  ---                    +5V          3.3V  ---        ---
+   6  GND    ---  ---                    GND          GND   ---        ---
+   7  GND    ---  ---                    GND          GND   ---        ---
+   8  Vin    ---  ---                    VIN          Vin   ---        ---
+  ADCL
+   1  A0     PA16 SPCK1/TD/AD7           AD0          A0    Touch_Din  ---
+   2  A1     PA24 MCDA3/PCK1/AD6         AD1          A1    Touch_CLK  ---
+   3  A2     PA23 MCDA2/TCLK4/AD5        AD2          A2    ---        ---
+   4  A3     PA22 MCDA1/TCLK3/AD4        AD3          A3    TFT_CS     ---
+   5  A4     PA6  TIOB2/NCS0/AD3         AD4          A4    TFT_WR     ---
+   6  A5     PA4  TCLK1/NWAIT/AD2        AD5          A5    TFT_RS     ---
+   7  A6     PA3  TIOB1/PWMFI1/AD1/WKUP1 AD6          ---   ---        ---
+   8  A7     PA2  TIOA1/NANDRDY/AD0      AD7          ---   ---        ---
+
+  NOTE:
+
+  1. It is not possible to use any of the SPI devices on the Shield unless
+     a bit-bang SPI interface is used.  This includes the touch controller
+     and the SD card.
+  2. UART0 cannot be used
+  3. Parallel data is not contiguous in any PIO register
+  4. 3.3V and 5V are reversed.
 
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^

@@ -44,7 +44,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ug-9664hswag01.h>
 
@@ -159,7 +159,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
  *   Set or clear the SD1329 D/Cn bit to select data (true) or command
  *   (false).  This function must be provided by platform-specific logic.
  *   This is an implementation of the cmddata method of the SPI
- *   interface defined by struct spi_ops_s (see include/nuttx/spi.h).
+ *   interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
  *
  * Input Parameters:
  *

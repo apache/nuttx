@@ -40,7 +40,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <debug.h>
 
 #include <arch/board/board.h>

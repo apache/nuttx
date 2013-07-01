@@ -50,7 +50,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
 /****************************************************************************
