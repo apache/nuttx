@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include <semaphore.h>
+
 #include <nuttx/spi/spi.h>
 
 #ifdef CONFIG_SPI_BITBANG
@@ -49,15 +51,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-#ifndef SPI_BITBANG_MODE  <<< NOOOO.. Needs to be programmable
-#  define SPI_BITBANG_MODE SPI_MODE0
-#endif
-
-#ifndef CONFIG_SPI_BITBANG_FREQUENCY  <<< NOOOO.. Needs to be programmable
-#  define CONFIG_SPI_BITBANG_FREQUENCY 1000000
-#endif
-
 /* Debug ********************************************************************/
 /* Check if SPI debut is enabled (non-standard.. no support in
  * include/debug.h
@@ -97,6 +90,11 @@ struct spi_bitbang_ops_s
   void (*select)(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
                  bool selected);
 
+  /* Platform-specific, SPI frequency function */
+
+  uint32_t (*setfrequency)(FAR struct spi_bitbang_s *priv,
+                           uint32_t frequency);
+
   /* Platform-specific, SPI mode function */
 
   void (*setmode)(FAR struct spi_bitbang_s *priv, enum spi_mode_e mode);
@@ -117,20 +115,24 @@ struct spi_bitbang_ops_s
 #endif
 };
 
+/* This is the type of the function that can exchange one bit */
+
+typedef uint8_t (*bitexchange_t)(FAR struct spi_bitbang_s *priv, uint8_t dataout);
+
 /* This structure provides the state of the SPI bit-bang driver */
 
 struct spi_bitbang_s
 {
   struct spi_dev_s dev;                    /* Publicly visible version of SPI driver */
   FAR const struct spi_bitbang_ops_s *low; /* Low-level operations */
-  uint32_t         hpnsec;                /* Number of microseconds in a half cycle */
+  uint32_t         holdtime;               /* SCK hold time to achieve requested frequency */
+  bitexchange_t    exchange;               /* The select bit exchange function */
 #ifndef CONFIG_SPI_OWNBUS
   sem_t            exclsem;                /* Supports mutually exclusive access to SPI */
 #endif
 #ifdef CONFIG_SPI_BITBANG_VARWIDTH
   uint8_t          nbits;                  /* Number of bits in the transfer */
 #endif
-  FAR void        *priv;                   /* For use by the lower half driver */
 };
 
 /****************************************************************************

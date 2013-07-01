@@ -42,6 +42,7 @@
 #include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/spi/spi_bitbang.h>
@@ -123,16 +124,16 @@ static uint16_t spi_send(FAR struct spi_dev_s *dev, uint16_t ch);
 static void     spi_exchange(FAR struct spi_dev_s *dev,
                    FAR const void *txbuffer, FAR void *rxbuffer,
                    size_t nwords);
-static uint8_t  spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
-#ifdef CONFIG_SPI_CMDDATA
-static int      spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
-                  bool cmd);
-#endif
 #ifndef CONFIG_SPI_EXCHANGE
 static void     spi_sndblock(FAR struct spi_dev_s *dev,
                   FAR const void *buffer, size_t nwords);
 static void     spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer,
                   size_t nwords);
+#endif
+static uint8_t  spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+#ifdef CONFIG_SPI_CMDDATA
+static int      spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                  bool cmd);
 #endif
 
 /****************************************************************************
@@ -259,22 +260,12 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
 static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
+  uint32_t actual;
 
-  /* SPI frequency cannot be precisely controlled with a bit-bang interface.
-   * Freqency corresponds to delay in toggle the SPI clock line:  Set high,
-   * wait, set low, wait, set high, wait, etc.
-   *
-   * Here we calcalute the half period of the frequency in nanoseconds (i.e.,
-   * the amount of time that the clock should remain in the high or low state).
-   *
-   *   frequency = psec / 1 sec                  - psec = full period in seconds
-   *   psec      = 1 sec / frequency
-   *   hpsec     = 1 sec / (2 * frequency)       - hpsec = half period in seconds
-   *   hpnsec    = 1000000000 / (2 * frequency)  - hpnsec = half period in nanoseconds
-   */
-
-  priv->hpnsec = (1000000000ul + frequency) / (frequency << 2);
-  return frequency;
+  DEBUGASSERT(priv && priv->low->setfrequency);
+  actual = priv->low->setfrequency(priv, frequency);
+  spivdbg("frequency=%d holdtime=%d actual=%d\n",
+          frequency, priv->holdtime, actual);
 }
 
 /****************************************************************************
@@ -297,6 +288,7 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
   DEBUGASSERT(priv && priv->low->setmode);
   priv->low->setmode(priv, mode);
+  spivdbg("mode=%d exchange=%p\n", mode, priv->exchange);
 }
 
 /****************************************************************************
@@ -327,6 +319,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   DEBUGASSERT(nbits == 8);
 #endif
 }
+
 /****************************************************************************
  * Name: spi_send
  *
@@ -382,6 +375,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev,
   uint16_t dataout;
   uint16_t datain;
 
+  spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
   DEBUGASSERT(priv && priv->low && priv->low->exchange);
 
   /* If there is no data source, send 0xff */
@@ -497,6 +491,56 @@ static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t nw
 #endif
 
 /****************************************************************************
+ * Name: spi_status
+ *
+ * Description:
+ *   Get status bits associated with the device associated with 'devid'
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *   devid - Identifies the device of interest
+ *
+ * Returned Value:
+ *   Bit encoded status byte
+ *
+ ****************************************************************************/
+
+static uint8_t spi_status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
+  DEBUGASSERT(priv && priv->low && priv->low->status);
+
+  return priv->low->status(priv, devid);
+}
+
+/****************************************************************************
+ * Name: spi_cmddata
+ *
+ * Description:
+ *   Control the SPI CMD/DATA like for the device associated with 'devid'
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *   devid - Identifies the device of interest
+ *   cmd   - True:CMD False:DATA
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_CMDDATA
+static int spi_cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                       bool cmd)
+{
+  FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
+  DEBUGASSERTcmddata(priv && priv->low && priv->low->status);
+
+  return priv->low->cmddata(priv, devid, cmd);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -531,10 +575,12 @@ FAR struct spi_dev_s *spi_create_bitbang(FAR const struct spi_bitbang_ops_s *low
   priv->nbits   = 8;
 #endif
 
+  sem_init(&priv->exclsem, 0, 1);
+
   /* Select an initial state of mode 0, 8-bits, and 400KHz */
 
   low->setmode(priv, SPIDEV_MODE0);
-  spi_setfrequency(&priv->dev, 400000);
+  low->setfrequency(priv, 400000);
 
   /* And return the initialized driver structure */
 

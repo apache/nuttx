@@ -1,5 +1,5 @@
 ############################################################################
-# configs/arduino-due/src/Makefile
+# drivers/spi/Make.defs
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,85 +33,20 @@
 #
 ############################################################################
 
--include $(TOPDIR)/Make.defs
+# Don't build anything if there is no SPI support
 
-CFLAGS += -I$(TOPDIR)/sched
+ifeq ($(CONFIG_SPI),y)
 
-ASRCS =
-AOBJS = $(ASRCS:.S=$(OBJEXT))
-
-CSRCS = sam_boot.c
-
-ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += sam_cxxinitialize.c
-endif
-
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += sam_autoleds.c
-else
-CSRCS += sam_userleds.c
-endif
-
-ifeq ($(CONFIG_ARDUINO_ITHEAD_TFT),y)
+# Include the selected SPI drivers
 
 ifeq ($(CONFIG_SPI_BITBANG),y)
-ifeq ($(CONFIG_MMCSD_SPI),y)
-CSRCS += sam_mmcsd.c
+  CSRCS += spi_bitbang.c
 endif
 
-ifeq ($(CONFIG_INPUT),y)
-CSRCS += sam_touchscreen.c
-endif
-endif
+# Include SPI device driver build support
 
-ifeq ($(CONFIG_LCD),y)
-CSRCS += sam_lcd.c
-endif
+DEPPATH += --dep-path spi
+VPATH += :spi
+CFLAGS += ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)spi}
 endif
 
-ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += sam_nsh.c
-endif
-
-COBJS = $(CSRCS:.c=$(OBJEXT))
-
-SRCS = $(ASRCS) $(CSRCS)
-OBJS = $(AOBJS) $(COBJS)
-
-ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(WINTOOL),y)
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
-else
-  CFLAGS += -I$(ARCH_SRCDIR)/chip
-  CFLAGS += -I$(ARCH_SRCDIR)/common
-  CFLAGS += -I$(ARCH_SRCDIR)/armv7-m
-endif
-
-all: libboard$(LIBEXT)
-
-$(AOBJS): %$(OBJEXT): %.S
-	$(call ASSEMBLE, $<, $@)
-
-$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
-	$(call COMPILE, $<, $@)
-
-libboard$(LIBEXT): $(OBJS)
-	$(call ARCHIVE, $@, $(OBJS))
-
-.depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
-	$(Q) touch $@
-
-depend: .depend
-
-clean:
-	$(call DELFILE, libboard$(LIBEXT))
-	$(call CLEAN)
-
-distclean: clean
-	$(call DELFILE, Make.dep)
-	$(call DELFILE, .depend)
-
--include Make.dep

@@ -890,55 +890,70 @@ Configuration sub-directories
     This configuration directory will built the NuttShell.  See NOTES above.
 
     NOTES:
-    1. The configuration configuration can be modified to include support
-       for the on-board SRAM (1MB).
+    1. If the ITEAD TFT shield is connected to the Arduino Due, then
+       support for the SD card slot can be enabled by making the following
+       changes to the configuration:
 
-       System Type -> External Memory Configuration
-         CONFIG_ARCH_EXTSRAM0=y              : Select SRAM on CS0
-         CONFIG_ARCH_EXTSRAM0SIZE=1048576    : Size=1MB
+       Board Selection -> Peripheral
+         CONFIG_SAM34_UART0=n              : Disable UART0.  Can't use with this shield
+         CONFIG_SAM34_USART0=y             : Enable USART0
+         CONFIG_USART0_ISUART=y
 
-       Now what are you going to do with the SRAM.  There are two choices:
+       Device Drivers -> Serial
+         CONFIG_USART0_SERIAL_CONSOLE=y    : Configure the console on USART0
+         CONFIG_USART0_RXBUFSIZE=256
+         CONFIG_USART0_TXBUFSIZE=256
+         CONFIG_USART0_BAUD=115200
+         CONFIG_USART0_BITS=8
+         CONFIG_USART0_PARITY=0
+         CONFIG_USART0_2STOP=0
 
-       a)  To enable the NuttX RAM test that may be used to verify the
-           external SRAM:
+         NOTE: USART0 TTL levels are available on COMM 5 (TXD0) and
+         COMM 6 (RXD0)
 
-           System Type -> External Memory Configuration
-             CONFIG_ARCH_EXTSRAM0HEAP=n      : Don't add to heap
+       Board Selection -> Board-Specific Options:
+         CONFIG_ARCH_LEDS=n                : Can't support LEDs with this shield installed
+         CONFIG_ARDUINO_ITHEAD_TFT=y       : Enable support for the Shield
 
-           Application Configuration -> System NSH Add-Ons
-             CONFIG_SYSTEM_RAMTEST=y         : Enable the RAM test built-in
+       NOTE: You cannot use UART0 or LEDs with this ITEAD module.
 
-         In this configuration, the SDRAM is not added to heap and so is
-         not excessible to the applications.  So the RAM test can be
-         freely executed against the SRAM memory beginning at address
-         0x6000:0000 (CS0).
+       File Systems:
+         CONFIG_DISABLE_MOUNTPOINT=n       : Mountpoint support is needed
+         CONFIG_FS_FAT=y                   : Enable the FAT file system
+         CONFIG_FAT_LCNAMES=y              : Enable upper/lower case 8.3 file names (Optional, see below)
+         CONFIG_FAT_LFN=y                  : Enable long file named (Optional, see below)
+         CONFIG_FAT_MAXFNAME=32            : Maximum supported file name length
 
-         nsh> ramtest -h
-         Usage: <noname> [-w|h|b] <hex-address> <decimal-size>
+         There are issues related to patents that Microsoft holds on FAT long
+         file name technologies.  See the top level COPYING file for further
+         details.
 
-         Where:
-           <hex-address> starting address of the test.
-           <decimal-size> number of memory locations (in bytes).
-           -w Sets the width of a memory location to 32-bits.
-           -h Sets the width of a memory location to 16-bits (default).
-           -b Sets the width of a memory location to 8-bits.
+       System Type -> Peripherals:
+         CONFIG_SAM34_SPI0=y                : Enable the SAM4L SPI peripheral
 
-         To test the entire external SRAM:
+       Device Drivers
+         CONFIG_SPI=y                      : Enable SPI support
+         CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
+         CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
+         CONFIG_SPI_BITBANG=y              : Enable SPI bit-bang support
 
-         nsh> ramtest 60000000 1048576
-         RAMTest: Marching ones: 60000000 1048576
-         RAMTest: Marching zeroes: 60000000 1048576
-         RAMTest: Pattern test: 60000000 1048576 55555555 aaaaaaaa
-         RAMTest: Pattern test: 60000000 1048576 66666666 99999999
-         RAMTest: Pattern test: 60000000 1048576 33333333 cccccccc
-         RAMTest: Address-in-address test: 60000000 1048576
+         CONFIG_MMCSD=y                    : Enable MMC/SD support
+         CONFIG_MMCSD_NSLOTS=1             : Only one MMC/SD card slot
+         CONFIG_MMCSD_MULTIBLOCK_DISABLE=n : Should not need to disable multi-block transfers
+         CONFIG_MMCSD_HAVECARDDETECT=y     : I/O1 module as a card detect GPIO
+         CONFIG_MMCSD_SPI=y                : Use the SPI interface to the MMC/SD card
+         CONFIG_MMCSD_SPICLOCK=20000000    : This is a guess for the optimal MMC/SD frequency
+         CONFIG_MMCSD_SPIMODE=0            : Mode 0 is required
 
-        b) To add this RAM to the NuttX heap, you would need to change the
-           configuration as follows:
+       Board Selection -> Common Board Options
+         CONFIG_NSH_ARCHINIT=y             : Initialize the MMC/SD slot when NSH starts
+         CONFIG_NSH_MMCSDSLOTNO=0          : Only one MMC/SD slot, slot 0
+         CONFIG_NSH_MMCSDSPIPORTNO=0       : (does not really matter in this case)
 
-           System Type -> External Memory Configuration
-             CONFIG_ARCH_EXTSRAM0HEAP=y     : Add external RAM to heap
+       Board Selection -> SAM4L Xplained Pro Modules
+         CONFIG_SAM4L_XPLAINED_IOMODULE=y      : I/O1 module is connected
+         CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1=y : In EXT1, or EXT2
+         CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2=y
 
-           Memory Management
-             -CONFIG_MM_REGIONS=1           : Only the internal SRAM
-             +CONFIG_MM_REGIONS=2           : Also include external SRAM
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization

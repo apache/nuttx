@@ -69,7 +69,10 @@ fi
 # toolchain.
 export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 
+# This is the Cygwin path to the location where I have the Arduino BOSSA program
+export BOSSA_BIN="/cygdrive/c/Program Files (x86)/Arduino/arduino-1.5.2/hardware/tools"
+
 # Add the path to the toolchain to the PATH varialble
-export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+export PATH="${TOOLCHAIN_BIN}:${BOSSA_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"
