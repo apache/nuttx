@@ -36,7 +36,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/arch.h>
 
 #include <errno.h>

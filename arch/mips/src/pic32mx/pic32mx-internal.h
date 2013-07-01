@@ -47,7 +47,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 
 #include "up_internal.h"
 #include "chip.h"
@@ -390,7 +390,7 @@ EXTERN void pic32mx_dumpgpio(uint32_t pinset, const char *msg);
  * Description:
  *   These external functions must be provided by board-specific logic.  They are
  *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods
+ *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
  *   including up_spiinitialize()) are provided by common PIC32MX logic.  To use
  *   this common SPI logic on your board:
  *

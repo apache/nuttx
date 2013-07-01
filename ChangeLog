@@ -5092,4 +5092,8 @@
 	  problem (2013-6-28).
 	* confgis/sam3u_ek/nxwm:  Created a configuration for the NxWM
 	  window manager for the SAM3U-EK board.
+	* drivers/spi and include/nuttx/spi:  New sub-directories to hold
+	  SPI-related files.  includes/nuttx/spi.h moved to include/nuttx/spi/.;
+	  SPI-related Kconfig info moved from drivers/Kconfig to drivers/spi/kconfig
+	  (2013-7-1).
 

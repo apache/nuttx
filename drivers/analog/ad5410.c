@@ -51,7 +51,7 @@
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/dac.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 
 #if defined(CONFIG_DAC_AD5410)
 

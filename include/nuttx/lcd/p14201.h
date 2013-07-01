@@ -118,7 +118,7 @@ extern "C" {
  **************************************************************************************/
 
 struct lcd_dev_s; /* see nuttx/lcd.h */
-struct spi_dev_s; /* see nuttx/spi.h */
+struct spi_dev_s; /* see nuttx/spi/spi.h */
 EXTERN FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi, unsigned int devno);
 
 #undef EXTERN

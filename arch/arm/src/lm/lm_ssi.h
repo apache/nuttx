@@ -76,7 +76,7 @@ extern "C"
  * The external functions, lm_spiselect, lm_spistatus, and
  * lm_spicmddata must be provided by board-specific logic.  These are
  * implementations of the select, status, and cmddata methods of the SPI
- * interface defined by struct spi_ops_s (see include/nuttx/spi.h).
+ * interface defined by struct spi_ops_s (see include/nuttx/spi/spi.h).
  * All other methods (including up_spiinitialize()) are provided by common
  * logic.  To use this common SPI logic on your board:
  *

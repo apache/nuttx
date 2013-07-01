@@ -123,7 +123,7 @@ extern "C"
  ****************************************************************************/
 
 struct lcd_dev_s; /* see nuttx/lcd.h */
-struct spi_dev_s; /* see nuttx/spi.h */
+struct spi_dev_s; /* see nuttx/spi/spi.h */
 FAR struct lcd_dev_s *st7567_initialize(FAR struct spi_dev_s *spi, unsigned int devno);
 
 /****************************************************************************

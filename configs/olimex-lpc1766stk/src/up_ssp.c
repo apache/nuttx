@@ -44,7 +44,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #ifdef CONFIG_SPI_CALLBACK
 #include <nuttx/irq.h>
 #endif
@@ -258,7 +258,7 @@ void weak_function lpc1766stk_sspinitialize(void)
  *   The external functions, lpc17_ssp0/ssp1select and lpc17_ssp0/ssp1status 
  *   must be provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi.h). All other methods (including lpc17_sspinitialize())
+ *   include/nuttx/spi/spi.h). All other methods (including lpc17_sspinitialize())
  *   are provided by common LPC17xx logic.  To use this common SPI logic on your
  *   board:
  *
@@ -326,7 +326,7 @@ uint8_t lpc17_ssp1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  *   MMC/SD drvier when an SD card is inserted or removed, then
  *   CONFIG_SPI_CALLBACK should be defined and the following function(s) must
  *   must be implemented.  These functiosn implements the registercallback
- *   method of the SPI interface (see include/nuttx/spi.h for details)
+ *   method of the SPI interface (see include/nuttx/spi/spi.h for details)
  *
  * Input Parameters:
  *   dev -      Device-specific state data

@@ -51,7 +51,7 @@
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/analog/adc.h>
 
 #if defined(CONFIG_ADC_ADS1255)

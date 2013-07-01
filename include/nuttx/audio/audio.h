@@ -56,7 +56,7 @@
 #include <nuttx/compiler.h>
 
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 
 #ifdef CONFIG_AUDIO
 

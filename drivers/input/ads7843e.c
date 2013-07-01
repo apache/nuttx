@@ -67,7 +67,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/input/touchscreen.h>

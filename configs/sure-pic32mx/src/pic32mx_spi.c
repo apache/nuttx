@@ -43,7 +43,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -183,7 +183,7 @@ void weak_function pic32mx_spiinitialize(void)
  *   The external functions, pic32mx_spi2select and pic32mx_spi2status 
  *   must be provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
+ *   include/nuttx/spi/spi.h). All other methods (including up_spiinitialize())
  *   are provided by common PIC32MX logic.  To use this common SPI logic on your
  *   board:
  *

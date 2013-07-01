@@ -43,7 +43,7 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #  include <stdbool.h>
-#  include <nuttx/spi.h>
+#  include <nuttx/spi/spi.h>
 #endif
 
 /************************************************************************************
@@ -179,7 +179,7 @@ extern "C" {
 /* The external functions, imx_spiselect, imx_spistatus, and imx_cmddaa must be
  * provided by board-specific logic.  These are implementations of the select and
  * status methods of the SPI interface defined by struct spi_ops_s (see
- * include/nuttx/spi.h).  All other methods (including up_spiinitialize()) are
+ * include/nuttx/spi/spi.h).  All other methods (including up_spiinitialize()) are
  * provided by common logic.  To use this common SPI logic on your board:
  *
  *   1. Provide imx_spiselect() and imx_spistatus() functions in your board-specific 

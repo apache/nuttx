@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/spi.h
+ * include/nuttx/spi/spi.h
  *
  *   Copyright(C) 2008-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SPI_H
-#define __INCLUDE_NUTTX_SPI_H
+#ifndef __INCLUDE_NUTTX_SPI_SPI_H
+#define __INCLUDE_NUTTX_SPI_SPI_H
 
 /****************************************************************************
  * Included Files
@@ -410,7 +410,7 @@ struct spi_ops_s
 
 struct spi_dev_s
 {
-  const struct spi_ops_s *ops;
+  FAR const struct spi_ops_s *ops;
 };
 
 /****************************************************************************
@@ -466,4 +466,4 @@ FAR struct spi_dev_s *up_spiinitialize(int port);
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __INCLUDE_NUTTX_SPI_H */
+#endif /* __INCLUDE_NUTTX_SPI_SPI_H */

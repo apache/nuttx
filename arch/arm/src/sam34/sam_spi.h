@@ -88,7 +88,7 @@ extern "C"
  *   o sam_spiselect is a functions tomanage the board-specific chip selects
  *   o sam_spistatus and sam_spicmddata:  Implementations of the status
  *     and cmddata methods of the SPI interface defined by struct spi_ops_
- *     (see include/nuttx/spi.h). All other methods including
+ *     (see include/nuttx/spi/spi.h). All other methods including
  *     up_spiinitialize()) are provided by common SAM3/4 logic.
  *
  *  To use this common SPI logic on your board:
@@ -154,7 +154,7 @@ void sam_spiselect(enum spi_dev_e devid, bool selected);
  *   devid - Identifies the (logical) device
  *
  * Returned Values:
- *   Bit-encoded SPI status (see include/nuttx/spi.h.
+ *   Bit-encoded SPI status (see include/nuttx/spi/spi.h.
  *
  ****************************************************************************/
 

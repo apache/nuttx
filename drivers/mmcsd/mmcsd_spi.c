@@ -53,7 +53,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/mmcsd.h>
 

@@ -54,7 +54,7 @@
 #include <stdbool.h>
 #include <semaphore.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 
 /************************************************************************************
  * Pre-processor Definitions

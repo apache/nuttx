@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 
 #include <unistd.h>
 #include <debug.h>

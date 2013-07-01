@@ -43,7 +43,7 @@
 #include <stdio.h>
 #include <debug.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/vs1053.h>
 

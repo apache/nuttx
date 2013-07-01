@@ -47,7 +47,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/i2c.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 
 #include <nuttx/irq.h>
 

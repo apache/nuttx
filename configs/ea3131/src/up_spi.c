@@ -44,7 +44,7 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -108,7 +108,7 @@ void weak_function lpc31_spiinitialize(void)
  *   The external functions, lpc31_spiselect and lpc31_spistatus must be
  *   provided by board-specific logic.  They are implementations of the select
  *   and status methods of the SPI interface defined by struct spi_ops_s (see
- *   include/nuttx/spi.h). All other methods (including up_spiinitialize())
+ *   include/nuttx/spi/spi.h). All other methods (including up_spiinitialize())
  *   are provided by common LPC31XX logic.  To use this common SPI logic on your
  *   board:
  *

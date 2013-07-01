@@ -588,7 +588,7 @@ Analog Input
   To intialize and use the PGA117, you to add logic something like the
   following in your application code:
 
-  #include <nuttx/spi.h>
+  #include <nuttx/spi/spi.h>
   #include <nuttx/analog/pga11x.h>
 
   FAR struct spi_dev_s *spi;

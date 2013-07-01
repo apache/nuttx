@@ -176,7 +176,7 @@ EXTERN void lpc31_clockconfig(void);
  *   The external functions, lpc31_spiselect, lpc31_spistatus, and
  *   lpc31_spicmddata must be provided by board-specific logic.  These are
  *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods
+ *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
  *   (including up_spiinitialize()) are provided by common LPC31XX logic.  To use
  *   this common SPI logic on your board:
  *

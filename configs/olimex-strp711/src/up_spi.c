@@ -44,11 +44,10 @@
 #include <stdbool.h>
 #include <debug.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/arch.h>
+#include <nuttx/spi/spi.h>
 
 #include <arch/board/board.h>
-#include <nuttx/arch.h>
-#include <nuttx/spi.h>
 
 #include "up_internal.h"
 #include "up_arch.h"

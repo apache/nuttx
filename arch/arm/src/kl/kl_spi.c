@@ -45,7 +45,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <arch/irq.h>
 #include <arch/board/board.h>
 

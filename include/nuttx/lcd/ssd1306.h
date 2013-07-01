@@ -219,7 +219,7 @@ extern "C"
  **************************************************************************************/
 
 struct lcd_dev_s; /* See include/nuttx/lcd/lcd.h */
-struct spi_dev_s; /* See include/nuttx/spi.h */
+struct spi_dev_s; /* See include/nuttx/spi/spi.h */
 FAR struct lcd_dev_s *ssd1306_initialize(FAR struct spi_dev_s *spi, unsigned int devno);
 
 /************************************************************************************************

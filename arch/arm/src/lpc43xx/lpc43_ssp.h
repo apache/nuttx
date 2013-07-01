@@ -41,7 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include "chip/lpc43_ssp.h"
 
 #if defined(CONFIG_LPC43_SSP0) || defined(CONFIG_LPC43_SSP1)
@@ -163,7 +163,7 @@ EXTERN void ssp_flush(FAR struct spi_dev_s *dev);
  *   MMC/SD drvier when an SD card is inserted or removed, then
  *   CONFIG_SPI_CALLBACK should be defined and the following function(s) must
  *   must be implemented.  These functiosn implements the registercallback
- *   method of the SPI interface (see include/nuttx/spi.h for details)
+ *   method of the SPI interface (see include/nuttx/spi/spi.h for details)
  *
  * Input Parameters:
  *   dev -      Device-specific state data

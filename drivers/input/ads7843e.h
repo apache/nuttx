@@ -58,7 +58,7 @@
 #include <wdog.h>
 #include <nuttx/wqueue.h>
 
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <nuttx/clock.h>
 #include <nuttx/input/ads7843e.h>
 

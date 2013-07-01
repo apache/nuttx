@@ -44,7 +44,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 
 /************************************************************************************
  * Definitions
@@ -102,7 +102,7 @@ extern "C" {
 /* The external functions, ez80_spiselect, ez80_spistatus, ans ez80_spicmddata must
  * be provided by board-specific logic.  These are implementations of the select,
  * status, and cmddata methods of the SPI interface defined by struct spi_ops_s (see
- * include/nuttx/spi.h).  All other methods (including up_spiinitialize()) are
+ * include/nuttx/spi/spi.h).  All other methods (including up_spiinitialize()) are
  * provided by common logic.  To use this common SPI logic on your board:
  *
  *   1. Provide ez80_spiselect() and ez80_spistatus() functions in your board-specific 

@@ -96,7 +96,7 @@ EXTERN int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev);
  *
  ****************************************************************************/
 
-struct spi_dev_s; /* See nuttx/spi.h */
+struct spi_dev_s; /* See nuttx/spi/spi.h */
 EXTERN int mmcsd_spislotinitialize(int minor, int slotno, FAR struct spi_dev_s *spi);
 
 #undef EXTERN

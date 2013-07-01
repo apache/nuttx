@@ -39,7 +39,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
@@ -93,5 +93,4 @@ void stm32_boardinitialize(void)
 #if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
   stm32_usbinitialize();
 #endif
-
 }

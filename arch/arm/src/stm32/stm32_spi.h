@@ -77,7 +77,7 @@ enum    spi_dev_e;
  *   The external functions, stm32_spi1/2/...select, stm32_spi1/2/...status, and
  *   stm32_spi1/2/...cmddata must be provided by board-specific logic.  These are
  *   implementations of the select, status, and cmddata methods of the SPI interface
- *   defined by struct spi_ops_s (see include/nuttx/spi.h). All other methods
+ *   defined by struct spi_ops_s (see include/nuttx/spi/spi.h). All other methods
  *   (including up_spiinitialize()) are provided by common STM32 logic.  To use this
  *   common SPI logic on your board:
  *

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <nuttx/spi.h>
+#include <nuttx/spi/spi.h>
 
 int board_power_off(void)
 {

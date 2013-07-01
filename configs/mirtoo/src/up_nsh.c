@@ -48,7 +48,7 @@
 #include <debug.h>
 
 #ifdef CONFIG_PIC32MX_SPI2
-#  include <nuttx/spi.h>
+#  include <nuttx/spi/spi.h>
 #  include <nuttx/mtd.h>
 #  include <nuttx/fs/nxffs.h>
 #endif
