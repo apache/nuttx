@@ -77,6 +77,17 @@
 #define SPI_CLRMOSI putreg32(1 << 7,  SAM_PIOD_CODR)
 #define SPI_GETMISO ((getreg32(SAM_PIOD_PDSR) >> 8) & 1)
 
+/* Only mode 0 */
+
+#undef  SPI_BITBANG_DISABLEMODE0
+#define SPI_BITBANG_DISABLEMODE1 1
+#define SPI_BITBANG_DISABLEMODE2 1
+#define SPI_BITBANG_DISABLEMODE3 1
+
+/* Only 8-bit data width */
+
+#undef SPI_BITBANG_VARWIDTH
+
 /* SPI_PERBIT_NSEC is the minimum time to transfer one bit.  This determines
  * the maximum frequency and is also used to calculate delays to achieve
  * other SPI frequencies.
@@ -87,7 +98,9 @@
  * I measured a frequency of approximately 305KHz.
  *
  * NOTE that there are really only two frequencies possible: hold time=1
- * (305KHz) and hold time = 0 (probably around 781KHz)
+ * (305KHz) and hold time = 0 (probably around 781KHz).  I believe that
+ * the code is capable of rates up to around 10MHz, but I think that the
+ * mere presence of the rate controlling logic slows it down.
  */
 
 #define SPI_PERBIT_NSEC      1350 /* Calibrated at 400KHz */

@@ -52,6 +52,11 @@
  * - Defines SPI_GETMISO to sample the MISO state
  * - Defines SPI_PERBIT_NSEC which is the minimum time to transfer one bit.
  *   This determines the maximum frequency.
+ * - Other configuration options:
+ *   SPI_BITBANG_DISABLEMODE0 - Define to disable Mode 0 support
+ *   SPI_BITBANG_DISABLEMODE1 - Define to disable Mode 1 support
+ *   SPI_BITBANG_DISABLEMODE2 - Define to disable Mode 2 support
+ *   SPI_BITBANG_DISABLEMODE3 - Define to disable Mode 3 support
  * - Provide implementations of spi_select(), spi_status(), and spi_cmddata().
  * - Then include this file
  * - Provide an initialization function that initializes the GPIO pins used
@@ -225,7 +230,7 @@ static void spi_setmode(FAR struct spi_bitbang_s *priv,
   switch (mode)
     {
     case SPIDEV_MODE0: /* CPOL=0; CPHA=0 */
-#ifndef CONFIG_SPI_BITBANG_DISABLEMODE0
+#ifndef SPI_BITBANG_DISABLEMODE0
       SPI_CLRSCK;      /* Resting level of the clock is low */
       priv->exchange = spi_bitexchange0;
 #else
@@ -234,7 +239,7 @@ static void spi_setmode(FAR struct spi_bitbang_s *priv,
       break;
 
     case SPIDEV_MODE1: /* CPOL=0; CPHA=1 */
-#ifndef CONFIG_SPI_BITBANG_DISABLEMODE1
+#ifndef SPI_BITBANG_DISABLEMODE1
       SPI_CLRSCK;      /* Resting level of the clock is low */
       priv->exchange = spi_bitexchange1;
 #else
@@ -243,7 +248,7 @@ static void spi_setmode(FAR struct spi_bitbang_s *priv,
       break;
 
     case SPIDEV_MODE2: /* CPOL=1; CPHA=0 */
-#ifndef CONFIG_SPI_BITBANG_DISABLEMODE2
+#ifndef SPI_BITBANG_DISABLEMODE2
       SPI_SETSCK;      /* Resting level of the clock is high */
       priv->exchange = spi_bitexchange2;
 #else
@@ -252,7 +257,7 @@ static void spi_setmode(FAR struct spi_bitbang_s *priv,
       break;
 
     case SPIDEV_MODE3: /* CPOL=1; CPHA=1 */
-#ifndef CONFIG_SPI_BITBANG_DISABLEMODE3
+#ifndef SPI_BITBANG_DISABLEMODE3
       SPI_SETSCK;      /* Resting level of the clock is high */
       priv->exchange = spi_bitexchange3;
 #else
@@ -272,6 +277,20 @@ static void spi_setmode(FAR struct spi_bitbang_s *priv,
  * Description:
  *   Exchange one bit in mode 0
  *
+ *   MODE 0: CPOL=0 and CPHA = 0
+ *   The base value of the clock is zero.  Data is captured on the clock's
+ *   rising edge and data is propagated on the falling edge (high->low
+ *   transition).
+ *
+ *         hold time
+ *       +------------+
+ *       |            | hold time
+ *  -----+            +------------
+ *    |   |           `- Propagate to next bit
+ *    |   |
+ *    |   `- MISO sampled
+ *    ` Set MOSI
+ *
  * Input Parameters:
  *   dev  - Device-specific state data
  *   lock - true: Lock spi bus, false: unlock SPI bus
@@ -281,7 +300,7 @@ static void spi_setmode(FAR struct spi_bitbang_s *priv,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_BITBANG_DISABLEMODE0
+#ifndef SPI_BITBANG_DISABLEMODE0
 static uint16_t spi_bitexchange0(FAR struct spi_bitbang_s *priv,
                                  uint16_t dataout)
 {
@@ -319,6 +338,19 @@ static uint16_t spi_bitexchange0(FAR struct spi_bitbang_s *priv,
  * Description:
  *   Exchange one bit in mode 1
  *
+ *   MODE 1: CPOL=0 and CPHA = 1
+ *   The base value of the clock is zero.  Data is captured on the clock's
+ *   falling edge and data is propagated on the rising edge
+ *
+ *         hold time
+ *       +------------+
+ *       |            | hold time
+ *  -----+            +------------
+ *        |           | `- MISO sampled
+ *        |           |
+ *        |           `- Propagate to next bit
+ *        ` Set MOSI
+ *
  * Input Parameters:
  *   dev  - Device-specific state data
  *   lock - true: Lock spi bus, false: unlock SPI bus
@@ -328,7 +360,7 @@ static uint16_t spi_bitexchange0(FAR struct spi_bitbang_s *priv,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_BITBANG_DISABLEMODE1
+#ifndef SPI_BITBANG_DISABLEMODE1
 static uint16_t spi_bitexchange1(FAR struct spi_bitbang_s *priv,
                                 uint16_t dataout)
 {
@@ -367,6 +399,19 @@ static uint16_t spi_bitexchange1(FAR struct spi_bitbang_s *priv,
  * Description:
  *   Exchange one bit in mode 2
  *
+ *   MODE 2: CPOL=1 and CPHA = 0
+ *     The base value of the clock is one.  Data is captured on the clock's
+ *     falling edge and data is propagated on the rising edge.
+ *
+ *         hold time
+ *  -----+            +------------
+ *       |            | hold time
+ *       +------------+
+ *      |  |          `- Propagate to next bit
+ *      |  |
+ *      |  `- MISO sampled
+ *       ` Set MOSI
+ *
  * Input Parameters:
  *   dev  - Device-specific state data
  *   lock - true: Lock spi bus, false: unlock SPI bus
@@ -376,7 +421,7 @@ static uint16_t spi_bitexchange1(FAR struct spi_bitbang_s *priv,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_BITBANG_DISABLEMODE2
+#ifndef SPI_BITBANG_DISABLEMODE2
 static uint16_t spi_bitexchange2(FAR struct spi_bitbang_s *priv,
                                  uint16_t dataout)
 {
@@ -414,6 +459,19 @@ static uint16_t spi_bitexchange2(FAR struct spi_bitbang_s *priv,
  * Description:
  *   Exchange one bit in mode 3
  *
+ *   MODE 3: CPOL=1 and CPHA = 1
+ *     The base value of the clock is one.  Data is captured on the clock's
+ *     rising edge and data is propagated on the falling edge.
+ *
+ *         hold time
+ *  -----+            +------------
+ *       |            | hold time
+ *       +------------+
+ *        |           | `- MISO sampled
+ *        |           |
+ *        |           `- Propagate to next bit
+ *         ` Set MOSI
+ *
  * Input Parameters:
  *   dev  - Device-specific state data
  *   lock - true: Lock spi bus, false: unlock SPI bus
@@ -423,7 +481,7 @@ static uint16_t spi_bitexchange2(FAR struct spi_bitbang_s *priv,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_SPI_BITBANG_DISABLEMODE3
+#ifndef SPI_BITBANG_DISABLEMODE3
 static uint16_t spi_bitexchange3(FAR struct spi_bitbang_s *priv,
                                  uint16_t dataout)
 {

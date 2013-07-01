@@ -36,4 +36,14 @@ config SPI_BITBANG
 		Enable support for a generic SPI bit-bang device.
 		See include/nuttx/spi/spi_bitbang.h for further information.
 
+if SPI_BITBANG
+
+config SPI_BITBANG_VARWIDTH
+	bool "SPI bit-bang variable width transfers"
+	default n
+	---help---
+		Enable support for a variable dat width transfers.  Default: 8-bit
+		only.
+
+endif
 endif

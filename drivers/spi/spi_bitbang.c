@@ -312,7 +312,7 @@ static void spi_setbits(FAR struct spi_dev_s *dev, int nbits)
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
 
   spivdbg("nbits=%d\n", nbits);
-  DEBUGASSERT(priv && nbits > 0);
+  DEBUGASSERT(priv && nbits > 0 && nbits <= 16);
   priv->nbits = nbits;
 #else
   spivdbg("nbits=%d\n", nbits);
