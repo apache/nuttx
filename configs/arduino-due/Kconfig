@@ -4,4 +4,13 @@
 #
 
 if ARCH_BOARD_ARDUINO_DUE
+
+config ARDUINO_ITHEAD_TFT
+	bool "ITEAD 2.4 inch TFT w/Touch"
+	default n
+	---help---
+		Select this option if you have the ITEAD 2.4" TFT module installed.
+		This will enable support for the peripherals on that module
+		including the SD card, TFT LCD, and touchscreen controller.
+
 endif

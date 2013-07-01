@@ -97,6 +97,163 @@
 #define GPIO_LED_TX  (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
                       GPIO_PORT_PIOA | GPIO_PIN21)
 
+/* ITEAD 2.4" TFT with Touch
+ *
+ * The Arduino 2.4" TFT Touch Shield is designed for all the Arduino
+ * compatible boards. It works in 3.3V voltage level. It can be directly
+ * plugged on the Arduino and other compatible boards. It will offer
+ * display, touch and storage functions for the Arduino board
+ *
+ * Features:
+ *
+ *   1. Compatible with 3.3/5V operation voltage level
+ *   2. Compatible with UTFT library
+ *   3. With SD Card Socket
+ *
+ * The Arduino 2.4" TFT Touch shield uses the S6D1121 controller , it
+ * supports 8-bit data interface. The touch IC is TSC2046.
+ *
+ * ---------- --------------------------- ----------- ----- ---------- ------------------
+ * Arduino       ATSAM3X                 Due        ITHEAD
+ * Due PIN    GPIO FUNCTION             SIGNAL       PIN   SIGNAL     NOTES
+ * ---------- ---- ---------------------- ----------- ----- ---------- ------------------
+ * PWMH
+ * 10  SCL1   PA18 TWCK0/A20/WKUP9        SCL1         ---   ---        SCL not available
+ *  9  SDA1   PA17 TWD0SPCK0              SDA1         ---   ---        SDA not available
+ *  8  Aref   ---  ---                    AREF         Vref  ---        ---
+ *  7  GND    ---  ---                    GND          GND   ---        ---
+ *  6  PWM13  PB27 SPI0_SPCK/A20/WKUP10   PWM13        D13   SD_SCK     SCK, also LED "L", Pulled low on-board
+ *  5  PWM12  PD8  A21/NANDALE/TIOB8      PWM12        D12   SD_MISO    MISO not available
+ *  4  PWM11  PD7  A17/BA1/TIOA8          PWM11        D11   SD_MOSI    MOSI not available, Pulled low on-board
+ *  3  PWM10  ???  ???                    SS0/PWM10    D10   SD_CS      Pulled low on-board
+ *  2  PWM9   PC21 A0/NBS0/PWML4          PWM9         D9    Touch_Dout ---
+ *  1  PWM8   PC22 A1/PWML5               PWM8         D8    Touch_IRQ  ---
+ * PWML
+ *  8  PWM7   PC23 A2/PWML6               PWM7         D7    DB15       ---
+ *  7  PWM6   PC24 A3/PWML7               PWM6         D6    DB14       ---
+ *  6  PWM5   PC25 A4/TIOA6               PWM5         D5    DB13       ---
+ *  5  PWM4   PC26 A5/TIOB6               SS1/PWM4     D4    DB12       ---
+ *  4  PWM3   PC28 A7/TIOA7               PWM3         D3    DB11       ---
+ *  3  PWM2   PB25 RTS0/TIOA0             PWM2         D2    DB10       ---
+ *  2  PWM1   PA9  UTXD/PWMH3             TX           D1    DB9        UART0 TX
+ *  1  PWM0   PA8  URXD/PWMH0/WKUP4       RX           D0    DB8        UART0 RX
+ * ---------- ---- ---------------------- ----------- ----- ---------- ------------------
+ * POWER
+ *  1  ---    ---  ---                    ---          ---   ---        ---
+ *  2  IOref  ---  ---                    IOREF +3V3   ---   ---        ---
+ *  3  RESET  ---  ---                    MASTER_RESET RST   ---        ---
+ *  4  3.3V   ---  ---                    +3V3         5V    ---        ---
+ *  5  5V     ---  ---                    +5V          3.3V  ---        ---
+ *  6  GND    ---  ---                    GND          GND   ---        ---
+ *  7  GND    ---  ---                    GND          GND   ---        ---
+ *  8  Vin    ---  ---                    VIN          Vin   ---        ---
+ * ADCL
+ *  1  A0     PA16 SPCK1/TD/AD7           AD0          A0    Touch_Din  ---
+ *  2  A1     PA24 MCDA3/PCK1/AD6         AD1          A1    Touch_CLK  ---
+ *  3  A2     PA23 MCDA2/TCLK4/AD5        AD2          A2    ---        ---
+ *  4  A3     PA22 MCDA1/TCLK3/AD4        AD3          A3    TFT_CS     ---
+ *  5  A4     PA6  TIOB2/NCS0/AD3         AD4          A4    TFT_WR     ---
+ *  6  A5     PA4  TCLK1/NWAIT/AD2        AD5          A5    TFT_RS     ---
+ *  7  A6     PA3  TIOB1/PWMFI1/AD1/WKUP1 AD6          ---   ---        ---
+ *  8  A7     PA2  TIOA1/NANDRDY/AD0      AD7          ---   ---        ---
+ * ---------- ---- ---------------------- ----------- ----- ---------- ------------------
+ *
+ * NOTES:
+ *
+ * 1. It is not possible to use any of the SPI devices on the Shield unless
+ *    a bit-bang SPI interface is used.  This includes the touch controller
+ *    and the SD card.
+ * 2. UART0 cannot be used.  USARTs on the COMM connector should be available.
+ * 3. Parallel data is not contiguous in the PIO register
+ * 4. 3.3V and 5V are reversed.
+ */
+
+#ifdef CONFIG_ARDUINO_ITHEAD_TFT
+  /* In order to use the SD card on the ITEAD shield, you must enable the
+   * SPI bit-bang driver as well as support for SPI-based MMC/SD cards.
+   */
+
+#  if defined(CONFIG_SPI_BITBANG) && defined(CONFIG_MMC_SPI)
+
+   /* The SD slot shares the pin with LED "L" so LED support must be disabled
+    * to use the MMC/SD card on the ITEAD shield.
+    */
+
+#    ifdef CONFIG_ARCH_LEDs
+#      error LEDs may not be used with the ITEAD SD card
+#    endif
+
+#    define GPIO_SD_SCK   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOB | GPIO_PIN27)
+#    define GPIO_SD_MISO  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOD | GPIO_PIN8)
+#    define GPIO_SD_MOSI  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOD | GPIO_PIN7)
+#    define GPIO_SD_CS    (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIO? | GPIO_PIN?)
+#  endif
+
+  /* In order to use the touchscreen on the ITEAD shield, you must enable the
+   * SPI bit-bang driver and INPUT device support.
+   */
+
+#  if defined(CONFIG_SPI_BITBANG) && defined(CONFIG_INPUT)
+#    define GPIO_TSC_SCK  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOA | GPIO_PIN24)
+#    define GPIO_TSC_MISO (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOC | GPIO_PIN21)
+#    define GPIO_TSC_MOSI (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOA | GPIO_PIN16)
+#    define GPIO_TSC_CS   (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIO? | GPIO_PIN?)
+#    define GPIO_TSC_IRQ  (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_INT_BOTHEDGES | \
+                           GPIO_PORT_PIOC | GPIO_PIN22)
+#    define SAM_TCS_IRQ   SAM_IRQ_PC21
+#  endif
+
+  /* Only CONFIG_LCD is expected to enable the TFT LCD */
+
+#  ifdef CONFIG_LCD
+
+    /* UART0 cannot be used with the LCD because the UART0 pins are used
+     * by the LCD.
+     */
+
+#    ifdef CONFIG_SAM34_UART0
+#      error "UART0 cannot be used with the ITEAD LCD"
+#    endif
+
+   /* Data pins are initially configured but may be switched dynamically to
+    * either inputs or outputs as needed.
+    */
+
+#    define GPIO_LCD_D0IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOA | GPIO_PIN8)
+#    define GPIO_LCD_D1IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOA | GPIO_PIN9)
+#    define GPIO_LCD_D2IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOB | GPIO_PIN25)
+#    define GPIO_LCD_D3IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOC | GPIO_PIN28)
+#    define GPIO_LCD_D4IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOC | GPIO_PIN26)
+#    define GPIO_LCD_D5IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOC | GPIO_PIN25)
+#    define GPIO_LCD_D6IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOC | GPIO_PIN24)
+#    define GPIO_LCD_D7IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOC | GPIO_PIN23)
+#    define GPIO_LCD_D7IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOC | GPIO_PIN23)
+#    define GPIO_LCD_CS   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOA | GPIO_PIN22)
+#    define GPIO_LCD_WR   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOA | GPIO_PIN6)
+#    define GPIO_LCD_RS   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+                           GPIO_PORT_PIOA | GPIO_PIN4)
+#  endif
+#endif
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

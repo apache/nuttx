@@ -122,19 +122,22 @@ ITEAD 2.4" TFT with Touch
   The Arduino 2.4" TFT Touch shield uses the S6D1121 controller , it
   supports 8-bit data interface. The touch IC is TSC2046.
 
-  Arduino       ATSAM3X                 Due        ITHEAD
-  Due PIN    GPIO FUNCTION             SIGNAL       PIN   SIGNAL     NOTES
+  ---------- --------------------------- ----------- ----- ---------- ------------------
+  Arduino            ATSAM3X             Due         ITHEAD
+  Due PIN    GPIO FUNCTION               SIGNAL      PIN   SIGNAL     NOTES
+  ---------- ---- ---------------------- ----------- ----- ---------- ------------------
   PWMH
   10  SCL1   PA18 TWCK0/A20/WKUP9        SCL1         ---   ---        SCL not available
    9  SDA1   PA17 TWD0SPCK0              SDA1         ---   ---        SDA not available
    8  Aref   ---  ---                    AREF         Vref  ---        ---
    7  GND    ---  ---                    GND          GND   ---        ---
-   6  PWM13  PB27 SPI0_SPCK/A20/WKUP10   PWM13        D13   SD_SCK     SCK, also LED "L"
+   6  PWM13  PB27 SPI0_SPCK/A20/WKUP10   PWM13        D13   SD_SCK     SCK, also LED "L", Pulled low on-board
    5  PWM12  PD8  A21/NANDALE/TIOB8      PWM12        D12   SD_MISO    MISO not available
-   4  PWM11  PD7  A17/BA1/TIOA8          PWM11        D11   SD_MOSI    MOSI not available
-   3  PWM10  ???  ???                    SS0/PWM10    D10   SD_CS      ???
-   2  PWM9   PC21 A0/NBS0/PWML4          PWM9         D9    Touch_IRQ  ---
-   1  PWM8   PC22 A1/PWML5               PWM8         D8    Touch_Dout ---
+   4  PWM11  PD7  A17/BA1/TIOA8          PWM11        D11   SD_MOSI    MOSI not available, Pulled low on-board
+   3  PWM10  ???  ???                    SS0/PWM10    D10   SD_CS      Pulled low on-board
+   2  PWM9   PC21 A0/NBS0/PWML4          PWM9         D9    Touch_Dout ---
+   1  PWM8   PC22 A1/PWML5               PWM8         D8    Touch_IRQ  ---
+
   PWML
    8  PWM7   PC23 A2/PWML6               PWM7         D7    DB15       ---
    7  PWM6   PC24 A3/PWML7               PWM6         D6    DB14       ---
@@ -144,7 +147,7 @@ ITEAD 2.4" TFT with Touch
    3  PWM2   PB25 RTS0/TIOA0             PWM2         D2    DB10       ---
    2  PWM1   PA9  UTXD/PWMH3             TX           D1    DB9        UART0 TX
    1  PWM0   PA8  URXD/PWMH0/WKUP4       RX           D0    DB8        UART0 RX
-
+  ---------- ---- ---------------------- ----------- ----- ---------- ------------------
   POWER
    1  ---    ---  ---                    ---          ---   ---        ---
    2  IOref  ---  ---                    IOREF +3V3   ---   ---        ---
@@ -163,14 +166,15 @@ ITEAD 2.4" TFT with Touch
    6  A5     PA4  TCLK1/NWAIT/AD2        AD5          A5    TFT_RS     ---
    7  A6     PA3  TIOB1/PWMFI1/AD1/WKUP1 AD6          ---   ---        ---
    8  A7     PA2  TIOA1/NANDRDY/AD0      AD7          ---   ---        ---
+  ---------- ---- ---------------------- ----------- ----- ---------- ------------------
 
-  NOTE:
+  NOTES:
 
   1. It is not possible to use any of the SPI devices on the Shield unless
      a bit-bang SPI interface is used.  This includes the touch controller
      and the SD card.
-  2. UART0 cannot be used
-  3. Parallel data is not contiguous in any PIO register
+  2. UART0 cannot be used.  USARTs on the COMM connector should be available.
+  3. Parallel data is not contiguous in the PIO register
   4. 3.3V and 5V are reversed.
 
 Development Environment
