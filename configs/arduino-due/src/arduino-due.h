@@ -173,7 +173,7 @@
    * SPI bit-bang driver as well as support for SPI-based MMC/SD cards.
    */
 
-#  if defined(CONFIG_SPI_BITBANG) && defined(CONFIG_MMC_SPI)
+#  if defined(CONFIG_SPI_BITBANG) && defined(CONFIG_MMCSD_SPI)
 
    /* The SD slot shares the pin with LED "L" so LED support must be disabled
     * to use the MMC/SD card on the ITEAD shield.
@@ -183,13 +183,13 @@
 #      error LEDs may not be used with the ITEAD SD card
 #    endif
 
-#    define GPIO_SD_SCK   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_SD_SCK   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOB | GPIO_PIN27)
-#    define GPIO_SD_MISO  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_SD_MISO  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOD | GPIO_PIN8)
-#    define GPIO_SD_MOSI  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_SD_MOSI  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOD | GPIO_PIN7)
-#    define GPIO_SD_CS    (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLR | \
+#    define GPIO_SD_CS    (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIO? | GPIO_PIN?)
 #  endif
 
@@ -198,13 +198,13 @@
    */
 
 #  if defined(CONFIG_SPI_BITBANG) && defined(CONFIG_INPUT)
-#    define GPIO_TSC_SCK  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_TSC_SCK  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOA | GPIO_PIN24)
-#    define GPIO_TSC_MISO (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_TSC_MISO (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOC | GPIO_PIN21)
-#    define GPIO_TSC_MOSI (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_TSC_MOSI (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOA | GPIO_PIN16)
-#    define GPIO_TSC_CS   (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLR | \
+#    define GPIO_TSC_CS   (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIO? | GPIO_PIN?)
 #    define GPIO_TSC_IRQ  (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_INT_BOTHEDGES | \
                            GPIO_PORT_PIOC | GPIO_PIN22)
@@ -227,29 +227,29 @@
     * either inputs or outputs as needed.
     */
 
-#    define GPIO_LCD_D0IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_LCD_D0IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOA | GPIO_PIN8)
-#    define GPIO_LCD_D1IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_LCD_D1IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOA | GPIO_PIN9)
-#    define GPIO_LCD_D2IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_LCD_D2IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOB | GPIO_PIN25)
-#    define GPIO_LCD_D3IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_LCD_D3IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOC | GPIO_PIN28)
-#    define GPIO_LCD_D4IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_LCD_D4IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOC | GPIO_PIN26)
-#    define GPIO_LCD_D5IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_LCD_D5IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOC | GPIO_PIN25)
-#    define GPIO_LCD_D6IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_LCD_D6IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOC | GPIO_PIN24)
-#    define GPIO_LCD_D7IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_LCD_D7IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOC | GPIO_PIN23)
-#    define GPIO_LCD_D7IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_LCD_D7IN (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOC | GPIO_PIN23)
-#    define GPIO_LCD_CS   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_LCD_CS   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOA | GPIO_PIN22)
-#    define GPIO_LCD_WR   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_LCD_WR   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOA | GPIO_PIN6)
-#    define GPIO_LCD_RS   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLR | \
+#    define GPIO_LCD_RS   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOA | GPIO_PIN4)
 #  endif
 #endif
@@ -287,6 +287,20 @@ void sam_sram_initialize(void);
 #ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void);
 #endif
+
+/****************************************************************************
+ * Name: sam_sdinitialize
+ *
+ * Description:
+ *   Initialize the SPI-based SD card.
+ *
+ *****************************************************************************/
+
+#if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
+    defined(CONFIG_MMCSD_SPI)
+int sam_sdinitialize(int minor);
+#endif
+
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_ARDUINO_DUE_SRC_ARDUNO_DUE_H */

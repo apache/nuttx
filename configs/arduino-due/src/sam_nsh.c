@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sam4l-xplained/src/sam_nsh.c
+ * config/arduino-due/src/sam_nsh.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -42,24 +42,21 @@
 #include <stdio.h>
 #include <debug.h>
 
-#include "sam4l-xplained.h"
+#include "arduino-due.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
-/* Support for the SD card slot on the I/O1 module */
+#if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
+    defined(CONFIG_MMCSD_SPI)
+/* Support for the SD card slot on the ITEAD TFT shield */
 /* Verify NSH PORT and SLOT settings */
 
 #  define SAM34_MMCSDSLOTNO    0 /* There is only one slot */
 
 #  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != SAM34_MMCSDSLOTNO
 #    error Only one MMC/SD slot:  Slot 0 (CONFIG_NSH_MMCSDSLOTNO)
-#  endif
-
-#  if defined(CONFIG_NSH_MMCSDSPIPORTNO) && CONFIG_NSH_MMCSDSPIPORTNO != SD_CSNO
-#    error CONFIG_NSH_MMCSDSPIPORTNO must have the same value as SD_CSNO
 #  endif
 
 /* Default MMC/SD minor number */
@@ -99,20 +96,8 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(CONFIG_SAM34_LCDCA) && defined(CONFIG_SAM4L_XPLAINED_SLCD1MODULE)
-  /* Initialize the SLCD and register the SLCD device as /dev/slcd */
-
-  {
-    int ret = sam_slcd_initialize();
-    if (ret < 0)
-      {
-        message("nsh_archinitialize: Failed to initialize the LCD: %d\n",
-                ret);
-        return ret;
-      }
-  }
-#endif
-#if defined(CONFIG_SAM34_SPI0) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
+#if defined(CONFIG_ARDUINO_ITHEAD_TFT) && defined(CONFIG_SPI_BITBANG) && \
+    defined(CONFIG_MMCSD_SPI)
   /* Initialize the SPI-based MMC/SD slot */
 
   {

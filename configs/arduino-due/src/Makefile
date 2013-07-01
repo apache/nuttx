@@ -55,7 +55,7 @@ endif
 ifeq ($(CONFIG_ARDUINO_ITHEAD_TFT),y)
 
 ifeq ($(CONFIG_SPI_BITBANG),y)
-ifeq ($(CONFIG_MMC_SPI),y)
+ifeq ($(CONFIG_MMCSD_SPI),y)
 CSRCS += sam_mmcsd.c
 endif
 
@@ -67,6 +67,10 @@ endif
 ifeq ($(CONFIG_LCD),y)
 CSRCS += sam_lcd.c
 endif
+endif
+
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS += sam_nsh.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
