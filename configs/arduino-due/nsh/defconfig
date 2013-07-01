@@ -245,6 +245,7 @@ CONFIG_NSH_MMCSDMINOR=0
 #
 # Board-Specific Options
 #
+# CONFIG_ARDUINO_ITHEAD_TFT is not set
 
 #
 # RTOS Features

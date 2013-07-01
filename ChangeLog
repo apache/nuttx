@@ -5096,4 +5096,7 @@
 	  SPI-related files.  includes/nuttx/spi.h moved to include/nuttx/spi/.;
 	  SPI-related Kconfig info moved from drivers/Kconfig to drivers/spi/kconfig
 	  (2013-7-1).
+	* drivers/spi/spi_bitbang.c and include/nuttx/spi/spi_bitbang.h:  Add
+	  support for a generic bit-bang SPI driver.  This checkout is the
+	  common upper-half logic.  Still missing the lower half (2013-7-1).
 

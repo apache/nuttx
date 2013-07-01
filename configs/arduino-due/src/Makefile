@@ -52,6 +52,23 @@ else
 CSRCS += sam_userleds.c
 endif
 
+ifeq ($(CONFIG_ARDUINO_ITHEAD_TFT),y)
+
+ifeq ($(CONFIG_SPI_BITBANG),y)
+ifeq ($(CONFIG_MMC_SPI),y)
+CSRCS += sam_mmcsd.c
+endif
+
+ifeq ($(CONFIG_INPUT),y)
+CSRCS += sam_touchscreen.c
+endif
+endif
+
+ifeq ($(CONFIG_LCD),y)
+CSRCS += sam_lcd.c
+endif
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
