@@ -88,22 +88,16 @@
 
 #undef SPI_BITBANG_VARWIDTH
 
+/* Calibration value for timing loop */
+
+#define SPI_BITBAND_LOOPSPERMSEC CONFIG_BOARD_LOOPSPERMSEC
+
 /* SPI_PERBIT_NSEC is the minimum time to transfer one bit.  This determines
  * the maximum frequency and is also used to calculate delays to achieve
  * other SPI frequencies.
- *
- * This value came from selecting 400KHz and increasing SPI_PERBIT_NSEC
- * until a frequency close to 400KHz was achieved. This is what was
- * reported by the software: frequency=400000 holdtime=1 actual=298507.
- * I measured a frequency of approximately 305KHz.
- *
- * NOTE that there are really only two frequencies possible: hold time=1
- * (305KHz) and hold time = 0 (probably around 781KHz).  I believe that
- * the code is capable of rates up to around 10MHz, but I think that the
- * mere presence of the rate controlling logic slows it down.
  */
 
-#define SPI_PERBIT_NSEC      1350 /* Calibrated at 400KHz */
+#define SPI_PERBIT_NSEC      100
 
 /* Misc definitions */
 
@@ -166,7 +160,7 @@ static void spi_select(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
 
 static uint8_t spi_status(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid)
 {
-  if (devid = SPIDEV_MMCSD)
+  if (devid == SPIDEV_MMCSD)
     {
       return SPI_STATUS_PRESENT;
     }
