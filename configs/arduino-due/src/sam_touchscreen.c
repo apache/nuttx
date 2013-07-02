@@ -92,8 +92,6 @@
 #define SPI_SETMOSI putreg32(1 << 16, SAM_PIOA_SODR)
 #define SPI_CLRMOSI putreg32(1 << 16, SAM_PIOA_CODR)
 #define SPI_GETMISO ((getreg32(SAM_PIOC_PDSR) >> 21) & 1)
-#define SPI_SETCS   putreg32(1 << ?, SAM_PIO?_SODR)
-#define SPI_CLRCS   putreg32(1 << ?, SAM_PIO?_CODR)
 
 /* Only mode 0 */
 
@@ -131,12 +129,12 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
 #endif
 
 /* IRQ/GPIO access callbacks.  These operations all hidden behind
- * callbacks to isolate the ADS7843E driver from differences in GPIO
+ * callbacks to isolate the XPT2046 driver from differences in GPIO
  * interrupt handling by varying boards and MCUs.  If possible,
  * interrupts should be configured on both rising and falling edges
  * so that contact and loss-of-contact events can be detected.
  *
- * attach  - Attach the ADS7843E interrupt handler to the GPIO interrupt
+ * attach  - Attach the XPT2046 interrupt handler to the GPIO interrupt
  * enable  - Enable or disable the GPIO interrupt
  * clear   - Acknowledge/clear any pending GPIO interrupt
  * pendown - Return the state of the pen down GPIO input
@@ -152,9 +150,9 @@ static bool tsc_pendown(FAR struct ads7843e_config_s *state);
  * Private Data
  ****************************************************************************/
 
-/* A reference to a structure of this type must be passed to the ADS7843E
+/* A reference to a structure of this type must be passed to the XPT2046
  * driver.  This structure provides information about the configuration
- * of the ADS7843E and provides some board-specific hooks.
+ * of the XPT2046 and provides some board-specific hooks.
  *
  * Memory for this structure is provided by the caller.  It is not copied
  * by the driver and is presumed to persist while the driver is active. The
@@ -201,7 +199,7 @@ static struct ads7843e_config_s g_tscinfo =
 static void spi_select(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
                        bool selected)
 {
-# warning Still need CS GPIO pin
+  /* The touchscreen controller is always selected */
 }
 
 /****************************************************************************
@@ -250,12 +248,12 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
 
 /****************************************************************************
  * IRQ/GPIO access callbacks.  These operations all hidden behind
- * callbacks to isolate the ADS7843E driver from differences in GPIO
+ * callbacks to isolate the XPT2046 driver from differences in GPIO
  * interrupt handling by varying boards and MCUs.  If possible,
  * interrupts should be configured on both rising and falling edges
  * so that contact and loss-of-contact events can be detected.
  *
- *   attach  - Attach the ADS7843E interrupt handler to the GPIO interrupt
+ *   attach  - Attach the XPT2046 interrupt handler to the GPIO interrupt
  *   enable  - Enable or disable the GPIO interrupt
  *   clear   - Acknowledge/clear any pending GPIO interrupt
  *   pendown - Return the state of the pen down GPIO input
@@ -264,7 +262,7 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
 
 static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
 {
-  /* Attach the ADS7843E interrupt */
+  /* Attach the XPT2046 interrupt */
 
   ivdbg("Attaching %p to IRQ %d\n", isr, SAM_TCS_IRQ);
   return irq_attach(SAM_TCS_IRQ, isr);
@@ -342,7 +340,6 @@ static FAR struct spi_dev_s *sam_tsc_spiinitialize(void)
   sam_configgpio(GPIO_TSC_SCK);
   sam_configgpio(GPIO_TSC_MISO);
   sam_configgpio(GPIO_TSC_MOSI);
-  sam_configgpio(GPIO_TSC_CS);
 
   /* Create the SPI driver instance */
 
@@ -379,10 +376,9 @@ int arch_tcinitialize(int minor)
   idbg("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
-  /* Configure and enable the ADS7843E interrupt pin as an input */
+  /* Configure and enable the XPT2046 interrupt pin as an input */
 
   (void)sam_configgpio(GPIO_TSC_IRQ);
-  (void)sam_configgpio(GPIO_TCS_IRQ);
 
   /* Configure the PIO interrupt */
 
@@ -428,7 +424,7 @@ int arch_tcinitialize(int minor)
 
 void arch_tcuninitialize(void)
 {
-  /* No support for un-initializing the touchscreen ADS7843E device yet */
+  /* No support for un-initializing the touchscreen XPT2046 device yet */
 }
 
 #endif /* CONFIG_ARDUINO_ITHEAD_TFT && CONFIG_SPI_BITBANG && CONFIG_INPUT_ADS7843E */

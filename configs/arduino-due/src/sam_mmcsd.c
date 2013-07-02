@@ -76,6 +76,8 @@
 #define SPI_SETMOSI putreg32(1 << 7,  SAM_PIOD_SODR)
 #define SPI_CLRMOSI putreg32(1 << 7,  SAM_PIOD_CODR)
 #define SPI_GETMISO ((getreg32(SAM_PIOD_PDSR) >> 8) & 1)
+#define SPI_SETCS   putreg32(1 << 28, SAM_PIOA_SODR)
+#define SPI_CLRCS   putreg32(1 << 28, SAM_PIOA_CODR)
 
 /* Only mode 0 */
 
@@ -143,7 +145,17 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
 static void spi_select(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
                        bool selected)
 {
-# warning Still need CS GPIO pin
+  if (devid == SPIDEV_MMCSD)
+    {
+      if (selected)
+        {
+          SPI_CLRCS;
+        }
+      else
+        {
+          SPI_SETCS;
+        }
+    }
 }
 
 /****************************************************************************
@@ -216,8 +228,7 @@ static FAR struct spi_dev_s *sam_mmcsd_spiinitialize(void)
   sam_configgpio(GPIO_SD_SCK);
   sam_configgpio(GPIO_SD_MISO);
   sam_configgpio(GPIO_SD_MOSI);
-  // sam_configgpio(GPIO_SD_CS);
-  # warning Still need CS GPIO pin
+  sam_configgpio(GPIO_SD_CS);
 
   /* Create the SPI driver instance */
 
