@@ -53,6 +53,7 @@
  * - Defines SPI_PERBIT_NSEC which is the minimum time to transfer one bit.
  *   This determines the maximum frequency.
  * - Other configuration options:
+ *   SPI_BITBAND_LOOPSPERMSEC - Delay loop calibration
  *   SPI_BITBANG_DISABLEMODE0 - Define to disable Mode 0 support
  *   SPI_BITBANG_DISABLEMODE1 - Define to disable Mode 1 support
  *   SPI_BITBANG_DISABLEMODE2 - Define to disable Mode 2 support
@@ -93,20 +94,25 @@
  * Private Function Prototypes
  ****************************************************************************/
 
+static void     spi_delay(uint32_t holdtime);
 static void     spi_select(FAR struct spi_bitbang_s *priv,
                   enum spi_dev_e devid, bool selected);
 static uint32_t spi_setfrequency(FAR struct spi_bitbang_s *priv,
                   uint32_t frequency);
 static void     spi_setmode(FAR struct spi_bitbang_s *priv,
                   enum spi_mode_e mode);
-static uint16_t spi_bitexchange0(FAR struct spi_bitbang_s *priv,
-                  uint16_t dataout);
-static uint16_t spi_bitexchange1(FAR struct spi_bitbang_s *priv,
-                  uint16_t dataout);
-static uint16_t spi_bitexchange2(FAR struct spi_bitbang_s *priv,
-                  uint16_t dataout);
-static uint16_t spi_bitexchange3(FAR struct spi_bitbang_s *priv,
-                  uint16_t dataout);
+#ifndef SPI_BITBANG_DISABLEMODE0
+static uint16_t spi_bitexchange0(uint16_t dataout, uint32_t holdtime);
+#endif
+#ifndef SPI_BITBANG_DISABLEMODE1
+static uint16_t spi_bitexchange1(uint16_t dataout, uint32_t holdtime);
+#endif
+#ifndef SPI_BITBANG_DISABLEMODE2
+static uint16_t spi_bitexchange2(uint16_t dataout, uint32_t holdtime);
+#endif
+#ifndef SPI_BITBANG_DISABLEMODE3
+static uint16_t spi_bitexchange3(uint16_t dataout, uint32_t holdtime);
+#endif
 static uint16_t spi_exchange(FAR struct spi_bitbang_s *priv,
                   uint16_t dataout);
 static uint8_t  spi_status(FAR struct spi_bitbang_s *priv,
@@ -135,7 +141,28 @@ static const struct spi_bitbang_ops_s g_spiops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
- /****************************************************************************
+/****************************************************************************
+ * Name: spi_delay
+ *
+ * Description:
+ *   Delay for a specified number of loops
+ *
+ * Input Parameters:
+ *   count - The number of loops
+ *
+ * Returned Value:
+ *   Returns the actual frequency selected
+ *
+ ****************************************************************************/
+
+static void spi_delay(uint32_t holdtime)
+{
+  volatile int i;
+
+  for (i = 0; i < holdtime; i++);
+}
+
+/****************************************************************************
  * Name: spi_setfrequency
  *
  * Description:
@@ -167,11 +194,9 @@ static uint32_t spi_setfrequency(FAR struct spi_bitbang_s *priv, uint32_t freque
    *
    * As examples:
    * 1) frequency = 400KHz; SPI_PERBIT_NSEC = 100
-   *    pnsec     = 2500 - 100 = 2400
-   *    holdtime  = ((2401) >> 1) + 500) / 1000 = 1
+   *    pnsec     = (2500 - 100) / 2 = 1200
    * 2) frequency = 20MHz;  SPI_PERBIT_NSEC = 100
-   *    pnsec     = 50 - 100 -> 0
-   *    holdtime  = ((0) >> 1) + 500) / 1000 = 0
+   *    pnsec     = (50 - 100( / 2 -> 0
    */
 
   pnsec = (1000000000ul + (frequency >> 1)) / frequency;
@@ -187,22 +212,45 @@ static uint32_t spi_setfrequency(FAR struct spi_bitbang_s *priv, uint32_t freque
       pnsec = 0;
     }
 
-  /* The hold time in microseconds is half of this (in microseconds) */
+  /* The hold time in nanoseconds is then half this */
 
-  priv->holdtime =  (((pnsec + 1) >> 1) + 500) / 1000;
+  pnsec = (pnsec + 1) >> 1;
+
+  /* But what we really want is the hold time in loop counts. We know that
+   * SPI_BITBAND_LOOPSPERMSEC is the number of times through a delay loop
+   * to get 1 millisecond.
+   *
+   * SPI_BITBAND_LOOPSPERMSEC / 1000000 is then the the number of counts
+   * to get 1 nanosecond.  In reality, this is a number less than zero.  But
+   * then we can use this to calculate:
+   *
+   * holdtime loops/hold = pnsec nsec/hold * (SPI_BITBAND_LOOPSPERMSEC / 1000000) loops/nsec
+   *
+   * As examples:
+   * 1) frequency = 400KHz; SPI_PERBIT_NSEC = 100; pnsec = 1200;
+   *    SPI_BITBAND_LOOPSPERMSEC = 5000
+   *    holdtime  = (1200 * 5000 + 500000) / 1000000 = 6
+   * 2) frequency = 20MHz;  SPI_PERBIT_NSEC = 100; pnsec = 0;
+   *    SPI_BITBAND_LOOPSPERMSEC = 5000
+   *    holdtime  = (0 * 5000 + 500000) / 1000000 = 0
+   */
+
+  priv->holdtime = (pnsec * SPI_BITBAND_LOOPSPERMSEC + 500000) / 1000000;
 
   /* Let's do our best to calculate the actual frequency
    *
    * As examples:
-   * 1) frequency = 400KHz; SPI_PERBIT_NSEC = 100; holdtime = 1
-   *    pnsec     = 2000 * 1 + 100 = 2100
-   *    frequency = 476KHz
+   * 1) frequency = 400KHz; SPI_PERBIT_NSEC = 100;
+   *    SPI_BITBAND_LOOPSPERMSEC = 5000; holdtime = 6
+   *    pnsec     = 2 * 1000000 * 6 / 5000 + 100 = 2500 nsec
+   *    frequency = 400KHz
    * 2) frequency = 20MHz;  SPI_PERBIT_NSEC = 100; holdtime = 0
-   *    pnsec     = 2000 * 0 + 100 = 100
+   *    SPI_BITBAND_LOOPSPERMSEC = 5000; holdtime = 0
+   *    pnsec     = 2 * 0 * 6 / 5000 + 100 = 100 nsec
    *    frequency = 10MHz
    */
 
-  pnsec = 2000 * priv->holdtime + SPI_PERBIT_NSEC;
+  pnsec = 2 * 1000000 * priv->holdtime / SPI_BITBAND_LOOPSPERMSEC + SPI_PERBIT_NSEC;
   frequency = 1000000000ul / pnsec;
   return frequency;
 }
@@ -301,8 +349,7 @@ static void spi_setmode(FAR struct spi_bitbang_s *priv,
  ****************************************************************************/
 
 #ifndef SPI_BITBANG_DISABLEMODE0
-static uint16_t spi_bitexchange0(FAR struct spi_bitbang_s *priv,
-                                 uint16_t dataout)
+static uint16_t spi_bitexchange0(uint16_t dataout, uint32_t holdtime)
 {
   uint16_t datain;
                                    /* No clock transition before setting MOSI */
@@ -317,15 +364,15 @@ static uint16_t spi_bitexchange0(FAR struct spi_bitbang_s *priv,
 
   SPI_SETSCK;                     /* Clock transition before getting MISO */
   datain = (uint16_t)SPI_GETMISO; /* Get bit 0 = MOSI value */
-  if (priv->holdtime)
+  if (holdtime > 0)
     {
-      up_udelay(priv->holdtime);
+      spi_delay(holdtime);
     }
 
   SPI_CLRSCK;                     /* Return clock to the resting state after getting MISO */
-  if (priv->holdtime)
+  if (holdtime > 0)
     {
-      up_udelay(priv->holdtime);
+      spi_delay(holdtime);
     }
 
   return datain;
@@ -361,8 +408,7 @@ static uint16_t spi_bitexchange0(FAR struct spi_bitbang_s *priv,
  ****************************************************************************/
 
 #ifndef SPI_BITBANG_DISABLEMODE1
-static uint16_t spi_bitexchange1(FAR struct spi_bitbang_s *priv,
-                                uint16_t dataout)
+static uint16_t spi_bitexchange1(uint16_t dataout, uint32_t holdtime)
 {
   uint16_t datain;
 
@@ -376,17 +422,17 @@ static uint16_t spi_bitexchange1(FAR struct spi_bitbang_s *priv,
       SPI_CLRMOSI;                /* Clear MISO if the bit is not set */
     }
 
-  if (priv->holdtime)
+  if (holdtime > 0)
     {
-      up_udelay(priv->holdtime);
+      spi_delay(holdtime);
     }
 
   SPI_CLRSCK;                     /* Clock transition before getting MISO */
   datain = (uint16_t)SPI_GETMISO; /* Get bit 0 = MOSI value */
                                   /* Clock is in resting state after getting MISO */
-  if (priv->holdtime)
+  if (holdtime > 0)
     {
-      up_udelay(priv->holdtime);
+      spi_delay(holdtime);
     }
 
   return datain;
@@ -422,8 +468,7 @@ static uint16_t spi_bitexchange1(FAR struct spi_bitbang_s *priv,
  ****************************************************************************/
 
 #ifndef SPI_BITBANG_DISABLEMODE2
-static uint16_t spi_bitexchange2(FAR struct spi_bitbang_s *priv,
-                                 uint16_t dataout)
+static uint16_t spi_bitexchange2(uint16_t dataout, uint32_t holdtime)
 {
   uint16_t datain;
                                   /* No clock transition before setting MOSI */
@@ -438,15 +483,15 @@ static uint16_t spi_bitexchange2(FAR struct spi_bitbang_s *priv,
 
   SPI_CLRSCK;                     /* Clock transition before getting MISO */
   datain = (uint16_t)SPI_GETMISO; /* Get bit 0 = MOSI value */
-  if (priv->holdtime)
+  if (holdtime > 0)
     {
-      up_udelay(priv->holdtime);
+      spi_delay(holdtime);
     }
 
   SPI_SETSCK;                     /* Return clock to the resting state after getting MISO */
-  if (priv->holdtime)
+  if (holdtime > 0)
     {
-      up_udelay(priv->holdtime);
+      spi_delay(holdtime);
     }
 
   return datain;
@@ -482,8 +527,7 @@ static uint16_t spi_bitexchange2(FAR struct spi_bitbang_s *priv,
  ****************************************************************************/
 
 #ifndef SPI_BITBANG_DISABLEMODE3
-static uint16_t spi_bitexchange3(FAR struct spi_bitbang_s *priv,
-                                 uint16_t dataout)
+static uint16_t spi_bitexchange3(uint16_t dataout, uint32_t holdtime)
 {
   uint16_t datain;
 
@@ -497,17 +541,17 @@ static uint16_t spi_bitexchange3(FAR struct spi_bitbang_s *priv,
       SPI_CLRMOSI;                /* Clear MISO if the bit is not set */
     }
 
-  if (priv->holdtime)
+  if (holdtime > 0)
     {
-      up_udelay(priv->holdtime);
+      spi_delay(holdtime);
     }
 
   SPI_SETSCK;                     /* Clock transition before getting MISO */
   datain = (uint16_t)SPI_GETMISO; /* Get bit 0 = MOSI value */
                                   /* Clock is in resting state after getting MISO */
-  if (priv->holdtime)
+  if (holdtime > 0)
     {
-      up_udelay(priv->holdtime);
+      spi_delay(holdtime);
     }
 
   return datain;
@@ -532,6 +576,8 @@ static uint16_t spi_bitexchange3(FAR struct spi_bitbang_s *priv,
 #ifdef CONFIG_SPI_BITBANG_VARWIDTH
 static uint16_t spi_exchange(FAR struct spi_bitbang_s *priv, uint16_t dataout)
 {
+  bitexchange_t exchange = priv->exchange;
+  uint32_t holdtime = priv->holdtime;
   uint16_t datain;
   uint16_t bit;
   int shift;
@@ -550,7 +596,7 @@ static uint16_t spi_exchange(FAR struct spi_bitbang_s *priv, uint16_t dataout)
        */
 
       datain <<= 1;
-      datain |= priv->exchange(priv, dataout & bit);
+      datain |= exchange(dataout & bit, holdtime);
     }
 
   return datain;
@@ -559,6 +605,8 @@ static uint16_t spi_exchange(FAR struct spi_bitbang_s *priv, uint16_t dataout)
 #else
 static uint16_t spi_exchange(FAR struct spi_bitbang_s *priv, uint16_t dataout)
 {
+  bitexchange_t exchange = priv->exchange;
+  uint32_t holdtime = priv->holdtime;
   uint8_t datain;
 
   /* Transfer each bit.  This is better done with straight-line logic
@@ -568,42 +616,42 @@ static uint16_t spi_exchange(FAR struct spi_bitbang_s *priv, uint16_t dataout)
 
   /* Exchange bit 7 with the slave */
 
-  datain = priv->exchange(priv, dataout & (1 << 7));
+  datain = priv->exchange(dataout & (1 << 7), holdtime);
 
   /* Exchange bit 6 with the slave */
 
   datain <<= 1;
-  datain |= priv->exchange(priv, dataout & (1 << 6));
+  datain |= priv->exchange(dataout & (1 << 6), holdtime);
 
   /* Exchange bit 5 with the slave */
 
   datain <<= 1;
-  datain |= priv->exchange(priv, dataout & (1 << 5));
+  datain |= priv->exchange(dataout & (1 << 5), holdtime);
 
   /* Exchange bit 4 with the slave */
 
   datain <<= 1;
-  datain |= priv->exchange(priv, dataout & (1 << 4));
+  datain |= priv->exchange(dataout & (1 << 4), holdtime);
 
   /* Exchange bit 3 with the slave */
 
   datain <<= 1;
-  datain |= priv->exchange(priv, dataout & (1 << 3));
+  datain |= priv->exchange(dataout & (1 << 3), holdtime);
 
   /* Exchange bit 2 with the slave */
 
   datain <<= 1;
-  datain |= priv->exchange(priv, dataout & (1 << 2));
+  datain |= priv->exchange(dataout & (1 << 2), holdtime);
 
   /* Exchange bit 1 with the slave */
 
   datain <<= 1;
-  datain |= priv->exchange(priv, dataout & (1 << 1));
+  datain |= priv->exchange(dataout & (1 << 1), holdtime);
 
   /* Exchange bit 0 with the slave */
 
   datain <<= 1;
-  datain |= priv->exchange(priv, dataout & (1 << 0));
+  datain |= priv->exchange(dataout & (1 << 0), holdtime);
 
   return datain;
 }

@@ -117,7 +117,7 @@ struct spi_bitbang_ops_s
 
 /* This is the type of the function that can exchange one bit */
 
-typedef uint8_t (*bitexchange_t)(FAR struct spi_bitbang_s *priv, uint8_t dataout);
+typedef uint8_t (*bitexchange_t)(uint8_t dataout, uint32_t holdtime);
 
 /* This structure provides the state of the SPI bit-bang driver */
 

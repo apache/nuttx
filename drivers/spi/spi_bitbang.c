@@ -266,6 +266,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
   actual = priv->low->setfrequency(priv, frequency);
   spivdbg("frequency=%d holdtime=%d actual=%d\n",
           frequency, priv->holdtime, actual);
+  return actual;
 }
 
 /****************************************************************************
