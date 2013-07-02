@@ -589,7 +589,7 @@ Configurations
             CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
 
             CONFIG_INPUT=y                    : Enable support for input devices
-            CONFIG_INPUT_ADS7843E=y           : Enable support for the XPT2048
+            CONFIG_INPUT_ADS7843E=y           : Enable support for the XPT2046
             CONFIG_ADS7843E_SPIDEV=2          : Use SPI CS 2 for communication
             CONFIG_ADS7843E_SPIMODE=0         : Use SPI mode 0
             CONFIG_ADS7843E_FREQUENCY=1000000 : SPI BAUD 1MHz
