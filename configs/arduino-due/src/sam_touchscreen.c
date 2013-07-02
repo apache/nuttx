@@ -264,22 +264,22 @@ static int tsc_attach(FAR struct ads7843e_config_s *state, xcpt_t isr)
 {
   /* Attach the XPT2046 interrupt */
 
-  ivdbg("Attaching %p to IRQ %d\n", isr, SAM_TCS_IRQ);
-  return irq_attach(SAM_TCS_IRQ, isr);
+  ivdbg("Attaching %p to IRQ %d\n", isr, SAM_TSC_IRQ);
+  return irq_attach(SAM_TSC_IRQ, isr);
 }
 
 static void tsc_enable(FAR struct ads7843e_config_s *state, bool enable)
 {
   /* Attach and enable, or detach and disable */
 
-  ivdbg("IRQ:%d enable:%d\n", SAM_TCS_IRQ, enable);
+  ivdbg("IRQ:%d enable:%d\n", SAM_TSC_IRQ, enable);
   if (enable)
     {
-      sam_gpioirqenable(SAM_TCS_IRQ);
+      sam_gpioirqenable(SAM_TSC_IRQ);
     }
   else
     {
-      sam_gpioirqdisable(SAM_TCS_IRQ);
+      sam_gpioirqdisable(SAM_TSC_IRQ);
     }
 }
 
@@ -290,31 +290,14 @@ static void tsc_clear(FAR struct ads7843e_config_s *state)
 
 static bool tsc_busy(FAR struct ads7843e_config_s *state)
 {
-#if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_VERBOSE)
-  static bool last = (bool)-1;
-#endif
-
-  /* BUSY is high impedance when CS is high (not selected).  When CS is
-   * is low, BUSY is active high.
-   */
-
-  bool busy = sam_gpioread(GPIO_TCS_BUSY);
-#if defined(CONFIG_DEBUG_INPUT) && defined(CONFIG_DEBUG_VERBOSE)
-  if (busy != last)
-    {
-      ivdbg("busy:%d\n", busy);
-      last = busy;
-    }
-#endif
-
-  return busy;
+  return false; /* The BUSY signal is not connected */
 }
 
 static bool tsc_pendown(FAR struct ads7843e_config_s *state)
 {
   /* The /PENIRQ value is active low */
 
-  bool pendown = !sam_gpioread(GPIO_TCS_IRQ);
+  bool pendown = !sam_gpioread(GPIO_TSC_IRQ);
   ivdbg("pendown:%d\n", pendown);
   return pendown;
 }
@@ -382,7 +365,7 @@ int arch_tcinitialize(int minor)
 
   /* Configure the PIO interrupt */
 
-  sam_gpioirq(SAM_TCS_IRQ);
+  sam_gpioirq(SAM_TSC_IRQ);
 
   /* Get an instance of the SPI interface for the touchscreen chip select */
 

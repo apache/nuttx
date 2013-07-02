@@ -248,7 +248,7 @@
 
 #    define GPIO_TSC_IRQ  (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_INT_BOTHEDGES | \
                            GPIO_PORT_PIOC | GPIO_PIN21)
-#    define SAM_TCS_IRQ   SAM_IRQ_PC21
+#    define SAM_TSC_IRQ   SAM_IRQ_PC21
 #  endif
 
   /* Only CONFIG_LCD is expected to enable the TFT LCD */

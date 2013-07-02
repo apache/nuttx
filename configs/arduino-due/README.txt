@@ -1024,6 +1024,9 @@ Configuration sub-directories
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
 
+       STATUS:
+       2013-7-2:  SD card is not responding.  All 0's received on SPI.
+
     3. This configuration has been used for verifying the touchscreen on
        on the ITEAD TFT Shield.  With the modifications below, you can
        include the touchscreen test program at apps/examples/touchscreen as
@@ -1043,6 +1046,13 @@ Configuration sub-directories
          CONFIG_SPI_BITBANG=y              : Enable SPI bit-bang support
 
          CONFIG_INPUT=y                    : Enable support for input devices
+         CONFIG_INPUT_ADS7843E=y           : Enable support for the XPT2046
+         CONFIG_ADS7843E_SPIDEV=0          : (Doesn't matter)
+         CONFIG_ADS7843E_SPIMODE=0         : Use SPI mode 0
+         CONFIG_ADS7843E_FREQUENCY=1000000 : SPI BAUD 1MHz
+         CONFIG_ADS7843E_SWAPXY=y          : If landscpe orientation
+         CONFIG_ADS7843E_THRESHX=51        : These will probably need to be tuned
+         CONFIG_ADS7843E_THRESHY=39
 
        System Type:
          CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
@@ -1064,3 +1074,7 @@ Configuration sub-directories
          CONFIG_DEBUG=y                    : Enable debug features
          CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
          CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
+
+       STATUS:
+       2013-7-2:  TSC is not responding.  All 0's received on SPI.
+
