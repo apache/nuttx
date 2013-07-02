@@ -122,6 +122,11 @@ ITEAD 2.4" TFT with Touch
   The Arduino 2.4" TFT Touch shield uses the S6D1121 controller , it
   supports 8-bit data interface. The touch IC is XPT2046.
 
+  NOTE:  When used with the ITEAD shield, the power from the USB connector
+  seems to be inefficient (for example, I lose the USB connection when I
+  insert an SD card).  I recommends using a 7-12V power supply with the
+  Arduino in this case.
+
   Connector:
 
   ---------- --------------------------- ----------- --------------------------- ------------------
@@ -863,25 +868,28 @@ Configurations
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output on UART1 which is available on J1 or J4 (see the
-     section "Serial Consoles" above).  USART1 or the virtual COM
-     port on UART0 are options. The virtual COM port could
-     be used, for example, by reconfiguring to use UART0 like:
+     output on UART0 which is available both on the USB virtual COM port
+     and on the PWML connector (see the section "Serial Consoles" above).
 
-       System Type -> AT91SAM3/4 Peripheral Support
-         CONFIG_SAM_UART0=y
-         CONFIG_SAM_UART1=n
+     However, the pin usage by the ITEAD TFT shield conflict with the pin
+     usage for UART0.  In this case you need to switch to USART0 by
+     modifying the configuration as follows:
 
-       Device Drivers -> Serial Driver Support -> Serial Console
-         CONFIG_UART0_SERIAL_CONSOLE=y
+       Board Selection -> Peripheral
+         CONFIG_SAM34_UART0=n              : Disable UART0.  Can't use with this shield
+         CONFIG_SAM34_USART0=y             : Enable USART0
+         CONFIG_USART0_ISUART=y
 
-       Device Drivers -> Serial Driver Support -> UART0 Configuration
-         CONFIG_UART0_2STOP=0
-         CONFIG_UART0_BAUD=115200
-         CONFIG_UART0_BITS=8
-         CONFIG_UART0_PARITY=0
-         CONFIG_UART0_RXBUFSIZE=256
-         CONFIG_UART0_TXBUFSIZE=256
+       Device Drivers -> Serial
+         CONFIG_USART0_SERIAL_CONSOLE=y    : Configure the console on USART0
+         CONFIG_USART0_RXBUFSIZE=256
+         CONFIG_USART0_TXBUFSIZE=256
+         CONFIG_USART0_BAUD=115200
+         CONFIG_USART0_BITS=8
+         CONFIG_USART0_PARITY=0
+         CONFIG_USART0_2STOP=0
+
+     NOTE: USART0 TTL levels are available on COMM 5 (TXD0) and COMM 6 (RXD0).
 
   3. Unless otherwise stated, the configurations are setup for
      Linux (or any other POSIX environment like Cygwin under Windows):

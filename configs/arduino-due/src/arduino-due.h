@@ -205,8 +205,8 @@
 
 #    define GPIO_SD_SCK   (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOB | GPIO_PIN27)
-#    define GPIO_SD_MISO  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
-                           GPIO_PORT_PIOD | GPIO_PIN8)
+#    define GPIO_SD_MISO  (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_PORT_PIOD | \
+                           GPIO_PIN8)
 #    define GPIO_SD_MOSI  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOD | GPIO_PIN7)
 
@@ -241,8 +241,8 @@
 
 #    define GPIO_TSC_SCK  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOA | GPIO_PIN24)
-#    define GPIO_TSC_MISO (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
-                           GPIO_PORT_PIOC | GPIO_PIN22)
+#    define GPIO_TSC_MISO (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_PORT_PIOC | \
+                           GPIO_PIN22)
 #    define GPIO_TSC_MOSI (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOA | GPIO_PIN16)
 
