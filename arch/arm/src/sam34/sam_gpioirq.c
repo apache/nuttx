@@ -84,7 +84,7 @@
  *
  ****************************************************************************/
 
-static inline uint32_t sam_gpiobase(uint16_t pinset)
+static inline uint32_t sam_gpiobase(gpio_pinset_t pinset)
 {
   int port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
   return SAM_PION_BASE(port >> GPIO_PORT_SHIFT);
@@ -98,7 +98,7 @@ static inline uint32_t sam_gpiobase(uint16_t pinset)
  *
  ****************************************************************************/
 
-static inline int sam_gpiopin(uint16_t pinset)
+static inline int sam_gpiopin(gpio_pinset_t pinset)
 {
   return 1 << ((pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
 }
@@ -195,6 +195,27 @@ static int up_gpiocinterrupt(int irq, void *context)
 }
 #endif
 
+#ifdef CONFIG_GPIOD_IRQ
+static int up_gpiodinterrupt(int irq, void *context)
+{
+  return up_gpiointerrupt(SAM_PIOD_BASE, SAM_IRQ_PD0, context);
+}
+#endif
+
+#ifdef CONFIG_GPIOE_IRQ
+static int up_gpioeinterrupt(int irq, void *context)
+{
+  return up_gpiointerrupt(SAM_PIOE_BASE, SAM_IRQ_PE0, context);
+}
+#endif
+
+#ifdef CONFIG_GPIOF_IRQ
+static int up_gpiofinterrupt(int irq, void *context)
+{
+  return up_gpiointerrupt(SAM_PIOF_BASE, SAM_IRQ_PF0, context);
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -260,8 +281,62 @@ void sam_gpioirqinitialize(void)
 
   /* Attach and enable the GPIOC IRQ */
 
-  (void)irq_attach(SAM_IRQ_PIOC, up_gpioainterrupt);
+  (void)irq_attach(SAM_IRQ_PIOC, up_gpiocinterrupt);
   up_enable_irq(SAM_IRQ_PIOC);
+#endif
+
+  /* Configure GPIOD interrupts */
+
+#ifdef CONFIG_GPIOD_IRQ
+  /* Enable GPIOD clocking */
+
+  sam_piod_enableclk();
+
+  /* Clear and disable all GPIOD interrupts */
+
+  (void)getreg32(SAM_PIOD_ISR);
+  putreg32(0xffffffff, SAM_PIOD_IDR);
+
+  /* Attach and enable the GPIOC IRQ */
+
+  (void)irq_attach(SAM_IRQ_PIOD, up_gpiodinterrupt);
+  up_enable_irq(SAM_IRQ_PIOD);
+#endif
+
+  /* Configure GPIOE interrupts */
+
+#ifdef CONFIG_GPIOE_IRQ
+  /* Enable GPIOE clocking */
+
+  sam_pioe_enableclk();
+
+  /* Clear and disable all GPIOE interrupts */
+
+  (void)getreg32(SAM_PIOE_ISR);
+  putreg32(0xffffffff, SAM_PIOE_IDR);
+
+  /* Attach and enable the GPIOE IRQ */
+
+  (void)irq_attach(SAM_IRQ_PIOE, up_gpioeinterrupt);
+  up_enable_irq(SAM_IRQ_PIOE);
+#endif
+
+  /* Configure GPIOF interrupts */
+
+#ifdef CONFIG_GPIOF_IRQ
+  /* Enable GPIOF clocking */
+
+  sam_piof_enableclk();
+
+  /* Clear and disable all GPIOF interrupts */
+
+  (void)getreg32(SAM_PIOF_ISR);
+  putreg32(0xffffffff, SAM_PIOF_IDR);
+
+  /* Attach and enable the GPIOF IRQ */
+
+  (void)irq_attach(SAM_IRQ_PIOF, up_gpiofinterrupt);
+  up_enable_irq(SAM_IRQ_PIOF);
 #endif
 }
 
@@ -273,7 +348,7 @@ void sam_gpioirqinitialize(void)
  *
  ************************************************************************************/
 
-void sam_gpioirq(uint16_t pinset)
+void sam_gpioirq(gpio_pinset_t pinset)
 {
   uint32_t base = sam_gpiobase(pinset);
   int      pin  = sam_gpiopin(pinset);
