@@ -42,7 +42,7 @@ config SPI_BITBANG_VARWIDTH
 	bool "SPI bit-bang variable width transfers"
 	default n
 	---help---
-		Enable support for a variable dat width transfers.  Default: 8-bit
+		Enable support for a variable data width transfers.  Default: 8-bit
 		only.
 
 endif

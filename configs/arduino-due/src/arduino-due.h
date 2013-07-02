@@ -194,10 +194,10 @@
 #  endif
 
   /* In order to use the touchscreen on the ITEAD shield, you must enable the
-   * SPI bit-bang driver and INPUT device support.
+   * SPI bit-bang driver and ADS7843E/XPT2046 device support.
    */
 
-#  if defined(CONFIG_SPI_BITBANG) && defined(CONFIG_INPUT)
+#  if defined(CONFIG_SPI_BITBANG) && defined(CONFIG_INPUT_ADS7843E)
 #    define GPIO_TSC_SCK  (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \
                            GPIO_PORT_PIOA | GPIO_PIN24)
 #    define GPIO_TSC_MISO (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_CLEAR | \

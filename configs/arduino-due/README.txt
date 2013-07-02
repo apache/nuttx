@@ -890,9 +890,24 @@ Configuration sub-directories
     This configuration directory will built the NuttShell.  See NOTES above.
 
     NOTES:
-    1. If the ITEAD TFT shield is connected to the Arduino Due, then
-       support for the SD card slot can be enabled by making the following
-       changes to the configuration:
+    1. NSH built-in applications are supported.  However, there are
+       no built-in applications built with the default configuration.
+
+       Binary Formats:
+         CONFIG_BUILTIN=y                    : Enable support for built-in programs
+
+       Applicaton Configuration:
+         CONFIG_NSH_BUILTIN_APPS=y           : Enable starting apps from NSH command line
+
+    2. By default, this configuration uses UART0 and has support LEDs
+       enabled.  UART0 output is available on the USB debugging port or
+       on pins 0-1 of the PWML connector.
+
+       This configuration can be modified to use peripherals on the ITEAD
+       TFT shield as described below.  However, in that case the UART0 and
+       LED "L" GPIO pins conflict with the pin usage by the ITEAD TFT
+       Shield.  In this case you need to switch to USART0 and disable LEDs
+       by modifying the configuration as follows:
 
        Board Selection -> Peripheral
          CONFIG_SAM34_UART0=n              : Disable UART0.  Can't use with this shield
@@ -915,7 +930,15 @@ Configuration sub-directories
          CONFIG_ARCH_LEDS=n                : Can't support LEDs with this shield installed
          CONFIG_ARDUINO_ITHEAD_TFT=y       : Enable support for the Shield
 
-       NOTE: You cannot use UART0 or LEDs with this ITEAD module.
+    3. If the ITEAD TFT shield is connected to the Arduino Due, then
+       support for the SD card slot can be enabled by making the following
+       changes to the configuration:
+
+       NOTE: You cannot use UART0 or LEDs with this ITEAD module.  You must
+       switch to USART0 and disable LED support as described above.
+
+       Board Selection -> Board-Specific Options:
+         CONFIG_ARDUINO_ITHEAD_TFT=y       : Enable support for the Shield
 
        File Systems:
          CONFIG_DISABLE_MOUNTPOINT=n       : Mountpoint support is needed
@@ -927,9 +950,6 @@ Configuration sub-directories
          There are issues related to patents that Microsoft holds on FAT long
          file name technologies.  See the top level COPYING file for further
          details.
-
-       System Type -> Peripherals:
-         CONFIG_SAM34_SPI0=y                : Enable the SAM4L SPI peripheral
 
        Device Drivers
          CONFIG_SPI=y                      : Enable SPI support
@@ -950,10 +970,46 @@ Configuration sub-directories
          CONFIG_NSH_MMCSDSLOTNO=0          : Only one MMC/SD slot, slot 0
          CONFIG_NSH_MMCSDSPIPORTNO=0       : (does not really matter in this case)
 
-       Board Selection -> SAM4L Xplained Pro Modules
-         CONFIG_SAM4L_XPLAINED_IOMODULE=y      : I/O1 module is connected
-         CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1=y : In EXT1, or EXT2
-         CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2=y
-
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
+
+    3. This configuration has been used for verifying the touchscreen on
+       on the ITEAD TFT Shield.  With the modifications below, you can
+       include the touchscreen test program at apps/examples/touchscreen as
+       an NSH built-in application.  You can enable the touchscreen and test
+       by modifying the  default configuration in the following ways:
+
+       NOTE: You cannot use UART0 or LEDs with this ITEAD module.  You must
+       switch to USART0 and disable LED support as described above.
+
+       Board Selection -> Board-Specific Options:
+         CONFIG_ARDUINO_ITHEAD_TFT=y       : Enable support for the Shield
+
+       Device Drivers
+         CONFIG_SPI=y                      : Enable SPI support
+         CONFIG_SPI_EXCHANGE=y             : The exchange() method is supported
+         CONFIG_SPI_OWNBUS=y               : Smaller code if this is the only SPI device
+         CONFIG_SPI_BITBANG=y              : Enable SPI bit-bang support
+
+         CONFIG_INPUT=y                    : Enable support for input devices
+
+       System Type:
+         CONFIG_GPIO_IRQ=y                 : GPIO interrupt support
+         CONFIG_GPIOACIRQ=y                : Enable GPIO interrupts from port C
+
+       RTOS Features:
+         CONFIG_DISABLE_SIGNALS=n          : Signals are required
+
+       Library Support:
+         CONFIG_SCHED_WORKQUEUE=y          : Work queue support required
+
+       Applicaton Configuration:
+         CONFIG_EXAMPLES_TOUCHSCREEN=y     : Enable the touchscreen built-int test
+
+       Defaults should be okay for related touchscreen settings.  Touchscreen
+       debug output on USART0 can be enabled with:
+
+       Build Setup:
+         CONFIG_DEBUG=y                    : Enable debug features
+         CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
+         CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
