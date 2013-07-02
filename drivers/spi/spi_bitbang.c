@@ -238,6 +238,8 @@ static void spi_select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
                        bool selected)
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
+
+  spivdbg("devid=%d selected=%d\n", devid, selected);
   DEBUGASSERT(priv && priv->low->select);
   priv->low->select(priv, devid, selected);
 }
@@ -287,6 +289,7 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
   FAR struct spi_bitbang_s *priv = (FAR struct spi_bitbang_s *)dev;
+
   DEBUGASSERT(priv && priv->low->setmode);
   priv->low->setmode(priv, mode);
   spivdbg("mode=%d exchange=%p\n", mode, priv->exchange);
