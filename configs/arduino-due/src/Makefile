@@ -59,7 +59,7 @@ ifeq ($(CONFIG_MMCSD_SPI),y)
 CSRCS += sam_mmcsd.c
 endif
 
-ifeq ($(CONFIG_INPUT),y)
+ifeq ($(CONFIG_INPUT_ADS7843E),y)
 CSRCS += sam_touchscreen.c
 endif
 endif

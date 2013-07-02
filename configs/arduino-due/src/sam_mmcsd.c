@@ -125,16 +125,18 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
 #include <nuttx/spi/spi_bitbang.c>
 
 /****************************************************************************
- * Name: sam_mmcsd_spiinitialize
+ * Name: spi_select
  *
  * Description:
- *   Initialize the SPI bitband driver
+ *   Select or de-selected the SPI device specified by 'devid'
  *
  * Input Parameters:
- *   None
+ *   priv     - An instance of the bit-bang driver structure
+ *   devid    - The device to select or de-select
+ *   selected - True:select false:de-select
  *
  * Returned Value:
- *   A non-NULL reference to the SPI driver on success
+ *   None
  *
  ****************************************************************************/
 
@@ -145,16 +147,17 @@ static void spi_select(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
 }
 
 /****************************************************************************
- * Name: sam_mmcsd_spiinitialize
+ * Name: spi_status
  *
  * Description:
- *   Initialize the SPI bitband driver
+ *   Return status of the SPI device specified by 'devid'
  *
  * Input Parameters:
- *   None
+ *   priv     - An instance of the bit-bang driver structure
+ *   devid    - The device to select or de-select
  *
  * Returned Value:
- *   A non-NULL reference to the SPI driver on success
+ *   An 8-bit, bit-encoded status byte
  *
  ****************************************************************************/
 
@@ -196,7 +199,7 @@ static int spi_cmddata(FAR struct spi_bitbang_s *priv, enum spi_dev_e devid,
  * Name: sam_mmcsd_spiinitialize
  *
  * Description:
- *   Initialize the SPI bitband driver
+ *   Initialize the SPI bit-bang driver
  *
  * Input Parameters:
  *   None
