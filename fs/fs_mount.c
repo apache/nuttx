@@ -394,7 +394,7 @@ errout:
 #else
   fdbg("No filesystems enabled\n");
   set_errno(ENOSYS);
-  return error;
+  return ERROR;
 #endif /* BDFS_SUPPORT || NONBDFS_SUPPORT */
 }
 
