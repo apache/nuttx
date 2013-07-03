@@ -416,19 +416,15 @@ int arch_tcinitialize(int minor)
  *   None
  *
  * Returned Value:
- *   None.
+ *   None
  *
  ****************************************************************************/
 
 void arch_tcuninitialize(void)
 {
-  /* No real support for un-initializing the touchscreen XPT2046 device.
-   * Just make sure that interrupts are disabled and that no handler is
-   * attached.
+  /* No support for un-initializing the touchscreen XPT2046 device.  It will
+   * continue to run and process touch interrupts in the background.
    */
-
-  sam_gpioirqdisable(SAM_TSC_IRQ);
-  irq_detach(SAM_TSC_IRQ);
 }
 
 #endif /* CONFIG_ARDUINO_ITHEAD_TFT && CONFIG_SPI_BITBANG && CONFIG_INPUT_ADS7843E */

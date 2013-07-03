@@ -352,14 +352,14 @@ static void spi_setmode(FAR struct spi_bitbang_s *priv,
 static uint16_t spi_bitexchange0(uint16_t dataout, uint32_t holdtime)
 {
   uint16_t datain;
-                                   /* No clock transition before setting MOSI */
+                                  /* No clock transition before setting MOSI */
   if (dataout != 0)
     {
-      SPI_SETMOSI;                /* Set MISO if the bit is set */
+      SPI_SETMOSI;                /* Set MOSI if the bit is set */
     }
   else
     {
-      SPI_CLRMOSI;                /* Clear MISO if the bit is not set */
+      SPI_CLRMOSI;                /* Clear MOSI if the bit is not set */
     }
 
   SPI_SETSCK;                     /* Clock transition before getting MISO */
@@ -369,7 +369,7 @@ static uint16_t spi_bitexchange0(uint16_t dataout, uint32_t holdtime)
       spi_delay(holdtime);
     }
 
-  SPI_CLRSCK;                     /* Return clock to the resting state after getting MISO */
+  SPI_CLRSCK;                     /* Return clock to the resting state */
   if (holdtime > 0)
     {
       spi_delay(holdtime);
@@ -415,11 +415,11 @@ static uint16_t spi_bitexchange1(uint16_t dataout, uint32_t holdtime)
   SPI_SETSCK;                     /* Clock transition before setting MOSI */
   if (dataout != 0)
     {
-      SPI_SETMOSI;                /* Set MISO if the bit is set */
+      SPI_SETMOSI;                /* Set MOSI if the bit is set */
     }
   else
     {
-      SPI_CLRMOSI;                /* Clear MISO if the bit is not set */
+      SPI_CLRMOSI;                /* Clear MOSI if the bit is not set */
     }
 
   if (holdtime > 0)
@@ -429,7 +429,7 @@ static uint16_t spi_bitexchange1(uint16_t dataout, uint32_t holdtime)
 
   SPI_CLRSCK;                     /* Clock transition before getting MISO */
   datain = (uint16_t)SPI_GETMISO; /* Get bit 0 = MISO value */
-                                  /* Clock is in resting state after getting MISO */
+                                  /* Clock is in resting state */
   if (holdtime > 0)
     {
       spi_delay(holdtime);
@@ -474,11 +474,11 @@ static uint16_t spi_bitexchange2(uint16_t dataout, uint32_t holdtime)
                                   /* No clock transition before setting MOSI */
   if (dataout != 0)
     {
-      SPI_SETMOSI;                /* Set MISO if the bit is set */
+      SPI_SETMOSI;                /* Set MOSI if the bit is set */
     }
   else
     {
-      SPI_CLRMOSI;                /* Clear MISO if the bit is not set */
+      SPI_CLRMOSI;                /* Clear MOSI if the bit is not set */
     }
 
   SPI_CLRSCK;                     /* Clock transition before getting MISO */
@@ -488,7 +488,7 @@ static uint16_t spi_bitexchange2(uint16_t dataout, uint32_t holdtime)
       spi_delay(holdtime);
     }
 
-  SPI_SETSCK;                     /* Return clock to the resting state after getting MISO */
+  SPI_SETSCK;                     /* Return clock to the resting state */
   if (holdtime > 0)
     {
       spi_delay(holdtime);
@@ -534,11 +534,11 @@ static uint16_t spi_bitexchange3(uint16_t dataout, uint32_t holdtime)
   SPI_CLRSCK;                     /* Clock transition before setting MOSI */
   if (dataout != 0)
     {
-      SPI_SETMOSI;                /* Set MISO if the bit is set */
+      SPI_SETMOSI;                /* Set MOSI if the bit is set */
     }
   else
     {
-      SPI_CLRMOSI;                /* Clear MISO if the bit is not set */
+      SPI_CLRMOSI;                /* Clear MOSI if the bit is not set */
     }
 
   if (holdtime > 0)
@@ -548,7 +548,7 @@ static uint16_t spi_bitexchange3(uint16_t dataout, uint32_t holdtime)
 
   SPI_SETSCK;                     /* Clock transition before getting MISO */
   datain = (uint16_t)SPI_GETMISO; /* Get bit 0 = MISO value */
-                                  /* Clock is in resting state after getting MISO */
+                                  /* Clock is in resting state */
   if (holdtime > 0)
     {
       spi_delay(holdtime);
