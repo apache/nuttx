@@ -139,7 +139,32 @@ static int sam_irqbase(int irq, uint32_t *base, int *pin)
           return OK;
         }
 #endif
+#ifdef CONFIG_GPIOD_IRQ
+      if (irq <= SAM_IRQ_PD31)
+        {
+          *base = SAM_PIOD_BASE;
+          *pin  = irq - SAM_IRQ_PD0;
+          return OK;
+        }
+#endif
+#ifdef CONFIG_GPIOE_IRQ
+      if (irq <= SAM_IRQ_PE31)
+        {
+          *base = SAM_PIOE_BASE;
+          *pin  = irq - SAM_IRQ_PE0;
+          return OK;
+        }
+#endif
+#ifdef CONFIG_GPIOF_IRQ
+      if (irq <= SAM_IRQ_PF31)
+        {
+          *base = SAM_PIOF_BASE;
+          *pin  = irq - SAM_IRQ_PF0;
+          return OK;
+        }
+#endif
     }
+
   return -EINVAL;
 }
 
@@ -408,7 +433,7 @@ void sam_gpioirqenable(int irq)
     {
        /* Clear (all) pending interrupts and enable this pin interrupt */
 
-       (void)getreg32(base + SAM_PIO_ISR_OFFSET);
+       //(void)getreg32(base + SAM_PIO_ISR_OFFSET);
        putreg32((1 << pin), base + SAM_PIO_IER_OFFSET);
     }
 }
