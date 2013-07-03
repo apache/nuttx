@@ -232,8 +232,8 @@
   *  7  IN3     N/C      ---       ---      8    IN4      N/C      ---       ---
   *  9  VREF    ---      ---       ---      10   VCC      ---      ---       ---
   *  11 IRQ     J2 pin 2 D9        PC21     12   DOUT     J2 pin 1 D8        PC22
-  *  13 BUSY    N/C      ---       ---      14   DIN      J1 pin 1 D14       PA16
-  *  15 /CS     ---      ---       ---      16   DCLK     J1 pin 2 D15       PA24
+  *  13 BUSY    N/C      ---       ---      14   DIN      J1 pin 1 A0/D14    PA16
+  *  15 /CS     ---      ---       ---      16   DCLK     J1 pin 2 A1/D15    PA24
   * --- ------- -------- --------- -------- ---- -------- -------- --------- -------
   *
   * NOTE: /CS is connected to ground (XPT2046 is always selected)

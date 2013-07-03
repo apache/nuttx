@@ -5104,3 +5104,8 @@
 	* configs/arduino-due/src/sam_nsh.c and sam_mmcsd.c:  Add NSH customize
 	  initialization.  If so configured, initialize the SPI bit bang
 	  interface to the MMC/SD slot on the ITEAD shield (2013-7-1).
+	* fs/fs_mount.c:  Fix compilation error if no file systems are enabled:
+	  Change error to ERROR (2013-7-3).
+	* arch/arm/src/sam34/sam_gpioirq.c:  Fix some errors for interrupts
+	  on ports D-F (2013-7-3).
+

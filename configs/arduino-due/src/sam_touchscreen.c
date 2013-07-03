@@ -91,7 +91,7 @@
 #define SPI_CLRSCK  putreg32(1 << 24, SAM_PIOA_CODR)
 #define SPI_SETMOSI putreg32(1 << 16, SAM_PIOA_SODR)
 #define SPI_CLRMOSI putreg32(1 << 16, SAM_PIOA_CODR)
-#define SPI_GETMISO ((getreg32(SAM_PIOC_PDSR) >> 21) & 1)
+#define SPI_GETMISO ((getreg32(SAM_PIOC_PDSR) >> 22) & 1)
 
 /* Only mode 0 */
 
@@ -174,6 +174,7 @@ static struct ads7843e_config_s g_tscinfo =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
 /****************************************************************************
  * Include the bit-band skeleton logic
  ****************************************************************************/
@@ -354,36 +355,50 @@ static FAR struct spi_dev_s *sam_tsc_spiinitialize(void)
 int arch_tcinitialize(int minor)
 {
   FAR struct spi_dev_s *dev;
+  static bool initialized = false;
   int ret;
 
   idbg("minor %d\n", minor);
   DEBUGASSERT(minor == 0);
 
-  /* Configure and enable the XPT2046 interrupt pin as an input */
+  /* Have we already initialized?  Since we never uninitialize we must prevent
+   * multiple initializations.  This is necessary, for example, when the
+   * touchscreen example is used as a built-in application in NSH and can be
+   * called numerous time.  It will attempt to initialize each time.
+   */
 
-  (void)sam_configgpio(GPIO_TSC_IRQ);
-
-  /* Configure the PIO interrupt */
-
-  sam_gpioirq(SAM_TSC_IRQ);
-
-  /* Get an instance of the SPI interface for the touchscreen chip select */
-
-  dev = sam_tsc_spiinitialize();
-  if (!dev)
+  if (!initialized)
     {
-      idbg("Failed to initialize bit bang SPI\n");
-      return -ENODEV;
-    }
+      /* Configure and enable the XPT2046 interrupt pin as an input */
 
-  /* Initialize and register the SPI touschscreen device */
+      (void)sam_configgpio(GPIO_TSC_IRQ);
 
-  ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
-  if (ret < 0)
-    {
-      idbg("Failed to register touchscreen device\n");
-      /* up_spiuninitialize(dev); */
-      return -ENODEV;
+      /* Configure the PIO interrupt */
+
+      sam_gpioirq(SAM_TSC_IRQ);
+
+      /* Get an instance of the SPI interface for the touchscreen chip select */
+
+      dev = sam_tsc_spiinitialize();
+      if (!dev)
+        {
+          idbg("Failed to initialize bit bang SPI\n");
+          return -ENODEV;
+        }
+
+      /* Initialize and register the SPI touschscreen device */
+
+      ret = ads7843e_register(dev, &g_tscinfo, CONFIG_ADS7843E_DEVMINOR);
+      if (ret < 0)
+        {
+          idbg("Failed to register touchscreen device\n");
+          /* up_spiuninitialize(dev); */
+          return -ENODEV;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
     }
 
   return OK;
@@ -407,7 +422,13 @@ int arch_tcinitialize(int minor)
 
 void arch_tcuninitialize(void)
 {
-  /* No support for un-initializing the touchscreen XPT2046 device yet */
+  /* No real support for un-initializing the touchscreen XPT2046 device.
+   * Just make sure that interrupts are disabled and that no handler is
+   * attached.
+   */
+
+  sam_gpioirqdisable(SAM_TSC_IRQ);
+  irq_detach(SAM_TSC_IRQ);
 }
 
 #endif /* CONFIG_ARDUINO_ITHEAD_TFT && CONFIG_SPI_BITBANG && CONFIG_INPUT_ADS7843E */

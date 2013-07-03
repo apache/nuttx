@@ -35,11 +35,11 @@ PIO Pin Usage
   ----- ---------- ---- -------- ----- ------------ ---- ------ ----- ----------- ---- ---------
   PA0   CANTX0     ADCH 8        PB0   ETX_CLK      ETH  1      PC0   ERASE       N/A
   PA1   CANRX0     ACDH 7        PB1   ETX_EN       ETH  3      PC1   PIN33       XIO  14
-  PA2   AD7        ADCL 7        PB2   ETXD0        ETH  5      PC2   PIN34       XIO  15
-  PA3   AD6        ADCL 6        PB3   ETXD1        ETH  7      PC3   PIN35       XIO  16
-  PA4   AD5        ADCL 5        PB4   ERX_DV       ETH  10     PC4   PIN36       XIO  17
+  PA2   AD7        ADCL 8        PB2   ETXD0        ETH  5      PC2   PIN34       XIO  15
+  PA3   AD6        ADCL 7        PB3   ETXD1        ETH  7      PC3   PIN35       XIO  16
+  PA4   AD5        ADCL 6        PB4   ERX_DV       ETH  10     PC4   PIN36       XIO  17
   PA5   EEXTINT    ETH  8        PB5   ERXD0        ETH  9      PC5   PIN37       XIO  18
-  PA6   AD4        ADCL 4        PB6   ERXD1        ETH  11     PC6   PIN38       XIO  19
+  PA6   AD4        ADCL 5        PB6   ERXD1        ETH  11     PC6   PIN38       XIO  19
   PA7   PIN31      XIO  12       PB7   ERX_ER       ETH  13     PC7   PIN39       XIO  20
   PA8   [U]RX      PWML 1        PB8   EMDC         ETH  14     PC8   PIN40       XIO  21
   PA9   [U]TX      PWML 2        PB9   EMDIO        ETH  12     PC9   PIN41       XIO  22
@@ -49,15 +49,15 @@ PIO Pin Usage
   PA13  TXD1       COMM 3        PB13  SCL0-3       COMM 8      PC13  PIN50       XIO  31
   PA14  PIN23      XIO  4        PB14  CANTX1/IO    XIO  34     PC14  PIN49       XIO  30
   PA15  PIN24      XIO  5        PB15  DAC0(CANRX1) ADCH 5      PC15  PIN48       XIO  29
-  PA16  AD0        ADCL 0        PB16  DAC1         ADCH 6      PC16  PIN47       XIO  28
+  PA16  AD0        ADCL 1        PB16  DAC1         ADCH 6      PC16  PIN47       XIO  28
   PA17  SDA1       PWMH 9        PB17  AD8          ADCH 1      PC17  PIN46       XIO  27
   PA18  SCL1       PWMH 10       PB18  AD9          ADCH 2      PC18  PIN45       XIO  26
   PA19  PIN42      XIO  23       PB19  AD10         ADCH 3      PC19  PIN44       XIO  25
   PA20  PIN43      XIO  24       PB20  AD11(TXD3)   ADCH 4      PC20  N/C         N/A
   PA21  TXL        TX YELLOW LED PB21  AD14(RXD3)   XIO  33     PC21  PWM9        PWMH 2
-  PA22  AD3        ADCL 3        PB22  N/C          N/A         PC22  PWM8        PWMH 1
-  PA23  AD2        ADCL 2        PB23  SS3          ???         PC23  PWM7        PWML 8
-  PA24  AD1        ADCL 1        PB24  N/C          N/A         PC24  PWM6        PWML 7
+  PA22  AD3        ADCL 4        PB22  N/C          N/A         PC22  PWM8        PWMH 1
+  PA23  AD2        ADCL 3        PB23  SS3          ???         PC23  PWM7        PWML 8
+  PA24  AD1        ADCL 2        PB24  N/C          N/A         PC24  PWM6        PWML 7
   PA25  MISO       SPI  1        PB25  PWM2         PWML 3      PC25  PWM5        PWML 6
   PA26  MOSI       SPI  4        PB26  PIN22        ???         PC26  SS1/PWM4    PWML 10 (there are two)
   PA27  SPCK       SPI  3        PB27  PWM13        PWMH 6      PC27  N/C         N/A
@@ -179,6 +179,7 @@ ITEAD 2.4" TFT with Touch
 
   1. It is not possible to use any of the SPI devices on the Shield unless
      a bit-bang SPI interface is used.  This includes the touch controller
+     a bit-bang SPI interface is used.  This includes the touch controller
      and the SD card.
   2. UART0 cannot be used.  USARTs on the COMM connector should be available.
   3. Parallel data is not contiguous in the PIO register
@@ -218,8 +219,8 @@ ITEAD 2.4" TFT with Touch
    7  IN3     N/C      ---       ---      8    IN4      N/C      ---       ---
    9  VREF    ---      ---       ---      10   VCC      ---      ---       ---
    11 IRQ     J2 pin 2 D9        PC21     12   DOUT     J2 pin 1 D8        PC22
-   13 BUSY    N/C      ---       ---      14   DIN      J1 pin 1 D14       PA16
-   15 /CS     ---      ---       ---      16   DCLK     J1 pin 2 D15       PA24
+   13 BUSY    N/C      ---       ---      14   DIN      J1 pin 1 A0/D15    PA16
+   15 /CS     ---      ---       ---      16   DCLK     J1 pin 2 A1/D15    PA24
   --- ------- -------- --------- -------- ---- -------- -------- --------- -------
 
   NOTES:
