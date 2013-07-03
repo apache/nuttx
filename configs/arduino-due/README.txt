@@ -185,6 +185,9 @@ ITEAD 2.4" TFT with Touch
   3. Parallel data is not contiguous in the PIO register
   4. Touchcontroller /CS pin is connected to ground (always selected).
   5. Either PA28 or PC29 may drive PWM10
+  6. The schematics I have do not agree with the documentation.  The Touch IRQ
+     and Dout pins are reversed in the Documentation (D9 an D8, respectively).
+     I am assuming that the schematic is correct.
 
   SD Interface:
 

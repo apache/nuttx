@@ -11,6 +11,7 @@ choice
 
 config ARCH_DBDP11215
 	bool "DB_DP11215 PIC32 Storage Demo Board"
+	select ARCH_HAVE_LEDS
 	---help---
 		DB_DP11215 PIC32 Storage Demo Board
 
@@ -34,7 +35,6 @@ config ARCH_DBDP11212
 		- 2x16 LCD display
 		- 4 digit, 8 segment LED display
 		- Three tactile switches
-		- Four user LEDs
 
 endchoice
 endif

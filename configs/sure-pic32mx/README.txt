@@ -927,6 +927,7 @@ Where <subdir> is one of the following:
         Board Configuration:
            CONFIG_ARCH_DBDP11215=n    : Disable the DB-DP11215
            CONFIG_ARCH_DBDP11212=y    : Enable the DB-DP11212
+           CONFIG_ARCH_LEDS=n         : The DB-DP11212 has no LEDs
 
         System Type -> PIC32MX Peripheral Support:
            CONFIG_PIC32MX_UART2=n     : Disable UART2
@@ -951,7 +952,7 @@ Where <subdir> is one of the following:
           CONFIG_RAMLOG_SYSLOG=y      : This enables the RAM-based logger as the
                                         system logger.
 
-        Logging is currently can be set up to use any amount of memorym (here 8KB):
+        Logging is currently can be set up to use any amount of memory (here 8KB):
 
           CONFIG_RAMLOG_CONSOLE_BUFSIZE=8192
 
