@@ -891,7 +891,7 @@ void composite_uninitialize(FAR void *handle)
 
   if (priv->dev2)
     {
-      DEV1_UNINITIALIZE(priv->dev2);
+      DEV2_UNINITIALIZE(priv->dev2);
       priv->dev2 = NULL;
     }
 

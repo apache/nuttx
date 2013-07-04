@@ -5108,4 +5108,7 @@
 	  Change error to ERROR (2013-7-3).
 	* arch/arm/src/sam34/sam_gpioirq.c:  Fix some errors for interrupts
 	  on ports D-F (2013-7-3).
+	* /drivers/usbdev/composite.c: Fix a type in the composite device
+	  driver unitialization logic.  DEV1 should be DEV2 in one case
+	  (2013-7-4).
 
