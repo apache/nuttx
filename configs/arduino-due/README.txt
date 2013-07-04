@@ -187,7 +187,9 @@ ITEAD 2.4" TFT with Touch
   5. Either PA28 or PC29 may drive PWM10
   6. The schematics I have do not agree with the documentation.  The Touch IRQ
      and Dout pins are reversed in the Documentation (D9 an D8, respectively).
-     I am assuming that the schematic is correct.
+     I am assuming that the schematic is correct (and the schematic does seem
+     to match up with what little I can see on the single visible side of the
+     board).
 
   SD Interface:
 
