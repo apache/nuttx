@@ -803,12 +803,14 @@ Where <subdir> is one of the following:
          CONFIG_DEBUG_LCD=y         : Enable LCD debug output
 
        NOTES:
-       a. I do not have the LCD1602 working.  I may just be getting lost in the
-          tangle of wires or perhaps there is something fundamentally wrong with
-          the code.
-       b. At this point in time, testing of the SLCD is very limited because
-          there is not much in apps/examples/slcd.  Basically  driver with a working
-          test setup and ready to be tested and debugged.
+       2013-05-27: The LCD1602 has been verified on the DB-DP11212 using
+         this configuration.  It has not been used with the usbnsh configuration
+         or with the DB-11112 board.  It looks to me like the connection to the
+         LCD1602 is identical on the DB-11112 and so I would expect that to work.
+
+         At this point in time, testing of the SLCD is very limited because
+         there is not much in apps/examples/slcd.  Basically  driver with a working
+         test setup and ready to be tested and debugged.
 
   usbnsh:
   =======
@@ -956,5 +958,8 @@ Where <subdir> is one of the following:
 
           CONFIG_RAMLOG_CONSOLE_BUFSIZE=8192
 
+        STATUS:
+          2013-7-4:  This configuration was last verified.
+
      7. See the notes for the nsh configuration.  Most also apply to the usbnsh
-        configuration.
+        configuration as well.
