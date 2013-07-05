@@ -330,14 +330,19 @@ static void spi_setmode(FAR struct spi_bitbang_s *priv,
  *   rising edge and data is propagated on the falling edge (high->low
  *   transition).
  *
- *         hold time
- *       +------------+
- *       |            | hold time
- *  -----+            +------------
- *    |   |           `- Propagate to next bit
- *    |   |
- *    |   `- MISO sampled
- *    ` Set MOSI
+ * /CS --+
+ *       |
+ *       +-----------------------------------------------------------------
+ *       <-hold time-> <-hold time-><-hold time-><-hold time-><-hold time->
+ *                     +------------+            +------------+
+ *                     |            |            |            |
+ * SCLK ---------------+            +------------+            +------------
+ *       ` Set MOSI     |            `- Set MOSI  |            `- Set MOSI
+ *                      |                         |
+ *                      `- Sample MISO            `- Sample MISO
+ *
+ * MISO   <------------X------------><-----------X------------>
+ * MOSO
  *
  * Input Parameters:
  *   dev  - Device-specific state data
@@ -352,28 +357,33 @@ static void spi_setmode(FAR struct spi_bitbang_s *priv,
 static uint16_t spi_bitexchange0(uint16_t dataout, uint32_t holdtime)
 {
   uint16_t datain;
-                                  /* No clock transition before setting MOSI */
+
+  /* Here the clock is is in the resting set (low).  Set MOSI output and wait
+   * for the hold time
+   */
+
   if (dataout != 0)
     {
-      SPI_SETMOSI;                /* Set MOSI if the bit is set */
+      SPI_SETMOSI;
     }
   else
     {
-      SPI_CLRMOSI;                /* Clear MOSI if the bit is not set */
+      SPI_CLRMOSI;
     }
 
-  SPI_SETSCK;                     /* Clock transition before getting MISO */
-  datain = (uint16_t)SPI_GETMISO; /* Get bit 0 = MISO value */
-  if (holdtime > 0)
-    {
-      spi_delay(holdtime);
-    }
+  spi_delay(holdtime);
 
-  SPI_CLRSCK;                     /* Return clock to the resting state */
-  if (holdtime > 0)
-    {
-      spi_delay(holdtime);
-    }
+  /* Set the clock high and sample MISO */
+
+  SPI_SETSCK;
+  datain = (uint16_t)SPI_GETMISO;
+
+  /* Wait the required amount of hold time then put the clock back in the
+   * resting state.
+   */
+
+  spi_delay(holdtime);
+  SPI_CLRSCK;
 
   return datain;
 }
@@ -389,14 +399,19 @@ static uint16_t spi_bitexchange0(uint16_t dataout, uint32_t holdtime)
  *   The base value of the clock is zero.  Data is captured on the clock's
  *   falling edge and data is propagated on the rising edge
  *
- *         hold time
- *       +------------+
- *       |            | hold time
- *  -----+            +------------
- *        |           | `- MISO sampled
- *        |           |
- *        |           `- Propagate to next bit
- *        ` Set MOSI
+ * /CS --+
+ *       |
+ *       +-----------------------------------------------------------------
+ *       <-hold time-> <-hold time-><-hold time-><-hold time-><-hold time->
+ *       +------------+            +------------+
+ *       |            |            |            |
+ * SCLK -+            +------------+            +------------
+ *        ` Set MOSI   |            `- Set MOSI  |
+ *                     |                         |
+ *                      `- Sample MISO            `- Sample MISO
+ *
+ * MISO   <-----------X-------------><----------X------------->
+ * MOSO
  *
  * Input Parameters:
  *   dev  - Device-specific state data
@@ -412,28 +427,31 @@ static uint16_t spi_bitexchange1(uint16_t dataout, uint32_t holdtime)
 {
   uint16_t datain;
 
-  SPI_SETSCK;                     /* Clock transition before setting MOSI */
+  /* The clock should be in the resting state (low).  Set the clock to the
+   * high state and set MOSI.
+   */
+
+  SPI_SETSCK;
   if (dataout != 0)
     {
-      SPI_SETMOSI;                /* Set MOSI if the bit is set */
+      SPI_SETMOSI;
     }
   else
     {
-      SPI_CLRMOSI;                /* Clear MOSI if the bit is not set */
+      SPI_CLRMOSI;
     }
 
-  if (holdtime > 0)
-    {
-      spi_delay(holdtime);
-    }
+  /* Wait for the required hold time then put the clock back into the
+   * resting (low) state.
+   */
 
-  SPI_CLRSCK;                     /* Clock transition before getting MISO */
-  datain = (uint16_t)SPI_GETMISO; /* Get bit 0 = MISO value */
-                                  /* Clock is in resting state */
-  if (holdtime > 0)
-    {
-      spi_delay(holdtime);
-    }
+  spi_delay(holdtime);
+  SPI_CLRSCK;
+
+  /* Sample MISO on the falling edge and wait for the hold time again */
+
+  datain = (uint16_t)SPI_GETMISO;
+  spi_delay(holdtime);
 
   return datain;
 }
@@ -449,14 +467,19 @@ static uint16_t spi_bitexchange1(uint16_t dataout, uint32_t holdtime)
  *     The base value of the clock is one.  Data is captured on the clock's
  *     falling edge and data is propagated on the rising edge.
  *
- *         hold time
- *  -----+            +------------
- *       |            | hold time
- *       +------------+
- *      |  |          `- Propagate to next bit
- *      |  |
- *      |  `- MISO sampled
- *       ` Set MOSI
+ * /CS --+
+ *       |
+ *       +-----------------------------------------------------------------
+ *       <-hold time-> <-hold time-><-hold time-><-hold time-><-hold time->
+ *      ---------------+            +------------+            +------------
+ *                     |            |            |            |
+ * SCLK                +------------+            +------------+
+ *       ` Set MOSI     |            `- Set MOSI  |             `- Set MOSI
+ *                      |                         |
+ *                      `- Sample MISO            `- Sample MISO
+ *
+ * MISO   <------------X------------><-----------X------------>
+ * MOSO
  *
  * Input Parameters:
  *   dev  - Device-specific state data
@@ -471,28 +494,33 @@ static uint16_t spi_bitexchange1(uint16_t dataout, uint32_t holdtime)
 static uint16_t spi_bitexchange2(uint16_t dataout, uint32_t holdtime)
 {
   uint16_t datain;
-                                  /* No clock transition before setting MOSI */
+
+  /* Here the clock is is in the resting set (high).  Set MOSI output and wait
+   * for the hold time
+   */
+
   if (dataout != 0)
     {
-      SPI_SETMOSI;                /* Set MOSI if the bit is set */
+      SPI_SETMOSI;
     }
   else
     {
-      SPI_CLRMOSI;                /* Clear MOSI if the bit is not set */
+      SPI_CLRMOSI;
     }
 
-  SPI_CLRSCK;                     /* Clock transition before getting MISO */
-  datain = (uint16_t)SPI_GETMISO; /* Get bit 0 = MISO value */
-  if (holdtime > 0)
-    {
-      spi_delay(holdtime);
-    }
+  spi_delay(holdtime);
 
-  SPI_SETSCK;                     /* Return clock to the resting state */
-  if (holdtime > 0)
-    {
-      spi_delay(holdtime);
-    }
+  /* Set the clock low and sample MISO */
+
+  SPI_CLRSCK;
+  datain = (uint16_t)SPI_GETMISO;
+
+  /* Wait the required amount of hold time then put the clock back in the
+   * resting state (high).
+   */
+
+  spi_delay(holdtime);
+  SPI_SETSCK;
 
   return datain;
 }
@@ -508,14 +536,19 @@ static uint16_t spi_bitexchange2(uint16_t dataout, uint32_t holdtime)
  *     The base value of the clock is one.  Data is captured on the clock's
  *     rising edge and data is propagated on the falling edge.
  *
- *         hold time
- *  -----+            +------------
- *       |            | hold time
- *       +------------+
- *        |           | `- MISO sampled
- *        |           |
- *        |           `- Propagate to next bit
- *         ` Set MOSI
+ * /CS --+
+ *       |
+ *       +-----------------------------------------------------------------
+ *       <-hold time-> <-hold time-><-hold time-><-hold time-><-hold time->
+ *      -+            +------------+            +------------
+ *       |            |            |            |
+ * SCLK  +------------+            +------------+
+ *        ` Set MOSI   |            `- Set MOSI  |
+ *                     |                         |
+ *                      `- Sample MISO            `- Sample MISO
+ *
+ * MISO   <-----------X-------------><----------X------------->
+ * MOSO
  *
  * Input Parameters:
  *   dev  - Device-specific state data
@@ -531,6 +564,10 @@ static uint16_t spi_bitexchange3(uint16_t dataout, uint32_t holdtime)
 {
   uint16_t datain;
 
+  /* The clock should be in the resting state (high).  Set the clock to the
+   * low state and set MOSI.
+   */
+
   SPI_CLRSCK;                     /* Clock transition before setting MOSI */
   if (dataout != 0)
     {
@@ -541,18 +578,17 @@ static uint16_t spi_bitexchange3(uint16_t dataout, uint32_t holdtime)
       SPI_CLRMOSI;                /* Clear MOSI if the bit is not set */
     }
 
-  if (holdtime > 0)
-    {
-      spi_delay(holdtime);
-    }
+  /* Wait for the required hold time then put the clock back into the
+   * resting (high) state.
+   */
 
-  SPI_SETSCK;                     /* Clock transition before getting MISO */
-  datain = (uint16_t)SPI_GETMISO; /* Get bit 0 = MISO value */
-                                  /* Clock is in resting state */
-  if (holdtime > 0)
-    {
-      spi_delay(holdtime);
-    }
+  spi_delay(holdtime);
+  SPI_SETSCK;
+
+  /* Sample MISO on the rising edge and wait for the hold time again */
+
+  datain = (uint16_t)SPI_GETMISO;
+  spi_delay(holdtime);
 
   return datain;
 }
