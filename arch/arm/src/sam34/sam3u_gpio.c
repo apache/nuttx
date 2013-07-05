@@ -375,11 +375,14 @@ int sam_configgpio(gpio_pinset_t cfgset)
 {
   uintptr_t base = sam_gpiobase(cfgset);
   uint32_t  pin  = sam_gpiopin(cfgset);
+  irqstate_t flags;
   int       ret;
 
-  /* Enable writing to GPIO registers
-   * TODO:  This probably requires some protection against re-entry.
-   */
+  /* Disable interrupts to prohibit re-entrance. */
+
+  flags = irqsave();
+
+  /* Enable writing to GPIO registers */
 
   putreg32(PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
 
@@ -409,9 +412,10 @@ int sam_configgpio(gpio_pinset_t cfgset)
         break;
     }
 
-  /* Enable writing to GPIO registers */
+  /* Disable writing to GPIO registers */
 
   putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
+  irqrestore(flags);
 
   return ret;
 }
