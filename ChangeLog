@@ -5111,4 +5111,6 @@
 	* /drivers/usbdev/composite.c: Fix a type in the composite device
 	  driver unitialization logic.  DEV1 should be DEV2 in one case
 	  (2013-7-4).
+	* arch/arm/src/sam34/sam3u_gpio.c:  sam_configgpio() must protect
+	  against re-entrancy (2013-7-5).
 

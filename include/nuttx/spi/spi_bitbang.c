@@ -337,12 +337,11 @@ static void spi_setmode(FAR struct spi_bitbang_s *priv,
  *                     +------------+            +------------+
  *                     |            |            |            |
  * SCLK ---------------+            +------------+            +------------
- *       ` Set MOSI     |            `- Set MOSI  |            `- Set MOSI
- *                      |                         |
+ *       `- Set MOSI    |            `- Set MOSI  |            `- Set MOSI
  *                      `- Sample MISO            `- Sample MISO
  *
- * MISO   <------------X------------><-----------X------------>
- * MOSO
+ * MISO  /-------------X-----------\/------------X-------------\/-----------
+ * MOSO  \-------------X-----------/\------------X-------------/\-----------
  *
  * Input Parameters:
  *   dev  - Device-specific state data
@@ -406,12 +405,11 @@ static uint16_t spi_bitexchange0(uint16_t dataout, uint32_t holdtime)
  *       +------------+            +------------+
  *       |            |            |            |
  * SCLK -+            +------------+            +------------
- *        ` Set MOSI   |            `- Set MOSI  |
- *                     |                         |
+ *        `- Set MOSI  |            `- Set MOSI  |
  *                      `- Sample MISO            `- Sample MISO
  *
- * MISO   <-----------X-------------><----------X------------->
- * MOSO
+ * MISO   /-----------X------------\/-----------X-------------\/------------
+ * MOSO   \-----------X------------/\-----------X-------------/\------------
  *
  * Input Parameters:
  *   dev  - Device-specific state data
@@ -474,12 +472,11 @@ static uint16_t spi_bitexchange1(uint16_t dataout, uint32_t holdtime)
  *      ---------------+            +------------+            +------------
  *                     |            |            |            |
  * SCLK                +------------+            +------------+
- *       ` Set MOSI     |            `- Set MOSI  |             `- Set MOSI
- *                      |                         |
- *                      `- Sample MISO            `- Sample MISO
+ *       `- Set MOSI    |            `- Set MOSI  |             `- Set MOSI
+ *                       `- Sample MISO            `- Sample MISO
  *
- * MISO   <------------X------------><-----------X------------>
- * MOSO
+ * MISO  /-------------X------------\/-----------X-------------\/-----------
+ * MOSO  \-------------X------------/\-----------X-------------/\-----------
  *
  * Input Parameters:
  *   dev  - Device-specific state data
@@ -544,11 +541,10 @@ static uint16_t spi_bitexchange2(uint16_t dataout, uint32_t holdtime)
  *       |            |            |            |
  * SCLK  +------------+            +------------+
  *        ` Set MOSI   |            `- Set MOSI  |
- *                     |                         |
  *                      `- Sample MISO            `- Sample MISO
  *
- * MISO   <-----------X-------------><----------X------------->
- * MOSO
+ * MISO   /-----------X------------\/-----------X-------------\/------------
+ * MOSO   \-----------X------------/\-----------X-------------/\------------
  *
  * Input Parameters:
  *   dev  - Device-specific state data
