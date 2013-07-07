@@ -60,7 +60,7 @@ endif
 # Add the miscellaneous C files to the build
 
 CSRCS += lib_match.c
-CSRCS += lib_crc32.c
+CSRCS += lib_crc32.c lib_crc16.c
 CSRCS += lib_dbg.c lib_dumpbuffer.c
 
 # Keyboard driver encoder/decoder

@@ -5113,4 +5113,6 @@
 	  (2013-7-4).
 	* arch/arm/src/sam34/sam3u_gpio.c:  sam_configgpio() must protect
 	  against re-entrancy (2013-7-5).
+	* libc/misc/lib_crc16.c and include/crc16.h:  Add CRC16 support
+	  (2013-7-7).
 

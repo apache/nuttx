@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/crc32.h
+ * include/crc16.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_CRC32_H
-#define __INCLUDE_CRC32_H
+#ifndef __INCLUDE_CRC16_H
+#define __INCLUDE_CRC16_H
 
 /****************************************************************************
  * Included Files
@@ -56,28 +56,28 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: crc32part
+ * Name: crc16part
  *
  * Description:
  *   Continue CRC calculation on a part of the buffer.
  *
  ****************************************************************************/
 
-uint32_t crc32part(FAR const uint8_t *src, size_t len, uint32_t crc32val);
+uint16_t crc16part(FAR const uint8_t *src, size_t len, uint16_t crc16val);
 
 /****************************************************************************
- * Name: crc32
+ * Name: crc16
  *
  * Description:
- *   Return a 32-bit CRC of the contents of the 'src' buffer, length 'len'
+ *   Return a 16-bit CRC of the contents of the 'src' buffer, length 'len'
  *
  ****************************************************************************/
 
-uint32_t crc32(FAR const uint8_t *src, size_t len);
+uint16_t crc16(FAR const uint8_t *src, size_t len);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_CRC32_H */
+#endif /* __INCLUDE_CRC16_H */
