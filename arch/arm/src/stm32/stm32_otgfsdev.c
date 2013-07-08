@@ -1,5 +1,5 @@
 /*******************************************************************************
- * arch/arm/src/stm32/stm32_usbdev.c
+ * arch/arm/src/stm32/stm32_otgfsdev.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -434,7 +434,7 @@ struct stm32_usbdev_s
   uint8_t                 devstate:4;    /* See enum stm32_devstate_e */
   uint8_t                 ep0state:4;    /* See enum stm32_ep0state_e */
   uint8_t                 testmode:4;    /* Selected test mode */
-  uint8_t                 epavail:4;     /* Bitset of available endpoints */
+  uint8_t                 epavail[2];    /* Bitset of available OUT/IN endpoints */
 
   /* E0 SETUP data buffering.
    *
@@ -1964,7 +1964,11 @@ static void stm32_usbreset(struct stm32_usbdev_s *priv)
     {
       CLASS_DISCONNECT(priv->driver, &priv->usbdev);
     }
-  priv->epavail = STM32_EP_AVAILABLE;
+
+  /* Mark all endpoints as available */
+
+  priv->epavail[0] = STM32_EP_AVAILABLE;
+  priv->epavail[1] = STM32_EP_AVAILABLE;
 
   /* Disable all end point interrupts */
 
@@ -4705,10 +4709,10 @@ static FAR struct usbdev_ep_s *stm32_ep_alloc(FAR struct usbdev_s *dev,
 
   epphy = USB_EPNO(eplog);
 
-  /* Get the set of available endpoints */
+  /* Get the set of available endpoints depending on the direction */
 
   flags = irqsave();
-  epavail = priv->epavail;
+  epavail = priv->epavail[in];
 
   /* A physical address of 0 means that any endpoint will do */
 
@@ -4749,7 +4753,7 @@ static FAR struct usbdev_ep_s *stm32_ep_alloc(FAR struct usbdev_s *dev,
             {
               /* Mark the endpoint no longer available */
 
-              priv->epavail &= ~(1 << epno);
+              priv->epavail[in] &= ~(1 << epno);
 
               /* And return the pointer to the standard endpoint structure */
 
@@ -4787,7 +4791,7 @@ static void stm32_ep_free(FAR struct usbdev_s *dev, FAR struct usbdev_ep_s *ep)
       /* Mark the endpoint as available */
 
       flags = irqsave();
-      priv->epavail |= (1 << privep->epphy);
+      priv->epavail[privep->isin] |= (1 << privep->epphy);
       irqrestore(flags);
     }
 }
@@ -5049,7 +5053,9 @@ static void stm32_swinitialize(FAR struct stm32_usbdev_s *priv)
 
   priv->usbdev.ops = &g_devops;
   priv->usbdev.ep0 = &priv->epin[EP0].ep;
-  priv->epavail    = STM32_EP_AVAILABLE;
+
+  priv->epavail[0] = STM32_EP_AVAILABLE;
+  priv->epavail[1] = STM32_EP_AVAILABLE;
 
   priv->epin[EP0].ep.priv  = priv;
   priv->epout[EP0].ep.priv = priv;

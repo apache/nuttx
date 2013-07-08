@@ -5115,4 +5115,7 @@
 	  against re-entrancy (2013-7-5).
 	* libc/misc/lib_crc16.c and include/crc16.h:  Add CRC16 support
 	  (2013-7-7).
-
+	* arch/arm/src/stm32/stm32_otgfsdev.c:  SourceForge bug #16:  Fix
+	  endpoint allocation logic.  The same endpoint can be allocated as
+	  an IN or an OUT endpoint.  The implementation only support one
+	  allocation, either IN or OUT (From Chia Cheng Tsao, 2013-7-8).
