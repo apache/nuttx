@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/rwbuffer.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -274,7 +274,7 @@ static ssize_t rwb_writebuffer(FAR struct rwbuffer_s *rwb,
   /* Add data to cache */
 
   fvdbg("writebuffer: copying %d bytes from %p to %p\n",
-        nblocks * wrb->blocksize, wrbuffer,
+        nblocks * rwb->blocksize, wrbuffer,
         &rwb->wrbuffer[rwb->wrnblocks * rwb->blocksize]);
   memcpy(&rwb->wrbuffer[rwb->wrnblocks * rwb->blocksize],
          wrbuffer, nblocks * rwb->blocksize);
@@ -430,7 +430,7 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
       rwb->wrbuffer = kmalloc(allocsize);
       if (!rwb->wrbuffer)
         {
-          fdbg("Write buffer kmalloc(%d) failed\n", allocsizee);
+          fdbg("Write buffer kmalloc(%d) failed\n", allocsize);
           return -ENOMEM;
         }
     }
@@ -613,7 +613,7 @@ int rwb_write(FAR struct rwbuffer_s *rwb, off_t startblock,
     {
       rwb_resetrhbuffer(rwb);
     }
-  rwb_give(&rwb->rhsem);
+  rwb_semgive(&rwb->rhsem);
 #endif
 
 #ifdef CONFIG_FS_WRITEBUFFER

@@ -5116,6 +5116,13 @@
 	* libc/misc/lib_crc16.c and include/crc16.h:  Add CRC16 support
 	  (2013-7-7).
 	* arch/arm/src/stm32/stm32_otgfsdev.c:  SourceForge bug #16:  Fix
-	  endpoint allocation logic.  The same endpoint can be allocated as
-	  an IN or an OUT endpoint.  The implementation only support one
-	  allocation, either IN or OUT (From Chia Cheng Tsao, 2013-7-8).
+	  to the endpoint allocation logic.  Apparently the same endpoint can
+	  be allocated as both an IN or an OUT endpoint.  The existing
+	  implementation only supported one allocation, either IN or OUT.  This
+	  resulted in failures to allocate enpoints when used with the CDC/ACM +
+	  MSC composite driver (From Chia Cheng Tsao, 2013-7-8).
+	* arch/arm/src/stm32/stm32_sdio.c:  SourceForge bug #17:  Add
+	  support for the data block end (DBCKEND) interrupt to terminate
+	  transfers (From Chia Cheng Tsao, 2013-7-8)
+	* drivers/rwbuffer.c: SourceForge bug #17: Correct typos that can cause
+	  failures in some configurations (From Chia Cheng Tsao, 2013-7-8).
