@@ -5126,3 +5126,6 @@
 	  transfers (From Chia Cheng Tsao, 2013-7-8)
 	* drivers/rwbuffer.c: SourceForge bug #17: Correct typos that can cause
 	  failures in some configurations (From Chia Cheng Tsao, 2013-7-8).
+	* include/nuttx/usb/usbdev.h: Fix some typos that cause compiler errors
+	  when CONFIG_USBDEV_DMA and CONFIG_USBDEV_DMAMEMORY are selected (From
+	  Chia Cheng Tsao, 2013-7-12).

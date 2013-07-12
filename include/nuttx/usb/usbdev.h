@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/usb/usbdev.h
  *
- *   Copyright (C) 2008-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * NOTE:  This interface was inspired by the Linux gadget interface by
@@ -86,8 +86,8 @@
 /* Allocate/free an I/O buffer.  Should not be called from interrupt processing! */
 
 #ifdef CONFIG_USBDEV_DMA
-#  define EP_ALLOCBUFFER(ep,nb)    (ep)->ops->alloc(ep,nb)
-#  define EP_FREEBUFFER(ep,buff)   (ep)->ops->free(ep,buf)
+#  define EP_ALLOCBUFFER(ep,nb)    (ep)->ops->allocbuffer(ep,nb)
+#  define EP_FREEBUFFER(ep,buf)    (ep)->ops->freebuffer(ep,buf)
 #else
 #  define EP_ALLOCBUFFER(ep,nb)    malloc(nb)
 #  define EP_FREEBUFFER(ep,buf)    free(buf)
@@ -340,7 +340,7 @@ extern "C"
  *
  ************************************************************************************/
 
-EXTERN int usbdev_register(FAR struct usbdevclass_driver_s *driver);
+int usbdev_register(FAR struct usbdevclass_driver_s *driver);
 
 /************************************************************************************
  * Name: usbdev_unregister
@@ -352,7 +352,7 @@ EXTERN int usbdev_register(FAR struct usbdevclass_driver_s *driver);
  *
  ************************************************************************************/
 
-EXTERN int usbdev_unregister(FAR struct usbdevclass_driver_s *driver);
+int usbdev_unregister(FAR struct usbdevclass_driver_s *driver);
 
 /****************************************************************************
  * Name: usbdev_dma_alloc and usbdev_dma_free
@@ -381,8 +381,8 @@ EXTERN int usbdev_unregister(FAR struct usbdevclass_driver_s *driver);
  ****************************************************************************/
 
 #if defined(CONFIG_USBDEV_DMA) && defined(CONFIG_USBDEV_DMAMEMORY)
-EXTERN FAR void *usbdev_dma_alloc(size_t size);
-EXTERN void usbdev_dma_free(FAR void *memory);
+FAR void *usbdev_dma_alloc(size_t size);
+void usbdev_dma_free(FAR void *memory);
 #endif
 
 #undef EXTERN

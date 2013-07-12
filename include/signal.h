@@ -246,23 +246,24 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN int kill(pid_t, int);
-EXTERN int sigemptyset(FAR sigset_t *set);
-EXTERN int sigfillset(FAR sigset_t *set);
-EXTERN int sigaddset(FAR sigset_t *set, int signo);
-EXTERN int sigdelset(FAR sigset_t *set, int signo);
-EXTERN int sigismember(FAR const sigset_t *set, int signo);
-EXTERN int sigaction(int sig, FAR const struct sigaction *act, FAR struct sigaction *oact);
-EXTERN int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
-EXTERN int sigpending(FAR sigset_t *set);
-EXTERN int sigsuspend(FAR const sigset_t *sigmask);
-EXTERN int sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
-EXTERN int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,
-                        FAR const struct timespec *timeout);
+int kill(pid_t, int);
+int sigemptyset(FAR sigset_t *set);
+int sigfillset(FAR sigset_t *set);
+int sigaddset(FAR sigset_t *set, int signo);
+int sigdelset(FAR sigset_t *set, int signo);
+int sigismember(FAR const sigset_t *set, int signo);
+int sigaction(int sig, FAR const struct sigaction *act,
+              FAR struct sigaction *oact);
+int sigprocmask(int how, FAR const sigset_t *set, FAR sigset_t *oset);
+int sigpending(FAR sigset_t *set);
+int sigsuspend(FAR const sigset_t *sigmask);
+int sigwaitinfo(FAR const sigset_t *set, FAR struct siginfo *value);
+int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *value,
+                 FAR const struct timespec *timeout);
 #ifdef CONFIG_CAN_PASS_STRUCTS
-EXTERN int sigqueue(int pid, int signo, union sigval value);
+int sigqueue(int pid, int signo, union sigval value);
 #else
-EXTERN int sigqueue(int pid, int signo, FAR void *sival_ptr);
+int sigqueue(int pid, int signo, FAR void *sival_ptr);
 #endif
 
 #undef EXTERN
