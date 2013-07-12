@@ -16,6 +16,7 @@ Contents
   - NXFLAT Toolchain
   - AtmelStudio6.1
   - LEDs
+  - Serial Console
   - SAM3U-EK-specific Configuration Options
   - Configurations
 
@@ -267,8 +268,27 @@ LEDs
     on a small proportion of the time.
 *** LED2 may also flicker normally if signals are processed.
 
+Serial Console
+^^^^^^^^^^^^^^
+
+  By default, all of these configurations use UART0 for the NuttX serial
+  console.  UART0 corresponds to the DB-9 connector labelled "UART".  This
+  is a male connector and will require a female-to-female, NUL modem cable
+  to connect to a PC.
+
+  An alternate is USART1 which connects to the other DB-9 connector labeled
+  "USART".  USART1 is not enabled by default unless specifically noted
+  otherwise in the configuration description.  A NUL modem cable must be
+  used with the port as well.
+
+  NOTE:  One of the USART1 pins is shared with the audio CODEC.  The audio
+  CODEC cannot be used of USART1 is enabled.
+
+  By default serial console is configured for 115000, 8-bit, 1 stop bit, and
+  no parity.
+
 SAM3U-EK-specific Configuration Options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
        be set to:
