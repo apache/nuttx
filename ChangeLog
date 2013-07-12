@@ -5129,3 +5129,6 @@
 	* include/nuttx/usb/usbdev.h: Fix some typos that cause compiler errors
 	  when CONFIG_USBDEV_DMA and CONFIG_USBDEV_DMAMEMORY are selected (From
 	  Chia Cheng Tsao, 2013-7-12).
+	* nuttx/configs/olimex-lpc1766stk/zmodem:  Add a new configuration to
+	  test the Zmodem sz and rz commands (which don't actually exist yet,
+	  but will). (2013-7-12).
