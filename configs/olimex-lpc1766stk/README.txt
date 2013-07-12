@@ -14,6 +14,7 @@ Contents
   NuttX OABI "buildroot" Toolchain
   NXFLAT Toolchain
   LEDs
+  Serial Console
   Using OpenOCD and GDB with an FT2232 JTAG emulator
   Olimex LPC1766-STK Configuration Options
   USB Host Configuration
@@ -448,6 +449,23 @@ LEDs
      spending more time processing timer interrupts than doing any other kind of
      processing.  That, of course, makes sense if the system is truly idle and only
      processing timer interrupts.
+
+Serial Console
+^^^^^^^^^^^^^^
+
+  By default, all of these configurations use UART0 for the NuttX serial
+  console.  UART0 corresponds to the DB-9 connector labelled "RS232_0".  This
+  is a female connector and will require a normal male-to-female RS232 cable
+  to connect to a PC.
+
+  An alternate is UART1 which connects to the other DB-9 connector labeled
+  "RS232_1".  UART1 is not enabled by default unless specifically noted
+  otherwise in the configuration description.  A normal serial cable must be
+  used with the port as well.
+
+  By default serial console is configured for 57600 baud, 8-bit, 1 stop bit,
+  and no parity.  Higher rates will probably require minor modification of
+  the UART initialization logic to use the fractional dividers.
 
 Using OpenOCD and GDB with an FT2232 JTAG emulator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1043,3 +1061,51 @@ Where <subdir> is one of the following:
     class driver at apps/examples/usbstorage.  See apps/examples/README.txt
     for more information.
 
+  zmodem:
+    This is an alternative NSH configuration that was used to test Zmodem
+    file transfers.  It is similar to the standard NSH configuration but has
+    the following differences:
+
+    1. UART0 is still the NuttX serial console as with most of the other
+       configurations here.  However, UART1 is also enabled for performing
+       the Zmodem transfers.  Zmodem transfers can be performed on the
+       console device, however, this configuration permits debug output on
+       the serial console which the transfer is in progress without
+       interfering with the file transfer.
+
+         CONFIG_LPC17XX_UART1=y
+         CONFIG_UART1_ISUART=y
+         CONFIG_UART1_RXBUFSIZE=256
+         CONFIG_UART1_TXBUFSIZE=256
+         CONFIG_UART1_BAUD=115200
+         CONFIG_UART1_BITS=8
+         CONFIG_UART1_PARITY=0
+         CONFIG_UART1_2STOP=0
+
+    2. Support is included for the NuttX sz and rz commands.
+
+    This program has been verified against the rzsz programs running on a
+    Linux PC.  To send a file to the PC, first start rz on the Linux host:
+
+      $ sudo rz </dev/ttyS0 >/dev/ttyS0
+
+    You can add the rz -v option multiple times, each increases the level
+    of debug output.
+
+    NOTE: The NuttX Zmodem does sends rz\n when it starts in compliance with
+    the Zmodem specification.  On Linux this, however, seems to start some
+    other, incompatible version of rz.  You need to start rz manually to
+    make sure that the correct version is selected.  You can tell when this
+    evil rz/sz has inserted itself because you will see the '^' (0x5e)
+    character replacing the standard Zmodem ZDLE character (0x19) in the
+    binary data stream.
+
+    If you don't have the rz command on your Linux box, the package to
+    install rzsz (or possibily lrzsz).
+
+    Then on the target:
+
+      > sz -d /dev/ttyS1 <filename>
+
+    Where filename is a file residing in the /tmp directory.
+ 
