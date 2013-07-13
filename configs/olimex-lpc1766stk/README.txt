@@ -1082,10 +1082,28 @@ Where <subdir> is one of the following:
          CONFIG_UART1_PARITY=0
          CONFIG_UART1_2STOP=0
 
-    2. Support is included for the NuttX sz and rz commands.
+    2. Support is included for the NuttX sz and rz commands.  In order to
+       use these commands, you will need to mount the SD card so that you
+       will have a file system to transfer files in and out of:
+
+         nsh> mount -t vfat /dev/mmcds0 /mnt/sdcard
+
+       NOTE:  You must use the mountpoint /mnt/sdcard because that is the
+       Zmodem sandbox specified in the configuration.
+
+         CONFIG_SYSTEM_ZMODEM_MOUNTPOINT="/mnt/sdcard"
+
+       Hmmm.. I probably should set up an NSH script to just mount /dev/mmcsd0
+       at /mnt/sdcard each time the board boots.
 
     This program has been verified against the rzsz programs running on a
-    Linux PC.  To send a file to the PC, first start rz on the Linux host:
+    Linux PC.  To send a file to the PC, first make sure that the serial
+    port is configured to work with the board:
+
+      $ sudo stty -F /dev/ttyS0 57600
+      $ sudo stty -F /dev/ttyS0
+
+    start rz on the Linux host:
 
       $ sudo rz </dev/ttyS0 >/dev/ttyS0
 
