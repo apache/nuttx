@@ -1089,7 +1089,8 @@ Where <subdir> is one of the following:
          nsh> mount -t vfat /dev/mmcds0 /mnt/sdcard
 
        NOTE:  You must use the mountpoint /mnt/sdcard because that is the
-       Zmodem sandbox specified in the configuration.
+       Zmodem sandbox specified in the configuration:  All files received
+       from the remote host will be stored at /mnt/sdcard because of:
 
          CONFIG_SYSTEM_ZMODEM_MOUNTPOINT="/mnt/sdcard"
 
@@ -1125,5 +1126,6 @@ Where <subdir> is one of the following:
 
       > sz -d /dev/ttyS1 <filename>
 
-    Where filename is a file residing in the /tmp directory.
+    Where filename is the full path to the file to send (i.e., it begins
+    with the '/' character).
  
