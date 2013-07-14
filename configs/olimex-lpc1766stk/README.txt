@@ -137,7 +137,7 @@ Olimex LPC1766-STK development board
   But, referring to a different Olimex board, "Nokia 6100 LCD Display
   Driver," Revision 1, James P. Lynch ("Nokia 6100 LCD Display Driver.pdf")
   says:
-  
+
   "The major irritant in using this display is identifying the graphics
    controller; there are two possibilities (Epson S1D15G00 or Philips
    PCF8833). The LCD display sold by the German Web Shop Jelu has a Leadis
@@ -158,11 +158,11 @@ Olimex LPC1766-STK development board
 
   The LCD connects to the LPC1766 via SPI and two GPIOs.  The two GPIOs are
   noted above:
-  
+
     P1.21 is the SPI chip select, and
     P3.25 is the LCD reset
     P3.26 is PWM1 output used to control the backlight intensity.
-  
+
   MISO0 and MOSI0 are join via a 1K ohm resistor so the LCD appears to be
   write only.
 
@@ -239,7 +239,7 @@ IDEs
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project (There is a simple RIDE project
   in the RIDE subdirectory).
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -334,7 +334,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -398,7 +398,7 @@ LEDs
 
   LED1    LED2      Meaning
   ------- --------  --------------------------------------------------------------------
-   OFF    OFF      Still initializing and there is no interrupt activity. 
+   OFF    OFF      Still initializing and there is no interrupt activity.
                     Initialization is very fast so if you see this, it probably means
                     that the system is hung up somewhere in the initialization phases.
    OFF     Glowing  Still initializing (see above) but taking interrupts.
@@ -408,7 +408,7 @@ LEDs
    OFF     Flashing Ooops!  We crashed before finishing initialization (or, perhaps
                     after initialization, during an interrupt while the LPC17xx was
                     sleeping -- see below).
- 
+
    ON      OFF      The system has completed initialization, but is apparently not taking
                     any interrupts.
    ON      Glowing  The OS successfully initialized and is taking interrupts (but, for
@@ -426,7 +426,7 @@ LEDs
   NOTE: In glowing/glowing case, you get some good subjective information about the
   behavior of your system by looking at the level of the LED glow (or better, by
   connecting O-Scope and calculating the actual duty):
-  
+
   1. The intensity of the glow is determined by the duty of LED on/off toggle --
      as the ON period becomes larger with respect the OFF period, the LED will
      glow more brightly.
@@ -442,7 +442,7 @@ LEDs
 
   When my LPC1766 sits IDLE -- doing absolutely nothing but processing timer interrupts --
   I see the following:
-  
+
   1. LED1 glows dimly due to the timer interrupts.
   2. But LED2 is even more dim!  The LED ON time excludes the time processing the
      interrupt that re-awakens the processing.  So this tells me that the LPC1766 is
@@ -471,24 +471,24 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Downloading OpenOCD
-  
+
     You can get information about OpenOCD here: http://openocd.berlios.de/web/
     and you can download it from here. http://sourceforge.net/projects/openocd/files/.
     To get the latest OpenOCD with more mature lpc17xx, you have to download
     from the GIT archive.
-    
+
       git clone git://openocd.git.sourceforge.net/gitroot/openocd/openocd
 
     At present, there is only the older, frozen 0.4.0 version.  These, of course,
     may have changed since I wrote this.
- 
+
   Building OpenOCD under Cygwin:
 
     You can build OpenOCD for Windows using the Cygwin tools.  Below are a
     few notes that worked as of November 7, 2010.  Things may have changed
     by the time you read this, but perhaps the following will be helpful to
     you:
-    
+
     1. Install Cygwin (http://www.cygwin.com/).  My recommendation is to install
        everything.  There are many tools you will need and it is best just to
        waste a little disk space and have everthing you need.  Everything will
@@ -505,23 +505,23 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
        CDM20802 WHQL Certified.zip
        $ mkdir ftd2xx
        $ cd ftd2xx
-       $ unzip ..CDM20802\ WHQL\ Certified.zip 
+       $ unzip ..CDM20802\ WHQL\ Certified.zip
        Archive:  CDM20802 WHQL Certified.zip
        ...
 
     3. Get the latest OpenOCD source
-    
+
        $ pwd
        /home/OpenOCD
        $ git clone git://openocd.git.sourceforge.net/gitroot/openocd/openocd
- 
+
        You will then have the source code in /home/OpenOCD/openocd
 
     4. Build OpenOCD for the FT22322 interface
 
        $ pwd
        /home/OpenOCD/openocd
-       $ ./bootstrap 
+       $ ./bootstrap
 
        Jim is a tiny version of the Tcl scripting language.  It is needed
        by more recent versions of OpenOCD.  Build libjim.a using the following
@@ -557,7 +557,7 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
     I have been using the Olimex ARM-USB-OCD JTAG debugger with the
     LPC1766-STK (http://www.olimex.com).  OpenOCD requires a configuration
     file.  I keep the one I used last here:
-    
+
       configs/olimex-lpc1766stk/tools/olimex.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
@@ -571,13 +571,13 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
       flash bank $_FLASHNAME lpc2000 0x0 0x80000 0 0 $_TARGETNAME ...
 
     To:
- 
+
       flash bank $_FLASHNAME lpc2000 0x0 0x40000 0 0 $_TARGETNAME ...
-    
+
     There is also a script on the tools/ directory that I use to start
     the OpenOCD daemon on my system called oocd.sh.  That script will
     probably require some modifications to work in another environment:
-  
+
     - Possibly the value of OPENOCD_PATH and TARGET_PATH
     - It assumes that the correct script to use is the one at
       configs/olimex-lpc1766stk/tools/olimex.cfg
@@ -623,11 +623,11 @@ Using OpenOCD and GDB with an FT2232 JTAG emulator
        FLASH.
     3. The MCU must be halted prior to loading code using 'mon reset'
        as described below.
- 
+
     OpenOCD will support several special 'monitor' commands.  These
     GDB commands will send comments to the OpenOCD monitor.  Here
     are a couple that you will need to use:
-  
+
      (gdb) monitor reset
      (gdb) monitor halt
 
@@ -710,7 +710,7 @@ Olimex LPC1766-STK Configuration Options
        the delay actually is 100 seconds.
 
     Individual subsystems can be enabled:
-    
+
       CONFIG_LPC17_MAINOSC=y
       CONFIG_LPC17_PLL0=y
       CONFIG_LPC17_PLL1=n
@@ -799,7 +799,7 @@ Olimex LPC1766-STK Configuration Options
   LPC17xx USB Device Configuration
 
     CONFIG_LPC17_USBDEV_FRAME_INTERRUPT
-      Handle USB Start-Of-Frame events. 
+      Handle USB Start-Of-Frame events.
       Enable reading SOF from interrupt handler vs. simply reading on demand.
       Probably a bad idea... Unless there is some issue with sampling the SOF
       from hardware asynchronously.
@@ -898,7 +898,7 @@ Where <subdir> is one of the following:
     1. Support for FAT long file names is built-in but can easily be
        removed if you are concerned about Microsoft patent issues (see the
        section "FAT Long File Names" in the top-level COPYING file).
-       
+
        CONFIG_FS_FAT=y
        CONFIG_FAT_LCNAMES=y <-- Long file name support
        CONFIG_FAT_LFN=y
@@ -908,7 +908,7 @@ Where <subdir> is one of the following:
 
     2. You may also want to define the following in your configuration file.
        Otherwise, you will have not feedback about what is going on:
- 
+
        CONFIG_DEBUG=y
        CONFIG_DEBUG_VERBOSE=y
        CONFIG_DEBUG_FTPC=y
@@ -918,7 +918,7 @@ Where <subdir> is one of the following:
     HID keyboard class driver using the test logic in apps/examples/hidkbd.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -954,7 +954,7 @@ Where <subdir> is one of the following:
     Configuration Notes:
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -1003,15 +1003,15 @@ Where <subdir> is one of the following:
     1. Configure and build the slip-httpd configuration.
     2. Connect to a Linux box (assuming /dev/ttyS0)
     3. Reset on the target side and attach SLIP on the Linux side:
-    
+
        $ modprobe slip
        $ slattach -L -p slip -s 57600 /dev/ttyS0 &
- 
+
        This should create an interface with a name like sl0, or sl1, etc.
        Add -d to get debug output.  This will show the interface name.
 
        NOTE: The -L option is included to suppress use of hardware flow
-       control.  This is necessary because I haven't figured out how to 
+       control.  This is necessary because I haven't figured out how to
        use the UART1 hardware flow control yet.
 
        NOTE: The Linux slip module hard-codes its MTU size to 296.  So you
@@ -1038,7 +1038,7 @@ Where <subdir> is one of the following:
 
     NOTE: This configurat only works with VERBOSE debug disabled.  For some
     reason, certain debug statements hang(?).
-    
+
     NOTE: This example does not use UART1's hardware flow control.  UART1
     hardware flow control is partially implemented but does not behave as
     expected.  It needs a little more work.
@@ -1097,35 +1097,67 @@ Where <subdir> is one of the following:
        Hmmm.. I probably should set up an NSH script to just mount /dev/mmcsd0
        at /mnt/sdcard each time the board boots.
 
-    This program has been verified against the rzsz programs running on a
-    Linux PC.  To send a file to the PC, first make sure that the serial
-    port is configured to work with the board:
+    3. Sending Files from the Target to the Linux Host PC
 
-      $ sudo stty -F /dev/ttyS0 57600
-      $ sudo stty -F /dev/ttyS0
+      This program has been verified against the rzsz programs running on a
+      Linux PC.  To send a file to the PC, first make sure that the serial
+      port is configured to work with the board:
 
-    start rz on the Linux host:
+        $ sudo stty -F /dev/ttyS0 57600
+        $ sudo stty -F /dev/ttyS0
 
-      $ sudo rz </dev/ttyS0 >/dev/ttyS0
+      Start rz on the Linux host:
 
-    You can add the rz -v option multiple times, each increases the level
-    of debug output.
+        $ sudo rz </dev/ttyS0 >/dev/ttyS0
 
-    NOTE: The NuttX Zmodem does sends rz\n when it starts in compliance with
-    the Zmodem specification.  On Linux this, however, seems to start some
-    other, incompatible version of rz.  You need to start rz manually to
-    make sure that the correct version is selected.  You can tell when this
-    evil rz/sz has inserted itself because you will see the '^' (0x5e)
-    character replacing the standard Zmodem ZDLE character (0x19) in the
-    binary data stream.
+      You can add the rz -v option multiple times, each increases the level
+      of debug output.
 
-    If you don't have the rz command on your Linux box, the package to
-    install rzsz (or possibily lrzsz).
+      NOTE: The NuttX Zmodem does sends rz\n when it starts in compliance with
+      the Zmodem specification.  On Linux this, however, seems to start some
+      other, incompatible version of rz.  You need to start rz manually to
+      make sure that the correct version is selected.  You can tell when this
+      evil rz/sz has inserted itself because you will see the '^' (0x5e)
+      character replacing the standard Zmodem ZDLE character (0x19) in the
+      binary data stream.
 
-    Then on the target:
+      If you don't have the rz command on your Linux box, the package to
+      install rzsz (or possibily lrzsz).
 
-      > sz -d /dev/ttyS1 <filename>
+      Then on the target:
 
-    Where filename is the full path to the file to send (i.e., it begins
-    with the '/' character).
- 
+        > sz -d /dev/ttyS1 <filename>
+
+      Where filename is the full path to the file to send (i.e., it begins
+      with the '/' character).
+
+    4. Receiving Files on the Target from the Linux Host PC
+
+       To send a file to the target, first make sure that the serial port on
+       the host is configured to work with the board:
+
+         $ sudo stty -F /dev/ttyS0 57600
+          $ sudo stty -F /dev/ttyS0
+
+       Start rz on the on the target:
+
+         nsh> rz -d /dev/ttyS1
+
+       Then use the sz command on Linux to send the file to the target:
+
+         $ sudo sz <filename> t </dev/ttyS0 >/dev/ttyS0
+
+       Where <filename> is the file that you want to send.
+
+       The resulting file will be found where you have configured the Zmodem
+       "sandbox" via CONFIG_SYSTEM_ZMODEM_MOUNTPOINT, in this case at
+       /mnt/sdcard.
+
+       You can add the az -v option multiple times, each increases the level
+       of debug output.  If you want to capture the Linux rz output, then
+       re-direct stderr to a log file by adding 2>az.log to the end of the
+       rz command.
+
+       If you don't have the az command on your Linux box, the package to
+       install rzsz (or possibily lrzsz).
+
