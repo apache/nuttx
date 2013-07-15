@@ -1068,21 +1068,81 @@ Where <subdir> is one of the following:
 
     1. UART0 is still the NuttX serial console as with most of the other
        configurations here.  However, UART1 is also enabled for performing
-       the Zmodem transfers.  Zmodem transfers can be performed on the
-       console device, however, this configuration permits debug output on
-       the serial console which the transfer is in progress without
-       interfering with the file transfer.
+       the Zmodem transfers.
 
          CONFIG_LPC17XX_UART1=y
          CONFIG_UART1_ISUART=y
-         CONFIG_UART1_RXBUFSIZE=256
+         CONFIG_UART1_RXBUFSIZE=512
          CONFIG_UART1_TXBUFSIZE=256
-         CONFIG_UART1_BAUD=115200
+         CONFIG_UART1_BAUD=9600
          CONFIG_UART1_BITS=8
          CONFIG_UART1_PARITY=0
          CONFIG_UART1_2STOP=0
 
-    2. Support is included for the NuttX sz and rz commands.  In order to
+    2. Hardware Flow Control
+
+       In principle, Zmodem transfers could be performed on the any serial
+       device, including the console device.  However, only the LPC17xx
+       UART1 supports hardware flow control which is required for Zmodem
+       trasnfers.  Also, this configuration permits debug output on the
+       serial console while the transfer is in progress without interfering
+       with the file transfer.
+
+       In additional, a very low BAUD is selected to avoid other sources
+       of data overrun.  This should be unnecessary if buffering and hardware
+       flow control are set up correctly.
+
+       However, in the LPC17xx serial driver, hardware flow control only
+       protects the hardware RX FIFO:  Data will not be lost in the hardware
+       FIFO but can still be lost when it is taken from the FIFO.  We can
+       still overflow the serial driver's RX buffer even with hardware flow
+       control enabled! That is probably a bug.  But the workaround solution
+       that I have used is to use lower data rates and a large serial driver
+       RX buffer.
+
+       Those measures should be unnecessary if buffering and hardware flow
+       control are set up and working correctly.
+
+    3. Buffering Notes:
+
+       RX Buffer Size
+       --------------
+       The Zmodem protocol supports a message that informs the file sender
+       of the maximum size of dat that you can buffer (ZRINIT).  However, my
+       experience is that the Linux sz ignores this setting and always sends
+       file data at the maximum size (1024) no matter what size of buffer you
+       report.  That is unfortunate because that, combined with the
+       possibilities of data overrun mean that you must use quite large
+       buffering for Zmodem file receipt to be reliable (none of these issues
+       effect sending of files).
+
+       Buffer Recommendations
+       ----------------------
+       Based on the limitations of NuttX hardware flow control and of the
+       Linux sz behavior, I have been testing with the following configuration
+      (assuming UART1 is the Zmodem device):
+
+       a) This setting determines that maximum size of a data packet frame:
+
+          CONFIG_SYSTEM_ZMODEM_PKTBUFSIZE=1024
+
+       b) Input Buffering.  If the input buffering is set to a full frame,
+          then  data overflow is less likely.
+
+          CONFIG_UART1_RXBUFSIZE=1024
+
+       c) With a larger driver input buffer, the Zmodem receive I/O buffer
+          can be smaller:
+
+          CONFIG_SYSTEM_ZMODEM_RCVBUFSIZE=256
+
+       d) Output buffering.  Overrun cannot occur on output (on the NuttX side)
+          so there is no need to be so careful:
+
+          CONFIG_SYSTEM_ZMODEM_SNDBUFSIZE=512
+          CONFIG_UART1_TXBUFSIZE=256
+
+    4. Support is included for the NuttX sz and rz commands.  In order to
        use these commands, you will need to mount the SD card so that you
        will have a file system to transfer files in and out of:
 
@@ -1097,51 +1157,63 @@ Where <subdir> is one of the following:
        Hmmm.. I probably should set up an NSH script to just mount /dev/mmcsd0
        at /mnt/sdcard each time the board boots.
 
-    3. Sending Files from the Target to the Linux Host PC
+    4. Sending Files from the Target to the Linux Host PC
 
-      This program has been verified against the rzsz programs running on a
-      Linux PC.  To send a file to the PC, first make sure that the serial
-      port is configured to work with the board:
+       This program has been verified against the rzsz programs running on a
+       Linux PC.  To send a file to the PC, first make sure that the serial
+       port is configured to work with the board:
 
-        $ sudo stty -F /dev/ttyS0 57600
-        $ sudo stty -F /dev/ttyS0
+         $ sudo stty -F /dev/ttyS0 9600     # Select 9600 BAUD
+         $ sudo stty -F /dev/ttyS0 crtscts  # Enables CTS/RTS handshaking
+         $ sudo stty -F /dev/ttyS0          # Show the TTY configuration
 
-      Start rz on the Linux host:
+       Start rz on the Linux host:
 
-        $ sudo rz </dev/ttyS0 >/dev/ttyS0
+         $ sudo rz </dev/ttyS0 >/dev/ttyS0
 
-      You can add the rz -v option multiple times, each increases the level
-      of debug output.
+       You can add the rz -v option multiple times, each increases the level
+       of debug output.
 
-      NOTE: The NuttX Zmodem does sends rz\n when it starts in compliance with
-      the Zmodem specification.  On Linux this, however, seems to start some
-      other, incompatible version of rz.  You need to start rz manually to
-      make sure that the correct version is selected.  You can tell when this
-      evil rz/sz has inserted itself because you will see the '^' (0x5e)
-      character replacing the standard Zmodem ZDLE character (0x19) in the
-      binary data stream.
+       NOTE: The NuttX Zmodem does sends rz\n when it starts in compliance with
+       the Zmodem specification.  On Linux this, however, seems to start some
+       other, incompatible version of rz.  You need to start rz manually to
+       make sure that the correct version is selected.  You can tell when this
+       evil rz/sz has inserted itself because you will see the '^' (0x5e)
+       character replacing the standard Zmodem ZDLE character (0x19) in the
+       binary data stream.
 
-      If you don't have the rz command on your Linux box, the package to
-      install rzsz (or possibily lrzsz).
+       If you don't have the rz command on your Linux box, the package to
+       install rzsz (or possibily lrzsz).
 
-      Then on the target:
+       Then on the target:
 
-        > sz -d /dev/ttyS1 <filename>
+         > sz -d /dev/ttyS1 <filename>
 
-      Where filename is the full path to the file to send (i.e., it begins
-      with the '/' character).
+       Where filename is the full path to the file to send (i.e., it begins
+       with the '/' character).
 
-    4. Receiving Files on the Target from the Linux Host PC
+       /dev/ttyS1 is configured to support Hardware flow control in order to
+       throttle therates of data transfer to fit within the allocated buffers.
+       Other devices may be used but if they do not support hardware flow
+       control, the transfers will fail
+
+    5. Receiving Files on the Target from the Linux Host PC
 
        To send a file to the target, first make sure that the serial port on
        the host is configured to work with the board:
 
-         $ sudo stty -F /dev/ttyS0 57600
-          $ sudo stty -F /dev/ttyS0
+         $ sudo stty -F /dev/ttyS0 9600     # Select 9600 BAUD
+         $ sudo stty -F /dev/ttyS0 crtscts  # Enables CTS/RTS handshaking
+         $ sudo stty -F /dev/ttyS0          # Show the TTY configuration
 
        Start rz on the on the target:
 
          nsh> rz -d /dev/ttyS1
+
+       /dev/ttyS1 is configured to support Hardware flow control in order to
+       throttle therates of data transfer to fit within the allocated buffers.
+       Other devices may be used but if they do not support hardware flow
+       control, the transfers will fail
 
        Then use the sz command on Linux to send the file to the target:
 
@@ -1160,4 +1232,21 @@ Where <subdir> is one of the following:
 
        If you don't have the az command on your Linux box, the package to
        install rzsz (or possibily lrzsz).
+
+    STATUS
+      2013-7-15:  I have been able to send large and small files with the
+        sz command.  I have been able to receive small files, but there are
+        problems receiving large files:  The Linux SZ does not obey the
+        buffering limits and continues to send data while rz is writing
+        the previously received data to the file and the serial driver's RX
+        buffer is overrun by a few bytes while the write is in progress.  As
+        a result, when it reads the next buffer of data, a few bytes may be
+        missing (maybe 10). Either (1) we need a more courteous host
+        application, or (2) we need to greatly improve the target side
+        buffering capability!
+
+        My thought now is to implement the NuttX sz and rz commands as
+        PC side applications as well.  Matching both sides and obeying
+        the handshaking will solve the issues.  Another option might be
+        to fix the serial driver hardware flow control somehow.
 

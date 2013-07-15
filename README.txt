@@ -1244,7 +1244,9 @@ apps
  |- system/
  |   |- i2c
  |   |  `- README.txt
- |   `- install
+ |   |- install
+ |   |  `- README.txt
+ |   `- zmodem
  |      `- README.txt
  `- README.txt
 
