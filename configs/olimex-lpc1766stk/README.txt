@@ -1241,37 +1241,17 @@ Where <subdir> is one of the following:
         the previously received data to the file and the serial driver's RX
         buffer is overrun by a few bytes while the write is in progress.  As
         a result, when it reads the next buffer of data, a few bytes may be
-        missing (maybe 10).  The symptom of this missing data is a CRC check
-        failure.
+        missing.  The symptom of this missing data is a CRC check failure.
 
         Either (1) we need a more courteous host application, or (2) we
         need to greatly improve the target side buffering capability!
 
-        My thought now is to implement the NuttX sz and rz commands as
-        PC side applications as well.  Matching both sides and obeying
-        the handshaking will solve the issues.  Another option might be
-        to fix the serial driver hardware flow control somehow.
+        We might get better behavior if we use the NuttX rz/sz commands
+        on the host side (see apps/system/zmodem/README.txt).
 
-      sz has several command line options which one would think would
-      alleviate these problems.  But as of yet, I have not found a
-      combination of options that does so:
+      2013-7-16: I have verified that with debug off and at lower serial
+        BAUD (2400), the transfers of large succeed without errors.  I do
+        not consider this a "solution" to the problem.  I also found that
+        the LPC17xx hardware flow control causes strange hangs; Zmodem
+        works better with hardware flow control disabled.
 
-      -L N, --packetlen N
-          Use ZMODEM sub-packets of length N. A larger N (32 <= N <= 1024)
-          gives slightly higher throughput, a smaller N speeds error
-          recovery. The default is 128 below 300 baud, 256 above 300 baud,
-          or 1024 above 2400 baud.
-
-      -l N, --framelen N
-          Wait for the receiver to acknowledge correct data every N
-          (32 <= N <= 1024) characters. This may be used to avoid network
-          overrun when XOFF flow control is lacking.
-
-      -w N, --windowsize N
-          Limit the transmit window size to N bytes (ZMODEM).
-
-      UPDATE:  I have verified that with debug off and at lower serial
-      BAUD (2400), the transfers of large fails succeed without errors.
-      You may need the Linux sz -O option to keep it from timing out
-      in these low BAUD transfers.  I do not consider this a "solution"
-      to the problem.
