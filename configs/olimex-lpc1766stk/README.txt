@@ -1072,9 +1072,9 @@ Where <subdir> is one of the following:
 
          CONFIG_LPC17XX_UART1=y
          CONFIG_UART1_ISUART=y
-         CONFIG_UART1_RXBUFSIZE=512
+         CONFIG_UART1_RXBUFSIZE=1024
          CONFIG_UART1_TXBUFSIZE=256
-         CONFIG_UART1_BAUD=9600
+         CONFIG_UART1_BAUD=2400
          CONFIG_UART1_BITS=8
          CONFIG_UART1_PARITY=0
          CONFIG_UART1_2STOP=0
@@ -1163,9 +1163,12 @@ Where <subdir> is one of the following:
        Linux PC.  To send a file to the PC, first make sure that the serial
        port is configured to work with the board:
 
-         $ sudo stty -F /dev/ttyS0 9600     # Select 9600 BAUD
-         $ sudo stty -F /dev/ttyS0 crtscts  # Enables CTS/RTS handshaking
+         $ sudo stty -F /dev/ttyS0 2400     # Select 2400 BAUD
+         $ sudo stty -F /dev/ttyS0 crtscts  # Enables CTS/RTS handshaking *
          $ sudo stty -F /dev/ttyS0          # Show the TTY configuration
+
+         * Only is hardware flow control is enabled.  It is *not* in this
+           default configuration.
 
        Start rz on the Linux host:
 
@@ -1199,12 +1202,19 @@ Where <subdir> is one of the following:
 
     5. Receiving Files on the Target from the Linux Host PC
 
+       NOTE:  There are issues with using the Linux sz command with the NuttX
+       rz command. See "STATUS" below.  It is recommended that you use the
+       NuttX sz command on Linux as described in the next paragraph.
+
        To send a file to the target, first make sure that the serial port on
        the host is configured to work with the board:
 
-         $ sudo stty -F /dev/ttyS0 9600     # Select 9600 BAUD
-         $ sudo stty -F /dev/ttyS0 crtscts  # Enables CTS/RTS handshaking
+         $ sudo stty -F /dev/ttyS0 2400     # Select 2400 BAUD
+         $ sudo stty -F /dev/ttyS0 crtscts  # Enables CTS/RTS handshaking *
          $ sudo stty -F /dev/ttyS0          # Show the TTY configuration
+
+         * Only is hardware flow control is enabled.  It is *not* in this
+           default configuration.
 
        Start rz on the on the target:
 
@@ -1234,14 +1244,17 @@ Where <subdir> is one of the following:
        install rzsz (or possibily lrzsz).
 
     STATUS
-      2013-7-15:  I have been able to send large and small files with the
-        sz command.  I have been able to receive small files, but there are
-        problems receiving large files:  The Linux SZ does not obey the
-        buffering limits and continues to send data while rz is writing
-        the previously received data to the file and the serial driver's RX
-        buffer is overrun by a few bytes while the write is in progress.  As
-        a result, when it reads the next buffer of data, a few bytes may be
-        missing.  The symptom of this missing data is a CRC check failure.
+      2013-7-15:  Testing against the Linux rz/sz commands.
+
+        I have been able to send large and small files with the target sz
+        command. I have been able to receive small files, but there are
+        problems receiving large files using the Linux sz command:  The
+        Linux SZ does not obey the buffering limits and continues to send
+        data while rz is writing the previously received data to the file
+        and the serial driver's RX buffer is overrun by a few bytes while
+        the write is in progress. As a result, when it reads the next
+        buffer of data, a few bytes may be missing.  The symptom of this
+        missing data is a CRC check failure.
 
         Either (1) we need a more courteous host application, or (2) we
         need to greatly improve the target side buffering capability!
@@ -1249,9 +1262,25 @@ Where <subdir> is one of the following:
         We might get better behavior if we use the NuttX rz/sz commands
         on the host side (see apps/system/zmodem/README.txt).
 
-      2013-7-16: I have verified that with debug off and at lower serial
-        BAUD (2400), the transfers of large succeed without errors.  I do
-        not consider this a "solution" to the problem.  I also found that
-        the LPC17xx hardware flow control causes strange hangs; Zmodem
-        works better with hardware flow control disabled.
+      2013-7-16:  More Testing against the Linux rz/sz commands.
 
+        I have verified that with debug off and at lower serial
+        BAUD (2400), the transfers of large files succeed without errors.  I
+        do not consider this a "solution" to the problem.  I also found that
+        the LPC17xx hardware flow control causes strange hangs; Zmodem works
+        much better with hardware flow control disabled.
+
+        At this lower BAUD, RX buffer sizes could probably be reduced; Or
+        perhaps the BAUD coud be increased.  My thought, however, is that
+        tuning in such an unhealthy situation is not the approach:  The
+        best thing to do would be to use the matching NuttX sz on the Linux
+        host side.
+
+    2013-7-16. More Testing against the NuttX rz/sz on Both Ends.
+
+      The NuttX sz/rz commands have been modified so that they can be
+      built and executed under Linux.  In this case, there are no
+      transfer problems at all in either direction and with large or
+      small files.  This configuration could probably run at much higher
+      serial speeds and with much smaller buffers (although that has not
+      been verified as of this writing).
