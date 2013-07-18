@@ -1960,8 +1960,8 @@ configs/rgmp
   hybrid operating system. This makes your application able to use both RTOS
   and GPOS features.
 
-  See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further information
-  about RGMP.
+  See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
+  information about RGMP.
 
 configs/sam3u-ek
   The port of NuttX to the Atmel SAM3U-EK development board.
