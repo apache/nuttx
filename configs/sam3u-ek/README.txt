@@ -743,5 +743,4 @@ Configurations
 
   ostest:
     This configuration directory, performs a simple OS test using
-    examples/ostest.  By default, this project assumes that you are
-    using the DFU bootloader.
+    examples/ostest.
