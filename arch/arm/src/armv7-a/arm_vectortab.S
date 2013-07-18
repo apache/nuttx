@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/include/irq.h
+ * arch/arm/src/arm7-a/arm_vectortab.S
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,72 +33,71 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather, only indirectly
- * through nuttx/irq.h
- */
-
-#ifndef __ARCH_ARM_INCLUDE_IRQ_H
-#define __ARCH_ARM_INCLUDE_IRQ_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-/* Include NuttX-specific IRQ definitions */
-
-#include <nuttx/irq.h>
-
-/* Include chip-specific IRQ definitions (including IRQ numbers) */
-
-#include <arch/chip/irq.h>
-
-/* Include ARM architecture-specific IRQ definitions (including register
- * save structure and irqsave()/irqrestore() macros)
- */
-
-#if defined(CONFIG_ARCH_CORTEXA5)
-#  include <arch/armv7-a/irq.h>
-#elif defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
-#  include <arch/armv7-m/irq.h>
-#elif defined(CONFIG_ARCH_CORTEXM0)
-#  include <arch/armv6-m/irq.h>
-#else
-#  include <arch/arm/irq.h>
-#endif
+#include <nuttx/config.h>
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
+ * Global Data
  ****************************************************************************/
 
 /****************************************************************************
- * Inline functions
+ * Assembly Macros
  ****************************************************************************/
 
 /****************************************************************************
- * Public Variables
+ * Name: _vector_start
+ *
+ * Description:
+ *   Vector initialization block
  ****************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+	.globl	_vector_start
 
-#ifndef __ASSEMBLY__
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/* These will be relocated to VECTOR_BASE. */
 
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-#endif
+_vector_start:
+	ldr	pc, .Lresethandler			/* 0x00: Reset */
+	ldr	pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
+	ldr	pc, .Lswihandler			/* 0x08: Software interrupt */
+	ldr	pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
+	ldr	pc, .Ldataaborthandler		/* 0x10: Data abort */
+	ldr	pc, .Laddrexcptnhandler		/* 0x14: Address exception (reserved) */
+	ldr	pc, .Lirqhandler			/* 0x18: IRQ */
+	ldr	pc, .Lfiqhandler			/* 0x1c: FIQ */
 
-#endif /* __ARCH_ARM_INCLUDE_IRQ_H */
+	.globl   __start
+	.globl	up_vectorundefinsn
+	.globl	up_vectorswi
+	.globl	up_vectorprefetch
+	.globl	up_vectordata
+	.globl	up_vectoraddrexcptn
+	.globl	up_vectorirq
+	.globl	up_vectorfiq
 
+.Lresethandler:
+	.long   __start
+.Lundefinedhandler:
+	.long	up_vectorundefinsn
+.Lswihandler:
+	.long	up_vectorswi
+.Lprefetchaborthandler:
+	.long	up_vectorprefetch
+.Ldataaborthandler:
+	.long	up_vectordata
+.Laddrexcptnhandler:
+	.long	up_vectoraddrexcptn
+.Lirqhandler:
+	.long	up_vectorirq
+.Lfiqhandler:
+	.long	up_vectorfiq
+
+	.globl	_vector_end
+_vector_end:
+	.end

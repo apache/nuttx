@@ -5132,3 +5132,8 @@
 	* nuttx/configs/olimex-lpc1766stk/zmodem:  Add a new configuration to
 	  test the Zmodem sz and rz commands (which don't actually exist yet,
 	  but will). (2013-7-12).
+	* arch/arm/include/armv7-a and src/armv7-a:  Beginning to add support
+	  for the ARMMv7-A, the Cortex-A5 in particular.  The initial checkin
+	  is only fragmentary:  A few header files and some copied ARM9
+	  assembly files.  More to come (2013-7-18).
+
