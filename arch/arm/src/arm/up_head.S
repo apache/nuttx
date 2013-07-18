@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/up_pghead.S
+ * arch/arm/src/arm/up_head.S
  *
  *   Copyright (C) 2007, 2009-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

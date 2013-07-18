@@ -174,8 +174,7 @@ config ARCH_EXTDRAMSIZE
 
 choice
 	prompt "SDRAM Width Selection"
-	default ARCH_CHIP_STM32F103ZET6
-	depends on ARCH_CHIP_STM32
+	default ARCH_SDRAM_16BIT
 
 config ARCH_SDRAM_8BIT
 	bool "8-bit"
