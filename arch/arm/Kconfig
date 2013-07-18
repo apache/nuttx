@@ -299,7 +299,7 @@ if ARCH_CORTEXM0
 source arch/arm/src/armv6-m/Kconfig
 endif
 if ARCH_CORTEXA5
-source arch/arm/src/armv7/Kconfig
+source arch/arm/src/armv7-a/Kconfig
 endif
 if ARCH_CORTEXM3 || ARCH_CORTEXM4
 source arch/arm/src/armv7-m/Kconfig
