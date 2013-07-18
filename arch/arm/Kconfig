@@ -138,31 +138,43 @@ endchoice
 
 config ARCH_ARM7TDMI
 	bool
+	default n
 
 config ARCH_ARM926EJS
 	bool
+	default n
 
 config ARCH_ARM920T
 	bool
+	default n
 
 config ARCH_CORTEXM0
 	bool
+	default n
 	select ARCH_IRQPRIO
 
 config ARCH_CORTEXM3
 	bool
+	default n
 	select ARCH_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
 
 config ARCH_CORTEXM4
 	bool
+	default n
 	select ARCH_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
+
+config ARCH_CORTEXA5
+	bool
+	default n
+	select ARCH_IRQPRIO
 
 config ARCH_FAMILY
 	string
 	default "arm"		if ARCH_ARM7TDMI || ARCH_ARM926EJS || ARCH_ARM920T
 	default "armv6-m"	if ARCH_CORTEXM0
+	default "armv7-a"	if ARCH_CORTEXA5
 	default "armv7-m"	if ARCH_CORTEXM3 || ARCH_CORTEXM4
 
 config ARCH_CHIP
@@ -285,6 +297,9 @@ config DEBUG_HARDFAULT
 
 if ARCH_CORTEXM0
 source arch/arm/src/armv6-m/Kconfig
+endif
+if ARCH_CORTEXA5
+source arch/arm/src/armv7/Kconfig
 endif
 if ARCH_CORTEXM3 || ARCH_CORTEXM4
 source arch/arm/src/armv7-m/Kconfig
