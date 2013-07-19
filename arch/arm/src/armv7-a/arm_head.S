@@ -46,6 +46,7 @@
 
 #include "arm.h"
 #include "cp15.h"
+#include "sctlr.h"
 
 /**********************************************************************************
  * Configuration
@@ -355,77 +356,105 @@ __start:
 
 	ldr		lr, .LCvstart			/* Abs. virtual address */
 
+	/* Configure the domain access register (see mmu.h) */
+
 	mov		r0, #0x1f				/* Domains 0, 1 = client */
-	mcr		p15, 0, r0, c3, c0		/* Load domain access register */
-	mrc		p15, 0, r0, c1, c0		/* Get control register */
+	mcr		CP15_DACR(r0)			/* Load domain access register */
 
-	/* Clear bits (see arm.h)
+	/* Configure the system control register (see sctrl.h) */
+
+	mrc		CP15_SCTLR(r0)			/* Get control register */
+
+	/* Clear bits to reset values.  This is only necessary in situations like, for
+	 * example, we get here via a bootloader and the control register is in some
+	 * unknown state.
 	 *
-	 * CR_R - ROM MMU protection
-	 * CR_F - Implementation defined
-	 * CR_Z - Implementation defined
+	 *   SCTLR_A    Bit 1:  Strict alignment disabled (reset value)
+	 *   SCTLR_C    Bit 2:  DCache disabled (reset value)
 	 *
-	 * CR_A - Alignment abort enable
-	 * CR_C - Dcache enable
-	 * CR_W - Write buffer enable
+	 *   SCTLR_SW   Bit 10: SWP/SWPB not enabled (reset value)
+	 *   SCTLR_I    Bit 12: ICache disabled (reset value)
+	 *   SCTLR_V    Bit 13: Assume low vectors (reset value)
+	 *   SCTLR_RR   Bit 14: The Cortex-A5 processor only supports a fixed random
+	 *                      replacement strategy.
+	 *   SCTLR_HA   Bit 17: Not supported by A5
 	 *
-	 * CR_I - Icache enable
+	 *   SCTLR_EE   Bit 25: Little endian (reset value).
+	 *   SCTLR_TRE  Bit 28: No memory region remapping (reset value)
+	 *   SCTLR_AFE  Bit 29: Full, legacy access permissions behavior (reset value).
+	 *   SCTLR_TE   Bit 30: All exceptions handled in ARM state (reset value).
 	 */
 
-	bic		r0, r0, #(CR_R|CR_F|CR_Z)
-	bic		r0, r0, #(CR_A|CR_C|CR_W)
-	bic		r0, r0, #(CR_I)
+	bic		r0, r0, #(SCTLR_A  | SCTLR_C)
+	bic		r0, r0, #(SCTLR_SW | SCTLR_I   | SCTLR_V   | SCTLR_RR | SCTLR_HA)
+	bic		r0, r0, #(SCTLR_EE | SCTLR_TRE | SCTLR_AFE | SCTLR_TE)
 
-	/* Set bits (see arm.h)
+	/* Set bits to enable the MMU
 	 *
-	 * CR_M - MMU enable
-	 * CR_P - 32-bit exception handler
-	 * CR_D - 32-bit data address range
+	 *   SCTLR_M     Bit 0:  Enable the MMU
+	 *   SCTLR_Z     Bit 11: Program flow prediction control always enabled on A5
 	 */
 
-	orr		r0, r0, #(CR_M|CR_P|CR_D)
+	orr		r0, r0, #(SCTLR_M /* | SCTLR_Z */)
 	
-	/* In most architectures, vectors are relocated to 0xffff0000.
-	 * -- but not all
+	/* Position vectors to 0xffff0000 if so configured.
 	 *
-	 * CR_S - System MMU protection
-	 * CR_V - Vectors relocated to 0xffff0000
+	 *   SCTLR_V    Bit 13: High vectors
 	 */
 
 #ifndef CONFIG_ARCH_LOWVECTORS
-	orr		r0, r0, #(CR_S|CR_V)
-#else
-	orr		r0, r0, #(CR_S)
+	orr		r0, r0, #(SCTLR_V)
 #endif
-	/* CR_RR - Round Robin cache replacement */
 
-#ifdef CPU_CACHE_ROUND_ROBIN
-	orr		r0, r0, #(CR_RR)
+	/* CR_RR - Round Robin cache replacement
+	 *
+	 *   SCTLR_RR   Bit 14: The Cortex-A5 processor only supports a fixed random
+	 *                      replacement strategy.
+	 */
+
+#ifndef CPU_CACHE_ROUND_ROBIN
 #endif
-	/* CR_C - Dcache enable */
+
+	/* CR_C - Dcache enable
+	 *
+	 *   SCTLR_C    Bit 2:  DCache enable
+	 */
 
 #ifndef CPU_DCACHE_DISABLE
-	orr		r0, r0, #(CR_C)
+	orr		r0, r0, #(SCTLR_C)
 #endif
-	/* CR_C - Dcache enable */
+
+	/* CR_C - Icache enable
+	 *
+	 *   SCTLR_I    Bit 12: ICache enable
+	 */
 
 #ifndef CPU_ICACHE_DISABLE
-	orr		r0, r0, #(CR_I)
+	orr		r0, r0, #(SCTLR_I)
 #endif
-	/* CR_A - Alignment abort enable */
+
+	/* CR_A - Alignment abort enable
+	 *
+	 *   SCTLR_A    Bit 1:  Strict alignment enabled
+	 */
 
 #ifdef ALIGNMENT_TRAP
-	orr		r0, r0, #(CR_A)
+	orr		r0, r0, #(SCTLR_A)
 #endif
-	mcr		p15, 0, r0, c1, c0, 0	/* write control reg */
 
-	/* Get TMP=2 Processor ID register */
+	/* Then write the configured control register */
 
-	mrc		p15, 0, r1, c0, c0, 0	/* read id reg */
-	mov		r1,r1					/* Null-avoiding nop */
-	mov		r1,r1					/* Null-avoiding nop */
+	mcr		CP15_SCTLR(r0)			/* Write control reg */
 
-	/* And "jump" to .Lvstart */
+	/* Read the Main ID register.  This will be available in R1 after
+	 * MMU trampoline (not currently used)
+	 */
+
+	mrc		CP15_MIDR(r1)			/* Read main id reg */
+	mov		r1, r1					/* Null-avoiding nop */
+	mov		r1, r1					/* Null-avoiding nop */
+
+	/* And "jump" to .Lvstart in the newly mapped virtual address space */
 
 	mov		pc, lr
 
@@ -433,7 +462,7 @@ __start:
  * PC_Relative Data
  ****************************************************************************/
 
-	/* Most addresses are all virtual address */
+	/* Most addresses are virtual address */
 	
 	.type	.LCvstart, %object
 .LCvstart:

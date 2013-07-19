@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/src/up_vectoraddrexceptn.S
+ * arch/arm/src/arm/up_vectoraddrexceptn.S
  *
  *   Copyright (C) 2008-2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

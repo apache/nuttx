@@ -60,8 +60,8 @@
  * implement this feature, so this register always RAZ.
  */
 
-/* System Control Register (SCTRL). see sctrl.h */
-/* Non-secure Access Control Register (NSACR).  See sctrl.h */
+/* System Control Register (SCTLR). see cstlr.h */
+/* Non-secure Access Control Register (NSACR).  See cstlr.h */
 
 /* Translation Table Base Register 0 (TTBR0)*/
 
@@ -205,7 +205,7 @@
 #define TLBHR_16MB         (1 << 3)  /* Bit 3:  16MB supersections are present in the TLB */
                                      /* Bits 4-31: Reserved */
 
-/* Context ID Register (CONTEXTIDR).  See sctrl.h */
+/* Context ID Register (CONTEXTIDR).  See cstlr.h */
 
 /************************************************************************************
  * Assemby Macros

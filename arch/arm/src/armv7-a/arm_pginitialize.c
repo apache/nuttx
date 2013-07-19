@@ -1,5 +1,6 @@
 /****************************************************************************
- * arch/arm/src/arm7-a/arm_vectortab.S
+ * arch/arm/src/armv7-a/arm_pginitialize.c
+ * Initialize the MMU for on-demand paging support.
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,65 +40,57 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
+
+#include <nuttx/sched.h>
+#include <nuttx/page.h>
+
+#include "up_internal.h"
+
+#ifdef CONFIG_PAGING
+
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Data
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Assembly Macros
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _vector_start
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: up_pginitialize()
  *
  * Description:
- *   Vector initialization block
+ *  Initialize the MMU for on-demand paging support..
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.  This function will crash if any errors are detected during MMU
+ *   initialization
+ *
+ * Assumptions:
+ *   - Called early in the platform initialization sequence so that no special
+ *     concurrency protection is required.
+ *
  ****************************************************************************/
 
-	.globl	_vector_start
+void up_pginitialize(void)
+{
+  /* None needed at present.  This file is just retained in case the need
+   * arises in the future.  Nothing calls up_pginitialize() now.  If needed,
+   * if should be called early in up_boot.c to assure that all paging is
+   * ready.
+   */
+}
 
-/* These will be relocated to VECTOR_BASE. */
-
-_vector_start:
-	ldr		pc, .Lresethandler			/* 0x00: Reset */
-	ldr		pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
-	ldr		pc, .Lswihandler			/* 0x08: Software interrupt */
-	ldr		pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
-	ldr		pc, .Ldataaborthandler		/* 0x10: Data abort */
-	ldr		pc, .Laddrexcptnhandler		/* 0x14: Address exception (reserved) */
-	ldr		pc, .Lirqhandler			/* 0x18: IRQ */
-	ldr		pc, .Lfiqhandler			/* 0x1c: FIQ */
-
-	.globl   __start
-	.globl	arm_vectorundefinsn
-	.globl	arm_vectorswi
-	.globl	arm_vectorprefetch
-	.globl	arm_vectordata
-	.globl	arm_vectoraddrexcptn
-	.globl	arm_vectorirq
-	.globl	arm_vectorfiq
-
-.Lresethandler:
-	.long	__start
-.Lundefinedhandler:
-	.long	arm_vectorundefinsn
-.Lswihandler:
-	.long	arm_vectorswi
-.Lprefetchaborthandler:
-	.long	arm_vectorprefetch
-.Ldataaborthandler:
-	.long	arm_vectordata
-.Laddrexcptnhandler:
-	.long	arm_vectoraddrexcptn
-.Lirqhandler:
-	.long	arm_vectorirq
-.Lfiqhandler:
-	.long	arm_vectorfiq
-
-	.globl	_vector_end
-_vector_end:
-	.end
+#endif /* CONFIG_PAGING */

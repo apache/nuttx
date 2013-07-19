@@ -29,7 +29,6 @@ config ARCH_CHIP_DM320
 	bool "TMS320 DM320"
 	select ARCH_ARM926EJS
 	select ARCH_HAVE_LOWVECTORS
-	select ARCH_HAVE_MMU
 	---help---
 		TI DMS320 DM320 (ARM926EJS)
 
@@ -38,7 +37,6 @@ config ARCH_CHIP_IMX
 	select ARCH_ARM920T
 	select ARCH_HAVE_HEAP2
 	select ARCH_HAVE_LOWVECTORS
-	select ARCH_HAVE_MMU
 	---help---
 		Freescale iMX architectures (ARM920T)
 
@@ -91,7 +89,6 @@ config ARCH_CHIP_LPC31XX
 	bool "NXP LPC31XX"
 	select ARCH_ARM926EJS
 	select ARCH_HAVE_LOWVECTORS
-	select ARCH_HAVE_MMU
 	---help---
 		NPX LPC31XX architectures (ARM926EJS).
 
@@ -143,10 +140,12 @@ config ARCH_ARM7TDMI
 config ARCH_ARM926EJS
 	bool
 	default n
+	select ARCH_HAVE_MMU
 
 config ARCH_ARM920T
 	bool
 	default n
+	select ARCH_HAVE_MMU
 
 config ARCH_CORTEXM0
 	bool
@@ -169,6 +168,7 @@ config ARCH_CORTEXA5
 	bool
 	default n
 	select ARCH_IRQPRIO
+	select ARCH_HAVE_MMU
 
 config ARCH_FAMILY
 	string
@@ -261,11 +261,9 @@ config ARCH_LOWVECTORS
 	---help---
 		Support ARM vectors in low memory.
 
-config ARCH_HAVE_MMU
-	bool
-
 config PGTABLE_VADDR
 	hex "Page table virtual address"
+	default 0x0
 	depends on ARCH_HAVE_MMU
 	---help---
 		Page table virtual address (might be defined in the board.h file).  Not

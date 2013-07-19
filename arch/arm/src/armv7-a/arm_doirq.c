@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm7-a/arm_vectortab.S
+ * arch/arm/src/armv7-a/arm_doirq.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,65 +39,78 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <assert.h>
+
+#include <arch/board/board.h>
+
+#include "up_arch.h"
+#include "os_internal.h"
+#include "up_internal.h"
+
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Data
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Assembly Macros
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _vector_start
- *
- * Description:
- *   Vector initialization block
+ * Private Functions
  ****************************************************************************/
 
-	.globl	_vector_start
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/* These will be relocated to VECTOR_BASE. */
+void up_doirq(int irq, uint32_t *regs)
+{
+  up_ledon(LED_INIRQ);
+#ifdef CONFIG_SUPPRESS_INTERRUPTS
+  PANIC();
+#else
+  uint32_t *savestate;
 
-_vector_start:
-	ldr		pc, .Lresethandler			/* 0x00: Reset */
-	ldr		pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
-	ldr		pc, .Lswihandler			/* 0x08: Software interrupt */
-	ldr		pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
-	ldr		pc, .Ldataaborthandler		/* 0x10: Data abort */
-	ldr		pc, .Laddrexcptnhandler		/* 0x14: Address exception (reserved) */
-	ldr		pc, .Lirqhandler			/* 0x18: IRQ */
-	ldr		pc, .Lfiqhandler			/* 0x1c: FIQ */
+  /* Nested interrupts are not supported in this implementation.  If you want
+   * to implement nested interrupts, you would have to (1) change the way that
+   * current_regs is handled and (2) the design associated with
+   * CONFIG_ARCH_INTERRUPTSTACK.  The savestate variable will not work for
+   * that purpose as implemented here because only the outermost nested
+   * interrupt can result in a context switch (it can probably be deleted).
+   */
 
-	.globl   __start
-	.globl	arm_vectorundefinsn
-	.globl	arm_vectorswi
-	.globl	arm_vectorprefetch
-	.globl	arm_vectordata
-	.globl	arm_vectoraddrexcptn
-	.globl	arm_vectorirq
-	.globl	arm_vectorfiq
+  /* Current regs non-zero indicates that we are processing an interrupt;
+   * current_regs is also used to manage interrupt level context switches.
+   */
 
-.Lresethandler:
-	.long	__start
-.Lundefinedhandler:
-	.long	arm_vectorundefinsn
-.Lswihandler:
-	.long	arm_vectorswi
-.Lprefetchaborthandler:
-	.long	arm_vectorprefetch
-.Ldataaborthandler:
-	.long	arm_vectordata
-.Laddrexcptnhandler:
-	.long	arm_vectoraddrexcptn
-.Lirqhandler:
-	.long	arm_vectorirq
-.Lfiqhandler:
-	.long	arm_vectorfiq
+  savestate    = (uint32_t*)current_regs;
+  current_regs = regs;
 
-	.globl	_vector_end
-_vector_end:
-	.end
+  /* Mask and acknowledge the interrupt */
+
+  up_maskack_irq(irq);
+
+  /* Deliver the IRQ */
+
+  irq_dispatch(irq, regs);
+
+  /* Restore the previous value of current_regs.  NULL would indicate that
+   * we are no longer in an interrupt handler.  It will be non-NULL if we
+   * are returning from a nested interrupt.
+   */
+
+  current_regs = savestate;
+
+  /* Unmask the last interrupt (global interrupts are still disabled) */
+
+  up_enable_irq(irq);
+#endif
+  up_ledoff(LED_INIRQ);
+}

@@ -1,7 +1,7 @@
 /****************************************************************************
- *  arch/arm/src/arm/up_prefetchabort.c
+ *  arch/arm/src/armv7-a/arm_prefetchabort.c
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_prefetchabort
+ * Name: arm_prefetchabort
  *
  * Description;
  *   This is the prefetch abort exception handler. The ARM prefetch abort
@@ -87,7 +87,7 @@
  *
  ****************************************************************************/
 
-void up_prefetchabort(uint32_t *regs)
+void arm_prefetchabort(uint32_t *regs)
 {
 #ifdef CONFIG_PAGING
    uint32_t *savestate;

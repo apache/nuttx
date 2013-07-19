@@ -274,6 +274,9 @@ config ARCH_HAVE_VFORK
 	bool
 	default n
 
+config ARCH_HAVE_MMU
+	bool
+
 config ARCH_STACKDUMP
 	bool "Dump stack on assertions"
 	default n
@@ -334,6 +337,7 @@ config ARCH_CALIBRATION
 
 config DRAM_START
 	hex "DRAM start physical address"
+	default 0x0
 	help
 		The physical start address of installed RAM.  Despite the naming,
 		this may be SDRAM or SRAM or any other RAM technology that support
@@ -341,6 +345,7 @@ config DRAM_START
 
 config DRAM_VSTART
 	hex "DRAM start virtual address"
+	default 0x0
 	depends on ARCH_HAVE_MMU
 	help
 		The virtual start address of installed RAM.  Despite the naming,
@@ -349,6 +354,7 @@ config DRAM_VSTART
 
 config DRAM_SIZE
 	int "DRAM size"
+	default 0
 	help
 		The size in bytes of the installed RAM.  Despite the naming,
 		this may be SDRAM or SRAM or any other RAM technology that support

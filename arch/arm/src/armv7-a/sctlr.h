@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/armv7-a/sctrl.h
+ * arch/arm/src/armv7-a/sctlr.h
  * CP15 System Control Registers
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -41,8 +41,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_A_CPSR_H
-#define __ARCH_ARM_SRC_ARMV7_A_CPSR_H
+#ifndef __ARCH_ARM_SRC_ARMV7_A_SCTLR_H
+#define __ARCH_ARM_SRC_ARMV7_A_SCTLR_H
 
 /************************************************************************************
  * Included Files
@@ -124,14 +124,14 @@
 #define SCTLR_C            (1 << 2)  /* Bit 2:  Determines if data can be cached */
                                      /* Bits 3-9: Reserved */
 #define SCTLR_SW           (1 << 10) /* Bit 10: SWP/SWPB Enable bit */
-#define SCTLR_A            (1 << 11) /* Bit 11: Program flow prediction control (1) */
+#define SCTLR_Z            (1 << 11) /* Bit 11: Program flow prediction control (1) */
 #define SCTLR_I            (1 << 12) /* Bit 12: Determines if instructions can be cached */
 #define SCTLR_V            (1 << 13) /* Bit 13: Vectors bit */
 #define SCTLR_RR           (1 << 14) /* Bit 14: Cache replacement strategy (2) */
                                      /* Bits 15-16: Reserved */
 #define SCTLR_HA           (1 << 17) /* Bit 17: Hardware management access disabled (2) */
                                      /* Bits 18-24: Reserved */
-#define SCTLR_EE           (1 << 25) /* Bit 15: Determines the value the CPSR.E */
+#define SCTLR_EE           (1 << 25) /* Bit 25: Determines the value the CPSR.E */
                                      /* Bits 26-27: Reserved */
 #define SCTLR_TRE          (1 << 28) /* Bit 28: TEX remap */
 #define SCTLR_AFE          (1 << 29) /* Bit 29: Access Flag Enable bit */
@@ -237,14 +237,14 @@
 	mrc		p15, 0, \id, c0, c0, 0
 	.endm
 
-/* Read/write the system control register (SCTRL) */
+/* Read/write the system control register (SCTLR) */
 
-	.macro	cp15_rdsctrl, sctrl
-	mrc		p15, 0, \sctrl, c1, c0, 0
+	.macro	cp15_rdsctlr, sctlr
+	mrc		p15, 0, \sctlr, c1, c0, 0
 	.endm
 
-	.macro	cp15_wrsctrl, sctrl
-	mcr		p15, 0, \sctrl, c1, c0, 0
+	.macro	cp15_wrsctlr, sctlr
+	mcr		p15, 0, \sctlr, c1, c0, 0
 	nop
 	nop
 	nop
@@ -278,23 +278,23 @@ static inline unsigned int cp15_rdid(void)
   return id;
 }
 
-/* Read/write the system control register (SCTRL) */
+/* Read/write the system control register (SCTLR) */
 
-static inline unsigned int cp15_rdsctrl(void)
+static inline unsigned int cp15_rdsctlr(void)
 {
-  unsigned int sctrl;
+  unsigned int sctlr;
   __asm__ __volatile__
     (
       "\tmrc p15, 0, %0, c1, c0, 0"
-      : "=r" (sctrl)
+      : "=r" (sctlr)
       :
       : "memory"
     );
 
-  return sctrl;
+  return sctlr;
 }
 
-static inline void cp15_wrsctrl(unsigned int sctrl)
+static inline void cp15_wrsctlr(unsigned int sctlr)
 {
   __asm__ __volatile__
     (
@@ -308,7 +308,7 @@ static inline void cp15_wrsctrl(unsigned int sctrl)
       "\tnop\n"
       "\tnop\n"
       :
-      : "r" (sctrl)
+      : "r" (sctlr)
       : "memory"
     );
 }
@@ -337,4 +337,4 @@ extern "C" {
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_A_CPSR_H */
+#endif  /* __ARCH_ARM_SRC_ARMV7_A_SCTLR_H */
