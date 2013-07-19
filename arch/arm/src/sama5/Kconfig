@@ -1,0 +1,239 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_CHIP_SAMA5
+
+comment "ATSAMA5 Configuration Options"
+
+choice
+	prompt "Atmel AT91SAMA5 Chip Selection"
+	default ARCH_CHIP_ATSAMA5D33
+
+config ARCH_CHIP_ATSAMA5D31
+	bool "Atmel ATSAMA5D31"
+	select ARCH_CHIP_SAMA5D3
+
+config ARCH_CHIP_ATSAMA5D33
+	bool "Atmel ATSAMA5D33"
+	select ARCH_CHIP_SAMA5D3
+
+config ARCH_CHIP_ATSAMA5D34
+	bool "Atmel ATSAMA5D34"
+	select ARCH_CHIP_SAMA5D3
+
+config ARCH_CHIP_ATSAMA5D35
+	bool "Atmel ATSAMA5D35"
+	select ARCH_CHIP_SAMA5D3
+
+endchoice
+
+menu "ATSAMA5 Peripheral Support"
+
+config SAMA5_DBGU
+	bool "Debug Unit Interrupt (DBGU)"
+	default n
+
+config SAMA5_PIT
+	bool "Periodic Interval Timer Interrupt (PIT)"
+	default n
+
+config SAMA5_WDT
+	bool "Watchdog timer Interrupt (WDT)"
+	default n
+
+config SAMA5_HSMC
+	bool "Multi-bit ECC Interrupt (HSMC)"
+	default n
+
+config SAMA5_SMD
+	bool "SMD Soft Modem (SMD)"
+	default n
+
+config SAMA5_UART0
+	bool "UART 0"
+	default y
+	select ARCH_HAVE_UART0
+
+config SAMA5_UART1
+	bool "UART 1"
+	default n
+	select ARCH_HAVE_UART1
+
+config SAMA5_USART0
+	bool "USART 0"
+	default n
+	select ARCH_HAVE_USART0
+
+config SAMA5_USART1
+	bool "USART 1"
+	default n
+	select ARCH_HAVE_USART1
+
+config SAMA5_USART2
+	bool "USART 2"
+	default n
+	select ARCH_HAVE_USART2
+
+config SAMA5_USART3
+	bool "USART 3"
+	default n
+	select ARCH_HAVE_USART3
+
+config SAMA5_TWI0
+	bool "Two-Wire Interface 0 (TWI0)"
+	default n
+
+config SAMA5_TWI1
+	bool "Two-Wire Interface 1 (TWI1)"
+	default n
+
+config SAMA5_TWI2
+	bool "Two-Wire Interface 2 (TWI2)"
+	default n
+
+config SAMA5_HSMCI0
+	bool "High Speed Multimedia Card Interface 0 (HSMCI0)"
+	default n
+
+config SAMA5_HSMCI1
+	bool "High Speed Multimedia Card Interface 1 (HSMCI1)"
+	default n
+
+config SAMA5_HSMCI2
+	bool "High Speed Multimedia Card Interface 2 (HSMCI2)"
+	default n
+
+config SAMA5_SPI0
+	bool "Serial Peripheral Interface 0 (SPI0)"
+	default n
+
+config SAMA5_SPI1
+	bool "Serial Peripheral Interface 1 (SPI1)"
+	default n
+
+config SAMA5_TC0
+	bool "Timer Counter 0 (ch. 0, 1, 2) (TC0)"
+	default n
+
+config SAMA5_TC1
+	bool "Timer Counter 1 (ch. 3, 4, 5) (TC1)"
+	default n
+
+config SAMA5_PWM
+	bool "Pulse Width Modulation Controller (PWM)"
+	default n
+
+config SAMA5_ADC
+	bool "Touch Screen ADC Controller (ADC)"
+	default n
+
+config SAMA5_DMAC0
+	bool "DMA Controller 0 (DMAC0)"
+	default n
+
+config SAMA5_DMAC1
+	bool "DMA Controller 1 (DMAC1)"
+	default n
+
+config SAMA5_UHPHS
+	bool "USB Host High Speed (UHPHS)"
+	default n
+
+config SAMA5_UDPHS
+	bool "USB Device High Speed (UDPHS)"
+	default n
+
+config SAMA5_GMAC
+	bool "Gigabit Ethernet MAC (GMAC)"
+	default n
+
+config SAMA5_EMAC
+	bool "Ethernet MAC (EMAC)"
+	default n
+
+config SAMA5_LCDC
+	bool "LCD Controller (LCDC)"
+	default n
+
+config SAMA5_ISI
+	bool "Image Sensor Interface (ISI)"
+	default n
+
+config SAMA5_SSC0
+	bool "Synchronous Serial Controller 0 (SSC0)"
+	default n
+
+config SAMA5_SSC1
+	bool "Synchronous Serial Controller 1 (SSC1)"
+	default n
+
+config SAMA5_CAN0
+	bool "CAN controller 0 (CAN0)"
+	default n
+
+config SAMA5_CAN1
+	bool "CAN controller 1 (CAN1)"
+	default n
+
+config SAMA5_SHA
+	bool "Secure Hash Algorithm (SHA)"
+	default n
+
+config SAMA5_AES
+	bool "Advanced Encryption Standard (AES)"
+	default n
+
+config SAMA5_TDES
+	bool "Triple Data Encryption Standard (TDES)"
+	default n
+
+config SAMA5_TRNG
+	bool "True Random Number Generator (TRNG)"
+	default n
+
+config SAMA5_ARM
+	bool "Performance Monitor Unit (ARM)"
+	default n
+
+config SAMA5_FUSE
+	bool "Fuse Controller (FUSE)"
+	default n
+
+config SAMA5_MPDDRC
+	bool "MPDDR controller (MPDDRC)"
+	default n
+
+endmenu
+
+config PIO_IRQ
+	bool "PIO pin interrupts"
+	---help---
+		Enable support for interrupting PIO pins
+
+if PIO_IRQ
+
+config PIOA_IRQ
+	bool "PIOA interrupts"
+	default n
+
+config PIOB_IRQ
+	bool "PIOB interrupts"
+	default n
+
+config PIOC_IRQ
+	bool "PIOC interrupts"
+	default n
+
+config PIOD_IRQ
+	bool "PIOD interrupts"
+	default n
+
+config PIOE_IRQ
+	bool "PIOE interrupts"
+	default n
+
+endif
+
+endif
