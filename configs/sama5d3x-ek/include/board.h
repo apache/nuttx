@@ -143,7 +143,7 @@ uint8_t up_buttons(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_GPIOA_IRQ
+#ifdef CONFIG_PIOA_IRQ
 xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */
