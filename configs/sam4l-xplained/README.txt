@@ -198,8 +198,7 @@ GNU Toolchain Options
   2. The devkitARM GNU toolchain, ok
   4. The NuttX buildroot Toolchain (see below).
 
-  All testing has been conducted using the NuttX buildroot toolchain.  However,
-  the make system is setup to default to use the devkitARM toolchain.  To use
+  All testing has been conducted using the NuttX buildroot toolchain.  To use
   the CodeSourcery, devkitARM or Raisonance GNU toolchain, you simply need to
   add one of the following configuration options to your .config (or defconfig)
   file:
@@ -491,7 +490,7 @@ SAM4L Xplained Pro-specific Configuration Options
 
        CONFIG_DRAM_START=0x20000000
 
-    CONFIG_ARCH_IRQPRIO - The SAM3UF103Z supports interrupt prioritization
+    CONFIG_ARCH_IRQPRIO - The SAM4L supports interrupt prioritization
 
        CONFIG_ARCH_IRQPRIO=y
 

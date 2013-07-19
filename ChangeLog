@@ -5136,4 +5136,8 @@
 	  for the ARMMv7-A, the Cortex-A5 in particular.  The initial checkin
 	  is only fragmentary:  A few header files and some copied ARM9
 	  assembly files.  More to come (2013-7-18).
-
+	* arch/arm/include/sama5, arch/arm/src/sama5, and configs/sama5d3x-e:
+	  Add a directory framework to support the Atmel AT91SAMA5D3 family and
+	  the SAMA5D3x-EK board(s) in particular.  There is very little here on
+	  the first check-in, this structure is being used now primarily to
+	  create the Cortex-A5 support (2013-7-19).

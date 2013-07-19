@@ -21,7 +21,7 @@ README
 Contents
 ^^^^^^^^
 
-  - PIO Muxing
+  - PIO Muliplexing
   - Development Environment
   - GNU Toolchain Options
   - IDEs
@@ -33,8 +33,8 @@ Contents
   - SAM4S Xplained-specific Configuration Options
   - Configurations
 
-PIO Muxing
-^^^^^^^^^^
+PIO Muliplexing
+^^^^^^^^^^^^^^^
 
   PA0   SMC_A17                  PB0   J2.3 default   PC0   SMC_D0
   PA1   SMC_A18                  PB1   J2.4           PC1   SMC_D1
@@ -72,23 +72,25 @@ PIO Muxing
 Development Environment
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-  Either Linux or Cygwin on Windows can be used for the development environment.
+  Several possibile development enviorments may be use:
+
+  - Linux or OSX native
+  - Cygwin unders Windows
+  - MinGW + MSYS under Windows
+  - Windows native (with GNUMake from GNUWin32).
+
+  All testing has been performed using Cygwin under Windows.
+
   The source has been built only using the GNU toolchain (see below).  Other
-  toolchains will likely cause problems. Testing was performed using the Cygwin
-  environment.
+  toolchains will likely cause problems.
 
 GNU Toolchain Options
 ^^^^^^^^^^^^^^^^^^^^^
 
-  The NuttX make system has been modified to support the following different
+  The NuttX make system has been modified to support the several different
   toolchain options.
 
-  1. The CodeSourcery GNU toolchain,
-  2. The devkitARM GNU toolchain, ok
-  4. The NuttX buildroot Toolchain (see below).
-
-  All testing has been conducted using the NuttX buildroot toolchain.  However,
-  the make system is setup to default to use the devkitARM toolchain.  To use
+  All testing has been conducted using the NuttX buildroot toolchain.  To use
   the CodeSourcery, devkitARM or Raisonance GNU toolchain, you simply need to
   add one of the following configuration options to your .config (or defconfig)
   file:
@@ -137,9 +139,9 @@ GNU Toolchain Options
 
        MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
 
-  NOTE 1: The CodeSourcery toolchain (2009q1) does not work with default optimization
-  level of -Os (See Make.defs).  It will work with -O0, -O1, or -O2, but not with
-  -Os.
+  NOTE 1: Older CodeSourcery toolchains (2009q1) do not work with default
+  optimization level of -Os (See Make.defs).  It will work with -O0, -O1, or
+  -O2, but not with -Os.
 
   NOTE 2: The devkitARM toolchain includes a version of MSYS make.  Make sure that
   the paths to Cygwin's /bin and /usr/bin directories appear BEFORE the devkitARM
@@ -254,7 +256,7 @@ NXFLAT Toolchain
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh lpcxpresso-lpc1768/<sub-dir>
+     ./configure.sh sam4s-xplained/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -408,7 +410,7 @@ SAM4S Xplained-specific Configuration Options
 
     CONFIG_DRAM_START=0x20000000
 
-  CONFIG_ARCH_IRQPRIO - The SAM3UF103Z supports interrupt prioritization
+  CONFIG_ARCH_IRQPRIO - The SAM4S supports interrupt prioritization
 
     CONFIG_ARCH_IRQPRIO=y
 

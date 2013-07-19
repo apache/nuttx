@@ -1,0 +1,63 @@
+############################################################################
+# arch/arm/samad5/Make.defs
+#
+#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Author: Gregory Nutt <gnutt@nuttx.org>
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in
+#    the documentation and/or other materials provided with the
+#    distribution.
+# 3. Neither the name Gregory Nutt nor the names of its contributors may be
+#    used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+# AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+#
+############################################################################
+
+HEAD_ASRC  = arm_head.S
+
+CMN_ASRCS  = arm_vectors.S arm_vectortab.S arm_fullcontextrestore.S
+CMN_ASRCS += arm_saveusercontext.S arm_vectoraddrexcptn.S arm_vfork.S
+
+CMN_CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_exit.c
+CMN_CSRCS += up_createstack.c up_releasestack.c up_usestack.c up_vfork.c
+CMN_CSRCS += up_mdelay.c up_udelay.c
+CMN_CSRCS += up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
+
+CMN_CSRCS += arm_assert.c arm_blocktask.c arm_copystate.c arm_dataabort.c
+CMN_CSRCS += arm_doirq.c arm_initialstate.c arm_prefetchabort.c
+CMN_CSRCS += arm_releasepending.c arm_reprioritizertr.c
+CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
+CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
+
+ifeq ($(CONFIG_PAGING),y)
+CMN_CSRCS += arm_allocpage.c arm_checkmapping.c arm_pginitialize.c
+CMN_CSRCS += arm_va2pte.c
+endif
+
+ifeq ($(CONFIG_ELF),y)
+CMN_CSRCS += arm_elf.c
+endif
+
+CHIP_ASRCS =
+
+CHIP_CSRCS =

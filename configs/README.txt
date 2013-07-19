@@ -1963,6 +1963,10 @@ configs/rgmp
   See http://rgmp.sourceforge.net/wiki/index.php/Main_Page for further
   information about RGMP.
 
+configs/sama5d3x-ek
+  The port of NuttX to the Atmel SAMA5D3x-EK development board (where
+  x=1,3,4, or 5).
+
 configs/sam3u-ek
   The port of NuttX to the Atmel SAM3U-EK development board.
 
