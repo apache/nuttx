@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm7-a/arm_vectortab.S
+ * arch/arm/src/armv7-a/arm_saveusercontext.S
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,67 +37,82 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/irq.h>
+#include "up_internal.h"
+
+	.file	"arm_saveusercontext.S"
 
 /****************************************************************************
- * Definitions
+ * Preprocessor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Data
+ * Public Symbols
+ ****************************************************************************/
+
+	.globl	up_saveusercontext
+
+/****************************************************************************
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Assembly Macros
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _vector_start
- *
- * Description:
- *   Vector initialization block
+ * Private Functions
  ****************************************************************************/
 
-	.globl	_vector_start
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/* These will be relocated to VECTOR_BASE. */
+/****************************************************************************
+ * Name: up_saveusercontext
+ ****************************************************************************/
 
-_vector_start:
-	ldr		pc, .Lresethandler			/* 0x00: Reset */
-	ldr		pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
-	ldr		pc, .Lswihandler			/* 0x08: Software interrupt */
-	ldr		pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
-	ldr		pc, .Ldataaborthandler		/* 0x10: Data abort */
-	ldr		pc, .Laddrexcptnhandler		/* 0x14: Address exception (reserved) */
-	ldr		pc, .Lirqhandler			/* 0x18: IRQ */
-	ldr		pc, .Lfiqhandler			/* 0x1c: FIQ */
+	.text
+	.globl	up_saveusercontext
+	.type	up_saveusercontext, function
+up_saveusercontext:
+	/* On entry, a1 (r0) holds address of struct xcptcontext.
+	 * Offset to the user region.
+	 */
 
-	.globl   __start
-	.globl	arm_vectorundefinsn
-	.globl	arm_vectorswi
-	.globl	arm_vectorprefetch
-	.globl	arm_vectordata
-	.globl	arm_vectoraddrexcptn
-	.globl	arm_vectorirq
-	.globl	arm_vectorfiq
+	/* Make sure that the return value will be non-zero (the
+	 * value of the other volatile registers don't matter --
+	 * r1-r3, ip).  This function is called throught the
+	 * normal C calling conventions and the values of these
+	 * registers cannot be assumed at the point of setjmp
+	 * return.
+	 */
 
-.Lresethandler:
-	.long	__start
-.Lundefinedhandler:
-	.long	arm_vectorundefinsn
-.Lswihandler:
-	.long	arm_vectorswi
-.Lprefetchaborthandler:
-	.long	arm_vectorprefetch
-.Ldataaborthandler:
-	.long	arm_vectordata
-.Laddrexcptnhandler:
-	.long	arm_vectoraddrexcptn
-.Lirqhandler:
-	.long	arm_vectorirq
-.Lfiqhandler:
-	.long	arm_vectorfiq
+	mov		ip, #1
+	str		ip, [r0, #(4*REG_R0)]
 
-	.globl	_vector_end
-_vector_end:
-	.end
+	/* Save the volatile registers (plus r12 which really
+	 * doesn't need to be saved)
+	 */
+
+	add		r1, r0, #(4*REG_R4)
+	stmia	r1, {r4-r14}
+
+	/* Save the current cpsr */
+
+	mrs		r2, cpsr		/* R3 = CPSR value */
+	add		r1, r0, #(4*REG_CPSR)
+	str		r2, [r1]
+
+	/* Finally save the return address as the PC so that we
+	 * return to the exit from this function.
+	 */
+
+	add		r1, r0, #(4*REG_PC)
+	str		lr, [r1]
+
+	/* Return 0 */
+
+	mov		r0, #0			/* Return value == 0 */
+	mov		pc, lr			/* Return */
+	.size	up_saveusercontext, . - up_saveusercontext

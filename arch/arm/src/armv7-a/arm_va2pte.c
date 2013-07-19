@@ -1,7 +1,8 @@
 /****************************************************************************
- *  arch/arm/src/arm/up_prefetchabort.c
+ * arch/arm/src/armv7-a/arm_va2pte.c
+ * Utility to map a virtual address to a L2 page table entry.
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,28 +43,18 @@
 #include <stdint.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
-#ifdef CONFIG_PAGING
-#  include <nuttx/page.h>
-#endif
+#include <nuttx/sched.h>
+#include <nuttx/page.h>
 
-#include "os_internal.h"
+#include "chip.h"
+#include "pg_macros.h"
 #include "up_internal.h"
+
+#ifdef CONFIG_PAGING
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-/* Output debug info if stack dump is selected -- even if 
- * debug is not selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lowsyslog
-#endif
 
 /****************************************************************************
  * Private Data
@@ -78,77 +69,53 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_prefetchabort
+ * Name: up_va2pte
  *
- * Description;
- *   This is the prefetch abort exception handler. The ARM prefetch abort
- *   exception occurs when a memory fault is detected during an an
- *   instruction fetch.
+ * Description:
+ *  Convert a virtual address within the paged text region into a pointer to
+ *  the corresponding page table entry.
+ *
+ * Input Parameters:
+ *   vaddr - The virtual address within the paged text region.
+ *
+ * Returned Value:
+ *   A pointer to  the corresponding page table entry.
+ *
+ * Assumptions:
+ *   - This function is called from the normal tasking context (but with
+ *     interrupts disabled).  The implementation must take whatever actions
+ *     are necessary to assure that the operation is safe within this
+ *     context.
  *
  ****************************************************************************/
 
-void up_prefetchabort(uint32_t *regs)
+uint32_t *up_va2pte(uintptr_t vaddr)
 {
-#ifdef CONFIG_PAGING
-   uint32_t *savestate;
+  uint32_t L1;
+  uint32_t *L2;
+  unsigned int ndx;
 
-  /* Save the saved processor context in current_regs where it can be accessed
-   * for register dumps and possibly context switching.
+  /* The virtual address is expected to lie in the paged text region */
+
+  DEBUGASSERT(vaddr >= PG_PAGED_VBASE && vaddr < PG_PAGED_VEND);
+
+  /* Get the L1 table entry associated with this virtual address */
+
+  L1 = *(uint32_t*)PG_POOL_VA2L1VADDR(vaddr);
+
+  /* Get the address of the L2 page table from the L1 entry */
+
+  L2 = (uint32_t*)PG_POOL_L12VPTABLE(L1);
+
+  /* Get the index into the L2 page table.  Each L1 entry maps
+   * 256 x 4Kb or 1024 x 1Kb pages.
    */
 
-  savestate    = (uint32_t*)current_regs;
-#endif
-  current_regs = regs;
+  ndx = (vaddr & 0x000fffff) >> PAGESHIFT;
 
-#ifdef CONFIG_PAGING
-  /* Get the (virtual) address of instruction that caused the prefetch abort.
-   * When the exception occurred, this address was provided in the lr register
-   * and this value was saved in the context save area as the PC at the
-   * REG_R15 index.
-   *
-   * Check to see if this miss address is within the configured range of
-   * virtual addresses.
-   */
+  /* Return true if this virtual address is mapped. */
 
-  pglldbg("VADDR: %08x VBASE: %08x VEND: %08x\n",
-          regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
-
-  if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
-    {
-      /* Save the offending PC as the fault address in the TCB of the currently
-       * executing task.  This value is, of course, already known in regs[REG_R15],
-       * but saving it in this location will allow common paging logic for both
-       * prefetch and data aborts.
-       */
-
-      FAR struct tcb_s *tcb = (FAR struct tcb_s *)g_readytorun.head;
-      tcb->xcp.far  = regs[REG_R15];
-
-      /* Call pg_miss() to schedule the page fill.  A consequences of this
-       * call are:
-       *
-       * (1) The currently executing task will be blocked and saved on
-       *     on the g_waitingforfill task list.
-       * (2) An interrupt-level context switch will occur so that when
-       *     this function returns, it will return to a different task,
-       *     most likely the page fill worker thread.
-       * (3) The page fill worker task has been signalled and should
-       *     execute immediately when we return from this exception.
-       */
-
-      pg_miss();
-
-      /* Restore the previous value of current_regs.  NULL would indicate that
-       * we are no longer in an interrupt handler.  It will be non-NULL if we
-       * are returning from a nested interrupt.
-       */
-
-      current_regs = savestate;
-    }
-  else
-#endif
-    {
-      lldbg("Prefetch abort. PC: %08x\n", regs[REG_PC]);
-      PANIC();
-    }
+  return &L2[ndx];
 }
+
+#endif /* CONFIG_PAGING */

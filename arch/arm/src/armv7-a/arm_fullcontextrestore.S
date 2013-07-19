@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm7-a/arm_vectortab.S
+ * arch/arm/src/armv7-a/arm_fullcontextrestore.S
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,67 +37,81 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/irq.h>
+#include "up_internal.h"
+
+	.file	"arm_fullcontextrestore.S"
 
 /****************************************************************************
- * Definitions
+ * Preprocessor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Global Data
+ * Public Symbols
+ ****************************************************************************/
+
+	.globl	up_fullcontextrestore
+
+/****************************************************************************
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Assembly Macros
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
- * Name: _vector_start
- *
- * Description:
- *   Vector initialization block
+ * Private Functions
  ****************************************************************************/
 
-	.globl	_vector_start
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
-/* These will be relocated to VECTOR_BASE. */
+/****************************************************************************
+ * Name: up_fullcontextrestore
+ ****************************************************************************/
 
-_vector_start:
-	ldr		pc, .Lresethandler			/* 0x00: Reset */
-	ldr		pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
-	ldr		pc, .Lswihandler			/* 0x08: Software interrupt */
-	ldr		pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
-	ldr		pc, .Ldataaborthandler		/* 0x10: Data abort */
-	ldr		pc, .Laddrexcptnhandler		/* 0x14: Address exception (reserved) */
-	ldr		pc, .Lirqhandler			/* 0x18: IRQ */
-	ldr		pc, .Lfiqhandler			/* 0x1c: FIQ */
+	.globl	up_fullcontextrestore
+	.type	up_fullcontextrestore, function
+up_fullcontextrestore:
 
-	.globl   __start
-	.globl	arm_vectorundefinsn
-	.globl	arm_vectorswi
-	.globl	arm_vectorprefetch
-	.globl	arm_vectordata
-	.globl	arm_vectoraddrexcptn
-	.globl	arm_vectorirq
-	.globl	arm_vectorfiq
+	/* On entry, a1 (r0) holds address of the register save area */
 
-.Lresethandler:
-	.long	__start
-.Lundefinedhandler:
-	.long	arm_vectorundefinsn
-.Lswihandler:
-	.long	arm_vectorswi
-.Lprefetchaborthandler:
-	.long	arm_vectorprefetch
-.Ldataaborthandler:
-	.long	arm_vectordata
-.Laddrexcptnhandler:
-	.long	arm_vectoraddrexcptn
-.Lirqhandler:
-	.long	arm_vectorirq
-.Lfiqhandler:
-	.long	arm_vectorfiq
+	/* Recover all registers except for r0, r1, R15, and CPSR */
 
-	.globl	_vector_end
-_vector_end:
-	.end
+	add		r1, r0, #(4*REG_R2)		/* Offset to REG_R2 storage */
+	ldmia	r1, {r2-r14}			/* Recover registers */
+
+	/* Create a stack frame to hold the PC */
+
+	sub		sp, sp, #(3*4)			/* Frame for three registers */
+	ldr		r1, [r0, #(4*REG_R0)]	/* Fetch the stored r0 value */
+	str		r1, [sp]				/* Save it at the top of the stack */
+	ldr		r1, [r0, #(4*REG_R1)]	/* Fetch the stored r1 value */
+	str		r1, [sp, #4]			/* Save it in the stack */
+	ldr		r1, [r0, #(4*REG_PC)]	/* Fetch the stored pc value */
+	str		r1, [sp, #8]			/* Save it at the bottom of the frame */
+
+	/* Now we can restore the CPSR.  We wait until we are completely
+	 * finished with the context save data to do this. Restore the CPSR
+	 * may re-enable and interrupts and we could be in a context
+	 * where the save structure is only protected by interrupts being
+	 * disabled.
+	 */
+
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
+	msr		cpsr, r1				/* Set the CPSR */
+
+	/* Now recover r0 and r1 */
+
+	ldr		r0, [sp]
+	ldr		r1, [sp, #4]
+	add		sp, sp, #(2*4)
+
+	/* Then return to the address at the stop of the stack,
+	 * destroying the stack frame
+	 */
+
+	ldr		pc, [sp], #4
+	.size up_fullcontextrestore, . - up_fullcontextrestore

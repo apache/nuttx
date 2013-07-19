@@ -1,7 +1,7 @@
 /****************************************************************************
- *  arch/arm/src/arm/up_prefetchabort.c
+ *  arch/arm/src/armv7-a/arm_unblocktask.c
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,31 +39,17 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
+#include <sched.h>
 #include <debug.h>
-
-#include <nuttx/irq.h>
-#ifdef CONFIG_PAGING
-#  include <nuttx/page.h>
-#endif
+#include <nuttx/arch.h>
 
 #include "os_internal.h"
+#include "clock_internal.h"
 #include "up_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-/* Output debug info if stack dump is selected -- even if 
- * debug is not selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lowsyslog
-#endif
 
 /****************************************************************************
  * Private Data
@@ -78,77 +64,91 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_prefetchabort
+ * Name: up_unblock_task
  *
- * Description;
- *   This is the prefetch abort exception handler. The ARM prefetch abort
- *   exception occurs when a memory fault is detected during an an
- *   instruction fetch.
+ * Description:
+ *   A task is currently in an inactive task list
+ *   but has been prepped to execute.  Move the TCB to the
+ *   ready-to-run list, restore its context, and start execution.
+ *
+ * Inputs:
+ *   tcb: Refers to the tcb to be unblocked.  This tcb is
+ *     in one of the waiting tasks lists.  It must be moved to
+ *     the ready-to-run list and, if it is the highest priority
+ *     ready to run taks, executed.
  *
  ****************************************************************************/
 
-void up_prefetchabort(uint32_t *regs)
+void up_unblock_task(struct tcb_s *tcb)
 {
-#ifdef CONFIG_PAGING
-   uint32_t *savestate;
+  struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
 
-  /* Save the saved processor context in current_regs where it can be accessed
-   * for register dumps and possibly context switching.
+  /* Verify that the context switch can be performed */
+
+  ASSERT((tcb->task_state >= FIRST_BLOCKED_STATE) &&
+         (tcb->task_state <= LAST_BLOCKED_STATE));
+
+  /* Remove the task from the blocked task list */
+
+  sched_removeblocked(tcb);
+
+  /* Reset its timeslice.  This is only meaningful for round
+   * robin tasks but it doesn't here to do it for everything
    */
 
-  savestate    = (uint32_t*)current_regs;
+#if CONFIG_RR_INTERVAL > 0
+  tcb->timeslice = CONFIG_RR_INTERVAL / MSEC_PER_TICK;
 #endif
-  current_regs = regs;
 
-#ifdef CONFIG_PAGING
-  /* Get the (virtual) address of instruction that caused the prefetch abort.
-   * When the exception occurred, this address was provided in the lr register
-   * and this value was saved in the context save area as the PC at the
-   * REG_R15 index.
-   *
-   * Check to see if this miss address is within the configured range of
-   * virtual addresses.
+  /* Add the task in the correct location in the prioritized
+   * g_readytorun task list
    */
 
-  pglldbg("VADDR: %08x VBASE: %08x VEND: %08x\n",
-          regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
-
-  if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
+  if (sched_addreadytorun(tcb))
     {
-      /* Save the offending PC as the fault address in the TCB of the currently
-       * executing task.  This value is, of course, already known in regs[REG_R15],
-       * but saving it in this location will allow common paging logic for both
-       * prefetch and data aborts.
-       */
-
-      FAR struct tcb_s *tcb = (FAR struct tcb_s *)g_readytorun.head;
-      tcb->xcp.far  = regs[REG_R15];
-
-      /* Call pg_miss() to schedule the page fill.  A consequences of this
-       * call are:
+      /* The currently active task has changed! We need to do
+       * a context switch to the new task.
        *
-       * (1) The currently executing task will be blocked and saved on
-       *     on the g_waitingforfill task list.
-       * (2) An interrupt-level context switch will occur so that when
-       *     this function returns, it will return to a different task,
-       *     most likely the page fill worker thread.
-       * (3) The page fill worker task has been signalled and should
-       *     execute immediately when we return from this exception.
+       * Are we in an interrupt handler? 
        */
 
-      pg_miss();
+      if (current_regs)
+        {
+          /* Yes, then we have to do things differently.
+           * Just copy the current_regs into the OLD rtcb.
+           */
 
-      /* Restore the previous value of current_regs.  NULL would indicate that
-       * we are no longer in an interrupt handler.  It will be non-NULL if we
-       * are returning from a nested interrupt.
+          up_savestate(rtcb->xcp.regs);
+
+          /* Restore the exception context of the rtcb at the (new) head 
+           * of the g_readytorun task list.
+           */
+
+          rtcb = (struct tcb_s*)g_readytorun.head;
+
+          /* Then switch contexts */
+
+          up_restorestate(rtcb->xcp.regs);
+        }
+
+      /* We are not in an interrupt handler.  Copy the user C context
+       * into the TCB of the task that was previously active.  if 
+       * up_saveusercontext returns a non-zero value, then this is really the
+       * previously running task restarting!
        */
 
-      current_regs = savestate;
-    }
-  else
-#endif
-    {
-      lldbg("Prefetch abort. PC: %08x\n", regs[REG_PC]);
-      PANIC();
+      else if (!up_saveusercontext(rtcb->xcp.regs))
+        {
+          /* Restore the exception context of the new task that is ready to
+           * run (probably tcb).  This is the new rtcb at the head of the
+           * g_readytorun task list.
+           */
+
+          rtcb = (struct tcb_s*)g_readytorun.head;
+
+          /* Then switch contexts */
+
+          up_fullcontextrestore(rtcb->xcp.regs);
+        }
     }
 }

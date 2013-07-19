@@ -1,7 +1,7 @@
 /****************************************************************************
- *  arch/arm/src/arm/up_prefetchabort.c
+ *  arch/arm/src/armv7-a/arm_initialstate.c
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,30 +40,17 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <debug.h>
+#include <string.h>
 
-#include <nuttx/irq.h>
-#ifdef CONFIG_PAGING
-#  include <nuttx/page.h>
-#endif
+#include <nuttx/arch.h>
 
-#include "os_internal.h"
+#include "arm.h"
 #include "up_internal.h"
+#include "up_arch.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-/* Output debug info if stack dump is selected -- even if 
- * debug is not selected.
- */
-
-#ifdef CONFIG_ARCH_STACKDUMP
-# undef  lldbg
-# define lldbg lowsyslog
-#endif
 
 /****************************************************************************
  * Private Data
@@ -78,77 +65,82 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_prefetchabort
+ * Name: up_initial_state
  *
- * Description;
- *   This is the prefetch abort exception handler. The ARM prefetch abort
- *   exception occurs when a memory fault is detected during an an
- *   instruction fetch.
+ * Description:
+ *   A new thread is being started and a new TCB
+ *   has been created. This function is called to initialize
+ *   the processor specific portions of the new TCB.
+ *
+ *   This function must setup the intial architecture registers
+ *   and/or  stack so that execution will begin at tcb->start
+ *   on the next context switch.
  *
  ****************************************************************************/
 
-void up_prefetchabort(uint32_t *regs)
+void up_initial_state(struct tcb_s *tcb)
 {
-#ifdef CONFIG_PAGING
-   uint32_t *savestate;
+  struct xcptcontext *xcp = &tcb->xcp;
+  uint32_t cpsr;
 
-  /* Save the saved processor context in current_regs where it can be accessed
-   * for register dumps and possibly context switching.
+  /* Initialize the initial exception register context structure */
+
+  memset(xcp, 0, sizeof(struct xcptcontext));
+
+  /* Save the initial stack pointer */
+
+  xcp->regs[REG_SP]      = (uint32_t)tcb->adj_stack_ptr;
+
+  /* Save the task entry point */
+
+  xcp->regs[REG_PC]      = (uint32_t)tcb->start;
+
+  /* If this task is running PIC, then set the PIC base register to the
+   * address of the allocated D-Space region.
    */
 
-  savestate    = (uint32_t*)current_regs;
-#endif
-  current_regs = regs;
-
-#ifdef CONFIG_PAGING
-  /* Get the (virtual) address of instruction that caused the prefetch abort.
-   * When the exception occurred, this address was provided in the lr register
-   * and this value was saved in the context save area as the PC at the
-   * REG_R15 index.
-   *
-   * Check to see if this miss address is within the configured range of
-   * virtual addresses.
-   */
-
-  pglldbg("VADDR: %08x VBASE: %08x VEND: %08x\n",
-          regs[REG_PC], PG_PAGED_VBASE, PG_PAGED_VEND);
-
-  if (regs[REG_R15] >= PG_PAGED_VBASE && regs[REG_R15] < PG_PAGED_VEND)
+#ifdef CONFIG_PIC
+  if (tcb->dspace != NULL)
     {
-      /* Save the offending PC as the fault address in the TCB of the currently
-       * executing task.  This value is, of course, already known in regs[REG_R15],
-       * but saving it in this location will allow common paging logic for both
-       * prefetch and data aborts.
+      /* Set the PIC base register (probably R10) to the address of the
+       * alloacated D-Space region.
        */
 
-      FAR struct tcb_s *tcb = (FAR struct tcb_s *)g_readytorun.head;
-      tcb->xcp.far  = regs[REG_R15];
+      xcp->regs[REG_PIC] = (uint32_t)tcb->dspace->region;
+    }
+#endif
 
-      /* Call pg_miss() to schedule the page fill.  A consequences of this
-       * call are:
-       *
-       * (1) The currently executing task will be blocked and saved on
-       *     on the g_waitingforfill task list.
-       * (2) An interrupt-level context switch will occur so that when
-       *     this function returns, it will return to a different task,
-       *     most likely the page fill worker thread.
-       * (3) The page fill worker task has been signalled and should
-       *     execute immediately when we return from this exception.
-       */
+  /* Set supervisor- or user-mode, depending on how NuttX is configured and
+   * what kind of thread is being started.  Disable FIQs in any event
+   */
 
-      pg_miss();
+#ifdef CONFIG_NUTTX_KERNEL
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+    {
+      /* It is a kernel thread.. set supervisor mode */
 
-      /* Restore the previous value of current_regs.  NULL would indicate that
-       * we are no longer in an interrupt handler.  It will be non-NULL if we
-       * are returning from a nested interrupt.
-       */
-
-      current_regs = savestate;
+      cpsr               = PSR_MODE_SUPER | PSR_F_BIT;
     }
   else
-#endif
     {
-      lldbg("Prefetch abort. PC: %08x\n", regs[REG_PC]);
-      PANIC();
+      /* It is a normal task or a pthread.  Set user mode */
+
+      cpsr               = PSR_MODE_USER | PSR_F_BIT;
     }
+#else
+  /* If the kernel build is not selected, then all threads run in
+   * supervisor-mode.
+   */
+
+  cpsr                   = PSR_MODE_SUPER | PSR_F_BIT;
+#endif
+
+  /* Enable or disable interrupts, based on user configuration */
+
+# ifdef CONFIG_SUPPRESS_INTERRUPTS
+  cpsr                  |= PSR_I_BIT;
+# endif
+
+  xcp->regs[REG_CPSR]    = cpsr;
 }
+

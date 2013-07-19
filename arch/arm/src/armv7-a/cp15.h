@@ -194,7 +194,7 @@
 #define CP15_IDATAR(r)     _CP15(3, r, c15, c4, 1)  /* Instruction Cache Data Read Operation Register */
 #define CP15_TLBR(r)       _CP15(3, r, c15, c4, 2)  /* TLB Data Read Operation Register */
 #define CP15_CBADDR(r)     _CP15(4, r, c15, c0, 0)  /* Configuration Base Address Register */
-#define CP15_TLBHITMAP(r)  _CP15(5, r, c15, c0, 0)  /* TLB access and attributes
+#define CP15_TLBHITMAP(r)  _CP15(5, r, c15, c0, 0)  /* TLB access and attributes */
 
 /* System control register descriptions.
  *
