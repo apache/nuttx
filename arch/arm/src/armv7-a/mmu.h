@@ -51,6 +51,17 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* The Cortex-A5 supports two translation table base address registers.  In this,
+ * implementation, only Translation Table Base Register 0 (TTBR0) is used.  The
+ * TTBR0 contains the upper bits of the address a a page table in physical memory.
+ * If 4KB page sizes are used, then TTBR0 registers holds bits 14-31 of the page
+ * table address;  A full 30-bit address is formed by ORing in bits 2-13 or the
+ * virtual address (MVA).  As a consequence, the page table must be aligned to a
+ * 16Kb address in physical memory and could require up to 16Kb of memory.
+ */
+
+#define PGTABLE_SIZE       0x00004000
+
 /* Reference: Cortex-A5™ MPCore Paragraph 6.7, "MMU software accessible registers." */
 
 /* TLB Type Register TLB Type Register
