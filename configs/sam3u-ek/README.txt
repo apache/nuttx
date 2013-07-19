@@ -38,8 +38,7 @@ GNU Toolchain Options
   2. The devkitARM GNU toolchain, ok
   4. The NuttX buildroot Toolchain (see below).
 
-  All testing has been conducted using the NuttX buildroot toolchain.  However,
-  the make system is setup to default to use the devkitARM toolchain.  To use
+  All testing has been conducted using the NuttX buildroot toolchain.  To use
   the CodeSourcery, devkitARM, Atollic, or AtmelStudio GNU toolchain, you simply
   need to add one of the following configuration options to your .config (or
   defconfig) file:
@@ -204,7 +203,7 @@ NXFLAT Toolchain
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh lpcxpresso-lpc1768/<sub-dir>
+     ./configure.sh sam3u-ek/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -337,7 +336,7 @@ SAM3U-EK-specific Configuration Options
 
        CONFIG_DRAM_START=0x20000000
 
-    CONFIG_ARCH_IRQPRIO - The SAM3UF103Z supports interrupt prioritization
+    CONFIG_ARCH_IRQPRIO - The SAM3U supports interrupt prioritization
 
        CONFIG_ARCH_IRQPRIO=y
 

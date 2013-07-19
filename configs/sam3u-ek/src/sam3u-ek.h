@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/sam3uek_eval/src/sam3u-ek.h
+ * configs/sam3u-ek/src/sam3u-ek.h
  *
  *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
