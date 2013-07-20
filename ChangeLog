@@ -5141,3 +5141,6 @@
 	  the SAMA5D3x-EK board(s) in particular.  There is very little here on
 	  the first check-in, this structure is being used now primarily to
 	  create the Cortex-A5 support (2013-7-19).
+	* arch/arm/src/armv7-a/arm_cache.S:  Cortex-A5 cache operations
+	  (2013-7-20).
+

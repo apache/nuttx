@@ -87,9 +87,10 @@
  *
  ****************************************************************************/
 
-void arm_prefetchabort(uint32_t *regs)
-{
 #ifdef CONFIG_PAGING
+
+void arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
+{
    uint32_t *savestate;
 
   /* Save the saved processor context in current_regs where it can be accessed
@@ -97,10 +98,8 @@ void arm_prefetchabort(uint32_t *regs)
    */
 
   savestate    = (uint32_t*)current_regs;
-#endif
   current_regs = regs;
 
-#ifdef CONFIG_PAGING
   /* Get the (virtual) address of instruction that caused the prefetch abort.
    * When the exception occurred, this address was provided in the lr register
    * and this value was saved in the context save area as the PC at the
@@ -146,9 +145,28 @@ void arm_prefetchabort(uint32_t *regs)
       current_regs = savestate;
     }
   else
-#endif
     {
-      lldbg("Prefetch abort. PC: %08x\n", regs[REG_PC]);
+      lldbg("Prefetch abort. PC: %08x IFAR: %08x IFSR: %08x\n",
+            regs[REG_PC], ifar, ifsr);
       PANIC();
     }
 }
+
+#else /* CONFIG_PAGING */
+
+void arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
+{
+  /* Save the saved processor context in current_regs where it can be accessed
+   * for register dumps and possibly context switching.
+   */
+
+  current_regs = regs;
+
+  /* Crash -- possibly showing diagnostic debug information. */
+
+  lldbg("Prefetch abort. PC: %08x IFAR: %08x IFSR: %08x\n",
+        regs[REG_PC], ifar, ifsr);
+  PANIC();
+}
+
+#endif /* CONFIG_PAGING */

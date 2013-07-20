@@ -41,6 +41,7 @@
 #include <nuttx/irq.h>
 
 #include "arm.h"
+#include "cp15.h"
 
 /************************************************************************************
  * Definitions
@@ -87,6 +88,7 @@ g_aborttmp:
 
 	.globl	arm_vectorirq
 	.type	arm_vectorirq, %function
+
 arm_vectorirq:
 	/* On entry, we are in IRQ mode.  We are free to use
 	 * the IRQ mode r13 and r14.
@@ -101,7 +103,7 @@ arm_vectorirq:
 	/* Then switch back to SVC mode */
 
 	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
-	orr		lr, lr, #(PSR_MODE_SUPER | PSR_I_BIT)
+	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr		cpsr_c, lr				/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -163,6 +165,7 @@ arm_vectorirq:
 
 	.globl	arm_vectorswi
 	.type	arm_vectorswi, %function
+
 arm_vectorswi:
 
 	/* Create a context structure.  First set aside a stack frame
@@ -213,6 +216,7 @@ arm_vectorswi:
 
 	.globl	arm_vectordata
 	.type	arm_vectordata, %function
+
 arm_vectordata:
 	/* On entry we are free to use the ABORT mode registers
 	 * r13 and r14
@@ -227,7 +231,7 @@ arm_vectordata:
 	/* Then switch back to SVC mode */
 
 	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
-	orr		lr, lr, #(PSR_MODE_SUPER | PSR_I_BIT)
+	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr		cpsr_c, lr				/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -256,10 +260,8 @@ arm_vectordata:
 
 	mov		fp, #0					/* Init frame pointer */
 	mov		r0, sp					/* Get r0=xcp */
-#ifdef CONFIG_PAGING
-	mrc		p15, 0, r2, c5, c0, 0	/* Get r2=FSR */
-	mrc		p15, 0, r1, c6, c0, 0	/* Get R1=FAR */
-#endif
+	mrc		CP15_DFAR(r1)			/* Get R1=DFAR */
+	mrc		CP15_DFSR(r2)			/* Get r2=DFSR */
 	bl		arm_dataabort			/* Call the handler */
 
 	/* Restore the CPSR, SVC modr registers and return */
@@ -287,6 +289,7 @@ arm_vectordata:
 
 	.globl	arm_vectorprefetch
 	.type	arm_vectorprefetch, %function
+
 arm_vectorprefetch:
 	/* On entry we are free to use the ABORT mode registers
 	 * r13 and r14
@@ -301,7 +304,7 @@ arm_vectorprefetch:
 	/* Then switch back to SVC mode */
 
 	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
-	orr		lr, lr, #(PSR_MODE_SUPER | PSR_I_BIT)
+	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr		cpsr_c, lr				/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -330,6 +333,8 @@ arm_vectorprefetch:
 
 	mov		fp, #0					/* Init frame pointer */
 	mov		r0, sp					/* Get r0=xcp */
+	mrc		CP15_IFAR(r1)			/* Get R1=IFAR */
+	mrc		CP15_IFSR(r2)			/* Get r2=IFSR */
 	bl		arm_prefetchabort		/* Call the handler */
 
 	/* Restore the CPSR, SVC modr registers and return */
@@ -355,6 +360,7 @@ arm_vectorprefetch:
 
 	.globl	arm_vectorundefinsn
 	.type	arm_vectorundefinsn, %function
+
 arm_vectorundefinsn:
 	/* On entry we are free to use the UND mode registers
 	 * r13 and r14
@@ -368,7 +374,7 @@ arm_vectorundefinsn:
 	/* Then switch back to SVC mode */
 
 	bic		lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
-	orr		lr, lr, #(PSR_MODE_SUPER | PSR_I_BIT)
+	orr		lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr		cpsr_c, lr				/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -421,6 +427,7 @@ arm_vectorundefinsn:
 
 	.globl	arm_vectorfiq
 	.type	arm_vectorfiq, %function
+
 arm_vectorfiq:
 	subs	pc, lr, #4
 	.size	arm_vectorfiq, . - arm_vectorfiq

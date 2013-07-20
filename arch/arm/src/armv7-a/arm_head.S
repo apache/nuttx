@@ -230,7 +230,7 @@
 __start:
 	/* Make sure that we are in SVC mode with all IRQs disabled */
 
-	mov		r0, #(PSR_MODE_SUPER | PSR_I_BIT | PSR_F_BIT)
+	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
 	msr		cpsr_c, r0
 
 	/* Initialize DRAM using a macro provided by board-specific logic.
@@ -341,15 +341,49 @@ __start:
 	 *   r4 = Address of the base of the L1 table
 	 */
 
+	/* Invalidate caches and TLBs.
+	 *
+	 * NOTE: "The ARMv7 Virtual Memory System Architecture (VMSA) does not
+	 * support a CP15 operation to invalidate the entire data cache. ...
+	 * In normal usage the only time the entire data cache has to be
+	 * invalidated is on reset."
+	 *
+	 * REVISIT:  This could be an issue if NuttX is every started in a
+	 * context where the DCache could be dirty.
+	 */
+
 	mov		r0, #0
-	mcr		p15, 0, r0, c7, c7		/* Invalidate I,D caches */
-	mcr		p15, 0, r0, c7, c10, 4	/* Drain write buffer */
-	mcr		p15, 0, r0, c8, c7		/* Invalidate I,D TLBs */
-	mcr		p15, 0, r4, c2, c0		/* Load page table pointer */
+	mcr		CP15_ICIALLUIS(r0)	/* Invalidate entire instruction cache Inner Shareable */
+
+	/* Load the page table address.
+	 *
+	 * NOTES:
+	 * - Here we assume that the page table address is aligned to at least
+	 *   least a 16KB boundary (bits 0-13 are zero).  No masking is provided
+	 *   to protect against an unaligned page table address.
+	 * - The Cortex-A5 has two page table address registers, TTBR0 and 1.
+	 *   Only TTBR0 is used in this implementation but both are initialized.
+	 *
+	 * Here we expect to have:
+	 *   r0 = Zero
+	 *   r4 = Address of the base of the L1 table
+	 */
+
+	mcr		CP15_TTBR0(r4)
+	mcr		CP15_TTBR1(r4)
+
+	/* Clear the TTB control register (TTBCR) to indicate that we are using
+	 * TTBR0.  r0 still holds the value of zero.
+	 */
+
+	mcr		CP15_TTBCR(r0)
+
+	/* Enable DCache write-through if so configured.
+	 *
+	 * The Cortex-A5 MPCore data cache only supports a write-back policy.
+	 */
 
 #ifdef CPU_DCACHE_WRITETHROUGH
-	mov		r0, #4					/* Disable write-back on caches explicitly */
-	mcr		p15, 7, r0, c15, c0, 0
 #endif 
 
 	/* Enable the MMU and caches
