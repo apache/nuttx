@@ -173,7 +173,7 @@
 
 /* Sizes of sections/regions.  The boot logic in sam_boot.c, will select
  * 1Mb level 1 MMU mappings to span the entire physical address space.
- * The definitiions below specify the number of 1Mb entries that are
+ * The definitions below specify the number of 1Mb entries that are
  * required to span a particular address region.
  */
 

@@ -119,20 +119,20 @@ void up_initial_state(struct tcb_s *tcb)
     {
       /* It is a kernel thread.. set supervisor mode */
 
-      cpsr               = PSR_MODE_SUPER | PSR_F_BIT;
+      cpsr               = PSR_MODE_SVC | PSR_F_BIT;
     }
   else
     {
       /* It is a normal task or a pthread.  Set user mode */
 
-      cpsr               = PSR_MODE_USER | PSR_F_BIT;
+      cpsr               = PSR_MODE_USR | PSR_F_BIT;
     }
 #else
   /* If the kernel build is not selected, then all threads run in
    * supervisor-mode.
    */
 
-  cpsr                   = PSR_MODE_SUPER | PSR_F_BIT;
+  cpsr                   = PSR_MODE_SVC | PSR_F_BIT;
 #endif
 
   /* Enable or disable interrupts, based on user configuration */

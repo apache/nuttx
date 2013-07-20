@@ -238,11 +238,11 @@
 	nop
 	.endm
 
-/* The  ARMv7-aA architecture supports two translation tables.  This
+/* The ARMv7-aA architecture supports two translation tables.  This
  * implementation, however, uses only translation table 0.  This
- * functions clears the TTB control register (TTBCR), indicating that
- * we are using TTB 0.  This is it writes the value of the page table
- * to Translation Table Base Register 0 (TTBR0).
+ * macro  writes the address of the page table to the Translation
+ * Table Base Register 0 (TTBR0) .  Then it clears the TTB control
+ * register (TTBCR), indicating that we are using TTB 0it.
  */
 
 	.macro	cp14_wrttb, ttb, scratch
@@ -288,11 +288,11 @@ static inline void cp15_wrdacr(unsigned int dacr)
     );
 }
 
-/* The  ARMv7-aA architecture supports two translation tables.  This
+/* The ARMv7-aA architecture supports two translation tables.  This
  * implementation, however, uses only translation table 0.  This
- * functions clears the TTB control register (TTBCR), indicating that
- * we are using TTB 0.  This is it writes the value of the page table
- * to Translation Table Base Register 0 (TTBR0).
+ * function  writes the address of the page table to the Translation
+ * Table Base Register 0 (TTBR0).  Then it clears the TTB control
+ * register (TTBCR), indicating that we are using TTBR0.
  */
 
 static inline void cp14_wrttb(unsigned int ttb)

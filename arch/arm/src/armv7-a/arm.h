@@ -58,15 +58,15 @@
 
 #define PSR_MODE_SHIFT    (1)       /* Bits 0-4: Mode fields */
 #define PSR_MODE_MASK     (31 << PSR_MODE_SHIFT)
-#  define PSR_MODE_USER   (16 << PSR_MODE_SHIFT) /* User mode */
+#  define PSR_MODE_USR    (16 << PSR_MODE_SHIFT) /* User mode */
 #  define PSR_MODE_FIQ    (17 << PSR_MODE_SHIFT) /* FIQ mode */
 #  define PSR_MODE_IRQ    (18 << PSR_MODE_SHIFT) /* IRQ mode */
-#  define PSR_MODE_SUPER  (19 << PSR_MODE_SHIFT) /* Supervisor mode */
+#  define PSR_MODE_SVC    (19 << PSR_MODE_SHIFT) /* Supervisor mode */
 #  define PSR_MODE_MON    (22 << PSR_MODE_SHIFT) /* Monitor mode */
-#  define PSR_MODE_ABORT  (23 << PSR_MODE_SHIFT) /* Abort mode */
+#  define PSR_MODE_ABT    (23 << PSR_MODE_SHIFT) /* Abort mode */
 #  define PSR_MODE_HYP    (26 << PSR_MODE_SHIFT) /* Hyp mode */
-#  define PSR_MODE_UNDEF  (27 << PSR_MODE_SHIFT) /* Undefined mode */
-#  define PSR_MODE_SYSTEM (31 << PSR_MODE_SHIFT) /* System mode */
+#  define PSR_MODE_UND    (27 << PSR_MODE_SHIFT) /* Undefined mode */
+#  define PSR_MODE_SYS    (31 << PSR_MODE_SHIFT) /* System mode */
 #define PSR_T_BIT         (1 << 5)  /* Bit 5: Thumb execution state bit */
 #define PSR_MASK_SHIFT    (6)       /* Bits 6-8: Mask Bits */
 #define PSR_MASK_MASK     (7 << PSR_GE_SHIFT)

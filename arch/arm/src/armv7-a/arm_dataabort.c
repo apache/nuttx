@@ -86,12 +86,12 @@
  * If CONFIG_PAGING is selected in the NuttX configuration file, then these
  * additional input values are expected:
  *
- *   far - Fault address register.  On a data abort, the ARM MMU places the
- *     miss virtual address (MVA) into the FAR register.  This is the address
+ *   dfar - Fault address register.  On a data abort, the ARM MMU places the
+ *     miss virtual address (MVA) into the DFAR register.  This is the address
  *     of the data which, when accessed, caused the fault.
- *   fsr - Fault status register.  On a data a abort, the ARM MMU places an
+ *   dfsr - Fault status register.  On a data a abort, the ARM MMU places an
  *     encoded four-bit value, the fault status, along with the four-bit
- *     encoded domain number, in the data FSR
+ *     encoded domain number, in the data DFSR
  *
  * Description:
  *   This is the data abort exception handler. The ARM data abort exception
@@ -100,10 +100,10 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PAGING
-void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
+
+void arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
 {
-  FAR struct tcb_s *tcb = (FAR struct tcb_s *)g_readytorun.head;
-#ifdef CONFIG_PAGING
+  DFAR struct tcb_s *tcb = (DFAR struct tcb_s *)g_readytorun.head;
   uint32_t *savestate;
 
   /* Save the saved processor context in current_regs where it can be accessed
@@ -112,10 +112,8 @@ void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
 
 
   savestate    = (uint32_t*)current_regs;
-#endif
   current_regs = regs;
 
-#ifdef CONFIG_PAGING
   /* In the NuttX on-demand paging implementation, only the read-only, .text
    * section is paged.  However, the ARM compiler generated PC-relative data
    * fetches from within the .text sections.  Also, it is customary to locate
@@ -129,19 +127,19 @@ void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * fatal error.
    */
 
-  pglldbg("FSR: %08x FAR: %08x\n", fsr, far);
-  if ((fsr & FSR_MASK) != FSR_PAGE)
+  pglldbg("DFSR: %08x DFAR: %08x\n", dfsr, dfar);
+  if ((dfsr & FSR_MASK) != FSR_PAGE)
     {
       goto segfault;
     }
 
   /* Check the (virtual) address of data that caused the data abort. When
-   * the exception occurred, this address was provided in the FAR register.
+   * the exception occurred, this address was provided in the DFAR register.
    * (It has not yet been saved in the register context save area).
    */
  
   pgllvdbg("VBASE: %08x VEND: %08x\n", PG_PAGED_VBASE, PG_PAGED_VEND);
-  if (far < PG_PAGED_VBASE || far >= PG_PAGED_VEND)
+  if (dfar < PG_PAGED_VBASE || dfar >= PG_PAGED_VEND)
     {
       goto segfault;
     }
@@ -152,7 +150,7 @@ void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
    * prefetch and data aborts.
    */
 
-  tcb->xcp.far = regs[REG_R15];
+  tcb->xcp.dfar = regs[REG_R15];
 
   /* Call pg_miss() to schedule the page fill.  A consequences of this
    * call are:
@@ -177,14 +175,14 @@ void arm_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr)
   return;
 
 segfault:
-#endif
-  lldbg("Data abort. PC: %08x FAR: %08x FSR: %08x\n", regs[REG_PC], far, fsr);
+  lldbg("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
+        regs[REG_PC], dfar, dfsr);
   PANIC();
 }
 
 #else /* CONFIG_PAGING */
 
-void arm_dataabort(uint32_t *regs)
+void arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
 {
   /* Save the saved processor context in current_regs where it can be accessed
    * for register dumps and possibly context switching.
@@ -192,9 +190,10 @@ void arm_dataabort(uint32_t *regs)
 
   current_regs = regs;
 
-  /* Crash -- possibly showing diagnost debug information. */
+  /* Crash -- possibly showing diagnostic debug information. */
 
-  lldbg("Data abort. PC: %08x\n", regs[REG_PC]);
+  lldbg("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
+        regs[REG_PC], dfar, dfsr);
   PANIC();
 }
 

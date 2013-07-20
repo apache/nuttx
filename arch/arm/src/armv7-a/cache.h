@@ -11,6 +11,12 @@
  *  "ARM® Architecture Reference Manual, ARMv7-A and ARMv7-R edition", Copyright ©
  *   1996-1998, 2000, 2004-2012 ARM. All rights reserved. ARM DDI 0406C.b (ID072512)
  *
+ * Portions of this file derive from Atmel sample code for the SAMA5D3 Cortex-A5
+ * which also has a modified BSD-style license:
+ *
+ *   Copyright (c) 2012, Atmel Corporation
+ *   All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -21,8 +27,8 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
+ * 3. Neither the name NuttX nor Atmel nor the names of the contributors may
+ *    be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -40,8 +46,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_A_CPSR_H
-#define __ARCH_ARM_SRC_ARMV7_A_CPSR_H
+#ifndef __ARCH_ARM_SRC_ARMV7_A_CACHE_H
+#define __ARCH_ARM_SRC_ARMV7_A_CACHE_H
 
 /************************************************************************************
  * Included Files
@@ -50,7 +56,12 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* Cache definitions ****************************************************************/
+/* L1 Memory */
 
+#define CP15_L1_LINESIZE 32
+
+/* CP15 Registers *******************************************************************/
 /* Reference: Cortex-A5™ MPCore Paragraph 4.1.5, "Cache Operations Registers."
  *
  * Terms:
@@ -66,16 +77,16 @@
  *
  * CP15 Register:     ICIALLUIS
  *   Description:     Invalidate entire instruction cache Inner Shareable.
- *   Register Format: SBZ
+ *   Register Format: Should be zero (SBZ)
  *   Instruction:     MCR p15, 0, <Rd>, c7, c1, 0
  * CP15 Register:     BPIALLIS
  *   Description:     Invalidate entire branch predictor array Inner Shareable.
- *   Register Format: SBZ
+ *   Register Format: Should be zero (SBZ)
  *   Instruction:     MCR p15, 0, <Rd>, c7, c1, 6
  * CP15 Register:     ICIALLU
  *   Description:     Invalidate all instruction caches to PoU. Also flushes branch
  *                    target cache.
- *   Register Format: SBZ
+ *   Register Format: Should be zero (SBZ)
  *   Instruction:     MCR p15, 0, <Rd>, c7, c5, 0
  * CP15 Register:     ICIMVAU
  *   Description:     Invalidate instruction cache by VA to PoU.
@@ -83,11 +94,11 @@
  *   Instruction:     MCR p15, 0, <Rd>, c7, c5, 1
  * CP15 Register:     BPIALL
  *   Description:     Invalidate entire branch predictor array.
- *   Register Format: SBZ
+ *   Register Format: Should be zero (SBZ)
  *   Instruction:     MCR p15, 0, <Rd>, c7, c5, 6
  * CP15 Register:     BPIMVA
  *   Description:     Invalidate VA from branch predictor array.
- *   Register Format: SBZ
+ *   Register Format: Should be zero (SBZ)
  *   Instruction:     MCR p15, 0, <Rd>, c7, c5, 7
  * CP15 Register:     DCIMVAC
  *   Description:     Invalidate data cache line by VA to PoC.
@@ -142,7 +153,7 @@
 
 /* VA and SBZ format */
 
-#define CACHE_SBZ_SHIFT     (4)       /* Bits 0-4:  SBZ */
+#define CACHE_SBZ_SHIFT     (4)       /* Bits 0-4:  Should be zero (SBZ) */
 #define CACHE_SBZ_MASK      (31 << TLB_SBZ_SHIFT)
 #define CACHE_VA_MASK       (0xfffffffe0) /* Bits 5-31: Virtual address */
 
@@ -152,95 +163,243 @@
 
 #ifdef __ASSEMBLY__
 
-/* Invalidate I cache predictor array inner sharable */
+/************************************************************************************
+ * Name: cp15_invalidate_icache_inner_sharable
+ *
+ * Description:
+ *   Invalidate I cache predictor array inner sharable
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_invalidate_icache_inner_sharable, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c1, 0
+	.macro	cp15_invalidate_icache_inner_sharable, tmp
+	mov		\tmp, #0
+	mrc		p15, 0, \tmp, c7, c1, 0
 	.endm
 
-/* Invalidate entire branch predictor array inner sharable */
+/************************************************************************************
+ * Name: cp15_invalidate_btb_inner_sharable
+ *
+ * Description:
+ *   Invalidate entire branch predictor array inner sharable
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_invalidate_btb_inner_sharable, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c1, 6
+	.macro	cp15_invalidate_btb_inner_sharable, tmp
+	mov		\tmp, #0
+	mrc		p15, 0, \tmp, c7, c1, 6
 	.endm
 
-/* Invalidate all instruction caches to PoU, also flushes branch target cache */
+/************************************************************************************
+ * Name: cp15_invalidate_icache
+ *
+ * Description:
+ *   Invalidate all instruction caches to PoU, also flushes branch target cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_invalidate_icache, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c5, 0
+	.macro	cp15_invalidate_icache, tmp
+	mov		\tmp, #0
+	mrc		p15, 0, \tmp, c7, c5, 0
 	.endm
 
-/* Invalidate instruction caches by VA to PoU */
+/************************************************************************************
+ * Name: cp15_invalidate_icache_bymva
+ *
+ * Description:
+ *   Invalidate instruction caches by VA to PoU
+ *
+ * Input Parameters:
+ *   va - Register with VA format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_invalidate_icache_bymva, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c5, 1
+	.macro	cp15_invalidate_icache_bymva, va
+	mrc		p15, 0, \va, c7, c5, 1
 	.endm
 
-/* Flush entire branch predictor array */
+/************************************************************************************
+ * Name: cp15_flush_btb
+ *
+ * Description:
+ *   Invalidate entire branch predictor array
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_flush_btb, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c5, 6
+	.macro	cp15_flush_btb, tmp
+	mov		\tmp, #0
+	mrc		p15, 0, \tmp, c7, c5, 6
 	.endm
 
-/* Flush branch predictor array entry by MVA */
+/************************************************************************************
+ * Name: cp15_flush_btb_bymva
+ *
+ * Description:
+ *   Invalidate branch predictor array entry by MVA
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_flush_btb_bymva, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c5, 7
+	.macro	cp15_flush_btb_bymva, tmp
+	mov		\tmp, #0
+	mrc		p15, 0, \tmp, c7, c5, 7
 	.endm
 
-/* Invalidate data cache line by VA to PoC */
+/************************************************************************************
+ * Name: cp15_invalidate_dcacheline_bymva
+ *
+ * Description:
+ *   Invalidate data cache line by VA to PoC
+ *
+ * Input Parameters:
+ *   va - Register with VA format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_invalidate_dcacheline_bymva, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c6, 1
+	.macro	cp15_invalidate_dcacheline_bymva, va
+	mrc		p15, 0, \va, c7, c6, 1
 	.endm
 
-/* Invalidate data cache line by set/way */
+/************************************************************************************
+ * Name: cp15_invalidate_dcacheline_bysetway
+ *
+ * Description:
+ *   Invalidate data cache line by set/way
+ *
+ * Input Parameters:
+ *   setway - Register with Set/Way format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_invalidate_dcacheline_bysetway, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c6, 2
+	.macro	cp15_invalidate_dcacheline_bysetway, setway
+	mrc		p15, 0, \setway, c7, c6, 2
 	.endm
 
-/* Clean data cache line by MVA */
+/************************************************************************************
+ * Name: cp15_clean_dcache_bymva
+ *
+ * Description:
+ *   Clean data cache line by MVA
+ *
+ * Input Parameters:
+ *   va - Register with VA format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_clean_dcache_bymva, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c10, 1
+	.macro	cp15_clean_dcache_bymva, va
+	mrc		p15, 0, \va, c7, c10, 1
 	.endm
 
-/* Clean data cache line by Set/way */
+/************************************************************************************
+ * Name: cp15_clean_dcache_bysetway
+ *
+ * Description:
+ *   Clean data cache line by Set/way
+ *
+ * Input Parameters:
+ *   setway - Register with Set/Way format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_clean_dcache_bysetway, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c10, 2
+	.macro	cp15_clean_dcache_bysetway, setway
+	mrc		p15, 0, \setway, c7, c10, 2
 	.endm
 
-/* Clean unified cache line by MVA */
+/************************************************************************************
+ * Name: cp15_clean_dcache_bymva
+ *
+ * Description:
+ *   Clean unified cache line by MVA
+ *
+ * Input Parameters:
+ *   setway - Register with VA format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_clean_dcache_bymva, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c11, 1
+	.macro	cp15_clean_dcache_bymva, setway
+	mrc		p15, 0, \setway, c7, c11, 1
 	.endm
 
-/* Clean and invalidate data cache line by VA to PoC */
+/************************************************************************************
+ * Name: cp15_cleaninvalidate_dcacheline_bymva
+ *
+ * Description:
+ *   Clean and invalidate data cache line by VA to PoC
+ *
+ * Input Parameters:
+ *   va - Register with VA format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_cleaninvalidate_dcacheline_bymva, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c14, 1
+	.macro	cp15_cleaninvalidate_dcacheline_bymva, va
+	mrc		p15, 0, \va, c7, c14, 1
 	.endm
 
-/* Clean and Incalidate data cache line by Set/Way */
+/************************************************************************************
+ * Name: cp15_cleaninvalidate_dcacheline
+ *
+ * Description:
+ *   Clean and Incalidate data cache line by Set/Way
+ *
+ * Input Parameters:
+ *   setway - Register with Set/Way format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-	.macro	cp15_cleaninvalidate_dcacheline, scratch
-	mov		\scratch, #0
-	mrc		p15, 0, \scratch, c7, c14, 2
+	.macro	cp15_cleaninvalidate_dcacheline, setway
+	mrc		p15, 0, \setway, c7, c14, 2
 	.endm
 
 #endif /* __ASSEMBLY__ */
@@ -251,7 +410,19 @@
 
 #ifndef __ASSEMBLY__
 
-/* Invalidate I cache predictor array inner sharable */
+/************************************************************************************
+ * Name: cp15_invalidate_icache_inner_sharable
+ *
+ * Description:
+ *   Invalidate I cache predictor array inner sharable
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
 static inline void cp15_invalidate_icache_inner_sharable(void)
 {
@@ -260,11 +431,24 @@ static inline void cp15_invalidate_icache_inner_sharable(void)
       "\tmov r0, #0\n"
       "\tmcr p15, 0, r0, c7, c1, 0\n"
       :
-      : "r" (ttb)
+      :
       : "r0", "memory"
     );
+}
 
-/* Invalidate entire branch predictor array inner sharable */
+/************************************************************************************
+ * Name: cp15_invalidate_btb_inner_sharable
+ *
+ * Description:
+ *   Invalidate entire branch predictor array inner sharable
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
 static inline void cp15_invalidate_btb_inner_sharable(void)
 {
@@ -273,11 +457,24 @@ static inline void cp15_invalidate_btb_inner_sharable(void)
       "\tmov r0, #0\n"
       "\tmcr p15, 0, r0, c7, c1, 6\n"
       :
-      : "r" (ttb)
+      :
       : "r0", "memory"
     );
+}
 
-/* Invalidate all instruction caches to PoU, also flushes branch target cache */
+/************************************************************************************
+ * Name: cp15_invalidate_icache
+ *
+ * Description:
+ *   Invalidate all instruction caches to PoU, also flushes branch target cache
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
 static inline void cp15_invalidate_icache(void)
 {
@@ -286,24 +483,49 @@ static inline void cp15_invalidate_icache(void)
       "\tmov r0, #0\n"
       "\tmcr p15, 0, r0, c7, c5, 0\n"
       :
-      : "r" (ttb)
+      :
       : "r0", "memory"
     );
+}
 
-/* Invalidate instruction caches by VA to PoU */
+/************************************************************************************
+ * Name: cp15_invalidate_icache_bymva
+ *
+ * Description:
+ *   Invalidate instruction caches by VA to PoU
+ *
+ * Input Parameters:
+ *   va - 32-bit value with VA format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-static inline void cp15_invalidate_icache_bymva(void)
+static inline void cp15_invalidate_icache_bymva(unsigned int va)
 {
   __asm__ __volatile__
     (
-      "\tmov r0, #0\n"
-      "\tmcr p15, 0, r0, c7, c5, 1\n"
+      "\tmcr p15, 0, %0, c7, c5, 1\n"
       :
-      : "r" (ttb)
-      : "r0", "memory"
+      : "r" (va)
+      : "memory"
     );
+}
 
-/* Flush entire branch predictor array */
+/************************************************************************************
+ * Name: cp15_flush_btb
+ *
+ * Description:
+ *   Invalidate entire branch predictor array
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
 static inline void cp15_flush_btb(void)
 {
@@ -312,11 +534,24 @@ static inline void cp15_flush_btb(void)
       "\tmov r0, #0\n"
       "\tmcr p15, 0, r0, c7, c5, 6\n"
       :
-      : "r" (ttb)
+      :
       : "r0", "memory"
     );
+}
 
-/* Flush branch predictor array entry by MVA */
+/************************************************************************************
+ * Name: cp15_flush_btb_bymva
+ *
+ * Description:
+ *   Invalidate branch predictor array entry by MVA
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
 static inline void cp15_flush_btb_bymva(void)
 {
@@ -325,109 +560,196 @@ static inline void cp15_flush_btb_bymva(void)
       "\tmov r0, #0\n"
       "\tmcr p15, 0, r0, c7, c5, 7\n"
       :
-      : "r" (ttb)
+      :
       : "r0", "memory"
     );
+}
+
+/************************************************************************************
+ * Name: cp15_invalidate_dcacheline_bymva
+ *
+ * Description:
+ *   Invalidate data cache line by VA to PoC
+ *
+ * Input Parameters:
+ *   va - 32-bit value with VA format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
 /* Invalidate data cache line by VA to PoC */
 
-static inline void cp15_invalidate_dcacheline_bymva(void)
+static inline void cp15_invalidate_dcacheline_bymva(unsigned int va)
 {
   __asm__ __volatile__
     (
-      "\tmov r0, #0\n"
-      "\tmcr p15, 0, r0, c7, c6, 1\n"
+      "\tmcr p15, 0, %0, c7, c6, 1\n"
       :
-      : "r" (ttb)
-      : "r0", "memory"
+      : "r" (va)
+      : "memory"
     );
+}
+
+/************************************************************************************
+ * Name: cp15_invalidate_dcacheline_bysetway
+ *
+ * Description:
+ *   Invalidate data cache line by set/way
+ *
+ * Input Parameters:
+ *   setway - 32-bit value with Set/Way format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
 /* Invalidate data cache line by set/way */
 
-static inline void cp15_invalidate_dcacheline_bysetway(void)
+static inline void cp15_invalidate_dcacheline_bysetway(unsigned int setway)
 {
   __asm__ __volatile__
     (
-      "\tmov r0, #0\n"
-      "\tmcr p15, 0, r0, c7, c6, 2\n"
+      "\tmcr p15, 0, %0, c7, c6, 2\n"
       :
-      : "r" (ttb)
-      : "r0", "memory"
+      : "r" (setway)
+      : "memory"
     );
+}
+
+/************************************************************************************
+ * Name: cp15_clean_dcache_bymva
+ *
+ * Description:
+ *   Clean data cache line by MVA
+ *
+ * Input Parameters:
+ *   va - 32-bit value with VA format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
 /* Clean data cache line by MVA */
 
-static inline void cp15_clean_dcache_bymva(void)
+static inline void cp15_clean_dcache_bymva(unsigned int va)
 {
   __asm__ __volatile__
     (
-      "\tmov r0, #0\n"
-      "\tmcr p15, 0, r0, c7, c10, 1\n"
+      "\tmcr p15, 0, %0, c7, c10, 1\n"
       :
-      : "r" (ttb)
-      : "r0", "memory"
+      : "r" (va)
+      : "memory"
     );
+}
 
-/* Clean data cache line by Set/way */
+/************************************************************************************
+ * Name: cp15_clean_dcache_bysetway
+ *
+ * Description:
+ *   Clean data cache line by Set/way
+ *
+ * Input Parameters:
+ *   setway - 32-bit value with Set/Way format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-static inline void cp15_clean_dcache_bysetway(void)
+static inline void cp15_clean_dcache_bysetway(unsigned int setway)
 {
   __asm__ __volatile__
     (
-      "\tmov r0, #0\n"
-      "\tmcr p15, 0, r0, c7, c10, 2\n"
+      "\tmcr p15, 0, %0, c7, c10, 2\n"
       :
-      : "r" (ttb)
-      : "r0", "memory"
+      : "r" (setway)
+      : "memory"
     );
+}
 
-/* Clean unified cache line by MVA */
+/************************************************************************************
+ * Name: cp15_clean_dcache_bymva
+ *
+ * Description:
+ *   Clean unified cache line by MVA
+ *
+ * Input Parameters:
+ *   setway - 32-bit value with VA format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-static inline void cp15_clean_dcache_bymva(void)
+static inline void cp15_clean_dcache_bymva(unsigned int setway)
 {
   __asm__ __volatile__
     (
-      "\tmov r0, #0\n"
-      "\tmcr p15, 0, r0, c7, c11, 1\n"
+      "\tmcr p15, 0, %0, c7, c11, 1\n"
       :
-      : "r" (ttb)
-      : "r0", "memory"
+      : "r" (setway)
+      : "memory"
     );
+}
 
-/* Clean and invalidate data cache line by VA to PoC */
+/************************************************************************************
+ * Name: cp15_cleaninvalidate_dcacheline_bymva
+ *
+ * Description:
+ *   Clean and invalidate data cache line by VA to PoC
+ *
+ * Input Parameters:
+ *   va - 32-bit value with VA format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-static inline void cp15_cleaninvalidate_dcacheline_bymva(void)
+static inline void cp15_cleaninvalidate_dcacheline_bymva(unsigned int va)
 {
   __asm__ __volatile__
     (
-      "\tmov r0, #0\n"
       "\tmcr p15, 0, r0, c7, c14, 1\n"
       :
-      : "r" (ttb)
-      : "r0", "memory"
+      : "r" (va)
+      : "memory"
     );
+}
 
-/* Clean and Incalidate data cache line by Set/Way */
+/************************************************************************************
+ * Name: cp15_cleaninvalidate_dcacheline
+ *
+ * Description:
+ *   Clean and Incalidate data cache line by Set/Way
+ *
+ * Input Parameters:
+ *   setway - 32-bit value with Set/Way format
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
-static inline void cp15_cleaninvalidate_dcacheline(void)
+static inline void cp15_cleaninvalidate_dcacheline(unsigned int setway)
 {
   __asm__ __volatile__
     (
-      "\tmov r0, #0\n"
-      "\tmcr p15, 0, r0, c7, c14, 2\n"
+      "\tmcr p15, 0, %0, c7, c14, 2\n"
       :
-      : "r" (ttb)
-      : "r0", "memory"
+      : "r" (setway)
+      : "memory"
     );
+}
 
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Public Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Public Function Prototypes
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -438,10 +760,86 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: cp15_coherent_dcache_for_dma
+ *
+ * Description:
+ *   Ensure that the I and D caches are coherent within specified region.
+ *   This is typically used when code has been written to a memory region,
+ *   and will be executed.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void cp15_coherent_dcache_for_dma(uintptr_t start, uintptr_t end);
+
+/****************************************************************************
+ * Name: cp15_invalidate_dcache_for_dma
+ *
+ * Description:
+ *   Invalidate the data cache within the specified region; we will be
+ *   performing a DMA operation in this region and we want to purge old data
+ *   in the cache.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void cp15_invalidate_dcache_for_dma(uintptr_t start, uintptr_t end);
+
+/****************************************************************************
+ * Name: cp15_clean_dcache_for_dma
+ *
+ * Description:
+ *   Clean the data cache within the specified region
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void cp15_clean_dcache_for_dma(uintptr_t start, uintptr_t end);
+
+/****************************************************************************
+ * Name: cp15_flush_dcache_for_dma
+ *
+ * Description:
+ *   Flush the data cache within the specified region
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void cp15_flush_dcache_for_dma(uintptr_t start, uintptr_t end);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_A_CPSR_H */
+#endif  /* __ARCH_ARM_SRC_ARMV7_A_CACHE_H */

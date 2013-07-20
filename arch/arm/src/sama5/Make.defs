@@ -35,8 +35,9 @@
 
 HEAD_ASRC  = arm_head.S
 
-CMN_ASRCS  = arm_vectors.S arm_vectortab.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_saveusercontext.S arm_vectoraddrexcptn.S arm_vfork.S
+CMN_ASRCS  = arm_vectors.S arm_vectortab.S arm_cache.S
+CMN_ASRCS += arm_fullcontextrestore.S arm_saveusercontext.S
+CMN_ASRCS += arm_vectoraddrexcptn.S arm_vfork.S
 
 CMN_CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_exit.c
 CMN_CSRCS += up_createstack.c up_releasestack.c up_usestack.c up_vfork.c
