@@ -175,21 +175,40 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 
-/* Save the current interrupt enable state & disable IRQs */
+/* Disable IRQs and return the previous IRQ state */
 
 static inline irqstate_t irqsave(void)
 {
-  unsigned int flags;
-  unsigned int temp;
+  unsigned int cpsr;
+
   __asm__ __volatile__
     (
-     "\tmrs    %0, cpsr\n"
-     "\torr    %1, %0, #128\n"
-     "\tmsr    cpsr_c, %1"
-     : "=r" (flags), "=r" (temp)
-     :
-     : "memory");
-  return flags;
+      "\tmrs    %0, cpsr\n"
+      "\tcpsid  i\n"
+      : "=r" (cpsr)
+      :
+      : "memory"
+    );
+
+  return cpsr;
+}
+
+/* Enable IRQs and return the previous IRQ state */
+
+static inline irqstate_t irqenable(void)
+{
+  unsigned int cpsr;
+
+  __asm__ __volatile__
+    (
+      "\tmrs    %0, cpsr\n"
+      "\tcpsie  i\n"
+      : "=r" (cpsr)
+      :
+      : "memory"
+    );
+
+  return cpsr;
 }
 
 /* Restore saved IRQ & FIQ state */
@@ -198,11 +217,13 @@ static inline void irqrestore(irqstate_t flags)
 {
   __asm__ __volatile__
     (
-     "msr    cpsr_c, %0"
-     :
-     : "r" (flags)
-     : "memory");
+      "msr    cpsr_c, %0"
+      :
+      : "r" (flags)
+      : "memory"
+    );
 }
+
 #endif /* __ASSEMBLY__ */
 
 /****************************************************************************

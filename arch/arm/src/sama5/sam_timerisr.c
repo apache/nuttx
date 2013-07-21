@@ -145,6 +145,7 @@ void up_timerinit(void)
    */
 
   regval = PIT_PIV | PIT_MR_PITEN | PIT_MR_PITIEN;
+  putreg32(regval, SAM_PIT_MR);
 
   /* And enable the timer interrupt */
 
