@@ -48,11 +48,10 @@ Development Environment
 GNU Toolchain Options
 ^^^^^^^^^^^^^^^^^^^^^
 
-  The NuttX make system has been modified to support the several different
-  toolchain options.
+  The NuttX make system will support the several different toolchain options.
 
   All testing has been conducted using the AtmelStudio GCC toolchain.  To use
-  the CodeSourcery, devkitARM or Raisonance GNU toolchain, you simply need to
+  the CodeSourcery, devkitARM or other GNU toolchain, you simply need to add
   add one of the following configuration options to your .config (or defconfig)
   file:
 
