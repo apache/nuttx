@@ -41,7 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include "chip.h"
+#include <arch/sama5/chip.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -64,8 +64,9 @@
 #define SAM_BOOTMEM_PSECTION    0x00000000 /* 0x00000000-0x000fffff: Boot memory */
 #define SAM_ROM_PSECTION        0x00100000 /* 0x00100000-0x001fffff: ROM */
 #define SAM_NFCSRAM_PSECTION    0x00200000 /* 0x00200000-0x002fffff: NFC SRAM */
-#define SAM_SRAM0_PSECTION      0x00300000 /* 0x00300000-0x0030ffff: SRAM0 */
-#define SAM_SRAM1_PSECTION      0x00310000 /* 0x00310000-0x003fffff: SRAM1 */
+#define SAM_ISRAM_PSECTION      0x00300000 /* 0x00300000-0x0030ffff: SRAM */
+#  define SAM_ISRAM0_PADDR      0x00300000 /* 0x00300000-0x0030ffff: SRAM0 */
+#  define SAM_ISRAM1_PADDR      0x00310000 /* 0x00310000-0x003fffff: SRAM1 */
 #define SAM_SMD_PSECTION        0x00400000 /* 0x00400000-0x004fffff: SMD */
 #define SAM_UDPHSRAM_PSECTION   0x00500000 /* 0x00500000-0x005fffff: UDPH SRAM */
 #define SAM_UHPOHCI_PSECTION    0x00600000 /* 0x00600000-0x006fffff: UHP OHCI */
@@ -154,7 +155,8 @@
 #define SAM_BOOTMEM_SIZE        (1*1024*1024)   /* 0x00000000-0x000fffff: Boot memory */
 #define SAM_ROM_SIZE            (1*1024*1024)   /* 0x00100000-0x001fffff: ROM */
 #define SAM_NFCSRAM_SIZE        (1*1024*1024)   /* 0x00200000-0x002fffff: NFC SRAM */
-#define SAM_SRAM_SIZE           (1*1024*1024)   /* 0x00300000-0x0030ffff: SRAM0 and SRAM1 */
+                                                /* 0x00300000-0x003fffff: SRAM0 and SRAM1 */
+#define SAM_ISRAM_SIZE          (64*1024 + SAM_ISRAM1_SIZE)
 #define SAM_SMD_SIZE            (1*1024*1024)   /* 0x00400000-0x004fffff: SMD */
 #define SAM_UDPHSRAM_SIZE       (1*1024*1024)   /* 0x00500000-0x005fffff: UDPH SRAM */
 #define SAM_UHPOHCI_SIZE        (1*1024*1024)   /* 0x00600000-0x006fffff: UHP OHCI */
@@ -180,7 +182,7 @@
 #define SAM_BOOTMEM_NSECTIONS   _NSECTIONS(SAM_BOOTMEM_SIZE)
 #define SAM_ROM_NSECTIONS       _NSECTIONS(SAM_ROM_SIZE)
 #define SAM_NFCSRAM_NSECTIONS   _NSECTIONS(SAM_NFCSRAM_SIZE)
-#define SAM_SRAM_NSECTION S     _NSECTIONS(SAM_SRAM_SIZE)
+#define SAM_ISRAM_NSECTIONS     _NSECTIONS(SAM_ISRAM_SIZE)
 #define SAM_SMD_NSECTIONS       _NSECTIONS(SAM_SMD_SIZE)
 #define SAM_UDPHSRAM_NSECTIONS  _NSECTIONS(SAM_UDPHSRAM_SIZE)
 #define SAM_UHPOHCI_NSECTIONS   _NSECTIONS(SAM_UHPOHCI_SIZE)
@@ -204,7 +206,7 @@
 #define SAM_BOOTMEM_MMUFLAGS    MMU_ROMFLAGS
 #define SAM_ROM_MMUFLAGS        MMU_ROMFLAGS
 #define SAM_NFCSRAM_MMUFLAGS    MMU_IOFLAGS
-#define SAM_SRAM_MMUFLAGS       MMU_MEMFLAGS
+#define SAM_ISRAM_MMUFLAGS      MMU_MEMFLAGS
 #define SAM_SMD_MMUFLAGS        MMU_MEMFLAGS
 #define SAM_UDPHSRAM_MMUFLAGS   MMU_IOFLAGS
 #define SAM_UHPOHCI_MMUFLAGS    MMU_IOFLAGS
@@ -242,9 +244,9 @@
 #  define SAM_BOOTMEM_VSECTION   0x00000000 /* 0x00000000-0x000fffff: Boot memory */
 #  define SAM_ROM_VSECTION       0x00100000 /* 0x00100000-0x001fffff: ROM */
 #  define SAM_NFCSRAM_VSECTION   0x00200000 /* 0x00200000-0x002fffff: NFC SRAM */
-#  define SAM_SRAM_VSECTION      0x00300000 /* 0x00300000-0x0030ffff: SRAM0 */
-#  define SAM_SRAM0_VADDR        0x00300000 /* 0x00300000-0x0030ffff: SRAM0 */
-#  define SAM_SRAM1_VADDR        0x00310000 /* 0x00310000-0x003fffff: SRAM1 */
+#  define SAM_ISRAM_VSECTION     0x00300000 /* 0x00300000-0x0030ffff: SRAM */
+#    define SAM_ISRAM0_VADDR     0x00300000 /* 0x00300000-0x0030ffff: SRAM0 */
+#    define SAM_ISRAM1_VADDR     0x00310000 /* 0x00310000-0x003fffff: SRAM1 */
 #  define SAM_SMD_VSECTION       0x00400000 /* 0x00400000-0x004fffff: SMD */
 #  define SAM_UDPHSRAM_VSECTION  0x00500000 /* 0x00500000-0x005fffff: UDPH SRAM */
 #  define SAM_UHPOHCI_VSECTION   0x00600000 /* 0x00600000-0x006fffff: UHP OHCI */
@@ -278,7 +280,7 @@
 #elif defined(CONFIG_BOOT_RUNFROMEXTSRAM)
 #  define NUTTX_START_VADDR            CONFIG_SAMA5_SRAM_VBASE
 #else /* CONFIG_BOOT_RUNFROMISRAM, CONFIG_PAGING */
-#  define NUTTX_START_VADDR            SAM_SRAM_VSECTION
+#  define NUTTX_START_VADDR            SAM_ISRAM_VSECTION
 #endif
 
 /* Determine the address of the MMU page table.  We will try to place that page
@@ -308,63 +310,53 @@
 
 #  ifdef CONFIG_ARCH_ROMPGTABLE
 #    error "CONFIG_ARCH_ROMPGTABLE defined; PGTABLE_BASE_P/VADDR not defined"
+#  endif
+
+  /* If CONFIG_PAGING is selected, then parts of the 1-to-1 virtual memory
+   * map probably do not apply because paging logic will probably partition
+   * the SRAM section differently.  In particular, if the page table is located
+   * at the end of SRAM, then the virtual page table address defined below
+   * will probably be in error.  In that case PGTABLE_BASE_VADDR is defined
+   * in the file mmu.h
+   *
+   * We must declare the page table in ISRAM0 or 1.  We decide depending upon
+   * where the vector table was place.
+   */
+
+#  ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
+
+  /* In this case, table must lie at the top 16Kb of ISRAM1 (or ISRAM0 if ISRAM1
+   * is not available in this architecture)
+   *
+   * If CONFIG_PAGING is defined, then mmu.h assign the virtual address
+   * of the page table.
+   */
+
+#    if SAM_ISRAM1_SIZE > 0
+#        define PGTABLE_BASE_PADDR (SAM_ISRAM1_PADDR+SAM_ISRAM1_SIZE-PGTABLE_SIZE)
+#        ifndef CONFIG_PAGING
+#          define PGTABLE_BASE_VADDR (SAM_ISRAM1_VADDR+SAM_ISRAM1_SIZE-PGTABLE_SIZE)
+#        endif
+#    else
+#        define PGTABLE_BASE_PADDR (SAM_ISRAM0_PADDR+SAM_ISRAM0_SIZE-PGTABLE_SIZE)
+#        ifndef CONFIG_PAGING
+#          define PGTABLE_BASE_VADDR (SAM_ISRAM0_VADDR+SAM_ISRAM0_SIZE-PGTABLE_SIZE)
+#        endif
+#    endif
+#    define PGTABLE_IN_HIGHSRAM    1
 #  else
 
-     /* If CONFIG_PAGING is selected, then parts of the 1-to-1 virtual memory
-      * map probably do not apply because paging logic will probably partition
-      * the SRAM section differently.  In particular, if the page table is located
-      * at the end of SRAM, then the virtual page table address defined below
-      * will probably be in error.
-      *
-      * We work around this header file interdependency by (1) insisting that
-      * pg_macros.h be included AFTER this header file, then (2) allowing the
-      * pg_macros.h header file to redefine PGTABLE_BASE_VADDR.
-      */
+  /* Otherwise, ISRAM1 (or ISRAM0 if ISRAM1 is not available in this
+   * architecture) will be mapped so that the end of the SRAM region will
+   * provide memory for the vectors.  The page table will then be places at
+   * the first 16Kb of ISRAM0.
+   */
 
-#    if defined(CONFIG_PAGING) && defined(__ARCH_ARM_SRC_ARM_PG_MACROS_H)
-#       error "pg_macros.h must be included AFTER this header file"
+#    define PGTABLE_BASE_PADDR     SAM_ISRAM0_PADDR
+#    ifndef CONFIG_PAGING
+#      define PGTABLE_BASE_VADDR   SAM_ISRAM0_VADDR
 #    endif
-
-
-     /* We must declare the page table in ISRAM0 or 1.  We decide depending upon
-      * where the vector table was place.
-      */
-
-#    ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
-
-       /* In this case, ISRAM0 will be shadowed at address 0x0000:0000.  The page
-        * table must lie at the top 16Kb of ISRAM1 (or ISRAM0 if this is a ISRAM1 is
-        * not available in this architecture)
-        */
-
-#      ifdef HAVE_INTSRAM1
-#          define PGTABLE_BASE_PADDR (SAM_INTSRAM1_PADDR+SAM_INTSRAM1_SIZE-PGTABLE_SIZE)
-#          define PGTABLE_BASE_VADDR (SAM_INTSRAM1_VADDR+SAM_INTSRAM1_SIZE-PGTABLE_SIZE)
-#      else
-#          define PGTABLE_BASE_PADDR (SAM_INTSRAM0_PADDR+SAM_INTSRAM0_SIZE-PGTABLE_SIZE)
-#          define PGTABLE_BASE_VADDR (SAM_INTSRAM0_VADDR+SAM_INTSRAM0_SIZE-PGTABLE_SIZE)
-#      endif
-#      define PGTABLE_IN_HIGHSRAM    1
-
-       /* If CONFIG_PAGING is defined, insist that pg_macros.h assign the virtual
-        * address of the page table.
-        */
-
-#      ifdef CONFIG_PAGING
-#        undef PGTABLE_BASE_VADDR
-#      endif
-#    else
-
-       /* Otherwise, ISRAM1 (or ISRAM0 for the is ISRAM1 is not available in this
-        * architecture) will be mapped so that the end of the SRAM region will
-        * provide memory for the vectors.  The page table will then be places at
-        * the first 16Kb of ISRAM0 (which will be in the shadow memory region).
-        */
-
-#      define PGTABLE_BASE_PADDR     SAM_SHADOWSPACE_PSECTION
-#      define PGTABLE_BASE_VADDR     SAM_SHADOWSPACE_VSECTION
-#      define PGTABLE_IN_LOWSRAM     1
-#    endif
+#    define PGTABLE_IN_LOWSRAM     1
 #  endif
 #endif
 
@@ -374,17 +366,12 @@
  * portion of this table is not accessible in the virtual address space (for
  * normal operation). We will reuse this memory for coarse page tables as follows:
  *
- * NOTE: If CONFIG_PAGING is defined, pg_macros.h will re-assign the virtual
- * address of the page table.
+ * NOTE: If CONFIG_PAGING is defined, mmu.h will re-assign the virtual address
+ * of the page table.
  */
 
-#define PGTABLE_L2_COARSE_OFFSET    ((((SAM_LAST_PSECTION >> 20) + 255) & ~255) << 2)
-#define PGTABLE_L2_COARSE_PBASE     (PGTABLE_BASE_PADDR+PGTABLE_L2_COARSE_OFFSET)
-#define PGTABLE_L2_COARSE_VBASE     (PGTABLE_BASE_VADDR+PGTABLE_L2_COARSE_OFFSET)
-
-#define PGTABLE_L2_FINE_OFFSET      ((((SAM_LAST_PSECTION >> 20) + 1023) & ~1023) << 2)
-#define PGTABLE_L2_FINE_PBASE       (PGTABLE_BASE_PADDR+PGTABLE_L2_FINE_OFFSET)
-#define PGTABLE_L2_FINE_VBASE       (PGTABLE_BASE_VADDR+PGTABLE_L2_FINE_OFFSET)
+#define PGTABLE_L2_PBASE            (PGTABLE_BASE_PADDR+0x00000800)
+#define PGTABLE_L2_VBASE            (PGTABLE_BASE_VADDR+0x00000800)
 
 /* Page table end addresses: */
 
@@ -393,13 +380,9 @@
 
 /* Page table sizes */
 
-#define PGTABLE_L2_COARSE_ALLOC     (PGTABLE_L2_END_VADDR-PGTABLE_L2_COARSE_VBASE)
-#define PGTABLE_COARSE_TABLE_SIZE   (4*256)
-#define PGTABLE_NCOARSE_TABLES      (PGTABLE_L2_COARSE_ALLOC / PGTABLE_COARSE_TABLE_SIZE)
-
-#define PGTABLE_L2_FINE_ALLOC       (PGTABLE_L2_END_VADDR-PGTABLE_L2_FINE_VBASE)
-#define PGTABLE_FINE_TABLE_SIZE     (4*1024)
-#define PGTABLE_NFINE_TABLES        (PGTABLE_L2_FINE_ALLOC / PGTABLE_FINE_TABLE_SIZE)
+#define PGTABLE_L2_ALLOC            (PGTABLE_L2_END_VADDR-PGTABLE_L2_VBASE)
+#define PGTABLE_L2_SIZE             (4*256)
+#define PGTABLE_L2_NENTRIES         (PGTABLE_L2_ALLOC / PGTABLE_L2_SIZE)
 
 /* Determine the base address of the vector table:
  *
@@ -410,17 +393,17 @@
 
 #define VECTOR_TABLE_SIZE           0x00010000
 #ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
-#  define SAM_VECTOR_PADDR      SAM_INTSRAM0_PADDR
-#  define SAM_VECTOR_VSRAM      SAM_INTSRAM0_VADDR
+#  define SAM_VECTOR_PADDR      SAM_ISRAM0_PADDR
+#  define SAM_VECTOR_VSRAM      SAM_ISRAM0_VADDR
 #  define SAM_VECTOR_VADDR      0x00000000
 #  define SAM_VECTOR_VCOARSE    0x00000000
 #else  /* Vectors located at 0xffff:0000 -- this probably does not work */
-#  ifdef HAVE_INTSRAM1
-#    define SAM_VECTOR_PADDR    (SAM_INTSRAM1_PADDR+SAM_INTSRAM1_SIZE-VECTOR_TABLE_SIZE)
-#    define SAM_VECTOR_VSRAM    (SAM_INTSRAM1_VADDR+SAM_INTSRAM1_SIZE-VECTOR_TABLE_SIZE)
+#  ifdef HAVE_ISRAM1
+#    define SAM_VECTOR_PADDR    (SAM_ISRAM1_PADDR+SAM_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
+#    define SAM_VECTOR_VSRAM    (SAM_ISRAM1_VADDR+SAM_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
 #  else
-#    define SAM_VECTOR_PADDR    (SAM_INTSRAM0_PADDR+SAM_INTSRAM0_SIZE-VECTOR_TABLE_SIZE)
-#    define SAM_VECTOR_VSRAM    (SAM_INTSRAM0_VADDR+SAM_INTSRAM0_SIZE-VECTOR_TABLE_SIZE)
+#    define SAM_VECTOR_PADDR    (SAM_ISRAM0_PADDR+SAM_ISRAM0_SIZE-VECTOR_TABLE_SIZE)
+#    define SAM_VECTOR_VSRAM    (SAM_ISRAM0_VADDR+SAM_ISRAM0_SIZE-VECTOR_TABLE_SIZE)
 #  endif
 #  define SAM_VECTOR_VADDR      0xffff0000
 #  define SAM_VECTOR_VCOARSE    0xfff00000
