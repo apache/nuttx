@@ -92,13 +92,21 @@
  */
 
 #if defined(CONFIG_ARCH_CHIP_ATSAMA5D31)
-#  define ATSAMA5D3  1  /* SAMA5D3 family */
+#  define ATSAMA5D3        1         /* SAMA5D3 family */
+#  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
+#  define SAM_ISRAM1_SIZE (64*1024)
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D33)
-#  define ATSAMA5D3  1  /* SAMA5D3 family */
+#  define ATSAMA5D3        1         /* SAMA5D3 family */
+#  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
+#  define SAM_ISRAM1_SIZE (64*1024)
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D34)
-#  define ATSAMA5D3  1  /* SAMA5D3 family */
+#  define ATSAMA5D3        1         /* SAMA5D3 family */
+#  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
+#  define SAM_ISRAM1_SIZE (64*1024)
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D35)
-#  define ATSAMA5D3  1  /* SAMA5D3 family */
+#  define ATSAMA5D3        1         /* SAMA5D3 family */
+#  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
+#  define SAM_ISRAM1_SIZE (64*1024)
 #else
 #  error Unrecognized SAMAD5 chip
 #endif

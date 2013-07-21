@@ -80,7 +80,7 @@
 
    /* Virtual base of the address of the L2 page tables need to recalculates
     * using this new virtual base address of the L2 page table.
-	*/
+    */
 
 #  undef PGTABLE_L2_FINE_VBASE
 #  define PGTABLE_L2_FINE_VBASE   (PGTABLE_BASE_VADDR+PGTABLE_L2_FINE_OFFSET)
@@ -369,7 +369,7 @@
  * Description:
  *   Write several, contiguous L2 page table entries.  npages entries will be
  *   written. This macro is used when CONFIG_PAGING is enable.  This case,
- *   it is used asfollows:
+ *   it is used as follows:
  *
  *	ldr	r0, =PGTABLE_L2_BASE_PADDR	<-- Address in L2 table
  *	ldr	r1, =PG_LOCKED_PBASE		<-- Physical page memory address

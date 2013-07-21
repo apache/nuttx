@@ -343,17 +343,20 @@ __start:
 
 	/* Invalidate caches and TLBs.
 	 *
-	 * NOTE: "The ARMv7 Virtual Memory System Architecture (VMSA) does not
-	 * support a CP15 operation to invalidate the entire data cache. ...
-	 * In normal usage the only time the entire data cache has to be
-	 * invalidated is on reset."
+	 *   NOTE: "The ARMv7 Virtual Memory System Architecture (VMSA) does not
+	 *   support a CP15 operation to invalidate the entire data cache. ...
+	 *   In normal usage the only time the entire data cache has to be
+	 *   invalidated is on reset."
 	 *
-	 * REVISIT:  This could be an issue if NuttX is every started in a
-	 * context where the DCache could be dirty.
+	 * The instruction cache is virtually indexed and physically tagged but
+	 * the data cache is physically indexed and physically tagged.  So it
+	 * should not be an issue if the system comes up with a dirty Dcache;
+	 * the ICache, however, must be invalidated.
 	 */
 
 	mov		r0, #0
 	mcr		CP15_ICIALLUIS(r0)	/* Invalidate entire instruction cache Inner Shareable */
+	mcr		CP15_TLBIALLIS(r0)	/* Invalidate entire Unified TLB Inner Shareable */
 
 	/* Load the page table address.
 	 *
@@ -392,10 +395,15 @@ __start:
 
 	ldr		lr, .LCvstart			/* Abs. virtual address */
 
-	/* Configure the domain access register (see mmu.h) */
+	/* Configure the domain access register (see mmu.h).
+	 *
+	 *   Domains 0: Accesses are not checked
+	 *   Domains 1: Accesses are not checked
+	 *   Domains 2: Accesses checked against permissions in the TLB
+	 */
 
-	mov		r0, #0x1f				/* Domains 0, 1 = client */
-	mcr		CP15_DACR(r0)			/* Load domain access register */
+	mov		r0, #(DACR_MANAGER(0) | DACR_MANAGER(1) |  DACR_CLIENT(2))
+	mcr		CP15_DACR(r0)			/* Set domain access register */
 
 	/* Configure the system control register (see sctrl.h) */
 
@@ -668,7 +676,7 @@ __start:
 
 	/* Finally branch to the OS entry point */
 
-	mov	lr, #0
+	mov		lr, #0
 	b		os_start
 
 	/* Text-section constants:

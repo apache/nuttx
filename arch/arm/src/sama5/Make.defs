@@ -35,7 +35,7 @@
 
 HEAD_ASRC  = arm_head.S
 
-CMN_ASRCS  = arm_vectors.S arm_vectortab.S arm_cache.S
+CMN_ASRCS  = arm_vectors.S arm_vectortab.S arm_cache.S arm_fpuconfig.S
 CMN_ASRCS += arm_fullcontextrestore.S arm_saveusercontext.S
 CMN_ASRCS += arm_vectoraddrexcptn.S arm_vfork.S
 
@@ -61,4 +61,4 @@ endif
 
 CHIP_ASRCS =
 
-CHIP_CSRCS =
+CHIP_CSRCS = sam_boot.c
