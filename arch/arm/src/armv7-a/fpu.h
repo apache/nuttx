@@ -34,12 +34,14 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7_A_CPSR_H
-#define __ARCH_ARM_SRC_ARMV7_A_CPSR_H
+#ifndef __ARCH_ARM_SRC_ARMV7_A_FPU_H
+#define __ARCH_ARM_SRC_ARMV7_A_FPU_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#include <nuttx/config.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -87,4 +89,4 @@ void arm_fpuconfig(void);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __ARCH_ARM_SRC_ARMV7_A_CPSR_H */
+#endif  /* __ARCH_ARM_SRC_ARMV7_A_FPU_H */
