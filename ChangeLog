@@ -5145,7 +5145,7 @@
 	  (2013-7-20).
 	* /arch/arm/src/armv7-a/arm_fpuconfig.S and fpu.h: A few more files for
 	  the ARMv7-A/Cortex-A5 port (2013-7-21).
-	* arm/src/sama5/sam_boot.c, sam_clockconfig.h, sam_lowputc.h:  A few
-	  more files for the SAMA5D3 port (2013-7-21).
+	* arm/src/sama5/sam_boot.c, sam_clockconfig.h, sam_lowputc.h, and
+	  sam_timerisr.c:  A few  more files for the SAMA5D3 port (2013-7-21).
 	* configs/sama5d3x-ek/src/sam_autoleds.c:  A few more files for the port
 	  to the SAMA5D3x-EK board (2013-7-21).

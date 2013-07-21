@@ -43,4 +43,3 @@
 #include <nuttx/config.h>
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_PINMAP_H */
-
