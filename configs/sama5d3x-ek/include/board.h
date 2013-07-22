@@ -51,9 +51,10 @@
  * definitions will configure clocking
  *
  *   MAINOSC:  Frequency = 12MHz (crysta)
- *   PLLA: PLL Divider = 1, Multiplier = 16 to generate PLLACK = 192MHz
- *   Master Clock (MCK): Source = PLLACK, Prescalar = 1 to generate MCK = 96MHz
- *   CPU clock: 96MHz
+ *   PLLA: PLL Divider = 1, Multiplier = 66 to generate PLLACK = 792MHz
+ *   Master Clock (MCK): Source = PLLACK/2, Prescalar = 1, MDIV =  to generate
+*      MCK      =  132MHz
+ *     CPU clock = 396MHz
  */
 
 /* Main oscillator register settings.
@@ -67,22 +68,33 @@
 /* PLLA configuration.
  *
  *   Divider = 1
- *   Multipler = 16
+ *   Multipler = 66
  */
 
-#define BOARD_CKGR_PLLAR_MUL       (15 << PMC_CKGR_PLLAR_MUL_SHIFT)
-#define BOARD_CKGR_PLLAR_STMODE    PMC_CKGR_PLLAR_STMODE_FAST
 #define BOARD_CKGR_PLLAR_COUNT     (63 << PMC_CKGR_PLLAR_COUNT_SHIFT)
+#define BOARD_CKGR_PLLAR_OUT       (0)
+#define BOARD_CKGR_PLLAR_MUL       (65 << PMC_CKGR_PLLAR_MUL_SHIFT)
 #define BOARD_CKGR_PLLAR_DIV       PMC_CKGR_PLLAR_DIV_BYPASS
 
 /* PMC master clock register settings.
  *
- *  Source = PLLA
- *  Divider = 2
+ *  Master/Processor Clock Source Selection = PLLA
+ *  Master/Processor Clock Prescaler        = 1
+ *  PLLA Divider                            = 2
+ *  Master Clock Division (MDIV)            = 3
+ *
+ *  NOTE: Bit PLLADIV2 must always be set to 1 when MDIV is set to 3.
+ *
+ *  Prescaler input                         = 792MHz / 2 = 396MHz
+ *  Prescaler output                        = 792MHz / 1 = 396MHz
+ *  Processor Clock (PCK)                   = 396MHz
+ *  Master clock (MCK)                       = 396MHz / 3 = 132MHz
  */
 
 #define BOARD_PMC_MCKR_CSS         PMC_MCKR_CSS_PLLA
-#define BOARD_PMC_MCKR_PRES        PMC_MCKR_PRES_DIV2
+#define BOARD_PMC_MCKR_PRES        PMC_MCKR_PRES_DIV1
+#define BOARD_PMC_MCKR_PLLADIV     PMC_MCKR_PLLADIV2
+#define BOARD_PMC_MCKR_MDIV        PMC_MCKR_MDIV_PCKDIV3
 
 /* USB UTMI PLL start-up time */
 
@@ -91,9 +103,9 @@
 /* Resulting frequencies */
 
 #define BOARD_MAINOSC_FREQUENCY    (12000000)  /* MAINOSC: 12MHz crystal on-board */
-#define BOARD_PLLA_FREQUENCY       (192000000) /* PLLACK:  16 * 12Mhz / 1 */
-#define BOARD_MCK_FREQUENCY        (96000000)  /* MCK:     PLLACK / 2 */
-#define BOARD_CPU_FREQUENCY        (96000000)  /* CPU:     MCK */
+#define BOARD_PLLA_FREQUENCY       (792000000) /* PLLACK:  66 * 12Mhz / 1 */
+#define BOARD_PCK_FREQUENCY        (396000000) /* CPU:     PLLACK / 2 / 1  */
+#define BOARD_MCK_FREQUENCY        (132000000) /* MCK:     PLLACK / 2 / 1 / 3 */
 
 /* HSMCI clocking
  *
