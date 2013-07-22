@@ -53,16 +53,12 @@
 #define SAM_PIT_PIVR_OFFSET  0x0008 /* Periodic Interval Value Register */
 #define SAM_PIT_PIIR_OFFSET  0x000c /* Periodic Interval Image Register */
 
-/* PIT Virtual Base Address *********************************************************/
-
-#define SAM_PIT_VBASE       (SAM_SYSC_VADDR+SAM_PITC_OFFSET)
-
 /* PIT Register Addresses ***********************************************************/
 
-#define SAM_PIT_MR          (SAM_PIT_VBASE+SAM_PIT_MR_OFFSET)
-#define SAM_PIT_SR          (SAM_PIT_VBASE+SAM_PIT_SR_OFFSET)
-#define SAM_PIT_PIVR        (SAM_PIT_VBASE+SAM_PIT_PIVR_OFFSET)
-#define SAM_PIT_PIIR        (SAM_PIT_VBASE+SAM_PIT_PIIR_OFFSET)
+#define SAM_PIT_MR          (SAM_PITC_VBASE+SAM_PIT_MR_OFFSET)
+#define SAM_PIT_SR          (SAM_PITC_VBASE+SAM_PIT_SR_OFFSET)
+#define SAM_PIT_PIVR        (SAM_PITC_VBASE+SAM_PIT_PIVR_OFFSET)
+#define SAM_PIT_PIIR        (SAM_PITC_VBASE+SAM_PIT_PIIR_OFFSET)
 
 /* PIT Register Bit Definitions *****************************************************/
 
