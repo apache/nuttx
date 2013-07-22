@@ -50,10 +50,9 @@ GNU Toolchain Options
 
   The NuttX make system will support the several different toolchain options.
 
-  All testing has been conducted using the AtmelStudio GCC toolchain.  To use
-  the CodeSourcery, devkitARM or other GNU toolchain, you simply need to add
-  add one of the following configuration options to your .config (or defconfig)
-  file:
+  All testing has been conducted using the CodeSourcery GCC toolchain.  To use
+  a different toolchain, you simply need to add change to one of the following
+  configuration options to your .config (or defconfig) file:
 
     CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
     CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
@@ -63,8 +62,9 @@ GNU Toolchain Options
     CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
     CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y      : Generic GCC ARM EABI toolchain for Windows
 
-  The AtmelStudio GCC toolchain is selected with CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y
-  and setting the PATH variable appropriately.
+  The CodeSourcery GCC toolchain is selected with
+  CONFIG_ARMV7A_TOOLCHAIN_GNU_EABIW=y and setting the PATH variable
+  appropriately.
 
   If you are not using AtmelStudio GCC toolchain, then you may also have to
   modify the PATH in the setenv.h file if your make cannot find the tools.
