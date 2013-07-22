@@ -150,4 +150,3 @@ ifeq ($(CONFIG_ARMV7A_TOOLCHAIN),GNU_EABIW)
     WINTOOL = y
   endif
 endif
-

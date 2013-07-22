@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_lowputc.h
+ * arch/arm/src/sama5/sam_irq.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,30 +33,36 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_SAM_LOWPUTC_H
-#define __ARCH_ARM_SRC_SAMA5_SAM_LOWPUTC_H
+#ifndef __ARCH_ARM_SRC_SAMA5_SAM_IRQ_H
+#define __ARCH_ARM_SRC_SAMA5_SAM_IRQ_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
-
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "up_internal.h"
-#include "chip.h"
+#include "chip/sam_aic.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define SCRTYPE_NTYPES    6
+#define SAM_DEFAULT_PRIOR ((AIC_SMR_PRIOR_MAX+1) >> 1)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+enum sam_srctype_e
+{
+  SRCTYPE_IHIGH    = 0, /* Internal high level */
+  SRCTYPE_XLOW     = 1, /* External low level */
+  SRCTYPE_IRISING  = 2, /* Internal positive edge */
+  SRCTYPE_XFALLING = 3, /* External negative edge */
+  SRCTYPE_XHIGH    = 4, /* External high level */
+  SRCTYPE_XRISING  = 5  /* External rising edge */
+};
 
 /****************************************************************************
  * Inline Functions
@@ -77,22 +83,20 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
+/***************************************************************************
  * Public Function Prototypes
- ****************************************************************************/
+ ***************************************************************************/
 
 /****************************************************************************
- * Name: sam_lowsetup
+ * Name: sam_irq_srctype
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level
- *   initialization including setup of the console UART.  This UART done
- *   early so that the serial console is available for debugging very early
- *   in the boot sequence.
+ *   irq     - Identifies the IRQ source to be configured
+ *   srctype - IRQ source configuration
  *
  ****************************************************************************/
 
-void sam_lowsetup(void);
+void sam_irq_srctype(int irq, enum sam_srctype_e srctype);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -100,4 +104,4 @@ void sam_lowsetup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMA5_SAM_LOWPUTC_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_SAM_IRQ_H */

@@ -46,6 +46,22 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* Overview:
+ *
+ *  SAMA5 Physical (unmapped) Memory Map
+ *  - SAMA5 Internal Memories
+ *  - SAMA5 Internal Peripheral Offsets
+ *  - System Controller Peripheral Offsets
+ *  Sizes of memory regions in bytes
+ *  Sizes of memory regions in sections
+ *  Section MMU Flags
+ *  SAMA5 Virtual (mapped) Memory Map
+ *  - Peripheral virtual base addresses
+ *  - NuttX vitual base address
+ *  MMU Page Table Location
+ *  Page table start addresses
+ *  Base address of the interrupt vector table
+ */
 
 /* SAMA5 Physical (unmapped) Memory Map */
 
@@ -119,38 +135,39 @@
 
 /* System Controller Peripheral Offsets */
 
-#define SAM_HSMC_OFFSET         0x0fffc000 /* 0x0fffc000-0x0fffcfff: HSMC */
+#define SAM_HSMC_OFFSET         0x00ffc000 /* 0x0fffc000-0x0fffcfff: HSMC */
                                            /* 0x0fffd000-0x0fffe3ff: Reserved */
-#define SAM_FUSE_OFFSET         0x0fffe400 /* 0x0fffe400-0x0fffe5ff: FUSE */
-#define SAM_DMAC0_OFFSET        0x0fffe600 /* 0x0fffe600-0x0fffe7ff: DMAC0 */
-#define SAM_DMAC1_OFFSET        0x0fffe800 /* 0x0fffe800-0x0fffe9ff: DMAC1 */
-#define SAM_MPDDRC_OFFSET       0x0fffea00 /* 0x0fffea00-0x0fffebff: MPDDRC */
-#define SAM_MATRIX_OFFSET       0x0fffec00 /* 0x0fffec00-0x0fffedff: MATRIX */
-#define SAM_DBGU_OFFSET         0x0fffee00 /* 0x0fffee00-0x0fffefff: DBGU */
-#define SAM_AIC_OFFSET          0x0ffff000 /* 0x0ffff000-0x0ffff1ff: AIC */
-#define SAM_PIOA_OFFSET         0x0ffff200 /* 0x0ffff200-0x0ffff3ff: PIOA */
-#define SAM_PIOB_OFFSET         0x0ffff400 /* 0x0ffff400-0x0ffff5ff: PIOB */
-#define SAM_PIOC_OFFSET         0x0ffff600 /* 0x0ffff600-0x0ffff7ff: PIOC */
-#define SAM_PIOD_OFFSET         0x0ffff800 /* 0x0ffff800-0x0ffff9ff: PIOD */
-#define SAM_PIOE_OFFSET         0x0ffffa00 /* 0x0ffffa00-0x0ffffbff: PIOE */
-#define SAM_PMC_OFFSET          0x0ffffc00 /* 0x0ffffc00-0x0ffffdff: PMC */
-#define SAM_RSTC_OFFSET         0x0ffffe00 /* 0x0ffffe00-0x0ffffe0f: RSTC */
-#define SAM_SHDC_OFFSET         0x0ffffe10 /* 0x0ffffe10-0x0ffffe1f: SHDC */
+#define SAM_FUSE_OFFSET         0x00ffe400 /* 0x0fffe400-0x0fffe5ff: FUSE */
+#define SAM_DMAC0_OFFSET        0x00ffe600 /* 0x0fffe600-0x0fffe7ff: DMAC0 */
+#define SAM_DMAC1_OFFSET        0x00ffe800 /* 0x0fffe800-0x0fffe9ff: DMAC1 */
+#define SAM_MPDDRC_OFFSET       0x00ffea00 /* 0x0fffea00-0x0fffebff: MPDDRC */
+#define SAM_MATRIX_OFFSET       0x00ffec00 /* 0x0fffec00-0x0fffedff: MATRIX */
+#define SAM_DBGU_OFFSET         0x00ffee00 /* 0x0fffee00-0x0fffefff: DBGU */
+#define SAM_AIC_OFFSET          0x00fff000 /* 0x0ffff000-0x0ffff1ff: AIC */
+#define SAM_PIOA_OFFSET         0x00fff200 /* 0x0ffff200-0x0ffff3ff: PIOA */
+#define SAM_PIOB_OFFSET         0x00fff400 /* 0x0ffff400-0x0ffff5ff: PIOB */
+#define SAM_PIOC_OFFSET         0x00fff600 /* 0x0ffff600-0x0ffff7ff: PIOC */
+#define SAM_PIOD_OFFSET         0x00fff800 /* 0x0ffff800-0x0ffff9ff: PIOD */
+#define SAM_PIOE_OFFSET         0x00fffa00 /* 0x0ffffa00-0x0ffffbff: PIOE */
+#define SAM_PMC_OFFSET          0x00fffc00 /* 0x0ffffc00-0x0ffffdff: PMC */
+#define SAM_RSTC_OFFSET         0x00fffe00 /* 0x0ffffe00-0x0ffffe0f: RSTC */
+#define SAM_SHDC_OFFSET         0x00fffe10 /* 0x0ffffe10-0x0ffffe1f: SHDC */
                                            /* 0x0ffffe20-0x0ffffe2f: Reserved */
-#define SAM_PITC_OFFSET         0x0ffffe30 /* 0x0ffffe30-0x0ffffe3f: PITC */
-#define SAM_WDT_OFFSET          0x0ffffe40 /* 0x0ffffe40-0x0ffffe4f: WDT */
-#define SAM_SCKCR_OFFSET        0x0ffffe50 /* 0x0ffffe50-0x0ffffe53: SCKCR */
-#define SAM_BSC_OFFSET          0x0ffffe54 /* 0x0ffffe54-0x0ffffe5f: BSC */
-#define SAM_GPBR_OFFSET         0x0ffffe60 /* 0x0ffffe60-0x0ffffe6f: GPBR */
+#define SAM_PITC_OFFSET         0x00fffe30 /* 0x0ffffe30-0x0ffffe3f: PITC */
+#define SAM_WDT_OFFSET          0x00fffe40 /* 0x0ffffe40-0x0ffffe4f: WDT */
+#define SAM_SCKCR_OFFSET        0x00fffe50 /* 0x0ffffe50-0x0ffffe53: SCKCR */
+#define SAM_BSC_OFFSET          0x00fffe54 /* 0x0ffffe54-0x0ffffe5f: BSC */
+#define SAM_GPBR_OFFSET         0x00fffe60 /* 0x0ffffe60-0x0ffffe6f: GPBR */
                                            /* 0x0ffffe70-0x0ffffeaf: Reserved */
-#define SAM_RTCC_OFFSET         0x0ffffeb0 /* 0x0ffffeb0-0x0ffffedf: RTCC */
+#define SAM_RTCC_OFFSET         0x00fffeb0 /* 0x0ffffeb0-0x0ffffedf: RTCC */
                                            /* 0x0ffffee0-0x0fffffff: Reserved */
 
-/* Sizes of memory regions in bytes (Excluding undefined addresses at the end of
- * the memory region).  The implemented sizes of the EBI CS0-3 and DDRCS regions
+/* Sizes of memory regions in bytes.
+ *
+ * These sizes exclude the undefined addresses at the end of the memory
+ * region.  The implemented sizes of the EBI CS0-3 and DDRCS regions
  * are not known apriori and must be specified with configuration settings.
  */
-
                                                 /* 0x00000000-0x0fffffff: Internal Memories */
 #define SAM_BOOTMEM_SIZE        (1*1024*1024)   /* 0x00000000-0x000fffff: Boot memory */
 #define SAM_ROM_SIZE            (1*1024*1024)   /* 0x00100000-0x001fffff: ROM */
@@ -173,10 +190,12 @@
 
 #define _NSECTIONS(b)           (((b)+0x000fffff) >> 20)
 
-/* Sizes of sections/regions.  The boot logic in sam_boot.c, will select
- * 1Mb level 1 MMU mappings to span the entire physical address space.
- * The definitions below specify the number of 1Mb entries that are
- * required to span a particular address region.
+/* Sizes of memory regions in sections.
+ *
+ * The boot logic in sam_boot.c, will select 1Mb level 1 MMU mappings to
+ * span the entire physical address space.  The definitions below specify
+ * the number of 1Mb entries that are required to span a particular address
+ * region.
  */
 
 #define SAM_BOOTMEM_NSECTIONS   _NSECTIONS(SAM_BOOTMEM_SIZE)
@@ -225,7 +244,9 @@
 #define SAM_PERIPHB_MMUFLAGS    MMU_IOFLAGS
 #define SAM_SYSC_MMUFLAGS       MMU_IOFLAGS
 
-/* board_memorymap.h contains special mappings that are needed when a ROM
+/* SAMA5 Virtual (mapped) Memory Map
+ *
+ * board_memorymap.h contains special mappings that are needed when a ROM
  * memory map is used.  It is included in this odd location becaue it depends
  * on some the virtual address definitions provided above.
  */
@@ -268,7 +289,68 @@
 
 #endif
 
-/* The boot logic will create a temporarily mapping based on where NuttX is
+/* Peripheral virtual base addresses */
+
+#define SAM_HSMCI0_VBASE         (SAM_PERIPHA_VSECTION+SAM_HSMCI0_OFFSET)
+#define SAM_SPI0_VBASE           (SAM_PERIPHA_VSECTION+SAM_SPI0_OFFSET)
+#define SAM_SSC0_VBASE           (SAM_PERIPHA_VSECTION+SAM_SSC0_OFFSET)
+#define SAM_CAN0_VBASE           (SAM_PERIPHA_VSECTION+SAM_CAN0_OFFSET)
+#define SAM_TC012_VBASE          (SAM_PERIPHA_VSECTION+SAM_TC012_OFFSET)
+#define SAM_TWI0_VBASE           (SAM_PERIPHA_VSECTION+SAM_TWI0_OFFSET)
+#define SAM_TWI1_VBASE           (SAM_PERIPHA_VSECTION+SAM_TWI1_OFFSET)
+#define SAM_USART0_VBASE         (SAM_PERIPHA_VSECTION+SAM_USART0_OFFSET)
+#define SAM_USART1_VBASE         (SAM_PERIPHA_VSECTION+SAM_USART1_OFFSET)
+#define SAM_UART0_VBASE          (SAM_PERIPHA_VSECTION+SAM_UART0_OFFSET)
+#define SAM_GMAC_VBASE           (SAM_PERIPHA_VSECTION+SAM_GMAC_OFFSET)
+#define SAM_PWMC_VBASE           (SAM_PERIPHA_VSECTION+SAM_PWMC_OFFSET)
+#define SAM_LCDC_VBASE           (SAM_PERIPHA_VSECTION+SAM_LCDC_OFFSET)
+#define SAM_ISI_VBASE            (SAM_PERIPHA_VSECTION+SAM_ISI_OFFSET)
+#define SAM_SFR_VBASE            (SAM_PERIPHA_VSECTION+SAM_SFR_OFFSET)
+
+#define SAM_HSMCI1_VBASE         (SAM_PERIPHB_VSECTION+SAM_HSMCI1_OFFSET)
+#define SAM_HSMCI2_VBASE         (SAM_PERIPHB_VSECTION+SAM_HSMCI2_OFFSET)
+#define SAM_SPI1_VBASE           (SAM_PERIPHB_VSECTION+SAM_SPI1_OFFSET)
+#define SAM_SSC1_VBASE           (SAM_PERIPHB_VSECTION+SAM_SSC1_OFFSET)
+#define SAM_CAN1_VBASE           (SAM_PERIPHB_VSECTION+SAM_CAN1_OFFSET)
+#define SAM_TC345_VBASE          (SAM_PERIPHB_VSECTION+SAM_TC345_OFFSET)
+#define SAM_TSADC_VBASE          (SAM_PERIPHB_VSECTION+SAM_TSADC_OFFSET)
+#define SAM_TWI2_VBASE           (SAM_PERIPHB_VSECTION+SAM_TWI2_OFFSET)
+#define SAM_USART2_VBASE         (SAM_PERIPHB_VSECTION+SAM_USART2_OFFSET)
+#define SAM_USART3_VBASE         (SAM_PERIPHB_VSECTION+SAM_USART3_OFFSET)
+#define SAM_UART1_VBASE          (SAM_PERIPHB_VSECTION+SAM_UART1_OFFSET)
+#define SAM_EMAC_VBASE           (SAM_PERIPHB_VSECTION+SAM_EMAC_OFFSET)
+#define SAM_UDPHS_VBASE          (SAM_PERIPHB_VSECTION+SAM_UDPHS_OFFSET)
+#define SAM_SHA_VBASE            (SAM_PERIPHB_VSECTION+SAM_SHA_OFFSET)
+#define SAM_AES_VBASE            (SAM_PERIPHB_VSECTION+SAM_AES_OFFSET)
+#define SAM_TDES_VBASE           (SAM_PERIPHB_VSECTION+SAM_TDES_OFFSET)
+#define SAM_TRNG_VBASE           (SAM_PERIPHB_VSECTION+SAM_TRNG_OFFSET)
+
+#define SAM_HSMC_VBASE           (SAM_SYSC_VSECTION+SAM_HSMC_OFFSET)
+#define SAM_FUSE_VBASE           (SAM_SYSC_VSECTION+SAM_FUSE_OFFSET)
+#define SAM_DMAC0_VBASE          (SAM_SYSC_VSECTION+SAM_DMAC0_OFFSET)
+#define SAM_DMAC1_VBASE          (SAM_SYSC_VSECTION+SAM_DMAC1_OFFSET)
+#define SAM_MPDDRC_VBASE         (SAM_SYSC_VSECTION+SAM_MPDDRC_OFFSET)
+#define SAM_MATRIX_VBASE         (SAM_SYSC_VSECTION+SAM_MATRIX_OFFSET)
+#define SAM_DBGU_VBASE           (SAM_SYSC_VSECTION+SAM_DBGU_OFFSET)
+#define SAM_AIC_VBASE            (SAM_SYSC_VSECTION+SAM_AIC_OFFSET)
+#define SAM_PIOA_VBASE           (SAM_SYSC_VSECTION+SAM_PIOA_OFFSET)
+#define SAM_PIOB_VBASE           (SAM_SYSC_VSECTION+SAM_PIOB_OFFSET)
+#define SAM_PIOC_VBASE           (SAM_SYSC_VSECTION+SAM_PIOC_OFFSET)
+#define SAM_PIOD_VBASE           (SAM_SYSC_VSECTION+SAM_PIOD_OFFSET)
+#define SAM_PIOE_VBASE           (SAM_SYSC_VSECTION+SAM_PIOE_OFFSET)
+#define SAM_PMC_VBASE            (SAM_SYSC_VSECTION+SAM_PMC_OFFSET)
+#define SAM_RSTC_VBASE           (SAM_SYSC_VSECTION+SAM_RSTC_OFFSET)
+#define SAM_SHDC_VBASE           (SAM_SYSC_VSECTION+SAM_SHDC_OFFSET)
+#define SAM_PITC_VBASE           (SAM_SYSC_VSECTION+SAM_PITC_OFFSET)
+#define SAM_WDT_VBASE            (SAM_SYSC_VSECTION+SAM_WDT_OFFSET)
+#define SAM_SCKCR_VBASE          (SAM_SYSC_VSECTION+SAM_SCKCR_OFFSET)
+#define SAM_BSC_VBASE            (SAM_SYSC_VSECTION+SAM_BSC_OFFSET)
+#define SAM_GPBR_VBASE           (SAM_SYSC_VSECTION+SAM_GPBR_OFFSET)
+#define SAM_RTCC_VBASE           (SAM_SYSC_VSECTION+SAM_RTCC_OFFSET)
+
+/* NuttX vitual base address
+ *
+ * The boot logic will create a temporarily mapping based on where NuttX is
  * executing in memory.  In this case, NuttX could be running from NOR FLASH,
  * SDRAM, external SRAM, or internal SRAM.
  */
@@ -283,7 +365,9 @@
 #  define NUTTX_START_VADDR            SAM_ISRAM_VSECTION
 #endif
 
-/* Determine the address of the MMU page table.  We will try to place that page
+/* MMU Page Table Location
+ *
+ * Determine the address of the MMU page table.  We will try to place that page
  * table at the beginng of ISRAM0 if the vectors are at the high address, 0xffff:0000
  * or at the end of ISRAM1 (or ISRAM0 if ISRAM1 is not available in this architecture)
  * if the vectors are at 0x0000:0000
@@ -360,7 +444,7 @@
 #  endif
 #endif
 
-/* Page table start addresses:
+/* Page table start addresses.
  *
  * 16Kb of memory is reserved hold the page table for the virtual mappings.  A
  * portion of this table is not accessible in the virtual address space (for
@@ -384,7 +468,7 @@
 #define PGTABLE_L2_SIZE             (4*256)
 #define PGTABLE_L2_NENTRIES         (PGTABLE_L2_ALLOC / PGTABLE_L2_SIZE)
 
-/* Determine the base address of the vector table:
+/* Base address of the interrupt vector table.
  *
  *   SAM_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
  *   SAM_VECTOR_VSRAM - Virtual address of vector table in SRAM
