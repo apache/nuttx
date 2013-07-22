@@ -5154,4 +5154,6 @@
 	* arch/arm/src/sama5/sam_clockconfig.c:  Add SAMA5 PLL configuration
 	  logic (plus associated header files).  Initiali checkin is for the
 	  SAM3U which is very similar but needs to be verified (2013-7-22).
+	* arch/arm/src/sama5/sam_periphclks.h:  Add macros to enable and
+	  disable SAMA5 peripheral clocks (2013-7-22).
 
