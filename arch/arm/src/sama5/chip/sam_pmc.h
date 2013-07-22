@@ -201,10 +201,7 @@
 #define PMC_CKGR_MCFR_MAINF_SHIFT      (0)       /* Bits 0-15: Main Clock Frequency */
 #define PMC_CKGR_MCFR_MAINF_MASK       (0xffff << PMC_CKGR_MCFR_MAINF_SHIFT)
 #define PMC_CKGR_MCFR_MAINFRDY         (1 << 16) /* Bit 16: Main Clock Ready */
-
-#if defined(CONFIG_ARCH_CHIP_SAM4S)
-#  define PMC_CKGR_MCFR_RCMEAS         (1 << 20) /* Bit 20: RC Oscillator Frequency Measure (write-only) */
-#endif
+#define PMC_CKGR_MCFR_RCMEAS           (1 << 20) /* Bit 20: RC Oscillator Frequency Measure (write-only) */
 
 /* PMC Clock Generator PLLA Register */
 
@@ -244,7 +241,7 @@
 #  define PMC_MCKR_MDIV_PCKDIV1        (0 << PMC_MCKR_MDIV_SHIFT) /* Prescaler Output Clock divided by 1 */
 #  define PMC_MCKR_MDIV_PCKDIV2        (1 << PMC_MCKR_MDIV_SHIFT) /* Prescaler Output Clock divided by 2 */
 #  define PMC_MCKR_MDIV_PCKDIV4        (2 << PMC_MCKR_MDIV_SHIFT) /* Prescaler Output Clock divided by 4 */
-#  define PMC_MCKR_MDIV_MASPCK1DIV3K   (3 << PMC_MCKR_MDIV_SHIFT) /* Prescaler Output Clock divided by 3 */
+#  define PMC_MCKR_MDIV_PCKDIV3        (3 << PMC_MCKR_MDIV_SHIFT) /* Prescaler Output Clock divided by 3 */
 #define PMC_MCKR_PLLADIV2              (1 << 12) /* Bit 12: PLLA Divider */
 
 /* USB Clock Register PMC_USB */

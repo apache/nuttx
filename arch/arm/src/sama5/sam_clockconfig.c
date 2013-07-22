@@ -57,18 +57,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* PMC register settings based on the board configuration values defined
- * in board.h
- */
-
-#define BOARD_CKGR_MOR      (PMC_CKGR_MOR_KEY | BOARD_CKGR_MOR_MOSCXTST | \
-                             PMC_CKGR_MOR_MOSCRCEN | PMC_CKGR_MOR_MOSCXTEN)
-#define BOARD_CKGR_PLLAR    (PMC_CKGR_PLLAR_ONE | BOARD_CKGR_PLLAR_MUL | \
-                             BOARD_CKGR_PLLAR_COUNT | BOARD_CKGR_PLLAR_DIV)
-#define BOARD_PMC_MCKR_FAST (BOARD_PMC_MCKR_PRES | PMC_MCKR_CSS_MAIN)
-#define BOARD_PMC_MCKR      (BOARD_PMC_MCKR_PRES | BOARD_PMC_MCKR_CSS)
-#define BOARD_CKGR_UCKR     (BOARD_CKGR_UCKR_UPLLCOUNT | PMC_CKGR_UCKR_UPLLEN)
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -104,152 +92,262 @@ static inline void sam_wdtsetup(void)
 
 static void sam_pmcwait(uint32_t bit)
 {
-  volatile uint32_t delay;
+  /* There is no timeout on this wait.  Why not?  Because the symptoms there
+   * is no fallback if the wait times out and if the wait does time out, it
+   * can be very difficult to determine what happened.  Much better to just
+   * hang here.
+   */
 
-  for (delay = 0;
-       (getreg32(SAM_PMC_SR) & bit) == 0 && delay < UINT32_MAX;
-       delay++);
+  while ((getreg32(SAM_PMC_SR) & bit) == 0);
 }
 
 /****************************************************************************
- * Name: sam_pmcsetup
+ * Name: sam_enablemosc
  *
  * Description:
- *   Initialize clocking
+ *   Enable the main osciallator
  *
  ****************************************************************************/
 
-static inline void sam_pmcsetup(void)
+static inline void sam_enablemosc(void)
 {
   uint32_t regval;
 
-  /* Enable main oscillator (if it has not already been selected) */
+  /* Switch from the internal 12MHz RC to the main external oscillator */
 
   if ((getreg32(SAM_PMC_CKGR_MOR) & PMC_CKGR_MOR_MOSCSEL) == 0)
     {
-      /* "When the MOSCXTEN bit and the MOSCXTCNT are written in CKGR_MOR to
-       *  enable the main oscillator, the MOSCXTS bit in the Power Management
-       *  Controller Status Register (PMC_SR) is cleared and the counter starts
-       *  counting down on the slow clock divided by 8 from the MOSCXTCNT
-       *  value. ... When the counter reaches 0, the MOSCXTS bit is set,
-       *  indicating that the main clock is valid."
+      /* Enable main external oscillator */
+
+      regval  = getreg32(SAM_PMC_CKGR_MOR);
+      regval |= PMC_CKGR_MOR_MOSCXTEN | PMC_CKGR_MOR_KEY;
+      putreg32(regval, SAM_PMC_CKGR_MOR);
+
+      /* Wait for the main clock to become ready  */
+
+      while ((getreg32(SAM_PMC_CKGR_MCFR) & PMC_CKGR_MCFR_MAINFRDY) == 0);
+
+      /* Disable external OSC 12 MHz bypass */
+
+      regval  = getreg32(SAM_PMC_CKGR_MOR);
+      regval &= ~PMC_CKGR_MOR_MOSCXTBY;
+      regval |= PMC_CKGR_MOR_KEY;
+      putreg32(regval, SAM_PMC_CKGR_MOR);
+
+      /* Switch main clock source to the external oscillator */
+
+      regval  = getreg32(SAM_PMC_CKGR_MOR);
+      regval |= (PMC_CKGR_MOR_MOSCSEL | PMC_CKGR_MOR_KEY);
+      putreg32(regval, SAM_PMC_CKGR_MOR);
+
+      /* Wait for the main clock status change for the external oscillator
+       * selection.
        */
 
-      putreg32(BOARD_CKGR_MOR, SAM_PMC_CKGR_MOR);
-      sam_pmcwait(PMC_INT_MOSCXTS);
+      sam_pmcwait(PMC_INT_MOSCSELS);
+
+      /* And handle the case where MCK is running on main CLK */
+
+      sam_pmcwait(PMC_INT_MCKRDY);
     }
+}
 
-  /* "Switch to the main oscillator.  The selection is made by writing the
-   *  MOSCSEL bit in the Main Oscillator Register (CKGR_MOR). The switch of
-   *  the Main Clock source is glitch free, so there is no need to run out
-   *  of SLCK, PLLACK or UPLLCK in order to change the selection. The MOSCSELS
-   *  bit of the power Management Controller Status Register (PMC_SR) allows
-   *  knowing when the switch sequence is done."
-   *
-   *   MOSCSELS: Main Oscillator Selection Status
-   *             0 = Selection is done
-   *             1 = Selection is in progress
-   */
+/****************************************************************************
+ * Name: sam_selectmosc
+ *
+ * Description:
+ *   Select the main oscillator as the input clock for processor clock (PCK)
+ *   and the main clock (MCK).  The PCK and MCK differ only by the MDIV
+ *   divisor that permits the MCK to run at a lower rate.
+ *
+ ****************************************************************************/
 
-  putreg32((BOARD_CKGR_MOR | PMC_CKGR_MOR_MOSCSEL), SAM_PMC_CKGR_MOR);
-  sam_pmcwait(PMC_INT_MOSCSELS);
+static inline void sam_selectmosc(void)
+{
+  uint32_t regval;
 
-  /* "Select the master clock. "The Master Clock selection is made by writing
-   *  the CSS field (Clock Source Selection) in PMC_MCKR (Master Clock Register).
-   *  The prescaler supports the division by a power of 2 of the selected clock
-   *  between 1 and 64, and the division by 3. The PRES field in PMC_MCKR programs
-   *  the prescaler. Each time PMC_MCKR is written to define a new Master Clock,
-   *  the MCKRDY bit is cleared in PMC_SR. It reads 0 until the Master Clock is
-   *  established.
-   */
+  /* Select the main oscillator as the input clock for PCK and MCK */
 
-  regval = getreg32(SAM_PMC_MCKR);
+  regval  = getreg32(SAM_PMC_MCKR);
   regval &= ~PMC_MCKR_CSS_MASK;
   regval |= PMC_MCKR_CSS_MAIN;
   putreg32(regval, SAM_PMC_MCKR);
-  sam_pmcwait(PMC_INT_MCKRDY);
 
-  /* Setup PLLA and wait for LOCKA */
+  /* Wait for main clock to be ready */
 
-  putreg32(BOARD_CKGR_PLLAR, SAM_PMC_CKGR_PLLAR);
-  sam_pmcwait(PMC_INT_LOCKA);
-
-  /* Setup UTMI for USB and wait for LOCKU */
-
-#ifdef CONFIG_USBDEV
-  regval = getreg32(SAM_PMC_CKGR_UCKR);
-  regval |= BOARD_CKGR_UCKR;
-  putreg32(regval, SAM_PMC_CKGR_UCKR);
-  sam_pmcwait(PMC_INT_LOCKU);
-#endif
-
-  /* Switch to the fast clock and wait for MCKRDY */
-
-  putreg32(BOARD_PMC_MCKR_FAST, SAM_PMC_MCKR);
-  sam_pmcwait(PMC_INT_MCKRDY);
-
-  putreg32(BOARD_PMC_MCKR, SAM_PMC_MCKR);
   sam_pmcwait(PMC_INT_MCKRDY);
 }
 
 /****************************************************************************
- * Name: sam_enabledefaultmaster and sam_disabledefaultmaster
+ * Name: sam_pllasetup
  *
  * Description:
- *   Enable/disable default master access
+ *   Select the main oscillator as the input clock for processor clock (PCK)
+ *   and the main clock (MCK).  The PCK and MCK differ only by the MDIV
+ *   divisor that permits the MCK to run at a lower rate.
  *
  ****************************************************************************/
 
-static inline void sam_enabledefaultmaster(void)
-{
-#warning Missing Logic
-#if 0
-  uint32_t regval;
-
-  /* Set default master: SRAM0 -> Cortex-A5 System */
-
-  regval  = getreg32(SAM_MATRIX_SCFG0);
-  regval |= (MATRIX_SCFG0_FIXEDDEFMSTR_ARMS|MATRIX_SCFG_DEFMSTRTYPE_FIXED);
-  putreg32(regval, SAM_MATRIX_SCFG0);
-
-  /* Set default master: SRAM1 -> Cortex-A5 System */
-
-  regval  = getreg32(SAM_MATRIX_SCFG1);
-  regval |= (MATRIX_SCFG1_FIXEDDEFMSTR_ARMS|MATRIX_SCFG_DEFMSTRTYPE_FIXED);
-  putreg32(regval, SAM_MATRIX_SCFG1);
-
-  /* Set default master: Internal flash0 -> Cortex-A5 Instruction/Data */
-
-  regval  = getreg32(SAM_MATRIX_SCFG3);
-  regval |= (MATRIX_SCFG3_FIXEDDEFMSTR_ARMC|MATRIX_SCFG_DEFMSTRTYPE_FIXED);
-  putreg32(regval, SAM_MATRIX_SCFG3);
-#endif
-}
-
-#if 0 /* Not used */
-static inline void sam_disabledefaultmaster(void)
+static inline void sam_pllasetup(void)
 {
   uint32_t regval;
 
-  /* Clear default master: SRAM0 -> Cortex-A5 System */
+  /* Configure PLLA */
 
-  regval  = getreg32(SAM_MATRIX_SCFG0);
-  regval &= ~MATRIX_SCFG_DEFMSTRTYPE_MASK;
-  putreg32(regval, SAM_MATRIX_SCFG0);
+  regval = (BOARD_CKGR_PLLAR_DIV | BOARD_CKGR_PLLAR_COUNT |
+            BOARD_CKGR_PLLAR_OUT | BOARD_CKGR_PLLAR_MUL |
+            PMC_CKGR_PLLAR_ONE);
+  putreg32(regval, SAM_PMC_CKGR_PLLAR);
 
-  /* Clear default master: SRAM1 -> Cortex-A5 System */
+  /* Set the PLL Charge Pump Current Register to zero */
 
-  regval  = getreg32(SAM_MATRIX_SCFG1);
-  regval &= ~MATRIX_SCFG_DEFMSTRTYPE_MASK;
-  putreg32(regval, SAM_MATRIX_SCFG1);
+  putreg32(0, SAM_PMC_PLLICPR);
 
-  /* Clear default master: Internal flash0 -> Cortex-A5 Instruction/Data */
+  /* And wait for the PLL to lock on */
 
-  regval  = getreg32(SAM_MATRIX_SCFG3);
-  regval &= ~MATRIX_SCFG_DEFMSTRTYPE_MASK;
-  putreg32(regval, SAM_MATRIX_SCFG3);
+  sam_pmcwait(PMC_INT_LOCKA);
 }
+
+/****************************************************************************
+ * Name: sam_plladivider
+ *
+ * Description:
+ *   Configure MCK PLLA divider
+ *
+ ****************************************************************************/
+
+static inline void sam_plladivider(void)
+{
+  uint32_t regval;
+
+  /* Is the PLLA divider currently set? */
+
+  regval = getreg32(SAM_PMC_MCKR);
+  if ((regval & PMC_MCKR_PLLADIV2) != 0)
+    {
+#if BOARD_PMC_MCKR_PLLADIV == 0
+      /* The divider is set and we are configured to clear it */
+
+      regval &= ~PMC_MCKR_PLLADIV2;
+#else
+      /* The divider is already set */
+
+      return;
 #endif
+    }
+  else
+    {
+#if BOARD_PMC_MCKR_PLLADIV == 0
+      /* The divider is already cleared */
+
+      return;
+#else
+      /* The divider is clear and we are configured to set it */
+
+      regval |= PMC_MCKR_PLLADIV2;
+#endif
+    }
+
+  /* We changed the PLLA divider.  Wait for the main clock to be ready again */
+
+  sam_pmcwait(PMC_INT_MCKRDY);
+}
+
+/****************************************************************************
+ * Name: sam_mckprescaler
+ *
+ * Description:
+ *   Configure main clock (MCK) Prescaler
+ *
+ ****************************************************************************/
+
+static inline void sam_mckprescaler(void)
+{
+  uint32_t regval;
+
+  /* Set the main clock prescaler */
+
+  regval  = getreg32(SAM_PMC_MCKR);
+  regval &= ~PMC_MCKR_PRES_MASK;
+  regval |= BOARD_PMC_MCKR_PRES;
+  putreg32(regval, SAM_PMC_MCKR);
+
+  /* Wait for the main clock to be ready again */
+
+  sam_pmcwait(PMC_INT_MCKRDY);
+}
+
+/****************************************************************************
+ * Name: sam_mckdivider
+ *
+ * Description:
+ *   Configure main clock (MCK) divider (MDIV).  This divider allows the MCK
+ *   to run at a lower rate then PCK.
+ *
+ ****************************************************************************/
+
+static inline void sam_mckdivider(void)
+{
+  uint32_t regval;
+
+  /* Set the main clock divider */
+
+  regval  = getreg32(SAM_PMC_MCKR);
+  regval &= ~PMC_MCKR_MDIV_MASK;
+  regval |= BOARD_PMC_MCKR_MDIV;
+  putreg32(regval, SAM_PMC_MCKR);
+
+  /* Wait for the main clock to be ready again */
+
+  sam_pmcwait(PMC_INT_MCKRDY);
+}
+
+/****************************************************************************
+ * Name: sam_selectplla
+ *
+ * Description:
+ *   Select the PLLA output as the input clock for PCK and MCK.
+ *
+ ****************************************************************************/
+
+static inline void sam_selectplla(void)
+{
+  uint32_t regval;
+
+  /* Select the PLLA output as the main clock input */
+
+  regval  = getreg32(SAM_PMC_MCKR);
+  regval &= ~PMC_MCKR_CSS_MASK;
+  regval |= PMC_MCKR_CSS_PLLA;
+  putreg32(regval, SAM_PMC_MCKR);
+
+  /* Wait for the main clock to be ready again */
+
+  sam_pmcwait(PMC_INT_MCKRDY);
+}
+
+/****************************************************************************
+ * Name: sam_upllsetup
+ *
+ * Description:
+ *   Select the PLLA output as the input clock for PCK and MCK.
+ *
+ ****************************************************************************/
+
+static inline void sam_upllsetup(void)
+{
+#ifdef CONFIG_USBDEV
+  uint32_t regval;
+
+  /* Setup UTMI for USB and wait for LOCKU */
+
+  regval = getreg32(SAM_PMC_CKGR_UCKR);
+  regval |= (BOARD_CKGR_UCKR_UPLLCOUNT | PMC_CKGR_UCKR_UPLLEN);
+  putreg32(regval, SAM_PMC_CKGR_UCKR);
+
+  sam_pmcwait(PMC_INT_LOCKU);
+#endif
+}
 
 /****************************************************************************
  * Public Functions
@@ -275,10 +373,38 @@ void sam_clockconfig(void)
   sam_wdtsetup();
 
   /* Initialize clocking */
+  /* Enable main oscillator (if it has not already been selected) */
 
-  sam_pmcsetup();
+  sam_enablemosc();
 
-  /* Optimize CPU setting for speed */
+  /* Select the main oscillator as the input clock for processor clock (PCK)
+   * and the main clock (MCK).  The PCK and MCK differ only by the MDIV
+   * divisor that permits the MCK to run at a lower rate.
+   */
 
-  sam_enabledefaultmaster();
+  sam_selectmosc();
+
+  /* Setup PLLA */
+
+  sam_pllasetup();
+
+  /* Configure the MCK PLLA divider. */
+
+  sam_plladivider();
+
+  /* Configure the MCK Prescaler */
+
+  sam_mckprescaler();
+
+  /* Configure MCK Divider */
+
+  sam_mckdivider();
+
+  /* Finally, elect the PLLA output as the input clock for PCK and MCK. */
+
+  sam_selectplla();
+
+  /* Setup UTMI for USB */
+
+  sam_upllsetup();
 }
