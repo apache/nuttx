@@ -50,12 +50,13 @@ fi
 # This is the Cygwin path to the location where I installed the Atmel GCC
 # toolchain under Windows.  You will also have to edit this if you install
 # this toolchain in any other location
-export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/Atmel/Atmel Toolchain/ARM GCC/Native/4.7.3.99/arm-gnu-toolchain/bin"
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/Atmel/Atmel Toolchain/ARM GCC/Native/4.7.3.99/arm-gnu-toolchain/bin"
 
 # This is the Cygwin path to the location where I installed the CodeSourcery
 # toolchain under windows.  You will also have to edit this if you install
 # the CodeSourcery toolchain in any other location
 #export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
+export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery_CodeBench_Lite_for_ARM_EABI/bin"
 
 # These are the Cygwin paths to the locations where I installed the Atollic
 # toolchain under windows.  You will also have to edit this if you install

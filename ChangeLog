@@ -5151,4 +5151,7 @@
 	  to the SAMA5D3x-EK board (2013-7-21).
 	* arch/arm/src/sama5/sam_irq.c: SAMA5 interrupt handling logic
 	  (2013-7-22).
+	* arch/arm/src/sama5/sam_clockconfig.c:  Add SAMA5 PLL configuration
+	  logic (plus associated header files).  Initiali checkin is for the
+	  SAM3U which is very similar but needs to be verified (2013-7-22).
 
