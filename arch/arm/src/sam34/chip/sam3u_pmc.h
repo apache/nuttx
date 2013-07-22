@@ -500,7 +500,7 @@
 #    define PMC_PCR_DIV1                 (0 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK */
 #    define PMC_PCR_DIV2                 (1 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/2 */
 #    define PMC_PCR_DIV4                 (2 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/4 */
-#  define PMC_PCR_EN                      (1 << 0)  /* Bit 0: Enable */
+#  define PMC_PCR_EN                     (1 << 28) /* Bit 28: Enable */
 #endif
 
 /* Oscillator Calibration Register */

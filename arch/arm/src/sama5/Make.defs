@@ -62,4 +62,4 @@ endif
 
 CHIP_ASRCS =
 
-CHIP_CSRCS = sam_boot.c sam_irq.c sam_timerisr.c
+CHIP_CSRCS = sam_boot.c sam_clockconfig.c sam_irq.c sam_timerisr.c
