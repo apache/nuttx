@@ -39,19 +39,19 @@ include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 
 # Setup for the kind of memory that we are executing from
 
-ifeq ($(CONFIG_BOOT_SRAM),y)
+ifeq ($(CONFIG_LPC43_BOOT_SRAM),y)
   LDSCRIPT = ramconfig.ld
 endif
-ifeq ($(CONFIG_BOOT_SPIFI),y)
+ifeq ($(CONFIG_LPC43_BOOT_SPIFI),y)
   LDSCRIPT = spificonfig.ld
 endif
-ifeq ($(CONFIG_BOOT_FLASHA),y)
+ifeq ($(CONFIG_LPC43_BOOT_FLASHA),y)
   LDSCRIPT = flashaconfig.ld
 endif
-ifeq ($(CONFIG_BOOT_FLASHB),y)
+ifeq ($(CONFIG_LPC43_BOOT_FLASHB),y)
   LDSCRIPT = flashaconfig.ld
 endif
-ifeq ($(CONFIG_BOOT_CS0FLASH),y)
+ifeq ($(CONFIG_LPC43_BOOT_CS0FLASH),y)
   LDSCRIPT = cs0flash.ld
 endif
 

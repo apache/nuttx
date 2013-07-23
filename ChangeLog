@@ -5163,4 +5163,6 @@
 	  for the SAMA5.  Still compilation issues.  (2013-7-22).
 	* arch/arm/src/sama5/chip/sama5d3x_pinmap.h:  Add pin multiplexing
 	  definitions for the SAMA5D3 (2013-7-23).
+	* arch/arm/src/sama5/chip/:  New header files for SAMA5 AXI Matrix
+	  SFR, and BSC blocks (2013-7-23).
 

@@ -425,12 +425,12 @@ Code Red IDE/Tools
   By default, the configurations here assume that you are executing directly
   from SRAM.
 
-    CONFIG_BOOT_SRAM=y             : Executing in SRAM
+    CONFIG_LPC43_BOOT_SRAM=y       : Executing in SRAM
     CONFIG_LPC43_CODEREDW=y        : Code Red under Windows
 
   To execute from SPIFI, you would need to set:
 
-    CONFIG_BOOT_SPIFI=y            : Executing from SPIFI
+    CONFIG_LPC43_BOOT_SPIFI=y      : Executing from SPIFI
     CONFIG_DRAM_SIZE=(128*1024)    : SRAM Bank0 size
     CONFIG_DRAM_START=0x10000000   : SRAM Bank0 base address
     CONFIG_SPIFI_OFFSET=(512*1024) : SPIFI file system offset
@@ -725,20 +725,20 @@ LPC4330-Xplorer Configuration Options
 
        CONFIG_ARCH_FPU=y
  
-    CONFIG_BOOT_xxx - The startup code needs to know if the code is running
+    CONFIG_LPC43_BOOT_xxx - The startup code needs to know if the code is running
        from internal FLASH, external FLASH, SPIFI, or SRAM in order to
        initialize properly.  Note that a boot device is not specified for 
        cases where the code is copied into SRAM; those cases are all covered
-       by CONFIG_BOOT_SRAM.
+       by CONFIG_LPC43_BOOT_SRAM.
 
-       CONFIG_BOOT_SRAM=y      : Running from SRAM             (0x1000:0000)
-       CONFIG_BOOT_SPIFI=y     : Running from QuadFLASH        (0x1400:0000)
-       CONFIG_BOOT_FLASHA=y    : Running in internal FLASHA    (0x1a00:0000)
-       CONFIG_BOOT_FLASHB=y    : Running in internal FLASHA    (0x1b00:0000)
-       CONFIG_BOOT_CS0FLASH=y  : Running in external FLASH CS0 (0x1c00:0000)
-       CONFIG_BOOT_CS1FLASH=y  : Running in external FLASH CS1 (0x1d00:0000)
-       CONFIG_BOOT_CS2FLASH=y  : Running in external FLASH CS2 (0x1e00:0000)
-       CONFIG_BOOT_CS3FLASH=y  : Running in external FLASH CS3 (0x1f00:0000)
+       CONFIG_LPC43_BOOT_SRAM=y      : Running from SRAM             (0x1000:0000)
+       CONFIG_LPC43_BOOT_SPIFI=y     : Running from QuadFLASH        (0x1400:0000)
+       CONFIG_LPC43_BOOT_FLASHA=y    : Running in internal FLASHA    (0x1a00:0000)
+       CONFIG_LPC43_BOOT_FLASHB=y    : Running in internal FLASHA    (0x1b00:0000)
+       CONFIG_LPC43_BOOT_CS0FLASH=y  : Running in external FLASH CS0 (0x1c00:0000)
+       CONFIG_LPC43_BOOT_CS1FLASH=y  : Running in external FLASH CS1 (0x1d00:0000)
+       CONFIG_LPC43_BOOT_CS2FLASH=y  : Running in external FLASH CS2 (0x1e00:0000)
+       CONFIG_LPC43_BOOT_CS3FLASH=y  : Running in external FLASH CS3 (0x1f00:0000)
 
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs
@@ -909,7 +909,7 @@ Where <subdir> is one of the following:
     examples/ostest.  By default, this project assumes that you are
     executing directly from SRAM.
 
-      CONFIG_BOOT_SRAM=y             : Executing in SRAM
+      CONFIG_LPC43_BOOT_SRAM=y       : Executing in SRAM
       CONFIG_LPC43_CODEREDW=y        : Code Red under Windows
 
     This configuration directory, performs a simple test of the USB host
@@ -949,12 +949,12 @@ Where <subdir> is one of the following:
     examples/ostest.    By default, this project assumes that you are
     executing directly from SRAM.
 
-      CONFIG_BOOT_SRAM=y             : Executing in SRAM
+      CONFIG_LPC43_BOOT_SRAM=y       : Executing in SRAM
       CONFIG_LPC43_CODEREDW=y        : Code Red under Windows
 
     To execute from SPIFI, you would need to set:
 
-      CONFIG_BOOT_SPIFI=y            : Executing from SPIFI
+      CONFIG_LPC43_BOOT_SPIFI=y      : Executing from SPIFI
       CONFIG_DRAM_SIZE=(128*1024)    : SRAM Bank0 size
       CONFIG_DRAM_START=0x10000000   : SRAM Bank0 base address
       CONFIG_SPIFI_OFFSET=(512*1024) : SPIFI file system offset

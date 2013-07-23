@@ -141,7 +141,7 @@
 
 /* Check for Configuration A. */
 
-#ifndef CONFIG_BOOT_SRAM
+#ifndef CONFIG_LPC43_BOOT_SRAM
 
 /* Configuration A */
 /* CONFIG_DRAM_START should be set to the base of AHB SRAM, local 0. */

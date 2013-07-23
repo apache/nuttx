@@ -160,6 +160,13 @@ CONFIG_SAMA5_UART0=y
 # CONFIG_SAMA5_ARM is not set
 # CONFIG_SAMA5_FUSE is not set
 # CONFIG_SAMA5_MPDDRC is not set
+# CONFIG_PIO_IRQ is not set
+CONFIG_SAMA5_BOOT_SRAM=y
+# CONFIG_SAMA5_BOOT_SDRAM is not set
+# CONFIG_SAMA5_BOOT_CS0FLASH is not set
+# CONFIG_SAMA5_BOOT_CS1FLASH is not set
+# CONFIG_SAMA5_BOOT_CS2FLASH is not set
+# CONFIG_SAMA5_BOOT_CS3FLASH is not set
 
 #
 # External Memory Configuration

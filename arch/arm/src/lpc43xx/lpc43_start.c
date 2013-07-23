@@ -129,31 +129,31 @@ static inline void lpc43_setbootrom(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BOOT_CS0FLASH) || defined(CONFIG_BOOT_CS1FLASH) || \
-    defined(CONFIG_BOOT_CS2FLASH) || defined(CONFIG_BOOT_CS3FLASH)
+#if defined(CONFIG_LPC43_BOOT_CS0FLASH) || defined(CONFIG_LPC43_BOOT_CS1FLASH) || \
+    defined(CONFIG_LPC43_BOOT_CS2FLASH) || defined(CONFIG_LPC43_BOOT_CS3FLASH)
 static inline void lpc43_enabuffering(void)
 {
   uint32_t regval;
 
-#ifdef CONFIG_BOOT_CS0FLASH
+#ifdef CONFIG_LPC43_BOOT_CS0FLASH
   regval = getreg32(LPC43_EMC_STATCONFIG0);
   regval |= EMC_STATCONFIG_BENA
   putreg32(regval, LPC43_EMC_STATCONFIG0);
 #endif
 
-#ifdef CONFIG_BOOT_CS1FLASH
+#ifdef CONFIG_LPC43_BOOT_CS1FLASH
   regval = getreg32(LPC43_EMC_STATCONFIG1);
   regval |= EMC_STATCONFIG_BENA
   putreg32(regval, LPC43_EMC_STATCONFIG1);
 #endif
 
-#ifdef CONFIG_BOOT_CS2FLASH
+#ifdef CONFIG_LPC43_BOOT_CS2FLASH
   regval = getreg32(LPC43_EMC_STATCONFIG2);
   regval |= EMC_STATCONFIG_BENA
   putreg32(regval, LPC43_EMC_STATCONFIG2);
 #endif
 
-#ifdef CONFIG_BOOT_CS3FLASH
+#ifdef CONFIG_LPC43_BOOT_CS3FLASH
   regval = getreg32(LPC43_EMC_STATCONFIG3);
   regval |= EMC_STATCONFIG_BENA
   putreg32(regval, LPC43_EMC_STATCONFIG3);
