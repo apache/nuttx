@@ -89,36 +89,36 @@ config ARCH_FAMILY_LPC4357
 
 choice
 	prompt "LPC43XX Boot Configuration"
-	default BOOT_SRAM
+	default LPC43_BOOT_SRAM
 	depends on ARCH_CHIP_LPC43XX
 	---help---
 		The startup code needs to know if the code is running from internal FLASH,
 		external FLASH, SPIFI, or SRAM in order to initialize properly.  Note that
 		a boot device is not specified for cases where the code is copied into SRAM;
-		those cases are all covered by BOOT_SRAM.
+		those cases are all covered by LPC43_BOOT_SRAM.
 
-config BOOT_SRAM
+config LPC43_BOOT_SRAM
 	bool "Running from SRAM"
 
-config BOOT_SPIFI
+config LPC43_BOOT_SPIFI
 	bool "Running from QuadFLASH"
 
-config BOOT_FLASHA
+config LPC43_BOOT_FLASHA
 	bool "Running in internal FLASHA"
 
-config BOOT_FLASHB
+config LPC43_BOOT_FLASHB
 	bool "Running in internal FLASHA"
 
-config BOOT_CS0FLASH
+config LPC43_BOOT_CS0FLASH
 	bool "Running in external FLASH CS0"
 
-config BOOT_CS1FLASH
+config LPC43_BOOT_CS1FLASH
 	bool "Running in external FLASH CS1"
 
-config BOOT_CS2FLASH
+config LPC43_BOOT_CS2FLASH
 	bool "Running in external FLASH CS2"
 
-config BOOT_CS3FLASH
+config LPC43_BOOT_CS3FLASH
 	bool "Running in external FLASH CS3"
 
 endchoice

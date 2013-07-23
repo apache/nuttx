@@ -50,11 +50,14 @@
 
 #include "sam_clockconfig.h"
 #include "chip/sam_pmc.h"
-#include "chip/sam_wdt.h"
-#include "chip/sam_matrix.h"
+#include "chip/sam_sfr.h"
 
 /****************************************************************************
  * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
@@ -68,19 +71,6 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: sam_wdtsetup
- *
- * Description:
- *   Disable the watchdog timer
- *
- ****************************************************************************/
-
-static inline void sam_wdtsetup(void)
-{
-  putreg32(WDT_MR_WDDIS, SAM_WDT_MR);
-}
 
 /****************************************************************************
  * Name: sam_pmcwait
@@ -364,47 +354,153 @@ static inline void sam_upllsetup(void)
  *   performs other low-level chip initialization of the chip including master
  *   clock, IRQ & watchdog configuration.
  *
+ * Boot Sequence
+ *
+ *   This logic may be executing in ISRAM or in external mmemory: CS0, DDR,
+ *   CS1, CS2, or CS3.  It may be executing in CS0 or ISRAM through the
+ *   action of the SAMA5 "first level bootloader;"  it might be executing in
+ *   CS1-3 through the action of some second level bootloader that provides
+ *   configuration for those memories.
+ *
+ *   The system always boots from the ROM memory at address 0x0000:0000,
+ *   starting the internal first level bootloader.  That bootloader can be
+ *   configured to work in different ways using the BMS pin and the contents
+ *   of the Boot Sequence Configuration Register (BSC_CR).
+ *
+ *   If the BMS_BIT is read "1", then the first level bootloader will
+ *   support execution of code in the memory connected to CS0 on the EBI
+ *   interface (presumably NOR flash).  The following sequence is performed
+ *   by the first level bootloader if BMS_BIT is "1":
+ *
+ *     - The main clock is the on-chip 12 MHz RC oscillator,
+ *     - The Static Memory Controller is configured with timing allowing
+ *       code execution in CS0 external memory at 12 MHz
+ *     - AXI matrix is configured to remap EBI CS0 address at 0x0
+ *     - 0x0000:0000 is loaded in the Program Counter register
+ *
+ *   The user software in the external memory must perform the next
+ *   operation in order to complete the clocks and SMC timings configuration
+ *   to run at a higher clock frequency:
+ *
+ *     - Enable the 32768 Hz oscillator if best accuracy is needed
+ *     - Reprogram the SMC setup, cycle, hold, mode timing registers for EBI
+ *       CS0, to adapt them to the new clock.
+ *     - Program the PMC (Main Oscillator Enable or Bypass mode)
+ *     - Program and Start the PLL
+ *     - Switch the system clock to the new value
+ *
+ *  If the BMS_BIT is read "0", then the first level bootloader will
+ *  perform:
+ *
+ *     - Basic chip initialization: XTal or external clock frequency
+ *       detection:
+ *
+ *       a. Stack Setup for ARM supervisor mode
+ *       b. Main Oscillator Detection:  The bootloader attempts to use an
+ *          external crystal.  If this is not successful, then  the 12 MHz
+ *          Fast RC internal oscillator is used as the main osciallator.
+ *       c. Main Clock Selection: The Master Clock source is switched from
+ *          to the main oscillator without prescaler. PCK and MCK are now
+ *          the Main Clock.
+ *       d. PLLA Initialization: PLLA is configured to get a PCK at 96 MHz
+ *          and an MCK at 48 MHz. If an external clock or crystal frequency
+ *          running at 12 MHz is found, then the PLLA is configured to allow
+ *          USB communication.
+ *
+ *     - Attempt to retrieve a valid code from external non-volatile
+ *       memories (NVM): SPI0 CS0 Flash Boot, SD Card Boot, NAND Flash Boot,
+ *       SPI0 CS1 Flash Boot, or TWI EEPROM Boot.  Different heuristics are
+ *       used with each media type.  If a valid image is found, it is copied
+ *       to internal SRAM and started.
+ *
+ *     - In case no valid application has been found on any NVM, the SAM-BA
+ *       Monitor is started.
+ *
  ****************************************************************************/
 
 void sam_clockconfig(void)
 {
-  /* Configure the watchdog timer */
+#ifdef CONFIG_SAMA5_BOOT_CS0FLASH
+  bool config = false;
+#endif
 
-  sam_wdtsetup();
-
-  /* Initialize clocking */
-  /* Enable main oscillator (if it has not already been selected) */
-
-  sam_enablemosc();
-
-  /* Select the main oscillator as the input clock for processor clock (PCK)
-   * and the main clock (MCK).  The PCK and MCK differ only by the MDIV
-   * divisor that permits the MCK to run at a lower rate.
+  /* Initialize clocking.
+   *
+   * Check first:  Are we running in CS0?
    */
 
-  sam_selectmosc();
+#ifdef CONFIG_SAMA5_BOOT_CS0FLASH
+  /* Yes... did we get here via the first level bootloader? */
 
-  /* Setup PLLA */
+  if ((getreg32(SAM_SFR_EBICFG) & SFR_EBICFG_BMS) != 0)
+    {
+      /* Yes.. Perform the following operations in order to complete the
+       * clocks and SMC timings configuration to run at a higher clock
+       * frequency:
+       *
+       *   - Enable the 32768 Hz oscillator if best accuracy is needed
+       *   - Reprogram the SMC setup, cycle, hold, mode timing registers for EBI
+       *     CS0, to adapt them to the new clock.
+       *   - Program the PMC (Main Oscillator Enable or Bypass mode)
+       *   - Program and Start the PLL
+       *   - Switch the system clock to the new value
+       */
+#error Missing logic
 
-  sam_pllasetup();
+      config = true;
+    }
+#endif
 
-  /* Configure the MCK PLLA divider. */
+  /* If we are running from DDRAM or CS1-3, then we will not modify the
+   * clock configuration.  In these cases, we have to assume that some
+   * secondary bootloader started us here and that the bootloader has
+   * configured clocking appropriately.
+   *
+   * If we are running in CS0, then we may have been started by either
+   * the first or second level bootloader.  In either case, we need to
+   * update the PLLA settings in order to get a higher performance
+   * clock.
+   */
 
-  sam_plladivider();
+#ifdef CONFIG_SAMA5_BOOT_CS0FLASH
+  if (config)
+#if define(CONFIG_SAMA5_BOOT_SRAM) || defined(CONFIG_SAMA5_BOOT_CS0FLASH)
+    {
+      /* Enable main oscillator (if it has not already been selected) */
 
-  /* Configure the MCK Prescaler */
+      sam_enablemosc();
 
-  sam_mckprescaler();
+      /* Select the main oscillator as the input clock for processor clock
+       * (PCK) and the main clock (MCK).  The PCK and MCK differ only by the
+       * MDIV divisor that permits the MCK to run at a lower rate.
+       */
 
-  /* Configure MCK Divider */
+      sam_selectmosc();
 
-  sam_mckdivider();
+      /* Setup PLLA */
 
-  /* Finally, elect the PLLA output as the input clock for PCK and MCK. */
+      sam_pllasetup();
 
-  sam_selectplla();
+      /* Configure the MCK PLLA divider. */
 
-  /* Setup UTMI for USB */
+      sam_plladivider();
 
-  sam_upllsetup();
+      /* Configure the MCK Prescaler */
+
+      sam_mckprescaler();
+
+      /* Configure MCK Divider */
+
+      sam_mckdivider();
+
+      /* Finally, elect the PLLA output as the input clock for PCK and MCK. */
+
+      sam_selectplla();
+
+      /* Setup UTMI for USB */
+
+      sam_upllsetup();
+    }
+#endif /* CONFIG_SAMA5_BOOT_SRAM || CONFIG_SAMA5_BOOT_CS0FLASH */
+#endif /* CONFIG_SAMA5_BOOT_CS0FLASH */
 }

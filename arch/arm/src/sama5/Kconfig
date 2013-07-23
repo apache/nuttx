@@ -236,4 +236,33 @@ config PIOE_IRQ
 
 endif
 
+choice
+	prompt "SAMA5 Boot Configuration"
+	default SAMA5_BOOT_SRAM
+	---help---
+		The startup code needs to know if the code is running from internal SRAM,
+		external SRAM, or CS0-3 in order to initialize properly.  Note that the
+		boot device is not specified for cases where the code is copied into SRAM;
+		those cases are all covered by SAMA5_BOOT_SRAM.
+
+config SAMA5_BOOT_SRAM
+	bool "Running from internal SRAM"
+
+config SAMA5_BOOT_SDRAM
+	bool "Running from external SDRAM"
+
+config SAMA5_BOOT_CS0FLASH
+	bool "Running in external FLASH CS0"
+
+config SAMA5_BOOT_CS1FLASH
+	bool "Running in external FLASH CS1"
+
+config SAMA5_BOOT_CS2FLASH
+	bool "Running in external FLASH CS2"
+
+config SAMA5_BOOT_CS3FLASH
+	bool "Running in external FLASH CS3"
+
+endchoice
+
 endif

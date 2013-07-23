@@ -51,10 +51,13 @@
 #include "up_internal.h"
 
 #ifdef CONFIG_PIO_IRQ
-#  include "sam_pio.h"
+#  include "sam_gpio.h"
 #endif
 
 #include "chip/sam_aic.h"
+#include "chip/sam_matrix.h"
+#include "chip/sam_aximx.h"
+
 #include "sam_irq.h"
 
 /****************************************************************************
@@ -279,6 +282,18 @@ void up_irqinitialize(void)
   /* Restore protection and the interrupt state */
 
   putreg32(AIC_WPMR_WPKEY | AIC_WPMR_WPEN, SAM_AIC_WPMR);
+
+  /* Set remap state 0:
+   *
+   * Boot state:    ROM is seen at address 0x00000000
+   * Remap State 0: SRAM is seen at address 0x00000000 (through AHB slave
+   *                interface) instead of ROM.
+   * Remap State 1: HEBI is seen at address 0x00000000 (through AHB slave
+   *                interface) instead of ROM for external boot.
+   */
+
+  putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable remap */
+  putreg32(AXIMX_REMAP_REMAP0, SAM_AXIMX_REMAP); /* Remap SRAM */
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
