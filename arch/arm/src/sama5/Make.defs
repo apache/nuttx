@@ -60,6 +60,7 @@ ifeq ($(CONFIG_ELF),y)
 CMN_CSRCS += arm_elf.c
 endif
 
-CHIP_ASRCS =
+CHIP_ASRCS  =
 
-CHIP_CSRCS = sam_boot.c sam_clockconfig.c sam_irq.c sam_timerisr.c
+CHIP_CSRCS  = sam_boot.c sam_clockconfig.c sam_irq.c sam_lowputc.c
+CHIP_CSRCS += sam_serial.c sam_timerisr.c
