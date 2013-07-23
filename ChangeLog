@@ -5168,4 +5168,12 @@
 	* arch/arm/src/armv7-a/arm_vectors.S:  Force 8-byte stack alignment
 	  in interrupt handlers before calling C code.  Other ARM
 	  architectures need to do this as well (2013-7-23).
+	* arm/src/armv7-m/up_copyarmstate.c and armv7-a/up_copyarmstate.c:
+	  Added a new form of the register copy function that should save quit a
+	  bit of time for armv7-m (without common vectors) and with armv7-a
+	  (2013-7-23).
+	* arch/arm/src/armv7-a/arm_restorefpu.S, arm_savefpu.S, arm_doirq.c,
+	  arm_fullcontextrestore.S, arm_saveusercontext.S:  Add hardware
+	  floating point register save/restore logic for the Cortex-A5\
+	  (2013-7-23).
 

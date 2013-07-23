@@ -45,7 +45,7 @@ CMN_UCSRCS =
 CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
 CMN_ASRCS += vfork.S
 
-CMN_CSRCS  = up_assert.c up_blocktask.c up_copystate.c
+CMN_CSRCS  = up_assert.c up_blocktask.c up_copyfullstate.c
 CMN_CSRCS += up_createstack.c up_mdelay.c up_udelay.c up_exit.c
 CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
 CMN_CSRCS += up_memfault.c up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
@@ -85,6 +85,9 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += up_fpu.S
+ifneq ($(CONFIG_ARMV7M_CMNVECTOR),y)
+CMN_CSRCS += up_copyarmstate.c
+endif
 endif
 
 CHIP_ASRCS  = 

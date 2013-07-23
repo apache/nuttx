@@ -105,7 +105,7 @@ void up_sigdeliver(void)
 
   /* Save the real return state on the stack. */
 
-  up_copystate(regs, rtcb->xcp.regs);
+  up_copyfullstate(regs, rtcb->xcp.regs);
   regs[REG_PC]         = rtcb->xcp.saved_pc;
   regs[REG_PRIMASK]    = rtcb->xcp.saved_primask;
   regs[REG_XPSR]       = rtcb->xcp.saved_xpsr;

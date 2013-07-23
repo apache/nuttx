@@ -395,14 +395,11 @@ __start:
 
 	ldr		lr, .LCvstart			/* Abs. virtual address */
 
-	/* Configure the domain access register (see mmu.h).
-	 *
-	 *   Domains 0: Accesses are not checked
-	 *   Domains 1: Accesses are not checked
-	 *   Domains 2: Accesses checked against permissions in the TLB
+	/* Configure the domain access register (see mmu.h).  Only domain 0 is
+	 * supported and it uses the permissions in the TLB.
 	 */
 
-	mov		r0, #(DACR_MANAGER(0) | DACR_MANAGER(1) |  DACR_CLIENT(2))
+	mov		r0, #DACR_CLIENT(0)
 	mcr		CP15_DACR(r0)			/* Set domain access register */
 
 	/* Configure the system control register (see sctrl.h) */

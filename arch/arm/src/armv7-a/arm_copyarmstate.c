@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv6-m/up_copystate.c
+ * arch/arm/src/armv7-a/arm_copyarmstate.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,6 +44,8 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
+#ifdef CONFIG_ARCH_FPU
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -61,26 +63,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copystate
+ * Name: up_copyarmstate
  ****************************************************************************/
 
 /* A little faster than most memcpy's */
 
-void up_copystate(uint32_t *dest, uint32_t *src)
+void up_copyarmstate(uint32_t *dest, uint32_t *src)
 {
   int i;
 
-  /* In the Cortex-M0 model, the state is copied from the stack to the TCB,
+  /* In the Cortex-M3 model, the state is copied from the stack to the TCB,
    * but only a reference is passed to get the state from the TCB.  So the
    * following check avoids copying the TCB save area onto itself:
    */
 
   if (src != dest)
     {
-      for (i = 0; i < XCPTCONTEXT_REGS; i++)
+      for (i = 0; i < ARM_CONTEXT_REGS; i++)
         {
           *dest++ = *src++;
         }
     }
 }
 
+#endif /* CONFIG_ARCH_FPU */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/up_copystate.c
+ * arch/arm/src/arm/up_copyfullstate.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,26 +61,22 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copystate
+ * Name: up_copyfullstate
  ****************************************************************************/
 
 /* A little faster than most memcpy's */
 
-void up_copystate(uint32_t *dest, uint32_t *src)
+void up_copyfullstate(uint32_t *dest, uint32_t *src)
 {
   int i;
 
-  /* In the Cortex-M3 model, the state is copied from the stack to the TCB,
-   * but only a reference is passed to get the state from the TCB.  So the
-   * following check avoids copying the TCB save area onto itself:
+  /* In the current ARM model, the state is always copied to and from the
+   * stack and TCB.
    */
 
-  if (src != dest)
+  for (i = 0; i < XCPTCONTEXT_REGS; i++)
     {
-      for (i = 0; i < XCPTCONTEXT_REGS; i++)
-        {
-          *dest++ = *src++;
-        }
+      *dest++ = *src++;
     }
 }
 

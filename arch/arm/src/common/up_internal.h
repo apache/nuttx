@@ -121,22 +121,46 @@
 #if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM3) || \
     defined(CONFIG_ARCH_CORTEXM4)
 
+  /* If the floating point unit is present and enabled, then save the
+   * floating point registers as well as normal ARM registers.  This only
+   * applies if "lazy" floating point register save/restore is used
+   * (i.e., not CONFIG_ARMV7M_CMNVECTOR).
+   */
+
 #  if defined(CONFIG_ARCH_FPU) && !defined(CONFIG_ARMV7M_CMNVECTOR)
 #    define up_savestate(regs) \
        do { \
-         up_copystate(regs, (uint32_t*)current_regs); \
+         up_copyarmstate(regs, (uint32_t*)current_regs); \
          up_savefpu(regs); \
        } \
        while (0)
 #  else
-#    define up_savestate(regs)  up_copystate(regs, (uint32_t*)current_regs)
+#    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)current_regs)
 #  endif
 #  define up_restorestate(regs) (current_regs = regs)
 
+/* Otherwise, for the ARM7, ARM9, and Cortex-A5.  The state is copied in full
+ * from stack to stack.  This is not very efficient.
+ */
+
 #else
 
-#  define up_savestate(regs)    up_copystate(regs, (uint32_t*)current_regs)
-#  define up_restorestate(regs) up_copystate((uint32_t*)current_regs, regs)
+  /* If the floating point unit is present and enabled, then save the
+   * floating point registers as well as normal ARM registers.  Only "lazy"
+   * floating point save/restore is supported.
+   */
+
+#  if defined(CONFIG_ARCH_FPU)
+#    define up_savestate(regs) \
+       do { \
+         up_copyarmstate(regs, (uint32_t*)current_regs); \
+         up_savefpu(regs); \
+       } \
+       while (0)
+#  else
+#    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)current_regs)
+#  endif
+#  define up_restorestate(regs) up_copyfullstate((uint32_t*)current_regs, regs)
 
 #endif
 
@@ -244,7 +268,10 @@ void up_boot(void);
 
 /* Context switching */
 
-void up_copystate(uint32_t *dest, uint32_t *src);
+void up_copyfullstate(uint32_t *dest, uint32_t *src);
+#ifdef CONFIG_ARCH_FPU
+void up_copyarmstate(uint32_t *dest, uint32_t *src);
+#endif
 void up_decodeirq(uint32_t *regs);
 int  up_saveusercontext(uint32_t *saveregs);
 void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;

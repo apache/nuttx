@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/arm_fullcontextrestore.S
+ * arch/arm/src/armv7-a/arm_copyfullstate.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,27 +37,19 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/irq.h>
+#include <nuttx/config.h>
+
+#include <stdint.h>
+
+#include "os_internal.h"
 #include "up_internal.h"
 
-	.file	"arm_fullcontextrestore.S"
-
 /****************************************************************************
- * Preprocessor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
-
-/****************************************************************************
- * Public Symbols
- ****************************************************************************/
-
-	.globl	up_fullcontextrestore
 
 /****************************************************************************
  * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -69,74 +61,25 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_fullcontextrestore
+ * Name: up_copyfullstate
+ *
+ * Description:
+ *    Copy the entire register save area (including the floating point
+ *    registers if applicable).  This is a little faster than most memcpy's
+ *    since it does 32-bit transfers.
+ *
  ****************************************************************************/
 
-	.globl	up_fullcontextrestore
-	.type	up_fullcontextrestore, function
+void up_copyfullstate(uint32_t *dest, uint32_t *src)
+{
+  int i;
 
-up_fullcontextrestore:
+  /* In the current ARM model, the state is always copied to and from the
+   * stack and TCB.
+   */
 
-	/* On entry, a1 (r0) holds address of the register save area.  All other
-	 * registers are available for use.
-	 */
-
-#ifdef CONFIG_ARCH_FPU
-	/* First, restore the floating point registers.  Lets do this before we
-	 * restore the arm registers so that we have plentry of registers to
-	 * work with.
-	 */
-
-	add		r1, r0, #(4*REG_S0)		/* r1=Address of FP register storage */
-
-	/* Load all floating point registers.  Registers are loaded in numeric order,
-	 * s0, s1, ... in increasing address order.
-	 */
-
-	vldmia	r1!, {s0-s31}			/* Restore the full FP context */
-
-	/* Load the floating point control and status register.   At the end of the
-	 * vstmia, r1 will point to the FPCSR storage location.
-	 */
-
-	ldr		r2, [r1], #4			/* Fetch the floating point control and status register */
-	vmsr	fpscr, r2				/* Restore the FPCSR */
-#endif
-
-	/* Recover all registers except for r0, r1, R15, and CPSR */
-
-	add		r1, r0, #(4*REG_R2)		/* Offset to REG_R2 storage */
-	ldmia	r1, {r2-r14}			/* Recover registers */
-
-	/* Create a stack frame to hold the some registers */
-
-	sub		sp, sp, #(3*4)			/* Frame for three registers */
-	ldr		r1, [r0, #(4*REG_R0)]	/* Fetch the stored r0 value */
-	str		r1, [sp]				/* Save it at the top of the stack */
-	ldr		r1, [r0, #(4*REG_R1)]	/* Fetch the stored r1 value */
-	str		r1, [sp, #4]			/* Save it in the stack */
-	ldr		r1, [r0, #(4*REG_PC)]	/* Fetch the stored pc value */
-	str		r1, [sp, #8]			/* Save it at the bottom of the frame */
-
-	/* Now we can restore the CPSR.  We wait until we are completely
-	 * finished with the context save data to do this. Restore the CPSR
-	 * may re-enable and interrupts and we could be in a context
-	 * where the save structure is only protected by interrupts being
-	 * disabled.
-	 */
-
-	ldr		r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
-	msr		cpsr, r1				/* Set the CPSR */
-
-	/* Now recover r0 and r1 */
-
-	ldr		r0, [sp]
-	ldr		r1, [sp, #4]
-	add		sp, sp, #(2*4)
-
-	/* Then return to the address at the stop of the stack,
-	 * destroying the stack frame
-	 */
-
-	ldr		pc, [sp], #4
-	.size up_fullcontextrestore, . - up_fullcontextrestore
+  for (i = 0; i < XCPTCONTEXT_REGS; i++)
+    {
+      *dest++ = *src++;
+    }
+}
