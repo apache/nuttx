@@ -5165,4 +5165,7 @@
 	  definitions for the SAMA5D3 (2013-7-23).
 	* arch/arm/src/sama5/chip/:  New header files for SAMA5 AXI Matrix
 	  SFR, and BSC blocks (2013-7-23).
+	* arch/arm/src/armv7-a/arm_vectors.S:  Force 8-byte stack alignment
+	  in interrupt handlers before calling C code.  Other ARM
+	  architectures need to do this as well (2013-7-23).
 

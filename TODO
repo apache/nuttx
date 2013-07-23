@@ -1,7 +1,7 @@
-NuttX TODO List (Last updated June 23, 2013)
+NuttX TODO List (Last updated July 23, 2013)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This file summarizes known NuttX bugs, limitations, inconsistencies with 
+This file summarizes known NuttX bugs, limitations, inconsistencies with
 standards, things that could be improved, and ideas for enhancements.  See
 also individual README.txt files in the configs/ sub-directories for each
 board port.
@@ -24,7 +24,7 @@ nuttx/
   (1)  Documentation (Documentation/)
   (6)  Build system / Toolchains
   (5)  Linux/Cywgin simulation (arch/sim)
-  (4)  ARM (arch/arm/)
+  (5)  ARM (arch/arm/)
   (1)  ARM/C5471 (arch/arm/src/c5471/)
   (3)  ARM/DM320 (arch/arm/src/dm320/)
   (2)  ARM/i.MX (arch/arm/src/imx/)
@@ -149,7 +149,7 @@ o Task/Scheduler (sched/)
 
   Title:       ISSUES WITH atexit() AND on_exit()
   Description: These functions execute with the following bad properties:
-  
+
                1. They run with interrupts disabled,
                2. They run in supervisor mode (if applicable), and
                3. They do not obey any setup of PIC or address
@@ -426,7 +426,7 @@ o Kernel Build
                the count becomes negative the caller must be blocked.
 
                Update:
-               "I am thinking that there should be a "magic" global, user-accessible 
+               "I am thinking that there should be a "magic" global, user-accessible
                 variable that holds the PID of the currently executing thread;
                 basically the PID of the task at the head of the ready-to-run list.
                 This variable would have to be reset each time the head of the ready-
@@ -474,10 +474,10 @@ o Kernel Build
                OS services within the kernel and with other OS facilities, such
                as the file system, message queues, etc., residing in user-space
                and to interfacing with those core OS facilities through traps.
-  Status:      Open 
+  Status:      Open
   Priority:    Low.  This is a good idea and certainly an architectural
                improvement.  However, there is no strong motivivation now do
-               do that partitioning work. 
+               do that partitioning work.
 
 o C++ Support
   ^^^^^^^^^^^
@@ -641,7 +641,7 @@ o Binary loaders (binfmt/)
   Priority:    Medium-High
 
   Title:       READ-ONLY DATA IN RAM
-  Description: At present, all .rodata must be put into RAM.  There is a 
+  Description: At present, all .rodata must be put into RAM.  There is a
                tentative design change that might allow .rodata to be placed
                in FLASH (see Documentation/NuttXNxFlat.html).
   Status:      Open
@@ -676,9 +676,9 @@ o Binary loaders (binfmt/)
                else
                  NXFLATLDSCRIPT=$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld
                endif
-               
+
                Then use
-               
+
                NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T"$(NXFLATLDSCRIPT)" -no-check-sections
 
   Status:      Open
@@ -712,15 +712,15 @@ o Binary loaders (binfmt/)
                   .word   .LC4-(.LPIC5+4)
 
                This is good and bad.  This is good because it means that .rodata.str1.1 can now
-               reside in FLASH with .text and can be accessed using PC-relative addressing. 
+               reside in FLASH with .text and can be accessed using PC-relative addressing.
                That can be accomplished by simply moving the .rodata from the .data section to
                the .text section in the linker script.  (The NXFLAT linker script is located at
                nuttx/binfmt/libnxflat/gnu-nxflat.ld).
 
                This is bad because a lot of stuff may get broken an a lot of test will need to
-               be done.  One question that I have is does this apply to all kinds of .rodata? 
+               be done.  One question that I have is does this apply to all kinds of .rodata?
                Or just to .rodata.str1.1?
-  
+
   Status:      Open.  Many of the required changes are in place but, unfortunately, not enough
                go be fully functional.  I think all of the I-Space-to-I-Space fixes are in place.
                However, the generated code also includes PC-relative references to .bss which
@@ -797,7 +797,7 @@ o Network (net/, drivers/net)
   Description: At present, there cannot be two concurrent active TCP send
                operations in progress using the same socket.  This is because
                the uIP ACK logic will support only one transfer at a time.  The
-               solution is simple: A mutex will be needed to make sure that each 
+               solution is simple: A mutex will be needed to make sure that each
                send that is started is able to be the exclusive sender until all of
                the data to be sent has been ACKed.
   Status:      Open.  There is some temporary logic to apps/nshlib that does
@@ -1001,13 +1001,13 @@ o Libraries (libc/)
   Title:       RESETTING GETOPT()
   Description: There is an issue with the way that getopt() handles errors that
                return '?'.
-               
+
                1. Does getopt() reset its global variables after returning '?' so
                   that it can be re-used?  That would be required to support where
                   the caller terminates parsing before reaching the last parameter.
                2. Or is the client expected to continue parsing after getopt()
                   returns '?'  and parse until the final parameter?
-            
+
                The current getopt() implementation only supports #2.
   Status:      Open
   Priority:    Low
@@ -1030,11 +1030,11 @@ o Libraries (libc/)
                ferror().
 
   Title:       CONCURRENT STREAM READ/WRITE
-  Description: NuttX only supports a single file pointer so reads and writes 
+  Description: NuttX only supports a single file pointer so reads and writes
                must be from the same position.  This prohibits implementation
                of behavior like that required for fopen() with the "a+" mode.
                According to the fopen man page:
-               
+
                "a+ Open for reading and appending (writing at end of file).
                 The file is created if it does not exist. The initial file
                 position for reading is at the beginning of the file, but
@@ -1059,11 +1059,11 @@ o Libraries (libc/)
                 by zero, since it will result in a compile-time diagnostic, if the
                 implementation does not support infinity."
   Status:       Open
-  Priority:     
+  Priority:
 
   Title:       OLD dtoa NEEDS TO BE UPDATED
   Description: This implementation of dtoa in libc/stdio is old and will not
-               work with some newer compilers.  See 
+               work with some newer compilers.  See
                http://patrakov.blogspot.com/2009/03/dont-use-old-dtoac.html
   Status:      Open
   Priority:    ??
@@ -1208,7 +1208,7 @@ o Graphics subystem (graphics/)
   Priority:    Medium.  Not important for day-to-day testing but would be
                a critical improvement if NxConsole were to be used in a
                product.
- 
+
 o Pascal Add-On (pcode/)
   ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -1350,7 +1350,7 @@ o Linux/Cywgin simulation (arch/sim)
                least, partially functional (it has never been rigorously tested).
   Status:      Open
   Priority:    Low (unless you want to test networking features on the simulation).
-  
+
   Title:       ROUND-ROBIN SCHEDULING IN THE SIMULATOR
   Description: Since the simulation is not pre-emptible, you can't use round-robin
                scheduling (no time slicing).  Currently, the timer interrupts are
@@ -1361,7 +1361,7 @@ o Linux/Cywgin simulation (arch/sim)
                irqrestore() to block and (conditionally) unblock the signal.
   Status:      Open
   Priority:    Low
-  
+
   Title:       NSH ISSUES ON THE SIMULATOR
   Descripion:  The NSH example has some odd behaviors.  Mult-tasking -- for example,
                execution of commands in background -- does not work normally.  This
@@ -1454,6 +1454,31 @@ o ARM (arch/arm/)
   Priority:    Low.  The conditions of continous interrupts is really the problem.
                If your design needs continous interrupts like this, please try
                the above change and, please, submit a patch with the working fix.
+
+  Title:       STACK ALIGNMENT IN INTERRUPT HANDLERS
+  Description: The EABI standard requires that the stack always have a 32-byte
+               alignment.  There is no guaratee at present that the stack will be
+               so aligned in an interrupt handler.  Therefore, I would expect some
+               issues if, for example, floating point or perhaps long long operations
+               were performed in an interrupt handler.
+
+               This issue exists for ARM7, ARM9, Cortex-M0, Cortex-M3, and
+               Cortex-M4 but has been addressed for the Cortex-A5.  The fix
+               is really simple can cannot be incorporated without some
+               substantial testing.  For ARM, the fix is the following logic
+               arround each call into C code from assembly:
+
+                 mov  r4, sp     /* Save the SP in a preserved register */
+                 bic  sp, sp, #7 /* Force 8-byte alignement */
+                 bl   cfunction  /* Call the C function */
+                 mov  sp, r4     /* Restore the possibly unaligned stack pointer */
+
+               This same issue applies to the interrupt stack which is, I think
+               improperly aligned in almost all cases (except Cortex-A5).
+
+  Status:      Open
+  Priority:    Low for me because I never do floating point operations in
+               interrupt handlers.
 
 o ARM/C5471 (arch/arm/src/c5471/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1590,7 +1615,7 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
 
   Title:       USB BROKEN?
   Description: I tried to bring up the new configuration at configs/mcu123-214x/composite,
-               and Linux failed to enumerate the device.  I don't know if this is 
+               and Linux failed to enumerate the device.  I don't know if this is
                a problem with the lpc214x USB driver (bit rot), or due to recent
                changed (e.g., -r4359 is suspicious), or an incompatibility between the
                Composite driver and the LPC214x USB driver.  It will take more work
@@ -1698,7 +1723,7 @@ o ARM/STM32 (arch/arm/src/stm32/)
                is sent, the driver works fine.
   Status:      Open
   Priority:    Medium-High
-  
+
   Title:       DMA EXTENSIONS F1/3
   Description: DMA logic needs to be extended.  DMA2, Channel 5, will not work
                because the DMA2 channels 4 & 5 share the same interrupt.
@@ -1941,7 +1966,7 @@ o Renesas M16C/26 (arch/sh/src/m16c)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:        M16C DOES NOT BUILD
-  Description:  The M16C target cannot be built.  The GNU m16c-elf-ld link fails with 
+  Description:  The M16C target cannot be built.  The GNU m16c-elf-ld link fails with
                 the following message:
 
                 m32c-elf-ld: BFD (GNU Binutils) 2.19 assertion fail /home/Owner/projects/nuttx/buildroot/toolchain_build_m32c/binutils-2.19/bfd/elf32-m32c.c:482
@@ -2167,7 +2192,7 @@ o z16 (arch/z16)
   Title:       ZDS-II COMPILER PROBLEMS
   Description: The file drivers/mmcsd/mmcsd_sdio.c generates an internal compiler
                error like:
- 
+
                mmcsd\mmcsd_sdio.c
                Internal Error(0503) On line 2504 of "MMCSD\MMCSD_SDIO.C"
                    File <c3>, Args(562,46)
@@ -2182,7 +2207,7 @@ o z16 (arch/z16)
                reliable Windows native build.  As of this writing, the Cygwin
                based build has not been re-verified.
   Status:      Open
-  Priority:    Low -- I don't think anyone uses the Z16 port.  
+  Priority:    Low -- I don't think anyone uses the Z16 port.
 
 o mc68hc1x (arch/hc)
   ^^^^^^^^^^^^^^^^^^
@@ -2219,7 +2244,7 @@ o Network Utilities (apps/netutils/)
 
   Title:       THE ARP ISSUES AGAIN
   Description: The first GET received by THTTPD is not responded to.  Refreshing the page
-               from the browser solves the problem and THTTPD works fine after thatg.  I 
+               from the browser solves the problem and THTTPD works fine after thatg.  I
                believe that this is the duplicate of another bug: "Outgoing [uIP] packets are dropped
                and overwritten by ARP packets if the destination IP has not been mapped to a MAC."
   Status:      Open
