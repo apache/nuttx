@@ -391,7 +391,7 @@ static char g_usart3txbuffer[CONFIG_USART3_TXBUFSIZE];
 #ifdef CONFIG_SAM34_UART0
 static struct up_dev_s g_uart0priv =
 {
-  .usartbase      = SAM_UART0_BASE,
+  .usartbase      = SAM_UART0_VBASE,
   .baud           = CONFIG_UART0_BAUD,
   .irq            = SAM_IRQ_UART0,
   .parity         = CONFIG_UART0_PARITY,
@@ -421,7 +421,7 @@ static uart_dev_t g_uart0port =
 #ifdef CONFIG_SAM34_UART1
 static struct up_dev_s g_uart1priv =
 {
-  .usartbase      = SAM_UART1_BASE,
+  .usartbase      = SAM_UART1_VBASE,
   .baud           = CONFIG_UART1_BAUD,
   .irq            = SAM_IRQ_UART1,
   .parity         = CONFIG_UART1_PARITY,
@@ -451,7 +451,7 @@ static uart_dev_t g_uart1port =
 #ifdef CONFIG_SAM34_USART0
 static struct up_dev_s g_usart0priv =
 {
-  .usartbase      = SAM_USART0_BASE,
+  .usartbase      = SAM_USART0_VBASE,
   .baud           = CONFIG_USART0_BAUD,
   .irq            = SAM_IRQ_USART0,
   .parity         = CONFIG_USART0_PARITY,
@@ -481,7 +481,7 @@ static uart_dev_t g_usart0port =
 #ifdef CONFIG_SAM34_USART1
 static struct up_dev_s g_usart1priv =
 {
-  .usartbase      = SAM_USART1_BASE,
+  .usartbase      = SAM_USART1_VBASE,
   .baud           = CONFIG_USART1_BAUD,
   .irq            = SAM_IRQ_USART1,
   .parity         = CONFIG_USART1_PARITY,
@@ -511,7 +511,7 @@ static uart_dev_t g_usart1port =
 #ifdef CONFIG_SAM34_USART2
 static struct up_dev_s g_usart2priv =
 {
-  .usartbase      = SAM_USART2_BASE,
+  .usartbase      = SAM_USART2_VBASE,
   .baud           = CONFIG_USART2_BAUD,
   .irq            = SAM_IRQ_USART2,
   .parity         = CONFIG_USART2_PARITY,
@@ -541,7 +541,7 @@ static uart_dev_t g_usart2port =
 #ifdef CONFIG_SAM34_USART3
 static struct up_dev_s g_usart3priv =
 {
-  .usartbase      = SAM_USART3_BASE,
+  .usartbase      = SAM_USART3_VBASE,
   .baud           = CONFIG_USART3_BAUD,
   .irq            = SAM_IRQ_USART3,
   .parity         = CONFIG_USART3_PARITY,
@@ -669,10 +669,10 @@ static int up_setup(struct uart_dev_s *dev)
 #ifdef HAVE_USART
   else if (priv->bits == 9
 #if defined(CONFIG_SAM34_UART0)
-           && priv->usartbase != SAM_UART0_BASE
+           && priv->usartbase != SAM_UART0_VBASE
 #endif
 #if defined(CONFIG_SAM34_UART1)
-           && priv->usartbase != SAM_UART1_BASE
+           && priv->usartbase != SAM_UART1_VBASE
 #endif
           )
     {
