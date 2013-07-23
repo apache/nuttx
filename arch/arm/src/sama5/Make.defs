@@ -62,5 +62,5 @@ endif
 
 CHIP_ASRCS  =
 
-CHIP_CSRCS  = sam_boot.c sam_clockconfig.c sam_irq.c sam_lowputc.c
-CHIP_CSRCS += sam_serial.c sam_timerisr.c
+CHIP_CSRCS  = sam_boot.c sam_clockconfig.c sam_gpio.c sam_irq.c
+CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_timerisr.c

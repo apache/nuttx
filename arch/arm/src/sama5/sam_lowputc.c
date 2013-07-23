@@ -140,37 +140,37 @@
 /* Select USART parameters for the selected console */
 
 #if defined(CONFIG_UART0_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_UART0_BASE
+#  define SAM_CONSOLE_VBASE    SAM_UART0_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_UART0_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_UART0_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_UART0_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_UART0_2STOP
 #elif defined(CONFIG_UART1_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_UART1_BASE
+#  define SAM_CONSOLE_VBASE    SAM_UART1_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_UART1_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_UART1_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_UART1_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_UART1_2STOP
 #elif defined(CONFIG_USART0_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_USART0_BASE
+#  define SAM_CONSOLE_VBASE    SAM_USART0_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_USART0_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART0_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_USART0_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_USART0_2STOP
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_USART1_BASE
+#  define SAM_CONSOLE_VBASE    SAM_USART1_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_USART1_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART1_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_USART1_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_USART1_2STOP
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_USART2_BASE
+#  define SAM_CONSOLE_VBASE    SAM_USART2_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_USART2_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART2_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_USART2_PARITY
 #  define SAM_CONSOLE_2STOP    CONFIG_USART2_2STOP
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE)
-#  define SAM_CONSOLE_BASE     SAM_USART3_BASE
+#  define SAM_CONSOLE_VBASE    SAM_USART3_VBASE
 #  define SAM_CONSOLE_BAUD     CONFIG_USART3_BAUD
 #  define SAM_CONSOLE_BITS     CONFIG_USART3_BITS
 #  define SAM_CONSOLE_PARITY   CONFIG_USART3_PARITY
@@ -249,11 +249,11 @@ void up_lowputc(char ch)
 {
   /* Wait for the transmitter to be available */
 
-  while ((getreg32(SAM_CONSOLE_BASE + SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) == 0);
+  while ((getreg32(SAM_CONSOLE_VBASE + SAM_UART_SR_OFFSET) & UART_INT_TXEMPTY) == 0);
 
   /* Send the character */
 
-  putreg32((uint32_t)ch, SAM_CONSOLE_BASE + SAM_UART_THR_OFFSET);
+  putreg32((uint32_t)ch, SAM_CONSOLE_VBASE + SAM_UART_THR_OFFSET);
 }
 
 /**************************************************************************
@@ -350,27 +350,27 @@ void sam_lowsetup(void)
   /* Reset and disable receiver and transmitter */
 
   putreg32((UART_CR_RSTRX | UART_CR_RSTTX | UART_CR_RXDIS | UART_CR_TXDIS),
-           SAM_CONSOLE_BASE + SAM_UART_CR_OFFSET);
+           SAM_CONSOLE_VBASE + SAM_UART_CR_OFFSET);
 
   /* Disable all interrupts */
 
-  putreg32(0xffffffff, SAM_CONSOLE_BASE + SAM_UART_IDR_OFFSET);
+  putreg32(0xffffffff, SAM_CONSOLE_VBASE + SAM_UART_IDR_OFFSET);
 
   /* Set up the mode register */
 
-  putreg32(MR_VALUE, SAM_CONSOLE_BASE + SAM_UART_MR_OFFSET);
+  putreg32(MR_VALUE, SAM_CONSOLE_VBASE + SAM_UART_MR_OFFSET);
 
   /* Configure the console baud.  NOTE: Oversampling by 8 is not supported.
    * This may limit BAUD rates for lower USART clocks.
    */
 
   putreg32(((SAM_USART_CLOCK + (SAM_CONSOLE_BAUD << 3)) / (SAM_CONSOLE_BAUD << 4)),
-           SAM_CONSOLE_BASE + SAM_UART_BRGR_OFFSET);
+           SAM_CONSOLE_VBASE + SAM_UART_BRGR_OFFSET);
 
   /* Enable receiver & transmitter */
 
   putreg32((UART_CR_RXEN | UART_CR_TXEN),
-           SAM_CONSOLE_BASE + SAM_UART_CR_OFFSET);
+           SAM_CONSOLE_VBASE + SAM_UART_CR_OFFSET);
 #endif
 }
 
