@@ -41,5 +41,12 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/sama5/chip.h>
+
+#if defined(ATSAMA5D3)
+#  include "chip/sama5d3x_pinmap.h"
+#else
+#  error Unrecognized SAMA5 architecture
+#endif
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_PINMAP_H */
