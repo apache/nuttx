@@ -37,7 +37,24 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)armv7-a$(DELIM)Toolchain.defs
 
-LDSCRIPT = isram.ld
+ifeq ($(CONFIG_SAMA5_BOOT_SRAM),y)
+  LDSCRIPT = isram.ld
+endif
+ifeq ($(CONFIG_SAMA5_BOOT_SDRAM),y)
+  LDSCRIPT = ddram.ld
+endif
+ifeq ($(CONFIG_SAMA5_BOOT_CS0FLASH),y)
+#  LDSCRIPT = cs0flash.ld
+endif
+ifeq ($(CONFIG_SAMA5_BOOT_CS1FLASH),y)
+#  LDSCRIPT = cs1flash.ld
+endif
+ifeq ($(CONFIG_SAMA5_BOOT_CS2FLASH),y)
+#  LDSCRIPT = cs2flash.ld
+endif
+ifeq ($(CONFIG_SAMA5_BOOT_CS3FLASH),y)
+#  LDSCRIPT = cs3flash.ld
+endif
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
