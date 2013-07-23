@@ -90,15 +90,15 @@ g_aborttmp:
 	.type	arm_vectorirq, %function
 
 arm_vectorirq:
-	/* On entry, we are in IRQ mode.  We are free to use
-	 * the IRQ mode r13 and r14.
+	/* On entry, we are in IRQ mode.  We are free to use the IRQ mode r13
+	 * and r14.
 	 */
 
-	ldr	r13, .Lirqtmp
-	sub	lr, lr, #4
-	str	lr, [r13]				/* Save lr_IRQ */
-	mrs	lr, spsr
-	str	lr, [r13, #4]			/* Save spsr_IRQ */
+	ldr		r13, .Lirqtmp
+	sub		lr, lr, #4
+	str		lr, [r13]				/* Save lr_IRQ */
+	mrs		lr, spsr
+	str		lr, [r13, #4]			/* Save spsr_IRQ */
 
 	/* Then switch back to SVC mode */
 

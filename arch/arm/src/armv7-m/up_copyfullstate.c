@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/arm/up_copystate.c
+ * arch/arm/src/armv7-m/up_copyfullstate.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,22 +61,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_copystate
+ * Name: up_copyfullstate
+ *
+ * Description:
+ *    Copy the entire register save area (including the floating point
+ *    registers if applicable).  This is a little faster than most memcpy's
+ *    since it does 32-bit transfers.
+ *
  ****************************************************************************/
 
-/* A little faster than most memcpy's */
-
-void up_copystate(uint32_t *dest, uint32_t *src)
+void up_copyfullstate(uint32_t *dest, uint32_t *src)
 {
   int i;
 
-  /* In the current ARM model, the state is always copied to and from the
-   * stack and TCB.
+  /* In the Cortex-M3 model, the state is copied from the stack to the TCB,
+   * but only a reference is passed to get the state from the TCB.  So the
+   * following check avoids copying the TCB save area onto itself:
    */
 
-  for (i = 0; i < XCPTCONTEXT_REGS; i++)
+  if (src != dest)
     {
-      *dest++ = *src++;
+      for (i = 0; i < XCPTCONTEXT_REGS; i++)
+        {
+          *dest++ = *src++;
+        }
     }
 }
-

@@ -49,7 +49,7 @@ CMN_UCSRCS =
 CMN_ASRCS  = up_saveusercontext.S up_fullcontextrestore.S up_switchcontext.S
 CMN_ASRCS += vfork.S
 
-CMN_CSRCS  = up_assert.c up_blocktask.c up_copystate.c up_createstack.c
+CMN_CSRCS  = up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c
 CMN_CSRCS += up_mdelay.c up_udelay.c up_exit.c up_initialize.c up_memfault.c
 CMN_CSRCS += up_initialstate.c up_interruptcontext.c up_modifyreg8.c
 CMN_CSRCS += up_modifyreg16.c up_modifyreg32.c up_releasepending.c
@@ -90,6 +90,9 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += up_fpu.S
+ifneq ($(CONFIG_ARMV7M_CMNVECTOR),y)
+CMN_CSRCS += up_copyarmstate.c
+endif
 endif
 
 # Required LPC17xx files

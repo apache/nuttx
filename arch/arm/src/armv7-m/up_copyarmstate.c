@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/up_sigdeliver.c
+ * arch/arm/src/armv7-m/up_copyarmstate.c
  *
- *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,18 +40,11 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <sched.h>
-#include <debug.h>
-
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <arch/board/board.h>
 
 #include "os_internal.h"
 #include "up_internal.h"
-#include "up_arch.h"
 
-#ifndef CONFIG_DISABLE_SIGNALS
+#if defined(CONFIG_ARCH_FPU) && !defined(CONFIG_ARMV7M_CMNVECTOR)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -70,81 +63,31 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_sigdeliver
+ * Name: up_copyarmstate
  *
  * Description:
- *   This is the a signal handling trampoline.  When a signal action was
- *   posted.  The task context was mucked with and forced to branch to this
- *   location with interrupts disabled.
+ *    Copy the ARM portion of the register save area (omitting the floating
+ *    point registers).  This is a little faster than most memcpy's since it
+ *    does 32-bit transfers.
  *
  ****************************************************************************/
 
-void up_sigdeliver(void)
+void up_copyarmstate(uint32_t *dest, uint32_t *src)
 {
-  struct tcb_s  *rtcb = (struct tcb_s*)g_readytorun.head;
-  uint32_t regs[XCPTCONTEXT_REGS];
-  sig_deliver_t sigdeliver;
+  int i;
 
-  /* Save the errno.  This must be preserved throughout the signal handling
-   * so that the user code final gets the correct errno value (probably
-   * EINTR).
+  /* In the Cortex-M3 model, the state is copied from the stack to the TCB,
+   * but only a reference is passed to get the state from the TCB.  So the
+   * following check avoids copying the TCB save area onto itself:
    */
 
-  int saved_errno = rtcb->pterrno;
-
-  up_ledon(LED_SIGNAL);
-
-  sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
-        rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
-  ASSERT(rtcb->xcp.sigdeliver != NULL);
-
-  /* Save the real return state on the stack. */
-
-  up_copyfullstate(regs, rtcb->xcp.regs);
-  regs[REG_PC]         = rtcb->xcp.saved_pc;
-#ifdef CONFIG_ARMV7M_USEBASEPRI
-  regs[REG_BASEPRI]    = rtcb->xcp.saved_basepri;
-#else
-  regs[REG_PRIMASK]    = rtcb->xcp.saved_primask;
-#endif
-  regs[REG_XPSR]       = rtcb->xcp.saved_xpsr;
-
-  /* Get a local copy of the sigdeliver function pointer. We do this so that
-   * we can nullify the sigdeliver function pointer in the TCB and accept
-   * more signal deliveries while processing the current pending signals.
-   */
-
-  sigdeliver           = rtcb->xcp.sigdeliver;
-  rtcb->xcp.sigdeliver = NULL;
-
-  /* Then restore the task interrupt state */
-
-#ifdef CONFIG_ARMV7M_USEBASEPRI
-  irqrestore((uint8_t)regs[REG_BASEPRI]);
-#else
-  irqrestore((uint16_t)regs[REG_PRIMASK]);
-#endif
-
-  /* Deliver the signal */
-
-  sigdeliver(rtcb);
-
-  /* Output any debug messages BEFORE restoring errno (because they may
-   * alter errno), then disable interrupts again and restore the original
-   * errno that is needed by the user logic (it is probably EINTR).
-   */
-
-  sdbg("Resuming\n");
-  (void)irqsave();
-  rtcb->pterrno = saved_errno;
-
-  /* Then restore the correct state for this thread of
-   * execution.
-   */
-
-  up_ledoff(LED_SIGNAL);
-  up_fullcontextrestore(regs);
+  if (src != dest)
+    {
+      for (i = 0; i < SW_INT_REGS; i++)
+        {
+          *dest++ = *src++;
+        }
+    }
 }
 
-#endif /* !CONFIG_DISABLE_SIGNALS */
-
+#endif /* CONFIG_ARCH_FPU && !CONFIG_ARMV7M_CMNVECTOR */

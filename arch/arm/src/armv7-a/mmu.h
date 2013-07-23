@@ -447,73 +447,43 @@
 
 #endif /* CONFIG_PAGING */
 
-/* Page Size Selections *************************************************************/
+/* MMU flags ************************************************************************/
 
-/* Create some friendly definitions to handle some differences between
- * small and tiny pages.
- */
+/* Create some friendly definitions to handle page table entries */
 
-#if CONFIG_PAGING_PAGESIZE == 1024
-
-   /* Base of the L2 page table (aligned to 4Kb byte boundaries) */
-
-#  define PGTABLE_L2_BASE_PADDR PGTABLE_L2_FINE_PBASE
-#  define PGTABLE_L2_BASE_VADDR PGTABLE_L2_FINE_VBASE
-
-   /* Number of pages in an L2 table per L1 entry */
-
-#  define PTE_NPAGES            PTE_TINY_NPAGES
-
-   /* Mask to get the page table physical address from an L1 entry */
-
-#  define PG_L1_PADDRMASK       PMD_PTE_PADDR_MASK
-
-   /* MMU Flags for each memory region */
-
-#  define MMU_L1_TEXTFLAGS      (PMD_TYPE_PTE)
-#  define MMU_L2_TEXTFLAGS      (PTE_TYPE_SMALL | PTE_AP_R12 | PTE_CACHEABLE)
-#  define MMU_L1_DATAFLAGS      (PMD_TYPE_PTE)
-#  define MMU_L2_DATAFLAGS      (PTE_TYPE_SMALL | PTE_AP_RW12 | PTE_CACHEABLE|PTE_B)
-#  define MMU_L2_ALLOCFLAGS     (PTE_TYPE_SMALL | PTE_AP_RW12)
-#  define MMU_L1_PGTABFLAGS     (PMD_TYPE_PTE)
-#  define MMU_L2_PGTABFLAGS     (PTE_TYPE_SMALL | PTE_AP_RW12)
-
-#  define MMU_L2_VECTRWFLAGS    (PTE_TYPE_SMALL | PTE_AP_RW12)
-#  define MMU_L2_VECTROFLAGS    (PTE_TYPE_SMALL | PTE_AP_R12 | PTE_CACHEABLE)
-
-#elif CONFIG_PAGING_PAGESIZE == 4096
-
-   /* Base of the L2 page table (aligned to 1Kb byte boundaries) */
-
-#  define PGTABLE_L2_BASE_PADDR PGTABLE_L2_PBASE
-#  define PGTABLE_L2_BASE_VADDR PGTABLE_L2_VBASE
-
-   /* Number of pages in an L2 table per L1 entry */
-
-#  define PTE_NPAGES            PTE_SMALL_NPAGES
-
-   /* Mask to get the page table physical address from an L1 entry */
-
-#  define PG_L1_PADDRMASK       PMD_SECT_PADDR_MASK
-
-   /* MMU Flags for each memory region. */
-
-#  define MMU_L1_TEXTFLAGS      (PMD_TYPE_PTE)
-#  define MMU_L2_TEXTFLAGS      (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRO|PTE_CACHEABLE)
-#  define MMU_L1_DATAFLAGS      (PMD_TYPE_PTE)
-#  define MMU_L2_DATAFLAGS      (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW|PTE_CACHEABLE|PTE_B)
-#  define MMU_L2_ALLOCFLAGS     (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW)
-#  define MMU_L1_PGTABFLAGS     (PMD_TYPE_PTE)
-#  define MMU_L2_PGTABFLAGS     (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW)
-
-#  define MMU_L2_VECTRWFLAGS    (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRW)
-#  define MMU_L2_VECTROFLAGS    (PTE_TYPE_SMALL|PTE_SMALL_AP_UNO_SRO|PTE_CACHEABLE)
-
-#else
-#  error "Need extended definitions for CONFIG_PAGING_PAGESIZE"
+#if CONFIG_PAGING_PAGESIZE != 4096
+#  error "Unsupported value for CONFIG_PAGING_PAGESIZE"
 #endif
 
-#define PT_SIZE                 (4*PTE_NPAGES)
+/* Base of the L2 page table (aligned to 1Kb byte boundaries) */
+
+#define PGTABLE_L2_BASE_PADDR PGTABLE_L2_PBASE
+#define PGTABLE_L2_BASE_VADDR PGTABLE_L2_VBASE
+
+/* Number of pages in an L2 table per L1 entry */
+
+#define PTE_NPAGES            PTE_SMALL_NPAGES
+#define PT_SIZE               (4*PTE_NPAGES)
+
+/* Mask to get the page table physical address from an L1 entry */
+
+#define PG_L1_PADDRMASK       PMD_SECT_PADDR_MASK
+
+/* MMU Flags for each type memory region. */
+
+#define MMU_L1_TEXTFLAGS      (PMD_TYPE_PTE)
+#define MMU_L2_TEXTFLAGS      (PTE_TYPE_SMALL | PTE_SMALL_AP_UNO_SRO | \
+                               PTE_CACHEABLE)
+#define MMU_L1_DATAFLAGS      (PMD_TYPE_PTE)
+#define MMU_L2_DATAFLAGS      (PTE_TYPE_SMALL | PTE_SMALL_AP_UNO_SRW | \
+                               PTE_CACHEABLE | PTE_B)
+#define MMU_L2_ALLOCFLAGS     (PTE_TYPE_SMALL | PTE_SMALL_AP_UNO_SRW)
+#define MMU_L1_PGTABFLAGS     (PMD_TYPE_PTE)
+#define MMU_L2_PGTABFLAGS     (PTE_TYPE_SMALL | PTE_SMALL_AP_UNO_SRW)
+
+#define MMU_L2_VECTRWFLAGS    (PTE_TYPE_SMALL | PTE_SMALL_AP_UNO_SRW)
+#define MMU_L2_VECTROFLAGS    (PTE_TYPE_SMALL | PTE_SMALL_AP_UNO_SRO | \
+                               PTE_CACHEABLE)
 
 /* Addresses of Memory Regions ******************************************************/
 
