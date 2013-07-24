@@ -67,7 +67,7 @@
 
 void sam_boardinitialize(void)
 {
-#ifdef CONFIG_ARCH_EXTSRAM0
+#ifdef CONFIG_SAM34_EXTSRAM0
   /* Configure and enable SRAM on board the SAM4S Xplained */
 
   sam_sram_initialize();

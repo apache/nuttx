@@ -508,8 +508,8 @@ CONFIGURATION
        the configuration in the following ways:
 
        CONFIG_LPC17_EMC=y                  : Enable the EMC
-       CONFIG_ARCH_EXTDRAM=y               : Configure external DRAM
-       CONFIG_ARCH_EXTDRAMSIZE=67108864    : DRAM size 2x256/8 = 64MB
+       CONFIG_LPC17_EXTDRAM=y               : Configure external DRAM
+       CONFIG_LPC17_EXTDRAMSIZE=67108864    : DRAM size 2x256/8 = 64MB
        CONFIG_SYSTEM_RAMTEST=y             : Enable the RAM test built-in
 
        In this configuration, the SDRAM is not added to heap and so is

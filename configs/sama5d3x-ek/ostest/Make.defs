@@ -37,7 +37,7 @@ include ${TOPDIR}/.config
 include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}$(DELIM)arch$(DELIM)arm$(DELIM)src$(DELIM)armv7-a$(DELIM)Toolchain.defs
 
-ifeq ($(CONFIG_SAMA5_BOOT_SRAM),y)
+ifeq ($(CONFIG_SAMA5_BOOT_ISRAM),y)
   LDSCRIPT = isram.ld
 endif
 ifeq ($(CONFIG_SAMA5_BOOT_SDRAM),y)

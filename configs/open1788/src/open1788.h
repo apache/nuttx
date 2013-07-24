@@ -184,7 +184,7 @@ void weak_function open1788_sspinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_LPC17_EMC
-#ifdef CONFIG_ARCH_EXTDRAM
+#ifdef CONFIG_LPC17_EXTDRAM
 void open1788_sdram_initialize(void);
 #endif
 
@@ -196,7 +196,7 @@ void open1788_sdram_initialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_ARCH_EXTNOR
+#ifdef CONFIG_LPC17_EXTNOR
 void open1788_nor_initialize(void);
 #endif
 
@@ -208,7 +208,7 @@ void open1788_nor_initialize(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_ARCH_EXTNAND
+#ifdef CONFIG_LPC17_EXTNAND
 void open1788_nand_initialize(void);
 #endif
 #endif /* CONFIG_LPC17_EMC */

@@ -79,13 +79,13 @@ void lpc17_boardinitialize(void)
 
 #ifdef CONFIG_LPC17_EMC
   lpc17_emcinitialize();
-#ifdef CONFIG_ARCH_EXTDRAM
+#ifdef CONFIG_LPC17_EXTDRAM
   open1788_sdram_initialize();
 #endif
-#ifdef CONFIG_ARCH_EXTNOR
+#ifdef CONFIG_LPC17_EXTNOR
   open1788_nor_initialize();
 #endif
-#ifdef CONFIG_ARCH_EXTNAND
+#ifdef CONFIG_LPC17_EXTNAND
   open1788_nand_initialize();
 #endif
 #endif
