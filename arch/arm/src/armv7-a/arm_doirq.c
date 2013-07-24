@@ -113,7 +113,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
    * interrupt handler.
    */
 
-  regs         = current_regs;
+  regs         = (uint32_t *)current_regs;
   current_regs = NULL;
 
   /* Unmask the last interrupt (global interrupts are still disabled) */
