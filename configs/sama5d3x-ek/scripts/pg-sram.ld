@@ -60,6 +60,9 @@
  * get a link time error saying that the locked region is full, you may have to
  * re-organize this memory layout (here and in defconfig) to make the locked
  * region even bigger.
+ *
+ * NOTE 3: Vectors in low memory are assumed and 16KB of ISRAM is reserved at
+ * the high end of ISRAM for the page table (?).
  */
 
 MEMORY

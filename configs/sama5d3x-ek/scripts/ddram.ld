@@ -36,11 +36,14 @@
 /* The SAMA5D3 has 128 KB of ISRAM beginning at virtual address 0x0030:0000.
  * This memory configuration, however, loads into the 64 MB SDRAM on board
  * the SAMA5D3x-EK which lies at 0x2000:0000
+ *
+ * Vectors in low memory are assumed and 16KB of ISRAM is reserved at the
+ * high end of ISRAM for the page table.
  */
 
 MEMORY
 {
-	isram (W!RX) : ORIGIN = 0x300000, LENGTH = 128K
+	isram (W!RX) : ORIGIN = 0x300000, LENGTH = 128K - 16K
 	sdram (W!RX) : ORIGIN = 0x20000000, LENGTH = 64M
 }
 
