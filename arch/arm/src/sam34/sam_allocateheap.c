@@ -75,24 +75,24 @@
  * to be used as heap.
  */
 
-#if !defined(CONFIG_ARCH_EXTSRAM0) || !defined(CONFIG_ARCH_EXTSRAM0HEAP)
-#  undef CONFIG_ARCH_EXTSRAM0SIZE
-#  define CONFIG_ARCH_EXTSRAM0SIZE 0
+#if !defined(CONFIG_SAM34_EXTSRAM0) || !defined(CONFIG_SAM34_EXTSRAM0HEAP)
+#  undef CONFIG_SAM34_EXTSRAM0SIZE
+#  define CONFIG_SAM34_EXTSRAM0SIZE 0
 #endif
 
-#if !defined(CONFIG_ARCH_EXTSRAM1) || !defined(CONFIG_ARCH_EXTSRAM1HEAP)
-#  undef CONFIG_ARCH_EXTSRAM1SIZE
-#  define CONFIG_ARCH_EXTSRAM1SIZE 0
+#if !defined(CONFIG_SAM34_EXTSRAM1) || !defined(CONFIG_SAM34_EXTSRAM1HEAP)
+#  undef CONFIG_SAM34_EXTSRAM1SIZE
+#  define CONFIG_SAM34_EXTSRAM1SIZE 0
 #endif
 
-#if !defined(CONFIG_ARCH_EXTSRAM2) || !defined(CONFIG_ARCH_EXTSRAM2HEAP)
-#  undef CONFIG_ARCH_EXTSRAM2SIZE
-#  define CONFIG_ARCH_EXTSRAM2SIZE 0
+#if !defined(CONFIG_SAM34_EXTSRAM2) || !defined(CONFIG_SAM34_EXTSRAM2HEAP)
+#  undef CONFIG_SAM34_EXTSRAM2SIZE
+#  define CONFIG_SAM34_EXTSRAM2SIZE 0
 #endif
 
-#if !defined(CONFIG_ARCH_EXTSRAM3) || !defined(CONFIG_ARCH_EXTSRAM3HEAP)
-#  undef CONFIG_ARCH_EXTSRAM3SIZE
-#  define CONFIG_ARCH_EXTSRAM3SIZE 0
+#if !defined(CONFIG_SAM34_EXTSRAM3) || !defined(CONFIG_SAM34_EXTSRAM3HEAP)
+#  undef CONFIG_SAM34_EXTSRAM3SIZE
+#  define CONFIG_SAM34_EXTSRAM3SIZE 0
 #endif
 
 /* SAM3U, SAM3X, and SAM3A Unique memory configurations */
@@ -119,7 +119,7 @@
 #      warning "CONFIG_MM_REGIONS < 3: NFC SRAM not included in HEAP"
 #    endif
 
-#    if CONFIG_ARCH_EXTSRAM0SIZE > 0
+#    if CONFIG_SAM34_EXTSRAM0SIZE > 0
 #      if CONFIG_MM_REGIONS > 3
 #        define HAVE_EXTSRAM0_REGION 1
 #      else
@@ -127,7 +127,7 @@
 #      endif
 #    endif
 
-#  elif CONFIG_ARCH_EXTSRAM0SIZE > 0
+#  elif CONFIG_SAM34_EXTSRAM0SIZE > 0
 #    if CONFIG_MM_REGIONS > 2
 #       define HAVE_EXTSRAM0_REGION 1
 #    else
@@ -138,7 +138,7 @@
 
 /* The SAM4S and SAM4L may have only internal SRAM0 and external SRAM0 */
 
-#  if CONFIG_ARCH_EXTSRAM0SIZE > 0
+#  if CONFIG_SAM34_EXTSRAM0SIZE > 0
 #    if CONFIG_MM_REGIONS > 1
 #       define HAVE_EXTSRAM0_REGION 1
 #    else
@@ -340,44 +340,44 @@ void up_addregion(void)
 #ifdef HAVE_EXTSRAM0_REGION
   /* Allow user access to the heap memory */
 
-  sam_mpu_uheap(SAM_EXTCS0_BASE, CONFIG_ARCH_EXTSRAM0SIZE);
+  sam_mpu_uheap(SAM_EXTCS0_BASE, CONFIG_SAM34_EXTSRAM0SIZE);
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM_EXTCS0_BASE, CONFIG_ARCH_EXTSRAM0SIZE);
+  kumm_addregion((FAR void*)SAM_EXTCS0_BASE, CONFIG_SAM34_EXTSRAM0SIZE);
 
 #endif /* HAVE_EXTSRAM0_REGION */
 
 #ifdef HAVE_EXTSRAM1_REGION
   /* Allow user access to the heap memory */
 
-  sam_mpu_uheap(SAM_EXTCS1_BASE, CONFIG_ARCH_EXTSRAM1SIZE);
+  sam_mpu_uheap(SAM_EXTCS1_BASE, CONFIG_SAM34_EXTSRAM1SIZE);
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM_EXTCS1_BASE, CONFIG_ARCH_EXTSRAM1SIZE);
+  kumm_addregion((FAR void*)SAM_EXTCS1_BASE, CONFIG_SAM34_EXTSRAM1SIZE);
 
 #endif /* HAVE_EXTSRAM0_REGION */
 
 #ifdef HAVE_EXTSRAM2_REGION
   /* Allow user access to the heap memory */
 
-  sam_mpu_uheap(SAM_EXTCS2_BASE, CONFIG_ARCH_EXTSRAM2SIZE);
+  sam_mpu_uheap(SAM_EXTCS2_BASE, CONFIG_SAM34_EXTSRAM2SIZE);
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM_EXTCS2_BASE, CONFIG_ARCH_EXTSRAM2SIZE);
+  kumm_addregion((FAR void*)SAM_EXTCS2_BASE, CONFIG_SAM34_EXTSRAM2SIZE);
 
 #endif /* HAVE_EXTSRAM0_REGION */
 
 #ifdef HAVE_EXTSRAM3_REGION
   /* Allow user access to the heap memory */
 
-  sam_mpu_uheap(SAM_EXTCS3_BASE, CONFIG_ARCH_EXTSRAM3SIZE);
+  sam_mpu_uheap(SAM_EXTCS3_BASE, CONFIG_SAM34_EXTSRAM3SIZE);
 
   /* Add the region */
 
-  kumm_addregion((FAR void*)SAM_EXTCS3_BASE, CONFIG_ARCH_EXTSRAM3SIZE);
+  kumm_addregion((FAR void*)SAM_EXTCS3_BASE, CONFIG_SAM34_EXTSRAM3SIZE);
 
 #endif /* HAVE_EXTSRAM0_REGION */
 }

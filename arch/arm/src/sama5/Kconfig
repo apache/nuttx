@@ -27,7 +27,7 @@ config ARCH_CHIP_ATSAMA5D35
 	bool "Atmel ATSAMA5D35"
 	select ARCH_CHIP_SAMA5D3
 
-endchoice
+endchoice # Atmel AT91SAMA5 Chip Selection
 
 menu "ATSAMA5 Peripheral Support"
 
@@ -205,7 +205,7 @@ config SAMA5_MPDDRC
 	bool "MPDDR controller (MPDDRC)"
 	default n
 
-endmenu
+endmenu # ATSAMA5 Peripheral Support
 
 config PIO_IRQ
 	bool "PIO pin interrupts"
@@ -234,35 +234,364 @@ config PIOE_IRQ
 	bool "PIOE interrupts"
 	default n
 
-endif
+endif # PIO_IRQ
+
+menu "External Memory Configuration"
+
+config SAMA5_DDRCS
+	bool "External DDR-SDRAM Memory"
+	default n
+	---help---
+		Build in support for DDR-SDRAM memory resources.
+
+if SAMA5_DDRCS
+
+config SAMA5_DDRCS_SIZE
+	int "DDR-SDRAM Memory size"
+	default 0
+	---help---
+		Mapped size of the DDR-SDRAM memory region.
+
+choice
+	prompt "DDR-SDRAM Memory Type"
+	default SAMA5_DDRCS_LPDDR1
+	---help---
+		Select the type of DDR-SDRAM memory present
+
+config SAMA5_DDRCS_LPDDR1
+	bool "Low-power DDR1-SDRAM (LPDDR1)"
+
+config SAMA5_DDRCS_LPDDR2
+	bool "Low-power DDR2-SDRAM-S4 (LPDDR2)"
+
+endchoice # DDR-SDRAM Memory Type
+endif # SAMA5_DDRCS
+
+config SAMA5_EBICS0
+	bool "External CS0 Memory"
+	default n
+	---help---
+		Build in support for memory resources in the chip select 0 (CS0)
+		memory region.
+
+if SAMA5_EBICS0
+
+config SAMA5_EBICS0_SIZE
+	int "CS0 Memory size"
+	default 0
+	---help---
+		Mapped size of the memory region at CS0.
+
+choice
+	prompt "CS0 Memory Type"
+	default SAMA5_EBICS0_NOR
+	---help---
+		Select the type of memory present on CS0
+
+config SAMA5_EBICS0_SRAM
+	bool "SRAM"
+
+config SAMA5_EBICS0_PSRAM
+	bool "PSRAM"
+
+config SAMA5_EBICS0_PROM
+	bool "PROM"
+
+config SAMA5_EBICS0_EEPROM
+	bool "EEPROM"
+
+config SAMA5_EBICS0_EPROM
+	bool "EPROM"
+
+config SAMA5_EBICS0_LCD
+	bool "LCD"
+
+config SAMA5_EBICS0_NOR
+	bool "NOR Flash"
+
+config SAMA5_EBICS0_NAND
+	bool "NAND Flash"
+
+endchoice # CS0 Memory Type
+endif # SAMA5_EBICS0
+
+config SAMA5_EBICS1
+	bool "External CS1 Memory"
+	default n
+	---help---
+		Build in support for memory resources in the chip select 1 (CS1)
+		memory region.
+
+if SAMA5_EBICS1
+
+config SAMA5_EBICS1_SIZE
+	int "CS1 Memory size"
+	default 0
+	---help---
+		Mapped size of the memory region at CS1.
+
+choice
+	prompt "CS1 Memory Type"
+	default SAMA5_EBICS1_NOR
+	---help---
+		Select the type of memory present on CS1
+
+config SAMA5_EBICS1_SRAM
+	bool "SRAM"
+
+config SAMA5_EBICS1_PSRAM
+	bool "PSRAM"
+
+config SAMA5_EBICS1_PROM
+	bool "PROM"
+
+config SAMA5_EBICS1_EEPROM
+	bool "EEPROM"
+
+config SAMA5_EBICS1_EPROM
+	bool "EPROM"
+
+config SAMA5_EBICS1_LCD
+	bool "LCD"
+
+config SAMA5_EBICS1_NOR
+	bool "NOR Flash"
+
+config SAMA5_EBICS1_NAND
+	bool "NAND Flash"
+
+endchoice # CS1 Memory Type
+endif # SAMA5_EBICS1
+
+config SAMA5_EBICS2
+	bool "External CS2 Memory"
+	default n
+	---help---
+		Build in support for memory resources in the chip select 2 (CS2)
+		memory region.
+
+if SAMA5_EBICS2
+
+config SAMA5_EBICS2_SIZE
+	int "CS2 Memory size"
+	default 0
+	---help---
+		Mapped size of the memory region at CS2.
+
+choice
+	prompt "CS2 Memory Type"
+	default SAMA5_EBICS2_NOR
+	---help---
+		Select the type of memory present on CS2
+
+config SAMA5_EBICS2_SRAM
+	bool "SRAM"
+
+config SAMA5_EBICS2_PSRAM
+	bool "PSRAM"
+
+config SAMA5_EBICS2_PROM
+	bool "PROM"
+
+config SAMA5_EBICS2_EEPROM
+	bool "EEPROM"
+
+config SAMA5_EBICS2_EPROM
+	bool "EPROM"
+
+config SAMA5_EBICS2_LCD
+	bool "LCD"
+
+config SAMA5_EBICS2_NOR
+	bool "NOR Flash"
+
+config SAMA5_EBICS2_NAND
+	bool "NAND Flash"
+
+endchoice # CS2 Memory Type
+endif # SAMA5_EBICS2
+
+config SAMA5_EBICS3
+	bool "External CS3 Memory"
+	default n
+	---help---
+		Build in support for memory resources in the chip select 3 (CS3)
+		memory region.
+
+if SAMA5_EBICS3
+
+config SAMA5_EBICS3_SIZE
+	int "CS3 Memory size"
+	default 0
+	---help---
+		Mapped size of the memory region at CS3.
+
+choice
+	prompt "CS3 Memory Type"
+	default SAMA5_EBICS3_NOR
+	---help---
+		Select the type of memory present on CS3
+
+config SAMA5_EBICS3_SRAM
+	bool "SRAM"
+
+config SAMA5_EBICS3_PSRAM
+	bool "PSRAM"
+
+config SAMA5_EBICS3_PROM
+	bool "PROM"
+
+config SAMA5_EBICS3_EEPROM
+	bool "EEPROM"
+
+config SAMA5_EBICS3_EPROM
+	bool "EPROM"
+
+config SAMA5_EBICS3_LCD
+	bool "LCD"
+
+config SAMA5_EBICS3_NOR
+	bool "NOR Flash"
+
+config SAMA5_EBICS3_NAND
+	bool "NAND Flash"
+
+endchoice # CS3 Memory Type
+endif # SAMA5_EBICS3
+endmenu # External Memory Configuration
 
 choice
 	prompt "SAMA5 Boot Configuration"
-	default SAMA5_BOOT_SRAM
+	default SAMA5_BOOT_ISRAM
 	---help---
 		The startup code needs to know if the code is running from internal SRAM,
 		external SRAM, or CS0-3 in order to initialize properly.  Note that the
-		boot device is not specified for cases where the code is copied into SRAM;
-		those cases are all covered by SAMA5_BOOT_SRAM.
+		boot device is not specified for cases where the code is copied into
+		internal SRAM; those cases are all covered by SAMA5_BOOT_ISRAM.
 
-config SAMA5_BOOT_SRAM
+config SAMA5_BOOT_ISRAM
 	bool "Running from internal SRAM"
 
 config SAMA5_BOOT_SDRAM
 	bool "Running from external SDRAM"
+	depends on SAMA5_DDRCS
 
 config SAMA5_BOOT_CS0FLASH
 	bool "Running in external FLASH CS0"
+	depends on SAMA5_EBICS0_NOR
+
+config SAMA5_BOOT_CS0SRAM
+	bool "Running in external FLASH CS0"
+	depends on SAMA5_EBICS0_SRAM || SAMA5_EBICS0_PSRAM
 
 config SAMA5_BOOT_CS1FLASH
 	bool "Running in external FLASH CS1"
+	depends on SAMA5_EBICS1_NOR
+
+config SAMA5_BOOT_CS1SRAM
+	bool "Running in external FLASH CS1"
+	depends on SAMA5_EBICS1_SRAM || SAMA5_EBICS1_PSRAM
 
 config SAMA5_BOOT_CS2FLASH
 	bool "Running in external FLASH CS2"
+	depends on SAMA5_EBICS2_NOR
 
-config SAMA5_BOOT_CS3FLASH
+config SAMA5_BOOT_CS2SRAM
+	bool "Running in external FLASH CS2"
+	depends on SAMA5_EBICS2_SRAM || SAMA5_EBICS2_PSRAM
+
+config SAMA5_BOOT_CS2FLASH
 	bool "Running in external FLASH CS3"
+	depends on SAMA5_EBICS3_NOR
 
-endchoice
+config SAMA5_BOOT_CS3SRAM
+	bool "Running in external FLASH CS3"
+	depends on SAMA5_EBICS3_SRAM || SAMA5_EBICS3_PSRAM
 
-endif
+endchoice # SAMA5 Boot Configuration
+
+menu "Heap Configuration"
+
+config SAMA5_ISRAM_HEAP
+	bool "Include ISRAM in heap"
+	default y
+	depends on !SAMA5_BOOT_ISRAM
+	---help---
+		Include the internal SRAM memory in the heap.
+
+		NOTE:  MM_REGIONS must also be set to indicate the total number of
+		memory regions to be added to the heap.
+
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM INTERNAL SRAM!!**
+		In this case, the remaining ISRAM will automatically be added to the
+		heap (using DRAM_END).
+
+config SAMA5_DDRCS_HEAP
+	bool "Include DDR-SDRAM in heap"
+	default y
+	depends on SAMA5_DDRCS && !SAMA5_BOOT_SDRAM
+	---help---
+		Include the DDR-SDRAM memory in the heap.
+
+		NOTE:  MM_REGIONS must also be set to indicate the total number of
+		memory regions to be added to the heap.
+
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM SDRAM!!**
+		In this case, the remaining SDRAM will automatically be added to the
+		heap (using DRAM_END)
+
+config SAMA5_EBICS0_HEAP
+	bool "Include SRAM/PSRAM in heap"
+	default y
+	depends on (SAMA5_EBICS0_SRAM || SAMA5_EBICS0_PSRAM) && !SAMA5_BOOT_CS0SRAM
+	---help---
+		Include the CS0 SRAM/PSREAM memory in the heap.
+
+		NOTE:  MM_REGIONS must also be set to indicate the total number of
+		memory regions to be added to the heap.
+
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM CS0 SRAM!!**
+		In this case, the remaining SRAM will automatically be added to the
+		heap (using DRAM_END).
+
+config SAMA5_EBICS1_HEAP
+	bool "Include SRAM/PSRAM in heap"
+	default y
+	depends on (SAMA5_EBICS1_SRAM || SAMA5_EBICS1_PSRAM) && !SAMA5_BOOT_CS1SRAM
+	---help---
+		Include the CS1 SRAM/PSREAM memory in the heap.
+
+		NOTE:  MM_REGIONS must also be set to indicate the total number of
+		memory regions to be added to the heap.
+
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM CS1 SRAM!!**
+		In this case, the remaining SRAM will automatically be added to the
+		heap (using DRAM_END).
+
+config SAMA5_EBICS2_HEAP
+	bool "Include SRAM/PSRAM in heap"
+	default y
+	depends on (SAMA5_EBICS2_SRAM || SAMA5_EBICS2_PSRAM) && !SAMA5_BOOT_CS2SRAM
+	---help---
+		Include the CS2 SRAM/PSREAM memory in the heap.
+
+		NOTE:  MM_REGIONS must also be set to indicate the total number of
+		memory regions to be added to the heap.
+
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM CS2 SRAM!!**
+		In this case, the remaining SRAM will automatically be added to the
+		heap (using DRAM_END).
+
+config SAMA5_EBICS3_HEAP
+	bool "Include SRAM/PSRAM in heap"
+	default y
+	depends on (SAMA5_EBICS3_SRAM || SAMA5_EBICS3_PSRAM) && !SAMA5_BOOT_CS3SRAM
+	---help---
+		Include the CS3 SRAM/PSREAM memory in the heap.
+
+		*** DO NOT SELECT THIS OPTION IF YOU ARE EXECUTING FROM CS3 SRAM!!**
+		In this case, the remaining SRAM will automatically be added to the
+		heap (using DRAM_END).
+
+endmenu # Heap Configuration
+endif # ARCH_CHIP_SAMA5

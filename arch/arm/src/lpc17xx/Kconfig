@@ -323,6 +323,120 @@ config LPC17_EEPROM
 
 endmenu
 
+menu "External Memory Configuration"
+
+config ARCH_HAVE_EXTNAND
+	bool
+
+config ARCH_HAVE_EXTNOR
+	bool
+
+config ARCH_HAVE_EXTDRAM
+	bool
+
+config ARCH_HAVE_EXTSRAM0
+	bool
+
+config LPC17_EXTNAND
+	bool "Configure external NAND"
+	default n
+	depends on ARCH_HAVE_EXTNAND
+	---help---
+		Configure external NAND memory and, if applicable, map then external
+		NAND into the memory map.
+
+if LPC17_EXTNAND
+
+config LPC17_EXTNANDSIZE
+	int "External NAND size"
+	default 0
+	---help---
+		Size of the external NAND in bytes.
+
+endif
+
+config LPC17_EXTNOR
+	bool "Configure external NOR memory"
+	default n
+	depends on ARCH_HAVE_EXTNOR
+	---help---
+		Configure external NOR memory and, if applicable, map then external
+		NOR into the memory map.
+
+if LPC17_EXTNOR
+
+config LPC17_EXTNORSIZE
+	int "External NOR size"
+	default 0
+	---help---
+		Size of the external NOR in bytes.
+
+endif
+
+config LPC17_EXTDRAM
+	bool "Configure external DRAM"
+	default n
+	depends on ARCH_HAVE_EXTDRAM
+	---help---
+		Configure external DRAM memory and, if applicable, map then external
+		DRAM into the memory map.
+
+if LPC17_EXTDRAM
+
+config LPC17_EXTDRAMSIZE
+	int "External SDRAM size"
+	default 0
+	---help---
+		Size of the external SDRAM in bytes.
+
+choice
+	prompt "SDRAM Width Selection"
+	default LPC17_SDRAM_16BIT
+
+config LPC17_SDRAM_8BIT
+	bool "8-bit"
+
+config LPC17_SDRAM_16BIT
+	bool "16-bit"
+
+config LPC17_SDRAM_32BIT
+	bool "32-bit"
+
+endchoice
+
+config LPC17_EXTDRAMHEAP
+	bool "Add external SDRAM to the heap"
+	default y
+	---help---
+		Add the external SDRAM into the heap.
+
+endif
+
+config LPC17_EXTSRAM0
+	bool "Configure external SRAM (Bank 0)"
+	default n
+	depends on ARCH_HAVE_EXTSRAM0
+	---help---
+		Configure external SRAM Bank 0 memory and, if applicable, map then
+		external SRAM Bank 0 into the memory map.
+
+if LPC17_EXTSRAM0
+
+config LPC17_EXTSRAM0SIZE
+	int "External SRAM size"
+	default 0
+	---help---
+		Size of the external SRAM Bank 0 in bytes.
+
+config LPC17_EXTSRAM0HEAP
+	bool "Add external SRAM (Bank 0) to the heap"
+	default y
+	---help---
+		Add external SRAM Bank 0 into the heap.
+
+endif
+endmenu
+
 menu "Serial driver options"
 	depends on LPC17_UART0 || LPC17_UART1 || LPC17_UART2 || LPC17_UART3 || LPC17_UART4
 

@@ -38,7 +38,7 @@ config ARCH_CHIP_LPC3154
 	select ARCH_HAVE_EXTSRAM1
 	select ARCH_HAVE_EXTDRAM
 
-endchoice
+endchoice # LPC31xx Configuration Options
 
 choice
 	prompt "Toolchain Selection"
@@ -62,11 +62,11 @@ config LPC31_BUILDROOT
 	bool "Buildroot"
 	depends on !WINDOWS_NATIVE
 
-endchoice
+endchoice # Toolchain Selection
 
 config LPC31_SDRAMHCLK
 	int "External SDRAM HCLK"
-	depends on ARCH_EXTSDRAM
+	depends on LPC31_EXTSDRAM
 	---help---
 		The SDRAM HCLK may be specified here (if not, it will be calculated).
 
@@ -89,7 +89,127 @@ config LPC31_MCI
 	bool "MCI"
 	default n
 
-endmenu
+endmenu # LPC31xx Peripheral Support
+
+menu "External Memory Configuration"
+
+config ARCH_HAVE_EXTNAND
+	bool
+
+config ARCH_HAVE_EXTDRAM
+	bool
+
+config ARCH_HAVE_EXTSRAM0
+	bool
+
+config ARCH_HAVE_EXTSRAM1
+	bool
+
+config LPC31_EXTNAND
+	bool "Configure external NAND"
+	default n
+	depends on ARCH_HAVE_EXTNAND
+	---help---
+		Configure external NAND memory and, if applicable, map then external
+		NAND into the memory map.
+
+if LPC31_EXTNAND
+
+config LPC31_EXTNANDSIZE
+	int "External NAND size"
+	default 0
+	---help---
+		Size of the external NAND in bytes.
+
+endif # LPC31_EXTNAND
+
+config LPC31_EXTDRAM
+	bool "Configure external DRAM"
+	default n
+	depends on ARCH_HAVE_EXTDRAM
+	---help---
+		Configure external DRAM memory and, if applicable, map then external
+		DRAM into the memory map.
+
+if LPC31_EXTDRAM
+
+config LPC31_EXTDRAMSIZE
+	int "External SDRAM size"
+	default 0
+	---help---
+		Size of the external SDRAM in bytes.
+
+choice
+	prompt "SDRAM Width Selection"
+	default LPC31_SDRAM_16BIT
+
+config LPC31_SDRAM_8BIT
+	bool "8-bit"
+
+config LPC31_SDRAM_16BIT
+	bool "16-bit"
+
+config LPC31_SDRAM_32BIT
+	bool "32-bit"
+
+endchoice # SDRAM Width Selection
+
+config LPC31_EXTDRAMHEAP
+	bool "Add external SDRAM to the heap"
+	default y
+	---help---
+		Add the external SDRAM into the heap.
+
+endif # LPC31_EXTDRAM
+
+config LPC31_EXTSRAM0
+	bool "Configure external SRAM (Bank 0)"
+	default n
+	depends on ARCH_HAVE_EXTSRAM0
+	---help---
+		Configure external SRAM Bank 0 memory and, if applicable, map then
+		external SRAM Bank 0 into the memory map.
+
+if LPC31_EXTSRAM0
+
+config LPC31_EXTSRAM0SIZE
+	int "External SRAM size"
+	default 0
+	---help---
+		Size of the external SRAM Bank 0 in bytes.
+
+config LPC31_EXTSRAM0HEAP
+	bool "Add external SRAM (Bank 0) to the heap"
+	default y
+	---help---
+		Add external SRAM Bank 0 into the heap.
+
+endif # LPC31_EXTSRAM0
+
+config LPC31_EXTSRAM1
+	bool "Configure external SRAM (Bank 1)"
+	default n
+	depends on ARCH_HAVE_EXTSRAM1
+	---help---
+		Configure external SRAM Bank 1 memory and, if applicable, map then
+		external SRAM Bank 1 into the memory map.
+
+if LPC31_EXTSRAM1
+
+config LPC31_EXTSRAM1SIZE
+	int "External SRAM1 size"
+	default 0
+	---help---
+		Size of the external SRAM Bank 1 in bytes.
+
+config LPC31_EXTSRAM1HEAP
+	bool "Add external SRAM (Bank 1) to the heap"
+	default y
+	---help---
+		Add external SRAM Bank 1 into the heap.
+
+endif # LPC31_EXTSRAM1
+endmenu # External Memory Configuration
 
 menu "LPC31xx UART Configuration"
 	depends on LPC31_UART
@@ -109,7 +229,7 @@ config LPC31_UART_MULVAL
 	---help---
 		BAUD multiplier
 
-endmenu
+endmenu # LPC31xx UART Configuration
 
 menu "USB device driver options"
 
@@ -143,7 +263,7 @@ config LPC31_USBDEV_REGDEBUG
 	---help---
 		Output detailed register-level USB device debug information.  Requires also DEBUG.
 
-endmenu
+endmenu # USB device driver options
 
 menu "SPI device driver options"
 
@@ -154,5 +274,4 @@ config LPC31_SPI_REGDEBUG
 	---help---
 		Output detailed register-level SPI device debug information.  Requires also DEBUG.
 
-endmenu
-
+endmenu # SPI device driver options
