@@ -78,7 +78,7 @@
  * Returned Value:
  *   This function does not return anything explicitly.  However, it is called from
  *   interrupt level assembly logic that assumes that r0 is preserved.
- * 
+ *
  ************************************************************************************/
 
 	.globl	up_restorefpu
