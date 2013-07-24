@@ -53,7 +53,7 @@ SECTIONS
 {
 	.text : {
 		_stext = ABSOLUTE(.);
-		*(.vectors)
+		KEEP (*(.vectors))
 		*(.text .text.*)
 		*(.fixup)
 		*(.gnu.warning)

@@ -81,7 +81,7 @@ SECTIONS
 {
 	.locked : {
 		_slocked = ABSOLUTE(.);
-		*(.vectors)
+		KEEP (*(.vectors))
 		up_head.o locked.r (.text .text.*)
 		up_head.o locked.r (.fixup)
 		up_head.o locked.r (.gnu.warning)
