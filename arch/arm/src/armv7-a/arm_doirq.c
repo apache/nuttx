@@ -70,7 +70,7 @@
  * Public Functions
  ****************************************************************************/
 
-void up_doirq(int irq, uint32_t *regs)
+uint32_t *arm_doirq(int irq, uint32_t *regs)
 {
   up_ledon(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
@@ -100,22 +100,27 @@ void up_doirq(int irq, uint32_t *regs)
    * point state before returning from the interrupt.
    */
 
+#ifdef CONFIG_ARCH_FPU
   if (regs != current_regs)
     {
       /* Restore floating point registers */
 
       up_restorefpu((uint32_t*)current_regs);
     }
+#endif
 
   /* Set current_regs to NULL to indicate that we are no longer in an
    * interrupt handler.
    */
 
+  regs         = current_regs;
   current_regs = NULL;
 
   /* Unmask the last interrupt (global interrupts are still disabled) */
 
   up_enable_irq(irq);
 #endif
+
   up_ledoff(LED_INIRQ);
+  return regs;
 }

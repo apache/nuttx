@@ -71,8 +71,6 @@
  *
  ****************************************************************************/
 
-/* A little faster than most memcpy's */
-
 void up_copyarmstate(uint32_t *dest, uint32_t *src)
 {
   int i;

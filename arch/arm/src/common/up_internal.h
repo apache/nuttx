@@ -134,8 +134,25 @@
 #  endif
 #  define up_restorestate(regs) (current_regs = regs)
 
-/* Otherwise, for the ARM7, ARM9, and Cortex-A5.  The state is copied in full
- * from stack to stack.  This is not very efficient.
+/* The Cortex-A5 supports the same mechanism, but only lazy floating point
+ * register save/restore.
+ */
+
+#elif defined(CONFIG_ARCH_CORTEXA5)
+
+  /* If the floating point unit is present and enabled, then save the
+   * floating point registers as well as normal ARM registers.
+   */
+
+#  if defined(CONFIG_ARCH_FPU)
+#    define up_savestate(regs)  up_copyarmstate(regs, (uint32_t*)current_regs)
+#  else
+#    define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)current_regs)
+#  endif
+#  define up_restorestate(regs) (current_regs = regs)
+
+/* Otherwise, for the ARM7 and ARM9.  The state is copied in full from stack
+ * to stack.  This is not very efficient and should be fixed to match Cortex-A5.
  */
 
 #else
@@ -289,10 +306,17 @@ void up_systemreset(void) noreturn_function;
 void up_irqinitialize(void);
 void up_maskack_irq(int irq);
 
+/* Exception handling logic unique to the Cortex-M family */
+
 #if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM3) || \
     defined(CONFIG_ARCH_CORTEXM4)
 
+/* Interrupt dispatch */
+
 uint32_t *up_doirq(int irq, uint32_t *regs);
+
+/* Exception Handlers */
+
 int  up_svcall(int irq, FAR void *context);
 int  up_hardfault(int irq, FAR void *context);
 
@@ -301,9 +325,43 @@ int  up_hardfault(int irq, FAR void *context);
 int  up_memfault(int irq, FAR void *context);
 
 #  endif /* CONFIG_ARCH_CORTEXM3 || CONFIG_ARCH_CORTEXM4 */
-#else /* CONFIG_ARCH_CORTEXM0 || CONFIG_ARCH_CORTEXM3 || CONFIG_ARCH_CORTEXM4 */
+
+/* Exception handling logic unique to the Cortex-A family (but should be
+ * back-ported to the ARM7 and ARM9 families).
+ */
+
+#elif defined(CONFIG_ARCH_CORTEXA5)
+
+/* Interrupt dispatch */
+
+uint32_t *arm_doirq(int irq, uint32_t *regs);
+
+/* Paging support */
+
+#ifdef CONFIG_PAGING
+void arm_pginitialize(void);
+uint32_t *arm_va2pte(uintptr_t vaddr);
+#else /* CONFIG_PAGING */
+# define up_pginitialize()
+#endif /* CONFIG_PAGING */
+
+/* Exception Handlers */
+
+uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr);
+uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr);
+uint32_t *arm_syscall(uint32_t *regs);
+uint32_t *arm_undefinedinsn(uint32_t *regs);
+
+/* Exception handling logic common to other ARM7 and ARM9 family. */
+
+#else /* ARM7 | ARM9 */
+
+/* Interrupt dispatch */
 
 void up_doirq(int irq, uint32_t *regs);
+
+/* Paging support (and exception handlers) */
+
 #ifdef CONFIG_PAGING
 void up_pginitialize(void);
 uint32_t *up_va2pte(uintptr_t vaddr);
@@ -312,6 +370,9 @@ void up_dataabort(uint32_t *regs, uint32_t far, uint32_t fsr);
 # define up_pginitialize()
 void up_dataabort(uint32_t *regs);
 #endif /* CONFIG_PAGING */
+
+/* Exception handlers */
+
 void up_prefetchabort(uint32_t *regs);
 void up_syscall(uint32_t *regs);
 void up_undefinedinsn(uint32_t *regs);

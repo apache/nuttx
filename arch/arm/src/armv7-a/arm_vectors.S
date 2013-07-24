@@ -136,20 +136,27 @@ arm_vectorirq:
 	str		r0, [sp]				/* Save the user stack pointer */
 	mov		r4, sp					/* Save the SP in a preserved register */
 	bic		sp, sp, #7				/* Force 8-byte alignement */
-	bl		up_decodeirq			/* Call the handler */
+	bl		arm_decodeirq			/* Call the handler */
 	ldr		sp, [r4]				/* Restore the user stack pointer */
 #else
 	mov		r4, sp					/* Save the SP in a preserved register */
 	bic		sp, sp, #7				/* Force 8-byte alignement */
-	bl		up_decodeirq			/* Call the handler */
+	bl		arm_decodeirq			/* Call the handler */
 	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
 #endif
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Upon return from arm_decodeirq, r0 holds the pointer to the register
+	 * state save area to use to restore the registers.  This may or may not
+	 * be the same value that was passed to arm_decodeirq:  It will differ if a
+	 * context switch is required.
+	 */
+
+	/* Restore the CPSR, SVC mode registers and return */
+
 .Lnoirqset:
-	ldr		r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr		spsr, r0
-	ldmia	sp, {r0-r15}^			/* Return */
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	msr		spsr, r1
+	ldmia	r0, {r0-r15}^			/* Return */
 
 .Lirqtmp:
 	.word	g_irqtmp
@@ -162,7 +169,7 @@ arm_vectorirq:
 
 /************************************************************************************
  * Function: arm_vectorswi
- * 
+ *
  * Description:
  *   SWI interrupt. We enter the SWI in SVC mode.
  *
@@ -192,21 +199,27 @@ arm_vectorswi:
 	stmia	r0, {r1-r4}
 
 	/* Then call the SWI handler with interrupts disabled.
-	 * void up_syscall(struct xcptcontext *xcp)
+	 * void arm_syscall(struct xcptcontext *xcp)
 	 */
 
 	mov		fp, #0					/* Init frame pointer */
 	mov		r0, sp					/* Get r0=xcp */
 	mov		r4, sp					/* Save the SP in a preserved register */
 	bic		sp, sp, #7				/* Force 8-byte alignement */
-	bl		up_syscall				/* Call the handler */
+	bl		arm_syscall				/* Call the handler */
 	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
+
+	/* Upon return from arm_syscall, r0 holds the pointer to the register
+	 * state save area to use to restore the registers.  This may or may not
+	 * be the same value that was passed to arm_syscall:  It will differ if a
+	 * context switch is required.
+	 */
 
 	/* Restore the CPSR, SVC modr registers and return */
 
-	ldr		r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr		spsr, r0
-	ldmia	sp, {r0-r15}^			/* Return */
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	msr		spsr, r1
+	ldmia	r0, {r0-r15}^			/* Return */
 	.size	arm_vectorswi, . - arm_vectorswi
 
 	.align	5
@@ -275,11 +288,17 @@ arm_vectordata:
 	bl		arm_dataabort			/* Call the handler */
 	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
 
+	/* Upon return from arm_dataabort, r0 holds the pointer to the register
+	 * state save area to use to restore the registers.  This may or may not
+	 * be the same value that was passed to arm_dataabort:  It will differ if a
+	 * context switch is required.
+	 */
+
 	/* Restore the CPSR, SVC modr registers and return */
 
-	ldr		r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr		spsr_cxsf, r0
-	ldmia	sp, {r0-r15}^			/* Return */
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	msr		spsr_cxsf, r1
+	ldmia	r0, {r1-r15}^			/* Return */
 
 .Ldaborttmp:
 	.word	g_aborttmp
@@ -351,11 +370,17 @@ arm_vectorprefetch:
 	bl		arm_prefetchabort		/* Call the handler */
 	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
 
+	/* Upon return from arm_prefetchabort, r0 holds the pointer to the register
+	 * state save area to use to restore the registers.  This may or may not
+	 * be the same value that was passed to arm_prefetchabort:  It will differ if a
+	 * context switch is required.
+	 */
+
 	/* Restore the CPSR, SVC modr registers and return */
 
-	ldr		r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr		spsr_cxsf, r0
-	ldmia	sp, {r0-r15}^			/* Return */
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	msr		spsr_cxsf, r1
+	ldmia	r0, {r0-r15}^			/* Return */
 
 .Lpaborttmp:
 	.word	g_aborttmp
@@ -422,11 +447,17 @@ arm_vectorundefinsn:
 	bl		arm_undefinedinsn		/* Call the handler */
 	mov		sp, r4					/* Restore the possibly unaligned stack pointer */
 
+	/* Upon return from arm_undefinedinsn, r0 holds the pointer to the register
+	 * state save area to use to restore the registers.  This may or may not
+	 * be the same value that was passed to arm_undefinedinsn:  It will differ if a
+	 * context switch is required.
+	 */
+
 	/* Restore the CPSR, SVC modr registers and return */
 
-	ldr		r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr		spsr_cxsf, r0
-	ldmia	sp, {r0-r15}^			/* Return */
+	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	msr		spsr_cxsf, r1
+	ldmia	r0, {r0-r15}^			/* Return */
 
 .Lundeftmp:
 	.word	g_undeftmp

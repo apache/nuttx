@@ -69,7 +69,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_va2pte
+ * Name: arm_va2pte
  *
  * Description:
  *  Convert a virtual address within the paged text region into a pointer to
@@ -89,7 +89,7 @@
  *
  ****************************************************************************/
 
-uint32_t *up_va2pte(uintptr_t vaddr)
+uint32_t *arm_va2pte(uintptr_t vaddr)
 {
   uint32_t L1;
   uint32_t *L2;

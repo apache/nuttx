@@ -76,19 +76,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_syscall
+ * Name: arm_syscall
  *
  * Description:
- *   SWI interrupts will vection here with insn=the SWI
- *   instruction and xcp=the interrupt context
+ *   SWI interrupts will vection here with insn=the SWI instruction and
+ *   xcp=the interrupt context
  *
- *   The handler may get the SWI number be de-referencing
- *   the return address saved in the xcp and decoding
- *   the SWI instruction
+ *   The handler may get the SWI number be de-referencing the return
+ *   address saved in the xcp and decoding the SWI instruction
  *
  ****************************************************************************/
 
-void up_syscall(uint32_t *regs)
+uint32_t *arm_syscall(uint32_t *regs)
 {
   lldbg("Syscall from 0x%x\n", regs[REG_PC]);
   current_regs = regs;
