@@ -754,32 +754,6 @@ config SAM34_EXTSRAM1HEAP
 endif # SAM34_EXTSRAM1
 endmenu # External Memory Configuration
 
-comment "AT91SAM3/4 USART Configuration"
-
-config USART0_ISUART
-	bool "USART0 is a UART"
-	default y
-	depends on SAM34_USART0
-	select ARCH_HAVE_USART0
-
-config USART1_ISUART
-	bool "USART1 is a UART"
-	default y
-	depends on SAM34_USART1
-	select ARCH_HAVE_USART1
-
-config USART2_ISUART
-	bool "USART2 is a UART"
-	default n
-	depends on SAM34_USART2
-	select ARCH_HAVE_USART2
-
-config USART3_ISUART
-	bool "USART3 is a UART"
-	default y
-	depends on SAM34_USART3
-	select ARCH_HAVE_USART2
-
 comment "AT91SAM3/4 GPIO Interrupt Configuration"
 
 config GPIO_IRQ

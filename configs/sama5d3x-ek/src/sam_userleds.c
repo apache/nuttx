@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sam4s-xplained/src/sam_userleds.c
+ * configs/sama5d3x-ek/src/sam_userleds.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,6 +32,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
+/* There are two LEDs on the SAMA5D3 series-CM board that can be controlled
+ * by software.  A  blue LED is controlled via GPIO pins.  A red LED normally
+ * provides an indication that power is supplied to the board but can also
+ * be controlled via software.
+ *
+ *   PE25.  This blue LED is pulled high and is illuminated by pulling PE25
+ *   low.
+ *
+ *   PE24.  The red LED is also pulled high but is driven by a transistor so
+ *   that it is illuminated when power is applied even if PE24 is not
+ *   configured as an output.  If PE24 is configured as an output, then the
+ *   LCD is illuminated by a low output.
+ */
 
 /****************************************************************************
  * Included Files
@@ -47,7 +60,7 @@
 
 #include "chip.h"
 #include "sam_gpio.h"
-#include "sam4s-xplained.h"
+#include "sama5d3x-ek.h"
 
 #ifndef CONFIG_ARCH_LEDS
 
@@ -93,10 +106,10 @@
 
 void sam_ledinit(void)
 {
-  /* Configure D9-2 GPIOs for output */
+  /* Configure LED GPIOs for output */
 
-  sam_configgpio(GPIO_D9);
-  sam_configgpio(GPIO_D10);
+  sam_configgpio(GPIO_BLUE);
+  sam_configgpio(GPIO_RED);
 }
 
 /****************************************************************************
@@ -107,13 +120,13 @@ void sam_setled(int led, bool ledon)
 {
   uint32_t ledcfg;
 
-  if (led == BOARD_D9)
+  if (led == BOARD_BLUE)
     {
-      ledcfg = GPIO_D9;
+      ledcfg = GPIO_BLUE;
     }
-  else if (led == BOARD_D10)
+  else if (led == BOARD_RED)
     {
-      ledcfg = GPIO_D10;
+      ledcfg = GPIO_RED;
     }
   else
     {
@@ -131,11 +144,11 @@ void sam_setleds(uint8_t ledset)
 {
   bool ledon;
 
-  ledon = ((ledset & BOARD_D9_BIT) != 0);
-  sam_gpiowrite(GPIO_D9, ledon);
+  ledon = ((ledset & BOARD_BLUE_BIT) != 0);
+  sam_gpiowrite(GPIO_BLUE, ledon);
 
-  ledon = ((ledset & BOARD_D10_BIT) != 0);
-  sam_gpiowrite(GPIO_D10, ledon);
+  ledon = ((ledset & BOARD_RED_BIT) != 0);
+  sam_gpiowrite(GPIO_RED, ledon);
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

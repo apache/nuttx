@@ -5159,7 +5159,7 @@
 	* arch/arm/src/sama5/sam_lowputc.c and sam_serial.c:  Add support
 	  for SAMA5 UARTs.  Does not even compile as of initial checkin.
 	  (2013-7-22).
-	* arch/arm/src/sama5/sam_gpio.c:  Add GPIO configuratino support
+	* arch/arm/src/sama5/sam_gpio.c:  Add GPIO configuration support
 	  for the SAMA5.  Still compilation issues.  (2013-7-22).
 	* arch/arm/src/sama5/chip/sama5d3x_pinmap.h:  Add pin multiplexing
 	  definitions for the SAMA5D3 (2013-7-23).
@@ -5187,3 +5187,12 @@
 	  configuration options for SAMA5 external memory regions; add a custom
 	  sam_allocateheap.c to add the various configured memory regions to the
 	  heap (2013-7-24).
+	* configs/sama5d3x-ek/src/sam_buttons.c, sam_userleds.c, and
+	  sam_autoleds.c:  Add support for the buttons and LEDs on-board the
+	  SAMA5D3x-EK (2013-7-24).
+	* configs/sama5d3x-ek/ostest/defconfig:  Switch console to USART1
+	  (2013-7-4).
+	* arch/arm/src/sam34/Kconfig and drivers/serial/Kconfig:  All serial
+	  configuration logic for USARTs needs to depend on if the USART is
+	  configured as a UART or not.  And this is for all CPUS, not just
+	  SAM3/4 (2013-7-24).

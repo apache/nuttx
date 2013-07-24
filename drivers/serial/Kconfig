@@ -372,13 +372,64 @@ config ARCH_HAVE_USART7
 config ARCH_HAVE_USART8
        bool
 
+#
+# USARTn configuration.  Is the USART configured to behave like a UART?
+#
+
+comment "USART Configuration"
+
+config USART0_ISUART
+	bool "USART0 is a UART"
+	default y
+	depends on ARCH_HAVE_USART0
+
+config USART1_ISUART
+	bool "USART1 is a UART"
+	default y
+	depends on ARCH_HAVE_USART1
+
+config USART2_ISUART
+	bool "USART2 is a UART"
+	default y
+	depends on ARCH_HAVE_USART2
+
+config USART3_ISUART
+	bool "USART3 is a UART"
+	default y
+	depends on USART3_ISUART
+
+config USART4_ISUART
+	bool "USART4 is a UART"
+	default y
+	depends on ARCH_HAVE_USART4
+
+config USART5_ISUART
+	bool "USART5 is a UART"
+	default y
+	depends on ARCH_HAVE_USART5
+
+config USART6_ISUART
+	bool "USART6 is a UART"
+	default y
+	depends on ARCH_HAVE_USART6
+
+config USART7_ISUART
+	bool "USART7 is a UART"
+	default y
+	depends on ARCH_HAVE_USART7
+
+config USART8_ISUART
+	bool "USART8 is a UART"
+	default y
+	depends on ARCH_HAVE_USART8
+
 config MCU_SERIAL
 	bool
-	default y if ARCH_HAVE_UART || ARCH_HAVE_UART0 || ARCH_HAVE_USART0 || \
-	ARCH_HAVE_UART1 || ARCH_HAVE_USART1 || ARCH_HAVE_UART2 || ARCH_HAVE_USART2 || \
-	ARCH_HAVE_UART3 || ARCH_HAVE_USART3 || ARCH_HAVE_UART4 || ARCH_HAVE_USART4 || \
-	ARCH_HAVE_UART5 || ARCH_HAVE_USART5 || ARCH_HAVE_UART6 || ARCH_HAVE_USART6 || \
-	ARCH_HAVE_UART7 || ARCH_HAVE_USART7 || ARCH_HAVE_UART8 || ARCH_HAVE_USART8
+	default y if ARCH_HAVE_UART || ARCH_HAVE_UART0 || USART0_ISUART || \
+	ARCH_HAVE_UART1 || USART1_ISUART || ARCH_HAVE_UART2 || USART2_ISUART || \
+	ARCH_HAVE_UART3 || USART3_ISUART || ARCH_HAVE_UART4 || USART4_ISUART || \
+	ARCH_HAVE_UART5 || USART5_ISUART || ARCH_HAVE_UART6 || USART6_ISUART || \
+	ARCH_HAVE_UART7 || USART7_ISUART || ARCH_HAVE_UART8 || USART8_ISUART
 
 #
 # Standard serial driver configuration
@@ -411,9 +462,8 @@ config SERIAL_TIOCSERGSTRUCT
 		supports the TIOCSERGSTRUCT ioctl, and (2) this option is selected, then
 		support for the TIOCSERGSTRUCT will be enabled.
 
-
 #
-# U[S]ARTn_XYZ settings for MCU serial drivers
+# Serial console selection
 #
 
 choice
@@ -431,7 +481,7 @@ config UART0_SERIAL_CONSOLE
 
 config USART0_SERIAL_CONSOLE
 	bool "USART0"
-	depends on ARCH_HAVE_USART0
+	depends on USART0_ISUART
 
 config UART1_SERIAL_CONSOLE
 	bool "UART1"
@@ -439,7 +489,7 @@ config UART1_SERIAL_CONSOLE
 
 config USART1_SERIAL_CONSOLE
 	bool "USART1"
-	depends on ARCH_HAVE_USART1
+	depends on USART1_ISUART
 
 config UART2_SERIAL_CONSOLE
 	bool "UART2"
@@ -447,7 +497,7 @@ config UART2_SERIAL_CONSOLE
 
 config USART2_SERIAL_CONSOLE
 	bool "USART2"
-	depends on ARCH_HAVE_USART2
+	depends on USART2_ISUART
 
 config UART3_SERIAL_CONSOLE
 	bool "UART3"
@@ -463,7 +513,7 @@ config UART4_SERIAL_CONSOLE
 
 config USART4_SERIAL_CONSOLE
 	bool "USART4"
-	depends on ARCH_HAVE_USART4
+	depends on USART4_ISUART
 
 config UART5_SERIAL_CONSOLE
 	bool "UART5"
@@ -471,7 +521,7 @@ config UART5_SERIAL_CONSOLE
 
 config USART5_SERIAL_CONSOLE
 	bool "USART5"
-	depends on ARCH_HAVE_USART5
+	depends on USART5_ISUART
 
 config UART6_SERIAL_CONSOLE
 	bool "UART6"
@@ -479,7 +529,7 @@ config UART6_SERIAL_CONSOLE
 
 config USART6_SERIAL_CONSOLE
 	bool "USART6"
-	depends on ARCH_HAVE_USART6
+	depends on USART6_ISUART
 
 config UART7_SERIAL_CONSOLE
 	bool "UART7"
@@ -487,7 +537,7 @@ config UART7_SERIAL_CONSOLE
 
 config USART7_SERIAL_CONSOLE
 	bool "USART7"
-	depends on ARCH_HAVE_USART7
+	depends on USART7_ISUART
 
 config UART8_SERIAL_CONSOLE
 	bool "UART8"
@@ -495,12 +545,16 @@ config UART8_SERIAL_CONSOLE
 
 config USART8_SERIAL_CONSOLE
 	bool "USART8"
-	depends on ARCH_HAVE_USART8
+	depends on USART8_ISUART
 
 config NO_SERIAL_CONSOLE
 	bool "No serial console"
 
 endchoice
+
+#
+# U[S]ARTn_XYZ settings for MCU serial drivers
+#
 
 menu "UART Configuration"
 	depends on ARCH_HAVE_UART
@@ -617,7 +671,7 @@ config UART0_OFLOWCONTROL
 endmenu
 
 menu "USART0 Configuration"
-	depends on ARCH_HAVE_USART0
+	depends on USART0_ISUART
 
 config USART0_RXBUFSIZE
 	int "Receive buffer size"
@@ -731,7 +785,7 @@ config UART1_OFLOWCONTROL
 endmenu
 
 menu "USART1 Configuration"
-	depends on ARCH_HAVE_USART1
+	depends on USART1_ISUART
 
 config USART1_RXBUFSIZE
 	int "Receive buffer size"
@@ -845,7 +899,7 @@ config UART2_OFLOWCONTROL
 endmenu
 
 menu "USART2 Configuration"
-	depends on ARCH_HAVE_USART2
+	depends on USART2_ISUART
 
 config USART2_RXBUFSIZE
 	int "Receive buffer size"
@@ -959,7 +1013,7 @@ config UART3_OFLOWCONTROL
 endmenu
 
 menu "USART3 Configuration"
-	depends on ARCH_HAVE_USART3
+	depends on USART3_ISUART
 
 config USART3_RXBUFSIZE
 	int "Receive buffer size"
@@ -1073,7 +1127,7 @@ config UART4_OFLOWCONTROL
 endmenu
 
 menu "USART4 Configuration"
-	depends on ARCH_HAVE_USART4
+	depends on USART4_ISUART
 
 config USART4_RXBUFSIZE
 	int "Receive buffer size"
@@ -1187,7 +1241,7 @@ config UART5_OFLOWCONTROL
 endmenu
 
 menu "USART5 Configuration"
-	depends on ARCH_HAVE_USART5
+	depends on USART5_ISUART
 
 config USART5_RXBUFSIZE
 	int "Receive buffer size"
@@ -1244,7 +1298,7 @@ config USART5_OFLOWCONTROL
 endmenu
 
 menu "USART6 Configuration"
-	depends on ARCH_HAVE_USART6
+	depends on USART6_ISUART
 
 config USART6_RXBUFSIZE
 	int "Receive buffer size"
@@ -1358,7 +1412,7 @@ config UART6_OFLOWCONTROL
 endmenu
 
 menu "USART7 Configuration"
-	depends on ARCH_HAVE_USART7
+	depends on USART7_ISUART
 
 config USART7_RXBUFSIZE
 	int "Receive buffer size"
@@ -1472,7 +1526,7 @@ config UART7_OFLOWCONTROL
 endmenu
 
 menu "USART8 Configuration"
-	depends on ARCH_HAVE_USART8
+	depends on USART8_ISUART
 
 config USART8_RXBUFSIZE
 	int "Receive buffer size"
