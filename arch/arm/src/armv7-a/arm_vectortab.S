@@ -58,7 +58,8 @@
  *   Vector initialization block
  ****************************************************************************/
 
-	.globl	_vector_start
+	.section	.vectors, "ax"
+	.globl		_vector_start
 
 /* These will be relocated to VECTOR_BASE. */
 
