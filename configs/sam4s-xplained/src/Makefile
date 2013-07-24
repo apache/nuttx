@@ -42,7 +42,7 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = sam_boot.c
 
-ifeq ($(CONFIG_ARCH_EXTSRAM0),y)
+ifeq ($(CONFIG_SAM34_EXTSRAM0),y)
 CSRCS += sam_sram.c
 endif
 

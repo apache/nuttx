@@ -46,7 +46,7 @@
 #include "chip/sam3u_smc.h"
 #include "sam4s-xplained.h"
 
-#ifdef CONFIG_ARCH_EXTSRAM0
+#ifdef CONFIG_SAM34_EXTSRAM0
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -131,4 +131,4 @@ void sam_sram_initialize(void)
   sam_gpiowrite(GPIO_EBI_NLB, false);
 }
 
-#endif /* CONFIG_ARCH_EXTSRAM0 */
+#endif /* CONFIG_SAM34_EXTSRAM0 */

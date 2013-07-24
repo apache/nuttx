@@ -43,7 +43,6 @@ CMN_CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_exit.c
 CMN_CSRCS += up_createstack.c up_releasestack.c up_usestack.c up_vfork.c
 CMN_CSRCS += up_mdelay.c up_udelay.c
 CMN_CSRCS += up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
-CMN_CSRCS += up_allocateheap.c
 
 CMN_CSRCS += arm_assert.c arm_blocktask.c arm_copyfullstate.c arm_dataabort.c
 CMN_CSRCS += arm_doirq.c arm_initialstate.c arm_prefetchabort.c
@@ -67,5 +66,5 @@ endif
 
 CHIP_ASRCS  =
 
-CHIP_CSRCS  = sam_boot.c sam_clockconfig.c sam_gpio.c sam_irq.c
-CHIP_CSRCS += sam_lowputc.c sam_serial.c sam_timerisr.c
+CHIP_CSRCS  = sam_allocateheap.c sam_boot.c sam_clockconfig.c sam_gpio.c
+CHIP_CSRCS += sam_irq.c sam_lowputc.c sam_serial.c sam_timerisr.c

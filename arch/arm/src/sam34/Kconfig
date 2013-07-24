@@ -163,7 +163,7 @@ config ARCH_CHIP_ATSAM4S8B
 	select ARCH_CORTEXM4
 	select ARCH_CHIP_SAM4S
 
-endchoice
+endchoice # AT91SAM3/4 Chip Selection
 
 config ARCH_CHIP_SAM3U
 	bool
@@ -520,7 +520,7 @@ config SAM34_HSMCI
 	default n
 	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
 
-endmenu
+endmenu # AT91SAM3/4 Peripheral Support
 
 if ARCH_CHIP_SAM4L
 menu "AT91SAM3/4 Clock Configuration"
@@ -587,8 +587,8 @@ config SAM34_RCFAST8M
 config SAM34_RCFAST4M
 	bool "4MHz"
 
-endchoice
-endif
+endchoice # Fast RC Oscillator Speed
+endif # SAM34_RCFAST
 
 config SAM34_RC1M
 	bool "1MHz RC oscillator"
@@ -610,8 +610,149 @@ config SAM34_RC32K
 		you can also force the clock to be enabled at boot time for other
 		purposes.
 
-endmenu
-endif
+endmenu # AT91SAM3/4 Clock Configuration
+endif # ARCH_CHIP_SAM4L
+
+menu "External Memory Configuration"
+
+config ARCH_HAVE_EXTNAND
+	bool
+
+config ARCH_HAVE_EXTNOR
+	bool
+
+config ARCH_HAVE_EXTDRAM
+	bool
+
+config ARCH_HAVE_EXTSRAM0
+	bool
+
+config ARCH_HAVE_EXTSRAM1
+	bool
+
+config SAM34_EXTNAND
+	bool "Configure external NAND"
+	default n
+	depends on ARCH_HAVE_EXTNAND
+	---help---
+		Configure external NAND memory and, if applicable, map then external
+		NAND into the memory map.
+
+if SAM34_EXTNAND
+
+config SAM34_EXTNANDSIZE
+	int "External NAND size"
+	default 0
+	---help---
+		Size of the external NAND in bytes.
+
+endif # SAM34_EXTNAND
+
+config SAM34_EXTNOR
+	bool "Configure external NOR memory"
+	default n
+	depends on ARCH_HAVE_EXTNOR
+	---help---
+		Configure external NOR memory and, if applicable, map then external
+		NOR into the memory map.
+
+if SAM34_EXTNOR
+
+config SAM34_EXTNORSIZE
+	int "External NOR size"
+	default 0
+	---help---
+		Size of the external NOR in bytes.
+
+endif # SAM34_EXTNOR
+
+config SAM34_EXTDRAM
+	bool "Configure external DRAM"
+	default n
+	depends on ARCH_HAVE_EXTDRAM
+	---help---
+		Configure external DRAM memory and, if applicable, map then external
+		DRAM into the memory map.
+
+if SAM34_EXTDRAM
+
+config SAM34_EXTDRAMSIZE
+	int "External SDRAM size"
+	default 0
+	---help---
+		Size of the external SDRAM in bytes.
+
+choice
+	prompt "SDRAM Width Selection"
+	default SAM34_SDRAM_16BIT
+
+config SAM34_SDRAM_8BIT
+	bool "8-bit"
+
+config SAM34_SDRAM_16BIT
+	bool "16-bit"
+
+config SAM34_SDRAM_32BIT
+	bool "32-bit"
+
+endchoice # SDRAM Width Selection
+
+config SAM34_EXTDRAMHEAP
+	bool "Add external SDRAM to the heap"
+	default y
+	---help---
+		Add the external SDRAM into the heap.
+
+endif # SAM34_EXTDRAM
+
+config SAM34_EXTSRAM0
+	bool "Configure external SRAM (Bank 0)"
+	default n
+	depends on ARCH_HAVE_EXTSRAM0
+	---help---
+		Configure external SRAM Bank 0 memory and, if applicable, map then
+		external SRAM Bank 0 into the memory map.
+
+if SAM34_EXTSRAM0
+
+config SAM34_EXTSRAM0SIZE
+	int "External SRAM size"
+	default 0
+	---help---
+		Size of the external SRAM Bank 0 in bytes.
+
+config SAM34_EXTSRAM0HEAP
+	bool "Add external SRAM (Bank 0) to the heap"
+	default y
+	---help---
+		Add external SRAM Bank 0 into the heap.
+
+endif # SAM34_EXTSRAM0
+
+config SAM34_EXTSRAM1
+	bool "Configure external SRAM (Bank 1)"
+	default n
+	depends on ARCH_HAVE_EXTSRAM1
+	---help---
+		Configure external SRAM Bank 1 memory and, if applicable, map then
+		external SRAM Bank 1 into the memory map.
+
+if SAM34_EXTSRAM1
+
+config SAM34_EXTSRAM1SIZE
+	int "External SRAM1 size"
+	default 0
+	---help---
+		Size of the external SRAM Bank 1 in bytes.
+
+config SAM34_EXTSRAM1HEAP
+	bool "Add external SRAM (Bank 1) to the heap"
+	default y
+	---help---
+		Add external SRAM Bank 1 into the heap.
+
+endif # SAM34_EXTSRAM1
+endmenu # External Memory Configuration
 
 comment "AT91SAM3/4 USART Configuration"
 
@@ -675,7 +816,7 @@ config GPIOF_IRQ
 	default n
 	depends on ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A
 
-endif
+endif # GPIO_IRQ
 
 if SAM34_WDT
 comment "AT91SAM3/4 Watchdog Configuration"|
@@ -701,4 +842,4 @@ config WDT_DISABLE_ON_RESET
 		configure and disable the watchdog timer very early in the boot
 		sequence.
 
-endif
+endif # SAM34_WDT

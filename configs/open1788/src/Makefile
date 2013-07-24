@@ -41,15 +41,15 @@ ASRCS =
 CSRCS = lpc17_boardinitialize.c lpc17_ssp.c
 
 ifeq ($(CONFIG_LPC17_EMC),y)
-ifeq ($(CONFIG_ARCH_EXTNOR),y)
+ifeq ($(CONFIG_LPC17_EXTNOR),y)
   CSRCS += lpc17_norinitialize.c
 endif
 
-ifeq ($(CONFIG_ARCH_EXTNAND),y)
+ifeq ($(CONFIG_LPC17_EXTNAND),y)
   CSRCS += lpc17_nandinitialize.c
 endif
 
-ifeq ($(CONFIG_ARCH_EXTDRAM),y)
+ifeq ($(CONFIG_LPC17_EXTDRAM),y)
   CSRCS += lpc17_sdraminitialize.c
 endif
 endif

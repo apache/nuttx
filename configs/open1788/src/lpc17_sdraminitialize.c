@@ -52,7 +52,7 @@
 
 #include "open1788.h"
 
-#if defined(CONFIG_LPC17_EMC) && defined(CONFIG_ARCH_EXTDRAM)
+#if defined(CONFIG_LPC17_EMC) && defined(CONFIG_LPC17_EXTDRAM)
 
 /************************************************************************************
  * Definitions
@@ -78,13 +78,13 @@
 
 /* Set up for 32-bit SDRAM at CS0 */
 
-#define CONFIG_ARCH_SDRAM_32BIT
+#define CONFIG_LPC17_SDRAM_32BIT
 
-#ifdef CONFIG_ARCH_SDRAM_16BIT 
+#ifdef CONFIG_LPC17_SDRAM_16BIT 
 #  define SDRAM_SIZE        0x02000000 /* 256Mbit */
-#else /* if defined(CONFIG_ARCH_SDRAM_32BIT) */
-#  undef CONFIG_ARCH_SDRAM_32BIT
-#  define CONFIG_ARCH_SDRAM_32BIT 1
+#else /* if defined(CONFIG_LPC17_SDRAM_32BIT) */
+#  undef CONFIG_LPC17_SDRAM_32BIT
+#  define CONFIG_LPC17_SDRAM_32BIT 1
 #  define SDRAM_SIZE        0x04000000 /* 512Mbit */
 #endif
 
@@ -109,7 +109,7 @@
 void open1788_sdram_initialize(void)
 {
   uint32_t regval;
-#ifdef CONFIG_ARCH_SDRAM_16BIT
+#ifdef CONFIG_LPC17_SDRAM_16BIT
   volatile uint16_t dummy;
 #else
   volatile uint32_t dummy;
@@ -159,7 +159,7 @@ void open1788_sdram_initialize(void)
 
   putreg32(MDKCFG_RASCAS0VAL, LPC17_EMC_DYNAMICRASCAS0);
 
-  #ifdef CONFIG_ARCH_SDRAM_16BIT
+  #ifdef CONFIG_LPC17_SDRAM_16BIT
     /* For Manley lpc1778 SDRAM: H57V2562GTR-75C, 256Mb, 16Mx16, 4 banks, row=13, column=9:
      *
      * 256Mb, 16Mx16, 4 banks, row=13, column=9, RBC
@@ -168,7 +168,7 @@ void open1788_sdram_initialize(void)
   putreg32(EMC_DYNAMICCONFIG_MD_SDRAM |  EMC_DYNAMICCONFIG_AM0(13),
            LPC17_EMC_DYNAMICCONFIG0);
 
-#elif defined CONFIG_ARCH_SDRAM_32BIT
+#elif defined CONFIG_LPC17_SDRAM_32BIT
     /* 256Mb, 16Mx16, 4 banks, row=13, column=9, RBC */
 
   putreg32(EMC_DYNAMICCONFIG_MD_SDRAM |  EMC_DYNAMICCONFIG_AM0(13) | EMC_DYNAMICCONFIG_AM1,
@@ -210,9 +210,9 @@ void open1788_sdram_initialize(void)
   putreg32(EMC_DYNAMICCONTROL_CE | EMC_DYNAMICCONTROL_CS | EMC_DYNAMICCONTROL_I_MODE,
            LPC17_EMC_DYNAMICCONTROL);
 
-#ifdef CONFIG_ARCH_SDRAM_16BIT
+#ifdef CONFIG_LPC17_SDRAM_16BIT
   dummy = getreg16(SDRAM_BASE | (0x33 << 12));  /* 8 burst, 3 CAS latency */
-#elif defined CONFIG_ARCH_SDRAM_32BIT
+#elif defined CONFIG_LPC17_SDRAM_32BIT
   dummy = getreg32(SDRAM_BASE | (0x32 << 13)); /* 4 burst, 3 CAS latency */
 #endif
 
@@ -233,4 +233,4 @@ void open1788_sdram_initialize(void)
   putreg32(regval, LPC17_SYSCON_EMCDLYCTL);
 }
 
-#endif /* CONFIG_LPC17_EMC && CONFIG_ARCH_EXTDRAM */
+#endif /* CONFIG_LPC17_EMC && CONFIG_LPC17_EXTDRAM */

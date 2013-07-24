@@ -316,7 +316,7 @@
  *
  ************************************************************************************/
 
-#ifdef CONFIG_ARCH_EXTSRAM0
+#ifdef CONFIG_SAM34_EXTSRAM0
 void sam_sram_initialize(void);
 #endif
 

@@ -5176,4 +5176,14 @@
 	  arm_fullcontextrestore.S, arm_saveusercontext.S:  Add hardware
 	  floating point register save/restore logic for the Cortex-A5\
 	  (2013-7-23).
-
+	* arch/Kconfig:  Attempt at generic external memory configuration is not
+	  flexible enough, especially for the SAMA5.  Move external memory
+	  configuration options from arch/Kconfig to
+	  arch/arm/src/lpc17xx/Kconfig, lpc31xx/Kconfig, sam34/Kconfig, and
+	  sama5/Kconfig and renamed each from CONFIG_ARCH_ to, for example,
+	  CONFIG_LPC31_.  This renaming also affect many defconfig files
+	  (2013-7-24).
+	* arch/arm/src/sama5/Kconfig and sam_allocateheap.c:  Set up
+	  configuration options for SAMA5 external memory regions; add a custom
+	  sam_allocateheap.c to add the various configured memory regions to the
+	  heap (2013-7-24).

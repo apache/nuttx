@@ -201,7 +201,7 @@
  */
 
 #ifdef CONFIG_LPC17_EMC
-#if defined(CONFIG_ARCH_EXTNAND) || defined(CONFIG_ARCH_EXTDRAM)
+#if defined(CONFIG_LPC17_EXTNAND) || defined(CONFIG_LPC17_EXTDRAM)
 #  define BOARD_CMDDLY             17
 #  define BOARD_FBCLKDLY           17
 #  define BOARD_CLKOUT0DLY         1
