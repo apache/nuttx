@@ -117,7 +117,7 @@ static bool g_pgwrap;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_allocpage()
+ * Name: arm_allocpage()
  *
  * Description:
  *  This architecture-specific function will set aside page in memory and map
@@ -136,9 +136,9 @@ static bool g_pgwrap;
  *  NOTE 2: If an in-use page is un-mapped, it may be necessary to flush the
  *  instruction cache in some architectures.
  *
- *  NOTE 3: Allocating and filling a page is a two step process.  up_allocpage()
+ *  NOTE 3: Allocating and filling a page is a two step process.  arm_allocpage()
  *  allocates the page, and up_fillpage() fills it with data from some non-
- *  volatile storage device.  This distinction is made because up_allocpage()
+ *  volatile storage device.  This distinction is made because arm_allocpage()
  *  can probably be implemented in board-independent logic whereas up_fillpage()
  *  probably must be implemented as board-specific logic.
  *
@@ -165,7 +165,7 @@ static bool g_pgwrap;
  *
  ****************************************************************************/
 
-int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
+int arm_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
 {
   uintptr_t vaddr;
   uintptr_t paddr;
@@ -203,7 +203,7 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
        */
 
        uintptr_t oldvaddr = PG_POOL_NDX2VA(g_ptemap[pgndx]);
-       pte = up_va2pte(oldvaddr);
+       pte = arm_va2pte(oldvaddr);
       *pte = 0;
 
       /* Invalidate the instruction TLB corresponding to the virtual address */
@@ -227,7 +227,7 @@ int up_allocpage(FAR struct tcb_s *tcb, FAR void **vpage)
    * non-cached (MMU_L2_ALLOCFLAGS)
    */
 
-  pte = up_va2pte(vaddr);
+  pte = arm_va2pte(vaddr);
   *pte = (paddr | MMU_L2_ALLOCFLAGS);
 
   /* And save the new L1 index */

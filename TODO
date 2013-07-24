@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 23, 2013)
+NuttX TODO List (Last updated July 24, 2013)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -1390,8 +1390,11 @@ o ARM (arch/arm/)
   Description: ARM interrupt handling performance could be improved in some
                ways. One easy way is to use a pointer to the context save
                area in current_regs instead of using up_copystate so much.
-               see handling of 'current_regs" in arch/arm/src/armv7-m/* for
-               examples of how this might be done.
+
+               This approach is already implemented for the ARM Cortex-M0,
+               Cortex-M3, Cortex-M4, and Cortex-A5 families.  But still needs
+               to be back-ported to the ARM7 and ARM9 (which are nearly
+               identical to the Cortex-A5 in this regard).
   Status:      Open
   Priority:    Low
 

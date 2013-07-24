@@ -101,7 +101,7 @@
 
 #ifdef CONFIG_PAGING
 
-void arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
+uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
 {
   DFAR struct tcb_s *tcb = (DFAR struct tcb_s *)g_readytorun.head;
   uint32_t *savestate;
@@ -109,7 +109,6 @@ void arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
   /* Save the saved processor context in current_regs where it can be accessed
    * for register dumps and possibly context switching.
    */
-
 
   savestate    = (uint32_t*)current_regs;
   current_regs = regs;
@@ -172,17 +171,18 @@ void arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
    */
 
   current_regs = savestate;
-  return;
+  return regs;
 
 segfault:
   lldbg("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
         regs[REG_PC], dfar, dfsr);
   PANIC();
+  return regs; /* To keep the compiler happy */
 }
 
 #else /* CONFIG_PAGING */
 
-void arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
+uint32_t *arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
 {
   /* Save the saved processor context in current_regs where it can be accessed
    * for register dumps and possibly context switching.
@@ -195,6 +195,7 @@ void arm_dataabort(uint32_t *regs, uint32_t dfar, uint32_t dfsr)
   lldbg("Data abort. PC: %08x DFAR: %08x DFSR: %08x\n",
         regs[REG_PC], dfar, dfsr);
   PANIC();
+  return regs; /* To keep the compiler happy */
 }
 
 #endif /* CONFIG_PAGING */

@@ -283,6 +283,7 @@ void up_irqinitialize(void)
 
   putreg32(AIC_WPMR_WPKEY | AIC_WPMR_WPEN, SAM_AIC_WPMR);
 
+#ifndef CONFIG_ARCH_LOWVECTORS
   /* Set remap state 0:
    *
    * Boot state:    ROM is seen at address 0x00000000
@@ -290,10 +291,15 @@ void up_irqinitialize(void)
    *                interface) instead of ROM.
    * Remap State 1: HEBI is seen at address 0x00000000 (through AHB slave
    *                interface) instead of ROM for external boot.
+   *
+   * Here we are assuming that vectors reside in the lower end of ISRAM.
+   * Hmmm... this probably does not matter since we will map a page to
+   * address 0x0000:0000 in that case anyway.
    */
 
   putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable remap */
   putreg32(AXIMX_REMAP_REMAP0, SAM_AXIMX_REMAP); /* Remap SRAM */
+#endif
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
@@ -315,13 +321,13 @@ void up_irqinitialize(void)
 }
 
 /****************************************************************************
- * Name: up_decodeirq
+ * Name: arm_decodeirq
  *
  * Description:
  *   This function is called from the IRQ vector handler in arm_vectors.S.
  *   At this point, the interrupt has been taken and the registers have
  *   been saved on the stack.  This function simply needs to determine the
- *   the irq number of the interrupt and then to call up_doirq to dispatch
+ *   the irq number of the interrupt and then to call arm_doirq to dispatch
  *   the interrupt.
  *
  *  Input paramters:
@@ -329,7 +335,7 @@ void up_irqinitialize(void)
  *
  ****************************************************************************/
 
-void up_decodeirq(uint32_t *regs)
+uint32_t *arm_decodeirq(uint32_t *regs)
 {
   uint32_t regval;
 
@@ -376,11 +382,12 @@ void up_decodeirq(uint32_t *regs)
 
   /* Dispatch the interrupt */
 
-  up_doirq((int)regval, regs);
+  regs = arm_doirq((int)regval, regs);
 
   /* Acknowledge interrupt */
 
   putreg32(AIC_EOICR_ENDIT, SAM_AIC_EOICR);
+  return regs;
 }
 
 /****************************************************************************

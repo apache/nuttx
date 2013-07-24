@@ -68,10 +68,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_checkmapping()
+ * Name: arm_checkmapping()
  *
  * Description:
- *  The function up_checkmapping() returns an indication if the page fill
+ *  The function arm_checkmapping() returns an indication if the page fill
  *  still needs to performed or not. In certain conditions, the page fault
  *  may occur on several threads and be queued multiple times. This function
  *  will prevent the same page from be filled multiple times.
@@ -97,7 +97,7 @@
  *
  ****************************************************************************/
 
-bool up_checkmapping(FAR struct tcb_s *tcb)
+bool arm_checkmapping(FAR struct tcb_s *tcb)
 {
   uintptr_t vaddr;
   uint32_t *pte;
@@ -113,7 +113,7 @@ bool up_checkmapping(FAR struct tcb_s *tcb)
 
   /* Get the PTE associated with this virtual address */
 
-  pte = up_va2pte(vaddr);
+  pte = arm_va2pte(vaddr);
 
   /* Return true if this virtual address is mapped. */
 

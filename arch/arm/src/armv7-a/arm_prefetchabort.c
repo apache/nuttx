@@ -89,7 +89,7 @@
 
 #ifdef CONFIG_PAGING
 
-void arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
+uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 {
    uint32_t *savestate;
 
@@ -150,11 +150,13 @@ void arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
             regs[REG_PC], ifar, ifsr);
       PANIC();
     }
+
+  return regs;
 }
 
 #else /* CONFIG_PAGING */
 
-void arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
+uint32_t *arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
 {
   /* Save the saved processor context in current_regs where it can be accessed
    * for register dumps and possibly context switching.
@@ -167,6 +169,7 @@ void arm_prefetchabort(uint32_t *regs, uint32_t ifar, uint32_t ifsr)
   lldbg("Prefetch abort. PC: %08x IFAR: %08x IFSR: %08x\n",
         regs[REG_PC], ifar, ifsr);
   PANIC();
+  return regs; /* To keep the compiler happy */
 }
 
 #endif /* CONFIG_PAGING */

@@ -73,9 +73,10 @@
  * Name: arm_undefinedinsn
  ****************************************************************************/
 
-void arm_undefinedinsn(uint32_t *regs)
+uint32_t *arm_undefinedinsn(uint32_t *regs)
 {
   lldbg("Undefined instruction at 0x%x\n", regs[REG_PC]);
   current_regs = regs;
   PANIC();
+  return regs; /* To keep the compiler happy */
 }

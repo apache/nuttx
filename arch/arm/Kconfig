@@ -113,6 +113,7 @@ config ARCH_CHIP_SAMA5
 	bool "Atmel AT91SAMA5"
 	select ARCH_CORTEXA5
 	select ARCH_HAVE_FPU
+	select ARCH_HAVE_LOWVECTORS
 	---help---
 		Atmel AT91SAMA5 (ARM Cortex-A5)
 

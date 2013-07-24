@@ -99,7 +99,8 @@ void up_copyarmstate(uint32_t *dest, uint32_t *src)
 
       /* Skip over the floating point registers and save the block of ARM
        * registers that were saved by the hardware when the interrupt was
-       * taken.  Indices: (SW_INT_REGS+SW_FPU_REGS) through (HW_XCPT_REGS-1)
+       * taken.  Indices: (SW_INT_REGS+SW_FPU_REGS) through
+       * (XCPTCONTEXT_REGS-1)
        */
 
       src  += SW_FPU_REGS;
