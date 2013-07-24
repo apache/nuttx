@@ -3,7 +3,63 @@ README
 
   This README file describes the port of NuttX to the SAMA5D3x-EK
   development boards. These boards feature the Atmel SAMA5D3
-  microprocessors.
+  microprocessors.  Three different SAMA5D3x-EK kits are available
+
+    - SAMA5D31-EK with the ATSAMA5D1 (http://www.atmel.com/devices/sama5d31.aspx)
+    - SAMA5D33-EK with the ATSAMA5D3 (http://www.atmel.com/devices/sama5d31.aspx)
+    - SAMA5D34-EK with the ATSAMA5D4 (http://www.atmel.com/devices/sama5d31.aspx)
+    - SAMA5D35-EK with the ATSAMA5D5 (http://www.atmel.com/devices/sama5d31.aspx)
+
+  The each consist of an identical base board with different plug-in
+  modules for each CPU.  An option 7 inch LCD is also available..
+
+  The SAMA5D3FAE-EK bundle includes everything:  The base board, all four
+  CPU modules, and the LCD.
+
+    SAMA5D3 Family
+
+                              ATSAMA5D31    ATSAMA5D33    ATSAMA5D34    ATSAMA5D35
+    ------------------------- ------------- ------------- ------------- -------------
+    Pin Count                 324           324           324           324
+    Max. Operating Frequency  536           536           536           536
+    CPU                       Cortex-A5     Cortex-A5     Cortex-A5     Cortex-A5
+    Max I/O Pins              160           160           160           160
+    Ext Interrupts            160           160           160           160
+    USB Transceiver           3             3             3             3
+    USB Speed                 Hi-Speed      Hi-Speed      Hi-Speed      Hi-Speed
+    USB Interface             Host, Device  Host, Device  Host, Device  Host, Device
+    SPI                       6             6             6             6
+    TWI (I2C)                 3             3             3             3
+    UART                      7             5             5             7
+    CAN                       -             -             2             2
+    LIN                       4             4             4             4
+    SSC                       2             2             2             2
+    Ethernet                  1             1             1             2
+    SD / eMMC                 3             2             3             3
+    Graphic LCD               Yes           Yes           Yes           -
+    Camera Interface          Yes           Yes           Yes           Yes
+    ADC channels              12            12            12            12
+    ADC Resolution (bits)     12            12            12            12
+    ADC Speed (ksps)          440           440           440           440
+    Resistive Touch Screen    Yes           Yes           Yes           Yes
+    Crypto Engine             AES/DES/      AES/DES/      AES/DES/      AES/DES/
+                              SHA/TRNG      SHA/TRNG      SHA/TRNG      SHA/TRNG
+    SRAM (Kbytes)             128           128           128           128
+    External Bus Interface    1             1             1             1
+    DRAM Memory               DDR2/LPDDR,   DDR2/LPDDR,   DDR2/LPDDR,   DDR2/LPDDR,
+                              SDRAM/LPSDR   SDRAM/LPSDR   DDR2/LPDDR,   DDR2/LPDDR,
+    NAND Interface            Yes           Yes           Yes           Yes
+    Temp. Range (deg C)       -40 to 85     -40 to 85     -40 to 85     -40 to 85
+    I/O Supply Class          1.8/3.3       1.8/3.3       1.8/3.3       1.8/3.3
+    Operating Voltage (Vcc)   1.08 to 1.32  1.08 to 1.32  1.08 to 1.32  1.08 to 1.32
+    FPU                       Yes           Yes           Yes           Yes
+    MPU / MMU                 No/Yes        No/Yes        No/Yes        No/Yes
+    Timers                    5             5             5             6
+    Output Compare channels   6             6             6             6
+    Input Capture Channels    6             6             6             6
+    PWM Channels              4             4             4             4
+    32kHz RTC                 Yes           Yes           Yes           Yes
+    Packages                  LFBGA324_A    LFBGA324_A    LFBGA324_A    LFBGA324_A
 
 Contents
 ========
@@ -230,16 +286,99 @@ Buttons and LEDs
 
   Buttons
   -------
-  To be provided
+  There are five push button switches on the SAMA5D3X-EK base board:
+
+    1. One Reset, board reset (BP1)
+    2. One Wake up, push button to bring the processor out of low power mode
+      (BP2)
+    3. One User momentary Push Button
+    4. One Disable CS Push Button
+
+  Only the momentary push button is controllable by software (labeled
+  "PB_USER1" on the board):
+
+    - PE27.  Pressing the switch connect PE27 to grounded.  Therefore, PE27
+      must be pulled high internally.  When the button is pressed the SAMA5
+      will sense "0" is on PE27.
 
   LEDs
   ----
-  To be provided
+  There are two LEDs on the SAMA5D3 series-CM board that can be controlled
+  by software.  A  blue LED is controlled via GPIO pins.  A red LED normally
+  provides an indication that power is supplied to the board but can also
+  be controlled via software.
+
+    PE25.  This blue LED is pulled high and is illuminated by pulling PE25
+    low.
+
+    PE24.  The red LED is also pulled high but is driven by a transistor so
+    that it is illuminated when power is applied even if PE24 is not
+    configured as an output.  If PE24 is configured as an output, then the
+    LCD is illuminated by a low output.
+
+  These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+  defined.  In that case, the usage by the board port is defined in
+  include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
+  events as follows:
+
+    SYMBOL                Meaning                     LED state
+                                                    Blue     Red
+    -------------------  -----------------------  -------- --------
+    LED_STARTED          NuttX has been started     OFF      OFF
+    LED_HEAPALLOCATE     Heap has been allocated    OFF      OFF
+    LED_IRQSENABLED      Interrupts enabled         OFF      OFF
+    LED_STACKCREATED     Idle stack created         ON       OFF
+    LED_INIRQ            In an interrupt              No change
+    LED_SIGNAL           In a signal handler          No change
+    LED_ASSERTION        An assertion failed          No change
+    LED_PANIC            The system has crashed     OFF      Blinking
+    LED_IDLE             MCU is is sleep mode         Not used
+
+  Thus if the blue LED is statically on, NuttX has successfully booted and
+  is, apparently, running normmally.  If the red is flashing at
+  approximately 2Hz, then a fatal error has been detected and the system
+  has halted.
 
 Serial Consoles
 ===============
 
-  To be provided
+  USART1
+  ------
+  By default USART1 is used as the NuttX serial console in all
+  configurations (unless otherwise noted).  USART1 is buffered with an
+  RS-232 Transceiver (Analog Devices ADM3312EARU) and connected to the DB-9
+  male socket (J8).
+
+    USART1 Connector J8
+    -------------------------------
+    SAMA5 FUNCTION  NUTTX GPIO
+    PIO   NAME      CONFIGURATION
+    ---- ---------- ---------------
+    PB27 RTS1       GPIO_USART1_RTS
+    PB29 TXD1       GPIO_USART1_TXD
+    PB28 RXD1       GPIO_USART1_RXD
+    PB26 CTS1       GPIO_USART1_CTS
+
+    NOTE: Debug TX and RX pins also go the the ADM3312EARU, but I am
+    uncertain of the functionality.
+
+    -------------------------------
+    SAMA5 FUNCTION  NUTTX GPIO
+    PIO   NAME      CONFIGURATION
+    ---- ---------- ---------------
+    PB31 DTXD       GPIO_DBGU_DTXD
+    PB30 DRXD       GPIO_DBGU_DRXD
+
+  Hardware UART via CDC
+  ---------------------
+  "J-Link-OB-ATSAM3U4C comes with an additional hardware UART that is
+   accessible from a host via CDC which allows terminal communication with
+   the target device. This feature is enabled only if a certain port (CDC
+   disabled, PA25, pin 24 on J-Link-OB-ATSAM3U4C) is NOT connected to ground
+   (open).
+
+    - Jumper JP16 not fitted: CDC is enabled
+    - Jumper JP16 fitted : CDC is disabled"
 
 SAMA5D3x-EK Configuration Options
 =================================
@@ -471,3 +610,25 @@ Configurations
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.
+
+    NOTES:
+    1. This configuration uses the default USART1 serial console.  That
+       is easily changed by reconfiguring to (1) enable a different
+       serial peripheral, and (2) selecting that serial peripheral as
+       the console device.
+
+    2. By default, this configuration is set up to build on Windows
+       under either a Cygwin or MSYS environment using a recent, Windows-
+       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
+       toolchain).  Both the build environment and the toolchain
+       selection can easily be changed by reconfiguring:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows operating system
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
+       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+    3. This configuration executes out of internal SRAM an can only
+       be loaded via JTAG.
+
+       CONFIG_SAMA5_BOOT_ISRAM=y               : Boot into internal SRAM
+       CONFIG_BOOT_RUNFROMISRAM=y              : Run from internal SRAM
