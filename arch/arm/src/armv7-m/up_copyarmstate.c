@@ -67,8 +67,7 @@
  *
  * Description:
  *    Copy the ARM portion of the register save area (omitting the floating
- *    point registers).  This is a little faster than most memcpy's since it
- *    does 32-bit transfers.
+ *    point registers) and save the floating pointer register directly.
  *
  ****************************************************************************/
 
@@ -83,7 +82,30 @@ void up_copyarmstate(uint32_t *dest, uint32_t *src)
 
   if (src != dest)
     {
+      /* Save the floating point registers: This will initialize the floating
+       * registers at indices SW_INT_REGS through (SW_INT_REGS+SW_FPU_REGS-1)
+       */
+
+      up_savefpu(dest);
+
+      /* Save the block of ARM registers that were saved by the interrupt
+       * handling logic.  Indices: 0 through (SW_INT_REGS-1).
+       */
+
       for (i = 0; i < SW_INT_REGS; i++)
+        {
+          *dest++ = *src++;
+        }
+
+      /* Skip over the floating point registers and save the block of ARM
+       * registers that were saved by the hardware when the interrupt was
+       * taken.  Indices: (SW_INT_REGS+SW_FPU_REGS) through (HW_XCPT_REGS-1)
+       */
+
+      src  += SW_FPU_REGS;
+      dest += SW_FPU_REGS;
+
+      for (i = 0; i < HW_XCPT_REGS; i++)
         {
           *dest++ = *src++;
         }

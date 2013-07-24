@@ -64,6 +64,11 @@
 
 /****************************************************************************
  * Name: up_copyarmstate
+ *
+ * Description:
+ *    Copy the ARM portion of the register save area (omitting the floating
+ *    point registers) and save the floating pointer register directly.
+ *
  ****************************************************************************/
 
 /* A little faster than most memcpy's */
@@ -79,6 +84,16 @@ void up_copyarmstate(uint32_t *dest, uint32_t *src)
 
   if (src != dest)
     {
+      /* Save the floating point registers: This will initialize the floating
+       * registers at indices ARM_CONTEXT_REGS through (XCPTCONTEXT_REGS-1)
+       */
+
+      up_savefpu(dest);
+
+      /* Then copy all of the ARM registers (mitting the floating point
+       * registers).  Indices: 0 through (ARM_CONTEXT_REGS-1).
+       */
+
       for (i = 0; i < ARM_CONTEXT_REGS; i++)
         {
           *dest++ = *src++;
