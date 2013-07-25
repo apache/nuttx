@@ -5196,3 +5196,8 @@
 	  configuration logic for USARTs needs to depend on if the USART is
 	  configured as a UART or not.  And this is for all CPUS, not just
 	  SAM3/4 (2013-7-24).
+	* arch/arm/src/arm/up_head.S and arch/arm/src/armv7-a/arm_head.S:
+	  Fix a bug (uninitialized register error) that crept in the ARM9
+	  boot-up code several years ago and was cloned into the Cortex-A5
+	  code.  Obviously no one has used the ARM9 NuttX port for years!
+

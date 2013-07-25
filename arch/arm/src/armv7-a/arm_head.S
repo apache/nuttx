@@ -65,7 +65,7 @@
  * 1. We execute in place in FLASH (CONFIG_BOOT_RUNFROMFLASH=y).  In this case
  *    the boot logic must:
  *
- *    - Configure SDRAM, 
+ *    - Configure SDRAM,
  *    - Initialize the .data section in RAM, and
  *    - Clear .bss section
  */
@@ -91,7 +91,7 @@
  *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=y).  In this case
  *    the boot logic must:
  *
- *    - Configure SDRAM, 
+ *    - Configure SDRAM,
  *    - Copy ourself to DRAM (after mapping it), and
  *    - Clear .bss section
  *
@@ -117,7 +117,7 @@
 
 /* 3. There is bootloader that copies us to DRAM (but probably not to the beginning)
  *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=n). In this case SDRAM
- *    was initialized by the boot loader, and this boot logic must: 
+ *    was initialized by the boot loader, and this boot logic must:
  *
  *    - Clear .bss section
  */
@@ -234,7 +234,7 @@ __start:
 	msr		cpsr_c, r0
 
 	/* Initialize DRAM using a macro provided by board-specific logic.
-	 * 
+	 *
 	 * This must be done in two cases:
 	 * 1. CONFIG_BOOT_RUNFROMFLASH.  The system is running from FLASH
 	 * 2. CONFIG_BOOT_COPYTORAM.  The system booted from FLASH but
@@ -289,15 +289,15 @@ __start:
 	 * preserved through the following.
 	 */
 
-	adr	r0, .Ltxtspan
+	adr		r0, .Ltxtspan
 	ldmia	r0, {r0, r1, r2, r3, r5}
- 	pg_l1span r0, r1, r2, r3, r5, r6
- 
+	pg_l1span r0, r1, r2, r3, r5, r6
+
 	/* Then populate the L2 table for the locked text region only. */
 
 	adr		r0, .Ltxtmap
 	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l2map r0, r1, r2, r3, r5
+	pg_l2map r0, r1, r2, r3, r5
 
 	/* Make sure that the page table is itself mapped and and read/write-able.
 	 * First, populate the L1 table:
@@ -305,18 +305,28 @@ __start:
 
 	adr		r0, .Lptabspan
 	ldmia	r0, {r0, r1, r2, r3, r5}
- 	pg_l1span r0, r1, r2, r3, r5, r6
+	pg_l1span r0, r1, r2, r3, r5, r6
 
 	/* Then populate the L2 table. */
 
 	adr		r0, .Lptabmap
 	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l2map r0, r1, r2, r3, r5
+	pg_l2map r0, r1, r2, r3, r5
 
 #else /* CONFIG_PAGING */
 
+	/* Create identity mapping for first MB of the .text section if we have
+	 * no already done so.
+	 */
+
+#ifdef CONFIG_IDENTITY_TEXTMAP
+	mksection r0, r4				/* r0=phys. base section */
+	ldr		r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
+	add		r3, r1, r0				/* r3=flags + base */
+#endif
+
 	/* Create a virtual single section mapping for the first MB of the .text
-	 * address space. Now, we have the first 1MB mapping to both phyical and
+	 * address space. Now, we have the first 1MB mapping to both physical and
 	 * virtual addresses.  The rest of the .text mapping will be completed in
 	 * .Lvstart once we have moved the physical mapping out of the way.
 	 *
@@ -387,7 +397,7 @@ __start:
 	 */
 
 #ifdef CPU_DCACHE_WRITETHROUGH
-#endif 
+#endif
 
 	/* Enable the MMU and caches
 	 * lr = Resume at .Lvstart with the MMU enabled
@@ -573,7 +583,6 @@ __start:
 	 * cover additinal RAM sections.
 	 */
 
-
 #ifndef CONFIG_ARCH_ROMPGTABLE
 #ifndef CONFIG_IDENTITY_TEXTMAP
 	ldr		r4, .LCvpgtable			/* r4=virtual page table */
@@ -588,13 +597,13 @@ __start:
 
 	adr		r0, .Ldataspan
 	ldmia	r0, {r0, r1, r2, r3, r4}
- 	pg_l1span r0, r1, r2, r3, r4, r5
+	pg_l1span r0, r1, r2, r3, r4, r5
 
 	/* Populate the L2 table for the data region */
 
 	adr		r0, .Ldatamap
 	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l2map r0, r1, r2, r3, r4
+	pg_l2map r0, r1, r2, r3, r4
 
 #elif defined(CONFIG_BOOT_RUNFROMFLASH)
 #  error "Logic not implemented"

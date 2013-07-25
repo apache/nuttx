@@ -67,7 +67,7 @@ Contents
   - Configurations
 
 Contents
-^^^^^^^^
+========
 
   - PIO Muliplexing
   - Development Environment
@@ -76,6 +76,7 @@ Contents
   - NuttX EABI "buildroot" Toolchain
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
+  - Loading Code
   - Buttons and LEDs
   - Serial Consoles
   - SAMA5D3x-EK Configuration Options
@@ -102,7 +103,7 @@ Development Environment
   toolchains will likely cause problems.
 
 GNU Toolchain Options
-^^^^^^^^^^^^^^^^^^^^^
+=====================
 
   The NuttX make system will support the several different toolchain options.
 
@@ -164,7 +165,7 @@ GNU Toolchain Options
   path or will get the wrong version of make.
 
 IDEs
-^^^^
+====
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project (There is a simple RIDE project
@@ -197,7 +198,7 @@ IDEs
   startup object needed by RIDE.
 
 NuttX EABI "buildroot" Toolchain
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+================================
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
   be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
@@ -240,7 +241,7 @@ NuttX EABI "buildroot" Toolchain
   See instructions below.
 
 NuttX OABI "buildroot" Toolchain
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+================================
 
   The older, OABI buildroot toolchain is also available.  To use the OABI
   toolchain, use the build instructtions above, but (1) modify the
@@ -249,7 +250,7 @@ NuttX OABI "buildroot" Toolchain
   cortexm3-defconfig-4.3.3
 
 NXFLAT Toolchain
-^^^^^^^^^^^^^^^^
+================
 
   If you are *not* using the NuttX buildroot toolchain and you want to use
   the NXFLAT tools, then you will still have to build a portion of the buildroot
@@ -281,8 +282,33 @@ NXFLAT Toolchain
   8. Edit setenv.h, if necessary, so that the PATH variable includes
      the path to the newly built NXFLAT binaries.
 
+Loading Code
+============
+
+  Loading code with the Segger tools and GDB
+  ------------------------------------------
+
+    1) Change directories into the directory where you built NuttX.
+    2) Start the GDB server and wait until it is ready to accept GDB
+       connections.
+    3) Then run GDB like this:
+
+         $ arm-none-eabi-gdb
+         (gdb) target remote localhost:2331
+         (gdb) mon reset
+         (gdb) load nuttx
+         (gdb) ... start debugging ...
+
+  Loading code using J-Link Commander
+  ----------------------------------
+
+    J-Link> r
+    J-Link> loadbin <file> <address>
+    J-Link> setpc <address of __start>
+    J-Link> ... start debugging ...
+
 Buttons and LEDs
-^^^^^^^^^^^^^^^^
+================
 
   Buttons
   -------

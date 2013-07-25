@@ -64,7 +64,7 @@
  * 1. We execute in place in FLASH (CONFIG_BOOT_RUNFROMFLASH=y).  In this case
  *    the boot logic must:
  *
- *    - Configure SDRAM, 
+ *    - Configure SDRAM,
  *    - Initialize the .data section in RAM, and
  *    - Clear .bss section
  */
@@ -90,7 +90,7 @@
  *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=y).  In this case
  *    the boot logic must:
  *
- *    - Configure SDRAM, 
+ *    - Configure SDRAM,
  *    - Copy ourself to DRAM (after mapping it), and
  *    - Clear .bss section
  *
@@ -116,7 +116,7 @@
 
 /* 3. There is bootloader that copies us to DRAM (but probably not to the beginning)
  *    (CONFIG_BOOT_RUNFROMFLASH=n && CONFIG_BOOT_COPYTORAM=n). In this case SDRAM
- *    was initialized by the boot loader, and this boot logic must: 
+ *    was initialized by the boot loader, and this boot logic must:
  *
  *    - Clear .bss section
  */
@@ -202,7 +202,7 @@
 
 //#ifndef CONFIG_ARCH_LOWVECTORS
 	.macro	mksection, section, pgtable
-	bic	\section, \pgtable, #0x000ff000
+	bic		\section, \pgtable, #0x000ff000
 	.endm
 //#endif
 
@@ -210,8 +210,8 @@
 
 #ifdef CONFIG_DEBUG
 	.macro	showprogress, code
-	mov	r0, #\code
-	bl	up_lowputc
+	mov		r0, #\code
+	bl		up_lowputc
 	.endm
 #else
 	.macro	showprogress, code
@@ -231,8 +231,8 @@
 __start:
 	/* Make sure that we are in SVC mode with all IRQs disabled */
 
-	mov	r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT)
-	msr	cpsr_c, r0
+	mov		r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r0
 
 	/* Initialize DRAM using a macro provided by board-specific logic */
 
@@ -241,18 +241,18 @@ __start:
 #endif
 	/* Clear the 16K level 1 page table */
 
-	ldr	r4, .LCppgtable			/* r4=phys. page table */
+	ldr		r4, .LCppgtable			/* r4=phys. page table */
 #ifndef CONFIG_ARCH_ROMPGTABLE
-	mov	r0, r4
-	mov	r1, #0
-	add	r2, r0, #PGTABLE_SIZE
+	mov		r0, r4
+	mov		r1, #0
+	add		r2, r0, #PGTABLE_SIZE
 .Lpgtableclear:
-	str	r1, [r0], #4
-	str	r1, [r0], #4
-	str	r1, [r0], #4
-	str	r1, [r0], #4
-	teq	r0, r2
-	bne	.Lpgtableclear
+	str		r1, [r0], #4
+	str		r1, [r0], #4
+	str		r1, [r0], #4
+	str		r1, [r0], #4
+	teq		r0, r2
+	bne		.Lpgtableclear
 
 	/* Create identity mapping for first MB of the .text section to support
 	 * this startup logic executing out of the physical address space.  This
@@ -262,10 +262,10 @@ __start:
 	 */
 
 #ifndef CONFIG_IDENTITY_TEXTMAP
-	mksection r0, r4			/* r0=phys. base section */
-	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
-	add	r3, r1, r0			/* r3=flags + base */
-	str	r3, [r4, r0, lsr #18]		/* identity mapping */
+	mksection r0, r4				/* r0=phys. base section */
+	ldr		r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
+	add		r3, r1, r0				/* r3=flags + base */
+	str		r3, [r4, r0, lsr #18]	/* identity mapping */
 #endif
 
 #ifdef CONFIG_PAGING
@@ -283,34 +283,40 @@ __start:
 	 * preserved through the following.
 	 */
 
-	adr	r0, .Ltxtspan
+	adr		r0, .Ltxtspan
 	ldmia	r0, {r0, r1, r2, r3, r5}
- 	pg_l1span r0, r1, r2, r3, r5, r6
- 
+	pg_l1span r0, r1, r2, r3, r5, r6
+
 	/* Then populate the L2 table for the locked text region only. */
 
-	adr	r0, .Ltxtmap
+	adr		r0, .Ltxtmap
 	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l2map r0, r1, r2, r3, r5
+	pg_l2map r0, r1, r2, r3, r5
 
 	/* Make sure that the page table is itself mapped and and read/write-able.
 	 * First, populate the L1 table:
 	 */
 
-	adr	r0, .Lptabspan
+	adr		r0, .Lptabspan
 	ldmia	r0, {r0, r1, r2, r3, r5}
- 	pg_l1span r0, r1, r2, r3, r5, r6
+	pg_l1span r0, r1, r2, r3, r5, r6
 
 	/* Then populate the L2 table. */
 
-	adr	r0, .Lptabmap
+	adr		r0, .Lptabmap
 	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l2map r0, r1, r2, r3, r5
+	pg_l2map r0, r1, r2, r3, r5
 
 #else /* CONFIG_PAGING */
 
+#ifdef CONFIG_IDENTITY_TEXTMAP
+	mksection r0, r4				/* r0=phys. base section */
+	ldr		r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
+	add		r3, r1, r0				/* r3=flags + base */
+#endif
+
 	/* Create a virtual single section mapping for the first MB of the .text
-	 * address space. Now, we have the first 1MB mapping to both phyical and
+	 * address space. Now, we have the first 1MB mapping to both physical and
 	 * virtual addresses.  The rest of the .text mapping will be completed in
 	 * .Lvstart once we have moved the physical mapping out of the way.
 	 *
@@ -318,9 +324,9 @@ __start:
 	 * r4 = Address of the base of the L1 table
 	 */
 
-	ldr	r2, .LCvpgtable			/* r2=virt. page table */
-	mksection r0, r2			/* r0=virt. base section */
-	str	r3, [r4, r0, lsr #18]		/* identity mapping */
+	ldr		r2, .LCvpgtable			/* r2=virt. page table */
+	mksection r0, r2				/* r0=virt. base section */
+	str		r3, [r4, r0, lsr #18]	/* identity mapping */
 
 	/* NOTE: No .data/.bss access should be attempted.  This temporary mapping
 	 * can only be assumed to cover the initial .text region.
@@ -335,27 +341,27 @@ __start:
 	 * r4 = Address of the base of the L1 table
 	 */
 
-	mov	r0, #0
-	mcr	p15, 0, r0, c7, c7		/* Invalidate I,D caches */
-	mcr	p15, 0, r0, c7, c10, 4		/* Drain write buffer */
-	mcr	p15, 0, r0, c8, c7		/* Invalidate I,D TLBs */
-	mcr	p15, 0, r4, c2, c0		/* Load page table pointer */
+	mov		r0, #0
+	mcr		p15, 0, r0, c7, c7		/* Invalidate I,D caches */
+	mcr		p15, 0, r0, c7, c10, 4	/* Drain write buffer */
+	mcr		p15, 0, r0, c8, c7		/* Invalidate I,D TLBs */
+	mcr		p15, 0, r4, c2, c0		/* Load page table pointer */
 
 #ifdef CPU_DCACHE_WRITETHROUGH
-	mov	r0, #4				/* Disable write-back on caches explicitly */
-	mcr	p15, 7, r0, c15, c0, 0
-#endif 
+	mov		r0, #4					/* Disable write-back on caches explicitly */
+	mcr		p15, 7, r0, c15, c0, 0
+#endif
 
 	/* Enable the MMU and caches
 	 * lr = Resume at .Lvstart with the MMU enabled
 	 */
 
-	ldr	lr, .LCvstart			/* Abs. virtual address */
+	ldr		lr, .LCvstart			/* Abs. virtual address */
 
-	mov	r0, #0x1f			/* Domains 0, 1 = client */
-	mcr	p15, 0, r0, c3, c0		/* Load domain access register */
-	mrc	p15, 0, r0, c1, c0		/* Get control register */
-	
+	mov		r0, #0x1f				/* Domains 0, 1 = client */
+	mcr		p15, 0, r0, c3, c0		/* Load domain access register */
+	mrc		p15, 0, r0, c1, c0		/* Get control register */
+
 	/* Clear bits (see arm.h)
 	 *
 	 * CR_R - ROM MMU protection
@@ -369,9 +375,9 @@ __start:
 	 * CR_I - Icache enable
 	 */
 
-	bic	r0, r0, #(CR_R|CR_F|CR_Z)
-	bic	r0, r0, #(CR_A|CR_C|CR_W)
-	bic	r0, r0, #(CR_I)
+	bic		r0, r0, #(CR_R|CR_F|CR_Z)
+	bic		r0, r0, #(CR_A|CR_C|CR_W)
+	bic		r0, r0, #(CR_I)
 
 	/* Set bits (see arm.h)
 	 *
@@ -380,7 +386,7 @@ __start:
 	 * CR_D - 32-bit data address range
 	 */
 
-	orr	r0, r0, #(CR_M|CR_P|CR_D)
+	orr		r0, r0, #(CR_M|CR_P|CR_D)
 	
 	/* In most architectures, vectors are relocated to 0xffff0000.
 	 * -- but not all
@@ -390,37 +396,37 @@ __start:
 	 */
 
 #ifndef CONFIG_ARCH_LOWVECTORS
-	orr	r0, r0, #(CR_S|CR_V)
+	orr		r0, r0, #(CR_S|CR_V)
 #else
-	orr	r0, r0, #(CR_S)
+	orr		r0, r0, #(CR_S)
 #endif
 	/* CR_RR - Round Robin cache replacement */
 
 #ifdef CPU_CACHE_ROUND_ROBIN
-	orr	r0, r0, #(CR_RR)
+	orr		r0, r0, #(CR_RR)
 #endif
 	/* CR_C - Dcache enable */
 
 #ifndef CPU_DCACHE_DISABLE
-	orr	r0, r0, #(CR_C)
+	orr		r0, r0, #(CR_C)
 #endif
 	/* CR_C - Dcache enable */
 
 #ifndef CPU_ICACHE_DISABLE
-	orr	r0, r0, #(CR_I)
+	orr		r0, r0, #(CR_I)
 #endif
 	/* CR_A - Alignment abort enable */
 
 #ifdef ALIGNMENT_TRAP
-	orr	r0, r0, #(CR_A)
+	orr		r0, r0, #(CR_A)
 #endif
-	mcr	p15, 0, r0, c1, c0, 0		/* write control reg */
+	mcr		p15, 0, r0, c1, c0, 0	/* write control reg */
 
 	/* Get TMP=2 Processor ID register */
 
-	mrc	p15, 0, r1, c0, c0, 0		/* read id reg */
-	mov	r1,r1				/* Null-avoiding nop */
-	mov	r1,r1				/* Null-avoiding nop */
+	mrc		p15, 0, r1, c0, c0, 0	/* read id reg */
+	mov		r1,r1					/* Null-avoiding nop */
+	mov		r1,r1					/* Null-avoiding nop */
 
 	/* And "jump" to .Lvstart */
 
@@ -500,28 +506,27 @@ __start:
 	 * cover additinal RAM sections.
 	 */
 
-
 #ifndef CONFIG_ARCH_ROMPGTABLE
 #ifndef CONFIG_IDENTITY_TEXTMAP
-	ldr	r4, .LCvpgtable			/* r4=virtual page table */
-	ldr	r1, .LCppgtable			/* r1=phys. page table */
-	mksection r3, r1			/* r2=phys. base addr */
-	mov	r0, #0				/* flags + base = 0 */
-	str	r0, [r4, r3, lsr #18]		/* Undo identity mapping */
+	ldr		r4, .LCvpgtable			/* r4=virtual page table */
+	ldr		r1, .LCppgtable			/* r1=phys. page table */
+	mksection r3, r1				/* r2=phys. base addr */
+	mov		r0, #0					/* flags + base = 0 */
+	str		r0, [r4, r3, lsr #18]	/* Undo identity mapping */
 #endif
 
 #if defined(CONFIG_PAGING)
 	/* Populate the L1 table for the data region */
 
-	adr	r0, .Ldataspan
+	adr		r0, .Ldataspan
 	ldmia	r0, {r0, r1, r2, r3, r4}
- 	pg_l1span r0, r1, r2, r3, r4, r5
+	pg_l1span r0, r1, r2, r3, r4, r5
 
 	/* Populate the L2 table for the data region */
 
-	adr	r0, .Ldatamap
+	adr		r0, .Ldatamap
 	ldmia	r0, {r0, r1, r2, r3}
- 	pg_l2map r0, r1, r2, r3, r4
+	pg_l2map r0, r1, r2, r3, r4
 
 #elif defined(CONFIG_BOOT_RUNFROMFLASH)
 #  error "Logic not implemented"
@@ -530,23 +535,23 @@ __start:
 	 * We round NUTTX_START_VADDR down to the nearest megabyte boundary.
 	 */
 
-	ldr	r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
-	add	r3, r3, r1			/* r3=flags + base */
+	ldr		r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
+	add		r3, r3, r1				/* r3=flags + base */
 
-	add	r0, r4, #(NUTTX_START_VADDR & 0xff000000) >> 18
-	bic	r2, r3, #0x00f00000
-	str	r2, [r0]
+	add		r0, r4, #(NUTTX_START_VADDR & 0xff000000) >> 18
+	bic		r2, r3, #0x00f00000
+	str		r2, [r0]
 
-	add	r0, r0, #(NUTTX_START_VADDR & 0x00f00000) >> 18
-	str	r3, [r0], #4
+	add		r0, r0, #(NUTTX_START_VADDR & 0x00f00000) >> 18
+	str		r3, [r0], #4
 
 	/* Now map the remaining RX_NSECTIONS-1 sections of the executable
 	 * memory region.
 	 */
 
 	.rept	RX_NSECTIONS-1
-	add	r3, r3, #SECTION_SIZE
-	str	r3, [r0], #4
+	add		r3, r3, #SECTION_SIZE
+	str		r3, [r0], #4
 	.endr
 
 	/* If we are executing from RAM with a fixed page configuration, then
@@ -563,17 +568,17 @@ __start:
 
 	/* Zero BSS and set up the stack pointer */
 
-	adr	r0, .Linitparms
+	adr		r0, .Linitparms
 	ldmia	r0, {r0, r1, sp}
 
 	/* Clear the frame pointer and .bss */
 
-	mov     fp, #0
+	mov		fp, #0
 
 .Lbssinit:	
-	cmp     r0, r1		       		/* Clear up to _bss_end_ */
+	cmp		r0, r1					/* Clear up to _bss_end_ */
 	strcc	fp, [r0],#4
-	bcc	.Lbssinit
+	bcc		.Lbssinit
 
 	/* If the .data section is in a separate, unitialized address space,
 	 * then we will also need to copy the initial values of of the .data
@@ -585,23 +590,23 @@ __start:
 	 */
 
 #if defined(CONFIG_BOOT_RUNFROMFLASH) || defined(CONFIG_PAGING)
-	adr	r3, .Ldatainit
+	adr		r3, .Ldatainit
 	ldmia	r3, {r0, r1, r2}
 
 1:	ldmia	r0!, {r3 - r10}
 	stmia	r1!, {r3 - r10}
-	cmp	r1, r2
-	blt	1b
+	cmp		r1, r2
+	blt		1b
 #endif
 
 	/* Perform early C-level, platform-specific initialization */
 
-	bl	up_boot
+	bl		up_boot
 
 	/* Finally branch to the OS entry point */
 
-	mov	lr, #0
-	b	os_start
+	mov		lr, #0
+	b		os_start
 
 	/* Text-section constants:
 	 *
@@ -658,4 +663,3 @@ g_idle_topstack:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
 	.size	g_idle_topstack, .-g_idle_topstack
 	.end
-
