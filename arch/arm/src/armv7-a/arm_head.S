@@ -457,7 +457,7 @@ __start:
 	orr		r0, r0, #(SCTLR_V)
 #endif
 
-	/* CR_RR - Round Robin cache replacement
+	/* Round Robin cache replacement
 	 *
 	 *   SCTLR_RR   Bit 14: The Cortex-A5 processor only supports a fixed random
 	 *                      replacement strategy.
@@ -466,7 +466,7 @@ __start:
 #ifndef CPU_CACHE_ROUND_ROBIN
 #endif
 
-	/* CR_C - Dcache enable
+	/* Dcache enable
 	 *
 	 *   SCTLR_C    Bit 2:  DCache enable
 	 */
@@ -475,7 +475,7 @@ __start:
 	orr		r0, r0, #(SCTLR_C)
 #endif
 
-	/* CR_C - Icache enable
+	/* Icache enable
 	 *
 	 *   SCTLR_I    Bit 12: ICache enable
 	 */
@@ -484,13 +484,25 @@ __start:
 	orr		r0, r0, #(SCTLR_I)
 #endif
 
-	/* CR_A - Alignment abort enable
+	/* Alignment abort enable
 	 *
 	 *   SCTLR_A    Bit 1:  Strict alignment enabled
 	 */
 
 #ifdef ALIGNMENT_TRAP
 	orr		r0, r0, #(SCTLR_A)
+#endif
+
+	/* AP[0:2] Permissions model
+	 *
+	 *   SCTLR_AFE  Bit 29: Full, legacy access permissions behavior (reset value).
+	 *
+	 * When AFE=1, the page table AP[0] is used as an access flag and AP[2:1]
+	 * control.  When AFE=0, AP[2:0] control access permissions.
+	 */
+
+#ifdef CONFIG_AFE_ENABLE
+	orr		r0, r0, #(SCTLR_AFE)
 #endif
 
 	/* Then write the configured control register */

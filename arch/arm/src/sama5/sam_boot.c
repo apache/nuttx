@@ -58,8 +58,29 @@
 #include "sam_lowputc.h"
 
 /****************************************************************************
- * Private Types
+ * Pre-processor Definitions
  ****************************************************************************/
+/* The vectors are, by default, positioned at the beginning of the text
+ * section.  Under what conditions do we have to remap the these vectors?
+ *
+ * 1) If we are using high vectors.  In this case, the vectors will lie at
+ *    virtual address 0xfffc0000 and we will need to a) copy the vectors to
+ *    another location, and 2) map the vectors to that address.
+ * 2) If we are using low vectors but the .text region is not already mapped
+ *    to address 0x0000:0000
+ * 3) We are not using a ROM page table.  We cannot set any custom mappings in
+ *    the case and the build must conform to the ROM page table properties
+ */
+
+#undef NEED_VECTORMAP
+#if !defined(CONFIG_ARCH_LOWVECTORS) || (NUTTX_START_VADDR & 0xfff00000) != 0
+
+#  if defined(CONFIG_ARCH_ROMPGTABLE)
+#    error Vector remap cannot be performed if we are using a ROM page table
+#  endif
+
+#  define NEED_VECTORMAP
+#endif
 
 /****************************************************************************
  * Private Types
@@ -94,64 +115,64 @@ static const struct section_mapping_s section_mapping[] =
   /* SAMA5 Internal Memories */
 
 #ifndef CONFIG_ARCH_LOWVECTORS
-  { SAM_BOOTMEM_PSECTION, SAM_BOOTMEM_VSECTION, 
+  { SAM_BOOTMEM_PSECTION, SAM_BOOTMEM_VSECTION,
     SAM_BOOTMEM_MMUFLAGS, SAM_BOOTMEM_NSECTIONS},
 #endif
-  { SAM_ROM_PSECTION, SAM_ROM_VSECTION, 
+  { SAM_ROM_PSECTION, SAM_ROM_VSECTION,
     SAM_ROM_MMUFLAGS, SAM_ROM_NSECTIONS},
-  { SAM_NFCSRAM_PSECTION, SAM_NFCSRAM_VSECTION, 
+  { SAM_NFCSRAM_PSECTION, SAM_NFCSRAM_VSECTION,
     SAM_NFCSRAM_MMUFLAGS, SAM_NFCSRAM_NSECTIONS},
 #ifndef CONFIG_PAGING /* Internal SRAM is already fully mapped */
-  { SAM_ISRAM_PSECTION, SAM_ISRAM_VSECTION, 
+  { SAM_ISRAM_PSECTION, SAM_ISRAM_VSECTION,
     SAM_ISRAM_MMUFLAGS, SAM_ISRAM_NSECTIONS},
 #endif
-  { SAM_SMD_PSECTION, SAM_SMD_VSECTION, 
+  { SAM_SMD_PSECTION, SAM_SMD_VSECTION,
     SAM_SMD_MMUFLAGS, SAM_SMD_NSECTIONS},
-  { SAM_UDPHSRAM_PSECTION, SAM_UDPHSRAM_VSECTION, 
+  { SAM_UDPHSRAM_PSECTION, SAM_UDPHSRAM_VSECTION,
     SAM_UDPHSRAM_MMUFLAGS, SAM_UDPHSRAM_NSECTIONS},
-  { SAM_UHPOHCI_PSECTION, SAM_UHPOHCI_VSECTION, 
+  { SAM_UHPOHCI_PSECTION, SAM_UHPOHCI_VSECTION,
     SAM_UHPOHCI_MMUFLAGS, SAM_UHPOHCI_NSECTIONS},
-  { SAM_UHPEHCI_PSECTION, SAM_UHPEHCI_VSECTION, 
+  { SAM_UHPEHCI_PSECTION, SAM_UHPEHCI_VSECTION,
     SAM_UHPEHCI_MMUFLAGS, SAM_UHPEHCI_NSECTIONS},
-  { SAM_AXIMX_PSECTION, SAM_AXIMX_VSECTION, 
+  { SAM_AXIMX_PSECTION, SAM_AXIMX_VSECTION,
     SAM_AXIMX_MMUFLAGS, SAM_AXIMX_NSECTIONS},
-  { SAM_DAP_PSECTION, SAM_DAP_VSECTION, 
+  { SAM_DAP_PSECTION, SAM_DAP_VSECTION,
     SAM_DAP_MMUFLAGS, SAM_DAP_NSECTIONS},
 
 /* SAMA5 External Memories */
 
 #ifdef CONFIG_SAMA5_EBICS0
-  { SAM_EBICS0_PSECTION, SAM_EBICS0_VSECTION, 
+  { SAM_EBICS0_PSECTION, SAM_EBICS0_VSECTION,
     SAM_EBICS0_MMUFLAGS, SAM_EBICS0_NSECTIONS},
 #endif
 #ifdef CONFIG_SAMA5_DDRCS
-  { SAM_DDRCS_PSECTION, SAM_DDRCS_VSECTION, 
+  { SAM_DDRCS_PSECTION, SAM_DDRCS_VSECTION,
     SAM_DDRCS_MMUFLAGS, SAM_DDRCS_NSECTIONS},
 #endif
 #ifdef CONFIG_SAMA5_EBICS1
-  { SAM_EBICS1_PSECTION, SAM_EBICS1_VSECTION, 
+  { SAM_EBICS1_PSECTION, SAM_EBICS1_VSECTION,
     SAM_EBICS1_MMUFLAGS, SAM_EBICS1_NSECTIONS},
 #endif
 #ifdef CONFIG_SAMA5_EBICS2
-  { SAM_EBICS2_PSECTION, SAM_EBICS2_VSECTION, 
+  { SAM_EBICS2_PSECTION, SAM_EBICS2_VSECTION,
     SAM_EBICS2_MMUFLAGS, SAM_EBICS2_NSECTIONS},
 #endif
 #ifdef CONFIG_SAMA5_EBICS3
-  { SAM_EBICS3_PSECTION, SAM_EBICS3_VSECTION, 
+  { SAM_EBICS3_PSECTION, SAM_EBICS3_VSECTION,
     SAM_EBICS3_MMUFLAGS, SAM_EBICS3_NSECTIONS},
 #endif
 #ifdef CONFIG_SAMA5_NFCCR
-  { SAM_NFCCR_PSECTION, SAM_NFCCR_VSECTION, 
+  { SAM_NFCCR_PSECTION, SAM_NFCCR_VSECTION,
     SAM_NFCCR_MMUFLAGS, SAM_NFCCR_NSECTIONS},
 #endif
 
 /* SAMA5 Internal Peripherals */
 
-  { SAM_PERIPHA_PSECTION, SAM_PERIPHA_VSECTION, 
+  { SAM_PERIPHA_PSECTION, SAM_PERIPHA_VSECTION,
     SAM_PERIPHA_MMUFLAGS, SAM_PERIPHA_NSECTIONS},
-  { SAM_PERIPHB_PSECTION, SAM_PERIPHB_VSECTION, 
+  { SAM_PERIPHB_PSECTION, SAM_PERIPHB_VSECTION,
     SAM_PERIPHB_MMUFLAGS, SAM_PERIPHB_NSECTIONS},
-  { SAM_SYSC_PSECTION, SAM_SYSC_VSECTION, 
+  { SAM_SYSC_PSECTION, SAM_SYSC_VSECTION,
     SAM_SYSC_MMUFLAGS, SAM_SYSC_NSECTIONS},
 };
 #define NMAPPINGS (sizeof(section_mapping) / sizeof(struct section_mapping_s))
@@ -162,12 +183,16 @@ static const struct section_mapping_s section_mapping[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_setlevel1entry
+ * Name: sam_setl1entry
+ *
+ * Description:
+ *   Set a level 1 translation table entry.
+ *
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-static inline void sam_setlevel1entry(uint32_t paddr, uint32_t vaddr,
-                                      uint32_t mmuflags)
+static inline void sam_setl1entry(uint32_t paddr, uint32_t vaddr,
+                                  uint32_t mmuflags)
 {
   uint32_t *pgtable = (uint32_t*)PGTABLE_BASE_VADDR;
   uint32_t  index   = vaddr >> 20;
@@ -179,12 +204,11 @@ static inline void sam_setlevel1entry(uint32_t paddr, uint32_t vaddr,
 #endif
 
 /****************************************************************************
- * Name: sam_setlevel2coarseentry
+ * Name: sam_setl2smallentry
  ****************************************************************************/
 
-static inline void
-sam_setlevel2coarseentry(uint32_t ctabvaddr, uint32_t paddr, uint32_t vaddr,
-                         uint32_t mmuflags)
+static inline void sam_setl2smallentry(uint32_t ctabvaddr, uint32_t paddr,
+                                       uint32_t vaddr, uint32_t mmuflags)
 {
   uint32_t *ctable  = (uint32_t*)ctabvaddr;
   uint32_t  index;
@@ -218,7 +242,7 @@ static void sam_setupmappings(void)
 
       for (j = 0; j < section_mapping[i].nsections; j++)
         {
-          sam_setlevel1entry(sect_paddr, sect_vaddr, mmuflags);
+          sam_setl1entry(sect_paddr, sect_vaddr, mmuflags);
           sect_paddr += SECTION_SIZE;
           sect_vaddr += SECTION_SIZE;
         }
@@ -234,8 +258,7 @@ static void sam_setupmappings(void)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && \
-    defined(CONFIG_PAGING)
+#if defined(NEED_VECTORMAP) && defined(CONFIG_PAGING)
 static void  sam_vectorpermissions(uint32_t mmuflags)
 {
   /* The PTE for the beginning of ISRAM is at the base of the L2 page table */
@@ -248,7 +271,7 @@ static void  sam_vectorpermissions(uint32_t mmuflags)
   pte = *ptr;
   if (pte == 0)
     {
-      pte = PG_VECT_PBASE;   
+      pte = PG_VECT_PBASE;
     }
   else
     {
@@ -278,7 +301,7 @@ static void  sam_vectorpermissions(uint32_t mmuflags)
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_ARCH_ROMPGTABLE) && !defined(CONFIG_ARCH_LOWVECTORS)
+#ifdef NEED_VECTORMAP
 static void sam_vectormapping(void)
 {
   uint32_t vector_paddr = SAM_VECTOR_PADDR;
@@ -293,39 +316,44 @@ static void sam_vectormapping(void)
 
   while (vector_paddr < end_paddr)
     {
-      sam_setlevel2coarseentry(PGTABLE_L2_VBASE,  vector_paddr,
-                               vector_vaddr, MMU_L2_VECTORFLAGS);
+      sam_setl2smallentry(VECTOR_L2_VBASE,  vector_paddr, vector_vaddr,
+                          MMU_L2_VECTORFLAGS);
       vector_paddr += 4096;
       vector_vaddr += 4096;
     }
 
   /* Now set the level 1 descriptor to refer to the level 2 page table. */
 
-  sam_setlevel1entry(PGTABLE_L2_PBASE, SAM_VECTOR_VCOARSE,
-                     MMU_L1_VECTORFLAGS);
+  sam_setl1entry(VECTOR_L2_PBASE, SAM_VECTOR_VADDR, MMU_L1_VECTORFLAGS);
 }
+#else
+  /* No vector remap */
+
+#  define sam_vectormapping()
 #endif
 
 /****************************************************************************
  * Name: sam_copyvectorblock
  *
  * Description:
- *   Copy the interrupt block to its final destination.
+ *   Copy the interrupt block to its final destination.  Vectors are already
+ *   positioned at the beginning of the text region and only need to be
+ *   copied in the case where we are using high vectors.
  *
  ****************************************************************************/
 
+#ifndef CONFIG_ARCH_LOWVECTORS
 static void sam_copyvectorblock(void)
 {
   uint32_t *src;
   uint32_t *end;
   uint32_t *dest;
 
-  /* If we are using vectors in low memory but RAM in that area has been marked
+  /* If we are using re-mapped vectors in an area that has been marked
    * read only, then temparily mark the mapping write-able (non-buffered).
    */
 
-#if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && \
-     defined(CONFIG_PAGING)
+#if defined(NEED_VECTORMAP) && defined(CONFIG_PAGING)
   sam_vectorpermissions(MMU_L2_VECTRWFLAGS);
 #endif
 
@@ -349,11 +377,15 @@ static void sam_copyvectorblock(void)
 
   /* Make the vectors read-only, cacheable again */
 
-#if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && \
-     defined(CONFIG_PAGING)
-  sam_vectorpermissions(MMU_L2_VECTROFLAGS);
+#if defined(NEED_VECTORMAP) && defined(CONFIG_PAGING)
+  sam_vectorpermissions(MMU_L2_VECTORFLAGS);
 #endif
 }
+#else
+/* Don't copy the vectors */
+
+#  define sam_copyvectorblock()
+#endif
 
 /****************************************************************************
  * Name: sam_wdtdisable
@@ -365,7 +397,9 @@ static void sam_copyvectorblock(void)
 
 static inline void sam_wdtdisable(void)
 {
+#if 0 // REVISIT
   putreg32(WDT_MR_WDDIS, SAM_WDT_MR);
+#endif
 }
 
 /****************************************************************************
@@ -444,20 +478,19 @@ static inline void sam_wdtdisable(void)
 
 void up_boot(void)
 {
+#ifndef CONFIG_ARCH_ROMPGTABLE
   /* __start provided the basic MMU mappings for SRAM.  Now provide mappings
    * for all IO regions (Including the vector region).
    */
 
-#ifndef CONFIG_ARCH_ROMPGTABLE
   sam_setupmappings();
 
   /* Provide a special mapping for the IRAM interrupt vector positioned in
    * high memory.
    */
 
-#ifndef CONFIG_ARCH_LOWVECTORS
   sam_vectormapping();
-#endif
+
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
   /* Setup up vector block.  _vector_start and _vector_end are exported from
@@ -472,7 +505,7 @@ void up_boot(void)
 
   /* Initialize clocking to settings provided by board-specific logic */
 
-  sam_clockconfig();   
+  sam_clockconfig();
 
   /* Initialize the FPU */
 

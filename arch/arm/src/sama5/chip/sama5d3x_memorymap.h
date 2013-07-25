@@ -89,7 +89,7 @@
 #define SAM_UHPEHCI_PSECTION     0x00700000 /* 0x00700000-0x007fffff: UHP EHCI */
 #define SAM_AXIMX_PSECTION       0x00800000 /* 0x00800000-0x008fffff: AXI Matr */
 #define SAM_DAP_PSECTION         0x00900000 /* 0x00900000-0x009fffff: DAP */
-                                            /* 0x000a0000-0x0fffffff: Undefined */
+                                            /* 0x00a00000-0x0fffffff: Undefined */
 /* SAMA5 Internal Peripheral Offsets */
 
 #define SAM_PERIPHA_PSECTION     0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
@@ -129,39 +129,41 @@
 #  define SAM_TDES_OFFSET        0x0003c000 /* 0x0003c000-0x0003ffff: TDES */
 #  define SAM_TRNG_OFFSET        0x00040000 /* 0x00040000-0x00043fff: TRNG */
                                             /* 0x00044000-0x00ffbfff: Reserved */
-#define SAM_SYSC_PSECTION        0xff000000 /* 0xff000000-0xffffffff: System Controller */
+#define SAM_SYSC_PSECTION        0xfff00000 /* 0xfff00000-0xffffffff: System Controller */
 #define SAM_SYSC_PADDR           0xffffc000 /* 0xffffc000-0xffffffff: System Controller */
 #  define SAM_SYSC_OFFSET        0x00000000 /* 0x0fffc000-0x0fffffff: System Controller */
 
-/* System Controller Peripheral Offsets */
+/* System Controller Peripheral Offsets.  All relative to the beginning of the
+ * 16KB virtual or physical SYSC region (SAM_SYSC_VADDR or SAM_SYSC_PADDR).
+ */
 
-#define SAM_HSMC_OFFSET          0x00ffc000 /* 0x0fffc000-0x0fffcfff: HSMC */
-                                            /* 0x0fffd000-0x0fffe3ff: Reserved */
-#define SAM_FUSE_OFFSET          0x00ffe400 /* 0x0fffe400-0x0fffe5ff: FUSE */
-#define SAM_DMAC0_OFFSET         0x00ffe600 /* 0x0fffe600-0x0fffe7ff: DMAC0 */
-#define SAM_DMAC1_OFFSET         0x00ffe800 /* 0x0fffe800-0x0fffe9ff: DMAC1 */
-#define SAM_MPDDRC_OFFSET        0x00ffea00 /* 0x0fffea00-0x0fffebff: MPDDRC */
-#define SAM_MATRIX_OFFSET        0x00ffec00 /* 0x0fffec00-0x0fffedff: MATRIX */
-#define SAM_DBGU_OFFSET          0x00ffee00 /* 0x0fffee00-0x0fffefff: DBGU */
-#define SAM_AIC_OFFSET           0x00fff000 /* 0x0ffff000-0x0ffff1ff: AIC */
-#define SAM_PION_OFFSET(n)       (0x00fff200+((n) << 9))
-#define SAM_PIOA_OFFSET          0x00fff200 /* 0x0ffff200-0x0ffff3ff: PIOA */
-#define SAM_PIOB_OFFSET          0x00fff400 /* 0x0ffff400-0x0ffff5ff: PIOB */
-#define SAM_PIOC_OFFSET          0x00fff600 /* 0x0ffff600-0x0ffff7ff: PIOC */
-#define SAM_PIOD_OFFSET          0x00fff800 /* 0x0ffff800-0x0ffff9ff: PIOD */
-#define SAM_PIOE_OFFSET          0x00fffa00 /* 0x0ffffa00-0x0ffffbff: PIOE */
-#define SAM_PMC_OFFSET           0x00fffc00 /* 0x0ffffc00-0x0ffffdff: PMC */
-#define SAM_RSTC_OFFSET          0x00fffe00 /* 0x0ffffe00-0x0ffffe0f: RSTC */
-#define SAM_SHDC_OFFSET          0x00fffe10 /* 0x0ffffe10-0x0ffffe1f: SHDC */
-                                            /* 0x0ffffe20-0x0ffffe2f: Reserved */
-#define SAM_PITC_OFFSET          0x00fffe30 /* 0x0ffffe30-0x0ffffe3f: PITC */
-#define SAM_WDT_OFFSET           0x00fffe40 /* 0x0ffffe40-0x0ffffe4f: WDT */
-#define SAM_SCKCR_OFFSET         0x00fffe50 /* 0x0ffffe50-0x0ffffe53: SCKCR */
-#define SAM_BSC_OFFSET           0x00fffe54 /* 0x0ffffe54-0x0ffffe5f: BSC */
-#define SAM_GPBR_OFFSET          0x00fffe60 /* 0x0ffffe60-0x0ffffe6f: GPBR */
-                                            /* 0x0ffffe70-0x0ffffeaf: Reserved */
-#define SAM_RTCC_OFFSET          0x00fffeb0 /* 0x0ffffeb0-0x0ffffedf: RTCC */
-                                            /* 0x0ffffee0-0x0fffffff: Reserved */
+#define SAM_HSMC_OFFSET          0x00000000 /* 0x00000000-0x00000fff: HSMC */
+                                            /* 0x00001000-0x000023ff: Reserved */
+#define SAM_FUSE_OFFSET          0x00002400 /* 0x00002400-0x000025ff: FUSE */
+#define SAM_DMAC0_OFFSET         0x00002600 /* 0x00002600-0x000027ff: DMAC0 */
+#define SAM_DMAC1_OFFSET         0x00002800 /* 0x00002800-0x000029ff: DMAC1 */
+#define SAM_MPDDRC_OFFSET        0x00002a00 /* 0x00002a00-0x00002bff: MPDDRC */
+#define SAM_MATRIX_OFFSET        0x00002c00 /* 0x00002c00-0x00002dff: MATRIX */
+#define SAM_DBGU_OFFSET          0x00002e00 /* 0x00002e00-0x00002fff: DBGU */
+#define SAM_AIC_OFFSET           0x00003000 /* 0x00003000-0x000031ff: AIC */
+#define SAM_PION_OFFSET(n)       (0x00003200+((n) << 9))
+#define SAM_PIOA_OFFSET          0x00003200 /* 0x00003200-0x000033ff: PIOA */
+#define SAM_PIOB_OFFSET          0x00003400 /* 0x00003400-0x000035ff: PIOB */
+#define SAM_PIOC_OFFSET          0x00003600 /* 0x00003600-0x000037ff: PIOC */
+#define SAM_PIOD_OFFSET          0x00003800 /* 0x00003800-0x000039ff: PIOD */
+#define SAM_PIOE_OFFSET          0x00003a00 /* 0x00003a00-0x00003bff: PIOE */
+#define SAM_PMC_OFFSET           0x00003c00 /* 0x00003c00-0x00003dff: PMC */
+#define SAM_RSTC_OFFSET          0x00003e00 /* 0x00003e00-0x00003e0f: RSTC */
+#define SAM_SHDC_OFFSET          0x00003e10 /* 0x00003e10-0x00003e1f: SHDC */
+                                            /* 0x00003e20-0x00003e2f: Reserved */
+#define SAM_PITC_OFFSET          0x00003e30 /* 0x00003e30-0x00003e3f: PITC */
+#define SAM_WDT_OFFSET           0x00003e40 /* 0x00003e40-0x00003e4f: WDT */
+#define SAM_SCKCR_OFFSET         0x00003e50 /* 0x00003e50-0x00003e53: SCKCR */
+#define SAM_BSC_OFFSET           0x00003e54 /* 0x00003e54-0x00003e5f: BSC */
+#define SAM_GPBR_OFFSET          0x00003e60 /* 0x00003e60-0x00003e6f: GPBR */
+                                            /* 0x00003e70-0x00003eaf: Reserved */
+#define SAM_RTCC_OFFSET          0x00003eb0 /* 0x00003eb0-0x00003edf: RTCC */
+                                            /* 0x00003ee0-0x00003fff: Reserved */
 
 /* Sizes of memory regions in bytes.
  *
@@ -185,7 +187,7 @@
                                                  /* 0xf0000000-0xffffffff: Internal Peripherals */
 #define SAM_PERIPHA_SIZE         (15*1024)       /* 0xf0000000-0xf003bfff: Internal Peripherals */
 #define SAM_PERIPHB_SIZE         (272*1024)      /* 0xf8000000-0xf8043fff: Internal Peripherals */
-#define SAM_SYSC_SIZE            (1*1024*1024)   /* 0xff000000-0x0ffffedf: Internal Peripherals */
+#define SAM_SYSC_SIZE            (1*1024*1024)   /* 0xfff00000-0x0ffffedf: Internal Peripherals */
 
 /* Convert size in bytes to number of sections (in Mb). */
 
@@ -285,7 +287,7 @@
 #define SAM_PERIPH_VSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
 #  define SAM_PERIPHA_VSECTION   0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
 #  define SAM_PERIPHB_VSECTION   0xf8000000 /* 0xf8000000-0xffffbfff: Internal Peripherals B */
-#  define SAM_SYSC_VSECTION      0xff000000 /* 0xff000000-0xffffffff: System Controller */
+#  define SAM_SYSC_VSECTION      0xfff00000 /* 0xfff00000-0xffffffff: System Controller */
 #  define SAM_SYSC_VADDR         0xffffc000 /* 0xffffc000-0xffffffff: System Controller */
 
 #endif
@@ -326,29 +328,29 @@
 #define SAM_TDES_VBASE           (SAM_PERIPHB_VSECTION+SAM_TDES_OFFSET)
 #define SAM_TRNG_VBASE           (SAM_PERIPHB_VSECTION+SAM_TRNG_OFFSET)
 
-#define SAM_HSMC_VBASE           (SAM_SYSC_VSECTION+SAM_HSMC_OFFSET)
-#define SAM_FUSE_VBASE           (SAM_SYSC_VSECTION+SAM_FUSE_OFFSET)
-#define SAM_DMAC0_VBASE          (SAM_SYSC_VSECTION+SAM_DMAC0_OFFSET)
-#define SAM_DMAC1_VBASE          (SAM_SYSC_VSECTION+SAM_DMAC1_OFFSET)
-#define SAM_MPDDRC_VBASE         (SAM_SYSC_VSECTION+SAM_MPDDRC_OFFSET)
-#define SAM_MATRIX_VBASE         (SAM_SYSC_VSECTION+SAM_MATRIX_OFFSET)
-#define SAM_DBGU_VBASE           (SAM_SYSC_VSECTION+SAM_DBGU_OFFSET)
-#define SAM_AIC_VBASE            (SAM_SYSC_VSECTION+SAM_AIC_OFFSET)
-#define SAM_PION_VBASE(n)        (SAM_SYSC_VSECTION+SAM_PION_OFFSET(n))
-#define SAM_PIOA_VBASE           (SAM_SYSC_VSECTION+SAM_PIOA_OFFSET)
-#define SAM_PIOB_VBASE           (SAM_SYSC_VSECTION+SAM_PIOB_OFFSET)
-#define SAM_PIOC_VBASE           (SAM_SYSC_VSECTION+SAM_PIOC_OFFSET)
-#define SAM_PIOD_VBASE           (SAM_SYSC_VSECTION+SAM_PIOD_OFFSET)
-#define SAM_PIOE_VBASE           (SAM_SYSC_VSECTION+SAM_PIOE_OFFSET)
-#define SAM_PMC_VBASE            (SAM_SYSC_VSECTION+SAM_PMC_OFFSET)
-#define SAM_RSTC_VBASE           (SAM_SYSC_VSECTION+SAM_RSTC_OFFSET)
-#define SAM_SHDC_VBASE           (SAM_SYSC_VSECTION+SAM_SHDC_OFFSET)
-#define SAM_PITC_VBASE           (SAM_SYSC_VSECTION+SAM_PITC_OFFSET)
-#define SAM_WDT_VBASE            (SAM_SYSC_VSECTION+SAM_WDT_OFFSET)
-#define SAM_SCKCR_VBASE          (SAM_SYSC_VSECTION+SAM_SCKCR_OFFSET)
-#define SAM_BSC_VBASE            (SAM_SYSC_VSECTION+SAM_BSC_OFFSET)
-#define SAM_GPBR_VBASE           (SAM_SYSC_VSECTION+SAM_GPBR_OFFSET)
-#define SAM_RTCC_VBASE           (SAM_SYSC_VSECTION+SAM_RTCC_OFFSET)
+#define SAM_HSMC_VBASE           (SAM_SYSC_VADDR+SAM_HSMC_OFFSET)
+#define SAM_FUSE_VBASE           (SAM_SYSC_VADDR+SAM_FUSE_OFFSET)
+#define SAM_DMAC0_VBASE          (SAM_SYSC_VADDR+SAM_DMAC0_OFFSET)
+#define SAM_DMAC1_VBASE          (SAM_SYSC_VADDR+SAM_DMAC1_OFFSET)
+#define SAM_MPDDRC_VBASE         (SAM_SYSC_VADDR+SAM_MPDDRC_OFFSET)
+#define SAM_MATRIX_VBASE         (SAM_SYSC_VADDR+SAM_MATRIX_OFFSET)
+#define SAM_DBGU_VBASE           (SAM_SYSC_VADDR+SAM_DBGU_OFFSET)
+#define SAM_AIC_VBASE            (SAM_SYSC_VADDR+SAM_AIC_OFFSET)
+#define SAM_PION_VBASE(n)        (SAM_SYSC_VADDR+SAM_PION_OFFSET(n))
+#define SAM_PIOA_VBASE           (SAM_SYSC_VADDR+SAM_PIOA_OFFSET)
+#define SAM_PIOB_VBASE           (SAM_SYSC_VADDR+SAM_PIOB_OFFSET)
+#define SAM_PIOC_VBASE           (SAM_SYSC_VADDR+SAM_PIOC_OFFSET)
+#define SAM_PIOD_VBASE           (SAM_SYSC_VADDR+SAM_PIOD_OFFSET)
+#define SAM_PIOE_VBASE           (SAM_SYSC_VADDR+SAM_PIOE_OFFSET)
+#define SAM_PMC_VBASE            (SAM_SYSC_VADDR+SAM_PMC_OFFSET)
+#define SAM_RSTC_VBASE           (SAM_SYSC_VADDR+SAM_RSTC_OFFSET)
+#define SAM_SHDC_VBASE           (SAM_SYSC_VADDR+SAM_SHDC_OFFSET)
+#define SAM_PITC_VBASE           (SAM_SYSC_VADDR+SAM_PITC_OFFSET)
+#define SAM_WDT_VBASE            (SAM_SYSC_VADDR+SAM_WDT_OFFSET)
+#define SAM_SCKCR_VBASE          (SAM_SYSC_VADDR+SAM_SCKCR_OFFSET)
+#define SAM_BSC_VBASE            (SAM_SYSC_VADDR+SAM_BSC_OFFSET)
+#define SAM_GPBR_VBASE           (SAM_SYSC_VADDR+SAM_GPBR_OFFSET)
+#define SAM_RTCC_VBASE           (SAM_SYSC_VADDR+SAM_RTCC_OFFSET)
 
 /* NuttX vitual base address
  *
@@ -446,30 +448,6 @@
 #  endif
 #endif
 
-/* Page table start addresses.
- *
- * 16Kb of memory is reserved hold the page table for the virtual mappings.  A
- * portion of this table is not accessible in the virtual address space (for
- * normal operation). We will reuse this memory for coarse page tables as follows:
- *
- * NOTE: If CONFIG_PAGING is defined, mmu.h will re-assign the virtual address
- * of the page table.
- */
-
-#define PGTABLE_L2_PBASE          (PGTABLE_BASE_PADDR+0x00000800)
-#define PGTABLE_L2_VBASE          (PGTABLE_BASE_VADDR+0x00000800)
-
-/* Page table end addresses: */
-
-#define PGTABLE_L2_END_PADDR      (PGTABLE_BASE_PADDR+PGTABLE_SIZE)
-#define PGTABLE_L2_END_VADDR      (PGTABLE_BASE_VADDR+PGTABLE_SIZE)
-
-/* Page table sizes */
-
-#define PGTABLE_L2_ALLOC          (PGTABLE_L2_END_VADDR-PGTABLE_L2_VBASE)
-#define PGTABLE_L2_SIZE           (4*256)
-#define PGTABLE_L2_NENTRIES       (PGTABLE_L2_ALLOC / PGTABLE_L2_SIZE)
-
 /* Base address of the interrupt vector table.
  *
  *   SAM_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
@@ -482,9 +460,8 @@
 #  define SAM_VECTOR_PADDR        SAM_ISRAM0_PADDR
 #  define SAM_VECTOR_VSRAM        SAM_ISRAM0_VADDR
 #  define SAM_VECTOR_VADDR        0x00000000
-#  define SAM_VECTOR_VCOARSE      0x00000000
 #else  /* Vectors located at 0xffff:0000 -- this probably does not work */
-#  ifdef HAVE_ISRAM1
+#  ifdef SAM_ISRAM1_SIZE >= VECTOR_TABLE_SIZE
 #    define SAM_VECTOR_PADDR      (SAM_ISRAM1_PADDR+SAM_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
 #    define SAM_VECTOR_VSRAM      (SAM_ISRAM1_VADDR+SAM_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
 #  else
@@ -492,8 +469,61 @@
 #    define SAM_VECTOR_VSRAM      (SAM_ISRAM0_VADDR+SAM_ISRAM0_SIZE-VECTOR_TABLE_SIZE)
 #  endif
 #  define SAM_VECTOR_VADDR        0xffff0000
-#  define SAM_VECTOR_VCOARSE      0xfff00000
 #endif
+
+/* Level 2 Page table start addresses.
+ *
+ * 16Kb of memory is reserved hold the page table for the virtual mappings.  A
+ * portion of this table is not accessible in the virtual address space (for
+ * normal operation).   There is this large whole in the physcal address space
+ * for which there will never be level 1 mappings:
+ *
+ *   0x80000000-0xefffffff: Undefined (1.75 GB)
+ *
+ * That is the offset where the main L2 page table will be positioned.  This
+ * corresponds to page table offsets 0x000002000 through 0x000003c00.  That
+ * is 1792 entries mapping 1MB of address each for a total of 1.75 GB of virtual
+ * address space)
+ */
+
+#define PGTABLE_L2_OFFSET         0x000002000
+#define PGTABLE_L2_SIZE           0x000001c00
+
+/* This other small region is reserved for the vector table L2 page table
+ *
+ *   0x00a00000-0x0fffffff: Undefined (246 MB)
+ *
+ * This corresponds to page table offsets 0x000000028 through 0x00000400.  That
+ * is 246 entries mapping 1MB of address each for a total of 246 MB of virtual
+ * address space)
+ */
+
+#define VECTOR_L2_OFFSET          0x000000028
+#define VECTOR_L2_SIZE            0x000000400
+
+/* If we need more L2 page tables, there additional entries can be obtained
+ * from other unused areas in the physical memory map:
+ *
+ *   0x0003c000-0x07ffffff: Reserved  (127.8 MB)
+ *   0x00044000-0x00ffbfff: Reserved  ( 15.7 MB)
+ *
+ * NOTE: If CONFIG_PAGING is defined, mmu.h will re-assign the virtual address
+ * of the page table.
+ */
+
+#define PGTABLE_L2_PBASE          (PGTABLE_BASE_PADDR+PGTABLE_L2_OFFSET)
+#define PGTABLE_L2_VBASE          (PGTABLE_BASE_VADDR+PGTABLE_L2_OFFSET)
+
+#define VECTOR_L2_PBASE           (SAM_VECTOR_PADDR+VECTOR_L2_OFFSET)
+#define VECTOR_L2_VBASE           (SAM_VECTOR_VADDR+VECTOR_L2_OFFSET)
+
+/* Page table end addresses: */
+
+#define PGTABLE_L2_END_PADDR      (PGTABLE_L2_PBASE+PGTABLE_L2_SIZE)
+#define PGTABLE_L2_END_VADDR      (PGTABLE_L2_VBASE+PGTABLE_L2_SIZE)
+
+#define VECTOR_L2_END_PADDR       (VECTOR_L2_PBASE+VECTOR_L2_SIZE)
+#define VECTOR_L2_END_VADDR       (VECTOR_L2_VBASE+VECTOR_L2_SIZE)
 
 /************************************************************************************
  * Public Types
