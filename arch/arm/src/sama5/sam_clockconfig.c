@@ -464,7 +464,8 @@ void sam_clockconfig(void)
 
 #ifdef CONFIG_SAMA5_BOOT_CS0FLASH
   if (config)
-#if define(CONFIG_SAMA5_BOOT_ISRAM) || defined(CONFIG_SAMA5_BOOT_CS0FLASH)
+#endif /* CONFIG_SAMA5_BOOT_CS0FLASH */
+#if defined(CONFIG_SAMA5_BOOT_ISRAM) || defined(CONFIG_SAMA5_BOOT_CS0FLASH)
     {
       /* Enable main oscillator (if it has not already been selected) */
 
@@ -502,5 +503,4 @@ void sam_clockconfig(void)
       sam_upllsetup();
     }
 #endif /* CONFIG_SAMA5_BOOT_ISRAM || CONFIG_SAMA5_BOOT_CS0FLASH */
-#endif /* CONFIG_SAMA5_BOOT_CS0FLASH */
 }

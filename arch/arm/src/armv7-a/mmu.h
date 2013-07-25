@@ -310,28 +310,57 @@
 #define PMD_SSECT_XBA1_SHIFT  (5)          /* Bits 24-31: Extended base address, PA[31:24] */
 #define PMD_SSECT_XBA1_MASK   (15 << PMD_SSECT_XBA1_SHIFT)
 
-/* Level 1 Section/Supersection Access Permissions:
+/* Level 1 Section/Supersection Access Permissions.
  *
- * WR    - Read/write addess allowed
- * R     - Read-only access allowed
- * 0,1,2 - At PL0, PL1, and/or PL2
+ * Paragraph B3.7.1, Access permissions: "If address translation is using
+ * the Short-descriptor translation table format, it must set SCTLR.AFE to
+ * 1 to enable use of the Access flag.... Setting this bit to 1 redefines
+ * the AP[0] bit in the translation table descriptors as an Access flag, and
+ * limits the access permissions information in the translation table
+ * descriptors to AP[2:1]...
  *
- * PL0   - User privilege level
- * PL1   - Privilieged mode
- * PL2   - Software executing in Hyp mode
+ * Key:
+ *
+ *   WR    - Read/write addess allowed
+ *   R     - Read-only access allowed
+ *   0,1,2 - At PL0, PL1, and/or PL2
+ *
+ *   PL0   - User privilege level
+ *   PL1   - Privilieged mode
+ *   PL2   - Software executing in Hyp mode
  */
 
-#define PMD_SECT_AP_NONE     (0)
-#define PMD_SECT_AP_RW12     (PMD_SECT_AP0)
-#define PMD_SECT_AP_RW12_R0  (PMD_SECT_AP1)
-#define PMD_SECT_AP_RW012    (PMD_SECT_AP0 | PMD_SECT_AP1)
-#define PMD_SECT_AP_R12      (PMD_SECT_AP0 | PMD_SECT_AP2)
-#define PMD_SECT_AP_R012     (PMD_SECT_AP0 | PMD_SECT_AP1 | PMD_SECT_AP2)
+#ifdef CONFIG_AFE_ENABLE
+/* AP[2:1] access permissions model.  AP[0] is used as an access flag: */
+
+#  define PMD_SECT_AP_RW1     (0)
+#  define PMD_SECT_AP_RW01    (PMD_SECT_AP1)
+#  define PMD_SECT_AP_R1      (PMD_SECT_AP2)
+#  define PMD_SECT_AP_R01     (PMD_SECT_AP1 | PMD_SECT_AP2)
+
+#else
+/* AP[2:0] access permissions control, Short-descriptor format only */
+
+#  define PMD_SECT_AP_NONE    (0)
+#  define PMD_SECT_AP_RW12    (PMD_SECT_AP0)
+#  define PMD_SECT_AP_RW12_R0 (PMD_SECT_AP1)
+#  define PMD_SECT_AP_RW012   (PMD_SECT_AP0 | PMD_SECT_AP1)
+#  define PMD_SECT_AP_R12     (PMD_SECT_AP0 | PMD_SECT_AP2)
+#  define PMD_SECT_AP_R012    (PMD_SECT_AP0 | PMD_SECT_AP1 | PMD_SECT_AP2)
+
+/* Some mode-independent aliases */
+
+#  define PMD_SECT_AP_RW1     PMD_SECT_AP_RW12
+#  define PMD_SECT_AP_RW01    PMD_SECT_AP_RW012
+#  define PMD_SECT_AP_R1      PMD_SECT_AP_R12
+#  define PMD_SECT_AP_R01     PMD_SECT_AP_R012
+
+#endif
 
 /* Short-descriptor translation table second-level descriptor formats
  *
- * A PMD_TYPE_PTE level-one table entry provides the base address of the beginning of a second
- * -level page table. There are two types of page table entries:
+ * A PMD_TYPE_PTE level-one table entry provides the base address of the beginning
+ * of a second-level page table. There are two types of page table entries:
  *
  *   - Large page table entries support mapping of 64KB memory regions.
  *   - Small page table entries support mapping of 4KB memory regions.
@@ -385,12 +414,32 @@
  * PL2   - Software executing in Hyp mode
  */
 
-#define PTE_AP_NONE          (0)
-#define PTE_AP_RW12          (PTE_AP0)
-#define PTE_AP_RW12_R0       (PTE_AP1)
-#define PTE_AP_RW012         (PTE_AP0 | PTE_AP1)
-#define PTE_AP_R12           (PTE_AP0 | PTE_AP2)
-#define PTE_AP_R012          (PTE_AP0 | PTE_AP1 | PTE_AP2)
+#ifdef CONFIG_AFE_ENABLE
+/* AP[2:1] access permissions model.  AP[0] is used as an access flag: */
+
+#  define PTE_AP_RW1         (0)
+#  define PTE_AP_RW01        (PTE_AP1)
+#  define PTE_AP_R1          (PTE_AP2)
+#  define PTE_AP_R01         (PTE_AP1 | PTE_AP2)
+
+#else
+/* AP[2:0] access permissions control, Short-descriptor format only */
+
+#  define PTE_AP_NONE        (0)
+#  define PTE_AP_RW12        (PTE_AP0)
+#  define PTE_AP_RW12_R0     (PTE_AP1)
+#  define PTE_AP_RW012       (PTE_AP0 | PTE_AP1)
+#  define PTE_AP_R12         (PTE_AP0 | PTE_AP2)
+#  define PTE_AP_R012        (PTE_AP0 | PTE_AP1 | PTE_AP2)
+
+/* Some mode-independent aliases */
+
+#  define PTE_AP_RW1         PTE_AP_RW12
+#  define PTE_AP_RW01        PTE_AP_RW012
+#  define PTE_AP_R1          PTE_AP_R12
+#  define PTE_AP_R01         PTE_AP_R012
+
+#endif
 
 /* Default MMU flags for RAM memory, IO, vector region
  *
@@ -398,16 +447,16 @@
  */
 
 #define MMU_ROMFLAGS \
-  (PMD_TYPE_SECT | PMD_SECT_AP_R12)
+  (PMD_TYPE_SECT | PMD_SECT_AP_RW1)
 
 #define MMU_MEMFLAGS \
-  (PMD_TYPE_SECT | PMD_SECT_C | PMD_SECT_B | PMD_SECT_AP_RW12)
+  (PMD_TYPE_SECT | PMD_SECT_C | PMD_SECT_B | PMD_SECT_AP_RW1)
 
 #define MMU_IOFLAGS \
-  (PMD_TYPE_SECT | PMD_SECT_AP_RW012)
+  (PMD_TYPE_SECT | PMD_SECT_AP_RW01)
 
 #define MMU_L1_VECTORFLAGS   (PMD_TYPE_PTE)
-#define MMU_L2_VECTORFLAGS   (PTE_TYPE_SMALL | PTE_AP_RW12)
+#define MMU_L2_VECTORFLAGS   (PTE_TYPE_SMALL | PTE_AP_RW1)
 
 /* Mapped section size */
 
@@ -442,7 +491,7 @@
    * using this new virtual base address of the L2 page table.
    */
 
-#  undef PGTABLE_L2_VBASE
+#  undef  PGTABLE_L2_VBASE
 #  define PGTABLE_L2_VBASE (PGTABLE_BASE_VADDR+PGTABLE_L2_OFFSET)
 
 #endif /* CONFIG_PAGING */
