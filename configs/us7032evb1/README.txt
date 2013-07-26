@@ -110,8 +110,8 @@ Architecture selection
     and the up_prioritize_irq() API.  Should be defined.
   CONFIG_BOARD_LOOPSPERMSEC - for delay loops
   CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to SH1_LCEVB1
-  CONFIG_DRAM_SIZE - Describes the internal DRAM.
-  CONFIG_DRAM_START - The start address of internal DRAM
+  CONFIG_RAM_SIZE - Describes the internal DRAM.
+  CONFIG_RAM_START - The start address of internal DRAM
   CONFIG_ARCH_INTERRUPTSTACK - This architecture supports an interrupt
     stack. If defined, this symbol is the size of the interrupt
     stack in bytes.  If not defined, the user task stacks will be

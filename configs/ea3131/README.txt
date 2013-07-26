@@ -522,15 +522,15 @@ ARM/EA3131-specific Configuration Options
     CONFIG_ENDIAN_BIG - define if big endian (default is little
        endian)
 
-    CONFIG_DRAM_SIZE - For most ARM9 architectures, this describes the
+    CONFIG_RAM_SIZE - For most ARM9 architectures, this describes the
       size of installed DRAM.  For the LPC313X, it is used only to
       deterimine how to map the executable regions.  It is SDRAM size
       only if you are executing out of the external SDRAM; or it could
       be NOR FLASH size, external SRAM size, or internal SRAM size.
 
-    CONFIG_DRAM_START - The start address of installed DRAM (physical)
+    CONFIG_RAM_START - The start address of installed DRAM (physical)
 
-    CONFIG_DRAM_VSTART - The startaddress of DRAM (virtual)
+    CONFIG_RAM_VSTART - The startaddress of DRAM (virtual)
 
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs

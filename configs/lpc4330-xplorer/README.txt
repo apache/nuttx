@@ -431,8 +431,8 @@ Code Red IDE/Tools
   To execute from SPIFI, you would need to set:
 
     CONFIG_LPC43_BOOT_SPIFI=y      : Executing from SPIFI
-    CONFIG_DRAM_SIZE=(128*1024)    : SRAM Bank0 size
-    CONFIG_DRAM_START=0x10000000   : SRAM Bank0 base address
+    CONFIG_RAM_SIZE=(128*1024)    : SRAM Bank0 size
+    CONFIG_RAM_START=0x10000000   : SRAM Bank0 base address
     CONFIG_SPIFI_OFFSET=(512*1024) : SPIFI file system offset
 
   To boot the LPC4330-Xplorer from SPIFI the DIP switches should be 1-OFF,
@@ -707,15 +707,15 @@ LPC4330-Xplorer Configuration Options
     CONFIG_ENDIAN_BIG - define if big endian (default is little
        endian)
 
-    CONFIG_DRAM_SIZE - Describes the installed DRAM (CPU SRAM in this case):
+    CONFIG_RAM_SIZE - Describes the installed DRAM (CPU SRAM in this case):
 
-       CONFIG_DRAM_SIZE=(32*1024) (32Kb)
+       CONFIG_RAM_SIZE=(32*1024) (32Kb)
 
        There is an additional 32Kb of SRAM in AHB SRAM banks 0 and 1.
 
-    CONFIG_DRAM_START - The start address of installed DRAM
+    CONFIG_RAM_START - The start address of installed DRAM
 
-       CONFIG_DRAM_START=0x10000000
+       CONFIG_RAM_START=0x10000000
 
     CONFIG_ARCH_IRQPRIO - The LPC43xx supports interrupt prioritization
 
@@ -955,8 +955,8 @@ Where <subdir> is one of the following:
     To execute from SPIFI, you would need to set:
 
       CONFIG_LPC43_BOOT_SPIFI=y      : Executing from SPIFI
-      CONFIG_DRAM_SIZE=(128*1024)    : SRAM Bank0 size
-      CONFIG_DRAM_START=0x10000000   : SRAM Bank0 base address
+      CONFIG_RAM_SIZE=(128*1024)    : SRAM Bank0 size
+      CONFIG_RAM_START=0x10000000   : SRAM Bank0 base address
       CONFIG_SPIFI_OFFSET=(512*1024) : SPIFI file system offset
 
     CONFIG_MM_REGIONS should also be increased if you want to other SRAM banks

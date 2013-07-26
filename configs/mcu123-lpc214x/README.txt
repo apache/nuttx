@@ -248,9 +248,9 @@ ARM/LPC214X-specific Configuration Options
 	CONFIG_ENDIAN_BIG - define if big endian (default is little
 	   endian)
 
-	CONFIG_DRAM_SIZE - Describes the installed RAM.
+	CONFIG_RAM_SIZE - Describes the installed RAM.
 
-	CONFIG_DRAM_START - The start address of installed RAM
+	CONFIG_RAM_START - The start address of installed RAM
 
 	CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
 	   have LEDs
