@@ -49,8 +49,10 @@
 
 #include <arch/board/board.h>
 
+#include "chip.h"
 #include "up_arch.h"
 #include "up_internal.h"
+#include "mmu.h"
 
 /****************************************************************************
  * Private Definitions
@@ -93,6 +95,30 @@
    (!defined(SAMA5_CONFIG_EBICS3_SRAM) && !defined(CONFIG_SAMA5_EBICS3_PSRAM))
    
 #  undef SAMA5_EBICS3_HEAP
+#endif
+
+/* Adjust the size of the primary RAM region if (1) internal SRAM is the
+ * the primary RAM region, (2) other logic has positioned the MMU page
+ * table at the end of the internal SRAM, and (3) this is not a kernel
+ * build using a separate kernel heap.
+ *
+ * NOTES:
+ * - If this is a kernel build using a separate kernel heap, then the heap
+ *   if defined by the userspace blob.
+ *
+ * - Internal SRAM is the "primary" RAM region in the case where we are
+ *   executing from internal SRAM.  In that case, g_idle_topstack points
+ *   into internal SRAM and CONFIG_DRAM_END is the end of internal SRAM.
+ */
+
+#if defined(CONFIG_BOOT_RUNFROMISRAM) && defined(PGTABLE_IN_HIGHSRAM) && \
+  (!defined(CONFIG_NUTTX_KERNEL)      || !defined(CONFIG_MM_KERNEL_HEAP))
+#  define ADJUSTED_RAM_END (CONFIG_DRAM_END-PGTABLE_SIZE)
+
+/* Otherwise, the heap extends to the end of the primary RAM */
+
+#else
+#  define ADJUSTED_RAM_END CONFIG_DRAM_END
 #endif
 
 /****************************************************************************
@@ -150,10 +176,10 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = CONFIG_DRAM_END - ubase;
+  size_t    usize = ADJUSTED_RAM_END - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)CONFIG_DRAM_END);
+  DEBUGASSERT(ubase < (uintptr_t)ADJUSTED_RAM_END);
 
   /* Return the user-space heap settings */
 
@@ -166,7 +192,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_idle_topstack;
-  *heap_size  = CONFIG_DRAM_END - g_idle_topstack;
+  *heap_size  = ADJUSTED_RAM_END - g_idle_topstack;
 #endif
 }
 
@@ -190,10 +216,10 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = CONFIG_DRAM_END - ubase;
+  size_t    usize = ADJUSTED_RAM_END - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)CONFIG_DRAM_END);
+  DEBUGASSERT(ubase < (uintptr_t)ADJUSTED_RAM_END);
 
   /* Return the kernel heap settings (i.e., the part of the heap region
    * that was not dedicated to the user heap).

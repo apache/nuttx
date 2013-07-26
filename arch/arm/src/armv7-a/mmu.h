@@ -539,12 +539,10 @@
 /* We position the locked region PTEs at an offset into the first
  * L2 page table.  The L1 entry points to an 1Mb aligned virtual
  * address.  The actual L2 entry will be offset into the aligned
- * L2 table.
+ * L2 table.  For 4KB, "small" pages:
  *
- * Coarse: PG_L1_PADDRMASK=0xfffffc00
- *         OFFSET=(((a) & 0x000fffff) >> 12) << 2)
- * Fine:   PG_L1_PADDRMASK=0xfffff000
- *         OFFSET=(((a) & 0x000fffff) >> 10) << 2)
+ *   PG_L1_PADDRMASK=0xfffff000
+ *   OFFSET=(((a) & 0x000fffff) >> 10) << 2)
  */
 
 #define PG_L1_LOCKED_PADDR      (PGTABLE_BASE_PADDR + ((PG_LOCKED_VBASE >> 20) << 2))
@@ -866,10 +864,9 @@
  * Name: pg_l1span
  *
  * Description:
- *   Write several, contiguous unmapped coarse L1 page table entries.  As
- *   many entries will be written as  many as needed to span npages.  This
- *   macro is used when CONFIG_PAGING is enable.  This case, it is used as
- *   follows:
+ *   Write several, contiguous, unmapped, small L1 page table entries.  As many
+ *   entries will be written as  many as needed to span npages.  This macro is
+ *   used when CONFIG_PAGING is enable.  In this case, it is used as follows:
  *
  *	ldr	r0, =PG_L1_PGTABLE_PADDR	<-- Address in the L1 table
  *	ldr	r1, =PG_L2_PGTABLE_PADDR	<-- Physical address of L2 page table
@@ -905,7 +902,7 @@
 	.macro	pg_l1span, l1, l2, npages, ppage, mmuflags, tmp
 	b		2f
 1:
-	/* Write the L1 table entry that refers to this (unmapped) coarse page
+	/* Write the L1 table entry that refers to this (unmapped) small page
 	 * table.
 	 *
 	 * tmp = (l2table | mmuflags), the value to write into the page table

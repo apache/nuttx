@@ -371,10 +371,17 @@
 
 /* MMU Page Table Location
  *
- * Determine the address of the MMU page table.  We will try to place that page
- * table at the beginng of ISRAM0 if the vectors are at the high address, 0xffff:0000
- * or at the end of ISRAM1 (or ISRAM0 if ISRAM1 is not available in this architecture)
- * if the vectors are at 0x0000:0000
+ * Determine the address of the MMU page table.  Regardless of the memory
+ * configuration, we will keep the page table in the SAMA5's internal SRAM.
+ * We will always attempt to use the bottom 16KB of internal SRAM for the
+ * page table, but there are a few conditions that affect this:
+ *
+ * 1) If CONFIG_ARCH_ROMPGTABLE, then the page table resides in ROM and we
+ *    will not use any page table in RAM.
+ * 2) We are executing out of SRAM.  In this case, vectors will reside at
+ *    the bottom of SRAM, following by .text, .data, .bss, and heep.  The
+ *    page table will be squeezed into the end of internal SRAM in this
+ *    case.
  *
  * Or... the user may specify the address of the page table explicitly be defining
  * CONFIG_PGTABLE_VADDR and CONFIG_PGTABLE_PADDR in the configuration or board.h file.
@@ -407,11 +414,12 @@
    * will probably be in error.  In that case PGTABLE_BASE_VADDR is defined
    * in the file mmu.h
    *
-   * We must declare the page table in ISRAM0 or 1.  We decide depending upon
-   * where the vector table was place.
+   * We must declare the page table at the bottom or at the top of internal
+   * SRAM.  We pick the the bottom of internal SRAM *unless* there are vectors
+   * in the way at that position.
    */
 
-#  ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
+#if defined(CONFIG_BOOT_RUNFROMISRAM) && defined(CONFIG_ARCH_LOWVECTORS)
 
   /* In this case, table must lie at the top 16Kb of ISRAM1 (or ISRAM0 if ISRAM1
    * is not available in this architecture)
@@ -434,9 +442,8 @@
 #    define PGTABLE_IN_HIGHSRAM   1
 #  else
 
-  /* Otherwise, ISRAM1 (or ISRAM0 if ISRAM1 is not available in this
-   * architecture) will be mapped so that the end of the SRAM region will
-   * provide memory for the vectors.  The page table will then be places at
+  /* Otherwise, the vectors lie at another location (perhaps in NOR FLASH, perhaps
+   * elsewhere in internal SRAM).  The page table will then be positioned at
    * the first 16Kb of ISRAM0.
    */
 
@@ -459,7 +466,7 @@
  *
  * That is the offset where the main L2 page table will be positioned.  This
  * corresponds to page table offsets 0x000002000 through 0x000003c00.  That
- * is 1792 entries mapping 1MB of address each for a total of 1.75 GB of virtual
+ * is 1792 entries, each mapping 4KB of address for a total of 7MB of virtual
  * address space)
  */
 
@@ -470,9 +477,13 @@
  *
  *   0x00a00000-0x0fffffff: Undefined (246 MB)
  *
- * This corresponds to page table offsets 0x000000028 through 0x00000400.  That
- * is 246 entries mapping 1MB of address each for a total of 246 MB of virtual
- * address space)
+ * This corresponds to page table offsets 0x000000028 through 0x00000400.
+ * That is 246 entries each mapping 4KB of address each for a total of 984KB
+ * of virtual address space).  For low vectors, this L2 page table can can
+ * span: 0x0000:0000 through 0x000f:6000 leaving up to the full 984KB for
+ * vector logic.  For high vectors located at 0xffff:0000, this L2 page
+ * table can cover only 0xfff0:0000 through 0xffff:6000 which leaves 5KB for
+ * vectors.
  */
 
 #define VECTOR_L2_OFFSET          0x000000028
