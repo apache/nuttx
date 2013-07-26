@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: June 11, 2013</p>
+      <p>Last Updated: July 26, 2013</p>
     </td>
   </tr>
 </table>
@@ -4367,12 +4367,12 @@ void (*notify)(FAR struct pm_callback_s *cb, enum pm_state_e pmstate);
   Some architectures require a description of the RAM configuration:
 </p>
 <ul>
-  <li><code>CONFIG_DRAM_SIZE</code>:
-    Describes the installed DRAM.</li>
-  <li><code>CONFIG_DRAM_START</code>:
-    The start address of DRAM (physical)</li>
-  <li><code>CONFIG_DRAM_VSTART</code>:
-    The start address of DRAM (virtual)</li>
+  <li><code>CONFIG_RAM_SIZE</code>:
+    Describes the primary installed RAM.</li>
+  <li><code>CONFIG_RAM_START</code>:
+    The start address of primary RAM (physical)</li>
+  <li><code>CONFIG_RAM_VSTART</code>:
+    The start address of primary RAM (virtual).  This is only needed on platforms that support address mapping.</li>
 </ul>
 
 <h2>Build Options</h2>
@@ -5063,14 +5063,14 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
   <li>
     <code>CONFIG_PAGING_NLOCKED</code>:
     This is the number of locked pages in the memory map.
-    The locked address region will then be from <code>CONFIG_DRAM_VSTART</code> through
-    (<code>CONFIG_DRAM_VSTART</code> + <code>CONFIG_PAGING_PAGESIZE</code>*<code>CONFIG_PAGING_NLOCKED</code>)
+    The locked address region will then be from <code>CONFIG_RAM_VSTART</code> through
+    (<code>CONFIG_RAM_VSTART</code> + <code>CONFIG_PAGING_PAGESIZE</code>*<code>CONFIG_PAGING_NLOCKED</code>)
   </li>
   <li>
     <code>CONFIG_PAGING_LOCKED_PBASE</code> and <code>CONFIG_PAGING_LOCKED_VBASE</code>:
     These may be defined to determine the base address of the locked page regions.
-    If neither are defined, the logic will be set the bases to <code>CONFIG_DRAM_START</code>
-    and <code>CONFIG_DRAM_VSTART</code> (i.e., it assumes that the base address of the locked
+    If neither are defined, the logic will be set the bases to <code>CONFIG_RAM_START</code>
+    and <code>CONFIG_RAM_VSTART</code> (i.e., it assumes that the base address of the locked
     region is at the beginning of RAM).
     <b>NOTE</b>:
     In some architectures, it may be necessary to take some memory from the beginning
