@@ -48,7 +48,7 @@
 
 /* Locate the IDLE thread stack at the end of RAM. */
 
-#define CONFIG_STACK_END   CONFIG_DRAM_SIZE
+#define CONFIG_STACK_END   CONFIG_RAM_SIZE
 #define CONFIG_STACK_BASE  (CONFIG_STACK_END - CONFIG_IDLETHREAD_STACKSIZE)
 
 /* The heap then extends from the linker determined beginning of the heap (s__HEAP).

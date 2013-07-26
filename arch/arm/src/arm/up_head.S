@@ -128,11 +128,11 @@
    * beginning of RAM.
    */
 
-#  if !defined(CONFIG_DRAM_START) || !defined(CONFIG_DRAM_VSTART)
-#    error "CONFIG_DRAM_START or CONFIG_DRAM_VSTART is not defined"
+#  if !defined(CONFIG_RAM_START) || !defined(CONFIG_RAM_VSTART)
+#    error "CONFIG_RAM_START or CONFIG_RAM_VSTART is not defined"
 #  endif
 
-#  if CONFIG_DRAM_START == CONFIG_DRAM_VSTART
+#  if CONFIG_RAM_START == CONFIG_RAM_VSTART
 #    define CONFIG_IDENTITY_TEXTMAP 1
 #  endif
 
@@ -162,13 +162,13 @@
  ****************************************************************************/
 
 /* RX_NSECTIONS determines the number of 1Mb sections to map for the
- * Read/eXecute address region.  This is based on CONFIG_DRAM_SIZE.  For most
- * ARM9 architectures, CONFIG_DRAM_SIZE describes the size of installed SDRAM.
+ * Read/eXecute address region.  This is based on CONFIG_RAM_SIZE.  For most
+ * ARM9 architectures, CONFIG_RAM_SIZE describes the size of installed SDRAM.
  * But for other architectures, this might refer to the size of FLASH or
  * SRAM regions. (bad choice of naming).
  */
 
-#define RX_NSECTIONS ((CONFIG_DRAM_SIZE+0x000fffff) >> 20)
+#define RX_NSECTIONS ((CONFIG_RAM_SIZE+0x000fffff) >> 20)
 
 /****************************************************************************
  * Assembly Macros

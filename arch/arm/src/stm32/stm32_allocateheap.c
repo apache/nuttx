@@ -63,7 +63,7 @@
  * following definitions must be provided to specify the size and
  * location of internal(system) SRAM:
  *
- * CONFIG_DRAM_END            : End address (+1) of SRAM (F1 family only, the
+ * CONFIG_RAM_END            : End address (+1) of SRAM (F1 family only, the
  *                            : F4 family uses the a priori end of SRAM)
  *
  * The F4 family also contains internal CCM SRAM.  This SRAM is different
@@ -93,14 +93,14 @@
 #endif
 
 /* The STM32L15xxx family has only internal SRAM.  The heap is in one contiguous
- * block starting at g_idle_topstack and extending through CONFIG_DRAM_END.
+ * block starting at g_idle_topstack and extending through CONFIG_RAM_END.
  */
 
 #if defined(CONFIG_STM32_STM32L15XX)
 
    /* Set the end of system SRAM */
 
-#  define SRAM1_END CONFIG_DRAM_END
+#  define SRAM1_END CONFIG_RAM_END
 
    /* There is no FSMC (Other EnergyLite STM32's do have an FSMC, but not the STM32L15X */
 
@@ -118,7 +118,7 @@
 #  endif
 
 /* For the STM312F10xxx family, all internal SRAM is in one contiguous block
- * starting at g_idle_topstack and extending through CONFIG_DRAM_END (my apologies
+ * starting at g_idle_topstack and extending through CONFIG_RAM_END (my apologies
  * for the bad naming).  In addition, external FSMC SRAM may be available.
  */
 
@@ -126,7 +126,7 @@
 
    /* Set the end of system SRAM */
 
-#  define SRAM1_END CONFIG_DRAM_END
+#  define SRAM1_END CONFIG_RAM_END
 
    /* Check if external FSMC SRAM is provided */
 
@@ -160,7 +160,7 @@
 
    /* Set the end of system SRAM */
 
-#  define SRAM1_END CONFIG_DRAM_END
+#  define SRAM1_END CONFIG_RAM_END
 
    /* Set the range of CCM SRAM as well (although we may not use it) */
 

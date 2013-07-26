@@ -62,7 +62,7 @@
  *
  * We cannot add the region if it is if we are executing from it!  In that
  * case, the remainder of the memory will automatically be added to the heap
- * based on g_idle_topstack and CONFIG_DRAM_END
+ * based on g_idle_topstack and CONFIG_RAM_END
  */
 
 #if defined(CONFIG_SAMA5_BOOT_ISRAM)
@@ -108,17 +108,17 @@
  *
  * - Internal SRAM is the "primary" RAM region in the case where we are
  *   executing from internal SRAM.  In that case, g_idle_topstack points
- *   into internal SRAM and CONFIG_DRAM_END is the end of internal SRAM.
+ *   into internal SRAM and CONFIG_RAM_END is the end of internal SRAM.
  */
 
 #if defined(CONFIG_BOOT_RUNFROMISRAM) && defined(PGTABLE_IN_HIGHSRAM) && \
   (!defined(CONFIG_NUTTX_KERNEL)      || !defined(CONFIG_MM_KERNEL_HEAP))
-#  define ADJUSTED_RAM_END (CONFIG_DRAM_END-PGTABLE_SIZE)
+#  define ADJUSTED_RAM_END (CONFIG_RAM_END-PGTABLE_SIZE)
 
 /* Otherwise, the heap extends to the end of the primary RAM */
 
 #else
-#  define ADJUSTED_RAM_END CONFIG_DRAM_END
+#  define ADJUSTED_RAM_END CONFIG_RAM_END
 #endif
 
 /****************************************************************************

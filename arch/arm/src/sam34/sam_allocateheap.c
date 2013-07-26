@@ -149,12 +149,12 @@
 
 /* Check common SRAM0 configuration */
 
-#if CONFIG_DRAM_END > (SAM_INTSRAM0_BASE+SAM34_SRAM0_SIZE)
-#  error "CONFIG_DRAM_END is beyond the end of SRAM0"
-#  undef CONFIG_DRAM_END
-#  define CONFIG_DRAM_END (SAM_INTSRAM0_BASE+SAM34_SRAM0_SIZE)
-#elif CONFIG_DRAM_END < (SAM_INTSRAM0_BASE+SAM34_SRAM0_SIZE)
-#  warning "CONFIG_DRAM_END is before end of SRAM0... not all of SRAM0 used"
+#if CONFIG_RAM_END > (SAM_INTSRAM0_BASE+SAM34_SRAM0_SIZE)
+#  error "CONFIG_RAM_END is beyond the end of SRAM0"
+#  undef CONFIG_RAM_END
+#  define CONFIG_RAM_END (SAM_INTSRAM0_BASE+SAM34_SRAM0_SIZE)
+#elif CONFIG_RAM_END < (SAM_INTSRAM0_BASE+SAM34_SRAM0_SIZE)
+#  warning "CONFIG_RAM_END is before end of SRAM0... not all of SRAM0 used"
 #endif
 
 /****************************************************************************
@@ -211,21 +211,21 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = CONFIG_DRAM_END - ubase;
+  size_t    usize = CONFIG_RAM_END - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)CONFIG_DRAM_END);
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
 
   /* Adjust that size to account for MPU alignment requirements.
-   * NOTE that there is an implicit assumption that the CONFIG_DRAM_END
+   * NOTE that there is an implicit assumption that the CONFIG_RAM_END
    * is aligned to the MPU requirement.
    */
 
   log2  = (int)mpu_log2regionfloor(usize);
-  DEBUGASSERT((CONFIG_DRAM_END & ((1 << log2) - 1)) == 0);
+  DEBUGASSERT((CONFIG_RAM_END & ((1 << log2) - 1)) == 0);
 
   usize = (1 << log2);
-  ubase = CONFIG_DRAM_END - usize;
+  ubase = CONFIG_RAM_END - usize;
 
   /* Return the user-space heap settings */
 
@@ -242,7 +242,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_idle_topstack;
-  *heap_size  = CONFIG_DRAM_END - g_idle_topstack;
+  *heap_size  = CONFIG_RAM_END - g_idle_topstack;
 #endif
 }
 
@@ -265,21 +265,21 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = CONFIG_DRAM_END - ubase;
+  size_t    usize = CONFIG_RAM_END - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)CONFIG_DRAM_END);
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
 
   /* Adjust that size to account for MPU alignment requirements.
-   * NOTE that there is an implicit assumption that the CONFIG_DRAM_END
+   * NOTE that there is an implicit assumption that the CONFIG_RAM_END
    * is aligned to the MPU requirement.
    */
 
   log2  = (int)mpu_log2regionfloor(usize);
-  DEBUGASSERT((CONFIG_DRAM_END & ((1 << log2) - 1)) == 0);
+  DEBUGASSERT((CONFIG_RAM_END & ((1 << log2) - 1)) == 0);
 
   usize = (1 << log2);
-  ubase = CONFIG_DRAM_END - usize;
+  ubase = CONFIG_RAM_END - usize;
 
   /* Return the kernel heap settings (i.e., the part of the heap region
    * that was not dedicated to the user heap).

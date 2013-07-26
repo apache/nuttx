@@ -87,7 +87,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 {
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_idle_topstack;
-  *heap_size  = (IMX_SDRAM_VSECTION + CONFIG_DRAM_SIZE) - g_idle_topstack;
+  *heap_size  = (IMX_SDRAM_VSECTION + CONFIG_RAM_SIZE) - g_idle_topstack;
 }
 
 /****************************************************************************
@@ -107,8 +107,8 @@ void up_addregion(void)
    */
 
 #if !defined(CONFIG_BOOT_RUNFROMFLASH) && !defined(CONFIG_BOOT_COPYTORAM)
-#  if (CONFIG_DRAM_NUTTXENTRY & 0xffff0000) != CONFIG_DRAM_VSTART
-  uint32_t start = CONFIG_DRAM_VSTART + 0x1000;
+#  if (CONFIG_DRAM_NUTTXENTRY & 0xffff0000) != CONFIG_RAM_VSTART
+  uint32_t start = CONFIG_RAM_VSTART + 0x1000;
   uint32_t end   = (CONFIG_DRAM_NUTTXENTRY & 0xffff0000);
   kmm_addregion((FAR void*)start, end - start);
 #  endif
