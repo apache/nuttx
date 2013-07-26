@@ -195,7 +195,7 @@
  */
 
 #ifdef CONFIG_ARCH_LOWVECTORS
-#  warning "REVISIT"
+#  warning REVISIT
 #endif
 
 //#ifndef CONFIG_ARCH_LOWVECTORS
@@ -594,7 +594,7 @@ __start:
 
 	/* Remove the temporary mapping (if one was made).  The following assumes
 	 * that the total RAM size is > 1Mb and extends that initial mapping to
-	 * cover additinal RAM sections.
+	 * cover additional RAM sections.
 	 */
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
@@ -622,18 +622,26 @@ __start:
 #elif defined(CONFIG_BOOT_RUNFROMFLASH)
 #  error "Logic not implemented"
 #else
-	/* Now setup the pagetables for our normal SDRAM mappings mapped region.
+	/* Get the following value (if we did not already do so above):
+	 *
+	 *   R4 = Virtual address of the page table
+	 *   R3 = Physical address of the NuttX execution space (aligned to a
+	 *        one megabyte addres boundary
+	 */
+
+#ifdef CONFIG_IDENTITY_TEXTMAP
+	ldr		r4, .LCvpgtable			/* r4=virtual page table */
+#endif
+	ldr		r3, .LCnuttxpaddr		/* r3=Aligned Nuttx start address (physical) */
+
+	/* Now setup the page tables for our normal mapped execution region.
 	 * We round NUTTX_START_VADDR down to the nearest megabyte boundary.
 	 */
 
 	ldr		r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
 	add		r3, r3, r1				/* r3=flags + base */
 
-	add		r0, r4, #(NUTTX_START_VADDR & 0xff000000) >> 18
-	bic		r2, r3, #0x00f00000
-	str		r2, [r0]
-
-	add		r0, r0, #(NUTTX_START_VADDR & 0x00f00000) >> 18
+	add		r0, r4, #(NUTTX_START_VADDR & 0xfff00000) >> 18
 	str		r3, [r0], #4
 
 	/* Now map the remaining RX_NSECTIONS-1 sections of the executable
@@ -713,6 +721,13 @@ __start:
 	.long	_sbss
 	.long	_ebss
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+
+#if !defined(CONFIG_PAGING) && !defined(CONFIG_BOOT_RUNFROMFLASH)
+
+.LCnuttxpaddr:
+	.long	NUTTX_START_PADDR & 0xfff00000
+
+#endif
 
 #ifdef CONFIG_PAGING
 

@@ -217,6 +217,7 @@
  */
 
 #define NUTTX_START_VADDR         ((CONFIG_DRAM_NUTTXENTRY & 0xfff00000) | PGTABLE_SIZE)
+#define NUTTX_START_PADDR         (IMX_SDRAM0_PSECTION | PGTABLE_SIZE)
 
 #if NUTTX_START_VADDR != CONFIG_DRAM_NUTTXENTRY
 # error "CONFIG_DRAM_NUTTXENTRY does not have correct offset for page table"

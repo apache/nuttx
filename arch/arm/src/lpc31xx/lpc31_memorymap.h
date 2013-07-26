@@ -247,12 +247,16 @@
 
 #if defined(CONFIG_BOOT_RUNFROMFLASH)
 #  define NUTTX_START_VADDR            LPC31_MPMC_VADDR
+#  define NUTTX_START_PADDR            LPC31_MPMC_PADDR
 #elif defined(CONFIG_BOOT_RUNFROMSDRAM)
 #  define NUTTX_START_VADDR            LPC31_EXTSDRAM0_VSECTION
+#  define NUTTX_START_PADDR            LPC31_EXTSDRAM0_PSECTION
 #elif defined(CONFIG_BOOT_RUNFROMEXTSRAM)
 #  define NUTTX_START_VADDR            LPC31_EXTSRAM0_VADDR
+#  define NUTTX_START_PADDR            LPC31_EXTSRAM0_PADDR
 #else /* CONFIG_BOOT_RUNFROMISRAM, CONFIG_PAGING */
 #  define NUTTX_START_VADDR            LPC31_INTSRAM0_VADDR
+#  define NUTTX_START_PADDR            LPC31_INTSRAM0_PADDR
 #endif
 
 /* Determine the address of the MMU page table.  We will try to place that page

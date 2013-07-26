@@ -176,6 +176,7 @@
  */
 
 #define NUTTX_START_VADDR            (DM320_SDRAM_VADDR+PGTABLE_SIZE)
+#define NUTTX_START_PADDR            (DM320_SDRAM_PADDR+PGTABLE_SIZE)
 
 /* Section MMU Flags                 Flags              CW */
 #define DM320_FLASH_MMUFLAGS         MMU_IOFLAGS     /* -- */
