@@ -448,29 +448,6 @@
 #  endif
 #endif
 
-/* Base address of the interrupt vector table.
- *
- *   SAM_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
- *   SAM_VECTOR_VSRAM - Virtual address of vector table in SRAM
- *   SAM_VECTOR_VADDR - Virtual address of vector table (0x00000000 or 0xffff0000)
- */
-
-#define VECTOR_TABLE_SIZE         0x00010000
-#ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
-#  define SAM_VECTOR_PADDR        SAM_ISRAM0_PADDR
-#  define SAM_VECTOR_VSRAM        SAM_ISRAM0_VADDR
-#  define SAM_VECTOR_VADDR        0x00000000
-#else  /* Vectors located at 0xffff:0000 -- this probably does not work */
-#  ifdef SAM_ISRAM1_SIZE >= VECTOR_TABLE_SIZE
-#    define SAM_VECTOR_PADDR      (SAM_ISRAM1_PADDR+SAM_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
-#    define SAM_VECTOR_VSRAM      (SAM_ISRAM1_VADDR+SAM_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
-#  else
-#    define SAM_VECTOR_PADDR      (SAM_ISRAM0_PADDR+SAM_ISRAM0_SIZE-VECTOR_TABLE_SIZE)
-#    define SAM_VECTOR_VSRAM      (SAM_ISRAM0_VADDR+SAM_ISRAM0_SIZE-VECTOR_TABLE_SIZE)
-#  endif
-#  define SAM_VECTOR_VADDR        0xffff0000
-#endif
-
 /* Level 2 Page table start addresses.
  *
  * 16Kb of memory is reserved hold the page table for the virtual mappings.  A
@@ -514,8 +491,8 @@
 #define PGTABLE_L2_PBASE          (PGTABLE_BASE_PADDR+PGTABLE_L2_OFFSET)
 #define PGTABLE_L2_VBASE          (PGTABLE_BASE_VADDR+PGTABLE_L2_OFFSET)
 
-#define VECTOR_L2_PBASE           (SAM_VECTOR_PADDR+VECTOR_L2_OFFSET)
-#define VECTOR_L2_VBASE           (SAM_VECTOR_VADDR+VECTOR_L2_OFFSET)
+#define VECTOR_L2_PBASE           (PGTABLE_BASE_PADDR+VECTOR_L2_OFFSET)
+#define VECTOR_L2_VBASE           (PGTABLE_BASE_VADDR+VECTOR_L2_OFFSET)
 
 /* Page table end addresses: */
 
@@ -524,6 +501,29 @@
 
 #define VECTOR_L2_END_PADDR       (VECTOR_L2_PBASE+VECTOR_L2_SIZE)
 #define VECTOR_L2_END_VADDR       (VECTOR_L2_VBASE+VECTOR_L2_SIZE)
+
+/* Base address of the interrupt vector table.
+ *
+ *   SAM_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
+ *   SAM_VECTOR_VSRAM - Virtual address of vector table in SRAM
+ *   SAM_VECTOR_VADDR - Virtual address of vector table (0x00000000 or 0xffff0000)
+ */
+
+#define VECTOR_TABLE_SIZE         0x00010000
+#ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
+#  define SAM_VECTOR_PADDR        SAM_ISRAM0_PADDR
+#  define SAM_VECTOR_VSRAM        SAM_ISRAM0_VADDR
+#  define SAM_VECTOR_VADDR        0x00000000
+#else  /* Vectors located at 0xffff:0000 -- this probably does not work */
+#  ifdef SAM_ISRAM1_SIZE >= VECTOR_TABLE_SIZE
+#    define SAM_VECTOR_PADDR      (SAM_ISRAM1_PADDR+SAM_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
+#    define SAM_VECTOR_VSRAM      (SAM_ISRAM1_VADDR+SAM_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
+#  else
+#    define SAM_VECTOR_PADDR      (SAM_ISRAM0_PADDR+SAM_ISRAM0_SIZE-VECTOR_TABLE_SIZE)
+#    define SAM_VECTOR_VSRAM      (SAM_ISRAM0_VADDR+SAM_ISRAM0_SIZE-VECTOR_TABLE_SIZE)
+#  endif
+#  define SAM_VECTOR_VADDR        0xffff0000
+#endif
 
 /************************************************************************************
  * Public Types
