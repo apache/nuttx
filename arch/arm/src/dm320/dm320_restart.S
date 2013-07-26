@@ -121,7 +121,7 @@ up_phyrestart:
 
 	.type	.LCphysrestart, %object
 .LCphysrestart:
-	.long	(up_phyrestart - CONFIG_DRAM_VSTART - CONFIG_DRAM_START)
+	.long	(up_phyrestart - CONFIG_RAM_VSTART - CONFIG_RAM_START)
 .LCbtldrentry:
 	.long	DM320_EXT_MEM_PADDR
 

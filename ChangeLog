@@ -5200,4 +5200,9 @@
 	  Fix a bug (uninitialized register error) that crept in the ARM9
 	  boot-up code several years ago and was cloned into the Cortex-A5
 	  code.  Obviously no one has used the ARM9 NuttX port for years!
+	* Many files:  Finally... I changed the naming to of configuration
+	  variables like CONFIG_DRAM_ to CONFIG_RAM_.  This has bothered
+	  me for a long time since most boards don't have DRAM.  The more
+	  generic RAM naming should not produce so much cognitive dissonance
+	  (2013-7-26).
 

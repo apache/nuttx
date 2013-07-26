@@ -181,8 +181,8 @@ int main(int argc, char **argv, char **envp)
   printf("/* If the end of RAM is not specified then it is assumed to be the beginning\n");
   printf(" * of RAM plus the RAM size.\n");
   printf(" */\n\n");
-  printf("#ifndef CONFIG_DRAM_END\n");
-  printf("# define CONFIG_DRAM_END (CONFIG_DRAM_START+CONFIG_DRAM_SIZE)\n");
+  printf("#ifndef CONFIG_RAM_END\n");
+  printf("# define CONFIG_RAM_END (CONFIG_RAM_START+CONFIG_RAM_SIZE)\n");
   printf("#endif\n\n");
   printf("/* If no file streams are configured, then make certain that buffered I/O\n");
   printf(" * support is disabled\n");

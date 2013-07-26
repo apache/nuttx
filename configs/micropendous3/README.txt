@@ -429,14 +429,14 @@ Micropendous3 Configuration Options
     CONFIG_ENDIAN_BIG - define if big endian (default is little
        endian)
 
-    CONFIG_DRAM_SIZE - Describes the installed DRAM.  One of:
+    CONFIG_RAM_SIZE - Describes the installed DRAM.  One of:
 
-       CONFIG_DRAM_SIZE=(4*1024) - (4Kb)
-       CONFIG_DRAM_SIZE=(8*1024) - (8Kb)
+       CONFIG_RAM_SIZE=(4*1024) - (4Kb)
+       CONFIG_RAM_SIZE=(8*1024) - (8Kb)
 
-    CONFIG_DRAM_START - The start address of installed SRAM
+    CONFIG_RAM_START - The start address of installed SRAM
 
-       CONFIG_DRAM_START=0x800100
+       CONFIG_RAM_START=0x800100
 
     CONFIG_ARCH_LEDS - Use LEDs to show state. Unique to boards that
        have LEDs

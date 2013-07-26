@@ -194,7 +194,7 @@ extern volatile uint32_t *current_regs;
 /* This is the beginning of heap as provided from up_head.S.
  * This is the first address in DRAM after the loaded
  * program+bss+idle stack.  The end of the heap is
- * CONFIG_DRAM_END
+ * CONFIG_RAM_END
  */
 
 extern const uint32_t g_idle_topstack;

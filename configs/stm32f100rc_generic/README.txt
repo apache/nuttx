@@ -334,13 +334,13 @@ configured on pins PA3 and PA2, respectively.
     CONFIG_ENDIAN_BIG - define if big endian (default is little
        endian)
 
-    CONFIG_DRAM_SIZE - Describes the installed DRAM (SRAM in this case):
+    CONFIG_RAM_SIZE - Describes the installed DRAM (SRAM in this case):
 
-       CONFIG_DRAM_SIZE=24576 (24kB)
+       CONFIG_RAM_SIZE=24576 (24kB)
 
-    CONFIG_DRAM_START - The start address of installed DRAM
+    CONFIG_RAM_START - The start address of installed DRAM
 
-       CONFIG_DRAM_START=0x20000000
+       CONFIG_RAM_START=0x20000000
 
     CONFIG_ARCH_IRQPRIO - STM32F100RC chip supports interrupt prioritization
 

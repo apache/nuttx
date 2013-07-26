@@ -88,8 +88,8 @@
 
 /* CONFIG_PAGING_LOCKED_P/VBASE - May be defined to determine the base
  * address of the locked page regions (lowest in memory).  If neither
- * are defined, then this logic will be set the bases to CONFIG_DRAM_START
- * and CONFIG_DRAM_VSTART (i.e., it assumes that the base address of the
+ * are defined, then this logic will be set the bases to CONFIG_RAM_START
+ * and CONFIG_RAM_VSTART (i.e., it assumes that the base address of the
  * locked region is at the beginning of RAM).
  *
  * NOTE:  In some architectures, it may be necessary to take some memory
@@ -105,8 +105,8 @@
 #  define PG_LOCKED_PBASE          CONFIG_PAGING_LOCKED_PBASE
 #  define PG_LOCKED_VBASE          CONFIG_PAGING_LOCKED_VBASE
 #else
-#  define PG_LOCKED_PBASE          CONFIG_DRAM_START
-#  define PG_LOCKED_VBASE          CONFIG_DRAM_VSTART
+#  define PG_LOCKED_PBASE          CONFIG_RAM_START
+#  define PG_LOCKED_VBASE          CONFIG_RAM_VSTART
 #endif
 
 #define PG_LOCKED_PEND             (PG_LOCKED_PBASE + PG_LOCKED_SIZE)
@@ -175,7 +175,7 @@
  * extending all the way to the end of memory. 
  */
 
-#define PG_RAM_PAGES               (CONFIG_DRAM_SIZE >> PAGESHIFT)
+#define PG_RAM_PAGES               (CONFIG_RAM_SIZE >> PAGESHIFT)
 
 #ifdef CONFIG_PAGING_NDATA
 #  define PG_DATA_NPAGES           CONFIG_PAGING_NDATA

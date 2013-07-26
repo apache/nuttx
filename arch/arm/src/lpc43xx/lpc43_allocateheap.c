@@ -133,10 +133,10 @@
  *
  * The config.h file will define only:
  *
- *    CONFIG_DRAM_START = The start of the data RAM region which may be
+ *    CONFIG_RAM_START = The start of the data RAM region which may be
  *      either local SRAM bank 0 (Configuration A) or 1 (Configuration B).
- *    CONFIG_DRAM_START = The size of the data RAM region.
- *    CONFIG_DRAM_END   = The sum of the above
+ *    CONFIG_RAM_START = The size of the data RAM region.
+ *    CONFIG_RAM_END   = The sum of the above
  */
 
 /* Check for Configuration A. */
@@ -144,16 +144,16 @@
 #ifndef CONFIG_LPC43_BOOT_SRAM
 
 /* Configuration A */
-/* CONFIG_DRAM_START should be set to the base of AHB SRAM, local 0. */
+/* CONFIG_RAM_START should be set to the base of AHB SRAM, local 0. */
 
-#  if CONFIG_DRAM_START != LPC43_LOCSRAM_BANK0_BASE
-#    error "CONFIG_DRAM_START must be set to the base address of AHB SRAM Bank 0"
+#  if CONFIG_RAM_START != LPC43_LOCSRAM_BANK0_BASE
+#    error "CONFIG_RAM_START must be set to the base address of AHB SRAM Bank 0"
 #  endif
 
 /* The configured RAM size should be equal to the size of local SRAM Bank 0 */
 
-#  if CONFIG_DRAM_SIZE != LPC43_LOCSRAM_BANK0_SIZE
-#    error "CONFIG_DRAM_SIZE must be set to size of AHB SRAM Bank 0"
+#  if CONFIG_RAM_SIZE != LPC43_LOCSRAM_BANK0_SIZE
+#    error "CONFIG_RAM_SIZE must be set to size of AHB SRAM Bank 0"
 #  endif
 
 /* Now we can assign all of the memory regions for configuration A */
@@ -167,16 +167,16 @@
 #else
 
 /* Configuration B */
-/* CONFIG_DRAM_START should be set to the base of local SRAM, bank 1. */
+/* CONFIG_RAM_START should be set to the base of local SRAM, bank 1. */
 
-#  if CONFIG_DRAM_START != LPC43_LOCSRAM_BANK1_BASE
-#    error "CONFIG_DRAM_START must be set to the base address of AHB SRAM Bank 0"
+#  if CONFIG_RAM_START != LPC43_LOCSRAM_BANK1_BASE
+#    error "CONFIG_RAM_START must be set to the base address of AHB SRAM Bank 0"
 #  endif
 
 /* The configured RAM size should be equal to the size of local SRAM Bank 1 */
 
-#  if CONFIG_DRAM_SIZE != LPC43_LOCSRAM_BANK1_SIZE
-#    error "CONFIG_DRAM_SIZE must be set to size of AHB SRAM Bank 0"
+#  if CONFIG_RAM_SIZE != LPC43_LOCSRAM_BANK1_SIZE
+#    error "CONFIG_RAM_SIZE must be set to size of AHB SRAM Bank 0"
 #  endif
 
 /* Now we can assign all of the memory regions for configuration B */
@@ -249,7 +249,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_idle_topstack;
-  *heap_size = CONFIG_DRAM_END - g_idle_topstack;
+  *heap_size = CONFIG_RAM_END - g_idle_topstack;
 }
 
 /************************************************************************

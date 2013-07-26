@@ -194,30 +194,33 @@ config ARCH_CALIBRATION
 		watch to measure the actual delay then adjust BOARD_LOOPSPERMSEC until
 		the actual delay is 100 seconds.
 
-config DRAM_START
-	hex "DRAM start physical address"
+config RAM_START
+	hex "Primary RAM start address (physical)"
 	default 0x0
 	help
-		The physical start address of installed RAM.  Despite the naming,
-		this may be SDRAM or SRAM or any other RAM technology that support
-		program execution.
+		The physical start address of primary installed RAM.  "Primary" RAM
+		refers to the RAM that you link program code into.  If program code
+		does not excecute out of RAM but from FLASH, then you may designate
+		any block of RAM as "primary."
 
-config DRAM_VSTART
-	hex "DRAM start virtual address"
+config RAM_VSTART
+	hex "Primary RAM start address (virtual)"
 	default 0x0
 	depends on ARCH_HAVE_MMU
 	help
-		The virtual start address of installed RAM.  Despite the naming,
-		this may be SDRAM or SRAM or any other RAM technology that support
-		program execution.
+		The virtual start address of installed primary RAM. "Primary" RAM
+                refers to the RAM that you link program code into.  If program code
+                does not excecute out of RAM but from FLASH, then you may designate
+                any block of RAM as "primary."
 
-config DRAM_SIZE
-	int "DRAM size"
+config RAM_SIZE
+	int "Primary RAM size"
 	default 0
 	help
-		The size in bytes of the installed RAM.  Despite the naming,
-		this may be SDRAM or SRAM or any other RAM technology that support
-		program execution.
+		The size in bytes of the installed primary RAM. "Primary" RAM
+                refers to the RAM that you link program code into.  If program code
+                does not excecute out of RAM but from FLASH, then you may designate
+                any block of RAM as "primary."
 
 config ARCH_HAVE_INTERRUPTSTACK
 	bool

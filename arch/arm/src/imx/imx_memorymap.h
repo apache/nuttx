@@ -65,7 +65,7 @@
 
 /* Mapped sections */
 #define IMX_PERIPHERALS_NSECTIONS 1          /*  1Mb  1 section                     */
-#define IMX_SDRAM0_NSECTIONS      16         /* 16Mb Based on CONFIG_DRAM_SIZE      */
+#define IMX_SDRAM0_NSECTIONS      16         /* 16Mb Based on CONFIG_RAM_SIZE      */
 #define IMX_SDRAM1_NSECTIONS      0          /* 64Mb (Not mapped)                   */
 #define IMX_FLASH_NSECTIONS       32         /* 64Mb Based on CONFIG_FLASH_SIZE     */
 #define IMX_CS1_NSECTIONS         16         /* 16Mb                                */
@@ -116,11 +116,11 @@
 #ifdef CONFIG_BOOT_RUNFROMFLASH
    /* Use the identity mapping */
 
-#  define IMX_SDRAM_VSECTION      0x08000000 /* -(+CONFIG_DRAM_SIZE)                */
+#  define IMX_SDRAM_VSECTION      0x08000000 /* -(+CONFIG_RAM_SIZE)                 */
 #else
    /* Map SDRAM to address zero */
 
-#  define IMX_SDRAM_VSECTION      0x00000000 /* -(+CONFIG_DRAM_SIZE)                */
+#  define IMX_SDRAM_VSECTION      0x00000000 /* -(+CONFIG_RAM_SIZE)                 */
 #endif
 
 /* We use a identity mapping for other regions */

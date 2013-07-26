@@ -122,7 +122,7 @@ $(TOPDIR)/lib/$(SDCCLIB): $(SDCC_LIBDIR)/$(SDCCLIB)
 # IDLE thread stack
 
 asm_mem.h:
-	@echo "	CONFIG_STACK_END == ($(CONFIG_DRAM_SIZE) - 1)" >> asm_mem.h
+	@echo "	CONFIG_STACK_END == ($(CONFIG_RAM_SIZE) - 1)" >> asm_mem.h
 	@echo "	CONFIG_STACK_BASE == (CONFIG_STACK_END - $(CONFIG_IDLETHREAD_STACKSIZE))" >> asm_mem.h
 
 # Combine all objects in this directory into a library

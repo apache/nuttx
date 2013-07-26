@@ -63,24 +63,24 @@
 /* Configuration ************************************************************/
 /* The configured RAM start address must be the beginning of CPU SRAM */
 
-#if CONFIG_DRAM_START != LPC17_SRAM_BASE
-#  warning "CONFIG_DRAM_START is not at LPC17_SRAM_BASE"
-#  undef CONFIG_DRAM_START
-#  undef CONFIG_DRAM_END
-#  define CONFIG_DRAM_START LPC17_SRAM_BASE
-#  define CONFIG_DRAM_END  (LPC17_SRAM_BASE+LPC17_CPUSRAM_SIZE)
+#if CONFIG_RAM_START != LPC17_SRAM_BASE
+#  warning "CONFIG_RAM_START is not at LPC17_SRAM_BASE"
+#  undef CONFIG_RAM_START
+#  undef CONFIG_RAM_END
+#  define CONFIG_RAM_START LPC17_SRAM_BASE
+#  define CONFIG_RAM_END  (LPC17_SRAM_BASE+LPC17_CPUSRAM_SIZE)
 #endif
 
 /* The configured RAM size must be less then or equal to the CPU SRAM size */
 
-#if CONFIG_DRAM_SIZE > LPC17_CPUSRAM_SIZE
-#  warning "CONFIG_DRAM_SIZE is larger than the size of CPU SRAM"
-#  undef CONFIG_DRAM_SIZE
-#  undef CONFIG_DRAM_END
-#  define CONFIG_DRAM_SIZE LPC17_CPUSRAM_SIZE
-#  define CONFIG_DRAM_END (LPC17_SRAM_BASE+LPC17_CPUSRAM_SIZE)
-#elif CONFIG_DRAM_SIZE < LPC17_CPUSRAM_SIZE
-#  warning "CONFIG_DRAM_END is before end of CPU SRAM... not all of CPU SRAM used"
+#if CONFIG_RAM_SIZE > LPC17_CPUSRAM_SIZE
+#  warning "CONFIG_RAM_SIZE is larger than the size of CPU SRAM"
+#  undef CONFIG_RAM_SIZE
+#  undef CONFIG_RAM_END
+#  define CONFIG_RAM_SIZE LPC17_CPUSRAM_SIZE
+#  define CONFIG_RAM_END (LPC17_SRAM_BASE+LPC17_CPUSRAM_SIZE)
+#elif CONFIG_RAM_SIZE < LPC17_CPUSRAM_SIZE
+#  warning "CONFIG_RAM_END is before end of CPU SRAM... not all of CPU SRAM used"
 #endif
 
 /* Figure out how much heap be have in AHB SRAM (if any).  Complications:
@@ -222,21 +222,21 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = CONFIG_DRAM_END - ubase;
+  size_t    usize = CONFIG_RAM_END - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)CONFIG_DRAM_END);
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
 
   /* Adjust that size to account for MPU alignment requirements.
-   * NOTE that there is an implicit assumption that the CONFIG_DRAM_END
+   * NOTE that there is an implicit assumption that the CONFIG_RAM_END
    * is aligned to the MPU requirement.
    */
 
   log2  = (int)mpu_log2regionfloor(usize);
-  DEBUGASSERT((CONFIG_DRAM_END & ((1 << log2) - 1)) == 0);
+  DEBUGASSERT((CONFIG_RAM_END & ((1 << log2) - 1)) == 0);
 
   usize = (1 << log2);
-  ubase = CONFIG_DRAM_END - usize;
+  ubase = CONFIG_RAM_END - usize;
 
   /* Return the user-space heap settings */
 
@@ -253,7 +253,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_idle_topstack;
-  *heap_size  = CONFIG_DRAM_END - g_idle_topstack;
+  *heap_size  = CONFIG_RAM_END - g_idle_topstack;
 #endif
 }
 
@@ -276,21 +276,21 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = CONFIG_DRAM_END - ubase;
+  size_t    usize = CONFIG_RAM_END - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)CONFIG_DRAM_END);
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
 
   /* Adjust that size to account for MPU alignment requirements.
-   * NOTE that there is an implicit assumption that the CONFIG_DRAM_END
+   * NOTE that there is an implicit assumption that the CONFIG_RAM_END
    * is aligned to the MPU requirement.
    */
 
   log2  = (int)mpu_log2regionfloor(usize);
-  DEBUGASSERT((CONFIG_DRAM_END & ((1 << log2) - 1)) == 0);
+  DEBUGASSERT((CONFIG_RAM_END & ((1 << log2) - 1)) == 0);
 
   usize = (1 << log2);
-  ubase = CONFIG_DRAM_END - usize;
+  ubase = CONFIG_RAM_END - usize;
 
   /* Return the kernel heap settings (i.e., the part of the heap region
    * that was not dedicated to the user heap).

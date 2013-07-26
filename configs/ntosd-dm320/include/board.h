@@ -71,20 +71,20 @@
  */
 
 #ifdef CONFIG_ARCH_NTOSD_DEVBOARD
-#  if CONFIG_DRAM_START != 0x01000000
-#    error "Invalid setting for CONFIG_DRAM_START"
+#  if CONFIG_RAM_START != 0x01000000
+#    error "Invalid setting for CONFIG_RAM_START"
 #  endif
-#  if CONFIG_DRAM_SIZE != 0x01000000
-#    warning "Check CONFIG_DRAM_SIZE.  This Neuros OSD has 0x01000000 bytes of SDRAM"
+#  if CONFIG_RAM_SIZE != 0x01000000
+#    warning "Check CONFIG_RAM_SIZE.  This Neuros OSD has 0x01000000 bytes of SDRAM"
 #  endif
 #  define DM320_SDRAM_PSECTION         0x01000000 /* 496Mb  many section   -- */
 #  define   DM320_SDRAM_PADDR          0x01000000 /* 496Mb  many sections  CW */
 #else
-#  if CONFIG_DRAM_START != 0x01100000
-#    error "Invalid setting for CONFIG_DRAM_START"
+#  if CONFIG_RAM_START != 0x01100000
+#    error "Invalid setting for CONFIG_RAM_START"
 #  endif
-#  if CONFIG_DRAM_SIZE != 0x02000000
-#    warning "Check CONFIG_DRAM_SIZE.  This Neuros OSD has 0x02000000 bytes of SDRAM"
+#  if CONFIG_RAM_SIZE != 0x02000000
+#    warning "Check CONFIG_RAM_SIZE.  This Neuros OSD has 0x02000000 bytes of SDRAM"
 #  endif
 #  define DM320_SDRAM_PSECTION         0x01100000 /* 496Mb  many section   -- */
 #  define   DM320_SDRAM_PADDR          0x01100000 /* 496Mb  many sections  CW */

@@ -453,17 +453,17 @@ SAMA5D3x-EK Configuration Options
   CONFIG_ENDIAN_BIG - define if big endian (default is little
   endian)
 
-  CONFIG_DRAM_SIZE - Describes the installed DRAM (SRAM in this case):
+  CONFIG_RAM_SIZE - Describes the installed DRAM (SRAM in this case):
 
-    CONFIG_DRAM_SIZE=0x0002000 (128Kb)
+    CONFIG_RAM_SIZE=0x0002000 (128Kb)
 
-  CONFIG_DRAM_START - The physical start address of installed DRAM
+  CONFIG_RAM_START - The physical start address of installed DRAM
 
-    CONFIG_DRAM_START=0x20000000
+    CONFIG_RAM_START=0x20000000
 
-  CONFIG_DRAM_VSTART - The virutal start address of installed DRAM
+  CONFIG_RAM_VSTART - The virutal start address of installed DRAM
 
-    CONFIG_DRAM_VSTART=0x20000000
+    CONFIG_RAM_VSTART=0x20000000
 
   CONFIG_ARCH_IRQPRIO - The SAM3UF103Z supports interrupt prioritization
 

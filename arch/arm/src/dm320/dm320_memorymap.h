@@ -137,8 +137,8 @@
 
 /* DM320 Virtual Memory Map */
 
-#if CONFIG_DRAM_VSTART != 0x00000000
-# error "Invalid setting for CONFIG_DRAM_VSTART"
+#if CONFIG_RAM_VSTART != 0x00000000
+# error "Invalid setting for CONFIG_RAM_VSTART"
 #endif
 
 /* Section/Region Name               Virt Address  End        Size  CW */
