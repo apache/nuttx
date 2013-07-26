@@ -401,7 +401,7 @@
                                           /* Bit 2:  Bufferable bit */
                                           /* Bit 3:  Cacheable bit */
                                           /* Bits 4-5: Access Permissions bits AP[0:1] */
-#define PTE_SMALL_AP_MASK    (0xfffff000) /* Bits 12-31: Small page base address, PA[31:12] */
+#define PTE_SMALL_PADDR_MASK (0xfffff000) /* Bits 12-31: Small page base address, PA[31:12] */
 
 /* Level 2 Translation Table Access Permissions:
  *

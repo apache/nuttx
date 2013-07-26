@@ -264,6 +264,12 @@
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
 
+/* Notice that these mappings are a simple 1-to-1 mapping *unless*
+ * CONFIG_ARCH_LOWVECTORS is not defined.  In the high vector case, the
+ * register system controls register area is moved out 0f 0xffff:000 where
+ * the high vectors must reside.
+ */
+
 #define SAM_INTMEM_VSECTION      0x00000000 /* 0x00000000-0x0fffffff: Internal Memories */
 #  define SAM_BOOTMEM_VSECTION   0x00000000 /* 0x00000000-0x000fffff: Boot memory */
 #  define SAM_ROM_VSECTION       0x00100000 /* 0x00100000-0x001fffff: ROM */
@@ -284,12 +290,24 @@
 #define SAM_EBICS3_VSECTION      0x60000000 /* 0x60000000-0x6fffffff: EBI Chip select 2 */
 #define SAM_NFCCR_VSECTION       0x70000000 /* 0x70000000-0x7fffffff: NFC Command Registers */
                                             /* 0x80000000-0xefffffff: Undefined */
+
+/* If CONFIG_ARCH_LOWVECTORS is not defined, then move the system control
+ * registers out of the way.
+ */
+
+#ifdef CONFIG_ARCH_LOWVECTORS
 #define SAM_PERIPH_VSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
 #  define SAM_PERIPHA_VSECTION   0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
 #  define SAM_PERIPHB_VSECTION   0xf8000000 /* 0xf8000000-0xffffbfff: Internal Peripherals B */
 #  define SAM_SYSC_VSECTION      0xfff00000 /* 0xfff00000-0xffffffff: System Controller */
 #  define SAM_SYSC_VADDR         0xffffc000 /* 0xffffc000-0xffffffff: System Controller */
-
+#else
+#define SAM_PERIPH_VSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
+#  define SAM_PERIPHA_VSECTION   0xf1000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
+#  define SAM_PERIPHB_VSECTION   0xf2000000 /* 0xf8000000-0xffffbfff: Internal Peripherals B */
+#  define SAM_SYSC_VSECTION      0xf300000  /* 0xfff00000-0xffffffff: System Controller */
+#  define SAM_SYSC_VADDR         0xf30fc000 /* 0xffffc000-0xffffffff: System Controller */
+#endif
 #endif
 
 /* Peripheral virtual base addresses */

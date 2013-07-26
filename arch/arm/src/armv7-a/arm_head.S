@@ -382,8 +382,13 @@ __start:
 	mcr		CP15_TTBR0(r4)
 	mcr		CP15_TTBR1(r4)
 
-	/* Clear the TTB control register (TTBCR) to indicate that we are using
+	/* Set the TTB control register (TTBCR) to indicate that we are using
 	 * TTBR0.  r0 still holds the value of zero.
+	 *
+	 *   N   : 0=Selects TTBR0 and 16KB page table size indexed by VA[31:20]
+	 *   PD0 : 0=Perform translation table walks using TTBR0
+	 *   PD1 : 0=Perform translation table walks using TTBR1 (but it is disabled)
+	 *   EAE : 0=Use 32-bit translation system
 	 */
 
 	mcr		CP15_TTBCR(r0)

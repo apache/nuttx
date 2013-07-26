@@ -38,7 +38,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <stdint.h>
+#include <assert.h>
 
 #ifdef CONFIG_PAGING
 #  include <nuttx/page.h>
@@ -304,9 +306,14 @@ static void  sam_vectorpermissions(uint32_t mmuflags)
 #ifdef NEED_VECTORMAP
 static void sam_vectormapping(void)
 {
-  uint32_t vector_paddr = SAM_VECTOR_PADDR;
-  uint32_t vector_vaddr = SAM_VECTOR_VADDR;
-  uint32_t end_paddr    = vector_paddr + VECTOR_TABLE_SIZE;
+  uint32_t vector_paddr = SAM_VECTOR_PADDR & PTE_SMALL_PADDR_MASK;
+  uint32_t vector_vaddr = SAM_VECTOR_VADDR & PTE_SMALL_PADDR_MASK;
+  uint32_t vector_size  = (uint32_t)&_vector_end - (uint32_t)&_vector_start;
+  uint32_t end_paddr    = SAM_VECTOR_PADDR + vector_size;
+
+  /* REVISIT:  Cannot really assert in this context */
+
+  DEBUGASSERT (vector_size <= VECTOR_TABLE_SIZE);
 
   /* We want to keep our interrupt vectors and interrupt-related logic in
    * zero-wait state internal SRAM (ISRAM).  The SAMA5 has 128Kb of ISRAM
@@ -324,7 +331,9 @@ static void sam_vectormapping(void)
 
   /* Now set the level 1 descriptor to refer to the level 2 page table. */
 
-  sam_setl1entry(VECTOR_L2_PBASE, SAM_VECTOR_VADDR, MMU_L1_VECTORFLAGS);
+  sam_setl1entry(VECTOR_L2_PBASE & PMD_PTE_PADDR_MASK,
+                SAM_VECTOR_VADDR & PMD_PTE_PADDR_MASK,
+                MMU_L1_VECTORFLAGS);
 }
 #else
   /* No vector remap */
