@@ -633,6 +633,35 @@ Configurations
   Configuration sub-directories
   -----------------------------
 
+  hello:
+    This configuration directory, performs the (almost) simplest of all
+    possible examples:  examples/hello.  This just comes up, says hello
+    on the serial console and terminates.  This configuration is of
+    value during bring-up because it is small and can run entirely out
+    of internal SRAM.
+
+    NOTES:
+    1. This configuration uses the default USART1 serial console.  That
+       is easily changed by reconfiguring to (1) enable a different
+       serial peripheral, and (2) selecting that serial peripheral as
+       the console device.
+
+    2. By default, this configuration is set up to build on Windows
+       under either a Cygwin or MSYS environment using a recent, Windows-
+       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
+       toolchain).  Both the build environment and the toolchain
+       selection can easily be changed by reconfiguring:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows operating system
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
+       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+    3. This configuration executes out of internal SRAM an can only
+       be loaded via JTAG.
+
+       CONFIG_SAMA5_BOOT_ISRAM=y               : Boot into internal SRAM
+       CONFIG_BOOT_RUNFROMISRAM=y              : Run from internal SRAM
+
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.
@@ -658,3 +687,11 @@ Configurations
 
        CONFIG_SAMA5_BOOT_ISRAM=y               : Boot into internal SRAM
        CONFIG_BOOT_RUNFROMISRAM=y              : Run from internal SRAM
+
+    STATUS:
+      2013-7-26:  This ostest configuration is too large to fit in SAMA5
+        internal SRAM (along with a usable heap and a 16KB page table).
+        I do not want to simplify this test because I will, eventually,
+        need to do the entire OS test.  But I will need to configure this
+        to run out of FLASH or SDRAM in this future.  For now, I created
+        the smaller 'hello' configuration for the basic bringup.
