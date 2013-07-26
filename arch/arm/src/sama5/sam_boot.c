@@ -311,7 +311,7 @@ static void sam_vectormapping(void)
   uint32_t vector_size  = (uint32_t)&_vector_end - (uint32_t)&_vector_start;
   uint32_t end_paddr    = SAM_VECTOR_PADDR + vector_size;
 
-  /* REVISIT:  Cannot really assert in this context */
+  /* REVISIT:  Can really assert in this context */
 
   DEBUGASSERT (vector_size <= VECTOR_TABLE_SIZE);
 
