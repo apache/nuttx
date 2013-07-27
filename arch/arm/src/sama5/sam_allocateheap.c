@@ -57,12 +57,32 @@
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
+/* The Primary Heap *********************************************************/
+/* The primary heap is defined by CONFIG_RAM_START, CONFIG_RAM_SIZE, and
+ * CONFIG_RAM_END where:
+ *
+ *   CONFIG_RAM_END = CONFIG_RAM_START + CONFIG_RAM_SIZE
+ *
+ * CONFIG_RAM_START is the usable beginning of the RAM region.  The "usable"
+ * start would exclude, for example, any memory at the bottom of the RAM
+ * region used for the 16KB page table.  If we are also executing from this
+ * same RAM region then CONFIG_RAM_START is not used.  Instead, the value of
+ * g_idle_stack is the used; this variable holds the first avaiable byte of
+ * memory after the .text, .data, .bss, and IDLE stack allocations.
+ *
+ * CONFIG_RAM_END is defined in the configuration it is the usable top of
+ * the RAM region beginning at CONFIG_RAM_START.  The "usable" top would
+ * exclude, for example, any memory reserved at the top of the for the 16KB
+ * page table.
+ */
+
+/* Memory Regions ***********************************************************/
 /* We cannot use the memory for heap if it is not enabled.  Or, if it is
  * enabled, but does not hold SDRAM, SRAM, or PSRAM.
  *
  * We cannot add the region if it is if we are executing from it!  In that
  * case, the remainder of the memory will automatically be added to the heap
- * based on g_idle_topstack and CONFIG_RAM_END
+ * based on g_idle_topstack and CONFIG_RAM_END.
  */
 
 #if defined(CONFIG_SAMA5_BOOT_ISRAM)
@@ -75,50 +95,26 @@
 
 #if !defined(CONFIG_SAMA5_EBICS0) || defined(CONFIG_SAMA5_BOOT_CS0SRAM) || \
    (!defined(CONFIG_SAMA5_EBICS0_SRAM) && !defined(CONFIG_SAMA5_EBICS0_PSRAM))
-   
+
 #  undef SAMA5_EBICS0_HEAP
 #endif
 
 #if !defined(CONFIG_SAMA5_EBICS1) || defined(CONFIG_SAMA5_BOOT_CS1SRAM) || \
    (!defined(CONFIG_SAMA5_EBICS1_SRAM) && !defined(CONFIG_SAMA5_EBICS1_PSRAM))
-   
+
 #  undef SAMA5_EBICS1_HEAP
 #endif
 
 #if !defined(CONFIG_SAMA5_EBICS2) || defined(CONFIG_SAMA5_BOOT_CS2SRAM) || \
    (!defined(CONFIG_SAMA5_EBICS2_SRAM) && !defined(CONFIG_SAMA5_EBICS2_PSRAM))
-   
+
 #  undef SAMA5_EBICS2_HEAP
 #endif
 
 #if !defined(SAMA5_CONFIG_EBICS3) || defined(CONFIG_SAMA5_BOOT_CS3SRAM) || \
    (!defined(SAMA5_CONFIG_EBICS3_SRAM) && !defined(CONFIG_SAMA5_EBICS3_PSRAM))
-   
+
 #  undef SAMA5_EBICS3_HEAP
-#endif
-
-/* Adjust the size of the primary RAM region if (1) internal SRAM is the
- * the primary RAM region, (2) other logic has positioned the MMU page
- * table at the end of the internal SRAM, and (3) this is not a kernel
- * build using a separate kernel heap.
- *
- * NOTES:
- * - If this is a kernel build using a separate kernel heap, then the heap
- *   if defined by the userspace blob.
- *
- * - Internal SRAM is the "primary" RAM region in the case where we are
- *   executing from internal SRAM.  In that case, g_idle_topstack points
- *   into internal SRAM and CONFIG_RAM_END is the end of internal SRAM.
- */
-
-#if defined(CONFIG_BOOT_RUNFROMISRAM) && defined(PGTABLE_IN_HIGHSRAM) && \
-  (!defined(CONFIG_NUTTX_KERNEL)      || !defined(CONFIG_MM_KERNEL_HEAP))
-#  define ADJUSTED_RAM_END (CONFIG_RAM_END-PGTABLE_SIZE)
-
-/* Otherwise, the heap extends to the end of the primary RAM */
-
-#else
-#  define ADJUSTED_RAM_END CONFIG_RAM_END
 #endif
 
 /****************************************************************************
@@ -176,10 +172,10 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = ADJUSTED_RAM_END - ubase;
+  size_t    usize = CONFIG_RAM_END - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)ADJUSTED_RAM_END);
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
 
   /* Return the user-space heap settings */
 
@@ -192,7 +188,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_idle_topstack;
-  *heap_size  = ADJUSTED_RAM_END - g_idle_topstack;
+  *heap_size  = CONFIG_RAM_END - g_idle_topstack;
 #endif
 }
 
@@ -216,10 +212,10 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = ADJUSTED_RAM_END - ubase;
+  size_t    usize = CONFIG_RAM_END - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)ADJUSTED_RAM_END);
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
 
   /* Return the kernel heap settings (i.e., the part of the heap region
    * that was not dedicated to the user heap).

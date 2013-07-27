@@ -193,7 +193,7 @@
      !defined(CONFIG_UART1_SERIAL_CONSOLE)
 #  define MR_CHRL_VALUE UART_MR_MODE9
 #else
-#  error "Invlaid number of bits"
+#  error "Invalid number of bits"
 #endif
 
 #if SAM_CONSOLE_PARITY == 1
