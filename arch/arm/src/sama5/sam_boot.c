@@ -51,6 +51,7 @@
 #include "chip.h"
 #include "arm.h"
 #include "mmu.h"
+#include "cache.h"
 #include "fpu.h"
 #include "up_internal.h"
 #include "up_arch.h"
@@ -499,6 +500,14 @@ void up_boot(void)
    */
 
   sam_vectormapping();
+
+
+  /* The SRAM address hold the the page table is probably buffered.  Make sure
+   * that the modified contents of the page table are flushed into physical
+   * memory.
+   */
+
+  cp15_clean_dcache_for_dma(VECTOR_L2_VBASE, VECTOR_L2_VBASE + PGTABLE_SIZE);
 
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 

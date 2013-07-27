@@ -82,6 +82,8 @@
  * Included Files
  ****************************************************************************/
 
+#include "cp15.h"
+
 	.file	"arm_cache.S"
 
 /****************************************************************************
@@ -108,9 +110,10 @@
  * Name: cp15_coherent_dcache_for_dma
  *
  * Description:
- *   Ensure that the I and D caches are coherent within specified region.
- *   This is typically used when code has been written to a memory region,
- *   and will be executed.
+ *   Ensure that the I and D caches are coherent within specified region
+ *   by cleaning the D cache (i.e., flushing the D cache contents to memory
+ *   and invalidating the I cache. This is typically used when code has been
+ *   written to a memory region, and will be executed.
  *
  * Input Parameters:
  *   start - virtual start address of region
@@ -125,37 +128,43 @@
 	.type	cp15_coherent_dcache_for_dma, function
 
 cp15_coherent_dcache_for_dma:
-
-	mrc		p15, 0, r3, c0, c0, 1
-	lsr		r3, r3, #16
+	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
+	lsr		r3, r3, #16				/* Isolate the DMinLine field */
 	and		r3, r3, #0xf
 	mov		r2, #4
-	mov		r2, r2, lsl r3
+	mov		r2, r2, lsl r3			/* Get the cache line size in bytes */
 
-	sub		r3, r2, #1
-	bic		r12, r0, r3
+	sub		r3, r2, #1				/* R3=Cache line size mask */
+	bic		r12, r0, r3				/* R12=aligned start address */
+
+	/* Loop, flushing each D cache line to memory */
 1:
-	mcr		p15, 0, r12, c7, c11, 1
-	add		r12, r12, r2
-	cmp		r12, r1
+	mcr		CP15_DCCMVAU(r12)		/* Clean data or unified cache line by VA to PoU */
+	add		r12, r12, r2			/* R12=Next cache line */
+	cmp		r12, r1					/* Loop until all cache lines have been cleaned */
 	blo		1b
+
 	dsb
 
-	mrc		p15, 0, r3, c0, c0, 1
-	and		r3, r3, #0xf
+	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
+	and		r3, r3, #0xf			/* Isolate the IminLine field */
 	mov		r2, #4
-	mov		r2, r2, lsl r3
+	mov		r2, r2, lsl r3			/* Get the cache line size in bytes */
 
-	sub		r3, r2, #1
-	bic		r12, r0, r3
+	sub		r3, r2, #1				/* R3=Cache line size mask */
+	bic		r12, r0, r3				/* R12=aligned start address */
+
+	/* Loop, invalidating each I cache line to memory */
 2:
-	mcr		p15, 0, r12, c7, c5, 1
-	add		r12, r12, r2
-	cmp		r12, r1
+	mcr		CP15_ICIMVAU(r12)		/* Invalidate instruction cache by VA to PoU */
+	add		r12, r12, r2			/* R12=Next cache line */
+	cmp		r12, r1					/* Loop until all cache lines have been invalidated */
 	blo		2b
+
 	mov		r0, #0
-	mcr		p15, 0, r0, c7, c1, 6
-	mcr		 p15, 0, r0, c7, c5, 6
+	mcr		CP15_BPIALLIS(r0)		/* Invalidate entire branch predictor array Inner Shareable */
+	mcr		CP15_BPIALL(r0)			/* Invalidate entire branch predictor array Inner Shareable */
+
 	dsb
 	isb
 	bx		lr
@@ -183,26 +192,29 @@ cp15_coherent_dcache_for_dma:
 
 cp15_invalidate_dcache_for_dma:
 
-	mrc		p15, 0, r3, c0, c0, 1
-	lsr		r3, r3, #16
+	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
+	lsr		r3, r3, #16				/* Isolate the DMinLine field */
 	and		r3, r3, #0xf
 	mov		r2, #4
-	mov		r2, r2, lsl r3
+	mov		r2, r2, lsl r3			/* Get the cache line size in bytes */
 
-	sub		r3, r2, #1
+	sub		r3, r2, #1				/* R3=Cache line size mask */
 	tst		r0, r3
-	bic		r0, r0, r3
+	bic		r0, r0, r3				/* R0=aligned start address */
 
-	mcrne	p15, 0, r0, c7, c14, 1
+	mcrne	CP15_DCCIMVAC(r0)		/* Clean and invalidate data cache line by VA to PoC */
 
 	tst		r1, r3
-	bic		r1, r1, r3
-	mcrne	p15, 0, r1, c7, c14, 1
+	bic		r1, r1, r3				/* R0=aligned end address */
+	mcrne	CP15_DCCIMVAC(r1)		/* Clean and invalidate data cache line by VA to PoC */
+
+	/* Loop, invalidating each D cache line */
 3:
-	mcr		p15, 0, r0, c7, c6, 1
-	add		r0, r0, r2
-	cmp		r0, r1
+	mcr		CP15_DCIMVAC(r0)		/* Invalidate data cache line by VA to PoC */
+	add		r0, r0, r2				/* R12=Next cache line */
+	cmp		r0, r1					/* Loop until all cache lines have been invalidate */
 	blo		3b
+
 	dsb
 	bx		lr
 	.size cp15_coherent_dcache_for_dma, . - cp15_coherent_dcache_for_dma
@@ -211,7 +223,8 @@ cp15_invalidate_dcache_for_dma:
  * Name: cp15_clean_dcache_for_dma
  *
  * Description:
- *   Clean the data cache within the specified region
+ *   Clean the data cache within the specified region by flushing the
+ *   contents of the data cache to memory.
  *
  * Input Parameters:
  *   start - virtual start address of region
@@ -226,19 +239,24 @@ cp15_invalidate_dcache_for_dma:
 	.type	cp15_clean_dcache_for_dma, function
 
 cp15_clean_dcache_for_dma:
-	mrc		p15, 0, r3, c0, c0, 1
-	lsr		r3, r3, #16
+
+	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
+	lsr		r3, r3, #16				/* Isolate the DMinLine field */
 	and		r3, r3, #0xf
 	mov		r2, #4
-	mov		r2, r2, lsl r3
+	mov		r2, r2, lsl r3			/* Get the cache line size in bytes */
 
-	sub		r3, r2, #1
-	bic		r0, r0, r3
+	sub		r3, r2, #1				/* R3=Cache line size mask */
+	bic		r12, r0, r3				/* R12=aligned start address */
+
+	/* Loop, cleaning each cache line by writing its contents to memory */
+
 4:
-	mcr		p15, 0, r0, c7, c10, 1
-	add		r0, r0, r2
-	cmp		r0, r1
+	mcr		CP15_DCCMVAC(r0)		/* Clean data cache line to PoC by VA */
+	add		r0, r0, r2				/* R12=Next cache line */
+	cmp		r0, r1					/* Loop until all cache lines have been cleaned */
 	blo		4b
+
 	dsb
 	bx		lr
 	.size cp15_clean_dcache_for_dma, . - cp15_clean_dcache_for_dma
@@ -247,7 +265,8 @@ cp15_clean_dcache_for_dma:
  * Name: cp15_flush_dcache_for_dma
  *
  * Description:
- *   Flush the data cache within the specified region
+ *   Flush the data cache within the specified region by cleaning and
+ *   invalidating the the D cache.
  *
  * Input Parameters:
  *   start - virtual start address of region
@@ -262,18 +281,24 @@ cp15_clean_dcache_for_dma:
 	.type	cp15_flush_dcache_for_dma, function
 
 cp15_flush_dcache_for_dma:
-	mrc		p15, 0, r3, c0, c0, 1
-	lsr		r3, r3, #16
+
+	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
+	lsr		r3, r3, #16				/* Isolate the DMinLine field */
 	and		r3, r3, #0xf
 	mov		r2, #4
-	mov		r2, r2, lsl r3
-	sub		r3, r2, #1
-	bic		r0, r0, r3
+	mov		r2, r2, lsl r3			/* Get the cache line size in bytes */
+
+	sub		r3, r2, #1				/* R3=Cache line size mask */
+	bic		r12, r0, r3				/* R12=aligned start address */
+
+	/* Loop, cleaning and invaliding each D cache line in the address range */
+
 5:
-	mcr		p15, 0, r0, c7, c14, 1
-	add		r0, r0, r2
-	cmp		r0, r1
+	mcrne	CP15_DCCIMVAC(r0)		/* Clean and invalidate data cache line by VA to PoC */
+	add		r0, r0, r2				/* R12=Next cache line */
+	cmp		r0, r1					/* Loop until all cache lines have been cleaned */
 	blo		5b
+
 	dsb
 	bx		lr
 	.size cp15_flush_dcache_for_dma, . - cp15_flush_dcache_for_dma
@@ -298,20 +323,22 @@ cp15_flush_dcache_for_dma:
 	.type	cp15_flush_kern_dcache_for_dma, function
 
 cp15_flush_kern_dcache_for_dma:
-	mrc		p15, 0, r3, c0, c0, 1
-	lsr		r3, r3, #16
+
+	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
+	lsr		r3, r3, #16				/* Isolate the DMinLine field */
 	and		r3, r3, #0xf
 	mov		r2, #4
-	mov		r2, r2, lsl r3
+	mov		r2, r2, lsl r3			/* Get the cache line size in bytes */
 
 	add		r1, r0, r1
-	sub		r3, r2, #1
-	bic		r0, r0, r3
+	sub		r3, r2, #1				/* R3=Cache line size mask */
+	bic		r0, r0, r3				/* R0=aligned start address */
 
-	mcr		p15, 0, r0, c7, c14, 1
-	add		r0, r0, r2
-	cmp		r0, r1
-	blo		1b
+	mcrne	CP15_DCCIMVAC(r0)		/* Clean and invalidate data cache line by VA to PoC */
+	add		r0, r0, r2				/* R12=Next cache line */
+	cmp		r0, r1					/* Loop until all cache lines have been cleaned */
+	blo		1b						/* Merge with loop flushing each D cache line to memory */
+
 	dsb
 	bx		lr
 	.size cp15_flush_kern_dcache_for_dma, . - cp15_flush_kern_dcache_for_dma
