@@ -61,7 +61,7 @@
  *  MCR p15, <Op1>, <Rd>, <CRn>, <CRm>, <Op2> ; Write CP15 Register
  *
  * Where
- *  
+ *
  *   <Op1> is the Opcode_1 value for the register
  *   <Rd>  is a general purpose register
  *   <CRn> is the register number within CP15
