@@ -98,7 +98,6 @@
 	.globl	cp15_invalidate_dcache_for_dma
 	.globl	cp15_clean_dcache_for_dma
 	.globl	cp15_flush_dcache_for_dma
-	.globl	cp15_flush_kern_dcache_for_dma
 
 /****************************************************************************
  * Public Functions
@@ -302,44 +301,4 @@ cp15_flush_dcache_for_dma:
 	dsb
 	bx		lr
 	.size cp15_flush_dcache_for_dma, . - cp15_flush_dcache_for_dma
-
-/****************************************************************************
- * Name: cp15_flush_kern_dcache_for_dma
- *
- * Description:
- *   Ensure that the data held in the page kaddr is written back to the page
- *   in question.
- *
- * Input Parameters:
- *   start - virtual start address of region
- *   end   - virtual end address of region
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-	.globl	cp15_flush_kern_dcache_for_dma
-	.type	cp15_flush_kern_dcache_for_dma, function
-
-cp15_flush_kern_dcache_for_dma:
-
-	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
-	lsr		r3, r3, #16				/* Isolate the DMinLine field */
-	and		r3, r3, #0xf
-	mov		r2, #4
-	mov		r2, r2, lsl r3			/* Get the cache line size in bytes */
-
-	add		r1, r0, r1
-	sub		r3, r2, #1				/* R3=Cache line size mask */
-	bic		r0, r0, r3				/* R0=aligned start address */
-
-	mcrne	CP15_DCCIMVAC(r0)		/* Clean and invalidate data cache line by VA to PoC */
-	add		r0, r0, r2				/* R12=Next cache line */
-	cmp		r0, r1					/* Loop until all cache lines have been cleaned */
-	blo		1b						/* Merge with loop flushing each D cache line to memory */
-
-	dsb
-	bx		lr
-	.size cp15_flush_kern_dcache_for_dma, . - cp15_flush_kern_dcache_for_dma
 	.end
