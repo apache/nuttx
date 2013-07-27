@@ -271,8 +271,8 @@ void os_start(void)
 
   /* Assign the process ID of ZERO to the idle task */
 
-  g_pidhash[ PIDHASH(0)].tcb = &g_idletcb.cmn;
-  g_pidhash[ PIDHASH(0)].pid = 0;
+  g_pidhash[PIDHASH(0)].tcb = &g_idletcb.cmn;
+  g_pidhash[PIDHASH(0)].pid = 0;
 
   /* Initialize the IDLE task TCB *******************************************/
   /* Initialize a TCB for this thread of execution.  NOTE:  The default

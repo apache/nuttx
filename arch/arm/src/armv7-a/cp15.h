@@ -196,11 +196,4 @@
 #define CP15_CBADDR(r)     _CP15(4, r, c15, c0, 0)  /* Configuration Base Address Register */
 #define CP15_TLBHITMAP(r)  _CP15(5, r, c15, c0, 0)  /* TLB access and attributes */
 
-/* System control register descriptions.
- *
- * To be provided
- *
- * Reference: Cortex-A5™ MPCore, Technical Reference Manual, Paragraph 4.3.
- */
-
 #endif /* __ARCH_ARM_SRC_ARMV7_A_CP15_H */
