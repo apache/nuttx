@@ -52,7 +52,7 @@
  *
  *   MAINOSC:  Frequency = 12MHz (crysta)
  *   PLLA: PLL Divider = 1, Multiplier = 66 to generate PLLACK = 792MHz
- *   Master Clock (MCK): Source = PLLACK/2, Prescalar = 1, MDIV =  to generate
+ *   Master Clock (MCK): Source = PLLACK/2, Prescalar = 1, MDIV = 3 to generate
 *      MCK      =  132MHz
  *     CPU clock = 396MHz
  */
@@ -88,7 +88,7 @@
  *  Prescaler input                         = 792MHz / 2 = 396MHz
  *  Prescaler output                        = 792MHz / 1 = 396MHz
  *  Processor Clock (PCK)                   = 396MHz
- *  Master clock (MCK)                       = 396MHz / 3 = 132MHz
+ *  Master clock (MCK)                      = 396MHz / 3 = 132MHz
  */
 
 #define BOARD_PMC_MCKR_CSS         PMC_MCKR_CSS_PLLA

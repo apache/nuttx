@@ -64,11 +64,6 @@ README
 Contents
 ========
 
-  - Configurations
-
-Contents
-========
-
   - PIO Muliplexing
   - Development Environment
   - GNU Toolchain Options
@@ -76,7 +71,8 @@ Contents
   - NuttX EABI "buildroot" Toolchain
   - NuttX OABI "buildroot" Toolchain
   - NXFLAT Toolchain
-  - Loading Code
+  - Loading Code into SRAM with J-Link
+  - Writing to FLASH using SAM-BA
   - Buttons and LEDs
   - Serial Consoles
   - SAMA5D3x-EK Configuration Options
@@ -282,8 +278,8 @@ NXFLAT Toolchain
   8. Edit setenv.h, if necessary, so that the PATH variable includes
      the path to the newly built NXFLAT binaries.
 
-Loading Code
-============
+Loading Code into SRAM with J-Link
+==================================
 
   Loading code with the Segger tools and GDB
   ------------------------------------------
@@ -306,6 +302,42 @@ Loading Code
     J-Link> loadbin <file> <address>
     J-Link> setpc <address of __start>
     J-Link> ... start debugging ...
+
+Writing to FLASH using SAM-BA
+=============================
+
+  Assumed starting configuration:
+
+    1. You have installed the J-Lnk CDC USB driver (Windows only, there is
+        no need to install a driver on any regular Linux distribution),
+    2. You have the USB connected to DBGU poort (J14)
+    3. Terminal configuration:  115200 8N1
+
+  Using SAM-BA to write to FLASH:
+
+    1. Exit the terminal emulation program and remove the USB cable from
+       the DBGU port (J14)
+    2. Connect the USB cable to the device USB port (J20)
+    3. JP9 must open so that (BMS == 1) to boot from on-chip Boot ROM
+    4. Press and maintain PB4 CS_BOOT button and power up the board.  PB4
+       CS_BOOT button prevents booting from Nand or serial Flash by
+       disabling Flash Chip Selects after having powered the board, you can
+       release the PB4 BS_BOOT button.
+    5. On Windows you may need to wait for a device driver to be installed.
+    6. Start the SAM-BA application, selecting (1) the correct USB serial
+       port, and (2) board = at91sama5d3x-ek.
+    7. The SAM-BA menu should appear.
+    8. Select the FLASH bank that you want to use and the address to write
+       to and "Execute"
+    9. When you are finished writing to FLASH, remove the USB cable from J20
+       and re-connect the serial link on USB CDC / DBGU connector (J14) and
+       re-open the terminal emulator program.
+    10. Power cycle the board.
+
+  NOTES:  By closing JP9 (BMS == 0), you can force the board to boot
+  directly to NOR FLASH.  Executing from other memories will require that
+  you provide a special code header so that you code can be recognized as a
+  boot-able image by the ROM bootloader.
 
 Buttons and LEDs
 ================
