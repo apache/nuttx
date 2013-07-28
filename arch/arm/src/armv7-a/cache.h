@@ -765,7 +765,7 @@ extern "C" {
  ****************************************************************************/
 
 /****************************************************************************
- * Name: cp15_coherent_dcache_for_dma
+ * Name: cp15_coherent_dcache
  *
  * Description:
  *   Ensure that the I and D caches are coherent within specified region
@@ -782,10 +782,10 @@ extern "C" {
  *
  ****************************************************************************/
 
-void cp15_coherent_dcache_for_dma(uintptr_t start, uintptr_t end);
+void cp15_coherent_dcache(uintptr_t start, uintptr_t end);
 
 /****************************************************************************
- * Name: cp15_invalidate_dcache_for_dma
+ * Name: cp15_invalidate_dcache
  *
  * Description:
  *   Invalidate the data cache within the specified region; we will be
@@ -801,10 +801,10 @@ void cp15_coherent_dcache_for_dma(uintptr_t start, uintptr_t end);
  *
  ****************************************************************************/
 
-void cp15_invalidate_dcache_for_dma(uintptr_t start, uintptr_t end);
+void cp15_invalidate_dcache(uintptr_t start, uintptr_t end);
 
 /****************************************************************************
- * Name: cp15_clean_dcache_for_dma
+ * Name: cp15_clean_dcache
  *
  * Description:
  *   Clean the data cache within the specified region by flushing the
@@ -819,10 +819,10 @@ void cp15_invalidate_dcache_for_dma(uintptr_t start, uintptr_t end);
  *
  ****************************************************************************/
 
-void cp15_clean_dcache_for_dma(uintptr_t start, uintptr_t end);
+void cp15_clean_dcache(uintptr_t start, uintptr_t end);
 
 /****************************************************************************
- * Name: cp15_flush_dcache_for_dma
+ * Name: cp15_flush_dcache
  *
  * Description:
  *   Flush the data cache within the specified region by cleaning and
@@ -837,7 +837,7 @@ void cp15_clean_dcache_for_dma(uintptr_t start, uintptr_t end);
  *
  ****************************************************************************/
 
-void cp15_flush_dcache_for_dma(uintptr_t start, uintptr_t end);
+void cp15_flush_dcache(uintptr_t start, uintptr_t end);
 
 #undef EXTERN
 #ifdef __cplusplus

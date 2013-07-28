@@ -94,10 +94,10 @@
  * Public Symbols
  ****************************************************************************/
 
-	.globl	cp15_coherent_dcache_for_dma
-	.globl	cp15_invalidate_dcache_for_dma
-	.globl	cp15_clean_dcache_for_dma
-	.globl	cp15_flush_dcache_for_dma
+	.globl	cp15_coherent_dcache
+	.globl	cp15_invalidate_dcache
+	.globl	cp15_clean_dcache
+	.globl	cp15_flush_dcache
 
 /****************************************************************************
  * Public Functions
@@ -106,7 +106,7 @@
 	.text
 
 /****************************************************************************
- * Name: cp15_coherent_dcache_for_dma
+ * Name: cp15_coherent_dcache
  *
  * Description:
  *   Ensure that the I and D caches are coherent within specified region
@@ -123,10 +123,10 @@
  *
  ****************************************************************************/
 
-	.globl	cp15_coherent_dcache_for_dma
-	.type	cp15_coherent_dcache_for_dma, function
+	.globl	cp15_coherent_dcache
+	.type	cp15_coherent_dcache, function
 
-cp15_coherent_dcache_for_dma:
+cp15_coherent_dcache:
 	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
 	lsr		r3, r3, #16				/* Isolate the DMinLine field */
 	and		r3, r3, #0xf
@@ -167,10 +167,10 @@ cp15_coherent_dcache_for_dma:
 	dsb
 	isb
 	bx		lr
-	.size cp15_coherent_dcache_for_dma, . - cp15_coherent_dcache_for_dma
+	.size cp15_coherent_dcache, . - cp15_coherent_dcache
 
 /****************************************************************************
- * Name: cp15_invalidate_dcache_for_dma
+ * Name: cp15_invalidate_dcache
  *
  * Description:
  *   Invalidate the data cache within the specified region; we will be
@@ -186,10 +186,10 @@ cp15_coherent_dcache_for_dma:
  *
  ****************************************************************************/
 
-	.globl	cp15_invalidate_dcache_for_dma
-	.type	cp15_invalidate_dcache_for_dma, function
+	.globl	cp15_invalidate_dcache
+	.type	cp15_invalidate_dcache, function
 
-cp15_invalidate_dcache_for_dma:
+cp15_invalidate_dcache:
 
 	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
 	lsr		r3, r3, #16				/* Isolate the DMinLine field */
@@ -216,10 +216,10 @@ cp15_invalidate_dcache_for_dma:
 
 	dsb
 	bx		lr
-	.size cp15_coherent_dcache_for_dma, . - cp15_coherent_dcache_for_dma
+	.size cp15_coherent_dcache, . - cp15_coherent_dcache
 
 /****************************************************************************
- * Name: cp15_clean_dcache_for_dma
+ * Name: cp15_clean_dcache
  *
  * Description:
  *   Clean the data cache within the specified region by flushing the
@@ -234,10 +234,10 @@ cp15_invalidate_dcache_for_dma:
  *
  ****************************************************************************/
 
-	.globl	cp15_clean_dcache_for_dma
-	.type	cp15_clean_dcache_for_dma, function
+	.globl	cp15_clean_dcache
+	.type	cp15_clean_dcache, function
 
-cp15_clean_dcache_for_dma:
+cp15_clean_dcache:
 
 	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
 	lsr		r3, r3, #16				/* Isolate the DMinLine field */
@@ -258,10 +258,10 @@ cp15_clean_dcache_for_dma:
 
 	dsb
 	bx		lr
-	.size cp15_clean_dcache_for_dma, . - cp15_clean_dcache_for_dma
+	.size cp15_clean_dcache, . - cp15_clean_dcache
 
 /****************************************************************************
- * Name: cp15_flush_dcache_for_dma
+ * Name: cp15_flush_dcache
  *
  * Description:
  *   Flush the data cache within the specified region by cleaning and
@@ -276,10 +276,10 @@ cp15_clean_dcache_for_dma:
  *
  ****************************************************************************/
 
-	.globl	cp15_flush_dcache_for_dma
-	.type	cp15_flush_dcache_for_dma, function
+	.globl	cp15_flush_dcache
+	.type	cp15_flush_dcache, function
 
-cp15_flush_dcache_for_dma:
+cp15_flush_dcache:
 
 	mrc		CP15_TR(r3)				/* Read the Cache Type Register */
 	lsr		r3, r3, #16				/* Isolate the DMinLine field */
@@ -300,5 +300,5 @@ cp15_flush_dcache_for_dma:
 
 	dsb
 	bx		lr
-	.size cp15_flush_dcache_for_dma, . - cp15_flush_dcache_for_dma
+	.size cp15_flush_dcache, . - cp15_flush_dcache
 	.end
