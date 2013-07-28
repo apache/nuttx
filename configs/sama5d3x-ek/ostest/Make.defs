@@ -44,7 +44,7 @@ ifeq ($(CONFIG_SAMA5_BOOT_SDRAM),y)
   LDSCRIPT = ddram.ld
 endif
 ifeq ($(CONFIG_SAMA5_BOOT_CS0FLASH),y)
-#  LDSCRIPT = cs0flash.ld
+  LDSCRIPT = norflash.ld
 endif
 ifeq ($(CONFIG_SAMA5_BOOT_CS1FLASH),y)
 #  LDSCRIPT = cs1flash.ld

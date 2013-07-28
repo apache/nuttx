@@ -445,6 +445,9 @@ void sam_clockconfig(void)
        *   - Enable the 32768 Hz oscillator if best accuracy is needed
        *   - Reprogram the SMC setup, cycle, hold, mode timing registers for EBI
        *     CS0, to adapt them to the new clock.
+       *
+       * Then below:
+       *
        *   - Program the PMC (Main Oscillator Enable or Bypass mode)
        *   - Program and Start the PLL
        *   - Switch the system clock to the new value

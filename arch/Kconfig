@@ -194,34 +194,6 @@ config ARCH_CALIBRATION
 		watch to measure the actual delay then adjust BOARD_LOOPSPERMSEC until
 		the actual delay is 100 seconds.
 
-config RAM_START
-	hex "Primary RAM start address (physical)"
-	default 0x0
-	help
-		The physical start address of primary installed RAM.  "Primary" RAM
-		refers to the RAM that you link program code into.  If program code
-		does not excecute out of RAM but from FLASH, then you may designate
-		any block of RAM as "primary."
-
-config RAM_VSTART
-	hex "Primary RAM start address (virtual)"
-	default 0x0
-	depends on ARCH_HAVE_MMU
-	help
-		The virtual start address of installed primary RAM. "Primary" RAM
-                refers to the RAM that you link program code into.  If program code
-                does not excecute out of RAM but from FLASH, then you may designate
-                any block of RAM as "primary."
-
-config RAM_SIZE
-	int "Primary RAM size"
-	default 0
-	help
-		The size in bytes of the installed primary RAM. "Primary" RAM
-                refers to the RAM that you link program code into.  If program code
-                does not excecute out of RAM but from FLASH, then you may designate
-                any block of RAM as "primary."
-
 config ARCH_HAVE_INTERRUPTSTACK
 	bool
 
@@ -269,3 +241,59 @@ config BOOT_COPYTORAM
 		RAM for better performance.
 
 endchoice
+
+menu "Boot Memory Configuration"
+
+config RAM_START
+	hex "Primary RAM start address (physical)"
+	default 0x0
+	help
+		The physical start address of primary installed RAM.  "Primary" RAM
+		refers to the RAM that you link program code into.  If program code
+		does not excecute out of RAM but from FLASH, then you may designate
+		any block of RAM as "primary."
+
+config RAM_VSTART
+	hex "Primary RAM start address (virtual)"
+	default 0x0
+	depends on ARCH_HAVE_MMU
+	help
+		The virtual start address of installed primary RAM. "Primary" RAM
+		refers to the RAM that you link program code into.  If program code
+		does not excecute out of RAM but from FLASH, then you may designate
+		any block of RAM as "primary."
+
+config RAM_SIZE
+	int "Primary RAM size"
+	default 0
+	help
+		The size in bytes of the installed primary RAM. "Primary" RAM
+		refers to the RAM that you link program code into.  If program code
+		does not excecute out of RAM but from FLASH, then you may designate
+		any block of RAM as "primary."
+
+if BOOT_RUNFROMFLASH && ARCH_HAVE_MMU
+
+config FLASH_START
+	hex "Boot FLASH start address (physical)"
+	default 0x0
+	help
+		The physical start address of installed boot FLASH.  "Boot" FLASH
+		refers to the FLASH that you link program code into.
+
+config FLASH_VSTART
+	hex "Boot FLASH start address (virtual)"
+	default 0x0
+	help
+		The virtual start address of installed boot FLASH.  "Boot" FLASH
+		refers to the FLASH that you link program code into.
+
+config FLASH_SIZE
+	int "Boot FLASH size"
+	default 0
+	help
+		The size in bytes of the installed boot FLASH.  "Boot" FLASH
+		refers to the FLASH that you link program code into.
+
+endif
+endmenu

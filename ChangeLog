@@ -5209,4 +5209,6 @@
 	  to simplify bring up of the SAMA5 (it will probably be removed
 	  later) (2013-7-26).
 	* The sama5d3x-ek/hello now runs correctly (2013-7-28).
-
+	* configs/sama5d3x-ek/ostest/:  This configuration has been modified
+	  to run out NOR flash.  More work is still needed to reconfigure the
+	  SMC so the the NOR flash can work with the high clock (2013-7-28).

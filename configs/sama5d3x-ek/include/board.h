@@ -218,6 +218,15 @@
 #define BUTTON_USER1_BIT  (1 << BUTTON_USER1)
 
 /************************************************************************************
+ * Assembly Language Macros
+ ************************************************************************************/
+
+#ifdef __ASSEMBLY__
+	.macro	config_sdram
+	.endm
+#endif /* __ASSEMBLY__ */
+
+/************************************************************************************
  * Public Data
  ************************************************************************************/
 
@@ -309,5 +318,5 @@ xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 }
 #endif
 
-#endif /* __ASSEMBLY__ */
+#endif /* !__ASSEMBLY__ */
 #endif  /* __CONFIGS_SAMA5D3X_EK_INCLUDE_BOARD_H */

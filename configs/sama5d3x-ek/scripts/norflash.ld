@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sama5d3x-ek/scripts/isram.ld
+ * configs/sama5d3x-ek/scripts/norflash.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,15 +33,20 @@
  *
  ****************************************************************************/
 
-/* The SAMA5D3 has 128 KB of ISRAM beginning at virtual address 0x0030:0000.
+/* The SAMA5D3x-EK has 128MB of NOR flash at CS0 (0x1000:0000).  In this
+ * configuration, the .text and a copy of the .data section will be loaded
+ * into NOR flash.  NuttX .data, .bss, the IDLE stack, and the primary
+ * heap will be allocated in SRAM.  The SAMA5D3 has 128 KB of ISRAM beginning
+ * at virtual address 0x0030:0000.
  *
- * Vectors in low memory are assumed and 16KB of ISRAM is reserved at the
- * high end of ISRAM for the page table.
+ * Vectors in low memory are assumed to reside at the beginning of NOR flash
+ * 16KB of ISRAM is reserved at the beginning of ISRAM for the page table.
  */
 
 MEMORY
 {
-	isram (W!RX) : ORIGIN = 0x300000, LENGTH = 128K - 16K
+	norflash (W!RX) : ORIGIN = 0x10000000, LENGTH = 128M
+	isram    (WRX!)  : ORIGIN = 0x00304000, LENGTH = 128K - 16K
 }
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
@@ -67,17 +72,17 @@ SECTIONS
 		*(.ARM.extab*)
 		*(.gnu.linkonce.armextab.*)
 		_etext = ABSOLUTE(.);
-	} > isram
+	} > norflash
 
 	.init_section : {
 		_sinit = ABSOLUTE(.);
 		*(.init_array .init_array.*)
 		_einit = ABSOLUTE(.);
-	} > isram
+	} > norflash
 
 	.ARM.extab : {
 		*(.ARM.extab*)
-	} > isram
+	} > norflash
 
 	/* .ARM.exidx is sorted, so has to go in its own output section.  */
 
@@ -85,7 +90,7 @@ SECTIONS
 	.ARM.exidx :
 	{
 		*(.ARM.exidx* .gnu.linkonce.armexidx.*)
-	} > isram
+	} > norflash
 	PROVIDE_HIDDEN (__exidx_end = .);
 
 	.data : {
@@ -94,7 +99,9 @@ SECTIONS
 		*(.gnu.linkonce.d.*)
 		CONSTRUCTORS
 		_edata = ABSOLUTE(.);
-	} > isram
+	} > isram AT > norflash
+
+	_eronly = LOADADDR(.data);
 
 	.bss : {
 		_sbss = ABSOLUTE(.);
