@@ -66,23 +66,23 @@
 /* The vectors are, by default, positioned at the beginning of the text
  * section.  Under what conditions do we have to remap the these vectors?
  *
- * 1) If we are using high vectors.  In this case, the vectors will lie at
- *    virtual address 0xfffc0000 and we will need to a) copy the vectors to
- *    another location, and 2) map the vectors to that address.
- * 2) If we are using low vectors but the .text region is not already mapped
- *    to address 0x0000:0000
- * 3) We are not using a ROM page table.  We cannot set any custom mappings in
+ * 1) If we are using high vectors (CONFIG_ARCH_LOWVECTORS=n).  In this case,
+ *    the vectors will lie at virtual address 0xffff:000 and we will need
+ *    to a) copy the vectors to another location, and b) map the vectors
+ *    to that address, and
+ *
+ *    For the case of CONFIG_ARCH_LOWVECTORS=y, defined.  The SAMA5 boot-up
+ *    logic will map the beginning of the boot memory to address 0x0000:0000
+ *    using both the MMU and the AXI matrix REMAP register.  No vector copy
+ *    is required because the vectors are position at the beginning of the
+ *    boot memory at link time and no additional MMU mapping required.
+ *
+ * 2) We are not using a ROM page table.  We cannot set any custom mappings in
  *    the case and the build must conform to the ROM page table properties
  */
 
-#undef NEED_VECTORMAP
-#if !defined(CONFIG_ARCH_LOWVECTORS) || (NUTTX_START_VADDR & 0xfff00000) != 0
-
-#  if defined(CONFIG_ARCH_ROMPGTABLE)
-#    error Vector remap cannot be performed if we are using a ROM page table
-#  endif
-
-#  define NEED_VECTORMAP
+#if !defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_ARCH_ROMPGTABLE)
+#  error High vector remap cannot be performed if we are using a ROM page table
 #endif
 
 /****************************************************************************
@@ -117,10 +117,8 @@ static const struct section_mapping_s section_mapping[] =
 {
   /* SAMA5 Internal Memories */
 
-#ifndef CONFIG_ARCH_LOWVECTORS
   { SAM_BOOTMEM_PSECTION, SAM_BOOTMEM_VSECTION,
     SAM_BOOTMEM_MMUFLAGS, SAM_BOOTMEM_NSECTIONS},
-#endif
   { SAM_ROM_PSECTION, SAM_ROM_VSECTION,
     SAM_ROM_MMUFLAGS, SAM_ROM_NSECTIONS},
   { SAM_NFCSRAM_PSECTION, SAM_NFCSRAM_VSECTION,
@@ -261,7 +259,8 @@ static void sam_setupmappings(void)
  *
  ****************************************************************************/
 
-#if defined(NEED_VECTORMAP) && defined(CONFIG_PAGING)
+#if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && \
+     defined(CONFIG_PAGING)
 static void  sam_vectorpermissions(uint32_t mmuflags)
 {
   /* The PTE for the beginning of ISRAM is at the base of the L2 page table */
@@ -304,7 +303,7 @@ static void  sam_vectorpermissions(uint32_t mmuflags)
  *
  ****************************************************************************/
 
-#ifdef NEED_VECTORMAP
+#if !defined(CONFIG_ARCH_ROMPGTABLE) && !defined(CONFIG_ARCH_LOWVECTORS)
 static void sam_vectormapping(void)
 {
   uint32_t vector_paddr = SAM_VECTOR_PADDR & PTE_SMALL_PADDR_MASK;
@@ -312,7 +311,7 @@ static void sam_vectormapping(void)
   uint32_t vector_size  = (uint32_t)&_vector_end - (uint32_t)&_vector_start;
   uint32_t end_paddr    = SAM_VECTOR_PADDR + vector_size;
 
-  /* REVISIT:  Can really assert in this context */
+  /* REVISIT:  Cannot really assert in this context */
 
   DEBUGASSERT (vector_size <= VECTOR_TABLE_SIZE);
 
@@ -363,7 +362,7 @@ static void sam_copyvectorblock(void)
    * read only, then temparily mark the mapping write-able (non-buffered).
    */
 
-#if defined(NEED_VECTORMAP) && defined(CONFIG_PAGING)
+#ifdef CONFIG_PAGING
   sam_vectorpermissions(MMU_L2_VECTRWFLAGS);
 #endif
 
@@ -387,7 +386,7 @@ static void sam_copyvectorblock(void)
 
   /* Make the vectors read-only, cacheable again */
 
-#if defined(NEED_VECTORMAP) && defined(CONFIG_PAGING)
+#if !defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_PAGING)
   sam_vectorpermissions(MMU_L2_VECTORFLAGS);
 #endif
 }
@@ -407,9 +406,7 @@ static void sam_copyvectorblock(void)
 
 static inline void sam_wdtdisable(void)
 {
-#if 0 // REVISIT
   putreg32(WDT_MR_WDDIS, SAM_WDT_MR);
-#endif
 }
 
 /****************************************************************************
@@ -501,13 +498,12 @@ void up_boot(void)
 
   sam_vectormapping();
 
-
   /* The SRAM address hold the the page table is probably buffered.  Make sure
    * that the modified contents of the page table are flushed into physical
    * memory.
    */
 
-  cp15_clean_dcache_for_dma(VECTOR_L2_VBASE, VECTOR_L2_VBASE + PGTABLE_SIZE);
+  cp15_clean_dcache(PGTABLE_BASE_VADDR, PGTABLE_BASE_VADDR + PGTABLE_SIZE);
 
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 

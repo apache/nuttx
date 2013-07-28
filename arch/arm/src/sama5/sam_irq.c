@@ -283,14 +283,17 @@ void up_irqinitialize(void)
 
   putreg32(AIC_WPMR_WPKEY | AIC_WPMR_WPEN, SAM_AIC_WPMR);
 
-#ifndef CONFIG_ARCH_LOWVECTORS
-  /* Set remap state 0:
+#ifdef CONFIG_ARCH_LOWVECTORS
+  /* Set remap state 0.  This is done late in the boot sequence.  Any
+   * exceptions taken before this point in time will be handled by the
+   * ROM code, not by the NuttX interrupt since which was, up to this
+   * point, uninitialized.
    *
-   * Boot state:    ROM is seen at address 0x00000000
-   * Remap State 0: SRAM is seen at address 0x00000000 (through AHB slave
-   *                interface) instead of ROM.
-   * Remap State 1: HEBI is seen at address 0x00000000 (through AHB slave
-   *                interface) instead of ROM for external boot.
+   *   Boot state:    ROM is seen at address 0x00000000
+   *   Remap State 0: SRAM is seen at address 0x00000000 (through AHB slave
+   *                  interface) instead of ROM.
+   *   Remap State 1: HEBI is seen at address 0x00000000 (through AHB slave
+   *                  interface) instead of ROM for external boot.
    *
    * Here we are assuming that vectors reside in the lower end of ISRAM.
    * Hmmm... this probably does not matter since we will map a page to
@@ -299,6 +302,8 @@ void up_irqinitialize(void)
 
   putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable remap */
   putreg32(AXIMX_REMAP_REMAP0, SAM_AXIMX_REMAP); /* Remap SRAM */
+
+  /* It might be wise to flush the instruction cache here */
 #endif
 
   /* currents_regs is non-NULL only while processing an interrupt */

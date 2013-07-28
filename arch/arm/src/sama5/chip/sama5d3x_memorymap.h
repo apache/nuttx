@@ -486,54 +486,68 @@
  *
  *   0x80000000-0xefffffff: Undefined (1.75 GB)
  *
- * That is the offset where the main L2 page table will be positioned.  This
- * corresponds to page table offsets 0x000002000 through 0x000003c00.  That
+ * That is the offset where the main L2 page tables will be positioned.  This
+ * corresponds to page table offsets 0x000002000 up to 0x000003c00.  That
  * is 1792 entries, each mapping 4KB of address for a total of 7MB of virtual
  * address space)
+ *
+ * Up to two L2 page tables may be used:
+ *
+ * 1) One mapping the vector table.  However, L2 page tables must be aligned
+ *    to 1KB address boundaries, so the minimum L2 page table size is then
+ *    1KB, mapping up a full megabyte of virtual address space.
+ *
+ *    This L2 page table is only allocated if CONFIG_ARCH_LOWVECTORS is *not*
+ *    defined.  The SAMA5 boot-up logic will map the beginning of the boot
+ *    memory to address 0x0000:0000 using both the MMU and the AXI matrix
+ *    REMAP register.  So no L2 page table is required.
+ *
+ * 2) If on-demand paging is supported (CONFIG_PAGING=y), than an additional
+ *    L2 page table is needed.  This page table will use the remainder of
+ *    the address space.
  */
 
-#define PGTABLE_L2_OFFSET         0x000002000
-#define PGTABLE_L2_SIZE           0x000001c00
+#ifndef CONFIG_ARCH_LOWVECTORS
+/* Vector L2 page table offset/size */
 
-/* This other small region is reserved for the vector table L2 page table
- *
- *   0x00a00000-0x0fffffff: Undefined (246 MB)
- *
- * This corresponds to page table offsets 0x000000028 through 0x00000400.
- * That is 246 entries each mapping 4KB of address each for a total of 984KB
- * of virtual address space).  For low vectors, this L2 page table can can
- * span: 0x0000:0000 through 0x000f:6000 leaving up to the full 984KB for
- * vector logic.  For high vectors located at 0xffff:0000, this L2 page
- * table can cover only 0xfff0:0000 through 0xffff:6000 which leaves 5KB for
- * vectors.
- */
+#  define VECTOR_L2_OFFSET        0x000002000
+#  define VECTOR_L2_SIZE          0x000000400
 
-#define VECTOR_L2_OFFSET          0x000000028
-#define VECTOR_L2_SIZE            0x000000400
+/* Vector L2 page table base addresses */
 
-/* If we need more L2 page tables, there additional entries can be obtained
- * from other unused areas in the physical memory map:
+#  define VECTOR_L2_PBASE         (PGTABLE_BASE_PADDR+VECTOR_L2_OFFSET)
+#  define VECTOR_L2_VBASE         (PGTABLE_BASE_VADDR+VECTOR_L2_OFFSET)
+
+/* Vector L2 page table end addresses */
+
+#  define VECTOR_L2_END_PADDR     (VECTOR_L2_PBASE+VECTOR_L2_SIZE)
+#  define VECTOR_L2_END_VADDR     (VECTOR_L2_VBASE+VECTOR_L2_SIZE)
+
+/* Paging L2 page table offset/size */
+
+#  define PGTABLE_L2_OFFSET       0x000002400
+#  define PGTABLE_L2_SIZE         0x000001800
+
+#else
+/* Paging L2 page table offset/size */
+
+#  define PGTABLE_L2_OFFSET       0x000002000
+#  define PGTABLE_L2_SIZE         0x000001c00
+#endif
+
+/* Paging L2 page table base addresses
  *
- *   0x0003c000-0x07ffffff: Reserved  (127.8 MB)
- *   0x00044000-0x00ffbfff: Reserved  ( 15.7 MB)
- *
- * NOTE: If CONFIG_PAGING is defined, mmu.h will re-assign the virtual address
- * of the page table.
+ * NOTE: If CONFIG_PAGING is defined, mmu.h will re-assign the virtual
+ * address of the page table.
  */
 
 #define PGTABLE_L2_PBASE          (PGTABLE_BASE_PADDR+PGTABLE_L2_OFFSET)
 #define PGTABLE_L2_VBASE          (PGTABLE_BASE_VADDR+PGTABLE_L2_OFFSET)
 
-#define VECTOR_L2_PBASE           (PGTABLE_BASE_PADDR+VECTOR_L2_OFFSET)
-#define VECTOR_L2_VBASE           (PGTABLE_BASE_VADDR+VECTOR_L2_OFFSET)
-
-/* Page table end addresses: */
+/* Paging L2 page table end addresses */
 
 #define PGTABLE_L2_END_PADDR      (PGTABLE_L2_PBASE+PGTABLE_L2_SIZE)
 #define PGTABLE_L2_END_VADDR      (PGTABLE_L2_VBASE+PGTABLE_L2_SIZE)
-
-#define VECTOR_L2_END_PADDR       (VECTOR_L2_PBASE+VECTOR_L2_SIZE)
-#define VECTOR_L2_END_VADDR       (VECTOR_L2_VBASE+VECTOR_L2_SIZE)
 
 /* Base address of the interrupt vector table.
  *
