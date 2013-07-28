@@ -261,6 +261,7 @@
                                           /* Bit 4:  Should be zero (SBZ) */
 #define PMD_PTE_DOM_SHIFT    (5)          /* Bits 5-8: Domain */
 #define PMD_PTE_DOM_MASK     (15 << PMD_PTE_DOMAIN_SHIFT)
+#  define PMD_PTE_DOM(n)     ((n) << PMD_PTE_DOMAIN_SHIFT)
                                           /* Bit 9:  Not implemented */
 #define PMD_PTE_PADDR_MASK   (0xfffffc00) /* Bits 10-31: Page table base address */
 
@@ -288,14 +289,15 @@
 #define PMD_SECT_C           (1 << 3)     /* Bit 3:  Cacheable bit*/
 #define PMD_SECT_XN          (1 << 4)     /* Bit 4:  Execute-never bit */
 #define PMD_SECT_DOM_SHIFT   (5)          /* Bits 5-8: Domain */
-#define PMD_SECT_DOM_MASK    (15 << PMD_SECT_DOMAIN_SHIFT)
+#define PMD_SECT_DOM_MASK    (15 << PMD_SECT_DOM_SHIFT)
+#  define PMD_SECT_DOM(n)    ((n) << PMD_SECT_DOM_SHIFT)
                                           /* Bit 9:  Implementation defined */
 #define PMD_SECT_AP_SHIFT    (10)         /* Bits 10-11: Access Permissions bits AP[0:1] */
 #define PMD_SECT_AP_MASK     (3 << PMD_SECT_AP_SHIFT)
 #  define PMD_SECT_AP0       (1 << PMD_SECT_AP_SHIFT) /* AP[0]:  Access permission bit 0 */
 #  define PMD_SECT_AP1       (2 << PMD_SECT_AP_SHIFT) /* AP[1]:  Access permission bit 1 */
 #define PMD_SECT_TEX_SHIFT   (12)         /* Bits 12-14: Memory region attribute bits */
-#define PMD_SECT_TEX_MASK    (7 << PMD_SECT_AP_SHIFT)
+#define PMD_SECT_TEX_MASK    (7 << PMD_SECT_TEX_SHIFT)
 #define PMD_SECT_AP2         (1 << 15)    /* Bit 15: AP[2]:  Access permission bit 2 */
 #define PMD_SECT_S           (1 << 16)    /* Bit 16: Shareable bit */
 #define PMD_SECT_NG          (1 << 17)    /* Bit 17: Not global bit. */
@@ -374,7 +376,7 @@
 #  define PTE_TYPE_LARGE     (1 << PTE_TYPE_SHIFT) /* 64Kb of memory */
 #  define PTE_TYPE_SMALL     (2 << PTE_TYPE_SHIFT) /*  4Kb of memory */
 #define PTE_B                (1 << 2)     /* Bit 2:  Bufferable bit */
-#define PTE_CACHEABLE        (1 << 3)     /* Bit 3:  Cacheable bit */
+#define PTE_C                (1 << 3)     /* Bit 3:  Cacheable bit */
 #define PTE_AP_SHIFT         (4)          /* Bits 4-5: Access Permissions bits AP[0:1] */
 #define PTE_AP_MASK          (3 << PTE_AP_SHIFT)
 #  define PTE_AP0            (1 << PTE_AP_SHIFT)   /* AP[0]:  Access permission bit 0 */
@@ -441,20 +443,77 @@
 
 #endif
 
+/* Memory types
+ *
+ * When TEX[2] == 1, the memory region is cacheable memory, and TEX[1:0]
+ * describe inner and outer cache attributes.  In this implementation,
+ * however, TEX[2:0] are always zero.  In this case, the cacheability is
+ * described simply as:
+ *
+ *  C B Memory Type
+ *  - - ---------------------------------------------------------------
+ *  0 0 Strongly-ordered. Strongly-ordered Shareable
+ *  0 1 Shareable Device. Device Shareable
+ *  1 0 Outer and Inner Write-Through, no Write-Allocate. Normal S bit
+ *  1 1 Outer and Inner Write-Back, no Write-Allocate. Normal S bit
+ *
+ * The memory type is actually controlled by the contents of the PRRR and
+ * NMRR registers.  For the simple case where TEX[2:0] = 0b000, the control
+ * is as follows:
+ *
+ *
+ *       MEMORY     INNER         OUTER        OUTER SHAREABLE
+ *   C B TYPE       CACHEABILITY  CACHEABILITY ATTRIBUTE
+ *   - - ---------- ------------- ------------ -----------------
+ *   0 0 PRRR[1:0]  NMRR[1:0]     NMRR[17:16]  NOT(PRRR[24])
+ *   0 1 PRRR[3:2]  NMRR[3:2]     NMRR[19:18]  NOT(PRRR[25])
+ *   1 0 PRRR[5:4]  NMRR[5:4]     NMRR[21:20]  NOT(PRRR[26])
+ *   1 1 PRRR[7:6]  NMRR[7:6]     NMRR[23:22]  NOT(PRRR[27])
+ *
+ * But on reset I see the following in PRRR:
+ *
+ *   PRRR[1:0]   = 0b00, Strongly ordered memory
+ *   PRRR[3:2]   = 0b01, Device memory
+ *   PRRR[5:4]   = 0b10, Normal memory
+ *   PRRR[7:6]   = 0b10, Normal memory
+ *   PRRR[14:27] = 0b10, Outer shareable
+ *
+ * And the following in NMRR:
+ *
+ *   NMRR[1:0]   = 0b00, Region is Non-cacheable
+ *   NMRR[3:2]   = 0b00, Region is Non-cacheable
+ *   NMRR[5:4]   = 0b10, Region is Write-Through, no Write-Allocate
+ *   NMRR[7:6]   = 0b11, Region is Write-Back, no Write-Allocate
+ *   NMRR[17:16] = 0b00, Region is Non-cacheable
+ *   NMRR[19:18] = 0b00, Region is Non-cacheable
+ *   NMRR[21:20] = 0b10, Region is Write-Through, no Write-Allocate
+ *   NMRR[23:22] = 0b11, Region is Write-Back, no Write-Allocate
+ */
+
+#define PMD_STRONGLY_ORDER   (0)
+#define PMD_DEVICE           (PMD_SECT_B)
+#define PMD_WRITE_THROUGH    (PMD_SECT_C)
+#define PMD_WRITE_BACK       (PMD_SECT_B | PMD_SECT_C)
+
+#define PTE_STRONGLY_ORDER   (0)
+#define PTE_DEVICE           (PTE_B)
+#define PTE_WRITE_THROUGH    (PTE_C)
+#define PTE_WRITE_BACK       (PTE_B | PTE_C)
+
 /* Default MMU flags for RAM memory, IO, vector region
  *
  * REVISIT:  Here we expect all threads to be running at PL1
  */
 
-#define MMU_ROMFLAGS \
-  (PMD_TYPE_SECT | PMD_SECT_AP_RW1)
-#define MMU_MEMFLAGS \
-  (PMD_TYPE_SECT | PMD_SECT_C | PMD_SECT_B | PMD_SECT_AP_RW1)
-#define MMU_IOFLAGS \
-  (PMD_TYPE_SECT | PMD_SECT_XN | PMD_SECT_AP_RW1)
+#define MMU_ROMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_R1 | PMD_WRITE_THROUGH | \
+                              PMD_SECT_DOM(0))
+#define MMU_MEMFLAGS         (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_WRITE_BACK | \
+                              PMD_SECT_DOM(0))
+#define MMU_IOFLAGS          (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_DEVICE | \
+                              PMD_SECT_DOM(0) | PMD_SECT_XN)
 
-#define MMU_L1_VECTORFLAGS   (PMD_TYPE_PTE)
-#define MMU_L2_VECTORFLAGS   (PTE_TYPE_SMALL | PTE_AP_RW1)
+#define MMU_L1_VECTORFLAGS   (PMD_TYPE_PTE | PMD_PTE_PXN | PMD_PTE_DOM(0))
+#define MMU_L2_VECTORFLAGS   (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_RW1)
 
 /* Mapped section size */
 
@@ -518,19 +577,17 @@
 
 /* MMU Flags for each type memory region. */
 
-#define MMU_L1_TEXTFLAGS      (PMD_TYPE_PTE)
-#define MMU_L2_TEXTFLAGS      (PTE_TYPE_SMALL | PTE_SMALL_AP_UNO_SRO | \
-                               PTE_CACHEABLE)
-#define MMU_L1_DATAFLAGS      (PMD_TYPE_PTE)
-#define MMU_L2_DATAFLAGS      (PTE_TYPE_SMALL | PTE_SMALL_AP_UNO_SRW | \
-                               PTE_CACHEABLE | PTE_B)
-#define MMU_L2_ALLOCFLAGS     (PTE_TYPE_SMALL | PTE_SMALL_AP_UNO_SRW)
-#define MMU_L1_PGTABFLAGS     (PMD_TYPE_PTE)
-#define MMU_L2_PGTABFLAGS     (PTE_TYPE_SMALL | PTE_SMALL_AP_UNO_SRW)
+#define MMU_L1_TEXTFLAGS      (PMD_TYPE_PTE | PMD_PTE_DOM(0))
+#define MMU_L2_TEXTFLAGS      (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_R1)
+#define MMU_L1_DATAFLAGS      (PMD_TYPE_PTE | PMD_PTE_PXN | PMD_PTE_DOM(0))
+#define MMU_L2_DATAFLAGS      (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW1)
+#define MMU_L2_ALLOCFLAGS     (PTE_TYPE_SMALL | PTE_WRITE_BACK | PTE_AP_RW1)
+#define MMU_L1_PGTABFLAGS     (PMD_TYPE_PTE | PMD_PTE_PXN | PTE_WRITE_THROUGH | \
+                               PMD_PTE_DOM(0))
+#define MMU_L2_PGTABFLAGS     (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_RW1)
 
-#define MMU_L2_VECTRWFLAGS    (PTE_TYPE_SMALL | PTE_SMALL_AP_UNO_SRW)
-#define MMU_L2_VECTROFLAGS    (PTE_TYPE_SMALL | PTE_SMALL_AP_UNO_SRO | \
-                               PTE_CACHEABLE)
+#define MMU_L2_VECTRWFLAGS    (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_RW1)
+#define MMU_L2_VECTROFLAGS    (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_R1)
 
 /* Addresses of Memory Regions ******************************************************/
 

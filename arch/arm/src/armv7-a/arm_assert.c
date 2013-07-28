@@ -289,7 +289,6 @@ void up_assert(const uint8_t *filename, int lineno)
 #ifdef CONFIG_PRINT_TASKNAME
   struct tcb_s *rtcb = (struct tcb_s*)g_readytorun.head;
 #endif
-
   up_ledon(LED_ASSERTION);
 
 #ifdef CONFIG_PRINT_TASKNAME

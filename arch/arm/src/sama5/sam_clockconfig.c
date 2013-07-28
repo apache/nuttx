@@ -238,6 +238,10 @@ static inline void sam_plladivider(void)
 #endif
     }
 
+  /* Set/clear the divider */
+
+  putreg32(regval, SAM_PMC_MCKR);
+
   /* We changed the PLLA divider.  Wait for the main clock to be ready again */
 
   sam_pmcwait(PMC_INT_MCKRDY);
@@ -308,7 +312,7 @@ static inline void sam_selectplla(void)
 
   regval  = getreg32(SAM_PMC_MCKR);
   regval &= ~PMC_MCKR_CSS_MASK;
-  regval |= PMC_MCKR_CSS_PLLA;
+  regval |= BOARD_PMC_MCKR_CSS;
   putreg32(regval, SAM_PMC_MCKR);
 
   /* Wait for the main clock to be ready again */
