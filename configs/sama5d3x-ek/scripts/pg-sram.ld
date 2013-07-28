@@ -110,8 +110,6 @@ SECTIONS
 	} > isram
 	PROVIDE_HIDDEN (__exidx_end = .);
 
-	_eronly = ABSOLUTE(.);
-
 	.paged : {
 		_spaged = ABSOLUTE(.);
 		*(.text .text.*)

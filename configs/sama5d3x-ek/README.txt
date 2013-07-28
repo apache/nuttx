@@ -318,7 +318,7 @@ Writing to FLASH using SAM-BA
     1. Exit the terminal emulation program and remove the USB cable from
        the DBGU port (J14)
     2. Connect the USB cable to the device USB port (J20)
-    3. JP9 must open so that (BMS == 1) to boot from on-chip Boot ROM
+    3. JP9 must open (BMS == 1) to boot from on-chip Boot ROM.
     4. Press and maintain PB4 CS_BOOT button and power up the board.  PB4
        CS_BOOT button prevents booting from Nand or serial Flash by
        disabling Flash Chip Selects after having powered the board, you can
@@ -332,7 +332,9 @@ Writing to FLASH using SAM-BA
     9. When you are finished writing to FLASH, remove the USB cable from J20
        and re-connect the serial link on USB CDC / DBGU connector (J14) and
        re-open the terminal emulator program.
-    10. Power cycle the board.
+    10. If you loaded code in NOR flash (CS0), then you will need to close
+        JP9 (BMS == 0) to force booting out of NOR flash (see NOTE).
+    11. Power cycle the board.
 
   NOTES:  By closing JP9 (BMS == 0), you can force the board to boot
   directly to NOR FLASH.  Executing from other memories will require that
@@ -688,11 +690,14 @@ Configurations
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
        CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
-    3. This configuration executes out of internal SRAM an can only
+    3. This configuration executes out of internal SRAM and can only
        be loaded via JTAG.
 
        CONFIG_SAMA5_BOOT_ISRAM=y               : Boot into internal SRAM
        CONFIG_BOOT_RUNFROMISRAM=y              : Run from internal SRAM
+
+    STATUS:
+      2013-7-28:  This configuration was verified functional.
 
   ostest:
     This configuration directory, performs a simple OS test using
@@ -714,16 +719,17 @@ Configurations
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
        CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
-    3. This configuration executes out of internal SRAM an can only
-       be loaded via JTAG.
+    3. This configuration executes out of CS0 NOR flash and can only
+       be loaded via JTAG.  128MB
 
-       CONFIG_SAMA5_BOOT_ISRAM=y               : Boot into internal SRAM
-       CONFIG_BOOT_RUNFROMISRAM=y              : Run from internal SRAM
+       CONFIG_SAMA5_BOOT_CS0FLASH=y            : Boot from FLASH on CS0
+       CONFIG_BOOT_RUNFROMFLASH=y              : Run in place on FLASH (vs copying to RAM)
+
+       CONFIG_SAMA5_EBICS0=y                   : Enable CS0 external memory
+       CONFIG_SAMA5_EBICS0_SIZE=134217728      : Memory size is 128KB
+       CONFIG_SAMA5_EBICS0_NOR=y               : Memory type is NOR FLASH
+
+       NOTE:  In order to boot in this configuration, you need to close the
+       BMS jumper.
 
     STATUS:
-      2013-7-26:  This ostest configuration is too large to fit in SAMA5
-        internal SRAM (along with a usable heap and a 16KB page table).
-        I do not want to simplify this test because I will, eventually,
-        need to do the entire OS test.  But I will need to configure this
-        to run out of FLASH or SDRAM in this future.  For now, I created
-        the smaller 'hello' configuration for the basic bringup.

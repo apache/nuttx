@@ -91,8 +91,6 @@ SECTIONS
 	} > sdram
 	PROVIDE_HIDDEN (__exidx_end = .);
 
-	_eronly = ABSOLUTE(.);
-
 	.data : {
 		_sdata = ABSOLUTE(.);
 		*(.data .data.*)
