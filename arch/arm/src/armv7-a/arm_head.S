@@ -44,6 +44,8 @@
 #  include "pg_macros.h"
 #endif
 
+#include <arch/board/board.h>
+
 #include "arm.h"
 #include "cp15.h"
 #include "sctlr.h"
@@ -55,7 +57,6 @@
  **********************************************************************************/
 
 #undef ALIGNMENT_TRAP
-#undef CPU_DCACHE_WRITETHROUGH
 #undef CPU_CACHE_ROUND_ROBIN
 #undef CPU_DCACHE_DISABLE
 #undef CPU_ICACHE_DISABLE
@@ -71,7 +72,6 @@
  */
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
-#  error "Configuration not implemented"
 #  define DO_SDRAM_INIT 1
 
   /* Check for the identity mapping:  For this configuration, this would be
@@ -163,10 +163,11 @@
  ****************************************************************************/
 
 /* RX_NSECTIONS determines the number of 1Mb sections to map for the
- * Read/eXecute address region.  This is based on CONFIG_RAM_SIZE.
+ * Read/eXecute address region.  This is based on NUTTX_TEXT_SIZE.
  */
 
-#define RX_NSECTIONS ((CONFIG_RAM_SIZE+0x000fffff) >> 20)
+#define RX_NSECTIONS ((NUTTX_TEXT_SIZE+0x000fffff) >> 20)
+#define WR_NSECTIONS ((NUTTX_RAM_SIZE+0x000fffff) >> 20)
 
 /****************************************************************************
  * Assembly Macros
@@ -393,14 +394,6 @@ __start:
 
 	mcr		CP15_TTBCR(r0)
 
-	/* Enable DCache write-through if so configured.
-	 *
-	 * The Cortex-A5 MPCore data cache only supports a write-back policy.
-	 */
-
-#ifdef CPU_DCACHE_WRITETHROUGH
-#endif
-
 	/* Enable the MMU and caches
 	 * lr = Resume at .Lvstart with the MMU enabled
 	 */
@@ -619,8 +612,6 @@ __start:
 	ldmia	r0, {r0, r1, r2, r3}
 	pg_l2map r0, r1, r2, r3, r4
 
-#elif defined(CONFIG_BOOT_RUNFROMFLASH)
-#  error "Logic not implemented"
 #else
 	/* Get the following value (if we did not already do so above):
 	 *
@@ -632,16 +623,16 @@ __start:
 #ifdef CONFIG_IDENTITY_TEXTMAP
 	ldr		r4, .LCvpgtable			/* r4=virtual page table */
 #endif
-	ldr		r3, .LCnuttxpaddr		/* r3=Aligned Nuttx start address (physical) */
+	ldr		r3, .LCnuttxptext		/* r3=Aligned Nuttx start address (physical) */
 
 	/* Now setup the page tables for our normal mapped execution region.
-	 * We round NUTTX_START_VADDR down to the nearest megabyte boundary.
+	 * We round NUTTX_TEXT_VADDR down to the nearest megabyte boundary.
 	 */
 
 	ldr		r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
 	add		r3, r3, r1				/* r3=flags + base */
 
-	add		r0, r4, #(NUTTX_START_VADDR & 0xfff00000) >> 18
+	add		r0, r4, #(NUTTX_TEXT_VADDR & 0xfff00000) >> 18
 	str		r3, [r0], #4
 
 	/* Now map the remaining RX_NSECTIONS-1 sections of the executable
@@ -660,8 +651,43 @@ __start:
 	 * and will require a separate mapping.  Or, if we are supporting on-demand
 	 * paging of the .text region, then the RAM-based .data/.bss/heap section
 	 * will still probably be located in a separate (virtual) address region.
+	 *
+	 * Here we have:
+	 *
+	 *    R4 = The virtual address of the page table.
+	 *    R1 = MMU_MEMFLAGS
 	 */
 
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+
+	/* Get the following values
+	 *
+	 *   R3 = Physical address of the NuttX RAM space (aligned to a
+	 *        one megabyte addres boundary).
+	 */
+
+	ldr		r3, .LCnuttxpram		/* r3=Aligned Nuttx RAM address (physical) */
+	add		r3, r3, r1				/* r3=flags + base */
+
+	/* Now setup the page tables for our normal mapped execution region.
+	 * We round NUTTX_RAM_VADDR down to the nearest megabyte boundary.
+	 */
+
+	ldr		r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
+
+	add		r0, r4, #(NUTTX_RAM_VADDR & 0xfff00000) >> 18
+	str		r3, [r0], #4
+
+	/* Now map the remaining WR_NSECTIONS-1 sections of the RAM memory
+	 * region.
+	 */
+
+	.rept	WR_NSECTIONS-1
+	add		r3, r3, #SECTION_SIZE
+	str		r3, [r0], #4
+	.endr
+
+#endif /* CONFIG_BOOT_RUNFROMFLASH */
 #endif /* CONFIG_PAGING */
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
@@ -722,11 +748,14 @@ __start:
 	.long	_ebss
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 
-#if !defined(CONFIG_PAGING) && !defined(CONFIG_BOOT_RUNFROMFLASH)
+#if !defined(CONFIG_PAGING)
+.LCnuttxptext:
+	.long	NUTTX_TEXT_PADDR & 0xfff00000
 
-.LCnuttxpaddr:
-	.long	NUTTX_START_PADDR & 0xfff00000
-
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+.LCnuttxpram:
+	.long	NUTTX_RAM_PADDR & 0xfff00000
+#endif
 #endif
 
 #ifdef CONFIG_PAGING

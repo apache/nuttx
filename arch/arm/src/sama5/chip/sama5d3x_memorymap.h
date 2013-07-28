@@ -374,21 +374,21 @@
  *
  * The boot logic will create a temporarily mapping based on where NuttX is
  * executing in memory.  In this case, NuttX could be running from NOR FLASH,
- * SDRAM, external SRAM, or internal SRAM.
+ * SDRAM, external SRAM, or internal SRAM.  If we are running from FLASH,
+ * then we must have a separate mapping for the non-contiguous RAM region.
  */
 
 #if defined(CONFIG_BOOT_RUNFROMFLASH)
-#  define NUTTX_START_VADDR       CONFIG_SAMA5_NORFLASH_VBASE
-#  define NUTTX_START_PADDR       CONFIG_SAMA5_NORFLASH_PBASE
-#elif defined(CONFIG_BOOT_RUNFROMSDRAM)
-#  define NUTTX_START_VADDR       SAM_DDRCS_VSECTION
-#  define NUTTX_START_PADDR       SAM_DDRCS_PSECTION
-#elif defined(CONFIG_BOOT_RUNFROMEXTSRAM)
-#  define NUTTX_START_VADDR       CONFIG_SAMA5_SRAM_VBASE
-#  define NUTTX_START_PADDR       CONFIG_SAMA5_SRAM_PBASE
-#else /* CONFIG_BOOT_RUNFROMISRAM, CONFIG_PAGING */
-#  define NUTTX_START_VADDR       SAM_ISRAM_VSECTION
-#  define NUTTX_START_PADDR       SAM_ISRAM_PSECTION
+#  define NUTTX_TEXT_VADDR       (CONFIG_FLASH_VSTART & 0xfff00000)
+#  define NUTTX_TEXT_PADDR       (CONFIG_FLASH_START & 0xfff00000)
+#  define NUTTX_TEXT_SIZE        (CONFIG_FLASH_END - NUTTX_TEXT_VADDR)
+#  define NUTTX_RAM_VADDR        (CONFIG_RAM_VSTART & 0xfff00000)
+#  define NUTTX_RAM_PADDR        (CONFIG_RAM_START & 0xfff00000)
+#  define NUTTX_RAM_SIZE         (CONFIG_RAM_END - NUTTX_RAM_PADDR)
+#else /* Running from some kind of RAM */
+#  define NUTTX_TEXT_VADDR       (CONFIG_RAM_VSTART & 0xfff00000)
+#  define NUTTX_TEXT_PADDR       (CONFIG_RAM_START & 0xfff00000)
+#  define NUTTX_TEXT_SIZE        (CONFIG_RAM_END - NUTTX_TEXT_VADDR)
 #endif
 
 /* MMU Page Table Location
