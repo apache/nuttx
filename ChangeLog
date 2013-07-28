@@ -5207,5 +5207,6 @@
 	  (2013-7-26).
 	* configs/sama5d3x-ek/hello:  Added a tiny hello world configuration
 	  to simplify bring up of the SAMA5 (it will probably be removed
-	  later) (2013-7026).
+	  later) (2013-7-26).
+	* The sama5d3x-ek/hello now runs correctly (2013-7-28).
 
