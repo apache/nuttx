@@ -1,5 +1,5 @@
-/************************************************************************************
- * configs/sama5d3x-ek/src/sam_norflash.c
+/*****************************************************************************
+ * configs/sama5d3x-ek/src/nor_main.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,14 +31,15 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <debug.h>
 
 #include "up_arch.h"
@@ -47,58 +48,36 @@
 
 #include "sama5d3x-ek.h"
 
-#ifdef CONFIG_SAMA5_BOOT_CS0FLASH
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
-/************************************************************************************
- * Definitions
- ************************************************************************************/
-
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
-
-/************************************************************************************
- * Public Functions
- ************************************************************************************/
+#define NOR_ENTRY ((nor_entry_t)SAM_EBICS0_VSECTION)
 
 /****************************************************************************
- * Name: board_norflash_config
+ * Private Types
+ ****************************************************************************/
+
+typedef void (*nor_entry_t)(void);
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nor_main
  *
  * Description:
- *   If CONFIG_SAMA5_BOOT_CS0FLASH, then the system is boot directly off
- *   CS0 NOR FLASH.  In this case, we assume that we get here from the
- *   primary boot loader under these conditions:
- *
- *     "If BMS signal is tied to 0, BMS_BIT is read at 1.  The ROM Code
- *      allows execution of the code contained into the memory connected to
- *      Chip Select 0 of the External Bus Interface.
- *
- *     "To achieve that, the following sequence is preformed by the ROM
- *      Code:
- *
- *        - The main clock is the on-chip 12 MHz RC oscillator,
- *        - The Static Memory Controller is configured with timing allowing
- *          code execution inCS0 external memory at 12 MHz
- *        - AXI matrix is configured to remap EBI CS0 address at 0x0
- *        - 0x0 is loaded in the Program Counter register
- *
- *     "The user software in the external memory must perform the next
- *      operation in order to complete the clocks and SMC timings
- *      configuration to run at a higher clock frequency:
- *
- *        - Enable the 32768 Hz oscillator if best accuracy is needed
- *        - Reprogram the SMC setup, cycle, hold, mode timing registers
- *          for EBI CS0, to adapt them to the new clock
- *        - Program the PMC (Main Oscillator Enable or Bypass mode)
- *        - Program and Start the PLL
- *        - Switch the system clock to the new value"
- *
- *   This function provides the board-specific implementation of the logic
- *   to reprogram the SMC.
+ *   nor_main is a tiny program that runs in ISRAM.  nor_main will enable
+ *   NOR flash then jump to the program in NOR flash
  *
  ****************************************************************************/
 
-void board_norflash_config(void)
+int nor_main(int argc, char *argv)
 {
   uint32_t regval;
 
@@ -106,6 +85,7 @@ void board_norflash_config(void)
    * are executing from NOR FLASH now).
    */
 
+  printf("Configuring NOR flash on CS0\n");
   sam_hsmc_enableclk();
 
   /* The SAMA5D3x-EK has 118MB of 16-bit NOR FLASH at CS0.  The NOR FLASH
@@ -133,6 +113,19 @@ void board_norflash_config(void)
            HSMC_MODE_EXNWMODE_DISABLED | HSMC_MODE_BIT_16 |
            HSMC_MODE_TDFCYCLES(1);
   putreg32(regval, SAM_HSMC_MODE(HSMC_CS0));
-}
 
-#endif /* CONFIG_SAMA5_BOOT_CS0FLASH */
+  /* Then jump into NOR flash */
+
+#if 1
+  printf("Waiting for GDB halt\n");
+  fflush(stdout);
+  for (;;);
+#else
+  printf("Jumping to NOR flash on CS0\n");
+  fflush(stdout);
+  usleep(500*1000);
+
+  NOR_ENTRY();
+#endif
+  return 0; /* NOR_ENTRY() should not return */
+}

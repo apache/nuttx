@@ -5222,4 +5222,9 @@
 	  logic to re-configure the SAMA5D3x-EK NOR FLASH before while
 	  running out of NOR FLASH.  We need to change the NOR FLASH
 	  timing BEFORE increasing the main clock (2013-7-29).
+	* configs/sama5d3-ek/norboot and src/nor_main.c:  The norboot
+	  configuration to help debug NuttX in NOR flash.  It runs
+	  out of ISRAM, configures NOR FLASH, then waits for you to
+	  break in with a debugger to start the program in NOR FLASH
+	  (2013-7-29).
 
