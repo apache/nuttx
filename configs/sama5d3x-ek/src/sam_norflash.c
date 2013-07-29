@@ -41,6 +41,10 @@
 
 #include <debug.h>
 
+#include "up_arch.h"
+#include "sam_periphclks.h"
+#include "chip/sam_hsmc.h"
+
 #include "sama5d3x-ek.h"
 
 #ifdef CONFIG_SAMA5_BOOT_CS0FLASH
@@ -96,7 +100,42 @@
 
 void board_norflash_config(void)
 {
-#warning Missing logic
+  uint32_t regval;
+
+  /* Make sure that the SMC peripheral is enabled (But of course it is... we
+   * are executing from NOR FLASH now).
+   */
+
+  sam_hsmc_enableclk();
+
+  /* The SAMA5D3x-EK has NOR FLASH at CS0.  The NOR FLASH has already been
+   * configured by the first level ROM bootloader... we simply need to modify
+   * the timints here.
+   */
+
+  /* Configure SMC, NCS0 is assigned to a norflash */
+
+  regval =  HSMC_SETUP_NWE_SETUP(1) |  HSMC_SETUP_NCS_WRSETUP(0) |
+            HSMC_SETUP_NRD_SETUP(2) | HSMC_SETUP_NCS_RDSETUP(0);
+  putreg32(regval, SAM_HSMC_SETUP(HSMC_CS0));
+
+  regval =  HSMC_PULSE_NWE_PULSE(10) | HSMC_PULSE_NCS_WRPULSE(10) |
+            HSMC_PULSE_NRD_PULSE(11) | HSMC_PULSE_NCS_RDPULSE(11);
+  putreg32(regval, SAM_HSMC_PULSE(HSMC_CS0));
+
+  regval =  HSMC_CYCLE_NWE_CYCLE(11) | HSMC_CYCLE_NRD_CYCLE(14);
+  putreg32(regval, SAM_HSMC_CYCLE(HSMC_CS0));
+
+  regval =  HSMC_TIMINGS_TCLR(0) | HSMC_TIMINGS_TADL(0) |
+            HSMC_TIMINGS_TAR(0) | HSMC_TIMINGS_TRR(0) |
+            HSMC_TIMINGS_TWB(0) | HSMC_TIMINGS_RBNSEL(0);
+  putreg32(regval, SAM_HSMC_TIMINGS(HSMC_CS0));
+
+  regval  = getreg32(SAM_HSMC_MODE(HSMC_CS0));
+  regval &= HSMC_MODE_DBW; /* Preserve the data bus width */
+  regval |= HSMC_MODE_READMODE | HSMC_MODE_WRITEMODE |
+            HSMC_MODE_EXNWMODE_DISABLED | HSMC_MODE_TDFCYCLES(1);
+  putreg32(regval, SAM_HSMC_MODE(HSMC_CS0));
 }
 
 #endif /* CONFIG_SAMA5_BOOT_CS0FLASH */

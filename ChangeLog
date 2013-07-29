@@ -5216,3 +5216,10 @@
 	  configs/sama5d3x-ek/src/sam_norflash.c:  Add a file structure that
 	  will (eventually) support reconfiguration of NOR flash when NuttX
 	  boots from NOR FLASH (2013-7-29).
+	* arch/arm/src/sama5/chip/sam_hsmc/h:  SAMA5 HSMC register
+	  defintion file (2013-7-29)
+	* configs/sama5d3x-ek/src/sam_norflash.c:  Add board specific
+	  logic to re-configure the SAMA5D3x-EK NOR FLASH before while
+	  running out of NOR FLASH.  We need to change the NOR FLASH
+	  timing BEFORE increasing the main clock (2013-7-29).
+
