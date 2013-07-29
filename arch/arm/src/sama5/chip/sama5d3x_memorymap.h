@@ -379,13 +379,85 @@
  */
 
 #if defined(CONFIG_BOOT_RUNFROMFLASH)
+
+/* Some sanity checks.  If we are running from FLASH, then one of the
+ * external chip selects must be configured to boot from NOR flash.
+ * And, if so, then its size must agree with the configured size.
+ */
+
+#if defined(CONFIG_SAMA5_EBICS0) && defined(CONFIG_SAMA5_EBICS0_NOR) && \
+    defined (CONFIG_SAMA5_BOOT_CS0FLASH)
+
+#  if CONFIG_SAMA5_EBICS0_SIZE != CONFIG_FLASH_SIZE
+#    error CS0 FLASH size disagreement
+#  endif
+
+#  undef CONFIG_SAMA5_BOOT_CS1FLASH
+#  undef CONFIG_SAMA5_BOOT_CS2FLASH
+#  undef CONFIG_SAMA5_BOOT_CS3FLASH
+
+#elif defined(CONFIG_SAMA5_EBICS1) && defined(CONFIG_SAMA5_EBICS1_NOR) && \
+      defined (CONFIG_SAMA5_BOOT_CS1FLASH)
+
+#  if CONFIG_SAMA5_EBICS1_SIZE != CONFIG_FLASH_SIZE
+#    error CS1 FLASH size disagreement
+#  endif
+
+#  undef CONFIG_SAMA5_BOOT_CS0FLASH
+#  undef CONFIG_SAMA5_BOOT_CS2FLASH
+#  undef CONFIG_SAMA5_BOOT_CS3FLASH
+
+#elif defined(CONFIG_SAMA5_EBICS2) && defined(CONFIG_SAMA5_EBICS2_NOR) && \
+      defined (CONFIG_SAMA5_BOOT_CS2FLASH)
+
+#  if CONFIG_SAMA2_EBICS0_SIZE != CONFIG_FLASH_SIZE
+#    error CS2 FLASH size disagreement
+#  endif
+
+#  undef CONFIG_SAMA5_BOOT_CS0FLASH
+#  undef CONFIG_SAMA5_BOOT_CS1FLASH
+#  undef CONFIG_SAMA5_BOOT_CS3FLASH
+
+#elif defined(CONFIG_SAMA5_EBICS3) && defined(CONFIG_SAMA5_EBICS3_NOR) && \
+      defined (CONFIG_SAMA5_BOOT_CS3FLASH)
+
+#  if CONFIG_SAMA5_EBICS3_SIZE != CONFIG_FLASH_SIZE
+#    error CS3 FLASH size disagreement
+#  endif
+
+#  undef CONFIG_SAMA5_BOOT_CS0FLASH
+#  undef CONFIG_SAMA5_BOOT_CS1FLASH
+#  undef CONFIG_SAMA5_BOOT_CS2FLASH
+
+#else
+#  error CONFIG_BOOT_RUNFROMFLASH=y, but no bootable NOR flash defined
+
+#  undef CONFIG_SAMA5_BOOT_CS0FLASH
+#  undef CONFIG_SAMA5_BOOT_CS1FLASH
+#  undef CONFIG_SAMA5_BOOT_CS2FLASH
+#  undef CONFIG_SAMA5_BOOT_CS3FLASH
+
+#endif
+
+/* Set up the NOR FLASH region as the NUTTX .text region */
+
 #  define NUTTX_TEXT_VADDR       (CONFIG_FLASH_VSTART & 0xfff00000)
 #  define NUTTX_TEXT_PADDR       (CONFIG_FLASH_START & 0xfff00000)
 #  define NUTTX_TEXT_SIZE        (CONFIG_FLASH_END - NUTTX_TEXT_VADDR)
+
+/* In the default configuration, the primary RAM use for .bss and .data
+ * is the internal SRAM.
+ */
+
 #  define NUTTX_RAM_VADDR        (CONFIG_RAM_VSTART & 0xfff00000)
 #  define NUTTX_RAM_PADDR        (CONFIG_RAM_START & 0xfff00000)
 #  define NUTTX_RAM_SIZE         (CONFIG_RAM_END - NUTTX_RAM_PADDR)
-#else /* Running from some kind of RAM */
+
+#else
+/* Otherwise we are running from some kind of RAM (ISRAM or SDRAM).
+ * Setup the RAM region as the NUTTX .txt, .bss, and .data region.
+ */
+
 #  define NUTTX_TEXT_VADDR       (CONFIG_RAM_VSTART & 0xfff00000)
 #  define NUTTX_TEXT_PADDR       (CONFIG_RAM_START & 0xfff00000)
 #  define NUTTX_TEXT_SIZE        (CONFIG_RAM_END - NUTTX_TEXT_VADDR)

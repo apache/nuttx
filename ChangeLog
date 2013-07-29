@@ -5212,3 +5212,7 @@
 	* configs/sama5d3x-ek/ostest/:  This configuration has been modified
 	  to run out NOR flash.  More work is still needed to reconfigure the
 	  SMC so the the NOR flash can work with the high clock (2013-7-28).
+	* arch/arm/src/sama5/sam_clockconfig.c/h and
+	  configs/sama5d3x-ek/src/sam_norflash.c:  Add a file structure that
+	  will (eventually) support reconfiguration of NOR flash when NuttX
+	  boots from NOR FLASH (2013-7-29).

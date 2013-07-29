@@ -267,7 +267,7 @@ __start:
 
 #ifndef CONFIG_IDENTITY_TEXTMAP
 	mksection r0, r4				/* r0=phys. base section */
-	ldr		r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
+	ldr		r1, .LCtextflags		/* R1=.text section MMU flags */
 	add		r3, r1, r0				/* r3=flags + base */
 	str		r3, [r4, r0, lsr #18]	/* identity mapping */
 #endif
@@ -319,7 +319,7 @@ __start:
 
 #ifdef CONFIG_IDENTITY_TEXTMAP
 	mksection r0, r4				/* r0=phys. base section */
-	ldr		r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
+	ldr		r1, .LCtextflags		/* R1=.text section MMU flags */
 	add		r3, r1, r0				/* r3=flags + base */
 #endif
 
@@ -525,50 +525,66 @@ __start:
 	.type	.LCvstart, %object
 .LCvstart:
 	.long	.Lvstart
+	.size	.LCvstart, . -.LCvstart
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-	.type	.LCmmuflags, %object
-.LCmmuflags:
-	.long	MMU_MEMFLAGS			/* MMU flags for memory sections */
+	.type	.LCtextflags, %object
+.LCtextflags:
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+	.long	MMU_ROMFLAGS			/* MMU flags text section in FLASH/ROM */
+#else
+	.long	MMU_MEMFLAGS			/* MMU flags for text section in RAM */
+#endif
+	.size	.LCtextflags, . -.LCtextflags
 #endif
 
 	.type	.LCppgtable, %object
 .LCppgtable:
 	.long	PGTABLE_BASE_PADDR		/* Physical start of page table */
+	.size	.LCppgtable, . -.LCppgtable
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
 	.type	.LCvpgtable, %object
 .LCvpgtable:
 	.long	PGTABLE_BASE_VADDR		/* Virtual start of page table */
+	.size	.LCvpgtable, . -.LCvpgtable
 #endif
 
 #ifdef CONFIG_PAGING
 
+	.type	.Ltxtspan, %object
 .Ltxtspan:
 	.long	PG_L1_TEXT_PADDR		/* Physical address in the L1 table */
 	.long	PG_L2_TEXT_PBASE		/* Physical address of the start of the L2 page table */
 	.long	PG_TEXT_NVPAGES			/* Total (virtual) text pages to be mapped */
 	.long	PG_L2_TEXT_NPAGE1		/* The number of text pages in the first page table */
 	.long	MMU_L1_TEXTFLAGS		/* L1 MMU flags to use */
+	.size	.Ltxtspan, . -.Ltxtspan
 
+	.type	.Ltxtmap, %object
 .Ltxtmap:
 	.long	PG_L2_LOCKED_PADDR		/* Physical address in the L2 table */
 	.long	PG_LOCKED_PBASE			/* Physical address of locked base memory */
 	.long	CONFIG_PAGING_NLOCKED	/* Number of pages in the locked region */
 	.long	MMU_L2_TEXTFLAGS		/* L2 MMU flags to use */
+	.size	.Ltxtmap, . -.Ltxtmap
 
+	.type	.Lptabspan, %object
 .Lptabspan:
 	.long	PG_L1_PGTABLE_PADDR		/* Physical address in the L1 table */
 	.long	PG_L2_PGTABLE_PBASE		/* Physical address of the start of the L2 page table */
 	.long	PG_PGTABLE_NPAGES		/* Total mapped page table pages */
 	.long	PG_L2_PGTABLE_NPAGE1	/* The number of text pages in the first page table */
 	.long	MMU_L1_PGTABFLAGS		/* L1 MMU flags to use */
+	.size	.Lptabspan, . -.Lptabspan
 
+	.type	.Lptabmap, %object
 .Lptabmap:
 	.long	PG_L2_PGTABLE_PADDR		/* Physical address in the L2 table */
 	.long	PGTABLE_BASE_PADDR		/* Physical address of the page table memory */
 	.long	PG_PGTABLE_NPAGES		/* Total mapped page table pages */
 	.long	MMU_L2_PGTABFLAGS		/* L2 MMU flags to use */
+	.size	.Lptabmap, . -.Lptabmap
 
 #endif /* CONFIG_PAGING */
 	.size	__start, .-__start
@@ -583,6 +599,7 @@ __start:
 	.align	5
 	.local	.Lvstart
 	.type	.Lvstart, %function
+
 .Lvstart:
 
 	/* Remove the temporary mapping (if one was made).  The following assumes
@@ -629,7 +646,7 @@ __start:
 	 * We round NUTTX_TEXT_VADDR down to the nearest megabyte boundary.
 	 */
 
-	ldr		r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
+	ldr		r1, .LCtextflags		/* R1=.text section MMU flags */
 	add		r3, r3, r1				/* r3=flags + base */
 
 	add		r0, r4, #(NUTTX_TEXT_VADDR & 0xfff00000) >> 18
@@ -652,28 +669,20 @@ __start:
 	 * paging of the .text region, then the RAM-based .data/.bss/heap section
 	 * will still probably be located in a separate (virtual) address region.
 	 *
-	 * Here we have:
-	 *
-	 *    R4 = The virtual address of the page table.
-	 *    R1 = MMU_MEMFLAGS
+	 * Here we still have R4 = The virtual address of the page table.
 	 */
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 
-	/* Get the following values
-	 *
-	 *   R3 = Physical address of the NuttX RAM space (aligned to a
-	 *        one megabyte addres boundary).
-	 */
+	/* Get R3 = Value of RAM L1 page table entry */
 
 	ldr		r3, .LCnuttxpram		/* r3=Aligned Nuttx RAM address (physical) */
+	ldr		r1, .LCramflags			/* R1=.bss/.data section MMU flags */
 	add		r3, r3, r1				/* r3=flags + base */
 
-	/* Now setup the page tables for our normal mapped execution region.
+	/* Now setup the page tables for our normal mapped RAM region.
 	 * We round NUTTX_RAM_VADDR down to the nearest megabyte boundary.
 	 */
-
-	ldr		r1, .LCmmuflags			/* FLGS=MMU_MEMFLAGS */
 
 	add		r0, r4, #(NUTTX_RAM_VADDR & 0xfff00000) >> 18
 	str		r3, [r0], #4
@@ -743,43 +752,60 @@ __start:
 	 * end of memory.  See g_idle_topstack below.
 	 */
 
+	.type	.Linitparms, %object
 .Linitparms:
 	.long	_sbss
 	.long	_ebss
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+	.size	.Linitparms, . -.Linitparms
 
 #if !defined(CONFIG_PAGING)
+	.type	.LCnuttxptext, %object
 .LCnuttxptext:
 	.long	NUTTX_TEXT_PADDR & 0xfff00000
+	.size	.LCnuttxptext, . -.LCnuttxptext
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
+	.type	.LCramflags, %object
+.LCramflags:
+	.long	MMU_MEMFLAGS			/* MMU flags for RAM section */
+	.size	.LCramflags, . -.LCramflags
+
+	.type	.LCnuttxpram, %object
 .LCnuttxpram:
 	.long	NUTTX_RAM_PADDR & 0xfff00000
+	.size	.LCnuttxpram, . -.LCnuttxpram
 #endif
 #endif
 
 #ifdef CONFIG_PAGING
 
+	.type	.Ldataspan, %object
 .Ldataspan:
 	.long	PG_L1_DATA_VADDR	/* Virtual address in the L1 table */
 	.long	PG_L2_DATA_PBASE	/* Physical address of the start of the L2 page table */
 	.long	PG_DATA_NPAGES		/* Number of pages in the data region */
 	.long	PG_L2_DATA_NPAGE1	/* The number of text pages in the first page table */
 	.long	MMU_L1_DATAFLAGS	/* L1 MMU flags to use */
+	.size	.Ldataspan, . -.Ldataspan
 
+	.type	.Ldatamap, %object
 .Ldatamap:
 	.long	PG_L2_DATA_VADDR	/* Virtual address in the L2 table */
 	.long	PG_DATA_PBASE		/* Physical address of data memory  */
 	.long	PG_DATA_NPAGES		/* Number of pages in the data region */
 	.long	MMU_L2_DATAFLAGS	/* L2 MMU flags to use */
+	.size	.Ldatamap, . -.Ldatamap
 
 #endif /* CONFIG_PAGING */
 
 #if defined(CONFIG_BOOT_RUNFROMFLASH) || defined(CONFIG_PAGING)
+	.type	.Ldatainit, %object
 .Ldatainit:
 	.long	_eronly			/* Where .data defaults are stored in FLASH */
 	.long	_sdata			/* Where .data needs to reside in SDRAM */
 	.long	_edata
+	.size	.Ldatainit, . -.Ldatainit
 #endif
 	.size	.Lvstart, .-.Lvstart
 
@@ -790,7 +816,7 @@ __start:
 	 * above.
 	 */
 
-	.data
+	.section	.rodata, "a"
 	.align	4
 	.globl	g_idle_topstack
 	.type	g_idle_topstack, object

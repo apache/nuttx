@@ -46,7 +46,7 @@
 MEMORY
 {
 	norflash (W!RX) : ORIGIN = 0x10000000, LENGTH = 128M
-	isram    (WRX!)  : ORIGIN = 0x00304000, LENGTH = 128K - 16K
+	isram    (WR)   : ORIGIN = 0x00304000, LENGTH = 128K - 16K
 }
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")

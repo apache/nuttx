@@ -452,8 +452,15 @@ void sam_clockconfig(void)
        *   - Program and Start the PLL
        *   - Switch the system clock to the new value
        */
-#error Missing logic
 
+      /* Enable the 32768 Hz oscillator */
+      /* REVISIT! */
+
+      /* Reprogram the SMC setup, cycle, hold, mode timing registers for EBI
+       * CS0, to adapt them to the new clock.
+       */
+
+      board_norflash_config();
       config = true;
     }
 #endif
