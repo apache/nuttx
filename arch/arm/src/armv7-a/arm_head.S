@@ -189,22 +189,6 @@
  * containing both.
  */
 
-/* REVISIT:  This works now of the low vector case only because the RAM
- * sizes that we have been dealing with are less then 1MB so that both the
- * page table and the vector table are in the same 1MB RAM block.  But
- * this will certainly break later. Hence, the annoying warning.
- */
-
-#ifdef CONFIG_ARCH_LOWVECTORS
-#  warning REVISIT
-#endif
-
-//#ifndef CONFIG_ARCH_LOWVECTORS
-	.macro	mksection, section, pgtable
-	bic		\section, \pgtable, #0x000ff000
-	.endm
-//#endif
-
 /* This macro will modify r0, r1, r2 and r14 */
 
 #ifdef CONFIG_DEBUG
@@ -266,9 +250,9 @@ __start:
 	 */
 
 #ifndef CONFIG_IDENTITY_TEXTMAP
-	mksection r0, r4				/* r0=phys. base section */
+	ldr		r0, .LCptextbase		/* r0=phys. base address of .text section */
 	ldr		r1, .LCtextflags		/* R1=.text section MMU flags */
-	add		r3, r1, r0				/* r3=flags + base */
+	orr		r3, r1, r0				/* r3=flags + base */
 	str		r3, [r4, r0, lsr #18]	/* identity mapping */
 #endif
 
@@ -313,16 +297,6 @@ __start:
 
 #else /* CONFIG_PAGING */
 
-	/* Create identity mapping for first MB of the .text section if we have
-	 * no already done so.
-	 */
-
-#ifdef CONFIG_IDENTITY_TEXTMAP
-	mksection r0, r4				/* r0=phys. base section */
-	ldr		r1, .LCtextflags		/* R1=.text section MMU flags */
-	add		r3, r1, r0				/* r3=flags + base */
-#endif
-
 	/* Create a virtual single section mapping for the first MB of the .text
 	 * address space. Now, we have the first 1MB mapping to both physical and
 	 * virtual addresses.  The rest of the .text mapping will be completed in
@@ -332,14 +306,41 @@ __start:
 	 * r4 = Address of the base of the L1 table
 	 */
 
-	ldr		r2, .LCvpgtable			/* r2=virt. page table */
-	mksection r0, r2				/* r0=virt. base section */
-	str		r3, [r4, r0, lsr #18]	/* identity mapping */
+#ifdef CONFIG_IDENTITY_TEXTMAP
+	ldr		r0, .LCptextbase		/* r0=phys. base address of .text section */
+	ldr		r1, .LCtextflags		/* R1=.text section MMU flags */
+	orr		r3, r1, r0				/* r3=flags + base */
+#endif
+
+	ldr		r0, .LCvtextbase		/* r0=virtual base address of .text section */
+	str		r3, [r4, r0, lsr #18]	/* Save the L1 entry using vaddress as an index */
 
 	/* NOTE: No .data/.bss access should be attempted.  This temporary mapping
 	 * can only be assumed to cover the initial .text region.
 	 */
 
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+	/* If we are executing from FLASH, then we will need an additional mapping
+	 * for the page table itself (otherwise, we will crash when we try to modify
+	 * the page table after turning the MMU on.
+	 *
+	 * Here we expect to have:
+	 * r4 = Address of the base of the L1 table
+	 *
+	 * REVISIT:  We might need this second mapping under certain conditions
+	 * when executing from RAM too.  When the RAM region is larger than 1MB
+	 * and the page table is in the high end of RAM, then the single mapping
+	 * above will not be sufficient.
+	 */
+
+	ldr		r0, .LCprambase			/* r0=phys. base address of the primary RAM region */
+	ldr		r1, .LCramflags			/* R1=MMU flags use with the primary RAM region */
+	orr		r3, r1, r0				/* r3=flags + base */
+
+	ldr		r0, .LCvrambase			/* r0=virtual base address of .text section */
+	str		r3, [r4, r0, lsr #18]	/* Save the L1 entry using vaddress as an index */
+
+#endif /* CONFIG_BOOT_RUNFROMFLASH */
 #endif /* CONFIG_PAGING */
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
@@ -520,14 +521,30 @@ __start:
  * PC_Relative Data
  ****************************************************************************/
 
-	/* Most addresses are virtual address */
-	
+	/* The virtual start address of the second phase boot logic */
+
 	.type	.LCvstart, %object
 .LCvstart:
 	.long	.Lvstart
 	.size	.LCvstart, . -.LCvstart
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
+	/* The aligned, physical base address of the .text section */
+
+	.type	.LCptextbase, %object
+.LCptextbase:
+	.long	NUTTX_TEXT_PADDR & 0xfff00000
+	.size	.LCptextbase, . -.LCptextbase
+
+	/* The aligned, virtual base address of the .text section */
+
+	.type	.LCvtextbase, %object
+.LCvtextbase:
+	.long	NUTTX_TEXT_VADDR & 0xfff00000
+	.size	.LCvtextbase, . -.LCvtextbase
+
+	/* The MMU flags used with the .text mapping */
+
 	.type	.LCtextflags, %object
 .LCtextflags:
 #ifdef CONFIG_BOOT_RUNFROMFLASH
@@ -536,7 +553,35 @@ __start:
 	.long	MMU_MEMFLAGS			/* MMU flags for text section in RAM */
 #endif
 	.size	.LCtextflags, . -.LCtextflags
+
+#if !defined(CONFIG_PAGING)
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+	/* The physical base address of the primary RAM region */
+
+	.type	.LCprambase, %object
+.LCprambase:
+	.long	NUTTX_RAM_PADDR & 0xfff00000
+	.size	.LCprambase, . -.LCprambase
+
+	/* The virtual base address of the primary RAM region */
+
+	.type	.LCvrambase, %object
+.LCvrambase:
+	.long	NUTTX_RAM_VADDR & 0xfff00000
+	.size	.LCvrambase, . -.LCvrambase
+
+	/* The MMU flags used with the primary RAM region */
+
+	.type	.LCramflags, %object
+.LCramflags:
+	.long	MMU_MEMFLAGS			/* MMU flags for RAM section */
+	.size	.LCramflags, . -.LCramflags
 #endif
+#endif
+
+#endif
+
+	/* The physical base address of the page table */
 
 	.type	.LCppgtable, %object
 .LCppgtable:
@@ -544,6 +589,8 @@ __start:
 	.size	.LCppgtable, . -.LCppgtable
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
+	/* The virtual base address of the page table */
+
 	.type	.LCvpgtable, %object
 .LCvpgtable:
 	.long	PGTABLE_BASE_VADDR		/* Virtual start of page table */
@@ -609,11 +656,10 @@ __start:
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
 #ifndef CONFIG_IDENTITY_TEXTMAP
-	ldr		r4, .LCvpgtable			/* r4=virtual page table */
-	ldr		r1, .LCppgtable			/* r1=phys. page table */
-	mksection r3, r1				/* r2=phys. base addr */
+	ldr		r4, .LCvpgtable			/* r4=virtual page table base address */
+	ldr		r3, .LCvtextbase		/* r0=virtual base address of .text section */
 	mov		r0, #0					/* flags + base = 0 */
-	str		r0, [r4, r3, lsr #18]	/* Undo identity mapping */
+	str		r3, [r4, r3, lsr #18]	/* identity mapping */
 #endif
 
 #if defined(CONFIG_PAGING)
@@ -640,7 +686,7 @@ __start:
 #ifdef CONFIG_IDENTITY_TEXTMAP
 	ldr		r4, .LCvpgtable			/* r4=virtual page table */
 #endif
-	ldr		r3, .LCnuttxptext		/* r3=Aligned Nuttx start address (physical) */
+	ldr		r3, .LCptextbase		/* r3=Aligned Nuttx start address (physical) */
 
 	/* Now setup the page tables for our normal mapped execution region.
 	 * We round NUTTX_TEXT_VADDR down to the nearest megabyte boundary.
@@ -676,7 +722,7 @@ __start:
 
 	/* Get R3 = Value of RAM L1 page table entry */
 
-	ldr		r3, .LCnuttxpram		/* r3=Aligned Nuttx RAM address (physical) */
+	ldr		r3, .LCprambase			/* r3=Aligned Nuttx RAM address (physical) */
 	ldr		r1, .LCramflags			/* R1=.bss/.data section MMU flags */
 	add		r3, r3, r1				/* r3=flags + base */
 
@@ -758,25 +804,6 @@ __start:
 	.long	_ebss
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 	.size	.Linitparms, . -.Linitparms
-
-#if !defined(CONFIG_PAGING)
-	.type	.LCnuttxptext, %object
-.LCnuttxptext:
-	.long	NUTTX_TEXT_PADDR & 0xfff00000
-	.size	.LCnuttxptext, . -.LCnuttxptext
-
-#ifdef CONFIG_BOOT_RUNFROMFLASH
-	.type	.LCramflags, %object
-.LCramflags:
-	.long	MMU_MEMFLAGS			/* MMU flags for RAM section */
-	.size	.LCramflags, . -.LCramflags
-
-	.type	.LCnuttxpram, %object
-.LCnuttxpram:
-	.long	NUTTX_RAM_PADDR & 0xfff00000
-	.size	.LCnuttxpram, . -.LCnuttxpram
-#endif
-#endif
 
 #ifdef CONFIG_PAGING
 

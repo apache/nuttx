@@ -285,7 +285,7 @@ static inline unsigned int cp15_rdsctlr(void)
   unsigned int sctlr;
   __asm__ __volatile__
     (
-      "\tmrc p15, 0, %0, c1, c0, 0"
+      "\tmrc p15, 0, %0, c1, c0, 0\n"
       : "=r" (sctlr)
       :
       : "memory"
@@ -298,7 +298,7 @@ static inline void cp15_wrsctlr(unsigned int sctlr)
 {
   __asm__ __volatile__
     (
-      "\tmcr p15, 0, $0, c1, c0, 0\n"
+      "\tmcr p15, 0, %0, c1, c0, 0\n"
       "\tnop\n"
       "\tnop\n"
       "\tnop\n"
