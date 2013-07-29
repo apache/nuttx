@@ -46,6 +46,10 @@ ifeq ($(CONFIG_HAVE_CXX),y)
 CSRCS += sam_cxxinitialize.c
 endif
 
+ifeq ($(CONFIG_SAMA5_BOOT_CS0FLASH),y)
+CSRCS += sam_norflash.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += sam_autoleds.c
 else

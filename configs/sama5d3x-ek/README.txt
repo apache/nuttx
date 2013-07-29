@@ -729,6 +729,14 @@ Configurations
        CONFIG_SAMA5_EBICS0_SIZE=134217728      : Memory size is 128KB
        CONFIG_SAMA5_EBICS0_NOR=y               : Memory type is NOR FLASH
 
+       CONFIG_FLASH_START=0x10000000           : Physical FLASH start address
+       CONFIG_FLASH_VSTART=0x10000000          : Virtual FLASH start address
+       CONFIG_FLASH_SIZE=134217728             : FLASH size (again)
+
+       CONFIG_RAM_START=0x00300400             : Data stored after page table
+       CONFIG_RAM_VSTART=0x00300400
+       CONFIG_RAM_SIZE=114688                  : Available size of 128KB - 16KB for page table
+
        NOTE:  In order to boot in this configuration, you need to close the
        BMS jumper.
 
