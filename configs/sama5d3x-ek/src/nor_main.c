@@ -43,6 +43,7 @@
 #include <debug.h>
 
 #include "up_arch.h"
+#include "sctlr.h"
 #include "sam_periphclks.h"
 #include "chip/sam_hsmc.h"
 
@@ -114,18 +115,33 @@ int nor_main(int argc, char *argv)
            HSMC_MODE_TDFCYCLES(1);
   putreg32(regval, SAM_HSMC_MODE(HSMC_CS0));
 
+  /* Disable the caches and the MMU.  Disabling the MMU should be safe here
+   * because there is a 1-to-1 identity mapping between the physical and
+   * virtual addressing.
+   */
+
+#if 0 /* Causes a crash */
+  printf("Disabling the caches and the MMU\n");
+  regval  = cp15_rdsctlr();
+  regval &= ~(SCTLR_M | SCTLR_C | SCTLR_I);
+  cp15_wrsctlr(regval);
+#endif
+
+#ifdef SAMA5_NOR_START
   /* Then jump into NOR flash */
 
-#if 1
-  printf("Waiting for GDB halt\n");
-  fflush(stdout);
-  for (;;);
-#else
   printf("Jumping to NOR flash on CS0\n");
   fflush(stdout);
   usleep(500*1000);
 
   NOR_ENTRY();
+#else
+  /* Or just wait patiently for the user to break in with GDB. */
+
+  printf("Waiting for GDB halt\n");
+  fflush(stdout);
+  for (;;);
 #endif
+
   return 0; /* NOR_ENTRY() should not return */
 }
