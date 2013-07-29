@@ -699,6 +699,20 @@ Configurations
     STATUS:
       2013-7-28:  This configuration was verified functional.
 
+  norboot:
+    This is a little program to help debug of code in NOR flash.  It
+    does the following:
+
+    - It enables and configures NOR FLASH, then
+    - Waits for you to break in with GDB.
+
+    At that point, you can set the PC and begin executing from NOR FLASH
+    under debug control.
+
+    NOTES:
+    1. This program derives from the hello configuration.  All of the
+       notes there apply to this configuration as well.
+
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.

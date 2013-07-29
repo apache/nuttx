@@ -11,6 +11,18 @@ config SAMA5_NOR_MAIN
 	depends on SAMA5_BOOT_ISRAM
 	---help---
 		nor_main is a tiny program that runs in ISRAM.  nor_main will enable
-		NOR flash then jump to the program in NOR flash
+		NOR flash then either (1) jump to the program in NOR flash or (2)
+		wait for you to break in with GDB to debug the NOR program.
+
+config SAMA5_NOR_START
+	bool "Start NOR program"
+	default n
+	depends on SAMA5_NOR_MAIN
+	---help---
+		The default behavior of the NOR boot program is to initialize the
+		NOR FLASH at CS0, then patiently wait for you to break into the
+		program with GDB.  An alternative behvior is enabled with this
+		option:  If SAMA5_NOR_START is defined, then it will not wait but
+		will, instead, immediately start the program in NOR FLASH.
 
 endif
