@@ -4,4 +4,13 @@
 #
 
 if ARCH_BOARD_SAMA5D3X_EK
+
+config SAMA5_NOR_MAIN
+	bool "Build nor_main"
+	default n
+	depends on SAMA5_BOOT_ISRAM
+	---help---
+		nor_main is a tiny program that runs in ISRAM.  nor_main will enable
+		NOR flash then jump to the program in NOR flash
+
 endif
