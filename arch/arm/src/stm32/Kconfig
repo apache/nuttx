@@ -675,7 +675,7 @@ config STM32_SPI1
 config STM32_SPI2
 	bool "SPI2"
 	default n
-	depends on STM32_CONNECTIVITYLINE || STM32_STM32F20XX || STM32_STM32F40XX || (STM32_VALUELINE && STM32_HIGHDENSITY) || (STM32_STM32F10XX && (STM32_HIGHDENSITY || STM32_MEDIUMDENSITY))
+	depends on STM32_CONNECTIVITYLINE || STM32_STM32F20XX || STM32_STM32F40XX || (STM32_VALUELINE && STM32_HIGHDENSITY) || (STM32_STM32F10XX && (STM32_HIGHDENSITY || STM32_MEDIUMDENSITY)) || STM32_STM32F30XX
 	select SPI
 	select STM32_SPI
 
@@ -1121,7 +1121,7 @@ config ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
 
 config STM32_CCMEXCLUDE
 	bool "Exclude CCM SRAM from the heap"
-	depends on STM32_STM32F20XX || STM32_STM32F40XX
+	depends on STM32_STM32F20XX || STM32_STM32F40XX || STM32_STM32F30XX
 	default y if  ARCH_DMA || ELF
 	---help---
 		Exclude CCM SRAM from the HEAP because (1) it cannot be used for DMA
@@ -2201,6 +2201,61 @@ config STM32_TIM14_DAC2
 		Reserve TIM14 to trigger DAC2
 
 endchoice
+
+menu "DAC Configuration"
+	depends on STM32_DAC1 || STM32_DAC2
+
+config STM32_DAC1_DMA
+	bool "DAC1 DMA"
+	depends on STM32_DAC1
+	default n
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer.  The DMA transfer could be
+		supported by and EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+if STM32_DAC1_DMA
+
+config STM32_DAC1_TIMER
+	int "DAC1 timer"
+	range 2 7
+
+config STM32_DAC1_TIMER_FREQUENCY
+	int "DAC1 timer frequency"
+	default 0
+	range 0 14
+
+endif
+
+config STM32_DAC2_DMA
+	bool "DAC2 DMA"
+	depends on STM32_DAC2
+	default n
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer.  The DMA transfer could be
+		supported by and EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+if STM32_DAC2_DMA
+
+config STM32_DAC2_TIMER
+	int "DAC2 timer"
+	default 0
+	range 2 7
+
+config STM32_DAC2_TIMER_FREQUENCY
+	int "DAC2 timer frequency"
+	default 0
+
+endif
+
+config STM32_DAC_DMA_BUFFER_SIZE
+	int "DAC DMA buffer size"
+	default 256
+
+endmenu
 
 config STM32_USART
 	bool

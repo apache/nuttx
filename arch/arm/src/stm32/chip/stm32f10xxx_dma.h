@@ -291,7 +291,7 @@
 
 #define STM32_DMA2_CHAN1          (7)
 #define STM32_DMA2_CHAN2          (8)
-#define STM32_DMA2_CHAN3          (1)
+#define STM32_DMA2_CHAN3          (9)
 #define STM32_DMA2_CHAN4          (10)
 #define STM32_DMA2_CHAN5          (11)
 

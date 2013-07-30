@@ -5229,4 +5229,7 @@
 	  (2013-7-29).
 	* arch/arm/src/armv7-a/arm_cache.S:  Separate the bigger cache
 	  operations into separater files (2013-7-29).
+	* arch/arm/src/stm32/stm32_dac.c:  Fixed numerous DAC driver
+	  errors and added support for DAC DMA (contributed by John
+	  Wharington, 2013-7-30).
 

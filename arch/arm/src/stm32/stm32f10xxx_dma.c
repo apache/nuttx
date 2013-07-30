@@ -58,7 +58,7 @@
 
 /* Only for the STM32F10xx family for now */
 
-#ifdef CONFIG_STM32_STM32F10XX
+#if defined(CONFIG_STM32_STM32F10XX) || defined(CONFIG_STM32_STM32F30XX)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -157,7 +157,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   },
   {
     .chan     = 3,
-#ifdef CONFIG_STM32_CONNECTIVITYLINE
+#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX)
     .irq      = STM32_IRQ_DMA2CH4,
 #else
     .irq      = STM32_IRQ_DMA2CH45,
@@ -166,7 +166,7 @@ static struct stm32_dma_s g_dma[DMA_NCHANNELS] =
   },
   {
     .chan     = 4,
-#ifdef CONFIG_STM32_CONNECTIVITYLINE
+#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX)
     .irq      = STM32_IRQ_DMA2CH5,
 #else
     .irq      = STM32_IRQ_DMA2CH45,
@@ -288,7 +288,7 @@ static int stm32_dmainterrupt(int irq, void *context)
     }
   else
 #if STM32_NDMA > 1
-#ifdef CONFIG_STM32_CONNECTIVITYLINE
+#if defined(CONFIG_STM32_CONNECTIVITYLINE) || defined(CONFIG_STM32_STM32F30XX)
   if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH5)
 #else
   if (irq >= STM32_IRQ_DMA2CH1 && irq <= STM32_IRQ_DMA2CH45)
@@ -615,10 +615,12 @@ bool stm32_dmacapable(uint32_t maddr)
 {
   switch (maddr & STM32_REGION_MASK)
     {
+#if defined(CONFIG_STM32_STM32F10XX)
       case STM32_FSMC_BANK1:
       case STM32_FSMC_BANK2:
       case STM32_FSMC_BANK3:
       case STM32_FSMC_BANK4:
+#endif
       case STM32_SRAM_BASE:
       case STM32_CODE_BASE:
         /* All RAM and flash is supported */
