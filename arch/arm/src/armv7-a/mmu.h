@@ -794,6 +794,38 @@
 #ifdef __ASSEMBLY__
 
 /************************************************************************************
+ * Name: cp15_disable_mmu
+ *
+ * Description:
+ *   Disable the MMU
+ *
+ * Inputs:
+ *   None
+ *
+ ************************************************************************************/
+
+	.macro	cp15_disable_mmu, scratch
+	mrc		p15, 0, \scratch, c1, c0, 0
+	bic		\scratch, \scratch, #1
+	mcr		p15, 0, \scratch, c1, c0, 0
+	.endm
+
+/************************************************************************************
+ * Name: cp15_invalidate_tlbs
+ *
+ * Description:
+ *   Invalidate TLBs
+ *
+ * Inputs:
+ *   None
+ *
+ ************************************************************************************/
+
+	.macro	cp15_invalidate_tlbs, scratch
+	mcr		p15, 0, \scratch, c8, c7, 0	/* TLBIALL */
+	.endm
+
+/************************************************************************************
  * Name: cp15_wrdacr
  *
  * Description:
@@ -1000,13 +1032,51 @@
 
 #ifndef __ASSEMBLY__
 
-#endif /* __ASSEMBLY__ */
-
-/********************************************************************************************
- * Inline Functions
+/************************************************************************************
+ * Name: cp15_disable_mmu
+ *
+ * Description:
+ *   Disable the MMU
+ *
+ * Inputs:
+ *   None
+ *
  ************************************************************************************/
 
-#ifndef __ASSEMBLY__
+static inline void cp15_disable_mmu(void)
+{
+  __asm__ __volatile__
+    (
+      "\tmrc p15, 0, r0, c1, c0, 0\n"
+      "\tbic r0, r0, #1\n"
+      "\tmcr p15, 0, r0, c1, c0, 0\n"
+      :
+      :
+      : "r0", "memory"
+    );
+}
+
+/************************************************************************************
+ * Name: cp15_invalidate_tlbs
+ *
+ * Description:
+ *   Invalidate TLBs
+ *
+ * Inputs:
+ *   None
+ *
+ ************************************************************************************/
+
+static inline void cp15_invalidate_tlbs(void)
+{
+  __asm__ __volatile__
+    (
+      "\tmcr p15, 0, r0, c8, c7, 0\n" /* TLBIALL */
+      :
+      :
+      : "r0", "memory"
+    );
+}
 
 /************************************************************************************
  * Name: cp15_wrdacr

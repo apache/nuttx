@@ -194,6 +194,27 @@
 #ifdef __ASSEMBLY__
 
 /************************************************************************************
+ * Name: cp15_disable_caches
+ *
+ * Description:
+ *   Disable L1 Caches
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+	.macro	cp15_invalidate_icache_inner_sharable, tmp
+	mrc		p15, 0, \tmp, c1, c0, 0		/* Read SCTLR */
+	bic		\tmp, \tmp, #(0x1 << 12)	/* Disable I cache */
+	bic		\tmp, \tmp, #(0x1 << 2)		/* Disable D cache */
+	mcr		p15, 0, \tmp, c1, c0, 0		/* Updagte the SCTLR */
+	.endm
+
+/************************************************************************************
  * Name: cp15_invalidate_icache_inner_sharable
  *
  * Description:
@@ -439,6 +460,34 @@
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/************************************************************************************
+ * Name: cp15_disable_caches
+ *
+ * Description:
+ *   Disable L1 Caches
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+static inline void cp15_disable_caches(void)
+{
+  __asm__ __volatile__
+    (
+      "\tmrc  p15, 0, r0, c1, c0, 0\n"  /* Read SCTLR */
+      "\tbic  r0, r0, #(0x1 << 12)\n"   /* Disable I cache */
+      "\tbic  r0, r0, #(0x1 << 2)\n"    /* Disable D cache */
+      "\tmcr  p15, 0, r0, c1, c0, 0\n"  /* Updagte the SCTLR */
+      :
+      :
+      : "r0", "memory"
+    );
+}
 
 /************************************************************************************
  * Name: cp15_invalidate_icache_inner_sharable
@@ -832,6 +881,22 @@ void cp15_coherent_dcache(uintptr_t start, uintptr_t end);
  ****************************************************************************/
 
 void cp15_invalidate_dcache(uintptr_t start, uintptr_t end);
+
+/****************************************************************************
+ * Name: cp15_invalidate_dcache_all
+ *
+ * Description:
+ *   Invalidate the entire contents of D cache.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void cp15_invalidate_dcache_all(void);
 
 /****************************************************************************
  * Name: cp15_clean_dcache

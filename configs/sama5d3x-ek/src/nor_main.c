@@ -43,7 +43,8 @@
 #include <debug.h>
 
 #include "up_arch.h"
-#include "sctlr.h"
+#include "mmu.h"
+#include "cache.h"
 #include "sam_periphclks.h"
 #include "chip/sam_hsmc.h"
 
@@ -120,11 +121,15 @@ int nor_main(int argc, char *argv)
    * virtual addressing.
    */
 
-#if 0 /* Causes a crash */
-  printf("Disabling the caches and the MMU\n");
-  regval  = cp15_rdsctlr();
-  regval &= ~(SCTLR_M | SCTLR_C | SCTLR_I);
-  cp15_wrsctlr(regval);
+#if 0 /* Causes crashes */
+  cp15_disable_mmu();
+  cp15_disable_caches();
+
+  /* Invalidate caches and TLBs */
+
+  cp15_invalidate_icache();
+  cp15_invalidate_dcache_all();
+  cp15_invalidate_tlbs();
 #endif
 
 #ifdef SAMA5_NOR_START
