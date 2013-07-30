@@ -284,6 +284,12 @@ void up_irqinitialize(void)
   putreg32(AIC_WPMR_WPKEY | AIC_WPMR_WPEN, SAM_AIC_WPMR);
 
 #if defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_SAMA5_BOOT_ISRAM)
+  /* Disable MATRIX write protection */
+
+#if 0 /* Disabled on reset */
+  putreg32(MATRIX_WPMR_WPKEY, SAM_MATRIX_WPMR);
+#endif
+
   /* Set remap state 0 if we are running from internal SRAM.  If we booted
    * into NOR FLASH, then the first level bootloader should have already
    * provided this mapping for us.
@@ -305,6 +311,12 @@ void up_irqinitialize(void)
 
   putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable remap */
   putreg32(AXIMX_REMAP_REMAP0, SAM_AXIMX_REMAP); /* Remap SRAM */
+
+  /* Restore MATRIX write protection */
+
+#if 0 /* Disabled on reset */
+  putreg32(MATRIX_WPMR_WPKEY | MATRIX_WPMR_WPEN, SAM_MATRIX_WPMR);
+#endif
 
   /* It might be wise to flush the instruction cache here */
 #endif

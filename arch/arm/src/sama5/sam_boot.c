@@ -117,8 +117,37 @@ static const struct section_mapping_s section_mapping[] =
 {
   /* SAMA5 Internal Memories */
 
+  /* If CONFIG_ARCH_LOWVECTORS is defined, then the vectors located at the
+   * beginning of the .text region must appear at address zero.  There are
+   * two ways to accomplish this:
+   *
+   *   1. By explicitly mapping the beginning of .text region with a page
+   *      table entry so that the virtual address zero maps to the beginning
+   *      of the .text region.
+   *   2. A second way is to map the use the AXI MATRIX remap register to
+   *      map physical address zero to the beginning of the text region,
+   *      either internal SRAM or EBI CS 0.  Then we can set an identity
+   *      mapping to map the boot region at 0x0000:0000 to virtual address
+   *      0x0000:00000
+   *
+   * The first level bootloader is supposed to provide the AXI MATRIX
+   * mapping for us at boot time base on the state of the BMS pin.  However,
+   * I have found that in the test environments that I use, I cannot always
+   * be assured of that physical address mapping.
+   *
+   * So we do both here.  If we are exectuing from FLASH, then we provide
+   * the MMU to map the physical address of FLASH to address 0x0000:0000;
+   * if we are executing from the internal SRAM, then we trust the bootload
+   * to setup the AXI MATRIX mapping.
+   */
+
+#if defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_SAMA5_BOOT_ISRAM)
+  { CONFIG_FLASH_VSTART, 0x00000000, MMU_ROMFLAGS, 1},
+#else
   { SAM_BOOTMEM_PSECTION, SAM_BOOTMEM_VSECTION,
     SAM_BOOTMEM_MMUFLAGS, SAM_BOOTMEM_NSECTIONS},
+#endif
+
   { SAM_ROM_PSECTION, SAM_ROM_VSECTION,
     SAM_ROM_MMUFLAGS, SAM_ROM_NSECTIONS},
   { SAM_NFCSRAM_PSECTION, SAM_NFCSRAM_VSECTION,
