@@ -5232,4 +5232,6 @@
 	* arch/arm/src/stm32/stm32_dac.c:  Fixed numerous DAC driver
 	  errors and added support for DAC DMA (contributed by John
 	  Wharington, 2013-7-30).
+	* arch/arm/src/stm32/stm32f30xx_i2c.c:  An I2C driver for
+	  the STM32 F3 family from John Wharington (2013-7-30).
 
