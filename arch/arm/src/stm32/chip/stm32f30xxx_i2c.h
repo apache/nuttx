@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/stm32/chip/stm32f30xxx_i2c.h
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -151,6 +151,7 @@
 #define I2C_OAR1_OA1_7_SHIFT      (1)       /* Bits 1-7: 7-bit interface address */
 #define I2C_OAR1_OA1_7_MASK       (0x7f << I2C_OAR1_OA1_7_SHIFT)
 #define I2C_OAR1_OA1MODE          (1 << 10) /* Bit 10: Own Address 1 10-bit mode */
+#define I2C_OAR1_ONE              (1 << 14) /* Bit 14: always keep on in software */
 #define I2C_OAR1_OA1EN            (1 << 15) /* Bit 15: Own Address 1 enable */
 
 /* Own address register 2 */
@@ -174,16 +175,20 @@
 #define I2C_TIMINGR_SCLL_SHIFT    (0)        /* Bits 0-7: SCL low period (master) */
 #define I2C_TIMINGR_SCLL_MASK     (0xff << I2C_TIMINGR_SCLL_SHIFT)
 #  define I2C_TIMINGR_SCLL(n)     (((n)-1) << I2C_TIMINGR_SCLL_SHIFT) /* tSCLL = n x tPRESC */
-#define I2C_TIMINGR_SCLH_SHIFT    (0)        /* Bits 8-15: SCL high period (master) */
+
+#define I2C_TIMINGR_SCLH_SHIFT    (8)        /* Bits 8-15: SCL high period (master) */
 #define I2C_TIMINGR_SCLH_MASK     (0xff << I2C_TIMINGR_SCLH_SHIFT)
 #  define I2C_TIMINGR_SCLH(n)     (((n)-1) << I2C_TIMINGR_SCLH_SHIFT) /* tSCLH = n x tPRESC */
-#define I2C_TIMINGR_SDADEL_SHIFT  (0)        /* Bits 16-19: Data hold time */
+
+#define I2C_TIMINGR_SDADEL_SHIFT  (16)        /* Bits 16-19: Data hold time */
 #define I2C_TIMINGR_SDADEL_MASK   (15 << I2C_TIMINGR_SDADEL_SHIFT)
 #  define I2C_TIMINGR_SDADEL(n)   ((n) << I2C_TIMINGR_SDADEL_SHIFT) /* tSDADEL= n x tPRESC */
-#define I2C_TIMINGR_SCLDEL_SHIFT  (0)        /* Bits 20-23: Data setup time */
+
+#define I2C_TIMINGR_SCLDEL_SHIFT  (20)        /* Bits 20-23: Data setup time */
 #define I2C_TIMINGR_SCLDEL_MASK   (15 << I2C_TIMINGR_SCLDEL_SHIFT)
 #  define I2C_TIMINGR_SCLDEL(n)   (((n)-1) << I2C_TIMINGR_SCLDEL_SHIFT) /* tSCLDEL = n x tPRESC */
-#define I2C_TIMINGR_PRESC_SHIFT   (0)        /* Bits 28-31: Timing prescaler */
+
+#define I2C_TIMINGR_PRESC_SHIFT   (28)        /* Bits 28-31: Timing prescaler */
 #define I2C_TIMINGR_PRESC_MASK    (15 << I2C_TIMINGR_PRESC_SHIFT)
 #  define I2C_TIMINGR_PRESC(n)    (((n)-1) << I2C_TIMINGR_PRESC_SHIFT) /* tPRESC = n x tI2CCLK */
 
@@ -223,6 +228,11 @@
 #define I2C_ISR_DIR               (1 << 16) /* Bit 16: Transfer direction (slave) */
 #define I2C_ISR_ADDCODE_SHIFT     (17)      /* Bits 17-23: Address match code (slave) */
 #define I2C_ISR_ADDCODE_MASK      (0x7f << I2C_ISR_ADDCODE_SHIFT)
+
+#define I2C_ISR_ERRORMASK (I2C_INT_BERR | I2C_INT_ARLO | I2C_INT_OVR | I2C_INT_PECERR | I2C_INT_TIMEOUT)
+
+#define I2C_ICR_CLEARMASK (I2C_INT_ADDR | I2C_INT_NACK | I2C_INT_STOP | I2C_INT_BERR | I2C_INT_ARLO \
+                           | I2C_INT_OVR | I2C_INT_PECERR | I2C_INT_TIMEOUT | I2C_INT_ALERT)
 
 /* Packet error checking register */
 
