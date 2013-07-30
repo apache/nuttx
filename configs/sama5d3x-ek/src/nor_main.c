@@ -42,11 +42,16 @@
 #include <stdio.h>
 #include <debug.h>
 
+#include <arch/irq.h>
+
 #include "up_arch.h"
 #include "mmu.h"
 #include "cache.h"
+
 #include "sam_periphclks.h"
 #include "chip/sam_hsmc.h"
+#include "chip/sam_matrix.h"
+#include "chip/sam_aximx.h"
 
 #include "sama5d3x-ek.h"
 
@@ -115,6 +120,33 @@ int nor_main(int argc, char *argv)
            HSMC_MODE_EXNWMODE_DISABLED | HSMC_MODE_BIT_16 |
            HSMC_MODE_TDFCYCLES(1);
   putreg32(regval, SAM_HSMC_MODE(HSMC_CS0));
+
+  /* Interrupts must be disabled through the following.  In this configuration,
+   * there should only be timer interupts.  Your NuttX configuration must use
+   * CONFIG_SERIAL_LOWCONSOLE=y or printf() will hang when the interrupts
+   * are disabled!
+   */
+
+  (void)irqdisable();
+
+  /* Set remap state 0.  This is done late in the boot sequence.  Any
+   * exceptions taken before this point in time will be handled by the
+   * ROM code, not by the NuttX interrupt since which was, up to this
+   * point, uninitialized.
+   *
+   *   Boot state:    ROM is seen at address 0x00000000
+   *   Remap State 0: SRAM is seen at address 0x00000000 (through AHB slave
+   *                  interface) instead of ROM.
+   *   Remap State 1: HEBI is seen at address 0x00000000 (through AHB slave
+   *                  interface) instead of ROM for external boot.
+   *
+   * Here we are assuming that vectors reside in the lower end of ISRAM.
+   * Hmmm... this probably does not matter since we will map a page to
+   * address 0x0000:0000 in that case anyway.
+   */
+
+  putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable remap */
+  putreg32(AXIMX_REMAP_REMAP0, SAM_AXIMX_REMAP); /* Remap SRAM */
 
   /* Disable the caches and the MMU.  Disabling the MMU should be safe here
    * because there is a 1-to-1 identity mapping between the physical and
