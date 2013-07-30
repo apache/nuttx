@@ -92,7 +92,7 @@ int nor_main(int argc, char *argv)
    * are executing from NOR FLASH now).
    */
 
-  printf("Configuring NOR flash on CS0\n");
+  printf("Configuring NOR flash on CS0 and halting\n");
   sam_hsmc_enableclk();
 
   /* The SAMA5D3x-EK has 118MB of 16-bit NOR FLASH at CS0.  The NOR FLASH
@@ -139,14 +139,18 @@ int nor_main(int argc, char *argv)
    */
 
   putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable remap */
-  putreg32(AXIMX_REMAP_REMAP1, SAM_AXIMX_REMAP); /* Remap SRAM */
+  putreg32(AXIMX_REMAP_REMAP1, SAM_AXIMX_REMAP); /* Remap HEBI */
 
   /* Disable the caches and the MMU.  Disabling the MMU should be safe here
    * because there is a 1-to-1 identity mapping between the physical and
    * virtual addressing.
    */
 
-#if 0 /* Causes crashes */
+  /* NOTE:  This generates crashes and lots of error, but does leave the
+   * system in the proper state to run from NOR:  very ugly but usable.
+   * Better than the alternative.
+   */
+
   cp15_disable_mmu();
   cp15_disable_caches();
 
@@ -155,21 +159,20 @@ int nor_main(int argc, char *argv)
   cp15_invalidate_icache();
   cp15_invalidate_dcache_all();
   cp15_invalidate_tlbs();
-#endif
 
 #ifdef SAMA5_NOR_START
   /* Then jump into NOR flash */
 
-  printf("Jumping to NOR flash on CS0\n");
-  fflush(stdout);
-  usleep(500*1000);
+//  printf("Jumping to NOR flash on CS0\n");
+//  fflush(stdout);
+//  usleep(500*1000);
 
   NOR_ENTRY();
 #else
   /* Or just wait patiently for the user to break in with GDB. */
 
-  printf("Waiting for GDB halt\n");
-  fflush(stdout);
+//  printf("Waiting for GDB halt\n");
+//  fflush(stdout);
   for (;;);
 #endif
 
