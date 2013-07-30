@@ -129,6 +129,12 @@ int nor_main(int argc, char *argv)
 
   (void)irqdisable();
 
+  /* Disable MATRIX write protection */
+
+#if 0 /* Disabled on reset */
+  putreg32(MATRIX_WPMR_WPKEY, SAM_MATRIX_WPMR);
+#endif
+
   /* Set remap state 1.
    *
    *   Boot state:    ROM is seen at address 0x00000000
@@ -136,10 +142,19 @@ int nor_main(int argc, char *argv)
    *                  interface) instead of ROM.
    *   Remap State 1: HEBI is seen at address 0x00000000 (through AHB slave
    *                  interface) instead of ROM for external boot.
+   *
+   * REVISIT:  This does not work.  No matter what I do, the internal
+   * SRAM is always visible at address zero.  I am missing something.
    */
 
   putreg32(MATRIX_MRCR_RCB0, SAM_MATRIX_MRCR);   /* Enable remap */
   putreg32(AXIMX_REMAP_REMAP1, SAM_AXIMX_REMAP); /* Remap HEBI */
+
+  /* Restore MATRIX write protection */
+
+#if 0 /* Disabled on reset */
+  putreg32(MATRIX_WPMR_WPKEY | MATRIX_WPMR_WPEN, SAM_MATRIX_WPMR);
+#endif
 
   /* Disable the caches and the MMU.  Disabling the MMU should be safe here
    * because there is a 1-to-1 identity mapping between the physical and
@@ -163,16 +178,21 @@ int nor_main(int argc, char *argv)
 #ifdef SAMA5_NOR_START
   /* Then jump into NOR flash */
 
-//  printf("Jumping to NOR flash on CS0\n");
-//  fflush(stdout);
-//  usleep(500*1000);
+#if 0 /* Trying to printf() in this state is fatal */
+  printf("Jumping to NOR flash on CS0\n");
+  fflush(stdout);
+  usleep(500*1000);
+#endif
 
   NOR_ENTRY();
 #else
   /* Or just wait patiently for the user to break in with GDB. */
 
-//  printf("Waiting for GDB halt\n");
-//  fflush(stdout);
+#if 0 /* Trying to printf() in this state is fatal */
+  printf("Waiting for GDB halt\n");
+  fflush(stdout);
+#endif
+
   for (;;);
 #endif
 

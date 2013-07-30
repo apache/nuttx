@@ -755,3 +755,7 @@ Configurations
        BMS jumper.
 
     STATUS:
+      2013-7-30:  I have been unable to execute this configuration from NOR
+        FLASH by closing the BMS jumper (J9).  As far as I can tell, this
+        jumper does nothing on my board???  I have been using the norboot
+        configuration to start the program in NOR FLASH (see just above).
