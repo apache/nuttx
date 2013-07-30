@@ -160,6 +160,36 @@
 /************************************************************************************
  * Assemby Macros
  ************************************************************************************/
+/* cp15_cache Cache Operations
+ *
+ * Usage
+ *
+ * They are performed as MCR instructions and only operate on a level 1 cache
+ * associated with  ARM v7 processor.
+ *
+ * The supported operations are:
+ *
+ *   1. Any of these operations can be applied to any data cache or any
+ *      unified cache.
+ *   2. Invalidate by MVA. Performs an invalidate of a data or unified cache
+ *      line
+ *      based on the address it contains.
+ *   3. Invalidate by set/way. Performs an invalidate of a data or unified
+ *      cache line based on its location in the cache hierarchy.
+ *   4. Clean by MVA.  Performs a clean of a data or unified cache line based
+ *      on the address it contains.
+ *   5. Clean by set/way. Performs a clean of a data or unified cache line
+ *      based on its location in the cache hierarchy.
+ *   6. Clean and Invalidate by MVA. Performs a clean and invalidate of a
+ *      data or unified cache line based on the address it contains.
+ *   7. Clean and Invalidate by set/way. Performs a clean and invalidate of
+ *      a data or unified cache line based on its location in the cache
+ *      hierarchy.
+ *
+ * NOTE: Many of these operations are implemented as assembly language
+ * macros or as C inline functions in the file cache.h.  The larger functions
+ * are implemented here as C-callable functions.
+ */
 
 #ifdef __ASSEMBLY__
 

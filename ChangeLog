@@ -5227,4 +5227,6 @@
 	  out of ISRAM, configures NOR FLASH, then waits for you to
 	  break in with a debugger to start the program in NOR FLASH
 	  (2013-7-29).
+	* arch/arm/src/armv7-a/arm_cache.S:  Separate the bigger cache
+	  operations into separater files (2013-7-29).
 
