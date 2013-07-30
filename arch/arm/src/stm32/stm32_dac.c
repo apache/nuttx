@@ -333,10 +333,10 @@ struct stm32_chan_s
 #endif
   uint8_t    intf;       /* DAC zero-based interface number (0 or 1) */
   uint32_t   dro;        /* Data output register */
+  uint32_t   tsel;       /* CR trigger select value */
 #ifdef HAVE_DMA
   uint16_t   dmachan;    /* DMA channel needed by this DAC */
   DMA_HANDLE dma;        /* Allocated DMA channel */
-  uint32_t   tsel;       /* CR trigger select value */
   uint32_t   tbase;      /* Timer base address */
   uint32_t   tfrequency; /* Timer frequency */
   uint16_t   dmabuffer[CONFIG_STM32_DAC_DMA_BUFFER_SIZE]; /* DMA transfer buffer */
@@ -741,7 +741,9 @@ static int dac_send(FAR struct dac_dev_s *dev, FAR struct dac_msg_s *msg)
 
   /* Reset counters (generate an update) */
 
+#ifdef HAVE_DMA
   tim_modifyreg(chan, STM32_BTIM_EGR_OFFSET, 0, ATIM_EGR_UG);
+#endif
   return OK;
 }
 
