@@ -5234,4 +5234,7 @@
 	  Wharington, 2013-7-30).
 	* arch/arm/src/stm32/stm32f30xx_i2c.c:  An I2C driver for
 	  the STM32 F3 family from John Wharington (2013-7-30).
+	* arch/arm/include/armv7-m:  Add irqdisable() (2013-7-30);
+	* configs/sama5d3-ek/src/nor_main.c:  Now disables interrupts
+	  before jumping to NOR flash (2013-7-30).
 
