@@ -283,11 +283,14 @@ void up_irqinitialize(void)
 
   putreg32(AIC_WPMR_WPKEY | AIC_WPMR_WPEN, SAM_AIC_WPMR);
 
-#ifdef CONFIG_ARCH_LOWVECTORS
-  /* Set remap state 0.  This is done late in the boot sequence.  Any
-   * exceptions taken before this point in time will be handled by the
-   * ROM code, not by the NuttX interrupt since which was, up to this
-   * point, uninitialized.
+#if defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_SAMA5_BOOT_ISRAM)
+  /* Set remap state 0 if we are running from internal SRAM.  If we booted
+   * into NOR FLASH, then the first level bootloader should have already
+   * provided this mapping for us.
+   *
+   * This is done late in the boot sequence.  Any exceptions taken before
+   * this point in time will be handled by the ROM code, not by the NuttX
+   * interrupt since which was, up to this point, uninitialized.
    *
    *   Boot state:    ROM is seen at address 0x00000000
    *   Remap State 0: SRAM is seen at address 0x00000000 (through AHB slave
