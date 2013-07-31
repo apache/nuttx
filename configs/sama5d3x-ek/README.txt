@@ -449,7 +449,7 @@ Buttons and LEDs
     PE24.  The red LED is also pulled high but is driven by a transistor so
     that it is illuminated when power is applied even if PE24 is not
     configured as an output.  If PE24 is configured as an output, then the
-    LCD is illuminated by a low output.
+    LCD is illuminated by a high output.
 
   These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
   defined.  In that case, the usage by the board port is defined in
@@ -772,7 +772,13 @@ Configurations
        CONFIG_BOOT_RUNFROMISRAM=y              : Run from internal SRAM
 
     STATUS:
+      2013-7-19:  This configuration (as do the others) run at 396MHz.
+        The SAMA5D3 can run at 536MHz.  I still need to figure out the
+        PLL settings to get that speed.
+
       2013-7-28:  This configuration was verified functional.
+
+      2013-7-31:  Delay loop calibrated.
 
   norboot:
     This is a little program to help debug of code in NOR flash.  It
@@ -787,6 +793,13 @@ Configurations
     NOTES:
     1. This program derives from the hello configuration.  All of the
        notes there apply to this configuration as well.
+
+    STATUS:
+      2013-7-19:  This configuration (as do the others) run at 396MHz.
+        The SAMA5D3 can run at 536MHz.  I still need to figure out the
+        PLL settings to get that speed.
+
+      2013-7-31:  Delay loop calibrated.
 
   nsh:
     This configuration directory provide the NuttShell (NSH).
@@ -833,12 +846,21 @@ Configurations
        However, no built-in applications are selected in the base configuration.
 
     STATUS:
+      2013-7-19:  This configuration (as do the others) run at 396MHz.
+        The SAMA5D3 can run at 536MHz.  I still need to figure out the
+        PLL settings to get that speed.
+
       2013-7-31:  I have been unable to execute this configuration from NOR
         FLASH by closing the BMS jumper (J9).  As far as I can tell, this
         jumper does nothing on my board???  I have been using the norboot
         configuration to start the program in NOR FLASH (see just above).
         See "Creating and Using NORBOOT" above.
+
       2013-7-31:  This NSH configuration appears to be fully functional.
+
+      2013-7-31:  Using delay loop calibration from the hello configuration.
+        That configuration runs out of internal SRAM and, as a result, this
+        configuration needs to be recalibrated.
 
   ostest:
     This configuration directory, performs a simple OS test using
@@ -883,15 +905,22 @@ Configurations
        BMS jumper.
 
     STATUS:
+      2013-7-19:  This configuration (as do the others) run at 396MHz.
+        The SAMA5D3 can run at 536MHz.  I still need to figure out the
+        PLL settings to get that speed.
+
       2013-7-30:  I have been unable to execute this configuration from NOR
         FLASH by closing the BMS jumper (J9).  As far as I can tell, this
         jumper does nothing on my board???  I have been using the norboot
         configuration to start the program in NOR FLASH (see just above).
         See "Creating and Using NORBOOT" above.
 
-       2013-7-31:
-         The OS test configuration is basically functional, but takes a very
-         long time in the round-robin scheduler test computing prime numbers.
-         This test is suppose to be slow -- like several seconds -- but not
-         many minutes.  No idea why yet.  The best guess would be an excessive
-         number of context switches.
+       2013-7-31:  The OS test configuration is basically functional, but
+         takes a very long time in the round-robin scheduler test computing
+         prime numbers.  This test is supposed to be slow -- like several
+         seconds -- but not many minutes.  No idea why yet.  The best guess
+         would be an excessive number of context switches.
+
+      2013-7-31:  Using delay loop calibration from the hello configuration.
+        That configuration runs out of internal SRAM and, as a result, this
+        configuration needs to be recalibrated.

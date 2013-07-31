@@ -122,10 +122,15 @@ void sam_setled(int led, bool ledon)
 
   if (led == BOARD_BLUE)
     {
+      /* Low illuminates */
+
       ledcfg = GPIO_BLUE;
+      ledon  = !ledon;
     }
   else if (led == BOARD_RED)
     {
+      /* High illuminates */
+
       ledcfg = GPIO_RED;
     }
   else
@@ -144,8 +149,12 @@ void sam_setleds(uint8_t ledset)
 {
   bool ledon;
 
-  ledon = ((ledset & BOARD_BLUE_BIT) != 0);
+  /* Low illuminates */
+
+  ledon = ((ledset & BOARD_BLUE_BIT) == 0);
   sam_gpiowrite(GPIO_BLUE, ledon);
+
+  /* High illuminates */
 
   ledon = ((ledset & BOARD_RED_BIT) != 0);
   sam_gpiowrite(GPIO_RED, ledon);

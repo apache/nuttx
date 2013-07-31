@@ -131,8 +131,8 @@ void up_ledinit(void)
 
 void up_ledon(int led)
 {
-  bool blueoff = true;
-  bool redoff  = true;
+  bool blueoff = true;  /* Low illuminates */
+  bool redon   = false; /* High illuminates */
 
   switch (led)
     {
@@ -148,13 +148,12 @@ void up_ledon(int led)
         return;
 
       case 3:  /* LED_PANIC */
-        redoff = false;
+        redon = true;
         break;
     }
 
   sam_gpiowrite(GPIO_BLUE, blueoff);
-  sam_gpiowrite(GPIO_RED, redoff);
-
+  sam_gpiowrite(GPIO_RED, redon);
 }
 
 /****************************************************************************
@@ -165,8 +164,8 @@ void up_ledoff(int led)
 {
   if (led != 2)
     {
-      sam_gpiowrite(GPIO_BLUE, true);
-      sam_gpiowrite(GPIO_RED, true);
+      sam_gpiowrite(GPIO_BLUE, true);  /* Low illuminates */
+      sam_gpiowrite(GPIO_RED, false);  /* High illuminates */
     }
 }
 
