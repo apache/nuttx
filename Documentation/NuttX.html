@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 16, 2013</p>
+      <p>Last Updated: July 31, 2013</p>
     </td>
   </tr>
 </table>
@@ -1631,6 +1631,7 @@
       <li><a href="#arm7tdmi">ARM7TDMI</b></a> (5)</li>
       <li><a href="#arm920t">ARM920T</a> (1) </li>
       <li><a href="#arm926ejs">ARM926EJS</a> (3) </li>
+      <li><a href="#armcortexa5">ARM Cortex-A5</a> (1) </li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (2)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (20)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (9)</li>
@@ -1698,6 +1699,7 @@
       <li><a href="#at91sam3x">Atmel AT91SAM3X</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#at91sam4l">Atmel AT91SAM4L</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#at91sam4s">Atmel AT91SAM4S</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#at91sama5d">Atmel AT91SAMA5D</a> <small>(ARM Cortex-A5)</small></li>
     </ul>
   </li>
   <li>Freescale
@@ -2090,6 +2092,52 @@
           Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/ea3152/README.txt">README</a> file for further information.
       </p>
     </ul>
+  </td>
+</tr>
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
+    <a name="armcortexa5"><b>ARM Cortex-A5</b>.</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="at91sama5d"><b>Atmel SAMA5D</b>.</a>
+        This is the  port of NuttX to the Atmel SAMA5D3x-EK development boards (where x=1,3,4, or 5).
+        These boards feature the Atmel SAMA5D3 microprocessors.
+        Four different SAMA5D3x-EK kits are available
+    </p>
+    <ul>
+      <li>SAMA5D31-EK with the <a href="http://www.atmel.com/devices/sama5d31.aspx">ATSAMA5D1</a></li>
+      <li>SAMA5D33-EK with the <a href="http://www.atmel.com/devices/sama5d33.aspx">ATSAMA5D3</a></li>
+      <li>SAMA5D34-EK with the <a href="http://www.atmel.com/devices/sama5d34.aspx">ATSAMA5D4</a></li>
+      <li>SAMA5D35-EK with the <a href="http://www.atmel.com/devices/sama5d35.aspx">ATSAMA5D5</a></li>
+    </ul>
+    <p>
+      The each kit consist of an identical base board with different plug-in modules for each CPU.
+      An option 7 inch LCD is also available.
+      All four boards are supported by NuttX with a simple reconfiguration of the processor type.
+    </p>
+    <p>
+      There is also the SAMA5D3FAE-EK bundle includes everything:  The base board, all four CPU modules, and the LCD.
+    </p>
+    <ul>
+      <p>
+        <b>STATUS</b>.
+        Initial support for the NUC120 was released in NuttX-6.29.
+        This initial support is very minimal:
+        There are simple test configurations that run out of internal SRAM and two configurations that run out of the on-boar NOR FLASH:
+        (1) An OS test configuration that verifies the correct port of NuttX to the part and
+        (2) a NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for further application development.
+        As of this writing, more device drivers are needed to make this a more complete port.
+        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sama5d3x-ek/README.txt">README</a> file for further information.
+      </p>
+        <b>Development Environments:</b>
+        1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS  with Windows native toolchain, or 4) Native Windows.
+        All testing has been perfomed with the CodeSourcery toolchain (GCC version 4.7.3) in the Cygwin environment under Windows.
+    </p>
   </td>
 </tr>
 <tr>
