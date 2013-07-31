@@ -48,6 +48,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
+#include "sam_periphclks.h"
 #include "chip/sam_pit.h"
 
 /****************************************************************************
@@ -100,23 +101,23 @@
 
 int up_timerisr(int irq, uint32_t *regs)
 {
-   /* "When CPIV and PICNT values are obtained by reading the Periodic
-    *  Interval Value Register (PIT_PIVR), the overflow counter (PICNT) is
-    *  reset and the PITS is cleared, thus acknowledging the interrupt. The
-    *  value of PICNT gives the number of periodic intervals elapsed since the
-    *  last read of PIT_PIVR.
-    */
+  /* "When CPIV and PICNT values are obtained by reading the Periodic
+   *  Interval Value Register (PIT_PIVR), the overflow counter (PICNT) is
+   *  reset and the PITS is cleared, thus acknowledging the interrupt. The
+   *  value of PICNT gives the number of periodic intervals elapsed since the
+   *  last read of PIT_PIVR.
+   */
 
-   uint32_t picnt = getreg32(SAM_PIT_PIVR) >> PIT_PICNT_SHIFT;
+  uint32_t picnt = getreg32(SAM_PIT_PIVR) >> PIT_PICNT_SHIFT;
 
-   /* Process timer interrupt (multiple times if we missed an interrupt) */
+  /* Process timer interrupt (multiple times if we missed an interrupt) */
 
-   while (picnt-- > 0)
-     {
-       sched_process_timer();
-     }
+  while (picnt-- > 0)
+    {
+      sched_process_timer();
+    }
 
-   return OK;
+  return OK;
 }
 
 /****************************************************************************
@@ -131,6 +132,10 @@ int up_timerisr(int irq, uint32_t *regs)
 void up_timerinit(void)
 {
   uint32_t regval;
+
+  /* Enable the PIT peripheral */
+
+  sam_pit_enableclk();
 
   /* Make sure that interrupts from the PIT are disabled */
 

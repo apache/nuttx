@@ -215,7 +215,7 @@ arm_vectorswi:
 	 * context switch is required.
 	 */
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr		spsr, r1
@@ -294,7 +294,7 @@ arm_vectordata:
 	 * context switch is required.
 	 */
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr		spsr_cxsf, r1
@@ -376,7 +376,7 @@ arm_vectorprefetch:
 	 * context switch is required.
 	 */
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr		spsr_cxsf, r1
@@ -453,7 +453,7 @@ arm_vectorundefinsn:
 	 * context switch is required.
 	 */
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr		spsr_cxsf, r1
