@@ -122,12 +122,12 @@ int nor_main(int argc, char *argv)
   putreg32(regval, SAM_HSMC_MODE(HSMC_CS0));
 
   /* Interrupts must be disabled through the following.  In this configuration,
-   * there should only be timer interupts.  Your NuttX configuration must use
+   * there should only be timer interrupts.  Your NuttX configuration must use
    * CONFIG_SERIAL_LOWCONSOLE=y or printf() will hang when the interrupts
    * are disabled!
    */
 
-  (void)irqdisable();
+  (void)irqsave();
 
   /* Disable MATRIX write protection */
 
