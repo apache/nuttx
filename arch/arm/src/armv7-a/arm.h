@@ -57,7 +57,7 @@
 
 /* PSR bits */
 
-#define PSR_MODE_SHIFT    (1)       /* Bits 0-4: Mode fields */
+#define PSR_MODE_SHIFT    (0)       /* Bits 0-4: Mode fields */
 #define PSR_MODE_MASK     (31 << PSR_MODE_SHIFT)
 #  define PSR_MODE_USR    (16 << PSR_MODE_SHIFT) /* User mode */
 #  define PSR_MODE_FIQ    (17 << PSR_MODE_SHIFT) /* FIQ mode */

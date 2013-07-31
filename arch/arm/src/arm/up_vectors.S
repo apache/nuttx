@@ -139,7 +139,7 @@ up_vectorirq:
 	bl	up_decodeirq		/* Call the handler */
 #endif
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 .Lnoirqset:
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr	spsr, r0
@@ -192,7 +192,7 @@ up_vectorswi:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	up_syscall		/* Call the handler */
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr	spsr, r0
@@ -263,7 +263,7 @@ up_vectordata:
 #endif
 	bl	up_dataabort		/* Call the handler */
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr	spsr_cxsf, r0
@@ -333,7 +333,7 @@ up_vectorprefetch:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	up_prefetchabort	/* Call the handler */
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr	spsr_cxsf, r0
@@ -400,7 +400,7 @@ up_vectorundefinsn:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	up_undefinedinsn	/* Call the handler */
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr	spsr_cxsf, r0
