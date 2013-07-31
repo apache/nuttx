@@ -759,3 +759,20 @@ Configurations
         FLASH by closing the BMS jumper (J9).  As far as I can tell, this
         jumper does nothing on my board???  I have been using the norboot
         configuration to start the program in NOR FLASH (see just above).
+        I do that as follows:
+
+        1. I build the norboot configuration and rename nuttx to norboot
+        2. I build the the ostest configuration and write it to NOR FLASH
+           using SAM-BA
+        3. Then I start the J-Link GDB server and GDB.  In GDB, I do the
+           following:
+
+           (gdb) mon reset                # Reset and halt the CPU
+           (gdb) load norboot             # Load norboot into internal SRAM
+           (gdb) mon go                   # Start norboot
+           (gdb) mon halt                 # Break in
+           (gdb) mon reg pc = 0x10000040  # Set the PC to NOR flash entry point
+           (gdb) mon go                   # And jump into NOR flash
+
+       2013-7-31:
+         The OS test configuration is functional.

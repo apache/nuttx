@@ -250,6 +250,23 @@ struct xcptcontext
 
 #ifndef __ASSEMBLY__
 
+/* Return the current IRQ state */
+
+static inline irqstate_t irqstate(void)
+{
+  unsigned int cpsr;
+
+  __asm__ __volatile__
+    (
+      "\tmrs    %0, cpsr\n"
+      : "=r" (cpsr)
+      :
+      : "memory"
+    );
+
+  return cpsr;
+}
+
 /* Disable IRQs and return the previous IRQ state */
 
 static inline irqstate_t irqsave(void)
@@ -278,24 +295,6 @@ static inline irqstate_t irqenable(void)
     (
       "\tmrs    %0, cpsr\n"
       "\tcpsie  i\n"
-      : "=r" (cpsr)
-      :
-      : "memory"
-    );
-
-  return cpsr;
-}
-
-/* Disable IRQs and return the previous IRQ state */
-
-static inline irqstate_t irqdisable(void)
-{
-  unsigned int cpsr;
-
-  __asm__ __volatile__
-    (
-      "\tmrs    %0, cpsr\n"
-      "\tcpsid  i\n"
       : "=r" (cpsr)
       :
       : "memory"
