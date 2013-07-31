@@ -3,7 +3,7 @@ README
 
   This README file describes the port of NuttX to the SAMA5D3x-EK
   development boards. These boards feature the Atmel SAMA5D3
-  microprocessors.  Three different SAMA5D3x-EK kits are available
+  microprocessors.  Four different SAMA5D3x-EK kits are available
 
     - SAMA5D31-EK with the ATSAMA5D1 (http://www.atmel.com/devices/sama5d31.aspx)
     - SAMA5D33-EK with the ATSAMA5D3 (http://www.atmel.com/devices/sama5d31.aspx)
@@ -73,6 +73,7 @@ Contents
   - NXFLAT Toolchain
   - Loading Code into SRAM with J-Link
   - Writing to FLASH using SAM-BA
+  - Creating and Using NORBOOT
   - Buttons and LEDs
   - Serial Consoles
   - SAMA5D3x-EK Configuration Options
@@ -341,6 +342,80 @@ Writing to FLASH using SAM-BA
   you provide a special code header so that you code can be recognized as a
   boot-able image by the ROM bootloader.
 
+Creating and Using NORBOOT
+==========================
+
+  In order to have more control of debugging code that runs out of NOR FLASH,
+  I created the sama5d3x-ek/norboot configuration.  That configuration is
+  described below under "Configurations."
+
+  Here are some general instructions on how to build an use norboot:
+
+  Building:
+  1. Remove any old configurations (if applicable).
+
+       cd <nuttx>
+       make distclean
+
+  2. Install and build the norboot configuration:
+
+       cd tools
+       ./configure.sh sama5d3x-ek/<subdir>
+       cd -
+       . ./setenv.sh
+
+     Before sourcing the setenv.sh file above, you should examine it and
+     perform edits as necessary so that TOOLCHAIN_BIN is the correct path
+     to the directory than holds your toolchain binaries.
+
+  3. Rename the binaries.  Since you will need two versions of NuttX:  this
+     norboot version that runs in internal SRAM and another under test in
+     NOR FLASH, I rename the resulting binary files so that they can be
+     distinguished:
+
+       mv nuttx norboot
+       mv nuttx.hex norboot.hex
+       mv nuttx.bin norboot.bin
+
+  4. Build your NOR configuration and write this into NOR FLASH.  Here, for
+     example, is how you would create the NSH NOR configuration:
+
+       cd <nuttx>
+       make distclean                 # Remove the norboot configuration
+       cd tools
+       ./configure.sh sama5d3x-ek/nsh # Establish the NSH configuration
+       cd -
+       make                           # Build the NSH configuration
+
+     Then use SAM-BA to write the nuttx.bin binary into NOR FLASH.  This
+     will involve holding the CS_BOOT button and power cycling to start
+     the ROM loader.  The SAM-BA serial connection will be on the device
+     USB port, not the debug USB port.  Follow the SAM-BA instruction to
+     write the nuttx.bin binary to NOR FLASH.
+
+   5. Restart the system without holding CS_BOOT to get back to the normal
+      debug setup.
+
+   6. Then start the J-Link GDB server and GDB.  In GDB, I do the following:
+
+       (gdb) mon reset                # Reset and halt the CPU
+       (gdb) load norboot             # Load norboot into internal SRAM
+       (gdb) mon go                   # Start norboot
+       (gdb) mon halt                 # Break in
+       (gdb) mon reg pc = 0x10000040  # Set the PC to NOR flash entry point
+       (gdb) mon go                   # And jump into NOR flash
+
+      The norboot program can also be configured to jump directly into
+      NOR FLASH with out requiring the the final halt and go, but since I
+      have been debugging the early boot sequence, the above sequence has
+      been most convenient for me.
+
+    STATUS:
+      2013-7-30:  I have been unable to execute this configuration from NOR
+        FLASH by closing the BMS jumper (J9).  As far as I can tell, this
+        jumper does nothing on my board???  So I have been using the norboot
+        configuration exclusively to start the program-under-test in NOR FLASH.
+
 Buttons and LEDs
 ================
 
@@ -608,7 +683,7 @@ Configurations
     . ./setenv.sh
 
   Before sourcing the setenv.sh file above, you should examine it and perform
-  edits as necessary so that BUILDROOT_BIN is the correct path to the directory
+  edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
   than holds your toolchain binaries.
 
   And then build NuttX by simply typing the following.  At the conclusion of
@@ -713,6 +788,58 @@ Configurations
     1. This program derives from the hello configuration.  All of the
        notes there apply to this configuration as well.
 
+  nsh:
+    This configuration directory provide the NuttShell (NSH).
+
+    NOTES:
+    1. This configuration uses the default USART1 serial console.  That
+       is easily changed by reconfiguring to (1) enable a different
+       serial peripheral, and (2) selecting that serial peripheral as
+       the console device.
+
+    2. By default, this configuration is set up to build on Windows
+       under either a Cygwin or MSYS environment using a recent, Windows-
+       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
+       toolchain).  Both the build environment and the toolchain
+       selection can easily be changed by reconfiguring:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows operating system
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
+       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+    3. This configuration executes out of CS0 NOR flash and can only
+       be loaded via SAM-BA.  These are the relevant configuration options
+       the define the NOR FLASH configuration:
+
+       CONFIG_SAMA5_BOOT_CS0FLASH=y            : Boot from FLASH on CS0
+       CONFIG_BOOT_RUNFROMFLASH=y              : Run in place on FLASH (vs copying to RAM)
+
+       CONFIG_SAMA5_EBICS0=y                   : Enable CS0 external memory
+       CONFIG_SAMA5_EBICS0_SIZE=134217728      : Memory size is 128KB
+       CONFIG_SAMA5_EBICS0_NOR=y               : Memory type is NOR FLASH
+
+       CONFIG_FLASH_START=0x10000000           : Physical FLASH start address
+       CONFIG_FLASH_VSTART=0x10000000          : Virtual FLASH start address
+       CONFIG_FLASH_SIZE=134217728             : FLASH size (again)
+
+       CONFIG_RAM_START=0x00300400             : Data stored after page table
+       CONFIG_RAM_VSTART=0x00300400
+       CONFIG_RAM_SIZE=114688                  : Available size of 128KB - 16KB for page table
+
+       NOTE:  In order to boot in this configuration, you need to close the
+       BMS jumper.
+
+    4. This configuration has support for NSH built-in applications enabled.
+       However, no built-in applications are selected in the base configuration.
+
+    STATUS:
+      2013-7-31:  I have been unable to execute this configuration from NOR
+        FLASH by closing the BMS jumper (J9).  As far as I can tell, this
+        jumper does nothing on my board???  I have been using the norboot
+        configuration to start the program in NOR FLASH (see just above).
+        See "Creating and Using NORBOOT" above.
+      2013-7-31:  This NSH configuration appears to be fully functional.
+
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.
@@ -734,7 +861,8 @@ Configurations
        CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
     3. This configuration executes out of CS0 NOR flash and can only
-       be loaded via JTAG.  128MB
+       be loaded via SAM-BA.  These are the relevant configuration options
+       the define the NOR FLASH configuration:
 
        CONFIG_SAMA5_BOOT_CS0FLASH=y            : Boot from FLASH on CS0
        CONFIG_BOOT_RUNFROMFLASH=y              : Run in place on FLASH (vs copying to RAM)
@@ -759,20 +887,11 @@ Configurations
         FLASH by closing the BMS jumper (J9).  As far as I can tell, this
         jumper does nothing on my board???  I have been using the norboot
         configuration to start the program in NOR FLASH (see just above).
-        I do that as follows:
-
-        1. I build the norboot configuration and rename nuttx to norboot
-        2. I build the the ostest configuration and write it to NOR FLASH
-           using SAM-BA
-        3. Then I start the J-Link GDB server and GDB.  In GDB, I do the
-           following:
-
-           (gdb) mon reset                # Reset and halt the CPU
-           (gdb) load norboot             # Load norboot into internal SRAM
-           (gdb) mon go                   # Start norboot
-           (gdb) mon halt                 # Break in
-           (gdb) mon reg pc = 0x10000040  # Set the PC to NOR flash entry point
-           (gdb) mon go                   # And jump into NOR flash
+        See "Creating and Using NORBOOT" above.
 
        2013-7-31:
-         The OS test configuration is functional.
+         The OS test configuration is basically functional, but takes a very
+         long time in the round-robin scheduler test computing prime numbers.
+         This test is suppose to be slow -- like several seconds -- but not
+         many minutes.  No idea why yet.  The best guess would be an excessive
+         number of context switches.

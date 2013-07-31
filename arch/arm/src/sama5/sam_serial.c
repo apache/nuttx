@@ -1111,7 +1111,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_earlyserialinit
+ * Name: sam_earlyserialinit
  *
  * Description:
  *   Performs the low level USART initialization early in debug so that the
@@ -1120,7 +1120,7 @@ static bool up_txempty(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-void up_earlyserialinit(void)
+void sam_earlyserialinit(void)
 {
   /* NOTE:  All GPIO configuration for the USARTs was performed in
    * sam_lowsetup

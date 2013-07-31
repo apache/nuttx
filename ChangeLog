@@ -5237,4 +5237,7 @@
 	* arch/arm/include/armv7-m:  Add irqdisable() (2013-7-30);
 	* configs/sama5d3-ek/src/nor_main.c:  Now disables interrupts
 	  before jumping to NOR flash (2013-7-30).
-
+	* configs/sama5d3-ek/nsh:  Add an NSH configuration for the
+	  SAMA5D3x-EK (2013-7-31)
+	* configs/sama5d3-ek/src/sam_cxxinitialize.c:  Add C++ support
+	  (2013-7-31).
