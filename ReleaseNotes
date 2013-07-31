@@ -4505,3 +4505,214 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
         from C code.
       - Add some missing NSH library configuration values (from Lorenz
         Meier).
+
+NuttX-6.29
+----------
+
+The 96th release of NuttX, Version 6.29, was made on July 31, 2013,
+and is available for download from the SourceForge website.  Note
+that release consists of two tarballs:  nuttx-6.29.tar.gz and
+apps-6.29.tar.gz.  Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+    * Drivers:
+
+      - Generalized the SSD1306 driver and added support UG-2832HSWEG04
+        which is very similar to the existing support for the
+        UG-2864HSWEG01.
+      - Added support for a generic bit-bang SPI driver.  This includes
+        both a common "upper half" driver as well as a platformp-specific
+        "lower half" dirvers based on a common "template."
+
+    * ARMv7-A, Cortex-A5
+
+      - Added support for the ARMv7-A architecture and the Cortex-A5 in particular.
+
+    * ARMv7-M, Cortex-M3/4
+
+      - Modified how some registers are copied during a context switch (with
+        lazy FPU register saving).  This should save some context switching
+        time when the context switch is due to interrupt level processing.
+
+    * STM32:
+
+      - Added support for a separate CCM heap.  This may be useful for
+        segregating allocations for CCM (which cannot be used for DMA)
+        from other allocations (that may be used used for DMA).
+
+    * STM32 Drivers:
+
+      - DAC: Added support for DAC DMA (contributed by John Wharington).
+      - I2C: An I2C driver for the STM32 F3 family (from John Wharington).
+
+    * Atmel AT91 SAM/4:
+
+      - Add support for SAM3X and SAM3A chips
+
+    * Atmel AT91 SAM/4 Drivers:
+
+      - Re-architect the SAM3/4 SPI driver so that is it compatible with the
+        SPI drivers of other MCUs.
+      - Added register definition file for the SAM4L LCD peripheral.
+      - Added SAM4L PDCA register definition file
+
+    * Atmel AT91 SAM/4 Boards:
+
+      - SAM4L-Xplained: Added support for the SPI-based SD card on the I/O1
+        module.
+      - SAM4L-Xplained: Added a driver for the LED1 segment LCD module.
+      - SAM4L-Xplained: Added support for the UG-2832HSWEG04 OLED on the
+        SAM4L Xplained Pro's OLED1 module
+      - SAM4S-Xplained: Added support for on-board 1MB SRAM
+      - Arduino Due:  Basic support for the Arduino Due (SAM3X) is now
+        included.
+      - SAM3U-EK:  The touchscreen is now functional.
+
+    * Atmel AT91 SAMA5D3
+
+      - Added support for the Atmel AT91SAMA5D3 Cortex-A5 chip family.
+
+    * Atmel AT91 SAMA5D3 Boards
+
+      - Added support for the Atmel SAMA5D3x-EK boards which use the AT9
+        SAMA5D3x chips (x=1,3,4,5).
+
+    * Freescale KL25Z Drivers
+
+      - Freescale KL25Z TSI register definitions and example TSI driver for
+        the Freedom KL25Z board from Alan Carvalho de Assis.
+      - Added SPI driver and register definitions for the Freescale KL25Z.
+      - Added a framework for controlling SPI-related discrete inputs and
+        outputs.  Taken from work by Alan Carvalho de Assis
+
+    * Build System:
+
+      - New sub-directories to hold SPI-related files:  includes/nuttx/spi.h
+        moved to include/nuttx/spi/.; SPI-related Kconfig info moved from
+        drivers/Kconfig to drivers/spi/kconfig.
+      - Finally... I changed the naming of configuration variables like
+        CONFIG_DRAM_ to CONFIG_RAM_.  This has bothered me for a long time
+        since most boards don't have DRAM.  The more generic RAM naming
+        should not produce so much cognitive dissonance
+
+    * Libraries:
+
+      - Added CRC16 support.
+
+    * Applications:
+
+      - Added Zmodem file transfer support.  This may be used as an embedded
+        library or may be built as 'sz' and 'rz' commands that can be
+        executed from NSH.
+      - C++ initializers should be set once and, preferably, in the context
+        of the task that uses any C++ statically initialized classes.  This
+        only becomes an issue if cxxtest or helloxx are built as NSH builtin
+        applications.  Then you want the initialization done in cxxtext or
+        helloxx and not in NSH (and certainly not twice).  Added
+        configuration options to control who does the C++ initialization.
+        NSH now does not do C++ initialization be default and must be
+        configured to do otherwise.  Conversely, cxxtest and helloxx
+        will always do C++ initialization unless configured do otherwise.
+      - examples/cxxtext:  Add ostream test as provided by Michael.
+      - NSH:  Added a 'cmp' command that can be used to compare two files
+        for equivalence.  Returns an indication if the files differ. 
+        Contributed by Andrew Tridgell (via Lorenz Meier).
+
+Efforts In Progress.  The following are features that are partially
+implemented but present in this release.  They are not likely be be
+completed soon.
+
+    * Audio System:
+
+      - A complete audio subsystem include CODECs, higher level management,
+        interface definitions, and audio drivers was contributed by Ken
+        Pettit.  This work has not been completely verified as of this
+        release and so is categorized as a work-in-progress.  At present,
+        progress is blocked due to issues interfacing with the VS1053
+        audio DAC on the Mikroe STM32F4 board.
+
+    * kconfig-fronted Configuration:
+
+    -  Conversion of old configurations to use the kconfig-frontends
+       tool is an ongoing effort that will continue for some time.
+       At this time, only 45% of the configurations have been converted
+       to use the kconfig-frontends tools.
+
+Bugfixes (see the ChangeLog for details).  Some of these are very important:
+
+    * File Systems:
+
+      - Fixed compilation error if no file systems are enabled: Change
+        error to ERROR.
+      - Read-Ahead/Write buffering: Correct typos that can cause failures
+        in some configurations (From Chia Cheng Tsao).
+
+    * Drivers
+
+      - Remove the wait for the touchscreen busy bit in the ADS7843E driver.
+        From my reading of the ADS7843 spec, it would not be appropriate to
+        wait for the BUSY bit to de-asserted anyway (since it is only de-
+        asserted when we read the data).  Most boards do not even bother to
+        provide the BUSY bit.
+      - MMC/SD SPI based driver:  Driver needs to make sure that the SPI
+        mode and data width are correct.
+      - ENC28J60:  Change buffer ordering to work around Errata.  From Dave
+        (ziggurat29).
+
+    * USB Device Controller Drivers:
+
+      - Fixed a typo in the composite device driver unitialization logic.
+        DEV1 should be DEV2 in one case.
+      - usbdev.h: Fix some typos that cause compiler errors when
+        CONFIG_USBDEV_DMA and CONFIG_USBDEV_DMAMEMORY are selected (From
+        Chia Cheng Tsao).
+
+    * ARM9:
+
+      - Fix a bug (uninitialized register error) that crept in the ARM9
+        boot-up code several years ago.  Obviously no one has used the
+        ARM9 NuttX port for years!
+
+    * STM32 Drivers:
+
+      - Fix STM32 OTF FS endpoint allocation logic.  Apparently the same
+        endpoint can be allocated as both an IN or an OUT endpoint.  The
+        existing implementation only supported one allocation, either IN or
+        OUT.  This resulted in failures to allocate endpoints when used with
+        the CDC/ACM + MSC composite driver (From Chia Cheng Tsao).
+      - SDIO: Add support for the data block end (DBCKEND) interrupt to
+        terminate transfers (From Chia Cheng Tsao).
+      - DAC: Fixed numerous DAC driver errors and added support for DAC
+        DMA (contributed by John Wharington).
+
+    * SAM3/4:
+
+      - SAM4S: Correct configuration of PIO pins for SAM4S B and C peripherals.
+      - Need to disable write protection before configuring PIO pins.
+      - GPIO configuration logic must protect against re-entrancy.
+      - Clocking must be applied to the SMC module for the 3X and 3A family in
+        order for the NFC SRAM to be functional.
+      - Fixed some errors for interrupts on ports D-F.
+
+    * SAM3/4 Drivers:
+
+      - Common SPI driver: Fix SPI mode setting.  In the SAM3/4 family, the
+        clock phase control (CPHA) is inverted (NPHA).  Also fixed an
+        incorrect pointer test.  Was checking if the wrong pointer was NULL.
+
+    * SAM3/4 Boards:
+
+      - SAM3U-EK: Fix polarity of the /PENIRQ signal (it is active low).
+        The SAM3U-EK board now runs at 96MHz.
+
+    * Applications:
+
+      - apps/examples/nxhello:  Minor fix for compilation error when the
+        display resolution is low (< 8bpp) due to a typo that has been there
+        for a long time.  Also Correct default colors when in Y1 code mode.
+      - apps/system/ramtest:  The RAM test was not correctly built
+        into the configuration and build system.
+      - apps/examples/composite: Change to prevent some false alarm debug
+        assertions (From Chia Cheng Tao).

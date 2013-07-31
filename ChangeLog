@@ -4965,7 +4965,7 @@
 	* arch/arm/src/arm*/Toolchain.mk, Kconfig (and lots of configuration
 	  files):  Add support for a generic Windows EABI toolchain (2013-6-13).
 
-6.29 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+6.29 2013-07-31 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/sam34/chip/sam4l_pinmap.h: Change naming of some pin
 	  configurations to match names used with other SAM part (2013-6-15).
@@ -5048,7 +5048,7 @@
 	  UG-2832HSWEG04.  Untested changes! (2013-6-24).
 	* arch/arm/src/stm32/stm32_ccm.c and .h:  Add support for a seperate CCM
 	  heap.  This may be useful for segregating allocations for CCM (which
-	  cannot be used for DMA) for other allocations (that may be used used
+	  cannot be used for DMA) from other allocations (that may be used used
 	  for DMA) (2013-6-25).
 	* arch/arm/src/sam32/sam3u_gpio.h:  Correct configuration of PIO pins
 	  for SAM4S B and C peripherals (2013-6-26)
@@ -5057,7 +5057,7 @@
 	* arch/arm/include/sam34/chip.h and sam3x_irq.h:  Add support for
 	  SAM3X and SAM3A chips (2013-6-26).
 	* arch/arm/src/sam34/chip/sam3x_vectors.h:  Add support for SAM3X/3A
-	  interrupt vectros (2013-6-26).
+	  interrupt vectors (2013-6-26).
 	* arch/arm/src/sam34/sam3x_periphclks.h:  Add peripheral clock
 	  controls for the SAM3X/3A (2013-6-26).
 	* arch/arm/src/sam34/chip/sam3x_memorymap.h:  Add SAM3X/3A memory map
@@ -5087,7 +5087,7 @@
 	  SRAM to be functional (2013-6-28).
 	* arch/arm/src/sam34/sam3u_gpio.c:  Need to disable write
 	  protection before configuring PIO pins.
-	* configs/sam3u-ek/nsh:  The touchscreen is now function.  The above
+	* configs/sam3u-ek/nsh:  The touchscreen is now functional.  The above
 	  fix to the sam3u_gpio.c write protection also fixed the touchscreen
 	  problem (2013-6-28).
 	* confgis/sam3u_ek/nxwm:  Created a configuration for the NxWM
@@ -5108,7 +5108,7 @@
 	  Change error to ERROR (2013-7-3).
 	* arch/arm/src/sam34/sam_gpioirq.c:  Fix some errors for interrupts
 	  on ports D-F (2013-7-3).
-	* /drivers/usbdev/composite.c: Fix a type in the composite device
+	* /drivers/usbdev/composite.c: Fix a typo in the composite device
 	  driver unitialization logic.  DEV1 should be DEV2 in one case
 	  (2013-7-4).
 	* arch/arm/src/sam34/sam3u_gpio.c:  sam_configgpio() must protect
@@ -5133,7 +5133,7 @@
 	  test the Zmodem sz and rz commands (which don't actually exist yet,
 	  but will). (2013-7-12).
 	* arch/arm/include/armv7-a and src/armv7-a:  Beginning to add support
-	  for the ARMMv7-A, the Cortex-A5 in particular.  The initial checkin
+	  for the ARMv7-A, the Cortex-A5 in particular.  The initial checkin
 	  is only fragmentary:  A few header files and some copied ARM9
 	  assembly files.  More to come (2013-7-18).
 	* arch/arm/include/sama5, arch/arm/src/sama5, and configs/sama5d3x-e:
@@ -5200,7 +5200,7 @@
 	  Fix a bug (uninitialized register error) that crept in the ARM9
 	  boot-up code several years ago and was cloned into the Cortex-A5
 	  code.  Obviously no one has used the ARM9 NuttX port for years!
-	* Many files:  Finally... I changed the naming to of configuration
+	* Many files:  Finally... I changed the naming of configuration
 	  variables like CONFIG_DRAM_ to CONFIG_RAM_.  This has bothered
 	  me for a long time since most boards don't have DRAM.  The more
 	  generic RAM naming should not produce so much cognitive dissonance
@@ -5241,3 +5241,5 @@
 	  SAMA5D3x-EK (2013-7-31)
 	* configs/sama5d3-ek/src/sam_cxxinitialize.c:  Add C++ support
 	  (2013-7-31).
+
+6.30 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
