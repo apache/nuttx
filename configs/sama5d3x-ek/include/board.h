@@ -156,7 +156,7 @@
  *   PE24.  The red LED is also pulled high but is driven by a transistor so
  *   that it is illuminated when power is applied even if PE24 is not
  *   configured as an output.  If PE24 is configured as an output, then the
- *   LCD is illuminated by a low output.
+ *   LCD is illuminated by a high output.
  */
 
 /* LED index values for use with sam_setled() */
