@@ -5243,3 +5243,9 @@
 	  (2013-7-31).
 
 6.30 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/src/sama5/arm_pghead.S:  Separate the logic that is
+	  enabled by CONFIG_PAGING out of arm_head.S.  That was just
+	  too much conditional compilation to be supportable
+	  (2013-8-1).
+

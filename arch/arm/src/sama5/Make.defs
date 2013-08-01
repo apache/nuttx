@@ -1,5 +1,5 @@
 ############################################################################
-# arch/arm/samad5/Make.defs
+# arch/arm/sama5/Make.defs
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,13 +33,28 @@
 #
 ############################################################################
 
+# The vector table is the "head" object, i.e., the one that must forced into
+# the link in order to draw in all of the other components
+
 HEAD_ASRC  = arm_vectortab.S
 
+# Force the start-up logic to be at the beginning of the .text to simplify
+# debug.
+
+ifeq ($(CONFIG_PAGING),y)
+CMN_ASRCS  = arm_pghead.S
+else
 CMN_ASRCS  = arm_head.S
+endif
+
+# Common assembly language files
+
 CMN_ASRCS += arm_vectors.S arm_fpuconfig.S arm_fullcontextrestore.S
 CMN_ASRCS += arm_saveusercontext.S arm_vectoraddrexcptn.S arm_vfork.S
 CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
 CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S cp15_invalidate_dcache_all.S
+
+# Common C source files
 
 CMN_CSRCS  = up_initialize.c up_idle.c up_interruptcontext.c up_exit.c
 CMN_CSRCS += up_createstack.c up_releasestack.c up_usestack.c up_vfork.c
@@ -51,6 +66,8 @@ CMN_CSRCS += arm_doirq.c arm_initialstate.c arm_prefetchabort.c
 CMN_CSRCS += arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
 CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
+
+# Configuration dependent C and assembly language files
 
 ifeq ($(CONFIG_PAGING),y)
 CMN_CSRCS += arm_allocpage.c arm_checkmapping.c arm_pginitialize.c
@@ -66,7 +83,13 @@ CMN_ASRCS += arm_savefpu.S arm_restorefpu.S
 CMN_CSRCS += arm_copyarmstate.c
 endif
 
+# SAMA5-specific assembly language files
+
 CHIP_ASRCS  =
+
+# SAMA5-specific C source files
 
 CHIP_CSRCS  = sam_allocateheap.c sam_boot.c sam_clockconfig.c sam_gpio.c
 CHIP_CSRCS += sam_irq.c sam_lowputc.c sam_serial.c sam_timerisr.c
+
+# Configuration dependent C and assembly language files
