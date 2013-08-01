@@ -5,16 +5,14 @@ README
   development boards. These boards feature the Atmel SAMA5D3
   microprocessors.  Four different SAMA5D3x-EK kits are available
 
-    - SAMA5D31-EK with the ATSAMA5D1 (http://www.atmel.com/devices/sama5d31.aspx)
-    - SAMA5D33-EK with the ATSAMA5D3 (http://www.atmel.com/devices/sama5d31.aspx)
-    - SAMA5D34-EK with the ATSAMA5D4 (http://www.atmel.com/devices/sama5d31.aspx)
-    - SAMA5D35-EK with the ATSAMA5D5 (http://www.atmel.com/devices/sama5d31.aspx)
+    - SAMA5D31-EK with the ATSAMA5D31 (http://www.atmel.com/devices/sama5d31.aspx)
+    - SAMA5D33-EK with the ATSAMA5D33 (http://www.atmel.com/devices/sama5d33.aspx)
+    - SAMA5D34-EK with the ATSAMA5D34 (http://www.atmel.com/devices/sama5d34.aspx)
+    - SAMA5D35-EK with the ATSAMA5D35 (http://www.atmel.com/devices/sama5d35.aspx)
 
   The each consist of an identical base board with different plug-in
-  modules for each CPU.  An option 7 inch LCD is also available..
-
-  The SAMA5D3FAE-EK bundle includes everything:  The base board, all four
-  CPU modules, and the LCD.
+  modules for each CPU.  I also have a 7 inch LCD for my SAMA5D3x-EK, but this
+  is not yet generally available..
 
     SAMA5D3 Family
 
