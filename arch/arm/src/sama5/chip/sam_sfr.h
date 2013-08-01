@@ -49,7 +49,9 @@
 /* SFR Register Offsets *************************************************************/
 
                                            /* 0x0000-0x000c: Reserved */
-#define SAM_SFR_OHCIICR_OFFSET      0x1000 /* OHCI Interrupt Configuration Register */
+#define SAM_SFR_DDRCFG_OFFSET       0x0004 /* DDR Configuration register (undocumented) */
+                                           /* 0x0000-0x000c: Reserved */
+#define SAM_SFR_OHCIICR_OFFSET      0x0010 /* OHCI Interrupt Configuration Register */
 #define SAM_SFR_OHCIISR_OFFSET      0x0014 /* OHCI Interrupt Status Register */
                                            /* 0x0018-0x001c: Reserved */
 #define SAM_SFR_SECURE_OFFSET       0x0028 /* Security Configuration Register */
@@ -60,6 +62,7 @@
 
 /* SFR Register Addresses ***********************************************************/
 
+#define SAM_SFR_DDRCFG              (SAM_SFR_VBASE+SAM_SFR_DDRCFG_OFFSET) /* REVISIT */
 #define SAM_SFR_OHCIICR             (SAM_SFR_VBASE+SAM_SFR_OHCIICR_OFFSET)
 #define SAM_SFR_OHCIISR             (SAM_SFR_VBASE+SAM_SFR_OHCIISR_OFFSET)
 #define SAM_SFR_SECURE              (SAM_SFR_VBASE+SAM_SFR_SECURE_OFFSET)
@@ -67,6 +70,10 @@
 #define SAM_SFR_EBICFG              (SAM_SFR_VBASE+SAM_SFR_EBICFG_OFFSET)
 
 /* SFR Register Bit Definitions *****************************************************/
+
+/* DDR Configuration register (undocumented, REVISIT) */
+
+#define SFR_DDRCFG_DRQON            (3 << 16) /* Force DDR_DQ and DDR_DQS input buffer always on */
 
 /* OHCI Interrupt Configuration Register */
 
