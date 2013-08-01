@@ -5254,4 +5254,7 @@
 	  caching issues (and much less redundant) (2013-8-1)
 	* arch/arm/src/sama5/chip/sam_mpddrc.h:  Add DDR controller
 	  registers definitions for the SAMA5 (2013-8-1).
+	* nuttx/configs/sama5d3x-ek/src/sam_sdram.c:  Add logic which
+	  will (eventually) support the SDRAM on the SAMA5D3x-EK
+	  board.  Initial commit is untested and incomplete (2013-8-1).
 

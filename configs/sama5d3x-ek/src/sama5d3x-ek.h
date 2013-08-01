@@ -109,6 +109,37 @@
  ************************************************************************************/
 
 /************************************************************************************
+ * Name: board_sdram_config
+ *
+ * Description:
+ *   Configures DDR2 (MT47H128M16RT 128MB/ MT47H64M16HR)
+ *
+ *     MT47H64M16HR : 8 Meg x 16 x 8 banks
+ *     Refresh count: 8K
+ *     Row address: A[12:0] (8K)
+ *     Column address A[9:0] (1K)
+ *     Bank address BA[2:0] a(24,25) (8)
+ *
+ *  This logic was taken from Atmel sample code for the SAMA5D3x-EK.
+ *
+ *  Input Parameters:
+ *     devtype - Either DDRAM_MT47H128M16RT or DDRAM_MT47H64M16HR
+ *
+ *  Assumptions:
+ *    The DDR memory regions is configured as strongly ordered memory.  When we
+ *    complete initialization of SDRAM and it is ready for use, we will make DRAM
+ *    into normal memory.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM) && \
+   !defined(CONFIG_BOOT_RUNFROMSDRAM)
+void board_sdram_config(uint8_t sdramtype);
+#else
+#  define board_sdram_config(t)
+#endif
+
+/************************************************************************************
  * Name: up_ledinit
  ************************************************************************************/
 

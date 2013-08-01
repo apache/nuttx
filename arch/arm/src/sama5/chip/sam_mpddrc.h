@@ -66,8 +66,8 @@
 #define SAM_MPDDRC_OCMS_KEY1_OFFSET     0x003c /* MPDDRC OCMS KEY1 Register */
 #define SAM_MPDDRC_OCMS_KEY2_OFFSET     0x0040 /* MPDDRC OCMS KEY2 Register */
                                                /* 0x0044-0x0070 Reserved */
-#define SAM_MPDDRC_DLL_MO_OFFSET        0x0074 /* MPDDRC DLL Master Offset Register */
-#define SAM_MPDDRC_DLL_SOF_OFFSET       0x0078 /* MPDDRC DLL Slave Offset Register */
+#define SAM_MPDDRC_DLL_MOR_OFFSET       0x0074 /* MPDDRC DLL Master Offset Register */
+#define SAM_MPDDRC_DLL_SOR_OFFSET       0x0078 /* MPDDRC DLL Slave Offset Register */
 #define SAM_MPDDRC_DLL_MS_OFFSET        0x007c /* MPDDRC DLL Status Master Register */
 #define SAM_MPDDRC_DLL_SS0_OFFSET       0x0080 /* MPDDRC DLL Status Slave 0 Register */
 #define SAM_MPDDRC_DLL_SS1_OFFSET       0x0084 /* MPDDRC DLL Status Slave 1 Register */
@@ -97,8 +97,8 @@
 #define SAM_MPDDRC_OCMS                 (SAM_MPDDRC_OFFSET+SAM_MPDDRC_OCMS_OFFSET)
 #define SAM_MPDDRC_OCMS_KEY1            (SAM_MPDDRC_OFFSET+SAM_MPDDRC_OCMS_KEY1_OFFSET)
 #define SAM_MPDDRC_OCMS_KEY2            (SAM_MPDDRC_OFFSET+SAM_MPDDRC_OCMS_KEY2_OFFSET)
-#define SAM_MPDDRC_DLL_MO               (SAM_MPDDRC_OFFSET+SAM_MPDDRC_DLL_MO_OFFSET)
-#define SAM_MPDDRC_DLL_SOF              (SAM_MPDDRC_OFFSET+SAM_MPDDRC_DLL_SOF_OFFSET)
+#define SAM_MPDDRC_DLL_MOR              (SAM_MPDDRC_OFFSET+SAM_MPDDRC_DLL_MOR_OFFSET)
+#define SAM_MPDDRC_DLL_SOR              (SAM_MPDDRC_OFFSET+SAM_MPDDRC_DLL_SOR_OFFSET)
 #define SAM_MPDDRC_DLL_MS               (SAM_MPDDRC_OFFSET+SAM_MPDDRC_DLL_MS_OFFSET)
 #define SAM_MPDDRC_DLL_SS0              (SAM_MPDDRC_OFFSET+SAM_MPDDRC_DLL_SS0_OFFSET)
 #define SAM_MPDDRC_DLL_SS1              (SAM_MPDDRC_OFFSET+SAM_MPDDRC_DLL_SS1_OFFSET)
@@ -140,16 +140,16 @@
 
 #define MPDDRC_CR_NC_SHIFT              (0)       /* Bits 0-1: Number of Column Bits */
 #define MPDDRC_CR_NC_MASK               (3 << MPDDRC_CR_NC_SHIFT)
-#  define MPDDRC_CR_NC_COL9             (0 << MPDDRC_CR_NC_SHIFT) /* 9 DDR column bits */
-#  define MPDDRC_CR_NC_COL10            (1 << MPDDRC_CR_NC_SHIFT) /* 10 DDR column bits */
-#  define MPDDRC_CR_NC_COL11            (2 << MPDDRC_CR_NC_SHIFT) /* 11 DDR column bits */
-#  define MPDDRC_CR_NC_COL12            (3 << MPDDRC_CR_NC_SHIFT) /* 12 DDR column bits */
+#  define MPDDRC_CR_NC_9                (0 << MPDDRC_CR_NC_SHIFT) /* 9 DDR column bits */
+#  define MPDDRC_CR_NC_10               (1 << MPDDRC_CR_NC_SHIFT) /* 10 DDR column bits */
+#  define MPDDRC_CR_NC_11               (2 << MPDDRC_CR_NC_SHIFT) /* 11 DDR column bits */
+#  define MPDDRC_CR_NC_12               (3 << MPDDRC_CR_NC_SHIFT) /* 12 DDR column bits */
 #define MPDDRC_CR_NR_SHIFT              (2)       /* Bits 2-3: Number of Row Bits */
 #define MPDDRC_CR_NR_MASK               (3 << MPDDRC_CR_NR_SHIFT)
-#  define MPDDRC_CR_NR_ROW11            (0 << MPDDRC_CR_NR_SHIFT) /* 00 ROW_11 11 row bits */
-#  define MPDDRC_CR_NR_ROW12            (1 << MPDDRC_CR_NR_SHIFT) /* 01 ROW_12 12 row bits */
-#  define MPDDRC_CR_NR_ROW13            (2 << MPDDRC_CR_NR_SHIFT) /* 10 ROW_13 13 row bits */
-#  define MPDDRC_CR_NR_ROW14            (3 << MPDDRC_CR_NR_SHIFT) /* 11 ROW_14 14 row bits */
+#  define MPDDRC_CR_NR_11               (0 << MPDDRC_CR_NR_SHIFT) /* 00 ROW_11 11 row bits */
+#  define MPDDRC_CR_NR_12               (1 << MPDDRC_CR_NR_SHIFT) /* 01 ROW_12 12 row bits */
+#  define MPDDRC_CR_NR_13               (2 << MPDDRC_CR_NR_SHIFT) /* 10 ROW_13 13 row bits */
+#  define MPDDRC_CR_NR_14               (3 << MPDDRC_CR_NR_SHIFT) /* 11 ROW_14 14 row bits */
 #define MPDDRC_CR_CAS_SHIFT             (4)       /* Bits 4-6: CAS Latency */
 #define MPDDRC_CR_CAS_MASK              (7 << MPDDRC_CR_CAS_SHIFT)
 #  define MPDDRC_CR_CAS_2               (2 << MPDDRC_CR_CAS_SHIFT) /* 010 DDR_CAS2 LPDDR1 CAS Latency 2 */
@@ -159,7 +159,7 @@
 #  define MPDDRC_CR_CAS_6               (6 << MPDDRC_CR_CAS_SHIFT) /* 110 DDR_CAS6 DDR2 CAS Latency 6 */
 #define MPDDRC_CR_DLL                   (1 << 7)  /* Bit 7:  Reset DLL */
 #define MPDDRC_CR_DIC_DS                (1 << 8)  /* Bit 8:  Output Driver Impedance Control (Drive Strength) */
-#define MPDDRC_CR_DIS_DLL               (1 << 9)  /* Bit 9:  DISABLE DLL */
+#define MPDDRC_CR_DIS_DLL               (1 << 9)  /* Bit 9:  Disable DLL */
 #define MPDDRC_CR_ZQ_SHIFT              (10)      /* Bits 10-11: ZQ Calibration */
 #define MPDDRC_CR_ZQ_MASK               (3 << MPDDRC_CR_ZQ_SHIFT)
 #  define MPDDRC_CR_ZQ_INIT             (0 << MPDDRC_CR_ZQ_SHIFT) /* Calibration command after initialization */
@@ -248,8 +248,8 @@
 #  define MPDDRC_LPR_LPCB_SELFREFRESH   (1 << MPDDRC_LPR_LPCB_SHIFT) /* Issues a 'Self Refresh' to device, clocks deactivated */
 #  define MPDDRC_LPR_LPCB_POWERDOWN     (2 << MPDDRC_LPR_LPCB_SHIFT) /* Issues a 'Power-down' to device after each access */
 #  define MPDDRC_LPR_LPCB_DEEPPWD       (3 << MPDDRC_LPR_LPCB_SHIFT) /* TIssues a 'Deep Power-down' to Low-power device */
-#define MPDDRC_LPR_CLK_FR               (1 << 2)  /* Bit 2:  Clock Frozen Command*/
-#define MPDDRC_LPR_LPDDR2_PWOFF         (1 << 3)  /* Bit 3:  LPDDR2 Power Off*/
+#define MPDDRC_LPR_CLK_FR               (1 << 2)  /* Bit 2:  Clock Frozen Command */
+#define MPDDRC_LPR_LPDDR2_PWOFF         (1 << 3)  /* Bit 3:  LPDDR2 Power Off */
 #define MPDDRC_LPR_PASR_SHIFT           (4)       /* Bits 4-6: Partial Array Self Refresh */
 #define MPDDRC_LPR_PASR_MASK            (7 << MPDDRC_LPR_PASR_SHIFT)
 #  define MPDDRC_LPR_PASR(n)            ((n) << MPDDRC_LPR_PASR_SHIFT)
@@ -258,10 +258,12 @@
 #  define MPDDRC_LPR_DS(n)              ((n) << MPDDRC_LPR_DS_SHIFT)
 #define MPDDRC_LPR_TIMEOUT_SHIFT        (12)      /* Bits 12-13: Enter Low-power Mode */
 #define MPDDRC_LPR_TIMEOUT_MASK         (3 << MPDDRC_LPR_TIMEOUT_SHIFT)
-#  define MPDDRC_LPR_TIMEOUT_END        (0 << MPDDRC_LPR_TIMEOUT_SHIFT) /* Activates low-power mode after the end of transfer */
+#  define MPDDRC_LPR_TIMEOUT_0CLKS      (0 << MPDDRC_LPR_TIMEOUT_SHIFT) /* Activates low-power mode after the end of transfer */
 #  define MPDDRC_LPR_TIMEOUT_64CLKS     (1 << MPDDRC_LPR_TIMEOUT_SHIFT) /* Activates low-power mode 64 clocks after the end of transfer */
 #  define MPDDRC_LPR_TIMEOUT_128CLKS    (2 << MPDDRC_LPR_TIMEOUT_SHIFT) /* 28 Activates low-power mode 128 clocks after the end of transfer */
 #define MPDDRC_LPR_APDE                 (1 << 16) /* Bit 16:  ctive Power Down Exit Time */
+#  define MPDDRC_LPR_APDE_FAST          (0)
+#  define MPDDRC_LPR_APDE_SLOW          MPDDRC_LPR_APDE
 #define MPDDRC_LPR_UPD_MR_SHIFT         (20)      /* Bits 20-21: Update Load Mode Register and Extended Mode Register */
 #define MPDDRC_LPR_UPD_MR_MASK          (3 << MPDDRC_LPR_UPD_MR_SHIFT)
 #  define MPDDRC_LPR_UPD_MR_DISABLED    (0 << MPDDRC_LPR_UPD_MR_SHIFT) /* DISABLED Update is disabled */
@@ -282,6 +284,7 @@
 /* MPDDRC High Speed Register */
 
 #define MPDDRC_HS_DIS_ANTICIP_READ      (1 << 2) /* Bit 2:  Disable Anticip Read Access */
+#define MPDDRC_HS_AUTOREFRESH_CAL       (1 << 5) /* Bit 5:  calibration during autorefresh (REVISIT) */
 
 /* MPDDRC LPDDR2 Low-power Register */
 
@@ -317,7 +320,7 @@
 
 #define MPDDRC_IO_CALIBR_RDIV_SHIFT     (0)       /* Bits 0-2: Resistor Divider, Output Driver Impedance */
 #define MPDDRC_IO_CALIBR_RDIV_MASK      (7 << MPDDRC_IO_CALIBR_RDIV_SHIFT)
-#  define MPDDRC_IO_CALIBR_RZQ34        (1 << MPDDRC_IO_CALIBR_RDIV_SHIFT) /* LPDDR2 RZQ = 34.3 Ohm DDR2/LPDDR1: Not applicable */
+#  define MPDDRC_IO_CALIBR_RZQ34_NA     (1 << MPDDRC_IO_CALIBR_RDIV_SHIFT) /* LPDDR2 RZQ = 34.3 Ohm DDR2/LPDDR1: Not applicable */
 #  define MPDDRC_IO_CALIBR_RZQ40_33     (2 << MPDDRC_IO_CALIBR_RDIV_SHIFT) /* LPDDR2:RZQ = 40 Ohm   DDR2/LPDDR1: RZQ = 33.3 Ohm */
 #  define MPDDRC_IO_CALIBR_RZQ48_40     (3 << MPDDRC_IO_CALIBR_RDIV_SHIFT) /* LPDDR2:RZQ = 48 Ohm   DDR2/LPDDR1: RZQ = 40 Ohm */
 #  define MPDDRC_IO_CALIBR_RZQ60_50     (4 << MPDDRC_IO_CALIBR_RDIV_SHIFT) /* LPDDR2:RZQ = 60 Ohm   DDR2/LPDDR1: RZQ = 50 Ohm */
@@ -342,28 +345,31 @@
 
 /* MPDDRC DLL Master Offset Register */
 
-#define MPDDRC_DLL_MO_MOFF_SHIFT        (0)       /* Bits 0-3: DLL Master Delay Line Offset */
-#define MPDDRC_DLL_MO_MOFF_MASK         (15 << MPDDRC_DLL_MO_MOFF_SHIFT)
-#  define MPDDRC_DLL_MO_MOFF(n)         ((n) << MPDDRC_DLL_MO_MOFF_SHIFT)
-#define MPDDRC_DLL_MO_CLK90OFF_SHIFT    (8)       /* Bits 8-12: DLL CLK90 Delay Line Offset */
-#define MPDDRC_DLL_MO_CLK90OFF_MASK     (31 << MPDDRC_DLL_MO_CLK90OFF_SHIFT)
-#  define MPDDRC_DLL_MO_CLK90OFF(n)     ((n) << MPDDRC_DLL_MO_CLK90OFF_SHIFT)
-#define MPDDRC_DLL_MO_SELOFF            (1 << 16) /* Bit 16: DLL Offset Selection */
+#define MPDDRC_DLL_MOR_MOFF_SHIFT       (0)       /* Bits 0-3: DLL Master Delay Line Offset */
+#define MPDDRC_DLL_MOR_MOFF_MASK        (15 << MPDDRC_DLL_MOR_MOFF_SHIFT)
+#  define MPDDRC_DLL_MOR_MOFF(n)        ((n) << MPDDRC_DLL_MOR_MOFF_SHIFT)
+#define MPDDRC_DLL_MOR_CLK90OFF_SHIFT   (8)       /* Bits 8-12: DLL CLK90 Delay Line Offset */
+#define MPDDRC_DLL_MOR_CLK90OFF_MASK    (31 << MPDDRC_DLL_MOR_CLK90OFF_SHIFT)
+#  define MPDDRC_DLL_MOR_CLK90OFF(n)    ((n) << MPDDRC_DLL_MOR_CLK90OFF_SHIFT)
+#define MPDDRC_DLL_MOR_SELOFF           (1 << 16) /* Bit 16: DLL Offset Selection */
+#define MPDDRC_DLL_MOR_KEY_SHIFT        (24)      /* Bits 24-31: DLL CLK90 Delay Line Offset (REVISIT) */
+#define MPDDRC_DLL_MOR_KEY_MASK         (0xff << MPDDRC_DLL_MOR_CLK90OFF_SHIFT)
+#  define MPDDRC_DLL_MOR_KEY            (0xc5 << MPDDRC_DLL_MOR_CLK90OFF_SHIFT)
 
 /* MPDDRC DLL Slave Offset Register */
 
-#define MPDDRC_DLL_SOF_S0OFF_SHIFT      (0)     /* Bits 0-4: DLL Slave 0 Delay Line Offset */
-#define MPDDRC_DLL_SOF_S0OFF_MASK       (31 << MPDDRC_DLL_SOF_S0OFF_SHIFT)
-#  define MPDDRC_DLL_SOF_S0OFF(n)       ((n) << MPDDRC_DLL_SOF_S0OFF_SHIFT)
-#define MPDDRC_DLL_SOF_S1OFF_SHIFT      (8)     /* Bits 8-12: DLL Slave 1 Delay Line Offset */
-#define MPDDRC_DLL_SOF_S1OFF_MASK       (31 << MPDDRC_DLL_SOF_S1OFF_SHIFT)
-#  define MPDDRC_DLL_SOF_S1OFF(n)       ((n) << MPDDRC_DLL_SOF_S1OFF_SHIFT)
-#define MPDDRC_DLL_SOF_S2OFF_SHIFT      (16)     /* Bits 16-20: DLL Slave 2 Delay Line Offset */
-#define MPDDRC_DLL_SOF_S2OFF_MASK       (31 << MPDDRC_DLL_SOF_S2OFF_SHIFT)
-#  define MPDDRC_DLL_SOF_S2OFF(n)       ((n) << MPDDRC_DLL_SOF_S2OFF_SHIFT)
-#define MPDDRC_DLL_SOF_S3OFF_SHIFT      (24)     /* Bits 24-28: DLL Slave 3 Delay Line Offset */
-#define MPDDRC_DLL_SOF_S3OFF_MASK       (31 << MPDDRC_DLL_SOF_S3OFF_SHIFT)
-#  define MPDDRC_DLL_SOF_S3OFF(n)       ((n) << MPDDRC_DLL_SOF_S3OFF_SHIFT)
+#define MPDDRC_DLL_SOR_S0OFF_SHIFT      (0)     /* Bits 0-4: DLL Slave 0 Delay Line Offset */
+#define MPDDRC_DLL_SOR_S0OFF_MASK       (31 << MPDDRC_DLL_SOR_S0OFF_SHIFT)
+#  define MPDDRC_DLL_SOR_S0OFF(n)       ((n) << MPDDRC_DLL_SOR_S0OFF_SHIFT)
+#define MPDDRC_DLL_SOR_S1OFF_SHIFT      (8)     /* Bits 8-12: DLL Slave 1 Delay Line Offset */
+#define MPDDRC_DLL_SOR_S1OFF_MASK       (31 << MPDDRC_DLL_SOR_S1OFF_SHIFT)
+#  define MPDDRC_DLL_SOR_S1OFF(n)       ((n) << MPDDRC_DLL_SOR_S1OFF_SHIFT)
+#define MPDDRC_DLL_SOR_S2OFF_SHIFT      (16)     /* Bits 16-20: DLL Slave 2 Delay Line Offset */
+#define MPDDRC_DLL_SOR_S2OFF_MASK       (31 << MPDDRC_DLL_SOR_S2OFF_SHIFT)
+#  define MPDDRC_DLL_SOR_S2OFF(n)       ((n) << MPDDRC_DLL_SOR_S2OFF_SHIFT)
+#define MPDDRC_DLL_SOR_S3OFF_SHIFT      (24)     /* Bits 24-28: DLL Slave 3 Delay Line Offset */
+#define MPDDRC_DLL_SOR_S3OFF_MASK       (31 << MPDDRC_DLL_SOR_S3OFF_SHIFT)
+#  define MPDDRC_DLL_SOR_S3OFF(n)       ((n) << MPDDRC_DLL_SOR_S3OFF_SHIFT)
 
 /* MPDDRC DLL Status Master Register */
 

@@ -133,7 +133,7 @@
 #define PMC_LCDCK                      (1 << 3)  /* Bit 3:  LCD2x Clock */
 #define PMC_SMDCK                      (1 << 4)  /* Bit 4:  SMD Clock */
 #define PMC_UHP                        (1 << 6)  /* Bit 6:  USB Host OHCI Clocks */
-#define PMC_UDP                        (1 << 7)  /* Bit 7: USB Device Clock */
+#define PMC_UDP                        (1 << 7)  /* Bit 7:  USB Device Clock */
 #define PMC_PCK0                       (1 << 8)  /* Bit 8:  Programmable Clock 0 Output */
 #define PMC_PCK1                       (1 << 9)  /* Bit 9:  Programmable Clock 1 Output */
 #define PMC_PCK2                       (1 << 10) /* Bit 10: Programmable Clock 2 Output */
