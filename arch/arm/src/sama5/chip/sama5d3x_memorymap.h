@@ -443,7 +443,8 @@
 
 #  define NUTTX_TEXT_VADDR       (CONFIG_FLASH_VSTART & 0xfff00000)
 #  define NUTTX_TEXT_PADDR       (CONFIG_FLASH_START & 0xfff00000)
-#  define NUTTX_TEXT_SIZE        (CONFIG_FLASH_END - NUTTX_TEXT_VADDR)
+#  define NUTTX_TEXT_PEND        ((CONFIG_FLASH_END + 0x000fffff) & 0xfff00000)
+#  define NUTTX_TEXT_SIZE        (NUTTX_TEXT_PEND - NUTTX_TEXT_PADDR)
 
 /* In the default configuration, the primary RAM use for .bss and .data
  * is the internal SRAM.
@@ -451,7 +452,8 @@
 
 #  define NUTTX_RAM_VADDR        (CONFIG_RAM_VSTART & 0xfff00000)
 #  define NUTTX_RAM_PADDR        (CONFIG_RAM_START & 0xfff00000)
-#  define NUTTX_RAM_SIZE         (CONFIG_RAM_END - NUTTX_RAM_PADDR)
+#  define NUTTX_RAM_PEND         ((CONFIG_RAM_END + 0x000fffff) & 0xfff00000)
+#  define NUTTX_RAM_SIZE         (NUTTX_RAM_PEND - NUTTX_RAM_PADDR)
 
 #else
 /* Otherwise we are running from some kind of RAM (ISRAM or SDRAM).
@@ -460,7 +462,8 @@
 
 #  define NUTTX_TEXT_VADDR       (CONFIG_RAM_VSTART & 0xfff00000)
 #  define NUTTX_TEXT_PADDR       (CONFIG_RAM_START & 0xfff00000)
-#  define NUTTX_TEXT_SIZE        (CONFIG_RAM_END - NUTTX_TEXT_VADDR)
+#  define NUTTX_TEXT_PEND        ((CONFIG_RAM_END + 0x000fffff) & 0xfff00000)
+#  define NUTTX_TEXT_SIZE        (NUTTX_TEXT_PEND - NUTTX_TEXT_PADDR)
 #endif
 
 /* MMU Page Table Location

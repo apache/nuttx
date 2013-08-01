@@ -5248,4 +5248,8 @@
 	  enabled by CONFIG_PAGING out of arm_head.S.  That was just
 	  too much conditional compilation to be supportable
 	  (2013-8-1).
-
+	* arch/arm/src/sama5/arm_head.S: Setup page table mappings for
+	  all of .text, .bss, .data, stacks and heap before enabling
+	  the MMU and caching.  This is safer because it avoids the
+	  caching issues (and much less redundant) (2013-8-1)
+ 
