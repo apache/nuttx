@@ -49,6 +49,14 @@
  * Included Files
  ************************************************************************************/
 
+#include <nuttx/config.h>
+
+#ifndef __ASSEMBLY__
+#  include <sys/types.h>
+#  include <stdint.h>
+#  include "chip.h"
+#endif /* __ASSEMBLY__ */
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
@@ -490,7 +498,7 @@
  *   NMRR[23:22] = 0b11, Region is Write-Back, no Write-Allocate
  */
 
-#define PMD_STRONGLY_ORDER   (0)
+#define PMD_STRONGLY_ORDERED (0)
 #define PMD_DEVICE           (PMD_SECT_B)
 #define PMD_WRITE_THROUGH    (PMD_SECT_C)
 #define PMD_WRITE_BACK       (PMD_SECT_B | PMD_SECT_C)
@@ -511,6 +519,9 @@
                               PMD_SECT_DOM(0))
 #define MMU_IOFLAGS          (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | PMD_DEVICE | \
                               PMD_SECT_DOM(0) | PMD_SECT_XN)
+#define MMU_STRONGLY_ORDERED (PMD_TYPE_SECT | PMD_SECT_AP_RW1 | \
+                              PMD_STRONGLY_ORDERED | PMD_SECT_DOM(0) | \
+                              PMD_SECT_XN)
 
 #define MMU_L1_VECTORFLAGS   (PMD_TYPE_PTE | PMD_PTE_PXN | PMD_PTE_DOM(0))
 #define MMU_L2_VECTORFLAGS   (PTE_TYPE_SMALL | PTE_WRITE_THROUGH | PTE_AP_RW1)
@@ -788,6 +799,26 @@
 #endif /* CONFIG_PAGING */
 
 /************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+#ifndef __ASSEMBLY__
+/* struct section_mapping_s describes the L1 mapping of a large region of memory
+ * consisting of one or more 1MB sections (nsections).
+ *
+ * All addresses must be aligned to 1MB address boundaries.
+ */
+
+struct section_mapping_s
+{
+  uint32_t physbase;   /* Physical address of the region to be mapped */
+  uint32_t virtbase;   /* Virtual address of the region to be mapped */
+  uint32_t mmuflags;   /* MMU settings for the region (e.g., cache-able) */
+  uint32_t nsections;  /* Number of mappings in the region */
+};
+#endif
+
+/************************************************************************************
  * Assemby Macros
  ************************************************************************************/
 
@@ -814,7 +845,12 @@
  * Name: cp15_invalidate_tlbs
  *
  * Description:
- *   Invalidate TLBs
+ *   Invalidate entire unified TLB
+ *
+ *   The Invalidate entire TLB operations invalidate all unlocked entries in the
+ *   TLB. The operation ignores the value in the register Rt specified by the MCR
+ *   instruction that performs the operation. Software does not have to write a
+ *   value to the register before issuing the MCR instruction.
  *
  * Inputs:
  *   None
@@ -823,6 +859,24 @@
 
 	.macro	cp15_invalidate_tlbs, scratch
 	mcr		p15, 0, \scratch, c8, c7, 0	/* TLBIALL */
+	.endm
+
+/************************************************************************************
+ * Name: cp15_invalidate_tlb_bymva
+ *
+ * Description:
+ *   Invalidate unified TLB entry by MVA all ASID Inner Shareable
+ *
+ * Inputs:
+ *   vaddr - The virtual address to be invalidated
+ *
+ ************************************************************************************/
+
+	.macro	cp15_invalidate_tlb_bymva, vaddr
+	dsb
+	mcr		p15, 0, \vaddr, c8, c3, 3	/* TLBIMVAAIS */
+	dsb
+	isb
 	.endm
 
 /************************************************************************************
@@ -1060,7 +1114,12 @@ static inline void cp15_disable_mmu(void)
  * Name: cp15_invalidate_tlbs
  *
  * Description:
- *   Invalidate TLBs
+ *   Invalidate entire unified TLB
+ *
+ *   The Invalidate entire TLB operations invalidate all unlocked entries in the
+ *   TLB. The operation ignores the value in the register Rt specified by the MCR
+ *   instruction that performs the operation. Software does not have to write a
+ *   value to the register before issuing the MCR instruction.
  *
  * Inputs:
  *   None
@@ -1075,6 +1134,31 @@ static inline void cp15_invalidate_tlbs(void)
       :
       :
       : "r0", "memory"
+    );
+}
+
+/************************************************************************************
+ * Name: cp15_invalidate_tlb_bymva
+ *
+ * Description:
+ *   Invalidate unified TLB entry by MVA all ASID Inner Shareable
+ *
+ * Inputs:
+ *   vaddr - The virtual address to be invalidated
+ *
+ ************************************************************************************/
+
+static inline void cp15_invalidate_tlb_bymva(uint32_t vaddr)
+{
+  __asm__ __volatile__
+    (
+      "\tdsb\n"
+      "\tmcr p15, 0, %0, c8, c3, 3\n" /* TLBIMVAAIS */
+      "\tdsb\n"
+      "\tisb\n"
+      :
+      : "r" (vaddr)
+      : "r1", "memory"
     );
 }
 
@@ -1144,6 +1228,61 @@ static inline void cp14_wrttb(unsigned int ttb)
     );
 }
 
+/*************************************************************************************
+ * Name: mmu_l1_getentry
+ *
+ * Description:
+ *   Given a virtual address, return the valule of the corresponding L1 table entry.
+ *
+ * Input Paramters:
+ *   vaddr - The virtual address to be mapped.
+ *
+ ************************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+static inline uint32_t mmu_l1_getentry(uint32_t vaddr)
+{
+  uint32_t *l1table = (uint32_t*)PGTABLE_BASE_VADDR;
+  uint32_t  index   = vaddr >> 20;
+
+  /* Return the address of the page table entry */
+
+  return l1table[index];
+}
+#endif
+
+/*************************************************************************************
+ * Name: mmu_l2_getentry
+ *
+ * Description:
+ *   Given a address of the beginning of an L2 page table and a virtual address,
+ *   return the varlue of the corresponding L2 page table entry.
+ *
+ * Input Paramters:
+ *   l2vaddr - The virtual address of the beginning of the L2 page table
+ *   vaddr - The virtual address to be mapped.
+ *
+ ************************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+static inline uint32_t mmu_l2_getentry(uint32_t l2vaddr, uint32_t vaddr)
+{
+  uint32_t *l2table  = (uint32_t*)l2vaddr;
+  uint32_t  index;
+
+  /* The table divides a 1Mb address space up into 256 entries, each
+   * corresponding to 4Kb of address space.  The page table index is
+   * related to the offset from the beginning of 1Mb region.
+   */
+
+  index = (vaddr & 0x000ff000) >> 12;
+
+  /* Return the address of the page table entry */
+
+  return l2table[index];
+}
+#endif
+
 #endif /* __ASSEMBLY__ */
 
 /************************************************************************************
@@ -1160,6 +1299,58 @@ static inline void cp14_wrttb(unsigned int ttb)
 extern "C" {
 #else
 #define EXTERN extern
+#endif
+
+/************************************************************************************
+ * Name: mmu_l1_setentry
+ *
+ * Description:
+ *   Set a one level 1 translation table entry.  Only a single L1 page table is
+ *   supported.
+ *
+ * Input Paramters:
+ *   paddr - The physical address to be mapped.  Must be aligned to a 1MB address
+ *     boundary
+ *   vaddr - The virtual address to be mapped.  Must be aligned to a 1MB address
+ *     boundary
+ *   mmuflags - The MMU flags to use in the mapping.
+ *
+ ************************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags);
+#endif
+
+/************************************************************************************
+ * Name: mmu_l2_map_region
+ *
+ * Description:
+ *   Set multiple level 1 translation table entries in order to map a region of
+ *   memory.
+ *
+ * Input Parameters:
+ *   mapping - Describes the mapping to be performed.
+ *
+ ************************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+void mmu_l2_map_region(const struct section_mapping_s *mapping);
+#endif
+
+/****************************************************************************
+ * Name: mmu_invalidate_region
+ *
+ * Description:
+ *   Invalidate TLBs for a range of addresses (all 4KB aligned).
+ *
+ * Input Parameters:
+ *   vaddr - The beginning of the region to invalidate.
+ *   size  - The size of the region in bytes to be invalidated.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_ARCH_ROMPGTABLE
+void mmu_invalidate_region(uint32_t vstart, size_t size);
 #endif
 
 #undef EXTERN
