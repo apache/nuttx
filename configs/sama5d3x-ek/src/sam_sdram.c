@@ -51,36 +51,50 @@
 #include "up_arch.h"
 
 #include "sam_periphclks.h"
-#incldue "chip/sam_memorymap.h"
+#include "chip/sam_memorymap.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_sfr.h"
+#include "chip/sam_mpddrc.h"
 
 #include "sama5d3x-ek.h"
 
 /* This file requires:
  *
  * CONFIG_SAMA5_DDRCS -- DRAM support is enabled, and
- * !CONFIG_SAMA5_BOOT_SDRAM - We did not boot into SRAM, and
- * !CONFIG_BOOT_RUNFROMSDRAM - We are not running from SDRAM.
+ * !CONFIG_SAMA5_BOOT_SDRAM - We did not boot into SRAM.
  */
 
-#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM) && \
-   !defined(CONFIG_BOOT_RUNFROMSDRAM)
+#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Used for SDRAM command handshaking */
+/* SDRAM differences */
 
-#define DDR2_BA0(r) (1 << (25 + r))
-#define DDR2_BA1(r) (1 << (26 + r))
+#if defined(CONFIG_SAMA5_MT47H128M16RT)
+
+  /* Used for SDRAM command handshaking */
+
+#  define DDR2_BA0    (1 << 26)
+#  define DDR2_BA1    (1 << 27)
+
+#elif defined(CONFIG_SAMA5_MT47H64M16HR)
+
+  /* Used for SDRAM command handshaking */
+
+#  define DDR2_BA0    (1 << 25)
+#  define DDR2_BA1    (1 << 26)
+
+#else
+#  error Unknwon SDRAM type
+#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_sdram_delay
+ * Name: sam_sdram_delay
  *
  * Description:
  *   Precision delay function for SDRAM configuration.
@@ -90,7 +104,7 @@
  *
  ****************************************************************************/
 
-static inline board_sdram_delay(unsigned int loops)
+static inline void sam_sdram_delay(unsigned int loops)
 {
   volatile unsigned int i;
 
@@ -105,7 +119,7 @@ static inline board_sdram_delay(unsigned int loops)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: board_sdram_config
+ * Name: sam_sdram_config
  *
  * Description:
  *   Configures DDR2 (MT47H128M16RT 128MB/ MT47H64M16HR)
@@ -128,7 +142,7 @@ static inline board_sdram_delay(unsigned int loops)
  *
  ************************************************************************************/
 
-void board_sdram_config(uint8_t sdramtype)
+void sam_sdram_config(void)
 {
   volatile uint8_t *ddr = (uint8_t *)SAM_DDRCS_VSECTION;
   uint32_t regval;
@@ -180,7 +194,7 @@ void board_sdram_config(uint8_t sdramtype)
   regval  =  getreg32(SAM_MPDDRC_IO_CALIBR);
   regval &= ~(MPDDRC_IO_CALIBR_RDIV_MASK | MPDDRC_IO_CALIBR_TZQIO_MASK);
   regval |= (MPDDRC_IO_CALIBR_RZQ48_40 |  MPDDRC_IO_CALIBR_TZQIO(3));
-  putreg(regval, SAM_MPDDRC_IO_CALIBR);
+  putreg32(regval, SAM_MPDDRC_IO_CALIBR);
 
   /* Force DDR_DQ and DDR_DQS input buffer always on, clearing other bits
    * (undocumented)
@@ -198,8 +212,11 @@ void board_sdram_config(uint8_t sdramtype)
 
   /* Step 2: Program the features of DDR2-SDRAM device into the Timing
    * Register
-   *
-   * For DDRAM_MT47H128M16RT
+   */
+
+#if defined(CONFIG_SAMA5_MT47H128M16RT)
+
+  /* For MT47H128M16RT
    *
    *   NC      = 10 DDR column bits
    *   NR      = 14 DDR row bits
@@ -217,19 +234,16 @@ void board_sdram_config(uint8_t sdramtype)
    *   UNAL    = Unaliged access supported
    */
 
-  if (sdramtype == DDRAM_MT47H128M16RT)
-    {
-      regval = MPDDRC_CR_NC_10 |    /* Number of Column Bits */
-               MPDDRC_CR_NR_14 |    /* Number of Row Bits */
-               MPDDRC_CR_CAS_4 |    /* CAS Latency */
-               MPDDRC_CR_OCD_EXIT | /* Off-chip Driver */
-               MPDDRC_CR_8BANKS |   /* Number of Banks */
-               MPDDRC_CR_NDQS |     /* Not DQS */
-               MPDDRC_CR_UNAL;      /* upport Unaligned Access */
-      putreg32(regval, SAM_MPDDRC_CR);
-    }
+  regval = MPDDRC_CR_NC_10 |    /* Number of Column Bits */
+           MPDDRC_CR_NR_14 |    /* Number of Row Bits */
+           MPDDRC_CR_CAS_4 |    /* CAS Latency */
+           MPDDRC_CR_OCD_EXIT | /* Off-chip Driver */
+           MPDDRC_CR_8BANKS |   /* Number of Banks */
+           MPDDRC_CR_NDQS |     /* Not DQS */
+           MPDDRC_CR_UNAL;      /* upport Unaligned Access */
 
-  /* For DDRAM_MT47H128M16RT
+#elif defined(CONFIG_SAMA5_MT47H64M16HR)
+  /* For MT47H64M16HR
    *
    *   NC      = 10 DDR column bits
    *   NR      = 13 DDR row bits
@@ -247,17 +261,19 @@ void board_sdram_config(uint8_t sdramtype)
    *   UNAL    = Unaliged access supported
    */
 
-  else if (sdramtype == DDRAM_MT47H64M16HR)
-    {
-      regval = MPDDRC_CR_NC_10 |    /* Number of Column Bits */
-               MPDDRC_CR_NR_13 |    /* Number of Row Bits */
-               MPDDRC_CR_CAS_3 |    /* CAS Latency */
-               MPDDRC_CR_OCD_EXIT | /* Off-chip Driver */
-               MPDDRC_CR_8BANKS |   /* Number of Banks */
-               MPDDRC_CR_NDQS |     /* Not DQS */
-               MPDDRC_CR_UNAL;      /* upport Unaligned Access */
-      putreg32(regval, SAM_MPDDRC_CR);
-    }
+  regval = MPDDRC_CR_NC_10 |    /* Number of Column Bits */
+           MPDDRC_CR_NR_13 |    /* Number of Row Bits */
+           MPDDRC_CR_CAS_3 |    /* CAS Latency */
+           MPDDRC_CR_OCD_EXIT | /* Off-chip Driver */
+           MPDDRC_CR_8BANKS |   /* Number of Banks */
+           MPDDRC_CR_NDQS |     /* Not DQS */
+           MPDDRC_CR_UNAL;      /* upport Unaligned Access */
+
+#else
+#  error Unknwon SDRAM type
+#endif
+
+  putreg32(regval, SAM_MPDDRC_CR);
 
   /* Configure the Timing Parameter 0 Register */
 
@@ -301,7 +317,7 @@ void board_sdram_config(uint8_t sdramtype)
 
   /* DDRSDRC Low-power Register */
 
-  board_sdram_delay(13200);
+  sam_sdram_delay(13200);
 
   regval = MPDDRC_LPR_LPCB_DISABLED |  /* Low-power Feature is inhibited */
            MPDDRC_LPR_TIMEOUT_0CLKS |  /* Activates low-power mode after the end of transfer */
@@ -333,7 +349,7 @@ void board_sdram_config(uint8_t sdramtype)
   /* Now CKE is driven high.*/
   /* Wait 400 ns min */
 
-  board_sdram_delay(100);
+  sam_sdram_delay(100);
 
   /* Step 5: An all banks precharge command is issued to the DDR2-SDRAM. */
 
@@ -345,7 +361,7 @@ void board_sdram_config(uint8_t sdramtype)
 
   /* Wait 400 ns min */
 
-  board_sdram_delay(100);
+  sam_sdram_delay(100);
 
   /* Step 6: An Extended Mode Register set (EMRS2) cycle is  issued to chose
    * between commercialor high  temperature operations.
@@ -355,11 +371,11 @@ void board_sdram_config(uint8_t sdramtype)
    */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((uint8_t *)(ddr + DDR2_BA1(sdramtype))) = 0;
+  *((uint8_t *)(ddr + DDR2_BA1)) = 0;
 
   /* Wait 2 cycles min */
 
-  board_sdram_delay(100);
+  sam_sdram_delay(100);
 
   /* Step 7: An Extended Mode Register set (EMRS3) cycle is issued to set
    * all registers to 0.
@@ -369,11 +385,11 @@ void board_sdram_config(uint8_t sdramtype)
    */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((uint8_t *)(ddr + DDR2_BA1(sdramtype) + DDR2_BA0(sdramtype))) = 0;
+  *((uint8_t *)(ddr + DDR2_BA1 + DDR2_BA0)) = 0;
 
   /* Wait 2 cycles min */
 
-  board_sdram_delay(100);
+  sam_sdram_delay(100);
 
    /* Step 8:  An Extended Mode Register set (EMRS1) cycle is issued to enable DLL.
     *
@@ -381,11 +397,11 @@ void board_sdram_config(uint8_t sdramtype)
     */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((uint8_t *)(ddr + DDR2_BA0(sdramtype))) = 0;
+  *((uint8_t *)(ddr + DDR2_BA0)) = 0;
 
   /* An additional 200 cycles of clock are required for locking DLL */
 
-  board_sdram_delay(10000);
+  sam_sdram_delay(10000);
 
   /* Step 9:  Program DLL field into the Configuration Register.*/
 
@@ -403,11 +419,12 @@ void board_sdram_config(uint8_t sdramtype)
 
   /* Wait 2 cycles min */
 
-  board_sdram_delay(100);
+  sam_sdram_delay(100);
 
   /* Step 11: An all banks precharge command is issued to the DDR2-SDRAM.
    *
-   * Perform a write access to any DDR2-SDRAM address to acknowledge this command */
+   * Perform a write access to any DDR2-SDRAM address to acknowledge this
+   * command
    */
 
   putreg32(MPDDRC_MR_MODE_PRCGALL, SAM_MPDDRC_MR);
@@ -415,7 +432,7 @@ void board_sdram_config(uint8_t sdramtype)
 
   /* Wait 2 cycles min */
 
-  board_sdram_delay(100);
+  sam_sdram_delay(100);
 
   /* Step 12: Two auto-refresh (CBR) cycles are provided. Program the auto
    * refresh command (CBR) into the Mode Register.
@@ -429,7 +446,7 @@ void board_sdram_config(uint8_t sdramtype)
 
   /* Wait 2 cycles min */
 
-  board_sdram_delay(100);
+  sam_sdram_delay(100);
 
   /* Configure 2nd CBR.
    *
@@ -441,7 +458,7 @@ void board_sdram_config(uint8_t sdramtype)
 
   /* Wait 2 cycles min */
 
-  board_sdram_delay(100);
+  sam_sdram_delay(100);
 
   /* Step 13: Program DLL field into the Configuration Register to low
    * (Disable DLL reset).
@@ -462,14 +479,14 @@ void board_sdram_config(uint8_t sdramtype)
 
   /* Wait 2 cycles min */
 
-  board_sdram_delay(100);
+  sam_sdram_delay(100);
 
   /* Step 15: Program OCD field into the Configuration Register to high (OCD
    * calibration default).
    */
 
   regval  = getreg32(SAM_MPDDRC_CR);
-  retval |= MPDDRC_CR_OCD_DEFAULT;
+  regval |= MPDDRC_CR_OCD_DEFAULT;
   putreg32(regval, SAM_MPDDRC_CR);
 
   /* Step 16: An Extended Mode Register set (EMRS1) cycle is issued to OCD
@@ -480,11 +497,11 @@ void board_sdram_config(uint8_t sdramtype)
    */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((uint8_t *)(ddr + DDR2_BA0(sdramtype))) = 0;
+  *((uint8_t *)(ddr + DDR2_BA0)) = 0;
 
   /* Wait 2 cycles min */
 
-  board_sdram_delay(100);
+  sam_sdram_delay(100);
 
   /* Step 17: Program OCD field into the Configuration Register to low (OCD
    * calibration mode exit).
@@ -504,11 +521,11 @@ void board_sdram_config(uint8_t sdramtype)
    */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((uint8_t *)(ddr + DDR2_BA0(sdramtype))) = 0;
+  *((uint8_t *)(ddr + DDR2_BA0)) = 0;
 
   /* Wait 2 cycles min */
 
-  board_sdram_delay(100);
+  sam_sdram_delay(100);
 
   /* Step 19,20: A mode Normal command is provided. Program the Normal mode
    * into Mode Register.
@@ -540,9 +557,7 @@ void board_sdram_config(uint8_t sdramtype)
   /* OK now we are ready to work on the DDRSDR */
   /* Wait for end of calibration */
 
-  board_sdram_delay(500);
-#warning Make SDRAM cacheable
+  sam_sdram_delay(500);
 }
 
-#endif /* CONFIG_SAMA5_DDRCS && !CONFIG_SAMA5_BOOT_SDRAM && !CONFIG_BOOT_RUNFROMSDRAM */
-#endif /* CONFIG_SAMA5_BOOT_CS0FLASH */
+#endif /* CONFIG_SAMA5_DDRCS && !CONFIG_SAMA5_BOOT_SDRAM */

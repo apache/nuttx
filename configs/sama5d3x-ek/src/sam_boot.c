@@ -67,6 +67,18 @@
 
 void sam_boardinitialize(void)
 {
+#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
+
+  /* Configure SDRAM if (1) SDRAM has been enalbled in the NuttX configuration and
+   * (2) if we are not currently running out of SDRAM.  If we are now running out
+   * of SDRAM then we have to assume that some second level bootloader has properly
+   * configured SDRAM for our use.
+   */
+
+  sam_sdram_config();
+
+#endif
+
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 

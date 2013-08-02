@@ -5,6 +5,23 @@
 
 if ARCH_BOARD_SAMA5D3X_EK
 
+choice
+	prompt "SAMA5D3x-EK DRAM Type"
+	default SAMA5_MT47H128M16RT
+	depends on SAMA5_DDRCS
+
+config SAMA5_MT47H128M16RT
+	bool "MT47H128M16RT"
+	---help---
+		Micron 2Gbit x16 DDR2-1066 128Mb
+
+config SAMA5_MT47H64M16HR
+	bool "MT47H64M16HR"
+	---help---
+		Micron 1Gbit x16 DDR2-800 64Mb
+
+endchoice
+
 config SAMA5_NOR_MAIN
 	bool "Build nor_main"
 	default n

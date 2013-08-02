@@ -112,7 +112,7 @@
  * Name: board_sdram_config
  *
  * Description:
- *   Configures DDR2 (MT47H128M16RT 128MB/ MT47H64M16HR)
+ *   Configures DDR2 (MT47H128M16RT 128MB / MT47H64M16HR)
  *
  *     MT47H64M16HR : 8 Meg x 16 x 8 banks
  *     Refresh count: 8K
@@ -132,9 +132,8 @@
  *
  ************************************************************************************/
 
-#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM) && \
-   !defined(CONFIG_BOOT_RUNFROMSDRAM)
-void board_sdram_config(uint8_t sdramtype);
+#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
+void sam_sdram_config(void);
 #else
 #  define board_sdram_config(t)
 #endif
