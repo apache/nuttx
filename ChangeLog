@@ -5268,4 +5268,6 @@
 	  configures DRAM as strongly ordered so that it can be initialized.
 	  After initialization, the page table entries are modified so
 	  that DRAM is fully cache-able (2018-8-2).
+	* arch/arm/src/sama5/chip/sam_mpddrc.h:  Correct typos in the
+	  SAMA5 DDR controller register definitions (2013-9-2013).
 

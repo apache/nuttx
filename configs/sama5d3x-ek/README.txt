@@ -843,10 +843,63 @@ Configurations
     4. This configuration has support for NSH built-in applications enabled.
        However, no built-in applications are selected in the base configuration.
 
+    5. SDRAM support can be enabled by adding the following to your NuttX
+       configuration file:
+
+       CONFIG_SAMA5_MPDDRC=y                   : Enable the DDR controller
+       CONFIG_SAMA5_DDRCS=y                    : Tell the system that DRAM is at the DDR CS
+       CONFIG_SAMA5_DDRCS_SIZE=268435456       : 2Gb DRAM -> 256GB
+       CONFIG_SAMA5_DDRCS_LPDDR2=y             : Its DDR2
+       CONFIG_SAMA5_MT47H128M16RT=y            : This is the type of DDR2
+
+       Now that you have SDRAM enabled, what are you going to do with it?  One
+       thing you can is add it to the heap
+
+       CONFIG_SAMA5_DDRCS_HEAP=y               : Add the SDRAM to the heap
+       CONFIG_MM_REGIONS=2                     : Two memory regions:  ISRAM and SDRAM
+
+       Another thing you could do is to enable the RAM test built-in
+       application:
+
+    6. You can enable the NuttX RAM test that may be used to verify the
+       external SDAM.  To do this, keep the SDRAM out of the heap so that
+       it can be tested without crashing programs using the memory:
+
+       CONFIG_SAMA5_DDRCS_HEAP=n               : Don't add the SDRAM to the heap
+       CONFIG_MM_REGIONS=1                     : One memory regions:  ISRAM
+
+       In this configuration, the SDRAM is not added to heap and so is not
+       excessible to the applications.  So the RAM test can be freely
+       executed against the SRAM memory beginning at address 0x2000:0000
+       (DDR CS):
+
+       nsh> ramtest -h
+       Usage: <noname> [-w|h|b] <hex-address> <decimal-size>
+
+       Where:
+         <hex-address> starting address of the test.
+         <decimal-size> number of memory locations (in bytes).
+         -w Sets the width of a memory location to 32-bits.
+         -h Sets the width of a memory location to 16-bits (default).
+         -b Sets the width of a memory location to 8-bits.
+
+       To test the entire external 256MB SRAM:
+
+       nsh> ramtest 20000000 268435456
+       RAMTest: Marching ones: 60000000 268435456
+       RAMTest: Marching zeroes: 60000000 268435456
+       RAMTest: Pattern test: 60000000 268435456 55555555 aaaaaaaa
+       RAMTest: Pattern test: 60000000 268435456 66666666 99999999
+       RAMTest: Pattern test: 60000000 268435456 33333333 cccccccc
+       RAMTest: Address-in-address test: 60000000 268435456
+
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
         The SAMA5D3 can run at 536MHz.  I still need to figure out the
         PLL settings to get that speed.
+
+        If the CPU speed changes, then so must the NOR and SDRAM
+        initialization!
 
       2013-7-31:  I have been unable to execute this configuration from NOR
         FLASH by closing the BMS jumper (J9).  As far as I can tell, this
@@ -859,6 +912,9 @@ Configurations
       2013-7-31:  Using delay loop calibration from the hello configuration.
         That configuration runs out of internal SRAM and, as a result, this
         configuration needs to be recalibrated.
+
+      2013-8-31:  SDRAM configuration and RAM test usage are documented,
+        but untested.
 
   ostest:
     This configuration directory, performs a simple OS test using
@@ -906,6 +962,9 @@ Configurations
       2013-7-19:  This configuration (as do the others) run at 396MHz.
         The SAMA5D3 can run at 536MHz.  I still need to figure out the
         PLL settings to get that speed.
+
+        If the CPU speed changes, then so must the NOR and SDRAM
+        initialization!
 
       2013-7-30:  I have been unable to execute this configuration from NOR
         FLASH by closing the BMS jumper (J9).  As far as I can tell, this

@@ -20,7 +20,7 @@ CONFIG_WINDOWS_CYGWIN=y
 #
 # Build Configuration
 #
-CONFIG_APPS_DIR="../apps"
+# CONFIG_APPS_DIR="../apps"
 # CONFIG_BUILD_2PASS is not set
 
 #
@@ -167,7 +167,6 @@ CONFIG_SAMA5_USART1=y
 #
 # External Memory Configuration
 #
-# CONFIG_SAMA5_DDRCS is not set
 CONFIG_SAMA5_EBICS0=y
 CONFIG_SAMA5_EBICS0_SIZE=134217728
 # CONFIG_SAMA5_EBICS0_SRAM is not set
@@ -248,6 +247,7 @@ CONFIG_ARCH_HAVE_IRQBUTTONS=y
 # Board-Specific Options
 #
 CONFIG_SAMA5_NOR_MAIN=y
+# CONFIG_SAMA5_NOR_START is not set
 
 #
 # RTOS Features

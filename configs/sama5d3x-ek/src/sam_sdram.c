@@ -124,6 +124,14 @@ static inline void sam_sdram_delay(unsigned int loops)
  * Description:
  *   Configures DDR2 (MT47H128M16RT 128MB/ MT47H64M16HR)
  *
+ *   Configures DDR2 (MT47H128M16RT 128MB or, optionally,  MT47H64M16HR)
+ *
+ *   Per the SAMA5D3x-EK User guide: "Two SDRAM/DDR2 used as main system memory.
+ *   MT47H128M16 - 2 Gb - 16 Meg x 16 x 8 banks, the board provides up to 2 Gb on-
+ *   board, soldered DDR2 SDRAM. The memory bus is 32 bits wide and operates with
+ *   up to 166 MHz."
+ *
+ *   From the Atmel Code Example:
  *     MT47H64M16HR : 8 Meg x 16 x 8 banks
  *     Refresh count: 8K
  *     Row address: A[12:0] (8K)
