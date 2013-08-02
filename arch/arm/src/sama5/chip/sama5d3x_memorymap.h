@@ -46,6 +46,13 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* Decimal configuration values may exceed 2Gb and, hence, overflow to negative
+ * values unless we force them to unsigned long:
+ */
+
+#define __CONCAT(a,b) a ## b
+#define MKULONG(a) __CONCAT(a,ul)
+
 /* Overview:
  *
  *  SAMA5 Physical (unmapped) Memory Map
@@ -189,6 +196,14 @@
 #define SAM_PERIPHB_SIZE         (272*1024)      /* 0xf8000000-0xf8043fff: Internal Peripherals */
 #define SAM_SYSC_SIZE            (1*1024*1024)   /* 0xfff00000-0x0ffffedf: Internal Peripherals */
 
+/* Force configured sizes that might exceed 2GB to be unsigned long */
+
+#define SAMA5_EBICS0_SIZE        MKULONG(CONFIG_SAMA5_EBICS0_SIZE)
+#define SAMA5_DDRCS_SIZE         MKULONG(CONFIG_SAMA5_DDRCS_SIZE)
+#define SAMA5_EBICS1_SIZE        MKULONG(CONFIG_SAMA5_EBICS1_SIZE)
+#define SAMA5_EBICS2_SIZE        MKULONG(CONFIG_SAMA5_EBICS2_SIZE)
+#define SAMA5_EBICS3_SIZE        MKULONG(CONFIG_SAMA5_EBICS3_SIZE)
+
 /* Convert size in bytes to number of sections (in Mb). */
 
 #define _NSECTIONS(b)            (((b)+0x000fffff) >> 20)
@@ -212,11 +227,11 @@
 #define SAM_AXIMX_NSECTIONS      _NSECTIONS(SAM_AXIMX_SIZE)
 #define SAM_DAP_NSECTIONS        _NSECTIONS(SAM_DAP_SIZE)
 
-#define SAM_EBICS0_NSECTIONS     _NSECTIONS(CONFIG_SAMA5_EBICS0_SIZE)
-#define SAM_DDRCS_NSECTIONS      _NSECTIONS(CONFIG_SAMA5_DDRCS_SIZE)
-#define SAM_EBICS1_NSECTIONS     _NSECTIONS(CONFIG_SAMA5_EBICS1_SIZE)
-#define SAM_EBICS2_NSECTIONS     _NSECTIONS(CONFIG_SAMA5_EBICS2_SIZE)
-#define SAM_EBICS3_NSECTIONS     _NSECTIONS(CONFIG_SAMA5_EBICS3_SIZE)
+#define SAM_EBICS0_NSECTIONS     _NSECTIONS(SAMA5_EBICS0_SIZE)
+#define SAM_DDRCS_NSECTIONS      _NSECTIONS(SAMA5_DDRCS_SIZE)
+#define SAM_EBICS1_NSECTIONS     _NSECTIONS(SAMA5_EBICS1_SIZE)
+#define SAM_EBICS2_NSECTIONS     _NSECTIONS(SAMA5_EBICS2_SIZE)
+#define SAM_EBICS3_NSECTIONS     _NSECTIONS(SAMA5_EBICS3_SIZE)
 #define SAM_NFCCR_NSECTIONS      _NSECTIONS(SAM_NFCCR_SIZE)
 
 #define SAM_PERIPHA_NSECTIONS    _NSECTIONS(SAM_PERIPHA_SIZE)

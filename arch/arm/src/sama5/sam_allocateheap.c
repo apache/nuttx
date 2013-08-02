@@ -45,6 +45,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/userspace.h>
 
 #include <arch/board/board.h>
@@ -242,11 +243,11 @@ void up_addregion(void)
   size_t size;
 
 #ifdef CONFIG_SAMA5_ISRAM_HEAP
-#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
+  size = SAM_ISRAM0_SIZE + SAM_ISRAM1_SIZE;
 
+#if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the ISRAM heap */
 
-  size = SAM_ISRAM0_SIZE + SAM_ISRAM1_SIZE;
   sam_uheap((uintptr_t)SAM_ISRAM0_VADDR, size);
 
 #endif
@@ -261,10 +262,11 @@ void up_addregion(void)
 #ifdef CONFIG_SAMA5_DDRCS_HEAP
   if (nregions > 0)
     {
+      size = SAMA5_DDRCS_SIZE;
+
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the ISRAM heap */
 
-      size = CONFIG_SAMA5_DDRCS_SIZE;
       sam_uheap((uintptr_t)SAM_DDRCS_VSECTION, size);
 #endif
 
@@ -285,10 +287,11 @@ void up_addregion(void)
 #ifdef SAMA5_EBICS0_HEAP
   if (nregions > 0)
     {
+      size = SAMA5_EBICS0_SIZE;
+
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the ISRAM heap */
 
-      size = CONFIG_SAMA5_EBICS0_SIZE;
       sam_uheap((uintptr_t)SAM_EBICS0_VSECTION, size);
 #endif
 
@@ -309,10 +312,11 @@ void up_addregion(void)
 #ifdef SAMA5_EBICS1_HEAP
   if (nregions > 0)
     {
+      size = SAMA5_EBICS1_SIZE;
+
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the ISRAM heap */
 
-      size = CONFIG_SAMA5_EBICS1_SIZE;
       sam_uheap((uintptr_t)SAM_EBICS1_VSECTION, size);
 #endif
 
@@ -333,10 +337,11 @@ void up_addregion(void)
 #ifdef SAMA5_EBICS2_HEAP
   if (nregions > 0)
     {
+      size = SAMA5_EBICS2_SIZE;
+
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the ISRAM heap */
 
-      size = CONFIG_SAMA5_EBICS2_SIZE;
       sam_uheap((uintptr_t)SAM_EBICS2_VSECTION, size);
 #endif
 
@@ -357,10 +362,11 @@ void up_addregion(void)
 #ifdef SAMA5_EBICS3_HEAP
   if (nregions > 0)
     {
+      size = SAMA5_EBICS3_SIZE;
+
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
       /* Allow user-mode access to the ISRAM heap */
 
-      size = CONFIG_SAMA5_EBICS3_SIZE;
       sam_uheap((uintptr_t)SAM_EBICS3_VSECTION, size);
 #endif
 

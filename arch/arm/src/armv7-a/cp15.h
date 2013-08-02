@@ -147,14 +147,14 @@
 #define CP15_DCCIMVAC(r)   _CP15(0, r, c7, c14, 1)
 #define CP15_DCCISW(r)     _CP15(0, r, c7, c14, 2)
 
-#define CP15_TLBIALLIS(r)  _CP15(0, r, c8, c3, 0)   /* TLB maintenance operations */
-#define CP15_TLBIMVAIS(r)  _CP15(0, r, c8, c3, 1)
-#define CP15_TLBIASIDIS(r) _CP15(0, r, c8, c3, 2)
-#define CP15_TLBIMVAAIS(r) _CP15(0, r, c8, c3, 3)
-#define CP15_TLBIALL(r,c)  _CP15(0, r, c8, c, 0)    /* CRm = c5, c6, or c7 */
-#define CP15_TLBIMVA(r,c)  _CP15(0, r, c8, c, 1)    /* CRm = c5, c6, or c7 */
-#define CP15_TLBIASID(r,c) _CP15(0, r, c8, c, 2)    /* CRm = c5, c6, or c7 */
-#define CP15_TLBIMVAA(r,c) _CP15(0, r, c8, c, 3)    /* CRm = c5, c6, or c7 */
+#define CP15_TLBIALLIS(r)  _CP15(0, r, c8, c3, 0)   /* Invalidate entire unified TLB Inner Shareable */
+#define CP15_TLBIMVAIS(r)  _CP15(0, r, c8, c3, 1)   /* Invalidate unified TLB entry by MVA and ASID, Inner Shareable */
+#define CP15_TLBIASIDIS(r) _CP15(0, r, c8, c3, 2)   /* Invalidate unified TLB by ASID match Inner Shareable */
+#define CP15_TLBIMVAAIS(r) _CP15(0, r, c8, c3, 3)   /* Invalidate unified TLB entry by MVA all ASID Inner Shareable */
+#define CP15_TLBIALL(r,c)  _CP15(0, r, c8, c, 0)    /* Invalidate entire instruction TLB. CRm = c5, c6, or c7 */
+#define CP15_TLBIMVA(r,c)  _CP15(0, r, c8, c, 1)    /* Invalidate instruction TLB entry by MVA and ASID. CRm = c5, c6, or c7 */
+#define CP15_TLBIASID(r,c) _CP15(0, r, c8, c, 2)    /* Invalidate data TLB by ASID match. CRm = c5, c6, or c7 */
+#define CP15_TLBIMVAA(r,c) _CP15(0, r, c8, c, 3)    /* Invalidate unified TLB entry by MVA and ASID. CRm = c5, c6, or c7 */
 
 #define CP15_MCR(r)        _CP15(0, r, c9, c12, 0)  /* Performance Monitor Control Register */
 #define CP15_PMCNTENSET(r) _CP15(0, r, c9, c12, 1)  /* Count Enable Set Register */

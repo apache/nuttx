@@ -5257,4 +5257,15 @@
 	* nuttx/configs/sama5d3x-ek/src/sam_sdram.c:  Add logic which
 	  will (eventually) support the SDRAM on the SAMA5D3x-EK
 	  board.  Initial commit is untested and incomplete (2013-8-1).
+	* arch/arm/src/armv7-a/arm_mmu.c:  Move some generic MMU logic
+	  out of SAMA5-specific code into this share-able file (2013-8-2)
+	* arch/arm/src/armv7-a/mmu.h:  Add inline functions to invalidate
+	  a single TLB.
+	* arch/arm/src/sama5/sam_allocateheap.c and chip/sama5d3x_memorymap.h:
+	  Add logic to handle signed overflow when a memory region is
+	  greater than or equal to 2GB (2013-8-2).
+	* arch/arm/src/sama5/sam_boot.c:  Boot logic now initially
+	  configures DRAM as strongly ordered so that it can be initialized.
+	  After initialization, the page table entries are modified so
+	  that DRAM is fully cache-able (2018-8-2).
 

@@ -44,7 +44,7 @@ config SAMA5_WDT
 	default n
 
 config SAMA5_HSMC
-	bool "Multi-bit ECC Interrupt (HSMC)"
+	bool "Static Memory Controller (HSMC)"
 	default n
 
 config SAMA5_SMD
@@ -241,6 +241,7 @@ menu "External Memory Configuration"
 config SAMA5_DDRCS
 	bool "External DDR-SDRAM Memory"
 	default n
+	depends on SAMA5_MPDDRC
 	---help---
 		Build in support for DDR-SDRAM memory resources.
 
@@ -270,6 +271,7 @@ endif # SAMA5_DDRCS
 config SAMA5_EBICS0
 	bool "External CS0 Memory"
 	default n
+	depends on SAMA5_HSMC
 	---help---
 		Build in support for memory resources in the chip select 0 (CS0)
 		memory region.
@@ -318,6 +320,7 @@ endif # SAMA5_EBICS0
 config SAMA5_EBICS1
 	bool "External CS1 Memory"
 	default n
+	depends on SAMA5_HSMC
 	---help---
 		Build in support for memory resources in the chip select 1 (CS1)
 		memory region.
@@ -365,6 +368,7 @@ endif # SAMA5_EBICS1
 
 config SAMA5_EBICS2
 	bool "External CS2 Memory"
+	depends on SAMA5_HSMC
 	default n
 	---help---
 		Build in support for memory resources in the chip select 2 (CS2)
@@ -414,6 +418,7 @@ endif # SAMA5_EBICS2
 config SAMA5_EBICS3
 	bool "External CS3 Memory"
 	default n
+	depends on SAMA5_HSMC
 	---help---
 		Build in support for memory resources in the chip select 3 (CS3)
 		memory region.

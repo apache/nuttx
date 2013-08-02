@@ -51,7 +51,6 @@
 #include "chip.h"
 #include "arm.h"
 #include "mmu.h"
-#include "cache.h"
 #include "fpu.h"
 #include "up_internal.h"
 #include "up_arch.h"
@@ -88,14 +87,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-struct section_mapping_s
-{
-  uint32_t physbase;   /* Physical address of the region to be mapped */
-  uint32_t virtbase;   /* Virtual address of the region to be mapped */
-  uint32_t mmuflags;   /* MMU settings for the region (e.g., cache-able) */
-  uint32_t nsections;  /* Number of mappings in the region */
-};
 
 /****************************************************************************
  * Public Variables
@@ -142,70 +133,106 @@ static const struct section_mapping_s section_mapping[] =
    */
 
 #if defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_SAMA5_BOOT_ISRAM)
-  { CONFIG_FLASH_VSTART, 0x00000000, MMU_ROMFLAGS, 1},
+  { CONFIG_FLASH_VSTART,   0x00000000,
+    MMU_ROMFLAGS,          1 },
 #else
-  { SAM_BOOTMEM_PSECTION, SAM_BOOTMEM_VSECTION,
-    SAM_BOOTMEM_MMUFLAGS, SAM_BOOTMEM_NSECTIONS},
+  { SAM_BOOTMEM_PSECTION,  SAM_BOOTMEM_VSECTION,
+    SAM_BOOTMEM_MMUFLAGS,  SAM_BOOTMEM_NSECTIONS },
 #endif
 
-  { SAM_ROM_PSECTION, SAM_ROM_VSECTION,
-    SAM_ROM_MMUFLAGS, SAM_ROM_NSECTIONS},
-  { SAM_NFCSRAM_PSECTION, SAM_NFCSRAM_VSECTION,
-    SAM_NFCSRAM_MMUFLAGS, SAM_NFCSRAM_NSECTIONS},
+  { SAM_ROM_PSECTION,      SAM_ROM_VSECTION,
+    SAM_ROM_MMUFLAGS,      SAM_ROM_NSECTIONS },
+  { SAM_NFCSRAM_PSECTION,  SAM_NFCSRAM_VSECTION,
+    SAM_NFCSRAM_MMUFLAGS,  SAM_NFCSRAM_NSECTIONS },
 #ifndef CONFIG_PAGING /* Internal SRAM is already fully mapped */
-  { SAM_ISRAM_PSECTION, SAM_ISRAM_VSECTION,
-    SAM_ISRAM_MMUFLAGS, SAM_ISRAM_NSECTIONS},
+  { SAM_ISRAM_PSECTION,    SAM_ISRAM_VSECTION,
+    SAM_ISRAM_MMUFLAGS,    SAM_ISRAM_NSECTIONS },
 #endif
-  { SAM_SMD_PSECTION, SAM_SMD_VSECTION,
-    SAM_SMD_MMUFLAGS, SAM_SMD_NSECTIONS},
+  { SAM_SMD_PSECTION,      SAM_SMD_VSECTION,
+    SAM_SMD_MMUFLAGS,      SAM_SMD_NSECTIONS },
   { SAM_UDPHSRAM_PSECTION, SAM_UDPHSRAM_VSECTION,
-    SAM_UDPHSRAM_MMUFLAGS, SAM_UDPHSRAM_NSECTIONS},
-  { SAM_UHPOHCI_PSECTION, SAM_UHPOHCI_VSECTION,
-    SAM_UHPOHCI_MMUFLAGS, SAM_UHPOHCI_NSECTIONS},
-  { SAM_UHPEHCI_PSECTION, SAM_UHPEHCI_VSECTION,
-    SAM_UHPEHCI_MMUFLAGS, SAM_UHPEHCI_NSECTIONS},
-  { SAM_AXIMX_PSECTION, SAM_AXIMX_VSECTION,
-    SAM_AXIMX_MMUFLAGS, SAM_AXIMX_NSECTIONS},
-  { SAM_DAP_PSECTION, SAM_DAP_VSECTION,
-    SAM_DAP_MMUFLAGS, SAM_DAP_NSECTIONS},
+    SAM_UDPHSRAM_MMUFLAGS, SAM_UDPHSRAM_NSECTIONS },
+  { SAM_UHPOHCI_PSECTION,  SAM_UHPOHCI_VSECTION,
+    SAM_UHPOHCI_MMUFLAGS,  SAM_UHPOHCI_NSECTIONS },
+  { SAM_UHPEHCI_PSECTION,  SAM_UHPEHCI_VSECTION,
+    SAM_UHPEHCI_MMUFLAGS,  SAM_UHPEHCI_NSECTIONS },
+  { SAM_AXIMX_PSECTION,    SAM_AXIMX_VSECTION,
+    SAM_AXIMX_MMUFLAGS,    SAM_AXIMX_NSECTIONS },
+  { SAM_DAP_PSECTION,      SAM_DAP_VSECTION,
+    SAM_DAP_MMUFLAGS,      SAM_DAP_NSECTIONS },
 
-/* SAMA5 External Memories */
+/* SAMA5 CS0 External Memories */
 
 #ifdef CONFIG_SAMA5_EBICS0
   { SAM_EBICS0_PSECTION, SAM_EBICS0_VSECTION,
-    SAM_EBICS0_MMUFLAGS, SAM_EBICS0_NSECTIONS},
+    SAM_EBICS0_MMUFLAGS, SAM_EBICS0_NSECTIONS },
 #endif
+
+/* SAMA5 External SDRAM Memory.  The SDRAM is not usable until it has been
+ * initialized.  If we are running out of SDRAM now, we can assume that some
+ * second level boot loader has properly configured SRAM for us.  In that
+ * case, we set the the MMU flags for the final, fully cache-able state.
+ *
+ * If we are running from ISRAM or NOR flash, then we will need to configure
+ * the SDRAM ourselves.  In this case, we set the MMU flags to the strongly
+ * ordered, non-cacheable state.  We need this direct access to SDRAM in
+ * order to configure it.  Once SDRAM has been initialized, it will be re-
+ * configured in its final state.
+ */
+
 #ifdef CONFIG_SAMA5_DDRCS
-  { SAM_DDRCS_PSECTION, SAM_DDRCS_VSECTION,
-    SAM_DDRCS_MMUFLAGS, SAM_DDRCS_NSECTIONS},
+#ifdef CONFIG_SAMA5_BOOT_SDRAM
+  { SAM_DDRCS_PSECTION,    SAM_DDRCS_VSECTION,
+    MMU_STRONGLY_ORDERED,  SAM_DDRCS_NSECTIONS },
+#else
+  { SAM_DDRCS_PSECTION,    SAM_DDRCS_VSECTION,
+    SAM_DDRCS_MMUFLAGS,    SAM_DDRCS_NSECTIONS },
 #endif
+#endif
+
+/* SAMA5 CS1-3 External Memories */
+
 #ifdef CONFIG_SAMA5_EBICS1
-  { SAM_EBICS1_PSECTION, SAM_EBICS1_VSECTION,
-    SAM_EBICS1_MMUFLAGS, SAM_EBICS1_NSECTIONS},
+  { SAM_EBICS1_PSECTION,   SAM_EBICS1_VSECTION,
+    SAM_EBICS1_MMUFLAGS,   SAM_EBICS1_NSECTIONS },
 #endif
 #ifdef CONFIG_SAMA5_EBICS2
-  { SAM_EBICS2_PSECTION, SAM_EBICS2_VSECTION,
-    SAM_EBICS2_MMUFLAGS, SAM_EBICS2_NSECTIONS},
+  { SAM_EBICS2_PSECTION,   SAM_EBICS2_VSECTION,
+    SAM_EBICS2_MMUFLAGS,   SAM_EBICS2_NSECTIONS },
 #endif
 #ifdef CONFIG_SAMA5_EBICS3
-  { SAM_EBICS3_PSECTION, SAM_EBICS3_VSECTION,
-    SAM_EBICS3_MMUFLAGS, SAM_EBICS3_NSECTIONS},
+  { SAM_EBICS3_PSECTION,   SAM_EBICS3_VSECTION,
+    SAM_EBICS3_MMUFLAGS,   SAM_EBICS3_NSECTIONS },
 #endif
 #ifdef CONFIG_SAMA5_NFCCR
-  { SAM_NFCCR_PSECTION, SAM_NFCCR_VSECTION,
-    SAM_NFCCR_MMUFLAGS, SAM_NFCCR_NSECTIONS},
+  { SAM_NFCCR_PSECTION,   SAM_NFCCR_VSECTION,
+    SAM_NFCCR_MMUFLAGS,   SAM_NFCCR_NSECTIONS },
 #endif
 
 /* SAMA5 Internal Peripherals */
 
   { SAM_PERIPHA_PSECTION, SAM_PERIPHA_VSECTION,
-    SAM_PERIPHA_MMUFLAGS, SAM_PERIPHA_NSECTIONS},
+    SAM_PERIPHA_MMUFLAGS, SAM_PERIPHA_NSECTIONS },
   { SAM_PERIPHB_PSECTION, SAM_PERIPHB_VSECTION,
-    SAM_PERIPHB_MMUFLAGS, SAM_PERIPHB_NSECTIONS},
-  { SAM_SYSC_PSECTION, SAM_SYSC_VSECTION,
-    SAM_SYSC_MMUFLAGS, SAM_SYSC_NSECTIONS},
+    SAM_PERIPHB_MMUFLAGS, SAM_PERIPHB_NSECTIONS },
+  { SAM_SYSC_PSECTION,    SAM_SYSC_VSECTION,
+    SAM_SYSC_MMUFLAGS,    SAM_SYSC_NSECTIONS },
 };
 #define NMAPPINGS (sizeof(section_mapping) / sizeof(struct section_mapping_s))
+#endif
+
+/* SAMA5 External SDRAM Memory.  Final configuration.  The SDRAM was
+ * configured in a temporary state to support low-level ininitialization.
+ * After the SDRAM has been fully initialized, this structure is used to
+ * set the SDRM in its final, fully cache-able state.
+ */
+
+#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
+static const struct section_mapping_s operational_mapping =
+{
+  SAM_DDRCS_PSECTION,     SAM_DDRCS_VSECTION,
+  SAM_DDRCS_MMUFLAGS,     SAM_DDRCS_NSECTIONS
+};
 #endif
 
 /****************************************************************************
@@ -213,69 +240,21 @@ static const struct section_mapping_s section_mapping[] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_setl1entry
- *
- * Description:
- *   Set a level 1 translation table entry.
- *
- ****************************************************************************/
-
-#ifndef CONFIG_ARCH_ROMPGTABLE
-static inline void sam_setl1entry(uint32_t paddr, uint32_t vaddr,
-                                  uint32_t mmuflags)
-{
-  uint32_t *pgtable = (uint32_t*)PGTABLE_BASE_VADDR;
-  uint32_t  index   = vaddr >> 20;
-
-  /* Save the page table entry */
-
-  pgtable[index]  = (paddr | mmuflags);
-}
-#endif
-
-/****************************************************************************
- * Name: sam_setl2smallentry
- ****************************************************************************/
-
-static inline void sam_setl2smallentry(uint32_t ctabvaddr, uint32_t paddr,
-                                       uint32_t vaddr, uint32_t mmuflags)
-{
-  uint32_t *ctable  = (uint32_t*)ctabvaddr;
-  uint32_t  index;
-
-  /* The table divides a 1Mb address space up into 256 entries, each
-   * corresponding to 4Kb of address space.  The page table index is
-   * related to the offset from the beginning of 1Mb region.
-   */
-
-  index = (vaddr & 0x000ff000) >> 12;
-
-  /* Save the table entry */
-
-  ctable[index] = (paddr | mmuflags);
-}
-
-/****************************************************************************
  * Name: sam_setupmappings
+ *
+ * Description
+ *   Map all of the memory regions defined in section_mapping[]
+ *
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-static void sam_setupmappings(void)
+static inline void sam_setupmappings(void)
 {
-  int i, j;
+  int i;
 
   for (i = 0; i < NMAPPINGS; i++)
     {
-      uint32_t sect_paddr = section_mapping[i].physbase;
-      uint32_t sect_vaddr = section_mapping[i].virtbase;
-      uint32_t mmuflags   = section_mapping[i].mmuflags;
-
-      for (j = 0; j < section_mapping[i].nsections; j++)
-        {
-          sam_setl1entry(sect_paddr, sect_vaddr, mmuflags);
-          sect_paddr += SECTION_SIZE;
-          sect_vaddr += SECTION_SIZE;
-        }
+      mmu_l2_map_region(&section_mapping[i]);
     }
 }
 #endif
@@ -290,16 +269,17 @@ static void sam_setupmappings(void)
 
 #if !defined(CONFIG_ARCH_ROMPGTABLE) && defined(CONFIG_ARCH_LOWVECTORS) && \
      defined(CONFIG_PAGING)
-static void  sam_vectorpermissions(uint32_t mmuflags)
+static void sam_vectorpermissions(uint32_t mmuflags)
 {
   /* The PTE for the beginning of ISRAM is at the base of the L2 page table */
 
-  uint32_t *ptr = (uint32_t*)PG_L2_VECT_VADDR;
-  uint32_t pte;
+  uint32_t pte = mmu_l2_getentry(PG_L2_VECT_VADDR, 0);
 
-  /* The pte might be zero the first time this function is called. */
+  /* String the MMU flags from the page table entry.
+   *
+   * The pte might be zero the first time this function is called.
+   */
 
-  pte = *ptr;
   if (pte == 0)
     {
       pte = PG_VECT_PBASE;
@@ -309,13 +289,9 @@ static void  sam_vectorpermissions(uint32_t mmuflags)
       pte &= PG_L1_PADDRMASK;
     }
 
-  /* Update the MMU flags and save */
+  /* Update the page table entry with the MMU flags and save */
 
-  *ptr = pte | mmuflags;
-
-  /* Invalid the TLB for this address */
-
-  tlb_invalidate_single(PG_L2_VECT_VADDR);
+  mmu_l2_setentry(PG_L2_VECT_VADDR, pte, 0, mmuflags);
 }
 #endif
 
@@ -352,17 +328,17 @@ static void sam_vectormapping(void)
 
   while (vector_paddr < end_paddr)
     {
-      sam_setl2smallentry(VECTOR_L2_VBASE,  vector_paddr, vector_vaddr,
-                          MMU_L2_VECTORFLAGS);
+      mmu_l2_setentry(VECTOR_L2_VBASE,  vector_paddr, vector_vaddr,
+                      MMU_L2_VECTORFLAGS);
       vector_paddr += 4096;
       vector_vaddr += 4096;
     }
 
   /* Now set the level 1 descriptor to refer to the level 2 page table. */
 
-  sam_setl1entry(VECTOR_L2_PBASE & PMD_PTE_PADDR_MASK,
-                SAM_VECTOR_VADDR & PMD_PTE_PADDR_MASK,
-                MMU_L1_VECTORFLAGS);
+  mmu_l1_setentry(VECTOR_L2_PBASE & PMD_PTE_PADDR_MASK,
+                  SAM_VECTOR_VADDR & PMD_PTE_PADDR_MASK,
+                  MMU_L1_VECTORFLAGS);
 }
 #else
   /* No vector remap */
@@ -527,13 +503,6 @@ void up_boot(void)
 
   sam_vectormapping();
 
-  /* The SRAM address hold the the page table is probably buffered.  Make sure
-   * that the modified contents of the page table are flushed into physical
-   * memory.
-   */
-
-  cp15_clean_dcache(PGTABLE_BASE_VADDR, PGTABLE_BASE_VADDR + PGTABLE_SIZE);
-
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
   /* Setup up vector block.  _vector_start and _vector_end are exported from
@@ -578,7 +547,20 @@ void up_boot(void)
   sam_userspace();
 #endif
 
-  /* Perform board-specific initialization */
+  /* Perform board-specific initialization,  This must include:
+   *
+   * - Initialization of board-specific memory resources (e.g., SDRAM)
+   * - Configuration of board specific resources (GPIOs, LEDs, etc).
+   */
 
   sam_boardinitialize();
+
+  /* SDRAM was configured in a temporary state to support low-level
+   * ininitialization.  Now that the SDRAM has been fully initialized,
+   * we can reconfigure the SDRAM in its final, fully cache-able state.
+   */
+
+#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
+  mmu_l2_map_region(&operational_mapping);
+#endif
 }
