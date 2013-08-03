@@ -61,14 +61,14 @@
 #include "sam_irq.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enable NVIC debug features that are probably only desireable during
- * bringup
- */
+/****************************************************************************
+ * Private types
+ ****************************************************************************/
 
-#undef SAM_IRQ_DEBUG
+typedef uint32_t *(*doirq_t)(int irq, uint32_t *regs);
 
 /****************************************************************************
  * Public Data
@@ -97,34 +97,34 @@ static const uint8_t g_srctype[SCRTYPE_NTYPES] =
  *
  ****************************************************************************/
 
-#if defined(SAM_IRQ_DEBUG) && defined (CONFIG_DEBUG)
+#if defined(CONFIG_DEBUG_IRQ)
 static void sam_dumpaic(const char *msg, int irq)
 {
   irqstate_t flags;
 
   flags = irqsave();
-  slldbg("AIC (%s, irq=%d):\n", msg, irq);
+  lldbg("AIC (%s, irq=%d):\n", msg, irq);
 
   /* Select the register set associated with this irq */
 
-  putreg32(irq, SAM_AIC_SSR)
+  putreg32(irq, SAM_AIC_SSR);
 
   /* Then dump all of the (readable) register contents */
 
-  slldbg("  SSR: %08x  SMR: %08x  SVR: %08x  IVR: %08x\n",
-         getreg32(SAM_AIC_SSR),  getreg32(SAM_AIC_SMR),
-         getreg32(SAM_AIC_SVR),  getreg32(SAM_AIC_IVR));
-  slldbg("  FVR: %08x ISR: %08x\n",
-         getreg32(SAM_AIC_FVR),  getreg32(SAM_AIC_ISR));
-  slldbg("  IPR: %08x       %08x       %08x       %08x\n",
-         getreg32(SAM_AIC_IPR0), getreg32(SAM_AIC_IPR1),
-         getreg32(SAM_AIC_IPR2), getreg32(SAM_AIC_IPR3));
-  slldbg("  IMR: %08x CISR: %08x  SPU: %08x FFSR: %08x\n",
-         getreg32(SAM_AIC_IMR),  getreg32(SAM_AIC_CISR),
-         getreg32(SAM_AIC_SPU),  getreg32(SAM_AIC_FFSR));
-  slldbg("  DCR: %08x WPMR: %08x WPMR: %08x\n",
-         getreg32(SAM_AIC_DCR),  getreg32(SAM_AIC_WPMR),
-         getreg32(SAM_AIC_WPMR));
+  lldbg("  SSR: %08x  SMR: %08x  SVR: %08x  IVR: %08x\n",
+        getreg32(SAM_AIC_SSR),  getreg32(SAM_AIC_SMR),
+        getreg32(SAM_AIC_SVR),  getreg32(SAM_AIC_IVR));
+  lldbg("  FVR: %08x ISR: %08x\n",
+        getreg32(SAM_AIC_FVR),  getreg32(SAM_AIC_ISR));
+  lldbg("  IPR: %08x       %08x       %08x       %08x\n",
+        getreg32(SAM_AIC_IPR0), getreg32(SAM_AIC_IPR1),
+        getreg32(SAM_AIC_IPR2), getreg32(SAM_AIC_IPR3));
+  lldbg("  IMR: %08x CISR: %08x  SPU: %08x FFSR: %08x\n",
+        getreg32(SAM_AIC_IMR),  getreg32(SAM_AIC_CISR),
+        getreg32(SAM_AIC_SPU),  getreg32(SAM_AIC_FFSR));
+  lldbg("  DCR: %08x WPMR: %08x WPMR: %08x\n",
+        getreg32(SAM_AIC_DCR),  getreg32(SAM_AIC_WPMR),
+        getreg32(SAM_AIC_WPMR));
   irqrestore(flags);
 }
 #else
@@ -161,14 +161,16 @@ static void sam_dumpaic(const char *msg, int irq)
  *
  ****************************************************************************/
 
-static void sam_spurious(void)
+static uint32_t *sam_spurious(int irq, uint32_t *regs)
 {
   /* This is probably irrevelant since true vectored interrupts are not used
    * in this implementation.  The value of AIC_IVR is ignored.
    */
 
-  lldbg("Spurious interrupt\n");
-  PANIC();
+#if defined(CONFIG_DEBUG_IRQ)
+  lldbg("Spurious interrupt: IRQ %d\n", irq);
+#endif
+  return regs;
 }
 
 /****************************************************************************
@@ -179,32 +181,17 @@ static void sam_spurious(void)
  *
  ****************************************************************************/
 
-static void sam_fiqhandler(void)
+static uint32_t *sam_fiqhandler(int irq, uint32_t *regs)
 {
-  /* This is probably irrevelant since true vectored interrupts are not used
-   * in this implementation.  The value of AIC_IVR is ignored.
+  /* This is probably irrevelant since FIQs are not used in this
+   * implementation.
    */
 
-  lldbg("FIQ\n");
+#if defined(CONFIG_DEBUG_IRQ) || defined(CONFIG_ARCH_STACKDUMP)
+  lldbg("FIQ?: IRQ: %d\n");
+#endif
   PANIC();
-}
-
-/****************************************************************************
- * Name: sam_irqhandler
- *
- * Description:
- *   Default IRQ interrupt handler.
- *
- ****************************************************************************/
-
-static void sam_irqhandler( void )
-{
-  /* This is probably irrevelant since true vectored interrupts are not used
-   * in this implementation.  The value of AIC_IVR is ignored.
-   */
-
-  lldbg("IRQ\n");
-  PANIC();
+  return regs; /* Won't get here */
 }
 
 /****************************************************************************
@@ -254,7 +241,7 @@ void up_irqinitialize(void)
         }
       else
         {
-          putreg32((uint32_t)sam_irqhandler, SAM_AIC_SVR);
+          putreg32((uint32_t)arm_doirq, SAM_AIC_SVR);
         }
 
       /* Set the default interrupt priority */
@@ -357,7 +344,8 @@ void up_irqinitialize(void)
 
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
-  uint32_t regval;
+  uint32_t irqid;
+  uint32_t ivr;
 
  /* Paragraph 17.8.5 Protect Mode: "The Protect Mode permits reading the
   *   Interrupt Vector Register without performing the associated automatic
@@ -391,18 +379,18 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
   /* Write in the IVR to support Protect Mode */
 
-  regval = getreg32(SAM_AIC_IVR);
-  putreg32(regval, SAM_AIC_IVR);
+  ivr = getreg32(SAM_AIC_IVR);
+  putreg32(ivr, SAM_AIC_IVR);
 
   /* Get the IRQ number from the interrrupt status register.  NOTE that the
    * IRQ number is the same is the peripheral ID (PID).
    */
 
-  regval = getreg32(SAM_AIC_ISR) & AIC_ISR_MASK;
+  irqid = getreg32(SAM_AIC_ISR) & AIC_ISR_MASK;
 
   /* Dispatch the interrupt */
 
-  regs = arm_doirq((int)regval, regs);
+  regs = ((doirq_t)ivr)((int)irqid, regs);
 
   /* Acknowledge interrupt */
 

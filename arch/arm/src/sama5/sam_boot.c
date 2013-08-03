@@ -58,6 +58,7 @@
 #include "chip/sam_wdt.h"
 #include "sam_clockconfig.h"
 #include "sam_lowputc.h"
+#include "sam_serial.h"
 
 /****************************************************************************
  * Pre-processor Definitions

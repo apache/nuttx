@@ -86,34 +86,34 @@ volatile uint32_t *current_regs;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG_IRQ) && defined (CONFIG_DEBUG)
+#if defined(CONFIG_DEBUG_IRQ)
 static void nuc_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
   flags = irqsave();
 
-  slldbg("NVIC (%s, irq=%d):\n", msg, irq);
-  slldbg("  ISER:       %08x ICER:   %08x\n",
-         getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER));
-  slldbg("  ISPR:       %08x ICPR:   %08x\n",
-         getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
-  slldbg("  IRQ PRIO:   %08x %08x %08x %08x\n", 
+  lldbg("NVIC (%s, irq=%d):\n", msg, irq);
+  lldbg("  ISER:       %08x ICER:   %08x\n",
+        getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER));
+  lldbg("  ISPR:       %08x ICPR:   %08x\n",
+        getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
+  lldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
         getreg32(ARMV6M_NVIC_IPR0), getreg32(ARMV6M_NVIC_IPR1),
         getreg32(ARMV6M_NVIC_IPR2), getreg32(ARMV6M_NVIC_IPR3));
-  slldbg("              %08x %08x %08x %08x\n", 
+  lldbg("              %08x %08x %08x %08x\n",
         getreg32(ARMV6M_NVIC_IPR4), getreg32(ARMV6M_NVIC_IPR5),
         getreg32(ARMV6M_NVIC_IPR6), getreg32(ARMV6M_NVIC_IPR7));
 
-  slldbg("SYSCON:\n");
-  slldbg("  CPUID:      %08x\n",
-         getreg32(ARMV6M_SYSCON_CPUID));
-  slldbg("  ICSR:       %08x AIRCR:  %08x\n",
-         getreg32(ARMV6M_SYSCON_ICSR), getreg32(ARMV6M_SYSCON_AIRCR));
-  slldbg("  SCR:        %08x CCR:    %08x\n",
-         getreg32(ARMV6M_SYSCON_SCR), getreg32(ARMV6M_SYSCON_CCR));
-  slldbg("  SHPR2:      %08x SHPR3:  %08x\n",
-         getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
+  lldbg("SYSCON:\n");
+  lldbg("  CPUID:      %08x\n",
+        getreg32(ARMV6M_SYSCON_CPUID));
+  lldbg("  ICSR:       %08x AIRCR:  %08x\n",
+        getreg32(ARMV6M_SYSCON_ICSR), getreg32(ARMV6M_SYSCON_AIRCR));
+  lldbg("  SCR:        %08x CCR:    %08x\n",
+        getreg32(ARMV6M_SYSCON_SCR), getreg32(ARMV6M_SYSCON_CCR));
+  lldbg("  SHPR2:      %08x SHPR3:  %08x\n",
+        getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
 
   irqrestore(flags);
 }
