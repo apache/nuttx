@@ -933,7 +933,8 @@ Configurations
         improves with accesses.  Clearly, more work needs to be done.
 
         Here is another strange observation:  SDRAM accesses tend to
-        generate occasional spurious interrupts!  No idea why.
+        generate occasional spurious interrupts in those same conditions
+        where the memory test fails!  No idea why.
 
   ostest:
     This configuration directory, performs a simple OS test using
