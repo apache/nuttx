@@ -5274,3 +5274,5 @@
 	  interrupts (2013-8-3).
 	* arch/*/src/*/*_irq.c:  Standardize configuration variables used
 	  to enable interrupt controller debug output (2013-8-3).
+	* arch/arm/src/sama5/chip/sam_dmac.h: Add register definitions for the
+	  SAMA5 DMA controller (2013-8-3).
