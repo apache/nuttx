@@ -927,12 +927,13 @@ Configurations
         That configuration runs out of internal SRAM and, as a result, this
         configuration needs to be recalibrated.
 
-      2013-8-31:  SDRAM configuration and RAM test usage are documented,
-        but only partially functional.  SDRAM is accessible but many regions
-        on the SDRAM fail the RAM test.  Most likely there is some error in
-        the SDRAM timing configuration.  I am also seeing occasional crashes
-        involving unexpected interrupts and the UART when running the RAM
-        test.  Not sure what to make of that yet
+      2013-8-3:  SDRAM configuration and RAM test usage have been verified
+        and are functional.  I not some issues now; Occassionally, SDRAM is
+        not functional on initial boot.  Or is initially not functional but
+        improves with accesses.  Clearly, more work needs to be done.
+
+        Here is another strange observation:  SDRAM accesses tend to
+        generate occasional spurious interrupts!  No idea why.
 
   ostest:
     This configuration directory, performs a simple OS test using
