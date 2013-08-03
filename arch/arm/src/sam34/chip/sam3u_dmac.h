@@ -58,7 +58,7 @@
 #define SAM_DMAC_SREQ_OFFSET           0x08 /* DMAC Software Single Request Register */
 #define SAM_DMAC_CREQ_OFFSET           0x0c /* DMAC Software Chunk Transfer Request Register */
 #define SAM_DMAC_LAST_OFFSET           0x10 /* DMAC Software Last Transfer Flag Register */
-                                            /* 0x014-0x18: Reserved */
+                                            /* 0x014: Reserved */
 #define SAM_DMAC_EBCIER_OFFSET         0x18 /* DMAC Error Enable */
 #define SAM_DMAC_EBCIDR_OFFSET         0x1C /* DMAC Error Disable */
 #define SAM_DMAC_EBCIMR_OFFSET         0x20 /* DMAC Error Mask */
