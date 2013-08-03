@@ -51,13 +51,13 @@
 #ifdef CONFIG_ARCH_MATH_H
 #  include <arch/math.h>
 
-/* If CONFIG_LIB is enabled, then the math library at lib/math will be
+/* If CONFIG_LIBM is enabled, then the math library at lib/math will be
  * built.  This library was taken from the math library developed for the
  * Rhombus OS by Nick Johnson (https://github.com/nickbjohnson4224/rhombus).
  * The port or the Rhombus math library was contributed by Darcy Gong.
  */
 
-#else if defined CONFIG_LIBM
+#elif defined CONFIG_LIBM
 
 /****************************************************************************
  * Copyright (C) 2009-2011 Nick Johnson <nickbjohnson4224 at gmail.com>
