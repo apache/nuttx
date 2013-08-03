@@ -60,12 +60,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Enable NVIC debug features that are probably only desireable during
- * bringup
- */
-
-#undef LM_IRQ_DEBUG
-
 /* Get a 32-bit version of the default priority */
 
 #define DEFPRIORITY32 \
@@ -96,32 +90,32 @@ volatile uint32_t *current_regs;
  *
  ****************************************************************************/
 
-#if defined(LM_IRQ_DEBUG) && defined (CONFIG_DEBUG)
+#if defined(CONFIG_DEBUG_IRQ)
 static void lm_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
   flags = irqsave();
-  slldbg("NVIC (%s, irq=%d):\n", msg, irq);
-  slldbg("  INTCTRL:    %08x VECTAB: %08x\n",
-         getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
+  lldbg("NVIC (%s, irq=%d):\n", msg, irq);
+  lldbg("  INTCTRL:    %08x VECTAB: %08x\n",
+        getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
-  slldbg("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
-         getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
-         getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
+  lldbg("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
+        getreg32(NVIC_SYSHCON_MEMFAULTENA), getreg32(NVIC_SYSHCON_BUSFAULTENA),
+        getreg32(NVIC_SYSHCON_USGFAULTENA), getreg32(NVIC_SYSTICK_CTRL_ENABLE));
 #endif
-  slldbg("  IRQ ENABLE: %08x %08x\n",
-         getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE));
-  slldbg("  SYSH_PRIO:  %08x %08x %08x\n",
-         getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
-         getreg32(NVIC_SYSH12_15_PRIORITY));
-  slldbg("  IRQ PRIO:   %08x %08x %08x %08x\n", 
+  lldbg("  IRQ ENABLE: %08x %08x\n",
+        getreg32(NVIC_IRQ0_31_ENABLE), getreg32(NVIC_IRQ32_63_ENABLE));
+  lldbg("  SYSH_PRIO:  %08x %08x %08x\n",
+        getreg32(NVIC_SYSH4_7_PRIORITY), getreg32(NVIC_SYSH8_11_PRIORITY),
+        getreg32(NVIC_SYSH12_15_PRIORITY));
+  lldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ0_3_PRIORITY), getreg32(NVIC_IRQ4_7_PRIORITY),
         getreg32(NVIC_IRQ8_11_PRIORITY), getreg32(NVIC_IRQ12_15_PRIORITY));
-  slldbg("              %08x %08x %08x %08x\n", 
+  lldbg("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ16_19_PRIORITY), getreg32(NVIC_IRQ20_23_PRIORITY),
         getreg32(NVIC_IRQ24_27_PRIORITY), getreg32(NVIC_IRQ28_31_PRIORITY));
-  slldbg("              %08x %08x %08x %08x\n", 
+  lldbg("              %08x %08x %08x %08x\n",
         getreg32(NVIC_IRQ32_35_PRIORITY), getreg32(NVIC_IRQ36_39_PRIORITY),
         getreg32(NVIC_IRQ40_43_PRIORITY), getreg32(NVIC_IRQ44_47_PRIORITY));
   irqrestore(flags);

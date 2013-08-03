@@ -327,64 +327,75 @@ config DEBUG_VERBOSE
 comment "Subsystem Debug Options"
 
 config DEBUG_MM
-	bool "Enable Memory Manager Debug Output"
+	bool "Memory Manager Debug Output"
 	default n
 	---help---
 		Enable memory management debug SYSLOG output (disabled by default)
 
 config DEBUG_SCHED
-	bool "Enable Scheduler Debug Output"
+	bool "Scheduler Debug Output"
 	default n
 	---help---
 		Enable OS debug SYSLOG output (disabled by default)
 
 config DEBUG_PAGING
-	bool "Enable Demand Paging Debug Output"
+	bool "Demand Paging Debug Output"
 	default n
 	depends on PAGING
 	---help---
 		Enable demand paging debug SYSLOG output (disabled by default)
 
 config DEBUG_NET
-	bool "Enable Network Debug Output"
+	bool "Network Debug Output"
 	default n
 	depends on NET
 	---help---
 		Enable network debug SYSLOG output (disabled by default)
 
 config DEBUG_USB
-	bool "Enable USB Debug Output"
+	bool "USB Debug Output"
 	default n
 	depends on USBDEV || USBHOST
 	---help---
 		Enable usb debug SYSLOG output (disabled by default)
 
 config DEBUG_FS
-	bool "Enable File System Debug Output"
+	bool "File System Debug Output"
 	default n
 	---help---
 		Enable file system debug SYSLOG output (disabled by default)
 
 config DEBUG_LIB
-	bool "Enable C Library Debug Output"
+	bool "C Library Debug Output"
 	default n
 	---help---
 		Enable C library debug SYSLOG output (disabled by default)
 
 config DEBUG_BINFMT
-	bool "Enable Binary Loader Debug Output"
+	bool "Binary Loader Debug Output"
 	default n
 	---help---
 		Enable binary loader debug SYSLOG output (disabled by default)
 
 config DEBUG_GRAPHICS
-	bool "Enable Graphics Debug Output"
+	bool "Graphics Debug Output"
 	default n
 	---help---
 		Enable NX graphics debug SYSLOG output (disabled by default)
 
+config DEBUG_IRQ
+	bool "Interrupt Controller Debug Output"
+	default n
+	---help---
+		Some (but not all) architectures support debug output to verify
+		interrupt controller logic.  If supported, then option will enable
+		that output.  This may interfere with normal operations!  You
+		should *not* enable interrupt controller debug unless you suspect
+		that here is a problem with that logic.  On some platforms, this
+		option may even cause crashes! Use with care!
+
 config DEBUG_SYSCALL
-	bool "Enable SYSCALL Debug Output"
+	bool "SYSCALL Debug Output"
 	default n
 	depends on NUTTX_KERNEL
 	---help---
@@ -394,7 +405,7 @@ config DEBUG_SYSCALL
 comment "Driver Debug Options"
 
 config DEBUG_LCD
-	bool "Enable Low-level LCD Debug Output"
+	bool "Low-level LCD Debug Output"
 	default n
 	depends on LCD
 	---help---
@@ -403,7 +414,7 @@ config DEBUG_LCD
 		may not be available for some boards.
 
 config DEBUG_LEDS
-	bool "Enable Low-level LED Debug Output"
+	bool "Low-level LED Debug Output"
 	default n
 	depends on ARCH_HAVE_LEDS
 	---help---
@@ -412,7 +423,7 @@ config DEBUG_LEDS
 		some boards.
 
 config DEBUG_INPUT
-	bool "Enable Input Device Debug Output"
+	bool "Input Device Debug Output"
 	default n
 	depends on INPUT
 	---help---
@@ -422,7 +433,7 @@ config DEBUG_INPUT
 		some boards.
 
 config DEBUG_ANALOG
-	bool "Enable Analog Device Debug Output"
+	bool "Analog Device Debug Output"
 	default n
 	---help---
 		Enable low level debug SYSLOG output from the analog device drivers
@@ -431,7 +442,7 @@ config DEBUG_ANALOG
 		for some MCUs.
 
 config DEBUG_I2C
-	bool "Enable I2C Debug Output"
+	bool "I2C Debug Output"
 	default n
 	depends on I2C
 	---help---
@@ -440,7 +451,7 @@ config DEBUG_I2C
 		be available for some MCUs.
 
 config DEBUG_SPI
-	bool "Enable SPI Debug Output"
+	bool "SPI Debug Output"
 	default n
 	depends on SPI
 	---help---
@@ -449,7 +460,7 @@ config DEBUG_SPI
 		be available for some MCUs.
 
 config DEBUG_CAN
-	bool "Enable CAN Debug Output"
+	bool "CAN Debug Output"
 	default n
 	depends on CAN
 	---help---
@@ -458,7 +469,7 @@ config DEBUG_CAN
 		be available for some MCUs.
 
 config DEBUG_SDIO
-	bool "Enable SDIO Debug Output"
+	bool "SDIO Debug Output"
 	default n
 	depends on MMCSD_SDIO
 	---help---
@@ -467,7 +478,7 @@ config DEBUG_SDIO
 		be available for some MCUs.
 
 config DEBUG_GPIO
-	bool "Enable GPIO Debug Output"
+	bool "GPIO Debug Output"
 	default n
 	---help---
 		Enable GPIO-releated debug SYSLOG output (disabled by default).
@@ -475,7 +486,7 @@ config DEBUG_GPIO
 		be available for some MCUs.
 
 config DEBUG_DMA
-	bool "Enable DMA Debug Output"
+	bool "DMA Debug Output"
 	default n
 	depends on ARCH_DMA
 	---help---
@@ -484,7 +495,7 @@ config DEBUG_DMA
 		be available for some MCUs.
 
 config DEBUG_WATCHDOG
-	bool "Enable Watchdog Timer Debug Output"
+	bool "Watchdog Timer Debug Output"
 	default n
 	depends on WATCHDOG
 	---help---
@@ -493,7 +504,7 @@ config DEBUG_WATCHDOG
 		be available for some MCUs.
 
 config DEBUG_AUDIO
-	bool "Enable Audio Device Debug Output"
+	bool "Audio Device Debug Output"
 	default n
 	---help---
 		Enable low level debug SYSLOG output from the audio subsystem and
@@ -503,7 +514,7 @@ config DEBUG_AUDIO
 endif
 
 config DEBUG_SYMBOLS
-	bool "Enable Debug Symbols"
+	bool "Generate Debug Symbols"
 	default n
 	---help---
 		Build without optimization and with debug symbols (needed
