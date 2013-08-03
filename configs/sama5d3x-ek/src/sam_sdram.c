@@ -162,14 +162,14 @@ void sam_sdram_config(void)
   /* Enable DDR clocking */
 
   regval  = getreg32(SAM_PMC_SCER);
-  regval |= SAM_PMC_SCER;
+  regval |= PMC_DDRCK;
   putreg32(regval, SAM_PMC_SCER);
 
   /* Clear the low power register */
 
   putreg32(0, SAM_MPDDRC_LPR);
 
-  /* Enabled autofresh during calibration (undocumented) */
+  /* Enable autofresh during calibration (undocumented) */
 
   regval  = getreg32(SAM_MPDDRC_HS);
   regval |= MPDDRC_HS_AUTOREFRESH_CAL;
@@ -194,7 +194,7 @@ void sam_sdram_config(void)
   regval = MPDDRC_DLL_MOR_MOFF(7) |       /* DLL Master Delay Line Offset */
            MPDDRC_DLL_MOR_CLK90OFF(31) |  /* DLL CLK90 Delay Line Offset */
            MPDDRC_DLL_MOR_SELOFF |        /* DLL Offset Selection */
-           MPDDRC_DLL_MOR_KEY |           /* Undocumented key */
+           MPDDRC_DLL_MOR_KEY;            /* Undocumented key */
   putreg32(regval, SAM_MPDDRC_DLL_MOR);
 
   /* Configure the I/O calibration register */
@@ -320,12 +320,12 @@ void sam_sdram_config(void)
                                      *   min 18ns */
            MPDDRC_TPR2_TRTP(2) |    /* Four Active Windows:
                                      *   2 * 7.5 = 15 ns (min 7.5ns) */
-           MPDDRC_TPR2_TFAW(10) ;
+           MPDDRC_TPR2_TFAW(10);
   putreg32(regval, SAM_MPDDRC_TPR2);
 
   /* DDRSDRC Low-power Register */
 
-  sam_sdram_delay(13200);
+  sam_sdram_delay(13300);
 
   regval = MPDDRC_LPR_LPCB_DISABLED |  /* Low-power Feature is inhibited */
            MPDDRC_LPR_TIMEOUT_0CLKS |  /* Activates low-power mode after the end of transfer */
@@ -345,7 +345,14 @@ void sam_sdram_config(void)
 
   *ddr = 0;
 
-  /* Now clocks which drive DDR2-SDRAM device are enabled.*/
+  /* Now clocks which drive DDR2-SDRAM device are enabled.
+   *
+   * A minimum pause of 200 usec is provided to precede any signal toggle.
+   * (6 core cycles per iteration, core is at 396MHz: min 13200 loops)
+   */
+
+  sam_sdram_delay(13300);
+
   /* Step 4:  An NOP command is issued to the DDR2-SDRAM */
 
   putreg32(MPDDRC_MR_MODE_NOP, SAM_MPDDRC_MR);
@@ -379,7 +386,7 @@ void sam_sdram_config(void)
    */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((uint8_t *)(ddr + DDR2_BA1)) = 0;
+  *((volatile uint8_t *)(ddr + DDR2_BA1)) = 0;
 
   /* Wait 2 cycles min */
 
@@ -392,20 +399,20 @@ void sam_sdram_config(void)
    * set to 1.
    */
 
-  putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((uint8_t *)(ddr + DDR2_BA1 + DDR2_BA0)) = 0;
+  putreg32(MPDDRC_MR_MODE_LMR, SAM_MPDDRC_MR);
+  *((volatile uint8_t *)(ddr + DDR2_BA1 + DDR2_BA0)) = 0;
 
   /* Wait 2 cycles min */
 
   sam_sdram_delay(100);
 
-   /* Step 8:  An Extended Mode Register set (EMRS1) cycle is issued to enable DLL.
-    *
-    * The write address must be chosen so that BA[1] is set to 0 and BA[0] is set to 1.
-    */
+  /* Step 8:  An Extended Mode Register set (EMRS1) cycle is issued to enable DLL.
+   *
+   * The write address must be chosen so that BA[1] is set to 0 and BA[0] is set to 1.
+   */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((uint8_t *)(ddr + DDR2_BA0)) = 0;
+  *((volatile uint8_t *)(ddr + DDR2_BA0)) = 0;
 
   /* An additional 200 cycles of clock are required for locking DLL */
 
@@ -505,7 +512,7 @@ void sam_sdram_config(void)
    */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((uint8_t *)(ddr + DDR2_BA0)) = 0;
+  *((volatile uint8_t *)(ddr + DDR2_BA0)) = 0;
 
   /* Wait 2 cycles min */
 
@@ -529,7 +536,7 @@ void sam_sdram_config(void)
    */
 
   putreg32(MPDDRC_MR_MODE_EXTLMR, SAM_MPDDRC_MR);
-  *((uint8_t *)(ddr + DDR2_BA0)) = 0;
+  *((volatile uint8_t *)(ddr + DDR2_BA0)) = 0;
 
   /* Wait 2 cycles min */
 

@@ -353,8 +353,8 @@
 #  define MPDDRC_DLL_MOR_CLK90OFF(n)    ((n) << MPDDRC_DLL_MOR_CLK90OFF_SHIFT)
 #define MPDDRC_DLL_MOR_SELOFF           (1 << 16) /* Bit 16: DLL Offset Selection */
 #define MPDDRC_DLL_MOR_KEY_SHIFT        (24)      /* Bits 24-31: DLL CLK90 Delay Line Offset (REVISIT) */
-#define MPDDRC_DLL_MOR_KEY_MASK         (0xff << MPDDRC_DLL_MOR_CLK90OFF_SHIFT)
-#  define MPDDRC_DLL_MOR_KEY            (0xc5 << MPDDRC_DLL_MOR_CLK90OFF_SHIFT)
+#define MPDDRC_DLL_MOR_KEY_MASK         (0xff << MPDDRC_DLL_MOR_KEY_SHIFT)
+#  define MPDDRC_DLL_MOR_KEY            (0xc5 << MPDDRC_DLL_MOR_KEY_SHIFT)
 
 /* MPDDRC DLL Slave Offset Register */
 

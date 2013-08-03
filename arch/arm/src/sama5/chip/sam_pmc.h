@@ -128,7 +128,7 @@
  * Clock Status Register common bit-field definitions
  */
 
-#define PMC_PCK                        (1 << 2)  /* Bit 2:  Processor Clock */
+#define PMC_PCK                        (1 << 0)  /* Bit 0:  Processor Clock */
 #define PMC_DDRCK                      (1 << 2)  /* Bit 2:  DDR Clock */
 #define PMC_LCDCK                      (1 << 3)  /* Bit 3:  LCD2x Clock */
 #define PMC_SMDCK                      (1 << 4)  /* Bit 4:  SMD Clock */
