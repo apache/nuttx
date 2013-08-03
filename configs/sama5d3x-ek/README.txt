@@ -846,7 +846,10 @@ Configurations
     5. SDRAM support can be enabled by adding the following to your NuttX
        configuration file:
 
+       System Type->ATSAMA5 Peripheral Support
        CONFIG_SAMA5_MPDDRC=y                   : Enable the DDR controller
+
+       System Type->External Memory Configuration
        CONFIG_SAMA5_DDRCS=y                    : Tell the system that DRAM is at the DDR CS
        CONFIG_SAMA5_DDRCS_SIZE=268435456       : 2Gb DRAM -> 256GB
        CONFIG_SAMA5_DDRCS_LPDDR2=y             : Its DDR2
@@ -855,7 +858,10 @@ Configurations
        Now that you have SDRAM enabled, what are you going to do with it?  One
        thing you can is add it to the heap
 
+       System Type->Heap Configuration
        CONFIG_SAMA5_DDRCS_HEAP=y               : Add the SDRAM to the heap
+
+       Memory Management
        CONFIG_MM_REGIONS=2                     : Two memory regions:  ISRAM and SDRAM
 
        Another thing you could do is to enable the RAM test built-in
@@ -865,8 +871,16 @@ Configurations
        external SDAM.  To do this, keep the SDRAM out of the heap so that
        it can be tested without crashing programs using the memory:
 
+       System Type->Heap Configuration
        CONFIG_SAMA5_DDRCS_HEAP=n               : Don't add the SDRAM to the heap
+
+       Memory Management
        CONFIG_MM_REGIONS=1                     : One memory regions:  ISRAM
+
+       Then enable the RAM test built-in application:
+
+       Application Configuration->System NSH Add-Ons->Ram Test
+       CONFIG_SYSTEM_RAMTEST=y
 
        In this configuration, the SDRAM is not added to heap and so is not
        excessible to the applications.  So the RAM test can be freely
@@ -885,13 +899,13 @@ Configurations
 
        To test the entire external 256MB SRAM:
 
-       nsh> ramtest 20000000 268435456
-       RAMTest: Marching ones: 60000000 268435456
-       RAMTest: Marching zeroes: 60000000 268435456
-       RAMTest: Pattern test: 60000000 268435456 55555555 aaaaaaaa
-       RAMTest: Pattern test: 60000000 268435456 66666666 99999999
-       RAMTest: Pattern test: 60000000 268435456 33333333 cccccccc
-       RAMTest: Address-in-address test: 60000000 268435456
+       nsh> ramtest -w 20000000 268435456
+       RAMTest: Marching ones: 20000000 268435456
+       RAMTest: Marching zeroes: 20000000 268435456
+       RAMTest: Pattern test: 20000000 268435456 55555555 aaaaaaaa
+       RAMTest: Pattern test: 20000000 268435456 66666666 99999999
+       RAMTest: Pattern test: 20000000 268435456 33333333 cccccccc
+       RAMTest: Address-in-address test: 20000000 268435456
 
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
@@ -914,7 +928,11 @@ Configurations
         configuration needs to be recalibrated.
 
       2013-8-31:  SDRAM configuration and RAM test usage are documented,
-        but untested.
+        but only partially functional.  SDRAM is accessible but many regions
+        on the SDRAM fail the RAM test.  Most likely there is some error in
+        the SDRAM timing configuration.  I am also seeing occasional crashes
+        involving unexpected interrupts and the UART when running the RAM
+        test.  Not sure what to make of that yet
 
   ostest:
     This configuration directory, performs a simple OS test using
