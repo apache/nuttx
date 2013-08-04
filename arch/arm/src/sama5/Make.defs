@@ -93,3 +93,13 @@ CHIP_CSRCS  = sam_allocateheap.c sam_boot.c sam_clockconfig.c sam_gpio.c
 CHIP_CSRCS += sam_irq.c sam_lowputc.c sam_serial.c sam_timerisr.c
 
 # Configuration dependent C and assembly language files
+
+ifeq ($(CONFIG_SAMA5_DMAC0),y)
+CHIP_CSRCS += sam_dmac.c
+else
+ifeq ($(CONFIG_SAMA5_DMAC1),y)
+CHIP_CSRCS += sam_dmac.c
+else
+endif
+endif
+

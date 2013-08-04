@@ -95,18 +95,26 @@
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
 #  define SAM_ISRAM1_SIZE (64*1024)
+#  define SAM_NDMAC        2         /* (2) DMA controllers */
+#  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D33)
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
 #  define SAM_ISRAM1_SIZE (64*1024)
+#  define SAM_NDMAC        2         /* (2) DMA controllers */
+#  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D34)
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
 #  define SAM_ISRAM1_SIZE (64*1024)
+#  define SAM_NDMAC        2         /* (2) DMA controllers */
+#  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
 #elif defined(CONFIG_ARCH_CHIP_ATSAMA5D35)
 #  define ATSAMA5D3        1         /* SAMA5D3 family */
 #  define SAM_ISRAM0_SIZE (64*1024)  /* 128KB of SRAM in two banks */
 #  define SAM_ISRAM1_SIZE (64*1024)
+#  define SAM_NDMAC        2         /* (2) DMA controllers */
+#  define SAM_NDMACHAN     8         /* (8) DMA channels per DMA controller */
 #else
 #  error Unrecognized SAMAD5 chip
 #endif
