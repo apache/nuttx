@@ -5282,4 +5282,6 @@
 	* arch/arm/src/sama5/sam_spi.c, sam_spi.h, and chip/sam_spi.h:
 	  Leverage SPI support from SAM/3/4.  Initial check-inis untested
 	  and have several limitations:  No DMA, no SPI1 support (2013-8-4).
+	* arch/arm/src/sama5/sam_spi.c and sam_spi.h:  Now supports SPI1
+	  (2013-8-4).
 

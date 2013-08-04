@@ -115,7 +115,7 @@
 
 struct sam_dmach_s
 {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
   uint8_t dmac;                   /* DMA controller number (0-1) */
 #endif
   uint8_t chan;                   /* DMA channel number (0-6) */
@@ -189,7 +189,7 @@ static struct sam_dmach_s g_dmach0[SAM_NDMACHAN] =
 {
 #if SAM_NDMACHAN > 0
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 0,
 #endif
     .chan     = 0,
@@ -198,7 +198,7 @@ static struct sam_dmach_s g_dmach0[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 1
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 0,
 #endif
     .chan     = 1,
@@ -207,7 +207,7 @@ static struct sam_dmach_s g_dmach0[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 2
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 0,
 #endif
     .chan     = 2,
@@ -216,7 +216,7 @@ static struct sam_dmach_s g_dmach0[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 3
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 0,
 #endif
     .chan     = 3,
@@ -225,7 +225,7 @@ static struct sam_dmach_s g_dmach0[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 4
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 0,
 #endif
     .chan     = 4,
@@ -234,7 +234,7 @@ static struct sam_dmach_s g_dmach0[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 5
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 0,
 #endif
     .chan     = 5,
@@ -243,7 +243,7 @@ static struct sam_dmach_s g_dmach0[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 6
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 0,
 #endif
     .chan     = 6,
@@ -252,7 +252,7 @@ static struct sam_dmach_s g_dmach0[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 7
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 0,
 #endif
     .chan     = 7,
@@ -291,7 +291,7 @@ static struct sam_dmach_s g_dmach1[SAM_NDMACHAN] =
 {
 #if SAM_NDMACHAN > 0
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 1,
 #endif
     .chan     = 0,
@@ -300,7 +300,7 @@ static struct sam_dmach_s g_dmach1[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 1
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 1,
 #endif
     .chan     = 1,
@@ -309,7 +309,7 @@ static struct sam_dmach_s g_dmach1[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 2
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 1,
 #endif
     .chan     = 2,
@@ -318,7 +318,7 @@ static struct sam_dmach_s g_dmach1[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 3
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 1,
 #endif
     .chan     = 3,
@@ -327,7 +327,7 @@ static struct sam_dmach_s g_dmach1[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 4
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 1,
 #endif
     .chan     = 4,
@@ -336,7 +336,7 @@ static struct sam_dmach_s g_dmach1[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 5
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 1,
 #endif
     .chan     = 5,
@@ -345,7 +345,7 @@ static struct sam_dmach_s g_dmach1[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 6
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 1,
 #endif
     .chan     = 6,
@@ -354,7 +354,7 @@ static struct sam_dmach_s g_dmach1[SAM_NDMACHAN] =
 #endif
 #if SAM_NDMACHAN > 7
   {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
     .dmac     = 1,
 #endif
     .chan     = 7,
@@ -500,14 +500,14 @@ static inline void sam_putdmach(struct sam_dmach_s *dmach, uint32_t value,
  * Name: sam_controller
  *
  * Description:
- *    Given a DMA channel instrance, return a pointer to the parent DMA
+ *    Given a DMA channel instance, return a pointer to the parent DMA
  *    controller instance.
  *
  ****************************************************************************/
 
 static inline struct sam_dmac_s *sam_controller(struct sam_dmach_s *dmach)
 {
-#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
   return dmach->dmac ? &g_dmac1 : &g_dmac0;
 #elif defined(CONFIG_SAMA5_DMAC0)
   return &g_dmac0;
