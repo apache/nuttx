@@ -85,7 +85,11 @@
 #endif
 
 #ifdef CONFIG_SAM34_SPI1
-#  error Support for SPI1 has not yet been implemented
+  /* NOTE: See arch/arm/sama5/sam_spi.c.  That is the same SPI IP and that
+   * version on the driver has been extended to support both SPI0 and SPI1
+   */
+
+#  error Support for SPI1 has not yet been implemented (see NOTE)
 #endif
 
 /* Debug *******************************************************************/
