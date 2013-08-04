@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/sam3u-ek/src/up_spi.c
+ * configs/sama5d3x-ek/src/up_spi.c
  *
- *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,9 +51,9 @@
 #include "chip.h"
 #include "sam_gpio.h"
 #include "sam_spi.h"
-#include "sam3u-ek.h"
+#include "sama5d3x-ek.h"
 
-#ifdef CONFIG_SAM34_SPI0
+#if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
 
 /************************************************************************************
  * Definitions
@@ -89,32 +89,33 @@
  * Name: sam_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the SAM3U-EK board.
+ *   Called to configure SPI chip select GPIO pins for the SAMA5D3x-EK board.
  *
  ************************************************************************************/
 
 void weak_function sam_spiinitialize(void)
 {
-  /* The ZigBee module connects used NPCS0.  However, there is not yet any
-   * ZigBee support.
-   */
+#ifdef CONFIG_SAMA5_SPI0
+#ifdef CONFIG_MTD_AT25
+  /* The AT25 serial FLASH connects using NPCS0 */
 
-   /* The touchscreen connects using NPCS2 (PC14). */
+   sam_configgpio(GPIO_AT25_NPCS0);
+#endif
+#endif
 
-#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-   sam_configgpio(GPIO_TSC_NPCS2);
+#ifdef CONFIG_SAMA5_SPI1
 #endif
 }
 
 /****************************************************************************
- * Name:  sam_spiselect, sam_spistatus, and sam_spicmddata
+ * Name:  sam_spi[0|1]select, sam_spi[0|1]status, and sam_spi[0|1]cmddata
  *
  * Description:
  *   These external functions must be provided by board-specific logic.  They
  *   include:
  *
- *   o sam_spiselect is a functions tomanage the board-specific chip selects
- *   o sam_spistatus and sam_spicmddata:  Implementations of the status
+ *   o sam_spi[0|1]select is a functions tomanage the board-specific chip selects
+ *   o sam_spi[0|1]status and sam_spi[0|1]cmddata:  Implementations of the status
  *     and cmddata methods of the SPI interface defined by struct spi_ops_
  *     (see include/nuttx/spi/spi.h). All other methods including
  *     up_spiinitialize()) are provided by common SAM3/4 logic.
@@ -123,11 +124,11 @@ void weak_function sam_spiinitialize(void)
  *
  *   1. Provide logic in sam_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide sam_spiselect() and sam_spistatus() functions in your board-
+ *   2. Provide sam_spi[0|1]select() and sam_spi[0|1]status() functions in your board-
  *      specific logic.  These functions will perform chip selection and
  *      status operations using GPIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
- *      sam_spicmddata() functions in your board-specific logic.  This
+ *      sam_spi[0|1]cmddata() functions in your board-specific logic.  This
  *      function will perform cmd/data selection operations using GPIOs in
  *      the way your board is configured.
  *   3. Add a call to up_spiinitialize() in your low level application
@@ -140,7 +141,7 @@ void weak_function sam_spiinitialize(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_spiselect
+ * Name: sam_spi[0|1]select
  *
  * Description:
  *   PIO chip select pins may be programmed by the board specific logic in
@@ -164,26 +165,28 @@ void weak_function sam_spiinitialize(void)
  *
  ****************************************************************************/
 
-void sam_spiselect(enum spi_dev_e devid, bool selected)
+#ifdef CONFIG_SAMA5_SPI0
+void sam_spi0select(enum spi_dev_e devid, bool selected)
 {
-  /* The touchscreen chip select is implemented as a GPIO OUTPUT that must
-   * be controlled by this function.  This is because the ADS7843E driver
-   * must be able to sample the device BUSY GPIO input between SPI transfers.
-   * However, the AD7843E will tri-state the BUSY input whenever the chip
-   * select is de-asserted.  So the only option is to control the chip select
-   * manually and hold it low throughout the SPI transfer.
-   */
+#ifdef CONFIG_MTD_AT25
+  /* The AT25 serial FLASH connects using NPCS0 */
 
-#if defined(CONFIG_INPUT) && defined(CONFIG_INPUT_ADS7843E)
-  if (devid == SPIDEV_TOUCHSCREEN)
+  if (devid == SPIDEV_FLASH)
     {
-      sam_gpiowrite(GPIO_TSC_NPCS2, !selected);
+      sam_gpiowrite(GPIO_AT25_NPCS0, !selected);
     }
 #endif
 }
+#endif
+
+#ifdef CONFIG_SAMA5_SPI1
+void sam_spi1select(enum spi_dev_e devid, bool selected)
+{
+}
+#endif
 
 /****************************************************************************
- * Name: sam_spistatus
+ * Name: sam_spi[0|1]status
  *
  * Description:
  *   Return status information associated with the SPI device.
@@ -196,9 +199,18 @@ void sam_spiselect(enum spi_dev_e devid, bool selected)
  *
  ****************************************************************************/
 
-uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+#ifdef CONFIG_SAMA5_SPI0
+uint8_t sam_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return 0;
 }
+#endif
 
-#endif /* CONFIG_SAM34_SPI0 */
+#ifdef CONFIG_SAMA5_SPI0
+uint8_t sam_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  return 0;
+}
+#endif
+
+#endif /* CONFIG_SAMA5_SPI0 || CONFIG_SAMA5_SPI1 */

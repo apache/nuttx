@@ -94,6 +94,28 @@
                       GPIO_INT_BOTHEDGES | GPIO_PORT_PIOE | GPIO_PIN27)
 #define IRQ_USER1    SAM_IRQ_PE27
 
+/* SPI Chip Selects *****************************************************************/
+/* Both the Ronetix and Embest versions of the SAMAD3x CPU modules include an
+ * Atmel AT25DF321A, 32-megabit, 2.7-volt SPI serial flash.  The SPI
+ * connection is as follows:
+ *
+ *   AT25DF321A      SAMA5
+ *   --------------- -----------------------------------------------
+ *   SI              PD11 SPI0_MOSI
+ *   SO              PD10 SPI0_MIS0
+ *   SCK             PD12 SPI0_SPCK
+ *   /CS             PD13 via NL17SZ126 if JP1 is closed (See below)
+ *
+ * JP1 and JP2 seem to related to /CS on the Ronetix board, but the usage is
+ * less clear.  For the Embest module, JP1 must be closed to connect /CS to
+ * PD13; on the Ronetix schematic, JP11 seems only to bypass a resistor (may
+ * not be populated?).  I think closing JP1 is correct in either case.
+ */
+
+#define GPIO_AT25_NPCS0 (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
+                         GPIO_PORT_PIOD | GPIO_PIN13)
+#define AT25_CSNUM      0
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -107,6 +129,18 @@
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: sam_spiinitialize
+ *
+ * Description:
+ *   Called to configure SPI chip select PIO pins for the SAMA4D3x-EK board.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
+void weak_function sam_spiinitialize(void);
+#endif
 
 /************************************************************************************
  * Name: board_sdram_config

@@ -62,7 +62,6 @@ README
 Contents
 ========
 
-  - PIO Muliplexing
   - Development Environment
   - GNU Toolchain Options
   - IDEs
@@ -74,13 +73,9 @@ Contents
   - Creating and Using NORBOOT
   - Buttons and LEDs
   - Serial Consoles
+  - Serial FLASH
   - SAMA5D3x-EK Configuration Options
   - Configurations
-
-PIO Muliplexing
-===============
-
-  To be provided
 
 Development Environment
 =======================
@@ -513,6 +508,25 @@ Serial Consoles
     - Jumper JP16 not fitted: CDC is enabled
     - Jumper JP16 fitted : CDC is disabled"
 
+Serial FLASH
+============
+
+  Both the Ronetix and Embest versions of the SAMAD3x CPU modules include an
+  Atmel AT25DF321A, 32-megabit, 2.7-volt SPI serial flash.  The SPI
+  connection is as follows:
+
+    AT25DF321A      SAMA5
+    --------------- -----------------------------------------------
+    SI              PD11 SPI0_MOSI
+    SO              PD10 SPI0_MIS0
+    SCK             PD12 SPI0_SPCK
+    /CS             PD13 via NL17SZ126 if JP1 is closed (See below)
+
+  JP1 and JP2 seem to related to /CS on the Ronetix board, but the usage is
+  less clear.  For the Embest module, JP1 must be closed to connect /CS to
+  PD13; on the Ronetix schematic, JP11 seems only to bypass a resistor (may
+  not be populated?).  I think closing JP1 is correct in either case.
+
 SAMA5D3x-EK Configuration Options
 =================================
 
@@ -914,6 +928,24 @@ Configurations
 
         If the CPU speed changes, then so must the NOR and SDRAM
         initialization!
+
+    7. The Embest or Ronetix CPU module includes an Atmel AT25DF321A,
+       32-megabit, 2.7-volt SPI serial flash.  Support for that serial
+       FLASH can be enabled by modifying the NuttX configuration as
+       follows:
+
+       System Type -> SAMA5 Peripheral Support
+         CONFIG_SAMA5_SPI0=y                   : Enable SPI0
+
+       Device Drivers -> Memory Technology Device (MTD) Support
+         CONFIG_SPI=y                          : Enable SPI support
+         CONFIG_SPI_EXCHANGE=y                 : Support the exchange method
+
+       Device Drivers -> SPI Driver Support
+         CONFIG_MTD=y                          : Enable MTD support
+         CONFIG_MTD_AT25=y                     : Enable the AT25 driver
+         CONFIG_AT25_SPIMODE=0                 : Use SPI mode 0
+         CONFIG_AT25_SPIFREQUENCY=20000000     : Use SPI frequency 20MHz
 
       2013-7-31:  I have been unable to execute this configuration from NOR
         FLASH by closing the BMS jumper (J9).  As far as I can tell, this

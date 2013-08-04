@@ -86,6 +86,31 @@ config AT24XX_ADDR
 
 endif
 
+config MTD_AT25
+	bool "SPI-based AT25 FLASH"
+	default n
+	select SPI
+
+if MTD_AT25
+
+config AT25_SPIMODE
+	int "AT25 SPI Mode"
+	default 0
+
+config AT25_SPIFREQUENCY
+	int "AT25 SPI Frequency"
+	default 20000000
+
+config AT25_READONLY
+	bool "AT25 Read-Only FLASH"
+	default n
+
+config AT25_SECTOR512
+	bool "Simulate 512 byte Erase Blocks"
+	default n
+
+endif
+
 config MTD_AT45DB
 	bool "SPI-based AT45DB flash"
 	default n
@@ -94,15 +119,15 @@ config MTD_AT45DB
 if MTD_AT45DB
 
 config AT45DB_FREQUENCY
-	int "at45db frequency"
+	int "AT45DB frequency"
 	default 1000000
 
 config AT45DB_PREWAIT
-	bool "enables higher performance write logic"
+	bool "Enable higher performance write logic"
 	default y
 
 config AT45DB_PWRSAVE
-	bool "enables power save"
+	bool "Enable power save"
 	default n
 
 endif
@@ -147,7 +172,7 @@ endif
 
 config MTD_SMART
 	bool "Sector Mapped Allocation for Really Tiny (SMART) Flash support"
-	default y
+	default n
 	---help---
 		The MP25x series of Flash devices are typically very small and have a very large
 		erase block size.  This causes issues with the standard Flash Translation Layer
