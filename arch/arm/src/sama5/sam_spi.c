@@ -88,6 +88,7 @@
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_VERBOSE
 #  undef CONFIG_DEBUG_SPI
+#  undef CONFIG_SAMA5_SPI_REGDEBUG
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
@@ -136,6 +137,15 @@ struct sam_spidev_s
   bool initialized;            /* TRUE: Controller has been initialized */
   const uint32_t *csraddr;     /* Addresses of CSR register */
   select_t select;             /* SPI select callout */
+
+  /* Debug stuff */
+
+#ifdef CONFIG_SAMA5_SPI_REGDEBUG
+   bool     wrlast;            /* Last was a write */
+   uint32_t addresslast;       /* Last address */
+   uint32_t valuelast;         /* Last value */
+   int      ntimes;            /* Number of times */
+#endif
 };
 
 /****************************************************************************
@@ -144,10 +154,23 @@ struct sam_spidev_s
 
 /* Helpers */
 
-#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
-static void spi_dumpregs(struct sam_spidev_s *spi, const char *msg);
+#ifdef CONFIG_SAMA5_SPI_REGDEBUG
+static bool     spi_checkreg(struct sam_spidev_s *spi, bool wr,
+                  uint32_t value, uint32_t address);
 #else
-# define spi_dumpregs(spi,msg)
+# define        spi_checkreg(spi,wr,value,address) (false)
+#endif
+
+static inline uint32_t spi_getreg(struct sam_spidev_s *spi,
+                  unsigned int offset);
+static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
+                  unsigned int offset);
+static inline struct sam_spidev_s *spi_device(struct sam_spics_s *spics);
+
+#if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
+static void     spi_dumpregs(struct sam_spidev_s *spi, const char *msg);
+#else
+# define        spi_dumpregs(spi,msg)
 #endif
 
 static inline void spi_flush(struct sam_spidev_s *spi);
@@ -272,6 +295,60 @@ static struct sam_spidev_s g_spi1dev =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: spi_checkreg
+ *
+ * Description:
+ *   Check if the current register access is a duplicate of the preceding.
+ *
+ * Input Parameters:
+ *   value   - The value to be written
+ *   address - The address of the register to write to
+ *
+ * Returned Value:
+ *   true:  This is the first register access of this type.
+ *   flase: This is the same as the preceding register access.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_SPI_REGDEBUG
+static bool spi_checkreg(struct sam_spidev_s *spi, bool wr, uint32_t value,
+                         uint32_t address)
+{
+  if (wr      == spi->wrlast &&     /* Same kind of access? */
+      value   == spi->valuelast &&  /* Same value? */
+      address == spi->addresslast)  /* Same address? */
+    {
+      /* Yes, then just keep a count of the number of times we did this. */
+
+      spi->ntimes++;
+      return false;
+    }
+  else
+    {
+      /* Did we do the previous operation more than once? */
+
+      if (spi->ntimes > 0)
+        {
+          /* Yes... show how many times we did it */
+
+          lldbg("...[Repeats %d times]...\n", spi->ntimes);
+        }
+
+      /* Save information about the new access */
+
+      spi->wrlast      = wr;
+      spi->valuelast   = value;
+      spi->addresslast = address;
+      spi->ntimes      = 0;
+    }
+
+  /* Return true if this is the first time that we have done this operation */
+
+  return true;
+}
+#endif
+
+/****************************************************************************
  * Name: spi_getreg
  *
  * Description:
@@ -282,7 +359,17 @@ static struct sam_spidev_s g_spi1dev =
 static inline uint32_t spi_getreg(struct sam_spidev_s *spi,
                                   unsigned int offset)
 {
-  return getreg32(spi->base + offset);
+  uint32_t address = spi->base + offset;
+  uint32_t value = getreg32(address);
+
+#ifdef CONFIG_SAMA5_SPI_REGDEBUG
+  if (spi_checkreg(spi, false, value, address))
+    {
+      lldbg("%08x->%08x\n", address, value);
+    }
+#endif
+
+  return value;
 }
 
 /****************************************************************************
@@ -296,7 +383,16 @@ static inline uint32_t spi_getreg(struct sam_spidev_s *spi,
 static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
                               unsigned int offset)
 {
-  spi_putreg(spi, value, spi->base + offset);
+  uint32_t address = spi->base + offset;
+
+#ifdef CONFIG_SAMA5_SPI_REGDEBUG
+  if (spi_checkreg(spi, true, value, address))
+    {
+      lldbg("%08x<-%08x\n", address, value);
+    }
+#endif
+
+  spi_putreg(spi, value, address);
 }
 
 /****************************************************************************
