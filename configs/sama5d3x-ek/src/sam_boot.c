@@ -67,6 +67,17 @@
 
 void sam_boardinitialize(void)
 {
+  /* Configure SPI chip selects if 1) SPI is enable, and 2) the weak function
+   * sam_spiinitialize() has been brought into the link.
+   */
+
+#if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
+  if (sam_spiinitialize)
+    {
+      sam_spiinitialize();
+    }
+#endif
+
 #if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
 
   /* Configure SDRAM if (1) SDRAM has been enalbled in the NuttX configuration and

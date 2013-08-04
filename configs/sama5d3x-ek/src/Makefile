@@ -46,6 +46,14 @@ ifeq ($(CONFIG_HAVE_CXX),y)
 CSRCS += sam_cxxinitialize.c
 endif
 
+ifeq ($(CONFIG_SAMA5_SPI0),y)
+CSRCS += sam_spi.c
+else
+ifeq ($(CONFIG_SAMA5_SPI1),y)
+CSRCS += sam_spi.c
+endif
+endif
+
 ifeq ($(CONFIG_SAMA5_DDRCS),y)
 CSRCS += sam_sdram.c
 endif
