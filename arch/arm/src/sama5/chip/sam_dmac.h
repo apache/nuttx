@@ -88,8 +88,8 @@
 #define SAM_DMAC_CH_SPIP_OFFSET        0x0018 /* DMAC Channel Source PinP Configuration Register */
 #define SAM_DMAC_CH_DPIP_OFFSET        0x001c /* DMAC Channel Destination PinP Configuration Register */
                                               /* 0x20-0x24: Reserved */
-#define SAM_DMAC_CH_WPMR_OFFSET        0x01e4 /* DMAC Write Protect Mode Register */
-#define SAM_DMAC_CH_WPSR_OFFSET        0x01e8 /* DMAC Write Protect Status Register */
+#define SAM_DMAC_WPMR_OFFSET           0x01e4 /* DMAC Write Protect Mode Register */
+#define SAM_DMAC_WPSR_OFFSET           0x01e8 /* DMAC Write Protect Status Register */
                                               /* 0x01ec-0x1fc: Reserved */
 
 /* DMAC0 register adresses **************************************************************/
@@ -108,8 +108,8 @@
 #define SAM_DMAC0_CHDR                 (SAM_DMAC0_VBASE+SAM_DMAC_CHDR_OFFSET)
 #define SAM_DMAC0_CHSR                 (SAM_DMAC0_VBASE+SAM_DMAC_CHSR_OFFSET)
 
-#define SAM_DMAC0_CH_WPMR              (SAM_DMAC0_VBASE+SAM_DMAC_CH_WPMR_OFFSET)
-#define SAM_DMAC0_CH_WPSR              (SAM_DMAC0_VBASE+SAM_DMAC_CH_WPSR_OFFSET)
+#define SAM_DMAC0_WPMR                 (SAM_DMAC0_VBASE+SAM_DMAC_WPMR_OFFSET)
+#define SAM_DMAC0_WPSR                 (SAM_DMAC0_VBASE+SAM_DMAC_WPSR_OFFSET)
 
 /* DMAC0 channel registers */
 
@@ -220,8 +220,8 @@
 #define SAM_DMAC1_CHDR                 (SAM_DMAC1_VBASE+SAM_DMAC_CHDR_OFFSET)
 #define SAM_DMAC1_CHSR                 (SAM_DMAC1_VBASE+SAM_DMAC_CHSR_OFFSET)
 
-#define SAM_DMAC1_CH_WPMR              (SAM_DMAC1_VBASE+SAM_DMAC_CH_WPMR_OFFSET)
-#define SAM_DMAC1_CH_WPSR              (SAM_DMAC1_VBASE+SAM_DMAC_CH_WPSR_OFFSET)
+#define SAM_DMAC1_WPMR                 (SAM_DMAC1_VBASE+SAM_DMAC_WPMR_OFFSET)
+#define SAM_DMAC1_WPSR                 (SAM_DMAC1_VBASE+SAM_DMAC_WPSR_OFFSET)
 
 /* DMAC1 channel registers */
 
@@ -325,7 +325,7 @@
 #define DMAC_GCFG_ARB_CFG              (1 << 4)  /* Bit 4:  Arbiter Configuration */
 #  define DMAC_GCFG_ARB_FIXED          (0)       /* Bit 4=0: Fixed priority arbiter */
 #  define DMAC_GCFG_ARB_ROUNDROBIN     (1 << 4)  /* Bit 4=1: Round robin arbiter */
-#define DMAC_DICEN                     (1 << 8)  /* Bit 8:  Descriptor Integrity Check
+#define DMAC_DICEN                     (1 << 8)  /* Bit 8:  Descriptor Integrity Check */
 
 /* DMAC Enable Register */
 
@@ -683,6 +683,12 @@
 #define DMAC_CH_CTRLB_DST_PIP          (1 << 12) /* Bit 12: Destination Picture-in-Picture Mode */
 #define DMAC_CH_CTRLB_SRCDSCR          (1 << 16) /* Bit 16: Source buffer descriptor fetch operation disabled */
 #define DMAC_CH_CTRLB_DSTDSCR          (1 << 20) /* Bit 20: Dest buffer descriptor fetch operation disabled */
+#define DMAC_CH_CTRLB_FC_SHIFT         (21)      /* Bits 21-22:  Flow controller  */
+#define DMAC_CH_CTRLB_FC_MASK          (3 << DMAC_CH_CTRLB_FC_SHIFT)
+#  define DMAC_CH_CTRLB_FC_M2M         (0 << DMAC_CH_CTRLB_FC_SHIFT) /* Memory-to-Memory  */
+#  define DMAC_CH_CTRLB_FC_M2P         (1 << DMAC_CH_CTRLB_FC_SHIFT) /* Memory-to-Peripheral */
+#  define DMAC_CH_CTRLB_FC_P2M         (2 << DMAC_CH_CTRLB_FC_SHIFT) /* Peripheral-to-Memory  */
+#  define DMAC_CH_CTRLB_FC_P2P         (3 << DMAC_CH_CTRLB_FC_SHIFT) /* Peripheral-to-Peripheral */
 #define DMAC_CH_CTRLB_SRCINCR_SHIFT    (24)      /* Bits 24-25 */
 #define DMAC_CH_CTRLB_SRCINCR_MASK     (3 << DMAC_CH_CTRLB_SRCINCR_SHIFT)
 #  define DMAC_CH_CTRLB_SRCINCR_INCR   (0 << DMAC_CH_CTRLB_SRCINCR_SHIFT) /* Incrementing address */
@@ -751,6 +757,53 @@
 #define DMAC_WPSR_WPVS                 (1 << 0)  /* Bit 0:  Write Protect Violation Status */
 #define DMAC_WPSR_WPVSRC_SHIFT         (8)       /* Bits 8-23:  Write Protect Violation Source */
 #define DMAC_WPSR_WPVSRC_MASK          (0xffff << DMAC_WPSR_WPVSRC_SHIFT)
+
+/* DMA Channel Definitions **************************************************************/
+/* DMA Controller 0 Channel Definitions */
+
+#define DMAC0_CH_HSMCI0               (0)        /* HSMCI0 Receive/transmit */
+#define DMAC0_CH_SPI0_TX              (1)        /* SPI0 Transmit */
+#define DMAC0_CH_SPI0_RX              (2)        /* SPI0 Receive */
+#define DMAC0_CH_USART0_TX            (3)        /* USART0 Transmit */
+#define DMAC0_CH_USART0_RX            (4)        /* USART0 Receive */
+#define DMAC0_CH_USART1_TX            (5)        /* USART1 Transmit */
+#define DMAC0_CH_USART1_RX            (6)        /* USART1 Receive */
+#define DMAC0_CH_TWI0_TX              (7)        /* TWI0 Transmit */
+#define DMAC0_CH_TWI0_RX              (8)        /* TWI0 Receive */
+#define DMAC0_CH_TWI1_TX              (9)        /* TWI1 Transmit */
+#define DMAC0_CH_TWI1_RX              (10)       /* TWI1 Receive */
+#define DMAC0_CH_UART0_TX             (11)       /* UART0 Transmit */
+#define DMAC0_CH_UART0_RX             (12)       /* UART0 Receive */
+#define DMAC0_CH_SSC0_TX              (13)       /* SSC0 Transmit */
+#define DMAC0_CH_SSC0_RX              (14)       /* SSC0 Receive */
+#define DMAC0_CH_SMD_TX               (15)       /* SMD Transmit */
+#define DMAC0_CH_SMD_RX               (16)       /* SMD Receive */
+
+
+/* DMA Controller 0 Channel Definitions */
+
+#define DMAC1_CH_HSMCI1               (0)        /* HSMCI1 Receive/transmit */
+#define DMAC1_CH_HSMCI2               (1)        /* HSMCI2 Receive/transmit */
+#define DMAC1_CH_ADC_RX               (2)        /* ADC Receive */
+#define DMAC1_CH_SSC1_TX              (3)        /* SSC1 Transmit */
+#define DMAC1_CH_SSC1_RX              (4)        /* SSC1 Receive */
+#define DMAC1_CH_UART1_TX             (5)        /* UART1 Transmit */
+#define DMAC1_CH_UART1_RX             (6)        /* UART1 Receive */
+#define DMAC1_CH_USART2_TX            (7)        /* USART2 Transmit */
+#define DMAC1_CH_USART2_RX            (8)        /* USART2 Receive */
+#define DMAC1_CH_USART3_TX            (9)        /* USART3 Transmit */
+#define DMAC1_CH_USART3_RX            (10)       /* USART3 Receive */
+#define DMAC1_CH_TWI2_TX              (11)       /* TWI2 Transmit */
+#define DMAC1_CH_TWI2_RX              (12)       /* TWI2 Receive */
+#define DMAC1_CH_DBGU_TX              (13)       /* DBGU Transmit */
+#define DMAC1_CH_DBGU_RX              (14)       /* DBGU Receive */
+#define DMAC1_CH_SPI1_TX              (15)       /* SPI1 Transmit */
+#define DMAC1_CH_SPI1_RX              (16)       /* SPI1 Receive */
+#define DMAC1_CH_SHA_TX               (17)       /* SHA Transmit */
+#define DMAC1_CH_AES_TX               (18)       /* AES Transmit */
+#define DMAC1_CH_AES_RX               (19)       /* AES Receive */
+#define DMAC1_CH_TDES_TX              (20)       /* TDES Transmit */
+#define DMAC1_CH_TDES_RX              (21)       /* TDES Receive */
 
 /****************************************************************************************
  * Public Types

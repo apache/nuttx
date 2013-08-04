@@ -132,10 +132,12 @@ config SAMA5_ADC
 config SAMA5_DMAC0
 	bool "DMA Controller 0 (DMAC0)"
 	default n
+	select ARCH_DMA
 
 config SAMA5_DMAC1
 	bool "DMA Controller 1 (DMAC1)"
 	default n
+	select ARCH_DMA
 
 config SAMA5_UHPHS
 	bool "USB Host High Speed (UHPHS)"

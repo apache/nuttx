@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/sam34/sam3u_dmac.c
+ * arch/arm/src/sama5/sam3u_dmac.c
  *
- *   Copyright (C) 2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,11 +53,12 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "os_internal.h"
-#include "chip.h"
 
+#include "chip.h"
 #include "sam_dmac.h"
-#include "chip/sam3u_pmc.h"
-#include "chip/sam3u_dmac.h"
+#include "sam_periphclks.h"
+#include "chip/sam_pmc.h"
+#include "chip/sam_dmac.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -65,33 +66,46 @@
 
 /* Configuration ************************************************************/
 
+/* All of the currently supported SAMA5 chips support two DMA controllers
+ * of 8 DMA Channels each.
+ */
+
+#if SAM_NDMAC < 1
+#  undef CONFIG_SAMA5_DMAC1
+#  undef CONFIG_SAMA5_DMAC0
+#elif SAM_NDMAC < 2
+#  undef CONFIG_SAMA5_DMAC1
+#endif
+
 /* Condition out the whole file unless DMA is selected in the configuration */
 
-#ifdef CONFIG_SAM34_DMA
+#if defined(CONFIG_SAMA5_DMAC0) || defined(CONFIG_SAMA5_DMAC1)
 
-/* If AT90SAM3U support is enabled, then OS DMA support should also be enabled */
+/* If SAMA5 DMA support is enabled, then OS DMA support should also be
+ * enabled
+ */
 
 #ifndef CONFIG_ARCH_DMA
-#  warning "SAM3/4 DMA enabled but CONFIG_ARCH_DMA disabled"
+#  warning "SAMA5 DMA enabled but CONFIG_ARCH_DMA disabled"
 #endif
 
 /* Check the number of link list descriptors to allocate */
 
-#ifndef CONFIG_SAM34_NLLDESC
-#  define CONFIG_SAM34_NLLDESC SAM34_NDMACHAN
+#ifndef CONFIG_SAMA5_NLLDESC
+#  define CONFIG_SAMA5_NLLDESC SAM_NDMACHAN
 #endif
 
-#if CONFIG_SAM34_NLLDESC < SAM34_NDMACHAN
-#  warning "At least SAM34_NDMACHAN descriptors must be allocated"
+#if CONFIG_SAMA5_NLLDESC < SAM_NDMACHAN
+#  warning "At least SAM_NDMACHAN descriptors must be allocated"
 
-#  undef CONFIG_SAM34_NLLDESC
-#  define CONFIG_SAM34_NLLDESC SAM34_NDMACHAN
+#  undef CONFIG_SAMA5_NLLDESC
+#  define CONFIG_SAMA5_NLLDESC SAM_NDMACHAN
 #endif
 
 /* Register values **********************************************************/
 
-#define DMACHAN_CTRLB_BOTHDSCR \
-  (DMACHAN_CTRLB_SRCDSCR | DMACHAN_CTRLB_DSTDSCR)
+#define DMAC_CH_CTRLB_BOTHDSCR \
+  (DMAC_CH_CTRLB_SRCDSCR | DMAC_CH_CTRLB_DSTDSCR)
 
 /****************************************************************************
  * Private Types
@@ -99,92 +113,266 @@
 
 /* This structure descibes one DMA channel */
 
-struct sam_dma_s
+struct sam_dmach_s
 {
-  uint8_t                chan;       /* DMA channel number (0-6) */
-  bool                   inuse;      /* TRUE: The DMA channel is in use */
-  uint32_t               flags;      /* DMA channel flags */
-  uint32_t               base;       /* DMA register channel base address */
-  uint32_t               cfg;        /* Pre-calculated CFG register for transfer */
-  dma_callback_t         callback;   /* Callback invoked when the DMA completes */
-  void                  *arg;        /* Argument passed to callback function */
-  struct dma_linklist_s *llhead;     /* DMA link list head */
-  struct dma_linklist_s *lltail;     /* DMA link list head */
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+  uint8_t dmac;                   /* DMA controller number (0-1) */
+#endif
+  uint8_t chan;                   /* DMA channel number (0-6) */
+  bool inuse;                     /* TRUE: The DMA channel is in use */
+  uint32_t flags;                 /* DMA channel flags */
+  uint32_t base;                  /* DMA register channel base address */
+  uint32_t cfg;                   /* Pre-calculated CFG register for transfer */
+  dma_callback_t callback;        /* Callback invoked when the DMA completes */
+  void *arg;                      /* Argument passed to callback function */
+  struct dma_linklist_s *llhead;  /* DMA link list head */
+  struct dma_linklist_s *lltail;  /* DMA link list head */
+};
+
+/* This structure describes the stae of one DMA controller */
+
+struct sam_dmac_s
+{
+  /* These semaphores protect the DMA channel and descriptor tables */
+
+  sem_t chsem;                       /* Protects channel table */
+  sem_t dsem;                        /* Protects descriptior table */
+  uint32_t base;                     /* DMA register channel base address */
+
+  /* This array describes the available link list descriptors */
+
+  struct dma_linklist_s *desc;
+
+  /* This array describes each DMA channel */
+
+  struct sam_dmach_s *dmach;
 };
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/* These semaphores protect the DMA channel and descriptor tables */
-
-static sem_t g_chsem;
-static sem_t g_dsem;
-
 /* CTRLA field lookups */
 
-static const uint32_t g_srcwidth[3] =
+static const uint32_t g_srcwidth[4] =
 {
-  DMACHAN_CTRLA_SRCWIDTH_BYTE,
-  DMACHAN_CTRLA_SRCWIDTH_HWORD,
-  DMACHAN_CTRLA_SRCWIDTH_WORD
+  DMAC_CH_CTRLA_SRCWIDTH_BYTE,
+  DMAC_CH_CTRLA_SRCWIDTH_HWORD,
+  DMAC_CH_CTRLA_SRCWIDTH_WORD,
+  DMAC_CH_CTRLA_SRCWIDTH_DWORD
 };
 
-static const uint32_t g_destwidth[3] =
+static const uint32_t g_destwidth[4] =
 {
-  DMACHAN_CTRLA_DSTWIDTH_BYTE,
-  DMACHAN_CTRLA_DSTWIDTH_HWORD,
-  DMACHAN_CTRLA_DSTWIDTH_WORD
+  DMAC_CH_CTRLA_DSTWIDTH_BYTE,
+  DMAC_CH_CTRLA_DSTWIDTH_HWORD,
+  DMAC_CH_CTRLA_DSTWIDTH_WORD,
+  DMAC_CH_CTRLA_DSTWIDTH_DWORD
 };
 
 static const uint32_t g_fifocfg[3] =
 {
-  DMACHAN_CFG_FIFOCFG_LARGEST,
-  DMACHAN_CFG_FIFOCFG_HALF,
-  DMACHAN_CFG_FIFOCFG_SINGLE
+  DMAC_CH_CFG_FIFOCFG_ALAP,
+  DMAC_CH_CFG_FIFOCFG_HALF,
+  DMAC_CH_CFG_FIFOCFG_ASAP
 };
+
+#ifdef CONFIG_SAMA5_DMAC0
 
 /* This array describes the available link list descriptors */
 
-static struct dma_linklist_s g_linklist[CONFIG_SAM34_NLLDESC];
+struct dma_linklist_s g_desc0[CONFIG_SAMA5_NLLDESC];
 
-/* This array describes the state of each DMA */
+/* This array describes the state of each DMAC0 channel 0 */
 
-static struct sam_dma_s g_dma[SAM34_NDMACHAN] =
+static struct sam_dmach_s g_dmach0[SAM_NDMACHAN] =
 {
-#ifdef CONFIG_ARCH_CHIP_ATSAM3U4E
-  /* the AT91SAM3U4E has four DMA channels.  The FIFOs for channels 0-2 are
-   * 8 bytes in size; channel 3 is 32 bytes.
-   */
-
-#if SAM34_NDMACHAN != 4
-#  error "Logic here assumes SAM34_NDMACHAN is 4"
+#if SAM_NDMACHAN > 0
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 0,
 #endif
-
-  {
     .chan     = 0,
-    .flags    = DMACH_FLAG_FIFO_8BYTES,
-    .base     = SAM_DMACHAN0_BASE,
+    .base     = SAM_DMAC0_CH0_BASE,
   },
+#endif
+#if SAM_NDMACHAN > 1
   {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 0,
+#endif
     .chan     = 1,
-    .flags    = DMACH_FLAG_FIFO_8BYTES,
-    .base     = SAM_DMACHAN1_BASE,
+    .base     = SAM_DMAC0_CH1_BASE,
   },
+#endif
+#if SAM_NDMACHAN > 2
   {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 0,
+#endif
     .chan     = 2,
-    .flags    = DMACH_FLAG_FIFO_8BYTES,
-    .base     = SAM_DMACHAN2_BASE,
+    .base     = SAM_DMAC0_CH2_BASE,
   },
+#endif
+#if SAM_NDMACHAN > 3
   {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 0,
+#endif
     .chan     = 3,
-    .flags    = (DMACH_FLAG_FIFO_32BYTES | DMACH_FLAG_FLOWCONTROL),
-    .base     = SAM_DMACHAN3_BASE,
+    .base     = SAM_DMAC0_CH3_BASE,
+  },
+#endif
+#if SAM_NDMACHAN > 4
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 0,
+#endif
+    .chan     = 4,
+    .base     = SAM_DMAC0_CH4_BASE,
+  },
+#endif
+#if SAM_NDMACHAN > 5
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 0,
+#endif
+    .chan     = 5,
+    .base     = SAM_DMAC0_CH5_BASE,
+  },
+#endif
+#if SAM_NDMACHAN > 6
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 0,
+#endif
+    .chan     = 6,
+    .base     = SAM_DMAC0_CH6_BASE,
+  },
+#endif
+#if SAM_NDMACHAN > 7
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 0,
+#endif
+    .chan     = 7,
+    .base     = SAM_DMAC0_CH7_BASE,
   }
-#else
-#  error "Nothing is known about the DMA channels for this device"
 #endif
 };
+
+/* This describes the overall state of DMA controller 0 */
+
+static struct sam_dmac_s g_dmac0 =
+{
+  /* This array describes the available link list descriptors */
+
+  .desc       = g_desc0,
+
+  /* This array describes each DMA channel */
+
+  .dmach      = g_dmach0,
+};
+
+#endif /* CONFIG_SAMA5_DMAC0 */
+
+/* This array describes the state of DMA controller 1 */
+
+#ifdef CONFIG_SAMA5_DMAC1
+/* This array describes the available link list descriptors */
+
+struct dma_linklist_s g_desc1[CONFIG_SAMA5_NLLDESC];
+
+static struct sam_dmach_s g_dmach1[SAM_NDMACHAN] =
+{
+#if SAM_NDMACHAN > 0
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 1,
+#endif
+    .chan     = 0,
+    .base     = SAM_DMAC1_CH0_BASE,
+  },
+#endif
+#if SAM_NDMACHAN > 1
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 1,
+#endif
+    .chan     = 1,
+    .base     = SAM_DMAC1_CH1_BASE,
+  },
+#endif
+#if SAM_NDMACHAN > 2
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 1,
+#endif
+    .chan     = 2,
+    .base     = SAM_DMAC1_CH2_BASE,
+  },
+#endif
+#if SAM_NDMACHAN > 3
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 1,
+#endif
+    .chan     = 3,
+    .base     = SAM_DMAC1_CH3_BASE,
+  },
+#endif
+#if SAM_NDMACHAN > 4
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 1,
+#endif
+    .chan     = 4,
+    .base     = SAM_DMAC1_CH4_BASE,
+  },
+#endif
+#if SAM_NDMACHAN > 5
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 1,
+#endif
+    .chan     = 5,
+    .base     = SAM_DMAC1_CH5_BASE,
+  },
+#endif
+#if SAM_NDMACHAN > 6
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 1,
+#endif
+    .chan     = 6,
+    .base     = SAM_DMAC1_CH6_BASE,
+  },
+#endif
+#if SAM_NDMACHAN > 7
+  {
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+    .dmac     = 1,
+#endif
+    .chan     = 7,
+    .base     = SAM_DMAC1_CH7_BASE,
+  }
+#endif
+};
+
+/* This describes the overall state of DMA controller 1 */
+
+static struct sam_dmac_s g_dmac1 =
+{
+  /* This array describes the available link list descriptors */
+
+  .desc       = g_desc1,
+
+  /* This array describes each DMA channel */
+
+  .dmach      = g_dmach1,
+};
+
+#endif /* CONFIG_SAMA5_DMAC1 */
 
 /****************************************************************************
  * Private Functions
@@ -198,11 +386,11 @@ static struct sam_dma_s g_dma[SAM34_NDMACHAN] =
  *
  ****************************************************************************/
 
-static void sam_takechsem(void)
+static void sam_takechsem(struct sam_dmac_s *dmac)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(&g_chsem) != 0)
+  while (sem_wait(&dmac->chsem) != 0)
     {
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
@@ -212,9 +400,9 @@ static void sam_takechsem(void)
     }
 }
 
-static inline void sam_givechsem(void)
+static inline void sam_givechsem(struct sam_dmac_s *dmac)
 {
-  (void)sem_post(&g_chsem);
+  (void)sem_post(&dmac->chsem);
 }
 
 /****************************************************************************
@@ -225,11 +413,11 @@ static inline void sam_givechsem(void)
  *
  ****************************************************************************/
 
-static void sam_takedsem(void)
+static void sam_takedsem(struct sam_dmac_s *dmac)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(&g_dsem) != 0)
+  while (sem_wait(&dmac->dsem) != 0)
     {
       /* The only case that an error should occur here is if the wait was
        * awakened by a signal.
@@ -239,43 +427,85 @@ static void sam_takedsem(void)
     }
 }
 
-static inline void sam_givedsem(void)
+static inline void sam_givedsem(struct sam_dmac_s *dmac)
 {
-  (void)sem_post(&g_dsem);
+  (void)sem_post(&dmac->dsem);
 }
 
 /****************************************************************************
- * Name: sam_fifosize
+ * Name: sam_getdmac
  *
  * Description:
- *  Decode the FIFO size from the flags
+ *  Read a global DMAC register
  *
  ****************************************************************************/
 
-static unsigned int sam_fifosize(uint8_t dmach_flags)
+static inline uint32_t sam_getdmac(struct sam_dmac_s *dmac,
+                                   unsigned int offset)
 {
-  dmach_flags &= DMACH_FLAG_FIFOSIZE_MASK;
-  if (dmach_flags == DMACH_FLAG_FIFO_8BYTES)
-    {
-      return 8;
-    }
-  else /* if (dmach_flags == DMACH_FLAG_FIFO_32BYTES) */
-    {
-      return 32;
-    }
+  return getreg32(dmac->base + offset);
 }
 
 /****************************************************************************
- * Name: sam_flowcontrol
+ * Name: sam_putdmac
  *
  * Description:
- *  Decode the FIFO flow control from the flags
+ *  Write a value to a global DMAC register
  *
  ****************************************************************************/
 
-static inline bool sam_flowcontrol(uint8_t dmach_flags)
+static inline void sam_putdmac(struct sam_dmac_s *dmac, uint32_t value,
+                               unsigned int offset)
 {
-  return ((dmach_flags & DMACH_FLAG_FLOWCONTROL) != 0);
+  putreg32(value, dmac->base + offset);
+}
+
+/****************************************************************************
+ * Name: sam_getdmach
+ *
+ * Description:
+ *  Read a DMAC channel register
+ *
+ ****************************************************************************/
+
+static inline uint32_t sam_getdmach(struct sam_dmach_s *dmach,
+                                    unsigned int offset)
+{
+  return getreg32(dmach->base + offset);
+}
+
+/****************************************************************************
+ * Name: sam_putdmach
+ *
+ * Description:
+ *  Write a value to a DMAC channel register
+ *
+ ****************************************************************************/
+
+static inline void sam_putdmach(struct sam_dmach_s *dmach, uint32_t value,
+                                unsigned int offset)
+{
+  putreg32(value, dmach->base + offset);
+}
+
+/****************************************************************************
+ * Name: sam_controller
+ *
+ * Description:
+ *    Given a DMA channel instrance, return a pointer to the parent DMA
+ *    controller instance.
+ *
+ ****************************************************************************/
+
+static inline struct sam_dmac_s *sam_controller(struct sam_dmach_s *dmach)
+{
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC01)
+  return dmach->dmac ? &g_dmac1 : &g_dmac0;
+#elif defined(CONFIG_SAMA5_DMAC0)
+  return &g_dmac0;
+#else
+  return &g_dmac1;
+#endif
 }
 
 /****************************************************************************
@@ -286,9 +516,11 @@ static inline bool sam_flowcontrol(uint8_t dmach_flags)
  *
  ****************************************************************************/
 
-static inline uint32_t sam_fifocfg(struct sam_dma_s *dmach)
+static inline uint32_t sam_fifocfg(struct sam_dmach_s *dmach)
 {
-  unsigned int ndx = (dmach->flags & DMACH_FLAG_FIFOCFG_MASK) >> DMACH_FLAG_FIFOCFG_SHIFT;
+  unsigned int ndx;
+
+  ndx = (dmach->flags & DMACH_FLAG_FIFOCFG_MASK) >> DMACH_FLAG_FIFOCFG_SHIFT;
   DEBUGASSERT(ndx < 3);
   return g_fifocfg[ndx];
 }
@@ -302,17 +534,19 @@ static inline uint32_t sam_fifocfg(struct sam_dma_s *dmach)
  *
  ****************************************************************************/
 
-static inline uint32_t sam_txcfg(struct sam_dma_s *dmach)
+static inline uint32_t sam_txcfg(struct sam_dmach_s *dmach)
 {
   uint32_t regval;
 
   /* Set transfer (memory to peripheral) DMA channel configuration register */
 
-  regval   = (((dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT) << DMACHAN_CFG_SRCPER_SHIFT);
-  regval  |=   (dmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? DMACHAN_CFG_SRCH2SEL : 0;
-  regval  |= (((dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT) << DMACHAN_CFG_DSTPER_SHIFT);
-  regval  |=   (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMACHAN_CFG_DSTH2SEL : 0;
-  regval  |= sam_fifocfg(dmach);
+  regval  = (((dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT)
+    << DMAC_CH_CFG_SRCPER_SHIFT);
+  regval |=   (dmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? DMAC_CH_CFG_SRCH2SEL : 0;
+  regval |= (((dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT)
+    << DMAC_CH_CFG_DSTPER_SHIFT);
+  regval |=   (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMAC_CH_CFG_DSTH2SEL : 0;
+  regval |= sam_fifocfg(dmach);
   return regval;
 }
 
@@ -325,17 +559,19 @@ static inline uint32_t sam_txcfg(struct sam_dma_s *dmach)
  *
  ****************************************************************************/
 
-static inline uint32_t sam_rxcfg(struct sam_dma_s *dmach)
+static inline uint32_t sam_rxcfg(struct sam_dmach_s *dmach)
 {
   uint32_t regval;
 
   /* Set received (peripheral to memory) DMA channel config */
 
-  regval   = (((dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT) << DMACHAN_CFG_SRCPER_SHIFT);
-  regval  |=   (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMACHAN_CFG_SRCH2SEL : 0;
-  regval  |= (((dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT) << DMACHAN_CFG_DSTPER_SHIFT);
-  regval  |=   (dmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? DMACHAN_CFG_DSTH2SEL : 0;
-  regval  |= sam_fifocfg(dmach);
+  regval  = (((dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT)
+    << DMAC_CH_CFG_SRCPER_SHIFT);
+  regval |=   (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMAC_CH_CFG_SRCH2SEL : 0;
+  regval |= (((dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT)
+    << DMAC_CH_CFG_DSTPER_SHIFT);
+  regval |=   (dmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? DMAC_CH_CFG_DSTH2SEL : 0;
+  regval |= sam_fifocfg(dmach);
   return regval;
 }
 
@@ -350,8 +586,7 @@ static inline uint32_t sam_rxcfg(struct sam_dma_s *dmach)
  *
  ****************************************************************************/
 
-static inline uint32_t
-sam_txctrlabits(struct sam_dma_s *dmach)
+static inline uint32_t sam_txctrlabits(struct sam_dmach_s *dmach)
 {
   uint32_t regval;
   unsigned int ndx;
@@ -363,19 +598,19 @@ sam_txctrlabits(struct sam_dma_s *dmach)
    */
 
   ndx = (dmach->flags & DMACH_FLAG_MEMWIDTH_MASK) >> DMACH_FLAG_MEMWIDTH_SHIFT;
-  DEBUGASSERT(ndx < 3);
+  DEBUGASSERT(ndx < 4);
   regval = g_srcwidth[ndx];
 
   /* Set the source chuck size (memory chunk size) */
 
   if ((dmach->flags & DMACH_FLAG_MEMCHUNKSIZE) == DMACH_FLAG_MEMCHUNKSIZE_4)
     {
-      regval |= DMACHAN_CTRLA_SCSIZE_4;
+      regval |= DMAC_CH_CTRLA_SCSIZE_4;
     }
-#if 0 /* DMACHAN_CTRLA_SCSIZE_1 is zero */
+#if 0 /* DMAC_CH_CTRLA_SCSIZE_1 is zero */
   else
     {
-      regval |= DMACHAN_CTRLA_SCSIZE_1;
+      regval |= DMAC_CH_CTRLA_SCSIZE_1;
     }
 #endif
 
@@ -384,19 +619,19 @@ sam_txctrlabits(struct sam_dma_s *dmach)
    */
 
   ndx = (dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK) >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
-  DEBUGASSERT(ndx < 3);
+  DEBUGASSERT(ndx < 4);
   regval |= g_destwidth[ndx];
 
   /* Set the destination chuck size (peripheral chunk size) */
 
   if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) == DMACH_FLAG_PERIPHCHUNKSIZE_4)
     {
-      regval |= DMACHAN_CTRLA_DCSIZE_4;
+      regval |= DMAC_CH_CTRLA_DCSIZE_4;
     }
-#if 0 /* DMACHAN_CTRLA_DCSIZE_1 is zero */
+#if 0 /* DMAC_CH_CTRLA_DCSIZE_1 is zero */
   else
     {
-      regval |= DMACHAN_CTRLA_DCSIZE_1;
+      regval |= DMAC_CH_CTRLA_DCSIZE_1;
     }
 #endif
 
@@ -411,7 +646,7 @@ sam_txctrlabits(struct sam_dma_s *dmach)
  *
  ****************************************************************************/
 
-static inline uint32_t sam_txctrla(struct sam_dma_s *dmach,
+static inline uint32_t sam_txctrla(struct sam_dmach_s *dmach,
                                    uint32_t dmasize, uint32_t txctrlabits)
 {
   /* Set the buffer transfer size field.  This is the number of transfers to
@@ -427,8 +662,9 @@ static inline uint32_t sam_txctrla(struct sam_dma_s *dmach,
       dmasize >>= 2;
     }
 
-  DEBUGASSERT(dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
-  return (txctrlabits & ~DMACHAN_CTRLA_BTSIZE_MASK) | (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT);
+  DEBUGASSERT(dmasize <= DMAC_CH_CTRLA_BTSIZE_MAX);
+  return (txctrlabits & ~DMAC_CH_CTRLA_BTSIZE_MASK) |
+         (dmasize << DMAC_CH_CTRLA_BTSIZE_SHIFT);
 }
 
 /****************************************************************************
@@ -442,9 +678,9 @@ static inline uint32_t sam_txctrla(struct sam_dma_s *dmach,
  *
  ****************************************************************************/
 
-static inline uint32_t sam_rxctrlabits(struct sam_dma_s *dmach)
+static inline uint32_t sam_rxctrlabits(struct sam_dmach_s *dmach)
 {
-  uint32_t     regval;
+  uint32_t regval;
   unsigned int ndx;
 
   DEBUGASSERT(dmach);
@@ -453,41 +689,46 @@ static inline uint32_t sam_rxctrlabits(struct sam_dma_s *dmach)
    * selections. Set the source width (peripheral width).
    */
 
-  ndx = (dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK) >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
-  DEBUGASSERT(ndx < 3);
+  ndx = (dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK)
+    >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
+
+  DEBUGASSERT(ndx < 4);
   regval = g_srcwidth[ndx];
 
   /* Set the source chuck size (peripheral chunk size) */
 
-  if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) == DMACH_FLAG_PERIPHCHUNKSIZE_4)
+  if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) ==
+       DMACH_FLAG_PERIPHCHUNKSIZE_4)
     {
-      regval |= DMACHAN_CTRLA_SCSIZE_4;
+      regval |= DMAC_CH_CTRLA_SCSIZE_4;
     }
-#if 0 /* DMACHAN_CTRLA_SCSIZE_1 is zero */
+#if 0 /* DMAC_CH_CTRLA_SCSIZE_1 is zero */
   else
     {
-      regval |= DMACHAN_CTRLA_SCSIZE_1;
+      regval |= DMAC_CH_CTRLA_SCSIZE_1;
     }
 #endif
 
-  /* Since this is a receive, the destination is described by the memory selections.
-   * Set the destination width (memory width).
+  /* Since this is a receive, the destination is described by the memory
+   * selections. Set the destination width (memory width).
    */
 
-  ndx = (dmach->flags & DMACH_FLAG_MEMWIDTH_MASK) >> DMACH_FLAG_MEMWIDTH_SHIFT;
-  DEBUGASSERT(ndx < 3);
+  ndx = (dmach->flags & DMACH_FLAG_MEMWIDTH_MASK)
+    >> DMACH_FLAG_MEMWIDTH_SHIFT;
+
+  DEBUGASSERT(ndx < 4);
   regval |= g_destwidth[ndx];
 
   /* Set the destination chuck size (memory chunk size) */
 
   if ((dmach->flags & DMACH_FLAG_MEMCHUNKSIZE) == DMACH_FLAG_MEMCHUNKSIZE_4)
     {
-      regval |= DMACHAN_CTRLA_DCSIZE_4;
+      regval |= DMAC_CH_CTRLA_DCSIZE_4;
     }
-#if 0 /* DMACHAN_CTRLA_DCSIZE_1 is zero */
+#if 0 /* DMAC_CH_CTRLA_DCSIZE_1 is zero */
   else
     {
-      regval |= DMACHAN_CTRLA_DCSIZE_1;
+      regval |= DMAC_CH_CTRLA_DCSIZE_1;
     }
 #endif
 
@@ -502,7 +743,7 @@ static inline uint32_t sam_rxctrlabits(struct sam_dma_s *dmach)
  *
  ****************************************************************************/
 
-static inline uint32_t sam_rxctrla(struct sam_dma_s *dmach,
+static inline uint32_t sam_rxctrla(struct sam_dmach_s *dmach,
                                    uint32_t dmasize, uint32_t txctrlabits)
 {
   /* Set the buffer transfer size field.  This is the number of transfers to
@@ -513,13 +754,15 @@ static inline uint32_t sam_rxctrla(struct sam_dma_s *dmach,
    * chunk size)
    */
 
-  if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) == DMACH_FLAG_PERIPHCHUNKSIZE_4)
+  if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) ==
+      DMACH_FLAG_PERIPHCHUNKSIZE_4)
     {
       dmasize >>= 2;
     }
 
-  DEBUGASSERT(dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
-  return (txctrlabits & ~DMACHAN_CTRLA_BTSIZE_MASK) | (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT);
+  DEBUGASSERT(dmasize <= DMAC_CH_CTRLA_BTSIZE_MAX);
+  return (txctrlabits & ~DMAC_CH_CTRLA_BTSIZE_MASK) |
+         (dmasize << DMAC_CH_CTRLA_BTSIZE_SHIFT);
 }
 
 /****************************************************************************
@@ -531,7 +774,7 @@ static inline uint32_t sam_rxctrla(struct sam_dma_s *dmach,
  *
  ****************************************************************************/
 
-static inline uint32_t sam_txctrlb(struct sam_dma_s *dmach)
+static inline uint32_t sam_txctrlb(struct sam_dmach_s *dmach)
 {
   uint32_t regval;
 
@@ -539,11 +782,11 @@ static inline uint32_t sam_txctrlb(struct sam_dma_s *dmach)
    * and destination descriptors.  The default will be single transfer mode.
    */
 
-  regval = DMACHAN_CTRLB_BOTHDSCR;
+  regval = DMAC_CH_CTRLB_BOTHDSCR;
 
   /* Select flow control (even if the channel doesn't support it).  The
-   * naming convention from TX is memory to peripheral, but that is really be
-   * determined by bits in the DMA flags.
+   * naming convention from TX is memory to peripheral, but that is really
+   * be determined by bits in the DMA flags.
    */
 
   /* Is the memory source really a peripheral? */
@@ -556,13 +799,13 @@ static inline uint32_t sam_txctrlb(struct sam_dma_s *dmach)
         {
           /* Yes.. Use peripheral-to-peripheral flow control */
 
-          regval |= DMACHAN_CTRLB_FC_P2P;
+          regval |= DMAC_CH_CTRLB_FC_P2P;
         }
       else
         {
           /* No.. Use peripheral-to-memory flow control */
 
-          regval |= DMACHAN_CTRLB_FC_P2M;
+          regval |= DMAC_CH_CTRLB_FC_P2M;
         }
     }
   else
@@ -575,13 +818,13 @@ static inline uint32_t sam_txctrlb(struct sam_dma_s *dmach)
         {
           /* Yes.. Use memory-to-peripheral flow control */
 
-          regval |= DMACHAN_CTRLB_FC_M2P;
+          regval |= DMAC_CH_CTRLB_FC_M2P;
         }
       else
         {
           /* No.. Use memory-to-memory flow control */
 
-          regval |= DMACHAN_CTRLB_FC_M2M;
+          regval |= DMAC_CH_CTRLB_FC_M2M;
         }
     }
 
@@ -589,15 +832,16 @@ static inline uint32_t sam_txctrlb(struct sam_dma_s *dmach)
 
   if ((dmach->flags & DMACH_FLAG_MEMINCREMENT) == 0)
     {
-      regval |= DMACHAN_CTRLB_SRCINCR_FIXED;
+      regval |= DMAC_CH_CTRLB_SRCINCR_FIXED;
     }
 
   /* Select destination address incrementing */
 
   if ((dmach->flags & DMACH_FLAG_PERIPHINCREMENT) == 0)
     {
-      regval |= DMACHAN_CTRLB_DSTINCR_FIXED;
+      regval |= DMAC_CH_CTRLB_DSTINCR_FIXED;
     }
+
   return regval;
 }
 
@@ -610,19 +854,19 @@ static inline uint32_t sam_txctrlb(struct sam_dma_s *dmach)
  *
  ****************************************************************************/
 
-static inline uint32_t sam_rxctrlb(struct sam_dma_s *dmach)
+static inline uint32_t sam_rxctrlb(struct sam_dmach_s *dmach)
 {
   uint32_t regval;
 
-  /* Assume that we will not be using the link list and disable the source and
-   * destination descriptors.  The default will be single transfer mode.
+  /* Assume that we will not be using the link list and disable the source
+   * and destination descriptors.  The default will be single transfer mode.
    */
 
-  regval = DMACHAN_CTRLB_BOTHDSCR;
+  regval = DMAC_CH_CTRLB_BOTHDSCR;
 
   /* Select flow control (even if the channel doesn't support it).  The
-   * naming convention from RX is peripheral to memory, but that is really be
-   * determined by bits in the DMA flags.
+   * naming convention from RX is peripheral to memory, but that is really
+   * be determined by bits in the DMA flags.
    */
 
   /* Is the peripheral source really a peripheral? */
@@ -635,13 +879,13 @@ static inline uint32_t sam_rxctrlb(struct sam_dma_s *dmach)
         {
           /* Yes.. Use peripheral-to-peripheral flow control */
 
-          regval |= DMACHAN_CTRLB_FC_P2P;
+          regval |= DMAC_CH_CTRLB_FC_P2P;
         }
       else
         {
           /* No.. Use peripheral-to-memory flow control */
 
-          regval |= DMACHAN_CTRLB_FC_P2M;
+          regval |= DMAC_CH_CTRLB_FC_P2M;
         }
     }
   else
@@ -654,13 +898,13 @@ static inline uint32_t sam_rxctrlb(struct sam_dma_s *dmach)
         {
           /* Yes.. Use memory-to-peripheral flow control */
 
-          regval |= DMACHAN_CTRLB_FC_M2P;
+          regval |= DMAC_CH_CTRLB_FC_M2P;
         }
       else
         {
           /* No.. Use memory-to-memory flow control */
 
-          regval |= DMACHAN_CTRLB_FC_M2M;
+          regval |= DMAC_CH_CTRLB_FC_M2M;
         }
     }
 
@@ -668,15 +912,16 @@ static inline uint32_t sam_rxctrlb(struct sam_dma_s *dmach)
 
   if ((dmach->flags & DMACH_FLAG_PERIPHINCREMENT) == 0)
     {
-      regval |= DMACHAN_CTRLB_SRCINCR_FIXED;
+      regval |= DMAC_CH_CTRLB_SRCINCR_FIXED;
     }
 
   /* Select address incrementing */
 
   if ((dmach->flags & DMACH_FLAG_MEMINCREMENT) == 0)
     {
-      regval |= DMACHAN_CTRLB_DSTINCR_FIXED;
+      regval |= DMAC_CH_CTRLB_DSTINCR_FIXED;
     }
+
   return regval;
 }
 
@@ -686,54 +931,55 @@ static inline uint32_t sam_rxctrlb(struct sam_dma_s *dmach)
  * Description:
  *  Allocate and add one descriptor to the DMA channel's link list.
  *
- *  NOTE: link list entries are freed by the DMA interrupt handler.  However,
- *  since the setting/clearing of the 'in use' indication is atomic, no
- *  special actions need be performed.  It would be a good thing to add logic
- *  to handle the case where all of the entries are exhausted and we could
- *  wait for some to be freed by the interrupt handler.
+ *  NOTE: link list entries are freed by the DMA interrupt handler.
+ *  However, since the setting/clearing of the 'in use' indication is
+ *  atomic, no special actions need be performed.  It would be a good thing
+ *  to add logic to handle the case where all of the entries are exhausted
+ *  and we could wait for some to be freed by the interrupt handler.
  *
  ****************************************************************************/
 
 static struct dma_linklist_s *
-sam_allocdesc(struct sam_dma_s *dmach, struct dma_linklist_s *prev,
-              uint32_t src, uint32_t dest, uint32_t ctrla, uint32_t ctrlb)
+sam_allocdesc(struct sam_dmach_s *dmach, struct dma_linklist_s *prev,
+              uint32_t saddr, uint32_t daddr, uint32_t ctrla, uint32_t ctrlb)
 {
+  struct sam_dmac_s *dmac = sam_controller(dmach);
   struct dma_linklist_s *desc = NULL;
   int i;
 
-  /* Sanity check -- src == 0 is the indication that the link is unused.
+  /* Sanity check -- saddr == 0 is the indication that the link is unused.
    * Obviously setting it to zero would break that usage.
    */
 
 #ifdef CONFIG_DEBUG
-  if (src != 0)
+  if (saddr != 0)
 #endif
     {
       /* Table a descriptor table semaphore count.  When we get one, then there
        * is at least one free descriptor in the table and it is ours.
        */
 
-      sam_takedsem();
+      sam_takedsem(dmac);
 
       /* Examine each link list entry to find an available one -- i.e., one
-       * with src == 0.  That src field is set to zero by the DMA transfer
+       * with saddr == 0.  That saddr field is set to zero by the DMA transfer
        * complete interrupt handler.  The following should be safe because
        * that is an atomic operation.
        */
 
-      sam_takechsem();
-      for (i = 0; i < CONFIG_SAM34_NLLDESC; i++)
+      sam_takechsem(dmac);
+      for (i = 0; i < CONFIG_SAMA5_NLLDESC; i++)
         {
-          if (g_linklist[i].src == 0)
+          if (dmac->desc[i].saddr == 0)
             {
               /* We have it.  Initialize the new link list entry */
 
-              desc        = &g_linklist[i];
-              desc->src   = src;    /* Source address */
-              desc->dest  = dest;   /* Destination address */
+              desc        = &dmac->desc[i];
+              desc->saddr = saddr;  /* Source address */
+              desc->daddr = daddr;  /* Destination address */
               desc->ctrla = ctrla;  /* Control A value */
               desc->ctrlb = ctrlb;  /* Control B value */
-              desc->next  = 0;      /* Next descriptor address */
+              desc->dscr  = 0;      /* Next descriptor address */
 
               /* And then hook it at the tail of the link list */
 
@@ -759,18 +1005,18 @@ sam_allocdesc(struct sam_dma_s *dmach, struct dma_linklist_s *prev,
                    * this should work even if that is not the case.
                    */
 
-                  prev->ctrlb &= ~DMACHAN_CTRLB_BOTHDSCR;
+                  prev->ctrlb &= ~DMAC_CH_CTRLB_BOTHDSCR;
 
                   /* Link the previous tail to the new tail */
 
-                  prev->next = (uint32_t)desc;
+                  prev->dscr = (uint32_t)desc;
                 }
 
               /* In any event, this is the new tail of the list.  The source
                * and destination descriptors must be disabled for the last entry
                * in the link list. */
 
-              desc->ctrlb  |= DMACHAN_CTRLB_BOTHDSCR;
+              desc->ctrlb  |= DMAC_CH_CTRLB_BOTHDSCR;
               dmach->lltail = desc;
               break;
             }
@@ -780,7 +1026,7 @@ sam_allocdesc(struct sam_dma_s *dmach, struct dma_linklist_s *prev,
        * search loop should always be successful.
        */
 
-      sam_givechsem();
+      sam_givechsem(dmac);
       DEBUGASSERT(desc != NULL);
     }
 
@@ -797,10 +1043,11 @@ sam_allocdesc(struct sam_dma_s *dmach, struct dma_linklist_s *prev,
  *
  ****************************************************************************/
 
-static void sam_freelinklist(struct sam_dma_s *dmach)
+static void sam_freelinklist(struct sam_dmach_s *dmach)
 {
+  struct sam_dmac_s *dmac = sam_controller(dmach);
   struct dma_linklist_s *desc;
-  struct dma_linklist_s *next;
+  struct dma_linklist_s *dscr;
 
   /* Get the head of the link list and detach the link list from the DMA
    * channel
@@ -814,11 +1061,11 @@ static void sam_freelinklist(struct sam_dma_s *dmach)
 
   while (desc != NULL)
     {
-      next = (struct dma_linklist_s *)desc->next;
-      DEBUGASSERT(desc->src != 0);
+      dscr = (struct dma_linklist_s *)desc->dscr;
+      DEBUGASSERT(desc->saddr != 0);
       memset(desc, 0, sizeof(struct dma_linklist_s));
-      sam_givedsem();
-      desc = next;
+      sam_givedsem(dmac);
+      desc = dscr;
     }
 }
 
@@ -832,7 +1079,7 @@ static void sam_freelinklist(struct sam_dma_s *dmach)
  *
  ****************************************************************************/
 
-static int sam_txbuffer(struct sam_dma_s *dmach, uint32_t paddr,
+static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
                         uint32_t maddr, size_t nbytes)
 {
   uint32_t regval;
@@ -881,7 +1128,7 @@ static int sam_txbuffer(struct sam_dma_s *dmach, uint32_t paddr,
  *
  ****************************************************************************/
 
-static int sam_rxbuffer(struct sam_dma_s *dmach, uint32_t paddr,
+static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
                         uint32_t maddr, size_t nbytes)
 {
   uint32_t regval;
@@ -927,55 +1174,57 @@ static int sam_rxbuffer(struct sam_dma_s *dmach, uint32_t paddr,
  *
  ****************************************************************************/
 
-static inline int sam_single(struct sam_dma_s *dmach)
+static inline int sam_single(struct sam_dmach_s *dmach)
 {
+  struct sam_dmac_s *dmac = sam_controller(dmach);
   struct dma_linklist_s *llhead = dmach->llhead;
 
   /* Clear any pending interrupts from any previous DMAC transfer by reading
    * the interrupt status register.
    */
 
-  (void)getreg32(SAM_DMAC_EBCISR);
+  (void)sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET);
 
   /* Write the starting source address in the SADDR register */
 
-  DEBUGASSERT(llhead != NULL && llhead->src != 0);
-  putreg32(llhead->src, dmach->base + SAM_DMACHAN_SADDR_OFFSET);
+  DEBUGASSERT(llhead != NULL && llhead->saddr != 0);
+  sam_putdmach(dmach, llhead->saddr, SAM_DMAC_CH_SADDR_OFFSET);
 
   /* Write the starting destination address in the DADDR register */
 
-  putreg32(llhead->dest, dmach->base + SAM_DMACHAN_DADDR_OFFSET);
+  sam_putdmach(dmach, llhead->daddr, SAM_DMAC_CH_DADDR_OFFSET);
 
   /* Set up the CTRLA register */
 
-  putreg32(llhead->ctrla, dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
+  sam_putdmach(dmach, llhead->ctrla, SAM_DMAC_CH_CTRLA_OFFSET);
 
   /* Set up the CTRLB register */
 
-  putreg32(llhead->ctrlb, dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
+  sam_putdmach(dmach, llhead->ctrlb, SAM_DMAC_CH_CTRLA_OFFSET);
 
   /* Both the DST and SRC DSCR bits should be '1' in CTRLB */
 
-  DEBUGASSERT((llhead->ctrlb & DMACHAN_CTRLB_BOTHDSCR) == DMACHAN_CTRLB_BOTHDSCR);
+  DEBUGASSERT((llhead->ctrlb & DMAC_CH_CTRLB_BOTHDSCR) ==
+              DMAC_CH_CTRLB_BOTHDSCR);
 
   /* Set up the CFG register */
 
-  putreg32(dmach->cfg, dmach->base + SAM_DMACHAN_CFG_OFFSET);
+  sam_putdmach(dmach, dmach->cfg, SAM_DMAC_CH_CFG_OFFSET);
 
   /* Enable the channel by writing a ‘1’ to the CHER enable bit */
 
-  putreg32(DMAC_CHER_ENA(dmach->chan), SAM_DMAC_CHER);
+  sam_putdmac(dmac, DMAC_CHER_ENA(dmach->chan), SAM_DMAC_CHER_OFFSET);
 
-  /* The DMA has been started. Once the transfer completes, hardware sets the
-   * interrupts and disables the channel.  We will received buffer complete and
-   * transfer complete interrupts.
+  /* The DMA has been started. Once the transfer completes, hardware sets
+   * the interrupts and disables the channel.  We will received buffer
+   * complete and* transfer complete interrupts.
    *
    * Enable error, buffer complete and transfer complete interrupts.
-   * (Since there is only a single buffer, we don't need the buffer complete
-   * interrupt).
+   * (Since there is only a single buffer, we don't need the buffer
+   * complete interrupt).
    */
 
-  putreg32(DMAC_EBC_CBTCINTS(dmach->chan), SAM_DMAC_EBCIER);
+  sam_putdmac(dmac, DMAC_EBC_CBTCINTS(dmach->chan), SAM_DMAC_EBCIER_OFFSET);
   return OK;
 }
 
@@ -987,56 +1236,59 @@ static inline int sam_single(struct sam_dma_s *dmach)
  *
  ****************************************************************************/
 
-static inline int sam_multiple(struct sam_dma_s *dmach)
+static inline int sam_multiple(struct sam_dmach_s *dmach)
 {
+  struct sam_dmac_s *dmac = sam_controller(dmach);
   struct dma_linklist_s *llhead = dmach->llhead;
 
-  DEBUGASSERT(llhead != NULL && llhead->src != 0);
+  DEBUGASSERT(llhead != NULL && llhead->saddr != 0);
 
   /* Check the first and last CTRLB values */
 
-  DEBUGASSERT((llhead->ctrlb & DMACHAN_CTRLB_BOTHDSCR) == 0);
-  DEBUGASSERT((dmach->lltail->ctrlb & DMACHAN_CTRLB_BOTHDSCR) == DMACHAN_CTRLB_BOTHDSCR);
+  DEBUGASSERT((llhead->ctrlb & DMAC_CH_CTRLB_BOTHDSCR) == 0);
+  DEBUGASSERT((dmach->lltail->ctrlb & DMAC_CH_CTRLB_BOTHDSCR) ==
+              DMAC_CH_CTRLB_BOTHDSCR);
 
-  /* Clear any pending interrupts from any previous DMAC transfer by reading the
-   * status register
+  /* Clear any pending interrupts from any previous DMAC transfer by reading
+   * the status register
    */
 
-  (void)getreg32(SAM_DMAC_EBCISR);
+  (void)sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET);
 
   /* Set up the initial CTRLB register (to enable descriptors) */
 
-  putreg32(llhead->ctrlb, dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
+  sam_putdmach(dmach, llhead->ctrlb, SAM_DMAC_CH_CTRLA_OFFSET);
 
   /* Set up the CTRLB register */
 
-  putreg32(llhead->ctrlb, dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
+  sam_putdmach(dmach, llhead->ctrlb, SAM_DMAC_CH_CTRLA_OFFSET);
 
   /* Write the channel configuration information into the CFG register */
 
-  putreg32(dmach->cfg, dmach->base + SAM_DMACHAN_CFG_OFFSET);
+  sam_putdmach(dmach, dmach->cfg, SAM_DMAC_CH_CFG_OFFSET);
 
   /* Program the DSCR register with the pointer to the firstlink list entry. */
 
-  putreg32((uint32_t)llhead, dmach->base + SAM_DMACHAN_DSCR_OFFSET);
+  sam_putdmach(dmach, (uint32_t)llhead, SAM_DMAC_CH_DSCR_OFFSET);
 
   /* Finally, enable the channel by writing a ‘1’ to the CHER enable */
 
-  putreg32(DMAC_CHER_ENA(dmach->chan), SAM_DMAC_CHER);
+  sam_putdmac(dmac, DMAC_CHER_ENA(dmach->chan), SAM_DMAC_CHER_OFFSET);
 
-  /* As each buffer of data is transferred, the CTRLA register is written back
-   * into the link list entry.  The CTRLA contains updated BTSIZE and DONE bits.
-   * Additionally, the CTRLA DONE bit is asserted when the buffer transfer has completed.
+  /* As each buffer of data is transferred, the CTRLA register is written
+   * back into the link list entry.  The CTRLA contains updated BTSIZE and
+   * DONE bits.  Additionally, the CTRLA DONE bit is asserted when the
+   * buffer transfer has completed.
    *
-   * The DMAC transfer continues until the CTRLB register disables the descriptor
-   * (DSCR bits) registers at the final buffer tranfer.
+   * The DMAC transfer continues until the CTRLB register disables the
+   * descriptor (DSCR bits) registers at the final buffer tranfer.
    *
    * Enable error, buffer complete and transfer complete interrupts.  We
    * don't really need the buffer complete interrupts, but we will take them
    * just to handle stall conditions.
    */
 
-  putreg32(DMAC_EBC_CHANINTS(dmach->chan), SAM_DMAC_EBCIER);
+  sam_putdmac(dmac, DMAC_EBC_CHANINTS(dmach->chan), SAM_DMAC_EBCIER_OFFSET);
   return OK;
 }
 
@@ -1048,15 +1300,19 @@ static inline int sam_multiple(struct sam_dma_s *dmach)
  *
  ****************************************************************************/
 
-static void sam_dmaterminate(struct sam_dma_s *dmach, int result)
+static void sam_dmaterminate(struct sam_dmach_s *dmach, int result)
 {
+  struct sam_dmac_s *dmac = sam_controller(dmach);
+
   /* Disable all channel interrupts */
 
-  putreg32(DMAC_EBC_CHANINTS(dmach->chan), SAM_DMAC_EBCIDR);
+  sam_putdmac(dmac, DMAC_EBC_CHANINTS(dmach->chan), SAM_DMAC_EBCIDR_OFFSET);
 
-  /* Disable the channel by writing one to the write-only channel disable register */
+  /* Disable the channel by writing one to the write-only channel disable
+   * register.
+   */
 
-  putreg32(DMAC_CHDR_DIS(dmach->chan), SAM_DMAC_CHDR);
+  sam_putdmac(dmac, DMAC_CHDR_DIS(dmach->chan), SAM_DMAC_CHDR_OFFSET);
 
   /* Free the linklist */
 
@@ -1074,16 +1330,16 @@ static void sam_dmaterminate(struct sam_dma_s *dmach, int result)
 }
 
 /****************************************************************************
- * Name: sam_dmainterrupt
+ * Name: sam_dmac_interrupt
  *
  * Description:
  *  DMA interrupt handler
  *
  ****************************************************************************/
 
-static int sam_dmainterrupt(int irq, void *context)
+static int sam_dmac_interrupt(struct sam_dmac_s *dmac)
 {
-  struct sam_dma_s *dmach;
+  struct sam_dmach_s *dmach;
   unsigned int chndx;
   uint32_t regval;
 
@@ -1091,7 +1347,8 @@ static int sam_dmainterrupt(int irq, void *context)
    * status bits.
    */
 
-  regval = getreg32(SAM_DMAC_EBCISR) & getreg32(SAM_DMAC_EBCIMR);
+  regval = sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET) &
+           sam_getdmac(dmac, SAM_DMAC_EBCIMR_OFFSET);
 
   /* Check if the any transfer has completed */
 
@@ -1099,13 +1356,13 @@ static int sam_dmainterrupt(int irq, void *context)
     {
       /* Yes.. Check each bit  to see which channel has interrupted */
 
-      for (chndx = 0; chndx < SAM34_NDMACHAN; chndx++)
+      for (chndx = 0; chndx < SAM_NDMACHAN; chndx++)
         {
           /* Are any interrupts pending for this channel? */
 
           if ((regval & DMAC_EBC_CHANINTS(chndx)) != 0)
             {
-              dmach = &g_dma[chndx];
+              dmach = &dmac->dmach[chndx];
 
               /* Yes.. Did an error occur? */
 
@@ -1133,12 +1390,67 @@ static int sam_dmainterrupt(int irq, void *context)
                 {
                   /* Write the KEEPON field to clear the STALL states */
 
-                  putreg32(DMAC_CHER_KEEP(dmach->chan), SAM_DMAC_CHER);
+                  sam_putdmac(dmac, DMAC_CHER_KEEP(dmach->chan),
+                              SAM_DMAC_CHER_OFFSET);
                 }
             }
         }
     }
+
   return OK;
+}
+
+/****************************************************************************
+ * Name: sam_dmac0_interrupt and sam_dmac1_interrupt
+ *
+ * Description:
+ *  DMA interrupt handler
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_DMAC0
+static int sam_dmac0_interrupt(int irq, void *context)
+{
+  return sam_dmac_interrupt(&g_dmac0);
+}
+#endif
+
+#ifdef CONFIG_SAMA5_DMAC1
+static int sam_dmac1_interrupt(int irq, void *context)
+{
+  return sam_dmac_interrupt(&g_dmac1);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_dmainitialize
+ *
+ * Description:
+ *   Initialize the DMA subsystem
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sam_dmainitialize(struct sam_dmac_s *dmac)
+{
+  /* Disable all DMA interrupts */
+
+  sam_putdmac(dmac, DMAC_EBC_ALLINTS, SAM_DMAC_EBCIDR_OFFSET);
+
+  /* Disable all DMA channels */
+
+  sam_putdmac(dmac, DMAC_CHDR_DIS_ALL, SAM_DMAC_CHDR_OFFSET);
+
+  /* Enable the DMA controller */
+
+  sam_putdmac(dmac,DMAC_EN_ENABLE, SAM_DMAC_EN_OFFSET);
+
+  /* Initialize semaphores */
+
+  sem_init(&dmac->chsem, 0, 1);
+  sem_init(&dmac->dsem, 0, SAM_NDMACHAN);
 }
 
 /****************************************************************************
@@ -1158,34 +1470,41 @@ static int sam_dmainterrupt(int irq, void *context)
 
 void weak_function up_dmainitialize(void)
 {
+#ifdef CONFIG_SAMA5_DMAC0
   /* Enable peripheral clock */
 
-  sam_dmac_enableclk();
-
-  /* Disable all DMA interrupts */
-
-  putreg32(DMAC_EBC_ALLINTS, SAM_DMAC_EBCIDR);
-
-  /* Disable all DMA channels */
-
-  putreg32(DMAC_CHDR_DIS_ALL, SAM_DMAC_CHDR);
+  sam_dmac0_enableclk();
 
   /* Attach DMA interrupt vector */
 
-  (void)irq_attach(SAM_IRQ_DMAC, sam_dmainterrupt);
+  (void)irq_attach(SAM_IRQ_DMAC0, sam_dmac0_interrupt);
 
-  /* Enable the IRQ at the NVIC (still disabled at the DMA controller) */
+  /* Initialize the controller */
 
-  up_enable_irq(SAM_IRQ_DMAC);
+  sam_dmainitialize(&g_dmac0);
 
-  /* Enable the DMA controller */
+  /* Enable the IRQ at the AIC (still disabled at the DMA controller) */
 
-  putreg32(DMAC_EN_ENABLE, SAM_DMAC_EN);
+  up_enable_irq(SAM_IRQ_DMAC0);
+#endif
 
-  /* Initialize semaphores */
+#ifdef CONFIG_SAMA5_DMAC1
+  /* Enable peripheral clock */
 
-  sem_init(&g_chsem, 0, 1);
-  sem_init(&g_dsem, 0, SAM34_NDMACHAN);
+  sam_dmac1_enableclk();
+
+  /* Attach DMA interrupt vector */
+
+  (void)irq_attach(SAM_IRQ_DMAC1, sam_dmac1_interrupt);
+
+  /* Initialize the controller */
+
+  sam_dmainitialize(&g_dmac1);
+
+  /* Enable the IRQ at the AIC (still disabled at the DMA controller) */
+
+  up_enable_irq(SAM_IRQ_DMAC1);
+#endif
 }
 
 /****************************************************************************
@@ -1208,28 +1527,41 @@ void weak_function up_dmainitialize(void)
  *
  ****************************************************************************/
 
-DMA_HANDLE sam_dmachannel(uint32_t dmach_flags)
+DMA_HANDLE sam_dmachannel(uint32_t chflags)
 {
-  struct sam_dma_s *dmach;
+  struct sam_dmac_s *dmac;
+  struct sam_dmach_s *dmach;
   unsigned int chndx;
 
-  /* Get the search parameters */
+  /* Pick the DMA controller */
 
-  bool flowcontrol = sam_flowcontrol(dmach_flags);
-  unsigned int fifosize = sam_fifosize(dmach_flags);
+  if ((chflags & DMACH_FLAG_DMAC) == DMACH_FLAG_DMAC0)
+    {
+#ifdef CONFIG_SAMA5_DMAC0
+      dmac = &g_dmac0;
+#else
+      return NULL;
+#endif
+    }
+  else
+    {
+#ifdef CONFIG_SAMA5_DMAC1
+      dmac = &g_dmac1;
+#else
+      return NULL;
+#endif
+    }
 
   /* Search for an available DMA channel with at least the requested FIFO
    * size.
    */
 
   dmach = NULL;
-  sam_takechsem();
-  for (chndx = 0; chndx < SAM34_NDMACHAN; chndx++)
+  sam_takechsem(dmac);
+  for (chndx = 0; chndx < SAM_NDMACHAN; chndx++)
     {
-      struct sam_dma_s *candidate = &g_dma[chndx];
-      if (!candidate->inuse &&
-          (sam_fifosize(candidate->flags) >= fifosize) &&
-          (!flowcontrol || sam_flowcontrol(dmach_flags)))
+      struct sam_dmach_s *candidate = &dmac->dmach[chndx];
+      if (!candidate->inuse)
         {
           dmach         = candidate;
           dmach->inuse  = true;
@@ -1238,25 +1570,22 @@ DMA_HANDLE sam_dmachannel(uint32_t dmach_flags)
            * channel
            */
 
-          (void)getreg32(SAM_DMAC_EBCISR);
+          (void)sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET);
 
           /* Disable the channel by writing one to the write-only channel
            * disable register
            */
 
-          putreg32(DMAC_CHDR_DIS(chndx), SAM_DMAC_CHDR);
+          sam_putdmac(dmac,DMAC_CHDR_DIS(chndx), SAM_DMAC_CHDR_OFFSET);
 
-          /* See the DMA channel flags, retaining the fifo size and flow
-           * control settings which are inherent properties of the FIFO
-           * and cannot be changed.
-           */
+          /* See the DMA channel flags. */
 
-          dmach->flags &= (DMACH_FLAG_FLOWCONTROL | DMACH_FLAG_FIFOSIZE_MASK);
-          dmach->flags |= (dmach_flags & ~((DMACH_FLAG_FLOWCONTROL | DMACH_FLAG_FIFOSIZE_MASK)));
+          dmach->flags = chflags;
           break;
         }
     }
-  sam_givechsem();
+
+  sam_givechsem(dmac);
   return (DMA_HANDLE)dmach;
 }
 
@@ -1275,15 +1604,15 @@ DMA_HANDLE sam_dmachannel(uint32_t dmach_flags)
 
 void sam_dmafree(DMA_HANDLE handle)
 {
-  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
+  struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
 
   /* Mark the channel no longer in use.  Clearing the inuse flag is an atomic
    * operation and so should be safe.
    */
 
   DEBUGASSERT((dmach != NULL) && (dmach->inuse));
-  dmach->flags &= (DMACH_FLAG_FLOWCONTROL | DMACH_FLAG_FIFOSIZE_MASK);
-  dmach->inuse  = false;                   /* No longer in use */
+  dmach->flags = 0;
+  dmach->inuse = false;                   /* No longer in use */
 }
 
 /****************************************************************************
@@ -1299,23 +1628,23 @@ void sam_dmafree(DMA_HANDLE handle)
 
 int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
 {
-  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
+  struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   int ret = OK;
 
   DEBUGASSERT(dmach && dmach->llhead != NULL && dmach->lltail != 0);
 
   /* If this is a large transfer, break it up into smaller buffers */
 
-  while (nbytes > DMACHAN_CTRLA_BTSIZE_MAX)
+  while (nbytes > DMAC_CH_CTRLA_BTSIZE_MAX)
     {
       /* Set up the maximum size transfer */
 
-      ret = sam_txbuffer(dmach, paddr, maddr, DMACHAN_CTRLA_BTSIZE_MAX);
+      ret = sam_txbuffer(dmach, paddr, maddr, DMAC_CH_CTRLA_BTSIZE_MAX);
       if (ret == OK);
         {
           /* Decrement the number of bytes left to transfer */
 
-          nbytes -= DMACHAN_CTRLA_BTSIZE_MAX;
+          nbytes -= DMAC_CH_CTRLA_BTSIZE_MAX;
 
           /* Increment the memory & peripheral address (if it is appropriate to
            * do do).
@@ -1323,12 +1652,12 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 
           if ((dmach->flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
             {
-              paddr += DMACHAN_CTRLA_BTSIZE_MAX;
+              paddr += DMAC_CH_CTRLA_BTSIZE_MAX;
             }
 
           if ((dmach->flags & DMACH_FLAG_MEMINCREMENT) != 0)
             {
-              maddr += DMACHAN_CTRLA_BTSIZE_MAX;
+              maddr += DMAC_CH_CTRLA_BTSIZE_MAX;
             }
         }
     }
@@ -1339,6 +1668,7 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
     {
       ret = sam_txbuffer(dmach, paddr, maddr, nbytes);
     }
+
   return ret;
 }
 
@@ -1355,23 +1685,23 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 
 int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
 {
-  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
+  struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   int ret = OK;
 
   DEBUGASSERT(dmach && dmach->llhead != NULL && dmach->lltail != 0);
 
   /* If this is a large transfer, break it up into smaller buffers */
 
-  while (nbytes > DMACHAN_CTRLA_BTSIZE_MAX)
+  while (nbytes > DMAC_CH_CTRLA_BTSIZE_MAX)
     {
       /* Set up the maximum size transfer */
 
-      ret = sam_rxbuffer(dmach, paddr, maddr, DMACHAN_CTRLA_BTSIZE_MAX);
+      ret = sam_rxbuffer(dmach, paddr, maddr, DMAC_CH_CTRLA_BTSIZE_MAX);
       if (ret == OK);
         {
           /* Decrement the number of bytes left to transfer */
 
-          nbytes -= DMACHAN_CTRLA_BTSIZE_MAX;
+          nbytes -= DMAC_CH_CTRLA_BTSIZE_MAX;
 
           /* Increment the memory & peripheral address (if it is appropriate to
            * do do).
@@ -1379,12 +1709,12 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 
           if ((dmach->flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
             {
-              paddr += DMACHAN_CTRLA_BTSIZE_MAX;
+              paddr += DMAC_CH_CTRLA_BTSIZE_MAX;
             }
 
           if ((dmach->flags & DMACH_FLAG_MEMINCREMENT) != 0)
             {
-              maddr += DMACHAN_CTRLA_BTSIZE_MAX;
+              maddr += DMAC_CH_CTRLA_BTSIZE_MAX;
             }
         }
     }
@@ -1395,6 +1725,7 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
     {
       ret = sam_rxbuffer(dmach, paddr, maddr, nbytes);
     }
+
   return ret;
 }
 
@@ -1408,7 +1739,7 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 
 int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 {
-  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
+  struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   int ret = -EINVAL;
 
   /* Verify that the DMA has been setup (i.e., at least one entry in the
@@ -1434,6 +1765,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
           ret = sam_multiple(dmach);
         }
     }
+
   return ret;
 }
 
@@ -1449,7 +1781,7 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
 
 void sam_dmastop(DMA_HANDLE handle)
 {
-  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
+  struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   irqstate_t flags;
 
   DEBUGASSERT(dmach != NULL);
@@ -1472,7 +1804,8 @@ void sam_dmastop(DMA_HANDLE handle)
 #ifdef CONFIG_DEBUG_DMA
 void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
 {
-  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
+  struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
+  struct sam_dmac_s *dmac = sam_controller(dmach);
   irqstate_t flags;
 
   /* Sample global registers.  NOTE: reading EBCISR clears interrupts, but
@@ -1482,23 +1815,27 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
    */
 
   flags        = irqsave();
-  regs->gcfg   = getreg32(SAM_DMAC_GCFG);
-  regs->en     = getreg32(SAM_DMAC_EN);
-  regs->sreq   = getreg32(SAM_DMAC_SREQ);
-  regs->creq   = getreg32(SAM_DMAC_CREQ);
-  regs->last   = getreg32(SAM_DMAC_LAST);
-  regs->ebcimr = getreg32(SAM_DMAC_EBCIMR);
-  regs->ebcisr = getreg32(SAM_DMAC_EBCISR);
-  regs->chsr   = getreg32(SAM_DMAC_CHSR);
+  regs->gcfg   = sam_getdmac(dmac, SAM_DMAC_GCFG_OFFSET);
+  regs->en     = sam_getdmac(dmac, SAM_DMAC_EN_OFFSET);
+  regs->sreq   = sam_getdmac(dmac, SAM_DMAC_SREQ_OFFSET);
+  regs->creq   = sam_getdmac(dmac, SAM_DMAC_CREQ_OFFSET);
+  regs->last   = sam_getdmac(dmac, SAM_DMAC_LAST_OFFSET);
+  regs->ebcimr = sam_getdmac(dmac, SAM_DMAC_EBCIMR_OFFSET);
+  regs->ebcisr = sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET);
+  regs->chsr   = sam_getdmac(dmac, SAM_DMAC_CHSR_OFFSET);
+  regs->wpmr   = sam_getdmac(dmac, SAM_DMAC_WPMR_OFFSET);
+  regs->wpsr   = sam_getdmac(dmac, SAM_DMAC_WPSR_OFFSET);
 
   /* Sample channel registers */
 
-  regs->saddr  = getreg32(dmach->base + SAM_DMACHAN_SADDR_OFFSET);
-  regs->daddr  = getreg32(dmach->base + SAM_DMACHAN_DADDR_OFFSET);
-  regs->dscr   = getreg32(dmach->base + SAM_DMACHAN_DSCR_OFFSET);
-  regs->ctrla  = getreg32(dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
-  regs->ctrlb  = getreg32(dmach->base + SAM_DMACHAN_CTRLB_OFFSET);
-  regs->cfg    = getreg32(dmach->base + SAM_DMACHAN_CFG_OFFSET);
+  regs->saddr  = sam_getdmach(dmach, SAM_DMAC_CH_SADDR_OFFSET);
+  regs->daddr  = sam_getdmach(dmach, SAM_DMAC_CH_DADDR_OFFSET);
+  regs->dscr   = sam_getdmach(dmach, SAM_DMAC_CH_DSCR_OFFSET);
+  regs->ctrla  = sam_getdmach(dmach, SAM_DMAC_CH_CTRLA_OFFSET);
+  regs->ctrlb  = sam_getdmach(dmach, SAM_DMAC_CH_CTRLB_OFFSET);
+  regs->cfg    = sam_getdmach(dmach, SAM_DMAC_CH_CFG_OFFSET);
+  regs->spip   = sam_getdmach(dmach, SAM_DMAC_CH_SPIP_OFFSET);
+  regs->dpip   = sam_getdmach(dmach, SAM_DMAC_CH_DPIP_OFFSET);
   irqrestore(flags);
 }
 #endif /* CONFIG_DEBUG_DMA */
@@ -1518,25 +1855,30 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs)
 void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
                  const char *msg)
 {
-  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
+  struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
+  struct sam_dmac_s *dmac = sam_controller(dmach);
 
   dmadbg("%s\n", msg);
   dmadbg("  DMA Global Registers:\n");
-  dmadbg("      GCFG[%08x]: %08x\n", SAM_DMAC_GCFG, regs->gcfg);
-  dmadbg("        EN[%08x]: %08x\n", SAM_DMAC_EN, regs->en);
-  dmadbg("      SREQ[%08x]: %08x\n", SAM_DMAC_SREQ, regs->sreq);
-  dmadbg("      CREQ[%08x]: %08x\n", SAM_DMAC_CREQ, regs->creq);
-  dmadbg("      LAST[%08x]: %08x\n", SAM_DMAC_LAST, regs->last);
-  dmadbg("    EBCIMR[%08x]: %08x\n", SAM_DMAC_EBCIMR, regs->ebcimr);
-  dmadbg("    EBCISR[%08x]: %08x\n", SAM_DMAC_EBCISR, regs->ebcisr);
-  dmadbg("      CHSR[%08x]: %08x\n", SAM_DMAC_CHSR, regs->chsr);
+  dmadbg("      GCFG[%08x]: %08x\n", dmac->base + SAM_DMAC_GCFG_OFFSET, regs->gcfg);
+  dmadbg("        EN[%08x]: %08x\n", dmac->base + SAM_DMAC_EN_OFFSET, regs->en);
+  dmadbg("      SREQ[%08x]: %08x\n", dmac->base + SAM_DMAC_SREQ_OFFSET, regs->sreq);
+  dmadbg("      CREQ[%08x]: %08x\n", dmac->base + SAM_DMAC_CREQ_OFFSET, regs->creq);
+  dmadbg("      LAST[%08x]: %08x\n", dmac->base + SAM_DMAC_LAST_OFFSET, regs->last);
+  dmadbg("    EBCIMR[%08x]: %08x\n", dmac->base + SAM_DMAC_EBCIMR_OFFSET, regs->ebcimr);
+  dmadbg("    EBCISR[%08x]: %08x\n", dmac->base + SAM_DMAC_EBCISR_OFFSET, regs->ebcisr);
+  dmadbg("      CHSR[%08x]: %08x\n", dmac->base + SAM_DMAC_CHSR_OFFSET, regs->chsr);
+  dmadbg("      WPMR[%08x]: %08x\n", dmac->base + SAM_DMAC_WPMR_OFFSET, regs->wpmr);
+  dmadbg("      WPSR[%08x]: %08x\n", dmac->base + SAM_DMAC_WPSR_OFFSET, regs->wpsr);
   dmadbg("  DMA Channel Registers:\n");
-  dmadbg("     SADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_SADDR_OFFSET, regs->saddr);
-  dmadbg("     DADDR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_DADDR_OFFSET, regs->daddr);
-  dmadbg("      DSCR[%08x]: %08x\n", dmach->base + SAM_DMACHAN_DSCR_OFFSET, regs->dscr);
-  dmadbg("     CTRLA[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CTRLA_OFFSET, regs->ctrla);
-  dmadbg("     CTRLB[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CTRLB_OFFSET, regs->ctrlb);
-  dmadbg("       CFG[%08x]: %08x\n", dmach->base + SAM_DMACHAN_CFG_OFFSET, regs->cfg);
+  dmadbg("     SADDR[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_SADDR_OFFSET, regs->saddr);
+  dmadbg("     DADDR[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_DADDR_OFFSET, regs->daddr);
+  dmadbg("      DSCR[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_DSCR_OFFSET, regs->dscr);
+  dmadbg("     CTRLA[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_CTRLA_OFFSET, regs->ctrla);
+  dmadbg("     CTRLB[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_CTRLB_OFFSET, regs->ctrlb);
+  dmadbg("       CFG[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_CFG_OFFSET, regs->cfg);
+  dmadbg("      SPIP[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_SPIP_OFFSET, regs->spip);
+  dmadbg("      DPIP[%08x]: %08x\n", dmach->base + SAM_DMAC_CH_DPIP_OFFSET, regs->dpip);
 }
 #endif /* CONFIG_DEBUG_DMA */
-#endif /* CONFIG_SAM34_DMA */
+#endif /* CONFIG_SAMA5_DMAC0 || CONFIG_SAMA5_DMAC1 */
