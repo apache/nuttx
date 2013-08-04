@@ -265,6 +265,10 @@ static struct sam_dmach_s g_dmach0[SAM_NDMACHAN] =
 
 static struct sam_dmac_s g_dmac0 =
 {
+  /* DMAC 0 base address */
+
+  .base       = SAM_DMAC0_VBASE,
+
   /* This array describes the available link list descriptors */
 
   .desc       = g_desc0,
@@ -363,6 +367,10 @@ static struct sam_dmach_s g_dmach1[SAM_NDMACHAN] =
 
 static struct sam_dmac_s g_dmac1 =
 {
+  /* DMAC 0 base address */
+
+  .base       = SAM_DMAC1_VBASE,
+
   /* This array describes the available link list descriptors */
 
   .desc       = g_desc1,

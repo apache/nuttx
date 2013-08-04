@@ -103,3 +103,11 @@ else
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_SPI0),y)
+CHIP_CSRCS += sam_spi.c
+else
+ifeq ($(CONFIG_SAMA5_SPI1),y)
+CHIP_CSRCS += sam_spi.c
+else
+endif
+endif
