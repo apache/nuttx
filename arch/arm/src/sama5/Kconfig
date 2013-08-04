@@ -238,6 +238,17 @@ config PIOE_IRQ
 
 endif # PIO_IRQ
 
+menu "SPI device driver options"
+
+config SAMA5_SPI_REGDEBUG
+	bool "SPI Register level debug"
+	depends on (SAMA5_SPI0 || SAMA5_SPI1) && DEBUG
+	default n
+	---help---
+		Output detailed register-level SPI device debug information.  Requires also DEBUG.
+
+endmenu # SPI device driver options
+
 menu "External Memory Configuration"
 
 config SAMA5_DDRCS
