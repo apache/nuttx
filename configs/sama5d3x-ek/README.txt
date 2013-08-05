@@ -953,6 +953,21 @@ Configurations
        NOTE that you must close JP1 on the Embest/Ronetix board in
        order to enable the AT25 FLASH chip select.
 
+       You can then format the AT25 FLASH for a FAT file system and mount
+       the file system at /mnt/sdcard using these NSH commands:
+
+         nsh> mkfatfs /dev/mtdblock0
+         nsh> mount -t vfat /dev/mtdblock0 /mnt/sdcard
+
+       Then you an use the FLASH as a normal FAT file system:
+
+         nsh> echo "This is a test" >/mnt/sdcard/atest.txt
+         nsh> ls -l /mnt/sdcard
+         /mnt/sdcard:
+          -rw-rw-rw-      16 atest.txt
+         nsh> cat /mnt/sdcard/atest.txt
+         This is a test
+
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
         The SAMA5D3 can run at 536MHz.  I still need to figure out the
@@ -981,6 +996,8 @@ Configurations
         Here is another strange observation:  SDRAM accesses tend to
         generate occasional spurious interrupts in those same conditions
         where the memory test fails!  No idea why.
+
+      2013-8-5:  The AT25 configuration has been verified to be functional.
 
   ostest:
     This configuration directory, performs a simple OS test using
