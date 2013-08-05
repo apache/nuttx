@@ -128,6 +128,8 @@ struct sam_spics_s
 
 typedef void (*select_t)(enum spi_dev_e devid, bool selected);
 
+/* Chip select register offsetrs */
+
 /* The overall state of one SPI controller */
 
 struct sam_spidev_s
@@ -135,7 +137,6 @@ struct sam_spidev_s
   uint32_t base;               /* SPI controller register base address */
   sem_t spisem;                /* Assures mutually exclusive acess to SPI */
   bool initialized;            /* TRUE: Controller has been initialized */
-  const uint32_t *csraddr;     /* Addresses of CSR register */
   select_t select;             /* SPI select callout */
 
   /* Debug stuff */
@@ -200,6 +201,14 @@ static void     spi_recvblock(struct spi_dev_s *dev, void *buffer,
  * Private Data
  ****************************************************************************/
 
+/* This array maps chip select numbers (0-3) to CSR register offsets */
+
+static const uint8_t g_csroffset[4] =
+{
+  SAM_SPI_CSR0_OFFSET, SAM_SPI_CSR1_OFFSET,
+  SAM_SPI_CSR2_OFFSET, SAM_SPI_CSR3_OFFSET
+};
+
 #ifdef CONFIG_SAMA5_SPI0
 /* SPI0 driver operations */
 
@@ -226,19 +235,11 @@ static const struct spi_ops_s g_spi0ops =
   .registercallback  = 0,                 /* Not implemented */
 };
 
-/* This array maps chip select numbers (0-3) to CSR register addresses */
-
-static const uint32_t g_csraddr0[4] =
-{
-  SAM_SPI0_CSR0, SAM_SPI0_CSR1, SAM_SPI0_CSR2, SAM_SPI0_CSR3
-};
-
 /* This is the overall state of the SPI0 controller */
 
 static struct sam_spidev_s g_spi0dev =
 {
   .base    = SAM_SPI0_VBASE,
-  .csraddr = g_csraddr0,
   .select  = sam_spi0select,
 };
 #endif
@@ -269,19 +270,11 @@ static const struct spi_ops_s g_spi1ops =
   .registercallback  = 0,                 /* Not implemented */
 };
 
-/* This array maps chip select numbers (0-3) to CSR register addresses */
-
-static const uint32_t g_csraddr1[4] =
-{
-  SAM_SPI1_CSR0, SAM_SPI1_CSR1, SAM_SPI1_CSR2, SAM_SPI1_CSR3
-};
-
 /* This is the overall state of the SPI0 controller */
 
 static struct sam_spidev_s g_spi1dev =
 {
   .base    = SAM_SPI1_VBASE,
-  .csraddr = g_csraddr1,
   .select  = sam_spi1select,
 };
 #endif
@@ -392,7 +385,7 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
     }
 #endif
 
-  spi_putreg(spi, value, address);
+  putreg32(value, address);
 }
 
 /****************************************************************************
@@ -415,17 +408,17 @@ static void spi_dumpregs(struct sam_spidev_s *spi, const char *msg)
 {
   spivdbg("%s:\n", msg);
   spivdbg("    MR:%08x   SR:%08x  IMR:%08x\n",
-          spi_getreg(spi, SAM_SPI_MR_OFFSET),
-          spi_getreg(spi, SAM_SPI_SR_OFFSET),
-          spi_getreg(spi, SAM_SPI_IMR_OFFSET));
+          getreg32(spi->base + SAM_SPI_MR_OFFSET),
+          getreg32(spi->base + SAM_SPI_SR_OFFSET),
+          getreg32(spi->base + SAM_SPI_IMR_OFFSET));
   spivdbg("  CSR0:%08x CSR1:%08x CSR2:%08x CSR3:%08x\n",
-          spi_getreg(spi, SAM_SPI_CSR0_OFFSET),
-          spi_getreg(spi, SAM_SPI_CSR1_OFFSET),
-          spi_getreg(spi, SAM_SPI_CSR2_OFFSET),
-          spi_getreg(spi, SAM_SPI_CSR3_OFFSET));
+          getreg32(spi->base + SAM_SPI_CSR0_OFFSET),
+          getreg32(spi->base + SAM_SPI_CSR1_OFFSET),
+          getreg32(spi->base + SAM_SPI_CSR2_OFFSET),
+          getreg32(spi->base + SAM_SPI_CSR3_OFFSET));
   spivdbg("  WPCR:%08x WPSR:%08x\n",
-          spi_getreg(spi, SAM_SPI_WPCR_OFFSET),
-          spi_getreg(spi, SAM_SPI_WPSR_OFFSET));
+          getreg32(spi->base + SAM_SPI_WPCR_OFFSET),
+          getreg32(spi->base + SAM_SPI_WPSR_OFFSET));
 }
 #endif
 
@@ -642,7 +635,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   uint32_t dlybs;
   uint32_t dlybct;
   uint32_t regval;
-  uint32_t regaddr;
+  unsigned int offset;
 
   spivdbg("cs=%d frequency=%d\n", spics->cs, frequency);
 
@@ -677,8 +670,8 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   /* Save the new scbr value */
 
-  regaddr = spi->csraddr[spics->cs];
-  regval  = getreg32(regaddr);
+  offset = (unsigned int)g_csroffset[spics->cs];
+  regval  = spi_getreg(spi, offset);
   regval &= ~(SPI_CSR_SCBR_MASK | SPI_CSR_DLYBS_MASK | SPI_CSR_DLYBCT_MASK);
   regval |= scbr << SPI_CSR_SCBR_SHIFT;
 
@@ -711,12 +704,12 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 
   dlybct  = SAM_SPI_CLOCK / 200000 / 32;
   regval |= dlybct << SPI_CSR_DLYBCT_SHIFT;
-  putreg32(regval, regaddr);
+  spi_putreg(spi, regval, offset);
 
   /* Calculate the new actual frequency */
 
   actual = SAM_SPI_CLOCK / scbr;
-  spivdbg("csr[%08x]=%08x actual=%d\n", regaddr, regval, actual);
+  spivdbg("csr[offset=%02x]=%08x actual=%d\n", offset, regval, actual);
 
   /* Save the frequency setting */
 
@@ -749,7 +742,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
   uint32_t regval;
-  uint32_t regaddr;
+  unsigned int offset;
 
   spivdbg("cs=%d mode=%d\n", spics->cs, mode);
 
@@ -769,8 +762,8 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
        *  3    1    0
        */
 
-      regaddr = spi->csraddr[spics->cs];
-      regval  = getreg32(regaddr);
+      offset = (unsigned int)g_csroffset[spics->cs];
+      regval  = spi_getreg(spi, offset);
       regval &= ~(SPI_CSR_CPOL | SPI_CSR_NCPHA);
 
       switch (mode)
@@ -795,8 +788,8 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
           return;
         }
 
-      putreg32(regval, regaddr);
-      spivdbg("csr[%08x]=%08x\n", regaddr, regval);
+      spi_putreg(spi, regval, offset);
+      spivdbg("csr[offset=%02x]=%08x\n", offset, regval);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -825,8 +818,8 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
-  uint32_t regaddr;
   uint32_t regval;
+  unsigned int offset;
 
   spivdbg("cs=%d nbits=%d\n", spics->cs, nbits);
   DEBUGASSERT(spics && nbits > 7 && nbits < 17);
@@ -846,13 +839,13 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 #endif
       /* Yes... Set number of bits appropriately */
 
-      regaddr = spi->csraddr[spics->cs];
-      regval  = getreg32(regaddr);
+      offset  = (unsigned int)g_csroffset[spics->cs];
+      regval  = spi_getreg(spi, offset);
       regval &= ~SPI_CSR_BITS_MASK;
       regval |= SPI_CSR_BITS(nbits);
-      putreg32(regval, regaddr);
+      spi_putreg(spi, regval, offset);
 
-      spivdbg("csr[%08x]=%08x\n", regaddr, regval);
+      spivdbg("csr[offset=%02x]=%08x\n", offset, regval);
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
@@ -1105,6 +1098,10 @@ struct spi_dev_s *up_spiinitialize(int port)
   int csno  = (port & __SPI_CS_MASK) >> __SPI_CS_SHIFT;
   int spino = (port & __SPI_SPI_MASK) >> __SPI_SPI_SHIFT;
   irqstate_t flags;
+#ifndef CONFIG_SPI_OWNBUS
+  uint32_t regval;
+  unsigned int offset;
+#endif
 
   /* The support SAM parts have only a single SPI port */
 
@@ -1230,6 +1227,22 @@ struct spi_dev_s *up_spiinitialize(int port)
 #endif
       spi_dumpregs(spi, "After initialization");
     }
+
+#ifndef CONFIG_SPI_OWNBUS
+  /* Set to mode=0 and nbits=8 and impossible frequency. It is only
+   * critical to do this if CONFIG_SPI_OWNBUS is not defined because in
+   * that case, the SPI will only be reconfigured if there is a change.
+   */
+
+  offset = (unsigned int)g_csroffset[csno];
+  regval = spi_getreg(spi, offset);
+  regval &= ~(SPI_CSR_CPOL | SPI_CSR_NCPHA | SPI_CSR_BITS_MASK);
+  regval |= (SPI_CSR_NCPHA | SPI_CSR_BITS(8));
+  spi_putreg(spi, regval, offset);
+
+  spics->nbits = 8;
+  spivdbg("csr[offset=%02x]=%08x\n", offset, regval);
+#endif
 
   return &spics->spidev;
 }
