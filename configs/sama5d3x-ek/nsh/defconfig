@@ -165,6 +165,10 @@ CONFIG_SAMA5_USART1=y
 # CONFIG_PIO_IRQ is not set
 
 #
+# SPI device driver options
+#
+
+#
 # External Memory Configuration
 #
 CONFIG_SAMA5_EBICS0=y
@@ -392,8 +396,17 @@ CONFIG_USART1_2STOP=0
 #
 # File system configuration
 #
-CONFIG_DISABLE_MOUNTPOINT=y
+# CONFIG_DISABLE_MOUNTPOINT is not set
 # CONFIG_FS_RAMMAP is not set
+CONFIG_FS_FAT=y
+CONFIG_FAT_LCNAMES=y
+CONFIG_FAT_LFN=y
+CONFIG_FAT_MAXFNAME=32
+# CONFIG_FS_FATTIME is not set
+# CONFIG_FAT_DMAMEMORY is not set
+# CONFIG_FS_NXFFS is not set
+# CONFIG_FS_ROMFS is not set
+# CONFIG_FS_SMARTFS is not set
 # CONFIG_FS_BINFS is not set
 
 #

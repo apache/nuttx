@@ -857,7 +857,11 @@ Configurations
     4. This configuration has support for NSH built-in applications enabled.
        However, no built-in applications are selected in the base configuration.
 
-    5. SDRAM support can be enabled by adding the following to your NuttX
+    5. This configuration has support for the FAT file system built in.  However,
+       by default, there are no block drivers intialized.  The FAT file system can
+       still be used to create RAM disks.
+
+    6. SDRAM support can be enabled by adding the following to your NuttX
        configuration file:
 
        System Type->ATSAMA5 Peripheral Support
@@ -881,7 +885,7 @@ Configurations
        Another thing you could do is to enable the RAM test built-in
        application:
 
-    6. You can enable the NuttX RAM test that may be used to verify the
+    7. You can enable the NuttX RAM test that may be used to verify the
        external SDAM.  To do this, keep the SDRAM out of the heap so that
        it can be tested without crashing programs using the memory:
 
@@ -921,15 +925,7 @@ Configurations
        RAMTest: Pattern test: 20000000 268435456 33333333 cccccccc
        RAMTest: Address-in-address test: 20000000 268435456
 
-    STATUS:
-      2013-7-19:  This configuration (as do the others) run at 396MHz.
-        The SAMA5D3 can run at 536MHz.  I still need to figure out the
-        PLL settings to get that speed.
-
-        If the CPU speed changes, then so must the NOR and SDRAM
-        initialization!
-
-    7. The Embest or Ronetix CPU module includes an Atmel AT25DF321A,
+    8. The Embest or Ronetix CPU module includes an Atmel AT25DF321A,
        32-megabit, 2.7-volt SPI serial flash.  Support for that serial
        FLASH can be enabled by modifying the NuttX configuration as
        follows:
@@ -946,6 +942,24 @@ Configurations
          CONFIG_MTD_AT25=y                     : Enable the AT25 driver
          CONFIG_AT25_SPIMODE=0                 : Use SPI mode 0
          CONFIG_AT25_SPIFREQUENCY=20000000     : Use SPI frequency 20MHz
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
+       Board Selection
+         CONFIG_SAMA5_AT25_AUTOMOUNT=y         : Mounts AT25 for NSH
+         CONFIG_SAMA5_AT25_FTL=y               : Create block driver for FAT
+
+       NOTE that you must close JP1 on the Embest/Ronetix board in
+       order to enable the AT25 FLASH chip select.
+
+    STATUS:
+      2013-7-19:  This configuration (as do the others) run at 396MHz.
+        The SAMA5D3 can run at 536MHz.  I still need to figure out the
+        PLL settings to get that speed.
+
+        If the CPU speed changes, then so must the NOR and SDRAM
+        initialization!
 
       2013-7-31:  I have been unable to execute this configuration from NOR
         FLASH by closing the BMS jumper (J9).  As far as I can tell, this
