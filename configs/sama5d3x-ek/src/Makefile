@@ -66,6 +66,18 @@ ifeq ($(CONFIG_SAMA5_NOR_MAIN),y)
 CSRCS += nor_main.c
 endif
 
+ifeq ($(CONFIG_MTD_AT25),y)
+CSRCS += sam_at25.c
+endif
+
+ifeq ($(CONFIG_SAMA5_HSMCI0),y)
+CSRCS += sam_hsmci.c
+else
+ifeq ($(CONFIG_SAMA5_HSMCI1),y)
+CSRCS += sam_hsmci.c
+endif
+endif
+
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += sam_nsh.c
 endif

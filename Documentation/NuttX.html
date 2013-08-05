@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: July 31, 2013</p>
+      <p>Last Updated: August 5, 2013</p>
     </td>
   </tr>
 </table>
@@ -1992,12 +1992,14 @@
     <ul>
       <p>
         <b>STATUS</b>.
-        Initial support for the NUC120 was released in NuttX-6.29.
+        Initial support for the SAMA5D3x-EK was released in NuttX-6.29.
         This initial support is very minimal:
         There are simple test configurations that run out of internal SRAM and two configurations that run out of the on-boar NOR FLASH:
         (1) An OS test configuration that verifies the correct port of NuttX to the part and
         (2) a NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for further application development.
-        As of this writing, more device drivers are needed to make this a more complete port.
+        Develop continues.
+        Drivers for DMA, SPI, AT25 Serial Flash, and HSMCI memory cards included in NuttX-6.30.
+        More device drivers are needed to make this a more complete port, particularly USB and networking.
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sama5d3x-ek/README.txt">README</a> file for further information.
       </p>
         <b>Development Environments:</b>

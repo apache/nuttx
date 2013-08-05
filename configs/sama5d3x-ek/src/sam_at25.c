@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d3x-ek/src/sam_nsh.c
+ * config/sama5d3x-ek/src/sam_at25.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -61,12 +61,9 @@
  ****************************************************************************/
 
 /* Configuration ************************************************************/
-
-#define HAVE_AT25  1
-#define HAVE_MMCSD 1
-
 /* Can't support the AT25 device if it SPI0 or AT25 support are not enabled */
 
+#define HAVE_AT25  1
 #if !defined(CONFIG_SAMA5_SPI0) || !defined(CONFIG_MTD_AT25)
 #  undef HAVE_AT25
 #endif
@@ -87,48 +84,10 @@
 #  undef HAVE_AT25
 #endif
 
-/* Use minor device number 0 is not is provided */
-
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
-#endif
-
-/* Can't support MMC/SD if the card interface(s) are not enable */
-
-#if !defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_HSMCI0)
-#  undef HAVE_MMCSD
-#endif
-
-/* Can't support MMC/SD features if mountpoints are disabled */
-
-#if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef HAVE_MMCSD
-#endif
-
-/* Assign minor device numbers.  We basically ignore more of the NSH
- * configuration here (NSH SLOTNO ignored completely; NSH minor extended
- * to handle more devices.
- */
-
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
-#endif
-
-#ifdef HAVE_MMCSD
-
-#  define HSMCI0_SLOTNO 0
-#  define HSMCI1_SLOTNO 1
-
-#  ifdef CONFIG_SAMA5_HSMCI0
-#     define HSMCI0_MINOR  CONFIG_NSH_MMCSDMINOR
-#     define HSMCI1_MINOR  (CONFIG_NSH_MMCSDMINOR+1)
-#     define AT25_MINOR    (CONFIG_NSH_MMCSDMINOR+2)
-#  else
-#     define HSMCI1_MINOR  CONFIG_NSH_MMCSDMINOR
-#     define AT25_MINOR    (CONFIG_NSH_MMCSDMINOR+1)
-#  endif
-#else
-#  define AT25_MINOR CONFIG_NSH_MMCSDMINOR
+#if defined(CONFIG_SAMA5_AT25_FTL) && defined(CONFIG_SAMA5_AT25_NXFFS)
+#  warning Both CONFIG_SAMA5_AT25_FTL and CONFIG_SAMA5_AT25_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5_AT25_NXFFS
+#  undef CONFIG_SAMA5_AT25_NXFFS
 #endif
 
 /****************************************************************************
@@ -136,50 +95,72 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: sam_at25_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Initialize and configure the AT25 SPI Flash
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+#ifdef CONFIG_MTD_AT25
+int sam_at25_initialize(int minor)
 {
-#if defined(HAVE_AT25) || defined(HAVE_MMCSD)
-  int ret;
-#endif
-
-  /* Initialize the AT25 driver */
-
 #ifdef HAVE_AT25
-  ret = sam_at25_initialize(AT25_MINOR);
-  if (ret < 0)
-    {
-      fdbg("ERROR: sam_at25_initialize failed: %d\n", ret);
-      return ret;
-#endif
+  FAR struct spi_dev_s *spi;
+  FAR struct mtd_dev_s *mtd;
+  int ret;
 
-#ifdef HAVE_MMCSD
-#ifdef CONFIG_SAMA5_HSMCI0
-  ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR);
+  /* Get the SPI port driver */
+
+  spi = up_spiinitialize(AT25_PORT);
+  if (!spi)
+    {
+      fdbg("ERROR: Failed to initialize SPI port %d\n", AT25_PORT);
+      return -ENODEV;
+    }
+
+  /* Now bind the SPI interface to the AT25 SPI FLASH driver */
+
+  mtd = at25_initialize(spi);
+  if (!mtd)
+    {
+      fdbg("ERROR: Failed to bind SPI port %d to the AT25 FLASH driver\n");
+      return -ENODEV;
+    }
+
+#if defined(CONFIG_SAMA5_AT25_FTL)
+  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+
+  ret = ftl_initialize(CONFIG_NSH_MMCSDMINOR, mtd);
   if (ret < 0)
     {
-      fdbg("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-           HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
+      fdbg("ERROR: Initialize the FTL layer\n");
       return ret;
     }
-#endif
 
-#ifdef CONFIG_SAMA5_HSMCI0
-  ret = sam_hsmci_initialize(HSMCI1_SLOTNO, HSMCI1_MINOR);
+#elif defined(CONFIG_SAMA5_AT25_NXFFS)
+  /* Initialize to provide NXFFS on the MTD interface */
+
+  ret = nxffs_initialize(mtd);
   if (ret < 0)
     {
-      fdbg("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-           HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
+      fdbg("ERROR: NXFFS initialization failed: %d\n", -ret);
       return ret;
     }
+
+  /* Mount the file system at /mnt/at25 */
+
+  ret = mount(NULL, "/mnt/at25", "nxffs", 0, NULL);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+      return ret;
+    }
+
 #endif
 #endif
 
   return OK;
 }
+
+#endif

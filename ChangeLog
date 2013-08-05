@@ -5297,3 +5297,13 @@
 	  SPI driver while testing the SAMA5 SPI driver:  If CONFIG_SPI_OWNBUS
 	  is not set, the driver will not configure the SPI mode correctly
 	  (2013-8-5).
+	* configs/sama5d3x-ek/src/sam_at25.c: Move AT25 initialization logic
+	  out of sam_nsh.c and into a separate file where it can be better
+	  shared (2013-8-5).
+	* arch/arm/src/sama5/sam_hsmci.c, sam_hsmci.h, and chip.sam_hsmci.h:
+	  Add register definitions and a driver for the (3) HSMCI memory card
+	  interfaces provided by the SAMA5.  Leveraged from the SAM3/4 and
+	  untested on initial commit (2013-8-5).
+	* nuttx/configs/sama5d3x-ek/src/sam_hsmci.c and sam_nsh.c:  Add support
+	  for the (2) SD card slots provided on the SAMA5D3x-EK boards.
+	  Untested on initial commit (2013-8-5).

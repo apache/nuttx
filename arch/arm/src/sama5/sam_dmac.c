@@ -1535,7 +1535,7 @@ void weak_function up_dmainitialize(void)
  *
  ****************************************************************************/
 
-DMA_HANDLE sam_dmachannel(uint32_t chflags)
+DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
 {
   struct sam_dmac_s *dmac;
   struct sam_dmach_s *dmach;
@@ -1543,21 +1543,26 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
 
   /* Pick the DMA controller */
 
-  if ((chflags & DMACH_FLAG_DMAC) == DMACH_FLAG_DMAC0)
-    {
 #ifdef CONFIG_SAMA5_DMAC0
+  if (dmacno == 0)
+    {
       dmac = &g_dmac0;
-#else
-      return NULL;
-#endif
     }
   else
-    {
-#ifdef CONFIG_SAMA5_DMAC1
-      dmac = &g_dmac1;
-#else
-      return NULL;
 #endif
+
+#ifdef CONFIG_SAMA5_DMAC0
+  if (dmacno == 1)
+    {
+      dmac = &g_dmac1;
+    }
+  else
+#endif
+
+    {
+      fdbg("Bad DMAC number: %d\n", dmacno);
+      DEBUGPANIC();
+      return (DMA_HANDLE)NULL;
     }
 
   /* Search for an available DMA channel with at least the requested FIFO
