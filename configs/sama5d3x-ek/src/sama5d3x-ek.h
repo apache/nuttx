@@ -94,6 +94,49 @@
                       GPIO_INT_BOTHEDGES | GPIO_PORT_PIOE | GPIO_PIN27)
 #define IRQ_USER1    SAM_IRQ_PE27
 
+/* HSMCI Card Slots *****************************************************************/
+/* The SAMA5D3x-EK provides a two SD memory card slots:  (1) a full size SD card
+ * slot (J7 labeled MCI0), and (2) a microSD memory card slot (J6 labeled MCI1).
+ *
+ * The full size SD card slot connects via HSMCI0.  The card detect discrete
+ * is available on PB17 (pulled high).  The write protect descrete is tied to
+ * ground (via PP6) and not available to software.  The slot supports 8-bit
+ * wide transfer mode, but the NuttX driver currently uses only the 4-bit
+ * wide transfer mode
+ *
+ *   PD17 MCI0_CD
+ *   PD1  MCI0_DA0
+ *   PD2  MCI0_DA1
+ *   PD3  MCI0_DA2
+ *   PD4  MCI0_DA3
+ *   PD5  MCI0_DA4
+ *   PD6  MCI0_DA5
+ *   PD7  MCI0_DA6
+ *   PD8  MCI0_DA7
+ *   PD9  MCI0_CK
+ *   PD0  MCI0_CDA
+ */
+
+#define GPIO_MCI0_CD (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
+                      GPIO_INT_BOTHEDGES | GPIO_PORT_PIOD | GPIO_PIN17)
+#define IRQ_MCI0_CD  SAM_IRQ_PD17
+
+/* The microSD connects vi HSMCI1.  The card detect discrete is available on
+ * PB18 (pulled high):
+ *
+ *   PD18  MCI1_CD
+ *   PB20  MCI1_DA0
+ *   PB21  MCI1_DA1
+ *   PB22  MCI1_DA2
+ *   PB23  MCI1_DA3
+ *   PB24  MCI1_CK
+ *   PB19  MCI1_CDA
+ */
+
+#define GPIO_MCI1_CD (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
+                      GPIO_INT_BOTHEDGES | GPIO_PORT_PIOD | GPIO_PIN18)
+#define IRQ_MCI1_CD  SAM_IRQ_PD18
+
 /* SPI Chip Selects *****************************************************************/
 /* Both the Ronetix and Embest versions of the SAMAD3x CPU modules include an
  * Atmel AT25DF321A, 32-megabit, 2.7-volt SPI serial flash.  The SPI
@@ -176,6 +219,54 @@ void weak_function sam_spiinitialize(void);
 void sam_sdram_config(void);
 #else
 #  define board_sdram_config(t)
+#endif
+
+/****************************************************************************
+ * Name: sam_at25_initialize
+ *
+ * Description:
+ *   Initialize and configure the AT25 SPI Flash
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_AT25
+int sam_at25_initialize(int minor);
+#endif
+
+/****************************************************************************
+ * Name: sam_hsmci_initialize
+ *
+ * Description:
+ *   Initialize and configure one HSMCI slot
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SAMA5_HSMCI0) || defined(CONFIG_SAMA5_HSMCI1)
+int sam_hsmci_initialize(int slotno, int minor);
+#endif
+
+/************************************************************************************
+ * Name: sam_cardinserted
+ *
+ * Description:
+ *   Check if a card is inserted into the selected HSMCI slot
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_SAMA5_HSMCI0) || defined(CONFIG_SAMA5_HSMCI1)
+bool sam_cardinserted(int slotno);
+#endif
+
+/************************************************************************************
+ * Name: sam_writeprotected
+ *
+ * Description:
+ *   Check if a card is inserted into the selected HSMCI slot
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_MMCSD
+bool sam_writeprotected(int slotno);
 #endif
 
 /************************************************************************************

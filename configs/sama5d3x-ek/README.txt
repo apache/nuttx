@@ -74,6 +74,7 @@ Contents
   - Buttons and LEDs
   - Serial Consoles
   - Serial FLASH
+  - HSMCI Card Slots
   - SAMA5D3x-EK Configuration Options
   - Configurations
 
@@ -527,6 +528,42 @@ Serial FLASH
   PD13; on the Ronetix schematic, JP11 seems only to bypass a resistor (may
   not be populated?).  I think closing JP1 is correct in either case.
 
+HSMCI Card Slots
+================
+
+  The SAMA5D3x-EK provides a two SD memory card slots:  (1) a full size SD
+  card slot (J7 labeled MCI0), and (2) a microSD memory card slot (J6
+  labeled MCI1).
+
+  The full size SD card slot connects via HSMCI0.  The card detect discrete
+  is available on PB17 (pulled high).  The write protect descrete is tied to
+  ground (via PP6) and not available to software.  The slot supports 8-bit
+  wide transfer mode, but the NuttX driver currently uses only the 4-bit
+  wide transfer mode
+
+    PD17 MCI0_CD
+    PD1  MCI0_DA0
+    PD2  MCI0_DA1
+    PD3  MCI0_DA2
+    PD4  MCI0_DA3
+    PD5  MCI0_DA4
+    PD6  MCI0_DA5
+    PD7  MCI0_DA6
+    PD8  MCI0_DA7
+    PD9  MCI0_CK
+    PD0  MCI0_CDA
+
+  The microSD connects vi HSMCI1.  The card detect discrete is available on
+  PB18 (pulled high):
+
+    PD18  MCI1_CD
+    PB20  MCI1_DA0
+    PB21  MCI1_DA1
+    PB22  MCI1_DA2
+    PB23  MCI1_DA3
+    PB24  MCI1_CK
+    PB19  MCI1_CDA
+
 SAMA5D3x-EK Configuration Options
 =================================
 
@@ -967,6 +1004,31 @@ Configurations
           -rw-rw-rw-      16 atest.txt
          nsh> cat /mnt/sdcard/atest.txt
          This is a test
+
+    9. Enabling HSMCI support. The SAMA5D3x-EK provides a two SD memory card
+       slots:  (1) a full size SD card slot (J7 labeled MCI0), and (2) a
+       microSD memory card slot (J6 labeled MCI1).  The full size SD card
+       slot connects via HSMCI0; the microSD connects vi HSMCI1.  Support
+       for both SD slots can be enabled with the following settings:
+
+       System Type->ATSAMA5 Peripheral Support
+         CONFIG_SAMA5_HSMCI0=y                 : Enable HSMCI0 support
+         CONFIG_SAMA5_HSMCI1=y                 : Enable HSMCI1 support
+         CONFIG_SAMA5_DMAC0=y                  : DMAC0 is needed by HSMCI0
+         CONFIG_SAMA5_DMAC1=y                  : DMAC1 is needed by HSMCI1
+
+       Device Drivers ->
+         CONFIG_MMCSD=y                        : Enable MMC/SD support
+         CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
+         CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
+         CONFIG_SDIO_DMA=y                     : Use SDIO DMA
+         CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes
+
+       Library Routines
+         CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
