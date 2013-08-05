@@ -99,7 +99,6 @@ CHIP_CSRCS += sam_dmac.c
 else
 ifeq ($(CONFIG_SAMA5_DMAC1),y)
 CHIP_CSRCS += sam_dmac.c
-else
 endif
 endif
 
@@ -109,5 +108,17 @@ else
 ifeq ($(CONFIG_SAMA5_SPI1),y)
 CHIP_CSRCS += sam_spi.c
 else
+endif
+endif
+
+ifeq ($(CONFIG_SAMA5_HSMCI0),y)
+CHIP_CSRCS += sam_hsmci.c
+else
+ifeq ($(CONFIG_SAMA5_HSMCI1),y)
+CHIP_CSRCS += sam_hsmci.c
+else
+ifeq ($(CONFIG_SAMA5_HSMCI2),y)
+CHIP_CSRCS += sam_hsmci.c
+endif
 endif
 endif
