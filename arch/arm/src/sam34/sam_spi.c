@@ -896,6 +896,10 @@ FAR struct spi_dev_s *up_spiinitialize(int cs)
 {
   FAR struct sam_spidev_s *priv;
   irqstate_t flags;
+#ifndef CONFIG_SPI_OWNBUS
+  uint32_t regaddr;
+  uint32_t regval;
+#endif
 
   /* The support SAM parts have only a single SPI port */
 
@@ -984,6 +988,22 @@ FAR struct spi_dev_s *up_spiinitialize(int cs)
 #endif
       spi_dumpregs("After initialization");
     }
+
+#ifndef CONFIG_SPI_OWNBUS
+  /* Set to mode=0 and nbits=8 and impossible frequency. It is only
+   * critical to do this if CONFIG_SPI_OWNBUS is not defined because in
+   * that case, the SPI will only be reconfigured if there is a change.
+   */
+
+  regaddr = g_csraddr[cs];
+  regval  = getreg32(regaddr);
+  regval &= ~(SPI_CSR_CPOL | SPI_CSR_NCPHA | SPI_CSR_BITS_MASK);
+  regval |= (SPI_CSR_NCPHA | SPI_CSR_BITS(8));
+  putreg32(regval, regaddr);
+
+  priv->nbits = 8;
+  spivdbg("csr[%08x]=%08x\n", regaddr, regval);
+#endif
 
   return &priv->spidev;
 }
