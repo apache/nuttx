@@ -5286,4 +5286,8 @@
 	  and a register access debug option (2013-8-4).
 	* configs/sama5d3x-ek/src/sam_spi.c:  At board support for the
 	  AT25 serial flash (2013-8-4).
+	* configs/sama5d3x-ek/nsh/defconfig:  FAT file system support is
+	  now enabled by default (2013-8-5)
+	* confgis/sama5d3x-ek/src/sam_nsh.c:  Automatically mount AT25
+	  file system for NSH if so configured (2013-8-5).
 

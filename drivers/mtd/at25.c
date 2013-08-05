@@ -57,9 +57,14 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration ********************************************************************/
 
 #ifndef CONFIG_AT25_SPIMODE
 #  define CONFIG_AT25_SPIMODE SPIDEV_MODE0
+#endif
+
+#ifndef CONFIG_AT25_SPIFREQUENCY
+#  define CONFIG_AT25_SPIFREQUENCY 20000000
 #endif
 
 /* AT25 Registers *******************************************************************/
@@ -180,7 +185,7 @@ static void at25_lock(FAR struct spi_dev_s *dev)
 
   SPI_SETMODE(dev, CONFIG_AT25_SPIMODE);
   SPI_SETBITS(dev, 8);
-  (void)SPI_SETFREQUENCY(dev, 20000000);
+  (void)SPI_SETFREQUENCY(dev, CONFIG_AT25_SPIFREQUENCY);
 }
 
 /************************************************************************************

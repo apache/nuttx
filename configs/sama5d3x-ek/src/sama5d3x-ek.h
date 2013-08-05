@@ -114,7 +114,7 @@
 
 #define GPIO_AT25_NPCS0 (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
                          GPIO_PORT_PIOD | GPIO_PIN13)
-#define AT25_CSNUM      0
+#define AT25_PORT       SPI0_CS0
 
 /************************************************************************************
  * Public Types

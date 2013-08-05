@@ -162,6 +162,8 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+/* MTD Support **************************************************************/
+
 /****************************************************************************
  * Name: mtd_partition
  *
@@ -199,6 +201,17 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
 int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);
 
 /****************************************************************************
+ * Name: flash_eraseall
+ *
+ * Description:
+ *   Call a block driver with the MDIOC_BULKERASE ioctl command.  This will
+ *   cause the MTD driver to erase all of the flash.
+ *
+ ****************************************************************************/
+
+int flash_eraseall(FAR const char *driver);
+
+/****************************************************************************
  * Name: smart_initialize
  *
  * Description:
@@ -217,16 +230,54 @@ int ftl_initialize(int minor, FAR struct mtd_dev_s *mtd);
 int smart_initialize(int minor, FAR struct mtd_dev_s *mtd,
                      FAR const char *partname);
 
+/* MTD Driver Initialization ************************************************/
+/* Create an initialized MTD device instance for a particular memory device.
+ * MTD devices are not registered in the file system as are other device
+ * driver but, but are created as instances that can be bound to other
+ * functions (such as a block or character driver front end).
+ */
+
 /****************************************************************************
- * Name: flash_eraseall
+ * Name: at45db_initialize
  *
  * Description:
- *   Call a block driver with the MDIOC_BULKERASE ioctl command.  This will
- *   cause the MTD driver to erase all of the flash.
+ *   Initializes the driver for SPI-based AT45DB161D (16Mbit).
  *
  ****************************************************************************/
 
-int flash_eraseall(FAR const char *driver);
+FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *dev);
+
+/****************************************************************************
+ * Name: at24c_initialize
+ *
+ * Description:
+ *   Initializes the driver for I2C-based at24cxx EEPROM(AT24C32, AT24C64,
+ *   AT24C128, AT24C256)
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev);
+
+/****************************************************************************
+ * Name: at25_initialize
+ *
+ * Description:
+ *   Initializes the driver for SPI-based AT25DF321 (32Mbit) flash.
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev);
+
+/****************************************************************************
+ * Name: m25p_initialize
+ *
+ * Description:
+ *   Initializes the for SPI-based M25P1 (128Kbit),  M25P64 (32Mbit), M25P64
+ *   (64Mbit), and M25P128 (128Mbit) FLASH (and compatible).
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
  * Name: rammtd_initialize
@@ -243,48 +294,13 @@ int flash_eraseall(FAR const char *driver);
 FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size);
 
 /****************************************************************************
- * Name: m25p_initialize
- *
- * Description:
- *   Create an initialized MTD device instance.  MTD devices are not registered
- *   in the file system, but are created as instances that can be bound to
- *   other functions (such as a block or character driver front end).
- *
- ****************************************************************************/
-
-FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev);
-
-/****************************************************************************
- * Name: at45db_initialize
- *
- * Description:
- *   Create an initialized MTD device instance.  MTD devices are not registered
- *   in the file system, but are created as instances that can be bound to
- *   other functions (such as a block or character driver front end).
- *
- ****************************************************************************/
-
-FAR struct mtd_dev_s *at45db_initialize(FAR struct spi_dev_s *dev);
-
-/****************************************************************************
- * Name: at24c_initialize
- *
- * Description:
- *   Create an initialized MTD device instance.  MTD devices are not registered
- *   in the file system, but are created as instances that can be bound to
- *   other functions (such as a block or character driver front end).
- *
- ****************************************************************************/
-
-FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev);
-
-/****************************************************************************
  * Name: sst25_initialize
  *
  * Description:
- *   Create an initialized MTD device instance.  MTD devices are not registered
- *   in the file system, but are created as instances that can be bound to
- *   other functions (such as a block or character driver front end).
+ *   Initializes the drvier for SPI-based SST25 FLASH
+ *
+ *   Supports SST25VF512, SST25VF010, SST25VF520, SST25VF540, SST25VF080,
+ *   and SST25VF016
  *
  ****************************************************************************/
 
@@ -295,10 +311,9 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev);
  *
  * Description:
  *   Create and initialize an MTD device instance assuming an SST39VF NOR
- *   FLASH device at the configured address in memory.  MTD devices are not
- *   registered in the file system, but are created as instances that can
- *   be bound to other functions (such as a block or character driver front
- *   end).
+ *   FLASH device at the configured address in memory.
+ *
+ *   Supports SST39VF1601, SST39VF1602, SST39VF3201, SST39VF3202.
  *
  ****************************************************************************/
 
@@ -308,15 +323,12 @@ FAR struct mtd_dev_s *sst39vf_initialize(void);
  * Name: w25_initialize
  *
  * Description:
- *   Create an initialized MTD device instance.  MTD devices are not registered
- *   in the file system, but are created as instances that can be bound to
- *   other functions (such as a block or character driver front end).
+ *   Initializes the driver for SPI-based W25x16, x32, and x64 and W25q16,
+ *   q32, q64, and q128 FLASH
  *
  ****************************************************************************/
 
 FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
-
-FAR struct mtd_dev_s *at25_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
  * Name: up_flashinitialize

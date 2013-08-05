@@ -411,7 +411,7 @@ static inline void spi_putreg(struct sam_spidev_s *spi, uint32_t value,
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
-static void spi_dumpregs(const struct sam_spidev_s *spi, const char *msg)
+static void spi_dumpregs(struct sam_spidev_s *spi, const char *msg)
 {
   spivdbg("%s:\n", msg);
   spivdbg("    MR:%08x   SR:%08x  IMR:%08x\n",

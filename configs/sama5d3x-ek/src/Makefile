@@ -66,6 +66,10 @@ ifeq ($(CONFIG_SAMA5_NOR_MAIN),y)
 CSRCS += nor_main.c
 endif
 
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS += sam_nsh.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += sam_autoleds.c
 else
