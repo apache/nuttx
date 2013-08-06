@@ -494,38 +494,37 @@ static void sam_callback(void *arg);
  * Private Data
  ****************************************************************************/
 
-struct sam_dev_s g_sdiodev =
+/* Callbacks */
+
+static const struct sdio_dev_s g_callbacks =
 {
-  .dev =
-  {
-    .reset            = sam_reset,
-    .status           = sam_status,
-    .widebus          = sam_widebus,
-    .clock            = sam_clock,
-    .attach           = sam_attach,
-    .sendcmd          = sam_sendcmd,
-    .blocksetup       = sam_blocksetup,
-    .recvsetup        = sam_dmarecvsetup,
-    .sendsetup        = sam_dmasendsetup,
-    .cancel           = sam_cancel,
-    .waitresponse     = sam_waitresponse,
-    .recvR1           = sam_recvshort,
-    .recvR2           = sam_recvlong,
-    .recvR3           = sam_recvshort,
-    .recvR4           = sam_recvnotimpl,
-    .recvR5           = sam_recvnotimpl,
-    .recvR6           = sam_recvshort,
-    .recvR7           = sam_recvshort,
-    .waitenable       = sam_waitenable,
-    .eventwait        = sam_eventwait,
-    .callbackenable   = sam_callbackenable,
-    .registercallback = sam_registercallback,
+  .reset            = sam_reset,
+  .status           = sam_status,
+  .widebus          = sam_widebus,
+  .clock            = sam_clock,
+  .attach           = sam_attach,
+  .sendcmd          = sam_sendcmd,
+  .blocksetup       = sam_blocksetup,
+  .recvsetup        = sam_dmarecvsetup,
+  .sendsetup        = sam_dmasendsetup,
+  .cancel           = sam_cancel,
+  .waitresponse     = sam_waitresponse,
+  .recvR1           = sam_recvshort,
+  .recvR2           = sam_recvlong,
+  .recvR3           = sam_recvshort,
+  .recvR4           = sam_recvnotimpl,
+  .recvR5           = sam_recvnotimpl,
+  .recvR6           = sam_recvshort,
+  .recvR7           = sam_recvshort,
+  .waitenable       = sam_waitenable,
+  .eventwait        = sam_eventwait,
+  .callbackenable   = sam_callbackenable,
+  .registercallback = sam_registercallback,
 #ifdef CONFIG_SDIO_DMA
-    .dmasupported     = sam_dmasupported,
-    .dmarecvsetup     = sam_dmarecvsetup,
-    .dmasendsetup     = sam_dmasendsetup,
+  .dmasupported     = sam_dmasupported,
+  .dmarecvsetup     = sam_dmarecvsetup,
+  .dmasendsetup     = sam_dmasendsetup,
 #endif
-  },
 };
 
 /* Pre-allocate memory for each HSMCI device */
@@ -2809,11 +2808,18 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       return NULL;
     }
 
+  fvdbg("priv: %p base: %08x hsmci: %d dmac: %d pid: %d\n",
+        priv, priv->base, priv->hsmci, dmac, pid);
+
   /* Initialize the HSMCI slot structure */
 
   sem_init(&priv->waitsem, 0, 0);
   priv->waitwdog = wd_create();
   DEBUGASSERT(priv->waitwdog);
+
+  /* Initialize the callbacks */
+
+  memcpy(&priv->dev, &g_callbacks, sizeof(struct sdio_dev_s ));
 
   /* Allocate a DMA channel */
 
@@ -2825,7 +2831,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    */
 
   sam_reset(&priv->dev);
-  return &g_sdiodev.dev;
+  return &priv->dev;
 }
 
 /****************************************************************************
