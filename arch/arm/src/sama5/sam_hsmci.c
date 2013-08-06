@@ -736,7 +736,7 @@ static void sam_disablewaitints(struct sam_dev_s *priv,
   priv->waitevents = 0;
   priv->wkupevent  = wkupevent;
   priv->waitmask   = 0;
-  putreg32(~priv->xfrmask, SAM_HSMCI_IDR_OFFSET);
+  sam_putreg(priv, ~priv->xfrmask, SAM_HSMCI_IDR_OFFSET);
   irqrestore(flags);
 }
 
@@ -782,7 +782,7 @@ static void sam_disablexfrints(struct sam_dev_s *priv)
 {
   irqstate_t flags = irqsave();
   priv->xfrmask = 0;
-  putreg32(~priv->waitmask, SAM_HSMCI_IDR_OFFSET);
+  sam_putreg(priv, ~priv->waitmask, SAM_HSMCI_IDR_OFFSET);
   irqrestore(flags);
 }
 
