@@ -5314,5 +5314,9 @@
 	  files sam_gpio.* to sam_pio.* (2013-8-6).
 	* arch/arm/src/sama5/sam_pioirq.c:  Add support for SAMA5 PIO interrupts
 	  (2013-8-6).
-	* confgs/sama5d3x-ek/src/sam_hsmci.c:  Add support for SD slot card
+	* configs/sama5d3x-ek/src/sam_hsmci.c:  Add support for SD slot card
 	  detection PIO interrupts (2013-8-6).
+	* arch/arm/src/sam34/sam_hsmci.c and sama5/sam_hsmci.c:  Fix handling
+	  of some masked status conditions that can cause false-alarm errors
+	  (2013-8-6).
+ 
