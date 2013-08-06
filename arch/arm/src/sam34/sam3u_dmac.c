@@ -903,7 +903,7 @@ static int sam_rxbuffer(struct sam_dma_s *dmach, uint32_t paddr,
       ctrlb  = sam_rxctrlb(dmach);
     }
 
-   ctrla  = sam_rxctrla(dmach, regval, nbytes);
+   ctrla = sam_rxctrla(dmach, nbytes, regval);
 
   /* Add the new link list entry */
 
@@ -1159,7 +1159,7 @@ static int sam_dmainterrupt(int irq, void *context)
 
 void weak_function up_dmainitialize(void)
 {
-  dmallvdbg("Iinitialize DMAC0\n");
+  dmallvdbg("Initialize DMAC0\n");
 
   /* Enable peripheral clock */
 
