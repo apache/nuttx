@@ -136,10 +136,10 @@
 
 struct sam_hsmci_info_s
 {
-  pio_pinset_t pincfg;
-  uint8_t irq;
-  xcpt_t handler;
-  struct sdio_dev_s **hsmci;
+  pio_pinset_t pincfg;        /* Card detect PIO pin configuratin */
+  uint8_t irq;                /* Interrupt number (same as pid) */
+  xcpt_t handler;             /* Interrupt handler */
+  struct sdio_dev_s **hsmci;  /* R/W device handle */
 };
 
 /****************************************************************************
@@ -264,9 +264,9 @@ int sam_hsmci_initialize(int slotno, int minor)
   /* Get the HSMI description */
 
   info = sam_hsmci_info(slotno);
-  if (info)
+  if (!info)
     {
-      fdbg("No info for slotno &d\n", slotno);
+      fdbg("No info for slotno %d\n", slotno);
       return -EINVAL;
     }
 
@@ -325,16 +325,16 @@ bool sam_cardinserted(int slotno)
   /* Get the HSMI description */
 
   info = sam_hsmci_info(slotno);
-  if (info)
+  if (!info)
     {
-      fdbg("No info for slotno &d\n", slotno);
+      fdbg("No info for slotno %d\n", slotno);
       return false;
     }
 
   /* Get the state of the PIO pin */
 
-  inserted = sam_pioread(PIO_MCI0_CD);
-  fvdbg("Slot 0 inserted: %s\n", slotno, inserted ? "NO" : "YES");
+  inserted = sam_pioread(info->pincfg);
+  fvdbg("Slot %d inserted: %s\n", slotno, inserted ? "NO" : "YES");
   return !inserted;
 
 #else /* HAVE_MMCSD */

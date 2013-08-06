@@ -2982,6 +2982,7 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
       mmcsd_givesem(priv);
       return -EBUSY;
     }
+
   fvdbg("Attached MMC/SD interrupts\n");
 
   /* Register a callback so that we get informed if media is inserted or
