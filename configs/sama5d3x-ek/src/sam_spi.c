@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "chip.h"
-#include "sam_gpio.h"
+#include "sam_pio.h"
 #include "sam_spi.h"
 #include "sama5d3x-ek.h"
 
@@ -89,7 +89,7 @@
  * Name: sam_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the SAMA5D3x-EK board.
+ *   Called to configure SPI chip select PIO pins for the SAMA5D3x-EK board.
  *
  ************************************************************************************/
 
@@ -99,7 +99,7 @@ void weak_function sam_spiinitialize(void)
 #ifdef CONFIG_MTD_AT25
   /* The AT25 serial FLASH connects using NPCS0 */
 
-   sam_configgpio(GPIO_AT25_NPCS0);
+   sam_configpio(PIO_AT25_NPCS0);
 #endif
 #endif
 
@@ -126,10 +126,10 @@ void weak_function sam_spiinitialize(void)
  *      pins.
  *   2. Provide sam_spi[0|1]select() and sam_spi[0|1]status() functions in your board-
  *      specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
+ *      status operations using PIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spi[0|1]cmddata() functions in your board-specific logic.  This
- *      function will perform cmd/data selection operations using GPIOs in
+ *      function will perform cmd/data selection operations using PIOs in
  *      the way your board is configured.
  *   3. Add a call to up_spiinitialize() in your low level application
  *      initialization logic
@@ -151,9 +151,9 @@ void weak_function sam_spiinitialize(void)
  *   a stub.
  *
  *   An alternative way to program the PIO chip select pins is as a normal
- *   GPIO output.  In that case, the automatic control of the CS pins is
+ *   PIO output.  In that case, the automatic control of the CS pins is
  *   bypassed and this function must provide control of the chip select.
- *   NOTE:  In this case, the GPIO output pin does *not* have to be the
+ *   NOTE:  In this case, the PIO output pin does *not* have to be the
  *   same as the NPCS pin normal associated with the chip select number.
  *
  * Input Parameters:
@@ -173,7 +173,7 @@ void sam_spi0select(enum spi_dev_e devid, bool selected)
 
   if (devid == SPIDEV_FLASH)
     {
-      sam_gpiowrite(GPIO_AT25_NPCS0, !selected);
+      sam_piowrite(PIO_AT25_NPCS0, !selected);
     }
 #endif
 }

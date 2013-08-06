@@ -61,7 +61,7 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "sam_gpio.h"
+#include "sam_pio.h"
 #include "sama5d3x-ek.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
@@ -74,7 +74,7 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_PIOE_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+#if defined(CONFIG_SAMA5_PIOE_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 static xcpt_t g_irquser1;
 #endif
 
@@ -99,7 +99,7 @@ static xcpt_t g_irquser1;
 
 void up_buttoninit(void)
 {
-  (void)sam_configgpio(GPIO_USER1);
+  (void)sam_configpio(PIO_USER1);
 }
 
 /************************************************************************************
@@ -115,7 +115,7 @@ void up_buttoninit(void)
 
 uint8_t up_buttons(void)
 {
-  return sam_gpioread(GPIO_USER1) ? 0 : BUTTON_USER1_BIT;
+  return sam_pioread(PIO_USER1) ? 0 : BUTTON_USER1_BIT;
 }
 
 /****************************************************************************
@@ -128,15 +128,13 @@ uint8_t up_buttons(void)
  *   handler address isreturned (so that it may restored, if so desired).
  *
  * Configuration Notes:
- *   Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the
- *   overall GPIO IRQ feature and CONFIG_AVR32_GPIOIRQSETA and/or
- *   CONFIG_AVR32_GPIOIRQSETB must be enabled to select GPIOs to support
- *   interrupts on.  For button support, bits 2 and 3 must be set in
- *   CONFIG_AVR32_GPIOIRQSETB (PB2 and PB3).
+ *   Configuration CONFIG_SAMA5_PIO_IRQ must be selected to enable the
+ *   overall PIO IRQ feature and CONFIG_SAMA5_PIOE_IRQ must be enabled to select
+ *   PIOs to support interrupts on PIOE.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_PIOE_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+#if defined(CONFIG_SAMA5_PIOE_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
 {
   xcpt_t oldhandler = NULL;
@@ -158,9 +156,9 @@ xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
 
       /* Configure the interrupt */
 
-      sam_gpioirq(IRQ_USER1);
+      sam_pioirq(IRQ_USER1);
       (void)irq_attach(IRQ_USER1, irqhandler);
-      sam_gpioirqenable(IRQ_USER1);
+      sam_pioirqenable(IRQ_USER1);
     }
 
   /* Return the old button handler (so that it can be restored) */

@@ -55,7 +55,7 @@
  ************************************************************************************/
 /* LEDs *****************************************************************************/
 /* There are two LEDs on the SAMA5D3 series-CM board that can be controlled
- * by software.  A  blue LED is controlled via GPIO pins.  A red LED normally
+ * by software.  A  blue LED is controlled via PIO pins.  A red LED normally
  * provides an indication that power is supplied to the board but can also
  * be controlled via software.
  *
@@ -68,10 +68,10 @@
  *   LCD is illuminated by a high output.
  */
 
-#define GPIO_BLUE    (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
-                      GPIO_PORT_PIOE | GPIO_PIN25)
-#define GPIO_RED     (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_CLEAR | \
-                      GPIO_PORT_PIOE | GPIO_PIN24)
+#define PIO_BLUE     (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
+                      PIO_PORT_PIOE | PIO_PIN25)
+#define PIO_RED      (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_CLEAR | \
+                      PIO_PORT_PIOE | PIO_PIN24)
 
 /* Buttons **************************************************************************/
 /* There are five push button switches on the SAMA5D3X-EK base board:
@@ -90,9 +90,9 @@
  *     will sense "0" is on PE27.
  */
 
-#define GPIO_USER1   (GPIO_INPUT | GPIO_CFG_PULLUP | GPIO_CFG_DEGLITCH | \
-                      GPIO_INT_BOTHEDGES | GPIO_PORT_PIOE | GPIO_PIN27)
-#define IRQ_USER1    SAM_IRQ_PE27
+#define PIO_USER1    (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN27)
+#define IRQ_USER1     SAM_IRQ_PE27
 
 /* HSMCI Card Slots *****************************************************************/
 /* The SAMA5D3x-EK provides a two SD memory card slots:  (1) a full size SD card
@@ -117,9 +117,9 @@
  *   PD0  MCI0_CDA
  */
 
-#define GPIO_MCI0_CD (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
-                      GPIO_INT_BOTHEDGES | GPIO_PORT_PIOD | GPIO_PIN17)
-#define IRQ_MCI0_CD  SAM_IRQ_PD17
+#define PIO_MCI0_CD  (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOD | PIO_PIN17)
+#define IRQ_MCI0_CD   SAM_IRQ_PD17
 
 /* The microSD connects vi HSMCI1.  The card detect discrete is available on
  * PB18 (pulled high):
@@ -133,9 +133,9 @@
  *   PB19  MCI1_CDA
  */
 
-#define GPIO_MCI1_CD (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
-                      GPIO_INT_BOTHEDGES | GPIO_PORT_PIOD | GPIO_PIN18)
-#define IRQ_MCI1_CD  SAM_IRQ_PD18
+#define PIO_MCI1_CD  (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOD | PIO_PIN18)
+#define IRQ_MCI1_CD   SAM_IRQ_PD18
 
 /* SPI Chip Selects *****************************************************************/
 /* Both the Ronetix and Embest versions of the SAMAD3x CPU modules include an
@@ -155,9 +155,9 @@
  * not be populated?).  I think closing JP1 is correct in either case.
  */
 
-#define GPIO_AT25_NPCS0 (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
-                         GPIO_PORT_PIOD | GPIO_PIN13)
-#define AT25_PORT       SPI0_CS0
+#define PIO_AT25_NPCS0 (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
+                        PIO_PORT_PIOD | PIO_PIN13)
+#define AT25_PORT      SPI0_CS0
 
 /************************************************************************************
  * Public Types

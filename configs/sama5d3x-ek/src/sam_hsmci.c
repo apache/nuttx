@@ -65,30 +65,6 @@
  *   PB19  MCI1_CDA
  */
 
-
-/* SPI Chip Selects *****************************************************************/
-/* Both the Ronetix and Embest versions of the SAMAD3x CPU modules include an
- * Atmel AT25DF321A, 32-megabit, 2.7-volt SPI serial flash.  The SPI
- * connection is as follows:
- *
- *   AT25DF321A      SAMA5
- *   --------------- -----------------------------------------------
- *   SI              PD11 SPI0_MOSI
- *   SO              PD10 SPI0_MIS0
- *   SCK             PD12 SPI0_SPCK
- *   /CS             PD13 via NL17SZ126 if JP1 is closed (See below)
- *
- * JP1 and JP2 seem to related to /CS on the Ronetix board, but the usage is
- * less clear.  For the Embest module, JP1 must be closed to connect /CS to
- * PD13; on the Ronetix schematic, JP11 seems only to bypass a resistor (may
- * not be populated?).  I think closing JP1 is correct in either case.
- */
-
-#define GPIO_AT25_NPCS0 (GPIO_OUTPUT | GPIO_CFG_PULLUP | GPIO_OUTPUT_SET | \
-                         GPIO_PORT_PIOD | GPIO_PIN13)
-#define AT25_PORT       SPI0_CS0
-
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -103,35 +79,41 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
+#include "sam_pio.h"
 #include "sam_hsmci.h"
+
 #include "sama5d3x-ek.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-/* This needs to be extended.  The card detect GPIO must be configured as an
- * interrupt.  When the interrupt indicating that a card has been inserted
- * or removed is received, this function must call sio_mediachange() to
- * handle that event.
- */
-
-#warning "Card detect interrupt handling needed"
-
 /* Configuration ************************************************************/
 
 #define HAVE_MMCSD  1
 
 /* Can't support MMC/SD if the card interface(s) are not enable */
 
-#if !defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_HSMCI0)
+#if !defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_HSMCI1)
 #  undef HAVE_MMCSD
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
 
-#if defined(CONFIG_DISABLE_MOUNTPOINT)
+#if defined(HAVE_MMCSD) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#  warning Mountpoints disabled.  No MMC/SD support
 #  undef HAVE_MMCSD
 #endif
+
+/* We need PIO interrupts on PIOD to support card detect interrupts */
+
+#if defined(HAVE_MMCSD) && !defined(CONFIG_SAMA5_PIOD_IRQ)
+#  warning PIOD interrupts not enabled.  No MMC/SD support.
+#  undef HAVE_MMCSD
+#endif
+
+/* The NSH slot and minor numbers are useless for us because we have
+ * multiple HSMCI devices.
+ */
 
 #ifdef HAVE_MMCSD
 #  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
@@ -148,26 +130,102 @@
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Private Types
  ****************************************************************************/
-/************************************************************************************
- * Name: sam_hsmci_gpioinit
- *
- * Description:
- *   Initialize HSMCI support.  This function is called very early in board
- *   initialization.
- *
- ************************************************************************************/
+/* This structure holds information unique to one HSMCI peripheral */
+
+struct sam_hsmci_info_s
+{
+  pio_pinset_t pincfg;
+  uint8_t irq;
+  xcpt_t handler;
+  struct sdio_dev_s **hsmci;
+};
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Retained HSMCI driver handles for use by interrupt handlers */
 
 #ifdef HAVE_MMCSD
-static void sam_hsmci_gpioinit(int slotno)
+#ifdef CONFIG_SAMA5_HSMCI0
+static struct sdio_dev_s *g_hsmci0;
+#endif
+#ifdef CONFIG_SAMA5_HSMCI1
+static struct sdio_dev_s *g_hsmci1;
+#endif
+
+/* HSCMI device characteristics */
+
+#ifdef CONFIG_SAMA5_HSMCI0
+static int sam_hsmci0_cardetect(int irq, void *regs);
+
+static const struct sam_hsmci_info_s g_hsmci0_info =
 {
+  PIO_MCI0_CD, IRQ_MCI0_CD, sam_hsmci0_cardetect, &g_hsmci0
+};
+#endif
+
+#ifdef CONFIG_SAMA5_HSMCI1
+static int sam_hsmci1_cardetect(int irq, void *regs);
+
+static const struct sam_hsmci_info_s g_hsmci1_info =
+{
+  PIO_MCI1_CD, IRQ_MCI1_CD, sam_hsmci1_cardetect, &g_hsmci1
+};
+#endif
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_hsmci0_cardetect and sam_hsmci1_cardetect
+ *
+ * Description:
+ *   Card detect interrupt handlers
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_MMCSD
+#ifdef CONFIG_SAMA5_HSMCI0
+static int sam_hsmci0_cardetect(int irq, void *regs)
+{
+   sdio_mediachange(g_hsmci0, sam_cardinserted(0));
+   return OK;
+}
+#endif
+
+#ifdef CONFIG_SAMA5_HSMCI1
+static int sam_hsmci1_cardetect(int irq, void *regs)
+{
+   sdio_mediachange(g_hsmci1, sam_cardinserted(1));
+   return OK;
+}
+#endif
+#endif
+
+/****************************************************************************
+ * Name: sam_hsmci_info
+ *
+ * Description:
+ *   Initialize HSMCI PIOs.
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_MMCSD
+static const struct sam_hsmci_info_s *sam_hsmci_info(int slotno)
+{
+   const struct sam_hsmci_info_s *info = NULL;
+
 #ifdef CONFIG_SAMA5_HSMCI0
 #ifdef CONFIG_SAMA5_HSMCI1
   if (slotno == 0)
 #endif
     {
-      sam_configgpio(GPIO_MCI0_CD);
+      info = &g_hsmci0_info;
     }
 #ifdef CONFIG_SAMA5_HSMCI1
   else
@@ -176,9 +234,11 @@ static void sam_hsmci_gpioinit(int slotno)
 
 #ifdef CONFIG_SAMA5_HSMCI1
     {
-      sam_configgpio(GPIO_MCI1_CD);
+      info = &g_hsmci1_info;
     }
 #endif
+
+  return info;
 }
 #endif
 
@@ -198,18 +258,27 @@ static void sam_hsmci_gpioinit(int slotno)
 int sam_hsmci_initialize(int slotno, int minor)
 {
 #ifdef HAVE_MMCSD
-  FAR struct sdio_dev_s *sdio;
+  const struct sam_hsmci_info_s *info;
   int ret;
 
-  /* Initialize card-detect and write-protect GPIOs */
+  /* Get the HSMI description */
 
-  sam_hsmci_gpioinit(slotno);
+  info = sam_hsmci_info(slotno);
+  if (info)
+    {
+      fdbg("No info for slotno &d\n", slotno);
+      return -EINVAL;
+    }
+
+  /* Initialize card-detect and write-protect PIOs */
+
+   sam_configpio(info->pincfg);
 
   /* Mount the SDIO-based MMC/SD block driver */
   /* First, get an instance of the SDIO interface */
 
-  sdio = sdio_initialize(slotno);
-  if (!sdio)
+  *info->hsmci = sdio_initialize(slotno);
+  if (!*info->hsmci)
     {
       fdbg("Failed to initialize SDIO slot %d\n",  slotno);
       return -ENODEV;
@@ -217,57 +286,57 @@ int sam_hsmci_initialize(int slotno, int minor)
 
   /* Now bind the SDIO interface to the MMC/SD driver */
 
-  ret = mmcsd_slotinitialize(minor, sdio);
+  ret = mmcsd_slotinitialize(minor, *info->hsmci);
   if (ret != OK)
     {
       fdbg("Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
 
+  /* Configure card detect interrupts */
+
+  sam_pioirq(info->pincfg);
+  (void)irq_attach(info->irq, info->handler);
+  sam_pioirqenable(info->irq);
+
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 
-   sdio_mediachange(sdio, sam_cardinserted(slotno));
+   sdio_mediachange(*info->hsmci, sam_cardinserted(slotno));
 #endif
 
   return OK;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_cardinserted
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_HSMCI0) || defined(CONFIG_SAMA5_HSMCI1)
 bool sam_cardinserted(int slotno)
 {
 #ifdef HAVE_MMCSD
+  const struct sam_hsmci_info_s *info;
+  bool inserted;
 
-#ifdef CONFIG_SAMA5_HSMCI0
-#ifdef CONFIG_SAMA5_HSMCI1
-  if (slotno == 0)
-#endif /* CONFIG_SAMA5_HSMCI1 */
+  /* Get the HSMI description */
+
+  info = sam_hsmci_info(slotno);
+  if (info)
     {
-      bool inserted = sam_gpioread(GPIO_MCI0_CD);
-      fvdbg("Slot 0 inserted: %s\n", inserted ? "NO" : "YES");
-      return !inserted;
+      fdbg("No info for slotno &d\n", slotno);
+      return false;
     }
 
-#ifdef CONFIG_SAMA5_HSMCI1
-  else
-#endif /* CONFIG_SAMA5_HSMCI1 */
-#endif /* CONFIG_SAMA5_HSMCI0 */
+  /* Get the state of the PIO pin */
 
-#ifdef CONFIG_SAMA5_HSMCI1
-    {
-      bool inserted = sam_gpioread(GPIO_MCI1_CD);
-      fvdbg("Slot 1 inserted: %s\n", inserted ? "NO" : "YES");
-      return !inserted;
-    }
+  inserted = sam_pioread(PIO_MCI0_CD);
+  fvdbg("Slot 0 inserted: %s\n", slotno, inserted ? "NO" : "YES");
+  return !inserted;
 
-#endif /* CONFIG_SAMA5_HSMCI1 */
 #else /* HAVE_MMCSD */
 
   return false;
@@ -276,13 +345,13 @@ bool sam_cardinserted(int slotno)
 }
 #endif /* CONFIG_SAMA5_HSMCIO ||  CONFIG_SAMA5_HSMCI1 */
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_writeprotected
  *
  * Description:
  *   Check if a card is inserted into the selected HSMCI slot
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_HSMCI0) || defined(CONFIG_SAMA5_HSMCI1)
 bool sam_writeprotected(int slotno)
