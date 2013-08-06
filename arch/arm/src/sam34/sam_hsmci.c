@@ -1159,7 +1159,7 @@ static int sam_interrupt(int irq, void *context)
                 {
                   /* Yes.. Was the error some kind of timeout? */
 
-                  fllvdbg("ERROR:events: %08x SR: %08x\n",
+                  fllvdbg("ERROR: events: %08x SR: %08x\n",
                           priv->cmdrmask, enabled);
 
                   if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
@@ -1687,6 +1687,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 {
   struct sam_dev_s *priv = (struct sam_dev_s*)dev;
   uint32_t sr;
+  uint32_t pending;
   int32_t  timeout;
 
   switch (cmd & MMCSD_RESPONSE_MASK)
@@ -1718,22 +1719,24 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
     {
       /* Did a Command-Response sequence termination evernt occur? */
 
-      sr = getreg32(SAM_HSMCI_SR);
-      if ((sr & priv->cmdrmask) != 0)
+      sr      = getreg32(SAM_HSMCI_SR);
+      pending = sr & priv->cmdrmask;
+
+      if (pending != 0)
         {
           sam_cmdsample2(SAMPLENDX_AT_WAKEUP, sr);
           sam_cmddump();
 
           /* Yes.. Did the Command-Response sequence end with an error? */
 
-          if ((sr & HSMCI_RESPONSE_ERRORS) != 0)
+          if ((pending & HSMCI_RESPONSE_ERRORS) != 0)
             {
               /* Yes.. Was the error some kind of timeout? */
 
               fdbg("ERROR: cmd: %08x events: %08x SR: %08x\n",
                    cmd, priv->cmdrmask, sr);
 
-              if ((sr & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
+              if ((pending & HSMCI_RESPONSE_TIMEOUT_ERRORS) != 0)
                 {
                   /* Yes.. return a timeout error */
 
