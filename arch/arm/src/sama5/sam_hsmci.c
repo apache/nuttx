@@ -1339,7 +1339,7 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
       /* Handle in progress, interrupt driven data transfers ****************/
       /* Do any of these interrupts signal the end a data transfer? */
 
-      pending  = enabled & priv->xfrmask;
+      pending = enabled & priv->xfrmask;
       if (pending != 0)
         {
           /* Yes.. the transfer is complete.  Did it complete with an error? */
@@ -1373,7 +1373,7 @@ static int sam_hsmci_interrupt(struct sam_dev_s *priv)
       /* Handle wait events *************************************************/
       /* Do any of these interrupts signal wakeup event? */
 
-      pending  = enabled & priv->waitmask;
+      pending = enabled & priv->waitmask;
       if (pending != 0)
         {
           sdio_eventset_t wkupevent = 0;

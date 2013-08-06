@@ -1158,7 +1158,7 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
       ctrlb  = sam_rxctrlb(dmach);
     }
 
-   ctrla  = sam_rxctrla(dmach, regval, nbytes);
+   ctrla = sam_rxctrla(dmach, nbytes, regval);
 
   /* Add the new link list entry */
 
@@ -1480,7 +1480,7 @@ void sam_dmainitialize(struct sam_dmac_s *dmac)
 void weak_function up_dmainitialize(void)
 {
 #ifdef CONFIG_SAMA5_DMAC0
-  dmallvdbg("Iinitialize DMAC0\n");
+  dmallvdbg("Initialize DMAC0\n");
 
   /* Enable peripheral clock */
 
@@ -1500,7 +1500,7 @@ void weak_function up_dmainitialize(void)
 #endif
 
 #ifdef CONFIG_SAMA5_DMAC1
-  dmallvdbg("Iinitialize DMAC1\n");
+  dmallvdbg("Initialize DMAC1\n");
 
   /* Enable peripheral clock */
 
