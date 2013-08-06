@@ -60,7 +60,7 @@
 #include "chip.h"
 #include "up_arch.h"
 
-#include "sam_gpio.h"
+#include "sam_pio.h"
 #include "sam_dmac.h"
 #include "sam_hsmci.h"
 #include "sam_periphclks.h"
@@ -2705,17 +2705,17 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       priv->base  = SAM_HSMCI0_VBASE;
       priv->hsmci = 0;
 
-      /* Configure GPIOs for 4-bit, wide-bus operation.  NOTE: (1) the chip
+      /* Configure PIOs for 4-bit, wide-bus operation.  NOTE: (1) the chip
        * is capable of 8-bit wide bus operation but D4-D7 are not configured,
-       * (2) any card detection GPIOs must be set up in board-specific logic.
+       * (2) any card detection PIOs must be set up in board-specific logic.
        */
 
-      sam_configgpio(GPIO_MCI0_DA0);   /* Data 0 of Slot A */
-      sam_configgpio(GPIO_MCI0_DA1);   /* Data 1 of Slot A */
-      sam_configgpio(GPIO_MCI0_DA2);   /* Data 2 of Slot A */
-      sam_configgpio(GPIO_MCI0_DA3);   /* Data 3 of Slot A */
-      sam_configgpio(GPIO_MCI0_CK);    /* SD clock */
-      sam_configgpio(GPIO_MCI0_CDA);   /* Command/Response */
+      sam_configpio(PIO_MCI0_DA0);   /* Data 0 of Slot A */
+      sam_configpio(PIO_MCI0_DA1);   /* Data 1 of Slot A */
+      sam_configpio(PIO_MCI0_DA2);   /* Data 2 of Slot A */
+      sam_configpio(PIO_MCI0_DA3);   /* Data 3 of Slot A */
+      sam_configpio(PIO_MCI0_CK);    /* SD clock */
+      sam_configpio(PIO_MCI0_CDA);   /* Command/Response */
 
       /* Enable the HSMCI0 peripheral clock.  This really should be done in
        * sam_enable (as well as disabling peripheal clocks in sam_disable().
@@ -2742,17 +2742,17 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       priv->base  = SAM_HSMCI1_VBASE;
       priv->hsmci = 1;
 
-      /* Configure GPIOs for 4-bit, wide-bus operation.  NOTE: (1) the chip
+      /* Configure PIOs for 4-bit, wide-bus operation.  NOTE: (1) the chip
        * is capable of 8-bit wide bus operation but D4-D7 are not configured,
-       * (2) any card detection GPIOs must be set up in board-specific logic.
+       * (2) any card detection PIOs must be set up in board-specific logic.
        */
 
-      sam_configgpio(GPIO_MCI1_DA0);   /* Data 0 of Slot A */
-      sam_configgpio(GPIO_MCI1_DA1);   /* Data 1 of Slot A */
-      sam_configgpio(GPIO_MCI1_DA2);   /* Data 2 of Slot A */
-      sam_configgpio(GPIO_MCI1_DA3);   /* Data 3 of Slot A */
-      sam_configgpio(GPIO_MCI1_CK);    /* SD clock */
-      sam_configgpio(GPIO_MCI1_CDA);   /* Command/Response */
+      sam_configpio(PIO_MCI1_DA0);   /* Data 0 of Slot A */
+      sam_configpio(PIO_MCI1_DA1);   /* Data 1 of Slot A */
+      sam_configpio(PIO_MCI1_DA2);   /* Data 2 of Slot A */
+      sam_configpio(PIO_MCI1_DA3);   /* Data 3 of Slot A */
+      sam_configpio(PIO_MCI1_CK);    /* SD clock */
+      sam_configpio(PIO_MCI1_CDA);   /* Command/Response */
 
       /* Enable the HSMCI1 peripheral clock  This really should be done in
        * sam_enable (as well as disabling peripheal clocks in sam_disable().
@@ -2779,17 +2779,17 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       priv->base  = SAM_HSMCI2_VBASE;
       priv->hsmci = 2;
 
-      /* Configure GPIOs for 4-bit, wide-bus operation.  NOTE: (1) the chip
+      /* Configure PIOs for 4-bit, wide-bus operation.  NOTE: (1) the chip
        * is capable of 8-bit wide bus operation but D4-D7 are not configured,
-       * (2) any card detection GPIOs must be set up in board-specific logic.
+       * (2) any card detection PIOs must be set up in board-specific logic.
        */
 
-      sam_configgpio(GPIO_MCI2_DA0);   /* Data 0 of Slot A */
-      sam_configgpio(GPIO_MCI2_DA1);   /* Data 1 of Slot A */
-      sam_configgpio(GPIO_MCI2_DA2);   /* Data 2 of Slot A */
-      sam_configgpio(GPIO_MCI1_DA3);   /* Data 3 of Slot A */
-      sam_configgpio(GPIO_MCI2_DA3);    /* SD clock */
-      sam_configgpio(GPIO_MCI2_CDA);   /* Command/Response */
+      sam_configpio(PIO_MCI2_DA0);   /* Data 0 of Slot A */
+      sam_configpio(PIO_MCI2_DA1);   /* Data 1 of Slot A */
+      sam_configpio(PIO_MCI2_DA2);   /* Data 2 of Slot A */
+      sam_configpio(PIO_MCI1_DA3);   /* Data 3 of Slot A */
+      sam_configpio(PIO_MCI2_DA3);    /* SD clock */
+      sam_configpio(PIO_MCI2_CDA);   /* Command/Response */
 
       /* Enable the HSMCI2 peripheral clock  This really should be done in
        * sam_enable (as well as disabling peripheal clocks in sam_disable().

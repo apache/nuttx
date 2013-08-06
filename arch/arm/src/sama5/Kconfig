@@ -212,30 +212,30 @@ config SAMA5_MPDDRC
 
 endmenu # ATSAMA5 Peripheral Support
 
-config PIO_IRQ
+config SAMA5_PIO_IRQ
 	bool "PIO pin interrupts"
 	---help---
 		Enable support for interrupting PIO pins
 
-if PIO_IRQ
+if SAMA5_PIO_IRQ
 
-config PIOA_IRQ
+config SAMA5_PIOA_IRQ
 	bool "PIOA interrupts"
 	default n
 
-config PIOB_IRQ
+config SAMA5_PIOB_IRQ
 	bool "PIOB interrupts"
 	default n
 
-config PIOC_IRQ
+config SAMA5_PIOC_IRQ
 	bool "PIOC interrupts"
 	default n
 
-config PIOD_IRQ
+config SAMA5_PIOD_IRQ
 	bool "PIOD interrupts"
 	default n
 
-config PIOE_IRQ
+config SAMA5_PIOE_IRQ
 	bool "PIOE interrupts"
 	default n
 

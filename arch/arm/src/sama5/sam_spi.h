@@ -122,10 +122,10 @@ extern "C"
  *      pins.
  *   2. Provide sam_spi[0|1]select() and sam_spi[0|1]status() functions in your board-
  *      specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
+ *      status operations using PIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spi[0|1]cmddata() functions in your board-specific logic.  This
- *      function will perform cmd/data selection operations using GPIOs in
+ *      function will perform cmd/data selection operations using PIOs in
  *      the way your board is configured.
  *   3. Add a call to up_spiinitialize() in your low level application
  *      initialization logic
@@ -151,9 +151,9 @@ enum spi_dev_e;
  *   a stub.
  *
  *   An alternative way to program the PIO chip select pins is as a normal
- *   GPIO output.  In that case, the automatic control of the CS pins is
+ *   PIO output.  In that case, the automatic control of the CS pins is
  *   bypassed and this function must provide control of the chip select.
- *   NOTE:  In this case, the GPIO output pin does *not* have to be the
+ *   NOTE:  In this case, the PIO output pin does *not* have to be the
  *   same as the NPCS pin normal associated with the chip select number.
  *
  * Input Parameters:
@@ -207,7 +207,7 @@ uint8_t sam_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
  *   may be configured to use 9-bit data transfers with the 9th bit
  *   indicating command or data.  That same hardware may be configurable,
  *   instead, to use 8-bit data but to require an additional, board-
- *   specific GPIO control to distinguish command and data.  This function
+ *   specific PIO control to distinguish command and data.  This function
  *   would be needed in that latter case.
  *
  * Input Parameters:
