@@ -33,7 +33,7 @@
  *
  ****************************************************************************/
 /* There are two LEDs on the SAMA5D3 series-CM board that can be controlled
- * by software.  A  blue LED is controlled via GPIO pins.  A red LED normally
+ * by software.  A  blue LED is controlled via PIO pins.  A red LED normally
  * provides an indication that power is supplied to the board but can also
  * be controlled via software.
  *
@@ -81,6 +81,7 @@
 
 #include <arch/board/board.h>
 
+#include "sam_pio.h"
 #include "sama5d3x-ek.h"
 
 #ifdef CONFIG_ARCH_LEDS
@@ -119,10 +120,10 @@
 
 void up_ledinit(void)
 {
-  /* Configure LED GPIOs for output */
+  /* Configure LED PIOs for output */
 
-  sam_configgpio(GPIO_BLUE);
-  sam_configgpio(GPIO_RED);
+  sam_configpio(PIO_BLUE);
+  sam_configpio(PIO_RED);
 }
 
 /****************************************************************************
@@ -152,8 +153,8 @@ void up_ledon(int led)
         break;
     }
 
-  sam_gpiowrite(GPIO_BLUE, blueoff);
-  sam_gpiowrite(GPIO_RED, redon);
+  sam_piowrite(PIO_BLUE, blueoff);
+  sam_piowrite(PIO_RED, redon);
 }
 
 /****************************************************************************
@@ -164,8 +165,8 @@ void up_ledoff(int led)
 {
   if (led != 2)
     {
-      sam_gpiowrite(GPIO_BLUE, true);  /* Low illuminates */
-      sam_gpiowrite(GPIO_RED, false);  /* High illuminates */
+      sam_piowrite(PIO_BLUE, true);  /* Low illuminates */
+      sam_piowrite(PIO_RED, false);  /* High illuminates */
     }
 }
 

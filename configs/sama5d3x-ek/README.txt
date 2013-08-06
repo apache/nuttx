@@ -433,7 +433,7 @@ Buttons and LEDs
   LEDs
   ----
   There are two LEDs on the SAMA5D3 series-CM board that can be controlled
-  by software.  A  blue LED is controlled via GPIO pins.  A red LED normally
+  by software.  A  blue LED is controlled via PIO pins.  A red LED normally
   provides an indication that power is supplied to the board but can also
   be controlled via software.
 
@@ -480,23 +480,23 @@ Serial Consoles
 
     USART1 Connector J8
     -------------------------------
-    SAMA5 FUNCTION  NUTTX GPIO
+    SAMA5 FUNCTION  NUTTX PIO
     PIO   NAME      CONFIGURATION
     ---- ---------- ---------------
-    PB27 RTS1       GPIO_USART1_RTS
-    PB29 TXD1       GPIO_USART1_TXD
-    PB28 RXD1       GPIO_USART1_RXD
-    PB26 CTS1       GPIO_USART1_CTS
+    PB27 RTS1       PIO_USART1_RTS
+    PB29 TXD1       PIO_USART1_TXD
+    PB28 RXD1       PIO_USART1_RXD
+    PB26 CTS1       PIO_USART1_CTS
 
     NOTE: Debug TX and RX pins also go the the ADM3312EARU, but I am
     uncertain of the functionality.
 
     -------------------------------
-    SAMA5 FUNCTION  NUTTX GPIO
+    SAMA5 FUNCTION  NUTTX PIO
     PIO   NAME      CONFIGURATION
     ---- ---------- ---------------
-    PB31 DTXD       GPIO_DBGU_DTXD
-    PB30 DRXD       GPIO_DBGU_DRXD
+    PB31 DTXD       PIO_DBGU_DTXD
+    PB30 DRXD       PIO_DBGU_DRXD
 
   Hardware UART via CDC
   ---------------------
@@ -694,11 +694,11 @@ SAMA5D3x-EK Configuration Options
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.
 
-    CONFIG_PIOA_IRQ          - Support PIOA interrupts
-    CONFIG_PIOB_IRQ          - Support PIOB interrupts
-    CONFIG_PIOC_IRQ          - Support PIOD interrupts
-    CONFIG_PIOD_IRQ          - Support PIOD interrupts
-    CONFIG_PIOE_IRQ          - Support PIOE interrupts
+    CONFIG_SAMA5_PIOA_IRQ     - Support PIOA interrupts
+    CONFIG_SAMA5_PIOB_IRQ     - Support PIOB interrupts
+    CONFIG_SAMA5_PIOC_IRQ     - Support PIOD interrupts
+    CONFIG_SAMA5_PIOD_IRQ     - Support PIOD interrupts
+    CONFIG_SAMA5_PIOE_IRQ     - Support PIOE interrupts
 
     CONFIG_USART0_ISUART     - USART0 is configured as a UART
     CONFIG_USART1_ISUART     - USART1 is configured as a UART
@@ -1017,9 +1017,13 @@ Configurations
          CONFIG_SAMA5_DMAC0=y                  : DMAC0 is needed by HSMCI0
          CONFIG_SAMA5_DMAC1=y                  : DMAC1 is needed by HSMCI1
 
+         CONFIG_SAMA5_PIO_IRQ=y                : PIO interrupts needed
+         CONFIG_SAMA5_PIOD_IRQ=y               : Card detect pins are on PIOD
+
        Device Drivers ->
          CONFIG_MMCSD=y                        : Enable MMC/SD support
          CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
+         CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
          CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
          CONFIG_SDIO_DMA=y                     : Use SDIO DMA
          CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes

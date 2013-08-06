@@ -1,6 +1,6 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_gpio.c
- * General Purpose Input/Output (GPIO) logic for the SAMA5
+ * arch/arm/src/sama5/sam_pio.c
+ * General Purpose Input/Output (PIO) logic for the SAMA5
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +52,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "sam_gpio.h"
+#include "sam_pio.h"
 #include "chip/sam_pio.h"
 
 /****************************************************************************
@@ -75,47 +75,47 @@ static const char g_portchar[4]   = { 'A', 'B', 'C', 'D' };
  * Private Function Prototypes
  ****************************************************************************/
 /****************************************************************************
- * Name: sam_gpiobase
+ * Name: sam_piobase
  *
  * Description:
- *   Return the base address of the GPIO register set
+ *   Return the base address of the PIO register set
  *
  ****************************************************************************/
 
-static inline uintptr_t sam_gpiobase(gpio_pinset_t cfgset)
+static inline uintptr_t sam_piobase(pio_pinset_t cfgset)
 {
-  int port = (cfgset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  int port = (cfgset & PIO_PORT_MASK) >> PIO_PORT_SHIFT;
   return SAM_PION_VBASE(port);
 }
 
 /****************************************************************************
- * Name: sam_gpiopin
+ * Name: sam_piopin
  *
  * Description:
- *   Returun the base address of the GPIO register set
+ *   Returun the base address of the PIO register set
  *
  ****************************************************************************/
 
-static inline int sam_gpiopin(gpio_pinset_t cfgset)
+static inline int sam_piopin(pio_pinset_t cfgset)
 {
-  return 1 << ((cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT);
+  return 1 << ((cfgset & PIO_PIN_MASK) >> PIO_PIN_SHIFT);
 }
 
 /****************************************************************************
  * Name: sam_configinput
  *
  * Description:
- *   Configure a GPIO input pin based on bit-encoded description of the pin.
+ *   Configure a PIO input pin based on bit-encoded description of the pin.
  *
  ****************************************************************************/
 
 static inline int sam_configinput(uintptr_t base, uint32_t pin,
-                                  gpio_pinset_t cfgset)
+                                  pio_pinset_t cfgset)
 {
-#if defined(GPIO_HAVE_SCHMITT) || defined(GPIO_HAVE_DRIVE)
+#if defined(PIO_HAVE_SCHMITT) || defined(PIO_HAVE_DRIVE)
   uint32_t regval;
 #endif
-#if defined(GPIO_HAVE_DRIVE)
+#if defined(PIO_HAVE_DRIVE)
   uint32_t offset;
   uint32_t mask;
   uint32_t drive;
@@ -128,7 +128,7 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
 
   /* Enable/disable the pull-up as requested */
 
-  if ((cfgset & GPIO_CFG_PULLUP) != 0)
+  if ((cfgset & PIO_CFG_PULLUP) != 0)
     {
       putreg32(pin, base + SAM_PIO_PUER_OFFSET);
     }
@@ -137,10 +137,10 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
       putreg32(pin, base + SAM_PIO_PUDR_OFFSET);
     }
 
-#ifdef GPIO_HAVE_PULLDOWN
+#ifdef PIO_HAVE_PULLDOWN
   /* Enable/disable the pull-down as requested */
 
-  if ((cfgset & GPIO_CFG_PULLDOWN) != 0)
+  if ((cfgset & PIO_CFG_PULLDOWN) != 0)
     {
       putreg32(pin, base + SAM_PIO_PPDER_OFFSET);
     }
@@ -152,7 +152,7 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
 
   /* Check if filtering should be enabled */
 
-  if ((cfgset & GPIO_CFG_DEGLITCH) != 0)
+  if ((cfgset & PIO_CFG_DEGLITCH) != 0)
     {
       putreg32(pin, base + SAM_PIO_IFER_OFFSET);
     }
@@ -161,11 +161,11 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
       putreg32(pin, base + SAM_PIO_IFDR_OFFSET);
     }
 
-#ifdef GPIO_HAVE_SCHMITT
+#ifdef PIO_HAVE_SCHMITT
   /* Enable/disable the Schmitt trigger */
 
   regval = getreg32(base + SAM_PIO_SCHMITT_OFFSET);
-  if ((cfgset & GPIO_CFG_PULLDOWN) != 0)
+  if ((cfgset & PIO_CFG_PULLDOWN) != 0)
     {
       regval |= pin;
     }
@@ -176,10 +176,10 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
   putreg32(regval, base + SAM_PIO_SCHMITT_OFFSET);
 #endif
 
-#ifdef GPIO_HAVE_DRIVE
+#ifdef PIO_HAVE_DRIVE
   /* Configure drive strength */
 
-  drive = (cfgset & GPIO_DRIVE_MASK) >> GPIO_DRIVE_SHIFT;
+  drive = (cfgset & PIO_DRIVE_MASK) >> PIO_DRIVE_SHIFT;
   if (pin < 32)
     {
       offset = SAM_PIO_DRIVER1_OFFSET;
@@ -199,7 +199,7 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
   putreg32(regval, base + offset);
 #endif
 
-  /* Configure the pin as an input and enable the GPIO function */
+  /* Configure the pin as an input and enable the PIO function */
 
   putreg32(pin, base + SAM_PIO_ODR_OFFSET);
   putreg32(pin, base + SAM_PIO_PER_OFFSET);
@@ -216,12 +216,12 @@ static inline int sam_configinput(uintptr_t base, uint32_t pin,
  * Name: sam_configoutput
  *
  * Description:
- *   Configure a GPIO output pin based on bit-encoded description of the pin.
+ *   Configure a PIO output pin based on bit-encoded description of the pin.
  *
  ****************************************************************************/
 
 static inline int sam_configoutput(uintptr_t base, uint32_t pin,
-                                   gpio_pinset_t cfgset)
+                                   pio_pinset_t cfgset)
 {
   /* Disable interrupts on the pin */
 
@@ -229,7 +229,7 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
 
   /* Enable/disable the pull-up as requested */
 
-  if ((cfgset & GPIO_CFG_PULLUP) != 0)
+  if ((cfgset & PIO_CFG_PULLUP) != 0)
     {
       putreg32(pin, base + SAM_PIO_PUER_OFFSET);
     }
@@ -238,10 +238,10 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
       putreg32(pin, base + SAM_PIO_PUDR_OFFSET);
     }
 
-#ifdef GPIO_HAVE_PULLDOWN
+#ifdef PIO_HAVE_PULLDOWN
   /* Enable/disable the pull-down as requested */
 
-  if ((cfgset & GPIO_CFG_PULLDOWN) != 0)
+  if ((cfgset & PIO_CFG_PULLDOWN) != 0)
     {
       putreg32(pin, base + SAM_PIO_PPDER_OFFSET);
     }
@@ -253,7 +253,7 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
 
   /* Enable the open drain driver if requrested */
 
-  if ((cfgset & GPIO_CFG_OPENDRAIN) != 0)
+  if ((cfgset & PIO_CFG_OPENDRAIN) != 0)
     {
       putreg32(pin, base + SAM_PIO_MDER_OFFSET);
     }
@@ -264,7 +264,7 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
 
   /* Set default value */
 
-  if ((cfgset & GPIO_OUTPUT_SET) != 0)
+  if ((cfgset & PIO_OUTPUT_SET) != 0)
     {
       putreg32(pin, base + SAM_PIO_SODR_OFFSET);
     }
@@ -273,7 +273,7 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
       putreg32(pin, base + SAM_PIO_CODR_OFFSET);
     }
 
-  /* Configure the pin as an output and enable the GPIO function */
+  /* Configure the pin as an output and enable the PIO function */
 
   putreg32(pin, base + SAM_PIO_OER_OFFSET);
   putreg32(pin, base + SAM_PIO_PER_OFFSET);
@@ -284,13 +284,13 @@ static inline int sam_configoutput(uintptr_t base, uint32_t pin,
  * Name: sam_configperiph
  *
  * Description:
- *   Configure a GPIO pin driven by a peripheral A or B signal based on
+ *   Configure a PIO pin driven by a peripheral A or B signal based on
  *   bit-encoded description of the pin.
  *
  ****************************************************************************/
 
 static inline int sam_configperiph(uintptr_t base, uint32_t pin,
-                                   gpio_pinset_t cfgset)
+                                   pio_pinset_t cfgset)
 {
   uint32_t regval;
 
@@ -300,7 +300,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
 
   /* Enable/disable the pull-up as requested */
 
-  if ((cfgset & GPIO_CFG_PULLUP) != 0)
+  if ((cfgset & PIO_CFG_PULLUP) != 0)
     {
       putreg32(pin, base + SAM_PIO_PUER_OFFSET);
     }
@@ -309,10 +309,10 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
       putreg32(pin, base + SAM_PIO_PUDR_OFFSET);
     }
 
-#ifdef GPIO_HAVE_PULLDOWN
+#ifdef PIO_HAVE_PULLDOWN
   /* Enable/disable the pull-down as requested */
 
-  if ((cfgset & GPIO_CFG_PULLDOWN) != 0)
+  if ((cfgset & PIO_CFG_PULLDOWN) != 0)
     {
       putreg32(pin, base + SAM_PIO_PPDER_OFFSET);
     }
@@ -322,7 +322,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
     }
 #endif
 
-#ifdef GPIO_HAVE_PERIPHCD
+#ifdef PIO_HAVE_PERIPHCD
   /* Configure pin, depending upon the peripheral A, B, C or D
    *
    *   PERIPHA: ABCDSR1[n] = 0 ABCDSR2[n] = 0
@@ -332,8 +332,8 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
    */
 
   regval = getreg32(base + SAM_PIO_ABCDSR1_OFFSET);
-  if ((cfgset & GPIO_MODE_MASK) == GPIO_PERIPHA ||
-      (cfgset & GPIO_MODE_MASK) == GPIO_PERIPHC)
+  if ((cfgset & PIO_MODE_MASK) == PIO_PERIPHA ||
+      (cfgset & PIO_MODE_MASK) == PIO_PERIPHC)
     {
       regval &= ~pin;
     }
@@ -344,8 +344,8 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
   putreg32(regval, base + SAM_PIO_ABCDSR1_OFFSET);
 
   regval = getreg32(base + SAM_PIO_ABCDSR2_OFFSET);
-  if ((cfgset & GPIO_MODE_MASK) == GPIO_PERIPHA ||
-      (cfgset & GPIO_MODE_MASK) == GPIO_PERIPHB)
+  if ((cfgset & PIO_MODE_MASK) == PIO_PERIPHA ||
+      (cfgset & PIO_MODE_MASK) == PIO_PERIPHB)
     {
       regval &= ~pin;
     }
@@ -363,7 +363,7 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
    */
 
   regval = getreg32(base + SAM_PIO_ABSR_OFFSET);
-  if ((cfgset & GPIO_MODE_MASK) == GPIO_PERIPHA)
+  if ((cfgset & PIO_MODE_MASK) == PIO_PERIPHA)
     {
       regval &= ~pin;
     }
@@ -385,17 +385,17 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_configgpio
+ * Name: sam_configpio
  *
  * Description:
- *   Configure a GPIO pin based on bit-encoded description of the pin.
+ *   Configure a PIO pin based on bit-encoded description of the pin.
  *
  ****************************************************************************/
 
-int sam_configgpio(gpio_pinset_t cfgset)
+int sam_configpio(pio_pinset_t cfgset)
 {
-  uintptr_t base = sam_gpiobase(cfgset);
-  uint32_t  pin  = sam_gpiopin(cfgset);
+  uintptr_t base = sam_piobase(cfgset);
+  uint32_t  pin  = sam_piopin(cfgset);
   irqstate_t flags;
   int       ret;
 
@@ -403,27 +403,27 @@ int sam_configgpio(gpio_pinset_t cfgset)
 
   flags = irqsave();
 
-  /* Enable writing to GPIO registers */
+  /* Enable writing to PIO registers */
 
   putreg32(PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
 
   /* Handle the pin configuration according to pin type */
 
-  switch (cfgset & GPIO_MODE_MASK)
+  switch (cfgset & PIO_MODE_MASK)
     {
-      case GPIO_INPUT:
+      case PIO_INPUT:
         ret = sam_configinput(base, pin, cfgset);
         break;
 
-      case GPIO_OUTPUT:
+      case PIO_OUTPUT:
         ret = sam_configoutput(base, pin, cfgset);
         break;
 
-      case GPIO_PERIPHA:
-      case GPIO_PERIPHB:
-#ifdef GPIO_HAVE_PERIPHCD
-      case GPIO_PERIPHC:
-      case GPIO_PERIPHD:
+      case PIO_PERIPHA:
+      case PIO_PERIPHB:
+#ifdef PIO_HAVE_PERIPHCD
+      case PIO_PERIPHC:
+      case PIO_PERIPHD:
 #endif
         ret = sam_configperiph(base, pin, cfgset);
         break;
@@ -433,7 +433,7 @@ int sam_configgpio(gpio_pinset_t cfgset)
         break;
     }
 
-  /* Disable writing to GPIO registers */
+  /* Disable writing to PIO registers */
 
   putreg32(PIO_WPMR_WPEN | PIO_WPMR_WPKEY, base + SAM_PIO_WPMR_OFFSET);
   irqrestore(flags);
@@ -442,17 +442,17 @@ int sam_configgpio(gpio_pinset_t cfgset)
 }
 
 /****************************************************************************
- * Name: sam_gpiowrite
+ * Name: sam_piowrite
  *
  * Description:
- *   Write one or zero to the selected GPIO pin
+ *   Write one or zero to the selected PIO pin
  *
  ****************************************************************************/
 
-void sam_gpiowrite(gpio_pinset_t pinset, bool value)
+void sam_piowrite(pio_pinset_t pinset, bool value)
 {
-  uintptr_t base = sam_gpiobase(pinset);
-  uint32_t  pin  = sam_gpiopin(pinset);
+  uintptr_t base = sam_piobase(pinset);
+  uint32_t  pin  = sam_piopin(pinset);
 
   if (value)
     {
@@ -465,20 +465,20 @@ void sam_gpiowrite(gpio_pinset_t pinset, bool value)
 }
 
 /****************************************************************************
- * Name: sam_gpioread
+ * Name: sam_pioread
  *
  * Description:
- *   Read one or zero from the selected GPIO pin
+ *   Read one or zero from the selected PIO pin
  *
  ****************************************************************************/
 
-bool sam_gpioread(gpio_pinset_t pinset)
+bool sam_pioread(pio_pinset_t pinset)
 {
-  uintptr_t base = sam_gpiobase(pinset);
-  uint32_t  pin  = sam_gpiopin(pinset);
+  uintptr_t base = sam_piobase(pinset);
+  uint32_t  pin  = sam_piopin(pinset);
   uint32_t  regval;
 
-  if ((pinset & GPIO_MODE_MASK) == GPIO_OUTPUT)
+  if ((pinset & PIO_MODE_MASK) == PIO_OUTPUT)
     {
       regval = getreg32(base + SAM_PIO_ODSR_OFFSET);
     }
@@ -491,15 +491,15 @@ bool sam_gpioread(gpio_pinset_t pinset)
 }
 
 /************************************************************************************
- * Function:  sam_dumpgpio
+ * Function:  sam_dumppio
  *
  * Description:
- *   Dump all GPIO registers associated with the base address of the provided pinset.
+ *   Dump all PIO registers associated with the base address of the provided pinset.
  *
  ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_GPIO
-int sam_dumpgpio(uint32_t pinset, const char *msg)
+int sam_dumppio(uint32_t pinset, const char *msg)
 {
   irqstate_t    flags;
   uintptr_t     base;
@@ -508,11 +508,11 @@ int sam_dumpgpio(uint32_t pinset, const char *msg)
 
   /* Get the base address associated with the PIO port */
 
-  pin  = sam_gpiopin(pinset);
-  port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
+  pin  = sam_piopin(pinset);
+  port = (pinset & PIO_PORT_MASK) >> PIO_PORT_SHIFT;
   base = SAM_PION_BASE(port);
 
-  /* The following requires exclusive access to the GPIO registers */
+  /* The following requires exclusive access to the PIO registers */
 
   flags = irqsave();
   lldbg("PIO%c pinset: %08x base: %08x -- %s\n",

@@ -1122,7 +1122,7 @@ static bool up_txempty(struct uart_dev_s *dev)
 
 void sam_earlyserialinit(void)
 {
-  /* NOTE:  All GPIO configuration for the USARTs was performed in
+  /* NOTE:  All PIO configuration for the USARTs was performed in
    * sam_lowsetup
    */
 

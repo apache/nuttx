@@ -60,7 +60,7 @@
 #include "up_arch.h"
 
 #include "chip.h"
-#include "sam_gpio.h"
+#include "sam_pio.h"
 #include "sam_spi.h"
 #include "sam_periphclks.h"
 #include "chip/sam_pmc.h"
@@ -602,9 +602,9 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
    * may be only stubs.
    *
    * An alternative way to program the PIO chip select pins is as normal
-   * GPIO outputs.  In that case, the automatic control of the CS pins is
+   * PIO outputs.  In that case, the automatic control of the CS pins is
    * bypassed and this function must provide control of the chip select.
-   * NOTE:  In this case, the GPIO output pin does *not* have to be the
+   * NOTE:  In this case, the PIO output pin does *not* have to be the
    * same as the NPCS pin normal associated with the chip select number.
    */
 
@@ -1171,9 +1171,9 @@ struct spi_dev_s *up_spiinitialize(int port)
            * select pins must be selected by board-specific logic.
            */
 
-          sam_configgpio(GPIO_SPI0_MISO);
-          sam_configgpio(GPIO_SPI0_MOSI);
-          sam_configgpio(GPIO_SPI0_SPCK);
+          sam_configpio(PIO_SPI0_MISO);
+          sam_configpio(PIO_SPI0_MOSI);
+          sam_configpio(PIO_SPI0_SPCK);
         }
 #endif
 #if defined(CONFIG_SAMA5_SPI0) && defined(CONFIG_SAMA5_SPI1)
@@ -1187,9 +1187,9 @@ struct spi_dev_s *up_spiinitialize(int port)
            * select pins must be selected by board-specific logic.
            */
 
-          sam_configgpio(GPIO_SPI1_MISO);
-          sam_configgpio(GPIO_SPI1_MOSI);
-          sam_configgpio(GPIO_SPI1_SPCK);
+          sam_configpio(PIO_SPI1_MISO);
+          sam_configpio(PIO_SPI1_MOSI);
+          sam_configpio(PIO_SPI1_SPCK);
         }
 #endif
 

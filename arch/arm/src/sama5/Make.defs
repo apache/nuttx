@@ -89,7 +89,7 @@ CHIP_ASRCS  =
 
 # SAMA5-specific C source files
 
-CHIP_CSRCS  = sam_allocateheap.c sam_boot.c sam_clockconfig.c sam_gpio.c
+CHIP_CSRCS  = sam_allocateheap.c sam_boot.c sam_clockconfig.c sam_pio.c
 CHIP_CSRCS += sam_irq.c sam_lowputc.c sam_serial.c sam_timerisr.c
 
 # Configuration dependent C and assembly language files
@@ -100,6 +100,10 @@ else
 ifeq ($(CONFIG_SAMA5_DMAC1),y)
 CHIP_CSRCS += sam_dmac.c
 endif
+endif
+
+ifeq ($(CONFIG_SAMA5_PIO_IRQ),y)
+CHIP_CSRCS += sam_pioirq.c
 endif
 
 ifeq ($(CONFIG_SAMA5_SPI0),y)

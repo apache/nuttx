@@ -47,7 +47,7 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
-#include "sam_gpio.h"
+#include "sam_pio.h"
 #include "sam_periphclks.h"
 #include "sam_lowputc.h"
 
@@ -292,56 +292,56 @@ void sam_lowsetup(void)
   /* Configure UART pins for all selected UART/USARTs */
 
 #ifdef CONFIG_SAMA5_UART0
-  (void)sam_configgpio(GPIO_UART0_RXD);
-  (void)sam_configgpio(GPIO_UART0_TXD);
+  (void)sam_configpio(PIO_UART0_RXD);
+  (void)sam_configpio(PIO_UART0_TXD);
 #endif
 
 #ifdef CONFIG_SAMA5_UART1
-  (void)sam_configgpio(GPIO_UART1_RXD);
-  (void)sam_configgpio(GPIO_UART1_TXD);
+  (void)sam_configpio(PIO_UART1_RXD);
+  (void)sam_configpio(PIO_UART1_TXD);
 #endif
 
 #ifdef CONFIG_SAMA5_USART0
-  (void)sam_configgpio(GPIO_USART0_RXD);
-  (void)sam_configgpio(GPIO_USART0_TXD);
+  (void)sam_configpio(PIO_USART0_RXD);
+  (void)sam_configpio(PIO_USART0_TXD);
 #ifdef CONFIG_USART0_OFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART0_CTS);
+  (void)sam_configpio(PIO_USART0_CTS);
 #endif
 #ifdef CONFIG_USART0_IFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART0_RTS);
+  (void)sam_configpio(PIO_USART0_RTS);
 #endif
 #endif
 
 #ifdef CONFIG_SAMA5_USART1
-  (void)sam_configgpio(GPIO_USART1_RXD);
-  (void)sam_configgpio(GPIO_USART1_TXD);
+  (void)sam_configpio(PIO_USART1_RXD);
+  (void)sam_configpio(PIO_USART1_TXD);
 #ifdef CONFIG_USART1_OFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART1_CTS);
+  (void)sam_configpio(PIO_USART1_CTS);
 #endif
 #ifdef CONFIG_USART1_IFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART1_RTS);
+  (void)sam_configpio(PIO_USART1_RTS);
 #endif
 #endif
 
 #ifdef CONFIG_SAMA5_USART2
-  (void)sam_configgpio(GPIO_USART2_RXD);
-  (void)sam_configgpio(GPIO_USART2_TXD);
+  (void)sam_configpio(PIO_USART2_RXD);
+  (void)sam_configpio(PIO_USART2_TXD);
 #ifdef CONFIG_USART2_OFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART2_CTS);
+  (void)sam_configpio(PIO_USART2_CTS);
 #endif
 #ifdef CONFIG_USART2_IFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART2_RTS);
+  (void)sam_configpio(PIO_USART2_RTS);
 #endif
 #endif
 
 #ifdef CONFIG_SAMA5_USART3
-  (void)sam_configgpio(GPIO_USART3_RXD);
-  (void)sam_configgpio(GPIO_USART3_TXD);
+  (void)sam_configpio(PIO_USART3_RXD);
+  (void)sam_configpio(PIO_USART3_TXD);
 #ifdef CONFIG_USART3_OFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART3_CTS);
+  (void)sam_configpio(PIO_USART3_CTS);
 #endif
 #ifdef CONFIG_USART3_IFLOWCONTROL
-  (void)sam_configgpio(GPIO_USART3_RTS);
+  (void)sam_configpio(PIO_USART3_RTS);
 #endif
 #endif
 

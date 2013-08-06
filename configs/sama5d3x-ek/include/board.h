@@ -146,7 +146,7 @@
 
 /* LED definitions ******************************************************************/
 /* There are two LEDs on the SAMA5D3 series-CM board that can be controlled
- * by software.  A  blue LED is controlled via GPIO pins.  A red LED normally
+ * by software.  A  blue LED is controlled via PIO pins.  A red LED normally
  * provides an indication that power is supplied to the board but can also
  * be controlled via software.
  *
@@ -308,7 +308,7 @@ uint8_t up_buttons(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_PIOA_IRQ
+#ifdef CONFIG_SAMA5_PIOE_IRQ
 xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

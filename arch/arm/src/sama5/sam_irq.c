@@ -50,8 +50,8 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
-#ifdef CONFIG_PIO_IRQ
-#  include "sam_gpio.h"
+#ifdef CONFIG_SAMA5_PIO_IRQ
+#  include "sam_pio.h"
 #endif
 
 #include "chip/sam_aic.h"
@@ -317,7 +317,7 @@ void up_irqinitialize(void)
    * PIO pins.
    */
 
-#ifdef CONFIG_PIO_IRQ
+#ifdef CONFIG_SAMA5_PIO_IRQ
   sam_pioirqinitialize();
 #endif
 
@@ -426,7 +426,7 @@ void up_disable_irq(int irq)
       sam_dumpaic("disable", irq);
       irqrestore(flags);
     }
-#ifdef CONFIG_PIO_IRQ
+#ifdef CONFIG_SAMA5_PIO_IRQ
   else
     {
       /* Maybe it is a (derived) PIO IRQ */
@@ -465,7 +465,7 @@ void up_enable_irq(int irq)
       sam_dumpaic("enable", irq);
       irqrestore(flags);
     }
-#ifdef CONFIG_PIO_IRQ
+#ifdef CONFIG_SAMA5_PIO_IRQ
   else
     {
       /* Maybe it is a (derived) PIO IRQ */

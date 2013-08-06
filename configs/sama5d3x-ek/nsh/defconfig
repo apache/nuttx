@@ -162,7 +162,7 @@ CONFIG_SAMA5_USART1=y
 # CONFIG_SAMA5_ARM is not set
 # CONFIG_SAMA5_FUSE is not set
 # CONFIG_SAMA5_MPDDRC is not set
-# CONFIG_PIO_IRQ is not set
+# CONFIG_SAMA5_PIO_IRQ is not set
 
 #
 # SPI device driver options

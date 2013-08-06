@@ -551,7 +551,7 @@ void up_boot(void)
   /* Perform board-specific initialization,  This must include:
    *
    * - Initialization of board-specific memory resources (e.g., SDRAM)
-   * - Configuration of board specific resources (GPIOs, LEDs, etc).
+   * - Configuration of board specific resources (PIOs, LEDs, etc).
    */
 
   sam_boardinitialize();
