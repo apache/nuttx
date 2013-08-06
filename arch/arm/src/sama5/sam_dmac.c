@@ -1157,6 +1157,7 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
       regval = sam_rxctrlabits(dmach);
       ctrlb  = sam_rxctrlb(dmach);
     }
+
    ctrla  = sam_rxctrla(dmach, regval, nbytes);
 
   /* Add the new link list entry */
@@ -1479,6 +1480,8 @@ void sam_dmainitialize(struct sam_dmac_s *dmac)
 void weak_function up_dmainitialize(void)
 {
 #ifdef CONFIG_SAMA5_DMAC0
+  dmallvdbg("Iinitialize DMAC0\n");
+
   /* Enable peripheral clock */
 
   sam_dmac0_enableclk();
@@ -1497,6 +1500,8 @@ void weak_function up_dmainitialize(void)
 #endif
 
 #ifdef CONFIG_SAMA5_DMAC1
+  dmallvdbg("Iinitialize DMAC1\n");
+
   /* Enable peripheral clock */
 
   sam_dmac1_enableclk();
@@ -1560,7 +1565,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
 #endif
 
     {
-      fdbg("Bad DMAC number: %d\n", dmacno);
+      dmadbg("Bad DMAC number: %d\n", dmacno);
       DEBUGPANIC();
       return (DMA_HANDLE)NULL;
     }
@@ -1599,6 +1604,9 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
     }
 
   sam_givechsem(dmac);
+
+  dmavdbg("dmacno: %d chflags: %08x returning dmach: %p\n",
+          (int)dmacno, (int)chflags, dmach);
   return (DMA_HANDLE)dmach;
 }
 
@@ -1619,11 +1627,13 @@ void sam_dmafree(DMA_HANDLE handle)
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
 
+  dmavdbg("dmach: %p\n", dmach);
+  DEBUGASSERT((dmach != NULL) && (dmach->inuse));
+
   /* Mark the channel no longer in use.  Clearing the inuse flag is an atomic
    * operation and so should be safe.
    */
 
-  DEBUGASSERT((dmach != NULL) && (dmach->inuse));
   dmach->flags = 0;
   dmach->inuse = false;                   /* No longer in use */
 }
@@ -1644,7 +1654,10 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   int ret = OK;
 
-  DEBUGASSERT(dmach && dmach->llhead != NULL && dmach->lltail != 0);
+  dmavdbg("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
+          dmach, (int)paddr, (int)maddr, (int)nbytes);
+  DEBUGASSERT(dmach);
+  dmavdbg("llhead: %p lltail: %p\n", dmach->llhead, dmach->lltail);
 
   /* If this is a large transfer, break it up into smaller buffers */
 
@@ -1696,12 +1709,16 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
  *
  ****************************************************************************/
 
-int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
+int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+                   size_t nbytes)
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   int ret = OK;
 
-  DEBUGASSERT(dmach && dmach->llhead != NULL && dmach->lltail != 0);
+  dmavdbg("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
+          dmach, (int)paddr, (int)maddr, (int)nbytes);
+  DEBUGASSERT(dmach);
+  dmavdbg("llhead: %p lltail: %p\n", dmach->llhead, dmach->lltail);
 
   /* If this is a large transfer, break it up into smaller buffers */
 
@@ -1755,11 +1772,13 @@ int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg)
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   int ret = -EINVAL;
 
+  dmavdbg("dmach: %p callback: %p arg: %p\n", dmach, callback, arg);
+  DEBUGASSERT(dmach != NULL);
+
   /* Verify that the DMA has been setup (i.e., at least one entry in the
    * link list).
    */
 
-  DEBUGASSERT(dmach != NULL);
   if (dmach->llhead)
     {
       /* Save the callback info.  This will be invoked whent the DMA commpletes */
@@ -1797,7 +1816,9 @@ void sam_dmastop(DMA_HANDLE handle)
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   irqstate_t flags;
 
+  dmavdbg("dmach: %p\n", dmach);
   DEBUGASSERT(dmach != NULL);
+
   flags = irqsave();
   sam_dmaterminate(dmach, -EINTR);
   irqrestore(flags);

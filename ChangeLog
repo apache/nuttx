@@ -5319,4 +5319,7 @@
 	* arch/arm/src/sam34/sam_hsmci.c and sama5/sam_hsmci.c:  Fix handling
 	  of some masked status conditions that can cause false-alarm errors
 	  (2013-8-6).
- 
+	* arch/arm/src/sama5/sam_dmac.c and sam34/sam34_dmac.c:  For SAMA5,
+	  correct some bad register address and some bad assertions that caused
+	  false alarms.  These latter were backported to the SAM34 DMAC driver
+	  as well (2013-8-6).
