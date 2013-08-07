@@ -53,6 +53,59 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration ************************************************************/
+
+#define HAVE_HSMCI_MTD  1
+#define HAVE_AT25_MTD   1
+
+/* Can't support MMC/SD if the card interface(s) are not enable */
+
+#if !defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_HSMCI1)
+#  undef HAVE_HSMCI_MTD
+#endif
+
+/* Can't support MMC/SD features if mountpoints are disabled */
+
+#if defined(HAVE_HSMCI_MTD) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#  warning Mountpoints disabled.  No MMC/SD support
+#  undef HAVE_HSMCI_MTD
+#endif
+
+/* We need PIO interrupts on PIOD to support card detect interrupts */
+
+#if defined(HAVE_HSMCI_MTD) && !defined(CONFIG_SAMA5_PIOD_IRQ)
+#  warning PIOD interrupts not enabled.  No MMC/SD support.
+#  undef HAVE_HSMCI_MTD
+#endif
+
+/* Can't support the AT25 device if it SPI0 or AT25 support are not enabled */
+
+#if !defined(CONFIG_SAMA5_SPI0) || !defined(CONFIG_MTD_AT25)
+#  undef HAVE_AT25_MTD
+#endif
+
+/* Can't support AT25 features if mountpoints are disabled or if we were not
+ * asked to mount the AT25 part
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5_AT25_AUTOMOUNT)
+#  undef HAVE_AT25_MTD
+#endif
+
+/* If we are going to mount the AT25, then they user must also have told
+ * us what to do with it by setting one of these.
+ */
+
+#if !defined(CONFIG_SAMA5_AT25_FTL) && !defined(CONFIG_SAMA5_AT25_NXFFS)
+#  undef HAVE_AT25_MTD
+#endif
+
+#if defined(CONFIG_SAMA5_AT25_FTL) && defined(CONFIG_SAMA5_AT25_NXFFS)
+#  warning Both CONFIG_SAMA5_AT25_FTL and CONFIG_SAMA5_AT25_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5_AT25_NXFFS
+#  undef CONFIG_SAMA5_AT25_NXFFS
+#endif
+
 /* LEDs *****************************************************************************/
 /* There are two LEDs on the SAMA5D3 series-CM board that can be controlled
  * by software.  A  blue LED is controlled via PIO pins.  A red LED normally
@@ -229,7 +282,7 @@ void sam_sdram_config(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MTD_AT25
+#ifdef HAVE_AT25_MTD
 int sam_at25_initialize(int minor);
 #endif
 
@@ -241,7 +294,7 @@ int sam_at25_initialize(int minor);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_HSMCI0) || defined(CONFIG_SAMA5_HSMCI1)
+#ifdef HAVE_HSMCI_MTD
 int sam_hsmci_initialize(int slotno, int minor);
 #endif
 
@@ -253,7 +306,7 @@ int sam_hsmci_initialize(int slotno, int minor);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_SAMA5_HSMCI0) || defined(CONFIG_SAMA5_HSMCI1)
+#ifdef HAVE_HSMCI_MTD
 bool sam_cardinserted(int slotno);
 #endif
 
@@ -261,11 +314,11 @@ bool sam_cardinserted(int slotno);
  * Name: sam_writeprotected
  *
  * Description:
- *   Check if a card is inserted into the selected HSMCI slot
+ *   Check if the card in the MMCSD slot is write protected
  *
  ************************************************************************************/
 
-#ifdef HAVE_MMCSD
+#ifdef HAVE_HSMCI_MTD
 bool sam_writeprotected(int slotno);
 #endif
 

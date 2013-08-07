@@ -62,49 +62,6 @@
 
 /* Configuration ************************************************************/
 
-#define HAVE_AT25  1
-#define HAVE_MMCSD 1
-
-/* Can't support the AT25 device if it SPI0 or AT25 support are not enabled */
-
-#if !defined(CONFIG_SAMA5_SPI0) || !defined(CONFIG_MTD_AT25)
-#  undef HAVE_AT25
-#endif
-
-/* Can't support AT25 features if mountpoints are disabled or if we were not
- * asked to mount the AT25 part
- */
-
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5_AT25_AUTOMOUNT)
-#  undef HAVE_AT25
-#endif
-
-/* If we are going to mount the AT25, then they user must also have told
- * us what to do with it by setting one of these.
- */
-
-#if !defined(CONFIG_SAMA5_AT25_FTL) && !defined(CONFIG_SAMA5_AT25_NXFFS)
-#  undef HAVE_AT25
-#endif
-
-/* Use minor device number 0 is not is provided */
-
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
-#endif
-
-/* Can't support MMC/SD if the card interface(s) are not enable */
-
-#if !defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_HSMCI0)
-#  undef HAVE_MMCSD
-#endif
-
-/* Can't support MMC/SD features if mountpoints are disabled */
-
-#if defined(CONFIG_DISABLE_MOUNTPOINT)
-#  undef HAVE_MMCSD
-#endif
-
 /* Assign minor device numbers.  We basically ignore more of the NSH
  * configuration here (NSH SLOTNO ignored completely; NSH minor extended
  * to handle more devices.
@@ -114,7 +71,7 @@
 #  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
-#ifdef HAVE_MMCSD
+#ifdef HAVE_HSMCI_MTD
 
 #  define HSMCI0_SLOTNO 0
 #  define HSMCI1_SLOTNO 1
@@ -145,13 +102,13 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(HAVE_AT25) || defined(HAVE_MMCSD)
+#if defined(HAVE_AT25_MTD) || defined(HAVE_HSMCI_MTD)
   int ret;
 #endif
 
   /* Initialize the AT25 driver */
 
-#ifdef HAVE_AT25
+#ifdef HAVE_AT25_MTD
   ret = sam_at25_initialize(AT25_MINOR);
   if (ret < 0)
     {
@@ -159,7 +116,7 @@ int nsh_archinitialize(void)
       return ret;
 #endif
 
-#ifdef HAVE_MMCSD
+#ifdef HAVE_HSMCI_MTD
 #ifdef CONFIG_SAMA5_HSMCI0
   ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR);
   if (ret < 0)
@@ -170,7 +127,7 @@ int nsh_archinitialize(void)
     }
 #endif
 
-#ifdef CONFIG_SAMA5_HSMCI0
+#ifdef CONFIG_SAMA5_HSMCI1
   ret = sam_hsmci_initialize(HSMCI1_SLOTNO, HSMCI1_MINOR);
   if (ret < 0)
     {
