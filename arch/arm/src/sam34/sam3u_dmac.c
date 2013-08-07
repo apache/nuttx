@@ -412,7 +412,7 @@ sam_txctrlabits(struct sam_dma_s *dmach)
  ****************************************************************************/
 
 static inline uint32_t sam_txctrla(struct sam_dma_s *dmach,
-                                   uint32_t dmasize, uint32_t txctrlabits)
+                                   uint32_t dmasize, uint32_t ctrla)
 {
   /* Set the buffer transfer size field.  This is the number of transfers to
    * be performed, that is, the number of source width transfers to perform.
@@ -428,7 +428,8 @@ static inline uint32_t sam_txctrla(struct sam_dma_s *dmach,
     }
 
   DEBUGASSERT(dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
-  return (txctrlabits & ~DMACHAN_CTRLA_BTSIZE_MASK) | (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT);
+  return (ctrla & ~DMACHAN_CTRLA_BTSIZE_MASK) |
+         (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT);
 }
 
 /****************************************************************************
@@ -503,7 +504,7 @@ static inline uint32_t sam_rxctrlabits(struct sam_dma_s *dmach)
  ****************************************************************************/
 
 static inline uint32_t sam_rxctrla(struct sam_dma_s *dmach,
-                                   uint32_t dmasize, uint32_t txctrlabits)
+                                   uint32_t dmasize, uint32_t ctrla)
 {
   /* Set the buffer transfer size field.  This is the number of transfers to
    * be performed, that is, the number of source width transfers to perform.
@@ -519,7 +520,8 @@ static inline uint32_t sam_rxctrla(struct sam_dma_s *dmach,
     }
 
   DEBUGASSERT(dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
-  return (txctrlabits & ~DMACHAN_CTRLA_BTSIZE_MASK) | (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT);
+  return (ctrla & ~DMACHAN_CTRLA_BTSIZE_MASK) |
+         (dmasize << DMACHAN_CTRLA_BTSIZE_SHIFT);
 }
 
 /****************************************************************************
@@ -1130,7 +1132,7 @@ static int sam_dmainterrupt(int irq, void *context)
                * interrupt as part of a multiple buffer transfer.
                */
 
-              else /* f ((regval & DMAC_EBC_BTC(chndx)) != 0) */
+              else /* if ((regval & DMAC_EBC_BTC(chndx)) != 0) */
                 {
                   /* Write the KEEPON field to clear the STALL states */
 
