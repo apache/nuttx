@@ -56,39 +56,11 @@
 
 #include "sama5d3x-ek.h"
 
+#ifdef CONFIG_MTD_AT25
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
-/* Configuration ************************************************************/
-/* Can't support the AT25 device if it SPI0 or AT25 support are not enabled */
-
-#define HAVE_AT25  1
-#if !defined(CONFIG_SAMA5_SPI0) || !defined(CONFIG_MTD_AT25)
-#  undef HAVE_AT25
-#endif
-
-/* Can't support AT25 features if mountpoints are disabled or if we were not
- * asked to mount the AT25 part
- */
-
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5_AT25_AUTOMOUNT)
-#  undef HAVE_AT25
-#endif
-
-/* If we are going to mount the AT25, then they user must also have told
- * us what to do with it by setting one of these.
- */
-
-#if !defined(CONFIG_SAMA5_AT25_FTL) && !defined(CONFIG_SAMA5_AT25_NXFFS)
-#  undef HAVE_AT25
-#endif
-
-#if defined(CONFIG_SAMA5_AT25_FTL) && defined(CONFIG_SAMA5_AT25_NXFFS)
-#  warning Both CONFIG_SAMA5_AT25_FTL and CONFIG_SAMA5_AT25_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5_AT25_NXFFS
-#  undef CONFIG_SAMA5_AT25_NXFFS
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -102,10 +74,8 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MTD_AT25
 int sam_at25_initialize(int minor)
 {
-#ifdef HAVE_AT25
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
   int ret;
@@ -158,9 +128,8 @@ int sam_at25_initialize(int minor)
     }
 
 #endif
-#endif
 
   return OK;
 }
 
-#endif
+#endif /* HAVE_AT25_MTD */

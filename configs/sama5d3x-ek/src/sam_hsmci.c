@@ -84,50 +84,11 @@
 
 #include "sama5d3x-ek.h"
 
+#ifdef HAVE_HSMCI_MTD
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-#define HAVE_MMCSD  1
-
-/* Can't support MMC/SD if the card interface(s) are not enable */
-
-#if !defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_HSMCI1)
-#  undef HAVE_MMCSD
-#endif
-
-/* Can't support MMC/SD features if mountpoints are disabled */
-
-#if defined(HAVE_MMCSD) && defined(CONFIG_DISABLE_MOUNTPOINT)
-#  warning Mountpoints disabled.  No MMC/SD support
-#  undef HAVE_MMCSD
-#endif
-
-/* We need PIO interrupts on PIOD to support card detect interrupts */
-
-#if defined(HAVE_MMCSD) && !defined(CONFIG_SAMA5_PIOD_IRQ)
-#  warning PIOD interrupts not enabled.  No MMC/SD support.
-#  undef HAVE_MMCSD
-#endif
-
-/* The NSH slot and minor numbers are useless for us because we have
- * multiple HSMCI devices.
- */
-
-#ifdef HAVE_MMCSD
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#  endif
-
-#  ifndef CONFIG_NSH_MMCSDMINOR
-#    define CONFIG_NSH_MMCSDMINOR 0
-#  endif
-
-#  ifndef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
-#endif
 
 /****************************************************************************
  * Private Types
@@ -148,7 +109,6 @@ struct sam_hsmci_info_s
 
 /* Retained HSMCI driver handles for use by interrupt handlers */
 
-#ifdef HAVE_MMCSD
 #ifdef CONFIG_SAMA5_HSMCI0
 static struct sdio_dev_s *g_hsmci0;
 #endif
@@ -175,7 +135,6 @@ static const struct sam_hsmci_info_s g_hsmci1_info =
   PIO_MCI1_CD, IRQ_MCI1_CD, sam_hsmci1_cardetect, &g_hsmci1
 };
 #endif
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -189,7 +148,6 @@ static const struct sam_hsmci_info_s g_hsmci1_info =
  *
  ****************************************************************************/
 
-#ifdef HAVE_MMCSD
 #ifdef CONFIG_SAMA5_HSMCI0
 static int sam_hsmci0_cardetect(int irq, void *regs)
 {
@@ -205,7 +163,6 @@ static int sam_hsmci1_cardetect(int irq, void *regs)
    return OK;
 }
 #endif
-#endif
 
 /****************************************************************************
  * Name: sam_hsmci_info
@@ -215,7 +172,6 @@ static int sam_hsmci1_cardetect(int irq, void *regs)
  *
  ****************************************************************************/
 
-#ifdef HAVE_MMCSD
 static const struct sam_hsmci_info_s *sam_hsmci_info(int slotno)
 {
    const struct sam_hsmci_info_s *info = NULL;
@@ -240,7 +196,6 @@ static const struct sam_hsmci_info_s *sam_hsmci_info(int slotno)
 
   return info;
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -254,10 +209,8 @@ static const struct sam_hsmci_info_s *sam_hsmci_info(int slotno)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_HSMCI0) || defined(CONFIG_SAMA5_HSMCI1)
 int sam_hsmci_initialize(int slotno, int minor)
 {
-#ifdef HAVE_MMCSD
   const struct sam_hsmci_info_s *info;
   int ret;
 
@@ -302,7 +255,6 @@ int sam_hsmci_initialize(int slotno, int minor)
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 
    sdio_mediachange(*info->hsmci, sam_cardinserted(slotno));
-#endif
 
   return OK;
 }
@@ -315,10 +267,8 @@ int sam_hsmci_initialize(int slotno, int minor)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_HSMCI0) || defined(CONFIG_SAMA5_HSMCI1)
 bool sam_cardinserted(int slotno)
 {
-#ifdef HAVE_MMCSD
   const struct sam_hsmci_info_s *info;
   bool inserted;
 
@@ -336,14 +286,7 @@ bool sam_cardinserted(int slotno)
   inserted = sam_pioread(info->pincfg);
   fvdbg("Slot %d inserted: %s\n", slotno, inserted ? "NO" : "YES");
   return !inserted;
-
-#else /* HAVE_MMCSD */
-
-  return false;
-
-#endif /* HAVE_MMCSD */
 }
-#endif /* CONFIG_SAMA5_HSMCIO ||  CONFIG_SAMA5_HSMCI1 */
 
 /****************************************************************************
  * Name: sam_writeprotected
@@ -353,13 +296,11 @@ bool sam_cardinserted(int slotno)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_HSMCI0) || defined(CONFIG_SAMA5_HSMCI1)
 bool sam_writeprotected(int slotno)
 {
   /* There are no write protect pins */
 
   return false;
 }
-#endif
 
-#endif /* CONFIG_SAMA5_HSMCI0 || CONFIG_SAMA5_HSMCI1 */
+#endif /* HAVE_HSMCI_MTD */
