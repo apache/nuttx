@@ -99,8 +99,8 @@
 #endif
 
 #if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_VERBOSE)
-#  undef CONFIG_HSMCI_CMDDEBUG
-#  undef CONFIG_HSMCI_XFRDEBUG
+#  undef CONFIG_SAMA5_HSMCI_CMDDEBUG
+#  undef CONFIG_SAMA5_HSMCI_XFRDEBUG
 #endif
 
 #ifdef CONFIG_SAMA5_HSMCI_RDPROOF
@@ -233,7 +233,7 @@
 
 /* Register logging support */
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
 #  ifdef CONFIG_DEBUG_DMA
 #    define SAMPLENDX_BEFORE_SETUP  0
 #    define SAMPLENDX_BEFORE_ENABLE 1
@@ -249,7 +249,7 @@
 #  endif
 #endif
 
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAMA5_HSMCI_CMDDEBUG
 #  define SAMPLENDX_AFTER_CMDR      0
 #  define SAMPLENDX_AT_WAKEUP       1
 #  define DEBUG_NCMDSAMPLES         2
@@ -258,6 +258,40 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+/* Register logging support */
+
+#if defined(CONFIG_SAMA5_HSMCI_XFRDEBUG) || defined(CONFIG_SAMA5_HSMCI_CMDDEBUG)
+struct sam_hsmciregs_s
+{
+  uint32_t mr;    /* Mode Register */
+  uint32_t dtor;  /* Data Timeout Register */
+  uint32_t sdcr;  /* SD/SDIO Card Register */
+  uint32_t argr;  /* Argument Register */
+  uint32_t blkr;  /* Block Register */
+  uint32_t cstor; /* Completion Signal Timeout Register */
+  uint32_t rsp0;  /* Response Register 0 */
+  uint32_t rsp1;  /* Response Register 1 */
+  uint32_t rsp2;  /* Response Register 2 */
+  uint32_t rsp3;  /* Response Register 3 */
+  uint32_t sr;    /* Status Register */
+  uint32_t imr;   /* Interrupt Mask Register */
+  uint32_t dma;   /* DMA Configuration Register */
+  uint32_t cfg;   /* Configuration Register */
+  uint32_t wpmr;  /* Write Protection Mode Register */
+  uint32_t wpsr;  /* Write Protection Status Register */
+};
+#endif
+
+#ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
+struct sam_xfrregs_s
+{
+  struct sam_hsmciregs_s hsmci;
+#ifdef CONFIG_DEBUG_DMA
+  struct sam_dmaregs_s  dma;
+#endif
+};
+#endif
 
 /* This structure defines the state of the SAMA5 HSMCI interface */
 
@@ -305,51 +339,17 @@ struct sam_dev_s
 
   /* Register logging support */
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#if defined(CONFIG_SAMA5_HSMCI_CMDDEBUG) && defined(CONFIG_SAMA5_HSMCI_XFRDEBUG)
+   bool              xfrinitialized;
+   bool              cmdinitialized;
+#endif
+#ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
   struct sam_xfrregs_s xfrsamples[DEBUG_NDMASAMPLES];
 #endif
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAMA5_HSMCI_CMDDEBUG
   struct sam_hsmciregs_s cmdsamples[DEBUG_NCMDSAMPLES];
 #endif
-#if defined(CONFIG_HSMCI_XFRDEBUG) && defined(CONFIG_HSMCI_CMDDEBUG)
-static bool                     g_xfrinitialized;
-static bool                     g_cmdinitialized;
-#endif
 };
-
-/* Register logging support */
-
-#if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
-struct sam_hsmciregs_s
-{
-  uint32_t mr;    /* Mode Register */
-  uint32_t dtor;  /* Data Timeout Register */
-  uint32_t sdcr;  /* SD/SDIO Card Register */
-  uint32_t argr;  /* Argument Register */
-  uint32_t blkr;  /* Block Register */
-  uint32_t cstor; /* Completion Signal Timeout Register */
-  uint32_t rsp0;  /* Response Register 0 */
-  uint32_t rsp1;  /* Response Register 1 */
-  uint32_t rsp2;  /* Response Register 2 */
-  uint32_t rsp3;  /* Response Register 3 */
-  uint32_t sr;    /* Status Register */
-  uint32_t imr;   /* Interrupt Mask Register */
-  uint32_t dma;   /* DMA Configuration Register */
-  uint32_t cfg;   /* Configuration Register */
-  uint32_t wpmr;  /* Write Protection Mode Register */
-  uint32_t wpsr;  /* Write Protection Status Register */
-};
-#endif
-
-#ifdef CONFIG_HSMCI_XFRDEBUG
-struct sam_xfrregs_s
-{
-  struct sam_hsmciregs_s hsmci;
-#ifdef CONFIG_DEBUG_DMA
-  struct sam_dmaregs_s  dma;
-#endif
-};
-#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -383,13 +383,14 @@ static inline void sam_enable(struct sam_dev_s *priv);
 
 /* Register Sampling ********************************************************/
 
-#if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
+#if defined(CONFIG_SAMA5_HSMCI_XFRDEBUG) || defined(CONFIG_SAMA5_HSMCI_CMDDEBUG)
 static void sam_hsmcisample(struct sam_dev_s *priv,
               struct sam_hsmciregs_s *regs);
-static void sam_hsmcidump(struct sam_hsmciregs_s *regs, const char *msg);
+static void sam_hsmcidump(struct sam_dev_s *priv,
+              struct sam_hsmciregs_s *regs, const char *msg);
 #endif
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
 static void sam_xfrsampleinit(struct sam_dev_s *priv);
 static void sam_xfrsample(struct sam_dev_s *priv, int index);
 static void sam_xfrdumpone(struct sam_dev_s *priv,
@@ -401,7 +402,7 @@ static void sam_xfrdump(struct sam_dev_s *priv);
 #  define   sam_xfrdump(priv)
 #endif
 
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAMA5_HSMCI_CMDDEBUG
 static void sam_cmdsampleinit(struct sam_dev_s *priv);
 static inline void sam_cmdsample1(struct sam_dev_s *priv, int index3);
 static inline void sam_cmdsample2(struct sam_dev_s *priv, int index,
@@ -832,7 +833,7 @@ static inline void sam_enable(struct sam_dev_s *priv)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
+#if defined(CONFIG_SAMA5_HSMCI_XFRDEBUG) || defined(CONFIG_SAMA5_HSMCI_CMDDEBUG)
 static void sam_hsmcisample(struct sam_dev_s *priv,
                             struct sam_hsmciregs_s *regs)
 {
@@ -863,26 +864,27 @@ static void sam_hsmcisample(struct sam_dev_s *priv,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HSMCI_XFRDEBUG) || defined(CONFIG_HSMCI_CMDDEBUG)
-static void sam_hsmcidump(struct sam_hsmciregs_s *regs, const char *msg)
+#if defined(CONFIG_SAMA5_HSMCI_XFRDEBUG) || defined(CONFIG_SAMA5_HSMCI_CMDDEBUG)
+static void sam_hsmcidump(struct sam_dev_s *priv,
+                          struct sam_hsmciregs_s *regs, const char *msg)
 {
   fdbg("HSMCI Registers: %s\n", msg);
-  fdbg("     MR[%08x]: %08x\n", SAM_HSMCI_MR,    regs->mr);
-  fdbg("   DTOR[%08x]: %08x\n", SAM_HSMCI_DTOR,  regs->dtor);
-  fdbg("   SDCR[%08x]: %08x\n", SAM_HSMCI_SDCR,  regs->sdcr);
-  fdbg("   ARGR[%08x]: %08x\n", SAM_HSMCI_ARGR,  regs->argr);
-  fdbg("   BLKR[%08x]: %08x\n", SAM_HSMCI_BLKR,  regs->blkr);
-  fdbg("  CSTOR[%08x]: %08x\n", SAM_HSMCI_CSTOR, regs->cstor);
-  fdbg("  RSPR0[%08x]: %08x\n", SAM_HSMCI_RSPR0, regs->rsp0);
-  fdbg("  RSPR1[%08x]: %08x\n", SAM_HSMCI_RSPR1, regs->rsp1);
-  fdbg("  RSPR2[%08x]: %08x\n", SAM_HSMCI_RSPR2, regs->rsp2);
-  fdbg("  RSPR3[%08x]: %08x\n", SAM_HSMCI_RSPR3, regs->rsp3);
-  fdbg("     SR[%08x]: %08x\n", SAM_HSMCI_SR,    regs->sr);
-  fdbg("    IMR[%08x]: %08x\n", SAM_HSMCI_IMR,   regs->imr);
-  fdbg("    DMA[%08x]: %08x\n", SAM_HSMCI_DMA,   regs->dma);
-  fdbg("    CFG[%08x]: %08x\n", SAM_HSMCI_CFG,   regs->cfg);
-  fdbg("   WPMR[%08x]: %08x\n", SAM_HSMCI_WPMR,  regs->wpmr);
-  fdbg("   WPSR[%08x]: %08x\n", SAM_HSMCI_WPSR,  regs->wpsr);
+  fdbg("     MR[%08x]: %08x\n", priv->base + SAM_HSMCI_MR_OFFSET,    regs->mr);
+  fdbg("   DTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_DTOR_OFFSET,  regs->dtor);
+  fdbg("   SDCR[%08x]: %08x\n", priv->base + SAM_HSMCI_SDCR_OFFSET,  regs->sdcr);
+  fdbg("   ARGR[%08x]: %08x\n", priv->base + SAM_HSMCI_ARGR_OFFSET,  regs->argr);
+  fdbg("   BLKR[%08x]: %08x\n", priv->base + SAM_HSMCI_BLKR_OFFSET,  regs->blkr);
+  fdbg("  CSTOR[%08x]: %08x\n", priv->base + SAM_HSMCI_CSTOR_OFFSET, regs->cstor);
+  fdbg("  RSPR0[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR0_OFFSET, regs->rsp0);
+  fdbg("  RSPR1[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR1_OFFSET, regs->rsp1);
+  fdbg("  RSPR2[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR2_OFFSET, regs->rsp2);
+  fdbg("  RSPR3[%08x]: %08x\n", priv->base + SAM_HSMCI_RSPR3_OFFSET, regs->rsp3);
+  fdbg("     SR[%08x]: %08x\n", priv->base + SAM_HSMCI_SR_OFFSET,    regs->sr);
+  fdbg("    IMR[%08x]: %08x\n", priv->base + SAM_HSMCI_IMR_OFFSET,   regs->imr);
+  fdbg("    DMA[%08x]: %08x\n", priv->base + SAM_HSMCI_DMA_OFFSET,   regs->dma);
+  fdbg("    CFG[%08x]: %08x\n", priv->base + SAM_HSMCI_CFG_OFFSET,   regs->cfg);
+  fdbg("   WPMR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPMR_OFFSET,  regs->wpmr);
+  fdbg("   WPSR[%08x]: %08x\n", priv->base + SAM_HSMCI_WPSR_OFFSET,  regs->wpsr);
 }
 #endif
 
@@ -894,7 +896,7 @@ static void sam_hsmcidump(struct sam_hsmciregs_s *regs, const char *msg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
 static void sam_xfrsample(struct sam_dev_s *priv, int index)
 {
   struct sam_xfrregs_s *regs = &priv->xfrsamples[index];
@@ -914,14 +916,14 @@ static void sam_xfrsample(struct sam_dev_s *priv, int index)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
 static void sam_xfrsampleinit(struct sam_dev_s *priv)
 {
   memset(priv->xfrsamples, 0xff,
          DEBUG_NDMASAMPLES * sizeof(struct sam_xfrregs_s));
 
-#ifdef CONFIG_HSMCI_CMDDEBUG
-  g_xfrinitialized = true;
+#ifdef CONFIG_SAMA5_HSMCI_CMDDEBUG
+  priv->xfrinitialized = true;
 #endif
 }
 #endif
@@ -934,14 +936,14 @@ static void sam_xfrsampleinit(struct sam_dev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
 static void sam_xfrdumpone(struct sam_dev_s *priv,
                            struct sam_xfrregs_s *regs, const char *msg)
 {
 #ifdef CONFIG_DEBUG_DMA
   sam_dmadump(priv->dma, &regs->dma, msg);
 #endif
-  sam_hsmcidump(&regs->hsmci, msg);
+  sam_hsmcidump(priv, &regs->hsmci, msg);
 }
 #endif
 
@@ -953,11 +955,11 @@ static void sam_xfrdumpone(struct sam_dev_s *priv,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
+#ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
 static void  sam_xfrdump(struct sam_dev_s *priv)
 {
-#ifdef CONFIG_HSMCI_CMDDEBUG
-  if (g_xfrinitialized)
+#ifdef CONFIG_SAMA5_HSMCI_CMDDEBUG
+  if (priv->xfrinitialized)
 #endif
     {
       sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_BEFORE_SETUP],
@@ -974,8 +976,8 @@ static void  sam_xfrdump(struct sam_dev_s *priv)
       sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_DMA_CALLBACK],
                      "DMA Callback");
 #endif
-#ifdef CONFIG_HSMCI_CMDDEBUG
-      g_xfrinitialized = false;
+#ifdef CONFIG_SAMA5_HSMCI_CMDDEBUG
+      priv->xfrinitialized = false;
 #endif
     }
 }
@@ -989,14 +991,14 @@ static void  sam_xfrdump(struct sam_dev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAMA5_HSMCI_CMDDEBUG
 static void sam_cmdsampleinit(struct sam_dev_s *priv)
 {
   memset(priv->cmdsamples, 0xff,
          DEBUG_NCMDSAMPLES * sizeof(struct sam_hsmciregs_s));
 
-#ifdef CONFIG_HSMCI_XFRDEBUG
-  g_cmdinitialized = true;
+#ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
+  priv->cmdinitialized = true;
 #endif
 }
 #endif
@@ -1009,7 +1011,7 @@ static void sam_cmdsampleinit(struct sam_dev_s *priv)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAMA5_HSMCI_CMDDEBUG
 static inline void sam_cmdsample1(struct sam_dev_s *priv, int index)
 {
   sam_hsmcisample(priv, &priv->cmdsamples[index]);
@@ -1031,19 +1033,19 @@ static inline void sam_cmdsample2(struct sam_dev_s *priv, int index,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_HSMCI_CMDDEBUG
+#ifdef CONFIG_SAMA5_HSMCI_CMDDEBUG
 static void sam_cmddump(struct sam_dev_s *priv)
 {
-#ifdef CONFIG_HSMCI_XFRDEBUG
-  if (g_cmdinitialized)
+#ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
+  if (priv->cmdinitialized)
 #endif
     {
-      sam_hsmcidump(&priv->cmdsamples[SAMPLENDX_AFTER_CMDR],
+      sam_hsmcidump(priv, &priv->cmdsamples[SAMPLENDX_AFTER_CMDR],
                     "After command setup");
-      sam_hsmcidump(&g_cmdsamples[SAMPLENDX_AT_WAKEUP],
+      sam_hsmcidump(priv, &g_cmdsamples[SAMPLENDX_AT_WAKEUP],
                     "After wakeup");
-#ifdef CONFIG_HSMCI_XFRDEBUG
-      g_cmdinitialized = false;
+#ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
+      priv->cmdinitialized = false;
 #endif
     }
 }
@@ -2728,7 +2730,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       /* For DMA channel selection */
 
       dmac = 0;
-      pid  = SAM_PID_HSMCI0;
+      pid  = DMAC0_CH_HSMCI0;
     }
   else
 #endif
@@ -2765,7 +2767,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       /* For DMA channel selection */
 
       dmac = 1;
-      pid  = SAM_PID_HSMCI1;
+      pid  = DMAC1_CH_HSMCI1;
     }
   else
 #endif
@@ -2802,7 +2804,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       /* For DMA channel selection */
 
       dmac = 1;
-      pid  = SAM_PID_HSMCI2;
+      pid  = DMAC1_CH_HSMCI2;
     }
   else
 #endif

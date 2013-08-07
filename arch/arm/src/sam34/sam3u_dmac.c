@@ -953,7 +953,7 @@ static inline int sam_single(struct sam_dma_s *dmach)
 
   /* Set up the CTRLB register */
 
-  putreg32(llhead->ctrlb, dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
+  putreg32(llhead->ctrlb, dmach->base + SAM_DMACHAN_CTRLB_OFFSET);
 
   /* Both the DST and SRC DSCR bits should be '1' in CTRLB */
 
@@ -1005,13 +1005,13 @@ static inline int sam_multiple(struct sam_dma_s *dmach)
 
   (void)getreg32(SAM_DMAC_EBCISR);
 
-  /* Set up the initial CTRLB register (to enable descriptors) */
+  /* Set up the initial CTRLA register */
 
-  putreg32(llhead->ctrlb, dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
+  putreg32(llhead->ctrla, dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
 
-  /* Set up the CTRLB register */
+  /* Set up the CTRLB register (will enable descriptors) */
 
-  putreg32(llhead->ctrlb, dmach->base + SAM_DMACHAN_CTRLA_OFFSET);
+  putreg32(llhead->ctrlb, dmach->base + SAM_DMACHAN_CTRLB_OFFSET);
 
   /* Write the channel configuration information into the CFG register */
 
