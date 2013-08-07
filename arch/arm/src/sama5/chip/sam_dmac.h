@@ -780,7 +780,7 @@
 #define DMAC0_CH_SMD_RX               (16)       /* SMD Receive */
 
 
-/* DMA Controller 0 Channel Definitions */
+/* DMA Controller 1 Channel Definitions */
 
 #define DMAC1_CH_HSMCI1               (0)        /* HSMCI1 Receive/transmit */
 #define DMAC1_CH_HSMCI2               (1)        /* HSMCI2 Receive/transmit */

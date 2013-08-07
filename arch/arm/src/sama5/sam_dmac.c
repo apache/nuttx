@@ -652,7 +652,7 @@ static inline uint32_t sam_txctrlabits(struct sam_dmach_s *dmach)
  ****************************************************************************/
 
 static inline uint32_t sam_txctrla(struct sam_dmach_s *dmach,
-                                   uint32_t dmasize, uint32_t txctrlabits)
+                                   uint32_t dmasize, uint32_t ctrla)
 {
   unsigned int chunksize;
 
@@ -686,7 +686,7 @@ static inline uint32_t sam_txctrla(struct sam_dmach_s *dmach,
     }
 
   DEBUGASSERT(dmasize <= DMAC_CH_CTRLA_BTSIZE_MAX);
-  return (txctrlabits & ~DMAC_CH_CTRLA_BTSIZE_MASK) |
+  return (ctrla & ~DMAC_CH_CTRLA_BTSIZE_MASK) |
          (dmasize << DMAC_CH_CTRLA_BTSIZE_SHIFT);
 }
 
@@ -753,7 +753,7 @@ static inline uint32_t sam_rxctrlabits(struct sam_dmach_s *dmach)
  ****************************************************************************/
 
 static inline uint32_t sam_rxctrla(struct sam_dmach_s *dmach,
-                                   uint32_t dmasize, uint32_t txctrlabits)
+                                   uint32_t dmasize, uint32_t ctrla)
 {
   unsigned int chunksize;
 
@@ -787,7 +787,7 @@ static inline uint32_t sam_rxctrla(struct sam_dmach_s *dmach,
     }
 
   DEBUGASSERT(dmasize <= DMAC_CH_CTRLA_BTSIZE_MAX);
-  return (txctrlabits & ~DMAC_CH_CTRLA_BTSIZE_MASK) |
+  return (ctrla & ~DMAC_CH_CTRLA_BTSIZE_MASK) |
          (dmasize << DMAC_CH_CTRLA_BTSIZE_SHIFT);
 }
 
@@ -803,6 +803,7 @@ static inline uint32_t sam_rxctrla(struct sam_dmach_s *dmach,
 static inline uint32_t sam_txctrlb(struct sam_dmach_s *dmach)
 {
   uint32_t regval;
+  unsigned int ahbif;
 
   /* Assume that we will not be using the link list and disable the source
    * and destination descriptors.  The default will be single transfer mode.
@@ -854,12 +855,22 @@ static inline uint32_t sam_txctrlb(struct sam_dmach_s *dmach)
         }
     }
 
+  /* Source ABH layer */
+
+  ahbif = (dmach->flags & DMACH_FLAG_MEMAHB_MASK) >> DMACH_FLAG_MEMAHB_SHIFT;
+  regval |= (ahbif << DMAC_CH_CTRLB_SIF_SHIFT);
+
   /* Select source address incrementing */
 
   if ((dmach->flags & DMACH_FLAG_MEMINCREMENT) == 0)
     {
       regval |= DMAC_CH_CTRLB_SRCINCR_FIXED;
     }
+
+  /* Destination ABH layer */
+
+  ahbif = (dmach->flags & DMACH_FLAG_PERIPHAHB_MASK) >> DMACH_FLAG_PERIPHAHB_SHIFT;
+  regval |= (ahbif << DMAC_CH_CTRLB_DIF_SHIFT);
 
   /* Select destination address incrementing */
 
@@ -883,6 +894,7 @@ static inline uint32_t sam_txctrlb(struct sam_dmach_s *dmach)
 static inline uint32_t sam_rxctrlb(struct sam_dmach_s *dmach)
 {
   uint32_t regval;
+  unsigned int ahbif;
 
   /* Assume that we will not be using the link list and disable the source
    * and destination descriptors.  The default will be single transfer mode.
@@ -934,12 +946,22 @@ static inline uint32_t sam_rxctrlb(struct sam_dmach_s *dmach)
         }
     }
 
+  /* Source ABH layer */
+
+  ahbif = (dmach->flags & DMACH_FLAG_PERIPHAHB_MASK) >> DMACH_FLAG_PERIPHAHB_SHIFT;
+  regval |= (ahbif << DMAC_CH_CTRLB_SIF_SHIFT);
+
   /* Select source address incrementing */
 
   if ((dmach->flags & DMACH_FLAG_PERIPHINCREMENT) == 0)
     {
       regval |= DMAC_CH_CTRLB_SRCINCR_FIXED;
     }
+
+  /* Destination ABH layer */
+
+  ahbif = (dmach->flags & DMACH_FLAG_MEMAHB_MASK) >> DMACH_FLAG_MEMAHB_SHIFT;
+  regval |= (ahbif << DMAC_CH_CTRLB_DIF_SHIFT);
 
   /* Select address incrementing */
 
@@ -1033,7 +1055,10 @@ sam_allocdesc(struct sam_dmach_s *dmach, struct dma_linklist_s *prev,
 
                   prev->ctrlb &= ~DMAC_CH_CTRLB_BOTHDSCR;
 
-                  /* Link the previous tail to the new tail */
+                  /* Link the previous tail to the new tail.
+                   * REVISIT:  This assumes that the next description is fetched
+                   * via AHB IF0.
+                   */
 
                   prev->dscr = (uint32_t)desc;
                 }
@@ -1413,7 +1438,7 @@ static int sam_dmac_interrupt(struct sam_dmac_s *dmac)
                * interrupt as part of a multiple buffer transfer.
                */
 
-              else /* f ((regval & DMAC_EBC_BTC(chndx)) != 0) */
+              else /* if ((regval & DMAC_EBC_BTC(chndx)) != 0) */
                 {
                   /* Write the KEEPON field to clear the STALL states */
 
