@@ -78,37 +78,43 @@
 
 /* Peripheral endpoint characteristics */
 
-#define DMACH_FLAG_PERIPHPID_SHIFT            (2)       /* Bits 2-5: Peripheral PID */
-#define DMACH_FLAG_PERIPHPID_MASK             (15 << DMACH_FLAG_PERIPHPID_SHIFT)
-#define DMACH_FLAG_PERIPHH2SEL                (1 << 6)  /* Bits 6: HW handshaking */
-#define DMACH_FLAG_PERIPHISPERIPH             (1 << 7)  /* Bits 7: 0=memory; 1=peripheral */
-#define DMACH_FLAG_PERIPHWIDTH_SHIFT          (8)       /* Bits 8-9: Peripheral width */
+#define DMACH_FLAG_PERIPHPID_SHIFT            (2)       /* Bits 2-7: Peripheral PID */
+#define DMACH_FLAG_PERIPHPID_MASK             (63 << DMACH_FLAG_PERIPHPID_SHIFT)
+#define DMACH_FLAG_PERIPHH2SEL                (1 << 8)  /* Bits 8: HW handshaking */
+#define DMACH_FLAG_PERIPHISPERIPH             (1 << 9)  /* Bits 9: 0=memory; 1=peripheral */
+#define DMACH_FLAG_PERIPHWIDTH_SHIFT          (10)      /* Bits 10-11: Peripheral width */
 #define DMACH_FLAG_PERIPHWIDTH_MASK           (3 << DMACH_FLAG_PERIPHWIDTH_SHIFT)
 #  define DMACH_FLAG_PERIPHWIDTH_8BITS        (0 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 8 bits */
 #  define DMACH_FLAG_PERIPHWIDTH_16BITS       (1 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 16 bits */
 #  define DMACH_FLAG_PERIPHWIDTH_32BITS       (2 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 32 bits */
 #  define DMACH_FLAG_PERIPHWIDTH_64BITS       (3 << DMACH_FLAG_PERIPHWIDTH_SHIFT) /* 64 bits */
-#define DMACH_FLAG_PERIPHINCREMENT            (1 << 10) /* Bit 10: Autoincrement peripheral address */
-#define DMACH_FLAG_PERIPHCHUNKSIZE            (1 << 11) /* Bit 11: Peripheral chunk size */
-#  define DMACH_FLAG_PERIPHCHUNKSIZE_1        (0)                        /* Peripheral chunksize = 1 */
-#  define DMACH_FLAG_PERIPHCHUNKSIZE_4        DMACH_FLAG_PERIPHCHUNKSIZE /* Peripheral chunksize = 4 */
+#define DMACH_FLAG_PERIPHINCREMENT            (1 << 12) /* Bit 12: Autoincrement peripheral address */
+#define DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT      (13)      /* Bits 13-14: Peripheral chunk size */
+#define DMACH_FLAG_PERIPHCHUNKSIZE_MASK       (3 << DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT)
+#  define DMACH_FLAG_PERIPHCHUNKSIZE_1        (0 << DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT) /* Peripheral chunksize = 1 */
+#  define DMACH_FLAG_PERIPHCHUNKSIZE_4        (1 << DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT) /* Peripheral chunksize = 4 */
+#  define DMACH_FLAG_PERIPHCHUNKSIZE_8        (3 << DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT) /* Peripheral chunksize = 8 */
+#  define DMACH_FLAG_PERIPHCHUNKSIZE_16       (4 << DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT) /* Peripheral chunksize = 16 */
 
 /* Memory endpoint characteristics */
 
-#define DMACH_FLAG_MEMPID_SHIFT               (12)      /* Bits 12-15: Memory PID */
-#define DMACH_FLAG_MEMPID_MASK                (15 << DMACH_FLAG_PERIPHPID_SHIFT)
-#define DMACH_FLAG_MEMH2SEL                   (1 << 16) /* Bits 16: HW handshaking */
-#define DMACH_FLAG_MEMISPERIPH                (1 << 17) /* Bits 17: 0=memory; 1=peripheral */
-#define DMACH_FLAG_MEMWIDTH_SHIFT             (18)      /* Bits 18-19: Memory width */
+#define DMACH_FLAG_MEMPID_SHIFT               (15)      /* Bits 15-20: Memory PID */
+#define DMACH_FLAG_MEMPID_MASK                (63 << DMACH_FLAG_PERIPHPID_SHIFT)
+#define DMACH_FLAG_MEMH2SEL                   (1 << 21) /* Bits 21: HW handshaking */
+#define DMACH_FLAG_MEMISPERIPH                (1 << 22) /* Bits 22: 0=memory; 1=peripheral */
+#define DMACH_FLAG_MEMWIDTH_SHIFT             (23)      /* Bits 23-24: Memory width */
 #define DMACH_FLAG_MEMWIDTH_MASK              (3 << DMACH_FLAG_MEMWIDTH_SHIFT)
 #  define DMACH_FLAG_MEMWIDTH_8BITS           (0 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 8 bits */
 #  define DMACH_FLAG_MEMWIDTH_16BITS          (1 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 16 bits */
 #  define DMACH_FLAG_MEMWIDTH_32BITS          (2 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 32 bits */
 #  define DMACH_FLAG_MEMWIDTH_64BITS          (3 << DMACH_FLAG_MEMWIDTH_SHIFT) /* 64 bits */
-#define DMACH_FLAG_MEMINCREMENT               (1 << 20) /* Bit 20: Autoincrement memory address */
-#define DMACH_FLAG_MEMCHUNKSIZE               (1 << 21) /* Bit 21: Memory chunk size */
-#  define DMACH_FLAG_MEMCHUNKSIZE_1           (0)                     /* Memory chunksize = 1 */
-#  define DMACH_FLAG_MEMCHUNKSIZE_4           DMACH_FLAG_MEMCHUNKSIZE /* Memory chunksize = 4 */
+#define DMACH_FLAG_MEMINCREMENT               (1 << 25) /* Bit 25: Autoincrement memory address */
+#define DMACH_FLAG_MEMCHUNKSIZE_SHIFT         (26)      /* Bit 26-27: Memory chunk size */
+#define DMACH_FLAG_MEMCHUNKSIZE_MASK          (3 << DMACH_FLAG_MEMCHUNKSIZE_SHIFT)
+#  define DMACH_FLAG_MEMCHUNKSIZE_1           (0 << DMACH_FLAG_MEMCHUNKSIZE_SHIFT) /* Peripheral chunksize = 1 */
+#  define DMACH_FLAG_MEMCHUNKSIZE_4           (1 << DMACH_FLAG_MEMCHUNKSIZE_SHIFT) /* Peripheral chunksize = 4 */
+#  define DMACH_FLAG_MEMCHUNKSIZE_8           (3 << DMACH_FLAG_MEMCHUNKSIZE_SHIFT) /* Peripheral chunksize = 8 */
+#  define DMACH_FLAG_MEMCHUNKSIZE_16          (4 << DMACH_FLAG_MEMCHUNKSIZE_SHIFT) /* Peripheral chunksize = 16 */
 
 /************************************************************************************
  * Public Types

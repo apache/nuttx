@@ -545,15 +545,20 @@ static inline uint32_t sam_fifocfg(struct sam_dmach_s *dmach)
 static inline uint32_t sam_txcfg(struct sam_dmach_s *dmach)
 {
   uint32_t regval;
+  unsigned int pid;
 
   /* Set transfer (memory to peripheral) DMA channel configuration register */
 
-  regval  = (((dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT)
-    << DMAC_CH_CFG_SRCPER_SHIFT);
+  pid     = (dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT;
+  regval  = ((pid & 0x0f) << DMAC_CH_CFG_SRCPER_SHIFT);
+  regval |= ((pid & 0x30) << (DMAC_CH_CFG_SRCPERMSB_SHIFT-4));
   regval |=   (dmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? DMAC_CH_CFG_SRCH2SEL : 0;
-  regval |= (((dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT)
-    << DMAC_CH_CFG_DSTPER_SHIFT);
-  regval |=   (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMAC_CH_CFG_DSTH2SEL : 0;
+
+  pid     = (dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT;
+  regval |= ((pid & 0x0f) << DMAC_CH_CFG_DSTPER_SHIFT);
+  regval |= ((pid & 0x30) << (DMAC_CH_CFG_DSTPERMSB_SHIFT-4));
+  regval |= (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMAC_CH_CFG_DSTH2SEL : 0;
+
   regval |= sam_fifocfg(dmach);
   return regval;
 }
@@ -570,15 +575,20 @@ static inline uint32_t sam_txcfg(struct sam_dmach_s *dmach)
 static inline uint32_t sam_rxcfg(struct sam_dmach_s *dmach)
 {
   uint32_t regval;
+  unsigned int pid;
 
   /* Set received (peripheral to memory) DMA channel config */
 
-  regval  = (((dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT)
-    << DMAC_CH_CFG_SRCPER_SHIFT);
-  regval |=   (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMAC_CH_CFG_SRCH2SEL : 0;
-  regval |= (((dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT)
-    << DMAC_CH_CFG_DSTPER_SHIFT);
-  regval |=   (dmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? DMAC_CH_CFG_DSTH2SEL : 0;
+  pid     = (dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT;
+  regval  = ((pid & 0x0f) << DMAC_CH_CFG_SRCPER_SHIFT);
+  regval |= ((pid & 0x30) << (DMAC_CH_CFG_SRCPERMSB_SHIFT-4));
+  regval |= (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMAC_CH_CFG_SRCH2SEL : 0;
+
+  pid     = (dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT;
+  regval |= ((pid & 0x0f) << DMAC_CH_CFG_DSTPER_SHIFT);
+  regval |= ((pid & 0x30) << (DMAC_CH_CFG_DSTPERMSB_SHIFT-4));
+  regval |= (dmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? DMAC_CH_CFG_DSTH2SEL : 0;
+
   regval |= sam_fifocfg(dmach);
   return regval;
 }
@@ -598,6 +608,7 @@ static inline uint32_t sam_txctrlabits(struct sam_dmach_s *dmach)
 {
   uint32_t regval;
   unsigned int ndx;
+  unsigned int chunksize;
 
   DEBUGASSERT(dmach);
 
@@ -611,16 +622,9 @@ static inline uint32_t sam_txctrlabits(struct sam_dmach_s *dmach)
 
   /* Set the source chuck size (memory chunk size) */
 
-  if ((dmach->flags & DMACH_FLAG_MEMCHUNKSIZE) == DMACH_FLAG_MEMCHUNKSIZE_4)
-    {
-      regval |= DMAC_CH_CTRLA_SCSIZE_4;
-    }
-#if 0 /* DMAC_CH_CTRLA_SCSIZE_1 is zero */
-  else
-    {
-      regval |= DMAC_CH_CTRLA_SCSIZE_1;
-    }
-#endif
+  chunksize = (dmach->flags & DMACH_FLAG_MEMCHUNKSIZE_MASK)
+    >> DMACH_FLAG_MEMCHUNKSIZE_SHIFT;
+  regval |= chunksize << DMAC_CH_CTRLA_SCSIZE_SHIFT;
 
   /* Since this is a transmit, the destination is described by the peripheral selections.
    * Set the destination width (peripheral width).
@@ -632,16 +636,9 @@ static inline uint32_t sam_txctrlabits(struct sam_dmach_s *dmach)
 
   /* Set the destination chuck size (peripheral chunk size) */
 
-  if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) == DMACH_FLAG_PERIPHCHUNKSIZE_4)
-    {
-      regval |= DMAC_CH_CTRLA_DCSIZE_4;
-    }
-#if 0 /* DMAC_CH_CTRLA_DCSIZE_1 is zero */
-  else
-    {
-      regval |= DMAC_CH_CTRLA_DCSIZE_1;
-    }
-#endif
+  chunksize = (dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE_MASK)
+    >> DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT;
+  regval |= chunksize << DMAC_CH_CTRLA_DCSIZE_SHIFT;
 
   return regval;
 }
@@ -657,6 +654,8 @@ static inline uint32_t sam_txctrlabits(struct sam_dmach_s *dmach)
 static inline uint32_t sam_txctrla(struct sam_dmach_s *dmach,
                                    uint32_t dmasize, uint32_t txctrlabits)
 {
+  unsigned int chunksize;
+
   /* Set the buffer transfer size field.  This is the number of transfers to
    * be performed, that is, the number of source width transfers to perform.
    */
@@ -665,9 +664,25 @@ static inline uint32_t sam_txctrla(struct sam_dmach_s *dmach,
    * chunk size)
    */
 
-  if ((dmach->flags & DMACH_FLAG_MEMCHUNKSIZE) == DMACH_FLAG_MEMCHUNKSIZE_4)
+  chunksize = (dmach->flags & DMACH_FLAG_MEMCHUNKSIZE_MASK)
+    >> DMACH_FLAG_MEMCHUNKSIZE_SHIFT;
+  switch (chunksize)
     {
-      dmasize >>= 2;
+      default:
+      case 0: /* 1 byte */
+        break;
+
+      case 1: /* 4 bytes */
+        dmasize >>= 2;
+        break;
+
+      case 2: /* 8 bytes */
+        dmasize >>= 3;
+        break;
+
+      case 3: /* 16 bytes */
+        dmasize >>= 4;
+        break;
     }
 
   DEBUGASSERT(dmasize <= DMAC_CH_CTRLA_BTSIZE_MAX);
@@ -690,6 +705,7 @@ static inline uint32_t sam_rxctrlabits(struct sam_dmach_s *dmach)
 {
   uint32_t regval;
   unsigned int ndx;
+  unsigned int chunksize;
 
   DEBUGASSERT(dmach);
 
@@ -705,17 +721,9 @@ static inline uint32_t sam_rxctrlabits(struct sam_dmach_s *dmach)
 
   /* Set the source chuck size (peripheral chunk size) */
 
-  if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) ==
-       DMACH_FLAG_PERIPHCHUNKSIZE_4)
-    {
-      regval |= DMAC_CH_CTRLA_SCSIZE_4;
-    }
-#if 0 /* DMAC_CH_CTRLA_SCSIZE_1 is zero */
-  else
-    {
-      regval |= DMAC_CH_CTRLA_SCSIZE_1;
-    }
-#endif
+  chunksize = (dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE_MASK)
+    >> DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT;
+  regval |= chunksize << DMAC_CH_CTRLA_SCSIZE_SHIFT;
 
   /* Since this is a receive, the destination is described by the memory
    * selections. Set the destination width (memory width).
@@ -729,16 +737,9 @@ static inline uint32_t sam_rxctrlabits(struct sam_dmach_s *dmach)
 
   /* Set the destination chuck size (memory chunk size) */
 
-  if ((dmach->flags & DMACH_FLAG_MEMCHUNKSIZE) == DMACH_FLAG_MEMCHUNKSIZE_4)
-    {
-      regval |= DMAC_CH_CTRLA_DCSIZE_4;
-    }
-#if 0 /* DMAC_CH_CTRLA_DCSIZE_1 is zero */
-  else
-    {
-      regval |= DMAC_CH_CTRLA_DCSIZE_1;
-    }
-#endif
+  chunksize = (dmach->flags & DMACH_FLAG_MEMCHUNKSIZE_MASK)
+    >> DMACH_FLAG_MEMCHUNKSIZE_SHIFT;
+  regval |= chunksize << DMAC_CH_CTRLA_DCSIZE_SHIFT;
 
   return regval;
 }
@@ -754,6 +755,8 @@ static inline uint32_t sam_rxctrlabits(struct sam_dmach_s *dmach)
 static inline uint32_t sam_rxctrla(struct sam_dmach_s *dmach,
                                    uint32_t dmasize, uint32_t txctrlabits)
 {
+  unsigned int chunksize;
+
   /* Set the buffer transfer size field.  This is the number of transfers to
    * be performed, that is, the number of source width transfers to perform.
    */
@@ -762,10 +765,25 @@ static inline uint32_t sam_rxctrla(struct sam_dmach_s *dmach,
    * chunk size)
    */
 
-  if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) ==
-      DMACH_FLAG_PERIPHCHUNKSIZE_4)
+  chunksize = (dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE_MASK)
+    >> DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT;
+  switch (chunksize)
     {
-      dmasize >>= 2;
+      default:
+      case 0: /* 1 byte */
+        break;
+
+      case 1: /* 4 bytes */
+        dmasize >>= 2;
+        break;
+
+      case 2: /* 8 bytes */
+        dmasize >>= 3;
+        break;
+
+      case 3: /* 16 bytes */
+        dmasize >>= 4;
+        break;
     }
 
   DEBUGASSERT(dmasize <= DMAC_CH_CTRLA_BTSIZE_MAX);
@@ -1209,7 +1227,7 @@ static inline int sam_single(struct sam_dmach_s *dmach)
 
   /* Set up the CTRLB register */
 
-  sam_putdmach(dmach, llhead->ctrlb, SAM_DMAC_CH_CTRLA_OFFSET);
+  sam_putdmach(dmach, llhead->ctrlb, SAM_DMAC_CH_CTRLB_OFFSET);
 
   /* Both the DST and SRC DSCR bits should be '1' in CTRLB */
 
@@ -1264,13 +1282,13 @@ static inline int sam_multiple(struct sam_dmach_s *dmach)
 
   (void)sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET);
 
-  /* Set up the initial CTRLB register (to enable descriptors) */
+  /* Set up the initial CTRLA register */
 
-  sam_putdmach(dmach, llhead->ctrlb, SAM_DMAC_CH_CTRLA_OFFSET);
+  sam_putdmach(dmach, llhead->ctrla, SAM_DMAC_CH_CTRLA_OFFSET);
 
-  /* Set up the CTRLB register */
+  /* Set up the CTRLB register (will enable descriptors) */
 
-  sam_putdmach(dmach, llhead->ctrlb, SAM_DMAC_CH_CTRLA_OFFSET);
+  sam_putdmach(dmach, llhead->ctrlb, SAM_DMAC_CH_CTRLB_OFFSET);
 
   /* Write the channel configuration information into the CFG register */
 
