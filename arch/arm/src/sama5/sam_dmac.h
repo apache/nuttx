@@ -104,7 +104,7 @@
 /* Memory endpoint characteristics */
 
 #define DMACH_FLAG_MEMPID_SHIFT               (17)      /* Bits 17-22: Memory PID */
-#define DMACH_FLAG_MEMPID_MASK                (63 << DMACH_FLAG_PERIPHPID_SHIFT)
+#define DMACH_FLAG_MEMPID_MASK                (63 << DMACH_FLAG_MEMPID_SHIFT)
 #define DMACH_FLAG_MEMH2SEL                   (1 << 23) /* Bits 23: HW handshaking */
 #define DMACH_FLAG_MEMISPERIPH                (1 << 24) /* Bits 24: 0=memory; 1=peripheral */
 #define DMACH_FLAG_MEMAHB_SHIFT               (25)      /* Bits 25-26: Peripheral ABH layer number */

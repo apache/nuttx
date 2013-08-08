@@ -175,7 +175,7 @@
   ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  | HSMCI_INT_RENDE   | HSMCI_INT_RDIRE | \
     HSMCI_INT_RINDE )
 #define HSMCI_RESPONSE_TIMEOUT_ERRORS \
-  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE  )
+  ( HSMCI_INT_CSTOE | HSMCI_INT_RTOE )
 
 /* Data transfer errors:
  *
@@ -261,7 +261,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
 /* Register logging support */
 
 #if defined(CONFIG_SAMA5_HSMCI_XFRDEBUG) || defined(CONFIG_SAMA5_HSMCI_CMDDEBUG)
@@ -432,7 +431,7 @@ static void sam_notransfer(struct sam_dev_s *priv);
 
 /* Interrupt Handling *******************************************************/
 
-static int sam_hsmci_interrupt(struct sam_dev_s *priv);
+static int  sam_hsmci_interrupt(struct sam_dev_s *priv);
 #ifdef CONFIG_SAMA5_HSMCI0
 static int  sam_hsmci0_interrupt(int irq, void *context);
 #endif
@@ -497,7 +496,6 @@ static void sam_callback(void *arg);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
 /* Callbacks */
 
 static const struct sdio_dev_s g_callbacks =
@@ -2733,7 +2731,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       /* For DMA channel selection */
 
       dmac = 0;
-      pid  = DMAC0_CH_HSMCI0;
+      pid  = SAM_PID_HSMCI0;
     }
   else
 #endif
@@ -2770,7 +2768,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       /* For DMA channel selection */
 
       dmac = 1;
-      pid  = DMAC1_CH_HSMCI1;
+      pid  = SAM_PID_HSMCI1;
     }
   else
 #endif
@@ -2807,7 +2805,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       /* For DMA channel selection */
 
       dmac = 1;
-      pid  = DMAC1_CH_HSMCI2;
+      pid  = SAM_PID_HSMCI2;
     }
   else
 #endif
@@ -2827,7 +2825,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 
   /* Initialize the callbacks */
 
-  memcpy(&priv->dev, &g_callbacks, sizeof(struct sdio_dev_s ));
+  memcpy(&priv->dev, &g_callbacks, sizeof(struct sdio_dev_s));
 
   /* Allocate a DMA channel */
 
