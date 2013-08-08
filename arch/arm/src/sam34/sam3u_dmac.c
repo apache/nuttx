@@ -424,7 +424,7 @@ static inline uint32_t sam_txctrla(struct sam_dma_s *dmach,
 
   if ((dmach->flags & DMACH_FLAG_MEMCHUNKSIZE) == DMACH_FLAG_MEMCHUNKSIZE_4)
     {
-      dmasize >>= 2;
+      dmasize = (dmasize + 3) >> 2;
     }
 
   DEBUGASSERT(dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
@@ -516,7 +516,7 @@ static inline uint32_t sam_rxctrla(struct sam_dma_s *dmach,
 
   if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) == DMACH_FLAG_PERIPHCHUNKSIZE_4)
     {
-      dmasize >>= 2;
+      dmasize = (dmasize + 3) >> 2;
     }
 
   DEBUGASSERT(dmasize <= DMACHAN_CTRLA_BTSIZE_MAX);
@@ -1311,6 +1311,7 @@ void sam_dmafree(DMA_HANDLE handle)
 int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
 {
   struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
+  size_t maxtransfer;
   int ret = OK;
 
   dmavdbg("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
@@ -1318,18 +1319,31 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
   DEBUGASSERT(dmach);
   dmavdbg("llhead: %p lltail: %p\n", dmach->llhead, dmach->lltail);
 
+  /* The maximum transfer size in bytes depends upon the maximum number of
+   * transfers and the number of bytes per transfer.
+   */
+
+  if ((dmach->flags & DMACH_FLAG_MEMCHUNKSIZE) == DMACH_FLAG_MEMCHUNKSIZE_4)
+    {
+      maxtransfer = 4 * DMACHAN_CTRLA_BTSIZE_MAX;
+    }
+  else
+    {
+      maxtransfer = DMACHAN_CTRLA_BTSIZE_MAX;
+    }
+
   /* If this is a large transfer, break it up into smaller buffers */
 
-  while (nbytes > DMACHAN_CTRLA_BTSIZE_MAX)
+  while (nbytes > maxtransfer)
     {
       /* Set up the maximum size transfer */
 
-      ret = sam_txbuffer(dmach, paddr, maddr, DMACHAN_CTRLA_BTSIZE_MAX);
+      ret = sam_txbuffer(dmach, paddr, maddr, maxtransfer);
       if (ret == OK);
         {
           /* Decrement the number of bytes left to transfer */
 
-          nbytes -= DMACHAN_CTRLA_BTSIZE_MAX;
+          nbytes -= maxtransfer;
 
           /* Increment the memory & peripheral address (if it is appropriate to
            * do do).
@@ -1337,12 +1351,12 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 
           if ((dmach->flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
             {
-              paddr += DMACHAN_CTRLA_BTSIZE_MAX;
+              paddr += maxtransfer;
             }
 
           if ((dmach->flags & DMACH_FLAG_MEMINCREMENT) != 0)
             {
-              maddr += DMACHAN_CTRLA_BTSIZE_MAX;
+              maddr += maxtransfer;
             }
         }
     }
@@ -1371,6 +1385,7 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes)
 {
   struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
+  size_t maxtransfer;
   int ret = OK;
 
   dmavdbg("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
@@ -1378,18 +1393,31 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
   DEBUGASSERT(dmach);
   dmavdbg("llhead: %p lltail: %p\n", dmach->llhead, dmach->lltail);
 
+  /* The maximum transfer size in bytes depends upon the maximum number of
+   * transfers and the number of bytes per transfer.
+   */
+
+  if ((dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE) == DMACH_FLAG_PERIPHCHUNKSIZE_4)
+    {
+      maxtransfer = 4 * DMACHAN_CTRLA_BTSIZE_MAX;
+    }
+  else
+    {
+      maxtransfer = DMACHAN_CTRLA_BTSIZE_MAX;
+    }
+
   /* If this is a large transfer, break it up into smaller buffers */
 
-  while (nbytes > DMACHAN_CTRLA_BTSIZE_MAX)
+  while (nbytes > maxtransfer)
     {
       /* Set up the maximum size transfer */
 
-      ret = sam_rxbuffer(dmach, paddr, maddr, DMACHAN_CTRLA_BTSIZE_MAX);
+      ret = sam_rxbuffer(dmach, paddr, maddr, maxtransfer);
       if (ret == OK);
         {
           /* Decrement the number of bytes left to transfer */
 
-          nbytes -= DMACHAN_CTRLA_BTSIZE_MAX;
+          nbytes -= maxtransfer;
 
           /* Increment the memory & peripheral address (if it is appropriate to
            * do do).
@@ -1397,12 +1425,12 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nby
 
           if ((dmach->flags & DMACH_FLAG_PERIPHINCREMENT) != 0)
             {
-              paddr += DMACHAN_CTRLA_BTSIZE_MAX;
+              paddr += maxtransfer;
             }
 
           if ((dmach->flags & DMACH_FLAG_MEMINCREMENT) != 0)
             {
-              maddr += DMACHAN_CTRLA_BTSIZE_MAX;
+              maddr += maxtransfer;
             }
         }
     }
