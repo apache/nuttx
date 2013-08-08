@@ -759,11 +759,13 @@ static inline uint32_t sam_txcfg(struct sam_dmach_s *dmach)
 
   /* Set transfer (memory to peripheral) DMA channel configuration register */
 
+  regval   = DMAC_CH_CFG_SOD;
+
   pid      = (dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT;
   isperiph = ((dmach->flags & DMACH_FLAG_MEMISPERIPH) != 0);
   pchan    = sam_source_channel(dmach, pid, isperiph);
 
-  regval   = ((pchan & 0x0f) << DMAC_CH_CFG_SRCPER_SHIFT);
+  regval  |= ((pchan & 0x0f) << DMAC_CH_CFG_SRCPER_SHIFT);
   regval  |= ((pchan & 0x30) << (DMAC_CH_CFG_SRCPERMSB_SHIFT-4));
   regval  |= (dmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? DMAC_CH_CFG_SRCH2SEL : 0;
 
@@ -797,11 +799,13 @@ static inline uint32_t sam_rxcfg(struct sam_dmach_s *dmach)
 
   /* Set received (peripheral to memory) DMA channel config */
 
+  regval   = DMAC_CH_CFG_SOD;
+
   pid      = (dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT;
   isperiph = ((dmach->flags & DMACH_FLAG_PERIPHISPERIPH) != 0);
   pchan    = sam_source_channel(dmach, pid, isperiph);
 
-  regval   = ((pchan & 0x0f) << DMAC_CH_CFG_SRCPER_SHIFT);
+  regval  |= ((pchan & 0x0f) << DMAC_CH_CFG_SRCPER_SHIFT);
   regval  |= ((pchan & 0x30) << (DMAC_CH_CFG_SRCPERMSB_SHIFT-4));
   regval  |= (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMAC_CH_CFG_SRCH2SEL : 0;
 
@@ -1167,7 +1171,7 @@ static inline uint32_t sam_txctrlb(struct sam_dmach_s *dmach)
    * and destination descriptors.  The default will be single transfer mode.
    */
 
-  regval = DMAC_CH_CTRLB_BOTHDSCR;
+  regval = DMAC_CH_CTRLB_BOTHDSCR | DMAC_CH_CTRLB_IEN;
 
   /* Select flow control (even if the channel doesn't support it).  The
    * naming convention from TX is memory to peripheral, but that is really
@@ -1258,7 +1262,7 @@ static inline uint32_t sam_rxctrlb(struct sam_dmach_s *dmach)
    * and destination descriptors.  The default will be single transfer mode.
    */
 
-  regval = DMAC_CH_CTRLB_BOTHDSCR;
+  regval = DMAC_CH_CTRLB_BOTHDSCR | DMAC_CH_CTRLB_IEN;
 
   /* Select flow control (even if the channel doesn't support it).  The
    * naming convention from RX is peripheral to memory, but that is really
@@ -1605,6 +1609,10 @@ static inline int sam_single(struct sam_dmach_s *dmach)
 
   sam_putdmach(dmach, llhead->daddr, SAM_DMAC_CH_DADDR_OFFSET);
 
+  /* Clear the next descriptor address */
+
+  sam_putdmach(dmach, 0, SAM_DMAC_CH_DSCR_OFFSET);
+
   /* Set up the CTRLA register */
 
   sam_putdmach(dmach, llhead->ctrla, SAM_DMAC_CH_CTRLA_OFFSET);
@@ -1628,7 +1636,7 @@ static inline int sam_single(struct sam_dmach_s *dmach)
 
   /* The DMA has been started. Once the transfer completes, hardware sets
    * the interrupts and disables the channel.  We will received buffer
-   * complete and* transfer complete interrupts.
+   * complete and transfer complete interrupts.
    *
    * Enable error, buffer complete and transfer complete interrupts.
    * (Since there is only a single buffer, we don't need the buffer

@@ -420,7 +420,7 @@ static void sam_cmddump(struct sam_dev_s *priv);
 /* DMA Helpers **************************************************************/
 
 static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result);
-static uint32_t sam_pfifo(struct sam_dev_s *priv);
+static uint32_t sam_dmaregister(struct sam_dev_s *priv, unsigned int offset);
 
 /* Data Transfer Helpers ****************************************************/
 
@@ -1074,21 +1074,21 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
 }
 
 /****************************************************************************
- * Name: sam_pfifo
+ * Name: sam_dmaregister
  *
  * Description:
- *   Return the physical address of a FIFO
+ *   Return the physical address of an HSMCI register
  *
  ****************************************************************************/
 
-static uint32_t sam_pfifo(struct sam_dev_s *priv)
+static uint32_t sam_dmaregister(struct sam_dev_s *priv, unsigned int offset)
 {
   /* Get the offset into the 1MB section containing the HSMCI registers */
 
   uint32_t pbase = priv->base & 0xfff00000;
 
 #ifdef CONFIG_HSMCI_HSMCI0
-  /* Add in the physcal base for HSMCI0
+  /* Add in the physical base for HSMCI0
    *
    * We only have to check if this is HSMCI0 if either HSMCI1 or HSMCI2 are
    * enabled.
@@ -1106,7 +1106,7 @@ static uint32_t sam_pfifo(struct sam_dev_s *priv)
 #endif
 
 #ifdef CONFIG_HSMCI_HSMCI1
-  /* Add in the physcal base for HSMCI1
+  /* Add in the physical base for HSMCI1
    *
    * We only have to check if this is HSCMCi1 if HSMCI2 is enabled.
    */
@@ -1122,7 +1122,7 @@ static uint32_t sam_pfifo(struct sam_dev_s *priv)
 #endif
 #endif
 
-  /* Add in the physcal base for HSMCI2.
+  /* Add in the physical base for HSMCI2.
    *
    * If we get here, we con't have to check.
    */
@@ -1133,7 +1133,7 @@ static uint32_t sam_pfifo(struct sam_dev_s *priv)
     }
 #endif
 
-  return pbase + SAM_HSMCI_FIFO_OFFSET;
+  return pbase + offset;
 }
 
 /****************************************************************************
@@ -2505,9 +2505,14 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                           size_t buflen)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
+  uint32_t rdr;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+
+  /* Physical address of the HSCMI RDR registr */
+
+  rdr = sam_dmaregister(priv, SAM_HSMCI_RDR_OFFSET);
 
   /* Setup register sampling */
 
@@ -2517,7 +2522,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Configure the RX DMA */
 
   sam_enablexfrints(priv, HSMCI_DMARECV_INTS);
-  sam_dmarxsetup(priv->dma, sam_pfifo(priv), (uint32_t)buffer, buflen);
+  sam_dmarxsetup(priv->dma, rdr, (uint32_t)buffer, buflen);
 
   /* Enable DMA handshaking */
 
@@ -2554,9 +2559,14 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
                           FAR const uint8_t *buffer, size_t buflen)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
+  uint32_t tdr;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+
+  /* Physical address of the HSCMI TDR registr */
+
+  tdr = sam_dmaregister(priv, SAM_HSMCI_TDR_OFFSET);
 
   /* Setup register sampling */
 
@@ -2565,7 +2575,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Configure the TX DMA */
 
-  sam_dmatxsetup(priv->dma, sam_pfifo(priv), (uint32_t)buffer, buflen);
+  sam_dmatxsetup(priv->dma, tdr, (uint32_t)buffer, buflen);
 
   /* Enable DMA handshaking */
 
