@@ -308,7 +308,8 @@ static inline uint32_t sam_txcfg(struct sam_dma_s *dmach)
 
   /* Set transfer (memory to peripheral) DMA channel configuration register */
 
-  regval   = (((dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT) << DMACHAN_CFG_SRCPER_SHIFT);
+  regval   = DMACHAN_CFG_SOD;
+  regval  |= (((dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT) << DMACHAN_CFG_SRCPER_SHIFT);
   regval  |=   (dmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? DMACHAN_CFG_SRCH2SEL : 0;
   regval  |= (((dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT) << DMACHAN_CFG_DSTPER_SHIFT);
   regval  |=   (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMACHAN_CFG_DSTH2SEL : 0;
@@ -331,7 +332,8 @@ static inline uint32_t sam_rxcfg(struct sam_dma_s *dmach)
 
   /* Set received (peripheral to memory) DMA channel config */
 
-  regval   = (((dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT) << DMACHAN_CFG_SRCPER_SHIFT);
+  regval   = DMACHAN_CFG_SOD;
+  regval  |= (((dmach->flags & DMACH_FLAG_PERIPHPID_MASK) >> DMACH_FLAG_PERIPHPID_SHIFT) << DMACHAN_CFG_SRCPER_SHIFT);
   regval  |=   (dmach->flags & DMACH_FLAG_PERIPHH2SEL) != 0 ? DMACHAN_CFG_SRCH2SEL : 0;
   regval  |= (((dmach->flags & DMACH_FLAG_MEMPID_MASK) >> DMACH_FLAG_MEMPID_SHIFT) << DMACHAN_CFG_DSTPER_SHIFT);
   regval  |=   (dmach->flags & DMACH_FLAG_MEMH2SEL) != 0 ? DMACHAN_CFG_DSTH2SEL : 0;
@@ -948,6 +950,10 @@ static inline int sam_single(struct sam_dma_s *dmach)
   /* Write the starting destination address in the DADDR register */
 
   putreg32(llhead->dest, dmach->base + SAM_DMACHAN_DADDR_OFFSET);
+
+  /* Clear the next descriptor address register */
+
+  putreg32(0, dmach->base + SAM_DMACHAN_DSCR_OFFSET);
 
   /* Set up the CTRLA register */
 

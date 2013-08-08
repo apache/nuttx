@@ -2217,7 +2217,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Configure the RX DMA */
 
   sam_enablexfrints(priv, HSMCI_DMARECV_INTS);
-  sam_dmarxsetup(priv->dma, SAM_HSMCI_FIFO, (uint32_t)buffer, buflen);
+  sam_dmarxsetup(priv->dma, SAM_HSMCI_RDR, (uint32_t)buffer, buflen);
 
   /* Enable DMA handshaking */
 
@@ -2265,7 +2265,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Configure the TX DMA */
 
-  sam_dmatxsetup(priv->dma, SAM_HSMCI_FIFO, (uint32_t)buffer, buflen);
+  sam_dmatxsetup(priv->dma, SAM_HSMCI_TDR, (uint32_t)buffer, buflen);
 
   /* Enable DMA handshaking */
 
