@@ -128,11 +128,14 @@ struct sam_dmach_s
 #endif
   uint8_t chan;                   /* DMA channel number (0-6) */
   bool inuse;                     /* TRUE: The DMA channel is in use */
+  bool rx;                        /* TRUE: Peripheral to memory transfer */
   uint32_t flags;                 /* DMA channel flags */
   uint32_t base;                  /* DMA register channel base address */
   uint32_t cfg;                   /* Pre-calculated CFG register for transfer */
   dma_callback_t callback;        /* Callback invoked when the DMA completes */
   void *arg;                      /* Argument passed to callback function */
+  uint32_t rxaddr;                /* RX memory address */
+  size_t rxsize;                  /* Size of RX memory region */
   struct dma_linklist_s *llhead;  /* DMA link list head */
   struct dma_linklist_s *lltail;  /* DMA link list head */
 };
@@ -1431,6 +1434,13 @@ sam_allocdesc(struct sam_dmach_s *dmach, struct dma_linklist_s *prev,
 
               desc->ctrlb  |= DMAC_CH_CTRLB_BOTHDSCR;
               dmach->lltail = desc;
+
+              /* Assume that we will be doing multple buffer transfers and that
+               * that hardware will be accessing the descriptor via DMA.
+               */
+
+              cp15_coherent_dcache((uintptr_t)desc,
+                                   (uintptr_t)desc + sizeof(struct dma_linklist_s));
               break;
             }
         }
@@ -1528,7 +1538,6 @@ static int sam_txbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
    */
 
   dmach->cfg = sam_txcfg(dmach);
-
   return OK;
 }
 
@@ -1736,6 +1745,15 @@ static void sam_dmaterminate(struct sam_dmach_s *dmach, int result)
   /* Free the linklist */
 
   sam_freelinklist(dmach);
+
+  /* If this was an RX DMA (peripheral-to-memory), then invalidate the cache
+   * to force reloads from memory.
+   */
+
+  if (dmach->rx)
+    {
+      cp15_invalidate_dcache(dmach->rxaddr, dmach->rxaddr + dmach->rxsize);
+    }
 
   /* Perform the DMA complete callback */
 
@@ -2158,6 +2176,12 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
       ret = sam_txbuffer(dmach, paddr, maddr, remaining);
     }
 
+  /* Save an indication so that the DMA interrupt completion logic will know
+   * that this was not an RX transfer.
+   */
+
+  dmach->rx = false;
+
   /* Clean caches associated with the DMA memory */
 
   cp15_coherent_dcache(maddr, maddr + nbytes);
@@ -2230,6 +2254,14 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
     {
       ret = sam_rxbuffer(dmach, paddr, maddr, remaining);
     }
+
+  /* Save an indication so that the DMA interrupt completion logic will know
+   * that this was an RX transfer and will invalidate the cache.
+   */
+
+  dmach->rx     = true;
+  dmach->rxaddr = maddr;
+  dmach->rxsize = (dmach->flags & DMACH_FLAG_MEMINCREMENT) != 0 ? nbytes : sizeof(uint32_t);
 
   /* Clean caches associated with the DMA memory */
 

@@ -149,7 +149,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   /* Verify the FAT32 file system type. The determination of the file
    * system type is based on the number of clusters on the volume:  FAT12
    * volume has <= FAT_MAXCLUST12 (4084) clusters, a FAT16 volume has <=
-   * FAT_MINCLUST16 (microsfoft says < 65,525) clusters, and any larger
+   * FAT_MINCLUST16 (Microsoft says < 65,525) clusters, and any larger
    * is FAT32.
    *
    * Get the number of 32-bit directory entries in root directory (zero
