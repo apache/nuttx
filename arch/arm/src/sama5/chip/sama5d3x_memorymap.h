@@ -192,7 +192,7 @@
 #define SAM_DAP_SIZE             (1*1024*1024)   /* 0x00900000-0x009fffff: DAP */
 #define SAM_NFCCR_SIZE           (256*1024*1024) /* 0x70000000-0x7fffffff: NFC Command Registers */
                                                  /* 0xf0000000-0xffffffff: Internal Peripherals */
-#define SAM_PERIPHA_SIZE         (15*1024)       /* 0xf0000000-0xf003bfff: Internal Peripherals */
+#define SAM_PERIPHA_SIZE         (240*1024)      /* 0xf0000000-0xf003bfff: Internal Peripherals */
 #define SAM_PERIPHB_SIZE         (272*1024)      /* 0xf8000000-0xf8043fff: Internal Peripherals */
 #define SAM_SYSC_SIZE            (1*1024*1024)   /* 0xfff00000-0x0ffffedf: Internal Peripherals */
 
@@ -312,16 +312,16 @@
 
 #ifdef CONFIG_ARCH_LOWVECTORS
 #define SAM_PERIPH_VSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
-#  define SAM_PERIPHA_VSECTION   0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
-#  define SAM_PERIPHB_VSECTION   0xf8000000 /* 0xf8000000-0xffffbfff: Internal Peripherals B */
-#  define SAM_SYSC_VSECTION      0xfff00000 /* 0xfff00000-0xffffffff: System Controller */
+#  define SAM_PERIPHA_VSECTION   0xf0000000 /* 0xf0000000-0xf7ffffff: Internal Peripherals A */
+#  define SAM_PERIPHB_VSECTION   0xf8000000 /* 0xf8000000-0xffefffff: Internal Peripherals B */
+#  define SAM_SYSC_VSECTION      0xfff00000 /* 0xfff00000-0xffffbfff: System Controller */
 #  define SAM_SYSC_VADDR         0xffffc000 /* 0xffffc000-0xffffffff: System Controller */
 #else
 #define SAM_PERIPH_VSECTION      0xf0000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
-#  define SAM_PERIPHA_VSECTION   0xf1000000 /* 0xf0000000-0xffffffff: Internal Peripherals */
-#  define SAM_PERIPHB_VSECTION   0xf2000000 /* 0xf8000000-0xffffbfff: Internal Peripherals B */
-#  define SAM_SYSC_VSECTION      0xf300000  /* 0xfff00000-0xffffffff: System Controller */
-#  define SAM_SYSC_VADDR         0xf30fc000 /* 0xffffc000-0xffffffff: System Controller */
+#  define SAM_PERIPHA_VSECTION   0xf0000000 /* 0xf0000000-0xf00fffff: Internal Peripherals A */
+#  define SAM_PERIPHB_VSECTION   0xf1000000 /* 0xf1000000-0xf10fffff: Internal Peripherals B */
+#  define SAM_SYSC_VSECTION      0xf2000000 /* 0xf2000000-0xf20fffff: System Controller */
+#  define SAM_SYSC_VADDR         0xf20fc000 /* 0xf20fc000-0xf20fffff: System Controller */
 #endif
 #endif
 

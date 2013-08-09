@@ -89,8 +89,8 @@ CHIP_ASRCS  =
 
 # SAMA5-specific C source files
 
-CHIP_CSRCS  = sam_allocateheap.c sam_boot.c sam_clockconfig.c sam_pio.c
-CHIP_CSRCS += sam_irq.c sam_lowputc.c sam_serial.c sam_timerisr.c
+CHIP_CSRCS  = sam_allocateheap.c sam_boot.c sam_clockconfig.c sam_memories.c
+CHIP_CSRCS += sam_pio.c sam_irq.c sam_lowputc.c sam_serial.c sam_timerisr.c
 
 # Configuration dependent C and assembly language files
 

@@ -66,8 +66,9 @@
 #include "chip.h"
 #include "sam_pio.h"
 #include "sam_dmac.h"
-#include "sam_spi.h"
+#include "sam_memories.h"
 #include "sam_periphclks.h"
+#include "sam_spi.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_spi.h"
 #include "chip/sam_pinmap.h"
@@ -272,7 +273,7 @@ static void     spi_dma_sampledone(struct sam_spics_s *spics);
 
 static void     spi_rxcallback(DMA_HANDLE handle, void *arg, int result);
 static void     spi_txcallback(DMA_HANDLE handle, void *arg, int result);
-static uint32_t spi_physregaddr(struct sam_spics_s *spics,
+static inline uintptr_t spi_physregaddr(struct sam_spics_s *spics,
                   unsigned int offset);
 #endif
 
@@ -849,44 +850,11 @@ static void spi_txcallback(DMA_HANDLE handle, void *arg, int result)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SPI_DMA
-static uint32_t spi_physregaddr(struct sam_spics_s *spics,
-                                unsigned int offset)
+static inline uintptr_t spi_physregaddr(struct sam_spics_s *spics,
+                                        unsigned int offset)
 {
   struct sam_spidev_s *spi = spi_device(spics);
-
-  /* Get the offset into the 1MB section containing the SPI registers */
-
-  uint32_t pbase = spi->base & 0x000fffff;
-
-#ifdef CONFIG_SAMA5_SPI0
-  /* Add in the physical base for SPI0
-   *
-   * We only have to check if this is SPI0 if SPI1 is enabled.
-   */
-
-#if defined(CONFIG_SAMA5_SPI1)
-  if (spics->spino == 0)
-#endif
-    {
-      pbase |= SAM_PERIPHA_PSECTION;
-    }
-#if defined(CONFIG_SAMA5_SPI1)
-  else
-#endif
-#endif
-
-#ifdef CONFIG_SAMA5_SPI1
-  /* Add in the physical base for SPI1
-   *
-   * If we get here, we con't have to check anything.
-   */
-
-    {
-      pbase |= SAM_PERIPHB_PSECTION;
-    }
-#endif
-
-  return pbase + offset;
+  return sam_physregaddr(spi->base + offset);
 }
 #endif
 
@@ -1425,6 +1393,7 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   uint32_t txdummy;
   uint32_t rxdummy;
   uint32_t paddr;
+  uint32_t maddr;
   int ret;
 
   /* If we cannot do DMA -OR- if this is a small SPI transfer, then let
@@ -1522,7 +1491,9 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   /* Configure the exchange transfers */
 
   paddr = spi_physregaddr(spics, SAM_SPI_RDR_OFFSET);
-  ret = sam_dmarxsetup(spics->rxdma, paddr, (uint32_t)rxbuffer, nwords);
+  maddr = sam_physramaddr((uintptr_t)rxbuffer);
+
+  ret = sam_dmarxsetup(spics->rxdma, paddr, maddr, nwords);
   if (ret < 0)
     {
       dmadbg("ERROR: sam_dmarxsetup failed: %d\n", ret);
@@ -1532,7 +1503,9 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
   spi_rxdma_sample(spics, DMA_AFTER_SETUP);
 
   paddr = spi_physregaddr(spics, SAM_SPI_TDR_OFFSET);
-  ret = sam_dmatxsetup(spics->txdma, paddr, (uint32_t)txbuffer, nwords);
+  maddr = sam_physramaddr((uintptr_t)txbuffer);
+
+  ret = sam_dmatxsetup(spics->txdma, paddr, maddr, nwords);
   if (ret < 0)
     {
       dmadbg("ERROR: sam_dmatxsetup failed: %d\n", ret);

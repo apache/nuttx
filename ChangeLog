@@ -5330,4 +5330,6 @@
 	* arch/arm/src/sama5/sam_dmac.c:  Finally after many bugfixes (the
 	  last being caching issues), the SAMA5 DMA support has been
 	  verified (with SPI) (2013-8-9).
+	* arch/arm/src/sama5/sam_memories.c and .h:  Central logic for
+	  conversions between physical and virtual addresses (2013-8-9).
 
