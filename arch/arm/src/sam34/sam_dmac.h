@@ -195,6 +195,24 @@ extern "C"
 DMA_HANDLE sam_dmachannel(uint32_t dmach_flags);
 
 /****************************************************************************
+ * Name: sam_dmaconfig
+ *
+ * Description:
+ *   There are two channel usage models:  (1) The channel is allocated and
+ *   configured in one step.  This is the typical case where a DMA channel
+ *   performs a constant role.  The alternative is (2) where the DMA channel
+ *   is reconfigured on the fly. In this case, the chflags provided to
+ *   sam_dmachannel are not used and sam_dmaconfig() is called before each
+ *   DMA to configure the DMA channel appropriately.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sam_dmaconfig(DMA_HANDLE handle, uint32_t chflags);
+
+/****************************************************************************
  * Name: sam_dmafree
  *
  * Description:

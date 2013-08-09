@@ -187,100 +187,112 @@ extern "C"
  * Public Function Prototypes
  ************************************************************************************/
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_dmachannel
  *
  * Description:
- *   Allocate a DMA channel.  This function sets aside a DMA channel with
- *   the required FIFO size and flow control capabilities (determined by
- *   dma_flags) then  gives the caller exclusive access to the DMA channel.
+ *   Allocate a DMA channel.  This function sets aside a DMA channel then gives the
+ *   caller exclusive access to the DMA channel.
  *
- *   The naming convention in all of the DMA interfaces is that one side is
- *   the 'peripheral' and the other is 'memory'.  Howerver, the interface
- *   could still be used if, for example, both sides were memory although
- *   the naming would be awkward.
+ *   The naming convention in all of the DMA interfaces is that one side is the
+ *   'peripheral' and the other is 'memory'.  Howerver, the interface could still
+ *   be used if, for example, both sides were memory although the naming would be
+ *   awkward.
  *
  * Returned Value:
- *   If a DMA channel if the required FIFO size is available, this function
- *   returns a non-NULL, void* DMA channel handle.  NULL is returned on any
- *   failure.
+ *   If a DMA channel is available, this function returns a non-NULL, void* DMA
+ *   channel handle.  NULL is returned on any failure.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t dmach_flags);
+DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags);
 
-/****************************************************************************
- * Name: sam_dmafree
+/************************************************************************************
+ * Name: sam_dmaconfig
  *
  * Description:
- *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must
- *   NEVER be used again until sam_dmachannel() is called again to re-gain
- *   a valid handle.
+ *   There are two channel usage models:  (1) The channel is allocated and configured
+ *   in one step.  This is the typical case where a DMA channel performs a constant
+ *   role.  The alternative is (2) where the DMA channel is reconfigured on the fly.
+ *   In this case, the chflags provided to sam_dmachannel are not used and
+ *   sam_dmaconfig() is called before each DMA to configure the DMA channel
+ *   appropriately.
  *
  * Returned Value:
  *   None
  *
- ****************************************************************************/
+ ************************************************************************************/
+
+void sam_dmaconfig(DMA_HANDLE handle, uint32_t chflags);
+
+/************************************************************************************
+ * Name: sam_dmafree
+ *
+ * Description:
+ *   Release a DMA channel.  NOTE:  The 'handle' used in this argument must NEVER be
+ *   used again until sam_dmachannel() is called again to re-gain a valid handle.
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
 
 void sam_dmafree(DMA_HANDLE handle);
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_dmatxsetup
  *
  * Description:
- *   Configure DMA for transmit of one buffer (memory to peripheral).  This
- *   function may be called multiple times to handle large and/or dis-
- *   continuous transfers.  Calls to sam_dmatxsetup() and sam_dmarxsetup()
- *   must not be intermixed on the same transfer, however.
+ *   Configure DMA for transmit of one buffer (memory to peripheral).  This function
+ *   may be called multiple times to handle large and/or discontinuous transfers.
+ *   Calls to sam_dmatxsetup() and sam_dmarxsetup() must not be intermixed on the
+ *   same transfer, however.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                   size_t nbytes);
+int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes);
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_dmarxsetup
  *
  * Description:
- *   Configure DMA for receipt of one buffer (peripheral to memory).  This
- *   function may be called multiple times to handle large and/or dis-
- *   continuous transfers.  Calls to sam_dmatxsetup() and sam_dmarxsetup()
- *   must not be intermixed on the same transfer, however.
+ *   Configure DMA for receipt of one buffer (peripheral to memory).  This function
+ *   may be called multiple times to handle large and/or discontinuous transfers.
+ *   Calls to sam_dmatxsetup() and sam_dmarxsetup() must not be intermixed on the
+ *   same transfer, however.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
-                   size_t nbytes);
+int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nbytes);
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_dmastart
  *
  * Description:
  *   Start the DMA transfer
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 int sam_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg);
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_dmastop
  *
  * Description:
- *   Cancel the DMA.  After sam_dmastop() is called, the DMA channel is
- *   reset and sam_dmarx/txsetup() must be called before sam_dmastart() can be
- *   called again
+ *   Cancel the DMA.  After sam_dmastop() is called, the DMA channel is reset and
+ *   sam_dmarx/txsetup() must be called before sam_dmastart() can be called again
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 void sam_dmastop(DMA_HANDLE handle);
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_dmasample
  *
  * Description:
  *   Sample DMA register contents
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
 void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs);
@@ -288,17 +300,16 @@ void sam_dmasample(DMA_HANDLE handle, struct sam_dmaregs_s *regs);
 #  define sam_dmasample(handle,regs)
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: sam_dmadump
  *
  * Description:
  *   Dump previously sampled DMA register contents
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_DEBUG_DMA
-void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs,
-                 const char *msg);
+void sam_dmadump(DMA_HANDLE handle, const struct sam_dmaregs_s *regs, const char *msg);
 #else
 #  define sam_dmadump(handle,regs,msg)
 #endif

@@ -848,7 +848,7 @@ static inline uint32_t sam_txctrlabits(struct sam_dmach_s *dmach)
   DEBUGASSERT(ndx < 4);
   regval = g_srcwidth[ndx];
 
-  /* Set the source chuck size (memory chunk size) */
+  /* Set the source chunk size (memory chunk size) */
 
   chunksize = (dmach->flags & DMACH_FLAG_MEMCHUNKSIZE_MASK)
     >> DMACH_FLAG_MEMCHUNKSIZE_SHIFT;
@@ -862,7 +862,7 @@ static inline uint32_t sam_txctrlabits(struct sam_dmach_s *dmach)
   DEBUGASSERT(ndx < 4);
   regval |= g_destwidth[ndx];
 
-  /* Set the destination chuck size (peripheral chunk size) */
+  /* Set the destination chunk size (peripheral chunk size) */
 
   chunksize = (dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE_MASK)
     >> DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT;
@@ -881,36 +881,36 @@ static inline uint32_t sam_txctrlabits(struct sam_dmach_s *dmach)
 
 static size_t sam_maxtxtransfer(struct sam_dmach_s *dmach)
 {
-  unsigned int chunksize;
+  unsigned int srcwidth;
   size_t maxtransfer;
 
-  /* Adjust the the source transfer size for the source chunk size (peripheral
-   * chunk size).  BTSIZE is "the number of transfers to be performed, that
-   * is, for writes it refers to the number of source width transfers
-   * to perform when DMAC is flow controller. For Reads, BTSIZE refers to
-   * the number of transfers completed on the Source Interface. ..."
+  /* Get the maximum transfer size in bytes.  BTSIZE is "the number of
+   * transfers to be performed, that is, for writes it refers to the number
+   * of source width transfers to perform when DMAC is flow controller. For
+   * Reads, BTSIZE refers to the number of transfers completed on the Source
+   * Interface. ..."
    */
 
-  chunksize = (dmach->flags & DMACH_FLAG_MEMCHUNKSIZE_MASK)
-    >> DMACH_FLAG_MEMCHUNKSIZE_SHIFT;
+  srcwidth = (dmach->flags & DMACH_FLAG_MEMWIDTH_MASK)
+    >> DMACH_FLAG_MEMWIDTH_SHIFT;
 
-  switch (chunksize)
+  switch (srcwidth)
     {
       default:
-      case 0: /* 1 byte */
+      case 0: /* 8 bits, 1 byte */
         maxtransfer = DMAC_CH_CTRLA_BTSIZE_MAX;
         break;
 
-      case 1: /* 4 bytes */
+      case 1: /* 16 bits, 2 bytes */
+        maxtransfer = 2 * DMAC_CH_CTRLA_BTSIZE_MAX;
+        break;
+
+      case 2: /* 32 bits 4 bytes */
         maxtransfer = 4 * DMAC_CH_CTRLA_BTSIZE_MAX;
         break;
 
-      case 2: /* 8 bytes */
+      case 3: /* 64 bits, 8 bytes */
         maxtransfer = 8 * DMAC_CH_CTRLA_BTSIZE_MAX;
-        break;
-
-      case 3: /* 16 bytes */
-        maxtransfer = 16 * DMAC_CH_CTRLA_BTSIZE_MAX;
         break;
     }
 
@@ -927,7 +927,7 @@ static size_t sam_maxtxtransfer(struct sam_dmach_s *dmach)
 
 static uint32_t sam_ntxtransfers(struct sam_dmach_s *dmach, uint32_t dmasize)
 {
-  unsigned int chunksize;
+  unsigned int srcwidth;
 
   /* Adjust the the source transfer size for the source chunk size (memory
    * chunk size).  BTSIZE is "the number of transfers to be performed, that
@@ -936,25 +936,25 @@ static uint32_t sam_ntxtransfers(struct sam_dmach_s *dmach, uint32_t dmasize)
    * the number of transfers completed on the Source Interface. ..."
    */
 
-  chunksize = (dmach->flags & DMACH_FLAG_MEMCHUNKSIZE_MASK)
-    >> DMACH_FLAG_MEMCHUNKSIZE_SHIFT;
+  srcwidth = (dmach->flags & DMACH_FLAG_MEMWIDTH_MASK)
+    >> DMACH_FLAG_MEMWIDTH_SHIFT;
 
-  switch (chunksize)
+  switch (srcwidth)
     {
       default:
-      case 0: /* 1 byte */
+      case 0: /* 8 bits, 1 byte */
         break;
 
-      case 1: /* 4 bytes */
+      case 1: /* 16 bits, 2 bytes */
+        dmasize = (dmasize + 1) >> 1;
+        break;
+
+      case 2: /* 32 bits, 4 bytes */
         dmasize = (dmasize + 3) >> 2;
         break;
 
-      case 2: /* 8 bytes */
+      case 3: /* 64 bits, 8 bytes */
         dmasize = (dmasize + 7) >> 3;
-        break;
-
-      case 3: /* 16 bytes */
-        dmasize = (dmasize + 15) >> 4;
         break;
     }
 
@@ -970,7 +970,7 @@ static uint32_t sam_ntxtransfers(struct sam_dmach_s *dmach, uint32_t dmasize)
  ****************************************************************************/
 
 static inline uint32_t sam_txctrla(struct sam_dmach_s *dmach,
-                                   uint32_t dmasize, uint32_t ctrla)
+                                   uint32_t ctrla, uint32_t dmasize)
 {
   uint32_t ntransfers;
 
@@ -1014,7 +1014,7 @@ static inline uint32_t sam_rxctrlabits(struct sam_dmach_s *dmach)
   DEBUGASSERT(ndx < 4);
   regval = g_srcwidth[ndx];
 
-  /* Set the source chuck size (peripheral chunk size) */
+  /* Set the source chunk size (peripheral chunk size) */
 
   chunksize = (dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE_MASK)
     >> DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT;
@@ -1030,7 +1030,7 @@ static inline uint32_t sam_rxctrlabits(struct sam_dmach_s *dmach)
   DEBUGASSERT(ndx < 4);
   regval |= g_destwidth[ndx];
 
-  /* Set the destination chuck size (memory chunk size) */
+  /* Set the destination chunk size (memory chunk size) */
 
   chunksize = (dmach->flags & DMACH_FLAG_MEMCHUNKSIZE_MASK)
     >> DMACH_FLAG_MEMCHUNKSIZE_SHIFT;
@@ -1049,36 +1049,36 @@ static inline uint32_t sam_rxctrlabits(struct sam_dmach_s *dmach)
 
 static size_t sam_maxrxtransfer(struct sam_dmach_s *dmach)
 {
-  unsigned int chunksize;
+  unsigned int srcwidth;
   size_t maxtransfer;
 
-  /* Adjust the the source transfer size for the source chunk size (peripheral
-   * chunk size).  BTSIZE is "the number of transfers to be performed, that
-   * is, for writes it refers to the number of source width transfers
-   * to perform when DMAC is flow controller. For Reads, BTSIZE refers to
-   * the number of transfers completed on the Source Interface. ..."
+  /* Get the maximum transfer size in bytes.  BTSIZE is "the number of
+   * transfers to be performed, that is, for writes it refers to the number
+   * of source width transfers to perform when DMAC is flow controller. For
+   * Reads, BTSIZE refers to the number of transfers completed on the Source
+   * Interface. ..."
    */
 
-  chunksize = (dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE_MASK)
-    >> DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT;
+  srcwidth = (dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK)
+    >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
 
-  switch (chunksize)
+  switch (srcwidth)
     {
       default:
-      case 0: /* 1 byte */
+      case 0: /* 8 bits, 1 byte */
         maxtransfer = DMAC_CH_CTRLA_BTSIZE_MAX;
         break;
 
-      case 1: /* 4 bytes */
+      case 1: /* 16 bits, 2 bytes */
+        maxtransfer = 2 * DMAC_CH_CTRLA_BTSIZE_MAX;
+        break;
+
+      case 2: /* 32 bits, 4 bytes */
         maxtransfer = 4 * DMAC_CH_CTRLA_BTSIZE_MAX;
         break;
 
-      case 2: /* 8 bytes */
+      case 3: /* 64 bits, 8 bytes */
         maxtransfer = 8 * DMAC_CH_CTRLA_BTSIZE_MAX;
-        break;
-
-      case 3: /* 16 bytes */
-        maxtransfer = 16 * DMAC_CH_CTRLA_BTSIZE_MAX;
         break;
     }
 
@@ -1095,7 +1095,7 @@ static size_t sam_maxrxtransfer(struct sam_dmach_s *dmach)
 
 static uint32_t sam_nrxtransfers(struct sam_dmach_s *dmach, uint32_t dmasize)
 {
-  unsigned int chunksize;
+  unsigned int srcwidth;
 
   /* Adjust the the source transfer size for the source chunk size (peripheral
    * chunk size).  BTSIZE is "the number of transfers to be performed, that
@@ -1104,25 +1104,25 @@ static uint32_t sam_nrxtransfers(struct sam_dmach_s *dmach, uint32_t dmasize)
    * the number of transfers completed on the Source Interface. ..."
    */
 
-  chunksize = (dmach->flags & DMACH_FLAG_PERIPHCHUNKSIZE_MASK)
-    >> DMACH_FLAG_PERIPHCHUNKSIZE_SHIFT;
+  srcwidth = (dmach->flags & DMACH_FLAG_PERIPHWIDTH_MASK)
+    >> DMACH_FLAG_PERIPHWIDTH_SHIFT;
 
-  switch (chunksize)
+  switch (srcwidth)
     {
       default:
-      case 0: /* 1 byte */
+      case 0: /* 8 bits, 1 byte */
         break;
 
-      case 1: /* 4 bytes */
+      case 1: /* 16 bits, 2 bytes */
+        dmasize = (dmasize + 1) >> 1;
+        break;
+
+      case 2: /* 32 bits, 4 bytes */
         dmasize = (dmasize + 3) >> 2;
         break;
 
-      case 2: /* 8 bytes */
+      case 3: /* 64 bits, 8 bytes */
         dmasize = (dmasize + 7) >> 3;
-        break;
-
-      case 3: /* 16 bytes */
-        dmasize = (dmasize + 15) >> 4;
         break;
     }
 
@@ -1138,7 +1138,7 @@ static uint32_t sam_nrxtransfers(struct sam_dmach_s *dmach, uint32_t dmasize)
  ****************************************************************************/
 
 static inline uint32_t sam_rxctrla(struct sam_dmach_s *dmach,
-                                   uint32_t dmasize, uint32_t ctrla)
+                                   uint32_t ctrla, uint32_t dmasize)
 {
   uint32_t ntransfers;
 
@@ -1564,7 +1564,7 @@ static int sam_rxbuffer(struct sam_dmach_s *dmach, uint32_t paddr,
       ctrlb  = sam_rxctrlb(dmach);
     }
 
-   ctrla = sam_rxctrla(dmach, nbytes, regval);
+   ctrla = sam_rxctrla(dmach, regval, nbytes);
 
   /* Add the new link list entry */
 
@@ -1769,9 +1769,9 @@ static int sam_dmac_interrupt(struct sam_dmac_s *dmac)
   regval = sam_getdmac(dmac, SAM_DMAC_EBCISR_OFFSET) &
            sam_getdmac(dmac, SAM_DMAC_EBCIMR_OFFSET);
 
-  /* Check if the any transfer has completed */
+  /* Check if the any transfer has completed or any errors have ocurred. */
 
-  if (regval & DMAC_EBC_BTC_MASK)
+  if (regval & DMAC_EBC_ALLCHANINTS)
     {
       /* Yes.. Check each bit  to see which channel has interrupted */
 
@@ -1933,10 +1933,8 @@ void weak_function up_dmainitialize(void)
 /****************************************************************************
  * Name: sam_dmachannel
  *
- * Description:
- *   Allocate a DMA channel.  This function sets aside a DMA channel with
- *   the required FIFO size and flow control capabilities (determined by
- *   dma_flags) then  gives the caller exclusive access to the DMA channel.
+ *   Allocate a DMA channel.  This function sets aside a DMA channel then
+ *   gives the caller exclusive access to the DMA channel.
  *
  *   The naming convention in all of the DMA interfaces is that one side is
  *   the 'peripheral' and the other is 'memory'.  Howerver, the interface
@@ -1944,9 +1942,8 @@ void weak_function up_dmainitialize(void)
  *   the naming would be awkward.
  *
  * Returned Value:
- *   If a DMA channel if the required FIFO size is available, this function
- *   returns a non-NULL, void* DMA channel handle.  NULL is returned on any
- *   failure.
+ *   If a DMA channel is available, this function returns a non-NULL, void*
+ *   DMA channel handle.  NULL is returned on any failure.
  *
  ****************************************************************************/
 
@@ -1975,7 +1972,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
 #endif
 
     {
-      dmadbg("Bad DMAC number: %d\n", dmacno);
+      dmadbg("ERROR: Bad DMAC number: %d\n", dmacno);
       DEBUGPANIC();
       return (DMA_HANDLE)NULL;
     }
@@ -2006,7 +2003,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
 
           sam_putdmac(dmac,DMAC_CHDR_DIS(chndx), SAM_DMAC_CHDR_OFFSET);
 
-          /* See the DMA channel flags. */
+          /* Set the DMA channel flags. */
 
           dmach->flags = chflags;
           break;
@@ -2015,9 +2012,55 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
 
   sam_givechsem(dmac);
 
-  dmavdbg("dmacno: %d chflags: %08x returning dmach: %p\n",
-          (int)dmacno, (int)chflags, dmach);
+  /* Show the result of the allocation */
+
+  if (dmach)
+    {
+      dmavdbg("DMAC%d CH%d: chflags: %08x returning dmach: %p\n",
+              (int)dmacno, dmach->chan, (int)chflags, dmach);
+    }
+  else
+    {
+      dmadbg("ERROR: Failed allocate DMAC%d channel\n", (int)dmacno);
+    }
+
   return (DMA_HANDLE)dmach;
+}
+
+/************************************************************************************
+ * Name: sam_dmaconfig
+ *
+ * Description:
+ *   There are two channel usage models:  (1) The channel is allocated and configured
+ *   in one step.  This is the typical case where a DMA channel performs a constant
+ *   role.  The alternative is (2) where the DMA channel is reconfigured on the fly.
+ *   In this case, the chflags provided to sam_dmachannel are not used and
+ *   sam_dmaconfig() is called before each DMA to configure the DMA channel
+ *   appropriately.
+ *
+ * Returned Value:
+ *   None
+ *
+ ************************************************************************************/
+
+void sam_dmaconfig(DMA_HANDLE handle, uint32_t chflags)
+{
+  struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
+
+  /* Set the new DMA channel flags. */
+
+  dmach->flags = chflags;
+
+#if defined(CONFIG_SAMA5_DMAC0) && defined(CONFIG_SAMA5_DMAC1)
+  dmavdbg("DMAC%d CH%d: chflags: %08x\n",
+          dmach->dmac, dmach->chan, (int)chflags);
+#elif defined(CONFIG_SAMA5_DMAC0)
+  dmavdbg("DMAC0 CH%d: chflags: %08x\n",
+          dmach->chan, (int)chflags);
+#else
+  dmavdbg("DMAC1 CH%d: chflags: %08x\n",
+          dmach->chan, (int)chflags);
+#endif
 }
 
 /****************************************************************************
@@ -2064,6 +2107,7 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   size_t maxtransfer;
+  size_t remaining;
   int ret = OK;
 
   dmavdbg("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
@@ -2076,10 +2120,11 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
    */
 
   maxtransfer = sam_maxtxtransfer(dmach);
+  remaining   = nbytes;
 
   /* If this is a large transfer, break it up into smaller buffers */
 
-  while (nbytes > maxtransfer)
+  while (remaining > maxtransfer)
     {
       /* Set up the maximum size transfer */
 
@@ -2088,7 +2133,7 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
         {
           /* Decrement the number of bytes left to transfer */
 
-          nbytes -= maxtransfer;
+          remaining -= maxtransfer;
 
           /* Increment the memory & peripheral address (if it is appropriate to
            * do do).
@@ -2108,9 +2153,9 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 
   /* Then set up the final buffer transfer */
 
-  if (ret == OK && nbytes > 0)
+  if (ret == OK && remaining > 0)
     {
-      ret = sam_txbuffer(dmach, paddr, maddr, nbytes);
+      ret = sam_txbuffer(dmach, paddr, maddr, remaining);
     }
 
   /* Clean caches associated with the DMA memory */
@@ -2135,6 +2180,7 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 {
   struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
   size_t maxtransfer;
+  size_t remaining;
   int ret = OK;
 
   dmavdbg("dmach: %p paddr: %08x maddr: %08x nbytes: %d\n",
@@ -2147,10 +2193,11 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
    */
 
   maxtransfer = sam_maxrxtransfer(dmach);
+  remaining   = nbytes;
 
   /* If this is a large transfer, break it up into smaller buffers */
 
-  while (nbytes > maxtransfer)
+  while (remaining > maxtransfer)
     {
       /* Set up the maximum size transfer */
 
@@ -2159,7 +2206,7 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
         {
           /* Decrement the number of bytes left to transfer */
 
-          nbytes -= maxtransfer;
+          remaining -= maxtransfer;
 
           /* Increment the memory & peripheral address (if it is appropriate to
            * do do).
@@ -2179,9 +2226,9 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 
   /* Then set up the final buffer transfer */
 
-  if (ret == OK && nbytes > 0)
+  if (ret == OK && remaining > 0)
     {
-      ret = sam_rxbuffer(dmach, paddr, maddr, nbytes);
+      ret = sam_rxbuffer(dmach, paddr, maddr, remaining);
     }
 
   /* Clean caches associated with the DMA memory */
