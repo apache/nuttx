@@ -62,8 +62,9 @@
 
 #include "sam_pio.h"
 #include "sam_dmac.h"
-#include "sam_hsmci.h"
 #include "sam_periphclks.h"
+#include "sam_memories.h"
+#include "sam_hsmci.h"
 #include "chip/sam_dmac.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_hsmci.h"
@@ -420,7 +421,8 @@ static void sam_cmddump(struct sam_dev_s *priv);
 /* DMA Helpers **************************************************************/
 
 static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result);
-static uint32_t sam_physregaddr(struct sam_dev_s *priv, unsigned int offset);
+static inline uintptr_t hsmci_physregaddr(struct sam_dev_s *priv,
+              unsigned int offset);
 
 /* Data Transfer Helpers ****************************************************/
 
@@ -1074,66 +1076,17 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
 }
 
 /****************************************************************************
- * Name: sam_physregaddr
+ * Name: hsmci_physregaddr
  *
  * Description:
  *   Return the physical address of an HSMCI register
  *
  ****************************************************************************/
 
-static uint32_t sam_physregaddr(struct sam_dev_s *priv, unsigned int offset)
+static inline uintptr_t hsmci_physregaddr(struct sam_dev_s *priv,
+                                          unsigned int offset)
 {
-  /* Get the offset into the 1MB section containing the HSMCI registers */
-
-  uint32_t pbase = priv->base & 0x000fffff;
-
-#ifdef CONFIG_SAMA5_HSMCI0
-  /* Add in the physical base for HSMCI0
-   *
-   * We only have to check if this is HSMCI0 if either HSMCI1 or HSMCI2 are
-   * enabled.
-   */
-
-#if defined(CONFIG_SAMA5_HSMCI1) || defined(CONFIG_SAMA5_HSMCI2)
-  if (priv->hsmci == 0)
-#endif
-    {
-      pbase |= SAM_PERIPHA_PSECTION;
-    }
-#if defined(CONFIG_SAMA5_HSMCI1) || defined(CONFIG_SAMA5_HSMCI2)
-  else
-#endif
-#endif
-
-#ifdef CONFIG_SAMA5_HSMCI1
-  /* Add in the physical base for HSMCI1
-   *
-   * We only have to check if this is HSCMCi1 if HSMCI2 is enabled.
-   */
-
-#ifdef CONFIG_SAMA5_HSMCI2
-  if (priv->hsmci == 1)
-#endif
-    {
-      pbase |= SAM_PERIPHB_PSECTION;
-    }
-#ifdef CONFIG_SAMA5_HSMCI2
-  else
-#endif
-#endif
-
-  /* Add in the physical base for HSMCI2.
-   *
-   * If we get here, we con't have to check.
-   */
-
-#ifdef CONFIG_SAMA5_HSMCI2
-    {
-      pbase |= SAM_PERIPHB_PSECTION;
-    }
-#endif
-
-  return pbase + offset;
+  return sam_physregaddr(priv->base + offset);
 }
 
 /****************************************************************************
@@ -2505,14 +2458,18 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
                           size_t buflen)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
-  uint32_t rdr;
+  uint32_t paddr;
+  uint32_t maddr;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
-  /* Physical address of the HSCMI RDR registr */
+  /* Physical address of the HSCMI RDR register and of the buffer location
+   * in RAM.
+   */
 
-  rdr = sam_physregaddr(priv, SAM_HSMCI_RDR_OFFSET);
+  paddr = hsmci_physregaddr(priv, SAM_HSMCI_RDR_OFFSET);
+  maddr = sam_physramaddr((uintptr_t)buffer);
 
   /* Setup register sampling */
 
@@ -2522,7 +2479,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Configure the RX DMA */
 
   sam_enablexfrints(priv, HSMCI_DMARECV_INTS);
-  sam_dmarxsetup(priv->dma, rdr, (uint32_t)buffer, buflen);
+  sam_dmarxsetup(priv->dma, paddr, maddr, buflen);
 
   /* Enable DMA handshaking */
 
@@ -2559,14 +2516,16 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
                           FAR const uint8_t *buffer, size_t buflen)
 {
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
-  uint32_t tdr;
+  uint32_t paddr;
+  uint32_t maddr;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
   DEBUGASSERT(((uint32_t)buffer & 3) == 0);
 
   /* Physical address of the HSCMI TDR registr */
 
-  tdr = sam_physregaddr(priv, SAM_HSMCI_TDR_OFFSET);
+  paddr = hsmci_physregaddr(priv, SAM_HSMCI_TDR_OFFSET);
+  maddr = sam_physramaddr((uintptr_t)buffer);
 
   /* Setup register sampling */
 
@@ -2575,7 +2534,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Configure the TX DMA */
 
-  sam_dmatxsetup(priv->dma, tdr, (uint32_t)buffer, buflen);
+  sam_dmatxsetup(priv->dma, paddr, maddr, buflen);
 
   /* Enable DMA handshaking */
 
