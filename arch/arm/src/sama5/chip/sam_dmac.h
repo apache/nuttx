@@ -509,11 +509,10 @@
 #  define DMAC_EBC_DICERR6             (1 << (DMAC_EBC_DICERR_SHIFT+6))
 #  define DMAC_EBC_DICERR7             (1 << (DMAC_EBC_DICERR_SHIFT+7))
 
-#define DMAC_EBC_BTCINTS(n)            (0x00010001 << (n))  /* BTC+ERR interrupts */
 #define DMAC_EBC_CBTCINTS(n)           (0x00010100 << (n))  /* CBT+ERR interrupts */
 #define DMAC_EBC_CHANINTS(n)           (0x00010101 << (n))  /* BTC+CBT+ERR interrupts */
-#define DMAC_EBC_ALLCHANINTS(n)        (0x01010101 << (n))  /* All channel interrupts */
-#define DMAC_EBC_ALLINTS               (0xffffffff)         /* All interrupts */
+#define DMAC_EBC_ALLCHANINTS           (0x00ffffff)         /* All BTC+CBT+ERR interrupts */
+#define DMAC_EBC_ALLINTS               (0xffffffff)         /* All channel interrupts */
 
 /* DMAC Channel Handler Enable Register */
 
@@ -695,7 +694,7 @@
 #  define DMAC_CH_CTRLB_SRCINCR_INCR   (0 << DMAC_CH_CTRLB_SRCINCR_SHIFT) /* Incrementing address */
 #  define DMAC_CH_CTRLB_SRCINCR_DECR   (1 << DMAC_CH_CTRLB_SRCINCR_SHIFT) /* Decrementing address */
 #  define DMAC_CH_CTRLB_SRCINCR_FIXED  (2 << DMAC_CH_CTRLB_SRCINCR_SHIFT) /* Fixed address */
-#define DMAC_CH_CTRLB_DSTINCR_SHIFT    (28)      /* Bits 28-29 */  
+#define DMAC_CH_CTRLB_DSTINCR_SHIFT    (28)      /* Bits 28-29 */
 #define DMAC_CH_CTRLB_DSTINCR_MASK     (3 << DMAC_CH_CTRLB_DSTINCR_SHIFT)
 #  define DMAC_CH_CTRLB_DSTINCR_INCR   (0 << DMAC_CH_CTRLB_DSTINCR_SHIFT) /* Incrementing address */
 #  define DMAC_CH_CTRLB_DSTINCR_DECR   (1 << DMAC_CH_CTRLB_DSTINCR_SHIFT) /* Decrementing address */

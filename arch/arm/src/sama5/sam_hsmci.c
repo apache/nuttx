@@ -420,7 +420,7 @@ static void sam_cmddump(struct sam_dev_s *priv);
 /* DMA Helpers **************************************************************/
 
 static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result);
-static uint32_t sam_dmaregister(struct sam_dev_s *priv, unsigned int offset);
+static uint32_t sam_physregaddr(struct sam_dev_s *priv, unsigned int offset);
 
 /* Data Transfer Helpers ****************************************************/
 
@@ -1074,50 +1074,50 @@ static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
 }
 
 /****************************************************************************
- * Name: sam_dmaregister
+ * Name: sam_physregaddr
  *
  * Description:
  *   Return the physical address of an HSMCI register
  *
  ****************************************************************************/
 
-static uint32_t sam_dmaregister(struct sam_dev_s *priv, unsigned int offset)
+static uint32_t sam_physregaddr(struct sam_dev_s *priv, unsigned int offset)
 {
   /* Get the offset into the 1MB section containing the HSMCI registers */
 
-  uint32_t pbase = priv->base & 0xfff00000;
+  uint32_t pbase = priv->base & 0x000fffff;
 
-#ifdef CONFIG_HSMCI_HSMCI0
+#ifdef CONFIG_SAMA5_HSMCI0
   /* Add in the physical base for HSMCI0
    *
    * We only have to check if this is HSMCI0 if either HSMCI1 or HSMCI2 are
    * enabled.
    */
 
-#if defined(CONFIG_HSMCI_HSMCI1) || defined(CONFIG_HSMCI_HSMCI2)
+#if defined(CONFIG_SAMA5_HSMCI1) || defined(CONFIG_SAMA5_HSMCI2)
   if (priv->hsmci == 0)
 #endif
     {
       pbase |= SAM_PERIPHA_PSECTION;
     }
-#if defined(CONFIG_HSMCI_HSMCI1) || defined(CONFIG_HSMCI_HSMCI2)
+#if defined(CONFIG_SAMA5_HSMCI1) || defined(CONFIG_SAMA5_HSMCI2)
   else
 #endif
 #endif
 
-#ifdef CONFIG_HSMCI_HSMCI1
+#ifdef CONFIG_SAMA5_HSMCI1
   /* Add in the physical base for HSMCI1
    *
    * We only have to check if this is HSCMCi1 if HSMCI2 is enabled.
    */
 
-#ifdef CONFIG_HSMCI_HSMCI2
+#ifdef CONFIG_SAMA5_HSMCI2
   if (priv->hsmci == 1)
 #endif
     {
       pbase |= SAM_PERIPHB_PSECTION;
     }
-#ifdef CONFIG_HSMCI_HSMCI2
+#ifdef CONFIG_SAMA5_HSMCI2
   else
 #endif
 #endif
@@ -1127,7 +1127,7 @@ static uint32_t sam_dmaregister(struct sam_dev_s *priv, unsigned int offset)
    * If we get here, we con't have to check.
    */
 
-#ifdef CONFIG_HSMCI_HSMCI2
+#ifdef CONFIG_SAMA5_HSMCI2
     {
       pbase |= SAM_PERIPHB_PSECTION;
     }
@@ -2351,7 +2351,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
       if (ret != OK)
         {
            fdbg("ERROR: wd_start failed: %d\n", ret);
-         }
+        }
     }
 
   /* Loop until the event (or the timeout occurs). Race conditions are avoided
@@ -2512,7 +2512,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Physical address of the HSCMI RDR registr */
 
-  rdr = sam_dmaregister(priv, SAM_HSMCI_RDR_OFFSET);
+  rdr = sam_physregaddr(priv, SAM_HSMCI_RDR_OFFSET);
 
   /* Setup register sampling */
 
@@ -2566,7 +2566,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Physical address of the HSCMI TDR registr */
 
-  tdr = sam_dmaregister(priv, SAM_HSMCI_TDR_OFFSET);
+  tdr = sam_physregaddr(priv, SAM_HSMCI_TDR_OFFSET);
 
   /* Setup register sampling */
 

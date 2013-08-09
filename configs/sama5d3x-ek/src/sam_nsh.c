@@ -114,6 +114,7 @@ int nsh_archinitialize(void)
     {
       fdbg("ERROR: sam_at25_initialize failed: %d\n", ret);
       return ret;
+    }
 #endif
 
 #ifdef HAVE_HSMCI_MTD

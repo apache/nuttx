@@ -245,6 +245,32 @@ if SAMA5_SPI0 || SAMA5_SPI1
 
 menu "SPI device driver options"
 
+config SAMA5_SPI_DMA
+	bool "SPI DMA"
+	default n
+	depends on (SAMA5_DMAC0 && SAMA5_SPI0) || (SAMA5_DMAC1 && SAMA5_SPI1)
+	---help---
+		Use DMA to improve SPI transfer performance.
+
+config SAMA5_SPI_DMATHRESHOLD
+	int "SPI DMA threshold"
+	default 4
+	depends on SAMA5_SPI_DMA
+	---help---
+		When SPI DMA is enabled, small DMA transfers will still be performed
+		by polling logic.  But we need a threshold value to determine what
+		is small.  That value is provided by CONFIG_SAMA5_SPI_DMATHRESHOLD.
+
+config SAMA5_SPI_DMADEBUG
+	bool "SPI DMA transfer debug"
+	depends on SAMA5_SPI_DMA && DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze SPI DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
 config SAMA5_SPI_REGDEBUG
 	bool "SPI Register level debug"
 	depends on DEBUG

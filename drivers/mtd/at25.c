@@ -205,7 +205,6 @@ static inline int at25_readid(struct at25_dev_s *priv)
 {
   uint16_t manufacturer;
   uint16_t memory;
-  uint16_t version;
 
   fvdbg("priv: %p\n", priv);
 

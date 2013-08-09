@@ -48,12 +48,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <semaphore.h>
+#include <wdog.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <arch/board/board.h>
 #include <nuttx/arch.h>
+#include <nuttx/clock.h>
 #include <nuttx/spi/spi.h>
 
 #include "up_internal.h"
@@ -61,6 +65,7 @@
 
 #include "chip.h"
 #include "sam_pio.h"
+#include "sam_dmac.h"
 #include "sam_spi.h"
 #include "sam_periphclks.h"
 #include "chip/sam_pmc.h"
@@ -73,12 +78,48 @@
  * Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
+/* When SPI DMA is enabled, small DMA transfers will still be performed by
+ * polling logic.  But we need a threshold value to determine what is small.
+ * That value is provided by CONFIG_SAMA5_SPI_DMATHRESHOLD.
+ */
+
+#ifndef CONFIG_SAMA5_SPI_DMATHRESHOLD
+#  define CONFIG_SAMA5_SPI_DMATHRESHOLD 4
+#endif
+
+#ifdef CONFIG_SAMA5_SPI_DMA
+
+#  if defined(CONFIG_SAMA5_SPI0) && defined(CONFIG_SAMA5_DMAC0)
+#    define SAMA5_SPI0_DMA true
+#  else
+#    define SAMA5_SPI0_DMA false
+#  endif
+
+#  if defined(CONFIG_SAMA5_SPI1) && defined(CONFIG_SAMA5_DMAC1)
+#    define SAMA5_SPI1_DMA true
+#  else
+#    define SAMA5_SPI1_DMA false
+#  endif
+#endif
+
+#ifndef CONFIG_SAMA5_SPI_DMA
+#  undef CONFIG_SAMA5_SPI_DMADEBUG
+#endif
+
+/* Clocking *****************************************************************/
 /* Select MCU-specific settings
  *
  * SPI is driven by the main clock.
  */
 
 #define SAM_SPI_CLOCK  BOARD_MCK_FREQUENCY
+
+/* DMA timeout.  The value is not critical; we just don't want the system to
+ * hang in the event that a DMA does not finish.  This is set to
+ */
+
+#define DMA_TIMEOUT_MS    (800)
+#define DMA_TIMEOUT_TICKS ((DMA_TIMEOUT_MS + (MSEC_PER_TICK-1)) / MSEC_PER_TICK)
 
 /* Debug *******************************************************************/
 /* Check if SPI debut is enabled (non-standard.. no support in
@@ -88,7 +129,12 @@
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_VERBOSE
 #  undef CONFIG_DEBUG_SPI
+#  undef CONFIG_SAMA5_SPI_DMADEBUG
 #  undef CONFIG_SAMA5_SPI_REGDEBUG
+#endif
+
+#ifndef CONFIG_DEBUG_DMA
+#  undef CONFIG_SAMA5_SPI_DMADEBUG
 #endif
 
 #ifdef CONFIG_DEBUG_SPI
@@ -103,6 +149,14 @@
 #  define spivdbg(x...)
 #endif
 
+#define DMA_INITIAL      0
+#define DMA_AFTER_SETUP  1
+#define DMA_AFTER_START  2
+#define DMA_CALLBACK     3
+#define DMA_TIMEOUT      3
+#define DMA_END_TRANSFER 4
+#define DMA_NSAMPLES     5
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -112,16 +166,34 @@
 struct sam_spics_s
 {
   struct spi_dev_s spidev;     /* Externally visible part of the SPI interface */
+
 #ifndef CONFIG_SPI_OWNBUS
   uint32_t frequency;          /* Requested clock frequency */
   uint32_t actual;             /* Actual clock frequency */
   uint8_t nbits;               /* Width of word in bits (8 to 16) */
   uint8_t mode;                /* Mode 0,1,2,3 */
 #endif
+
 #if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
   uint8_t spino;               /* SPI controller number (0 or 1) */
 #endif
   uint8_t cs;                  /* Chip select number */
+
+#ifdef CONFIG_SAMA5_SPI_DMA
+  bool candma;                 /* DMA is supported */
+  sem_t dmawait;               /* Used to wait for DMA completion */
+  WDOG_ID dmadog;              /* Watchdog that handles DMA timeouts */
+  int result;                  /* DMA result */
+  DMA_HANDLE rxdma;            /* SPI RX DMA handle */
+  DMA_HANDLE txdma;            /* SPI TX DMA handle */
+#endif
+
+  /* Debug stuff */
+
+#ifdef CONFIG_SAMA5_SPI_DMADEBUG
+  struct sam_dmaregs_s rxdmaregs[DMA_NSAMPLES];
+  struct sam_dmaregs_s txdmaregs[DMA_NSAMPLES];
+#endif
 };
 
 /* Type of board-specific SPI status fuction */
@@ -136,8 +208,11 @@ struct sam_spidev_s
 {
   uint32_t base;               /* SPI controller register base address */
   sem_t spisem;                /* Assures mutually exclusive acess to SPI */
-  bool initialized;            /* TRUE: Controller has been initialized */
   select_t select;             /* SPI select callout */
+  bool initialized;            /* TRUE: Controller has been initialized */
+#ifdef CONFIG_SAMA5_SPI_DMA
+  uint8_t pid;                 /* Peripheral ID */
+#endif
 
   /* Debug stuff */
 
@@ -177,6 +252,30 @@ static void     spi_dumpregs(struct sam_spidev_s *spi, const char *msg);
 static inline void spi_flush(struct sam_spidev_s *spi);
 static inline uint32_t spi_cs2pcs(struct sam_spics_s *spics);
 
+/* DMA support */
+
+#ifdef CONFIG_SAMA5_SPI_DMA
+
+#ifdef CONFIG_SAMA5_SPI_DMADEBUG
+#  define spi_rxdma_sample(s,i) sam_dmasample((s)->rxdma, &(s)->rxdmaregs[i])
+#  define spi_txdma_sample(s,i) sam_dmasample((s)->txdma, &(s)->txdmaregs[i])
+static void     spi_dma_sampleinit(struct sam_spics_s *spics);
+static void     spi_dma_sampledone(struct sam_spics_s *spics);
+
+#else
+#  define spi_rxdma_sample(s,i)
+#  define spi_txdma_sample(s,i)
+#  define spi_dma_sampleinit(s)
+#  define spi_dma_sampledone(s)
+
+#endif
+
+static void     spi_rxcallback(DMA_HANDLE handle, void *arg, int result);
+static void     spi_txcallback(DMA_HANDLE handle, void *arg, int result);
+static uint32_t spi_physregaddr(struct sam_spics_s *spics,
+                  unsigned int offset);
+#endif
+
 /* SPI methods */
 
 #ifndef CONFIG_SPI_OWNBUS
@@ -188,6 +287,10 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency);
 static void     spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode);
 static void     spi_setbits(struct spi_dev_s *dev, int nbits);
 static uint16_t spi_send(struct spi_dev_s *dev, uint16_t ch);
+#ifdef CONFIG_SAMA5_SPI_DMA
+static void     spi_exchange_nodma(struct spi_dev_s *dev,
+                   const void *txbuffer, void *rxbuffer, size_t nwords);
+#endif
 static void     spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
                    void *rxbuffer, size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
@@ -241,6 +344,9 @@ static struct sam_spidev_s g_spi0dev =
 {
   .base    = SAM_SPI0_VBASE,
   .select  = sam_spi0select,
+#ifdef CONFIG_SAMA5_SPI_DMA
+  .pid     = SAM_PID_SPI0,
+#endif
 };
 #endif
 
@@ -276,6 +382,9 @@ static struct sam_spidev_s g_spi1dev =
 {
   .base    = SAM_SPI1_VBASE,
   .select  = sam_spi1select,
+#ifdef CONFIG_SAMA5_SPI_DMA
+  .pid     = SAM_PID_SPI1,
+#endif
 };
 #endif
 
@@ -502,6 +611,284 @@ static inline uint32_t spi_cs2pcs(struct sam_spics_s *spics)
 {
   return ((uint32_t)1 << (spics->cs)) - 1;
 }
+
+/****************************************************************************
+ * Name: spi_dma_sampleinit
+ *
+ * Description:
+ *   Initialize sampling of DMA registers (if CONFIG_SAMA5_SPI_DMADEBUG)
+ *
+ * Input Parameters:
+ *   spics - Chip select doing the DMA
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_SPI_DMADEBUG
+static void spi_dma_sampleinit(struct sam_spics_s *spics)
+{
+  /* Put contents of register samples into a known state */
+
+  memset(spics->rxdmaregs, 0xff, DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
+  memset(spics->txdmaregs, 0xff, DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
+
+  /* Then get the initial samples */
+
+  sam_dmasample(spics->rxdma, &spics->rxdmaregs[DMA_INITIAL]);
+  sam_dmasample(spics->txdma, &spics->txdmaregs[DMA_INITIAL]);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dma_sampledone
+ *
+ * Description:
+ *   Dump sampled DMA registers
+ *
+ * Input Parameters:
+ *   spics - Chip select doing the DMA
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_SPI_DMADEBUG
+static void spi_dma_sampledone(struct sam_spics_s *spics)
+{
+  /* Sample the final registers */
+
+  sam_dmasample(spics->rxdma, &spics->rxdmaregs[DMA_END_TRANSFER]);
+  sam_dmasample(spics->txdma, &spics->txdmaregs[DMA_END_TRANSFER]);
+
+  /* Then dump the sampled DMA registers */
+  /* Initial register values */
+
+  sam_dmadump(spics->txdma, &spics->txdmaregs[DMA_INITIAL],
+              "TX: Initial Registers");
+  sam_dmadump(spics->rxdma, &spics->rxdmaregs[DMA_INITIAL],
+              "RX: Initial Registers");
+
+  /* Register values after DMA setup */
+
+  sam_dmadump(spics->txdma, &spics->txdmaregs[DMA_AFTER_SETUP],
+              "TX: After DMA Setup");
+  sam_dmadump(spics->rxdma, &spics->rxdmaregs[DMA_AFTER_SETUP],
+              "RX: After DMA Setup");
+
+  /* Register values after DMA start */
+
+  sam_dmadump(spics->txdma, &spics->txdmaregs[DMA_AFTER_START],
+              "TX: After DMA Start");
+  sam_dmadump(spics->rxdma, &spics->rxdmaregs[DMA_AFTER_START],
+              "RX: After DMA Start");
+
+  /* Register values at the time of the TX and RX DMA callbacks
+   * -OR- DMA timeout.
+   *
+   * If the DMA timedout, then there will not be any RX DMA
+   * callback samples.  There is probably no TX DMA callback
+   * samples either, but we don't know for sure.
+   */
+
+  sam_dmadump(spics->txdma, &spics->txdmaregs[DMA_CALLBACK],
+              "TX: At DMA callback");
+
+  /* Register values at the end of the DMA */
+
+  if (spics->result == -ETIMEDOUT)
+    {
+      sam_dmadump(spics->rxdma, &spics->rxdmaregs[DMA_TIMEOUT],
+                  "RX: At DMA timeout");
+    }
+  else
+    {
+      sam_dmadump(spics->rxdma, &spics->rxdmaregs[DMA_CALLBACK],
+                  "RX: At DMA callback");
+    }
+
+  sam_dmadump(spics->rxdma, &spics->rxdmaregs[DMA_END_TRANSFER],
+              "RX: At End-of-Transfer");
+  sam_dmadump(spics->txdma, &spics->txdmaregs[DMA_END_TRANSFER],
+              "TX: At End-of-Transfer");
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_dmatimeout
+ *
+ * Description:
+ *   The watchdog timeout setup when a has expired without completion of a
+ *   DMA.
+ *
+ * Input Parameters:
+ *   argc   - The number of arguments (should be 1)
+ *   arg    - The argument (state structure reference cast to uint32_t)
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Always called from the interrupt level with interrupts disabled.
+ *
+ ****************************************************************************/
+
+static void spi_dmatimeout(int argc, uint32_t arg)
+{
+  struct sam_spics_s *spics = (struct sam_spics_s *)arg;
+  DEBUGASSERT(spics != NULL);
+
+  /* Sample DMA registers at the time of the timeout */
+
+  spi_rxdma_sample(spics, DMA_CALLBACK);
+
+  /* Report timeout result, perhaps overwriting any failure reports from
+   * the TX callback.
+   */
+
+  spics->result = -ETIMEDOUT;
+
+  /* Then wake up the waiting thread */
+
+  sem_post(&spics->dmawait);
+}
+
+/****************************************************************************
+ * Name: spi_rxcallback
+ *
+ * Description:
+ *   This callback function is invoked at the completion of the SPI RX DMA.
+ *
+ * Input Parameters:
+ *   handle - The DMA handler
+ *   arg - A pointer to the chip select struction
+ *   result - The result of the DMA transfer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_SPI_DMA
+static void spi_rxcallback(DMA_HANDLE handle, void *arg, int result)
+{
+  struct sam_spics_s *spics = (struct sam_spics_s *)arg;
+  DEBUGASSERT(spics != NULL);
+
+  /* Cancel the watchdog timeout */
+
+  (void)wd_cancel(spics->dmadog);
+
+  /* Sample DMA registers at the time of the callback */
+
+  spi_rxdma_sample(spics, DMA_CALLBACK);
+
+  /* Report the result of the transfer only if the TX callback has not already
+   * reported an error.
+   */
+
+  if (spics->result == -EBUSY)
+    {
+      /* Save the result of the transfer if no error was previuosly reported */
+
+      spics->result = result;
+    }
+
+  /* Then wake up the waiting thread */
+
+  sem_post(&spics->dmawait);
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_txcallback
+ *
+ * Description:
+ *   This callback function is invoked at the completion of the SPI TX DMA.
+ *
+ * Input Parameters:
+ *   handle - The DMA handler
+ *   arg - A pointer to the chip select struction
+ *   result - The result of the DMA transfer
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_SPI_DMA
+static void spi_txcallback(DMA_HANDLE handle, void *arg, int result)
+{
+  struct sam_spics_s *spics = (struct sam_spics_s *)arg;
+  DEBUGASSERT(spics != NULL);
+
+  spi_txdma_sample(spics, DMA_CALLBACK);
+
+  /* Do nothing on the TX callback unless an error is reported.  This
+   * callback is not really important because the SPI exchange is not
+   * complete until the RX callback is received.
+   */
+
+  if (result != OK && spics->result == -EBUSY)
+    {
+      /* Save the result of the transfer if an error is reported */
+
+      spics->result = result;
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: spi_physregaddr
+ *
+ * Description:
+ *   Return the physical address of an HSMCI register
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_SPI_DMA
+static uint32_t spi_physregaddr(struct sam_spics_s *spics,
+                                unsigned int offset)
+{
+  struct sam_spidev_s *spi = spi_device(spics);
+
+  /* Get the offset into the 1MB section containing the SPI registers */
+
+  uint32_t pbase = spi->base & 0x000fffff;
+
+#ifdef CONFIG_SAMA5_SPI0
+  /* Add in the physical base for SPI0
+   *
+   * We only have to check if this is SPI0 if SPI1 is enabled.
+   */
+
+#if defined(CONFIG_SAMA5_SPI1)
+  if (spics->spino == 0)
+#endif
+    {
+      pbase |= SAM_PERIPHA_PSECTION;
+    }
+#if defined(CONFIG_SAMA5_SPI1)
+  else
+#endif
+#endif
+
+#ifdef CONFIG_SAMA5_SPI1
+  /* Add in the physical base for SPI1
+   *
+   * If we get here, we con't have to check anything.
+   */
+
+    {
+      pbase |= SAM_PERIPHB_PSECTION;
+    }
+#endif
+
+  return pbase + offset;
+}
+#endif
 
 /****************************************************************************
  * Name: spi_lock
@@ -890,10 +1277,16 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
 }
 
 /****************************************************************************
- * Name: spi_exchange
+ * Name: spi_exchange (and spi_exchange_nodma)
  *
  * Description:
- *   Exahange a block of data from SPI. Required.
+ *   Exchange a block of data from SPI.  There are two versions of this
+ *   function:  (1) One that is enabled only when CONFIG_SAMA5_SPI_DMA=y
+ *   that performs DMA SPI transfers, but only when a larger block of
+ *   data is being transferred.  And (2) another version that does polled
+ *   SPI transfers.  When CONFIG_SAMA5_SPI_DMA=n the latter is the only
+ *   version avaialable; when CONFIG_SAMA5_SPI_DMA=y, this version is only
+ *   used for short SPI transfers and gets renamed as spi_exchange_nodma).
  *
  * Input Parameters:
  *   dev      - Device-specific state data
@@ -910,9 +1303,13 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
  *
  ****************************************************************************/
 
-static void  spi_exchange(struct spi_dev_s *dev,
-                          const void *txbuffer, void *rxbuffer,
-                          size_t nwords)
+#ifdef CONFIG_SAMA5_SPI_DMA
+static void spi_exchange_nodma(struct spi_dev_s *dev, const void *txbuffer,
+              void *rxbuffer, size_t nwords)
+#else
+static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+              void *rxbuffer, size_t nwords)
+#endif
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
@@ -1016,6 +1413,226 @@ static void  spi_exchange(struct spi_dev_s *dev,
         }
     }
 }
+
+#ifdef CONFIG_SAMA5_SPI_DMA
+static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
+                         void *rxbuffer, size_t nwords)
+{
+  struct sam_spics_s *spics = (struct sam_spics_s *)dev;
+  struct sam_spidev_s *spi = spi_device(spics);
+  uint32_t rxflags;
+  uint32_t txflags;
+  uint32_t txdummy;
+  uint32_t rxdummy;
+  uint32_t paddr;
+  int ret;
+
+  /* If we cannot do DMA -OR- if this is a small SPI transfer, then let
+   * spi_exchange_nodma() do the work.
+   */
+
+  if (!spics->candma || nwords <= CONFIG_SAMA5_SPI_DMATHRESHOLD)
+    {
+      spi_exchange_nodma(dev, txbuffer, rxbuffer, nwords);
+      return;
+    }
+
+  spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+
+  spics = (struct sam_spics_s *)dev;
+  spi = spi_device(spics);
+  DEBUGASSERT(spics && spi);
+
+  /* Make sure that any previous transfer is flushed from the hardware */
+
+  spi_flush(spi);
+
+  /* Sample initial DMA registers */
+
+  spi_dma_sampleinit(spics);
+
+  /* Configure the DMA channels.  There are four different cases:
+   *
+   * 1) A true exchange with the memory address incrementing on both
+   *    RX and TX channels,
+   * 2) A read operation with the memory address incrementing only on
+   *    the receive channel,
+   * 3) A write operation where the memory address increments only on
+   *    the receive channel, and
+   * 4) A corner case where there the memory address does not increment
+   *    on either channel.  This case might be used in certain cases
+   *    where you want to assure that certain number of clocks are
+   *    provided on the SPI bus.
+   */
+
+  rxflags = DMACH_FLAG_FIFOCFG_LARGEST |
+            ((uint32_t)spi->pid << DMACH_FLAG_PERIPHPID_SHIFT) |
+            DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |
+            DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHWIDTH_8BITS |
+            DMACH_FLAG_PERIPHCHUNKSIZE_1 |
+            ((uint32_t)(0x3f) << DMACH_FLAG_MEMPID_SHIFT) |
+            DMACH_FLAG_MEMAHB_AHB_IF0 | DMACH_FLAG_MEMWIDTH_8BITS |
+            DMACH_FLAG_MEMCHUNKSIZE_1;
+
+  if (!rxbuffer)
+    {
+      /* No sink data buffer.  Point to our dummy buffer and leave
+       * the rxflags so that no address increment is performed.
+       */
+
+      rxbuffer = (void *)&rxdummy;
+    }
+  else
+    {
+      /* A receive buffer is available.  Use normal TX memory incrementing. */
+
+      rxflags |= DMACH_FLAG_MEMINCREMENT;
+    }
+
+  txflags = DMACH_FLAG_FIFOCFG_LARGEST |
+            ((uint32_t)spi->pid << DMACH_FLAG_PERIPHPID_SHIFT) |
+            DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |
+            DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHWIDTH_8BITS |
+            DMACH_FLAG_PERIPHCHUNKSIZE_1 |
+            ((uint32_t)(0x3f) << DMACH_FLAG_MEMPID_SHIFT) |
+            DMACH_FLAG_MEMAHB_AHB_IF0 | DMACH_FLAG_MEMWIDTH_8BITS |
+            DMACH_FLAG_MEMCHUNKSIZE_1;
+
+  if (!txbuffer)
+    {
+      /* No source data buffer.  Point to our dummy buffer and configure
+       * the txflags so that no address increment is performed.
+       */
+
+      txdummy  = 0xffffffff;
+      txbuffer = (const void *)&txdummy;
+    }
+  else
+    {
+      /* Source data is available.  Use normal TX memory incrementing. */
+
+      txflags |= DMACH_FLAG_MEMINCREMENT;
+    }
+
+  /* Then configure the DMA channels to make it so */
+
+  sam_dmaconfig(spics->rxdma, rxflags);
+  sam_dmaconfig(spics->txdma, txflags);
+
+  /* Configure the exchange transfers */
+
+  paddr = spi_physregaddr(spics, SAM_SPI_RDR_OFFSET);
+  ret = sam_dmarxsetup(spics->rxdma, paddr, (uint32_t)rxbuffer, nwords);
+  if (ret < 0)
+    {
+      dmadbg("ERROR: sam_dmarxsetup failed: %d\n", ret);
+      return;
+    }
+
+  spi_rxdma_sample(spics, DMA_AFTER_SETUP);
+
+  paddr = spi_physregaddr(spics, SAM_SPI_TDR_OFFSET);
+  ret = sam_dmatxsetup(spics->txdma, paddr, (uint32_t)txbuffer, nwords);
+  if (ret < 0)
+    {
+      dmadbg("ERROR: sam_dmatxsetup failed: %d\n", ret);
+      return;
+    }
+
+  spi_txdma_sample(spics, DMA_AFTER_SETUP);
+
+  /* Start the DMA transfer */
+
+  spics->result = -EBUSY;
+  ret = sam_dmastart(spics->rxdma, spi_rxcallback, (void *)spics);
+  if (ret < 0)
+    {
+      dmadbg("ERROR: RX sam_dmastart failed: %d\n", ret);
+      return;
+    }
+
+  spi_rxdma_sample(spics, DMA_AFTER_START);
+
+  ret = sam_dmastart(spics->txdma, spi_txcallback, (void *)spics);
+  if (ret < 0)
+    {
+      dmadbg("ERROR: RX sam_dmastart failed: %d\n", ret);
+      sam_dmastop(spics->rxdma);
+      return;
+    }
+
+  spi_txdma_sample(spics, DMA_AFTER_START);
+
+  /* Wait for DMA completion.  This is done in a loop becaue there my be
+   * false alarm semaphore counts that cause sam_wait() not fail to wait
+   * or to wake-up prematurely (for example due to the receipt of a signal).
+   * We know that the DMA has completed when the result is anything other
+   * that -EBUSY.
+   */
+
+  do
+    {
+      /* Start (or re-start) the watchdog timeout */
+
+      ret = wd_start(spics->dmadog, DMA_TIMEOUT_TICKS,
+                     (wdentry_t)spi_dmatimeout, 1, (uint32_t)spics);
+      if (ret != OK)
+        {
+           spidbg("ERROR: wd_start failed: %d\n", ret);
+        }
+
+      /* Wait for the DMA complete */
+
+      ret = sem_wait(&spics->dmawait);
+
+      /* Cancel the watchdog timeout */
+
+      (void)wd_cancel(spics->dmadog);
+
+      /* Check if we were awakened by an error of some kind */
+
+      if (ret < 0)
+        {
+          /* EINTR is not a failure.  That simply means that the wait
+           * was awakened by a signel.
+           */
+
+          int errorcode = errno;
+          if (errorcode != EINTR)
+            {
+              DEBUGPANIC();
+              return;
+            }
+        }
+
+      /* Not that we might be awkened before the wait is over due to
+       * residual counts on the semaphore.  So, to handle, that case,
+       * we loop until somthing changes the DMA result to any value other
+       * than -EBUSY.
+       */
+    }
+  while (spics->result == -EBUSY);
+
+  /* Dump the sampled DMA registers */
+
+  spi_dma_sampledone(spics);
+
+  /* Make sure that the DMA is stopped (it will be stopped automatically
+   * on normal transfers, but not necessarily when the transfer terminates
+   * on an error condition).
+   */
+
+  sam_dmastop(spics->rxdma);
+  sam_dmastop(spics->txdma);
+
+  /* All we can do is complain if the DMA fails */
+
+  if (spics->result)
+    {
+      spidbg("ERROR: DMA failed with result: %d\n", spics->result);
+    }
+}
+#endif /* CONFIG_SAMA5_SPI_DMA */
 
 /***************************************************************************
  * Name: spi_sndblock
@@ -1124,13 +1741,46 @@ struct spi_dev_s *up_spiinitialize(int port)
   spics = (struct sam_spics_s *)zalloc(sizeof(struct sam_spics_s));
   if (!spics)
     {
-      spivdbg("ERROR:  Failed to allocate a chip select structure\n");
+      spidbg("ERROR: Failed to allocate a chip select structure\n");
       return NULL;
     }
 
   /* Set up the initial state for this chip select structure.  Other fields
    * were zeroed by zalloc().
    */
+
+#ifdef CONFIG_SAMA5_SPI_DMA
+  /* Can we do DMA on this peripheral? */
+
+  spics->candma = spino ? SAMA5_SPI1_DMA : SAMA5_SPI0_DMA;
+
+  /* Pre-allocate DMA channels.  These allocations exploit that fact that
+   * SPI0 is managed by DMAC0 and SPI1 is managed by DMAC1.  Hence,
+   * the SPI number (spino) is the same as the DMAC number.
+   */
+
+  if (spics->candma)
+    {
+      spics->rxdma = sam_dmachannel(spino, 0);
+      if (!spics->rxdma)
+        {
+          spidbg("ERROR: Failed to allocate the RX DMA channel\n");
+          spics->candma = false;
+        }
+    }
+
+  if (spics->candma)
+    {
+      spics->txdma = sam_dmachannel(spino, 0);
+      if (!spics->txdma)
+        {
+          spidbg("ERROR: Failed to allocate the TX DMA channel\n");
+          sam_dmafree(spics->rxdma);
+          spics->rxdma  = NULL;
+          spics->candma = false;
+        }
+    }
+#endif
 
    /* Select the SPI operations */
 
@@ -1225,6 +1875,20 @@ struct spi_dev_s *up_spiinitialize(int port)
       sem_init(&spi->spisem, 0, 1);
       spi->initialized = true;
 #endif
+
+#ifdef CONFIG_SAMA5_SPI_DMA
+      /* Initialize the SPI semaphore that is used to wake up the waiting
+       * thread when the DMA transfer completes.
+       */
+
+      sem_init(&spics->dmawait, 0, 0);
+
+      /* Create a watchdog time to catch DMA timeouts */
+
+      spics->dmadog = wd_create();
+      DEBUGASSERT(spics->dmadog);
+#endif
+
       spi_dumpregs(spi, "After initialization");
     }
 
