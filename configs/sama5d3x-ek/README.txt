@@ -987,6 +987,16 @@ Configurations
          CONFIG_SAMA5_AT25_AUTOMOUNT=y         : Mounts AT25 for NSH
          CONFIG_SAMA5_AT25_FTL=y               : Create block driver for FAT
 
+       The SPI driver can be built to do polled or DMA SPI data transfers.
+       The following additional changes will enable SPI DMA:
+
+       System Type -> SAMA5 Peripheral Support
+         CONFIG_SAMA5_DMAC0=y                   : Enable DMA controller 0
+
+       System Type -> SPI device driver options
+         CONFIG_SAMA5_SPI_DMA=y                 : Use DMA for SPI transfers
+         CONFIG_SAMA5_SPI_DMATHRESHOLD=4        : Don't DMA for small transfers
+
        NOTE that you must close JP1 on the Embest/Ronetix board in
        order to enable the AT25 FLASH chip select.
 
