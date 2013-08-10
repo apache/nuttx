@@ -228,9 +228,9 @@ static int fat_open(FAR struct file *filep, const char *relpath,
           goto errout_with_semaphore;
         }
 
-#ifdef CONFIG_FILE_MODE
-#  warning "Missing check for privileges based on inode->i_mode"
-#endif
+      /* TODO: if CONFIG_FILE_MODE=y, need check for privileges based on
+       * inode->i_mode
+       */
 
       /* Check if the caller has sufficient privileges to open the file */
 
@@ -1897,11 +1897,8 @@ static int fat_unlink(struct inode *mountpt, const char *relpath)
        * open reference to the file is closed.
        */
 
-#ifdef CONFIG_CPP_HAVE_WARNING
-#  warning "Need to defer deleting cluster chain if the file is open"
-#endif
-
       /* Remove the file */
+      /* TODO: Need to defer deleting cluster chain if the file is open. */
 
       ret = fat_remove(fs, relpath, false);
     }
@@ -2158,11 +2155,8 @@ int fat_rmdir(struct inode *mountpt, const char *relpath)
        * open reference to the directory is closed.
        */
 
-#ifdef CONFIG_CPP_HAVE_WARNING
-#  warning "Need to defer deleting cluster chain if the directory is open"
-#endif
-
       /* Remove the directory */
+      /* TODO: Need to defer deleting cluster chain if the file is open. */
 
       ret = fat_remove(fs, relpath, true);
     }
