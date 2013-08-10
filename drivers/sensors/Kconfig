@@ -2,6 +2,7 @@
 # For a description of the syntax of this configuration file,
 # see misc/tools/kconfig-language.txt.
 #
+
 config LIS331DL
 	bool "ST LIS331DL device support"
 	default n
@@ -30,4 +31,3 @@ config DEBUG_QENCODER
 	bool "Enable Qencoder Debug"
 	default n
 	depends on QENCODER
-	

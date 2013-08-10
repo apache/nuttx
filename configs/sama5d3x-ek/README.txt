@@ -1065,8 +1065,8 @@ Configurations
         configuration needs to be recalibrated.
 
       2013-8-3:  SDRAM configuration and RAM test usage have been verified
-        and are functional.  I not some issues now; Occassionally, SDRAM is
-        not functional on initial boot.  Or is initially not functional but
+        and are functional.  I note some issues; occassionally, SDRAM is
+        not functional on initial boot or is initially not functional but
         improves with accesses.  Clearly, more work needs to be done.
 
         Here is another strange observation:  SDRAM accesses tend to
@@ -1074,6 +1074,8 @@ Configurations
         where the memory test fails!  No idea why.
 
       2013-8-5:  The AT25 configuration has been verified to be functional.
+      2013-9-9:  The AT25 configuration has been verified with DMA
+        enabled.
 
   ostest:
     This configuration directory, performs a simple OS test using

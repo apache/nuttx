@@ -396,7 +396,7 @@ config USART2_ISUART
 config USART3_ISUART
 	bool "USART3 is a UART"
 	default y
-	depends on USART3_ISUART
+	depends on ARCH_HAVE_USART3
 
 config USART4_ISUART
 	bool "USART4 is a UART"

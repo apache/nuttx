@@ -112,9 +112,6 @@ config ARCH_FAMILY_LPC178X
 config ARCH_HAVE_SPIFI
 	bool
 
-config ARCH_HAVE_SDIO
-	bool
-
 menu "LPC17xx Peripheral Support"
 
 config LPC17_MAINOSC
