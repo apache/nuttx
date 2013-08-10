@@ -519,6 +519,7 @@ config SAM34_HSMCI
 	bool "High Speed Multimedia Card Interface (HSMCI)"
 	default n
 	depends on ARCH_CHIP_SAM3U || ARCH_CHIP_SAM3X || ARCH_CHIP_SAM3A || ARCH_CHIP_SAM4S
+	select ARCH_HAVE_SDIO
 
 endmenu # AT91SAM3/4 Peripheral Support
 

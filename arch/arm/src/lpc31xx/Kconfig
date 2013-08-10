@@ -88,6 +88,7 @@ config LPC31_USB
 config LPC31_MCI
 	bool "MCI"
 	default n
+	select ARCH_HAVE_SDIO
 
 endmenu # LPC31xx Peripheral Support
 
