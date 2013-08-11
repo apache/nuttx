@@ -78,6 +78,14 @@ CSRCS += sam_hsmci.c
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_UHPHS),y)
+CSRCS += sam_usb.c
+else
+ifeq ($(CONFIG_SAMA5_UDPHS),y)
+CSRCS += sam_usb.c
+endif
+endif
+
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += sam_nsh.c
 endif

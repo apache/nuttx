@@ -58,6 +58,7 @@
 #define HAVE_HSMCI_MTD  1
 #define HAVE_AT25_MTD   1
 
+/* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
 
 #if !defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_HSMCI1)
@@ -78,6 +79,7 @@
 #  undef HAVE_HSMCI_MTD
 #endif
 
+/* AT25 Serial FLASH */
 /* Can't support the AT25 device if it SPI0 or AT25 support are not enabled */
 
 #if !defined(CONFIG_SAMA5_SPI0) || !defined(CONFIG_MTD_AT25)
@@ -104,6 +106,39 @@
 #  warning Both CONFIG_SAMA5_AT25_FTL and CONFIG_SAMA5_AT25_NXFFS are set
 #  warning Ignoring CONFIG_SAMA5_AT25_NXFFS
 #  undef CONFIG_SAMA5_AT25_NXFFS
+#endif
+
+/* USB Host / USB Device */
+/* Either CONFIG_SAMA5_UHPHS or CONFIG_SAMA5_UDPHS must be defined, or there is
+ * no USB of any kind.
+ */
+
+#if !defined(CONFIG_SAMA5_UHPHS)
+#  undef CONFIG_SAMA5_OHCI
+#  undef CONFIG_SAMA5_EHCI
+#endif
+
+#if !defined(CONFIG_SAMA5_UDPHS)
+#endif
+
+/* CONFIG_USBDEV and CONFIG_USBHOST must also be defined */
+
+#if defined(CONFIG_USBDEV)
+#else
+#endif
+
+#if defined(CONFIG_USBHOST)
+#  if !defined(CONFIG_SAMA5_OHCI) && !defined(CONFIG_SAMA5_EHCI)
+#    warning CONFIG_USBHOST is defined, but neither CONFIG_SAMA5_OHCI nor CONFIG_SAMA5_EHCI are defined
+#  endif
+#else
+#  undef CONFIG_SAMA5_OHCI
+#  undef CONFIG_SAMA5_EHCI
+#endif
+
+#if defined(CONFIG_SAMA5_OHCI) && defined(CONFIG_SAMA5_EHCI)
+#  warning Both CONFIG_SAMA5_OHCI and CONFIG_SAMA5_EHCI are defined
+#  undef CONFIG_SAMA5_EHCI
 #endif
 
 /* LEDs *****************************************************************************/
@@ -320,6 +355,32 @@ bool sam_cardinserted(int slotno);
 
 #ifdef HAVE_HSMCI_MTD
 bool sam_writeprotected(int slotno);
+#endif
+
+/************************************************************************************
+ * Name: sam_usbinitialize
+ *
+ * Description:
+ *   Called from sam_usbinitialize very early in inialization to setup USB-related
+ *   GPIO pins for the STM32F4Discovery board.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
+void weak_function sam_usbinitialize(void);
+#endif
+
+/****************************************************************************************************
+ * Name: stm32_usbhost_initialize
+ *
+ * Description:
+ *   Called at application startup time to initialize the USB host functionality. This function will
+ *   start a thread that will monitor for device connection/disconnection events.
+ *
+ ****************************************************************************************************/
+
+#if defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI)
+int sam_usbhost_initialize(void);
 #endif
 
 /************************************************************************************

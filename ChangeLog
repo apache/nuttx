@@ -5364,3 +5364,5 @@
 	* drivers/usbhost/usbhost_hidkbd.c and usbhost_storage.c:  Correct some
 	  compilation errors when pre-allocated class structures are used.  Also
 	  eliminate some warnings about uninitialized variables (2013-8-11).
+	* configs/sama5d3x-ek/src/sam_usb.c and related files:  Add support for
+	  initialization of the USB host and mass storage class device (2013-8-11).

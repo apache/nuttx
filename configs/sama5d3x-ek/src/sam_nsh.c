@@ -112,7 +112,7 @@ int nsh_archinitialize(void)
   ret = sam_at25_initialize(AT25_MINOR);
   if (ret < 0)
     {
-      fdbg("ERROR: sam_at25_initialize failed: %d\n", ret);
+      dbg("ERROR: sam_at25_initialize failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -122,8 +122,8 @@ int nsh_archinitialize(void)
   ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR);
   if (ret < 0)
     {
-      fdbg("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-           HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
+      dbg("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
+          HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
       return ret;
     }
 #endif
@@ -132,11 +132,24 @@ int nsh_archinitialize(void)
   ret = sam_hsmci_initialize(HSMCI1_SLOTNO, HSMCI1_MINOR);
   if (ret < 0)
     {
-      fdbg("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-           HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
+      dbg("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
+          HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
       return ret;
     }
 #endif
+#endif
+
+#if defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI)
+  /* Initialize USB host operation.  sam_usbhost_initialize() starts a thread
+   * will monitor for USB connection and disconnection events.
+   */
+
+  ret = sam_usbhost_initialize();
+  if (ret != OK)
+    {
+      dbg("ERROR: Failed to initialize USB host: %d\n", ret);
+      return ret;
+    }
 #endif
 
   return OK;
