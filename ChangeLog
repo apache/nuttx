@@ -5342,4 +5342,8 @@
 	* drivers/mmcsd/mmcsd_sdio.c:  Correction for a bad return value
 	  when multiple block SDIO transfers are suppressed.  By Andrew Tridgell
 	  via Lorenz Meier (2013-8-10).
-
+	* drivers/serial/serial.c, drivers/usbdev/cdcacm.c, and
+	  include/nuttx/fs/ioctl.h: Added support for FIONREAD and FIONWRITE,
+	  added TERMIOS input / output processing support for UART and CDCACM
+	  serial ports. Implemented by Mike Smith, Andrew Tridgell and Lorenz
+	  Meier (2013-8-10).

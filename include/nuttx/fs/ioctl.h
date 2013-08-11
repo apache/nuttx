@@ -114,6 +114,13 @@
                                            *      is open).
                                            */
 
+#define FIONREAD        _FIOC(0x0005)     /* IN:  Location to return value (int *)
+                                           * OUT: Bytes readable from this fd
+                                           */
+#define FIONWRITE       _FIOC(0x0006)     /* IN:  Location to return value (int *)
+                                           * OUT: Bytes writable to this fd
+                                           */
+
 /* NuttX file system ioctl definitions **************************************/
 
 #define _DIOCVALID(c)   (_IOC_TYPE(c)==_DIOCBASE)

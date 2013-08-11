@@ -1821,7 +1821,7 @@ static ssize_t mmcsd_flush(FAR void *dev, FAR const uint8_t *buffer,
   size_t block;
   size_t endblock;
 #endif
-  ssize_t ret = nblocks;
+  ssize_t ret;
 
   DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 0)
 
@@ -1829,6 +1829,8 @@ static ssize_t mmcsd_flush(FAR void *dev, FAR const uint8_t *buffer,
   /* Write each block using only the single block transfer method */
 
   endblock = startblock + nblocks - 1;
+  ret = nblocks;
+
   for (block = startblock; block <= endblock; block++)
     {
       /* Write this block from the user buffer */
