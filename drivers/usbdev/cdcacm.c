@@ -1937,6 +1937,52 @@ static int cdcuart_ioctl(FAR struct file *filep,int cmd,unsigned long arg)
       break;
 #endif
 
+    case FIONREAD:
+      {
+        int count;
+        irqstate_t state = irqsave();
+
+        /* Determine the number of bytes available in the buffer. */
+
+        if (serdev->recv.tail <= serdev->recv.head)
+          {
+            count = serdev->recv.head - serdev->recv.tail;
+          }
+        else
+          {
+            count = serdev->recv.size - (serdev->recv.tail - serdev->recv.head);
+          }
+
+        irqrestore(state);
+
+        *(int *)arg = count;
+        ret = 0;
+      }
+      break;
+
+    case FIONWRITE:
+      {
+        int count;
+        irqstate_t state = irqsave();
+
+        /* Determine the number of bytes free in the buffer. */
+
+        if (serdev->xmit.head < serdev->xmit.tail)
+          {
+            count = serdev->xmit.tail - serdev->xmit.head - 1;
+          }
+        else
+          {
+            count = serdev->xmit.size - (serdev->xmit.head - serdev->xmit.tail) - 1;
+          }
+
+        irqrestore(state);
+
+        *(int *)arg = count;
+        ret = 0;
+      }
+      break;
+
     default:
       ret = -ENOTTY;
       break;

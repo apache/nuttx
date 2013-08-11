@@ -5347,3 +5347,6 @@
 	  added TERMIOS input / output processing support for UART and CDCACM
 	  serial ports. Implemented by Mike Smith, Andrew Tridgell and Lorenz
 	  Meier (2013-8-10).
+	* drivers/usbdev/cdcacm.c:  Added FIONREAD and FIONWRITE to CDC/ACM
+	  driver based on serial.c implementation. From Lorenz Meier
+	  (2013-8-10).
