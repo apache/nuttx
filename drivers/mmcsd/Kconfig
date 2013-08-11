@@ -63,10 +63,12 @@ endif
 
 config ARCH_HAVE_SDIO
 	bool
+	default n
 
 config MMCSD_SDIO
 	bool "MMC/SD SDIO transfer support"
 	default n
+	depends on ARCH_HAVE_SDIO
 
 if MMCSD_SDIO
 

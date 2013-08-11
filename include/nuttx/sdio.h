@@ -582,8 +582,19 @@
  * Description:
  *   Enable/disable of a set of SDIO wait events.  This is part of the
  *   the SDIO_WAITEVENT sequence.  The set of to-be-waited-for events is
- *   configured before calling SDIO_EVENTWAIT.  This is done in this way
- *   to help the driver to eliminate race conditions between the command
+ *   configured before calling either calling SDIO_DMARECVSETUP,
+ *   SDIO_DMASENDSETUP, or or SDIO_WAITEVENT.  This is the recommended
+ *   ordering:
+ *
+ *     SDIO_WAITENABLE:    Discard any pending interrupts, enable event(s)
+ *                         of interest
+ *     SDIO_DMARECVSETUP/
+ *     SDIO_DMASENDSETUP:  Setup the logic that will trigger the event the
+ *                         event(s) of interest
+ *     SDIO_WAITEVENT:     Wait for the event of interest (which might
+ *                         already have occurred)
+ *
+ *   This sequency should eliminate race conditions between the command/trasnfer
  *   setup and the subsequent events.
  *
  *   The enabled events persist until either (1) SDIO_WAITENABLE is called

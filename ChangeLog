@@ -5332,4 +5332,10 @@
 	  verified (with SPI) (2013-8-9).
 	* arch/arm/src/sama5/sam_memories.c and .h:  Central logic for
 	  conversions between physical and virtual addresses (2013-8-9).
-
+	* arch/arm/src/sama5/sam_hsmci.c and sam34/sam_hsmci.c:  Correct a
+	  race condition in the SAMA5 HSCMI driver:  The tranfer done
+	  interrupt was firing before the wait was started.  Fix this and
+	  also backported the changes to SAM3/4 (untested).  Now HSCMI is
+	  functional on the SAMA5 with DMA! (2013-8-10).
+	* arch/arm/src/sam34/sam3u_periphclks.h: Correct a typo in a register
+	  name (2013-8-10).

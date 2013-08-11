@@ -56,6 +56,7 @@
 #include "chip.h"
 
 #include "sam_dmac.h"
+#include "sam_periphclks.h"
 #include "chip/sam3u_pmc.h"
 #include "chip/sam3u_dmac.h"
 
@@ -413,7 +414,7 @@ sam_txctrlabits(struct sam_dma_s *dmach)
  *
  ****************************************************************************/
 
-static size_t sam_maxtxtransfer(struct sam_dmach_s *dmach)
+static size_t sam_maxtxtransfer(struct sam_dma_s *dmach)
 {
   unsigned int srcwidth;
   size_t maxtransfer;
@@ -558,7 +559,7 @@ static inline uint32_t sam_rxctrlabits(struct sam_dma_s *dmach)
  *
  ****************************************************************************/
 
-static size_t sam_maxrxtransfer(struct sam_dmach_s *dmach)
+static size_t sam_maxrxtransfer(struct sam_dma_s *dmach)
 {
   unsigned int srcwidth;
   size_t maxtransfer;
@@ -1399,7 +1400,7 @@ DMA_HANDLE sam_dmachannel(uint32_t chflags)
 
 void sam_dmaconfig(DMA_HANDLE handle, uint32_t chflags)
 {
-  struct sam_dmach_s *dmach = (struct sam_dmach_s *)handle;
+  struct sam_dma_s *dmach = (struct sam_dma_s *)handle;
 
   /* Set the new DMA channel flags. */
 

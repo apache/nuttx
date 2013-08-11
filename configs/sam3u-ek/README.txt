@@ -640,14 +640,44 @@ Configurations
             CONFIG_DEBUG_VERBOSE=y            : Enable verbose debug output
             CONFIG_DEBUG_INPUT=y              : Enable debug output from input devices
 
-          STATUS:
-            2013-6-28: The touchscreen is functional.
-            2013-6-29: Hmmm... but there appear to be conditions when the
-              touchscreen driver locks up.  Looks like some issue with
-              managing the interrupts.
-            2013-6-30:  Those lock-ups appear to be due to poorly placed
-              debug output statements.  If you do not enable debug output,
-              the touchscreen is rock-solid.
+    3. Enabling HSMCI support. The SAM3U-KE provides a an SD memory card
+       slot.  Support for the SD slot can be enabled with the following
+       settings:
+
+       System Type->ATSAM3/4 Peripheral Support
+         CONFIG_SAM34_HSMCI=y                 : Enable HSMCI support
+         CONFIG_SAM34_DMA=y                   : DMAC support is needed by HSMCI
+
+       System Type
+         CONFIG_SAM34_GPIO_IRQ=y              : PIO interrupts needed
+         CONFIG_SAM34_GPIOA_IRQ=y             : Card detect pin is on PIOA
+
+       Device Drivers -> MMC/SD Driver Support
+         CONFIG_MMCSD=y                        : Enable MMC/SD support
+         CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
+         CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
+         CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
+         CONFIG_SDIO_DMA=y                     : Use SDIO DMA
+         CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes
+
+       Library Routines
+         CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
+    STATUS:
+      2013-6-28: The touchscreen is functional.
+      2013-6-29: Hmmm... but there appear to be conditions when the
+        touchscreen driver locks up.  Looks like some issue with
+        managing the interrupts.
+      2013-6-30:  Those lock-ups appear to be due to poorly placed
+        debug output statements.  If you do not enable debug output,
+        the touchscreen is rock-solid.
+      2013-8-10:  Added the comments above above enabling HSMCI memory
+        card support and verified that the configuration builds without
+        error.  However, that configuration has not yet been tested (and
+        is may even be incomplete).
 
   nx:
     Configures to use examples/nx using the HX834x LCD hardware on

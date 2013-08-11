@@ -55,10 +55,19 @@
  * when the interrupt indicating that a card has been inserted or removed is received,
  * this function must call sio_mediachange() to handle that event.  See
  * arch/arm/src/sam34/sam_hsmci.h for more information.
+ *
+ * Also see the SAMA5D3x-EK implementation of this same logic.  The card detect
+ * interrupt handling should be a drop-in.
  */
 
 #ifdef GPIO_MCI_CD
 #  warning "Card detect interrupt handling needed"
+#endif
+
+/* Usually defined in NuttX header files */
+
+#ifndef OK
+#  define OK 0
 #endif
 
 /************************************************************************************

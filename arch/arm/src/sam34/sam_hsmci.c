@@ -63,6 +63,7 @@
 #include "sam_gpio.h"
 #include "sam_dmac.h"
 #include "sam_hsmci.h"
+#include "sam_periphclks.h"
 #include "chip/sam3u_dmac.h"
 #include "chip/sam3u_pmc.h"
 #include "chip/sam_hsmci.h"
@@ -268,6 +269,7 @@ struct sam_dev_s
   uint32_t           cmdrmask;   /* Interrupt enables for this particular cmd/response */
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
   WDOG_ID            waitwdog;   /* Watchdog that handles event timeouts */
+  bool               dmabusy;    /* TRUE: DMA is in progress */
 
   /* Callback support */
 
@@ -329,11 +331,14 @@ struct sam_xfrregs_s
 
 static void sam_takesem(struct sam_dev_s *priv);
 #define     sam_givesem(priv) (sem_post(&priv->waitsem))
-static void sam_enablewaitints(struct sam_dev_s *priv, uint32_t waitmask,
+
+static void sam_configwaitints(struct sam_dev_s *priv, uint32_t waitmask,
               sdio_eventset_t waitevents);
 static void sam_disablewaitints(struct sam_dev_s *priv, sdio_eventset_t wkupevents);
-static void sam_enablexfrints(struct sam_dev_s *priv, uint32_t xfrmask);
+static inline void sam_configxfrints(struct sam_dev_s *priv, uint32_t xfrmask);
 static void sam_disablexfrints(struct sam_dev_s *priv);
+static void sam_enableints(struct sam_dev_s *priv);
+
 static inline void sam_disable(void);
 static inline void sam_enable(void);
 
@@ -522,10 +527,13 @@ static void sam_takesem(struct sam_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: sam_enablewaitints
+ * Name: sam_configwaitints
  *
  * Description:
- *   Enable HSMCI interrupts needed to suport the wait function
+ *   Configure HSMCI interrupts needed to support the wait function.  Wait
+ *   interrupts are configured here, but not enabled until
+ *   sam_enableints() is called.  Why?  Because the XFRDONE interrupt
+ *   is always pending until start the data transfer.
  *
  * Input Parameters:
  *   priv       - A reference to the HSMCI device state structure
@@ -537,20 +545,17 @@ static void sam_takesem(struct sam_dev_s *priv)
  *
  ****************************************************************************/
 
-static void sam_enablewaitints(struct sam_dev_s *priv, uint32_t waitmask,
+static void sam_configwaitints(struct sam_dev_s *priv, uint32_t waitmask,
                                sdio_eventset_t waitevents)
 {
   irqstate_t flags;
 
-  /* Save all of the data and set the new interrupt mask in one, atomic
-   * operation.
-   */
+  /* Save all of the data in one, atomic operation. */
 
   flags = irqsave();
   priv->waitevents = waitevents;
   priv->wkupevent  = 0;
   priv->waitmask   = waitmask;
-  putreg32(priv->xfrmask | priv->waitmask, SAM_HSMCI_IER);
   irqrestore(flags);
 }
 
@@ -587,10 +592,13 @@ static void sam_disablewaitints(struct sam_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: sam_enablexfrints
+ * Name: sam_configxfrints
  *
  * Description:
- *   Enable HSMCI interrupts needed to support the data transfer event
+ *   Configure HSMCI interrupts needed to support the data transfer.  Data
+ *   transfer interrupts are configured here, but not enabled until
+ *   sam_enableints() is called.  Why?  Because the XFRDONE interrupt
+ *   is always pending until start the data transfer.
  *
  * Input Parameters:
  *   priv    - A reference to the HSMCI device state structure
@@ -601,12 +609,9 @@ static void sam_disablewaitints(struct sam_dev_s *priv,
  *
  ****************************************************************************/
 
-static void sam_enablexfrints(struct sam_dev_s *priv, uint32_t xfrmask)
+static inline void sam_configxfrints(struct sam_dev_s *priv, uint32_t xfrmask)
 {
-  irqstate_t flags = irqsave();
   priv->xfrmask = xfrmask;
-  putreg32(priv->xfrmask | priv->waitmask, SAM_HSMCI_IER);
-  irqrestore(flags);
 }
 
 /****************************************************************************
@@ -630,6 +635,28 @@ static void sam_disablexfrints(struct sam_dev_s *priv)
   priv->xfrmask = 0;
   putreg32(~priv->waitmask, SAM_HSMCI_IDR);
   irqrestore(flags);
+}
+
+/****************************************************************************
+ * Name: sam_enableints
+ *
+ * Description:
+ *   Enable the previously configured HSMCI interrupts needed to suport the
+ *   wait and transfer functions.
+ *
+ * Input Parameters:
+ *   priv - A reference to the HSMCI device state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void sam_enableints(struct sam_dev_s *priv)
+{
+  /* Enable all interrupts associated with the waited-for event */
+
+  putreg32(priv->xfrmask | priv->waitmask, SAM_HSMCI_IER);
 }
 
 /****************************************************************************
@@ -903,9 +930,15 @@ static void sam_cmddump(void)
 
 static void sam_dmacallback(DMA_HANDLE handle, void *arg, int result)
 {
+  struct sam_dev_s *priv = (struct sam_dev_s *)arg;
+
   /* We don't really do anything at the completion of DMA.  The termination
    * of the transfer is driven by the HSMCI interrupts.
+   *
+   * Mark the DMA not busy.
    */
+
+  priv->dmabusy = false;
 
   sam_xfrsample((struct sam_dev_s*)arg, SAMPLENDX_DMA_CALLBACK);
 }
@@ -1025,6 +1058,7 @@ static void sam_endtransfer(struct sam_dev_s *priv,
    */
 
   sam_dmastop(priv->dma);
+  priv->dmabusy = false;
 
   /* Disable the DMA handshaking */
 
@@ -1100,6 +1134,7 @@ static int sam_interrupt(int irq, void *context)
 
       sr      = getreg32(SAM_HSMCI_SR);
       enabled = sr & getreg32(SAM_HSMCI_IMR);
+
       if (enabled == 0)
         {
           break;
@@ -1270,6 +1305,7 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
   priv->waitevents = 0;      /* Set of events to be waited for */
   priv->waitmask   = 0;      /* Interrupt enables for event waiting */
   priv->wkupevent  = 0;      /* The event that caused the wakeup */
+  priv->dmabusy    = false;  /* No DMA in progress */
   wd_cancel(priv->waitwdog); /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
@@ -1620,8 +1656,8 @@ static void sam_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
  * Name: sam_cancel
  *
  * Description:
- *   Cancel the data transfer setup of HSMCI_RECVSETUP, HSMCI_SENDSETUP,
- *   HSMCI_DMARECVSETUP or HSMCI_DMASENDSETUP.  This must be called to cancel
+ *   Cancel the data transfer setup of SDIO_RECVSETUP, SDIO_SENDSETUP,
+ *   SDIO_DMARECVSETUP or SDIO_DMASENDSETUP.  This must be called to cancel
  *   the data transfer setup if, for some reason, you cannot perform the
  *   transfer.
  *
@@ -1660,6 +1696,7 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
    */
 
   sam_dmastop(priv->dma);
+  priv->dmabusy = false;
 
   /* Disable the DMA handshaking */
 
@@ -1947,13 +1984,24 @@ static int sam_recvnotimpl(FAR struct sdio_dev_s *dev,
  *
  * Description:
  *   Enable/disable of a set of SDIO wait events.  This is part of the
- *   the HSMCI_WAITEVENT sequence.  The set of to-be-waited-for events is
- *   configured before calling sam_eventwait.  This is done in this way
- *   to help the driver to eliminate race conditions between the command
+ *   the SDIO_WAITEVENT sequence.  The set of to-be-waited-for events is
+ *   configured before calling either calling SDIO_DMARECVSETUP,
+ *   SDIO_DMASENDSETUP, or or SDIO_WAITEVENT.  This is the recommended
+ *   ordering:
+ *
+ *     SDIO_WAITENABLE:    Discard any pending interrupts, enable event(s)
+ *                         of interest
+ *     SDIO_DMARECVSETUP/
+ *     SDIO_DMASENDSETUP:  Setup the logic that will trigger the event the
+ *                         event(s) of interest
+ *     SDIO_WAITEVENT:     Wait for the event of interest (which might
+ *                         already have occurred)
+ *
+ *   This sequency should eliminate race conditions between the command/trasnfer
  *   setup and the subsequent events.
  *
- *   The enabled events persist until either (1) HSMCI_WAITENABLE is called
- *   again specifying a different set of wait events, or (2) HSMCI_EVENTWAIT
+ *   The enabled events persist until either (1) SDIO_WAITENABLE is called
+ *   again specifying a different set of wait events, or (2) SDIO_EVENTWAIT
  *   returns.
  *
  * Input Parameters:
@@ -1988,10 +2036,20 @@ static void sam_waitenable(FAR struct sdio_dev_s *dev,
       waitmask |= priv->cmdrmask;
     }
 
-  /* Enable event-related interrupts */
+  /* Clear (most) pending interrupts by reading the status register.
+   * No interrupts should be lost (assuming that interrupts were enabled
+   * before sam_waitenable() was called).  Any interrupts that become
+   * pending after this point must be valid event indications.
+   */
 
   (void)getreg32(SAM_HSMCI_SR);
-  sam_enablewaitints(priv, waitmask, eventset);
+
+  /* Wait interrupts are configured here, but not enabled until
+   * sam_eventwait() is called.  Why?  Because the XFRDONE interrupt is
+   * always pending until start the data transfer.
+   */
+
+  sam_configwaitints(priv, waitmask, eventset);
 }
 
 /****************************************************************************
@@ -1999,8 +2057,8 @@ static void sam_waitenable(FAR struct sdio_dev_s *dev,
  *
  * Description:
  *   Wait for one of the enabled events to occur (or a timeout).  Note that
- *   all events enabled by HSMCI_WAITEVENTS are disabled when sam_eventwait
- *   returns.  HSMCI_WAITEVENTS must be called again before sam_eventwait
+ *   all events enabled by SDIO_WAITEVENTS are disabled when sam_eventwait
+ *   returns.  SDIO_WAITEVENTS must be called again before sam_eventwait
  *   can be used again.
  *
  * Input Parameters:
@@ -2022,13 +2080,22 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
   sdio_eventset_t wkupevent = 0;
   int ret;
 
-  /* There is a race condition here... the event may have completed before
-   * we get here.  In this case waitevents will be zero, but wkupevents will
-   * be non-zero (and, hopefully, the semaphore count will also be non-zero.
+  /* Since interrupts not been enabled to this point, any relevant events
+   * are pending and should not yet have occurred.
    */
 
-  DEBUGASSERT((priv->waitevents != 0 && priv->wkupevent == 0) ||
-              (priv->waitevents == 0 && priv->wkupevent != 0));
+  DEBUGASSERT(priv->waitevents != 0 && priv->wkupevent == 0);
+
+  /* Now enable event-related interrupts. If the events are pending, they
+   * may happen immediately here before entering the loop.
+   */
+
+  sam_enableints(priv);
+
+  /* There is a race condition here... the event may have completed before
+   * we get here.  In this case waitevents will be zero, but wkupevents will
+   * be non-zero (and, hopefully, the semaphore count will also be non-zero).
+   */
 
   /* Check if the timeout event is specified in the event set */
 
@@ -2043,7 +2110,16 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
            return SDIOWAIT_TIMEOUT;
         }
 
-      /* Start the watchdog timer */
+      /* Start the watchdog timer.  I am not sure why this is, but I am
+       * currently seeing some additional delays when DMA is used (On the
+       * SAMA5, might not be necessary for SAM3/4).
+       */
+
+#warning REVISIT: This should not be necessary
+      if (priv->dmabusy)
+        {
+          timeout += 500;
+        }
 
       delay = (timeout + (MSEC_PER_TICK-1)) / MSEC_PER_TICK;
       ret   = wd_start(priv->waitwdog, delay, (wdentry_t)sam_eventtimeout,
@@ -2099,7 +2175,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
  *
  *   Events are automatically disabled once the callback is performed and no
  *   further callback events will occur until they are again enabled by
- *   calling this methos.
+ *   calling this methods.
  *
  * Input Parameters:
  *   dev      - An instance of the SDIO device interface
@@ -2133,7 +2209,7 @@ static void sam_callbackenable(FAR struct sdio_dev_s *dev,
  *   thread.
  *
  *   When this method is called, all callbacks should be disabled until they
- *   are enabled via a call to HSMCI_CALLBACKENABLE
+ *   are enabled via a call to SDIO_CALLBACKENABLE.
  *
  * Input Parameters:
  *   dev -      Device-specific state data
@@ -2216,7 +2292,6 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Configure the RX DMA */
 
-  sam_enablexfrints(priv, HSMCI_DMARECV_INTS);
   sam_dmarxsetup(priv->dma, SAM_HSMCI_RDR, (uint32_t)buffer, buflen);
 
   /* Enable DMA handshaking */
@@ -2226,8 +2301,16 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Start the DMA */
 
+  priv->dmabusy = true;
   sam_dmastart(priv->dma, sam_dmacallback, priv);
+
+  /* Configure transfer-related interrupts.  Transfer interrupts are not
+   * enabled until after the transfer is stard with an SD command (i.e.,
+   * at the beginning of sam_eventwait().
+   */
+
   sam_xfrsample(priv, SAMPLENDX_AFTER_SETUP);
+  sam_configxfrints(priv, HSMCI_DMARECV_INTS);
   return OK;
 }
 
@@ -2274,12 +2357,16 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Start the DMA */
 
+  priv->dmabusy = true;
   sam_dmastart(priv->dma, sam_dmacallback, priv);
+
+  /* Configure transfer-related interrupts.  Transfer interrupts are not
+   * enabled until after the transfer is stard with an SD command (i.e.,
+   * at the beginning of sam_eventwait().
+   */
+
   sam_xfrsample(priv, SAMPLENDX_AFTER_SETUP);
-
-  /* Enable TX interrrupts */
-
-  sam_enablexfrints(priv, HSMCI_DMASEND_INTS);
+  sam_configxfrints(priv, HSMCI_DMASEND_INTS);
   return OK;
 }
 
