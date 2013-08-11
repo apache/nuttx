@@ -1027,10 +1027,11 @@ Configurations
          CONFIG_SAMA5_DMAC0=y                  : DMAC0 is needed by HSMCI0
          CONFIG_SAMA5_DMAC1=y                  : DMAC1 is needed by HSMCI1
 
+       System Type
          CONFIG_SAMA5_PIO_IRQ=y                : PIO interrupts needed
          CONFIG_SAMA5_PIOD_IRQ=y               : Card detect pins are on PIOD
 
-       Device Drivers ->
+       Device Drivers -> MMC/SD Driver Support
          CONFIG_MMCSD=y                        : Enable MMC/SD support
          CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
          CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
@@ -1074,8 +1075,11 @@ Configurations
         where the memory test fails!  No idea why.
 
       2013-8-5:  The AT25 configuration has been verified to be functional.
-      2013-9-9:  The AT25 configuration has been verified with DMA
+      2013-8-9:  The AT25 configuration has been verified with DMA
         enabled.
+
+      2013-8-10: Basic HSCMI1 functionality (with DMA) has been verified.
+        Most testing is needed to assure that this is a stable solution.
 
   ostest:
     This configuration directory, performs a simple OS test using
@@ -1133,7 +1137,7 @@ Configurations
         configuration to start the program in NOR FLASH (see just above).
         See "Creating and Using NORBOOT" above.
 
-       2013-7-31:  The OS test configuration is basically functional, but
+      2013-7-31:  The OS test configuration is basically functional, but
          takes a very long time in the round-robin scheduler test computing
          prime numbers.  This test is supposed to be slow -- like several
          seconds -- but not many minutes.  No idea why yet.  The best guess
