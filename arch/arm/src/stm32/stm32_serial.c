@@ -2441,10 +2441,17 @@ void up_serialinit(void)
 
   for (i = 0; i < STM32_NUSART; i++)
     {
+      /* Don't create a device for non-configured ports. */
+
+      if (uart_devs[i] == 0)
+        {
+          continue;
+        }
+
 #ifndef CONFIG_SERIAL_DISABLE_REORDERING
       /* Don't create a device for the console - we did that above */
 
-      if ((uart_devs[i] == 0) || (uart_devs[i]->dev.isconsole))
+      if (uart_devs[i]->dev.isconsole)
         {
           continue;
         }
