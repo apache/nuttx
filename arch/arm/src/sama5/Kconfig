@@ -259,7 +259,7 @@ config SAMA5_SPI_DMATHRESHOLD
 	---help---
 		When SPI DMA is enabled, small DMA transfers will still be performed
 		by polling logic.  But we need a threshold value to determine what
-		is small.  That value is provided by CONFIG_SAMA5_SPI_DMATHRESHOLD.
+		is small.  That value is provided by SAMA5_SPI_DMATHRESHOLD.
 
 config SAMA5_SPI_DMADEBUG
 	bool "SPI DMA transfer debug"
@@ -334,6 +334,53 @@ config SAMA5_HSMCI_REGDEBUG
 
 endmenu # HSMCI device driver options
 endif # SAMA5_HSMCI0 || SAMA5_HSMCI1 || SAMA5_HSMCI2
+
+if SAMA5_UHPHS
+menu "USB High Speed Host device driver options"
+
+config SAMA5_OHCI
+	bool "Full speed OHCI support"
+	default n
+	---help---
+		Build support for the SAMA5 USB full speed Open Host Controller
+		Interface (OHCI).
+
+if SAMA5_OHCI
+config SAMA5_OHCI_NEDS
+	int "Number of endpoint descriptors"
+	default 2
+
+config SAMA5_OHCI_NTDS
+	int "Number of transfer descriptors"
+	default 3
+
+config SAMA5_OHCI_TDBUFFERS
+	int "Number of transfer descriptor buffers"
+	default 2
+
+config SAMA5_OHCI_TDBUFSIZE
+	int "Size of one transfer descriptor buffer"
+	default 128
+	---help---
+		The size of one transfer descriptor (TD) buffer in bytes.  The TD
+		buffer size must be an even number of 32-bit words
+
+config SAMA5_OHCI_REGDEBUG
+	bool "Enable low-level OHCI register debug"
+	default n
+	depends on DEBUG
+
+endif # OHCI
+
+config SAMA5_EHCI
+	bool "High speed EHCI support"
+	default n
+	---help---
+		Build support for the SAMA5 USB high speed Enhanced Host Controller
+		Interface (OHCI).
+
+endmenu # USB High Speed Host driver option
+endif # SAMA5_UHPHS
 
 menu "External Memory Configuration"
 

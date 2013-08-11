@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_storage.c
  *
- *   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,6 +137,13 @@ struct usbhost_state_s
   size_t                  tbuflen;      /* Size of the allocated transfer buffer */
   usbhost_ep_t            bulkin;       /* Bulk IN endpoint */
   usbhost_ep_t            bulkout;      /* Bulk OUT endpoint */
+};
+
+/* This is how struct usbhost_state_s looks to the free list logic */
+
+struct usbhost_freestate_s
+{
+  FAR struct usbhost_freestate_s *flink;
 };
 
 /****************************************************************************
@@ -300,7 +307,7 @@ static struct usbhost_state_s g_prealloc[CONFIG_USBHOST_NPREALLOC];
 /* This is a list of free, pre-allocated USB host storage class instances */
 
 #if CONFIG_USBHOST_NPREALLOC > 0
-static struct usbhost_state_s *g_freelist;
+static FAR struct usbhost_freestate_s *g_freelist;
 #endif
 
 /* This is a bitmap that is used to allocate device names /dev/sda-z. */
@@ -356,7 +363,7 @@ static void usbhost_takesem(sem_t *sem)
 #if CONFIG_USBHOST_NPREALLOC > 0
 static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 {
-  struct usbhost_state_s *priv;
+  FAR struct usbhost_freestate_s *entry;
   irqstate_t flags;
 
   /* We may be executing from an interrupt handler so we need to take one of
@@ -364,15 +371,15 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
    */
 
   flags = irqsave();
-  priv = g_freelist;
-  if (priv)
+  entry = g_freelist;
+  if (entry)
     {
-      g_freelist        = priv->class.flink;
-      priv->class.flink = NULL;
+      g_freelist = entry->flink;
     }
+
   irqrestore(flags);
-  ullvdbg("Allocated: %p\n", priv);;
-  return priv;
+  ullvdbg("Allocated: %p\n", entry);;
+  return (FAR struct usbhost_state_s *)entry;
 }
 #else
 static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
@@ -407,16 +414,17 @@ static inline FAR struct usbhost_state_s *usbhost_allocclass(void)
 #if CONFIG_USBHOST_NPREALLOC > 0
 static inline void usbhost_freeclass(FAR struct usbhost_state_s *class)
 {
+  FAR struct usbhost_freestate_s *entry = (FAR struct usbhost_freestate_s *)class;
   irqstate_t flags;
-  DEBUGASSERT(class != NULL);
+  DEBUGASSERT(entry != NULL);
 
-  ullvdbg("Freeing: %p\n", class);;
+  ullvdbg("Freeing: %p\n", entry);
 
   /* Just put the pre-allocated class structure back on the freelist */
 
   flags = irqsave();
-  class->class.flink = g_freelist;
-  g_freelist = class;
+  entry->flink = g_freelist;
+  g_freelist = entry;
   irqrestore(flags);
 }
 #else
@@ -821,7 +829,6 @@ static inline int usbhost_readcapacity(FAR struct usbhost_state_s *priv)
 static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
 {
   FAR struct usbmsc_cbw_s *cbw;
-  FAR struct scsiresp_inquiry_s *resp;
   int result;
 
   /* Initialize a CBW (re-using the allocated transfer buffer) */
@@ -846,9 +853,12 @@ static inline int usbhost_inquiry(FAR struct usbhost_state_s *priv)
                              priv->tbuffer, SCSIRESP_INQUIRY_SIZEOF);
       if (result == OK)
         {
-          /* TODO: If USB debug is enabled, dump the response data here */
+#if 0
+          FAR struct scsiresp_inquiry_s *resp;
 
+          /* TODO: If USB debug is enabled, dump the response data here */
           resp = (FAR struct scsiresp_inquiry_s *)priv->tbuffer;
+#endif
 
           /* Receive the CSW */
 
@@ -970,6 +980,11 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
   DEBUGASSERT(priv != NULL &&
               configdesc != NULL &&
               desclen >= sizeof(struct usb_cfgdesc_s));
+
+  /* Keep the compiler from complaining about uninitialized variables */
+
+  memset(&bindesc, 0, sizeof(struct usbhost_epdesc_s));
+  memset(&boutdesc, 0, sizeof(struct usbhost_epdesc_s));
 
   /* Verify that we were passed a configuration descriptor */
 
@@ -2225,14 +2240,15 @@ int usbhost_storageinit(void)
    */
 
 #if CONFIG_USBHOST_NPREALLOC > 0
+  FAR struct usbhost_freestate_s *entry;
   int i;
 
   g_freelist = NULL;
   for (i = 0; i < CONFIG_USBHOST_NPREALLOC; i++)
     {
-      struct usbhost_state_s *class = &g_prealloc[i];
-      class->class.flink = g_freelist;
-      g_freelist         = class;
+      entry        = (FAR struct usbhost_freestate_s *)&g_prealloc[i];
+      entry->flink = g_freelist;
+      g_freelist   = entry;
     }
 #endif
 

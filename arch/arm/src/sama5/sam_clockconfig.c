@@ -321,16 +321,37 @@ static inline void sam_selectplla(void)
 }
 
 /****************************************************************************
- * Name: sam_upllsetup
+ * Name: sam_usbclockconfig
  *
  * Description:
- *   Select the PLLA output as the input clock for PCK and MCK.
+ *   Configure clocking for USB.
  *
  ****************************************************************************/
 
-static inline void sam_upllsetup(void)
+static inline void sam_usbclockconfig(void)
 {
-#ifdef CONFIG_USBDEV
+#ifdef CONFIG_SAMA5_OHCI
+  /* For OHCI Full-speed operations only, the user has to perform the
+   * following:
+   *
+   *   1) Enable UHP peripheral clock, bit (1 << AT91C_ID_UHPHS) in PMC_PCER
+   *      register.
+   *   2) Select PLLACK as Input clock of OHCI part, USBS bit in PMC_USB
+   *      register.
+   *   3) Program the OHCI clocks (UHP48M and UHP12M) with USBDIV field in
+   *      PMC_USB register. USBDIV value is calculated regarding the PLLACK
+   *      value and USB Full-speed accuracy.
+   *   4) Enable the OHCI clocks, UHP bit in PMC_SCER register.
+   *
+   * Steps 2 and 3 are done here.  1 and 2 are performed with the USB device
+   * driver is opened.
+   */
+
+  putreg32(BOARD_OHCI_INPUT | BOARD_OHCI_DIVIDER << PMC_USB_USBDIV_SHIFT,
+          SAM_PMC_USB);
+#endif
+
+#if 0 // #ifdef CONFIG_USBDEV
   uint32_t regval;
 
   /* Setup UTMI for USB and wait for LOCKU */
@@ -512,9 +533,9 @@ void sam_clockconfig(void)
 
       sam_selectplla();
 
-      /* Setup UTMI for USB */
+      /* Setup USB clocking */
 
-      sam_upllsetup();
+      sam_usbclockconfig();
     }
 #endif /* CONFIG_SAMA5_BOOT_ISRAM || CONFIG_SAMA5_BOOT_CS0FLASH */
 }

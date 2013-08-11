@@ -1,7 +1,7 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32_otgfs.h
+ * arch/arm/src/lpc17xx/lpc17_usbhost.h
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_OTGFS_H
-#define __ARCH_ARM_SRC_STM32_STM32_OTGFS_H
+#ifndef __ARCH_ARM_SRC_LPC17XX_LPC17_USBHOST_H
+#define __ARCH_ARM_SRC_LPC17XX_LPC17_USBHOST_H
 
 /************************************************************************************
  * Included Files
@@ -42,24 +42,20 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-
-#include "stm32.h"
-#include "chip/stm32_otgfs.h"
-
-#ifdef CONFIG_STM32_OTGFS
-
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* Configuration ********************************************************************/
-
-#ifndef CONFIG_OTGFS_PRI
-#  define CONFIG_OTGFS_PRI NVIC_SYSH_PRIORITY_DEFAULT
-#endif
 
 /************************************************************************************
- * Public Functions
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
  ************************************************************************************/
 
 #ifndef __ASSEMBLY__
@@ -73,11 +69,15 @@ extern "C"
 #define EXTERN extern
 #endif
 
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+
 /*******************************************************************************
- * Name: stm32_otgfshost_initialize
+ * Name: sam_ohci_initialize
  *
  * Description:
- *   Initialize USB host device controller hardware.
+ *   Initialize USB OHCI host controller hardware.
  *
  * Input Parameters:
  *   controller -- If the device supports more than USB host controller, then
@@ -100,21 +100,8 @@ extern "C"
 
 #ifdef CONFIG_USBHOST
 struct usbhost_driver_s;
-FAR struct usbhost_driver_s *stm32_otgfshost_initialize(int controller);
+FAR struct usbhost_driver_s *sam_ohci_initialize(int controller);
 #endif
-
-/************************************************************************************
- * Name:  stm32_usbsuspend
- *
- * Description:
- *   Board logic must provide the stm32_usbsuspend logic if the OTG FS device driver
- *   is used.  This function is called whenever the USB enters or leaves suspend
- *   mode. This is an opportunity for the board logic to shutdown clocks, power,
- *   etc. while the USB is suspended.
- *
- ************************************************************************************/
-
-void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -122,6 +109,4 @@ void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_STM32_OTGFS */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_OTGFS_H */
-
+#endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_USBHOST_H */

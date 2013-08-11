@@ -694,18 +694,18 @@ SAMA5D3x-EK Configuration Options
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.
 
-    CONFIG_SAMA5_PIOA_IRQ     - Support PIOA interrupts
-    CONFIG_SAMA5_PIOB_IRQ     - Support PIOB interrupts
-    CONFIG_SAMA5_PIOC_IRQ     - Support PIOD interrupts
-    CONFIG_SAMA5_PIOD_IRQ     - Support PIOD interrupts
-    CONFIG_SAMA5_PIOE_IRQ     - Support PIOE interrupts
+    CONFIG_SAMA5_PIOA_IRQ    - Support PIOA interrupts
+    CONFIG_SAMA5_PIOB_IRQ    - Support PIOB interrupts
+    CONFIG_SAMA5_PIOC_IRQ    - Support PIOD interrupts
+    CONFIG_SAMA5_PIOD_IRQ    - Support PIOD interrupts
+    CONFIG_SAMA5_PIOE_IRQ    - Support PIOE interrupts
 
     CONFIG_USART0_ISUART     - USART0 is configured as a UART
     CONFIG_USART1_ISUART     - USART1 is configured as a UART
     CONFIG_USART2_ISUART     - USART2 is configured as a UART
     CONFIG_USART3_ISUART     - USART3 is configured as a UART
 
-  ST91SAM4S specific device driver settings
+  ST91SAMA5 specific device driver settings
 
     CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,3) or UART
            m (m=4,5) for the console and ttys0 (default is the USART1).
@@ -717,6 +717,34 @@ SAMA5D3x-EK Configuration Options
     CONFIG_U[S]ARTn_BITS - The number of bits.  Must be either 7 or 8.
     CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
     CONFIG_U[S]ARTn_2STOP - Two stop bits
+
+  AT91SAMA5 USB Host Configuration
+  Pre-requisites
+
+    CONFIG_USBDEV          - Enable USB device support
+    CONFIG_USBHOST         - Enable USB host support
+    CONFIG_SAMA5_UHPHS     - Needed
+    CONFIG_SAMA5_OHCI      - Enable the STM32 USB OTG FS block
+    CONFIG_SCHED_WORKQUEUE - Worker thread support is required
+
+  Options:
+
+    CONFIG_SAMA5_OHCI_NEDS
+      Number of endpoint descriptors
+    CONFIG_SAMA5_OHCI_NTDS
+      Number of transfer descriptors
+    CONFIG_SAMA5_OHCI_TDBUFFERS
+      Number of transfer descriptor buffers
+    CONFIG_SAMA5_OHCI_TDBUFSIZE
+      Size of one transfer descriptor buffer
+    CONFIG_USBHOST_INT_DISABLE
+      Disable interrupt endpoint support
+    CONFIG_USBHOST_ISOC_DISABLE
+      Disable isochronous endpoint support
+    CONFIG_USBHOST_BULK_DISABLE
+      Disable bulk endpoint support
+
+config SAMA5_OHCI_REGDEBUG
 
 Configurations
 ==============
@@ -1084,6 +1112,25 @@ Configurations
           volume when it is removed.  But those callbacks are not used in
           this configuration.
 
+    10) Support the USB full-speed OHCI host driver can be enabled by change
+        the NuttX configuration file as follows:
+
+        System Type -> ATSAMA5 Peripheral Support
+          CONFIG_SAMA5_UHPHS=y                 : USB Host High Speed
+
+        System Type -> USB High Speed Host driver options
+          CONFIG_SAMA5_OHCI=y                  : Full-speed OHCI support
+                                               : Defaults for values probably OK
+        Device Drivers
+          CONFIG_USBHOST=y                     : Enable USB host support
+
+        Device Drivers -> USB Host Driver Support
+          CONFIG_USBHOST_ISOC_DISABLE=y        : Isochronous endpoints not used
+          CONFIG_USBHOST_MSC=y                 : Enable the mass storage class driver
+
+        Library Routines
+          CONFIG_SCHED_WORKQUEUE               : Worker thread support is required
+
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
         The SAMA5D3 can run at 536MHz.  I still need to figure out the
@@ -1131,6 +1178,8 @@ Configurations
         and prevents NSH from receiving data.  There is no issue when the
         debug output is suppressed and card insertial and removal works as
         expected (at least on the HSMCI1 microSD slot).
+
+      2013-8-11: Added OHCI configuration.  Untested!
 
   ostest:
     This configuration directory, performs a simple OS test using

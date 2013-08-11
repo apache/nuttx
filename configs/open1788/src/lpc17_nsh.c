@@ -52,6 +52,7 @@
 
 #include "lpc17_gpio.h"
 #include "lpc17_sdcard.h"
+#include "lpc17_usbhost.h"
 #include "open1788.h"
 
 /****************************************************************************

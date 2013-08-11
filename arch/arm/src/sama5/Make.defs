@@ -115,6 +115,15 @@ else
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_UHPHS),y)
+ifeq ($(CONFIG_SAMA5_OHCI),y)
+CHIP_CSRCS += sam_ohci.c
+endif
+ifeq ($(CONFIG_SAMA5_EHCI),y)
+CHIP_CSRCS += sam_ehci.c
+endif
+endif
+
 ifeq ($(CONFIG_SAMA5_HSMCI0),y)
 CHIP_CSRCS += sam_hsmci.c
 else

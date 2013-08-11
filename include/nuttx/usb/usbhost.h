@@ -800,33 +800,6 @@ EXTERN int usbhost_kbdinit(void);
 EXTERN int usbhost_wlaninit(void);
 
 /*******************************************************************************
- * Name: usbhost_initialize
- *
- * Description:
- *   Initialize USB host device controller hardware.
- *
- * Input Parameters:
- *   controller -- If the device supports more than USB host controller, then
- *     this identifies which controller is being intialized.  Normally, this
- *     is just zero.
- *
- * Returned Value:
- *   And instance of the USB host interface.  The controlling task should
- *   use this interface to (1) call the wait() method to wait for a device
- *   to be connected, and (2) call the enumerate() method to bind the device
- *   to a class driver.
- *
- * Assumptions:
- * - This function should called in the initialization sequence in order
- *   to initialize the USB device functionality.
- * - Class drivers should be initialized prior to calling this function.
- *   Otherwise, there is a race condition if the device is already connected.
- *
- *******************************************************************************/
-
-EXTERN FAR struct usbhost_driver_s *usbhost_initialize(int controller);
-
-/*******************************************************************************
  * Name: usbhost_enumerate
  *
  * Description:
