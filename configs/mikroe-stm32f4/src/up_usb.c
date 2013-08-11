@@ -53,6 +53,7 @@
 
 #include "up_arch.h"
 #include "stm32.h"
+#include "stm32_otgfs.h"
 #include "mikroe-stm32f4-internal.h"
 
 #ifdef CONFIG_STM32_OTGFS
@@ -185,7 +186,7 @@ int stm32_usbhost_initialize(void)
   /* Then get an instance of the USB host interface */
 
   uvdbg("Initialize USB host\n");
-  g_drvr = usbhost_initialize(0);
+  g_drvr = stm32_otgfshost_initialize(0);
   if (g_drvr)
     {
       /* Start a thread to handle device connection. */

@@ -2,7 +2,7 @@
  * configs/cloudctrl/src/up_usbdev.c
  * arch/arm/src/board/up_boot.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Darcy Gong <darcy.gong@gmail.com>
  *
@@ -54,6 +54,7 @@
 
 #include "up_arch.h"
 #include "stm32.h"
+#include "stm32_otgfs.h"
 #include "cloudctrl-internal.h"
 
 #ifdef CONFIG_STM32_OTGFS
@@ -186,7 +187,7 @@ int stm32_usbhost_initialize(void)
   /* Then get an instance of the USB host interface */
 
   uvdbg("Initialize USB host\n");
-  g_drvr = usbhost_initialize(0);
+  g_drvr = stm32_otgfshost_initialize(0);
   if (g_drvr)
     {
       /* Start a thread to handle device connection. */
