@@ -289,7 +289,8 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
  * Name: uart_irqwrite
  ************************************************************************************/
 
-static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev, FAR const char *buffer, size_t buflen)
+static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev, FAR const char *buffer,
+                                    size_t buflen)
 {
   ssize_t ret = buflen;
 
@@ -321,9 +322,9 @@ static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev, FAR const char *buffer,
 static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
-  FAR struct inode *inode  = filep->f_inode;
-  FAR uart_dev_t   *dev    = inode->i_private;
-  ssize_t           nread  = buflen;
+  FAR struct inode *inode    = filep->f_inode;
+  FAR uart_dev_t   *dev      = inode->i_private;
+  ssize_t           nwritten = buflen;
   bool              oktoblock;
   int               ret;
   char              ch;
@@ -473,13 +474,13 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
            * interrupted transfer.
            */
 
-          if (buflen < nread)
+          if (buflen < nwritten)
             {
               /* Some data was transferred.  Return the number of bytes that
                * were successfully transferred.
                */
 
-              nread -= buflen;
+              nwritten -= buflen;
             }
           else
             {
@@ -487,7 +488,7 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
                * The VFS layer will set the errno value appropriately).
                */
  
-              nread = ret;
+              nwritten = ret;
             }
 
           break;
@@ -500,7 +501,7 @@ static ssize_t uart_write(FAR struct file *filep, FAR const char *buffer,
     }
 
   uart_givesem(&dev->xmit.sem);
-  return nread;
+  return nwritten;
 }
 
 /************************************************************************************

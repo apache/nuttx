@@ -2704,8 +2704,8 @@ static void sam_callback(void *arg)
         {
           /* Yes.. queue it */
 
-           fvdbg("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
-          (void)work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback, priv->cbarg, 0);
+           fllvdbg("Queuing callback to %p(%p)\n", priv->callback, priv->cbarg);
+          (void)work_queue(LPWORK, &priv->cbwork, (worker_t)priv->callback, priv->cbarg, 0);
         }
       else
         {
@@ -2931,7 +2931,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
       priv->cdstatus &= ~SDIO_STATUS_PRESENT;
     }
 
-  fvdbg("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
+  fllvdbg("cdstatus OLD: %02x NEW: %02x\n", cdstatus, priv->cdstatus);
 
   /* Perform any requested callback if the status has changed */
 

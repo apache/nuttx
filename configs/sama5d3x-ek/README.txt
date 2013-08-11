@@ -1045,6 +1045,45 @@ Configurations
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
+       Using the SD card:
+
+       1) If you try mounting an SD card with nothing in the slot, the
+          mount will fail:
+
+            nsh> mount -t vfat /dev/mmcsd1 /mnt/sd1
+            nsh: mount: mount failed: 19
+
+          NSH can be configured to provide errors as strings instead of
+          numbers.  But in this case, only the error number is reported.
+          The  error numbers can be found in nuttx/include/errno.h:
+
+            #define ENODEV              19
+            #define ENODEV_STR          "No such device"
+
+          So the mount command is saying that there is no device or, more
+          correctly, that there is no card in the SD card slot.
+
+        2) Inserted the SD card.  Then the mount should succeed.
+
+            nsh> mount -t vfat /dev/mmcsd1 /mnt/sd1
+            nsh> ls /mnt/sd1
+            /mnt/sd1:
+             atest.txt
+            nsh> cat /mnt/sd1/atest.txt
+            This is a test
+
+        3) Before removing the card, you must umount the file system.  This
+           is equivalent to "ejecting" or "safely removing" the card on
+           Windows:  It flushes any cached data to the card and makes the SD
+           card unavailable to the applications.
+
+             nsh> mount -t vfat /dev/mmcsd1 /mnt/sd1
+
+          It is now safe to remove the card.  NuttX provides into callbacks
+          that can be used by an application to automatically unmount the
+          volume when it is removed.  But those callbacks are not used in
+          this configuration.
+
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
         The SAMA5D3 can run at 536MHz.  I still need to figure out the
@@ -1063,7 +1102,7 @@ Configurations
 
       2013-7-31:  Using delay loop calibration from the hello configuration.
         That configuration runs out of internal SRAM and, as a result, this
-        configuration needs to be recalibrated.
+        configuration should be recalibrated.
 
       2013-8-3:  SDRAM configuration and RAM test usage have been verified
         and are functional.  I note some issues; occassionally, SDRAM is
@@ -1080,6 +1119,18 @@ Configurations
 
       2013-8-10: Basic HSCMI1 functionality (with DMA) has been verified.
         Most testing is needed to assure that this is a stable solution.
+      2013-8-11: HSMCI0 is more finicky.  Usually there is no card
+        communcation and I get timeouts.  But if I remove and re-insert the
+        card it few times, sometimes communication is successfully and the
+        card behaves normally.  I suspected an electro-mechanical issue but
+        but now think there is more to the problem than that.
+      2013-8-11: I see another problem doing card insertion and card removal
+        testing.  When there is a lot of debug output, the system locks up.
+        I have traced to this the debug output itself.  The debug output
+        from the device driver interferes with normal serial port operation
+        and prevents NSH from receiving data.  There is no issue when the
+        debug output is suppressed and card insertial and removal works as
+        expected (at least on the HSMCI1 microSD slot).
 
   ostest:
     This configuration directory, performs a simple OS test using

@@ -2231,6 +2231,7 @@ static void mmcsd_mediachange(FAR void *arg)
 
       SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
     }
+
   mmcsd_givesem(priv);
 }
 
