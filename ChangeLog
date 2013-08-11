@@ -5350,3 +5350,5 @@
 	* drivers/usbdev/cdcacm.c:  Added FIONREAD and FIONWRITE to CDC/ACM
 	  driver based on serial.c implementation. From Lorenz Meier
 	  (2013-8-10).
+	* arch/arm/src/stm32/Kconfig and stm32_serial.c:  Added option to
+	  disable serial port reordering.  From Lorenz Meier (2013-8-10).
