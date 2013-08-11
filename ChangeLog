@@ -5339,3 +5339,7 @@
 	  functional on the SAMA5 with DMA! (2013-8-10).
 	* arch/arm/src/sam34/sam3u_periphclks.h: Correct a typo in a register
 	  name (2013-8-10).
+	* drivers/mmcsd/mmcsd_sdio.c:  Correction for a bad return value
+	  when multiple block SDIO transfers are suppressed.  By Andrew Tridgell
+	  via Lorenz Meier (2013-8-10).
+
