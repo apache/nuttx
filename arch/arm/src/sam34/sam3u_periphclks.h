@@ -51,7 +51,7 @@
 /* Helper macros */
 
 #define sam_enableperipheral(s)    putreg32((1 << (s)), SAM_PMC_PCER)
-#define sam_disableperipheral(s)   putreg32((1 << (s)), SAM_PMC_PDER)
+#define sam_disableperipheral(s)   putreg32((1 << (s)), SAM_PMC_PCDR)
 
 #define sam_supc_enableclk()       sam_enableperipheral(SAM_PID_SUPC)
 #define sam_rstc_enableclk()       sam_enableperipheral(SAM_PID_RSTC)
