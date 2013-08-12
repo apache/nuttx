@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbhost/usbhost_skeleton.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,6 +105,7 @@ struct usbhost_state_s
   char                    devchar;      /* Character identifying the /dev/skel[n] device */
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
   uint8_t                 ifno;         /* Interface number */
+  uint8_t                 funcaddr;     /* USB function address */
   int16_t                 crefs;        /* Reference count on the driver instance */
   sem_t                   exclsem;      /* Used to maintain mutual exclusive access */
   struct work_s           work;         /* For interacting with the worker thread */
@@ -368,7 +369,7 @@ static void usbhost_destroy(FAR void *arg)
 
   /* Disconnect the USB host device */
 
-  DRVR_DISCONNECT(priv->drvr);
+  DRVR_DISCONNECT(priv->drvr, priv->funcaddr);
 
   /* And free the class instance.  Hmmm.. this may execute on the worker
    * thread and the work structure is part of what is getting freed.  That
@@ -953,6 +954,15 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
       if (ret != OK)
         {
           udbg("usbhost_devinit() failed: %d\n", ret);
+        }
+      else
+        {
+          /* Save the function address (We will need it when we disconnect).
+           * NOTE that address is available in the endpoint structures as
+           * well.
+           */
+
+          priv->funcaddr = funcaddr;
         }
     }
  

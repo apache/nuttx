@@ -5380,4 +5380,9 @@
 	  breakage, but I expect some (2013-8-12).
 	* configs/olimex-stm32-p107/nsh/defconfig and appconfig:  Converted to
 	  use the kconfig-frontends tool. From Max Holtzberg (2013-8-12).
+	* includes/nuttx/usb/usbhost.h, et al:  Continued changes to the USB
+	  host interface to support multiple downstream ports.  When a class
+	  is disconnected, it needs to provide the FunctionAddress to the
+	  USB HCD disconnect method so that the HCD will know which port
+	  is being disconnected (2013-8-12).
 

@@ -180,8 +180,14 @@
 
 struct sam_rhport_s
 {
+  /* Root hub port status */
+
   volatile bool    connected;   /* Connected to device */
   volatile bool    lowspeed;    /* Low speed device attached. */
+
+  /* The bound device class driver */
+
+  struct usbhost_class_s *class;
 };
 
 /* This structure retains the state of the USB host controller */
@@ -194,10 +200,6 @@ struct sam_ohci_s
    */
 
   struct usbhost_driver_s drvr;
-
-  /* The bound device class driver */
-
-  struct usbhost_class_s *class;
 
   /* Driver status */
 
@@ -368,7 +370,7 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr,
                        FAR const uint8_t *buffer);
 static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                         FAR uint8_t *buffer, size_t buflen);
-static void sam_disconnect(FAR struct usbhost_driver_s *drvr);
+static void sam_disconnect(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr);
 
 /* Initialization **************************************************************/
 
@@ -401,7 +403,6 @@ static struct sam_ohci_s g_usbhost =
       .transfer     = sam_transfer,
       .disconnect   = sam_disconnect,
     },
-  .class            = NULL,
 };
 
 /* This is a free list of EDs and TD buffers */
@@ -1372,13 +1373,13 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
           ullvdbg("Root Hub Status Change\n");
           for (rhpndx = 0; rhpndx < SAM_USBHOST_NRHPORT; rhpndx++)
             {
+              struct sam_rhport_s *rhport = &priv->rhport[rhpndx];
               uint32_t rhportst;
 
               regaddr  = SAM_USBHOST_RHPORTST(rhpndx+1);
               rhportst = sam_getreg(regaddr);
 
-              ullvdbg("RHPORTST%d: %08x\n",
-                      rhpndx + 1, rhportst);
+              ullvdbg("RHPORTST%d: %08x\n", rhpndx + 1, rhportst);
 
               if ((rhportst & OHCI_RHPORTST_CSC) != 0)
                 {
@@ -1404,11 +1405,11 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
                         {
                           /* Connected ... Did we just become connected? */
 
-                          if (!priv->rhport[rhpndx].connected)
+                          if (!rhport->connected)
                             {
                               /* Yes.. connected. */
 
-                              priv->rhport[rhpndx].connected = true;
+                              rhport->connected = true;
 
                               ullvdbg("RHPort%d connected, rhswait: %d\n",
                                       rhpndx + 1, priv->rhswait);
@@ -1430,31 +1431,31 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
                            * when CCS == 1.
                            */
 
-                          priv->rhport[rhpndx].lowspeed =
+                          rhport->lowspeed =
                             (rhportst & OHCI_RHPORTST_LSDA) != 0;
 
                           ullvdbg("Speed: %s\n",
-                                  priv->rhport[rhpndx].lowspeed ? "LOW" : "FULL");
+                                  rhport->lowspeed ? "LOW" : "FULL");
                         }
 
                       /* Check if we are now disconnected */
 
-                      else if (priv->rhport[rhpndx].connected)
+                      else if (rhport->connected)
                         {
                           /* Yes.. disconnect the device */
 
                           ullvdbg("RHport%d disconnected\n", rhpndx+1);
-                          priv->rhport[rhpndx].connected = false;
-                          priv->rhport[rhpndx].lowspeed  = false;
+                          rhport->connected = false;
+                          rhport->lowspeed  = false;
 
                           /* Are we bound to a class instance? */
 
-                          if (priv->class)
+                          if (rhport->class)
                             {
                               /* Yes.. Disconnect the class */
 
-                              CLASS_DISCONNECTED(priv->class);
-                              priv->class = NULL;
+                              CLASS_DISCONNECTED(rhport->class);
+                              rhport->class = NULL;
                             }
 
                         /* Notify any waiters for the Root Hub Status change
@@ -1671,13 +1672,17 @@ static int sam_wait(FAR struct usbhost_driver_s *drvr, FAR const bool *connected
 static int sam_enumerate(FAR struct usbhost_driver_s *drvr, int rhpndx)
 {
   struct sam_ohci_s *priv = (struct sam_ohci_s *)drvr;
+  struct sam_rhport_s *rhport;
   uint32_t regaddr;
+
+  DEBUGASSERT(priv && rhpndx >= 0 && rhpndx < SAM_USBHOST_NRHPORT);
+  rhport = &priv->rhport[rhpndx];
 
   /* Are we connected to a device?  The caller should have called the wait()
    * method first to be assured that a device is connected.
    */
 
-  while (!priv->rhport[rhpndx].connected)
+  while (!rhport->connected)
     {
       /* No, return an error */
 
@@ -1708,7 +1713,7 @@ static int sam_enumerate(FAR struct usbhost_driver_s *drvr, int rhpndx)
    */
 
   uvdbg("Enumerate the device\n");
-  return usbhost_enumerate(drvr, rhpndx+1, &priv->class);
+  return usbhost_enumerate(drvr, rhpndx+1, &rhport->class);
 }
 
 /************************************************************************************
@@ -1740,10 +1745,11 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                             uint16_t maxpacketsize)
 {
   struct sam_ohci_s *priv = (struct sam_ohci_s *)drvr;
-  int rhpndx = (int)funcaddr - 1;
+  struct sam_rhport_s *rhport;
 
-  DEBUGASSERT(drvr && funcaddr > 0 && funcaddr <= SAM_USBHOST_NRHPORT &&
+  DEBUGASSERT(priv && funcaddr > 0 && funcaddr <= SAM_USBHOST_NRHPORT &&
               maxpacketsize < 2048);
+  rhport = &priv->rhport[funcaddr - 1];
 
   /* We must have exclusive access to EP0 and the control list */
 
@@ -1754,7 +1760,7 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
   g_edctrl.hw.ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
                      (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
 
-  if (priv->rhport[rhpndx].lowspeed)
+  if (rhport->lowspeed)
    {
      g_edctrl.hw.ctrl |= ED_CONTROL_S;
    }
@@ -2395,6 +2401,7 @@ errout:
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   funcaddr - Address of the function to be disconnected.
  *
  * Returned Values:
  *   None
@@ -2405,10 +2412,12 @@ errout:
  *
  *******************************************************************************/
 
-static void sam_disconnect(FAR struct usbhost_driver_s *drvr)
+static void sam_disconnect(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr)
 {
   struct sam_ohci_s *priv = (struct sam_ohci_s *)drvr;
-  priv->class = NULL;
+  DEBUGASSERT(priv && funcaddr > 0 && funcaddr <= SAM_USBHOST_NRHPORT);
+
+  priv->rhport[funcaddr - 1].class = NULL;
 }
 
 /*******************************************************************************
