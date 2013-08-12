@@ -169,7 +169,7 @@ static int nsh_waiter(int argc, char *argv[])
     {
       /* Wait for the device to change state */
 
-      ret = DRVR_WAIT(g_drvr, connected);
+      ret = DRVR_WAIT(g_drvr, &connected);
       DEBUGASSERT(ret == OK);
 
       connected = !connected;
@@ -181,7 +181,7 @@ static int nsh_waiter(int argc, char *argv[])
         {
           /* Yes.. enumerate the newly connected device */
 
-          (void)DRVR_ENUMERATE(g_drvr);
+          (void)DRVR_ENUMERATE(g_drvr, 0);
         }
     }
 

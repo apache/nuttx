@@ -1,7 +1,7 @@
 /************************************************************************************
  * include/nuttx/usb/usbhost.h
  *
- *   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References:
@@ -155,22 +155,26 @@
  * Name: DRVR_WAIT
  *
  * Description:
- *   Wait for a device to be connected or disconneced.
+ *   Wait for a device to be connected or disconnected to/from a root hub port.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
- *   connected - TRUE: Wait for device to be connected; FALSE: wait for device to
- *      be disconnected
+ *   drvr - The USB host driver instance obtained as a parameter from the call
+ *      to the class create() method.
+ *   connected - A pointer to an array of n boolean values corresponding to
+ *      root hubs 1 through n.  For each boolean value: TRUE: Wait for a device
+ *      to be connected on the root hub; FALSE: wait for device to be
+ *      disconnected from the root hub.
  *
  * Returned Values:
- *   Zero (OK) is returned when a device in connected. This function will not
- *   return until either (1) a device is connected or (2) some failure occurs.
- *   On a failure, a negated errno value is returned indicating the nature of
- *   the failure
+ *   And index [0..(n-1)} corresponding to the root hub port number {1..n} is
+ *   returned when a device in connected or disconnectd. This function will not
+ *   return until either (1) a device is connected or disconntect to/from any
+ *   root hub port or until (2) some failure occurs.  On a failure, a negated
+ *   errno value is returned indicating the nature of the failure
  *
  * Assumptions:
- *   This function will *not* be called from an interrupt handler.
+ *   - Called from a single thread so no mutual exclusion is required.
+ *   - Never called from an interrupt handler.
  *
  *******************************************************************************/
 
@@ -192,6 +196,7 @@
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   rphndx - Root hub port index.  0-(n-1) corresponds to root hub port 1-n.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -202,7 +207,7 @@
  *
  ************************************************************************************/
 
-#define DRVR_ENUMERATE(drvr) ((drvr)->enumerate(drvr))
+#define DRVR_ENUMERATE(drvr,rhpndx) ((drvr)->enumerate(drvr,rhpndx))
 
 /************************************************************************************
  * Name: DRVR_EP0CONFIGURE
@@ -589,19 +594,19 @@ struct usbhost_driver_s
 {
   /* Wait for a device to connect or disconnect. */
 
-  int (*wait)(FAR struct usbhost_driver_s *drvr, bool connected);
+  int (*wait)(FAR struct usbhost_driver_s *drvr, FAR const bool *connected);
 
-  /* Enumerate the connected device.  As part of this enumeration process,
-   * the driver will (1) get the device's configuration descriptor, (2)
-   * extract the class ID info from the configuration descriptor, (3) call
-   * usbhost_findclass() to find the class that supports this device, (4)
-   * call the create() method on the struct usbhost_registry_s interface
-   * to get a class instance, and finally (5) call the connect() method
-   * of the struct usbhost_class_s interface.  After that, the class is in
-   * charge of the sequence of operations.
+  /* Enumerate the device connected on a root hub port.  As part of this
+   * enumeration process, the driver will (1) get the device's configuration
+   * descriptor, (2) extract the class ID info from the configuration
+   * descriptor, (3) call usbhost_findclass() to find the class that supports
+   * this device, (4) call the create() method on the struct usbhost_registry_s
+   * interface to get a class instance, and finally (5) call the connect()
+   * method of the struct usbhost_class_s interface.  After that, the class is
+   * in charge of the sequence of operations.
    */
 
-  int (*enumerate)(FAR struct usbhost_driver_s *drvr);
+  int (*enumerate)(FAR struct usbhost_driver_s *drvr, int rhpndx);
 
   /* Configure endpoint 0.  This method is normally used internally by the
    * enumerate() method but is made available at the interface to support
@@ -689,7 +694,8 @@ struct usbhost_driver_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -718,7 +724,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN int usbhost_registerclass(struct usbhost_registry_s *class);
+int usbhost_registerclass(struct usbhost_registry_s *class);
 
 /************************************************************************************
  * Name: usbhost_findclass
@@ -740,7 +746,7 @@ EXTERN int usbhost_registerclass(struct usbhost_registry_s *class);
  *
  ************************************************************************************/
 
-EXTERN const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id);
+const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_id_s *id);
 
 /****************************************************************************
  * Name: usbhost_storageinit
@@ -759,7 +765,7 @@ EXTERN const struct usbhost_registry_s *usbhost_findclass(const struct usbhost_i
  *
  ****************************************************************************/
 
-EXTERN int usbhost_storageinit(void);
+int usbhost_storageinit(void);
 
 /****************************************************************************
  * Name: usbhost_kbdinit
@@ -778,7 +784,7 @@ EXTERN int usbhost_storageinit(void);
  *
  ****************************************************************************/
 
-EXTERN int usbhost_kbdinit(void);
+int usbhost_kbdinit(void);
 
 /****************************************************************************
  * Name: usbhost_wlaninit
@@ -797,7 +803,7 @@ EXTERN int usbhost_kbdinit(void);
  *
  ****************************************************************************/
 
-EXTERN int usbhost_wlaninit(void);
+int usbhost_wlaninit(void);
 
 /*******************************************************************************
  * Name: usbhost_enumerate
@@ -836,9 +842,8 @@ EXTERN int usbhost_wlaninit(void);
  *
  *******************************************************************************/
 
-EXTERN int usbhost_enumerate(FAR struct usbhost_driver_s *drvr,
-                             uint8_t funcaddr,
-                             FAR struct usbhost_class_s **class);
+int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
+                      FAR struct usbhost_class_s **class);
 
 #undef EXTERN
 #if defined(__cplusplus)

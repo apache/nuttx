@@ -358,8 +358,8 @@ static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx);
 
 /* USB host controller operations **********************************************/
 
-static int stm32_wait(FAR struct usbhost_driver_s *drvr, bool connected);
-static int stm32_enumerate(FAR struct usbhost_driver_s *drvr);
+static int stm32_wait(FAR struct usbhost_driver_s *drvr, FAR bool *connected);
+static int stm32_enumerate(FAR struct usbhost_driver_s *drvr, int rhpndx);
 static int stm32_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                               uint16_t maxpacketsize);
 static int stm32_epalloc(FAR struct usbhost_driver_s *drvr,
@@ -3013,8 +3013,8 @@ static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx)
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   connected - TRUE: Wait for device to be connected; FALSE: wait for device
- *      to be disconnected
+ *   connected - A pointer to a boolean value.  TRUE: Wait for device to be
+ *      connected; FALSE: wait for device to be disconnected
  *
  * Returned Values:
  *   Zero (OK) is returned when a device in connected. This function will not
@@ -3028,7 +3028,7 @@ static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx)
  *
  *******************************************************************************/
 
-static int stm32_wait(FAR struct usbhost_driver_s *drvr, bool connected)
+static int stm32_wait(FAR struct usbhost_driver_s *drvr, FAR bool *connected)
 {
   FAR struct stm32_usbhost_s *priv = (FAR struct stm32_usbhost_s *)drvr;
   irqstate_t flags;
@@ -3036,7 +3036,7 @@ static int stm32_wait(FAR struct usbhost_driver_s *drvr, bool connected)
   /* Are we already connected? */
 
   flags = irqsave();
-  while (priv->connected == connected)
+  while (priv->connected == *connected)
     {
       /* No... wait for the connection/disconnection */
 
@@ -3066,6 +3066,7 @@ static int stm32_wait(FAR struct usbhost_driver_s *drvr, bool connected)
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   rphndx - Root hub port index.  0-(n-1) corresponds to root hub port 1-n.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -3078,12 +3079,14 @@ static int stm32_wait(FAR struct usbhost_driver_s *drvr, bool connected)
  *
  *******************************************************************************/
 
-static int stm32_enumerate(FAR struct usbhost_driver_s *drvr)
+static int stm32_enumerate(FAR struct usbhost_driver_s *drvr, int rhpndx)
 {
   struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
   uint32_t regval;
   int chidx;
   int ret;
+
+  DEBUGASSERT(priv && rhpndx == 0);
 
   /* Are we connected to a device?  The caller should have called the wait()
    * method first to be assured that a device is connected.

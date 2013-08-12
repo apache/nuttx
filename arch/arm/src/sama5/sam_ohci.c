@@ -176,6 +176,13 @@
 /*******************************************************************************
  * Private Types
  *******************************************************************************/
+/* This structure retins the state of one root hub port */
+
+struct sam_rhport_s
+{
+  volatile bool    connected;   /* Connected to device */
+  volatile bool    lowspeed;    /* Low speed device attached. */
+};
 
 /* This structure retains the state of the USB host controller */
 
@@ -194,15 +201,18 @@ struct sam_ohci_s
 
   /* Driver status */
 
-  volatile bool    connected;   /* Connected to device */
-  volatile bool    lowspeed;    /* Low speed device attached. */
   volatile bool    rhswait;     /* TRUE: Thread is waiting for Root Hub Status change */
+
 #ifndef CONFIG_USBHOST_INT_DISABLE
   uint8_t          ininterval;  /* Minimum periodic IN EP polling interval: 2, 4, 6, 16, or 32 */
   uint8_t          outinterval; /* Minimum periodic IN EP polling interval: 2, 4, 6, 16, or 32 */
 #endif
   sem_t            exclsem;     /* Support mutually exclusive access */
   sem_t            rhssem;      /* Semaphore to wait Writeback Done Head event */
+
+  /* Root hub ports */
+
+  struct sam_rhport_s rhport[SAM_USBHOST_NRHPORT];
 
   /* Debug stuff */
 
@@ -337,8 +347,8 @@ static int sam_ohci_interrupt(int irq, FAR void *context);
 
 /* USB host controller operations **********************************************/
 
-static int sam_wait(FAR struct usbhost_driver_s *drvr, bool connected);
-static int sam_enumerate(FAR struct usbhost_driver_s *drvr);
+static int sam_wait(FAR struct usbhost_driver_s *drvr, FAR const bool *connected);
+static int sam_enumerate(FAR struct usbhost_driver_s *drvr, int rhpndx);
 static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                             uint16_t maxpacketsize);
 static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
@@ -1231,7 +1241,9 @@ static int sam_wdhwait(struct sam_ohci_s *priv, struct sam_ed_s *ed)
 
   /* Is the device still connected? */
 
+#if 0 /* REVISIT */
   if (priv->connected)
+#endif
     {
       /* Yes.. then set wdhwait to indicate that we expect to be informed when
        * either (1) the device is disconnected, or (2) the transfer completed.
@@ -1339,6 +1351,8 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
   uint32_t intst;
   uint32_t pending;
   uint32_t regval;
+  uint32_t regaddr;
+  int rhpndx;
 
   /* Read Interrupt Status and mask out interrupts that are not enabled. */
 
@@ -1353,39 +1367,99 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
 
       if ((pending & OHCI_INT_RHSC) != 0)
         {
-          uint32_t rhportst1 = sam_getreg(SAM_USBHOST_RHPORTST1);
-          ullvdbg("Root Hub Status Change, RHPORTST1: %08x\n", rhportst1);
+          /* Hand root hub status change on each root port */
 
-          if ((rhportst1 & OHCI_RHPORTST_CSC) != 0)
+          ullvdbg("Root Hub Status Change\n");
+          for (rhpndx = 0; rhpndx < SAM_USBHOST_NRHPORT; rhpndx++)
             {
-              uint32_t rhstatus = sam_getreg(SAM_USBHOST_RHSTATUS);
-              ullvdbg("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
+              uint32_t rhportst;
 
-              /* If DRWE is set, Connect Status Change indicates a remote wake-up event */
+              regaddr  = SAM_USBHOST_RHPORTST(rhpndx+1);
+              rhportst = sam_getreg(regaddr);
 
-              if (rhstatus & OHCI_RHSTATUS_DRWE)
+              ullvdbg("RHPORTST%d: %08x\n",
+                      rhpndx + 1, rhportst);
+
+              if ((rhportst & OHCI_RHPORTST_CSC) != 0)
                 {
-                  ullvdbg("DRWE: Remote wake-up\n");
-                }
+                  uint32_t rhstatus = sam_getreg(SAM_USBHOST_RHSTATUS);
+                  ullvdbg("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
 
-              /* Otherwise... Not a remote wake-up event */
+                  /* If DRWE is set, Connect Status Change indicates a remote
+                   * wake-up event
+                   */
 
-              else
-                {
-                  /* Check current connect status */
-
-                  if ((rhportst1 & OHCI_RHPORTST_CCS) != 0)
+                  if (rhstatus & OHCI_RHSTATUS_DRWE)
                     {
-                      /* Connected ... Did we just become connected? */
+                      ullvdbg("DRWE: Remote wake-up\n");
+                    }
 
-                      if (!priv->connected)
+                  /* Otherwise... Not a remote wake-up event */
+
+                  else
+                    {
+                      /* Check current connect status */
+
+                      if ((rhportst & OHCI_RHPORTST_CCS) != 0)
                         {
-                          /* Yes.. connected. */
+                          /* Connected ... Did we just become connected? */
 
-                          ullvdbg("Connected\n");
-                          priv->connected = true;
+                          if (!priv->rhport[rhpndx].connected)
+                            {
+                              /* Yes.. connected. */
 
-                          /* Notify any waiters */
+                              priv->rhport[rhpndx].connected = true;
+
+                              ullvdbg("RHPort%d connected, rhswait: %d\n",
+                                      rhpndx + 1, priv->rhswait);
+
+                              /* Notify any waiters */
+
+                              if (priv->rhswait)
+                                {
+                                  sam_givesem(&priv->rhssem);
+                                  priv->rhswait = false;
+                                }
+                            }
+                          else
+                            {
+                              ulldbg("Spurious status change (connected)\n");
+                            }
+
+                          /* The LSDA (Low speed device attached) bit is valid
+                           * when CCS == 1.
+                           */
+
+                          priv->rhport[rhpndx].lowspeed =
+                            (rhportst & OHCI_RHPORTST_LSDA) != 0;
+
+                          ullvdbg("Speed: %s\n",
+                                  priv->rhport[rhpndx].lowspeed ? "LOW" : "FULL");
+                        }
+
+                      /* Check if we are now disconnected */
+
+                      else if (priv->rhport[rhpndx].connected)
+                        {
+                          /* Yes.. disconnect the device */
+
+                          ullvdbg("RHport%d disconnected\n", rhpndx+1);
+                          priv->rhport[rhpndx].connected = false;
+                          priv->rhport[rhpndx].lowspeed  = false;
+
+                          /* Are we bound to a class instance? */
+
+                          if (priv->class)
+                            {
+                              /* Yes.. Disconnect the class */
+
+                              CLASS_DISCONNECTED(priv->class);
+                              priv->class = NULL;
+                            }
+
+                        /* Notify any waiters for the Root Hub Status change
+                         * event.
+                         */
 
                           if (priv->rhswait)
                             {
@@ -1395,63 +1469,23 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
                         }
                       else
                         {
-                          ulldbg("Spurious status change (connected)\n");
-                        }
-
-                      /* The LSDA (Low speed device attached) bit is valid
-                       * when CCS == 1.
-                       */
-
-                      priv->lowspeed = (rhportst1 & OHCI_RHPORTST_LSDA) != 0;
-                      ullvdbg("Speed:%s\n", priv->lowspeed ? "LOW" : "FULL");
-                    }
-
-                  /* Check if we are now disconnected */
-
-                  else if (priv->connected)
-                    {
-                      /* Yes.. disconnect the device */
-
-                      ullvdbg("Disconnected\n");
-                      priv->connected = false;
-                      priv->lowspeed  = false;
-
-                      /* Are we bound to a class instance? */
-
-                      if (priv->class)
-                        {
-                          /* Yes.. Disconnect the class */
-
-                          CLASS_DISCONNECTED(priv->class);
-                          priv->class = NULL;
-                        }
-
-                      /* Notify any waiters for the Root Hub Status change event */
-
-                      if (priv->rhswait)
-                        {
-                          sam_givesem(&priv->rhssem);
-                          priv->rhswait = false;
+                           ulldbg("Spurious status change (disconnected)\n");
                         }
                     }
-                  else
-                    {
-                       ulldbg("Spurious status change (disconnected)\n");
-                    }
+
+                  /* Clear the status change interrupt */
+
+                  sam_putreg(OHCI_RHPORTST_CSC, regaddr);
                 }
 
-              /* Clear the status change interrupt */
+              /* Check for port reset status change */
 
-              sam_putreg(OHCI_RHPORTST_CSC, SAM_USBHOST_RHPORTST1);
-            }
+              if ((rhportst & OHCI_RHPORTST_PRSC) != 0)
+                {
+                  /* Release the RH port from reset */
 
-          /* Check for port reset status change */
-
-          if ((rhportst1 & OHCI_RHPORTST_PRSC) != 0)
-            {
-              /* Release the RH port from reset */
-
-              sam_putreg(OHCI_RHPORTST_PRSC, SAM_USBHOST_RHPORTST1);
+                  sam_putreg(OHCI_RHPORTST_PRSC, regaddr);
+                }
             }
         }
 
@@ -1495,9 +1529,8 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
                 {
                   /* The transfer failed for some reason... dump some diagnostic info. */
 
-                  ulldbg("ERROR: ED xfrtype:%d TD CTRL:%08x/CC:%d RHPORTST1:%08x\n",
-                         ed->xfrtype, td->hw.ctrl, ed->tdstatus,
-                         sam_getreg(SAM_USBHOST_RHPORTST1));
+                  ulldbg("ERROR: ED xfrtype: %d TD CTRL: %08x/CC: %d\n",
+                         ed->xfrtype, td->hw.ctrl, ed->tdstatus);
                 }
 #endif
 
@@ -1519,7 +1552,7 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
 #ifdef CONFIG_DEBUG_USB
       if ((pending & SAM_DEBUG_INTS) != 0)
         {
-          ulldbg("ERROR: Unhandled interrupts INTST:%08x\n", intst);
+          ulldbg("ERROR: Unhandled interrupts INTST: %08x\n", intst);
         }
 #endif
 
@@ -1539,17 +1572,21 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
  * Name: sam_wait
  *
  * Description:
- *   Wait for a device to be connected or disconneced.
+ *   Wait for a device to be connected or disconnected to/from a root hub port.
  *
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call
  *      to the class create() method.
- *   connected - TRUE: Wait for device to be connected; FALSE: wait for device
- *      to be disconnected
+ *   connected - A pointer to an array of 3 boolean values corresponding to
+ *      root hubs 1, 2, and 3.  For each boolean value: TRUE: Wait for a device
+ *      to be connected on the root hub; FALSE: wait for device to be
+ *      disconnected from the root hub.
  *
  * Returned Values:
- *   Zero (OK) is returned when a device in connected. This function will not
- *   return until either (1) a device is connected or (2) some failure occurs.
+ *   And index [0, 1, or 2} corresponding to the root hub port number {1, 2,
+ *   or 3} is returned when a device is connected or disconnected. This
+ *   function will not return until either (1) a device is connected or
+ *   disconnected to/from any root hub port or until (2) some failure occurs.
  *   On a failure, a negated errno value is returned indicating the nature of
  *   the failure
  *
@@ -1559,25 +1596,47 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
  *
  *******************************************************************************/
 
-static int sam_wait(FAR struct usbhost_driver_s *drvr, bool connected)
+static int sam_wait(FAR struct usbhost_driver_s *drvr, FAR const bool *connected)
 {
   struct sam_ohci_s *priv = (struct sam_ohci_s *)drvr;
   irqstate_t flags;
+  int rhpndx;
 
-  /* Are we already connected? */
+  /* Loop until a change in the connection state changes on one of the root hub
+   * ports or until an error occurs.
+   */
 
   flags = irqsave();
-  while (priv->connected == connected)
+  for (;;)
     {
-      /* No... wait for the connection/disconnection */
+      /* Check for a change in the connection state on any root hub port */
+
+      for (rhpndx = 0; rhpndx < SAM_USBHOST_NRHPORT; rhpndx++)
+        {
+          /* Has the connection state changed on the RH port? */
+
+          while (priv->rhport[rhpndx].connected != connected[rhpndx])
+            {
+              /* Yes.. break out and return the RH port number */
+
+              break;
+            }
+        }
+
+      /* No changes on any port. Wait for a connection/disconnection event
+       * and check again
+       */
 
       priv->rhswait = true;
       sam_takesem(&priv->rhssem);
     }
+
   irqrestore(flags);
 
-  udbg("Connected:%s\n", priv->connected ? "YES" : "NO");
-  return OK;
+  udbg("RHPort%d connected: %s\n",
+       rhpndx + 1, priv->rhport[rhpndx].connected ? "YES" : "NO");
+
+  return rhpndx;
 }
 
 /*******************************************************************************
@@ -1596,6 +1655,7 @@ static int sam_wait(FAR struct usbhost_driver_s *drvr, bool connected)
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   rphndx - Root hub port index.  0-(n-1) corresponds to root hub port 1-n.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -1608,15 +1668,16 @@ static int sam_wait(FAR struct usbhost_driver_s *drvr, bool connected)
  *
  *******************************************************************************/
 
-static int sam_enumerate(FAR struct usbhost_driver_s *drvr)
+static int sam_enumerate(FAR struct usbhost_driver_s *drvr, int rhpndx)
 {
   struct sam_ohci_s *priv = (struct sam_ohci_s *)drvr;
+  uint32_t regaddr;
 
   /* Are we connected to a device?  The caller should have called the wait()
    * method first to be assured that a device is connected.
    */
 
-  while (!priv->connected)
+  while (!priv->rhport[rhpndx].connected)
     {
       /* No, return an error */
 
@@ -1628,25 +1689,26 @@ static int sam_enumerate(FAR struct usbhost_driver_s *drvr)
 
   up_mdelay(100);
 
-  /* Put RH port 1 in reset (the LPC176x supports only a single downstream port) */
+  /* Put the root hub port in reset (the SAMA5 supports three downstream ports) */
 
-  sam_putreg(OHCI_RHPORTST_PRS, SAM_USBHOST_RHPORTST1);
+  regaddr = SAM_USBHOST_RHPORTST(rhpndx+1);
+  sam_putreg(OHCI_RHPORTST_PRS, regaddr);
 
   /* Wait for the port reset to complete */
 
-  while ((sam_getreg(SAM_USBHOST_RHPORTST1) & OHCI_RHPORTST_PRS) != 0);
+  while ((sam_getreg(regaddr) & OHCI_RHPORTST_PRS) != 0);
 
   /* Release RH port 1 from reset and wait a bit */
 
-  sam_putreg(OHCI_RHPORTST_PRSC, SAM_USBHOST_RHPORTST1);
+  sam_putreg(OHCI_RHPORTST_PRSC, regaddr);
   up_mdelay(200);
 
   /* Let the common usbhost_enumerate do all of the real work.  Note that the
-   * FunctionAddress (USB address) is hardcoded to one.
+   * FunctionAddress (USB address) is set to the root hub port number for now.
    */
 
   uvdbg("Enumerate the device\n");
-  return usbhost_enumerate(drvr, 1, &priv->class);
+  return usbhost_enumerate(drvr, rhpndx+1, &priv->class);
 }
 
 /************************************************************************************
@@ -1678,8 +1740,10 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                             uint16_t maxpacketsize)
 {
   struct sam_ohci_s *priv = (struct sam_ohci_s *)drvr;
+  int rhpndx = (int)funcaddr - 1;
 
-  DEBUGASSERT(drvr && funcaddr < 128 && maxpacketsize < 2048);
+  DEBUGASSERT(drvr && funcaddr > 0 && funcaddr <= SAM_USBHOST_NRHPORT &&
+              maxpacketsize < 2048);
 
   /* We must have exclusive access to EP0 and the control list */
 
@@ -1688,9 +1752,9 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
   /* Set the EP0 ED control word */
 
   g_edctrl.hw.ctrl = (uint32_t)funcaddr << ED_CONTROL_FA_SHIFT |
-                    (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
+                     (uint32_t)maxpacketsize << ED_CONTROL_MPS_SHIFT;
 
-  if (priv->lowspeed)
+  if (priv->rhport[rhpndx].lowspeed)
    {
      g_edctrl.hw.ctrl |= ED_CONTROL_S;
    }
@@ -1700,7 +1764,7 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
   g_edctrl.xfrtype = USB_EP_ATTR_XFER_CONTROL;
   sam_givesem(&priv->exclsem);
 
-  uvdbg("EP0 CTRL:%08x\n", g_edctrl.hw.ctrl);
+  uvdbg("EP0 CTRL: %08x\n", g_edctrl.hw.ctrl);
   return OK;
 }
 
@@ -1731,13 +1795,16 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
 {
   struct sam_ohci_s *priv = (struct sam_ohci_s *)drvr;
   struct sam_ed_s   *ed;
+  int                rhpndx = (int)epdesc->funcaddr - 1;
   int                ret  = -ENOMEM;
 
   /* Sanity check.  NOTE that this method should only be called if a device is
    * connected (because we need a valid low speed indication).
    */
 
-  DEBUGASSERT(priv && epdesc && ep && priv->connected);
+  DEBUGASSERT(priv && epdesc && ep &&
+              rhpndx >= 0 && rhpndx < SAM_USBHOST_NRHPORT &&
+              priv->rhport[rhpndx].connected);
 
   /* We must have exclusive access to the ED pool, the bulk list, the periodic list
    * and the interrupt table.
@@ -1776,7 +1843,7 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
 
       /* Check for a low-speed device */
 
-      if (priv->lowspeed)
+      if (priv->rhport[rhpndx].lowspeed)
         {
           ed->hw.ctrl |= ED_CONTROL_S;
         }
@@ -1793,7 +1860,7 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
           ed->hw.ctrl |= ED_CONTROL_F;
         }
 #endif
-      uvdbg("EP%d CTRL:%08x\n", epdesc->addr, ed->hw.ctrl);
+      uvdbg("EP%d CTRL: %08x\n", epdesc->addr, ed->hw.ctrl);
 
       /* Initialize the semaphore that is used to wait for the endpoint
        * WDH event.
@@ -2124,7 +2191,7 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr,
   int  ret;
 
   DEBUGASSERT(drvr && req);
-  uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
+  uvdbg("type: %02x req: %02x value: %02x%02x index: %02x%02x len: %02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
 
@@ -2160,7 +2227,7 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr,
   int ret;
 
   DEBUGASSERT(drvr && req);
-  uvdbg("type:%02x req:%02x value:%02x%02x index:%02x%02x len:%02x%02x\n",
+  uvdbg("type: %02x req: %02x value: %02x%02x index: %02x%02x len: %02x%02x\n",
         req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], req->len[1], req->len[0]);
 
@@ -2241,7 +2308,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   DEBUGASSERT(priv && ed && buffer && buflen > 0);
 
   in = (ed->hw.ctrl  & ED_CONTROL_D_MASK) == ED_CONTROL_D_IN;
-  uvdbg("EP%d %s toggle:%d maxpacket:%d buflen:%d\n",
+  uvdbg("EP%d %s toggle: %d maxpacket: %d buflen: %d\n",
         (ed->hw.ctrl  & ED_CONTROL_EN_MASK) >> ED_CONTROL_EN_SHIFT,
         in ? "IN" : "OUT",
         (ed->hw.headp & ED_HEADP_C) != 0 ? 1 : 0,
@@ -2583,8 +2650,14 @@ FAR struct usbhost_driver_s *sam_ohci_initialize(int controller)
    * connected.  We need to set the initial connected state accordingly.
    */
 
-  regval          = sam_getreg(SAM_USBHOST_RHPORTST1);
-  priv->connected = ((regval & OHCI_RHPORTST_CCS) != 0);
+  for (i = 0; i < SAM_USBHOST_NRHPORT; i++)
+    {
+      regval                    = sam_getreg(SAM_USBHOST_RHPORTST(i));
+      priv->rhport[i].connected = ((regval & OHCI_RHPORTST_CCS) != 0);
+
+      uvdbg("RHPort%d Device connected: %s\n",
+            i+1, priv->rhport[i].connected ? "YES" : "NO");
+    }
 
   /* Drive Vbus +5V (the smoke test).  Should be done elsewhere in OTG
    * mode.
@@ -2595,8 +2668,7 @@ FAR struct usbhost_driver_s *sam_ohci_initialize(int controller)
   /* Enable interrupts at the interrupt controller */
 
   up_enable_irq(SAM_IRQ_UHPHS); /* enable USB interrupt */
-  udbg("USB host Initialized, Device connected:%s\n",
-       priv->connected ? "YES" : "NO");
+  uvdbg("USB OHCI Initialized\n");
 
   return &priv->drvr;
 }
