@@ -294,8 +294,8 @@ static int lpc17_usbinterrupt(int irq, FAR void *context);
 
 /* USB host controller operations **********************************************/
 
-static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected);
-static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr);
+static int lpc17_wait(FAR struct usbhost_driver_s *drvr, FAR bool *connected);
+static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr, int rhpndx);
 static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                               uint16_t maxpacketsize);
 static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
@@ -1518,8 +1518,8 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   connected - TRUE: Wait for device to be connected; FALSE: wait for device
- *      to be disconnected
+ *   connected - A pointer to a boolean value:  TRUE: Wait for device to be
+ *      connected; FALSE: wait for device to be disconnected
  *
  * Returned Values:
  *   Zero (OK) is returned when a device in connected. This function will not
@@ -1533,7 +1533,7 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
  *
  *******************************************************************************/
 
-static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected)
+static int lpc17_wait(FAR struct usbhost_driver_s *drvr, FAR bool *connected)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   irqstate_t flags;
@@ -1541,13 +1541,14 @@ static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected)
   /* Are we already connected? */
 
   flags = irqsave();
-  while (priv->connected == connected)
+  while (priv->connected == *connected)
     {
       /* No... wait for the connection/disconnection */
 
       priv->rhswait = true;
       lpc17_takesem(&priv->rhssem);
     }
+
   irqrestore(flags);
 
   udbg("Connected:%s\n", priv->connected ? "YES" : "NO");
@@ -1570,6 +1571,7 @@ static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected)
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
+ *   rphndx - Root hub port index.  0-(n-1) corresponds to root hub port 1-n.
  *
  * Returned Values:
  *   On success, zero (OK) is returned. On a failure, a negated errno value is
@@ -1582,9 +1584,10 @@ static int lpc17_wait(FAR struct usbhost_driver_s *drvr, bool connected)
  *
  *******************************************************************************/
 
-static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr)
+static int lpc17_enumerate(FAR struct usbhost_driver_s *drvr, int rphndx)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+  DEBUGASSERT(priv && rhpndx == 0);
 
   /* Are we connected to a device?  The caller should have called the wait()
    * method first to be assured that a device is connected.
