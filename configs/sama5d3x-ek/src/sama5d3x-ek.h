@@ -293,7 +293,7 @@
                       PIO_PORT_PIOD | PIO_PIN27)
 
 /*  Both Ports B and C
- *  
+ *
  *   PIO  Signal Name Function
  *   ---- ----------- -------------------------------------------------------
  *   PD28 OVCUR_USB   Combined overrcurrent indication from port A and B

@@ -54,6 +54,7 @@
 #include "up_arch.h"
 #include "sam_pio.h"
 #include "sam_usbhost.h"
+#include "chip/sam_ohci.h"
 #include "sama5d3x-ek.h"
 
 #if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
@@ -97,25 +98,29 @@ static struct usbhost_driver_s *g_ehci;
 #if HAVE_USBHOST
 static int usbhost_waiter(struct usbhost_driver_s *dev)
 {
-  bool connected = false;
+  bool connected[SAM_USBHOST_NRHPORT] = {false, false, false};
+  int rhpndx;
 
   uvdbg("Running\n");
   for (;;)
     {
       /* Wait for the device to change state */
 
-      DEBUGVERIFY(DRVR_WAIT(dev, connected) == OK);
+      rhpndx = DRVR_WAIT(dev, connected);
+      DEBUGASSERT(rhpndx >= 0 && rhpndx < SAM_USBHOST_NRHPORT);
 
-      connected = !connected;
-      uvdbg("%s\n", connected ? "connected" : "disconnected");
+      connected[rhpndx] = !connected[rhpndx];
+
+      uvdbg("RHport%d %s\n",
+            rhpndx + 1, connected[rhpndx] ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
-      if (connected)
+      if (connected[rhpndx])
         {
           /* Yes.. enumerate the newly connected device */
 
-          (void)DRVR_ENUMERATE(dev);
+          (void)DRVR_ENUMERATE(dev, rhpndx);
         }
     }
 
