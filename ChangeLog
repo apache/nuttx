@@ -5378,3 +5378,6 @@
 	  more changes are coming for this issues.  Changes are being blindly
 	  incorporated into other architrectures.  I am being careful to avoid
 	  breakage, but I expect some (2013-8-12).
+	* configs/olimex-stm32-p107/nsh/defconfig and appconfig:  Converted to
+	  use the kconfig-frontends tool. From Max Holtzberg (2013-8-12).
+
