@@ -75,6 +75,7 @@ Contents
   - Serial Consoles
   - Serial FLASH
   - HSMCI Card Slots
+  - USB Ports
   - SAMA5D3x-EK Configuration Options
   - Configurations
 
@@ -563,6 +564,59 @@ HSMCI Card Slots
     PB23  MCI1_DA3
     PB24  MCI1_CK
     PB19  MCI1_CDA
+
+USB Ports
+=========
+
+  The SAMA5D3 series-MB features three USB communication ports:
+
+    * Port A Host High Speed (EHCI) and Full Speed (OHCI) multiplexed with
+      USB Device High Speed Micro AB connector, J20
+
+    * Port B Host High Speed (EHCI) and Full Speed (OHCI) standard type A
+      connector, J19 upper port
+
+    * Port C Host Full Speed (OHCI) only standard type A connector, J19
+      lower port
+
+  All three USB host ports are equipped with 500 mA high-side power switch
+  for self-powered and buspowered applications. The USB device port feature
+  VBUS inserts detection function.
+
+  Port A
+  ------
+
+    PIO  Signal Name Function
+    ---- ----------- -------------------------------------------------------
+    PD29  VBUS_SENSE VBus detection
+    PD25  EN5V_USBA  VBus power enable (via MN15 AIC1526 Dual USB High-Side
+                     Power Switch.  The other channel of the switch is for
+                     the LCD)
+
+  Port B
+  ------
+
+    PIO  Signal Name Function
+    ---- ----------- -------------------------------------------------------
+    PD26 EN5V_USBB   VBus power enable (via MN14 AIC1526 Dual USB High-Side
+                     Power Switch).  To the A1 pin of J19 Dual USB A
+                     connector
+
+  Port C
+  ------
+
+    PIO  Signal Name Function
+    ---- ----------- -------------------------------------------------------
+    PD27 EN5V_USBC   VBus power enable (via MN14 AIC1526 Dual USB High-Side
+                     Power Switch).  To the B1 pin of J19 Dual USB A
+                     connector
+
+  Both Ports B and C
+  ------------------
+
+    PIO  Signal Name Function
+    ---- ----------- -------------------------------------------------------
+    PD28 OVCUR_USB   Combined overrcurrent indication from port A and B
 
 SAMA5D3x-EK Configuration Options
 =================================
@@ -1130,6 +1184,9 @@ Configurations
 
         Library Routines
           CONFIG_SCHED_WORKQUEUE               : Worker thread support is required
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.

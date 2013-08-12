@@ -63,7 +63,7 @@
 
 #include "chip.h"
 #include "sam_periphclks.h"
-#include "sam_ohci.h"
+#include "sam_usbhost.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_sfr.h"
 #include "chip/sam_ohci.h"
@@ -333,7 +333,7 @@ static int sam_ctrltd(struct sam_ohci_s *priv, uint32_t dirpid,
 
 /* Interrupt handling **********************************************************/
 
-static int sam_usbinterrupt(int irq, FAR void *context);
+static int sam_ohci_interrupt(int irq, FAR void *context);
 
 /* USB host controller operations **********************************************/
 
@@ -1326,14 +1326,14 @@ static int sam_ctrltd(struct sam_ohci_s *priv, uint32_t dirpid, uint8_t *buffer,
 }
 
 /*******************************************************************************
- * Name: sam_usbinterrupt
+ * Name: sam_ohci_interrupt
  *
  * Description:
  *   USB interrupt handler
  *
  *******************************************************************************/
 
-static int sam_usbinterrupt(int irq, FAR void *context)
+static int sam_ohci_interrupt(int irq, FAR void *context)
 {
   struct sam_ohci_s *priv = &g_usbhost;
   uint32_t intst;
@@ -2409,7 +2409,7 @@ static inline void sam_ep0init(struct sam_ohci_s *priv)
  *   Initialize USB OHCI host controller hardware.
  *
  * Input Parameters:
- *   controller -- If the device supports more than USB host controller, then
+ *   controller -- If the device supports more than one OHCI interface, then
  *     this identifies which controller is being intialized.  Normally, this
  *     is just zero.
  *
@@ -2572,7 +2572,7 @@ FAR struct usbhost_driver_s *sam_ohci_initialize(int controller)
 
   /* Attach USB host controller interrupt handler */
 
-  if (irq_attach(SAM_IRQ_UHPHS, sam_usbinterrupt) != 0)
+  if (irq_attach(SAM_IRQ_UHPHS, sam_ohci_interrupt) != 0)
     {
       udbg("Failed to attach IRQ\n");
       return NULL;
@@ -2585,6 +2585,12 @@ FAR struct usbhost_driver_s *sam_ohci_initialize(int controller)
 
   regval          = sam_getreg(SAM_USBHOST_RHPORTST1);
   priv->connected = ((regval & OHCI_RHPORTST_CCS) != 0);
+
+  /* Drive Vbus +5V (the smoke test).  Should be done elsewhere in OTG
+   * mode.
+   */
+
+  sam_usbhost_vbusdrive(SAM_OHCI_IFACE, true);
 
   /* Enable interrupts at the interrupt controller */
 

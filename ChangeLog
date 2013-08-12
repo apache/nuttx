@@ -5366,3 +5366,7 @@
 	  eliminate some warnings about uninitialized variables (2013-8-11).
 	* configs/sama5d3x-ek/src/sam_usb.c and related files:  Add support for
 	  initialization of the USB host and mass storage class device (2013-8-11).
+	* arch/arm/src/sama5/sam_ohci.c and sam_usbhost.h (was sam_ohci.h), and
+	  configs/sama5d3x-ek/src/sam_usb.c, and sama5d3x-ek.h:  Add controls
+	  to enable VBUS power in OHCI host most (2013-8-12).
+

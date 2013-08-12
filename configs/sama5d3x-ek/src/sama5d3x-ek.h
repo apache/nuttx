@@ -57,6 +57,7 @@
 
 #define HAVE_HSMCI_MTD  1
 #define HAVE_AT25_MTD   1
+#define HAVE_USBHOST    1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -139,6 +140,10 @@
 #if defined(CONFIG_SAMA5_OHCI) && defined(CONFIG_SAMA5_EHCI)
 #  warning Both CONFIG_SAMA5_OHCI and CONFIG_SAMA5_EHCI are defined
 #  undef CONFIG_SAMA5_EHCI
+#endif
+
+#if !defined(CONFIG_SAMA5_OHCI) && !defined(CONFIG_SAMA5_EHCI)
+#  undef HAVE_USBHOST
 #endif
 
 /* LEDs *****************************************************************************/
@@ -224,6 +229,81 @@
 #define PIO_MCI1_CD  (PIO_INPUT | PIO_CFG_DEFAULT | PIO_CFG_DEGLITCH | \
                       PIO_INT_BOTHEDGES | PIO_PORT_PIOD | PIO_PIN18)
 #define IRQ_MCI1_CD   SAM_IRQ_PD18
+
+/* USB Ports ************************************************************************/
+/* The SAMA5D3 series-MB features three USB communication ports:
+ *
+ *   1. Port A Host High Speed (EHCI) and Full Speed (OHCI) multiplexed with
+ *      USB Device High Speed Micro AB connector, J20
+ *
+ *   2. Port B Host High Speed (EHCI) and Full Speed (OHCI) standard type A
+ *      connector, J19 upper port
+ *
+ *   3. Port C Host Full Speed (OHCI) only standard type A connector, J19
+ *      lower port
+ *
+ * All three USB host ports are equipped with 500 mA high-side power switch
+ * for self-powered and buspowered applications. The USB device port feature
+ * VBUS inserts detection function.
+ *
+ * Port A
+ *
+ *   PIO  Signal Name Function
+ *   ---- ----------- -------------------------------------------------------
+ *   PD29  VBUS_SENSE VBus detection
+ *   PD25  EN5V_USBA  VBus power enable (via MN15 AIC1526 Dual USB High-Side
+ *                    Power Switch.  The other channel of the switch is for
+ *                    the LCD)
+ */
+
+#define PIO_USBA_VBUS_SENSE \
+                     (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOD | PIO_PIN29)
+#define IRQ_USBA_VBUS_SENSE \
+                     SAM_IRQ_PD29
+
+#define PIO_USBA_VBUS_ENABLE \
+                     (PIO_OUTPUT | PIO_CFG_DEFAULT | PIO_OUTPUT_CLEAR | \
+                      PIO_PORT_PIOD | PIO_PIN25)
+
+/* Port B
+ *
+ *   PIO  Signal Name Function
+ *   ---- ----------- -------------------------------------------------------
+ *   PD26 EN5V_USBB   VBus power enable (via MN14 AIC1526 Dual USB High-Side
+ *                    Power Switch).  To the A1 pin of J19 Dual USB A
+ *                    connector
+ */
+
+#define PIO_USBB_VBUS_ENABLE \
+                     (PIO_OUTPUT | PIO_CFG_DEFAULT | PIO_OUTPUT_CLEAR | \
+                      PIO_PORT_PIOD | PIO_PIN26)
+
+/* Port C
+ *
+ *   PIO  Signal Name Function
+ *   ---- ----------- -------------------------------------------------------
+ *   PD27 EN5V_USBC   VBus power enable (via MN14 AIC1526 Dual USB High-Side
+ *                    Power Switch).  To the B1 pin of J19 Dual USB A
+ *                    connector
+ */
+
+#define PIO_USBC_VBUS_ENABLE \
+                     (PIO_OUTPUT | PIO_CFG_DEFAULT | PIO_OUTPUT_CLEAR | \
+                      PIO_PORT_PIOD | PIO_PIN27)
+
+/*  Both Ports B and C
+ *  
+ *   PIO  Signal Name Function
+ *   ---- ----------- -------------------------------------------------------
+ *   PD28 OVCUR_USB   Combined overrcurrent indication from port A and B
+ */
+
+#define PIO_USBBC_VBUS_OVERCURRENT \
+                     (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOD | PIO_PIN28)
+#define IRQ_USBBC_VBUS_OVERCURRENT \
+                     SAM_IRQ_PD28
 
 /* SPI Chip Selects *****************************************************************/
 /* Both the Ronetix and Embest versions of the SAMAD3x CPU modules include an
@@ -379,7 +459,7 @@ void weak_function sam_usbinitialize(void);
  *
  ****************************************************************************************************/
 
-#if defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI)
+#ifdef HAVE_USBHOST
 int sam_usbhost_initialize(void);
 #endif
 

@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/sama5d3x-ek/src/up_usbdev.c
+ * configs/sama5d3x-ek/src/up_usb.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +52,8 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "up_arch.h"
-#include "sam_ohci.h"
+#include "sam_pio.h"
+#include "sam_usbhost.h"
 #include "sama5d3x-ek.h"
 
 #if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
@@ -72,9 +73,13 @@
 /************************************************************************************
  * Private Data
  ************************************************************************************/
+/* Retained device driver handles */
 
-#if defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI)
-static struct usbhost_driver_s *g_drvr;
+#ifdef CONFIG_SAMA5_OHCI
+static struct usbhost_driver_s *g_ohci;
+#endif
+#ifdef CONFIG_SAMA5_EHCI
+static struct usbhost_driver_s *g_ehci;
 #endif
 
 /************************************************************************************
@@ -85,12 +90,12 @@ static struct usbhost_driver_s *g_drvr;
  * Name: usbhost_waiter
  *
  * Description:
- *   Wait for USB devices to be connected.
+ *   Wait for USB devices to be connected to either the OHCI or EHCI hub.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_USBHOST
-static int usbhost_waiter(int argc, char *argv[])
+#if HAVE_USBHOST
+static int usbhost_waiter(struct usbhost_driver_s *dev)
 {
   bool connected = false;
 
@@ -99,7 +104,7 @@ static int usbhost_waiter(int argc, char *argv[])
     {
       /* Wait for the device to change state */
 
-      DEBUGVERIFY(DRVR_WAIT(g_drvr, connected) == OK);
+      DEBUGVERIFY(DRVR_WAIT(dev, connected) == OK);
 
       connected = !connected;
       uvdbg("%s\n", connected ? "connected" : "disconnected");
@@ -110,13 +115,43 @@ static int usbhost_waiter(int argc, char *argv[])
         {
           /* Yes.. enumerate the newly connected device */
 
-          (void)DRVR_ENUMERATE(g_drvr);
+          (void)DRVR_ENUMERATE(dev);
         }
     }
 
   /* Keep the compiler from complaining */
 
   return 0;
+}
+#endif
+
+/************************************************************************************
+ * Name: ohci_waiter
+ *
+ * Description:
+ *   Wait for USB devices to be connected to the OHCI hub.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_SAMA5_OHCI
+static int ohci_waiter(int argc, char *argv[])
+{
+  return usbhost_waiter(g_ohci);
+}
+#endif
+
+/************************************************************************************
+ * Name: ehci_waiter
+ *
+ * Description:
+ *   Wait for USB devices to be connected to the EHCI hub.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_SAMA5_EHCI
+static int ehci_waiter(int argc, char *argv[])
+{
+  return usbhost_waiter(g_ehci);
 }
 #endif
 
@@ -129,15 +164,93 @@ static int usbhost_waiter(int argc, char *argv[])
  *
  * Description:
  *   Called from sam_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the STM32F4Discovery board.
+ *   GPIO pins for the SAMA5D3x-EK board.
+ *
+ * USB Ports
+ *   The SAMA5D3 series-MB features three USB communication ports:
+ *
+ *     1. Port A Host High Speed (EHCI) and Full Speed (OHCI) multiplexed with
+ *        USB Device High Speed Micro AB connector, J20
+ *
+ *     2. Port B Host High Speed (EHCI) and Full Speed (OHCI) standard type A
+ *        connector, J19 upper port
+ *
+ *     3. Port C Host Full Speed (OHCI) only standard type A connector, J19
+ *        lower port
+ *
+ *   All three USB host ports are equipped with 500 mA high-side power switch
+ *   for self-powered and buspowered applications. The USB device port feature
+ *   VBUS inserts detection function.
+ *
+ *   Port A
+ *
+ *     PIO  Signal Name Function
+ *     ---- ----------- -------------------------------------------------------
+ *     PD29  VBUS_SENSE VBus detection
+ *     PD25  EN5V_USBA  VBus power enable (via MN15 AIC1526 Dual USB High-Side
+ *                      Power Switch.  The other channel of the switch is for
+ *                      the LCD)
+ *
+ *   Port B
+ *
+ *     PIO  Signal Name Function
+ *     ---- ----------- -------------------------------------------------------
+ *     PD26 EN5V_USBB   VBus power enable (via MN14 AIC1526 Dual USB High-Side
+ *                      Power Switch).  To the A1 pin of J19 Dual USB A
+ *                      connector
+ *
+ *   Port C
+ *
+ *     PIO  Signal Name Function
+ *     ---- ----------- -------------------------------------------------------
+ *     PD27 EN5V_USBC   VBus power enable (via MN14 AIC1526 Dual USB High-Side
+ *                      Power Switch).  To the B1 pin of J19 Dual USB A
+ *                      connector
+ *
+ *    Both Ports B and C
+ *
+ *     PIO  Signal Name Function
+ *     ---- ----------- -------------------------------------------------------
+ *     PD28 OVCUR_USB   Combined overrcurrent indication from port A and B
+ *
+ * That offers a lot of flexibility.  However, here we enable the ports only
+ * as follows:
+ *
+ *   Port A -- USB device
+ *   Port B -- EHCI host
+ *   Port C -- OHCI host
  *
  ************************************************************************************/
 
 void weak_function sam_usbinitialize(void)
 {
-  /* Configure pull-ups */
+#if 0
+  /* Configure Port A to support the USB device function */
 
-  /* Configure the OTG FS VBUS sensing GPIO, Power On, and Overcurrent PIOs */
+  sam_configpio(PIO_USBA_VBUS_SENSE); /* VBUS sense */
+
+  /* TODO:  Configure an interrupt on VBUS sense */
+#endif
+
+#ifdef CONFIG_SAMA5_OHCI
+  /* Configure Port C to support the USB OHCI function */
+
+  sam_configpio(PIO_USBC_VBUS_ENABLE); /* VBUS enable, initially OFF */
+
+#endif
+
+#ifdef CONFIG_SAMA5_EHCI
+  /* Configure Port B to support the USB OHCI function */
+
+  sam_configpio(PIO_USBB_VBUS_ENABLE); /* VBUS enable, initially OFF */
+
+#endif
+
+#if defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI)
+  /* Configure Port B/C VBUS overrcurrent detection */
+
+  sam_configpio(PIO_USBBC_VBUS_OVERCURRENT); /* VBUS overcurrent */
+#endif
 }
 
 /***********************************************************************************
@@ -150,7 +263,7 @@ void weak_function sam_usbinitialize(void)
  *
  ***********************************************************************************/
 
-#if defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI)
+#if HAVE_USBHOST
 int sam_usbhost_initialize(void)
 {
   int pid;
@@ -160,30 +273,55 @@ int sam_usbhost_initialize(void)
    * that we care about:
    */
 
-  uvdbg("Register class drivers\n");
   ret = usbhost_storageinit();
   if (ret != OK)
     {
-      udbg("Failed to register the mass storage class\n");
+      udbg("ERROR: Failed to register the mass storage class: %d\n", ret);
     }
 
-  /* Then get an instance of the USB host interface */
+#ifdef CONFIG_SAMA5_OHCI
+  /* Get an instance of the USB OHCI interface */
 
-  uvdbg("Initialize USB host\n");
-  g_drvr = sam_ohci_initialize(0);
-  if (g_drvr)
+  g_ohci = sam_ohci_initialize(0);
+  if (!g_ohci)
     {
-      /* Start a thread to handle device connection. */
-
-      uvdbg("Start usbhost_waiter\n");
-
-      pid = TASK_CREATE("usbhost", CONFIG_USBHOST_DEFPRIO,
-                        CONFIG_USBHOST_STACKSIZE,
-                        (main_t)usbhost_waiter, (FAR char * const *)NULL);
-      return pid < 0 ? -ENOEXEC : OK;
+      udbg("ERROR: sam_ohci_initialize failed\n");
+      return -ENODEV;
     }
 
-  return -ENODEV;
+  /* Start a thread to handle device connection. */
+
+  pid = TASK_CREATE("usbhost", CONFIG_USBHOST_DEFPRIO,  CONFIG_USBHOST_STACKSIZE,
+                    (main_t)ohci_waiter, (FAR char * const *)NULL);
+  if (pid < 0)
+    {
+      udbg("ERROR: Failed to create ohci_waiter task: %d\n", ret);
+      return -ENODEV;
+    }
+#endif
+
+#ifdef CONFIG_SAMA5_EHCI
+  /* Get an instance of the USB EHCI interface */
+
+  g_ehci = sam_ehci_initialize(0);
+  if (!g_ehci)
+    {
+      udbg("ERROR: sam_ehci_initialize failed\n");
+      return -ENODEV;
+    }
+
+  /* Start a thread to handle device connection. */
+
+  pid = TASK_CREATE("usbhost", CONFIG_USBHOST_DEFPRIO,  CONFIG_USBHOST_STACKSIZE,
+                    (main_t)ehci_waiter, (FAR char * const *)NULL);
+  if (pid < 0)
+    {
+      udbg("ERROR: Failed to create ehci_waiter task: %d\n", ret);
+      return -ENODEV;
+    }
+#endif
+
+  return OK;
 }
 #endif
 
@@ -191,21 +329,13 @@ int sam_usbhost_initialize(void)
  * Name: sam_usbhost_vbusdrive
  *
  * Description:
- *   Enable/disable driving of VBUS 5V output.  This function must be provided be
- *   each platform that implements the STM32 OTG FS host interface
- *
- *   "On-chip 5 V VBUS generation is not supported. For this reason, a charge pump 
- *    or, if 5 V are available on the application board, a basic power switch, must 
- *    be added externally to drive the 5 V VBUS line. The external charge pump can 
- *    be driven by any GPIO output. When the application decides to power on VBUS 
- *    using the chosen GPIO, it must also set the port power bit in the host port 
- *    control and status register (PPWR bit in OTG_FS_HPRT).
- *
- *   "The application uses this field to control power to this port, and the core 
- *    clears this bit on an overcurrent condition."
+ *   Enable/disable driving of VBUS 5V output.  This function must be provided by
+ *   each platform that implements the OHCI or EHCI host interface
  *
  * Input Parameters:
- *   iface - For future growth to handle multiple USB host interface.  Should be zero.
+ *   iface  - Selects USB host interface:
+ *            0 = EHCI (Port B)
+ *            1 = OHCI (Port C)
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:
@@ -213,18 +343,49 @@ int sam_usbhost_initialize(void)
  *
  ***********************************************************************************/
 
-#if defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI)
+#if HAVE_USBHOST
 void sam_usbhost_vbusdrive(int iface, bool enable)
 {
-  DEBUGASSERT(iface == 0);
-  
+  pio_pinset_t pinset;
+
+  /* Pick the PIO associated with the OHCI or EHCI interface */
+
+#ifdef CONFIG_SAMA5_OHCI
+  if (iface == SAM_OHCI_IFACE)
+    {
+      uvdbg("OHCI: iface %d enable %d\n", iface, enable);
+      pinset = PIO_USBC_VBUS_ENABLE;
+    }
+  else
+#endif
+
+#ifdef CONFIG_SAMA5_EHCI
+  if (iface == SAM_EHCI_IFACE)
+    {
+      uvdbg("EHCI: iface %d enable %d\n", iface, enable);
+      pinset = PIO_USBB_VBUS_ENABLE;
+    }
+  else
+#endif
+
+   {
+     udbg("ERROR: Unsupported iface %d\n", iface);
+     return;
+   }
+
+  /* Then enable or disable VBUS power */
+
   if (enable)
     {
       /* Enable the Power Switch by driving the enable pin low */
+
+        sam_piowrite(pinset, false);
     }
   else
-    { 
+    {
       /* Disable the Power Switch by driving the enable pin high */
+
+        sam_piowrite(pinset, false);
     }
 }
 #endif
@@ -244,9 +405,14 @@ void sam_usbhost_vbusdrive(int iface, bool enable)
  *
  ************************************************************************************/
 
-#if defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI)
+#if HAVE_USBHOST
 xcpt_t sam_setup_overcurrent(xcpt_t handler)
 {
+  /* Since this is a common signal, we will need to come up with some way to inform
+   * both EHCI and OHCI drivers when this error occurs.
+   */
+
+# warning Missing logic
   return NULL;
 }
 #endif

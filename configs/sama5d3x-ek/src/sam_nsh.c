@@ -88,6 +88,22 @@
 #  define AT25_MINOR CONFIG_NSH_MMCSDMINOR
 #endif
 
+/* Debug ********************************************************************/
+
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_DEBUG
+#    define message(...) syslog(__VA_ARGS__)
+#  else
+#    define message(...) printf(__VA_ARGS__)
+#  endif
+#else
+#  ifdef CONFIG_DEBUG
+#    define message syslog
+#  else
+#    define message printf
+#  endif
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -102,7 +118,7 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(HAVE_AT25_MTD) || defined(HAVE_HSMCI_MTD)
+#if defined(HAVE_AT25_MTD) || defined(HAVE_HSMCI_MTD) || defined(HAVE_USBHOST)
   int ret;
 #endif
 
@@ -112,7 +128,7 @@ int nsh_archinitialize(void)
   ret = sam_at25_initialize(AT25_MINOR);
   if (ret < 0)
     {
-      dbg("ERROR: sam_at25_initialize failed: %d\n", ret);
+      message("ERROR: sam_at25_initialize failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -122,8 +138,8 @@ int nsh_archinitialize(void)
   ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR);
   if (ret < 0)
     {
-      dbg("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-          HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
+      message("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
+              HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
       return ret;
     }
 #endif
@@ -132,14 +148,14 @@ int nsh_archinitialize(void)
   ret = sam_hsmci_initialize(HSMCI1_SLOTNO, HSMCI1_MINOR);
   if (ret < 0)
     {
-      dbg("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-          HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
+      message("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
+              HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
       return ret;
     }
 #endif
 #endif
 
-#if defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI)
+#ifdef HAVE_USBHOST
   /* Initialize USB host operation.  sam_usbhost_initialize() starts a thread
    * will monitor for USB connection and disconnection events.
    */
@@ -147,7 +163,7 @@ int nsh_archinitialize(void)
   ret = sam_usbhost_initialize();
   if (ret != OK)
     {
-      dbg("ERROR: Failed to initialize USB host: %d\n", ret);
+      message("ERROR: Failed to initialize USB host: %d\n", ret);
       return ret;
     }
 #endif
