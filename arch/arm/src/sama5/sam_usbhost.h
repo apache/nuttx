@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/lpc17xx/lpc17_usbhost.h
+ * arch/arm/src/sama5/sam_usbhost.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_LPC17_USBHOST_H
-#define __ARCH_ARM_SRC_LPC17XX_LPC17_USBHOST_H
+#ifndef __ARCH_ARM_SRC_SAMA5_SAM_USBHOST_H
+#define __ARCH_ARM_SRC_SAMA5_SAM_USBHOST_H
 
 /************************************************************************************
  * Included Files
@@ -42,9 +42,17 @@
 
 #include <nuttx/config.h>
 
+#ifdef CONFIG_USBHOST
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* This is the interface argument for call outs to board-specific functions which
+ * need to know which USB host interface is being used.
+ */
+
+#define SAM_EHCI_IFACE 0
+#define SAM_OHCI_IFACE 1
 
 /************************************************************************************
  * Public Types
@@ -80,7 +88,7 @@ extern "C"
  *   Initialize USB OHCI host controller hardware.
  *
  * Input Parameters:
- *   controller -- If the device supports more than USB host controller, then
+ *   controller -- If the device supports more than one USB OHCI interface, then
  *     this identifies which controller is being intialized.  Normally, this
  *     is just zero.
  *
@@ -98,10 +106,60 @@ extern "C"
  *
  *******************************************************************************/
 
-#ifdef CONFIG_USBHOST
+#ifdef CONFIG_SAMA5_OHCI
 struct usbhost_driver_s;
 FAR struct usbhost_driver_s *sam_ohci_initialize(int controller);
 #endif
+
+/*******************************************************************************
+ * Name: sam_ehci_initialize
+ *
+ * Description:
+ *   Initialize USB EHCI host controller hardware.
+ *
+ * Input Parameters:
+ *   controller -- If the device supports more than one EHCI interface, then
+ *     this identifies which controller is being intialized.  Normally, this
+ *     is just zero.
+ *
+ * Returned Value:
+ *   And instance of the USB host interface.  The controlling task should
+ *   use this interface to (1) call the wait() method to wait for a device
+ *   to be connected, and (2) call the enumerate() method to bind the device
+ *   to a class driver.
+ *
+ * Assumptions:
+ * - This function should called in the initialization sequence in order
+ *   to initialize the USB device functionality.
+ * - Class drivers should be initialized prior to calling this function.
+ *   Otherwise, there is a race condition if the device is already connected.
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_SAMA5_EHCI
+struct usbhost_driver_s;
+FAR struct usbhost_driver_s *sam_ehci_initialize(int controller);
+#endif
+
+/***********************************************************************************
+ * Name: sam_usbhost_vbusdrive
+ *
+ * Description:
+ *   Enable/disable driving of VBUS 5V output.  This function must be provided by
+ *   each platform that implements the OHCI or EHCI host interface
+ *
+ * Input Parameters:
+ *   iface  - Selects USB host interface:
+ *            0 = EHCI
+ *            1 = OHCI
+ *   enable - true: enable VBUS power; false: disable VBUS power
+ *
+ * Returned Value:
+ *   None
+ *
+ ***********************************************************************************/
+
+void sam_usbhost_vbusdrive(int iface, bool enable);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -109,4 +167,5 @@ FAR struct usbhost_driver_s *sam_ohci_initialize(int controller);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC17XX_LPC17_USBHOST_H */
+#endif /* CONFIG_USBHOST */
+#endif /* __ARCH_ARM_SRC_SAMA5_SAM_USBHOST_H */
