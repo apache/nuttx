@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: July 26, 2013</p>
+      <p>Last Updated: August 12, 2013</p>
     </td>
   </tr>
 </table>
@@ -3433,6 +3433,8 @@ extern void up_ledoff(int led);
     <p>
       <b>Examples</b>:
       <code>arch/arm/src/lpc17xx/lpc17_usbhost.c</code>.
+      <code>arch/arm/src/stm32/stm32_otgfshost.c</code>.
+      <code>arch/arm/src/sama5/sam_ohci.c</code>.
     </p>
   </li>
   <li>
@@ -3469,7 +3471,7 @@ extern void up_ledoff(int led);
       <ul>
         <li>
           <p>
-            <code>int (*wait)(FAR struct usbhost_driver_s *drvr, bool connected);</code>
+            <code>int (*wait)(FAR struct usbhost_driver_s *drvr, FAR const bool *connected);</code>
           </p>
           <p>
             Wait for a device to be connected or disconnected.
@@ -3477,10 +3479,10 @@ extern void up_ledoff(int led);
         </li>
         <li>
           <p>
-            <code>int (*enumerate)(FAR struct usbhost_driver_s *drvr);</code>
+            <code>int (*enumerate)(FAR struct usbhost_driver_s *drvr, int rhpndx);</code>
           </p>
           <p>
-            Enumerate the connected device.
+            Enumerate the device connected to a root hub port.
             As part of this enumeration process, the driver will
             (1) get the device's configuration descriptor,
             (2) extract the class ID info from the configuration descriptor,
