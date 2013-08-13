@@ -345,6 +345,8 @@ static int sam_ctrltd(struct sam_ohci_s *priv, uint32_t dirpid,
 
 /* Interrupt handling **********************************************************/
 
+static void sam_rhsc_interrupt(struct sam_ohci_s *priv);
+static void sam_wdh_interrupt(struct sam_ohci_s *priv);
 static int sam_ohci_interrupt(int irq, FAR void *context);
 
 /* USB host controller operations **********************************************/
@@ -1188,7 +1190,8 @@ static inline int sam_remisoced(struct sam_ohci_s *priv,
 
 static int sam_enqueuetd(struct sam_ohci_s *priv,
                          struct sam_ed_s *ed, uint32_t dirpid,
-                         uint32_t toggle, volatile uint8_t *buffer, size_t buflen)
+                         uint32_t toggle, volatile uint8_t *buffer,
+                         size_t buflen)
 {
   struct sam_gtd_s *td;
   int ret = -ENOMEM;
@@ -1339,10 +1342,208 @@ static int sam_ctrltd(struct sam_ohci_s *priv, uint32_t dirpid, uint8_t *buffer,
 }
 
 /*******************************************************************************
+ * Name: sam_rhsc_interrupt
+ *
+ * Description:
+ *   OHCI root hub status change interrupt handler
+ *
+ *******************************************************************************/
+
+static void sam_rhsc_interrupt(struct sam_ohci_s *priv)
+{
+  struct sam_rhport_s *rhport;
+  uint32_t regaddr;
+  uint32_t rhportst;
+  int rhpndx;
+
+  /* Handle root hub status change on each root port */
+
+  for (rhpndx = 0; rhpndx < SAM_USBHOST_NRHPORT; rhpndx++)
+    {
+      rhport   = &priv->rhport[rhpndx];
+
+      regaddr  = SAM_USBHOST_RHPORTST(rhpndx+1);
+      rhportst = sam_getreg(regaddr);
+
+      ullvdbg("RHPORTST%d: %08x\n", rhpndx + 1, rhportst);
+
+      if ((rhportst & OHCI_RHPORTST_CSC) != 0)
+        {
+          uint32_t rhstatus = sam_getreg(SAM_USBHOST_RHSTATUS);
+          ullvdbg("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
+
+          /* If DRWE is set, Connect Status Change indicates a remote
+           * wake-up event
+           */
+
+          if (rhstatus & OHCI_RHSTATUS_DRWE)
+            {
+              ullvdbg("DRWE: Remote wake-up\n");
+            }
+
+          /* Otherwise... Not a remote wake-up event */
+
+          else
+            {
+              /* Check current connect status */
+
+              if ((rhportst & OHCI_RHPORTST_CCS) != 0)
+                {
+                  /* Connected ... Did we just become connected? */
+
+                  if (!rhport->connected)
+                    {
+                      /* Yes.. connected. */
+
+                      rhport->connected = true;
+
+                      ullvdbg("RHPort%d connected, rhswait: %d\n",
+                              rhpndx + 1, priv->rhswait);
+
+                      /* Notify any waiters */
+
+                      if (priv->rhswait)
+                        {
+                          sam_givesem(&priv->rhssem);
+                          priv->rhswait = false;
+                        }
+                    }
+                  else
+                    {
+                      ulldbg("Spurious status change (connected)\n");
+                    }
+
+                  /* The LSDA (Low speed device attached) bit is valid
+                   * when CCS == 1.
+                   */
+
+                  rhport->lowspeed = (rhportst & OHCI_RHPORTST_LSDA) != 0;
+                  ullvdbg("Speed: %s\n", rhport->lowspeed ? "LOW" : "FULL");
+                }
+
+              /* Check if we are now disconnected */
+
+              else if (rhport->connected)
+                {
+                  /* Yes.. disconnect the device */
+
+                  ullvdbg("RHport%d disconnected\n", rhpndx+1);
+                  rhport->connected = false;
+                  rhport->lowspeed  = false;
+
+                  /* Are we bound to a class instance? */
+
+                  if (rhport->class)
+                    {
+                      /* Yes.. Disconnect the class */
+
+                      CLASS_DISCONNECTED(rhport->class);
+                      rhport->class = NULL;
+                    }
+
+                  /* Notify any waiters for the Root Hub Status change
+                   * event.
+                   */
+
+                  if (priv->rhswait)
+                    {
+                      sam_givesem(&priv->rhssem);
+                      priv->rhswait = false;
+                    }
+                }
+              else
+                {
+                   ulldbg("Spurious status change (disconnected)\n");
+                }
+            }
+
+          /* Clear the status change interrupt */
+
+          sam_putreg(OHCI_RHPORTST_CSC, regaddr);
+        }
+
+      /* Check for port reset status change */
+
+      if ((rhportst & OHCI_RHPORTST_PRSC) != 0)
+        {
+          /* Release the RH port from reset */
+
+          sam_putreg(OHCI_RHPORTST_PRSC, regaddr);
+        }
+    }
+}
+
+/*******************************************************************************
+ * Name: sam_wdh_interrupt
+ *
+ * Description:
+ *   OHCI write done head interrupt handler
+ *
+ *******************************************************************************/
+
+static void sam_wdh_interrupt(struct sam_ohci_s *priv)
+{
+  struct sam_gtd_s *td;
+  struct sam_gtd_s *next;
+
+  /* The host controller just wrote the list of finished TDs into the HCCA
+   * done head.  This may include multiple packets that were transferred
+   * in the preceding frame.
+   *
+   * Remove the TD(s) from the Writeback Done Head in the HCCA and return
+   * them to the free list.  Note that this is safe because the hardware
+   * will not modify the writeback done head again until the WDH bit is
+   * cleared in the interrupt status register.
+   */
+
+  td = (struct sam_gtd_s *)g_hcca.donehead;
+  g_hcca.donehead = 0;
+
+  /* Process each TD in the write done list */
+
+  for (; td; td = next)
+    {
+      /* Get the ED in which this TD was enqueued */
+
+      struct sam_ed_s *ed = td->ed;
+      DEBUGASSERT(ed != NULL);
+
+      /* Save the condition code from the (single) TD status/control
+       * word.
+       */
+
+      ed->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
+
+#ifdef CONFIG_DEBUG_USB
+      if (ed->tdstatus != TD_CC_NOERROR)
+        {
+          /* The transfer failed for some reason... dump some diagnostic info. */
+
+          ulldbg("ERROR: ED xfrtype: %d TD CTRL: %08x/CC: %d\n",
+                 ed->xfrtype, td->hw.ctrl, ed->tdstatus);
+        }
+#endif
+
+      /* Return the TD to the free list */
+
+      next = (struct sam_gtd_s *)td->hw.nexttd;
+      sam_tdfree(td);
+
+      /* And wake up the thread waiting for the WDH event */
+
+      if (ed->wdhwait)
+        {
+          sam_givesem(&ed->wdhsem);
+          ed->wdhwait = false;
+        }
+    }
+}
+
+/*******************************************************************************
  * Name: sam_ohci_interrupt
  *
  * Description:
- *   USB interrupt handler
+ *   OHCI interrupt handler
  *
  *******************************************************************************/
 
@@ -1352,8 +1553,6 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
   uint32_t intst;
   uint32_t pending;
   uint32_t regval;
-  uint32_t regaddr;
-  int rhpndx;
 
   /* Read Interrupt Status and mask out interrupts that are not enabled. */
 
@@ -1368,192 +1567,47 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
 
       if ((pending & OHCI_INT_RHSC) != 0)
         {
-          /* Hand root hub status change on each root port */
+          /* Handle root hub status change on each root port */
 
           ullvdbg("Root Hub Status Change\n");
-          for (rhpndx = 0; rhpndx < SAM_USBHOST_NRHPORT; rhpndx++)
-            {
-              struct sam_rhport_s *rhport = &priv->rhport[rhpndx];
-              uint32_t rhportst;
-
-              regaddr  = SAM_USBHOST_RHPORTST(rhpndx+1);
-              rhportst = sam_getreg(regaddr);
-
-              ullvdbg("RHPORTST%d: %08x\n", rhpndx + 1, rhportst);
-
-              if ((rhportst & OHCI_RHPORTST_CSC) != 0)
-                {
-                  uint32_t rhstatus = sam_getreg(SAM_USBHOST_RHSTATUS);
-                  ullvdbg("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
-
-                  /* If DRWE is set, Connect Status Change indicates a remote
-                   * wake-up event
-                   */
-
-                  if (rhstatus & OHCI_RHSTATUS_DRWE)
-                    {
-                      ullvdbg("DRWE: Remote wake-up\n");
-                    }
-
-                  /* Otherwise... Not a remote wake-up event */
-
-                  else
-                    {
-                      /* Check current connect status */
-
-                      if ((rhportst & OHCI_RHPORTST_CCS) != 0)
-                        {
-                          /* Connected ... Did we just become connected? */
-
-                          if (!rhport->connected)
-                            {
-                              /* Yes.. connected. */
-
-                              rhport->connected = true;
-
-                              ullvdbg("RHPort%d connected, rhswait: %d\n",
-                                      rhpndx + 1, priv->rhswait);
-
-                              /* Notify any waiters */
-
-                              if (priv->rhswait)
-                                {
-                                  sam_givesem(&priv->rhssem);
-                                  priv->rhswait = false;
-                                }
-                            }
-                          else
-                            {
-                              ulldbg("Spurious status change (connected)\n");
-                            }
-
-                          /* The LSDA (Low speed device attached) bit is valid
-                           * when CCS == 1.
-                           */
-
-                          rhport->lowspeed =
-                            (rhportst & OHCI_RHPORTST_LSDA) != 0;
-
-                          ullvdbg("Speed: %s\n",
-                                  rhport->lowspeed ? "LOW" : "FULL");
-                        }
-
-                      /* Check if we are now disconnected */
-
-                      else if (rhport->connected)
-                        {
-                          /* Yes.. disconnect the device */
-
-                          ullvdbg("RHport%d disconnected\n", rhpndx+1);
-                          rhport->connected = false;
-                          rhport->lowspeed  = false;
-
-                          /* Are we bound to a class instance? */
-
-                          if (rhport->class)
-                            {
-                              /* Yes.. Disconnect the class */
-
-                              CLASS_DISCONNECTED(rhport->class);
-                              rhport->class = NULL;
-                            }
-
-                        /* Notify any waiters for the Root Hub Status change
-                         * event.
-                         */
-
-                          if (priv->rhswait)
-                            {
-                              sam_givesem(&priv->rhssem);
-                              priv->rhswait = false;
-                            }
-                        }
-                      else
-                        {
-                           ulldbg("Spurious status change (disconnected)\n");
-                        }
-                    }
-
-                  /* Clear the status change interrupt */
-
-                  sam_putreg(OHCI_RHPORTST_CSC, regaddr);
-                }
-
-              /* Check for port reset status change */
-
-              if ((rhportst & OHCI_RHPORTST_PRSC) != 0)
-                {
-                  /* Release the RH port from reset */
-
-                  sam_putreg(OHCI_RHPORTST_PRSC, regaddr);
-                }
-            }
+          sam_rhsc_interrupt(priv);
         }
 
       /* Writeback Done Head interrupt */
 
       if ((pending & OHCI_INT_WDH) != 0)
         {
-          struct sam_gtd_s *td;
-          struct sam_gtd_s *next;
-
           /* The host controller just wrote the list of finished TDs into the HCCA
            * done head.  This may include multiple packets that were transferred
            * in the preceding frame.
-           *
-           * Remove the TD(s) from the Writeback Done Head in the HCCA and return
-           * them to the free list.  Note that this is safe because the hardware
-           * will not modify the writeback done head again until the WDH bit is
-           * cleared in the interrupt status register.
            */
 
-          td = (struct sam_gtd_s *)g_hcca.donehead;
-          g_hcca.donehead = 0;
-
-          /* Process each TD in the write done list */
-
-          for (; td; td = next)
-            {
-              /* Get the ED in which this TD was enqueued */
-
-              struct sam_ed_s *ed = td->ed;
-              DEBUGASSERT(ed != NULL);
-
-              /* Save the condition code from the (single) TD status/control
-               * word.
-               */
-
-              ed->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
-
-#ifdef CONFIG_DEBUG_USB
-              if (ed->tdstatus != TD_CC_NOERROR)
-                {
-                  /* The transfer failed for some reason... dump some diagnostic info. */
-
-                  ulldbg("ERROR: ED xfrtype: %d TD CTRL: %08x/CC: %d\n",
-                         ed->xfrtype, td->hw.ctrl, ed->tdstatus);
-                }
-#endif
-
-              /* Return the TD to the free list */
-
-              next = (struct sam_gtd_s *)td->hw.nexttd;
-              sam_tdfree(td);
-
-              /* And wake up the thread waiting for the WDH event */
-
-              if (ed->wdhwait)
-                {
-                  sam_givesem(&ed->wdhsem);
-                  ed->wdhwait = false;
-                }
-            }
+          ullvdbg("Writeback Done Head interrupt\n");
+          sam_wdh_interrupt(priv);
         }
 
 #ifdef CONFIG_DEBUG_USB
       if ((pending & SAM_DEBUG_INTS) != 0)
         {
-          ulldbg("ERROR: Unhandled interrupts INTST: %08x\n", intst);
+          if ((pending & OHCI_INT_UE) != 0)
+            {
+              /* An unrecoverable error occurred.  Unrecoverable errors
+               * are usually the consequence of bad descriptor contents
+               * or DMA errors.
+               *
+               * Treat this like a normal write done head interrupt.  We
+               * just want to see if there is any status information writen
+               * to the descriptors (and the normal write done head
+               * interrupt will not be occurring).
+               */
+
+              ulldbg("ERROR: Unrecoverable error. INTST: %08x\n", intst);
+              sam_wdh_interrupt(priv);
+            }
+          else
+            {
+              ulldbg("ERROR: Unhandled interrupts INTST: %08x\n", intst);
+            }
         }
 #endif
 
@@ -1727,7 +1781,8 @@ static int sam_enumerate(FAR struct usbhost_driver_s *drvr, int rhpndx)
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
  *   funcaddr - The USB address of the function containing the endpoint that EP0
- *     controls
+ *     controls.  A funcaddr of zero will be received if no address is yet assigned
+ *     to the device.
  *   maxpacketsize - The maximum number of bytes that can be sent to or
  *    received from the endpoint in a single data packet
  *
@@ -1746,8 +1801,10 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
   struct sam_ohci_s *priv = (struct sam_ohci_s *)drvr;
   struct sam_rhport_s *rhport;
 
-  DEBUGASSERT(priv && funcaddr > 0 && funcaddr <= SAM_USBHOST_NRHPORT &&
+  DEBUGASSERT(priv &&
+              funcaddr >= 0 && funcaddr <= SAM_USBHOST_NRHPORT &&
               maxpacketsize < 2048);
+
   rhport = &priv->rhport[funcaddr - 1];
 
   /* We must have exclusive access to EP0 and the control list */

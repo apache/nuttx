@@ -401,6 +401,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
       udbg("ERROR: SETADDRESS DRVR_CTRLOUT returned %d\n", ret);
       goto errout;
     }
+
   usleep(2*1000);
 
   /* Modify control pipe with the provided USB device address */
@@ -514,5 +515,6 @@ errout:
     {
       DRVR_FREE(drvr, (uint8_t*)ctrlreq);
     }
+
   return ret;
 }
