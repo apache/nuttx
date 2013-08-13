@@ -128,7 +128,6 @@ struct usbhost_state_s
   char                    sdchar;       /* Character identifying the /dev/sd[n] device */
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
   uint8_t                 ifno;         /* Interface number */
-  uint8_t                 funcaddr;     /* USB function address */
   int16_t                 crefs;        /* Reference count on the driver instance */
   uint16_t                blocksize;    /* Block size of USB mass storage device */
   uint32_t                nblocks;      /* Number of blocks on the USB mass storage device */
@@ -930,7 +929,7 @@ static void usbhost_destroy(FAR void *arg)
 
   /* Disconnect the USB host device */
 
-  DRVR_DISCONNECT(priv->drvr, priv->funcaddr);
+  DRVR_DISCONNECT(priv->drvr);
 
   /* And free the class instance.  Hmmm.. this may execute on the worker
    * thread and the work structure is part of what is getting freed.  That
@@ -1740,15 +1739,6 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
       if (ret != OK)
         {
           udbg("usbhost_initvolume() failed: %d\n", ret);
-        }
-      else
-        {
-          /* Save the function address (We will need it when we disconnect).
-           * NOTE that address is available in the endpoint structures as
-           * well.
-           */
-
-          priv->funcaddr = funcaddr;
         }
     }
 

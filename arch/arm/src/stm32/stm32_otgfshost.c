@@ -380,7 +380,7 @@ static int stm32_ctrlout(FAR struct usbhost_driver_s *drvr,
                          FAR const uint8_t *buffer);
 static int stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           FAR uint8_t *buffer, size_t buflen);
-static void stm32_disconnect(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr);
+static void stm32_disconnect(FAR struct usbhost_driver_s *drvr);
 
 /* Initialization **************************************************************/
 
@@ -3795,7 +3795,6 @@ static int stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   funcaddr - Address of the function to be disconnected.
  *
  * Returned Values:
  *   None
@@ -3806,10 +3805,10 @@ static int stm32_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
  *
  *******************************************************************************/
 
-static void stm32_disconnect(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr)
+static void stm32_disconnect(FAR struct usbhost_driver_s *drvr)
 {
   struct stm32_usbhost_s *priv = (struct stm32_usbhost_s *)drvr;
-  DEBUGASSERT(priv && funcaddr == 1);
+  DEBUGASSERT(priv);
 
   priv->class = NULL;
 }

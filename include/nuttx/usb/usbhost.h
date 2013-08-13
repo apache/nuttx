@@ -481,7 +481,6 @@
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   funcaddr - Address of the function to be disconnected.
  *
  * Returned Values:
  *   None
@@ -491,7 +490,7 @@
  *
  ************************************************************************************/
 
-#define DRVR_DISCONNECT(drvr,funcaddr) ((drvr)->disconnect(drvr,funcaddr))
+#define DRVR_DISCONNECT(drvr) ((drvr)->disconnect(drvr))
 
 /************************************************************************************
  * Public Types
@@ -685,7 +684,7 @@ struct usbhost_driver_s
    * (until a new instance is received from the create() method).
    */
 
-  void (*disconnect)(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr);
+  void (*disconnect)(FAR struct usbhost_driver_s *drvr);
 };
 
 /************************************************************************************

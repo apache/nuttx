@@ -315,7 +315,7 @@ static int lpc17_ctrlout(FAR struct usbhost_driver_s *drvr,
                          FAR const uint8_t *buffer);
 static int lpc17_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                           FAR uint8_t *buffer, size_t buflen);
-static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr);
+static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr);
 
 /* Initialization **************************************************************/
 
@@ -2378,7 +2378,6 @@ errout:
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   funcaddr - Address of the function to be disconnected.
  *
  * Returned Values:
  *   None
@@ -2389,10 +2388,10 @@ errout:
  *
  *******************************************************************************/
 
-static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr)
+static void lpc17_disconnect(FAR struct usbhost_driver_s *drvr)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
-  DEBUGASSERT(priv && funcaddr == 1);
+  DEBUGASSERT(priv);
 
   priv->class = NULL;
 }
