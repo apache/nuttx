@@ -5396,3 +5396,11 @@
 	  to new interface, struct usbhost_connection_s.  This is part of the
 	  necessary restructuring of the USB host interface to support multiple
 	  root hub ports (2013-8-13).
+	* arch/arm/src/sama5/sam_ohci.c:  Major restructuring of the driver due
+	  in order to handle multiple root hub ports.  Basically instead of one
+	  driver structure with an arrayof root hub port structures, there is no
+	  one container structure with an array of driver structures, one for
+	  each root hub port.  The advantage is that each class->driver call not
+	  passes information associated with the RHport implicitly.  The klugey,
+	  procedural alternative was to add the function address to every
+	  interface method (which I started to do but backed above) (2013-8-13).
