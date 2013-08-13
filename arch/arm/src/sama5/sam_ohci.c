@@ -182,8 +182,8 @@ struct sam_rhport_s
 {
   /* Root hub port status */
 
-  volatile bool    connected;   /* Connected to device */
-  volatile bool    lowspeed;    /* Low speed device attached. */
+  volatile bool connected;      /* Connected to device */
+  volatile bool lowspeed;       /* Low speed device attached. */
 
   /* The bound device class driver */
 
@@ -203,14 +203,14 @@ struct sam_ohci_s
 
   /* Driver status */
 
-  volatile bool    rhswait;     /* TRUE: Thread is waiting for Root Hub Status change */
+  volatile bool rhswait;        /* TRUE: Thread is waiting for Root Hub Status change */
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
-  uint8_t          ininterval;  /* Minimum periodic IN EP polling interval: 2, 4, 6, 16, or 32 */
-  uint8_t          outinterval; /* Minimum periodic IN EP polling interval: 2, 4, 6, 16, or 32 */
+  uint8_t ininterval;           /* Minimum periodic IN EP polling interval: 2, 4, 6, 16, or 32 */
+  uint8_t outinterval;          /* Minimum periodic IN EP polling interval: 2, 4, 6, 16, or 32 */
 #endif
-  sem_t            exclsem;     /* Support mutually exclusive access */
-  sem_t            rhssem;      /* Semaphore to wait Writeback Done Head event */
+  sem_t exclsem;                /* Support mutually exclusive access */
+  sem_t rhssem;                 /* Semaphore to wait Writeback Done Head event */
 
   /* Root hub ports */
 
@@ -219,10 +219,10 @@ struct sam_ohci_s
   /* Debug stuff */
 
 #ifdef CONFIG_SAMA5_SPI_REGDEBUG
-   bool     wrlast;             /* Last was a write */
+   bool wrlast;                 /* Last was a write */
    uint32_t addresslast;        /* Last address */
    uint32_t valuelast;          /* Last value */
-   int      ntimes;             /* Number of times */
+   int ntimes;                  /* Number of times */
 #endif
 };
 
@@ -372,7 +372,7 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr,
                        FAR const uint8_t *buffer);
 static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                         FAR uint8_t *buffer, size_t buflen);
-static void sam_disconnect(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr);
+static void sam_disconnect(FAR struct usbhost_driver_s *drvr);
 
 /* Initialization **************************************************************/
 
@@ -2457,7 +2457,6 @@ errout:
  * Input Parameters:
  *   drvr - The USB host driver instance obtained as a parameter from the call to
  *      the class create() method.
- *   funcaddr - Address of the function to be disconnected.
  *
  * Returned Values:
  *   None
@@ -2468,10 +2467,10 @@ errout:
  *
  *******************************************************************************/
 
-static void sam_disconnect(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr)
+static void sam_disconnect(FAR struct usbhost_driver_s *drvr)
 {
   struct sam_ohci_s *priv = (struct sam_ohci_s *)drvr;
-  DEBUGASSERT(priv && funcaddr > 0 && funcaddr <= SAM_USBHOST_NRHPORT);
+  DEBUGASSERT(priv);
 
   priv->rhport[funcaddr - 1].class = NULL;
 }
