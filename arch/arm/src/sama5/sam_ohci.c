@@ -338,7 +338,8 @@ static int  sam_ohci_interrupt(int irq, FAR void *context);
 
 /* USB host controller operations **********************************************/
 
-static int sam_wait(FAR struct usbhost_connection_s *conn, FAR const bool *connected);
+static int sam_wait(FAR struct usbhost_connection_s *conn,
+                    FAR const bool *connected);
 static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx);
 
 static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,

@@ -595,7 +595,7 @@ struct usbhost_connection_s
 {
   /* Wait for a device to connect or disconnect. */
 
-  int (*wait)(FAR struct usbhost_connection_s *drvr, FAR const bool *connected);
+  int (*wait)(FAR struct usbhost_connection_s *conn, FAR const bool *connected);
 
   /* Enumerate the device connected on a root hub port.  As part of this
    * enumeration process, the driver will (1) get the device's configuration
@@ -607,7 +607,7 @@ struct usbhost_connection_s
    * in charge of the sequence of operations.
    */
 
-  int (*enumerate)(FAR struct usbhost_connection_s *drvr, int rhpndx);
+  int (*enumerate)(FAR struct usbhost_connection_s *conn, int rhpndx);
 };
 
 /* struct usbhost_driver_s provides access to the USB host driver from the
