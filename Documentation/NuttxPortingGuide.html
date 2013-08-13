@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 12, 2013</p>
+      <p>Last Updated: August 13, 2013</p>
     </td>
   </tr>
 </table>
@@ -3426,9 +3426,11 @@ extern void up_ledoff(int led);
   </li>
   <li>
     <p>
-      <b><code>struct usbhost_driver_s</code></b>.
-      Each USB host controller driver must implement an instance of <code>struct usbhost_driver_s</code>.
-      This structure is defined in <code>include/nuttx/usb/usbhost.h</code>.
+      <b><code>struct usbhost_driver_s</code> and <code>struct usbhost_connection_s</code></b>.
+      Each USB host controller driver must implement an instance of <code>struct usbhost_driver_s</code> and <code>struct usbhost_connection_s</code>:
+      <code>struct usbhost_driver_s</code> provides the interface between the USB host driver and the USB class driver;
+      <code>struct usbhost_connection_s</code> provides the interface between the USB host driver and platform-specific connection management and device enumeration logoc.
+      These structures are defined in <code>include/nuttx/usb/usbhost.h</code>.
     </p>
     <p>
       <b>Examples</b>:
@@ -3471,7 +3473,7 @@ extern void up_ledoff(int led);
       <ul>
         <li>
           <p>
-            <code>int (*wait)(FAR struct usbhost_driver_s *drvr, FAR const bool *connected);</code>
+            <code>int (*wait)(FAR struct usbhost_connection_s *drvr, FAR const bool *connected);</code>
           </p>
           <p>
             Wait for a device to be connected or disconnected.
@@ -3479,7 +3481,7 @@ extern void up_ledoff(int led);
         </li>
         <li>
           <p>
-            <code>int (*enumerate)(FAR struct usbhost_driver_s *drvr, int rhpndx);</code>
+            <code>int (*enumerate)(FAR struct usbhost_connection_s *drvr, int rhpndx);</code>
           </p>
           <p>
             Enumerate the device connected to a root hub port.
