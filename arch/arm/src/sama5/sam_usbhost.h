@@ -107,8 +107,8 @@ extern "C"
  *******************************************************************************/
 
 #ifdef CONFIG_SAMA5_OHCI
-struct usbhost_driver_s;
-FAR struct usbhost_driver_s *sam_ohci_initialize(int controller);
+struct usbhost_connection_s;
+FAR struct usbhost_connection_s *sam_ohci_initialize(int controller);
 #endif
 
 /*******************************************************************************

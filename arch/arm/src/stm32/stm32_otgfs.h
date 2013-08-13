@@ -99,8 +99,8 @@ extern "C"
  *******************************************************************************/
 
 #ifdef CONFIG_USBHOST
-struct usbhost_driver_s;
-FAR struct usbhost_driver_s *stm32_otgfshost_initialize(int controller);
+struct usbhost_connection_s;
+FAR struct usbhost_connection_s *stm32_otgfshost_initialize(int controller);
 #endif
 
 /************************************************************************************

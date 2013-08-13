@@ -164,7 +164,7 @@
  ****************************************************************************/
 
 #ifdef NSH_HAVE_USBHOST
-static struct usbhost_driver_s *g_drvr;
+static struct usbhost_connection_s *g_usbconn;
 #endif
 #ifdef NSH_HAVE_MMCSD
 static FAR struct sdio_dev_s *g_sdiodev;
@@ -193,7 +193,7 @@ static int nsh_waiter(int argc, char *argv[])
     {
       /* Wait for the device to change state */
 
-      ret = DRVR_WAIT(g_drvr, &connected);
+      ret = CONN_WAIT(g_usbconn, &connected);
       DEBUGASSERT(ret == OK);
 
       connected = !connected;
@@ -205,7 +205,7 @@ static int nsh_waiter(int argc, char *argv[])
         {
           /* Yes.. enumerate the newly connected device */
 
-          (void)DRVR_ENUMERATE(g_drvr, 0);
+          (void)CONN_ENUMERATE(g_usbconn, 0);
         }
     }
 
@@ -336,8 +336,8 @@ static int nsh_usbhostinitialize(void)
   /* Then get an instance of the USB host interface */
 
   message("nsh_usbhostinitialize: Initialize USB host\n");
-  g_drvr = usbhost_initialize(0);
-  if (g_drvr)
+  g_usbconn = usbhost_initialize(0);
+  if (g_usbconn)
     {
       /* Start a thread to handle device connection. */
 

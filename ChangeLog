@@ -5391,4 +5391,8 @@
 	  in up_putc().  I think all architectures have this re-entrancy
 	  than can result in serial interrupt being disabled, but I have only
 	  seen the symptom on SAMA5 (2013-8-13).
-
+	* includes/nuttx/usb/usbhost.h and many other affected files:  Separate
+	  wait() and enumerate() methods from struct usbhost_driver_s and move
+	  to new interface, struct usbhost_connection_s.  This is part of the
+	  necessary restructuring of the USB host interface to support multiple
+	  root hub ports (2013-8-13).

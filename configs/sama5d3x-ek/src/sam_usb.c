@@ -77,10 +77,10 @@
 /* Retained device driver handles */
 
 #ifdef CONFIG_SAMA5_OHCI
-static struct usbhost_driver_s *g_ohci;
+static struct usbhost_connection_s *g_ohciconn;
 #endif
 #ifdef CONFIG_SAMA5_EHCI
-static struct usbhost_driver_s *g_ehci;
+static struct usbhost_connection_s *g_ehciconn;
 #endif
 
 /************************************************************************************
@@ -96,7 +96,7 @@ static struct usbhost_driver_s *g_ehci;
  ************************************************************************************/
 
 #if HAVE_USBHOST
-static int usbhost_waiter(struct usbhost_driver_s *dev)
+static int usbhost_waiter(struct usbhost_connection_s *dev)
 {
   bool connected[SAM_USBHOST_NRHPORT] = {false, false, false};
   int rhpndx;
@@ -106,7 +106,7 @@ static int usbhost_waiter(struct usbhost_driver_s *dev)
     {
       /* Wait for the device to change state */
 
-      rhpndx = DRVR_WAIT(dev, connected);
+      rhpndx = CONN_WAIT(dev, connected);
       DEBUGASSERT(rhpndx >= 0 && rhpndx < SAM_USBHOST_NRHPORT);
 
       connected[rhpndx] = !connected[rhpndx];
@@ -120,7 +120,7 @@ static int usbhost_waiter(struct usbhost_driver_s *dev)
         {
           /* Yes.. enumerate the newly connected device */
 
-          (void)DRVR_ENUMERATE(dev, rhpndx);
+          (void)CONN_ENUMERATE(dev, rhpndx);
         }
     }
 
@@ -141,7 +141,7 @@ static int usbhost_waiter(struct usbhost_driver_s *dev)
 #ifdef CONFIG_SAMA5_OHCI
 static int ohci_waiter(int argc, char *argv[])
 {
-  return usbhost_waiter(g_ohci);
+  return usbhost_waiter(g_ohciconn);
 }
 #endif
 
@@ -156,7 +156,7 @@ static int ohci_waiter(int argc, char *argv[])
 #ifdef CONFIG_SAMA5_EHCI
 static int ehci_waiter(int argc, char *argv[])
 {
-  return usbhost_waiter(g_ehci);
+  return usbhost_waiter(g_ehciconn);
 }
 #endif
 
@@ -287,8 +287,8 @@ int sam_usbhost_initialize(void)
 #ifdef CONFIG_SAMA5_OHCI
   /* Get an instance of the USB OHCI interface */
 
-  g_ohci = sam_ohci_initialize(0);
-  if (!g_ohci)
+  g_ohciconn = sam_ohci_initialize(0);
+  if (!g_ohciconn)
     {
       udbg("ERROR: sam_ohci_initialize failed\n");
       return -ENODEV;
@@ -308,8 +308,8 @@ int sam_usbhost_initialize(void)
 #ifdef CONFIG_SAMA5_EHCI
   /* Get an instance of the USB EHCI interface */
 
-  g_ehci = sam_ehci_initialize(0);
-  if (!g_ehci)
+  g_ehciconn = sam_ehci_initialize(0);
+  if (!g_ehciconn)
     {
       udbg("ERROR: sam_ehci_initialize failed\n");
       return -ENODEV;

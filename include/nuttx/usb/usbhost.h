@@ -152,14 +152,14 @@
 #define CLASS_DISCONNECTED(class) ((class)->disconnected(class))
 
 /*******************************************************************************
- * Name: DRVR_WAIT
+ * Name: CONN_WAIT
  *
  * Description:
  *   Wait for a device to be connected or disconnected to/from a root hub port.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call
- *      to the class create() method.
+ *   conn - The USB host connection instance obtained as a parameter from the call to
+ *      the USB driver initialization logic.
  *   connected - A pointer to an array of n boolean values corresponding to
  *      root hubs 1 through n.  For each boolean value: TRUE: Wait for a device
  *      to be connected on the root hub; FALSE: wait for device to be
@@ -178,10 +178,10 @@
  *
  *******************************************************************************/
 
-#define DRVR_WAIT(drvr, connected) ((drvr)->wait(drvr,connected))
+#define CONN_WAIT(conn, connected) ((conn)->wait(conn,connected))
 
 /************************************************************************************
- * Name: DRVR_ENUMERATE
+ * Name: CONN_ENUMERATE
  *
  * Description:
  *   Enumerate the connected device.  As part of this enumeration process,
@@ -194,8 +194,8 @@
  *   charge of the sequence of operations.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   conn - The USB host connection instance obtained as a parameter from the call to
+ *      the USB driver initialization logic.
  *   rphndx - Root hub port index.  0-(n-1) corresponds to root hub port 1-n.
  *
  * Returned Values:
@@ -207,7 +207,7 @@
  *
  ************************************************************************************/
 
-#define DRVR_ENUMERATE(drvr,rhpndx) ((drvr)->enumerate(drvr,rhpndx))
+#define CONN_ENUMERATE(conn,rhpndx) ((conn)->enumerate(conn,rhpndx))
 
 /************************************************************************************
  * Name: DRVR_EP0CONFIGURE
@@ -586,15 +586,16 @@ struct usbhost_epdesc_s
 
 typedef FAR void *usbhost_ep_t;
 
-/* struct usbhost_driver_s provides access to the USB host driver from the
- * USB host class implementation.
+/* struct usbhost_connection_s provides as interface between platform-specific
+ * connection monitoring and the USB host driver connectin and enumeration
+ * logic.
  */
 
-struct usbhost_driver_s
+struct usbhost_connection_s
 {
   /* Wait for a device to connect or disconnect. */
 
-  int (*wait)(FAR struct usbhost_driver_s *drvr, FAR const bool *connected);
+  int (*wait)(FAR struct usbhost_connection_s *drvr, FAR const bool *connected);
 
   /* Enumerate the device connected on a root hub port.  As part of this
    * enumeration process, the driver will (1) get the device's configuration
@@ -606,8 +607,15 @@ struct usbhost_driver_s
    * in charge of the sequence of operations.
    */
 
-  int (*enumerate)(FAR struct usbhost_driver_s *drvr, int rhpndx);
+  int (*enumerate)(FAR struct usbhost_connection_s *drvr, int rhpndx);
+};
 
+/* struct usbhost_driver_s provides access to the USB host driver from the
+ * USB host class implementation.
+ */
+
+struct usbhost_driver_s
+{
   /* Configure endpoint 0.  This method is normally used internally by the
    * enumerate() method but is made available at the interface to support
    * an external implementation of the enumeration logic.

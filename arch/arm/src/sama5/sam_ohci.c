@@ -351,8 +351,9 @@ static int sam_ohci_interrupt(int irq, FAR void *context);
 
 /* USB host controller operations **********************************************/
 
-static int sam_wait(FAR struct usbhost_driver_s *drvr, FAR const bool *connected);
-static int sam_enumerate(FAR struct usbhost_driver_s *drvr, int rhpndx);
+static int sam_wait(FAR struct usbhost_connection_s *conn, FAR const bool *connected);
+static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx);
+
 static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                             uint16_t maxpacketsize);
 static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
@@ -391,8 +392,6 @@ static struct sam_ohci_s g_usbhost =
 {
   .drvr             =
     {
-      .wait         = sam_wait,
-      .enumerate    = sam_enumerate,
       .ep0configure = sam_ep0configure,
       .epalloc      = sam_epalloc,
       .epfree       = sam_epfree,
@@ -405,6 +404,14 @@ static struct sam_ohci_s g_usbhost =
       .transfer     = sam_transfer,
       .disconnect   = sam_disconnect,
     },
+};
+
+/* This is the connection/enumeration interact */
+
+static struct usbhost_connection_s g_usbconn =
+{
+  .wait             = sam_wait,
+  .enumerate        = sam_enumerate,
 };
 
 /* This is a free list of EDs and TD buffers */
@@ -1630,8 +1637,8 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
  *   Wait for a device to be connected or disconnected to/from a root hub port.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call
- *      to the class create() method.
+ *   conn - The USB host connection instance obtained as a parameter from the call to
+ *      the USB driver initialization logic.
  *   connected - A pointer to an array of 3 boolean values corresponding to
  *      root hubs 1, 2, and 3.  For each boolean value: TRUE: Wait for a device
  *      to be connected on the root hub; FALSE: wait for device to be
@@ -1651,9 +1658,10 @@ static int sam_ohci_interrupt(int irq, FAR void *context)
  *
  *******************************************************************************/
 
-static int sam_wait(FAR struct usbhost_driver_s *drvr, FAR const bool *connected)
+static int sam_wait(FAR struct usbhost_connection_s *conn,
+                    FAR const bool *connected)
 {
-  struct sam_ohci_s *priv = (struct sam_ohci_s *)drvr;
+  struct sam_ohci_s *priv = &g_usbhost;
   irqstate_t flags;
   int rhpndx;
 
@@ -1707,8 +1715,8 @@ static int sam_wait(FAR struct usbhost_driver_s *drvr, FAR const bool *connected
  *   charge of the sequence of operations.
  *
  * Input Parameters:
- *   drvr - The USB host driver instance obtained as a parameter from the call to
- *      the class create() method.
+ *   conn - The USB host connection instance obtained as a parameter from the call to
+ *      the USB driver initialization logic.
  *   rphndx - Root hub port index.  0-(n-1) corresponds to root hub port 1-n.
  *
  * Returned Values:
@@ -1722,9 +1730,9 @@ static int sam_wait(FAR struct usbhost_driver_s *drvr, FAR const bool *connected
  *
  *******************************************************************************/
 
-static int sam_enumerate(FAR struct usbhost_driver_s *drvr, int rhpndx)
+static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 {
-  struct sam_ohci_s *priv = (struct sam_ohci_s *)drvr;
+  struct sam_ohci_s *priv = &g_usbhost;
   struct sam_rhport_s *rhport;
   uint32_t regaddr;
 
@@ -2734,5 +2742,5 @@ FAR struct usbhost_driver_s *sam_ohci_initialize(int controller)
   up_enable_irq(SAM_IRQ_UHPHS); /* enable USB interrupt */
   uvdbg("USB OHCI Initialized\n");
 
-  return &priv->drvr;
+  return &g_usbconn;
 }
