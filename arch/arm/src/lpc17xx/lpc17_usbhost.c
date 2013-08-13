@@ -241,7 +241,9 @@ static void lpc17_takesem(sem_t *sem);
 /* Byte stream access helper functions *****************************************/
 
 static inline uint16_t lpc17_getle16(const uint8_t *val);
+#if 0 /* Not used */
 static void lpc17_putle16(uint8_t *dest, uint16_t val);
+#endif
 
 /* OHCI memory pool helper functions *******************************************/
 
@@ -294,7 +296,8 @@ static int lpc17_usbinterrupt(int irq, FAR void *context);
 
 /* USB host controller operations **********************************************/
 
-static int lpc17_wait(FAR struct usbhost_connection_s *conn, FAR bool *connected);
+static int lpc17_wait(FAR struct usbhost_connection_s *conn,
+                      FAR const bool *connected);
 static int lpc17_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx);
 
 static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
@@ -541,11 +544,13 @@ static inline uint16_t lpc17_getle16(const uint8_t *val)
  *
  *******************************************************************************/
 
+#if 0 /* Not used */
 static void lpc17_putle16(uint8_t *dest, uint16_t val)
 {
   dest[0] = val & 0xff; /* Little endian means LS byte first in byte stream */
   dest[1] = val >> 8;
 }
+#endif
 
 /*******************************************************************************
  * Name: lpc17_edfree
@@ -1540,7 +1545,8 @@ static int lpc17_usbinterrupt(int irq, FAR void *context)
  *
  *******************************************************************************/
 
-static int lpc17_wait(FAR struct usbhost_connection_s *conn, FAR bool *connected)
+static int lpc17_wait(FAR struct usbhost_connection_s *conn,
+                      FAR const bool *connected)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)&g_usbhost;
   irqstate_t flags;
@@ -1630,7 +1636,7 @@ static int lpc17_enumerate(FAR struct usbhost_connection_s *conn, int rphndx)
    */
 
   uvdbg("Enumerate the device\n");
-  return usbhost_enumerate(drvr, 1, &priv->class);
+  return usbhost_enumerate(&g_usbhost.drvr, 1, &priv->class);
 }
 
 /************************************************************************************

@@ -358,7 +358,8 @@ static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx);
 
 /* USB host controller operations **********************************************/
 
-static int stm32_wait(FAR struct usbhost_connection_s *conn, FAR bool *connected);
+static int stm32_wait(FAR struct usbhost_connection_s *conn,
+                      FAR const bool *connected);
 static int stm32_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx);
 
 static int stm32_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
@@ -3035,7 +3036,8 @@ static void stm32_txfe_enable(FAR struct stm32_usbhost_s *priv, int chidx)
  *
  *******************************************************************************/
 
-static int stm32_wait(FAR struct usbhost_connection_s *conn, FAR bool *connected)
+static int stm32_wait(FAR struct usbhost_connection_s *conn,
+                      FAR const bool *connected)
 {
   FAR struct stm32_usbhost_s *priv = &g_usbhost;
   irqstate_t flags;
@@ -3159,7 +3161,7 @@ static int stm32_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 
   uvdbg("Enumerate the device\n");
   priv->smstate = SMSTATE_ENUM;
-  ret = usbhost_enumerate(drvr, 1, &priv->class);
+  ret = usbhost_enumerate(&g_usbhost.drvr, 1, &priv->class);
 
   /* The enumeration may fail either because of some HCD interfaces failure
    * or because the device class is not supported.  In either case, we just
