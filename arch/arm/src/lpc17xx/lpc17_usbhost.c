@@ -350,7 +350,7 @@ static struct lpc17_usbhost_s g_usbhost =
   .class            = NULL,
 };
 
-/* This is the connection/enumeration interact */
+/* This is the connection/enumeration interface */
 
 static struct usbhost_connection_s g_usbconn =
 {

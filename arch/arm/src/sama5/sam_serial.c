@@ -1204,8 +1204,6 @@ void up_serialinit(void)
 int up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
-  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
-
   /* This logic does not work.  Apparently re-entrancy problems cause the
    * loss of serial interrupts (a bad, zero IMR gets set).  My attempts to
    * make this function fully re-entrant have not been successful but the
@@ -1213,6 +1211,7 @@ int up_putc(int ch)
    */
 
 #if 0
+  struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
   uint32_t imr;
 
   /* Disable serial interrupts */
