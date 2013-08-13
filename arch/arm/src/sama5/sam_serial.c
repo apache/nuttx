@@ -1194,7 +1194,10 @@ void up_serialinit(void)
  * Name: up_putc
  *
  * Description:
- *   Provide priority, low-level access to support OS debug  writes
+ *   Provide priority, low-level access to support OS debug writes.  This
+ *   function is intended only to support early boot-up logic and serial
+ *   debug output from interrupt handlers.  It is invasive and will effect
+ *   your realtime performance!
  *
  ****************************************************************************/
 
@@ -1202,9 +1205,26 @@ int up_putc(int ch)
 {
 #ifdef HAVE_CONSOLE
   struct up_dev_s *priv = (struct up_dev_s*)CONSOLE_DEV.priv;
+
+  /* This logic does not work.  Apparently re-entrancy problems cause the
+   * loss of serial interrupts (a bad, zero IMR gets set).  My attempts to
+   * make this function fully re-entrant have not been successful but the
+   * following brute force approach works just fine.
+   */
+
+#if 0
   uint32_t imr;
 
+  /* Disable serial interrupts */
+
   up_disableallints(priv, &imr);
+#else
+  irqstate_t flags;
+
+  /* Disable all interrupts */
+
+  flags = irqsave();
+#endif
 
   /* Check for LF */
 
@@ -1216,7 +1236,16 @@ int up_putc(int ch)
     }
 
   up_lowputc(ch);
+
+#if 0 /* See comments above */
+  /* Restore serial interrupts */
+
   up_restoreusartint(priv, imr);
+#else
+  /* Restore all interrupts */
+
+  irqrestore(flags);
+#endif
 #endif
   return ch;
 }
