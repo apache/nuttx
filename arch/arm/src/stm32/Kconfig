@@ -2225,7 +2225,6 @@ config STM32_DAC1_TIMER
 config STM32_DAC1_TIMER_FREQUENCY
 	int "DAC1 timer frequency"
 	default 0
-	range 0 14
 
 endif
 

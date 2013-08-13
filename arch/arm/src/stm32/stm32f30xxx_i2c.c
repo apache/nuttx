@@ -1438,6 +1438,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
             {
               stm32_i2c_traceevent(priv, I2CEVENT_BTFRESTART, priv->msgc);
               /* ??? */
+              stm32_i2c_sendstart(priv);
             }
         }
       else if (priv->msgv)

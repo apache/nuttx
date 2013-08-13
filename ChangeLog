@@ -5385,4 +5385,5 @@
 	  is disconnected, it needs to provide the FunctionAddress to the
 	  USB HCD disconnect method so that the HCD will know which port
 	  is being disconnected (2013-8-12).
-
+	* nuttx/arch/arm/src/stm32/Kconfig, Make.defs, and /stm32f30xxx_i2c.c:
+	  STM32 F3 I2C fixes from John Wharington (2013-8-13).
