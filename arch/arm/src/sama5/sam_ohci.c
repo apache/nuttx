@@ -1616,11 +1616,17 @@ static int sam_wait(FAR struct usbhost_driver_s *drvr, FAR const bool *connected
         {
           /* Has the connection state changed on the RH port? */
 
-          while (priv->rhport[rhpndx].connected != connected[rhpndx])
+          if (priv->rhport[rhpndx].connected != connected[rhpndx])
             {
-              /* Yes.. break out and return the RH port number */
+              /* Yes.. Return the RH port number */
 
-              break;
+              irqrestore(flags);
+
+              udbg("RHPort%d connected: %s\n",
+                   rhpndx + 1,
+                   priv->rhport[rhpndx].connected ? "YES" : "NO");
+
+              return rhpndx;
             }
         }
 
@@ -1631,13 +1637,6 @@ static int sam_wait(FAR struct usbhost_driver_s *drvr, FAR const bool *connected
       priv->rhswait = true;
       sam_takesem(&priv->rhssem);
     }
-
-  irqrestore(flags);
-
-  udbg("RHPort%d connected: %s\n",
-       rhpndx + 1, priv->rhport[rhpndx].connected ? "YES" : "NO");
-
-  return rhpndx;
 }
 
 /*******************************************************************************
