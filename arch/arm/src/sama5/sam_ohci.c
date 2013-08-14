@@ -124,7 +124,10 @@
 #endif
 
 /* OHCI Setup ******************************************************************/
-/* Frame Interval / Periodic Start */
+/* Frame Interval / Periodic Start.
+ *
+ * At 12Mbps, there are 12000 bit time in each 1Msec frame.
+ */
 
 #define BITS_PER_FRAME          12000
 #define FI                     (BITS_PER_FRAME-1)
@@ -2689,6 +2692,17 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
   regval = getreg32(SAM_PMC_SCER);
   regval |= PMC_UHP;
   putreg32(regval, SAM_PMC_SCER);
+  irqrestore(flags);
+
+  /* Make all three ports usable.  Zero is the reset value and holds the
+   * ports in reset.
+   * REVISIT:  This will have to change in future.  Should be a configuration
+   * setting
+   */
+
+  regval  = getreg32(SAM_SFR_OHCIICR);
+  regval |= (SFR_OHCIICR_RES0 | SFR_OHCIICR_RES1 | SFR_OHCIICR_RES2);
+  putreg32(regval, SAM_SFR_OHCIICR);
   irqrestore(flags);
 
   /* Note that no pin pinconfiguration is required.  All USB HS pins have
