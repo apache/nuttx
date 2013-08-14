@@ -1612,10 +1612,10 @@ static void sam_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
   uint32_t regval;
   bool enable = true;
 
-  /* Fetch the current mode register and mask out the clkdiv (and pwsdiv) */
+  /* Fetch the current mode register and mask out the clkdiv+clockodd (and pwsdiv) */
 
   regval = sam_getreg(priv, SAM_HSMCI_MR_OFFSET);
-  regval &= ~(HSMCI_MR_CLKDIV_MASK | HSMCI_MR_PWSDIV_MASK);
+  regval &= ~(HSMCI_MR_CLKDIV_MASK | HSMCI_MR_PWSDIV_MASK | HSMCI_MR_CLKODD);
 
  /* These clock devisor values that must be defined in the board-specific
   * board.h header file: HSMCI_INIT_CLKDIV, HSMCI_MMCXFR_CLKDIV,
