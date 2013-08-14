@@ -120,12 +120,14 @@
  *
  *  USB Clock = PLLACK / (USBDIV + 1) = 48MHz
  *  USBDIV    = PLLACK / 48MHz - 1
- *            = 16.5
- *  REVISIT: USBDIV = 16 gives a clock of 46.59MHz which is an error of 3%
+ *            = 15.5
+ *
+ *  The maximum value of USBDIV is 15 corresponding to a divisor of 16.
+ *  REVISIT: USBDIV = 15 gives a clock of 49.5MHz which is an error of 3%
  */
 
 #  define BOARD_OHCI_INPUT         PMC_USB_USBS_PLLA
-#  define BOARD_OHCI_DIVIDER       (16)
+#  define BOARD_OHCI_DIVIDER       (15)
 #endif
 
 #if 0
