@@ -174,7 +174,7 @@
 #define HSMCI_MR_WRPROOF              (1 << 12) /* Bit 12: Write Proof Enable */
 #define HSMCI_MR_FBYTE                (1 << 13) /* Bit 13: Force Byte Transfer */
 #define HSMCI_MR_PADV                 (1 << 14) /* Bit 14: Padding Value */
-#define HSMCI_MR_CLKODD               (1 << 15) /* Bit 15: Clock divider is odd */
+#define HSMCI_MR_CLKODD               (1 << 16) /* Bit 15: Clock divider is odd */
 
 /* HSMCI Data Timeout Register */
 

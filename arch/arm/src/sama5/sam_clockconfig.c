@@ -374,7 +374,7 @@ static inline void sam_usbclockconfig(void)
  * Description:
  *   Called to initialize the SAM3/4.  This does whatever setup is needed to
  *   put the SoC in a usable state.  This includes the initialization of
- *   clocking using the settings in board.h.  (After power-on reset, the SAM3/4
+ *   clocking using the settings in board.h.  (After power-on reset, the SAMA5
  *   is initially running on a 12MHz internal RC clock).  This function also
  *   performs other low-level chip initialization of the chip including master
  *   clock, IRQ & watchdog configuration.
