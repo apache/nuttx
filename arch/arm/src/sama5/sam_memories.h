@@ -82,7 +82,7 @@ extern "C"
  *
  ****************************************************************************/
 
-uintptr_t sam_physregaddr(uintptr_t vregaddr);
+uintptr_t sam_physregaddr(uintptr_t virtregaddr);
 
 /****************************************************************************
  * Name: sam_physramaddr
@@ -93,7 +93,18 @@ uintptr_t sam_physregaddr(uintptr_t vregaddr);
  *
  ****************************************************************************/
 
-uintptr_t sam_physramaddr(uintptr_t vregaddr);
+uintptr_t sam_physramaddr(uintptr_t vramaddr);
+
+/****************************************************************************
+ * Name: sam_virtramaddr
+ *
+ * Description:
+ *   Give the phsical address of a RAM memory location, return the virtual
+ *   address of that location.
+ *
+ ****************************************************************************/
+
+uintptr_t sam_virtramaddr(uintptr_t physramaddr);
 
 #undef EXTERN
 #if defined(__cplusplus)

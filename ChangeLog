@@ -5330,7 +5330,7 @@
 	* arch/arm/src/sama5/sam_dmac.c:  Finally after many bugfixes (the
 	  last being caching issues), the SAMA5 DMA support has been
 	  verified (with SPI) (2013-8-9).
-	* arch/arm/src/sama5/sam_memories.c and .h:  Central logic for
+	* arch/arm/src/sama5/sam_memories.c and .h:  Centralize logic for
 	  conversions between physical and virtual addresses (2013-8-9).
 	* arch/arm/src/sama5/sam_hsmci.c and sam34/sam_hsmci.c:  Correct a
 	  race condition in the SAMA5 HSCMI driver:  The tranfer done
@@ -5404,3 +5404,7 @@
 	  passes information associated with the RHport implicitly.  The klugey,
 	  procedural alternative was to add the function address to every
 	  interface method (which I started to do but backed above) (2013-8-13).
+	* arch/arm/src/sama5/sam_memories.c and .h:  Extended logic so do
+	  conversions from physical to virtual addresses (2013-8-14).
+	* arch/arm/src/sama5/sam_ohci.c:  Add D cache contols and conversion
+	  between physical and virtual address (2013-8-14).

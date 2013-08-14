@@ -348,15 +348,15 @@ config SAMA5_OHCI
 if SAMA5_OHCI
 config SAMA5_OHCI_NEDS
 	int "Number of endpoint descriptors"
-	default 2
+	default 6
 
 config SAMA5_OHCI_NTDS
 	int "Number of transfer descriptors"
-	default 3
+	default 9
 
 config SAMA5_OHCI_TDBUFFERS
 	int "Number of transfer descriptor buffers"
-	default 2
+	default 6
 
 config SAMA5_OHCI_TDBUFSIZE
 	int "Size of one transfer descriptor buffer"
