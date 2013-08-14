@@ -123,7 +123,7 @@
  *
  *  USB Clock = PLLACK / (USBDIV + 1) = 48MHz
  *  USBDIV    = PLLACK / 48MHz - 1
- *            = 16
+ *            = 15
  *
  *  The maximum value of USBDIV is 15 corresponding to a divisor of 16.
  *  REVISIT: USBDIV = 15 gives an exact clock of 48MHz.
