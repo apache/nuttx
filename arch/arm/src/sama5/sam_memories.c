@@ -58,19 +58,19 @@
  * Name: peripha_physregaddr
  *
  * Description:
- *   Give the virtual address of a peripheral A register, return the
+ *   Given the virtual address of a peripheral A register, return the
  *   physical address of the register
  *
  ****************************************************************************/
 
-static inline uintptr_t peripha_physregaddr(uintptr_t vregaddr)
+static inline uintptr_t peripha_physregaddr(uintptr_t virtregaddr)
 {
 #if SAM_PERIPHA_PSECTION != SAM_PERIPHA_VSECTION
   /* Get the offset into the virtual memory region section containing the
    * register
    */
 
-  uintptr_t sectoffset = vregaddr - SAM_PERIPHA_VSECTION;
+  uintptr_t sectoffset = virtregaddr - SAM_PERIPHA_VSECTION;
 
   /* Add that offset to the physical base address of the memory region */
 
@@ -79,7 +79,7 @@ static inline uintptr_t peripha_physregaddr(uintptr_t vregaddr)
 #else
   /* 1-to-1 mapping */
 
-  return vregaddr;
+  return virtregaddr;
 
 #endif
 }
@@ -88,19 +88,19 @@ static inline uintptr_t peripha_physregaddr(uintptr_t vregaddr)
  * Name: periphb_physregaddr
  *
  * Description:
- *   Give the virtual address of a peripheral B register, return the
+ *   Given the virtual address of a peripheral B register, return the
  *   physical address of the register
  *
  ****************************************************************************/
 
-static inline uintptr_t periphb_physregaddr(uintptr_t vregaddr)
+static inline uintptr_t periphb_physregaddr(uintptr_t virtregaddr)
 {
 #if SAM_PERIPHB_PSECTION != SAM_PERIPHB_VSECTION
   /* Get the offset into the virtual memory region section containing the
    * register
    */
 
-  uintptr_t sectoffset = vregaddr - SAM_PERIPHB_VSECTION;
+  uintptr_t sectoffset = virtregaddr - SAM_PERIPHB_VSECTION;
 
   /* Add that offset to the physical base address of the memory region */
 
@@ -109,7 +109,7 @@ static inline uintptr_t periphb_physregaddr(uintptr_t vregaddr)
 #else
   /* 1-to-1 mapping */
 
-  return vregaddr;
+  return virtregaddr;
 
 #endif
 }
@@ -118,19 +118,19 @@ static inline uintptr_t periphb_physregaddr(uintptr_t vregaddr)
  * Name: sysc_physregaddr
  *
  * Description:
- *   Give the virtual address of a system controller register, return the
+ *   Given the virtual address of a system controller register, return the
  *   physical address of the register
  *
  ****************************************************************************/
 
-static inline uintptr_t sysc_physregaddr(uintptr_t vregaddr)
+static inline uintptr_t sysc_physregaddr(uintptr_t virtregaddr)
 {
 #if SAM_SYSC_PSECTION != SAM_SYSC_VSECTION
   /* Get the offset into the virtual memory region section containing the
    * register
    */
 
-  uintptr_t sectoffset = vregaddr - SAM_SYSC_VSECTION;
+  uintptr_t sectoffset = virtregaddr - SAM_SYSC_VSECTION;
 
   /* Add that offset to the physical base address of the memory region */
 
@@ -139,7 +139,7 @@ static inline uintptr_t sysc_physregaddr(uintptr_t vregaddr)
 #else
   /* 1-to-1 mapping */
 
-  return vregaddr;
+  return virtregaddr;
 
 #endif
 }
@@ -148,19 +148,19 @@ static inline uintptr_t sysc_physregaddr(uintptr_t vregaddr)
  * Name: isram_physramaddr
  *
  * Description:
- *   Give the virtual address of an internal SRAM memory location, return the
+ *   Given the virtual address of an internal SRAM memory location, return the
  *   physical address of that location
  *
  ****************************************************************************/
 
-static inline uintptr_t isram_physramaddr(uintptr_t vregaddr)
+static inline uintptr_t isram_physramaddr(uintptr_t virtramaddr)
 {
 #if SAM_ISRAM_PSECTION != SAM_ISRAM_VSECTION
   /* Get the offset into the virtual memory region section containing the
    * RAM memory location.
    */
 
-  uintptr_t sectoffset = vregaddr - SAM_ISRAM_VSECTION;
+  uintptr_t sectoffset = virtramaddr - SAM_ISRAM_VSECTION;
 
   /* Add that offset to the physical base address of the memory region */
 
@@ -169,7 +169,7 @@ static inline uintptr_t isram_physramaddr(uintptr_t vregaddr)
 #else
   /* 1-to-1 mapping */
 
-  return vregaddr;
+  return virtramaddr;
 
 #endif
 }
@@ -178,20 +178,20 @@ static inline uintptr_t isram_physramaddr(uintptr_t vregaddr)
  * Name: sdram_physramaddr
  *
  * Description:
- *   Give the virtual address of an external SDRAM memory location, return
+ *   Given the virtual address of an external SDRAM memory location, return
  *   the physical address of that location
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_DDRCS
-static inline uintptr_t sdram_physramaddr(uintptr_t vregaddr)
+static inline uintptr_t sdram_physramaddr(uintptr_t virtramaddr)
 {
 #if SAM_DDRCS_PSECTION != SAM_DDRCS_VSECTION
   /* Get the offset into the virtual memory region section containing the
    * RAM memory location.
    */
 
-  uintptr_t sectoffset = vregaddr - SAM_DDRCS_VSECTION;
+  uintptr_t sectoffset = virtramaddr - SAM_DDRCS_VSECTION;
 
   /* Add that offset to the physical base address of the memory region */
 
@@ -200,7 +200,7 @@ static inline uintptr_t sdram_physramaddr(uintptr_t vregaddr)
 #else
   /* 1-to-1 mapping */
 
-  return vregaddr;
+  return virtramaddr;
 
 #endif
 }
@@ -210,19 +210,19 @@ static inline uintptr_t sdram_physramaddr(uintptr_t vregaddr)
  * Name: nfcsram_physramaddr
  *
  * Description:
- *   Give the virtual address of an NFC SRAM memory location, return the
+ *   Given the virtual address of an NFC SRAM memory location, return the
  *   physical address of that location
  *
  ****************************************************************************/
 
-static inline uintptr_t nfcsram_physramaddr(uintptr_t vregaddr)
+static inline uintptr_t nfcsram_physramaddr(uintptr_t virtramaddr)
 {
 #if SAM_NFCSRAM_PSECTION != SAM_NFCSRAM_VSECTION
   /* Get the offset into the virtual memory region section containing the
    * RAM memory location.
    */
 
-  uintptr_t sectoffset = vregaddr - SAM_NFCSRAM_VSECTION;
+  uintptr_t sectoffset = virtramaddr - SAM_NFCSRAM_VSECTION;
 
   /* Add that offset to the physical base address of the memory region */
 
@@ -231,7 +231,7 @@ static inline uintptr_t nfcsram_physramaddr(uintptr_t vregaddr)
 #else
   /* 1-to-1 mapping */
 
-  return vregaddr;
+  return virtramaddr;
 
 #endif
 }
@@ -240,19 +240,19 @@ static inline uintptr_t nfcsram_physramaddr(uintptr_t vregaddr)
  * Name: udphsram_physramaddr
  *
  * Description:
- *   Give the virtual address of an UDPH SRAM memory location, return the
+ *   Given the virtual address of an UDPH SRAM memory location, return the
  *   physical address of that location
  *
  ****************************************************************************/
 
-static inline uintptr_t udphsram_physramaddr(uintptr_t vregaddr)
+static inline uintptr_t udphsram_physramaddr(uintptr_t virtramaddr)
 {
 #if SAM_UDPHSRAM_PSECTION != SAM_UDPHSRAM_VSECTION
   /* Get the offset into the virtual memory region section containing the
    * RAM memory location.
    */
 
-  uintptr_t sectoffset = vregaddr - SAM_UDPHSRAM_VSECTION;
+  uintptr_t sectoffset = virtramaddr - SAM_UDPHSRAM_VSECTION;
 
   /* Add that offset to the physical base address of the memory region */
 
@@ -261,7 +261,7 @@ static inline uintptr_t udphsram_physramaddr(uintptr_t vregaddr)
 #else
   /* 1-to-1 mapping */
 
-  return vregaddr;
+  return virtramaddr;
 
 #endif
 }
@@ -270,21 +270,21 @@ static inline uintptr_t udphsram_physramaddr(uintptr_t vregaddr)
  * Name: ebics0_physramaddr
  *
  * Description:
- *   Give the virtual address of an external CS0 SRAM memory location,
+ *   Given the virtual address of an external CS0 SRAM memory location,
  *   return the physical address of that location
  *
  ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_EBICS0) && (defined(CONFIG_SAMA5_EBICS0_SRAM) || \
     defined(CONFIG_SAMA5_EBICS0_PSRAM))
-static inline uintptr_t ebics0_physramaddr(uintptr_t vregaddr)
+static inline uintptr_t ebics0_physramaddr(uintptr_t virtramaddr)
 {
 #if SAM_EBICS0_PSECTION != SAM_EBICS0_VSECTION
   /* Get the offset into the virtual memory region section containing the
    * RAM memory location.
    */
 
-  uintptr_t sectoffset = vregaddr - SAM_EBICS0_VSECTION;
+  uintptr_t sectoffset = virtramaddr - SAM_EBICS0_VSECTION;
 
   /* Add that offset to the physical base address of the memory region */
 
@@ -293,7 +293,7 @@ static inline uintptr_t ebics0_physramaddr(uintptr_t vregaddr)
 #else
   /* 1-to-1 mapping */
 
-  return vregaddr;
+  return virtramaddr;
 
 #endif
 }
@@ -303,21 +303,21 @@ static inline uintptr_t ebics0_physramaddr(uintptr_t vregaddr)
  * Name: ebics1_physramaddr
  *
  * Description:
- *   Give the virtual address of an external CS1 SRAM memory location,
+ *   Given the virtual address of an external CS1 SRAM memory location,
  *   return the physical address of that location
  *
  ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_EBICS1) && (defined(CONFIG_SAMA5_EBICS1_SRAM) || \
     defined(CONFIG_SAMA5_EBICS1_PSRAM))
-static inline uintptr_t ebics1_physramaddr(uintptr_t vregaddr)
+static inline uintptr_t ebics1_physramaddr(uintptr_t virtramaddr)
 {
 #if SAM_EBICS1_PSECTION != SAM_EBICS1_VSECTION
   /* Get the offset into the virtual memory region section containing the
    * RAM memory location.
    */
 
-  uintptr_t sectoffset = vregaddr - SAM_EBICS1_VSECTION;
+  uintptr_t sectoffset = virtramaddr - SAM_EBICS1_VSECTION;
 
   /* Add that offset to the physical base address of the memory region */
 
@@ -326,7 +326,7 @@ static inline uintptr_t ebics1_physramaddr(uintptr_t vregaddr)
 #else
   /* 1-to-1 mapping */
 
-  return vregaddr;
+  return virtramaddr;
 
 #endif
 }
@@ -336,21 +336,21 @@ static inline uintptr_t ebics1_physramaddr(uintptr_t vregaddr)
  * Name: ebics2_physramaddr
  *
  * Description:
- *   Give the virtual address of an external CS2 SRAM memory location,
+ *   Given the virtual address of an external CS2 SRAM memory location,
  *   return the physical address of that location
  *
  ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_EBICS2) && (defined(CONFIG_SAMA5_EBICS2_SRAM) || \
     defined(CONFIG_SAMA5_EBICS2_PSRAM))
-static inline uintptr_t ebics2_physramaddr(uintptr_t vregaddr)
+static inline uintptr_t ebics2_physramaddr(uintptr_t virtramaddr)
 {
 #if SAM_EBICS2_PSECTION != SAM_EBICS2_VSECTION
   /* Get the offset into the virtual memory region section containing the
    * RAM memory location.
    */
 
-  uintptr_t sectoffset = vregaddr - SAM_EBICS2_VSECTION;
+  uintptr_t sectoffset = virtramaddr - SAM_EBICS2_VSECTION;
 
   /* Add that offset to the physical base address of the memory region */
 
@@ -359,7 +359,7 @@ static inline uintptr_t ebics2_physramaddr(uintptr_t vregaddr)
 #else
   /* 1-to-1 mapping */
 
-  return vregaddr;
+  return virtramaddr;
 
 #endif
 }
@@ -369,21 +369,21 @@ static inline uintptr_t ebics2_physramaddr(uintptr_t vregaddr)
  * Name: ebics3_physramaddr
  *
  * Description:
- *   Give the virtual address of an external CS3 SRAM memory location,
+ *   Given the virtual address of an external CS3 SRAM memory location,
  *   return the physical address of that location
  *
  ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_EBICS3) && (defined(CONFIG_SAMA5_EBICS3_SRAM) || \
     defined(CONFIG_SAMA5_EBICS3_PSRAM))
-static inline uintptr_t ebics3_physramaddr(uintptr_t vregaddr)
+static inline uintptr_t ebics3_physramaddr(uintptr_t virtramaddr)
 {
 #if SAM_EBICS3_PSECTION != SAM_EBICS3_VSECTION
   /* Get the offset into the virtual memory region section containing the
    * RAM memory location.
    */
 
-  uintptr_t sectoffset = vregaddr - SAM_EBICS3_VSECTION;
+  uintptr_t sectoffset = virtramaddr - SAM_EBICS3_VSECTION;
 
   /* Add that offset to the physical base address of the memory region */
 
@@ -392,7 +392,261 @@ static inline uintptr_t ebics3_physramaddr(uintptr_t vregaddr)
 #else
   /* 1-to-1 mapping */
 
-  return vregaddr;
+  return virtramaddr;
+
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: isram_virtramaddr
+ *
+ * Description:
+ *   Given the physical address of an internal SRAM memory location, return
+ *   the virtual address of that location
+ *
+ ****************************************************************************/
+
+static inline uintptr_t isram_virtramaddr(uintptr_t physramaddr)
+{
+#if SAM_ISRAM_PSECTION != SAM_ISRAM_VSECTION
+  /* Get the offset into the virtual memory region section containing the
+   * RAM memory location.
+   */
+
+  uintptr_t sectoffset = physramaddr - SAM_ISRAM_PSECTION;
+
+  /* Add that offset to the physical base address of the memory region */
+
+  return SAM_ISRAM_VSECTION + sectoffset;
+
+#else
+  /* 1-to-1 mapping */
+
+  return physramaddr;
+
+#endif
+}
+
+/****************************************************************************
+ * Name: sdram_virtramaddr
+ *
+ * Description:
+ *   Given the physical address of an external SDRAM memory location, return
+ *   the virtual address of that location
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_DDRCS
+static inline uintptr_t sdram_virtramaddr(uintptr_t physramaddr)
+{
+#if SAM_DDRCS_PSECTION != SAM_DDRCS_VSECTION
+  /* Get the offset into the virtual memory region section containing the
+   * RAM memory location.
+   */
+
+  uintptr_t sectoffset = physramaddr - SAM_DDRCS_PSECTION;
+
+  /* Add that offset to the physical base address of the memory region */
+
+  return SAM_DDRCS_VSECTION + sectoffset;
+
+#else
+  /* 1-to-1 mapping */
+
+  return physramaddr;
+
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: nfcsram_virtramaddr
+ *
+ * Description:
+ *   Given the physical address of an NFC SRAM memory location, return the
+ *   virtual address of that location
+ *
+ ****************************************************************************/
+
+static inline uintptr_t nfcsram_virtramaddr(uintptr_t physramaddr)
+{
+#if SAM_NFCSRAM_PSECTION != SAM_NFCSRAM_VSECTION
+  /* Get the offset into the virtual memory region section containing the
+   * RAM memory location.
+   */
+
+  uintptr_t sectoffset = physramaddr - SAM_NFCSRAM_PSECTION;
+
+  /* Add that offset to the physical base address of the memory region */
+
+  return SAM_NFCSRAM_VSECTION + sectoffset;
+
+#else
+  /* 1-to-1 mapping */
+
+  return physramaddr;
+
+#endif
+}
+
+/****************************************************************************
+ * Name: udphsram_virtramaddr
+ *
+ * Description:
+ *   Given the physical address of an UDPH SRAM memory location, return the
+ *   virtual address of that location
+ *
+ ****************************************************************************/
+
+static inline uintptr_t udphsram_virtramaddr(uintptr_t physramaddr)
+{
+#if SAM_UDPHSRAM_PSECTION != SAM_UDPHSRAM_VSECTION
+  /* Get the offset into the virtual memory region section containing the
+   * RAM memory location.
+   */
+
+  uintptr_t sectoffset = physramaddr - SAM_UDPHSRAM_PSECTION;
+
+  /* Add that offset to the physical base address of the memory region */
+
+  return SAM_UDPHSRAM_VSECTION + sectoffset;
+
+#else
+  /* 1-to-1 mapping */
+
+  return physramaddr;
+
+#endif
+}
+
+/****************************************************************************
+ * Name: ebics0_virtramaddr
+ *
+ * Description:
+ *   Given the physical address of an external CS0 SRAM memory location,
+ *   return the virtual address of that location
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SAMA5_EBICS0) && (defined(CONFIG_SAMA5_EBICS0_SRAM) || \
+    defined(CONFIG_SAMA5_EBICS0_PSRAM))
+static inline uintptr_t ebics0_virtramaddr(uintptr_t physramaddr)
+{
+#if SAM_EBICS0_PSECTION != SAM_EBICS0_VSECTION
+  /* Get the offset into the virtual memory region section containing the
+   * RAM memory location.
+   */
+
+  uintptr_t sectoffset = physramaddr - SAM_EBICS0_PSECTION;
+
+  /* Add that offset to the physical base address of the memory region */
+
+  return SAM_EBICS0_VSECTION + sectoffset;
+
+#else
+  /* 1-to-1 mapping */
+
+  return physramaddr;
+
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: ebics1_virtramaddr
+ *
+ * Description:
+ *   Given the physical address of an external CS1 SRAM memory location,
+ *   return the virtual address of that location
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SAMA5_EBICS1) && (defined(CONFIG_SAMA5_EBICS1_SRAM) || \
+    defined(CONFIG_SAMA5_EBICS1_PSRAM))
+static inline uintptr_t ebics1_virtramaddr(uintptr_t physramaddr)
+{
+#if SAM_EBICS1_PSECTION != SAM_EBICS1_VSECTION
+  /* Get the offset into the virtual memory region section containing the
+   * RAM memory location.
+   */
+
+  uintptr_t sectoffset = physramaddr - SAM_EBICS1_PSECTION;
+
+  /* Add that offset to the physical base address of the memory region */
+
+  return SAM_EBICS1_VSECTION + sectoffset;
+
+#else
+  /* 1-to-1 mapping */
+
+  return physramaddr;
+
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: ebics2_virtramaddr
+ *
+ * Description:
+ *   Given the physical address of an external CS2 SRAM memory location,
+ *   return the virtual address of that location
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SAMA5_EBICS2) && (defined(CONFIG_SAMA5_EBICS2_SRAM) || \
+    defined(CONFIG_SAMA5_EBICS2_PSRAM))
+static inline uintptr_t ebics2_virtramaddr(uintptr_t physramaddr)
+{
+#if SAM_EBICS2_PSECTION != SAM_EBICS2_VSECTION
+  /* Get the offset into the virtual memory region section containing the
+   * RAM memory location.
+   */
+
+  uintptr_t sectoffset = physramaddr - SAM_EBICS2_PSECTION;
+
+  /* Add that offset to the physical base address of the memory region */
+
+  return SAM_EBICS2_VSECTION + sectoffset;
+
+#else
+  /* 1-to-1 mapping */
+
+  return physramaddr;
+
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: ebics3_virtramaddr
+ *
+ * Description:
+ *   Given the physical address of an external CS3 SRAM memory location,
+ *   return the virtual address of that location
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SAMA5_EBICS3) && (defined(CONFIG_SAMA5_EBICS3_SRAM) || \
+    defined(CONFIG_SAMA5_EBICS3_PSRAM))
+static inline uintptr_t ebics3_virtramaddr(uintptr_t physramaddr)
+{
+#if SAM_EBICS3_PSECTION != SAM_EBICS3_VSECTION
+  /* Get the offset into the virtual memory region section containing the
+   * RAM memory location.
+   */
+
+  uintptr_t sectoffset = physramaddr - SAM_EBICS3_PSECTION;
+
+  /* Add that offset to the physical base address of the memory region */
+
+  return SAM_EBICS3_VSECTION + sectoffset;
+
+#else
+  /* 1-to-1 mapping */
+
+  return physramaddr;
 
 #endif
 }
@@ -406,35 +660,35 @@ static inline uintptr_t ebics3_physramaddr(uintptr_t vregaddr)
  * Name: sam_physregaddr
  *
  * Description:
- *   Give the virtual address of a register, return the physical address of
+ *   Given the virtual address of a register, return the physical address of
  *   the register
  *
  ****************************************************************************/
 
-uintptr_t sam_physregaddr(uintptr_t vregaddr)
+uintptr_t sam_physregaddr(uintptr_t virtregaddr)
 {
   /* Check for a peripheral A register */
 
-  if (vregaddr >= SAM_PERIPHA_VSECTION &&
-      vregaddr < (SAM_PERIPHA_VSECTION + SAM_PERIPHA_SIZE))
+  if (virtregaddr >= SAM_PERIPHA_VSECTION &&
+      virtregaddr < (SAM_PERIPHA_VSECTION + SAM_PERIPHA_SIZE))
     {
-      return peripha_physregaddr(vregaddr);
+      return peripha_physregaddr(virtregaddr);
     }
 
   /* Check for a peripheral A register */
 
-  else if (vregaddr >= SAM_PERIPHB_VSECTION &&
-           vregaddr < (SAM_PERIPHB_VSECTION + SAM_PERIPHB_SIZE))
+  else if (virtregaddr >= SAM_PERIPHB_VSECTION &&
+           virtregaddr < (SAM_PERIPHB_VSECTION + SAM_PERIPHB_SIZE))
     {
-      return periphb_physregaddr(vregaddr);
+      return periphb_physregaddr(virtregaddr);
     }
 
   /* Check for a system controller register */
 
-  else if (vregaddr >= SAM_SYSC_VSECTION &&
-           vregaddr < (SAM_SYSC_VSECTION + SAM_SYSC_SIZE))
+  else if (virtregaddr >= SAM_SYSC_VSECTION &&
+           virtregaddr < (SAM_SYSC_VSECTION + SAM_SYSC_SIZE))
     {
-      return sysc_physregaddr(vregaddr);
+      return sysc_physregaddr(virtregaddr);
     }
 
   /* We will not get here unless we are called with an invalid register
@@ -442,64 +696,64 @@ uintptr_t sam_physregaddr(uintptr_t vregaddr)
    */
 
   DEBUGPANIC();
-  return vregaddr;
+  return virtregaddr;
 }
 
 /****************************************************************************
  * Name: sam_physramaddr
  *
  * Description:
- *   Give the virtual address of a RAM memory location, return the physical
+ *   Given the virtual address of a RAM memory location, return the physical
  *   address of that location.
  *
  ****************************************************************************/
 
-uintptr_t sam_physramaddr(uintptr_t vregaddr)
+uintptr_t sam_physramaddr(uintptr_t virtramaddr)
 {
   /* Check for internal SRAM.  We we assume that ISRAM0 and ISRAM1 are
    * contiguous.
    */
 
-  if (vregaddr >= SAM_ISRAM_VSECTION &&
-      vregaddr < (SAM_ISRAM_VSECTION + SAM_ISRAM_SIZE))
+  if (virtramaddr >= SAM_ISRAM_VSECTION &&
+      virtramaddr < (SAM_ISRAM_VSECTION + SAM_ISRAM_SIZE))
     {
-      return isram_physramaddr(vregaddr);
+      return isram_physramaddr(virtramaddr);
     }
 
 #ifdef CONFIG_SAMA5_DDRCS
   /* Check for external SDRAM */
 
-  else if (vregaddr >= SAM_DDRCS_VSECTION &&
-           vregaddr < (SAM_DDRCS_VSECTION + SAMA5_DDRCS_SIZE))
+  else if (virtramaddr >= SAM_DDRCS_VSECTION &&
+           virtramaddr < (SAM_DDRCS_VSECTION + SAMA5_DDRCS_SIZE))
     {
-      return sdram_physramaddr(vregaddr);
+      return sdram_physramaddr(virtramaddr);
     }
 #endif
 
   /* Check for NFCS SRAM.  */
 
-  if (vregaddr >= SAM_NFCSRAM_VSECTION &&
-      vregaddr < (SAM_NFCSRAM_VSECTION + SAM_NFCSRAM_SIZE))
+  if (virtramaddr >= SAM_NFCSRAM_VSECTION &&
+      virtramaddr < (SAM_NFCSRAM_VSECTION + SAM_NFCSRAM_SIZE))
     {
-      return nfcsram_physramaddr(vregaddr);
+      return nfcsram_physramaddr(virtramaddr);
     }
 
   /* Check for UDPH SRAM.  */
 
-  if (vregaddr >= SAM_UDPHSRAM_VSECTION &&
-      vregaddr < (SAM_UDPHSRAM_VSECTION + SAM_UDPHSRAM_SIZE))
+  if (virtramaddr >= SAM_UDPHSRAM_VSECTION &&
+      virtramaddr < (SAM_UDPHSRAM_VSECTION + SAM_UDPHSRAM_SIZE))
     {
-      return udphsram_physramaddr(vregaddr);
+      return udphsram_physramaddr(virtramaddr);
     }
 
 #if defined(CONFIG_SAMA5_EBICS0) && (defined(CONFIG_SAMA5_EBICS0_SRAM) || \
     defined(CONFIG_SAMA5_EBICS0_PSRAM))
   /* Check for external SRAM or PSRAM on CS0 */
 
-  else if (vregaddr >= SAM_EBICS0_VSECTION &&
-           vregaddr < (SAM_EBICS0_VSECTION + SAMA5_EBICS0_SIZE))
+  else if (virtramaddr >= SAM_EBICS0_VSECTION &&
+           virtramaddr < (SAM_EBICS0_VSECTION + SAMA5_EBICS0_SIZE))
     {
-      return ebics0_physramaddr(vregaddr);
+      return ebics0_physramaddr(virtramaddr);
     }
 #endif
 
@@ -507,10 +761,10 @@ uintptr_t sam_physramaddr(uintptr_t vregaddr)
     defined(CONFIG_SAMA5_EBICS1_PSRAM))
   /* Check for external SRAM or PSRAM on CS1 */
 
-  else if (vregaddr >= SAM_EBICS1_VSECTION &&
-           vregaddr < (SAM_EBICS1_VSECTION + SAMA5_EBICS1_SIZE))
+  else if (virtramaddr >= SAM_EBICS1_VSECTION &&
+           virtramaddr < (SAM_EBICS1_VSECTION + SAMA5_EBICS1_SIZE))
     {
-      return ebics1_physramaddr(vregaddr);
+      return ebics1_physramaddr(virtramaddr);
     }
 #endif
 
@@ -518,10 +772,10 @@ uintptr_t sam_physramaddr(uintptr_t vregaddr)
     defined(CONFIG_SAMA5_EBICS2_PSRAM))
   /* Check for external SRAM or PSRAM on CS2 */
 
-  else if (vregaddr >= SAM_EBICS2_VSECTION &&
-           vregaddr < (SAM_EBICS2_VSECTION + SAMA5_EBICS2_SIZE))
+  else if (virtramaddr >= SAM_EBICS2_VSECTION &&
+           virtramaddr < (SAM_EBICS2_VSECTION + SAMA5_EBICS2_SIZE))
     {
-      return ebics2_physramaddr(vregaddr);
+      return ebics2_physramaddr(virtramaddr);
     }
 #endif
 
@@ -529,10 +783,10 @@ uintptr_t sam_physramaddr(uintptr_t vregaddr)
     defined(CONFIG_SAMA5_EBICS3_PSRAM))
   /* Check for external SRAM or PSRAM on CS3 */
 
-  else if (vregaddr >= SAM_EBICS3_VSECTION &&
-           vregaddr < (SAM_EBICS3_VSECTION + SAMA5_EBICS3_SIZE))
+  else if (virtramaddr >= SAM_EBICS3_VSECTION &&
+           virtramaddr < (SAM_EBICS3_VSECTION + SAMA5_EBICS3_SIZE))
     {
-      return ebics3_physramaddr(vregaddr);
+      return ebics3_physramaddr(virtramaddr);
     }
 #endif
 
@@ -541,5 +795,104 @@ uintptr_t sam_physramaddr(uintptr_t vregaddr)
    */
 
   DEBUGPANIC();
-  return vregaddr;
+  return virtramaddr;
+}
+
+/****************************************************************************
+ * Name: sam_virtramaddr
+ *
+ * Description:
+ *   Give the phsical address of a RAM memory location, return the virtual
+ *   address of that location.
+ *
+ ****************************************************************************/
+
+uintptr_t sam_virtramaddr(uintptr_t physramaddr)
+{
+  /* Check for internal SRAM.  We we assume that ISRAM0 and ISRAM1 are
+   * contiguous.
+   */
+
+  if (physramaddr >= SAM_ISRAM_PSECTION &&
+      physramaddr < (SAM_ISRAM_PSECTION + SAM_ISRAM_SIZE))
+    {
+      return isram_virtramaddr(physramaddr);
+    }
+
+#ifdef CONFIG_SAMA5_DDRCS
+  /* Check for external SDRAM */
+
+  else if (physramaddr >= SAM_DDRCS_PSECTION &&
+           physramaddr < (SAM_DDRCS_PSECTION + SAMA5_DDRCS_SIZE))
+    {
+      return sdram_virtramaddr(physramaddr);
+    }
+#endif
+
+  /* Check for NFCS SRAM.  */
+
+  if (physramaddr >= SAM_NFCSRAM_PSECTION &&
+      physramaddr < (SAM_NFCSRAM_PSECTION + SAM_NFCSRAM_SIZE))
+    {
+      return nfcsram_virtramaddr(physramaddr);
+    }
+
+  /* Check for UDPH SRAM.  */
+
+  if (physramaddr >= SAM_UDPHSRAM_PSECTION &&
+      physramaddr < (SAM_UDPHSRAM_PSECTION + SAM_UDPHSRAM_SIZE))
+    {
+      return udphsram_virtramaddr(physramaddr);
+    }
+
+#if defined(CONFIG_SAMA5_EBICS0) && (defined(CONFIG_SAMA5_EBICS0_SRAM) || \
+    defined(CONFIG_SAMA5_EBICS0_PSRAM))
+  /* Check for external SRAM or PSRAM on CS0 */
+
+  else if (physramaddr >= SAM_EBICS0_PSECTION &&
+           physramaddr < (SAM_EBICS0_PSECTION + SAMA5_EBICS0_SIZE))
+    {
+      return ebics0_virtramaddr(physramaddr);
+    }
+#endif
+
+#if defined(CONFIG_SAMA5_EBICS1) && (defined(CONFIG_SAMA5_EBICS1_SRAM) || \
+    defined(CONFIG_SAMA5_EBICS1_PSRAM))
+  /* Check for external SRAM or PSRAM on CS1 */
+
+  else if (physramaddr >= SAM_EBICS1_PSECTION &&
+           physramaddr < (SAM_EBICS1_PSECTION + SAMA5_EBICS1_SIZE))
+    {
+      return ebics1_virtramaddr(physramaddr);
+    }
+#endif
+
+#if defined(CONFIG_SAMA5_EBICS2) && (defined(CONFIG_SAMA5_EBICS2_SRAM) || \
+    defined(CONFIG_SAMA5_EBICS2_PSRAM))
+  /* Check for external SRAM or PSRAM on CS2 */
+
+  else if (physramaddr >= SAM_EBICS2_PSECTION &&
+           physramaddr < (SAM_EBICS2_PSECTION + SAMA5_EBICS2_SIZE))
+    {
+      return ebics2_virtramaddr(physramaddr);
+    }
+#endif
+
+#if defined(CONFIG_SAMA5_EBICS3) && (defined(CONFIG_SAMA5_EBICS3_SRAM) || \
+    defined(CONFIG_SAMA5_EBICS3_PSRAM))
+  /* Check for external SRAM or PSRAM on CS3 */
+
+  else if (physramaddr >= SAM_EBICS3_PSECTION &&
+           physramaddr < (SAM_EBICS3_PSECTION + SAMA5_EBICS3_SIZE))
+    {
+      return ebics3_virtramaddr(physramaddr);
+    }
+#endif
+
+  /* We will not get here unless we are called with an invalid or
+   * unsupported RAM address
+   */
+
+  DEBUGPANIC();
+  return physramaddr;
 }
