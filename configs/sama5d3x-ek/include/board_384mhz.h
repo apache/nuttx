@@ -90,9 +90,9 @@
  *  NOTE: Bit PLLADIV2 must always be set to 1 when MDIV is set to 3.
  *
  *  Prescaler input                         = 768MHz / 2 = 384MHz
- *  Prescaler output                        = 768MHz / 1 = 384MHz
+ *  Prescaler output                        = 384MHz / 1 = 384MHz
  *  Processor Clock (PCK)                   = 384MHz
- *  Master clock (MCK)                      = 396MHz / 3 = 129MHz
+ *  Master clock (MCK)                      = 396MHz / 3 = 128MHz
  */
 
 #define BOARD_PMC_MCKR_CSS         PMC_MCKR_CSS_PLLA
@@ -126,11 +126,13 @@
  *            = 15
  *
  *  The maximum value of USBDIV is 15 corresponding to a divisor of 16.
- *  REVISIT: USBDIV = 15 gives an exact clock of 48MHz.
+ *  REVISIT: However, using the divisor of (15+1) yields a frame rate
+ *  of 500 frames per second.  A divisor of (7+1) gives the correct 1MS
+ *  frame rate.  I cannot explain the factor of 2 difference.
  */
 
 #define BOARD_OHCI_INPUT           PMC_USB_USBS_PLLA
-#define BOARD_OHCI_DIVIDER         (15)
+#define BOARD_OHCI_DIVIDER         (7)
 
 /* Resulting frequencies */
 

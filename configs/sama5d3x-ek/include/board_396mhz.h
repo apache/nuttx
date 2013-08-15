@@ -89,7 +89,7 @@
  *  NOTE: Bit PLLADIV2 must always be set to 1 when MDIV is set to 3.
  *
  *  Prescaler input                         = 792MHz / 2 = 396MHz
- *  Prescaler output                        = 792MHz / 1 = 396MHz
+ *  Prescaler output                        = 396MHz / 1 = 396MHz
  *  Processor Clock (PCK)                   = 396MHz
  *  Master clock (MCK)                      = 396MHz / 3 = 132MHz
  */
