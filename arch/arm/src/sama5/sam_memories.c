@@ -695,6 +695,7 @@ uintptr_t sam_physregaddr(uintptr_t virtregaddr)
    * address
    */
 
+  dbg("Bad virtual address: %08lx\n|", virtregaddr);
   DEBUGPANIC();
   return virtregaddr;
 }
@@ -791,10 +792,15 @@ uintptr_t sam_physramaddr(uintptr_t virtramaddr)
 #endif
 
   /* We will not get here unless we are called with an invalid or
-   * unsupported RAM address
+   * unsupported RAM address.  Special case the NULL address.
    */
 
-  DEBUGPANIC();
+  if (virtramaddr != 0)
+    {
+      dbg("Bad virtual address: %08lx\n|", virtramaddr);
+      DEBUGPANIC();
+    }
+
   return virtramaddr;
 }
 
@@ -802,7 +808,7 @@ uintptr_t sam_physramaddr(uintptr_t virtramaddr)
  * Name: sam_virtramaddr
  *
  * Description:
- *   Give the phsical address of a RAM memory location, return the virtual
+ *   Give the physical address of a RAM memory location, return the virtual
  *   address of that location.
  *
  ****************************************************************************/
@@ -890,9 +896,14 @@ uintptr_t sam_virtramaddr(uintptr_t physramaddr)
 #endif
 
   /* We will not get here unless we are called with an invalid or
-   * unsupported RAM address
+   * unsupported RAM address.  Special case the NULL address.
    */
 
-  DEBUGPANIC();
+  if (physramaddr != 0)
+    {
+      dbg("Bad physical address: %08lx\n|", physramaddr);
+      DEBUGPANIC();
+    }
+
   return physramaddr;
 }
