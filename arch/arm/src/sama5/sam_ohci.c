@@ -181,6 +181,7 @@ struct sam_rhport_s
   volatile bool connected;      /* Connected to device */
   volatile bool lowspeed;       /* Low speed device attached. */
   uint8_t       rhpndx;         /* Root hub port index */
+  bool          ep0init;        /* True:  EP0 initialized */
 
   /* The bound device class driver */
 
@@ -321,12 +322,14 @@ static inline int sam_remisoced(struct sam_ed_s *ed);
 
 /* Descriptor helper functions *************************************************/
 
-static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
-                         uint32_t dirpid, uint32_t toggle,
-                         volatile uint8_t *buffer, size_t buflen);
-static int sam_wdhwait(struct sam_rhport_s *rhport, struct sam_ed_s *ed);
-static int sam_ctrltd(struct sam_rhport_s *rhport, uint32_t dirpid,
-                      uint8_t *buffer, size_t buflen);
+static int  sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
+                          uint32_t dirpid, uint32_t toggle,
+                          volatile uint8_t *buffer, size_t buflen);
+static void sam_ep0enqueue(int rhpndx);
+static void sam_ep0dequeue(int rhpndx);
+static int  sam_wdhwait(struct sam_rhport_s *rhport, struct sam_ed_s *ed);
+static int  sam_ctrltd(struct sam_rhport_s *rhport, uint32_t dirpid,
+                       uint8_t *buffer, size_t buflen);
 
 /* Interrupt handling **********************************************************/
 
@@ -360,10 +363,6 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr,
 static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
                         FAR uint8_t *buffer, size_t buflen);
 static void sam_disconnect(FAR struct usbhost_driver_s *drvr);
-
-/* Initialization **************************************************************/
-
-static inline void sam_ep0init(void);
 
 /*******************************************************************************
  * Private Data
@@ -969,7 +968,7 @@ static inline int sam_addinted(const FAR struct usbhost_epdesc_s *epdesc,
    */
 
   ed->hw.nexted = physhead;
-  physed        =  sam_virtramaddr((uintptr_t)ed);
+  physed        =  sam_physramaddr((uintptr_t)ed);
   sam_setinttab((uint32_t)physed, interval, offset);
   uvdbg("head: %08x next: %08x\n", physed, physhead);
 
@@ -1190,6 +1189,8 @@ static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
       /* Skip processing of this ED */
 
       ed->hw.ctrl      |= ED_CONTROL_K;
+      cp15_coherent_dcache((uintptr_t)ed,
+                           (uintptr_t)ed + sizeof(struct sam_ed_s));
 
       /* Select the common tail ED for this root hub port */
 
@@ -1224,18 +1225,221 @@ static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
 
       /* Flush the buffer, the new TD, and the modified ED to RAM */
 
-      cp15_coherent_dcache((uintptr_t)buffer, buflen);
-      cp15_coherent_dcache((uintptr_t)tdtail, sizeof(struct sam_gtd_s));
-      cp15_coherent_dcache((uintptr_t)td, sizeof(struct sam_gtd_s));
+      cp15_coherent_dcache((uintptr_t)buffer,
+                           (uintptr_t)buffer + buflen);
+      cp15_coherent_dcache((uintptr_t)tdtail,
+                           (uintptr_t)tdtail + sizeof(struct sam_gtd_s));
+      cp15_coherent_dcache((uintptr_t)td,
+                           (uintptr_t)td + sizeof(struct sam_gtd_s));
 
       /* Resume processing of this ED */
 
       ed->hw.ctrl      &= ~ED_CONTROL_K;
-      cp15_coherent_dcache((uintptr_t)ed, sizeof(struct sam_ed_s));
+      cp15_coherent_dcache((uintptr_t)ed,
+                           (uintptr_t)ed + sizeof(struct sam_ed_s));
       ret               = OK;
     }
 
   return ret;
+}
+
+/*******************************************************************************
+ * Name: sam_ep0enqueue
+ *
+ * Description:
+ *   Initialize ED for EP0, add it to the control ED list, and enable control
+ *   transfers.
+ *
+ * Input Parameters:
+ *   rhpndx - Root hub port index.
+ *
+ * Returned Values:
+ *   None
+ *
+ *******************************************************************************/
+
+static void sam_ep0enqueue(int rhpndx)
+{
+  struct sam_ed_s *edctrl;
+  struct sam_gtd_s *tdtail;
+  irqstate_t flags;
+  uintptr_t physaddr;
+  uint32_t regval;
+
+  /* ControlListEnable.  This bit is cleared to disable the processing of the
+   * Control list.  We should never modify the control list while CLE is set.
+   */
+
+  flags   = irqsave();
+  regval  = sam_getreg(SAM_USBHOST_CTRL);
+  regval &= ~OHCI_CTRL_CLE;
+  sam_putreg(regval, SAM_USBHOST_CTRL);
+
+  /* Get some pointers to the EP0 control ED and to the common tail TD
+   * for this root hub port.
+   */
+
+  tdtail           = &g_tdtail[rhpndx];
+  edctrl           = &g_edctrl[rhpndx];
+
+  /* Initialize the common tail TD for this port */
+
+  memset(tdtail, 0, sizeof(struct sam_gtd_s));
+  tdtail->ed       = edctrl;
+  tdtail->prealloc = true;
+
+  /* Initialize the control endpoint for this port */
+
+  memset(edctrl, 0, sizeof(struct sam_ed_s));
+  sem_init(&edctrl->wdhsem, 0, 0);
+
+  /* Set up some default values (like max packetsize = 8).
+   * NOTE that the SKIP bit is set until the first readl TD is added.
+   */
+
+  (void)sam_ep0configure(&g_ohci.rhport[rhpndx].drvr, 0, 8);
+  edctrl->hw.ctrl  |= ED_CONTROL_K;
+
+  /* Link the common tail TD to the ED's TD list */
+
+  physaddr          = sam_physramaddr((uintptr_t)tdtail);
+  edctrl->hw.headp  = (uint32_t)physaddr;
+  edctrl->hw.tailp  = (uint32_t)physaddr;
+
+  /* The new ED will be the first ED in the list.  Set the nexted
+   * pointer of the ED old head of the list
+   */
+
+  physaddr          = sam_getreg(SAM_USBHOST_CTRLHEADED);
+  edctrl->hw.nexted = physaddr;
+
+  /* Set the control list head to the new ED */
+
+  physaddr          = (uintptr_t)sam_physramaddr((uintptr_t)edctrl);
+  sam_putreg(physaddr, SAM_USBHOST_CTRLHEADED);
+
+  /* Flush the affected control ED and tail TD to RAM */
+
+  cp15_coherent_dcache((uintptr_t)edctrl,
+                       (uintptr_t)edctrl + sizeof(struct sam_ed_s));
+  cp15_coherent_dcache((uintptr_t)tdtail,
+                       (uintptr_t)tdtail + sizeof(struct sam_gtd_s));
+
+  /* ControlListEnable.  This bit is set to (re-)enable the processing of the
+   * Control list.  Note: once enabled, it remains enabled and we may even
+   * complete list processing before we get the bit set.
+   */
+
+  regval = sam_getreg(SAM_USBHOST_CTRL);
+  regval |= OHCI_CTRL_CLE;
+  sam_putreg(regval, SAM_USBHOST_CTRL);
+  irqrestore(flags);
+}
+
+/*******************************************************************************
+ * Name: sam_ep0dequeue
+ *
+ * Description:
+ *   Remove the ED for EP0 from the control ED list and posssibly disable control
+ *   list processing.
+ *
+ * Input Parameters:
+ *   rhpndx - Root hub port index.
+ *
+ * Returned Values:
+ *   None
+ *
+ *******************************************************************************/
+
+static void sam_ep0dequeue(int rhpndx)
+{
+  struct sam_ed_s *edctrl;
+  struct sam_ed_s *curred;
+  struct sam_ed_s *preved;
+  struct sam_gtd_s *tdtail;
+  struct sam_gtd_s *currtd;
+  irqstate_t flags;
+  uintptr_t physcurr;
+  uint32_t regval;
+
+  /* ControlListEnable.  This bit is cleared to disable the processing of the
+   * Control list.  We should never modify the control list while CLE is set.
+   */
+
+  flags   = irqsave();
+  regval  = sam_getreg(SAM_USBHOST_CTRL);
+  regval &= ~OHCI_CTRL_CLE;
+  sam_putreg(regval, SAM_USBHOST_CTRL);
+
+  /* Search the control list to find the entry to be removed (and its
+   * precedessor).
+   */
+
+  edctrl   = &g_edctrl[rhpndx];
+  physcurr = sam_getreg(SAM_USBHOST_CTRLHEADED);
+
+  for (curred = (struct sam_ed_s *)sam_virtramaddr(physcurr),
+       preved = NULL;
+       curred && curred != edctrl;
+       preved = curred,
+       curred =(struct sam_ed_s *)sam_virtramaddr(physcurr))
+    {
+      physcurr = curred->hw.nexted;
+    }
+
+  DEBUGASSERT(curred);
+
+  /* Remove the ED from the control list */
+
+  if (preved)
+    {
+      /* Unlink the ED from the previous ED in the list */
+
+      preved->hw.nexted = edctrl->hw.nexted;
+
+      /* Flush the modified ED to RAM */
+
+      cp15_coherent_dcache((uintptr_t)preved,
+                           (uintptr_t)preved + sizeof(struct sam_ed_s));
+    }
+  else
+    {
+      /* Set the new control list head ED */
+
+      sam_putreg(edctrl->hw.nexted, SAM_USBHOST_CTRLHEADED);
+
+      /* If the control list head is still non-NULL, then (re-)enable
+       * processing of the Control list.
+       */
+
+      if (edctrl->hw.nexted != 0)
+        {
+          regval = sam_getreg(SAM_USBHOST_CTRL);
+          regval |= OHCI_CTRL_CLE;
+          sam_putreg(regval, SAM_USBHOST_CTRL);
+        }
+    }
+  irqrestore(flags);
+
+  /* Release any TDs that may still be attached to the ED */
+
+  tdtail   = &g_tdtail[rhpndx];
+  physcurr = edctrl->hw.headp;
+
+  for (currtd = (struct sam_gtd_s *)sam_virtramaddr(physcurr);
+       currtd && currtd != tdtail;
+       currtd =(struct sam_gtd_s *)sam_virtramaddr(physcurr))
+    {
+      physcurr = currtd->hw.nexttd;
+      sam_tdfree(currtd);
+    }
+
+  /* Reset the control Ed and tail the common tail TD for this port.
+   * This is totally unnecessary but helps with debug.
+   */
+
+  memset(tdtail, 0, sizeof(struct sam_gtd_s));
+  memset(edctrl, 0, sizeof(struct sam_ed_s));
 }
 
 /*******************************************************************************
@@ -1514,8 +1718,21 @@ static void sam_wdh_interrupt(void)
    * cleared in the interrupt status register.
    */
 
+  /* Invalidate D-cache to force re-reading of the Done Head */
+
+# if 0 /* Apparently insufficient */
+  cp15_invalidate_dcache((uintptr_t)&g_hcca.donehead,
+                         (uintptr_t)&g_hcca.donehead + sizeof(uint32_t));
+#else
+  cp15_invalidate_dcache((uintptr_t)&g_hcca,
+                         (uintptr_t)&g_hcca + sizeof(struct ohci_hcca_s));
+#endif
+
+  /* Now read the done head */
+
   td = (struct sam_gtd_s *)sam_virtramaddr(g_hcca.donehead);
   g_hcca.donehead = 0;
+  DEBUGASSERT(td);
 
   /* Process each TD in the write done list */
 
@@ -1525,6 +1742,11 @@ static void sam_wdh_interrupt(void)
 
       struct sam_ed_s *ed = td->ed;
       DEBUGASSERT(ed != NULL);
+
+      /* Invalidate the ED D-cache to force reload from memory */
+
+      cp15_invalidate_dcache((uintptr_t)ed,
+                             (uintptr_t)ed + sizeof( struct sam_ed_s));
 
       /* Save the condition code from the (single) TD status/control
        * word.
@@ -1544,7 +1766,7 @@ static void sam_wdh_interrupt(void)
 
       /* Return the TD to the free list */
 
-      next = (struct sam_gtd_s *)td->hw.nexttd;
+      next = (struct sam_gtd_s *)sam_virtramaddr(td->hw.nexttd);
       sam_tdfree(td);
 
       /* And wake up the thread waiting for the WDH event */
@@ -1758,6 +1980,14 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
       return -ENODEV;
     }
 
+  /* Add EP0 to the control list */
+
+  if (!rhport->ep0init)
+    {
+      sam_ep0enqueue(rhport->rhpndx);
+      rhport->ep0init = true;
+    }
+
   /* USB 2.0 spec says at least 50ms delay before port reset */
 
   up_mdelay(100);
@@ -1842,7 +2072,8 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 
   /* Flush the modified control ED to RAM */
 
-  cp15_coherent_dcache((uintptr_t)edctrl, sizeof(struct sam_ed_s));
+  cp15_coherent_dcache((uintptr_t)edctrl,
+                       (uintptr_t)edctrl + sizeof(struct sam_ed_s));
   sam_givesem(&g_ohci.exclsem);
 
   uvdbg("RHPort%d EP0 CTRL: %08x\n", rhport->rhpndx + 1, edctrl->hw.ctrl);
@@ -2511,107 +2742,14 @@ static void sam_disconnect(FAR struct usbhost_driver_s *drvr)
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   DEBUGASSERT(rhport);
 
+  /* Remove the disconnected port from the control list */
+
+  sam_ep0dequeue(rhport->rhpndx);
+  rhport->ep0init = false;
+
+  /* Unbind the class */
+
   rhport->class = NULL;
-}
-
-/*******************************************************************************
- * Initialization
- *******************************************************************************/
-/*******************************************************************************
- * Name: sam_ep0init
- *
- * Description:
- *   Initialize ED for EP0, add it to the control ED list, and enable control
- *   transfers.
- *
- * Input Parameters:
- *   rhport - Root humb state instance.
- *
- * Returned Values:
- *   None
- *
- *******************************************************************************/
-
-static inline void sam_ep0init(void)
-{
-  uint32_t regval;
-  struct sam_ed_s *edctrl;
-  struct sam_ed_s *preved;
-  struct sam_gtd_s *tdtail;
-  uintptr_t phyctrl;
-  uintptr_t phytail;
-  int rhpndx;
-
-  /* Initialize the EP0 control EDs */
-
-  for (rhpndx = 0, preved = NULL;
-       rhpndx < SAM_USBHOST_NRHPORT;
-       rhpndx++, preved = edctrl)
-    {
-      /* Get some pointers to the EP0 control ED and to the common tail TD
-       * for this root hub port.
-       */
-
-      tdtail           = &g_tdtail[rhpndx];
-      edctrl           = &g_edctrl[rhpndx];
-
-      /* We will also need the physical addresses for the DMA */
-
-      phytail          = sam_physramaddr((uintptr_t)tdtail);
-
-      /* Initialize the common tail TD for this port */
-
-      memset(tdtail, 0, sizeof(struct sam_gtd_s));
-      tdtail->ed       = edctrl;
-      tdtail->prealloc = true;
-
-      /* Initialize the control endpoint for this port */
-
-      memset(edctrl, 0, sizeof(struct sam_ed_s));
-      sem_init(&edctrl->wdhsem, 0, 0);
-
-      /* Set up some default values (like max packetsize = 8). */
-
-      (void)sam_ep0configure(&g_ohci.rhport[rhpndx].drvr, 0, 8);
-
-      /* Link the common tail TD to the ED's TD list */
-
-      edctrl->hw.headp  = (uint32_t)phytail;
-      edctrl->hw.tailp  = (uint32_t)phytail;
-
-      /* If this is not the first ED in the list, then link the previous ED
-       * to this one.  Because of the memset, the last ED in the list will
-       * have nexted = NULL.
-       */
-
-      if (preved)
-        {
-          phyctrl           = sam_physramaddr((uintptr_t)edctrl);
-          preved->hw.nexted = (uint32_t)phyctrl;
-        }
-    }
-
-  /* Flush all of the control EDs and tail TDs to RAM */
-
-  cp15_coherent_dcache((uintptr_t)g_edctrl,
-                      SAM_USBHOST_NRHPORT * sizeof(struct sam_ed_s));
-  cp15_coherent_dcache((uintptr_t)g_tdtail,
-                      SAM_USBHOST_NRHPORT * sizeof(struct sam_gtd_s));
-
-  /* Set the head of the control list to the EP0 ED for RHport0. */
-
-  sam_putreg((uint32_t)sam_physramaddr((uintptr_t)&g_edctrl[0]),
-             SAM_USBHOST_CTRLHEADED);
-
-  /* ControlListEnable.  This bit is set to enable the processing of the
-   * Control list.  Note: once enabled, it remains enabled and we may even
-   * complete list processing before we get the bit set.  We really
-   * should never modify the control list while CLE is set.
-   */
-
-  regval = sam_getreg(SAM_USBHOST_CTRL);
-  regval |= OHCI_CTRL_CLE;
-  sam_putreg(regval, SAM_USBHOST_CTRL);
 }
 
 /*******************************************************************************
@@ -2797,10 +2935,6 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
   /* Set HCCA base address */
 
   sam_putreg((uint32_t)&g_hcca, SAM_USBHOST_HCCA);
-
-  /* Set up EP0 */
-
-  sam_ep0init();
 
   /* Clear pending interrupts */
 
