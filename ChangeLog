@@ -5408,3 +5408,7 @@
 	  conversions from physical to virtual addresses (2013-8-14).
 	* arch/arm/src/sama5/sam_ohci.c:  Add D cache contols and conversion
 	  between physical and virtual address (2013-8-14).
+	* arch/arm/src/stm32/stm32_spi.c:  nbits() interface extended to
+	  control bit order as well as bit width (from Teemu Pirinen)
+	  (2013-8-16)
+
