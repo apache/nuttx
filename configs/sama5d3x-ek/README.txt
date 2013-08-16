@@ -1188,6 +1188,11 @@ Configurations
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
+       NOTE:  When OHCI is selected, the SAMA5 will operate at 384MHz instead
+       of 396MHz.  This is so that the PLL generates a frequency which is a
+       multiple of the 48MHz needed for OHCI.  The delay loop calibration
+       values that are used will be off slightly because of this.
+
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
         The SAMA5D3 can run at 536MHz.  I still need to figure out the
