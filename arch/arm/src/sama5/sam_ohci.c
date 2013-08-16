@@ -756,24 +756,33 @@ static void sam_tbfree(uint8_t *buffer)
 static inline int sam_addbulked(struct sam_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_BULK_DISABLE
+  irqstate_t flags;
   uint32_t regval;
   uintptr_t physed;
+
+  /* Disable bulk list processing while we modify the list */
+
+  flags   = irqsave();
+  regval  = sam_getreg(SAM_USBHOST_CTRL);
+  regval &= ~OHCI_CTRL_BLE;
+  sam_putreg(regval, SAM_USBHOST_CTRL);
 
   /* Add the new bulk ED to the head of the bulk list */
 
   ed->hw.nexted = sam_getreg(SAM_USBHOST_BULKHEADED);
+  cp15_coherent_dcache((uintptr_t)ed,
+                       (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
 
   physed = sam_physramaddr((uintptr_t)ed);
   sam_putreg((uint32_t)physed, SAM_USBHOST_BULKHEADED);
 
-  /* BulkListEnable. This bit is set to enable the processing of the
-   * Bulk list.  Note: once enabled, it remains.  We really should
-   * never modify the bulk list while BLE is set.
-   */
+  /* Re-enable bulk list processing. */
 
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval |= OHCI_CTRL_BLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
+
+  irqrestore(flags);
   return OK;
 #else
   return -ENOSYS;
@@ -793,8 +802,16 @@ static inline int sam_rembulked(struct sam_ed_s *ed)
 #ifndef CONFIG_USBHOST_BULK_DISABLE
   struct sam_ed_s *curr;
   struct sam_ed_s *prev;
+  irqstate_t flags;
   uintptr_t physed;
   uint32_t regval;
+
+  /* Disable bulk list processing while we modify the list */
+
+  flags = irqsave();
+  regval  = sam_getreg(SAM_USBHOST_CTRL);
+  regval &= ~OHCI_CTRL_BLE;
+  sam_putreg(regval, SAM_USBHOST_CTRL);
 
   /* Find the ED in the bulk list.  NOTE: We really should never be mucking
    * with the bulk list while BLE is set.
@@ -820,12 +837,6 @@ static inline int sam_rembulked(struct sam_ed_s *ed)
           /* Yes... set the head of the bulk list to skip over this ED */
 
           sam_putreg(ed->hw.nexted, SAM_USBHOST_BULKHEADED);
-
-          /* If the bulk list is now empty, then disable it */
-
-          regval  = sam_getreg(SAM_USBHOST_CTRL);
-          regval &= ~OHCI_CTRL_BLE;
-          sam_putreg(regval, SAM_USBHOST_CTRL);
         }
       else
         {
@@ -834,9 +845,25 @@ static inline int sam_rembulked(struct sam_ed_s *ed)
            */
 
           prev->hw.nexted = ed->hw.nexted;
+          cp15_coherent_dcache((uintptr_t)prev,
+                               (uintptr_t)prev + sizeof(struct sam_ed_s));
         }
     }
 
+  /* Re-enable bulk list processing if the bulk list is still non-empty
+   * after removing the ED node.
+   */
+
+  if (sam_getreg(SAM_USBHOST_BULKHEADED) != 0)
+    {
+      /* If the bulk list is now empty, then disable it */
+
+      regval  = sam_getreg(SAM_USBHOST_CTRL);
+      regval |= OHCI_CTRL_BLE;
+      sam_putreg(regval, SAM_USBHOST_CTRL);
+    }
+
+  irqrestore(flags);
   return OK;
 #else
   return -ENOSYS;
@@ -897,7 +924,14 @@ static void sam_setinttab(uint32_t value, unsigned int interval, unsigned int of
   unsigned int i;
   for (i = offset; i < HCCA_INTTBL_WSIZE; i += interval)
     {
+      /* Modify the table value */
+
       g_hcca.inttbl[i] = value;
+
+      /* Make sure that the modified table value is flushed to RAM */
+
+      cp15_coherent_dcache(&g_hcca.inttbl[i],
+                           &g_hcca.inttbl[i] + sizeof(uint32_t) - 1);
     }
 }
 #endif
@@ -926,6 +960,7 @@ static inline int sam_addinted(const FAR struct usbhost_epdesc_s *epdesc,
                                struct sam_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_INT_DISABLE
+  irqstate_t flags;
   unsigned int interval;
   unsigned int offset;
   uintptr_t physed;
@@ -936,6 +971,7 @@ static inline int sam_addinted(const FAR struct usbhost_epdesc_s *epdesc,
    * at the next SOF... need to check.
    */
 
+  flags   = irqsave();
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_PLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
@@ -979,6 +1015,7 @@ static inline int sam_addinted(const FAR struct usbhost_epdesc_s *epdesc,
           interval = g_ohci.outinterval;
         }
     }
+
   uvdbg("min interval: %d offset: %d\n", interval, offset);
 
   /* Get the (physical) head of the first of the duplicated entries.  The
@@ -998,15 +1035,21 @@ static inline int sam_addinted(const FAR struct usbhost_epdesc_s *epdesc,
    */
 
   ed->hw.nexted = physhead;
-  physed        =  sam_physramaddr((uintptr_t)ed);
+  cp15_coherent_dcache((uintptr_t)ed,
+                       (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+
+  physed =  sam_physramaddr((uintptr_t)ed);
   sam_setinttab((uint32_t)physed, interval, offset);
+
   uvdbg("head: %08x next: %08x\n", physed, physhead);
 
-  /* Re-enabled periodic list processing */
+  /* Re-enable periodic list processing */
 
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval |= OHCI_CTRL_PLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
+
+  irqrestore(flags);
   return OK;
 #else
   return -ENOSYS;
@@ -1039,6 +1082,7 @@ static inline int sam_reminted(struct sam_ed_s *ed)
   struct sam_ed_s *head;
   struct sam_ed_s *curr;
   struct sam_ed_s *prev;
+  irqstate_t flags;
   uintptr_t physhead;
   unsigned int interval;
   unsigned int offset;
@@ -1048,6 +1092,7 @@ static inline int sam_reminted(struct sam_ed_s *ed)
    * at the next SOF... need to check.
    */
 
+  flags   = irqsave();
   regval  = sam_getreg(SAM_USBHOST_CTRL);
   regval &= ~OHCI_CTRL_PLE;
   sam_putreg(regval, SAM_USBHOST_CTRL);
@@ -1151,6 +1196,7 @@ static inline int sam_reminted(struct sam_ed_s *ed)
       sam_putreg(regval, SAM_USBHOST_CTRL);
     }
 
+  irqrestore(flags);
   return OK;
 #else
   return -ENOSYS;
@@ -2296,6 +2342,13 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
   ed->hw.headp = physaddr;
   ed->hw.tailp = physaddr;
 
+  /* Make sure these settings are flushed to RAM */
+
+  cp15_coherent_dcache((uintptr_t)ed,
+                       (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+  cp15_coherent_dcache((uintptr_t)td,
+                       (uintptr_t)td + sizeof(struct ohci_gtd_s) - 1);
+
   /* Now add the endpoint descriptor to the appropriate list */
 
   switch (ed->xfrtype)
@@ -2797,9 +2850,12 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
        * TDs on the Bulk list.
        */
 
-      regval  = sam_getreg(SAM_USBHOST_CMDST);
-      regval |= OHCI_CMDST_BLF;
-      sam_putreg(regval, SAM_USBHOST_CMDST);
+      if (ed->xfrtype == USB_EP_ATTR_XFER_BULK)
+        {
+          regval  = sam_getreg(SAM_USBHOST_CMDST);
+          regval |= OHCI_CMDST_BLF;
+          sam_putreg(regval, SAM_USBHOST_CMDST);
+        }
 
       /* Wait for the Writeback Done Head interrupt  Loop to handle any false
        * alarm semaphore counts.

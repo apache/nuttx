@@ -5411,4 +5411,6 @@
 	* arch/arm/src/stm32/stm32_spi.c:  nbits() interface extended to
 	  control bit order as well as bit width (from Teemu Pirinen)
 	  (2013-8-16)
+	* arch/arm/src/sama5/sam_ohci.c:  More to be tested, but the SAMA5
+	  OHCI driver is now basically funtional (2013-8-16).
 
