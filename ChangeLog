@@ -5413,4 +5413,5 @@
 	  (2013-8-16)
 	* arch/arm/src/sama5/sam_ohci.c:  More to be tested, but the SAMA5
 	  OHCI driver is now basically funtional (2013-8-16).
+	* include/nuttx/usb/ehci.h:  EHCI header file (2013-8-17).
 
