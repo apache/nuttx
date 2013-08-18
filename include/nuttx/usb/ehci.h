@@ -45,7 +45,7 @@
  ********************************************************************************************/
 
 #include <stdint.h>
- 
+
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
@@ -60,7 +60,7 @@
  * Space
  */
 
-#define EHCI_PCIUSBBASE_OFFSET         0x0010     
+#define EHCI_PCIUSBBASE_OFFSET         0x0010
 
 /* 0x0060: Serial Bus Release Number */
 
@@ -401,15 +401,16 @@
 
 #define ITD_BUFPTR1_MAXPKT_SHIFT       (0)        /* Bits 0-10: Maximum Packet Size */
 #define ITD_BUFPTR1_MAXPKT_MASK        (0x7ff << ITD_BUFPTR1_MAXPKT_SHIFT)
-#define ITD_BUFPTR1_DIRIN              (1 << 11)  /* Bit 11: Direction */
+#define ITD_BUFPTR1_DIRIN              (1 << 11)  /* Bit 11: Direction 1=IN */
+#define ITD_BUFPTR1_DIROUT             (0)        /* Bit 11: Direction 0=OUT */
 
 /* iTD Buffer Pointer Page 2. Table 3-6 */
 
 #define ITD_BUFPTR2_MULTI_SHIFT        (0)        /* Bits 0-1: Multi */
-#define ITD_BUFPTR2_MULTI_MASK         (3 << xxITD_BUFPTR2_MULTI_SHIFT
-#  define ITD_BUFPTR2_MULTI_1          (1 << xxITD_BUFPTR2_MULTI_SHIFT /* One transaction per micro-frame */
-#  define ITD_BUFPTR2_MULTI_2          (2 << xxITD_BUFPTR2_MULTI_SHIFT /* Two transactions per micro-frame */
-#  define ITD_BUFPTR2_MULTI_3          (3 << xxITD_BUFPTR2_MULTI_SHIFT /* Three transactions per micro-frame */
+#define ITD_BUFPTR2_MULTI_MASK         (3 << ITD_BUFPTR2_MULTI_SHIFT)
+#  define ITD_BUFPTR2_MULTI_1          (1 << ITD_BUFPTR2_MULTI_SHIFT) /* One transaction per micro-frame */
+#  define ITD_BUFPTR2_MULTI_2          (2 << ITD_BUFPTR2_MULTI_SHIFT) /* Two transactions per micro-frame */
+#  define ITD_BUFPTR2_MULTI_3          (3 << ITD_BUFPTR2_MULTI_SHIFT) /* Three transactions per micro-frame */
                                                   /* Bits 2-11: Reserved */
 /* iTD Buffer Pointer Page 3-6. Table 3-7 */
                                                   /* Bits 0-11: Reserved */
@@ -428,57 +429,262 @@
 #  define SITD_NLP_TYP_SITD            (2 << SITD_NLP_TYP_SHIFT) /* Split Transaction Isochronous Transfer Descriptor */
 #  define SITD_NLP_TYP_FSTN            (3 << SITD_NLP_TYP_SHIFT) /* Frame Span Traversal Node */
                                                    /* Bits 3-4: zero */
-#define SITD_NLP_MASK                  (0xffffffe0) /* Bits 5-31:  Frame List Link Pointer */
+#define SITD_NLP_MASK                  (0xffffffe0) /* Bits 5-31: Frame List Link Pointer */
 
 /* siTD Endpoint Capabilities/Characteristics. Paragraph 3.4.2 */
 /* Endpoint and Transaction Translator Characteristics. Table 3-9 */
 
-#define SITD_EPCHAR_
+#define SITD_EPCHAR_DEVADDR_SHIFT      (0)        /* Bitx 0-6: Device Address */
+#define SITD_EPCHAR_DEVADDR_MASK       (0x7f << SITD_EPCHAR_DEVADDR_SHIFT)
+                                                  /* Bits 7: Reserved */
+#define SITD_EPCHAR_ENDPT_SHIFT        (8)        /* Bitx 8-11: Endpoint Number */
+#define SITD_EPCHAR_ENDPT_MASK         (15 << SITD_EPCHAR_ENDPT_SHIFT)
+                                                  /* Bits 12-15: Reserved */
+#define SITD_EPCHAR_HUBADDR_SHIFT      (16)       /* Bitx 16-22: Hub Address */
+#define SITD_EPCHAR_HUBADDR_MASK       (0x7f << SITD_EPCHAR_HUBADDR_SHIFT)
+                                                  /* Bit 23: Reserved */
+#define SITD_EPCHAR_DIRIN              (1 << 31)  /* Bit 31: Direction 1=IN */
+#define SITD_EPCHAR_DIROUT             (0)        /* Bit 31: Direction 0=OUT */
 
 /* Micro-frame Schedule Control. Table 3-10 */
 
-#define SITD_FMSCHED_
-
+#define SITD_FMSCHED_SSMASK_SHIFT      (0)        /* Bitx 0-7: Split Start Mask (µFrame S-mask) */
+#define SITD_FMSCHED_SSMASK_MASK       (0xff << SITD_FMSCHED_SSMASK_SHIFT)
+#define SITD_FMSCHED_SCMASK_SHIFT      (8)        /* Bitx 8-15: Split Completion Mask (µFrame C-Mask) */
+#define SITD_FMSCHED_SCMASK_MASK       (0xff << SITD_FMSCHED_SCMASK_SHIFT)
+                                                  /* Bits 16-31: Reserved */
 /* siTD Transfer State. Paragraph 3.4.3 */
 
-#define SITD_XFRSTATE_
+#define SITD_XFRSTATE_STATUS_SHIFT     (0)        /* Bits 0-7: Status */
+#define SITD_XFRSTATE_CPROGMASK_SHIFT  (8)        /* Bits 8-15: µFrame Complete-split Progress Mask  */
+#define SITD_XFRSTATE_NBYTES_SHIFT     (16)       /* Bits 16-25: Total Bytes To Transfer */
+                                                  /* Bits 26-29: Reserved */
+#define SITD_XFRSTATE_P                (1 << 30)  /* Bit 30: Page Select */
+#define SITD_XFRSTATE_IOC              (1 << 31)  /* Bit 31: Interrupt On Complete */
 
 /* siTD Buffer Pointer List. Paragraph 3.4.4 */
+/* Page 0 */
 
-#define SITD_BUFPTR_
+#define SITD_BUFPTR0_OFFSET_SHIFT      (0)        /* Bits 0-11: Current Offset */
+#define SITD_BUFPTR0_OFFSET_MASK       (0xff << SITD_BUFPTR0_OFFSET_SHIFT)
+
+/* Page 1 */
+
+#define SITD_BUFPTR1_TCOUNT_SHIFT      (0)        /* Bits 0-2: Transaction count */
+#define SITD_BUFPTR1_TCOUNT_MASK       (7 << SITD_BUFPTR1_TCOUNT_SHIFT)
+#define SITD_BUFPTR1_TP_SHIFT          (33)       /* Bits 3-4: Transaction position */
+#define SITD_BUFPTR1_TP_MASK           (3 << SITD_BUFPTR1_TP_SHIFT)
+#  define SITD_BUFPTR1_TP_ENTIRE       (0 << SITD_BUFPTR1_TP_SHIFT) /* Entire full-speed transaction data payload. */
+#  define SITD_BUFPTR1_TP_BEGIN        (1 << SITD_BUFPTR1_TP_SHIFT) /* This is the first data payload */
+#  define SITD_BUFPTR1_TP_MID          (2 << SITD_BUFPTR1_TP_SHIFT) /* This the middle payload */
+#  define SITD_BUFPTR1_TP_END          (3 << SITD_BUFPTR1_TP_SHIFT) /* This is the last payload */
+                                                  /* Bits 5-11: Reserved */
+/* All pages */
+
+#define SITD_BUFPTR_MASK               (0xfffff000) /* Bits 12-31: Buffer Pointer List */
 
 /* Queue Element Transfer Descriptor (qTD). Paragraph 3.5 */
 /* Next qTD Pointer. Paragraph 3.5.1 */
 
-#define QTD_NQP_
+#define QTD_NQP_T                      (1 << 0)   /* Bit 0: Terminate */
+                                                  /* Bits 1-4: Reserved */
+#define QTD_NQP_NTEP_SHIFT             (5)        /* Bits 5-31: Next Transfer Element Pointer */
+#define QTD_NQP_NTEP_MASK              (0xffffffe0)
 
 /* Alternate Next qTD Pointer. Paragraph 3.5.2 */
 
-#define QTD_ANQP_
+#define QTD_AQP_T                      (1 << 0)   /* Bit 0: Terminate */
+                                                  /* Bits 1-4: Reserved */
+#define QTD_AQP_NTEP_SHIFT             (5)        /* Bits 5-31: Next Transfer Element Pointer */
+#define QTD_AQP_NTEP_MASK              (0xffffffe0)
 
 /* qTD Token. Paragraph 3.5.3 */
 
-#define QTD_TOKEN_
+#define QTD_TOKEN_STATUS_SHIFT         (0)        /* Bits 0-7: Status */
+#define QTD_TOKEN_STATUS_MASK          (0xff << QTD_TOKEN_STATUS_SHIFT)
+#  define QTD_TOKEN_P                  (1 << 0)   /* Bit 0 Ping State  */
+#  define QTD_TOKEN_ERR                (1 << 0)   /* Bit 0 Error */
+#  define QTD_TOKEN_SPLITXSTATE        (1 << 1)   /* Bit 1 Split Transaction State */
+#  define QTD_TOKEN_MMF                (1 << 2)   /* Bit 2 Missed Micro-Frame */
+#  define QTD_TOKEN_XACTERR            (1 << 3)   /* Bit 3 Transaction Error */
+#  define QTD_TOKEN_BABBLE             (1 << 4)   /* Bit 4 Babble Detected */
+#  define QTD_TOKEN_DBERR              (1 << 5)   /* Bit 5 Data Buffer Error */
+#  define QTD_TOKEN_HALTED             (1 << 6)   /* Bit 6 Halted */
+#  define QTD_TOKEN_ACTIVE             (1 << 7)   /* Bit 7 Active */
+#define QTD_TOKEN_PID_SHIFT            (8)        /* Bits 8-9: PID Code */
+#define QTD_TOKEN_PID_MASK             (3 << QTD_TOKEN_PID_SHIFT)
+#  define QTD_TOKEN_PID_OUT            (0 << QTD_TOKEN_PID_SHIFT) /* OUT Token generates token (E1H) */
+#  define QTD_TOKEN_PID_IN             (1 << QTD_TOKEN_PID_SHIFT) /* IN Token generates token (69H) */
+#  define QTD_TOKEN_PID_SETUP          (2 << QTD_TOKEN_PID_SHIFT) /* SETUP Token generates token (2DH) */
+#define QTD_TOKEN_CERR_SHIFT           (10)       /* Bits 10-11: Error Counter */
+#define QTD_TOKEN_CERR_MASK            (3 << QTD_TOKEN_CERR_SHIFT)
+#define QTD_TOKEN_CPAGE_SHIFT          (12)       /* Bits 12-14: Current Page */
+#define QTD_TOKEN_CPAGE_MASK           (7 << QTD_TOKEN_CPAGE_SHIFT)
+#define QTD_TOKEN_IOC                  (1 << 15)  /* Bit 15: Interrupt On Complete */
+#define QTD_TOKEN_NBYTES               (16)       /* Bits 16-30: Total Bytes to Transfer */
+#define QTD_TOKEN_TOGGLE               (1 << 13)  /* Bit 31: Data Toggle
 
 /* qTD Buffer Page Pointer List. Paragraph 3.5.4 */
+/* Page 0 */
 
-#define QTD_BUFPTR_
+#define QTD_BUFPTR0_OFFFSET_SHIFT      (0)        /* Bits 0-11: Current Offset */
+#define QTD_BUFPTR0_OFFFSET_MASK       (0xfff << QTD_BUFPTR0_OFFFSET_SHIFT)
+
+/* Other pages */
+                                                  /* Bits 0-11: Reserved */
+/* All pages */
+
+#define QTD_BUFPTR_SHIFT               (12)       /* Bits 12-31: Buffer Pointer List */
+#define QTD_BUFPTR_MASK                (0xfffff000)
 
 /* Queue Head. Paragraph 3.6 */
 /* Queue Head Horizontal Link Pointer.  Paragraph 3.6.1 */
 
-/* Endpoint Capabilities/Characteristics. Paragraph 3.6.2 */
+#define QH_HLP_T                       (1 << 0)   /* Bit 0: Terminate, Last QH invalid, see TYP */
+#define QH_HLP_TYP_SHIFT               (1)        /* Bits 1-2: Type */
+#define QH_HLP_TYP_MASK                (3 << QH_HLP_TYP_SHIFT)
+#  define QH_HLP_TYP_ITD               (0 << QH_HLP_TYP_SHIFT) /* Isochronous Transfer Descriptor */
+#  define QH_HLP_TYP_QH                (1 << QH_HLP_TYP_SHIFT) /* Queue Head */
+#  define QH_HLP_TYP_QH_               (2 << QH_HLP_TYP_SHIFT) /* Split Transaction Isochronous Transfer Descriptor */
+#  define QH_HLP_TYP_FSTN              (3 << QH_HLP_TYP_SHIFT) /* Frame Span Traversal Node */
+                                                   /* Bits 3-4: Reserved */
+#define QH_HLP_MASK                    (0xffffffe0) /* Bits 5-31: Queue Head Horizontal Link Pointer */
 
+/* Endpoint Capabilities/Characteristics. Paragraph 3.6.2 */
 /* Endpoint Characteristics: Queue Head DWord. Table 3-19 */
+
+#define QH_EPCHAR_DEVADDR_SHIFT        (0)        /* Bitx 0-6: Device Address */
+#define QH_EPCHAR_DEVADDR_MASK         (0x7f << QH_EPCHAR_DEVADDR_SHIFT)
+#define QH_EPCHAR_I                    (1 << 7)   /* Bit 7: Inactivate on Next Transactionl */
+#define QH_EPCHAR_ENDPT_SHIFT          (8)        /* Bitx 8-11: Endpoint Number */
+#define QH_EPCHAR_ENDPT_MASK           (15 << QH_EPCHAR_ENDPT_SHIFT)
+#define QH_EPCHAR_EPS_SHIFT            (12)       /* Bitx 12-13: Endpoint Speed */
+#define QH_EPCHAR_EPS_MASK             (3 << QH_EPCHAR_EPS_SHIFT)
+#  define QH_EPCHAR_EPS_FULL           (0 << QH_EPCHAR_EPS_SHIFT) /* Full-Speed (12Mbs) */
+#  define QH_EPCHAR_EPS_LOW            (1 << QH_EPCHAR_EPS_SHIFT) /* Low-Speed (1.5Mbs) */
+#  define QH_EPCHAR_EPS_HIGH           (2 << QH_EPCHAR_EPS_SHIFT) /* High-Speed (480 Mb/s) */
+#define QH_EPCHAR_DTC                  (1 << 14)  /* Bit 14: Data Toggle Control */
+#define QH_EPCHAR_H                    (1 << 15)  /* Bit 15: Head of Reclamation List Flag */
+#define QH_EPCHAR_MAXPKT_SHIFT         (16)       /* Bitx 16-26: Maximum Packet Length */
+#define QH_EPCHAR_MAXPKT_MASK          (0x7ff << QH_EPCHAR_MAXPKT_SHIFT)
+#define QH_EPCHAR_C                    (1 << 27)  /* Bit 27: Control Endpoint Flag */
+#define QH_EPCHAR_RL_SHIFT             (28)       /* Bitx 28-31: Nak Count Reload */
+#define QH_EPCHAR_RL_MASK              (15 << QH_EPCHAR_RL_SHIFT)
 
 /* Endpoint Capabilities: Queue Head DWord 2. Table 3-20 */
 
-/* Transfer Overlay.  Paragraph 3.6.3 */
+#define QH_EPCAPS_SSMASK_SHIFT         (0)        /* Bitx 0-7: Interrupt Schedule Mask (µFrame S-mask) */
+#define QH_EPCAPS_SSMASK_MASK          (0xff << QH_EPCAPS_SSMASK_SHIFT)
+#define QH_EPCAPS_SCMASK_SHIFT         (8)        /* Bitx 8-15: Split Completion Mask (µFrame C-Mask) */
+#define QH_EPCAPS_SCMASK_MASK          (0xff << QH_EPCAPS_SCMASK_SHIFT)
+#define QH_EPCAPS_HUBADDR_SHIFT        (16)       /* Bitx 16-22: Hub Address */
+#define QH_EPCAPS_HUBADDR_MASK         (0x7f << QH_EPCAPS_HUBADDR_SHIFT)
+#define QH_EPCAPS_PORT_SHIFT           (23)       /* Bit 23-29: Port Number */
+#define QH_EPCAPS_PORT_MASK            (0x7f << QH_EPCAPS_PORT_SHIFT)
+#define QH_EPCAPS_MULT_SHIFT           (30)       /* Bit 30-31: High-Bandwidth Pipe Multiplier */
+#define QH_EPCAPS_MULT_MASK            (3 << QH_EPCAPS_MULT_SHIFT)
+
+/* Transfer Overlay.  Paragraph 3.6.3
+ *
+ * NOTES:
+ * 1. Same as the field of the same name in struct ehci_qtd_s
+ * 2. Similar to the field of the same name in struct ehci_qtd_s, but with some
+ *    additional bitfields.
+ */
+
+/* Current qTD Link Pointer.  Table 3-21 */
+
+#define QH_CQP_NTEP_SHIFT              (5)        /* Bits 5-31: Next Transfer Element Pointer */
+#define QH_CQP_NTEP_MASK               (0xffffffe0)
+
+/* Next qTD Pointer (NOTE 1) */
+
+#define QH_NQP_T                       (1 << 0)   /* Bit 0: Terminate */
+                                                  /* Bits 1-4: Reserved */
+#define QH_NQP_NTEP_SHIFT              (5)        /* Bits 5-31: Next Transfer Element Pointer */
+#define QH_NQP_NTEP_MASK               (0xffffffe0)
+
+/* Alternate Next qTD Pointer.  Table 3.7 (NOTE 2) */
+
+#define QH_AQP_T                       (1 << 0)   /* Bit 0: Terminate */
+#define QH_AQP_NAKCNT                  (1)        /* Bits 1-4: Nak Counter */
+#define QH_AQP_NTEP_SHIFT              (5)        /* Bits 5-31: Next Transfer Element Pointer */
+#define QH_AQP_NTEP_MASK               (0xffffffe0)
+
+/* qTD Token (NOTE 1) */
+
+#define QH_TOKEN_STATUS_SHIFT          (0)        /* Bits 0-7: Status */
+#define QH_TOKEN_STATUS_MASK           (0xff << QH_TOKEN_STATUS_SHIFT)
+#  define QH_TOKEN_P                   (1 << 0)   /* Bit 0 Ping State  */
+#  define QH_TOKEN_ERR                 (1 << 0)   /* Bit 0 Error */
+#  define QH_TOKEN_SPLITXSTATE         (1 << 1)   /* Bit 1 Split Transaction State */
+#  define QH_TOKEN_MMF                 (1 << 2)   /* Bit 2 Missed Micro-Frame */
+#  define QH_TOKEN_XACTERR             (1 << 3)   /* Bit 3 Transaction Error */
+#  define QH_TOKEN_BABBLE              (1 << 4)   /* Bit 4 Babble Detected */
+#  define QH_TOKEN_DBERR               (1 << 5)   /* Bit 5 Data Buffer Error */
+#  define QH_TOKEN_HALTED              (1 << 6)   /* Bit 6 Halted */
+#  define QH_TOKEN_ACTIVE              (1 << 7)   /* Bit 7 Active */
+#define QH_TOKEN_PID_SHIFT             (8)        /* Bits 8-9: PID Code */
+#define QH_TOKEN_PID_MASK              (3 << QH_TOKEN_PID_SHIFT)
+#  define QH_TOKEN_PID_OUT             (0 << QH_TOKEN_PID_SHIFT) /* OUT Token generates token (E1H) */
+#  define QH_TOKEN_PID_IN              (1 << QH_TOKEN_PID_SHIFT) /* IN Token generates token (69H) */
+#  define QH_TOKEN_PID_SETUP           (2 << QH_TOKEN_PID_SHIFT) /* SETUP Token generates token (2DH) */
+#define QH_TOKEN_CERR_SHIFT            (10)       /* Bits 10-11: Error Counter */
+#define QH_TOKEN_CERR_MASK             (3 << QH_TOKEN_CERR_SHIFT)
+#define QH_TOKEN_CPAGE_SHIFT           (12)       /* Bits 12-14: Current Page */
+#define QH_TOKEN_CPAGE_MASK            (7 << QH_TOKEN_CPAGE_SHIFT)
+#define QH_TOKEN_IOC                   (1 << 15)  /* Bit 15: Interrupt On Complete */
+#define QH_TOKEN_NBYTES                (16)       /* Bits 16-30: Total Bytes to Transfer */
+#define QH_TOKEN_TOGGLE                (1 << 13)  /* Bit 31: Data Toggle
+
+/* Buffer Page Pointer List (NOTE 2)
+/* Page 0 */
+
+#define QH_BUFPTR0_OFFFSET_SHIFT      (0)        /* Bits 0-11: Current Offset */
+#define QH_BUFPTR0_OFFFSET_MASK       (0xfff << QH_BUFPTR0_OFFFSET_SHIFT)
+
+/* Page 1. Table 3.22 */
+
+#define QH_BUFPTR1_CPROGMASK_SHIFT    (0)        /* Bits 0-7: Split-transaction Complete-split Progress */
+#define QH_BUFPTR1_CPROGMASK_MASK     (0xff << QH_BUFPTR1_CPROGMASK_SHIFT)
+                                                  /* Bits 8-11: Reserved */
+/* Page 2. Table 3.22 */
+
+#define QH_BUFPTR2_FRAMETAG_SHIFT     (0)        /* Bits 0-4: Split-transaction Frame Tag */
+#define QH_BUFPTR2_FRAMETAG_MASK      (31 << QH_BUFPTR2_FRAMETAG_SHIFT)
+#define QH_BUFPTR2_SBYTES_SHIFT       (5)        /* Bits 5-11: S-bytes */
+#define QH_BUFPTR2_SBYTES_MASK        (0x7f << QH_BUFPTR2_SBYTES_SHIFT)
+
+/* Other pages */
+                                                  /* Bits 0-11: Reserved */
+/* All pages */
+
+#define QH_BUFPTR_SHIFT               (12)       /* Bits 12-31: Buffer Pointer List */
+#define QH_BUFPTR_MASK                (0xfffff000)
 
 /* Periodic Frame Span Traversal Node (STN). Paragrap 3.7 */
 /* FSTN Normal Path Pointer. Paragraph 3.7.1 */
 
+#define FSTN_NPP_T                     (1 << 0)   /* Bit 0: Terminate. 1=Link Pointer not valid */
+#define FSTN_NPP_TYP_SHIFT             (1)        /* Bits 1-2: Type */
+#define FSTN_NPP_TYP_MASK              (3 << FSTN_NPP_TYP_SHIFT)
+#  define FSTN_NPP_TYP_ITD             (0 << FSTN_NPP_TYP_SHIFT) /* Isochronous Transfer Descriptor */
+#  define FSTN_NPP_TYP_QH              (1 << FSTN_NPP_TYP_SHIFT) /* Queue Head */
+#  define FSTN_NPP_TYP_SITD            (2 << FSTN_NPP_TYP_SHIFT) /* Split Transaction Isochronous Transfer Descriptor */
+#  define FSTN_NPP_TYP_FSTN            (3 << FSTN_NPP_TYP_SHIFT) /* Frame Span Traversal Node */
+                                                  /* Bits 3-4: Reserved */
+#define FSTN_NPP_NPLP_SHIFT            (5)        /* Bits 5-31: Normal Path Link Pointer */
+#define FSTN_NPP_NPLP_MASK             (0xffffffe0)
+
 /* FSTN Back Path Link Pointer. Paragraph 3.7.2 */
+
+#define FSTN_BPP_T                     (1 << 0)   /* Bit 0: Terminate. 1=Link Pointer not valid */
+#define FSTN_BPP_TYP_SHIFT             (1)        /* Bits 1-2: Type */
+#define FSTN_BPP_TYP_MASK              (3 << FSTN_BPP_TYP_SHIFT)
+#  define FSTN_BPP_TYP_QH              (1 << FSTN_BPP_TYP_SHIFT) /* Queue Head */
+                                                  /* Bits 3-4: Reserved */
+#define FSTN_BPP_BPLP_SHIFT            (5)        /* Bits 5-31: Back Path Link Pointer */
+#define FSTN_BPP_BPLP_MASK             (0xffffffe0)
 
 /********************************************************************************************
  * Public Types
@@ -497,8 +703,8 @@
 struct ehci_itd_s
 {
   uint32_t nlp;                              /* 0x00-0x03: Next link pointer */
-  uint32_t transaction[8];                   /* 0x04-0x23: Transaction Status and Control List */
-  uint32_t bufpointer[7];                    /* 0x24-0x3c: Buffer Page Pointer List */
+  uint32_t trans[8];                         /* 0x04-0x23: Transaction Status and Control List */
+  uint32_t bpl[7];                           /* 0x24-0x3c: Buffer Page Pointer List */
 };
 
 /* Split Transaction Isochronous Transfer Descriptor (siTD). Paragraph 3.4 */
@@ -509,7 +715,7 @@ struct ehci_sitd_s
   uint32_t epchar;                           /* 0x04-0x07: Endpoint and Transaction Translator Characteristics */
   uint32_t fmsched;                          /* 0x08-0x0b: Micro-frame Schedule Control */
   uint32_t xfrstate;                         /* 0x0c-0x0f: Transfer Status and Control */
-  uint32_t bufpointer[2];                    /* 0x10-0x17: Buffer Pointer List */
+  uint32_t bpl[2];                           /* 0x10-0x17: Buffer Pointer List */
   uint32_t blp;                              /* 0x18-0x1b: Back link pointer */
 };
 
@@ -520,22 +726,37 @@ struct ehci_qtd_s
   uint32_t nqp;                              /* 0x00-0x03: Next qTD Pointer */
   uint32_t anqp;                             /* 0x04-0x07: Alternate Next qTD Pointer */
   uint32_t token;                            /* 0x08-0x0b: qTD Token */
-  uint32_t bufpointer[5];                    /* 0x0c-0x1c: Buffer Page Pointer List */
+  uint32_t bpl[5];                           /* 0x0c-0x1c: Buffer Page Pointer List */
 }
 
-/* Queue Head. Paragraph 3.6 */
+/* Queue Head. Paragraph 3.6
+ *
+ * NOTE:
+ * 1. Same as the field of the same name in struct ehci_qtd_s
+ * 2. Similar to the field of the same name in struct ehci_qtd_s, but with some
+ *    additional bitfields.
+ */
 
-struct echi_qh_s
+struct ehci_overly_s
+{
+  uint32_t cqp;                              /* 0x00-0x03: Current qTD Pointer */
+  uint32_t nqp;                              /* 0x04-0x07: Next qTD Pointer (NOTE 1) */
+  uint32_t anqp;                             /* 0x08-0x0b: Alternate Next qTD Pointer (NOTE 2) */
+  uint32_t token;                            /* 0x0c-0x0f: qTD Token (NOTE 1) */
+  uint32_t bpl[5];                           /* 0x10-0x23: Buffer Page Pointer List (NOTE 2)*/
+};
+
+struct ehci_qh_s
 {
   uint32_t hlp;                              /* 0x00-0x03: Queue Head Horizontal Link Pointer */
   uint32_t epchar;                           /* 0x04-0x07: Endpoint Characteristics */
   uint32_t epcaps;                           /* 0x08-0x0b: Endpoint Capabilities */
-  
+  struct ehci_overly_s overlay;              /* 0x0c-0x2f: Transfer overlay */
 };
 
 /* Periodic Frame Span Traversal Node (STN). Paragrap 3.7 */
 
-struct echi_fstn_s
+struct ehci_fstn_s
 {
   uint32_t npp;                              /* 0x00-0x03: Normal Path Pointer */
   uint32_t bpp;                              /* 0x04-0x07: Back Path Link Pointer */
@@ -555,7 +776,6 @@ extern "C" {
 /********************************************************************************************
  * Public Function Prototypes
  ********************************************************************************************/
-
 
 #undef EXTERN
 #ifdef __cplusplus

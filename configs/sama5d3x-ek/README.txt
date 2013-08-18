@@ -1240,8 +1240,20 @@ Configurations
         and prevents NSH from receiving data.  There is no issue when the
         debug output is suppressed and card insertial and removal works as
         expected (at least on the HSMCI1 microSD slot).
+      2013-8-14: I found an error in the way that the HSCMI clocking was
+        configured (a SAM3/4 cloning error).  Need to retest both HSMCI0/1
+        with the corrected clocking.
 
-      2013-8-11: Added OHCI configuration.  Untested!
+      2013-8-11: Added description to add OHCI to the configuration.
+      2013-8-16: The OCHI configuration is now basically functional.
+        Testing is not yet extensive, however:
+        a) I have lots of DEBUG output enabled.  There could be issues
+           when I re-test with debug options disabled.
+        b) I have tested only control and bulk endpoints.  I still need
+           to test interrupt endpoints.
+        c) I have tested only the Mass Storage Class (MSC) and not CDC/ACM.
+        d) OHCI will support 3 downstream points, but I currently have only
+           one enabled.
 
   ostest:
     This configuration directory, performs a simple OS test using
