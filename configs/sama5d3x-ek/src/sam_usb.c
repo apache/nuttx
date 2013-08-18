@@ -98,7 +98,7 @@ static struct usbhost_connection_s *g_ehciconn;
 #if HAVE_USBHOST
 static int usbhost_waiter(struct usbhost_connection_s *dev)
 {
-  bool connected[SAM_USBHOST_NRHPORT] = {false, false, false};
+  bool connected[SAM_OHCI_NRHPORT] = {false, false, false};
   int rhpndx;
 
   uvdbg("Running\n");
@@ -107,7 +107,7 @@ static int usbhost_waiter(struct usbhost_connection_s *dev)
       /* Wait for the device to change state */
 
       rhpndx = CONN_WAIT(dev, connected);
-      DEBUGASSERT(rhpndx >= 0 && rhpndx < SAM_USBHOST_NRHPORT);
+      DEBUGASSERT(rhpndx >= 0 && rhpndx < SAM_OHCI_NRHPORT);
 
       connected[rhpndx] = !connected[rhpndx];
 

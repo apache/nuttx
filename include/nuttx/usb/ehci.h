@@ -545,7 +545,7 @@
 #define QH_HLP_TYP_MASK                (3 << QH_HLP_TYP_SHIFT)
 #  define QH_HLP_TYP_ITD               (0 << QH_HLP_TYP_SHIFT) /* Isochronous Transfer Descriptor */
 #  define QH_HLP_TYP_QH                (1 << QH_HLP_TYP_SHIFT) /* Queue Head */
-#  define QH_HLP_TYP_QH_               (2 << QH_HLP_TYP_SHIFT) /* Split Transaction Isochronous Transfer Descriptor */
+#  define QH_HLP_TYP_SITD              (2 << QH_HLP_TYP_SHIFT) /* Split Transaction Isochronous Transfer Descriptor */
 #  define QH_HLP_TYP_FSTN              (3 << QH_HLP_TYP_SHIFT) /* Frame Span Traversal Node */
                                                    /* Bits 3-4: Reserved */
 #define QH_HLP_MASK                    (0xffffffe0) /* Bits 5-31: Queue Head Horizontal Link Pointer */
@@ -584,6 +584,11 @@
 #define QH_EPCAPS_MULT_SHIFT           (30)       /* Bit 30-31: High-Bandwidth Pipe Multiplier */
 #define QH_EPCAPS_MULT_MASK            (3 << QH_EPCAPS_MULT_SHIFT)
 
+/* Current qTD Link Pointer.  Table 3-21 */
+
+#define QH_CQP_NTEP_SHIFT              (5)        /* Bits 5-31: Next Transfer Element Pointer */
+#define QH_CQP_NTEP_MASK               (0xffffffe0)
+
 /* Transfer Overlay.  Paragraph 3.6.3
  *
  * NOTES:
@@ -591,11 +596,6 @@
  * 2. Similar to the field of the same name in struct ehci_qtd_s, but with some
  *    additional bitfields.
  */
-
-/* Current qTD Link Pointer.  Table 3-21 */
-
-#define QH_CQP_NTEP_SHIFT              (5)        /* Bits 5-31: Next Transfer Element Pointer */
-#define QH_CQP_NTEP_MASK               (0xffffffe0)
 
 /* Next qTD Pointer (NOTE 1) */
 
@@ -689,6 +689,42 @@
 /********************************************************************************************
  * Public Types
  ********************************************************************************************/
+/* Registers ********************************************************************************/
+/* Since the operational registers are not known a compile time, representing register blocks
+ * with structures is more convenient than using individual register offsets.
+ */
+
+/* Host Controller Capability Registers.  This register block must be positioned at a well
+ * known address.
+ */
+
+struct ehci_hccr_s
+{
+  uint8_t  caplength;        /* 0x00: Capability Register Length */
+  uint8_t  reserved;
+  uint16_t hciversion;       /* 0x02: Interface Version Number */
+  uint32_t hcsparams;        /* 0x04: Structural Parameters */
+  uint32_t hccparams;        /* 0x08: Capability Parameters */
+  uint8_t  hcspportrt[8];    /* 0x0c: Companion Port Route Description */
+};
+
+/* Host Controller Operational Registers.  This register block is positioned at an offset
+ * of 'caplength' from the beginning of the Host Controller Capability Registers.
+ */
+
+struct ehci_hcor_s
+{
+  uint32_t usbcmd;           /* 0x00: USB Command */
+  uint32_t usbsts;           /* 0x04: USB Status */
+  uint32_t usbintr;          /* 0x08: USB Interrupt Enable */
+  uint32_t frindex;          /* 0x0c: USB Frame Index */
+  uint32_t ctrldssegment;    /* 0x10: 4G Segment Selector */
+  uint32_t periodiclistbase; /* 0x14: Frame List Base Address */
+  uint32_t asynclistaddr;    /* 0x18: Next Asynchronous List Address */
+  uint32_t reserved[9];
+  uint32_t configflag;       /* 0x40: Configured Flag Register */
+  uint32_t portsc[15];       /* 0x44: Port Status/Control */
+};
 
 /* Data Structures **************************************************************************/
 /* Paragraph 3 */
@@ -707,6 +743,8 @@ struct ehci_itd_s
   uint32_t bpl[7];                           /* 0x24-0x3c: Buffer Page Pointer List */
 };
 
+#define SIZEOF_EHCI_ITD_S (64)               /* 16*sizeof(uint32_t) */
+
 /* Split Transaction Isochronous Transfer Descriptor (siTD). Paragraph 3.4 */
 
 struct ehci_sitd_s
@@ -719,15 +757,20 @@ struct ehci_sitd_s
   uint32_t blp;                              /* 0x18-0x1b: Back link pointer */
 };
 
+#define SIZEOF_EHCI_SITD_S (28)              /* 7*sizeof(uint32_t) */
+
 /* Queue Element Transfer Descriptor (qTD). Paragraph 3.5 */
+/* 32-bit version.  See EHCI Appendix B for the 64-bit version. */
 
 struct ehci_qtd_s
 {
   uint32_t nqp;                              /* 0x00-0x03: Next qTD Pointer */
-  uint32_t anqp;                             /* 0x04-0x07: Alternate Next qTD Pointer */
+  uint32_t alt;                              /* 0x04-0x07: Alternate Next qTD Pointer */
   uint32_t token;                            /* 0x08-0x0b: qTD Token */
   uint32_t bpl[5];                           /* 0x0c-0x1c: Buffer Page Pointer List */
-}
+};
+
+#define SIZEOF_EHCI_QTD_S (32)               /* 8*sizeof(uint32_t) */
 
 /* Queue Head. Paragraph 3.6
  *
@@ -737,22 +780,26 @@ struct ehci_qtd_s
  *    additional bitfields.
  */
 
-struct ehci_overly_s
+struct ehci_overlay_s
 {
-  uint32_t cqp;                              /* 0x00-0x03: Current qTD Pointer */
-  uint32_t nqp;                              /* 0x04-0x07: Next qTD Pointer (NOTE 1) */
-  uint32_t anqp;                             /* 0x08-0x0b: Alternate Next qTD Pointer (NOTE 2) */
-  uint32_t token;                            /* 0x0c-0x0f: qTD Token (NOTE 1) */
-  uint32_t bpl[5];                           /* 0x10-0x23: Buffer Page Pointer List (NOTE 2)*/
+  uint32_t nqp;                              /* 0x00-0x03: Next qTD Pointer (NOTE 1) */
+  uint32_t alt;                              /* 0x04-0x07: Alternate Next qTD Pointer (NOTE 2) */
+  uint32_t token;                            /* 0x08-0x0b: qTD Token (NOTE 1) */
+  uint32_t bpl[5];                           /* 0x0c-0x1c: Buffer Page Pointer List (NOTE 2)*/
 };
+
+#define SIZEOF_EHCI_OVERLAY (32)             /* 8*sizeof(uint32_t) */
 
 struct ehci_qh_s
 {
   uint32_t hlp;                              /* 0x00-0x03: Queue Head Horizontal Link Pointer */
   uint32_t epchar;                           /* 0x04-0x07: Endpoint Characteristics */
   uint32_t epcaps;                           /* 0x08-0x0b: Endpoint Capabilities */
-  struct ehci_overly_s overlay;              /* 0x0c-0x2f: Transfer overlay */
+  uint32_t cqp;                              /* 0x0c-0x0f: Current qTD Pointer */
+  struct ehci_overlay_s overlay;             /* 0x10-0x2c: Transfer overlay */
 };
+
+#define SIZEOF_EHCI_OVERLAY (48)             /* 4*sizeof(uint32_t) + SIZEOF_EHCI_OVERLAY */
 
 /* Periodic Frame Span Traversal Node (STN). Paragrap 3.7 */
 
@@ -761,6 +808,8 @@ struct ehci_fstn_s
   uint32_t npp;                              /* 0x00-0x03: Normal Path Pointer */
   uint32_t bpp;                              /* 0x04-0x07: Back Path Link Pointer */
 };
+
+#define SIZEOF_EHCI_FSTN_S (8)               /* 2*sizeof(uint32_t) */
 
 /********************************************************************************************
  * Public Data
