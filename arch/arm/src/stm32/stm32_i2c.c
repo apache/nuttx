@@ -1355,7 +1355,7 @@ static int stm32_i2c_isr(struct stm32_i2c_priv_s *priv)
    * since ACK is not returned. We should ignore this error.
    */
 
-  if ((status & I2C_ISR_ERRORMASK) != 0)
+  if ((status & I2C_SR1_ERRORMASK) != 0)
     {
       stm32_i2c_traceevent(priv, I2CEVENT_ERROR, 0);
 

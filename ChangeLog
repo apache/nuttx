@@ -5414,4 +5414,7 @@
 	* arch/arm/src/sama5/sam_ohci.c:  More to be tested, but the SAMA5
 	  OHCI driver is now basically funtional (2013-8-16).
 	* include/nuttx/usb/ehci.h:  EHCI header file (2013-8-17).
+	* arch/arm/src/stm32/stm32_i2c.c:  Correct an error that crept into
+	  the STM32 F1 I2C driver with some recent changes.  From Yiran Liao
+	  (2013-8-18).
 
