@@ -161,8 +161,8 @@
  * and one for the tail ED for each RHPort:
  */
 
-#define SAMA5_OHCI_NEDS       (CONFIG_SAMA5_OHCI_NEDS + SAM_USBHOST_NRHPORT)
-#define SAMA5_OHCI_NTDS       (CONFIG_SAMA5_OHCI_NTDS + SAM_USBHOST_NRHPORT)
+#define SAMA5_OHCI_NEDS       (CONFIG_SAMA5_OHCI_NEDS + SAM_OHCI_NRHPORT)
+#define SAMA5_OHCI_NTDS       (CONFIG_SAMA5_OHCI_NTDS + SAM_OHCI_NRHPORT)
 
 /* TD delay interrupt value */
 
@@ -228,7 +228,7 @@ struct sam_ohci_s
 
   /* Root hub ports */
 
-  struct sam_rhport_s rhport[SAM_USBHOST_NRHPORT];
+  struct sam_rhport_s rhport[SAM_OHCI_NRHPORT];
 };
 
 /* The OCHI expects the size of an endpoint descriptor to be 16 bytes.
@@ -505,7 +505,7 @@ static void sam_checkreg(uint32_t addr, uint32_t val, bool iswrite)
       count     = 0;
       prevwrite = iswrite;
 
-      /* Show the new regisgter access */
+      /* Show the new register access */
 
       sam_printreg(addr, val, iswrite);
     }
@@ -930,8 +930,8 @@ static void sam_setinttab(uint32_t value, unsigned int interval, unsigned int of
 
       /* Make sure that the modified table value is flushed to RAM */
 
-      cp15_coherent_dcache(&g_hcca.inttbl[i],
-                           &g_hcca.inttbl[i] + sizeof(uint32_t) - 1);
+      cp15_coherent_dcache((uintptr_t)&g_hcca.inttbl[i],
+                           (uintptr_t)&g_hcca.inttbl[i] + sizeof(uint32_t) - 1);
     }
 }
 #endif
@@ -1687,7 +1687,7 @@ static void sam_rhsc_interrupt(void)
 
   /* Handle root hub status change on each root port */
 
-  for (rhpndx = 0; rhpndx < SAM_USBHOST_NRHPORT; rhpndx++)
+  for (rhpndx = 0; rhpndx < SAM_OHCI_NRHPORT; rhpndx++)
     {
       rhport   = &g_ohci.rhport[rhpndx];
 
@@ -2028,7 +2028,7 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
     {
       /* Check for a change in the connection state on any root hub port */
 
-      for (rhpndx = 0; rhpndx < SAM_USBHOST_NRHPORT; rhpndx++)
+      for (rhpndx = 0; rhpndx < SAM_OHCI_NRHPORT; rhpndx++)
         {
           /* Has the connection state changed on the RH port? */
 
@@ -2089,7 +2089,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
   uint32_t regaddr;
   int ret;
 
-  DEBUGASSERT(rhpndx >= 0 && rhpndx < SAM_USBHOST_NRHPORT);
+  DEBUGASSERT(rhpndx >= 0 && rhpndx < SAM_OHCI_NRHPORT);
   rhport = &g_ohci.rhport[rhpndx];
 
   /* Are we connected to a device?  The caller should have called the wait()
@@ -2179,7 +2179,7 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
   struct sam_ed_s *edctrl;
 
   DEBUGASSERT(rhport &&
-              funcaddr >= 0 && funcaddr <= SAM_USBHOST_NRHPORT &&
+              funcaddr >= 0 && funcaddr <= SAM_OHCI_NRHPORT &&
               maxpacketsize < 2048);
 
   edctrl = rhport->ep0.ed;
@@ -3072,7 +3072,7 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
   /* Initialize the root hub port structures */
 
-  for (i = 0; i < SAM_USBHOST_NRHPORT; i++)
+  for (i = 0; i < SAM_OHCI_NRHPORT; i++)
     {
       struct sam_rhport_s *rhport = &g_ohci.rhport[i];
 
@@ -3153,7 +3153,7 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
    * connected.  We need to set the initial connected state accordingly.
    */
 
-  for (i = 0; i < SAM_USBHOST_NRHPORT; i++)
+  for (i = 0; i < SAM_OHCI_NRHPORT; i++)
     {
       regval                     = sam_getreg(SAM_USBHOST_RHPORTST(i));
       g_ohci.rhport[i].connected = ((regval & OHCI_RHPORTST_CCS) != 0);
