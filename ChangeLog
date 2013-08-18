@@ -5417,4 +5417,7 @@
 	* arch/arm/src/stm32/stm32_i2c.c:  Correct an error that crept into
 	  the STM32 F1 I2C driver with some recent changes.  From Yiran Liao
 	  (2013-8-18).
-
+	* drivers/usbhost/usbhost_devaddr.c and include/nuttx/usb/usbhost_devaddr.h:
+	  Add logic for management of device addresses.  This logic does not
+	  currently hook into into anything.  It will someday be a part of the
+	  NuttX USB hub implementation (2013-8-18).

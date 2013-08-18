@@ -81,7 +81,7 @@ extern "C"
  *
  ************************************************************************************/
 
-EXTERN int usbdev_serialinitialize(int minor);
+int usbdev_serialinitialize(int minor);
 
 #undef EXTERN
 #if defined(__cplusplus)
