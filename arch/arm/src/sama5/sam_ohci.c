@@ -186,7 +186,7 @@ struct sam_eplist_s
   struct sam_gtd_s *tail;      /* Tail transfer descriptor (TD) */
 };
 
-/* This structure retins the state of one root hub port */
+/* This structure retains the state of one root hub port */
 
 struct sam_rhport_s
 {
@@ -2792,9 +2792,6 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   struct sam_ed_s *ed;
   uint32_t dirpid;
   uint32_t regval;
-#if SAM_IOBUFFERS > 0
-  uint8_t *origbuf = NULL;
-#endif
   bool in;
   int ret;
 
@@ -3015,7 +3012,7 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
   /* Enable OHCI clocks */
 
-  regval = getreg32(SAM_PMC_SCER);
+  regval  = getreg32(SAM_PMC_SCER);
   regval |= PMC_UHP;
   putreg32(regval, SAM_PMC_SCER);
   irqrestore(flags);
@@ -3035,7 +3032,7 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
    * dedicated function
    */
 
-  udbg("Initializing Host Stack\n");
+  udbg("Initializing OHCI Stack\n");
 
   /* Initialize all the HCCA to 0 */
 

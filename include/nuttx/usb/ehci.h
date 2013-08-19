@@ -49,6 +49,16 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
+/* General definitions **********************************************************************/
+/* Endpoint speed values as used in endpoint characteristics field */
+
+#define EHCI_FULL_SPEED               (0) /* Full-Speed (12Mbs) */
+#define EHCI_LOW_SPEED                (1) /* Low-Speed (1.5Mbs) */
+#define EHCI_HIGH_SPEED               (2) /* High-Speed (480 Mb/s) */
+
+#define EHCI_DIR_IN                   (1) /* Direction IN: Peripheral to host */
+#define EHCI_DIR_OUT                  (0) /* Direction OUT: Host to peripheral */
+
 /* PCI Configuration Space Register Offsets *************************************************/
 /* Paragraph 2.1 */
 
@@ -456,8 +466,11 @@
 /* siTD Transfer State. Paragraph 3.4.3 */
 
 #define SITD_XFRSTATE_STATUS_SHIFT     (0)        /* Bits 0-7: Status */
+#define SITD_XFRSTATE_STATUS_MASK      (0xff << SITD_XFRSTATE_STATUS_SHIFT)
 #define SITD_XFRSTATE_CPROGMASK_SHIFT  (8)        /* Bits 8-15: µFrame Complete-split Progress Mask  */
+#define SITD_XFRSTATE_CPROGMASK_MASK   (0xff << SITD_XFRSTATE_CPROGMASK_SHIFT)
 #define SITD_XFRSTATE_NBYTES_SHIFT     (16)       /* Bits 16-25: Total Bytes To Transfer */
+#define SITD_XFRSTATE_NBYTES_MASK      (0x3ff << SITD_XFRSTATE_NBYTES_SHIFT)
                                                   /* Bits 26-29: Reserved */
 #define SITD_XFRSTATE_P                (1 << 30)  /* Bit 30: Page Select */
 #define SITD_XFRSTATE_IOC              (1 << 31)  /* Bit 31: Interrupt On Complete */
@@ -521,7 +534,8 @@
 #define QTD_TOKEN_CPAGE_SHIFT          (12)       /* Bits 12-14: Current Page */
 #define QTD_TOKEN_CPAGE_MASK           (7 << QTD_TOKEN_CPAGE_SHIFT)
 #define QTD_TOKEN_IOC                  (1 << 15)  /* Bit 15: Interrupt On Complete */
-#define QTD_TOKEN_NBYTES               (16)       /* Bits 16-30: Total Bytes to Transfer */
+#define QTD_TOKEN_NBYTES_SHIFT         (16)       /* Bits 16-30: Total Bytes to Transfer */
+#define QTD_TOKEN_NBYTES_MASK          (0x7fff << QTD_TOKEN_NBYTES_SHIFT)
 #define QTD_TOKEN_TOGGLE               (1 << 13)  /* Bit 31: Data Toggle
 
 /* qTD Buffer Page Pointer List. Paragraph 3.5.4 */
@@ -555,7 +569,7 @@
 
 #define QH_EPCHAR_DEVADDR_SHIFT        (0)        /* Bitx 0-6: Device Address */
 #define QH_EPCHAR_DEVADDR_MASK         (0x7f << QH_EPCHAR_DEVADDR_SHIFT)
-#define QH_EPCHAR_I                    (1 << 7)   /* Bit 7: Inactivate on Next Transactionl */
+#define QH_EPCHAR_I                    (1 << 7)   /* Bit 7: Inactivate on Next Transaction */
 #define QH_EPCHAR_ENDPT_SHIFT          (8)        /* Bitx 8-11: Endpoint Number */
 #define QH_EPCHAR_ENDPT_MASK           (15 << QH_EPCHAR_ENDPT_SHIFT)
 #define QH_EPCHAR_EPS_SHIFT            (12)       /* Bitx 12-13: Endpoint Speed */
@@ -634,7 +648,8 @@
 #define QH_TOKEN_CPAGE_SHIFT           (12)       /* Bits 12-14: Current Page */
 #define QH_TOKEN_CPAGE_MASK            (7 << QH_TOKEN_CPAGE_SHIFT)
 #define QH_TOKEN_IOC                   (1 << 15)  /* Bit 15: Interrupt On Complete */
-#define QH_TOKEN_NBYTES                (16)       /* Bits 16-30: Total Bytes to Transfer */
+#define QH_TOKEN_NBYTES_SHIFT          (16)       /* Bits 16-30: Total Bytes to Transfer */
+#define QH_TOKEN_NBYTES_MASK           (0x7fff << QH_TOKEN_NBYTES_SHIFT)
 #define QH_TOKEN_TOGGLE                (1 << 13)  /* Bit 31: Data Toggle
 
 /* Buffer Page Pointer List (NOTE 2)
