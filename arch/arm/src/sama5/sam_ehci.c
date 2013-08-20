@@ -55,6 +55,7 @@
 
 #include "up_arch.h"
 #include "sam_periphclks.h"
+#include "sam_memories.h"
 #include "sam_usbhost.h"
 #include "chip/sam_ehci.h"
 
@@ -127,6 +128,11 @@ struct sam_list_s
   struct sam_list_s *flink;    /* Link to next entry in the list */
                                /* Variable length entry data follows */
 };
+
+/* List traversal callout functions */
+
+typedef int (*foreach_qh_t)(struct sam_qh_s *qh, uint32_t **bp, void *arg);
+typedef int (*foreach_qtd_t)(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
 
 /* This structure describes one endpoint. */
 
@@ -220,10 +226,19 @@ static void sam_takesem(sem_t *sem);
 
 /* Allocators ******************************************************************/
 
-static struct sam_qh_s *sam_qhalloc(void);
-static void sam_qhfree(struct sam_qh_s *qh);
-static struct sam_qtd_s *sam_qtdalloc(void);
-static void sam_qtdfree(struct sam_qtd_s *qtd);
+static struct sam_qh_s *sam_qh_alloc(void);
+static void sam_qh_free(struct sam_qh_s *qh);
+static struct sam_qtd_s *sam_qtd_alloc(void);
+static void sam_qtd_free(struct sam_qtd_s *qtd);
+
+/* List Management *************************************************************/
+
+static int sam_qh_foreach(struct sam_qh_s *qh, uint32_t *bp,
+         foreach_qh_t handler, void *arg);
+static int sam_qtd_foreach(struct sam_qh_s *qh, foreach_qtd_t handler,
+         void *arg);
+static int sam_qtd_discard(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
+static int sam_qh_discard(struct sam_qh_s *qh);
 
 /* Interrupt Handling **********************************************************/
 
@@ -597,14 +612,14 @@ static void sam_takesem(sem_t *sem)
  * Allocators
  *******************************************************************************/
 /*******************************************************************************
- * Name: sam_qhalloc
+ * Name: sam_qh_alloc
  *
  * Description:
  *   Allocate a Queue Head (QH) structure by removing it from the free list
  *
  *******************************************************************************/
 
-static struct sam_qh_s *sam_qhalloc(void)
+static struct sam_qh_s *sam_qh_alloc(void)
 {
   struct sam_qh_s *qh;
 
@@ -621,14 +636,14 @@ static struct sam_qh_s *sam_qhalloc(void)
 }
 
 /*******************************************************************************
- * Name: sam_qhfree
+ * Name: sam_qh_free
  *
  * Description:
  *   Free a Queue Head (QH) structure by returning it to the free list
  *
  *******************************************************************************/
 
-static void sam_qhfree(struct sam_qh_s *qh)
+static void sam_qh_free(struct sam_qh_s *qh)
 {
   struct sam_list_s *entry = (struct sam_list_s *)qh;
 
@@ -639,7 +654,7 @@ static void sam_qhfree(struct sam_qh_s *qh)
 }
 
 /*******************************************************************************
- * Name: sam_qtdalloc
+ * Name: sam_qtd_alloc
  *
  * Description:
  *   Allocate a Queue Element Transfer Descriptor (qTD) by removing it from the
@@ -647,7 +662,7 @@ static void sam_qhfree(struct sam_qh_s *qh)
  *
  *******************************************************************************/
 
-static struct sam_qtd_s *sam_qtdalloc(void)
+static struct sam_qtd_s *sam_qtd_alloc(void)
 {
   struct sam_qtd_s *qtd;
 
@@ -672,7 +687,7 @@ static struct sam_qtd_s *sam_qtdalloc(void)
  *
  *******************************************************************************/
 
-static void sam_qtdfree(struct sam_qtd_s *qtd)
+static void sam_qtd_free(struct sam_qtd_s *qtd)
 {
   struct sam_list_s *entry = (struct sam_list_s *)qtd;
 
@@ -683,6 +698,211 @@ static void sam_qtdfree(struct sam_qtd_s *qtd)
 }
 
 /*******************************************************************************
+ * List Management
+ *******************************************************************************/
+
+/*******************************************************************************
+ * Name: sam_qh_foreach
+ *
+ * Description:
+ *   Give the first entry in a list of Queue Head (QH) structures, call the
+ *   handler for each QH structure in the list (including the one at the head
+ *   of the list).
+ *
+ *******************************************************************************/
+
+static int sam_qh_foreach(struct sam_qh_s *qh, uint32_t *bp, foreach_qh_t handler,
+                          void *arg)
+{
+  struct sam_qh_s *next;
+  uintptr_t physaddr;
+  int ret;
+
+  DEBUGASSERT(qh && handler);
+  while (qh)
+    {
+      /* Is this the end of the list?  Check the horizontal link pointer (HLP)
+       * terminate (T) bit.  If T==1, then the HLP address is not valid.
+       */
+
+      if ((qh->hw.hlp & QH_HLP_T) != 0)
+        {
+          /* Set the next pointer to NULL.  This will terminate the loop. */
+
+          next = NULL;
+        }
+      else
+        {
+          physaddr = qh->hw.hlp & QH_HLP_MASK;
+          next     = (struct sam_qh_s *)sam_virtramaddr(physaddr);
+        }
+
+      /* Perform the user action on this entry.  The action might result in
+       * unlinking the entry!  But that is okay because we already have the
+       * next QH pointer.
+       *
+       * Notice that we do not manage the back pointer (bp).  If the callout
+       * uses it, it must update it as necessary.
+       */
+
+      ret = handler(qh, &bp, arg);
+
+      /* If the handler returns any non-zero value, then terminate the traversal
+       * early.
+       */
+
+      if (ret != 0)
+        {
+          return ret;
+        }
+
+      /* Set up to visit the next entry */
+
+      qh = next;
+    }
+
+  return OK;
+}
+
+/*******************************************************************************
+ * Name: sam_qtd_foreach
+ *
+ * Description:
+ *   Give a Queue Head (QH) instance, call the handler for each qTD structure
+ *   in the queue.
+ *
+ *******************************************************************************/
+
+static int sam_qtd_foreach(struct sam_qh_s *qh, foreach_qtd_t handler, void *arg)
+{
+  struct sam_qtd_s *qtd;
+  struct sam_qtd_s *next;
+  uintptr_t physaddr;
+  uint32_t *bp;
+  int ret;
+
+  DEBUGASSERT(qh && handler);
+
+  /* Handle the special case where the queue is empty */
+
+  bp = &qh->hw.overlay.nqp;
+  if ((*bp & QH_NQP_T) != 0)
+    {
+      return 0;
+    }
+
+  /* Start with the first qTD in the queue */
+
+  physaddr = sam_read32(bp);
+  qtd      = (struct sam_qtd_s *)sam_virtramaddr(physaddr);
+  next     = NULL;
+
+  /* Now loop until we encounter the end of the qTD list */
+
+  while (qtd)
+    {
+      /* Is this the end of the list?  Check the next qTD pointer (NQP)
+       * terminate (T) bit.  If T==1, then the NQP address is not valid.
+       */
+
+      if ((qtd->hw.nqp & QTD_NQP_T) != 0)
+        {
+          /* Set the next pointer to NULL.  This will terminate the loop. */
+
+          next = NULL;
+        }
+      else
+        {
+          physaddr = qtd->hw.nqp & QTD_NQP_NTEP_MASK;
+          next     = (struct sam_qtd_s *)sam_virtramaddr(physaddr);
+        }
+
+      /* Perform the user action on this entry.  The action might result in
+       * unlinking the entry!  But that is okay because we already have the
+       * next qTD pointer.
+       *
+       * Notice that we do not manage the back pointer (bp).  If the callout
+       * uses it, it must update it as necessary.
+       */
+
+      ret = handler(qtd, &bp, arg);
+
+      /* If the handler returns any non-zero value, then terminate the traversal
+       * early.
+       */
+
+      if (ret != 0)
+        {
+          return ret;
+        }
+
+      /* Set up to visit the next entry */
+
+      qtd = next;
+    }
+
+  return OK;
+}
+
+/*******************************************************************************
+ * Name: sam_qtd_discard
+ *
+ * Description:
+ *   This is a sam_qtd_foreach callback.  It simply unlinks the QTD, updates
+ *   the back pointer, and frees the QTD structure.
+ *
+ *******************************************************************************/
+
+static int sam_qtd_discard(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
+{
+  DEBUGASSERT(qtd && bp && *bp);
+
+  /* Remove the qTD from the list by updating the forward pointer to skip
+   * around this qTD.  We do not change that pointer because are repeatedly
+   * removing the aTD at the head of the QH list.
+   */
+
+  **bp = qtd->hw.nqp;
+
+  /* Then free the qTD */
+
+  sam_qtd_free(qtd);
+  return OK;
+}
+
+/*******************************************************************************
+ * Name: sam_qh_discard
+ *
+ * Description:
+ *   Free the Queue Head (QH) and all qTD's attached to the QH.
+ *
+ * Assumptions:
+ *   The QH structure itself has already been unlinked from whatever list it
+ *   may have been in.
+ *
+ *******************************************************************************/
+
+static int sam_qh_discard(struct sam_qh_s *qh)
+{
+  int ret;
+
+  DEBUGASSERT(qh);
+
+  /* Free all of the qTD's attached to the QH */
+
+  ret = sam_gtd_foreach(qh, sam_qtd_discard, NULL);
+  if (ret < 0)
+    {
+      udbg("ERROR: sam_gtd_foreach failed: %d\n", ret);
+    }
+
+  /* Then free the QH itself */
+
+  sam_qh_free(qh);
+  return ret;
+}
+
+/*******************************************************************************
  * EHCI Interrupt Handling
  *******************************************************************************/
 
@@ -690,7 +910,7 @@ static void sam_qtdfree(struct sam_qtd_s *qtd)
  * Name: sam_ehci_interrupt
  *
  * Description:
- *   OHCI interrupt handler
+ *   EHCI interrupt handler
  *
  *******************************************************************************/
 
@@ -1553,7 +1773,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
     {
       /* Put the QH structure in a free list */
 
-      sam_qhfree(&g_ghpool[i]);
+      sam_qh_free(&g_ghpool[i]);
     }
 
   /* Initialize the list of free Queue Head (QH) structures */
@@ -1562,7 +1782,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
     {
       /* Put the TD in a free list */
 
-      sam_qtdfree(&g_qtdpool[i]);
+      sam_qtd_free(&g_qtdpool[i]);
     }
 
   /* EHCI Hardware Configuration ***********************************************/
@@ -1614,7 +1834,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   /* Enable interrupts at the interrupt controller */
 
   up_enable_irq(SAM_IRQ_UHPHS); /* enable USB interrupt */
-  uvdbg("USB OHCI Initialized\n");
+  uvdbg("USB EHCI Initialized\n");
 
   /* Initialize and return the connection interface */
 
