@@ -98,13 +98,43 @@
 #define BOARD_PMC_MCKR_PRES        PMC_MCKR_PRES_DIV1
 #define BOARD_PMC_MCKR_PLLADIV     PMC_MCKR_PLLADIV2
 #define BOARD_PMC_MCKR_MDIV        PMC_MCKR_MDIV_PCKDIV3
-786
+
 /* Resulting frequencies */
 
 #define BOARD_MAINOSC_FREQUENCY    (12000000)  /* MAINOSC: 12MHz crystal on-board */
 #define BOARD_PLLA_FREQUENCY       (792000000) /* PLLACK:  66 * 12Mhz / 1 */
 #define BOARD_PCK_FREQUENCY        (396000000) /* CPU:     PLLACK / 2 / 1  */
 #define BOARD_MCK_FREQUENCY        (132000000) /* MCK:     PLLACK / 2 / 1 / 3 */
+
+#ifdef CONFIG_SAMA5_EHCI
+/* The USB Host High Speed requires a 480 MHz clock (UPLLCK) for the embedded
+ * High-speed transceivers. UPLLCK is the output of the 480 MHz UTMI PLL
+ * (UPLL).  The source clock of the UTMI PLL is the Main OSC output:  Either
+ * the 12MHz internal RC oscillator on a an external 12MHz crystal.  The
+ * Main OSC must be 12MHz because the UPLL has a built-in 40x multiplier.
+ *
+ * For High-speed operations, the user has to perform the following:
+ *
+ *   1) Enable UHP peripheral clock, bit (1 << AT91C_ID_UHPHS) in
+ *      PMC_PCER register.
+ *   2) Write CKGR_PLLCOUNT field in PMC_UCKR register.
+ *   3) Enable UPLL, bit AT91C_CKGR_UPLLEN in PMC_UCKR register.
+ *   4) Wait until UTMI_PLL is locked. LOCKU bit in PMC_SR register
+ *   5) Enable BIAS, bit AT91C_CKGR_BIASEN in PMC_UCKR register.
+ *   6) Select UPLLCK as Input clock of OHCI part, USBS bit in PMC_USB
+ *      register.
+ *   7) Program the OHCI clocks (UHP48M and UHP12M) with USBDIV field in
+ *      PMC_USB register. USBDIV must be 9 (division by 10) if UPLLCK is
+ *      selected.
+ *   8) Enable OHCI clocks, UHP bit in PMC_SCER register.
+ *
+ * Steps 2 through 7 performed here.  1 and 8 are performed in the EHCI
+ * driver is initialized.
+ */
+
+#  define BOARD_CKGR_UCKR_UPLLCOUNT  (15)  /* Maximum value */
+#  define BOARD_CKGR_UCKR_BIASCOUNT  (15)  /* Maximum value */
+#endif
 
 /* HSMCI clocking
  *
