@@ -91,6 +91,7 @@
 #  define umm_malloc(s)       USERSPACE->mm_malloc(s)
 #  define umm_zalloc(s)       USERSPACE->mm_zalloc(s)
 #  define umm_realloc(p,s)    USERSPACE->mm_realloc(p,s)
+#  define umm_memalign(a,s)   USERSPACE->mm_memalign(a,s)
 #  define umm_free(p)         USERSPACE->mm_free(p)
 #endif
 
@@ -140,6 +141,9 @@ struct userspace_s
 
   FAR void *(*mm_malloc)(size_t size);
   FAR void *(*mm_realloc)(FAR void *oldmem, size_t newsize);
+#if 0 /* Not yet integrated */
+  FAR void *(*mm_memalign)(size_t alignment, size_t size);
+#endif
   FAR void *(*mm_zalloc)(size_t size);
   void (*mm_free)(FAR void *mem);
 
