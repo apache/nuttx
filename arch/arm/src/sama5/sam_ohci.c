@@ -215,8 +215,6 @@ struct sam_rhport_s
 
 struct sam_ohci_s
 {
-  /* Driver status */
-
   volatile bool rhswait;       /* TRUE: Thread is waiting for Root Hub Status change */
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
@@ -611,7 +609,7 @@ static void sam_putle16(uint8_t *dest, uint16_t val)
  * Name: sam_edalloc
  *
  * Description:
- *   Return an endpoint descriptor to the free list
+ *   Allocate an endpoint descriptor by removing it from the free list
  *
  *******************************************************************************/
 
@@ -634,7 +632,7 @@ static struct sam_ed_s *sam_edalloc(void)
  * Name: sam_edfree
  *
  * Description:
- *   Return an endpoint descriptor to the free list
+ *   Free an endpoint descriptor by returning to the free list
  *
  *******************************************************************************/
 
@@ -686,7 +684,7 @@ static struct sam_gtd_s *sam_tdalloc(void)
  * Name: sam_tdfree
  *
  * Description:
- *   Return an transfer descriptor to the free list
+ *   Free a transfer descriptor by returning it to the free list
  *
  * Assumptions:
  *   - Only called from the WDH interrupt handler (and during initialization).
