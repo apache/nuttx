@@ -377,8 +377,38 @@ config SAMA5_EHCI
 	default n
 	---help---
 		Build support for the SAMA5 USB high speed Enhanced Host Controller
-		Interface (OHCI).
+		Interface (EHCI).
 
+if SAMA5_EHCI
+
+config SAMA5_EHCI_NQHS
+	int "Number of Queue Head (QH) structures"
+	default 4
+	---help---
+		Configurable number of Queue Head (QH) structures.  The default is
+		one per Root hub port plus one for EP0.
+
+config SAMA5_EHCI_NQTDS
+	int "Number of Queue Element Transfer Descriptor (qTDs)"
+	default 4
+	---help---
+		Configurable number of Queue Element Transfer Descriptor (qTDs).
+		The default is one per root hub plus three from EP0.
+
+config SAMA5_EHCI_BUFSIZE
+	int "Size of one request/descriptor buffer"
+	default 128
+	---help---
+		The size of one request/descriptor buffer in bytes.  The TD buffe
+		size must be an even number of 32-bit words and must be large enough
+		to hangle the largest transfer via a SETUP request.
+
+config SAMA5_EHCI_REGDEBUG
+	bool "Enable low-level EHCI register debug"
+	default n
+	depends on DEBUG
+
+endif # EHCI
 endmenu # USB High Speed Host driver option
 endif # SAMA5_UHPHS
 

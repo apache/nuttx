@@ -352,7 +352,15 @@ static inline void sam_usbclockconfig(void)
 #endif
 
 #ifdef CONFIG_SAMA5_EHCI
-  /* For High-speed operations, the user has to perform the following:
+  uint32_t regval;
+
+  /* The USB Host High Speed requires a 480 MHz clock (UPLLCK) for the
+   * embedded High-speed transceivers. UPLLCK is the output of the 480 MHz
+   * UTMI PLL (UPLL).  The source clock of the UTMI PLL is the Main OSC output:
+   * Either the 12MHz internal oscillator on a 12MHz crystal.  The Main OSC
+   * must be 12MHz because the UPLL has a built-in 40x multiplier.
+   *
+   * For High-speed operations, the user has to perform the following:
    *
    *   1) Enable UHP peripheral clock, bit (1 << AT91C_ID_UHPHS) in
    *      PMC_PCER register.
@@ -371,19 +379,42 @@ static inline void sam_usbclockconfig(void)
    * driver is initialized.
    */
 
-#  warning Missing logic
-#endif
+  /* 2) Write CKGR_PLLCOUNT field in PMC_UCKR register. */
 
-#if 0 // #ifdef CONFIG_USBDEV
-  uint32_t regval;
-
-  /* Setup UTMI for USB and wait for LOCKU */
-
-  regval = getreg32(SAM_PMC_CKGR_UCKR);
-  regval |= (BOARD_CKGR_UCKR_UPLLCOUNT | PMC_CKGR_UCKR_UPLLEN);
+  regval = PMC_CKGR_UCKR_UPLLCOUNT(BOARD_CKGR_UCKR_UPLLCOUNT);
   putreg32(regval, SAM_PMC_CKGR_UCKR);
 
+  /* 3) Enable UPLL, bit AT91C_CKGR_UPLLEN in PMC_UCKR register. */
+
+  regval |= PMC_CKGR_UCKR_UPLLEN;
+  putreg32(regval, SAM_PMC_CKGR_UCKR);
+
+  /* 4) Wait until UTMI_PLL is locked. LOCKU bit in PMC_SR register */
+
   sam_pmcwait(PMC_INT_LOCKU);
+
+  /* 5) Enable BIAS, bit AT91C_CKGR_BIASEN in PMC_UCKR register. */
+
+  regval |= PMC_CKGR_UCKR_BIASCOUNT(BOARD_CKGR_UCKR_BIASCOUNT);
+  putreg32(regval, SAM_PMC_CKGR_UCKR);
+
+  regval |= PMC_CKGR_UCKR_BIASEN;
+  putreg32(regval, SAM_PMC_CKGR_UCKR);
+
+  /* 6) Select UPLLCK as Input clock of OHCI part, USBS bit in PMC_USB
+   *    register.
+   */
+
+  regval = PMC_USB_USBS_UPLL;
+  putreg32(regval, SAM_PMC_USB);
+
+  /* 7) Program the OHCI clocks (UHP48M and UHP12M) with USBDIV field in
+   *    PMC_USB register. USBDIV must be 9 (division by 10) if UPLLCK is
+   *    selected.
+   */
+
+  regval |= PMC_USB_USBDIV(9);
+  putreg32(regval, SAM_PMC_USB);
 #endif
 }
 

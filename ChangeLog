@@ -5421,3 +5421,7 @@
 	  Add logic for management of device addresses.  This logic does not
 	  currently hook into into anything.  It will someday be a part of the
 	  NuttX USB hub implementation (2013-8-18).
+	* nuttx/arch/arm/src/sama5/sam_ehci.c and other files:  Create a skeleton
+	  environment for development of an EHCI driver.  Not much in place yet
+	  (2013-8-20).
+
