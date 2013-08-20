@@ -179,9 +179,11 @@
 #define PMC_CKGR_UCKR_UPLLEN           (1 << 16) /* Bit 16: UTMI PLL Enable */
 #define PMC_CKGR_UCKR_UPLLCOUNT_SHIFT  (20)      /* Bits 20-23: UTMI PLL Start-up Time */
 #define PMC_CKGR_UCKR_UPLLCOUNT_MASK   (15 << PMC_CKGR_UCKR_UPLLCOUNT_SHIFT)
+#  define PMC_CKGR_UCKR_UPLLCOUNT(n)   ((n) << PMC_CKGR_UCKR_UPLLCOUNT_SHIFT)
 #define PMC_CKGR_UCKR_BIASEN           (1 << 24) /* Bit 24: UTMI BIAS Enable */
 #define PMC_CKGR_UCKR_BIASCOUNT_SHIFT  (28)      /* Bits 28-31: UTMI BIAS Start-up Time */
-#define PMC_CKGR_UCKR_BIASCOUNT_MASK   (15 << PMC_CKGR_UCKR_BIASCOUNT_SHIFT) */
+#define PMC_CKGR_UCKR_BIASCOUNT_MASK   (15 << PMC_CKGR_UCKR_BIASCOUNT_SHIFT)
+#  define PMC_CKGR_UCKR_BIASCOUNT(n)   ((n) << PMC_CKGR_UCKR_BIASCOUNT_SHIFT)
 
 /* PMC Clock Generator Main Oscillator Register */
 
@@ -251,6 +253,7 @@
 #  define PMC_USB_USBS_UPLL            PMC_USB_USBS
 #define PMC_USB_USBDIV_SHIFT           (8)       /* Bits 8-11: Divider for USB Clock */
 #define PMC_USB_USBDIV_MASK            (15 << PMC_USB_USBDIV_SHIFT)
+#  define PMC_USB_USBDIV(a)            ((a) << PMC_USB_USBDIV_SHIFT)
 
 /* Soft Modem Clock Register */
 

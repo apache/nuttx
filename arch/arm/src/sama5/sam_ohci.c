@@ -192,7 +192,7 @@ struct sam_rhport_s
 {
   /* Common device fields.  This must be the first thing defined in the
    * structure so that it is possible to simply cast from struct usbhost_s
-   * to structsam_usbhost_s.
+   * to struct sam_rhport_s.
    */
 
   struct usbhost_driver_s drvr;

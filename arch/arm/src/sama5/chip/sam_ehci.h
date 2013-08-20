@@ -69,11 +69,11 @@
 
 /* Host Controller Capability Registers */
 
-#define HCCR ((struct ehci_hccr_s *)SAM_UHPEHCI_VSECTION
+#define HCCR ((struct ehci_hccr_s *)SAM_UHPEHCI_VSECTION)
 
 /* Host Controller Operational Registers */
 
-#define HCOR ((volatile struct ehci_hcor_s *)(SAM_UHPEHCI_VSECTION + 0x10)
+#define HCOR ((volatile struct ehci_hcor_s *)(SAM_UHPEHCI_VSECTION + 0x10))
 
 /****************************************************************************
  * Public Types
