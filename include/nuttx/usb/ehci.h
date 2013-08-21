@@ -282,11 +282,11 @@
 
 #define EHCI_INT_USBINT                (1 << 0)   /* Bit 0:  USB Interrupt */
 #define EHCI_INT_USBERRINT             (1 << 1)   /* Bit 1:  USB Error Interrupt */
-#define EHCI_INT_PCHG                  (1 << 2)   /* Bit 2:  Port Change Detect */
+#define EHCI_INT_PORTSC                (1 << 2)   /* Bit 2:  Port Change Detect */
 #define EHCI_INT_FLROLL                (1 << 3)   /* Bit 3:  Frame List Rollover */
 #define EHCI_INT_SYSERROR              (1 << 4)   /* Bit 4:  Host System Error */
 #define EHCI_INT_AAINT                 (1 << 5)   /* Bit 5:  Interrupt on Async Advance */
-
+#define ECHI_INT_ALLINTS               (0x3f)     /* Bits 0-5:  All interrupts */
                                                   /* Bits 6-11: Reserved */
 #define EHCI_USBSTS_HALTED             (1 << 12)  /* Bit 12: HC Halted */
 #define EHCI_USBSTS_RECLAM             (1 << 13)  /* Bit 13: Reclamation */
@@ -351,6 +351,9 @@
 #define EHCI_PORTSC_WKDSCNNTE          (1 << 21)  /* Bit 21: Wake on Disconnect Enable */
 #define EHCI_PORTSC_WKOCE              (1 << 22)  /* Bit 22: Wake on Over-current Enable */
                                                   /* Bits 23-31: Reserved */
+
+#define EHCI_PORTSC_ALLINTS            (EHCI_PORTSC_CSC | EHCI_PORTSC_PEC | \
+                                        EHCI_PORTSC_OCC | EHCI_PORTSC_RESUME)
 
 /* Data Structures **************************************************************************/
 /* Paragraph 3 */

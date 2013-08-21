@@ -386,14 +386,14 @@ config SAMA5_EHCI_NQHS
 	default 4
 	---help---
 		Configurable number of Queue Head (QH) structures.  The default is
-		one per Root hub port plus one for EP0.
+		one per Root hub port plus one for EP0 (4).
 
 config SAMA5_EHCI_NQTDS
 	int "Number of Queue Element Transfer Descriptor (qTDs)"
-	default 4
+	default 6
 	---help---
 		Configurable number of Queue Element Transfer Descriptor (qTDs).
-		The default is one per root hub plus three from EP0.
+		The default is one per root hub plus three from EP0 (6).
 
 config SAMA5_EHCI_BUFSIZE
 	int "Size of one request/descriptor buffer"

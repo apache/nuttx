@@ -49,6 +49,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/ehci.h>
@@ -67,6 +68,11 @@
  * Pre-processor Definitions
  *******************************************************************************/
 /* Configuration ***************************************************************/
+/* Pre-requisites */
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error Work queue support is required (CONFIG_SCHED_WORKQUEUE)
+#endif
 
 /* Configurable number of Queue Head (QH) structures.  The default is one per
  * Root hub port plus one for EP0.
@@ -95,6 +101,12 @@
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_SAMA5_EHCI_REGDEBUG
 #endif
+
+/* Driver-private Definitions **************************************************/
+
+#define EHCI_HANDLED_INTS (EHCI_INT_USBINT | EHCI_INT_USBERRINT | \
+                           EHCI_INT_PORTSC |  EHCI_INT_SYSERROR | \
+                           EHCI_INT_AAINT)
 
 /*******************************************************************************
  * Private Types
@@ -140,11 +152,12 @@ typedef int (*foreach_qtd_t)(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
 
 struct sam_epinfo_s
 {
-  uint8_t          epno;       /* Endpoint number */
-  uint8_t          devaddr;    /* Device address */
-  uint8_t          xfrtype;    /* See USB_EP_ATTR_XFER_* definitions in usb.h */
-  uint8_t          speed;      /* See USB_*_SPEED definitions in ehci.h */
-  uint8_t          flags;      /* See EPINFO_FLAG_* definitions above */
+  uint8_t          epno:7;     /* Endpoint number */
+  uint8_t          dirin:1;    /* 1:IN endpoint 0:OUT endpoint */
+  uint8_t          devaddr:7;  /* Device address */
+  uint8_t          toggle:1;   /* Next data toggle */
+  uint8_t          xfrtype:2;  /* See USB_EP_ATTR_XFER_* definitions in usb.h */
+  uint8_t          speed:2;    /* See USB_*_SPEED definitions in ehci.h */
   volatile bool    wait;       /* TRUE: Thread is waiting for transfer completion */
   uint16_t         maxpacket;  /* Maximum packet size */
   sem_t            wsem;       /* Semaphore used to wait for transfer completion */
@@ -176,13 +189,14 @@ struct sam_rhport_s
 
 struct sam_ehci_s
 {
-  volatile bool rhwait;        /* TRUE: Thread is waiting for root hub event */
+  volatile bool pscwait;       /* TRUE: Thread is waiting for port status change event */
   sem_t exclsem;               /* Support mutually exclusive access */
-  sem_t rhsem;                 /* Semaphore to wait for root hub events */
+  sem_t pscsem;                /* Semaphore to wait for port status change events */
 
   struct sam_epinfo_s ep0;     /* Endpoint 0 */
   struct sam_list_s *qhfree;   /* List of free Queue Head (QH) structures */
   struct sam_list_s *qtdfree;  /* List of free Queue Element Transfer Descriptor (qTD) */
+  struct work_s work;          /* Supports interrupt bottom half */
 
   /* Root hub ports */
 
@@ -251,7 +265,13 @@ static int sam_qh_flush(struct sam_qh_s *qh);
 
 /* Interrupt Handling **********************************************************/
 
-static int sam_ehci_interrupt(int irq, FAR void *context);
+static inline void sam_ioc_bottomhalf(void);
+static inline void sam_err_bottomhalf(void);
+static inline void sam_portsc_bottomhalf(void);
+static inline void sam_syserr_bottomhalf(void);
+static inline void sam_async_advance_bottomhalf(void);
+static void sam_ehci_bottomhalf(FAR void *arg);
+static int sam_ehci_tophalf(int irq, FAR void *context);
 
 /* USB Host Controller Operations **********************************************/
 
@@ -587,7 +607,7 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
   /* We got here because either the waited for condition or a timeout
    * occurred.  Return a value to indicate which.
    */
- 
+
   return (regval == donebits) ? OK : -ETIMEDOUT;
 }
 
@@ -1000,16 +1020,374 @@ static int sam_qh_flush(struct sam_qh_s *qh)
  *******************************************************************************/
 
 /*******************************************************************************
- * Name: sam_ehci_interrupt
+ * Name: sam_ioc_bottomhalf
  *
  * Description:
- *   EHCI interrupt handler
+ *   EHCI USB Interrupt (USBINT) "Bottom Half" interrupt handler
+ *
+ *  "The Host Controller sets this bit to 1 on the  completion of a USB
+ *   transaction, which results in the retirement of a Transfer Descriptor that
+ *   had its IOC bit set.
+ *
+ *  "The Host Controller also sets this bit to 1 when a short packet is detected
+ *   (actual number of bytes received was less than the expected number of
+ *   bytes)."
  *
  *******************************************************************************/
 
-static int sam_ehci_interrupt(int irq, FAR void *context)
+static inline void sam_ioc_bottomhalf(void)
 {
-#warning "Missing logic"
+  ullvdbg("USB Interrupt (USBINT) Interrupt\n");
+}
+
+/*******************************************************************************
+ * Name: sam_ioc_bottomhalf
+ *
+ * Description:
+ *   EHCI USB Error Interrupt (USBERRINT) "Bottom Half" interrupt handler
+ *
+ *  "The Host Controller sets this bit to 1 when completion of a USB transaction
+ *   results in an error condition (e.g., error counter underflow). If the TD on
+ *   which the error interrupt occurred also had its IOC bit set, both this bit
+ *   and USBINT bit are set. ..."
+ *
+ *******************************************************************************/
+
+static inline void sam_err_bottomhalf(void)
+{
+  ulldbg("USB Error Interrupt (USBERRINT) Interrupt\n");
+
+  /* Remove all queued transfers */
+#warning Missing logic
+}
+
+/*******************************************************************************
+ * Name: sam_portsc_bottomhalf
+ *
+ * Description:
+ *   EHCI Port Change Detect "Bottom Half" interrupt handler
+ *
+ *  "The Host Controller sets this bit to a one when any port for which the Port
+ *   Owner bit is set to zero ... has a change bit transition from a zero to a
+ *   one or a Force Port Resume bit transition from a zero to a one as a result
+ *   of a J-K transition detected on a suspended port.  This bit will also be set
+ *   as a result of the Connect Status Change being set to a one after system
+ *   software has relinquished ownership of a connected port by writing a one
+ *   to a port's Port Owner bit...
+ *
+ *  "This bit is allowed to be maintained in the Auxiliary power well.
+ *   Alternatively, it is also acceptable that on a D3 to D0 transition of the
+ *   EHCI HC device, this bit is loaded with the OR of all of the PORTSC change
+ *   bits (including: Force port resume, over-current change, enable/disable
+ *   change and connect status change)."
+ *
+ *******************************************************************************/
+
+static inline void sam_portsc_bottomhalf(void)
+{
+  struct sam_rhport_s *rhport;
+  uint32_t portsc;
+  int rhpndx;
+
+  /* Handle root hub status change on each root port */
+
+  for (rhpndx = 0; rhpndx < SAM_EHCI_NRHPORT; rhpndx++)
+    {
+      rhport = &g_ehci.rhport[rhpndx];
+      portsc = sam_getreg(&HCOR->portsc[rhpndx]);
+
+      ullvdbg("PORTSC%d: %08x\n", rhpndx + 1, portsc);
+
+      /* Handle port connection status change (CSC) events */
+
+      if ((portsc & EHCI_PORTSC_CSC) != 0)
+        {
+          ullvdbg("Connect Status Change\n");
+
+          /* Check current connect status */
+
+          if ((portsc & EHCI_PORTSC_CCS) != 0)
+            {
+              /* Connected ... Did we just become connected? */
+
+              if (!rhport->connected)
+                {
+                  /* Yes.. connected. */
+
+                  rhport->connected = true;
+
+                  ullvdbg("RHPort%d connected, pscwait: %d\n",
+                          rhpndx + 1, g_ehci.pscwait);
+
+                  /* Notify any waiters */
+
+                  if (g_ehci.pscwait)
+                    {
+                      sam_givesem(&g_ehci.pscsem);
+                      g_ehci.pscwait = false;
+                    }
+                }
+              else
+                {
+                  ulldbg("Already connected\n");
+                }
+            }
+          else
+            {
+              /* Disconnected... Did we just become disconnected? */
+
+              if (rhport->connected)
+                {
+                  /* Yes.. disconnect the device */
+
+                  ullvdbg("RHport%d disconnected\n", rhpndx+1);
+                  rhport->connected = false;
+                  rhport->lowspeed  = false;
+
+                  /* Are we bound to a class instance? */
+
+                  if (rhport->class)
+                    {
+                      /* Yes.. Disconnect the class */
+
+                      CLASS_DISCONNECTED(rhport->class);
+                      rhport->class = NULL;
+                    }
+
+                  /* Notify any waiters for the Root Hub Status change
+                   * event.
+                   */
+
+                  if (g_ehci.pscwait)
+                    {
+                      sam_givesem(&g_ehci.pscsem);
+                      g_ehci.pscwait = false;
+                    }
+                }
+              else
+                {
+                   ulldbg("Already disconnected\n");
+                }
+            }
+        }
+
+      /* Clear all pending port interrupt sources by writing a '1' to the
+       * corresponding bit in the PORTSC register.
+       */
+
+      sam_putreg(portsc & EHCI_PORTSC_ALLINTS, &HCOR->portsc[rhpndx]);
+    }
+}
+
+/*******************************************************************************
+ * Name: sam_syserr_bottomhalf
+ *
+ * Description:
+ *   EHCI Host System Error "Bottom Half" interrupt handler
+ *
+ *  "The Host Controller sets this bit to 1 when a serious error occurs during a
+ *   host system access involving the Host Controller module. ... When this
+ *   error occurs, the Host Controller clears the Run/Stop bit in the Command
+ *   register to prevent further execution of the scheduled TDs."
+ *
+ *******************************************************************************/
+
+static inline void sam_syserr_bottomhalf(void)
+{
+  ulldbg("Host System Error Interrupt\n");
+  PANIC();
+}
+
+/*******************************************************************************
+ * Name: sam_async_advance_bottomhalf
+ *
+ * Description:
+ *   EHCI Async Advance "Bottom Half" interrupt handler
+ *
+ *  "System software can force the host controller to issue an interrupt the
+ *   next time the host controller advances the asynchronous schedule by writing
+ *   a one to the Interrupt on Async Advance Doorbell bit in the USBCMD
+ *   register. This status bit indicates the assertion of that interrupt
+ *   source."
+ *
+ *******************************************************************************/
+
+static inline void sam_async_advance_bottomhalf(void)
+{
+  ulldbg("Async Advance Interrupt\n");
+
+  /* Remove all tagged QH entries */
+#warning Missing logic
+}
+
+/*******************************************************************************
+ * Name: sam_ehci_bottomhalf
+ *
+ * Description:
+ *   EHCI "Bottom Half" interrupt handler
+ *
+ *******************************************************************************/
+
+static void sam_ehci_bottomhalf(FAR void *arg)
+{
+  uint32_t pending = (uint32_t)arg;
+  uint32_t regval;
+
+  /* Handle all unmasked interrupt sources */
+  /* USB Interrupt (USBINT)
+   *
+   *  "The Host Controller sets this bit to 1 on the  completion of a USB
+   *   transaction, which results in the retirement of a Transfer Descriptor
+   *   that had its IOC bit set.
+   *
+   *  "The Host Controller also sets this bit to 1 when a short packet is
+   *   detected (actual number of bytes received was less than the expected
+   *   number of bytes)."
+   */
+
+  if ((pending & EHCI_INT_USBINT) != 0)
+    {
+      sam_ioc_bottomhalf();
+    }
+
+  /* USB Error Interrupt (USBERRINT)
+   *
+   *  "The Host Controller sets this bit to 1 when completion of a USB
+   *   transaction results in an error condition (e.g., error counter
+   *   underflow). If the TD on which the error interrupt occurred also
+   *   had its IOC bit set, both this bit and USBINT bit are set. ..."
+   */
+
+  if ((pending & EHCI_INT_USBERRINT) != 0)
+    {
+      sam_err_bottomhalf();
+    }
+
+  /* Port Change Detect
+   *
+   *  "The Host Controller sets this bit to a one when any port for which
+   *   the Port Owner bit is set to zero ... has a change bit transition
+   *   from a zero to a one or a Force Port Resume bit transition from a zero
+   *   to a one as a result of a J-K transition detected on a suspended port.
+   *   This bit will also be set as a result of the Connect Status Change
+   *   being set to a one after system software has relinquished ownership
+   *    of a connected port by writing a one to a port's Port Owner bit...
+   *
+   *  "This bit is allowed to be maintained in the Auxiliary power well.
+   *   Alternatively, it is also acceptable that on a D3 to D0 transition
+   *   of the EHCI HC device, this bit is loaded with the OR of all of the
+   *   PORTSC change bits (including: Force port resume, over-current change,
+   *   enable/disable change and connect status change)."
+   */
+
+  if ((pending & EHCI_INT_PORTSC) != 0)
+    {
+      sam_portsc_bottomhalf();
+    }
+
+  /* Frame List Rollover
+   *
+   *  "The Host Controller sets this bit to a one when the Frame List Index ...
+   *   rolls over from its maximum value to zero. The exact value at which
+   *   the rollover occurs depends on the frame list size. For example, if
+   *   the frame list size (as programmed in the Frame List Size field of the
+   *   USBCMD register) is 1024, the Frame Index Register rolls over every
+   *   time FRINDEX[13] toggles. Similarly, if the size is 512, the Host
+   *   Controller sets this bit to a one every time FRINDEX[12] toggles."
+   */
+
+#if 0 /* Not used */
+  if ((pending & EHCI_INT_FLROLL) != 0)
+    {
+      sam_flroll_bottomhalf();
+    }
+#endif
+
+  /* Host System Error
+   *
+   *  "The Host Controller sets this bit to 1 when a serious error occurs
+   *   during a host system access involving the Host Controller module. ...
+   *   When this error occurs, the Host Controller clears the Run/Stop bit
+   *   in the Command register to prevent further execution of the scheduled
+   *   TDs."
+   */
+
+  if ((pending & EHCI_INT_SYSERROR) != 0)
+    {
+      sam_syserr_bottomhalf();
+    }
+
+  /* Interrupt on Async Advance
+   *
+   *  "System software can force the host controller to issue an interrupt
+   *   the next time the host controller advances the asynchronous schedule
+   *   by writing a one to the Interrupt on Async Advance Doorbell bit in
+   *   the USBCMD register. This status bit indicates the assertion of that
+   *   interrupt source."
+   */
+
+  if ((pending & EHCI_INT_AAINT) != 0)
+    {
+      sam_async_advance_bottomhalf();
+    }
+
+  /* Re-enable relevant EHCI interrupts.  Interrupts should still be enabled
+   * at the level of the AIC.
+   */
+
+  sam_putreg(EHCI_HANDLED_INTS, &HCOR->usbintr);
+}
+
+/*******************************************************************************
+ * Name: sam_ehci_tophalf
+ *
+ * Description:
+ *   EHCI "Top Half" interrupt handler
+ *
+ *******************************************************************************/
+
+static int sam_ehci_tophalf(int irq, FAR void *context)
+{
+  uint32_t usbsts;
+  uint32_t pending;
+  uint32_t regval;
+
+  /* Read Interrupt Status and mask out interrupts that are not enabled. */
+
+  usbsts = sam_getreg(&HCOR->usbsts);
+  regval = sam_getreg(&HCOR->usbintr);
+  ullvdbg("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
+
+  /* Handle all unmasked interrupt sources */
+
+  pending = usbsts & regval;
+  if (pending != 0)
+    {
+      /* Schedule interrupt handling work for the high priority worker thread
+       * so that we are not pressed for time and so that we can interrupt with
+       * other USB threads gracefully.
+       *
+       * The worker should be available now because we implement a handshake
+       * by controlling the EHCI interrupts.
+       */
+
+      DEBUGASSERT(work_available(&g_ehci.work));
+      DEBUGVERIFY(work_queue(HPWORK, &g_ehci.work, sam_ehci_bottomhalf,
+                            (FAR void *)pending, 0));
+
+      /* Disable further EHCI interrupts so that we do not overrun the work
+       * queue.
+       */
+
+      sam_putreg(0, &HCOR->usbintr);
+
+      /* Clear all pending status bits by writing the value of the pending
+       * interrupt bits back to the status register.
+       */
+
+      sam_putreg(usbsts & ECHI_INT_ALLINTS, &HCOR->usbsts);
+    }
+
   return OK;
 }
 
@@ -1080,8 +1458,8 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
        * and check again
        */
 
-      g_ehci.rhwait = true;
-      sam_takesem(&g_ehci.rhsem);
+      g_ehci.pscwait = true;
+      sam_takesem(&g_ehci.pscsem);
     }
 }
 
@@ -1833,7 +2211,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   /* Initialize the EHCI state data structure */
 
   sem_init(&g_ehci.exclsem, 0, 1);
-  sem_init(&g_ehci.rhsem,  0, 0);
+  sem_init(&g_ehci.pscsem,  0, 0);
 
   /* Initialize EP0 */
 
@@ -1894,19 +2272,25 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   /* Interrupt Configuration ***************************************************/
 
-  /* Clear pending interrupts */
-#warning Missing logic
-
-  /* Enable EHCI interrupts */
-#warning Missing logic
-
   /* Attach USB host controller interrupt handler */
 
-  if (irq_attach(SAM_IRQ_UHPHS, sam_ehci_interrupt) != 0)
+  if (irq_attach(SAM_IRQ_UHPHS, sam_ehci_tophalf) != 0)
     {
       udbg("ERROR: Failed to attach IRQ\n");
       return NULL;
     }
+
+  /* Clear pending interrupts.  Bits in the USBSTS register are cleared by
+   * writing a '1' to the corresponding bit.
+   */
+
+  sam_putreg(ECHI_INT_ALLINTS, &HCOR->usbsts);
+
+  /* Enable EHCI interrupts.  Interrupts are still disabled at the level of
+   * the AIC.
+   */
+
+  sam_putreg(EHCI_HANDLED_INTS, &HCOR->usbintr);
 
   /* Drive Vbus +5V (the smoke test).  Should be done elsewhere in OTG
    * mode.

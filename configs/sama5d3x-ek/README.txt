@@ -1166,7 +1166,7 @@ Configurations
           volume when it is removed.  But those callbacks are not used in
           this configuration.
 
-    10) Support the USB full-speed OHCI host driver can be enabled by change
+    10) Support the USB full-speed OHCI host driver can be enabled by changing
         the NuttX configuration file as follows:
 
         System Type -> ATSAMA5 Peripheral Support
@@ -1192,6 +1192,28 @@ Configurations
        of 396MHz.  This is so that the PLL generates a frequency which is a
        multiple of the 48MHz needed for OHCI.  The delay loop calibration
        values that are used will be off slightly because of this.
+
+    10) Support the USB high-speed EHCI host driver can be enabled by changing
+        the NuttX configuration file as follows:
+
+        System Type -> ATSAMA5 Peripheral Support
+          CONFIG_SAMA5_UHPHS=y                 : USB Host High Speed
+
+        System Type -> USB High Speed Host driver options
+          CONFIG_SAMA5_EHCI=y                  : High-speed EHCI support
+                                               : Defaults for values probably OK
+        Device Drivers
+          CONFIG_USBHOST=y                     : Enable USB host support
+
+        Device Drivers -> USB Host Driver Support
+          CONFIG_USBHOST_ISOC_DISABLE=y        : Isochronous endpoints not used
+          CONFIG_USBHOST_MSC=y                 : Enable the mass storage class driver
+
+        Library Routines
+          CONFIG_SCHED_WORKQUEUE               : Worker thread support is required
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
@@ -1254,6 +1276,10 @@ Configurations
         c) I have tested only the Mass Storage Class (MSC) and not CDC/ACM.
         d) OHCI will support 3 downstream points, but I currently have only
            one enabled.
+
+      2013-8-20:  Added description to add EHCI to the configuration.  At
+        present, however, EHCI is still a work in progress and not ready for
+        prime time.
 
   ostest:
     This configuration directory, performs a simple OS test using
