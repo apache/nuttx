@@ -763,7 +763,7 @@ static int enc_waitbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
     }
   while ((rddata & bits) != value || elapsed > ENC_POLLTIMEOUT);
 
-  return (rddata & bits) == value ? -ETIMEDOUT : OK;
+  return (rddata & bits) == value ? OK : -ETIMEDOUT;
 }
 
 /****************************************************************************
@@ -1007,7 +1007,7 @@ static uint16_t enc_rdphy(FAR struct enc_driver_s *priv, uint8_t phyaddr)
    */
 
   up_udelay(12);
-  if (enc_waitbreg(priv, ENC_MISTAT, MISTAT_BUSY, 0x00) == OK);
+  if (enc_waitbreg(priv, ENC_MISTAT, MISTAT_BUSY, 0x00) == OK)
     {
       /* 4. Clear the MICMD.MIIRD bit. */
 
