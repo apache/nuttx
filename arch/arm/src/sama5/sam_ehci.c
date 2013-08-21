@@ -102,11 +102,31 @@
 #  undef CONFIG_SAMA5_EHCI_REGDEBUG
 #endif
 
+/* Periodic transfers will be supported later */
+
+#undef CONFIG_USBHOST_INT_DISABLE
+#define CONFIG_USBHOST_INT_DISABLE 1
+
+#undef CONFIG_USBHOST_ISOC_DISABLE
+#define CONFIG_USBHOST_INT_DISABLE 1
+
 /* Driver-private Definitions **************************************************/
+
+/* This is the set of interrupts handled by this driver */
 
 #define EHCI_HANDLED_INTS (EHCI_INT_USBINT | EHCI_INT_USBERRINT | \
                            EHCI_INT_PORTSC |  EHCI_INT_SYSERROR | \
                            EHCI_INT_AAINT)
+
+/* The periodic frame list is a 4K-page aligned array of Frame List Link
+ * pointers. The length of the frame list may be programmable. The programmability
+ * of the periodic frame list is exported to system software via the HCCPARAMS
+ * register. If non-programmable, the length is 1024 elements. If programmable,
+ * the length can be selected by system software as one of 256, 512, or 1024
+ * elements.
+ */
+
+#define FRAME_LIST_SIZE 1024
 
 /*******************************************************************************
  * Private Types
@@ -316,13 +336,27 @@ static struct sam_ehci_s g_ehci;
 
 static struct usbhost_connection_s g_ehciconn;
 
+/* The head of the asynchronous queue */
+
+static struct sam_qh_s g_asynchead __attribute__ ((aligned(32)));
+
+#ifndef CONFIG_USBHOST_INT_DISABLE
+/* The head of the periodic queue */
+
+static struct sam_qh_s g_perhead   __attribute__ ((aligned(32)));
+
+/* The frame list */
+
+static uint32_t g_framelist[FRAME_LIST_SIZE] __attribute__ ((aligned(4096)));
+#endif
+
 /* Pools of pre-allocated data structures.  These will all be linked into the
  * free lists within g_ehci.  These must all be aligned to 32-byte boundaries
  */
 
 /* Queue Head (QH) pool */
 
-static struct sam_qh_s g_ghpool[CONFIG_SAMA5_EHCI_NQHS]
+static struct sam_qh_s g_qhpool[CONFIG_SAMA5_EHCI_NQHS]
                        __attribute__ ((aligned(32)));
 
 /* Queue Element Transfer Descriptor (qTD) pool */
@@ -1231,7 +1265,6 @@ static inline void sam_async_advance_bottomhalf(void)
 static void sam_ehci_bottomhalf(FAR void *arg)
 {
   uint32_t pending = (uint32_t)arg;
-  uint32_t regval;
 
   /* Handle all unmasked interrupt sources */
   /* USB Interrupt (USBINT)
@@ -2161,12 +2194,27 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 {
   irqstate_t flags;
   uint32_t regval;
+#ifdef CONFIG_DEBUG_USB
+  uint16_t regval16;
+  unsigned int nports;
+#endif
+  uintptr_t physaddr;
   int ret;
   int i;
 
   /* Sanity checks */
 
   DEBUGASSERT(controller == 0);
+  DEBUGASSERT(((uintptr_t)&g_asynchead & 0x1f) == 0);
+  DEBUGASSERT(((uintptr_t)&g_qhpool & 0x1f) == 0);
+  DEBUGASSERT(((uintptr_t)&g_qtdpool & 0x1f) == 0);
+  DEBUGASSERT((sizeof(struct sam_qh_s) & 0x1f) == 0);
+  DEBUGASSERT((sizeof(struct sam_qtd_s) & 0x1f) == 0);
+
+#ifndef CONFIG_USBHOST_INT_DISABLE
+  DEBUGASSERT(((uintptr_t)&g_perhead & 0x1f) == 0);
+  DEBUGASSERT(((uintptr_t)g_framelist & 0xfff) == 0);
+#endif
 
   /* SAMA5 Configuration *******************************************************/
   /* For High-speed operations, the user has to perform the following:
@@ -2245,7 +2293,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
     {
       /* Put the QH structure in a free list */
 
-      sam_qh_free(&g_ghpool[i]);
+      sam_qh_free(&g_qhpool[i]);
     }
 
   /* Initialize the list of free Queue Head (QH) structures */
@@ -2258,7 +2306,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
     }
 
   /* EHCI Hardware Configuration ***********************************************/
-
+  /* Host Controller Initialization. Paragraph 4.1 */
   /* Reset the EHCI hardware */
 
   ret = sam_reset();
@@ -2268,10 +2316,158 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
       return NULL;
     }
 
-#warning Missing logic
+  /* "In order to initialize the host controller, software should perform the
+   *  following steps:
+   *
+   *  • "Program the CTRLDSSEGMENT register with 4-Gigabyte segment where all
+   *     of the interface data structures are allocated. [64-bit mode]
+   *  • "Write the appropriate value to the USBINTR register to enable the
+   *     appropriate interrupts.
+   *  • "Write the base address of the Periodic Frame List to the PERIODICLIST
+   *     BASE register. If there are no work items in the periodic schedule,
+   *     all elements of the Periodic Frame List should have their T-Bits set
+   *     to a one.
+   *  • "Write the USBCMD register to set the desired interrupt threshold,
+   *     frame list size (if applicable) and turn the host controller ON via
+   *     setting the Run/Stop bit.
+   *  •  Write a 1 to CONFIGFLAG register to route all ports to the EHCI controller
+   *     ...
+   *
+   * "At this point, the host controller is up and running and the port registers
+   *  will begin reporting device connects, etc. System software can enumerate a
+   *  port through the reset process (where the port is in the enabled state). At
+   *  this point, the port is active with SOFs occurring down the enabled por
+   *  enabled Highspeed ports, but the schedules have not yet been enabled. The
+   *  EHCI Host controller will not transmit SOFs to enabled Full- or Low-speed
+   *  ports.
+   */
+
+  /* Disable all interrupts */
+
+  sam_putreg(0, &HCOR->usbintr);
+
+  /* Clear pending interrupts.  Bits in the USBSTS register are cleared by
+   * writing a '1' to the corresponding bit.
+   */
+
+  sam_putreg(ECHI_INT_ALLINTS, &HCOR->usbsts);
+
+#ifdef CONFIG_DEBUG
+  /* Show the ECHI version */
+
+  regval16 = sam_read16(&HCCR->hciversion);
+  uvdbg("HCIVERSIONI %x.%02x", regval16 >> 8, regval16 & 0xff);
+
+  /* Verify the the correct number of ports is reported */
+
+  regval = sam_getreg(&HCCR->hcsparams);
+  nports = (regval & EHCI_HCSPARAMS_NPORTS_MASK) >> EHCI_HCSPARAMS_NPORTS_SHIFT;
+
+  uvdbg("HCSPARAMS=%08x nports=%d", regval, nports);
+  DEBUGASSERT(nports == SAM_EHCI_NRHPORT);
+
+  /* Show the HCCPARAMS register */
+
+  regval = sam_getreg(&HCCR->hccparams);
+  uvdbg("HCCPARAMS=%08x\n", regval);
+#endif
+
+  /* Initialize the head of the asynchronous queue/reclamation list.
+   *
+   * "In order to communicate with devices via the asynchronous schedule,
+   *  system software must write the ASYNDLISTADDR register with the address
+   *  of a control or bulk queue head. Software must then enable the
+   *  asynchronous schedule by writing a one to the Asynchronous Schedule
+   *  Enable bit in the USBCMD register. In order to communicate with devices
+   *  via the periodic schedule, system software must enable the periodic
+   *  schedule by writing a one to the Periodic Schedule Enable bit in the
+   *  USBCMD register. Note that the schedules can be turned on before the
+   *  first port is reset (and enabled)."
+   */
+
+  memset(&g_asynchead, 0, sizeof(struct sam_qh_s));
+  sam_write32((uint32_t)&g_asynchead | QH_HLP_TYP_QH, &g_asynchead.hw.hlp);
+  sam_write32(QH_EPCHAR_H | QH_EPCHAR_EPS_FULL, &g_asynchead.hw.epchar);
+  sam_write32(QH_NQP_T, &g_asynchead.hw.overlay.nqp);
+  sam_write32(QH_NQP_T, &g_asynchead.hw.overlay.alt);
+  sam_write32(QH_TOKEN_HALTED, &g_asynchead.hw.overlay.token);
+
+  /* Set the Current Asynchronous List Address. */
+
+  physaddr = sam_physramaddr((uintptr_t)&g_asynchead);
+  sam_putreg(physaddr, &HCOR->asynclistaddr);
+
+#ifndef CONFIG_USBHOST_INT_DISABLE
+  /* Initialize the head of the periodic list */
+
+  memset(&g_perhead, 0, sizeof(struct sam_qh_s));
+  sam_write32(QH_HLP_T, &g_perhead.hw.hlp);
+  sam_write32(QH_NQP_T, &g_perhead.hw.overlay.nqp);
+  sam_write32(QH_NQP_T, &g_perhead.hw.overlay.alt);
+  sam_write32(QH_TOKEN_HALTED, &g_perhead.hw.overlay.token);
+  sam_write32(QH_EPCAPS_SSMASK(1), &g_perhead.hw.epcaps);
+
+  /* Attach the periodic QH to Period Frame List */
+
+  physaddr = sam_physramaddr((uintptr_t)&g_perhead);
+  for (i = 0; i < FRAME_LIST_SIZE; i++)
+    {
+      g_framelist[i] = physaddr | PFL_TYP_QH;
+    }
+
+  /* Set the Periodic Frame List Base Address. */
+
+  sam_putreg(physaddr, &HCOR->periodiclistbase);
+#endif
+
+  /* Enable the asynchronous schedule and, possibly set the frame list size */
+
+  regval  = sam_getreg(&HCOR->usbcmd);
+  regval &= ~(EHCI_USBCMD_HCRESET | EHCI_USBCMD_FLSIZE_MASK | 
+              EHCI_USBCMD_FLSIZE_MASK | EHCI_USBCMD_PSEN |
+              EHCI_USBCMD_IAADB | EHCI_USBCMD_LRESET);
+  regval |= EHCI_USBCMD_ASEN;
+
+#ifndef CONFIG_USBHOST_INT_DISABLE
+#  if FRAME_LIST_SIZE == 1024
+  regval |= EHCI_USBCMD_FLSIZE_1024;
+#  elif FRAME_LIST_SIZE == 512
+  regval |= EHCI_USBCMD_FLSIZE_512;
+#  elif FRAME_LIST_SIZE == 512
+  regval |= EHCI_USBCMD_FLSIZE_256;
+#  else
+#    error Unsupported frame size list size
+#  endif
+#endif
+
+  sam_putreg(regval, &HCOR->usbcmd);
+
+  /* Start the host controller by setting the RUN bit in the USBCMD regsiter. */
+
+  regval  = sam_getreg(&HCOR->usbcmd);
+  regval &= ~(EHCI_USBCMD_LRESET | EHCI_USBCMD_IAADB | EHCI_USBCMD_PSEN |
+              EHCI_USBCMD_ASEN | EHCI_USBCMD_HCRESET);
+  regval |= EHCI_USBCMD_RUN;
+  sam_putreg(regval, &HCOR->usbcmd);
+
+  /* Route all ports to this host controller by setting the CONFIG flag. */
+
+  regval  = sam_getreg(&HCOR->configflag);
+  regval |= EHCI_CONFIGFLAG;
+  sam_putreg(regval, &HCOR->configflag);
+
+  /* Wait for the ECHI to run (i.e., not longer report halted) */
+
+  ret = ehci_wait_usbsts(EHCI_USBSTS_HALTED, 0, 100*1000);
+  if (ret < 0)
+    {
+      udbg("ERROR: EHCI Failed to run: USBSTS=%08x\n",
+           sam_getreg(&HCOR->usbsts));
+
+      return NULL;
+    }
 
   /* Interrupt Configuration ***************************************************/
-
   /* Attach USB host controller interrupt handler */
 
   if (irq_attach(SAM_IRQ_UHPHS, sam_ehci_tophalf) != 0)
@@ -2279,12 +2475,6 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
       udbg("ERROR: Failed to attach IRQ\n");
       return NULL;
     }
-
-  /* Clear pending interrupts.  Bits in the USBSTS register are cleared by
-   * writing a '1' to the corresponding bit.
-   */
-
-  sam_putreg(ECHI_INT_ALLINTS, &HCOR->usbsts);
 
   /* Enable EHCI interrupts.  Interrupts are still disabled at the level of
    * the AIC.
