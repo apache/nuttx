@@ -360,7 +360,7 @@
 
 /* Periodic Frame List. Paragraph 3.1 */
 
-#define PFL_T                          (1 << 0)   /* Bit 0: Not memory pointer, see TYP */
+#define PFL_T                          (1 << 0)   /* Bit 0: Terminate, Link pointer invalid */
 #define PFL_TYP_SHIFT                  (1)        /* Bits 1-2: Type */
 #define PFL_TYP_MASK                   (3 << PFL_TYP_SHIFT)
 #  define PFL_TYP_ITD                  (0 << PFL_TYP_SHIFT) /* Isochronous Transfer Descriptor */
@@ -375,7 +375,7 @@
 /* Isochronous (High-Speed) Transfer Descriptor (iTD). Paragraph 3.3 */
 /* iTD Next Link Pointer. Paragraph 3.3.1 */
 
-#define ITD_NLP_T                      (1 << 0)   /* Bit 0: Link pointer invalid, see TYP */
+#define ITD_NLP_T                      (1 << 0)   /* Bit 0: Terminate, Link pointer invalid */
 #define ITD_NLP_TYP_SHIFT              (1)        /* Bits 1-2: Type */
 #define ITD_NLP_TYP_MASK               (3 << ITD_NLP_TYP_SHIFT)
 #  define ITD_NLP_TYP_ITD              (0 << ITD_NLP_TYP_SHIFT) /* Isochronous Transfer Descriptor */
@@ -434,7 +434,7 @@
 /* Split Transaction Isochronous Transfer Descriptor (siTD). Paragraph 3.4 */
 /* siTD Next Link Pointer. Paragraph 3.4.1 */
 
-#define SITD_NLP_T                     (1 << 0)   /* Bit 0: Link pointer invalid, see TYP */
+#define SITD_NLP_T                     (1 << 0)   /* Bit 0: Terminate, Link pointer invalid */
 #define SITD_NLP_TYP_SHIFT             (1)        /* Bits 1-2: Type */
 #define SITD_NLP_TYP_MASK              (3 << SITD_NLP_TYP_SHIFT)
 #  define SITD_NLP_TYP_ITD             (0 << SITD_NLP_TYP_SHIFT) /* Isochronous Transfer Descriptor */
@@ -463,8 +463,10 @@
 
 #define SITD_FMSCHED_SSMASK_SHIFT      (0)        /* Bitx 0-7: Split Start Mask (µFrame S-mask) */
 #define SITD_FMSCHED_SSMASK_MASK       (0xff << SITD_FMSCHED_SSMASK_SHIFT)
+#  define SITD_FMSCHED_SSMASK(n)       ((n) << SITD_FMSCHED_SSMASK_SHIFT)
 #define SITD_FMSCHED_SCMASK_SHIFT      (8)        /* Bitx 8-15: Split Completion Mask (µFrame C-Mask) */
 #define SITD_FMSCHED_SCMASK_MASK       (0xff << SITD_FMSCHED_SCMASK_SHIFT)
+#  define SITD_FMSCHED_SCMASK(n)       ((n) << SITD_FMSCHED_SCMASK_SHIFT)
                                                   /* Bits 16-31: Reserved */
 /* siTD Transfer State. Paragraph 3.4.3 */
 
@@ -557,7 +559,7 @@
 /* Queue Head. Paragraph 3.6 */
 /* Queue Head Horizontal Link Pointer.  Paragraph 3.6.1 */
 
-#define QH_HLP_T                       (1 << 0)   /* Bit 0: Terminate, Last QH invalid, see TYP */
+#define QH_HLP_T                       (1 << 0)   /* Bit 0: Terminate, QH HL pointer invalid */
 #define QH_HLP_TYP_SHIFT               (1)        /* Bits 1-2: Type */
 #define QH_HLP_TYP_MASK                (3 << QH_HLP_TYP_SHIFT)
 #  define QH_HLP_TYP_ITD               (0 << QH_HLP_TYP_SHIFT) /* Isochronous Transfer Descriptor */
@@ -592,14 +594,19 @@
 
 #define QH_EPCAPS_SSMASK_SHIFT         (0)        /* Bitx 0-7: Interrupt Schedule Mask (µFrame S-mask) */
 #define QH_EPCAPS_SSMASK_MASK          (0xff << QH_EPCAPS_SSMASK_SHIFT)
+#  define QH_EPCAPS_SSMASK(n)          ((n) <<  QH_EPCAPS_SSMASK_SHIFT)
 #define QH_EPCAPS_SCMASK_SHIFT         (8)        /* Bitx 8-15: Split Completion Mask (µFrame C-Mask) */
 #define QH_EPCAPS_SCMASK_MASK          (0xff << QH_EPCAPS_SCMASK_SHIFT)
+#  define QH_EPCAPS_SCMASK(n)          ((n) << QH_EPCAPS_SCMASK_SHIFT)
 #define QH_EPCAPS_HUBADDR_SHIFT        (16)       /* Bitx 16-22: Hub Address */
 #define QH_EPCAPS_HUBADDR_MASK         (0x7f << QH_EPCAPS_HUBADDR_SHIFT)
+#  define QH_EPCAPS_HUBADDR(n)         ((n) << QH_EPCAPS_HUBADDR_SHIFT)
 #define QH_EPCAPS_PORT_SHIFT           (23)       /* Bit 23-29: Port Number */
 #define QH_EPCAPS_PORT_MASK            (0x7f << QH_EPCAPS_PORT_SHIFT)
+#  define QH_EPCAPS_PORT(n)            ((n) << QH_EPCAPS_PORT_SHIFT)
 #define QH_EPCAPS_MULT_SHIFT           (30)       /* Bit 30-31: High-Bandwidth Pipe Multiplier */
 #define QH_EPCAPS_MULT_MASK            (3 << QH_EPCAPS_MULT_SHIFT)
+#  define QH_EPCAPS_MULT(n)            ((n) << QH_EPCAPS_MULT_SHIFT)
 
 /* Current qTD Link Pointer.  Table 3-21 */
 
