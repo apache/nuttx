@@ -54,6 +54,8 @@
 #include <nuttx/usb/ehci.h>
 
 #include "up_arch.h"
+#include "cache.h"
+
 #include "sam_periphclks.h"
 #include "sam_memories.h"
 #include "sam_usbhost.h"
@@ -239,6 +241,13 @@ static int sam_qtd_foreach(struct sam_qh_s *qh, foreach_qtd_t handler,
          void *arg);
 static int sam_qtd_discard(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
 static int sam_qh_discard(struct sam_qh_s *qh);
+
+/* Cache Operations ************************************************************/
+
+static int sam_qtd_invalidate(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
+static int sam_qh_invalidate(struct sam_qh_s *qh);
+static int sam_qtd_flush(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
+static int sam_qh_flush(struct sam_qh_s *qh);
 
 /* Interrupt Handling **********************************************************/
 
@@ -890,16 +899,100 @@ static int sam_qh_discard(struct sam_qh_s *qh)
 
   /* Free all of the qTD's attached to the QH */
 
-  ret = sam_gtd_foreach(qh, sam_qtd_discard, NULL);
+  ret = sam_qtd_foreach(qh, sam_qtd_discard, NULL);
   if (ret < 0)
     {
-      udbg("ERROR: sam_gtd_foreach failed: %d\n", ret);
+      udbg("ERROR: sam_qtd_foreach failed: %d\n", ret);
     }
 
   /* Then free the QH itself */
 
   sam_qh_free(qh);
   return ret;
+}
+
+/*******************************************************************************
+ * Cache Operations
+ *******************************************************************************/
+
+/*******************************************************************************
+ * Name: sam_qtd_invalidate
+ *
+ * Description:
+ *   This is a callback from sam_qtd_foreach.  It simply invalidates D-cache for
+ *   address range of the qTD entry.
+ *
+ *******************************************************************************/
+
+static int sam_qtd_invalidate(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
+{
+  /* Invalidate the D-Cache, i.e., force reloading of the D-Cache from memory
+   * memory over the specified address range.
+   */
+
+  cp15_invalidate_dcache((uintptr_t)&qtd->hw,
+                         (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  return OK;
+}
+
+/*******************************************************************************
+ * Name: sam_qh_invalidate
+ *
+ * Description:
+ *   Invalidate the Queue Head and all qTD entries in the queue.
+ *
+ *******************************************************************************/
+
+static int sam_qh_invalidate(struct sam_qh_s *qh)
+{
+  /* Invalidate the QH first so that we reload the qTD list head */
+
+  cp15_invalidate_dcache((uintptr_t)&qh->hw,
+                         (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+
+  /* Then invalidate all of the qTD entries in the queue */
+
+  return sam_qtd_foreach(qh, NULL, NULL);
+}
+
+/*******************************************************************************
+ * Name: sam_qtd_flush
+ *
+ * Description:
+ *   This is a callback from sam_qtd_foreach.  It simply flushes D-cache for
+ *   address range of the qTD entry.
+ *
+ *******************************************************************************/
+
+static int sam_qtd_flush(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
+{
+  /* Flush the D-Cache, i.e., make the contents of the memory match the contents
+   * of the D-Cache in the specified address range.
+   */
+
+  cp15_coherent_dcache((uintptr_t)&qtd->hw,
+                       (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  return OK;
+}
+
+/*******************************************************************************
+ * Name: sam_qh_flush
+ *
+ * Description:
+ *   Invalidate the Queue Head and all qTD entries in the queue.
+ *
+ *******************************************************************************/
+
+static int sam_qh_flush(struct sam_qh_s *qh)
+{
+  /* Flush the QH first */
+
+  cp15_invalidate_dcache((uintptr_t)&qh->hw,
+                         (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+
+  /* Then flush all of the qTD entries in the queue */
+
+  return sam_qtd_foreach(qh, NULL, NULL);
 }
 
 /*******************************************************************************
@@ -1214,6 +1307,7 @@ static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
   sam_takesem(&g_ehci.exclsem);
 
 #warning Missing logic
+  ret = -ENOSYS;
 
   /* And free the container */
 
