@@ -5424,4 +5424,7 @@
 	* nuttx/arch/arm/src/sama5/sam_ehci.c and other files:  Create a skeleton
 	  environment for development of an EHCI driver.  Not much in place yet
 	  (2013-8-20).
+	* nuttx/arch/arm/src/sama5/sam_ehci.c:  Now code complete for all
+	  asynchronous endpoints (control and bulk); nothing yet in place
+	  for periodic endponts (interrupt and isochronous) (2013-8-22).
 
