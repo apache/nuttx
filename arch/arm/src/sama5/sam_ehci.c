@@ -108,7 +108,7 @@
 #define CONFIG_USBHOST_INT_DISABLE 1
 
 #undef CONFIG_USBHOST_ISOC_DISABLE
-#define CONFIG_USBHOST_INT_DISABLE 1
+#define CONFIG_USBHOST_ISOC_DISABLE 1
 
 /* Driver-private Definitions **************************************************/
 
@@ -178,11 +178,14 @@ struct sam_epinfo_s
   uint8_t dirin:1;             /* 1:IN endpoint 0:OUT endpoint */
   uint8_t devaddr:7;           /* Device address */
   uint8_t toggle:1;            /* Next data toggle */
-  uint8_t xfrtype:2;           /* See USB_EP_ATTR_XFER_* definitions in usb.h */
-  uint8_t speed:2;             /* See USB_*_SPEED definitions in ehci.h */
+#ifndef CONFIG_USBHOST_INT_DISABLE
+  uint8_t interval;            /* Polling interval */
+#endif
   uint8_t status;              /* Retained token status bits (for debug purposes) */
   volatile bool iocwait;       /* TRUE: Thread is waiting for transfer completion */
-  uint16_t maxpacket;          /* Maximum packet size */
+  uint16_t maxpacket:11;       /* Maximum packet size */
+  uint16_t xfrtype:2;          /* See USB_EP_ATTR_XFER_* definitions in usb.h */
+  uint16_t speed:2;            /* See USB_*_SPEED definitions in ehci.h */
   int result;                  /* The result of the transfer */
   sem_t iocsem;                /* Semaphore used to wait for transfer completion */
 };
@@ -236,8 +239,10 @@ struct sam_ehci_s
 
 static uint16_t sam_read16(const uint8_t *addr);
 static uint32_t sam_read32(const uint8_t *addr);
+#if 0 /* Not used */
 static void sam_write16(uint16_t memval, uint8_t *addr);
 static void sam_write32(uint32_t memval, uint8_t *addr);
+#endif
 
 #ifdef CONFIG_ENDIAN_BIG
 static uint16_t sam_swap16(uint16_t value);
@@ -285,8 +290,10 @@ static int sam_qh_discard(struct sam_qh_s *qh);
 
 /* Cache Operations ************************************************************/
 
+#if 0 /* Not used */
 static int sam_qtd_invalidate(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
 static int sam_qh_invalidate(struct sam_qh_s *qh);
+#endif
 static int sam_qtd_flush(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
 static int sam_qh_flush(struct sam_qh_s *qh);
 
@@ -311,7 +318,6 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
 static int sam_qtd_ioccheck(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
 static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg);
 static inline void sam_ioc_bottomhalf(void);
-static inline void sam_err_bottomhalf(void);
 static inline void sam_portsc_bottomhalf(void);
 static inline void sam_syserr_bottomhalf(void);
 static inline void sam_async_advance_bottomhalf(void);
@@ -439,6 +445,7 @@ static inline uint32_t sam_read32(const uint8_t *addr)
  *
  *******************************************************************************/
 
+#if 0 /* Not used */
 static void sam_write16(uint16_t memval, uint8_t *addr)
 {
 #ifdef CONFIG_ENDIAN_BIG
@@ -449,6 +456,7 @@ static void sam_write16(uint16_t memval, uint8_t *addr)
   addr[1] = memval & 0xff;
 #endif
 }
+#endif
 
 /*******************************************************************************
  * Name: sam_write32
@@ -458,6 +466,7 @@ static void sam_write16(uint16_t memval, uint8_t *addr)
  *
  *******************************************************************************/
 
+#if 0 /* Not used */
 static void sam_write32(uint32_t memval, uint8_t *addr)
 {
 #ifdef CONFIG_ENDIAN_BIG
@@ -468,6 +477,7 @@ static void sam_write32(uint32_t memval, uint8_t *addr)
   sam_write16(memval >> 16, &addr[2]);
 #endif
 }
+#endif
 
 /*******************************************************************************
  * Name: sam_swap16
@@ -1053,6 +1063,7 @@ static int sam_qh_discard(struct sam_qh_s *qh)
  *
  *******************************************************************************/
 
+#if 0 /* Not used */
 static int sam_qtd_invalidate(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 {
   /* Invalidate the D-Cache, i.e., force reloading of the D-Cache from memory
@@ -1063,6 +1074,7 @@ static int sam_qtd_invalidate(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
                          (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
   return OK;
 }
+#endif
 
 /*******************************************************************************
  * Name: sam_qh_invalidate
@@ -1072,6 +1084,7 @@ static int sam_qtd_invalidate(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
  *
  *******************************************************************************/
 
+#if 0 /* Not used */
 static int sam_qh_invalidate(struct sam_qh_s *qh)
 {
   /* Invalidate the QH first so that we reload the qTD list head */
@@ -1081,8 +1094,9 @@ static int sam_qh_invalidate(struct sam_qh_s *qh)
 
   /* Then invalidate all of the qTD entries in the queue */
 
-  return sam_qtd_foreach(qh, NULL, NULL);
+  return sam_qtd_foreach(qh, sam_qtd_invalidate, NULL);
 }
+#endif
 
 /*******************************************************************************
  * Name: sam_qtd_flush
@@ -1121,7 +1135,7 @@ static int sam_qh_flush(struct sam_qh_s *qh)
 
   /* Then flush all of the qTD entries in the queue */
 
-  return sam_qtd_foreach(qh, NULL, NULL);
+  return sam_qtd_foreach(qh, sam_qtd_flush, NULL);
 }
 
 /*******************************************************************************
@@ -1922,8 +1936,6 @@ static inline void sam_ioc_bottomhalf(void)
 {
   int ret;
 
-  uvdbg("USB Interrupt (USBINT) Interrupt\n");
-
   /* Make sure that the head of the asynchronous queue is invalidated */
 
   cp15_invalidate_dcache((uintptr_t)&g_asynchead.hw,
@@ -1936,27 +1948,6 @@ static inline void sam_ioc_bottomhalf(void)
     {
       udbg("ERROR: sam_qh_forall failed: %d\n", ret);
     }
-}
-
-/*******************************************************************************
- * Name: sam_err_bottomhalf
- *
- * Description:
- *   EHCI USB Error Interrupt (USBERRINT) "Bottom Half" interrupt handler
- *
- *  "The Host Controller sets this bit to 1 when completion of a USB transaction
- *   results in an error condition (e.g., error counter underflow). If the TD on
- *   which the error interrupt occurred also had its IOC bit set, both this bit
- *   and USBINT bit are set. ..."
- *
- *******************************************************************************/
-
-static inline void sam_err_bottomhalf(void)
-{
-  udbg("USB Error Interrupt (USBERRINT) Interrupt\n");
-
-  /* Remove all queued transfers */
-#warning Missing logic
 }
 
 /*******************************************************************************
@@ -2114,8 +2105,7 @@ static inline void sam_async_advance_bottomhalf(void)
 {
   udbg("Async Advance Interrupt\n");
 
-  /* Remove all tagged QH entries */
-#warning Missing logic
+  /* REVISIT: Could remove all tagged QH entries here */
 }
 
 /*******************************************************************************
@@ -2147,24 +2137,30 @@ static void sam_ehci_bottomhalf(FAR void *arg)
    *  "The Host Controller also sets this bit to 1 when a short packet is
    *   detected (actual number of bytes received was less than the expected
    *   number of bytes)."
-   */
-
-  if ((pending & EHCI_INT_USBINT) != 0)
-    {
-      sam_ioc_bottomhalf();
-    }
-
-  /* USB Error Interrupt (USBERRINT)
+   *
+   * USB Error Interrupt (USBERRINT)
    *
    *  "The Host Controller sets this bit to 1 when completion of a USB
    *   transaction results in an error condition (e.g., error counter
    *   underflow). If the TD on which the error interrupt occurred also
    *   had its IOC bit set, both this bit and USBINT bit are set. ..."
+   *
+   * We do the same thing in either case:  Traverse the asynchonous queue
+   * and remove all of the transfers that are no longer active.
    */
 
-  if ((pending & EHCI_INT_USBERRINT) != 0)
+  if ((pending & (EHCI_INT_USBINT | EHCI_INT_USBERRINT)) != 0)
     {
-      sam_err_bottomhalf();
+      if ((pending & EHCI_INT_USBERRINT) != 0)
+        {
+          udbg("USB Error Interrupt (USBERRINT) Interrupt\n");
+        }
+      else
+        {
+          uvdbg("USB Interrupt (USBINT) Interrupt\n");
+        }
+
+      sam_ioc_bottomhalf();
     }
 
   /* Port Change Detect
@@ -2403,6 +2399,8 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 {
   struct sam_rhport_s *rhport;
+  volatile uint32_t *regaddr;
+  uint32_t regval;
 
   DEBUGASSERT(rhpndx >= 0 && rhpndx < SAM_EHCI_NRHPORT);
   rhport = &g_ehci.rhport[rhpndx];
@@ -2419,26 +2417,74 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
       return -ENODEV;
     }
 
-  /* Add EP0 to the control list */
-#warning Missing logic
+  /* USB 2.0 spec says at least 50ms delay before port reset.
+   * REVISIT:  I think this is wrong.  It needs to hold the port in 
+   * reset for 50Msec, not wait 50Msec before resetting.
+   */
 
-  /* USB 2.0 spec says at least 50ms delay before port reset */
+  usleep(100*1000);
 
-  up_mdelay(100);
+  /* Put the root hub port in reset.
+   *
+   * Paragraph 2.3.9:
+   *
+   *  "The HCHalted bit in the USBSTS register should be a zero before
+   *   software attempts to use [the Port Reset] bit. The host controller
+   *   may hold Port Reset asserted to a one when the HCHalted bit is a one.
+   */
 
-  /* Put the root hub port in reset (the SAMA5 supports three downstream ports) */
-#warning Missing logic
+  DEBUGASSERT((sam_getreg(&HCOR->usbsts) & EHCI_USBSTS_HALTED) == 0);
 
-  /* Wait for the port reset to complete */
-#warning Missing logic
+  /* paragraph 2.3.9:
+   *
+   *  "When software writes a one to [the Port Reset] bit (from a zero), the
+   *   bus reset sequence as defined in the USB Specification Revision 2.0 is
+   *   started.  Software writes a zero to this bit to terminate the bus reset
+   *   sequence.  Software must keep this bit at a one long enough to ensure
+   *   the reset sequence, as specified in the USB Specification Revision 2.0,
+   *   completes. Note: when software writes this bit to a one, it must also
+   *   write a zero to the Port Enable bit."
+   */
 
-  /* Release RH port 1 from reset and wait a bit */
-#warning Missing logic
+  regaddr = &HCOR->portsc[rhport->rhpndx];
+  regval  = sam_getreg(regaddr);
+  regval &= ~EHCI_PORTSC_PE;
+  regval &= EHCI_PORTSC_RESET;
+  sam_putreg(regval, regaddr);
 
-  up_mdelay(200);
+  /* USB 2.0 "Root hubs must provide an aggregate reset period of at least
+   * 50 ms."
+   */
+
+  usleep(50*1000);
+
+  regval  = sam_getreg(regaddr);
+  regval &= ~EHCI_PORTSC_RESET;
+  sam_putreg(regval, regaddr);
+
+  /* Wait for the port reset to complete
+   *
+   * Paragraph 2.3.9:
+   *
+   *  "Note that when software writes a zero to this bit there may be a
+   *   delay before the bit status changes to a zero. The bit status will
+   *   not read as a zero until after the reset has completed. If the port
+   *   is in high-speed mode after reset is complete, the host controller
+   *   will automatically enable this port (e.g. set the Port Enable bit
+   *   to a one). A host controller must terminate the reset and stabilize
+   *   the state of the port within 2 milliseconds of software transitioning
+   *   this bit from a one to a zero ..."
+   */
+
+  while ((sam_getreg(regaddr) & EHCI_PORTSC_RESET) != 0);
+  usleep(200*1000);
 
   /* Let the common usbhost_enumerate do all of the real work.  Note that the
-   * FunctionAddress (USB address) is set to the root hub port number for now.
+   * FunctionAddress (USB address) is set to the root hub port number + 1
+   * for now.
+   *
+   * REVISIT:  Hub support will require better device address assignment.
+   * See include/nuttx/usb/usbhost_devaddr.h.
    */
 
   uvdbg("Enumerate the device\n");
@@ -2475,19 +2521,25 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                             uint16_t maxpacketsize)
 {
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
+  struct sam_epinfo_s *epinfo;
 
   DEBUGASSERT(rhport &&
               funcaddr >= 0 && funcaddr <= SAM_EHCI_NRHPORT &&
               maxpacketsize < 2048);
 
+  epinfo = &rhport->ep0;
+
   /* We must have exclusive access to the EHCI data structures. */
 
   sam_takesem(&g_ehci.exclsem);
 
-#warning Missing logic
+  /* Remember the new device address and max packet size */
+
+  epinfo->devaddr   = funcaddr;
+  epinfo->maxpacket = maxpacketsize;
 
   sam_givesem(&g_ehci.exclsem);
-  return -ENOSYS;
+  return OK;
 }
 
 /************************************************************************************
@@ -2515,46 +2567,48 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
                        const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
 {
-  struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_epinfo_s *epinfo;
-  int ret  = -ENOMEM;
 
   /* Sanity check.  NOTE that this method should only be called if a device is
    * connected (because we need a valid low speed indication).
    */
 
-  DEBUGASSERT(rhport && epdesc && ep && rhport->connected);
+  DEBUGASSERT(drvr && epdesc && ep);
+  uvdbg("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d Max Packet Size=%d\n",
+        epdesc->addr, epdesc->in ? "IN" : "OUT", epdesc->funcaddr,
+        epdesc->xfrtype, epdesc->interval, epdesc->mxpacketsize);
 
-  /* Allocate a container for the endpoint data */
+  /* Allocate a endpoint information structure */
 
   epinfo = (struct sam_epinfo_s *)kzalloc(sizeof(struct sam_epinfo_s));
   if (!epinfo)
     {
       udbg("ERROR: Failed to allocate EP info structure\n");
-      goto errout;
+      return -ENOMEM;
     }
 
-  /* Initialize the endpoint container */
+  /* Initialize the endpoint container (which is really just another form of
+   * 'struct usbhost_epdesc_s', packed differently and with additional
+   * information.  A cleaner design might just embed struct usbhost_epdesc_s
+   * inside of struct sam_epinfo_s and just memcpy here.
+   */
 
+  epinfo->epno      = epdesc->addr;
+  epinfo->dirin     = epdesc->in;
+  epinfo->devaddr   = epdesc->funcaddr;
+  epinfo->xfrtype   = epdesc->xfrtype;
+#ifndef CONFIG_USBHOST_INT_DISABLE
+  epinfo->interval  = epdesc->interval;
+#endif
+  epinfo->maxpacket = epdesc->mxpacketsize;
   sem_init(&epinfo->iocsem, 0, 0);
 
-  /* We must have exclusive access to the EHCI data structures. */
-
-  sam_takesem(&g_ehci.exclsem);
-
-#warning Missing logic
-
-  /* Success.. return an opaque reference to the endpoint list container */
+  /* Success.. return an opaque reference to the endpoint information structure
+   * instance
+   */
 
   *ep = (usbhost_ep_t)epinfo;
-  sam_givesem(&g_ehci.exclsem);
   return OK;
-
-errout_with_semaphore:
-  sam_givesem(&g_ehci.exclsem);
-  kfree(epinfo);
-errout:
-  return ret;
 }
 
 /************************************************************************************
@@ -2579,28 +2633,16 @@ errout:
 
 static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep)
 {
-  struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_epinfo_s *epinfo = (struct sam_epinfo_s *)ep;
-  int ret;
-
-  DEBUGASSERT(rhport && epinfo);
 
   /* There should not be any pending, transfers */
-#warning Missing logic
 
-  /* We must have exclusive access to the EHCI data structures. */
+  DEBUGASSERT(drvr && epinfo && epinfo->iocwait == 0);
 
-  sam_takesem(&g_ehci.exclsem);
+  /* Free the container */
 
-#warning Missing logic
-  ret = -ENOSYS;
-
-  /* And free the container */
-
-  sem_destroy(&epinfo->iocsem);
   kfree(epinfo);
-  sam_givesem(&g_ehci.exclsem);
-  return ret;
+  return OK;
 }
 
 /*******************************************************************************
@@ -2877,7 +2919,6 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   int ret;
 
   DEBUGASSERT(rhport && epinfo && buffer && buflen > 0);
-#warning Missing logic
 
   /* We must have exclusive access to the EHCI hardware and data structures. */
 
@@ -2891,10 +2932,16 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
         ret = sam_async_transfer(rhport, epinfo, NULL, buffer, buflen);
         break;
 
-      default:
-      case USB_EP_ATTR_XFER_CONTROL:
-      case USB_EP_ATTR_XFER_ISOC:
+#ifndef CONFIG_USBHOST_INT_DISABLE
       case USB_EP_ATTR_XFER_INT:
+# warning "Interrupt endpoint support not emplemented"
+#endif
+#ifndef CONFIG_USBHOST_ISOC_DISABLE
+      case USB_EP_ATTR_XFER_ISOC:
+# warning "Isochronous endpoint support not emplemented"
+#endif
+      case USB_EP_ATTR_XFER_CONTROL:
+      default:
         udbg("ERROR: Support for transfer type %d not implemented\n");
         ret = -ENOSYS;
         break;
@@ -2932,10 +2979,8 @@ static void sam_disconnect(FAR struct usbhost_driver_s *drvr)
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   DEBUGASSERT(rhport);
 
-  /* Remove the disconnected port */
-#warning Missing logic
-
   /* Unbind the class */
+  /* REVISIT:  Is there more that needs to be done? */
 
   rhport->class = NULL;
 }
@@ -3397,7 +3442,8 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   for (i = 0; i < SAM_EHCI_NRHPORT; i++)
     {
-#warning Missing logic
+      g_ehci.rhport[i].connected =
+        ((sam_getreg(&HCOR->portsc[i]) & EHCI_PORTSC_CCS) != 0);
     }
 
   /* Enable interrupts at the interrupt controller */
