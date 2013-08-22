@@ -180,6 +180,7 @@ struct sam_epinfo_s
   uint8_t toggle:1;            /* Next data toggle */
   uint8_t xfrtype:2;           /* See USB_EP_ATTR_XFER_* definitions in usb.h */
   uint8_t speed:2;             /* See USB_*_SPEED definitions in ehci.h */
+  uint8_t status;              /* Retained token status bits (for debug purposes) */
   volatile bool iocwait;       /* TRUE: Thread is waiting for transfer completion */
   uint16_t maxpacket;          /* Maximum packet size */
   int result;                  /* The result of the transfer */
@@ -711,6 +712,8 @@ static void sam_takesem(sem_t *sem)
  * Description:
  *   Allocate a Queue Head (QH) structure by removing it from the free list
  *
+ * Assumption:  Caller holds the exclsem
+ *
  *******************************************************************************/
 
 static struct sam_qh_s *sam_qh_alloc(void)
@@ -735,6 +738,8 @@ static struct sam_qh_s *sam_qh_alloc(void)
  * Description:
  *   Free a Queue Head (QH) structure by returning it to the free list
  *
+ * Assumption:  Caller holds the exclsem
+ *
  *******************************************************************************/
 
 static void sam_qh_free(struct sam_qh_s *qh)
@@ -753,6 +758,8 @@ static void sam_qh_free(struct sam_qh_s *qh)
  * Description:
  *   Allocate a Queue Element Transfer Descriptor (qTD) by removing it from the
  *   free list
+ *
+ * Assumption:  Caller holds the exclsem
  *
  *******************************************************************************/
 
@@ -773,11 +780,13 @@ static struct sam_qtd_s *sam_qtd_alloc(void)
 }
 
 /*******************************************************************************
- * Name: sam_edfree
+ * Name: sam_qtd_free
  *
  * Description:
  *   Free a Queue Element Transfer Descriptor (qTD) by returning it to the free
  *   list
+ *
+ * Assumption:  Caller holds the exclsem
  *
  *******************************************************************************/
 
@@ -819,7 +828,7 @@ static int sam_qh_foreach(struct sam_qh_s *qh, uint32_t **bp, foreach_qh_t handl
        * terminate (T) bit.  If T==1, then the HLP address is not valid.
        */
 
-      if ((qh->hw.hlp & QH_HLP_T) != 0)
+      if ((sam_swap32(qh->hw.hlp) & QH_HLP_T) != 0)
         {
           /* Set the next pointer to NULL.  This will terminate the loop. */
 
@@ -928,7 +937,7 @@ static int sam_qtd_foreach(struct sam_qh_s *qh, foreach_qtd_t handler, void *arg
        * terminate (T) bit.  If T==1, then the NQP address is not valid.
        */
 
-      if ((qtd->hw.nqp & QTD_NQP_T) != 0)
+      if ((sam_swap32(qtd->hw.nqp) & QTD_NQP_T) != 0)
         {
           /* Set the next pointer to NULL.  This will terminate the loop. */
 
@@ -1141,8 +1150,10 @@ static int sam_ioc_setup(struct sam_rhport_s *rhport, struct sam_epinfo_s *epinf
        * completed.
        */
 
-      epinfo->iocwait = true;
-      ret = OK;
+      epinfo->iocwait = true;  /* We want to be awakened by IOC interrupt */
+      epinfo->status  = 0;     /* No status yet */
+      epinfo->result  = -EBUSY; /* Transfer in progress */
+      ret             = OK;    /* We are good to go */
     }
 
   irqrestore(flags);
@@ -1280,37 +1291,26 @@ errout_with_iocwait:
 
 static int sam_qtd_ioccheck(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 {
+  DEBUGASSERT(qtd);
+
   /* Make sure we reload the QH from memory */
 
   cp15_invalidate_dcache((uintptr_t)&qtd->hw,
                          (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
 
-  /* Is the qTD still active? */
+  /* Remove the qTD from the list */
 
-  if ((sam_swap32(qtd->hw.token) & QH_TOKEN_ACTIVE) == 0)
-    {
-      /* No.. remove the qTD from the list */
+  **bp = qtd->hw.nqp;
 
-      **bp = qtd->hw.nqp;
+  /* NOTE that we don't check if the qTD is active nor do we check if there
+   * are any errors reported in the qTD.  If the transfer halted due to
+   * an error, then I am not sure if we can believe this information anyway.
+   * The only sure place to check for errors in in the QH overlay.
+   */
 
-      /* Check the endpoint was halted (or other errors were reported).  If
-       * so, then set the result of the transfer as failed.
-       */
-#warning "Missing logic"
+  /* Release this QH by returning it to the free list */
 
-      /* Then release this QH by returning it to the free list */
-
-      sam_qtd_free(qtd);
-    }
-  else
-    {
-      /* Otherwise, the next qTD pointer of this qTD will become the next
-       * back pointer.
-       */
-
-      *bp = &qtd->hw.nqp;
-    }
-
+  sam_qtd_free(qtd);
   return OK;
 }
 
@@ -1328,6 +1328,7 @@ static int sam_qtd_ioccheck(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 {
   struct sam_epinfo_s *epinfo;
+  uint32_t token;
   int ret;
 
   DEBUGASSERT(qh && bp);
@@ -1337,7 +1338,36 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
   cp15_invalidate_dcache((uintptr_t)&qh->hw,
                          (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
 
-  /* Remove all active, attached qTD structures */
+  /* Get the endpoint info pointer from the extended QH data */
+
+  epinfo = qh->epinfo;
+  DEBUGASSERT(epinfo);
+
+  /* Paragraph 3.6.3: "The nine DWords in [the Transfer Overlay] area represent
+   * a transaction working space for the host controller. The general
+   * operational model is that the host controller can detect whether the
+   * overlay area contains a description of an active transfer. If it does
+   * not contain an active transfer, then it follows the Queue Head Horizontal
+   * Link Pointer to the next queue head. The host controller will never follow
+   * the Next Transfer Queue Element or Alternate Queue Element pointers unless
+   * it is actively attempting to advance the queue ..."
+   */
+
+  /* Is the qTD still active? */
+
+  token = sam_swap32(qh->hw.overlay.token);
+  uvdbg("EP%d TOKEN=%08x\n", epinfo->epno, token);
+
+  if ((token & QH_TOKEN_ACTIVE) != 0)
+    {
+      /* Yes... we cannot process the QH while it is still active.  Return
+       * zero to visit the next QH in the list.
+       */
+
+      return OK;
+    }
+
+  /* Remove all active, attached qTD structures from the inactive QH */
 
   ret = sam_qtd_foreach(qh, sam_qtd_ioccheck, NULL);
   if (ret < 0)
@@ -1357,14 +1387,34 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 
       **bp = qh->hw.overlay.nqp;
 
-      /* Get the info pointer from the QH */
+      /* Check for errors, update the data toggle */
 
-      epinfo = qh->epinfo;
+      if ((token & QH_TOKEN_ERRORS) == 0)
+        {
+          /* No errors.. Save the last data toggle value */
 
-      /* Is there a thread waiting form this tranfer to complete? */
+          epinfo->toggle = ((token & QTD_TOKEN_TOGGLE) != 0);
+
+          /* Report success */
+
+          epinfo->status  = 0;
+          epinfo->result  = OK;
+        }
+      else
+        {
+          /* An error occurred */
+
+          udbg("ERROR: EP%d TOKEN=%08x", epinfo->epno, token);
+          epinfo->status = (token & QH_TOKEN_STATUS_MASK) >> QH_TOKEN_STATUS_SHIFT;
+          epinfo->result = -EIO;
+        }
+
+      /* Is there a thread waiting for this transfer to complete? */
 
       if (epinfo->iocwait)
         {
+          /* Yes... wake it up */
+
           sam_givesem(&epinfo->iocsem);
           epinfo->iocwait = 0;
         }
@@ -1395,6 +1445,8 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
  *  "The Host Controller also sets this bit to 1 when a short packet is detected
  *   (actual number of bytes received was less than the expected number of
  *   bytes)."
+ *
+ * Assumptions:  The caller holds the EHCI exclsem
  *
  *******************************************************************************/
 
@@ -1610,6 +1662,13 @@ static void sam_ehci_bottomhalf(FAR void *arg)
 {
   uint32_t pending = (uint32_t)arg;
 
+  /* We need to have exclusive access to the EHCI data structures.  Waiting here
+   * is not a good thing to do on the worker thread, but there is no real option
+   * (other than to reschedule and delay).
+   */
+
+  sam_takesem(&g_ehci.exclsem);
+
   /* Handle all unmasked interrupt sources */
   /* USB Interrupt (USBINT)
    *
@@ -1707,6 +1766,10 @@ static void sam_ehci_bottomhalf(FAR void *arg)
     {
       sam_async_advance_bottomhalf();
     }
+
+  /* We are done with the EHCI structures */
+
+  sam_givesem(&g_ehci.exclsem);
 
   /* Re-enable relevant EHCI interrupts.  Interrupts should still be enabled
    * at the level of the AIC.
@@ -2750,15 +2813,18 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
    */
 
   memset(&g_asynchead, 0, sizeof(struct sam_qh_s));
-  g_asynchead.hw.hlp           = sam_swap32((uint32_t)&g_asynchead | QH_HLP_TYP_QH);
+  physaddr                     = sam_physramaddr((uintptr_t)&g_asynchead);
+  g_asynchead.hw.hlp           = sam_swap32(physaddr | QH_HLP_TYP_QH);
   g_asynchead.hw.epchar        = sam_swap32(QH_EPCHAR_H | QH_EPCHAR_EPS_FULL);
   g_asynchead.hw.overlay.nqp   = sam_swap32(QH_NQP_T);
   g_asynchead.hw.overlay.alt   = sam_swap32(QH_NQP_T);
   g_asynchead.hw.overlay.token = sam_swap32(QH_TOKEN_HALTED);
 
+  cp15_coherent_dcache((uintptr_t)&g_asynchead.hw,
+                       (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
+
   /* Set the Current Asynchronous List Address. */
 
-  physaddr = sam_physramaddr((uintptr_t)&g_asynchead);
   sam_putreg(sam_swap32(physaddr), &HCOR->asynclistaddr);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
@@ -2780,6 +2846,11 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
     }
 
   /* Set the Periodic Frame List Base Address. */
+
+  cp15_coherent_dcache((uintptr_t)&g_perhead.hw,
+                       (uintptr_t)&g_perhead.hw + sizeof(struct ehci_qh_s));
+  cp15_coherent_dcache((uintptr_t)g_framelist,
+                       (uintptr_t)g_framelist + FRAME_LIST_SIZE * sizeof(uint32_t));
 
   sam_putreg(sam_swap32(physaddr), &HCOR->periodiclistbase);
 #endif

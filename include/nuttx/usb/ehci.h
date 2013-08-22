@@ -529,6 +529,7 @@
 #  define QTD_TOKEN_DBERR              (1 << 5)   /* Bit 5 Data Buffer Error */
 #  define QTD_TOKEN_HALTED             (1 << 6)   /* Bit 6 Halted */
 #  define QTD_TOKEN_ACTIVE             (1 << 7)   /* Bit 7 Active */
+#  define QTD_TOKEN_ERRORS             (0x7c << QTD_TOKEN_STATUS_SHIFT)
 #define QTD_TOKEN_PID_SHIFT            (8)        /* Bits 8-9: PID Code */
 #define QTD_TOKEN_PID_MASK             (3 << QTD_TOKEN_PID_SHIFT)
 #  define QTD_TOKEN_PID_OUT            (0 << QTD_TOKEN_PID_SHIFT) /* OUT Token generates token (E1H) */
@@ -648,6 +649,7 @@
 #  define QH_TOKEN_DBERR               (1 << 5)   /* Bit 5 Data Buffer Error */
 #  define QH_TOKEN_HALTED              (1 << 6)   /* Bit 6 Halted */
 #  define QH_TOKEN_ACTIVE              (1 << 7)   /* Bit 7 Active */
+#  define QH_TOKEN_ERRORS              (0x7c << QH_TOKEN_STATUS_SHIFT)
 #define QH_TOKEN_PID_SHIFT             (8)        /* Bits 8-9: PID Code */
 #define QH_TOKEN_PID_MASK              (3 << QH_TOKEN_PID_SHIFT)
 #  define QH_TOKEN_PID_OUT             (0 << QH_TOKEN_PID_SHIFT) /* OUT Token generates token (E1H) */
