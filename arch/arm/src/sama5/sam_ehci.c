@@ -143,7 +143,7 @@ struct sam_qh_s
   /* Internal fields used by the EHCI driver */
 
   struct sam_epinfo_s *epinfo; /* Endpoint used for the transfer */
-  uint32_t pad[12];            /* Padding to assure 32-byte alignment */
+  uint8_t pad[12];             /* Padding to assure 32-byte alignment */
 };
 
 /* Internal representation of the EHCI Queue Element Transfer Descriptor (qTD) */
@@ -298,6 +298,18 @@ static int sam_qtd_flush(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
 static int sam_qh_flush(struct sam_qh_s *qh);
 
 /* Endpoint Transfer Handling **************************************************/
+
+#ifdef CONFIG_SAMA5_EHCI_REGDEBUG
+static int sam_qtd_dump(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
+static int sam_qh_dump(struct sam_qh_s *qh, uint32_t **bp, void *arg);
+#if 0 /* not used */
+static int sam_qh_dumpall(void);
+#endif
+#else
+#  define sam_qtd_dump(qtd, bp, arg) OK
+#  define sam_qh_dump(qh, bp, arg)   OK
+#  define sam_qh_dumpall()           OK
+#endif
 
 static int sam_ioc_setup(struct sam_rhport_s *rhport, struct sam_epinfo_s *epinfo);
 static int sam_ioc_wait(struct sam_epinfo_s *epinfo);
@@ -673,7 +685,7 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
       regval = sam_getreg(&HCOR->usbsts);
       if ((regval & EHCI_INT_SYSERROR) != 0)
         {
-          udbg("ERROR: System error: 0x%08X", regval);
+          udbg("ERROR: System error: %08x\n", regval);
           return -EIO;
         }
 
@@ -933,19 +945,20 @@ static int sam_qtd_foreach(struct sam_qh_s *qh, foreach_qtd_t handler, void *arg
 
   /* Handle the special case where the queue is empty */
 
-  bp = &qh->hw.overlay.nqp;
-  if ((*bp & QH_NQP_T) != 0)
+  bp       = &qh->hw.overlay.nqp;      /* Start of qTDs remaining */
+  physaddr = sam_swap32(*bp);          /* Physical address of first qTD in CPU order */
+
+  if ((physaddr & QH_NQP_T) != 0)
     {
       return 0;
     }
 
-  /* Start with the first qTD in the queue */
+  /* Start with the first qTD in the list */
 
-  physaddr = sam_swap32(*bp);
-  qtd      = (struct sam_qtd_s *)sam_virtramaddr(physaddr);
-  next     = NULL;
+  qtd  = (struct sam_qtd_s *)sam_virtramaddr(physaddr);
+  next = NULL;
 
-  /* Now loop until we encounter the end of the qTD list */
+  /* And loop until we encounter the end of the qTD list */
 
   while (qtd)
     {
@@ -1130,8 +1143,8 @@ static int sam_qh_flush(struct sam_qh_s *qh)
 {
   /* Flush the QH first */
 
-  cp15_invalidate_dcache((uintptr_t)&qh->hw,
-                         (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  cp15_coherent_dcache((uintptr_t)&qh->hw,
+                       (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
 
   /* Then flush all of the qTD entries in the queue */
 
@@ -1143,7 +1156,73 @@ static int sam_qh_flush(struct sam_qh_s *qh)
  *******************************************************************************/
 
 /*******************************************************************************
- * Name: sam_ioc_setup
+ * Name: sam_qtd_dump
+ *
+ * Description:
+ *   This is a sam_qtd_foreach callout function.  It dumps the context of one
+ *   qTD
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_SAMA5_EHCI_REGDEBUG
+static int sam_qtd_dump(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
+{
+  uvdbg("  QTD[%p]:\n", qtd);
+  uvdbg("    hw:\n");
+  uvdbg("      nqp: %08x alt: %08x token: %08x\n",
+        qtd->hw.nqp, qtd->hw.alt, qtd->hw.token);
+  uvdbg("      bpl: %08x %08x %08x %08x %08x\n",
+        qtd->hw.bpl[0], qtd->hw.bpl[1], qtd->hw.bpl[2],
+        qtd->hw.bpl[3], qtd->hw.bpl[4]);
+  return OK;
+}
+#endif
+
+/*******************************************************************************
+ * Name: sam_qh_dump
+ *
+ * Description:
+ *   This is a sam_qh_foreach callout function.  It dumps a QH structure and
+ *   all of the qTD structures linked to the QH.
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_SAMA5_EHCI_REGDEBUG
+static int sam_qh_dump(struct sam_qh_s *qh, uint32_t **bp, void *arg)
+{
+  struct sam_epinfo_s *epinfo;
+  struct ehci_overlay_s *overlay;
+
+  uvdbg("QH[%p]:\n", qh);
+  uvdbg("  hw:\n");
+  uvdbg("    hlp: %08x epchar: %08x epcaps: %08x cqp: %08x\n",
+        qh->hw.hlp, qh->hw.epchar, qh->hw.epcaps, qh->hw.cqp);
+
+  overlay = &qh->hw.overlay;
+  uvdbg("  overlay:\n");
+  uvdbg("    nqp: %08x alt: %08x token: %08x\n",
+        overlay->nqp, overlay->alt, overlay->token);
+  uvdbg("    bpl: %08x %08x %08x %08x %08x\n",
+        overlay->bpl[0], overlay->bpl[1], overlay->bpl[2],
+        overlay->bpl[3], overlay->bpl[4]);
+
+  epinfo = qh->epinfo;
+  uvdbg("  epinfo[%p]:\n", epinfo);
+  if (epinfo)
+    {
+      uvdbg("    EP%d DIR=%s FA=%08x TYPE=%d MaxPacket=%d\n",
+            epinfo->epno, epinfo->dirin ? "IN" : "OUT", epinfo->devaddr,
+            epinfo->xfrtype, epinfo->maxpacket);
+      uvdbg("    Toggle=%d iocwait=%d speed=%d result=%d\n",
+            epinfo->toggle, epinfo->iocwait, epinfo->speed, epinfo->result);
+    }
+
+  return sam_qtd_foreach(qh, sam_qtd_dump, NULL);
+}
+#endif
+
+/*******************************************************************************
+ * Name: sam_qh_dumpall
  *
  * Description:
  *   Set the request for the IOC event well BEFORE enabling the transfer (as
@@ -1153,12 +1232,34 @@ static int sam_qh_flush(struct sam_qh_s *qh)
  *
  *******************************************************************************/
 
+#ifdef CONFIG_SAMA5_EHCI_REGDEBUG
+#if 0 /* not used */
+static int sam_qh_dumpall(void)
+{
+  return sam_qh_forall(sam_qh_dump, NULL);
+}
+#endif
+#endif
+
+/*******************************************************************************
+ * Name: sam_ioc_setup
+ *
+ * Description:
+ *   Set the request for the IOC event well BEFORE enabling the transfer (as
+ *   soon as we are absolutely committed to the to avoid transfer).  We do this
+ *   to minimize race conditions.  This logic would have to be expanded if we
+ *   want to have more than one packet in flight at a time!
+ *
+ * Assumption:  The caller holds tex EHCI exclsem
+ *
+ *******************************************************************************/
+
 static int sam_ioc_setup(struct sam_rhport_s *rhport, struct sam_epinfo_s *epinfo)
 {
   irqstate_t flags;
   int ret = -ENODEV;
 
-  DEBUGASSERT(rhport && epinfo);
+  DEBUGASSERT(rhport && epinfo && !epinfo->iocwait);
 
   /* Is the device still connected? */
 
@@ -1185,6 +1286,9 @@ static int sam_ioc_setup(struct sam_rhport_s *rhport, struct sam_epinfo_s *epinf
  *
  * Description:
  *   Wait for the IOC event.
+ *
+ * Assumption:  The caller does *NOT* hold the EHCI exclsem.  That would cause
+ * a deadlock when the bottom-half, worker thread needs to take the semaphore.
  *
  *******************************************************************************/
 
@@ -1311,7 +1415,10 @@ static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
    * next qTD is added to the queue.
    */
 
+  qh->hw.hlp         = sam_swap32(QH_HLP_T);
   qh->hw.overlay.nqp = sam_swap32(QH_NQP_T);
+  qh->hw.overlay.alt = sam_swap32(QH_AQP_T);
+  return qh;
 }
 
 /*******************************************************************************
@@ -1564,7 +1671,10 @@ static struct sam_qtd_s *sam_qtd_statusphase(uint32_t tokenbits)
  *   This is a blocking function; it will not return until the control transfer
  *   has completed.
  *
- * Assumption:  The caller holds the EHCI exclsem
+ * Assumption:  The caller holds the EHCI exclsem.  The caller must be aware
+ *   that the EHCI exclsem will released while waiting for the transfer to
+ *   complete, but will be re-aquired when before returning.  The state of
+ *   EHCI resources could be very different upon return.
  *
  *******************************************************************************/
 
@@ -1638,7 +1748,7 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
    */
 
   flink  = &qh->hw.overlay.nqp;
-  toggle = epinfo->toggle ? 0 : QTD_TOKEN_TOGGLE;
+  toggle = (uint32_t)epinfo->toggle << QTD_TOKEN_TOGGLE_SHIFT;
   ret    = -EIO;
 
   /* Is the an EP0 SETUP request?  If req will be non-NULL */
@@ -1714,7 +1824,7 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
     {
       /* Extra TOKEN bits include the data toggle and the data PID. */
 
-      uint32_t tokenbits = toggle | datapid ;
+      uint32_t tokenbits = toggle | datapid;
 
       /* Allocate a new Queue Element Transfer Descriptor (qTD) for the status */
 
@@ -1733,11 +1843,33 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
 
   /* Add the new QH to the head of the asynchronous queue list */
 
+  (void)sam_qh_dump(qh, NULL, NULL);
   sam_qh_enqueue(qh);
+
+  /* Release the EHCI semaphore while we wait.  Other threads need the
+   * opportunity to access the EHCI resources while we wait.
+   *
+   * REVISIT:  Is this safe?  NO.  This is a bug and needs rethinking.
+   * We need to lock all of the port-resources (not EHCI common) until
+   * the transfer is complete.  But we can't use the common ECHI exclsem
+   * or we will deadlock while waiting (because the working thread that
+   * wakes this thread up needs the exclsem).
+   */
+#warning REVISIT
+  sam_givesem(&g_ehci.exclsem);
 
   /* Wait for the IOC completion event */
 
   ret = sam_ioc_wait(epinfo);
+
+  /* Re-aquire the ECHI semaphore.  The caller expects to be holding
+   * this upon return.
+   */
+
+  sam_takesem(&g_ehci.exclsem);
+
+  /* Did sam_ioc_wait() report an error? */
+
   if (ret < 0)
     {
       udbg("ERROR: Transfer failed\n");
@@ -1875,7 +2007,7 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
         {
           /* No errors.. Save the last data toggle value */
 
-          epinfo->toggle = ((token & QTD_TOKEN_TOGGLE) != 0);
+          epinfo->toggle = (token >> QTD_TOKEN_TOGGLE_SHIFT) & 1;
 
           /* Report success */
 
@@ -1912,6 +2044,8 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 
       *bp = &qh->hw.overlay.nqp;
     }
+
+  return OK;
 }
 
 /*******************************************************************************
@@ -2418,7 +2552,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
     }
 
   /* USB 2.0 spec says at least 50ms delay before port reset.
-   * REVISIT:  I think this is wrong.  It needs to hold the port in 
+   * REVISIT:  I think this is wrong.  It needs to hold the port in
    * reset for 50Msec, not wait 50Msec before resetting.
    */
 
@@ -2574,7 +2708,7 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
    */
 
   DEBUGASSERT(drvr && epdesc && ep);
-  uvdbg("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d Max Packet Size=%d\n",
+  uvdbg("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d MaxPacket=%d\n",
         epdesc->addr, epdesc->in ? "IN" : "OUT", epdesc->funcaddr,
         epdesc->xfrtype, epdesc->interval, epdesc->mxpacketsize);
 
@@ -3062,7 +3196,7 @@ static int sam_reset(void)
 
   if ((regval & EHCI_USBSTS_HALTED) == 0)
     {
-      udbg("ERROR: Timed out waiting for HCHalted.  USBSTS: %08X", regval);
+      udbg("ERROR: Timed out waiting for HCHalted. USBSTS: %08x", regval);
       return -ETIMEDOUT;
     }
 
@@ -3296,14 +3430,14 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   /* Show the ECHI version */
 
   regval16 = sam_swap16(HCCR->hciversion);
-  uvdbg("HCIVERSIONI %x.%02x", regval16 >> 8, regval16 & 0xff);
+  uvdbg("HCIVERSION %x.%02x\n", regval16 >> 8, regval16 & 0xff);
 
   /* Verify the the correct number of ports is reported */
 
   regval = sam_getreg(&HCCR->hcsparams);
   nports = (regval & EHCI_HCSPARAMS_NPORTS_MASK) >> EHCI_HCSPARAMS_NPORTS_SHIFT;
 
-  uvdbg("HCSPARAMS=%08x nports=%d", regval, nports);
+  uvdbg("HCSPARAMS=%08x nports=%d\n", regval, nports);
   DEBUGASSERT(nports == SAM_EHCI_NRHPORT);
 
   /* Show the HCCPARAMS register */
