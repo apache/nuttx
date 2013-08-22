@@ -542,7 +542,8 @@
 #define QTD_TOKEN_IOC                  (1 << 15)  /* Bit 15: Interrupt On Complete */
 #define QTD_TOKEN_NBYTES_SHIFT         (16)       /* Bits 16-30: Total Bytes to Transfer */
 #define QTD_TOKEN_NBYTES_MASK          (0x7fff << QTD_TOKEN_NBYTES_SHIFT)
-#define QTD_TOKEN_TOGGLE               (1 << 13)  /* Bit 31: Data Toggle */
+#define QTD_TOKEN_TOGGLE_SHIFT         (31)       /* Bit 31: Data Toggle */
+#define QTD_TOKEN_TOGGLE               (1 << 31)  /* Bit 31: Data Toggle */
 
 /* qTD Buffer Page Pointer List. Paragraph 3.5.4 */
 /* Page 0 */
@@ -662,7 +663,8 @@
 #define QH_TOKEN_IOC                   (1 << 15)  /* Bit 15: Interrupt On Complete */
 #define QH_TOKEN_NBYTES_SHIFT          (16)       /* Bits 16-30: Total Bytes to Transfer */
 #define QH_TOKEN_NBYTES_MASK           (0x7fff << QH_TOKEN_NBYTES_SHIFT)
-#define QH_TOKEN_TOGGLE                (1 << 13)  /* Bit 31: Data Toggle
+#define QH_TOKEN_TOGGLE_SHIFT          (31)       /* Bit 31: Data Toggle */
+#define QH_TOKEN_TOGGLE                (1 << 31)  /* Bit 31: Data Toggle */
 
 /* Buffer Page Pointer List (NOTE 2)
 /* Page 0 */
