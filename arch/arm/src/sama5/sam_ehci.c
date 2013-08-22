@@ -295,6 +295,13 @@ static int sam_qh_flush(struct sam_qh_s *qh);
 static int sam_ioc_setup(struct sam_rhport_s *rhport, struct sam_epinfo_s *epinfo);
 static int sam_ioc_wait(struct sam_epinfo_s *epinfo);
 static void sam_qh_enqueue(struct sam_qh_s *qh);
+static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
+         struct sam_epinfo_s *epinfo);
+static int sam_qtd_addbpl(struct sam_qtd_s *qtd, const void *buffer, size_t buflen);
+static struct sam_qtd_s *sam_qtd_setupphase(const struct usb_ctrlreq_s *req);
+static struct sam_qtd_s *sam_qtd_dataphase(void *buffer, int buflen,
+         uint32_t tokenbits);
+static struct sam_qtd_s *sam_qtd_statusphase(uint32_t tokenbits);
 static int sam_async_transfer(struct sam_rhport_s *rhport,
          struct sam_epinfo_s *epinfo, const struct usb_ctrlreq_s *req,
          uint8_t *buffer, size_t buflen);
@@ -874,26 +881,25 @@ static int sam_qh_foreach(struct sam_qh_s *qh, uint32_t **bp, foreach_qh_t handl
  *   Setup and call sam_qh_foreach to that every element of the asynchronous
  *   queue is examined.
  *
+ * Assumption:  The caller holds the EHCI exclsem
+ *
  *******************************************************************************/
 
 static int sam_qh_forall(foreach_qh_t handler, void *arg)
 {
   struct sam_qh_s *qh;
   uint32_t *bp;
-  int ret;
 
-  /* Preemption is disabled to prevent concurrent modification of the queue
-   * head by the other threads.
+  /* Set the back pointer to the forward qTD pointer of the asynchronous
+   * queue head.
    */
 
-  bp = (uint32_t *)&qh->hw.hlp;
-
-  sched_lock();
+  bp = (uint32_t *)&g_asynchead.hw.hlp;
   qh = (struct sam_qh_s *)sam_virtramaddr(sam_swap32(*bp) & QH_HLP_MASK);
-  sam_qh_foreach(qh, &bp, handler, arg);
-  sched_unlock();
 
-  return ret;
+  /* Then traverse and operate on every QH and qTD in the list */
+
+  return sam_qh_foreach(qh, &bp, handler, arg);
 }
 
 /*******************************************************************************
@@ -1186,20 +1192,15 @@ static int sam_ioc_wait(struct sam_epinfo_s *epinfo)
  * Description:
  *   Add a new, ready-to-go QH w/attached qTDs to the asynchonous queue.
  *
+ * Assumptions:  The caller holds the EHCI exclsem
+ *
  *******************************************************************************/
 
 static void sam_qh_enqueue(struct sam_qh_s *qh)
 {
   uintptr_t physaddr;
 
-  /* Add the new QH to the head of the asynchronous queue list.  Preemption
-   * is disabled momentarily to prevent concurrent modification of the queue
-   * head by the worker thread.
-   */
-
-  physaddr = (uintptr_t)sam_physramaddr((uintptr_t)qh);
-  sched_lock();
-
+  /* Add the new QH to the head of the asynchronous queue list. */
   /* Attach the old head as the new QH HLP and flush the new QH and its attached
    * qTDs to RAM.
    */
@@ -1211,10 +1212,330 @@ static void sam_qh_enqueue(struct sam_qh_s *qh)
    * modified head to RAM.
    */
 
+  physaddr = (uintptr_t)sam_physramaddr((uintptr_t)qh);
   g_asynchead.hw.hlp = sam_swap32(physaddr | QH_HLP_TYP_QH);
   cp15_coherent_dcache((uintptr_t)&g_asynchead,
                        (uintptr_t)&g_asynchead + sizeof(struct ehci_qh_s));
-  sched_unlock();
+}
+
+/*******************************************************************************
+ * Name: sam_qh_create
+ *
+ * Description:
+ *   Create a new Queue Head (QH)
+ *
+ *******************************************************************************/
+
+static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
+                                      struct sam_epinfo_s *epinfo)
+{
+  struct sam_qh_s *qh;
+  uint32_t regval;
+
+  /* Allocate a new queue head structure */
+
+  qh = sam_qh_alloc();
+  if (qh == NULL)
+    {
+      udbg("ERROR: Failed to allocate a QH\n");
+      return NULL;
+    }
+
+  /* Save the endpoint information with the QH itself */
+
+  qh->epinfo = epinfo;
+
+  /* Write QH endpoint characteristics:
+   *
+   * FIELD    DESCRIPTION                     VALUE/SOURCE
+   * -------- ------------------------------- --------------------
+   * DEVADDR  Device address                  Endpoint structure
+   * I        Inactivate on Next Transaction  0
+   * ENDPT    Endpoint number                 Endpoint structure
+   * EPS      Endpoint speed                  Endpoint structure
+   * DTC      Data toggle control             1
+   * MAXPKT   Max packet size                 Endpoint structure
+   * C        Control endpoint                Calculated
+   * RL       NAK count reloaded              8
+   */
+
+  regval = ((uint32_t)epinfo->devaddr   << QH_EPCHAR_DEVADDR_SHIFT) |
+           ((uint32_t)epinfo->epno      << QH_EPCHAR_ENDPT_SHIFT) |
+           ((uint32_t)epinfo->speed     << QH_EPCHAR_EPS_SHIFT) |
+           QH_EPCHAR_DTC |
+           ((uint32_t)epinfo->maxpacket << QH_EPCHAR_MAXPKT_SHIFT) |
+           ((uint32_t)8 << QH_EPCHAR_RL_SHIFT);
+
+  if (epinfo->speed != EHCI_FULL_SPEED && epinfo->epno == 0)
+    {
+      regval |= QH_EPCHAR_C;
+    }
+
+  qh->hw.epchar = sam_swap32(regval);
+
+  /* Write QH endpoint capabilities
+   *
+   * FIELD    DESCRIPTION                     VALUE/SOURCE
+   * -------- ------------------------------- --------------------
+   * SSMASK   Interrupt Schedule Mask         0
+   * SCMASK   Split Completion Mask           0
+   * HUBADDR  Hub Address                     Always 0 for now
+   * PORT     Port number                     RH port index + 1
+   * MULT     High band width multiplier      1
+   *
+   * REVISIT:  Future HUB support will require the HUB port number
+   * and HUB device address to be included here.
+   */
+
+  regval = ((uint32_t)0                      << QH_EPCAPS_HUBADDR_SHIFT) |
+           ((uint32_t)(rhport->rhpndx + 1)   << QH_EPCAPS_PORT_SHIFT) |
+           ((uint32_t)1                      << QH_EPCAPS_MULT_SHIFT);
+
+  qh->hw.epcaps = sam_swap32(regval);
+
+  /* Mark this as the end of this list.  This will be overwritten if/when the
+   * next qTD is added to the queue.
+   */
+
+  qh->hw.overlay.nqp = sam_swap32(QH_NQP_T);
+}
+
+/*******************************************************************************
+ * Name: sam_qtd_addbpl
+ *
+ * Description:
+ *   Add a buffer pointer list to a qTD.
+ *
+ *******************************************************************************/
+
+static int sam_qtd_addbpl(struct sam_qtd_s *qtd, const void *buffer, size_t buflen)
+{
+  uint32_t physaddr;
+  uint32_t nbytes;
+  uint32_t next;
+  int ndx;
+
+  physaddr = (uint32_t)sam_physramaddr((uintptr_t)buffer);
+
+  for (ndx = 0; ndx < 5; ndx++)
+    {
+      /* Write the physical address of the buffer into the qTD buffer pointer
+       * list.
+       */
+
+      qtd->hw.bpl[ndx] = sam_swap32(physaddr);
+
+      /* Get the next buffer pointer (in the case where we will have to transfer
+       * more then on 4KB chunks.
+       */
+
+      next = (physaddr + 4096) & ~4095;
+
+      /* How many bytes were included in the last buffer?  Was the the whole
+       * thing?
+       */
+
+      nbytes = next - physaddr;
+      if (nbytes >= buflen)
+        {
+          /* Yes... it was the whole thing.  Break out of the loop early. */
+
+          break;
+        }
+
+      /* Adjust the buffer length and physical address for the next time
+       * through the loop.
+       */
+
+      buflen  -= nbytes;
+      physaddr = next;
+    }
+
+  /* Handle the case of a huge buffer > 4*4KB = 16KB */
+
+  if (ndx >= 5)
+    {
+      uvdbg("ERROR:  Buffer too big.  Remaining %d\n", buflen);
+      return -EFBIG;
+    }
+
+  return OK;
+}
+
+/*******************************************************************************
+ * Name: sam_qtd_setupphase
+ *
+ * Description:
+ *   Create a SETUP phase request qTD.
+ *
+ *******************************************************************************/
+
+static struct sam_qtd_s *sam_qtd_setupphase(const struct usb_ctrlreq_s *req)
+{
+  struct sam_qtd_s *qtd;
+  uint32_t regval;
+  int ret;
+
+  /* Allocate a new Queue Element Transfer Descriptor (qTD) */
+
+  qtd = sam_qtd_alloc();
+  if (qtd == NULL)
+    {
+      udbg("ERROR: Failed to allocate request qTD");
+      return NULL;
+    }
+
+  /* Mark this as the end of the list (this will be overwritten if another
+   * qTD is added after this one.
+   */
+
+  qtd->hw.nqp = sam_swap32(QTD_NQP_T);
+  qtd->hw.alt = sam_swap32(QTD_AQP_T);
+
+  /* Write qTD token:
+   *
+   * FIELD    DESCRIPTION                     VALUE/SOURCE
+   * -------- ------------------------------- --------------------
+   * STATUS   Status                          QTD_TOKEN_ACTIVE
+   * PID      PID Code                        QTD_TOKEN_PID_SETUP
+   * CERR     Error Counter                   3
+   * CPAGE    Current Page                    0
+   * IOC      Interrupt on complete           0
+   * NBYTES   Total Bytes to Transfer         USB_SIZEOF_CTRLREQ
+   * TOGGLE   Data Toggle                     0
+   */
+
+  regval = QTD_TOKEN_ACTIVE | QTD_TOKEN_PID_SETUP |
+           ((uint32_t)3                  << QTD_TOKEN_CERR_SHIFT) |
+           ((uint32_t)USB_SIZEOF_CTRLREQ << QTD_TOKEN_NBYTES_SHIFT);
+
+  qtd->hw.token = sam_swap32(regval);
+
+  /* Add the buffer data */
+
+  ret = sam_qtd_addbpl(qtd, req, USB_SIZEOF_CTRLREQ);
+  if (ret < 0)
+    {
+      uvdbg("ERROR: sam_qtd_addbpl failed: %d\n", ret);
+      sam_qtd_free(qtd);
+      return NULL;
+    }
+
+  return qtd;
+}
+
+/*******************************************************************************
+ * Name: sam_qtd_dataphase
+ *
+ * Description:
+ *   Create a data transfer or SET data phase qTD.
+ *
+ *******************************************************************************/
+
+static struct sam_qtd_s *sam_qtd_dataphase(void *buffer, int buflen,
+                                           uint32_t tokenbits)
+{
+  struct sam_qtd_s *qtd;
+  uint32_t regval;
+  int ret;
+
+  /* Allocate a new Queue Element Transfer Descriptor (qTD) */
+
+  qtd = sam_qtd_alloc();
+  if (qtd == NULL)
+    {
+      udbg("ERROR: Failed to allocate data buffer qTD");
+      return NULL;
+    }
+
+  /* Mark this as the end of the list (this will be overwritten if another
+   * qTD is added after this one.
+   */
+
+  qtd->hw.nqp = sam_swap32(QTD_NQP_T);
+  qtd->hw.alt = sam_swap32(QTD_AQP_T);
+
+  /* Write qTD token:
+   *
+   * FIELD    DESCRIPTION                     VALUE/SOURCE
+   * -------- ------------------------------- --------------------
+   * STATUS   Status                          QTD_TOKEN_ACTIVE
+   * PID      PID Code                        Contained in tokenbits
+   * CERR     Error Counter                   3
+   * CPAGE    Current Page                    0
+   * IOC      Interrupt on complete           Contained in tokenbits
+   * NBYTES   Total Bytes to Transfer         buflen
+   * TOGGLE   Data Toggle                     Contained in tokenbits
+   */
+
+  regval = tokenbits | QTD_TOKEN_ACTIVE |
+           ((uint32_t)3       << QTD_TOKEN_CERR_SHIFT) |
+           ((uint32_t)buflen  << QTD_TOKEN_NBYTES_SHIFT);
+
+  qtd->hw.token = sam_swap32(regval);
+
+  /* Add the buffer information to the bufffer pointer list */
+
+  ret = sam_qtd_addbpl(qtd, buffer, buflen);
+  if (ret < 0)
+    {
+      udbg("ERROR: sam_qtd_addbpl failed: %d\n", ret);
+      sam_qtd_free(qtd);
+      return NULL;
+    }
+
+  return qtd;
+}
+
+/*******************************************************************************
+ * Name: sam_qtd_statusphase
+ *
+ * Description:
+ *   Create a STATUS phase request qTD.
+ *
+ *******************************************************************************/
+
+static struct sam_qtd_s *sam_qtd_statusphase(uint32_t tokenbits)
+{
+  struct sam_qtd_s *qtd;
+  uint32_t regval;
+
+  /* Allocate a new Queue Element Transfer Descriptor (qTD) */
+
+  qtd = sam_qtd_alloc();
+  if (qtd == NULL)
+    {
+      udbg("ERROR: Failed to allocate request qTD");
+      return NULL;
+    }
+
+  /* Mark this as the end of the list (this will be overwritten if another
+   * qTD is added after this one.
+   */
+
+  qtd->hw.nqp = sam_swap32(QTD_NQP_T);
+  qtd->hw.alt = sam_swap32(QTD_AQP_T);
+
+  /* Write qTD token:
+   *
+   * FIELD    DESCRIPTION                     VALUE/SOURCE
+   * -------- ------------------------------- --------------------
+   * STATUS   Status                          QTD_TOKEN_ACTIVE
+   * PID      PID Code                        Contained in tokenbits
+   * CERR     Error Counter                   3
+   * CPAGE    Current Page                    0
+   * IOC      Interrupt on complete           QH_TOKEN_IOC
+   * NBYTES   Total Bytes to Transfer         0
+   * TOGGLE   Data Toggle                     Contained in tokenbits
+   */
+
+  regval = tokenbits | QTD_TOKEN_ACTIVE |
+           ((uint32_t)3                  << QTD_TOKEN_CERR_SHIFT) |
+           QH_TOKEN_IOC |
+           ((uint32_t)USB_SIZEOF_CTRLREQ << QTD_TOKEN_NBYTES_SHIFT);
+
+  qtd->hw.token = sam_swap32(regval);
+  return qtd;
 }
 
 /*******************************************************************************
@@ -1222,10 +1543,14 @@ static void sam_qh_enqueue(struct sam_qh_s *qh)
  *
  * Description:
  *   Process a IN or OUT request on any asynchronous endpoint (bulk or control).
- *   This function will enqueue the request and wait for it to complete.
+ *   This function will enqueue the request and wait for it to complete.  Bulk
+ *   data transfers differ in that req == NULL and there are not SETUP or STATUS
+ *   phases.
  *
  *   This is a blocking function; it will not return until the control transfer
  *   has completed.
+ *
+ * Assumption:  The caller holds the EHCI exclsem
  *
  *******************************************************************************/
 
@@ -1234,10 +1559,18 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
                               const struct usb_ctrlreq_s *req,
                               uint8_t *buffer, size_t buflen)
 {
+  struct sam_qh_s *qh;
+  struct sam_qtd_s *qtd;
+  uintptr_t physaddr;
+  uint32_t *flink;
+  uint32_t toggle;
+  uint32_t datapid;
   int ret;
 
   uvdbg("RHport%d EP%d: buffer=%p, buflen=%d, req=%p\n",
         rhport->rhpndx+1, epinfo->epno, buffer, buflen, req);
+
+  DEBUGASSERT(rhport && epinfo);
 
   if (req != NULL)
     {
@@ -1245,6 +1578,12 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
             req->req, req->type, sam_read16(req->value),
             sam_read16(req->index));
     }
+
+  /* A buffer may or may be supplied with an EP0 SETUP transfer.  A buffer will
+   * always be present for normal endpoint data transfers.
+   */
+
+  DEBUGASSERT(req || (buffer && buflen > 0));
 
   /* Set the request for the IOC event well BEFORE enabling the transfer. */
 
@@ -1255,7 +1594,132 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
       return ret;
     }
 
-#warning "Missing logic"
+  /* Get the data token direction */
+
+  datapid = QTD_TOKEN_PID_OUT;
+  if (req)
+    {
+      if ((req->req & USB_REQ_DIR_MASK) == USB_REQ_DIR_IN)
+        {
+          datapid = QTD_TOKEN_PID_IN;
+        }
+    }
+  else if (epinfo->dirin)
+    {
+      datapid = QTD_TOKEN_PID_IN;
+    }
+
+  /* Create and initialize a Queue Head (QH) structure for this transfer */
+
+  qh = sam_qh_create(rhport, epinfo);
+  if (qh == NULL)
+    {
+      udbg("ERROR: sam_qh_create failed\n");
+      ret = -ENOMEM;
+      goto errout_with_iocwait;
+    }
+
+  /* Initialize the QH link and get the next data toggle (not used for SETUP
+   * transfers)
+   */
+
+  flink  = &qh->hw.overlay.nqp;
+  toggle = epinfo->toggle ? 0 : QTD_TOKEN_TOGGLE;
+  ret    = -EIO;
+
+  /* Is the an EP0 SETUP request?  If req will be non-NULL */
+
+  if (req != NULL)
+    {
+      /* Allocate a new Queue Element Transfer Descriptor (qTD) for the SETUP
+       * phase of the request sequence.
+       */
+
+      qtd = sam_qtd_setupphase(req);
+      if (qtd == NULL)
+        {
+          udbg("ERROR: sam_qtd_setupphase failed\n");
+          goto errout_with_qh;
+        }
+
+      /* Link the new qTD to the QH head. */
+
+      physaddr = sam_physramaddr((uintptr_t)qtd);
+      *flink = sam_swap32(physaddr);
+
+      /* Get the new forward link pointer and data toggle */
+
+      flink  = &qtd->hw.nqp;
+      toggle = QTD_TOKEN_TOGGLE;
+    }
+
+  /* A buffer may or may be supplied with an EP0 SETUP transfer.  A buffer will
+   * always be present for normal endpoint data transfers.
+   */
+
+  if (buffer && buflen > 0)
+    {
+      /* Extra TOKEN bits include the data toggle, the data PID, and if there
+       * is no request, and indication to interrupt at the end of this
+       * transfer.
+       */
+
+      uint32_t tokenbits = toggle | datapid;
+
+      /* If this is not an EP0 SETUP request, then nothing follows the data and
+       * we want the IOC interrupt when the data transfer completes.
+       */
+
+      if (!req)
+        {
+          tokenbits |= QTD_TOKEN_IOC;
+        }
+
+      /* Allocate a new Queue Element Transfer Descriptor (qTD) for the data
+       * buffer.
+       */
+
+      qtd = sam_qtd_dataphase(buffer, buflen, tokenbits);
+      if (qtd == NULL)
+        {
+          udbg("ERROR: sam_qtd_dataphase failed\n");
+          goto errout_with_qh;
+        }
+
+      /* Link the new qTD to either QH head of the SETUP qTD. */
+
+      physaddr = sam_physramaddr((uintptr_t)qtd);
+      *flink = sam_swap32(physaddr);
+
+      /* Set the forward link pointer to this new qTD */
+
+      flink = &qtd->hw.nqp;
+    }
+
+  if (req != NULL)
+    {
+      /* Extra TOKEN bits include the data toggle and the data PID. */
+
+      uint32_t tokenbits = toggle | datapid ;
+
+      /* Allocate a new Queue Element Transfer Descriptor (qTD) for the status */
+
+      qtd = sam_qtd_statusphase(tokenbits);
+      if (qtd == NULL)
+        {
+          udbg("ERROR: sam_qtd_statusphase failed\n");
+          goto errout_with_qh;
+        }
+
+      /* Link the new qTD to either the SETUP or data qTD. */
+
+      physaddr = sam_physramaddr((uintptr_t)qtd);
+      *flink = sam_swap32(physaddr);
+    }
+
+  /* Add the new QH to the head of the asynchronous queue list */
+
+  sam_qh_enqueue(qh);
 
   /* Wait for the IOC completion event */
 
@@ -1270,6 +1734,10 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
 
   return OK;
 
+  /* Clean-up after an error */
+
+errout_with_qh:
+  sam_qh_discard(qh);
 errout_with_iocwait:
   epinfo->iocwait = false;
   return ret;
