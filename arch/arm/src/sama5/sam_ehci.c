@@ -60,6 +60,7 @@
 #include "sam_periphclks.h"
 #include "sam_memories.h"
 #include "sam_usbhost.h"
+#include "chip/sam_sfr.h"
 #include "chip/sam_ehci.h"
 
 #ifdef CONFIG_SAMA5_EHCI
@@ -109,6 +110,18 @@
 
 #undef CONFIG_USBHOST_ISOC_DISABLE
 #define CONFIG_USBHOST_ISOC_DISABLE 1
+
+/* If UDPHS is enabled, then don't use port A */
+
+#ifdef CONFIG_SAMA5_UDPHS
+#  undef CONFIG_SAMA5_EHCI_RHPORT1
+#endif
+
+/* For now, suppress use of PORTA in any event.  I use that for SAM-BA and
+ * would prefer that the board not try to drive VBUS on that port!
+ */
+
+#undef CONFIG_SAMA5_EHCI_RHPORT1
 
 /* Driver-private Definitions **************************************************/
 
@@ -874,7 +887,7 @@ static int sam_qh_foreach(struct sam_qh_s *qh, uint32_t **bp, foreach_qh_t handl
        * the end of the asynchronous queue?
        */
 
-      else if (sam_virtramaddr(physaddr & QH_HLP_MASK) == &g_asynchead)
+      else if (sam_virtramaddr(physaddr & QH_HLP_MASK) == (uintptr_t)&g_asynchead)
         {
           /* That will also terminate the loop */
 
@@ -1973,15 +1986,15 @@ static int sam_qtd_ioccheck(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
                          (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
   sam_qtd_print(qtd);
 
-  /* Remove the qTD from the list */
+  /* Remove the qTD from the list
+   *
+   * NOTE that we don't check if the qTD is active nor do we check if there
+   * are any errors reported in the qTD.  If the transfer halted due to
+   * an error, then qTDs in the list after the error qTD will still appear
+   * to be active.
+   */
 
   **bp = qtd->hw.nqp;
-
-  /* NOTE that we don't check if the qTD is active nor do we check if there
-   * are any errors reported in the qTD.  If the transfer halted due to
-   * an error, then I am not sure if we can believe this information anyway.
-   * The only sure place to check for errors in in the QH overlay.
-   */
 
   /* Release this QH by returning it to the free list */
 
@@ -2064,6 +2077,7 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
        */
 
       **bp = qh->hw.hlp;
+      cp15_coherent_dcache((uintptr_t)*bp, (uintptr_t)*bp + sizeof(uint32_t));
 
       /* Check for errors, update the data toggle */
 
@@ -3377,9 +3391,30 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   regval = sam_getreg((volatile uint32_t *)SAM_PMC_SCER);
   regval |= PMC_UHP;
   sam_putreg(regval, (volatile uint32_t *)SAM_PMC_SCER);
+
+  /* "One transceiver is shared with the USB High Speed Device (port A). The
+   *  selection between Host Port A and USB Device is controlled by the UDPHS
+   *  enable bit (EN_UDPHS) located in the UDPHS_CTRL control register."
+   *
+   * Make all three ports usable for EHCI unless the high speed device is
+   * enabled; then let the device manage port zero.  Zero is the reset
+   * value for all ports; one makes the corresponding port available to OHCI.
+   */
+
+  regval  = getreg32(SAM_SFR_OHCIICR);
+#ifdef CONFIG_SAMA5_EHCI_RHPORT1
+  regval &= ~SFR_OHCIICR_RES1;
+#endif
+#ifdef CONFIG_SAMA5_EHCI_RHPORT2
+  regval &= ~SFR_OHCIICR_RES1;
+#endif
+#ifdef CONFIG_SAMA5_EHCI_RHPORT3
+  regval &= ~SFR_OHCIICR_RES2;
+#endif
+  putreg32(regval, SAM_SFR_OHCIICR);
   irqrestore(flags);
 
-  /* Note that no pin pinconfiguration is required.  All USB HS pins have
+  /* Note that no pin configuration is required.  All USB HS pins have
    * dedicated function
    */
 
@@ -3631,7 +3666,15 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
    * mode.
    */
 
-  sam_usbhost_vbusdrive(SAM_EHCI_IFACE, true);
+#ifndef CONFIG_SAMA5_EHCI_RHPORT1
+  sam_usbhost_vbusdrive(SAM_RHPORT1, true);
+#endif
+#ifndef CONFIG_SAMA5_EHCI_RHPORT2
+  sam_usbhost_vbusdrive(SAM_RHPORT2, true);
+#endif
+#ifndef CONFIG_SAMA5_EHCI_RHPORT3
+  sam_usbhost_vbusdrive(SAM_RHPORT3, true);
+#endif
   up_mdelay(50);
 
   /* If there is a USB device in the slot at power up, then we will not
