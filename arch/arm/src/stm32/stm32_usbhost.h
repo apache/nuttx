@@ -115,7 +115,7 @@ extern "C" {
  *
  ***********************************************************************************/
 
-EXTERN void stm32_usbhost_vbusdrive(int iface, bool enable);
+void stm32_usbhost_vbusdrive(int iface, bool enable);
 
 #undef EXTERN
 #if defined(__cplusplus)
