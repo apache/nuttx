@@ -1384,22 +1384,31 @@ static void sam_qh_enqueue(struct sam_qh_s *qh)
 {
   uintptr_t physaddr;
 
-  /* Add the new QH to the head of the asynchronous queue list. */
-  /* Attach the old head as the new QH HLP and flush the new QH and its attached
-   * qTDs to RAM.
+  /* Set the internal fqp field.  When we transverse the the QH list later,
+   * we need to know the correct place to start because the overlay may no
+   * longer point to the first qTD entry.
+   */
+
+  qh->fqp = qh->hw.overlay.nqp;
+  (void)sam_qh_dump(qh, NULL, NULL);
+
+  /* Add the new QH to the head of the asynchronous queue list.
+   *
+   * First, attach the old head as the new QH HLP and flush the new QH and its
+   * attached qTDs to RAM.
    */
 
   qh->hw.hlp = g_asynchead.hw.hlp;
   sam_qh_flush(qh);
 
-  /* Set the new QH as the first QH in the asychronous queue and flush the
+  /* Then set the new QH as the first QH in the asychronous queue and flush the
    * modified head to RAM.
    */
 
   physaddr = (uintptr_t)sam_physramaddr((uintptr_t)qh);
   g_asynchead.hw.hlp = sam_swap32(physaddr | QH_HLP_TYP_QH);
-  cp15_coherent_dcache((uintptr_t)&g_asynchead,
-                       (uintptr_t)&g_asynchead + sizeof(struct ehci_qh_s));
+  cp15_coherent_dcache((uintptr_t)&g_asynchead.hw,
+                       (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
 }
 
 /*******************************************************************************
@@ -1907,16 +1916,8 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
       *flink = sam_swap32(physaddr);
     }
 
-  /* Set the internal fqp field.  When we transverse the the QH list later,
-   * we need to know the correct place to start because the overlay may no
-   * longer point to the first qTD entry.
-   */
-
-  qh->fqp = qh->hw.overlay.nqp;
-
   /* Add the new QH to the head of the asynchronous queue list */
 
-  (void)sam_qh_dump(qh, NULL, NULL);
   sam_qh_enqueue(qh);
 
   /* Release the EHCI semaphore while we wait.  Other threads need the
