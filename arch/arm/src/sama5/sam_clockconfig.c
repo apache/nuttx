@@ -330,28 +330,7 @@ static inline void sam_selectplla(void)
 
 static inline void sam_usbclockconfig(void)
 {
-#ifdef CONFIG_SAMA5_OHCI
-  /* For OHCI Full-speed operations only, the user has to perform the
-   * following:
-   *
-   *   1) Enable UHP peripheral clock, bit (1 << AT91C_ID_UHPHS) in PMC_PCER
-   *      register.
-   *   2) Select PLLACK as Input clock of OHCI part, USBS bit in PMC_USB
-   *      register.
-   *   3) Program the OHCI clocks (UHP48M and UHP12M) with USBDIV field in
-   *      PMC_USB register. USBDIV value is calculated regarding the PLLACK
-   *      value and USB Full-speed accuracy.
-   *   4) Enable the OHCI clocks, UHP bit in PMC_SCER register.
-   *
-   * Steps 2 and 3 are done here.  1 and 2 are performed with the OHCI
-   * driver is initialized.
-   */
-
-  putreg32(BOARD_OHCI_INPUT | BOARD_OHCI_DIVIDER << PMC_USB_USBDIV_SHIFT,
-          SAM_PMC_USB);
-#endif
-
-#ifdef CONFIG_SAMA5_EHCI
+#if defined(CONFIG_SAMA5_EHCI)
   uint32_t regval;
 
   /* The USB Host High Speed requires a 480 MHz clock (UPLLCK) for the
@@ -415,6 +394,27 @@ static inline void sam_usbclockconfig(void)
 
   regval |= PMC_USB_USBDIV(9);
   putreg32(regval, SAM_PMC_USB);
+
+#elif defined(CONFIG_SAMA5_OHCI)
+  /* For OHCI Full-speed operations only, the user has to perform the
+   * following:
+   *
+   *   1) Enable UHP peripheral clock, bit (1 << AT91C_ID_UHPHS) in PMC_PCER
+   *      register.
+   *   2) Select PLLACK as Input clock of OHCI part, USBS bit in PMC_USB
+   *      register.
+   *   3) Program the OHCI clocks (UHP48M and UHP12M) with USBDIV field in
+   *      PMC_USB register. USBDIV value is calculated regarding the PLLACK
+   *      value and USB Full-speed accuracy.
+   *   4) Enable the OHCI clocks, UHP bit in PMC_SCER register.
+   *
+   * Steps 2 and 3 are done here.  1 and 2 are performed with the OHCI
+   * driver is initialized.
+   */
+
+  putreg32(BOARD_OHCI_INPUT | BOARD_OHCI_DIVIDER << PMC_USB_USBDIV_SHIFT,
+          SAM_PMC_USB);
+
 #endif
 }
 

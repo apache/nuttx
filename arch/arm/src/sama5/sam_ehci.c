@@ -201,6 +201,7 @@ struct sam_epinfo_s
   uint16_t xfrtype:2;          /* See USB_EP_ATTR_XFER_* definitions in usb.h */
   uint16_t speed:2;            /* See USB_*_SPEED definitions in ehci.h */
   int result;                  /* The result of the transfer */
+  uint32_t xfrd;               /* On completion, will hold the number of bytes transferred */
   sem_t iocsem;                /* Semaphore used to wait for transfer completion */
 };
 
@@ -335,11 +336,12 @@ static void sam_qh_enqueue(struct sam_qh_s *qh);
 static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
          struct sam_epinfo_s *epinfo);
 static int sam_qtd_addbpl(struct sam_qtd_s *qtd, const void *buffer, size_t buflen);
-static struct sam_qtd_s *sam_qtd_setupphase(const struct usb_ctrlreq_s *req);
-static struct sam_qtd_s *sam_qtd_dataphase(void *buffer, int buflen,
-         uint32_t tokenbits);
+static struct sam_qtd_s *sam_qtd_setupphase(struct sam_epinfo_s *epinfo,
+         const struct usb_ctrlreq_s *req);
+static struct sam_qtd_s *sam_qtd_dataphase(struct sam_epinfo_s *epinfo,
+         void *buffer, int buflen, uint32_t tokenbits);
 static struct sam_qtd_s *sam_qtd_statusphase(uint32_t tokenbits);
-static int sam_async_transfer(struct sam_rhport_s *rhport,
+static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
          struct sam_epinfo_s *epinfo, const struct usb_ctrlreq_s *req,
          uint8_t *buffer, size_t buflen);
 
@@ -1337,10 +1339,11 @@ static int sam_ioc_setup(struct sam_rhport_s *rhport, struct sam_epinfo_s *epinf
        * completed.
        */
 
-      epinfo->iocwait = true;  /* We want to be awakened by IOC interrupt */
-      epinfo->status  = 0;     /* No status yet */
+      epinfo->iocwait = true;   /* We want to be awakened by IOC interrupt */
+      epinfo->status  = 0;      /* No status yet */
+      epinfo->xfrd    = 0;      /* Nothing transferred yet */
       epinfo->result  = -EBUSY; /* Transfer in progress */
-      ret             = OK;    /* We are good to go */
+      ret             = OK;     /* We are good to go */
     }
 
   irqrestore(flags);
@@ -1459,10 +1462,19 @@ static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
            ((uint32_t)epinfo->maxpacket << QH_EPCHAR_MAXPKT_SHIFT) |
            ((uint32_t)8 << QH_EPCHAR_RL_SHIFT);
 
-  if (epinfo->speed != EHCI_FULL_SPEED && epinfo->epno == 0)
+  /* Paragraph 3.6.3: "Control Endpoint Flag (C). If the QH.EPS field
+   * indicates the endpoint is not a high-speed device, and the endpoint
+   * is an control endpoint, then software must set this bit to a one.
+   * Otherwise it should always set this bit to a zero."
+   */
+
+  if (epinfo->speed   != EHCI_HIGH_SPEED &&
+      epinfo->xfrtype == USB_EP_ATTR_XFER_CONTROL)
     {
       regval |= QH_EPCHAR_C;
     }
+
+  /* Save the endpoint characteristics word with the correct byte order */
 
   qh->hw.epchar = sam_swap32(regval);
 
@@ -1566,7 +1578,8 @@ static int sam_qtd_addbpl(struct sam_qtd_s *qtd, const void *buffer, size_t bufl
  *
  *******************************************************************************/
 
-static struct sam_qtd_s *sam_qtd_setupphase(const struct usb_ctrlreq_s *req)
+static struct sam_qtd_s *sam_qtd_setupphase(struct sam_epinfo_s *epinfo,
+                                            const struct usb_ctrlreq_s *req)
 {
   struct sam_qtd_s *qtd;
   uint32_t regval;
@@ -1617,6 +1630,10 @@ static struct sam_qtd_s *sam_qtd_setupphase(const struct usb_ctrlreq_s *req)
       return NULL;
     }
 
+  /* Add the data transfer size to the count in the epinfo structure */
+
+  epinfo->xfrd += USB_SIZEOF_CTRLREQ;
+
   return qtd;
 }
 
@@ -1628,7 +1645,8 @@ static struct sam_qtd_s *sam_qtd_setupphase(const struct usb_ctrlreq_s *req)
  *
  *******************************************************************************/
 
-static struct sam_qtd_s *sam_qtd_dataphase(void *buffer, int buflen,
+static struct sam_qtd_s *sam_qtd_dataphase(struct sam_epinfo_s *epinfo,
+                                           void *buffer, int buflen,
                                            uint32_t tokenbits)
 {
   struct sam_qtd_s *qtd;
@@ -1680,6 +1698,10 @@ static struct sam_qtd_s *sam_qtd_dataphase(void *buffer, int buflen,
       return NULL;
     }
 
+  /* Add the data transfer size to the count in the epinfo structure */
+
+  epinfo->xfrd += buflen;
+
   return qtd;
 }
 
@@ -1720,14 +1742,13 @@ static struct sam_qtd_s *sam_qtd_statusphase(uint32_t tokenbits)
    * PID      PID Code                        Contained in tokenbits
    * CERR     Error Counter                   3
    * CPAGE    Current Page                    0
-   * IOC      Interrupt on complete           QH_TOKEN_IOC
+   * IOC      Interrupt on complete           QTD_TOKEN_IOC
    * NBYTES   Total Bytes to Transfer         0
    * TOGGLE   Data Toggle                     Contained in tokenbits
    */
 
-  regval = tokenbits | QTD_TOKEN_ACTIVE |
+  regval = tokenbits | QTD_TOKEN_ACTIVE | QTD_TOKEN_IOC |
            ((uint32_t)3                  << QTD_TOKEN_CERR_SHIFT) |
-           QH_TOKEN_IOC |
            ((uint32_t)USB_SIZEOF_CTRLREQ << QTD_TOKEN_NBYTES_SHIFT);
 
   qtd->hw.token = sam_swap32(regval);
@@ -1751,12 +1772,18 @@ static struct sam_qtd_s *sam_qtd_statusphase(uint32_t tokenbits)
  *   complete, but will be re-aquired when before returning.  The state of
  *   EHCI resources could be very different upon return.
  *
+ * Returned value:
+ *   On success, this function returns the number of bytes actually transferred.
+ *   For control transfers, this size includes the size of the control request
+ *   plus the size of the data (which could be short); For bulk transfers, this
+ *   will be the number of data bytes transfers (which could be short).
+ *
  *******************************************************************************/
 
-static int sam_async_transfer(struct sam_rhport_s *rhport,
-                              struct sam_epinfo_s *epinfo,
-                              const struct usb_ctrlreq_s *req,
-                              uint8_t *buffer, size_t buflen)
+static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
+                                  struct sam_epinfo_s *epinfo,
+                                  const struct usb_ctrlreq_s *req,
+                                  uint8_t *buffer, size_t buflen)
 {
   struct sam_qh_s *qh;
   struct sam_qtd_s *qtd;
@@ -1834,7 +1861,7 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
        * phase of the request sequence.
        */
 
-      qtd = sam_qtd_setupphase(req);
+      qtd = sam_qtd_setupphase(epinfo, req);
       if (qtd == NULL)
         {
           udbg("ERROR: sam_qtd_setupphase failed\n");
@@ -1878,7 +1905,7 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
        * buffer.
        */
 
-      qtd = sam_qtd_dataphase(buffer, buflen, tokenbits);
+      qtd = sam_qtd_dataphase(epinfo, buffer, buflen, tokenbits);
       if (qtd == NULL)
         {
           udbg("ERROR: sam_qtd_dataphase failed\n");
@@ -1950,9 +1977,9 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
       goto errout_with_iocwait;
     }
 
-  /* Transfer completed successfully */
+  /* Transfer completed successfully.  Return the number of bytes transferred */
 
-  return OK;
+  return epinfo->xfrd;
 
   /* Clean-up after an error */
 
@@ -1960,7 +1987,7 @@ errout_with_qh:
   sam_qh_discard(qh);
 errout_with_iocwait:
   epinfo->iocwait = false;
-  return ret;
+  return (ssize_t)ret;
 }
 
 /*******************************************************************************
@@ -1979,7 +2006,8 @@ errout_with_iocwait:
 
 static int sam_qtd_ioccheck(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 {
-  DEBUGASSERT(qtd);
+  struct sam_epinfo_s *epinfo = (struct sam_epinfo_s *)arg;
+  DEBUGASSERT(qtd && epinfo);
 
   /* Make sure we reload the QH from memory */
 
@@ -1996,6 +2024,16 @@ static int sam_qtd_ioccheck(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
    */
 
   **bp = qtd->hw.nqp;
+
+  /* Subtract the number of bytes left untransferred.  The epinfo->xfrd
+   * field is initialized to the the total number of bytes to be transferred
+   * (all qTDs in the list).  We subtract out the number of untransferred
+   * bytes on each transfer and the final result will be the number of bytes
+   * actually transferred.
+   */
+
+  epinfo->xfrd -= (sam_swap32(qtd->hw.token) & QTD_TOKEN_NBYTES_MASK) >>
+    QTD_TOKEN_NBYTES_SHIFT;
 
   /* Release this QH by returning it to the free list */
 
@@ -2061,7 +2099,7 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 
   /* Remove all active, attached qTD structures from the inactive QH */
 
-  ret = sam_qtd_foreach(qh, sam_qtd_ioccheck, NULL);
+  ret = sam_qtd_foreach(qh, sam_qtd_ioccheck, (void *)qh->epinfo);
   if (ret < 0)
     {
       udbg("ERROR: sam_qh_forall failed: %d\n", ret);
@@ -3056,7 +3094,7 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr,
 {
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   uint16_t len;
-  int  ret;
+  ssize_t nbytes;
 
   DEBUGASSERT(rhport && req);
 
@@ -3071,9 +3109,9 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr,
 
   /* Now perform the transfer */
 
-  ret = sam_async_transfer(rhport, &rhport->ep0, req, buffer, len);
+  nbytes = sam_async_transfer(rhport, &rhport->ep0, req, buffer, len);
   sam_givesem(&g_ehci.exclsem);
-  return ret;
+  return nbytes >=0 ? OK : (int)nbytes;
 }
 
 static int sam_ctrlout(FAR struct usbhost_driver_s *drvr,
@@ -3125,11 +3163,11 @@ static int sam_ctrlout(FAR struct usbhost_driver_s *drvr,
  *******************************************************************************/
 
 static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-                         FAR uint8_t *buffer, size_t buflen)
+                        FAR uint8_t *buffer, size_t buflen)
 {
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_epinfo_s *epinfo = (struct sam_epinfo_s *)ep;
-  int ret;
+  ssize_t nbytes;
 
   DEBUGASSERT(rhport && epinfo && buffer && buflen > 0);
 
@@ -3142,7 +3180,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
   switch (epinfo->xfrtype)
     {
       case USB_EP_ATTR_XFER_BULK:
-        ret = sam_async_transfer(rhport, epinfo, NULL, buffer, buflen);
+        nbytes = sam_async_transfer(rhport, epinfo, NULL, buffer, buflen);
         break;
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
@@ -3156,12 +3194,12 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       case USB_EP_ATTR_XFER_CONTROL:
       default:
         udbg("ERROR: Support for transfer type %d not implemented\n");
-        ret = -ENOSYS;
+        nbytes = -ENOSYS;
         break;
     }
 
   sam_givesem(&g_ehci.exclsem);
-  return ret;
+  return nbytes >=0 ? OK : (int)nbytes;
 }
 
 /*******************************************************************************
