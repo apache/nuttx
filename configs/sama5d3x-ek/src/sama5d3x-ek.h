@@ -58,6 +58,7 @@
 #define HAVE_HSMCI_MTD  1
 #define HAVE_AT25_MTD   1
 #define HAVE_USBHOST    1
+#define HAVE_USBDEV     1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -120,12 +121,13 @@
 #endif
 
 #if !defined(CONFIG_SAMA5_UDPHS)
+#  undef HAVE_USBDEV
 #endif
 
 /* CONFIG_USBDEV and CONFIG_USBHOST must also be defined */
 
-#if defined(CONFIG_USBDEV)
-#else
+#if !defined(CONFIG_USBDEV)
+#  undef HAVE_USBDEV
 #endif
 
 #if defined(CONFIG_USBHOST)
@@ -134,11 +136,6 @@
 #  endif
 #else
 #  undef CONFIG_SAMA5_OHCI
-#  undef CONFIG_SAMA5_EHCI
-#endif
-
-#if defined(CONFIG_SAMA5_OHCI) && defined(CONFIG_SAMA5_EHCI)
-#  warning Both CONFIG_SAMA5_OHCI and CONFIG_SAMA5_EHCI are defined
 #  undef CONFIG_SAMA5_EHCI
 #endif
 

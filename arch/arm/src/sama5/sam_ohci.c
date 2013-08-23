@@ -117,6 +117,18 @@
 
 #define SAM_BUFALLOC (CONFIG_SAMA5_OHCI_TDBUFFERS * CONFIG_SAMA5_OHCI_TDBUFSIZE)
 
+/* If UDPHS is enabled, then don't use port A */
+
+#ifdef CONFIG_SAMA5_UDPHS
+#  undef CONFIG_SAMA5_OHCI_RHPORT1
+#endif
+
+/* For now, suppress use of PORTA in any event.  I use that for SAM-BA and
+ * would prefer that the board not try to drive VBUS on that port!
+ */
+
+#undef CONFIG_SAMA5_OHCI_RHPORT1
+
 /* Debug */
 
 #ifndef CONFIG_DEBUG
@@ -3013,20 +3025,30 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
   regval  = getreg32(SAM_PMC_SCER);
   regval |= PMC_UHP;
   putreg32(regval, SAM_PMC_SCER);
-  irqrestore(flags);
 
-  /* Make all three ports usable.  Zero is the reset value and holds the
-   * ports in reset.
-   * REVISIT:  This will have to change in future.  Should be a configuration
-   * setting
+  /* "One transceiver is shared with the USB High Speed Device (port A). The
+   *  selection between Host Port A and USB Device is controlled by the UDPHS
+   *  enable bit (EN_UDPHS) located in the UDPHS_CTRL control register."
+   *
+   * Make all three ports usable for OHCI unless the high speed device is
+   * enabled; then let the device manage port zero.  Zero is the reset
+   * value for all ports; one makes the corresponding port available to OHCI.
    */
 
   regval  = getreg32(SAM_SFR_OHCIICR);
-  regval |= (SFR_OHCIICR_RES0 | SFR_OHCIICR_RES1 | SFR_OHCIICR_RES2);
+#ifdef CONFIG_SAMA5_OHCI_RHPORT1
+  regval |= SFR_OHCIICR_RES1;
+#endif
+#ifdef CONFIG_SAMA5_OHCI_RHPORT2
+  regval |= SFR_OHCIICR_RES1;
+#endif
+#ifdef CONFIG_SAMA5_OHCI_RHPORT3
+  regval |= SFR_OHCIICR_RES2;
+#endif
   putreg32(regval, SAM_SFR_OHCIICR);
   irqrestore(flags);
 
-  /* Note that no pin pinconfiguration is required.  All USB HS pins have
+  /* Note that no pin configuration is required.  All USB HS pins have
    * dedicated function
    */
 
@@ -3140,7 +3162,15 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
    * mode.
    */
 
-  sam_usbhost_vbusdrive(SAM_OHCI_IFACE, true);
+#ifndef CONFIG_SAMA5_OHCI_RHPORT1
+  sam_usbhost_vbusdrive(SAM_RHPORT1, true);
+#endif
+#ifndef CONFIG_SAMA5_OHCI_RHPORT2
+  sam_usbhost_vbusdrive(SAM_RHPORT2, true);
+#endif
+#ifndef CONFIG_SAMA5_OHCI_RHPORT3
+  sam_usbhost_vbusdrive(SAM_RHPORT3, true);
+#endif
   up_mdelay(50);
 
   /* If there is a USB device in the slot at power up, then we will not
