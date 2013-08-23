@@ -5427,4 +5427,8 @@
 	* nuttx/arch/arm/src/sama5/sam_ehci.c:  Now code complete for all
 	  asynchronous endpoints (control and bulk); nothing yet in place
 	  for periodic endponts (interrupt and isochronous) (2013-8-22).
+	* include/nuttx/serial/serial.h and arch/arm/src/stm32/chip/stm32f40xxx_pinmap.h:
+	  SourceForge bug #16 Fix IO pin map. Add CONFIG_SERIAL_TERMIOS support.
+	  Also fixes some STM32 F4 Timer 8 pin configurations.  From CCTSAO
+	  (2013-8-23).
 

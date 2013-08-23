@@ -46,6 +46,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <semaphore.h>
+#ifdef CONFIG_SERIAL_TERMIOS
+#  include <termios.h>
+#endif
 
 #include <nuttx/fs/fs.h>
 
@@ -191,6 +194,8 @@ struct uart_ops_s
 
 struct uart_dev_s
 {
+  /* State data */
+
   uint8_t              open_count;   /* Number of times the device has been opened */
   volatile bool        xmitwaiting;  /* true: User waiting for space in xmit.buffer */
   volatile bool        recvwaiting;  /* true: User waiting for data in recv.buffer */
@@ -198,14 +203,31 @@ struct uart_dev_s
   volatile bool        disconnected; /* true: Removable device is not connected */
 #endif
   bool                 isconsole;    /* true: This is the serial console */
+
+  /* Terminal control flags */
+
+#ifdef CONFIG_SERIAL_TERMIOS
+  tcflag_t             tc_iflag;     /* Input modes */
+  tcflag_t             tc_oflag;     /* Output modes */
+  tcflag_t             tc_lflag;     /* Local modes */
+#endif
+
+  /* Semaphores */
+
   sem_t                closesem;     /* Locks out new open while close is in progress */
   sem_t                xmitsem;      /* Wakeup user waiting for space in xmit.buffer */
   sem_t                recvsem;      /* Wakeup user waiting for data in recv.buffer */
 #ifndef CONFIG_DISABLE_POLL
   sem_t                pollsem;      /* Manages exclusive access to fds[] */
 #endif
+
+  /* I/O buffers */
+
   struct uart_buffer_s xmit;         /* Describes transmit buffer */
   struct uart_buffer_s recv;         /* Describes receive buffer */
+
+  /* Driver interface */
+
   FAR const struct uart_ops_s *ops;  /* Arch-specific operations */
   FAR void            *priv;         /* Used by the arch-specific logic */
 
