@@ -75,6 +75,12 @@
 
 #define HCOR ((volatile struct ehci_hcor_s *)(SAM_UHPEHCI_VSECTION + 0x10))
 
+/* USB2 Debug Port Register Interface.  These are not documented, but I was
+ * able to find these by registers by peeking at EHCI memory.
+ */
+
+#define HDEBUG ((volatile struct ehci_debug_s *)(SAM_UHPEHCI_VSECTION + 0x90))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
