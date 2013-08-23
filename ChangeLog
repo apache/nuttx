@@ -5431,4 +5431,6 @@
 	  SourceForge bug #16 Fix IO pin map. Add CONFIG_SERIAL_TERMIOS support.
 	  Also fixes some STM32 F4 Timer 8 pin configurations.  From CCTSAO
 	  (2013-8-23).
+	* arch/arm/src/lpc17xx/lpc17_usbhost.h:  Fix #endif with missing #if
+	  condition.  Reported by Andrew Bradford (2013-8-23).
 
