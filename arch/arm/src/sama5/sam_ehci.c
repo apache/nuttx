@@ -143,7 +143,8 @@ struct sam_qh_s
   /* Internal fields used by the EHCI driver */
 
   struct sam_epinfo_s *epinfo; /* Endpoint used for the transfer */
-  uint8_t pad[12];             /* Padding to assure 32-byte alignment */
+  uint32_t fqp;                /* First qTD in the list (physical address) */
+  uint8_t pad[8];              /* Padding to assure 32-byte alignment */
 };
 
 /* Internal representation of the EHCI Queue Element Transfer Descriptor (qTD) */
@@ -300,12 +301,16 @@ static int sam_qh_flush(struct sam_qh_s *qh);
 /* Endpoint Transfer Handling **************************************************/
 
 #ifdef CONFIG_SAMA5_EHCI_REGDEBUG
+static void sam_qtd_print(struct sam_qtd_s *qtd);
+static void sam_qh_print(struct sam_qh_s *qh);
 static int sam_qtd_dump(struct sam_qtd_s *qtd, uint32_t **bp, void *arg);
 static int sam_qh_dump(struct sam_qh_s *qh, uint32_t **bp, void *arg);
 #if 0 /* not used */
 static int sam_qh_dumpall(void);
 #endif
 #else
+#  define sam_qtd_print(qtd)
+#  define sam_qh_print(qh)
 #  define sam_qtd_dump(qtd, bp, arg) OK
 #  define sam_qh_dump(qh, bp, arg)   OK
 #  define sam_qh_dumpall()           OK
@@ -857,12 +862,29 @@ static int sam_qh_foreach(struct sam_qh_s *qh, uint32_t **bp, foreach_qh_t handl
        * terminate (T) bit.  If T==1, then the HLP address is not valid.
        */
 
-      if ((sam_swap32(qh->hw.hlp) & QH_HLP_T) != 0)
+      physaddr = sam_swap32(qh->hw.hlp);
+      if ((physaddr & QH_HLP_T) != 0)
         {
           /* Set the next pointer to NULL.  This will terminate the loop. */
 
           next = NULL;
         }
+
+      /* Is the next QH the asynchronous list head which will always be at
+       * the end of the asynchronous queue?
+       */
+
+      else if (sam_virtramaddr(physaddr & QH_HLP_MASK) == &g_asynchead)
+        {
+          /* That will also terminate the loop */
+
+          next = NULL;
+        }
+
+      /* Otherwise, there is a QH structure after this one that describes
+       * another transaction.
+       */
+
       else
         {
           physaddr = sam_swap32(qh->hw.hlp) & QH_HLP_MASK;
@@ -945,10 +967,10 @@ static int sam_qtd_foreach(struct sam_qh_s *qh, foreach_qtd_t handler, void *arg
 
   /* Handle the special case where the queue is empty */
 
-  bp       = &qh->hw.overlay.nqp;      /* Start of qTDs remaining */
+  bp       = &qh->fqp;                 /* Start of qTDs in original list */
   physaddr = sam_swap32(*bp);          /* Physical address of first qTD in CPU order */
 
-  if ((physaddr & QH_NQP_T) != 0)
+  if ((physaddr & QTD_NQP_T) != 0)
     {
       return 0;
     }
@@ -1156,6 +1178,69 @@ static int sam_qh_flush(struct sam_qh_s *qh)
  *******************************************************************************/
 
 /*******************************************************************************
+ * Name: sam_qtd_print
+ *
+ * Description:
+ *   Print the context of one qTD
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_SAMA5_EHCI_REGDEBUG
+static void sam_qtd_print(struct sam_qtd_s *qtd)
+{
+  udbg("  QTD[%p]:\n", qtd);
+  udbg("    hw:\n");
+  udbg("      nqp: %08x alt: %08x token: %08x\n",
+       qtd->hw.nqp, qtd->hw.alt, qtd->hw.token);
+  udbg("      bpl: %08x %08x %08x %08x %08x\n",
+       qtd->hw.bpl[0], qtd->hw.bpl[1], qtd->hw.bpl[2],
+       qtd->hw.bpl[3], qtd->hw.bpl[4]);
+}
+#endif
+
+/*******************************************************************************
+ * Name: sam_qh_print
+ *
+ * Description:
+ *   Print the context of one QH
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_SAMA5_EHCI_REGDEBUG
+static void sam_qh_print(struct sam_qh_s *qh)
+{
+  struct sam_epinfo_s *epinfo;
+  struct ehci_overlay_s *overlay;
+
+  udbg("QH[%p]:\n", qh);
+  udbg("  hw:\n");
+  udbg("    hlp: %08x epchar: %08x epcaps: %08x cqp: %08x\n",
+       qh->hw.hlp, qh->hw.epchar, qh->hw.epcaps, qh->hw.cqp);
+
+  overlay = &qh->hw.overlay;
+  udbg("  overlay:\n");
+  udbg("    nqp: %08x alt: %08x token: %08x\n",
+       overlay->nqp, overlay->alt, overlay->token);
+  udbg("    bpl: %08x %08x %08x %08x %08x\n",
+       overlay->bpl[0], overlay->bpl[1], overlay->bpl[2],
+       overlay->bpl[3], overlay->bpl[4]);
+
+  udbg("  fqp:\n", qh->fqp);
+
+  epinfo = qh->epinfo;
+  udbg("  epinfo[%p]:\n", epinfo);
+  if (epinfo)
+    {
+      udbg("    EP%d DIR=%s FA=%08x TYPE=%d MaxPacket=%d\n",
+           epinfo->epno, epinfo->dirin ? "IN" : "OUT", epinfo->devaddr,
+           epinfo->xfrtype, epinfo->maxpacket);
+      udbg("    Toggle=%d iocwait=%d speed=%d result=%d\n",
+           epinfo->toggle, epinfo->iocwait, epinfo->speed, epinfo->result);
+    }
+}
+#endif
+
+/*******************************************************************************
  * Name: sam_qtd_dump
  *
  * Description:
@@ -1167,13 +1252,7 @@ static int sam_qh_flush(struct sam_qh_s *qh)
 #ifdef CONFIG_SAMA5_EHCI_REGDEBUG
 static int sam_qtd_dump(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 {
-  uvdbg("  QTD[%p]:\n", qtd);
-  uvdbg("    hw:\n");
-  uvdbg("      nqp: %08x alt: %08x token: %08x\n",
-        qtd->hw.nqp, qtd->hw.alt, qtd->hw.token);
-  uvdbg("      bpl: %08x %08x %08x %08x %08x\n",
-        qtd->hw.bpl[0], qtd->hw.bpl[1], qtd->hw.bpl[2],
-        qtd->hw.bpl[3], qtd->hw.bpl[4]);
+  sam_qtd_print(qtd);
   return OK;
 }
 #endif
@@ -1190,33 +1269,7 @@ static int sam_qtd_dump(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 #ifdef CONFIG_SAMA5_EHCI_REGDEBUG
 static int sam_qh_dump(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 {
-  struct sam_epinfo_s *epinfo;
-  struct ehci_overlay_s *overlay;
-
-  uvdbg("QH[%p]:\n", qh);
-  uvdbg("  hw:\n");
-  uvdbg("    hlp: %08x epchar: %08x epcaps: %08x cqp: %08x\n",
-        qh->hw.hlp, qh->hw.epchar, qh->hw.epcaps, qh->hw.cqp);
-
-  overlay = &qh->hw.overlay;
-  uvdbg("  overlay:\n");
-  uvdbg("    nqp: %08x alt: %08x token: %08x\n",
-        overlay->nqp, overlay->alt, overlay->token);
-  uvdbg("    bpl: %08x %08x %08x %08x %08x\n",
-        overlay->bpl[0], overlay->bpl[1], overlay->bpl[2],
-        overlay->bpl[3], overlay->bpl[4]);
-
-  epinfo = qh->epinfo;
-  uvdbg("  epinfo[%p]:\n", epinfo);
-  if (epinfo)
-    {
-      uvdbg("    EP%d DIR=%s FA=%08x TYPE=%d MaxPacket=%d\n",
-            epinfo->epno, epinfo->dirin ? "IN" : "OUT", epinfo->devaddr,
-            epinfo->xfrtype, epinfo->maxpacket);
-      uvdbg("    Toggle=%d iocwait=%d speed=%d result=%d\n",
-            epinfo->toggle, epinfo->iocwait, epinfo->speed, epinfo->result);
-    }
-
+  sam_qh_print(qh);
   return sam_qtd_foreach(qh, sam_qtd_dump, NULL);
 }
 #endif
@@ -1841,6 +1894,13 @@ static int sam_async_transfer(struct sam_rhport_s *rhport,
       *flink = sam_swap32(physaddr);
     }
 
+  /* Set the internal fqp field.  When we transverse the the QH list later,
+   * we need to know the correct place to start because the overlay may no
+   * longer point to the first qTD entry.
+   */
+
+  qh->fqp = qh->hw.overlay.nqp;
+
   /* Add the new QH to the head of the asynchronous queue list */
 
   (void)sam_qh_dump(qh, NULL, NULL);
@@ -1911,6 +1971,7 @@ static int sam_qtd_ioccheck(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 
   cp15_invalidate_dcache((uintptr_t)&qtd->hw,
                          (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+  sam_qtd_print(qtd);
 
   /* Remove the qTD from the list */
 
@@ -1951,8 +2012,11 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
 
   cp15_invalidate_dcache((uintptr_t)&qh->hw,
                          (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
+  sam_qh_print(qh);
 
-  /* Get the endpoint info pointer from the extended QH data */
+  /* Get the endpoint info pointer from the extended QH data.  Only the
+   * g_asynchead QH can have a NULL epinfo field.
+   */
 
   epinfo = qh->epinfo;
   DEBUGASSERT(epinfo);
@@ -1993,13 +2057,13 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
    * the asynchronous queue.
    */
 
-  if ((sam_swap32(qh->hw.overlay.nqp) & QH_NQP_T) != 0)
+  if ((sam_swap32(qh->fqp) & QTD_NQP_T) != 0)
     {
       /* Set the forward link of the previous QH to point to the next
        * QH in the list.
        */
 
-      **bp = qh->hw.overlay.nqp;
+      **bp = qh->hw.hlp;
 
       /* Check for errors, update the data toggle */
 
@@ -2042,7 +2106,7 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
       /* Otherwise, the horizontal link pointer of this QH will become the next back pointer.
        */
 
-      *bp = &qh->hw.overlay.nqp;
+      *bp = &qh->hw.hlp;
     }
 
   return OK;
@@ -3466,6 +3530,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   g_asynchead.hw.overlay.nqp   = sam_swap32(QH_NQP_T);
   g_asynchead.hw.overlay.alt   = sam_swap32(QH_NQP_T);
   g_asynchead.hw.overlay.token = sam_swap32(QH_TOKEN_HALTED);
+  g_asynchead.fqp              = sam_swap32(QTD_NQP_T);
 
   cp15_coherent_dcache((uintptr_t)&g_asynchead.hw,
                        (uintptr_t)&g_asynchead.hw + sizeof(struct ehci_qh_s));
