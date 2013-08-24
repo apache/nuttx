@@ -1166,14 +1166,14 @@ Configurations
           volume when it is removed.  But those callbacks are not used in
           this configuration.
 
-    10) Support the USB full-speed OHCI host driver can be enabled by changing
+    10) Support the USB low/full-speed OHCI host driver can be enabled by changing
         the NuttX configuration file as follows:
 
         System Type -> ATSAMA5 Peripheral Support
           CONFIG_SAMA5_UHPHS=y                 : USB Host High Speed
 
         System Type -> USB High Speed Host driver options
-          CONFIG_SAMA5_OHCI=y                  : Full-speed OHCI support
+          CONFIG_SAMA5_OHCI=y                  : Low/full-speed OHCI support
                                                : Defaults for values probably OK
         Device Drivers
           CONFIG_USBHOST=y                     : Enable USB host support
@@ -1194,14 +1194,17 @@ Configurations
        values that are used will be off slightly because of this.
 
     10) Support the USB high-speed EHCI host driver can be enabled by changing
-        the NuttX configuration file as follows:
+        the NuttX configuration file as follows.  If EHCI is enabled by itself,
+        then only high-speed devices can be supported.  If OHCI is also enabled,
+        then all low-, full-, and high speed devices should work.
 
         System Type -> ATSAMA5 Peripheral Support
           CONFIG_SAMA5_UHPHS=y                 : USB Host High Speed
 
         System Type -> USB High Speed Host driver options
           CONFIG_SAMA5_EHCI=y                  : High-speed EHCI support
-                                               : Defaults for values probably OK
+          CONFIG_SAMA5_OHCI=y                  : Low/full-speed OHCI support
+                                               : Defaults for values probably OK for both
         Device Drivers
           CONFIG_USBHOST=y                     : Enable USB host support
 
