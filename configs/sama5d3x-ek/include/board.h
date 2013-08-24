@@ -51,17 +51,20 @@
  * definitions will configure operational clocking.
  */
 
-#ifndef CONFIG_SAMA5_OHCI
+#if !defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI)
 /* This is the configuration provided in the Atmel example code.  This setup results
- * in a CPU clock of 396MHz
+ * in a CPU clock of 396MHz.
+ *
+ * In this configuration, UPLL is the source of the UHPHS clock (if enabled).
  */
 
 #  include <arch/board/board_396MHz.h>
 
 #else
-/* This is an alternative slower configuration that will produce a 48MHz USB clock
- * with the required accuracy.  When used with OHCI, an additional requirement is
- * the PLLACK be a multiple of 48MHz.  This setup results in a CPU clock of 384MHz.
+/* OHCI Only.  This is an alternative slower configuration that will produce a 48MHz
+ * USB clock with the required accuracy using only PLLA.  When PPLA is used to clock
+ * OHCI, an additional requirement is the PLLACK be a multiple of 48MHz.  This setup
+ * results in a CPU clock of 384MHz.
  */
 
 #  include <arch/board/board_384MHz.h>

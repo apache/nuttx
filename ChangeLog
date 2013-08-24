@@ -5433,4 +5433,11 @@
 	  (2013-8-23).
 	* arch/arm/src/lpc17xx/lpc17_usbhost.h:  Fix #endif with missing #if
 	  condition.  Reported by Andrew Bradford (2013-8-23).
-
+	* nuttx/arch/arm/src/sama5/sam_ehci.c:  Now handles low- and full-speed
+	  connections by giving the port to the OHCI driver (2013-8-24).
+	* nuttx/arch/arm/src/sama5/sam_ohci.c:  Now uses the work queue to
+	  defer interrupt processing (2013-8-24).
+	* nuttx/arch/arm/src/sama5/sam_ohci.c and nuttx/arch/arm/src/sama5/sam_ehci.c:
+	  EHCI is now the common interrupt "master."  It will receive all UHPHS
+	  interrupts and route the interrupt event to both the OHCI and EHCI
+	  logic (2013-8-24).

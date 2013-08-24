@@ -120,6 +120,20 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller);
 #endif
 
 /*******************************************************************************
+ * Name: sam_ohci_tophalf
+ *
+ * Description:
+ *   OHCI "Top Half" interrupt handler.  If both EHCI and OHCI are enabled, then
+ *   EHCI will manage the common UHPHS interrupt and will forward the interrupt
+ *   event to this function.
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_SAMA5_OHCI
+int sam_ohci_tophalf(int irq, FAR void *context);
+#endif
+
+/*******************************************************************************
  * Name: sam_ehci_initialize
  *
  * Description:

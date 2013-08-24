@@ -339,7 +339,7 @@ if SAMA5_UHPHS
 menu "USB High Speed Host device driver options"
 
 config SAMA5_OHCI
-	bool "Full speed OHCI support"
+	bool "Full/low speed OHCI support"
 	default n
 	---help---
 		Build support for the SAMA5 USB full speed Open Host Controller
@@ -377,7 +377,8 @@ config SAMA5_EHCI
 	default n
 	---help---
 		Build support for the SAMA5 USB high speed Enhanced Host Controller
-		Interface (EHCI).
+		Interface (EHCI).  If low/full speed is needed too, then you must
+		also enable the OHCI controller.
 
 if SAMA5_EHCI
 
@@ -410,72 +411,22 @@ config SAMA5_EHCI_REGDEBUG
 
 endif # SAMA5_EHCI
 
-if SAMA5_OHCI && SAMA5_EHCI
+if SAMA5_OHCI || SAMA5_EHCI
 
-config SAMA5_OHCI_RHPORT1
-	bool "Use Port A for OHCI"
-	default n
-	depends on !SAMA5_UDPHS
-
-config SAMA5_OHCI_RHPORT2
-	bool "Use Port B for OHCI"
-	default n
-
-config SAMA5_OHCI_RHPORT3
-	bool "Use Port C for OHCI"
-	default y
-
-config SAMA5_EHCI_RHPORT1
-	bool
-	default y if !SAMA5_OHCI_RHPORT1
-	default n if SAMA5_OHCI_RHPORT1
-	depends on !SAMA5_UDPHS
-
-config SAMA5_EHCI_RHPORT2
-	bool
-	default y if !SAMA5_OHCI_RHPORT2
-	default n if SAMA5_OHCI_RHPORT2
-
-config SAMA5_EHCI_RHPORT3
-	bool
-	default y if !SAMA5_OHCI_RHPORT3
-	default n if SAMA5_OHCI_RHPORT3
-
-endif # SAMA5_OHCI && SAMA5_EHCI
-
-if SAMA5_OHCI && !SAMA5_EHCI
-
-config SAMA5_OHCI_RHPORT1
-	bool
+config SAMA5_UHPHS_RHPORT1
+	bool "Use Port A"
 	default y
 	depends on !SAMA5_UDPHS
 
-config SAMA5_OHCI_RHPORT2
-	bool
+config SAMA5_UHPHS_RHPORT2
+	bool "Use Port B"
 	default y
 
-config SAMA5_OHCI_RHPORT3
-	bool
+config SAMA5_UHPHS_RHPORT3
+	bool "Use Port C"
 	default y
 
-endif # SAMA5_OHCI && !SAMA5_EHCI
-
-if !SAMA5_OHCI && SAMA5_EHCI
-
-config SAMA5_EHCI_RHPORT1
-	bool
-	default y
-	depends on !SAMA5_UDPHS
-
-config SAMA5_EHCI_RHPORT2
-	bool
-	default y
-
-config SAMA5_EHCI_RHPORT3
-	bool
-	default y
-
-endif # !SAMA5_OHCI && SAMA5_EHCI
+endif # SAMA5_OHCI || SAMA5_EHCI
 
 endmenu # USB High Speed Host driver option
 endif # SAMA5_UHPHS

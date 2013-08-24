@@ -114,14 +114,14 @@
 /* If UDPHS is enabled, then don't use port A */
 
 #ifdef CONFIG_SAMA5_UDPHS
-#  undef CONFIG_SAMA5_EHCI_RHPORT1
+#  undef CONFIG_SAMA5_UHPHS_RHPORT1
 #endif
 
 /* For now, suppress use of PORTA in any event.  I use that for SAM-BA and
  * would prefer that the board not try to drive VBUS on that port!
  */
 
-#undef CONFIG_SAMA5_EHCI_RHPORT1
+#undef CONFIG_SAMA5_UHPHS_RHPORT1
 
 /* Driver-private Definitions **************************************************/
 
@@ -2548,6 +2548,32 @@ static int sam_ehci_tophalf(int irq, FAR void *context)
 }
 
 /*******************************************************************************
+ * Name: sam_uhphs_interrupt
+ *
+ * Description:
+ *   Common UHPHS interrupt handler.  When both OHCI and EHCI are enabled, EHCI
+ *   owns the interrupt and provides the interrupting event to both the OHCI and
+ *   EHCI controllers.
+ *
+ *******************************************************************************/
+
+#ifdef CONFIG_SAMA5_OHCI
+static int sam_uhphs_interrupt(int irq, FAR void *context)
+{
+   int ohci;
+   int ehci;
+
+   /* Provide the interrupting event to both the EHCI and OHCI top half */
+   ohci = sam_ohci_tophalf(irq, context);
+   ehci = sam_ehci_tophalf(irq, context);
+
+   /* Return OK only if both handlers returned OK */
+
+   return ohci == OK ? ehci : ohci;
+}
+#endif
+
+/*******************************************************************************
  * USB Host Controller Operations
  *******************************************************************************/
 /*******************************************************************************
@@ -2696,23 +2722,49 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
     {
       /* Paragraph 2.3.9:
        *
-       *  "Port Owner ... This bit unconditionally goes to a 0b when the
-       *   Configured bit in the CONFIGFLAG register makes a 0b to 1b
-       *   transition. This bit unconditionally goes to 1b whenever the
-       *   Configured bit is zero.
+       *   "Port Owner ... This bit unconditionally goes to a 0b when the
+       *    Configured bit in the CONFIGFLAG register makes a 0b to 1b
+       *    transition. This bit unconditionally goes to 1b whenever the
+       *    Configured bit is zero.
        *
-       *  "System software uses this field to release ownership of the
-       *   port to a selected host controller (in the event that the
-       *   attached device is not a high-speed device). Software writes
-       *   a one to this bit when the attached device is not a high-speed
-       *   device. A one in this bit means that a companion host
-       *   controller owns and controls the port. ....
+       *   "System software uses this field to release ownership of the
+       *    port to a selected host controller (in the event that the
+       *    attached device is not a high-speed device). Software writes
+       *    a one to this bit when the attached device is not a high-speed
+       *    device. A one in this bit means that a companion host
+       *    controller owns and controls the port. ....
+       *
+       * Paragraph 4.2:
+       *
+       *   "When a port is routed to a companion HC, it remains under the
+       *    control of the companion HC until the device is disconnected
+       *    from the root por ... When a disconnect occurs, the disconnect
+       *    event is detected by both the companion HC port control and the
+       *    EHCI port ownership control. On the event, the port ownership
+       *    is returned immediately to the EHCI controller. The companion
+       *    HC stack detects the disconnect and acknowledges as it would
+       *    in an ordinary standalone implementation. Subsequent connects
+       *    will be detected by the EHCI port register and the process will
+       *    repeat."
        */
-#warning REVISIT
 
       rhport->ep0.speed = EHCI_LOW_SPEED;
-      regval &= EHCI_PORTSC_OWNER;
+      regval |= EHCI_PORTSC_OWNER;
       sam_putreg(regval, &HCOR->portsc[rhpndx]);
+
+#ifndef CONFIG_SAMA5_OHCI
+      /* Give the port to the OHCI controller. Zero is the reset value for
+       * all ports; one makes the corresponding port available to OHCI.
+       */
+
+      regval  = getreg32(SAM_SFR_OHCIICR);
+      regval |= SFR_OHCIICR_RES(rhpndx);
+      putreg32(regval, SAM_SFR_OHCIICR);
+#endif
+
+      /* And return a failure */
+
+      return -EPERM;
     }
   else
     {
@@ -2802,10 +2854,38 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
     }
   else
     {
-      /* Low- or Full- speed device */
+      /* Low- or Full- speed device.  Set the port ownership bit.
+       *
+       * Paragraph 4.2:
+       *
+       *   "When a port is routed to a companion HC, it remains under the
+       *    control of the companion HC until the device is disconnected
+       *    from the root por ... When a disconnect occurs, the disconnect
+       *    event is detected by both the companion HC port control and the
+       *    EHCI port ownership control. On the event, the port ownership
+       *    is returned immediately to the EHCI controller. The companion
+       *    HC stack detects the disconnect and acknowledges as it would
+       *    in an ordinary standalone implementation. Subsequent connects
+       *    will be detected by the EHCI port register and the process will
+       *    repeat."
+       */
 
-      regval &= EHCI_PORTSC_OWNER;
+      regval |= EHCI_PORTSC_OWNER;
       sam_putreg(regval, &HCOR->portsc[rhpndx]);
+
+#ifndef CONFIG_SAMA5_OHCI
+      /* Give the port to the OHCI controller. Zero is the reset value for
+       * all ports; one makes the corresponding port available to OHCI.
+       */
+
+      regval  = getreg32(SAM_SFR_OHCIICR);
+      regval |= SFR_OHCIICR_RES(rhpndx);
+      putreg32(regval, SAM_SFR_OHCIICR);
+#endif
+
+      /* And return a failure */
+
+      return -EPERM;
     }
 
   /* Let the common usbhost_enumerate do all of the real work.  Note that the
@@ -3521,13 +3601,13 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
    */
 
   regval  = getreg32(SAM_SFR_OHCIICR);
-#ifdef CONFIG_SAMA5_EHCI_RHPORT1
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT1
+  regval &= ~SFR_OHCIICR_RES0;
+#endif
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT2
   regval &= ~SFR_OHCIICR_RES1;
 #endif
-#ifdef CONFIG_SAMA5_EHCI_RHPORT2
-  regval &= ~SFR_OHCIICR_RES1;
-#endif
-#ifdef CONFIG_SAMA5_EHCI_RHPORT3
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT3
   regval &= ~SFR_OHCIICR_RES2;
 #endif
   putreg32(regval, SAM_SFR_OHCIICR);
@@ -3767,9 +3847,16 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
     }
 
   /* Interrupt Configuration ***************************************************/
-  /* Attach USB host controller interrupt handler */
+  /* Attach USB host controller interrupt handler.  If OHCI is also enabled,
+   * then we have to use a common UHPHS interrupt handler.
+   */
 
-  if (irq_attach(SAM_IRQ_UHPHS, sam_ehci_tophalf) != 0)
+#ifdef CONFIG_SAMA5_OHCI
+  ret = irq_attach(SAM_IRQ_UHPHS, sam_uhphs_interrupt);
+#else
+  ret = irq_attach(SAM_IRQ_UHPHS, sam_ehci_tophalf);
+#endif
+  if (ret != 0)
     {
       udbg("ERROR: Failed to attach IRQ\n");
       return NULL;
@@ -3781,17 +3868,22 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   sam_putreg(EHCI_HANDLED_INTS, &HCOR->usbintr);
 
-  /* Drive Vbus +5V (the smoke test).  Should be done elsewhere in OTG
-   * mode.
+  /* Drive Vbus +5V (the smoke test)
+   *
+   * REVISIT:
+   * - Should be done elsewhere in OTG mode.
+   * - Can we postpone enabling VBUS to save power?
+   * - Some EHCI implementations require setting the power bit in the
+   *   PORTSC register to enable power.
    */
 
-#ifndef CONFIG_SAMA5_EHCI_RHPORT1
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT1
   sam_usbhost_vbusdrive(SAM_RHPORT1, true);
 #endif
-#ifndef CONFIG_SAMA5_EHCI_RHPORT2
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT2
   sam_usbhost_vbusdrive(SAM_RHPORT2, true);
 #endif
-#ifndef CONFIG_SAMA5_EHCI_RHPORT3
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT3
   sam_usbhost_vbusdrive(SAM_RHPORT3, true);
 #endif
   up_mdelay(50);

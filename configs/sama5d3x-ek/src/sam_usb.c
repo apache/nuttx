@@ -71,6 +71,10 @@
 #  define CONFIG_USBHOST_STACKSIZE 1024
 #endif
 
+#ifdef HAVE_USBDEV
+#  undef CONFIG_SAMA5_UHPHS_RHPORT1
+#endif
+
 /************************************************************************************
  * Private Data
  ************************************************************************************/
@@ -102,12 +106,17 @@ static xcpt_t g_ochandler;
  ************************************************************************************/
 
 #if HAVE_USBHOST
+#ifdef CONFIG_DEBUG_USB
+static int usbhost_waiter(struct usbhost_connection_s *dev, const char *hcistr)
+#else
 static int usbhost_waiter(struct usbhost_connection_s *dev)
+#endif
 {
   bool connected[SAM_OHCI_NRHPORT] = {false, false, false};
   int rhpndx;
+  int ret;
 
-  uvdbg("Running\n");
+  uvdbg("%s Waiter Running\n", hcistr);
   for (;;)
     {
       /* Wait for the device to change state */
@@ -117,8 +126,8 @@ static int usbhost_waiter(struct usbhost_connection_s *dev)
 
       connected[rhpndx] = !connected[rhpndx];
 
-      uvdbg("RHport%d %s\n",
-            rhpndx + 1, connected[rhpndx] ? "connected" : "disconnected");
+      uvdbg("%s RHport%d %s\n",
+            hcistr, rhpndx + 1, connected[rhpndx] ? "connected" : "disconnected");
 
       /* Did we just become connected? */
 
@@ -126,7 +135,12 @@ static int usbhost_waiter(struct usbhost_connection_s *dev)
         {
           /* Yes.. enumerate the newly connected device */
 
-          (void)CONN_ENUMERATE(dev, rhpndx);
+          ret = CONN_ENUMERATE(dev, rhpndx);
+          if (ret < 0)
+            {
+              uvdbg("%s RHport%d CONN_ENUMERATE failed: %d\n", hcistr, rhpndx+1, ret);
+              connected[rhpndx] = false;
+            }
         }
     }
 
@@ -147,7 +161,11 @@ static int usbhost_waiter(struct usbhost_connection_s *dev)
 #ifdef CONFIG_SAMA5_OHCI
 static int ohci_waiter(int argc, char *argv[])
 {
+#ifdef CONFIG_DEBUG_USB
+  return usbhost_waiter(g_ohciconn, "OHCI");
+#else
   return usbhost_waiter(g_ohciconn);
+#endif
 }
 #endif
 
@@ -162,7 +180,11 @@ static int ohci_waiter(int argc, char *argv[])
 #ifdef CONFIG_SAMA5_EHCI
 static int ehci_waiter(int argc, char *argv[])
 {
+#ifdef CONFIG_DEBUG_USB
+  return usbhost_waiter(g_ehciconn, "EHCI");
+#else
   return usbhost_waiter(g_ehciconn);
+#endif
 }
 #endif
 
@@ -244,23 +266,30 @@ void weak_function sam_usbinitialize(void)
 #endif
 
 #ifdef HAVE_USBHOST
-#ifndef HAVE_USBDEV
-  /* Configure Port A to support the USB OHCI/EHCI function only if USB
-   * device is not also supported.
-   */
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT1
+  /* Configure Port A to support the USB OHCI/EHCI function */
 
   sam_configpio(PIO_USBA_VBUS_ENABLE); /* VBUS enable, initially OFF */
 #endif
 
-  /* Configure Ports B and C to support the USB OHCI/EHCI function */
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT2
+  /* Configure Port B to support the USB OHCI/EHCI function */
 
   sam_configpio(PIO_USBB_VBUS_ENABLE); /* VBUS enable, initially OFF */
-  sam_configpio(PIO_USBC_VBUS_ENABLE); /* VBUS enable, initially OFF */
+#endif
 
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT3
+  /* Configure Port C to support the USB OHCI/EHCI function */
+
+  sam_configpio(PIO_USBC_VBUS_ENABLE); /* VBUS enable, initially OFF */
+#endif
+
+#if defined(CONFIG_SAMA5_UHPHS_RHPORT2) || defined(CONFIG_SAMA5_UHPHS_RHPORT3)
   /* Configure Port B/C VBUS overrcurrent detection */
 
   sam_configpio(PIO_USBBC_VBUS_OVERCURRENT); /* VBUS overcurrent */
 #endif
+#endif /* HAVE_USBHOST */
 }
 
 /***********************************************************************************
@@ -364,7 +393,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
   switch (rhport)
     {
     case SAM_RHPORT1:
-#ifdef HAVE_USBDEV
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT1
       udbg("ERROR: RHPort1 is not available in this configuration\n");
       return;
 #else
@@ -373,12 +402,22 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
 #endif
 
     case SAM_RHPORT2:
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT2
+      udbg("ERROR: RHPort2 is not available in this configuration\n");
+      return;
+#else
       pinset = PIO_USBB_VBUS_ENABLE;
       break;
+#endif
 
     case SAM_RHPORT3:
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT3
+      udbg("ERROR: RHPort3 is not available in this configuration\n");
+      return;
+#else
       pinset = PIO_USBC_VBUS_ENABLE;
       break;
+#endif
 
     default:
       udbg("ERROR: RHPort%d is not supported\n", rhport+1);
@@ -407,7 +446,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
  *
  * Description:
  *   Setup to receive an interrupt-level callback if an overcurrent condition is
- *   detected.
+ *   detected on port B or C.
  *
  *   REVISIT: Since this is a common signal, we will need to come up with some way
  *   to inform both EHCI and OHCI drivers when this error occurs.
@@ -423,7 +462,9 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
 #if HAVE_USBHOST
 xcpt_t sam_setup_overcurrent(xcpt_t handler)
 {
-#if defined(CONFIG_SAMA5_PIOD_IRQ)
+#if defined(CONFIG_SAMA5_PIOD_IRQ) && (defined(CONFIG_SAMA5_UHPHS_RHPORT2) || \
+    defined(CONFIG_SAMA5_UHPHS_RHPORT3))
+
   xcpt_t oldhandler;
   irqstate_t flags;
 
@@ -447,11 +488,13 @@ xcpt_t sam_setup_overcurrent(xcpt_t handler)
   /* Return the old button handler (so that it can be restored) */
 
   return oldhandler;
+
 #else
   return NULL;
+
 #endif
 }
-#endif
+#endif /* CONFIG_SAMA5_PIOD_IRQ ... */
 
 /************************************************************************************
  * Name:  sam_usbsuspend
