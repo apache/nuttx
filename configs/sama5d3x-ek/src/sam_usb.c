@@ -393,7 +393,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
   switch (rhport)
     {
     case SAM_RHPORT1:
-#ifdef CONFIG_SAMA5_UHPHS_RHPORT1
+#ifndef CONFIG_SAMA5_UHPHS_RHPORT1
       udbg("ERROR: RHPort1 is not available in this configuration\n");
       return;
 #else
@@ -402,7 +402,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
 #endif
 
     case SAM_RHPORT2:
-#ifdef CONFIG_SAMA5_UHPHS_RHPORT2
+#ifndef CONFIG_SAMA5_UHPHS_RHPORT2
       udbg("ERROR: RHPort2 is not available in this configuration\n");
       return;
 #else
@@ -411,7 +411,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
 #endif
 
     case SAM_RHPORT3:
-#ifdef CONFIG_SAMA5_UHPHS_RHPORT3
+#ifndef CONFIG_SAMA5_UHPHS_RHPORT3
       udbg("ERROR: RHPort3 is not available in this configuration\n");
       return;
 #else
