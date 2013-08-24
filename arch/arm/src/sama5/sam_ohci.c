@@ -1995,6 +1995,7 @@ static void sam_ohci_bottomhalf(void *arg)
   /* Now re-enable interrupts */
 
   sam_putreg(OHCI_INT_MIE, SAM_USBHOST_INTEN);
+  sam_givesem(&g_ohci.exclsem);
 }
 
 /*******************************************************************************
@@ -3264,41 +3265,53 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
 int sam_ohci_tophalf(int irq, FAR void *context)
 {
   uint32_t intst;
-  uint32_t regval;
+  uint32_t inten;
   uint32_t pending;
 
   /* Read Interrupt Status and mask out interrupts that are not enabled. */
 
   intst  = sam_getreg(SAM_USBHOST_INTST);
-  regval = sam_getreg(SAM_USBHOST_INTEN);
-  ullvdbg("INST: %08x INTEN: %08x\n", intst, regval);
+  inten = sam_getreg(SAM_USBHOST_INTEN);
+  ullvdbg("INST: %08x INTEN: %08x\n", intst, inten);
 
-  pending = intst & regval;
-  if (pending != 0)
+#ifdef CONFIG_SAMA5_EHCI
+  /* Check the Master Interrupt Enable bit (MIE).  It this function is called
+   * from the common UHPHS interrupt handler, there might be pending interrupts
+   * but with the overall interstate disabled.  This could never happen if only
+   * OHCI were enabled because we would never get here.
+   */
+
+  if ((inten & OHCI_INT_MIE) != 0)
+#endif
     {
-      /* Schedule interrupt handling work for the high priority worker thread
-       * so that we are not pressed for time and so that we can interrupt with
-       * other USB threads gracefully.
-       *
-       * The worker should be available now because we implement a handshake
-       * by controlling the OHCI interrupts.
-       */
+      /* Mask out the interrupts that are not enabled */
+      pending = intst & inten;
+      if (pending != 0)
+        {
+          /* Schedule interrupt handling work for the high priority worker
+           * thread so that we are not pressed for time and so that we can
+           * interrupt with other USB threads gracefully.
+           *
+           * The worker should be available now because we implement a
+           * handshake by controlling the OHCI interrupts.
+           */
 
-      DEBUGASSERT(work_available(&g_ohci.work));
-      DEBUGVERIFY(work_queue(HPWORK, &g_ohci.work, sam_ohci_bottomhalf,
-                            (FAR void *)pending, 0));
+          DEBUGASSERT(work_available(&g_ohci.work));
+          DEBUGVERIFY(work_queue(HPWORK, &g_ohci.work, sam_ohci_bottomhalf,
+                                 (FAR void *)pending, 0));
 
-      /* Disable further OHCI interrupts so that we do not overrun the work
-       * queue.
-       */
+          /* Disable further OHCI interrupts so that we do not overrun the
+           * work queue.
+           */
 
-      sam_putreg(OHCI_INT_MIE, SAM_USBHOST_INTDIS);
+          sam_putreg(OHCI_INT_MIE, SAM_USBHOST_INTDIS);
 
-      /* Clear all pending status bits by writing the value of the pending
-       * interrupt bits back to the status register.
-       */
+          /* Clear all pending status bits by writing the value of the
+           * pending interrupt bits back to the status register.
+           */
 
-      sam_putreg(intst, SAM_USBHOST_INTST);
+          sam_putreg(intst, SAM_USBHOST_INTST);
+        }
     }
 
   return OK;
