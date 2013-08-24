@@ -1534,7 +1534,8 @@ static int sam_qtd_addbpl(struct sam_qtd_s *qtd, const void *buffer, size_t bufl
       qtd->hw.bpl[ndx] = sam_swap32(physaddr);
 
       /* Get the next buffer pointer (in the case where we will have to transfer
-       * more then on 4KB chunks.
+       * more then one chunk).  This buffer must be aligned to a 4KB address
+       * boundary.
        */
 
       next = (physaddr + 4096) & ~4095;
@@ -2675,6 +2676,51 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 
   usleep(100*1000);
 
+  /* Paragraph 2.3.9:
+   *
+   *  "Line Status ... These bits reflect the current logical levels of the
+   *   D+ (bit 11) and D- (bit 10) signal lines. These bits are used for
+   *   detection of low-speed USB devices prior to the port reset and enable
+   *   sequence. This field is valid only when the port enable bit is zero
+   *   and the current connect status bit is set to a one."
+   *
+   *   Bits[11:10] USB State Interpretation
+   *   ----------- --------- --------------
+   *   00b         SE0       Not Low-speed device, perform EHCI reset
+   *   10b         J-state   Not Low-speed device, perform EHCI reset
+   *   01b         K-state   Low-speed device, release ownership of port
+   */
+
+  regval = sam_getreg(&HCOR->portsc[rhpndx]);
+  if ((regval & EHCI_PORTSC_LSTATUS_MASK) == EHCI_PORTSC_LSTATUS_KSTATE)
+    {
+      /* Paragraph 2.3.9:
+       *
+       *  "Port Owner ... This bit unconditionally goes to a 0b when the
+       *   Configured bit in the CONFIGFLAG register makes a 0b to 1b
+       *   transition. This bit unconditionally goes to 1b whenever the
+       *   Configured bit is zero.
+       *
+       *  "System software uses this field to release ownership of the
+       *   port to a selected host controller (in the event that the
+       *   attached device is not a high-speed device). Software writes
+       *   a one to this bit when the attached device is not a high-speed
+       *   device. A one in this bit means that a companion host
+       *   controller owns and controls the port. ....
+       */
+#warning REVISIT
+
+      rhport->ep0.speed = EHCI_LOW_SPEED;
+      regval &= EHCI_PORTSC_OWNER;
+      sam_putreg(regval, &HCOR->portsc[rhpndx]);
+    }
+  else
+    {
+      /* Assume full-speed for now */
+
+      rhport->ep0.speed = EHCI_FULL_SPEED;
+    }
+
   /* Put the root hub port in reset.
    *
    * Paragraph 2.3.9:
@@ -2729,6 +2775,38 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 
   while ((sam_getreg(regaddr) & EHCI_PORTSC_RESET) != 0);
   usleep(200*1000);
+
+  /* Paragraph 4.2.2:
+   *
+   *  "... The reset process is actually complete when software reads a zero
+   *   in the PortReset bit. The EHCI Driver checks the PortEnable bit in the
+   *   PORTSC register. If set to a one, the connected device is a high-speed
+   *   device and EHCI Driver (root hub emulator) issues a change report to the
+   *   hub driver and the hub driver continues to enumerate the attached device."
+   *
+   *  "At the time the EHCI Driver receives the port reset and enable request
+   *   the LineStatus bits might indicate a low-speed device. Additionally,
+   *   when the port reset process is complete, the PortEnable field may
+   *   indicate that a full-speed device is attached. In either case the EHCI
+   *   driver sets the PortOwner bit in the PORTSC register to a one to
+   *   release port ownership to a companion host controller."
+   */
+#warning REVISIT
+
+  regval = sam_getreg(&HCOR->portsc[rhpndx]);
+  if ((regval & EHCI_PORTSC_PE) != 0)
+    {
+      /* High speed device */
+
+      rhport->ep0.speed = EHCI_HIGH_SPEED;
+    }
+  else
+    {
+      /* Low- or Full- speed device */
+
+      regval &= EHCI_PORTSC_OWNER;
+      sam_putreg(regval, &HCOR->portsc[rhpndx]);
+    }
 
   /* Let the common usbhost_enumerate do all of the real work.  Note that the
    * FunctionAddress (USB address) is set to the root hub port number + 1
@@ -2818,6 +2896,7 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
                        const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
 {
+  struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_epinfo_s *epinfo;
 
   /* Sanity check.  NOTE that this method should only be called if a device is
@@ -2847,11 +2926,12 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
   epinfo->epno      = epdesc->addr;
   epinfo->dirin     = epdesc->in;
   epinfo->devaddr   = epdesc->funcaddr;
-  epinfo->xfrtype   = epdesc->xfrtype;
 #ifndef CONFIG_USBHOST_INT_DISABLE
   epinfo->interval  = epdesc->interval;
 #endif
   epinfo->maxpacket = epdesc->mxpacketsize;
+  epinfo->xfrtype   = epdesc->xfrtype;
+  epinfo->speed     = rhport->ep0.speed;
   sem_init(&epinfo->iocsem, 0, 0);
 
   /* Success.. return an opaque reference to the endpoint information structure
