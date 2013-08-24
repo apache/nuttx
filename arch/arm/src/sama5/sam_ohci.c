@@ -50,6 +50,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/ohci.h>
 #include <nuttx/usb/usbhost.h>
@@ -70,10 +71,17 @@
 #include "chip/sam_sfr.h"
 #include "chip/sam_ohci.h"
 
+#ifdef CONFIG_SAMA5_OHCI
+
 /*******************************************************************************
  * Definitions
  *******************************************************************************/
 /* Configuration ***************************************************************/
+/* Pre-requisites */
+
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error Work queue support is required (CONFIG_SCHED_WORKQUEUE)
+#endif
 
 /* Configurable number of user endpoint descriptors (EDs).  This number excludes
  * the control endpoint that is always allocated.
@@ -120,14 +128,14 @@
 /* If UDPHS is enabled, then don't use port A */
 
 #ifdef CONFIG_SAMA5_UDPHS
-#  undef CONFIG_SAMA5_OHCI_RHPORT1
+#  undef CONFIG_SAMA5_UHPHS_RHPORT1
 #endif
 
 /* For now, suppress use of PORTA in any event.  I use that for SAM-BA and
  * would prefer that the board not try to drive VBUS on that port!
  */
 
-#undef CONFIG_SAMA5_OHCI_RHPORT1
+#undef CONFIG_SAMA5_UHPHS_RHPORT1
 
 /* Debug */
 
@@ -235,6 +243,7 @@ struct sam_ohci_s
 #endif
   sem_t exclsem;               /* Support mutually exclusive access */
   sem_t rhssem;                /* Semaphore to wait Writeback Done Head event */
+  struct work_s work;          /* Supports interrupt bottom half */
 
   /* Root hub ports */
 
@@ -362,9 +371,9 @@ static int  sam_ctrltd(struct sam_rhport_s *rhport, uint32_t dirpid,
 
 /* Interrupt handling **********************************************************/
 
-static void sam_rhsc_interrupt(void);
-static void sam_wdh_interrupt(void);
-static int  sam_ohci_interrupt(int irq, FAR void *context);
+static void sam_rhsc_bottomhalf(void);
+static void sam_wdh_bottomhalf(void);
+static void sam_ohci_bottomhalf(void *arg);
 
 /* USB host controller operations **********************************************/
 
@@ -1681,14 +1690,14 @@ static int sam_ctrltd(struct sam_rhport_s *rhport, uint32_t dirpid,
 }
 
 /*******************************************************************************
- * Name: sam_rhsc_interrupt
+ * Name: sam_rhsc_bottomhalf
  *
  * Description:
  *   OHCI root hub status change interrupt handler
  *
  *******************************************************************************/
 
-static void sam_rhsc_interrupt(void)
+static void sam_rhsc_bottomhalf(void)
 {
   struct sam_rhport_s *rhport;
   uint32_t regaddr;
@@ -1813,14 +1822,14 @@ static void sam_rhsc_interrupt(void)
 }
 
 /*******************************************************************************
- * Name: sam_wdh_interrupt
+ * Name: sam_wdh_bottomhalf
  *
  * Description:
  *   OHCI write done head interrupt handler
  *
  *******************************************************************************/
 
-static void sam_wdh_interrupt(void)
+static void sam_wdh_bottomhalf(void)
 {
   struct sam_eplist_s *eplist;
   struct sam_gtd_s *td;
@@ -1913,82 +1922,79 @@ static void sam_wdh_interrupt(void)
 }
 
 /*******************************************************************************
- * Name: sam_ohci_interrupt
+ * Name: sam_ohci_bottomhalf
  *
  * Description:
- *   OHCI interrupt handler
+ *   OHCI interrupt bottom half.  This function runs on the high priority worker
+ *   thread and was xcheduled when the last interrupt occurred.  The set of
+ *   pending interrupts is provided as the argument.  OHCI interrupts were
+ *   disabled when this function is scheduled so no further interrupts can
+ *   occur until this work re-enables OHCI interrupts
  *
  *******************************************************************************/
 
-static int sam_ohci_interrupt(int irq, FAR void *context)
+static void sam_ohci_bottomhalf(void *arg)
 {
-  uint32_t intst;
-  uint32_t pending;
-  uint32_t regval;
+  uint32_t pending = (uint32_t)arg;
 
-  /* Read Interrupt Status and mask out interrupts that are not enabled. */
+  /* We need to have exclusive access to the EHCI data structures.  Waiting here
+   * is not a good thing to do on the worker thread, but there is no real option
+   * (other than to reschedule and delay).
+   */
 
-  intst  = sam_getreg(SAM_USBHOST_INTST);
-  regval = sam_getreg(SAM_USBHOST_INTEN);
-  ullvdbg("INST: %08x INTEN: %08x\n", intst, regval);
+  sam_takesem(&g_ohci.exclsem);
 
-  pending = intst & regval;
-  if (pending != 0)
+  /* Root hub status change interrupt */
+
+  if ((pending & OHCI_INT_RHSC) != 0)
     {
-      /* Root hub status change interrupt */
+      /* Handle root hub status change on each root port */
 
-      if ((pending & OHCI_INT_RHSC) != 0)
-        {
-          /* Handle root hub status change on each root port */
-
-          ullvdbg("Root Hub Status Change\n");
-          sam_rhsc_interrupt();
-        }
-
-      /* Writeback Done Head interrupt */
-
-      if ((pending & OHCI_INT_WDH) != 0)
-        {
-          /* The host controller just wrote the list of finished TDs into the HCCA
-           * done head.  This may include multiple packets that were transferred
-           * in the preceding frame.
-           */
-
-          ullvdbg("Writeback Done Head interrupt\n");
-          sam_wdh_interrupt();
-        }
-
-#ifdef CONFIG_DEBUG_USB
-      if ((pending & SAM_DEBUG_INTS) != 0)
-        {
-          if ((pending & OHCI_INT_UE) != 0)
-            {
-              /* An unrecoverable error occurred.  Unrecoverable errors
-               * are usually the consequence of bad descriptor contents
-               * or DMA errors.
-               *
-               * Treat this like a normal write done head interrupt.  We
-               * just want to see if there is any status information writen
-               * to the descriptors (and the normal write done head
-               * interrupt will not be occurring).
-               */
-
-              ulldbg("ERROR: Unrecoverable error. INTST: %08x\n", intst);
-              sam_wdh_interrupt();
-            }
-          else
-            {
-              ulldbg("ERROR: Unhandled interrupts INTST: %08x\n", intst);
-            }
-        }
-#endif
-
-      /* Clear interrupt status register */
-
-      sam_putreg(intst, SAM_USBHOST_INTST);
+      ullvdbg("Root Hub Status Change\n");
+      sam_rhsc_bottomhalf();
     }
 
-  return OK;
+  /* Writeback Done Head interrupt */
+
+  if ((pending & OHCI_INT_WDH) != 0)
+    {
+      /* The host controller just wrote the list of finished TDs into the HCCA
+       * done head.  This may include multiple packets that were transferred
+       * in the preceding frame.
+       */
+
+      ullvdbg("Writeback Done Head interrupt\n");
+      sam_wdh_bottomhalf();
+    }
+
+#ifdef CONFIG_DEBUG_USB
+  if ((pending & SAM_DEBUG_INTS) != 0)
+    {
+      if ((pending & OHCI_INT_UE) != 0)
+        {
+          /* An unrecoverable error occurred.  Unrecoverable errors
+           * are usually the consequence of bad descriptor contents
+           * or DMA errors.
+           *
+           * Treat this like a normal write done head interrupt.  We
+           * just want to see if there is any status information writen
+           * to the descriptors (and the normal write done head
+           * interrupt will not be occurring).
+           */
+
+          ulldbg("ERROR: Unrecoverable error. pending: %08x\n", pending);
+          sam_wdh_bottomhalf();
+        }
+      else
+        {
+          ulldbg("ERROR: Unhandled interrupts pending: %08x\n", pending);
+        }
+    }
+#endif
+
+  /* Now re-enable interrupts */
+
+  sam_putreg(OHCI_INT_MIE, SAM_USBHOST_INTEN);
 }
 
 /*******************************************************************************
@@ -2040,11 +2046,25 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
       for (rhpndx = 0; rhpndx < SAM_OHCI_NRHPORT; rhpndx++)
         {
+#ifndef CONFIG_SAMA5_EHCI
+          /* If a device is no longer connected, return the port to the EHCI
+           * controller.  Zero is the reset value for all ports; one makes
+           * the corresponding port available to OHCI.
+           */
+
+          if (!g_ohci.rhport[rhpndx].connected)
+            {
+              regval  = getreg32(SAM_SFR_OHCIICR);
+              regval &= ~SFR_OHCIICR_RES(rhpndx);
+              putreg32(regval, SAM_SFR_OHCIICR);
+            }
+#endif
+
           /* Has the connection state changed on the RH port? */
 
           if (g_ohci.rhport[rhpndx].connected != connected[rhpndx])
             {
-              /* Yes.. Return the RH port number */
+              /* Yes.. Return the RH port number ;to inform the call which */
 
               irqrestore(flags);
 
@@ -2864,6 +2884,18 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
           sam_putreg(regval, SAM_USBHOST_CMDST);
         }
 
+      /* Release the OHCI semaphore while we wait.  Other threads need the
+       * opportunity to access the EHCI resources while we wait.
+       *
+       * REVISIT:  Is this safe?  NO.  This is a bug and needs rethinking.
+       * We need to lock all of the port-resources (not EHCI common) until
+       * the transfer is complete.  But we can't use the common OHCI exclsem
+       * or we will deadlock while waiting (because the working thread that
+       * wakes this thread up needs the exclsem).
+       */
+#warning REVISIT
+      sam_givesem(&g_ohci.exclsem);
+
       /* Wait for the Writeback Done Head interrupt  Loop to handle any false
        * alarm semaphore counts.
        */
@@ -2872,6 +2904,12 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
         {
           sam_takesem(&eplist->wdhsem);
         }
+
+      /* Re-aquire the ECHI semaphore.  The caller expects to be holding
+       * this upon return.
+       */
+
+      sam_takesem(&g_ohci.exclsem);
 
       /* Invalidate the D cache to force the ED to be reloaded from RAM */
 
@@ -3029,23 +3067,27 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
   /* "One transceiver is shared with the USB High Speed Device (port A). The
    *  selection between Host Port A and USB Device is controlled by the UDPHS
    *  enable bit (EN_UDPHS) located in the UDPHS_CTRL control register."
-   *
-   * Make all three ports usable for OHCI unless the high speed device is
+   */
+
+#ifndef CONFIG_SAMA5_EHCI
+  /* Make all three ports usable for OHCI unless the high speed device is
    * enabled; then let the device manage port zero.  Zero is the reset
    * value for all ports; one makes the corresponding port available to OHCI.
    */
 
   regval  = getreg32(SAM_SFR_OHCIICR);
-#ifdef CONFIG_SAMA5_OHCI_RHPORT1
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT1
+  regval |= SFR_OHCIICR_RES0;
+#endif
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT2
   regval |= SFR_OHCIICR_RES1;
 #endif
-#ifdef CONFIG_SAMA5_OHCI_RHPORT2
-  regval |= SFR_OHCIICR_RES1;
-#endif
-#ifdef CONFIG_SAMA5_OHCI_RHPORT3
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT3
   regval |= SFR_OHCIICR_RES2;
 #endif
   putreg32(regval, SAM_SFR_OHCIICR);
+#endif
+
   irqrestore(flags);
 
   /* Note that no pin configuration is required.  All USB HS pins have
@@ -3148,27 +3190,32 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
   /* Enable OHCI interrupts */
 
-  sam_putreg((SAM_ALL_INTS|OHCI_INT_MIE), SAM_USBHOST_INTEN);
+  sam_putreg((SAM_ALL_INTS | OHCI_INT_MIE), SAM_USBHOST_INTEN);
 
-  /* Attach USB host controller interrupt handler */
+#ifndef CONFIG_SAMA5_EHCI
+  /* Attach USB host controller interrupt handler.  If ECHI is enabled,
+   * then it will manage the shared interrupt. */
 
-  if (irq_attach(SAM_IRQ_UHPHS, sam_ohci_interrupt) != 0)
+  if (irq_attach(SAM_IRQ_UHPHS, sam_ohci_tophalf) != 0)
     {
       udbg("Failed to attach IRQ\n");
       return NULL;
     }
 
-  /* Drive Vbus +5V (the smoke test).  Should be done elsewhere in OTG
-   * mode.
+  /* Drive Vbus +5V (the smoke test).
+   *
+   * REVISIT:
+   * - Should be done elsewhere in OTG mode.
+   * - Can we postpone enabling VBUS to save power?
    */
 
-#ifndef CONFIG_SAMA5_OHCI_RHPORT1
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT1
   sam_usbhost_vbusdrive(SAM_RHPORT1, true);
 #endif
-#ifndef CONFIG_SAMA5_OHCI_RHPORT2
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT2
   sam_usbhost_vbusdrive(SAM_RHPORT2, true);
 #endif
-#ifndef CONFIG_SAMA5_OHCI_RHPORT3
+#ifdef CONFIG_SAMA5_UHPHS_RHPORT3
   sam_usbhost_vbusdrive(SAM_RHPORT3, true);
 #endif
   up_mdelay(50);
@@ -3187,9 +3234,14 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
             i+1, g_ohci.rhport[i].connected ? "YES" : "NO");
     }
 
-  /* Enable interrupts at the interrupt controller */
+  /* Enable interrupts at the interrupt controller.  If ECHI is enabled,
+   * then it will manage the shared interrupt.
+   */
 
   up_enable_irq(SAM_IRQ_UHPHS); /* enable USB interrupt */
+
+#endif /* CONFIG_SAMA5_EHCI */
+
   uvdbg("USB OHCI Initialized\n");
 
   /* Initialize and return the connection interface */
@@ -3198,3 +3250,58 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
   g_ohciconn.enumerate = sam_enumerate;
   return &g_ohciconn;
 }
+
+/*******************************************************************************
+ * Name: sam_ohci_tophalf
+ *
+ * Description:
+ *   OHCI "Top Half" interrupt handler.  If both EHCI and OHCI are enabled, then
+ *   EHCI will manage the common UHPHS interrupt and will forward the interrupt
+ *   event to this function.
+ *
+ *******************************************************************************/
+
+int sam_ohci_tophalf(int irq, FAR void *context)
+{
+  uint32_t intst;
+  uint32_t regval;
+  uint32_t pending;
+
+  /* Read Interrupt Status and mask out interrupts that are not enabled. */
+
+  intst  = sam_getreg(SAM_USBHOST_INTST);
+  regval = sam_getreg(SAM_USBHOST_INTEN);
+  ullvdbg("INST: %08x INTEN: %08x\n", intst, regval);
+
+  pending = intst & regval;
+  if (pending != 0)
+    {
+      /* Schedule interrupt handling work for the high priority worker thread
+       * so that we are not pressed for time and so that we can interrupt with
+       * other USB threads gracefully.
+       *
+       * The worker should be available now because we implement a handshake
+       * by controlling the OHCI interrupts.
+       */
+
+      DEBUGASSERT(work_available(&g_ohci.work));
+      DEBUGVERIFY(work_queue(HPWORK, &g_ohci.work, sam_ohci_bottomhalf,
+                            (FAR void *)pending, 0));
+
+      /* Disable further OHCI interrupts so that we do not overrun the work
+       * queue.
+       */
+
+      sam_putreg(OHCI_INT_MIE, SAM_USBHOST_INTDIS);
+
+      /* Clear all pending status bits by writing the value of the pending
+       * interrupt bits back to the status register.
+       */
+
+      sam_putreg(intst, SAM_USBHOST_INTST);
+    }
+
+  return OK;
+}
+
+#endif /* CONFIG_SAMA5_OHCI */

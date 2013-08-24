@@ -77,9 +77,10 @@
 
 /* OHCI Interrupt Configuration Register */
 
-#define SFR_OHCIICR_RES0            (1 << 0)  /* Bit 0:  USB port 0 reset */
-#define SFR_OHCIICR_RES1            (1 << 1)  /* Bit 1:  USB port 1 reset */
-#define SFR_OHCIICR_RES2            (1 << 2)  /* Bit 2:  USB port 2 reset */
+#define SFR_OHCIICR_RES(n)          (1 << (n)) /* Bit 0:  USB port n reset, n=0..2 */
+#  define SFR_OHCIICR_RES0          (1 << 0)  /* Bit 0:  USB port 0 reset */
+#  define SFR_OHCIICR_RES1          (1 << 1)  /* Bit 1:  USB port 1 reset */
+#  define SFR_OHCIICR_RES2          (1 << 2)  /* Bit 2:  USB port 2 reset */
 #define SFR_OHCIICR_ARIE            (1 << 4)  /* Bit 4:  OHCI asynchronous resume interrupt enable */
 #define SFR_OHCIICR_APPSTART        (0)       /* Bit 5:  Reserved, must write 0 */
 #define SFR_OHCIICR_UDPPUDIS        (1 << 23) /* Bit 23: USB device pull-up disable */
