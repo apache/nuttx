@@ -3872,7 +3872,9 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
    *
    * REVISIT:
    * - Should be done elsewhere in OTG mode.
-   * - Can we postpone enabling VBUS to save power?
+   * - Can we postpone enabling VBUS to save power?  I think it can be
+   *   done in sam_enumerate() and can probably be disabled when the
+   *   port is disconnected.
    * - Some EHCI implementations require setting the power bit in the
    *   PORTSC register to enable power.
    */
