@@ -2798,7 +2798,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
   regaddr = &HCOR->portsc[rhport->rhpndx];
   regval  = sam_getreg(regaddr);
   regval &= ~EHCI_PORTSC_PE;
-  regval &= EHCI_PORTSC_RESET;
+  regval |= EHCI_PORTSC_RESET;
   sam_putreg(regval, regaddr);
 
   /* USB 2.0 "Root hubs must provide an aggregate reset period of at least
