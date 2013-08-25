@@ -1,9 +1,8 @@
-/************************************************************************************
- * configs/olimex-stm32-p107/src/up_boot.c
- * arch/arm/src/board/up_boot.c
+/******************************************************************************
+ * configs/olimex-stm32-p107/src/p107-internal.h
  *
- *   Copyright (C) 2009, 2012 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2013 Max Holtzberg. All rights reserved.
+ *   Author: Max Holtzberg <mholtzberg@uvc-ingenieure.de>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,52 +31,58 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ******************************************************************************/
+#ifndef __CONFIGS_OLIMEX_STM32_P107_SRC_INTERNAL_H
+#define __CONFIGS_OLIMEX_STM32_P107_SRC_INTERNAL_H
 
-/************************************************************************************
+/******************************************************************************
  * Included Files
- ************************************************************************************/
+ ******************************************************************************/
 
 #include <nuttx/config.h>
-#include <debug.h>
-#include <arch/board/board.h>
+#include <nuttx/compiler.h>
+#include <stdint.h>
 
-#include "up_arch.h"
-#include "p107-internal.h"
+/******************************************************************************
+ * Definitions
+ ******************************************************************************/
 
-/************************************************************************************
- * Pre-processor Definitions
- ************************************************************************************/
+/* ENCX24J600
+ *
+ * --- ------ -------------- ---------------------------------------------------
+ * PIN NAME   SIGNAL         NOTES
+ * --- ------ -------------- ---------------------------------------------------
+ *
+ * 54  PB15   PB15-CS_UEXT   ENCX24J600 #CS
+ * 78  PC10   PC10-SPI3-SCK  ENCX24J600 SCK
+ * 79  PC11   PC11-SPI3-MISO ENCX24J600 MISO
+ * 80  PC12   PC12-SPI3-MOSI ENCX24J600 MOSI
+ * 95  PB8    PB8            ENCX24J600 #Interrupt
+ */
 
-/************************************************************************************
- * Private Functions
- ************************************************************************************/
+
+#ifdef CONFIG_ENCX24J600
+#  define GPIO_ENCX24J600_CS    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz| \
+                                 GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN15)
+#  define GPIO_ENCX24J600_INTR  (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_MODE_INPUT| \
+                                 GPIO_EXTI|GPIO_PORTB|GPIO_PIN8)
+#endif
+
+#ifndef __ASSEMBLY__
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_boardinitialize
+ * Name: stm32_spiinitialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Called to configure SPI chip select GPIO pins for the M3 Wildfire board.
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void)
-{
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spiinitialize() has been brought into the link.
-   */
+void weak_function stm32_spiinitialize(void);
 
-#if defined(CONFIG_STM32_SPI3)
-  if (stm32_spiinitialize)
-    {
-      stm32_spiinitialize();
-    }
-#endif
-
-}
+#endif  /* __ASSEMBLY__ */
+#endif /* __CONFIGS_OLIMEX_STM32_P107_SRC_INTERNAL_H */

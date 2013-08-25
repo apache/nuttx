@@ -37,13 +37,17 @@
 
 CFLAGS		+= -I$(TOPDIR)/sched
 
-ASRCS		= 
+ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= up_boot.c
+CSRCS		= up_boot.c up_spi.c
 
 ifeq ($(CONFIG_CAN),y)
 CSRCS		+= up_can.c
+endif
+
+ifeq ($(CONFIG_ENCX24J600),y)
+CSRCS		+= up_encx24j600.c
 endif
 
 COBJS		= $(CSRCS:.c=$(OBJEXT))
