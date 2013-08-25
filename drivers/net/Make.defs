@@ -51,6 +51,10 @@ ifeq ($(CONFIG_ENC28J60),y)
   CSRCS += enc28j60.c
 endif
 
+ifeq ($(CONFIG_ENCX24J600),y)
+  CSRCS += encx24j600.c
+endif
+
 ifeq ($(CONFIG_NET_VNET),y)
   CSRCS += vnet.c
 endif

@@ -5445,5 +5445,8 @@
 	  From Max Holtzberg (2013-8-25).
 	* arch/arm/src/sama5/sam_ohci.c:  SAMA5 OHCI is again functional by
 	  itself after all of the changes to integrate with EHCI. (2013-8-25).
-
-
+	* drivers/net/encx24j600.c/.h and include/nuttx/net/encx24j600.h: 
+	  Support the Microchip ENCX24J600 Ethernet driver from Max Holtberg
+	  (2013-8-25).
+	* configs/olimex-stm32-p107:  Incorporate ENCX24J600 support for the
+	  Olimex STM32 P107 board.  From Max Holtzberg (2013-8-25).

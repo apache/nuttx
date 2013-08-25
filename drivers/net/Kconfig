@@ -16,7 +16,7 @@ config NET_CS89x0
 	depends on EXPERIMENTAL
 	---help---
 	Under construction -- do not use
-	
+
 config ENC28J60
 	bool "Microchip ENC28J60 support"
 	default n
@@ -79,6 +79,62 @@ config ENC28J60_REGDEBUG
 
 endif
 
+config ENCX24J600
+	bool "Microchip ENCX24J600 support"
+	default n
+	select SPI
+	---help---
+		References:
+		ENC424J600/624J600 Data Sheet Stand-Alone 10/100 Ethernet Controller
+		with SPI or Parallel Interface DS39935B, 2009 Microchip Technology Inc.
+
+if ENCX24J600
+config ENC28J60_NINTERFACES
+	int "Number of physical ENCX24J600"
+	default 1
+	range 1,1
+	---help---
+		Specifies the number of physical ENCX24J600
+		devices that will be supported.
+
+config ENCX24J600_SPIMODE
+	int "SPI mode"
+	default 0
+	---help---
+		Controls the SPI mode.  The ENCX24J600 spec says that it supports SPI
+		mode 0,0 only: "The implementation used on this device supports SPI
+		mode 0,0 only. In addition, the SPI port requires that SCK be at Idle
+		in a low state; selectable clock polarity is not supported."
+		However, sometimes you need to tinker with these things.
+
+config ENCX24J600_FREQUENCY
+	int "SPI frequency"
+	default 14000000
+	---help---
+		Define to use a different bus frequency
+
+config ENCX24J600_STATS
+	bool "Network statistics support"
+	default n
+	---help---
+		Collect network statistics
+
+config ENCX24J600_DUMPPACKET
+	bool "Dump Packets"
+	default n
+	---help---
+		If selected, the ENCX24J600 driver  will dump the contents of each
+		packet to the console.
+
+config ENCX24J600_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG && DEBUG_NET
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG and DEBUG_NET.
+
+endif
+
 config NET_E1000
 	bool "E1000 support"
 	default n
@@ -86,7 +142,7 @@ config NET_E1000
 config NET_SLIP
 	bool "SLIP (serial line) support"
 	default n
-	---help---	
+	---help---
 		Reference: RFC 1055
 
 config NET_VNET
