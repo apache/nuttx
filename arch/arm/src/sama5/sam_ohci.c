@@ -1661,7 +1661,19 @@ static int sam_ctrltd(struct sam_rhport_s *rhport, uint32_t dirpid,
       regval |= OHCI_CMDST_CLF;
       sam_putreg(regval, SAM_USBHOST_CMDST);
 
-      /* Wait for the Writeback Done Head interrupt.  Loop to handle any false
+      /* Release the OHCI semaphore while we wait.  Other threads need the
+       * opportunity to access the EHCI resources while we wait.
+       *
+       * REVISIT:  Is this safe?  NO.  This is a bug and needs rethinking.
+       * We need to lock all of the port-resources (not EHCI common) until
+       * the transfer is complete.  But we can't use the common OHCI exclsem
+       * or we will deadlock while waiting (because the working thread that
+       * wakes this thread up needs the exclsem).
+       */
+#warning REVISIT
+      sam_givesem(&g_ohci.exclsem);
+
+      /* Wait for the Writeback Done Head interrupt  Loop to handle any false
        * alarm semaphore counts.
        */
 
@@ -1669,6 +1681,12 @@ static int sam_ctrltd(struct sam_rhport_s *rhport, uint32_t dirpid,
         {
           sam_takesem(&eplist->wdhsem);
         }
+
+      /* Re-aquire the ECHI semaphore.  The caller expects to be holding
+       * this upon return.
+       */
+
+      sam_takesem(&g_ohci.exclsem);
 
       /* Check the TD completion status bits */
 
