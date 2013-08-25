@@ -1,5 +1,5 @@
 /****************************************************************************
- * rm/romfs/fs_romfsutil.h
+ * rm/romfs/fs_romfsutil.c
  *
  *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -97,7 +97,7 @@ static inline uint32_t romfs_swap32(uint32_t value)
  * Name: romfs_devread32
  *
  * Desciption:
- *   Read the big-endian 32-bit value from the mount device buffer 
+ *   Read the big-endian 32-bit value from the mount device buffer
  *
  * Assumption:
  *   All values are aligned to 32-bit boundaries
@@ -126,8 +126,9 @@ static uint32_t romfs_devread32(struct romfs_mountpt_s *rm, int ndx)
  *
  ****************************************************************************/
 
-static inline int romfs_checkentry(struct romfs_mountpt_s *rm, uint32_t offset,
-                                   const char *entryname, int entrylen,
+static inline int romfs_checkentry(struct romfs_mountpt_s *rm,
+                                   uint32_t offset, const char *entryname,
+                                   int entrylen,
                                    struct romfs_dirinfo_s *dirinfo)
 {
   char name[NAME_MAX+1];
@@ -182,6 +183,7 @@ static inline int romfs_checkentry(struct romfs_mountpt_s *rm, uint32_t offset,
               dirinfo->rd_dir.fr_curroffset  = offset;
               dirinfo->rd_size               = size;
             }
+
           dirinfo->rd_next                   = next;
           return OK;
         }
@@ -434,6 +436,7 @@ int romfs_hwread(struct romfs_mountpt_s *rm, uint8_t *buffer, uint32_t sector,
             }
         }
     }
+
   return ret;
 }
 
@@ -445,7 +448,8 @@ int romfs_hwread(struct romfs_mountpt_s *rm, uint8_t *buffer, uint32_t sector,
  *
  ****************************************************************************/
 
-int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf, uint32_t sector)
+int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf,
+                        uint32_t sector)
 {
   int ret;
 
@@ -609,7 +613,7 @@ int romfs_fsconfigure(struct romfs_mountpt_s *rm)
 
   /* and return success */
 
-  rm->rm_mounted      = true;
+  rm->rm_mounted    = true;
   return OK;
 }
 
@@ -707,8 +711,8 @@ int romfs_checkmount(struct romfs_mountpt_s *rm)
  *
  ****************************************************************************/
 
-int romfs_finddirentry(struct romfs_mountpt_s *rm, struct romfs_dirinfo_s *dirinfo,
-                       const char *path)
+int romfs_finddirentry(struct romfs_mountpt_s *rm,
+                       struct romfs_dirinfo_s *dirinfo, const char *path)
 {
   const char *entryname;
   const char *terminator;
@@ -806,8 +810,9 @@ int romfs_finddirentry(struct romfs_mountpt_s *rm, struct romfs_dirinfo_s *dirin
  *
  ****************************************************************************/
 
-int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32_t offset, uint32_t *poffset,
-                        uint32_t *pnext, uint32_t *pinfo, uint32_t *psize)
+int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32_t offset,
+                        uint32_t *poffset, uint32_t *pnext, uint32_t *pinfo,
+                        uint32_t *psize)
 {
   uint32_t save;
   uint32_t next;
@@ -846,6 +851,7 @@ int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32_t offset, uint32_t *p
   *pnext = (save & RFNEXT_OFFSETMASK) | (next & RFNEXT_ALLMODEMASK);
   *pinfo = romfs_devread32(rm, ndx + ROMFS_FHDR_INFO);
   *psize = romfs_devread32(rm, ndx + ROMFS_FHDR_SIZE);
+
   return OK;
 }
 
@@ -857,7 +863,8 @@ int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32_t offset, uint32_t *p
  *
  ****************************************************************************/
 
-int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32_t offset, char *pname)
+int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32_t offset,
+                        char *pname)
 {
   int16_t  ndx;
   uint16_t namelen;
@@ -873,7 +880,7 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32_t offset, char *pname
     {
       /* Read the sector into memory */
 
-      ndx = romfs_devcacheread(rm, offset);
+      ndx = romfs_devcacheread(rm, offset + namelen);
       if (ndx < 0)
         {
           return ndx;
@@ -924,7 +931,8 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32_t offset, char *pname
  *
  ****************************************************************************/
 
-int romfs_datastart(struct romfs_mountpt_s *rm, uint32_t offset, uint32_t *start)
+int romfs_datastart(struct romfs_mountpt_s *rm, uint32_t offset,
+                    uint32_t *start)
 {
   int16_t ndx;
   int     ret;
@@ -971,4 +979,3 @@ int romfs_datastart(struct romfs_mountpt_s *rm, uint32_t offset, uint32_t *start
 
   return -EINVAL; /* Won't get here */
 }
-

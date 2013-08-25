@@ -5450,3 +5450,7 @@
 	  (2013-8-25).
 	* configs/olimex-stm32-p107:  Incorporate ENCX24J600 support for the
 	  Olimex STM32 P107 board.  From Max Holtzberg (2013-8-25).
+	* fs/romfs/fs_romfsutil.c:  Fix an error where long (>15) file names
+	  were read incorrectly from a ROMFS file system.  From Mike Smit
+	  (2013-8-25).
+
