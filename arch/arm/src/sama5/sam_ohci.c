@@ -1035,7 +1035,7 @@ static inline int sam_addinted(const FAR struct usbhost_epdesc_s *epdesc,
         }
     }
 
-  uvdbg("min interval: %d offset: %d\n", interval, offset);
+  uvdbg("Min interval: %d offset: %d\n", interval, offset);
 
   /* Get the (physical) head of the first of the duplicated entries.  The
    * first offset entry is always guaranteed to contain the common ED list
@@ -1186,7 +1186,7 @@ static inline int sam_reminted(struct sam_ed_s *ed)
             }
         }
 
-      uvdbg("min interval: %d offset: %d\n", interval, offset);
+      uvdbg("Min interval: %d offset: %d\n", interval, offset);
 
       /* Save the new minimum interval */
 
@@ -1678,7 +1678,7 @@ static int sam_ctrltd(struct sam_rhport_s *rhport, uint32_t dirpid,
         }
       else
         {
-          uvdbg("Bad TD completion status: %d\n", edctrl->tdstatus);
+          udbg("ERROR: Bad TD completion status: %d\n", edctrl->tdstatus);
           ret = -EIO;
         }
     }
@@ -1713,12 +1713,12 @@ static void sam_rhsc_bottomhalf(void)
       regaddr  = SAM_USBHOST_RHPORTST(rhpndx+1);
       rhportst = sam_getreg(regaddr);
 
-      ullvdbg("RHPORTST%d: %08x\n", rhpndx + 1, rhportst);
+      uvdbg("RHPORTST%d: %08x\n", rhpndx + 1, rhportst);
 
       if ((rhportst & OHCI_RHPORTST_CSC) != 0)
         {
           uint32_t rhstatus = sam_getreg(SAM_USBHOST_RHSTATUS);
-          ullvdbg("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
+          uvdbg("Connect Status Change, RHSTATUS: %08x\n", rhstatus);
 
           /* If DRWE is set, Connect Status Change indicates a remote
            * wake-up event
@@ -1726,7 +1726,7 @@ static void sam_rhsc_bottomhalf(void)
 
           if (rhstatus & OHCI_RHSTATUS_DRWE)
             {
-              ullvdbg("DRWE: Remote wake-up\n");
+              uvdbg("DRWE: Remote wake-up\n");
             }
 
           /* Otherwise... Not a remote wake-up event */
@@ -1745,8 +1745,8 @@ static void sam_rhsc_bottomhalf(void)
 
                       rhport->connected = true;
 
-                      ullvdbg("RHPort%d connected, rhswait: %d\n",
-                              rhpndx + 1, g_ohci.rhswait);
+                      uvdbg("RHPort%d connected, rhswait: %d\n",
+                            rhpndx + 1, g_ohci.rhswait);
 
                       /* Notify any waiters */
 
@@ -1758,7 +1758,7 @@ static void sam_rhsc_bottomhalf(void)
                     }
                   else
                     {
-                      ulldbg("Spurious status change (connected)\n");
+                      uvdbg("Spurious status change (connected)\n");
                     }
 
                   /* The LSDA (Low speed device attached) bit is valid
@@ -1766,7 +1766,7 @@ static void sam_rhsc_bottomhalf(void)
                    */
 
                   rhport->lowspeed = (rhportst & OHCI_RHPORTST_LSDA) != 0;
-                  ullvdbg("Speed: %s\n", rhport->lowspeed ? "LOW" : "FULL");
+                  uvdbg("Speed: %s\n", rhport->lowspeed ? "LOW" : "FULL");
                 }
 
               /* Check if we are now disconnected */
@@ -1775,7 +1775,7 @@ static void sam_rhsc_bottomhalf(void)
                 {
                   /* Yes.. disconnect the device */
 
-                  ullvdbg("RHport%d disconnected\n", rhpndx+1);
+                  uvdbg("RHport%d disconnected\n", rhpndx+1);
                   rhport->connected = false;
                   rhport->lowspeed  = false;
 
@@ -1801,7 +1801,7 @@ static void sam_rhsc_bottomhalf(void)
                 }
               else
                 {
-                   ulldbg("Spurious status change (disconnected)\n");
+                   uvdbg("Spurious status change (disconnected)\n");
                 }
             }
 
@@ -1901,8 +1901,8 @@ static void sam_wdh_bottomhalf(void)
         {
           /* The transfer failed for some reason... dump some diagnostic info. */
 
-          ulldbg("ERROR: ED xfrtype: %d TD CTRL: %08x/CC: %d\n",
-                 ed->xfrtype, td->hw.ctrl, ed->tdstatus);
+          udbg("ERROR: ED xfrtype: %d TD CTRL: %08x/CC: %d\n",
+               ed->xfrtype, td->hw.ctrl, ed->tdstatus);
         }
 #endif
 
@@ -1950,7 +1950,7 @@ static void sam_ohci_bottomhalf(void *arg)
     {
       /* Handle root hub status change on each root port */
 
-      ullvdbg("Root Hub Status Change\n");
+      uvdbg("Root Hub Status Change\n");
       sam_rhsc_bottomhalf();
     }
 
@@ -1963,7 +1963,7 @@ static void sam_ohci_bottomhalf(void *arg)
        * in the preceding frame.
        */
 
-      ullvdbg("Writeback Done Head interrupt\n");
+      uvdbg("Writeback Done Head interrupt\n");
       sam_wdh_bottomhalf();
     }
 
@@ -1982,12 +1982,12 @@ static void sam_ohci_bottomhalf(void *arg)
            * interrupt will not be occurring).
            */
 
-          ulldbg("ERROR: Unrecoverable error. pending: %08x\n", pending);
+          udbg("ERROR: Unrecoverable error. pending: %08x\n", pending);
           sam_wdh_bottomhalf();
         }
       else
         {
-          ulldbg("ERROR: Unhandled interrupts pending: %08x\n", pending);
+          udbg("ERROR: Unhandled interrupts pending: %08x\n", pending);
         }
     }
 #endif
@@ -2047,7 +2047,7 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
       for (rhpndx = 0; rhpndx < SAM_OHCI_NRHPORT; rhpndx++)
         {
-#ifndef CONFIG_SAMA5_EHCI
+#ifdef CONFIG_SAMA5_EHCI
           /* If a device is no longer connected, return the port to the EHCI
            * controller.  Zero is the reset value for all ports; one makes
            * the corresponding port available to OHCI.
@@ -2055,7 +2055,7 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
           if (!g_ohci.rhport[rhpndx].connected)
             {
-              regval  = getreg32(SAM_SFR_OHCIICR);
+              uint32_t regval  = getreg32(SAM_SFR_OHCIICR);
               regval &= ~SFR_OHCIICR_RES(rhpndx);
               putreg32(regval, SAM_SFR_OHCIICR);
             }
@@ -2069,8 +2069,8 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
               irqrestore(flags);
 
-              udbg("RHPort%d connected: %s\n",
-                   rhpndx + 1, g_ohci.rhport[rhpndx].connected ? "YES" : "NO");
+              uvdbg("RHPort%d connected: %s\n",
+                    rhpndx + 1, g_ohci.rhport[rhpndx].connected ? "YES" : "NO");
 
               return rhpndx;
             }
@@ -2131,7 +2131,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
     {
       /* No, return an error */
 
-      udbg("Not connected\n");
+      uvdbg("Not connected\n");
       return -ENODEV;
     }
 
@@ -2142,7 +2142,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
       ret = sam_ep0enqueue(rhport);
       if (ret < 0)
         {
-          udbg("ERRPOR:  Failed to enqueue EP0\n");
+          udbg("ERROR:  Failed to enqueue EP0\n");
           return ret;
         }
 
@@ -2935,7 +2935,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
         }
       else
         {
-          uvdbg("Bad TD completion status: %d\n", ed->tdstatus);
+          udbg("ERROR: Bad TD completion status: %d\n", ed->tdstatus);
           ret = -EIO;
         }
     }
@@ -3095,7 +3095,7 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
    * dedicated function
    */
 
-  udbg("Initializing OHCI Stack\n");
+  uvdbg("Initializing OHCI Stack\n");
 
   /* Initialize all the HCCA to 0 */
 
@@ -3195,11 +3195,12 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
 #ifndef CONFIG_SAMA5_EHCI
   /* Attach USB host controller interrupt handler.  If ECHI is enabled,
-   * then it will manage the shared interrupt. */
+   * then it will manage the shared interrupt.
+   */
 
   if (irq_attach(SAM_IRQ_UHPHS, sam_ohci_tophalf) != 0)
     {
-      udbg("Failed to attach IRQ\n");
+      udbg("ERROR: Failed to attach IRQ\n");
       return NULL;
     }
 
