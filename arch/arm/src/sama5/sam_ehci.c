@@ -1749,8 +1749,7 @@ static struct sam_qtd_s *sam_qtd_statusphase(uint32_t tokenbits)
    */
 
   regval = tokenbits | QTD_TOKEN_ACTIVE | QTD_TOKEN_IOC |
-           ((uint32_t)3                  << QTD_TOKEN_CERR_SHIFT) |
-           ((uint32_t)USB_SIZEOF_CTRLREQ << QTD_TOKEN_NBYTES_SHIFT);
+           ((uint32_t)3 << QTD_TOKEN_CERR_SHIFT);
 
   qtd->hw.token = sam_swap32(regval);
   return qtd;
@@ -1877,7 +1876,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
       /* Get the new forward link pointer and data toggle */
 
       flink  = &qtd->hw.nqp;
-      toggle = QTD_TOKEN_TOGGLE;
+      toggle = 0;
     }
 
   /* A buffer may or may be supplied with an EP0 SETUP transfer.  A buffer will
