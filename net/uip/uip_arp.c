@@ -97,7 +97,7 @@ struct arp_hdr_s
   uint8_t  ah_hwlen;         /*  8-bit Hardware address size (6) */
   uint8_t  ah_protolen;      /*  8-bit Procotol address size (4) */
   uint16_t ah_opcode;        /* 16-bit Operation */
-  uint8_t  ah_shwaddr[6];    /* 48-bit Sender hardware address */   
+  uint8_t  ah_shwaddr[6];    /* 48-bit Sender hardware address */
   uint16_t ah_sipaddr[2];    /* 32-bit Sender IP adress */
   uint8_t  ah_dhwaddr[6];    /* 48-bit Target hardware address */
   uint16_t ah_dipaddr[2];    /* 32-bit Target IP address */
@@ -201,7 +201,7 @@ void uip_arp_ipin(struct uip_driver_s *dev)
    */
 
   srcipaddr = uip_ip4addr_conv(IPBUF->eh_srcipaddr);
-  if (!uip_ipaddr_maskcmp(srcipaddr, dev->d_ipaddr, dev->d_netmask))
+  if (uip_ipaddr_maskcmp(srcipaddr, dev->d_ipaddr, dev->d_netmask))
     {
       uip_arp_update(IPBUF->eh_srcipaddr, ETHBUF->src);
     }
@@ -236,7 +236,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
 
   if (dev->d_len < (sizeof(struct arp_hdr_s) + UIP_LLH_LEN))
     {
-      nlldbg("Too small\n");    
+      nlldbg("Too small\n");
       dev->d_len = 0;
       return;
     }
@@ -246,14 +246,14 @@ void uip_arp_arpin(struct uip_driver_s *dev)
   switch(parp->ah_opcode)
     {
       case HTONS(ARP_REQUEST):
-        nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);    
+        nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);
 
         /* ARP request. If it asked for our address, we send out a reply. */
 
         if (uip_ipaddr_cmp(ipaddr, dev->d_ipaddr))
           {
             struct uip_eth_hdr *peth = ETHBUF;
- 
+
             /* First, we register the one who made the request in our ARP
              * table, since it is likely that we will do more communication
              * with this host in the future.
@@ -278,7 +278,7 @@ void uip_arp_arpin(struct uip_driver_s *dev)
         break;
 
       case HTONS(ARP_REPLY):
-        nllvdbg("ARP reply for IP %04lx\n", (long)ipaddr);    
+        nllvdbg("ARP reply for IP %04lx\n", (long)ipaddr);
 
         /* ARP reply. We insert or update the ARP table if it was meant
          * for us.
@@ -389,7 +389,7 @@ void uip_arp_out(struct uip_driver_s *dev)
       tabptr = uip_arp_find(ipaddr);
       if (!tabptr)
         {
-           nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);    
+           nllvdbg("ARP request for IP %04lx\n", (long)ipaddr);
 
           /* The destination address was not in our ARP table, so we
            * overwrite the IP packet with an ARP request.

@@ -5441,3 +5441,6 @@
 	  EHCI is now the common interrupt "master."  It will receive all UHPHS
 	  interrupts and route the interrupt event to both the OHCI and EHCI
 	  logic (2013-8-24).
+	* net/uip/uip_arp.c:  Correct backward condition in netmask task.
+	  From Max Holtzberg (2013-8-25).
+
