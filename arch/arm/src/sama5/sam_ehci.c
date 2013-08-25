@@ -1564,7 +1564,7 @@ static int sam_qtd_addbpl(struct sam_qtd_s *qtd, const void *buffer, size_t bufl
 
   if (ndx >= 5)
     {
-      uvdbg("ERROR:  Buffer too big.  Remaining %d\n", buflen);
+      udbg("ERROR:  Buffer too big.  Remaining %d\n", buflen);
       return -EFBIG;
     }
 
@@ -1626,7 +1626,7 @@ static struct sam_qtd_s *sam_qtd_setupphase(struct sam_epinfo_s *epinfo,
   ret = sam_qtd_addbpl(qtd, req, USB_SIZEOF_CTRLREQ);
   if (ret < 0)
     {
-      uvdbg("ERROR: sam_qtd_addbpl failed: %d\n", ret);
+      udbg("ERROR: sam_qtd_addbpl failed: %d\n", ret);
       sam_qtd_free(qtd);
       return NULL;
     }
@@ -2270,7 +2270,7 @@ static inline void sam_portsc_bottomhalf(void)
                 }
               else
                 {
-                  udbg("Already connected\n");
+                  uvdbg("Already connected\n");
                 }
             }
           else
@@ -2307,7 +2307,7 @@ static inline void sam_portsc_bottomhalf(void)
                 }
               else
                 {
-                   udbg("Already disconnected\n");
+                   uvdbg("Already disconnected\n");
                 }
             }
         }
@@ -2355,7 +2355,7 @@ static inline void sam_syserr_bottomhalf(void)
 
 static inline void sam_async_advance_bottomhalf(void)
 {
-  udbg("Async Advance Interrupt\n");
+  uvdbg("Async Advance Interrupt\n");
 
   /* REVISIT: Could remove all tagged QH entries here */
 }
@@ -2629,8 +2629,8 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
               irqrestore(flags);
 
-              udbg("RHPort%d connected: %s\n",
-                   rhpndx + 1, g_ehci.rhport[rhpndx].connected ? "YES" : "NO");
+              uvdbg("RHPort%d connected: %s\n",
+                    rhpndx + 1, g_ehci.rhport[rhpndx].connected ? "YES" : "NO");
 
               return rhpndx;
             }
@@ -2691,7 +2691,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
     {
       /* No, return an error */
 
-      udbg("Not connected\n");
+      uvdbg("Not connected\n");
       return -ENODEV;
     }
 
