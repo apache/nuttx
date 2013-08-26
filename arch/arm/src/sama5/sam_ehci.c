@@ -2657,7 +2657,9 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
           if (g_ehci.rhport[rhpndx].connected != connected[rhpndx])
             {
-              /* Yes.. Return the RH port number */
+              /* Yes.. Return the RH port number to inform the caller which
+               * port has the connection change.
+               */
 
               irqrestore(flags);
 
@@ -2784,7 +2786,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
       regval |= EHCI_PORTSC_OWNER;
       sam_putreg(regval, &HCOR->portsc[rhpndx]);
 
-#ifndef CONFIG_SAMA5_OHCI
+#ifdef CONFIG_SAMA5_OHCI
       /* Give the port to the OHCI controller. Zero is the reset value for
        * all ports; one makes the corresponding port available to OHCI.
        */
@@ -2905,7 +2907,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
       regval |= EHCI_PORTSC_OWNER;
       sam_putreg(regval, &HCOR->portsc[rhpndx]);
 
-#ifndef CONFIG_SAMA5_OHCI
+#ifdef CONFIG_SAMA5_OHCI
       /* Give the port to the OHCI controller. Zero is the reset value for
        * all ports; one makes the corresponding port available to OHCI.
        */
@@ -3007,6 +3009,7 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 static int sam_getdevinfo(FAR struct usbhost_driver_s *drvr,
                           FAR struct usbhost_devinfo_s *devinfo)
 {
+#if 0
   struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
   struct sam_epinfo_s *epinfo;
 
@@ -3017,7 +3020,6 @@ static int sam_getdevinfo(FAR struct usbhost_driver_s *drvr,
    * low or full speed devices are handed off to the OHCI driver.
    */
 
-#if 0
   switch (epinfo->speed)
     {
     case EHCI_LOW_SPEED:
@@ -3035,6 +3037,8 @@ static int sam_getdevinfo(FAR struct usbhost_driver_s *drvr,
     }
 
 #else
+  DEBUGASSERT(drvr && devinfo);
+
   devinfo->speed = DEVINFO_SPEED_HIGH;
 
 #endif
