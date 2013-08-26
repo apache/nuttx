@@ -270,13 +270,13 @@ static void lpc17_setinttab(uint32_t value, unsigned int interval, unsigned int 
 #endif
 
 static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
-                                 const FAR struct usbhost_epdesc_s *epdesc, 
+                                 FAR const struct usbhost_epdesc_s *epdesc, 
                                  struct lpc17_ed_s *ed);
 static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
                                  struct lpc17_ed_s *ed);
 
 static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
-                                  const FAR struct usbhost_epdesc_s *epdesc, 
+                                  FAR const struct usbhost_epdesc_s *epdesc, 
                                   struct lpc17_ed_s *ed);
 static inline int lpc17_remisoced(struct lpc17_usbhost_s *priv,
                                   struct lpc17_ed_s *ed);
@@ -302,8 +302,10 @@ static int lpc17_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx);
 
 static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                               uint16_t maxpacketsize);
+static int lpc17_getdevinfo(FAR struct usbhost_driver_s *drvr,
+                            FAR struct usbhost_devinfo_s *devinfo);
 static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
-                         const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
+                         FAR const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
 static int lpc17_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 static int lpc17_alloc(FAR struct usbhost_driver_s *drvr,
                        FAR uint8_t **buffer, FAR size_t *maxlen);
@@ -339,6 +341,7 @@ static struct lpc17_usbhost_s g_usbhost =
   .drvr             =
     {
       .ep0configure = lpc17_ep0configure,
+      .getdevinfo   = lpc17_getdevinfo,
       .epalloc      = lpc17_epalloc,
       .epfree       = lpc17_epfree,
       .alloc        = lpc17_alloc,
@@ -889,7 +892,7 @@ static void lpc17_setinttab(uint32_t value, unsigned int interval, unsigned int 
  *******************************************************************************/
  
 static inline int lpc17_addinted(struct lpc17_usbhost_s *priv,
-                                 const FAR struct usbhost_epdesc_s *epdesc, 
+                                 FAR const struct usbhost_epdesc_s *epdesc, 
                                  struct lpc17_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_INT_DISABLE
@@ -1125,7 +1128,7 @@ static inline int lpc17_reminted(struct lpc17_usbhost_s *priv,
  *******************************************************************************/
  
 static inline int lpc17_addisoced(struct lpc17_usbhost_s *priv,
-                                  const FAR struct usbhost_epdesc_s *epdesc, 
+                                  FAR const struct usbhost_epdesc_s *epdesc, 
                                   struct lpc17_ed_s *ed)
 {
 #ifndef CONFIG_USBHOST_ISOC_DISABLE
@@ -1695,6 +1698,37 @@ static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcadd
 }
 
 /************************************************************************************
+ * Name: lpc17_getdevinfo
+ *
+ * Description:
+ *   Get information about the connected device.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   devinfo - A pointer to memory provided by the caller in which to return the
+ *      device information.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+static int lpc17_getdevinfo(FAR struct usbhost_driver_s *drvr,
+                            FAR struct usbhost_devinfo_s *devinfo)
+{
+  struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
+
+  DEBUGASSERT(drvr && devinfo);
+  devinfo->speed = priv->lowspeed ? DEVINFO_SPEED_LOW : DEVINFO_SPEED_FULL;
+  return OK;
+}
+
+/************************************************************************************
  * Name: lpc17_epalloc
  *
  * Description:
@@ -1717,7 +1751,7 @@ static int lpc17_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcadd
  ************************************************************************************/
 
 static int lpc17_epalloc(FAR struct usbhost_driver_s *drvr,
-                         const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
+                         FAR const struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)drvr;
   struct lpc17_ed_s      *ed;
