@@ -237,6 +237,35 @@
 #define DRVR_EP0CONFIGURE(drvr,funcaddr,mps) ((drvr)->ep0configure(drvr,funcaddr,mps))
 
 /************************************************************************************
+ * Name: DRVR_GETDEVINFO
+ *
+ * Description:
+ *   Get information about the connected device.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   devinfo - A pointer to memory provided by the caller in which to return the
+ *      device information.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+#define DRVR_GETDEVINFO(drvr,devinfo) ((drvr)->getdevinfo(drvr,devinfo))
+
+/* struct usbhost_devinfo_s speed settings */
+
+#define DEVINFO_SPEED_LOW  0
+#define DEVINFO_SPEED_FULL 1
+#define DEVINFO_SPEED_HIGH 2
+
+/************************************************************************************
  * Name: DRVR_EPALLOC
  *
  * Description:
@@ -578,6 +607,13 @@ struct usbhost_epdesc_s
   uint16_t mxpacketsize; /* Max packetsize */
 };
 
+/* This structure provides information about the connected device */
+
+struct usbhost_devinfo_s
+{
+  uint8_t speed:2;       /* Device speed: 0=low, 1=full, 2=high */
+};
+
 /* This type represents one endpoint configured by the epalloc() method.
  * The actual form is know only internally to the USB host controller
  * (for example, for an OHCI driver, this would probably be a pointer
@@ -624,11 +660,17 @@ struct usbhost_driver_s
   int (*ep0configure)(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                       uint16_t maxpacketsize);
 
+  /* Get information about the connected device */
+
+  int (*getdevinfo)(FAR struct usbhost_driver_s *drvr,
+                   FAR struct usbhost_devinfo_s *devinfo);
+
   /* Allocate and configure an endpoint. */
 
   int (*epalloc)(FAR struct usbhost_driver_s *drvr,
-                const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
-  int (*epfree)(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
+                 FAR const struct usbhost_epdesc_s *epdesc,
+                 FAR usbhost_ep_t *ep);
+  int (*epfree)(FAR struct usbhost_driver_s *drvr, FAR usbhost_ep_t ep);
 
   /* Some hardware supports special memory in which transfer descriptors can
    * be accessed more efficiently.  The following methods provide a mechanism
@@ -655,7 +697,7 @@ struct usbhost_driver_s
    */
 
   int (*ioalloc)(FAR struct usbhost_driver_s *drvr,
-               FAR uint8_t **buffer, size_t buflen);
+                 FAR uint8_t **buffer, size_t buflen);
   int (*iofree)(FAR struct usbhost_driver_s *drvr, FAR uint8_t *buffer);
 
   /* Process a IN or OUT request on the control endpoint.  These methods

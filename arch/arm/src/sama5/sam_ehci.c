@@ -364,6 +364,8 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx);
 
 static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
          uint16_t maxpacketsize);
+static int sam_getdevinfo(FAR struct usbhost_driver_s *drvr,
+         FAR struct usbhost_devinfo_s *devinfo);
 static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
          const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
 static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
@@ -2982,6 +2984,64 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 }
 
 /************************************************************************************
+ * Name: sam_getdevinfo
+ *
+ * Description:
+ *   Get information about the connected device.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   devinfo - A pointer to memory provided by the caller in which to return the
+ *      device information.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+static int sam_getdevinfo(FAR struct usbhost_driver_s *drvr,
+                          FAR struct usbhost_devinfo_s *devinfo)
+{
+  struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
+  struct sam_epinfo_s *epinfo;
+
+  DEBUGASSERT(drvr && devinfo);
+  epinfo = &rhport->ep0;
+
+  /* As implemented now, this driver supports only HIGH speed.  All
+   * low or full speed devices are handed off to the OHCI driver.
+   */
+
+#if 0
+  switch (epinfo->speed)
+    {
+    case EHCI_LOW_SPEED:
+      devinfo->speed = DEVINFO_SPEED_LOW;
+      break;
+
+    case EHCI_FULL_SPEED:
+      devinfo->speed = DEVINFO_SPEED_FULL;
+      break;
+
+    default:
+    case EHCI_HIGH_SPEED:
+      devinfo->speed = DEVINFO_SPEED_HIGH;
+      break;
+    }
+
+#else
+  devinfo->speed = DEVINFO_SPEED_HIGH;
+
+#endif
+  return OK;
+}
+
+/************************************************************************************
  * Name: sam_epalloc
  *
  * Description:
@@ -3670,6 +3730,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
       /* Initialize the device operations */
 
       rhport->drvr.ep0configure   = sam_ep0configure;
+      rhport->drvr.getdevinfo     = sam_getdevinfo;
       rhport->drvr.epalloc        = sam_epalloc;
       rhport->drvr.epfree         = sam_epfree;
       rhport->drvr.alloc          = sam_alloc;

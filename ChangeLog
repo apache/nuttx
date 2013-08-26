@@ -5459,4 +5459,10 @@
 	  by the STM32 SDIO driver.  From CCTSAO (2013-6-26)
 	* drivers/net/encx24j600.c and .h: Use the ENC's SRAM for multiple TX
 	  packets.  From Max Holtzberg (2013-6-26).
-
+	* include/nuttx/usb/usbhost.h, drivers/usbhost/usbhost_enumerate.c, and
+	  all USB host drivers:  Added a new driver method:  getdevinfo.  This
+	  method is intended to get various information about the connected device,
+	  but currently returns only the device speed.  The device speed is
+	  necessary by usbhost_enumerate in order to set a credible initial EP0
+	  max packetsize.  High speed needs 64 bytes, low speed needs 8 bytes,
+	  and full speed can handle almost any size (2013-8-26).

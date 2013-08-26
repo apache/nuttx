@@ -383,6 +383,8 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx);
 
 static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
                             uint16_t maxpacketsize);
+static int sam_getdevinfo(FAR struct usbhost_driver_s *drvr,
+                          FAR struct usbhost_devinfo_s *devinfo);
 static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
                        const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
 static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
@@ -2262,6 +2264,37 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 }
 
 /************************************************************************************
+ * Name: sam_getdevinfo
+ *
+ * Description:
+ *   Get information about the connected device.
+ *
+ * Input Parameters:
+ *   drvr - The USB host driver instance obtained as a parameter from the call to
+ *      the class create() method.
+ *   devinfo - A pointer to memory provided by the caller in which to return the
+ *      device information.
+ *
+ * Returned Values:
+ *   On success, zero (OK) is returned. On a failure, a negated errno value is
+ *   returned indicating the nature of the failure
+ *
+ * Assumptions:
+ *   This function will *not* be called from an interrupt handler.
+ *
+ ************************************************************************************/
+
+static int sam_getdevinfo(FAR struct usbhost_driver_s *drvr,
+                          FAR struct usbhost_devinfo_s *devinfo)
+{
+  struct sam_rhport_s *rhport = (struct sam_rhport_s *)drvr;
+
+  DEBUGASSERT(drvr && devinfo);
+  devinfo->speed = rhport->lowspeed ? DEVINFO_SPEED_LOW : DEVINFO_SPEED_FULL;
+  return OK;
+}
+
+/************************************************************************************
  * Name: sam_epalloc
  *
  * Description:
@@ -3156,6 +3189,7 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
       rhport->rhpndx              = i;
       rhport->drvr.ep0configure   = sam_ep0configure;
+      rhport->drvr.getdevinfo     = sam_getdevinfo;
       rhport->drvr.epalloc        = sam_epalloc;
       rhport->drvr.epfree         = sam_epfree;
       rhport->drvr.alloc          = sam_alloc;
