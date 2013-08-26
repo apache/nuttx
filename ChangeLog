@@ -5453,4 +5453,8 @@
 	* fs/romfs/fs_romfsutil.c:  Fix an error where long (>15) file names
 	  were read incorrectly from a ROMFS file system.  From Mike Smit
 	  (2013-8-25).
+	* arch/arm/src/stm32/stm32_sdio.c: SourceForge bug #17 Fix if
+	  CONFIG_SDIO_BLOCKSETUP defined, OS will crash". Generate an error
+	  if CONFIG_SDIO_BLOCKSETUP is defined; that option is not yet supported
+	  by the STM32 SDIO driver.  From CCTSAO (2013-6-26)
 

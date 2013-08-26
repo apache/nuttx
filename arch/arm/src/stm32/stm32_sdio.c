@@ -481,6 +481,9 @@ struct stm32_dev_s g_sdiodev =
     .clock            = stm32_clock,
     .attach           = stm32_attach,
     .sendcmd          = stm32_sendcmd,
+#ifdef CONFIG_SDIO_BLOCKSETUP
+    .blocksetup       = stm32_blocksetup, /* Not implemented yet */
+#endif
     .recvsetup        = stm32_recvsetup,
     .sendsetup        = stm32_sendsetup,
     .cancel           = stm32_cancel,
