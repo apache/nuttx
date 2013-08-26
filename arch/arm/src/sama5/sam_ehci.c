@@ -1523,6 +1523,18 @@ static int sam_qtd_addbpl(struct sam_qtd_s *qtd, const void *buffer, size_t bufl
   uint32_t next;
   int ndx;
 
+  /* Flush the contents of the data buffer to RAM so that the correct contents
+   * will be accessed for an OUT DMA.
+   */
+
+  cp15_coherent_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+
+  /* Loop, adding the aligned physical addresses of the buffer to the buffer page
+   * list.  Only the first entry need not be aligned (because only the first
+   * entry has the offset field). The subsequent entries must begin on 4KB
+   * address boundaries.
+   */
+
   physaddr = (uint32_t)sam_physramaddr((uintptr_t)buffer);
 
   for (ndx = 0; ndx < 5; ndx++)
@@ -1825,7 +1837,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
   datapid = QTD_TOKEN_PID_OUT;
   if (req)
     {
-      if ((req->req & USB_REQ_DIR_MASK) == USB_REQ_DIR_IN)
+      if ((req->type & USB_REQ_DIR_MASK) == USB_REQ_DIR_IN)
         {
           datapid = QTD_TOKEN_PID_IN;
         }
