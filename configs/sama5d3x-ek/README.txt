@@ -1283,6 +1283,13 @@ Configurations
       2013-8-20:  Added description to add EHCI to the configuration.  At
         present, however, EHCI is still a work in progress and not ready for
         prime time.
+      2013-8-26: EHCI is still non-functional.  After days of work, it is
+        able to exchange a SETUP transfer or two, but it still does not make
+        it through the full enumeration sequence.
+        Nor does the hand-off of high speed devices to OHCI work.  In this
+        case, OHCI gets the port, but the port is reset, lost by OCHI and
+        returned to EHCI.  EHCI sees the full-speed port and hands it off
+        to OHCI and this sequence continues forever.
 
   ostest:
     This configuration directory, performs a simple OS test using
