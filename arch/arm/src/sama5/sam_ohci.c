@@ -2085,7 +2085,9 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
           if (g_ohci.rhport[rhpndx].connected != connected[rhpndx])
             {
-              /* Yes.. Return the RH port number ;to inform the call which */
+              /* Yes.. Return the RH port number to inform the caller which
+               * port has the connection change.
+               */
 
               irqrestore(flags);
 
