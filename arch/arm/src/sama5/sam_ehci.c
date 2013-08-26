@@ -982,8 +982,8 @@ static int sam_qtd_foreach(struct sam_qh_s *qh, foreach_qtd_t handler, void *arg
 
   /* Handle the special case where the queue is empty */
 
-  bp       = &qh->fqp;                 /* Start of qTDs in original list */
-  physaddr = sam_swap32(*bp);          /* Physical address of first qTD in CPU order */
+  bp       = &qh->fqp;         /* Start of qTDs in original list */
+  physaddr = sam_swap32(*bp);  /* Physical address of first qTD in CPU order */
 
   if ((physaddr & QTD_NQP_T) != 0)
     {
@@ -1608,7 +1608,7 @@ static struct sam_qtd_s *sam_qtd_setupphase(struct sam_epinfo_s *epinfo,
     }
 
   /* Mark this as the end of the list (this will be overwritten if another
-   * qTD is added after this one.
+   * qTD is added after this one).
    */
 
   qtd->hw.nqp = sam_swap32(QTD_NQP_T);
@@ -1676,7 +1676,7 @@ static struct sam_qtd_s *sam_qtd_dataphase(struct sam_epinfo_s *epinfo,
     }
 
   /* Mark this as the end of the list (this will be overwritten if another
-   * qTD is added after this one.
+   * qTD is added after this one).
    */
 
   qtd->hw.nqp = sam_swap32(QTD_NQP_T);
@@ -1741,7 +1741,7 @@ static struct sam_qtd_s *sam_qtd_statusphase(uint32_t tokenbits)
     }
 
   /* Mark this as the end of the list (this will be overwritten if another
-   * qTD is added after this one.
+   * qTD is added after this one).
    */
 
   qtd->hw.nqp = sam_swap32(QTD_NQP_T);
@@ -1936,9 +1936,28 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
 
   if (req != NULL)
     {
-      /* Extra TOKEN bits include the data toggle and the data PID. */
+      /* Extra TOKEN bits include the data toggle and the correct data PID. */
 
-      uint32_t tokenbits = toggle | datapid;
+      uint32_t tokenbits = toggle;
+
+      /* The status phase direction is the opposite of the data phase.  If
+       * this is an IN request, then we received the buffer and we will send
+       * the zero length packet handshake.
+       */
+
+      if ((req->type & USB_REQ_DIR_MASK) == USB_REQ_DIR_IN)
+        {
+          tokenbits |= QTD_TOKEN_PID_OUT;
+        }
+
+      /* Otherwise, this in an OUT request.  We send the buffer and we expect
+       * to receive the NULL packet handshake.
+       */
+
+      else
+        {
+          tokenbits |= QTD_TOKEN_PID_IN;
+        }
 
       /* Allocate a new Queue Element Transfer Descriptor (qTD) for the status */
 
