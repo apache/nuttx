@@ -58,6 +58,7 @@
 #include <debug.h>
 #include <wdog.h>
 #include <errno.h>
+#include <queue.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -158,11 +159,10 @@
 
 /* Packet memory layout */
 
-#define ALIGNED_BUFSIZE ((CONFIG_NET_BUFSIZE + 1) & ~1)   /* Address has to be even */
-#define PKTMEM_TX_START PKTMEM_START                      /* Start TX buffer at teh beginning of SRAM */
-#define PKTMEM_TX_ENDP1 ALIGNED_BUFSIZE                   /* Allow TX buffer for one frame */
-#define PKTMEM_RX_START PKTMEM_TX_ENDP1                   /* Followed by RX buffer */
-#define PKTMEM_RX_END   (PKTMEM_END - 1)                  /* RX buffer goes to the end of SRAM */
+#define PKTMEM_ALIGNED_BUFSIZE ((CONFIG_NET_BUFSIZE + 1) & ~1)
+#define PKTMEM_NDESCR   ((PKTMEM_SIZE / 2) / PKTMEM_ALIGNED_BUFSIZE)
+#define PKTMEM_RX_START (PKTMEM_START + PKTMEM_SIZE / 2)   /* Followed by RX buffer */
+#define PKTMEM_RX_END   (PKTMEM_START + PKTMEM_SIZE - 2)   /* RX buffer goes to the end of SRAM */
 
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
@@ -194,9 +194,16 @@
 
 enum enc_state_e
 {
-  ENCSTATE_UNINIT = 0,                /* The interface is in an uninitialized state */
-  ENCSTATE_DOWN,                      /* The interface is down */
-  ENCSTATE_UP                         /* The interface is up */
+  ENCSTATE_UNINIT = 0,                 /* The interface is in an uninitialized state */
+  ENCSTATE_DOWN,                       /* The interface is down */
+  ENCSTATE_UP                          /* The interface is up */
+};
+
+struct enc_descr_s
+{
+  struct enc_descr_next *flink;
+  uint16_t addr;
+  uint16_t len;
 };
 
 /* The enc_driver_s encapsulates all state information for a single hardware
@@ -224,6 +231,10 @@ struct enc_driver_s
   struct work_s         irqwork;       /* Interrupt continuation work queue support */
   struct work_s         towork;        /* Tx timeout work queue support */
   struct work_s         pollwork;      /* Poll timeout work queue support */
+
+  struct enc_descr_s    descralloc[PKTMEM_NDESCR];
+  sq_queue_t            freedescr;       /* The free descriptor list */
+  sq_queue_t            txqueue;         /* Enqueued descriptors waiting for transmition */
 
   /* This is the contained SPI driver intstance */
 
@@ -297,6 +308,7 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
 
 /* Common TX logic */
 
+static int  enc_txenqueue(FAR struct enc_driver_s *priv);
 static int  enc_transmit(FAR struct enc_driver_s *priv);
 static int  enc_uiptxpoll(struct uip_driver_s *dev);
 
@@ -361,7 +373,7 @@ static inline void enc_configspi(FAR struct spi_dev_s *spi)
 
   SPI_SETMODE(spi, CONFIG_ENCX24J600_SPIMODE);
   SPI_SETBITS(spi, 8);
-  SPI_SETFREQUENCY(spi, CONFIG_ENCX24J600_FREQUENCY)
+  SPI_SETFREQUENCY(spi, CONFIG_ENCX24J600_FREQUENCY);
 }
 #endif
 
@@ -1021,13 +1033,13 @@ static void enc_wrphy(FAR struct enc_driver_s *priv, uint8_t phyaddr,
 
 static int enc_transmit(FAR struct enc_driver_s *priv)
 {
-  /* Increment statistics */
+  struct enc_descr_s *descr;
 
-  nllvdbg("Sending packet, pktlen: %d\n", priv->dev.d_len);
+  /* dequeue next packet to transmit */
 
-#ifdef CONFIG_ENCX24J600_STATS
-  priv->stats.txrequests++;
-#endif
+  descr = (struct enc_descr_s*)sq_remfirst(&priv->txqueue);
+
+  DEBUGASSERT(descr != NULL);
 
   /* Verify that the hardware is ready to send another packet.  The driver
    * starts a transmission process by setting ECON1.TXRTS. When the packet is
@@ -1041,19 +1053,10 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
 
   DEBUGASSERT((enc_rdreg(priv, ENC_ECON1) & ECON1_TXRTS) == 0);
 
-  /* Send the packet: address=priv->dev.d_buf, length=priv->dev.d_len */
+  /* Set TXStart and TXLen registers. */
 
-  enc_dumppacket("Transmit Packet", priv->dev.d_buf, priv->dev.d_len);
-
-  /* copy the packet into the transmit buffer */
-
-  enc_cmd(priv, ENC_WGPWRPT, PKTMEM_TX_START);
-  enc_wrbuffer(priv, priv->dev.d_buf, priv->dev.d_len);
-
-  /* Set TX Len registers. TX Start is set in enc_reset  */
-
-  enc_wrreg(priv, ENC_ETXLEN, priv->dev.d_len);
-
+  enc_wrreg(priv, ENC_ETXST, descr->addr);
+  enc_wrreg(priv, ENC_ETXLEN, descr->len);
 
   /* Set TXRTS to send the packet in the transmit buffer */
 
@@ -1064,17 +1067,91 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
    * the timer is started?
    */
 
-  (void)wd_start(priv->txtimeout, ENC_TXTIMEOUT, enc_txtimeout, 1, (uint32_t)priv);
+  (void)wd_start(priv->txtimeout, ENC_TXTIMEOUT, enc_txtimeout, 1,
+                (uint32_t)priv);
+
+  /* free the descriptor */
+
+  sq_addlast((sq_entry_t*)descr, &priv->freedescr);
 
   return OK;
+}
+
+/****************************************************************************
+ * Function: enc_txenqueue
+ *
+ * Description:
+ *   Write packet from d_buf to the enc's SRAM if a free descriptor is available.
+ *   The filled descriptor is enqueued for transmission.
+ *
+ * Parameters:
+ *   dev  - Reference to the NuttX driver state structure
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ * Assumptions:
+ *   A packet is available in d_buf.
+ *   Interrupts are enabled but the caller holds the uIP lock.
+ *
+ ****************************************************************************/
+
+static int enc_txenqueue(FAR struct enc_driver_s *priv)
+{
+  int ret = OK;
+  struct enc_descr_s *descr;
+
+  DEBUGASSERT(priv->dev.d_len > 0);
+
+  /* Increment statistics */
+
+#ifdef CONFIG_ENCX24J600_STATS
+  priv->stats.txrequests++;
+#endif
+
+  descr = (struct enc_descr_s*)sq_remfirst(&priv->freedescr);
+
+  if (descr != NULL)
+    {
+      enc_dumppacket("Write packet to enc SRAM", priv->dev.d_buf,
+                     priv->dev.d_len);
+
+      /* copy the packet into the transmit buffer described by the current
+       * tx descriptor
+       */
+
+      enc_cmd(priv, ENC_WGPWRPT, descr->addr);
+      enc_wrbuffer(priv, priv->dev.d_buf, priv->dev.d_len);
+
+      /* store packet length */
+
+      descr->len = priv->dev.d_len;
+
+      /* enqueue packet */
+
+      sq_addlast((sq_entry_t*)descr, &priv->txqueue);
+
+      /* if currently no transmission is active, trigger the transmission */
+
+      if ((enc_rdreg(priv, ENC_ECON1) & ECON1_TXRTS) == 0)
+        {
+          enc_transmit(priv);
+        }
+    }
+  else
+    {
+      ret = -ENOMEM;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
  * Function: enc_uiptxpoll
  *
  * Description:
- *   The transmitter is available, check if uIP has any outgoing packets ready
- *   to send.  This is a callback from uip_poll().  uip_poll() may be called:
+ *   Enqueues uIP packets if available.
+ *   This is a callback from uip_poll().  uip_poll() may be called:
  *
  *   1. When the preceding TX packet send is complete,
  *   2. When the preceding TX packet send timedout and the interface is reset
@@ -1094,27 +1171,26 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
 static int enc_uiptxpoll(struct uip_driver_s *dev)
 {
   FAR struct enc_driver_s *priv = (FAR struct enc_driver_s *)dev->d_private;
+  int ret = OK;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
    */
 
   nllvdbg("Poll result: d_len=%d\n", priv->dev.d_len);
+
   if (priv->dev.d_len > 0)
     {
       uip_arp_out(&priv->dev);
-      enc_transmit(priv);
 
-      /* Stop the poll now because we can queue only one packet */
-
-      return -EBUSY;
+      ret = enc_txenqueue(priv);
     }
 
   /* If zero is returned, the polling will continue until all connections have
    * been examined.
    */
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1182,9 +1258,18 @@ static void enc_linkstatus(FAR struct enc_driver_s *priv)
 
 static void enc_txif(FAR struct enc_driver_s *priv)
 {
-  /* If no further xmits are pending, then cancel the TX timeout */
+  if (sq_empty(&priv->txqueue))
+    {
+      /* If no further xmits are pending, then cancel the TX timeout */
 
-  wd_cancel(priv->txtimeout);
+      wd_cancel(priv->txtimeout);
+    }
+  else
+    {
+      /* process txqueue */
+
+      enc_transmit(priv);
+    }
 
   /* Then poll uIP for new XMIT data */
 
@@ -1229,7 +1314,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
       if (priv->dev.d_len > 0)
         {
           uip_arp_out(&priv->dev);
-          enc_transmit(priv);
+          enc_txenqueue(priv);
         }
     }
   else if (BUF->type == htons(UIP_ETHTYPE_ARP))
@@ -1243,7 +1328,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
 
        if (priv->dev.d_len > 0)
          {
-           enc_transmit(priv);
+           enc_txenqueue(priv);
          }
      }
   else
@@ -2180,6 +2265,7 @@ static void enc_setmacaddr(FAR struct enc_driver_s *priv)
 
 static int enc_reset(FAR struct enc_driver_s *priv)
 {
+  int i;
   int ret;
   uint16_t regval;
 
@@ -2229,11 +2315,19 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   priv->nextpkt = PKTMEM_RX_START;
   enc_wrreg(priv, ENC_ERXST, PKTMEM_RX_START);
-  enc_wrreg(priv, ENC_ETXST, PKTMEM_TX_START);
 
   /* Program the Tail Pointer, ERXTAIL, to the last even address of the buffer */
 
   enc_wrreg(priv, ENC_ERXTAIL, PKTMEM_RX_END);
+
+  sq_init(&priv->freedescr);
+  sq_init(&priv->txqueue);
+
+  for (i = 0; i < PKTMEM_NDESCR; i++)
+    {
+      priv->descralloc[i].addr = PKTMEM_START + PKTMEM_ALIGNED_BUFSIZE * i;
+      sq_addlast((sq_entry_t*)&priv->descralloc[i], &priv->freedescr);
+    }
 
   /* "Typically, when using auto-negotiation, users should write 0x05E1 to PHANA
    * to advertise flow control capability."

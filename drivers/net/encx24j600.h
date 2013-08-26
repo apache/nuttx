@@ -414,7 +414,7 @@
 /* 24-Kbyte Transmit/Receive Packet Dual Port SRAM */
 
 #define PKTMEM_START    0x0000
-#define PKTMEM_END      0x5fff
+#define PKTMEM_SIZE     0x6000
 
 /* RX Status Bit Definitions ************************************************/
 
