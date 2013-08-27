@@ -62,7 +62,7 @@
  * 19  PGED3/VREF+/CVREF+/AN0/C3INC/RPA0/CTED1/PMD7/RA0 AIN PGA117 Vout
   --- ------------------------------------------------ ----------------------------
  *
- * The PGA117 driver can be enabled by setting the following the the nsh
+ * The PGA117 driver can be enabled by setting the following the nsh
  * configuration:
  *
  *   CONFIG_ADC=y         : Enable support for analog input devices

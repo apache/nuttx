@@ -249,7 +249,7 @@ static int tc_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
  * Private Data
  ****************************************************************************/
 
-/* This the the vtable that supports the character driver interface */
+/* This the vtable that supports the character driver interface */
 
 static const struct file_operations tc_fops =
 {
@@ -610,7 +610,7 @@ static int tc_waitsample(FAR struct tc_dev_s *priv,
         }
     }
 
-  /* Re-acquire the the semaphore that manages mutually exclusive access to
+  /* Re-acquire the semaphore that manages mutually exclusive access to
    * the device structure.  We may have to wait here.  But we have our sample.
    * Interrupts and pre-emption will be re-enabled while we wait.
    */

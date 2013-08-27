@@ -69,7 +69,7 @@ export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ 
 # toolchain.
 #export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 
-# This the the Cygwin path to the location where I built genromfs.  If you use
+# This the Cygwin path to the location where I built genromfs.  If you use
 # the buildroot toolchain, then genromfs can probably be found in TOOLCHAIN_DIR
 export GENROMFS_PATH="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 

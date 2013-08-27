@@ -84,7 +84,7 @@ CodeSourcery on Linux
 
   If you select the CodeSourcery toolchain, the make system will assume that you
   are running a Windows version of the toolchain.  If you are running under Linux,
-  the the make will probably fail.  The fix is to edit your Make.defs file and
+  the make will probably fail.  The fix is to edit your Make.defs file and
   use something like:
 
     CROSSDEV = arm-none-eabi-

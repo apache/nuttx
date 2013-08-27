@@ -401,7 +401,7 @@ Creating and Using NORBOOT
        (gdb) mon go                   # And jump into NOR flash
 
       The norboot program can also be configured to jump directly into
-      NOR FLASH with out requiring the the final halt and go, but since I
+      NOR FLASH without requiring the final halt and go, but since I
       have been debugging the early boot sequence, the above sequence has
       been most convenient for me.
 
@@ -489,7 +489,7 @@ Serial Consoles
     PB28 RXD1       PIO_USART1_RXD
     PB26 CTS1       PIO_USART1_CTS
 
-    NOTE: Debug TX and RX pins also go the the ADM3312EARU, but I am
+    NOTE: Debug TX and RX pins also go to the ADM3312EARU, but I am
     uncertain of the functionality.
 
     -------------------------------

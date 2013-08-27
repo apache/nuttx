@@ -230,7 +230,7 @@ Using OpenOCD with the Olimex ARM-USB-OCD
         Open1788 board.
 
       /usr/local/share/openocd/scripts/target/lpc1788.cfg
-        This is the configuration file for the the LPC1788 target.
+        This is the configuration file for the LPC1788 target.
         It just sets up a few parameters then sources lpc17xx.cfg
 
       /usr/local/share/openocd/scripts/target/lpc17xx.cfg
@@ -373,7 +373,7 @@ CONFIGURATION
     In the normal case (just 'make'), make will attempt to build both user-
     and kernel-mode blobs more or less interleaved.  This actual works!
     However, for me it is very confusing so I prefer the above make command:
-    Make the user-space binaries first (pass1), then make the the kernel-space
+    Make the user-space binaries first (pass1), then make the kernel-space
     binaries (pass2)
 
     NOTES:
@@ -417,7 +417,7 @@ CONFIGURATION
          System.map        - Symbols in the kernel-space ELF file
 
        Loading these .elf files with OpenOCD is tricky.  It appears to me
-       that when nuttx_user.elf is loaded, it destroys the the nuttx image
+       that when nuttx_user.elf is loaded, it destroys the nuttx image
        in FLASH.  But loading the nuttx ELF does not harm the nuttx_user.elf
        in FLASH.  Conclusion:  Always load nuttx_user.elf before nuttx.
 

@@ -198,7 +198,7 @@ struct pg_source_s
 
   FAR struct mtd_dev_s *mtd;
 
-  /* This the the device geometry */
+  /* This the device geometry */
 
 #ifdef CONFIG_DEBUG
   FAR struct mtd_geometry_s geo;
