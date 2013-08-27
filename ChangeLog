@@ -5469,4 +5469,8 @@
 	* arch/arm:  Add hooks for Cortex-A8.  Not much more yet (2013-8-27).
 	* Lots of files:  Fix all occurrents of "the the" in documentation and
 	  comments (2013-8-27).
+	* arch/arm/src/sama5/sam_allocateheap.c:  Correct the logic that
+	  determines which memory regions get added to the heap.  When
+	  CONFIG_MM_NREGIONS > 1, the logic was adding the ISRAM region to
+	  the heap twice! (2013-6-27).
 

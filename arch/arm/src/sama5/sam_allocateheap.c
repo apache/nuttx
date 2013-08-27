@@ -59,19 +59,23 @@
  * Private Definitions
  ****************************************************************************/
 /* The Primary Heap *********************************************************/
-/* The primary heap is defined by CONFIG_RAM_START, CONFIG_RAM_SIZE, and
- * CONFIG_RAM_END where:
+/* The physical address of the primary heap is defined by CONFIG_RAM_START,
+ * CONFIG_RAM_SIZE, and CONFIG_RAM_END where:
  *
  *   CONFIG_RAM_END = CONFIG_RAM_START + CONFIG_RAM_SIZE
  *
- * CONFIG_RAM_START is the usable beginning of the RAM region.  The "usable"
+ * and the corresponding virtual address are give by:
+ *
+ *   CONFIG_RAM_VEND = CONFIG_RAM_VSTART + CONFIG_RAM_SIZE
+ *
+ * CONFIG_RAM_VSTART is the usable beginning of the RAM region.  The "usable"
  * start would exclude, for example, any memory at the bottom of the RAM
  * region used for the 16KB page table.  If we are also executing from this
  * same RAM region then CONFIG_RAM_START is not used.  Instead, the value of
  * g_idle_stack is the used; this variable holds the first avaiable byte of
  * memory after the .text, .data, .bss, and IDLE stack allocations.
  *
- * CONFIG_RAM_END is defined in the configuration it is the usable top of
+ * CONFIG_RAM_VEND is defined in the configuration it is the usable top of
  * the RAM region beginning at CONFIG_RAM_START.  The "usable" top would
  * exclude, for example, any memory reserved at the top of the for the 16KB
  * page table.
@@ -83,7 +87,7 @@
  *
  * We cannot add the region if it is if we are executing from it!  In that
  * case, the remainder of the memory will automatically be added to the heap
- * based on g_idle_topstack and CONFIG_RAM_END.
+ * based on g_idle_topstack and CONFIG_RAM_VEND.
  */
 
 #if defined(CONFIG_SAMA5_BOOT_ISRAM)
@@ -115,6 +119,35 @@
 #if !defined(SAMA5_CONFIG_EBICS3) || defined(CONFIG_SAMA5_BOOT_CS3SRAM) || \
    (!defined(SAMA5_CONFIG_EBICS3_SRAM) && !defined(CONFIG_SAMA5_EBICS3_PSRAM))
 
+#  undef SAMA5_EBICS3_HEAP
+#endif
+
+/* The heap space in the primary memory region is added automatically when
+ * up_allocate heap is called.  So if the memory region is the primary region,
+ * it should not be added to the heap (again).
+ */
+
+#if (CONFIG_RAM_VSTART & 0xfff00000) == SAM_ISRAM0_VADDR
+#  undef CONFIG_SAMA5_ISRAM_HEAP
+#endif
+
+#if (CONFIG_RAM_VSTART & 0xfff00000) == SAM_DDRCS_VSECTION
+#  undef CONFIG_SAMA5_DDRCS_HEAP
+#endif
+
+#if (CONFIG_RAM_VSTART & 0xfff00000) == SAM_EBICS0_VSECTION
+#  undef SAMA5_EBICS0_HEAP
+#endif
+
+#if (CONFIG_RAM_VSTART & 0xfff00000) == SAM_EBICS1_VSECTION
+#  undef SAMA5_EBICS1_HEAP
+#endif
+
+#if (CONFIG_RAM_VSTART & 0xfff00000) == SAM_EBICS2_VSECTION
+#  undef SAMA5_EBICS2_HEAP
+#endif
+
+#if (CONFIG_RAM_VSTART & 0xfff00000) == SAM_EBICS3_VSECTION
 #  undef SAMA5_EBICS3_HEAP
 #endif
 
@@ -173,10 +206,10 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = CONFIG_RAM_END - ubase;
+  size_t    usize = CONFIG_RAM_VEND - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_VEND);
 
   /* Return the user-space heap settings */
 
@@ -189,7 +222,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_idle_topstack;
-  *heap_size  = CONFIG_RAM_END - g_idle_topstack;
+  *heap_size  = CONFIG_RAM_VEND - g_idle_topstack;
 #endif
 }
 
@@ -213,10 +246,10 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = CONFIG_RAM_END - ubase;
+  size_t    usize = CONFIG_RAM_VEND - ubase;
   int       log2;
 
-  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
+  DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_VEND);
 
   /* Return the kernel heap settings (i.e., the part of the heap region
    * that was not dedicated to the user heap).
@@ -239,7 +272,7 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 #if CONFIG_MM_REGIONS > 1
 void up_addregion(void)
 {
-  int nregions = CONFIG_MM_REGIONS;
+  int nregions = CONFIG_MM_REGIONS - 1;
   size_t size;
 
 #ifdef CONFIG_SAMA5_ISRAM_HEAP
