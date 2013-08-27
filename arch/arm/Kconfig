@@ -178,11 +178,17 @@ config ARCH_CORTEXA5
 	select ARCH_IRQPRIO
 	select ARCH_HAVE_MMU
 
+config ARCH_CORTEXA8
+	bool
+	default n
+	select ARCH_IRQPRIO
+	select ARCH_HAVE_MMU
+
 config ARCH_FAMILY
 	string
 	default "arm"		if ARCH_ARM7TDMI || ARCH_ARM926EJS || ARCH_ARM920T
 	default "armv6-m"	if ARCH_CORTEXM0
-	default "armv7-a"	if ARCH_CORTEXA5
+	default "armv7-a"	if ARCH_CORTEXA5 || ARCH_CORTEXA8
 	default "armv7-m"	if ARCH_CORTEXM3 || ARCH_CORTEXM4
 
 config ARCH_CHIP
@@ -305,7 +311,7 @@ config DEBUG_HARDFAULT
 if ARCH_CORTEXM0
 source arch/arm/src/armv6-m/Kconfig
 endif
-if ARCH_CORTEXA5
+if ARCH_CORTEXA5 || ARCH_CORTEXA8
 source arch/arm/src/armv7-a/Kconfig
 endif
 if ARCH_CORTEXM3 || ARCH_CORTEXM4
