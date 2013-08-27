@@ -748,7 +748,7 @@ static uint32_t sam_sink_channel(struct sam_dmach_s *dmach, uint8_t pid,
  * Name: sam_txcfg
  *
  * Description:
- *  Decode the the flags to get the correct CFG register bit settings for
+ *  Decode the flags to get the correct CFG register bit settings for
  *  a transmit (memory to peripheral) transfer.
  *
  ****************************************************************************/
@@ -788,7 +788,7 @@ static inline uint32_t sam_txcfg(struct sam_dmach_s *dmach)
  * Name: sam_rxcfg
  *
  * Description:
- *  Decode the the flags to get the correct CFG register bit settings for
+ *  Decode the flags to get the correct CFG register bit settings for
  *  a receive (peripheral to memory) transfer.
  *
  ****************************************************************************/
@@ -828,7 +828,7 @@ static inline uint32_t sam_rxcfg(struct sam_dmach_s *dmach)
  * Name: sam_txctrlabits
  *
  * Description:
- *  Decode the the flags to get the correct CTRLA register bit settings for
+ *  Decode the flags to get the correct CTRLA register bit settings for
  *  a transmit (memory to peripheral) transfer.  These are only the "fixed"
  *  CTRLA values and  need to be updated with the actual transfer size before
  *  being written to CTRLA sam_txctrla).
@@ -932,7 +932,7 @@ static uint32_t sam_ntxtransfers(struct sam_dmach_s *dmach, uint32_t dmasize)
 {
   unsigned int srcwidth;
 
-  /* Adjust the the source transfer size for the source chunk size (memory
+  /* Adjust the source transfer size for the source chunk size (memory
    * chunk size).  BTSIZE is "the number of transfers to be performed, that
    * is, for writes it refers to the number of source width transfers
    * to perform when DMAC is flow controller. For Reads, BTSIZE refers to
@@ -992,7 +992,7 @@ static inline uint32_t sam_txctrla(struct sam_dmach_s *dmach,
  * Name: sam_rxctrlabits
  *
  * Description:
- *  Decode the the flags to get the correct CTRLA register bit settings for
+ *  Decode the flags to get the correct CTRLA register bit settings for
  *  a read (peripheral to memory) transfer. These are only the "fixed" CTRLA
  *  values and need to be updated with the actual transfer size before being
  *  written to CTRLA sam_rxctrla).
@@ -1100,7 +1100,7 @@ static uint32_t sam_nrxtransfers(struct sam_dmach_s *dmach, uint32_t dmasize)
 {
   unsigned int srcwidth;
 
-  /* Adjust the the source transfer size for the source chunk size (peripheral
+  /* Adjust the source transfer size for the source chunk size (peripheral
    * chunk size).  BTSIZE is "the number of transfers to be performed, that
    * is, for writes it refers to the number of source width transfers
    * to perform when DMAC is flow controller. For Reads, BTSIZE refers to
@@ -1160,7 +1160,7 @@ static inline uint32_t sam_rxctrla(struct sam_dmach_s *dmach,
  * Name: sam_txctrlb
  *
  * Description:
- *  Decode the the flags to get the correct CTRLB register bit settings for
+ *  Decode the flags to get the correct CTRLB register bit settings for
  *  a transmit (memory to peripheral) transfer.
  *
  ****************************************************************************/
@@ -1251,7 +1251,7 @@ static inline uint32_t sam_txctrlb(struct sam_dmach_s *dmach)
  * Name: sam_rxctrlb
  *
  * Description:
- *  Decode the the flags to get the correct CTRLB register bit settings for
+ *  Decode the flags to get the correct CTRLB register bit settings for
  *  a receive (peripheral to memory) transfer.
  *
  ****************************************************************************/

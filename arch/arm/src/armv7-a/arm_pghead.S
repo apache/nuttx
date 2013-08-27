@@ -265,7 +265,7 @@ __start:
 	 * effect.  First populate the L1 table for the locked and paged
 	 * text regions.
 	 *
-	 * We could probably make the the pg_l1span and pg_l2map macros into
+	 * We could probably make the pg_l1span and pg_l2map macros into
 	 * call-able subroutines, but we would have to be carefully during
 	 * this phase while we are operating in a physical address space.
 	 *

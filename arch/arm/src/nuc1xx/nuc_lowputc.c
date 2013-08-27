@@ -86,7 +86,7 @@
 #endif
 
 /* Select either the external high speed crystal, the PLL output, or
- * the internal high speed clock as the the UART clock source.
+ * the internal high speed clock as the UART clock source.
  */
 
 #if defined(CONFIG_NUC_UARTCLK_XTALHI)

@@ -2495,7 +2495,7 @@ static inline int lpc17_ethinitialize(int intf)
 #endif
   if (ret != 0)
     {
-      /* We could not attach the ISR to the the interrupt */
+      /* We could not attach the ISR to the interrupt */
 
       return -EAGAIN;
     }

@@ -636,7 +636,7 @@ static void lpc17_setpwrctrl(uint32_t pwrctrl)
  *
  * Description:
  *   Return the current value of the  the PWRCTRL field of the SD card P
- *   register.  This function can be used to see the the SD card is power ON
+ *   register.  This function can be used to see if the SD card is powered ON
  *   or OFF
  *
  * Input Parameters:
@@ -908,7 +908,7 @@ static void lpc17_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl)
  * Name: lpc17_datadisable
  *
  * Description:
- *   Disable the the SD card data path setup by lpc17_dataconfig() and
+ *   Disable the SD card data path setup by lpc17_dataconfig() and
  *   disable DMA.
  *
  ****************************************************************************/

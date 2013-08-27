@@ -172,7 +172,7 @@ static const struct section_mapping_s section_mapping[] =
 /* SAMA5 External SDRAM Memory.  The SDRAM is not usable until it has been
  * initialized.  If we are running out of SDRAM now, we can assume that some
  * second level boot loader has properly configured SRAM for us.  In that
- * case, we set the the MMU flags for the final, fully cache-able state.
+ * case, we set the MMU flags for the final, fully cache-able state.
  *
  * If we are running from ISRAM or NOR flash, then we will need to configure
  * the SDRAM ourselves.  In this case, we set the MMU flags to the strongly

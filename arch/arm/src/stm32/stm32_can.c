@@ -1332,7 +1332,7 @@ static int can_bittiming(struct stm32_can_s *priv)
 
   canllvdbg("TS1: %d TS2: %d BRP: %d\n", ts1, ts2, brp);
 
- /* Configure bit timing.  This also does the the following, less obvious
+ /* Configure bit timing.  This also does the following, less obvious
    * things.  Unless loopback mode is enabled, it:
    *
    * - Disables silent mode.

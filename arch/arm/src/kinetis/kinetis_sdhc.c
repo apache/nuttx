@@ -742,7 +742,7 @@ static void kinetis_dataconfig(struct kinetis_dev_s *priv, bool bwrite,
  * Name: kinetis_datadisable
  *
  * Description:
- *   Disable the the SDIO data path setup by kinetis_dataconfig() and
+ *   Disable the SDIO data path setup by kinetis_dataconfig() and
  *   disable DMA.
  *
  ****************************************************************************/

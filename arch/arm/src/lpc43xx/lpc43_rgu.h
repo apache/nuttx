@@ -76,7 +76,7 @@ extern "C" {
  *   Reset as many of the LPC43 peripherals as possible. This is necessary
  *   because the LPC43 does not provide any way of performing a full system
  *   reset under debugger control.  So, if CONFIG_DEBUG is set (indicating
- *   that a debugger is being used?), the the boot logic will call this 
+ *   that a debugger is being used?), the boot logic will call this
  *   function on all restarts.
  *
  ****************************************************************************/

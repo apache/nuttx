@@ -203,7 +203,7 @@
 #  error "Unknown STM32 DMA"
 #endif
 
-/* SDIO DMA Channel/Stream selection.  For the the case of the STM32 F4, there
+/* SDIO DMA Channel/Stream selection.  For the case of the STM32 F4, there
  * are multiple DMA stream options that must be dis-ambiguated in the board.h
  * file.
  */
@@ -682,7 +682,7 @@ static void stm32_setpwrctrl(uint32_t pwrctrl)
  *
  * Description:
  *   Return the current value of the  the PWRCTRL field of the SDIO POWER
- *   register.  This function can be used to see the the SDIO is power ON
+ *   register.  This function can be used to see if the SDIO is powered ON
  *   or OFF
  *
  * Input Parameters:
@@ -952,7 +952,7 @@ static void stm32_dataconfig(uint32_t timeout, uint32_t dlen, uint32_t dctrl)
  * Name: stm32_datadisable
  *
  * Description:
- *   Disable the the SDIO data path setup by stm32_dataconfig() and
+ *   Disable the SDIO data path setup by stm32_dataconfig() and
  *   disable DMA.
  *
  ****************************************************************************/

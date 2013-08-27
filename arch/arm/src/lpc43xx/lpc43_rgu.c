@@ -76,7 +76,7 @@
  *   Reset as many of the LPC43 peripherals as possible. This is necessary
  *   because the LPC43 does not provide any way of performing a full system
  *   reset under debugger control.  So, if CONFIG_DEBUG is set (indicating
- *   that a debugger is being used?), the the boot logic will call this 
+ *   that a debugger is being used?), the boot logic will call this
  *   function on all restarts.
  *
  * Assumptions:
@@ -93,7 +93,7 @@ void lpc43_softreset(void)
   /* Disable interrupts */
 
   flags = irqsave();
- 
+
   /* Reset all of the peripherals that we can (safely) */
 
   putreg32((RGU_CTRL0_LCD_RST     | RGU_CTRL0_USB0_RST     |

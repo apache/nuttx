@@ -968,7 +968,7 @@ void cp15_clean_dcache(uintptr_t start, uintptr_t end);
  *
  * Description:
  *   Flush the data cache within the specified region by cleaning and
- *   invalidating the the D cache.
+ *   invalidating the D cache.
  *
  * Input Parameters:
  *   start - virtual start address of region

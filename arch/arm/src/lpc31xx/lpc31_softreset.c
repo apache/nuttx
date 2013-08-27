@@ -84,7 +84,7 @@ void lpc31_softreset(enum lpc31_resetid_e resetid)
 
   for (i = 0;i < 1000; i++);
 
-  /* Then set the the soft reset bit */
+  /* Then set the soft reset bit */
 
   putreg32(CGU_SOFTRESET, address);
 }

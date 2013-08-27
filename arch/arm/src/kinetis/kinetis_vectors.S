@@ -626,7 +626,7 @@ kinetis_common:
 	sub		r1, #(4*SW_FPU_REGS)
 #endif
 
-	/* Save the the remaining registers on the stack after the registers pushed
+	/* Save the remaining registers on the stack after the registers pushed
 	 * by the exception handling logic. r2=SP and r3=primask or basepri, r4-r11,
 	 * r14=register values.
 	 */
