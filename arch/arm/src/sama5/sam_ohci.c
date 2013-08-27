@@ -791,8 +791,8 @@ static inline int sam_addbulked(struct sam_ed_s *ed)
   /* Add the new bulk ED to the head of the bulk list */
 
   ed->hw.nexted = sam_getreg(SAM_USBHOST_BULKHEADED);
-  cp15_coherent_dcache((uintptr_t)ed,
-                       (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+  cp15_clean_dcache((uintptr_t)ed,
+                    (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
 
   physed = sam_physramaddr((uintptr_t)ed);
   sam_putreg((uint32_t)physed, SAM_USBHOST_BULKHEADED);
@@ -866,8 +866,8 @@ static inline int sam_rembulked(struct sam_ed_s *ed)
            */
 
           prev->hw.nexted = ed->hw.nexted;
-          cp15_coherent_dcache((uintptr_t)prev,
-                               (uintptr_t)prev + sizeof(struct sam_ed_s));
+          cp15_clean_dcache((uintptr_t)prev,
+                            (uintptr_t)prev + sizeof(struct sam_ed_s));
         }
     }
 
@@ -951,8 +951,8 @@ static void sam_setinttab(uint32_t value, unsigned int interval, unsigned int of
 
       /* Make sure that the modified table value is flushed to RAM */
 
-      cp15_coherent_dcache((uintptr_t)&g_hcca.inttbl[i],
-                           (uintptr_t)&g_hcca.inttbl[i] + sizeof(uint32_t) - 1);
+      cp15_clean_dcache((uintptr_t)&g_hcca.inttbl[i],
+                        (uintptr_t)&g_hcca.inttbl[i] + sizeof(uint32_t) - 1);
     }
 }
 #endif
@@ -1056,8 +1056,8 @@ static inline int sam_addinted(const FAR struct usbhost_epdesc_s *epdesc,
    */
 
   ed->hw.nexted = physhead;
-  cp15_coherent_dcache((uintptr_t)ed,
-                       (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+  cp15_clean_dcache((uintptr_t)ed,
+                    (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
 
   physed =  sam_physramaddr((uintptr_t)ed);
   sam_setinttab((uint32_t)physed, interval, offset);
@@ -1286,8 +1286,8 @@ static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
       /* Skip processing of this ED while we modify the TD list. */
 
       ed->hw.ctrl      |= ED_CONTROL_K;
-      cp15_coherent_dcache((uintptr_t)ed,
-                           (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+      cp15_clean_dcache((uintptr_t)ed,
+                        (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
 
       /* Get the tail ED for this root hub port */
 
@@ -1326,20 +1326,20 @@ static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
 
       if (buffer && buflen > 0)
         {
-          cp15_coherent_dcache((uintptr_t)buffer,
-                               (uintptr_t)buffer + buflen - 1);
+          cp15_clean_dcache((uintptr_t)buffer,
+                            (uintptr_t)buffer + buflen - 1);
         }
 
-      cp15_coherent_dcache((uintptr_t)tdtail,
-                           (uintptr_t)tdtail + sizeof(struct ohci_gtd_s) - 1);
-      cp15_coherent_dcache((uintptr_t)td,
-                           (uintptr_t)td + sizeof(struct ohci_gtd_s) - 1);
+      cp15_clean_dcache((uintptr_t)tdtail,
+                        (uintptr_t)tdtail + sizeof(struct ohci_gtd_s) - 1);
+      cp15_clean_dcache((uintptr_t)td,
+                        (uintptr_t)td + sizeof(struct ohci_gtd_s) - 1);
 
       /* Resume processing of this ED */
 
       ed->hw.ctrl      &= ~ED_CONTROL_K;
-      cp15_coherent_dcache((uintptr_t)ed,
-                           (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+      cp15_clean_dcache((uintptr_t)ed,
+                        (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
       ret               = OK;
     }
 
@@ -1436,10 +1436,10 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
 
   /* Flush the affected control ED and tail TD to RAM */
 
-  cp15_coherent_dcache((uintptr_t)edctrl,
-                       (uintptr_t)edctrl + sizeof(struct ohci_ed_s) - 1);
-  cp15_coherent_dcache((uintptr_t)tdtail,
-                       (uintptr_t)tdtail + sizeof(struct ohci_gtd_s) - 1);
+  cp15_clean_dcache((uintptr_t)edctrl,
+                    (uintptr_t)edctrl + sizeof(struct ohci_ed_s) - 1);
+  cp15_clean_dcache((uintptr_t)tdtail,
+                    (uintptr_t)tdtail + sizeof(struct ohci_gtd_s) - 1);
 
   /* ControlListEnable.  This bit is set to (re-)enable the processing of the
    * Control list.  Note: once enabled, it remains enabled and we may even
@@ -1519,8 +1519,8 @@ static void sam_ep0dequeue(struct sam_rhport_s *rhport)
 
       /* Flush the modified ED to RAM */
 
-      cp15_coherent_dcache((uintptr_t)preved,
-                           (uintptr_t)preved + sizeof(struct ohci_ed_s) - 1);
+      cp15_clean_dcache((uintptr_t)preved,
+                        (uintptr_t)preved + sizeof(struct ohci_ed_s) - 1);
     }
   else
     {
@@ -2257,8 +2257,8 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 
   /* Flush the modified control ED to RAM */
 
-  cp15_coherent_dcache((uintptr_t)edctrl,
-                       (uintptr_t)edctrl + sizeof(struct ohci_ed_s) - 1);
+  cp15_clean_dcache((uintptr_t)edctrl,
+                    (uintptr_t)edctrl + sizeof(struct ohci_ed_s) - 1);
   sam_givesem(&g_ohci.exclsem);
 
   uvdbg("RHPort%d EP0 CTRL: %08x\n", rhport->rhpndx + 1, edctrl->hw.ctrl);
@@ -2428,10 +2428,10 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
 
   /* Make sure these settings are flushed to RAM */
 
-  cp15_coherent_dcache((uintptr_t)ed,
-                       (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
-  cp15_coherent_dcache((uintptr_t)td,
-                       (uintptr_t)td + sizeof(struct ohci_gtd_s) - 1);
+  cp15_clean_dcache((uintptr_t)ed,
+                    (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+  cp15_clean_dcache((uintptr_t)td,
+                    (uintptr_t)td + sizeof(struct ohci_gtd_s) - 1);
 
   /* Now add the endpoint descriptor to the appropriate list */
 
