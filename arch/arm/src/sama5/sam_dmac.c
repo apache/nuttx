@@ -1439,8 +1439,8 @@ sam_allocdesc(struct sam_dmach_s *dmach, struct dma_linklist_s *prev,
                * that hardware will be accessing the descriptor via DMA.
                */
 
-              cp15_coherent_dcache((uintptr_t)desc,
-                                   (uintptr_t)desc + sizeof(struct dma_linklist_s));
+              cp15_clean_dcache((uintptr_t)desc,
+                                (uintptr_t)desc + sizeof(struct dma_linklist_s));
               break;
             }
         }
@@ -2184,7 +2184,7 @@ int sam_dmatxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 
   /* Clean caches associated with the DMA memory */
 
-  cp15_coherent_dcache(maddr, maddr + nbytes);
+  cp15_clean_dcache(maddr, maddr + nbytes);
   return ret;
 }
 
@@ -2265,7 +2265,7 @@ int sam_dmarxsetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
 
   /* Clean caches associated with the DMA memory */
 
-  cp15_coherent_dcache(maddr, maddr + nbytes);
+  cp15_clean_dcache(maddr, maddr + nbytes);
   return ret;
 }
 

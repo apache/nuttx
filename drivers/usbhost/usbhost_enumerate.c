@@ -314,6 +314,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
   size_t maxlen;
   unsigned int cfglen;
   uint8_t maxpacketsize;
+  uint8_t descsize;
   uint8_t *buffer;
   int  ret;
 
@@ -364,25 +365,27 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
       /* For high-speed, we must use 64 bytes */
 
       maxpacketsize = 64;
+      descsize      = USB_SIZEOF_DEVDESC;
     }
   else
     {
       /* Eight will work for both low- and full-speed */
 
       maxpacketsize = 8;
+      descsize      = 8;
     }
 
   /* Set the initial maximum packet size */
 
   DRVR_EP0CONFIGURE(drvr, 0, maxpacketsize);
 
-  /* Read first 'maxpacketsize' bytes of the device descriptor */
+  /* Read first 8 bytes of the device descriptor */
 
   ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
   usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_DEVICE << 8));
   usbhost_putle16(ctrlreq->index, 0);
-  usbhost_putle16(ctrlreq->len, maxpacketsize);
+  usbhost_putle16(ctrlreq->len, descsize);
 
   ret = DRVR_CTRLIN(drvr, ctrlreq, buffer);
   if (ret != OK)
@@ -400,19 +403,23 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 
   DRVR_EP0CONFIGURE(drvr, 0, maxpacketsize);
 
-  /* Now read the full device descriptor */
+  /* Now read the full device descriptor (if we have not already done so) */
 
-  ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
-  ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
-  usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_DEVICE << 8));
-  usbhost_putle16(ctrlreq->index, 0);
-  usbhost_putle16(ctrlreq->len, USB_SIZEOF_DEVDESC);
-
-  ret = DRVR_CTRLIN(drvr, ctrlreq, buffer);
-  if (ret != OK)
+  if (descsize < USB_SIZEOF_DEVDESC)
     {
-      udbg("ERROR: GETDESCRIPTOR/DEVICE, DRVR_CTRLIN returned %d\n", ret);
-      goto errout;
+      ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
+      ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
+      usbhost_putle16(ctrlreq->value, (USB_DESC_TYPE_DEVICE << 8));
+      usbhost_putle16(ctrlreq->index, 0);
+      usbhost_putle16(ctrlreq->len, USB_SIZEOF_DEVDESC);
+
+      ret = DRVR_CTRLIN(drvr, ctrlreq, buffer);
+      if (ret != OK)
+        {
+          udbg("ERROR: GETDESCRIPTOR/DEVICE, DRVR_CTRLIN returned %d\n",
+               ret);
+          goto errout;
+        }
     }
 
   /* Get class identification information from the device descriptor.  Most
