@@ -504,7 +504,7 @@ static int emac_ifdown(struct uip_driver_s *dev)
   wd_cancel(priv->d_txpoll);
   wd_cancel(priv->d_txtimeout);
 
-  /* Put the the EMAC is its reset, non-operational state.  This should be
+  /* Put the EMAC is its reset, non-operational state.  This should be
    * a known configuration that will guarantee the emac_ifup() always
    * successfully brings the interface back up.
    */
@@ -655,7 +655,7 @@ int emac_initialize(int intf)
 
   if (irq_attach(CONFIG_HCS12_IRQ, emac_interrupt))
     {
-      /* We could not attach the ISR to the the interrupt */
+      /* We could not attach the ISR to the interrupt */
 
       return -EAGAIN;
     }

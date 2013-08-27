@@ -266,7 +266,7 @@ void group_addchild(FAR struct task_group_s *group,
  *
  * Description:
  *   Find a child status structure in the given task group.  A reference to
- *   the child structure is returned, but the child remains the the group's
+ *   the child structure is returned, but the child remains in the group's
  *   list of children.
  *
  * Parameters:

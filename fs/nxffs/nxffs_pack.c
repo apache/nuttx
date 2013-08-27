@@ -260,7 +260,7 @@ static inline off_t nxffs_mediacheck(FAR struct nxffs_volume_s *volume,
  *   pack   - The volume packing state structure.
  *   froffset - On input, this is the location where we should be searching
  *     for the location to begin packing.  On successful return, froffset
- *     will be set the the offset in FLASH where the first inode should be
+ *     will be set to the offset in FLASH where the first inode should be
  *     copied to.  If -ENOSPC is returned -- meaning that the FLASH is full
  *     --  then no packing can be performed. In this case, then the free
  *     flash offset is returned through this location.
@@ -939,7 +939,7 @@ static inline int nxffs_packblock(FAR struct nxffs_volume_s *volume,
       nxffs_packtransfer(volume, pack);
 
       /* Now, either the (1) src block has been fully transferred, (2) all
-       * of the source data has been transferred, or (3) the the destination
+       * of the source data has been transferred, or (3) the destination
        * block is full, .. or all three.
        *
        * Check if all of the bytes in the source inode have been transferred.
@@ -1121,7 +1121,7 @@ nxffs_setupwriter(FAR struct nxffs_volume_s *volume,
  *
  *   Writing is performed at the end of the free FLASH region and this
  *   implemenation is restricted to a single writer.  The new inode is not
- *   written to FLASH until the the writer is closed and so will not be
+ *   written to FLASH until the writer is closed and so will not be
  *   found by nxffs_packblock().
  *
  * Input Parameters:
@@ -1192,7 +1192,7 @@ static inline int nxffs_packwriter(FAR struct nxffs_volume_s *volume,
        nxffs_packtransfer(volume, pack);
 
        /* Now, either the (1) src block has been fully transferred, (2) all
-        * of the source data has been transferred, or (3) the the destination
+        * of the source data has been transferred, or (3) the destination
         * block is full, .. or all three.
         *
         * Check if all of the bytes in the source inode have been transferred.
@@ -1473,7 +1473,7 @@ start_pack:
                                  /* Writing is performed at the end of the free
                                   * FLASH region and this implemenation is restricted
                                   * to a single writer.  The new inode is not
-                                  * written to FLASH until the the writer is closed
+                                  * written to FLASH until the writer is closed
                                   * and so will not be found by nxffs_packblock().
                                   */
 

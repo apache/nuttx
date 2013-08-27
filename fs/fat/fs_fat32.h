@@ -687,7 +687,7 @@
  *   allocated each time a FAT file is opened.
  *
  *   Some hardware, however, may require special DMA-capable memory in
- *   order to perform the the transfers.  If CONFIG_FAT_DMAMEMORY is defined
+ *   order to perform the transfers.  If CONFIG_FAT_DMAMEMORY is defined
  *   then the architecture-specific hardware must provide the funtions
  *   fat_dma_alloc() and fat_dma_free() as prototyped below:  fat_dmalloc()
  *   will allocate DMA-capable memory of the specified size; fat_dmafree()

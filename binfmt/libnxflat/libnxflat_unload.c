@@ -71,7 +71,7 @@
  * Description:
  *   This function unloads the object from memory. This essentially undoes
  *   the actions of nxflat_load.  It is called only under certain error
- *   conditions after the the module has been loaded but not yet started.
+ *   conditions after the module has been loaded but not yet started.
  *
  * Returned Value:
  *   0 (OK) is returned on success and a negated errno is returned on

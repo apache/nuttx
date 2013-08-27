@@ -1223,7 +1223,7 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
         }
       else
         {
-          /* Make sure the the FLASH is unprotected so that we can write into it */
+          /* Make sure that the FLASH is unprotected so that we can write into it */
 
 #ifndef CONFIG_SST25_READONLY
           sst25_unprotect(priv->dev);

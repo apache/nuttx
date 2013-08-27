@@ -489,7 +489,7 @@ static int vnet_ifdown(struct uip_driver_s *dev)
 	wd_cancel(vnet->sk_txpoll);
 	//wd_cancel(vnet->sk_txtimeout);
 
-	/* Put the the EMAC is its reset, non-operational state.  This should be
+	/* Put the EMAC is its reset, non-operational state.  This should be
 	 * a known configuration that will guarantee the vnet_ifup() always
 	 * successfully brings the interface back up.
 	 */

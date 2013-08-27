@@ -772,7 +772,7 @@ Where <subdir> is one of the following:
     In the normal case (just 'make'), make will attempt to build both user-
     and kernel-mode blobs more or less interleaved.  This actual works!
     However, for me it is very confusing so I prefer the above make command:
-    Make the user-space binaries first (pass1), then make the the kernel-space
+    Make the user-space binaries first (pass1), then make the kernel-space
     binaries (pass2)
 
     NOTES:

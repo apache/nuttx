@@ -117,7 +117,7 @@ o Task/Scheduler (sched/)
 
   Title:       GET_ENVIRON_PTR()
   Description: get_environ_ptr() (sched/sched_getenvironptr.c) is not implemented.
-               The representation of the the environment strings selected for
+               The representation of the environment strings selected for
                NutX is not compatible with the operation.  Some significant
                re-design would be required to implement this funcion and that
                effort is thought to be not worth the result.
@@ -422,7 +422,7 @@ o Kernel Build
                Linux, for example, has functions call up() and down().  up()
                increments the semaphore count but does not call into the kernel
                unless incrementing the count unblocks a task; similarly, down
-               decrements the count and does not call into the the kernel unless
+               decrements the count and does not call into the kernel unless
                the count becomes negative the caller must be blocked.
 
                Update:

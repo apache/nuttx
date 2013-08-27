@@ -163,7 +163,7 @@ static void ssp_cdirqsetup(int irq, xcpt_t irqhandler)
     }
   else
     {
-      /* Disable then then detach the the old interrupt handler */
+      /* Disable then detach the old interrupt handler */
 
       up_disable_irq(irq);
       (void)irq_detach(irq);

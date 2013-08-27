@@ -210,7 +210,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
       pstate->snd_sent = pstate->snd_acked;
 
 #if defined(CONFIG_NET_TCP_SPLIT)
-      /* Reset the the even/odd indicator to even since we need to
+      /* Reset the even/odd indicator to even since we need to
        * retransmit.
        */
 

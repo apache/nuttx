@@ -1709,7 +1709,7 @@ void nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
     <dt><code>dest</code>
     <dd>The location to copy the memory region
     <dt><code>deststride</code>
-    <dd>The width, in bytes, the the dest memory
+    <dd>The width, in bytes, of the dest memory
   </dl></ul>
 </p>
 <p>
@@ -2335,7 +2335,7 @@ void nxtk_getwindow(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
     <dt><code>dest</code>
     <dd>The location to copy the memory region
     <dt><code>deststride</code>
-    <dd>The width, in bytes, the the dest memory
+    <dd>The width, in bytes, of the dest memory
   </dl>
 </p>
 <p>
@@ -2689,7 +2689,7 @@ int nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
     <dt><code>dest</code>
     <dd>TThe location to copy the memory region.
     <dt><code>deststride</code>
-    <dd>The width, in bytes, the the dest memory.
+    <dd>The width, in bytes, of the dest memory.
   </dl>
 </p>
 <p>
@@ -3522,7 +3522,7 @@ enum nx_fontid_e
   <li>
     <p>
       <b><code>nuttx/graphics/Makefile</code></b>.
-      This file needs logic to auto-generate a C source file from the header file that you generated with the the <i>bdf-converter</i> program.
+      This file needs logic to auto-generate a C source file from the header file that you generated with the <i>bdf-converter</i> program.
       Notice <code>NXFONTS_FONTID=2</code>; this must be set to the same font ID value that you defined in the <code>include/nuttx/nx/nxfonts.h</code> file.
     </p>
     <ul><pre>

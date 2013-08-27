@@ -171,7 +171,7 @@ uint8_t pic32mx_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
         {
           ret = SPI_STATUS_PRESENT;
 
-          /* A high value indicates the the card is write protected. */
+          /* A high value indicates that the card is write protected. */
 
           if (pic32mx_gpioread(GPIO_SD_WP))
             {

@@ -520,7 +520,7 @@ void weak_function up_dmainitialize(void)
  *
  * Input parameter:
  *   dmamap - Identifies the stream/channel resource. For the STM32 F4, this
- *     is a bit-encoded  value as provided by the the DMAMAP_* definitions
+ *     is a bit-encoded  value as provided by the DMAMAP_* definitions
  *     in chip/stm32f40xxx_dma.h
  *
  * Returned Value:

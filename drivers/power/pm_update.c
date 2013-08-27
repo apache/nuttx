@@ -278,7 +278,7 @@ void pm_worker(FAR void *arg)
 
       else if (g_pmglobals.recommended < nextstate)
         {
-          /* No.. increment the count.  Has is passed the the count required
+          /* No.. increment the count.  Has it passed the count required
            * for a state transition?
            */
 

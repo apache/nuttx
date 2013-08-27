@@ -251,7 +251,7 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume, uint16_t reserve)
     }
   while (ret != OK);
 
-  /* Return the the character at this offset.  Note that on return,
+  /* Return the character at this offset.  Note that on return,
    * iooffset could point to the byte outside of the current block.
    */
 

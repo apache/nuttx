@@ -220,7 +220,7 @@ static uint32_t spi_setfrequency(FAR struct spi_bitbang_s *priv, uint32_t freque
    * SPI_BITBAND_LOOPSPERMSEC is the number of times through a delay loop
    * to get 1 millisecond.
    *
-   * SPI_BITBAND_LOOPSPERMSEC / 1000000 is then the the number of counts
+   * SPI_BITBAND_LOOPSPERMSEC / 1000000 is then the number of counts
    * to get 1 nanosecond.  In reality, this is a number less than zero.  But
    * then we can use this to calculate:
    *

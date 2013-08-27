@@ -272,7 +272,7 @@ static const struct usb_epdesc_s g_epbulkindesc =
   1                                             /* interval */
 };
 
-/* The components of the the configuration descriptor are maintained as
+/* The components of the configuration descriptor are maintained as
  * a collection of separate descriptor structure coordinated by the
  * following array.  These descriptors could have been combined into
  * one larger "super" configuration descriptor structure.  However, I

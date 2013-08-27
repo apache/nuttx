@@ -1219,7 +1219,7 @@ static int stm32_uiptxpoll(struct uip_driver_s *dev)
  *
  * Description:
  *   The function is called when a frame is received using the DMA receive
- *   interrupt.  It scans the RX descriptors to the the received frame.
+ *   interrupt.  It scans the RX descriptors to the received frame.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1347,7 +1347,7 @@ static void stm32_disableint(FAR struct stm32_ethmac_s *priv, uint32_t ierbit)
  *
  * Description:
  *   The function is called when a frame is received using the DMA receive
- *   interrupt.  It scans the RX descriptors to the the received frame.
+ *   interrupt.  It scans the RX descriptors to the received frame.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1506,7 +1506,7 @@ static int stm32_recvframe(FAR struct stm32_ethmac_s *priv)
               dev->d_len = ((rxdesc->rdes0 & ETH_RDES0_FL_MASK) >> ETH_RDES0_FL_SHIFT) - 4;
 
               /* Get a buffer from the free list.  We don't even check if
-               * this is successful because we already assure the the free
+               * this is successful because we already assure the free
                * list is not empty above.
                */
 
@@ -2536,7 +2536,7 @@ static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
       return ret;
     }
 
-  /* Bit 8 of the DSCR register is zero, the the DM9161 has not selected RMII.
+  /* Bit 8 of the DSCR register is zero, then the DM9161 has not selected RMII.
    * If RMII is not selected, then reset the MCU to recover.
    */
  

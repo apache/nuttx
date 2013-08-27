@@ -900,8 +900,8 @@ static int up_interrupts(int irq, void *context)
       if (count > 0)
 #else
       /* Check if the receive data register is full (RDRF).  NOTE:  If
-       * FIFOS are enabled, this does not mean that the the FIFO is full,
-       * rather, it means that the the number of bytes in the RX FIFO has
+       * FIFOS are enabled, this does not mean that the FIFO is full,
+       * rather, it means that the number of bytes in the RX FIFO has
        * exceeded the watermark setting.  There may actually be RX data
        * available!
        *
@@ -929,8 +929,8 @@ static int up_interrupts(int irq, void *context)
 #  error "Missing logic"
 #else
       /* Check if the transmit data register is "empty."  NOTE:  If FIFOS
-       * are enabled, this does not mean that the the FIFO is empty, rather,
-       * it means that the the number of bytes in the TX FIFO is below the
+       * are enabled, this does not mean that the FIFO is empty, rather,
+       * it means that the number of bytes in the TX FIFO is below the
        * watermark setting.  There could actually be space for additional TX
        * data.
        *
@@ -1090,8 +1090,8 @@ static bool up_rxavailable(struct uart_dev_s *dev)
   return count > 0;
 #else
   /* Return true if the receive data register is full (RDRF).  NOTE:  If
-   * FIFOS are enabled, this does not mean that the the FIFO is full,
-   * rather, it means that the the number of bytes in the RX FIFO has
+   * FIFOS are enabled, this does not mean that the FIFO is full,
+   * rather, it means that the number of bytes in the RX FIFO has
    * exceeded the watermark setting.  There may actually be RX data
    * available!
    */
@@ -1175,8 +1175,8 @@ static bool up_txready(struct uart_dev_s *dev)
 #  error "Missing logic"
 #else
   /* Return true if the transmit data register is "empty."  NOTE:  If
-   * FIFOS are enabled, this does not mean that the the FIFO is empty,
-   * rather, it means that the the number of bytes in the TX FIFO is
+   * FIFOS are enabled, this does not mean that the FIFO is empty,
+   * rather, it means that the number of bytes in the TX FIFO is
    * below the watermark setting.  There may actually be space for
    * additional TX data.
    */

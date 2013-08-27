@@ -175,7 +175,7 @@ config NET_TCP_SPLIT
 	bool "Enable packet splitting"
 	default n
 	---help---
-		send() will not return until the the transfer has been ACKed by the
+		send() will not return until the transfer has been ACKed by the
 		recipient.  But under RFC 1122, the host need not ACK each packet
 		immediately; the host may wait for 500 MS before ACKing.  This
 		combination can cause very slow performance with small transfers are

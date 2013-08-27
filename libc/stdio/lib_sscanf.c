@@ -108,7 +108,7 @@ static int findwidth(FAR const char *buf, FAR const char *fmt)
       return strcspn(buf, spaces);
     }
 
-  /* No.. Another possibility is the the format character is followed by
+  /* No.. Another possibility is the format character is followed by
    * some recognizable delimiting value.
    */
 

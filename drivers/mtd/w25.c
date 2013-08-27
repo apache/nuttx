@@ -1152,7 +1152,7 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *spi)
         }
       else
         {
-          /* Make sure the the FLASH is unprotected so that we can write into it */
+          /* Make sure that the FLASH is unprotected so that we can write into it */
 
 #ifndef CONFIG_W25_READONLY
           w25_unprotect(priv);

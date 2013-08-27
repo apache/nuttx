@@ -1769,7 +1769,7 @@ from the NuttX Porting Guide:
        point that is called from the application at initialization
        time.  This driver calls usbhost_registerclass() during this
        initialization in order to makes itself available in the
-       event the the device that it supports is connected.  Examples:
+       event that the device that it supports is connected.  Examples:
        The function usbhost_storageinit() in the file
        drivers/usbhost/usbhost_storage.c
     2. Each application must include a waiter thread thread that

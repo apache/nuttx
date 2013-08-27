@@ -1389,7 +1389,7 @@ static void sam_qh_enqueue(struct sam_qh_s *qh)
 {
   uintptr_t physaddr;
 
-  /* Set the internal fqp field.  When we transverse the the QH list later,
+  /* Set the internal fqp field.  When we transverse the QH list later,
    * we need to know the correct place to start because the overlay may no
    * longer point to the first qTD entry.
    */
@@ -1554,7 +1554,7 @@ static int sam_qtd_addbpl(struct sam_qtd_s *qtd, const void *buffer, size_t bufl
 
       next = (physaddr + 4096) & ~4095;
 
-      /* How many bytes were included in the last buffer?  Was the the whole
+      /* How many bytes were included in the last buffer?  Was it the whole
        * thing?
        */
 
@@ -2059,7 +2059,7 @@ static int sam_qtd_ioccheck(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
   **bp = qtd->hw.nqp;
 
   /* Subtract the number of bytes left untransferred.  The epinfo->xfrd
-   * field is initialized to the the total number of bytes to be transferred
+   * field is initialized to the total number of bytes to be transferred
    * (all qTDs in the list).  We subtract out the number of untransferred
    * bytes on each transfer and the final result will be the number of bytes
    * actually transferred.
@@ -3825,7 +3825,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   regval16 = sam_swap16(HCCR->hciversion);
   uvdbg("HCIVERSION %x.%02x\n", regval16 >> 8, regval16 & 0xff);
 
-  /* Verify the the correct number of ports is reported */
+  /* Verify that the correct number of ports is reported */
 
   regval = sam_getreg(&HCCR->hcsparams);
   nports = (regval & EHCI_HCSPARAMS_NPORTS_MASK) >> EHCI_HCSPARAMS_NPORTS_SHIFT;

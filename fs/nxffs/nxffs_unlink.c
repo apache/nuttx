@@ -122,7 +122,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
 
   nxffs_ioseek(volume, entry.hoffset);
 
-  /* Make sure the the block is in the cache */
+  /* Make sure that the block is in the cache */
 
   ret = nxffs_rdcache(volume, volume->ioblock);
   if (ret < 0)

@@ -469,7 +469,7 @@ static int htmlize_character(char *dest, char ch)
   const char *str;
 
   /* Transfer the character from into the destination buffer, perform the
-   * conversion only the the character is one of the special characters.
+   * conversion only if the character is one of the special characters.
    */
 
   str = NULL;
@@ -1413,7 +1413,7 @@ static void process_default(FILE *stream, struct default_s *defp)
  * Name: print_default
  *
  * Description:
- *   Output and the list of defaults to the the HTML body file.
+ *   Output and the list of defaults to the HTML body file.
  *
  ****************************************************************************/
 
@@ -1485,7 +1485,7 @@ static void print_default(struct default_s *defp, output_t outfunc)
  * Name: free_default
  *
  * Description:
- *   Output and the list of defaults to the the HTML body file.
+ *   Output and the list of defaults to the HTML body file.
  *
  ****************************************************************************/
 

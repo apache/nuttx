@@ -2576,7 +2576,7 @@
 	* arch/arm/src/stm32/stm32f*0xx_rcc.c:  In order to use CAN2, both CAN1 and
 	  CAN2 clocking must be enabled.
 	* arch/mips/src/pic32mx/picm32mx-usbdev.c:  Several stall-related fixes so that
-	  the USB device driver can used the the mass storage class (which does a LOT
+	  the USB device driver can used the mass storage class (which does a LOT
 	  of stalling as part of its normal protocol).  The PIC32 USB Mass Storage
 	  device is, however, still non-functional when debug is OFF.
 	* include/nuttx/fs: Move all file-system related files from include/nuttx to
@@ -3288,7 +3288,7 @@
 	* arch/*/src/Makefile:  Remove some old logic that was kicked off
 	  when CONFIG_BOOT_RUNFROMFLASH=y.  The old logic used to use
 	  objcopy to move sections.  Newer logic changes the load position
-	  of sections in the the linker script.  As far as I can tell, there
+	  of sections in the linker script.  As far as I can tell, there
 	  is nothing in the source tree now that depends on the old way of
 	  doing things (if I am wrong, they will need a change to the linker
 	  script).
@@ -3406,7 +3406,7 @@
 	  touchscreen driver).
 	* configs/shenzhou/src/up_touchscreen.c:  Add ADS7843E touchscreen
 	  support for the Shenzhou board.  The initial check-in is untested
-	  and basically a clone of the the touchscreen support for the SAM-3U.
+	  and basically a clone of the touchscreen support for the SAM-3U.
 	* tools/cfgparser.c: There are some NxWidget configuration
 	  settings that must be de-quoted.
 	* arch/arm/src/stm32/Kconfig: There is no SPI4.  Some platforms
@@ -3567,7 +3567,7 @@
 	* net/netdev_ioctl.c:  Add interface state flags and ioctl calls
 	  to bring network interfaces up and down (from Darcy Gong).
 	* config/stm32f4discovery: Enable C++ exceptions.  Now the entire
-	  apps/examples/cxxtest works -- meaning the the uClibc++ is
+	  apps/examples/cxxtest works -- meaning that the uClibc++ is
 	  complete and verified for the STM32 platform.
 
 6.24 2012-12-20 Gregory Nutt <gnutt@nuttx.org>
@@ -3636,7 +3636,7 @@
 	  CONFIG_WINDOWS_NATIVE.  This will allow me to eliminate a lot of
 	  conditional logic elsewhere.
 	* nuttx/graphics: One a mouse button is pressed, continue to report all
-	  mouse button events to the first window that received the the initial
+	  mouse button events to the first window that received the initial
 	  button down event, even if the mouse attempts to drag outside the
 	  window. From Petteri Aimonen.
 	* nuttx/graphics/nxmu/nx_block.c:  One more fix to the NX block message
@@ -3753,7 +3753,7 @@
 	  Also from Petteri Aimonen.
 	* include/stdbool.h: Can now be disabled for C++ files if CONFIG_C99_BOOL8 is
 	  defined.  CONFIG_C99_BOOL8 indicates (1) that the sizeof(_Bool) is one in both
-	  C and C++, and (2) the the C compiler is C99 and supports the _Bool intrinsic
+	  C and C++, and (2) the C compiler is C99 and supports the _Bool intrinsic
 	  type. Requested by Freddie Chopin.
 	* include/stdlib/lib_rand.c:  Various additional changes so that the integer
 	  value zero can be returned.  Requested by Freddie Chopin.
@@ -4435,7 +4435,7 @@
 	  and simpler.  However, the C code intermixed with SVC calls was
 	  not properly preserving registers.  The more complex, assembly
 	  language version does not suffer from these issues.  I believe
-	  the the kernel build can now be called "feature complete"
+	  the kernel build can now be called "feature complete"
 	  (2013-03-23).
 	* binfmt/binfmt_execmodule.c:  Here is a place where I forget
 	  to update the call to sched_releasetcb() to pass the thread
@@ -4509,7 +4509,7 @@
 	  support for the touschscreen on the WaveShare LCD (2013-4-01).
 	* configs/several:  There were already some functions called
 	  lpc17_sspinitialize().  So they had to be renamed (2013-4-01).
-	* arch/arm/src/lpc17xx/lpc17_ssp.c:  Adapted to work the the LPC178x
+	* arch/arm/src/lpc17xx/lpc17_ssp.c:  Adapted to work with the LPC178x
 	  family (2013-4-01).
 	* arch/arm/src/lpc17xx/lpc17_gpio.c/.h:  Separate LPC176x and LPC178x
 	  logic into separate files.  The logic is diverging to much to
@@ -4725,7 +4725,7 @@
 	* nuttx/syscall/syscall.csv:  Type of first parameter of on_exit() is
 	  wrong. Reported by Ken Pettit (2013-5-17).
 	* configs/mikroe-stm32f4/kernel/, kostest/ and scripts/:  Add kernel build
-	  support and kernel mode OS test example for the the MikroElektronkia
+	  support and kernel mode OS test example for the MikroElektronkia
 	  MultiMedia STM32 M4 board.  From Ken Pettit (2013-5-17).
 	* arch/arm/include/stm32/chip.h and arch/arm/src/stme32/chip/stm32l15xxx_pinmap.h:
 	  Beginning of support for the STM32L15X family (2013-5-18).
@@ -4982,7 +4982,7 @@
 	  so that is it compatible with the SPI drivers of other MCUs
 	  (2013-6-16).
 	* configs/sam3u-ek/src/up_touchscreen.c and configs/sam4l-xplained/src/sam_mmcsd.c:
-	  Changed needed because of the above change the the SAM3/4 SPI
+	  Changed needed because of the above change to the SAM3/4 SPI
 	  interface (2013-6-16).
 	* drivers/input/ads7843e.c:  Remove the wait for the touchscreen busy
 	  bit.  I don't see the busy bit changing on the SAM3U-EK board.  But
@@ -5211,7 +5211,7 @@
 	* The sama5d3x-ek/hello now runs correctly (2013-7-28).
 	* configs/sama5d3x-ek/ostest/:  This configuration has been modified
 	  to run out NOR flash.  More work is still needed to reconfigure the
-	  SMC so the the NOR flash can work with the high clock (2013-7-28).
+	  SMC so that the NOR flash can work with the high clock (2013-7-28).
 	* arch/arm/src/sama5/sam_clockconfig.c/h and
 	  configs/sama5d3x-ek/src/sam_norflash.c:  Add a file structure that
 	  will (eventually) support reconfiguration of NOR flash when NuttX
@@ -5467,4 +5467,6 @@
 	  max packetsize.  High speed needs 64 bytes, low speed needs 8 bytes,
 	  and full speed can handle almost any size (2013-8-26).
 	* arch/arm:  Add hooks for Cortex-A8.  Not much more yet (2013-8-27).
+	* Lots of files:  Fix all occurrents of "the the" in documentation and
+	  comments (2013-8-27).
 

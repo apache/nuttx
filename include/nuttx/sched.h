@@ -246,7 +246,7 @@ struct child_status_s
 struct dspace_s
 {
   /* The life of the structure allocation is determined by this reference
-   * count.  This count is number of threads that shared the the same D-Space.
+   * count.  This count is number of threads that shared the same D-Space.
    * This includes the parent task as well as any pthreads created by the
    * parent task or any of its child threads.
    */

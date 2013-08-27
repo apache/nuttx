@@ -298,7 +298,7 @@ static inline uint32_t sam_fifocfg(struct sam_dma_s *dmach)
  * Name: sam_txcfg
  *
  * Description:
- *  Decode the the flags to get the correct CFG register bit settings for
+ *  Decode the flags to get the correct CFG register bit settings for
  *  a transmit (memory to peripheral) transfer.
  *
  ****************************************************************************/
@@ -322,7 +322,7 @@ static inline uint32_t sam_txcfg(struct sam_dma_s *dmach)
  * Name: sam_rxcfg
  *
  * Description:
- *  Decode the the flags to get the correct CFG register bit settings for
+ *  Decode the flags to get the correct CFG register bit settings for
  *  a receive (peripheral to memory) transfer.
  *
  ****************************************************************************/
@@ -346,7 +346,7 @@ static inline uint32_t sam_rxcfg(struct sam_dma_s *dmach)
  * Name: sam_txctrlabits
  *
  * Description:
- *  Decode the the flags to get the correct CTRLA register bit settings for
+ *  Decode the flags to get the correct CTRLA register bit settings for
  *  a transmit (memory to peripheral) transfer.  These are only the "fixed"
  *  CTRLA values and  need to be updated with the actual transfer size before
  *  being written to CTRLA sam_txctrla).
@@ -492,7 +492,7 @@ static inline uint32_t sam_txctrla(struct sam_dma_s *dmach,
  * Name: sam_rxctrlabits
  *
  * Description:
- *  Decode the the flags to get the correct CTRLA register bit settings for
+ *  Decode the flags to get the correct CTRLA register bit settings for
  *  a read (peripheral to memory) transfer. These are only the "fixed" CTRLA
  *  values and need to be updated with the actual transfer size before being
  *  written to CTRLA sam_rxctrla).
@@ -637,7 +637,7 @@ static inline uint32_t sam_rxctrla(struct sam_dma_s *dmach,
  * Name: sam_txctrlb
  *
  * Description:
- *  Decode the the flags to get the correct CTRLB register bit settings for
+ *  Decode the flags to get the correct CTRLB register bit settings for
  *  a transmit (memory to peripheral) transfer.
  *
  ****************************************************************************/
@@ -716,7 +716,7 @@ static inline uint32_t sam_txctrlb(struct sam_dma_s *dmach)
  * Name: sam_rxctrlb
  *
  * Description:
- *  Decode the the flags to get the correct CTRLB register bit settings for
+ *  Decode the flags to get the correct CTRLB register bit settings for
  *  a receive (peripheral to memory) transfer.
  *
  ****************************************************************************/

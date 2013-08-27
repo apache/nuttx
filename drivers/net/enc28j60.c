@@ -448,7 +448,7 @@ static inline void enc_unlock(FAR struct enc_driver_s *priv)
  *
  * Description:
  *   Read a global register (EIE, EIR, ESTAT, ECON2, or ECON1).  The cmd
- *   include the CMD 'OR'd with the the global address register.
+ *   include the CMD 'OR'd with the global address register.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -491,7 +491,7 @@ static uint8_t enc_rdgreg2(FAR struct enc_driver_s *priv, uint8_t cmd)
  *
  * Description:
  *   Write to a global register (EIE, EIR, ESTAT, ECON2, or ECON1).  The cmd
- *   include the CMD 'OR'd with the the global address register.
+ *   include the CMD 'OR'd with the global address register.
  *
  * Parameters:
  *   priv   - Reference to the driver state structure

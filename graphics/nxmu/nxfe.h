@@ -382,7 +382,7 @@ struct nxsvrmsg_fill_s
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the fill */
 };
 
-/* Get a rectangular region from the the window */
+/* Get a rectangular region from the window */
 
 struct nxsvrmsg_getrectangle_s
 {

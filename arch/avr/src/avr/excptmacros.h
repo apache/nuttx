@@ -524,7 +524,7 @@
 	ld		r25, x+
 	ld		r24, x+
 
-	/* Finally, recover X [r26-r27] from the the new stack.  The PC remains on the new
+	/* Finally, recover X [r26-r27] from the new stack.  The PC remains on the new
 	 * stack so that the user of this macro can return with ret (not reti, ret will
 	 * preserve the restored interrupt state).
 	 */

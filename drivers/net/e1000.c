@@ -703,7 +703,7 @@ static int e1000_ifdown(struct uip_driver_s *dev)
     wd_cancel(e1000->txpoll);
     wd_cancel(e1000->txtimeout);
 
-    /* Put the the EMAC is its reset, non-operational state.  This should be
+    /* Put the EMAC is its reset, non-operational state.  This should be
      * a known configuration that will guarantee the skel_ifup() always
      * successfully brings the interface back up.
      */

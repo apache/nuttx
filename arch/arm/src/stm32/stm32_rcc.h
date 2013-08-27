@@ -76,7 +76,7 @@ extern "C"
  * Public Data
  ************************************************************************************/
 
-/* This symbol references the Cortex-M3 vector table (as positioned by the the linker
+/* This symbol references the Cortex-M3 vector table (as positioned by the linker
  * script, ld.script or ld.script.dfu.  The standard location for the vector table is
  * at the beginning of FLASH at address 0x0800:0000.  If we are using the STMicro DFU
  * bootloader, then the vector table will be offset to a different location in FLASH

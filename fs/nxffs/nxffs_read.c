@@ -127,7 +127,7 @@ static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
       datstart  = datend;
       datend   += blkentry->datlen;
 
-      /* Offset to search for the the next data block */
+      /* Offset to search for the next data block */
 
       offset = blkentry->hoffset + SIZEOF_NXFFS_DATA_HDR + blkentry->datlen;
     }
@@ -418,7 +418,7 @@ int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
   uint16_t dlen;
   int ret;
 
-  /* Make sure the the block containing the data block header is in the cache */
+  /* Make sure that the block containing the data block header is in the cache */
 
   nxffs_ioseek(volume, offset);
   ret = nxffs_rdcache(volume, volume->ioblock);

@@ -996,7 +996,7 @@ static int stm32_chan_wait(FAR struct stm32_usbhost_s *priv,
 static void stm32_chan_wakeup(FAR struct stm32_usbhost_s *priv,
                               FAR struct stm32_chan_s *chan)
 {
-  /* Is the the transfer complete? Is there a thread waiting for this transfer
+  /* Is the transfer complete? Is there a thread waiting for this transfer
    * to complete?
    */
 
@@ -1774,7 +1774,7 @@ static inline void stm32_gint_hcinisr(FAR struct stm32_usbhost_s *priv,
           stm32_chan_halt(priv, chidx, CHREASON_XFRC);
 
           /* Clear any pending NAK condition.  The 'indata1' data toggle
-           * should have been appropriately updated by the the RxFIFO
+           * should have been appropriately updated by the RxFIFO
            * logic as each packet was received.
            */
 
@@ -2961,7 +2961,7 @@ static inline void stm32_hostinit_enable(void)
  *   Enable Tx FIFO empty interrupts.  This is necessary when the entire
  *   transfer will not fit into Tx FIFO.  The transfer will then be completed
  *   when the Tx FIFO is empty.  NOTE:  The Tx FIFO interrupt is disabled
- *   the the fifo empty interrupt handler when the transfer is complete.
+ *   the fifo empty interrupt handler when the transfer is complete.
  *
  * Input Parameters:
  *   priv - Driver state structure reference

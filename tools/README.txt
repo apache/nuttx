@@ -4,7 +4,7 @@ tools/README.txt
 This README file addresses the contents of the NuttX tools/ directory.
 
 The tools/ directory contains miscellaneous scripts and host C programs
-that are necessary parts of the the NuttX build system.  These files
+that are necessary parts of the NuttX build system.  These files
 include:
 
 README.txt
@@ -427,7 +427,7 @@ incdir.bat
 ---------
 
   Different compilers have different conventions for specifying lists
-  of include file paths on the the compiler command line.  This incdir.sh
+  of include file paths on the compiler command line.  This incdir.sh
   bash script allows the build system to create include file paths without
   concern for the particular compiler in use.
 
@@ -489,7 +489,7 @@ kconfig.bat
   only a few options for the Windows user (see the top-level README.txt
   file).
 
-  You can, with some effort, run the the Cygwin kconfig-mconf tool directly
+  You can, with some effort, run the Cygwin kconfig-mconf tool directly
   in the CMD.exe shell.  In this case, you do not have to modify the
   .config file, but there are other complexities:  You need to
   temporarily set the Cgywin directories in the PATH variable and

@@ -527,7 +527,7 @@
    * in the file mmu.h
    *
    * We must declare the page table at the bottom or at the top of internal
-   * SRAM.  We pick the the bottom of internal SRAM *unless* there are vectors
+   * SRAM.  We pick the bottom of internal SRAM *unless* there are vectors
    * in the way at that position.
    */
 

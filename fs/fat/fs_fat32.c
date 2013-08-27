@@ -1548,12 +1548,12 @@ static int fat_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
             {
               /* The name was successfully extracted.  Re-read the
                * attributes:  If this is long directory entry, then the
-               * attributes that we need will be the the final, short file
+               * attributes that we need will be the final, short file
                * name entry and not in the directory entry where we started
                * looking for the file name.  We can be assured that, on
                * success,  fat_dirname2path() will leave the short file name
                * entry in the cache regardless of the kind of directory
-               * entry.  We simply have to re-read it to cover the the long
+               * entry.  We simply have to re-read it to cover the long
                * file name case.
                */
 

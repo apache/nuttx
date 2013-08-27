@@ -246,7 +246,7 @@ int exec_module(FAR const struct binary_s *bin);
  *
  * Description:
  *   If CONFIG_SCHED_HAVE_PARENT is defined, this function may be called by
- *   the parent of the the newly created task to automatically unload the
+ *   the parent of the newly created task to automatically unload the
  *   module when the task exits.  This assumes that (1) the caller is the
  *   parent of the created task, (2) that bin was allocated with kmalloc()
  *   or friends.  It will also automatically free the structure with kfree()

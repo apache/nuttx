@@ -185,7 +185,7 @@ int sem_timedwait(FAR sem_t *sem, FAR const struct timespec *abstime)
 #endif
 
   /* Create a watchdog.  We will not actually need this watchdog
-   * unless the the semaphore is unavailable, but we will reserve it up
+   * unless the semaphore is unavailable, but we will reserve it up
    * front before we enter the following critical section.
    */
 

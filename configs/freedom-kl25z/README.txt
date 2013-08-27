@@ -139,10 +139,10 @@ mbed
 
   1. Connect the KL25Z to the host PC using the USB connector labeled
      SDA.
-  2. A new file system will appear call MBED; open it with Windows
+  2. A new file system will appear called MBED; open it with Windows
      Explorer (assuming that you are using Windows).
   3. Drag and drop nuttx.bin into the MBED window.  This will load the
-     nuttx.bin binary into the the KL25Z.  the MBED window will close
+     nuttx.bin binary into the KL25Z.  The MBED window will close
      then re-open and the KL25Z will be running the new code.
 
   Using the Freescale SDA debugger is essentially the same.  That

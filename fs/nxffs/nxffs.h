@@ -670,7 +670,7 @@ extern off_t nxffs_inodeend(FAR struct nxffs_volume_s *volume,
  * Name: nxffs_verifyblock
  *
  * Description:
- *   Assure the the provided (logical) block number is in the block cache
+ *   Assure that the provided (logical) block number is in the block cache
  *   and that it has a valid block header (i.e., proper magic and
  *   marked good)
  *

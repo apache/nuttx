@@ -745,7 +745,7 @@ int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size)
             }
         }
 
-      /* If we get here, then we have looked at every byte in the the block
+      /* If we get here, then we have looked at every byte in the block
        * and did not find any sequence of erased bytes long enough to hold
        * the object.  Skip to the next, valid block.
        */

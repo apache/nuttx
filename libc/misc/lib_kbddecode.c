@@ -255,7 +255,7 @@ int kbd_decode(FAR struct lib_instream_s *stream,
         }
     }
 
-  /* We have successfully parsed the the entire escape sequence.  Return the
+  /* We have successfully parsed the entire escape sequence.  Return the
    * keyboard value in pch and the value an indication determined by the
    * terminating character.
    */

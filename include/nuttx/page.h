@@ -253,7 +253,7 @@ extern "C"
  *
  *   1) Sanity checking.
  *      - ASSERT if the currently executing task is the page fill worker
- *        thread.  The page fill worker thread is how the the page fault
+ *        thread.  The page fill worker thread is how the page fault
  *        is resolved and all logic associated with the page fill worker
  *        must be "locked" and always present in memory.
  *   2) Block the currently executing task.

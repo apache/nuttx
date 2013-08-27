@@ -434,7 +434,7 @@ HCS12/NE64BADGE-specific Configuration Options
 
 	CONFIG_HCS12_NONBANKED - Indicates that the target systems does not
 	  support banking.  Only short calls are made; one fixed page is
-	  presented the the paging window.  Only 48Kb of FLASH is usable
+	  presented in the paging window.  Only 48Kb of FLASH is usable
 	  in this configuration: pages 3e, 3d, then 3f will appear as a
 	  contiguous address space in memory.
 

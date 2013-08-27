@@ -238,7 +238,7 @@ uint8_t pic32mx_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
         {
           ret = SPI_STATUS_PRESENT;
 
-          /* It seems that a high value indicates the the card is write
+          /* It seems that a high value indicates the card is write
            * protected.
            */
 

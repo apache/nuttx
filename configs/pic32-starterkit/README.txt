@@ -240,7 +240,7 @@ PIN CONFIGURATIONS                     SIGNAL NAME                ON-BOARD CONNE
 MEB Connector
 =============
 
-The following table summarizes how the pins brought the the MEB through the
+The following table summarizes how the pins brought the MEB through the
 J2 on the Ethernet Starter Kit are mapped.  This connect is J2 on the Ethernet
 Starter Kit and J3 on the MEB.
 

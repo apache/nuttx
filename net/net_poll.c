@@ -144,7 +144,7 @@ static uint16_t poll_interrupt(FAR struct uip_driver_s *dev, FAR void *conn,
 
       if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
         {
-          /* Make the the connection has been lost */
+          /* Marki that the connection has been lost */
 
           net_lostconnection(info->psock, flags);
           eventset |= (POLLERR | POLLHUP);

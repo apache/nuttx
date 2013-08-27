@@ -3513,7 +3513,7 @@ extern void up_ledoff(int led);
           <p>
             Each USB host class driver includes an intialization entry point that is called from the
             application at initialization time.
-            This driver calls <code>usbhost_registerclass()</code> during this initialization in order to makes itself available in the event the the device that it supports is connected.
+            This driver calls <code>usbhost_registerclass()</code> during this initialization in order to makes itself available in the event the device that it supports is connected.
           </p>
           <p>
             <b>Examples</b>:
@@ -3559,7 +3559,7 @@ extern void up_ledoff(int led);
   <li>
     <p>
       <b><code>include/nuttx/usb/usbdev_trace.h</code></b>.
-      Declarations needed to work the the NuttX USB device driver trace capability.
+      Declarations needed to work with the NuttX USB device driver trace capability.
       That USB trace capability is detailed in <a href="UsbTrace.html">separate document</a>.
     </p>
   </li>
@@ -4197,13 +4197,13 @@ void pm_activity(int priority);
 enum pm_state_e pm_checkstate(void);
 </pre></ul>
 <p><b>Description:</b>
-  This function is called from the MCU-specific IDLE loop to monitor the the power management conditions.
+  This function is called from the MCU-specific IDLE loop to monitor the power management conditions.
   This function returns the &quot;recommended&quot; power management state based on the PM configuration and activity reported in the last sampling periods.
   The power management state is not automatically changed, however.
   The IDLE loop must call <code>pm_changestate()</code> in order to make the state change.
 </p>
 <p>
-  These two steps are separated because the plaform-specific IDLE loop may have additional situational information that is not available to the the PM sub-system.
+  These two steps are separated because the platform-specific IDLE loop may have additional situational information that is not available to the PM sub-system.
   For example, the IDLE loop may know that the battery charge level is very low and may force lower power states even if there is activity.
 </p>
 <p>

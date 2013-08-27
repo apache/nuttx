@@ -51,7 +51,7 @@ conditions where mmap() can be supported:
       each time that rammap() is called. Not very useful!
 
    b. The entire mapped portion of the file must be present in memory.
-      Since it is assumed the the MCU does not have an MMU, on-demanding
+      Since it is assumed that the MCU does not have an MMU, on-demanding
       paging in of file blocks cannot be supported. Since the while mapped
       portion of the file must be present in memory, there are limitations
       in the size of files that may be memory mapped (especially on MCUs

@@ -90,7 +90,7 @@ struct nxbe_fill_s
  *   rect - The location to be copied
  *   plane - Specifies the color plane to get from.
  *   dest - The location to copy the memory region
- *   deststride - The width, in bytes, the the dest memory
+ *   deststride - The width, in bytes, of the dest memory
  *
  * Return:
  *   None

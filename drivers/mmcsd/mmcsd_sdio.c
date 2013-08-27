@@ -1042,7 +1042,7 @@ static int mmcsd_verifystate(FAR struct mmcsd_state_s *priv, uint32_t state)
  * Name: mmcsd_wrprotected
  *
  * Description:
- *   Return true if the the card is unlocked an not write protected.  The
+ *   Return true if the card is unlocked an not write protected.  The
  *
  *
  ****************************************************************************/
@@ -2763,7 +2763,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
            * connected (This implementation supports only a single MMC card).  So
            * we cannot re-send CMD1 without first placing the card back into
            * stand-by state (if the card is busy, it will automatically
-           * go back to the the standby state).
+           * go back to the standby state).
            */
 
           mmcsd_sendcmdpoll(priv, MMC_CMD1, MMCSD_VDD_33_34);

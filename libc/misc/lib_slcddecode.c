@@ -391,7 +391,7 @@ enum slcdret_e slcd_decode(FAR struct lib_instream_s *stream,
         }
     }
 
-  /* We have successfully parsed the the entire escape sequence.  Return the
+  /* We have successfully parsed the entire escape sequence.  Return the
    * CLCD value in pch, return the count in parg, and an indication that this
    * is a special action.
    */

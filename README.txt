@@ -477,7 +477,7 @@ NuttX Configuration Tool under DOS
      And of course, after you use the configuration tool you need to
      restore CONFIG_WINDOWS_NATIVE=y and the correct CONFIG_APPS_DIR.
 
-  2) You can, with some effort, run the the Cygwin kconfig-mconf tool
+  2) You can, with some effort, run the Cygwin kconfig-mconf tool
      directly in the Windows console window.  In this case, you do not
      have to modify the .config file, but there are other complexities:
 
@@ -791,7 +791,7 @@ Installing GNUWin32
   5. After running GetGNUWin32-0.x.x.exe, you will have a new directory
      <this-directory>/GetGNUWin32
 
-  Note the the GNUWin32 installer didn't install GNUWin32.  Instead, it
+  Note that the GNUWin32 installer didn't install GNUWin32.  Instead, it
   installed another, smarter downloader.  That downloader is the GNUWin32
   package management tool developed by the Open SSL project.
 

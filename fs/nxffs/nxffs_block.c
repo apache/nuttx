@@ -74,7 +74,7 @@
  * Name: nxffs_verifyblock
  *
  * Description:
- *   Assure the the provided (logical) block number is in the block cache
+ *   Assure that the provided (logical) block number is in the block cache
  *   and that it has a valid block header (i.e., proper magic and
  *   marked good)
  *
@@ -94,7 +94,7 @@ int nxffs_verifyblock(FAR struct nxffs_volume_s *volume, off_t block)
   FAR struct nxffs_block_s *blkhdr;
   int ret;
 
-  /* Make sure the the block is in the cache */
+  /* Make sure that the block is in the cache */
 
   ret = nxffs_rdcache(volume, block);
   if (ret < 0)

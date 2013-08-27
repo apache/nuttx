@@ -623,7 +623,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *   lower      - A pointer the publicly visible representation of the "lower-half"
  *                driver state structure.
  *   newhandler - The new watchdog expiration function pointer.  If this
- *                function pointer is NULL, then the the reset-on-expiration
+ *                function pointer is NULL, then the reset-on-expiration
  *                behavior is restored,
  *
  * Returned Values:

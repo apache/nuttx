@@ -794,7 +794,7 @@ EXTERN uint32_t lpc31_clkfreq(enum lpc31_clockid_e clkid,
  * Name: lpc31_enableexten
  *
  * Description:
- *   Enable external enabling for the the specified possible clocks.
+ *   Enable external enabling for the specified possible clocks.
  *
  ************************************************************************/
 
@@ -804,7 +804,7 @@ EXTERN void lpc31_enableexten(enum lpc31_clockid_e clkid);
  * Name: lpc31_disableexten
  *
  * Description:
- *   Disable external enabling for the the specified possible clocks.
+ *   Disable external enabling for the specified possible clocks.
  *
  ************************************************************************/
 

@@ -670,7 +670,7 @@ Where <subdir> is one of the following:
     NOTE: The SD card should *not* be mounted under NSH *and* exported
     by the mass storage device!!! That can result in corruption of the
     SD card format.  This is the sequence of commands that you should
-    used to work the the SD card safely:
+    use to work with the SD card safely:
 
       mount -t vfat /dev/mmcsd0 /mnt/sdcard : Mount the SD card initially
       ...

@@ -65,7 +65,7 @@
  *
  *   1) Sanity checking.
  *      - ASSERT if the currently executing task is the page fill worker
- *        thread.  The page fill worker thread is how the the page fault
+ *        thread.  The page fill worker thread is how the page fault
  *        is resolved and all logic associated with the page fill worker
  *        must be "locked" and always present in memory.
  *      - ASSERT if an interrupt was executing at the time of the exception.
@@ -127,7 +127,7 @@ void pg_miss(void)
   /* Sanity checking
    *
    * ASSERT if the currently executing task is the page fill worker thread.
-   * The page fill worker thread is how the the page fault is resolved and
+   * The page fill worker thread is how the page fault is resolved and
    * all logic associated with the page fill worker must be "locked" and
    * always present in memory.
    */

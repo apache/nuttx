@@ -102,7 +102,7 @@ gran_common_initialize(FAR void *heapstart, size_t heapsize, uint8_t log2gran,
   unsigned int       alignedsize;
   unsigned int       ngranules;
 
-  /* Check parameters if debug is on.  Note the the size of a granual is
+  /* Check parameters if debug is on.  Note the size of a granual is
    * limited to 2**31 bytes and that the size of the granule must be greater
    * than the alignment size.
    */

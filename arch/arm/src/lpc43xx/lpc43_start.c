@@ -114,7 +114,7 @@ static inline void lpc43_setbootrom(void)
 
   putreg32(LPC43_ROM_BASE, LPC43_CREG_M4MEMMAP);
 
-  /* Address zero now maps to the Boot ROM.  Make sure the the VTOR will
+  /* Address zero now maps to the Boot ROM.  Make sure that the VTOR will
    * use the ROM vector table at that address.
    */
 
@@ -197,7 +197,7 @@ static inline void lpc43_fpuconfig(void)
    * with the volatile FP registers stacked above the basic context.
    */
 
-  regval = getcontrol(); 
+  regval = getcontrol();
   regval |= (1 << 2);
   setcontrol(regval);
 
@@ -227,7 +227,7 @@ static inline void lpc43_fpuconfig(void)
    * with the volatile FP registers stacked in the saved context.
    */
 
-  regval = getcontrol(); 
+  regval = getcontrol();
   regval &= ~(1 << 2);
   setcontrol(regval);
 
@@ -273,7 +273,7 @@ void __start(void)
   /* Reset as many of the LPC43 peripherals as possible. This is necessary
    * because the LPC43 does not provide any way of performing a full system
    * reset under debugger control.  So, if CONFIG_DEBUG is set (indicating
-   * that a debugger is being used?), the the boot logic will call this 
+   * that a debugger is being used?), the boot logic will call this
    * function on all restarts.
    */
 

@@ -58,7 +58,7 @@
  *   stream is at the end of file.
  *
  * Returned Value:
- *  This function will return non-zero if the the file pointer is positioned
+ *  This function will return non-zero if the file pointer is positioned
  *  at the end of file.
  *
  ****************************************************************************/

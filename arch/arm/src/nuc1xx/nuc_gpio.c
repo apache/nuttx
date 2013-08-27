@@ -101,7 +101,7 @@ int nuc_configgpio(gpio_cfgset_t cfgset)
   DEBUGASSERT((unsigned)port <= NUC_GPIO_PORTE);
   base = NUC_GPIO_CTRL_BASE(port);
 
-  /* Set the the GPIO PMD register */
+  /* Set the GPIO PMD register */
 
   regaddr = base + NUC_GPIO_PMD_OFFSET;
   regval = getreg32(regaddr);

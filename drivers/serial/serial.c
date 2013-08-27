@@ -207,7 +207,7 @@ static int uart_putxmitchar(FAR uart_dev_t *dev, int ch, bool oktoblock)
         }
 
       /* The buffer is full and no data is available now.  Should be block,
-       * waiting for the the hardware to remove some data from the TX
+       * waiting for the hardware to remove some data from the TX
        * buffer?
        */
 

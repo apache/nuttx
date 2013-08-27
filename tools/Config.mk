@@ -75,7 +75,7 @@ endif
 # Depends on this setting passed as a make commaond line definition from the
 # toplevel Makefile:
 #
-#   TOPDIR - The path to the the top level NuttX directory in the form
+#   TOPDIR - The path to the top level NuttX directory in the form
 #     appropriate for the current build environment
 #
 # Depends on this settings defined in board-specific defconfig file installed
