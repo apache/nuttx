@@ -138,7 +138,7 @@
  * register save/restore.
  */
 
-#elif defined(CONFIG_ARCH_CORTEXA5)
+#elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)
 
   /* If the floating point unit is present and enabled, then save the
    * floating point registers as well as normal ARM registers.
@@ -330,7 +330,7 @@ int  up_memfault(int irq, FAR void *context);
  * back-ported to the ARM7 and ARM9 families).
  */
 
-#elif defined(CONFIG_ARCH_CORTEXA5)
+#elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)
 
 /* Interrupt dispatch */
 

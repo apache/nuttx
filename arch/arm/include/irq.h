@@ -56,7 +56,7 @@
  * save structure and irqsave()/irqrestore() macros)
  */
 
-#if defined(CONFIG_ARCH_CORTEXA5)
+#if defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)
 #  include <arch/armv7-a/irq.h>
 #elif defined(CONFIG_ARCH_CORTEXM3) || defined(CONFIG_ARCH_CORTEXM4)
 #  include <arch/armv7-m/irq.h>

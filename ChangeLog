@@ -5466,3 +5466,5 @@
 	  necessary by usbhost_enumerate in order to set a credible initial EP0
 	  max packetsize.  High speed needs 64 bytes, low speed needs 8 bytes,
 	  and full speed can handle almost any size (2013-8-26).
+	* arch/arm:  Add hooks for Cortex-A8.  Not much more yet (2013-8-27).
+
