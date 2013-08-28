@@ -1207,6 +1207,8 @@ Configurations
                                                : Defaults for values probably OK for both
         Device Drivers
           CONFIG_USBHOST=y                     : Enable USB host support
+          CONFIG_USBHOST_INT_DISABLE=y         : Interrupt endpoints not needed
+          CONFIG_USBHOST_ISOC_DISABLE=y        : Isochronous endpoints not needed
 
         Device Drivers -> USB Host Driver Support
           CONFIG_USBHOST_ISOC_DISABLE=y        : Isochronous endpoints not used
@@ -1215,8 +1217,8 @@ Configurations
         Library Routines
           CONFIG_SCHED_WORKQUEUE               : Worker thread support is required
 
-       Application Configuration -> NSH Library
-         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+        Application Configuration -> NSH Library
+          CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
@@ -1283,13 +1285,13 @@ Configurations
       2013-8-20:  Added description to add EHCI to the configuration.  At
         present, however, EHCI is still a work in progress and not ready for
         prime time.
-      2013-8-26: EHCI is still non-functional.  After days of work, it is
-        able to exchange a SETUP transfer or two, but it still does not make
-        it through the full enumeration sequence.
-        Nor does the hand-off of high speed devices to OHCI work.  In this
-        case, OHCI gets the port, but the port is reset, lost by OCHI and
-        returned to EHCI.  EHCI sees the full-speed port and hands it off
-        to OHCI and this sequence continues forever.
+      2013-8-26:
+        The hand-off of full speed devices to OHCI does not work. In this
+        case, OHCI gets the port, but the port is reset, lost by OHCI and
+        returned to EHCI.  EHCI sees the full-speed port and hands it off to
+        OHCI and this sequence continues forever.
+      2013-8-28: EHCI is partially functional.  It is able to mount a high-
+        speed USB FLASH drive using the Mass Storage Class (MSC) interface.
 
   ostest:
     This configuration directory, performs a simple OS test using
