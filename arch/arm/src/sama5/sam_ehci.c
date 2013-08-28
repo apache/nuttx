@@ -415,6 +415,7 @@ static struct sam_qh_s g_perhead   __attribute__ ((aligned(32)));
 static uint32_t g_framelist[FRAME_LIST_SIZE] __attribute__ ((aligned(4096)));
 #endif
 
+#ifdef CONFIG_SAMA5_EHCI_PREALLOCATE
 /* Pools of pre-allocated data structures.  These will all be linked into the
  * free lists within g_ehci.  These must all be aligned to 32-byte boundaries
  */
@@ -428,6 +429,21 @@ static struct sam_qh_s g_qhpool[CONFIG_SAMA5_EHCI_NQHS]
 
 static struct sam_qtd_s g_qtdpool[CONFIG_SAMA5_EHCI_NQTDS]
                         __attribute__ ((aligned(32)));
+
+#else
+/* Pools of dynamically data structures.  These will all be linked into the
+ * free lists within g_ehci.  These must all be aligned to 32-byte boundaries
+ */
+
+/* Queue Head (QH) pool */
+
+static struct sam_qh_s *g_qhpool;
+
+/* Queue Element Transfer Descriptor (qTD) pool */
+
+static struct sam_qtd_s *g_qtdpool;
+
+#endif
 
 /*******************************************************************************
  * Private Functions
@@ -824,7 +840,7 @@ static struct sam_qtd_s *sam_qtd_alloc(void)
   if (qtd)
     {
       g_ehci.qtdfree = ((struct sam_list_s *)qtd)->flink;
-      memset(qtd, 0, sizeof(struct sam_list_s));
+      memset(qtd, 0, sizeof(struct sam_qtd_s));
     }
 
   return qtd;
@@ -1836,13 +1852,6 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
 
   DEBUGASSERT(rhport && epinfo);
 
-  if (req != NULL)
-    {
-      uvdbg("req=%02x type=%02x value=%04x index=%04x\n",
-            req->req, req->type, sam_read16(req->value),
-            sam_read16(req->index));
-    }
-
   /* A buffer may or may be supplied with an EP0 SETUP transfer.  A buffer will
    * always be present for normal endpoint data transfers.
    */
@@ -1908,7 +1917,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
       /* Get the new forward link pointer and data toggle */
 
       flink  = &qtd->hw.nqp;
-      toggle = 0;
+      toggle = QTD_TOKEN_TOGGLE;
     }
 
   /* A buffer may or may be supplied with an EP0 SETUP transfer.  A buffer will
@@ -3717,14 +3726,17 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   DEBUGASSERT(controller == 0);
   DEBUGASSERT(((uintptr_t)&g_asynchead & 0x1f) == 0);
-  DEBUGASSERT(((uintptr_t)&g_qhpool & 0x1f) == 0);
-  DEBUGASSERT(((uintptr_t)&g_qtdpool & 0x1f) == 0);
   DEBUGASSERT((sizeof(struct sam_qh_s) & 0x1f) == 0);
   DEBUGASSERT((sizeof(struct sam_qtd_s) & 0x1f) == 0);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
   DEBUGASSERT(((uintptr_t)&g_perhead & 0x1f) == 0);
   DEBUGASSERT(((uintptr_t)g_framelist & 0xfff) == 0);
+#endif
+
+#ifdef CONFIG_SAMA5_EHCI_PREALLOCATE
+  DEBUGASSERT(((uintptr_t)&g_qhpool & 0x1f) == 0);
+  DEBUGASSERT(((uintptr_t)&g_qtdpool & 0x1f) == 0);
 #endif
 
   /* SAMA5 Configuration *******************************************************/
@@ -3827,6 +3839,18 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
       sem_init(&rhport->ep0.iocsem, 0, 0);
     }
 
+#ifndef CONFIG_SAMA5_EHCI_PREALLOCATE
+  /* Allocate a pool of free Queue Head (QH) structures */
+
+  g_qhpool = (struct sam_qh_s *)
+    kmemalign(32, CONFIG_SAMA5_EHCI_NQHS * sizeof(struct sam_qh_s));
+  if (!g_qhpool)
+    {
+      udbg("ERROR: Failed to allocate the QH pool\n");
+      return NULL;
+    }
+#endif
+
   /* Initialize the list of free Queue Head (QH) structures */
 
   for (i = 0; i < CONFIG_SAMA5_EHCI_NQHS; i++)
@@ -3836,7 +3860,20 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
       sam_qh_free(&g_qhpool[i]);
     }
 
-  /* Initialize the list of free Queue Head (QH) structures */
+#ifndef CONFIG_SAMA5_EHCI_PREALLOCATE
+  /* Allocate a pool of free  Transfer Descriptor (qTD) structures */
+
+  g_qtdpool = (struct sam_qtd_s *)
+    kmemalign(32, CONFIG_SAMA5_EHCI_NQTDS * sizeof(struct sam_qtd_s));
+  if (!g_qtdpool)
+    {
+      udbg("ERROR: Failed to allocate the qTD pool\n");
+      kfree(g_qhpool);
+      return NULL;
+    }
+#endif
+
+  /* Initialize the list of free Transfer Descriptor (qTD) structures */
 
   for (i = 0; i < CONFIG_SAMA5_EHCI_NQTDS; i++)
     {
