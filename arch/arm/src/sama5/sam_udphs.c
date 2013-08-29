@@ -441,9 +441,9 @@ static void   sam_ep0setup(struct sam_usbdev_s *priv);
 static void   sam_ep0out(struct sam_usbdev_s *priv);
 static void   sam_ep0in(struct sam_usbdev_s *priv);
 static inline void
-              sam_ep0done(struct sam_usbdev_s *priv, uint16_t istr);
+              sam_ep0done(struct sam_usbdev_s *priv, uint16_t intsta);
 static void   sam_lptransfer(struct sam_usbdev_s *priv);
-static int    sam_uhphs_interrupt(int irq, void *context);
+static int    sam_udphs_interrupt(int irq, void *context);
 
 /* Endpoint helpers *********************************************************/
 
@@ -688,7 +688,7 @@ static void sam_dumpep(struct sam_usbdev_s *priv, int epno)
   /* Common registers */
 
   lldbg("CNTR:   %04x\n", getreg16(SAM_USB_CNTR));
-  lldbg("ISTR:   %04x\n", getreg16(SAM_USB_ISTR));
+  lldbg("ISTR:   %04x\n", getreg16(SAM_UDPHS_INTSTA));
   lldbg("FNR:    %04x\n", getreg16(SAM_USB_FNR));
   lldbg("DADDR:  %04x\n", getreg16(SAM_USB_DADDR));
   lldbg("BTABLE: %04x\n", getreg16(SAM_USB_BTABLE));
@@ -1741,7 +1741,7 @@ static void sam_ep0out(struct sam_usbdev_s *priv)
  * Name: sam_ep0done
  ****************************************************************************/
 
-static inline void sam_ep0done(struct sam_usbdev_s *priv, uint32_t istr)
+static inline void sam_ep0done(struct sam_usbdev_s *priv, uint32_t intsta)
 {
   uint32_t epr;
 
@@ -1762,11 +1762,11 @@ static inline void sam_ep0done(struct sam_usbdev_s *priv, uint32_t istr)
    * packet sent to or received from the host PC.
    */
 
-  if ((istr & USB_ISTR_DIR) == 0)
+  if ((intsta & USB_ISTR_DIR) == 0)
     {
       /* EP0 IN: device-to-host (DIR=0) */
 
-      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0IN), istr);
+      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0IN), intsta);
       sam_clrepctrtx(EP0);
       sam_ep0in(priv);
     }
@@ -1867,23 +1867,23 @@ static inline void sam_ep0done(struct sam_usbdev_s *priv, uint32_t istr)
 static void sam_lptransfer(struct sam_usbdev_s *priv) 
 {
   uint8_t  epno;
-  uint32_t istr;
+  uint32_t intsta;
 
   /* Stay in loop while LP interrupts are pending */
 
-  while (((istr = sam_getreg(SAM_USB_ISTR)) & USB_ISTR_CTR) != 0)
+  while (((intsta = sam_getreg(SAM_UDPHS_INTSTA)) & USB_ISTR_CTR) != 0)
     {
-      sam_putreg((uint32_t)~USB_ISTR_CTR, SAM_USB_ISTR);
+      sam_putreg((uint32_t)~USB_ISTR_CTR, SAM_UDPHS_INTSTA);
 
       /* Extract highest priority endpoint number */ 
 
-      epno = (uint8_t)(istr & USB_ISTR_EPID_MASK);
+      epno = (uint8_t)(intsta & USB_ISTR_EPID_MASK);
 
       /* Handle EP0 completion events */
 
       if (epno == 0)
         {
-          sam_ep0done(priv, istr);
+          sam_ep0done(priv, intsta);
         }
 
       /* Handle other endpoint completion events */
@@ -1896,118 +1896,154 @@ static void sam_lptransfer(struct sam_usbdev_s *priv)
 }
 
 /****************************************************************************
- * Name: sam_uhphs_interrupt
+ * Name: sam_udphs_interrupt
  ****************************************************************************/
 
-static int sam_uhphs_interrupt(int irq, void *context)
+static int sam_udphs_interrupt(int irq, void *context)
 {
   /* For now there is only one USB controller, but we will always refer to
-   * it using a pointer to make any future ports to multiple USB controllers
+   * it using a pointer to make any future ports to multiple UDPHS controllers
    * easier.
    */
 
   struct sam_usbdev_s *priv = &g_usbdev;
-  uint32_t istr;
-  uint8_t  epno;
+  uint32_t intsta;
+  uint32_t ien;
+  uint32_t pending;
+  int i;
 
-  /* Handle correct transfer event for isochronous and double-buffer bulk transfers. */
+  /* Get the set of pending interrupts */
 
-  istr = sam_getreg(SAM_USB_ISTR);
-  usbtrace(TRACE_INTENTRY(SAM_TRACEINTID_INTERRUPT), istr);
-  while ((istr & USB_ISTR_CTR) != 0)
-    {
-      sam_putreg((uint32_t)~USB_ISTR_CTR, SAM_USB_ISTR);
-      
-      /* Extract highest priority endpoint number */ 
+  intsta = sam_getreg(SAM_UDPHS_INTSTA);
+  usbtrace(TRACE_INTENTRY(SAM_TRACEINTID_INTERRUPT), intsta);
 
-      epno = (uint8_t)(istr & USB_ISTR_EPID_MASK);
+  inten   = sam_getreg(SAM_UDPHS_IEN);
+  pending = insta & inten;
 
-      /* And handle the completion event */
-
-      sam_epdone(priv, epno);
-
-      /* Fetch the status again for the next time through the loop */
-
-      istr = sam_getreg(SAM_USB_ISTR);
-    }
-
-  /* Handle Reset interrupts.  When this event occurs, the peripheral is left
-   * in the same conditions it is left by the system reset (but with the
-   * USB controller enabled).
+  /* Handle all pending UDPHS interrupts (and new interrupts that become
+   * pending)
    */
 
-  if ((istr & USB_ISTR_RESET) != 0)
+  while (pending)
     {
-      /* Reset interrupt received. Clear the RESET interrupt status. */
+      usbtrace(TRACE_INTENTRY(SAM_TRACEINTID_INTERRUPT), intsta);
 
-      sam_putreg(~USB_ISTR_RESET, SAM_USB_ISTR);
-      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RESET), istr);
+      /* Suspend, treated last */
 
-      /* Restore our power-up state and exit now because istr is no longer
-       * valid.
-       */
+      if ((pending == UDPHS_INT_DETSUSPD) != 0)
+        {
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_DETSUSPD), (uint16_t)pending);
 
-      sam_reset(priv);
-      goto exit_lpinterrupt;
+          /* Enable wakeup interrupts */
+
+          regval  = inten;
+          regval &= ~UDPHS_INT_DETSUSPD;
+          regval |= (UDPHS_INT_WAKEUP | UDPHS_INT_ENDOFRSM);
+          sam_putreg(regval, SAM_UDPHS_IEN);
+
+          /* Acknowledge interrupt */
+
+          sam_putreg(UDPHS_INT_DETSUSPD | UDPHS_INT_WAKEUP, SAM_UDPHS_CLRINT);
+          sam_suspend(priv);
+        }
+
+      /* SOF interrupt*/
+
+      else if ((pending & UDPHS_INT_INTSOF) != 0)
+        {
+          /* Acknowledge interrupt */
+
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_INTSOF), (uint16_t)pending);
+          sam_putreg(UDPHS_INT_INTSOF, SAM_UDPHS_CLRINT);
+        }
+
+      /* Resume */
+
+      else if ((pending & UDPHS_INT_WAKEUP) != 0 ||
+               (pending & UDPHS_INT_ENDOFRSM) != 0)
+        {
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_WAKEUP), (uint16_t)pending);
+          sam_resume(priv);
+
+          /* Acknowledge interrupt */
+
+          sam_putreg(UDPHS_INT_WAKEUP | UDPHS_INT_ENDOFRSM | UDPHS_INT_DETSUSPD,
+                     SAM_UDPHS_CLRINT);
+
+          /* Enable suspend interrupts */
+
+          inten &= ~UDPHS_INT_WAKEUP;
+          inten |= (UDPHS_INT_ENDOFRSM | UDPHS_INT_DETSUSPD);
+          sam_putreg(inten, SAM_UDPHS_IEN);
+        }
+
+      /* Bus reset */
+
+      if ((pending & UDPHS_INT_ENDRESET) != 0)
+        {
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_ENDRESET), (uint16_t)pending);
+
+          /* Clear and enable the suspend interrupt */
+
+          sam_putreg(UDPHS_INT_WAKEUP | UDPHS_INT_DETSUSPD, SAM_UDPHS_CLRINT);
+
+          inten |= UDPHS_INT_DETSUSPD;
+          sam_putreg(inten, SAM_UDPHS_IEN);
+
+          /* Handle the reset */
+
+          sam_reset();
+
+          /* Acknowledge the interrupt */
+
+          sam_putreg(UDPHS_INT_ENDRESET, SAM_UDPHS_CLRINT);
+        }
+
+      /* Upstream resume */
+
+      else if ((pending & UDPHS_INT_UPSTRRES) != 0)
+        {
+          /* Acknowledge interrupt */
+
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_UPSTRRES), (uint16_t)pending);
+          sam_putreg(UDPHS_INT_ENDRESET, SAM_UDPHS_CLRINT);
+          pUdp->UDPHS_CLRINT = UDPHS_INT_UPSTRRES;
+        }
+
+      /* DMA interrupts */
+
+      if ((pending & UDPHS_INT_DMA_MASK) != 0)
+        {
+          for (i = 1; i <= SAM_UDPHS_NDMACHANNELS; i++)
+            {
+              if ((pending & UDPHS_INT_DMA(i)) != 0)
+                {
+                  sam_dma_interrupt(priv, i);
+                }
+            }
+        }
+
+      /* Endpoint Interrupts */
+
+      if ((pending & UDPHS_INT_EPT_MASK) != 0)
+        {
+          for (i = 1; i <= SAM_UDPHS_NENDPOINTS; i++)
+            {
+              if ((pending & UDPHS_INT_EPT(i)) != 0)
+                {
+                  sam_ep_interrupt(priv, i);
+                }
+            }
+        }
+
+      /* Re-sample the set of pending interrupts */
+
+      intsta  = sam_getreg(SAM_UDPHS_INTSTA);
+      inten   = sam_getreg(SAM_UDPHS_IEN);
+      pending = insta & inten;
     }
 
-  /* Handle Wakeup interrupts.  This interrupt is only enable while the USB is
-   * suspended.
-   */
-
-  if ((istr & USB_ISTR_WKUP & priv->imask) != 0)
-    {
-      /* Wakeup interrupt received. Clear the WKUP interrupt status.  The
-       * cause of the resume is indicated in the FNR register
-       */
-
-      sam_putreg(~USB_ISTR_WKUP, SAM_USB_ISTR);
-      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_WKUP), sam_getreg(SAM_USB_FNR));
-
-      /* Perform the wakeup action */
-
-      sam_initresume(priv);
-      priv->rsmstate = RSMSTATE_IDLE;
-
-      /* Disable ESOF polling, disable the wakeup interrupt, and
-       * re-enable the suspend interrupt.  Clear any pending SUSP
-       * interrupts.
-       */
-
-      sam_setimask(priv, USB_CNTR_SUSPM, USB_CNTR_ESOFM|USB_CNTR_WKUPM);
-      sam_putreg(~USB_CNTR_SUSPM, SAM_USB_ISTR);
-    }
-
-  if ((istr & USB_ISTR_SUSP & priv->imask) != 0)
-    {
-        usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_SUSP), 0);
-        sam_suspend(priv);
-
-        /* Clear of the ISTR bit must be done after setting of USB_CNTR_FSUSP */ 
-
-        sam_putreg(~USB_ISTR_SUSP, SAM_USB_ISTR);
-    }
-
-  if ((istr & USB_ISTR_ESOF & priv->imask) != 0)
-    {
-      sam_putreg(~USB_ISTR_ESOF, SAM_USB_ISTR);
-      
-      /* Resume handling timing is made with ESOFs */ 
-
-      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_ESOF), 0);
-      sam_esofpoll(priv);
-    }
-
-  if ((istr & USB_ISTR_CTR & priv->imask) != 0)
-    {
-      /* Low priority endpoint correct transfer interrupt */ 
-
-      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_LPCTR), istr);
-      sam_lptransfer(priv);
-    }
-
-exit_lpinterrupt:
-  usbtrace(TRACE_INTEXIT(SAM_TRACEINTID_INTERRUPT), sam_getreg(SAM_USB_EP0R));
+  usbtrace(TRACE_INTEXIT(SAM_TRACEINTID_INTERRUPT), insta);
   return OK;
 }
 
@@ -2871,7 +2907,7 @@ static int sam_wakeup(struct usbdev_s *dev)
    */
 
   sam_setimask(priv, USB_CNTR_ESOFM, USB_CNTR_WKUPM|USB_CNTR_SUSPM);
-  sam_putreg(~USB_ISTR_ESOF, SAM_USB_ISTR);
+  sam_putreg(~USB_ISTR_ESOF, SAM_UDPHS_INTSTA);
   irqrestore(flags);
   return OK;
 }
@@ -2991,7 +3027,7 @@ static void sam_hw_reset(struct sam_usbdev_s *priv)
 
   /* Clear any pending interrupts */
 
-  sam_putreg(0, SAM_USB_ISTR);
+  sam_putreg(0, SAM_UDPHS_INTSTA);
 
   /* Enable interrupts at the USB controller */
 
@@ -3227,7 +3263,7 @@ static void sam_hw_shutdown(struct sam_usbdev_s *priv)
 
   /* Clear any pending interrupts */ 
 
-  sam_putreg(0, SAM_USB_ISTR);
+  sam_putreg(0, SAM_UDPHS_INTSTA);
 
   /* Disconnect the device / disable the pull-up */ 
 
@@ -3290,17 +3326,10 @@ void up_usbinitialize(void)
    * them when we need them later.
    */
 
-  if (irq_attach(SAM_IRQ_UHPHS, sam_uhphs_interrupt) != 0)
+  if (irq_attach(SAM_IRQ_UHPHS, sam_udphs_interrupt) != 0)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_IRQREGISTRATION),
-               (uint16_t)SAM_IRQ_USBHP);
-      goto errout;
-    }
-
-  if (irq_attach(SAM_IRQ_USBLP, sam_lpinterrupt) != 0)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_IRQREGISTRATION),
-               (uint16_t)SAM_IRQ_USBLP);
+               (uint16_t)SAM_IRQ_UDPHS);
       goto errout;
     }
 
@@ -3335,12 +3364,10 @@ void up_usbuninitialize(void)
   flags = irqsave();
   usbtrace(TRACE_DEVUNINIT, 0);
 
-  /* Disable and detach the USB IRQs */
+  /* Disable and detach the UDPHS IRQ */
 
-  up_disable_irq(SAM_IRQ_USBHP);
-  up_disable_irq(SAM_IRQ_USBLP);
-  irq_detach(SAM_IRQ_USBHP);
-  irq_detach(SAM_IRQ_USBLP);
+  up_disable_irq(SAM_IRQ_UDPHS);
+  irq_detach(SAM_IRQ_UDPHS);
 
   if (priv->driver)
     {
@@ -3411,13 +3438,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       /* Enable USB controller interrupts at the NVIC */
 
-      up_enable_irq(SAM_IRQ_USBHP);
-      up_enable_irq(SAM_IRQ_USBLP);
-
-      /* Set the interrrupt priority */
-
-      up_prioritize_irq(SAM_IRQ_USBHP, CONFIG_USB_PRI);
-      up_prioritize_irq(SAM_IRQ_USBLP, CONFIG_USB_PRI);
+      up_enable_irq(SAM_IRQ_UDPHS);
 
       /* Enable pull-up to connect the device.  The host should enumerate us
        * some time after this
@@ -3473,8 +3494,7 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
 
   /* Disable USB controller interrupts (but keep them attached) */
 
-  up_disable_irq(SAM_IRQ_USBHP);
-  up_disable_irq(SAM_IRQ_USBLP);
+  up_disable_irq(SAM_IRQ_UDPHS);
 
   /* Put the hardware in an inactive state.  Then bring the hardware back up
    * in the reset state (this is probably not necessary, the sam_reset()
