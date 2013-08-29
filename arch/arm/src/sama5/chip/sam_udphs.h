@@ -220,31 +220,35 @@
 
 /* UDPHS Interrupt Enable Register and UDPHS Interrupt Status Register */
 
-#define UDPHS_IEN_EPT(ep)               (1 << +((ep)+8))  /* Endpoint ep Interrupt */
-#  define UDPHS_IEN_EPT0                (1 << 8)  /* Bit 8: Endpoint 0 Interrupt */
-#  define UDPHS_IEN_EPT1                (1 << 9)  /* Bit 9: Endpoint 1 Interrupt */
-#  define UDPHS_IEN_EPT2                (1 << 10) /* Bit 0: Endpoint 2 Interrupt */
-#  define UDPHS_IEN_EPT3                (1 << 11) /* Bit 1: Endpoint 3 Interrupt */
-#  define UDPHS_IEN_EPT4                (1 << 12) /* Bit 2: Endpoint 4 Interrupt */
-#  define UDPHS_IEN_EPT5                (1 << 13) /* Bit 3: Endpoint 5 Interrupt */
-#  define UDPHS_IEN_EPT6                (1 << 14) /* Bit 4: Endpoint 6 Interrupt */
-#  define UDPHS_IEN_EPT7                (1 << 15) /* Bit 5: Endpoint 7 Interrupt */
-#  define UDPHS_IEN_EPT8                (1 << 16) /* Bit 6: Endpoint 8 Interrupt */
-#  define UDPHS_IEN_EPT9                (1 << 17) /* Bit 7: Endpoint 9 Interrupt */
-#  define UDPHS_IEN_EPT10               (1 << 18) /* Bit 8: Endpoint 10 Interrupt */
-#  define UDPHS_IEN_EPT11               (1 << 19) /* Bit 9: Endpoint 11 Interrupt */
-#  define UDPHS_IEN_EPT12               (1 << 20) /* Bit 0: Endpoint 12 Interrupt */
-#  define UDPHS_IEN_EPT13               (1 << 21) /* Bit 1: Endpoint 13 Interrupt */
-#  define UDPHS_IEN_EPT14               (1 << 22) /* Bit 2: Endpoint 14 Interrupt */
-#  define UDPHS_IEN_EPT15               (1 << 23) /* Bit 3: Endpoint 15 Interrupt */
-#define UDPHS_IEN_DMA(ch)               (1 << ((ch)+24)  /* DMA Channel ch Interrupt */
-#  define UDPHS_IEN_DMA1                (1 << 25) /* Bit 5: DMA Channel 1 Interrupt */
-#  define UDPHS_IEN_DMA2                (1 << 26) /* Bit 6: DMA Channel 2 Interrupt */
-#  define UDPHS_IEN_DMA3                (1 << 27) /* Bit 7: DMA Channel 3 Interrupt */
-#  define UDPHS_IEN_DMA4                (1 << 28) /* Bit 8: DMA Channel 4 Interrupt */
-#  define UDPHS_IEN_DMA5                (1 << 29) /* Bit 9: DMA Channel 5 Interrupt */
-#  define UDPHS_IEN_DMA6                (1 << 30) /* Bit 0: DMA Channel 6 Interrupt */
-#  define UDPHS_IEN_DMA7                (1 << 31) /* Bit 1: DMA Channel 7 Interrupt */
+#define UDPHS_INT_EPT_SHIFT             (8)       /* Bits 8-23: Endpoint interrupts */
+#define UDPHS_INT_EPT_MASK              (0xffff << UDPHS_INT_EPT_SHIFT)
+#define UDPHS_INT_EPT(ep)               (1 << +((ep)+8))  /* Endpoint ep Interrupt */
+#  define UDPHS_INT_EPT0                (1 << 8)  /* Bit 8: Endpoint 0 Interrupt */
+#  define UDPHS_INT_EPT1                (1 << 9)  /* Bit 9: Endpoint 1 Interrupt */
+#  define UDPHS_INT_EPT2                (1 << 10) /* Bit 10: Endpoint 2 Interrupt */
+#  define UDPHS_INT_EPT3                (1 << 11) /* Bit 11: Endpoint 3 Interrupt */
+#  define UDPHS_INT_EPT4                (1 << 12) /* Bit 12: Endpoint 4 Interrupt */
+#  define UDPHS_INT_EPT5                (1 << 13) /* Bit 13: Endpoint 5 Interrupt */
+#  define UDPHS_INT_EPT6                (1 << 14) /* Bit 14: Endpoint 6 Interrupt */
+#  define UDPHS_INT_EPT7                (1 << 15) /* Bit 15: Endpoint 7 Interrupt */
+#  define UDPHS_INT_EPT8                (1 << 16) /* Bit 16: Endpoint 8 Interrupt */
+#  define UDPHS_INT_EPT9                (1 << 17) /* Bit 17: Endpoint 9 Interrupt */
+#  define UDPHS_INT_EPT10               (1 << 18) /* Bit 18: Endpoint 10 Interrupt */
+#  define UDPHS_INT_EPT11               (1 << 19) /* Bit 19: Endpoint 11 Interrupt */
+#  define UDPHS_INT_EPT12               (1 << 20) /* Bit 20: Endpoint 12 Interrupt */
+#  define UDPHS_INT_EPT13               (1 << 21) /* Bit 21: Endpoint 13 Interrupt */
+#  define UDPHS_INT_EPT14               (1 << 22) /* Bit 22: Endpoint 14 Interrupt */
+#  define UDPHS_INT_EPT15               (1 << 23) /* Bit 23: Endpoint 15 Interrupt */
+#define UDPHS_INT_DMA_SHIFT             (25)      /* Bits 25-31: Endpoint interrupts */
+#define UDPHS_INT_DMA_MASK              (0x7f << UDPHS_INT_DMA_SHIFT)
+#define UDPHS_INT_DMA(ch)               (1 << ((ch)+24)  /* DMA Channel ch Interrupt */
+#  define UDPHS_INT_DMA1                (1 << 25) /* Bit 25: DMA Channel 1 Interrupt */
+#  define UDPHS_INT_DMA2                (1 << 26) /* Bit 26: DMA Channel 2 Interrupt */
+#  define UDPHS_INT_DMA3                (1 << 27) /* Bit 27: DMA Channel 3 Interrupt */
+#  define UDPHS_INT_DMA4                (1 << 28) /* Bit 28: DMA Channel 4 Interrupt */
+#  define UDPHS_INT_DMA5                (1 << 29) /* Bit 29: DMA Channel 5 Interrupt */
+#  define UDPHS_INT_DMA6                (1 << 30) /* Bit 30: DMA Channel 6 Interrupt */
+#  define UDPHS_INT_DMA7                (1 << 31) /* Bit 31: DMA Channel 7 Interrupt */
 
 /* UDPHS Endpoints Reset Register */
 
