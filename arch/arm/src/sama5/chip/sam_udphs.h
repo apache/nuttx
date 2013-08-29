@@ -4,6 +4,9 @@
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * References:
+ *   SAMA5D3 Series Data Sheet
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -48,6 +51,10 @@
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
+/* General Definitions **********************************************************************/
+
+#define SAM_UDPHS_NENDPOINTS            15
+#define SAM_UDPHS_NDMACHANNELS           7
 
 /* Register offsets *************************************************************************/
 
@@ -430,6 +437,21 @@
 /********************************************************************************************
  * Public Types
  ********************************************************************************************/
+
+/* This structure defines the UDPHS DMA Transfer Descriptor.  Instances of DMA transfer
+ * descriptors must by aligned to 16-byte address boundaries.
+ *
+ * Each value contains the next value of each of three UDPHS DMA registers.  The first
+ * register value (UDPHS_DMANXTDSCx) is a link that can be used to chain sequences of
+ * DMA transfers.
+ */
+
+struct udphs_dtd_s
+{
+  uint32_t nxtd;  /* Next Descriptor Address Register: UDPHS_DMANXTDSCx */
+  uint32_t addr;  /* DMA Channelx Address Register: UDPHS_DMAADDRESSx */
+  uint32_t ctrl;  /* DMA Channelx Control Register: UDPHS_DMACONTROLx */
+};
 
 /********************************************************************************************
  * Public Data
