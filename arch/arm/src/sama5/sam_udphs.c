@@ -447,6 +447,7 @@ static int    sam_udphs_interrupt(int irq, void *context);
 
 /* Endpoint helpers *********************************************************/
 
+static void   sam_epset_reset(struct sam_usbdev_s *priv, uint32_t epset);
 static inline struct sam_ep_s *
               sam_epreserve(struct sam_usbdev_s *priv, uint8_t epset);
 static inline void
@@ -2179,6 +2180,50 @@ static void sam_esofpoll(struct sam_usbdev_s *priv)
  * Endpoint Helpers
  ****************************************************************************/
 /****************************************************************************
+ * Name: sam_epset_reset
+ ****************************************************************************/
+
+void sam_epset_reset(struct sam_usbdev_s *priv, uint32_t epset)
+{
+  struct sam_ep_s *privep;
+  uint32_t bit;
+  int epno;
+
+  /* Restrict the set of of endpoints to those actually supported */
+
+  epset &= ((1 << SAM_UDPHS_NENDPOINTS) - 1);
+
+  /* Then reset each endpoint in the set */
+
+  for (epno = 0, bit = 1; epno < SAM_UDPHS_NENDPOINTS; epno++)
+    {
+      if ((epset & bit) != 0)
+        {
+          privep = &priv->eplist[epno];
+
+          /* Disable endpoint interrupt */
+
+          sam_putreg(~UDPHS_INT_EPT(epno), SAM_UDPHS_IEN);
+
+          /* Reset endpoint */
+
+          sam_putreg(UDPHS_EPTRST(epno), SAM_UDPHS_EPTRST);
+
+          /* Endpoint is no longer functional */
+
+          privep->epstate = UDPHS_EPSTATE_DISABLED;
+          privep->bank = 0;
+
+          /* Terminate transfer on this endpoint */
+
+          sam_endoftransfer(epno, USBD_STATUS_RESET);
+        }
+
+      bit <<= 1;
+    }
+}
+
+/****************************************************************************
  * Name: sam_epreserve
  ****************************************************************************/
 
@@ -3058,9 +3103,9 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
 
   sam_udphs_enableclk();
 
-  /* Reset & disable endpoints */
+  /* Reset and disable endpoints */
 
-  sam_ep_resetall(0xffffffff, USBD_STATUS_RESET, 0);
+  sam_epset_reset(priv, 0xffffffff);
 
   /* Configure the pull-up on D+ and disconnect it */
 
@@ -3071,7 +3116,17 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   regval |= UDPHS_CTRL_PULLDDIS;
   sam_putreg(regval, SAM_UDPHS_CTRL);
 
-  /* Reset the UDPHS block */
+  /* Reset the UDPHS block
+   *
+   * Paragraph 33.5.1.  "One transceiver is shared with the USB High Speed
+   *   Device (port A). The selection between Host Port A and USB Device is
+   *   controlled by the UDPHS enable bit (EN_UDPHS) located in the UDPHS_CTRL
+   *   control register.
+   *
+   *  "In the case the port A is driven by the USB High Speed Device, the ...
+   *   transceiver is automatically selected for Device operation once the
+   *   USB High Speed Device is enabled."
+   */
 
   regval &= ~UDPHS_CTRL_ENUDPHS;
   sam_putreg(regval, SAM_UDPHS_CTRL);
