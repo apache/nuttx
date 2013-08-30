@@ -54,7 +54,7 @@
 /* General Definitions **********************************************************************/
 
 #define SAM_UDPHS_NENDPOINTS            15
-#define SAM_UDPHS_NDMACHANNELS           7
+#define SAM_UDPHS_NDMACHANNELS           7     /* For EP1-7 */
 
 /* Register offsets *************************************************************************/
 
@@ -103,14 +103,14 @@
 
 /* DMA Channel Offsets */
 
-#define SAM_UPPHS_CH_OFFSET(ch)         (0x0300+((ch)<<4)
-#define SAM_UPPHS_CH0_OFFSET            0x0300
-#define SAM_UPPHS_CH1_OFFSET            0x0310
-#define SAM_UPPHS_CH2_OFFSET            0x0320
-#define SAM_UPPHS_CH3_OFFSET            0x0330
-#define SAM_UPPHS_CH4_OFFSET            0x0340
-#define SAM_UPPHS_CH5_OFFSET            0x0350
-#define SAM_UPPHS_CH6_OFFSET            0x0360
+#define SAM_UPPHS_CH_OFFSET(ch)         (0x0300+(((ch)-1)<<4))
+#define SAM_UPPHS_CH1_OFFSET            0x0300
+#define SAM_UPPHS_CH2_OFFSET            0x0310
+#define SAM_UPPHS_CH3_OFFSET            0x0320
+#define SAM_UPPHS_CH4_OFFSET            0x0330
+#define SAM_UPPHS_CH5_OFFSET            0x0340
+#define SAM_UPPHS_CH6_OFFSET            0x0350
+#define SAM_UPPHS_CH7_OFFSET            0x0360
 
 /* DMA Channel Registers */
 
@@ -164,13 +164,13 @@
 /* DMA Channel Base Addresses */
 
 #define SAM_UPPHS_CH_BASE(ch)           (SAM_UDPHS_VBASE+SAM_UPPHS_CH_OFFSET(ch))
-#define SAM_UPPHS_CH0_BASE              (SAM_UDPHS_VBASE+SAM_UPPHS_CH0_OFFSET)
 #define SAM_UPPHS_CH1_BASE              (SAM_UDPHS_VBASE+SAM_UPPHS_CH1_OFFSET)
 #define SAM_UPPHS_CH2_BASE              (SAM_UDPHS_VBASE+SAM_UPPHS_CH2_OFFSET)
 #define SAM_UPPHS_CH3_BASE              (SAM_UDPHS_VBASE+SAM_UPPHS_CH3_OFFSET)
 #define SAM_UPPHS_CH4_BASE              (SAM_UDPHS_VBASE+SAM_UPPHS_CH4_OFFSET)
 #define SAM_UPPHS_CH5_BASE              (SAM_UDPHS_VBASE+SAM_UPPHS_CH5_OFFSET)
 #define SAM_UPPHS_CH6_BASE              (SAM_UDPHS_VBASE+SAM_UPPHS_CH6_OFFSET)
+#define SAM_UPPHS_CH7_BASE              (SAM_UDPHS_VBASE+SAM_UPPHS_CH7_OFFSET)
 
 /* DMA Channel Registers */
 
@@ -427,6 +427,7 @@
 #define UDPHS_DMACONTROL_BURSTLCK       (1 << 7)  /* Bit 7:  Burst Lock Enable */
 #define UDPHS_DMACONTROL_BUFLEN_SHIFT   (16)      /* Bits 16-31: Buffer Byte Length (Write-only) */
 #define UDPHS_DMACONTROL_BUFLEN_MASK    (0xffff << UDPHS_DMACONTROL_BUFLEN_SHIFT)
+#  define UDPHS_DMACONTROL_BUFLEN(n)    ((n) << UDPHS_DMACONTROL_BUFLEN_SHIFT)
 
 /* UDPHS DMA Channel Status Register */
 
@@ -456,6 +457,7 @@ struct udphs_dtd_s
   uint32_t addr;  /* DMA Channelx Address Register: UDPHS_DMAADDRESSx */
   uint32_t ctrl;  /* DMA Channelx Control Register: UDPHS_DMACONTROLx */
 };
+#define SIZEOF_USPHS_DTD_S 12
 
 /********************************************************************************************
  * Public Data
