@@ -391,7 +391,7 @@ static inline void sam_putreg(uint32_t regval, uintptr_t regaddr);
 static void   sam_suspend(struct sam_usbdev_s *priv);
 static void   sam_resume(struct sam_usbdev_s *priv);
 
-/* DMA **********************************************************************/
+/* DMA/Request Helpers ******************************************************/
 
 #ifdef CONFIG_SAMA5_UDPHS_SCATTERGATHER
 static struct sam_dtd_s *sam_dtd_alloc(struct sam_usbdev_s *priv);
@@ -399,6 +399,8 @@ static void   sam_dtd_free(struct sam_usbdev_s *priv, struct sam_dtd_s *dtd);
 #endif
 static void   sam_dma_single(uint8_t epno, struct sam_req_s *privreq,
                 uint32_t dmacontrol);
+static int    sam_req_wrdma(struct sam_usbdev_s *priv,
+                struct sam_ep_s *privep, struct sam_req_s *privreq)
 
 /* Request Helpers **********************************************************/
 
@@ -412,6 +414,8 @@ static inline void
 static void   sam_req_complete(struct sam_ep_s *privep, int16_t result);
 static void   sam_fifo_write(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep, const uint8_t *data, size_t nbytes);
+static int    sam_req_wrnodma(struct sam_usbdev_s *priv,
+                struct sam_ep_s *privep, struct sam_req_s *privreq)
 static int    sam_req_write(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep);
 static int    sam_req_read(struct sam_usbdev_s *priv,
@@ -808,7 +812,9 @@ static void sam_dma_single(uint8_t epno, struct sam_req_s *privreq,
   /* Clear any pending interrupts then enable the DMA interrupt */
 
   (void)sam_getreg(SAM_UDPHS_DMASTATUS(epno));
-  sam_putreg(UDPHS_INT_DMA(epno), SAM_UDPHS_IEN);
+  regval  = sam_getreg(SAM_UDPHS_IEN);
+  regval |= UDPHS_INT_DMA(epno)
+  sam_putreg(regval, SAM_UDPHS_IEN);
 
   /* Setup and enable the DMA */
 
@@ -816,6 +822,84 @@ static void sam_dma_single(uint8_t epno, struct sam_req_s *privreq,
 
   dmacontrol |= UDPHS_DMACONTROL_BUFLEN(privreq->inflight);
   sam_putreg(dmacontrol, SAM_UDPHS_DMACONTROL(epno));
+}
+
+/****************************************************************************
+ * Name: sam_req_wrdma
+ *
+ * Description:
+ *   Process the next queued write request for an endpoint that supports DMA.
+ *
+ ****************************************************************************/
+
+static int sam_req_wrdma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
+                         struct sam_req_s *privreq)
+{
+  uint32_t regval;
+  int epno;
+
+  /* The endpoint must be IDLE and ready to begin the next transfer */
+
+  if (privep->epstate != UDPHS_EPSTATE_IDLE)
+    {
+      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EPINBUSY), privep->epstate);
+      return -EBUSY;
+    }
+
+  /* Switch to the sending state */
+
+  privep->epstate   = UDPHS_EPSTATE_SENDING;
+  privep->txnullpkt = 0;
+  privreq->inflight = 0;
+  privreq->req.xfrd = 0;
+
+  /* Get the endpoint number */
+
+  epno = USB_EPNO(privep->ep.eplog);
+
+  /* Either (1) we are committed to sending the null packet (because
+   * txnullpkt == 1 && nbytes == 0), or (2) we havenot yet sent the last
+   * packet (nbytes > 0). In either case, it is appropriate to clear
+   * txnullpkt now.
+   */
+
+  privep->txnullpkt = 0;
+
+  /* How many bytes remain to be transferred in the request? */
+
+  remaining = privreq->req.len - privreq->req.xfrd - privreq->inflight;
+
+  /* If there are no bytes to send, then send a null packet */
+
+  if (remaining > 0)
+    {
+      /* Clip the transfer to the size of the DMA FIFO */
+
+      if (remaining > DMA_MAX_FIFO_SIZE)
+        {
+          privreq->inflight = DMA_MAX_FIFO_SIZE;
+        }
+      else
+        {
+          privreq->inflight = remaining;
+        }
+
+      /* Single transfer */
+
+      sam_dma_single(epno, privreq, UDPHS_DMACONTROL_ENDBEN
+                      | UDPHS_DMACONTROL_ENDBUFFIT
+                      | UDPHS_DMACONTROL_CHANNENB);
+      return OK;
+    }
+
+  /* Enable the endpoint interrupt */
+
+  regval  = sam_getreg(SAM_UDPHS_IEN);
+  regval |= UDPHS_INT_EPT(epno);
+  sam_putreg(regval, SAM_UDPHS_IEN);
+
+  sam_putreg(UDPHS_EPTCTL_TXRDY, SAM_UDPHS_EPTCTLENB);
+  return OK;
 }
 
 /****************************************************************************
@@ -929,12 +1013,17 @@ static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
 }
 
 /****************************************************************************
- * Name: sam_req_write
+ * Name: sam_req_wrnodma
+ *
+ * Description:
+ *   Process the next queued write request for an endpoint that does not
+ *   support DMA.
+ *
  ****************************************************************************/
 
-static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
+static int sam_req_wrnodma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
+                           struct sam_req_s *privreq)
 {
-  struct sam_req_s *privreq;
   uint8_t *buf;
   uint8_t *fifo;
   uint8_t epno;
@@ -942,28 +1031,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
   int nbytes;
   int bytesleft;
 
-  /* We get here when an IN endpoint interrupt occurs.  So now we know that
-   * there is no TX transfer in progress.
-   */
-
-  privep->txbusy = false;
-
-  /* Check the request from the head of the endpoint request queue */
-
-  privreq = sam_rqpeek(privep);
-  if (!privreq)
-    {
-      /* There is no TX transfer in progress and no new pending TX
-       * requests to send.
-       */
-
-      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EPINQEMPTY), 0);
-      return -ENOENT;
-    }
-
   epno = USB_EPNO(privep->ep.eplog);
-  ullvdbg("epno=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
-          epno, privreq, privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
 
   /* Get the number of bytes to send.  The totals bytes remaining to be sent
    * is the the total size of the buffer, minus the number of bytes
@@ -984,8 +1052,8 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
     }
 
   /* Either (1) we are committed to sending the null packet (because txnullpkt == 1
-   * && nbytes == 0), or (2) we have not yet send the last packet (nbytes > 0).
-   * In either case, it is appropriate to clearn txnullpkt now.
+   * && nbytes == 0), or (2) we havenot yet sent the last packet (nbytes > 0).
+   * In either case, it is appropriate to clear txnullpkt now.
    */
 
   privep->txnullpkt = 0;
@@ -1046,11 +1114,68 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
         privep->txbusy = true;
     }
 
+  return OK;
+}
+
+/****************************************************************************
+ * Name: sam_req_write
+ *
+ * Description:
+ *   Process the next queued write request
+ *
+ ****************************************************************************/
+
+static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
+{
+  struct sam_req_s *privreq;
+  uint8_t epno;
+
+  /* We get here when an IN endpoint interrupt occurs.  So now we know that
+   * there is no TX transfer in progress.
+   */
+
+  privep->txbusy = false;
+
+  /* Check the request from the head of the endpoint request queue */
+
+  privreq = sam_rqpeek(privep);
+  if (!privreq)
+    {
+      /* There is no TX transfer in progress and no new pending TX
+       * requests to send.
+       */
+
+      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EPINQEMPTY), 0);
+      return -ENOENT;
+    }
+
+  epno = USB_EPNO(privep->ep.eplog);
+  ullvdbg("epno=%d req=%p: len=%d xfrd=%d nullpkt=%d\n",
+          epno, privreq, privreq->req.len, privreq->req.xfrd, privep->txnullpkt);
+
+  /* The way that we handle the transfer is going to depend on whether
+   * or not this endpoint supports DMA.
+   */
+
+  if ((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0)
+    {
+      ret = sam_req_wrdma(priv, privep, privreq);
+    }
+  else
+    {
+      ret = sam_req_wrnodma(priv, privep, privreq);
+    }
+
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* If all of the bytes were sent (including any final null packet)
    * then we are finished with the request buffer).
    */
 
-  if (privreq->req.len - privreq->req.xfrd && !privep->txnullpkt)
+  if (privreq->req.len == privreq->req.xfrd && !privep->txnullpkt)
     {
       /* Return the write request to the class driver */
 
@@ -2053,7 +2178,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
           regval = UDPHS_DMACONTROL_ENDTREN | UDPHS_DMACONTROL_ENDTRIT |
                    UDPHS_DMACONTROL_ENDBEN | UDPHS_DMACONTROL_ENDBUFFIT |
-                   UDPHS_DMACONTROL_CHANNENB
+                   UDPHS_DMACONTROL_CHANNENB;
           sam_dma_single(epno, privreq, regval);
         }
     }
@@ -2383,7 +2508,9 @@ void sam_epset_reset(struct sam_usbdev_s *priv, uint16_t epset)
 
           /* Disable endpoint interrupt */
 
-          sam_putreg(~UDPHS_INT_EPT(epno), SAM_UDPHS_IEN);
+          regval = sam_getreg(SAM_UDPHS_IEN);
+          regval &= ~UDPHS_INT_EPT(epno);
+          sam_putreg(regval, SAM_UDPHS_IEN);
 
           /* Cancel any queued requests.  Since they are canceled
            * with status -ESHUTDOWN, then will not be requeued
