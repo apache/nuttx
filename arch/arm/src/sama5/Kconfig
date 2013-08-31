@@ -335,8 +335,44 @@ config SAMA5_HSMCI_REGDEBUG
 endmenu # HSMCI device driver options
 endif # SAMA5_HSMCI0 || SAMA5_HSMCI1 || SAMA5_HSMCI2
 
+if SAMA5_UDPHS
+menu "USB High Speed Device Controller driver (DCD) options"
+
+config UDPHS_SCATTERGATHER
+	bool
+	default n
+	---help---
+		Scatter gather DMA is not yet supported
+
+config SAMA5_UDPHS_NDTDS
+	int "Number of UDPHS DMA transfer descriptors"
+	default 9
+	depends on UDPHS_SCATTERGATHER
+	---help---
+		DMA tranfer descriptors are allocated in a pool at boot time.  This
+		setting provides the number of DMA transfer descriptors to be
+		allocated.
+
+config SAMA5_UDPHS_PREALLOCATE
+	bool "Pre-allocate DMA transfer descriptors"
+	default y
+	depends on UDPHS_SCATTERGATHER
+	---help---
+		If this option is selected then DMA tranfer descriptors will be
+		pre-allocated in .bss.  Otherwise, the descriptors will be allocated
+		at start-up time with kmalloc().  This might be important if a larger
+		memory pool is available after startup.
+
+config SAMA5_UDPHS_REGDEBUG
+	bool "Enable low-level UPPHS register debug"
+	default n
+	depends on DEBUG
+
+endmenu # USB High Speed Host Device driver (DCD) options
+endif # SAMA5_UDPHS
+
 if SAMA5_UHPHS
-menu "USB High Speed Host device driver options"
+menu "USB High Speed Host Controller driver (HCD) options"
 
 config SAMA5_OHCI
 	bool "Full/low speed OHCI support"
@@ -436,7 +472,7 @@ config SAMA5_UHPHS_RHPORT3
 
 endif # SAMA5_OHCI || SAMA5_EHCI
 
-endmenu # USB High Speed Host driver option
+endmenu # USB High Speed Host Controller driver (HCD) options
 endif # SAMA5_UHPHS
 
 menu "External Memory Configuration"

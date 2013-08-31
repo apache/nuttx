@@ -82,7 +82,7 @@
                                                /* 0x00e4-0x00e8 Reserved */
 /* Endpoint Offsets */
 
-#define SAM_UPPHS_EP_OFFSET(ep)         (0x0100+((unsigned int)(ep)<<5)
+#define SAM_UPPHS_EP_OFFSET(ep)         (0x0100+((unsigned int)(ep)<<5))
 #define SAM_UPPHS_EP0_OFFSET            0x0100
 #define SAM_UPPHS_EP1_OFFSET            0x0120
 #define SAM_UPPHS_EP2_OFFSET            0x0140
@@ -252,7 +252,7 @@
 #  define UDPHS_INT_EPT15               (1 << 23) /* Bit 23: Endpoint 15 Interrupt */
 #define UDPHS_INT_DMA_SHIFT             (25)      /* Bits 25-31: Endpoint interrupts */
 #define UDPHS_INT_DMA_MASK              (0x7f << UDPHS_INT_DMA_SHIFT)
-#define UDPHS_INT_DMA(ch)               (1 << ((ch)+24)  /* DMA Channel ch Interrupt */
+#define UDPHS_INT_DMA(ch)               (1 << ((ch)+24)) /* DMA Channel ch Interrupt */
 #  define UDPHS_INT_DMA1                (1 << 25) /* Bit 25: DMA Channel 1 Interrupt */
 #  define UDPHS_INT_DMA2                (1 << 26) /* Bit 26: DMA Channel 2 Interrupt */
 #  define UDPHS_INT_DMA3                (1 << 27) /* Bit 27: DMA Channel 3 Interrupt */

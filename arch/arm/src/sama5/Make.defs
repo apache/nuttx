@@ -124,6 +124,10 @@ CHIP_CSRCS += sam_ehci.c
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_UDPHS),y)
+CHIP_CSRCS += sam_udphs.c
+endif
+
 ifeq ($(CONFIG_SAMA5_HSMCI0),y)
 CHIP_CSRCS += sam_hsmci.c
 else
