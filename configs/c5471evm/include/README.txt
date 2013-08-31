@@ -1,1 +1,0 @@
-This directory contains header files unique to the Spectrum Digital C5471 EVM.
