@@ -5480,4 +5480,5 @@
 	* arch/arm/src/sama5/sam-udphs.c:  A framework for the USB device
 	  driver taken from another architecture.  There is very little
 	  useful in this initial check-in (2013-8-29).
+	* Remove all empty and most useless README.txt files (2013-8-31)
 

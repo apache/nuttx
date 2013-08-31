@@ -959,17 +959,10 @@ nuttx
  |   |- arm/
  |   |   `- src
  |   |       `- lpc214x/README.txt
- |   |- avr/
- |   |   `- README.txt
  |   |- sh/
  |   |   |- include/
- |   |   |   |-m16c/README.txt
- |   |   |   |-sh1/README.txt
  |   |   |   `-README.txt
  |   |   |- src/
- |   |   |   |-common/README.txt
- |   |   |   |-m16c/README.txt
- |   |   |   |-sh1/README.txt
  |   |   |   `-README.txt
  |   |- x86/
  |   |   |- include/
@@ -989,8 +982,6 @@ nuttx
  |   |- avr32dev1/
  |   |   `- README.txt
  |   |- c5471evm/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- cloudctrl
  |   |   `- README.txt
@@ -1005,8 +996,6 @@ nuttx
  |   |- ea3152/
  |   |   `- README.txt
  |   |- eagle100/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- ekk-lm3s9b96/
  |   |   `- README.txt
@@ -1026,37 +1015,24 @@ nuttx
  |   |-  freedom-kl25z/
  |   |   `- README.txt
  |   |-  hymini-stm32v/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- kwikstik-k40/
  |   |   `- README.txt
  |   |- lincoln60/
  |   |   `- README.txt
  |   |- lm3s6432-s2e/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- lm3s6965-ek/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- lm3s8962-ek/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- lpc4330-xplorer/
  |   |   `- README.txt
  |   |- lpcxpresso-lpc1768/
  |   |   `- README.txt
- |   |- m68332evb/
- |   |   |- include/README.txt
- |   |   `- src/README.txt
  |   |- mbed/
  |   |   `- README.txt
  |   |- mcu123-lpc214x/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- micropendous3/
  |   |   `- README.txt
@@ -1065,15 +1041,11 @@ nuttx
  |   |- mirtoo/
  |   |   `- README.txt
  |   |- mx1ads/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- ne63badge/
  |   |   `- README.txt
  |   |- ntosd-dm320/
  |   |   |- doc/README.txt
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- nucleus2g/
  |   |   `- README.txt
@@ -1082,11 +1054,8 @@ nuttx
  |   |- olimex-lpc1766stk/
  |   |   `- README.txt
  |   |- olimex-lpc2378/
- |   |   |- include/README.txt
  |   |   `- README.txt
  |   |- olimex-strp711/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- open1788/
  |   |   `- README.txt
@@ -1101,16 +1070,10 @@ nuttx
  |   |- pirelli_dpl10/
  |   |   `- README.txt
  |   |- pjrc-8051/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- qemu-i486/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- rgmp/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- sama5d3x-ek/
  |   |   `- README.txt
@@ -1121,19 +1084,13 @@ nuttx
  |   |- sam4s-xplained/
  |   |   `- README.txt
  |   |- sim/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- shenzhou/
  |   |   `- README.txt
  |   |- skp16c26/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- stm3210e-eval/
- |   |   |- include/README.txt
  |   |   |- RIDE/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- stm3220g-eval/
  |   |   `- README.txt
@@ -1158,24 +1115,17 @@ nuttx
  |   |- ubw32/
  |   |   `- README.txt
  |   |- us7032evb1/
- |   |   |- bin/README.txt
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- vsn/
  |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- xtrs/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- z16f2800100zcog/
  |   |   |- ostest/README.txt
  |   |   |- pashello/README.txt
  |   |   `- README.txt
  |   |- z80sim/
- |   |   |- include/README.txt
- |   |   |- src/README.txt
  |   |   `- README.txt
  |   |- z8encore000zco/
  |   |   |- ostest/README.txt
