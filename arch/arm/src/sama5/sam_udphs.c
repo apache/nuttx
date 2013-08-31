@@ -348,8 +348,6 @@ struct sam_usbdev_s
   uint8_t                  selfpowered:1; /* 1: Device is self powered */
   uint8_t                  epavail;       /* Bitset of available endpoints */
   uint8_t                  bufavail;      /* Bitset of available buffers */
-  uint16_t                 rxstatus;      /* Saved during interrupt processing */
-  uint16_t                 txstatus;      /* "   " "    " "       " "        " */
   uint16_t                 imask;         /* Current interrupt mask */
 
   /* DMA Transfer descriptors */
@@ -424,14 +422,15 @@ static void   sam_req_cancel(struct sam_ep_s *privep);
 
 /* Interrupt level processing ***********************************************/
 
-static void   sam_dispatchrequest(struct sam_usbdev_s *priv);
-static void   sam_epdone(struct sam_usbdev_s *priv, uint8_t epno);
+static void   sam_ep0_read(struct usb_ctrlreq_s *req);
+static void   sam_ep0_dispatch(struct sam_usbdev_s *priv);
+static void   sam_ep_done(struct sam_usbdev_s *priv, uint8_t epno);
 static void   sam_setdevaddr(struct sam_usbdev_s *priv, uint8_t value);
-static void   sam_ep0setup(struct sam_usbdev_s *priv);
-static void   sam_ep0out(struct sam_usbdev_s *priv);
-static void   sam_ep0in(struct sam_usbdev_s *priv);
+static void   sam_ep0_setup(struct sam_usbdev_s *priv);
+static void   sam_ep0_out(struct sam_usbdev_s *priv);
+static void   sam_ep0_in(struct sam_usbdev_s *priv);
 static inline void
-              sam_ep0done(struct sam_usbdev_s *priv, uint16_t intsta);
+              sam_ep0_done(struct sam_usbdev_s *priv, uint16_t intsta);
 static void   sam_lptransfer(struct sam_usbdev_s *priv);
 static void   sam_dma_interrupt(struct sam_usbdev_s *priv, int chan);
 static void   sam_ep_interrupt(struct sam_usbdev_s *priv, int epno);
@@ -1189,6 +1188,10 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
 
 /****************************************************************************
  * Name: sam_req_read
+ *
+ * Description:
+ *   Process the next queued read request
+ *
  ****************************************************************************/
 
 static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
@@ -1293,10 +1296,28 @@ static void sam_req_cancel(struct sam_ep_s *privep)
  * Interrupt Level Processing
  ****************************************************************************/
 /****************************************************************************
- * Name: sam_dispatchrequest
+ * Name: sam_ep0_read
+ *
+ * Description:
+ *   Read a general USB request from the UDPHS FIFO
+ *
  ****************************************************************************/
 
-static void sam_dispatchrequest(struct sam_usbdev_s *priv)
+static void sam_ep0_read(struct usb_ctrlreq_s *req)
+{
+  uint32_t *buffer = (uint32_t *)req;
+  volatile uint32_t *fifo;
+
+  fifo = (volatile uint32_t *)SAM_UDPHSRAM_VSECTION;
+  *buffer++ = *fifo;
+  *buffer = *fifo;
+}
+
+/****************************************************************************
+ * Name: sam_ep0_dispatch
+ ****************************************************************************/
+
+static void sam_req_dispatch(struct sam_usbdev_s *priv)
 {
   int ret;
 
@@ -1317,10 +1338,10 @@ static void sam_dispatchrequest(struct sam_usbdev_s *priv)
 }
 
 /****************************************************************************
- * Name: sam_epdone
+ * Name: sam_ep_done
  ****************************************************************************/
 
-static void sam_epdone(struct sam_usbdev_s *priv, uint8_t epno)
+static void sam_ep_done(struct sam_usbdev_s *priv, uint8_t epno)
 {
   struct sam_ep_s *privep;
   uint32_t epr;
@@ -1347,14 +1368,10 @@ static void sam_epdone(struct sam_usbdev_s *priv, uint8_t epno)
         {
           /* Read host data into the current read request */
 
-          (void)sam_req_read(priv, privep);
+          (void)sam_ep0_read(priv, privep);
 
-          /* "After the received data is processed, the application software
-           *  should set the STAT_RX bits to '11' (Valid) in the USB_EPnR,
-           *  enabling further transactions. "
-           */
-
-          priv->rxstatus  = USB_EPR_STATRX_VALID;
+          /* Enable further transactions on the endpoint */
+#warning Missing logic
         }
 
       /* NAK further OUT packets if there there no more read requests */
@@ -1364,20 +1381,15 @@ static void sam_epdone(struct sam_usbdev_s *priv, uint8_t epno)
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EPOUTPENDING), (uint16_t)epno);
 
           /* Mark the RX processing as pending and NAK any OUT actions
-           * on this endpoint.  "While the STAT_RX bits are equal to '10'
-           * (NAK), any OUT request addressed to that endpoint is NAKed,
-           * indicating a flow control condition: the USB host will retry
-           * the transaction until it succeeds."
+           * on this endpoint.
            */
+#warning Missing logic
 
-          priv->rxstatus  = USB_EPR_STATRX_NAK;
           priv->rxpending = true;
         }
 
       /* Clear the interrupt status and set the new RX status */
-
-      sam_clrepctrrx(epno);
-      sam_seteprxstatus(epno, priv->rxstatus);
+#warning Missing logic
     }
 
   /* IN: device-to-host
@@ -1394,12 +1406,7 @@ static void sam_epdone(struct sam_usbdev_s *priv, uint8_t epno)
 
       /* Handle write requests */
 
-      priv->txstatus = USB_EPR_STATTX_NAK;
       sam_req_write(priv, privep);
-
-      /* Set the new TX status */
-
-      sam_seteptxstatus(epno, priv->txstatus);
     }
 }
 
@@ -1427,10 +1434,10 @@ static void sam_setdevaddr(struct sam_usbdev_s *priv, uint8_t value)
 }
 
 /****************************************************************************
- * Name: sam_ep0setup
+ * Name: sam_ep0_setup
  ****************************************************************************/
 
-static void sam_ep0setup(struct sam_usbdev_s *priv)
+static void sam_ep0_setup(struct sam_usbdev_s *priv)
 {
   struct sam_ep_s   *ep0     = &priv->eplist[EP0];
   struct sam_req_s  *privreq = sam_rqpeek(ep0);
@@ -1465,9 +1472,6 @@ static void sam_ep0setup(struct sam_usbdev_s *priv)
   ep0->stalled  = 0;
   ep0->txbusy   = 0;
 
-  /* Get a 32-bit PMA address and use that to get the 8-byte setup request */
-#warning Missing logic
-
   /* And extract the little-endian 16-bit values to host order */
 
   value.w = GETUINT16(priv->ctrl.value);
@@ -1487,7 +1491,7 @@ static void sam_ep0setup(struct sam_usbdev_s *priv)
 
       /* Let the class implementation handle all non-standar requests */
 
-      sam_dispatchrequest(priv);
+      sam_ep0_dispatch(priv);
       return;
     }
 
@@ -1612,7 +1616,7 @@ static void sam_ep0setup(struct sam_usbdev_s *priv)
              * endpoint recipient)
              */
 
-            sam_dispatchrequest(priv);
+            sam_ep0_dispatch(priv);
             handled = true;
           }
         else
@@ -1656,7 +1660,7 @@ static void sam_ep0setup(struct sam_usbdev_s *priv)
           {
             /* The class driver handles all recipients except recipient=endpoint */
 
-            sam_dispatchrequest(priv);
+            sam_ep0_dispatch(priv);
             handled = true;
           }
         else
@@ -1722,7 +1726,7 @@ static void sam_ep0setup(struct sam_usbdev_s *priv)
           {
             /* The request seems valid... let the class implementation handle it */
 
-            sam_dispatchrequest(priv);
+            sam_ep0_dispatch(priv);
             handled = true;
           }
         else
@@ -1747,7 +1751,7 @@ static void sam_ep0setup(struct sam_usbdev_s *priv)
           {
             /* The request seems valid... let the class implementation handle it */
 
-            sam_dispatchrequest(priv);
+            sam_ep0_dispatch(priv);
             handled = true;
           }
         else
@@ -1772,7 +1776,7 @@ static void sam_ep0setup(struct sam_usbdev_s *priv)
           {
              /* The request seems valid... let the class implementation handle it */
 
-             sam_dispatchrequest(priv);
+             sam_ep0_dispatch(priv);
              handled = true;
           }
         else
@@ -1800,7 +1804,7 @@ static void sam_ep0setup(struct sam_usbdev_s *priv)
         /* Let the class implementation handle the request */
 
         usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_GETSETIF), priv->ctrl.type);
-        sam_dispatchrequest(priv);
+        sam_ep0_dispatch(priv);
         handled = true;
       }
       break;
@@ -1861,10 +1865,10 @@ static void sam_ep0setup(struct sam_usbdev_s *priv)
 }
 
 /****************************************************************************
- * Name: sam_ep0in
+ * Name: sam_ep0_in
  ****************************************************************************/
 
-static void sam_ep0in(struct sam_usbdev_s *priv)
+static void sam_ep0_in(struct sam_usbdev_s *priv)
 {
   int ret;
 
@@ -1905,10 +1909,10 @@ static void sam_ep0in(struct sam_usbdev_s *priv)
 }
 
 /****************************************************************************
- * Name: sam_ep0out
+ * Name: sam_ep0_out
  ****************************************************************************/
 
-static void sam_ep0out(struct sam_usbdev_s *priv)
+static void sam_ep0_out(struct sam_usbdev_s *priv)
 {
   int ret;
 
@@ -1932,25 +1936,15 @@ static void sam_ep0out(struct sam_usbdev_s *priv)
 }
 
 /****************************************************************************
- * Name: sam_ep0done
+ * Name: sam_ep0_done
  ****************************************************************************/
 
-static inline void sam_ep0done(struct sam_usbdev_s *priv, uint32_t intsta)
+static inline void sam_ep0_done(struct sam_usbdev_s *priv, uint32_t intsta)
 {
   uint32_t epr;
 
-  /* Initialize RX and TX status.  We shouldn't have to actually look at the
-   * status because the hardware is supposed to set the both RX and TX status
-   * to NAK when an EP0 SETUP occurs (of course, this might not be a setup)
-   */
-
-  priv->rxstatus = USB_EPR_STATRX_NAK;
-  priv->txstatus = USB_EPR_STATTX_NAK;
-
-  /* Set both RX and TX status to NAK  */
-
-  sam_seteprxstatus(EP0, USB_EPR_STATRX_NAK);
-  sam_seteptxstatus(EP0, USB_EPR_STATTX_NAK);
+  /* Setup to NAK further requests on the endpoint */
+#warning Missing logic
 
   /* Check the direction bit to determine if this the completion of an EP0
    * packet sent to or received from the host PC.
@@ -1962,7 +1956,7 @@ static inline void sam_ep0done(struct sam_usbdev_s *priv, uint32_t intsta)
 
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0IN), intsta);
       sam_clrepctrtx(EP0);
-      sam_ep0in(priv);
+      sam_ep0_in(priv);
     }
   else
     {
@@ -1978,7 +1972,7 @@ static inline void sam_ep0done(struct sam_usbdev_s *priv, uint32_t intsta)
         {
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0INDONE), epr);
           sam_clrepctrtx(EP0);
-          sam_ep0in(priv);
+          sam_ep0_in(priv);
         }
 
       /* SETUP is set by the hardware when the last completed
@@ -1989,7 +1983,7 @@ static inline void sam_ep0done(struct sam_usbdev_s *priv, uint32_t intsta)
         {
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0SETUPDONE), epr);
           sam_clrepctrrx(EP0);
-          sam_ep0setup(priv);
+          sam_ep0_setup(priv);
         }
 
       /* Set by the hardware when an OUT/SETUP transaction successfully
@@ -2000,7 +1994,7 @@ static inline void sam_ep0done(struct sam_usbdev_s *priv, uint32_t intsta)
         {
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0OUTDONE), epr);
           sam_clrepctrrx(EP0);
-          sam_ep0out(priv);
+          sam_ep0_out(priv);
         }
 
       /* None of the above */
@@ -2016,42 +2010,12 @@ static inline void sam_ep0done(struct sam_usbdev_s *priv, uint32_t intsta)
 
   sam_seteprxcount(EP0, SAM_EP0MAXPACKET);
 
-  /* Now figure out the new RX/TX status.  Here are all possible
-   * consequences of the above EP0 operations:
-   *
-   * rxstatus txstatus ep0state  MEANING
-   * -------- -------- --------- ---------------------------------
-   * NAK      NAK      IDLE      Nothing happened
-   * NAK      VALID    IDLE      EP0 response sent from USBDEV driver
-   * NAK      VALID    WRREQUEST EP0 response sent from class driver
-   * NAK      ---      STALL     Some protocol error occurred
-   *
-   * First handle the STALL condition:
-   */
+  /* Handle the STALL condition: */
 
   if (priv->ep0state == EP0STATE_STALLED)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EP0SETUPSTALLED), priv->ep0state);
-      priv->rxstatus = USB_EPR_STATRX_STALL;
-      priv->txstatus = USB_EPR_STATTX_STALL;
     }
-
-  /* Was a transmission started?  If so, txstatus will be VALID.  The
-   * only special case to handle is when both are set to NAK.  In that
-   * case, we need to set RX status to VALID in order to accept the next
-   * SETUP request.
-   */
-
-  else if (priv->rxstatus == USB_EPR_STATRX_NAK &&
-           priv->txstatus == USB_EPR_STATTX_NAK)
-    {
-      priv->rxstatus = USB_EPR_STATRX_VALID;
-    }
-
-  /* Now set the new TX and RX status */
-
-  sam_seteprxstatus(EP0, priv->rxstatus);
-  sam_seteptxstatus(EP0, priv->txstatus);
 }
 
 /****************************************************************************
@@ -2077,23 +2041,25 @@ static void sam_lptransfer(struct sam_usbdev_s *priv)
 
       if (epno == 0)
         {
-          sam_ep0done(priv, intsta);
+          sam_ep0_done(priv, intsta);
         }
 
       /* Handle other endpoint completion events */
 
       else
         {
-          sam_epdone(priv, epno);
+          sam_ep_done(priv, epno);
         }
     }
 }
 
-/*
- * "The DMA channel index refers to the corresponding EP number. When no DMA
- *  channel is assigned to one EP, the associated registers are reserved.
- *  This is the case for EP0, so DMA Channel 0 registers are reserved."
- */
+/****************************************************************************
+ * Name: sam_dma_interrupt
+ *
+ * Description:
+ *   Handle the UDPHS DMA interrupt
+ *
+ ****************************************************************************/
 
 static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 {
@@ -2109,7 +2075,8 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
   /* Not all endpoints support DMA */
 
-  DEBUGASSERT((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0);
+  DEBUGASSERT((unsigned)epno < SAM_UDPHS_NENDPOINTS &&
+              (SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0);
 
   /* Get the endpoint structure */
 
@@ -2220,7 +2187,252 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 }
 
 /****************************************************************************
+ * Name: sam_ep_interrupt
+ *
+ * Description:
+ *   Handle the UDPHS endpoint interrupt
+ *
+ ****************************************************************************/
+
+static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
+{
+  struct sam_ep_s *privep;
+  struct sam_req_s *privreq;
+  struct usb_ctrlreq_s *req;
+  uint32_t reqbuf[2];
+  uint32_t eptsta;
+  uint32_t eptype;
+  uint32_t regval;
+  uint16_t pktsize;
+
+  DEBUGASSERT((unsigned)epno < SAM_UDPHS_NENDPOINTS);
+
+  /* Get the endpoint structure */
+
+  privep = &priv->eplist[epno];
+
+  /* Get the request from the head of the endpoint request queue */
+
+  privreq = sam_rqpeek(privep);
+  DEBUGASSERT(privreg);
+
+  /* Get the endpoint status */
+
+  eptsta = sam_getreg(SAM_UDPHS_EPTSTA(epno));
+
+  /* Get the endpoint type */
+
+  regval =  sam_getreg(SAM_UDPHS_EPTCFG(epno))
+  eptype = regval & UDPHS_EPTCFG_TYPE_MASK;
+
+  req    = (struct usb_ctrlreq_s *)reqbuf;
+
+  /* IN packet sent */
+
+  if ((sam_getreg(SAM_UDPHS_EPTCTL(epno)) & UDPHS_EPTCTL_TXRDY) != 0 &&
+      (eptsta & UDPHS_EPTSTA_TXRDY) == 0)
+    {
+      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_TXRDY), (uint16_t)eptsta);
+
+      /* Sending state */
+
+      if (privep->epstate == UDPHS_EPSTATE_SENDING)
+        {
+          ssize_t remaining;
+
+          /* Were their bytes in flight? */
+
+          if (privreq->inflight)
+            {
+              privreq->req.xfrd += privreq->inflight;
+              privreq->inflight = 0;
+            }
+
+          /* Check for a zero-length data transfer */
+
+          if (privreq->req.len == 0 &&
+             (privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0)
+            {
+              privep->txnullpkt = 1;
+            }
+
+          /* Check for the end of transfer */
+
+          if (privreq->req.xfrd == privreq->req.len ||
+              privep->txnullpkt != 0)
+            {
+              privep->txnullpkt = 1;
+
+              /* Send next packet */
+
+              (void)sam_req_wrdma(priv, privep);
+              sam_putreg(UDPHS_EPTSETSTA_TXRDY, SAM_UDPHS_EPTSETSTA(ep));
+            }
+          else
+            {
+              /* Disable interrupt on none-control EP */
+
+              if (eptype != UDPHS_EPTCFG_TYPE_CTRL8)
+                {
+                  regval  = sam_getreg(SAM_UDPHS_IEN);
+                  regval &= ~UDPHS_INT_EPT(epno);
+                  sam_putreg(regval, SAM_UDPHS_IEN);
+                }
+
+              sam_putreg(UDPHS_EPTCTL_TXRDY, SAM_UDPHS_EPTCTLDIS(epno));
+              sam_req_complete(privep, OK);
+              privep->txnullpkt = 0;
+            }
+        }
+      else
+        {
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_TXRDYERR), privep->txnullpkt);
+        }
+    }
+
+  /* OUT packet received */
+
+  if ((eptsta & UDPHS_EPTSTA_RXRDYTXKL) != 0)
+    {
+      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXRDY), (uint16_t)eptsta);
+
+      /* NOT in receiving state */
+
+      if (privep->epstate != UDPHS_EPSTATE_RECEIVING)
+        {
+          /* Check if ACK received on a Control EP */
+
+          if (eptype == UDPHS_EPTCFG_TYPE_CTRL8 &&
+              (eptsta & UDPHS_EPTSTA_BYTECNT_MASK) == 0)
+            {
+              sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(ep));
+              sam_req_complete(privep, OK);
+            }
+
+          /* Data has been STALLed */
+
+          else if ((epsta & UDPHS_EPTSTA_FRCESTALL) != 0)
+            {
+              sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(ep));
+            }
+
+          /* NAK the data */
+
+          else
+            {
+              regval  = sam_getreg(SAM_UDPHS_IEN);
+              regval &= ~UDPHS_INT_EPT(epno);
+              sam_putreg(regval, SAM_UDPHS_IEN);
+            }
+        }
+
+      /* In read state */
+
+      else
+        {
+          pktsize = (uint16_t)
+            ((eptsta & UDPHS_EPTSTA_BYTECNT_MASK) >> UDPHS_EPTSTA_BYTECNT_SHIFT);
+
+          sam_ep0_read(priv, privep);
+          sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(ep));
+
+          /* Check if transfer is finished */
+
+          if (privreq->req.xfrd == privreq->req.len ||
+              pktsize < privep->ep.maxpacket)
+            {
+              sam_putreg(UDPHS_EPTCTL_RXRDYTXKL, SAM_UDPHS_EPTCTLDIS(epno));
+
+              /* Disable interrupt if not control EP */
+
+              if (UDPHS_EPTCFG_TYPE_CTRL8 != eptype)
+                {
+                  regval  = sam_getreg(SAM_UDPHS_IEN);
+                  regval &= ~UDPHS_INT_EPT(epno);
+                  sam_putreg(regval, SAM_UDPHS_IEN);
+                }
+
+              sam_req_complete(privep, OK);
+            }
+        }
+    }
+
+  /* STALL sent */
+
+  if ((eptsta & UDPHS_EPTSTA_STALLSNT) != 0)
+    {
+      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_STALLSNT), (uint16_t)eptsta);
+
+      /* Acknowledge */
+
+      sam_putreg(UDPHS_EPTSTA_STALLSNT, SAM_UDPHS_EPTCLRSTA(ep));
+
+      /* ISO error */
+
+      if (eptype == UDPHS_EPTCFG_EPT_TYPE_ISO)
+        {
+          sam_req_complete(privep, -EIO);
+        }
+
+      /* If EP is not halted, clear STALL */
+
+      else
+        {
+          if (privep->epstate != UDPHS_EPSTATE_HALTED)
+            {
+              sam_putreg(UDPHS_EPTSTA_FRCESTALL, SAM_UDPHS_EPTCLRSTA(ep));
+            }
+        }
+    }
+
+  /* SETUP packet received */
+
+  if ((eptsta & UDPHS_EPTSTA_RXSETUP) != 0)
+    {
+      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXSETUP), (uint16_t)eptsta);
+
+      /* If a transfer was pending, complete it Handles the case where during
+       * the status phase of a control write transfer, the host receives the
+       * device ZLP and ack it, but the ack is not received by the device
+       */
+
+      if (privep->epstate == UDPHS_EPSTATE_RECEIVING ||
+          privep->epstate == UDPHS_EPSTATE_SENDING)
+        {
+          sam_req_complete(privep, OK);
+        }
+
+      /* ISO Err Flow */
+
+      if (eptype == UDPHS_EPTCFG_EPT_TYPE_ISO)
+        {
+          /* Acknowledge setup packet */
+
+          sam_putreg(UDPHS_EPTSTA_RXSETUP, SAM_UDPHS_EPTCLRSTA(ep));
+        }
+      else
+        {
+          /* Copy setup */
+
+          sam_ep0_read(priv->ctrl);
+
+          /* Acknowledge setup packet */
+
+          sam_putreg(UDPHS_EPTSTA_RXSETUP, SAM_UDPHS_EPTCLRSTA(ep));
+
+          /* Handle the EP0 SETUP command */
+
+          sam_ep0_setup(priv);
+        }
+    }
+}
+
+/****************************************************************************
  * Name: sam_udphs_interrupt
+ *
+ * Description:
+ *   Handle the UDPHS interrupt
+ *
  ****************************************************************************/
 
 static int sam_udphs_interrupt(int irq, void *context)
@@ -2675,25 +2887,14 @@ static int sam_ep_configure(struct usbdev_ep_s *ep,
       /* The full, logical EP number includes direction */
 
       ep->eplog = USB_EPIN(epno);
-
-      /* Set up TX; disable RX */
-
-      sam_seteptxaddr(epno, pma);
-      sam_seteptxstatus(epno, USB_EPR_STATTX_NAK);
-      sam_seteprxstatus(epno, USB_EPR_STATRX_DIS);
+#warning Missing logic
     }
   else
     {
       /* The full, logical EP number includes direction */
 
       ep->eplog = USB_EPOUT(epno);
-
-      /* Set up RX; disable TX */
-
-      sam_seteprxaddr(epno, pma);
-      sam_seteprxcount(epno, maxpacket);
-      sam_seteprxstatus(epno, USB_EPR_STATRX_VALID);
-      sam_seteptxstatus(epno, USB_EPR_STATTX_DIS);
+#warning Missing logic
     }
 
    sam_dumpep(priv, epno);
@@ -2728,10 +2929,7 @@ static int sam_ep_disable(struct usbdev_ep_s *ep)
   sam_req_cancel(privep);
 
   /* Disable TX; disable RX */
-
-  sam_seteprxcount(epno, 0);
-  sam_seteprxstatus(epno, USB_EPR_STATRX_DIS);
-  sam_seteptxstatus(epno, USB_EPR_STATTX_DIS);
+#warning Missing logic
 
   irqrestore(flags);
   return OK;
@@ -2851,12 +3049,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
       if (!privep->txbusy)
         {
-          priv->txstatus = USB_EPR_STATTX_NAK;
           ret = sam_req_write(priv, privep);
-
-          /* Set the new TX status */
-
-          sam_seteptxstatus(epno, priv->txstatus);
         }
     }
 
@@ -2874,15 +3067,8 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
       if (priv->rxpending)
         {
-          /* Set STAT_RX bits to '11' in the USB_EPnR, enabling further
-           * transactions. "While the STAT_RX bits are equal to '10'
-           * (NAK), any OUT request addressed to that endpoint is NAKed,
-           * indicating a flow control condition: the USB host will retry
-           * the transaction until it succeeds."
-           */
-
-          priv->rxstatus  = USB_EPR_STATRX_VALID;
-          sam_seteprxstatus(epno, priv->rxstatus);
+          /* NAK any OUT request addressed to the endpoint */
+#warning Missing logic
 
           /* Data is no longer pending */
 
@@ -2951,15 +3137,8 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
   /* Get status of the endpoint; stall the request if the endpoint is
    * disabled
    */
+#warning Missing logic
 
-  if (USB_ISEPIN(ep->eplog))
-    {
-      status = sam_geteptxstatus(epno);
-    }
-  else
-    {
-      status = sam_geteprxstatus(epno);
-    }
 
   if (status == 0)
     {
@@ -2992,12 +3171,7 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
 
               /* Restart any queued write requests */
 
-              priv->txstatus = USB_EPR_STATTX_NAK;
               (void)sam_req_write(priv, privep);
-
-              /* Set the new TX status */
-
-              sam_seteptxstatus(epno, priv->txstatus);
             }
         }
       else
@@ -3016,9 +3190,6 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
                 {
                   sam_clrrxdtog(epno);
                 }
-
-              priv->rxstatus = USB_EPR_STATRX_VALID;
-              sam_seteprxstatus(epno, USB_EPR_STATRX_VALID);
             }
         }
     }
@@ -3029,21 +3200,7 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
     {
       usbtrace(TRACE_EPSTALL, epno);
       privep->stalled = true;
-
-      if (USB_ISEPIN(ep->eplog))
-        {
-          /* IN endpoint */
-
-          priv->txstatus = USB_EPR_STATTX_STALL;
-          sam_seteptxstatus(epno, USB_EPR_STATTX_STALL);
-        }
-      else
-        {
-          /* OUT endpoint */
-
-          priv->rxstatus = USB_EPR_STATRX_STALL;
-          sam_seteprxstatus(epno, USB_EPR_STATRX_STALL);
-        }
+#warning Missing logic
     }
 
   irqrestore(flags);
@@ -3312,14 +3469,7 @@ static void sam_hw_reset(struct sam_usbdev_s *priv)
 # warning Missing logic
 
   /* Initialize EP0 */
-
-  sam_seteptype(EP0, USB_EPR_EPTYPE_CONTROL);
-  sam_seteptxstatus(EP0, USB_EPR_STATTX_NAK);
-  sam_seteprxaddr(EP0, SAM_EP0_RXADDR);
-  sam_seteprxcount(EP0, SAM_EP0MAXPACKET);
-  sam_seteptxaddr(EP0, SAM_EP0_TXADDR);
-  sam_clrstatusout(EP0);
-  sam_seteprxstatus(EP0, USB_EPR_STATRX_VALID);
+#warning Missing logic
 
   /* Set the device to respond on default address */
 
