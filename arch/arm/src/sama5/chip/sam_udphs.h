@@ -52,9 +52,19 @@
  * Pre-processor Definitions
  ********************************************************************************************/
 /* General Definitions **********************************************************************/
+/* Number of endpoints and DMA channels */
 
 #define SAM_UDPHS_NENDPOINTS            15
 #define SAM_UDPHS_NDMACHANNELS           7     /* For EP1-7 */
+
+/* Capabilities and characteristics of endpoints */
+
+#define SAM_UDPHS_MAXPACKETSIZE(ep) \
+   (((unsigned)(ep) < 1) ? 64 : 1024)
+#define SAM_UDPHS_NBANKS(ep) \
+   (((unsigned)(ep) < 1) ? 1 : (((unsigned)(ep) < 3) ? 3 : 2))
+#define SAM_UDPHS_DMA(ep) \
+   (((unsigned)(ep) < 1) ? false : (((unsigned)(ep) < 8) ? true : false))
 
 /* Register offsets *************************************************************************/
 
@@ -298,7 +308,7 @@
 #define UDPHS_EPTCFG_DIR                (1 << 3)  /* Bit 3:  Endpoint Direction */
 #define UDPHS_EPTCFG_TYPE_SHIFT         (4)       /* Bits 4-5: Endpoint Type */
 #define UDPHS_EPTCFG_TYPE_MASK          (3 << UDPHS_EPTCFG_TYPE_SHIFT)
-#  define UDPHS_EPTCFG_TYPE_CTRL        (0 << UDPHS_EPTCFG_TYPE_SHIFT) /* Control endpoint */
+#  define UDPHS_EPTCFG_TYPE_CTRL8       (0 << UDPHS_EPTCFG_TYPE_SHIFT) /* Control endpoint */
 #  define UDPHS_EPTCFG_TYPE_ISO         (1 << UDPHS_EPTCFG_TYPE_SHIFT) /* Isochronous endpoint */
 #  define UDPHS_EPTCFG_TYPE_BULK        (2 << UDPHS_EPTCFG_TYPE_SHIFT) /* Bulk endpoint */
 #  define UDPHS_EPTCFG_TYPE_INT         (3 << UDPHS_EPTCFG_TYPE_SHIFT) /* Interrupt endpoint */
