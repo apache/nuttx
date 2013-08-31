@@ -1220,6 +1220,27 @@ Configurations
         Application Configuration -> NSH Library
           CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
+    10) Support the USB high-speed EHCI host driver can be enabled by changing
+        the NuttX configuration file as follows.  If EHCI is enabled by itself,
+
+        Device Drivers -> USB Device Driver Support
+          CONFIG_USBDEV=y                       : Enable USB device support
+          CONFIG_USBDEV_DMA=y                   : Device uses DMA
+          CONFIG_USBDEV_DUALSPEED=y             : Device support High and Full Speed
+
+        System Type -> ATSAMA5 Peripheral Support
+          CONFIG_SAMA5_UDPHS=y                  : Enable UDPHS High Speed USB device
+
+        Application Configuration -> NSH Library
+          CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
+        You also need to select a device-side class driver for the USB device,
+        This will select the CDC/ACM serial device.  Defaults for the other
+        options should be okay.
+
+        Device Drivers -> USB Device Driver Support
+          CONFIG_CDCACM=y                       : Enable the CDC/ACM device
+
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
         The SAMA5D3 can run at 536MHz.  I still need to figure out the
@@ -1292,6 +1313,10 @@ Configurations
         OHCI and this sequence continues forever.
       2013-8-28: EHCI is partially functional.  It is able to mount a high-
         speed USB FLASH drive using the Mass Storage Class (MSC) interface.
+
+      2013-8-31: Added description to add UDPHS high-speed USB device
+        support.  That function is still, however, a long way from being
+        functional.
 
   ostest:
     This configuration directory, performs a simple OS test using
