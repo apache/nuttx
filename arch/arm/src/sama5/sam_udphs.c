@@ -122,14 +122,6 @@
 #define DMA_MAX_FIFO_SIZE   (65536/1) /* Max size of the FMA FIFO */
 #define EPT_VIRTUAL_SIZE    16384     /* FIFO space size in units of 32-bit words */
 
-/* Packet sizes.  We use a fixed 64 max packet size for all endpoint types */
-
-#define SAM_MAXPACKET_SHIFT (6)
-#define SAM_MAXPACKET_SIZE  (1 << (SAM_MAXPACKET_SHIFT))
-#define SAM_MAXPACKET_MASK  (SAM_MAXPACKET_SIZE-1)
-
-#define SAM_EP0MAXPACKET    SAM_MAXPACKET_SIZE
-
 /* USB-related masks */
 
 #define REQRECIPIENT_MASK     (USB_REQ_TYPE_MASK | USB_REQ_RECIPIENT_MASK)
@@ -398,7 +390,9 @@ static void   sam_dtd_free(struct sam_usbdev_s *priv, struct sam_dtd_s *dtd);
 static void   sam_dma_single(uint8_t epno, struct sam_req_s *privreq,
                 uint32_t dmacontrol);
 static int    sam_req_wrdma(struct sam_usbdev_s *priv,
-                struct sam_ep_s *privep, struct sam_req_s *privreq)
+                struct sam_ep_s *privep, struct sam_req_s *privreq);
+static int    sam_req_rddma(struct sam_usbdev_s *priv,
+                struct sam_ep_s *privep, struct sam_req_s *privreq);
 
 /* Request Helpers **********************************************************/
 
@@ -416,6 +410,8 @@ static int    sam_req_wrnodma(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep, struct sam_req_s *privreq)
 static int    sam_req_write(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep);
+static int    sam_req_rddnoma(struct sam_usbdev_s *priv,
+                struct sam_ep_s *privep, struct sam_req_s *privreq);
 static int    sam_req_read(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep);
 static void   sam_req_cancel(struct sam_ep_s *privep);
@@ -446,6 +442,8 @@ static inline void
                 struct sam_ep_s *privep);
 static inline bool
               sam_ep_reserved(struct sam_usbdev_s *priv, int epno);
+static int    sam_ep_configure_internal(struct sam_ep_s *privep,
+                const struct usb_epdesc_s *desc);
 
 /* Endpoint operations ******************************************************/
 
@@ -687,37 +685,34 @@ static void sam_dumpep(struct sam_usbdev_s *priv, int epno)
 {
   uintptr_t addr;
 
-  /* Common registers */
+  /* Global Registers */
 
-  lldbg("CNTR:   %04x\n", getreg16(SAM_USB_CNTR));
-  lldbg("ISTR:   %04x\n", getreg16(SAM_UDPHS_INTSTA));
-  lldbg("FNR:    %04x\n", getreg16(SAM_USB_FNR));
-  lldbg("DADDR:  %04x\n", getreg16(SAM_USB_DADDR));
-  lldbg("BTABLE: %04x\n", getreg16(SAM_USB_BTABLE));
+  lldbg("Global Register:\n");
+  lldbg("  CTRL:    %04x\n", sam_getreg(SAM_UDPHS_CTRL));
+  lldbg("  FNUM:    %04x\n", sam_getreg(SAM_UDPHS_FNUM));
+  lldbg("  IEN:     %04x\n", sam_getreg(SAM_UDPHS_IEN));
+  lldbg("  INSTA:   %04x\n", sam_getreg(SAM_UDPHS_INTSTA));
+  lldbg("  TST:     %04x\n", sam_getreg(SAM_UDPHS_TST));
 
-  /* Endpoint register */
+  /* Endpoint registers */
 
-  addr = SAM_USB_EPR(epno);
-  lldbg("EPR%d:   [%08x] %04x\n", epno, addr, getreg16(addr));
+  lldbg("Endpoint %d Register:\n", epno);
+  lldbg("  CFG:     %04x\n", sam_getreg(SAM_UDPHS_EPTCFG(epno)));
+  lldbg("  CTL:     %04x\n", sam_getreg(SAM_UDPHS_EPTCTL(epno)));
+  lldbg("  STA:     %04x\n", sam_getreg(SAM_UDPHS_EPTSTA(epno)));
 
-  /* Endpoint descriptor */
-
-  addr = SAM_USB_BTABLE_ADDR(epno, 0);
-  lldbg("DESC:   %08x\n", addr);
-
-  /* Endpoint buffer descriptor */
-
-  addr = SAM_USB_ADDR_TX(epno);
-  lldbg("  TX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
-
-  addr = SAM_USB_COUNT_TX(epno);
-  lldbg("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
-
-  addr = SAM_USB_ADDR_RX(epno);
-  lldbg("  RX ADDR:  [%08x] %04x\n",  addr, getreg16(addr));
-
-  addr = SAM_USB_COUNT_RX(epno);
-  lldbg("     COUNT: [%08x] %04x\n",  addr, getreg16(addr));
+  lldbg("DMA %d Register:\n", epno);
+  if ((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0)
+    {
+      lldbg("  NXTDSC:  %04x\n", sam_getreg(SAM_UDPHS_DMANXTDSC(epno)));
+      lldbg("  ADDRESS: %04x\n", sam_getreg(SAM_UDPHS_DMAADDRESS(epno)));
+      lldbg("  CONTROL: %04x\n", sam_getreg(SAM_UDPHS_DMACONTROL(epno)));
+      lldbg("  STATUS:  %04x\n", sam_getreg(SAM_UDPHS_DMASTATUS(epno)));
+    }
+  else
+    {
+      lldbg("  None\n");
+    }
 }
 #endif
 
@@ -898,6 +893,73 @@ static int sam_req_wrdma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
   sam_putreg(regval, SAM_UDPHS_IEN);
 
   sam_putreg(UDPHS_EPTCTL_TXRDY, SAM_UDPHS_EPTCTLENB);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: sam_req_rddma
+ *
+ * Description:
+ *   Process the next queued read request for an endpoint that supports DMA.
+ *
+ ****************************************************************************/
+
+static int sam_req_rddma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
+                         struct sam_req_s *privreq)
+{
+  uint32_t regval;
+  int epno;
+
+  /* The endpoint must be IDLE and ready to begin the next transfer */
+
+  if (privep->epstate != UDPHS_EPSTATE_IDLE)
+    {
+      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EPINBUSY), privep->epstate);
+      return -EBUSY;
+    }
+
+  /* Get the endpoint number */
+
+  epno = USB_EPNO(privep->ep.eplog);
+
+  /* Switch to the receiving state */
+
+  privep->epstate   = UDPHS_EPSTATE_RECEIVING;
+  privep->txnullpkt = 0;
+  privreq->inflight = 0;
+  privreq->req.xfrd = 0;
+
+  /* How many more bytes can we append to the request buffer? */
+
+  remaining = privreq->req.len - privreq->req.xfrd;
+  if (remaining > 0)
+    {
+      /* Clip the DMA transfer size to the size available in the user buffer */
+
+      if (remaining > DMA_MAX_FIFO_SIZE)
+        {
+         privreq->inflight = DMA_MAX_FIFO_SIZE;
+        }
+      else
+        {
+          privreq->inflight = remaining;
+        }
+
+      /* And perform the single DMA transfer */
+
+      regval = UDPHS_DMACONTROL_ENDBEN | UDPHS_DMACONTROL_ENDBUFFIT |
+               UDPHS_DMACONTROL_CHANNENB
+      sam_dma_single(epno, privreq, regval);
+      return OK;
+    }
+
+  /* Enable the endpoint interrupt */
+
+  regval  = sam_getreg(SAM_UDPHS_IEN);
+  regval |= UDPHS_INT_EPT(epno);
+  sam_putreg(regval, SAM_UDPHS_IEN);
+
+  sam_putreg(UDPHS_EPTCTL_RXRDYTXKL, SAM_UDPHS_EPTCTLENB(epno));
   return OK;
 }
 
@@ -1414,23 +1476,33 @@ static void sam_ep_done(struct sam_usbdev_s *priv, uint8_t epno)
  * Name: sam_setdevaddr
  ****************************************************************************/
 
-static void sam_setdevaddr(struct sam_usbdev_s *priv, uint8_t value)
+static void sam_setdevaddr(struct sam_usbdev_s *priv, uint8_t address)
 {
-  int epno;
-
-  /* Set address in every allocated endpoint */
-
-  for (epno = 0; epno < SAM_UDPHS_NENDPOINTS; epno++)
+  if (address)
     {
-      if (sam_ep_reserved(priv, epno))
-        {
-          sam_setepaddress((uint8_t)epno, (uint8_t)epno);
-        }
+      /* Enable the address */
+
+      regval  = sam_getreg(SAM_UDPHS_CTRL);
+      regval &= ~UDPHS_CTRL_DEVADDR_MASK;
+      regval |= UDPHS_CTRL_DEVADDR(address) | UDPHS_CTRL_FADDREN;
+      sam_putreg(regval, SAM_UDPHS_CTRL);
+
+      /* Go to the addressed state */
+
+      priv->devstate = UDPHS_DEVSTATE_ADDRESS;
     }
+  else
+    {
+      /* Disable address */
 
-  /* Set the device address and enable function */
+      regval  = sam_getreg(SAM_UDPHS_CTRL);
+      regval &= ~SAM_UDPHS_CTRL_FADDR_EN;
+      sam_putreg(regval, SAM_UDPHS_CTRL);
 
-  sam_putreg(value|USB_DADDR_EF, SAM_USB_DADDR);
+      /* Revert to the un-addressed, default state */
+
+      priv->devstate = UDPHS_DEVSTATE_DEFAULT;
+    }
 }
 
 /****************************************************************************
@@ -2754,6 +2826,10 @@ void sam_epset_reset(struct sam_usbdev_s *priv, uint16_t epset)
 
 /****************************************************************************
  * Name: sam_ep_reserve
+ *
+ * Description:
+ *   Find and un-reserved endpoint number and reserve it for the caller.
+ *
  ****************************************************************************/
 
 static inline struct sam_ep_s *
@@ -2794,6 +2870,11 @@ sam_ep_reserve(struct sam_usbdev_s *priv, uint8_t epset)
 
 /****************************************************************************
  * Name: sam_ep_unreserve
+ *
+ * Description:
+ *   The endpoint is no long in-used.  It will be un-reserved and can be
+ *   re-used if needed.
+ *
  ****************************************************************************/
 
 static inline void
@@ -2806,6 +2887,10 @@ sam_ep_unreserve(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
 
 /****************************************************************************
  * Name: sam_ep_reserved
+ *
+ * Description:
+ *   Check if the endpoint has already been allocated.
+ *
  ****************************************************************************/
 
 static inline bool
@@ -2815,10 +2900,168 @@ sam_ep_reserved(struct sam_usbdev_s *priv, int epno)
 }
 
 /****************************************************************************
+ * Name: sam_ep_configure
+ *
+ * Description:
+ *   This is the internal implementation of the endpoint configuration logic
+ *   and implements the endpoint configuration method of the usbdev_ep_s
+ *   interface.  As an internal interface, it will be used to configure
+ *   endpoint 0 which is not available to the class implementation.
+ *
+ ****************************************************************************/
+
+static int sam_ep_configure_internal(struct sam_ep_s *privep,
+                                     const struct usb_epdesc_s *desc)
+{
+  uint32_t regval;
+  uint8_t epno;
+  uint8_t eptype;
+  uint8_t nbtrans;
+  uint8_t maxpacket;
+  bool dirin;
+  bool highspeed;
+
+  /* Decode the endpoint descriptor */
+
+  epno      = USB_EPNO(desc->addr);
+  dirin     = (desc->addr & USB_DIR_MASK) == USB_REQ_DIR_IN;
+  eptype    = (desc->type & USB_REQ_TYPE_MASK) >> USB_REQ_TYPE_SHIFT;
+  maxpacket = GETUINT16(desc->mxpacketsize);
+
+  /* Special case high-speed endpoints */
+
+  highspeed = ((sam_getreg(SAM_UDPHS_INTSTA) & UDPHS_INTSTA_SPEED) > 0);
+  nbtrans   = 1;
+
+  if (highspeed)
+    {
+      /* HS Interval, 125us */
+      /* MPS: Bits 12:11 specify NB_TRANS, as USB 2.0 Spec. */
+
+      nbtrans = ((maxpacket >> 11) & 3);
+      if (nbtrans == 3)
+        {
+          nbtrans = 1;
+        }
+      else
+        {
+          nbtrans++;
+        }
+
+      /* Mask, bit 10..0 is the size */
+
+       maxpacket &= 0x7ff;
+    }
+
+   /* Initialize the endpoint structure */
+
+   privep->ep.eplog     = desc->addr;              /* Includes direction */
+   privep->ep.maxpacket = maxpacket;
+   privep->epstate      = UDPHS_EPSTATE_IDLE;
+   privep->bank         = SAM_UDPHS_NBANKS(epno);
+
+  /* Initialize the endpoint hardware */
+  /* Disable the endpoint */
+
+  sam_putreg(UDPHS_EPTCTL_SHRTPCKT | UDPHS_EPTCTL_BUSYBANK |
+             UDPHS_EPTCTL_NAKOUT | UDPHS_EPTCTL_NAKIN |
+             UDPHS_EPTCTL_STALLSNT | UDPHS_EPTCTL_STALLSNT |
+             UDPHS_EPTCTL_TXRDY | UDPHS_EPTCTL_RXRDYTXKL |
+             UDPHS_EPTCTL_ERROVFLW | UDPHS_EPTCTL_MDATARX |
+             UDPHS_EPTCTL_DATAXRX | UDPHS_EPTCTL_NYETDIS |
+             UDPHS_EPTCTL_INTDISDMA | UDPHS_EPTCTL_AUTOVALID |
+             UDPHS_EPTCTL_EPTENABL,
+             SAM_UDPHS_EPTCTLDIS(epno));
+
+  /* Reset Endpoint Fifos */
+
+  sam_putreg(UDPHS_EPTSTA_TOGGLESQ_MASK | UDPHS_EPTSTA_FRCESTALL,
+             SAM_UDPHS_EPTCLRSTA(ep));
+  sam_putreg(UDPHS_EPTRST(epno), SAM_UDPHS_EPTRST);
+
+  /* If this is EP0, disable interrupts now */
+
+  if (eptype == USB_EP_ATTR_XFER_CONTROL)
+    {
+      regval  = sam_getreg(SAM_UDPHS_IEN);
+      regval &= ~UDPHS_INT_EPT(epno);
+      sam_putreg(regval, SAM_UDPHS_IEN);
+    }
+
+  /* Configure the endpoint */
+
+  if (maxpacket <= 8)
+    {
+      regval = UDPHS_EPTCFG_SIZE_8;
+    }
+  else if (maxpacket <= 16)
+    {
+      regval = UDPHS_EPTCFG_SIZE_16;
+    }
+  else if (maxpacket <= 32)
+    {
+      regval = UDPHS_EPTCFG_SIZE_32;
+    }
+  else if (maxpacket <= 64)
+    {
+      regval = UDPHS_EPTCFG_SIZE_64;
+    }
+  else if (maxpacket <= 128)
+    {
+      regval = UDPHS_EPTCFG_SIZE_128;
+    }
+  else if (maxpacket <= 256)
+    {
+      regval = UDPHS_EPTCFG_SIZE_256;
+    }
+  else if (maxpacket <= 512)
+    {
+      regval = UDPHS_EPTCFG_SIZE_512;
+    }
+  else if (privep->ep.maxpacket <= 1024)
+    {
+      regval = UDPHS_EPTCFG_SIZE_1024;
+    }
+  else
+    {
+      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADEPTYPE), eptype);
+      DEBUGPANIC();
+      regval = UDPHS_EPTCFG_SIZE_8;
+    }
+
+  regval |= ((uint32_t)dirin << 3) | (eptype << 4) |
+            ((privep->bank) << 6) | (nbtrans << 8);
+  sam_putreg(regval, SAM_UDPHS_EPTCFG(epno));
+
+  DEBUGASSERT((sam_getreg(SAM_UDPHS_EPTCFG(epno)) & UDPHS_EPTCFG_EPT_MAPD) == 0);
+
+  /* Enable the endpoint */
+
+  if (eptype == USB_EP_ATTR_XFER_CONTROL)
+    {
+      sam_putreg(UDPHS_EPTCTL_RXRDYTXKL | UDPHS_EPTCTL_RXSETUP |
+                 UDPHS_EPTCTL_EPTENABL,
+                 SAM_UDPHS_EPTCTLENB(epno));
+    }
+  else
+    {
+      sam_putreg(UDPHS_EPTCTL_AUTOVALID | UDPHS_EPTCTL_EPTENABL,
+                 SAM_UDPHS_EPTCTLENB(epno));
+    }
+
+  sam_dumpep(priv, epno);
+  return OK;
+}
+
+/****************************************************************************
  * Endpoint operations
  ****************************************************************************/
 /****************************************************************************
  * Name: sam_ep_configure
+ *
+ * Description:
+ *   This is the endpoint configuration method of the usbdev_ep_s interface.
+ *
  ****************************************************************************/
 
 static int sam_ep_configure(struct usbdev_ep_s *ep,
@@ -2826,79 +3069,20 @@ static int sam_ep_configure(struct usbdev_ep_s *ep,
                             bool last)
 {
   struct sam_ep_s *privep = (struct sam_ep_s *)ep;
-  uint16_t pma;
-  uint16_t setting;
-  uint16_t maxpacket;
-  uint8_t  epno;
 
-#ifdef CONFIG_DEBUG
-  if (!ep || !desc)
-    {
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDPARMS), 0);
-      ulldbg("ERROR: ep=%p desc=%p\n");
-      return -EINVAL;
-    }
+  /* Verify parameters.  Endpoint 0 is not available at this interface */
+
+#if defing(CONFIG_DEBUG) || defined(CONFIG_USBDEV_TRACE)
+  uint8_t epno = USB_EPNO(desc->addr);
+  usbtrace(TRACE_EPCONFIGURE, (uint16_t)epno);
+
+  DEBUGASSERT(ep && desc && epno > 0 && epno < SAM_UDPHS_NENDPOINTS);
+  DEBUGASSERT(epno == USB_EPNO(ep->eplog));
 #endif
 
-  /* Get the unadorned endpoint address */
+  /* This logic is implemented in sam_ep_configure_internal */
 
-  epno = USB_EPNO(desc->addr);
-  usbtrace(TRACE_EPCONFIGURE, (uint16_t)epno);
-  DEBUGASSERT(epno == USB_EPNO(ep->eplog));
-
-  /* Set the requested type */
-
-  switch (desc->attr & USB_EP_ATTR_XFERTYPE_MASK)
-   {
-    case USB_EP_ATTR_XFER_INT: /* Interrupt endpoint */
-      setting = USB_EPR_EPTYPE_INTERRUPT;
-      break;
-
-    case USB_EP_ATTR_XFER_BULK: /* Bulk endpoint */
-      setting = USB_EPR_EPTYPE_BULK;
-      break;
-
-    case USB_EP_ATTR_XFER_ISOC: /* Isochronous endpoint */
-#warning "REVISIT: Need to review isochronous EP setup"
-      setting = USB_EPR_EPTYPE_ISOC;
-      break;
-
-    case USB_EP_ATTR_XFER_CONTROL: /* Control endpoint */
-      setting = USB_EPR_EPTYPE_CONTROL;
-      break;
-
-    default:
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADEPTYPE), (uint16_t)desc->type);
-      return -EINVAL;
-    }
-
-  sam_seteptype(epno, setting);
-
-  /* Get the maxpacket size of the endpoint. */
-
-  maxpacket = GETUINT16(desc->mxpacketsize);
-  DEBUGASSERT(maxpacket <= SAM_MAXPACKET_SIZE);
-  ep->maxpacket = maxpacket;
-
-  /* Get the subset matching the requested direction */
-
-  if (USB_ISEPIN(desc->addr))
-    {
-      /* The full, logical EP number includes direction */
-
-      ep->eplog = USB_EPIN(epno);
-#warning Missing logic
-    }
-  else
-    {
-      /* The full, logical EP number includes direction */
-
-      ep->eplog = USB_EPOUT(epno);
-#warning Missing logic
-    }
-
-   sam_dumpep(priv, epno);
-   return OK;
+  return sam_ep_configure_internal(privep, desc);
 }
 
 /****************************************************************************
@@ -3418,8 +3602,8 @@ static void sam_reset(struct sam_usbdev_s *priv)
   /* Reset and disable all endpoints other.  Then re-configure EP0 */
 
   sam_epset_reset(priv, SAM_EPSET_ALL);
-  sam_ep_configure((struct usbdev_ep_s *ep)&priv->eplist[EP0],
-                   &g_ep0desc, false);
+  sam_ep_configure_internal(&priv->eplist[EP0], &g_ep0desc);
+
   /* Reset endpoints */
 
   for (epno = 0; epno < SAM_UDPHS_NENDPOINTS; epno++)

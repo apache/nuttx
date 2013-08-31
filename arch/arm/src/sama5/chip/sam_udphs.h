@@ -54,7 +54,7 @@
 /* General Definitions **********************************************************************/
 /* Number of endpoints and DMA channels */
 
-#define SAM_UDPHS_NENDPOINTS            15
+#define SAM_UDPHS_NENDPOINTS            16     /* EP0-15 */
 #define SAM_UDPHS_NDMACHANNELS           7     /* For EP1-7 */
 
 /* Capabilities and characteristics of endpoints */
@@ -82,7 +82,7 @@
                                                /* 0x00e4-0x00e8 Reserved */
 /* Endpoint Offsets */
 
-#define SAM_UPPHS_EP_OFFSET(ep)         (0x0100+((ep)<<5)
+#define SAM_UPPHS_EP_OFFSET(ep)         (0x0100+((unsigned int)(ep)<<5)
 #define SAM_UPPHS_EP0_OFFSET            0x0100
 #define SAM_UPPHS_EP1_OFFSET            0x0120
 #define SAM_UPPHS_EP2_OFFSET            0x0140
@@ -113,7 +113,7 @@
 
 /* DMA Channel Offsets */
 
-#define SAM_UPPHS_CH_OFFSET(ch)         (0x0300+(((ch)-1)<<4))
+#define SAM_UPPHS_CH_OFFSET(ch)         (0x0300+(((unsigned int)(ch)-1)<<4))
 #define SAM_UPPHS_CH1_OFFSET            0x0300
 #define SAM_UPPHS_CH2_OFFSET            0x0310
 #define SAM_UPPHS_CH3_OFFSET            0x0320
@@ -197,6 +197,7 @@
 
 #define UDPHS_CTRL_DEVADDR_SHIFT        (0)       /* Bits 0-6: UDPHS Address */
 #define UDPHS_CTRL_DEVADDR_MASK         (0x7f << UDPHS_CTRL_DEVADDR_SHIFT)
+#  define UDPHS_CTRL_DEVADDR(addr)      ((addr) << UDPHS_CTRL_DEVADDR_SHIFT)
 #define UDPHS_CTRL_FADDREN              (1 << 7)  /* Bit 7:  Function Address Enable */
 #define UDPHS_CTRL_ENUDPHS              (1 << 8)  /* Bit 8:  UDPHS Enable */
 #define UDPHS_CTRL_DETACH               (1 << 9)  /* Bit 9:  Detach Command */
