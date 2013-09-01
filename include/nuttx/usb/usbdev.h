@@ -189,6 +189,10 @@
 #define USB_SPEED_HIGH            3 /* USB 2.0 */
 #define USB_SPEED_VARIABLE        4 /* Wireless USB 2.5 */
 
+/* Maximum size of a request buffer */
+
+#define USBDEV_MAXREQUEUST        UINT16_MAX
+
 /* Request flags */
 
 #define USBDEV_REQFLAGS_NULLPKT   1 /* Bit 0: Terminate w/short packet; null packet if necessary */
