@@ -106,7 +106,9 @@
 #define BOARD_PCK_FREQUENCY        (396000000) /* CPU:     PLLACK / 2 / 1  */
 #define BOARD_MCK_FREQUENCY        (132000000) /* MCK:     PLLACK / 2 / 1 / 3 */
 
-#ifdef CONFIG_SAMA5_EHCI
+#if defined(CONFIG_SAMA5_EHCI) || defined(CONFIG_SAMA5_OHCI) || \
+    defined(CONFIG_SAMA5_UDPHS)
+
 /* The USB Host High Speed requires a 480 MHz clock (UPLLCK) for the embedded
  * High-speed transceivers. UPLLCK is the output of the 480 MHz UTMI PLL
  * (UPLL).  The source clock of the UTMI PLL is the Main OSC output:  Either
@@ -132,6 +134,7 @@
  * driver is initialized.
  */
 
+#  define BOARD_USE_UPLL             1     /* Use UPLL for clock source */
 #  define BOARD_CKGR_UCKR_UPLLCOUNT  (15)  /* Maximum value */
 #  define BOARD_CKGR_UCKR_BIASCOUNT  (15)  /* Maximum value */
 #endif
