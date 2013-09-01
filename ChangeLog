@@ -5483,4 +5483,6 @@
 	* Remove all empty and most useless README.txt files (2013-8-31)
 	* configs/freedom-kl25z/src/kl_spi.c:  Correct typo in name of a
 	  function.  From Alan Carvalho de Assis (2013-8-31).
+	* drivers/usbdev/cdcacm_desc.c:  Fixed some compilation errors that
+	  only occur when dual speed support is enabled (2013-9-1).
 
