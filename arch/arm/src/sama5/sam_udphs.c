@@ -1489,16 +1489,6 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
           /* And complete the request */
 
           sam_req_complete(privep, OK);
-
-          /* NAK further OUT packets if there there no more read requests */
-
-          if (sam_rqempty(privep))
-            {
-              /* Mark the RX processing as pending and NAK any OUT actions
-               * on this endpoint.
-               */
-#warning Missing logic
-            }
         }
     }
 
@@ -1544,7 +1534,7 @@ static void sam_req_cancel(struct sam_ep_s *privep)
 
 static void sam_ep0_rdsetup(struct usb_ctrlreq_s *req)
 {
-  uint32_t *buffer = (uint32_t *)req;
+  volatile uint32_t *buffer = (uint32_t *)req;
   volatile uint32_t *fifo;
 
   fifo = (volatile uint32_t *)SAM_UDPHSRAM_VSECTION;
@@ -1565,7 +1555,7 @@ static void sam_ep0_wrstatus(struct sam_usbdev_s *priv,
                              const uint8_t *data,
                              size_t nbytes)
 {
-  uint8_t *fifo;
+  volatile uint8_t *fifo;
 
   if (nbytes > 0)
     {
@@ -2120,7 +2110,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
   regval &= ~(UDPHS_DMACONTROL_ENDTREN | UDPHS_DMACONTROL_ENDBEN);
   sam_putreg(regval, regaddr);
 
-  /* Check for end of buffer buffer.  Set by hardware when the
+  /* Check for end of the buffer.  Set by hardware when the
    * BUFF_COUNT downcount reach zero.
    */
 
@@ -2564,13 +2554,12 @@ static void sam_suspend(struct sam_usbdev_s *priv)
       priv->prevstate = priv->devstate;
       priv->devstate  = UDPHS_DEVSTATE_SUSPENDED;
 
-      /* The Atmel sample code disables USB clocking here (via the PMC
+      /* Disable clocking to the UDPHS peripheral
+       *
+       * NOTE: The Atmel sample code disables USB clocking here (via the PMC
        * CKGR_UCKR).  However, we cannot really do that here because that
        * clocking is also needed by the UHPHS host.
        */
-#warning REVISIT
-
-      /* Disable clocking to the UDPHS peripheral */
 
       sam_udphs_disableclk();
 
@@ -2598,16 +2587,17 @@ static void sam_resume(struct sam_usbdev_s *priv)
 
   if (priv->devstate == UDPHS_DEVSTATE_SUSPENDED)
     {
-      /* Enable clocking to the UDPHS peripheral. */
-
-      sam_udphs_enableclk();
-
-      /* In the Atmel example code, they also enable USB clocking
+      /* Enable clocking to the UDPHS peripheral.
+       *
+       * NOTE: In the Atmel example code, they also enable USB clocking
        * at this point (via the BIAS in the CKGR_UCKR register).  In this
        * implementation, that should not be necessary here because we
        * never disable BIAS to begin with.
        */
-#warning REVISIT
+
+      sam_udphs_enableclk();
+
+      /* Revert to the previous state */
 
       priv->devstate = priv->prevstate;
 
@@ -3387,9 +3377,6 @@ static void sam_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep)
 
   if (priv && privep)
     {
-      /* Free the buffer assigned to this endpoint */
-#warning Missing logic
-
       /* Mark the endpoint as available */
 
       sam_ep_unreserve(priv, privep);
@@ -3552,16 +3539,15 @@ static void sam_reset(struct sam_usbdev_s *priv)
 {
   uint8_t epno;
 
-  /* Make sure that clocking is eanbled to the UDPHS peripheral. */
-
-  sam_udphs_enableclk();
-
-  /* In the Atmel example code, they also enable USB clocking
+  /* Make sure that clocking is enabled to the UDPHS peripheral.
+   *
+   * NOTE: In the Atmel example code, they also enable USB clocking
    * at this point (via the BIAS in the CKGR_UCKR register).  In this
    * implementation, that should not be necessary here because we
    * never disable BIAS to begin with.
    */
-#warning REVISIT
+
+  sam_udphs_enableclk();
 
   /* Tell the class driver that we are disconnected.  The class driver
    * should then accept any new configurations.
