@@ -100,7 +100,9 @@
 #define BOARD_PMC_MCKR_PLLADIV     PMC_MCKR_PLLADIV2
 #define BOARD_PMC_MCKR_MDIV        PMC_MCKR_MDIV_PCKDIV3
 
-#ifdef CONFIG_SAMA5_OHCI
+#if defined(CONFIG_SAMA5_EHCI) || defined(CONFIG_SAMA5_OHCI) || \
+    defined(CONFIG_SAMA5_UDPHS)
+
 /* For OHCI Full-speed operations, the user has to perform the following:
  *
  *   1) Enable UHP peripheral clock, bit (1 << AT91C_ID_UHPHS) in PMC_PCER
@@ -132,8 +134,9 @@
  *  frame rate.  I cannot explain the factor of 2 difference.
  */
 
-#  define BOARD_OHCI_INPUT         PMC_USB_USBS_PLLA
-#  define BOARD_OHCI_DIVIDER       (7)
+#  undef  BOARD_USE_UPLL                              /* Use PLLA as source clock */
+#  define BOARD_OHCI_INPUT         PMC_USB_USBS_PLLA  /* Input is PLLACK */
+#  define BOARD_OHCI_DIVIDER       (7)                /* Divided by 8 */
 #endif
 
 /* Resulting frequencies */

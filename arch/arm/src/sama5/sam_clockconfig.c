@@ -330,7 +330,14 @@ static inline void sam_selectplla(void)
 
 static inline void sam_usbclockconfig(void)
 {
-#if defined(CONFIG_SAMA5_EHCI)
+#if defined(CONFIG_SAMA5_EHCI) || defined(CONFIG_SAMA5_OHCI) || \
+    defined(CONFIG_SAMA5_UDPHS)
+
+  /* We can either get the clock from the UPLL or from PLLA.  In this latter
+   * case, however, the PLLACK frequency must be a multiple of 48MHz.
+   */
+
+#if defined(BOARD_USE_UPLL)
   uint32_t regval;
 
   /* The USB Host High Speed requires a 480 MHz clock (UPLLCK) for the
@@ -395,7 +402,7 @@ static inline void sam_usbclockconfig(void)
   regval |= PMC_USB_USBDIV(9);
   putreg32(regval, SAM_PMC_USB);
 
-#elif defined(CONFIG_SAMA5_OHCI)
+#else /* BOARD_USE_UPLL */
   /* For OHCI Full-speed operations only, the user has to perform the
    * following:
    *
@@ -415,7 +422,8 @@ static inline void sam_usbclockconfig(void)
   putreg32(BOARD_OHCI_INPUT | BOARD_OHCI_DIVIDER << PMC_USB_USBDIV_SHIFT,
           SAM_PMC_USB);
 
-#endif
+#endif /* BOARD_USE_UPLL */
+#endif /* CONFIG_SAMA5_EHCI ||CONFIG_SAMA5_OHCI) || CONFIG_SAMA5_UDPHS */
 }
 
 /****************************************************************************

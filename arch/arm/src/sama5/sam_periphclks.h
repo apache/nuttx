@@ -52,8 +52,8 @@
 
 #define sam_enableperiph0(s)       putreg32((1 << (s)), SAM_PMC_PCER0)
 #define sam_enableperiph1(s)       putreg32((1 << ((s) - 32)), SAM_PMC_PCER1)
-#define sam_disableperiph0(s)      putreg32((1 << (s)), SAM_PMC_PDER0)
-#define sam_disableperiph1(s)      putreg32((1 << ((s) - 32)), SAM_PMC_PDER1)
+#define sam_disableperiph0(s)      putreg32((1 << (s)), SAM_PMC_PCDR0)
+#define sam_disableperiph1(s)      putreg32((1 << ((s) - 32)), SAM_PMC_PCDR1)
 #define sam_isenabled0(s)          (getreg32(SAM_PMC_PCER0) & (1 << (s)) != 0)
 #define sam_isenabled1(s)          (getreg32(SAM_PMC_PCER1) & (1 << ((s) - 32)) != 0)
 
