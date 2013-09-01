@@ -59,6 +59,7 @@
 #define HAVE_AT25_MTD   1
 #define HAVE_USBHOST    1
 #define HAVE_USBDEV     1
+#define HAVE_USBMONITOR 1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -141,6 +142,13 @@
 
 #if !defined(CONFIG_SAMA5_OHCI) && !defined(CONFIG_SAMA5_EHCI)
 #  undef HAVE_USBHOST
+#endif
+
+/* Check if we should enable the USB monitor before starting NSH */
+
+#if !defined(HAVE_USBDEV) || !defined(CONFIG_USBDEV_TRACE) || \
+   !defined(CONFIG_SYSTEM_USBMONITOR)
+#  undef HAVE_USBMONITOR
 #endif
 
 /* LEDs *****************************************************************************/

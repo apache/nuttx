@@ -88,7 +88,7 @@ config USBDEV_TRACE_NRECORDS
 config USBDEV_TRACE_STRINGS
 bool "Decode device controller events"
 	default n
-	depends on USBDEV_TRACE
+	depends on USBDEV_TRACE || DEBUG_USB
 	---help---
 		If USBDEV_TRACE_STRINGS is defined, then the USB device controller
 		driver must provide arrays of strings to support decoding of device-
