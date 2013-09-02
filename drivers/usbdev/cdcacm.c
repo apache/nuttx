@@ -535,6 +535,7 @@ static struct usbdev_req_s *cdcacm_allocreq(FAR struct usbdev_ep_s *ep,
           req = NULL;
         }
     }
+
   return req;
 }
 
@@ -978,6 +979,7 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
       ret = -ENODEV;
       goto errout;
     }
+
   priv->epintin->priv = priv;
 
   /* Pre-allocate the IN bulk endpoint */
@@ -989,6 +991,7 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
       ret = -ENODEV;
       goto errout;
     }
+
   priv->epbulkin->priv = priv;
 
   /* Pre-allocate the OUT bulk endpoint */
@@ -1000,6 +1003,7 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
       ret = -ENODEV;
       goto errout;
     }
+
   priv->epbulkout->priv = priv;
 
   /* Pre-allocate read requests */
