@@ -1198,22 +1198,22 @@
 #define GTIM_CCMR2_IC4F_MASK      (0x0f << GTIM_CCMR2_IC4F_SHIFT)
                                             /* (See common CCMR Input Capture Filter definitions below) */
 
-/* Capture/compare enable register (TIM2-5 and TIM9-14) */
+/* Capture/compare enable register (TIM1 and TIM8, TIM2-5 and TIM9-14) */
 
 #define GTIM_CCER_CC1E            (1 << 0)  /* Bit 0: Capture/Compare 1 output enable */
 #define GTIM_CCER_CC1P            (1 << 1)  /* Bit 1: Capture/Compare 1 output polarity */
-#define GTIM_CCER_CC1NE           (1 << 2)  /* Bit 2: Capture/Compare 1 complementary output enable (TIM15-17) */
+#define GTIM_CCER_CC1NE           (1 << 2)  /* Bit 2: Capture/Compare 1 complementary output enable (TIM1 and TIM8 only) */
 #define GTIM_CCER_CC1NP           (1 << 3)  /* Bit 3: Capture/Compare 1 output Polarity (F2,F3,F4 and TIM15-17) */
 #define GTIM_CCER_CC2E            (1 << 4)  /* Bit 4: Capture/Compare 2 output enable (TIM2-5,9&12 only) */
 #define GTIM_CCER_CC2P            (1 << 5)  /* Bit 5: Capture/Compare 2 output polarity (TIM2-5,9&12 only) */
-#define GTIM_CCER_CC2NE           (1 << 6)  /* Bit 6: CC2NE: Capture/Compare 2 complementary output enable (TIM15) */
+#define GTIM_CCER_CC2NE           (1 << 6)  /* Bit 6: Capture/Compare 2 complementary output enable (TIM1 and TIM8 only) */
 #define GTIM_CCER_CC2NP           (1 << 7)  /* Bit 7: Capture/Compare 2 output Polarity (F2,F3,F4 and TIM2-5,9,12&15 only) */
 #define GTIM_CCER_CC3E            (1 << 8)  /* Bit 8: Capture/Compare 3 output enable (TIM2-5 only) */
 #define GTIM_CCER_CC3P            (1 << 9)  /* Bit 9: Capture/Compare 3 output Polarity (TIM2-5 only) */
+#define GTIM_CCER_CC3NE           (1 << 10) /* Bit 10: Capture/Compare 3 complementary output enable (TIM1 and TIM8 only) */
 #define GTIM_CCER_CC3NP           (1 << 11) /* Bit 11: Capture/Compare 3 output Polarity (F2,F4 and TIM2-5 only) */
 #define GTIM_CCER_CC4E            (1 << 12) /* Bit 12: Capture/Compare 4 output enable (TIM2-5 only) */
 #define GTIM_CCER_CC4P            (1 << 13) /* Bit 13: Capture/Compare 4 output Polarity (TIM2-5 only) */
-#define GTIM_CCER_CC4NP           (1 << 15) /* Bit 15: Capture/Compare 4 output Polarity (F2,F4 and TIM2-5 only) */
 
 /* 16-bit counter register */
 
