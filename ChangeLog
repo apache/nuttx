@@ -5487,4 +5487,6 @@
 	  only occur when dual speed support is enabled (2013-9-1).
 	* arch/arm/src/sama5/sam_clockconfig.c and configs/sama5d3x-ek/include/board_*mhz.h:
 	  Add logic to support UDPHS clocking (2013-9-13).
+	* arm/src/stm32/chip/stm32_tim.h:  Some CCER bit settings changed
+	  per SourceForge bug #18 submitted by CCCTSAO (2013-9-2).
 
