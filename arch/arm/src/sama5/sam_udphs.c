@@ -197,16 +197,17 @@
 #define SAM_TRACEINTID_INTERRUPT          0x0018
 #define SAM_TRACEINTID_INTSOF             0x0019
 #define SAM_TRACEINTID_NOSTDREQ           0x001a
-#define SAM_TRACEINTID_RXRDY              0x001b
-#define SAM_TRACEINTID_RXSETUP            0x001c
-#define SAM_TRACEINTID_SETADDRESS         0x001d
-#define SAM_TRACEINTID_SETCONFIG          0x001e
-#define SAM_TRACEINTID_SETFEATURE         0x001f
-#define SAM_TRACEINTID_STALLSNT           0x0020
-#define SAM_TRACEINTID_SYNCHFRAME         0x0021
-#define SAM_TRACEINTID_TXRDY              0x0022
-#define SAM_TRACEINTID_UPSTRRES           0x0023
-#define SAM_TRACEINTID_WAKEUP             0x0024
+#define SAM_TRACEINTID_PENDING            0x001b
+#define SAM_TRACEINTID_RXRDY              0x001c
+#define SAM_TRACEINTID_RXSETUP            0x001d
+#define SAM_TRACEINTID_SETADDRESS         0x001e
+#define SAM_TRACEINTID_SETCONFIG          0x001f
+#define SAM_TRACEINTID_SETFEATURE         0x0020
+#define SAM_TRACEINTID_STALLSNT           0x0021
+#define SAM_TRACEINTID_SYNCHFRAME         0x0022
+#define SAM_TRACEINTID_TXRDY              0x0023
+#define SAM_TRACEINTID_UPSTRRES           0x0024
+#define SAM_TRACEINTID_WAKEUP             0x0025
 
 /* Ever-present MIN and MAX macros */
 
@@ -624,6 +625,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
   TRACE_STR(SAM_TRACEINTID_INTERRUPT),
   TRACE_STR(SAM_TRACEINTID_INTSOF),
   TRACE_STR(SAM_TRACEINTID_NOSTDREQ),
+  TRACE_STR(SAM_TRACEINTID_PENDING),
   TRACE_STR(SAM_TRACEINTID_RXRDY),
   TRACE_STR(SAM_TRACEINTID_RXSETUP),
   TRACE_STR(SAM_TRACEINTID_SETADDRESS),
@@ -2335,7 +2337,6 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 {
   struct sam_ep_s *privep;
-  struct sam_req_s *privreq;
   uint32_t eptsta;
   uint32_t eptype;
   uint32_t regval;
@@ -2346,11 +2347,6 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
   /* Get the endpoint structure */
 
   privep = &priv->eplist[epno];
-
-  /* Get the request from the head of the endpoint request queue */
-
-  privreq = sam_rqpeek(privep);
-  DEBUGASSERT(privreq);
 
   /* Get the endpoint status */
 
@@ -2585,7 +2581,6 @@ static int sam_udphs_interrupt(int irq, void *context)
 
   struct sam_usbdev_s *priv = &g_udphs;
   uint32_t intsta;
-  uint32_t ien;
   uint32_t pending;
   uint32_t regval;
   int i;
@@ -2595,8 +2590,8 @@ static int sam_udphs_interrupt(int irq, void *context)
   intsta  = sam_getreg(SAM_UDPHS_INTSTA);
   usbtrace(TRACE_INTENTRY(SAM_TRACEINTID_INTERRUPT), intsta);
 
-  ien     = sam_getreg(SAM_UDPHS_IEN);
-  pending = intsta & ien;
+  regval  = sam_getreg(SAM_UDPHS_IEN);
+  pending = intsta & regval;
 
   /* Handle all pending UDPHS interrupts (and new interrupts that become
    * pending)
@@ -2604,7 +2599,7 @@ static int sam_udphs_interrupt(int irq, void *context)
 
   while (pending)
     {
-      usbtrace(TRACE_INTENTRY(SAM_TRACEINTID_INTERRUPT), intsta);
+      usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_PENDING), (uint16_t)pending);
 
       /* Suspend, treated last */
 
@@ -2614,7 +2609,7 @@ static int sam_udphs_interrupt(int irq, void *context)
 
           /* Enable wakeup interrupts */
 
-          regval  = ien;
+          regval  = sam_getreg(SAM_UDPHS_IEN);
           regval &= ~UDPHS_INT_DETSUSPD;
           regval |= (UDPHS_INT_WAKEUP | UDPHS_INT_ENDOFRSM);
           sam_putreg(regval, SAM_UDPHS_IEN);
@@ -2650,23 +2645,39 @@ static int sam_udphs_interrupt(int irq, void *context)
 
           /* Enable suspend interrupts */
 
-          ien &= ~UDPHS_INT_WAKEUP;
-          ien |= (UDPHS_INT_ENDOFRSM | UDPHS_INT_DETSUSPD);
-          sam_putreg(ien, SAM_UDPHS_IEN);
+          regval  = sam_getreg(SAM_UDPHS_IEN);
+          regval &= ~UDPHS_INT_WAKEUP;
+          regval |= (UDPHS_INT_ENDOFRSM | UDPHS_INT_DETSUSPD);
+          sam_putreg(regval, SAM_UDPHS_IEN);
         }
 
-      /* Bus reset */
+      /* End of Reset. "Set by hardware when an End Of Reset has been detected
+       * by the UDPHS controller."
+       *
+       * Paragraph 32.6.14.4 From Powered State to Default State (reset)
+       *   "After its connection to a USB host, the USB device waits for an
+       *    end-of-bus reset. The unmasked flag ENDRESET is set in the
+       *    UDPHS_IEN register and an interrupt is triggered.
+       *
+       *   "Once the ENDRESET interrupt has been triggered, the device
+       *    enters Default State. In this state, the UDPHS software must:
+       *
+       *    - Enable the default endpoint, setting the EPT_ENABL flag in
+       *      the UDPHS_EPTCTLENB[0] register and, optionally, enabling
+       *      the interrupt for endpoint 0 by writing 1 in EPT_0 of the
+       *      UDPHS_IEN register. The enumeration then begins by a control
+       *      transfer.
+       *    - Configure the Interrupt Mask Register which has been reset
+       *      by the USB reset detection
+       *    - Enable the transceiver.
+       *
+       *   "In this state, the EN_UDPHS bit in UDPHS_CTRL register must be
+       *    enabled."
+       */
 
       if ((pending & UDPHS_INT_ENDRESET) != 0)
         {
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_ENDRESET), (uint16_t)pending);
-
-          /* Clear and enable the suspend interrupt */
-
-          sam_putreg(UDPHS_INT_WAKEUP | UDPHS_INT_DETSUSPD, SAM_UDPHS_CLRINT);
-
-          ien |= UDPHS_INT_DETSUSPD;
-          sam_putreg(ien, SAM_UDPHS_IEN);
 
           /* Handle the reset */
 
@@ -2689,7 +2700,7 @@ static int sam_udphs_interrupt(int irq, void *context)
 
       /* DMA interrupts */
 
-      if ((pending & UDPHS_INT_DMA_MASK) != 0)
+      else if ((pending & UDPHS_INT_DMA_MASK) != 0)
         {
           for (i = 1; i <= SAM_UDPHS_NDMACHANNELS; i++)
             {
@@ -2703,9 +2714,9 @@ static int sam_udphs_interrupt(int irq, void *context)
 
       /* Endpoint Interrupts */
 
-      if ((pending & UDPHS_INT_EPT_MASK) != 0)
+      else if ((pending & UDPHS_INT_EPT_MASK) != 0)
         {
-          for (i = 1; i <= SAM_UDPHS_NENDPOINTS; i++)
+          for (i = 0; i < SAM_UDPHS_NENDPOINTS; i++)
             {
               if ((pending & UDPHS_INT_EPT(i)) != 0)
                 {
@@ -2718,8 +2729,8 @@ static int sam_udphs_interrupt(int irq, void *context)
       /* Re-sample the set of pending interrupts */
 
       intsta  = sam_getreg(SAM_UDPHS_INTSTA);
-      ien     = sam_getreg(SAM_UDPHS_IEN);
-      pending = intsta & ien;
+      regval  = sam_getreg(SAM_UDPHS_IEN);
+      pending = intsta & regval;
     }
 
   usbtrace(TRACE_INTEXIT(SAM_TRACEINTID_INTERRUPT), intsta);
@@ -2977,6 +2988,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
                                      const struct usb_epdesc_s *desc)
 {
   struct sam_usbdev_s *priv;
+  uintptr_t regaddr;
   uint32_t regval;
   uint8_t epno;
   uint8_t eptype;
@@ -3054,55 +3066,58 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
 
   /* Configure the endpoint */
 
+  regaddr = SAM_UDPHS_EPTCFG(epno);
+  regval  = sam_getreg(regaddr) & UDPHS_EPTCFG_MAPD;
+
   if (maxpacket <= 8)
     {
-      regval = UDPHS_EPTCFG_SIZE_8;
+      regval |= UDPHS_EPTCFG_SIZE_8;
     }
   else if (maxpacket <= 16)
     {
-      regval = UDPHS_EPTCFG_SIZE_16;
+      regval |= UDPHS_EPTCFG_SIZE_16;
     }
   else if (maxpacket <= 32)
     {
-      regval = UDPHS_EPTCFG_SIZE_32;
+      regval |= UDPHS_EPTCFG_SIZE_32;
     }
   else if (maxpacket <= 64)
     {
-      regval = UDPHS_EPTCFG_SIZE_64;
+      regval |= UDPHS_EPTCFG_SIZE_64;
     }
   else if (maxpacket <= 128)
     {
-      regval = UDPHS_EPTCFG_SIZE_128;
+      regval |= UDPHS_EPTCFG_SIZE_128;
     }
   else if (maxpacket <= 256)
     {
-      regval = UDPHS_EPTCFG_SIZE_256;
+      regval |= UDPHS_EPTCFG_SIZE_256;
     }
   else if (maxpacket <= 512)
     {
-      regval = UDPHS_EPTCFG_SIZE_512;
+      regval |= UDPHS_EPTCFG_SIZE_512;
     }
   else if (privep->ep.maxpacket <= 1024)
     {
-      regval = UDPHS_EPTCFG_SIZE_1024;
+      regval |= UDPHS_EPTCFG_SIZE_1024;
     }
   else
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADEPTYPE), eptype);
       DEBUGPANIC();
-      regval = UDPHS_EPTCFG_SIZE_8;
+      regval |= UDPHS_EPTCFG_SIZE_8;
     }
 
   regval |= ((uint32_t)dirin << 3) | (eptype << 4) |
             ((privep->bank) << 6) | (nbtrans << 8);
-  sam_putreg(regval, SAM_UDPHS_EPTCFG(epno));
+  sam_putreg(regval, regaddr);
 
   /* Verify that the EPT_MAPD flag is set. This flag is set if the
    * endpoint size and the number of banks are correct compared to
    * the FIFO maximum capacity and the maximum number of allowed banks.
    */
 
-  if ((sam_getreg(SAM_UDPHS_EPTCFG(epno)) & UDPHS_EPTCFG_MAPD) == 0)
+  if ((sam_getreg(regaddr) & UDPHS_EPTCFG_MAPD) == 0)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EPTCFGMAPD), epno);
       return -EINVAL;
@@ -3112,15 +3127,15 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
 
   if (eptype == USB_EP_ATTR_XFER_CONTROL)
     {
-      sam_putreg(UDPHS_EPTCTL_RXRDYTXKL | UDPHS_EPTCTL_RXSETUP |
-                 UDPHS_EPTCTL_EPTENABL,
-                 SAM_UDPHS_EPTCTLENB(epno));
+      regval = UDPHS_EPTCTL_RXRDYTXKL | UDPHS_EPTCTL_RXSETUP |
+               UDPHS_EPTCTL_EPTENABL;
     }
   else
     {
-      sam_putreg(UDPHS_EPTCTL_AUTOVALID | UDPHS_EPTCTL_EPTENABL,
-                 SAM_UDPHS_EPTCTLENB(epno));
+      regval = UDPHS_EPTCTL_AUTOVALID | UDPHS_EPTCTL_EPTENABL;
     }
+
+  sam_putreg(regval, SAM_UDPHS_EPTCTLENB(epno));
 
   /* If this was the last endpoint, then the class driver is fully
    * configured.
@@ -3812,6 +3827,7 @@ static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
 
 static void sam_reset(struct sam_usbdev_s *priv)
 {
+  uint32_t regval;
   uint8_t epno;
 
   /* Make sure that clocking is enabled to the UDPHS peripheral.
@@ -3869,6 +3885,20 @@ static void sam_reset(struct sam_usbdev_s *priv)
   /* Re-configure the USB controller in its initial, unconnected state */
 
   priv->usbdev.speed = USB_SPEED_FULL;
+
+  /* Clear all pending interrupt status */
+
+  regval = UDPHS_INT_UPSTRRES | UDPHS_INT_ENDOFRSM | UDPHS_INT_WAKEUP |
+           UDPHS_INT_ENDRESET | UDPHS_INT_INTSOF | UDPHS_INT_MICROSOF |
+           UDPHS_INT_DETSUSPD;
+  sam_putreg(regval, SAM_UDPHS_CLRINT);
+
+  /* Enable normal operational interrupts (including endpoint 0) */
+
+  regval = UDPHS_INT_ENDOFRSM | UDPHS_INT_WAKEUP | UDPHS_INT_DETSUSPD |
+           UDPHS_INT_EPT0;
+  sam_putreg(regval, SAM_UDPHS_IEN);
+
   sam_dumpep(priv, EP0);
 }
 
@@ -3991,18 +4021,6 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   /* Disable all interrupts */
 
   sam_putreg(0, SAM_UDPHS_IEN);
-
-  /* Clear all pending interrupt status */
-
-  regval = UDPHS_INT_UPSTRRES | UDPHS_INT_ENDOFRSM | UDPHS_INT_WAKEUP |
-           UDPHS_INT_ENDRESET | UDPHS_INT_INTSOF | UDPHS_INT_MICROSOF |
-           UDPHS_INT_DETSUSPD;
-  sam_putreg(regval, SAM_UDPHS_CLRINT);
-
-  /* Enable interrupts */
-
-  regval = UDPHS_INT_ENDOFRSM | UDPHS_INT_WAKEUP | UDPHS_INT_DETSUSPD;
-  sam_putreg(regval, SAM_UDPHS_IEN);
 
   /* The Atmel sample code disables USB clocking here (via the PMC
    * CKGR_UCKR).  However, we cannot really do that here because that
@@ -4161,9 +4179,9 @@ void up_usbinitialize(void)
 
   sam_sw_setup(priv);
 
-  /* Power up and initialize USB controller, but leave it in the reset
-   * state.  Interrupts from the UDPHS controller are initialized here,
-   * but will not be enabled at the AIC until the class driver is installed.
+  /* Power up and initialize USB controller.  Interrupts from the UDPHS
+   * controller are initialized here, but will not be enabled at the AIC
+   * until the class driver is installed (by sam_reset()).
    */
 
   sam_hw_setup(priv);
@@ -4280,7 +4298,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
     }
   else
     {
-      /* Setup the USB controller -- enabling interrupts at the USB controller */
+      /* Reset the USB controller and configure endpoint 0 */
 
       sam_reset(priv);
 
@@ -4335,7 +4353,6 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
    */
 
   flags = irqsave();
-  sam_reset(priv);
 
   /* Unbind the class driver */
 
@@ -4346,8 +4363,8 @@ int usbdev_unregister(struct usbdevclass_driver_s *driver)
   up_disable_irq(SAM_IRQ_UDPHS);
 
   /* Put the hardware in an inactive state.  Then bring the hardware back up
-   * in the reset state (this is probably not necessary, the sam_reset()
-   * call above was probably sufficient).
+   * in the initial state.  This is essentially the same state as we were
+   * in when up_usbinitialize() was first called.
    */
 
   sam_hw_shutdown(priv);
