@@ -115,6 +115,7 @@
 #define SAM_EPSET_NOTEP0    (0xfffe)  /* All endpoints except EP0 */
 #define SAM_EPSET_DMA       (0x00fe)  /* All endpoints that support DMA transfers */
 #define SAM_EP_BIT(ep)      (1 << (ep))
+#define SAM_EP0_MAXPACKET   (64)      /* EP0 Max. packet size */
 
 /* DMA FIFO */
 
@@ -169,38 +170,42 @@
 
 /* Trace interrupt codes */
 
-#define SAM_TRACEINTID_CLEARFEATURE       0x0001
-#define SAM_TRACEINTID_DETSUSPD           0x0002
-#define SAM_TRACEINTID_DEVGETSTATUS       0x0003
-#define SAM_TRACEINTID_DISPATCH           0x0004
-#define SAM_TRACEINTID_DMA                0x0005
-#define SAM_TRACEINTID_DMAEOB             0x0006
-#define SAM_TRACEINTID_DMAEOC             0x0007
-#define SAM_TRACEINTID_DMAERR             0x0008
-#define SAM_TRACEINTID_ENDRESET           0x0009
-#define SAM_TRACEINTID_EP                 0x000a
-#define SAM_TRACEINTID_EP0SETUPSETADDRESS 0x000b
-#define SAM_TRACEINTID_EPGETSTATUS        0x000c
-#define SAM_TRACEINTID_EPINDONE           0x000d
-#define SAM_TRACEINTID_EPINQEMPTY         0x000e
-#define SAM_TRACEINTID_EPOUTQEMPTY        0x000f
-#define SAM_TRACEINTID_GETCONFIG          0x0010
-#define SAM_TRACEINTID_GETSETDESC         0x0011
-#define SAM_TRACEINTID_GETSETIF           0x0012
-#define SAM_TRACEINTID_GETSTATUS          0x0013
-#define SAM_TRACEINTID_IFGETSTATUS        0x0014
-#define SAM_TRACEINTID_INTERRUPT          0x0015
-#define SAM_TRACEINTID_INTSOF             0x0016
-#define SAM_TRACEINTID_NOSTDREQ           0x0017
-#define SAM_TRACEINTID_RXRDY              0x0018
-#define SAM_TRACEINTID_RXSETUP            0x0019
-#define SAM_TRACEINTID_SETCONFIG          0x001a
-#define SAM_TRACEINTID_SETFEATURE         0x001b
-#define SAM_TRACEINTID_STALLSNT           0x001c
-#define SAM_TRACEINTID_SYNCHFRAME         0x001d
-#define SAM_TRACEINTID_TXRDY              0x001e
-#define SAM_TRACEINTID_UPSTRRES           0x001f
-#define SAM_TRACEINTID_WAKEUP             0x0020
+#define SAM_TRACEINTID_ADDRESSED          0x0001
+#define SAM_TRACEINTID_CLEARFEATURE       0x0002
+#define SAM_TRACEINTID_DETSUSPD           0x0003
+#define SAM_TRACEINTID_DEVGETSTATUS       0x0004
+#define SAM_TRACEINTID_DISPATCH           0x0005
+#define SAM_TRACEINTID_DMA                0x0006
+#define SAM_TRACEINTID_DMAEOB             0x0007
+#define SAM_TRACEINTID_DMAEOC             0x0008
+#define SAM_TRACEINTID_DMAERR             0x0009
+#define SAM_TRACEINTID_ENDRESET           0x000a
+#define SAM_TRACEINTID_EP                 0x000b
+#define SAM_TRACEINTID_EP0SETUPIN         0x000c
+#define SAM_TRACEINTID_EP0SETUPOUT        0x000d
+#define SAM_TRACEINTID_EP0SETUPSETADDRESS 0x000e
+#define SAM_TRACEINTID_EPGETSTATUS        0x000f
+#define SAM_TRACEINTID_EPINDONE           0x0010
+#define SAM_TRACEINTID_EPINQEMPTY         0x0011
+#define SAM_TRACEINTID_EPOUTQEMPTY        0x0012
+#define SAM_TRACEINTID_GETCONFIG          0x0013
+#define SAM_TRACEINTID_GETSETDESC         0x0014
+#define SAM_TRACEINTID_GETSETIF           0x0015
+#define SAM_TRACEINTID_GETSTATUS          0x0016
+#define SAM_TRACEINTID_IFGETSTATUS        0x0017
+#define SAM_TRACEINTID_INTERRUPT          0x0018
+#define SAM_TRACEINTID_INTSOF             0x0019
+#define SAM_TRACEINTID_NOSTDREQ           0x001a
+#define SAM_TRACEINTID_RXRDY              0x001b
+#define SAM_TRACEINTID_RXSETUP            0x001c
+#define SAM_TRACEINTID_SETADDRESS         0x001d
+#define SAM_TRACEINTID_SETCONFIG          0x001e
+#define SAM_TRACEINTID_SETFEATURE         0x001f
+#define SAM_TRACEINTID_STALLSNT           0x0020
+#define SAM_TRACEINTID_SYNCHFRAME         0x0021
+#define SAM_TRACEINTID_TXRDY              0x0022
+#define SAM_TRACEINTID_UPSTRRES           0x0023
+#define SAM_TRACEINTID_WAKEUP             0x0024
 
 /* Ever-present MIN and MAX macros */
 
@@ -229,14 +234,21 @@
 
 enum sam_epstate_e
 {
+                              /* --- All Endpoints --- */
   UDPHS_EPSTATE_DISABLED = 0, /* Endpoint is disabled */
   UDPHS_EPSTATE_STALLED,      /* Endpoint is stalled */
   UDPHS_EPSTATE_IDLE,         /* Endpoint is idle (i.e. ready for transmission) */
   UDPHS_EPSTATE_SENDING,      /* Endpoint is sending data */
-  UDPHS_EPSTATE_RECEIVING     /* Endpoint is receiving data */
+  UDPHS_EPSTATE_RECEIVING,    /* Endpoint is receiving data */
+                              /* --- Endpoint 0 Only --- */
+  UDPHS_EPSTATE_EP0DATAOUT,   /* Endpoint 0 is receiving SETUP OUT data */
+  UDPHS_EPSTATE_EP0STATUSIN,  /* Endpoint 0 is sending SETUP status */
+  UDPHS_EPSTATE_EP0ADDRESS    /* Address change is pending completion of status */
 };
 
-enum sam_devstate_s
+/* The overall state of the device */
+
+enum sam_devstate_e
 {
   UDPHS_DEVSTATE_SUSPENDED = 0, /* The device is currently suspended */
   UDPHS_DEVSTATE_ATTACHED,      /* USB cable is plugged into the device */
@@ -244,6 +256,16 @@ enum sam_devstate_s
   UDPHS_DEVSTATE_DEFAULT,       /* Device has been reset */
   UDPHS_DEVSTATE_ADDRESS,       /* The device has been given an address on the bus */
   UDPHS_DEVSTATE_CONFIGURED     /* A valid configuration has been selected. */
+};
+
+/* The result of EP0 SETUP processing */
+
+enum sam_ep0setup_e
+{
+  UDPHS_EP0SETUP_SUCCESS = 0,   /* The SETUP was handle without incident */
+  UDPHS_EP0SETUP_DISPATCHED,    /* The SETUP was forwarded to the class driver */
+  UDPHS_EP0SETUP_ADDRESS,       /* A new device address is pending */
+  UDPHS_EP0SETUP_STALL          /* An error occurred */
 };
 
 /* DMA transfer descriptor */
@@ -324,6 +346,7 @@ struct sam_usbdev_s
   struct usb_ctrlreq_s     ctrl;          /* Last EP0 request */
   uint8_t                  devstate;      /* State of the device (see enum sam_devstate_e) */
   uint8_t                  prevstate;     /* Previous state of the device */
+  uint8_t                  devaddr;       /* Assigned device address */
   uint8_t                  rxpending:1;   /* 1: OUT data in the FIFO, but no read requests */
   uint8_t                  selfpowered:1; /* 1: Device is self powered */
   uint16_t                 epavail;       /* Bitset of available endpoints */
@@ -340,6 +363,16 @@ struct sam_usbdev_s
   /* The endpoint list */
 
   struct sam_ep_s          eplist[SAM_UDPHS_NENDPOINTS];
+
+  /* EP0 data buffer.  For data that is included in an EP0 SETUP OUT
+   * transaction.  In this case, no request is in place from the class
+   * driver and the incoming data is caught in this buffer.  The size
+   * of valid dat in the buffer is given by ctrlreg.len[].  For the
+   * case of EP0 SETUP IN transaction, the normal request mechanism is
+   * used and the class driver provides the buffering.
+   */
+
+  uint8_t                  ep0out[SAM_EP0_MAXPACKET];
 };
 
 /****************************************************************************
@@ -349,11 +382,11 @@ struct sam_usbdev_s
 /* Register operations ******************************************************/
 
 #ifdef CONFIG_SAMA5_UDPHS_REGDEBUG
-static void sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite);
-static void sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite);
+static void   sam_printreg(uintptr_t regaddr, uint32_t regval, bool iswrite);
+static void   sam_checkreg(uintptr_t regaddr, uint32_t regval, bool iswrite);
 static uint32_t sam_getreg(uintptr_t regaddr);
-static void sam_putreg(uint32_t regval, uintptr_t regaddr);
-static void sam_dumpep(struct sam_usbdev_s *priv, int epno);
+static void   sam_putreg(uint32_t regval, uintptr_t regaddr);
+static void   sam_dumpep(struct sam_usbdev_s *priv, int epno);
 #else
 static inline uint32_t sam_getreg(uintptr_t regaddr);
 static inline void sam_putreg(uint32_t regval, uintptr_t regaddr);
@@ -401,9 +434,8 @@ static void   sam_req_cancel(struct sam_ep_s *privep);
 
 /* Interrupt level processing ***********************************************/
 
-static void   sam_ep0_rdsetup(struct usb_ctrlreq_s *req);
-static void   sam_ep0_wrstatus(struct sam_usbdev_s *priv,
-                const uint8_t *data, size_t nbytes);
+static void   sam_ep0_read(uint8_t *buffer, size_t buflen);
+static void   sam_ep0_wrstatus(const uint8_t *buffer, size_t buflen);
 static void   sam_ep0_dispatch(struct sam_usbdev_s *priv);
 static void   sam_setdevaddr(struct sam_usbdev_s *priv, uint8_t value);
 static void   sam_ep0_setup(struct sam_usbdev_s *priv);
@@ -556,6 +588,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
 const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 {
+  TRACE_STR(SAM_TRACEINTID_ADDRESSED),
   TRACE_STR(SAM_TRACEINTID_CLEARFEATURE),
   TRACE_STR(SAM_TRACEINTID_DETSUSPD),
   TRACE_STR(SAM_TRACEINTID_DEVGETSTATUS),
@@ -566,6 +599,8 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
   TRACE_STR(SAM_TRACEINTID_DMAERR),
   TRACE_STR(SAM_TRACEINTID_ENDRESET),
   TRACE_STR(SAM_TRACEINTID_EP),
+  TRACE_STR(SAM_TRACEINTID_EP0SETUPIN),
+  TRACE_STR(SAM_TRACEINTID_EP0SETUPOUT),
   TRACE_STR(SAM_TRACEINTID_EP0SETUPSETADDRESS),
   TRACE_STR(SAM_TRACEINTID_EPGETSTATUS),
   TRACE_STR(SAM_TRACEINTID_EPINDONE),
@@ -581,6 +616,7 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
   TRACE_STR(SAM_TRACEINTID_NOSTDREQ),
   TRACE_STR(SAM_TRACEINTID_RXRDY),
   TRACE_STR(SAM_TRACEINTID_RXSETUP),
+  TRACE_STR(SAM_TRACEINTID_SETADDRESS),
   TRACE_STR(SAM_TRACEINTID_SETCONFIG),
   TRACE_STR(SAM_TRACEINTID_SETFEATURE),
   TRACE_STR(SAM_TRACEINTID_STALLSNT),
@@ -1511,6 +1547,7 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
 
           /* And complete the request */
 
+          privep->epstate = UDPHS_EPSTATE_IDLE;
           sam_req_complete(privep, OK);
         }
     }
@@ -1548,21 +1585,24 @@ static void sam_req_cancel(struct sam_ep_s *privep)
  * Interrupt Level Processing
  ****************************************************************************/
 /****************************************************************************
- * Name: sam_ep0_rdsetup
+ * Name: sam_ep0_read
  *
  * Description:
  *   Read a general USB request from the UDPHS FIFO
  *
  ****************************************************************************/
 
-static void sam_ep0_rdsetup(struct usb_ctrlreq_s *req)
+static void sam_ep0_read(uint8_t *buffer, size_t buflen)
 {
-  volatile uint32_t *buffer = (uint32_t *)req;
-  volatile uint32_t *fifo;
+  volatile const uint8_t *fifo;
 
-  fifo = (volatile uint32_t *)SAM_UDPHSRAM_VSECTION;
-  *buffer++ = *fifo;
-  *buffer = *fifo;
+  /* Retrieve packet from the FIFO */
+
+  fifo = (volatile const uint8_t *)SAM_UDPHSRAM_VSECTION;
+  for (; buflen > 0; buflen--)
+    {
+      *buffer++ = *fifo++;
+    }
 }
 
 /****************************************************************************
@@ -1574,21 +1614,16 @@ static void sam_ep0_rdsetup(struct usb_ctrlreq_s *req)
  *
  ****************************************************************************/
 
-static void sam_ep0_wrstatus(struct sam_usbdev_s *priv,
-                             const uint8_t *data,
-                             size_t nbytes)
+static void sam_ep0_wrstatus(const uint8_t *buffer, size_t buflen)
 {
   volatile uint8_t *fifo;
 
-  if (nbytes > 0)
-    {
-      /* Write packet in the FIFO buffer */
+  /* Write packet in the FIFO buffer */
 
-      fifo = (volatile uint32_t *)SAM_UDPHSRAM_VSECTION;
-      for (; nbytes; nbytes--)
-        {
-          *fifo++ = *data++;
-        }
+  fifo = (volatile uint8_t *)SAM_UDPHSRAM_VSECTION;
+  for (; buflen > 0; buflen--)
+    {
+      *fifo++ = *buffer++;
     }
 }
 
@@ -1598,14 +1633,34 @@ static void sam_ep0_wrstatus(struct sam_usbdev_s *priv,
 
 static void sam_ep0_dispatch(struct sam_usbdev_s *priv)
 {
+  uint8_t *dataout;
+  size_t outlen;
   int ret;
 
   usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_DISPATCH), 0);
   if (priv && priv->driver)
     {
+      /* Assume IN SETUP (or OUT SETUP with no data) */
+
+      dataout = NULL;
+      outlen  = 0;
+
+      /* Was this an OUT SETUP command? */
+
+      if (USB_REQ_ISOUT(priv->ctrl.type))
+        {
+          uint16_t tmplen = GETUINT16(priv->ctrl.len);
+          if (tmplen > 0)
+            {
+              dataout = priv->ep0out;
+              outlen  = tmplen;
+            }
+        }
+
       /* Forward to the control request to the class driver implementation */
 
-      ret = CLASS_SETUP(priv->driver, &priv->usbdev, &priv->ctrl, NULL, 0);
+      ret = CLASS_SETUP(priv->driver, &priv->usbdev, &priv->ctrl,
+                        dataout, outlen);
       if (ret < 0)
         {
           /* Stall on failure */
@@ -1657,15 +1712,14 @@ static void sam_setdevaddr(struct sam_usbdev_s *priv, uint8_t address)
 
 static void sam_ep0_setup(struct sam_usbdev_s *priv)
 {
-  struct sam_ep_s   *ep0     = &priv->eplist[EP0];
-  struct sam_req_s  *privreq = sam_rqpeek(ep0);
-  struct sam_ep_s   *privep;
+  struct sam_ep_s     *ep0     = &priv->eplist[EP0];
+  struct sam_req_s    *privreq = sam_rqpeek(ep0);
+  struct sam_ep_s     *privep;
   union wb_u           value;
   union wb_u           index;
   union wb_u           len;
   union wb_u           response;
-  bool                 handled = false;
-  bool                 stalled = false;
+  enum sam_ep0setup_e  ep0result;
   uint8_t              epno;
   int                  nbytes = 0; /* Assume zero-length packet */
   int                  ret;
@@ -1716,6 +1770,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
    * USB device controller driver; pass what is left to the class driver
    */
 
+  ep0result = UDPHS_EP0SETUP_SUCCESS;
   switch (priv->ctrl.req)
     {
     case USB_REQ_GETSTATUS:
@@ -1731,7 +1786,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
             index.b[MSB] != 0 || value.w != 0)
           {
             usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADEPGETSTATUS), 0);
-            stalled = true;
+            ep0result = UDPHS_EP0SETUP_STALL;
           }
         else
           {
@@ -1744,7 +1799,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
                   if (epno >= SAM_UDPHS_NENDPOINTS)
                     {
                       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADEPGETSTATUS), epno);
-                      stalled = true;
+                      ep0result = UDPHS_EP0SETUP_STALL;
                     }
                   else
                     {
@@ -1778,7 +1833,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
                   else
                     {
                       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADDEVGETSTATUS), 0);
-                      stalled = true;
+                      ep0result = UDPHS_EP0SETUP_STALL;
                     }
                 }
                 break;
@@ -1794,7 +1849,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
               default:
                 {
                   usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADGETSTATUS), 0);
-                  stalled = true;
+                  ep0result = UDPHS_EP0SETUP_STALL;
                 }
                 break;
               }
@@ -1818,7 +1873,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
              */
 
             sam_ep0_dispatch(priv);
-            handled = true;
+            ep0result = UDPHS_EP0SETUP_DISPATCHED;
           }
         else
           {
@@ -1831,13 +1886,16 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
                 privep         = &priv->eplist[epno];
                 privep->halted = 0;
 
-                ret            = sam_ep_stall(&privep->ep, true);
-                stalled        = (ret < 0);
+                ret = sam_ep_stall(&privep->ep, true);
+                if (ret < 0)
+                  {
+                    ep0result = UDPHS_EP0SETUP_STALL;
+                  }
               }
             else
               {
                 usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADCLEARFEATURE), 0);
-                stalled = true;
+                ep0result = UDPHS_EP0SETUP_STALL;
               }
           }
       }
@@ -1864,7 +1922,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
             /* The class driver handles all recipients except recipient=endpoint */
 
             sam_ep0_dispatch(priv);
-            handled = true;
+            ep0result = UDPHS_EP0SETUP_DISPATCHED;
           }
         else
           {
@@ -1876,13 +1934,17 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
               {
                 privep         = &priv->eplist[epno];
                 privep->halted = 1;
-                ret            = sam_ep_stall(&privep->ep, false);
-                stalled        = (ret < 0);
+
+                ret = sam_ep_stall(&privep->ep, false);
+                if (ret < 0)
+                  {
+                    ep0result = UDPHS_EP0SETUP_STALL;
+                  }
               }
             else
               {
                 usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADSETFEATURE), 0);
-                stalled = true;
+                ep0result = UDPHS_EP0SETUP_STALL;
               }
           }
       }
@@ -1901,14 +1963,19 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
             index.w != 0 || len.w != 0 || value.w > 127)
           {
             usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADSETADDRESS), 0);
-            stalled = true;
+            ep0result = UDPHS_EP0SETUP_STALL;
           }
+        else
+          {
+            /* Note that setting of the device address will be deferred.  A
+             * zero-length packet will be sent and the device address will
+             * be set when the zero-length packet transfer completes.
+             */
 
-        /* Note that setting of the device address will be deferred.  A zero-length
-         * packet will be sent and the device address will be set when the zero-
-         * length packet transfer completes.
-         */
-#warning Missing logic
+            usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_SETADDRESS), value.w);
+            priv->devaddr = value.w;
+            ep0result     = UDPHS_EP0SETUP_ADDRESS;
+          }
       }
       break;
 
@@ -1932,12 +1999,12 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
             /* The request seems valid... let the class implementation handle it */
 
             sam_ep0_dispatch(priv);
-            handled = true;
+            ep0result = UDPHS_EP0SETUP_DISPATCHED;
           }
         else
           {
             usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADGETSETDESC), 0);
-            stalled = true;
+            ep0result = UDPHS_EP0SETUP_STALL;
           }
       }
       break;
@@ -1957,12 +2024,12 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
             /* The request seems valid... let the class implementation handle it */
 
             sam_ep0_dispatch(priv);
-            handled = true;
+            ep0result = UDPHS_EP0SETUP_DISPATCHED;
           }
         else
           {
             usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADGETCONFIG), 0);
-            stalled = true;
+            ep0result = UDPHS_EP0SETUP_STALL;
           }
       }
       break;
@@ -1985,12 +2052,12 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
               */
 
              sam_ep0_dispatch(priv);
-             handled = true;
+            ep0result = UDPHS_EP0SETUP_DISPATCHED;
           }
         else
           {
             usbtrace(TRACE_DEVERROR(SAM_TRACEERR_BADSETCONFIG), 0);
-            stalled = true;
+            ep0result = UDPHS_EP0SETUP_STALL;
           }
       }
       break;
@@ -2013,7 +2080,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
 
         usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_GETSETIF), priv->ctrl.type);
         sam_ep0_dispatch(priv);
-        handled = true;
+        ep0result = UDPHS_EP0SETUP_DISPATCHED;
       }
       break;
 
@@ -2032,51 +2099,83 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
     default:
       {
         usbtrace(TRACE_DEVERROR(SAM_TRACEERR_INVALIDCTRLREQ), priv->ctrl.req);
-        stalled = true;
+        ep0result = UDPHS_EP0SETUP_STALL;
       }
       break;
     }
 
-  /* At this point, the request has been handled and there are three possible
-   * outcomes:
-   *
-   * 1. The setup request was successfully handled above and a response packet
-   *    must be sent (may be a zero length packet).
-   * 2. The request was successfully handled by the class implementation.  In
-   *    case, the EP0 IN response has already been queued and the local variable
-   *    'handled' will be set to true and 'stalled' will be false;
-   * 3. An error was detected in either the above logic or by the class implementation
-   *    logic.  In either case, stalled will be true to indicate this case.
-   *
-   * NOTE: Non-standard requests are a special case.  They are handled by the
-   * class implementation and this function returned early above, skipping this
-   * logic altogether.  See sam_ep0_dispatch().
-   */
+  /* Restrict the data length to the length requested in the setup packet */
 
-  if (stalled)
+  if (nbytes > len.w)
     {
-      /* Stall EP0 */
-
-      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EP0SETUPSTALLED), priv->ctrl.req);
-      (void)sam_ep_stall(&priv->eplist[EP0].ep, true);
+      nbytes = len.w;
     }
 
-  /* Was the request handled by sam_ep0_dispatch()? */
+  /* At this point, the request has been handled and there are three
+   * (or four) possible outcomes:
+   *
+   * 1a. ep0result == UDPHS_EP0SETUP_SUCCESS
+   *
+   *    The setup request was successfully handled above and a response
+   *    packet must be sent (may be a zero length packet).
+   *
+   * 1b. ep0result == UDPHS_EP0SETUP_ADDRESS
+   *
+   *    A special case is the case where epstate=UDPHS_EPSTATE_EP0ADDRESS.
+   *    This that the above processing generated an additional state where
+   *    we need to wait to obtain our device address.
+   *
+   * 2. ep0result == UDPHS_EP0SETUP_DISPATCHED;
+   *
+   *    The request was forwarded to the class implementation.  In case,
+   *    EP0 IN data may have already been sent and the EP0 IN response
+   *    has already been queued?  Or perhaps the endpoint has already 
+   *    been stalled?  This is all under the control of the class driver.
+   *
+   *    NOTE that for the case of non-standard SETUP requested, those
+   *    requests were forwarded to the class driver and we don't even get
+   *    to this logic.
+   *
+   * 3. ep0result == UDPHS_EP0SETUP_STALL;
+   *
+   *    An error was detected in either the above logic or by the class
+   *    implementation logic.
+   */
 
-  else if (!handled)
+  switch (ep0result)
     {
-      /* We will respond.  First, restrict the data length to the length
-       * requested in the setup packet
-       */
-
-      if (nbytes > len.w)
+      case UDPHS_EP0SETUP_SUCCESS:
         {
-          nbytes = len.w;
+          /* Send the response (might be a zero-length packet) */
+
+          ep0->epstate = UDPHS_EPSTATE_EP0STATUSIN;
+          sam_ep0_wrstatus(response.b, nbytes);
         }
+        break;
 
-      /* Send the response (might be a zero-length packet) */
+      case UDPHS_EP0SETUP_ADDRESS:
+        {
+          /* Send the response (might be a zero-length packet) */
 
-      sam_ep0_wrstatus(priv, response.b, nbytes);
+          ep0->epstate = UDPHS_EPSTATE_EP0ADDRESS;
+          sam_ep0_wrstatus(response.b, nbytes);
+        }
+        break;
+
+      case UDPHS_EP0SETUP_STALL:
+        {
+          /* Stall EP0 */
+
+          usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EP0SETUPSTALLED),
+                   priv->ctrl.req);
+
+          (void)sam_ep_stall(&priv->eplist[EP0].ep, true);
+        }
+        break;
+
+      case UDPHS_EP0SETUP_DISPATCHED:
+      default:
+        break;
     }
 }
 
@@ -2259,17 +2358,35 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
     {
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_TXRDY), (uint16_t)eptsta);
 
-      /* Sending state */
+      /* Sending state.  This is the completion of a "normal" write request
+       * transfer.  In this case, we need to resume request processing in
+       * order to send the next outgoing packet.
+       */
 
-      if (privep->epstate == UDPHS_EPSTATE_SENDING)
+      if (privep->epstate == UDPHS_EPSTATE_SENDING ||
+          privep->epstate == UDPHS_EPSTATE_EP0STATUSIN)
         {
-          /* Continue processing the write request */
+          /* Continue/resume processing the write requests */
 
+          privep->epstate = UDPHS_EPSTATE_IDLE;
           (void)sam_req_write(priv, privep);
+        }
+
+      /* Setting of the device address is a special case.  The address was
+       * obtained when a preceding SETADDRESS SETUP command was processed.
+       * But the address is not set until the final SETUP status phase
+       * completes.  This interrupt indicates the completion of that status
+       * phase and now we set the address.
+       */
+
+      else if (privep->epstate == UDPHS_EPSTATE_EP0ADDRESS)
+        {
+          usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_ADDRESSED), priv->devaddr);
+          sam_setdevaddr(priv, priv->devaddr);
         }
       else
         {
-           usbtrace(TRACE_DEVERROR(SAM_TRACEERR_TXRDYERR), privep->epstate);
+          usbtrace(TRACE_DEVERROR(SAM_TRACEERR_TXRDYERR), privep->epstate);
         }
     }
 
@@ -2279,9 +2396,49 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
     {
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXRDY), (uint16_t)eptsta);
 
-      /* NOT in receiving state */
+      /* Are we receiving data for a read request? */
 
-      if (privep->epstate != UDPHS_EPSTATE_RECEIVING)
+      if (privep->epstate == UDPHS_EPSTATE_RECEIVING)
+        {
+          /* Yes, get the size of the packet that we just received */
+
+          pktsize = (uint16_t)
+            ((eptsta & UDPHS_EPTSTA_BYTECNT_MASK) >>
+            UDPHS_EPTSTA_BYTECNT_SHIFT);
+
+          /* And continue processing the read request */
+
+          privep->epstate = UDPHS_EPSTATE_IDLE;
+          sam_req_read(priv, privep, pktsize);
+          sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(epno));
+        }
+
+      /* Did we just receive the data associated with an OUT SETUP command? */
+
+      else if (privep->epstate != UDPHS_EPSTATE_EP0DATAOUT)
+        {
+          uint16_t len;
+
+#ifdef CONFIG_DEBUG
+          /* Yes.. get the size of the packet that we just received */
+
+          pktsize = (uint16_t)
+            ((eptsta & UDPHS_EPTSTA_BYTECNT_MASK) >>
+            UDPHS_EPTSTA_BYTECNT_SHIFT);
+#endif
+
+          /* Copy the OUT data from the EP0 FIFO into special EP0 buffer. */
+
+          len = GETUINT16(priv->ctrl.len);
+          DEBUGASSERT(len > 0 && len == pktsize);
+          sam_ep0_read(priv->ep0out, len);
+
+          /* And handle the EP0 SETUP now. */
+
+          privep->epstate = UDPHS_EPSTATE_IDLE;
+          sam_ep0_setup(priv);
+        }
+      else
         {
           /* Check if ACK received on a Control EP */
 
@@ -2306,21 +2463,6 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
               regval &= ~UDPHS_INT_EPT(epno);
               sam_putreg(regval, SAM_UDPHS_IEN);
             }
-        }
-
-      /* In read state */
-
-      else
-        {
-          /* Get the size of the packet that we just received */
-
-          pktsize = (uint16_t)
-            ((eptsta & UDPHS_EPTSTA_BYTECNT_MASK) >> UDPHS_EPTSTA_BYTECNT_SHIFT);
-
-          /* Continue processing the read request */
-
-          sam_req_read(priv, privep, pktsize);
-          sam_putreg(UDPHS_EPTSTA_RXRDYTXKL, SAM_UDPHS_EPTCLRSTA(epno));
         }
     }
 
@@ -2358,9 +2500,10 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
     {
       usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_RXSETUP), (uint16_t)eptsta);
 
-      /* If a transfer was pending, complete it. Handle the case where during
-       * the status phase of a control write transfer, the host receives the
-       * device ZLP and ack it, but the ack is not received by the device
+      /* If a request transfer was pending, complete it. Handle the case
+       * where during the status phase of a control write transfer, the host
+       * receives the device ZLP and ack it, but the ack is not received by the
+       * device
        */
 
       if (privep->epstate == UDPHS_EPSTATE_RECEIVING ||
@@ -2379,17 +2522,38 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
         }
       else
         {
-          /* Copy setup */
+          uint16_t len;
 
-          sam_ep0_rdsetup(&priv->ctrl);
+          /* Copy setup data from the EP0 FIFO into the driver structure. */
+
+          sam_ep0_read((uint8_t *)&priv->ctrl, USB_SIZEOF_CTRLREQ);
 
           /* Acknowledge setup packet */
 
           sam_putreg(UDPHS_EPTSTA_RXSETUP, SAM_UDPHS_EPTCLRSTA(epno));
 
-          /* Handle the EP0 SETUP command */
+          /* Check for a SETUP IN transaction */
 
-          sam_ep0_setup(priv);
+          len = GETUINT16(priv->ctrl.len);
+          if (USB_REQ_ISOUT(priv->ctrl.type) && len > 0)
+            {
+              /* Yes.. then we have to wait for the IN data phase to
+               * complete before processing the SETUP command.
+               */
+
+              usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0SETUPIN), len);
+              privep->epstate = UDPHS_EPSTATE_EP0DATAOUT;
+            }
+          else
+            {
+              /* This is an SETUP OUT command (or a SETUP IN with no data).
+               * Handle the EP0 SETUP now.
+               */
+
+              usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0SETUPOUT), priv->ctrl.req);
+              privep->epstate = UDPHS_EPSTATE_IDLE;
+              sam_ep0_setup(priv);
+            }
         }
     }
 }
@@ -3579,7 +3743,9 @@ static void sam_reset(struct sam_usbdev_s *priv)
 
   /* The device enters the Default state */
 
+  priv->devaddr   = 0;
   sam_setdevaddr(priv, 0);
+
   priv->devstate  = UDPHS_DEVSTATE_DEFAULT;
   priv->rxpending = false;
 
