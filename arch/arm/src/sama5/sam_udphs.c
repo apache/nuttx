@@ -2862,7 +2862,7 @@ static void sam_epset_reset(struct sam_usbdev_s *priv, uint16_t epset)
   /* Reset each endpoint in the set */
 
   for (epno = 0, bit = 1, epset &= SAM_EPSET_ALL;
-       epno < SAM_UDPHS_NENDPOINTS || epset == 0;
+       epno < SAM_UDPHS_NENDPOINTS && epset != 0;
        epno++, bit <<= 1)
     {
       /* Is this endpoint in the set? */
@@ -3754,7 +3754,7 @@ static void sam_reset(struct sam_usbdev_s *priv)
   sam_epset_reset(priv, SAM_EPSET_ALL);
   sam_ep_configure_internal(&priv->eplist[EP0], &g_ep0desc);
 
-  /* Reset endpoints */
+  /* Reset endpoint data structures */
 
   for (epno = 0; epno < SAM_UDPHS_NENDPOINTS; epno++)
     {
@@ -3779,7 +3779,6 @@ static void sam_reset(struct sam_usbdev_s *priv)
 
   /* Re-configure the USB controller in its initial, unconnected state */
 
-  sam_reset(priv);
   priv->usbdev.speed = USB_SPEED_FULL;
   sam_dumpep(priv, EP0);
 }
@@ -3847,7 +3846,7 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
 
   /* Initialize DMA channels */
 
-  for (i = 1; i < SAM_UDPHS_NDMACHANNELS; i++)
+  for (i = 1; i <= SAM_UDPHS_NDMACHANNELS; i++)
     {
       /* Stop any DMA transfer */
 
@@ -3867,9 +3866,9 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
       sam_putreg(regval, SAM_UDPHS_DMACONTROL(i));
     }
 
-  /* Initialize DMA channels */
+  /* Initialize Endpoints */
 
-  for (i = 1; i < SAM_UDPHS_NENDPOINTS; i++)
+  for (i = 0; i < SAM_UDPHS_NENDPOINTS; i++)
     {
       /* Disable endpoint */
 
