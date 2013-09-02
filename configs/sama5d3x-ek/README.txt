@@ -1241,6 +1241,15 @@ Configurations
         Device Drivers -> USB Device Driver Support
           CONFIG_CDCACM=y                       : Enable the CDC/ACM device
 
+        The following setting enables an example that can can be used to
+        control the CDC/ACM device.  It will add two new NSH commands:
+        (1) sercon will connect the USB serial device (creating /dev/ttyACM0),
+        and (2) serdis which will disconnect the USB serial device (destroying
+        /dev/ttyACM0).
+
+        Application Configuration -> Examples:
+          CONFIG_EXAMPLES_CDCACM=y              : Enable an CDC/ACM example
+
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
         The SAMA5D3 can run at 536MHz.  I still need to figure out the
