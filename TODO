@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated July 24, 2013)
+NuttX TODO List (Last updated August 2, 2013)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -951,6 +951,10 @@ o USB (drivers/usbdev, drivers/usbhost)
                3. When the setup packet is dispatched to the class driver,
                   the OUT data must be passed as the final parameter in the
                   call.
+
+               Update 2013-9-2:  The new USB device-side driver for the SAMA5D3
+               correctly supports OUT SETUP data following the same design as
+               per above.
 
   Status:      Open
   Priority:    High for class drivers that need EP0 data.  For example, the

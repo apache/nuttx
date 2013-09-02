@@ -161,12 +161,13 @@
 #define SAM_TRACEERR_EPINBUSY             0x0012
 #define SAM_TRACEERR_EPOUTNULLPACKET      0x0013
 #define SAM_TRACEERR_EPRESERVE            0x0014
-#define SAM_TRACEERR_INVALIDCTRLREQ       0x0015
-#define SAM_TRACEERR_INVALIDPARMS         0x0016
-#define SAM_TRACEERR_IRQREGISTRATION      0x0017
-#define SAM_TRACEERR_NOTCONFIGURED        0x0018
-#define SAM_TRACEERR_REQABORTED           0x0019
-#define SAM_TRACEERR_TXRDYERR             0x001a
+#define SAM_TRACEERR_EPTCFGMAPD           0x0015
+#define SAM_TRACEERR_INVALIDCTRLREQ       0x0016
+#define SAM_TRACEERR_INVALIDPARMS         0x0017
+#define SAM_TRACEERR_IRQREGISTRATION      0x0018
+#define SAM_TRACEERR_NOTCONFIGURED        0x0019
+#define SAM_TRACEERR_REQABORTED           0x001a
+#define SAM_TRACEERR_TXRDYERR             0x001b
 
 /* Trace interrupt codes */
 
@@ -466,6 +467,10 @@ static struct usbdev_req_s *
               sam_ep_allocreq(struct usbdev_ep_s *ep);
 static void   sam_ep_freereq(struct usbdev_ep_s *ep,
                 struct usbdev_req_s *);
+#ifdef CONFIG_USBDEV_DMA
+static void  *sam_ep_allocbuffer(struct usbdev_ep_s *ep, uint16_t nbytes);
+static void   sam_ep_freebuffer(struct usbdev_ep_s *ep, void *buf);
+#endif
 static int    sam_ep_submit(struct usbdev_ep_s *ep,
                 struct usbdev_req_s *req);
 static int    sam_ep_cancel(struct usbdev_ep_s *ep,
@@ -507,6 +512,10 @@ static const struct usbdev_epops_s g_epops =
   .disable       = sam_ep_disable,
   .allocreq      = sam_ep_allocreq,
   .freereq       = sam_ep_freereq,
+#ifdef CONFIG_USBDEV_DMA
+  .allocbuffer   = sam_ep_allocbuffer,
+  .freebuffer    = sam_ep_freebuffer,
+#endif
   .submit        = sam_ep_submit,
   .cancel        = sam_ep_cancel,
   .stall         = sam_ep_stall,
@@ -571,6 +580,7 @@ const struct trace_msg_t g_usb_trace_strings_deverror[] =
   TRACE_STR(SAM_TRACEERR_EPINBUSY),
   TRACE_STR(SAM_TRACEERR_EPOUTNULLPACKET),
   TRACE_STR(SAM_TRACEERR_EPRESERVE),
+  TRACE_STR(SAM_TRACEERR_EPTCFGMAPD),
   TRACE_STR(SAM_TRACEERR_INVALIDCTRLREQ),
   TRACE_STR(SAM_TRACEERR_INVALIDPARMS),
   TRACE_STR(SAM_TRACEERR_IRQREGISTRATION),
@@ -2129,7 +2139,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
    *
    *    The request was forwarded to the class implementation.  In case,
    *    EP0 IN data may have already been sent and the EP0 IN response
-   *    has already been queued?  Or perhaps the endpoint has already 
+   *    has already been queued?  Or perhaps the endpoint has already
    *    been stalled?  This is all under the control of the class driver.
    *
    *    NOTE that for the case of non-standard SETUP requested, those
@@ -3087,7 +3097,16 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
             ((privep->bank) << 6) | (nbtrans << 8);
   sam_putreg(regval, SAM_UDPHS_EPTCFG(epno));
 
-  DEBUGASSERT((sam_getreg(SAM_UDPHS_EPTCFG(epno)) & UDPHS_EPTCFG_MAPD) == 0);
+  /* Verify that the EPT_MAPD flag is set. This flag is set if the
+   * endpoint size and the number of banks are correct compared to
+   * the FIFO maximum capacity and the maximum number of allowed banks.
+   */
+
+  if ((sam_getreg(SAM_UDPHS_EPTCFG(epno)) & UDPHS_EPTCFG_MAPD) == 0)
+    {
+      usbtrace(TRACE_DEVERROR(SAM_TRACEERR_EPTCFGMAPD), epno);
+      return -EINVAL;
+    }
 
   /* Enable the endpoint */
 
@@ -3147,6 +3166,10 @@ static int sam_ep_configure(struct usbdev_ep_s *ep,
 
 /****************************************************************************
  * Name: sam_ep_disable
+ *
+ * Description:
+ *   This is the disable() method of the USB device endpoint structure.
+ *
  ****************************************************************************/
 
 static int sam_ep_disable(struct usbdev_ep_s *ep)
@@ -3187,6 +3210,10 @@ static int sam_ep_disable(struct usbdev_ep_s *ep)
 
 /****************************************************************************
  * Name: sam_ep_allocreq
+ *
+ * Description:
+ *   This is the allocreq() method of the USB device endpoint structure.
+ *
  ****************************************************************************/
 
 static struct usbdev_req_s *sam_ep_allocreq(struct usbdev_ep_s *ep)
@@ -3215,6 +3242,10 @@ static struct usbdev_req_s *sam_ep_allocreq(struct usbdev_ep_s *ep)
 
 /****************************************************************************
  * Name: sam_ep_freereq
+ *
+ * Description:
+ *   This is the freereq() method of the USB device endpoint structure.
+ *
  ****************************************************************************/
 
 static void sam_ep_freereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
@@ -3235,6 +3266,44 @@ static void sam_ep_freereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
 /****************************************************************************
  * Name: sam_ep_submit
+ *
+ * Description:
+ *   This is the allocbuffer() method of the USB device endpoint structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV_DMA
+static void *sam_ep_allocbuffer(struct usbdev_ep_s *ep, uint16_t nbytes)
+{
+  /* There is not special buffer allocation requirement */
+
+  return kumalloc(nbytes);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_ep_submit
+ *
+ * Description:
+ *   This is the freebuffer() method of the USB device endpoint structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_USBDEV_DMA
+static void sam_ep_freebuffer(struct usbdev_ep_s *ep, void *buf)
+{
+  /* There is not special buffer allocation requirement */
+
+  kufree(buf);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_ep_submit
+ *
+ * Description:
+ *   This is the submit() method of the USB device endpoint structure.
+ *
  ****************************************************************************/
 
 static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
@@ -3680,24 +3749,44 @@ static int sam_selfpowered(struct usbdev_s *dev, bool selfpowered)
  *
  ****************************************************************************/
 
-static int sam_pullup(FAR struct usbdev_s *dev,  bool enable)
+static int sam_pullup(FAR struct usbdev_s *dev, bool enable)
 {
   struct sam_usbdev_s *priv = (struct sam_usbdev_s *)dev;
   uint32_t regval;
 
-  regval  = sam_getreg(SAM_UDPHS_CTRL);
+  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
+
+  /* DETACH PULLD_DIS DP        DM         Condition
+   *
+   *   0         1    Pull      High       VBUS present
+   *                  Up        Impedance
+   *   1         0    Pull      Pull       No VBUS
+   *                  Down      Down
+   *   1         1    High      High       VBUS present +
+   *                  Impedance Imedpance  Disconnect
+   */
+
+  regval = sam_getreg(SAM_UDPHS_CTRL);
   if (enable)
     {
+      /* PULLD_DIS=1: No pull-Down on DP and DM */
+
       regval |= UDPHS_CTRL_PULLDDIS;
       sam_putreg(regval, SAM_UDPHS_CTRL);
+
+      /* DETACH=0: UDPHS is attached.  Pulls up the DP line */
 
       regval &= ~UDPHS_CTRL_DETACH;
       sam_putreg(regval, SAM_UDPHS_CTRL);
     }
   else
     {
+      /* DETACH=1: UDPHS is detached, UTMI transceiver is suspended. */
+
       regval |= UDPHS_CTRL_DETACH;
       sam_putreg(regval, SAM_UDPHS_CTRL);
+
+      /* PULLD_DIS=0: Pull-Down on DP & DM */
 
       regval &= ~UDPHS_CTRL_PULLDDIS;
       sam_putreg(regval, SAM_UDPHS_CTRL);
@@ -3816,7 +3905,7 @@ static void sam_hw_setup(struct sam_usbdev_s *priv)
   regval |= UDPHS_CTRL_DETACH;
   sam_putreg(regval, SAM_UDPHS_CTRL);
 
-  regval |= UDPHS_CTRL_PULLDDIS;
+  regval &= ~UDPHS_CTRL_PULLDDIS;
   sam_putreg(regval, SAM_UDPHS_CTRL);
 
   /* Reset the UDPHS block
@@ -4085,7 +4174,7 @@ void up_usbinitialize(void)
    * them when we need them later.
    */
 
-  if (irq_attach(SAM_IRQ_UHPHS, sam_udphs_interrupt) != 0)
+  if (irq_attach(SAM_IRQ_UDPHS, sam_udphs_interrupt) != 0)
     {
       usbtrace(TRACE_DEVERROR(SAM_TRACEERR_IRQREGISTRATION),
                (uint16_t)SAM_IRQ_UDPHS);
