@@ -186,28 +186,26 @@
 #define SAM_TRACEINTID_EP0SETUPOUT        0x000d
 #define SAM_TRACEINTID_EP0SETUPSETADDRESS 0x000e
 #define SAM_TRACEINTID_EPGETSTATUS        0x000f
-#define SAM_TRACEINTID_EPINDONE           0x0010
-#define SAM_TRACEINTID_EPINQEMPTY         0x0011
-#define SAM_TRACEINTID_EPOUTQEMPTY        0x0012
-#define SAM_TRACEINTID_GETCONFIG          0x0013
-#define SAM_TRACEINTID_GETSETDESC         0x0014
-#define SAM_TRACEINTID_GETSETIF           0x0015
-#define SAM_TRACEINTID_GETSTATUS          0x0016
-#define SAM_TRACEINTID_IFGETSTATUS        0x0017
-#define SAM_TRACEINTID_INTERRUPT          0x0018
-#define SAM_TRACEINTID_INTSOF             0x0019
-#define SAM_TRACEINTID_NOSTDREQ           0x001a
-#define SAM_TRACEINTID_PENDING            0x001b
-#define SAM_TRACEINTID_RXRDY              0x001c
-#define SAM_TRACEINTID_RXSETUP            0x001d
-#define SAM_TRACEINTID_SETADDRESS         0x001e
-#define SAM_TRACEINTID_SETCONFIG          0x001f
-#define SAM_TRACEINTID_SETFEATURE         0x0020
-#define SAM_TRACEINTID_STALLSNT           0x0021
-#define SAM_TRACEINTID_SYNCHFRAME         0x0022
-#define SAM_TRACEINTID_TXRDY              0x0023
-#define SAM_TRACEINTID_UPSTRRES           0x0024
-#define SAM_TRACEINTID_WAKEUP             0x0025
+#define SAM_TRACEINTID_EPINQEMPTY         0x0010
+#define SAM_TRACEINTID_EPOUTQEMPTY        0x0011
+#define SAM_TRACEINTID_GETCONFIG          0x0012
+#define SAM_TRACEINTID_GETSETDESC         0x0013
+#define SAM_TRACEINTID_GETSETIF           0x0014
+#define SAM_TRACEINTID_GETSTATUS          0x0015
+#define SAM_TRACEINTID_IFGETSTATUS        0x0016
+#define SAM_TRACEINTID_INTERRUPT          0x0017
+#define SAM_TRACEINTID_INTSOF             0x0018
+#define SAM_TRACEINTID_NOSTDREQ           0x0019
+#define SAM_TRACEINTID_PENDING            0x001a
+#define SAM_TRACEINTID_RXRDY              0x001b
+#define SAM_TRACEINTID_RXSETUP            0x001c
+#define SAM_TRACEINTID_SETCONFIG          0x001d
+#define SAM_TRACEINTID_SETFEATURE         0x001e
+#define SAM_TRACEINTID_STALLSNT           0x001f
+#define SAM_TRACEINTID_SYNCHFRAME         0x0020
+#define SAM_TRACEINTID_TXRDY              0x0021
+#define SAM_TRACEINTID_UPSTRRES           0x0022
+#define SAM_TRACEINTID_WAKEUP             0x0023
 
 /* Ever-present MIN and MAX macros */
 
@@ -399,7 +397,7 @@ static inline void sam_putreg(uint32_t regval, uintptr_t regaddr);
 static void   sam_suspend(struct sam_usbdev_s *priv);
 static void   sam_resume(struct sam_usbdev_s *priv);
 
-/* DMA/Request Helpers ******************************************************/
+/* DMA Transfer Helpers *****************************************************/
 
 #ifdef CONFIG_SAMA5_UDPHS_SCATTERGATHER
 static struct sam_dtd_s *sam_dtd_alloc(struct sam_usbdev_s *priv);
@@ -422,6 +420,7 @@ static inline void
               sam_req_abort(struct sam_ep_s *privep,
                 struct sam_req_s *privreq, int16_t result);
 static void   sam_req_complete(struct sam_ep_s *privep, int16_t result);
+static void   sam_ep_txrdy(unsigned int epno);
 static int    sam_req_wrnodma(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep, struct sam_req_s *privreq);
 static int    sam_req_write(struct sam_usbdev_s *priv,
@@ -613,7 +612,6 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
   TRACE_STR(SAM_TRACEINTID_EP0SETUPOUT),
   TRACE_STR(SAM_TRACEINTID_EP0SETUPSETADDRESS),
   TRACE_STR(SAM_TRACEINTID_EPGETSTATUS),
-  TRACE_STR(SAM_TRACEINTID_EPINDONE),
   TRACE_STR(SAM_TRACEINTID_EPINQEMPTY),
   TRACE_STR(SAM_TRACEINTID_EPOUTQEMPTY),
   TRACE_STR(SAM_TRACEINTID_GETCONFIG),
@@ -627,7 +625,6 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
   TRACE_STR(SAM_TRACEINTID_PENDING),
   TRACE_STR(SAM_TRACEINTID_RXRDY),
   TRACE_STR(SAM_TRACEINTID_RXSETUP),
-  TRACE_STR(SAM_TRACEINTID_SETADDRESS),
   TRACE_STR(SAM_TRACEINTID_SETCONFIG),
   TRACE_STR(SAM_TRACEINTID_SETFEATURE),
   TRACE_STR(SAM_TRACEINTID_STALLSNT),
@@ -986,8 +983,6 @@ static int sam_req_wrdma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
   regval  = sam_getreg(SAM_UDPHS_IEN);
   regval |= UDPHS_INT_EPT(epno);
   sam_putreg(regval, SAM_UDPHS_IEN);
-
-  sam_putreg(UDPHS_EPTCTL_TXRDY, SAM_UDPHS_EPTCTLENB(epno));
   return OK;
 }
 
@@ -1140,9 +1135,6 @@ static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
 
   if (privreq)
     {
-      DEBUGASSERT((privep->epstate == UDPHS_EPSTATE_RECEIVING) ||
-                  (privep->epstate == UDPHS_EPSTATE_SENDING))
-
       /* Save the result in the request structure */
 
       privreq->req.result = result;
@@ -1157,6 +1149,36 @@ static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
       privep->epstate   = UDPHS_EPSTATE_IDLE;
       privep->txnullpkt = 0;
     }
+}
+
+/****************************************************************************
+ * Name: sam_ep_txrdy
+ *
+ * Description:
+ *   IN data has been loaded in the endpoint FIFO.  Manage the endpoint to
+ *   (1) initiate sending of the data and (2) receive the TXRDY interrupt
+ *   when the transfer completes.
+ *
+ ****************************************************************************/
+
+static void sam_ep_txrdy(unsigned int epno)
+{
+  /* Set TXRDY to indicate that the packet is ready to send (this works even
+   * for zero length packets).  We will get an TXCOMP interrupt with TXRDY
+   * cleared.  Then we are able to send the next packet.
+   */
+
+  sam_putreg(UDPHS_EPTSETSTA_TXRDY, SAM_UDPHS_EPTSETSTA(epno));
+
+  /* Clear the NAK IN bit to stop NAKing IN tokens from the host.  We now
+   * have data ready to go.
+   */
+
+  sam_putreg(UDPHS_EPTSTA_NAKIN, SAM_UDPHS_EPTCLRSTA(epno));
+
+  /* Enable the TXRDY interrupt on the endpoint */
+
+  sam_putreg(UDPHS_EPTCTL_TXRDY, SAM_UDPHS_EPTCTLENB(epno));
 }
 
 /****************************************************************************
@@ -1267,18 +1289,11 @@ static int sam_req_wrnodma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
         privep->epstate = UDPHS_EPSTATE_SENDING;
     }
 
-  /* Set TXRDY to indicate that the packet is ready to send (this works even
-   * for zero length packets).  We will get an TXCOMP interrupt with TXRDY
-   * cleared.  Then we are able to send the next packet.
+  /* Initiate the transfer and configure to receive the transfer complete
+   * interrupt.
    */
 
-  sam_putreg(UDPHS_EPTSETSTA_TXRDY, SAM_UDPHS_EPTSETSTA(epno));
-
-  /* Clear the NAK IN bit to stop NAKing IN tokens from the host.  We now
-   * have data ready to go.
-   */
-
-  sam_putreg(UDPHS_EPTSTA_NAKIN, SAM_UDPHS_EPTCLRSTA(epno));
+  sam_ep_txrdy(epno);
   return OK;
 }
 
@@ -1396,11 +1411,12 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           privep->epstate   = UDPHS_EPSTATE_SENDING;
           privep->txnullpkt = 0;
           privreq->inflight = 0;
-          sam_putreg(UDPHS_EPTSETSTA_TXRDY, SAM_UDPHS_EPTSETSTA(epno));
 
-          /* Clear the NAK IN bit to stop NAKing IN tokens from the host. */
+          /* Initiate the zero length transfer and configure to receive the
+           * transfer complete interrupt.
+           */
 
-          sam_putreg(UDPHS_EPTSTA_NAKIN, SAM_UDPHS_EPTCLRSTA(epno));
+          sam_ep_txrdy(epno);
         }
 
       /* If all of the bytes were sent (including any final null packet)
@@ -1428,6 +1444,8 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
               regval &= ~UDPHS_INT_EPT(epno);
               sam_putreg(regval, SAM_UDPHS_IEN);
             }
+
+          /* Disable the TXRDY interrupt */
 
           sam_putreg(UDPHS_EPTCTL_TXRDY, SAM_UDPHS_EPTCTLDIS(epno));
           privep->txnullpkt = 0;
@@ -1659,18 +1677,11 @@ static void sam_ep0_wrstatus(const uint8_t *buffer, size_t buflen)
       *fifo++ = *buffer++;
     }
 
-  /* Set TXRDY to indicate that the packet is ready to send (this works even
-   * for zero length packets).  We will get an TXCOMP interrupt with TXRDY
-   * cleared.  Then we are able to send the next packet.
+  /* Initiate the transfer and configure to receive the transfer complete
+   * interrupt.
    */
 
-  sam_putreg(UDPHS_EPTSETSTA_TXRDY, SAM_UDPHS_EPTSETSTA(EP0));
-
-  /* Clear the NAK IN bit to stop NAKing IN tokens from the host.  We now
-   * have data ready to go.
-   */
-
-  sam_putreg(UDPHS_EPTSTA_NAKIN, SAM_UDPHS_EPTCLRSTA(EP0));
+  sam_ep_txrdy(EP0);
 }
 
 /****************************************************************************
@@ -2004,7 +2015,6 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
          * len:   0; data = none
          */
 
-        usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0SETUPSETADDRESS), value.w);
         if ((priv->ctrl.type & USB_REQ_RECIPIENT_MASK) != USB_REQ_RECIPIENT_DEVICE ||
             index.w != 0 || len.w != 0 || value.w > 127)
           {
@@ -2018,7 +2028,7 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
              * be set when the zero-length packet transfer completes.
              */
 
-            usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_SETADDRESS), value.w);
+            usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_EP0SETUPSETADDRESS), value.w);
             priv->devaddr = value.w;
             ep0result     = UDPHS_EP0SETUP_ADDRESS;
           }
@@ -2168,8 +2178,9 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
    * 1b. ep0result == UDPHS_EP0SETUP_ADDRESS
    *
    *    A special case is the case where epstate=UDPHS_EPSTATE_EP0ADDRESS.
-   *    This that the above processing generated an additional state where
-   *    we need to wait to obtain our device address.
+   *    This means that the above processing generated an additional state
+   *    where we need to wait until we complete the status phase before
+   *    applying the new device address.
    *
    * 2. ep0result == UDPHS_EP0SETUP_DISPATCHED;
    *
@@ -2406,7 +2417,9 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
       if (privep->epstate == UDPHS_EPSTATE_SENDING ||
           privep->epstate == UDPHS_EPSTATE_EP0STATUSIN)
         {
-          /* Continue/resume processing the write requests */
+          /* Continue/resume processing the write requests.  TXRDY will
+           * be disabled when the last transfer completes.
+           */
 
           privep->epstate = UDPHS_EPSTATE_IDLE;
           (void)sam_req_write(priv, privep);
@@ -2422,11 +2435,20 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
       else if (privep->epstate == UDPHS_EPSTATE_EP0ADDRESS)
         {
           usbtrace(TRACE_INTDECODE(SAM_TRACEINTID_ADDRESSED), priv->devaddr);
+          DEBUGASSERT(epno == EP0);
+
+          /* Set the device address */
+
           sam_setdevaddr(priv, priv->devaddr);
+
+          /* Disable the further TXRDY interrupts on EP0. */
+
+          sam_putreg(UDPHS_EPTCTL_TXRDY, SAM_UDPHS_EPTCTLDIS(epno));
         }
       else
         {
           usbtrace(TRACE_DEVERROR(SAM_TRACEERR_TXRDYERR), privep->epstate);
+          sam_putreg(UDPHS_EPTCTL_TXRDY, SAM_UDPHS_EPTCTLDIS(epno));
         }
     }
 
@@ -2455,7 +2477,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
 
       /* Did we just receive the data associated with an OUT SETUP command? */
 
-      else if (privep->epstate != UDPHS_EPSTATE_EP0DATAOUT)
+      else if (privep->epstate == UDPHS_EPSTATE_EP0DATAOUT)
         {
           uint16_t len;
 
