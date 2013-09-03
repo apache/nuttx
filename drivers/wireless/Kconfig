@@ -8,12 +8,18 @@ config WL_CC1101
 	default n
 	select SPI
 
+menuconfig WL_CC3000
+	bool "CC3000 Wireless Module support"
+	default n
+	select SPI
+
 config WL_NRF24L01
 	bool "nRF24l01+ transceiver support"
 	default n
 	select SPI
 	---help---
 		This options adds driver support for the Nordic nRF24L01+ chip.
+
 
 if WL_NRF24L01
 

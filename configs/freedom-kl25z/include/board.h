@@ -182,9 +182,18 @@
  * alternative.
  */
 
-#define PIN_SPI0_SCK   PIN_SPI0_SCK_2
-#define PIN_SPI0_MISO  PIN_SPI0_MISO_4
-#define PIN_SPI0_MOSI  PIN_SPI0_MOSI_3
+#define PIN_SPI0_SCK   (PIN_SPI0_SCK_2 | PIN_ALT2_PULLUP)
+#define PIN_SPI0_MISO  (PIN_SPI0_MISO_4 | PIN_ALT2_PULLUP)
+#define PIN_SPI0_MOSI  (PIN_SPI0_MOSI_3 | PIN_ALT2_PULLUP)
+
+#define PIN_SPI1_SCK   (PIN_SPI1_SCK_2 | PIN_ALT2_PULLUP)
+#define PIN_SPI1_MISO  (PIN_SPI1_MISO_3 | PIN_ALT2_PULLUP)
+#define PIN_SPI1_MOSI  (PIN_SPI0_MOSI_7 | PIN_ALT2_PULLUP)
+
+/* These pins are used by CC3000 module */
+#define GPIO_WIFI_EN (GPIO_OUTPUT | GPIO_OUTPUT_ZER0 | PIN_PORTC | PIN12)
+#define GPIO_WIFI_IRQ (GPIO_INPUT | PIN_PORTA | PIN16)
+#define GPIO_WIFI_CS (GPIO_OUTPUT | GPIO_OUTPUT_ONE | PIN_PORTE | PIN1)
 
 /************************************************************************************
  * Public Data

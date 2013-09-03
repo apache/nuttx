@@ -5489,4 +5489,7 @@
 	  Add logic to support UDPHS clocking (2013-9-13).
 	* arm/src/stm32/chip/stm32_tim.h:  Some CCER bit settings changed
 	  per SourceForge bug #18 submitted by CCCTSAO (2013-9-2).
-
+	* apps/examples/cc3000, configs/freedom-kl25z, drivers/wireless/cc3000,
+	  and nuttx/include/nuttx/cc3000.  Initial support for the TI CC3000
+	  network module on the Freescale Freedom-KL25Z board from Alan Carvalho
+	  de Assis.  This is still very much a work in progress. (2013-9-3).

@@ -1,0 +1,10 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config WL_CC3000_DUMMY
+        bool "CC3000 Wireless Module Dummy Test"
+        default n
+	select SPI
+
