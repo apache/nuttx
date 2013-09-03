@@ -253,10 +253,9 @@ enum sam_epstate_e
 enum sam_devstate_e
 {
   UDPHS_DEVSTATE_SUSPENDED = 0, /* The device is currently suspended */
-  UDPHS_DEVSTATE_ATTACHED,      /* USB cable is plugged into the device */
   UDPHS_DEVSTATE_POWERED,       /* Host is providing +5V through the USB cable */
   UDPHS_DEVSTATE_DEFAULT,       /* Device has been reset */
-  UDPHS_DEVSTATE_ADDRESS,       /* The device has been given an address on the bus */
+  UDPHS_DEVSTATE_ADDRESSED,     /* The device has been given an address on the bus */
   UDPHS_DEVSTATE_CONFIGURED     /* A valid configuration has been selected. */
 };
 
@@ -347,7 +346,7 @@ struct sam_usbdev_s
 
   struct usb_ctrlreq_s     ctrl;          /* Last EP0 request */
   uint8_t                  devstate;      /* State of the device (see enum sam_devstate_e) */
-  uint8_t                  prevstate;     /* Previous state of the device */
+  uint8_t                  prevstate;     /* Previous state of the device before SUSPEND */
   uint8_t                  devaddr;       /* Assigned device address */
   uint8_t                  rxpending:1;   /* 1: OUT data in the FIFO, but no read requests */
   uint8_t                  selfpowered:1; /* 1: Device is self powered */
@@ -754,7 +753,7 @@ static uint32_t sam_getreg(uintptr_t regaddr)
 #else
 static inline uint32_t sam_getreg(uintptr_t regaddr)
 {
-  return getreg32(regaddr;
+  return getreg32(regaddr);
 }
 #endif
 
@@ -1179,7 +1178,13 @@ static int sam_req_wrnodma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
   int nbytes;
   int bytesleft;
 
+  /* Get the unadorned endpoint number */
+
   epno = USB_EPNO(privep->ep.eplog);
+
+  /* Write access to the FIFO is not possible if TXDRY is set */
+
+  DEBUGASSERT((sam_getreg(SAM_UDPHS_EPTSTA(epno)) & UDPHS_EPTSTA_TXRDY) == 0);
 
   /* Get the number of bytes to send.  The totals bytes remaining to be sent
    * is the the total size of the buffer, minus the number of bytes
@@ -1262,6 +1267,18 @@ static int sam_req_wrnodma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
         privep->epstate = UDPHS_EPSTATE_SENDING;
     }
 
+  /* Set TXRDY to indicate that the packet is ready to send (this works even
+   * for zero length packets).  We will get an TXCOMP interrupt with TXRDY
+   * cleared.  Then we are able to send the next packet.
+   */
+
+  sam_putreg(UDPHS_EPTSETSTA_TXRDY, SAM_UDPHS_EPTSETSTA(epno));
+
+  /* Clear the NAK IN bit to stop NAKing IN tokens from the host.  We now
+   * have data ready to go.
+   */
+
+  sam_putreg(UDPHS_EPTSTA_NAKIN, SAM_UDPHS_EPTCLRSTA(epno));
   return OK;
 }
 
@@ -1289,7 +1306,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
    * there is no TX transfer in progress.
    */
 
-  while (privep->epstate == UDPHS_EPSTATE_IDLE);
+  while (privep->epstate == UDPHS_EPSTATE_IDLE)
     {
       /* Check the request from the head of the endpoint request queue */
 
@@ -1305,7 +1322,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
         }
 
       epno = USB_EPNO(privep->ep.eplog);
-      ullvdbg("epno=%d req=%p: len=%d xfrd=%d inflight=%dnullpkt=%d\n",
+      ullvdbg("epno=%d req=%p: len=%d xfrd=%d inflight=%d nullpkt=%d\n",
               epno, privreq, privreq->req.len, privreq->req.xfrd,
               privreq->inflight, privep->txnullpkt);
 
@@ -1380,6 +1397,10 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           privep->txnullpkt = 0;
           privreq->inflight = 0;
           sam_putreg(UDPHS_EPTSETSTA_TXRDY, SAM_UDPHS_EPTSETSTA(epno));
+
+          /* Clear the NAK IN bit to stop NAKing IN tokens from the host. */
+
+          sam_putreg(UDPHS_EPTSTA_NAKIN, SAM_UDPHS_EPTCLRSTA(epno));
         }
 
       /* If all of the bytes were sent (including any final null packet)
@@ -1418,7 +1439,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
 }
 
 /****************************************************************************
- * Name: sam_req_wrnodma
+ * Name: sam_req_rdnodma
  *
  * Description:
  *   Process the next queued write request for an endpoint that does not
@@ -1637,6 +1658,19 @@ static void sam_ep0_wrstatus(const uint8_t *buffer, size_t buflen)
     {
       *fifo++ = *buffer++;
     }
+
+  /* Set TXRDY to indicate that the packet is ready to send (this works even
+   * for zero length packets).  We will get an TXCOMP interrupt with TXRDY
+   * cleared.  Then we are able to send the next packet.
+   */
+
+  sam_putreg(UDPHS_EPTSETSTA_TXRDY, SAM_UDPHS_EPTSETSTA(EP0));
+
+  /* Clear the NAK IN bit to stop NAKing IN tokens from the host.  We now
+   * have data ready to go.
+   */
+
+  sam_putreg(UDPHS_EPTSTA_NAKIN, SAM_UDPHS_EPTCLRSTA(EP0));
 }
 
 /****************************************************************************
@@ -1702,7 +1736,7 @@ static void sam_setdevaddr(struct sam_usbdev_s *priv, uint8_t address)
 
       /* Go to the addressed state */
 
-      priv->devstate = UDPHS_DEVSTATE_ADDRESS;
+      priv->devstate = UDPHS_DEVSTATE_ADDRESSED;
     }
   else
     {
@@ -2651,8 +2685,22 @@ static int sam_udphs_interrupt(int irq, void *context)
           sam_putreg(regval, SAM_UDPHS_IEN);
         }
 
-      /* End of Reset. "Set by hardware when an End Of Reset has been detected
-       * by the UDPHS controller."
+      /* End of Reset. Set by hardware when an End Of Reset has been
+       * detected by the UDPHS controller. Automatically enabled after USB
+       * reset.
+       *
+       * Paragraph 32.6.11, Speed Identification
+       *
+       *   "The high speed reset is managed by the hardware.
+       *
+       *   "At the connection, the host makes a reset which could be a
+       *    classic reset (full speed) or a high speed reset.
+       *
+       *   "At the end of the reset process (full or high), the ENDRESET
+       *    interrupt is generated.
+       *
+       *   "Then the CPU should read the SPEED bit in UDPHS_INTSTAx to
+       *    ascertain the speed mode of the device."
        *
        * Paragraph 32.6.14.4 From Powered State to Default State (reset)
        *   "After its connection to a USB host, the USB device waits for an
@@ -2683,9 +2731,16 @@ static int sam_udphs_interrupt(int irq, void *context)
 
           sam_reset(priv);
 
-          /* Acknowledge the interrupt */
+          /* Get the device speed */
 
-          sam_putreg(UDPHS_INT_ENDRESET, SAM_UDPHS_CLRINT);
+          if ((sam_getreg(SAM_UDPHS_INTSTA) & UDPHS_INTSTA_SPEED) > 0)
+            {
+              priv->usbdev.speed = USB_SPEED_HIGH;
+            }
+          else
+            {
+              priv->usbdev.speed = USB_SPEED_FULL;
+            }
         }
 
       /* Upstream resume */
@@ -2995,7 +3050,6 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
   uint8_t nbtrans;
   uint8_t maxpacket;
   bool dirin;
-  bool highspeed;
 
   /* Decode the endpoint descriptor */
 
@@ -3003,13 +3057,12 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
   dirin     = (desc->addr & USB_DIR_MASK) == USB_REQ_DIR_IN;
   eptype    = (desc->type & USB_REQ_TYPE_MASK) >> USB_REQ_TYPE_SHIFT;
   maxpacket = GETUINT16(desc->mxpacketsize);
-
-  /* Special case high-speed endpoints */
-
-  highspeed = ((sam_getreg(SAM_UDPHS_INTSTA) & UDPHS_INTSTA_SPEED) > 0);
   nbtrans   = 1;
 
-  if (highspeed)
+  /* Special case maxpacket handling for high-speed endpoints */
+
+  priv = privep->dev;
+  if (priv->usbdev.speed == USB_SPEED_HIGH)
     {
       /* HS Interval, 125us */
       /* MPS: Bits 12:11 specify NB_TRANS, as USB 2.0 Spec. */
@@ -3024,7 +3077,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
           nbtrans++;
         }
 
-      /* Mask, bit 10..0 is the size */
+      /* Mask, bit 10..0 is the max packet size */
 
        maxpacket &= 0x7ff;
     }
@@ -3141,7 +3194,6 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
    * configured.
    */
 
-  priv           = privep->dev;
   priv->devstate = UDPHS_DEVSTATE_CONFIGURED;
   sam_dumpep(priv, epno);
   return OK;
@@ -3218,7 +3270,7 @@ static int sam_ep_disable(struct usbdev_ep_s *ep)
 
   /* Revert to the addressed-but-not-configured state */
 
-  priv->devstate = UDPHS_DEVSTATE_ADDRESS;
+  priv->devstate = UDPHS_DEVSTATE_ADDRESSED;
   irqrestore(flags);
   return OK;
 }
@@ -4181,7 +4233,7 @@ void up_usbinitialize(void)
 
   /* Power up and initialize USB controller.  Interrupts from the UDPHS
    * controller are initialized here, but will not be enabled at the AIC
-   * until the class driver is installed (by sam_reset()).
+   * until the class driver is installed.
    */
 
   sam_hw_setup(priv);
@@ -4298,16 +4350,19 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
     }
   else
     {
-      /* Reset the USB controller and configure endpoint 0 */
-
-      sam_reset(priv);
-
-      /* Enable USB controller interrupts at the NVIC */
+      /* Enable USB controller interrupts at the AIC.
+       *
+       * NOTE that interrupts and clocking are left disabled in the UDPHS
+       * peripheral.  The ENDRESET interrupt will automatically be enabled
+       * when the bus reset occurs.  The normal operating configuration will
+       * be established at that time.
+       */
 
       up_enable_irq(SAM_IRQ_UDPHS);
 
       /* Enable pull-up to connect the device.  The host should enumerate us
-       * some time after this
+       * some time after this.  The next thing we expect the the ENDRESET
+       * interrupt.
        */
 
       sam_pullup(&priv->usbdev, true);
