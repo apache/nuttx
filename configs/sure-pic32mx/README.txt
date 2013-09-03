@@ -902,7 +902,7 @@ Where <subdir> is one of the following:
 
         Device Drivers -> "USB Device Driver Support:
           CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
-          CONFIG_USBDEV_TRACE_NRECORDS=256        : Buffer 128 records in memory
+          CONFIG_USBDEV_TRACE_NRECORDS=256        : Buffer 256 records in memory
 
         Application Configuration -> NSH LIbrary:
           CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
