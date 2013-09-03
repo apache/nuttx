@@ -1250,6 +1250,40 @@ Configurations
         Application Configuration -> Examples:
           CONFIG_EXAMPLES_CDCACM=y              : Enable an CDC/ACM example
 
+        Debugging USB Device.  There is normal console debug output available
+        that can be enabled with CONFIG_DEBUG + CONFIG_DEBUG_USB.  However,
+        USB device operation is very time critical and enabling this debug
+        output WILL interfere with the operation of the UDPHS.  USB device
+        tracing is a less invasive way to get debug information:  If tracing
+        is enabled, the USB device will save encoded trace output in in-memory
+        buffer; if the USB monitor is also enabled, that trace buffer will be
+        periodically emptied and dumped to the system logging device (the
+        serial console in this configuration):
+
+        Device Drivers -> "USB Device Driver Support:
+          CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
+          CONFIG_USBDEV_TRACE_NRECORDS=256        : Buffer 256 records in memory
+
+        Application Configuration -> NSH LIbrary:
+          CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
+          CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
+
+        Application Configuration -> System NSH Add-Ons:
+          CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
+          CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+          CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+          CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
+          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+          CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
+          CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
+          CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
+          CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+
+       NOTE: If USB debug output is also enabled, both outpus will appear
+       on the serial console.  However, the debug output will be
+       asynchronous with the trace output and, hence, difficult to
+       interpret.
+
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
         The SAMA5D3 can run at 536MHz.  I still need to figure out the
