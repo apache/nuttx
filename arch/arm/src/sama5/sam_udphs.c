@@ -1395,11 +1395,17 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
             }
         }
 
-      /* No data to send... is there a trailing zero length packet transfer
-       * pending?
+      /* No data to send... This can happen on one of two ways:
+       * (1) The last packet sent was the final packet of a transfer
+       * and was exactly maxpacketsize and the protocol expects
+       * a zero length packet to follow (privep->txnullpkt will be
+       * set).  Or (2) we called with a request packet that has
+       * len == 0 (privep->txnullpkt will not be set).  Either case
+       * means that it is time to send a NULL packet and complete
+       * this transfer.
        */
 
-      else if (privep->txnullpkt)
+      else
         {
           /* If we get here, then we sent the last of the data on the
            * previous pass and we need to send the zero length packet now.
