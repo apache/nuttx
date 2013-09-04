@@ -113,14 +113,14 @@
 
 /* DMA Channel Offsets */
 
-#define SAM_UPPHS_CH_OFFSET(ch)         (0x0300+(((unsigned int)(ch)-1)<<4))
-#define SAM_UPPHS_CH1_OFFSET            0x0300
-#define SAM_UPPHS_CH2_OFFSET            0x0310
-#define SAM_UPPHS_CH3_OFFSET            0x0320
-#define SAM_UPPHS_CH4_OFFSET            0x0330
-#define SAM_UPPHS_CH5_OFFSET            0x0340
-#define SAM_UPPHS_CH6_OFFSET            0x0350
-#define SAM_UPPHS_CH7_OFFSET            0x0360
+#define SAM_UPPHS_CH_OFFSET(ch)         (0x0300+((unsigned int)(ch)<<4))
+#define SAM_UPPHS_CH0_OFFSET            0x0300
+#define SAM_UPPHS_CH1_OFFSET            0x0310
+#define SAM_UPPHS_CH2_OFFSET            0x0320
+#define SAM_UPPHS_CH3_OFFSET            0x0330
+#define SAM_UPPHS_CH4_OFFSET            0x0340
+#define SAM_UPPHS_CH5_OFFSET            0x0350
+#define SAM_UPPHS_CH6_OFFSET            0x0360
 
 /* DMA Channel Registers */
 
