@@ -980,11 +980,20 @@ static int sam_req_wrdma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
           privreq->inflight = remaining;
         }
 
-      /* Single transfer */
+      /* And perform the single DMA transfer.
+       *
+       * 32.6.10.6 Bulk IN or Interrupt IN: Sending a Buffer Using DMA
+       * - END_B_EN: The endpoint can validate the packet (according to the
+       *   values programmed in the AUTO_VALID and SHRT_PCKT fields of
+       *   UDPHS_EPTCTLx.) ...
+       * - END_BUFFIT: generate an interrupt when the BUFF_COUNT in
+       *    UDPHS_DMASTATUSx reaches 0.
+       * - CHANN_ENB: Run and stop at end of buffer
+       */
 
-      sam_dma_single(epno, privreq, UDPHS_DMACONTROL_ENDBEN
-                      | UDPHS_DMACONTROL_ENDBUFFIT
-                      | UDPHS_DMACONTROL_CHANNENB);
+      sam_dma_single(epno, privreq,
+                     UDPHS_DMACONTROL_ENDBEN | UDPHS_DMACONTROL_ENDBUFFIT |
+                     UDPHS_DMACONTROL_CHANNENB);
       return OK;
     }
 
@@ -1049,10 +1058,26 @@ static int sam_req_rddma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
           privreq->inflight = remaining;
         }
 
-      /* And perform the single DMA transfer */
+      /* And perform the single DMA transfer.
+       *
+       * 32.6.10.12 Bulk OUT or Interrupt OUT: Sending a Buffer Using DMA
+       * - END_B_EN: Can be used for OUT packet truncation (discarding of
+       *   unbuffered packet data) at the end of DMA buffer.
+       * - END_BUFFIT: Generate an interrupt when BUFF_COUNT in the
+       *   UDPHS_DMASTATUSx register reaches 0.
+       * - END_TR_EN: End of transfer enable, the UDPHS device can put an
+       *   end to the current DMA transfer, in case of a short packet.
+       * - END_TR_IT: End of transfer interrupt enable, an interrupt is sent
+       *   after the last USB packet has been transferred by the DMA, if the
+       *   USB transfer ended with a short packet. (Beneficial when the
+       *   receive size is unknown.)
+       * - CHANN_ENB: Run and stop at end of buffer.
+       */
 
       regval = UDPHS_DMACONTROL_ENDBEN | UDPHS_DMACONTROL_ENDBUFFIT |
+               UDPHS_DMACONTROL_ENDTREN | UDPHS_DMACONTROL_ENDTRIT |
                UDPHS_DMACONTROL_CHANNENB;
+
       sam_dma_single(epno, privreq, regval);
       return OK;
     }
@@ -2327,6 +2352,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
           regval = UDPHS_DMACONTROL_ENDTREN | UDPHS_DMACONTROL_ENDTRIT |
                    UDPHS_DMACONTROL_ENDBEN | UDPHS_DMACONTROL_ENDBUFFIT |
                    UDPHS_DMACONTROL_CHANNENB;
+
           sam_dma_single(epno, privreq, regval);
         }
     }
@@ -3059,7 +3085,7 @@ sam_ep_reserved(struct sam_usbdev_s *priv, int epno)
 }
 
 /****************************************************************************
- * Name: sam_ep_configure
+ * Name: sam_ep_configure_internal
  *
  * Description:
  *   This is the internal implementation of the endpoint configuration logic
@@ -3075,17 +3101,23 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
   struct sam_usbdev_s *priv;
   uintptr_t regaddr;
   uint32_t regval;
+  uint16_t maxpacket;
   uint8_t epno;
   uint8_t eptype;
   uint8_t nbtrans;
-  uint8_t maxpacket;
   bool dirin;
+
+  uvdbg("len: %02x type: %02x addr: %02x attr: %02x "
+        "maxpacketsize: %02x %02x interval: %02x\n",
+        desc->len, desc->type, desc->addr, desc->attr,
+        desc->mxpacketsize[0],  desc->mxpacketsize[1],
+        desc->interval);
 
   /* Decode the endpoint descriptor */
 
   epno      = USB_EPNO(desc->addr);
   dirin     = (desc->addr & USB_DIR_MASK) == USB_REQ_DIR_IN;
-  eptype    = (desc->type & USB_REQ_TYPE_MASK) >> USB_REQ_TYPE_SHIFT;
+  eptype    = (desc->attr & USB_EP_ATTR_XFERTYPE_MASK) >> USB_EP_ATTR_XFERTYPE_SHIFT;
   maxpacket = GETUINT16(desc->mxpacketsize);
   nbtrans   = 1;
 
@@ -3180,7 +3212,7 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
     {
       regval |= UDPHS_EPTCFG_SIZE_512;
     }
-  else if (privep->ep.maxpacket <= 1024)
+  else if (maxpacket <= 1024)
     {
       regval |= UDPHS_EPTCFG_SIZE_1024;
     }
@@ -3191,8 +3223,8 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
       regval |= UDPHS_EPTCFG_SIZE_8;
     }
 
-  regval |= ((uint32_t)dirin << 3) | (eptype << 4) |
-            ((privep->bank) << 6) | (nbtrans << 8);
+  regval |= ((uint32_t)dirin << 3) | ((uint32_t)eptype << 4) |
+            ((uint32_t)(privep->bank) << 6) | ((uint32_t)nbtrans << 8);
   sam_putreg(regval, regaddr);
 
   /* Verify that the EPT_MAPD flag is set. This flag is set if the
@@ -3206,16 +3238,24 @@ static int sam_ep_configure_internal(struct sam_ep_s *privep,
       return -EINVAL;
     }
 
-  /* Enable the endpoint */
+  /* Enable the endpoint.  The way that the endpoint is enabled depends of
+   * if the endpoint supports DMA transfers or not.
+   */
 
-  if (eptype == USB_EP_ATTR_XFER_CONTROL)
+  if ((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0)
     {
-      regval = UDPHS_EPTCTL_RXRDYTXKL | UDPHS_EPTCTL_RXSETUP |
-               UDPHS_EPTCTL_EPTENABL;
+      /* Select AUTO_VALID so that the hardware will manage RXRDY_TXKL
+       * and TXRDY.
+       */
+
+      regval = UDPHS_EPTCTL_AUTOVALID | UDPHS_EPTCTL_EPTENABL;
     }
   else
     {
-      regval = UDPHS_EPTCTL_AUTOVALID | UDPHS_EPTCTL_EPTENABL;
+      /* No DMA... Software will manage RXRDY_TXKL and TXRDY. */
+
+      regval = UDPHS_EPTCTL_RXRDYTXKL | UDPHS_EPTCTL_RXSETUP |
+               UDPHS_EPTCTL_EPTENABL;
     }
 
   sam_putreg(regval, SAM_UDPHS_EPTCTLENB(epno));
