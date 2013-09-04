@@ -418,8 +418,8 @@
 #  define UDPHS_EPTSTA_BUSYBANK_1       (0 << UDPHS_EPTSTA_BUSYBANK_SHIFT) /* 1 busy bank */
 #  define UDPHS_EPTSTA_BUSYBANK_2       (1 << UDPHS_EPTSTA_BUSYBANK_SHIFT) /* 2 busy banks */
 #  define UDPHS_EPTSTA_BUSYBANK_3       (2 << UDPHS_EPTSTA_BUSYBANK_SHIFT) /* 3 busy banks */
-#define UDPHS_EPTSTA_BYTECNT_SHIFT      (24)      /* Bits 24-30: UDPHS Byte Count */
-#define UDPHS_EPTSTA_BYTECNT_MASK       (0x7f << UDPHS_EPTSTA_BYTECNT_SHIFT)
+#define UDPHS_EPTSTA_BYTECNT_SHIFT      (20)      /* Bits 20-30: UDPHS Byte Count */
+#define UDPHS_EPTSTA_BYTECNT_MASK       (0x7ff << UDPHS_EPTSTA_BYTECNT_SHIFT)
 #define UDPHS_EPTSTA_SHRTPCKT           (1 << 31)  /* Bit 31: Short Packet */
 
 /* DMA Channel Registers */
@@ -438,7 +438,7 @@
 #define UDPHS_DMACONTROL_BURSTLCK       (1 << 7)  /* Bit 7:  Burst Lock Enable */
 #define UDPHS_DMACONTROL_BUFLEN_SHIFT   (16)      /* Bits 16-31: Buffer Byte Length (Write-only) */
 #define UDPHS_DMACONTROL_BUFLEN_MASK    (0xffff << UDPHS_DMACONTROL_BUFLEN_SHIFT)
-#  define UDPHS_DMACONTROL_BUFLEN(n)    ((n) << UDPHS_DMACONTROL_BUFLEN_SHIFT)
+#  define UDPHS_DMACONTROL_BUFLEN(n)    ((uint32_t)(n) << UDPHS_DMACONTROL_BUFLEN_SHIFT)
 
 /* UDPHS DMA Channel Status Register */
 
