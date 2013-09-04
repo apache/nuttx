@@ -188,7 +188,7 @@ int
 socket(long domain, long type, long protocol)
 {
 	long ret;
-	unsigned char *ptr, *args;
+	uint8_t *ptr, *args;
 	
 	ret = EFAIL;
 	ptr = tSLInformation.pucTxCommandBuffer;
@@ -229,7 +229,7 @@ long
 closesocket(long sd)
 {
 	long ret;
-	unsigned char *ptr, *args;
+	uint8_t *ptr, *args;
 	
 	ret = EFAIL;
 	ptr = tSLInformation.pucTxCommandBuffer;
@@ -302,7 +302,7 @@ long
 accept(long sd, sockaddr *addr, socklen_t *addrlen)
 {
 	long ret;
-	unsigned char *ptr, *args;
+	uint8_t *ptr, *args;
 	tBsdReturnParams tAcceptReturnArguments;
 	
 	ret = EFAIL;
@@ -366,7 +366,7 @@ long
 bind(long sd, const sockaddr *addr, long addrlen)
 {
 	long ret;
-	unsigned char *ptr, *args;
+	uint8_t *ptr, *args;
 	
 	ret = EFAIL;
 	ptr = tSLInformation.pucTxCommandBuffer;
@@ -378,7 +378,7 @@ bind(long sd, const sockaddr *addr, long addrlen)
 	args = UINT32_TO_STREAM(args, sd);
 	args = UINT32_TO_STREAM(args, 0x00000008);
 	args = UINT32_TO_STREAM(args, addrlen);
-	ARRAY_TO_STREAM(args, ((unsigned char *)addr), addrlen);
+	ARRAY_TO_STREAM(args, ((uint8_t *)addr), addrlen);
 	
 	// Initiate a HCI command
 	hci_command_send(HCI_CMND_BIND,
@@ -419,7 +419,7 @@ long
 listen(long sd, long backlog)
 {
 	long ret;
-	unsigned char *ptr, *args;
+	uint8_t *ptr, *args;
 	
 	ret = EFAIL;
 	ptr = tSLInformation.pucTxCommandBuffer;
@@ -461,11 +461,11 @@ listen(long sd, long backlog)
 
 #ifndef CC3000_TINY_DRIVER
 int 
-gethostbyname(char * hostname, unsigned short usNameLen, 
+gethostbyname(char * hostname, uint16_t usNameLen, 
 							unsigned long* out_ip_addr)
 {
 	tBsdGethostbynameParams ret;
-	unsigned char *ptr, *args;
+	uint8_t *ptr, *args;
 	
 	errno = EFAIL;
 	
@@ -531,7 +531,7 @@ long
 connect(long sd, const sockaddr *addr, long addrlen)
 {
 	long int ret;
-	unsigned char *ptr, *args;
+	uint8_t *ptr, *args;
 	
 	ret = EFAIL;
 	ptr = tSLInformation.pucTxCommandBuffer;
@@ -542,7 +542,7 @@ connect(long sd, const sockaddr *addr, long addrlen)
 	args = UINT32_TO_STREAM(args, sd);
 	args = UINT32_TO_STREAM(args, 0x00000008);
 	args = UINT32_TO_STREAM(args, addrlen);
-	ARRAY_TO_STREAM(args, ((unsigned char *)addr), addrlen);
+	ARRAY_TO_STREAM(args, ((uint8_t *)addr), addrlen);
 	
 	// Initiate a HCI command
 	hci_command_send(HCI_CMND_CONNECT,
@@ -599,7 +599,7 @@ int
 select(long nfds, TICC3000fd_set *readsds, TICC3000fd_set *writesds, TICC3000fd_set *exceptsds, 
        struct timeval *timeout)
 {
-	unsigned char *ptr, *args;
+	uint8_t *ptr, *args;
 	tBsdSelectRecvParams tParams;
 	unsigned long is_blocking;
 	
@@ -725,7 +725,7 @@ setsockopt(long sd, long level, long optname, const void *optval,
 					 socklen_t optlen)
 {
 	int ret;
-	unsigned char *ptr, *args;
+	uint8_t *ptr, *args;
 	
 	ptr = tSLInformation.pucTxCommandBuffer;
 	args = (ptr + HEADERS_SIZE_CMD);
@@ -736,7 +736,7 @@ setsockopt(long sd, long level, long optname, const void *optval,
 	args = UINT32_TO_STREAM(args, optname);
 	args = UINT32_TO_STREAM(args, 0x00000008);
 	args = UINT32_TO_STREAM(args, optlen);
-	ARRAY_TO_STREAM(args, ((unsigned char *)optval), optlen);
+	ARRAY_TO_STREAM(args, ((uint8_t *)optval), optlen);
 	
 	// Initiate a HCI command
 	hci_command_send(HCI_CMND_SETSOCKOPT,
@@ -807,7 +807,7 @@ setsockopt(long sd, long level, long optname, const void *optval,
 int
 getsockopt (long sd, long level, long optname, void *optval, socklen_t *optlen)
 {
-	unsigned char *ptr, *args;
+	uint8_t *ptr, *args;
 	tBsdGetSockOptReturnParams  tRetParams;
 	
 	ptr = tSLInformation.pucTxCommandBuffer;
@@ -825,7 +825,7 @@ getsockopt (long sd, long level, long optname, void *optval, socklen_t *optlen)
 	// Since we are in blocking state - wait for event complete
 	SimpleLinkWaitEvent(HCI_CMND_GETSOCKOPT, &tRetParams);
 	
-	if (((signed char)tRetParams.iStatus) >= 0)
+	if (((int8_t)tRetParams.iStatus) >= 0)
 	{
 		*optlen = 4;
 		memcpy(optval, tRetParams.ucOptValue, 4);
@@ -863,7 +863,7 @@ int
 simple_link_recv(long sd, void *buf, long len, long flags, sockaddr *from,
                 socklen_t *fromlen, long opcode)
 {
-	unsigned char *ptr, *args;
+	uint8_t *ptr, *args;
 	tBsdReadReturnParams tSocketReadEvent;
 	
 	ptr = tSLInformation.pucTxCommandBuffer;
@@ -885,7 +885,7 @@ simple_link_recv(long sd, void *buf, long len, long flags, sockaddr *from,
 	{
 		// Wait for the data in a synchronous way. Here we assume that the bug is 
 		// big enough to store also parameters of receive from too....
-		SimpleLinkWaitData((unsigned char *)buf, (unsigned char *)from, (unsigned char *)fromlen);
+		SimpleLinkWaitData((uint8_t *)buf, (uint8_t *)from, (uint8_t *)fromlen);
 	}
 	
 	errno = tSocketReadEvent.iNumberOfBytes;
@@ -981,8 +981,8 @@ int
 simple_link_send(long sd, const void *buf, long len, long flags,
               const sockaddr *to, long tolen, long opcode)
 {    
-	unsigned char uArgSize = 0,  addrlen;
-	unsigned char *ptr, *pDataPtr = NULL, *args;
+	uint8_t uArgSize = 0,  addrlen;
+	uint8_t *ptr, *pDataPtr = NULL, *args;
 	unsigned long addr_offset = 0;
 	int res;
         tBsdReadReturnParams tSocketSendEvent;
@@ -1040,16 +1040,16 @@ simple_link_send(long sd, const void *buf, long len, long flags,
 	}
 	
 	// Copy the data received from user into the TX Buffer
-	ARRAY_TO_STREAM(pDataPtr, ((unsigned char *)buf), len);
+	ARRAY_TO_STREAM(pDataPtr, ((uint8_t *)buf), len);
 	
 	// In case we are using SendTo, copy the to parameters
 	if (opcode == HCI_CMND_SENDTO)
 	{	
-		ARRAY_TO_STREAM(pDataPtr, ((unsigned char *)to), tolen);
+		ARRAY_TO_STREAM(pDataPtr, ((uint8_t *)to), tolen);
 	}
 	
 	// Initiate a HCI command
-	hci_data_send(opcode, ptr, uArgSize, len,(unsigned char*)to, tolen);
+	hci_data_send(opcode, ptr, uArgSize, len,(uint8_t*)to, tolen);
         
          if (opcode == HCI_CMND_SENDTO)
             SimpleLinkWaitEvent(HCI_EVNT_SENDTO, &tSocketSendEvent);
@@ -1139,10 +1139,10 @@ sendto(long sd, const void *buf, long len, long flags, const sockaddr *to,
 //*****************************************************************************
 
 int
-mdnsAdvertiser(unsigned short mdnsEnabled, char * deviceServiceName, unsigned short deviceServiceNameLength)
+mdnsAdvertiser(uint16_t mdnsEnabled, char * deviceServiceName, uint16_t deviceServiceNameLength)
 {
 	int ret;
- 	unsigned char *pTxBuffer, *pArgs;
+ 	uint8_t *pTxBuffer, *pArgs;
 	
 	if (deviceServiceNameLength > MDNS_DEVICE_SERVICE_MAX_LENGTH)
 	{

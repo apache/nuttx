@@ -55,22 +55,22 @@ extern "C" {
 
 typedef struct _netapp_dhcp_ret_args_t
 {
-    unsigned char aucIP[4];
-	unsigned char aucSubnetMask[4];
-	unsigned char aucDefaultGateway[4];
-	unsigned char aucDHCPServer[4];
-	unsigned char aucDNSServer[4];
+    uint8_t aucIP[4];
+	uint8_t aucSubnetMask[4];
+	uint8_t aucDefaultGateway[4];
+	uint8_t aucDHCPServer[4];
+	uint8_t aucDNSServer[4];
 }tNetappDhcpParams;
 
 typedef struct _netapp_ipconfig_ret_args_t
 {
-    unsigned char aucIP[4];
-	unsigned char aucSubnetMask[4];
-	unsigned char aucDefaultGateway[4];
-	unsigned char aucDHCPServer[4];
-	unsigned char aucDNSServer[4];
-	unsigned char uaMacAddr[6];
-	unsigned char uaSSID[32];
+    uint8_t aucIP[4];
+	uint8_t aucSubnetMask[4];
+	uint8_t aucDefaultGateway[4];
+	uint8_t aucDHCPServer[4];
+	uint8_t aucDNSServer[4];
+	uint8_t uaMacAddr[6];
+	uint8_t uaSSID[32];
 }tNetappIpconfigRetArgs;
 
 
@@ -99,7 +99,7 @@ typedef struct _netapp_pingreport_args
 //!                over resets.
 //
 //*****************************************************************************
-extern long  netapp_config_mac_adrress( unsigned char *mac );
+extern long  netapp_config_mac_adrress( uint8_t *mac );
 
 //*****************************************************************************
 //

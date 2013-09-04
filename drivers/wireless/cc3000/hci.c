@@ -63,11 +63,11 @@
 //!  @brief               Initiate an HCI command.
 //
 //*****************************************************************************
-unsigned short 
-hci_command_send(unsigned short usOpcode, unsigned char *pucBuff,
-                     unsigned char ucArgsLength)
+uint16_t 
+hci_command_send(uint16_t usOpcode, uint8_t *pucBuff,
+                     uint8_t ucArgsLength)
 { 
-	unsigned char *stream;
+	uint8_t *stream;
 	
 	stream = (pucBuff + SPI_HEADER_SIZE);
 	
@@ -97,14 +97,14 @@ hci_command_send(unsigned short usOpcode, unsigned char *pucBuff,
 //
 //*****************************************************************************
 long
-hci_data_send(unsigned char ucOpcode, 
-							unsigned char *ucArgs,
-							unsigned short usArgsLength, 
-							unsigned short usDataLength,
-							const unsigned char *ucTail,
-							unsigned short usTailLength)
+hci_data_send(uint8_t ucOpcode, 
+							uint8_t *ucArgs,
+							uint16_t usArgsLength, 
+							uint16_t usDataLength,
+							const uint8_t *ucTail,
+							uint16_t usTailLength)
 {
-	unsigned char *stream;
+	uint8_t *stream;
 	
 	stream = ((ucArgs) + SPI_HEADER_SIZE);
 	
@@ -134,10 +134,10 @@ hci_data_send(unsigned char ucOpcode,
 //!  @brief              Prepeare HCI header and initiate an HCI data write operation
 //
 //*****************************************************************************
-void hci_data_command_send(unsigned short usOpcode, unsigned char *pucBuff,
-                     unsigned char ucArgsLength,unsigned short ucDataLength)
+void hci_data_command_send(uint16_t usOpcode, uint8_t *pucBuff,
+                     uint8_t ucArgsLength,uint16_t ucDataLength)
 { 
- 	unsigned char *stream = (pucBuff + SPI_HEADER_SIZE);
+ 	uint8_t *stream = (pucBuff + SPI_HEADER_SIZE);
 	
 	UINT8_TO_STREAM(stream, HCI_TYPE_DATA);
 	UINT8_TO_STREAM(stream, usOpcode);
@@ -165,11 +165,11 @@ void hci_data_command_send(unsigned short usOpcode, unsigned char *pucBuff,
 //
 //*****************************************************************************
 void
-hci_patch_send(unsigned char ucOpcode, unsigned char *pucBuff, char *patch, unsigned short usDataLength)
+hci_patch_send(uint8_t ucOpcode, uint8_t *pucBuff, char *patch, uint16_t usDataLength)
 { 
- 	unsigned char *data_ptr = (pucBuff + SPI_HEADER_SIZE);
-	unsigned short usTransLength;
-	unsigned char *stream = (pucBuff + SPI_HEADER_SIZE);
+ 	uint8_t *data_ptr = (pucBuff + SPI_HEADER_SIZE);
+	uint16_t usTransLength;
+	uint8_t *stream = (pucBuff + SPI_HEADER_SIZE);
 	
 	UINT8_TO_STREAM(stream, HCI_TYPE_PATCH);
 	UINT8_TO_STREAM(stream, ucOpcode);
@@ -211,12 +211,12 @@ hci_patch_send(unsigned char ucOpcode, unsigned char *pucBuff, char *patch, unsi
 				usDataLength -= usTransLength;
 			}
 			
-			*(unsigned short *)data_ptr = usTransLength;
+			*(uint16_t *)data_ptr = usTransLength;
 			memcpy(data_ptr + SIMPLE_LINK_HCI_PATCH_HEADER_SIZE, patch, usTransLength);
 			patch += usTransLength;
 			
 			// Update the opcode of the event we will be waiting for
-			SpiWrite((unsigned char *)data_ptr, usTransLength + sizeof(usTransLength));
+			SpiWrite((uint8_t *)data_ptr, usTransLength + sizeof(usTransLength));
 		}
 	}
 }

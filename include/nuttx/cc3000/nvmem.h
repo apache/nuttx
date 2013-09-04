@@ -107,7 +107,7 @@ extern "C" {
 //!	 
 //*****************************************************************************
 
-extern signed long nvmem_read(unsigned long file_id, unsigned long length, unsigned long offset, unsigned char *buff);
+extern signed long nvmem_read(unsigned long file_id, unsigned long length, unsigned long offset, uint8_t *buff);
 
 //*****************************************************************************
 //
@@ -131,7 +131,7 @@ extern signed long nvmem_read(unsigned long file_id, unsigned long length, unsig
 //!	 
 //*****************************************************************************
 
-extern signed long nvmem_write(unsigned long ulFileId, unsigned long ulLength, unsigned long ulEntryOffset, unsigned char *buff);
+extern signed long nvmem_write(unsigned long ulFileId, unsigned long ulLength, unsigned long ulEntryOffset, uint8_t *buff);
 
 
 //*****************************************************************************
@@ -146,7 +146,7 @@ extern signed long nvmem_write(unsigned long ulFileId, unsigned long ulLength, u
 //!               mac address as appears over the air (OUI first)
 //!	 
 //*****************************************************************************
-extern	unsigned char nvmem_set_mac_address(unsigned char *mac);
+extern	uint8_t nvmem_set_mac_address(uint8_t *mac);
 
 
 //*****************************************************************************
@@ -161,7 +161,7 @@ extern	unsigned char nvmem_set_mac_address(unsigned char *mac);
 //!               mac address as appears over the air (OUI first)
 //!	 
 //*****************************************************************************
-extern	unsigned char nvmem_get_mac_address(unsigned char *mac);
+extern	uint8_t nvmem_get_mac_address(uint8_t *mac);
 
 
 //*****************************************************************************
@@ -181,7 +181,7 @@ extern	unsigned char nvmem_get_mac_address(unsigned char *mac);
 //!              applied in SP_PORTION_SIZE bytes portions.
 //!	 
 //*****************************************************************************
-extern	unsigned char nvmem_write_patch(unsigned long ulFileId, unsigned long spLength, const unsigned char *spData);
+extern	uint8_t nvmem_write_patch(unsigned long ulFileId, unsigned long spLength, const uint8_t *spData);
 
 
 //*****************************************************************************
@@ -198,7 +198,7 @@ extern	unsigned char nvmem_write_patch(unsigned long ulFileId, unsigned long spL
 //!	 
 //*****************************************************************************
 #ifndef CC3000_TINY_DRIVER 
-extern	unsigned char nvmem_read_sp_version(unsigned char* patchVer);
+extern	uint8_t nvmem_read_sp_version(uint8_t* patchVer);
 #endif
 
 //*****************************************************************************

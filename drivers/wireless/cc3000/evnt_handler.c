@@ -224,16 +224,16 @@ void hci_unsol_handle_patch_request(char *event_hdr)
 //*****************************************************************************
 
 	
-unsigned char *
-hci_event_handler(void *pRetParams, unsigned char *from, unsigned char *fromlen)
+uint8_t *
+hci_event_handler(void *pRetParams, uint8_t *from, uint8_t *fromlen)
 {
-	unsigned char *pucReceivedData, ucArgsize;
-	unsigned short usLength;
-	unsigned char *pucReceivedParams;
-	unsigned short usReceivedEventOpcode = 0;
+	uint8_t *pucReceivedData, ucArgsize;
+	uint16_t usLength;
+	uint8_t *pucReceivedParams;
+	uint16_t usReceivedEventOpcode = 0;
 	unsigned long retValue32;
-  unsigned char * RecvParams;
-  unsigned char *RetParams;
+  uint8_t * RecvParams;
+  uint8_t *RetParams;
 	
 	
 	while (1)
@@ -249,7 +249,7 @@ hci_event_handler(void *pRetParams, unsigned char *from, unsigned char *fromlen)
 												 usReceivedEventOpcode);
 				pucReceivedParams = pucReceivedData + HCI_EVENT_HEADER_SIZE;		
 				RecvParams = pucReceivedParams;
-				RetParams = (unsigned char *)pRetParams;
+				RetParams = (uint8_t *)pRetParams;
 				
 				// In case unsolicited event received - here the handling finished
 				if (hci_unsol_event_handler((char *)pucReceivedData) == 0)
@@ -281,7 +281,7 @@ hci_event_handler(void *pRetParams, unsigned char *from, unsigned char *fromlen)
 					case HCI_EVNT_MDNS_ADVERTISE:
 						
 						STREAM_TO_UINT8(pucReceivedData, HCI_EVENT_STATUS_OFFSET
-														,*(unsigned char *)pRetParams);
+														,*(uint8_t *)pRetParams);
 						break;
 						
 					case HCI_CMND_SETSOCKOPT:
@@ -310,10 +310,10 @@ hci_event_handler(void *pRetParams, unsigned char *from, unsigned char *fromlen)
 					case HCI_EVNT_READ_SP_VERSION:
 						
 						STREAM_TO_UINT8(pucReceivedData, HCI_EVENT_STATUS_OFFSET
-														,*(unsigned char *)pRetParams);
+														,*(uint8_t *)pRetParams);
 						pRetParams = ((char *)pRetParams) + 1;
 						STREAM_TO_UINT32((char *)pucReceivedParams, 0, retValue32);
-						UINT32_TO_STREAM((unsigned char *)pRetParams, retValue32);				
+						UINT32_TO_STREAM((uint8_t *)pRetParams, retValue32);				
 						break;
 						
 					case HCI_EVNT_BSD_GETHOSTBYNAME:
@@ -335,7 +335,7 @@ hci_event_handler(void *pRetParams, unsigned char *from, unsigned char *fromlen)
               pRetParams = ((char *)pRetParams) + 4; 
 							
 							//This argument returns in network order
-							memcpy((unsigned char *)pRetParams, 
+							memcpy((uint8_t *)pRetParams, 
 								  pucReceivedParams + ACCEPT_ADDRESS__OFFSET, sizeof(sockaddr));	
 							break;
 						}
@@ -383,7 +383,7 @@ hci_event_handler(void *pRetParams, unsigned char *from, unsigned char *fromlen)
 						
 						STREAM_TO_UINT8(pucReceivedData, HCI_EVENT_STATUS_OFFSET,((tBsdGetSockOptReturnParams *)pRetParams)->iStatus);
 						//This argument returns in network order
-						memcpy((unsigned char *)pRetParams, pucReceivedParams, 4);
+						memcpy((uint8_t *)pRetParams, pucReceivedParams, 4);
 						break;
 						
 					case HCI_CMND_WLAN_IOCTL_GET_SCAN_RESULTS:
@@ -396,7 +396,7 @@ hci_event_handler(void *pRetParams, unsigned char *from, unsigned char *fromlen)
 						pRetParams = ((char *)pRetParams) + 2;   					
 						STREAM_TO_UINT16((char *)pucReceivedParams,GET_SCAN_RESULTS_FRAME_TIME_OFFSET,*(unsigned long *)pRetParams);
 						pRetParams = ((char *)pRetParams) + 2;  
-						memcpy((unsigned char *)pRetParams,
+						memcpy((uint8_t *)pRetParams,
 							(char *)(pucReceivedParams + GET_SCAN_RESULTS_FRAME_TIME_OFFSET + 2), 
 							GET_SCAN_RESULTS_SSID_MAC_LENGTH);	
 						break;
@@ -548,8 +548,8 @@ hci_unsol_event_handler(char *event_hdr)
 			
 		case HCI_EVNT_WLAN_UNSOL_DHCP:
 			{
-				unsigned char	params[NETAPP_IPCONFIG_MAC_OFFSET + 1];	// extra byte is for the status
-				unsigned char *recParams = params;
+				uint8_t	params[NETAPP_IPCONFIG_MAC_OFFSET + 1];	// extra byte is for the status
+				uint8_t *recParams = params;
 				
 				data = (char*)(event_hdr) + HCI_EVENT_HEADER_SIZE;
 				
@@ -652,7 +652,7 @@ long
 hci_unsolicited_event_handler(void)
 {
 	unsigned long   res = 0;
-	unsigned char *pucReceivedData;
+	uint8_t *pucReceivedData;
 	
 	if (tSLInformation.usEventOrDataReceived != 0)
 	{
@@ -718,8 +718,8 @@ hci_event_unsol_flowcontrol_handler(char *pEvent)
 {
 	
 	long temp, value;
-	unsigned short i;
-	unsigned short  pusNumberOfHandles=0;
+	uint16_t i;
+	uint16_t  pusNumberOfHandles=0;
 	char *pReadPayload;
 	
 	STREAM_TO_UINT16((char *)pEvent,HCI_EVENT_HEADER_SIZE,pusNumberOfHandles);
@@ -801,12 +801,11 @@ update_socket_active_status(char *resp_params)
 //*****************************************************************************
 
 void 
-SimpleLinkWaitEvent(unsigned short usOpcode, void *pRetParams)
+SimpleLinkWaitEvent(uint16_t usOpcode, void *pRetParams)
 {
 	// In the blocking implementation the control to caller will be returned only 
 	// after the end of current transaction
 	tSLInformation.usRxEventOpcode = usOpcode;
-	printf("Going to call hci_event_handler...\n");
 	hci_event_handler(pRetParams, 0, 0);
 }
 
@@ -827,8 +826,8 @@ SimpleLinkWaitEvent(unsigned short usOpcode, void *pRetParams)
 //*****************************************************************************
 
 void 
-SimpleLinkWaitData(unsigned char *pBuf, unsigned char *from, 
-									 unsigned char *fromlen)
+SimpleLinkWaitData(uint8_t *pBuf, uint8_t *from, 
+									 uint8_t *fromlen)
 {
 	// In the blocking implementation the control to caller will be returned only 
 	// after the end of current transaction, i.e. only after data will be received

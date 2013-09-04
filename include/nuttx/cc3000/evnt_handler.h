@@ -67,7 +67,7 @@ extern "C" {
 //!                  event handler from global array of handlers pointers
 //
 //*****************************************************************************
-extern unsigned char *hci_event_handler(void *pRetParams, unsigned char *from, unsigned char *fromlen);
+extern uint8_t *hci_event_handler(void *pRetParams, uint8_t *from, uint8_t *fromlen);
 
 //*****************************************************************************
 //
@@ -143,7 +143,7 @@ typedef struct _bsd_select_return_t
 
 typedef struct _bsd_getsockopt_return_t
 {
-	unsigned char			ucOptValue[4];
+	uint8_t			ucOptValue[4];
 	char						iStatus;
 } tBsdGetSockOptReturnParams;
 

@@ -82,11 +82,11 @@
 //*****************************************************************************
 
 signed long 
-nvmem_read(unsigned long ulFileId, unsigned long ulLength, unsigned long ulOffset, unsigned char *buff)
+nvmem_read(unsigned long ulFileId, unsigned long ulLength, unsigned long ulOffset, uint8_t *buff)
 {
-	unsigned char ucStatus = 0xFF;
-	unsigned char *ptr;
-	unsigned char *args;
+	uint8_t ucStatus = 0xFF;
+	uint8_t *ptr;
+	uint8_t *args;
 	
 	ptr = tSLInformation.pucTxCommandBuffer;
 	args = (ptr + HEADERS_SIZE_CMD);
@@ -135,11 +135,11 @@ nvmem_read(unsigned long ulFileId, unsigned long ulLength, unsigned long ulOffse
 
 signed long 
 nvmem_write(unsigned long ulFileId, unsigned long ulLength, unsigned long 
-						ulEntryOffset, unsigned char *buff)
+						ulEntryOffset, uint8_t *buff)
 {
 	long iRes;
-	unsigned char *ptr;
-	unsigned char *args;
+	uint8_t *ptr;
+	uint8_t *args;
 	
 	iRes = EFAIL;
 	
@@ -178,7 +178,7 @@ nvmem_write(unsigned long ulFileId, unsigned long ulLength, unsigned long
 //!	 
 //*****************************************************************************
 
-unsigned char nvmem_set_mac_address(unsigned char *mac)
+uint8_t nvmem_set_mac_address(uint8_t *mac)
 {
 	return  nvmem_write(NVMEM_MAC_FILEID, MAC_ADDR_LEN, 0, mac);
 }
@@ -196,7 +196,7 @@ unsigned char nvmem_set_mac_address(unsigned char *mac)
 //!	 
 //*****************************************************************************
 
-unsigned char nvmem_get_mac_address(unsigned char *mac)
+uint8_t nvmem_get_mac_address(uint8_t *mac)
 {
 	return  nvmem_read(NVMEM_MAC_FILEID, MAC_ADDR_LEN, 0, mac);
 }
@@ -219,11 +219,11 @@ unsigned char nvmem_get_mac_address(unsigned char *mac)
 //!	 
 //*****************************************************************************
 
-unsigned char nvmem_write_patch(unsigned long ulFileId, unsigned long spLength, const unsigned char *spData)
+uint8_t nvmem_write_patch(unsigned long ulFileId, unsigned long spLength, const uint8_t *spData)
 {
-	unsigned char 	status = 0;
-	unsigned short	offset = 0;
-	unsigned char*      spDataPtr = (unsigned char*)spData;
+	uint8_t 	status = 0;
+	uint16_t	offset = 0;
+	uint8_t*      spDataPtr = (uint8_t*)spData;
 	
 	while ((status == 0) && (spLength >= SP_PORTION_SIZE))
 	{
@@ -263,11 +263,11 @@ unsigned char nvmem_write_patch(unsigned long ulFileId, unsigned long spLength, 
 //*****************************************************************************
 
 #ifndef CC3000_TINY_DRIVER
-unsigned char nvmem_read_sp_version(unsigned char* patchVer)
+uint8_t nvmem_read_sp_version(uint8_t* patchVer)
 {
-	unsigned char *ptr;
+	uint8_t *ptr;
 	// 1st byte is the status and the rest is the SP version
-	unsigned char	retBuf[5];	
+	uint8_t	retBuf[5];	
 	
 	ptr = tSLInformation.pucTxCommandBuffer;
   
@@ -310,9 +310,9 @@ unsigned char nvmem_read_sp_version(unsigned char* patchVer)
 signed long 
 nvmem_create_entry(unsigned long ulFileId, unsigned long ulNewLen)
 {
-	unsigned char *ptr; 
-	unsigned char *args;
-	unsigned short retval;
+	uint8_t *ptr; 
+	uint8_t *args;
+	uint16_t retval;
 	
 	ptr = tSLInformation.pucTxCommandBuffer;
 	args = (ptr + HEADERS_SIZE_CMD);

@@ -118,14 +118,14 @@ typedef struct _in_addr_t
 
 typedef struct _sockaddr_t
 {
-    unsigned short int    sa_family;
-    unsigned char     sa_data[14];
+    uint16_t   sa_family;
+    uint8_t    sa_data[14];
 } sockaddr;
 
 typedef struct _sockaddr_in_t
 {
-    short            sin_family;            // e.g. AF_INET
-    unsigned short   sin_port;              // e.g. htons(3490)
+    int16_t            sin_family;            // e.g. AF_INET
+    uint16_t   sin_port;              // e.g. htons(3490)
     in_addr          sin_addr;              // see struct in_addr, below
     char             sin_zero[8];           // zero this if you want to
 } sockaddr_in;
@@ -346,7 +346,7 @@ extern long listen(long sd, long backlog);
 //
 //*****************************************************************************
 #ifndef CC3000_TINY_DRIVER 
-extern int gethostbyname(char * hostname, unsigned short usNameLen, unsigned long* out_ip_addr);
+extern int gethostbyname(char * hostname, uint16_t usNameLen, unsigned long* out_ip_addr);
 #endif
 
 
@@ -642,7 +642,7 @@ extern int sendto(long sd, const void *buf, long len, long flags,
 //!  @brief    Set CC3000 in mDNS advertiser mode in order to advertise itself.
 //
 //*****************************************************************************
-extern int mdnsAdvertiser(unsigned short mdnsEnabled, char * deviceServiceName, unsigned short deviceServiceNameLength);
+extern int mdnsAdvertiser(uint16_t mdnsEnabled, char * deviceServiceName, uint16_t deviceServiceNameLength);
 
 //*****************************************************************************
 //

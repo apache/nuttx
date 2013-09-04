@@ -34,12 +34,12 @@ void SpiOpen(gcSpiHandleRx pfRxHandler);
 
 void SpiClose(void);
 
-long SpiWrite(unsigned char *pUserBuffer, unsigned short usLength);
+long SpiWrite(uint8_t *pUserBuffer, uint16_t usLength);
 
 void SpiResumeSpi(void);
 
 int CC3000InterruptHandler(int irq, void *context);
 
-short SPIInterruptsEnabled;
+int16_t SPIInterruptsEnabled;
 
-unsigned char wlan_tx_buffer[];
+uint8_t wlan_tx_buffer[];

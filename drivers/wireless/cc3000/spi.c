@@ -31,7 +31,7 @@
 
 // This flag lets the interrupt handler know if it should respond to
 // the WL_SPI_IRQ pin going low or not
-short SPIInterruptsEnabled=0;
+int16_t SPIInterruptsEnabled=0;
 
 
 #define READ                    3
@@ -117,11 +117,11 @@ typedef struct
 {
 	gcSpiHandleRx  SPIRxHandler;
 
-	unsigned short usTxPacketLength;
-	unsigned short usRxPacketLength;
+	uint16_t usTxPacketLength;
+	uint16_t usRxPacketLength;
 	unsigned long  ulSpiState;
-	unsigned char *pTxPacket;
-	unsigned char *pRxPacket;
+	uint8_t *pTxPacket;
+	uint8_t *pRxPacket;
 
 }tSpiInformation;
 
@@ -131,7 +131,7 @@ tSpiInformation sSpiInformation;
 //
 // Static buffer for 5 bytes of SPI HEADER
 //
-unsigned char tSpiReadHeader[] = {READ, 0, 0, 0, 0};
+uint8_t tSpiReadHeader[] = {READ, 0, 0, 0, 0};
 
 
 // The magic number that resides at the end of the TX/RX buffer (1 byte after the allocated size)
@@ -141,11 +141,11 @@ unsigned char tSpiReadHeader[] = {READ, 0, 0, 0, 0};
 #define CC3000_BUFFER_MAGIC_NUMBER (0xDE)
 
 char spi_buffer[CC3000_RX_BUFFER_SIZE];
-unsigned char wlan_tx_buffer[CC3000_TX_BUFFER_SIZE];
+uint8_t wlan_tx_buffer[CC3000_TX_BUFFER_SIZE];
 
 struct spi_dev_s *spi = NULL;
 
-unsigned int SPIPump(unsigned char data)
+unsigned int SPIPump(uint8_t data)
 {
 	uint8_t rx;
 
@@ -245,10 +245,10 @@ void SpiTriggerRxProcessing(void)
 //!  \brief  ...
 //
 //*****************************************************************************
-void SpiReadDataSynchronous(unsigned char *data, unsigned short size)
+void SpiReadDataSynchronous(uint8_t *data, uint16_t size)
 {
 	long i = 0;
-    unsigned char *data_to_send = tSpiReadHeader;
+    uint8_t *data_to_send = tSpiReadHeader;
     	
 	for (i = 0; i < size; i ++) {
 		data[i] = SPIPump(data_to_send[0]);
@@ -267,7 +267,7 @@ void SpiReadDataSynchronous(unsigned char *data, unsigned short size)
 //!  \brief  ...
 //
 //*****************************************************************************
-void SpiWriteDataSynchronous(unsigned char *data, unsigned short size)
+void SpiWriteDataSynchronous(uint8_t *data, uint16_t size)
 {
 	
 	while (size)
@@ -290,7 +290,7 @@ void SpiWriteDataSynchronous(unsigned char *data, unsigned short size)
 //!  \brief  ...
 //
 //*****************************************************************************
-long SpiFirstWrite(unsigned char *ucBuf, unsigned short usLength)
+long SpiFirstWrite(uint8_t *ucBuf, uint16_t usLength)
 {
     //
     // workaround for first transaction
@@ -328,9 +328,9 @@ long SpiFirstWrite(unsigned char *ucBuf, unsigned short usLength)
 //!  \brief  ...
 //
 //*****************************************************************************
-long SpiWrite(unsigned char *pUserBuffer, unsigned short usLength)
+long SpiWrite(uint8_t *pUserBuffer, uint16_t usLength)
 {
-    unsigned char ucPad = 0;
+    uint8_t ucPad = 0;
     
 	//
 	// Figure out the total length of the packet in order to figure out if there is padding or not
@@ -442,7 +442,7 @@ long SpiWrite(unsigned char *pUserBuffer, unsigned short usLength)
 long SpiReadDataCont(void)
 {
 	long data_to_recv;
-	unsigned char *evnt_buff, type;
+	uint8_t *evnt_buff, type;
 
 	
     //
@@ -644,7 +644,7 @@ void SpiOpen(gcSpiHandleRx pfRxHandler)
 	sSpiInformation.SPIRxHandler = pfRxHandler;
 	sSpiInformation.usTxPacketLength = 0;
 	sSpiInformation.pTxPacket = NULL;
-	sSpiInformation.pRxPacket = (unsigned char *)spi_buffer;
+	sSpiInformation.pRxPacket = (uint8_t *)spi_buffer;
 	sSpiInformation.usRxPacketLength = 0;
 	spi_buffer[CC3000_RX_BUFFER_SIZE - 1] = CC3000_BUFFER_MAGIC_NUMBER;
 	wlan_tx_buffer[CC3000_TX_BUFFER_SIZE - 1] = CC3000_BUFFER_MAGIC_NUMBER;

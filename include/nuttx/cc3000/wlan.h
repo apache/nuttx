@@ -141,7 +141,7 @@ extern void wlan_init(		tWlanCB	 	sWlanCB,
 //!
 //
 //*****************************************************************************
-extern void wlan_start(unsigned short usPatchesAvailableAtHost);
+extern void wlan_start(uint16_t usPatchesAvailableAtHost);
 
 //*****************************************************************************
 //
@@ -190,7 +190,7 @@ extern void wlan_stop(void);
 //*****************************************************************************
 #ifndef CC3000_TINY_DRIVER
 extern long wlan_connect(unsigned long ulSecType, char *ssid, long ssid_len,
-                        unsigned char *bssid, unsigned char *key, long key_len);
+                        uint8_t *bssid, uint8_t *key, long key_len);
 #else
 extern long wlan_connect(char *ssid, long ssid_len);
 
@@ -238,14 +238,14 @@ extern long wlan_disconnect(void);
 //
 //*****************************************************************************
 
-extern long wlan_add_profile(unsigned long ulSecType, unsigned char* ucSsid,
+extern long wlan_add_profile(unsigned long ulSecType, uint8_t* ucSsid,
 										 unsigned long ulSsidLen, 
-										 unsigned char *ucBssid,
+										 uint8_t *ucBssid,
                                          unsigned long ulPriority,
                                          unsigned long ulPairwiseCipher_Or_Key,
                                          unsigned long ulGroupCipher_TxKeyLen,
                                          unsigned long ulKeyMgmt,
-                                         unsigned char* ucPf_OrKey,
+                                         uint8_t* ucPf_OrKey,
                                          unsigned long ulPassPhraseLen);
 
 
@@ -377,7 +377,7 @@ extern long wlan_ioctl_set_connection_policy(
 
 
 extern long wlan_ioctl_get_scan_results(unsigned long ulScanTimeout,
-                                       unsigned char *ucResults);
+                                       uint8_t *ucResults);
 
 //*****************************************************************************
 //

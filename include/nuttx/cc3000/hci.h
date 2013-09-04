@@ -253,9 +253,9 @@ extern "C" {
 //!  @brief               Initiate an HCI command.
 //
 //*****************************************************************************
-extern unsigned short hci_command_send(unsigned short usOpcode, 
-                                   unsigned char *ucArgs,
-                                   unsigned char ucArgsLength);
+extern uint16_t hci_command_send(uint16_t usOpcode, 
+                                   uint8_t *ucArgs,
+                                   uint8_t ucArgsLength);
  
 
 //*****************************************************************************
@@ -273,12 +273,12 @@ extern unsigned short hci_command_send(unsigned short usOpcode,
 //!  @brief              Initiate an HCI data write operation
 //
 //*****************************************************************************
-extern long hci_data_send(unsigned char ucOpcode,
-                                      unsigned char *ucArgs,
-                                      unsigned short usArgsLength,
-                                      unsigned short usDataLength,
-                                      const unsigned char *ucTail,
-                                      unsigned short usTailLength);
+extern long hci_data_send(uint8_t ucOpcode,
+                                      uint8_t *ucArgs,
+                                      uint16_t usArgsLength,
+                                      uint16_t usDataLength,
+                                      const uint8_t *ucTail,
+                                      uint16_t usTailLength);
 
 
 //*****************************************************************************
@@ -295,8 +295,8 @@ extern long hci_data_send(unsigned char ucOpcode,
 //!  @brief              Prepare HCI header and initiate an HCI data write operation
 //
 //*****************************************************************************
-extern void hci_data_command_send(unsigned short usOpcode, unsigned char *pucBuff,
-                     unsigned char ucArgsLength, unsigned short ucDataLength);
+extern void hci_data_command_send(uint16_t usOpcode, uint8_t *pucBuff,
+                     uint8_t ucArgsLength, uint16_t ucDataLength);
 
 //*****************************************************************************
 //
@@ -312,7 +312,7 @@ extern void hci_data_command_send(unsigned short usOpcode, unsigned char *pucBuf
 //!  @brief               Prepare HCI header and initiate an HCI patch write operation
 //
 //*****************************************************************************
-extern void hci_patch_send(unsigned char ucOpcode, unsigned char *pucBuff, char *patch, unsigned short usDataLength);
+extern void hci_patch_send(uint8_t ucOpcode, uint8_t *pucBuff, char *patch, uint16_t usDataLength);
 
 
 

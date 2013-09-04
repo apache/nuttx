@@ -177,7 +177,7 @@ typedef char *(*tDriverPatches)(unsigned long *usLength);
 
 typedef char *(*tBootLoaderPatches)(unsigned long *usLength);
 
-typedef void (*tWlanCB)(long event_type, char * data, unsigned char length );
+typedef void (*tWlanCB)(long event_type, char * data, uint8_t length );
 
 typedef long (*tWlanReadInteruptPin)(void);
 
@@ -185,14 +185,14 @@ typedef void (*tWlanInterruptEnable)(void);
 
 typedef void (*tWlanInterruptDisable)(void);
 
-typedef void (*tWriteWlanPin)(unsigned char val);
+typedef void (*tWriteWlanPin)(uint8_t val);
 
 typedef struct
 {
-	unsigned short	 usRxEventOpcode;
-	unsigned short	 usEventOrDataReceived;
-	unsigned char 	*pucReceivedData;
-	unsigned char 	*pucTxCommandBuffer;
+	uint16_t	 usRxEventOpcode;
+	uint16_t	 usEventOrDataReceived;
+	uint8_t 	*pucReceivedData;
+	uint8_t 	*pucTxCommandBuffer;
 
 	tFWPatches 			sFWPatches;
 	tDriverPatches 		sDriverPatches;
@@ -204,15 +204,15 @@ typedef struct
     tWriteWlanPin         WriteWlanPin;
 
 	signed long		 slTransmitDataError;
-	unsigned short	 usNumberOfFreeBuffers;
-	unsigned short	 usSlBufferLength;
-	unsigned short	 usBufferSize;
-	unsigned short	 usRxDataPending;
+	uint16_t	 usNumberOfFreeBuffers;
+	uint16_t	 usSlBufferLength;
+	uint16_t	 usBufferSize;
+	uint16_t	 usRxDataPending;
 
 	unsigned long    NumberOfSentPackets;
 	unsigned long    NumberOfReleasedPackets;
 
-	unsigned char	 InformHostOnTxComplete;
+	uint8_t	 InformHostOnTxComplete;
 }sSimplLinkInformation;
 
 extern volatile sSimplLinkInformation tSLInformation;
@@ -238,7 +238,7 @@ extern volatile sSimplLinkInformation tSLInformation;
 //
 //*****************************************************************************
 
-extern void SimpleLinkWaitEvent(unsigned short usOpcode, void *pRetParams);
+extern void SimpleLinkWaitEvent(uint16_t usOpcode, void *pRetParams);
 
 //*****************************************************************************
 //
@@ -256,7 +256,7 @@ extern void SimpleLinkWaitEvent(unsigned short usOpcode, void *pRetParams);
 //
 //*****************************************************************************
 
-extern void SimpleLinkWaitData(unsigned char *pBuf, unsigned char *from, unsigned char *fromlen);
+extern void SimpleLinkWaitData(uint8_t *pBuf, uint8_t *from, uint8_t *fromlen);
 
 //*****************************************************************************
 //
@@ -272,7 +272,7 @@ extern void SimpleLinkWaitData(unsigned char *pBuf, unsigned char *from, unsigne
 //
 //*****************************************************************************
 
-extern unsigned char* UINT32_TO_STREAM_f (unsigned char *p, unsigned long u32);
+extern uint8_t* UINT32_TO_STREAM_f (uint8_t *p, unsigned long u32);
 
 //*****************************************************************************
 //
@@ -288,7 +288,7 @@ extern unsigned char* UINT32_TO_STREAM_f (unsigned char *p, unsigned long u32);
 //
 //*****************************************************************************
 
-extern unsigned char* UINT16_TO_STREAM_f (unsigned char *p, unsigned short u16);
+extern uint8_t* UINT16_TO_STREAM_f (uint8_t *p, uint16_t u16);
 
 //*****************************************************************************
 //
@@ -304,7 +304,7 @@ extern unsigned char* UINT16_TO_STREAM_f (unsigned char *p, unsigned short u16);
 //
 //*****************************************************************************
 
-extern unsigned short STREAM_TO_UINT16_f(char* p, unsigned short offset);
+extern uint16_t STREAM_TO_UINT16_f(char* p, uint16_t offset);
 
 //*****************************************************************************
 //
@@ -320,7 +320,7 @@ extern unsigned short STREAM_TO_UINT16_f(char* p, unsigned short offset);
 //
 //*****************************************************************************
 
-extern unsigned long STREAM_TO_UINT32_f(char* p, unsigned short offset);
+extern unsigned long STREAM_TO_UINT32_f(char* p, uint16_t offset);
 
 
 //*****************************************************************************
@@ -335,14 +335,14 @@ extern unsigned long STREAM_TO_UINT32_f(char* p, unsigned short offset);
 //This macro is used for copying 32 bit to stream while converting to little endian format.
 #define UINT32_TO_STREAM(_p, _u32)	(UINT32_TO_STREAM_f(_p, _u32))
 //This macro is used for copying a specified value length bits (l) to stream while converting to little endian format.
-#define ARRAY_TO_STREAM(p, a, l) 	{register short _i; for (_i = 0; _i < l; _i++) *(p)++ = ((unsigned char *) a)[_i];}
+#define ARRAY_TO_STREAM(p, a, l) 	{register int16_t _i; for (_i = 0; _i < l; _i++) *(p)++ = ((uint8_t *) a)[_i];}
 //This macro is used for copying received stream to 8 bit in little endian format.
-#define STREAM_TO_UINT8(_p, _offset, _u8)	{_u8 = (unsigned char)(*(_p + _offset));}
+#define STREAM_TO_UINT8(_p, _offset, _u8)	{_u8 = (uint8_t)(*(_p + _offset));}
 //This macro is used for copying received stream to 16 bit in little endian format.
 #define STREAM_TO_UINT16(_p, _offset, _u16)	{_u16 = STREAM_TO_UINT16_f(_p, _offset);}
 //This macro is used for copying received stream to 32 bit in little endian format.
 #define STREAM_TO_UINT32(_p, _offset, _u32)	{_u32 = STREAM_TO_UINT32_f(_p, _offset);}
-#define STREAM_TO_STREAM(p, a, l) 	{register short _i; for (_i = 0; _i < l; _i++) *(a)++= ((unsigned char *) p)[_i];}
+#define STREAM_TO_STREAM(p, a, l) 	{register int16_t _i; for (_i = 0; _i < l; _i++) *(a)++= ((uint8_t *) p)[_i];}
 
 
 
