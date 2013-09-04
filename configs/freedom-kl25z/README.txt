@@ -409,3 +409,28 @@ Where <subdir> is one of the following:
 
        There is probably enough free memroy to support 3 or 4 application
        threads in addition to NSH.
+
+    5. This configurations has support for NSH built-in applications.  However,
+       in the default configuration no built-in applications are enabled.
+
+    6. This configuration has been used to verify the TI CC3000 wireless
+       networking module.  In order to enable this module, you would need to
+       make the following changes to the default configuration files:
+
+       System Type -> Kinetis peripheral support
+         CONFIG_KL_SPI0=y                        : Enable SPI
+         CONFIG_KL_SPI1=y
+
+       Drivers -> SPI
+         CONFIG_SPI=y                            : Enable SPI
+         CONFIG_SPI_EXCHANGE=y
+
+       Drivers -> Wireless
+         CONFIG_WIRELESS=y                       : Enable wireless support
+         CONFIG_WL_CC3000=y                      : Build the CC3000 driver
+
+       Applications -> Examples
+         CONFIG_EXAMPLES_CC3000BASIC=y           : CC3000 test example
+
+       Applications -> NSH Library
+         CONFIG_NSH_ARCHINIT=y                   : Build in CC3000 initialization logic

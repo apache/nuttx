@@ -43,10 +43,10 @@
  * Include files
  *
  *****************************************************************************/
-#include <nuttx/cc3000/cc3000_common.h>
-#include <nuttx/cc3000/socket.h>
-#include <nuttx/cc3000/wlan.h>
-#include <nuttx/cc3000/evnt_handler.h>
+#include <nuttx/wireless/cc3000/cc3000_common.h>
+#include <nuttx/wireless/cc3000/socket.h>
+#include <nuttx/wireless/cc3000/wlan.h>
+#include <nuttx/wireless/cc3000/evnt_handler.h>
 
 //*****************************************************************************
 //

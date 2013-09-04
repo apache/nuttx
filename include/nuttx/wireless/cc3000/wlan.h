@@ -35,7 +35,7 @@
 #ifndef __WLAN_H__
 #define	__WLAN_H__
 
-#include "cc3000_common.h"
+#include <nuttx/wireless/cc3000/cc3000_common.h>
 
 //*****************************************************************************
 //

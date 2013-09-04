@@ -40,7 +40,7 @@
 //
 //*****************************************************************************
 
-#include <nuttx/cc3000/security.h>
+#include <nuttx/wireless/cc3000/security.h>
 
 #ifndef CC3000_UNENCRYPTED_SMART_CONFIG
 // foreward sbox

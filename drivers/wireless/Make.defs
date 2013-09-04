@@ -45,6 +45,10 @@ ifeq ($(CONFIG_WL_NRF24L01),y)
 CSRCS += nrf24l01.c
 endif
 
+ifeq ($(CONFIG_WL_CC3000),y)
+include wireless$(DELIM)cc3000$(DELIM)Make.defs
+endif
+
 # Include wireless devices build support
 
 DEPPATH += --dep-path wireless

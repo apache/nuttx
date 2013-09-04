@@ -33,11 +33,11 @@
 *
 *****************************************************************************/
 #include <string.h>
-#include <nuttx/cc3000/netapp.h>
-#include <nuttx/cc3000/hci.h>
-#include <nuttx/cc3000/socket.h>
-#include <nuttx/cc3000/evnt_handler.h>
-#include <nuttx/cc3000/nvmem.h>
+#include <nuttx/wireless/cc3000/netapp.h>
+#include <nuttx/wireless/cc3000/hci.h>
+#include <nuttx/wireless/cc3000/socket.h>
+#include <nuttx/wireless/cc3000/evnt_handler.h>
+#include <nuttx/wireless/cc3000/nvmem.h>
 
 #define MIN_TIMER_VAL_SECONDS      20
 #define MIN_TIMER_SET(t)    if ((0 != t) && (t < MIN_TIMER_VAL_SECONDS)) \

@@ -42,10 +42,10 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <nuttx/cc3000/nvmem.h>
-#include <nuttx/cc3000/hci.h>
-#include <nuttx/cc3000/socket.h>
-#include <nuttx/cc3000/evnt_handler.h>
+#include <nuttx/wireless/cc3000/nvmem.h>
+#include <nuttx/wireless/cc3000/hci.h>
+#include <nuttx/wireless/cc3000/socket.h>
+#include <nuttx/wireless/cc3000/evnt_handler.h>
 
 //*****************************************************************************
 //

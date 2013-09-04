@@ -35,7 +35,7 @@
 #ifndef __SECURITY__
 #define __SECURITY__
 
-#include "nvmem.h"
+#include <nuttx/wireless/cc3000/nvmem.h>
 
 //*****************************************************************************
 //
