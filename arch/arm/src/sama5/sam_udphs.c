@@ -135,8 +135,8 @@
 
 /* Request queue operations *************************************************/
 
-#define sam_rqempty(ep)     ((ep)->head == NULL)
-#define sam_rqpeek(ep)      ((ep)->head)
+#define sam_rqempty(q)        ((q)->head == NULL)
+#define sam_rqpeek(q)         ((q)->head)
 
 /* USB trace ****************************************************************/
 /* Trace error codes */
@@ -302,6 +302,14 @@ struct sam_req_s
   uint16_t             inflight;     /* Number of TX bytes written to FIFO */
 };
 
+/* The head of a queue of requests */
+
+struct sam_rqhead_s
+{
+  struct sam_req_s    *head;         /* Requests are added to the head of the list */
+  struct sam_req_s    *tail;         /* Requests are removed from the tail of the list */
+};
+
 /* This is the internal representation of an endpoint */
 
 struct sam_ep_s
@@ -316,8 +324,7 @@ struct sam_ep_s
   /* SAMA5-specific fields */
 
   struct sam_usbdev_s *dev;          /* Reference to private driver data */
-  struct sam_req_s    *head;         /* Request list for this endpoint */
-  struct sam_req_s    *tail;
+  struct sam_rqhead_s  reqq;         /* Read/write request queue */
 #ifdef CONFIG_SAMA5_UDPHS_SCATTERGATHER
   struct sam_dtd_s    *dtdll;        /* Head of the DMA transfer descriptor list */
 #endif
@@ -325,7 +332,8 @@ struct sam_ep_s
   volatile uint8_t     bank;         /* Current reception bank (0 or 1) */
   uint8_t              stalled:1;    /* true: Endpoint is stalled */
   uint8_t              halted:1;     /* true: Endpoint feature halted */
-  uint8_t              txnullpkt:1;  /* Null packet needed at end of transfer */
+  uint8_t              zlpneeded:1;  /* Zero length packet needed at end of transfer */
+  uint8_t              zlpsent:1;    /* Zero length packet has been sent */
 };
 
 struct sam_usbdev_s
@@ -414,8 +422,8 @@ static int    sam_req_rddma(struct sam_usbdev_s *priv,
 /* Request Helpers **********************************************************/
 
 static struct sam_req_s *
-              sam_req_dequeue(struct sam_ep_s *privep);
-static void   sam_req_enqueue(struct sam_ep_s *privep,
+              sam_req_dequeue(struct sam_rqhead_s *queue);
+static void   sam_req_enqueue(struct sam_rqhead_s *queue,
                 struct sam_req_s *req);
 static inline void
               sam_req_abort(struct sam_ep_s *privep,
@@ -431,7 +439,7 @@ static int    sam_req_rdnodma(struct sam_usbdev_s *priv,
                 uint16_t pktsize);
 static int    sam_req_read(struct sam_usbdev_s *priv,
                 struct sam_ep_s *privep, uint16_t pktsize);
-static void   sam_req_cancel(struct sam_ep_s *privep);
+static void   sam_req_cancel(struct sam_ep_s *privep, int16_t status);
 
 /* Interrupt level processing ***********************************************/
 
@@ -955,7 +963,7 @@ static int sam_req_wrdma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
 
   remaining = privreq->req.len - privreq->req.xfrd - privreq->inflight;
 
-  /* If there are no bytes to send, then send a null packet */
+  /* If there are no bytes to send, then send a zero length packet */
 
   if (remaining > 0)
     {
@@ -1018,7 +1026,8 @@ static int sam_req_rddma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
   /* Switch to the receiving state */
 
   privep->epstate   = UDPHS_EPSTATE_RECEIVING;
-  privep->txnullpkt = false;
+  privep->zlpneeded = false;
+  privep->zlpsent   = false;
   privreq->inflight = 0;
   privreq->req.xfrd = 0;
 
@@ -1065,16 +1074,16 @@ static int sam_req_rddma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
  * Name: sam_req_dequeue
  ****************************************************************************/
 
-static struct sam_req_s *sam_req_dequeue(struct sam_ep_s *privep)
+static struct sam_req_s *sam_req_dequeue(struct sam_rqhead_s *queue)
 {
-  struct sam_req_s *ret = privep->head;
+  struct sam_req_s *ret = queue->head;
 
   if (ret)
     {
-      privep->head = ret->flink;
-      if (!privep->head)
+      queue->head = ret->flink;
+      if (!queue->head)
         {
-          privep->tail = NULL;
+          queue->tail = NULL;
         }
 
       ret->flink = NULL;
@@ -1087,18 +1096,18 @@ static struct sam_req_s *sam_req_dequeue(struct sam_ep_s *privep)
  * Name: sam_req_enqueue
  ****************************************************************************/
 
-static void sam_req_enqueue(struct sam_ep_s *privep, struct sam_req_s *req)
+static void sam_req_enqueue(struct sam_rqhead_s *queue, struct sam_req_s *req)
 {
   req->flink = NULL;
-  if (!privep->head)
+  if (!queue->head)
     {
-      privep->head = req;
-      privep->tail = req;
+      queue->head = req;
+      queue->tail = req;
     }
   else
     {
-      privep->tail->flink = req;
-      privep->tail        = req;
+      queue->tail->flink = req;
+      queue->tail        = req;
     }
 }
 
@@ -1109,7 +1118,8 @@ static void sam_req_enqueue(struct sam_ep_s *privep, struct sam_req_s *req)
 static inline void
 sam_req_abort(struct sam_ep_s *privep, struct sam_req_s *privreq, int16_t result)
 {
-  usbtrace(TRACE_DEVERROR(SAM_TRACEERR_REQABORTED), (uint16_t)USB_EPNO(privep->ep.eplog));
+  usbtrace(TRACE_DEVERROR(SAM_TRACEERR_REQABORTED),
+           (uint16_t)USB_EPNO(privep->ep.eplog));
 
   /* Save the result in the request structure */
 
@@ -1132,7 +1142,7 @@ static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
   /* Remove the completed request at the head of the endpoint request list */
 
   flags = irqsave();
-  privreq = sam_req_dequeue(privep);
+  privreq = sam_req_dequeue(&privep->reqq);
   irqrestore(flags);
 
   if (privreq)
@@ -1149,7 +1159,8 @@ static void sam_req_complete(struct sam_ep_s *privep, int16_t result)
       /* Reset the endpoint state and restore the stalled indication */
 
       privep->epstate   = UDPHS_EPSTATE_IDLE;
-      privep->txnullpkt = false;
+      privep->zlpneeded = false;
+      privep->zlpsent   = false;
     }
 }
 
@@ -1228,8 +1239,8 @@ static int sam_req_wrnodma(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
       nbytes = bytesleft;
     }
 
-  /* If we are not sending a NULL packet, then clip the size to maxpacket
-   * and check if we need to send a following NULL packet.
+  /* If we are not sending a zero length packet, then clip the size to
+   * maxpacket and check if we need to send a following zero length packet.
    */
 
   nbytes = bytesleft;
@@ -1313,7 +1324,7 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
     {
       /* Check the request from the head of the endpoint request queue */
 
-      privreq = sam_rqpeek(privep);
+      privreq = sam_rqpeek(&privep->reqq);
       if (!privreq)
         {
           /* There is no TX transfer in progress and no new pending TX
@@ -1342,17 +1353,14 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           return -ENOENT;
         }
 
-      ullvdbg("epno=%d req=%p: len=%d xfrd=%d inflight=%d nullpkt=%d\n",
+      ullvdbg("epno=%d req=%p: len=%d xfrd=%d inflight=%d zlpneeded=%d\n",
               epno, privreq, privreq->req.len, privreq->req.xfrd,
-              privreq->inflight, privep->txnullpkt);
+              privreq->inflight, privep->zlpneeded);
 
-      /* Were there bytes in flight? */
+      /* Handle any bytes in flight. */
 
-      if (privreq->inflight)
-        {
-          privreq->req.xfrd += privreq->inflight;
-          privreq->inflight = 0;
-        }
+      privreq->req.xfrd += privreq->inflight;
+      privreq->inflight  = 0;
 
       /* Get the number of bytes left to be sent in the packet */
 
@@ -1366,17 +1374,17 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           if (bytesleft == privep->ep.maxpacket &&
              (privreq->req.flags & USBDEV_REQFLAGS_NULLPKT) != 0)
             {
-              /* Next time we get here, bytesleft will be zero and txnullpkt
+              /* Next time we get here, bytesleft will be zero and zlpneeded
                * will be set.
                */
 
-              privep->txnullpkt = true;
+              privep->zlpneeded = true;
             }
           else
             {
               /* No zero packet is forthcoming (maybe later) */
 
-              privep->txnullpkt = false;
+              privep->zlpneeded = false;
             }
 
           /* The way that we handle the transfer is going to depend on
@@ -1401,26 +1409,27 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
         }
 
       /* No data to send... This can happen on one of two ways:
-       * (1) The last packet sent was the final packet of a transfer
-       * and was exactly maxpacketsize and the protocol expects
-       * a zero length packet to follow (privep->txnullpkt will be
-       * set).  Or (2) we called with a request packet that has
-       * len == 0 (privep->txnullpkt will not be set).  Either case
-       * means that it is time to send a NULL packet and complete
+       * (1) The last packet sent was the final packet of a transfer.
+       * If it was also exactly maxpacketsize and the protocol expects
+       * a zero length packet to follow then privep->zlpneeded will be
+       * set.  Or (2) we called with a request packet that has
+       * len == 0 (privep->zlpneeded will not be set).  Either case
+       * means that it is time to send a zero length packet and complete
        * this transfer.
        */
 
-      else if (privreq->req.len == 0 || privep->txnullpkt)
+      else if ((privreq->req.len == 0 || privep->zlpneeded) && !privep->zlpsent)
         {
           /* If we get here, then we sent the last of the data on the
            * previous pass and we need to send the zero length packet now.
            *
            * A Zero Length Packet can be sent by setting just the TXRDY flag
-           * in* the UDPHS_EPTSETSTAx register
+           * in the UDPHS_EPTSETSTAx register
            */
 
           privep->epstate   = UDPHS_EPSTATE_SENDING;
-          privep->txnullpkt = false;
+          privep->zlpneeded = false;
+          privep->zlpsent   = true;
           privreq->inflight = 0;
 
           /* Initiate the zero length transfer and configure to receive the
@@ -1430,9 +1439,9 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           sam_ep_txrdy(epno);
         }
 
-      /* If all of the bytes were sent (including any final null packet)
-       * then we are finished with the request buffer), then we can return
-       * the request buffer to the class driver.  The transfer is not
+      /* If all of the bytes were sent (including any final zero length
+       * packet) then we are finished with the request buffer), then we can
+       * return the request buffer to the class driver.  The transfer is not
        * finished yet, however.  There are still bytes in flight.  The
        * transfer is truly finished when we are called again and the
        * request buffer is empty.
@@ -1446,7 +1455,6 @@ static int sam_req_write(struct sam_usbdev_s *priv, struct sam_ep_s *privep)
           usbtrace(TRACE_COMPLETE(USB_EPNO(privep->ep.eplog)),
                    privreq->req.xfrd);
 
-          privep->txnullpkt = false;
           sam_req_complete(privep, OK);
         }
     }
@@ -1527,7 +1535,7 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
   /* Check the request from the head of the endpoint request queue */
 
   epno    = USB_EPNO(privep->ep.eplog);
-  privreq = sam_rqpeek(privep);
+  privreq = sam_rqpeek(&privep->reqq);
   if (!privreq)
     {
       /* Incoming data available in the FIFO, but no packet to receive the data.
@@ -1608,25 +1616,28 @@ static int sam_req_read(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
  * Name: sam_req_cancel
  ****************************************************************************/
 
-static void sam_req_cancel(struct sam_ep_s *privep)
+static void sam_req_cancel(struct sam_ep_s *privep, int16_t result)
 {
   uint32_t regval;
   uint8_t epno;
 
-  /* Disable endpoint interrupts */
+  /* Disable endpoint interrupts if not endpoint 0 */
 
-  epno    = USB_EPNO(privep->ep.eplog);
-  regval  = sam_getreg(SAM_UDPHS_IEN);
-  regval &= ~UDPHS_INT_DMA(epno);
-  sam_putreg(regval, SAM_UDPHS_IEN);
+  epno = USB_EPNO(privep->ep.eplog);
+  if (epno != 0)
+    {
+      regval  = sam_getreg(SAM_UDPHS_IEN);
+      regval &= ~UDPHS_INT_DMA(epno);
+      sam_putreg(regval, SAM_UDPHS_IEN);
+    }
 
-  /* Then complete every queued request with -ESHUTDOWN status */
+  /* Then complete every queued request with the specified status */
 
-  while (!sam_rqempty(privep))
+  while (!sam_rqempty(&privep->reqq))
     {
       usbtrace(TRACE_COMPLETE(USB_EPNO(privep->ep.eplog)),
-               (sam_rqpeek(privep))->req.xfrd);
-      sam_req_complete(privep, -ESHUTDOWN);
+               (sam_rqpeek(&privep->reqq))->req.xfrd);
+      sam_req_complete(privep, result);
     }
 }
 
@@ -1767,8 +1778,7 @@ static void sam_setdevaddr(struct sam_usbdev_s *priv, uint8_t address)
 
 static void sam_ep0_setup(struct sam_usbdev_s *priv)
 {
-  struct sam_ep_s     *ep0     = &priv->eplist[EP0];
-  struct sam_req_s    *privreq = sam_rqpeek(ep0);
+  struct sam_ep_s     *ep0 = &priv->eplist[EP0];
   struct sam_ep_s     *privep;
   union wb_u           value;
   union wb_u           index;
@@ -1779,21 +1789,9 @@ static void sam_ep0_setup(struct sam_usbdev_s *priv)
   int                  nbytes = 0; /* Assume zero-length packet */
   int                  ret;
 
-  /* Terminate any pending requests (doesn't work if the pending request
-   * was a zero-length transfer!)
-   */
+  /* Terminate any pending requests */
 
-  while (!sam_rqempty(ep0))
-    {
-      int16_t result = OK;
-      if (privreq->req.xfrd != privreq->req.len)
-        {
-          result = -EPROTO;
-        }
-
-      usbtrace(TRACE_COMPLETE(ep0->ep.eplog), privreq->req.xfrd);
-      sam_req_complete(ep0, result);
-    }
+  sam_req_cancel(ep0, -EPROTO);
 
   /* Assume NOT stalled; no TX in progress */
 
@@ -2265,7 +2263,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
   /* Get the request from the head of the endpoint request queue */
 
-  privreq = sam_rqpeek(privep);
+  privreq = sam_rqpeek(&privep->reqq);
   DEBUGASSERT(privreq);
 
   /* Invalidate the data cache for region that just completed DMA.
@@ -2580,7 +2578,7 @@ static void sam_ep_interrupt(struct sam_usbdev_s *priv, int epno)
       if (privep->epstate == UDPHS_EPSTATE_RECEIVING ||
           privep->epstate == UDPHS_EPSTATE_SENDING)
         {
-          sam_req_complete(privep, OK);
+          sam_req_complete(privep, -EPROTO);
         }
 
       /* ISO Err Flow */
@@ -2938,7 +2936,7 @@ static void sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno)
    * for each of its configured endpoints.
    */
 
-  sam_req_cancel(privep);
+  sam_req_cancel(privep, -ESHUTDOWN);
 
   /* Reset endpoint */
 
@@ -2949,7 +2947,8 @@ static void sam_ep_reset(struct sam_usbdev_s *priv, uint8_t epno)
   privep->epstate   = UDPHS_EPSTATE_DISABLED;
   privep->stalled   = false;
   privep->halted    = false;
-  privep->txnullpkt = false;
+  privep->zlpneeded = false;
+  privep->zlpsent   = false;
   privep->bank      = 0;
 }
 
@@ -3289,14 +3288,10 @@ static int sam_ep_disable(struct usbdev_ep_s *ep)
   epno = USB_EPNO(ep->eplog);
   usbtrace(TRACE_EPDISABLE, epno);
 
-  /* Cancel any ongoing activity */
+  /* Reset the endpoint and cancel any ongoing activity */
 
   flags = irqsave();
-  sam_req_cancel(privep);
-
-  /* Reset the endpoint */
-
-  priv = privep->dev;
+  priv  = privep->dev;
   sam_ep_reset(priv, epno);
 
   /* Revert to the addressed-but-not-configured state */
@@ -3440,6 +3435,8 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   req->result       = -EINPROGRESS;
   req->xfrd         = 0;
   privreq->inflight = 0;
+  privep->zlpneeded = false;
+  privep->zlpsent   = false;
   flags             = irqsave();
 
   /* If we are stalled, then drop all requests on the floor */
@@ -3460,7 +3457,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
     {
       /* Add the new request to the request queue for the IN endpoint */
 
-      sam_req_enqueue(privep, privreq);
+      sam_req_enqueue(&privep->reqq, privreq);
       usbtrace(TRACE_INREQQUEUED(epno), req->len);
 
       /* If the IN endpoint FIFO is available, then transfer the data now */
@@ -3477,8 +3474,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
     {
       /* Add the new request to the request queue for the OUT endpoint */
 
-      privep->txnullpkt = false;
-      sam_req_enqueue(privep, privreq);
+      sam_req_enqueue(&privep->reqq, privreq);
       usbtrace(TRACE_OUTREQQUEUED(epno), req->len);
 
       /* This there a incoming data pending the availability of a request? */
@@ -3517,7 +3513,7 @@ static int sam_ep_cancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   usbtrace(TRACE_EPCANCEL, USB_EPNO(ep->eplog));
 
   flags = irqsave();
-  sam_req_cancel(privep);
+  sam_req_cancel(privep, -EAGAIN);
   irqrestore(flags);
   return OK;
 }
@@ -3604,7 +3600,11 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
 
           /* Abort the current transfer if necessary */
 
-          sam_req_complete(privep, -EIO);
+          if (privep->epstate == UDPHS_EPSTATE_SENDING ||
+              privep->epstate == UDPHS_EPSTATE_RECEIVING)
+            {
+              sam_req_complete(privep, -EIO);
+            }
 
           /* Put endpoint into stalled state */
 
@@ -3956,13 +3956,14 @@ static void sam_reset(struct sam_usbdev_s *priv)
        * for each of its configured endpoints.
        */
 
-      sam_req_cancel(privep);
+      sam_req_cancel(privep, -ESHUTDOWN);
 
       /* Reset endpoint status */
 
       privep->stalled   = false;
       privep->halted    = false;
-      privep->txnullpkt = false;
+      privep->zlpneeded = false;
+      privep->zlpsent   = false;
     }
 
   /* Re-configure the USB controller in its initial, unconnected state */
