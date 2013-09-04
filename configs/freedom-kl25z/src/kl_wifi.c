@@ -49,7 +49,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
 
-#include <nuttx/cc3000/spi.h>
+#include <nuttx/wireless/cc3000/spi.h>
 
 #include "up_arch.h"
 #include "kl_gpio.h"
