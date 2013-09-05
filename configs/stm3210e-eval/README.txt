@@ -736,7 +736,7 @@ Where <subdir> is one of the following:
     ----------- ----------------------- --------------------------------
     Built-in    None                    apps/examples/nx
     Apps                                apps/examples/nxhello
-                                        apps/examples/usbstorage (5)
+                                        apps/examples/usbmsc (5)
                                         apps/system/i2c
     =========== ======================= ================================
 
@@ -958,10 +958,10 @@ Where <subdir> is one of the following:
     In either the original appconfig file (before configuring)
     or in the final apps/.config file (after configuring).
 
-  usbstorage:
-  ----------
+  usbmsc:
+  -------
     This configuration directory exercises the USB mass storage
-    class driver at examples/usbstorage.  See examples/README.txt for
+    class driver at examples/usbmsc.  See examples/README.txt for
     more information.
 
       CONFIG_STM32_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin

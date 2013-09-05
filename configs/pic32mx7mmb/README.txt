@@ -776,10 +776,10 @@ Where <subdir> is one of the following:
 
   2. Changes to nuttx/.config.
 
-    a) Enable building of the examples/usbstorage:
+    a) Enable building of the examples/usbmsc:
 
-      -# CONFIGURED_APPS += examples/usbstorage
-      +  CONFIGURED_APPS += examples/usbstorage
+      -# CONFIGURED_APPS += examples/usbmsc
+      +  CONFIGURED_APPS += examples/usbmsc
 
   3. When NSH first comes up, you must manually create the RAM disk
      before exporting it:

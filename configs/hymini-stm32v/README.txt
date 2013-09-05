@@ -610,7 +610,7 @@ Where <subdir> is one of the following:
     ----------- ----------------------- --------------------------------
     Built-in    None                    apps/examples/nx
     Apps                                apps/examples/nxhello
-                                        apps/examples/usbstorage (4)
+                                        apps/examples/usbmsc (4)
                                         apps/examples/buttons
                                         apps/examples/nximage
     =========== ======================= ================================

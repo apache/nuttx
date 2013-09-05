@@ -5492,4 +5492,6 @@
 	* apps/examples/cc3000, configs/freedom-kl25z, drivers/wireless/cc3000,
 	  and nuttx/include/nuttx/cc3000.  Initial support for the TI CC3000
 	  network module on the Freescale Freedom-KL25Z board from Alan Carvalho
-	  de Assis.  This is still very much a work in progress. (2013-9-3).
+	  de Assis.  This is still very much a work in progress (2013-9-3).
+	* configs/*/usbmsc:  Renamed from config/*/usbstorage to match the
+	  change in naming in apps/examples submitted by CCTSAO (2013-9-5).

@@ -1095,7 +1095,7 @@ Where <subdir> is one of the following:
 
       CONFIG_CDCACM=y         : Enable the CDCACM device
 
-    examples/usbstorage - There are some hooks in the appconfig file
+    examples/usbmsc - There are some hooks in the appconfig file
     to enable the USB mass storage device.  However, this device cannot
     work until support for the SD card is also incorporated.
 
@@ -1208,10 +1208,10 @@ Where <subdir> is one of the following:
 
   2. Changes to apps/.config.
 
-    a) Enable building of the examples/usbstorage:
+    a) Enable building of the examples/usbmsc:
 
-      -# CONFIGURED_APPS += examples/usbstorage
-      +  CONFIGURED_APPS += examples/usbstorage
+      -# CONFIGURED_APPS += examples/usbmsc
+      +  CONFIGURED_APPS += examples/usbmsc
 
   3. When NSH first comes up, you must manually create the RAM disk
      before exporting it:

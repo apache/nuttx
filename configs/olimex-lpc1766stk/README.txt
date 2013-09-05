@@ -1056,9 +1056,9 @@ Where <subdir> is one of the following:
     driver at apps/examples/usbserial.  See apps/examples/README.txt for
     more information.
 
-  usbstorage:
+  usbmsc:
     This configuration directory exercises the USB mass storage
-    class driver at apps/examples/usbstorage.  See apps/examples/README.txt
+    class driver at apps/examples/usbmsc.  See apps/examples/README.txt
     for more information.
 
   zmodem:
