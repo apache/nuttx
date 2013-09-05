@@ -388,11 +388,11 @@ usbserial:
   NOTE:  If you have problems with this configurationt, perhaps it is a
   consequence of the last USB driver checking (r4359)
 
-usbstorage:
------------
+usbmsc:
+-------
 
   This configuration directory exercises the USB mass storage
-  class driver at examples/usbstorage.  See examples/README.txt for
+  class driver at examples/usbmsc.  See examples/README.txt for
   more information.
 
   Default toolchain:  Buildroot

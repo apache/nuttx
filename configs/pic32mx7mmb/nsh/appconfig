@@ -55,7 +55,7 @@ ifeq ($(CONFIG_PIC32MX_USBDEV),y)
 # USB Mass Storage Class device configurations
 
 ifeq ($(CONFIG_USBMSC),y)
-  CONFIGURED_APPS += examples/usbstorage
+  CONFIGURED_APPS += examples/usbmsc
 else
 
 # USB CDC/ACM serial device configurations

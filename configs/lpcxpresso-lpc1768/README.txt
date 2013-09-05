@@ -800,9 +800,9 @@ Where <subdir> is one of the following:
     Jumpers: Nothing special.  Use the default base board jumper
     settings.
 
-  usbstorage:
+  usbmsc:
     This configuration directory exercises the USB mass storage
-    class driver at apps/examples/usbstorage.  See apps/examples/README.txt
+    class driver at apps/examples/usbmsc.  See apps/examples/README.txt
     for more information.
 
     NOTE: At present, the value for the SD SPI frequency is too

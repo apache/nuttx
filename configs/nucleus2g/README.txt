@@ -543,8 +543,8 @@ Where <subdir> is one of the following:
     driver at examples/usbserial.  See examples/README.txt for
     more information.
 
-  usbstorage:
+  usbmsc:
     This configuration directory exercises the USB mass storage
-    class driver at examples/usbstorage.  See examples/README.txt for
+    class driver at examples/usbmsc.  See examples/README.txt for
     more information.
 

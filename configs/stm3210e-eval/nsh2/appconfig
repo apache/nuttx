@@ -50,7 +50,7 @@ CONFIGURED_APPS += examples/nx
 CONFIGURED_APPS += examples/nxhello
 #CONFIGURED_APPS += examples/nxlines
 #CONFIGURED_APPS += examples/nxtext
-CONFIGURED_APPS += examples/usbstorage
+CONFIGURED_APPS += examples/usbmsc
 
 ifeq ($(CONFIG_I2C),y)
 CONFIGURED_APPS += system/i2c
