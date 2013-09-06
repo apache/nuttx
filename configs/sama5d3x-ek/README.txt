@@ -975,19 +975,104 @@ Configurations
        order to enable the AT25 FLASH chip select.
 
        You can then format the AT25 FLASH for a FAT file system and mount
-       the file system at /mnt/sdcard using these NSH commands:
+       the file system at /mnt/at25 using these NSH commands:
 
          nsh> mkfatfs /dev/mtdblock0
-         nsh> mount -t vfat /dev/mtdblock0 /mnt/sdcard
+         nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
 
        Then you an use the FLASH as a normal FAT file system:
 
-         nsh> echo "This is a test" >/mnt/sdcard/atest.txt
-         nsh> ls -l /mnt/sdcard
-         /mnt/sdcard:
+         nsh> echo "This is a test" >/mnt/at25/atest.txt
+         nsh> ls -l /mnt/at25
+         /mnt/at25:
           -rw-rw-rw-      16 atest.txt
-         nsh> cat /mnt/sdcard/atest.txt
+         nsh> cat /mnt/at25/atest.txt
          This is a test
+
+    6. Support the USB high-speed EHCI device (UDPHS) driver is enabled.
+       These are the relevant NuttX configuration settings:
+
+       Device Drivers -> USB Device Driver Support
+         CONFIG_USBDEV=y                       : Enable USB device support
+         CONFIG_USBDEV_DUALSPEED=y             : Device support High and Full Speed
+         CONFIG_USBDEV_DMA=y                   : Device uses DMA
+
+       System Type -> ATSAMA5 Peripheral Support
+         CONFIG_SAMA5_UDPHS=y                  : Enable UDPHS High Speed USB device
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
+       The Mass Storage Class (MSC) class driver is seleced for use with
+       UDPHS:
+
+       Device Drivers -> USB Device Driver Support
+         CONFIG_USBMSC=y                       : Enable the USB MSC class driver
+         CONFIG_USBMSC_EPBULKOUT=1             : Use EP1 for the BULK OUT endpoint
+         CONFIG_USBMSC_EPBULKIN=2              : Use EP2 for the BULK IN endpoint
+
+       The following setting enables an example that can can be used to
+       control the CDC/ACM device.  It will add two new NSH commands:
+
+         a. msconn will connect the USB serial device and export the AT25
+            to the the host, and
+         b. msdis which will disconnect the USB serial device.
+
+       Application Configuration -> Examples:
+         CONFIG_EXAMPLES_USBMSC=y              : Enable the USBMSC example
+         CONFIG_EXAMPLES_USBMSC_NLUNS=1        : One LUN
+         CONFIG_EXAMPLES_USBMSC_DEVMINOR1=0    : Minor device zero
+         CONFIG_EXAMPLES_USBMSC_DEVPATH1="/dev/mmcsd0"
+                                               : Use a single, LUN:  The AT25
+                                               : block driver.
+
+       NOTE:  To prevent file system corruption, make sure that the AT25
+       is un-mounted *before* exporting the mass storage device to the host:
+
+         nsh> umount /mnt
+         nsh> mscon
+
+       The AT25 can be re-mount after the mass storage class is disconnected:
+
+         nsh> msdis
+         nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
+
+    The following features are *not* enabled in the demo configuration but
+    might be of some use to you:
+
+    7.  Debugging USB Device.  There is normal console debug output available
+        that can be enabled with CONFIG_DEBUG + CONFIG_DEBUG_USB.  However,
+        USB device operation is very time critical and enabling this debug
+        output WILL interfere with the operation of the UDPHS.  USB device
+        tracing is a less invasive way to get debug information:  If tracing
+        is enabled, the USB device will save encoded trace output in in-memory
+        buffer; if the USB monitor is also enabled, that trace buffer will be
+        periodically emptied and dumped to the system logging device (the
+        serial console in this configuration):
+
+        Device Drivers -> "USB Device Driver Support:
+          CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
+          CONFIG_USBDEV_TRACE_NRECORDS=256        : Buffer 256 records in memory
+
+        Application Configuration -> NSH LIbrary:
+          CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
+          CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
+
+        Application Configuration -> System NSH Add-Ons:
+          CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
+          CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+          CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+          CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
+          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+          CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
+          CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
+          CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
+          CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+
+       NOTE: If USB debug output is also enabled, both outpus will appear
+       on the serial console.  However, the debug output will be
+       asynchronous with the trace output and, hence, difficult to
+       interpret.
 
   hello:
     This configuration directory, performs the (almost) simplest of all
@@ -1287,7 +1372,7 @@ Configurations
           volume when it is removed.  But those callbacks are not used in
           this configuration.
 
-    10) Support the USB low/full-speed OHCI host driver can be enabled by changing
+    10. Support the USB low/full-speed OHCI host driver can be enabled by changing
         the NuttX configuration file as follows:
 
         System Type -> ATSAMA5 Peripheral Support
@@ -1314,7 +1399,7 @@ Configurations
        multiple of the 48MHz needed for OHCI.  The delay loop calibration
        values that are used will be off slightly because of this.
 
-    10) Support the USB high-speed EHCI host driver can be enabled by changing
+    11. Support the USB high-speed EHCI host driver can be enabled by changing
         the NuttX configuration file as follows.  If EHCI is enabled by itself,
         then only high-speed devices can be supported.  If OHCI is also enabled,
         then all low-, full-, and high speed devices should work.
@@ -1341,8 +1426,8 @@ Configurations
         Application Configuration -> NSH Library
           CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
-    10) Support the USB high-speed EHCI host driver can be enabled by changing
-        the NuttX configuration file as follows.  If EHCI is enabled by itself,
+    12. Support the USB high-speed EHCI device driver (UDPHS) can be enabled
+        by changing the NuttX configuration file as follows:
 
         Device Drivers -> USB Device Driver Support
           CONFIG_USBDEV=y                       : Enable USB device support
