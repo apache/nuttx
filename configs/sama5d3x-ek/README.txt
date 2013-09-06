@@ -873,6 +873,122 @@ Configurations
   Configuration sub-directories
   -----------------------------
 
+  demo:
+    This configuration directory provide the NuttShell (NSH).  There are
+    two NSH configurations:  nsh and demo.  The difference is that nsh is
+    intended to be a very simple NSH configuration upon which you can build
+    further functionality.  The demo configuration, on the other hand, is
+    intended to be a rich configuration that shows many features all working
+    together.
+
+    NOTES:
+    1. This configuration uses the default USART1 serial console.  That
+       is easily changed by reconfiguring to (1) enable a different
+       serial peripheral, and (2) selecting that serial peripheral as
+       the console device.
+
+    2. By default, this configuration is set up to build on Windows
+       under either a Cygwin or MSYS environment using a recent, Windows-
+       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
+       toolchain).  Both the build environment and the toolchain
+       selection can easily be changed by reconfiguring:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows operating system
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
+       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+    3. This configuration executes out of CS0 NOR flash and can only
+       be loaded via SAM-BA.  These are the relevant configuration options
+       the define the NOR FLASH configuration:
+
+       CONFIG_SAMA5_BOOT_CS0FLASH=y            : Boot from FLASH on CS0
+       CONFIG_BOOT_RUNFROMFLASH=y              : Run in place on FLASH (vs copying to RAM)
+
+       CONFIG_SAMA5_EBICS0=y                   : Enable CS0 external memory
+       CONFIG_SAMA5_EBICS0_SIZE=134217728      : Memory size is 128KB
+       CONFIG_SAMA5_EBICS0_NOR=y               : Memory type is NOR FLASH
+
+       CONFIG_FLASH_START=0x10000000           : Physical FLASH start address
+       CONFIG_FLASH_VSTART=0x10000000          : Virtual FLASH start address
+       CONFIG_FLASH_SIZE=134217728             : FLASH size (again)
+
+       CONFIG_RAM_START=0x00300400             : Data stored after page table
+       CONFIG_RAM_VSTART=0x00300400
+       CONFIG_RAM_SIZE=114688                  : Available size of 128KB - 16KB for page table
+
+       NOTE:  In order to boot in this configuration, you need to close the
+       BMS jumper.
+
+    The following features are pre-enabled in the demo configuration, but not
+    in the nsh configuration:
+
+    4. SDRAM is supported.  .data and .bss is still retained in ISRAM, but
+       SDRAM is intialized and the SDRAM memory is included in the heap.
+       Relevant configuration settings:
+
+       System Type->ATSAMA5 Peripheral Support
+         CONFIG_SAMA5_MPDDRC=y                 : Enable the DDR controller
+
+       System Type->External Memory Configuration
+         CONFIG_SAMA5_DDRCS=y                  : Tell the system that DRAM is at the DDR CS
+         CONFIG_SAMA5_DDRCS_SIZE=268435456     : 2Gb DRAM -> 256GB
+         CONFIG_SAMA5_DDRCS_LPDDR2=y           : Its DDR2
+         CONFIG_SAMA5_MT47H128M16RT=y          : This is the type of DDR2
+
+       System Type->Heap Configuration
+         CONFIG_SAMA5_DDRCS_HEAP=y             : Add the SDRAM to the heap
+
+       Memory Management
+         CONFIG_MM_REGIONS=2                   : Two heap memory regions:  ISRAM and SDRAM
+
+    5. The Embest or Ronetix CPU module includes an Atmel AT25DF321A,
+       32-megabit, 2.7-volt SPI serial flash.  Support for that serial
+       FLASH can is enabled in this configuration.  These are the relevant
+       configuration settings:
+
+       System Type -> SAMA5 Peripheral Support
+         CONFIG_SAMA5_SPI0=y                   : Enable SPI0
+         CONFIG_SAMA5_DMAC0=y                  : Enable DMA controller 0
+
+       System Type -> SPI device driver options
+         CONFIG_SAMA5_SPI_DMA=y                : Use DMA for SPI transfers
+         CONFIG_SAMA5_SPI_DMATHRESHOLD=4       : Don't DMA for small transfers
+
+       Device Drivers -> SPI Driver Support
+         CONFIG_SPI=y                          : Enable SPI support
+         CONFIG_SPI_EXCHANGE=y                 : Support the exchange method
+
+       Device Drivers -> Memory Technology Device (MTD) Support
+         CONFIG_MTD=y                          : Enable MTD support
+         CONFIG_MTD_AT25=y                     : Enable the AT25 driver
+         CONFIG_AT25_SPIMODE=0                 : Use SPI mode 0
+         CONFIG_AT25_SPIFREQUENCY=20000000     : Use SPI frequency 20MHz
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
+       Board Selection
+         CONFIG_SAMA5_AT25_AUTOMOUNT=y         : Mounts AT25 for NSH
+         CONFIG_SAMA5_AT25_FTL=y               : Create block driver for FAT
+
+       NOTE that you must close JP1 on the Embest/Ronetix board in
+       order to enable the AT25 FLASH chip select.
+
+       You can then format the AT25 FLASH for a FAT file system and mount
+       the file system at /mnt/sdcard using these NSH commands:
+
+         nsh> mkfatfs /dev/mtdblock0
+         nsh> mount -t vfat /dev/mtdblock0 /mnt/sdcard
+
+       Then you an use the FLASH as a normal FAT file system:
+
+         nsh> echo "This is a test" >/mnt/sdcard/atest.txt
+         nsh> ls -l /mnt/sdcard
+         /mnt/sdcard:
+          -rw-rw-rw-      16 atest.txt
+         nsh> cat /mnt/sdcard/atest.txt
+         This is a test
+
   hello:
     This configuration directory, performs the (almost) simplest of all
     possible examples:  examples/hello.  This just comes up, says hello
@@ -933,7 +1049,12 @@ Configurations
       2013-7-31:  Delay loop calibrated.
 
   nsh:
-    This configuration directory provide the NuttShell (NSH).
+    This configuration directory provide the NuttShell (NSH).  There are
+    two NSH configurations:  nsh and demo.  The difference is that nsh is
+    intended to be a very simple NSH configuration upon which you can build
+    further functionality.  The demo configuration, on the other hand, is
+    intended to be a rich configuration that shows many features all working
+    together.
 
     NOTES:
     1. This configuration uses the default USART1 serial console.  That
@@ -1052,11 +1173,11 @@ Configurations
        System Type -> SAMA5 Peripheral Support
          CONFIG_SAMA5_SPI0=y                   : Enable SPI0
 
-       Device Drivers -> Memory Technology Device (MTD) Support
+       Device Drivers -> SPI Driver Support
          CONFIG_SPI=y                          : Enable SPI support
          CONFIG_SPI_EXCHANGE=y                 : Support the exchange method
 
-       Device Drivers -> SPI Driver Support
+       Device Drivers -> Memory Technology Device (MTD) Support
          CONFIG_MTD=y                          : Enable MTD support
          CONFIG_MTD_AT25=y                     : Enable the AT25 driver
          CONFIG_AT25_SPIMODE=0                 : Use SPI mode 0
@@ -1359,8 +1480,9 @@ Configurations
         speed USB FLASH drive using the Mass Storage Class (MSC) interface.
 
       2013-8-31: Added description to add UDPHS high-speed USB device
-        support.  That function is still, however, a long way from being
-        functional.
+        support.
+      2013-9-5: The UDPHS driver is basically functional, subject to more
+        testing.
 
   ostest:
     This configuration directory, performs a simple OS test using

@@ -5505,4 +5505,8 @@
 	* net/net_monitor.c: Fixes a race condition where a loss of connection
 	  may not be detected when the connection is lost before it has been
 	  accepted (from Max Holtzberg) (2013-9-6).
+	* configs/sama5d3x-ek/demo:  Add a new NSH configuration.  The
+	  original NSH configuration will be a simple platform for testing
+	  individual features; the demo configuration will be a more complex
+	  platform for demonstrating multiple interacting features (2013-9-6).
 

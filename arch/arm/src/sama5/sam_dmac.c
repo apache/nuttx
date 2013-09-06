@@ -1981,7 +1981,7 @@ DMA_HANDLE sam_dmachannel(uint8_t dmacno, uint32_t chflags)
   else
 #endif
 
-#ifdef CONFIG_SAMA5_DMAC0
+#ifdef CONFIG_SAMA5_DMAC1
   if (dmacno == 1)
     {
       dmac = &g_dmac1;
