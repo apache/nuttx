@@ -1053,6 +1053,7 @@ Configurations
         Device Drivers -> "USB Device Driver Support:
           CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
           CONFIG_USBDEV_TRACE_NRECORDS=256        : Buffer 256 records in memory
+          CONFIG_USBDEV_TRACE_STRINGS=y           : (optional)
 
         Application Configuration -> NSH LIbrary:
           CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
@@ -1073,6 +1074,11 @@ Configurations
        on the serial console.  However, the debug output will be
        asynchronous with the trace output and, hence, difficult to
        interpret.
+
+    STATUS:
+      2013-9-6:  I have not confirmed this, but it appears that the AT25 does not
+        retain its formatting across power cycles.  I need to study this more.
+      2013-9-6:  The mass storage class is not yet working.
 
   hello:
     This configuration directory, performs the (almost) simplest of all
