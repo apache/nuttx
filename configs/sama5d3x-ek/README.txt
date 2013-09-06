@@ -1240,6 +1240,7 @@ Configurations
 
         Device Drivers -> USB Device Driver Support
           CONFIG_CDCACM=y                       : Enable the CDC/ACM device
+          CONFIG_CDCACM_BULKIN_REQLEN=768       : Default too small for high-speed
 
         The following setting enables an example that can can be used to
         control the CDC/ACM device.  It will add two new NSH commands:
