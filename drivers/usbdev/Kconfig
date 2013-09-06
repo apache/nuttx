@@ -486,14 +486,14 @@ config USBMSC_EP0MAXPACKET
 
 config USBMSC_EPBULKOUT
 	int "Bulk OUT endpoint number"
-	default 0
+	default 2
 	---help---
 		The logical 7-bit address of a hardware endpoints that support
 		bulk OUT and IN operations
 
 config USBMSC_EPBULKIN
 	int "Bulk IN endpoint number"
-	default 0
+	default 3
 	---help---
 		The logical 7-bit address of a hardware endpoints that support
 		bulk OUT and IN operations
@@ -522,17 +522,17 @@ config USBMSC_BULKOUTREQLEN
 		maxpacket and ideally as large as a block device sector.
 
 config USBMSC_VENDORID
-	hex "Mass stroage Vendor ID"
+	hex "Mass storage Vendor ID"
 	default 0x00
 	
 config USBMSC_VENDORSTR
-	string "Mass stroage vendor string"
+	string "Mass storage vendor string"
 	default "Nuttx"
 	---help---
 		The vendor ID code/string
 
 config USBMSC_PRODUCTID
-	hex "Mass stroage Product ID"
+	hex "Mass storage Product ID"
 	default 0x00
 
 config USBMSC_PRODUCTSTR
@@ -544,7 +544,7 @@ config USBMSC_VERSIONNO
 	default "0x399"
 
 config USBMSC_REMOVABLE
-	bool "Mass stroage remove able"
+	bool "Mass storage remove able"
 	default n
 	---help---
 		Select if the media is removable

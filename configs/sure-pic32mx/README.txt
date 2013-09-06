@@ -743,7 +743,7 @@ Where <subdir> is one of the following:
           CONFIG_USBMSC=y           : Enables the USB MSC class
 
         Application Configuration->Examples:
-          CONFIG_EXAMPLES_USBSTORAGE=y  : Enhables apps/examples/usbmsc
+          CONFIG_EXAMPLES_USBMSC=y  : Enhables apps/examples/usbmsc
 
     3. SD Card Support.
 

@@ -90,6 +90,10 @@ ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += sam_nsh.c
 endif
 
+ifeq ($(CONFIG_USBMSC),y)
+CSRCS += sam_usbmsc.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += sam_autoleds.c
 else

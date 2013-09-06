@@ -784,6 +784,8 @@ static inline int usbmsc_cmdstartstopunit(FAR struct usbmsc_dev_s *priv)
   if (ret == OK)
     {
 #ifndef CONFIG_USBMSC_REMOVABLE
+      FAR struct usbmsc_lun_s *lun = priv->lun;
+
       /* This command is not valid if the media is not removable */
 
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_NOTREMOVABLE), 0);
@@ -806,8 +808,8 @@ static inline int usbmsc_cmdpreventmediumremoval(FAR struct usbmsc_dev_s *priv)
 {
 #ifdef CONFIG_USBMSC_REMOVABLE
   FAR struct scsicmd_preventmediumremoval_s *pmr = (FAR struct scsicmd_preventmediumremoval_s *)priv->cdb;
-  FAR struct usbmsc_lun_s *lun = priv->lun;
 #endif
+  FAR struct usbmsc_lun_s *lun = priv->lun;
   int ret;
 
   priv->u.alloclen = 0;

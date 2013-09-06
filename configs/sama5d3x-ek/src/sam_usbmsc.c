@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/sam3u-ek/src/up_usbmsc.c
+ * configs/sama5d3x-ek/src/up_usbmsc.c
  *
- *   Copyright (C) 2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Configure and register the SAM3U MMC/SD SDIO block driver.
@@ -45,12 +45,9 @@
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/sdio.h>
-#include <nuttx/mmcsd.h>
+#include "sama5d3x-ek.h"
 
-#include "sam_hsmci.h"
-
-#ifdef CONFIG_SAM34_HSMCI
+#ifdef CONFIG_USBMSC
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -58,14 +55,23 @@
 
 /* Configuration ************************************************************/
 
+#ifndef HAVE_AT25_MTD
+#  error AT25 Serial FLASH not supported
+#endif
+
+#ifndef CONFIG_SAMA5_AT25_FTL
+#  error AT25 FTL support required (CONFIG_SAMA5_AT25_FTL)
+#  undef HAVE_AT25_MTD
+#endif
+
 #ifndef CONFIG_EXAMPLES_USBMSC_DEVMINOR1
 #  define CONFIG_EXAMPLES_USBMSC_DEVMINOR1 0
 #endif
 
-/* SLOT number(s) depends on the board configuration */
-
-#undef SAM_MMCSDSLOTNO
-#define SAM_MMCSDSLOTNO 0
+#if CONFIG_EXAMPLES_USBMSC_DEVMINOR1 != AT25_MINOR
+#  error Confusion in the assignment of minor device numbers
+#  undef HAVE_AT25_MTD
+#endif
 
 /* Debug ********************************************************************/
 
@@ -101,47 +107,19 @@
 
 int usbmsc_archinitialize(void)
 {
-  FAR struct sdio_dev_s *sdio;
-  int ret;
+  /* Initialize the AT25 MTD driver */
 
-  /* First, get an instance of the SDIO interface */
-
-  message("usbmsc_archinitialize: "
-          "Initializing SDIO slot %d\n",
-          SAM_MMCSDSLOTNO);
-
-  sdio = sdio_initialize(SAM_MMCSDSLOTNO);
-  if (!sdio)
+#ifdef HAVE_AT25_MTD
+  int ret = sam_at25_initialize(AT25_MINOR);
+  if (ret < 0)
     {
-      message("usbmsc_archinitialize: Failed to initialize SDIO slot %d\n",
-              SAM_MMCSDSLOTNO);
-      return -ENODEV;
+      message("ERROR: sam_at25_initialize failed: %d\n", ret);
     }
 
-  /* Now bind the SPI interface to the MMC/SD driver */
-
-  message("usbmsc_archinitialize: "
-          "Bind SDIO to the MMC/SD driver, minor=%d\n",
-          CONFIG_EXAMPLES_USBMSC_DEVMINOR1);
-
-  ret = mmcsd_slotinitialize(CONFIG_EXAMPLES_USBMSC_DEVMINOR1, sdio);
-  if (ret != OK)
-    {
-      message("usbmsc_archinitialize: "
-              "Failed to bind SDIO to the MMC/SD driver: %d\n",
-              ret);
-      return ret;
-    }
-  message("usbmsc_archinitialize: "
-          "Successfully bound SDIO to the MMC/SD driver\n");
-
-  /* Then let's guess and say that there is a card in the slot.  I need to check to
-   * see if the SAM3U10E-EVAL board supports a GPIO to detect if there is a card in
-   * the slot.
-   */
-
-   sdio_mediachange(sdio, true);
-   return OK;
+  return ret;
+#else
+  return -ENODEV;
+#endif
 }
 
-#endif /* CONFIG_SAM34_HSMCI */
+#endif /* CONFIG_USBMSC */

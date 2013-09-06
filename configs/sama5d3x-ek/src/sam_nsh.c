@@ -56,34 +56,6 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-/* Assign minor device numbers.  We basically ignore more of the NSH
- * configuration here (NSH SLOTNO ignored completely; NSH minor extended
- * to handle more devices.
- */
-
-#ifndef CONFIG_NSH_MMCSDMINOR
-#  define CONFIG_NSH_MMCSDMINOR 0
-#endif
-
-#ifdef HAVE_HSMCI_MTD
-
-#  define HSMCI0_SLOTNO 0
-#  define HSMCI1_SLOTNO 1
-
-#  ifdef CONFIG_SAMA5_HSMCI0
-#     define HSMCI0_MINOR  CONFIG_NSH_MMCSDMINOR
-#     define HSMCI1_MINOR  (CONFIG_NSH_MMCSDMINOR+1)
-#     define AT25_MINOR    (CONFIG_NSH_MMCSDMINOR+2)
-#  else
-#     define HSMCI1_MINOR  CONFIG_NSH_MMCSDMINOR
-#     define AT25_MINOR    (CONFIG_NSH_MMCSDMINOR+1)
-#  endif
-#else
-#  define AT25_MINOR CONFIG_NSH_MMCSDMINOR
-#endif
-
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_CPP_HAVE_VARARGS

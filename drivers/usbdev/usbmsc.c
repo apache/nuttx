@@ -922,7 +922,6 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
 #ifdef CONFIG_USBDEV_DUALSPEED
   FAR const struct usb_epdesc_s *epdesc;
   bool hispeed = (priv->usbdev->speed == USB_SPEED_HIGH);
-  uint16_t bulkmxpacket;
 #endif
   int i;
   int ret = 0;
@@ -966,12 +965,11 @@ int usbmsc_setconfig(FAR struct usbmsc_dev_s *priv, uint8_t config)
   /* Configure the IN bulk endpoint */
 
 #ifdef CONFIG_USBDEV_DUALSPEED
-  bulkmxpacket = USBMSC_BULKMAXPACKET(hispeed);
-  epdesc       = USBMSC_EPBULKINDESC(hispeed);
-  ret          = EP_CONFIGURE(priv->epbulkin, epdesc, false);
+  epdesc = USBMSC_EPBULKINDESC(hispeed);
+  ret    = EP_CONFIGURE(priv->epbulkin, epdesc, false);
 #else
-  ret          = EP_CONFIGURE(priv->epbulkin,
-                              usbmsc_getepdesc(USBMSC_EPFSBULKIN), false);
+  ret    = EP_CONFIGURE(priv->epbulkin,
+                        usbmsc_getepdesc(USBMSC_EPFSBULKIN), false);
 #endif
   if (ret < 0)
     {

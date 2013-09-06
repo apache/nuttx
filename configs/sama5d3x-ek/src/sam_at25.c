@@ -78,56 +78,64 @@ int sam_at25_initialize(int minor)
 {
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
+  static bool initialized = false;
   int ret;
 
-  /* Get the SPI port driver */
+  /* Have we already initialized? */
 
-  spi = up_spiinitialize(AT25_PORT);
-  if (!spi)
+  if (!initialized)
     {
-      fdbg("ERROR: Failed to initialize SPI port %d\n", AT25_PORT);
-      return -ENODEV;
-    }
+      /* No.. Get the SPI port driver */
 
-  /* Now bind the SPI interface to the AT25 SPI FLASH driver */
+      spi = up_spiinitialize(AT25_PORT);
+      if (!spi)
+        {
+          fdbg("ERROR: Failed to initialize SPI port %d\n", AT25_PORT);
+          return -ENODEV;
+        }
 
-  mtd = at25_initialize(spi);
-  if (!mtd)
-    {
-      fdbg("ERROR: Failed to bind SPI port %d to the AT25 FLASH driver\n");
-      return -ENODEV;
-    }
+      /* Now bind the SPI interface to the AT25 SPI FLASH driver */
+
+      mtd = at25_initialize(spi);
+      if (!mtd)
+        {
+          fdbg("ERROR: Failed to bind SPI port %d to the AT25 FLASH driver\n");
+          return -ENODEV;
+        }
 
 #if defined(CONFIG_SAMA5_AT25_FTL)
-  /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+      /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
 
-  ret = ftl_initialize(CONFIG_NSH_MMCSDMINOR, mtd);
-  if (ret < 0)
-    {
-      fdbg("ERROR: Initialize the FTL layer\n");
-      return ret;
-    }
+      ret = ftl_initialize(CONFIG_NSH_MMCSDMINOR, mtd);
+      if (ret < 0)
+        {
+          fdbg("ERROR: Initialize the FTL layer\n");
+          return ret;
+        }
 
 #elif defined(CONFIG_SAMA5_AT25_NXFFS)
-  /* Initialize to provide NXFFS on the MTD interface */
+      /* Initialize to provide NXFFS on the MTD interface */
 
-  ret = nxffs_initialize(mtd);
-  if (ret < 0)
-    {
-      fdbg("ERROR: NXFFS initialization failed: %d\n", -ret);
-      return ret;
-    }
+      ret = nxffs_initialize(mtd);
+      if (ret < 0)
+        {
+          fdbg("ERROR: NXFFS initialization failed: %d\n", -ret);
+          return ret;
+        }
 
-  /* Mount the file system at /mnt/at25 */
+      /* Mount the file system at /mnt/at25 */
 
-  ret = mount(NULL, "/mnt/at25", "nxffs", 0, NULL);
-  if (ret < 0)
-    {
-      fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
-      return ret;
-    }
-
+      ret = mount(NULL, "/mnt/at25", "nxffs", 0, NULL);
+      if (ret < 0)
+        {
+          fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          return ret;
+        }
 #endif
+      /* Now we are intialized */
+
+      initialized = true;
+    }
 
   return OK;
 }
