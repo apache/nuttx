@@ -185,7 +185,7 @@ static inline void recvfrom_newtcpdata(FAR struct uip_driver_s *dev,
        * here.  For example, what if up_datahandler() cannot buffer the
        * remainder of the packet?  In that case, the data will be dropped but
        * still ACKed.  Therefore it would not be resent.
-       * 
+       *
        * This is probably not an issue here because we only get here if the
        * read-ahead buffers are empty and there would have to be something
        * serioulsy wrong with the configuration not to be able to buffer a
@@ -410,7 +410,7 @@ static int recvfrom_timeout(struct recvfrom_s *pstate)
  *
  * Parameters:
  *   dev    - The device driver data structure
- *   pstate - the recvfrom state structure 
+ *   pstate - the recvfrom state structure
  *
  * Returned Value:
  *   None
@@ -509,7 +509,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct uip_driver_s *dev,
            *    bit to determine if more data will be received.  You might
            *    do this if read-ahead buffereing is disabled and we want to
            *    minimize the loss of back-to-back packets.  In this case,
-           *    the transfer is complete when either a) the entire user buffer 
+           *    the transfer is complete when either a) the entire user buffer
            *    is full or 2) when the receive timeout occurs (below).
            */
 
@@ -620,7 +620,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct uip_driver_s *dev,
           pstate->rf_cb->priv    = NULL;
           pstate->rf_cb->event   = NULL;
 
-          /* Report an error only if no data has been received. (If 
+          /* Report an error only if no data has been received. (If
            * CONFIG_NET_TCP_RECVDELAY then rf_recvlen should always be
            * zero).
            */
@@ -655,7 +655,7 @@ static uint16_t recvfrom_tcpinterrupt(FAR struct uip_driver_s *dev,
  *
  * Parameters:
  *   dev    - The device driver data structure
- *   pstate - the recvfrom state structure 
+ *   pstate - the recvfrom state structure
  *
  * Returned Value:
  *   None
@@ -953,6 +953,10 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       uip_udpenable(conn);
 
+      /* Notify the device driver of the receive call */
+
+      netdev_rxnotify(&conn->ripaddr);
+
       /* Wait for either the receive to complete or for an error/timeout to occur.
        * NOTES:  (1) uip_lockedwait will also terminate if a signal is received, (2)
        * interrupts are disabled!  They will be re-enabled while the task sleeps
@@ -1033,7 +1037,7 @@ static ssize_t tcp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
    * or if the user request was completely satisfied with data from the readahead
    * buffers.
    */
-   
+
   ret = state.rf_recvlen;
 
 #else
