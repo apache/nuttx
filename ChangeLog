@@ -5502,4 +5502,7 @@
 	  changes made to pl2303, but untested (2013-9-5).
 	* arch/arm/src/sama5/sam_udphs.c:  The high-speed device side driver
 	  is now functional (although more testing is always needed) (2013-9-5).
+	* net/net_monitor.c: Fixes a race condition where a loss of connection
+	  may not be detected when the connection is lost before it has been
+	  accepted (from Max Holtzberg) (2013-9-6).
 
