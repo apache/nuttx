@@ -5514,4 +5514,7 @@
 	  to the free list.  From Max Holtzberg (2013-9-6).
 	* configs/sama5d3x-ek/demo:  Add support for USB MSC device on the
 	  AT25 serial FLASH (untested) (2013-9-6).
+	* drivers/net/enc28j60.c:  Changes back-ported from the ENCX24J600
+	  to the ENC28J60 by Max Holtzberg.  These seem like reasonable and
+	  correct changes, but have yet to be verified on an ENC28J60 (2013-9-6).
 

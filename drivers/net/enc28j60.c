@@ -369,7 +369,7 @@ static int  enc_reset(FAR struct enc_driver_s *priv);
  * Assumptions:
  *
  ****************************************************************************/
- 
+
 #ifdef CONFIG_SPI_OWNBUS
 static inline void enc_configspi(FAR struct spi_dev_s *spi)
 {
@@ -640,7 +640,7 @@ static void enc_setbank(FAR struct enc_driver_s *priv, uint8_t bank)
  * Assumptions:
  *
  ****************************************************************************/
- 
+
 static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
 {
   uint8_t rddata;
@@ -698,7 +698,7 @@ static uint8_t enc_rdbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg)
  * Assumptions:
  *
  ****************************************************************************/
- 
+
 static void enc_wrbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
                        uint8_t wrdata)
 {
@@ -761,7 +761,7 @@ static int enc_waitbreg(FAR struct enc_driver_s *priv, uint8_t ctrlreg,
       rddata  = enc_rdbreg(priv, ctrlreg);
       elapsed = clock_systimer() - start;
     }
-  while ((rddata & bits) != value || elapsed > ENC_POLLTIMEOUT);
+  while ((rddata & bits) != value && elapsed < ENC_POLLTIMEOUT);
 
   return (rddata & bits) == value ? OK : -ETIMEDOUT;
 }
@@ -869,7 +869,7 @@ static void enc_rdbuffer(FAR struct enc_driver_s *priv, FAR uint8_t *buffer,
   /* Send the read buffer memory command (ignoring the response) */
 
   (void)SPI_SEND(priv->spi, ENC_RBM);
- 
+
   /* Then read the buffer data */
 
   SPI_RECVBLOCK(priv->spi, buffer, buflen);
@@ -918,7 +918,7 @@ static inline void enc_wrbuffer(FAR struct enc_driver_s *priv,
    */
 
   (void)SPI_SEND(priv->spi, ENC_WBM);
- 
+
   /* "...the ENC28J60 requires a single per packet control byte to
    * precede the packet for transmission."
    *
@@ -1119,7 +1119,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
    */
 
   DEBUGASSERT((enc_rdgreg(priv, ENC_ECON1) & ECON1_TXRTS) == 0);
- 
+
   /* Send the packet: address=priv->dev.d_buf, length=priv->dev.d_len */
 
   enc_dumppacket("Transmit Packet", priv->dev.d_buf, priv->dev.d_len);
@@ -1314,7 +1314,7 @@ static void enc_txerif(FAR struct enc_driver_s *priv)
    * 1.  Read the TSV:
    *     - Read ETXNDL to get the end pointer
    *     - Read 7 bytes from that pointer + 1 using ENC_RMB.
-   * 2. Determine if we need to retransmit.  Check the LATE COLLISION bit, if 
+   * 2. Determine if we need to retransmit.  Check the LATE COLLISION bit, if
    *    set, then we need to transmit.
    * 3. Retranmit by resetting ECON1_TXRTS.
    */
@@ -1479,7 +1479,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
       priv->stats.rxnotok++;
 #endif
     }
- 
+
   /* Check for a usable packet length (4 added for the CRC) */
 
   else if (pktlen > (CONFIG_NET_BUFSIZE + 4) || pktlen <= (UIP_LLH_LEN + 4))
@@ -1507,7 +1507,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
       enc_dumppacket("Received Packet", priv->dev.d_buf, priv->dev.d_len);
 
       /* Dispatch the packet to uIP */
- 
+
       enc_rxdispatch(priv);
     }
 
@@ -1735,6 +1735,10 @@ static void enc_irqworker(FAR void *arg)
         }
     }
 
+  /* Enable GPIO interrupts */
+
+  priv->lower->enable(priv->lower);
+
   /* Enable Ethernet interrupts */
 
   enc_bfsgreg(priv, ENC_EIE, EIE_INTIE);
@@ -1743,10 +1747,6 @@ static void enc_irqworker(FAR void *arg)
 
   enc_unlock(priv);
   uip_unlock(lock);
-
-  /* Enable GPIO interrupts */
-
-  priv->lower->enable(priv->lower);
 }
 
 /****************************************************************************
@@ -1814,10 +1814,9 @@ static void enc_toworker(FAR void *arg)
   nlldbg("Tx timeout\n");
   DEBUGASSERT(priv);
 
-  /* Get exclusive access to both uIP and the SPI bus. */
+  /* Get exclusive access to uIP */
 
   lock = uip_lock();
-  enc_lock(priv);
 
   /* Increment statistics and dump debug info */
 
@@ -1828,7 +1827,7 @@ static void enc_toworker(FAR void *arg)
   /* Then reset the hardware: Take the interface down, then bring it
    * back up
    */
- 
+
   ret = enc_ifdown(&priv->dev);
   DEBUGASSERT(ret == OK);
   ret = enc_ifup(&priv->dev);
@@ -1838,9 +1837,8 @@ static void enc_toworker(FAR void *arg)
 
   (void)uip_poll(&priv->dev, enc_uiptxpoll);
 
-  /* Release lock on the SPI bus and uIP */
+  /* Release lock on uIP */
 
-  enc_unlock(priv);
   uip_unlock(lock);
 }
 
@@ -1983,7 +1981,7 @@ static void enc_polltimer(int argc, uint32_t arg, ...)
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
- *   provided 
+ *   provided
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -2107,7 +2105,7 @@ static int enc_ifdown(struct uip_driver_s *dev)
  * Function: enc_txavail
  *
  * Description:
- *   Driver callback invoked when new TX data is available.  This is a 
+ *   Driver callback invoked when new TX data is available.  This is a
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
@@ -2166,7 +2164,7 @@ static int enc_txavail(struct uip_driver_s *dev)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be added 
+ *   mac  - The MAC address to be added
  *
  * Returned Value:
  *   None
@@ -2204,7 +2202,7 @@ static int enc_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be removed 
+ *   mac  - The MAC address to be removed
  *
  * Returned Value:
  *   None
@@ -2325,7 +2323,7 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
  * Assumptions:
  *
  ****************************************************************************/
- 
+
 static void enc_pwrfull(FAR struct enc_driver_s *priv)
 {
   nllvdbg("Clear PWRSV\n");
@@ -2333,7 +2331,7 @@ static void enc_pwrfull(FAR struct enc_driver_s *priv)
   /* 1. Wake-up by clearing ECON2.PWRSV. */
 
   enc_bfcgreg(priv, ENC_ECON2, ECON2_PWRSV);
-  
+
   /* 2. Wait at least 300 ìs for the PHY to stabilize. To accomplish the
    * delay, the host controller may poll ESTAT.CLKRDY and wait for it to
    * become set.
@@ -2482,7 +2480,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   enc_wrbreg(priv, ENC_MAIPGH, 0x0c);
 
   /* Set Back-to-Back Inter-Packet Gap */
- 
+
   enc_wrbreg(priv, ENC_MABBIPG, 0x12);
 #else
   /* Set filter mode: unicast OR broadcast AND crc valid AND Full Duplex */
@@ -2508,7 +2506,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   /* enc_wrphy(priv, ENC_PHLCON, ??); */
 
   /* Setup up PHCON1 & 2 */
-  
+
 #ifdef CONFIG_ENC28J60_HALFDUPLEX
   enc_wrphy(priv, ENC_PHCON1, 0x00);
   enc_wrphy(priv, ENC_PHCON2, PHCON2_HDLDIS);
