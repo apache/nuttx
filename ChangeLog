@@ -5495,3 +5495,11 @@
 	  de Assis.  This is still very much a work in progress (2013-9-3).
 	* configs/*/usbmsc:  Renamed from config/*/usbstorage to match the
 	  change in naming in apps/examples submitted by CCTSAO (2013-9-5).
+	* drivers/usbdev.c and pl2303.c:  Don't use max packetsize assigned to
+	  the endpoint when allocating request buffers; The default value of
+	  the endpoint max packetsize may be incorrect because the endpoint
+	  has not yet been configured.  Verified on CDC/ACM.  Corresponding
+	  changes made to pl2303, but untested (2013-9-5).
+	* arch/arm/src/sama5/sam_udphs.c:  The high-speed device side driver
+	  is now functional (although more testing is always needed) (2013-9-5).
+

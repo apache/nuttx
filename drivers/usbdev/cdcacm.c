@@ -1006,9 +1006,13 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
 
   priv->epbulkout->priv = priv;
 
-  /* Pre-allocate read requests */
+  /* Pre-allocate read requests.  The buffer size is one full packet. */
 
-  reqlen = priv->epbulkout->maxpacket;
+#ifdef CONFIG_USBDEV_DUALSPEED
+  reqlen = CONFIG_CDCACM_EPBULKOUT_HSSIZE;
+#else
+  reqlen = CONFIG_CDCACM_EPBULKOUT_FSSIZE;
+#endif
 
   for (i = 0; i < CONFIG_CDCACM_NRDREQS; i++)
     {
@@ -1025,9 +1029,24 @@ static int cdcacm_bind(FAR struct usbdevclass_driver_s *driver,
       reqcontainer->req->callback = cdcacm_rdcomplete;
     }
 
-  /* Pre-allocate write request containers and put in a free list */
+  /* Pre-allocate write request containers and put in a free list.
+   * The buffer size should be larger than a full packet.  Otherwise,
+   * we will send a bogus null packet at the end of each packet.
+   *
+   * Pick the larger of the max packet size and the configured request
+   * size.
+   */
 
-  reqlen = MAX(CONFIG_CDCACM_BULKIN_REQLEN, priv->epbulkin->maxpacket);
+#ifdef CONFIG_USBDEV_DUALSPEED
+  reqlen = CONFIG_CDCACM_EPBULKIN_HSSIZE;
+#else
+  reqlen = CONFIG_CDCACM_EPBULKIN_FSSIZE;
+#endif
+
+  if (CONFIG_CDCACM_BULKIN_REQLEN > reqlen)
+    {
+      reqlen = CONFIG_CDCACM_BULKIN_REQLEN;
+    }
 
   for (i = 0; i < CONFIG_CDCACM_NWRREQS; i++)
     {

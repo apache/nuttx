@@ -472,7 +472,7 @@ static const struct usb_epdesc_s g_epbulkoutdesc =
   USB_DESC_TYPE_ENDPOINT,                       /* type */
   PL2303_EPOUTBULK_ADDR,                        /* addr */
   PL2303_EPOUTBULK_ATTR,                        /* attr */
-  { LSBYTE(64), MSBYTE(64) },                   /* maxpacket -- might change to 512*/
+  { LSBYTE(64), MSBYTE(64) },                   /* maxpacket -- might change to 512 */
   0                                             /* interval */
 };
 
@@ -482,7 +482,7 @@ static const struct usb_epdesc_s g_epbulkindesc =
   USB_DESC_TYPE_ENDPOINT,                       /* type */
   PL2303_EPINBULK_ADDR,                         /* addr */
   PL2303_EPINBULK_ATTR,                         /* attr */
-  { LSBYTE(64), MSBYTE(64) },                   /* maxpacket -- might change to 512*/
+  { LSBYTE(64), MSBYTE(64) },                   /* maxpacket -- might change to 512 */
   0                                             /* interval */
 };
 
@@ -1381,9 +1381,13 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
     }
   priv->epbulkout->priv = priv;
 
-  /* Pre-allocate read requests */
+  /* Pre-allocate read requests.  The buffer size is one full packet. */
 
-  reqlen = priv->epbulkout->maxpacket;
+#ifdef CONFIG_USBDEV_DUALSPEED
+  reqlen = 512;
+#else
+  reqlen = 64;
+#endif
 
   for (i = 0; i < CONFIG_PL2303_NRDREQS; i++)
     {
@@ -1400,9 +1404,24 @@ static int usbclass_bind(FAR struct usbdevclass_driver_s *driver,
       reqcontainer->req->callback = usbclass_rdcomplete;
     }
 
-  /* Pre-allocate write request containers and put in a free list */
+  /* Pre-allocate write request containers and put in a free list.
+   * The buffer size should be larger than a full packet.  Otherwise,
+   * we will send a bogus null packet at the end of each packet.
+   *
+   * Pick the larger of the max packet size and the configured request
+   * size.
+   */
 
-  reqlen = max(CONFIG_PL2303_BULKIN_REQLEN, priv->epbulkin->maxpacket);
+#ifdef CONFIG_USBDEV_DUALSPEED
+  reqlen = 512;
+#else
+  reqlen = 64;
+#endif
+
+  if (CONFIG_PL2303_BULKIN_REQLEN > reqlen)
+    {
+      reqlen = CONFIG_CDCACM_BULKIN_REQLEN;
+    }
 
   for (i = 0; i < CONFIG_PL2303_NWRREQS; i++)
     {

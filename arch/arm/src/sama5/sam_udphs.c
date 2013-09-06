@@ -3505,7 +3505,7 @@ static void sam_ep_freereq(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 }
 
 /****************************************************************************
- * Name: sam_ep_submit
+ * Name: sam_ep_allocbuffer
  *
  * Description:
  *   This is the allocbuffer() method of the USB device endpoint structure.
@@ -3522,7 +3522,7 @@ static void *sam_ep_allocbuffer(struct usbdev_ep_s *ep, uint16_t nbytes)
 #endif
 
 /****************************************************************************
- * Name: sam_ep_submit
+ * Name: sam_ep_freebuffer
  *
  * Description:
  *   This is the freebuffer() method of the USB device endpoint structure.

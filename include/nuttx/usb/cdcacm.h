@@ -140,7 +140,11 @@
 #endif
 
 #ifndef CONFIG_CDCACM_BULKIN_REQLEN
-#  define CONFIG_CDCACM_BULKIN_REQLEN 96
+#  ifdef CONFIG_USBDEV_DUALSPEED
+#    define CONFIG_CDCACM_BULKIN_REQLEN (3 * CONFIG_CDCACM_EPBULKIN_FSSIZE / 2)
+#  else
+#    define CONFIG_CDCACM_BULKIN_REQLEN (3 * CONFIG_CDCACM_EPBULKIN_FSSIZE / 2)
+#  endif
 #endif
 
 /* Endpoint number and size (in bytes) of the CDC host-to-device (OUT) data

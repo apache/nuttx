@@ -210,7 +210,8 @@ config PL2303_NRDREQS
 
 config PL2303_BULKIN_REQLEN
 	int "Size of one write request buffer"
-	default 96
+	default 768 if USBDEV_DUALSPEED
+	default 96  if !USBDEV_DUALSPEED
 	---help---
 		Ideally, the BULKOUT request size should *not* be the same size as
 		the maxpacket size.  That is because IN transfers of exactly the
@@ -376,7 +377,8 @@ config CDCACM_NRDREQS
 
 config CDCACM_BULKIN_REQLEN
 	int "Size of one write request buffer"
-	default 96
+	default 768 if USBDEV_DUALSPEED
+	default 96  if !USBDEV_DUALSPEED
 	---help---
 		Ideally, the BULKOUT request size should *not* be the same size as
 		the maxpacket size.  That is because IN transfers of exactly the
