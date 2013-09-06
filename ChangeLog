@@ -5509,4 +5509,7 @@
 	  original NSH configuration will be a simple platform for testing
 	  individual features; the demo configuration will be a more complex
 	  platform for demonstrating multiple interacting features (2013-9-6).
+	* net/uip/uip_tcpbacklog.c:  Fix a major bug in the TCP/IP backlog
+	  initialization:  Only the first backlog buffer was getting added
+	  to the free list.  From Max Holtzberg (2013-9-6).
 
