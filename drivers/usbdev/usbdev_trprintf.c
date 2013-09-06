@@ -66,7 +66,7 @@
  ****************************************************************************/
 
 /*******************************************************************************
- * Name: get_string
+ * Name: get_trstring
  *
  * Description:
  *   Search the driver string data to find the string matching the provided ID.
@@ -74,7 +74,8 @@
  *******************************************************************************/
 
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
-static FAR const char *get_string(FAR const struct trace_msg_t *array, int id)
+static FAR const char *get_trstring(FAR const struct trace_msg_t *array,
+                                    uint8_t id)
 {
   FAR const struct trace_msg_t *p = array;
   while (p->str != NULL)
@@ -88,7 +89,6 @@ static FAR const char *get_string(FAR const struct trace_msg_t *array, int id)
   
   return "???";
 }
-
 #endif
 
 /****************************************************************************
@@ -108,182 +108,426 @@ void usbtrace_trprintf(trprintf_t trprintf, uint16_t event, uint16_t value)
   switch (event)
     {
     case TRACE_DEVINIT:
-      trprintf("USB controller initialization: %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "DCD initialize",
+               TRACE_DATA(event), "Initialized", value);
+#else
+      trprintf("%-18s   : %04x\n", "DCD initialize",
+               TRACE_DATA(event), value);
+#endif
       break;
 
     case TRACE_DEVUNINIT:
-      trprintf("USB controller un-initialization: %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "DCD un-initialize",
+               "Un-initialized", value);
+#else
+      trprintf("%-18s   : %04x\n", "DCD un-initialize",
+               value);
+#endif
       break;
 
     case TRACE_DEVREGISTER:
-      trprintf("usbdev_register(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "DCD register",
+               "Registered", value);
+#else
+      trprintf("%-18s   : %04x\n", "DCD register",
+               value);
+#endif
       break;
 
     case TRACE_DEVUNREGISTER:
-      trprintf("usbdev_unregister(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "DCD un-register",
+               "Un-registered", value);
+#else
+      trprintf("%-18s   : %04x\n", "DCD un-register",
+               value);
+#endif
       break;
 
     case TRACE_EPCONFIGURE:
-      trprintf("Endpoint configure(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "EP configure",
+               "Endpoint configured", value);
+#else
+      trprintf("%-18s   : %04x\n", "EP configure",
+               value);
+#endif
       break;
 
     case TRACE_EPDISABLE:
-      trprintf("Endpoint disable(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "EP disable",
+               "Endpoint disabled", value);
+#else
+      trprintf("%-18s   : %04x\n", "EP disable",
+               value);
+#endif
       break;
 
     case TRACE_EPALLOCREQ:
-      trprintf("Endpoint allocreq(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "EP allocreq",
+               "Allocate endpoint request", value);
+#else
+      trprintf("%-18s   : %04x\n", "EP allocreq",
+               value);
+#endif
       break;
 
     case TRACE_EPFREEREQ:
-      trprintf("Endpoint freereq(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "EP freereq",
+               "Free endpoint request", value);
+#else
+      trprintf("%-18s   : %04x\n", "EP freereq",
+               value);
+#endif
       break;
 
     case TRACE_EPALLOCBUFFER:
-      trprintf("Endpoint allocbuffer(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "EP allocbuffer",
+               "Allocate endpoint buffer", value);
+#else
+      trprintf("%-18s   : %04x\n", "EP allocbuffer",
+               value);
+#endif
       break;
 
     case TRACE_EPFREEBUFFER:
-      trprintf("Endpoint freebuffer(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "EP freebuffer",
+               "Free endpoint buffer", value);
+#else
+      trprintf("%-18s   : %04x\n", "EP freebuffer",
+               value);
+#endif
       break;
 
     case TRACE_EPSUBMIT:
-      trprintf("Endpoint submit(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "EP submit",
+               "Submit endpoint request", value);
+#else
+      trprintf("%-18s   : %04x\n", "EP submit",
+               value);
+#endif
       break;
 
     case TRACE_EPCANCEL:
-      trprintf("Endpoint cancel(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "EP cancel",
+               "Cancel endpoint request", value);
+#else
+      trprintf("%-18s   : %04x\n", "EP cancel",
+               value);
+#endif
       break;
 
     case TRACE_EPSTALL:
-      trprintf("Endpoint stall(true): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "EP stall",
+               "Stall endpoint", value);
+#else
+      trprintf("%-18s   : %04x\n", "EP stall",
+               value);
+#endif
       break;
 
     case TRACE_EPRESUME:
-      trprintf("Endpoint stall(false): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "EP resume",
+               "Resume endpoint", value);
+#else
+      trprintf("%-18s   : %04x\n", "EP resume",
+               value);
+#endif
       break;
 
     case TRACE_DEVALLOCEP:
-      trprintf("Device allocep(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "DCD allocep",
+               "Allocate endpoint", value);
+#else
+      trprintf("%-18s   : %04x\n", "DCD allocep",
+               value);
+#endif
       break;
 
     case TRACE_DEVFREEEP:
-      trprintf("Device freeep(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "DCD freeep",
+               "Free endpoint", value);
+#else
+      trprintf("%-18s   : %04x\n", "DCD freeep",
+               value);
+#endif
       break;
 
     case TRACE_DEVGETFRAME:
-      trprintf("Device getframe(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "DCD getframe",
+               "Get frame number", value);
+#else
+      trprintf("%-18s   : %04x\n", "DCD getframe",
+               value);
+#endif
       break;
 
     case TRACE_DEVWAKEUP:
-      trprintf("Device wakeup(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "DCD wakeup",
+               "Wakeup event", value);
+#else
+      trprintf("%-18s   : %04x\n", "DCD wakeup",
+               value);
+#endif
       break;
 
     case TRACE_DEVSELFPOWERED:
-      trprintf("Device selfpowered(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "DCD selfpowered",
+               "Self-powered", value);
+#else
+      trprintf("%-18s   : %04x\n", "DCD selfpowered",
+               value);
+#endif
       break;
 
     case TRACE_DEVPULLUP:
-      trprintf("Device pullup(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "DCD pullup",
+               "Soft connect", value);
+#else
+      trprintf("%-18s   : %04x\n", "DCD pullup",
+               value);
+#endif
       break;
 
     case TRACE_CLASSBIND:
-      trprintf("Class bind(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "Class bind",
+               "Bind class", value);
+#else
+      trprintf("%-18s   : %04x\n", "Class bind",
+               value);
+#endif
       break;
 
     case TRACE_CLASSUNBIND:
-      trprintf("Class unbind(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "Class unbind",
+               "Un-bind class", value);
+#else
+      trprintf("%-18s   : %04x\n", "Class unbind",
+               value);
+#endif
       break;
 
     case TRACE_CLASSDISCONNECT:
-      trprintf("Class disconnect(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "Class disconnect",
+               "Disconnect class", value);
+#else
+      trprintf("%-18s   : %04x\n", "Class disconnect",
+               value);
+#endif
       break;
 
     case TRACE_CLASSSETUP:
-      trprintf("Class setup(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "Class setup",
+               "Class SETUP request", value);
+#else
+      trprintf("%-18s   : %04x\n", "Class setup",
+               value);
+#endif
       break;
 
     case TRACE_CLASSSUSPEND:
-      trprintf("Class suspend(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "Class suspend",
+               "Suspend class", value);
+#else
+      trprintf("%-18s   : %04x\n", "Class suspend",
+               value);
+#endif
       break;
 
     case TRACE_CLASSRESUME:
-      trprintf("Class resume(): %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "Class resume",
+               "Resume class", value);
+#else
+      trprintf("%-18s   : %04x\n", "Class resume",
+               value);
+#endif
       break;
 
     case TRACE_CLASSRDCOMPLETE:
-      trprintf("Class RD request complete: %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "Class RD complete",
+               "Read request complete", value);
+#else
+      trprintf("%-18s   : %04x\n", "Class RD complete",
+               value);
+#endif
       break;
 
     case TRACE_CLASSWRCOMPLETE:
-      trprintf("Class WR request complete: %04x\n", value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+      trprintf("%-18s   : %-40s %04x\n", "Class RW complete",
+               "Write request complete", value);
+#else
+      trprintf("%-18s   : %04x\n", "Class RW complete",
+               value);
+#endif
       break;
 
     default:
       switch (TRACE_ID(event))
         {
         case TRACE_CLASSAPI_ID:        /* Other class driver system API calls */
-          trprintf("Class API call %d: %04x\n", TRACE_DATA(event), value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+          trprintf("%-18s %02x: %-40s %04x\n", "Class API call",
+                   TRACE_DATA(event),
+                   get_trstring(g_usb_trace_strings_clsapi, TRACE_DATA(event)),
+                   value);
+#else
+          trprintf("%-18s %02x: %04x\n", "Class API call",
+                   TRACE_DATA(event), value);
+#endif
           break;
 
         case TRACE_CLASSSTATE_ID:      /* Track class driver state changes */
-          trprintf("Class state %d: %04x\n", TRACE_DATA(event), value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+          trprintf("%-18s %02x: %-40s %04x\n", "Class state",
+                   TRACE_DATA(event),
+                   get_trstring(g_usb_trace_strings_clsstate, TRACE_DATA(event)),
+                   value);
+#else
+          trprintf("%-18s %02x: %04x\n", "Class state",
+                   TRACE_DATA(event), value);
+#endif
           break;
 
         case TRACE_INTENTRY_ID:        /* Interrupt handler entry */
-          trprintf("Interrupt %d entry: %04x\n", TRACE_DATA(event), value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+          trprintf("%-18s%3d: %-40s %04x\n", "Interrupt entry",
+                   TRACE_DATA(event), "ENTRY", value);
+#else
+          trprintf("%-18s%3d: %04x\n", "Interrupt entry",
+                   TRACE_DATA(event), value);
+#endif
           break;
 
         case TRACE_INTDECODE_ID:       /* Decoded interrupt event */
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
-          trprintf("Interrupt decode %3d: %-40s %04x\n", TRACE_DATA(event),
-                   get_string(g_usb_trace_strings_intdecode, TRACE_DATA(event)),
+          trprintf("%-18s%3d: %-40s %04x\n", "Interrupt decode",
+                   TRACE_DATA(event),
+                   get_trstring(g_usb_trace_strings_intdecode, TRACE_DATA(event)),
                    value);
 #else
-          trprintf("Interrupt decode %d: %04x\n", TRACE_DATA(event), value);
+          trprintf("%-18s%3d: %04x\n", "Interrupt decode",
+                   TRACE_DATA(event), value);
 #endif
           break;
 
         case TRACE_INTEXIT_ID:         /* Interrupt handler exit */
-          trprintf("Interrupt %d exit: %04x\n", TRACE_DATA(event), value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+          trprintf("%-18s%3d: %-40s %04x\n", "Interrupt exit",
+                   TRACE_DATA(event), "EXIT", value);
+#else
+          trprintf("%-18s%3d: %04x\n", "Interrupt exit",
+                   TRACE_DATA(event), value);
+#endif
           break;
 
         case TRACE_OUTREQQUEUED_ID:    /* Request queued for OUT endpoint */
-          trprintf("EP%d OUT request queued: %04x\n", TRACE_DATA(event), value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+          trprintf("EP%2d %-16s: %-40s %04x\n",
+                   TRACE_DATA(event), "OUT queued",
+                   "Read request queued", value);
+#else
+          trprintf("EP%2d %-16s: %04x\n",
+                   TRACE_DATA(event), "OUT queued", value);
+#endif
           break;
 
         case TRACE_INREQQUEUED_ID:     /* Request queued for IN endpoint */
-          trprintf("EP%d IN request queued: %04x\n", TRACE_DATA(event), value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+          trprintf("EP%2d %-16s: %-40s %04x\n",
+                   TRACE_DATA(event), "IN queued",
+                   "Write request queued", value);
+#else
+          trprintf("EP%2d %-16s: %04x\n",
+                   TRACE_DATA(event), "IN queued", value);
+#endif
           break;
 
         case TRACE_READ_ID:            /* Read (OUT) action */
-          trprintf("EP%d OUT read: %04x\n", TRACE_DATA(event), value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+          trprintf("EP%2d %-16s: %-40s %04x\n",
+                   TRACE_DATA(event), "OUT read",
+                   "Incoming data read", value);
+#else
+          trprintf("EP%2d %-16s: %04x\n",
+                   TRACE_DATA(event), "OUT read", value);
+#endif
           break;
 
         case TRACE_WRITE_ID:           /* Write (IN) action */
-          trprintf("EP%d IN write: %04x\n", TRACE_DATA(event), value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+          trprintf("EP%2d %-16s: %-40s %04x\n",
+                   TRACE_DATA(event), "IN write",
+                   "Outgoing data written", value);
+#else
+          trprintf("EP%2d %-16s: %04x\n",
+                   TRACE_DATA(event), "IN write", value);
+#endif
           break;
 
         case TRACE_COMPLETE_ID:        /* Request completed */
-          trprintf("EP%d request complete: %04x\n", TRACE_DATA(event), value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+          trprintf("EP%2d %-16s: %-40s %04x\n",
+                   TRACE_DATA(event), "Request complete",
+                   "Request completed", value);
+#else
+          trprintf("EP%2d %-16s: %04x\n",
+                   TRACE_DATA(event), "Request complete", value);
+#endif
           break;
 
         case TRACE_DEVERROR_ID:        /* USB controller driver error event */
 #ifdef CONFIG_USBDEV_TRACE_STRINGS
-          trprintf("Controller error: %02x: %-40s %04x\n", TRACE_DATA(event),
-                   get_string(g_usb_trace_strings_deverror, TRACE_DATA(event)),
+          trprintf("%-18s %02x: %-40s %04x\n", "Controller error",
+                   TRACE_DATA(event),
+                   get_trstring(g_usb_trace_strings_deverror, TRACE_DATA(event)),
                    value);
 #else
-          trprintf("Controller error: %02x:%04x\n", TRACE_DATA(event), value);
+          trprintf("%-18s %02x: %04x\n", "Controller error",
+                   TRACE_DATA(event),
+                   value);
 #endif
           break;
 
         case TRACE_CLSERROR_ID:        /* USB class driver error event */
-          trprintf("Class error: %02x:%04x\n", TRACE_DATA(event), value);
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+          trprintf("%-18s %02x: %-40s %04x\n", "Class error",
+                   TRACE_DATA(event),
+                   get_trstring(g_usb_trace_strings_clserror, TRACE_DATA(event)),
+                   value);
+#else
+          trprintf("%-18s %02x: %04x\n", "Class error",
+                   TRACE_DATA(event), value);
+#endif
           break;
 
         default:
-          trprintf("Unrecognized event: %02x:%02x:%04x\n",
+          trprintf("Unrecognized event   : %02x:%02x:%04x\n",
                 TRACE_ID(event) >> 8, TRACE_DATA(event), value);
           break;
         }

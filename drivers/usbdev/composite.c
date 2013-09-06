@@ -409,7 +409,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 #ifdef CONFIG_DEBUG
   if (!driver || !dev || !dev->ep0 || !ctrl)
     {
-      usbtrace(TRACE_CLSERROR(COMPOSITE_TRACEERR_SETUPINVALIDARGS), 0);
+      usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_SETUPINVALIDARGS), 0);
       return -EIO;
      }
 #endif
@@ -422,7 +422,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 #ifdef CONFIG_DEBUG
   if (!priv)
     {
-      usbtrace(TRACE_CLSERROR(COMPOSITE_TRACEERR_EP0NOTBOUND2), 0);
+      usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_EP0NOTBOUND2), 0);
       return -ENODEV;
     }
 #endif
@@ -510,7 +510,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
               default:
                 {
-                  usbtrace(TRACE_CLSERROR(COMPOSITE_TRACEERR_GETUNKNOWNDESC), value);
+                  usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_GETUNKNOWNDESC), value);
                 }
                 break;
               }
@@ -571,7 +571,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
            break;
 
         default:
-          usbtrace(TRACE_CLSERROR(COMPOSITE_TRACEERR_UNSUPPORTEDSTDREQ), ctrl->req);
+          usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_UNSUPPORTEDSTDREQ), ctrl->req);
           break;
         }
     }
@@ -613,7 +613,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
       ret = EP_SUBMIT(dev->ep0, ctrlreq);
       if (ret < 0)
         {
-          usbtrace(TRACE_CLSERROR(COMPOSITE_TRACEERR_EPRESPQ), (uint16_t)-ret);
+          usbtrace(TRACE_CLSERROR(USBCOMPOSITE_TRACEERR_EPRESPQ), (uint16_t)-ret);
           ctrlreq->result = OK;
           composite_ep0incomplete(dev->ep0, ctrlreq);
         }

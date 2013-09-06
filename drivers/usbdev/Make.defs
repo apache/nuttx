@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/usbdev/Make.defs
 #
-#   Copyright (C) 2008, 2010-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2010-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,10 @@ endif
 
 ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
   CSRCS += composite.c composite_desc.c
+endif
+
+ifeq ($(CONFIG_USBDEV_TRACE_STRINGS),y)
+  CSRCS += usbdev_strings.c
 endif
 
 CSRCS += usbdev_trace.c usbdev_trprintf.c

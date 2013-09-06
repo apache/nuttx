@@ -5517,4 +5517,7 @@
 	* drivers/net/enc28j60.c:  Changes back-ported from the ENCX24J600
 	  to the ENC28J60 by Max Holtzberg.  These seem like reasonable and
 	  correct changes, but have yet to be verified on an ENC28J60 (2013-9-6).
+	* drivers/usbdev/usbdev_strings.c:  Extended decoding and stringifging
+	  of USB trace output to include trace output from class drivers.
+	  (2013-9-6).
 

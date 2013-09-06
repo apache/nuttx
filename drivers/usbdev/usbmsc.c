@@ -1252,7 +1252,7 @@ void usbmsc_deferredresponse(FAR struct usbmsc_dev_s *priv, bool failed)
     {
       /* On a failure, the USB driver will stall. */
 
-      usbtrace(TRACE_DEVERROR(USBMSC_TRACEERR_DEFERREDRESPSTALLED), 0);
+      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_DEFERREDRESPSTALLED), 0);
       EP_STALL(dev->ep0);
     }
 }
