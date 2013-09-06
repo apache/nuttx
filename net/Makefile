@@ -76,7 +76,7 @@ NETDEV_CSRCS = netdev_register.c netdev_ioctl.c net_poll.c netdev_txnotify.c \
 		  netdev_foreach.c netdev_unregister.c netdev_sem.c
 
 ifeq ($(CONFIG_NET_RXAVAIL),y)
-NETDEV_CSRCS +=netdev_rxnotify.c
+NETDEV_CSRCS += netdev_rxnotify.c
 endif
 
 include uip/Make.defs

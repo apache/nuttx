@@ -138,7 +138,7 @@ int net_startmonitor(FAR struct socket *psock)
    * the monitoring callback.)
    */
 
-  if (conn->tcpstateflags == UIP_CLOSED)
+  if ((conn->tcpstateflags & UIP_CLOSED) != 0)
     {
       connection_event(conn, UIP_CLOSE);
     }
