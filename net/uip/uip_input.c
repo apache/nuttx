@@ -2,7 +2,7 @@
  * netuip/uip_input.c
  * The uIP TCP/IP stack code.
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -170,7 +170,7 @@ static uint8_t uip_reass(void)
    * fragment into the buffer.
    */
 
-  if (uiphdr_addr_cmp(pbuf->srcipaddr, pfbuf->srcipaddr) && 
+  if (uiphdr_addr_cmp(pbuf->srcipaddr, pfbuf->srcipaddr) &&
       uiphdr_addr_cmp(pbuf->destipaddr == pfbuf->destipaddr) &&
       pbuf->g_ipid[0] == pfbuf->g_ipid[0] && pbuf->g_ipid[1] == pfbuf->g_ipid[1])
     {
@@ -291,11 +291,14 @@ nullreturn:
  *
  * Description:
  *
+ * Returned Value:
+ *   OK if packet could be processed, otherwise ERROR.
+ *
  * Assumptions:
  *
  ****************************************************************************/
 
-void uip_input(struct uip_driver_s *dev)
+int uip_input(struct uip_driver_s *dev)
 {
   struct uip_ip_hdr *pbuf = BUF;
   uint16_t iplen;
@@ -311,7 +314,7 @@ void uip_input(struct uip_driver_s *dev)
 #ifdef CONFIG_NET_IPv6
   /* Check validity of the IP header. */
 
-  if ((pbuf->vtc & 0xf0) != 0x60) 
+  if ((pbuf->vtc & 0xf0) != 0x60)
     {
       /* IP version and header length. */
 
@@ -405,8 +408,7 @@ void uip_input(struct uip_driver_s *dev)
       uip_ipaddr_cmp(pbuf->destipaddr, g_alloneaddr))
 #endif
     {
-      uip_udpinput(dev);
-      return;
+      return uip_udpinput(dev);
     }
 
   /* In most other cases, the device must be assigned a non-zero IP
@@ -537,9 +539,11 @@ void uip_input(struct uip_driver_s *dev)
 
   /* Return and let the caller do any actual transmission. */
 
-  return;
+  return OK;
 
 drop:
   dev->d_len = 0;
+
+  return ERROR;
 }
 #endif /* CONFIG_NET */

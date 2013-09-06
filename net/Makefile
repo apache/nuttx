@@ -1,7 +1,7 @@
 ############################################################################
 # net/Makefile
 #
-#   Copyright (C) 2007, 2008, 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@ endif
 # Socket options
 
 ifeq ($(CONFIG_NET_SOCKOPTS),y)
-SOCK_CSRCS += setsockopt.c getsockopt.c 
+SOCK_CSRCS += setsockopt.c getsockopt.c
 ifneq ($(CONFIG_DISABLE_CLOCK),y)
 SOCK_CSRCS += net_timeo.c net_dsec2timeval.c net_timeval2dsec.c
 ifneq ($(CONFIG_NET_SLIP),y)
@@ -65,7 +65,7 @@ endif
 # Support for network access using streams
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)
-SOCK_CSRCS += net_checksd.c 
+SOCK_CSRCS += net_checksd.c
 endif
 
 # Support for operations on network devices
@@ -74,6 +74,10 @@ NETDEV_ASRCS =
 NETDEV_CSRCS = netdev_register.c netdev_ioctl.c net_poll.c netdev_txnotify.c \
 		  netdev_findbyname.c netdev_findbyaddr.c netdev_count.c \
 		  netdev_foreach.c netdev_unregister.c netdev_sem.c
+
+ifeq ($(CONFIG_NET_RXAVAIL),y)
+NETDEV_CSRCS +=netdev_rxnotify.c
+endif
 
 include uip/Make.defs
 endif

@@ -211,6 +211,14 @@ FAR struct uip_driver_s *netdev_findbyaddr(FAR const uip_ipaddr_t *raddr);
 void netdev_txnotify(const uip_ipaddr_t *raddr);
 #endif
 
+/* net_rxnotify.c ************************************************************/
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_RXAVAIL)
+void netdev_rxnotify(const uip_ipaddr_t *raddr);
+#else
+#  define netdev_rxnotify(raddr)
+#endif
+
 /* net_count.c ***************************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_internal.h
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __UIP_INTERNAL_H
-#define __UIP_INTERNAL_H
+#ifndef _NET_UIP_UIP_INTERNAL_H
+#define _NET_UIP_UIP_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -96,77 +96,77 @@ extern "C" {
 
 /* Defined in uip_callback.c ************************************************/
 
-EXTERN void uip_callbackinit(void);
-EXTERN FAR struct uip_callback_s *uip_callbackalloc(struct uip_callback_s **list);
-EXTERN void uip_callbackfree(FAR struct uip_callback_s *cb, struct uip_callback_s **list);
-EXTERN uint16_t uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn,
-                                  uint16_t flags, FAR struct uip_callback_s *list);
+void uip_callbackinit(void);
+FAR struct uip_callback_s *uip_callbackalloc(struct uip_callback_s **list);
+void uip_callbackfree(FAR struct uip_callback_s *cb, struct uip_callback_s **list);
+uint16_t uip_callbackexecute(FAR struct uip_driver_s *dev, void *pvconn,
+                             uint16_t flags, FAR struct uip_callback_s *list);
 
 #ifdef CONFIG_NET_TCP
 /* Defined in uip_tcpconn.c *************************************************/
 
-EXTERN void uip_tcpinit(void);
-EXTERN struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf);
-EXTERN struct uip_conn *uip_nexttcpconn(struct uip_conn *conn);
-EXTERN struct uip_conn *uip_tcplistener(uint16_t portno);
-EXTERN struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf);
+void uip_tcpinit(void);
+struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf);
+struct uip_conn *uip_nexttcpconn(struct uip_conn *conn);
+struct uip_conn *uip_tcplistener(uint16_t portno);
+struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf);
 
 /* Defined in uip_tcpseqno.c ************************************************/
 
-EXTERN void uip_tcpsetsequence(FAR uint8_t *seqno, uint32_t value);
-EXTERN uint32_t uip_tcpgetsequence(FAR uint8_t *seqno);
-EXTERN uint32_t uip_tcpaddsequence(FAR uint8_t *seqno, uint16_t len);
-EXTERN void uip_tcpinitsequence(FAR uint8_t *seqno);
-EXTERN void uip_tcpnextsequence(void);
+void uip_tcpsetsequence(FAR uint8_t *seqno, uint32_t value);
+uint32_t uip_tcpgetsequence(FAR uint8_t *seqno);
+uint32_t uip_tcpaddsequence(FAR uint8_t *seqno, uint16_t len);
+void uip_tcpinitsequence(FAR uint8_t *seqno);
+void uip_tcpnextsequence(void);
 
 /* Defined in uip_tcppoll.c *************************************************/
 
-EXTERN void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn);
+void uip_tcppoll(struct uip_driver_s *dev, struct uip_conn *conn);
 
 /* Defined in uip_udptimer.c ************************************************/
 
-EXTERN void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec);
+void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec);
 
 /* Defined in uip_listen.c **************************************************/
 
-EXTERN void uip_listeninit(void);
-EXTERN bool uip_islistener(uint16_t port);
-EXTERN int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn, uint16_t portno);
+void uip_listeninit(void);
+bool uip_islistener(uint16_t port);
+int uip_accept(struct uip_driver_s *dev, struct uip_conn *conn, uint16_t portno);
 
 /* Defined in uip_tcpsend.c *************************************************/
 
-EXTERN void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn,
-                        uint16_t flags, uint16_t len);
-EXTERN void uip_tcpreset(struct uip_driver_s *dev);
-EXTERN void uip_tcpack(struct uip_driver_s *dev, struct uip_conn *conn,
-                       uint8_t ack);
+void uip_tcpsend(struct uip_driver_s *dev, struct uip_conn *conn,
+                 uint16_t flags, uint16_t len);
+void uip_tcpreset(struct uip_driver_s *dev);
+void uip_tcpack(struct uip_driver_s *dev, struct uip_conn *conn,
+                uint8_t ack);
 
 /* Defined in uip_tcpappsend.c **********************************************/
 
-EXTERN void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
-                           uint16_t result);
-EXTERN void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
-                          uint16_t result);
+void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
+                    uint16_t result);
+void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
+                   uint16_t result);
 
 /* Defined in uip_tcpinput.c ************************************************/
 
-EXTERN void uip_tcpinput(struct uip_driver_s *dev);
+void uip_tcpinput(struct uip_driver_s *dev);
 
 /* Defined in uip_tcpcallback.c *********************************************/
 
-EXTERN uint16_t uip_tcpcallback(FAR struct uip_driver_s *dev,
-                                FAR struct uip_conn *conn, uint16_t flags);
+uint16_t uip_tcpcallback(FAR struct uip_driver_s *dev,
+                         FAR struct uip_conn *conn, uint16_t flags);
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
-EXTERN uint16_t uip_datahandler(FAR struct uip_conn *conn,
-                                FAR uint8_t *buffer, uint16_t nbytes);
+uint16_t uip_datahandler(FAR struct uip_conn *conn,
+                         FAR uint8_t *buffer, uint16_t nbytes);
 #endif
 
 /* Defined in uip_tcpreadahead.c ********************************************/
 
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
-EXTERN void uip_tcpreadaheadinit(void);
-EXTERN struct uip_readahead_s *uip_tcpreadaheadalloc(void);
-EXTERN void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
+void uip_tcpreadaheadinit(void);
+struct uip_readahead_s *uip_tcpreadaheadalloc(void);
+void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
 #endif /* CONFIG_NET_NTCP_READAHEAD_BUFFERS */
 
 #endif /* CONFIG_NET_TCP */
@@ -174,41 +174,41 @@ EXTERN void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
 #ifdef CONFIG_NET_UDP
 /* Defined in uip_udpconn.c *************************************************/
 
-EXTERN void uip_udpinit(void);
-EXTERN struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf);
-EXTERN struct uip_udp_conn *uip_nextudpconn(struct uip_udp_conn *conn);
+void uip_udpinit(void);
+struct uip_udp_conn *uip_udpactive(struct uip_udpip_hdr *buf);
+struct uip_udp_conn *uip_nextudpconn(struct uip_udp_conn *conn);
 
 /* Defined in uip_udppoll.c *************************************************/
 
-EXTERN void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn);
+void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn);
 
 /* Defined in uip_udpsend.c *************************************************/
 
-EXTERN void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn);
+void uip_udpsend(struct uip_driver_s *dev, struct uip_udp_conn *conn);
 
 /* Defined in uip_udpinput.c ************************************************/
 
-EXTERN void uip_udpinput(struct uip_driver_s *dev);
+int uip_udpinput(struct uip_driver_s *dev);
 
 /* Defined in uip_udpcallback.c *********************************************/
 
-EXTERN void uip_udpcallback(struct uip_driver_s *dev,
-                            struct uip_udp_conn *conn, uint16_t flags);
+int uip_udpcallback(struct uip_driver_s *dev,
+                    struct uip_udp_conn *conn, uint16_t flags);
 #endif /* CONFIG_NET_UDP */
 
 #ifdef CONFIG_NET_ICMP
 /* Defined in uip_icmpinput.c ***********************************************/
 
-EXTERN void uip_icmpinput(struct uip_driver_s *dev);
+void uip_icmpinput(struct uip_driver_s *dev);
 
 #ifdef CONFIG_NET_ICMP_PING
 /* Defined in uip_icmpoll.c *************************************************/
 
-EXTERN void uip_icmppoll(struct uip_driver_s *dev);
+void uip_icmppoll(struct uip_driver_s *dev);
 
 /* Defined in uip_icmsend.c *************************************************/
 
-EXTERN void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr);
+void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr);
 
 #endif /* CONFIG_NET_ICMP_PING */
 #endif /* CONFIG_NET_ICMP */
@@ -216,50 +216,49 @@ EXTERN void uip_icmpsend(struct uip_driver_s *dev, uip_ipaddr_t *destaddr);
 #ifdef CONFIG_NET_IGMP
 /* Defined in uip_igmpinit.c ************************************************/
 
-EXTERN void uip_igmpinit(void);
+void uip_igmpinit(void);
 
 /* Defined in uip_igmpinput.c ***********************************************/
 
-EXTERN void uip_igmpinput(struct uip_driver_s *dev);
+void uip_igmpinput(struct uip_driver_s *dev);
 
 /* Defined in uip_igmpgroup.c ***********************************************/
 
-EXTERN void uip_grpinit(void);
-EXTERN FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
-                                             FAR const uip_ipaddr_t *addr);
-EXTERN FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev,
-                                            FAR const uip_ipaddr_t *addr);
-EXTERN FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
-                                                 FAR const uip_ipaddr_t *addr);
-EXTERN void uip_grpfree(FAR struct uip_driver_s *dev,
-                        FAR struct igmp_group_s *group);
+void uip_grpinit(void);
+FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
+                                      FAR const uip_ipaddr_t *addr);
+FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev,
+                                     FAR const uip_ipaddr_t *addr);
+FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
+                                          FAR const uip_ipaddr_t *addr);
+void uip_grpfree(FAR struct uip_driver_s *dev,
+                 FAR struct igmp_group_s *group);
 
 /* Defined in uip_igmpmsg.c **************************************************/
 
-EXTERN void uip_igmpschedmsg(FAR struct igmp_group_s *group, uint8_t msgid);
-EXTERN void uip_igmpwaitmsg(FAR struct igmp_group_s *group, uint8_t msgid);
+void uip_igmpschedmsg(FAR struct igmp_group_s *group, uint8_t msgid);
+void uip_igmpwaitmsg(FAR struct igmp_group_s *group, uint8_t msgid);
 
 /* Defined in uip_igmppoll.c *************************************************/
 
-EXTERN void uip_igmppoll(FAR struct uip_driver_s *dev);
+void uip_igmppoll(FAR struct uip_driver_s *dev);
 
 /* Defined in up_igmpsend.c **************************************************/
 
-EXTERN void uip_igmpsend(FAR struct uip_driver_s *dev,
-                         FAR struct igmp_group_s *group,
-                         FAR uip_ipaddr_t *dest);
+void uip_igmpsend(FAR struct uip_driver_s *dev, FAR struct igmp_group_s *group,
+                  FAR uip_ipaddr_t *dest);
 
 /* Defined in uip_igmptimer.c ************************************************/
 
-EXTERN int uip_decisec2tick(int decisecs);
-EXTERN void uip_igmpstartticks(FAR struct igmp_group_s *group, int ticks);
-EXTERN void uip_igmpstarttimer(FAR struct igmp_group_s *group, uint8_t decisecs);
-EXTERN bool uip_igmpcmptimer(FAR struct igmp_group_s *group, int maxticks);
+int uip_decisec2tick(int decisecs);
+void uip_igmpstartticks(FAR struct igmp_group_s *group, int ticks);
+void uip_igmpstarttimer(FAR struct igmp_group_s *group, uint8_t decisecs);
+bool uip_igmpcmptimer(FAR struct igmp_group_s *group, int maxticks);
 
 /* Defined in uip_mcastmac ***************************************************/
 
-EXTERN void uip_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);
-EXTERN void uip_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);
+void uip_addmcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);
+void uip_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *ip);
 
 #endif /* CONFIG_NET_IGMP */
 
@@ -269,4 +268,4 @@ EXTERN void uip_removemcastmac(FAR struct uip_driver_s *dev, FAR uip_ipaddr_t *i
 #endif
 
 #endif /* CONFIG_NET */
-#endif /* __UIP_INTERNAL_H */
+#endif /* _NET_UIP_UIP_INTERNAL_H */

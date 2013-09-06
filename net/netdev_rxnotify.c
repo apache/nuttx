@@ -1,7 +1,7 @@
 /****************************************************************************
- * net/uip/uip_udpcallback.c
+ * net/netdev_rxnotify.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,19 +38,31 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
+#if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_RXAVAIL)
 
-#include <stdint.h>
+#include <sys/types.h>
+#include <string.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/net/uip/uipopt.h>
-#include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arch.h>
 
-#include "uip_internal.h"
+#include "net_internal.h"
+
+/****************************************************************************
+ * Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Priviate Types
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -58,44 +70,40 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Global Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Function: uip_udpcallback
+ * Function: netdev_rxnotify
  *
  * Description:
- *   Inform the application holding the UDP socket of a change in state.
+ *   Notify the device driver that the application waits for RX data.
+ *
+ * Parameters:
+ *   raddr - Pointer to the remote address to send the data
  *
  * Returned Value:
- *   OK if packet has been processed, otherwise ERROR.
+ *  None
  *
  * Assumptions:
- *   This function is called at the interrupt level with interrupts disabled.
+ *  Called from normal user mode
  *
  ****************************************************************************/
 
-int uip_udpcallback(struct uip_driver_s *dev, struct uip_udp_conn *conn,
-                    uint16_t flags)
+void netdev_rxnotify(const uip_ipaddr_t *raddr)
 {
-  int ret = ERROR;
+  /* Find the device driver that serves the subnet of the remote address */
 
-  nllvdbg("flags: %04x\n", flags);
+  /* @HACK how to get the interface with INADDR_ANY? */
 
-  /* Some sanity checking */
+  struct uip_driver_s *dev = netdev_findbyname("eth0");
 
-  if (conn)
+  if (dev && dev->d_rxavail)
     {
-      /* HACK to check if the packet could be processed */
+      /* Notify the device driver that new RX data is available. */
 
-      ret = (conn->list->event && (flags & conn->list->flags) != 0) ? OK : ERROR;
-
-      /* Perform the callback */
-
-      uip_callbackexecute(dev, conn, flags, conn->list);
+      (void)dev->d_rxavail(dev);
     }
-
-  return ret;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_UDP */
+#endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS && CONFIG_NET_RXAVAIL */

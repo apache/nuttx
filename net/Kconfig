@@ -40,7 +40,7 @@ config NET_NOINTS
 	bool "Not interrupt driven"
 	default n
 	---help---
-		NET_NOINT indicates that uIP is not called from the interrupt level. 
+		NET_NOINT indicates that uIP is not called from the interrupt level.
 		If NET_NOINTS is defined, critical sections will be managed with semaphores;
 		Otherwise, it assumed that uIP will be called from interrupt level handling
 		and critical sections will be managed by enabling and disabling interrupts.
@@ -228,6 +228,22 @@ config NET_BROADCAST
 	---help---
 		Incoming UDP broadcast support
 
+config NET_RXAVAIL
+	bool "Driver-based UDP backlog"
+	default n
+	---help---
+		One problem with UDP communications is that, unlike TCP/IP, there is
+		no backlog of UDP packets.  So if you are listening at the precise
+		moment that the UDP packet is sent, it will not be received.  This
+		is not incompatible with the properties of UDP, but can result in
+		bad performance if packets are missed, time out, and are resent.
+
+		Some Ethernet controllers have built-in RAM and the drivers can
+		support retention of UDP packets in that RAM.  If the drivers
+		supports such a capability, this option may be enabled to use it.
+		NOTE:  If this option is enabled, the driver must support the
+		rxavail() method in the uip_driver_s structure.
+
 endif
 endmenu
 
@@ -317,32 +333,32 @@ config NET_SLIP
 		network settings: NET_NOINTS and NET_MULTIBUFFER.
 
 		NET_BUFSIZE *must* be set to 296.  Other optional configuration
-		settings that affect the SLIP driver: NET_STATISTICS. 
+		settings that affect the SLIP driver: NET_STATISTICS.
 		Default: Ethernet
 
 		SLIP supports point-to-point IP communications over a serial port.
 		The default data link layer for uIP is Ethernet. If NET_SLIP is
 		defined in the NuttX configuration file, then SLIP will be supported.
 		The basic differences between the SLIP and Ethernet configurations is
-		that when SLIP is selected: 
+		that when SLIP is selected:
 		
-		* The link level header (that comes before the IP header) is omitted. 
-		* All MAC address processing is suppressed. 
+		* The link level header (that comes before the IP header) is omitted.
+		* All MAC address processing is suppressed.
 		* ARP is disabled.
 		
 		If NET_SLIP is not selected, then Ethernet will be used (there is
 		no need to define anything special in the configuration file to use
-		Ethernet -- it is the default). 
+		Ethernet -- it is the default).
 
 endif
 if NET_SLIP
 
-config SLIP_NINTERFACES 
+config SLIP_NINTERFACES
 	int "Number of SLIP interfaces"
 	default 1
 	---help---
 		Selects the number of physical SLIP
-		interfaces to support.  
+		interfaces to support.
 		Default: 1
 
 config SLIP_STACKSIZE

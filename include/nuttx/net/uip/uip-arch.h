@@ -2,7 +2,7 @@
  * include/nuttx/net/uip/uip-arch.h
  * Defines architecture-specific device driver interfaces to uIP
  *
- *   Copyright (C) 2007, 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Derived largely from portions of uIP with has a similar BSD-styple license:
@@ -180,6 +180,9 @@ struct uip_driver_s
   int (*d_ifup)(struct uip_driver_s *dev);
   int (*d_ifdown)(struct uip_driver_s *dev);
   int (*d_txavail)(struct uip_driver_s *dev);
+#ifdef CONFIG_NET_RXAVAIL
+  int (*d_rxavail)(struct uip_driver_s *dev);
+#endif
 #ifdef CONFIG_NET_IGMP
   int (*d_addmac)(struct uip_driver_s *dev, FAR const uint8_t *mac);
   int (*d_rmmac)(struct uip_driver_s *dev, FAR const uint8_t *mac);
@@ -249,7 +252,7 @@ struct uip_driver_s
  *       }
  */
 
-extern void uip_input(struct uip_driver_s *dev);
+extern int uip_input(struct uip_driver_s *dev);
 
 /* Polling of connections
  *

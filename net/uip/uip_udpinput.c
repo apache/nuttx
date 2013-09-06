@@ -85,17 +85,19 @@
  *   dev - The device driver structure containing the received UDP packet
  *
  * Return:
- *   None
+ *   OK if packet has been processed, otherwise ERROR.
  *
  * Assumptions:
  *   Called from the interrupt level or with interrupts disabled.
  *
  ****************************************************************************/
 
-void uip_udpinput(struct uip_driver_s *dev)
+int uip_udpinput(struct uip_driver_s *dev)
 {
   struct uip_udp_conn  *conn;
   struct uip_udpip_hdr *pbuf = UDPBUF;
+  int ret = ERROR;
+
 
 #ifdef CONFIG_NET_STATISTICS
   uip_stat.udp.recv++;
@@ -134,7 +136,7 @@ void uip_udpinput(struct uip_driver_s *dev)
 
           /* Perform the application callback */
 
-          uip_udpcallback(dev, conn, UIP_NEWDATA);
+          ret = uip_udpcallback(dev, conn, UIP_NEWDATA);
 
           /* If the application has data to send, setup the UDP/IP header */
 
@@ -150,7 +152,7 @@ void uip_udpinput(struct uip_driver_s *dev)
         }
     }
 
-  return;
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP */
