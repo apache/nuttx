@@ -1037,10 +1037,37 @@ Configurations
          nsh> msdis
          nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
 
+    7. The USB high-speed EHCI and the low-/full- OHCI host drivers are supported
+       in this configuration.
+       Here are the relevant configuration options that enable EHCI support:
+
+       System Type -> ATSAMA5 Peripheral Support
+         CONFIG_SAMA5_UHPHS=y                 : USB Host High Speed
+
+       System Type -> USB High Speed Host driver options
+         CONFIG_SAMA5_EHCI=y                  : High-speed EHCI support
+         CONFIG_SAMA5_OHCI=y                  : Low/full-speed OHCI support
+                                              : Defaults for values probably OK for both
+       Device Drivers
+         CONFIG_USBHOST=y                     : Enable USB host support
+         CONFIG_USBHOST_ISOC_DISABLE=y        : Isochronous endpoints not needed
+
+       Device Drivers -> USB Host Driver Support
+         CONFIG_USBHOST_ISOC_DISABLE=y        : Isochronous endpoints not used
+         CONFIG_USBHOST_MSC=y                 : Enable the mass storage class driver
+         CONFIG_USBHOST_HIDKBD=y              : Enable the HID keybaord class driver
+                                              : Defaults for values probably OK for both
+
+       Library Routines
+         CONFIG_SCHED_WORKQUEUE=y             : Worker thread support is required
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
     The following features are *not* enabled in the demo configuration but
     might be of some use to you:
 
-    7.  Debugging USB Device.  There is normal console debug output available
+    8.  Debugging USB Device.  There is normal console debug output available
         that can be enabled with CONFIG_DEBUG + CONFIG_DEBUG_USB.  However,
         USB device operation is very time critical and enabling this debug
         output WILL interfere with the operation of the UDPHS.  USB device
@@ -1395,7 +1422,7 @@ Configurations
           CONFIG_USBHOST_MSC=y                 : Enable the mass storage class driver
 
         Library Routines
-          CONFIG_SCHED_WORKQUEUE               : Worker thread support is required
+          CONFIG_SCHED_WORKQUEUE=y             : Worker thread support is required
 
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
@@ -1427,12 +1454,12 @@ Configurations
           CONFIG_USBHOST_MSC=y                 : Enable the mass storage class driver
 
         Library Routines
-          CONFIG_SCHED_WORKQUEUE               : Worker thread support is required
+          CONFIG_SCHED_WORKQUEUE=y             : Worker thread support is required
 
         Application Configuration -> NSH Library
           CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
-    12. Support the USB high-speed EHCI device driver (UDPHS) can be enabled
+    12. Support the USB high-speed USB device driver (UDPHS) can be enabled
         by changing the NuttX configuration file as follows:
 
         Device Drivers -> USB Device Driver Support

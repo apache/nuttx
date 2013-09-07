@@ -690,7 +690,7 @@ static void sam_putreg(uint32_t regval, volatile uint32_t *regaddr)
 #else
 static inline void sam_putreg(uint32_t regval, volatile uint32_t *regaddr)
 {
-  *regaval = regval;
+  *regaddr = regval;
 }
 #endif
 
