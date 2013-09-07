@@ -359,7 +359,6 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf)
 #ifdef CONFIG_USBDEV_DUALSPEED
   FAR const struct usb_epdesc_s *epdesc;
   bool hispeed = (speed == USB_SPEED_HIGH);
-  uint16_t bulkmxpacket;
 #endif
 
   /* Configuration descriptor.  If the USB mass storage device is
@@ -388,12 +387,11 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf)
       hispeed = !hispeed;
     }
 
-  bulkmxpacket = USBMSC_BULKMAXPACKET(hispeed);
-  epdesc       = USBMSC_EPBULKINDESC(hispeed);
+  epdesc = USBMSC_EPBULKINDESC(hispeed);
   memcpy(buf, epdesc, USB_SIZEOF_EPDESC);
   buf += USB_SIZEOF_EPDESC;
 
-  epdesc       = USBMSC_EPBULKOUTDESC(hispeed);
+  epdesc = USBMSC_EPBULKOUTDESC(hispeed);
   memcpy(buf, epdesc, USB_SIZEOF_EPDESC);
 #else
   memcpy(buf, &g_fsepbulkoutdesc, USB_SIZEOF_EPDESC);

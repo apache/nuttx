@@ -127,8 +127,8 @@ config COMPOSITE_EP0MAXPACKET
 
 config COMPOSITE_VENDORID
 	hex "Composite vendor ID"
-	default 0
-	
+	default 0x0000
+
 config COMPOSITE_VENDORSTR
 	string "Composite vendor ID"
 	default "Nuttx"
@@ -137,8 +137,8 @@ config COMPOSITE_VENDORSTR
 
 config COMPOSITE_PRODUCTID
 	hex "Composite product id"
-	default 0
-	
+	default 0x0000
+
 config COMPOSITE_PRODUCTSTR
 	string "Composite product string"
 	default "Composite device"
@@ -523,8 +523,13 @@ config USBMSC_BULKOUTREQLEN
 
 config USBMSC_VENDORID
 	hex "Mass storage Vendor ID"
-	default 0x00
-	
+	default 0x584e
+	---help---
+		The vendor ID (VID).  The value here is bogus.  You should not use
+		it in any commercial products!  You must go through the proper
+		channels to request a vendor ID for your company if you do not
+		already have one!
+
 config USBMSC_VENDORSTR
 	string "Mass storage vendor string"
 	default "Nuttx"
@@ -533,7 +538,9 @@ config USBMSC_VENDORSTR
 
 config USBMSC_PRODUCTID
 	hex "Mass storage Product ID"
-	default 0x00
+	default 0x5342
+	---help---
+		The product ID (PID).
 
 config USBMSC_PRODUCTSTR
 	string "Mass storage product string"

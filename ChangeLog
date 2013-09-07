@@ -5520,4 +5520,6 @@
 	* drivers/usbdev/usbdev_strings.c:  Extended decoding and stringifging
 	  of USB trace output to include trace output from class drivers.
 	  (2013-9-6).
+	* drivers/usbdev/usbmsc_desc.c:  Fix a warning when USB MSC is
+	  compiled for a high-speed device (2013-9-7).
 
