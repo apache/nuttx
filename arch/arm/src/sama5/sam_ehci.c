@@ -2415,9 +2415,33 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
         {
           /* An error occurred */
 
-          udbg("ERROR: EP%d TOKEN=%08x", epinfo->epno, token);
           epinfo->status = (token & QH_TOKEN_STATUS_MASK) >> QH_TOKEN_STATUS_SHIFT;
-          epinfo->result = -EIO;
+
+          /* The HALT condition is set on a variety of conditions:  babble, error
+           * counter countdown to zero, or a STALL.  If we can rule out babble
+           * (babble bit not set) and if the error counter is non-zero, then we can
+           * assume a STALL. In this case, we return -PERM to inform the class
+           * driver of the stall condition.
+           */
+
+          if ((token & (QH_TOKEN_BABBLE | QH_TOKEN_HALTED)) == QH_TOKEN_HALTED &&
+              (token & QH_TOKEN_CERR_MASK) != 0)
+            {
+              /* It is a stall,  Note the that the data toggle is reset
+               * after the stall.
+               */
+
+              udbg("EP%d Stalled: TOKEN=%08x\n", epinfo->epno, token);
+              epinfo->result = -EPERM;
+              epinfo->toggle = 0;
+            }
+          else
+            {
+              /* Otherwise, it is some kind of data transfer error */
+
+              udbg("ERROR: EP%d TOKEN=%08x\n", epinfo->epno, token);
+              epinfo->result = -EIO;
+            }
         }
 
       /* Is there a thread waiting for this transfer to complete? */
@@ -3921,7 +3945,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 {
   irqstate_t flags;
   uint32_t regval;
-#ifdef CONFIG_DEBUG_USB
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
   uint16_t regval16;
   unsigned int nports;
 #endif
@@ -4152,7 +4176,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   sam_putreg(ECHI_INT_ALLINTS, &HCOR->usbsts);
 
-#ifdef CONFIG_DEBUG
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
   /* Show the ECHI version */
 
   regval16 = sam_swap16(HCCR->hciversion);
