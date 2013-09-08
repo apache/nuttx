@@ -102,8 +102,9 @@
 #define USBHOST_BOUTFOUND   0x04
 #define USBHOST_ALLFOUND    0x07
 
-#define USBHOST_MAX_RETRIES 100
-#define USBHOST_MAX_CREFS   0x7fff
+#define USBHOST_RETRY_USEC  (50*1000)  /* Retry each 50 milliseconds */
+#define USBHOST_MAX_RETRIES 100        /* Give up after 5 seconds */
+#define USBHOST_MAX_CREFS   INT16_MAX  /* Max cref count before signed overflow */
 
 /****************************************************************************
  * Private Types
@@ -700,6 +701,7 @@ static inline int usbhost_maxlunreq(FAR struct usbhost_state_s *priv)
 
       *(priv->tbuffer) = 0;
     }
+
   return OK;
 }
 
@@ -1218,9 +1220,12 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
 
       /* Wait just a bit */
 
-      usleep(50*1000);
+      usleep(USBHOST_RETRY_USEC);
 
-      /* Send TESTUNITREADY to see if the unit is ready */
+      /* Send TESTUNITREADY to see if the unit is ready.  The most likely error
+       * error that can occur here is a a stall which simply means that the
+       * the device is not yet able to respond.
+       */
 
       ret = usbhost_testunitready(priv);
       if (ret == OK)
