@@ -66,6 +66,50 @@
  * Public Types
  ************************************************************************************/
 
+enum usbhost_trace1codes_e
+{
+  EHCI_TRACE1_SYSTEMERROR = 0,      /* EHCI ERROR: System error */
+  EHCI_TRACE1_QTDFOREACH_FAILED,    /* EHCI ERROR: sam_qtd_foreach failed */
+  EHCI_TRACE1_QHALLOC_FAILED,       /* EHCI ERROR: Failed to allocate a QH */
+  EHCI_TRACE1_BUFTOOBIG,            /* EHCI ERROR: Buffer too big */
+  EHCI_TRACE1_REQQTDALLOC_FAILED,   /* EHCI ERROR: Failed to allocate request qTD */
+  EHCI_TRACE1_ADDBPL_FAILED,        /* EHCI ERROR: sam_qtd_addbpl failed */
+  EHCI_TRACE1_DATAQTDALLOC_FAILED,  /* EHCI ERROR: Failed to allocate data buffer qTD */
+  EHCI_TRACE1_DEVDISCONNECTED,      /* EHCI ERROR: Device disconnected */
+  EHCI_TRACE1_QHCREATE_FAILED,      /* EHCI ERROR: sam_qh_create failed */
+  EHCI_TRACE1_QTDSETUP_FAILED,      /* EHCI ERROR: sam_qtd_setupphase failed */
+  EHCI_TRACE1_QTDDATA_FAILED,       /* EHCI ERROR: sam_qtd_dataphase failed */
+  EHCI_TRACE1_QTDSTATUS_FAILED,     /* EHCI ERROR: sam_qtd_statusphase failed */
+  EHCI_TRACE1_TRANSFER_FAILED,      /* EHCI ERROR: Transfer failed */
+  EHCI_TRACE1_QHFOREACH_FAILED,     /* EHCI ERROR: sam_qh_foreach failed: */
+  EHCI_TRACE1_SYSERR_INTR,          /* EHCI: Host System Error Interrup */
+  EHCI_TRACE1_USBERR_INTR,          /* EHCI: USB Error Interrupt (USBERRINT) Interrupt */
+  EHCI_TRACE1_EPALLOC_FAILED,       /* EHCI ERROR: Failed to allocate EP info structure */
+  EHCI_TRACE1_BADXFRTYPE,           /* EHCI ERROR: Support for transfer type not implemented */
+  EHCI_TRACE1_HCHALTED_TIMEOUT,     /* EHCI ERROR: Timed out waiting for HCHalted */
+  EHCI_TRACE1_QHPOOLALLOC_FAILED,   /* EHCI ERROR: Failed to allocate the QH pool */
+  EHCI_TRACE1_QTDPOOLALLOC_FAILED,  /* EHCI ERROR: Failed to allocate the qTD pool */
+  EHCI_TRACE1_PERFLALLOC_FAILED,    /* EHCI ERROR: Failed to allocate the periodic frame list */
+  EHCI_TRACE1_RESET_FAILED,         /* EHCI ERROR: sam_reset failed */
+  EHCI_TRACE1_RUN_FAILED,           /* EHCI ERROR: EHCI Failed to run: USBSTS=%08x */
+  EHCI_TRACE1_IRQATTACH_FAILED,     /* EHCI ERROR: Failed to attach IRQ%d */
+
+  __TRACE1_NSTRINGS,
+
+  EHCI_TRACE2_EPSTALLED,            /* EHCI EP Stalled */
+  EHCI_TRACE2_EPIOERROR,            /* EHCI ERROR: EP TOKEN */
+
+  __TRACE2_NSTRINGS
+};
+
+#define TRACE1_FIRST     0
+#define TRACE1_INDEX(id) ((int)(id) - TRACE1_FIRST)
+#define TRACE1_NSTRINGS  TRACE1_INDEX(__TRACE1_NSTRINGS)
+
+#define TRACE2_FIRST     (__TRACE1_NSTRINGS + 1)
+#define TRACE2_INDEX(id) ((int)(id) - TRACE2_FIRST)
+#define TRACE2_NSTRINGS  TRACE2_INDEX(__TRACE2_NSTRINGS)
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/
