@@ -1248,6 +1248,19 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
           uvdbg("Request sense\n");
           ret = usbhost_requestsense(priv);
         }
+
+      /* It is acceptable for a mass storage device to respond to the
+       * Test Unit Ready and Request Sense commands with a stall if it is
+       * unable to respond.  But other failures mean that something is
+       * wrong and a device reset is in order.  The transfer functions will
+       * return -EPERM if the transfer failed due to a stall.
+       */
+
+      if (ret < 0 && ret != -EPERM)
+        {
+          udbg("ERROR: DRVR_TRANSFER returned: %d\n", ret);
+          break;
+        }
     }
 
   /* Did the unit become ready?  Did an error occur? Or did we time out? */
@@ -1569,6 +1582,7 @@ static inline int usbhost_tfree(FAR struct usbhost_state_s *priv)
       priv->tbuffer = NULL;
       priv->tbuflen = 0;
     }
+
   return result;
 }
 

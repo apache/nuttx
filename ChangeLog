@@ -5522,4 +5522,8 @@
 	  (2013-9-6).
 	* drivers/usbdev/usbmsc_desc.c:  Fix a warning when USB MSC is
 	  compiled for a high-speed device (2013-9-7).
+	* drivers/usbhost/usbhost_storage.c:  If device is returning fatal
+	  transfer errors while attempt to initialize, don't bother with
+	  the startup retries; abort immediately so that the device will
+	  be reset and we can try again (2013-9-9).
 
