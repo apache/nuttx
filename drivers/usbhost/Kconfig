@@ -111,4 +111,19 @@ config HIDKBD_NODEBOUNCE
 	---help---
 		If set to y normal debouncing is disabled.  Default: 
 		Debounce enabled (No repeat keys).
+
 endif
+
+config USBHOST_TRACE
+	bool "Enable USB HCD tracing for debug"
+	default n
+	---help---
+		Enables USB tracing for debug.  Only supported for the HCD and,
+		further, no supported by all HCD implementations.
+
+config USBHOST_TRACE_NRECORDS
+	int "Number of trace entries to remember"
+	default 128
+	depends on USBHOST_TRACE
+	---help---
+		Number of trace entries to remember.

@@ -80,7 +80,7 @@ config USBDEV_TRACE
 
 config USBDEV_TRACE_NRECORDS
 	int "Number of trace entries to remember"
-	default 32 
+	default 128
 	depends on USBDEV_TRACE
 	---help---
 		Number of trace entries to remember
@@ -277,7 +277,7 @@ config CDCACM_IFNOBASE
 	default 0
 	depends on CDCACM_COMPOSITE
 	---help---
-		If the CDC driver is part of a composite device, then this may need to 
+		If the CDC driver is part of a composite device, then this may need to
 		be defined to offset the CDC/ACM interface numbers so that they are
 		unique and contiguous.  When used with the Mass Storage driver, the
 		correct value for this offset is zero.
@@ -287,7 +287,7 @@ config CDCACM_STRBASE
 	default 0
 	depends on CDCACM_COMPOSITE
 	---help---
-		If the CDC driver is part of a composite device, then this may need to 
+		If the CDC driver is part of a composite device, then this may need to
 		be defined to offset the CDC/ACM string numbers so that they are
 		unique and contiguous.  When used with the Mass Storage driver, the
 		correct value for this offset is four (this value actuallly only needs
@@ -461,7 +461,7 @@ config USBMSC_IFNOBASE
 	default 2
 	depends on USBMSC_COMPOSITE
 	---help---
-		If the CDC driver is part of a composite device, then this may need to 
+		If the CDC driver is part of a composite device, then this may need to
 		be defined to offset the mass storage interface number so that it is
 		unique and contiguous.  When used with the CDC/ACM driver, the
 		correct value for this offset is two (because of the two CDC/ACM
@@ -472,7 +472,7 @@ config USBMSC_STRBASE
 	default 2
 	depends on USBMSC_COMPOSITE
 	---help---
-		If the CDC driver is part of a composite device, then this may need to 
+		If the CDC driver is part of a composite device, then this may need to
 		be defined to offset the mass storage string numbers so that they are
 		unique and contiguous.  When used with the CDC/ACM driver, the
 		correct value for this offset is four (or perhaps 5 or 6, depending

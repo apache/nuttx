@@ -137,11 +137,11 @@
 /* Debug Register Offsets *******************************************************************/
 /* Paragraph C.3 */
 
-#define ECHI_DEBUG_PCS_OFFSET          0x0000     /* Debug Port Control/Status Register */
-#define ECHI_DEBUG_USBPIDS_OFFSET      0x0004     /* Debug USB PIDs Register */
-#define ECHI_DEBUG_DATA0_OFFSET        0x0008     /* Debug Data Buffer 0 Register [31:0]  */
-#define ECHI_DEBUG_DATA1_OFFSET        0x000c     /* Debug Data Buffer 1 Register [63:32]  */
-#define ECHI_DEBUG_DEVADDR_OFFSET      0x0010     /* Debug Device Address Register */
+#define EHCI_DEBUG_PCS_OFFSET          0x0000     /* Debug Port Control/Status Register */
+#define EHCI_DEBUG_USBPIDS_OFFSET      0x0004     /* Debug USB PIDs Register */
+#define EHCI_DEBUG_DATA0_OFFSET        0x0008     /* Debug Data Buffer 0 Register [31:0]  */
+#define EHCI_DEBUG_DATA1_OFFSET        0x000c     /* Debug Data Buffer 1 Register [63:32]  */
+#define EHCI_DEBUG_DEVADDR_OFFSET      0x0010     /* Debug Device Address Register */
 
 /* PCI Configuration Space Register Bit Definitions *****************************************/
 
@@ -295,7 +295,7 @@
 #define EHCI_INT_FLROLL                (1 << 3)   /* Bit 3:  Frame List Rollover */
 #define EHCI_INT_SYSERROR              (1 << 4)   /* Bit 4:  Host System Error */
 #define EHCI_INT_AAINT                 (1 << 5)   /* Bit 5:  Interrupt on Async Advance */
-#define ECHI_INT_ALLINTS               (0x3f)     /* Bits 0-5:  All interrupts */
+#define EHCI_INT_ALLINTS               (0x3f)     /* Bits 0-5:  All interrupts */
                                                   /* Bits 6-11: Reserved */
 #define EHCI_USBSTS_HALTED             (1 << 12)  /* Bit 12: HC Halted */
 #define EHCI_USBSTS_RECLAM             (1 << 13)  /* Bit 13: Reclamation */
@@ -368,41 +368,41 @@
 
 /* Debug Port Control/Status Register.  Paragraph C.3.1 */
 
-#define ECHI_DEBUG_PCS_LENGTH_SHIFT    (0)        /* Bits 0-3: Data Length */
-#define ECHI_DEBUG_PCS_LENGTH_MASK     (15 << ECHI_DEBUG_PCS_LENGTH_SHIFT)
-#define ECHI_DEBUG_PCS_WRITE           (1 << 4)   /* Bit 6:  Write/Read# */
-#define ECHI_DEBUG_PCS_GO              (1 << 5)   /* Bit 5:  Go */
-#define ECHI_DEBUG_PCS_ERROR           (1 << 6)   /* Bit 6:  Error/Good# */
-#define ECHI_DEBUG_PCS_EXCEPTION_SHIFT (17)       /* Bits 7-9: Exception */
-#define ECHI_DEBUG_PCS_EXCEPTION_MASK  (7 << ECHI_DEBUG_PCS_EXCEPTION_SHIFT)
-#define ECHI_DEBUG_PCS_INUSE           (1 << 10)  /* Bit 10: In Use */
+#define EHCI_DEBUG_PCS_LENGTH_SHIFT    (0)        /* Bits 0-3: Data Length */
+#define EHCI_DEBUG_PCS_LENGTH_MASK     (15 << EHCI_DEBUG_PCS_LENGTH_SHIFT)
+#define EHCI_DEBUG_PCS_WRITE           (1 << 4)   /* Bit 6:  Write/Read# */
+#define EHCI_DEBUG_PCS_GO              (1 << 5)   /* Bit 5:  Go */
+#define EHCI_DEBUG_PCS_ERROR           (1 << 6)   /* Bit 6:  Error/Good# */
+#define EHCI_DEBUG_PCS_EXCEPTION_SHIFT (17)       /* Bits 7-9: Exception */
+#define EHCI_DEBUG_PCS_EXCEPTION_MASK  (7 << EHCI_DEBUG_PCS_EXCEPTION_SHIFT)
+#define EHCI_DEBUG_PCS_INUSE           (1 << 10)  /* Bit 10: In Use */
                                                   /* Bits 11-15: Reserved */
-#define ECHI_DEBUG_PCS_DONE            (1 << 16)  /* Bit 16: Done */
+#define EHCI_DEBUG_PCS_DONE            (1 << 16)  /* Bit 16: Done */
                                                   /* Bits 17-27: Reserved */
-#define ECHI_DEBUG_PCS_ENABLED         (1 << 28)  /* Bit 28: Enabled */
+#define EHCI_DEBUG_PCS_ENABLED         (1 << 28)  /* Bit 28: Enabled */
                                                   /* Bit 29: Reserved */
-#define ECHI_DEBUG_PCS_OWNER           (1 << 30)  /* Bit 30: Owner */
+#define EHCI_DEBUG_PCS_OWNER           (1 << 30)  /* Bit 30: Owner */
                                                   /* Bit 31: Reserved */
 
 /* Debug USB PIDs Register.  Paragraph C.3.2 */
 
-#define ECHI_DEBUG_USBPIDS_TKPID_SHIFT (0)        /* Bits 0-7: Token PID */
-#define ECHI_DEBUG_USBPIDS_TKPID_MASK  (0xff << ECHI_DEBUG_USBPIDS_TKPID_SHIFT)
-#define ECHI_DEBUG_USBPIDS_SPID_SHIFT  (8)        /* Bits 8-15: Sent PID */
-#define ECHI_DEBUG_USBPIDS_SPID_MASK   (0xff << ECHI_DEBUG_USBPIDS_SPID_SHIFT)
-#define ECHI_DEBUG_USBPIDS_RPID_SHIFT  (16)       /* Bits 16-23: Received PID */
-#define ECHI_DEBUG_USBPIDS_RPID_MASK   (0xff << ECHI_DEBUG_USBPIDS_RPID_SHIFT)
+#define EHCI_DEBUG_USBPIDS_TKPID_SHIFT (0)        /* Bits 0-7: Token PID */
+#define EHCI_DEBUG_USBPIDS_TKPID_MASK  (0xff << EHCI_DEBUG_USBPIDS_TKPID_SHIFT)
+#define EHCI_DEBUG_USBPIDS_SPID_SHIFT  (8)        /* Bits 8-15: Sent PID */
+#define EHCI_DEBUG_USBPIDS_SPID_MASK   (0xff << EHCI_DEBUG_USBPIDS_SPID_SHIFT)
+#define EHCI_DEBUG_USBPIDS_RPID_SHIFT  (16)       /* Bits 16-23: Received PID */
+#define EHCI_DEBUG_USBPIDS_RPID_MASK   (0xff << EHCI_DEBUG_USBPIDS_RPID_SHIFT)
                                                   /* Bits 24-31: Reserved */
 
 /* Debug Data Buffer 0/1 Register [64:0]. Paragreph C.3.3.  64 bits of data. */
 
 /* Debug Device Address Register.  Paragraph C.3.4 */
 
-#define ECHI_DEBUG_DEVADDR_ENDPT_SHIFT (0)        /* Bit 0-3: USB Endpoint */
-#define ECHI_DEBUG_DEVADDR_ENDPT_MASK  (15 << ECHI_DEBUG_DEVADDR_ENDPT_SHIFT)
+#define EHCI_DEBUG_DEVADDR_ENDPT_SHIFT (0)        /* Bit 0-3: USB Endpoint */
+#define EHCI_DEBUG_DEVADDR_ENDPT_MASK  (15 << EHCI_DEBUG_DEVADDR_ENDPT_SHIFT)
                                                   /* Bits 4-7: Reserved */
-#define ECHI_DEBUG_DEVADDR_ADDR_SHIFT  (8)        /* Bits 8-14: USB Address */
-#define ECHI_DEBUG_DEVADDR_ADDR_MASK   (0x7f << ECHI_DEBUG_DEVADDR_ADDR_SHIFT)
+#define EHCI_DEBUG_DEVADDR_ADDR_SHIFT  (8)        /* Bits 8-14: USB Address */
+#define EHCI_DEBUG_DEVADDR_ADDR_MASK   (0x7f << EHCI_DEBUG_DEVADDR_ADDR_SHIFT)
                                                   /* Bits 15-31: Reserved */
 
 /* Data Structures **************************************************************************/

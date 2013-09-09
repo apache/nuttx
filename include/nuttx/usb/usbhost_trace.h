@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/usb/usbhost_trace.h
  *
- *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,21 +42,32 @@
 
 #include <nuttx/config.h>
 
-/* NOTE: Trace debug capability has not been implemented for USB host.  It
- * should be a simple port of the USB device trace logic.  But that has not
- * yet been done.
- */
-
 /****************************************************************************
- * Preprocessor definitions
+ * Pre-processor definitions
  ****************************************************************************/
+/* Event encoding/decoding macros *******************************************/
+
+#define TRACE_ENCODE1(id,u23)    (((uint32_t)(id) & 0x1ff) << 23 | \
+                                  ((uint32_t)(u23) & 0x007fffff))
+#define TRACE_ENCODE2(id,u7,u16) (((uint32_t)(id) & 0x1ff) << 23 | \
+                                  ((uint32_t)(u7) & 0x7f) << 16 | \
+                                  ((u16) & 0x0000ffff))
+
+#define TRACE_DECODE_NDX(ev)     (((ev) >> 23) & 0x1ff)
+#define TRACE_DECODE_U7(ev)      (((ev) >> 16) & 0x7f)
+#define TRACE_DECODE_U16(ev)     ((ev) & 0x0000ffff)
+#define TRACE_DECODE_U23(ev)     ((ev) & 0x007fffff)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
+/* Enumeration callback function signature */
+
+typedef int (*usbhost_trcallback_t)(FAR uint32_t trace, FAR void *arg);
+
 /****************************************************************************
- * Public Function Prototypes
+ * Public Data
  ****************************************************************************/
 
 #undef EXTERN
@@ -65,6 +76,83 @@
 extern "C" {
 #else
 # define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: usbhost_trace and usbhost_trace2
+ *
+ * Description:
+ *  Record a USB event (tracing or USB debug must be enabled)
+ *
+ * Assumptions:
+ *   May be called from an interrupt handler
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_USBHOST_TRACE) || \
+   (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+void usbhost_trace1(uint16_t id, uint32_t u23);
+void usbhost_trace2(uint16_t id, uint8_t u7, uint16_t u16);
+#else
+#  define usbhost_trace1(id, u23)
+#  define usbhost_trace2(id, u7, u16)
+#endif
+
+/****************************************************************************
+ * Name: usbhost_trenumerate
+ *
+ * Description:
+ *   Enumerate all buffer trace data (will temporarily disable tracing)
+ *
+ * Assumptions:
+ *   NEVER called from an interrupt handler
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_USBHOST_TRACE)
+int usbhost_trenumerate(usbhost_trcallback_t callback, FAR void *arg);
+#else
+#  define usbhost_trenumerate(callback,arg)
+#endif
+
+/****************************************************************************
+ * Name: usbhost_trdump
+ *
+ * Description:
+ *   Used usbhost_trenumerate to dump all buffer trace data to syslog().
+ *
+ * Assumptions:
+ *   NEVER called from an interrupt handler
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_USBHOST_TRACE)
+int usbhost_trdump(void);
+#else
+#  define usbhost_trdump(void)
+#endif
+
+/****************************************************************************
+ * Name: usbhost_trformat1 and usbhost_trformat2
+ *
+ * Description:
+ *   This interface must be provided by platform specific logic that knows
+ *   the HCDs encoding of USB trace data.
+ *
+ *   Given an 9-bit index, return a format string suitable for use with, say,
+ *   printf.  The returned format is expected to handle two unsigned integer
+ *   values.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_USBHOST_TRACE) || \
+   (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+FAR const char *usbhost_trformat1(uint16_t id);
+FAR const char *usbhost_trformat2(uint16_t id);
 #endif
 
 #undef EXTERN

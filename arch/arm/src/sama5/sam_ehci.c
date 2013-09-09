@@ -53,6 +53,7 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/ehci.h>
+#include <nuttx/usb/usbhost_trace.h>
 
 #include "up_arch.h"
 #include "cache.h"
@@ -723,7 +724,7 @@ static int ehci_wait_usbsts(uint32_t maskbits, uint32_t donebits,
       regval = sam_getreg(&HCOR->usbsts);
       if ((regval & EHCI_INT_SYSERROR) != 0)
         {
-          udbg("ERROR: System error: %08x\n", regval);
+          usbhost_trace1(EHCI_TRACE1_SYSTEMERROR, regval);
           return -EIO;
         }
 
@@ -1081,7 +1082,7 @@ static int sam_qh_discard(struct sam_qh_s *qh)
   ret = sam_qtd_foreach(qh, sam_qtd_discard, NULL);
   if (ret < 0)
     {
-      udbg("ERROR: sam_qtd_foreach failed: %d\n", ret);
+      usbhost_trace1(EHCI_TRACE1_QTDFOREACH_FAILED, -ret);
     }
 
   /* Then free the QH itself */
@@ -1418,7 +1419,7 @@ static struct sam_qh_s *sam_qh_create(struct sam_rhport_s *rhport,
   qh = sam_qh_alloc();
   if (qh == NULL)
     {
-      udbg("ERROR: Failed to allocate a QH\n");
+      usbhost_trace1(EHCI_TRACE1_QHALLOC_FAILED, 0);
       return NULL;
     }
 
@@ -1590,7 +1591,7 @@ static int sam_qtd_addbpl(struct sam_qtd_s *qtd, const void *buffer, size_t bufl
 
   if (ndx >= 5)
     {
-      udbg("ERROR:  Buffer too big.  Remaining %d\n", buflen);
+      usbhost_trace1(EHCI_TRACE1_BUFTOOBIG, buflen);
       return -EFBIG;
     }
 
@@ -1617,7 +1618,7 @@ static struct sam_qtd_s *sam_qtd_setupphase(struct sam_epinfo_s *epinfo,
   qtd = sam_qtd_alloc();
   if (qtd == NULL)
     {
-      udbg("ERROR: Failed to allocate request qTD");
+      usbhost_trace1(EHCI_TRACE1_REQQTDALLOC_FAILED, 0);
       return NULL;
     }
 
@@ -1652,7 +1653,7 @@ static struct sam_qtd_s *sam_qtd_setupphase(struct sam_epinfo_s *epinfo,
   ret = sam_qtd_addbpl(qtd, req, USB_SIZEOF_CTRLREQ);
   if (ret < 0)
     {
-      udbg("ERROR: sam_qtd_addbpl failed: %d\n", ret);
+      usbhost_trace1(EHCI_TRACE1_ADDBPL_FAILED, -ret);
       sam_qtd_free(qtd);
       return NULL;
     }
@@ -1685,7 +1686,7 @@ static struct sam_qtd_s *sam_qtd_dataphase(struct sam_epinfo_s *epinfo,
   qtd = sam_qtd_alloc();
   if (qtd == NULL)
     {
-      udbg("ERROR: Failed to allocate data buffer qTD");
+      usbhost_trace1(EHCI_TRACE1_DATAQTDALLOC_FAILED, 0);
       return NULL;
     }
 
@@ -1720,7 +1721,7 @@ static struct sam_qtd_s *sam_qtd_dataphase(struct sam_epinfo_s *epinfo,
   ret = sam_qtd_addbpl(qtd, buffer, buflen);
   if (ret < 0)
     {
-      udbg("ERROR: sam_qtd_addbpl failed: %d\n", ret);
+      usbhost_trace1(EHCI_TRACE1_ADDBPL_FAILED, -ret);
       sam_qtd_free(qtd);
       return NULL;
     }
@@ -1750,7 +1751,7 @@ static struct sam_qtd_s *sam_qtd_statusphase(uint32_t tokenbits)
   qtd = sam_qtd_alloc();
   if (qtd == NULL)
     {
-      udbg("ERROR: Failed to allocate request qTD");
+      usbhost_trace1(EHCI_TRACE1_REQQTDALLOC_FAILED, 0);
       return NULL;
     }
 
@@ -1836,7 +1837,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
   ret = sam_ioc_setup(rhport, epinfo);
   if (ret != OK)
     {
-      udbg("ERROR: Device disconnected\n");
+      usbhost_trace1(EHCI_TRACE1_DEVDISCONNECTED, -ret);
       return ret;
     }
 
@@ -1845,7 +1846,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
   qh = sam_qh_create(rhport, epinfo);
   if (qh == NULL)
     {
-      udbg("ERROR: sam_qh_create failed\n");
+      usbhost_trace1(EHCI_TRACE1_QHCREATE_FAILED, 0);
       ret = -ENOMEM;
       goto errout_with_iocwait;
     }
@@ -1878,7 +1879,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
       qtd = sam_qtd_setupphase(epinfo, req);
       if (qtd == NULL)
         {
-          udbg("ERROR: sam_qtd_setupphase failed\n");
+          usbhost_trace1(EHCI_TRACE1_QTDSETUP_FAILED, 0);
           goto errout_with_qh;
         }
 
@@ -1954,7 +1955,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
       qtd = sam_qtd_dataphase(epinfo, buffer, buflen, tokenbits);
       if (qtd == NULL)
         {
-          udbg("ERROR: sam_qtd_dataphase failed\n");
+          usbhost_trace1(EHCI_TRACE1_QTDDATA_FAILED, 0);
           goto errout_with_qh;
         }
 
@@ -2011,7 +2012,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
       qtd = sam_qtd_statusphase(tokenbits);
       if (qtd == NULL)
         {
-          udbg("ERROR: sam_qtd_statusphase failed\n");
+          usbhost_trace1(EHCI_TRACE1_QTDSTATUS_FAILED, 0);
           goto errout_with_qh;
         }
 
@@ -2051,7 +2052,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
    *
    * REVISIT:  Is this safe?  NO.  This is a bug and needs rethinking.
    * We need to lock all of the port-resources (not EHCI common) until
-   * the transfer is complete.  But we can't use the common ECHI exclsem
+   * the transfer is complete.  But we can't use the common EHCI exclsem
    * or we will deadlock while waiting (because the working thread that
    * wakes this thread up needs the exclsem).
    */
@@ -2062,7 +2063,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
 
   ret = sam_ioc_wait(epinfo);
 
-  /* Re-aquire the ECHI semaphore.  The caller expects to be holding
+  /* Re-aquire the EHCI semaphore.  The caller expects to be holding
    * this upon return.
    */
 
@@ -2072,7 +2073,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
 
   if (ret < 0)
     {
-      udbg("ERROR: Transfer failed\n");
+      usbhost_trace1(EHCI_TRACE1_TRANSFER_FAILED, -ret);
       goto errout_with_iocwait;
     }
 
@@ -2164,7 +2165,7 @@ static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
   ret = sam_ioc_setup(rhport, epinfo);
   if (ret != OK)
     {
-      udbg("ERROR: Device disconnected\n");
+      usbhost_trace1(EHCI_TRACE1_DEVDISCONNECTED, -ret);
       return ret;
     }
 
@@ -2173,7 +2174,7 @@ static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
   qh = sam_qh_create(rhport, epinfo);
   if (qh == NULL)
     {
-      udbg("ERROR: sam_qh_create failed\n");
+      usbhost_trace1(EHCI_TRACE1_QHCREATE_FAILED, 0);
       ret = -ENOMEM;
       goto errout_with_iocwait;
     }
@@ -2202,7 +2203,7 @@ static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
   qtd = sam_qtd_dataphase(epinfo, buffer, buflen, tokenbits);
   if (qtd == NULL)
     {
-      udbg("ERROR: sam_qtd_dataphase failed\n");
+      usbhost_trace1(EHCI_TRACE1_QTDDATA_FAILED, 0);
       goto errout_with_qh;
     }
 
@@ -2231,7 +2232,7 @@ static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
    *
    * REVISIT:  Is this safe?  NO.  This is a bug and needs rethinking.
    * We need to lock all of the port-resources (not EHCI common) until
-   * the transfer is complete.  But we can't use the common ECHI exclsem
+   * the transfer is complete.  But we can't use the common EHCI exclsem
    * or we will deadlock while waiting (because the working thread that
    * wakes this thread up needs the exclsem).
    */
@@ -2242,7 +2243,7 @@ static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
 
   ret = sam_ioc_wait(epinfo);
 
-  /* Re-aquire the ECHI semaphore.  The caller expects to be holding
+  /* Re-aquire the EHCI semaphore.  The caller expects to be holding
    * this upon return.
    */
 
@@ -2252,7 +2253,7 @@ static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
 
   if (ret < 0)
     {
-      udbg("ERROR: Transfer failed\n");
+      usbhost_trace1(EHCI_TRACE1_TRANSFER_FAILED, -ret);
       goto errout_with_iocwait;
     }
 
@@ -2382,7 +2383,7 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
   ret = sam_qtd_foreach(qh, sam_qtd_ioccheck, (void *)qh->epinfo);
   if (ret < 0)
     {
-      udbg("ERROR: sam_qtd_foreach failed: %d\n", ret);
+      usbhost_trace1(EHCI_TRACE1_QTDFOREACH_FAILED, -ret);
     }
 
   /* If there is no longer anything attached to the QH, then remove it from
@@ -2431,7 +2432,7 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
                * after the stall.
                */
 
-              udbg("EP%d Stalled: TOKEN=%08x\n", epinfo->epno, token);
+              usbhost_trace2(EHCI_TRACE2_EPSTALLED, epinfo->epno, token);
               epinfo->result = -EPERM;
               epinfo->toggle = 0;
             }
@@ -2439,7 +2440,7 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
             {
               /* Otherwise, it is some kind of data transfer error */
 
-              udbg("ERROR: EP%d TOKEN=%08x\n", epinfo->epno, token);
+              usbhost_trace2(EHCI_TRACE2_EPIOERROR, epinfo->epno, token);
               epinfo->result = -EIO;
             }
         }
@@ -2514,7 +2515,7 @@ static inline void sam_ioc_bottomhalf(void)
       ret = sam_qh_foreach(qh, &bp, sam_qh_ioccheck, NULL);
       if (ret < 0)
         {
-          udbg("ERROR: sam_qh_foreach failed: %d\n", ret);
+          usbhost_trace1(EHCI_TRACE1_QHFOREACH_FAILED, -ret);
         }
     }
 
@@ -2540,7 +2541,7 @@ static inline void sam_ioc_bottomhalf(void)
       ret = sam_qh_foreach(qh, &bp, sam_qh_ioccheck, NULL);
       if (ret < 0)
         {
-          udbg("ERROR: sam_qh_foreach failed: %d\n", ret);
+          usbhost_trace1(EHCI_TRACE1_QHFOREACH_FAILED, -ret);
         }
     }
 #endif
@@ -2679,7 +2680,7 @@ static inline void sam_portsc_bottomhalf(void)
 
 static inline void sam_syserr_bottomhalf(void)
 {
-  udbg("Host System Error Interrupt\n");
+  usbhost_trace1(EHCI_TRACE1_SYSERR_INTR, 0);
   PANIC();
 }
 
@@ -2749,7 +2750,7 @@ static void sam_ehci_bottomhalf(FAR void *arg)
     {
       if ((pending & EHCI_INT_USBERRINT) != 0)
         {
-          udbg("USB Error Interrupt (USBERRINT) Interrupt\n");
+          usbhost_trace1(EHCI_TRACE1_USBERR_INTR, 0);
         }
       else
         {
@@ -2885,7 +2886,7 @@ static int sam_ehci_tophalf(int irq, FAR void *context)
        * interrupt bits back to the status register.
        */
 
-      sam_putreg(usbsts & ECHI_INT_ALLINTS, &HCOR->usbsts);
+      sam_putreg(usbsts & EHCI_INT_ALLINTS, &HCOR->usbsts);
     }
 
   return OK;
@@ -3398,7 +3399,7 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
   epinfo = (struct sam_epinfo_s *)kzalloc(sizeof(struct sam_epinfo_s));
   if (!epinfo)
     {
-      udbg("ERROR: Failed to allocate EP info structure\n");
+      usbhost_trace1(EHCI_TRACE1_EPALLOC_FAILED, 0);
       return -ENOMEM;
     }
 
@@ -3760,7 +3761,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
 #endif
       case USB_EP_ATTR_XFER_CONTROL:
       default:
-        udbg("ERROR: Support for transfer type %d not implemented\n");
+        usbhost_trace1(EHCI_TRACE1_BADXFRTYPE, epinfo->xfrtype);
         nbytes = -ENOSYS;
         break;
     }
@@ -3880,7 +3881,7 @@ static int sam_reset(void)
 
   if ((regval & EHCI_USBSTS_HALTED) == 0)
     {
-      udbg("ERROR: Timed out waiting for HCHalted. USBSTS: %08x", regval);
+      usbhost_trace1(EHCI_TRACE1_HCHALTED_TIMEOUT, regval);
       return -ETIMEDOUT;
     }
 
@@ -4079,7 +4080,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
     kmemalign(32, CONFIG_SAMA5_EHCI_NQHS * sizeof(struct sam_qh_s));
   if (!g_qhpool)
     {
-      udbg("ERROR: Failed to allocate the QH pool\n");
+      usbhost_trace1(EHCI_TRACE1_QHPOOLALLOC_FAILED, 0);
       return NULL;
     }
 #endif
@@ -4100,7 +4101,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
     kmemalign(32, CONFIG_SAMA5_EHCI_NQTDS * sizeof(struct sam_qtd_s));
   if (!g_qtdpool)
     {
-      udbg("ERROR: Failed to allocate the qTD pool\n");
+      usbhost_trace1(EHCI_TRACE1_QTDPOOLALLOC_FAILED, 0);
       kfree(g_qhpool);
       return NULL;
     }
@@ -4113,7 +4114,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
     kmemalign(4096, FRAME_LIST_SIZE * sizeof(uint32_t));
   if (!g_framelist)
     {
-      udbg("ERROR: Failed to allocate the periodic frame list\n");
+      usbhost_trace1(EHCI_TRACE1_PERFLALLOC_FAILED, 0);
       kfree(g_qhpool);
       kfree(g_qtdpool);
       return NULL;
@@ -4136,7 +4137,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   ret = sam_reset();
   if (ret < 0)
     {
-      udbg("ERROR: sam_reset failed: %d\n", ret);
+      usbhost_trace1(EHCI_TRACE1_RESET_FAILED, -ret);
       return NULL;
     }
 
@@ -4174,10 +4175,10 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
    * writing a '1' to the corresponding bit.
    */
 
-  sam_putreg(ECHI_INT_ALLINTS, &HCOR->usbsts);
+  sam_putreg(EHCI_INT_ALLINTS, &HCOR->usbsts);
 
 #if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
-  /* Show the ECHI version */
+  /* Show the EHCI version */
 
   regval16 = sam_swap16(HCCR->hciversion);
   uvdbg("HCIVERSION %x.%02x\n", regval16 >> 8, regval16 & 0xff);
@@ -4295,14 +4296,12 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   regval |= EHCI_CONFIGFLAG;
   sam_putreg(regval, &HCOR->configflag);
 
-  /* Wait for the ECHI to run (i.e., not longer report halted) */
+  /* Wait for the EHCI to run (i.e., no longer report halted) */
 
   ret = ehci_wait_usbsts(EHCI_USBSTS_HALTED, 0, 100*1000);
   if (ret < 0)
     {
-      udbg("ERROR: EHCI Failed to run: USBSTS=%08x\n",
-           sam_getreg(&HCOR->usbsts));
-
+      usbhost_trace1(EHCI_TRACE1_RUN_FAILED, sam_getreg(&HCOR->usbsts));
       return NULL;
     }
 
@@ -4318,7 +4317,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 #endif
   if (ret != 0)
     {
-      udbg("ERROR: Failed to attach IRQ\n");
+      usbhost_trace1(EHCI_TRACE1_IRQATTACH_FAILED, SAM_IRQ_UHPHS);
       return NULL;
     }
 
