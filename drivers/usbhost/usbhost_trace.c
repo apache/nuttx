@@ -72,8 +72,8 @@
 
 #ifdef CONFIG_USBHOST_TRACE
 static uint32_t g_trace[CONFIG_USBHOST_TRACE_NRECORDS];
-static uint16_t g_head = 0;
-static uint16_t g_tail = 0;
+static volatile uint16_t g_head = 0;
+static volatile uint16_t g_tail = 0;
 static volatile bool g_disabled = false;
 #endif
 

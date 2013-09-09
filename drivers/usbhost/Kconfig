@@ -133,6 +133,11 @@ config USBHOST_TRACE_VERBOSE
 	bool "Enable verbose debug trace"
 	default n
 	---help---
-		Number of verbose trace output if supported by the platform.
+		Enable verbose trace output if supported by the platform.  The
+		intent is that if USBHOST_TRACE_VERBOSE is not defined, then only
+		errors, warnings, and critical messages would be logged.  If
+		USBHOST_TRACE_VERBOSE is defined, then general informative trace
+		information would also be included.
 
 endif
+

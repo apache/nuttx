@@ -93,13 +93,29 @@ extern "C" {
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBHOST_TRACE) || \
-   (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_USB
+#endif
+
+#if defined(CONFIG_USBHOST_TRACE) || defined(CONFIG_DEBUG_USB)
 void usbhost_trace1(uint16_t id, uint32_t u23);
 void usbhost_trace2(uint16_t id, uint8_t u7, uint16_t u16);
+
+#if defined(CONFIG_USBHOST_TRACE_VERBOSE) || \
+   (defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_USB))
+#  define usbhost_vtrace1(id, u23)     usbhost_trace1(id, u23)
+#  define usbhost_vtrace2(id, u7, u16) usbhost_trace2(id, u7, u16)
+#else
+#  define usbhost_vtrace1(id, u23)
+#  define usbhost_vtrace2(id, u7, u16)
+#endif
+
 #else
 #  define usbhost_trace1(id, u23)
 #  define usbhost_trace2(id, u7, u16)
+#  define usbhost_vtrace1(id, u23)
+#  define usbhost_vtrace2(id, u7, u16)
 #endif
 
 /****************************************************************************

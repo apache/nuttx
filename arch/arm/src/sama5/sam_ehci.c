@@ -115,6 +115,13 @@
 #  undef CONFIG_SAMA5_UHPHS_RHPORT1
 #endif
 
+/* Simplify DEBUG checks */
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_VERBOSE
+#  undef CONFIG_DEBUG_USB
+#endif
+
 /* For now, suppress use of PORTA in any event.  I use that for SAM-BA and
  * would prefer that the board not try to drive VBUS on that port!
  */
@@ -1821,8 +1828,14 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
   uint32_t regval;
   int ret;
 
+  /* Terse output only if we are tracing */
+
+#ifdef CONFIG_USBHOST_TRACE
+  usbhost_vtrace2(EHCI_VTRACE2_ASYNCXFR, epinfo->epno, buflen);
+#else
   uvdbg("RHport%d EP%d: buffer=%p, buflen=%d, req=%p\n",
         rhport->rhpndx+1, epinfo->epno, buffer, buflen, req);
+#endif
 
   DEBUGASSERT(rhport && epinfo);
 
@@ -2155,8 +2168,14 @@ static ssize_t sam_intr_transfer(struct sam_rhport_s *rhport,
   uint32_t regval;
   int ret;
 
+  /* Terse output only if we are tracing */
+
+#ifdef CONFIG_USBHOST_TRACE
+  usbhost_vtrace2(EHCI_VTRACE2_INTRXFR, epinfo->epno, buflen);
+#else
   uvdbg("RHport%d EP%d: buffer=%p, buflen=%d\n",
         rhport->rhpndx+1, epinfo->epno, buffer, buflen);
+#endif
 
   DEBUGASSERT(rhport && epinfo && buffer && buflen > 0);
 
@@ -2367,7 +2386,7 @@ static int sam_qh_ioccheck(struct sam_qh_s *qh, uint32_t **bp, void *arg)
   /* Is the qTD still active? */
 
   token = sam_swap32(qh->hw.overlay.token);
-  uvdbg("EP%d TOKEN=%08x\n", epinfo->epno, token);
+  usbhost_vtrace2(EHCI_VTRACE2_IOCCHECK, epinfo->epno, token);
 
   if ((token & QH_TOKEN_ACTIVE) != 0)
     {
@@ -2582,13 +2601,13 @@ static inline void sam_portsc_bottomhalf(void)
       rhport = &g_ehci.rhport[rhpndx];
       portsc = sam_getreg(&HCOR->portsc[rhpndx]);
 
-      uvdbg("PORTSC%d: %08x\n", rhpndx + 1, portsc);
+      usbhost_vtrace2(EHCI_VTRACE2_PORTSC, rhpndx + 1, portsc);
 
       /* Handle port connection status change (CSC) events */
 
       if ((portsc & EHCI_PORTSC_CSC) != 0)
         {
-          uvdbg("Connect Status Change\n");
+          usbhost_vtrace1(EHCI_VTRACE1_PORTSC_CSC, portsc);
 
           /* Check current connect status */
 
@@ -2602,8 +2621,8 @@ static inline void sam_portsc_bottomhalf(void)
 
                   rhport->connected = true;
 
-                  uvdbg("RHPort%d connected, pscwait: %d\n",
-                        rhpndx + 1, g_ehci.pscwait);
+                  usbhost_vtrace2(EHCI_VTRACE2_PORTSC_CONNECTED,
+                                  rhpndx + 1, g_ehci.pscwait);
 
                   /* Notify any waiters */
 
@@ -2615,7 +2634,7 @@ static inline void sam_portsc_bottomhalf(void)
                 }
               else
                 {
-                  uvdbg("Already connected\n");
+                  usbhost_vtrace1(EHCI_VTRACE1_PORTSC_CONNALREADY, portsc);
                 }
             }
           else
@@ -2626,7 +2645,9 @@ static inline void sam_portsc_bottomhalf(void)
                 {
                   /* Yes.. disconnect the device */
 
-                  uvdbg("RHport%d disconnected\n", rhpndx+1);
+                  usbhost_vtrace2(EHCI_VTRACE2_PORTSC_DISCONND,
+                                  rhpndx+1, g_ehci.pscwait);
+
                   rhport->connected = false;
                   rhport->lowspeed  = false;
 
@@ -2652,7 +2673,7 @@ static inline void sam_portsc_bottomhalf(void)
                 }
               else
                 {
-                   uvdbg("Already disconnected\n");
+                   usbhost_vtrace1(EHCI_VTRACE1_PORTSC_DISCALREADY, portsc);
                 }
             }
         }
@@ -2700,7 +2721,7 @@ static inline void sam_syserr_bottomhalf(void)
 
 static inline void sam_async_advance_bottomhalf(void)
 {
-  uvdbg("Async Advance Interrupt\n");
+  usbhost_vtrace1(EHCI_VTRACE1_AAINTR, 0);
 
   /* REVISIT: Could remove all tagged QH entries here */
 }
@@ -2750,11 +2771,11 @@ static void sam_ehci_bottomhalf(FAR void *arg)
     {
       if ((pending & EHCI_INT_USBERRINT) != 0)
         {
-          usbhost_trace1(EHCI_TRACE1_USBERR_INTR, 0);
+          usbhost_trace1(EHCI_TRACE1_USBERR_INTR, pending);
         }
       else
         {
-          uvdbg("USB Interrupt (USBINT) Interrupt\n");
+          usbhost_vtrace1(EHCI_VTRACE1_USBINTR, pending);
         }
 
       sam_ioc_bottomhalf();
@@ -2857,7 +2878,12 @@ static int sam_ehci_tophalf(int irq, FAR void *context)
 
   usbsts = sam_getreg(&HCOR->usbsts);
   regval = sam_getreg(&HCOR->usbintr);
+
+#ifdef CONFIG_USBHOST_TRACE
+  usbhost_vtrace1(EHCI_VTRACE1_TOPHALF, usbsts & regval);
+#else
   ullvdbg("USBSTS: %08x USBINTR: %08x\n", usbsts, regval);
+#endif
 
   /* Handle all unmasked interrupt sources */
 
@@ -2975,10 +3001,8 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
                */
 
               irqrestore(flags);
-
-              uvdbg("RHPort%d connected: %s\n",
-                    rhpndx + 1, g_ehci.rhport[rhpndx].connected ? "YES" : "NO");
-
+              usbhost_vtrace2(EHCI_VTRACE2_MONWAKEUP,
+                              rhpndx + 1, g_ehci.rhport[rhpndx].connected);
               return rhpndx;
             }
         }
@@ -3026,6 +3050,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
   struct sam_rhport_s *rhport;
   volatile uint32_t *regaddr;
   uint32_t regval;
+  int ret;
 
   DEBUGASSERT(rhpndx >= 0 && rhpndx < SAM_EHCI_NRHPORT);
   rhport = &g_ehci.rhport[rhpndx];
@@ -3038,7 +3063,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
     {
       /* No, return an error */
 
-      uvdbg("Not connected\n");
+      usbhost_vtrace1(EHCI_VTRACE1_ENUM_DISCONN, 0);
       return -ENODEV;
     }
 
@@ -3242,8 +3267,14 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
    * See include/nuttx/usb/usbhost_devaddr.h.
    */
 
-  uvdbg("Enumerate the device\n");
-  return usbhost_enumerate(&g_ehci.rhport[rhpndx].drvr, rhpndx+1, &rhport->class);
+  usbhost_vtrace2(EHCI_VTRACE2_CLASSENUM, rhpndx+1, rhpndx+1);
+  ret = usbhost_enumerate(&g_ehci.rhport[rhpndx].drvr, rhpndx+1, &rhport->class);
+  if (ret < 0)
+    {
+      usbhost_trace2(EHCI_TRACE2_CLASSENUM_FAILED, rhpndx+1, -ret);
+    }
+
+  return ret;
 }
 
 /************************************************************************************
@@ -3390,9 +3421,16 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
    */
 
   DEBUGASSERT(drvr && epdesc && ep);
+
+  /* Terse output only if we are tracing */
+
+#ifdef CONFIG_USBHOST_TRACE
+  usbhost_vtrace2(EHCI_VTRACE2_EPALLOC, epdesc->addr, epdesc->xfrtype);
+#else
   uvdbg("EP%d DIR=%s FA=%08x TYPE=%d Interval=%d MaxPacket=%d\n",
         epdesc->addr, epdesc->in ? "IN" : "OUT", epdesc->funcaddr,
         epdesc->xfrtype, epdesc->interval, epdesc->mxpacketsize);
+#endif
 
   /* Allocate a endpoint information structure */
 
@@ -3665,9 +3703,16 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr,
   DEBUGASSERT(rhport && req);
 
   len = sam_read16(req->len);
+
+  /* Terse output only if we are tracing */
+
+#ifdef CONFIG_USBHOST_TRACE
+  usbhost_vtrace2(EHCI_VTRACE2_CTRLINOUT, rhport->rhpndx + 1, req->req);
+#else
   uvdbg("RHPort%d type: %02x req: %02x value: %02x%02x index: %02x%02x len: %04x\n",
         rhport->rhpndx + 1, req->type, req->req, req->value[1], req->value[0],
         req->index[1], req->index[0], len);
+#endif
 
   /* We must have exclusive access to the EHCI hardware and data structures. */
 
@@ -4032,7 +4077,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 
   /* Software Configuration ****************************************************/
 
-  uvdbg("Initializing EHCI Stack\n");
+  usbhost_vtrace1(EHCI_VTRACE1_INITIALIZING, 0);
 
   /* Initialize the EHCI state data structure */
 
@@ -4181,20 +4226,20 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   /* Show the EHCI version */
 
   regval16 = sam_swap16(HCCR->hciversion);
-  uvdbg("HCIVERSION %x.%02x\n", regval16 >> 8, regval16 & 0xff);
+  usbhost_vtrace2(EHCI_VTRACE2_HCIVERSION, regval16 >> 8, regval16 & 0xff);
 
   /* Verify that the correct number of ports is reported */
 
   regval = sam_getreg(&HCCR->hcsparams);
   nports = (regval & EHCI_HCSPARAMS_NPORTS_MASK) >> EHCI_HCSPARAMS_NPORTS_SHIFT;
 
-  uvdbg("HCSPARAMS=%08x nports=%d\n", regval, nports);
+  usbhost_vtrace2(EHCI_VTRACE2_HCSPARAMS, nports, regval);
   DEBUGASSERT(nports == SAM_EHCI_NRHPORT);
 
   /* Show the HCCPARAMS register */
 
   regval = sam_getreg(&HCCR->hccparams);
-  uvdbg("HCCPARAMS=%08x\n", regval);
+  usbhost_vtrace1(EHCI_VTRACE1_HCCPARAMS, regval);
 #endif
 
   /* Initialize the head of the asynchronous queue/reclamation list.
@@ -4363,7 +4408,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
   /* Enable interrupts at the interrupt controller */
 
   up_enable_irq(SAM_IRQ_UHPHS); /* enable USB interrupt */
-  uvdbg("USB EHCI Initialized\n");
+  usbhost_vtrace1(EHCI_VTRACE1_INIITIALIZED, 0);
 
   /* Initialize and return the connection interface */
 

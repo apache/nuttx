@@ -86,6 +86,12 @@ struct sam_usbhost_trace_s
 
 static const struct sam_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
 {
+#ifdef CONFIG_SAMA5_OHCI
+#ifdef CONFIG_USBHOST_TRACE_VERBOSE
+#endif
+#endif
+
+#ifdef CONFIG_SAMA5_EHCI
   TRENTRY(EHCI_TRACE1_SYSTEMERROR,         TR_EHCI, TR_FMT1, "EHCI ERROR: System error: %06x\n"),
   TRENTRY(EHCI_TRACE1_QTDFOREACH_FAILED,   TR_EHCI, TR_FMT1, "EHCI ERROR: sam_qtd_foreach failed: %d\n"),
   TRENTRY(EHCI_TRACE1_QHALLOC_FAILED,      TR_EHCI, TR_FMT1, "EHCI ERROR: Failed to allocate a QH\n"),
@@ -101,7 +107,7 @@ static const struct sam_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(EHCI_TRACE1_TRANSFER_FAILED,     TR_EHCI, TR_FMT1, "EHCI ERROR: Transfer failed %d\n"),
   TRENTRY(EHCI_TRACE1_QHFOREACH_FAILED,    TR_EHCI, TR_FMT1, "EHCI ERROR: sam_qh_foreach failed: %d\n"),
   TRENTRY(EHCI_TRACE1_SYSERR_INTR,         TR_EHCI, TR_FMT1, "EHCI: Host System Error Interrupt\n"),
-  TRENTRY(EHCI_TRACE1_USBERR_INTR,         TR_EHCI, TR_FMT1, "EHCI: USB Error Interrupt (USBERRINT) Interrupt\n"),
+  TRENTRY(EHCI_TRACE1_USBERR_INTR,         TR_EHCI, TR_FMT1, "EHCI: USB Error Interrupt (USBERRINT) Interrupt: %06x\n"),
   TRENTRY(EHCI_TRACE1_EPALLOC_FAILED,      TR_EHCI, TR_FMT1, "EHCI ERROR: Failed to allocate EP info structure\n"),
   TRENTRY(EHCI_TRACE1_BADXFRTYPE,          TR_EHCI, TR_FMT1, "EHCI ERROR: Support for transfer type %d not implemented\n"),
   TRENTRY(EHCI_TRACE1_HCHALTED_TIMEOUT,    TR_EHCI, TR_FMT1, "EHCI ERROR: Timed out waiting for HCHalted. USBSTS: %06x\n"),
@@ -111,12 +117,48 @@ static const struct sam_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(EHCI_TRACE1_RESET_FAILED,        TR_EHCI, TR_FMT1, "EHCI ERROR: sam_reset failed: %d\n"),
   TRENTRY(EHCI_TRACE1_RUN_FAILED,          TR_EHCI, TR_FMT1, "EHCI ERROR: EHCI Failed to run: USBSTS=%08x\n"),
   TRENTRY(EHCI_TRACE1_IRQATTACH_FAILED,    TR_EHCI, TR_FMT1, "EHCI ERROR: Failed to attach IRQ%d\n"),
+#ifdef CONFIG_USBHOST_TRACE_VERBOSE
+  TRENTRY(EHCI_VTRACE1_PORTSC_CSC,         TR_EHCI, TR_FMT1, "EHCI Connect Status Change: %06x\n"),
+  TRENTRY(EHCI_VTRACE1_PORTSC_CONNALREADY, TR_EHCI, TR_FMT1, "EHCI Already connected: %06x\n"),
+  TRENTRY(EHCI_VTRACE1_PORTSC_DISCALREADY, TR_EHCI, TR_FMT1, "EHCI Already disconnected: %06x\n"),
+  TRENTRY(EHCI_VTRACE1_TOPHALF,            TR_EHCI, TR_FMT1, "EHCI Interrupt: %06x\n"),
+  TRENTRY(EHCI_VTRACE1_AAINTR,             TR_EHCI, TR_FMT1, "EHCI Async Advance Interrupt\n"),
+  TRENTRY(EHCI_VTRACE1_USBINTR,            TR_EHCI, TR_FMT1, "EHCI USB Interrupt (USBINT) Interrupt: %06x\n"),
+  TRENTRY(EHCI_VTRACE1_ENUM_DISCONN,       TR_EHCI, TR_FMT1, "EHCI Enumeration not connected\n"),
+  TRENTRY(EHCI_VTRACE1_INITIALIZING,       TR_EHCI, TR_FMT1, "EHCI Initializing EHCI Stack\n"),
+  TRENTRY(EHCI_VTRACE1_HCCPARAMS,          TR_EHCI, TR_FMT1, "EHCI HCCPARAMS=%06x\n"),
+  TRENTRY(EHCI_VTRACE1_INIITIALIZED,       TR_EHCI, TR_FMT1, "EHCI USB EHCI Initialized\n"),
+#endif
+#endif
 };
 
 static const struct sam_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
 {
+#ifdef CONFIG_SAMA5_OHCI
+#ifdef CONFIG_USBHOST_TRACE_VERBOSE
+#endif
+#endif
+
+#ifdef CONFIG_SAMA5_EHCI
   TRENTRY(EHCI_TRACE2_EPSTALLED,           TR_EHCI, TR_FMT2, "EHCI EP%d Stalled: TOKEN=%08x\n"),
   TRENTRY(EHCI_TRACE2_EPIOERROR,           TR_EHCI, TR_FMT2, "EHCI ERROR: EP%d TOKEN=%08x\n"),
+  TRENTRY(EHCI_TRACE2_CLASSENUM_FAILED,    TR_EHCI, TR_FMT2, "EHCI RHport%d usbhost_enumerate() failed: %d\n"),
+
+#ifdef CONFIG_USBHOST_TRACE_VERBOSE
+  TRENTRY(EHCI_VTRACE2_ASYNCXFR,           TR_EHCI, TR_FMT2, "EHCI Async transfer EP%d buflen=%d\n"),
+  TRENTRY(EHCI_VTRACE2_INTRXFR,            TR_EHCI, TR_FMT2, "EHCI Intr Transfer EP%d buflen=%d\n"),
+  TRENTRY(EHCI_VTRACE2_IOCCHECK,           TR_EHCI, TR_FMT2, "EHCI IOC EP%d TOKEN=%04x\n"),
+  TRENTRY(EHCI_VTRACE2_PORTSC,             TR_EHCI, TR_FMT2, "EHCI PORTSC%d: %04x\n"),
+  TRENTRY(EHCI_VTRACE2_PORTSC_CONNECTED,   TR_EHCI, TR_FMT2, "EHCI RHPort%d connected, pscwait: %d\n"),
+  TRENTRY(EHCI_VTRACE2_PORTSC_DISCONND,    TR_EHCI, TR_FMT2, "EHCI RHport%d disconnected, pscwait: %d\n"),
+  TRENTRY(EHCI_VTRACE2_MONWAKEUP,          TR_EHCI, TR_FMT2, "EHCI RHPort%d connected: %d\n"),
+  TRENTRY(EHCI_VTRACE2_CLASSENUM,          TR_EHCI, TR_FMT2, "EHCI RHPort%d: Enumerate the device, devaddr=%02x\n"),
+  TRENTRY(EHCI_VTRACE2_EPALLOC,            TR_EHCI, TR_FMT2, "EHCI EPALLOC: EP%d TYPE=%d\n"),
+  TRENTRY(EHCI_VTRACE2_CTRLINOUT,          TR_EHCI, TR_FMT2, "EHCI CTRLIN/OUT: RHPort%d req: %02x\n"),
+  TRENTRY(EHCI_VTRACE2_HCIVERSION,         TR_EHCI, TR_FMT2, "EHCI HCIVERSION %x.%02x\n"),
+  TRENTRY(EHCI_VTRACE2_HCSPARAMS,          TR_EHCI, TR_FMT2, "EHCI nports=%d, HCSPARAMS=%06x\n"),
+#endif
+#endif
 };
 
 /********************************************************************************************
