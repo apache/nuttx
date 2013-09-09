@@ -68,6 +68,12 @@
 
 enum usbhost_trace1codes_e
 {
+#ifdef CONFIG_SAMA5_OHCI
+#ifdef CONFIG_USBHOST_TRACE_VERBOSE
+#endif
+#endif
+
+#ifdef CONFIG_SAMA5_EHCI
   EHCI_TRACE1_SYSTEMERROR = 0,      /* EHCI ERROR: System error */
   EHCI_TRACE1_QTDFOREACH_FAILED,    /* EHCI ERROR: sam_qtd_foreach failed */
   EHCI_TRACE1_QHALLOC_FAILED,       /* EHCI ERROR: Failed to allocate a QH */
@@ -91,13 +97,50 @@ enum usbhost_trace1codes_e
   EHCI_TRACE1_QTDPOOLALLOC_FAILED,  /* EHCI ERROR: Failed to allocate the qTD pool */
   EHCI_TRACE1_PERFLALLOC_FAILED,    /* EHCI ERROR: Failed to allocate the periodic frame list */
   EHCI_TRACE1_RESET_FAILED,         /* EHCI ERROR: sam_reset failed */
-  EHCI_TRACE1_RUN_FAILED,           /* EHCI ERROR: EHCI Failed to run: USBSTS=%08x */
-  EHCI_TRACE1_IRQATTACH_FAILED,     /* EHCI ERROR: Failed to attach IRQ%d */
+  EHCI_TRACE1_RUN_FAILED,           /* EHCI ERROR: EHCI Failed to run */
+  EHCI_TRACE1_IRQATTACH_FAILED,     /* EHCI ERROR: Failed to attach IRQ */
+
+#ifdef CONFIG_USBHOST_TRACE_VERBOSE
+  EHCI_VTRACE1_PORTSC_CSC,          /* EHCI Connect Status Change */
+  EHCI_VTRACE1_PORTSC_CONNALREADY,  /* EHCI Already connected */
+  EHCI_VTRACE1_PORTSC_DISCALREADY,  /* EHCI Already disconnected */
+  EHCI_VTRACE1_TOPHALF,             /* EHCI Interrupt top half */
+  EHCI_VTRACE1_AAINTR,              /* EHCI Async Advance Interrupt */
+  EHCI_VTRACE1_USBINTR,             /* EHCI USB Interrupt (USBINT) Interrupt */
+  EHCI_VTRACE1_ENUM_DISCONN,        /* EHCI Enumeration not connected */
+  EHCI_VTRACE1_INITIALIZING,        /* EHCI Initializing EHCI Stack */
+  EHCI_VTRACE1_HCCPARAMS,           /* EHCI HCCPARAMS */
+  EHCI_VTRACE1_INIITIALIZED,        /* EHCI USB EHCI Initialized */
+#endif
+#endif
 
   __TRACE1_NSTRINGS,
 
+#ifdef CONFIG_SAMA5_OHCI
+#ifdef CONFIG_USBHOST_TRACE_VERBOSE
+#endif
+#endif
+
+#ifdef CONFIG_SAMA5_EHCI
   EHCI_TRACE2_EPSTALLED,            /* EHCI EP Stalled */
   EHCI_TRACE2_EPIOERROR,            /* EHCI ERROR: EP TOKEN */
+  EHCI_TRACE2_CLASSENUM_FAILED,     /* EHCI usbhost_enumerate() failed */
+
+#ifdef CONFIG_USBHOST_TRACE_VERBOSE
+  EHCI_VTRACE2_ASYNCXFR,            /* EHCI Async transfer */
+  EHCI_VTRACE2_INTRXFR,             /* EHCI Interrupt Transfer */
+  EHCI_VTRACE2_IOCCHECK,            /* EHCI IOC */
+  EHCI_VTRACE2_PORTSC,              /* EHCI PORTSC */
+  EHCI_VTRACE2_PORTSC_CONNECTED,    /* EHCI RHPort connected */
+  EHCI_VTRACE2_PORTSC_DISCONND,     /* EHCI RHport disconnected */
+  EHCI_VTRACE2_MONWAKEUP,           /* EHCI RHPort connected wakeup */
+  EHCI_VTRACE2_CLASSENUM,           /* EHCI RHPort CLASS enumeration */
+  EHCI_VTRACE2_EPALLOC,             /* EHCI EPALLOC */
+  EHCI_VTRACE2_CTRLINOUT,           /* EHCI CTRLIN/OUT */
+  EHCI_VTRACE2_HCIVERSION,          /* EHCI HCIVERSION */
+  EHCI_VTRACE2_HCSPARAMS,           /* EHCI HCSPARAMS */
+#endif
+#endif
 
   __TRACE2_NSTRINGS
 };
