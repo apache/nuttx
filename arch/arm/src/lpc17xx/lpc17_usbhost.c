@@ -1304,7 +1304,7 @@ static int lpc17_ctrltd(struct lpc17_usbhost_s *priv, uint32_t dirpid,
       else 
         {
           uvdbg("Bad TD completion status: %d\n", EDCTRL->tdstatus);
-          ret = -EIO;
+          ret = ed->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
         }
     }
 

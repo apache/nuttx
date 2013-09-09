@@ -2991,7 +2991,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       else
         {
           udbg("ERROR: Bad TD completion status: %d\n", ed->tdstatus);
-          ret = -EIO;
+          ret = ed->tdstatus == TD_CC_STALL ? -EPERM : -EIO;
         }
     }
 
