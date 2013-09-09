@@ -121,9 +121,18 @@ config USBHOST_TRACE
 		Enables USB tracing for debug.  Only supported for the HCD and,
 		further, no supported by all HCD implementations.
 
+if USBHOST_TRACE
+
 config USBHOST_TRACE_NRECORDS
 	int "Number of trace entries to remember"
 	default 128
-	depends on USBHOST_TRACE
 	---help---
 		Number of trace entries to remember.
+
+config USBHOST_TRACE_VERBOSE
+	bool "Enable verbose debug trace"
+	default n
+	---help---
+		Number of verbose trace output if supported by the platform.
+
+endif
