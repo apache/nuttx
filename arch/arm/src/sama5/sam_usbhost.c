@@ -62,6 +62,10 @@
 
 #define TRENTRY(id,ehci,fmt1,string) {string}
 
+#ifndef NULL
+#  define NULL ((FAR void *)0)
+#endif
+
 /********************************************************************************************
  * Private Types
  ********************************************************************************************/
@@ -139,15 +143,25 @@ static const struct sam_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
 FAR const char *usbhost_trformat1(uint16_t id)
 {
   int ndx = TRACE1_INDEX(id);
-  DEBUGASSERT(ndx < TRACE1_NSTRINGS);
-  return g_trace1[ndx].string;
+
+  if (ndx < TRACE1_NSTRINGS)
+    {
+      return g_trace1[ndx].string;
+    }
+
+  return NULL;
 }
 
 FAR const char *usbhost_trformat2(uint16_t id)
 {
   int ndx = TRACE2_INDEX(id);
-  DEBUGASSERT(ndx < TRACE2_NSTRINGS);
-  return g_trace2[ndx].string;
+
+  if (ndx < TRACE2_NSTRINGS)
+    {
+      return g_trace2[ndx].string;
+    }
+
+  return NULL;
 }
 
 #endif /* CONFIG_USBHOST_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
