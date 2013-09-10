@@ -1132,7 +1132,8 @@ Configurations
           CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
           CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
           CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
-          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+
+          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output (USB device tracing only)
           CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
           CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
           CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y

@@ -68,13 +68,36 @@
 
 enum usbhost_trace1codes_e
 {
+  __TRACE1_BASEVALUE = 0,           /* This will force the first value to be 1 */
+
 #ifdef CONFIG_SAMA5_OHCI
+  OHCI_TRACE1_DEVDISCONN,           /* OHCI ERROR: RHport Device disconnected */
+  OHCI_TRACE1_INTRUNRECOVERABLE,    /* OHCI ERROR: Unrecoverable error */
+  OHCI_TRACE1_INTRUNHANDLED,        /* OHCI ERROR: Unhandled interrupts */
+  OHCI_TRACE1_EPLISTALLOC_FAILED,   /* OHCI ERROR: Failed to allocate EP list */
+  OHCI_TRACE1_EDALLOC_FAILED,       /* OHCI ERROR: Failed to allocate ED */
+  OHCI_TRACE1_TDALLOC_FAILED,       /* OHCI ERROR: Failed to allocate TD */
+  OHCI_TRACE1_IRQATTACH,            /* OHCI ERROR: Failed to attach IRQ */
+
 #ifdef CONFIG_USBHOST_TRACE_VERBOSE
+  OHCI_VTRACE1_PHYSED,              /* OHCI physed */
+  OHCI_VTRACE1_VIRTED,              /* OHCI ed */
+  OHCI_VTRACE1_CSC,                 /* OHCI Connect Status Change */
+  OHCI_VTRACE1_DRWE,                /* OHCI DRWE: Remote wake-up */
+  OHCI_VTRACE1_ALREADYCONN,         /* OHCI Already connected */
+  OHCI_VTRACE1_SPEED,               /* OHCI Low speed */
+  OHCI_VTRACE1_ALREADYDISCONN,      /* OHCI Already disconnected */
+  OHCI_VTRACE1_RHSC,                /* OHCI Root Hub Status Change */
+  OHCI_VTRACE1_WDHINTR,             /* OHCI Writeback Done Head interrupt */
+  OHCI_VTRACE1_ENUMDISCONN,         /* OHCI RHport Not connected */
+  OHCI_VTRACE1_INITIALIZING,        /* OHCI Initializing Stack */
+  OHCI_VTRACE1_INITIALIZED,         /* OHCI Initialized */
+  OHCI_VTRACE1_INTRPENDING,         /* OHCI Interrupts pending */
 #endif
 #endif
 
 #ifdef CONFIG_SAMA5_EHCI
-  EHCI_TRACE1_SYSTEMERROR = 0,      /* EHCI ERROR: System error */
+  EHCI_TRACE1_SYSTEMERROR,          /* EHCI ERROR: System error */
   EHCI_TRACE1_QTDFOREACH_FAILED,    /* EHCI ERROR: sam_qtd_foreach failed */
   EHCI_TRACE1_QHALLOC_FAILED,       /* EHCI ERROR: Failed to allocate a QH */
   EHCI_TRACE1_BUFTOOBIG,            /* EHCI ERROR: Buffer too big */
@@ -114,10 +137,29 @@ enum usbhost_trace1codes_e
 #endif
 #endif
 
-  __TRACE1_NSTRINGS,
+  __TRACE1_NSTRINGS,                /* Separates the format 1 from the format 2 strings */
 
 #ifdef CONFIG_SAMA5_OHCI
+  OHCI_TRACE2_BADTDSTATUS,          /* OHCI ERROR: RHport Bad TD completion status */
+  OHCI_TRACE2_WHDTDSTATUS,          /* OHCI ERROR: WDH Bad TD completion status */
+  OHCI_TRACE2_EP0ENQUEUE_FAILED,    /* OHCI ERROR: RHport Failed to enqueue EP0 */
+  OHCI_TRACE2_EDENQUEUE_FAILED,     /* OHCI ERROR: Failed to queue ED for transfer type */
+  OHCI_TRACE2_CLASSENUM_FAILED,     /* OHCI usbhost_enumerate() failed */
+
 #ifdef CONFIG_USBHOST_TRACE_VERBOSE
+  OHCI_VTRACE2_INTERVAL,            /* OHCI interval */
+  OHCI_VTRACE2_MININTERVAL,         /* OHCI MIN interval/offset */
+  OHCI_VTRACE2_RHPORTST,            /* OHCI RHPORTST */
+  OHCI_VTRACE2_CONNECTED,           /* OHCI RHPort connected */
+  OHCI_VTRACE2_DISCONNECTED,        /* OHCI RHPort disconnected */
+  OHCI_VTRACE2_WAKEUP,              /* OHCI RHPort connected */
+  OHCI_VTRACE2_CLASSENUM,           /* OHCI Enumerate the device */
+  OHCI_VTRACE2_EP0CONFIGURE,        /* OHCI RHPort EP0 CTRL */
+  OHCI_VTRACE2_EPALLOC,             /* OHCI EP CTRL */
+  OHCI_VTRACE2_CTRLIN,              /* OHCI CTRLIN */
+  OHCI_VTRACE2_CTRLOUT,             /* OHCI CTRLOUT */
+  OHCI_VTRACE2_TRANSFER,            /* OHCI EP buflen */
+  OHCI_VTRACE2_INITCONNECTED,       /* OHCI RHPort Device connected */
 #endif
 #endif
 
@@ -142,14 +184,14 @@ enum usbhost_trace1codes_e
 #endif
 #endif
 
-  __TRACE2_NSTRINGS
+  __TRACE2_NSTRINGS                 /* Total number of enumeration values */
 };
 
-#define TRACE1_FIRST     0
+#define TRACE1_FIRST     ((int)__TRACE1_BASEVALUE + 1)
 #define TRACE1_INDEX(id) ((int)(id) - TRACE1_FIRST)
 #define TRACE1_NSTRINGS  TRACE1_INDEX(__TRACE1_NSTRINGS)
 
-#define TRACE2_FIRST     (__TRACE1_NSTRINGS + 1)
+#define TRACE2_FIRST     ((int)__TRACE1_NSTRINGS + 1)
 #define TRACE2_INDEX(id) ((int)(id) - TRACE2_FIRST)
 #define TRACE2_NSTRINGS  TRACE2_INDEX(__TRACE2_NSTRINGS)
 
