@@ -1158,14 +1158,16 @@ static int sam_qh_invalidate(struct sam_qh_s *qh)
 static int sam_qtd_flush(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 {
   /* Flush the D-Cache, i.e., make the contents of the memory match the contents
-   * of the D-Cache in the specified address range.  If debug is enabled, then
-   * we will also invalidate the contents of the D-cache so that we can examine
-   * the modified memory contents in the event of a failure.
+   * of the D-Cache in the specified address range and invalidate the D-Cache
+   * to force re-loading of the data from memory when next accessed.
    */
 
+#if 0 /* Didn't behave as expected */
+  cp15_flush_dcache((uintptr_t)&qtd->hw,
+                    (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
+#else
   cp15_clean_dcache((uintptr_t)&qtd->hw,
                     (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
-#ifdef CONFIG_DEBUG_USB
   cp15_invalidate_dcache((uintptr_t)&qtd->hw,
                          (uintptr_t)&qtd->hw + sizeof(struct ehci_qtd_s));
 #endif
@@ -1183,15 +1185,17 @@ static int sam_qtd_flush(struct sam_qtd_s *qtd, uint32_t **bp, void *arg)
 
 static int sam_qh_flush(struct sam_qh_s *qh)
 {
-  /* Flush the QH first.  Normally this just means writing the contents of the
-   * D-cache to RAM.  If debug is enabled, then we will also invalidate the
-   * contents of the D-cache so that we can examine the modified memory contents
-   * in the event of a failure.
+  /* Flush the QH first.  This will write the contents of the D-cache to RAM and
+   * invalidate the contents of the D-cache so that the next access will be
+   * reloaded from D-Cache.
    */
 
-  cp15_clean_dcache((uintptr_t)&qh->hw,
+#if 0 /* Didn't behave as expected */
+  cp15_flush_dcache((uintptr_t)&qh->hw,
                     (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
-#ifdef CONFIG_DEBUG_USB
+#else
+  cp15_clean_dcache((uintptr_t)&qh->hw,
+                     (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
   cp15_invalidate_dcache((uintptr_t)&qh->hw,
                          (uintptr_t)&qh->hw + sizeof(struct ehci_qh_s));
 #endif
@@ -1540,14 +1544,10 @@ static int sam_qtd_addbpl(struct sam_qtd_s *qtd, const void *buffer, size_t bufl
    * will be accessed for an OUT DMA.
    */
 
+#if 0 /* Didn't behave as expected */
+  cp15_flush_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+#else
   cp15_clean_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
-
-  /* If debug is enabled, then we will also invalidate the contents of the
-   * D-cache so that we can examine the modified memory contents in the event
-   * of a failure.
-   */
-
-#ifdef CONFIG_DEBUG_USB
   cp15_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
 #endif
 
@@ -1826,6 +1826,7 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
   uint32_t *alt;
   uint32_t toggle;
   uint32_t regval;
+  bool dirin = false;
   int ret;
 
   /* Terse output only if we are tracing */
@@ -1912,10 +1913,9 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
    */
 
   alt = NULL;
-  if (buffer && buflen > 0)
+  if (buffer != NULL && buflen > 0)
     {
       uint32_t tokenbits;
-      bool dirin;
 
       /* Extra TOKEN bits include the data toggle, the data PID, and if
        * there is no request, an indication to interrupt at the end of this
@@ -2082,6 +2082,24 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
 
   sam_takesem(&g_ehci.exclsem);
 
+#if 0 /* Does not seem to be needed */
+  /* Was there a data buffer?  Was this an OUT transfer? */
+
+  if (buffer != NULL && buflen > 0 && !dirin)
+    {
+      /* We have received data from the host -- unless there was an error.
+       * in any event, we will invalidate the data buffer so that we will
+       * reload any new data freshly DMAed into the user buffer.
+       *
+       * NOTE: This might be un-necessary.  We cleaned and invalidated the
+       * D-Cache prior to starting the DMA so the D-Cache should still be
+       * invalid in this memory region.
+       */
+
+      cp15_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+    }
+#endif
+
   /* Did sam_ioc_wait() report an error? */
 
   if (ret < 0)
@@ -2090,7 +2108,9 @@ static ssize_t sam_async_transfer(struct sam_rhport_s *rhport,
       goto errout_with_iocwait;
     }
 
-  /* Transfer completed successfully.  Return the number of bytes transferred */
+  /* Transfer completed successfully.  Return the number of bytes
+   * transferred.
+   */
 
   return epinfo->xfrd;
 

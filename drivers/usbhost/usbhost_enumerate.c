@@ -379,7 +379,7 @@ int usbhost_enumerate(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
 
   DRVR_EP0CONFIGURE(drvr, 0, maxpacketsize);
 
-  /* Read first 8 bytes of the device descriptor */
+  /* Read first bytes of the device descriptor */
 
   ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_RECIPIENT_DEVICE;
   ctrlreq->req  = USB_REQ_GETDESCRIPTOR;
