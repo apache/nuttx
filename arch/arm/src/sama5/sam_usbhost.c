@@ -100,9 +100,9 @@ static const struct sam_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(OHCI_VTRACE1_VIRTED,             TR_OHCI, TR_FMT1, "OHCI ed: %06x\n"),
   TRENTRY(OHCI_VTRACE1_CSC,                TR_OHCI, TR_FMT1, "OHCI Connect Status Change, RHSTATUS: %06x\n"),
   TRENTRY(OHCI_VTRACE1_DRWE,               TR_OHCI, TR_FMT1, "OHCI DRWE: Remote wake-up, RHSTATUS: %06x\n"),
-  TRENTRY(OHCI_VTRACE1_ALREADYCONN,        TR_OHCI, TR_FMT1, "OHCI Already connected, RHPORTST%d: %06x\n"),
+  TRENTRY(OHCI_VTRACE1_ALREADYCONN,        TR_OHCI, TR_FMT1, "OHCI Already connected, RHPORTST: %06x\n"),
   TRENTRY(OHCI_VTRACE1_SPEED,              TR_OHCI, TR_FMT1, "OHCI Low speed: %d\n"),
-  TRENTRY(OHCI_VTRACE1_ALREADYDISCONN,     TR_OHCI, TR_FMT1, "OHCI Already disconnected, RHPORTST%d: %06x\n"),
+  TRENTRY(OHCI_VTRACE1_ALREADYDISCONN,     TR_OHCI, TR_FMT1, "OHCI Already disconnected, RHPORTST: %06x\n"),
   TRENTRY(OHCI_VTRACE1_RHSC,               TR_OHCI, TR_FMT1, "OHCI Root Hub Status Change. Pending: %06x\n"),
   TRENTRY(OHCI_VTRACE1_WDHINTR,            TR_OHCI, TR_FMT1, "OHCI Writeback Done Head interrupt. Pending: %06x\n"),
   TRENTRY(OHCI_VTRACE1_ENUMDISCONN,        TR_OHCI, TR_FMT1, "OHCI RHport%dNot connected\n"),
@@ -136,7 +136,7 @@ static const struct sam_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(EHCI_TRACE1_QTDPOOLALLOC_FAILED, TR_EHCI, TR_FMT1, "EHCI ERROR: Failed to allocate the qTD pool\n"),
   TRENTRY(EHCI_TRACE1_PERFLALLOC_FAILED,   TR_EHCI, TR_FMT1, "EHCI ERROR: Failed to allocate the periodic frame list\n"),
   TRENTRY(EHCI_TRACE1_RESET_FAILED,        TR_EHCI, TR_FMT1, "EHCI ERROR: sam_reset failed: %d\n"),
-  TRENTRY(EHCI_TRACE1_RUN_FAILED,          TR_EHCI, TR_FMT1, "EHCI ERROR: EHCI Failed to run: USBSTS=%08x\n"),
+  TRENTRY(EHCI_TRACE1_RUN_FAILED,          TR_EHCI, TR_FMT1, "EHCI ERROR: EHCI Failed to run: USBSTS=%06x\n"),
   TRENTRY(EHCI_TRACE1_IRQATTACH_FAILED,    TR_EHCI, TR_FMT1, "EHCI ERROR: Failed to attach IRQ%d\n"),
 
 #ifdef CONFIG_USBHOST_TRACE_VERBOSE
@@ -181,8 +181,8 @@ static const struct sam_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
 #endif
 
 #ifdef CONFIG_SAMA5_EHCI
-  TRENTRY(EHCI_TRACE2_EPSTALLED,           TR_EHCI, TR_FMT2, "EHCI EP%d Stalled: TOKEN=%08x\n"),
-  TRENTRY(EHCI_TRACE2_EPIOERROR,           TR_EHCI, TR_FMT2, "EHCI ERROR: EP%d TOKEN=%08x\n"),
+  TRENTRY(EHCI_TRACE2_EPSTALLED,           TR_EHCI, TR_FMT2, "EHCI EP%d Stalled: TOKEN=%04x\n"),
+  TRENTRY(EHCI_TRACE2_EPIOERROR,           TR_EHCI, TR_FMT2, "EHCI ERROR: EP%d TOKEN=%04x\n"),
   TRENTRY(EHCI_TRACE2_CLASSENUM_FAILED,    TR_EHCI, TR_FMT2, "EHCI RHport%d usbhost_enumerate() failed: %d\n"),
 
 #ifdef CONFIG_USBHOST_TRACE_VERBOSE
@@ -197,7 +197,7 @@ static const struct sam_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
   TRENTRY(EHCI_VTRACE2_EPALLOC,            TR_EHCI, TR_FMT2, "EHCI EPALLOC: EP%d TYPE=%d\n"),
   TRENTRY(EHCI_VTRACE2_CTRLINOUT,          TR_EHCI, TR_FMT2, "EHCI CTRLIN/OUT: RHPort%d req: %02x\n"),
   TRENTRY(EHCI_VTRACE2_HCIVERSION,         TR_EHCI, TR_FMT2, "EHCI HCIVERSION %x.%02x\n"),
-  TRENTRY(EHCI_VTRACE2_HCSPARAMS,          TR_EHCI, TR_FMT2, "EHCI nports=%d, HCSPARAMS=%06x\n"),
+  TRENTRY(EHCI_VTRACE2_HCSPARAMS,          TR_EHCI, TR_FMT2, "EHCI nports=%d, HCSPARAMS=%04x\n"),
 #endif
 #endif
 };
