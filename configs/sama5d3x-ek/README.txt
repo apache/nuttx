@@ -1039,6 +1039,7 @@ Configurations
 
     7. The USB high-speed EHCI and the low-/full- OHCI host drivers are supported
        in this configuration.
+
        Here are the relevant configuration options that enable EHCI support:
 
        System Type -> ATSAMA5 Peripheral Support
@@ -1064,23 +1065,63 @@ Configurations
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
+       Example Usage:
+
+       NuttShell (NSH) NuttX-6.29
+       nsh> ls /dev
+        /dev:
+        console
+        mtdblock0
+        null
+        ttyS0
+
+       Here a USB FLASH stick is inserted.  Nothing visible happens in the
+       the shell.  But a new device will appear:
+
+       nsh> ls /dev
+       /dev:
+        console
+        mtdblock0
+        null
+        sda
+        ttyS0
+       nsh> mount -t vfat /dev/sda /mnt/sda
+       nsh> ls -l /mnt/sda
+       /mnt/sda:
+        -rw-rw-rw-    8788 viminfo
+        drw-rw-rw-       0 .Trash-1000/
+        -rw-rw-rw-    3378 zmodem.patch
+        -rw-rw-rw-    1503 sz-1.log
+        -rw-rw-rw-     613 .bashrc
+
     The following features are *not* enabled in the demo configuration but
     might be of some use to you:
 
-    8.  Debugging USB Device.  There is normal console debug output available
-        that can be enabled with CONFIG_DEBUG + CONFIG_DEBUG_USB.  However,
-        USB device operation is very time critical and enabling this debug
-        output WILL interfere with the operation of the UDPHS.  USB device
-        tracing is a less invasive way to get debug information:  If tracing
-        is enabled, the USB device will save encoded trace output in in-memory
-        buffer; if the USB monitor is also enabled, that trace buffer will be
-        periodically emptied and dumped to the system logging device (the
-        serial console in this configuration):
+    8.  Debugging USB.  There is normal console debug output available that
+        can be enabled with CONFIG_DEBUG + CONFIG_DEBUG_USB.  However, USB
+        operation is very time critical and enabling this debug output WILL
+        interfere with some operation.  USB tracing is a less invasive way
+        to get debug information:  If tracing is enabled, the USB driver(s)
+        will save encoded trace output in in-memory buffers; if the USB
+        monitor is also enabled, those trace buffers will be periodically
+        emptied and dumped to the system logging device (the serial console
+        in this configuration):
+
+        Either or both USB device or host controller driver tracing can
+        be enabled:
 
         Device Drivers -> "USB Device Driver Support:
-          CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
+          CONFIG_USBDEV_TRACE=y                   : Enable USB device trace feature
           CONFIG_USBDEV_TRACE_NRECORDS=256        : Buffer 256 records in memory
           CONFIG_USBDEV_TRACE_STRINGS=y           : (optional)
+
+        Device Drivers -> "USB Host Driver Support:
+          CONFIG_USBHOST_TRACE=y                   : Enable USB host trace feature
+          CONFIG_USBHOST_TRACE_NRECORDS=256        : Buffer 256 records in memory
+          CONFIG_USBHOST_TRACE_VERBOSE=y           : Buffer everything
+
+        These settings will configure the USB monitor thread which will dump the
+        buffered USB debug data once every second:
 
         Application Configuration -> NSH LIbrary:
           CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
@@ -1459,6 +1500,41 @@ Configurations
         Application Configuration -> NSH Library
           CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
+        Debugging USB Host.  There is normal console debug output available
+        that can be enabled with CONFIG_DEBUG + CONFIG_DEBUG_USB.  However,
+        USB host operation is very time critical and enabling this debug
+        output might interfere with the operation of the UDPHS.  USB host
+        tracing is a less invasive way to get debug information:  If tracing
+        is enabled, the USB host will save encoded trace output in in-memory
+        buffer; if the USB monitor is also enabled, that trace buffer will be
+        periodically emptied and dumped to the system logging device (the
+        serial console in this configuration):
+
+        Device Drivers -> "USB Host Driver Support:
+          CONFIG_USBHOST_TRACE=y                   : Enable USB host trace feature
+          CONFIG_USBHOST_TRACE_NRECORDS=256        : Buffer 256 records in memory
+          CONFIG_USBHOST_TRACE_VERBOSE=y           : Buffer everything
+
+        Application Configuration -> NSH LIbrary:
+          CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
+          CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
+
+        Application Configuration -> System NSH Add-Ons:
+          CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
+          CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
+          CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
+          CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
+          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
+          CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
+          CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
+          CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
+          CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
+
+       NOTE: If USB debug output is also enabled, both outpus will appear
+       on the serial console.  However, the debug output will be
+       asynchronous with the trace output and, hence, difficult to
+       interpret.
+
     12. Support the USB high-speed USB device driver (UDPHS) can be enabled
         by changing the NuttX configuration file as follows:
 
@@ -1503,6 +1579,7 @@ Configurations
         Device Drivers -> "USB Device Driver Support:
           CONFIG_USBDEV_TRACE=y                   : Enable USB trace feature
           CONFIG_USBDEV_TRACE_NRECORDS=256        : Buffer 256 records in memory
+          CONFIG_USBDEV_TRACE_STRINGS=y           : (optional)
 
         Application Configuration -> NSH LIbrary:
           CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
