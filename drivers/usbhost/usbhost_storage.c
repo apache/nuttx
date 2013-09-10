@@ -1322,45 +1322,43 @@ static inline int usbhost_initvolume(FAR struct usbhost_state_s *priv)
       ret = register_blockdriver(devname, &g_bops, 0, priv);
     }
 
-  /* Check if we successfully initialized. We now have to be concerned
-   * about asynchronous modification of crefs because the block
+  /* Decrement the reference count.  We incremented the reference count
+   * above so that usbhost_destroy() could not be called.  We now have to
+   * be concerned about asynchronous modification of crefs because the block
    * driver has been registerd.
    */
 
-  if (ret == OK)
+  usbhost_takesem(&priv->exclsem);
+  DEBUGASSERT(priv->crefs >= 2);
+
+  /* Decrement the reference count */
+
+  priv->crefs--;
+
+  /* Check if we successfully initialized.  If so, handle a corner case
+   * where (1) open() has been called so the reference count was > 2, but
+   * the device has been disconnected. In this case, the class instance
+   * needs to persist until close()
+   * is called.
+   */
+
+  if (ret == OK && priv->crefs <= 1 && priv->disconnected)
     {
-      usbhost_takesem(&priv->exclsem);
-      DEBUGASSERT(priv->crefs >= 2);
-
-      /* Decrement the reference count */
-
-      priv->crefs--;
-
-      /* Handle a corner case where (1) open() has been called so the
-       * reference count was > 2, but the device has been disconnected.
-       * In this case, the class instance needs to persist until close()
-       * is called.
+      /* The will cause the enumeration logic to disconnect the class
+       * driver.
        */
 
-      if (priv->crefs <= 1 && priv->disconnected)
-        {
-          /* The will cause the enumeration logic to disconnect
-           * the class driver.
-           */
-
-          ret = -ENODEV;
-        }
-
-      /* Release the semaphore... there is a race condition here.
-       * Decrementing the reference count and releasing the semaphore
-       * allows usbhost_destroy() to execute (on the worker thread);
-       * the class driver instance could get destoryed before we are
-       * ready to handle it!
-       */
-
-       usbhost_givesem(&priv->exclsem);
+      ret = -ENODEV;
     }
 
+  /* Release the semaphore... there is a race condition here.
+   * Decrementing the reference count and releasing the semaphore
+   * allows usbhost_destroy() to execute (on the worker thread);
+   * the class driver instance could get destroyed before we are
+   * ready to handle it!
+   */
+
+  usbhost_givesem(&priv->exclsem);
   return ret;
 }
 

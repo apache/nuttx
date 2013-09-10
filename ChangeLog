@@ -5526,4 +5526,8 @@
 	  transfer errors while attempt to initialize, don't bother with
 	  the startup retries; abort immediately so that the device will
 	  be reset and we can try again (2013-9-9).
+	* drivers/usbhost/usbhost_storagge:  Correct a reference counting
+	  error:  When an MSC device transfer fails while waiting for
+	  UnitTestReady (see 2013-9-9), the reference count was not being
+	  decremented.  The end result is a memory leak (2013-9-10).
 
