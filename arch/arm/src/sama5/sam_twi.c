@@ -137,9 +137,12 @@
 struct twi_dev_s
 {
   struct i2c_dev_s    dev;        /* Generic I2C device */
-  struct i2c_msg_s    msg;        /* A single message for legacy read/write */
+  struct i2c_msg_s    *msg;       /* Message list */
   uintptr_t           base;       /* Base address of registers */
   uint16_t            irq;        /* IRQ number for this device */
+  uint16_t            address;    /* Slave address */
+  uint16_t            flags;      /* Transfer flags */
+  uint8_t             msgc;       /* Number of message in the message list */
   uint8_t             twi;        /* TWI peripheral number (for debug output) */
 
   sem_t               exclsem;    /* Only one thread can access at a time */
@@ -194,6 +197,10 @@ static int twi2_interrupt(int irq, FAR void *context);
 #endif
 static void twi_timeout(int argc, uint32_t arg, ...);
 
+static int twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg);
+static int twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg);
+static int twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg);
+
 /* I2C device operations */
 
 static uint32_t twi_setfrequency(FAR struct i2c_dev_s *dev,
@@ -203,8 +210,8 @@ static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer,
           int buflen);
 static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen);
 #ifdef CONFIG_I2C_WRITEREAD
-static int twi_writeread(FAR struct i2c_dev_s *inst, const uint8_t *buffer,
-          int buflen, uint8_t *rbuffer, int buflen);
+static int twi_writeread(FAR struct i2c_dev_s *inst, const uint8_t *wbuffer,
+          int wbuflen, uint8_t *rbuffer, int rbuflen);
 #endif
 #ifdef CONFIG_I2C_TRANSFER
 static int twi_transfer(FAR struct i2c_dev_s *dev,
@@ -433,10 +440,12 @@ static int twi_wait(struct twi_dev_s *priv)
 
 static int twi_interrupt(struct twi_dev_s *priv)
 {
+  struct i2c_msg_s *msg;
   uint32_t sr;
   uint32_t imr;
   uint32_t pending;
   uint32_t regval;
+  int ret;
 
   /* Retrieve masked interrupt status */
 
@@ -448,14 +457,15 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
   /* Byte received */
 
+  msg = priv->msg;
   if ((pending & TWI_INT_RXRDY) == TWI_INT_RXRDY)
     {
-      priv->msg.buffer[priv->xfrd] = twi_getreg(priv, SAM_TWI_RHR_OFFSET);
+      msg->buffer[priv->xfrd] = twi_getreg(priv, SAM_TWI_RHR_OFFSET);
       priv->xfrd++;
 
       /* Check for transfer complete */
 
-      if (priv->xfrd >= priv->msg.length)
+      if (priv->xfrd >= msg->length)
         {
           /* The transfer is complete.  Disable the RXRDY interrupt and
            * enable the TXCOMP interrupt
@@ -467,7 +477,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
       /* Not yet complete, but will the next be the last byte? */
 
-      else if (priv->xfrd == (priv->msg.length - 1))
+      else if (priv->xfrd == (msg->length - 1))
         {
           /* Yes, set the stop signal */
 
@@ -481,7 +491,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
     {
       /* Transfer finished? */
 
-      if (priv->xfrd >= priv->msg.length)
+      if (priv->xfrd >= msg->length)
         {
           /* The transfer is complete.  Disable the TXRDY interrupt and
            * enable the TXCOMP interrupt
@@ -501,7 +511,7 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
       else
         {
-          twi_putreg(priv, SAM_TWI_THR_OFFSET, priv->msg.buffer[priv->xfrd]);
+          twi_putreg(priv, SAM_TWI_THR_OFFSET, msg->buffer[priv->xfrd]);
           priv->xfrd++;
         }
     }
@@ -511,11 +521,34 @@ static int twi_interrupt(struct twi_dev_s *priv)
   else if ((pending & TWI_INT_TXCOMP) == TWI_INT_TXCOMP)
     {
       twi_putreg(priv, SAM_TWI_IDR_OFFSET, TWI_INT_TXCOMP);
-      priv->result = OK;
+      ret = OK;
 
-      /* Wake up the waiting thread */
+      /* Is there another messasge to send? */
 
-      twi_givesem(&priv->waitsem);
+      if (priv->msgc > 1)
+        {
+          /* Yes... start the next message */
+
+          priv->msg++;
+          priv->msgc--;
+          ret = twi_startmessage(priv, priv->msg);
+          if (ret < 0)
+            {
+              /* Wake up the thread with the error indication */
+
+              priv->result = ret;
+              twi_givesem(&priv->waitsem);
+            }
+        }
+      else
+        {
+          /* No.. we made it to the end of the message list with no errors.
+           * Wake up the waiting thread with a success indication.
+           */
+
+          priv->result = OK;
+          twi_givesem(&priv->waitsem);
+        }
     }
 
   return OK;
@@ -560,6 +593,123 @@ static void twi_timeout(int argc, uint32_t arg, ...)
   i2clldbg("TWI%d Timeout!\n", priv->twi);
   priv->result = -ETIMEDOUT;
   twi_givesem(&priv->waitsem);
+}
+
+/*******************************************************************************
+ * Name: twi_startread
+ *
+ * Description:
+ *   Start the next read message
+ *
+ *******************************************************************************/
+
+static int twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg)
+{
+  irqstate_t flags;
+  int ret;
+
+  /* This function might be called from the interrupt level */
+
+  flags = irqsave();
+
+  /* Setup for the transfer */
+
+  priv->result = -EBUSY;
+  priv->xfrd   = 0;
+
+  /* Set STOP signal if only one byte is sent*/
+
+  if (msg->length == 1)
+    {
+      twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_STOP);
+    }
+
+  /* Set slave address and number of internal address bytes. */
+
+  twi_putreg(priv, SAM_TWI_MMR_OFFSET, 0);
+  twi_putreg(priv, SAM_TWI_MMR_OFFSET, TWI_MMR_IADRSZ_NONE | TWI_MMR_MREAD | TWI_MMR_DADR(msg->addr));
+
+  /* Set internal address bytes */
+
+  twi_putreg(priv, SAM_TWI_IADR_OFFSET, 0);
+  twi_putreg(priv, SAM_TWI_IADR_OFFSET, 0);
+
+  /* Enable read interrupt and send the START condition */
+
+  twi_putreg(priv, SAM_TWI_IER_OFFSET, TWI_INT_RXRDY);
+
+  if ((msg->flags & I2C_M_NORESTART) == 0)
+    {
+      twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_START);
+    }
+
+  ret = twi_wait(priv);
+  irqrestore(flags);
+  return ret;
+}
+
+/*******************************************************************************
+ * Name: twi_startwrite
+ *
+ * Description:
+ *   Start the next write message
+ *
+ *******************************************************************************/
+
+static int twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
+{
+  irqstate_t flags;
+  int ret;
+
+  /* This function might be called from the interrupt level */
+
+  flags = irqsave();
+
+  /* Setup for the transfer */
+
+  priv->result = -EBUSY;
+  priv->xfrd   = 0;
+
+  /* Set slave address and number of internal address bytes. */
+
+  twi_putreg(priv, SAM_TWI_MMR_OFFSET, 0);
+  twi_putreg(priv, SAM_TWI_MMR_OFFSET, TWI_MMR_IADRSZ_NONE | TWI_MMR_DADR(msg->addr));
+
+  /* Set internal address bytes. */
+
+  twi_putreg(priv, SAM_TWI_IADR_OFFSET, 0);
+  twi_putreg(priv, SAM_TWI_IADR_OFFSET, 0);
+
+  /* Write first byte to send.*/
+
+  twi_putreg(priv, SAM_TWI_THR_OFFSET, msg->buffer[0]);
+
+  /* Enable write interrupt */
+
+  twi_putreg(priv, SAM_TWI_IER_OFFSET, TWI_INT_TXRDY);
+  ret = twi_wait(priv);
+  irqrestore(flags);
+  return ret;
+}
+
+/*******************************************************************************
+ * Name: twi_startmessage
+ *
+ * Description:
+ *   Start the next write message
+ *
+ *******************************************************************************/
+
+static int twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg)
+{
+  if ((msg->flags & I2C_M_READ) == 0)
+    {
+      return twi_startread(priv, msg);
+    }
+  else
+    {
+      return twi_startwrite(priv, msg);
+    }
 }
 
 /*******************************************************************************
@@ -613,8 +763,8 @@ static int twi_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 
   /* Set the correctly shifted, 7-bit address */
 
-  priv->msg.addr  = addr << 1;
-  priv->msg.flags = 0 ;
+  priv->address = addr;
+  priv->flags   = (nbits == 10) ? I2C_M_TEN : 0;
 
   twi_givesem(&priv->exclsem);
   return OK;
@@ -632,8 +782,15 @@ static int twi_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
-  uint8_t devaddr;
   int ret;
+
+  struct i2c_msg_s msg =
+  {
+    .addr   = priv->address,
+    .flags  = priv->flags,
+    .buffer = (uint8_t *)buffer,
+    .length = buflen
+  };
 
   i2cvdbg("TWI%d buflen: %d\n", priv->twi, buflen);
   DEBUGASSERT(dev != NULL);
@@ -642,33 +799,23 @@ static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
 
   twi_takesem(&priv->exclsem);
 
-  priv->msg.addr  &= ~0x01;
-  priv->msg.buffer = (uint8_t*)buffer;
-  priv->msg.length = buflen;
-  priv->result     = -EBUSY;
-  priv->xfrd       = 0;
+  /* Initiate the wrte */
 
-  /* Set slave address and number of internal address bytes. */
+  priv->msg  = &msg;
+  priv->msgc = 1;
 
-  twi_putreg(priv, SAM_TWI_MMR_OFFSET, 0);
+  ret = twi_startwrite(priv, &msg);
+  if (ret < 0)
+    {
+      i2cdbg("ERROR: twi_startwrite failed: %d\n", ret);
+      goto errout;
+    }
 
-  devaddr = priv->msg.addr >> 1;
-  twi_putreg(priv, SAM_TWI_MMR_OFFSET, TWI_MMR_IADRSZ_NONE | TWI_MMR_DADR(devaddr));
+  /* And wait for the wrtie to complete */
 
-  /* Set internal address bytes. */
-
-  twi_putreg(priv, SAM_TWI_IADR_OFFSET, 0);
-  twi_putreg(priv, SAM_TWI_IADR_OFFSET, 0);
-
-  /* Write first byte to send.*/
-
-  twi_putreg(priv, SAM_TWI_THR_OFFSET, *buffer);
-
-  /* Enable write interrupt */
-
-  twi_putreg(priv, SAM_TWI_IER_OFFSET, TWI_INT_TXRDY);
   ret = twi_wait(priv);
 
+errout:
   twi_givesem(&priv->exclsem);
   return ret;
 }
@@ -684,49 +831,41 @@ static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
 
 static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
 {
-  struct twi_dev_s *priv = (struct twi_dev_s *) dev;
-  uint8_t devaddr;
+  struct twi_dev_s *priv = (struct twi_dev_s *)dev;
   int ret;
 
-  i2cvdbg(TWI%d "buflen: %d\n", priv->twi, buflen);
+  struct i2c_msg_s msg =
+  {
+    .addr   = priv->address,
+    .flags  = priv->flags | I2C_M_READ,
+    .buffer = buffer,
+    .length = buflen
+  };
+
   DEBUGASSERT(dev != NULL);
+  i2cvdbg(TWI%d "buflen: %d\n", priv->twi, buflen);
 
   /* Get exclusive access to the device */
 
   twi_takesem(&priv->exclsem);
 
-  priv->msg.addr  |= 0x01;
-  priv->msg.buffer = buffer;
-  priv->msg.length = buflen;
-  priv->result     = -EBUSY;
-  priv->xfrd       = 0;
+  /* Initiate the read */
 
-  /* Set STOP signal if only one byte is sent*/
+  priv->msg  = &msg;
+  priv->msgc = 1;
 
-  if (buflen == 1)
+  ret = twi_startread(priv, &msg);
+  if (ret < 0)
     {
-      twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_STOP);
+      i2cdbg("ERROR: twi_startread failed: %d\n", ret);
+      goto errout;
     }
 
-  /* Set slave address and number of internal address bytes. */
-
-  twi_putreg(priv, SAM_TWI_MMR_OFFSET, 0);
-
-  devaddr = priv->msg.addr >> 1;
-  twi_putreg(priv, SAM_TWI_MMR_OFFSET, TWI_MMR_IADRSZ_NONE | TWI_MMR_MREAD | TWI_MMR_DADR(devaddr));
-
-  /* Set internal address bytes */
-
-  twi_putreg(priv, SAM_TWI_IADR_OFFSET, 0);
-  twi_putreg(priv, SAM_TWI_IADR_OFFSET, 0);
-
-  /* Enable read interrupt and send the START codnition */
-
-  twi_putreg(priv, SAM_TWI_IER_OFFSET, TWI_INT_RXRDY);
-  twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_START);
+  /* And wait for the read to complete */
 
   ret = twi_wait(priv);
 
+errout:
   twi_givesem(&priv->exclsem);
   return ret;
 }
@@ -739,11 +878,54 @@ static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
  *******************************************************************************/
 
 #ifdef CONFIG_I2C_WRITEREAD
-static int twi_writeread(FAR struct i2c_dev_s *inst, const uint8_t *buffer,
-                         int buflen, uint8_t *rbuffer, int buflen)
+static int twi_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
+                         int wbuflen, uint8_t *rbuffer, int rbuflen)
 {
-#error Not implemented
-  return -ENOSYS;
+  struct twi_dev_s *priv = (struct twi_dev_s *)dev;
+  int ret;
+
+  struct i2c_msg_s msgv[2] =
+  {
+    {
+      .addr   = priv->address,
+      .flags  = priv->flags,
+      .buffer = (uint8_t *)wbuffer,  /* Override const */
+      .length = wbuflen
+    },
+    {
+      .addr   = priv->address,
+      .flags  = priv->flags | ((rbuflen > 0) ? I2C_M_READ : I2C_M_NORESTART),
+      .buffer = rbuffer,
+      .length = (rbuflen < 0) ? -rbuflen : rbuflen
+    }
+  };
+
+  DEBUGASSERT(dev != NULL);
+  i2cvdbg(TWI%d "wbuflen: %d rbuflen: %d\n", priv->twi, wbuflen, rbuflen);
+
+  /* Get exclusive access to the device */
+
+  twi_takesem(&priv->exclsem);
+
+  /* Initiate the read */
+
+  priv->msg  = msgv;
+  priv->msgc = 2;
+
+  ret = twi_startread(priv, msgv);
+  if (ret < 0)
+    {
+      i2cdbg("ERROR: twi_startread failed: %d\n", ret);
+      goto errout;
+    }
+
+  /* And wait for the read to complete */
+
+  ret = twi_wait(priv);
+
+errout:
+  twi_givesem(&priv->exclsem);
+  return ret;
 }
 #endif
 
@@ -791,8 +973,35 @@ static int twi_registercallback(FAR struct i2c_dev_s *dev,
 static int twi_transfer(FAR struct i2c_dev_s *dev,
                         FAR struct i2c_msg_s *msgs, int count)
 {
-#error Not implemented
-  return -ENOSYS;
+  struct twi_dev_s *priv = (struct twi_dev_s *)dev;
+  int ret;
+
+  DEBUGASSERT(dev != NULL);
+  i2cvdbg(TWI%d "count: %d\n", priv->twi, count);
+
+  /* Get exclusive access to the device */
+
+  twi_takesem(&priv->exclsem);
+
+  /* Initiate the message transfer */
+
+  priv->msg  = msgs;
+  priv->msgc = count;
+
+  ret = twi_startmessage(priv, msgs);
+  if (ret < 0)
+    {
+      i2cdbg("ERROR: twi_startread failed: %d\n", ret);
+      goto errout;
+    }
+
+  /* And wait for the read to complete */
+
+  ret = twi_wait(priv);
+
+errout:
+  twi_givesem(&priv->exclsem);
+  return ret;
 }
 #endif
 
@@ -1012,6 +1221,9 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
   /* Initialize the device structure */
 
   priv->dev.ops = &g_twiops;
+  priv->address = 0;
+  priv->flags   = 0;
+
   sem_init(&priv->exclsem, 0, 1);
   sem_init(&priv->waitsem, 0, 0);
 
