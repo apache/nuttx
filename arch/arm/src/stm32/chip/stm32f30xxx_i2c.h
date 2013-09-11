@@ -42,10 +42,10 @@
 
 /* Register Offsets *****************************************************************/
 
-#define STM32_I2C_CR1_OFFSET      0x0000  /* Control register 1 (32-bit) */
-#define STM32_I2C_CR2_OFFSET      0x0004  /* Control register 2 (32-bit) */
-#define STM32_I2C_OAR1_OFFSET     0x0008  /* Own address register 1 (16-bit) */
-#define STM32_I2C_OAR2_OFFSET     0x000c  /* Own address register 2 (16-bit) */
+#define STM32_I2C_CR1_OFFSET      0x0000 /* Control register 1 (32-bit) */
+#define STM32_I2C_CR2_OFFSET      0x0004 /* Control register 2 (32-bit) */
+#define STM32_I2C_OAR1_OFFSET     0x0008 /* Own address register 1 (16-bit) */
+#define STM32_I2C_OAR2_OFFSET     0x000c /* Own address register 2 (16-bit) */
 #define STM32_I2C_TIMINGR_OFFSET  0x0010 /* Timing register */
 #define STM32_I2C_TIMEOUTR_OFFSET 0x0014 /* Timeout register */
 #define STM32_I2C_ISR_OFFSET      0x0018 /* Interrupt and Status register */
