@@ -55,13 +55,13 @@
 
 /* Configuration ************************************************************/
 
-#ifndef HAVE_AT25_MTD
+#ifndef HAVE_AT25
 #  error AT25 Serial FLASH not supported
 #endif
 
 #ifndef CONFIG_SAMA5_AT25_FTL
 #  error AT25 FTL support required (CONFIG_SAMA5_AT25_FTL)
-#  undef HAVE_AT25_MTD
+#  undef HAVE_AT25
 #endif
 
 #ifndef CONFIG_EXAMPLES_USBMSC_DEVMINOR1
@@ -70,7 +70,7 @@
 
 #if CONFIG_EXAMPLES_USBMSC_DEVMINOR1 != AT25_MINOR
 #  error Confusion in the assignment of minor device numbers
-#  undef HAVE_AT25_MTD
+#  undef HAVE_AT25
 #endif
 
 /* Debug ********************************************************************/
@@ -109,7 +109,7 @@ int usbmsc_archinitialize(void)
 {
   /* Initialize the AT25 MTD driver */
 
-#ifdef HAVE_AT25_MTD
+#ifdef HAVE_AT25
   int ret = sam_at25_initialize(AT25_MINOR);
   if (ret < 0)
     {

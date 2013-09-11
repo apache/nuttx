@@ -56,7 +56,7 @@
 
 #include "sama5d3x-ek.h"
 
-#ifdef CONFIG_MTD_AT25
+#ifdef HAVE_AT25
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -140,4 +140,4 @@ int sam_at25_initialize(int minor)
   return OK;
 }
 
-#endif /* HAVE_AT25_MTD */
+#endif /* HAVE_AT25 */

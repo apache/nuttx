@@ -84,7 +84,7 @@
 
 #include "sama5d3x-ek.h"
 
-#ifdef HAVE_HSMCI_MTD
+#ifdef HAVE_HSMCI
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -341,4 +341,4 @@ bool sam_writeprotected(int slotno)
   return false;
 }
 
-#endif /* HAVE_HSMCI_MTD */
+#endif /* HAVE_HSMCI */
