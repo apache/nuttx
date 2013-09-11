@@ -76,6 +76,7 @@ Contents
   - Serial FLASH
   - HSMCI Card Slots
   - USB Ports
+  - AT24 Serial EEPROM
   - SAMA5D3x-EK Configuration Options
   - Configurations
 
@@ -617,6 +618,23 @@ USB Ports
     PIO  Signal Name Function
     ---- ----------- -------------------------------------------------------
     PD28 OVCUR_USB   Combined overrcurrent indication from port A and B
+
+AT24 Serial EEPROM
+==================
+
+  A AT24C512 Serial EEPPROM was used for tested I2C.  There are other I2C/TWI
+  devices on-board, but the serial EEPROM is the simplest test.
+
+  The Serial EEPROM was mounted on an external adaptor board and connected to
+  the SAMA5D3x-EK thusly:
+
+    - VCC -- VCC
+    - GND -- GND
+    - TWCK0(PA31) -- SCL
+    - TWD0(PA30)  -- SDA
+
+  By default, PA30 and PA31 are SWJ-DP pins, it can be used as a pin for TWI
+  peripheral in the end application.
 
 SAMA5D3x-EK Configuration Options
 =================================
