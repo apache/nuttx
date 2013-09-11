@@ -5530,4 +5530,6 @@
 	  error:  When an MSC device transfer fails while waiting for
 	  UnitTestReady (see 2013-9-9), the reference count was not being
 	  decremented.  The end result is a memory leak (2013-9-10).
+	* arch/arm/src/sama5/chip/sam_twi.h:  Added SAMA5 TWI register
+	  definition file (2013-9-11).
 
