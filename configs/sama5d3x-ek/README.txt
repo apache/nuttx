@@ -989,7 +989,84 @@ Configurations
          nsh> cat /mnt/at25/atest.txt
          This is a test
 
-    6. Support the USB high-speed EHCI device (UDPHS) driver is enabled.
+       NOTE:  It appears that if Linux runs out of NAND, it will destroy the
+       contents of the AT25.
+
+    6. Support for HSMCI car slots. The SAMA5D3x-EK provides a two SD memory
+       card slots:  (1) a full size SD card slot (J7 labeled MCI0), and (2)
+       a microSD memory card slot (J6 labeled MCI1).  The full size SD card
+       slot connects via HSMCI0; the microSD connects vi HSMCI1.  Relevant
+       configuration settings include:
+
+       System Type->ATSAMA5 Peripheral Support
+         CONFIG_SAMA5_HSMCI0=y                 : Enable HSMCI0 support
+         CONFIG_SAMA5_HSMCI1=y                 : Enable HSMCI1 support
+         CONFIG_SAMA5_DMAC0=y                  : DMAC0 is needed by HSMCI0
+         CONFIG_SAMA5_DMAC1=y                  : DMAC1 is needed by HSMCI1
+
+       System Type
+         CONFIG_SAMA5_PIO_IRQ=y                : PIO interrupts needed
+         CONFIG_SAMA5_PIOD_IRQ=y               : Card detect pins are on PIOD
+
+       Device Drivers -> MMC/SD Driver Support
+         CONFIG_MMCSD=y                        : Enable MMC/SD support
+         CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
+         CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
+         CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
+         CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
+         CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
+         CONFIG_SDIO_DMA=y                     : Use SDIO DMA
+         CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes
+
+       Library Routines
+         CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
+       Using the SD card:
+
+       1) After booting, the HSCMI devices will appear as /dev/mmcsd0
+          and /dev/mmcsd1.
+
+       2) If you try mounting an SD card with nothing in the slot, the
+          mount will fail:
+
+            nsh> mount -t vfat /dev/mmcsd1 /mnt/sd1
+            nsh: mount: mount failed: 19
+
+          NSH can be configured to provide errors as strings instead of
+          numbers.  But in this case, only the error number is reported.
+          The  error numbers can be found in nuttx/include/errno.h:
+
+            #define ENODEV              19
+            #define ENODEV_STR          "No such device"
+
+          So the mount command is saying that there is no device or, more
+          correctly, that there is no card in the SD card slot.
+
+       3) Inserted the SD card.  Then the mount should succeed.
+
+           nsh> mount -t vfat /dev/mmcsd1 /mnt/sd1
+           nsh> ls /mnt/sd1
+           /mnt/sd1:
+            atest.txt
+           nsh> cat /mnt/sd1/atest.txt
+           This is a test
+
+       4) Before removing the card, you must umount the file system.  This
+          is equivalent to "ejecting" or "safely removing" the card on
+          Windows:  It flushes any cached data to the card and makes the SD
+          card unavailable to the applications.
+
+            nsh> umount -t /mnt/sd1
+
+          It is now safe to remove the card.  NuttX provides into callbacks
+          that can be used by an application to automatically unmount the
+          volume when it is removed.  But those callbacks are not used in
+          this configuration.
+
+    7. Support the USB high-speed EHCI device (UDPHS) driver is enabled.
        These are the relevant NuttX configuration settings:
 
        Device Drivers -> USB Device Driver Support
@@ -1037,7 +1114,7 @@ Configurations
          nsh> msdis
          nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
 
-    7. The USB high-speed EHCI and the low-/full- OHCI host drivers are supported
+    8. The USB high-speed EHCI and the low-/full- OHCI host drivers are supported
        in this configuration.
 
        Here are the relevant configuration options that enable EHCI support:
@@ -1097,7 +1174,7 @@ Configurations
     The following features are *not* enabled in the demo configuration but
     might be of some use to you:
 
-    8.  Debugging USB.  There is normal console debug output available that
+    9.  Debugging USB.  There is normal console debug output available that
         can be enabled with CONFIG_DEBUG + CONFIG_DEBUG_USB.  However, USB
         operation is very time critical and enabling this debug output WILL
         interfere with some operation.  USB tracing is a less invasive way
@@ -1146,8 +1223,14 @@ Configurations
 
     STATUS:
       2013-9-6:  I have not confirmed this, but it appears that the AT25 does not
-        retain its formatting across power cycles.  I need to study this more.
-      2013-9-6:  The mass storage class is not yet working.
+        retain its formatting across power cycles.  I think that the contents of
+        the AT25 are destroyed (i.e., reformatted for different use) by Linux when
+        it runs out of NAND.
+      2013-9-11:  OHCI does not work with EHCI.  At present, EHCI receives the
+        full- or low-speed devices and correctly hands them off to OHCI.  But, for
+        some unknown reason, the connection is lost and the port reverts to EHCI which
+        returns the port to OHCI.  This sequence of connection events occurs
+        indefinitiely.  OHCI does work without EHCI enabled, however.
 
   hello:
     This configuration directory, performs the (almost) simplest of all
@@ -1398,6 +1481,8 @@ Configurations
          CONFIG_MMCSD=y                        : Enable MMC/SD support
          CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
          CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
+         CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
+         CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
          CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
          CONFIG_SDIO_DMA=y                     : Use SDIO DMA
          CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes
@@ -1410,7 +1495,10 @@ Configurations
 
        Using the SD card:
 
-       1) If you try mounting an SD card with nothing in the slot, the
+       1) After booting, the HSCMI devices will appear as /dev/mmcsd0
+          and /dev/mmcsd1.
+
+       2) If you try mounting an SD card with nothing in the slot, the
           mount will fail:
 
             nsh> mount -t vfat /dev/mmcsd1 /mnt/sd1
@@ -1426,21 +1514,21 @@ Configurations
           So the mount command is saying that there is no device or, more
           correctly, that there is no card in the SD card slot.
 
-        2) Inserted the SD card.  Then the mount should succeed.
+       3) Inserted the SD card.  Then the mount should succeed.
 
-            nsh> mount -t vfat /dev/mmcsd1 /mnt/sd1
-            nsh> ls /mnt/sd1
-            /mnt/sd1:
-             atest.txt
-            nsh> cat /mnt/sd1/atest.txt
-            This is a test
+           nsh> mount -t vfat /dev/mmcsd1 /mnt/sd1
+           nsh> ls /mnt/sd1
+           /mnt/sd1:
+            atest.txt
+           nsh> cat /mnt/sd1/atest.txt
+           This is a test
 
-        3) Before removing the card, you must umount the file system.  This
-           is equivalent to "ejecting" or "safely removing" the card on
-           Windows:  It flushes any cached data to the card and makes the SD
-           card unavailable to the applications.
+       3) Before removing the card, you must umount the file system.  This
+          is equivalent to "ejecting" or "safely removing" the card on
+          Windows:  It flushes any cached data to the card and makes the SD
+          card unavailable to the applications.
 
-             nsh> mount -t vfat /dev/mmcsd1 /mnt/sd1
+            nsh> umount -t /mnt/sd1
 
           It is now safe to remove the card.  NuttX provides into callbacks
           that can be used by an application to automatically unmount the

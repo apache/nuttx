@@ -86,14 +86,14 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(HAVE_AT25_MTD) || defined(HAVE_HSMCI_MTD) || defined(HAVE_USBHOST) || \
+#if defined(HAVE_AT25) || defined(HAVE_HSMCI) || defined(HAVE_USBHOST) || \
     defined(HAVE_USBMONITOR)
   int ret;
 #endif
 
   /* Initialize the AT25 driver */
 
-#ifdef HAVE_AT25_MTD
+#ifdef HAVE_AT25
   ret = sam_at25_initialize(AT25_MINOR);
   if (ret < 0)
     {
@@ -102,7 +102,7 @@ int nsh_archinitialize(void)
     }
 #endif
 
-#ifdef HAVE_HSMCI_MTD
+#ifdef HAVE_HSMCI
 #ifdef CONFIG_SAMA5_HSMCI0
   ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR);
   if (ret < 0)

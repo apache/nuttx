@@ -55,8 +55,8 @@
  ************************************************************************************/
 /* Configuration ************************************************************/
 
-#define HAVE_HSMCI_MTD  1
-#define HAVE_AT25_MTD   1
+#define HAVE_HSMCI      1
+#define HAVE_AT25       1
 #define HAVE_USBHOST    1
 #define HAVE_USBDEV     1
 #define HAVE_USBMONITOR 1
@@ -65,28 +65,28 @@
 /* Can't support MMC/SD if the card interface(s) are not enable */
 
 #if !defined(CONFIG_SAMA5_HSMCI0) && !defined(CONFIG_SAMA5_HSMCI1)
-#  undef HAVE_HSMCI_MTD
+#  undef HAVE_HSMCI
 #endif
 
 /* Can't support MMC/SD features if mountpoints are disabled */
 
-#if defined(HAVE_HSMCI_MTD) && defined(CONFIG_DISABLE_MOUNTPOINT)
+#if defined(HAVE_HSMCI) && defined(CONFIG_DISABLE_MOUNTPOINT)
 #  warning Mountpoints disabled.  No MMC/SD support
-#  undef HAVE_HSMCI_MTD
+#  undef HAVE_HSMCI
 #endif
 
 /* We need PIO interrupts on PIOD to support card detect interrupts */
 
-#if defined(HAVE_HSMCI_MTD) && !defined(CONFIG_SAMA5_PIOD_IRQ)
+#if defined(HAVE_HSMCI) && !defined(CONFIG_SAMA5_PIOD_IRQ)
 #  warning PIOD interrupts not enabled.  No MMC/SD support.
-#  undef HAVE_HSMCI_MTD
+#  undef HAVE_HSMCI
 #endif
 
 /* AT25 Serial FLASH */
 /* Can't support the AT25 device if it SPI0 or AT25 support are not enabled */
 
 #if !defined(CONFIG_SAMA5_SPI0) || !defined(CONFIG_MTD_AT25)
-#  undef HAVE_AT25_MTD
+#  undef HAVE_AT25
 #endif
 
 /* Can't support AT25 features if mountpoints are disabled or if we were not
@@ -94,7 +94,7 @@
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5_AT25_AUTOMOUNT)
-#  undef HAVE_AT25_MTD
+#  undef HAVE_AT25
 #endif
 
 /* If we are going to mount the AT25, then they user must also have told
@@ -102,7 +102,7 @@
  */
 
 #if !defined(CONFIG_SAMA5_AT25_FTL) && !defined(CONFIG_SAMA5_AT25_NXFFS)
-#  undef HAVE_AT25_MTD
+#  undef HAVE_AT25
 #endif
 
 #if defined(CONFIG_SAMA5_AT25_FTL) && defined(CONFIG_SAMA5_AT25_NXFFS)
@@ -111,16 +111,24 @@
 #  undef CONFIG_SAMA5_AT25_NXFFS
 #endif
 
-/* Assign minor device numbers.  We basically ignore most of the NSH
- * configuration here (NSH SLOTNO ignored completely; NSH minor extended
- * to handle more devices).
+/* Assign minor device numbers.  We will also use MINOR number 0 for the AT25.
+ * It should appear as /dev/mtdblock0
+ */
+
+#ifdef HAVE_AT25
+#  define AT25_MINOR 0
+#endif
+
+/* MMC/SD minor numbers:  The NSH device minor extended is extened to support
+ * two devices.  If CONFIG_NSH_MMCSDMINOR is zero, these will be:  /dev/mmcsd0
+ * and /dev/mmcsd1.
  */
 
 #ifndef CONFIG_NSH_MMCSDMINOR
 #  define CONFIG_NSH_MMCSDMINOR 0
 #endif
 
-#ifdef HAVE_HSMCI_MTD
+#ifdef HAVE_HSMCI
 
 #  define HSMCI0_SLOTNO 0
 #  define HSMCI1_SLOTNO 1
@@ -128,13 +136,10 @@
 #  ifdef CONFIG_SAMA5_HSMCI0
 #     define HSMCI0_MINOR  CONFIG_NSH_MMCSDMINOR
 #     define HSMCI1_MINOR  (CONFIG_NSH_MMCSDMINOR+1)
-#     define AT25_MINOR    (CONFIG_NSH_MMCSDMINOR+2)
 #  else
 #     define HSMCI1_MINOR  CONFIG_NSH_MMCSDMINOR
-#     define AT25_MINOR    (CONFIG_NSH_MMCSDMINOR+1)
 #  endif
 #else
-#  define AT25_MINOR CONFIG_NSH_MMCSDMINOR
 #endif
 
 /* USB Host / USB Device */
@@ -439,7 +444,7 @@ void sam_sdram_config(void);
  *
  ****************************************************************************/
 
-#ifdef HAVE_AT25_MTD
+#ifdef HAVE_AT25
 int sam_at25_initialize(int minor);
 #endif
 
@@ -451,7 +456,7 @@ int sam_at25_initialize(int minor);
  *
  ****************************************************************************/
 
-#ifdef HAVE_HSMCI_MTD
+#ifdef HAVE_HSMCI
 int sam_hsmci_initialize(int slotno, int minor);
 #endif
 
@@ -463,7 +468,7 @@ int sam_hsmci_initialize(int slotno, int minor);
  *
  ************************************************************************************/
 
-#ifdef HAVE_HSMCI_MTD
+#ifdef HAVE_HSMCI
 bool sam_cardinserted(int slotno);
 #endif
 
@@ -475,7 +480,7 @@ bool sam_cardinserted(int slotno);
  *
  ************************************************************************************/
 
-#ifdef HAVE_HSMCI_MTD
+#ifdef HAVE_HSMCI
 bool sam_writeprotected(int slotno);
 #endif
 
