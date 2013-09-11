@@ -368,14 +368,15 @@
 /* Peripheral Control Register */
 
 #define PMC_PCR_PID_SHIFT              (0)       /* Bits 0-5: Peripheral ID */
-#define PMC_PCR_PID_MASK               (63 < PMC_PCR_PID_SHIFT)
+#define PMC_PCR_PID_MASK               (63 << PMC_PCR_PID_SHIFT)
+#  define PMC_PCR_PID(n)               ((n) << PMC_PCR_PID_SHIFT)
 #define PMC_PCR_CMD                    (1 << 12) /* Bit 12: Command */
 #define PMC_PCR_DIV_SHIFT              (16)      /* Bits 16-17: Divisor Value */
-#define PMC_PCR_DIV_MASK               (3 < PMC_PCR_DIV_SHIFT)
-#  define PMC_PCR_DIV1                 (0 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK */
-#  define PMC_PCR_DIV2                 (1 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/2 */
-#  define PMC_PCR_DIV4                 (2 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/4 */
-#  define PMC_PCR_DIV8                 (3 < PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/8 */
+#define PMC_PCR_DIV_MASK               (3 << PMC_PCR_DIV_SHIFT)
+#  define PMC_PCR_DIV1                 (0 << PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK */
+#  define PMC_PCR_DIV2                 (1 << PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/2 */
+#  define PMC_PCR_DIV4                 (2 << PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/4 */
+#  define PMC_PCR_DIV8                 (3 << PMC_PCR_DIV_SHIFT) /* Peripheral clock is MCK/8 */
 #define PMC_PCR_EN                     (1 << 28) /* Bit 28: Enable */
 
 /* Oscillator Calibration Register */

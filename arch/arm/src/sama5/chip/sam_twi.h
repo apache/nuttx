@@ -137,6 +137,7 @@
 #define TWI_MMR_MREAD               (1 << 12) /* Bit 12: Master Read Direction */
 #define TWI_MMR_DADR_SHIFT          (16)      /* Bits 16-22:  Device Address */
 #define TWI_MMR_DADR_MASK           (0x7f << TWI_MMR_DADR_SHIFT)
+#  define TWI_MMR_DADR(n)           ((uint32_t)(n) << TWI_MMR_DADR_SHIFT)
 
 /* TWI Slave Mode Register */
 
