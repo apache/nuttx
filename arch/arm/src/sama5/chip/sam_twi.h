@@ -126,13 +126,13 @@
 #define TWI_CR_QUICK                (1 << 6)  /* Bit 6:  SMBUS Quick Command */
 #define TWI_CR_SWRST                (1 << 7)  /* Bit 7:  Software Reset */
 
-/* TWI Master Mode Register */'
+/* TWI Master Mode Register */
 
 #define TWI_MMR_IADRSZ_SHIFT        (8)      /* Bits 8-9:  Internal Device Address Size */
 #define TWI_MMR_IADRSZ_MASK         (3 << TWI_MMR_IADRSZ_SHIFT)
 #  define TWI_MMR_IADRSZ_NONE       (0 << TWI_MMR_IADRSZ_SHIFT) /* No internal device address */
 #  define TWI_MMR_IADRSZ_1BYTE      (1 << TWI_MMR_IADRSZ_SHIFT) /* One-byte internal device address */
-#  define TWI_MMR_IADRSZ_3BYTE      (2 << TWI_MMR_IADRSZ_SHIFT) /* Two-byte internal device address */
+#  define TWI_MMR_IADRSZ_2BYTE      (2 << TWI_MMR_IADRSZ_SHIFT) /* Two-byte internal device address */
 #  define TWI_MMR_IADRSZ_3BYTE      (3 << TWI_MMR_IADRSZ_SHIFT) /* Three-byte internal device address */
 #define TWI_MMR_MREAD               (1 << 12) /* Bit 12: Master Read Direction */
 #define TWI_MMR_DADR_SHIFT          (16)      /* Bits 16-22:  Device Address */

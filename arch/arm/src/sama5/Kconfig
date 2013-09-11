@@ -281,6 +281,36 @@ config SAMA5_SPI_REGDEBUG
 endmenu # SPI device driver options
 endif # SAMA5_SPI0 || SAMA5_SPI1
 
+if SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2
+
+menu "TWI device driver options"
+
+config SAMA5_TWI0_FREQUENCY
+	int "TWI0 Frequency"
+	default 100000
+	depends on SAMA5_TWI0
+
+config SAMA5_TWI1_FREQUENCY
+	int "TWI1 Frequency"
+	default 100000
+	depends on SAMA5_TWI1
+
+config SAMA5_TWI2_FREQUENCY
+	int "TWI2 Frequency"
+	default 100000
+	depends on SAMA5_TWI2
+
+config SAMA5_TWI_REGDEBUG
+	bool "TWI register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level TWI device debug information.
+		Very invasive! Requires also DEBUG.
+
+endmenu # TWI device driver options
+endif # SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2
+
 if SAMA5_HSMCI0 || SAMA5_HSMCI1 || SAMA5_HSMCI2
 menu "HSMCI device driver options"
 

@@ -140,6 +140,18 @@ endif
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_TWI0),y)
+CHIP_CSRCS += sam_twi.c
+else
+ifeq ($(CONFIG_SAMA5_TWI1),y)
+CHIP_CSRCS += sam_twi.c
+else
+ifeq ($(CONFIG_SAMA5_TWI2),y)
+CHIP_CSRCS += sam_twi.c
+endif
+endif
+endif
+
 ifeq ($(CONFIG_USBHOST_TRACE),y)
 CHIP_CSRCS += sam_usbhost.c
 else
