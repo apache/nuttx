@@ -46,14 +46,11 @@
 #include <errno.h>
 #include <debug.h>
 
-#ifdef CONFIG_SAMA5_SPI0
-#  include <nuttx/spi/spi.h>
-#  include <nuttx/mtd.h>
-#  include <nuttx/fs/nxffs.h>
+#include <nuttx/spi/spi.h>
+#include <nuttx/mtd.h>
+#include <nuttx/fs/nxffs.h>
 
-#  include "sam_spi.h"
-#endif
-
+#include "sam_spi.h"
 #include "sama5d3x-ek.h"
 
 #ifdef HAVE_AT25
@@ -70,7 +67,7 @@
  * Name: sam_at25_initialize
  *
  * Description:
- *   Initialize and configure the AT25 SPI Flash
+ *   Initialize and configure the AT25 serial FLASH
  *
  ****************************************************************************/
 
@@ -106,7 +103,7 @@ int sam_at25_initialize(int minor)
 #if defined(CONFIG_SAMA5_AT25_FTL)
       /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
 
-      ret = ftl_initialize(CONFIG_NSH_MMCSDMINOR, mtd);
+      ret = ftl_initialize(AT25_MINOR, mtd);
       if (ret < 0)
         {
           fdbg("ERROR: Initialize the FTL layer\n");

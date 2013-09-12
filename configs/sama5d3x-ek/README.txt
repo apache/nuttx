@@ -625,8 +625,9 @@ AT24 Serial EEPROM
   A AT24C512 Serial EEPPROM was used for tested I2C.  There are other I2C/TWI
   devices on-board, but the serial EEPROM is the simplest test.
 
-  The Serial EEPROM was mounted on an external adaptor board and connected to
-  the SAMA5D3x-EK thusly:
+  There is, however, no AT24 EEPROM on board the SAMA5D3x-EK:  The Serial
+  EEPROM was mounted on an external adaptor board and connected to the
+  SAMA5D3x-EK thusly:
 
     - VCC -- VCC
     - GND -- GND
@@ -1465,18 +1466,18 @@ Configurations
        order to enable the AT25 FLASH chip select.
 
        You can then format the AT25 FLASH for a FAT file system and mount
-       the file system at /mnt/sdcard using these NSH commands:
+       the file system at /mnt/at25 using these NSH commands:
 
          nsh> mkfatfs /dev/mtdblock0
-         nsh> mount -t vfat /dev/mtdblock0 /mnt/sdcard
+         nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
 
        Then you an use the FLASH as a normal FAT file system:
 
-         nsh> echo "This is a test" >/mnt/sdcard/atest.txt
-         nsh> ls -l /mnt/sdcard
-         /mnt/sdcard:
+         nsh> echo "This is a test" >/mnt/at25/atest.txt
+         nsh> ls -l /mnt/at25
+         /mnt/at25:
           -rw-rw-rw-      16 atest.txt
-         nsh> cat /mnt/sdcard/atest.txt
+         nsh> cat /mnt/at25/atest.txt
          This is a test
 
     9. Enabling HSMCI support. The SAMA5D3x-EK provides a two SD memory card
@@ -1707,6 +1708,68 @@ Configurations
        on the serial console.  However, the debug output will be
        asynchronous with the trace output and, hence, difficult to
        interpret.
+
+    13. AT24 Serial EEPROM. A AT24C512 Serial EEPPROM was used for tested
+        I2C.  There are other I2C/TWI devices on-board, but the serial
+        EEPROM is the simplest test.
+
+        There is, however, no AT24 EEPROM on board the SAMA5D3x-EK:  The
+        serial EEPROM was mounted on an external adaptor board and
+        connected to the SAMA5D3x-EK thusly:
+
+        - VCC -- VCC
+        - GND -- GND
+        - TWCK0(PA31) -- SCL
+        - TWD0(PA30)  -- SDA
+
+        By default, PA30 and PA31 are SWJ-DP pins, it can be used as a pin
+        for TWI peripheral in the end application.
+
+        The following configuration settings were used:
+
+       System Type -> SAMA5 Peripheral Support
+         CONFIG_SAMA5_TWI0=y                   : Enable TWI0
+
+       System Type -> TWI device driver options
+         SAMA5_TWI0_FREQUENCY=100000           : Select a TWI frequency
+
+       Device Drivers -> I2C Driver Support
+         CONFIG_I2C=y                          : Enable I2C support
+         CONFIG_I2C_TRANSFER=y                 : Driver supports the transfer() method
+         CONFIG_I2C_WRITEREAD=y                : Driver supports the writeread() method
+
+       Device Drivers -> Memory Technology Device (MTD) Support
+         CONFIG_MTD=y                          : Enable MTD support
+         CONFIG_MTD_AT24XX=y                   : Enable the AT24 driver
+         CONFIG_AT24XX_SIZE=512                : Specifies the AT 24C512 part
+         CONFIG_AT24XX_ADDR=0x53               : AT24 I2C address
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
+       File systems
+         CONFIG_NXFFS=y                        : Enables the NXFFS file system
+         CONFIG_NXFFS_PREALLOCATED=y           : Required
+                                               : Other defaults are probably OK
+
+       Board Selection
+         CONFIG_SAMA5_AT24_AUTOMOUNT=y         : Mounts AT24 for NSH
+         CONFIG_SAMA5_AT24_NXFFS=y             : Mount the AT24 using NXFFS
+
+       You can then format the AT25 FLASH for a FAT file system and mount
+       the file system at /mnt/at24 using these NSH commands:
+
+         nsh> mkfatfs /dev/mtdblock0
+         nsh> mount -t vfat /dev/mtdblock0 /mnt/at24
+
+       Then you an use the FLASH as a normal FAT file system:
+
+         nsh> echo "This is a test" >/mnt/at24/atest.txt
+         nsh> ls -l /mnt/at24
+         /mnt/at24:
+          -rw-rw-rw-      16 atest.txt
+         nsh> cat /mnt/at24/atest.txt
+         This is a test
 
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
