@@ -900,6 +900,9 @@ Configurations
     intended to be a rich configuration that shows many features all working
     together.
 
+    See also the NOTES associated with the nsh configuration for other hints
+    about features that can be included with this configuration.
+
     NOTES:
     1. This configuration uses the default USART1 serial console.  That
        is easily changed by reconfiguring to (1) enable a different
@@ -1241,10 +1244,13 @@ Configurations
        interpret.
 
     STATUS:
+      AT25
       2013-9-6:  I have not confirmed this, but it appears that the AT25 does not
         retain its formatting across power cycles.  I think that the contents of
         the AT25 are destroyed (i.e., reformatted for different use) by Linux when
         it runs out of NAND.
+
+      OHCI WITH EHCI
       2013-9-11:  OHCI does not work with EHCI.  At present, EHCI receives the
         full- or low-speed devices and correctly hands them off to OHCI.  But, for
         some unknown reason, the connection is lost and the port reverts to EHCI which
@@ -1771,7 +1777,33 @@ Configurations
          nsh> cat /mnt/at24/atest.txt
          This is a test
 
+    13. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
+        used to peek and poke I2C devices.  That tool cal be enabled by
+        setting the following:
+
+       System Type -> SAMA5 Peripheral Support
+         CONFIG_SAMA5_TWI0=y                   : Enable TWI0
+         CONFIG_SAMA5_TWI1=y                   : Enable TWI1
+         CONFIG_SAMA5_TWI2=y                   : Enable TWI2
+
+       System Type -> TWI device driver options
+         SAMA5_TWI0_FREQUENCY=100000           : Select a TWI0 frequency
+         SAMA5_TWI1_FREQUENCY=100000           : Select a TWI1 frequency
+         SAMA5_TWI2_FREQUENCY=100000           : Select a TWI2 frequency
+
+       Device Drivers -> I2C Driver Support
+         CONFIG_I2C=y                          : Enable I2C support
+         CONFIG_I2C_TRANSFER=y                 : Driver supports the transfer() method
+         CONFIG_I2C_WRITEREAD=y                : Driver supports the writeread() method
+
+       Application Configuration -> NSH Library
+         CONFIG_SYSTEM_I2CTOOL=y               : Enable the I2C tool
+         CONFIG_I2CTOOL_MINBUS=0               : TWI0 has the minimum bus number 0
+         CONFIG_I2CTOOL_MAXBUS=2               : TWI2 has the maximum bus number 2
+         CONFIG_I2CTOOL_DEFFREQ=100000         : Pick a consistent frequency
+
     STATUS:
+      PCK FREQUENCY
       2013-7-19:  This configuration (as do the others) run at 396MHz.
         The SAMA5D3 can run at 536MHz.  I still need to figure out the
         PLL settings to get that speed.
@@ -1779,75 +1811,53 @@ Configurations
         If the CPU speed changes, then so must the NOR and SDRAM
         initialization!
 
+      BOOT FROM NOT FLASH
       2013-7-31:  I have been unable to execute this configuration from NOR
         FLASH by closing the BMS jumper (J9).  As far as I can tell, this
         jumper does nothing on my board???  I have been using the norboot
         configuration to start the program in NOR FLASH (see just above).
         See "Creating and Using NORBOOT" above.
 
-      2013-7-31:  This NSH configuration appears to be fully functional.
+      2013-7-31:  The basic NSH configuration appears to be fully functional.
 
+      CALIBRATION
       2013-7-31:  Using delay loop calibration from the hello configuration.
         That configuration runs out of internal SRAM and, as a result, this
         configuration should be recalibrated.
 
+      SDRAM
       2013-8-3:  SDRAM configuration and RAM test usage have been verified
         and are functional.  I note some issues; occassionally, SDRAM is
         not functional on initial boot or is initially not functional but
         improves with accesses.  Clearly, more work needs to be done.
 
-        Here is another strange observation:  SDRAM accesses tend to
-        generate occasional spurious interrupts in those same conditions
-        where the memory test fails!  No idea why.
-
+      AT25 SERIAL FLASH
       2013-8-5:  The AT25 configuration has been verified to be functional.
       2013-8-9:  The AT25 configuration has been verified with DMA
         enabled.
 
-      2013-8-10: Basic HSCMI1 functionality (with DMA) has been verified.
-        Most testing is needed to assure that this is a stable solution.
-      2013-8-11: HSMCI0 is more finicky.  Usually there is no card
-        communcation and I get timeouts.  But if I remove and re-insert the
-        card it few times, sometimes communication is successfully and the
-        card behaves normally.  I suspected an electro-mechanical issue but
-        but now think there is more to the problem than that.
-      2013-8-11: I see another problem doing card insertion and card removal
-        testing.  When there is a lot of debug output, the system locks up.
-        I have traced to this the debug output itself.  The debug output
-        from the device driver interferes with normal serial port operation
-        and prevents NSH from receiving data.  There is no issue when the
-        debug output is suppressed and card insertial and removal works as
-        expected (at least on the HSMCI1 microSD slot).
-      2013-8-14: I found an error in the way that the HSCMI clocking was
-        configured (a SAM3/4 cloning error).  Need to retest both HSMCI0/1
-        with the corrected clocking.
+      2013-9-11: Basic HSCMI0/1 functionality (with DMA) has been verified.
 
-      2013-8-11: Added description to add OHCI to the configuration.
+      OHCI
       2013-8-16: The OCHI configuration is now basically functional.
         Testing is not yet extensive, however:
-        a) I have lots of DEBUG output enabled.  There could be issues
-           when I re-test with debug options disabled.
-        b) I have tested only control and bulk endpoints.  I still need
+        a) I have tested only control and bulk endpoints.  I still need
            to test interrupt endpoints.
-        c) I have tested only the Mass Storage Class (MSC) and not CDC/ACM.
-        d) OHCI will support 3 downstream points, but I currently have only
-           one enabled.
 
-      2013-8-20:  Added description to add EHCI to the configuration.  At
-        present, however, EHCI is still a work in progress and not ready for
-        prime time.
+      EHCI
       2013-8-26:
         The hand-off of full speed devices to OHCI does not work. In this
         case, OHCI gets the port, but the port is reset, lost by OHCI and
         returned to EHCI.  EHCI sees the full-speed port and hands it off to
         OHCI and this sequence continues forever.
-      2013-8-28: EHCI is partially functional.  It is able to mount a high-
-        speed USB FLASH drive using the Mass Storage Class (MSC) interface.
+      2013-8-28: EHCI is partially functional.
 
-      2013-8-31: Added description to add UDPHS high-speed USB device
-        support.
-      2013-9-5: The UDPHS driver is basically functional, subject to more
-        testing.
+      UDPHS
+      2013-9-5: The UDPHS driver is basically functional.
+
+      AT24 SERIAL EEPROM
+      2013-9-12:  I have been unusuccessful getting the external serial
+        EEPROM to work.
 
   ostest:
     This configuration directory, performs a simple OS test using
