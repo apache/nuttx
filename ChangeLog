@@ -5537,4 +5537,6 @@
 	* fs/nxffs:  Clean up some compilation warnings (2013-9-12)
 	* drivers/mtd/at24xx.c:  Add support for the AT 24C512 part
 	  (2013-9-12).
+	* arch/arm/src/sama5/sama5_twi.c:  Clean up some errors that
+	  only occur with CONFIG_DEBUG_I2C (2013-9-12).
 
