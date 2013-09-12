@@ -104,7 +104,7 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
   uint8_t  state;
   uint32_t noffs;
   uint32_t doffs;
-  uint32_t utc;
+//uint32_t utc;
   uint32_t ecrc;
   uint32_t datlen;
   uint32_t crc;
@@ -124,7 +124,7 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
   memcpy(&inode, &blkinfo->buffer[offset], SIZEOF_NXFFS_INODE_HDR);
   noffs  = nxffs_rdle32(inode.noffs);
   doffs  = nxffs_rdle32(inode.doffs);
-  utc    = nxffs_rdle32(inode.utc);
+//utc    = nxffs_rdle32(inode.utc);
   ecrc   = nxffs_rdle32(inode.crc);
   datlen = nxffs_rdle32(inode.datlen);
 
@@ -175,6 +175,7 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
         {
           fdbg(g_format, blkinfo->block, offset, "INODE", "UNVERFD", datlen);
         }
+
       return ERROR;
     }
 
