@@ -101,25 +101,29 @@ int sam_at24_initialize(int minor)
     {
       /* No.. Get the I2C bus driver */
 
+      fvdbg("Initialize TWI%d\n", AT24_BUS);
       i2c = up_i2cinitialize(AT24_BUS);
       if (!i2c)
         {
-          fdbg("ERROR: Failed to initialize I2C port %d\n", AT24_BUS);
+          fdbg("ERROR: Failed to initialize TWI%d\n", AT24_BUS);
           return -ENODEV;
         }
 
       /* Now bind the I2C interface to the AT24 I2C EEPROM driver */
 
+      fvdbg("Bind the AT24 EEPROM driver to TWI%d\n", AT24_BUS);
       mtd = at24c_initialize(i2c);
       if (!mtd)
         {
-          fdbg("ERROR: Failed to bind I2C port %d to the AT24 EEPROM driver\n");
+          fdbg("ERROR: Failed to bind TWI%d to the AT24 EEPROM driver\n",
+               AT24_BUS);
           return -ENODEV;
         }
 
 #if defined(CONFIG_SAMA5_AT24_FTL)
       /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
 
+      fvdbg("Initialize the FTL layer to create /dev/mtdblock%d\n", AT24_MINOR);
       ret = ftl_initialize(AT24_MINOR, mtd);
       if (ret < 0)
         {
@@ -130,6 +134,7 @@ int sam_at24_initialize(int minor)
 #elif defined(CONFIG_SAMA5_AT24_NXFFS)
       /* Initialize to provide NXFFS on the MTD interface */
 
+      fvdbg("Initialize the NXFFS file system\n");
       ret = nxffs_initialize(mtd);
       if (ret < 0)
         {
@@ -139,6 +144,7 @@ int sam_at24_initialize(int minor)
 
       /* Mount the file system at /mnt/at24 */
 
+      fvdbg("Mount the NXFFS file system at /dev/at24\n");
       ret = mount(NULL, "/mnt/at24", "nxffs", 0, NULL);
       if (ret < 0)
         {
