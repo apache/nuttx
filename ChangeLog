@@ -5539,4 +5539,7 @@
 	  (2013-9-12).
 	* arch/arm/src/sama5/sama5_twi.c:  Clean up some errors that
 	  only occur with CONFIG_DEBUG_I2C (2013-9-12).
+	* arch/arm/src/sama5/chip/sam_emac.h and sam_gmac.h:  Register
+	  definition files for the SAMA5 EMAC and GMAC peripherals
+	  (incomplete on the initial commit) (2013-9-12).
 
