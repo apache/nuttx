@@ -211,11 +211,14 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
 
       /* If the erase block was modified, then re-write it */
 
-      nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->pack);
-      if (nxfrd != volume->blkper)
+      if (modified)
         {
-          fdbg("Write erase block %d failed: %d\n", lblock, nxfrd);
-          return -EIO;
+          nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->pack);
+          if (nxfrd != volume->blkper)
+            {
+              fdbg("Write erase block %d failed: %d\n", lblock, nxfrd);
+              return -EIO;
+            }
         }
     }
 

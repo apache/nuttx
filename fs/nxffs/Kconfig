@@ -14,15 +14,16 @@ if FS_NXFFS
 
 config NXFFS_PREALLOCATED
 	bool "Single, preallocated volume"
-	default n
+	default y
 	---help---
 		If CONFIG_NXFSS_PREALLOCATED is defined, then this is the single, pre-
-		allocated NXFFS volume instance.
+		allocated NXFFS volume instance.  Currently required because full,
+		dynamic allocation of NXFFS volumes in not yet supporte.
 
 config NXFFS_ERASEDSTATE
 	hex "FLASH erased state"
 	default 0xff
-	---help---	
+	---help---
 		The erased state of FLASH. 
 		This must have one of the values of 0xff or 0x00.
 		Default: 0xff.
@@ -38,22 +39,21 @@ config NXFFS_PACKTHRESHOLD
 config NXFFS_MAXNAMLEN
 	int "Maximum file name length"
 	default 255
-	---help---	
+	---help---
 		The maximum size of an NXFFS file name.
 		Default: 255.
 
 config NXFFS_TAILTHRESHOLD
 	int "Tail threshold"
 	default 8192
-	---help---	
-		clean-up can either mean
-		packing files together toward the end of the file or, if file are
-		deleted at the end of the file, clean up can simply mean erasing
-		the end of FLASH memory so that it can be re-used again.  However,
-		doing this can also harm the life of the FLASH part because it can
-		mean that the tail end of the FLASH is re-used too often. This
-		threshold determines if/when it is worth erased the tail end of FLASH
-		and making it available for re-use (and possible over-wear).
-		Default: 8192.
+	---help---
+		Clean-up can either mean packing files together toward the end of
+		the file or, if files are deleted at the end of the file, clean up
+		can simply mean erasing the end of FLASH memory so that it can be
+		re-used again.  However, doing this can also harm the life of the
+		FLASH part because it can mean that the tail end of the FLASH is
+		re-used too often. This threshold determines if/when it is worth
+		erased the tail end of FLASH and making it available for re-use
+		(and possible over-wear). Default: 8192.
 
 endif

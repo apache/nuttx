@@ -176,8 +176,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
   volume = (FAR struct nxffs_volume_s *)kzalloc(sizeof(struct nxffs_volume_s));
   if (!volume)
     {
-      ret = -ENOMEM;
-      goto errout;
+      return -ENOMEM;
     }
 #endif
 

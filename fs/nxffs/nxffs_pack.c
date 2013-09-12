@@ -1275,7 +1275,7 @@ int nxffs_pack(FAR struct nxffs_volume_s *volume)
   off_t block;
   bool packed;
   int i;
-  int ret;
+  int ret = OK;
 
   /* Get the offset to the first valid inode entry */
 
