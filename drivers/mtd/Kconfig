@@ -67,22 +67,28 @@ config RAMMTD_FLASHSIM
 endif
 
 config MTD_AT24XX
-	bool "I2C-based AT24XX eeprom"
+	bool "I2C-based AT24xx eeprom"
 	default n
 	select I2C
 	---help---
-		Build support for I2C-based at24cxx EEPROM(at24c32, at24c64,
+		Build support for I2C-based AT24CXX EEPROM(at24c32, at24c64,
 		at24c128, at24c256)
 
 if MTD_AT24XX
 
 config AT24XX_SIZE
-	int "at24xx size(kByte)"
+	int "AT24xx size (kbit)"
 	default 64
+		---help---
+		This is the XX in the AT24Cxx part number.  For example, if you have a
+		AT 24C512, then the correct value is 512.  This value is also the capacity
+		of the part in kilobits.  For example, the 24C512 supports 512 Kbits or
+		512 /8 = 64 KiB.
 
 config AT24XX_ADDR
-	hex "at24xx i2c address"
+	hex "AT24XX I2C address"
 	default 0x50
+	range 0x50 0x57
 
 endif
 

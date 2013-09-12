@@ -5534,4 +5534,7 @@
 	  definition file (2013-9-11).
 	* arch/arm/src/sama5/sam_twi.c and .h:  Framework for a SAMA5
 	  TWI driver (not much present in initial checkin) (2013-9-11).
+	* fs/nxffs:  Clean up some compilation warnings (2013-9-12)
+	* drivers/mtd/at24xx.c:  Add support for the AT 24C512 part
+	  (2013-9-12).
 

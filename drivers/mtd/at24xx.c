@@ -1,6 +1,6 @@
 /************************************************************************************
  * drivers/mtd/at24xx.c
- * Driver for I2C-based at24cxx EEPROM(at24c32,at24c64,at24c128,at24c256)
+ * Driver for I2C-based at24cxx EEPROM(at24c32,at24c64,at24c128,at24c256,at24c512)
  *
  *   Copyright (C) 2011 Li Zhuoyi. All rights reserved.
  *   Author: Li Zhuoyi <lzyy.cn@gmail.com>
@@ -81,21 +81,24 @@
 
 /* Get the part configuration based on the size configuration */
 
-#if CONFIG_AT24XX_SIZE == 32
+#if CONFIG_AT24XX_SIZE == 32      /* AT24C32: 32Kbits = 4KiB; 128 * 32 =  4096 */
 #  define AT24XX_NPAGES     128
 #  define AT24XX_PAGESIZE   32
-#elif CONFIG_AT24XX_SIZE == 48
+#elif CONFIG_AT24XX_SIZE == 48    /* AT24C48: 48Kbits = 6KiB; 192 * 32 =  6144 */
 #  define AT24XX_NPAGES     192
 #  define AT24XX_PAGESIZE   32
-#elif CONFIG_AT24XX_SIZE == 64
+#elif CONFIG_AT24XX_SIZE == 64    /* AT24C64: 64Kbits = 8KiB; 256 * 32 = 8192 */
 #  define AT24XX_NPAGES     256
 #  define AT24XX_PAGESIZE   32
-#elif CONFIG_AT24XX_SIZE == 128
+#elif CONFIG_AT24XX_SIZE == 128   /* AT24C128: 128Kbits = 16KiB; 256 * 64 = 16384 */
 #  define AT24XX_NPAGES     256
 #  define AT24XX_PAGESIZE   64
-#elif CONFIG_AT24XX_SIZE == 256
+#elif CONFIG_AT24XX_SIZE == 256   /* AT24C256: 256Kbits = 32KiB; 512 * 64 = 32768 */
 #  define AT24XX_NPAGES     512
 #  define AT24XX_PAGESIZE   64
+#elif CONFIG_AT24XX_SIZE == 512   /* AT24C512: 512Kbits = 64KiB; 512 * 128 = 65536 */
+#  define AT24XX_NPAGES     512
+#  define AT24XX_PAGESIZE   128
 #endif
 
 /* For applications where a file system is used on the AT24, the tiny page sizes
@@ -139,8 +142,10 @@ static ssize_t at24c_bread(FAR struct mtd_dev_s *dev, off_t startblock,
                            size_t nblocks, FAR uint8_t *buf);
 static ssize_t at24c_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
                             size_t nblocks, FAR const uint8_t *buf);
+#if 0 /* Not implemented */
 static ssize_t at24c_read(FAR struct mtd_dev_s *dev, off_t offset,
                           size_t nbytes,FAR uint8_t *buffer);
+#endif
 static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
 
 /************************************************************************************
