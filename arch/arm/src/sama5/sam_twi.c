@@ -173,18 +173,24 @@ static void twi_takesem(sem_t *sem);
 #ifdef CONFIG_SAMA5_TWI_REGDEBUG
 static bool twi_checkreg(struct twi_dev_s *priv, bool wr,
               uint32_t value, uintptr_t address);
+static uint32_t twi_getabs(struct twi_dev_s *priv, uintptr_t address);
+static void twi_putabs(struct twi_dev_s *priv, uintptr_t address,
+              uint32_t value);
 #else
 # define    twi_checkreg(priv,wr,value,address) (false)
+# define    twi_putabs(p,a,v) putreg32(v,a)
+# define    twi_getabs(p,a) getreg32(a)
 #endif
 
-static inline uint32_t twi_getreg(struct twi_dev_s *priv,
+static inline uint32_t twi_getrel(struct twi_dev_s *priv,
           unsigned int offset);
-static inline void twi_putreg(struct twi_dev_s *priv, unsigned int offset,
+static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
           uint32_t value);
 
 /* I2C transfer helper functions */
 
 static int twi_wait(struct twi_dev_s *priv);
+static int twi_wakeup(struct twi_dev_s *priv, int result);
 static int twi_interrupt(struct twi_dev_s *priv);
 #ifdef CONFIG_SAMA5_TWI0
 static int twi0_interrupt(int irq, FAR void *context);
@@ -197,9 +203,9 @@ static int twi2_interrupt(int irq, FAR void *context);
 #endif
 static void twi_timeout(int argc, uint32_t arg, ...);
 
-static int twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg);
-static int twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg);
-static int twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg);
+static void twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg);
+static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg);
+static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg);
 
 /* I2C device operations */
 
@@ -351,49 +357,74 @@ static bool twi_checkreg(struct twi_dev_s *priv, bool wr, uint32_t value,
 #endif
 
 /****************************************************************************
- * Name: twi_getreg
+ * Name: twi_getabs
  *
  * Description:
- *  Read an SPI register
+ *  Read any 32-bit register using an absolute
  *
  ****************************************************************************/
 
-static inline uint32_t twi_getreg(struct twi_dev_s *priv, unsigned int offset)
+#ifdef CONFIG_SAMA5_TWI_REGDEBUG
+static uint32_t twi_getabs(struct twi_dev_s *priv, uintptr_t address)
 {
-  uint32_t address = priv->base + offset;
   uint32_t value = getreg32(address);
 
-#ifdef CONFIG_SAMA5_TWI_REGDEBUG
   if (twi_checkreg(priv, false, value, address))
     {
       lldbg("%08x->%08x\n", address, value);
     }
-#endif
 
   return value;
 }
+#endif
 
 /****************************************************************************
- * Name: twi_putreg
+ * Name: twi_putabs
  *
  * Description:
- *  Write a value to an SPI register
+ *  Write to any 32-bit register using an absolute address
  *
  ****************************************************************************/
 
-static inline void twi_putreg(struct twi_dev_s *priv, unsigned int offset,
-                              uint32_t value)
-{
-  uint32_t address = priv->base + offset;
-
 #ifdef CONFIG_SAMA5_TWI_REGDEBUG
+static void twi_putabs(struct twi_dev_s *priv, uintptr_t address,
+                       uint32_t value)
+{
   if (twi_checkreg(priv, true, value, address))
     {
       lldbg("%08x<-%08x\n", address, value);
     }
-#endif
 
   putreg32(value, address);
+}
+#endif
+
+/****************************************************************************
+ * Name: twi_getrel
+ *
+ * Description:
+ *  Read a TWI register using an offset relative to the TWI base address
+ *
+ ****************************************************************************/
+
+static inline uint32_t twi_getrel(struct twi_dev_s *priv, unsigned int offset)
+{
+  return twi_getabs(priv, priv->base + offset);
+}
+
+/****************************************************************************
+ * Name: twi_putrel
+ *
+ * Description:
+ *  Write a value to a TWI register using an offset relative to the TWI base
+ *  address.
+ *
+ ****************************************************************************/
+
+static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
+                              uint32_t value)
+{
+  twi_putabs(priv, priv->base + offset, value);
 }
 
 /****************************************************************************
@@ -405,6 +436,9 @@ static inline void twi_putreg(struct twi_dev_s *priv, unsigned int offset,
  *
  * Description:
  *   Perform a I2C transfer start
+ *
+ * Assumptions:
+ *   Interrupts are disabled
  *
  *******************************************************************************/
 
@@ -424,10 +458,35 @@ static int twi_wait(struct twi_dev_s *priv)
     }
   while (priv->result == -EBUSY);
 
-  /* Cancel the timeout and return the result of the transfer */
+  /* We get here via twi_wakeup.  The watchdog timer has been disabled and
+   * all further interrupts for the TWI have been disabled.
+   */
+
+  return priv->result;
+}
+
+/*******************************************************************************
+ * Name: twi_wakeup
+ *
+ * Description:
+ *   A terminal event has occurred.  Wake-up the waiting thread
+ *
+ *******************************************************************************/
+
+static int twi_wakeup(struct twi_dev_s *priv, int result)
+{
+  /* Cancel any pending timeout */
 
   wd_cancel(priv->timeout);
-  return priv->result;
+
+  /* Disable any further TWI interrupts */
+
+  twi_putrel(priv, SAM_TWI_IDR_OFFSET, TWI_INT_ALL);
+
+  /* Wake up the waiting thread with the result of the transfer */
+
+  priv->result = result;
+  twi_givesem(&priv->waitsem);
 }
 
 /*******************************************************************************
@@ -449,8 +508,8 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
   /* Retrieve masked interrupt status */
 
-  sr      = twi_getreg(priv, SAM_TWI_SR_OFFSET);
-  imr     = twi_getreg(priv, SAM_TWI_IMR_OFFSET);
+  sr      = twi_getrel(priv, SAM_TWI_SR_OFFSET);
+  imr     = twi_getrel(priv, SAM_TWI_IMR_OFFSET);
   pending = sr & imr;
 
   i2cllvdbg("TWI%d pending: %08x\n", priv->twi, pending);
@@ -458,9 +517,9 @@ static int twi_interrupt(struct twi_dev_s *priv)
   /* Byte received */
 
   msg = priv->msg;
-  if ((pending & TWI_INT_RXRDY) == TWI_INT_RXRDY)
+  if ((pending & TWI_INT_RXRDY) != 0)
     {
-      msg->buffer[priv->xfrd] = twi_getreg(priv, SAM_TWI_RHR_OFFSET);
+      msg->buffer[priv->xfrd] = twi_getrel(priv, SAM_TWI_RHR_OFFSET);
       priv->xfrd++;
 
       /* Check for transfer complete */
@@ -471,8 +530,8 @@ static int twi_interrupt(struct twi_dev_s *priv)
            * enable the TXCOMP interrupt
            */
 
-          twi_putreg(priv, SAM_TWI_IDR_OFFSET, TWI_INT_RXRDY);
-          twi_putreg(priv, SAM_TWI_IER_OFFSET, TWI_INT_TXCOMP);
+          twi_putrel(priv, SAM_TWI_IDR_OFFSET, TWI_INT_RXRDY);
+          twi_putrel(priv, SAM_TWI_IER_OFFSET, TWI_INT_TXCOMP);
         }
 
       /* Not yet complete, but will the next be the last byte? */
@@ -481,13 +540,13 @@ static int twi_interrupt(struct twi_dev_s *priv)
         {
           /* Yes, set the stop signal */
 
-          twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_STOP);
+          twi_putrel(priv, SAM_TWI_CR_OFFSET, TWI_CR_STOP);
         }
     }
 
   /* Byte sent*/
 
-  else if ((pending & TWI_INT_TXRDY) == TWI_INT_TXRDY)
+  else if ((pending & TWI_INT_TXRDY) != 0)
     {
       /* Transfer finished? */
 
@@ -497,30 +556,30 @@ static int twi_interrupt(struct twi_dev_s *priv)
            * enable the TXCOMP interrupt
            */
 
-          twi_putreg(priv, SAM_TWI_IDR_OFFSET, TWI_INT_TXRDY);
-          twi_putreg(priv, SAM_TWI_IER_OFFSET, TWI_INT_TXCOMP);
+          twi_putrel(priv, SAM_TWI_IDR_OFFSET, TWI_INT_TXRDY);
+          twi_putrel(priv, SAM_TWI_IER_OFFSET, TWI_INT_TXCOMP);
 
           /* Send the STOP condition */
 
-          regval  = twi_getreg(priv, SAM_TWI_CR_OFFSET);
+          regval  = twi_getrel(priv, SAM_TWI_CR_OFFSET);
           regval |= TWI_CR_STOP;
-          twi_putreg(priv, SAM_TWI_CR_OFFSET, regval);
+          twi_putrel(priv, SAM_TWI_CR_OFFSET, regval);
         }
 
       /* No, there are more bytes remaining to be sent */
 
       else
         {
-          twi_putreg(priv, SAM_TWI_THR_OFFSET, msg->buffer[priv->xfrd]);
+          twi_putrel(priv, SAM_TWI_THR_OFFSET, msg->buffer[priv->xfrd]);
           priv->xfrd++;
         }
     }
 
   /* Transfer complete */
 
-  else if ((pending & TWI_INT_TXCOMP) == TWI_INT_TXCOMP)
+  else if ((pending & TWI_INT_TXCOMP) != 0)
     {
-      twi_putreg(priv, SAM_TWI_IDR_OFFSET, TWI_INT_TXCOMP);
+      twi_putrel(priv, SAM_TWI_IDR_OFFSET, TWI_INT_TXCOMP);
       ret = OK;
 
       /* Is there another messasge to send? */
@@ -531,24 +590,27 @@ static int twi_interrupt(struct twi_dev_s *priv)
 
           priv->msg++;
           priv->msgc--;
-          ret = twi_startmessage(priv, priv->msg);
-          if (ret < 0)
-            {
-              /* Wake up the thread with the error indication */
-
-              priv->result = ret;
-              twi_givesem(&priv->waitsem);
-            }
+          twi_startmessage(priv, priv->msg);
         }
       else
         {
           /* No.. we made it to the end of the message list with no errors.
-           * Wake up the waiting thread with a success indication.
+           * Cancel any timeout and wake up the waiting thread with a
+           * success indication.
            */
 
-          priv->result = OK;
-          twi_givesem(&priv->waitsem);
+          twi_wakeup(priv, OK);
         }
+    }
+
+  /* Check for errors */
+
+  else if ((pending & TWI_INT_ERRORS) != 0)
+    {
+      /* Wake up the thread with an I/O error indication */
+
+      i2clldbg("ERROR: TWI%d pending: %08x\n", priv->twi, pending);
+      twi_wakeup(priv, -EIO);
     }
 
   return OK;
@@ -591,8 +653,7 @@ static void twi_timeout(int argc, uint32_t arg, ...)
   struct twi_dev_s *priv = (struct twi_dev_s *)arg;
 
   i2clldbg("TWI%d Timeout!\n", priv->twi);
-  priv->result = -ETIMEDOUT;
-  twi_givesem(&priv->waitsem);
+  twi_wakeup(priv, -ETIMEDOUT);
 }
 
 /*******************************************************************************
@@ -603,15 +664,8 @@ static void twi_timeout(int argc, uint32_t arg, ...)
  *
  *******************************************************************************/
 
-static int twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg)
+static void twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 {
-  irqstate_t flags;
-  int ret;
-
-  /* This function might be called from the interrupt level */
-
-  flags = irqsave();
-
   /* Setup for the transfer */
 
   priv->result = -EBUSY;
@@ -621,27 +675,22 @@ static int twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 
   if (msg->length == 1)
     {
-      twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_STOP);
+      twi_putrel(priv, SAM_TWI_CR_OFFSET, TWI_CR_STOP);
     }
 
   /* Set slave address and number of internal address bytes. */
 
-  twi_putreg(priv, SAM_TWI_MMR_OFFSET, 0);
-  twi_putreg(priv, SAM_TWI_MMR_OFFSET, TWI_MMR_IADRSZ_NONE | TWI_MMR_MREAD | TWI_MMR_DADR(msg->addr));
+  twi_putrel(priv, SAM_TWI_MMR_OFFSET, 0);
+  twi_putrel(priv, SAM_TWI_MMR_OFFSET, TWI_MMR_IADRSZ_NONE | TWI_MMR_MREAD | TWI_MMR_DADR(msg->addr));
 
-  /* Set internal address bytes */
+  /* Set internal address bytes (not used) */
 
-  twi_putreg(priv, SAM_TWI_IADR_OFFSET, 0);
-  twi_putreg(priv, SAM_TWI_IADR_OFFSET, 0);
+  twi_putrel(priv, SAM_TWI_IADR_OFFSET, 0);
 
   /* Enable read interrupt and send the START condition */
 
-  twi_putreg(priv, SAM_TWI_IER_OFFSET, TWI_INT_RXRDY);
-  twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_START);
-
-  ret = twi_wait(priv);
-  irqrestore(flags);
-  return ret;
+  twi_putrel(priv, SAM_TWI_IER_OFFSET, TWI_INT_RXRDY | TWI_INT_ERRORS);
+  twi_putrel(priv, SAM_TWI_CR_OFFSET, TWI_CR_START);
 }
 
 /*******************************************************************************
@@ -652,15 +701,8 @@ static int twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg)
  *
  *******************************************************************************/
 
-static int twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
+static void twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 {
-  irqstate_t flags;
-  int ret;
-
-  /* This function might be called from the interrupt level */
-
-  flags = irqsave();
-
   /* Setup for the transfer */
 
   priv->result = -EBUSY;
@@ -668,24 +710,20 @@ static int twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 
   /* Set slave address and number of internal address bytes. */
 
-  twi_putreg(priv, SAM_TWI_MMR_OFFSET, 0);
-  twi_putreg(priv, SAM_TWI_MMR_OFFSET, TWI_MMR_IADRSZ_NONE | TWI_MMR_DADR(msg->addr));
+  twi_putrel(priv, SAM_TWI_MMR_OFFSET, 0);
+  twi_putrel(priv, SAM_TWI_MMR_OFFSET, TWI_MMR_IADRSZ_NONE | TWI_MMR_DADR(msg->addr));
 
-  /* Set internal address bytes. */
+  /* Set internal address bytes (not used) */
 
-  twi_putreg(priv, SAM_TWI_IADR_OFFSET, 0);
-  twi_putreg(priv, SAM_TWI_IADR_OFFSET, 0);
+  twi_putrel(priv, SAM_TWI_IADR_OFFSET, 0);
 
   /* Write first byte to send.*/
 
-  twi_putreg(priv, SAM_TWI_THR_OFFSET, msg->buffer[0]);
+  twi_putrel(priv, SAM_TWI_THR_OFFSET, msg->buffer[0]);
 
   /* Enable write interrupt */
 
-  twi_putreg(priv, SAM_TWI_IER_OFFSET, TWI_INT_TXRDY);
-  ret = twi_wait(priv);
-  irqrestore(flags);
-  return ret;
+  twi_putrel(priv, SAM_TWI_IER_OFFSET, TWI_INT_TXRDY | TWI_INT_ERRORS);
 }
 
 /*******************************************************************************
@@ -696,15 +734,15 @@ static int twi_startwrite(struct twi_dev_s *priv, struct i2c_msg_s *msg)
  *
  *******************************************************************************/
 
-static int twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg)
+static void twi_startmessage(struct twi_dev_s *priv, struct i2c_msg_s *msg)
 {
   if ((msg->flags & I2C_M_READ) == 0)
     {
-      return twi_startread(priv, msg);
+      twi_startread(priv, msg);
     }
   else
     {
-      return twi_startwrite(priv, msg);
+      twi_startwrite(priv, msg);
     }
 }
 
@@ -750,7 +788,7 @@ static int twi_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
 
-  i2cvdbg("TWI%d nbits: %d\n", priv->twi, nbits);
+  i2cvdbg("TWI%d address: %02x nbits: %d\n", priv->twi, addr, nbits);
   DEBUGASSERT(dev != NULL && nbits == 7);
 
   /* Get exclusive access to the device */
@@ -778,6 +816,7 @@ static int twi_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int wbuflen)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
+  irqstate_t flags;
   int ret;
 
   struct i2c_msg_s msg =
@@ -800,18 +839,25 @@ static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int wbuf
   priv->msg  = &msg;
   priv->msgc = 1;
 
-  ret = twi_startwrite(priv, &msg);
-  if (ret < 0)
-    {
-      i2cdbg("ERROR: twi_startwrite failed: %d\n", ret);
-      goto errout;
-    }
+  /* Initiate the write operation.  The rest will be handled from interrupt
+   * logic.  Interrupts must be disabled to prevent re-entrance from the
+   * interrupt level.
+   */
 
-  /* And wait for the wrtie to complete */
+  flags = irqsave();
+  twi_startwrite(priv, &msg);
+
+  /* And wait for the write to complete.  Interrupts will be re-enabled while
+   * we are waiting.
+   */
 
   ret = twi_wait(priv);
+  if (ret < 0)
+    {
+      i2cdbg("ERROR: Transfer failed: %d\n", ret);
+    }
 
-errout:
+  irqrestore(flags);
   twi_givesem(&priv->exclsem);
   return ret;
 }
@@ -828,6 +874,7 @@ errout:
 static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *rbuffer, int rbuflen)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)dev;
+  irqstate_t flags;
   int ret;
 
   struct i2c_msg_s msg =
@@ -850,18 +897,25 @@ static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *rbuffer, int rbuflen)
   priv->msg  = &msg;
   priv->msgc = 1;
 
-  ret = twi_startread(priv, &msg);
-  if (ret < 0)
-    {
-      i2cdbg("ERROR: twi_startread failed: %d\n", ret);
-      goto errout;
-    }
+  /* Initiate the read operation.  The rest will be handled from interrupt
+   * logic.  Interrupts must be disabled to prevent re-entrance from the
+   * interrupt level.
+   */
 
-  /* And wait for the read to complete */
+  flags = irqsave();
+  twi_startread(priv, &msg);
+
+  /* And wait for the read to complete.  Interrupts will be re-enabled while
+   * we are waiting.
+   */
 
   ret = twi_wait(priv);
+  if (ret < 0)
+    {
+      i2cdbg("ERROR: Transfer failed: %d\n", ret);
+    }
 
-errout:
+  irqrestore(flags);
   twi_givesem(&priv->exclsem);
   return ret;
 }
@@ -878,6 +932,7 @@ static int twi_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
                          int wbuflen, uint8_t *rbuffer, int rbuflen)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)dev;
+  irqstate_t flags;
   int ret;
 
   struct i2c_msg_s msgv[2] =
@@ -908,18 +963,25 @@ static int twi_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
   priv->msg  = msgv;
   priv->msgc = 2;
 
-  ret = twi_startread(priv, msgv);
-  if (ret < 0)
-    {
-      i2cdbg("ERROR: twi_startread failed: %d\n", ret);
-      goto errout;
-    }
+  /* Initiate the write operation.  The rest will be handled from interrupt
+   * logic.  Interrupts must be disabled to prevent re-entrance from the
+   * interrupt level.
+   */
 
-  /* And wait for the read to complete */
+  flags = irqsave();
+  twi_startwrite(priv, msgv);
+
+  /* And wait for the write/read to complete.  Interrupts will be re-enabled
+   * while we are waiting.
+   */
 
   ret = twi_wait(priv);
+  if (ret < 0)
+    {
+      i2cdbg("ERROR: Transfer failed: %d\n", ret);
+    }
 
-errout:
+  irqrestore(flags);
   twi_givesem(&priv->exclsem);
   return ret;
 }
@@ -970,6 +1032,7 @@ static int twi_transfer(FAR struct i2c_dev_s *dev,
                         FAR struct i2c_msg_s *msgs, int count)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)dev;
+  irqstate_t flags;
   int ret;
 
   DEBUGASSERT(dev != NULL);
@@ -984,18 +1047,25 @@ static int twi_transfer(FAR struct i2c_dev_s *dev,
   priv->msg  = msgs;
   priv->msgc = count;
 
-  ret = twi_startmessage(priv, msgs);
-  if (ret < 0)
-    {
-      i2cdbg("ERROR: twi_startread failed: %d\n", ret);
-      goto errout;
-    }
+  /* Initiate the transfer.  The rest will be handled from interrupt
+   * logic.  Interrupts must be disabled to prevent re-entrance from the
+   * interrupt level.
+   */
 
-  /* And wait for the read to complete */
+  flags = irqsave();
+  twi_startmessage(priv, msgs);
+
+  /* And wait for the transfers to complete.  Interrupts will be re-enabled
+   * while we are waiting.
+   */
 
   ret = twi_wait(priv);
+  if (ret < 0)
+    {
+      i2cdbg("ERROR: Transfer failed: %d\n", ret);
+    }
 
-errout:
+  irqrestore(flags);
   twi_givesem(&priv->exclsem);
   return ret;
 }
@@ -1042,12 +1112,12 @@ static uint32_t twi_hw_setfrequency(struct twi_dev_s *priv, uint32_t frequency)
    * value for CLDIV and CHDIV (for 1:1 duty).
    */
 
-  twi_putreg(priv, SAM_TWI_CWGR_OFFSET, 0);
+  twi_putrel(priv, SAM_TWI_CWGR_OFFSET, 0);
 
   regval = ((uint32_t)ckdiv << TWI_CWGR_CKDIV_SHIFT) |
            ((uint32_t)cldiv << TWI_CWGR_CHDIV_SHIFT) |
            ((uint32_t)cldiv << TWI_CWGR_CLDIV_SHIFT);
-  twi_putreg(priv, SAM_TWI_CWGR_OFFSET, regval);
+  twi_putrel(priv, SAM_TWI_CWGR_OFFSET, regval);
 
   /* Return the actual frequency */
 
@@ -1075,26 +1145,26 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
 
   /* SVEN: TWI Slave Mode Enabled */
 
-  twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_SVEN);
+  twi_putrel(priv, SAM_TWI_CR_OFFSET, TWI_CR_SVEN);
 
   /* Reset the TWI */
 
-  twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_SWRST);
-  (void)twi_getreg(priv, SAM_TWI_RHR_OFFSET);
+  twi_putrel(priv, SAM_TWI_CR_OFFSET, TWI_CR_SWRST);
+  (void)twi_getrel(priv, SAM_TWI_RHR_OFFSET);
 
   /* TWI Slave Mode Disabled, TWI Master Mode Disabled. */
 
-  twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_SVDIS);
-  twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_MSDIS);
+  twi_putrel(priv, SAM_TWI_CR_OFFSET, TWI_CR_SVDIS);
+  twi_putrel(priv, SAM_TWI_CR_OFFSET, TWI_CR_MSDIS);
 
   /* Set master mode */
 
-  twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_MSEN);
+  twi_putrel(priv, SAM_TWI_CR_OFFSET, TWI_CR_MSEN);
 
   /* Set the TWI peripheral input clock to the maximum, valid frequency */
 
   regval = PMC_PCR_PID(pid) | PMC_PCR_CMD | TWI_PCR_DIV | PMC_PCR_EN;
-  putreg32(regval, SAM_PMC_PCR);
+  twi_putabs(priv, SAM_PMC_PCR, regval);
 
   /* Set the initial TWI data transfer frequency */
 
@@ -1121,7 +1191,7 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
   uint32_t frequency;
   unsigned int pid;
 
-  i2cvdbg("TWI%d Initializing\n", priv->twi);
+  i2cvdbg("Initializing TWI%d\n", bus);
 
   flags = irqsave();
 
@@ -1208,11 +1278,9 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
 #endif
     {
       irqrestore(flags);
-      i2cdbg("ERROR: Unsupported bus: %d\n", bus);
+      i2cdbg("ERROR: Unsupported bus: TWI%d\n", bus);
       return NULL;
     }
-
-  i2cvdbg("Initializing TWI%d\n", bus);
 
   /* Initialize the device structure */
 
