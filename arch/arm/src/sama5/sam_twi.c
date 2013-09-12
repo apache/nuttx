@@ -248,19 +248,19 @@ static struct twi_dev_s g_twi2;
 
 struct i2c_ops_s g_twiops =
 {
-  .setfrequency = twi_setfrequency,
-  .setaddress   = twi_setaddress,
-  .write        = twi_write,
-  .read         = twi_read,
+  .setfrequency     = twi_setfrequency,
+  .setaddress       = twi_setaddress,
+  .write            = twi_write,
+  .read             = twi_read,
 #ifdef CONFIG_I2C_WRITEREAD
-  .writeread    = twi_writeread,
+  .writeread        = twi_writeread,
 #endif
 #ifdef CONFIG_I2C_TRANSFER
-  .transfer     = twi_transfer
+  .transfer         = twi_transfer
 #endif
 #ifdef CONFIG_I2C_SLAVE
-  int    (*setownaddress)(FAR struct i2c_dev_s *dev, int addr, int nbits);
-  int    (*registercallback)(FAR struct i2c_dev_s *dev, int (*callback)(void) );
+  .setownaddress    = twi_setownaddress
+  .registercallback = twi_registercallback
 #endif
 };
 
@@ -637,11 +637,7 @@ static int twi_startread(struct twi_dev_s *priv, struct i2c_msg_s *msg)
   /* Enable read interrupt and send the START condition */
 
   twi_putreg(priv, SAM_TWI_IER_OFFSET, TWI_INT_RXRDY);
-
-  if ((msg->flags & I2C_M_NORESTART) == 0)
-    {
-      twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_START);
-    }
+  twi_putreg(priv, SAM_TWI_CR_OFFSET, TWI_CR_START);
 
   ret = twi_wait(priv);
   irqrestore(flags);
@@ -761,7 +757,7 @@ static int twi_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
 
   twi_takesem(&priv->exclsem);
 
-  /* Set the correctly shifted, 7-bit address */
+  /* Remember 7- or 10-bit address */
 
   priv->address = addr;
   priv->flags   = (nbits == 10) ? I2C_M_TEN : 0;
@@ -779,7 +775,7 @@ static int twi_setaddress(FAR struct i2c_dev_s *dev, int addr, int nbits)
  *
  *******************************************************************************/
 
-static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int buflen)
+static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer, int wbuflen)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
   int ret;
@@ -788,11 +784,11 @@ static int twi_write(FAR struct i2c_dev_s *dev, const uint8_t *buffer, int bufle
   {
     .addr   = priv->address,
     .flags  = priv->flags,
-    .buffer = (uint8_t *)buffer,
-    .length = buflen
+    .buffer = (uint8_t *)wbuffer,  /* Override const */
+    .length = wbuflen
   };
 
-  i2cvdbg("TWI%d buflen: %d\n", priv->twi, buflen);
+  i2cvdbg("TWI%d buflen: %d\n", priv->twi, wbuflen);
   DEBUGASSERT(dev != NULL);
 
   /* Get exclusive access to the device */
@@ -829,7 +825,7 @@ errout:
  *
  *******************************************************************************/
 
-static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
+static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *rbuffer, int rbuflen)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *)dev;
   int ret;
@@ -838,12 +834,12 @@ static int twi_read(FAR struct i2c_dev_s *dev, uint8_t *buffer, int buflen)
   {
     .addr   = priv->address,
     .flags  = priv->flags | I2C_M_READ,
-    .buffer = buffer,
-    .length = buflen
+    .buffer = rbuffer,
+    .length = rbuflen
   };
 
   DEBUGASSERT(dev != NULL);
-  i2cvdbg(TWI%d "buflen: %d\n", priv->twi, buflen);
+  i2cvdbg("TWI%d rbuflen: %d\n", priv->twi, rbuflen);
 
   /* Get exclusive access to the device */
 
@@ -901,7 +897,7 @@ static int twi_writeread(FAR struct i2c_dev_s *dev, const uint8_t *wbuffer,
   };
 
   DEBUGASSERT(dev != NULL);
-  i2cvdbg(TWI%d "wbuflen: %d rbuflen: %d\n", priv->twi, wbuflen, rbuflen);
+  i2cvdbg("TWI%d wbuflen: %d rbuflen: %d\n", priv->twi, wbuflen, rbuflen);
 
   /* Get exclusive access to the device */
 
@@ -977,7 +973,7 @@ static int twi_transfer(FAR struct i2c_dev_s *dev,
   int ret;
 
   DEBUGASSERT(dev != NULL);
-  i2cvdbg(TWI%d "count: %d\n", priv->twi, count);
+  i2cvdbg("TWI%d count: %d\n", priv->twi, count);
 
   /* Get exclusive access to the device */
 
@@ -1075,7 +1071,7 @@ static void twi_hw_initialize(struct twi_dev_s *priv, unsigned int pid,
 {
   uint32_t regval;
 
-  uvdbg("TWI%d Initializing\n", priv->twi);
+  i2cvdbg("TWI%d Initializing\n", priv->twi);
 
   /* SVEN: TWI Slave Mode Enabled */
 
@@ -1125,7 +1121,7 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
   uint32_t frequency;
   unsigned int pid;
 
-  uvdbg("TWI%d Initializing\n", priv->twi);
+  i2cvdbg("TWI%d Initializing\n", priv->twi);
 
   flags = irqsave();
 
@@ -1216,7 +1212,7 @@ struct i2c_dev_s *up_i2cinitialize(int bus)
       return NULL;
     }
 
-  i2cvdbg("Initializing TWI%d\n", port);
+  i2cvdbg("Initializing TWI%d\n", bus);
 
   /* Initialize the device structure */
 
@@ -1259,7 +1255,7 @@ int up_i2cuninitialize(FAR struct i2c_dev_s * dev)
 {
   struct twi_dev_s *priv = (struct twi_dev_s *) dev;
 
-  uvdbg("TWI%d Un-initializing\n", priv->twi);
+  i2cvdbg("TWI%d Un-initializing\n", priv->twi);
 
   /* Disable interrupts */
 
