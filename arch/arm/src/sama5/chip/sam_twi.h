@@ -174,6 +174,9 @@
 #define TWI_INT_SCLWS               (1 << 10) /* Bit 10: Clock Wait State */
 #define TWI_INT_EOSACC              (1 << 11) /* Bit 11: End Of Slave Access */
 
+#define TWI_INT_ERRORS              (0x00000340)
+#define TWI_INT_ALL                 (0x00000f77)
+
 /* TWI Receive Holding Register */
 
 #define TWI_RHR_RXDATA_SHIFT        (0)       /* Bits 0-7:  Master or Slave Receive Holding Data */
