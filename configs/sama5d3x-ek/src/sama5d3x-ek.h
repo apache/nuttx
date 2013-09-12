@@ -56,6 +56,7 @@
 /* Configuration ************************************************************/
 
 #define HAVE_HSMCI      1
+#define HAVE_AT24       1
 #define HAVE_AT25       1
 #define HAVE_USBHOST    1
 #define HAVE_USBDEV     1
@@ -101,6 +102,10 @@
  * us what to do with it by setting one of these.
  */
 
+#ifndef CONFIG_FS_NXFFS
+#  undef CONFIG_SAMA5_AT25_NXFFS
+#endif
+
 #if !defined(CONFIG_SAMA5_AT25_FTL) && !defined(CONFIG_SAMA5_AT25_NXFFS)
 #  undef HAVE_AT25
 #endif
@@ -111,12 +116,65 @@
 #  undef CONFIG_SAMA5_AT25_NXFFS
 #endif
 
+/* AT24 Serial EEPROM
+ *
+ * A AT24C512 Serial EEPPROM was used for tested I2C.  There are other I2C/TWI
+ * devices on-board, but the serial EEPROM is the simplest test.
+ *
+ * There is, however, no AT24 EEPROM on board the SAMA5D3x-EK:  The Serial
+ * EEPROM was mounted on an external adaptor board and connected to the
+ * SAMA5D3x-EK thusly:
+ *
+ *   - VCC -- VCC
+ *   - GND -- GND
+ *   - TWCK0(PA31) -- SCL
+ *   - TWD0(PA30)  -- SDA
+ *
+ * By default, PA30 and PA31 are SWJ-DP pins, it can be used as a pin for TWI
+ * peripheral in the end application.
+ */
+
+#define AT24_BUS 0
+
+#if !defined(CONFIG_MTD_AT24XX) || !defined(CONFIG_SAMA5_TWI0)
+#  undef HAVE_AT24
+#endif
+
+/* Can't support AT25 features if mountpoints are disabled or if we were not
+ * asked to mount the AT25 part
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5_AT24_AUTOMOUNT)
+#  undef HAVE_AT24
+#endif
+
+/* If we are going to mount the AT25, then they user must also have told
+ * us what to do with it by setting one of these.
+ */
+
+#ifndef CONFIG_FS_NXFFS
+#  undef CONFIG_SAMA5_AT24_NXFFS
+#endif
+
+#if !defined(CONFIG_SAMA5_AT24_FTL) && !defined(CONFIG_SAMA5_AT24_NXFFS)
+#  undef HAVE_AT24
+#endif
+
+#if defined(CONFIG_SAMA5_AT24_FTL) && defined(CONFIG_SAMA5_AT24_NXFFS)
+#  warning Both CONFIG_SAMA5_AT24_FTL and CONFIG_SAMA5_AT24_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5_AT24_NXFFS
+#  undef CONFIG_SAMA5_AT24_NXFFS
+#endif
+
 /* Assign minor device numbers.  We will also use MINOR number 0 for the AT25.
  * It should appear as /dev/mtdblock0
  */
 
 #ifdef HAVE_AT25
 #  define AT25_MINOR 0
+#  define AT24_MINOR 1
+#else
+#  define AT24_MINOR 0
 #endif
 
 /* MMC/SD minor numbers:  The NSH device minor extended is extened to support
@@ -440,12 +498,24 @@ void sam_sdram_config(void);
  * Name: sam_at25_initialize
  *
  * Description:
- *   Initialize and configure the AT25 SPI Flash
+ *   Initialize and configure the AT25 serial FLASH
  *
  ****************************************************************************/
 
 #ifdef HAVE_AT25
 int sam_at25_initialize(int minor);
+#endif
+
+/****************************************************************************
+ * Name: sam_at24_initialize
+ *
+ * Description:
+ *   Initialize and configure the AT24 serial EEPROM
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_AT24
+int sam_at24_initialize(int minor);
 #endif
 
 /****************************************************************************

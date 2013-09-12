@@ -67,7 +67,15 @@ CSRCS += nor_main.c
 endif
 
 ifeq ($(CONFIG_MTD_AT25),y)
+ifeq ($(CONFIG_SAMA5_SPI0),y)
 CSRCS += sam_at25.c
+endif
+endif
+
+ifeq ($(CONFIG_MTD_AT24XX),y)
+ifeq ($(CONFIG_SAMA5_TWI0),y)
+CSRCS += sam_at24.c
+endif
 endif
 
 ifeq ($(CONFIG_SAMA5_HSMCI0),y)

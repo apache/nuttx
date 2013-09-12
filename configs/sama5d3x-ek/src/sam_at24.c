@@ -1,5 +1,5 @@
 /****************************************************************************
- * config/sama5d3x-ek/src/sam_nsh.c
+ * config/sama5d3x-ek/src/sam_at24.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,6 +33,24 @@
  *
  ****************************************************************************/
 
+/* AT24 Serial EEPROM
+ *
+ * A AT24C512 Serial EEPPROM was used for tested I2C.  There are other I2C/TWI
+ * devices on-board, but the serial EEPROM is the simplest test.
+ *
+ * There is, however, no AT24 EEPROM on board the SAMA5D3x-EK:  The Serial
+ * EEPROM was mounted on an external adaptor board and connected to the
+ * SAMA5D3x-EK thusly:
+ *
+ *   - VCC -- VCC
+ *   - GND -- GND
+ *   - TWCK0(PA31) -- SCL
+ *   - TWD0(PA30)  -- SDA
+ *
+ * By default, PA30 and PA31 are SWJ-DP pins, it can be used as a pin for TWI
+ * peripheral in the end application.
+ */
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -46,121 +64,94 @@
 #include <errno.h>
 #include <debug.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
-#endif
+#include <nuttx/i2c.h>
+#include <nuttx/mtd.h>
+#include <nuttx/fs/nxffs.h>
 
 #include "sama5d3x-ek.h"
+
+#ifdef HAVE_AT24
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) syslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message syslog
-#  else
-#    define message printf
-#  endif
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: sam_at24_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Initialize and configure the AT24 serial EEPROM
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int sam_at24_initialize(int minor)
 {
-#if defined(HAVE_AT25) || defined(HAVE_AT24) || defined(HAVE_HSMCI) || \
-    defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
+  FAR struct i2c_dev_s *i2c;
+  FAR struct mtd_dev_s *mtd;
+  static bool initialized = false;
   int ret;
-#endif
 
-#ifdef HAVE_AT25
-  /* Initialize the AT25 driver */
+  /* Have we already initialized? */
 
-  ret = sam_at25_initialize(AT25_MINOR);
-  if (ret < 0)
+  if (!initialized)
     {
-      message("ERROR: sam_at25_initialize failed: %d\n", ret);
-      return ret;
+      /* No.. Get the I2C bus driver */
+
+      i2c = up_i2cinitialize(AT24_BUS);
+      if (!i2c)
+        {
+          fdbg("ERROR: Failed to initialize I2C port %d\n", AT24_BUS);
+          return -ENODEV;
+        }
+
+      /* Now bind the I2C interface to the AT24 I2C EEPROM driver */
+
+      mtd = at24c_initialize(i2c);
+      if (!mtd)
+        {
+          fdbg("ERROR: Failed to bind I2C port %d to the AT24 EEPROM driver\n");
+          return -ENODEV;
+        }
+
+#if defined(CONFIG_SAMA5_AT24_FTL)
+      /* And finally, use the FTL layer to wrap the MTD driver as a block driver */
+
+      ret = ftl_initialize(AT24_MINOR, mtd);
+      if (ret < 0)
+        {
+          fdbg("ERROR: Initialize the FTL layer\n");
+          return ret;
+        }
+
+#elif defined(CONFIG_SAMA5_AT24_NXFFS)
+      /* Initialize to provide NXFFS on the MTD interface */
+
+      ret = nxffs_initialize(mtd);
+      if (ret < 0)
+        {
+          fdbg("ERROR: NXFFS initialization failed: %d\n", -ret);
+          return ret;
+        }
+
+      /* Mount the file system at /mnt/at24 */
+
+      ret = mount(NULL, "/mnt/at24", "nxffs", 0, NULL);
+      if (ret < 0)
+        {
+          fdbg("ERROR: Failed to mount the NXFFS volume: %d\n", errno);
+          return ret;
+        }
+#endif
+      /* Now we are intialized */
+
+      initialized = true;
     }
-#endif
-
-#ifdef HAVE_AT24
-  /* Initialize the AT24 driver */
-
-  ret = sam_at24_initialize(AT24_MINOR);
-  if (ret < 0)
-    {
-      message("ERROR: sam_at24_initialize failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef HAVE_HSMCI
-#ifdef CONFIG_SAMA5_HSMCI0
-  /* Initialize the HSMCI0 driver */
-
-  ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR);
-  if (ret < 0)
-    {
-      message("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-              HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_SAMA5_HSMCI1
-  /* Initialize the HSMCI1 driver */
-
-  ret = sam_hsmci_initialize(HSMCI1_SLOTNO, HSMCI1_MINOR);
-  if (ret < 0)
-    {
-      message("ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",
-              HSMCI1_SLOTNO, HSMCI1_MINOR, ret);
-      return ret;
-    }
-#endif
-#endif
-
-#ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  sam_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
-   */
-
-  ret = sam_usbhost_initialize();
-  if (ret != OK)
-    {
-      message("ERROR: Failed to initialize USB host: %d\n", ret);
-      return ret;
-    }
-#endif
-
-#ifdef HAVE_USBMONITOR
-  /* Start the USB Monitor */
-
-  ret = usbmonitor_start(0, NULL);
-  if (ret != OK)
-    {
-      message("nsh_archinitialize: Start USB monitor: %d\n", ret);
-    }
-#endif
 
   return OK;
 }
+
+#endif /* HAVE_AT24 */

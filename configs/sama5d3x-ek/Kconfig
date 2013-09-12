@@ -43,19 +43,19 @@ config SAMA5_NOR_START
 		will, instead, immediately start the program in NOR FLASH.
 
 config SAMA5_AT25_AUTOMOUNT
-	bool "AT25 auto-mount"
+	bool "AT25 serial FLASH auto-mount"
 	default n
 	depends on NSH_ARCHINIT && SAMA5_SPI0 && MTD_AT25
 	---help---
 		Automatically initialize the AT25 SPI FLASH driver when NSH starts.
 
 choice
-	prompt "AT25 configuration"
+	prompt "AT25 serial FLASH configuration"
 	default SAMA5_AT25_FTL
 	depends on SAMA5_AT25_AUTOMOUNT
 
 config SAMA5_AT25_FTL
-	bool "Create AT25 block driver"
+	bool "Create AT25 Serial FLASH block driver"
 	---help---
 		Create the MTD driver for the AT25 and "wrap" the AT25 is a standard
 		block driver that could then, for example, be mounted using FAT or
@@ -63,7 +63,7 @@ config SAMA5_AT25_FTL
 		be no wear-leveling.
 
 config SAMA5_AT25_NXFFS
-	bool "Create AT25 NXFFS file system"
+	bool "Create AT25 serial FLASH NXFFS file system"
 	depends on FS_NXFFS
 	---help---
 		Create the MTD driver for the AT25 and and mount the AT25 device as
@@ -71,4 +71,46 @@ config SAMA5_AT25_NXFFS
 		NXFFS is that it can be very slow.
 
 endchoice
+
+config SAMA5_AT24_AUTOMOUNT
+	bool "AT24 Serial EEPROM auto-mount"
+	default n
+	depends on NSH_ARCHINIT && SAMA5_TWI0 && MTD_AT24XX
+	---help---
+		Automatically initialize the AT24 SPI EEPROM driver when NSH starts.
+
+		The Serial EEPROM was mounted on an external adaptor board and
+		connected to the SAMA5D3x-EK thusly:
+
+		- VCC -- VCC
+		- GND -- GND
+		- TWCK0(PA31) -- SCL
+		- TWD0(PA30)  -- SDA
+
+		By default, PA30 and PA31 are SWJ-DP pins, it can be used as a pin
+		for TWI peripheral in the end application.
+
+choice
+	prompt "AT24 serial EPPROM configuration"
+	default SAMA5_AT24_FTL
+	depends on SAMA5_AT24_AUTOMOUNT
+
+config SAMA5_AT24_FTL
+	bool "Create AT24 block driver"
+	---help---
+		Create the MTD driver for the AT24 and "wrap" the AT24 is a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+config SAMA5_AT24_NXFFS
+	bool "Create AT24 NXFFS file system"
+	depends on FS_NXFFS
+	---help---
+		Create the MTD driver for the AT24 and and mount the AT24 device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+endchoice
+
 endif
