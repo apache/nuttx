@@ -1802,6 +1802,55 @@ Configurations
          CONFIG_I2CTOOL_MAXBUS=2               : TWI2 has the maximum bus number 2
          CONFIG_I2CTOOL_DEFFREQ=100000         : Pick a consistent frequency
 
+       The I2C tool has extensive help that can be accessed as follows:
+
+       nsh> i2c help
+       Usage: i2c <cmd> [arguments]
+       Where <cmd> is one of:
+
+         Show help     : ?
+         List busses   : bus
+         List devices  : dev [OPTIONS] <first> <last>
+         Read register : get [OPTIONS] [<repititions>]
+         Show help     : help
+         Write register: set [OPTIONS] <value> [<repititions>]
+         Verify access : verf [OPTIONS] [<value>] [<repititions>]
+
+       Where common "sticky" OPTIONS include:
+         [-a addr] is the I2C device address (hex).  Default: 03 Current: 03
+         [-b bus] is the I2C bus number (decimal).  Default: 0 Current: 0
+         [-r regaddr] is the I2C device register address (hex).  Default: 00 Current: 00
+         [-w width] is the data width (8 or 16 decimal).  Default: 8 Current: 8
+         [-s|n], send/don't send start between command and data.  Default: -n Current: -n
+         [-i|j], Auto increment|don't increment regaddr on repititions.  Default: NO Current: NO
+         [-f freq] I2C frequency.  Default: 100000 Current: 100000
+
+       NOTES:
+       o Arguments are "sticky".  For example, once the I2C address is
+         specified, that address will be re-used until it is changed.
+
+       WARNING:
+       o The I2C dev command may have bad side effects on your I2C devices.
+         Use only at your own risk.
+
+       As an eample, the I2C dev comman can be used to list all devices
+       responding on TWI0 (the default) like this:
+
+         nsh> i2c dev 0x03 0x77
+              0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+         00:          -- -- -- -- -- -- -- -- -- -- -- -- --
+         10: -- -- -- -- -- -- -- -- -- -- 1a -- -- -- -- --
+         20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         30: -- -- -- -- -- -- -- -- -- 39 -- -- -- 3d -- --
+         40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         60: 60 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+         70: -- -- -- -- -- -- -- --
+         nsh>
+
+        Address 0x1a is the WM8904.  Address 0x39 is the SIL9022A. I am
+        not sure what is at address 0x3d and 0x60
+
     STATUS:
       PCK FREQUENCY
       2013-7-19:  This configuration (as do the others) run at 396MHz.
@@ -1855,9 +1904,16 @@ Configurations
       UDPHS
       2013-9-5: The UDPHS driver is basically functional.
 
-      AT24 SERIAL EEPROM
+      I2C
       2013-9-12:  I have been unusuccessful getting the external serial
-        EEPROM to work.
+        AT24 EEPROM to work.  I am pretty sure that this is a problem with
+        my external AT24 board (the TWI0 bus hangs when the AT24 is plugged
+        in).  I will skip the AT24 integration since it is not on the critical
+        path at the moment.
+      2013-9-12:  The I2C tool, however, seems to work well.  It succesfully
+        enumerates the devices on the bus and successfully exchanges a few
+        commands.  The real test of the come later when a real I2C device is
+        integrated.
 
   ostest:
     This configuration directory, performs a simple OS test using
