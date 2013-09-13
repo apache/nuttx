@@ -5552,4 +5552,6 @@
 	  Provided by Lorenz Meier (2013-9-13).
 	* arch/arm/src/stm32/Kconfig: Fix STM32 UART7/8 kconfig names
 	  and UART DMA.  Provided by Lorenz Meier (2013-9-13).
+	* configs/maple:  Board configuration for the LeafLabs Maple
+	  and Maple Mini boards.  From Librae (2013-9-13).
 

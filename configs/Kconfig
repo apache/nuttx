@@ -529,6 +529,16 @@ config ARCH_BOARD_SKP16C26
 		uses the GNU m32c toolchain.  STATUS:  The port is complete but untested
 		due to issues with compiler internal errors.
 
+config ARCH_BOARD_MAPLE
+	bool "maple board"
+	depends on ARCH_CHIP_STM32F103RBT6
+	select ARCH_HAVE_LEDS
+	---help---
+		A configuration for the LeafLab's Maple and Maple Mini boards.
+		These boards are based on the STM32F103RBT6 chip for the standard
+		version and on the STM32F103CBT6 for the mini version
+		(See http://leaflabs.com/docs/hardware/maple.html)
+
 config ARCH_BOARD_STM32_TINY
 	bool "STM32-Tiny board"
 	depends on ARCH_CHIP_STM32F103C8
@@ -812,6 +822,7 @@ config ARCH_BOARD
 	default "sam4s-xplained"      if ARCH_BOARD_SAM4S_XPLAINED
 	default "shenzhou"            if ARCH_BOARD_SHENZHOU
 	default "skp16c26"            if ARCH_BOARD_SKP16C26
+	default "maple"               if ARCH_BOARD_MAPLE
 	default "stm32_tiny"          if ARCH_BOARD_STM32_TINY
 	default "stm3210e-eval"       if ARCH_BOARD_STM3210E_EVAL
 	default "stm3220g-eval"       if ARCH_BOARD_STM3220G_EVAL
@@ -1047,6 +1058,9 @@ source "configs/shenzhou/Kconfig"
 endif
 if ARCH_BOARD_SKP16C26
 source "configs/skp16c26/Kconfig"
+endif
+if ARCH_BOARD_MAPLE
+source "configs/maple/Kconfig"
 endif
 if ARCH_BOARD_STM32_TINY
 source "configs/stm32_tiny/Kconfig"

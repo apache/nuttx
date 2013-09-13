@@ -1030,6 +1030,8 @@ nuttx
  |   |   `- README.txt
  |   |- lpcxpresso-lpc1768/
  |   |   `- README.txt
+ |   |- maple/
+ |   |   `- README.txt
  |   |- mbed/
  |   |   `- README.txt
  |   |- mcu123-lpc214x/

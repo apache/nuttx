@@ -1815,6 +1815,11 @@ configs/m68322evb
   Motorola. This OS is also built with the arm-nuttx-elf toolchain*.  STATUS:
   This port was never completed.
 
+configs/maple
+  NuttX support for the LeafLab's Maple and Maple Mini boards. These boards
+  are based on the STM32F103RBT6 chip for the standard version and on the
+  STM32F103CBT6 for the mini version (See http://leaflabs.com/docs/hardware/maple.html)
+
 configs/mbed
   The configurations in this directory support the mbed board (http://mbed.org)
   that features the NXP LPC1768 microcontroller. This OS is also built
