@@ -2378,6 +2378,12 @@ nsh>
          See <a href="http://firestm32.taobao.com">http://firestm32.taobao.com</a> (the current board is version 3).
          Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/fire-stm32v2/README.txt">README</a> file for further information.
       </li>
+      <li>
+         LeafLab's Maple and Maple Mini boards.
+         These boards are based on the STM32F103RBT6 chip for the standard version and on the STM32F103CBT6 for the mini version.
+         See the <a href="http://leaflabs.com/docs/hardware/maple.html">LeafLabs</a> web site for hardware information;
+         see the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/maple/README.txt">README</a> file for further information about the NuttX port.
+      </li>
     </ol>
     <p>
       These ports uses a GNU arm-nuttx-elf toolchain* under either Linux or Cygwin (with native Windows GNU tools or Cygwin-based GNU tools).
@@ -2411,6 +2417,9 @@ nsh>
           Support for FAT file system on an an SD card had been verified.
           The ENC28J60 network is functional (but required lifting the chip select pin on the W25x16 part).
           Customizations for the v3 version of the Wildfire board are selectable (but untested).
+        </li>
+        <li><b>Maple</b>.
+          Support for the Maple boards was contributed by Yiran Liao and first appear in NuttX 6-30.
         </li>
       </ul>
      </ul>
