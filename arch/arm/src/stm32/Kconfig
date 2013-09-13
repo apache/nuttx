@@ -2586,21 +2586,6 @@ config SDIO_WIDTH_D1_ONLY
 
 endmenu
 
-menu "CAN Configuration"
-	depends on STM32_CAN
-
-config CAN1_BAUD
-	int "Baud rate for CAN1"
-	default 250000
-	depends on STM32_CAN1
-
-config CAN2_BAUD
-	int "Baud rate for CAN2"
-	default 250000
-	depends on STM32_CAN2
-
-endmenu
-
 if STM32_ETHMAC
 menu "Ethernet MAC configuration"
 
@@ -2882,3 +2867,22 @@ config STM32_USB_ITRMP
 		either retain the legacy F1 behavior or to map the USB interupts to
 		there own dedicated vectors.  The option is available only for the
 		F3 family and selects the use of the dedicated USB interrupts.
+
+menu "CAN driver configuration"
+	depends on STM32_CAN1 || STM32_CAN2
+
+config CAN1_BAUD
+        int "CAN1 BAUD"
+        default 250000
+        depends on STM32_CAN1
+        ---help---
+                CAN1 BAUD rate.  Required if STM32_CAN1 is defined.
+
+config CAN2_BAUD
+        int "CAN2 BAUD"
+        default 250000
+        depends on STM32_CAN2
+        ---help---
+                CAN2 BAUD rate.  Required if STM32_CAN2 is defined.
+
+endmenu

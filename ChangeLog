@@ -5542,4 +5542,8 @@
 	* arch/arm/src/sama5/chip/sam_emac.h and sam_gmac.h:  Register
 	  definition files for the SAMA5 EMAC and GMAC peripherals
 	  (incomplete on the initial commit) (2013-9-12).
+	* arch/arm/src/stm32/stm32_can.c:  Patch provided by Lorenz
+	  Meier (2013-9-13).
+
+
 
