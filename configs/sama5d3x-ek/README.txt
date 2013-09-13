@@ -891,6 +891,33 @@ Configurations
 
   Configuration sub-directories
   -----------------------------
+  Summary:  Some of the descriptions below are long and wordy. Here is the
+  concise summary of the available SAMA5D3x-EK configurations:
+
+    demo: This is an NSH configuration that supports as much functionality
+      as possible.  That is why it gets its name:  It attempts to show as
+      much as possible
+    hello:  The tiniest configuration possible (almost).  It just says
+      "Hello, World!"  On the serial console.  It is so tiny that it is
+      able to run entirely out of internal SRAM (all of the other
+      configurations except norboot use NOR FLASH for .text and internal
+      SRAM for .data and .bass).  This configuration is only useful for
+      bring-up.
+    norboot:
+      This is a little program to help debug of code in NOR flash.  I wrote
+      it because I don't yet understand how to get the SAMA5 to boot from
+      NOR FLASH.  See the description below and the section above entitled
+      "Creating and Using NORBOOT" for more information
+    nsh:  This is another NSH configuration, not too different from the
+      demo configuration.  The nsh configuration is, however, bare bones.
+      It is the simplest possible NSH configuration and is useful as a
+      platform for debugging and integrating new features in isolation.
+    ostest:  This is another configuration that is only useful for bring-up.
+      It executes an exhaustive OS test to verify a correct port of NuttX
+      to the SAMA5D3-EK.  Since it now passes that test, the configuration
+      has little further use other than for reference.
+
+  Now for the gory details:
 
   demo:
     This configuration directory provide the NuttShell (NSH).  There are
