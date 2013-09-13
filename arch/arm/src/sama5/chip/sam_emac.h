@@ -383,4 +383,70 @@
 #define EMAC_WOL_SA1              (1 << 18) /* Bit 18: Specific address register 1 event enable */
 #define EMAC_WOL_MTI              (1 << 19) /* Bit 19: Multicast hash event enable */
 
+/* Descriptors **********************************************************************/
+
+/* Receive buffer descriptor:  Address word */
+
+#define RXDESC_ADDR_OWNER         (1 << 0)  /* Bit 0:  1=Software owns; 0=EMAC owns */
+#define RXDESC_ADDR_WRAP          (1 << 1)  /* Bit 1:  Last descriptor in list */
+#define RXDESC_ADDR_MASK          (0xfffffffc) /* Bits 2-31: Aligned buffer address */
+
+/* Receive buffer descriptor:  Control word */
+
+#define RXDESC_CTRL_FRLEN_SHIFT   (0)       /* Bits 0-11: Length of frame */
+#define RXDESC_CTRL_FRLEN_MASK    (0x000007ff << RXDESC_CTRL_FRLEN_SHIFT)
+#define RXDESC_CTRL_BOFFS_SHIFT   (12)      /* Bits 12-13: Receive buffer offset */
+#define RXDESC_CTRL_BOFFS_MASK    (3 << RXDESC_CTRL_BOFFS_SHIFT)
+#define RXDESC_CTRL_SOF           (1 << 14) /* Bit 14: Start of frame */
+#define RXDESC_CTRL_EOF           (1 << 15) /* Bit 15: End of frame */
+#define RXDESC_CTRL_CFI           (1 << 16) /* Bit 16: Concatenation format indicator (CFI) bit */
+#define RXDESC_CTRL_VLPRIO_SHIFT  (17)      /* Bits 17-19: VLAN priority */
+#define RXDESC_CTRL_VLPRIO_MASK   (7 << RXDESC_CTRL_VLANPRIO_SHIFT)
+#define RXDESC_CTRL_PRIODET       (1 << 20) /* Bit 20: Priority tag detected */
+#define RXDESC_CTRL_VLANTAG       (1 << 21) /* Bit 21: VLAN tag detected */
+#define RXDESC_CTRL_TYPEID        (1 << 22) /* Bit 22: Type ID match */
+#define RXDESC_CTRL_ADDR4         (1 << 23) /* Bit 23: Specific address register 4 match */
+#define RXDESC_CTRL_ADDR3         (1 << 24) /* Bit 24: Specific address register 3 match */
+#define RXDESC_CTRL_ADDR2         (1 << 25) /* Bit 25: Specific address register 2 match */
+#define RXDESC_CTRL_ADDR1         (1 << 26) /* Bit 26: Specific address register 1 match */
+                                            /* Bit 27: Reserved */
+#define RXDESC_CTRL_EXTADDR       (1 << 28) /* Bit 28: External address match */
+#define RXDESC_CTRL_UCAST         (1 << 29) /* Bit 29: Unicast hash match */
+#define RXDESC_CTRL_MCAST         (1 << 30) /* Bit 30: Multicast hash match */
+#define RXDESC_CTRL_ONES          (1 << 31) /* Bit 31: Global all ones broadcast address detected */
+
+/* Transmit buffer descriptor:  Address word (un-aligned, 32-bit address */
+
+/* Transmit buffer descriptor:  Control word */
+
+#define TXDESC_CTRL_BUFLEN_SHIFT  (0)       /* Bits 0-10: Length of buffer */
+#define TXDESC_CTRL_BUFLEN_MASK   (0x000003ff << TXDESC_CTRL_BUFLEN_SHIFT)
+                                            /* Bits 11-14: Reserved */
+#define TXDESC_CTRL_LAST          (1 << 15) /* Bit 15: Last buffer in the current frame */
+#define TXDESC_CTRL_NOCRC         (1 << 16) /* Bit 16: No CRC*/
+                                            /* Bits 17-26: Reserved */
+#define TXDESC_CTRL_NOBUFFER      (1 << 27) /* Bit 27: Buffers exhausted in mid frame*/
+#define TXDESC_CTRL_TXUR          (1 << 28) /* Bit 28: Transmit underrun*/
+#define TXDESC_CTRL_TXERR         (1 << 29) /* Bit 29: Retry limit exceeded, transmit error detected*/
+#define TXDESC_CTRL_WRAP          (1 << 30) /* Bit 30: Last descriptor in descriptor list*/
+#define TXDESC_CTRL_USED          (1 << 31) /* Bit 31: Zero for the EMAC to read from buffer*/
+
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+/* Receive buffer descriptor */
+
+struct emac_rxdesc_s
+{
+  uint32_t addr;     /* Buffer address */
+  uint32_t ctrl;     /* RX controls */
+};
+
+/* Transmit buffer descriptor */
+
+struct emac_txdesc_s
+{
+  uint32_t addr;     /* Buffer address */
+  uint32_t ctrl;     /* TX controls */
+};
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_EMAC_H */

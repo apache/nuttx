@@ -5554,4 +5554,8 @@
 	  and UART DMA.  Provided by Lorenz Meier (2013-9-13).
 	* configs/maple:  Board configuration for the LeafLabs Maple
 	  and Maple Mini boards.  From Librae (2013-9-13).
+	* arch/arm/src/sama5/sam_emac.c and .h:  Skeleton files for
+	  a SAMA5 EMAC driver.  Not much in the initial files; these
+	  are just hacked out and gutted versions of the corresponding
+	  STM32 files (2013-9-13).
 
