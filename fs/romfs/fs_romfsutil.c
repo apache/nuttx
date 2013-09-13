@@ -952,7 +952,7 @@ int romfs_datastart(struct romfs_mountpt_s *rm, uint32_t offset,
     {
       /* Read the sector into memory */
 
-      ndx = romfs_devcacheread(rm, offset);
+      ndx = romfs_devcacheread(rm, offset + namelen);
       if (ndx < 0)
         {
           return ndx;
