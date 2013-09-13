@@ -5550,4 +5550,6 @@
 	  (2013-9-13)
 	* fs/romfs/fs_romfsutil.c: Fix for filenames > 15 characters.
 	  Provided by Lorenz Meier (2013-9-13).
+	* arch/arm/src/stm32/Kconfig: Fix STM32 UART7/8 kconfig names
+	  and UART DMA.  Provided by Lorenz Meier (2013-9-13).
 

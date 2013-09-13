@@ -2284,7 +2284,7 @@ config USART1_RS485_DIR_POLARITY
 config USART1_RXDMA
 	bool "USART1 Rx DMA"
 	default n
-	depends on STM32_STM32F40XX && STM32_DMA2
+	depends on STM32_USART1 && ((STM32STM32F10XX && STM32_DMA1) || (!STM32_STM32F10XX && STM32_DMA2))
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -2309,7 +2309,7 @@ config USART2_RS485_DIR_POLARITY
 config USART2_RXDMA
 	bool "USART2 Rx DMA"
 	default n
-	depends on STM32_STM32F40XX && STM32_DMA1
+	depends on STM32_USART2 && STM32_DMA1
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -2334,7 +2334,7 @@ config USART3_RS485_DIR_POLARITY
 config USART3_RXDMA
 	bool "USART3 Rx DMA"
 	default n
-	depends on STM32_STM32F40XX && STM32_DMA1
+	depends on STM32_USART3 && STM32_DMA1
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -2359,7 +2359,7 @@ config UART4_RS485_DIR_POLARITY
 config UART4_RXDMA
 	bool "UART4 Rx DMA"
 	default n
-	depends on STM32_STM32F40XX && STM32_DMA1
+	depends on STM32_UART4 && STM32_DMA1
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -2384,7 +2384,7 @@ config UART5_RS485_DIR_POLARITY
 config UART5_RXDMA
 	bool "UART5 Rx DMA"
 	default n
-	depends on STM32_STM32F40XX && STM32_DMA1
+	depends on STM32_UART5 && STM32_DMA1
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
@@ -2409,63 +2409,63 @@ config USART6_RS485_DIR_POLARITY
 config USART6_RXDMA
 	bool "USART6 Rx DMA"
 	default n
-	depends on STM32_STM32F40XX && STM32_DMA2
+	depends on STM32_USART6 && STM32_DMA2
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
-config USART7_RS485
-	bool "RS-485 on USART7"
+config UART7_RS485
+	bool "RS-485 on UART7"
 	default n
-	depends on STM32_USART7
+	depends on STM32_UART7
 	---help---
-		Enable RS-485 interface on USART7. Your board config will have to
-		provide GPIO_USART7_RS485_DIR pin definition. Currently it cannot be
-		used with USART7_RXDMA.
+		Enable RS-485 interface on UART7. Your board config will have to
+		provide GPIO_UART7_RS485_DIR pin definition. Currently it cannot be
+		used with UART7_RXDMA.
 
-config USART7_RS485_DIR_POLARITY
-	int "USART7 RS-485 DIR pin polarity"
+config UART7_RS485_DIR_POLARITY
+	int "UART7 RS-485 DIR pin polarity"
 	default 1
 	range 0 1
-	depends on USART7_RS485
+	depends on UART7_RS485
 	---help---
-		Polarity of DIR pin for RS-485 on USART7. Set to state on DIR pin which
+		Polarity of DIR pin for RS-485 on UART7. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
-config USART7_RXDMA
-	bool "USART7 Rx DMA"
+config UART7_RXDMA
+	bool "UART7 Rx DMA"
 	default n
-	depends on STM32_STM32F40XX && STM32_DMA2
+	depends on STM32_UART7 && STM32_DMA2
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
-config USART8_RS485
-	bool "RS-485 on USART8"
+config UART8_RS485
+	bool "RS-485 on UART8"
 	default n
-	depends on STM32_USART8
+	depends on STM32_UART8
 	---help---
-		Enable RS-485 interface on USART8. Your board config will have to
-		provide GPIO_USART8_RS485_DIR pin definition. Currently it cannot be
-		used with USART8_RXDMA.
+		Enable RS-485 interface on UART8. Your board config will have to
+		provide GPIO_UART8_RS485_DIR pin definition. Currently it cannot be
+		used with UART8_RXDMA.
 
-config USART8_RS485_DIR_POLARITY
-	int "USART8 RS-485 DIR pin polarity"
+config UART8_RS485_DIR_POLARITY
+	int "UART8 RS-485 DIR pin polarity"
 	default 1
 	range 0 1
-	depends on USART8_RS485
+	depends on UART8_RS485
 	---help---
-		Polarity of DIR pin for RS-485 on USART8. Set to state on DIR pin which
+		Polarity of DIR pin for RS-485 on UART8. Set to state on DIR pin which
 		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
-config USART8_RXDMA
-	bool "USART8 Rx DMA"
+config UART8_RXDMA
+	bool "UART8 Rx DMA"
 	default n
-	depends on STM32_STM32F40XX && STM32_DMA2
+	depends on STM32_UART8 && STM32_DMA2
 	---help---
 		In high data rate usage, Rx DMA may eliminate Rx overrun errors
 
 config SERIAL_TERMIOS
 	bool "Serial driver TERMIOS supported"
-	depends on STM32_USART1 || STM32_USART2 || STM32_USART3 || STM32_UART4 || STM32_UART5 || STM32_USART6 || STM32_USART7 || STM32_USART8
+	depends on STM32_USART1 || STM32_USART2 || STM32_USART3 || STM32_UART4 || STM32_UART5 || STM32_USART6 || STM32_UART7 || STM32_UART8
 	default n
 	---help---
 		Serial driver supports termios.h interfaces (tcsetattr, tcflush, etc.).
@@ -2474,7 +2474,7 @@ config SERIAL_TERMIOS
 
 config SERIAL_DISABLE_REORDERING
 	bool "Disable reordering of ttySx devices."
-	depends on STM32_USART1 || STM32_USART2 || STM32_USART3 || STM32_UART4 || STM32_UART5 || STM32_USART6 || STM32_USART7 || STM32_USART8
+	depends on STM32_USART1 || STM32_USART2 || STM32_USART3 || STM32_UART4 || STM32_UART5 || STM32_USART6 || STM32_UART7 || STM32_UART8
 	default n
 	---help---
 		NuttX per default reorders the serial ports (/dev/ttySx) so that the
