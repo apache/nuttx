@@ -5242,7 +5242,7 @@
 	* configs/sama5d3-ek/src/sam_cxxinitialize.c:  Add C++ support
 	  (2013-7-31).
 
-6.30 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+6.30 2013-09-14 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/sama5/arm_pghead.S:  Separate the logic that is
 	  enabled by CONFIG_PAGING out of arm_head.S.  That was just
@@ -5288,9 +5288,9 @@
 	  AT25 serial flash (2013-8-4).
 	* configs/sama5d3x-ek/nsh/defconfig:  FAT file system support is
 	  now enabled by default (2013-8-5)
-	* confgis/sama5d3x-ek/src/sam_nsh.c:  Automatically mount AT25
+	* configs/sama5d3x-ek/src/sam_nsh.c:  Automatically mount AT25
 	  file system for NSH if so configured (2013-8-5).
-	* confgis/sama5d3x-ek/src/sam_nsh.c:  Verified that the AT25 FLASH
+	* configs/sama5d3x-ek/src/sam_nsh.c:  Verified that the AT25 FLASH
 	  works on the SAMA5D3x-EK boards and can support a FAT file system
 	  (2013-8-5).
 	* arch/arm/src/sam34/sam_spi.c:  Corrected an error in the SAM3/4
@@ -5358,7 +5358,7 @@
 	* include/nuttx/usb/usbhost.h, arch/arm/src/stm32, arch/arm/src/lpc17xx,
 	  and include/nuttx/usb/usbhost.h, and nuttx/configs/<stm32-boards>:
 	  Move prototype of usbhost_initialize() of usbhost.h and into
-	  architecture specific files.  This is necessasrybecause some chips
+	  architecture specific files.  This is necessary because some chips
 	  (like the SAMA5) have multiple, different USB host interfaces
 	  (2013-8-11).
 	* drivers/usbhost/usbhost_hidkbd.c and usbhost_storage.c:  Correct some
@@ -5445,8 +5445,8 @@
 	  From Max Holtzberg (2013-8-25).
 	* arch/arm/src/sama5/sam_ohci.c:  SAMA5 OHCI is again functional by
 	  itself after all of the changes to integrate with EHCI. (2013-8-25).
-	* drivers/net/encx24j600.c/.h and include/nuttx/net/encx24j600.h: 
-	  Support the Microchip ENCX24J600 Ethernet driver from Max Holtberg
+	* drivers/net/encx24j600.c/.h and include/nuttx/net/encx24j600.h:
+	  Support the Microchip ENCX24J600 Ethernet driver from Max Holtzberg
 	  (2013-8-25).
 	* configs/olimex-stm32-p107:  Incorporate ENCX24J600 support for the
 	  Olimex STM32 P107 board.  From Max Holtzberg (2013-8-25).
@@ -5495,8 +5495,8 @@
 	  de Assis.  This is still very much a work in progress (2013-9-3).
 	* configs/*/usbmsc:  Renamed from config/*/usbstorage to match the
 	  change in naming in apps/examples submitted by CCTSAO (2013-9-5).
-	* drivers/usbdev.c and pl2303.c:  Don't use max packetsize assigned to
-	  the endpoint when allocating request buffers; The default value of
+	* drivers/usbdev/cdcacm.c and pl2303.c:  Don't use max packetsize assigned
+	  to the endpoint when allocating request buffers; The default value of
 	  the endpoint max packetsize may be incorrect because the endpoint
 	  has not yet been configured.  Verified on CDC/ACM.  Corresponding
 	  changes made to pl2303, but untested (2013-9-5).
@@ -5517,7 +5517,7 @@
 	* drivers/net/enc28j60.c:  Changes back-ported from the ENCX24J600
 	  to the ENC28J60 by Max Holtzberg.  These seem like reasonable and
 	  correct changes, but have yet to be verified on an ENC28J60 (2013-9-6).
-	* drivers/usbdev/usbdev_strings.c:  Extended decoding and stringifging
+	* drivers/usbdev/usbdev_strings.c:  Extended decoding and stringifying
 	  of USB trace output to include trace output from class drivers.
 	  (2013-9-6).
 	* drivers/usbdev/usbmsc_desc.c:  Fix a warning when USB MSC is
@@ -5526,7 +5526,7 @@
 	  transfer errors while attempt to initialize, don't bother with
 	  the startup retries; abort immediately so that the device will
 	  be reset and we can try again (2013-9-9).
-	* drivers/usbhost/usbhost_storagge:  Correct a reference counting
+	* drivers/usbhost/usbhost_storage.c:  Correct a reference counting
 	  error:  When an MSC device transfer fails while waiting for
 	  UnitTestReady (see 2013-9-9), the reference count was not being
 	  decremented.  The end result is a memory leak (2013-9-10).
@@ -5559,3 +5559,4 @@
 	  are just hacked out and gutted versions of the corresponding
 	  STM32 files (2013-9-13).
 
+6.31 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
