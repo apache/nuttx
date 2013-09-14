@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_eth.c
+ * arch/arm/src/sama5/sam_emac.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -2102,7 +2102,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
   /* Perform any necessary, board-specific PHY initialization */
 
 #ifdef CONFIG_SAMA5_PHYINIT
-  ret = sam_phy_boardinitialize(0);
+  ret = sam_phy_boardinitialize(EMAC_INTF);
   if (ret < 0)
     {
       ndbg("Failed to initialize the PHY: %d\n", ret);
@@ -2674,34 +2674,32 @@ static int sam_ethconfig(FAR struct sam_emac_s *priv)
 }
 
 /****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Function: sam_emac_initialize
  *
  * Description:
- *   Initialize the Ethernet driver for one interface.  If the SAMA5 chip
- *   supports multiple Ethernet controllers, then board specific logic
- *   must implement up_netinitialize() and call this function to initialize
- *   the desired interfaces.
+ *   Initialize the EMAC driver.
  *
- * Parameters:
- *   intf - In the case where there are multiple EMACs, this value
- *          identifies which EMAC is to be initialized.
+ * Input Parameters:
+ *   None
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
  * Assumptions:
+ *   Called very early in the initialization sequence.
  *
  ****************************************************************************/
 
-static inline int sam_emac_initialize(int intf)
+int sam_emac_initialize(void)
 {
   struct sam_emac_s *priv;
 
-  nvdbg("intf: %d\n", intf);
-
   /* Get the interface structure associated with this interface number. */
 
-  DEBUGASSERT(intf == 0);
   priv = &g_emac;
 
   /* Initialize the driver structure */
@@ -2743,33 +2741,3 @@ static inline int sam_emac_initialize(int intf)
   (void)netdev_register(&priv->dev);
   return OK;
 }
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function: up_netinitialize
- *
- * Description:
- *   This is the "standard" network initialization logic called from the
- *   low-level initialization logic in up_initialize.c.  If both the EMAC
- *   and GMAC are enabled, then this single entry point must initialize
- *   both.
- *
- * Parameters:
- *   None.
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-void up_netinitialize(void)
-{
-  (void)sam_emac_initialize();
-}
-
-#endif /* CONFIG_NET && CONFIG_SAMA5_EMAC */

@@ -45,11 +45,19 @@
 #include "chip.h"
 #include "chip/sam_emac.h"
 
-#ifndef __ASSEMBLY__
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+/* Definitions for use with sam_phy_boardinitialize */
+
+#define GMAC_INTF 0
+#define EMAC_INTF 1
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -59,26 +67,47 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/************************************************************************************
- * Function: sam_ethinitialize
+/****************************************************************************
+ * Function: sam_gmac_initialize
  *
  * Description:
- *   Initialize the Ethernet driver for one interface.  If the STM32 chip supports
- *   multiple Ethernet controllers, then board specific logic must implement
- *   up_netinitialize() and call this function to initialize the desired interfaces.
+ *   Initialize the GMAC driver.
  *
- * Parameters:
- *   intf - In the case where there are multiple EMACs, this value identifies which
- *   EMAC is to be initialized.
+ * Input Parameters:
+ *   None
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
  * Assumptions:
+ *   Called very early in the initialization sequence.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-int sam_ethinitialize(int intf);
+#ifdef CONFIG_SAMA5_GMAC
+int sam_gmac_initialize(void);
+#endif
+
+/****************************************************************************
+ * Function: sam_emac_initialize
+ *
+ * Description:
+ *   Initialize the EMAC driver.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *   Called very early in the initialization sequence.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_EMAC
+int sam_emac_initialize(void);
+#endif
 
 /************************************************************************************
  * Function: sam_phy_boardinitialize
