@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: August 5, 2013</p>
+      <p>Last Updated: September 14, 2013</p>
     </td>
   </tr>
 </table>
@@ -63,13 +63,6 @@
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td>
-    <a href="#footprint">Memory Footprint</a>.<br>
-    Just how big is it?  Do I have enough memory to use NuttX?
-  </td>
-</tr>
-<tr>
-  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
-  <td>
     <a href="#licensing">Licensing</a>.<br>
     Are there any licensing restrictions for the use of NuttX? (Almost none)
     Will there be problems if I link my proprietary code with NuttX? (No)
@@ -78,9 +71,10 @@
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td>
-    <a href="#history">Release History</a><br>
+    <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-6.30/">Release Notes</a>
     What has changed in the last release of NuttX?
-    What unreleased changes are pending in GIT?
+    What has changed in previous releases of NuttX?
+    Are there any <a href="#pendingchanges">unreleased changes</a>.
   </td>
 </tr>
 <tr>
@@ -812,7 +806,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Built-in <a href="UsbTrace.html">USB trace</a> functionality for USB debug.</li>
+      <li>Built-in <a href="UsbTrace.html">USB device</a> and USB host trace functionality for non-invasive USB debug.</li>
     </p>
 </tr>
 
@@ -1103,380 +1097,57 @@
   </tr>
 </table>
 
-<h2>NuttX-6.29 Release Notes</h2>
+<h2>Git Repository</h2>
 <p>
-  The 95<sup>th</sup> release of NuttX, Version 6.29, was made on July 31, 2013, and is available for download from the
+  The working version of NuttX is available from the SourceForge GIT repository  <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/">here</a>.
+  That same page provides the URLS and instructions for <i>cloning</i> the GIT repository.
+</p>
+
+<h2>Released Versions</h2>
+<p>
+  In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
+  The current release is NuttX 6.30.
+  NuttX 6.30 is the 97<sup>th</sup> release of NuttX.
+  It was released on September 14, 2013, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-6.29.tar.gz</code> and <code>apps-6.29.tar.gz</code>.
-  Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information)
-  The change log associated with the release is available <a href="#currentrelease">here</a>.
+  Note that the release consists of two tarballs:  <code>nuttx-6.30.tar.gz</code> and <code>apps-6.20.tar.gz</code>.
+  Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
+  Release notes for NuttX 6.30 are avaialble <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-6.30/">here</a>.
+  The change log associated with the release is available <a href="ChangeLog.txt">here</a>.
   Unreleased changes after this release are available in GIT.
   These unreleased changes are also listed <a href="#pendingchanges">here</a>.
 </p>
 
-<p>
-  <b>Additional new features and extended functionality</b>
-</p>
+<h2><a name="pendingchanges"><b>Unreleased Changes</b>:</a></h2>
 
 <ul>
-  <li>
-    <p>
-      <b>Drivers</b>
+  <li><b>nuttx</b>.
+    <ul><p>
+      The ChangeLog for the not-yet-released version of NuttX is available at the bottom of the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ChangeLog">SourceForge GIT</a>.
     </p>
-    <ul>
-      <li>
-       Generalized the SSD1306 driver and added support UG-2832HSWEG04 which is very similar to the existing support for the UG-2864HSWEG01.
-      <li>
-       Added support for a generic bit-bang SPI driver.
-       This includes
-        both a common &quot;upper half&quot; driver as well as a platform-specific &quot;lower half &quot; drivers based on a common &quot;template. &quot;
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>ARMv7-A, Cortex-A5</b>
+  </li></ul>
+  <li><b>apps</b>.
+    <ul><p>
+      The ChangeLog for the not-yet-released version of apps is available at the bottom of the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/apps/ChangeLog.txt">SourceForge GIT</a>.
     </p>
-    <ul>
-      <li>
-       Added support for the ARMv7-A architecture and the Cortex-A5 in particular.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>ARMv7-M, Cortex-M3/4</b>
+  </li></ul>
+  <li><b>NxWidgets</b>.
+    <ul><p>
+      The ChangeLog for the not-yet-released version of NxWidgets is available at the bottom of the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/NxWidgets/ChangeLog">SourceForge GIT</a>.
     </p>
-    <ul>
-      <li>
-       Modified how some registers are copied during a context switch (with &quot;lazy&quot; FPU register saving).
-       This should save some context switching time when the context switch is due to interrupt level processing.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>STM32</b>
+  </li></ul>
+  <li><b>pascal</b>.
+    <ul><p>
+      The ChangeLog for the not-yet-released version of pascal is available at the bottom of the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/pascal/ChangeLog">SourceForge GIT</a>.
     </p>
-    <ul>
-      <li>
-       Added support for a separate CCM memory heap.
-       This may be useful for segregating allocations for CCM memory (which cannot be used for DMA) from other allocations (that may be used used for DMA).
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>STM32 Drivers</b>
+  </li></ul>
+  <li><b>buildroot</b>.
+    <ul><p>
+      The ChangeLog for the not-yet-released version of buildroot is available at the bottom of the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/buildroot/ChangeLog">SourceForge GIT</a>.
     </p>
-    <ul>
-      <li>
-       DAC: Added support for DAC DMA (contributed by John Wharington).
-      <li>
-       I2C: An I2C driver for the STM32 F3 family (from John Wharington).
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Atmel AT91 SAM/4</b>
-    </p>
-    <ul>
-      <li>
-       Add support for SAM3X and SAM3A chips
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Atmel AT91 SAM/4 Drivers</b>
-    </p>
-    <ul>
-      <li>
-       Re-architect the SAM3/4 SPI driver so that is it compatible with the SPI drivers of other MCUs.
-      <li>
-       Added register definition file for the SAM4L LCD peripheral.
-      <li>
-       Added SAM4L PDCA register definition file
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Atmel AT91 SAM/4 Boards</b>
-    </p>
-    <ul>
-      <li>
-       SAM4L-Xplained: Added support for the SPI-based SD card on the I/O1 module.
-      <li>
-       SAM4L-Xplained: Added a driver for the LED1 segment LCD module.
-      <li>
-       SAM4L-Xplained: Added support for the UG-2832HSWEG04 OLED on the SAM4L Xplained Pro's OLED1 module
-      <li>
-       SAM4S-Xplained: Added support for on-board 1MB SRAM.
-      <li>
-       Arduino Due: Basic support for the Arduino Due (SAM3X) is now included.
-      <li>
-       SAM3U-EK: The touchscreen is now functional.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Atmel AT91 SAMA5D3</b>
-    </p>
-    <ul>
-      <li>
-       Added support for the Atmel AT91SAMA5D3 Cortex-A5 chip family.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Atmel AT91 SAMA5D3 Boards</b>
-    </p>
-    <ul>
-      <li>
-        Added support for the Atmel SAMA5D3x-EK boards which use the AT91 SAMA5D3<i>x</i> chips (<i>x</i>=1,3,4,5).
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Freescale KL25Z Drivers</b>
-    </p>
-    <ul>
-      <li>
-       Freescale KL25Z TSI register definitions and example TSI driver for the Freedom KL25Z board from Alan Carvalho de Assis.
-      <li>
-       Added SPI driver and register definitions for the Freescale KL25Z.
-      <li>
-       Added a framework for controlling SPI-related discrete inputs and outputs.
-       Taken from work by Alan Carvalho de Assis
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Build System</b>
-    </p>
-    <ul>
-      <li>
-       New sub-directories to hold SPI-related files:
-       <code>includes/nuttx/spi.h</code>  moved to <code>include/nuttx/spi/.</code>;
-       SPI-related configuration logic moved from <code>drivers/Kconfig</code> to <code>drivers/spi/kconfig</code>.
-      <li>
-       Finally... I changed the naming of configuration variables like <code>CONFIG_DRAM_</code> to <code>CONFIG_RAM_</code>.
-       This has bothered me for a long time since most boards don't have DRAM.
-       The more generic RAM naming should not produce so much <i>cognitive dissonance</i>.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Libraries</b>
-    </p>
-    <ul>
-      <li>
-       Added CRC16 support.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Applications</b>
-    </p>
-    <ul>
-      <li>
-       Added Zmodem file transfer support.
-       This may be used as an embedded library or may be built as <code>sz</code> and <code>rz</code> commands that can be executed from the NSH command line.
-      <li>
-       C++ initializers should be set once and, preferably, in the context of the task that uses any C++ statically initialized classes.
-       This  only becomes an issue if <code>cxxtest</code> or <code>helloxx</code> are built as NSH builtin applications.
-       Then you want the initialization done in the context of <code>cxxtext</code> or <code>helloxx</code> tasks and not in the NSH task context(and certainly not twice).
-       Added configuration options to control who does the C++ initialization.
-       NSH now does not do C++ initialization be default and must be configured to do otherwise.  Conversely, <code>cxxtest</code> and <code>helloxx</code> will always do C++ initialization unless configured do otherwise.
-      <li>
-       <code>examples/cxxtext</code>:  Add an <code>ostream</code> test as provided by Michael.
-      <li>
-       NSH:  Added a <code>cmp</code> command that can be used to compare two files for equivalence.
-       Returns an indication if the files differ. 
-       Contributed by Andrew Tridgell (via Lorenz Meier).
-      </li>
-    </ul>
-  </li>
+  </li></ul>
 </ul>
 
-<p>
-  <b>Efforts In Progress</b>.
-  The following are features that are partially implemented but present in this release.
-  They are not likely be be completed soon.
-</p>
-
-<ul>
-  <li>
-    <p>
-      <b>Audio System</b>
-    </p>
-    <ul>
-      <li>
-        A complete audio subsystem include CODECs, higher level management, interface definitions, and audio drivers was contributed by Ken Pettit.
-        This work has not been completely verified as of this release and so is categorized as a work-in-progress.
-        At present, progress is blocked due to issues interfacing with the VS1053 audio DAC on the Mikroe STM32F4 board.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>kconfig-fronted Configuration</b>
-    </p>
-    <ul>
-      <li>
-       Conversion of old configurations to use the <code>kconfig-frontends</code> tool is an ongoing effort that will continue for some time.
-       At this time, only 45% of the configurations have been converted to use the <code>kconfig-frontends</code> tools.
-      </li>
-    </ul>
-  </li>
-</ul>
-
-<p>
-  <b>Bugfixes</b> (see the change log for details).
-  Some of these are very important:
-</p>
-
-<ul>
-  <li>
-    <p>
-      <b>File Systems</b>
-    </p>
-    <ul>
-      <li>
-       Fixed compilation error if no file systems are enabled: Change <code>error</code> to <code>ERROR</code>.
-      <li>
-       Read-Ahead/Write buffering: Correct typos that can cause failures in some configurations (From Chia Cheng Tsao).
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Driver</b>
-    </p>
-    <ul>
-      <li>
-       Remove the wait for the touchscreen busy bit in the ADS7843E driver.
-       From my reading of the ADS7843 spec, it would not be appropriate to wait for the BUSY bit to de-asserted anyway (since it is only de-asserted when we read the data).
-       Most boards do not even bother to provide the BUSY bit.
-      <li>
-       MMC/SD SPI based driver:
-       Driver needs to make sure that the SPI mode and data width are correct.
-      <li>
-       ENC28J60: Change buffer ordering to work around Errata.
-       From Dave (ziggurat29).
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>USB Device Controller Drivers</b>
-    </p>
-    <ul>
-      <li>
-       Fixed a typo in the composite device driver unitialization logic.
-       <code>DEV1</code> should be <code>DEV2</code> in one case.
-      <li>
-       <code>usbdev.h</code>: Fix some typos that cause compiler errors when <code>CONFIG_USBDEV_DMA</code> and <code>CONFIG_USBDEV_DMAMEMORY </code>are selected (From Chia Cheng Tsao).
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>ARM9</b>
-    </p>
-    <ul>
-      <li>
-       Fix a bug (uninitialized register error) that crept in the ARM9 boot-up code several years ago. 
-       Obviously no one has used the ARM9 NuttX port for years!
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>STM32 Drivers</b>
-    </p>
-    <ul>
-      <li>
-       Fix STM32 OTF FS endpoint allocation logic.
-       Apparently the same endpoint can be allocated as both an IN or an OUT endpoint.
-       The existing implementation only supported one allocation, either IN or OUT.
-       This resulted in failures to allocate endpoints when used with the CDC/ACM + MSC composite driver (From Chia Cheng Tsao).
-      <li>
-       SDIO: Add support for the data block end (<code>DBCKEND</code>) interrupt to terminate transfers (From Chia Cheng Tsao).
-      <li>
-       DAC: Fixed numerous DAC driver errors and added support for DAC DMA (contributed by John Wharington).
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>SAM3/4</b>
-    </p>
-    <ul>
-      <li>
-       SAM4S: Correct configuration of PIO pins for SAM4S B and C peripherals.
-      <li>
-       Need to disable write protection before configuring PIO pins.
-      <li>
-       GPIO configuration logic must protect against re-entrancy.
-      <li>
-       Clocking must be applied to the SMC module for the 3X and 3A family in order for the NFC SRAM to be functional.
-      <li>
-       Fixed some errors for interrupts on ports D-F.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>SAM3/4 Drivers</b>
-    </p>
-    <ul>
-      <li>
-       Common SPI driver: Fix SPI mode setting.
-       In the SAM3/4 family, the clock phase control (<code>CPHA</code>) is inverted (<code>NPHA</code>).
-       Also fixed an incorrect pointer test.
-       It was checking if the wrong pointer was NULL.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>SAM3/4 Boards</b>
-    </p>
-    <ul>
-      <li>
-       SAM3U-EK: Fix polarity of the <code>/PENIRQ</code> signal (it is active low).
-       The SAM3U-EK board now runs at 96MHz.
-      </li>
-    </ul>
-  </li>
-  <li>
-    <p>
-      <b>Applications</b>
-    </p>
-    <ul>
-      <li>
-       <code>apps/examples/nxhello</code>:  Minor fix for compilation error when the display resolution is low (&lt; 8bpp) due to a typo that has been there for a long time.
-       Also Correct default colors when in Y1 code mode.
-      <li>
-       <code>apps/system/ramtest</code>:  The RAM test was not correctly builtinto the configuration and build system.
-      <li>
-       <code>apps/examples/composite</code>: Change to prevent some false alarm debug assertions (From Chia Cheng Tao).
-      </li>
-    </ul>
-  </li>
-</ul>
-<p>
-  See the <a href="#currentrelease">ChangeLog</a> for additional, detailed changes.
-</p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -1993,13 +1664,18 @@
       <p>
         <b>STATUS</b>.
         Initial support for the SAMA5D3x-EK was released in NuttX-6.29.
-        This initial support is very minimal:
-        There are simple test configurations that run out of internal SRAM and two configurations that run out of the on-boar NOR FLASH:
+        That initial support was minimal:
+        There are simple test configurations that run out of internal SRAM and extended configurations that run out of the on-board NOR FLASH:
         (1) An OS test configuration that verifies the correct port of NuttX to the part and
-        (2) a NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for further application development.
+        (2) A barebones NuttShell (<a href="NuttShell.html">NSH</a>) configuration that can be used as the basis for further application development.
+        (3) A full-loaded NuttShell (<a href="NuttShell.html">NSH</a>) configuration that demonstrates all of the SAMA5D3x features.
+      </p>
+      <p>
+        The following drivers and features were added in Nuttx 6.30:
+        DMA and PIO interrupts, drivers for SPI, AT25 Serial Flash, Two Wire Interface (TWI), and HSMCI memory cards included in NuttX-6.30.
+        NuttX-6.30 also introduces full USB support:  High speed device controller driver, and OHCI (low- and full-speed) and EHCI (high-speed) host controller driver support.
         Develop continues.
-        Support of DMA and PIO interrupts and drivers for SPI, AT25 Serial Flash, and HSMCI memory cards included in NuttX-6.30.
-        More device drivers are needed to make this a more complete port, particularly USB and networking.
+        Additional driver developement is underway (include LCD and networking) and there should be available in NuttX-6.31.
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sama5d3x-ek/README.txt">README</a> file for further information.
       </p>
         <b>Development Environments:</b>
@@ -2451,6 +2127,7 @@ nsh>
         <b>STATUS:</b>
         Configurations for the basic OS test and NSH are available and verified.
         Networking is functional.
+        Support for an external ENCX24J600 network was added in NuttX 6.30.
       </ul>
     </p>
     <p>
@@ -2884,7 +2561,7 @@ nsh>
       <li>Easy access to most MCU pins.</li>
     </ul>
     <p>
-      Refer to the <a href="http://www.st.com/internet/evalboard/product/252419.jsp">STMicro web site</a> for further information about this board and to 
+      Refer to the <a href="http://www.st.com/internet/evalboard/product/252419.jsp">STMicro web site</a> for further information about this board and to
     </p>
     <ul>
       <p>
@@ -4098,59 +3775,6 @@ if [ -x "$WINELOADER" ]; then exec "$WINELOADER" "$appname" "$@"; fi
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="footprint"><h1>Memory Footprint</h1></a>
-  </td>
-  </tr>
-</table>
-
-<ul>
-<p><b>C5471 (ARM7)</b>
-  The build for this ARM7 target that includes most of the OS features and
-  a broad range of OS tests.  The size of this executable as given by the
-  Linux <tt>size</tt> command is (3/9/07):
-</p>
-<pre>
-   text    data     bss     dec     hex filename
-  53272     428    3568   57268    dfb4 nuttx
-</pre>
-<p><b>DM320 (ARM9)</b>
-  This build for the ARM9 target includes a significant subset of OS
-  features, a filesystem, Ethernet driver, full TCP/IP, UDP and (minimal)
-  ICMP stacks (via uIP) and a small network test application: (11/8/07,
-  configuration netconfig, apps/examples/nettest)
-</p>
-<pre>
-   text    data     bss     dec     hex filename
-  49472     296    3972   53740    d1ec nuttx
-</pre>
-<p>
-  Another build for the ARM9 target includes a minimal OS feature
-  set, Ethernet driver, full TCP/IP and (minimal) ICMP stacks, and
-  a small webserver: (11/20/07, configuration uipconfig, apps/examples/uip)
-</p>
-<pre>
-   text    data     bss     dec     hex filename
-  52040      72    4148   56260    dbc4 nuttx
-</pre>
-<p><b>87C52</b>
-  A reduced functionality OS test for the 8052 target requires only
-  about 18-19K:
-</p>
-<pre>
-Stack starts at: 0x21 (sp set to 0x20) with 223 bytes available.
-
-Other memory:
-   Name             Start    End      Size     Max
-   ---------------- -------- -------- -------- --------
-   PAGED EXT. RAM                         0      256
-   EXTERNAL RAM     0x0100   0x02fd     510     7936
-   ROM/EPROM/FLASH  0x2100   0x6e55   19798    24384
-</pre>
-</ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
     <a name="licensing"><h1>Licensing</h1></a>
   </td>
   </tr>
@@ -4165,445 +3789,6 @@ Other memory:
   without any concern for jeopardizing any proprietary software that
   you may link with it.
 </p>
-</ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="history"><h1>Release History</h1></a>
-  </td>
-  </tr>
-</table>
-
-<ul>
-<p>
-   ChangeLog snapshots associated with the previous, current, and future release are available below.
-</p>
-</ul>
-
-<center><table width ="80%">
-<tr>
-  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
-   <td>
-      <a href="ChangeLog.txt">Change logs for previous NuttX releases</a><br>
-   </td>
-</tr>
-<tr>
-  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
-   <td>
-      <a href="#currentrelease">ChangeLog for the current NuttX releases</a><br>
-   </td>
-</tr>
-<tr>
-  <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
-   <td>
-      <a href="#pendingchanges">Unreleased changes</a>
-   </td>
-</tr>
-</table></center>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="currentrelease">ChangeLog for the Current Release</a>
-  </td>
-  </tr>
-</table>
-
-<ul><pre>
-6.29 2013-07-31 Gregory Nutt &lt;gnutt@nuttx.org&gt;
-
-    * arch/arm/src/sam34/chip/sam4l_pinmap.h: Change naming of some pin
-      configurations to match names used with other SAM part (2013-6-15).
-    * arch/arm/src/sam34/sam4l_clockconfig.c: Corrected some typos
-      (2013-6-15).
-    * configs/sam4l-xplained/src/sam_buttons.c: Eliminate a warning
-      (2013-6-15).
-    * configs/sam4l-xplained/src/sam_mmcsd.c, sam_nsh.c, sam_spi.c,
-      sam3u-ek.h, Kconfig, Makefile, sam4l-xplained.h,
-      configs/sam4l-xplained/README.txt, and
-      configs/sam4l-xplained/include/board.h:  Add support for the SPI-
-      based SD card on the I/O1 module (2013-6-15).
-    * arch/arm/src/sam34/sam_spi.c:  Re-architect the SAM3/4 SPI driver
-      so that is it compatible with the SPI drivers of other MCUs
-      (2013-6-16).
-    * configs/sam3u-ek/src/up_touchscreen.c and configs/sam4l-xplained/src/sam_mmcsd.c:
-      Changed needed because of the above change to the SAM3/4 SPI
-      interface (2013-6-16).
-    * drivers/input/ads7843e.c:  Remove the wait for the touchscreen busy
-      bit.  I don't see the busy bit changing on the SAM3U-EK board.  But
-      maybe it is not supposed to.  From my reading of the ADS7843 spec, it
-      would not be appropriate to wait for the BUSY bit to de-asserted
-      anyway (since it is only de-asserted when we read the data)
-      (2013-6-16).
-    * configs/sam3u-ek/src/up_touchscreen.c: Fix polarity of the /PENIRQ
-      signal (it is active low) (2013-6-16).
-    * configs/sam3u-ek/include/board.h:  The SAM3U-EK board now runs at
-      96MHz.  This might have broken some things? (2013-6-17).
-    * drivers/mmcsd/mmcsd-spi.c:  Driver need to make sure that the SPI mode
-      and data width are correct (2013-6-17).
-    * arch/arm/src/kinetis/kinetis_tsi.h:  Corrections to the Kinetis
-      (2013-6-18)
-    * arch/arm/src/sam34/sam_spi.c:  Fix SPI mode setting.  In the SAM3/4
-      family, the clock phase control (CPHA) is inverted (NPHA) (2013-6-18).
-    * arch/arm/src/kl/chip/kl_tsi.h: Freescale KL25Z TSI register
-      definitions from Alan Carvalho de Assis (2013-6-18).
-    * configs/freedom-kl25z/src/kl_tsi.c:  Example TSI driver for the
-      Freedom KL25Z board from Alan Carvalho de Assis (2013-6-18).
-    * arch/arm/src/sam34/sam_spi.c:  Correct an incorrect pointer test.
-      Was checking if the wrong pointer was NULL (2013-6-18).
-    * arch/arm/src/kl/kl_spi.c and chip/kl_spi.h:  Add SPI driver and
-      register definitions for the Freescale KL25Z (2013-6-19).
-    * arm/src/sam34/chip/sam4l_lcdca.h:  Register definition file for
-      the SAM4L LCD peripheral (2013-6-19).
-    * arm/src/sam34/chip/sam_spi.h:  SPI register definition file updated
-      to include a few differences for the SAM4L (2013-6-19)
-    * arm/src/sam34/chip/sam4l_pdca.h: Add SAM4L PDCA register definition
-      file; also renamed sam_dmac.* files to sam3u_dmac.* to identify
-      them as SAM4U/4S only files (2013-6-19).
-    * configs/freedom-lk25z/src/kl_spi.c:  Add the framework for
-      controlling SPI-related discrete inputs and outputs.  Taken from
-      work by Alan Carvalho de Assis (2013-6-20).
-    * arch/arm/src/kl/kl_dumpgpio.c:  Now compiles (2013-6-20).
-    * configs/:  Several defconfig files were changed that had
-      CONFIG_HAVE_CXXINITIALIZE=y.  Because of recent changes to
-      apps/examples, these configurations may need to have
-      CONFIG_EXAMPLES_NSH_CXXINITIALIZE=y so that they behave as they did
-      before, i.e., so that C++ initializers will be called when NSH starts
-      up (2013-6-21).
-    * configs/sam4l-xplained/src/sam_slcd.c:  Beginning of a driver for the
-      LED1 segment LCD module.  This driver is incomplete on initial check-
-      in (2013-6-21).
-    * drivers/net/enc28j60.c:  Change buffer ordering to work around Errata
-      #5.  From Dave (ziggurat29, 2013-6-22).
-    * configs/sam4l-xplained/src/sam_slcd.c:  LED1 segment LCD module is now
-      functional (2013-6-23).
-    * drivers/lcd/ssd1306.c and include/nuttx/lcd/ssd1306.h.  Renamed
-      ug-2864hsweg01.c and .h to ssd1306.c and .h.  Extended to support the
-      UG-2832HSWEG04 which is very similar and also based on the SSD1306
-      controller (2013-6-23).
-    * configs/sam4l-xplained/src/sam_ug2832hsweg04.c: Add support for the
-      UG-2832HSWEG04 OLED on the SAM4L Xplained Pro's OLED1 module
-      (2013-6-23).
-    * include/debug.h:  Added macro DEBUGPANIC for forces crashes when debug
-      is enabled.
-    * drivers/lcd/ssd1306.c:  Driver now appears to be function for the
-      UG-2832HSWEG04 in landscape mode (2013-6-24).
-    * drivers/lcd/ug-2864ambag01.c and ug-9664hswag01.c:  Add/updated
-      support for reverse portrait mode from lessons learned with the
-      UG-2832HSWEG04.  Untested changes! (2013-6-24).
-    * arch/arm/src/stm32/stm32_ccm.c and .h:  Add support for a seperate CCM
-      heap.  This may be useful for segregating allocations for CCM (which
-      cannot be used for DMA) from other allocations (that may be used used
-      for DMA) (2013-6-25).
-    * arch/arm/src/sam32/sam3u_gpio.h:  Correct configuration of PIO pins
-      for SAM4S B and C peripherals (2013-6-26)
-    * configs/sam4s-xplained/src/sam_sram.c:  Added support for on-board
-      1MB SRAM (2013-6-26).
-    * arch/arm/include/sam34/chip.h and sam3x_irq.h:  Add support for
-      SAM3X and SAM3A chips (2013-6-26).
-    * arch/arm/src/sam34/chip/sam3x_vectors.h:  Add support for SAM3X/3A
-      interrupt vectors (2013-6-26).
-    * arch/arm/src/sam34/sam3x_periphclks.h:  Add peripheral clock
-      controls for the SAM3X/3A (2013-6-26).
-    * arch/arm/src/sam34/chip/sam3x_memorymap.h:  Add SAM3X/3A memory map
-      (2013-6-26).
-    * arch/arm/src/sam34/chip/sam3x_pinmap.h:  Add SAM3X/3A pin
-      multi-plexing definitions (2013-6-26).
-    * arch/arm/src/sam34/sam3x_gpio.h:  Add SAM3X/3A gpio encoding
-      macros.  These differ from the SAM3U only in because of the
-      6 PIOs:  PIOA-PIOF (2013-6-26).
-    * configs/arduino-due:  This is an empty directory now with only
-      a README file in it but this directory will eventually hold a port
-      for the Arduino Due (2013-6-26).
-    * arch/arm/src/sam34/Kconfig:  Add SAM3X/3A peripherals to the SAM3/4
-      configuration logic (2013-6-26).
-    * arch/arm/src and include/ and configs/sam*/:  Large rename of all
-      references to SPI with SPI0.  This is because all other SAMs have
-      only SPI but the 3X/3A have SPI0 and SPI1 (2013-6-26).
-    * configs/arduino-due:  Complete the basic board configuration and
-      integrate this into the configuration and build system.  The Arduino
-      Due is now ready to begin test (2013-6-17).
-    * configs/arduino-due/nsh:  Add an NSH configuration for the Arduino
-      Due.  Both the OS test and NSH configuration are now functional
-      (2013-6-28).
-    * configs/arduino-due/src:  Add support for the &quot;L&quot; LED (2013-6-28).
-    * arch/arm/src/sam34/sam_allocateheap.c:  Clocking must be applied
-      to the SMC module for the 3X and 3A family in order for the NFC
-      SRAM to be functional (2013-6-28).
-    * arch/arm/src/sam34/sam3u_gpio.c:  Need to disable write
-      protection before configuring PIO pins.
-    * configs/sam3u-ek/nsh:  The touchscreen is now functional.  The above
-      fix to the sam3u_gpio.c write protection also fixed the touchscreen
-      problem (2013-6-28).
-    * confgis/sam3u_ek/nxwm:  Created a configuration for the NxWM
-      window manager for the SAM3U-EK board (2013-6-29).
-    * drivers/spi and include/nuttx/spi:  New sub-directories to hold
-      SPI-related files.  includes/nuttx/spi.h moved to include/nuttx/spi/.;
-      SPI-related Kconfig info moved from drivers/Kconfig to drivers/spi/kconfig
-      (2013-7-1).
-    * drivers/spi/spi_bitbang.c and include/nuttx/spi/spi_bitbang.h:  Add
-      support for a generic bit-bang SPI driver.  This checkout is the
-      common upper-half logic.  Still missing the lower half (2013-7-1).
-    * include/nuttx/spi/spi_bitbang.c:  This is the common lower-half bit-
-      bang SPI logic (2013-7-1).
-    * configs/arduino-due/src/sam_nsh.c and sam_mmcsd.c:  Add NSH customize
-      initialization.  If so configured, initialize the SPI bit bang
-      interface to the MMC/SD slot on the ITEAD shield (2013-7-1).
-    * fs/fs_mount.c:  Fix compilation error if no file systems are enabled:
-      Change error to ERROR (2013-7-3).
-    * arch/arm/src/sam34/sam_gpioirq.c:  Fix some errors for interrupts
-      on ports D-F (2013-7-3).
-    * /drivers/usbdev/composite.c: Fix a typo in the composite device
-      driver unitialization logic.  DEV1 should be DEV2 in one case
-      (2013-7-4).
-    * arch/arm/src/sam34/sam3u_gpio.c:  sam_configgpio() must protect
-      against re-entrancy (2013-7-5).
-    * libc/misc/lib_crc16.c and include/crc16.h:  Add CRC16 support
-      (2013-7-7).
-    * arch/arm/src/stm32/stm32_otgfsdev.c:  SourceForge bug #16:  Fix
-      to the endpoint allocation logic.  Apparently the same endpoint can
-      be allocated as both an IN or an OUT endpoint.  The existing
-      implementation only supported one allocation, either IN or OUT.  This
-      resulted in failures to allocate enpoints when used with the CDC/ACM +
-      MSC composite driver (From Chia Cheng Tsao, 2013-7-8).
-    * arch/arm/src/stm32/stm32_sdio.c:  SourceForge bug #17:  Add
-      support for the data block end (DBCKEND) interrupt to terminate
-      transfers (From Chia Cheng Tsao, 2013-7-8)
-    * drivers/rwbuffer.c: SourceForge bug #17: Correct typos that can cause
-      failures in some configurations (From Chia Cheng Tsao, 2013-7-8).
-    * include/nuttx/usb/usbdev.h: Fix some typos that cause compiler errors
-      when CONFIG_USBDEV_DMA and CONFIG_USBDEV_DMAMEMORY are selected (From
-      Chia Cheng Tsao, 2013-7-12).
-    * nuttx/configs/olimex-lpc1766stk/zmodem:  Add a new configuration to
-      test the Zmodem sz and rz commands (which don't actually exist yet,
-      but will). (2013-7-12).
-    * arch/arm/include/armv7-a and src/armv7-a:  Beginning to add support
-      for the ARMv7-A, the Cortex-A5 in particular.  The initial checkin
-      is only fragmentary:  A few header files and some copied ARM9
-      assembly files.  More to come (2013-7-18).
-    * arch/arm/include/sama5, arch/arm/src/sama5, and configs/sama5d3x-e:
-      Add a directory framework to support the Atmel AT91SAMA5D3 family and
-      the SAMA5D3x-EK board(s) in particular.  There is very little here on
-      the first check-in, this structure is being used now primarily to
-      create the Cortex-A5 support (2013-7-19).
-    * arch/arm/src/armv7-a/arm_cache.S:  Cortex-A5 cache operations
-      (2013-7-20).
-    * /arch/arm/src/armv7-a/arm_fpuconfig.S and fpu.h: A few more files for
-      the ARMv7-A/Cortex-A5 port (2013-7-21).
-    * arch/arm/src/sama5/sam_boot.c, sam_clockconfig.h, sam_lowputc.h, and
-      sam_timerisr.c:  A few  more files for the SAMA5D3 port (2013-7-21).
-    * configs/sama5d3x-ek/src/sam_autoleds.c:  A few more files for the port
-      to the SAMA5D3x-EK board (2013-7-21).
-    * arch/arm/src/sama5/sam_irq.c: SAMA5 interrupt handling logic
-      (2013-7-22).
-    * arch/arm/src/sama5/sam_clockconfig.c:  Add SAMA5 PLL configuration
-      logic (plus associated header files).  Initiali checkin is for the
-      SAM3U which is very similar but needs to be verified (2013-7-22).
-    * arch/arm/src/sama5/sam_periphclks.h:  Add macros to enable and
-      disable SAMA5 peripheral clocks (2013-7-22).
-    * arch/arm/src/sama5/sam_lowputc.c and sam_serial.c:  Add support
-      for SAMA5 UARTs.  Does not even compile as of initial checkin.
-      (2013-7-22).
-    * arch/arm/src/sama5/sam_gpio.c:  Add GPIO configuration support
-      for the SAMA5.  Still compilation issues.  (2013-7-22).
-    * arch/arm/src/sama5/chip/sama5d3x_pinmap.h:  Add pin multiplexing
-      definitions for the SAMA5D3 (2013-7-23).
-    * arch/arm/src/sama5/chip/:  New header files for SAMA5 AXI Matrix
-      SFR, and BSC blocks (2013-7-23).
-    * arch/arm/src/armv7-a/arm_vectors.S:  Force 8-byte stack alignment
-      in interrupt handlers before calling C code.  Other ARM
-      architectures need to do this as well (2013-7-23).
-    * arm/src/armv7-m/up_copyarmstate.c and armv7-a/up_copyarmstate.c:
-      Added a new form of the register copy function that should save quit a
-      bit of time for armv7-m (without common vectors) and with armv7-a
-      (2013-7-23).
-    * arch/arm/src/armv7-a/arm_restorefpu.S, arm_savefpu.S, arm_doirq.c,
-      arm_fullcontextrestore.S, arm_saveusercontext.S:  Add hardware
-      floating point register save/restore logic for the Cortex-A5\
-      (2013-7-23).
-    * arch/Kconfig:  Attempt at generic external memory configuration is not
-      flexible enough, especially for the SAMA5.  Move external memory
-      configuration options from arch/Kconfig to
-      arch/arm/src/lpc17xx/Kconfig, lpc31xx/Kconfig, sam34/Kconfig, and
-      sama5/Kconfig and renamed each from CONFIG_ARCH_ to, for example,
-      CONFIG_LPC31_.  This renaming also affect many defconfig files
-      (2013-7-24).
-    * arch/arm/src/sama5/Kconfig and sam_allocateheap.c:  Set up
-      configuration options for SAMA5 external memory regions; add a custom
-      sam_allocateheap.c to add the various configured memory regions to the
-      heap (2013-7-24).
-    * configs/sama5d3x-ek/src/sam_buttons.c, sam_userleds.c, and
-      sam_autoleds.c:  Add support for the buttons and LEDs on-board the
-      SAMA5D3x-EK (2013-7-24).
-    * configs/sama5d3x-ek/ostest/defconfig:  Switch console to USART1
-      (2013-7-4).
-    * arch/arm/src/sam34/Kconfig and drivers/serial/Kconfig:  All serial
-      configuration logic for USARTs needs to depend on if the USART is
-      configured as a UART or not.  And this is for all CPUS, not just
-      SAM3/4 (2013-7-24).
-    * arch/arm/src/arm/up_head.S and arch/arm/src/armv7-a/arm_head.S:
-      Fix a bug (uninitialized register error) that crept in the ARM9
-      boot-up code several years ago and was cloned into the Cortex-A5
-      code.  Obviously no one has used the ARM9 NuttX port for years!
-    * Many files:  Finally... I changed the naming of configuration
-      variables like CONFIG_DRAM_ to CONFIG_RAM_.  This has bothered
-      me for a long time since most boards don't have DRAM.  The more
-      generic RAM naming should not produce so much cognitive dissonance
-      (2013-7-26).
-    * configs/sama5d3x-ek/hello:  Added a tiny hello world configuration
-      to simplify bring up of the SAMA5 (it will probably be removed
-      later) (2013-7-26).
-    * The sama5d3x-ek/hello now runs correctly (2013-7-28).
-    * configs/sama5d3x-ek/ostest/:  This configuration has been modified
-      to run out NOR flash.  More work is still needed to reconfigure the
-      SMC so that the NOR flash can work with the high clock (2013-7-28).
-    * arch/arm/src/sama5/sam_clockconfig.c/h and
-      configs/sama5d3x-ek/src/sam_norflash.c:  Add a file structure that
-      will (eventually) support reconfiguration of NOR flash when NuttX
-      boots from NOR FLASH (2013-7-29).
-    * arch/arm/src/sama5/chip/sam_hsmc/h:  SAMA5 HSMC register
-      defintion file (2013-7-29)
-    * configs/sama5d3x-ek/src/sam_norflash.c:  Add board specific
-      logic to re-configure the SAMA5D3x-EK NOR FLASH before while
-      running out of NOR FLASH.  We need to change the NOR FLASH
-      timing BEFORE increasing the main clock (2013-7-29).
-    * configs/sama5d3-ek/norboot and src/nor_main.c:  The norboot
-      configuration to help debug NuttX in NOR flash.  It runs
-      out of ISRAM, configures NOR FLASH, then waits for you to
-      break in with a debugger to start the program in NOR FLASH
-      (2013-7-29).
-    * arch/arm/src/armv7-a/arm_cache.S:  Separate the bigger cache
-      operations into separater files (2013-7-29).
-    * arch/arm/src/stm32/stm32_dac.c:  Fixed numerous DAC driver
-      errors and added support for DAC DMA (contributed by John
-      Wharington, 2013-7-30).
-    * arch/arm/src/stm32/stm32f30xx_i2c.c:  An I2C driver for
-      the STM32 F3 family from John Wharington (2013-7-30).
-    * arch/arm/include/armv7-m:  Add irqdisable() (2013-7-30);
-    * configs/sama5d3-ek/src/nor_main.c:  Now disables interrupts
-      before jumping to NOR flash (2013-7-30).
-    * configs/sama5d3-ek/nsh:  Add an NSH configuration for the
-      SAMA5D3x-EK (2013-7-31)
-    * configs/sama5d3-ek/src/sam_cxxinitialize.c:  Add C++ support
-      (2013-7-31).
-
-apps-6.29 2013-07-31 Gregory Nutt &lt;gnutt@nuttx.org&gt;
-
-    * apps/examples/nsh, cxxtest, and helloxx:  C++ initializers should be
-      set once and, preferably, in the context of the task that uses any C++
-      statically initialized classes.  These only becomes an issue if cxxtest
-      or helloxx are built as NSH builtin applications.  Then you want the
-      initialization done in cxxtext or helloxx and not in NSH (and certainly
-      not twice).  Added configuration options to control who does the C++
-      initialization.  NSH now does not do C++ initialization be default and
-      must be configured to do otherwise.  Converely, cxxtest and helloxx
-      will do C++ initialization unless configured do otherwise (2013-6-21).
-    * apps/examples/cxxtext:  Add ostream test as provided by Michael
-      (2013-6-21).
-    * apps/examples/nxhello:  Minor fix for compilation error when the
-      display resolution is low (&lt; 8bpp) due to a typo that has been there
-      for a long time (2013-6-23).
-    * apps/examplex/nxhello:  Correct default colors when in Y1 code mode.
-      (2013-6-24).
-    * apps/system/Make.defs and Kconfig:  The RAM test was not correctly built
-      into the configuration and build system (2013-6-26).
-    * apps/examples/composite/composite_main.c:  SourceForge But Ticket #19.
-      Change to prevent some false alarm debug assertions (From Chia Cheng
-      Tao, 2013-7-9).
-    * apps/system/zmodem:  Add configuration support and a build framework
-      for the Zmodem sz and rz command (which exist but have not yet been
-      checked in) (2013-7-12).
-    * apps/system/zmodem:  The 'sz' command is now complete and seems
-      functional (given on light testing).  The rz command logic exists but
-      is still untested and not yet checked in  (2013-7-13).
-    * apps/system/zmodem:  The 'rz' command is now complete and functional
-      under certain conditaions.  There are, however, some data overrun
-      issues that I am still uncertain how should be handled (2012-7-15).
-    * apps/system/zmodem/Makefile.host and host/: The Zmodem utilities
-      can now be built to execute on a Linux host.
-    * apps/nshlib/nsh_fscmds.c:  Add a 'cmp' command that can be used to
-      compare two files for equivalence.  Returns an indication if the files
-      differ.  Contributed by Andrew Tridgell (via Lorenz Meier) (2013-7-18).
-
-NxWidgets-1.8 2013-06-14 Gregory Nutt &lt;gnutt@nuttx.org&gt;
-
-    * NxWM::CMediaPlayer: shell application for an MP3 Media Player with
-      Kconfig settings to enable it.  I plan to write this app to help
-      develop and test the MP3 codec chip driver.  It really doesn't do
-      anything yet except display a text box saying &quot;Coming soon&quot;, and I
-      need to minimize the icon size a bit.  From Ken Pettit (2013-5-11).
-    * NxWidgets/nxwm/src/glyph_mediaplayer.cxx:  Smaller version of the
-      media player glyph.  From Ken Pettit (2013-5-12).
-    * NxWidgets/nxwm/include/ccalibration.hxx and src/ccalibration.cxx:
-      Fix a race condition that would cause the calibration screen
-      to fail to come up when its icon was touched (From Ken Pettit,
-      2013-5-12).
-    * Kconfig:  Default priorities for NxWidget and NxWM threads
-      should be 100, not 50, to be consistent with other default priorities.
-    * NxWidgets::CGlyphSliderHorizontal and NxWidgets::CGlyphSliderHorizontalGrip:
-      New widgets added by Ken Pettit (2013-5-15).
-    * NxWidgets/UnitTests/CGlyphSliderHorizontal:  Addes a unit test for the
-      NxWidgets::CGlyphSliderHorizontal class. From Ken Pettit (2013-5-17) .
-    * NxWidgets::CGlyphSliderHorizontal:  Fix a drawing error.  From Ken
-      Pettit (2013-5-17).
-    * UnitTests/*/Makefile and .gitignore:  Update the way that NSH
-      the Unit Tests are registered as built-in NSH applications (2013-5-30).
-    * NxWidgets::CImage:  Allow a NULL pointer for a bitmap.  Add protection
-      to prevent dereferencing the NULL pointer.  From Petteri Aimonen
-      (2013-6-4).
-    * NxWidgets::CNumericEdit:  Delay before auto-incrementing now varies:
-      A longer delay is required to start auto-incrementing and speed increases
-      while pressed.  From Petteri Aimonen (2013-6-4).
-    * NxWM::CTaskbar: Add a method to redraw the taskbar and the current
-      application.  This should only be necessary if the display loses
-      state due to e.g. powerdown or other manual intervention.  From
-      Petteri Aimonen (2013-6-4).
-
-uClibc++-1.0 2011-11-05 &lt;gnutt@nuttx.org&gt;
-
-    * The initial release of the uClibc++ implementation of the standard
-      C++ library for NuttX.  This package was contributed ay Qiang Yu and
-      David for the RGMP team.
-
-buildroot-1.12 2011-13-15 &lt;gnutt@nuttx.org&gt;
-
-    * Fix typo toolchain/gdb/Config.in that prevented GDB 7.4 from building
-      (from Ken Bannister).
-    * Add support for a Cortex-M0 toolchain based on GCC 4.6.3.
-
-pascal-3.0 2011-05-15 Gregory Nutt &lt;gnutt@nuttx.org&gt;
-
-    * nuttx/:  The Pascal add-on module now installs and builds under the
-      apps/interpreters directory.  This means that the pascal-2.1 module is
-      incompatible with will all releases of NuttX prior to nuttx-6.0 where the
-      apps/ module was introduced.
-</pre></ul>
-
-<table width ="100%">
-  <tr bgcolor="#e4e4e4">
-  <td>
-    <a name="pendingchanges">Unreleased Changes</a>
-  </td>
-  </tr>
-</table>
-
-<ul>
-  <li><b>nuttx</b>.
-    The ChangeLog for the not-yet-released version of NuttX is available at the bottom of the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/ChangeLog">SourceForge GIT</a>.
-  </li>
-  <li><b>apps</b>.
-    The ChangeLog for the not-yet-released version of apps is available at the bottom of the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/apps/ChangeLog.txt">SourceForge GIT</a>.
-  </li>
-  <li><b>NxWidgets</b>.
-    The ChangeLog for the not-yet-released version of NxWidgets is available at the bottom of the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/NxWidgets/ChangeLog">SourceForge GIT</a>.
-  </li>
-  <li><b>pascal</b>.
-    The ChangeLog for the not-yet-released version of pascal is available at the bottom of the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/pascal/ChangeLog">SourceForge GIT</a>.
-  </li>
-  <li><b>buildroot</b>.
-    The ChangeLog for the not-yet-released version of buildroot is available at the bottom of the ChangeLog file that can viewed in the <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/misc/buildroot/ChangeLog">SourceForge GIT</a>.
-  </li>
 </ul>
 
 <table width ="100%">
