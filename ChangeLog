@@ -5560,3 +5560,9 @@
 	  STM32 files (2013-9-13).
 
 6.31 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* nuttx/fs/romfs/fs_romfsutil.c:  Back out part of a recent
+	  ROMFS change (2013-9-14).
+	* configs/sama5d3x-ek/src/sam_ethernet.c:  Add support for
+	  PHY interrupts (2013-9-15).
+

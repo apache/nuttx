@@ -94,6 +94,14 @@ CSRCS += sam_usb.c
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_EMAC),y)
+CSRCS += sam_ethernet.c
+else
+ifeq ($(CONFIG_SAMA5_GMAC),y)
+CSRCS += sam_ethernet.c
+endif
+endif
+
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += sam_nsh.c
 endif

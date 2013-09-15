@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sama5/sam_eth.h
+ * arch/arm/src/sama5/sam_ethernet.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_SAM_EMAC_H
-#define __ARCH_ARM_SRC_SAMA5_SAM_EMAC_H
+#ifndef __ARCH_ARM_SRC_SAMA5_SAM_ETHERNET_H
+#define __ARCH_ARM_SRC_SAMA5_SAM_ETHERNET_H
 
 /************************************************************************************
  * Included Files
@@ -44,6 +44,7 @@
 
 #include "chip.h"
 #include "chip/sam_emac.h"
+#include "chip/sam_gmac.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -139,5 +140,5 @@ int sam_phy_boardinitialize(int intf);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMA5_SAM_EMAC_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_SAM_ETHERNET_H */
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_eth.c
+ * arch/arm/src/sama5/sam_ethernet.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,7 +39,7 @@
 
 #include <nuttx/config.h>
 #include <debug.h>
-#include "sam_emac.h"
+#include "sam_ethernet.h"
 
 #ifdef CONFIG_NET
 

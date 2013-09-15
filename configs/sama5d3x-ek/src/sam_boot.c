@@ -44,7 +44,7 @@
 #include "sama5d3x-ek.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /************************************************************************************
@@ -100,6 +100,18 @@ void sam_boardinitialize(void)
   if (sam_usbinitialize)
     {
       sam_usbinitialize();
+    }
+#endif
+
+  /* Configure board resources to support networkingif the 1) networking is enabled,
+   * 2) the EMAC or GMAC module is enabled, and 2) the weak function
+   * sam_netinitialize() has been brought into the build.
+   */
+
+#ifdef HAVE_NETWORK
+  if (sam_netinitialize)
+    {
+      sam_netinitialize();
     }
 #endif
 

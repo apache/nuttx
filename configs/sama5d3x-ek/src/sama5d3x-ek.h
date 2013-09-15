@@ -61,6 +61,7 @@
 #define HAVE_USBHOST    1
 #define HAVE_USBDEV     1
 #define HAVE_USBMONITOR 1
+#define HAVE_NETWORK    1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -251,6 +252,12 @@
 #  undef HAVE_USBMONITOR
 #endif
 
+/* Networking */
+
+#if !defined(CONFIG_NET) || (!defined(CONFIG_SAMA5_EMAC) && !defined(CONFIG_SAMA5_GMAC))
+#  undef HAVE_NETWORK
+#endif
+
 /* LEDs *****************************************************************************/
 /* There are two LEDs on the SAMA5D3 series-CM board that can be controlled
  * by software.  A  blue LED is controlled via PIO pins.  A red LED normally
@@ -409,6 +416,53 @@
                       PIO_INT_BOTHEDGES | PIO_PORT_PIOD | PIO_PIN28)
 #define IRQ_USBBC_VBUS_OVERCURRENT \
                      SAM_IRQ_PD28
+
+/* Ethernet */
+
+#ifdef CONFIG_SAMA4_EMAC
+ /* ETH1: Ethernet 10/100 (EMAC) Port
+  *
+  * The main board contains a MICREL PHY device (KSZ8051) operating at 10/100 Mbps.
+  * The board supports MII and RMII interface modes.
+  *
+  * The two independent PHY devices embedded on CM and MB boards are connected to
+  * independent RJ-45 connectors with built-in magnetic and status LEDs.
+  *
+  * At the De-Assertion of Reset:
+  *   PHY ADD[2:0]:001
+  *   CONFIG[2:0]:001,Mode:RMII
+  *   Duplex Mode:Half Duplex
+  *   Isolate Mode:Disable
+  *   Speed Mode:100Mbps
+  *   Nway Auto-Negotiation:Enable
+  *
+  * The KSZ8051 PHY interrtup is available on PE30 INT_ETH1
+  */
+
+#define PIO_INT_ETH1 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOE | PIO_PIN30)
+#define IRQ_INT_ETH1 SAM_IRQ_PE30
+
+#endif
+
+#ifdef CONFIG_SAMA4_GMAC
+  /* ETH0: Tri-Speed Ethernet PHY
+   *
+   * The SAMA5D3 series-CM board is equipped with a MICREL PHY devices (MICREL
+   * KSZ9021/31) operating at 10/100/1000 Mbps. The board supports RGMII interface
+   * mode. The Ethernet interface consists of 4 pairs of low voltage differential
+   * pair signals designated from GRX± and GTx± plus control signals for link
+   * activity indicators. These signals can be used to connect to a 10/100/1000
+   * BaseT RJ45 connector integrated on the main board.
+   *
+   * The KSZ9021/31 interrupt is available on PB35 INT_GETH0
+   */
+
+#define PIO_INT_ETH0 (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+                      PIO_INT_BOTHEDGES | PIO_PORT_PIOB | PIO_PIN25)
+#define IRQ_INT_ETH0 SAM_IRQ_PB25
+
+#endif
 
 /* SPI Chip Selects *****************************************************************/
 /* Both the Ronetix and Embest versions of the SAMAD3x CPU modules include an
@@ -578,6 +632,18 @@ void weak_function sam_usbinitialize(void);
 
 #ifdef HAVE_USBHOST
 int sam_usbhost_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: sam_netinitialize
+ *
+ * Description:
+ *   Configure board resources to support networking.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_NETWORK
+void weak_function sam_netinitialize(void);
 #endif
 
 /************************************************************************************
