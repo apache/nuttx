@@ -61,7 +61,7 @@
 
 #include "chip.h"
 #include "sam_pio.h"
-#include "sam_emac.h"
+#include "sam_ethernet.h"
 
 #include <arch/board/board.h>
 
@@ -181,7 +181,7 @@
 
 #define SAM_TXTIMEOUT   (60*CLK_TCK)
 
-/* PHY reset/configuration delays in milliseconds */ 
+/* PHY reset/configuration delays in milliseconds */
 
 #define PHY_RESET_DELAY   (65)
 #define PHY_CONFIG_DELAY  (1000)
@@ -1008,9 +1008,9 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
           (rxdesc->rdes0 & EMAC_RDES0_LS) == 0)
         {
           priv->rxcurr   = rxdesc;
-          priv->segments = 1;   
+          priv->segments = 1;
         }
-    
+
       /* Check if this is an intermediate segment in the frame */
 
       else if (((rxdesc->rdes0 & EMAC_RDES0_LS) == 0)&&
@@ -1022,7 +1022,7 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
       /* Otherwise, it is the last segment in the frame */
 
       else
-        { 
+        {
           priv->segments++;
 
           /* Check if the there is only one segment in the frame */
@@ -1105,7 +1105,7 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
   nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
           priv->rxhead, priv->rxcurr, priv->segments);
 
-  return -EAGAIN; 
+  return -EAGAIN;
 }
 
 /****************************************************************************
@@ -1512,7 +1512,7 @@ static void sam_polltimer(int argc, uint32_t arg, ...)
 
       if (dev->d_buf)
         {
-          /* Update TCP timing states and poll uIP for new XMIT data. 
+          /* Update TCP timing states and poll uIP for new XMIT data.
            */
 
           (void)uip_timer(dev, sam_uiptxpoll, SAM_POLLHSEC);
@@ -1540,7 +1540,7 @@ static void sam_polltimer(int argc, uint32_t arg, ...)
  *
  * Description:
  *   NuttX Callback: Bring up the Ethernet interface when an IP address is
- *   provided 
+ *   provided
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
@@ -1632,7 +1632,7 @@ static int sam_ifdown(struct uip_driver_s *dev)
  * Function: sam_txavail
  *
  * Description:
- *   Driver callback invoked when new TX data is available.  This is a 
+ *   Driver callback invoked when new TX data is available.  This is a
  *   stimulus perform an out-of-cycle poll and, thereby, reduce the TX
  *   latency.
  *
@@ -1682,7 +1682,7 @@ static int sam_txavail(struct uip_driver_s *dev)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be added 
+ *   mac  - The MAC address to be added
  *
  * Returned Value:
  *   None
@@ -1716,7 +1716,7 @@ static int sam_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  *
  * Parameters:
  *   dev  - Reference to the NuttX driver state structure
- *   mac  - The MAC address to be removed 
+ *   mac  - The MAC address to be removed
  *
  * Returned Value:
  *   None
@@ -1760,7 +1760,7 @@ static void sam_txdescinit(FAR struct sam_emac_s *priv)
 {
   struct emac_txdesc_s *txdesc;
   int i;
-  
+
   /* priv->txhead will point to the first, available TX descriptor in the chain.
    * Set the priv->txhead pointer to the first descriptor in the table.
    */
@@ -1775,7 +1775,7 @@ static void sam_txdescinit(FAR struct sam_emac_s *priv)
    priv->txtail   = NULL;
    priv->inflight = 0;
 
-  /* Initialize each TX descriptor */   
+  /* Initialize each TX descriptor */
 
   for (i = 0; i < CONFIG_SAMA5_EMAC_NTXDESC; i++)
     {
@@ -1783,8 +1783,8 @@ static void sam_txdescinit(FAR struct sam_emac_s *priv)
 
       /* Set Second Address Chained bit */
 
-      txdesc->tdes0 = EMAC_TDES0_TCH;  
-       
+      txdesc->tdes0 = EMAC_TDES0_TCH;
+
 #ifdef CHECKSUM_BY_HARDWARE
       /* Enable the checksum insertion for the TX frames */
 
@@ -1796,7 +1796,7 @@ static void sam_txdescinit(FAR struct sam_emac_s *priv)
        */
 
       txdesc->tdes2 = 0;
-    
+
       /* Initialize the next descriptor with the Next Descriptor Polling Enable */
 
       if (i < (CONFIG_SAMA5_EMAC_NTXDESC-1))
@@ -1813,7 +1813,7 @@ static void sam_txdescinit(FAR struct sam_emac_s *priv)
            * to the first descriptor base address
            */
 
-          txdesc->tdes3 = (uint32_t)priv->txtable;  
+          txdesc->tdes3 = (uint32_t)priv->txtable;
         }
     }
 
@@ -1841,7 +1841,7 @@ static void sam_rxdescinit(FAR struct sam_emac_s *priv)
 {
   struct emac_rxdesc_s *rxdesc;
   int i;
-  
+
   /* priv->rxhead will point to the first,  RX descriptor in the chain.
    * This will be where we receive the first incomplete frame.
    */
@@ -1855,7 +1855,7 @@ static void sam_rxdescinit(FAR struct sam_emac_s *priv)
   priv->rxcurr   = NULL;
   priv->segments = 0;
 
-  /* Initialize each TX descriptor */   
+  /* Initialize each TX descriptor */
 
   for (i = 0; i < CONFIG_SAMA5_EMAC_NRXDESC; i++)
     {
@@ -1869,12 +1869,12 @@ static void sam_rxdescinit(FAR struct sam_emac_s *priv)
        * RX desc receive interrupt
        */
 
-      rxdesc->rdes1 = EMAC_RDES1_RCH | (uint32_t)CONFIG_SAMA5_EMAC_BUFSIZE;  
+      rxdesc->rdes1 = EMAC_RDES1_RCH | (uint32_t)CONFIG_SAMA5_EMAC_BUFSIZE;
 
       /* Set Buffer1 address pointer */
 
       rxdesc->rdes2 = (uint32_t)&priv->rxbuffer[i*CONFIG_SAMA5_EMAC_BUFSIZE];
-    
+
       /* Initialize the next descriptor with the Next Descriptor Polling Enable */
 
       if (i < (CONFIG_SAMA5_EMAC_NRXDESC-1))
@@ -1891,7 +1891,7 @@ static void sam_rxdescinit(FAR struct sam_emac_s *priv)
            * to the first descriptor base address
            */
 
-          rxdesc->rdes3 = (uint32_t)priv->rxtable;  
+          rxdesc->rdes3 = (uint32_t)priv->rxtable;
         }
     }
 
@@ -2048,7 +2048,7 @@ static inline int sam_dm9161(FAR struct sam_emac_s *priv)
   /* Bit 8 of the DSCR register is zero, then the DM9161 has not selected RMII.
    * If RMII is not selected, then reset the MCU to recover.
    */
- 
+
   else if ((phyval & (1 << 8)) == 0)
     {
       up_systemreset();
@@ -2175,7 +2175,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
       ndbg("Timed out waiting for auto-negotiation\n");
       return -ETIMEDOUT;
     }
- 
+
   /* Read the result of the auto-negotiation from the PHY-specific register */
 
   ret = sam_phyread(CONFIG_SAMA5_PHYADDR, CONFIG_SAMA5_PHYSR, &phyval);
@@ -2331,16 +2331,23 @@ static inline void sam_selectrmii(void)
 
 static inline void sam_ethgpioconfig(FAR struct sam_emac_s *priv)
 {
-  /* Configure GPIO pins to support Ethernet */
+  /* Configure PIO pins to support EMAC */
+  /* Configure EMAC PIO pins common to both MII and RMII */
 
-#if defined(CONFIG_SAMA5_MII) || defined(CONFIG_SAMA5_RMII)
+  sam_configpio(PIO_EMAC_TX0);
+  sam_configpio(PIO_EMAC_TX1);
+  sam_configpio(PIO_EMAC_RX0);
+  sam_configpio(PIO_EMAC_RX1);
+
+  sam_configpio(PIO_EMAC_TXEN);
+  sam_configpio(PIO_EMAC_CRSDV);
+  sam_configpio(PIO_EMAC_RXER);
+  sam_configpio(PIO_EMAC_REFCK);
 
   /* MDC and MDIO are common to both modes */
 
-  sam_configgpio(GPIO_EMAC_MDC);
-  sam_configgpio(GPIO_EMAC_MDIO);
-
-  /* Set up the MII interface */
+  sam_configpio(PIO_EMAC_MDC);
+  sam_configpio(PIO_EMAC_MDIO);
 
 #if defined(CONFIG_SAMA5_MII)
 
@@ -2348,59 +2355,10 @@ static inline void sam_ethgpioconfig(FAR struct sam_emac_s *priv)
 
   sam_selectmii();
 
-  /* Provide clocking via MCO, MCO1 or MCO2:
-   *
-   * "MCO1 (microcontroller clock output), used to output HSI, LSE, HSE or PLL
-   *  clock (through a configurable prescaler) on PA8 pin."
-   *
-   * "MCO2 (microcontroller clock output), used to output HSE, PLL, SYSCLK or
-   *  PLLI2S clock (through a configurable prescaler) on PC9 pin."
-   */
+  /* Provide clocking */
+#warning Missing logic
 
-# if defined(CONFIG_SAMA5_MII_MCO1)
-  /* Configure MC01 to drive the PHY.  Board logic must provide MC01 clocking
-   * info.
-   */
-
-  sam_configgpio(GPIO_MCO1);
-  sam_mco1config(BOARD_CFGR_MC01_SOURCE, BOARD_CFGR_MC01_DIVIDER);
-
-# elif defined(CONFIG_SAMA5_MII_MCO2)
-  /* Configure MC02 to drive the PHY.  Board logic must provide MC02 clocking
-   * info.
-   */
-
-  sam_configgpio(GPIO_MCO2);
-  sam_mco2config(BOARD_CFGR_MC02_SOURCE, BOARD_CFGR_MC02_DIVIDER);
-
-# elif defined(CONFIG_SAMA5_MII_MCO)
-  /* Setup MCO pin for alternative usage */
-
-  sam_configgpio(GPIO_MCO);
-  sam_mcoconfig(BOARD_CFGR_MCO_SOURCE);
 # endif
-
-  /* MII interface pins (17):  
-   *
-   * MII_TX_CLK, MII_TXD[3:0], MII_TX_EN, MII_RX_CLK, MII_RXD[3:0], MII_RX_ER,
-   * MII_RX_DV, MII_CRS, MII_COL, MDC, MDIO
-   */
-
-  sam_configgpio(GPIO_EMAC_MII_COL);
-  sam_configgpio(GPIO_EMAC_MII_CRS);
-  sam_configgpio(GPIO_EMAC_MII_RXD0);
-  sam_configgpio(GPIO_EMAC_MII_RXD1);
-  sam_configgpio(GPIO_EMAC_MII_RXD2);
-  sam_configgpio(GPIO_EMAC_MII_RXD3);
-  sam_configgpio(GPIO_EMAC_MII_RX_CLK);
-  sam_configgpio(GPIO_EMAC_MII_RX_DV);
-  sam_configgpio(GPIO_EMAC_MII_RX_ER);
-  sam_configgpio(GPIO_EMAC_MII_TXD0);
-  sam_configgpio(GPIO_EMAC_MII_TXD1);
-  sam_configgpio(GPIO_EMAC_MII_TXD2);
-  sam_configgpio(GPIO_EMAC_MII_TXD3);
-  sam_configgpio(GPIO_EMAC_MII_TX_CLK);
-  sam_configgpio(GPIO_EMAC_MII_TX_EN);
 
   /* Set up the RMII interface. */
 
@@ -2410,59 +2368,10 @@ static inline void sam_ethgpioconfig(FAR struct sam_emac_s *priv)
 
   sam_selectrmii();
 
-  /* Provide clocking via MCO, MCO1 or MCO2:
-   *
-   * "MCO1 (microcontroller clock output), used to output HSI, LSE, HSE or PLL
-   *  clock (through a configurable prescaler) on PA8 pin."
-   *
-   * "MCO2 (microcontroller clock output), used to output HSE, PLL, SYSCLK or
-   *  PLLI2S clock (through a configurable prescaler) on PC9 pin."
-   */
-
-# if defined(CONFIG_SAMA5_RMII_MCO1)
-  /* Configure MC01 to drive the PHY.  Board logic must provide MC01 clocking
-   * info.
-   */
-
-  sam_configgpio(GPIO_MCO1);
-  sam_mco1config(BOARD_CFGR_MC01_SOURCE, BOARD_CFGR_MC01_DIVIDER);
-
-# elif defined(CONFIG_SAMA5_RMII_MCO2)
-  /* Configure MC02 to drive the PHY.  Board logic must provide MC02 clocking
-   * info.
-   */
-
-  sam_configgpio(GPIO_MCO2);
-  sam_mco2config(BOARD_CFGR_MC02_SOURCE, BOARD_CFGR_MC02_DIVIDER);
-
-# elif defined(CONFIG_SAMA5_RMII_MCO)
-  /* Setup MCO pin for alternative usage */
-
-  sam_configgpio(GPIO_MCO);
-  sam_mcoconfig(BOARD_CFGR_MCO_SOURCE);
-# endif
-
-  /* RMII interface pins (7):
-   *
-   * RMII_TXD[1:0], RMII_TX_EN, RMII_RXD[1:0], RMII_CRS_DV, MDC, MDIO,
-   * RMII_REF_CLK
-   */
-
-  sam_configgpio(GPIO_EMAC_RMII_CRS_DV);
-  sam_configgpio(GPIO_EMAC_RMII_REF_CLK);
-  sam_configgpio(GPIO_EMAC_RMII_RXD0);
-  sam_configgpio(GPIO_EMAC_RMII_RXD1);
-  sam_configgpio(GPIO_EMAC_RMII_TXD0);
-  sam_configgpio(GPIO_EMAC_RMII_TXD1);
-  /* sam_configgpio(GPIO_EMAC_RMII_TX_CLK); not needed? */
-  sam_configgpio(GPIO_EMAC_RMII_TX_EN);
+  /* Provide clocking */
+#warning Missing logic
 
 #endif
-#endif
-
-  /* Enable pulse-per-second (PPS) output signal */
-
-  sam_configgpio(GPIO_EMAC_PPS_OUT);
 }
 
 /****************************************************************************
@@ -2560,7 +2469,16 @@ static void sam_macaddress(FAR struct sam_emac_s *priv)
           dev->d_mac.ether_addr_octet[4], dev->d_mac.ether_addr_octet[5]);
 
   /* Set the MAC address */
-#warning Missing logic
+
+  regval = (uint32_t)dev->d_mac.ether_addr_octet[0]       |,
+           (uint32_t)dev->d_mac.ether_addr_octet[1] << 8  |,
+           (uint32_t)dev->d_mac.ether_addr_octet[2] << 16 |,
+           (uint32_t)dev->d_mac.ether_addr_octet[3] << 24 |,
+  sam_putreg(priv, SAM_GMAC_SAB1, regval);
+
+  regval = (uint32_t)dev->d_mac.ether_addr_octet[4]       |,
+           (uint32_t)dev->d_mac.ether_addr_octet[5] << 8  |,
+  sam_putreg(priv, SAM_GMAC_SAT1, regval);
 }
 
 /****************************************************************************
@@ -2587,18 +2505,18 @@ static int sam_macenable(FAR struct sam_emac_s *priv)
 
   sam_macaddress(priv);
 
-  /* Enable transmit state machine of the MAC for transmission on the MII */  
+  /* Enable transmit state machine of the MAC for transmission on the MII */
 #warning Missing logic
 
   /* Flush Transmit FIFO */
 #warning Missing logic
 
-  /* Enable receive state machine of the MAC for reception from the MII */  
+  /* Enable receive state machine of the MAC for reception from the MII */
 #warning Missing logic
- 
+
   /* Start DMA transmission */
 #warning Missing logic
- 
+
   /* Start DMA reception */
 #warning Missing logic
 
@@ -2719,7 +2637,7 @@ int sam_emac_initialize(void)
   priv->txpoll       = wd_create();   /* Create periodic poll timer */
   priv->txtimeout    = wd_create();   /* Create TX timeout timer */
 
-  /* Configure GPIO pins to support Ethernet */
+  /* Configure PIO pins to support EMAC */
 
   sam_ethgpioconfig(priv);
 
