@@ -5565,4 +5565,7 @@
 	  ROMFS change (2013-9-14).
 	* configs/sama5d3x-ek/src/sam_ethernet.c:  Add support for
 	  PHY interrupts (2013-9-15).
+	* arch/arm/src/kl/chip/kl_pit.h and kp_tpm.h:  Add register
+	  definitions for the Freescale Kinetis KL25Z from Alan
+	  Carvalho de Assis (2013-9-15).
 
