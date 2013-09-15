@@ -223,6 +223,10 @@ struct sam_emac_s
 
   /* Used to track transmit and receive descriptors */
 
+  uint8_t              *rxbuffer;    /* Allocated RX buffers */
+  uint8_t              *txbuffer;    /* Allocated TX buffers */
+  struct emac_rxdesc_s *rxdesc;      /* Allocated RX descriptors */
+  struct emac_txdesc_s *txdesc;      /* Allocated TX descriptors */
   struct emac_txdesc_s *txhead;      /* Next available TX descriptor */
   struct emac_rxdesc_s *rxhead;      /* Next available RX descriptor */
 
@@ -256,7 +260,36 @@ struct sam_emac_s
  * Private Data
  ****************************************************************************/
 
+/* The driver state singleton */
+
 static struct sam_emac_s g_emac;
+
+#ifdef CONFIG_SAMA5_EMAC_PREALLOCATE
+/* Preallocated data */
+/* TX descriptors list */
+
+static struct emac_txdesc_s g_txdesc[TX_BUFFERS] __attribute__((aligned(8)));
+
+/* RX descriptors list */
+
+static struct emac_rxdesc_s g_rxdesc[RX_BUFFERS]__attribute__((aligned(8)));
+
+/* Transmit Buffers
+ *
+ * Section 3.6 of AMBA 2.0 spec states that burst should not cross 1K Boundaries.
+ * Receive buffer manager writes are burst of 2 words => 3 lsb bits of the address
+ * shall be set to 0
+ */
+
+static uint8_t g_txbuffer[CONFIG_SAMA5_EMAC_NTXBUFFERS * EMAC_TX_UNITSIZE];
+               __attribute__((aligned(8)))
+
+/* Receive Buffers */
+
+static uint8_t g_rxbuffer[CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE]
+               __attribute__((aligned(8)));
+
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -339,6 +372,7 @@ static int  sam_macconfig(FAR struct sam_emac_s *priv);
 static void sam_macaddress(FAR struct sam_emac_s *priv);
 static int  sam_macenable(FAR struct sam_emac_s *priv);
 static int  sam_ethconfig(FAR struct sam_emac_s *priv);
+static int  sam_buffer_initialize(struct sam_emac_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -2589,6 +2623,82 @@ static int sam_ethconfig(FAR struct sam_emac_s *priv)
 
   nllvdbg("Enable normal operation\n");
   return sam_macenable(priv);
+}
+
+/****************************************************************************
+ * Function: sam_buffer_initialize
+ *
+ * Description:
+ *   Allocate alligned TX and RX descriptors and buffers.  For the case of
+ *   pre-allocated structures, the function degenerates to a few assignements.
+ *
+ * Input Parameters:
+ *   priv - The EMAC driver state
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *   Called very early in the initialization sequence.
+ *
+ ****************************************************************************/
+
+static int sam_buffer_initialize(struct sam_emac_s *priv)
+{
+#ifdef CONFIG_SAMA5_EMAC_PREALLOCATE
+  /* Use pre-allocated buffers */
+
+  priv->txdesc   = g_txdesc;
+  priv->rxdesc   = g_rxdesc;
+  priv->txbuffer = g_txbuffer;
+  priv->rxbuffer = g_rxbuffer;
+
+#else
+  /* Allocate buffers */
+
+  priv->txdesc = (struct emac_txdesc_s *)
+    kmemalign(8, CONFIG_SAMA5_EMAC_NTXBUFFERS * sizeof(struct emac_txdesc_s));
+  if (!priv->txdesc)
+    {
+      nlldbg("ERROR: Failed to allocate TX descriptors\n");
+      return -ENOMEM;
+    }
+
+  priv->rxdesc = (struct emac_rxdesc_s *)
+    kmemalign(8, CONFIG_SAMA5_EMAC_NRXBUFFERS * sizeof(struct emac_rxdesc_s));
+  if (!priv->txdesc)
+    {
+      nlldbg("ERROR: Failed to allocate RX descriptors\n");
+      kfree(priv->txdesc);
+      return -ENOMEM;
+    }
+
+  priv->txbuffer = (uint8_t *)
+    kmemalign(8, CONFIG_SAMA5_GMAC_NTXBUFFERS * GMAC_TX_UNITSIZE);
+  if (!priv->txbuffer)
+    {
+      nlldbg("ERROR: Failed to allocate TX buffer\n");
+      kfree(priv->txdesc);
+      kfree(priv->rxdesc);
+      return -ENOMEM;
+    }
+
+  priv->rxbuffer = (uint8_t *)kmemalign(8, CONFIG_SAMA5_GMAC_NRXBUFFERS * GMAC_RX_UNITSIZE);
+  if (!priv->rxbuffer)
+    {
+      nlldbg("ERROR: Failed to allocate RX buffer\n");
+      kfree(priv->txdesc);
+      kfree(priv->rxdesc);
+      kfree(priv->rxbuffer);
+      return -ENOMEM;
+    }
+#endif
+
+  DEBUGASSERT(((uintptr_t)priv->rxdesc   & 7) = 0 &&
+              ((uintptr_t)priv->rxbuffer & 7) = 0 &&
+              ((uintptr_t)priv->txdesc   & 7) = 0 &&
+              ((uintptr_t)priv->rxbuffer & 7) = 0 &&
+  return OK;
 }
 
 /****************************************************************************
