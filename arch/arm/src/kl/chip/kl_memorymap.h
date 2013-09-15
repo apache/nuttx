@@ -83,6 +83,7 @@
 # define KL_PIT_BASE       0x40037000 /* Periodic interrupt timers (PIT) */
 # define KL_TPM0_BASE      0x40038000 /* Timer/PWM (TPM) 0 */
 # define KL_TPM1_BASE      0x40039000 /* Timer/PWM (TPM) 1 */
+# define KL_TPM2_BASE      0x4003a000 /* Timer/PWM (TPM) 2 */
 # define KL_ADC0_BASE      0x4003b000 /* Analog-to-digital converter (ADC) 0 */
 # define KL_RTC_BASE       0x4003d000 /* Real time clock */
 # define KL_DAC0_BASE      0x4003f000 /* Digital-to-analog convert (DAC) 0 */
