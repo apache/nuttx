@@ -183,6 +183,19 @@ extern "C" {
 void sam_boardinitialize(void);
 
 /************************************************************************************
+ * Name: sam_phyirq
+ *
+ * Description:
+ *   This function may be called to register an interrupt handler that will be
+ *   called when an interrupt is received from a PHY.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_NET) && (defined(CONFIG_SAMA5_EMAC) || defined(CONFIG_SAMA5_GMAC))
+xcpt_t sam_phyirq(int intf, xcpt_t irqhandler);
+#endif
+
+/************************************************************************************
  * Name:  sam_ledinit, sam_setled, and sam_setleds
  *
  * Description:
