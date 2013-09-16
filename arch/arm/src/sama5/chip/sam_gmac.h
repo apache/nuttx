@@ -148,8 +148,8 @@
 #define SAM_GMAC_EFRN_OFFSET       0x01ec /* PTP Event Frame Received Nanoseconds */
 #define SAM_GMAC_PEFTS_OFFSET      0x01f0 /* PTP Peer Event Frame Transmitted Seconds */
 #define SAM_GMAC_PEFTN_OFFSET      0x01f4 /* PTP Peer Event Frame Transmitted Nanoseconds */
-#define SAM_GMAC_PEFRS_OFFSET      0x01f8 /* PTP Peer Event Frame ReceiveGMAC_PEFRNd Seconds */
-#define SAM_GMAC_PEFRS_OFFSET      0x01fc /* PTP Peer Event Frame Received Nanoseconds */
+#define SAM_GMAC_PEFRS_OFFSET      0x01f8 /* PTP Peer Event Frame Received Seconds */
+#define SAM_GMAC_PEFRN_OFFSET      0x01fc /* PTP Peer Event Frame Received Nanoseconds */
                                           /* 0x0200-0x023c Reserved */
                                           /* 0x0280-0x0298 Reserved */
 #define SAM_GMAC_ISRPQ_OFFSET(n)   (0x400 + ((n) << 2))  /* n=0..6 */
@@ -344,7 +344,7 @@
 #define SAM_GMAC_PEFTS             (SAM_GMAC_VBASE+SAM_GMAC_PEFTS_OFFSET)
 #define SAM_GMAC_PEFTN             (SAM_GMAC_VBASE+SAM_GMAC_PEFTN_OFFSET)
 #define SAM_GMAC_PEFRS             (SAM_GMAC_VBASE+SAM_GMAC_PEFRS_OFFSET)
-#define SAM_GMAC_PEFRS             (SAM_GMAC_VBASE+SAM_GMAC_PEFRS_OFFSET)
+#define SAM_GMAC_PEFRN             (SAM_GMAC_VBASE+SAM_GMAC_PEFRN_OFFSET)
 #define SAM_GMAC_ISRPQ(n)          (SAM_GMAC_VBASE+SAM_GMAC_ISRPQ_OFFSET(n))
 #define SAM_GMAC_ISRPQ0            (SAM_GMAC_VBASE+SAM_GMAC_ISRPQ0_OFFSET)
 #define SAM_GMAC_ISRPQ1            (SAM_GMAC_VBASE+SAM_GMAC_ISRPQ1_OFFSET)
@@ -628,8 +628,8 @@
 #define GMAC_PEFTS_
 /* PTP Peer Event Frame Transmitted Nanoseconds */
 #define GMAC_PEFTN_
-/* PTP Peer Event Frame ReceiveGMAC_PEFRNd Seconds */
-#define GMAC_PEFRS_
+/* PTP Peer Event Frame Received Seconds */
+#define GMAC_PEFRN_
 /* PTP Peer Event Frame Received Nanoseconds */
 #define GMAC_PEFRS_
 /* Interrupt Status Register Priority Queue 0-6 */
@@ -650,9 +650,5 @@
 #define GMAC_IDRPQ0_
 /* Interrupt Mask Register Priority Queue 0-6 */
 #define GMAC_IMRPQ0_
-
-        (1 << nn)  /* Bit nn: 
-_SHIFT  (nn)       /* Bits nn-nn: 
-_MASK   (xx << yy)
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_GMAC_H */
