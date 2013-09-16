@@ -47,8 +47,21 @@
 #ifdef HAVE_NETWORK
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
+
+/************************************************************************************
+ * Private Data
+ ************************************************************************************/
+
+#ifdef CONFIG_SAMA5_PIOE_IRQ
+#ifdef CONFIG_SAMA5_EMAC
+static xcpt g_emac_handler;
+#endif
+#ifdef CONFIG_SAMA5_GMAC
+static xcpt g_gmac_handler;
+#endif
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -117,6 +130,7 @@ void weak_function sam_netinitialize(void)
  *
  ************************************************************************************/
 
+#ifdef CONFIG_SAMA5_PIOE_IRQ
 xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
 {
   irqstate_t flags;
@@ -164,7 +178,9 @@ xcpt_t sam_phyirq(int intf, xcpt_t irqhandler)
 
   /* Return the old button handler (so that it can be restored) */
 
+  irqrestore(flags);
   return oldhandler;
 }
+#endif /* CONFIG_SAMA5_PIOE_IRQ */
 
 #endif /* HAVE_NETWORK */
