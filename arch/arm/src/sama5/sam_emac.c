@@ -152,8 +152,8 @@
 #  error CONFIG_NET_MULTIBUFFER must not be set
 #endif
 
-#define EMAC_RX_UNITSIZE            128     /* Fixed size for RX buffer  */
-#define EMAC_TX_UNITSIZE            1518    /* Size for ETH frame length */
+#define EMAC_RX_UNITSIZE 128                 /* Fixed size for RX buffer  */
+#define EMAC_TX_UNITSIZE CONFIG_NET_BUFSIZE  /* MAX size for Ethernet packet */
 
 /* We need at least one more free buffer than transmit buffers */
 
@@ -646,116 +646,71 @@ static void sam_buffer_free(struct sam_emac_s *priv)
 
 static int sam_transmit(FAR struct sam_emac_s *priv)
 {
-  struct emac_txdesc_s *txdesc;
-  struct emac_txdesc_s *txfirst;
-  uint8_t *buffer;
-  int bufcount;
-  int lastsize;
-  int txndx;
-  int i;
+  struct uip_driver_s *dev = &priv->dev;
+  volatile struct emac_txdesc_s *txdesc;
+  uintptr_t virtaddr;
+  uint32_t regval;
+  uint32_t status;
 
-  /* Verify that the hardware is ready to send another packet.  If we get
-   * here, then we are committed to sending a packet; Higher level logic
-   * must have assured that there is no transmission in progress.
-   */
+  nllvdbg("d_len: %d txhead: %d\n", priv->txhead);
 
-  txndx   = priv->txhead;
-  txdesc  = &priv->txdesc[txndx];
-  txfirst = txdesc;
+  /* Check parameter */
 
-  nllvdbg("d_len: %d d_buf: %p txhead: %d\n",
-          priv->dev.d_len, priv->dev.d_buf, txndx);
-
-  /* Now many buffers will be need to send the packet? */
-
-  bufcount = (priv->dev.d_len + (CONFIG_NET_BUFSIZE-1)) / CONFIG_NET_BUFSIZE;
-  lastsize = priv->dev.d_len - (bufcount - 1) * CONFIG_NET_BUFSIZE;
-
-  nllvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
-
-  /* Set the first segment bit in the first TX descriptor */
-#warning Missing logic
-
-  /* Set up all but the last TX descriptor */
-
-  buffer = priv->dev.d_buf;
-
-  for (i = 0; i < bufcount; i++)
+  if (dev->d_len > EMAC_TX_UNITSIZE)
     {
-      /* Set the Buffer1 address pointer */
-#warning Missing logic
-
-      /* Set the buffer size in all TX descriptors */
-
-      if (i == (bufcount-1))
-        {
-          /* This is the last segment.  Set the last segment bit in the
-           * last TX descriptor and ask for an interrupt when this
-           * segment transfer completes.
-           */
-#warning Missing logic
-
-          /* This segement is, most likely, of fractional buffersize */
-#warning Missing logic
-          buffer        += lastsize;
-        }
-      else
-        {
-          /* This is not the last segment.  We don't want an interrupt
-           * when this segment transfer completes.
-           */
-#warning Missing logic
-
-          /* The size of the transfer is the whole buffer */
-#warning Missing logic
-
-        }
-
-      /* Give the descriptor to DMA */
-#warning Missing logic
+      nlldbg("ERROR: Packet too big: %d\n", dev->d_len);
+      return -EINVAL;
     }
 
-  /* Remember where we left off in the TX descriptor chain */
+  /* Pointer to the current TX descriptor */
 
-  priv->txhead = txndx;
+  txdesc = &priv->txdesc[priv->txhead];
 
-  /* Detach the buffer from priv->dev structure.  That buffer is now
-   * "in-flight".
-   */
+  /* If no free TX descriptor, buffer can't be sent */
 
-  priv->dev.d_len = 0;
-
-  /* If there is no other TX buffer, in flight, then remember the location
-   * of the TX descriptor.  This is the location to check for TX done events.
-   */
-
-  if (!priv->txtail)
+  if (sam_txfree(priv) < 1)
     {
-      priv->txtail = txndx;
+      nlldbg("ERROR: No free TX descriptors\n");
+      return -EBUSY;
     }
 
-  /* Increment the number of TX transfer in-flight */
+  /* Setup/Copy data to transmition buffer */
 
+  if (dev->d_len > 0)
+    {
+      /* Driver manage the ring buffer */
 
-  nllvdbg("txhead: %d txtail: %d\n",
-          priv->txhead, priv->txtail);
+      virtaddr = sam_virtramaddr(txdesc->addr);
+      memcpy((void *)virtaddr, dev->d_buf, dev->d_len);
+      cp15_flush_dcache((uint32_t)virtaddr, ((uint32_t)virtaddr + dev->d_len));
+  }
 
-  /* If all TX descriptors are in-flight, then we have to disable receive interrupts
-   * too.  This is because receive events can trigger more un-stoppable transmit
-   * events.
-   */
+  /* Update TX descriptor status. */
 
-#warning "Missing logic"
+  status = dev->d_len | EMACTXD_STA_LAST;
+  if (priv->txhead == CONFIG_SAMA5_EMAC_NTXBUFFERS-1)
+    {
+      status |= EMACTXD_STA_WRAP;
+    }
+  txdesc->status = status;
 
-  /* Check if the TX Buffer unavailable flag is set */
-#warning "Missing logic"
+  /* Increment the head index */
 
-  /* Enable TX interrupts */
-#warning "Missing logic"
+  if (++priv->txhead >= CONFIG_SAMA5_EMAC_NTXBUFFERS)
+    {
+      priv->txhead = 0;
+    }
+
+  /* Now start transmission (if it is not already done) */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval |= EMAC_NCR_TSTART;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
 
   /* Setup the TX timeout watchdog (perhaps restarting the timer) */
 
-  (void)wd_start(priv->txtimeout, SAM_TXTIMEOUT, sam_txtimeout, 1, (uint32_t)priv);
+  (void)wd_start(priv->txtimeout, SAM_TXTIMEOUT, sam_txtimeout, 1,
+                 (uint32_t)priv);
   return OK;
 }
 
@@ -910,7 +865,7 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
        * any previous fragments.
        */
 
-      if ((rxdesc->status & EMACRXD_CTRL_SOF) != 0)
+      if ((rxdesc->status & EMACRXD_STA_SOF) != 0)
         {
           /* Skip previous fragments */
 
@@ -950,7 +905,7 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
         {
           if (rxndx == priv->rxndx)
             {
-              nvdbg("ERROR: No EOF (Invalid of buffers too small)\n");
+              nllvdbg("ERROR: No EOF (Invalid of buffers too small)\n");
               do
                 {
                   rxdesc = &priv->rxdesc[priv->rxndx];
@@ -992,12 +947,12 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
 
           /* If the end of frame has been received, return the data */
 
-          if ((rxdesc->status & EMACRXD_CTRL_EOF) != 0)
+          if ((rxdesc->status & EMACRXD_STA_EOF) != 0)
             {
               /* Frame size from the EMAC */
 
-              dev->d_len = (rxdesc->status & EMACRXD_CTRL_FRLEN_MASK);
-              nvdbg("packet %d-%d (%d)\n", priv->rxndx, rxndx, dev->d_len);
+              dev->d_len = (rxdesc->status & EMACRXD_STA_FRLEN_MASK);
+              nllvdbg("packet %d-%d (%d)\n", priv->rxndx, rxndx, dev->d_len);
 
               /* All data have been copied in the application frame buffer,
                * release the RX descriptor
@@ -1025,7 +980,7 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
 
               if (pktlen < dev->d_len)
                 {
-                  ndbg("ERROR: Buffer size %d; frame size %d\n", dev->d_len, pktlen);
+                  nlldbg("ERROR: Buffer size %d; frame size %d\n", dev->d_len, pktlen);
                   return -E2BIG;
                 }
 
@@ -1176,7 +1131,7 @@ static void sam_txdone(FAR struct sam_emac_s *priv)
 
       /* Is this TX descriptor still in use? */
 
-      if ((txdesc->status & EMACTXD_CTRL_USED) == 0)
+      if ((txdesc->status & EMACTXD_STA_USED) == 0)
         {
           /* Yes ... break out of the loop now */
 
@@ -1215,11 +1170,12 @@ static void sam_txdone(FAR struct sam_emac_s *priv)
 
 static int sam_emac_interrupt(int irq, FAR void *context)
 {
-  struct sam_emac_s *priv = &g_emac
+  struct sam_emac_s *priv = &g_emac;
   uint32_t isr;
   uint32_t rsr;
   uint32_t tsr;
   uint32_t imr;
+  uint32_t regval;
   uint32_t pending;
   uint32_t clrbits;
 
@@ -1228,7 +1184,7 @@ static int sam_emac_interrupt(int irq, FAR void *context)
   tsr = sam_getreg(priv, SAM_EMAC_TSR);
   imr = sam_getreg(priv, SAM_EMAC_IMR);
 
-  pending &= isr & ~(imr | 0xFFC300);
+  pending = isr & ~(imr | 0xFFC300);
   nllvdbg("isr: %08x pending: %08x\n", isr, pending);
 
   /* Check for the receipt of an RX packet.
@@ -1278,7 +1234,7 @@ static int sam_emac_interrupt(int irq, FAR void *context)
 
       /* Clear status */
 
-      sam_putreg(priv, SAM_EMAC_RSR, clrbits)
+      sam_putreg(priv, SAM_EMAC_RSR, clrbits);
 
       /* Handle the received packet */
 
@@ -1347,7 +1303,7 @@ static int sam_emac_interrupt(int irq, FAR void *context)
 
       /* Clear status */
 
-      sam_putreg(priv, SAM_EMAC_TSR, clrbits)
+      sam_putreg(priv, SAM_EMAC_TSR, clrbits);
 
       /* And handle the TX done event */
 
@@ -1478,9 +1434,9 @@ static int sam_ifup(struct uip_driver_s *dev)
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)dev->d_private;
   int ret;
 
-  ndbg("Bringing up: %d.%d.%d.%d\n",
-       dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
-       (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
+  nlldbg("Bringing up: %d.%d.%d.%d\n",
+         dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
+         (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
   /* Configure the EMAC interface for normal operation. */
 
@@ -1496,7 +1452,7 @@ static int sam_ifup(struct uip_driver_s *dev)
   ret = sam_phyinit(priv);
   if (ret < 0)
     {
-      ndbg("ERROR: sam_phyinit failed: %d\n", ret);
+      nlldbg("ERROR: sam_phyinit failed: %d\n", ret);
       return ret;
     }
 
@@ -1505,12 +1461,12 @@ static int sam_ifup(struct uip_driver_s *dev)
   ret = sam_autonegotiate(priv);
   if (ret < 0)
     {
-      ndbg("ERROR: sam_autonegotiate failed: %d\n", ret);
+      nlldbg("ERROR: sam_autonegotiate failed: %d\n", ret);
       return ret;
     }
 
   while (sam_linkup(priv) == 0);
-  nvdbg("Link detected \n");
+  nllvdbg("Link detected \n");
 
   /* Enable normal MAC operation */
 
@@ -1548,7 +1504,7 @@ static int sam_ifdown(struct uip_driver_s *dev)
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)dev->d_private;
   irqstate_t flags;
 
-  ndbg("Taking the network down\n");
+  nlldbg("Taking the network down\n");
 
   /* Disable the EMAC interrupt */
 
@@ -1724,8 +1680,8 @@ static int sam_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value
 #warning Missing logic
     }
 
-  ndbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
-       phydevaddr, phyregaddr);
+  nlldbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
+         phydevaddr, phyregaddr);
 
   return -ETIMEDOUT;
 }
@@ -1773,8 +1729,8 @@ static int sam_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value
 #warning Missing logic
     }
 
-  ndbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
-       phydevaddr, phyregaddr, value);
+  nlldbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
+         phydevaddr, phyregaddr, value);
 
   return -ETIMEDOUT;
 }
@@ -1810,7 +1766,7 @@ static inline int sam_dm9161(FAR struct sam_emac_s *priv)
   ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, MII_PHYID1, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read the PHY ID1: %d\n", ret);
+      nlldbg("Failed to read the PHY ID1: %d\n", ret);
       return ret;
     }
 
@@ -1821,14 +1777,14 @@ static inline int sam_dm9161(FAR struct sam_emac_s *priv)
       up_systemreset();
     }
 
-  nvdbg("PHY ID1: 0x%04X\n", phyval);
+  nllvdbg("PHY ID1: 0x%04X\n", phyval);
 
   /* Now check the "DAVICOM Specified Configuration Register (DSCR)", Register 16 */
 
   ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, 16, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read the PHY Register 0x10: %d\n", ret);
+      nlldbg("Failed to read the PHY Register 0x10: %d\n", ret);
       return ret;
     }
 
@@ -1881,7 +1837,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
   ret = sam_phywrite(CONFIG_SAMA5_EMAC_PHYADDR, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
-      ndbg("Failed to reset the PHY: %d\n", ret);
+      nlldbg("Failed to reset the PHY: %d\n", ret);
       return ret;
     }
   up_mdelay(PHY_RESET_DELAY);
@@ -1892,7 +1848,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
   ret = sam_phy_boardinitialize(EMAC_INTF);
   if (ret < 0)
     {
-      ndbg("Failed to initialize the PHY: %d\n", ret);
+      nlldbg("Failed to initialize the PHY: %d\n", ret);
       return ret;
     }
 #endif
@@ -1917,7 +1873,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
       ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          ndbg("Failed to read the PHY MSR: %d\n", ret);
+          nlldbg("Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_LINKSTATUS) != 0)
@@ -1928,7 +1884,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      ndbg("Timed out waiting for link status: %04x\n", phyval);
+      nlldbg("Timed out waiting for link status: %04x\n", phyval);
       return -ETIMEDOUT;
     }
 
@@ -1937,7 +1893,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
   ret = sam_phywrite(CONFIG_SAMA5_EMAC_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
     {
-      ndbg("Failed to enable auto-negotiation: %d\n", ret);
+      nlldbg("Failed to enable auto-negotiation: %d\n", ret);
       return ret;
     }
 
@@ -1948,7 +1904,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
       ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
-          ndbg("Failed to read the PHY MSR: %d\n", ret);
+          nlldbg("Failed to read the PHY MSR: %d\n", ret);
           return ret;
         }
       else if ((phyval & MII_MSR_ANEGCOMPLETE) != 0)
@@ -1959,7 +1915,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
 
   if (timeout >= PHY_RETRY_TIMEOUT)
     {
-      ndbg("Timed out waiting for auto-negotiation\n");
+      nlldbg("Timed out waiting for auto-negotiation\n");
       return -ETIMEDOUT;
     }
 
@@ -1968,13 +1924,13 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
   ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, CONFIG_SAMA5_EMAC_PHYSR, &phyval);
   if (ret < 0)
     {
-      ndbg("Failed to read PHY status register\n");
+      nlldbg("Failed to read PHY status register\n");
       return ret;
     }
 
   /* Remember the selected speed and duplex modes */
 
-  nvdbg("PHYSR[%d]: %04x\n", CONFIG_SAMA5_EMAC_PHYSR, phyval);
+  nllvdbg("PHYSR[%d]: %04x\n", CONFIG_SAMA5_EMAC_PHYSR, phyval);
 
   /* Different PHYs present speed and mode information in different ways.  IF
    * This CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG is selected, this indicates that the PHY
@@ -2038,7 +1994,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
   ret = sam_phywrite(CONFIG_SAMA5_EMAC_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
-     ndbg("Failed to write the PHY MCR: %d\n", ret);
+     nlldbg("Failed to write the PHY MCR: %d\n", ret);
       return ret;
     }
   up_mdelay(PHY_CONFIG_DELAY);
@@ -2053,7 +2009,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
 #endif
 #endif
 
-  ndbg("Duplex: %s Speed: %d MBps\n",
+  nlldbg("Duplex: %s Speed: %d MBps\n",
        priv->fduplex ? "FULL" : "HALF",
        priv->mbps100 ? 100 : 10);
 
@@ -2156,13 +2112,13 @@ static void sam_txreset(struct sam_emac_s *priv)
 
     physaddr           = sam_physramaddr(bufaddr);
     txdesc[ndx].addr   = physaddr;
-    txdesc[ndx].status = EMACTXD_CTRL_USED;
+    txdesc[ndx].status = EMACTXD_STA_USED;
   }
 
   /* Mark the final descriptor in the list */
 
   txdesc[CONFIG_SAMA5_EMAC_NTXBUFFERS - 1].status =
-    EMACTXD_CTRL_USED | EMACTXD_CTRL_WRAP;
+    EMACTXD_STA_USED | EMACTXD_STA_WRAP;
 
   /* Set the Transmit Buffer Queue Pointer Register */
 
@@ -2327,7 +2283,7 @@ static int sam_emac_configure(FAR struct sam_emac_s *priv)
 {
   uint32_t regval;
 
-  nvdbg("Entry\n");
+  nllvdbg("Entry\n");
 
   /* Enable clocking to the EMAC peripheral */
 
@@ -2441,7 +2397,7 @@ int sam_emac_initialize(void)
   priv->txpoll = wd_create();
   if (!priv->txpoll)
     {
-      ndbg("ERROR: Failed to create periodic poll timer\n");
+      nlldbg("ERROR: Failed to create periodic poll timer\n");
       ret = -EAGAIN;
       goto errout;
     }
@@ -2449,7 +2405,7 @@ int sam_emac_initialize(void)
   priv->txtimeout = wd_create();     /* Create TX timeout timer */
   if (!priv->txpoll)
     {
-      ndbg("ERROR: Failed to create periodic poll timer\n");
+      nlldbg("ERROR: Failed to create periodic poll timer\n");
       ret = -EAGAIN;
       goto errout_with_txpoll;
     }
@@ -2463,7 +2419,7 @@ int sam_emac_initialize(void)
   ret = sam_buffer_initialize(priv);
   if (ret < 0)
     {
-      ndbg("ERROR: sam_buffer_initialize failed: %d\n", ret);
+      nlldbg("ERROR: sam_buffer_initialize failed: %d\n", ret);
       goto errout_with_txtimeout;
     }
 
@@ -2474,7 +2430,7 @@ int sam_emac_initialize(void)
   ret = irq_attach(SAM_IRQ_EMAC, sam_emac_interrupt);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);
+      nlldbg("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);
       goto errout_with_buffers;
     }
 
@@ -2487,7 +2443,7 @@ int sam_emac_initialize(void)
   ret = sam_ifdown(&priv->dev);
   if (ret < 0)
     {
-      ndbg("ERROR: Failed to put the interface in the down state: %d\n", ret);
+      nlldbg("ERROR: Failed to put the interface in the down state: %d\n", ret);
       goto errout_with_buffers;
     }
 
@@ -2496,7 +2452,7 @@ int sam_emac_initialize(void)
   ret = netdev_register(&priv->dev);
   if (ret >= 0)
     {
-      ndbg("ERROR: netdev_register() failed: %d\n", ret);
+      nlldbg("ERROR: netdev_register() failed: %d\n", ret);
       return ret;
     }
 
