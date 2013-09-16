@@ -267,18 +267,17 @@ config SAMA5_EMAC_NRXBUFFERS
 		EMAC buffer memory is segmented into 128 byte units (not
 		configurable).  This setting provides the number of such 128 byte
 		units used for reception.  This is also equal to the number of RX
-		descriptors that will be allocate.d  The selected value must be an
+		descriptors that will be allocated  The selected value must be an
 		even power of 2.
 
 config SAMA5_EMAC_NTXBUFFERS
 	int "Number of TX buffers"
 	default 1
 	---help---
-		EMAC buffer memory is segmented into 128 byte units (not
-		configurable).  This setting provides the number of such 128 byte
-		units used for transmission.  This is also equal to the number of TX
-		descriptors that will be allocated.  The selected value must be an
-		even power of 2.
+		EMAC buffer memory is segmented into full Ethernet packets (size
+		NET_BUFSIZE bytes).  This setting provides the number of such packets
+		that can be in flight.  This is also equal to the number of TX
+		descriptors that will be allocated.
 
 config SAMA5_EMAC_PREALLOCATE
 	bool "Preallocate buffers"

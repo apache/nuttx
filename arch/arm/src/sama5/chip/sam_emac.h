@@ -395,43 +395,43 @@
 
 /* Receive buffer descriptor:  Control word */
 
-#define EMACRXD_CTRL_FRLEN_SHIFT  (0)       /* Bits 0-11: Length of frame */
-#define EMACRXD_CTRL_FRLEN_MASK   (0x000007ff << EMACRXD_CTRL_FRLEN_SHIFT)
-#define EMACRXD_CTRL_BOFFS_SHIFT  (12)      /* Bits 12-13: Receive buffer offset */
-#define EMACRXD_CTRL_BOFFS_MASK   (3 << EMACRXD_CTRL_BOFFS_SHIFT)
-#define EMACRXD_CTRL_SOF          (1 << 14) /* Bit 14: Start of frame */
-#define EMACRXD_CTRL_EOF          (1 << 15) /* Bit 15: End of frame */
-#define EMACRXD_CTRL_CFI          (1 << 16) /* Bit 16: Concatenation format indicator (CFI) bit */
-#define EMACRXD_CTRL_VLPRIO_SHIFT (17)      /* Bits 17-19: VLAN priority */
-#define EMACRXD_CTRL_VLPRIO_MASK  (7 << EMACRXD_CTRL_VLANPRIO_SHIFT)
-#define EMACRXD_CTRL_PRIODET      (1 << 20) /* Bit 20: Priority tag detected */
-#define EMACRXD_CTRL_VLANTAG      (1 << 21) /* Bit 21: VLAN tag detected */
-#define EMACRXD_CTRL_TYPEID       (1 << 22) /* Bit 22: Type ID match */
-#define EMACRXD_CTRL_ADDR4        (1 << 23) /* Bit 23: Specific address register 4 match */
-#define EMACRXD_CTRL_ADDR3        (1 << 24) /* Bit 24: Specific address register 3 match */
-#define EMACRXD_CTRL_ADDR2        (1 << 25) /* Bit 25: Specific address register 2 match */
-#define EMACRXD_CTRL_ADDR1        (1 << 26) /* Bit 26: Specific address register 1 match */
+#define EMACRXD_STA_FRLEN_SHIFT   (0)       /* Bits 0-11: Length of frame */
+#define EMACRXD_STA_FRLEN_MASK    (0x000007ff << EMACRXD_STA_FRLEN_SHIFT)
+#define EMACRXD_STA_BOFFS_SHIFT   (12)      /* Bits 12-13: Receive buffer offset */
+#define EMACRXD_STA_BOFFS_MASK    (3 << EMACRXD_STA_BOFFS_SHIFT)
+#define EMACRXD_STA_SOF           (1 << 14) /* Bit 14: Start of frame */
+#define EMACRXD_STA_EOF           (1 << 15) /* Bit 15: End of frame */
+#define EMACRXD_STA_CFI           (1 << 16) /* Bit 16: Concatenation format indicator (CFI) bit */
+#define EMACRXD_STA_VLPRIO_SHIFT  (17)      /* Bits 17-19: VLAN priority */
+#define EMACRXD_STA_VLPRIO_MASK   (7 << EMACRXD_STA_VLANPRIO_SHIFT)
+#define EMACRXD_STA_PRIODET       (1 << 20) /* Bit 20: Priority tag detected */
+#define EMACRXD_STA_VLANTAG       (1 << 21) /* Bit 21: VLAN tag detected */
+#define EMACRXD_STA_TYPEID        (1 << 22) /* Bit 22: Type ID match */
+#define EMACRXD_STA_ADDR4         (1 << 23) /* Bit 23: Specific address register 4 match */
+#define EMACRXD_STA_ADDR3         (1 << 24) /* Bit 24: Specific address register 3 match */
+#define EMACRXD_STA_ADDR2         (1 << 25) /* Bit 25: Specific address register 2 match */
+#define EMACRXD_STA_ADDR1         (1 << 26) /* Bit 26: Specific address register 1 match */
                                             /* Bit 27: Reserved */
-#define EMACRXD_CTRL_EXTADDR      (1 << 28) /* Bit 28: External address match */
-#define EMACRXD_CTRL_UCAST        (1 << 29) /* Bit 29: Unicast hash match */
-#define EMACRXD_CTRL_MCAST        (1 << 30) /* Bit 30: Multicast hash match */
-#define EMACRXD_CTRL_BCAST        (1 << 31) /* Bit 31: Global all ones broadcast address detected */
+#define EMACRXD_STA_EXTADDR       (1 << 28) /* Bit 28: External address match */
+#define EMACRXD_STA_UCAST         (1 << 29) /* Bit 29: Unicast hash match */
+#define EMACRXD_STA_MCAST         (1 << 30) /* Bit 30: Multicast hash match */
+#define EMACRXD_STA_BCAST         (1 << 31) /* Bit 31: Global all ones broadcast address detected */
 
 /* Transmit buffer descriptor:  Address word (un-aligned, 32-bit address */
 
 /* Transmit buffer descriptor:  Control word */
 
-#define EMACTXD_CTRL_BUFLEN_SHIFT (0)       /* Bits 0-10: Length of buffer */
-#define EMACTXD_CTRL_BUFLEN_MASK  (0x000003ff << EMACTXD_CTRL_BUFLEN_SHIFT)
+#define EMACTXD_STA_BUFLEN_SHIFT  (0)       /* Bits 0-10: Length of buffer */
+#define EMACTXD_STA_BUFLEN_MASK   (0x000003ff << EMACTXD_STA_BUFLEN_SHIFT)
                                             /* Bits 11-14: Reserved */
-#define EMACTXD_CTRL_LAST         (1 << 15) /* Bit 15: Last buffer in the current frame */
-#define EMACTXD_CTRL_NOCRC        (1 << 16) /* Bit 16: No CRC*/
+#define EMACTXD_STA_LAST          (1 << 15) /* Bit 15: Last buffer in the current frame */
+#define EMACTXD_STA_NOCRC         (1 << 16) /* Bit 16: No CRC*/
                                             /* Bits 17-26: Reserved */
-#define EMACTXD_CTRL_NOBUFFER     (1 << 27) /* Bit 27: Buffers exhausted in mid frame*/
-#define EMACTXD_CTRL_TXUR         (1 << 28) /* Bit 28: Transmit underrun*/
-#define EMACTXD_CTRL_TXERR        (1 << 29) /* Bit 29: Retry limit exceeded, transmit error detected*/
-#define EMACTXD_CTRL_WRAP         (1 << 30) /* Bit 30: Last descriptor in descriptor list*/
-#define EMACTXD_CTRL_USED         (1 << 31) /* Bit 31: Zero for the EMAC to read from buffer*/
+#define EMACTXD_STA_NOBUFFER      (1 << 27) /* Bit 27: Buffers exhausted in mid frame*/
+#define EMACTXD_STA_TXUR          (1 << 28) /* Bit 28: Transmit underrun*/
+#define EMACTXD_STA_TXERR         (1 << 29) /* Bit 29: Retry limit exceeded, transmit error detected*/
+#define EMACTXD_STA_WRAP          (1 << 30) /* Bit 30: Last descriptor in descriptor list*/
+#define EMACTXD_STA_USED          (1 << 31) /* Bit 31: Zero for the EMAC to read from buffer*/
 
 /************************************************************************************
  * Public Types
