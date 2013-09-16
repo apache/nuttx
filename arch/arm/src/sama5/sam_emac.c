@@ -51,16 +51,21 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/mii.h>
-
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arp.h>
 #include <nuttx/net/uip/uip-arch.h>
 
+#include "up_arch.h"
 #include "up_internal.h"
+#include "cache.h"
 
 #include "chip.h"
+#include "chip/sam_pinmap.h"
 #include "sam_pio.h"
+#include "sam_periphclks.h"
+#include "sam_memories.h"
 #include "sam_ethernet.h"
 
 #include <arch/board/board.h>
@@ -70,94 +75,80 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_SAMA5_PHYADDR
-#  error "CONFIG_SAMA5_PHYADDR must be defined in the NuttX configuration"
+/* Number of buffer for RX */
+
+#ifndef CONFIG_SAMA5_EMAC_NRXBUFFERS
+#  define CONFIG_SAMA5_EMAC_NRXBUFFERS  16
 #endif
 
-#if !defined(CONFIG_SAMA5_MII) && !defined(CONFIG_SAMA5_RMII)
-#  warning "Neither CONFIG_SAMA5_MII nor CONFIG_SAMA5_RMII defined"
+/* Number of buffer for TX */
+
+#ifndef CONFIG_SAMA5_EMAC_NTXBUFFERS
+#  define CONFIG_SAMA5_EMAC_NTXBUFFERS  32
 #endif
 
-#if defined(CONFIG_SAMA5_MII) && defined(CONFIG_SAMA5_RMII)
-#  error "Both CONFIG_SAMA5_MII and CONFIG_SAMA5_RMII defined"
+#undef CONFIG_SAMA5_EMAC_NBC
+
+#ifndef CONFIG_SAMA5_EMAC_PHYADDR
+#  error "CONFIG_SAMA5_EMAC_PHYADDR must be defined in the NuttX configuration"
 #endif
 
-#ifdef CONFIG_SAMA5_AUTONEG
-#  ifndef CONFIG_SAMA5_PHYSR
-#    error "CONFIG_SAMA5_PHYSR must be defined in the NuttX configuration"
+#if !defined(CONFIG_SAMA5_EMAC_MII) && !defined(CONFIG_SAMA5_EMAC_RMII)
+#  warning "Neither CONFIG_SAMA5_EMAC_MII nor CONFIG_SAMA5_EMAC_RMII defined"
+#endif
+
+#if defined(CONFIG_SAMA5_EMAC_MII) && defined(CONFIG_SAMA5_EMAC_RMII)
+#  error "Both CONFIG_SAMA5_EMAC_MII and CONFIG_SAMA5_EMAC_RMII defined"
+#endif
+
+#ifdef CONFIG_SAMA5_EMAC_AUTONEG
+#  ifndef CONFIG_SAMA5_EMAC_PHYSR
+#    error "CONFIG_SAMA5_EMAC_PHYSR must be defined in the NuttX configuration"
 #  endif
-#  ifdef CONFIG_SAMA5_PHYSR_ALTCONFIG
-#    ifndef CONFIG_SAMA5_PHYSR_ALTMODE
-#      error "CONFIG_SAMA5_PHYSR_ALTMODE must be defined in the NuttX configuration"
+#  ifdef CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG
+#    ifndef CONFIG_SAMA5_EMAC_PHYSR_ALTMODE
+#      error "CONFIG_SAMA5_EMAC_PHYSR_ALTMODE must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_PHYSR_10HD
-#      error "CONFIG_SAMA5_PHYSR_10HD must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC_PHYSR_10HD
+#      error "CONFIG_SAMA5_EMAC_PHYSR_10HD must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_PHYSR_100HD
-#      error "CONFIG_SAMA5_PHYSR_100HD must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC_PHYSR_100HD
+#      error "CONFIG_SAMA5_EMAC_PHYSR_100HD must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_PHYSR_10FD
-#      error "CONFIG_SAMA5_PHYSR_10FD must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC_PHYSR_10FD
+#      error "CONFIG_SAMA5_EMAC_PHYSR_10FD must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_PHYSR_100FD
-#      error "CONFIG_SAMA5_PHYSR_100FD must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC_PHYSR_100FD
+#      error "CONFIG_SAMA5_EMAC_PHYSR_100FD must be defined in the NuttX configuration"
 #    endif
 #  else
-#    ifndef CONFIG_SAMA5_PHYSR_SPEED
-#      error "CONFIG_SAMA5_PHYSR_SPEED must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC_PHYSR_SPEED
+#      error "CONFIG_SAMA5_EMAC_PHYSR_SPEED must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_PHYSR_100MBPS
-#      error "CONFIG_SAMA5_PHYSR_100MBPS must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC_PHYSR_100MBPS
+#      error "CONFIG_SAMA5_EMAC_PHYSR_100MBPS must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_PHYSR_MODE
-#      error "CONFIG_SAMA5_PHYSR_MODE must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC_PHYSR_MODE
+#      error "CONFIG_SAMA5_EMAC_PHYSR_MODE must be defined in the NuttX configuration"
 #    endif
-#    ifndef CONFIG_SAMA5_PHYSR_FULLDUPLEX
-#      error "CONFIG_SAMA5_PHYSR_FULLDUPLEX must be defined in the NuttX configuration"
+#    ifndef CONFIG_SAMA5_EMAC_PHYSR_FULLDUPLEX
+#      error "CONFIG_SAMA5_EMAC_PHYSR_FULLDUPLEX must be defined in the NuttX configuration"
 #    endif
 #  endif
 #endif
 
-/* Ethernet buffer sizes, number of buffers, and number of descriptors */
+/* EMAC buffer sizes, number of buffers, and number of descriptors */
 
-#ifndef CONFIG_NET_MULTIBUFFER
-#  error "CONFIG_NET_MULTIBUFFER is required"
+#ifdef CONFIG_NET_MULTIBUFFER
+#  error CONFIG_NET_MULTIBUFFER must not be set
 #endif
 
-/* Add 4 to the configured buffer size to account for the 2 byte checksum
- * memory needed at the end of the maximum size packet.  Buffer sizes must
- * be an even multiple of 4, 8, or 16 bytes (depending on buswidth).  We
- * will use the 16-byte alignment in all cases.
- */
-
-#define OPTIMAL_EMAC_BUFSIZE ((CONFIG_NET_BUFSIZE + 4 + 15) & ~15)
-
-#ifndef CONFIG_SAMA5_EMAC_BUFSIZE
-#  define CONFIG_SAMA5_EMAC_BUFSIZE OPTIMAL_EMAC_BUFSIZE
-#endif
-
-#if CONFIG_SAMA5_EMAC_BUFSIZE > EMAC_TDES1_TBS1_MASK
-#  error "CONFIG_SAMA5_EMAC_BUFSIZE is too large"
-#endif
-
-#if (CONFIG_SAMA5_EMAC_BUFSIZE & 15) != 0
-#  error "CONFIG_SAMA5_EMAC_BUFSIZE must be aligned"
-#endif
-
-#if CONFIG_SAMA5_EMAC_BUFSIZE != OPTIMAL_EMAC_BUFSIZE
-#  warning "You using an incomplete/untested configuration"
-#endif
-
-#ifndef CONFIG_SAMA5_EMAC_NRXDESC
-#  define CONFIG_SAMA5_EMAC_NRXDESC 8
-#endif
-#ifndef CONFIG_SAMA5_EMAC_NTXDESC
-#  define CONFIG_SAMA5_EMAC_NTXDESC 4
-#endif
+#define EMAC_RX_UNITSIZE            128     /* Fixed size for RX buffer  */
+#define EMAC_TX_UNITSIZE            1518    /* Size for ETH frame length */
 
 /* We need at least one more free buffer than transmit buffers */
 
-#define SAM_EMAC_NFREEBUFFERS (CONFIG_SAMA5_EMAC_NTXDESC+1)
+#define SAM_EMAC_NFREEBUFFERS (CONFIG_SAMA5_EMAC_NTXBUFFERS+1)
 
 /* Extremely detailed register debug that you would normally never want
  * enabled.
@@ -197,7 +188,7 @@
 /* Interrupt bit sets *******************************************************/
 
 /* Helpers ******************************************************************/
-/* This is a helper pointer for accessing the contents of the Ethernet
+/* This is a helper pointer for accessing the contents of the EMAC
  * header
  */
 
@@ -223,18 +214,18 @@ struct sam_emac_s
 
   /* Used to track transmit and receive descriptors */
 
+  uint8_t               phyaddr;     /* PHY address (pre-defined by pins on reset) */
+  uint16_t              txhead;      /* Circular buffer head index */
+  uint16_t              txtail;      /* Circualr buffer tail index */
+  uint16_t              rxndx;       /* RX index for current processing RX descriptor */
+  uint16_t              segments;    /* RX segment count */
+  uint16_t              inflight;    /* Number of TX transfers "in_flight" */
+  uint16_t              retries;     /* PHY retry count */
+
   uint8_t              *rxbuffer;    /* Allocated RX buffers */
   uint8_t              *txbuffer;    /* Allocated TX buffers */
   struct emac_rxdesc_s *rxdesc;      /* Allocated RX descriptors */
   struct emac_txdesc_s *txdesc;      /* Allocated TX descriptors */
-  struct emac_txdesc_s *txhead;      /* Next available TX descriptor */
-  struct emac_rxdesc_s *rxhead;      /* Next available RX descriptor */
-
-  struct emac_txdesc_s *txtail;      /* First "in_flight" TX descriptor */
-  struct emac_rxdesc_s *rxcurr;      /* First RX descriptor of the segment */
-  uint16_t              segments;    /* RX segment count */
-  uint16_t              inflight;    /* Number of TX transfers "in_flight" */
-  sq_queue_t            freeb;       /* The free buffer list */
 
   /* Debug stuff */
 
@@ -244,16 +235,6 @@ struct sam_emac_s
    uint32_t           vallast;    /* Last value */
    int                ntimes;     /* Number of times */
 #endif
-
-  /* Descriptor allocations */
-
-  struct emac_rxdesc_s rxtable[CONFIG_SAMA5_EMAC_NRXDESC];
-  struct emac_txdesc_s txtable[CONFIG_SAMA5_EMAC_NTXDESC];
-
-  /* Buffer allocations */
-
-  uint8_t rxbuffer[CONFIG_SAMA5_EMAC_NRXDESC*CONFIG_SAMA5_EMAC_BUFSIZE];
-  uint8_t alloc[SAM_EMAC_NFREEBUFFERS*CONFIG_SAMA5_EMAC_BUFSIZE];
 };
 
 /****************************************************************************
@@ -306,13 +287,6 @@ static void sam_putreg(struct sam_emac_s *priv, uintptr_t addr, uint32_t val);
 # define sam_putreg(priv,addr,val)  putreg32(val,addr)
 #endif
 
-/* Free buffer management */
-
-static void sam_initbuffer(FAR struct sam_emac_s *priv);
-static inline uint8_t *sam_allocbuffer(FAR struct sam_emac_s *priv);
-static inline void sam_freebuffer(FAR struct sam_emac_s *priv, uint8_t *buffer);
-static inline bool sam_isfreebuffer(FAR struct sam_emac_s *priv);
-
 /* Common TX logic */
 
 static int  sam_transmit(FAR struct sam_emac_s *priv);
@@ -327,7 +301,7 @@ static int  sam_recvframe(FAR struct sam_emac_s *priv);
 static void sam_receive(FAR struct sam_emac_s *priv);
 static void sam_freeframe(FAR struct sam_emac_s *priv);
 static void sam_txdone(FAR struct sam_emac_s *priv);
-static int  sam_interrupt(int irq, FAR void *context);
+static int  sam_emac_interrupt(int irq, FAR void *context);
 
 /* Watchdog timer expirations */
 
@@ -344,11 +318,6 @@ static int  sam_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 static int  sam_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 #endif
 
-/* Descriptor Initialization */
-
-static void sam_txdescinit(FAR struct sam_emac_s *priv);
-static void sam_rxdescinit(FAR struct sam_emac_s *priv);
-
 /* PHY Initialization */
 
 static int  sam_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
@@ -356,23 +325,19 @@ static int  sam_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t valu
 #ifdef CONFIG_PHY_DM9161
 static inline int sam_dm9161(FAR struct sam_emac_s *priv);
 #endif
+static int  sam_autonegotiate(struct sam_emac_s *priv);
+static bool sam_linkup(struct sam_emac_s *priv);
 static int  sam_phyinit(FAR struct sam_emac_s *priv);
 
 /* MAC/DMA Initialization */
 
-#ifdef CONFIG_SAMA5_MII
-static inline void sam_selectmii(void);
-#endif
-#ifdef CONFIG_SAMA5_RMII
-static inline void sam_selectrmii(void);
-#endif
-static inline void sam_ethgpioconfig(FAR struct sam_emac_s *priv);
-static void sam_ethreset(FAR struct sam_emac_s *priv);
-static int  sam_macconfig(FAR struct sam_emac_s *priv);
+static void sam_txreset(struct sam_emac_s *priv);
+static void sam_rxreset(struct sam_emac_s *priv);
+static void sam_emac_reset(FAR struct sam_emac_s *priv);
 static void sam_macaddress(FAR struct sam_emac_s *priv);
-static int  sam_macenable(FAR struct sam_emac_s *priv);
-static int  sam_ethconfig(FAR struct sam_emac_s *priv);
+static int  sam_emac_configure(FAR struct sam_emac_s *priv);
 static int  sam_buffer_initialize(struct sam_emac_s *priv);
+static void sam_buffer_free(struct sam_emac_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -475,121 +440,6 @@ static void sam_putreg(struct twi_dev_s *priv, uintptr_t address,
 #endif
 
 /****************************************************************************
- * Function: sam_initbuffer
- *
- * Description:
- *   Initialize the free buffer list.
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called during early driver initialization before Ethernet interrupts
- *   are enabled.
- *
- ****************************************************************************/
-
-static void sam_initbuffer(FAR struct sam_emac_s *priv)
-{
-  uint8_t *buffer;
-  int i;
-
-  /* Initialize the head of the free buffer list */
-
-  sq_init(&priv->freeb);
-
-  /* Add all of the pre-allocated buffers to the free buffer list */
-
-  for (i = 0, buffer = priv->alloc;
-       i < SAM_EMAC_NFREEBUFFERS;
-       i++, buffer += CONFIG_SAMA5_EMAC_BUFSIZE)
-    {
-      sq_addlast((FAR sq_entry_t *)buffer, &priv->freeb);
-    }
-}
-
-/****************************************************************************
- * Function: sam_allocbuffer
- *
- * Description:
- *   Allocate one buffer from the free buffer list.
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   Pointer to the allocated buffer on success; NULL on failure
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
- *
- ****************************************************************************/
-
-static inline uint8_t *sam_allocbuffer(FAR struct sam_emac_s *priv)
-{
-  /* Allocate a buffer by returning the head of the free buffer list */
-
-  return (uint8_t *)sq_remfirst(&priv->freeb);
-}
-
-/****************************************************************************
- * Function: sam_freebuffer
- *
- * Description:
- *   Return a buffer to the free buffer list.
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *   buffer - A pointer to the buffer to be freed
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   May or may not be called from an interrupt handler.  In either case,
- *   global interrupts are disabled, either explicitly or indirectly through
- *   interrupt handling logic.
- *
- ****************************************************************************/
-
-static inline void sam_freebuffer(FAR struct sam_emac_s *priv, uint8_t *buffer)
-{
-  /* Free the buffer by adding it to to the end of the free buffer list */
-
-  sq_addlast((FAR sq_entry_t *)buffer, &priv->freeb);
-}
-
-/****************************************************************************
- * Function: sam_isfreebuffer
- *
- * Description:
- *   Return TRUE if the free buffer list is not empty.
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   True if there are one or more buffers in the free buffer list;
- *   false if the free buffer list is empty
- *
- * Assumptions:
- *   None.
- *
- ****************************************************************************/
-
-static inline bool sam_isfreebuffer(FAR struct sam_emac_s *priv)
-{
-  /* Return TRUE if the free buffer list is not empty */
-
-  return !sq_empty(&priv->freeb);
-}
-
-/****************************************************************************
  * Function: sam_transmit
  *
  * Description:
@@ -613,137 +463,81 @@ static int sam_transmit(FAR struct sam_emac_s *priv)
 {
   struct emac_txdesc_s *txdesc;
   struct emac_txdesc_s *txfirst;
-
-  /* The internal (optimal) uIP buffer size may be configured to be larger
-   * than the Ethernet buffer size.
-   */
-
-#if OPTIMAL_EMAC_BUFSIZE > CONFIG_SAMA5_EMAC_BUFSIZE
   uint8_t *buffer;
   int bufcount;
   int lastsize;
+  int txndx;
   int i;
-#endif
 
   /* Verify that the hardware is ready to send another packet.  If we get
    * here, then we are committed to sending a packet; Higher level logic
    * must have assured that there is no transmission in progress.
    */
 
-  txdesc  = priv->txhead;
+  txndx   = priv->txhead;
+  txdesc  = &priv->txdesc[txndx];
   txfirst = txdesc;
 
-  nllvdbg("d_len: %d d_buf: %p txhead: %p tdes0: %08x\n",
-          priv->dev.d_len, priv->dev.d_buf, txdesc, txdesc->tdes0);
+  nllvdbg("d_len: %d d_buf: %p txhead: %d\n",
+          priv->dev.d_len, priv->dev.d_buf, txndx);
 
-  DEBUGASSERT(txdesc && (txdesc->tdes0 & EMAC_TDES0_OWN) == 0);
+  /* Now many buffers will be need to send the packet? */
 
-  /* Is the size to be sent greater than the size of the Ethernet buffer? */
+  bufcount = (priv->dev.d_len + (CONFIG_NET_BUFSIZE-1)) / CONFIG_NET_BUFSIZE;
+  lastsize = priv->dev.d_len - (bufcount - 1) * CONFIG_NET_BUFSIZE;
 
-  DEBUGASSERT(priv->dev.d_len > 0 && priv->dev.d_buf != NULL);
+  nllvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
 
-#if OPTIMAL_EMAC_BUFSIZE > CONFIG_SAMA5_EMAC_BUFSIZE
-  if (priv->dev.d_len > CONFIG_SAMA5_EMAC_BUFSIZE)
+  /* Set the first segment bit in the first TX descriptor */
+#warning Missing logic
+
+  /* Set up all but the last TX descriptor */
+
+  buffer = priv->dev.d_buf;
+
+  for (i = 0; i < bufcount; i++)
     {
-      /* Yes... how many buffers will be need to send the packet? */
-
-      bufcount = (priv->dev.d_len + (CONFIG_SAMA5_EMAC_BUFSIZE-1)) / CONFIG_SAMA5_EMAC_BUFSIZE;
-      lastsize = priv->dev.d_len - (bufcount - 1) * CONFIG_SAMA5_EMAC_BUFSIZE;
-
-      nllvdbg("bufcount: %d lastsize: %d\n", bufcount, lastsize);
-
-      /* Set the first segment bit in the first TX descriptor */
-
-      txdesc->tdes0 |= EMAC_TDES0_FS;
-
-      /* Set up all but the last TX descriptor */
-
-      buffer = priv->dev.d_buf;
-
-      for (i = 0; i < bufcount; i++)
-        {
-          /* This could be a normal event but the design does not handle it */
-
-          DEBUGASSERT((txdesc->tdes0 & EMAC_TDES0_OWN) == 0);
-
-          /* Set the Buffer1 address pointer */
-
-          txdesc->tdes2 = (uint32_t)buffer;
-
-          /* Set the buffer size in all TX descriptors */
-
-          if (i == (bufcount-1))
-            {
-              /* This is the last segment.  Set the last segment bit in the
-               * last TX descriptor and ask for an interrupt when this
-               * segment transfer completes.
-               */
-
-              txdesc->tdes0 |= (EMAC_TDES0_LS | EMAC_TDES0_IC);
-
-              /* This segement is, most likely, of fractional buffersize */
-
-              txdesc->tdes1  = lastsize;
-              buffer        += lastsize;
-            }
-          else
-            {
-              /* This is not the last segment.  We don't want an interrupt
-               * when this segment transfer completes.
-               */
-
-              txdesc->tdes0 &= ~EMAC_TDES0_IC;
-
-              /* The size of the transfer is the whole buffer */
-
-              txdesc->tdes1  = CONFIG_SAMA5_EMAC_BUFSIZE;
-              buffer        += CONFIG_SAMA5_EMAC_BUFSIZE;
-            }
-
-          /* Give the descriptor to DMA */
-
-          txdesc->tdes0 |= EMAC_TDES0_OWN;
-          txdesc         = (struct emac_txdesc_s *)txdesc->tdes3;
-        }
-    }
-  else
-#endif
-    {
-      /* The single descriptor is both the first and last segment.  And we do
-       * want an interrupt when the transfer completes.
-       */
-
-      txdesc->tdes0 |= (EMAC_TDES0_FS | EMAC_TDES0_LS | EMAC_TDES0_IC);
-
-      /* Set frame size */
-
-      DEBUGASSERT(priv->dev.d_len <= CONFIG_NET_BUFSIZE);
-      txdesc->tdes1 = priv->dev.d_len;
-
       /* Set the Buffer1 address pointer */
+#warning Missing logic
 
-      txdesc->tdes2 = (uint32_t)priv->dev.d_buf;
+      /* Set the buffer size in all TX descriptors */
 
-      /* Set OWN bit of the TX descriptor tdes0.  This gives the buffer to
-       * Ethernet DMA
-       */
+      if (i == (bufcount-1))
+        {
+          /* This is the last segment.  Set the last segment bit in the
+           * last TX descriptor and ask for an interrupt when this
+           * segment transfer completes.
+           */
+#warning Missing logic
 
-      txdesc->tdes0 |= EMAC_TDES0_OWN;
+          /* This segement is, most likely, of fractional buffersize */
+#warning Missing logic
+          buffer        += lastsize;
+        }
+      else
+        {
+          /* This is not the last segment.  We don't want an interrupt
+           * when this segment transfer completes.
+           */
+#warning Missing logic
 
-      /* Point to the next available TX descriptor */
+          /* The size of the transfer is the whole buffer */
+#warning Missing logic
 
-      txdesc = (struct emac_txdesc_s *)txdesc->tdes3;
+        }
+
+      /* Give the descriptor to DMA */
+#warning Missing logic
     }
 
   /* Remember where we left off in the TX descriptor chain */
 
-  priv->txhead = txdesc;
+  priv->txhead = txndx;
 
   /* Detach the buffer from priv->dev structure.  That buffer is now
    * "in-flight".
    */
 
-  priv->dev.d_buf = NULL;
   priv->dev.d_len = 0;
 
   /* If there is no other TX buffer, in flight, then remember the location
@@ -753,14 +547,14 @@ static int sam_transmit(FAR struct sam_emac_s *priv)
   if (!priv->txtail)
     {
       DEBUGASSERT(priv->inflight == 0);
-      priv->txtail = txfirst;
+      priv->txtail = txndx;
     }
 
   /* Increment the number of TX transfer in-flight */
 
   priv->inflight++;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+  nllvdbg("txhead: %d txtail: %d inflight: %d\n",
           priv->txhead, priv->txtail, priv->inflight);
 
   /* If all TX descriptors are in-flight, then we have to disable receive interrupts
@@ -768,7 +562,7 @@ static int sam_transmit(FAR struct sam_emac_s *priv)
    * events.
    */
 
-  if (priv->inflight >= CONFIG_SAMA5_EMAC_NTXDESC)
+  if (priv->inflight >= CONFIG_SAMA5_EMAC_NTXBUFFERS)
     {
 #warning "Missing logic"
     }
@@ -827,39 +621,18 @@ static int sam_uiptxpoll(struct uip_driver_s *dev)
       sam_transmit(priv);
       DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
 
-      /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
+      /* Check if the next TX descriptor is owned by the EMAC DMA or CPU.  We
        * cannot perform the TX poll if we are unable to accept another packet for
        * transmission.
-       *
-       * In a race condition, EMAC_TDES0_OWN may be cleared BUT still not available
-       * because sam_freeframe() has not yet run.  If sam_freeframe() has run,
-       * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
-       * CONFIG_SAMA5_EMAC_NTXDESC).
        */
+#warning Missing logic
 
-      if ((priv->txhead->tdes0 & EMAC_TDES0_OWN) != 0 ||
-           priv->txhead->tdes2 != 0)
         {
           /* We have to terminate the poll if we have no more descriptors
            * available for another transfer.
            */
 
           return -EBUSY;
-        }
-
-      /* We have the descriptor, we can continue the poll. Allocate a new
-       * buffer for the poll.
-       */
-
-      dev->d_buf = sam_allocbuffer(priv);
-
-      /* We can't continue the poll if we have no buffers */
-
-      if (dev->d_buf == NULL)
-        {
-          /* Terminate the poll. */
-
-          return -ENOMEM;
         }
     }
 
@@ -892,43 +665,16 @@ static void sam_dopoll(FAR struct sam_emac_s *priv)
 {
   FAR struct uip_driver_s *dev = &priv->dev;
 
-  /* Check if the next TX descriptor is owned by the Ethernet DMA or
+  /* Check if the next TX descriptor is owned by the EMAC DMA or
    * CPU.  We cannot perform the TX poll if we are unable to accept
    * another packet for transmission.
-   *
-   * In a race condition, EMAC_TDES0_OWN may be cleared BUT still not available
-   * because sam_freeframe() has not yet run.  If sam_freeframe() has run,
-   * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
-   * CONFIG_SAMA5_EMAC_NTXDESC).
    */
 
-  if ((priv->txhead->tdes0 & EMAC_TDES0_OWN) == 0 &&
-       priv->txhead->tdes2 == 0)
+#warning Missing logic
     {
-      /* If we have the descriptor, then poll uIP for new XMIT data.
-       * Allocate a buffer for the poll.
-       */
+      /* If we have the descriptor, then poll uIP for new XMIT data. */
 
-      DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
-      dev->d_buf = sam_allocbuffer(priv);
-
-      /* We can't poll if we have no buffers */
-
-      if (dev->d_buf)
-        {
-          (void)uip_poll(dev, sam_uiptxpoll);
-
-          /* We will, most likely end up with a buffer to be freed.  But it
-           * might not be the same one that we allocated above.
-           */
-
-          if (dev->d_buf)
-            {
-              DEBUGASSERT(dev->d_len == 0);
-              sam_freebuffer(priv, dev->d_buf);
-              dev->d_buf = NULL;
-            }
-        }
+      (void)uip_poll(dev, sam_uiptxpoll);
     }
 }
 
@@ -963,13 +709,11 @@ static void sam_freesegment(FAR struct sam_emac_s *priv,
   rxdesc = rxfirst;
   for (i = 0; i < segments; i++)
     {
-      rxdesc->rdes0 = EMAC_RDES0_OWN;
-      rxdesc = (struct emac_rxdesc_s *)rxdesc->rdes3;
+#warning Missing logic
     }
 
   /* Reset the segment managment logic */
 
-  priv->rxcurr   = NULL;
   priv->segments = 0;
 
   /* Check if the RX Buffer unavailable flag is set */
@@ -1002,20 +746,10 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
   struct emac_rxdesc_s *rxdesc;
   struct emac_rxdesc_s *rxcurr;
   uint8_t *buffer;
+  int rxndx;
   int i;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
-          priv->rxhead, priv->rxcurr, priv->segments);
-
-  /* Check if there are free buffers.  We cannot receive new frames in this
-   * design unless there is at least one free buffer.
-   */
-
-  if (!sam_isfreebuffer(priv))
-    {
-      nlldbg("No free buffers\n");
-      return -ENOMEM;
-    }
+  nllvdbg("rxndx: %d segments: %d\n", priv->rxndx, priv->segments);
 
   /* Scan descriptors owned by the CPU.  Scan until:
    *
@@ -1029,31 +763,23 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
    * transmit logic should also have disabled further RX interrupts.
    */
 
-  rxdesc = priv->rxhead;
-  for (i = 0;
-       (rxdesc->rdes0 & EMAC_RDES0_OWN) == 0 &&
-        i < CONFIG_SAMA5_EMAC_NRXDESC &&
-        priv->inflight < CONFIG_SAMA5_EMAC_NTXDESC;
-       i++)
+  rxndx  = priv->rxndx;
+  rxdesc = &priv->rxdesc[rxndx];
+
+#warning Missing logic
     {
       /* Check if this is the first segment in the frame */
-
-      if ((rxdesc->rdes0 & EMAC_RDES0_FS) != 0 &&
-          (rxdesc->rdes0 & EMAC_RDES0_LS) == 0)
-        {
-          priv->rxcurr   = rxdesc;
-          priv->segments = 1;
-        }
+#warning Missing logic
 
       /* Check if this is an intermediate segment in the frame */
-
-      else if (((rxdesc->rdes0 & EMAC_RDES0_LS) == 0)&&
-               ((rxdesc->rdes0 & EMAC_RDES0_FS) == 0))
+#warning Missing logic
+      if (true)
         {
           priv->segments++;
         }
 
       /* Otherwise, it is the last segment in the frame */
+#warning Missing logic
 
       else
         {
@@ -1067,50 +793,31 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
             }
           else
             {
-              rxcurr = priv->rxcurr;
+              rxcurr = &priv->rxdesc[priv->rxndx];
             }
 
-          nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
-              priv->rxhead, priv->rxcurr, priv->segments);
+          nllvdbg("rxndx: %d rxcurr: %p segments: %d\n",
+              priv->rxndx, rxcurr, priv->segments);
 
           /* Check if any errors are reported in the frame */
 
-          if ((rxdesc->rdes0 & EMAC_RDES0_ES) == 0)
+#warning Missing logic
+          if (true)
             {
               struct uip_driver_s *dev = &priv->dev;
 
               /* Get the Frame Length of the received packet: substruct 4
                * bytes of the CRC
                */
-
-              dev->d_len = ((rxdesc->rdes0 & EMAC_RDES0_FL_MASK) >> EMAC_RDES0_FL_SHIFT) - 4;
-
-              /* Get a buffer from the free list.  We don't even check if
-               * this is successful because we already assure the free
-               * list is not empty above.
-               */
-
-              buffer = sam_allocbuffer(priv);
-
-              /* Take the buffer from the RX descriptor of the first free
-               * segment, put it into the uIP device structure, then replace
-               * the buffer in the RX descriptor with the newly allocated
-               * buffer.
-               */
-
-              DEBUGASSERT(dev->d_buf == NULL);
-              dev->d_buf    = (uint8_t*)rxcurr->rdes2;
-              rxcurr->rdes2 = (uint32_t)buffer;
+#warning Missing logic
 
               /* Return success, remebering where we should re-start scanning
                * and resetting the segment scanning logic
                */
+#warning Missing logic
 
-              priv->rxhead   = (struct emac_rxdesc_s*)rxdesc->rdes3;
-              sam_freesegment(priv, rxcurr, priv->segments);
-
-              nllvdbg("rxhead: %p d_buf: %p d_len: %d\n",
-                      priv->rxhead, dev->d_buf, dev->d_len);
+              nllvdbg("rxndx: %d d_buf: %p d_len: %d\n",
+                      priv->rxndx, dev->d_buf, dev->d_len);
 
               return OK;
             }
@@ -1119,25 +826,22 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
               /* Drop the frame that contains the errors, reset the segment
                * scanning logic, and continue scanning with the next frame.
                */
-
-              nlldbg("DROPPED: RX descriptor errors: %08x\n", rxdesc->rdes0);
+#warning Missing logic
               sam_freesegment(priv, rxcurr, priv->segments);
             }
         }
 
       /* Try the next descriptor */
-
-      rxdesc = (struct emac_rxdesc_s*)rxdesc->rdes3;
+#warning Missing logic
     }
 
   /* We get here after all of the descriptors have been scanned or when rxdesc points
    * to the first descriptor owned by the DMA.  Remember where we left off.
    */
 
-  priv->rxhead = rxdesc;
+  priv->rxndx = rxndx;
 
-  nllvdbg("rxhead: %p rxcurr: %p segments: %d\n",
-          priv->rxhead, priv->rxcurr, priv->segments);
+  nllvdbg("rxndx: %d segments: %d\n", priv->rxndx, priv->segments);
 
   return -EAGAIN;
 }
@@ -1164,7 +868,7 @@ static void sam_receive(FAR struct sam_emac_s *priv)
   struct uip_driver_s *dev = &priv->dev;
 
   /* Loop while while sam_recvframe() successfully retrieves valid
-   * Ethernet frames.
+   * EMAC frames.
    */
 
   while (sam_recvframe(priv) == OK)
@@ -1224,20 +928,6 @@ static void sam_receive(FAR struct sam_emac_s *priv)
         {
           nlldbg("DROPPED: Unknown type: %04x\n", BUF->type);
         }
-
-      /* We are finished with the RX buffer.  NOTE:  If the buffer is
-       * re-used for transmission, the dev->d_buf field will have been
-       * nullified.
-       */
-
-      if (dev->d_buf)
-        {
-          /* Free the receive packet buffer */
-
-          sam_freebuffer(priv, dev->d_buf);
-          dev->d_buf = NULL;
-          dev->d_len = 0;
-        }
     }
 }
 
@@ -1261,45 +951,32 @@ static void sam_receive(FAR struct sam_emac_s *priv)
 static void sam_freeframe(FAR struct sam_emac_s *priv)
 {
   struct emac_txdesc_s *txdesc;
+  int txtail;
   int i;
 
-  nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+  nllvdbg("txhead: %d txtail: %d inflight: %d\n",
           priv->txhead, priv->txtail, priv->inflight);
 
   /* Scan for "in-flight" descriptors owned by the CPU */
 
-  txdesc = priv->txtail;
+  txtail = priv->txtail;
+  txdesc = &priv->txdesc[txtail];
+
   if (txdesc)
     {
       DEBUGASSERT(priv->inflight > 0);
 
-      for (i = 0; (txdesc->tdes0 & EMAC_TDES0_OWN) == 0; i++)
+#warning Missing logic
         {
-          /* There should be a buffer assigned to all in-flight
-           * TX descriptors.
-           */
-
-          nllvdbg("txtail: %p tdes0: %08x tdes2: %08x tdes3: %08x\n",
-                  txdesc, txdesc->tdes0, txdesc->tdes2, txdesc->tdes3);
-
-          DEBUGASSERT(txdesc->tdes2 != 0);
-
           /* Check if this is the first segment of a TX frame. */
+#warning Missing logic
 
-          if ((txdesc->tdes0 & EMAC_TDES0_FS) != 0)
-            {
-              /* Yes.. Free the buffer */
-
-              sam_freebuffer(priv, (uint8_t*)txdesc->tdes2);
-            }
-
-          /* In any event, make sure that TDES2 is nullified. */
-
-          txdesc->tdes2 = 0;
+          /* In any event, make sure that xxx is nullified. */
+#warning Missing logic
 
           /* Check if this is the last segement of a TX frame */
 
-          if ((txdesc->tdes0 & EMAC_TDES0_LS) != 0)
+#warning Missing logic
             {
               /* Yes.. Decrement the number of frames "in-flight". */
 
@@ -1314,24 +991,23 @@ static void sam_freeframe(FAR struct sam_emac_s *priv)
 
               if (priv->inflight <= 0)
                 {
-                  priv->txtail   = NULL;
+                  priv->txtail   = 0;
                   priv->inflight = 0;
                   return;
                 }
             }
 
           /* Try the next descriptor in the TX chain */
-
-          txdesc = (struct emac_txdesc_s*)txdesc->tdes3;
+#warning Missing logic
         }
 
       /* We get here if (1) there are still frames "in-flight". Remember
        * where we left off.
        */
 
-      priv->txtail = txdesc;
+      priv->txtail = txtail;
 
-      nllvdbg("txhead: %p txtail: %p inflight: %d\n",
+      nllvdbg("txhead: %d txtail: %d inflight: %d\n",
               priv->txhead, priv->txtail, priv->inflight);
     }
 }
@@ -1377,7 +1053,7 @@ static void sam_txdone(FAR struct sam_emac_s *priv)
 }
 
 /****************************************************************************
- * Function: sam_interrupt
+ * Function: sam_emac_interrupt
  *
  * Description:
  *   Hardware interrupt handler
@@ -1393,7 +1069,7 @@ static void sam_txdone(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static int sam_interrupt(int irq, FAR void *context)
+static int sam_emac_interrupt(int irq, FAR void *context)
 {
   register FAR struct sam_emac_s *priv = &g_emac;
   uint32_t dmasr;
@@ -1521,47 +1197,16 @@ static void sam_polltimer(int argc, uint32_t arg, ...)
   FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
   FAR struct uip_driver_s   *dev  = &priv->dev;
 
-  /* Check if the next TX descriptor is owned by the Ethernet DMA or CPU.  We
+  /* Check if the next TX descriptor is owned by the EMAC DMA or CPU.  We
    * cannot perform the timer poll if we are unable to accept another packet
    * for transmission.  Hmmm.. might be bug here.  Does this mean if there is
    * a transmit in progress, we will miss TCP time state updates?
-   *
-   * In a race condition, EMAC_TDES0_OWN may be cleared BUT still not available
-   * because sam_freeframe() has not yet run.  If sam_freeframe() has run,
-   * the buffer1 pointer (tdes2) will be nullified (and inflight should be <
-   * CONFIG_SAMA5_EMAC_NTXDESC).
    */
-
-  if ((priv->txhead->tdes0 & EMAC_TDES0_OWN) == 0 &&
-       priv->txhead->tdes2 == 0)
+#warning Missing logic
     {
-      /* If we have the descriptor, then perform the timer poll.  Allocate a
-       * buffer for the poll.
-       */
+      /* Update TCP timing states and poll uIP for new XMIT data. */
 
-      DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
-      dev->d_buf = sam_allocbuffer(priv);
-
-      /* We can't poll if we have no buffers */
-
-      if (dev->d_buf)
-        {
-          /* Update TCP timing states and poll uIP for new XMIT data.
-           */
-
-          (void)uip_timer(dev, sam_uiptxpoll, SAM_POLLHSEC);
-
-          /* We will, most likely end up with a buffer to be freed.  But it
-           * might not be the same one that we allocated above.
-           */
-
-          if (dev->d_buf)
-            {
-              DEBUGASSERT(dev->d_len == 0);
-              sam_freebuffer(priv, dev->d_buf);
-              dev->d_buf = NULL;
-            }
-        }
+      (void)uip_timer(dev, sam_uiptxpoll, SAM_POLLHSEC);
     }
 
   /* Setup the watchdog poll timer again */
@@ -1573,7 +1218,7 @@ static void sam_polltimer(int argc, uint32_t arg, ...)
  * Function: sam_ifup
  *
  * Description:
- *   NuttX Callback: Bring up the Ethernet interface when an IP address is
+ *   NuttX Callback: Bring up the EMAC interface when an IP address is
  *   provided
  *
  * Parameters:
@@ -1595,23 +1240,48 @@ static int sam_ifup(struct uip_driver_s *dev)
        dev->d_ipaddr & 0xff, (dev->d_ipaddr >> 8) & 0xff,
        (dev->d_ipaddr >> 16) & 0xff, dev->d_ipaddr >> 24);
 
-  /* Configure the Ethernet interface for DMA operation. */
+  /* Configure the EMAC interface for normal operation. */
 
-  ret = sam_ethconfig(priv);
+  nllvdbg("Initialize the EMAC\n");
+  sam_emac_configure(priv);
+
+  /* Set the MAC address (should have been configured while we were down) */
+
+  sam_macaddress(priv);
+
+  /* Initialize for PHY access */
+
+  ret = sam_phyinit(priv);
   if (ret < 0)
     {
+      ndbg("ERROR: sam_phyinit failed: %d\n", ret);
       return ret;
     }
+
+  /* Auto Negotiate, working in RMII mode */
+
+  ret = sam_autonegotiate(priv);
+  if (ret < 0)
+    {
+      ndbg("ERROR: sam_autonegotiate failed: %d\n", ret);
+      return ret;
+    }
+
+  while (sam_linkup(priv) == 0);
+  nvdbg("Link detected \n");
+
+  /* Enable normal MAC operation */
+
+  nllvdbg("Enable normal operation\n");
 
   /* Set and activate a timer process */
 
   (void)wd_start(priv->txpoll, SAM_WDDELAY, sam_polltimer, 1, (uint32_t)priv);
 
-  /* Enable the Ethernet interrupt */
+  /* Enable the EMAC interrupt */
 
   priv->ifup = true;
-  up_enable_irq(SAM_IRQ_ETH);
-
+  up_enable_irq(SAM_IRQ_EMAC);
   return OK;
 }
 
@@ -1638,10 +1308,10 @@ static int sam_ifdown(struct uip_driver_s *dev)
 
   ndbg("Taking the network down\n");
 
-  /* Disable the Ethernet interrupt */
+  /* Disable the EMAC interrupt */
 
   flags = irqsave();
-  up_disable_irq(SAM_IRQ_ETH);
+  up_disable_irq(SAM_IRQ_EMAC);
 
   /* Cancel the TX poll timer and TX timeout timers */
 
@@ -1653,7 +1323,7 @@ static int sam_ifdown(struct uip_driver_s *dev)
    * successfully brings the interface back up.
    */
 
-  sam_ethreset(priv);
+  sam_emac_reset(priv);
 
   /* Mark the device "down" */
 
@@ -1773,165 +1443,6 @@ static int sam_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
   return OK;
 }
 #endif
-
-/****************************************************************************
- * Function: sam_txdescinit
- *
- * Description:
- *   Initializes the DMA TX descriptors in chain mode.
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static void sam_txdescinit(FAR struct sam_emac_s *priv)
-{
-  struct emac_txdesc_s *txdesc;
-  int i;
-
-  /* priv->txhead will point to the first, available TX descriptor in the chain.
-   * Set the priv->txhead pointer to the first descriptor in the table.
-   */
-
-  priv->txhead = priv->txtable;
-
-  /* priv->txtail will point to the first segment of the oldest pending
-   * "in-flight" TX transfer.  NULL means that there are no active TX
-   * transfers.
-   */
-
-   priv->txtail   = NULL;
-   priv->inflight = 0;
-
-  /* Initialize each TX descriptor */
-
-  for (i = 0; i < CONFIG_SAMA5_EMAC_NTXDESC; i++)
-    {
-      txdesc = &priv->txtable[i];
-
-      /* Set Second Address Chained bit */
-
-      txdesc->tdes0 = EMAC_TDES0_TCH;
-
-#ifdef CHECKSUM_BY_HARDWARE
-      /* Enable the checksum insertion for the TX frames */
-
-      txdesc->tdes0 |= EMAC_TDES0_CIC_ALL;
-#endif
-
-      /* Clear Buffer1 address pointer (buffers will be assigned as they
-       * are used)
-       */
-
-      txdesc->tdes2 = 0;
-
-      /* Initialize the next descriptor with the Next Descriptor Polling Enable */
-
-      if (i < (CONFIG_SAMA5_EMAC_NTXDESC-1))
-        {
-          /* Set next descriptor address register with next descriptor base
-           * address
-           */
-
-          txdesc->tdes3 = (uint32_t)&priv->txtable[i+1];
-        }
-      else
-        {
-          /* For last descriptor, set next descriptor address register equal
-           * to the first descriptor base address
-           */
-
-          txdesc->tdes3 = (uint32_t)priv->txtable;
-        }
-    }
-
-  /* Set Transmit Desciptor List Address Register */
-#warning "Missing logic"
-}
-
-/****************************************************************************
- * Function: sam_rxdescinit
- *
- * Description:
- *   Initializes the DMA RX descriptors in chain mode.
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static void sam_rxdescinit(FAR struct sam_emac_s *priv)
-{
-  struct emac_rxdesc_s *rxdesc;
-  int i;
-
-  /* priv->rxhead will point to the first,  RX descriptor in the chain.
-   * This will be where we receive the first incomplete frame.
-   */
-
-  priv->rxhead = priv->rxtable;
-
-  /* If we accumulate the frame in segments, priv->rxcurr points to the
-   * RX descriptor of the first segment in the current TX frame.
-   */
-
-  priv->rxcurr   = NULL;
-  priv->segments = 0;
-
-  /* Initialize each TX descriptor */
-
-  for (i = 0; i < CONFIG_SAMA5_EMAC_NRXDESC; i++)
-    {
-      rxdesc = &priv->rxtable[i];
-
-      /* Set Own bit of the RX descriptor rdes0 */
-
-      rxdesc->rdes0 = EMAC_RDES0_OWN;
-
-      /* Set Buffer1 size and Second Address Chained bit and enabled DMA
-       * RX desc receive interrupt
-       */
-
-      rxdesc->rdes1 = EMAC_RDES1_RCH | (uint32_t)CONFIG_SAMA5_EMAC_BUFSIZE;
-
-      /* Set Buffer1 address pointer */
-
-      rxdesc->rdes2 = (uint32_t)&priv->rxbuffer[i*CONFIG_SAMA5_EMAC_BUFSIZE];
-
-      /* Initialize the next descriptor with the Next Descriptor Polling Enable */
-
-      if (i < (CONFIG_SAMA5_EMAC_NRXDESC-1))
-        {
-          /* Set next descriptor address register with next descriptor base
-           * address
-           */
-
-          rxdesc->rdes3 = (uint32_t)&priv->rxtable[i+1];
-        }
-      else
-        {
-          /* For last descriptor, set next descriptor address register equal
-           * to the first descriptor base address
-           */
-
-          rxdesc->rdes3 = (uint32_t)priv->rxtable;
-        }
-    }
-
-  /* Set Receive Descriptor List Address Register */
-#warning Missing logic
-}
 
 /****************************************************************************
  * Function: sam_phyread
@@ -2054,7 +1565,7 @@ static inline int sam_dm9161(FAR struct sam_emac_s *priv)
    * indication that check if the DM9161 PHY CHIP is not ready.
    */
 
-  ret = sam_phyread(CONFIG_SAMA5_PHYADDR, MII_PHYID1, &phyval);
+  ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, MII_PHYID1, &phyval);
   if (ret < 0)
     {
       ndbg("Failed to read the PHY ID1: %d\n", ret);
@@ -2072,7 +1583,7 @@ static inline int sam_dm9161(FAR struct sam_emac_s *priv)
 
   /* Now check the "DAVICOM Specified Configuration Register (DSCR)", Register 16 */
 
-  ret = sam_phyread(CONFIG_SAMA5_PHYADDR, 16, &phyval);
+  ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, 16, &phyval);
   if (ret < 0)
     {
       ndbg("Failed to read the PHY Register 0x10: %d\n", ret);
@@ -2125,7 +1636,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
 
   /* Put the PHY in reset mode */
 
-  ret = sam_phywrite(CONFIG_SAMA5_PHYADDR, MII_MCR, MII_MCR_RESET);
+  ret = sam_phywrite(CONFIG_SAMA5_EMAC_PHYADDR, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
       ndbg("Failed to reset the PHY: %d\n", ret);
@@ -2135,7 +1646,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
 
   /* Perform any necessary, board-specific PHY initialization */
 
-#ifdef CONFIG_SAMA5_PHYINIT
+#ifdef CONFIG_SAMA5_EMAC_PHYINIT
   ret = sam_phy_boardinitialize(EMAC_INTF);
   if (ret < 0)
     {
@@ -2156,12 +1667,12 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
 
   /* Perform auto-negotion if so configured */
 
-#ifdef CONFIG_SAMA5_AUTONEG
+#ifdef CONFIG_SAMA5_EMAC_AUTONEG
   /* Wait for link status */
 
   for (timeout = 0; timeout < PHY_RETRY_TIMEOUT; timeout++)
     {
-      ret = sam_phyread(CONFIG_SAMA5_PHYADDR, MII_MSR, &phyval);
+      ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
           ndbg("Failed to read the PHY MSR: %d\n", ret);
@@ -2181,7 +1692,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
 
   /* Enable auto-gegotiation */
 
-  ret = sam_phywrite(CONFIG_SAMA5_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
+  ret = sam_phywrite(CONFIG_SAMA5_EMAC_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
   if (ret < 0)
     {
       ndbg("Failed to enable auto-negotiation: %d\n", ret);
@@ -2192,7 +1703,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
 
   for (timeout = 0; timeout < PHY_RETRY_TIMEOUT; timeout++)
     {
-      ret = sam_phyread(CONFIG_SAMA5_PHYADDR, MII_MSR, &phyval);
+      ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, MII_MSR, &phyval);
       if (ret < 0)
         {
           ndbg("Failed to read the PHY MSR: %d\n", ret);
@@ -2212,7 +1723,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
 
   /* Read the result of the auto-negotiation from the PHY-specific register */
 
-  ret = sam_phyread(CONFIG_SAMA5_PHYADDR, CONFIG_SAMA5_PHYSR, &phyval);
+  ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, CONFIG_SAMA5_EMAC_PHYSR, &phyval);
   if (ret < 0)
     {
       ndbg("Failed to read PHY status register\n");
@@ -2221,34 +1732,34 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
 
   /* Remember the selected speed and duplex modes */
 
-  nvdbg("PHYSR[%d]: %04x\n", CONFIG_SAMA5_PHYSR, phyval);
+  nvdbg("PHYSR[%d]: %04x\n", CONFIG_SAMA5_EMAC_PHYSR, phyval);
 
   /* Different PHYs present speed and mode information in different ways.  IF
-   * This CONFIG_SAMA5_PHYSR_ALTCONFIG is selected, this indicates that the PHY
+   * This CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG is selected, this indicates that the PHY
    * represents speed and mode information are combined, for example, with
    * separate bits for 10HD, 100HD, 10FD and 100FD.
    */
 
-#ifdef CONFIG_SAMA5_PHYSR_ALTCONFIG
-  switch (phyval & CONFIG_SAMA5_PHYSR_ALTMODE)
+#ifdef CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG
+  switch (phyval & CONFIG_SAMA5_EMAC_PHYSR_ALTMODE)
     {
       default:
-      case CONFIG_SAMA5_PHYSR_10HD:
+      case CONFIG_SAMA5_EMAC_PHYSR_10HD:
         priv->fduplex = 0;
         priv->mbps100 = 0;
         break;
 
-      case CONFIG_SAMA5_PHYSR_100HD:
+      case CONFIG_SAMA5_EMAC_PHYSR_100HD:
         priv->fduplex = 0;
         priv->mbps100 = 1;
         break;
 
-      case CONFIG_SAMA5_PHYSR_10FD:
+      case CONFIG_SAMA5_EMAC_PHYSR_10FD:
         priv->fduplex = 1;
         priv->mbps100 = 0;
         break;
 
-      case CONFIG_SAMA5_PHYSR_100FD:
+      case CONFIG_SAMA5_EMAC_PHYSR_100FD:
         priv->fduplex = 1;
         priv->mbps100 = 1;
         break;
@@ -2261,12 +1772,12 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
    */
 
 #else
-  if ((phyval & CONFIG_SAMA5_PHYSR_MODE) == CONFIG_SAMA5_PHYSR_FULLDUPLEX)
+  if ((phyval & CONFIG_SAMA5_EMAC_PHYSR_MODE) == CONFIG_SAMA5_EMAC_PHYSR_FULLDUPLEX)
     {
       priv->fduplex = 1;
     }
 
-  if ((phyval & CONFIG_SAMA5_PHYSR_SPEED) == CONFIG_SAMA5_PHYSR_100MBPS)
+  if ((phyval & CONFIG_SAMA5_EMAC_PHYSR_SPEED) == CONFIG_SAMA5_EMAC_PHYSR_100MBPS)
     {
       priv->mbps100 = 1;
     }
@@ -2275,14 +1786,14 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
 #else /* Auto-negotion not selected */
 
   phyval = 0;
-#ifdef CONFIG_SAMA5_ETHFD
+#ifdef CONFIG_SAMA5_EMAC_ETHFD
   phyval |= MII_MCR_FULLDPLX;
 #endif
-#ifdef CONFIG_SAMA5_ETH100MBPS
+#ifdef CONFIG_SAMA5_EMAC_ETH100MBPS
   phyval |= MII_MCR_SPEED100;
 #endif
 
-  ret = sam_phywrite(CONFIG_SAMA5_PHYADDR, MII_MCR, phyval);
+  ret = sam_phywrite(CONFIG_SAMA5_EMAC_PHYADDR, MII_MCR, phyval);
   if (ret < 0)
     {
      ndbg("Failed to write the PHY MCR: %d\n", ret);
@@ -2292,10 +1803,10 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
 
   /* Remember the selected speed and duplex modes */
 
-#ifdef CONFIG_SAMA5_ETHFD
+#ifdef CONFIG_SAMA5_EMAC_ETHFD
   priv->fduplex = 1;
 #endif
-#ifdef CONFIG_SAMA5_ETH100MBPS
+#ifdef CONFIG_SAMA5_EMAC_ETH100MBPS
   priv->mbps100 = 1;
 #endif
 #endif
@@ -2307,51 +1818,11 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
   return OK;
 }
 
-/************************************************************************************
- * Name: sam_selectmii
- *
- * Description:
- *   Selects the MII inteface.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ************************************************************************************/
-
-#ifdef CONFIG_SAMA5_MII
-static inline void sam_selectmii(void)
-{
-#warning Missing logic
-}
-#endif
-
-/************************************************************************************
- * Name: sam_selectrmii
- *
- * Description:
- *   Selects the RMII inteface.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ************************************************************************************/
-
-static inline void sam_selectrmii(void)
-{
-#warning Missing logic
-}
-
 /****************************************************************************
  * Function: sam_ethgpioconfig
  *
  * Description:
- *  Configure GPIOs for the Ethernet interface.
+ *  Configure GPIOs for the EMAC interface.
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -2383,36 +1854,26 @@ static inline void sam_ethgpioconfig(FAR struct sam_emac_s *priv)
   sam_configpio(PIO_EMAC_MDC);
   sam_configpio(PIO_EMAC_MDIO);
 
-#if defined(CONFIG_SAMA5_MII)
-
-  /* Select the MII interface */
-
-  sam_selectmii();
-
-  /* Provide clocking */
+#if defined(CONFIG_SAMA5_EMAC_MII)
+  /* Provide clocking for the MII interface */
 #warning Missing logic
 
 # endif
 
   /* Set up the RMII interface. */
 
-#elif defined(CONFIG_SAMA5_RMII)
-
-  /* Select the RMII interface */
-
-  sam_selectrmii();
-
-  /* Provide clocking */
+#elif defined(CONFIG_SAMA5_EMAC_RMII)
+  /* Provide clocking for the RMII interface */
 #warning Missing logic
 
 #endif
 }
 
 /****************************************************************************
- * Function: sam_ethreset
+ * Function: sam_txreset
  *
  * Description:
- *  Reset the Ethernet block.
+ *  Reset the transmit logic
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -2424,55 +1885,144 @@ static inline void sam_ethgpioconfig(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static void sam_ethreset(FAR struct sam_emac_s *priv)
+static void sam_txreset(struct sam_emac_s *priv)
 {
+  uint8_t *txbuffer = priv->txbuffer;
+  struct emac_txdesc_s *txdesc = priv->txdesc;
+  uintptr_t bufaddr;
+  uint32_t physaddr;
   uint32_t regval;
+  int ndx;
 
-  /* Reset the EMAC */
-#warning Missing logic
+  /* Disable TX */
 
-  /* Wait for reset to complete */
-#warning Missing logic
+  regval = sam_getreg(priv, SAM_EMAC_NCR);
+  regval &= ~EMAC_NCR_TE;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+
+  /* Configure the TX descriptors. */
+
+  priv->txhead = 0;
+  priv->txtail = 0;
+
+  for (ndx = 0; ndx < CONFIG_SAMA5_EMAC_NTXBUFFERS; ndx++)
+  {
+    bufaddr = (uint32_t)(&(txbuffer[ndx * EMAC_TX_UNITSIZE]));
+    DEBUGASSERT((bufaddr & ~EMACTXD_ADDR_MASK) == 0);
+
+    /* Set the buffer address and mark the descriptor as used */
+
+    physaddr           = sam_physramaddr(bufaddr);
+    txdesc[ndx].addr   = physaddr;
+    txdesc[ndx].status = EMACTXD_CTRL_USED;
+  }
+
+  /* Mark the final descriptor in the list */
+
+  txdesc[CONFIG_SAMA5_EMAC_NTXBUFFERS - 1].status =
+    EMACTXD_CTRL_USED | EMACTXD_CTRL_WRAP;
+
+  /* Set the Transmit Buffer Queue Pointer Register */
+
+  physaddr = sam_physramaddr((uint32_t)txdesc);
+  sam_putreg(priv, SAM_EMAC_TBQP, physaddr);
 }
 
 /****************************************************************************
- * Function: sam_macconfig
+ * Function: sam_rxreset
  *
  * Description:
- *  Configure the Ethernet MAC for DMA operation.
+ *  Reset the receive logic
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
  *
  * Returned Value:
- *   OK on success; Negated errno on failure.
+ *   None.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-static int sam_macconfig(FAR struct sam_emac_s *priv)
+static void sam_rxreset(struct sam_emac_s *priv)
+{
+  struct emac_rxdesc_s *rxdesc = priv->rxdesc;
+  uint8_t *rxbuffer = priv->rxbuffer;
+  uint32_t bufaddr;
+  uint32_t physaddr;
+  uint32_t regval;
+  int ndx;
+
+  /* Disable RX */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval &= ~EMAC_NCR_RE;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+
+  /* Configure the RX descriptors. */
+
+  priv->rxndx = 0;
+  for (ndx = 0; ndx < CONFIG_SAMA5_EMAC_NRXBUFFERS; ndx++)
+  {
+    bufaddr = (uintptr_t)(&(rxbuffer[ndx * EMAC_RX_UNITSIZE]));
+    DEBUGASSERT((bufaddr & ~EMACRXD_ADDR_MASK) == 0);
+
+    /* Set the buffer address and remove EMACRXD_ADDR_OWNER and
+     * EMACRXD_ADDR_WRAP.
+     */
+
+    physaddr           = sam_physramaddr(bufaddr);
+    rxdesc[ndx].addr   = physaddr;
+    rxdesc[ndx].status = 0;
+  }
+
+  /* Mark the final descriptor in the list */
+
+  rxdesc[CONFIG_SAMA5_EMAC_NRXBUFFERS - 1].addr |= EMACRXD_ADDR_WRAP;
+
+  /* Set the Receive Buffer Queue Pointer Register */
+
+  physaddr = sam_physramaddr((uint32_t)rxdesc);
+  sam_putreg(priv, SAM_EMAC_RBQP, physaddr);
+}
+
+/****************************************************************************
+ * Function: sam_emac_reset
+ *
+ * Description:
+ *  Reset the EMAC block.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void sam_emac_reset(FAR struct sam_emac_s *priv)
 {
   uint32_t regval;
 
-#warning Missing logic
+  /* Disable all EMAC interrupts */
 
-  if (priv->fduplex)
-    {
-#warning Missing logic
-    }
+  sam_putreg(priv, SAM_EMAC_IDR, EMAC_INT_ALL);
 
-  if (priv->mbps100)
-    {
-#warning Missing logic
-    }
+  /* Reset RX and TX logic */
 
-#warning Missing logic
+  sam_rxreset(priv);
+  sam_txreset(priv);
 
-  /* DMA Configuration */
-#warning Missing logic
+  /* Disable RX, TX, and statistics */
 
-  return OK;
+  regval = EMAC_NCR_TE | EMAC_NCR_RE | EMAC_NCR_WESTAT | EMAC_NCR_CLRSTAT;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+
+  /* Disable clocking to the EMAC peripheral */
+
+  sam_emac_disableclk();
 }
 
 /****************************************************************************
@@ -2504,22 +2054,22 @@ static void sam_macaddress(FAR struct sam_emac_s *priv)
 
   /* Set the MAC address */
 
-  regval = (uint32_t)dev->d_mac.ether_addr_octet[0]       |,
-           (uint32_t)dev->d_mac.ether_addr_octet[1] << 8  |,
-           (uint32_t)dev->d_mac.ether_addr_octet[2] << 16 |,
-           (uint32_t)dev->d_mac.ether_addr_octet[3] << 24 |,
-  sam_putreg(priv, SAM_GMAC_SAB1, regval);
+  regval = (uint32_t)dev->d_mac.ether_addr_octet[0] |
+           (uint32_t)dev->d_mac.ether_addr_octet[1] << 8 |
+           (uint32_t)dev->d_mac.ether_addr_octet[2] << 16 |
+           (uint32_t)dev->d_mac.ether_addr_octet[3] << 24;
+  sam_putreg(priv, SAM_EMAC_SA1B, regval);
 
-  regval = (uint32_t)dev->d_mac.ether_addr_octet[4]       |,
-           (uint32_t)dev->d_mac.ether_addr_octet[5] << 8  |,
-  sam_putreg(priv, SAM_GMAC_SAT1, regval);
+  regval = (uint32_t)dev->d_mac.ether_addr_octet[4] |
+           (uint32_t)dev->d_mac.ether_addr_octet[5] << 8;
+  sam_putreg(priv, SAM_EMAC_SA1T, regval);
 }
 
 /****************************************************************************
- * Function: sam_macenable
+ * Function: sam_emac_configure
  *
  * Description:
- *  Enable normal MAC operation.
+ *  Configure the EMAC interface for DMA operation.
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -2531,105 +2081,86 @@ static void sam_macaddress(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static int sam_macenable(FAR struct sam_emac_s *priv)
+static int sam_emac_configure(FAR struct sam_emac_s *priv)
 {
   uint32_t regval;
 
-  /* Set the MAC address */
+  nvdbg("Entry\n");
 
-  sam_macaddress(priv);
+  /* Enable clocking to the EMAC peripheral */
 
-  /* Enable transmit state machine of the MAC for transmission on the MII */
-#warning Missing logic
+  sam_emac_enableclk();
 
-  /* Flush Transmit FIFO */
-#warning Missing logic
+  /* Disable TX, RX, interrupts, etc. */
 
-  /* Enable receive state machine of the MAC for reception from the MII */
-#warning Missing logic
+  sam_putreg(priv, SAM_EMAC_NCR, 0);
+  sam_putreg(priv, SAM_EMAC_IDR, EMAC_INT_ALL);
 
-  /* Start DMA transmission */
-#warning Missing logic
+  regval = sam_getreg(priv, SAM_EMAC_NCR);
+  regval |= EMAC_NCR_CLRSTAT;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
 
-  /* Start DMA reception */
-#warning Missing logic
+  /* Clear all status bits in the receive status register. */
 
-  /* Enable Ethernet DMA interrupts */
-#warning Missing logic
+  regval = (EMAC_RSR_OVR | EMAC_RSR_REC | EMAC_RSR_BNA);
+  sam_putreg(priv, SAM_EMAC_RSR, regval);
 
-  return OK;
-}
+  /* Clear all status bits in the transmit status register */
 
-/****************************************************************************
- * Function: sam_ethconfig
- *
- * Description:
- *  Configure the Ethernet interface for DMA operation.
- *
- * Parameters:
- *   priv - A reference to the private driver state structure
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
+  regval = (EMAC_TSR_UBR | EMAC_TSR_COL | EMAC_TSR_RLES | EMAC_TSR_BEX |
+            EMAC_TSR_COMP | EMAC_TSR_UND);
+  sam_putreg(priv, SAM_EMAC_TSR, regval);
 
-static int sam_ethconfig(FAR struct sam_emac_s *priv)
-{
-  int ret;
+  /* Clear any pending interrupts */
 
-  /* NOTE: The Ethernet clocks were initialized early in the boot-up
-   * sequence in sam_rcc.c.
+  (void)sam_getreg(priv, SAM_EMAC_ISR);
+
+  /* Enable/disable the copy of data into the buffers, ignore broadcasts.
+   * Don't copy FCS.
    */
 
-  /* Reset the Ethernet block */
+  regval  = sam_getreg(priv, SAM_EMAC_NCFGR);
+  regval |= (EMAC_NCFGR_DRFCS | EMAC_NCFGR_PAE);
 
-  nllvdbg("Reset the Ethernet block\n");
-  sam_ethreset(priv);
+#ifdef CONFIG_NET_PROMISCUOUS
+  regval |=  EMAC_NCFGR_CAF;
+#else
+  regval &= ~EMAC_NCFGR_CAF;
+#endif
 
-  /* Initialize the PHY */
+#ifdef CONFIG_SAMA5_EMAC_NBC
+  regval |=  EMAC_NCFGR_NBC;
+#else
+  regval &= ~EMAC_NCFGR_NBC;
+#endif
 
-  nllvdbg("Initialize the PHY\n");
-  ret = sam_phyinit(priv);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  sam_putreg(priv, SAM_EMAC_NCFGR, regval);
 
-  /* Initialize the MAC and DMA */
+  /* Reset TX and RX */
 
-  nllvdbg("Initialize the MAC and DMA\n");
-  ret = sam_macconfig(priv);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  sam_rxreset(priv);
+  sam_txreset(priv);
 
-  /* Initialize the free buffer list */
+  /* Enable Rx and Tx, plus the stats register. */
 
-  sam_initbuffer(priv);
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval |= (EMAC_NCR_RE | EMAC_NCR_TE | EMAC_NCR_WESTAT);
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
 
-  /* Initialize TX Descriptors list: Chain Mode */
+  /* Setup the interrupts for TX (and errors) */
 
-  sam_txdescinit(priv);
-
-  /* Initialize RX Descriptors list: Chain Mode  */
-
-  sam_rxdescinit(priv);
-
-  /* Enable normal MAC operation */
-
-  nllvdbg("Enable normal operation\n");
-  return sam_macenable(priv);
+  regval = (EMAC_INT_RXUBR | EMAC_INT_TUND | EMAC_INT_RLE | EMAC_INT_TXERR |
+            EMAC_INT_TCOMP | EMAC_INT_ROVR | EMAC_INT_HRESP | EMAC_INT_PFR |
+            EMAC_INT_PTZ);
+  sam_putreg(priv, SAM_EMAC_IER, regval);
+  return OK;
 }
 
 /****************************************************************************
  * Function: sam_buffer_initialize
  *
  * Description:
- *   Allocate alligned TX and RX descriptors and buffers.  For the case of
+ *   Allocate aligned TX and RX descriptors and buffers.  For the case of
  *   pre-allocated structures, the function degenerates to a few assignements.
  *
  * Input Parameters:
@@ -2654,51 +2185,102 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
   priv->rxbuffer = g_rxbuffer;
 
 #else
+  size_t allocsize;
+
   /* Allocate buffers */
 
-  priv->txdesc = (struct emac_txdesc_s *)
-    kmemalign(8, CONFIG_SAMA5_EMAC_NTXBUFFERS * sizeof(struct emac_txdesc_s));
+  allocsize = CONFIG_SAMA5_EMAC_NTXBUFFERS * sizeof(struct emac_txdesc_s);
+  priv->txdesc = (struct emac_txdesc_s *)kmemalign(8, allocsize);
   if (!priv->txdesc)
     {
       nlldbg("ERROR: Failed to allocate TX descriptors\n");
       return -ENOMEM;
     }
 
-  priv->rxdesc = (struct emac_rxdesc_s *)
-    kmemalign(8, CONFIG_SAMA5_EMAC_NRXBUFFERS * sizeof(struct emac_rxdesc_s));
-  if (!priv->txdesc)
+  memset(priv->txdesc, 0, allocsize);
+
+  allocsize = CONFIG_SAMA5_EMAC_NRXBUFFERS * sizeof(struct emac_rxdesc_s);
+  priv->rxdesc = (struct emac_rxdesc_s *)kmemalign(8, allocsize);
+  if (!priv->rxdesc)
     {
       nlldbg("ERROR: Failed to allocate RX descriptors\n");
-      kfree(priv->txdesc);
+      sam_buffer_free(priv);
       return -ENOMEM;
     }
 
-  priv->txbuffer = (uint8_t *)
-    kmemalign(8, CONFIG_SAMA5_GMAC_NTXBUFFERS * GMAC_TX_UNITSIZE);
+  memset(priv->rxdesc, 0, allocsize);
+
+  allocsize = CONFIG_SAMA5_EMAC_NTXBUFFERS * EMAC_TX_UNITSIZE;
+  priv->txbuffer = (uint8_t *)kmemalign(8, allocsize);
   if (!priv->txbuffer)
     {
       nlldbg("ERROR: Failed to allocate TX buffer\n");
-      kfree(priv->txdesc);
-      kfree(priv->rxdesc);
+      sam_buffer_free(priv);
       return -ENOMEM;
     }
 
-  priv->rxbuffer = (uint8_t *)kmemalign(8, CONFIG_SAMA5_GMAC_NRXBUFFERS * GMAC_RX_UNITSIZE);
+  allocsize = CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE;
+  priv->rxbuffer = (uint8_t *)kmemalign(8, allocsize);
   if (!priv->rxbuffer)
     {
       nlldbg("ERROR: Failed to allocate RX buffer\n");
-      kfree(priv->txdesc);
-      kfree(priv->rxdesc);
-      kfree(priv->rxbuffer);
+      sam_buffer_free(priv);
       return -ENOMEM;
     }
+
 #endif
 
   DEBUGASSERT(((uintptr_t)priv->rxdesc   & 7) = 0 &&
               ((uintptr_t)priv->rxbuffer & 7) = 0 &&
               ((uintptr_t)priv->txdesc   & 7) = 0 &&
-              ((uintptr_t)priv->rxbuffer & 7) = 0 &&
+              ((uintptr_t)priv->txbuffer & 7) = 0);
   return OK;
+}
+
+/****************************************************************************
+ * Function: sam_buffer_free
+ *
+ * Description:
+ *   Free aligned TX and RX descriptors and buffers.  For the case of
+ *   pre-allocated structures, the function does nothing.
+ *
+ * Input Parameters:
+ *   priv - The EMAC driver state
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sam_buffer_free(struct sam_emac_s *priv)
+{
+#ifndef CONFIG_SAMA5_EMAC_PREALLOCATE
+  /* Free allocated buffers */
+
+  if (priv->txdesc)
+    {
+      kfree(priv->txdesc);
+      priv->txdesc = NULL;
+    }
+
+  if (priv->rxdesc)
+    {
+      kfree(priv->rxdesc);
+      priv->rxdesc = NULL;
+    }
+
+  if (priv->txbuffer)
+    {
+      kfree(priv->txbuffer);
+      priv->txbuffer = NULL;
+    }
+
+  if (priv->rxbuffer)
+    {
+      kfree(priv->rxbuffer);
+      priv->rxbuffer = NULL;
+    }
+#endif
 }
 
 /****************************************************************************
@@ -2724,48 +2306,91 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
 
 int sam_emac_initialize(void)
 {
-  struct sam_emac_s *priv;
-
-  /* Get the interface structure associated with this interface number. */
-
-  priv = &g_emac;
+  struct sam_emac_s *priv = &g_emac;
+  int ret;
 
   /* Initialize the driver structure */
 
   memset(priv, 0, sizeof(struct sam_emac_s));
-  priv->dev.d_ifup    = sam_ifup;     /* I/F up (new IP address) callback */
-  priv->dev.d_ifdown  = sam_ifdown;   /* I/F down callback */
-  priv->dev.d_txavail = sam_txavail;  /* New TX data callback */
+  priv->dev.d_ifup    = sam_ifup;       /* I/F up (new IP address) callback */
+  priv->dev.d_ifdown  = sam_ifdown;     /* I/F down callback */
+  priv->dev.d_txavail = sam_txavail;    /* New TX data callback */
 #ifdef CONFIG_NET_IGMP
-  priv->dev.d_addmac  = sam_addmac;   /* Add multicast MAC address */
-  priv->dev.d_rmmac   = sam_rmmac;    /* Remove multicast MAC address */
+  priv->dev.d_addmac  = sam_addmac;     /* Add multicast MAC address */
+  priv->dev.d_rmmac   = sam_rmmac;      /* Remove multicast MAC address */
 #endif
   priv->dev.d_private = (void*)&g_emac; /* Used to recover private state from dev */
 
   /* Create a watchdog for timing polling for and timing of transmisstions */
 
-  priv->txpoll       = wd_create();   /* Create periodic poll timer */
-  priv->txtimeout    = wd_create();   /* Create TX timeout timer */
+  priv->txpoll = wd_create();
+  if (!priv->txpoll)
+    {
+      ndbg("ERROR: Failed to create periodic poll timer\n");
+      ret = -EAGAIN;
+      goto errout;
+    }
+ 
+  priv->txtimeout = wd_create();     /* Create TX timeout timer */
+  if (!priv->txpoll)
+    {
+      ndbg("ERROR: Failed to create periodic poll timer\n");
+      ret = -EAGAIN;
+      goto errout_with_txpoll;
+    }
 
   /* Configure PIO pins to support EMAC */
 
   sam_ethgpioconfig(priv);
 
-  /* Attach the IRQ to the driver */
+  /* Allocate buffers */
 
-  if (irq_attach(SAM_IRQ_ETH, sam_interrupt))
+  ret = sam_buffer_initialize(priv);
+  if (ret < 0)
     {
-      /* We could not attach the ISR to the interrupt */
-
-      return -EAGAIN;
+      ndbg("ERROR: sam_buffer_initialize failed: %d\n", ret);
+      goto errout_with_txtimeout;
     }
 
-  /* Put the interface in the down state. */
+  /* Attach the IRQ to the driver.  It will not be enabled at the AIC until
+   * the interface is in the 'up' state.
+   */
 
-  sam_ifdown(&priv->dev);
+  ret = irq_attach(SAM_IRQ_EMAC, sam_emac_interrupt);
+  if (ret < 0)
+    {
+      ndbg("ERROR: Failed to attach the handler to the IRQ%d\n", SAM_IRQ_EMAC);
+      goto errout_with_buffers;
+    }
+
+  /* Enable clocking to the EMAC peripheral (just for sam_ifdown()) */
+
+  sam_emac_enableclk();
+
+  /* Put the interface in the down state (disabling clocking again). */
+
+  ret = sam_ifdown(&priv->dev);
+  if (ret < 0)
+    {
+      ndbg("ERROR: Failed to put the interface in the down state: %d\n", ret);
+      goto errout_with_buffers;
+    }
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 
-  (void)netdev_register(&priv->dev);
-  return OK;
+  ret = netdev_register(&priv->dev);
+  if (ret >= 0)
+    {
+      ndbg("ERROR: netdev_register() failed: %d\n", ret);
+      return ret;
+    }
+
+errout_with_buffers:
+  sam_buffer_free(priv);
+errout_with_txtimeout:
+  wd_delete(priv->txtimeout);
+errout_with_txpoll:
+  wd_delete(priv->txpoll);
+errout:
+  return ret;
 }

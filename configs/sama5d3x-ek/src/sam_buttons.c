@@ -151,14 +151,15 @@ xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
 
       /* Get the old button interrupt handler and save the new one */
 
-      oldhandler = *g_irquser1;
-      *g_irquser1 = irqhandler;
+      oldhandler = g_irquser1;
+      g_irquser1 = irqhandler;
 
       /* Configure the interrupt */
 
       sam_pioirq(IRQ_USER1);
       (void)irq_attach(IRQ_USER1, irqhandler);
       sam_pioirqenable(IRQ_USER1);
+      irqrestore(flags);
     }
 
   /* Return the old button handler (so that it can be restored) */

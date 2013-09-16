@@ -90,7 +90,7 @@ static struct usbhost_connection_s *g_ehciconn;
 /* Overcurrent interrupt handler */
 
 #if defined(HAVE_USBHOST) && defined(CONFIG_SAMA5_PIOD_IRQ)
-static xcpt_t *g_ochandler;
+static xcpt_t g_ochandler;
 #endif
 
 /************************************************************************************
@@ -476,8 +476,8 @@ xcpt_t sam_setup_overcurrent(xcpt_t handler)
 
   /* Get the old button interrupt handler and save the new one */
 
-  oldhandler = *g_ochandler;
-  *g_ochandler = handler;
+  oldhandler  = g_ochandler;
+  g_ochandler = handler;
 
   /* Configure the interrupt */
 
