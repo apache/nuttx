@@ -4,6 +4,15 @@
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * References:
+ *   SAMA5D3 Series Data Sheet
+ *   Atmel NoOS sample code.
+ *
+ * The Atmel sample code has a BSD compatibile license that requires this
+ * copyright notice:
+ *
+ *   Copyright (c) 2012, Atmel Corporation
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -14,8 +23,8 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
+ * 3. Neither the names NuttX nor Atmel nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -218,8 +227,6 @@ struct sam_emac_s
   uint16_t              txhead;      /* Circular buffer head index */
   uint16_t              txtail;      /* Circualr buffer tail index */
   uint16_t              rxndx;       /* RX index for current processing RX descriptor */
-  uint16_t              segments;    /* RX segment count */
-  uint16_t              inflight;    /* Number of TX transfers "in_flight" */
   uint16_t              retries;     /* PHY retry count */
 
   uint8_t              *rxbuffer;    /* Allocated RX buffers */
@@ -287,6 +294,13 @@ static void sam_putreg(struct sam_emac_s *priv, uintptr_t addr, uint32_t val);
 # define sam_putreg(priv,addr,val)  putreg32(val,addr)
 #endif
 
+/* Buffer management */
+
+static uint16_t sam_txinuse(struct sam_emac_s *priv);
+static uint16_t sam_txfree(struct sam_emac_s *priv);
+static int  sam_buffer_initialize(struct sam_emac_s *priv);
+static void sam_buffer_free(struct sam_emac_s *priv);
+
 /* Common TX logic */
 
 static int  sam_transmit(FAR struct sam_emac_s *priv);
@@ -295,11 +309,8 @@ static void sam_dopoll(FAR struct sam_emac_s *priv);
 
 /* Interrupt handling */
 
-static void sam_freesegment(FAR struct sam_emac_s *priv,
-                            FAR struct emac_rxdesc_s *rxfirst, int segments);
 static int  sam_recvframe(FAR struct sam_emac_s *priv);
 static void sam_receive(FAR struct sam_emac_s *priv);
-static void sam_freeframe(FAR struct sam_emac_s *priv);
 static void sam_txdone(FAR struct sam_emac_s *priv);
 static int  sam_emac_interrupt(int irq, FAR void *context);
 
@@ -336,8 +347,6 @@ static void sam_rxreset(struct sam_emac_s *priv);
 static void sam_emac_reset(FAR struct sam_emac_s *priv);
 static void sam_macaddress(FAR struct sam_emac_s *priv);
 static int  sam_emac_configure(FAR struct sam_emac_s *priv);
-static int  sam_buffer_initialize(struct sam_emac_s *priv);
-static void sam_buffer_free(struct sam_emac_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -438,6 +447,182 @@ static void sam_putreg(struct twi_dev_s *priv, uintptr_t address,
   putreg32(value, address);
 }
 #endif
+
+/****************************************************************************
+ * Function: sam_txinuse
+ *
+ * Description:
+ *   Return the number of TX buffers in-use
+ *
+ * Input Parameters:
+ *   priv - The EMAC driver state
+ *
+ * Returned Value:
+ *   The number of TX buffers in-use
+ *
+ ****************************************************************************/
+
+static uint16_t sam_txinuse(struct sam_emac_s *priv)
+{
+  uint32_t txhead32 = (uint32_t)priv->txhead;
+  if ((uint32_t)priv->txtail > txhead32)
+    {
+      return txhead32 += CONFIG_SAMA5_EMAC_NTXBUFFERS;
+    }
+
+  return (uint16_t)(txhead32 - (uint32_t)priv->txtail);
+}
+
+/****************************************************************************
+ * Function: sam_txfree
+ *
+ * Description:
+ *   Return the number of TX buffers available
+ *
+ * Input Parameters:
+ *   priv - The EMAC driver state
+ *
+ * Returned Value:
+ *   The number of TX buffers available
+ *
+ ****************************************************************************/
+
+static uint16_t sam_txfree(struct sam_emac_s *priv)
+{
+  /* The number available is equal to the total number of buffers, minus the
+   * number of buffers in use.  Notice that that actual number of buffers is
+   * the configured size minus 1.
+   */
+
+  return (CONFIG_SAMA5_EMAC_NTXBUFFERS-1) - sam_txinuse(priv);
+}
+
+/****************************************************************************
+ * Function: sam_buffer_initialize
+ *
+ * Description:
+ *   Allocate aligned TX and RX descriptors and buffers.  For the case of
+ *   pre-allocated structures, the function degenerates to a few assignements.
+ *
+ * Input Parameters:
+ *   priv - The EMAC driver state
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *   Called very early in the initialization sequence.
+ *
+ ****************************************************************************/
+
+static int sam_buffer_initialize(struct sam_emac_s *priv)
+{
+#ifdef CONFIG_SAMA5_EMAC_PREALLOCATE
+  /* Use pre-allocated buffers */
+
+  priv->txdesc   = g_txdesc;
+  priv->rxdesc   = g_rxdesc;
+  priv->txbuffer = g_txbuffer;
+  priv->rxbuffer = g_rxbuffer;
+
+#else
+  size_t allocsize;
+
+  /* Allocate buffers */
+
+  allocsize = CONFIG_SAMA5_EMAC_NTXBUFFERS * sizeof(struct emac_txdesc_s);
+  priv->txdesc = (struct emac_txdesc_s *)kmemalign(8, allocsize);
+  if (!priv->txdesc)
+    {
+      nlldbg("ERROR: Failed to allocate TX descriptors\n");
+      return -ENOMEM;
+    }
+
+  memset(priv->txdesc, 0, allocsize);
+
+  allocsize = CONFIG_SAMA5_EMAC_NRXBUFFERS * sizeof(struct emac_rxdesc_s);
+  priv->rxdesc = (struct emac_rxdesc_s *)kmemalign(8, allocsize);
+  if (!priv->rxdesc)
+    {
+      nlldbg("ERROR: Failed to allocate RX descriptors\n");
+      sam_buffer_free(priv);
+      return -ENOMEM;
+    }
+
+  memset(priv->rxdesc, 0, allocsize);
+
+  allocsize = CONFIG_SAMA5_EMAC_NTXBUFFERS * EMAC_TX_UNITSIZE;
+  priv->txbuffer = (uint8_t *)kmemalign(8, allocsize);
+  if (!priv->txbuffer)
+    {
+      nlldbg("ERROR: Failed to allocate TX buffer\n");
+      sam_buffer_free(priv);
+      return -ENOMEM;
+    }
+
+  allocsize = CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE;
+  priv->rxbuffer = (uint8_t *)kmemalign(8, allocsize);
+  if (!priv->rxbuffer)
+    {
+      nlldbg("ERROR: Failed to allocate RX buffer\n");
+      sam_buffer_free(priv);
+      return -ENOMEM;
+    }
+
+#endif
+
+  DEBUGASSERT(((uintptr_t)priv->rxdesc   & 7) = 0 &&
+              ((uintptr_t)priv->rxbuffer & 7) = 0 &&
+              ((uintptr_t)priv->txdesc   & 7) = 0 &&
+              ((uintptr_t)priv->txbuffer & 7) = 0);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: sam_buffer_free
+ *
+ * Description:
+ *   Free aligned TX and RX descriptors and buffers.  For the case of
+ *   pre-allocated structures, the function does nothing.
+ *
+ * Input Parameters:
+ *   priv - The EMAC driver state
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sam_buffer_free(struct sam_emac_s *priv)
+{
+#ifndef CONFIG_SAMA5_EMAC_PREALLOCATE
+  /* Free allocated buffers */
+
+  if (priv->txdesc)
+    {
+      kfree(priv->txdesc);
+      priv->txdesc = NULL;
+    }
+
+  if (priv->rxdesc)
+    {
+      kfree(priv->rxdesc);
+      priv->rxdesc = NULL;
+    }
+
+  if (priv->txbuffer)
+    {
+      kfree(priv->txbuffer);
+      priv->txbuffer = NULL;
+    }
+
+  if (priv->rxbuffer)
+    {
+      kfree(priv->rxbuffer);
+      priv->rxbuffer = NULL;
+    }
+#endif
+}
 
 /****************************************************************************
  * Function: sam_transmit
@@ -546,26 +731,21 @@ static int sam_transmit(FAR struct sam_emac_s *priv)
 
   if (!priv->txtail)
     {
-      DEBUGASSERT(priv->inflight == 0);
       priv->txtail = txndx;
     }
 
   /* Increment the number of TX transfer in-flight */
 
-  priv->inflight++;
 
-  nllvdbg("txhead: %d txtail: %d inflight: %d\n",
-          priv->txhead, priv->txtail, priv->inflight);
+  nllvdbg("txhead: %d txtail: %d\n",
+          priv->txhead, priv->txtail);
 
   /* If all TX descriptors are in-flight, then we have to disable receive interrupts
    * too.  This is because receive events can trigger more un-stoppable transmit
    * events.
    */
 
-  if (priv->inflight >= CONFIG_SAMA5_EMAC_NTXBUFFERS)
-    {
 #warning "Missing logic"
-    }
 
   /* Check if the TX Buffer unavailable flag is set */
 #warning "Missing logic"
@@ -679,48 +859,6 @@ static void sam_dopoll(FAR struct sam_emac_s *priv)
 }
 
 /****************************************************************************
- * Function: sam_freesegment
- *
- * Description:
- *   The function is called when a frame is received using the DMA receive
- *   interrupt.  It scans the RX descriptors to the received frame.
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Global interrupts are disabled by interrupt handling logic.
- *
- ****************************************************************************/
-
-static void sam_freesegment(FAR struct sam_emac_s *priv,
-                              FAR struct emac_rxdesc_s *rxfirst, int segments)
-{
-  struct emac_rxdesc_s *rxdesc;
-  int i;
-
-  nllvdbg("rxfirst: %p segments: %d\n", rxfirst, segments);
-
-  /* Set OWN bit in RX descriptors.  This gives the buffers back to DMA */
-
-  rxdesc = rxfirst;
-  for (i = 0; i < segments; i++)
-    {
-#warning Missing logic
-    }
-
-  /* Reset the segment managment logic */
-
-  priv->segments = 0;
-
-  /* Check if the RX Buffer unavailable flag is set */
-#warning "Missing logic"
-}
-
-/****************************************************************************
  * Function: sam_recvframe
  *
  * Description:
@@ -744,105 +882,174 @@ static void sam_freesegment(FAR struct sam_emac_s *priv,
 static int sam_recvframe(FAR struct sam_emac_s *priv)
 {
   struct emac_rxdesc_s *rxdesc;
-  struct emac_rxdesc_s *rxcurr;
-  uint8_t *buffer;
-  int rxndx;
-  int i;
+  struct uip_driver_s *dev;
+  const uint8_t *src;
+  uint8_t  *dest;
+  uintptr_t physaddr;
+  uint32_t rxndx;
+  uint32_t pktlen;
+  uint16_t copylen;
+  bool isframe;
 
-  nllvdbg("rxndx: %d segments: %d\n", priv->rxndx, priv->segments);
-
-  /* Scan descriptors owned by the CPU.  Scan until:
-   *
-   *   1) We find a descriptor still owned by the DMA,
-   *   2) We have examined all of the RX descriptors, or
-   *   3) All of the TX descriptors are in flight.
-   *
-   * This last case is obscure.  It is due to that fact that each packet
-   * that we receive can generate an unstoppable transmisson.  So we have
-   * to stop receiving when we can not longer transmit.  In this case, the
-   * transmit logic should also have disabled further RX interrupts.
+  /* Process received RX descriptor.  The ownership bit is set by the EMAC
+   * once it has successfully written a frame to memory.
    */
 
-  rxndx  = priv->rxndx;
-  rxdesc = &priv->rxdesc[rxndx];
+  dev        = &priv->dev;
+  dev->d_len = 0;
 
-#warning Missing logic
+  rxndx      = priv->rxndx;
+  rxdesc     = &priv->rxdesc[rxndx];
+  isframe    = false;
+
+  nllvdbg("rxndx: %d: %d\n", rxndx);
+
+  while ((rxdesc->addr & EMACRXD_ADDR_OWNER) != 0)
     {
-      /* Check if this is the first segment in the frame */
-#warning Missing logic
+      /* The start of frame bit indicates the beginning of a frame.  Discard
+       * any previous fragments.
+       */
 
-      /* Check if this is an intermediate segment in the frame */
-#warning Missing logic
-      if (true)
+      if ((rxdesc->status & EMACRXD_CTRL_SOF) != 0)
         {
-          priv->segments++;
+          /* Skip previous fragments */
+
+          while (rxndx != priv->rxndx)
+            {
+              rxdesc = &priv->rxdesc[priv->rxndx];
+              rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
+
+              /* Increment the RX index */
+
+              if (++priv->rxndx >= CONFIG_SAMA5_EMAC_NRXBUFFERS)
+                {
+                  priv->rxndx = 0;
+                }
+            }
+
+          /* Reset the packet data pointer and packet length */
+
+          dest   = dev->d_buf;
+          pktlen = 0;
+
+          /* Start to gather buffers into the packet buffer */
+
+          isframe = true;
         }
 
-      /* Otherwise, it is the last segment in the frame */
-#warning Missing logic
+      /* Increment the working index */
 
-      else
+      if (++rxndx >= CONFIG_SAMA5_EMAC_NRXBUFFERS)
         {
-          priv->segments++;
+          rxndx = 0;
+        }
 
-          /* Check if the there is only one segment in the frame */
+      /* Copy data into the packet buffer */
 
-          if (priv->segments == 1)
+      if (isframe)
+        {
+          if (rxndx == priv->rxndx)
             {
-              rxcurr = rxdesc;
+              nvdbg("ERROR: No EOF (Invalid of buffers too small)\n");
+              do
+                {
+                  rxdesc = &priv->rxdesc[priv->rxndx];
+                  rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
+
+                  /* Increment the RX index */
+
+                  if (++priv->rxndx >= CONFIG_SAMA5_EMAC_NRXBUFFERS)
+                    {
+                      priv->rxndx = 0;
+                    }
+                }
+              while (rxndx != priv->rxndx);
+              return -EIO;
             }
-          else
+
+          /* Get the number of bytes to copy from the buffer */
+
+          copylen = EMAC_RX_UNITSIZE;
+          if ((pktlen + copylen) > CONFIG_NET_BUFSIZE)
             {
-              rxcurr = &priv->rxdesc[priv->rxndx];
+              copylen = CONFIG_NET_BUFSIZE - pktlen;
             }
 
-          nllvdbg("rxndx: %d rxcurr: %p segments: %d\n",
-              priv->rxndx, rxcurr, priv->segments);
+          /* Get the data source.  Invalidate the source memory region to
+           * force reload from RAM.
+           */
 
-          /* Check if any errors are reported in the frame */
+          physaddr = (uintptr_t)(rxdesc->addr & EMACRXD_ADDR_MASK);
+          src = (const uint8_t *)sam_virtramaddr(physaddr);
 
-#warning Missing logic
-          if (true)
+          cp15_invalidate_dcache((uintptr_t)src, copylen);
+
+          /* And do the copy */
+
+          memcpy(dest, src, copylen);
+          dest   += copylen;
+          pktlen += copylen;
+
+          /* If the end of frame has been received, return the data */
+
+          if ((rxdesc->status & EMACRXD_CTRL_EOF) != 0)
             {
-              struct uip_driver_s *dev = &priv->dev;
+              /* Frame size from the EMAC */
 
-              /* Get the Frame Length of the received packet: substruct 4
-               * bytes of the CRC
-               */
-#warning Missing logic
+              dev->d_len = (rxdesc->status & EMACRXD_CTRL_FRLEN_MASK);
+              nvdbg("packet %d-%d (%d)\n", priv->rxndx, rxndx, dev->d_len);
 
-              /* Return success, remebering where we should re-start scanning
-               * and resetting the segment scanning logic
+              /* All data have been copied in the application frame buffer,
+               * release the RX descriptor
                */
-#warning Missing logic
+
+              while (priv->rxndx != rxndx)
+                {
+                  rxdesc = &priv->rxdesc[priv->rxndx];
+                  rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
+
+                  /* Increment the RX index */
+
+                  if (++priv->rxndx >= CONFIG_SAMA5_EMAC_NRXBUFFERS)
+                    {
+                      priv->rxndx = 0;
+                    }
+                }
+
+              /* Check if the device packet buffer was large enough to accept
+               * all of the data.
+               */
 
               nllvdbg("rxndx: %d d_buf: %p d_len: %d\n",
                       priv->rxndx, dev->d_buf, dev->d_len);
 
+              if (pktlen < dev->d_len)
+                {
+                  ndbg("ERROR: Buffer size %d; frame size %d\n", dev->d_len, pktlen);
+                  return -E2BIG;
+                }
+
               return OK;
-            }
-          else
-            {
-              /* Drop the frame that contains the errors, reset the segment
-               * scanning logic, and continue scanning with the next frame.
-               */
-#warning Missing logic
-              sam_freesegment(priv, rxcurr, priv->segments);
             }
         }
 
-      /* Try the next descriptor */
-#warning Missing logic
-    }
+      /* We have not encount the SOF yet... discard this frament and keep looking */
 
-  /* We get here after all of the descriptors have been scanned or when rxdesc points
-   * to the first descriptor owned by the DMA.  Remember where we left off.
-   */
+      else
+        {
+          rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
+          priv->rxndx = rxndx;
+        }
+
+    /* Process the next buffer */
+
+    rxdesc = &priv->rxdesc[rxndx];
+  }
+
+  /* No packet was found */
 
   priv->rxndx = rxndx;
-
-  nllvdbg("rxndx: %d segments: %d\n", priv->rxndx, priv->segments);
-
+  nllvdbg("rxndx: %d\n", priv->rxndx);
   return -EAGAIN;
 }
 
@@ -851,6 +1058,7 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
  *
  * Description:
  *   An interrupt was received indicating the availability of a new RX packet
+ *   in FIFO memory.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -932,91 +1140,11 @@ static void sam_receive(FAR struct sam_emac_s *priv)
 }
 
 /****************************************************************************
- * Function: sam_freeframe
- *
- * Description:
- *   Scans the TX descriptors and frees the buffers of completed TX transfers.
- *
- * Parameters:
- *   priv  - Reference to the driver state structure
- *
- * Returned Value:
- *   None.
- *
- * Assumptions:
- *   Global interrupts are disabled by interrupt handling logic.
- *
- ****************************************************************************/
-
-static void sam_freeframe(FAR struct sam_emac_s *priv)
-{
-  struct emac_txdesc_s *txdesc;
-  int txtail;
-  int i;
-
-  nllvdbg("txhead: %d txtail: %d inflight: %d\n",
-          priv->txhead, priv->txtail, priv->inflight);
-
-  /* Scan for "in-flight" descriptors owned by the CPU */
-
-  txtail = priv->txtail;
-  txdesc = &priv->txdesc[txtail];
-
-  if (txdesc)
-    {
-      DEBUGASSERT(priv->inflight > 0);
-
-#warning Missing logic
-        {
-          /* Check if this is the first segment of a TX frame. */
-#warning Missing logic
-
-          /* In any event, make sure that xxx is nullified. */
-#warning Missing logic
-
-          /* Check if this is the last segement of a TX frame */
-
-#warning Missing logic
-            {
-              /* Yes.. Decrement the number of frames "in-flight". */
-
-              priv->inflight--;
-
-              /* If all of the TX descriptors were in-flight, then RX interrupts
-               * may have been disabled... we can re-enable them now.
-               */
-#warning "Missing logic"
-
-              /* If there are no more frames in-flight, then bail. */
-
-              if (priv->inflight <= 0)
-                {
-                  priv->txtail   = 0;
-                  priv->inflight = 0;
-                  return;
-                }
-            }
-
-          /* Try the next descriptor in the TX chain */
-#warning Missing logic
-        }
-
-      /* We get here if (1) there are still frames "in-flight". Remember
-       * where we left off.
-       */
-
-      priv->txtail = txtail;
-
-      nllvdbg("txhead: %d txtail: %d inflight: %d\n",
-              priv->txhead, priv->txtail, priv->inflight);
-    }
-}
-
-/****************************************************************************
  * Function: sam_txdone
  *
  * Description:
- *   An interrupt was received indicating that the last TX packet(s) is done
+ *   An interrupt was received indicating that a frame has completed
+ *   transmission.
  *
  * Parameters:
  *   priv  - Reference to the driver state structure
@@ -1031,20 +1159,36 @@ static void sam_freeframe(FAR struct sam_emac_s *priv)
 
 static void sam_txdone(FAR struct sam_emac_s *priv)
 {
-  DEBUGASSERT(priv->txtail != NULL);
+  struct emac_txdesc_s *txdesc;
 
-  /* Scan the TX desciptor change, returning buffers to free list */
+  /* Are there any outstanding transmssions?  Loop until either (1) all of
+   * the TX have been examined, or (2) until we encounter the first
+   * descriptor that is still in use by the hardware.
+   */
 
-  sam_freeframe(priv);
-
-  /* If no further xmits are pending, then cancel the TX timeout */
-
-  if (priv->inflight <= 0)
+  while (priv->txhead != priv->txtail)
     {
-      wd_cancel(priv->txtimeout);
+      /* Yes.. check the next buffer at the tail of the list */
 
-      /* And disable further TX interrupts. */
-#warning "Missing logic"
+      txdesc = &priv->txdesc[priv->txtail];
+      cp15_invalidate_dcache((uintptr_t)txdesc,
+                             (uintptr_t)txdesc + sizeof(struct emac_txdesc_s));
+
+      /* Is this TX descriptor still in use? */
+
+      if ((txdesc->status & EMACTXD_CTRL_USED) == 0)
+        {
+          /* Yes ... break out of the loop now */
+
+          break;
+        }
+
+      /* Increment the tail index */
+
+      if (++priv->txtail >= CONFIG_SAMA5_EMAC_NTXBUFFERS)
+        {
+          priv->txtail = 0;
+        }
     }
 
   /* Then poll uIP for new XMIT data */
@@ -1071,69 +1215,167 @@ static void sam_txdone(FAR struct sam_emac_s *priv)
 
 static int sam_emac_interrupt(int irq, FAR void *context)
 {
-  register FAR struct sam_emac_s *priv = &g_emac;
-  uint32_t dmasr;
+  struct sam_emac_s *priv = &g_emac
+  uint32_t isr;
+  uint32_t rsr;
+  uint32_t tsr;
+  uint32_t imr;
+  uint32_t pending;
+  uint32_t clrbits;
 
-  /* Get the DMA interrupt status bits (no MAC interrupts are expected) */
-#warning "Missing logic"
+  isr = sam_getreg(priv, SAM_EMAC_ISR);
+  rsr = sam_getreg(priv, SAM_EMAC_RSR);
+  tsr = sam_getreg(priv, SAM_EMAC_TSR);
+  imr = sam_getreg(priv, SAM_EMAC_IMR);
 
-  /* Mask only enabled interrupts.  This depends on the fact that the interrupt
-   * related bits (0-16) correspond in these two registers.
+  pending &= isr & ~(imr | 0xFFC300);
+  nllvdbg("isr: %08x pending: %08x\n", isr, pending);
+
+  /* Check for the receipt of an RX packet.
+   *
+   * RXCOMP indicates that a packet has been received and stored in memory.
+   *   The RXCOMP bit is cleared whent he interrupt status register was read.
+   * RSR:REC indicates that one or more frames have been received and placed
+   *   in memory. This indication is cleared by writing a one to this bit.
    */
-#warning "Missing logic"
 
-  /* Check if there are pending "normal" interrupts */
-
-#warning "Missing logic"
+  if ((pending & EMAC_INT_RCOMP) != 0 || (rsr & EMAC_RSR_REC) != 0)
     {
-      /* Yes.. Check if we received an incoming packet, if so, call
-       * sam_receive()
-       */
-#warning "Missing logic"
-        {
-          /* Clear the pending receive interrupt */
-#warning "Missing logic"
+      clrbits = EMAC_RSR_REC;
 
-          /* Handle the received package */
-
-          sam_receive(priv);
-        }
-
-      /* Check if a packet transmission just completed.  If so, call
-       * sam_txdone(). This may disable further TX interrupts if there
-       * are no pending tansmissions.
+      /* Check for Receive Overrun.
+       *
+       * RSR:RXOVR will be set if the RX FIFO is not able to store the
+       *   receive frame due to a FIFO overflow, or if the receive status
+       *   was not taken at the end of the frame. This bit is also set in
+       *   DMA packet buffer mode if the packet buffer overflows. For DMA
+       *   operation, the buffer will be recovered if an overrun occurs. This
+       *   bit is cleared when set to 1.
        */
 
-#warning "Missing logic"
+      if ((rsr & EMAC_RSR_OVR) != 0)
         {
-          /* Clear the pending receive interrupt */
-#warning "Missing logic"
-
-          /* Check if there are pending transmissions */
-
-          sam_txdone(priv);
+          nlldbg("ERROR: Receiver overrun RSR: %08x\n", rsr);
+          clrbits |= EMAC_RSR_OVR;
         }
 
-      /* Clear the pending normal summary interrupt */
-#warning "Missing logic"
+      /* Check for buffer not available (BNA)
+       *
+       * RSR:BNA means that an attempt was made to get a new buffer and the
+       *   pointer indicated that it was owned by the processor. The DMA will
+       *   reread the pointer each time an end of frame is received until a
+       *   valid pointer is found. This bit is set following each descriptor
+       *   read attempt that fails, even if consecutive pointers are
+       *   unsuccessful and software has in the mean time cleared the status
+       *   flag. Cleared by writing a one to this bit.
+       */
+
+      if ((rsr & EMAC_RSR_BNA) != 0)
+        {
+          nlldbg("ERROR: Buffer not available RSR: %08x\n", rsr);
+          clrbits |= EMAC_RSR_BNA;
+        }
+
+      /* Clear status */
+
+      sam_putreg(priv, SAM_EMAC_RSR, clrbits)
+
+      /* Handle the received packet */
+
+       sam_receive(priv);
     }
 
-  /* Handle error interrupt only if CONFIG_DEBUG_NET is eanbled */
+  /* Check for the completion of a transmission
+   *
+   * ISR:TCOMP is set when a frame has been transmitted. Cleared on read.
+   * TSR:COMP is set when a frame has been transmitted. Cleared by writing a
+   *   one to this bit.
+   */
+
+  if ((pending & EMAC_INT_TCOMP) != 0 || (tsr & EMAC_TSR_COMP) != 0)
+    {
+      /* A frame has been transmitted */
+
+      clrbits = EMAC_TSR_COMP;
+
+      /* Check for Retry Limit Exceeded (RLE) */
+
+      if ((tsr & EMAC_TSR_RLES) != 0)
+        {
+          /* Status RLE & Number of discarded buffers */
+
+          clrbits = EMAC_TSR_RLES | sam_txinuse(priv);
+          sam_txreset(priv);
+
+          nlldbg("ERROR: Retry Limit Exceeded TSR: %08x\n", tsr);
+
+          regval = sam_getreg(priv, SAM_EMAC_NCR);
+          regval |= EMAC_NCR_TE;
+          sam_putreg(priv, SAM_EMAC_NCR, regval);
+        }
+
+      /* Check Collision Occurred (COL) */
+
+      if ((tsr & EMAC_TSR_COL) != 0)
+        {
+          nlldbg("ERROR: Collision occurred TSR: %08x\n", tsr);
+          clrbits |= EMAC_TSR_COL;
+        }
+
+      /* Check Buffers exhausted mid frame (BEX) */
+
+      if ((tsr & EMAC_TSR_BEX) != 0)
+        {
+          nlldbg("ERROR: Buffers exhausted mid-frame TSR: %08x\n", tsr);
+          clrbits |= EMAC_TSR_BEX;
+        }
+
+      /* Check for Transmit Underrun (UND)
+       *
+       * ISR:UND is set transmit DMA was not able to read data from memory,
+       *   either because the bus was not granted in time, because a not
+       *   OK hresp(bus error) was returned or because a used bit was read
+       *   midway through frame transmission. If this occurs, the
+       *   transmitter forces bad CRC. Cleared by writing a one to this bit.
+       */
+
+      if ((tsr & EMAC_TSR_UND) != 0)
+        {
+          nlldbg("ERROR: Transmit Underrun TSR: %08x\n", tsr);
+          clrbits |= EMAC_TSR_UND;
+        }
+
+      /* Clear status */
+
+      sam_putreg(priv, SAM_EMAC_TSR, clrbits)
+
+      /* And handle the TX done event */
+
+      sam_txdone(priv);
+    }
 
 #ifdef CONFIG_DEBUG_NET
+  /* Chekc for PAUSE Frame recieved (PFRE).
+   *
+   * ISR:PFRE indicates that a pause frame has been received.  Cleared on a read.
+   */
 
-  /* Check if there are pending error interrupts */
-
-#warning "Missing logic"
+  if ((pending & EMAC_INT_PFRE) != 0)
     {
-      /* Just let the user know what happened */
+      nlldbg("Pause frame received\n");
+    }
 
-      nlldbg("Abormal event(s): %08x\n", dmasr);
+  /* Check for Pause Time Zero (PTZ)
+   *
+   * ISR:PTZ is set Pause Time Zero
+   */
 
-      /* Clear all pending error interrupts */
-#warning "Missing logic"
+  if ((pending & EMAC_INT_PTZ) != 0)
+    {
+      nlldbg("Pause TO!\n");
     }
 #endif
+
   return OK;
 }
 
@@ -2157,133 +2399,6 @@ static int sam_emac_configure(FAR struct sam_emac_s *priv)
 }
 
 /****************************************************************************
- * Function: sam_buffer_initialize
- *
- * Description:
- *   Allocate aligned TX and RX descriptors and buffers.  For the case of
- *   pre-allocated structures, the function degenerates to a few assignements.
- *
- * Input Parameters:
- *   priv - The EMAC driver state
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *   Called very early in the initialization sequence.
- *
- ****************************************************************************/
-
-static int sam_buffer_initialize(struct sam_emac_s *priv)
-{
-#ifdef CONFIG_SAMA5_EMAC_PREALLOCATE
-  /* Use pre-allocated buffers */
-
-  priv->txdesc   = g_txdesc;
-  priv->rxdesc   = g_rxdesc;
-  priv->txbuffer = g_txbuffer;
-  priv->rxbuffer = g_rxbuffer;
-
-#else
-  size_t allocsize;
-
-  /* Allocate buffers */
-
-  allocsize = CONFIG_SAMA5_EMAC_NTXBUFFERS * sizeof(struct emac_txdesc_s);
-  priv->txdesc = (struct emac_txdesc_s *)kmemalign(8, allocsize);
-  if (!priv->txdesc)
-    {
-      nlldbg("ERROR: Failed to allocate TX descriptors\n");
-      return -ENOMEM;
-    }
-
-  memset(priv->txdesc, 0, allocsize);
-
-  allocsize = CONFIG_SAMA5_EMAC_NRXBUFFERS * sizeof(struct emac_rxdesc_s);
-  priv->rxdesc = (struct emac_rxdesc_s *)kmemalign(8, allocsize);
-  if (!priv->rxdesc)
-    {
-      nlldbg("ERROR: Failed to allocate RX descriptors\n");
-      sam_buffer_free(priv);
-      return -ENOMEM;
-    }
-
-  memset(priv->rxdesc, 0, allocsize);
-
-  allocsize = CONFIG_SAMA5_EMAC_NTXBUFFERS * EMAC_TX_UNITSIZE;
-  priv->txbuffer = (uint8_t *)kmemalign(8, allocsize);
-  if (!priv->txbuffer)
-    {
-      nlldbg("ERROR: Failed to allocate TX buffer\n");
-      sam_buffer_free(priv);
-      return -ENOMEM;
-    }
-
-  allocsize = CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE;
-  priv->rxbuffer = (uint8_t *)kmemalign(8, allocsize);
-  if (!priv->rxbuffer)
-    {
-      nlldbg("ERROR: Failed to allocate RX buffer\n");
-      sam_buffer_free(priv);
-      return -ENOMEM;
-    }
-
-#endif
-
-  DEBUGASSERT(((uintptr_t)priv->rxdesc   & 7) = 0 &&
-              ((uintptr_t)priv->rxbuffer & 7) = 0 &&
-              ((uintptr_t)priv->txdesc   & 7) = 0 &&
-              ((uintptr_t)priv->txbuffer & 7) = 0);
-  return OK;
-}
-
-/****************************************************************************
- * Function: sam_buffer_free
- *
- * Description:
- *   Free aligned TX and RX descriptors and buffers.  For the case of
- *   pre-allocated structures, the function does nothing.
- *
- * Input Parameters:
- *   priv - The EMAC driver state
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void sam_buffer_free(struct sam_emac_s *priv)
-{
-#ifndef CONFIG_SAMA5_EMAC_PREALLOCATE
-  /* Free allocated buffers */
-
-  if (priv->txdesc)
-    {
-      kfree(priv->txdesc);
-      priv->txdesc = NULL;
-    }
-
-  if (priv->rxdesc)
-    {
-      kfree(priv->rxdesc);
-      priv->rxdesc = NULL;
-    }
-
-  if (priv->txbuffer)
-    {
-      kfree(priv->txbuffer);
-      priv->txbuffer = NULL;
-    }
-
-  if (priv->rxbuffer)
-    {
-      kfree(priv->rxbuffer);
-      priv->rxbuffer = NULL;
-    }
-#endif
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -2330,7 +2445,7 @@ int sam_emac_initialize(void)
       ret = -EAGAIN;
       goto errout;
     }
- 
+
   priv->txtimeout = wd_create();     /* Create TX timeout timer */
   if (!priv->txpoll)
     {
