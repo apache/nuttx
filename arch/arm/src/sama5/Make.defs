@@ -141,6 +141,7 @@ endif
 endif
 
 ifeq ($(CONFIG_NET),y)
+CHIP_CSRCS += sam_ethernet.c
 ifeq ($(CONFIG_SAMA5_EMAC),y)
 CHIP_CSRCS += sam_emac.c
 endif
