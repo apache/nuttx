@@ -242,16 +242,16 @@
 
 #define EMAC_MAN_DATA_SHIFT       (0)       /* Bits 0-15: Read/write data */
 #define EMAC_MAN_DATA_MASK        (0x0000ffff << EMAC_MAN_DATA_SHIFT)
-#  define EMAC_MAN_DATA(n)        ((n) << EMAC_MAN_DATA_SHIFT)
+#  define EMAC_MAN_DATA(n)        ((uint32_t)(n) << EMAC_MAN_DATA_SHIFT)
 #define EMAC_MAN_CODE_SHIFT       (16)      /* Bits 16-17:  Must be written to b10 */
 #define EMAC_MAN_CODE_MASK        (3 << EMAC_MAN_CODE_SHIFT)
 #  define EMAC_MAN_CODE           (2 << EMAC_MAN_CODE_SHIFT)
 #define EMAC_MAN_REGA_SHIFT       (18)      /* Bits 18-22: Register Address */
 #define EMAC_MAN_REGA_MASK        (31 << EMAC_MAN_REGA_SHIFT)
-#  define EMAC_MAN_REGA(n)        ((n) << EMAC_MAN_REGA_SHIFT)
+#  define EMAC_MAN_REGA(n)        ((uint32_t)(n) << EMAC_MAN_REGA_SHIFT)
 #define EMAC_MAN_PHYA_SHIFT       (23)      /* Bits 23-27: PHY Address */
 #define EMAC_MAN_PHYA_MASK        (31 << EMAC_MAN_PHYA_SHIFT)
-#  define EMAC_MAN_PHYA(n)        ((n) << EMAC_MAN_PHYA_SHIFT)
+#  define EMAC_MAN_PHYA(n)        ((uint32_t)(n) << EMAC_MAN_PHYA_SHIFT)
 #define EMAC_MAN_RW_SHIFT         (28)      /* Bits 28-29: Read-write */
 #define EMAC_MAN_RW_MASK          (3 << EMAC_MAN_RW_SHIFT)
 #  define EMAC_MAN_READ           (2 << EMAC_MAN_RW_SHIFT)
