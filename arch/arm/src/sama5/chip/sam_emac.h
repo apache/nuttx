@@ -193,8 +193,8 @@
 
 /* Network Status Register */
 
-#define EMAC_NSR_MDIO             (1 << 0)  /* Bit 0:  Status of the mdio_in pin */
-#define EMAC_NSR_IDLE             (1 << 1)  /* Bit 1:  PHY management logic is idle */
+#define EMAC_NSR_MDIO             (1 << 1)  /* Bit 1:  Status of the mdio_in pin */
+#define EMAC_NSR_IDLE             (1 << 2)  /* Bit 2:  PHY management logic is idle */
 
 /* Transmit Status Register */
 

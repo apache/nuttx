@@ -147,21 +147,19 @@
 #  endif
 #endif
 
-/* PHY definitions
- * REVISIT: net/Kconfig PHY definitions assume only a single Ethernet MAC.
- */
+/* PHY definitions */
 
-#if defined(CONFIG_ETH0_PHY_DM9161)
+#if defined(SAMA5_EMAC_PHY_DM9161)
 #  define MII_OUI_MSB    0x0181
 #  define MII_OUI_LSB    0x2e
-#elif defined(CONFIG_ETH0_PHY_LAN8700)
+#elif defined(SAMA5_EMAC_PHY_LAN8700)
 #  define MII_OUI_MSB    0x0007
 #  define MII_OUI_LSB    0x30
-#elif defined(CONFIG_ETH0_PHY_KSZ8051)
+#elif defined(SAMA5_EMAC_PHY_KSZ8051)
 #  define MII_OUI_MSB    0x0022
 #  define MII_OUI_LSB    0x05
 #else
-#  error Ethernet PHY recognized
+#  error EMAC PHY unrecognized
 #endif
 
 #ifdef CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG
@@ -314,9 +312,9 @@ static uint8_t g_rxbuffer[CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE]
 /* Register operations ******************************************************/
 
 #if defined(CONFIG_SAMA5_EMAC_REGDEBUG) && defined(CONFIG_DEBUG)
-static bool sasm_checkreg(struct twi_dev_s *priv, bool wr,
-                          uint32_t value, uintptr_t address);
-static uint32_t sam_getreg(uintptr_t addr);
+static bool sasm_checkreg(struct sam_emac_s *priv, bool wr,
+                          uint32_t regval, uintptr_t address);
+static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t addr);
 static void sam_putreg(struct sam_emac_s *priv, uintptr_t addr, uint32_t val);
 #else
 # define sam_getreg(priv,addr)      getreg32(addr)
@@ -370,9 +368,9 @@ static int  sam_phywait(struct sam_emac_s *priv);
 static int  sam_phyreset(struct sam_emac_s *priv);
 static int  sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr);
 static int  sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
-                        uint8_t regaddr, uint16_t *value);
+                        uint8_t regaddr, uint16_t *phyval);
 static int  sam_phywrite(struct sam_emac_s *priv, uint8_t phyaddr,
-                         uint8_t regaddr, uint16_t value);
+                         uint8_t regaddr, uint16_t phyval);
 static int  sam_autonegotiate(struct sam_emac_s *priv);
 static bool sam_linkup(struct sam_emac_s *priv);
 static int  sam_phyinit(struct sam_emac_s *priv);
@@ -395,7 +393,7 @@ static int  sam_emac_configure(struct sam_emac_s *priv);
  *   Check if the current register access is a duplicate of the preceding.
  *
  * Input Parameters:
- *   value   - The value to be written
+ *   regval  - The value to be written
  *   address - The address of the register to write to
  *
  * Returned Value:
@@ -405,12 +403,12 @@ static int  sam_emac_configure(struct sam_emac_s *priv);
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_EMAC_REGDEBUG
-static bool sam_checkreg(struct twi_dev_s *priv, bool wr, uint32_t value,
+static bool sam_checkreg(struct sam_emac_s *priv, bool wr, uint32_t regval,
                          uintptr_t address)
 {
-  if (wr      == priv->wrlast &&     /* Same kind of access? */
-      value   == priv->vallast &&  /* Same value? */
-      address == priv->addrlast)  /* Same address? */
+  if (wr      == priv->wrlast &&   /* Same kind of access? */
+      regval  == priv->vallast &&  /* Same value? */
+      address == priv->addrlast)   /* Same address? */
     {
       /* Yes, then just keep a count of the number of times we did this. */
 
@@ -431,7 +429,7 @@ static bool sam_checkreg(struct twi_dev_s *priv, bool wr, uint32_t value,
       /* Save information about the new access */
 
       priv->wrlast   = wr;
-      priv->vallast  = value;
+      priv->vallast  = regval;
       priv->addrlast = address;
       priv->ntimes   = 0;
     }
@@ -451,16 +449,16 @@ static bool sam_checkreg(struct twi_dev_s *priv, bool wr, uint32_t value,
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_EMAC_REGDEBUG
-static uint32_t sam_getreg(struct twi_dev_s *priv, uintptr_t address)
+static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t address)
 {
-  uint32_t value = getreg32(address);
+  uint32_t regval = getreg32(address);
 
-  if (twi_checkreg(priv, false, value, address))
+  if (sam_checkreg(priv, false, regval, address))
     {
-      lldbg("%08x->%08x\n", address, value);
+      lldbg("%08x->%08x\n", address, regval);
     }
 
-  return value;
+  return regval;
 }
 #endif
 
@@ -473,15 +471,15 @@ static uint32_t sam_getreg(struct twi_dev_s *priv, uintptr_t address)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_EMAC_REGDEBUG
-static void sam_putreg(struct twi_dev_s *priv, uintptr_t address,
-                       uint32_t value)
+static void sam_putreg(struct sam_emac_s *priv, uintptr_t address,
+                       uint32_t regval)
 {
-  if (twi_checkreg(priv, true, value, address))
+  if (sam_checkreg(priv, true, regval, address))
     {
-      lldbg("%08x<-%08x\n", address, value);
+      lldbg("%08x<-%08x\n", address, regval);
     }
 
-  putreg32(value, address);
+  putreg32(regval, address);
 }
 #endif
 
@@ -608,10 +606,10 @@ static int sam_buffer_initialize(struct sam_emac_s *priv)
 
 #endif
 
-  DEBUGASSERT(((uintptr_t)priv->rxdesc   & 7) = 0 &&
-              ((uintptr_t)priv->rxbuffer & 7) = 0 &&
-              ((uintptr_t)priv->txdesc   & 7) = 0 &&
-              ((uintptr_t)priv->txbuffer & 7) = 0);
+  DEBUGASSERT(((uintptr_t)priv->rxdesc   & 7) == 0 &&
+              ((uintptr_t)priv->rxbuffer & 7) == 0 &&
+              ((uintptr_t)priv->txdesc   & 7) == 0 &&
+              ((uintptr_t)priv->txbuffer & 7) == 0);
   return OK;
 }
 
@@ -779,8 +777,6 @@ static int sam_uiptxpoll(struct uip_driver_s *dev)
 {
   struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
 
-  DEBUGASSERT(priv->dev.d_buf != NULL);
-
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
    */
@@ -791,7 +787,6 @@ static int sam_uiptxpoll(struct uip_driver_s *dev)
 
       uip_arp_out(&priv->dev);
       sam_transmit(priv);
-      DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
 
       /* Check if the there are any free TX descriptors.  We cannot perform
        * the TX poll if we do not have buffering for another packet.
@@ -1009,8 +1004,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
                * all of the data.
                */
 
-              nllvdbg("rxndx: %d d_buf: %p d_len: %d\n",
-                      priv->rxndx, dev->d_buf, dev->d_len);
+              nllvdbg("rxndx: %d d_len: %d\n", priv->rxndx, dev->d_len);
 
               if (pktlen < dev->d_len)
                 {
@@ -1350,7 +1344,7 @@ static int sam_emac_interrupt(int irq, void *context)
    * ISR:PFRE indicates that a pause frame has been received.  Cleared on a read.
    */
 
-  if ((pending & EMAC_INT_PFRE) != 0)
+  if ((pending & EMAC_INT_PFR) != 0)
     {
       nlldbg("Pause frame received\n");
     }
@@ -1692,7 +1686,8 @@ static int sam_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
 #if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_VERBOSE)
 static void sam_phydump(struct sam_emac_s *priv)
 {
-  uint16_t value;
+  uint32_t regval;
+  uint16_t phyval;
 
   /* Enable management port */
 
@@ -1706,16 +1701,16 @@ static void sam_phydump(struct sam_emac_s *priv)
   nllvdbg("MII Registers (Address %02x)\n", priv->phyaddr);
 #endif
 
-  sam_phyread(priv, priv->phyaddr, MII_MCR, &value);
-  nllvdbg("  MCR:       %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_MSR, &value);
-  nllvdbg("  MSR:       %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_ADVERTISE, &value);
-  nllvdbg("  ADVERTISE: %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_LPA, &value);
-  nllvdbg("  LPR:       %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, CONFIG_SAMA5_EMAC_PHYSR, &value);
-  nllvdbg("  PHYSR:     %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_MCR, &phyval);
+  nllvdbg("  MCR:       %04x\n", phyval);
+  sam_phyread(priv, priv->phyaddr, MII_MSR, &phyval);
+  nllvdbg("  MSR:       %04x\n", phyval);
+  sam_phyread(priv, priv->phyaddr, MII_ADVERTISE, &phyval);
+  nllvdbg("  ADVERTISE: %04x\n", phyval);
+  sam_phyread(priv, priv->phyaddr, MII_LPA, &phyval);
+  nllvdbg("  LPR:       %04x\n", phyval);
+  sam_phyread(priv, priv->phyaddr, CONFIG_SAMA5_EMAC_PHYSR, &phyval);
+  nllvdbg("  PHYSR:     %04x\n", phyval);
 
   /* Disable management port */
 
@@ -1843,7 +1838,7 @@ static int sam_phyreset(struct sam_emac_s *priv)
 static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
 {
   uint32_t regval;
-  uint16_t value;
+  uint16_t phyval;
   uint8_t candidate;
   unsigned int offset;
   int ret = -ESRCH;
@@ -1860,8 +1855,8 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
 
   /* Check current candidate address */
 
-  ret = sam_phyread(priv, candidate, MII_PHYID1, &value);
-  if (ret == OK && value == MII_OUI_MSB)
+  ret = sam_phyread(priv, candidate, MII_PHYID1, &phyval);
+  if (ret == OK && phyval == MII_OUI_MSB)
     {
       *phyaddr = candidate;
       ret = OK;
@@ -1882,8 +1877,8 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
 
           /* Try reading the PHY ID from the candidate PHY address */
 
-          ret = sam_phyread(priv, candidate, MII_PHYID1, &value);
-          if (ret == OK && value == MII_OUI_MSB)
+          ret = sam_phyread(priv, candidate, MII_PHYID1, &phyval);
+          if (ret == OK && phyval == MII_OUI_MSB)
             {
               ret = OK;
               break;
@@ -1893,10 +1888,10 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
 
   if (ret == OK)
     {
-      nllvdbg("  PHYID1: %04x PHY addr: %d\n", value, candidate);
+      nllvdbg("  PHYID1: %04x PHY addr: %d\n", phyval, candidate);
       *phyaddr = candidate;
-      sam_phyread(priv, candidate, CONFIG_SAMA5_EMAC_PHYSR, &value);
-      nllvdbg("  PHYSR:  %04x PHY addr: %d\n", value, candidate);
+      sam_phyread(priv, candidate, CONFIG_SAMA5_EMAC_PHYSR, &phyval);
+      nllvdbg("  PHYSR:  %04x PHY addr: %d\n", phyval, candidate);
     }
 
   /* Disable management port */
@@ -1917,7 +1912,7 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
  *   priv - A reference to the private driver state structure
  *   phyaddr - The PHY device address
  *   regaddr - The PHY register address
- *   value - The location to return the 16-bit PHY register value.
+ *   phyval - The location to return the 16-bit PHY register value.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -1927,7 +1922,7 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
  ****************************************************************************/
 
 static int sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
-                       uint8_t regaddr, uint16_t *value)
+                       uint8_t regaddr, uint16_t *phyval)
 {
   uint32_t regval;
   int ret;
@@ -1958,7 +1953,7 @@ static int sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
 
   /* Return data */
 
-  *value = (uint16_t)(sam_getreg(priv, SAM_EMAC_MAN) & EMAC_MAN_DATA_MASK);
+  *phyval = (uint16_t)(sam_getreg(priv, SAM_EMAC_MAN) & EMAC_MAN_DATA_MASK);
   return OK;
 }
 
@@ -1972,7 +1967,7 @@ static int sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
  *   priv - A reference to the private driver state structure
  *   phyaddr - The PHY device address
  *   regaddr - The PHY register address
- *   value - The 16-bit value to write to the PHY register value.
+ *   phyval - The 16-bit value to write to the PHY register.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -1982,7 +1977,7 @@ static int sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
  ****************************************************************************/
 
 static int sam_phywrite(struct sam_emac_s *priv, uint8_t phyaddr,
-                        uint8_t regaddr, uint16_t value)
+                        uint8_t regaddr, uint16_t phyval)
 {
   uint32_t regval;
   int ret;
@@ -1998,11 +1993,11 @@ static int sam_phywrite(struct sam_emac_s *priv, uint8_t phyaddr,
 
   /* Write the PHY Maintenance register */
 
-  regval = EMAC_MAN_DATA(value) | EMAC_MAN_CODE | EMAC_MAN_REGA(regaddr) |
+  regval = EMAC_MAN_DATA(phyval) | EMAC_MAN_CODE | EMAC_MAN_REGA(regaddr) |
            EMAC_MAN_PHYA(priv->phyaddr) | EMAC_MAN_WRITE| EMAC_MAN_SOF;
   sam_putreg(priv, SAM_EMAC_MAN, regval);
 
-  /* Wait until the bus is again IDLE */
+  /* Wait until the PHY is again IDLE */
 
   ret = sam_phywait(priv);
   if (ret < 0)
@@ -2069,7 +2064,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   if (phyid1 == MII_OUI_MSB &&
      ((phyid2 & MII_PHYID2_OUI) >> 10) == MII_OUI_LSB)
     {
-      nllvdbg("  Vendor Number Model:   %04x\n", ((phyid2 >> 4) & 0x3f));
+      nllvdbg("  Vendor Model Number:   %04x\n", ((phyid2 >> 4) & 0x3f));
       nllvdbg("  Model Revision Number: %04x\n", (phyid2 & 7));
     }
   else
@@ -2082,18 +2077,18 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   ret = sam_phyread(priv, priv->phyaddr, MII_MCR, &mcr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to read BMCR\n");
+      nlldbg("ERROR: Failed to read MCR\n");
       goto errout;
     }
 
   mcr &= ~MII_MCR_ANENABLE;  /* Remove autonegotiation enable */
   mcr &= ~(MII_MCR_LOOPBACK | MII_MCR_PDOWN);
-  mcr |=  MII_MCR_ISOLATE;   /* Electrically isolate PHY */
+  mcr |= MII_MCR_ISOLATE;    /* Electrically isolate PHY */
 
   ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, mcr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to write BMCR\n");
+      nlldbg("ERROR: Failed to write MCR\n");
       goto errout;
     }
 
@@ -2117,7 +2112,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   ret = sam_phyread(priv, priv->phyaddr, MII_MCR, &mcr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to read BMCR\n");
+      nlldbg("ERROR: Failed to read MCR\n");
       goto errout;
     }
 
@@ -2125,7 +2120,7 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, mcr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to write BMCR\n");
+      nlldbg("ERROR: Failed to write MCR\n");
       goto errout;
     }
 
@@ -2137,11 +2132,11 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, mcr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to write BMCR\n");
+      nlldbg("ERROR: Failed to write MCR\n");
       goto errout;
     }
 
-  nllvdbg("  BMCR: %04x\n", value);
+  nllvdbg("  MCR: %04x\n", mcr);
 
   /* Check AutoNegotiate complete */
 
@@ -2271,7 +2266,7 @@ static bool sam_linkup(struct sam_emac_s *priv)
   ret = sam_phyread(priv, priv->phyaddr, MII_MSR, &msr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to read BMSR: %d\n", ret);
+      nlldbg("ERROR: Failed to read MSR: %d\n", ret);
       goto errout;
     }
 
@@ -2465,7 +2460,6 @@ static void sam_txreset(struct sam_emac_s *priv)
   for (ndx = 0; ndx < CONFIG_SAMA5_EMAC_NTXBUFFERS; ndx++)
   {
     bufaddr = (uint32_t)(&(txbuffer[ndx * EMAC_TX_UNITSIZE]));
-    DEBUGASSERT((bufaddr & ~EMACTXD_ADDR_MASK) == 0);
 
     /* Set the buffer address and mark the descriptor as used */
 
@@ -2704,11 +2698,11 @@ static int sam_emac_configure(struct sam_emac_s *priv)
   regval |= (EMAC_NCR_RE | EMAC_NCR_TE | EMAC_NCR_WESTAT);
   sam_putreg(priv, SAM_EMAC_NCR, regval);
 
-  /* Setup the interrupts for TX (and errors) */
+  /* Setup the interrupts for TX events, RX events, and error events */
 
-  regval = (EMAC_INT_RXUBR | EMAC_INT_TUND | EMAC_INT_RLE | EMAC_INT_TXERR |
-            EMAC_INT_TCOMP | EMAC_INT_ROVR | EMAC_INT_HRESP | EMAC_INT_PFR |
-            EMAC_INT_PTZ);
+  regval = (EMAC_INT_RCOMP | EMAC_INT_RXUBR | EMAC_INT_TUND | EMAC_INT_RLE |
+            EMAC_INT_TXERR | EMAC_INT_TCOMP | EMAC_INT_ROVR | EMAC_INT_HRESP |
+            EMAC_INT_PFR | EMAC_INT_PTZ);
   sam_putreg(priv, SAM_EMAC_IER, regval);
   return OK;
 }
@@ -2811,9 +2805,10 @@ int sam_emac_initialize(void)
   ret = netdev_register(&priv->dev);
   if (ret >= 0)
     {
-      nlldbg("ERROR: netdev_register() failed: %d\n", ret);
       return ret;
     }
+
+  nlldbg("ERROR: netdev_register() failed: %d\n", ret);
 
 errout_with_buffers:
   sam_buffer_free(priv);
