@@ -2095,26 +2095,6 @@ static int sam_autonegotiate(struct sam_emac_s *priv)
   /* Set the Auto_negotiation Advertisement Register MII advertising for
    * Next page 100BaseTxFD and HD, 10BaseTFD and HD, IEEE 802.3
    */
-#define MII_ADVERTISE_SELECT         0x001f    /* Bits 0-4: Selector field */
-#define MII_ADVERTISE_CSMA           (1 << 0)  /*         CSMA */
-#define MII_ADVERTISE_8023           (1 << 0)  /*         IEEE Std 802.3 */
-#define MII_ADVERTISE_8029           (2 << 0)  /*         IEEE Std 802.9 ISLAN-16T */
-#define MII_ADVERTISE_8025           (3 << 0)  /*         IEEE Std 802.5 */
-#define MII_ADVERTISE_1394           (4 << 0)  /*         IEEE Std 1394 */
-#define MII_ADVERTISE_10BASETXHALF   (1 << 5)  /* Bit 5:  Try 10BASE-TX half duplex */
-#define MII_ADVERTISE_1000XFULL      (1 << 5)  /* Bit 5:  Try 1000BASE-X full duplex */
-#define MII_ADVERTISE_10BASETXFULL   (1 << 6)  /* Bit 6:  Try 10BASE-TX full duplex */
-#define MII_ADVERTISE_1000XHALF      (1 << 6)  /* Bit 6:  Try 1000BASE-X half duplex */
-#define MII_ADVERTISE_100BASETXHALF  (1 << 7)  /* Bit 7:  Try 100BASE-TX half duplex */
-#define MII_ADVERTISE_1000XPAUSE     (1 << 7)  /* Bit 7:  Try 1000BASE-X pause */
-#define MII_ADVERTISE_100BASETXFULL  (1 << 8)  /* Bit 8:  Try 100BASE-TX full duplex*/
-#define MII_ADVERTISE_1000XASYMPAU   (1 << 8)  /* Bit 8:  Try 1000BASE-X asym pause */
-#define MII_ADVERTISE_100BASET4      (1 << 9)  /* Bit 9:  Try 100BASE-T4 */
-#define MII_ADVERTISE_FDXPAUSE       (1 << 10) /* Bit 10: Try full duplex flow control */
-#define MII_ADVERTISE_ASYMPAUSE      (1 << 11) /* Bit 11: Try asymetric pause */
-#define MII_ADVERTISE_RFAULT         (1 << 13) /* Bit 13: Remote fault supported */
-#define MII_ADVERTISE_LPACK          (1 << 14) /* Bit 14: Ack link partners response */
-#define MII_ADVERTISE_NXTPAGE        (1 << 15) /* Bit 15: Next page enabled */
 
   advertise = MII_ADVERTISE_100BASETXFULL | MII_ADVERTISE_100BASETXHALF |
               MII_ADVERTISE_10BASETXFULL | MII_ADVERTISE_10BASETXHALF |
