@@ -218,17 +218,17 @@
 /* PHYs *********************************************************************/
 /* Select PHY-specific values.  Add more PHYs as needed. */
 
-#if defined(CONFIG_PHY_KS8721)
+#if defined(CONFIG_ETH0_PHY_KS8721)
 #  define PIC32MX_PHYNAME      "KS8721"
 #  define PIC32MX_PHYID1       MII_PHYID1_KS8721
 #  define PIC32MX_PHYID2       MII_PHYID2_KS8721
 #  define PIC32MX_HAVE_PHY     1
-#elif defined(CONFIG_PHY_DP83848C)
+#elif defined(CONFIG_ETH0_PHY_DP83848C)
 #  define PIC32MX_PHYNAME      "DP83848C"
 #  define PIC32MX_PHYID1       MII_PHYID1_DP83848C
 #  define PIC32MX_PHYID2       MII_PHYID2_DP83848C
 #  define PIC32MX_HAVE_PHY     1
-#elif defined(CONFIG_PHY_LAN8720)
+#elif defined(CONFIG_ETH0_PHY_LAN8720)
 #  define PIC32MX_PHYNAME      "LAN8720"
 #  define PIC32MX_PHYID1       MII_PHYID1_LAN8720
 #  define PIC32MX_PHYID2       MII_PHYID2_LAN8720
@@ -2328,7 +2328,7 @@ static void pic32mx_showmii(uint8_t phyaddr, const char *msg)
   dbg("  ADVERTISE: %04x\n", pic32mx_phyread(phyaddr, MII_ADVERTISE));
   dbg("  LPA:       %04x\n", pic32mx_phyread(phyaddr, MII_LPA));
   dbg("  EXPANSION: %04x\n", pic32mx_phyread(phyaddr, MII_EXPANSION));
-#ifdef CONFIG_PHY_KS8721
+#ifdef CONFIG_ETH0_PHY_KS8721
   dbg("  10BTCR:    %04x\n", pic32mx_phyread(phyaddr, MII_KS8721_10BTCR));
 #endif
 }
@@ -2599,7 +2599,7 @@ static int pic32mx_phymode(uint8_t phyaddr, uint8_t mode)
 
   for (timeout = PIC32MX_MIITIMEOUT; timeout > 0; timeout--)
     {
-#ifdef CONFIG_PHY_DP83848C
+#ifdef CONFIG_ETH0_PHY_DP83848C
       phyreg = pic32mx_phyread(phyaddr, MII_DP83848C_STS);
       if ((phyreg & 0x0001) != 0)
         {
@@ -2653,7 +2653,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
    * specific control register.
    */
 
-#ifdef CONFIG_PHY_DP83848C
+#ifdef CONFIG_ETH0_PHY_DP83848C
  /* The RMII/MII of operation can be selected by strap options or register
   * control (using the RBR register). For RMII mode, it is required to use the
   * strap option, since it requires a 50 MHz clock instead of the normal 25 MHz.
@@ -2665,7 +2665,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
    * specific control register.
    */
 
-#ifdef CONFIG_PHY_DP83848C
+#ifdef CONFIG_ETH0_PHY_DP83848C
 #  warning "Missing logic"
 #endif
 
@@ -2806,7 +2806,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
 
   /* Check configuration */
 
-#if defined(CONFIG_PHY_KS8721)
+#if defined(CONFIG_ETH0_PHY_KS8721)
   phyreg = pic32mx_phyread(phyaddr, MII_KS8721_10BTCR);
 
   switch (phyreg & KS8721_10BTCR_MODE_MASK)
@@ -2827,7 +2827,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
         ndbg("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
-#elif defined(CONFIG_PHY_DP83848C)
+#elif defined(CONFIG_ETH0_PHY_DP83848C)
   phyreg = pic32mx_phyread(phyaddr, MII_DP83848C_STS);
 
   /* Configure for full/half duplex mode and speed */
@@ -2850,7 +2850,7 @@ static inline int pic32mx_phyinit(struct pic32mx_driver_s *priv)
         ndbg("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
-#elif defined(CONFIG_PHY_LAN8720)
+#elif defined(CONFIG_ETH0_PHY_LAN8720)
   {
     uint16_t advertise;
     uint16_t lpa;
