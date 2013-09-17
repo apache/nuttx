@@ -96,7 +96,7 @@
 
 /* Use MCU Pin Reset DM9161 PHY Chip */
 
-#ifdef CONFIG_PHY_DM9161
+#ifdef CONFIG_ETH0_PHY_DM9161
 #  define GPIO_DM9161_RET (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|GPIO_OUTPUT_SET|\
                            GPIO_PORTB|GPIO_PIN15)
 #endif
