@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17xx/lpc17_ethernet.c
  *
- *   Copyright (C) 2010-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -178,17 +178,17 @@
 /* PHYs *********************************************************************/
 /* Select PHY-specific values.  Add more PHYs as needed. */
 
-#if defined(CONFIG_PHY_KS8721)
+#if defined(CONFIG_ETH0_PHY_KS8721)
 #  define LPC17_PHYNAME      "KS8721"
 #  define LPC17_PHYID1       MII_PHYID1_KS8721
 #  define LPC17_PHYID2       MII_PHYID2_KS8721
 #  define LPC17_HAVE_PHY     1
-#elif defined(CONFIG_PHY_DP83848C)
+#elif defined(CONFIG_ETH0_PHY_DP83848C)
 #  define LPC17_PHYNAME      "DP83848C"
 #  define LPC17_PHYID1       MII_PHYID1_DP83848C
 #  define LPC17_PHYID2       MII_PHYID2_DP83848C
 #  define LPC17_HAVE_PHY     1
-#elif defined(CONFIG_PHY_LAN8720)
+#elif defined(CONFIG_ETH0_PHY_LAN8720)
 #  define LPC17_PHYNAME      "LAN8720"
 #  define LPC17_PHYID1       MII_PHYID1_LAN8720
 #  define LPC17_PHYID2       MII_PHYID2_LAN8720
@@ -1616,7 +1616,7 @@ static void lpc17_showmii(uint8_t phyaddr, const char *msg)
   dbg("  ADVERTISE: %04x\n", lpc17_phyread(phyaddr, MII_ADVERTISE));
   dbg("  LPA:       %04x\n", lpc17_phyread(phyaddr, MII_LPA));
   dbg("  EXPANSION: %04x\n", lpc17_phyread(phyaddr, MII_EXPANSION));
-#ifdef CONFIG_PHY_KS8721
+#ifdef CONFIG_ETH0_PHY_KS8721
   dbg("  10BTCR:    %04x\n", lpc17_phyread(phyaddr, MII_KS8721_10BTCR));
 #endif
 }
@@ -1860,7 +1860,7 @@ static int lpc17_phymode(uint8_t phyaddr, uint8_t mode)
 
   for (timeout = MII_BIG_TIMEOUT; timeout > 0; timeout--)
     {
-#ifdef CONFIG_PHY_DP83848C
+#ifdef CONFIG_ETH0_PHY_DP83848C
       phyreg = lpc17_phyread(phyaddr, MII_DP83848C_STS);
       if ((phyreg & 0x0001) != 0)
         {
@@ -2016,7 +2016,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
 
   /* Check configuration */
 
-#if defined(CONFIG_PHY_KS8721)
+#if defined(CONFIG_ETH0_PHY_KS8721)
   phyreg = lpc17_phyread(phyaddr, MII_KS8721_10BTCR);
 
   switch (phyreg & KS8721_10BTCR_MODE_MASK)
@@ -2039,7 +2039,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         ndbg("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
-#elif defined(CONFIG_PHY_DP83848C)
+#elif defined(CONFIG_ETH0_PHY_DP83848C)
   phyreg = lpc17_phyread(phyaddr, MII_DP83848C_STS);
 
   /* Configure for full/half duplex mode and speed */
@@ -2062,7 +2062,7 @@ static inline int lpc17_phyinit(struct lpc17_driver_s *priv)
         ndbg("Unrecognized mode: %04x\n", phyreg);
         return -ENODEV;
     }
-#elif defined(CONFIG_PHY_LAN8720)
+#elif defined(CONFIG_ETH0_PHY_LAN8720)
   {
     uint16_t advertise;
     uint16_t lpa;
