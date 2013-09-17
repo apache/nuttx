@@ -38,13 +38,14 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <debug.h>
 #include "sam_ethernet.h"
 
 #ifdef CONFIG_NET
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -88,6 +89,9 @@
 
 void up_netinitialize(void)
 {
+#if defined(CONFIG_SAMA5_GMAC) || defined(CONFIG_SAMA5_EMAC)
+  int ret;
+
   /* Initialize the GMAC driver */
 
 #ifdef CONFIG_SAMA5_GMAC
@@ -95,7 +99,6 @@ void up_netinitialize(void)
   if (ret < 0)
     {
       nlldbg("ERROR: sam_gmac_initialize failed: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -106,11 +109,9 @@ void up_netinitialize(void)
   if (ret < 0)
     {
       nlldbg("ERROR: sam_gmac_initialize failed: %d\n", ret);
-      return ret;
     }
 #endif
-
-  return OK;
+#endif /* CONFIG_SAMA5_GMAC | CONFIG_SAMA5_EMAC */
 }
 
 #endif /* CONFIG_NET && CONFIG_SAMA5_EMAC */

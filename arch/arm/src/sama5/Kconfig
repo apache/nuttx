@@ -159,11 +159,14 @@ config SAMA5_UDPHS
 config SAMA5_GMAC
 	bool "Gigabit Ethernet MAC (GMAC)"
 	default n
+	depends on SAMA5_HAVE_GMAC
+	select ARCH_HAVE_PHY
 
 config SAMA5_EMAC
 	bool "10/100MBps Ethernet MAC (EMAC)"
 	default n
 	depends on SAMA5_HAVE_EMAC
+	select ARCH_HAVE_PHY
 
 config SAMA5_LCDC
 	bool "LCD Controller (LCDC)"
@@ -255,6 +258,20 @@ config SAMA5_HAVE_GMAC
 config SAMA5_HAVE_EMAC
 	bool
 	default n
+
+if SAMA5_GMAC
+
+menu "GMAC device driver options"
+
+if SAMA5_EMAC
+
+config SAMA5_GMAC_ISETH0
+    bool "GMAC is ETH0"
+    default y
+
+endif # SAMA5_EMAC
+endmenu # GMAC device driver options
+endif # SAMA5_GMAC
 
 if SAMA5_EMAC
 
@@ -398,28 +415,28 @@ config SAMA5_EMAC_PHYSR_ALTMODE
 		for isolating the speed and full/half duplex mode bits.
 
 config SAMA5_EMAC_PHYSR_10HD
-	hex "10MHz/Half Duplex Value"
+	hex "10MBase-T Half Duplex Value"
 	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 10Mbps, half duplex setting.
 
 config SAMA5_EMAC_PHYSR_100HD
-	hex "100MHz/Half Duplex Value"
+	hex "100Base-T Half Duplex Value"
 	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, half duplex setting.
 
 config SAMA5_EMAC_PHYSR_10FD
-	hex "10MHz/Full Duplex Value"
+	hex "10Base-T Full Duplex Value"
 	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 10Mbps, full duplex setting.
 
 config SAMA5_EMAC_PHYSR_100FD
-	hex "100MHz/Full Duplex Value"
+	hex "100Base-T Full Duplex Value"
 	depends on SAMA5_EMAC_AUTONEG && SAMA5_EMAC_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if SAMA5_EMAC_AUTONEG is defined.  This is the value
@@ -431,6 +448,11 @@ config SAMA5_EMAC_REGDEBUG
 	depends on DEBUG
 	---help---
 		Enable very low-level register access debug.  Depends on DEBUG.
+
+config SAMA5_EMAC_ISETH0
+    bool
+    default y if !SAMA5_EMAC || !SAMA5_GMAC_ISETH0
+    default n if SAMA5_EMAC && SAMA5_GMAC_ISETH0
 
 endmenu # EMAC device driver options
 endif # SAMA5_EMAC

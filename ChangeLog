@@ -5568,4 +5568,15 @@
 	* arch/arm/src/kl/chip/kl_pit.h and kp_tpm.h:  Add register
 	  definitions for the Freescale Kinetis KL25Z from Alan
 	  Carvalho de Assis (2013-9-15).
-
+	* configs/ and a few Ethernet drivers:  Add the prefix ETH0
+	  to all PHY configuration selections.  This will allow us
+	  to support to Ethernet MAC drivers with two different
+	  PHYS (identified with ETH0 and ETH1) (2013-9-17).
+	* net/Kconfig and drivers/net/Kconfig:  Move PHY selections from
+	  net/Kconfig to drivers/net/Kconfig where they belong.  Add the previx
+	  ETH0_ to each PHY selection.  And a new configuration
+	  CONFIG_NETDEV_MULTINIC that can be set to enable support for multiple
+	  Ethernet MAC drivers (not fully implemented yet).  When Enabled,
+	  another set of PHY selections are enabled for ETH1_ (2013-9-17).
+	* include/nuttx/net/mii.h:  Add definitions for the Micrel KSZ8051 PHY
+	  (2013-9-17).

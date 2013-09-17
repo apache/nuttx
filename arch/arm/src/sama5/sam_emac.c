@@ -47,7 +47,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_SAMA5_EMAC)
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -78,6 +77,8 @@
 #include "sam_ethernet.h"
 
 #include <arch/board/board.h>
+
+#if defined(CONFIG_NET) && defined(CONFIG_SAMA5_EMAC)
 
 /****************************************************************************
  * Definitions
@@ -150,17 +151,42 @@
  * REVISIT: net/Kconfig PHY definitions assume only a single Ethernet MAC.
  */
 
-#if defined(CONFIG_SAMA5_EMAC_PHY_DM9161)
+#if defined(CONFIG_ETH0_PHY_DM9161)
 #  define MII_OUI_MSB    0x0181
 #  define MII_OUI_LSB    0x2e
-#elif defined(CONFIG_SAMA5_EMAC_PHY_LAN8700)
+#elif defined(CONFIG_ETH0_PHY_LAN8700)
 #  define MII_OUI_MSB    0x0007
 #  define MII_OUI_LSB    0x30
-#elif defined(CONFIG_SAMA5_EMAC_PHY_KSZ8051RNL)
+#elif defined(CONFIG_ETH0_PHY_KSZ8051)
 #  define MII_OUI_MSB    0x0022
 #  define MII_OUI_LSB    0x05
 #else
-#  error No PHY Ethernet PHY defined
+#  error Ethernet PHY recognized
+#endif
+
+#ifdef CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG
+
+#  define PHYSR_MODE(sr)     ((sr) & CONFIG_SAMA5_EMAC_PHYSR_ALTMODE)
+#  define PHYSR_ISMODE(sr,m) (PHYSR_MODE(sr) == (m))
+
+#  define PHYSR_IS10HDX(sr)  PHYSR_ISMODE(sr,CONFIG_SAMA5_EMAC_PHYSR_10HD)
+#  define PHYSR_IS100HDX(sr) PHYSR_ISMODE(sr,CONFIG_SAMA5_EMAC_PHYSR_100HD)
+#  define PHYSR_IS10FDX(sr)  PHYSR_ISMODE(sr,CONFIG_SAMA5_EMAC_PHYSR_10FD)
+#  define PHYSR_IS100FDX(sr) PHYSR_ISMODE(sr,CONFIG_SAMA5_EMAC_PHYSR_100FD)
+
+#else
+
+#  define PHYSR_MODESPEED    (CONFIG_PHYSR_MODE | CONFIG_PHYSR_SPEED)
+#  define PHYSR_10HDX        (0)
+#  define PHYSR_100HDX       (CONFIG_PHYSR_100MBPS)
+#  define PHYSR_10FDX        (CONFIG_PHYSR_FULLDUPLEX)
+#  define PHYSR_100FDX       (CONFIG_PHYSR_FULLDUPLEX | CONFIG_PHYSR_100MBPS)
+
+#  define PHYSR_IS10HDX(sr)  (((sr) & PHYSR_MODESPEED) == PHYSR_10HDX)
+#  define PHYSR_IS100HDX(sr) (((sr) & PHYSR_MODESPEED) == PHYSR_100HDX)
+#  define PHYSR_IS10FDX(sr)  (((sr) & PHYSR_MODESPEED) == PHYSR_10FDX)
+#  define PHYSR_IS100FDX(sr) (((sr) & PHYSR_MODESPEED) == PHYSR_100FDX)
+
 #endif
 
 /* EMAC buffer sizes, number of buffers, and number of descriptors */
@@ -767,12 +793,11 @@ static int sam_uiptxpoll(struct uip_driver_s *dev)
       sam_transmit(priv);
       DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
 
-      /* Check if the next TX descriptor is owned by the EMAC or CPU.  We
-       * cannot perform the TX poll if we are unable to accept another packet for
-       * transmission.
+      /* Check if the there are any free TX descriptors.  We cannot perform
+       * the TX poll if we do not have buffering for another packet.
        */
-#warning Missing logic
 
+      if (sam_txfree(priv) == 0)
         {
           /* We have to terminate the poll if we have no more descriptors
            * available for another transfer.
@@ -810,12 +835,11 @@ static void sam_dopoll(struct sam_emac_s *priv)
 {
   struct uip_driver_s *dev = &priv->dev;
 
-  /* Check if the next TX descriptor is owned by the EMAC or
-   * CPU.  We cannot perform the TX poll if we are unable to accept
-   * another packet for transmission.
+  /* Check if the there are any free TX descriptors.  We cannot perform the
+   * TX poll if we do not have buffering for another packet.
    */
 
-#warning Missing logic
+  if (sam_txfree(priv) > 0)
     {
       /* If we have the descriptor, then poll uIP for new XMIT data. */
 
@@ -1194,7 +1218,7 @@ static int sam_emac_interrupt(int irq, void *context)
   tsr = sam_getreg(priv, SAM_EMAC_TSR);
   imr = sam_getreg(priv, SAM_EMAC_IMR);
 
-  pending = isr & ~(imr | 0xFFC300);
+  pending = isr & ~(imr | 0xffc300);
   nllvdbg("isr: %08x pending: %08x\n", isr, pending);
 
   /* Check for the receipt of an RX packet.
@@ -1321,7 +1345,7 @@ static int sam_emac_interrupt(int irq, void *context)
     }
 
 #ifdef CONFIG_DEBUG_NET
-  /* Chekc for PAUSE Frame recieved (PFRE).
+  /* Check for PAUSE Frame recieved (PFRE).
    *
    * ISR:PFRE indicates that a pause frame has been received.  Cleared on a read.
    */
@@ -1405,12 +1429,11 @@ static void sam_polltimer(int argc, uint32_t arg, ...)
   struct sam_emac_s *priv = (struct sam_emac_s *)arg;
   struct uip_driver_s   *dev  = &priv->dev;
 
-  /* Check if the next TX descriptor is owned by the EMAC or CPU.  We
-   * cannot perform the timer poll if we are unable to accept another packet
-   * for transmission.  Hmmm.. might be bug here.  Does this mean if there is
-   * a transmit in progress, we will miss TCP time state updates?
+  /* Check if the there are any free TX descriptors.  We cannot perform the
+   * TX poll if we do not have buffering for another packet.
    */
-#warning Missing logic
+
+  if (sam_txfree(priv) > 0)
     {
       /* Update TCP timing states and poll uIP for new XMIT data. */
 
@@ -1684,33 +1707,15 @@ static void sam_phydump(struct sam_emac_s *priv)
 #endif
 
   sam_phyread(priv, priv->phyaddr, MII_MCR, &value);
-  nllvdbg("  BMCR:    %04x\n", value);
+  nllvdbg("  MCR:       %04x\n", value);
   sam_phyread(priv, priv->phyaddr, MII_MSR, &value);
-  nllvdbg("  BMSR:    %04x\n", value);
+  nllvdbg("  MSR:       %04x\n", value);
   sam_phyread(priv, priv->phyaddr, MII_ADVERTISE, &value);
-  nllvdbg("  ANAR:    %04x\n", value);
+  nllvdbg("  ADVERTISE: %04x\n", value);
   sam_phyread(priv, priv->phyaddr, MII_LPA, &value);
-  nllvdbg("  ANLPAR:  %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_ANER, &value);
-  nllvdbg("  ANER:    %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_DSCR, &value);
-  nllvdbg("  DSCR:    %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_DSCSR, &value);
-  nllvdbg("  DSCSR:   %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_10BTCSR, &value);
-  nllvdbg("  10BTCSR: %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_PWDOR, &value);
-  nllvdbg("  PWDOR:   %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_CONFIGR, &value);
-  nllvdbg("  CONFIGR: %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_MDINTR, &value);
-  nllvdbg("  MDINTR:  %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_RECR, &value);
-  nllvdbg("  RECR:    %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_DISCR, &value);
-  nllvdbg("  DISCR:   %04x\n", value);
-  sam_phyread(priv, priv->phyaddr, MII_RLSR, &value);
-  nllvdbg("  RLSR:    %04x\n", value);
+  nllvdbg("  LPR:       %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, CONFIG_SAMA5_EMAC_PHYSR, &value);
+  nllvdbg("  PHYSR:     %04x\n", value);
 
   /* Disable management port */
 
@@ -1888,10 +1893,10 @@ static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
 
   if (ret == OK)
     {
-      nllvdbg("PHYID1: %04x PHY addr: %d\n", value, candidate);
+      nllvdbg("  PHYID1: %04x PHY addr: %d\n", value, candidate);
       *phyaddr = candidate;
-      sam_phyread(priv, candidate, MII_DSCSR, &value);
-      nllvdbg("DSCSR:  %04x PHY addr: %d\n", value, candidate);
+      sam_phyread(priv, candidate, CONFIG_SAMA5_EMAC_PHYSR, &value);
+      nllvdbg("  PHYSR:  %04x PHY addr: %d\n", value, candidate);
     }
 
   /* Disable management port */
@@ -2253,7 +2258,7 @@ static bool sam_linkup(struct sam_emac_s *priv)
 {
   uint32_t regval;
   uint16_t msr;
-  uint16_t dscsr;
+  uint16_t physr;
   bool linkup = false;
   int ret;
 
@@ -2278,30 +2283,30 @@ static bool sam_linkup(struct sam_emac_s *priv)
 
   /* Re-configure Link speed */
 
-  ret = sam_phyread(priv, priv->phyaddr, MII_DSCSR, &dscsr);
+  ret = sam_phyread(priv, priv->phyaddr, CONFIG_SAMA5_EMAC_PHYSR, &physr);
   if (ret < 0)
     {
-      nlldbg("ERROR: Failed to read DSCSR: %d\n", ret);
+      nlldbg("ERROR: Failed to read PHYSR: %d\n", ret);
       goto errout;
     }
 
   regval = sam_getreg(priv, SAM_EMAC_NCFGR);
   regval &= ~(EMAC_NCFGR_SPD | EMAC_NCFGR_FD);
 
-  if ((msr & MII_MSR_100BASETXFULL) && (dscsr & MII_DSCSR_100FDX))
+  if ((msr & MII_MSR_100BASETXFULL) != 0 && PHYSR_IS100FDX(physr))
     {
       /* Set EMAC for 100BaseTX and Full Duplex */
 
       regval |= (EMAC_NCFGR_SPD | EMAC_NCFGR_FD);
     }
-  else if ((msr & MII_MSR_10BASETXFULL) && (dscsr & MII_DSCSR_10FDX))
+  else if ((msr & MII_MSR_10BASETXFULL) != 0  && PHYSR_IS10FDX(physr))
     {
       /* Set MII for 10BaseT and Full Duplex */
 
       regval |= EMAC_NCFGR_FD;
     }
 
-  else if ((msr & MII_MSR_100BASETXHALF) && (dscsr & MII_DSCSR_100HDX))
+  else if ((msr & MII_MSR_100BASETXHALF) != 0  && PHYSR_IS100HDX(physr))
     {
       /* Set MII for 100BaseTX and Half Duplex */
 
@@ -2309,7 +2314,7 @@ static bool sam_linkup(struct sam_emac_s *priv)
     }
 
 #if 0
-  else if ((msr & MII_MSR_10BASETXHALF) && (dscsr & MII_DSCSR_10HDX))
+  else if ((msr & MII_MSR_10BASETXHALF) != 0  && PHYSR_IS10HDX(physr))
     {
       /* Set MII for 10BaseT and Half Duplex */
     }
@@ -2413,30 +2418,12 @@ static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
   sam_configpio(PIO_EMAC_TX1);
   sam_configpio(PIO_EMAC_RX0);
   sam_configpio(PIO_EMAC_RX1);
-
   sam_configpio(PIO_EMAC_TXEN);
   sam_configpio(PIO_EMAC_CRSDV);
   sam_configpio(PIO_EMAC_RXER);
   sam_configpio(PIO_EMAC_REFCK);
-
-  /* MDC and MDIO are common to both modes */
-
   sam_configpio(PIO_EMAC_MDC);
   sam_configpio(PIO_EMAC_MDIO);
-
-#if defined(CONFIG_SAMA5_EMAC_MII)
-  /* Provide clocking for the MII interface */
-#warning Missing logic
-
-# endif
-
-  /* Set up the RMII interface. */
-
-#elif defined(CONFIG_SAMA5_EMAC_RMII)
-  /* Provide clocking for the RMII interface */
-#warning Missing logic
-
-#endif
 }
 
 /****************************************************************************
@@ -2837,3 +2824,5 @@ errout_with_txpoll:
 errout:
   return ret;
 }
+
+#endif /* CONFIG_NET && CONFIG_SAMA5_EMAC */

@@ -664,7 +664,7 @@ static void stm32_rxdescinit(FAR struct stm32_ethmac_s *priv);
 
 static int  stm32_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
 static int  stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
-#ifdef CONFIG_PHY_DM9161
+#ifdef CONFIG_ETH0_PHY_DM9161
 static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv);
 #endif
 static int  stm32_phyinit(FAR struct stm32_ethmac_s *priv);
@@ -2501,7 +2501,7 @@ static int stm32_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t val
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PHY_DM9161
+#ifdef CONFIG_ETH0_PHY_DM9161
 static inline int stm32_dm9161(FAR struct stm32_ethmac_s *priv)
 {
   uint16_t phyval;
@@ -2607,7 +2607,7 @@ static int stm32_phyinit(FAR struct stm32_ethmac_s *priv)
 
   /* Special workaround for the Davicom DM9161 PHY is required. */
 
-#ifdef CONFIG_PHY_DM9161
+#ifdef CONFIG_ETH0_PHY_DM9161
   ret = stm32_dm9161(priv);
   if (ret < 0)
     {

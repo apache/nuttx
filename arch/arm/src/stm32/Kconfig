@@ -2728,28 +2728,28 @@ config STM32_PHYSR_ALTMODE
 		for isolating the speed and full/half duplex mode bits.
 
 config STM32_PHYSR_10HD
-	hex "10MHz/Half Duplex Value"
+	hex "10MBase-T Half Duplex Value"
 	depends on STM32_AUTONEG && STM32_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if STM32_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 10Mbps, half duplex setting.
 
 config STM32_PHYSR_100HD
-	hex "100MHz/Half Duplex Value"
+	hex "100Base-T Half Duplex Value"
 	depends on STM32_AUTONEG && STM32_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if STM32_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 100Mbps, half duplex setting.
 
 config STM32_PHYSR_10FD
-	hex "10MHz/Full Duplex Value"
+	hex "10Base-T Full Duplex Value"
 	depends on STM32_AUTONEG && STM32_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if STM32_AUTONEG is defined.  This is the value
 		under the bit mask that represents the 10Mbps, full duplex setting.
 
 config STM32_PHYSR_100FD
-	hex "100MHz/Full Duplex Value"
+	hex "100Base-T Full Duplex Value"
 	depends on STM32_AUTONEG && STM32_PHYSR_ALTCONFIG
 	---help---
 		This must be provided if STM32_AUTONEG is defined.  This is the value
