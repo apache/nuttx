@@ -146,6 +146,23 @@
 #  endif
 #endif
 
+/* PHY definitions
+ * REVISIT: net/Kconfig PHY definitions assume only a single Ethernet MAC.
+ */
+
+#if defined(CONFIG_SAMA5_EMAC_PHY_DM9161)
+#  define MII_OUI_MSB    0x0181
+#  define MII_OUI_LSB    0x2e
+#elif defined(CONFIG_SAMA5_EMAC_PHY_LAN8700)
+#  define MII_OUI_MSB    0x0007
+#  define MII_OUI_LSB    0x30
+#elif defined(CONFIG_SAMA5_EMAC_PHY_KSZ8051RNL)
+#  define MII_OUI_MSB    0x0022
+#  define MII_OUI_LSB    0x05
+#else
+#  error No PHY Ethernet PHY defined
+#endif
+
 /* EMAC buffer sizes, number of buffers, and number of descriptors */
 
 #ifdef CONFIG_NET_MULTIBUFFER
@@ -181,20 +198,9 @@
 
 #define SAM_TXTIMEOUT   (60*CLK_TCK)
 
-/* PHY reset/configuration delays in milliseconds */
-
-#define PHY_RESET_DELAY   (65)
-#define PHY_CONFIG_DELAY  (1000)
-
 /* PHY read/write delays in loop counts */
 
-#define PHY_READ_TIMEOUT  (0x0004ffff)
-#define PHY_WRITE_TIMEOUT (0x0004ffff)
-#define PHY_RETRY_TIMEOUT (0x0004ffff)
-
-/* Register values **********************************************************/
-
-/* Interrupt bit sets *******************************************************/
+#define PHY_RETRY_MAX    1000000
 
 /* Helpers ******************************************************************/
 /* This is a helper pointer for accessing the contents of the EMAC
@@ -212,8 +218,6 @@
 struct sam_emac_s
 {
   uint8_t               ifup    : 1; /* true:ifup false:ifdown */
-  uint8_t               mbps100 : 1; /* 100MBps operation (vs 10 MBps) */
-  uint8_t               fduplex : 1; /* Full (vs. half) duplex */
   WDOG_ID               txpoll;      /* TX poll timer */
   WDOG_ID               txtimeout;   /* TX timeout timer */
 
@@ -227,7 +231,6 @@ struct sam_emac_s
   uint16_t              txhead;      /* Circular buffer head index */
   uint16_t              txtail;      /* Circualr buffer tail index */
   uint16_t              rxndx;       /* RX index for current processing RX descriptor */
-  uint16_t              retries;     /* PHY retry count */
 
   uint8_t              *rxbuffer;    /* Allocated RX buffers */
   uint8_t              *txbuffer;    /* Allocated TX buffers */
@@ -303,16 +306,16 @@ static void sam_buffer_free(struct sam_emac_s *priv);
 
 /* Common TX logic */
 
-static int  sam_transmit(FAR struct sam_emac_s *priv);
+static int  sam_transmit(struct sam_emac_s *priv);
 static int  sam_uiptxpoll(struct uip_driver_s *dev);
-static void sam_dopoll(FAR struct sam_emac_s *priv);
+static void sam_dopoll(struct sam_emac_s *priv);
 
 /* Interrupt handling */
 
-static int  sam_recvframe(FAR struct sam_emac_s *priv);
-static void sam_receive(FAR struct sam_emac_s *priv);
-static void sam_txdone(FAR struct sam_emac_s *priv);
-static int  sam_emac_interrupt(int irq, FAR void *context);
+static int  sam_recvframe(struct sam_emac_s *priv);
+static void sam_receive(struct sam_emac_s *priv);
+static void sam_txdone(struct sam_emac_s *priv);
+static int  sam_emac_interrupt(int irq, void *context);
 
 /* Watchdog timer expirations */
 
@@ -325,28 +328,36 @@ static int  sam_ifup(struct uip_driver_s *dev);
 static int  sam_ifdown(struct uip_driver_s *dev);
 static int  sam_txavail(struct uip_driver_s *dev);
 #ifdef CONFIG_NET_IGMP
-static int  sam_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
-static int  sam_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
+static int  sam_addmac(struct uip_driver_s *dev, const uint8_t *mac);
+static int  sam_rmmac(struct uip_driver_s *dev, const uint8_t *mac);
 #endif
 
 /* PHY Initialization */
 
-static int  sam_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value);
-static int  sam_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value);
-#ifdef CONFIG_PHY_DM9161
-static inline int sam_dm9161(FAR struct sam_emac_s *priv);
+#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_VERBOSE)
+static void sam_phydump(struct sam_emac_s *priv);
+#else
+#  define sam_phydump(priv)
 #endif
+
+static int  sam_phywait(struct sam_emac_s *priv);
+static int  sam_phyreset(struct sam_emac_s *priv);
+static int  sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr);
+static int  sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
+                        uint8_t regaddr, uint16_t *value);
+static int  sam_phywrite(struct sam_emac_s *priv, uint8_t phyaddr,
+                         uint8_t regaddr, uint16_t value);
 static int  sam_autonegotiate(struct sam_emac_s *priv);
 static bool sam_linkup(struct sam_emac_s *priv);
-static int  sam_phyinit(FAR struct sam_emac_s *priv);
+static int  sam_phyinit(struct sam_emac_s *priv);
 
-/* MAC/DMA Initialization */
+/* EMAC Initialization */
 
 static void sam_txreset(struct sam_emac_s *priv);
 static void sam_rxreset(struct sam_emac_s *priv);
-static void sam_emac_reset(FAR struct sam_emac_s *priv);
-static void sam_macaddress(FAR struct sam_emac_s *priv);
-static int  sam_emac_configure(FAR struct sam_emac_s *priv);
+static void sam_emac_reset(struct sam_emac_s *priv);
+static void sam_macaddress(struct sam_emac_s *priv);
+static int  sam_emac_configure(struct sam_emac_s *priv);
 
 /****************************************************************************
  * Private Functions
@@ -644,7 +655,7 @@ static void sam_buffer_free(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static int sam_transmit(FAR struct sam_emac_s *priv)
+static int sam_transmit(struct sam_emac_s *priv)
 {
   struct uip_driver_s *dev = &priv->dev;
   volatile struct emac_txdesc_s *txdesc;
@@ -740,7 +751,7 @@ static int sam_transmit(FAR struct sam_emac_s *priv)
 
 static int sam_uiptxpoll(struct uip_driver_s *dev)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)dev->d_private;
+  struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
 
   DEBUGASSERT(priv->dev.d_buf != NULL);
 
@@ -756,7 +767,7 @@ static int sam_uiptxpoll(struct uip_driver_s *dev)
       sam_transmit(priv);
       DEBUGASSERT(dev->d_len == 0 && dev->d_buf == NULL);
 
-      /* Check if the next TX descriptor is owned by the EMAC DMA or CPU.  We
+      /* Check if the next TX descriptor is owned by the EMAC or CPU.  We
        * cannot perform the TX poll if we are unable to accept another packet for
        * transmission.
        */
@@ -782,11 +793,10 @@ static int sam_uiptxpoll(struct uip_driver_s *dev)
  * Function: sam_dopoll
  *
  * Description:
- *   The function is called when a frame is received using the DMA receive
- *   interrupt.  It scans the RX descriptors to the received frame.
+ *   Perform the uIP poll.
  *
  * Parameters:
- *   priv  - Reference to the driver state structure
+ *   priv - Reference to the driver state structure
  *
  * Returned Value:
  *   None
@@ -796,11 +806,11 @@ static int sam_uiptxpoll(struct uip_driver_s *dev)
  *
  ****************************************************************************/
 
-static void sam_dopoll(FAR struct sam_emac_s *priv)
+static void sam_dopoll(struct sam_emac_s *priv)
 {
-  FAR struct uip_driver_s *dev = &priv->dev;
+  struct uip_driver_s *dev = &priv->dev;
 
-  /* Check if the next TX descriptor is owned by the EMAC DMA or
+  /* Check if the next TX descriptor is owned by the EMAC or
    * CPU.  We cannot perform the TX poll if we are unable to accept
    * another packet for transmission.
    */
@@ -817,8 +827,8 @@ static void sam_dopoll(FAR struct sam_emac_s *priv)
  * Function: sam_recvframe
  *
  * Description:
- *   The function is called when a frame is received using the DMA receive
- *   interrupt.  It scans the RX descriptors of the received frame.
+ *   The function is called when a frame is received. It scans the RX
+ *   descriptors of the received frame and assembles the full packet/
  *
  *   NOTE: This function will silently discard any packets containing errors.
  *
@@ -834,7 +844,7 @@ static void sam_dopoll(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static int sam_recvframe(FAR struct sam_emac_s *priv)
+static int sam_recvframe(struct sam_emac_s *priv)
 {
   struct emac_rxdesc_s *rxdesc;
   struct uip_driver_s *dev;
@@ -1026,7 +1036,7 @@ static int sam_recvframe(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static void sam_receive(FAR struct sam_emac_s *priv)
+static void sam_receive(struct sam_emac_s *priv)
 {
   struct uip_driver_s *dev = &priv->dev;
 
@@ -1112,7 +1122,7 @@ static void sam_receive(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static void sam_txdone(FAR struct sam_emac_s *priv)
+static void sam_txdone(struct sam_emac_s *priv)
 {
   struct emac_txdesc_s *txdesc;
 
@@ -1168,7 +1178,7 @@ static void sam_txdone(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static int sam_emac_interrupt(int irq, FAR void *context)
+static int sam_emac_interrupt(int irq, void *context)
 {
   struct sam_emac_s *priv = &g_emac;
   uint32_t isr;
@@ -1356,7 +1366,7 @@ static int sam_emac_interrupt(int irq, FAR void *context)
 
 static void sam_txtimeout(int argc, uint32_t arg, ...)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
+  struct sam_emac_s *priv = (struct sam_emac_s *)arg;
 
   nlldbg("Timeout!\n");
 
@@ -1392,10 +1402,10 @@ static void sam_txtimeout(int argc, uint32_t arg, ...)
 
 static void sam_polltimer(int argc, uint32_t arg, ...)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)arg;
-  FAR struct uip_driver_s   *dev  = &priv->dev;
+  struct sam_emac_s *priv = (struct sam_emac_s *)arg;
+  struct uip_driver_s   *dev  = &priv->dev;
 
-  /* Check if the next TX descriptor is owned by the EMAC DMA or CPU.  We
+  /* Check if the next TX descriptor is owned by the EMAC or CPU.  We
    * cannot perform the timer poll if we are unable to accept another packet
    * for transmission.  Hmmm.. might be bug here.  Does this mean if there is
    * a transmit in progress, we will miss TCP time state updates?
@@ -1431,7 +1441,7 @@ static void sam_polltimer(int argc, uint32_t arg, ...)
 
 static int sam_ifup(struct uip_driver_s *dev)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)dev->d_private;
+  struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
   int ret;
 
   nlldbg("Bringing up: %d.%d.%d.%d\n",
@@ -1501,7 +1511,7 @@ static int sam_ifup(struct uip_driver_s *dev)
 
 static int sam_ifdown(struct uip_driver_s *dev)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)dev->d_private;
+  struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
   irqstate_t flags;
 
   nlldbg("Taking the network down\n");
@@ -1551,7 +1561,7 @@ static int sam_ifdown(struct uip_driver_s *dev)
 
 static int sam_txavail(struct uip_driver_s *dev)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)dev->d_private;
+  struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
   irqstate_t flags;
 
   nllvdbg("ifup: %d\n", priv->ifup);
@@ -1594,9 +1604,9 @@ static int sam_txavail(struct uip_driver_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int sam_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int sam_addmac(struct uip_driver_s *dev, const uint8_t *mac)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)dev->d_private;
+  struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
 
   nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
@@ -1628,9 +1638,9 @@ static int sam_addmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IGMP
-static int sam_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
+static int sam_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
 {
-  FAR struct sam_emac_s *priv = (FAR struct sam_emac_s *)dev->d_private;
+  struct sam_emac_s *priv = (struct sam_emac_s *)dev->d_private;
 
   nllvdbg("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
@@ -1643,107 +1653,10 @@ static int sam_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac)
 #endif
 
 /****************************************************************************
- * Function: sam_phyread
+ * Function: sam_phydump
  *
  * Description:
- *  Read a PHY register.
- *
- * Parameters:
- *   phydevaddr - The PHY device address
- *   phyregaddr - The PHY register address
- *   value - The location to return the 16-bit PHY register value.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static int sam_phyread(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t *value)
-{
-  volatile uint32_t timeout;
-  uint32_t regval;
-
-  /* Configure the MACMIIAR register, preserving CSR Clock Range CR[2:0] bits */
-#warning Missing logic
-
-  /* Set the PHY device address, PHY register address, and set the buy bit.
-   * the  EMAC_MACMIIAR_MW is clear, indicating a read operation.
-   */
-#warning Missing logic
-
-  /* Wait for the transfer to complete */
-
-  for (timeout = 0; timeout < PHY_READ_TIMEOUT; timeout++)
-    {
-#warning Missing logic
-    }
-
-  nlldbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x\n",
-         phydevaddr, phyregaddr);
-
-  return -ETIMEDOUT;
-}
-
-/****************************************************************************
- * Function: sam_phywrite
- *
- * Description:
- *  Write to a PHY register.
- *
- * Parameters:
- *   phydevaddr - The PHY device address
- *   phyregaddr - The PHY register address
- *   value - The 16-bit value to write to the PHY register value.
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *
- ****************************************************************************/
-
-static int sam_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value)
-{
-  volatile uint32_t timeout;
-  uint32_t regval;
-
-  /* Configure the MACMIIAR register, preserving CSR Clock Range CR[2:0] bits */
-#warning Missing logic
-
-  /* Set the PHY device address, PHY register address, and set the busy bit.
-   * the  EMAC_MACMIIAR_MW is set, indicating a write operation.
-   */
-#warning Missing logic
-
-  /* Write the value into the MACIIDR register before setting the new MACMIIAR
-   * register value.
-   */
-#warning Missing logic
-
-  /* Wait for the transfer to complete */
-
-  for (timeout = 0; timeout < PHY_WRITE_TIMEOUT; timeout++)
-    {
-#warning Missing logic
-    }
-
-  nlldbg("MII transfer timed out: phydevaddr: %04x phyregaddr: %04x value: %04x\n",
-         phydevaddr, phyregaddr, value);
-
-  return -ETIMEDOUT;
-}
-
-/****************************************************************************
- * Function: sam_dm9161
- *
- * Description:
- *   Special workaround for the Davicom DM9161 PHY is required.  On power,
- *   up, the PHY is not usually configured correctly but will work after
- *   a powered-up reset.  This is really a workaround for some more
- *   fundamental issue with the PHY clocking initialization, but the
- *   root cause has not been studied (nor will it be with this workaround).
+ *   Dump the contents of PHY registers
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -1753,53 +1666,691 @@ static int sam_phywrite(uint16_t phydevaddr, uint16_t phyregaddr, uint16_t value
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PHY_DM9161
-static inline int sam_dm9161(FAR struct sam_emac_s *priv)
+#if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_VERBOSE)
+static void sam_phydump(struct sam_emac_s *priv)
 {
-  uint16_t phyval;
+  uint16_t value;
+
+  /* Enable management port */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval |= EMAC_NCR_MPE;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+
+#ifdef CONFIG_SAMA5_EMAC_RMII
+  nllvdbg("RMII Registers (Address %02x)\n", priv->phyaddr);
+#else /* defined(CONFIG_SAMA5_EMAC_MII) */
+  nllvdbg("MII Registers (Address %02x)\n", priv->phyaddr);
+#endif
+
+  sam_phyread(priv, priv->phyaddr, MII_MCR, &value);
+  nllvdbg("  BMCR:    %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_MSR, &value);
+  nllvdbg("  BMSR:    %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_ADVERTISE, &value);
+  nllvdbg("  ANAR:    %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_LPA, &value);
+  nllvdbg("  ANLPAR:  %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_ANER, &value);
+  nllvdbg("  ANER:    %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_DSCR, &value);
+  nllvdbg("  DSCR:    %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_DSCSR, &value);
+  nllvdbg("  DSCSR:   %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_10BTCSR, &value);
+  nllvdbg("  10BTCSR: %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_PWDOR, &value);
+  nllvdbg("  PWDOR:   %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_CONFIGR, &value);
+  nllvdbg("  CONFIGR: %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_MDINTR, &value);
+  nllvdbg("  MDINTR:  %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_RECR, &value);
+  nllvdbg("  RECR:    %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_DISCR, &value);
+  nllvdbg("  DISCR:   %04x\n", value);
+  sam_phyread(priv, priv->phyaddr, MII_RLSR, &value);
+  nllvdbg("  RLSR:    %04x\n", value);
+
+  /* Disable management port */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval &= ~EMAC_NCR_MPE;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+}
+#endif
+
+/****************************************************************************
+ * Function: sam_phywait
+ *
+ * Description:
+ *  Wait for the PHY to become IDLE
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno (-ETIMEDOUT) on failure.
+ *
+ ****************************************************************************/
+
+static int sam_phywait(struct sam_emac_s *priv)
+{
+  volatile unsigned int retries;
+
+  /* Loop for the configured number of attempts */
+
+  for (retries = 0; retries < PHY_RETRY_MAX; retries++)
+    {
+      /* Is the PHY IDLE */
+
+      if ((sam_getreg(priv, SAM_EMAC_NSR) & EMAC_NSR_IDLE) != 0)
+        {
+          return OK;
+        }
+    }
+
+  return -ETIMEDOUT;
+}
+
+/****************************************************************************
+ * Function: sam_phyreset
+ *
+ * Description:
+ *  Reset the PHY
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int sam_phyreset(struct sam_emac_s *priv)
+{
+  uint32_t regval;
+  uint16_t mcr;
+  int timeout;
   int ret;
 
-  /* Read the PHYID1 register;  A failure to read the PHY ID is one
-   * indication that check if the DM9161 PHY CHIP is not ready.
-   */
+  nllvdbg(" sam_phyreset\n");
 
-  ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, MII_PHYID1, &phyval);
+  /* Enable management port */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval |= EMAC_NCR_MPE;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+
+  /* Reset the PHY */
+
+  ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, MII_MCR_RESET);
   if (ret < 0)
     {
-      nlldbg("Failed to read the PHY ID1: %d\n", ret);
+      nlldbg("ERROR: sam_phywrite failed: %d\n", ret);
+    }
+
+  /* Wait for the PHY reset to complete */
+
+  ret = -ETIMEDOUT;
+  for (timeout = 0; timeout < 10; timeout++)
+    {
+      mcr = MII_MCR_RESET;
+      int result = sam_phyread(priv, priv->phyaddr, MII_MCR, &mcr);
+      if (result < 0)
+        {
+          nlldbg("ERROR: Failed to read the MCR register: %d\n", ret);
+          ret = result;
+        }
+      else if ((mcr & MII_MCR_RESET) == 0)
+        {
+          ret = OK;
+          break;
+        }
+    }
+
+  /* Disable management port */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval &= ~EMAC_NCR_MPE;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  return ret;
+}
+
+/****************************************************************************
+ * Function: sam_phyfind
+ *
+ * Description:
+ *  Verify the PHY address and, if it is bad, try to one that works.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int sam_phyfind(struct sam_emac_s *priv, uint8_t *phyaddr)
+{
+  uint32_t regval;
+  uint16_t value;
+  uint8_t candidate;
+  unsigned int offset;
+  int ret = -ESRCH;
+
+  nllvdbg("Find a valid PHY address\n");
+
+  /* Enable management port */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval |= EMAC_NCR_MPE;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+
+  candidate = *phyaddr;
+
+  /* Check current candidate address */
+
+  ret = sam_phyread(priv, candidate, MII_PHYID1, &value);
+  if (ret == OK && value == MII_OUI_MSB)
+    {
+      *phyaddr = candidate;
+      ret = OK;
+    }
+
+  /* The current address does not work... try another */
+
+  else
+    {
+      nlldbg("ERROR: sam_phyread failed for PHY address %02x: %d\n",
+             candidate, ret);
+
+      for (offset = 0; offset < 32; offset++)
+        {
+          /* Get the next candidate PHY address */
+
+          candidate = (candidate + 1) & 0x1f;
+
+          /* Try reading the PHY ID from the candidate PHY address */
+
+          ret = sam_phyread(priv, candidate, MII_PHYID1, &value);
+          if (ret == OK && value == MII_OUI_MSB)
+            {
+              ret = OK;
+              break;
+            }
+        }
+    }
+
+  if (ret == OK)
+    {
+      nllvdbg("PHYID1: %04x PHY addr: %d\n", value, candidate);
+      *phyaddr = candidate;
+      sam_phyread(priv, candidate, MII_DSCSR, &value);
+      nllvdbg("DSCSR:  %04x PHY addr: %d\n", value, candidate);
+    }
+
+  /* Disable management port */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval &= ~EMAC_NCR_MPE;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  return ret;
+}
+
+/****************************************************************************
+ * Function: sam_phyread
+ *
+ * Description:
+ *  Read a PHY register.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *   phyaddr - The PHY device address
+ *   regaddr - The PHY register address
+ *   value - The location to return the 16-bit PHY register value.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
+                       uint8_t regaddr, uint16_t *value)
+{
+  uint32_t regval;
+  int ret;
+
+  /* Make sure that the PHY is idle */
+
+  ret = sam_phywait(priv);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: sam_phywait failed: %d\n", ret);
       return ret;
     }
 
-  /* If we failed to read the PHY ID1 register, the reset the MCU to recover */
+  /* Write the PHY Maintenance register */
 
-  else if (phyval == 0xffff)
-    {
-      up_systemreset();
-    }
+  regval = EMAC_MAN_DATA(0) | EMAC_MAN_CODE | EMAC_MAN_REGA(regaddr) |
+           EMAC_MAN_PHYA(priv->phyaddr) | EMAC_MAN_READ | EMAC_MAN_SOF;
+  sam_putreg(priv, SAM_EMAC_MAN, regval);
 
-  nllvdbg("PHY ID1: 0x%04X\n", phyval);
+  /* Wait until the PHY is again idle */
 
-  /* Now check the "DAVICOM Specified Configuration Register (DSCR)", Register 16 */
-
-  ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, 16, &phyval);
+  ret = sam_phywait(priv);
   if (ret < 0)
     {
-      nlldbg("Failed to read the PHY Register 0x10: %d\n", ret);
+      nlldbg("ERROR: sam_phywait failed: %d\n", ret);
       return ret;
     }
 
-  /* Bit 8 of the DSCR register is zero, then the DM9161 has not selected RMII.
-   * If RMII is not selected, then reset the MCU to recover.
-   */
+  /* Return data */
 
-  else if ((phyval & (1 << 8)) == 0)
+  *value = (uint16_t)(sam_getreg(priv, SAM_EMAC_MAN) & EMAC_MAN_DATA_MASK);
+  return OK;
+}
+
+/****************************************************************************
+ * Function: sam_phywrite
+ *
+ * Description:
+ *  Write to a PHY register.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *   phyaddr - The PHY device address
+ *   regaddr - The PHY register address
+ *   value - The 16-bit value to write to the PHY register value.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static int sam_phywrite(struct sam_emac_s *priv, uint8_t phyaddr,
+                        uint8_t regaddr, uint16_t value)
+{
+  uint32_t regval;
+  int ret;
+
+  /* Make sure that the PHY is idle */
+
+  ret = sam_phywait(priv);
+  if (ret < 0)
     {
-      up_systemreset();
+      nlldbg("ERROR: sam_phywait failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Write the PHY Maintenance register */
+
+  regval = EMAC_MAN_DATA(value) | EMAC_MAN_CODE | EMAC_MAN_REGA(regaddr) |
+           EMAC_MAN_PHYA(priv->phyaddr) | EMAC_MAN_WRITE| EMAC_MAN_SOF;
+  sam_putreg(priv, SAM_EMAC_MAN, regval);
+
+  /* Wait until the bus is again IDLE */
+
+  ret = sam_phywait(priv);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: sam_phywait failed: %d\n", ret);
+      return ret;
     }
 
   return OK;
 }
+
+/****************************************************************************
+ * Function: sam_autonegotiate
+ *
+ * Description:
+ *  Autonegotiate speed and duplex.
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+static int sam_autonegotiate(struct sam_emac_s *priv)
+{
+  uint32_t regval;
+  uint16_t phyid1;
+  uint16_t phyid2;
+  uint16_t mcr;
+  uint16_t msr;
+  uint16_t advertise;
+  uint16_t lpa;
+  int timeout;
+  int ret;
+
+  /* Enable management port */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval |= EMAC_NCR_MPE;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+
+  /* Verify tht we can read the PHYID register */
+
+  ret = sam_phyread(priv, priv->phyaddr, MII_PHYID1, &phyid1);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: Failed to read PHYID1\n");
+      goto errout;
+    }
+
+  nllvdbg("PHYID1: %04x PHY address: %02x\n", phyid1, priv->phyaddr);
+
+  ret = sam_phyread(priv, priv->phyaddr, MII_PHYID2, &phyid2);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: Failed to read PHYID2\n");
+      goto errout;
+    }
+
+  nllvdbg("PHYID2: %04x PHY address: %02x\n", phyid2, priv->phyaddr);
+
+  if (phyid1 == MII_OUI_MSB &&
+     ((phyid2 & MII_PHYID2_OUI) >> 10) == MII_OUI_LSB)
+    {
+      nllvdbg("  Vendor Number Model:   %04x\n", ((phyid2 >> 4) & 0x3f));
+      nllvdbg("  Model Revision Number: %04x\n", (phyid2 & 7));
+    }
+  else
+    {
+      nlldbg("ERROR: PHY not recognized\n");
+    }
+
+  /* Setup control register */
+
+  ret = sam_phyread(priv, priv->phyaddr, MII_MCR, &mcr);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: Failed to read BMCR\n");
+      goto errout;
+    }
+
+  mcr &= ~MII_MCR_ANENABLE;  /* Remove autonegotiation enable */
+  mcr &= ~(MII_MCR_LOOPBACK | MII_MCR_PDOWN);
+  mcr |=  MII_MCR_ISOLATE;   /* Electrically isolate PHY */
+
+  ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, mcr);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: Failed to write BMCR\n");
+      goto errout;
+    }
+
+  /* Set the Auto_negotiation Advertisement Register MII advertising for
+   * Next page 100BaseTxFD and HD, 10BaseTFD and HD, IEEE 802.3
+   */
+#define MII_ADVERTISE_SELECT         0x001f    /* Bits 0-4: Selector field */
+#define MII_ADVERTISE_CSMA           (1 << 0)  /*         CSMA */
+#define MII_ADVERTISE_8023           (1 << 0)  /*         IEEE Std 802.3 */
+#define MII_ADVERTISE_8029           (2 << 0)  /*         IEEE Std 802.9 ISLAN-16T */
+#define MII_ADVERTISE_8025           (3 << 0)  /*         IEEE Std 802.5 */
+#define MII_ADVERTISE_1394           (4 << 0)  /*         IEEE Std 1394 */
+#define MII_ADVERTISE_10BASETXHALF   (1 << 5)  /* Bit 5:  Try 10BASE-TX half duplex */
+#define MII_ADVERTISE_1000XFULL      (1 << 5)  /* Bit 5:  Try 1000BASE-X full duplex */
+#define MII_ADVERTISE_10BASETXFULL   (1 << 6)  /* Bit 6:  Try 10BASE-TX full duplex */
+#define MII_ADVERTISE_1000XHALF      (1 << 6)  /* Bit 6:  Try 1000BASE-X half duplex */
+#define MII_ADVERTISE_100BASETXHALF  (1 << 7)  /* Bit 7:  Try 100BASE-TX half duplex */
+#define MII_ADVERTISE_1000XPAUSE     (1 << 7)  /* Bit 7:  Try 1000BASE-X pause */
+#define MII_ADVERTISE_100BASETXFULL  (1 << 8)  /* Bit 8:  Try 100BASE-TX full duplex*/
+#define MII_ADVERTISE_1000XASYMPAU   (1 << 8)  /* Bit 8:  Try 1000BASE-X asym pause */
+#define MII_ADVERTISE_100BASET4      (1 << 9)  /* Bit 9:  Try 100BASE-T4 */
+#define MII_ADVERTISE_FDXPAUSE       (1 << 10) /* Bit 10: Try full duplex flow control */
+#define MII_ADVERTISE_ASYMPAUSE      (1 << 11) /* Bit 11: Try asymetric pause */
+#define MII_ADVERTISE_RFAULT         (1 << 13) /* Bit 13: Remote fault supported */
+#define MII_ADVERTISE_LPACK          (1 << 14) /* Bit 14: Ack link partners response */
+#define MII_ADVERTISE_NXTPAGE        (1 << 15) /* Bit 15: Next page enabled */
+
+  advertise = MII_ADVERTISE_100BASETXFULL | MII_ADVERTISE_100BASETXHALF |
+              MII_ADVERTISE_10BASETXFULL | MII_ADVERTISE_10BASETXHALF |
+              MII_ADVERTISE_8023;
+
+  ret = sam_phywrite(priv, priv->phyaddr, MII_ADVERTISE, advertise);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: Failed to write ANAR\n");
+      goto errout;
+    }
+
+  /* Read and modify control register */
+
+  ret = sam_phyread(priv, priv->phyaddr, MII_MCR, &mcr);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: Failed to read BMCR\n");
+      goto errout;
+    }
+
+  mcr |= (MII_MCR_SPEED100 | MII_MCR_ANENABLE | MII_MCR_FULLDPLX);
+  ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, mcr);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: Failed to write BMCR\n");
+      goto errout;
+    }
+
+  /* Restart Auto_negotiation */
+
+  mcr |=  MII_MCR_ANRESTART;
+  mcr &= ~MII_MCR_ISOLATE;
+
+  ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, mcr);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: Failed to write BMCR\n");
+      goto errout;
+    }
+
+  nllvdbg("  BMCR: %04x\n", value);
+
+  /* Check AutoNegotiate complete */
+
+  timeout = 0;
+  for (;;)
+    {
+      ret = sam_phyread(priv, priv->phyaddr, MII_MSR, &msr);
+      if (ret < 0)
+        {
+          nlldbg("ERROR: Failed to read MSR\n");
+          goto errout;
+        }
+
+      /* Completed successfully? */
+
+      if ((msr & MII_MSR_ANEGCOMPLETE) != 0)
+        {
+          /* Yes.. break out of the loop */
+
+          nllvdbg("AutoNegotiate complete\n");
+          break;
+        }
+
+      /* No.. check for a timeout */
+
+      if (++timeout >= PHY_RETRY_MAX)
+        {
+          nlldbg("ERROR: TimeOut\n");
+          sam_phydump(priv);
+          ret = -ETIMEDOUT;
+          goto errout;
+        }
+    }
+
+  /* Get the AutoNeg Link partner base page */
+
+  ret = sam_phyread(priv, priv->phyaddr, MII_LPA, &lpa);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: Failed to read ANLPAR\n");
+      goto errout;
+    }
+
+  /* Setup the EMAC link speed */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCFGR);
+  regval &= (EMAC_NCFGR_SPD | EMAC_NCFGR_FD);
+
+  if (((advertise & lpa) & MII_ADVERTISE_100BASETXFULL) != 0)
+    {
+      /* Set MII for 100BaseTX and Full Duplex */
+
+      regval |= (EMAC_NCFGR_SPD | EMAC_NCFGR_FD);
+    }
+  else if (((advertise & lpa) & MII_ADVERTISE_10BASETXFULL) != 0)
+    {
+      /* Set MII for 10BaseT and Full Duplex */
+
+      regval |= EMAC_NCFGR_FD;
+    }
+  else if (((advertise & lpa) & MII_ADVERTISE_100BASETXHALF) != 0)
+    {
+      /* Set MII for 100BaseTX and half Duplex */
+
+      regval |= EMAC_NCFGR_SPD;
+    }
+#if 0
+  else if (((advertise & lpa) & MII_ADVERTISE_10BASETXHALF) != 0)
+    {
+      /* set MII for 10BaseT and half Duplex */
+    }
 #endif
+
+  sam_putreg(priv, SAM_EMAC_NCFGR, regval);
+
+  /* Select RMII/MII */
+
+  regval = sam_getreg(priv, SAM_EMAC_USRIO);
+#ifdef CONFIG_SAMA5_EMAC_RMII
+  regval |= EMAC_USRIO_RMII;
+#else /* defined(CONFIG_SAMA5_EMAC_MII) */
+  regval &= ~EMAC_USRIO_RMII;
+#endif
+
+  /* Enable the transceiver clock */
+
+  regval |=  EMAC_USRIO_CLKEN;
+  sam_putreg(priv, SAM_EMAC_USRIO, regval);
+
+errout:
+  /* Disable management port */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval &= ~EMAC_NCR_MPE;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+  return ret;
+}
+
+/****************************************************************************
+ * Function: sam_linkup
+ *
+ * Description:
+ *   Check if the link is up
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   true: The link is up
+ *
+ ****************************************************************************/
+
+static bool sam_linkup(struct sam_emac_s *priv)
+{
+  uint32_t regval;
+  uint16_t msr;
+  uint16_t dscsr;
+  bool linkup = false;
+  int ret;
+
+  /* Enable management port */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval |= EMAC_NCR_MPE;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+
+  ret = sam_phyread(priv, priv->phyaddr, MII_MSR, &msr);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: Failed to read BMSR: %d\n", ret);
+      goto errout;
+    }
+
+  if ((msr & MII_MSR_LINKSTATUS) == 0)
+    {
+      nlldbg("ERROR: MSR LinkStatus: %04x\n", msr);
+      goto errout;
+    }
+
+  /* Re-configure Link speed */
+
+  ret = sam_phyread(priv, priv->phyaddr, MII_DSCSR, &dscsr);
+  if (ret < 0)
+    {
+      nlldbg("ERROR: Failed to read DSCSR: %d\n", ret);
+      goto errout;
+    }
+
+  regval = sam_getreg(priv, SAM_EMAC_NCFGR);
+  regval &= ~(EMAC_NCFGR_SPD | EMAC_NCFGR_FD);
+
+  if ((msr & MII_MSR_100BASETXFULL) && (dscsr & MII_DSCSR_100FDX))
+    {
+      /* Set EMAC for 100BaseTX and Full Duplex */
+
+      regval |= (EMAC_NCFGR_SPD | EMAC_NCFGR_FD);
+    }
+  else if ((msr & MII_MSR_10BASETXFULL) && (dscsr & MII_DSCSR_10FDX))
+    {
+      /* Set MII for 10BaseT and Full Duplex */
+
+      regval |= EMAC_NCFGR_FD;
+    }
+
+  else if ((msr & MII_MSR_100BASETXHALF) && (dscsr & MII_DSCSR_100HDX))
+    {
+      /* Set MII for 100BaseTX and Half Duplex */
+
+      regval |= EMAC_NCFGR_SPD;
+    }
+
+#if 0
+  else if ((msr & MII_MSR_10BASETXHALF) && (dscsr & MII_DSCSR_10HDX))
+    {
+      /* Set MII for 10BaseT and Half Duplex */
+    }
+#endif
+
+  sam_putreg(priv, SAM_EMAC_NCFGR, regval);
+
+  /* Start the EMAC transfers */
+
+  nllvdbg("Link is up\n");
+  linkup = true;
+
+errout:
+  /* Disable management port */
+
+  regval  = sam_getreg(priv, SAM_EMAC_NCR);
+  regval &= ~EMAC_NCR_MPE;
+  sam_putreg(priv, SAM_EMAC_NCR, regval);
+
+  return linkup;
+}
 
 /****************************************************************************
  * Function: sam_phyinit
@@ -1813,205 +2364,46 @@ static inline int sam_dm9161(FAR struct sam_emac_s *priv)
  * Returned Value:
  *   OK on success; Negated errno on failure.
  *
- * Assumptions:
- *
  ****************************************************************************/
 
-static int sam_phyinit(FAR struct sam_emac_s *priv)
+static int sam_phyinit(struct sam_emac_s *priv)
 {
-  volatile uint32_t timeout;
   uint32_t regval;
-  uint16_t phyval;
   int ret;
 
-  /* Assume 10MBps and half duplex */
+  /* Configure PHY clocking */
 
-  priv->mbps100 = 0;
-  priv->fduplex = 0;
+  regval = sam_getreg(priv, SAM_EMAC_NCFGR);
+  regval &= ~EMAC_NCFGR_CLK_MASK;
 
-  /* Setup up PHY clocking by setting the SR field in the MACMIIAR register */
-#warning Missing logic
-
-  /* Put the PHY in reset mode */
-
-  ret = sam_phywrite(CONFIG_SAMA5_EMAC_PHYADDR, MII_MCR, MII_MCR_RESET);
-  if (ret < 0)
-    {
-      nlldbg("Failed to reset the PHY: %d\n", ret);
-      return ret;
-    }
-  up_mdelay(PHY_RESET_DELAY);
-
-  /* Perform any necessary, board-specific PHY initialization */
-
-#ifdef CONFIG_SAMA5_EMAC_PHYINIT
-  ret = sam_phy_boardinitialize(EMAC_INTF);
-  if (ret < 0)
-    {
-      nlldbg("Failed to initialize the PHY: %d\n", ret);
-      return ret;
-    }
-#endif
-
-  /* Special workaround for the Davicom DM9161 PHY is required. */
-
-#ifdef CONFIG_PHY_DM9161
-  ret = sam_dm9161(priv);
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
-
-  /* Perform auto-negotion if so configured */
-
-#ifdef CONFIG_SAMA5_EMAC_AUTONEG
-  /* Wait for link status */
-
-  for (timeout = 0; timeout < PHY_RETRY_TIMEOUT; timeout++)
-    {
-      ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, MII_MSR, &phyval);
-      if (ret < 0)
-        {
-          nlldbg("Failed to read the PHY MSR: %d\n", ret);
-          return ret;
-        }
-      else if ((phyval & MII_MSR_LINKSTATUS) != 0)
-        {
-          break;
-        }
-    }
-
-  if (timeout >= PHY_RETRY_TIMEOUT)
-    {
-      nlldbg("Timed out waiting for link status: %04x\n", phyval);
-      return -ETIMEDOUT;
-    }
-
-  /* Enable auto-gegotiation */
-
-  ret = sam_phywrite(CONFIG_SAMA5_EMAC_PHYADDR, MII_MCR, MII_MCR_ANENABLE);
-  if (ret < 0)
-    {
-      nlldbg("Failed to enable auto-negotiation: %d\n", ret);
-      return ret;
-    }
-
-  /* Wait until auto-negotiation completes */
-
-  for (timeout = 0; timeout < PHY_RETRY_TIMEOUT; timeout++)
-    {
-      ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, MII_MSR, &phyval);
-      if (ret < 0)
-        {
-          nlldbg("Failed to read the PHY MSR: %d\n", ret);
-          return ret;
-        }
-      else if ((phyval & MII_MSR_ANEGCOMPLETE) != 0)
-        {
-          break;
-        }
-    }
-
-  if (timeout >= PHY_RETRY_TIMEOUT)
-    {
-      nlldbg("Timed out waiting for auto-negotiation\n");
-      return -ETIMEDOUT;
-    }
-
-  /* Read the result of the auto-negotiation from the PHY-specific register */
-
-  ret = sam_phyread(CONFIG_SAMA5_EMAC_PHYADDR, CONFIG_SAMA5_EMAC_PHYSR, &phyval);
-  if (ret < 0)
-    {
-      nlldbg("Failed to read PHY status register\n");
-      return ret;
-    }
-
-  /* Remember the selected speed and duplex modes */
-
-  nllvdbg("PHYSR[%d]: %04x\n", CONFIG_SAMA5_EMAC_PHYSR, phyval);
-
-  /* Different PHYs present speed and mode information in different ways.  IF
-   * This CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG is selected, this indicates that the PHY
-   * represents speed and mode information are combined, for example, with
-   * separate bits for 10HD, 100HD, 10FD and 100FD.
-   */
-
-#ifdef CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG
-  switch (phyval & CONFIG_SAMA5_EMAC_PHYSR_ALTMODE)
-    {
-      default:
-      case CONFIG_SAMA5_EMAC_PHYSR_10HD:
-        priv->fduplex = 0;
-        priv->mbps100 = 0;
-        break;
-
-      case CONFIG_SAMA5_EMAC_PHYSR_100HD:
-        priv->fduplex = 0;
-        priv->mbps100 = 1;
-        break;
-
-      case CONFIG_SAMA5_EMAC_PHYSR_10FD:
-        priv->fduplex = 1;
-        priv->mbps100 = 0;
-        break;
-
-      case CONFIG_SAMA5_EMAC_PHYSR_100FD:
-        priv->fduplex = 1;
-        priv->mbps100 = 1;
-        break;
-    }
-
-  /* Different PHYs present speed and mode information in different ways.  Some
-   * will present separate information for speed and mode (this is the default).
-   * Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
-   * full/half duplex indication.
-   */
-
+#if BOARD_MCK_FREQUENCY > (160*1000*1000)
+#  error Supported MCK frequency
+#elif BOARD_MCK_FREQUENCY > (80*1000*1000)
+  regval |= EMAC_NCFGR_CLK_DIV64; /* MCK divided by 64 (MCK up to 160 MHz) */
+#elif BOARD_MCK_FREQUENCY > (40*1000*1000)
+  regval |= EMAC_NCFGR_CLK_DIV32; /* MCK divided by 32 (MCK up to 80 MHz) */
+#elif BOARD_MCK_FREQUENCY > (20*1000*1000)
+  regval |= EMAC_NCFGR_CLK_DIV16; /* MCK divided by 16 (MCK up to 40 MHz) */
 #else
-  if ((phyval & CONFIG_SAMA5_EMAC_PHYSR_MODE) == CONFIG_SAMA5_EMAC_PHYSR_FULLDUPLEX)
-    {
-      priv->fduplex = 1;
-    }
-
-  if ((phyval & CONFIG_SAMA5_EMAC_PHYSR_SPEED) == CONFIG_SAMA5_EMAC_PHYSR_100MBPS)
-    {
-      priv->mbps100 = 1;
-    }
+  regval |= EMAC_NCFGR_CLK_DIV8;  /* MCK divided by 8 (MCK up to 20 MHz) */
 #endif
 
-#else /* Auto-negotion not selected */
+  sam_putreg(priv, SAM_EMAC_NCFGR, regval);
 
-  phyval = 0;
-#ifdef CONFIG_SAMA5_EMAC_ETHFD
-  phyval |= MII_MCR_FULLDPLX;
-#endif
-#ifdef CONFIG_SAMA5_EMAC_ETH100MBPS
-  phyval |= MII_MCR_SPEED100;
-#endif
+  /* Check the PHY Address */
 
-  ret = sam_phywrite(CONFIG_SAMA5_EMAC_PHYADDR, MII_MCR, phyval);
+  priv->phyaddr = CONFIG_SAMA5_EMAC_PHYADDR;
+  ret = sam_phyfind(priv, &priv->phyaddr);
   if (ret < 0)
     {
-     nlldbg("Failed to write the PHY MCR: %d\n", ret);
+      nlldbg("ERROR: sam_phyfind failed: %d\n", ret);
       return ret;
     }
-  up_mdelay(PHY_CONFIG_DELAY);
 
-  /* Remember the selected speed and duplex modes */
-
-#ifdef CONFIG_SAMA5_EMAC_ETHFD
-  priv->fduplex = 1;
-#endif
-#ifdef CONFIG_SAMA5_EMAC_ETH100MBPS
-  priv->mbps100 = 1;
-#endif
-#endif
-
-  nlldbg("Duplex: %s Speed: %d MBps\n",
-       priv->fduplex ? "FULL" : "HALF",
-       priv->mbps100 ? 100 : 10);
+  if (priv->phyaddr != CONFIG_SAMA5_EMAC_PHYADDR)
+    {
+      sam_phyreset(priv);
+    }
 
   return OK;
 }
@@ -2032,7 +2424,7 @@ static int sam_phyinit(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static inline void sam_ethgpioconfig(FAR struct sam_emac_s *priv)
+static inline void sam_ethgpioconfig(struct sam_emac_s *priv)
 {
   /* Configure PIO pins to support EMAC */
   /* Configure EMAC PIO pins common to both MII and RMII */
@@ -2200,7 +2592,7 @@ static void sam_rxreset(struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static void sam_emac_reset(FAR struct sam_emac_s *priv)
+static void sam_emac_reset(struct sam_emac_s *priv)
 {
   uint32_t regval;
 
@@ -2239,9 +2631,9 @@ static void sam_emac_reset(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static void sam_macaddress(FAR struct sam_emac_s *priv)
+static void sam_macaddress(struct sam_emac_s *priv)
 {
-  FAR struct uip_driver_s *dev = &priv->dev;
+  struct uip_driver_s *dev = &priv->dev;
   uint32_t regval;
 
   nllvdbg("%s MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
@@ -2267,7 +2659,7 @@ static void sam_macaddress(FAR struct sam_emac_s *priv)
  * Function: sam_emac_configure
  *
  * Description:
- *  Configure the EMAC interface for DMA operation.
+ *  Configure the EMAC interface for normal operation.
  *
  * Parameters:
  *   priv - A reference to the private driver state structure
@@ -2279,7 +2671,7 @@ static void sam_macaddress(FAR struct sam_emac_s *priv)
  *
  ****************************************************************************/
 
-static int sam_emac_configure(FAR struct sam_emac_s *priv)
+static int sam_emac_configure(struct sam_emac_s *priv)
 {
   uint32_t regval;
 
