@@ -441,7 +441,7 @@ CONFIG_MTD=y
 # CONFIG_MTD_SST25 is not set
 # CONFIG_MTD_SST39FV is not set
 # CONFIG_MTD_W25 is not set
-# CONFIG_NETDEVICES is not set
+CONFIG_NETDEVICES=y
 # CONFIG_NET_SLIP is not set
 # CONFIG_PIPES is not set
 # CONFIG_PM is not set

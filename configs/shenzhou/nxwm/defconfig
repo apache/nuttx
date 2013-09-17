@@ -396,7 +396,7 @@ CONFIG_LCD_LANDSCAPE=y
 # CONFIG_LCD_RLANDSCAPE is not set
 # CONFIG_MMCSD is not set
 # CONFIG_MTD is not set
-# CONFIG_NETDEVICES is not set
+CONFIG_NETDEVICES=y
 # CONFIG_NET_SLIP is not set
 # CONFIG_PIPES is not set
 # CONFIG_PM is not set
