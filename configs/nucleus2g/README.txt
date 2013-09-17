@@ -462,7 +462,7 @@ Nucleus 2G Configuration Options
   LPC17xx specific PHY/Ethernet device driver settings.  These setting
   also require CONFIG_NET and CONFIG_LPC17_ETHERNET.
 
-    CONFIG_PHY_KS8721 - Selects Micrel KS8721 PHY
+    CONFIG_ETH0_PHY_KS8721 - Selects Micrel KS8721 PHY
     CONFIG_PHY_AUTONEG - Enable auto-negotion
     CONFIG_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
     CONFIG_PHY_FDUPLEX - Select full (vs. half) duplex

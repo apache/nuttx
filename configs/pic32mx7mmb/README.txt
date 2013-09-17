@@ -565,9 +565,9 @@ PIC32MX Configuration Options
 
 PIC32MX specific PHY/Ethernet device driver settings
 
-    CONFIG_PHY_KS8721 - Selects the Micrel KS8721 PHY
-    CONFIG_PHY_DP83848C - Selects the National Semiconduction DP83848C PHY
-    CONFIG_PHY_LAN8720 - Selects the SMSC LAN8720 PHY
+    CONFIG_ETH0_PHY_KS8721 - Selects the Micrel KS8721 PHY
+    CONFIG_ETH0_PHY_DP83848C - Selects the National Semiconduction DP83848C PHY
+    CONFIG_ETH0_PHY_LAN8720 - Selects the SMSC LAN8720 PHY
     CONFIG_PHY_AUTONEG - Enable auto-negotion
     CONFIG_PHY_SPEED100 - Select 100Mbit vs. 10Mbit speed.
     CONFIG_PHY_FDUPLEX - Select full (vs. half) duplex

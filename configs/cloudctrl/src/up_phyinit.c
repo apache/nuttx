@@ -58,7 +58,7 @@
  * Public Functions
  ************************************************************************************/
 
-#if defined(CONFIG_PHY_DM9161) && defined(CONFIG_STM32_PHYINIT)
+#if defined(CONFIG_ETH0_PHY_DM9161) && defined(CONFIG_STM32_PHYINIT)
 int stm32_phy_boardinitialize(int intf)
 {
   /* Configure the DM9161 PHY reset pin and take it out of reset */
