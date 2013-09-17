@@ -63,7 +63,7 @@
 
 #ifdef CONFIG_ARCH_BOARD_ZKITARM
 #  define CONFIG_NSH_HAVEUSBDEV 1
-#  ifdef CONFIG_LPC17_SSP0
+#  ifdef CONFIG_LPC17_SPI
 #    define CONFIG_NSH_HAVEMMCSD 1
 #  else
 #    undef CONFIG_NSH_HAVEMMCSD
@@ -78,7 +78,7 @@
 
 #ifdef CONFIG_NSH_HAVEMMCSD
 #  if !defined(CONFIG_NSH_MMCSDSPIPORTNO) || CONFIG_NSH_MMCSDSPIPORTNO != 0
-#    error "The ZKit-arm MMC/SD is on SSP0"
+#    error "The ZKit-arm MMC/SD is on SPI port 0"
 #    undef CONFIG_NSH_MMCSDSPIPORTNO
 #    define CONFIG_NSH_MMCSDSPIPORTNO 0
 #  endif
@@ -144,33 +144,33 @@
 int nsh_archinitialize(void)
 {
 #ifdef CONFIG_NSH_HAVEMMCSD
-  FAR struct spi_dev_s *ssp;
+  FAR struct spi_dev_s *spi;
   int ret;
 
-  /* Get the SSP port */
+  /* Get the SPI port */
 
-  ssp = lpc17_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
-  if (!ssp)
+  spi = lpc17_spiinitialize(CONFIG_NSH_MMCSDSPIPORTNO);
+  if (!spi)
     {
-      message("nsh_archinitialize: Failed to initialize SSP port %d\n",
+      message("nsh_archinitialize: Failed to initialize SPI port %d\n",
               CONFIG_NSH_MMCSDSPIPORTNO);
       return -ENODEV;
     }
 
-  message("Successfully initialized SSP port %d\n",
+  message("Successfully initialized SPI port %d\n",
           CONFIG_NSH_MMCSDSPIPORTNO);
 
-  /* Bind the SSP port to the slot */
+  /* Bind the SPI port to the slot */
 
-  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, ssp);
+  ret = mmcsd_spislotinitialize(CONFIG_NSH_MMCSDMINOR, CONFIG_NSH_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      message("nsh_archinitialize: Failed to bind SSP port %d to MMC/SD slot %d: %d\n",
+      message("nsh_archinitialize: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",
               CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO, ret);
       return ret;
     }
 
-  message("Successfuly bound SSP port %d to MMC/SD slot %d\n",
+  message("Successfuly bound SPI port %d to MMC/SD slot %d\n",
           CONFIG_NSH_MMCSDSPIPORTNO, CONFIG_NSH_MMCSDSLOTNO);
 #endif
   return OK;
