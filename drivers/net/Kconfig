@@ -2,6 +2,16 @@
 # For a description of the syntax of this configuration file,
 # see misc/tools/kconfig-language.txt.
 #
+
+config NETDEV_MULTINIC
+	bool "Multiple NIC support"
+	default n
+	---help---
+		Select this option if you board and/or MCU are capable of supporting
+		multiple Ethernet MAC drivers.
+
+comment "External Ethernet MAC Device Support"
+
 config NET_DM90x0
 	bool "Davicom dm9000/dm9010 support"
 	default n
@@ -149,3 +159,62 @@ config NET_VNET
 	bool "VNET support"
 	default n
 
+if ARCH_HAVE_PHY
+
+comment "External Ethernet PHY Device Support"
+
+choice
+	prompt "Board PHY Selection (ETH0)"
+	default ETH0_PHY_NONE
+	---help---
+		Identify the PHY on your board.  This setting is not used by all Ethernet
+		drivers nor do all Ethernet drivers support all PHYs.
+
+config ETH0_PHY_NONE
+	bool "No PHY support"
+
+config ETH0_PHY_KS8721
+	bool "Micrel KS8721 PHY"
+
+config ETH0_PHY_KSZ8051
+	bool "Micrel KSZ8051 PHY"
+
+config ETH0_PHY_DP83848C
+	bool "National Semiconduction DP83848C PHY"
+
+config ETH0_PHY_LAN8720
+	bool "SMSC LAN8720 PHY"
+
+config ETH0_PHY_DM9161
+	bool "Davicom DM9161 PHY"
+
+endchoice
+
+choice
+	prompt "Board PHY Selection (ETH1)"
+	default ETH1_PHY_NONE
+	depends on NETDEV_MULTINIC
+	---help---
+		Identify the PHY on your board.  This setting is not used by all Ethernet
+		drivers nor do all Ethernet drivers support all PHYs.
+
+config ETH1_PHY_NONE
+	bool "No PHY support"
+
+config ETH1_PHY_KS8721
+	bool "Micrel KS8721 PHY"
+
+config ETH1_PHY_KSZ8051
+	bool "Micrel KSZ8051 PHY"
+
+config ETH1_PHY_DP83848C
+	bool "National Semiconduction DP83848C PHY"
+
+config ETH1_PHY_LAN8720
+	bool "SMSC LAN8720 PHY"
+
+config ETH1_PHY_DM9161
+	bool "Davicom DM9161 PHY"
+
+endchoice
+endif # ARCH_HAVE_PHY

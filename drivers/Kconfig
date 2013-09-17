@@ -318,11 +318,20 @@ source drivers/mtd/Kconfig
 endif
 
 menuconfig NETDEVICES
-	bool "Network Device Support"
-	default n
+	bool "Network Device/PHY Support"
+	default n if !ARCH_HAVE_PHY
+	default y if ARCH_HAVE_PHY
 	depends on NET
 	---help---
-		Network interface drivers.  See also include/nuttx/net/net.h
+		Network interface driver and PHY selections.  This options enables
+		selection of drivers for external Ethernet MAC chips.  The majority
+		of MCUs, however, have built-in, internal Ethernet MAC peripherals
+		and that Ethernet support is selected in the MCU-specific
+		configuration menus.
+
+		Most Ethernet MAC drivers, whether internal or external, will
+		require configuration of an external PHY device.  That external PHY
+		device is also selected via this menu.
 
 if NETDEVICES
 source drivers/net/Kconfig
