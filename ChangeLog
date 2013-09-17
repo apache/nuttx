@@ -5580,3 +5580,12 @@
 	  another set of PHY selections are enabled for ETH1_ (2013-9-17).
 	* include/nuttx/net/mii.h:  Add definitions for the Micrel KSZ8051 PHY
 	  (2013-9-17).
+	* configs/zkit-arm-1768:  MMC/SD is on SPI, not SSP0.  From Rashid
+	  Fatah (2013-9-17).
+	* configs/: Lots of defconfig files changes.  A consequence of the
+	  above renaming and moving of the PHY configuration settings is
+	  that the you now also have to set CONFIG_NETDEVICES=y if you
+	  need to set a PHY configuration (2013-9-17).
+	* arch/arm/src/lpc17xx/lpc17_spi.c:  Remove undefined spi_select()
+	  prototype.  This was cause compile time warnings (2013-9-17).
+
