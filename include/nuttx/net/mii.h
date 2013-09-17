@@ -125,6 +125,18 @@
 #define MII_KS8721_INTCS             0x1b      /* Interrupt control/status register */
 #define MII_KS8721_10BTCR            0x1f      /* 10BASE-TX PHY control register */
 
+/* Micrel KSZ805:  0x11, 0x15-0x18, 0x1b, 0x1d, 0x1e-0x1f */
+
+#define MII_KSZ8051_AFEC1            0x11      /* AFE Control 1  */
+#define MII_KSZ8051_RXERR            0x15      /* RXERR Counter */
+#define MII_KSZ8051_OMSO             0x16      /* Operation Mode Strap Override */
+#define MII_KSZ8051_OMSS             0x17      /* Operation Mode Strap Status */
+#define MII_KSZ8051_XCTRL            0x18      /* Expanded Control */
+#define MII_KSZ8051_INT              0x1b      /* Interrupt Control/Status */
+#define MII_KSZ8051+LINKMD           0x1d      /* LinkMD(c) Control/Status */
+#define MII_KSZ8051_PHYCTRL1         0x1e      /* PHY Control 1 */
+#define MII_KSZ8051_PHYCTRL2         0x1f      /* PHY Control 2 */
+
 /* National Semiconductor DP83848C PHY Extended Registers */
 
 #define MII_DP83848C_STS             0x10      /* Status Register */
@@ -450,6 +462,29 @@
 #define KS8721_10BTCR_FORCE          (1 << 11) /* Bit 11: Force link */
 #define KS8721_10BTCR_ENERGY         (1 << 12) /* Bit 12: Energy detect */
 #define KS8721_10BTCR_PAIRSWAPD      (1 << 13) /* Bit 13: Pairswap disable */
+
+/* KSZ8051-specific register bit settings ***********************************/
+/* KSZ805 MII ID1/2 register bits */
+
+#define MII_PHYID1_KSZ8051           0x0022    /* ID1 value for Micrel KSZ8051 */
+#define MII_PHYID2_KSZ8051           0x1550    /* ID2 value for Micrel KSZ8051 */
+
+/* KSZ805 Register 0x1e: PHY Control 1 */
+                                               /* Bits 10-15: Reserved */
+#define MII_PHYCTRL1_ENPAUSE         (1 << 9)  /* Bit 9: Enable pause */
+#define MII_PHYCTRL1_LINKSTATUS      (1 << 8)  /* Bit 8: Link status */
+#define MII_PHYCTRL1_POLARITY        (1 << 7)  /* Bit 7: Polarity status */
+                                               /* Bit 6: Reserved */
+#define MII_PHYCTRL1_MDIX            (1 << 5)  /* Bit 5: MDI/MDI-X state */
+#define MII_PHYCTRL1_ENERGYDET       (1 << 4)  /* Bit 4: Energy detect */
+#define MII_PHYCTRL1_ISOLATE         (1 << 3)  /* Bit 3: PHY isolate */
+#define MII_PHYCTRL1_MODE_SHIFT      (0)       /* Bits 0-2: Operation mode */
+#define MII_PHYCTRL1_MODE_MASK       (7 << MII_PHYCTRL1_MODE_SHIFT)
+#  define MII_PHYCTRL1_MODE_BUSY     (0 << MII_PHYCTRL1_MODE_SHIFT) /* Still in autonegotiation */
+#  define MII_PHYCTRL1_MODE_10HDX    (1 << MII_PHYCTRL1_MODE_SHIFT) /* 10Base-T half-duplex */
+#  define MII_PHYCTRL1_MODE_100HDX   (2 << MII_PHYCTRL1_MODE_SHIFT) /* 100Base-T half-duplex */
+#  define MII_PHYCTRL1_MODE_10FDX    (5 << MII_PHYCTRL1_MODE_SHIFT) /* 10Base-T full-duplex */
+#  define MII_PHYCTRL1_MODE_100FDX   (6 << MII_PHYCTRL1_MODE_SHIFT) /* 100Base-T full-duplex */
 
 /****************************************************************************
  * Type Definitions
