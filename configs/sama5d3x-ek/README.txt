@@ -1878,6 +1878,61 @@ Configurations
         Address 0x1a is the WM8904.  Address 0x39 is the SIL9022A. I am
         not sure what is at address 0x3d and 0x60
 
+    14. Networking support via the EMAC 10/100Base-T peripheral can be
+        added to NSH be selecting the following configuration options.
+        Remember that only the SAMA5D31 and SAMAD35 support the EMAC
+        peripheral!  This will add several new commands to NSH:  ifconfig,
+        wget, put, get, ping, etc.
+
+        System Type
+          CONFIG_ARCH_CHIP_ATSAMA5D31=y       : SAMA5D31 or SAMAD35 support EMAC
+          CONFIG_ARCH_CHIP_ATSAMA5D35=y       : (others do not)
+
+        System Type -> SAMA5 Peripheral Support
+          CONFIG_SAMA5_EMAC=y                 : Enable the EMAC peripheral
+
+        System Type -> EMAC device driver options
+          CONFIG_SAMA5_EMAC_NRXBUFFERS=16     : Set aside some RS and TX buffers
+          CONFIG_SAMA5_EMAC_NTXBUFFERS=4
+          CONFIG_SAMA5_EMAC_PHYADDR=1         : KSZ8051 PHY is at address 1
+          CONFIG_SAMA5_EMAC_AUTONEG=y         : Use autonegotiation
+          CONFIG_SAMA5_EMAC_RMII=y            : Either MII or RMII interface should work
+          CONFIG_SAMA5_EMAC_PHYSR=30          : Address of PHY status register on KSZ8051
+          CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG=y : Needed for KSZ8051
+          CONFIG_SAMA5_EMAC_PHYSR_ALTMODE=0x7 : "    " " " "     "
+          CONFIG_SAMA5_EMAC_PHYSR_10HD=0x1    : "    " " " "     "
+          CONFIG_SAMA5_EMAC_PHYSR_100HD=0x2   : "    " " " "     "
+          CONFIG_SAMA5_EMAC_PHYSR_10FD=0x5    : "    " " " "     "
+          CONFIG_SAMA5_EMAC_PHYSR_100FD=0x6   : "    " " " "     "
+
+        Device drivers -> Network Device/PHY Support
+          CONFIG_NETDEVICES=y                 : Enabled PHY selection
+          CONFIG_ETH0_PHY_KSZ8051=y           : Select the KSZ8051 PHY
+
+        Networking Support
+          CONFIG_NET=y                        : Enable Neworking
+          CONFIG_NET_SOCKOPTS=y               : Enable socket operations
+          CONFIG_NET_BUFSIZE=562              : Maximum packet size (MTD) 1518 is more standard
+          CONFIG_NET_RECEIVE_WINDOW=562       : Should be the same as CONFIG_NET_BUFSIZE
+          CONFIG_NET_TCP=y                    : Enable TCP/IP networking
+          CONFIG_NET_UDP=y                    : Enable UDP networking
+          CONFIG_NET_ICMP=y                   : Enable ICMP networking
+          CONFIG_NET_ICMP_PING=y              : Needed for NSH ping command
+                                             : Defaults should be okay for other options
+        Application Configuration -> Network Utilities
+          CONFIG_NETUTILS_RESOLV=y            : Enable host address resolution
+          CONFIG_NETUTILS_TFTPC=y             : Enable TFTP data file transfers for get and put commands
+          CONFIG_NETUTILS_TELNETD=y           : Enable the Telnet daemon
+          CONFIG_NETUTILS_UIPLIB=y            : Network library support is needed
+          CONFIG_NETUTILS_WEBCLIENT=y         : Needed for wget support
+                                              : Defaults should be okay for other options
+        Application Configuration -> NSH Library
+          CONFIG_NSH_TELNET=y                 : Enable NSH session via Telnet
+          CONFIG_NSH_IPADDR=0x0a000002        : Select an IP address
+          CONFIG_NSH_DRIPADDR=0x0a000001      : IP address of gateway/host PC
+          CONFIG_NSH_NETMASK=0xffffff00       : Netmask
+          CONFIG_NSH_NOMAC=y                  : Need to make up a bogus MAC address
+
     STATUS:
       PCK FREQUENCY
       2013-7-19:  This configuration (as do the others) run at 396MHz.
@@ -1941,6 +1996,9 @@ Configurations
         enumerates the devices on the bus and successfully exchanges a few
         commands.  The real test of the come later when a real I2C device is
         integrated.
+
+      EMAC:
+      2013-9-17:  Driver created, but not fully integrated yet.
 
   ostest:
     This configuration directory, performs a simple OS test using

@@ -54,6 +54,63 @@
 #define GMAC_INTF 0
 #define EMAC_INTF 1
 
+/* Which is ETH0 and which is ETH1? */
+
+#ifndef CONFIG_SAMA5_GMAC
+#  undef CONFIG_SAMA5_GMAC_ISETH0
+#endif
+
+#ifndef CONFIG_SAMA5_EMAC
+#  undef CONFIG_SAMA5_EMAC_ISETH0
+#endif
+
+#if defined(CONFIG_SAMA5_GMAC_ISETH0) && defined(CONFIG_SAMA5_EMAC_ISETH0)
+#  error GMAC and EMAC cannot both be ETH0
+#endif
+
+#if defined(CONFIG_SAMA5_GMAC_ISETH0)
+#  if defined(CONFIG_ETH0_PHY_DM9161)
+#    define SAMA5_GMAC_PHY_DM9161 1
+#  elif defined(CONFIG_ETH0_PHY_LAN8700)
+#    define SAMA5_GMAC_PHY_LAN8700 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ8051)
+#    define SAMA5_GMAC_PHY_KSZ8051 1
+#  else
+#    error ETH0 PHY unrecognized
+#  endif
+#elif defined(CONFIG_SAMA5_GMAC)
+#  if defined(CONFIG_ETH1_PHY_DM9161)
+#    define SAMA5_GMAC_PHY_DM9161 1
+#  elif defined(CONFIG_ETH1_PHY_LAN8700)
+#    define SAMA5_GMAC_PHY_LAN8700 1
+#  elif defined(CONFIG_ETH1_PHY_KSZ8051)
+#    define SAMA5_GMAC_PHY_KSZ8051 1
+#  else
+#    error ETH1 PHY unrecognized
+#  endif
+#endif
+
+#if defined(CONFIG_SAMA5_EMAC_ISETH0)
+#  if defined(CONFIG_ETH0_PHY_DM9161)
+#    define SAMA5_EMAC_PHY_DM9161 1
+#  elif defined(CONFIG_ETH0_PHY_LAN8700)
+#    define SAMA5_EMAC_PHY_LAN8700 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ8051)
+#    define SAMA5_EMAC_PHY_KSZ8051 1
+#  else
+#    error ETH0 PHY unrecognized
+#  endif
+#elif defined(CONFIG_SAMA5_EMAC)
+#  if defined(CONFIG_ETH1_PHY_DM9161)
+#    define SAMA5_EMAC_PHY_DM9161 1
+#  elif defined(CONFIG_ETH1_PHY_LAN8700)
+#    define SAMA5_EMAC_PHY_LAN8700 1
+#  elif defined(CONFIG_ETH1_PHY_KSZ8051)
+#    define SAMA5_EMAC_PHY_KSZ8051 1
+#  else
+#    error ETH1 PHY unrecognized
+#  endif
+#endif
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
