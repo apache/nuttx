@@ -2056,11 +2056,7 @@ Configurations
         configuration to start the program in NOR FLASH (see just above).
         See "Creating and Using NORBOOT" above.
 
-      2013-7-31:  The OS test configuration is basically functional, but
-         takes a very long time in the round-robin scheduler test computing
-         prime numbers.  This test is supposed to be slow -- like several
-         seconds -- but not many minutes.  No idea why yet.  The best guess
-         would be an excessive number of context switches.
+      2013-7-31:  The OS test configuration is functional.
 
       2013-7-31:  Using delay loop calibration from the hello configuration.
         That configuration runs out of internal SRAM and, as a result, this
