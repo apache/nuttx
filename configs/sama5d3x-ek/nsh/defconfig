@@ -88,6 +88,7 @@ CONFIG_ARCH_CHIP_SAMA5=y
 # CONFIG_ARCH_CORTEXM3 is not set
 # CONFIG_ARCH_CORTEXM4 is not set
 CONFIG_ARCH_CORTEXA5=y
+# CONFIG_ARCH_CORTEXA8 is not set
 CONFIG_ARCH_FAMILY="armv7-a"
 CONFIG_ARCH_CHIP="sama5"
 CONFIG_ARCH_HAVE_FPU=y
@@ -148,7 +149,6 @@ CONFIG_SAMA5_USART1=y
 # CONFIG_SAMA5_UHPHS is not set
 # CONFIG_SAMA5_UDPHS is not set
 # CONFIG_SAMA5_GMAC is not set
-# CONFIG_SAMA5_EMAC is not set
 # CONFIG_SAMA5_LCDC is not set
 # CONFIG_SAMA5_ISI is not set
 # CONFIG_SAMA5_SSC0 is not set
@@ -163,10 +163,8 @@ CONFIG_SAMA5_USART1=y
 # CONFIG_SAMA5_FUSE is not set
 # CONFIG_SAMA5_MPDDRC is not set
 # CONFIG_SAMA5_PIO_IRQ is not set
-
-#
-# SPI device driver options
-#
+CONFIG_SAMA5_HAVE_GMAC=y
+# CONFIG_SAMA5_HAVE_EMAC is not set
 
 #
 # External Memory Configuration
