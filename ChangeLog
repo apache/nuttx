@@ -5588,4 +5588,6 @@
 	  need to set a PHY configuration (2013-9-17).
 	* arch/arm/src/lpc17xx/lpc17_spi.c:  Remove undefined spi_select()
 	  prototype.  This was cause compile time warnings (2013-9-17).
+	* configs/sama5d3x-ek/src/sam_ostest.c:  Add OS test support for
+	  the FPU test (2013-9-18).
 

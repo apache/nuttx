@@ -187,7 +187,14 @@
 
 #endif
 
-/* EMAC buffer sizes, number of buffers, and number of descriptors */
+/* EMAC buffer sizes, number of buffers, and number of descriptors.
+ *
+ * REVISIT: The CONFIG_NET_MULTIBUFFER might be useful.  It might be possible
+ * to use this option to send and receive messages directly into the DMA
+ * buffers, saving a copy.  There might be complications on the receiving
+ * side, however, where buffers may wrap and where the size of the received
+ * frame will typically be smaller than a full packet.
+ */
 
 #ifdef CONFIG_NET_MULTIBUFFER
 #  error CONFIG_NET_MULTIBUFFER must not be set

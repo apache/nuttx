@@ -110,6 +110,10 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += sam_usbmsc.c
 endif
 
+ifeq ($(CONFIG_ARCH_FPU),y)
+CSRCS += sam_ostest.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += sam_autoleds.c
 else
