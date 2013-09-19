@@ -1928,7 +1928,7 @@ static void sam_wdh_bottomhalf(void)
 
       ed->tdstatus = (td->hw.ctrl & GTD_STATUS_CC_MASK) >> GTD_STATUS_CC_SHIFT;
 
-#if defined(CONFIG_DEBUG_USB) || defined(CONFIG_USBHOST_TRACE)
+#ifdef HAVE_USBHOST_TRACE
       if (ed->tdstatus != TD_CC_NOERROR)
         {
           /* The transfer failed for some reason... dump some diagnostic info. */
@@ -2078,7 +2078,7 @@ static int sam_wait(FAR struct usbhost_connection_s *conn,
 
       for (rhpndx = 0; rhpndx < SAM_OHCI_NRHPORT; rhpndx++)
         {
-#ifdef CONFIG_SAMA5_EHCI
+#if 0 /* #ifdef CONFIG_SAMA5_EHCI */
           /* If a device is no longer connected, return the port to the EHCI
            * controller.  Zero is the reset value for all ports; one makes
            * the corresponding port available to OHCI.
