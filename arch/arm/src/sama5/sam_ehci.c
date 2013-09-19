@@ -580,7 +580,7 @@ static uint32_t sam_swap32(uint32_t value)
 static void sam_printreg(volatile uint32_t *regaddr, uint32_t regval,
                           bool iswrite)
 {
-  lldbg("%p%s%08x\n", regaddr, iswrite ? "<-" : "->", regval);
+  lldbg("%08x%s%08x\n", (uintptr_t)regaddr, iswrite ? "<-" : "->", regval);
 }
 #endif
 
@@ -2699,10 +2699,11 @@ static inline void sam_portsc_bottomhalf(void)
         }
 
       /* Clear all pending port interrupt sources by writing a '1' to the
-       * corresponding bit in the PORTSC register.
+       * corresponding bit in the PORTSC register.  In addition, we need
+       * to preserve the values of all R/W bits (RO bits don't matter)
        */
 
-      sam_putreg(portsc & EHCI_PORTSC_ALLINTS, &HCOR->portsc[rhpndx]);
+      sam_putreg(portsc, &HCOR->portsc[rhpndx]);
     }
 }
 
@@ -3144,7 +3145,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
       regval |= EHCI_PORTSC_OWNER;
       sam_putreg(regval, &HCOR->portsc[rhpndx]);
 
-#ifdef CONFIG_SAMA5_OHCI
+#if 0 /* #ifdef CONFIG_SAMA5_OHCI */
       /* Give the port to the OHCI controller. Zero is the reset value for
        * all ports; one makes the corresponding port available to OHCI.
        */
@@ -3156,6 +3157,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 
       /* And return a failure */
 
+      rhport->connected = false;
       return -EPERM;
     }
   else
@@ -3264,7 +3266,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
       regval |= EHCI_PORTSC_OWNER;
       sam_putreg(regval, &HCOR->portsc[rhpndx]);
 
-#ifdef CONFIG_SAMA5_OHCI
+#if 0 /* #ifdef CONFIG_SAMA5_OHCI */
       /* Give the port to the OHCI controller. Zero is the reset value for
        * all ports; one makes the corresponding port available to OHCI.
        */
@@ -3276,6 +3278,7 @@ static int sam_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 
       /* And return a failure */
 
+      rhport->connected = false;
       return -EPERM;
     }
 
