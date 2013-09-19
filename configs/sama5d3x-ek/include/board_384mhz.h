@@ -136,7 +136,11 @@
 
 #  undef  BOARD_USE_UPLL                              /* Use PLLA as source clock */
 #  define BOARD_OHCI_INPUT         PMC_USB_USBS_PLLA  /* Input is PLLACK */
-#  define BOARD_OHCI_DIVIDER       (7)                /* Divided by 8 */
+#  if 1                                               /* REVISIT */
+#    define BOARD_OHCI_DIVIDER     (7)                /* Divided by 8 */
+#  else
+#    define BOARD_OHCI_DIVIDER     (15)               /* Divided by 16 */
+#  endif
 #endif
 
 /* Resulting frequencies */
