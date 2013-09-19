@@ -397,9 +397,16 @@ static inline void sam_usbclockconfig(void)
   /* 7) Program the OHCI clocks (UHP48M and UHP12M) with USBDIV field in
    *    PMC_USB register. USBDIV must be 9 (division by 10) if UPLLCK is
    *    selected.
+   *
+   * REVISIT:  The divisor of 10 produces a rate that is too high. Division
+   * by 5, however, seems to work just fine.  No idea why?
    */
 
-  regval |= PMC_USB_USBDIV(9);
+#if 1 /* REVISIT */
+  regval |= PMC_USB_USBDIV(4);  /* Division by 5 */
+#else
+  regval |= PMC_USB_USBDIV(9);  /* Division by 10 */
+#endif
   putreg32(regval, SAM_PMC_USB);
 
 #else /* BOARD_USE_UPLL */
