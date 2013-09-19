@@ -47,8 +47,7 @@
 
 #include "sam_usbhost.h"
 
-#if defined(CONFIG_USBHOST_TRACE) || \
-   (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+#ifdef HAVE_USBHOST_TRACE
 
 /********************************************************************************************
  * Pre-processor Definitions
@@ -95,7 +94,7 @@ static const struct sam_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(OHCI_TRACE1_TDALLOC_FAILED,      TR_OHCI, TR_FMT1, "OHCI ERROR: Failed to allocate TD\n"),
   TRENTRY(OHCI_TRACE1_IRQATTACH,           TR_OHCI, TR_FMT1, "OHCI ERROR: Failed to attach IRQ%d\n"),
 
-#ifdef CONFIG_USBHOST_TRACE_VERBOSE
+#ifdef HAVE_USBHOST_TRACE_VERBOSE
   TRENTRY(OHCI_VTRACE1_PHYSED,             TR_OHCI, TR_FMT1, "OHCI physed: %06x\n"),
   TRENTRY(OHCI_VTRACE1_VIRTED,             TR_OHCI, TR_FMT1, "OHCI ed: %06x\n"),
   TRENTRY(OHCI_VTRACE1_CSC,                TR_OHCI, TR_FMT1, "OHCI Connect Status Change, RHSTATUS: %06x\n"),
@@ -139,7 +138,7 @@ static const struct sam_usbhost_trace_s g_trace1[TRACE1_NSTRINGS] =
   TRENTRY(EHCI_TRACE1_RUN_FAILED,          TR_EHCI, TR_FMT1, "EHCI ERROR: EHCI Failed to run: USBSTS=%06x\n"),
   TRENTRY(EHCI_TRACE1_IRQATTACH_FAILED,    TR_EHCI, TR_FMT1, "EHCI ERROR: Failed to attach IRQ%d\n"),
 
-#ifdef CONFIG_USBHOST_TRACE_VERBOSE
+#ifdef HAVE_USBHOST_TRACE_VERBOSE
   TRENTRY(EHCI_VTRACE1_PORTSC_CSC,         TR_EHCI, TR_FMT1, "EHCI Connect Status Change: %06x\n"),
   TRENTRY(EHCI_VTRACE1_PORTSC_CONNALREADY, TR_EHCI, TR_FMT1, "EHCI Already connected: %06x\n"),
   TRENTRY(EHCI_VTRACE1_PORTSC_DISCALREADY, TR_EHCI, TR_FMT1, "EHCI Already disconnected: %06x\n"),
@@ -163,7 +162,7 @@ static const struct sam_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
   TRENTRY(OHCI_TRACE2_EDENQUEUE_FAILED,    TR_OHCI, TR_FMT2, "OHCI ERROR: Failed to queue ED for transfer type %d: %d\n"),
   TRENTRY(OHCI_TRACE2_CLASSENUM_FAILED,    TR_OHCI, TR_FMT2, "OHCI RHport%d usbhost_enumerate() failed: %d\n"),
 
-#ifdef CONFIG_USBHOST_TRACE_VERBOSE
+#ifdef HAVE_USBHOST_TRACE_VERBOSE
   TRENTRY(OHCI_VTRACE2_INTERVAL,           TR_OHCI, TR_FMT2, "OHCI interval: %d->%d\n"),
   TRENTRY(OHCI_VTRACE2_MININTERVAL,        TR_OHCI, TR_FMT2, "OHCI MIN interval: %d offset: %d\n"),
   TRENTRY(OHCI_VTRACE2_RHPORTST,           TR_OHCI, TR_FMT2, "OHCI RHPORTST%d: %04x\n"),
@@ -185,7 +184,7 @@ static const struct sam_usbhost_trace_s g_trace2[TRACE2_NSTRINGS] =
   TRENTRY(EHCI_TRACE2_EPIOERROR,           TR_EHCI, TR_FMT2, "EHCI ERROR: EP%d TOKEN=%04x\n"),
   TRENTRY(EHCI_TRACE2_CLASSENUM_FAILED,    TR_EHCI, TR_FMT2, "EHCI RHport%d usbhost_enumerate() failed: %d\n"),
 
-#ifdef CONFIG_USBHOST_TRACE_VERBOSE
+#ifdef HAVE_USBHOST_TRACE_VERBOSE
   TRENTRY(EHCI_VTRACE2_ASYNCXFR,           TR_EHCI, TR_FMT2, "EHCI Async transfer EP%d buflen=%d\n"),
   TRENTRY(EHCI_VTRACE2_INTRXFR,            TR_EHCI, TR_FMT2, "EHCI Intr Transfer EP%d buflen=%d\n"),
   TRENTRY(EHCI_VTRACE2_IOCCHECK,           TR_EHCI, TR_FMT2, "EHCI IOC EP%d TOKEN=%04x\n"),
@@ -247,5 +246,5 @@ FAR const char *usbhost_trformat2(uint16_t id)
   return NULL;
 }
 
-#endif /* CONFIG_USBHOST_TRACE || CONFIG_DEBUG && CONFIG_DEBUG_USB */
+#endif /* HAVE_USBHOST_TRACE */
 
