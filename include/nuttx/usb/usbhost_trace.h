@@ -45,6 +45,27 @@
 /****************************************************************************
  * Pre-processor definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* Debug/Trace-related definitions */
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_USB
+#  undef CONFIG_DEBUG_VERBOSE
+#endif
+
+#ifndef CONFIG_USBHOST_TRACE
+#  undef CONFIG_USBHOST_TRACE_VERBOSE
+#endif
+
+/* Trace support is needed if either USB host tracing or USB debug output is enabled */
+
+#if defined(CONFIG_USBHOST_TRACE) || defined(CONFIG_DEBUG_USB)
+#  define HAVE_USBHOST_TRACE
+#  if defined(CONFIG_USBHOST_TRACE_VERBOSE) || defined(CONFIG_DEBUG_VERBOSE)
+#    define HAVE_USBHOST_TRACE_VERBOSE
+#  endif
+#endif
+
 /* Event encoding/decoding macros *******************************************/
 
 #define TRACE_ENCODE1(id,u23)    (((uint32_t)(id) & 0x1ff) << 23 | \
@@ -98,12 +119,11 @@ extern "C" {
 #  undef CONFIG_DEBUG_USB
 #endif
 
-#if defined(CONFIG_USBHOST_TRACE) || defined(CONFIG_DEBUG_USB)
+#ifdef HAVE_USBHOST_TRACE
 void usbhost_trace1(uint16_t id, uint32_t u23);
 void usbhost_trace2(uint16_t id, uint8_t u7, uint16_t u16);
 
-#if defined(CONFIG_USBHOST_TRACE_VERBOSE) || \
-   (defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_USB))
+#ifdef HAVE_USBHOST_TRACE_VERBOSE
 #  define usbhost_vtrace1(id, u23)     usbhost_trace1(id, u23)
 #  define usbhost_vtrace2(id, u7, u16) usbhost_trace2(id, u7, u16)
 #else
@@ -129,7 +149,7 @@ void usbhost_trace2(uint16_t id, uint8_t u7, uint16_t u16);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBHOST_TRACE)
+#ifdef CONFIG_USBHOST_TRACE
 int usbhost_trenumerate(usbhost_trcallback_t callback, FAR void *arg);
 #else
 #  define usbhost_trenumerate(callback,arg)
@@ -146,7 +166,7 @@ int usbhost_trenumerate(usbhost_trcallback_t callback, FAR void *arg);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBHOST_TRACE)
+#ifdef CONFIG_USBHOST_TRACE
 int usbhost_trdump(void);
 #else
 #  define usbhost_trdump(void)
@@ -165,8 +185,7 @@ int usbhost_trdump(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_USBHOST_TRACE) || \
-   (defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_USB))
+#ifdef HAVE_USBHOST_TRACE
 FAR const char *usbhost_trformat1(uint16_t id);
 FAR const char *usbhost_trformat2(uint16_t id);
 #endif

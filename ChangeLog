@@ -5590,4 +5590,8 @@
 	  prototype.  This was cause compile time warnings (2013-9-17).
 	* configs/sama5d3x-ek/src/sam_ostest.c:  Add OS test support for
 	  the FPU test (2013-9-18).
+	* arch/arm/src/sama5/sam_usbhost.h and include/nuttx/usb/usbhost_trace.h
+	  Correct some inconsistencies in the way that USB configuration
+	  settings are used.  This caused compilation errors in SAMA5 OHCI
+	  when USB debug was ON but USB host tracing was off (2013-9-19).
 
