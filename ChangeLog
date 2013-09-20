@@ -5600,4 +5600,9 @@
 	* Several USB device driver files:  Change naming of SELFPOWERED
 	  and REMOTEWAKEUP to avoid name collisions.  Prepend the name
 	  of the driver (for example CDCACM_SELFPOWERED) (201309-20).
-
+	* configs/sama5d3x-ek/nsh and demo: Increase the number of pre-allocated
+	  watchdog timers.  The default number of 4 was easily being exhausted
+	  in the more complex configurations.  Enable the task name feature
+	  to provide prettier ps command output.  src/sam_usb.c:  Use more
+	  descriptive task names when starting the EHCI and OHCI monitor tasks
+	  (2013-9-20).
