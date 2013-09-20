@@ -3108,6 +3108,7 @@ static void sam_disconnect(FAR struct usbhost_driver_s *drvr)
 
 FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
 {
+  uintptr_t physaddr;
   uint32_t regval;
   uint8_t *buffer;
   irqstate_t flags;
@@ -3192,6 +3193,9 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
   memset((void*)&g_hcca, 0, sizeof(struct ohci_hcca_s));
 
+  cp15_clean_dcache((uint32_t)&g_hcca,
+                    (uint32_t)&g_hcca + sizeof(struct ohci_hcca_s));
+
   /* Initialize user-configurable EDs */
 
   for (i = 0; i < SAMA5_OHCI_NEDS; i++)
@@ -3274,7 +3278,8 @@ FAR struct usbhost_connection_s *sam_ohci_initialize(int controller)
 
   /* Set HCCA base address */
 
-  sam_putreg((uint32_t)&g_hcca, SAM_USBHOST_HCCA);
+  physaddr = sam_physramaddr((uintptr_t)&g_hcca);
+  sam_putreg(physaddr, SAM_USBHOST_HCCA);
 
   /* Clear pending interrupts */
 
