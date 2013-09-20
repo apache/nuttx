@@ -354,7 +354,7 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
  * device.
  */
 
-static const const struct usbhost_id_s g_id =
+static const const struct usbhost_id_s g_hidkbd_id =
 {
   USB_CLASS_HID,            /* base     */
   USBHID_SUBCLASS_BOOTIF,   /* subclass */
@@ -365,15 +365,15 @@ static const const struct usbhost_id_s g_id =
 
 /* This is the USB host storage class's registry entry */
 
-static struct usbhost_registry_s g_skeleton =
+static struct usbhost_registry_s g_hidkbd =
 {
   NULL,                    /* flink     */
   usbhost_create,          /* create    */
   1,                       /* nids      */
-  &g_id                    /* id[]      */
+  &g_hidkbd_id             /* id[]      */
 };
 
-static const struct file_operations usbhost_fops =
+static const struct file_operations g_hidkbd_fops =
 {
   usbhost_open,            /* open      */
   usbhost_close,           /* close     */
@@ -1598,7 +1598,7 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   uvdbg("Register driver\n");
   usbhost_mkdevname(priv, devname);
-  ret = register_driver(devname, &usbhost_fops, 0666, priv);
+  ret = register_driver(devname, &g_hidkbd_fops, 0666, priv);
 
   /* We now have to be concerned about asynchronous modification of crefs
    * because the driver has been registerd.
@@ -2350,7 +2350,7 @@ int usbhost_kbdinit(void)
 
   /* Advertise our availability to support (certain) devices */
 
-  return usbhost_registerclass(&g_skeleton);
+  return usbhost_registerclass(&g_hidkbd);
 }
 
 #endif /* CONFIG_USBHOST)&& !CONFIG_USBHOST_INT_DISABLE && CONFIG_NFILE_DESCRIPTORS */
