@@ -1250,7 +1250,7 @@ Configurations
         buffered USB debug data once every second:
 
         Application Configuration -> NSH LIbrary:
-          CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH
+          CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH (USB device only)
           CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
 
         Application Configuration -> System NSH Add-Ons:

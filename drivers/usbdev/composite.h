@@ -103,6 +103,18 @@
 #undef CONFIG_COMPOSITE_CONFIGSTR
 #define CONFIG_COMPOSITE_CONFIGSTR "Composite"
 
+#ifdef CONFIG_USBDEV_SELFPOWERED
+#  define COMPOSITE_SELFPOWERED USB_CONFIG_ATTR_SELFPOWER
+#else
+#  define COMPOSITE_SELFPOWERED (0)
+#endif
+
+#ifdef CONFIG_USBDEV_REMOTEWAKEUP
+#  define COMPOSITE_REMOTEWAKEUP USB_CONFIG_ATTR_WAKEUP
+#else
+#  define COMPOSITE_REMOTEWAKEUP (0)
+#endif
+
 /* Constituent devices ******************************************************/
 
 #undef DEV1_IS_CDCACM

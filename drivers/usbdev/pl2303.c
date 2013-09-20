@@ -139,16 +139,16 @@
 
 /* USB Controller */
 
-#ifndef CONFIG_USBDEV_SELFPOWERED
-#  define SELFPOWERED USB_CONFIG_ATTR_SELFPOWER
+#ifdef CONFIG_USBDEV_SELFPOWERED
+#  define PL2303_SELFPOWERED USB_CONFIG_ATTR_SELFPOWER
 #else
-#  define SELFPOWERED (0)
+#  define PL2303_SELFPOWERED (0)
 #endif
 
-#ifndef CONFIG_USBDEV_REMOTEWAKEUP
-#  define REMOTEWAKEUP USB_CONFIG_ATTR_WAKEUP
+#ifdef CONFIG_USBDEV_REMOTEWAKEUP
+#  define PL2303_REMOTEWAKEUP USB_CONFIG_ATTR_WAKEUP
 #else
-#  define REMOTEWAKEUP (0)
+#  define PL2303_REMOTEWAKEUP (0)
 #endif
 
 #ifndef CONFIG_USBDEV_MAXPOWER
@@ -438,7 +438,9 @@ static const struct usb_cfgdesc_s g_cfgdesc =
   PL2303_NINTERFACES,                           /* ninterfaces */
   PL2303_CONFIGID,                              /* cfgvalue */
   PL2303_CONFIGSTRID,                           /* icfg */
-  USB_CONFIG_ATTR_ONE|SELFPOWERED|REMOTEWAKEUP, /* attr */
+  USB_CONFIG_ATTR_ONE |                         /* attr */
+    PL2303_SELFPOWERED |
+    PL2303_REMOTEWAKEUP,
   (CONFIG_USBDEV_MAXPOWER + 1) / 2              /* mxpower */
 };
 

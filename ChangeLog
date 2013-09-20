@@ -5597,4 +5597,7 @@
 	* nuttx/arch/arm/src/sama5/sam_clockconfig.c:  When 480MHz UPLL
 	  is used to drive OHCI, it should have a divider of 10.  However,
 	  that does not work.  A divider of 5 does.  Why? (2013-9-19).
+	* Several USB device driver files:  Change naming of SELFPOWERED
+	  and REMOTEWAKEUP to avoid name collisions.  Prepend the name
+	  of the driver (for example CDCACM_SELFPOWERED) (201309-20).
 

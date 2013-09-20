@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/usbdev/usbmsc.h
  *
- *   Copyright (C) 2008-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Mass storage class device.  Bulk-only with SCSI subclass.
@@ -226,16 +226,16 @@
 
 /* USB Controller */
 
-#ifndef CONFIG_USBDEV_SELFPOWERED
-#  define SELFPOWERED USB_CONFIG_ATTR_SELFPOWER
+#ifdef CONFIG_USBDEV_SELFPOWERED
+#  define USBMSC_SELFPOWERED USB_CONFIG_ATTR_SELFPOWER
 #else
-#  define SELFPOWERED (0)
+#  define USBMSC_SELFPOWERED (0)
 #endif
 
-#ifndef  CONFIG_USBDEV_REMOTEWAKEUP
-#  define REMOTEWAKEUP USB_CONFIG_ATTR_WAKEUP
+#ifdef  CONFIG_USBDEV_REMOTEWAKEUP
+#  define USBMSC_REMOTEWAKEUP USB_CONFIG_ATTR_WAKEUP
 #else
-#  define REMOTEWAKEUP (0)
+#  define USBMSC_REMOTEWAKEUP (0)
 #endif
 
 #ifndef CONFIG_USBDEV_MAXPOWER

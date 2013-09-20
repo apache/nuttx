@@ -125,7 +125,9 @@ static const struct usb_cfgdesc_s g_cfgdesc =
   COMPOSITE_NINTERFACES,                        /* ninterfaces */
   COMPOSITE_CONFIGID,                           /* cfgvalue */
   COMPOSITE_CONFIGSTRID,                        /* icfg */
-  USB_CONFIG_ATTR_ONE|SELFPOWERED|REMOTEWAKEUP, /* attr */
+  USB_CONFIG_ATTR_ONE |                         /* attr */
+    COMPOSITE_SELFPOWERED |
+    COMPOSITE_REMOTEWAKEUP,
   (CONFIG_USBDEV_MAXPOWER + 1) / 2              /* mxpower */
 };
 
