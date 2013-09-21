@@ -99,7 +99,7 @@ cp15_clean_dcache:
 	mov		r2, r2, lsl r3			/* Get the cache line size in bytes */
 
 	sub		r3, r2, #1				/* R3=Cache line size mask */
-	bic		r12, r0, r3				/* R12=aligned start address */
+	bic		r0, r0, r3				/* R0=aligned start address */
 
 	/* Loop, cleaning each cache line by writing its contents to memory */
 
