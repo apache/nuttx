@@ -5610,3 +5610,7 @@
 	  needed to be flushed to data cache; Fix another where a virual address
 	  was being used in a register where a physical address was required
 	  (2013-9-20).
+	* arch/arm/src/armv7-a/cp15_clean_dcache.S and cp15_flush_dcache.S:
+	  fix an error in the alignment of addresses to cache line boundaries
+	  (2013-9-21).
+
