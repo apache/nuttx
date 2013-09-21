@@ -102,7 +102,7 @@ extern "C"
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
 struct usbdevclass_driver_s;
-EXTERN int board_mscclassobject(FAR struct usbdevclass_driver_s **classdev);
+int board_mscclassobject(FAR struct usbdevclass_driver_s **classdev);
 #endif
 
 /****************************************************************************
@@ -124,7 +124,7 @@ EXTERN int board_mscclassobject(FAR struct usbdevclass_driver_s **classdev);
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
 struct usbdevclass_driver_s;
-EXTERN void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev);
+void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev);
 #endif
 
 /************************************************************************************
@@ -149,7 +149,7 @@ EXTERN void board_mscuninitialize(FAR struct usbdevclass_driver_s *classdev);
  *
  ************************************************************************************/
 
-EXTERN int usbmsc_configure(unsigned int nluns, void **handle);
+int usbmsc_configure(unsigned int nluns, void **handle);
 
 /************************************************************************************
  * Name: usbmsc_bindlun
@@ -171,9 +171,8 @@ EXTERN int usbmsc_configure(unsigned int nluns, void **handle);
  *
  ************************************************************************************/
 
-EXTERN int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
-                          unsigned int lunno, off_t startsector, size_t nsectors,
-                          bool readonly);
+int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath, unsigned int lunno,
+                   off_t startsector, size_t nsectors, bool readonly);
 
 /************************************************************************************
  * Name: usbmsc_unbindlun
@@ -190,7 +189,7 @@ EXTERN int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
  *
  ************************************************************************************/
 
-EXTERN int usbmsc_unbindlun(FAR void *handle, unsigned int lunno);
+int usbmsc_unbindlun(FAR void *handle, unsigned int lunno);
 
 /************************************************************************************
  * Name: usbmsc_exportluns
@@ -208,7 +207,7 @@ EXTERN int usbmsc_unbindlun(FAR void *handle, unsigned int lunno);
  ************************************************************************************/
 
 #if !defined(CONFIG_USBDEV_COMPOSITE) || !defined(CONFIG_USBMSC_COMPOSITE)
-EXTERN int usbmsc_exportluns(FAR void *handle);
+int usbmsc_exportluns(FAR void *handle);
 #endif
 
 /************************************************************************************
@@ -229,7 +228,7 @@ EXTERN int usbmsc_exportluns(FAR void *handle);
 
 #if defined(CONFIG_USBDEV_COMPOSITE) && defined(CONFIG_USBMSC_COMPOSITE)
 struct usbdevclass_driver_s;
-EXTERN int usbmsc_classobject(FAR void *handle, FAR struct usbdevclass_driver_s **classdev);
+int usbmsc_classobject(FAR void *handle, FAR struct usbdevclass_driver_s **classdev);
 #endif
 
 /************************************************************************************
@@ -249,7 +248,7 @@ EXTERN int usbmsc_classobject(FAR void *handle, FAR struct usbdevclass_driver_s 
  *
  ***********************************************************************************/
 
-EXTERN void usbmsc_uninitialize(FAR void *handle);
+void usbmsc_uninitialize(FAR void *handle);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -2198,6 +2198,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
                tail = 0;
              }
         }
+
       ret = nbytes;
 
       /* Update the tail index (pehaps marking the buffer empty) */
