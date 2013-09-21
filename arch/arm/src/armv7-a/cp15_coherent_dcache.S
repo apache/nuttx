@@ -82,7 +82,7 @@
  *
  * Input Parameters:
  *   start - virtual start address of region
- *   end   - virtual end address of region
+ *   end   - virtual end address of region + 1
  *
  * Returned Value:
  *   None

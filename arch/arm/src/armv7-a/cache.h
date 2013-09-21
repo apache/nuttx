@@ -901,7 +901,7 @@ extern "C" {
  *
  * Input Parameters:
  *   start - virtual start address of region
- *   end   - virtual end address of region
+ *   end   - virtual end address of region + 1
  *
  * Returned Value:
  *   None
@@ -920,7 +920,7 @@ void cp15_coherent_dcache(uintptr_t start, uintptr_t end);
  *
  * Input Parameters:
  *   start - virtual start address of region
- *   end   - virtual end address of region
+ *   end   - virtual end address of region + 1
  *
  * Returned Value:
  *   None
@@ -954,7 +954,7 @@ void cp15_invalidate_dcache_all(void);
  *
  * Input Parameters:
  *   start - virtual start address of region
- *   end   - virtual end address of region
+ *   end   - virtual end address of region + 1
  *
  * Returned Value:
  *   None
@@ -972,7 +972,7 @@ void cp15_clean_dcache(uintptr_t start, uintptr_t end);
  *
  * Input Parameters:
  *   start - virtual start address of region
- *   end   - virtual end address of region
+ *   end   - virtual end address of region + 1
  *
  * Returned Value:
  *   None
