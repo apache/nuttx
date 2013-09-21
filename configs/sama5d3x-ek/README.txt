@@ -1115,7 +1115,7 @@ Configurations
           volume when it is removed.  But those callbacks are not used in
           this configuration.
 
-    7. Support the USB high-speed EHCI device (UDPHS) driver is enabled.
+    7. Support the USB high-speed device (UDPHS) driver is enabled.
        These are the relevant NuttX configuration settings:
 
        Device Drivers -> USB Device Driver Support
@@ -1294,11 +1294,9 @@ Configurations
         it runs out of NAND.
 
       OHCI WITH EHCI
-      2013-9-11:  OHCI does not work with EHCI.  At present, EHCI receives the
-        full- or low-speed devices and correctly hands them off to OHCI.  But, for
-        some unknown reason, the connection is lost and the port reverts to EHCI which
-        returns the port to OHCI.  This sequence of connection events occurs
-        indefinitiely.  OHCI does work without EHCI enabled, however.
+      2013-9-19:  OHCI works correctly with EHCI.  EHCI will handle high-speed
+        device connections; full- and low-speed device connections will be
+        handed-off to the OHCI HCD.
 
   hello:
     This configuration directory, performs the (almost) simplest of all
@@ -1633,7 +1631,7 @@ Configurations
     11. Support the USB high-speed EHCI host driver can be enabled by changing
         the NuttX configuration file as follows.  If EHCI is enabled by itself,
         then only high-speed devices can be supported.  If OHCI is also enabled,
-        then all low-, full-, and high speed devices should work.
+        then all low-, full-, and high speed devices will work.
 
         System Type -> ATSAMA5 Peripheral Support
           CONFIG_SAMA5_UHPHS=y                 : USB Host High Speed
@@ -1986,21 +1984,19 @@ Configurations
       2013-9-11: Basic HSCMI0/1 functionality (with DMA) has been verified.
 
       OHCI
-      2013-8-16: The OCHI configuration is now basically functional.
+      2013-8-16: The OCHI configuration is functional.
         Testing is not yet extensive, however:
         a) I have tested only control and bulk endpoints.  I still need
            to test interrupt endpoints.
 
       EHCI
-      2013-8-26:
-        The hand-off of full speed devices to OHCI does not work. In this
-        case, OHCI gets the port, but the port is reset, lost by OHCI and
-        returned to EHCI.  EHCI sees the full-speed port and hands it off to
-        OHCI and this sequence continues forever.
-      2013-8-28: EHCI is partially functional.
+      2013-8-28: EHCI is functional.
+      2013-9-19:  OHCI works correctly with EHCI.  EHCI will handle high-speed
+        device connections; full- and low-speed device connections will be
+        handed-off to the OHCI HCD.
 
       UDPHS
-      2013-9-5: The UDPHS driver is basically functional.
+      2013-9-5: The UDPHS driver is functional.
 
       I2C
       2013-9-12:  I have been unusuccessful getting the external serial

@@ -51,7 +51,7 @@
  * definitions will configure operational clocking.
  */
 
-#if !defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI)
+#if 1 /* #if !defined(CONFIG_SAMA5_OHCI) || defined(CONFIG_SAMA5_EHCI) */
 /* This is the configuration provided in the Atmel example code.  This setup results
  * in a CPU clock of 396MHz.
  *
