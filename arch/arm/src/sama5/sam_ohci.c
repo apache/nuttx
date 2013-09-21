@@ -792,8 +792,7 @@ static inline int sam_addbulked(struct sam_ed_s *ed)
   /* Add the new bulk ED to the head of the bulk list */
 
   ed->hw.nexted = sam_getreg(SAM_USBHOST_BULKHEADED);
-  cp15_clean_dcache((uintptr_t)ed,
-                    (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+  cp15_clean_dcache((uintptr_t)ed, (uintptr_t)ed + sizeof(struct ohci_ed_s));
 
   physed = sam_physramaddr((uintptr_t)ed);
   sam_putreg((uint32_t)physed, SAM_USBHOST_BULKHEADED);
@@ -943,18 +942,20 @@ static unsigned int sam_getinterval(uint8_t interval)
 #if !defined(CONFIG_USBHOST_INT_DISABLE) || !defined(CONFIG_USBHOST_ISOC_DISABLE)
 static void sam_setinttab(uint32_t value, unsigned int interval, unsigned int offset)
 {
+  uintptr_t inttbl;
   unsigned int i;
+
   for (i = offset; i < HCCA_INTTBL_WSIZE; i += interval)
     {
       /* Modify the table value */
 
       g_hcca.inttbl[i] = value;
-
-      /* Make sure that the modified table value is flushed to RAM */
-
-      cp15_clean_dcache((uintptr_t)&g_hcca.inttbl[i],
-                        (uintptr_t)&g_hcca.inttbl[i] + sizeof(uint32_t) - 1);
     }
+
+  /* Make sure that the modified table value is flushed to RAM */
+
+  inttbl = (uintptr_t)g_hcca.inttbl;
+  cp15_clean_dcache(inttbl, inttbl + sizeof(uint32_t)*HCCA_INTTBL_WSIZE);
 }
 #endif
 
@@ -1057,8 +1058,7 @@ static inline int sam_addinted(const FAR struct usbhost_epdesc_s *epdesc,
    */
 
   ed->hw.nexted = physhead;
-  cp15_clean_dcache((uintptr_t)ed,
-                    (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+  cp15_clean_dcache((uintptr_t)ed, (uintptr_t)ed + sizeof(struct ohci_ed_s));
 
   physed =  sam_physramaddr((uintptr_t)ed);
   sam_setinttab((uint32_t)physed, interval, offset);
@@ -1296,7 +1296,7 @@ static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
 
       ed->hw.ctrl      |= ED_CONTROL_K;
       cp15_clean_dcache((uintptr_t)ed,
-                        (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+                        (uintptr_t)ed + sizeof(struct ohci_ed_s));
 
       /* Get the tail ED for this root hub port */
 
@@ -1336,19 +1336,27 @@ static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
       if (buffer && buflen > 0)
         {
           cp15_clean_dcache((uintptr_t)buffer,
-                            (uintptr_t)buffer + buflen - 1);
+                            (uintptr_t)buffer + buflen);
+
+          /* REVISIT:  This cache invalidation solves some transfer
+           * problems... but I don't understand why?  Without this,
+           * the above clean seems to fail to flush all of the buffer.
+           */
+
+          cp15_invalidate_dcache((uintptr_t)buffer,
+                                 (uintptr_t)buffer + buflen);
         }
 
       cp15_clean_dcache((uintptr_t)tdtail,
-                        (uintptr_t)tdtail + sizeof(struct ohci_gtd_s) - 1);
+                        (uintptr_t)tdtail + sizeof(struct ohci_gtd_s));
       cp15_clean_dcache((uintptr_t)td,
-                        (uintptr_t)td + sizeof(struct ohci_gtd_s) - 1);
+                        (uintptr_t)td + sizeof(struct ohci_gtd_s));
 
       /* Resume processing of this ED */
 
       ed->hw.ctrl      &= ~ED_CONTROL_K;
       cp15_clean_dcache((uintptr_t)ed,
-                        (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+                        (uintptr_t)ed + sizeof(struct ohci_ed_s));
       ret               = OK;
     }
 
@@ -1446,9 +1454,9 @@ static int sam_ep0enqueue(struct sam_rhport_s *rhport)
   /* Flush the affected control ED and tail TD to RAM */
 
   cp15_clean_dcache((uintptr_t)edctrl,
-                    (uintptr_t)edctrl + sizeof(struct ohci_ed_s) - 1);
+                    (uintptr_t)edctrl + sizeof(struct ohci_ed_s));
   cp15_clean_dcache((uintptr_t)tdtail,
-                    (uintptr_t)tdtail + sizeof(struct ohci_gtd_s) - 1);
+                    (uintptr_t)tdtail + sizeof(struct ohci_gtd_s));
 
   /* ControlListEnable.  This bit is set to (re-)enable the processing of the
    * Control list.  Note: once enabled, it remains enabled and we may even
@@ -1529,7 +1537,7 @@ static void sam_ep0dequeue(struct sam_rhport_s *rhport)
       /* Flush the modified ED to RAM */
 
       cp15_clean_dcache((uintptr_t)preved,
-                        (uintptr_t)preved + sizeof(struct ohci_ed_s) - 1);
+                        (uintptr_t)preved + sizeof(struct ohci_ed_s));
     }
   else
     {
@@ -1882,10 +1890,10 @@ static void sam_wdh_bottomhalf(void)
 
 # if 0 /* Apparently insufficient */
   cp15_invalidate_dcache((uintptr_t)&g_hcca.donehead,
-                         (uintptr_t)&g_hcca.donehead + sizeof(uint32_t) - 1);
+                         (uintptr_t)&g_hcca.donehead + sizeof(uint32_t));
 #else
   cp15_invalidate_dcache((uintptr_t)&g_hcca,
-                         (uintptr_t)&g_hcca + sizeof(struct ohci_hcca_s) - 1);
+                         (uintptr_t)&g_hcca + sizeof(struct ohci_hcca_s));
 #endif
 
   /* Now read the done head */
@@ -1903,7 +1911,7 @@ static void sam_wdh_bottomhalf(void)
        */
 
       cp15_invalidate_dcache((uintptr_t)td,
-                             (uintptr_t)td + sizeof( struct ohci_gtd_s) - 1);
+                             (uintptr_t)td + sizeof( struct ohci_gtd_s));
 
       /* Get the ED in which this TD was enqueued */
 
@@ -1920,7 +1928,7 @@ static void sam_wdh_bottomhalf(void)
        */
 
       cp15_invalidate_dcache((uintptr_t)ed,
-                             (uintptr_t)ed + sizeof( struct ohci_ed_s) - 1);
+                             (uintptr_t)ed + sizeof( struct ohci_ed_s));
 
       /* Save the condition code from the (single) TD status/control
        * word.
@@ -2276,7 +2284,7 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr, uint8_t funcaddr,
   /* Flush the modified control ED to RAM */
 
   cp15_clean_dcache((uintptr_t)edctrl,
-                    (uintptr_t)edctrl + sizeof(struct ohci_ed_s) - 1);
+                    (uintptr_t)edctrl + sizeof(struct ohci_ed_s));
   sam_givesem(&g_ohci.exclsem);
 
   usbhost_vtrace2(OHCI_VTRACE2_EP0CONFIGURE,
@@ -2448,9 +2456,9 @@ static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
   /* Make sure these settings are flushed to RAM */
 
   cp15_clean_dcache((uintptr_t)ed,
-                    (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+                    (uintptr_t)ed + sizeof(struct ohci_ed_s));
   cp15_clean_dcache((uintptr_t)td,
-                    (uintptr_t)td + sizeof(struct ohci_gtd_s) - 1);
+                    (uintptr_t)td + sizeof(struct ohci_gtd_s));
 
   /* Now add the endpoint descriptor to the appropriate list */
 
@@ -2816,7 +2824,7 @@ static int sam_ctrlin(FAR struct usbhost_driver_s *drvr,
    */
 
   sam_givesem(&g_ohci.exclsem);
-  cp15_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + len - 1);
+  cp15_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + len);
   return ret;
 }
 
@@ -3005,7 +3013,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
       /* Invalidate the D cache to force the ED to be reloaded from RAM */
 
       cp15_invalidate_dcache((uintptr_t)ed,
-                             (uintptr_t)ed + sizeof(struct ohci_ed_s) - 1);
+                             (uintptr_t)ed + sizeof(struct ohci_ed_s));
 
       /* Check the TD completion status bits */
 
@@ -3018,7 +3026,7 @@ static int sam_transfer(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
           if (in)
             {
               cp15_invalidate_dcache((uintptr_t)buffer,
-                                     (uintptr_t)buffer + buflen - 1);
+                                     (uintptr_t)buffer + buflen);
             }
 
           ret = OK;
