@@ -1141,7 +1141,7 @@ Configurations
        control the CDC/ACM device.  It will add two new NSH commands:
 
          a. msconn will connect the USB serial device and export the AT25
-            to the the host, and
+            to the host, and
          b. msdis which will disconnect the USB serial device.
 
        Application Configuration -> Examples:
@@ -1155,10 +1155,10 @@ Configurations
        NOTE:  To prevent file system corruption, make sure that the AT25
        is un-mounted *before* exporting the mass storage device to the host:
 
-         nsh> umount /mnt
+         nsh> umount /mnt/at25
          nsh> mscon
 
-       The AT25 can be re-mount after the mass storage class is disconnected:
+       The AT25 can be re-mounted after the mass storage class is disconnected:
 
          nsh> msdis
          nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
