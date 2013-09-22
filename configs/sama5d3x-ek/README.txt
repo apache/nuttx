@@ -1011,7 +1011,11 @@ Configurations
          CONFIG_MTD=y                          : Enable MTD support
          CONFIG_MTD_AT25=y                     : Enable the AT25 driver
          CONFIG_AT25_SPIMODE=0                 : Use SPI mode 0
-         CONFIG_AT25_SPIFREQUENCY=20000000     : Use SPI frequency 20MHz
+         CONFIG_AT25_SPIFREQUENCY=10000000     : Use SPI frequency 10MHz
+
+       The AT25 is capable of higher SPI rates than this.  I have not
+       experimented a lot, but at 20MHz, the behavior is not the same with
+       all CM modules.  This lower rate gives more predictable performance.
 
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
@@ -1490,7 +1494,11 @@ Configurations
          CONFIG_MTD=y                          : Enable MTD support
          CONFIG_MTD_AT25=y                     : Enable the AT25 driver
          CONFIG_AT25_SPIMODE=0                 : Use SPI mode 0
-         CONFIG_AT25_SPIFREQUENCY=20000000     : Use SPI frequency 20MHz
+         CONFIG_AT25_SPIFREQUENCY=10000000     : Use SPI frequency 10MHz
+
+       The AT25 is capable of higher SPI rates than this.  I have not
+       experimented a lot, but at 20MHz, the behavior is not the same with
+       all CM modules.  This lower rate gives more predictable performance.
 
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
