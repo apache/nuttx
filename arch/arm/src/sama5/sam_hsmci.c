@@ -2361,7 +2361,7 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
            return SDIOWAIT_TIMEOUT;
         }
 
-      /* Start the watchdog timer.  I am not sure why this is, but I am\
+      /* Start the watchdog timer.  I am not sure why this is, but I am
        * currently seeing some additional delays when DMA is used.
        */
 
