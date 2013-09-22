@@ -103,11 +103,11 @@ cp15_clean_dcache:
 
 	/* Loop, cleaning each cache line by writing its contents to memory */
 
-4:
+1:
 	mcr		CP15_DCCMVAC(r0)		/* Clean data cache line to PoC by VA */
 	add		r0, r0, r2				/* R12=Next cache line */
 	cmp		r0, r1					/* Loop until all cache lines have been cleaned */
-	blo		4b
+	blo		1b
 
 	dsb
 	bx		lr
