@@ -222,7 +222,7 @@ static const struct usb_epdesc_s g_epintindesc =
     LSBYTE(CONFIG_CDCACM_EPINTIN_FSSIZE),       /* maxpacket (full speed) */
     MSBYTE(CONFIG_CDCACM_EPINTIN_FSSIZE)
   },
-  0xff                                          /* interval */
+  10                                            /* interval */
 };
 
 /* Data interface descriptor */

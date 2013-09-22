@@ -5613,4 +5613,8 @@
 	* arch/arm/src/armv7-a/cp15_clean_dcache.S and cp15_flush_dcache.S:
 	  fix an error in the alignment of addresses to cache line boundaries
 	  (2013-9-21).
+	* drivers/usbdev/cdcacm_desc.c:  Change the interval for the interrupt
+	  endpoint from 0xff (invalid) to 10.  This is not a critical change
+	  but will avoid a complaint from the Linux driver when it overrides
+	  the 0xff value (2013-9-22).
 
