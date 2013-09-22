@@ -2420,7 +2420,7 @@ static void sam_dma_interrupt(struct sam_usbdev_s *priv, int epno)
 
           /* This is an OUT endpoint.  Invalidate the data cache for
            * region that just completed DMA. This will force the
-           * buffer data to be reloaded from RAM. when it is accessed
+           * buffer data to be reloaded from RAM when it is accessed.
            */
 
           DEBUGASSERT(USB_ISEPOUT(privep->ep.eplog));

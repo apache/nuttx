@@ -110,11 +110,11 @@ cp15_invalidate_dcache:
 	mcrne	CP15_DCCIMVAC(r1)		/* Clean and invalidate data cache line by VA to PoC */
 
 	/* Loop, invalidating each D cache line */
-3:
+1:
 	mcr		CP15_DCIMVAC(r0)		/* Invalidate data cache line by VA to PoC */
 	add		r0, r0, r2				/* R12=Next cache line */
 	cmp		r0, r1					/* Loop until all cache lines have been invalidate */
-	blo		3b
+	blo		1b
 
 	dsb
 	bx		lr

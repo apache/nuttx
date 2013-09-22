@@ -96,6 +96,7 @@ cp15_invalidate_dcache_all:
 
 	mov		r1, #0					/* r1 = way loop counter */
 way_loop:
+
 	mov		r3, #0					/* r3 = set loop counter */
 set_loop:
 	mov		r2, r1, lsl #30			/* r2 = way loop counter << 30 */
@@ -104,6 +105,7 @@ set_loop:
 	add		r3, r3, #1				/* Increment set counter */
 	cmp		r0, r3					/* Last set? */
 	bne		set_loop				/* Keep looping if not */
+
 	add		r1, r1, #1				/* Increment the way counter */
 	cmp		r1, #4					/* Last way? (four ways assumed) */
 	bne		way_loop				/* Keep looping if not */

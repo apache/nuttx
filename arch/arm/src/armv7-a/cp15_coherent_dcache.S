@@ -120,11 +120,11 @@ cp15_coherent_dcache:
 	bic		r12, r0, r3				/* R12=aligned start address */
 
 	/* Loop, invalidating each I cache line to memory */
-2:
+1:
 	mcr		CP15_ICIMVAU(r12)		/* Invalidate instruction cache by VA to PoU */
 	add		r12, r12, r2			/* R12=Next cache line */
 	cmp		r12, r1					/* Loop until all cache lines have been invalidated */
-	blo		2b
+	blo		1b
 
 	mov		r0, #0
 	mcr		CP15_BPIALLIS(r0)		/* Invalidate entire branch predictor array Inner Shareable */
