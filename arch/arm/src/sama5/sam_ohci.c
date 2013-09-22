@@ -1337,14 +1337,6 @@ static int sam_enqueuetd(struct sam_rhport_s *rhport, struct sam_ed_s *ed,
         {
           cp15_clean_dcache((uintptr_t)buffer,
                             (uintptr_t)buffer + buflen);
-
-          /* REVISIT:  This cache invalidation solves some transfer
-           * problems... but I don't understand why?  Without this,
-           * the above clean seems to fail to flush all of the buffer.
-           */
-
-          cp15_invalidate_dcache((uintptr_t)buffer,
-                                 (uintptr_t)buffer + buflen);
         }
 
       cp15_clean_dcache((uintptr_t)tdtail,

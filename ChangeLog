@@ -5607,7 +5607,7 @@
 	  descriptive task names when starting the EHCI and OHCI monitor tasks
 	  (2013-9-20).
 	* arch/arm/src/sama5/sam_ohci.c:  Fix a place where DMA-related data
-	  needed to be flushed to data cache; Fix another where a virual address
+	  needed to be flushed to data cache; Fix another where a virtual address
 	  was being used in a register where a physical address was required
 	  (2013-9-20).
 	* arch/arm/src/armv7-a/cp15_clean_dcache.S and cp15_flush_dcache.S:
