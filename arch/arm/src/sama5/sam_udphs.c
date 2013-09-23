@@ -3683,7 +3683,7 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
   /* Check that endpoint is in Idle state */
 
   privep = (struct sam_ep_s *)ep;
-  DEBUGASSERT(privep->epstate == UDPHS_EPSTATE_IDLE && privep->dev);
+  DEBUGASSERT(/* privep->epstate == UDPHS_EPSTATE_IDLE && */ privep->dev);
 
   priv = (struct sam_usbdev_s *)privep->dev;
   epno = USB_EPNO(ep->eplog);

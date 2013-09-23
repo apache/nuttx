@@ -131,6 +131,8 @@
  * REVISIT:  Is memory always on IF0?
  */
 
+#define HSMCI_DMA_CHKSIZE HSMCI_DMA_CHKSIZE_1
+
 #define DMA_FLAGS(pid) \
   (((pid) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF2 | \
    DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
@@ -1279,7 +1281,6 @@ static void sam_notransfer(struct sam_dev_s *priv)
   /* Clear the block size and count */
 
   sam_putreg(priv, 0, SAM_HSMCI_BLKR_OFFSET);
-
 }
 
 /****************************************************************************
@@ -2555,7 +2556,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   /* Enable DMA handshaking */
 
-  sam_putreg(priv, HSMCI_DMA_DMAEN, SAM_HSMCI_DMA_OFFSET);
+  sam_putreg(priv, HSMCI_DMA_DMAEN | HSMCI_DMA_CHKSIZE, SAM_HSMCI_DMA_OFFSET);
   sam_xfrsample(priv, SAMPLENDX_BEFORE_ENABLE);
 
   /* Start the DMA */
@@ -2618,7 +2619,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Enable DMA handshaking */
 
-  sam_putreg(priv, HSMCI_DMA_DMAEN, SAM_HSMCI_DMA_OFFSET);
+  sam_putreg(priv, HSMCI_DMA_DMAEN | HSMCI_DMA_CHKSIZE, SAM_HSMCI_DMA_OFFSET);
   sam_xfrsample(priv, SAMPLENDX_BEFORE_ENABLE);
 
   /* Start the DMA */
