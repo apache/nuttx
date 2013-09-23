@@ -118,6 +118,22 @@
 #  endif
 #endif
 
+/* TX-DMA is not reliable.  Often, the TX DMA will hang after transferring 64 bytes or so.
+ * I don't have any clue why at the moment.  This option suppresses TX DMA (only).
+ */
+
+#define HSCMI_NOTXDMA            1
+
+/* There are two ways to DMA:
+ *
+ *   (1) Use the FIFO address, incrementing the address on the HSMCI side
+ *   (2) Use the TDR/RDR address with no address increment
+ *
+ * Both work.
+ */
+
+#undef HSCMI_FIFODMA
+
 /* Timing */
 
 #define HSMCI_CMDTIMEOUT         (100000)
@@ -127,19 +143,36 @@
 
 #define HSMCI_DTIMER_DATATIMEOUT (0x000fffff)
 
-/* DMA configuration flags
+/* DMA configuration flags.  There are two ways to to this:
+ *
+ *   (1) Use the FIFO address, incrementing the address on the HSMCI side
+ *   (2) Use the TDR/RDR address with no address increment
+ *
  * REVISIT:  Is memory always on IF0?
  */
 
 #define HSMCI_DMA_CHKSIZE HSMCI_DMA_CHKSIZE_1
 
-#define DMA_FLAGS(pid) \
-  (((pid) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF2 | \
-   DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
-   DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-   ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
-   DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
-   DMACH_FLAG_MEMCHUNKSIZE_4)
+#ifdef HSCMI_FIFODMA
+#  define DMA_FLAGS(pid) \
+    (((pid) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF2 | \
+     DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
+     DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHINCREMENT | \
+     DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+     ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+     DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
+     DMACH_FLAG_MEMCHUNKSIZE_4)
+
+#else
+#  define DMA_FLAGS(pid) \
+    (((pid) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF2 | \
+     DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
+     DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+     ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+     DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
+     DMACH_FLAG_MEMCHUNKSIZE_4)
+
+#endif
 
 /* Status errors:
  *
@@ -261,6 +294,11 @@
 #  define DEBUG_NCMDSAMPLES         2
 #endif
 
+/* Some semi-standard definitions */
+
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -315,7 +353,8 @@ struct sam_dev_s
   volatile sdio_eventset_t wkupevent; /* The event that caused the wakeup */
   WDOG_ID            waitwdog;   /* Watchdog that handles event timeouts */
   uint8_t            hsmci;      /* HSMCI (0, 1, or 2) */
-  bool               dmabusy;    /* TRUE: DMA is in progress */
+  bool               dmabusy;    /* TRUE: DMA transfer is in progress (not used) */
+  bool               txbusy;     /* TRUE: TX transfer is in progress (for delay calculation) */
 
   /* Callback support */
 
@@ -350,6 +389,7 @@ struct sam_dev_s
    bool              cmdinitialized;
 #endif
 #ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
+  uint8_t            smplset;
   struct sam_xfrregs_s xfrsamples[DEBUG_NDMASAMPLES];
 #endif
 #ifdef CONFIG_SAMA5_HSMCI_CMDDEBUG
@@ -935,6 +975,7 @@ static void sam_xfrsample(struct sam_dev_s *priv, int index)
   sam_dmasample(priv->dma, &regs->dma);
 #endif
   sam_hsmcisample(priv, &regs->hsmci);
+  priv->smplset |= (1 << index);
 }
 #endif
 
@@ -949,6 +990,7 @@ static void sam_xfrsample(struct sam_dev_s *priv, int index)
 #ifdef CONFIG_SAMA5_HSMCI_XFRDEBUG
 static void sam_xfrsampleinit(struct sam_dev_s *priv)
 {
+  priv->smplset = 0;
   memset(priv->xfrsamples, 0xff,
          DEBUG_NDMASAMPLES * sizeof(struct sam_xfrregs_s));
 
@@ -992,20 +1034,40 @@ static void  sam_xfrdump(struct sam_dev_s *priv)
   if (priv->xfrinitialized)
 #endif
     {
-      sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_BEFORE_SETUP],
-                     "Before setup");
+      if ((priv->smplset & (1 << SAMPLENDX_BEFORE_SETUP)) != 0)
+        {
+          sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_BEFORE_SETUP],
+                         "Before setup");
+        }
 #ifdef CONFIG_DEBUG_DMA
-      sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_BEFORE_ENABLE],
-                     "Before DMA enable");
+      if ((priv->smplset & (1 << SAMPLENDX_BEFORE_SETUP)) != 0)
+        {
+          sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_BEFORE_ENABLE],
+                         "Before DMA enable");
+        }
 #endif
-      sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_AFTER_SETUP],
-                     "After setup");
-      sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_END_TRANSFER],
-                     "End of transfer");
+
+      if ((priv->smplset & (1 << SAMPLENDX_BEFORE_SETUP)) != 0)
+        {
+          sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_AFTER_SETUP],
+                         "After setup");
+        }
+
+      if ((priv->smplset & (1 << SAMPLENDX_BEFORE_SETUP)) != 0)
+        {
+          sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_END_TRANSFER],
+                         "End of transfer");
+        }
+
 #ifdef CONFIG_DEBUG_DMA
-      sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_DMA_CALLBACK],
-                     "DMA Callback");
+      if ((priv->smplset & (1 << SAMPLENDX_BEFORE_SETUP)) != 0)
+        {
+          sam_xfrdumpone(priv, &priv->xfrsamples[SAMPLENDX_DMA_CALLBACK],
+                         "DMA Callback");
+        }
 #endif
+
+      priv->smplset        = 0;
 #ifdef CONFIG_SAMA5_HSMCI_CMDDEBUG
       priv->xfrinitialized = false;
 #endif
@@ -1233,7 +1295,7 @@ static void sam_endtransfer(struct sam_dev_s *priv,
 
   /* Make sure that the DMA is stopped (it will be stopped automatically
    * on normal transfers, but not necessarily when the transfer terminates
-   * on an error condition.
+   * on an error condition).
    */
 
   sam_dmastop(priv->dma);
@@ -1526,6 +1588,7 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
   priv->waitmask   = 0;      /* Interrupt enables for event waiting */
   priv->wkupevent  = 0;      /* The event that caused the wakeup */
   priv->dmabusy    = false;  /* No DMA in progress */
+  priv->txbusy     = false;  /* No TX in progress */
   wd_cancel(priv->waitwdog); /* Cancel any timeouts */
 
   /* Interrupt mode data transfer support */
@@ -1949,6 +2012,7 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
 
   sam_dmastop(priv->dma);
   priv->dmabusy = false;
+  priv->txbusy  = false;
 
   /* Disable the DMA handshaking */
 
@@ -2366,10 +2430,11 @@ static sdio_eventset_t sam_eventwait(FAR struct sdio_dev_s *dev,
        * currently seeing some additional delays when DMA is used.
        */
 
-#warning REVISIT: This should not be necessary
-      if (priv->dmabusy)
+      if (priv->txbusy)
         {
-          timeout += 500;
+          /* TX transfers can be VERY long in the worst case */
+
+          timeout = MAX(5000, timeout);
         }
 
       delay = (timeout + (MSEC_PER_TICK-1)) / MSEC_PER_TICK;
@@ -2542,7 +2607,11 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
    * in RAM.
    */
 
+#ifdef HSCMI_FIFODMA
+  paddr = hsmci_physregaddr(priv, SAM_HSMCI_FIFO_OFFSET);
+#else
   paddr = hsmci_physregaddr(priv, SAM_HSMCI_RDR_OFFSET);
+#endif
   maddr = sam_physramaddr((uintptr_t)buffer);
 
   /* Setup register sampling */
@@ -2562,6 +2631,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   /* Start the DMA */
 
   priv->dmabusy = true;
+  priv->txbusy  = false;
   sam_dmastart(priv->dma, sam_dmacallback, priv);
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
@@ -2596,6 +2666,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
                           FAR const uint8_t *buffer, size_t buflen)
 {
+#ifndef HSCMI_NOTXDMA
   struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t paddr;
   uint32_t maddr;
@@ -2605,7 +2676,11 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   /* Physical address of the HSCMI TDR registr */
 
+#ifdef HSCMI_FIFODMA
+  paddr = hsmci_physregaddr(priv, SAM_HSMCI_FIFO_OFFSET);
+#else
   paddr = hsmci_physregaddr(priv, SAM_HSMCI_TDR_OFFSET);
+#endif
   maddr = sam_physramaddr((uintptr_t)buffer);
 
   /* Setup register sampling */
@@ -2625,6 +2700,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
   /* Start the DMA */
 
   priv->dmabusy = true;
+  priv->txbusy  = true;
   sam_dmastart(priv->dma, sam_dmacallback, priv);
 
   /* Configure transfer-related interrupts.  Transfer interrupts are not
@@ -2633,7 +2709,60 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
    */
 
   sam_xfrsample(priv, SAMPLENDX_AFTER_SETUP);
-  sam_configxfrints(priv, HSMCI_DMARECV_INTS);
+  sam_configxfrints(priv, HSMCI_DMASEND_INTS);
+
+#else
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
+  unsigned int nwords;
+  const uint32_t *ptr;
+  uint32_t sr;
+
+  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+
+  /* Disable DMA handshaking */
+
+  sam_putreg(priv, 0, SAM_HSMCI_DMA_OFFSET);
+  sam_configxfrints(priv, HSMCI_DMASEND_INTS);
+
+  priv->dmabusy = false;
+  priv->txbusy  = true;
+
+  /* Nullify register sampling */
+
+  sam_xfrsampleinit(priv);
+
+  /* Copy each word to the TX FIFO
+   *
+   * REVISIT:  If TX data underruns occur, then it may be necessary to
+   * disable pre-emption around this loop.
+   */
+
+  nwords = (buflen + 3) >> 2;
+  ptr = (const uint32_t *)buffer;
+
+  while (nwords > 0)
+    {
+      /* Check the HSMCI status */
+
+      sr = sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
+      if ((sr & HSMCI_DATA_DMASEND_ERRORS) != 0)
+        {
+          /* Some fatal error has occurred */
+
+          fdbg("ERROR: sr %08x\n", sr);
+          return -EIO;
+        }
+      else if ((sr & HSMCI_INT_TXRDY) != 0)
+        {
+          /* TXRDY -- transfer another word */
+
+          sam_putreg(priv, *ptr++, SAM_HSMCI_TDR_OFFSET);
+          nwords--;
+        }
+    }
+
+#endif
   return OK;
 }
 

@@ -5619,4 +5619,6 @@
 	  the 0xff value (2013-9-22).
 	* configs/zkit-arm-1769:  LED1 is not user controllable after booting.
 	  From Rashid Fatah (2013-9-23).
+	* arch/arm/src/sama5/sam_hsmci.c:  TX DMA disabled.  It is just not
+	  reliable. No idea why.  RX DMA is still used (2013-9-23).
 

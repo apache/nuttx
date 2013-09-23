@@ -829,7 +829,7 @@ struct dma_crc16_linklist_s
   uint32_t ctrla;   /*  8 Control A value */
   uint32_t ctrlb;   /* 12 Control B value */
   uint32_t dscr;    /* 16 Next descriptor address */
-  uint32_t crc16;   /* 10 Next descriptor address */
+  uint32_t crc16;   /* 20 CRC */
 };
 
 /****************************************************************************************
