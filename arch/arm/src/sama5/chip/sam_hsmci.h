@@ -348,7 +348,6 @@
 #define HSMCI_WPSR_VSRC_SHIFT         (8)       /* Bits 8-23: Write Protection Violation Source */
 #define HSMCI_WPSR_VSRC_MASK          (0xffff << HSMCI_WPSR_VSRC_SHIFT)
 
-
 /****************************************************************************************
  * Public Types
  ****************************************************************************************/
