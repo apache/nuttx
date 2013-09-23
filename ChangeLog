@@ -5617,4 +5617,6 @@
 	  endpoint from 0xff (invalid) to 10.  This is not a critical change
 	  but will avoid a complaint from the Linux driver when it overrides
 	  the 0xff value (2013-9-22).
+	* configs/zkit-arm-1769:  LED1 is not user controllable after booting.
+	  From Rashid Fatah (2013-9-23).
 
