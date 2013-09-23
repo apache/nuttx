@@ -161,16 +161,22 @@
  * on board the ZKIT-ARM-1769.  The following definitions
  * describe how NuttX controls the LEDs:
  */
-                                      /* LED1 LED2 */
-#define LED_STARTED                0  /*  OFF  OFF = Still initializing */
-#define LED_HEAPALLOCATE           0  /*  OFF  OFF = Still initializing */
-#define LED_IRQSENABLED            0  /*  OFF  OFF = Still initializing */
-#define LED_STACKCREATED           1  /*  ON   OFF = Initialization complete */
-#define LED_INIRQ                  2  /*  N/C  ON  = In an interrupt handler */
-#define LED_SIGNAL                 2  /*  N/C  ON  = In a signal handler (glowing) */
-#define LED_ASSERTION              2  /*  N/C  ON  = In an assertion */
-#define LED_PANIC                  2  /*  N/C  ON  = Oops! We crashed. (flashing) */
-#define LED_IDLE                   3  /*  OFF  N/C = LPC17 in sleep mode (LED1 glowing) */
+
+                                      /* LED1   LED2 */
+#define LED_STARTED                0  /* OFF    OFF  */
+#define LED_HEAPALLOCATE           1  /* ON     OFF  */
+#define LED_IRQSENABLED            2  /* OFF    ON   */
+#define LED_STACKCREATED           3  /* OFF    OFF  */
+
+/* After the system is booted, this logic will no longer use LED 1.
+ * LED 1 is available for use by application software using lpc17_led
+ * (prototyped below)
+ */
+                                      /* LED1   LED2 */
+#define LED_INIRQ                  4  /*  NC     ON  (momentary) */
+#define LED_SIGNAL                 5  /*  NC     ON  (momentary) */
+#define LED_ASSERTION              6  /*  NC     ON  (momentary) */
+#define LED_PANIC                  7  /*  NC     ON  (1Hz flashing) */
 
 /* Button definitions ***************************************************************/
 /* The ZKIT-ARM-1769 supports several buttons.  All will read "1" when open and "0"
@@ -231,7 +237,7 @@
 
 #define GPIO_CAN1_RD       GPIO_CAN1_RD_1
 #define GPIO_CAN1_TD       GPIO_CAN1_TD_1
-#define GPIO_CAN2_RD       GPIO_CAN2_RD_2 
+#define GPIO_CAN2_RD       GPIO_CAN2_RD_2
 #define GPIO_CAN2_TD       GPIO_CAN2_TD_2
 #define GPIO_I2C1_SDA      GPIO_I2C0_SDA
 #define GPIO_I2C1_SCL      GPIO_I2C0_SCL
@@ -335,6 +341,18 @@ extern "C" {
  ************************************************************************************/
 
 void lpc17_boardinitialize(void);
+
+/************************************************************************************
+ * Name: lpc17_led
+ *
+ * Description:
+ *   Once the system has booted, these functions can be used to control LEDs 1
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+void lpc17_led(int lednum, int state);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
