@@ -192,9 +192,10 @@ static const uint32_t g_fifocfg[3] =
  * before each DMA transfer in order to map the peripheral IDs to the
  * correct channel.  This must be done because the channel can change with
  * the direction of the transfer.
- *
- * DMA controller 0, RX DMA:
  */
+
+#ifdef CONFIG_SAMA5_DMAC0
+/* DMA controller 0, RX DMA: */
 
 static const struct sam_pidmap_s g_dmac0_rxchan[] =
 {
@@ -210,7 +211,6 @@ static const struct sam_pidmap_s g_dmac0_rxchan[] =
 };
 #define NDMAC0_RXCHANNELS (sizeof(g_dmac0_rxchan) / sizeof(struct sam_pidmap_s))
 
-#ifdef CONFIG_SAMA5_DMAC0
 /* DMA controller 0, TX DMA: */
 
 static const struct sam_pidmap_s g_dmac0_txchan[] =
