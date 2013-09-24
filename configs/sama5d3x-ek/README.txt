@@ -1152,20 +1152,31 @@ Configurations
          CONFIG_EXAMPLES_USBMSC=y              : Enable the USBMSC example
          CONFIG_EXAMPLES_USBMSC_NLUNS=1        : One LUN
          CONFIG_EXAMPLES_USBMSC_DEVMINOR1=0    : Minor device zero
-         CONFIG_EXAMPLES_USBMSC_DEVPATH1="/dev/mmcsd0"
+         CONFIG_EXAMPLES_USBMSC_DEVPATH1="/dev/mtdblock0"
                                                : Use a single, LUN:  The AT25
                                                : block driver.
 
-       NOTE:  To prevent file system corruption, make sure that the AT25
-       is un-mounted *before* exporting the mass storage device to the host:
+       NOTES:
 
-         nsh> umount /mnt/at25
-         nsh> mscon
+       a. To prevent file system corruption, make sure that the AT25 is un-
+          mounted *before* exporting the mass storage device to the host:
 
-       The AT25 can be re-mounted after the mass storage class is disconnected:
+            nsh> umount /mnt/at25
+            nsh> mscon
 
-         nsh> msdis
-         nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
+          The AT25 can be re-mounted after the mass storage class is disconnected:
+
+           nsh> msdis
+           nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
+
+       b. If you change the value CONFIG_EXAMPLES_USBMSC_DEVPATH1, then you
+          can export other file systems:
+
+           "/dev/mmcsd1" will export the HSMCI1 microSD
+           "/dev/mmcsd0" will export the HSMCI0 full-size SD slot
+           "/dev/ram0" could even be used to export a RAM disk.  But you would
+             first have to use mkrd to create the RAM disk and mkfatfs to put
+             a FAT file system on it.
 
     8. The USB high-speed EHCI and the low-/full- OHCI host drivers are supported
        in this configuration.
@@ -1301,6 +1312,10 @@ Configurations
       2013-9-19:  OHCI works correctly with EHCI.  EHCI will handle high-speed
         device connections; full- and low-speed device connections will be
         handed-off to the OHCI HCD.
+
+      UDPHS
+      2013-9-23: The exports AT25 (or RAM disk) works fine with Linux but does
+        not bring up Windows Explorer with Windows.  No idea why yet.
 
   hello:
     This configuration directory, performs the (almost) simplest of all
@@ -1687,11 +1702,6 @@ Configurations
           CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
           CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
           CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
-          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output
-          CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
-          CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
-          CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
-          CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
 
        NOTE: If USB debug output is also enabled, both outpus will appear
        on the serial console.  However, the debug output will be
