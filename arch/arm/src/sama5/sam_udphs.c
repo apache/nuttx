@@ -3588,32 +3588,36 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
   privep->zlpsent   = false;
   flags             = irqsave();
 
-  /* If we are stalled, then drop all requests on the floor */
-
-  if (privep->stalled)
-    {
-      sam_req_abort(privep, privreq, -EBUSY);
-      ulldbg("ERROR: stalled\n");
-      ret = -EBUSY;
-    }
-
   /* Handle IN (device-to-host) requests.  NOTE:  If the class device is
    * using the bi-directional EP0, then we assume that they intend the EP0
-   * IN functionality (EP0 OUT data receipt does not use requests).
+   * IN functionality (EP0 SETUP OUT data receipt does not use requests).
    */
 
-  else if (USB_ISEPIN(ep->eplog) || epno == EP0)
+  if (USB_ISEPIN(ep->eplog) || epno == EP0)
     {
-      /* Add the new request to the request queue for the IN endpoint */
+      /* If the endpoint is stalled, then fail any attempts to write
+       * through the endpoint.
+       */
 
-      sam_req_enqueue(&privep->reqq, privreq);
-      usbtrace(TRACE_INREQQUEUED(epno), req->len);
-
-      /* If the IN endpoint is IDLE, then transfer the data now */
-
-      if (privep->epstate == UDPHS_EPSTATE_IDLE)
+      if (privep->stalled)
         {
-          ret = sam_req_write(priv, privep);
+          sam_req_abort(privep, privreq, -EBUSY);
+          ulldbg("ERROR: stalled\n");
+          ret = -EPERM;
+        }
+      else
+        {
+          /* Add the new request to the request queue for the IN endpoint */
+
+          sam_req_enqueue(&privep->reqq, privreq);
+          usbtrace(TRACE_INREQQUEUED(epno), req->len);
+
+          /* If the IN endpoint is IDLE, then transfer the data now */
+
+          if (privep->epstate == UDPHS_EPSTATE_IDLE)
+            {
+              ret = sam_req_write(priv, privep);
+            }
         }
     }
 
@@ -3750,12 +3754,22 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
         {
           usbtrace(TRACE_EPSTALL, epno);
 
-          /* Abort the current transfer if necessary */
+          /* If this is an IN endpoint (or endpoint 0), then cancel all
+           * of the pending write requests.
+           */
 
-          if (privep->epstate == UDPHS_EPSTATE_SENDING ||
-              privep->epstate == UDPHS_EPSTATE_RECEIVING)
+          if (epno == 0 || USB_ISEPIN(ep->eplog))
             {
-              sam_req_complete(privep, -EIO);
+              sam_req_cancel(privep, -EPERM);
+            }
+
+          /* Otherwise, it is an OUT endpoint.  Complete any read request
+           * currently in progress (it will get requeued immediately).
+           */
+
+          else if (privep->epstate == UDPHS_EPSTATE_RECEIVING)
+            {
+              sam_req_complete(privep, -EPERM);
             }
 
           /* Put endpoint into stalled state */
