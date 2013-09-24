@@ -68,7 +68,7 @@ void sched_foreach(sched_foreach_t handler, FAR void *arg)
   irqstate_t flags = irqsave();
   int ndx;
 
-  /* Verify that the PID is within range */
+  /* Vist each active task */
 
   for (ndx = 0; ndx < CONFIG_MAX_TASKS; ndx++)
     {
