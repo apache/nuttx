@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/avr/src/avr/avr_internal.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -104,7 +104,7 @@ extern uint16_t g_idle_topstack;
  *
  ************************************************************************************/
 
-extern void up_copystate(uint8_t *dest, uint8_t *src);
+void up_copystate(uint8_t *dest, uint8_t *src);
 
 /************************************************************************************
  * Name:  up_fullcontextrestore
@@ -114,7 +114,7 @@ extern void up_copystate(uint8_t *dest, uint8_t *src);
  *
  ************************************************************************************/
 
-extern void up_fullcontextrestore(uint8_t *restoreregs) noreturn_function;
+void up_fullcontextrestore(uint8_t *restoreregs) noreturn_function;
 
 /************************************************************************************
  * Name:  up_switchcontext
@@ -124,7 +124,7 @@ extern void up_fullcontextrestore(uint8_t *restoreregs) noreturn_function;
  *
  ************************************************************************************/
 
-extern void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
+void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
 
 /************************************************************************************
  * Name:  up_doirq
@@ -134,7 +134,7 @@ extern void up_switchcontext(uint8_t *saveregs, uint8_t *restoreregs);
  *
  ************************************************************************************/
 
-extern uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
+uint8_t *up_doirq(uint8_t irq, uint8_t *regs);
 
 /************************************************************************************
  * Name:  avr_spiselect, avr_spitatus, and avr_spicmddata
@@ -167,31 +167,11 @@ struct spi_dev_s;
 enum spi_dev_e;
 
 #ifdef CONFIG_AVR_SPI
-extern void  avr_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-extern uint8_t avr_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  avr_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t avr_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-extern int avr_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int avr_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
-#endif
-
-/****************************************************************************
- * Name: up_check_stack
- *
- * Description:
- *   Determine (approximately) how much stack has been used be searching the
- *   stack memory for a high water mark.  That is, the deepest level of the
- *   stack that clobbered some recognizable marker in the stack memory.
- *
- * Input Parameters:
- *   None
- *
- * Returned value:
- *   The estimated amount of stack space used.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
-extern size_t up_check_stack(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

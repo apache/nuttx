@@ -126,17 +126,17 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 
 /* Defined in files with the same name as the function */
 
-extern void up_boot(void);
-extern void up_irqinitialize(void);
+void up_boot(void);
+void up_irqinitialize(void);
 #ifdef CONFIG_ARCH_DMA
-extern void weak_function up_dmainitialize(void);
+void weak_function up_dmainitialize(void);
 #endif
-extern void up_sigdeliver(void);
-extern int  up_timerisr(int irq, uint32_t *regs);
-extern void up_lowputc(char ch);
-extern void up_puts(const char *str);
-extern void up_lowputs(const char *str);
-extern void up_dumpstate(void);
+void up_sigdeliver(void);
+int  up_timerisr(int irq, uint32_t *regs);
+void up_lowputc(char ch);
+void up_puts(const char *str);
+void up_lowputs(const char *str);
+void up_dumpstate(void);
 
 /* Defined in common/up_allocateheap.c or chip/xxx_allocateheap.c */
 
@@ -152,13 +152,13 @@ void up_addregion(void);
  * before the OS gets started (clocks, console, LEDs, etc.)
  */
 
-extern void up_lowinit(void);
+void up_lowinit(void);
 
 /* Defined in chip/xxx_serial.c */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-extern void up_earlyserialinit(void);
-extern void up_serialinit(void);
+void up_earlyserialinit(void);
+void up_serialinit(void);
 #else
 # define up_earlyserialinit()
 # define up_serialinit()
@@ -167,7 +167,7 @@ extern void up_serialinit(void);
 /* Defined in drivers/lowconsole.c */
 
 #ifdef CONFIG_DEV_LOWCONSOLE
-extern void lowconsole_init(void);
+void lowconsole_init(void);
 #else
 # define lowconsole_init()
 #endif
@@ -179,8 +179,8 @@ extern void up_timerinit(void);
 /* Defined in configs/<board-name>/src/up_leds.c */
 
 #ifdef CONFIG_ARCH_LEDS
-extern void up_ledon(int led);
-extern void up_ledoff(int led);
+void up_ledon(int led);
+void up_ledoff(int led);
 #else
 # define up_ledon(led)
 # define up_ledoff(led)
@@ -189,7 +189,7 @@ extern void up_ledoff(int led);
 /* Defined in chip/xxx_ethernet.c */
 
 #ifdef CONFIG_NET
-extern void up_netinitialize(void);
+void up_netinitialize(void);
 #else
 # define up_netinitialize()
 #endif
@@ -197,14 +197,12 @@ extern void up_netinitialize(void);
 /* Defined in chip/xxx_usbdev.c */
 
 #ifdef CONFIG_USBDEV
-extern void up_usbinitialize(void);
-extern void up_usbuninitialize(void);
+void up_usbinitialize(void);
+void up_usbuninitialize(void);
 #else
 # define up_usbinitialize()
 # define up_usbuninitialize()
 #endif
 
 #endif /* __ASSEMBLY__ */
-
 #endif  /* __UP_INTERNAL_H */
-

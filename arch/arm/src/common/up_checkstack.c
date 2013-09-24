@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/common/up_checkstack.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -134,14 +134,19 @@ size_t up_check_tcbstack(FAR struct tcb_s *tcb)
   return mark*4;
 }
 
+ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
+{
+  return (ssize_t)tcb->adj_stack_size - (ssize_t)up_check_tcbstack(tcb);
+}
+
 size_t up_check_stack(void)
 {
   return up_check_tcbstack((FAR struct tcb_s*)g_readytorun.head);
 }
 
-size_t up_check_stack_remain(void)
+ssize_t up_check_stack_remain(void)
 {
-  return ((FAR struct tcb_s*)g_readytorun.head)->adj_stack_size - up_check_tcbstack((FAR struct tcb_s*)g_readytorun.head);
+  return up_check_tcbstack_remain((FAR struct tcb_s*)g_readytorun.head);
 }
 
 #endif /* CONFIG_DEBUG && CONFIG_DEBUG_STACK */

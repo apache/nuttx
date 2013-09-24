@@ -484,28 +484,6 @@ void up_usbuninitialize(void);
 void up_rnginitialize(void);
 #endif
 
-/****************************************************************************
- * Name: up_check_stack
- *
- * Description:
- *   Determine (approximately) how much stack has been used be searching the
- *   stack memory for a high water mark.  That is, the deepest level of the
- *   stack that clobbered some recognizable marker in the stack memory.
- *
- * Input Parameters:
- *   None
- *
- * Returned value:
- *   The estimated amount of stack space used.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
-size_t up_check_stack(void);
-size_t up_check_tcbstack(FAR struct tcb_s);
-size_t up_check_tcbstack_remain(FAR struct tcb_s);
-#endif
-
 #endif /* __ASSEMBLY__ */
 
 #endif  /* __ARCH_ARM_SRC_COMMON_UP_INTERNAL_H */
