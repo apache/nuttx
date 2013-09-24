@@ -85,7 +85,7 @@
 /****************************************************************************
  * Name: memset32
  *
- * On most larger then 8 bit archs this will need to be word aligned so
+ * On most larger than 8 bit archs this will need to be word aligned so
  * so maybe some checks should be put in place?
  *
  ****************************************************************************/

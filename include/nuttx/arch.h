@@ -987,6 +987,30 @@ void sched_process_timer(void);
 void irq_dispatch(int irq, FAR void *context);
 
 /****************************************************************************
+ * Name: up_check_stack and friends
+ *
+ * Description:
+ *   Determine (approximately) how much stack has been used be searching the
+ *   stack memory for a high water mark.  That is, the deepest level of the
+ *   stack that clobbered some recognizable marker in the stack memory.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned value:
+ *   The estimated amount of stack space used.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+struct tcb_s;
+size_t up_check_tcbstack(FAR struct tcb_s *tcb);
+ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb);
+size_t up_check_stack(void);
+ssize_t up_check_stack_remain(void);
+#endif
+
+/****************************************************************************
  * Board-specific button interfaces exported by the board-specific logic
  ****************************************************************************/
 

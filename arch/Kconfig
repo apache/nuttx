@@ -17,6 +17,7 @@ config ARCH_ARM
 	bool "ARM"
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_VFORK
+	select ARCH_HAVE_STACKCHECK
 	---help---
 		The ARM architectures
 

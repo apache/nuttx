@@ -312,6 +312,10 @@ config DEBUG
 		Note that enabling this option by itself does not produce debug output.
 		Debug output must also be selected on a subsystem-by-subsystem basis.
 
+config ARCH_HAVE_STACKCHECK
+	bool
+	default n
+
 if DEBUG
 config DEBUG_VERBOSE
 	bool "Enable Debug Verbose Output"
@@ -401,6 +405,13 @@ config DEBUG_SYSCALL
 	---help---
 		Enable very low level output related to system calls.  This gives
 		you basically a poor man's version of strace.
+
+config DEBUG_STACK
+	bool "Stack usage debug hooks"
+	default n
+	depends on ARCH_HAVE_STACKCHECK
+	---help---
+		Enable hooks to check stack usage.  Only supported by a few architectures.
 
 comment "Driver Debug Options"
 
