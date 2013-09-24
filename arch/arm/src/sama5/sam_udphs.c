@@ -956,7 +956,8 @@ static void sam_dma_wrsetup(struct sam_usbdev_s *priv, struct sam_ep_s *privep,
 
   /* How many bytes remain to be transferred in the request? */
 
-  remaining = privreq->req.len - privreq->req.xfrd;
+  remaining = (int)privreq->req.len - (int)privreq->req.xfrd;
+  DEBUGASSERT(remaining >= 0 && remaining <= (int)privreq->req.len);
 
   /* If there are no bytes to send, then send a zero length packet */
 
@@ -1020,8 +1021,9 @@ static void sam_dma_rdsetup(struct sam_usbdev_s *priv,
 
   /* How many more bytes can we append to the request buffer? */
 
-  remaining = privreq->req.len - privreq->req.xfrd;
-  DEBUGASSERT(remaining > 0 && privep->epstate == UDPHS_EPSTATE_RECEIVING);
+  remaining = (int)privreq->req.len - (int)privreq->req.xfrd;
+  DEBUGASSERT(remaining > 0 && remaining <= (int)privreq->req.len &&
+              privep->epstate == UDPHS_EPSTATE_RECEIVING);
 
   /* Clip the DMA transfer size to the size available in the user buffer */
 

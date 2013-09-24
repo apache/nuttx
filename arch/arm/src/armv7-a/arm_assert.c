@@ -200,6 +200,13 @@ static void up_dumpstate(void)
    * stack?
    */
 
+  if (sp > istackbase || sp <= istackbase - istacksize)
+    {
+      if (up_interrupt_context())
+        {
+          lldbg("ERROR: Stack pointer is not within interrupt stack\n");
+        }
+    }
   if (sp <= istackbase && sp > istackbase - istacksize)
     {
       /* Yes.. dump the interrupt stack */
@@ -231,9 +238,12 @@ static void up_dumpstate(void)
 
   if (sp > ustackbase || sp <= ustackbase - ustacksize)
     {
-#if !defined(CONFIG_ARCH_INTERRUPTSTACK) || CONFIG_ARCH_INTERRUPTSTACK < 4
-      lldbg("ERROR: Stack pointer is not within allocated stack\n");
+#if defined(CONFIG_ARCH_INTERRUPTSTACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+      if (!up_interrupt_context())
 #endif
+        {
+          lldbg("ERROR: Stack pointer is not within allocated stack\n");
+        }
     }
   else
     {
