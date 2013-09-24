@@ -3597,7 +3597,7 @@ static int sam_ep_submit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 
   /* Handle IN (device-to-host) requests.  NOTE:  If the class device is
    * using the bi-directional EP0, then we assume that they intend the EP0
-   * IN functionality.
+   * IN functionality (EP0 OUT data receipt does not use requests).
    */
 
   else if (USB_ISEPIN(ep->eplog) || epno == EP0)
@@ -3708,9 +3708,12 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
 
           privep->epstate = UDPHS_EPSTATE_IDLE;
 
-          /* Clear FORCESTALL flag */
+          /* Clear FORCESTALL request
+           * REVISIT:  Data sheet says to reset toggle to DATA0 only on OUT
+           * endpoints.
+           */
 
-          sam_putreg(UDPHS_EPTSTA_TOGGLESQ_MASK | UDPHS_EPTSTA_FRCESTALL,
+          sam_putreg(UDPHS_EPTCLRSTA_TOGGLESQ | UDPHS_EPTCLRSTA_FRCESTALL,
                      SAM_UDPHS_EPTCLRSTA(epno));
 
           /* Reset endpoint FIFOs */
@@ -3725,13 +3728,9 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
 
               (void)sam_req_write(priv, privep);
             }
-
-          if ((epno == 0 && privep->epstate == UDPHS_EPSTATE_IDLE) ||
-              USB_ISEPOUT(ep->eplog))
+          else
             {
-              /* OUT endpoint (or EP0 with no write request started).
-               * Restart any queued read requests.
-               */
+              /* OUT endpoint.  Restart any queued read requests. */
 
               (void)sam_req_read(priv, privep, 0);
             }
@@ -3764,22 +3763,18 @@ static int sam_ep_stall(struct usbdev_ep_s *ep, bool resume)
 
           sam_putreg(UDPHS_EPTSETSTA_FRCESTALL, SAM_UDPHS_EPTSETSTA(epno));
 
-          /* Enable endpoint/DMA interrupts */
+          /* Disable endpoint/DMA interrupts.  The not be re-enabled until
+           * the stall is cleared and the next transfer is started.  It
+           * would, of course, be a bad idea to do this on EP0 since it is
+           * a SETUP request that is going to clear the STALL.
+           */
 
-          regval = sam_getreg(SAM_UDPHS_IEN);
-          if ((SAM_EPSET_DMA & SAM_EP_BIT(epno)) != 0)
+          if (epno != 0)
             {
-              /* Enable the endpoint DMA interrupt */
-
-              regval &= ~UDPHS_INT_DMA(epno);
+              regval = sam_getreg(SAM_UDPHS_IEN);
+              regval &= ~(UDPHS_INT_DMA(epno) | UDPHS_INT_EPT(epno));
+              sam_putreg(regval, SAM_UDPHS_IEN);
             }
-          else
-            {
-              /* Enable the endpoint interrupt */
-
-              regval &= ~UDPHS_INT_EPT(epno);
-            }
-          sam_putreg(regval, SAM_UDPHS_IEN);
         }
     }
 
