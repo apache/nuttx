@@ -5621,4 +5621,6 @@
 	  From Rashid Fatah (2013-9-23).
 	* arch/arm/src/sama5/sam_hsmci.c:  TX DMA disabled.  It is just not
 	  reliable. No idea why.  RX DMA is still used (2013-9-23).
+	* driver/net/encx24j600.c:  UDP/RXAVAIL backlog support from Max
+	  Holtzberg (2013-9-24).
 

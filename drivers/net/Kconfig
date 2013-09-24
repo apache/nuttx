@@ -93,6 +93,7 @@ config ENCX24J600
 	bool "Microchip ENCX24J600 support"
 	default n
 	select SPI
+	select NET_RXAVAIL
 	---help---
 		References:
 		ENC424J600/624J600 Data Sheet Stand-Alone 10/100 Ethernet Controller
@@ -122,6 +123,15 @@ config ENCX24J600_FREQUENCY
 	default 14000000
 	---help---
 		Define to use a different bus frequency
+
+config ENCX24J600_NDESCR
+	int "Descriptor Count"
+	default 16
+	---help---
+		Defines how many descriptors are preallocated for the
+		transmission and reception queues.
+		The ENC has a relative large packet buffer of 24kB which can
+		be used to buffer multiple packets silmutaneously
 
 config ENCX24J600_STATS
 	bool "Network statistics support"
