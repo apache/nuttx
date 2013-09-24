@@ -213,6 +213,7 @@ static struct usbdev_req_s *usbmsc_allocreq(FAR struct usbdev_ep_s *ep,
           req = NULL;
         }
     }
+
   return req;
 }
 
@@ -288,6 +289,7 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
       ret = -ENOMEM;
       goto errout;
     }
+
   priv->ctrlreq->callback = usbmsc_ep0incomplete;
 
   /* Pre-allocate all endpoints... the endpoints will not be functional
@@ -306,6 +308,7 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
       ret = -ENODEV;
       goto errout;
     }
+
   priv->epbulkin->priv = priv;
 
   /* Pre-allocate the OUT bulk endpoint */
@@ -317,6 +320,7 @@ static int usbmsc_bind(FAR struct usbdevclass_driver_s *driver,
       ret = -ENODEV;
       goto errout;
     }
+
   priv->epbulkout->priv = priv;
 
   /* Pre-allocate read requests */
@@ -517,7 +521,7 @@ static int usbmsc_setup(FAR struct usbdevclass_driver_s *driver,
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_SETUPINVALIDARGS), 0);
       return -EIO;
-     }
+    }
 #endif
 
   /* Extract reference to private data */
@@ -1070,7 +1074,7 @@ void usbmsc_wrcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_WRCOMPLETEINVALIDARGS), 0);
       return;
-     }
+    }
 #endif
 
   /* Extract references to private data */
@@ -1131,7 +1135,7 @@ void usbmsc_rdcomplete(FAR struct usbdev_ep_s *ep, FAR struct usbdev_req_s *req)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_RDCOMPLETEINVALIDARGS), 0);
       return;
-     }
+    }
 #endif
 
   /* Extract references to private data */
@@ -1324,6 +1328,7 @@ int usbmsc_configure(unsigned int nluns, void **handle)
       ret = -ENOMEM;
       goto errout;
     }
+
   memset(priv->luntab, 0, priv->nluns * sizeof(struct usbmsc_lun_s));
 
   /* Initialize the USB class driver structure */
@@ -1465,6 +1470,7 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
           usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_ALLOCIOBUFFER), geo.geo_sectorsize);
           return -ENOMEM;
         }
+
       priv->iosize = geo.geo_sectorsize;
     }
   else if (priv->iosize < geo.geo_sectorsize)
@@ -1492,6 +1498,7 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
     {
       lun->readonly = true;
     }
+
   return OK;
 }
 
@@ -1680,6 +1687,7 @@ int usbmsc_classobject(FAR void *handle,
 
       *classdev = &alloc->drvr.drvr;
     }
+
   return ret;
 }
 #endif
@@ -1717,6 +1725,7 @@ void usbmsc_uninitialize(FAR void *handle)
       return;
     }
 #endif
+
   priv = &alloc->dev;
 
   /* If the thread hasn't already exitted, tell it to exit now */
@@ -1735,6 +1744,7 @@ void usbmsc_uninitialize(FAR void *handle)
           pthread_cond_signal(&priv->cond);
           irqrestore(flags);
         }
+
       pthread_mutex_unlock(&priv->mutex);
 
       /* Wait for the thread to exit.  This is necessary even if the
@@ -1744,9 +1754,10 @@ void usbmsc_uninitialize(FAR void *handle)
 
       (void)pthread_join(priv->thread, &value);
     }
+
   priv->thread = 0;
 
-  /* Unregister the driver (unless we are a part of a composite device */
+  /* Unregister the driver (unless we are a part of a composite device) */
 
 #ifndef CONFIG_USBMSC_COMPOSITE
   usbdev_unregister(&alloc->drvr.drvr);
@@ -1758,6 +1769,7 @@ void usbmsc_uninitialize(FAR void *handle)
     {
       usbmsc_lununinitialize(&priv->luntab[i]);
     }
+
   kfree(priv->luntab);
 
   /* Release the I/O buffer */

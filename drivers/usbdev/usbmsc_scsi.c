@@ -2619,6 +2619,7 @@ void *usbmsc_workerthread(void *arg)
 
           priv->thstate = USBMSC_STATE_IDLE;
         }
+
       irqrestore(flags);
 
       /* Loop processing each SCSI command state.  Each state handling
