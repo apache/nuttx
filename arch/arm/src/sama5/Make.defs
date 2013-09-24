@@ -83,6 +83,10 @@ CMN_ASRCS += arm_savefpu.S arm_restorefpu.S
 CMN_CSRCS += arm_copyarmstate.c
 endif
 
+ifeq ($(CONFIG_DEBUG_STACK),y)
+CMN_CSRCS += up_checkstack.c
+endif
+
 # SAMA5-specific assembly language files
 
 CHIP_ASRCS  =
