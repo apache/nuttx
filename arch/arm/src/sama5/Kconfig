@@ -160,12 +160,14 @@ config SAMA5_GMAC
 	bool "Gigabit Ethernet MAC (GMAC)"
 	default n
 	depends on SAMA5_HAVE_GMAC
+	select NETDEVICES
 	select ARCH_HAVE_PHY
 
 config SAMA5_EMAC
 	bool "10/100MBps Ethernet MAC (EMAC)"
 	default n
 	depends on SAMA5_HAVE_EMAC
+	select NETDEVICES
 	select ARCH_HAVE_PHY
 
 config SAMA5_LCDC

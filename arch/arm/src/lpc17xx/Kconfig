@@ -137,7 +137,7 @@ config LPC17_EMC
 
 config LPC17_ETHERNET
 	bool "Ethernet"
-	select NET
+	select NETDEVICES
 	select ARCH_HAVE_PHY
 	default n
 
@@ -683,13 +683,6 @@ config NET_REGDEBUG
 	default n
 	---help---
 		Enable low level register debug.  Also needs DEBUG.
-
-config NET_DUMPPACKET
-	bool "Enable packet dumping"
-	depends on DEBUG
-	default n
-	---help---
-		Dump all received and transmitted packets. Also needs DEBUG.
 
 config NET_HASH
 	bool "Hashing"

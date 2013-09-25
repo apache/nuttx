@@ -573,7 +573,7 @@ config PIC32MX_CAN2
 config PIC32MX_ETHERNET
 	bool "Ethernet"
 	default n
-	select NET
+	select NETDEVICES
 	select ARCH_HAVE_PHY
 
 config PIC32MX_CTMU
@@ -980,13 +980,6 @@ config NET_WOL
 	depends on PIC32MX_ETHERNET
 	---help---
 		Enable Wake-up on LAN (not fully implemented).
-
-config NET_DUMPPACKET
-	bool "Dump packets"
-	default n
-	depends on PIC32MX_ETHERNET && DEBUG
-	---help---
-		Dump all received and transmitted packets. Also needs DEBUG.
 
 config NET_REGDEBUG
 	bool "Register level debug"
