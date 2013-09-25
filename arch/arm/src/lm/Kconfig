@@ -120,6 +120,7 @@ config SSI1_DISABLE
 config LM_ETHERNET
 	bool "Stellaris Ethernet"
 	default n
+	select NETDEVICES
 	---help---
 		This must be set (along with NET) to build the Stellaris Ethernet driver.
 

@@ -3,12 +3,23 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+comment "General Ethernet MAC Driver Options"
+
 config NETDEV_MULTINIC
 	bool "Multiple NIC support"
 	default n
 	---help---
 		Select this option if you board and/or MCU are capable of supporting
 		multiple Ethernet MAC drivers.
+
+config NET_DUMPPACKET
+	bool "Enable packet dumping"
+	depends on DEBUG
+	default n
+	---help---
+		Some Ethernet MAC drivers supporting dumping of received and
+		transmitted packets as a debug option.  This setting enables that
+		debug option. Also needs DEBUG.
 
 comment "External Ethernet MAC Device Support"
 

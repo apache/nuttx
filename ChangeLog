@@ -5625,4 +5625,6 @@
 	  Holtzberg (2013-9-24).
 	* Standardized stack checking logic so the interfaces can be used
 	  by common stack monitoring logic (2013-9-24).
+	* drivers/net/Kconfig:  Move CONFIG_NET_DUMPPACKET out of LPC17
+	  and STM32 Kconfigs into the common network driver Kconfig (2013-9-25).
 
