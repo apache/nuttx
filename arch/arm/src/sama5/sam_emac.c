@@ -323,8 +323,8 @@ static uint8_t g_rxbuffer[CONFIG_SAMA5_EMAC_NRXBUFFERS * EMAC_RX_UNITSIZE]
 /* Register operations ******************************************************/
 
 #if defined(CONFIG_SAMA5_EMAC_REGDEBUG) && defined(CONFIG_DEBUG)
-static bool sasm_checkreg(struct sam_emac_s *priv, bool wr,
-                          uint32_t regval, uintptr_t address);
+static bool sam_checkreg(struct sam_emac_s *priv, bool wr,
+                         uint32_t regval, uintptr_t address);
 static uint32_t sam_getreg(struct sam_emac_s *priv, uintptr_t addr);
 static void sam_putreg(struct sam_emac_s *priv, uintptr_t addr, uint32_t val);
 #else
@@ -763,6 +763,26 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   (void)wd_start(priv->txtimeout, SAM_TXTIMEOUT, sam_txtimeout, 1,
                  (uint32_t)priv);
+
+  /* Set d_len to zero meaning that the d_buf[] packet buffer is again
+   * available.
+   */
+
+  dev->d_len = 0;
+
+  /* If we have no more available TX descriptors, then we must disable the
+   * RCOMP interrupt to stop further RX processing.  Why?  Because EACH RX
+   * packet that is dispatch is also an opportunity to replay with the a TX
+   * packet.  So, if we cannot handle an RX packet replay, then we disable
+   * all RX packet processing.
+   */
+
+  if (sam_txfree(priv) < 1)
+    {
+      nllvdbg("Disabling RX interrupts\n");
+      sam_putreg(priv, SAM_EMAC_IDR, EMAC_INT_RCOMP);
+    }
+
   return OK;
 }
 
@@ -1234,8 +1254,17 @@ static void sam_txdone(struct sam_emac_s *priv)
 
       if (++priv->txtail >= CONFIG_SAMA5_EMAC_NTXBUFFERS)
         {
+          /* Wrap to the beginning of the TX descriptor list */
+
           priv->txtail = 0;
         }
+
+      /* At least one TX descriptor is available.  Re-enable RX interrupts.
+       * RX interrupts may previously have been disabled when we ran out of
+       * TX desciptors (see commits in sam_transmit()).
+       */
+
+      sam_putreg(priv, SAM_EMAC_IER, EMAC_INT_RCOMP);
     }
 
   /* Then poll uIP for new XMIT data */
@@ -1279,61 +1308,9 @@ static int sam_emac_interrupt(int irq, void *context)
   pending = isr & ~(imr | 0xffc300);
   nllvdbg("isr: %08x pending: %08x\n", isr, pending);
 
-  /* Check for the receipt of an RX packet.
-   *
-   * RXCOMP indicates that a packet has been received and stored in memory.
-   *   The RXCOMP bit is cleared whent he interrupt status register was read.
-   * RSR:REC indicates that one or more frames have been received and placed
-   *   in memory. This indication is cleared by writing a one to this bit.
-   */
-
-  if ((pending & EMAC_INT_RCOMP) != 0 || (rsr & EMAC_RSR_REC) != 0)
-    {
-      clrbits = EMAC_RSR_REC;
-
-      /* Check for Receive Overrun.
-       *
-       * RSR:RXOVR will be set if the RX FIFO is not able to store the
-       *   receive frame due to a FIFO overflow, or if the receive status
-       *   was not taken at the end of the frame. This bit is also set in
-       *   DMA packet buffer mode if the packet buffer overflows. For DMA
-       *   operation, the buffer will be recovered if an overrun occurs. This
-       *   bit is cleared when set to 1.
-       */
-
-      if ((rsr & EMAC_RSR_OVR) != 0)
-        {
-          nlldbg("ERROR: Receiver overrun RSR: %08x\n", rsr);
-          clrbits |= EMAC_RSR_OVR;
-        }
-
-      /* Check for buffer not available (BNA)
-       *
-       * RSR:BNA means that an attempt was made to get a new buffer and the
-       *   pointer indicated that it was owned by the processor. The DMA will
-       *   reread the pointer each time an end of frame is received until a
-       *   valid pointer is found. This bit is set following each descriptor
-       *   read attempt that fails, even if consecutive pointers are
-       *   unsuccessful and software has in the mean time cleared the status
-       *   flag. Cleared by writing a one to this bit.
-       */
-
-      if ((rsr & EMAC_RSR_BNA) != 0)
-        {
-          nlldbg("ERROR: Buffer not available RSR: %08x\n", rsr);
-          clrbits |= EMAC_RSR_BNA;
-        }
-
-      /* Clear status */
-
-      sam_putreg(priv, SAM_EMAC_RSR, clrbits);
-
-      /* Handle the received packet */
-
-       sam_receive(priv);
-    }
-
-  /* Check for the completion of a transmission
+  /* Check for the completion of a transmission.  This should be done before
+   * checking for received data (because receiving can cause another transmission
+   * before we had a chance to handle the last one).
    *
    * ISR:TCOMP is set when a frame has been transmitted. Cleared on read.
    * TSR:COMP is set when a frame has been transmitted. Cleared by writing a
@@ -1400,6 +1377,60 @@ static int sam_emac_interrupt(int irq, void *context)
       /* And handle the TX done event */
 
       sam_txdone(priv);
+    }
+
+  /* Check for the receipt of an RX packet.
+   *
+   * RXCOMP indicates that a packet has been received and stored in memory.
+   *   The RXCOMP bit is cleared whent he interrupt status register was read.
+   * RSR:REC indicates that one or more frames have been received and placed
+   *   in memory. This indication is cleared by writing a one to this bit.
+   */
+
+  if ((pending & EMAC_INT_RCOMP) != 0 || (rsr & EMAC_RSR_REC) != 0)
+    {
+      clrbits = EMAC_RSR_REC;
+
+      /* Check for Receive Overrun.
+       *
+       * RSR:RXOVR will be set if the RX FIFO is not able to store the
+       *   receive frame due to a FIFO overflow, or if the receive status
+       *   was not taken at the end of the frame. This bit is also set in
+       *   DMA packet buffer mode if the packet buffer overflows. For DMA
+       *   operation, the buffer will be recovered if an overrun occurs. This
+       *   bit is cleared when set to 1.
+       */
+
+      if ((rsr & EMAC_RSR_OVR) != 0)
+        {
+          nlldbg("ERROR: Receiver overrun RSR: %08x\n", rsr);
+          clrbits |= EMAC_RSR_OVR;
+        }
+
+      /* Check for buffer not available (BNA)
+       *
+       * RSR:BNA means that an attempt was made to get a new buffer and the
+       *   pointer indicated that it was owned by the processor. The DMA will
+       *   reread the pointer each time an end of frame is received until a
+       *   valid pointer is found. This bit is set following each descriptor
+       *   read attempt that fails, even if consecutive pointers are
+       *   unsuccessful and software has in the mean time cleared the status
+       *   flag. Cleared by writing a one to this bit.
+       */
+
+      if ((rsr & EMAC_RSR_BNA) != 0)
+        {
+          nlldbg("ERROR: Buffer not available RSR: %08x\n", rsr);
+          clrbits |= EMAC_RSR_BNA;
+        }
+
+      /* Clear status */
+
+      sam_putreg(priv, SAM_EMAC_RSR, clrbits);
+
+      /* Handle the received packet */
+
+       sam_receive(priv);
     }
 
 #ifdef CONFIG_DEBUG_NET
@@ -2525,7 +2556,7 @@ static void sam_txreset(struct sam_emac_s *priv)
   {
     bufaddr = (uint32_t)(&(txbuffer[ndx * EMAC_TX_UNITSIZE]));
 
-    /* Set the buffer address and mark the descriptor as used */
+    /* Set the buffer address and mark the descriptor as in used by firmware */
 
     physaddr           = sam_physramaddr(bufaddr);
     txdesc[ndx].addr   = physaddr;
@@ -2539,7 +2570,7 @@ static void sam_txreset(struct sam_emac_s *priv)
 
   /* Set the Transmit Buffer Queue Pointer Register */
 
-  physaddr = sam_physramaddr((uint32_t)txdesc);
+  physaddr = sam_physramaddr((uintptr_t)txdesc);
   sam_putreg(priv, SAM_EMAC_TBQP, physaddr);
 }
 
@@ -2603,7 +2634,7 @@ static void sam_rxreset(struct sam_emac_s *priv)
 
   /* Set the Receive Buffer Queue Pointer Register */
 
-  physaddr = sam_physramaddr((uint32_t)rxdesc);
+  physaddr = sam_physramaddr((uintptr_t)rxdesc);
   sam_putreg(priv, SAM_EMAC_RBQP, physaddr);
 }
 
