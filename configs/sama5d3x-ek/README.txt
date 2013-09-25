@@ -1937,10 +1937,6 @@ Configurations
           CONFIG_SAMA5_EMAC_PHYSR_10FD=0x5    : "    " " " "     "
           CONFIG_SAMA5_EMAC_PHYSR_100FD=0x6   : "    " " " "     "
 
-        Device drivers -> Network Device/PHY Support
-          CONFIG_NETDEVICES=y                 : Enabled PHY selection
-          CONFIG_ETH0_PHY_KSZ8051=y           : Select the KSZ8051 PHY
-
         Networking Support
           CONFIG_NET=y                        : Enable Neworking
           CONFIG_NET_SOCKOPTS=y               : Enable socket operations
@@ -1951,10 +1947,14 @@ Configurations
           CONFIG_NET_ICMP=y                   : Enable ICMP networking
           CONFIG_NET_ICMP_PING=y              : Needed for NSH ping command
                                              : Defaults should be okay for other options
+        Device drivers -> Network Device/PHY Support
+          CONFIG_NETDEVICES=y                 : Enabled PHY selection
+          CONFIG_ETH0_PHY_KSZ8051=y           : Select the KSZ8051 PHY
+
         Application Configuration -> Network Utilities
           CONFIG_NETUTILS_RESOLV=y            : Enable host address resolution
-          CONFIG_NETUTILS_TFTPC=y             : Enable TFTP data file transfers for get and put commands
           CONFIG_NETUTILS_TELNETD=y           : Enable the Telnet daemon
+          CONFIG_NETUTILS_TFTPC=y             : Enable TFTP data file transfers for get and put commands
           CONFIG_NETUTILS_UIPLIB=y            : Network library support is needed
           CONFIG_NETUTILS_WEBCLIENT=y         : Needed for wget support
                                               : Defaults should be okay for other options
@@ -1964,6 +1964,15 @@ Configurations
           CONFIG_NSH_DRIPADDR=0x0a000001      : IP address of gateway/host PC
           CONFIG_NSH_NETMASK=0xffffff00       : Netmask
           CONFIG_NSH_NOMAC=y                  : Need to make up a bogus MAC address
+
+        NOTE:  If you enable this feature, you experience a delay on booting.
+        That is because the start-up logic waits for the network connection
+        to be established before starting NuttX.  In a real application, you
+        would probably want to do the network bringup on a separate thread
+        so that access to the NSH prompt is not delayed.
+        
+        This delay will be especially long if the board is not connected to
+        a network.
 
     STATUS:
       PCK FREQUENCY

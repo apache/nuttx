@@ -2,7 +2,7 @@
  * drivers/net/encx24j600.c
  *
  *   Copyright (C) 2013 UVC Ingenieure. All rights reserved.
- *   Author: Max Holztberg <mh@uvc.de>
+ *   Author: Max Holtzberg <mh@uvc.de>
  *
  * References:
  * - ENC424J600/624J600 Data Sheet, Stand-Alone 10/100 Ethernet Controller
@@ -74,7 +74,7 @@
 #include "encx24j600.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Configuration ************************************************************/
@@ -158,6 +158,10 @@
 /* Poll timeout */
 
 #define ENC_POLLTIMEOUT MSEC2TICK(50)
+
+/* Register poll timeout */
+
+#define ENC_REGPOLLTIMEOUT MSEC2TICK(5000)
 
 /* Packet Memory ************************************************************/
 
@@ -476,8 +480,8 @@ static void enc_cmd(FAR struct enc_driver_s *priv, uint8_t cmd, uint16_t arg)
   SPI_SELECT(priv->spi, SPIDEV_ETHERNET, true);;
 
   (void)SPI_SEND(priv->spi, cmd);          /* Clock out the command */
-  (void)SPI_SEND(priv->spi, arg & 0xff);   /* clock out the low byte */
-  (void)SPI_SEND(priv->spi, arg >> 8);     /* clock out the high byte */
+  (void)SPI_SEND(priv->spi, arg & 0xff);   /* Clock out the low byte */
+  (void)SPI_SEND(priv->spi, arg >> 8);     /* Clock out the high byte */
 
   /* De-select ENCX24J600 chip. */
 
@@ -591,8 +595,8 @@ static uint16_t enc_rdreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg)
 
   SPI_SEND(priv->spi, ENC_RCR | GETADDR(ctrlreg));
 
-  rddata = SPI_SEND(priv->spi, 0);        /* clock in the low byte */
-  rddata |= SPI_SEND(priv->spi, 0) << 8;  /* clock in the high byte */
+  rddata = SPI_SEND(priv->spi, 0);        /* Clock in the low byte */
+  rddata |= SPI_SEND(priv->spi, 0) << 8;  /* Clock in the high byte */
 
 
   SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
@@ -630,8 +634,8 @@ static void enc_wrreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
   enc_setbank(priv, GETBANK(ctrlreg));
 
   SPI_SEND(priv->spi, ENC_WCR | GETADDR(ctrlreg));
-  SPI_SEND(priv->spi, wrdata & 0xff); /* clock out the low byte */
-  SPI_SEND(priv->spi, wrdata >> 8);   /* clock out the high byte */
+  SPI_SEND(priv->spi, wrdata & 0xff); /* Clock out the low byte */
+  SPI_SEND(priv->spi, wrdata >> 8);   /* Clock out the high byte */
 
   SPI_SELECT(priv->spi, SPIDEV_ETHERNET, false);
   enc_wrdump(GETADDR(ctrlreg), wrdata);
@@ -673,7 +677,7 @@ static int enc_waitreg(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
       rddata  = enc_rdreg(priv, ctrlreg);
       elapsed = clock_systimer() - start;
     }
-  while ((rddata & bits) != value || elapsed > ENC_POLLTIMEOUT);
+  while ((rddata & bits) != value && elapsed < ENC_REGPOLLTIMEOUT);
 
   return (rddata & bits) == value ? OK : -ETIMEDOUT;
 }
@@ -714,8 +718,8 @@ static void enc_bfs(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
    */
 
   (void)SPI_SEND(priv->spi, ENC_BFS | GETADDR(ctrlreg)); /* Clock out the command */
-  (void)SPI_SEND(priv->spi, bits & 0xff);                /* clock out the low byte */
-  (void)SPI_SEND(priv->spi, bits >> 8);                  /* clock out the high byte */
+  (void)SPI_SEND(priv->spi, bits & 0xff);                /* Clock out the low byte */
+  (void)SPI_SEND(priv->spi, bits >> 8);                  /* Clock out the high byte */
 
   /* De-select ENCX24J600 chip. */
 
@@ -759,8 +763,8 @@ static void enc_bfc(FAR struct enc_driver_s *priv, uint16_t ctrlreg,
    */
 
   (void)SPI_SEND(priv->spi, ENC_BFC | GETADDR(ctrlreg)); /* Clock out the command */
-  (void)SPI_SEND(priv->spi, bits & 0xff);                /* clock out the low byte */
-  (void)SPI_SEND(priv->spi, bits >> 8);                  /* clock out the high byte */
+  (void)SPI_SEND(priv->spi, bits & 0xff);                /* Clock out the low byte */
+  (void)SPI_SEND(priv->spi, bits >> 8);                  /* Clock out the high byte */
 
   /* De-select ENCX24J600 chip. */
 
@@ -1128,7 +1132,7 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
       enc_dumppacket("Write packet to enc SRAM", priv->dev.d_buf,
                      priv->dev.d_len);
 
-      /* copy the packet into the transmit buffer described by the current
+      /* Copy the packet into the transmit buffer described by the current
        * tx descriptor
        */
 
@@ -1239,14 +1243,14 @@ static void enc_linkstatus(FAR struct enc_driver_s *priv)
 
   if (regval & ESTAT_PHYDPX)
     {
-      /* configure full-duplex */
+      /* Configure full-duplex */
 
       enc_wrreg(priv, ENC_MABBIPG, 0x15);
       enc_bfs(priv, ENC_MACON2, MACON2_FULDPX);
     }
   else
     {
-      /* configure half-duplex */
+      /* Configure half-duplex */
 
       enc_wrreg(priv, ENC_MABBIPG, 0x12);
       enc_bfc(priv, ENC_MACON2, MACON2_FULDPX);
@@ -1329,11 +1333,6 @@ static void enc_rxldpkt(FAR struct enc_driver_s *priv,
   enc_rdbuffer(priv, priv->dev.d_buf, priv->dev.d_len);
 
   enc_dumppacket("loaded RX packet", priv->dev.d_buf, priv->dev.d_len);
-}
-
-    {
-      nlldbg("Unsupported packet type dropped (%02x)\n", htons(BUF->type));
-    }
 }
 
 /****************************************************************************
@@ -1658,7 +1657,6 @@ static void enc_rxabtif(FAR struct enc_driver_s *priv)
 {
   /* Free the last received packet from the RX queue */
 
-  enc_bfs(priv, ENC_ECON1, ECON1_PKTDEC);
   nlldbg("rx abort\n");
 
   enc_rxrmpkt(priv, (struct enc_descr_s*)sq_peek(&priv->rxqueue));
@@ -2439,6 +2437,43 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
+ * Function: enc_ldmacaddr
+ *
+ * Description:
+ *   Load the MAC address from the ENCX24j600 and write it to the device
+ *   structure.
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void enc_ldmacaddr(FAR struct enc_driver_s *priv)
+{
+  uint16_t regval;
+  uint8_t *mac = priv->dev.d_mac.ether_addr_octet;
+
+  nvdbg("Using ENCX24J600's built in MAC address\n");
+
+  regval = enc_rdreg(priv, ENC_MAADR1);
+  mac[0] = regval & 0xff;
+  mac[1] = regval >> 8;
+
+  regval = enc_rdreg(priv, ENC_MAADR2);
+  mac[2] = regval & 0xff;
+  mac[3] = regval >> 8;
+
+  regval = enc_rdreg(priv, ENC_MAADR3);
+  mac[4] = regval & 0xff;
+  mac[5] = regval >> 8;
+}
+
+/****************************************************************************
  * Function: enc_setmacaddr
  *
  * Description:
@@ -2459,7 +2494,6 @@ static void enc_pwrsave(FAR struct enc_driver_s *priv)
 
 static void enc_setmacaddr(FAR struct enc_driver_s *priv)
 {
-  uint16_t regval;
   uint8_t *mac = priv->dev.d_mac.ether_addr_octet;
   struct ether_addr zmac;
 
@@ -2469,19 +2503,7 @@ static void enc_setmacaddr(FAR struct enc_driver_s *priv)
     {
       /* No user defined MAC address. Read it from the device. */
 
-      nvdbg("Using ENCX24J600's built in MAC address\n");
-
-      regval = enc_rdreg(priv, ENC_MAADR1);
-      mac[0] = regval & 0xff;
-      mac[1] = regval >> 8;
-
-      regval = enc_rdreg(priv, ENC_MAADR2);
-      mac[2] = regval & 0xff;
-      mac[3] = regval >> 8;
-
-      regval = enc_rdreg(priv, ENC_MAADR3);
-      mac[4] = regval & 0xff;
-      mac[5] = regval >> 8;
+      enc_ldmacaddr(priv);
     }
   else
     {
@@ -2520,17 +2542,13 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   nllvdbg("Reset\n");
 
-  /* configure SPI for the ENCX24J600 */
-
-  enc_configspi(priv->spi);
-
   do
     {
       enc_wrreg(priv, ENC_EUDAST, 0x1234);
     }
   while (enc_rdreg(priv, ENC_EUDAST) != 0x1234);
 
-  /* wait for clock to become ready */
+  /* Wait for clock to become ready */
 
   ret = enc_waitreg(priv, ENC_ESTAT, ESTAT_CLKRDY, ESTAT_CLKRDY);
 
@@ -2540,11 +2558,11 @@ static int enc_reset(FAR struct enc_driver_s *priv)
       return -ENODEV;
     }
 
-  /* reset the ENCX24J600 */
+  /* Reset the ENCX24J600 */
 
   enc_setethrst(priv);
 
-  /* check if EUDAST has been reset to 0 */
+  /* Check if EUDAST has been reset to 0 */
 
   regval = enc_rdreg(priv, ENC_EUDAST);
 
@@ -2579,6 +2597,12 @@ static int enc_reset(FAR struct enc_driver_s *priv)
       sq_addlast((sq_entry_t*)&priv->descralloc[i], &priv->freedescr);
     }
 
+#if 0
+  /* When restarting auto-negotiation, the ESTAT_PHYLINK gets set but the link
+   * seems not to be ready. Because auto-negotiation is enabled by default
+   * (but with different PHANA_* settings) I did not investigate that further.
+   */
+
   /* "Typically, when using auto-negotiation, users should write 0x05E1 to PHANA
    * to advertise flow control capability."
    */
@@ -2586,7 +2610,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   enc_wrphy(priv, ENC_PHANA, PHANA_ADPAUS0 | PHANA_AD10FD | PHANA_AD10 |
             PHANA_AD100FD | PHANA_AD100 | PHANA_ADIEEE0);
 
-  /* restart auto-negotiation */
+  /* Restart auto-negotiation */
 
   enc_wrphy(priv, ENC_PHCON1, PHCON1_RENEG);
 
@@ -2598,11 +2622,20 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   nllvdbg("Auto-negotation completed\n");
 
+#endif
+
   enc_linkstatus(priv);
 
   /* Set the maximum packet size which the controller will accept */
 
   enc_wrreg(priv, ENC_MAMXFL, CONFIG_NET_BUFSIZE);
+
+  ret = enc_waitreg(priv, ENC_ESTAT, ESTAT_PHYLNK, ESTAT_PHYLNK);
+  if (ret != OK)
+    {
+      nlldbg("ERROR: encx24j600 failed to establish link\n");
+      return -ENODEV;
+    }
 
   return OK;
 }
@@ -2678,9 +2711,25 @@ int enc_initialize(FAR struct spi_dev_s *spi,
       return -EAGAIN;
     }
 
+  /* Configure SPI for the ENCX24J600 */
+
+  enc_configspi(priv->spi);
+
+  /* Lock the SPI bus so that we have exclusive access */
+
+  enc_lock(priv);
+
+  /* Load the MAC address */
+
+  enc_ldmacaddr(priv);
+
   /* Power down the device */
 
   enc_pwrsave(priv);
+
+  /* Unlock the SPI bus */
+
+  enc_unlock(priv);
 
   /* Register the device with the OS so that socket IOCTLs can be performed */
 

@@ -694,7 +694,7 @@ static int sam_transmit(struct sam_emac_s *priv)
   uint32_t regval;
   uint32_t status;
 
-  nllvdbg("d_len: %d txhead: %d\n", priv->txhead);
+  nllvdbg("d_len: %d txhead: %d\n",  dev->d_len, priv->txhead);
 
   /* Check parameter */
 
@@ -720,12 +720,12 @@ static int sam_transmit(struct sam_emac_s *priv)
 
   if (dev->d_len > 0)
     {
-      /* Driver manage the ring buffer */
+      /* Driver managed the ring buffer */
 
       virtaddr = sam_virtramaddr(txdesc->addr);
       memcpy((void *)virtaddr, dev->d_buf, dev->d_len);
       cp15_flush_dcache((uint32_t)virtaddr, ((uint32_t)virtaddr + dev->d_len));
-  }
+    }
 
   /* Update TX descriptor status. */
 
@@ -734,6 +734,7 @@ static int sam_transmit(struct sam_emac_s *priv)
     {
       status |= EMACTXD_STA_WRAP;
     }
+
   txdesc->status = status;
 
   /* Increment the head index */
