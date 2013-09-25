@@ -706,7 +706,7 @@ CONFIG_EXAMPLES_NSH=y
 #
 # USB Mass Storage Class Example
 #
-# CONFIG_EXAMPLES_USBMSC is not set
+# CONFIG_SYSTEM_USBMSC is not set
 
 #
 # USB Serial Terminal Example

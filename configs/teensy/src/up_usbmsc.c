@@ -58,8 +58,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_EXAMPLES_USBMSC_DEVMINOR1
-#  define CONFIG_EXAMPLES_USBMSC_DEVMINOR1 0
+#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
+#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
 #endif
 
 /* PORT and SLOT number probably depend on the board configuration */
@@ -126,7 +126,7 @@ int usbmsc_archinitialize(void)
 
   message("Binding SPI port to MMC/SD slot\n");
 
-  ret = mmcsd_spislotinitialize(CONFIG_EXAMPLES_USBMSC_DEVMINOR1, AVR_MMCSDSLOTNO, spi);
+  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1, AVR_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
       message("mmcsd_spislotinitialize failed: %d\n", ret);

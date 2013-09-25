@@ -53,8 +53,8 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_EXAMPLES_USBMSC_DEVMINOR1
-#  define CONFIG_EXAMPLES_USBMSC_DEVMINOR1 0
+#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
+#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
 #endif
 
 /* Debug ********************************************************************/
@@ -91,13 +91,13 @@
 
 int usbmsc_archinitialize(void)
 {
-  /* If examples/usbmsc is built as an NSH command, then SD slot should
+  /* If system/usbmsc is built as an NSH command, then SD slot should
    * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
    * this case, there is nothing further to be done here.
    */
 
 #ifndef CONFIG_NSH_BUILTIN_APPS
-  return stm32_sdinitialize(CONFIG_EXAMPLES_USBMSC_DEVMINOR1);
+  return stm32_sdinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1);
 #else
   return OK;
 #endif

@@ -55,8 +55,8 @@ ifeq ($(CONFIG_PIC32MX_USBDEV),y)
 # USB Mass Storage Class device configurations
 
 ifeq ($(CONFIG_USBMSC),y)
-#  Uncomment to enable the examples/usbmsc built-in
-#  CONFIGURED_APPS += examples/usbmsc
+#  Uncomment to enable the system/usbmsc built-in
+#  CONFIGURED_APPS += system/usbmsc
 endif
 
 # USB CDC/ACM serial device configurations

@@ -57,15 +57,15 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_EXAMPLES_USBMSC_DEVMINOR1
-#  define CONFIG_EXAMPLES_USBMSC_DEVMINOR1 0
+#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
+#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
 #endif
 
-#ifndef CONFIG_EXAMPLES_USBMSC_DEVPATH1
-#  define CONFIG_EXAMPLES_USBMSC_DEVPATH1  "/dev/ram"
+#ifndef CONFIG_SYSTEM_USBMSC_DEVPATH1
+#  define CONFIG_SYSTEM_USBMSC_DEVPATH1  "/dev/ram"
 #endif
 
-static const char g_source[] = CONFIG_EXAMPLES_USBMSC_DEVPATH1;
+static const char g_source[] = CONFIG_SYSTEM_USBMSC_DEVPATH1;
 static struct fat_format_s g_fmt = FAT_FORMAT_INITIALIZER;
 
 #define USBMSC_NSECTORS        64
@@ -99,7 +99,7 @@ int usbmsc_archinitialize(void)
 
   /* Register a RAMDISK device to manage this RAM image */
   
-  ret = ramdisk_register(CONFIG_EXAMPLES_USBMSC_DEVMINOR1,
+  ret = ramdisk_register(CONFIG_SYSTEM_USBMSC_DEVMINOR1,
                          pbuffer,
                          USBMSC_NSECTORS,
                          USBMSC_SECTORSIZE,

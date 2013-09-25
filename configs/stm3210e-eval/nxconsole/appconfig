@@ -43,7 +43,7 @@ CONFIGURED_APPS += nshlib
 # Optional built-in applications
 
 ifeq ($(CONFIG_USBDEV),y)
-CONFIGURED_APPS += examples/usbmsc
+CONFIGURED_APPS += system/usbmsc
 endif
 
 ifeq ($(CONFIG_I2C),y)

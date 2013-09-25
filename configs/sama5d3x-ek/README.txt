@@ -1141,18 +1141,18 @@ Configurations
          CONFIG_USBMSC_EPBULKOUT=1             : Use EP1 for the BULK OUT endpoint
          CONFIG_USBMSC_EPBULKIN=2              : Use EP2 for the BULK IN endpoint
 
-       The following setting enables an example that can can be used to
+       The following setting enables an add-on that can can be used to
        control the CDC/ACM device.  It will add two new NSH commands:
 
          a. msconn will connect the USB serial device and export the AT25
             to the host, and
          b. msdis which will disconnect the USB serial device.
 
-       Application Configuration -> Examples:
-         CONFIG_EXAMPLES_USBMSC=y              : Enable the USBMSC example
-         CONFIG_EXAMPLES_USBMSC_NLUNS=1        : One LUN
-         CONFIG_EXAMPLES_USBMSC_DEVMINOR1=0    : Minor device zero
-         CONFIG_EXAMPLES_USBMSC_DEVPATH1="/dev/mtdblock0"
+       Application Configuration -> System Add-Ons:
+         CONFIG_SYSTEM_USBMSC=y                : Enable the USBMSC add-on
+         CONFIG_SYSTEM_USBMSC_NLUNS=1          : One LUN
+         CONFIG_SYSTEM_USBMSC_DEVMINOR1=0      : Minor device zero
+         CONFIG_SYSTEM_USBMSC_DEVPATH1="/dev/mtdblock0"
                                                : Use a single, LUN:  The AT25
                                                : block driver.
 
@@ -1169,7 +1169,7 @@ Configurations
            nsh> msdis
            nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
 
-       b. If you change the value CONFIG_EXAMPLES_USBMSC_DEVPATH1, then you
+       b. If you change the value CONFIG_SYSTEM_USBMSC_DEVPATH1, then you
           can export other file systems:
 
            "/dev/mmcsd1" will export the HSMCI1 microSD
