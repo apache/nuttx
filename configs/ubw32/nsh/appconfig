@@ -62,8 +62,8 @@ endif
 # USB CDC/ACM serial device configurations
 
 ifeq ($(CONFIG_CDCACM),y)
-#  Uncomment to enable the examples/cdcacm built-in
-#  CONFIGURED_APPS += examples/cdcacm
+#  Uncomment to enable the system/cdcacm built-in
+#  CONFIGURED_APPS += system/cdcacm
 #  Uncomment the following to enable the examples/usbterm built-in
 #  CONFIGURED_APPS += examples/usbterm
 endif

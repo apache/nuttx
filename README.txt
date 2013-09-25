@@ -1196,6 +1196,8 @@ apps
  |- NxWidgets/
  |   `- README.txt
  |- system/
+ |   |- cdcacm
+ |   |  `- README.txt
  |   |- i2c
  |   |  `- README.txt
  |   |- install

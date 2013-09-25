@@ -5631,3 +5631,5 @@
 	  testing is needed (as always) (2013-9-25).
 	* configs:  Changes to many defconfig files resulting from moving
 	  apps/examples/usbmsc to apps/system/usbmsc (2013-9-25).
+	* configs:  Changes to many defconfig files resulting from moving
+	  apps/examples/cdcacm to apps/system/cdcacm (2013-9-25).

@@ -58,7 +58,7 @@ endif
 
 ifeq ($(CONFIG_USBDEV),y)
 ifeq ($(CONFIG_CDCACM),y)
-CONFIGURED_APPS += examples/cdcacm
+CONFIGURED_APPS += system/cdcacm
 endif
 endif
 

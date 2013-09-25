@@ -759,7 +759,7 @@ Where <subdir> is one of the following:
 
        The CDC/ACM example is included as two NSH "built-in" commands.\
  
-       CONFIG_EXAMPLES_CDCACM=y      : Enable apps/examples/cdcacm
+       CONFIG_SYSTEM_CDCACM=y      : Enable apps/system/cdcacm
   
        The two commands are:
  
