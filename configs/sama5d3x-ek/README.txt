@@ -1943,6 +1943,8 @@ Configurations
           CONFIG_NET_BUFSIZE=562              : Maximum packet size (MTD) 1518 is more standard
           CONFIG_NET_RECEIVE_WINDOW=562       : Should be the same as CONFIG_NET_BUFSIZE
           CONFIG_NET_TCP=y                    : Enable TCP/IP networking
+          CONFIG_NET_TCPBACKLOG=y             : Support TCP/IP backlog
+          CONFIG_NET_TCP_READAHEAD_BUFSIZE=562  Read-ahead buffer size
           CONFIG_NET_UDP=y                    : Enable UDP networking
           CONFIG_NET_ICMP=y                   : Enable ICMP networking
           CONFIG_NET_ICMP_PING=y              : Needed for NSH ping command
@@ -1964,6 +1966,77 @@ Configurations
           CONFIG_NSH_DRIPADDR=0x0a000001      : IP address of gateway/host PC
           CONFIG_NSH_NETMASK=0xffffff00       : Netmask
           CONFIG_NSH_NOMAC=y                  : Need to make up a bogus MAC address
+
+        So what can you do with this networking support.  First you see that
+        NSH has several new network related commands:
+
+          ifconfig, ifdown, ifup:  Commands to help manage your network
+          get and put:             TFTP file transfers
+          wget:                    HTML file transfers
+          ping:                    Check for access to peers on the network
+          Telnet console:          You can access the NSH remotely via telnet.
+        
+        You can also enable other add on features like full FTP or a Web
+        Server or XML RPC and others.  There are also other features that
+        you can enable like DHCP client (or server) or network name
+        resolution.
+
+        By default, the IP address of the SAMA5D3x-EK will be 10.0.0.2 and
+        it will assume that your host is the gateway and has the IP address
+        10.0.0.1.
+
+          nsh> ifconfig
+          eth0    HWaddr 00:e0:de:ad:be:ef at UP
+                  IPaddr:10.0.0.2 DRaddr:10.0.0.1 Mask:255.255.255.0
+
+        You can use ping to test for connectivity to the host (Careful,
+        Window firewalls usually block ping-related ICMP traffic).  On the
+        target side, you can:
+
+          nsh> ping 10.0.0.1
+          PING 10.0.0.1 56 bytes of data
+          56 bytes from 10.0.0.1: icmp_seq=1 time=0 ms
+          56 bytes from 10.0.0.1: icmp_seq=2 time=0 ms
+          56 bytes from 10.0.0.1: icmp_seq=3 time=0 ms
+          56 bytes from 10.0.0.1: icmp_seq=4 time=0 ms
+          56 bytes from 10.0.0.1: icmp_seq=5 time=0 ms
+          56 bytes from 10.0.0.1: icmp_seq=6 time=0 ms
+          56 bytes from 10.0.0.1: icmp_seq=7 time=0 ms
+          56 bytes from 10.0.0.1: icmp_seq=8 time=0 ms
+          56 bytes from 10.0.0.1: icmp_seq=9 time=0 ms
+          56 bytes from 10.0.0.1: icmp_seq=10 time=0 ms
+          10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
+
+        NOTE: In this configuration is is normal to have packet loss > 0%
+        the first time you ping due to the default handling of the ARP
+        table.
+
+        On the host side, you should also be able to ping the SAMA5D3-EK:
+
+          $ ping 10.0.0.2
+
+        You can also log into the NSH from the host PC like this:
+
+          $ telnet 10.0.0.2
+          Trying 10.0.0.2...
+          Connected to 10.0.0.2.
+          Escape character is '^]'.
+          sh_telnetmain: Session [3] Started
+
+          NuttShell (NSH) NuttX-6.30
+          nsh> help
+          help usage:  help [-v] [<cmd>]
+
+            [           echo        ifconfig    mkdir       mw          sleep       
+            ?           exec        ifdown      mkfatfs     ping        test        
+            cat         exit        ifup        mkfifo      ps          umount      
+            cp          free        kill        mkrd        put         usleep      
+            cmp         get         losetup     mh          rm          wget        
+            dd          help        ls          mount       rmdir       xd          
+            df          hexdump     mb          mv          sh          
+
+          Builtin Apps:
+          nsh> 
 
         NOTE:  If you enable this feature, you experience a delay on booting.
         That is because the start-up logic waits for the network connection
