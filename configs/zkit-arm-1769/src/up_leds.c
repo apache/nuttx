@@ -206,7 +206,7 @@ void up_ledoff(int led)
 
 void lpc17_led(int lednum, int state)
 {
-  lpc17_gpiowrite(ZKITARM_LED1, state);
+  lpc17_gpiowrite(lednum, state);
 }
 
 #endif /* CONFIG_ARCH_LEDS */
