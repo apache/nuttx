@@ -392,7 +392,7 @@ usbmsc:
 -------
 
   This configuration directory exercises the USB mass storage
-  class driver at examples/usbmsc.  See examples/README.txt for
+  class driver at system/usbmsc.  See examples/README.txt for
   more information.
 
   Default toolchain:  Buildroot

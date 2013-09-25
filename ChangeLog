@@ -5629,4 +5629,5 @@
 	  and STM32 Kconfigs into the common network driver Kconfig (2013-9-25).
 	* arch/arm/src/sam_emac.c:  EMAC driver is basically functional.  More
 	  testing is needed (as always) (2013-9-25).
-
+	* configs:  Changes to many defconfig files resulting from moving
+	  apps/examples/usbmsc to apps/system/usbmsc (2013-9-25).

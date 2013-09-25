@@ -720,7 +720,7 @@ CONFIG_HAVE_CXXINITIALIZE=y
 #
 # USB Mass Storage Class Example
 #
-# CONFIG_EXAMPLES_USBMSC is not set
+# CONFIG_SYSTEM_USBMSC is not set
 
 #
 # USB Serial Terminal Example

@@ -61,8 +61,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_EXAMPLES_USBMSC_DEVMINOR1
-#  define CONFIG_EXAMPLES_USBMSC_DEVMINOR1 0
+#ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
+#  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
 #endif
 
 /* SLOT number(s) could depend on the board configuration */
@@ -131,9 +131,9 @@ int usbmsc_archinitialize(void)
 
   message("usbmsc_archinitialize: "
           "Bind SDIO to the MMC/SD driver, minor=%d\n",
-          CONFIG_EXAMPLES_USBMSC_DEVMINOR1);
+          CONFIG_SYSTEM_USBMSC_DEVMINOR1);
 
-  ret = mmcsd_slotinitialize(CONFIG_EXAMPLES_USBMSC_DEVMINOR1, sdio);
+  ret = mmcsd_slotinitialize(CONFIG_SYSTEM_USBMSC_DEVMINOR1, sdio);
   if (ret != OK)
     {
       message("usbmsc_archinitialize: "

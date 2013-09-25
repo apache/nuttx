@@ -1095,7 +1095,7 @@ Where <subdir> is one of the following:
 
       CONFIG_CDCACM=y         : Enable the CDCACM device
 
-    examples/usbmsc - There are some hooks in the appconfig file
+    system/usbmsc - There are some hooks in the appconfig file
     to enable the USB mass storage device.  However, this device cannot
     work until support for the SD card is also incorporated.
 
@@ -1203,15 +1203,15 @@ Where <subdir> is one of the following:
 
     d) Use a RAM disk (instead of an SD card) as the USB MSC logical unit:
 
-      -CONFIG_EXAMPLES_USBMSC_DEVPATH1="/dev/mmcsd0"
-      +CONFIG_EXAMPLES_USBMSC_DEVPATH1="/dev/ram0"
+      -CONFIG_SYSTEM_USBMSC_DEVPATH1="/dev/mmcsd0"
+      +CONFIG_SYSTEM_USBMSC_DEVPATH1="/dev/ram0"
 
   2. Changes to apps/.config.
 
-    a) Enable building of the examples/usbmsc:
+    a) Enable building of the system/usbmsc:
 
-      -# CONFIGURED_APPS += examples/usbmsc
-      +  CONFIGURED_APPS += examples/usbmsc
+      -# CONFIGURED_APPS += system/usbmsc
+      +  CONFIGURED_APPS += system/usbmsc
 
   3. When NSH first comes up, you must manually create the RAM disk
      before exporting it:
