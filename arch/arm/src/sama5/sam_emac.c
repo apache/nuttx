@@ -215,7 +215,11 @@
 #  undef CONFIG_SAMA5_EMAC_REGDEBUG
 #endif
 
-/* Clocking *****************************************************************/
+#ifdef CONFIG_NET_DUMPPACKET
+#  define sam_dumppacket(m,a,n) lib_dumpbuffer(m,a,n)
+#else
+#  define sam_dumppacket(m,a,n)
+#endif
 
 /* Timing *******************************************************************/
 /* TX poll delay = 1 seconds. CLK_TCK is the number of clock ticks per
@@ -695,6 +699,7 @@ static int sam_transmit(struct sam_emac_s *priv)
   uint32_t status;
 
   nllvdbg("d_len: %d txhead: %d\n",  dev->d_len, priv->txhead);
+  sam_dumppacket("Transmit packet", dev->d_buf, dev->d_len);
 
   /* Check parameter */
 
@@ -724,7 +729,7 @@ static int sam_transmit(struct sam_emac_s *priv)
 
       virtaddr = sam_virtramaddr(txdesc->addr);
       memcpy((void *)virtaddr, dev->d_buf, dev->d_len);
-      cp15_flush_dcache((uint32_t)virtaddr, ((uint32_t)virtaddr + dev->d_len));
+      cp15_clean_dcache((uint32_t)virtaddr, (uint32_t)virtaddr + dev->d_len);
     }
 
   /* Update TX descriptor status. */
@@ -735,7 +740,11 @@ static int sam_transmit(struct sam_emac_s *priv)
       status |= EMACTXD_STA_WRAP;
     }
 
+  /* Update the descriptor status and flush the updated value to RAM */
+
   txdesc->status = status;
+  cp15_clean_dcache((uint32_t)txdesc,
+                    (uint32_t)txdesc + sizeof(struct emac_txdesc_s));
 
   /* Increment the head index */
 
@@ -867,7 +876,9 @@ static void sam_dopoll(struct sam_emac_s *priv)
  *   further packets available
  *
  * Assumptions:
- *   Global interrupts are disabled by interrupt handling logic.
+ *   - Global interrupts are disabled by interrupt handling logic.
+ *   - The RX descriptor D-cache list has been invalided to force fetching
+ *     from RAM.
  *
  ****************************************************************************/
 
@@ -894,7 +905,12 @@ static int sam_recvframe(struct sam_emac_s *priv)
   rxdesc     = &priv->rxdesc[rxndx];
   isframe    = false;
 
-  nllvdbg("rxndx: %d: %d\n", rxndx);
+  /* Invalidate the RX descriptor to force re-fetching from RAM */
+
+  cp15_invalidate_dcache((uintptr_t)rxdesc,
+                         (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
+
+  nllvdbg("rxndx: %d\n", rxndx);
 
   while ((rxdesc->addr & EMACRXD_ADDR_OWNER) != 0)
     {
@@ -908,8 +924,16 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
           while (rxndx != priv->rxndx)
             {
+              /* Give ownership back to the EMAC */
+
               rxdesc = &priv->rxdesc[priv->rxndx];
               rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
+
+              /* Flush the modified RX descriptor to RAM */
+
+              cp15_clean_dcache((uintptr_t)rxdesc,
+                                (uintptr_t)rxdesc +
+                                sizeof(struct emac_rxdesc_s));
 
               /* Increment the RX index */
 
@@ -945,8 +969,16 @@ static int sam_recvframe(struct sam_emac_s *priv)
               nllvdbg("ERROR: No EOF (Invalid of buffers too small)\n");
               do
                 {
+                  /* Give ownership back to the EMAC */
+
                   rxdesc = &priv->rxdesc[priv->rxndx];
                   rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
+
+                  /* Flush the modified RX descriptor to RAM */
+
+                  cp15_clean_dcache((uintptr_t)rxdesc,
+                                    (uintptr_t)rxdesc +
+                                    sizeof(struct emac_rxdesc_s));
 
                   /* Increment the RX index */
 
@@ -974,7 +1006,7 @@ static int sam_recvframe(struct sam_emac_s *priv)
           physaddr = (uintptr_t)(rxdesc->addr & EMACRXD_ADDR_MASK);
           src = (const uint8_t *)sam_virtramaddr(physaddr);
 
-          cp15_invalidate_dcache((uintptr_t)src, copylen);
+          cp15_invalidate_dcache((uintptr_t)src, (uintptr_t)src + copylen);
 
           /* And do the copy */
 
@@ -997,8 +1029,16 @@ static int sam_recvframe(struct sam_emac_s *priv)
 
               while (priv->rxndx != rxndx)
                 {
+                  /* Give ownership back to the EMAC */
+
                   rxdesc = &priv->rxdesc[priv->rxndx];
                   rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
+
+                  /* Flush the modified RX descriptor to RAM */
+
+                  cp15_clean_dcache((uintptr_t)rxdesc,
+                                    (uintptr_t)rxdesc +
+                                    sizeof(struct emac_rxdesc_s));
 
                   /* Increment the RX index */
 
@@ -1024,17 +1064,31 @@ static int sam_recvframe(struct sam_emac_s *priv)
             }
         }
 
-      /* We have not encount the SOF yet... discard this frament and keep looking */
+      /* We have not encount the SOF yet... discard this fragment and keep looking */
 
       else
         {
+          /* Give ownership back to the EMAC */
+
           rxdesc->addr &= ~(EMACRXD_ADDR_OWNER);
+
+          /* Flush the modified RX descriptor to RAM */
+
+          cp15_clean_dcache((uintptr_t)rxdesc,
+                            (uintptr_t)rxdesc +
+                            sizeof(struct emac_rxdesc_s));
+
           priv->rxndx = rxndx;
         }
 
     /* Process the next buffer */
 
     rxdesc = &priv->rxdesc[rxndx];
+
+    /* Invalidate the RX descriptor to force re-fetching from RAM */
+
+    cp15_invalidate_dcache((uintptr_t)rxdesc,
+                           (uintptr_t)rxdesc + sizeof(struct emac_rxdesc_s));
   }
 
   /* No packet was found */
@@ -1072,6 +1126,8 @@ static void sam_receive(struct sam_emac_s *priv)
 
   while (sam_recvframe(priv) == OK)
     {
+      sam_dumppacket("Received packet", dev->d_buf, dev->d_len);
+
       /* Check if the packet is a valid size for the uIP buffer configuration
        * (this should not happen)
        */
@@ -2538,6 +2594,12 @@ static void sam_rxreset(struct sam_emac_s *priv)
   /* Mark the final descriptor in the list */
 
   rxdesc[CONFIG_SAMA5_EMAC_NRXBUFFERS - 1].addr |= EMACRXD_ADDR_WRAP;
+
+  /* Flush the entire RX descriptor table to RAM */
+
+  cp15_clean_dcache((uintptr_t)rxdesc,
+                    (uintptr_t)rxdesc +
+                    CONFIG_SAMA5_EMAC_NRXBUFFERS * sizeof(struct emac_rxdesc_s));
 
   /* Set the Receive Buffer Queue Pointer Register */
 
