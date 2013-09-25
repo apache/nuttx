@@ -563,7 +563,7 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 #
 # USB CDC/ACM Class Driver Example
 #
-# CONFIG_EXAMPLES_CDCACM is not set
+# CONFIG_SYSTEM_CDCACM is not set
 
 #
 # USB composite Class Driver Example

@@ -1086,10 +1086,10 @@ Where <subdir> is one of the following:
       CONFIG_PL2303=y         : Enable the Prolifics PL2303 emulation
       CONFIG_CDCACM=y         : or the CDC/ACM serial driver (not both)
 
-    examples/cdcacm -  The examples/cdcacm program can be included as an 
+    system/cdcacm -  The system/cdcacm program can be included as an 
     function by uncommenting the following line in the appconfig file:
     
-      CONFIGURED_APPS += examples/cdcacm
+      CONFIGURED_APPS += system/cdcacm
 
     and defining the following in your .config file:
 

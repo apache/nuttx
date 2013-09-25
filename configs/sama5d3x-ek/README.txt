@@ -1737,7 +1737,7 @@ Configurations
         /dev/ttyACM0).
 
         Application Configuration -> Examples:
-          CONFIG_EXAMPLES_CDCACM=y              : Enable an CDC/ACM example
+          CONFIG_SYSTEM_CDCACM=y              : Enable an CDC/ACM example
 
         Debugging USB Device.  There is normal console debug output available
         that can be enabled with CONFIG_DEBUG + CONFIG_DEBUG_USB.  However,

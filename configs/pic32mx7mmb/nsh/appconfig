@@ -62,7 +62,7 @@ else
 
 ifeq ($(CONFIG_CDCACM),y)
 # Comment out to enable the examples/usbterm built-in
-  CONFIGURED_APPS += examples/cdcacm
+  CONFIGURED_APPS += system/cdcacm
 # Uncomment the following to enable the examples/usbterm built-in
 # CONFIGURED_APPS += examples/usbterm
 else
