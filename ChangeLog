@@ -5640,4 +5640,6 @@
 	* arch/arm/src/sama5/sam_gmac.c:  Initial GMAC driver is really
 	  just the EMAC driver forced to compile with the GMAC register
 	  definitions (2013-9-26).
+	* arch/arm/src/sama5/sam_gmac.c and include/nuttx/net/gmii.h:
+	  Beginning of support for GMII/RGMII PHY support (2013-9-26)
 

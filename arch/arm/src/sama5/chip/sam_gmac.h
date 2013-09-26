@@ -483,7 +483,7 @@
 #  define GMAC_NCFGR_CLK_DIV32    (2 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 32 (MCK up to 80 MHz) */
 #  define GMAC_NCFGR_CLK_DIV48    (3 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 48 (MCK up to 120 MHz) */
 #  define GMAC_NCFGR_CLK_DIV64    (4 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 64 (MCK up to 160 MHz) */
-#  define GMAC_NCFGR_CLK_DIV96    (5 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 64 (MCK up to 240 MHz) */
+#  define GMAC_NCFGR_CLK_DIV96    (5 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 96 (MCK up to 240 MHz) */
 #define GMAC_NCFGR_DBW_SHIFT      (21)      /* Bits 21-22: Data Bus Width */
 #define GMAC_NCFGR_DBW_MASK       (3 << GMAC_NCFGR_DBW_SHIFT)
 #  define GMAC_NCFGR_DBW_32       (0 << GMAC_NCFGR_DBW_SHIFT) /* 32-bit data bus width */

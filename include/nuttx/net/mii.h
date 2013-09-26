@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/mii.h
  *
- *   Copyright (C) 2008-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,21 +164,6 @@
 #define MII_LAN8720_IMR              0x1e      /* Interrupt Mask Register */
 #define MII_LAN8720_SCSR             0x1f      /* PHY Special Control/Status Register */
 
-/* GMII */
-
-#define GMII_MCR                     MII_MCR         /* GMII management control */
-#define GMII_MSR                     MII_MSR         /* GMII management status */
-#define GMII_PHYID1                  MII_PHYID1      /* PHY ID 1 */
-#define GMII_PHYID2                  MII_PHYID2      /* PHY ID 2 */
-#define GMII_ADVERTISE               MII_ADVERTISE   /* Auto-negotiation advertisement */
-#define GMII_LPA                     MII_LPA         /* Auto-negotiation link partner base page ability */
-#define GMII_EXPANSION               MII_EXPANSION   /* Auto-negotiation expansion */
-#define GMII_NEXTPAGE                MII_NEXTPAGE    /* Auto-negotiation next page */
-#define GMII_LPANEXTPAGE             MII_LPANEXTPAGE /* Auto-negotiation link partner received next page */
-#define GMII_CTRL1000                0x09            /* 1000BASE-T control */
-#define GMII_STAT1000                0x0a            /* 1000BASE-T status */
-#define GMII_ESTATUS                 MII_ESTATUS     /* Extended status register */
-
 /* MII register bit settings ************************************************/
 
 /* MII Control register bit definitions */
@@ -204,6 +189,7 @@
 #define MII_MSR_RFAULT               (1 << 4)  /* Bit 4:  Remote fault */
 #define MII_MSR_ANEGCOMPLETE         (1 << 5)  /* Bit 5:  Auto-negotiation complete */
 #define MII_MSR_MFRAMESUPPRESS       (1 << 6)  /* Bit 6:  Management frame suppression */
+#define MII_MSR_UNIDIR               (1 << 7)  /* Bit 7:  Unidirectional ability */
 #define MII_MSR_ESTATEN              (1 << 8)  /* Bit 8:  Extended Status in R15 */
 #define MII_MSR_100BASET2FULL        (1 << 9)  /* Bit 9:  100BASE-T2 half duplex able */
 #define MII_MSR_100BASET2HALF        (1 << 10) /* Bit 10: 100BASE-T2 full duplex able */
@@ -213,11 +199,12 @@
 #define MII_MSR_100BASETXFULL        (1 << 14) /* Bit 14: 100BASE-TX full duplex able */
 #define MII_MSR_100BASET4            (1 << 15) /* Bit 15: 100BASE-T4 able */
 
+/* MII ID1 register bits: Bits 3-18 of the Organizationally Unique identifier (OUI) */
 /* MII ID2 register bits */
 
-#define MII_PHYID2_OUI               0xfc00    /* Bits 19-24 of OUI mask */
-#define MII_PHYID2_MODEL             0x03f0    /* Model number mask */
-#define MII_PHYID2_REV               0x000f    /* Revision number mask */
+#define MII_PHYID2_OUI               0xfc00    /* Bits 10-15: OUI mask [24:19] */
+#define MII_PHYID2_MODEL             0x03f0    /* Bits 4-9: Model number mask */
+#define MII_PHYID2_REV               0x000f    /* Bits 0-3: Revision number mask */
 
 /* Advertisement control register bit definitions */
 
@@ -289,6 +276,26 @@
 #define MII_NPADVERTISE_ACK2         (1 << 12) /* Bit 12: Acknowledgement 2 */
 #define MII_NPADVERTISE_MSGPAGE      (1 << 13) /* Bit 13: Message page */
 #define MII_NPADVERTISE_NXTPAGE      (1 << 15) /* Bit 15: Next page indication */
+
+/* MMD access control register */
+
+#define MII_MMDCONTROL_DEVAD_SHIFT    (0)      /* Bits 0-4: Device address */
+#define MII_MMDCONTROL_DEVAD_MASK     (31 << MII_MMDCONTROL_DEVAD_SHIFT)
+#  define MII_MMDCONTROL_DEVAD(n)     ((n) << MII_MMDCONTROL_DEVAD_SHIFT)
+                                               /* Bits 5-13: Reserved */
+#define MII_MMDCONTROL_FUNC_SHIFT    (14)      /* Bits 14-15: Function */
+#define MII_MMDCONTROL_FUNC_MASK     (3 << MII_MMDCONTROL_FUNC_SHIFT)
+#  define MII_MMDCONTROL_FUNC_ADDR   (0 << MII_MMDCONTROL_FUNC_SHIFT) /* Address */
+#  define MII_MMDCONTROL_FUNC_NOINCR (1 << MII_MMDCONTROL_FUNC_SHIFT) /* Data, no post increment */
+#  define MII_MMDCONTROL_FUNC_RWINCR (2 << MII_MMDCONTROL_FUNC_SHIFT) /* Data, post incr on reads & writes */
+#  define MII_MMDCONTROL_FUNC_WINCR  (3 << MII_MMDCONTROL_FUNC_SHIFT) /* Data, post incr on writes */
+
+/* Extended status register */
+                                               /* Bits 0-11: Reserved */
+#define MII_ESTATUS_1000BASETHALF    (1 << 12) /* Bit 12: 1000BASE-T Half Duplex able */
+#define MII_ESTATUS_1000BASETFULL    (1 << 13) /* Bit 13: 1000BASE-T Full Duplex able */
+#define MII_ESTATUS_1000BASEXHALF    (1 << 14) /* Bit 14: 1000BASE-X Half Duplex able */
+#define MII_ESTATUS_1000BASEXFULL    (1 << 15) /* Bit 15: 1000BASE-X Full Duplex able */
 
 /* MII PHYADDR register bit definitions */
 

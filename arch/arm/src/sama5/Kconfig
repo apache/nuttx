@@ -277,7 +277,7 @@ config SAMA5_GMAC_NRXBUFFERS
 
 config SAMA5_GMAC_NTXBUFFERS
 	int "Number of TX buffers"
-	default 1
+	default 8
 	---help---
 		GMAC buffer memory is segmented into full Ethernet packets (size
 		NET_BUFSIZE bytes).  This setting provides the number of such packets
@@ -471,7 +471,7 @@ config SAMA5_EMAC_NRXBUFFERS
 
 config SAMA5_EMAC_NTXBUFFERS
 	int "Number of TX buffers"
-	default 1
+	default 8
 	---help---
 		EMAC buffer memory is segmented into full Ethernet packets (size
 		NET_BUFSIZE bytes).  This setting provides the number of such packets
