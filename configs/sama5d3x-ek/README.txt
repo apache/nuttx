@@ -2023,7 +2023,7 @@ Configurations
           Escape character is '^]'.
           sh_telnetmain: Session [3] Started
 
-          NuttShell (NSH) NuttX-6.30
+          NuttShell (NSH) NuttX-6.31
           nsh> help
           help usage:  help [-v] [<cmd>]
 

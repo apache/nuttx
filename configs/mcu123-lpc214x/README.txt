@@ -334,7 +334,7 @@ composite:
 ----------
 
   A simple test of the USB Composite Device (see
-  apps/examples/README.txt and apps/examples/composite)
+  apps/examples/README.txt and apps/system/composite)
 
   Default toolchain:  CodeSourcery for Windows
   Output format:  ELF and Intel HEX

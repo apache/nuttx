@@ -61,8 +61,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_EXAMPLES_COMPOSITE_DEVMINOR1
-#  define CONFIG_EXAMPLES_COMPOSITE_DEVMINOR1 0
+#ifndef CONFIG_SYSTEM_COMPOSITE_DEVMINOR1
+#  define CONFIG_SYSTEM_COMPOSITE_DEVMINOR1 0
 #endif
 
 /* SLOT number(s) could depend on the board configuration */
@@ -109,7 +109,7 @@
 
 int composite_archinitialize(void)
 {
-  /* If examples/composite is built as an NSH command, then SD slot should
+  /* If system/composite is built as an NSH command, then SD slot should
    * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
    * this case, there is nothing further to be done here.
    *
@@ -137,9 +137,9 @@ int composite_archinitialize(void)
   /* Now bind the SDIO interface to the MMC/SD driver */
 
   message("composite_archinitialize: Bind SDIO to the MMC/SD driver, minor=%d\n",
-          CONFIG_EXAMPLES_COMPOSITE_DEVMINOR1);
+          CONFIG_SYSTEM_COMPOSITE_DEVMINOR1);
 
-  ret = mmcsd_slotinitialize(CONFIG_EXAMPLES_COMPOSITE_DEVMINOR1, sdio);
+  ret = mmcsd_slotinitialize(CONFIG_SYSTEM_COMPOSITE_DEVMINOR1, sdio);
   if (ret != OK)
     {
       message("composite_archinitialize: Failed to bind SDIO to the MMC/SD driver: %d\n",
