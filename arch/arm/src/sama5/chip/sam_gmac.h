@@ -590,8 +590,8 @@
 #define GMAC_MAN_DATA_MASK        (0x0000ffff << GMAC_MAN_DATA_SHIFT)
 #  define GMAC_MAN_DATA(n)        ((uint32_t)(n) << GMAC_MAN_DATA_SHIFT)
 #define GMAC_MAN_WTN_SHIFT        (16)      /* Bits 16-17:  Must be written to b10 */
-#define GMAC_MAN_WTN_MASK         (3 << GMAC_MAN_CODE_SHIFT)
-#  define GMAC_MAN_WTN            (2 << GMAC_MAN_CODE_SHIFT)
+#define GMAC_MAN_WTN_MASK         (3 << GMAC_MAN_WTN_SHIFT)
+#  define GMAC_MAN_WTN            (2 << GMAC_MAN_WTN_SHIFT)
 #define GMAC_MAN_REGA_SHIFT       (18)      /* Bits 18-22: Register Address */
 #define GMAC_MAN_REGA_MASK        (31 << GMAC_MAN_REGA_SHIFT)
 #  define GMAC_MAN_REGA(n)        ((uint32_t)(n) << GMAC_MAN_REGA_SHIFT)
@@ -914,5 +914,100 @@
 #define GMAC_ST2RPQ0_VLANP_MASK   (15 << GMAC_ST2RPQ0_VLANP_SHIFT)
 #  define GMAC_ST2RPQ0_VLANP(n)   ((n) << GMAC_ST2RPQ0_VLANP_SHIFT)
 #define GMAC_ST2RPQ0_VLANE        (1 << 8)  /* Bit 8:  VLAN Enable */
+
+/* Descriptors **********************************************************************/
+
+/* Receive buffer descriptor:  Address word */
+
+#define GMACRXD_ADDR_OWNER        (1 << 0)  /* Bit 0:  1=Software owns; 0=GMAC owns */
+#define GMACRXD_ADDR_WRAP         (1 << 1)  /* Bit 1:  Last descriptor in list */
+#define GMACRXD_ADDR_MASK         (0xfffffffc) /* Bits 2-31: Aligned buffer address */
+
+/* Receive buffer descriptor:  Control word */
+
+#define GMACRXD_STA_FRLEN_SHIFT   (0)       /* Bits 0-12: Length of frame */
+#define GMACRXD_STA_FRLEN_MASK    (0x00000fff << GMACRXD_STA_FRLEN_SHIFT)
+#define GMACRXD_STA_JFRLEN_SHIFT  (0)      /* Bits 0-13: Length of jumbo frame */
+#define GMACRXD_STA_JFRLEN_MASK   (0x00001fff << GMACRXD_STA_JFRLEN_SHIFT)
+#define GMACRXD_STA_BADFCS        (1 << 13) /* Bit 13: Frame had bad FCS */
+#define GMACRXD_STA_SOF           (1 << 14) /* Bit 14: Start of frame */
+#define GMACRXD_STA_EOF           (1 << 15) /* Bit 15: End of frame */
+#define GMACRXD_STA_CFI           (1 << 16) /* Bit 16: Canonical format indicator (CFI) bit */
+#define GMACRXD_STA_VLPRIO_SHIFT  (17)      /* Bits 17-19: VLAN priority */
+#define GMACRXD_STA_VLPRIO_MASK   (7 << GMACRXD_STA_VLANPRIO_SHIFT)
+#define GMACRXD_STA_PRIODET       (1 << 20) /* Bit 20: Priority tag detected */
+#define GMACRXD_STA_VLANTAG       (1 << 21) /* Bit 21: VLAN tag detected */
+#define GMACRXD_STA_TYPID_SHIFT   (22) /* Bits 22-23: Type ID register match */
+#define GMACRXD_STA_TYPID_MASK    (3 << GMACRXD_STA_TYPID_SHIFT)
+#  define GMACRXD_STA_TYPID1      (0 << GMACRXD_STA_TYPID_SHIFT) /* Type ID register 1 match */
+#  define GMACRXD_STA_TYPID2      (1 << GMACRXD_STA_TYPID_SHIFT) /* Type ID register 2 match */
+#  define GMACRXD_STA_TYPID3      (2 << GMACRXD_STA_TYPID_SHIFT) /* Type ID register 3 match */
+#  define GMACRXD_STA_TYPID4      (3 << GMACRXD_STA_TYPID_SHIFT) /* Type ID register 4 match */
+#define GMACRXD_STA_SNAP_SHIFT    (22) /* Bits 22-23: Specific Address Register match */
+#define GMACRXD_STA_SNAP_MASK     (3 << GMACRXD_STA_SNAP_SHIFT)
+#  define GMACRXD_STA_SNAP_NOCHK  (0 << GMACRXD_STA_SNAP_SHIFT) /* Checksum not checked */
+#  define GMACRXD_STA_SNAP_IPCHK  (1 << GMACRXD_STA_SNAP_SHIFT) /* IP header checksum checked */
+#  define GMACRXD_STA_SNAP_TCPCHK (2 << GMACRXD_STA_SNAP_SHIFT) /* IP header and TCP checksum checked */
+#  define GMACRXD_STA_SNAP_UDPCHK (3 << GMACRXD_STA_SNAP_SHIFT) /* IP header and UDP checksum checked */
+#define GMACRXD_STA_TYPID         (1 << 24) /* Bit 24: Type ID match found */
+#define GMACRXD_STA_SNAP          (1 << 24) /* Bit 24: Frame was SNAP encoded */
+#define GMACRXD_STA_ADDR_SHIFT    (25)      /* Bits 25-26: Specific Address Register match */
+#define GMACRXD_STA_ADDR_MASK     (3 << GMACRXD_STA_ADDR_SHIFT)
+# define GMACRXD_STA_ADDR1_MATCH  (0 << GMACRXD_STA_ADDR_SHIFT) /* Specific address register 1 match */
+# define GMACRXD_STA_ADDR2_MATCH  (1 << GMACRXD_STA_ADDR_SHIFT) /* Specific address register 2 match */
+# define GMACRXD_STA_ADDR3_MATCH  (2 << GMACRXD_STA_ADDR_SHIFT) /* Specific address register 3 match */
+# define GMACRXD_STA_ADDR4_MATCH  (3 << GMACRXD_STA_ADDR_SHIFT) /* Specific address register 4 match */
+#define GMACRXD_STA_ADDRMATCH     (1 << 27) /* Bit 27: Specific Address Register match found */
+                                            /* Bit 28: Reserved */
+#define GMACRXD_STA_UCAST         (1 << 29) /* Bit 29: Unicast hash match */
+#define GMACRXD_STA_MCAST         (1 << 30) /* Bit 30: Multicast hash match */
+#define GMACRXD_STA_BCAST         (1 << 31) /* Bit 31: Global all ones broadcast address detected */
+
+/* Transmit buffer descriptor:  Address word (un-aligned, 32-bit address */
+
+/* Transmit buffer descriptor:  Control word */
+
+#define GMACTXD_STA_BUFLEN_SHIFT  (0)       /* Bits 0-13: Length of buffer */
+#define GMACTXD_STA_BUFLEN_MASK   (0x00003fff << GMACTXD_STA_BUFLEN_SHIFT)
+                                            /* Bit 14: Reserved */
+#define GMACTXD_STA_LAST          (1 << 15) /* Bit 15: Last buffer in the current frame */
+#define GMACTXD_STA_NOCRC         (1 << 16) /* Bit 16: No CRC */
+                                            /* Bits 17-19: Reserved */
+#define GMACTXD_STA_CKERR_SHIFT   (20)      /* Bits 20-22: Transmit checksum generation errors */
+#define GMACTXD_STA_CKERR_MASK    (7 << GMACTXD_STA_CKERR_SHIFT)
+#  define GMACTXD_STA_CKERR_OK    (0 << GMACTXD_STA_CKERR_SHIFT) /* No Error */
+#  define GMACTXD_STA_CKERR_VLAN  (1 << GMACTXD_STA_CKERR_SHIFT) /* VLAN header error */
+#  define GMACTXD_STA_CKERR_SNAP  (2 << GMACTXD_STA_CKERR_SHIFT) /* SNAP header error */
+#  define GMACTXD_STA_CKERR_IP    (3 << GMACTXD_STA_CKERR_SHIFT) /* Bad IP type */
+#  define GMACTXD_STA_CKERR_UNK   (4 << GMACTXD_STA_CKERR_SHIFT) /* Not VLAN, SNAP or IP */
+#  define GMACTXD_STA_CKERR_FRAG  (5 << GMACTXD_STA_CKERR_SHIFT) /* Bad packet fragmentation */
+#  define GMACTXD_STA_CKERR_PROTO (6 << GMACTXD_STA_CKERR_SHIFT) /* Not TCP or UDP */
+#  define GMACTXD_STA_CKERR_END   (7 << GMACTXD_STA_CKERR_SHIFT) /* Premature end of packet */
+                                            /* Bits 23-25: Reserved */
+#define GMACTXD_STA_LCOL          (1 << 26) /* Bit 26: Late collision */
+#define GMACTXD_STA_TFC           (1 << 27) /* Bit 27: Transmit Frame Corruption due to AHB error */
+#define GMACTXD_STA_TXUR          (1 << 28) /* Bit 28: Transmit underrun */
+#define GMACTXD_STA_TXERR         (1 << 29) /* Bit 29: Retry limit exceeded, transmit error detected */
+#define GMACTXD_STA_WRAP          (1 << 30) /* Bit 30: Last descriptor in descriptor list */
+#define GMACTXD_STA_USED          (1 << 31) /* Bit 31: Zero for the GMAC to read from buffer */
+
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+/* Receive buffer descriptor */
+
+struct gmac_rxdesc_s
+{
+  uint32_t addr;     /* Buffer address */
+  uint32_t status;   /* RX status and controls */
+};
+
+/* Transmit buffer descriptor */
+
+struct gmac_txdesc_s
+{
+  uint32_t addr;     /* Buffer address */
+  uint32_t status;   /* TX status and controls */
+};
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_GMAC_H */

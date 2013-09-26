@@ -5637,3 +5637,7 @@
 	  apps/examples/composite to apps/system/composite (2013-9-25).
 	* configs/stm3210e-eval/composite:  Converted to use the kconfig-
 	  frontends tool (2013-9-25).
+	* arch/arm/src/sama5/sam_gmac.c:  Initial GMAC driver is really
+	  just the EMAC driver forced to compile with the GMAC register
+	  definitions (2013-9-26).
+
