@@ -157,8 +157,8 @@ void up_ledon(int led)
           break;
         }
 
-      lpc17_led(ZKITARM_LED1, led1);
-      lpc17_led(ZKITARM_LED2, led2);
+      lpc17_gpiowrite(ZKITARM_LED1, led1);
+      lpc17_gpiowrite(ZKITARM_LED2, led2);
     }
 
   /* We will always control the HB LED */
@@ -187,7 +187,7 @@ void up_ledoff(int led)
 
   if (g_nestcount <= 1)
     {
-      lpc17_led(ZKITARM_LED2, true);
+      lpc17_gpiowrite(ZKITARM_LED2, true);
       g_nestcount = 0;
     }
   else
@@ -206,7 +206,7 @@ void up_ledoff(int led)
 
 void lpc17_led(int lednum, int state)
 {
-  lpc17_gpiowrite(lednum, state);
+  lpc17_gpiowrite(ZKITARM_LED1, state);
 }
 
 #endif /* CONFIG_ARCH_LEDS */
