@@ -75,6 +75,8 @@
 #    define SAMA5_GMAC_PHY_LAN8700 1
 #  elif defined(CONFIG_ETH0_PHY_KSZ8051)
 #    define SAMA5_GMAC_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ90x1)
+#    define SAMA5_GMAC_PHY_KSZ90x1 1
 #  else
 #    error ETH0 PHY unrecognized
 #  endif
@@ -85,6 +87,8 @@
 #    define SAMA5_GMAC_PHY_LAN8700 1
 #  elif defined(CONFIG_ETH1_PHY_KSZ8051)
 #    define SAMA5_GMAC_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH1_PHY_KSZ90x1)
+#    define SAMA5_GMAC_PHY_KSZ90x1 1
 #  else
 #    error ETH1 PHY unrecognized
 #  endif
@@ -97,6 +101,8 @@
 #    define SAMA5_EMAC_PHY_LAN8700 1
 #  elif defined(CONFIG_ETH0_PHY_KSZ8051)
 #    define SAMA5_EMAC_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH0_PHY_KSZ90x1)
+#    define SAMA5_EMAC_PHY_KSZ90x1 1
 #  else
 #    error ETH0 PHY unrecognized
 #  endif
@@ -107,6 +113,8 @@
 #    define SAMA5_EMAC_PHY_LAN8700 1
 #  elif defined(CONFIG_ETH1_PHY_KSZ8051)
 #    define SAMA5_EMAC_PHY_KSZ8051 1
+#  elif defined(CONFIG_ETH1_PHY_KSZ90x1)
+#    define SAMA5_EMAC_PHY_KSZ90x1 1
 #  else
 #    error ETH1 PHY unrecognized
 #  endif

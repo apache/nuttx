@@ -94,7 +94,7 @@
 /* Number of buffer for TX */
 
 #ifndef CONFIG_SAMA5_EMAC_NTXBUFFERS
-#  define CONFIG_SAMA5_EMAC_NTXBUFFERS  32
+#  define CONFIG_SAMA5_EMAC_NTXBUFFERS  8
 #endif
 
 #undef CONFIG_SAMA5_EMAC_NBC
@@ -294,11 +294,13 @@ static struct sam_emac_s g_emac;
 /* Preallocated data */
 /* TX descriptors list */
 
-static struct emac_txdesc_s g_txdesc[TX_BUFFERS] __attribute__((aligned(8)));
+static struct emac_txdesc_s g_txdesc[CONFIG_SAMA5_EMAC_NTXBUFFERS]
+              __attribute__((aligned(8)));
 
 /* RX descriptors list */
 
-static struct emac_rxdesc_s g_rxdesc[RX_BUFFERS]__attribute__((aligned(8)));
+static struct emac_rxdesc_s g_rxdesc[CONFIG_SAMA5_EMAC_NRXBUFFERS]
+              __attribute__((aligned(8)));
 
 /* Transmit Buffers
  *

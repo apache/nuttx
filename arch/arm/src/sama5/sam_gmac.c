@@ -60,7 +60,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/net/mii.h>
+#include <nuttx/net/gmii.h>
 #include <nuttx/net/uip/uip.h>
 #include <nuttx/net/uip/uip-arp.h>
 #include <nuttx/net/uip/uip-arch.h>
@@ -94,7 +94,7 @@
 /* Number of buffer for TX */
 
 #ifndef CONFIG_SAMA5_GMAC_NTXBUFFERS
-#  define CONFIG_SAMA5_GMAC_NTXBUFFERS  32
+#  define CONFIG_SAMA5_GMAC_NTXBUFFERS  8
 #endif
 
 #undef CONFIG_SAMA5_GMAC_NBC
@@ -149,17 +149,11 @@
 
 /* PHY definitions */
 
-#if defined(SAMA5_GMAC_PHY_DM9161)
-#  define MII_OUI_MSB    0x0181
-#  define MII_OUI_LSB    0x2e
-#elif defined(SAMA5_GMAC_PHY_LAN8700)
-#  define MII_OUI_MSB    0x0007
-#  define MII_OUI_LSB    0x30
-#elif defined(SAMA5_GMAC_PHY_KSZ8051)
-#  define MII_OUI_MSB    0x0022
-#  define MII_OUI_LSB    0x05
+#ifdef SAMA5_GMAC_PHY_KSZ90x1
+#  define GMII_OUI_MSB       0x0022
+#  define GMII_OUI_LSB       0x05
 #else
-#  error GMAC PHY unrecognized
+#  error Unknown PHY
 #endif
 
 #ifdef CONFIG_SAMA5_GMAC_PHYSR_ALTCONFIG
@@ -203,6 +197,13 @@
 #define GMAC_RX_UNITSIZE 128                 /* Fixed size for RX buffer  */
 #define GMAC_TX_UNITSIZE CONFIG_NET_BUFSIZE  /* MAX size for Ethernet packet */
 
+/* The MAC can support frame lengths up to 1536 bytes */
+
+#define GMAC_MAX_FRAMELEN       1536
+#if CONFIG_NET_BUFSIZE >GMAC_MAX_FRAMELEN
+#  error CONFIG_NET_BUFSIZE is too large
+#endif
+
 /* We need at least one more free buffer than transmit buffers */
 
 #define SAM_GMAC_NFREEBUFFERS (CONFIG_SAMA5_GMAC_NTXBUFFERS+1)
@@ -235,7 +236,7 @@
 
 /* PHY read/write delays in loop counts */
 
-#define PHY_RETRY_MAX    1000000
+#define PHY_RETRY_MAX   300000
 
 /* Helpers ******************************************************************/
 /* This is a helper pointer for accessing the contents of the GMAC
@@ -294,11 +295,13 @@ static struct sam_gmac_s g_gmac;
 /* Preallocated data */
 /* TX descriptors list */
 
-static struct gmac_txdesc_s g_txdesc[TX_BUFFERS] __attribute__((aligned(8)));
+static struct gmac_txdesc_s g_txdesc[CONFIG_SAMA5_GMAC_NTXBUFFERS]
+              __attribute__((aligned(8)));
 
 /* RX descriptors list */
 
-static struct gmac_rxdesc_s g_rxdesc[RX_BUFFERS]__attribute__((aligned(8)));
+static struct gmac_rxdesc_s g_rxdesc[CONFIG_SAMA5_GMAC_NRXBUFFERS]
+              __attribute__((aligned(8)));
 
 /* Transmit Buffers
  *
@@ -307,14 +310,13 @@ static struct gmac_rxdesc_s g_rxdesc[RX_BUFFERS]__attribute__((aligned(8)));
  * shall be set to 0
  */
 
-static uint8_t g_txbuffer[CONFIG_SAMA5_GMAC_NTXBUFFERS * GMAC_TX_UNITSIZE];
-               __attribute__((aligned(8)))
+static uint8_t g_txbuffer[CONFIG_SAMA5_GMAC_NTXBUFFERS * GMAC_TX_UNITSIZE]
+               __attribute__((aligned(8)));
 
 /* Receive Buffers */
 
 static uint8_t g_rxbuffer[CONFIG_SAMA5_GMAC_NRXBUFFERS * GMAC_RX_UNITSIZE]
                __attribute__((aligned(8)));
-
 #endif
 
 /****************************************************************************
@@ -384,6 +386,7 @@ static int  sam_phywrite(struct sam_gmac_s *priv, uint8_t phyaddr,
                          uint8_t regaddr, uint16_t phyval);
 static int  sam_autonegotiate(struct sam_gmac_s *priv);
 static bool sam_linkup(struct sam_gmac_s *priv);
+static void sam_mdcclock(struct sam_gmac_s *priv);
 static int  sam_phyinit(struct sam_gmac_s *priv);
 
 /* GMAC Initialization */
@@ -1786,9 +1789,7 @@ static void sam_phydump(struct sam_gmac_s *priv)
 
   /* Enable management port */
 
-  regval  = sam_getreg(priv, SAM_GMAC_NCR);
-  regval |= GMAC_NCR_MPE;
-  sam_putreg(priv, SAM_GMAC_NCR, regval);
+  sam_enablemdio(priv);
 
 #ifdef CONFIG_SAMA5_GMAC_RGMII
   nllvdbg("RMII Registers (Address %02x)\n", priv->phyaddr);
@@ -1796,24 +1797,88 @@ static void sam_phydump(struct sam_gmac_s *priv)
   nllvdbg("MII Registers (Address %02x)\n", priv->phyaddr);
 #endif
 
-  sam_phyread(priv, priv->phyaddr, MII_MCR, &phyval);
+  sam_phyread(priv, priv->phyaddr, GMII_MCR, &phyval);
   nllvdbg("  MCR:       %04x\n", phyval);
-  sam_phyread(priv, priv->phyaddr, MII_MSR, &phyval);
+  sam_phyread(priv, priv->phyaddr, GMII_MSR, &phyval);
   nllvdbg("  MSR:       %04x\n", phyval);
-  sam_phyread(priv, priv->phyaddr, MII_ADVERTISE, &phyval);
+  sam_phyread(priv, priv->phyaddr, GMII_ADVERTISE, &phyval);
   nllvdbg("  ADVERTISE: %04x\n", phyval);
-  sam_phyread(priv, priv->phyaddr, MII_LPA, &phyval);
+  sam_phyread(priv, priv->phyaddr, GMII_LPA, &phyval);
   nllvdbg("  LPR:       %04x\n", phyval);
   sam_phyread(priv, priv->phyaddr, CONFIG_SAMA5_GMAC_PHYSR, &phyval);
   nllvdbg("  PHYSR:     %04x\n", phyval);
 
   /* Disable management port */
 
-  regval  = sam_getreg(priv, SAM_GMAC_NCR);
-  regval &= ~GMAC_NCR_MPE;
-  sam_putreg(priv, SAM_GMAC_NCR, regval);
+  sam_disablemdio(priv);
 }
 #endif
+
+/****************************************************************************
+ * Function: sam_enablemdio
+ *
+ * Description:
+ *  Enable the management port
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sam_enablemdio(struct sam_gmac_s *priv)
+{
+  uint32_t regval;
+  uint32_t enables;
+
+  /* Enable management port */
+
+  regval  = sam_getreg(priv, SAM_GMAC_NCR);
+  enables = regval & (GMAC_NCR_RXEN | GMAC_NCR_TXEN);
+
+  regval &= ~(GMAC_NCR_RXEN | GMAC_NCR_TXEN);
+  regval |= GMAC_NCR_MPE;
+  sam_putreg(priv, SAM_GMAC_NCR, regval);
+
+  regval |= enables;
+  sam_putreg(priv, SAM_GMAC_NCR, regval);
+}
+
+/****************************************************************************
+ * Function: sam_disablemdio
+ *
+ * Description:
+ *  Disable the management port
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sam_disablemdio(struct sam_gmac_s *priv)
+{
+  uint32_t regval;
+  uint32_t enables;
+
+  /* Disable management port */
+
+  regval  = sam_getreg(priv, SAM_GMAC_NCR);
+  enables = regval & (GMAC_NCR_RXEN | GMAC_NCR_TXEN);
+
+  regval &= ~(GMAC_NCR_RXEN | GMAC_NCR_TXEN);
+  sam_putreg(priv, SAM_GMAC_NCR, regval);
+
+  regval &= ~GMAC_NCR_MPE;
+  sam_putreg(priv, SAM_GMAC_NCR, regval);
+
+  regval |= enables;
+  sam_putreg(priv, SAM_GMAC_NCR, regval);
+}
 
 /****************************************************************************
  * Function: sam_phywait
@@ -1866,7 +1931,6 @@ static int sam_phywait(struct sam_gmac_s *priv)
 
 static int sam_phyreset(struct sam_gmac_s *priv)
 {
-  uint32_t regval;
   uint16_t mcr;
   int timeout;
   int ret;
@@ -1875,13 +1939,11 @@ static int sam_phyreset(struct sam_gmac_s *priv)
 
   /* Enable management port */
 
-  regval  = sam_getreg(priv, SAM_GMAC_NCR);
-  regval |= GMAC_NCR_MPE;
-  sam_putreg(priv, SAM_GMAC_NCR, regval);
+  sam_enablemdio(priv);
 
   /* Reset the PHY */
 
-  ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, MII_MCR_RESET);
+  ret = sam_phywrite(priv, priv->phyaddr, GMII_MCR, GMII_MCR_RESET);
   if (ret < 0)
     {
       nlldbg("ERROR: sam_phywrite failed: %d\n", ret);
@@ -1892,14 +1954,14 @@ static int sam_phyreset(struct sam_gmac_s *priv)
   ret = -ETIMEDOUT;
   for (timeout = 0; timeout < 10; timeout++)
     {
-      mcr = MII_MCR_RESET;
-      int result = sam_phyread(priv, priv->phyaddr, MII_MCR, &mcr);
+      mcr = GMII_MCR_RESET;
+      int result = sam_phyread(priv, priv->phyaddr, GMII_MCR, &mcr);
       if (result < 0)
         {
           nlldbg("ERROR: Failed to read the MCR register: %d\n", ret);
           ret = result;
         }
-      else if ((mcr & MII_MCR_RESET) == 0)
+      else if ((mcr & GMII_MCR_RESET) == 0)
         {
           ret = OK;
           break;
@@ -1908,9 +1970,7 @@ static int sam_phyreset(struct sam_gmac_s *priv)
 
   /* Disable management port */
 
-  regval  = sam_getreg(priv, SAM_GMAC_NCR);
-  regval &= ~GMAC_NCR_MPE;
-  sam_putreg(priv, SAM_GMAC_NCR, regval);
+  sam_disablemdio(priv);
   return ret;
 }
 
@@ -1932,7 +1992,6 @@ static int sam_phyreset(struct sam_gmac_s *priv)
 
 static int sam_phyfind(struct sam_gmac_s *priv, uint8_t *phyaddr)
 {
-  uint32_t regval;
   uint16_t phyval;
   uint8_t candidate;
   unsigned int offset;
@@ -1942,16 +2001,14 @@ static int sam_phyfind(struct sam_gmac_s *priv, uint8_t *phyaddr)
 
   /* Enable management port */
 
-  regval  = sam_getreg(priv, SAM_GMAC_NCR);
-  regval |= GMAC_NCR_MPE;
-  sam_putreg(priv, SAM_GMAC_NCR, regval);
+  sam_enablemdio(priv);
+
+  /* Check initial candidate address */
 
   candidate = *phyaddr;
 
-  /* Check current candidate address */
-
-  ret = sam_phyread(priv, candidate, MII_PHYID1, &phyval);
-  if (ret == OK && phyval == MII_OUI_MSB)
+  ret = sam_phyread(priv, candidate, GMII_PHYID1, &phyval);
+  if (ret == OK && phyval == GMII_OUI_MSB)
     {
       *phyaddr = candidate;
       ret = OK;
@@ -1972,8 +2029,8 @@ static int sam_phyfind(struct sam_gmac_s *priv, uint8_t *phyaddr)
 
           /* Try reading the PHY ID from the candidate PHY address */
 
-          ret = sam_phyread(priv, candidate, MII_PHYID1, &phyval);
-          if (ret == OK && phyval == MII_OUI_MSB)
+          ret = sam_phyread(priv, candidate, GMII_PHYID1, &phyval);
+          if (ret == OK && phyval == GMII_OUI_MSB)
             {
               ret = OK;
               break;
@@ -1991,9 +2048,7 @@ static int sam_phyfind(struct sam_gmac_s *priv, uint8_t *phyaddr)
 
   /* Disable management port */
 
-  regval  = sam_getreg(priv, SAM_GMAC_NCR);
-  regval &= ~GMAC_NCR_MPE;
-  sam_putreg(priv, SAM_GMAC_NCR, regval);
+  sam_disablemdio(priv);
   return ret;
 }
 
@@ -2034,7 +2089,7 @@ static int sam_phyread(struct sam_gmac_s *priv, uint8_t phyaddr,
   /* Write the PHY Maintenance register */
 
   regval = GMAC_MAN_DATA(0) | GMAC_MAN_WTN | GMAC_MAN_REGA(regaddr) |
-           GMAC_MAN_PHYA(priv->phyaddr) | GMAC_MAN_READ;
+           GMAC_MAN_PHYA(priv->phyaddr) | GMAC_MAN_READ | GMAC_MAN_CLTTO;
   sam_putreg(priv, SAM_GMAC_MAN, regval);
 
   /* Wait until the PHY is again idle */
@@ -2046,7 +2101,7 @@ static int sam_phyread(struct sam_gmac_s *priv, uint8_t phyaddr,
       return ret;
     }
 
-  /* Return data */
+  /* Return the PHY data */
 
   *phyval = (uint16_t)(sam_getreg(priv, SAM_GMAC_MAN) & GMAC_MAN_DATA_MASK);
   return OK;
@@ -2089,7 +2144,7 @@ static int sam_phywrite(struct sam_gmac_s *priv, uint8_t phyaddr,
   /* Write the PHY Maintenance register */
 
   regval = GMAC_MAN_DATA(phyval) | GMAC_MAN_WTN | GMAC_MAN_REGA(regaddr) |
-           GMAC_MAN_PHYA(priv->phyaddr) | GMAC_MAN_WRITE;
+           GMAC_MAN_PHYA(priv->phyaddr) | GMAC_MAN_WRITE | GMAC_MAN_CLTTO;
   sam_putreg(priv, SAM_GMAC_MAN, regval);
 
   /* Wait until the PHY is again IDLE */
@@ -2132,13 +2187,11 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 
   /* Enable management port */
 
-  regval  = sam_getreg(priv, SAM_GMAC_NCR);
-  regval |= GMAC_NCR_MPE;
-  sam_putreg(priv, SAM_GMAC_NCR, regval);
+  sam_enablemdio(priv);
 
   /* Verify tht we can read the PHYID register */
 
-  ret = sam_phyread(priv, priv->phyaddr, MII_PHYID1, &phyid1);
+  ret = sam_phyread(priv, priv->phyaddr, GMII_PHYID1, &phyid1);
   if (ret < 0)
     {
       nlldbg("ERROR: Failed to read PHYID1\n");
@@ -2147,7 +2200,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 
   nllvdbg("PHYID1: %04x PHY address: %02x\n", phyid1, priv->phyaddr);
 
-  ret = sam_phyread(priv, priv->phyaddr, MII_PHYID2, &phyid2);
+  ret = sam_phyread(priv, priv->phyaddr, GMII_PHYID2, &phyid2);
   if (ret < 0)
     {
       nlldbg("ERROR: Failed to read PHYID2\n");
@@ -2156,8 +2209,8 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 
   nllvdbg("PHYID2: %04x PHY address: %02x\n", phyid2, priv->phyaddr);
 
-  if (phyid1 == MII_OUI_MSB &&
-     ((phyid2 & MII_PHYID2_OUI) >> 10) == MII_OUI_LSB)
+  if (phyid1 == GMII_OUI_MSB &&
+     ((phyid2 & GMII_PHYID2_OUI) >> 10) == GMII_OUI_LSB)
     {
       nllvdbg("  Vendor Model Number:   %04x\n", ((phyid2 >> 4) & 0x3f));
       nllvdbg("  Model Revision Number: %04x\n", (phyid2 & 7));
@@ -2169,18 +2222,18 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 
   /* Setup control register */
 
-  ret = sam_phyread(priv, priv->phyaddr, MII_MCR, &mcr);
+  ret = sam_phyread(priv, priv->phyaddr, GMII_MCR, &mcr);
   if (ret < 0)
     {
       nlldbg("ERROR: Failed to read MCR\n");
       goto errout;
     }
 
-  mcr &= ~MII_MCR_ANENABLE;  /* Remove autonegotiation enable */
-  mcr &= ~(MII_MCR_LOOPBACK | MII_MCR_PDOWN);
-  mcr |= MII_MCR_ISOLATE;    /* Electrically isolate PHY */
+  mcr &= ~GMII_MCR_ANENABLE;  /* Remove autonegotiation enable */
+  mcr &= ~(GMII_MCR_LOOPBACK | GMII_MCR_PDOWN);
+  mcr |= GMII_MCR_ISOLATE;    /* Electrically isolate PHY */
 
-  ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, mcr);
+  ret = sam_phywrite(priv, priv->phyaddr, GMII_MCR, mcr);
   if (ret < 0)
     {
       nlldbg("ERROR: Failed to write MCR\n");
@@ -2191,11 +2244,11 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
    * Next page 100BaseTxFD and HD, 10BaseTFD and HD, IEEE 802.3
    */
 
-  advertise = MII_ADVERTISE_100BASETXFULL | MII_ADVERTISE_100BASETXHALF |
-              MII_ADVERTISE_10BASETXFULL | MII_ADVERTISE_10BASETXHALF |
-              MII_ADVERTISE_8023;
+  advertise = GMII_ADVERTISE_100BASETXFULL | GMII_ADVERTISE_100BASETXHALF |
+              GMII_ADVERTISE_10BASETXFULL | GMII_ADVERTISE_10BASETXHALF |
+              GMII_ADVERTISE_8023;
 
-  ret = sam_phywrite(priv, priv->phyaddr, MII_ADVERTISE, advertise);
+  ret = sam_phywrite(priv, priv->phyaddr, GMII_ADVERTISE, advertise);
   if (ret < 0)
     {
       nlldbg("ERROR: Failed to write ANAR\n");
@@ -2204,15 +2257,15 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 
   /* Read and modify control register */
 
-  ret = sam_phyread(priv, priv->phyaddr, MII_MCR, &mcr);
+  ret = sam_phyread(priv, priv->phyaddr, GMII_MCR, &mcr);
   if (ret < 0)
     {
       nlldbg("ERROR: Failed to read MCR\n");
       goto errout;
     }
 
-  mcr |= (MII_MCR_SPEED100 | MII_MCR_ANENABLE | MII_MCR_FULLDPLX);
-  ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, mcr);
+  mcr |= (GMII_MCR_SPEED100 | GMII_MCR_ANENABLE | GMII_MCR_FULLDPLX);
+  ret = sam_phywrite(priv, priv->phyaddr, GMII_MCR, mcr);
   if (ret < 0)
     {
       nlldbg("ERROR: Failed to write MCR\n");
@@ -2221,10 +2274,10 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 
   /* Restart Auto_negotiation */
 
-  mcr |=  MII_MCR_ANRESTART;
-  mcr &= ~MII_MCR_ISOLATE;
+  mcr |=  GMII_MCR_ANRESTART;
+  mcr &= ~GMII_MCR_ISOLATE;
 
-  ret = sam_phywrite(priv, priv->phyaddr, MII_MCR, mcr);
+  ret = sam_phywrite(priv, priv->phyaddr, GMII_MCR, mcr);
   if (ret < 0)
     {
       nlldbg("ERROR: Failed to write MCR\n");
@@ -2238,7 +2291,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
   timeout = 0;
   for (;;)
     {
-      ret = sam_phyread(priv, priv->phyaddr, MII_MSR, &msr);
+      ret = sam_phyread(priv, priv->phyaddr, GMII_MSR, &msr);
       if (ret < 0)
         {
           nlldbg("ERROR: Failed to read MSR\n");
@@ -2247,7 +2300,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 
       /* Completed successfully? */
 
-      if ((msr & MII_MSR_ANEGCOMPLETE) != 0)
+      if ((msr & GMII_MSR_ANEGCOMPLETE) != 0)
         {
           /* Yes.. break out of the loop */
 
@@ -2268,7 +2321,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
 
   /* Get the AutoNeg Link partner base page */
 
-  ret = sam_phyread(priv, priv->phyaddr, MII_LPA, &lpa);
+  ret = sam_phyread(priv, priv->phyaddr, GMII_LPA, &lpa);
   if (ret < 0)
     {
       nlldbg("ERROR: Failed to read ANLPAR\n");
@@ -2280,26 +2333,26 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
   regval  = sam_getreg(priv, SAM_GMAC_NCFGR);
   regval &= (GMAC_NCFGR_SPD | GMAC_NCFGR_FD);
 
-  if (((advertise & lpa) & MII_ADVERTISE_100BASETXFULL) != 0)
+  if (((advertise & lpa) & GMII_ADVERTISE_100BASETXFULL) != 0)
     {
       /* Set MII for 100BaseTX and Full Duplex */
 
       regval |= (GMAC_NCFGR_SPD | GMAC_NCFGR_FD);
     }
-  else if (((advertise & lpa) & MII_ADVERTISE_10BASETXFULL) != 0)
+  else if (((advertise & lpa) & GMII_ADVERTISE_10BASETXFULL) != 0)
     {
       /* Set MII for 10BaseT and Full Duplex */
 
       regval |= GMAC_NCFGR_FD;
     }
-  else if (((advertise & lpa) & MII_ADVERTISE_100BASETXHALF) != 0)
+  else if (((advertise & lpa) & GMII_ADVERTISE_100BASETXHALF) != 0)
     {
       /* Set MII for 100BaseTX and half Duplex */
 
       regval |= GMAC_NCFGR_SPD;
     }
 #if 0
-  else if (((advertise & lpa) & MII_ADVERTISE_10BASETXHALF) != 0)
+  else if (((advertise & lpa) & GMII_ADVERTISE_10BASETXHALF) != 0)
     {
       /* set MII for 10BaseT and half Duplex */
     }
@@ -2318,11 +2371,9 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
   sam_putreg(priv, SAM_GMAC_UR, regval);
 
 errout:
-  /* Disable management port */
+  /* Disable the management port */
 
-  regval  = sam_getreg(priv, SAM_GMAC_NCR);
-  regval &= ~GMAC_NCR_MPE;
-  sam_putreg(priv, SAM_GMAC_NCR, regval);
+  sam_disablemdio(priv);
   return ret;
 }
 
@@ -2350,18 +2401,18 @@ static bool sam_linkup(struct sam_gmac_s *priv)
 
   /* Enable management port */
 
-  regval  = sam_getreg(priv, SAM_GMAC_NCR);
-  regval |= GMAC_NCR_MPE;
-  sam_putreg(priv, SAM_GMAC_NCR, regval);
+  sam_enablemdio(priv);
 
-  ret = sam_phyread(priv, priv->phyaddr, MII_MSR, &msr);
+  /* Read the PHY MSR register */
+
+  ret = sam_phyread(priv, priv->phyaddr, GMII_MSR, &msr);
   if (ret < 0)
     {
       nlldbg("ERROR: Failed to read MSR: %d\n", ret);
       goto errout;
     }
 
-  if ((msr & MII_MSR_LINKSTATUS) == 0)
+  if ((msr & GMII_MSR_LINKSTATUS) == 0)
     {
       nlldbg("ERROR: MSR LinkStatus: %04x\n", msr);
       goto errout;
@@ -2379,20 +2430,20 @@ static bool sam_linkup(struct sam_gmac_s *priv)
   regval = sam_getreg(priv, SAM_GMAC_NCFGR);
   regval &= ~(GMAC_NCFGR_SPD | GMAC_NCFGR_FD);
 
-  if ((msr & MII_MSR_100BASETXFULL) != 0 && PHYSR_IS100FDX(physr))
+  if ((msr & GMII_MSR_100BASETXFULL) != 0 && PHYSR_IS100FDX(physr))
     {
       /* Set GMAC for 100BaseTX and Full Duplex */
 
       regval |= (GMAC_NCFGR_SPD | GMAC_NCFGR_FD);
     }
-  else if ((msr & MII_MSR_10BASETXFULL) != 0  && PHYSR_IS10FDX(physr))
+  else if ((msr & GMII_MSR_10BASETXFULL) != 0  && PHYSR_IS10FDX(physr))
     {
       /* Set MII for 10BaseT and Full Duplex */
 
       regval |= GMAC_NCFGR_FD;
     }
 
-  else if ((msr & MII_MSR_100BASETXHALF) != 0  && PHYSR_IS100HDX(physr))
+  else if ((msr & GMII_MSR_100BASETXHALF) != 0  && PHYSR_IS100HDX(physr))
     {
       /* Set MII for 100BaseTX and Half Duplex */
 
@@ -2400,7 +2451,7 @@ static bool sam_linkup(struct sam_gmac_s *priv)
     }
 
 #if 0
-  else if ((msr & MII_MSR_10BASETXHALF) != 0  && PHYSR_IS10HDX(physr))
+  else if ((msr & GMII_MSR_10BASETXHALF) != 0  && PHYSR_IS10HDX(physr))
     {
       /* Set MII for 10BaseT and Half Duplex */
     }
@@ -2416,11 +2467,64 @@ static bool sam_linkup(struct sam_gmac_s *priv)
 errout:
   /* Disable management port */
 
-  regval  = sam_getreg(priv, SAM_GMAC_NCR);
-  regval &= ~GMAC_NCR_MPE;
-  sam_putreg(priv, SAM_GMAC_NCR, regval);
-
+  sam_disablemdio(priv);
   return linkup;
+}
+
+/****************************************************************************
+ * Function: sam_mdcclock
+ *
+ * Description:
+ *  Configure the MDC clocking
+ *
+ * Parameters:
+ *   priv - A reference to the private driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sam_mdcclock(struct sam_gmac_s *priv)
+{
+  uint32_t ncfgr;
+  uint32_t ncr;
+  uint32_t enables;
+
+  /* Disable RX and TX momentarily */
+
+  ncr  = sam_getreg(priv, SAM_GMAC_NCR);
+  enables = ncr & (GMAC_NCR_RXEN | GMAC_NCR_TXEN);
+  ncr &= ~(GMAC_NCR_RXEN | GMAC_NCR_TXEN);
+  sam_putreg(priv, SAM_GMAC_NCR, ncr);
+
+  /* Modify the NCFGR register based on the configured board MCK frequency */
+
+  ncfgr  = sam_getreg(priv, SAM_GMAC_NCFGR);
+  ncfgr &= ~GMAC_NCFGR_CLK_MASK;
+
+#if BOARD_MCK_FREQUENCY <= 20000000
+  ncfgr = GMAC_NCFGR_CLK_DIV8;          /* MCK divided by 8 (MCK up to 20 MHz) */
+#elif BOARD_MCK_FREQUENCY <= 40000000
+  ncfgr = GMAC_NCFGR_CLK_DIV16;         /* MCK divided by 16 (MCK up to 40 MHz) */
+#elif BOARD_MCK_FREQUENCY <= 80000000
+  ncfgr = GMAC_NCFGR_CLK_DIV32;         /* MCK divided by 32 (MCK up to 80 MHz) */
+#elif BOARD_MCK_FREQUENCY <= 120000000
+  ncfgr = GMAC_NCFGR_CLK_DIV48;         /* MCK divided by 48 (MCK up to 120 MHz) */
+#elif BOARD_MCK_FREQUENCY <= 160000000
+  ncfgr = GMAC_NCFGR_CLK_DIV64;         /* MCK divided by 64 (MCK up to 160 MHz) */
+#elif BOARD_MCK_FREQUENCY <= 240000000
+  ncfgr = GMAC_NCFGR_CLK_DIV96;         /* MCK divided by 64 (MCK up to 240 MHz) */
+#else
+#  error Invalid BOARD_MCK_FREQUENCY
+#endif
+
+  sam_putreg(priv, SAM_GMAC_NCFGR, ncfgr);
+
+  /* Restore RX and TX enable settings */
+
+  ncr |= enables;
+  sam_putreg(priv, SAM_GMAC_NCR, ncr);
 }
 
 /****************************************************************************
@@ -2439,27 +2543,11 @@ errout:
 
 static int sam_phyinit(struct sam_gmac_s *priv)
 {
-  uint32_t regval;
   int ret;
 
   /* Configure PHY clocking */
 
-  regval = sam_getreg(priv, SAM_GMAC_NCFGR);
-  regval &= ~GMAC_NCFGR_CLK_MASK;
-
-#if BOARD_MCK_FREQUENCY > (160*1000*1000)
-#  error Supported MCK frequency
-#elif BOARD_MCK_FREQUENCY > (80*1000*1000)
-  regval |= GMAC_NCFGR_CLK_DIV64; /* MCK divided by 64 (MCK up to 160 MHz) */
-#elif BOARD_MCK_FREQUENCY > (40*1000*1000)
-  regval |= GMAC_NCFGR_CLK_DIV32; /* MCK divided by 32 (MCK up to 80 MHz) */
-#elif BOARD_MCK_FREQUENCY > (20*1000*1000)
-  regval |= GMAC_NCFGR_CLK_DIV16; /* MCK divided by 16 (MCK up to 40 MHz) */
-#else
-  regval |= GMAC_NCFGR_CLK_DIV8;  /* MCK divided by 8 (MCK up to 20 MHz) */
-#endif
-
-  sam_putreg(priv, SAM_GMAC_NCFGR, regval);
+  sam_mdcclock(priv);
 
   /* Check the PHY Address */
 
@@ -2497,41 +2585,27 @@ static int sam_phyinit(struct sam_gmac_s *priv)
 
 static inline void sam_ethgpioconfig(struct sam_gmac_s *priv)
 {
-  /* Configure PIO pins to support GMAC */
-  /* Configure GMAC PIO pins common to both MII and RMII */
-#warning REVISIT: Do we need all of these?
+  /* Configure PIO pins to support GMAC in RGMII mode */
+
   sam_configpio(PIO_GMAC_TX0);
   sam_configpio(PIO_GMAC_TX1);
-#if 0
   sam_configpio(PIO_GMAC_TX2);
   sam_configpio(PIO_GMAC_TX3);
-  sam_configpio(PIO_GMAC_TX4);
-  sam_configpio(PIO_GMAC_TX5);
-  sam_configpio(PIO_GMAC_TX6);
-  sam_configpio(PIO_GMAC_TX7);
-#endif
+
   sam_configpio(PIO_GMAC_RX0);
   sam_configpio(PIO_GMAC_RX1);
-#if 0
   sam_configpio(PIO_GMAC_RX2);
   sam_configpio(PIO_GMAC_RX3);
-  sam_configpio(PIO_GMAC_RX4);
-  sam_configpio(PIO_GMAC_RX5);
-  sam_configpio(PIO_GMAC_RX6);
-  sam_configpio(PIO_GMAC_RX7);
-#endif
-  sam_configpio(PIO_GMAC_TXEN);
-  sam_configpio(PIO_GMAC_TXER);
+
   sam_configpio(PIO_GMAC_TXCK);
+  sam_configpio(PIO_GMAC_TXEN);
   sam_configpio(PIO_GMAC_RXCK);
   sam_configpio(PIO_GMAC_RXDV);
   sam_configpio(PIO_GMAC_RXER);
-  sam_configpio(PIO_GMAC_125CK);
-  sam_configpio(PIO_GMAC_125CKO);
-  sam_configpio(PIO_GMAC_COL);
-  sam_configpio(PIO_GMAC_CRS);
+
   sam_configpio(PIO_GMAC_MDC);
   sam_configpio(PIO_GMAC_MDIO);
+  sam_configpio(PIO_GMAC_125CK);
 }
 
 /****************************************************************************
