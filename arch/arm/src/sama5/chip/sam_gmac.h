@@ -439,216 +439,480 @@
 /* GMAC Register Bit Definitions ***************************************************/
 
 /* Network Control Register */
-#define GMAC_NCR_
+
+#define GMAC_NCR_LBL               (1 << 1)  /* Bit 1:  Loopback local */
+#define GMAC_NCR_RXEN              (1 << 2)  /* Bit 2:  Receive enable */
+#define GMAC_NCR_TXEN              (1 << 3)  /* Bit 3:  Transmit enable */
+#define GMAC_NCR_MPE               (1 << 4)  /* Bit 4:  Management port enable */
+#define GMAC_NCR_CLRSTAT           (1 << 5)  /* Bit 5:  Clear statistics registers */
+#define GMAC_NCR_INCSTAT           (1 << 6)  /* Bit 6:  Increment statistics registers */
+#define GMAC_NCR_WESTAT            (1 << 7)  /* Bit 7:  Write enable for statistics registers */
+#define GMAC_NCR_BP                (1 << 8)  /* Bit 8:  Back pressure */
+#define GMAC_NCR_TSTART            (1 << 9)  /* Bit 9:  Start transmission */
+#define GMAC_NCR_THALT             (1 << 10) /* Bit 10: Transmit halt */
+#define GMAC_NCR_TXPF              (1 << 11) /* Bit 11: Transmit Pause Frame */
+#define GMAC_NCR_TXZQPF            (1 << 12) /* Bit 12: Transmit Zero Quantum Pause Frame */
+#define GMAC_NCR_RDS               (1 << 14) /* Bit 14: Read Snapshot */
+#define GMAC_NCR_SRTSM             (1 << 15) /* Bit 15: Store Receive Time Stamp to Memory */
+#define GMAC_NCR_ENPBPR            (1 << 16) /* Bit 16: Enable PFC Priority-based Pause Reception */
+#define GMAC_NCR_TXPBPF            (1 << 17) /* Bit 17: Transmit PFC Priority-based Pause Frame */
+#define GMAC_NCR_FNP               (1 << 18) /* Bit 18: Flush Next Packet */
+
 /* Network Configuration Register */
-#define GMAC_NCFGR_
+
+#define GMAC_NCFGR_SPD            (1 << 0)  /* Bit 0:  Speed */
+#define GMAC_NCFGR_FD             (1 << 1)  /* Bit 1:  Full Duplex */
+#define GMAC_NCFGR_DNVLAN         (1 << 2)  /* Bit 2:  Discard Non-VLAN FRAMES */
+#define GMAC_NCFGR_JFRAME         (1 << 3)  /* Bit 3:  Jumbo Frames */
+#define GMAC_NCFGR_CAF            (1 << 4)  /* Bit 4:  Copy All Frames */
+#define GMAC_NCFGR_NBC            (1 << 5)  /* Bit 5:  No Broadcast */
+#define GMAC_NCFGR_MTIHEN         (1 << 6)  /* Bit 6:  Multicast Hash Enable */
+#define GMAC_NCFGR_UNIHEN         (1 << 7)  /* Bit 7:  Unicast Hash Enable */
+#define GMAC_NCFGR_MAXFS          (1 << 8)  /* Bit 8:  Receive 1536 bytes frames */
+#define GMAC_NCFGR_GBE            (1 << 10) /* Bit 10: Gigabit Mode Enable */
+#define GMAC_NCFGR_RTY            (1 << 12) /* Bit 12: Retry test */
+#define GMAC_NCFGR_PEN            (1 << 13) /* Bit 13: Pause Enable */
+#define GMAC_NCFGR_RXBUFO_SHIFT   (14)      /* Bits 14-15: Receive Buffer Offset */
+#define GMAC_NCFGR_RXBUFO_MASK    (3 << GMAC_NCFGR_RXBUFO_SHIFT)
+#define GMAC_NCFGR_LFERD          (1 << 16) /* Bit 16: Length Field Error Frame Discard */
+#define GMAC_NCFGR_RFCS           (1 << 17) /* Bit 17: Remove FCS */
+#define GMAC_NCFGR_CLK_SHIFT      (18)      /* Bits 18-20: MDC clock division */
+#define GMAC_NCFGR_CLK_MASK       (7 << GMAC_NCFGR_CLK_SHIFT)
+#  define GMAC_NCFGR_CLK_DIV8     (0 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 8 (MCK up to 20 MHz) */
+#  define GMAC_NCFGR_CLK_DIV16    (1 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 16 (MCK up to 40 MHz) */
+#  define GMAC_NCFGR_CLK_DIV32    (2 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 32 (MCK up to 80 MHz) */
+#  define GMAC_NCFGR_CLK_DIV48    (3 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 48 (MCK up to 120 MHz) */
+#  define GMAC_NCFGR_CLK_DIV64    (4 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 64 (MCK up to 160 MHz) */
+#  define GMAC_NCFGR_CLK_DIV96    (5 << GMAC_NCFGR_CLK_SHIFT) /* MCK divided by 64 (MCK up to 240 MHz) */
+#define GMAC_NCFGR_DBW_SHIFT      (21)      /* Bits 21-22: Data Bus Width */
+#define GMAC_NCFGR_DBW_MASK       (3 << GMAC_NCFGR_DBW_SHIFT)
+#  define GMAC_NCFGR_DBW_32       (0 << GMAC_NCFGR_DBW_SHIFT) /* 32-bit data bus width */
+#  define GMAC_NCFGR_DBW_64       (1 << GMAC_NCFGR_DBW_SHIFT) /* 64-bit data bus width */
+#define GMAC_NCFGR_DCPF           (1 << 23) /* Bit 23: Disable Copy of Pause Frames */
+#define GMAC_NCFGR_RXCOEN         (1 << 24) /* Bit 24: Receive Checksum Offload Enable */
+#define GMAC_NCFGR_EFRHD          (1 << 25) /* Bit 25: Enable Frames Received in Half Duplex */
+#define GMAC_NCFGR_IRXFCS         (1 << 26) /* Bit 26: Ignore RX FCS */
+#define GMAC_NCFGR_IPGSEN         (1 << 28) /* Bit 28: IP Stretch Enable */
+#define GMAC_NCFGR_RXBP           (1 << 29) /* Bit 29: Receive Bad Preamble */
+#define GMAC_NCFGR_IRXER          (1 << 30) /* Bit 30: Ignore IPG GRXER */
+
 /* Network Status Register */
-#define GMAC_NSR_
+
+#define GMAC_NSR_MDIO             (1 << 1)  /* Bit 1:  MDIO Input Status */
+#define GMAC_NSR_IDLE             (1 << 2)  /* Bit 2:  PHY management logic idle */
+
 /* User Register */
-#define GMAC_UR_
+
+#define GMAC_UR_RGMII             (1 << 0)  /* Bit 0:  Reduced GMII Mode */
+
 /* DMA Configuration Register */
-#define GMAC_DCFGR_
+
+#define GMAC_DCFGR_FBLDO_SHIFT    (0)       /* Bits 0-4: Fixed Burst Length for DMA Data Operations */
+#define GMAC_DCFGR_FBLDO_MASK     (31 << GMAC_DCFGR_FBLDO_SHIFT)
+#  define GMAC_DCFGR_FBLDO_SINGLE (1 << GMAC_DCFGR_FBLDO_SHIFT)  /* 00001: Always use SINGLE AHB bursts */
+#  define GMAC_DCFGR_FBLDO_INCR4  (4 << GMAC_DCFGR_FBLDO_SHIFT)  /* 001xx: Attempt to use INCR4 AHB bursts */
+#  define GMAC_DCFGR_FBLDO_INCR8  (8 << GMAC_DCFGR_FBLDO_SHIFT)  /* 01xxx: Attempt to use INCR8 AHB bursts */
+#  define GMAC_DCFGR_FBLDO_INCR16 (16 << GMAC_DCFGR_FBLDO_SHIFT) /* 1xxxx: Attempt to use INCR16 AHB bursts */
+#define GMAC_DCFGR_ESMA           (1 << 6)  /* Bit 6:  Endian Swap Mode Enable for Management Descriptor Accesses */
+#define GMAC_DCFGR_ESPA           (1 << 7)  /* Bit 7:  Endian Swap Mode Enable for Packet Data Accesses */
+#define GMAC_DCFGR_RXBMS_SHIFT    (8)       /* Bits 8-9: Receiver Packet Buffer Memory Size Select */
+#define GMAC_DCFGR_RXBMS_MASK     (3 << GMAC_DCFGR_RXBMS_SHIFT)
+#  define GMAC_DCFGR_RXBMS_EIGHTH (0 << GMAC_DCFGR_RXBMS_SHIFT) /* 1/2 Kbyte Memory Size */
+#  define GMAC_DCFGR_RXBMS_QTR    (1 << GMAC_DCFGR_RXBMS_SHIFT) /* 1Kbyte Memory Size */
+#  define GMAC_DCFGR_RXBMS_HALF   (2 << GMAC_DCFGR_RXBMS_SHIFT) /* 2 Kbytes Memory Size */
+#  define GMAC_DCFGR_RXBMS_FULL   (3 << GMAC_DCFGR_RXBMS_SHIFT) /* 4 Kbytes Memory Size */
+#define GMAC_DCFGR_TXPBMS         (1 << 10) /* Bit 10: Transmitter Packet Buffer Memory Size Select */
+#define GMAC_DCFGR_TXCOEN         (1 << 11) /* Bit 11: Transmitter Checksum Generation Offload Enable */
+#define GMAC_DCFGR_DRBS_SHIFT     (16)      /* Bits 16-23: DMA Receive Buffer Size */
+#define GMAC_DCFGR_DRBS_MASK      (0xff << GMAC_DCFGR_DRBS_SHIFT)
+#  define GMAC_DCFGR_DRBS(n)      ((n) << GMAC_DCFGR_DRBS_SHIFT)
+#define GMAC_DCFGR_DDRP           (1 << 24) /* Bit 24: DMA Discard Receive Packets */
+
 /* Transmit Status Register */
-#define GMAC_TSR_
+
+#define GMAC_TSR_UBR              (1 << 0)  /* Bit 0:  Used Bit Read */
+#define GMAC_TSR_COL              (1 << 1)  /* Bit 1:  Collision Occurred */
+#define GMAC_TSR_RLE              (1 << 2)  /* Bit 2:  Retry Limit exceeded */
+#define GMAC_TSR_TXGO             (1 << 3)  /* Bit 3:  Transmit Go */
+#define GMAC_TSR_TFC              (1 << 4)  /* Bit 4:  Transmit Frame Corruption due to AHB error */
+#define GMAC_TSR_TXCOMP           (1 << 5)  /* Bit 5:  Transmit Complete */
+#define GMAC_TSR_UND              (1 << 6)  /* Bit 6:  Transmit Underrun */
+#define GMAC_TSR_LCO              (1 << 7)  /* Bit 7:  Late Collision Occurred */
+#define GMAC_TSR_HRESP            (1 << 8)  /* Bit 8:  HRESP Not OK */
+
 /* Receive Buffer Queue Base Address */
-#define GMAC_RBQB_
+
+#define GMAC_RBQB_MASK            (0xfffffffc)  /* Bits 2-31: Receive buffer queue base address */
+
 /* Transmit Buffer Queue Base Address */
-#define GMAC_TBQB_
+
+#define GMAC_TBQB_MASK            (0xfffffffc)  /* Bits 2-31: Transmit buffer queue base address */
+
 /* Receive Status Register */
-#define GMAC_RSR_
-/* Interrupt Status Register */
-#define GMAC_ISR_
-/* Interrupt Enable Register */
-#define GMAC_IER_
-/* Interrupt Disable Register */
-#define GMAC_IDR_
-/* Interrupt Mask Register */
-#define GMAC_IMR_
+
+#define GMAC_RSR_BNA              (1 << 0)  /* Bit 0:  Buffer Not Available */
+#define GMAC_RSR_REC              (1 << 1)  /* Bit 1:  Frame Received */
+#define GMAC_RSR_RXOVR            (1 << 2)  /* Bit 2:  Receive Overrun */
+#define GMAC_RSR_HNO              (1 << 3)  /* Bit 3:  HRESP Not OK */
+
+/* Interrupt Status Register, Interrupt Enable Register, Interrupt Disable Register */
+
+#define GMAC_INT_MFS              (1 << 0)  /* Bit 0:  Management Frame Sent */
+#define GMAC_INT_RCOMP            (1 << 1)  /* Bit 1:  Receive Complete */
+#define GMAC_INT_RXUBR            (1 << 2)  /* Bit 2:  Receive Used Bit Read */
+#define GMAC_INT_TXUBR            (1 << 3)  /* Bit 3:  Transmit Used Bit Read */
+#define GMAC_INT_TUR              (1 << 4)  /* Bit 4:  Transmit Under Run */
+#define GMAC_INT_RLEX             (1 << 5)  /* Bit 5:  Retry Limit Exceeded or Late Collision */
+#define GMAC_INT_TFC              (1 << 6)  /* Bit 6:  Transmit Frame Corruption due to AHB error */
+#define GMAC_INT_TCOMP            (1 << 7)  /* Bit 7:  Transmit Complete */
+#define GMAC_INT_ROVR             (1 << 10) /* Bit 10: Receive Overrun */
+#define GMAC_INT_HRESP            (1 << 11) /* Bit 11: HRESP not OK */
+#define GMAC_INT_PFNZ             (1 << 12) /* Bit 12: Pause Frame with Non-zero Pause Quantum */
+#define GMAC_INT_PTZ              (1 << 13) /* Bit 13: Pause Time Zero */
+#define GMAC_INT_PFTR             (1 << 14) /* Bit 14: Pause Frame Transmitted */
+#define GMAC_INT_EXINT            (1 << 15) /* Bit 15: External Interrupt (not in ISR) */
+#define GMAC_INT_DRQFR            (1 << 18) /* Bit 18: PTP Delay Request Frame Received */
+#define GMAC_INT_SFR              (1 << 19) /* Bit 19: PTP Sync Frame Received */
+#define GMAC_INT_DRQFT            (1 << 20) /* Bit 20: PTP Delay Request Frame Transmitted */
+#define GMAC_INT_SFT              (1 << 21) /* Bit 21: PTP Sync Frame Transmitted */
+#define GMAC_INT_PDRQFR           (1 << 22) /* Bit 22: PDelay Request Frame Received */
+#define GMAC_INT_PDRSFR           (1 << 23) /* Bit 23: PDelay Response Frame Received */
+#define GMAC_INT_PDRQFT           (1 << 24) /* Bit 24: PDelay Request Frame Transmitted */
+#define GMAC_INT_PDRSFT           (1 << 25) /* Bit 25: PDelay Response Frame Transmitted */
+#define GMAC_INT_SRI              (1 << 26) /* Bit 26: TSU Seconds Register Increment (not in IMR) */
+#define GMAC_INT_WOL              (1 << 28) /* Bit 28: Wake On LAN (not in IMR) */
+
+#define GMAC_INT_ALL              (0x17fcfcff)
+
 /* PHY Maintenance Register */
-#define GMAC_MAN_
+
+#define GMAC_MAN_DATA_SHIFT       (0)       /* Bits 0-15: PHY data */
+#define GMAC_MAN_DATA_MASK        (0x0000ffff << GMAC_MAN_DATA_SHIFT)
+#  define GMAC_MAN_DATA(n)        ((uint32_t)(n) << GMAC_MAN_DATA_SHIFT)
+#define GMAC_MAN_WTN_SHIFT        (16)      /* Bits 16-17:  Must be written to b10 */
+#define GMAC_MAN_WTN_MASK         (3 << GMAC_MAN_CODE_SHIFT)
+#  define GMAC_MAN_WTN            (2 << GMAC_MAN_CODE_SHIFT)
+#define GMAC_MAN_REGA_SHIFT       (18)      /* Bits 18-22: Register Address */
+#define GMAC_MAN_REGA_MASK        (31 << GMAC_MAN_REGA_SHIFT)
+#  define GMAC_MAN_REGA(n)        ((uint32_t)(n) << GMAC_MAN_REGA_SHIFT)
+#define GMAC_MAN_PHYA_SHIFT       (23)      /* Bits 23-27: PHY Address */
+#define GMAC_MAN_PHYA_MASK        (31 << GMAC_MAN_PHYA_SHIFT)
+#  define GMAC_MAN_PHYA(n)        ((uint32_t)(n) << GMAC_MAN_PHYA_SHIFT)
+#define GMAC_MAN_OP_SHIFT         (28)      /* Bits 28-29: Operation */
+#define GMAC_MAN_OP_MASK          (3 << GMAC_MAN_OP_SHIFT)
+#  define GMAC_MAN_READ           (2 << GMAC_MAN_OP_SHIFT)
+#  define GMAC_MAN_WRITE          (1 << GMAC_MAN_OP_SHIFT)
+#define GMAC_MAN_CLTTO            (1 << 30) /* Bit 30: Clause 22 Operation */
+#define GMAC_MAN_WZO              (1 << 31) /* Bit 31: Write ZERO */
+
 /* Received Pause Quantum Register */
-#define GMAC_RPQ_
+
+#define GMAC_RPQ_MASK             (0x0000ffff) /* Bits 0-15: Received Pause Quantum */
+
 /* Transmit Pause Quantum Register */
-#define GMAC_TPQ_
+
+#define GMAC_TPQ_MASK             (0x0000ffff) /* Bits 0-15: Transmit Pause Quantum */
+
 /* TX Partial Store and Forward Register */
-#define GMAC_TPSF_
+
+#define GMAC_TPSF_TPB1ADR_SHIFT   (0)       /* Bits 0-11: Transmit Partial Store and Forward Address */
+#define GMAC_TPSF_TPB1ADR_MASK    (0xfff << GMAC_TPSF_TPB1ADR_SHIFT)
+#  define GMAC_TPSF_TPB1ADR(n)    ((n) << GMAC_TPSF_TPB1ADR_SHIFT)
+#define GMAC_TPSF_ENTXP           (1 << 31) /* Bit 31: Enable TX Partial Store and Forward Operation */
+
 /* RX Partial Store and Forward Register */
-#define GMAC_RPSF_
-/* Hash Register Bottom [31:0] */
-#define GMAC_HRB_
-/* Hash Register Top [63:32] */
-#define GMAC_HRT_
-/* Specific Address 1 Bottom [31:0] Register */
-#define GMAC_SAB1_
+
+#define GMAC_RPSF_RPB1ADR_SHIFT   (0)       /* Bits 0-11: Receive Partial Store and Forward Address */
+#define GMAC_RPSF_RPB1ADR_MASK    (0xfff << GMAC_RPSF_RPB1ADR_SHIFT)
+#  define GMAC_RPSF_RPB1ADR(n)    ((n) << GMAC_RPSF_RPB1ADR_SHIFT)
+#define GMAC_RPSF_ENRXP           (1 << 31) /* Bit 31: Enable RX Partial Store and Forward Operation */
+
+/* Hash Register Bottom [31:0] (32-bit value) */
+/* Hash Register Top [63:32] (32-bit value) */
+
+/* Specific Address 1 Bottom [31:0] Register (32-bit value) */
 /* Specific Address 1 Top [47:32] Register */
-#define GMAC_SAT1_
-/* Specific Address 2 Bottom [31:0] Register */
-#define GMAC_SAB2_
+
+#define GMAC_SAT1_MASK            (0x0000ffff) /* Bits 0-15: Specific Address 1 [47:32]  */
+
+/* Specific Address 2 Bottom [31:0] Register (32-bit value) */
 /* Specific Address 2 Top [47:32] Register */
-#define GMAC_SAT2_
-/* Specific Address 3 Bottom [31:0] Register */
-#define GMAC_SAB3_
+
+#define GMAC_SAT2_MASK            (0x0000ffff) /* Bits 0-15: Specific Address 2 [47:32]  */
+
+/* Specific Address 3 Bottom [31:0] Register (32-bit value) */
 /* Specific Address 3 Top [47:32] Register */
-#define GMAC_SAT3_
-/* Specific Address 4 Bottom [31:0] Register */
-#define GMAC_SAB4_
+
+#define GMAC_SAT3_MASK            (0x0000ffff) /* Bits 0-15: Specific Address 3 [47:32]  */
+
+/* Specific Address 4 Bottom [31:0] Register (32-bit value) */
 /* Specific Address 4 Top [47:32] Register */
-#define GMAC_SAT4_
+
+#define GMAC_SAT4_MASK            (0x0000ffff) /* Bits 0-15: Specific Address 4 [47:32]  */
+
 /* Type ID Match 1 Register */
-#define GMAC_TIDM1_
+
+#define GMAC_TIDM1_MASK           (0x0000ffff) /* Bits 0-15: Type ID Match 1 */
+
 /* Type ID Match 2 Register */
-#define GMAC_TIDM2_
+
+#define GMAC_TIDM2_MASK           (0x0000ffff) /* Bits 0-15: Type ID Match 2 */
+
 /* Type ID Match 3 Register */
-#define GMAC_TIDM3_
+
+#define GMAC_TIDM3_MASK           (0x0000ffff) /* Bits 0-15: Type ID Match 3 */
+
 /* Type ID Match 4 Register */
-#define GMAC_TIDM4_
+
+#define GMAC_TIDM4_MASK           (0x0000ffff) /* Bits 0-15: Type ID Match 4 */
+
 /* Wake on LAN Register */
-#define GMAC_WOL_
+
+#define GMAC_WOL_IP_SHIFT         (0)       /* Bits 0-15: ARP request IP address */
+#define GMAC_WOL_IP_MASK          (0x0000ffff << GMAC_WOL_IP_SHIFT)
+#define GMAC_WOL_MAG              (1 << 16) /* Bit 16: Magic packet event enable */
+#define GMAC_WOL_ARP              (1 << 17) /* Bit 17: ARP request event enable */
+#define GMAC_WOL_SA1              (1 << 18) /* Bit 18: Specific address register 1 event enable */
+#define GMAC_WOL_MTI              (1 << 19) /* Bit 19: Multicast hash event enable */
+
 /* IPG Stretch Register */
-#define GMAC_IPGS_
+
+#define GMAC_IPGS_MASK            (0x0000ffff) /* Bits 0-15: Frame Length */
+
 /* Stacked VLAN Register */
-#define GMAC_SVLAN_
+
+#define GMAC_SVLAN_VLANTYP_SHIFT  (0)       /* Bits 0-15: User Defined VLAN_TYPE Field */
+#define GMAC_SVLAN_VLANTYP_MASK   (0xffff << GMAC_SVLAN_VLANTYP_SHIFT)
+#  define GMAC_SVLAN_VLANTYP(n)   ((n) << GMAC_SVLAN_VLANTYP_SHIFT)
+#define GMAC_SVLAN_ESVLAN         (1 << 31) /* Bit 31: Enable Stacked VLAN Processing Mode */
+
 /* Transmit PFC Pause Register */
-#define GMAC_TPFCP_
-/* Specific Address 1 Mask Bottom [31:0] Register */
-#define GMAC_SAMB1_
+
+#define GMAC_TPFCP_PEV_SHIFT      (0)       /* Bits 0-7: Priority Enable Vector */
+#define GMAC_TPFCP_PEV_MASK       (0xff << GMAC_TPFCP_PEV_SHIFT)
+#define GMAC_TPFCP_PQ_SHIFT       (8)       /* Bits 8-15: Pause Quantum */
+#define GMAC_TPFCP_PQ_MASK        (0xff << GMAC_TPFCP_PQ_SHIFT)
+
+/* Specific Address 1 Mask Bottom [31:0] Register (32-bit mask) */
 /* Specific Address 1 Mask Top [47:32] Register */
-#define GMAC_SAMT1_
-/* Octets Transmitted [31:0] Register */
-#define GMAC_OTLO_
+
+#define GMAC_SAMT1_MASK           (0x0000ffff) /* Bits 0-15: Specific Address 1 Mask [47:32] */
+
+/* Octets Transmitted [31:0] Register (32-bit value) */
 /* Octets Transmitted [47:32] Register */
-#define GMAC_OTHI_
-/* Frames Transmitted Register */
-#define GMAC_FT_
-/* Broadcast Frames Transmitted Register */
-#define GMAC_BCFT_
-/* Multicast Frames Transmitted Register */
-#define GMAC_MFT_
+
+#define GMAC_OTHI_MASK            (0x0000ffff) /* Bits 0-15: Transmitted Octets [47:32] */
+
+/* Frames Transmitted Register (32-bit value) */
+/* Broadcast Frames Transmitted Register (32-bit value) */
+/* Multicast Frames Transmitted Register (32-bit value) */
+
 /* Pause Frames Transmitted Register */
-#define GMAC_PFT_
-/* 64 Byte Frames Transmitted Register */
-#define GMAC_BFT64_
-/* 65 to 127 Byte Frames Transmitted Register */
-#define GMAC_TBFT127_
-/* 128 to 255 Byte Frames Transmitted Register */
-#define GMAC_TBFT255_
-/* 256 to 511 Byte Frames Transmitted Register */
-#define GMAC_TBFT511_
-/* 512 to 1023 Byte Frames Transmitted Register */
-#define GMAC_TBFT1023_
-/* 1024 to 1518 Byte Frames Transmitted Register */
-#define GMAC_TBFT1518_
-/* Greater Than 1518 Byte Frames Transmitted Register */
-#define GMAC_GTBFT1518_
+
+#define GMAC_PFT_MASK             (0x0000ffff) /* Bits 0-15: Pause Frames Transmitted */
+
+/* 64 Byte Frames Transmitted Register (32-bit value) */
+/* 65 to 127 Byte Frames Transmitted Register (32-bit value) */
+/* 128 to 255 Byte Frames Transmitted Register (32-bit value) */
+/* 256 to 511 Byte Frames Transmitted Register (32-bit value) */
+/* 512 to 1023 Byte Frames Transmitted Register (32-bit value) */
+/* 1024 to 1518 Byte Frames Transmitted Register (32-bit value) */
+/* Greater Than 1518 Byte Frames Transmitted Register (32-bit value) */
+
 /* Transmit Under Runs Register */
-#define GMAC_TUR_
+
+#define GMAC_TUR_MASK             (0x000003ff) /* Bits 0-9: Transmit Under Runs */
+
 /* Single Collision Frames Register */
-#define GMAC_SCF_
+
+#define GMAC_SCF_MASK             (0x0003ffff) /* Bits 0-17: Single Collisions */
+
 /* Multiple Collision Frames Register */
-#define GMAC_MCF_
+
+#define GMAC_MCF_MASK             (0x0003ffff) /* Bits 0-17: Multiple Collisions */
+
 /* Excessive Collisions Register */
-#define GMAC_EC_
+
+#define GMAC_EC_MASK              (0x000003ff) /* Bits 0-9: Excessive Collisions */
+
 /* Late Collisions Register */
-#define GMAC_LC_
+
+#define GMAC_LC_MASK              (0x000003ff) /* Bits 0-9: Late Collisions */
+
 /* Deferred Transmission Frames Register */
-#define GMAC_DTF_
+
+#define GMAC_DTF_MASK             (0x0003ffff) /* Bits 0-17: Deferred Transmission */
+
 /* Carrier Sense Errors Register */
-#define GMAC_CSE_
-/* Octets Received [31:0] Received */
-#define GMAC_ORLO_
+
+#define GMAC_CSE_MASK             (0x000003ff) /* Bits 0-9: Carrier Sense Error */
+
+/* Octets Received [31:0] Received (32-bit value) */
 /* Octets Received [47:32] Received */
-#define GMAC_ORHI_
-/* Frames Received Register */
-#define GMAC_FR_
-/* Broadcast Frames Received Register */
-#define GMAC_BCFR_
-/* Multicast Frames Received Register */
-#define GMAC_MFR_
+
+#define GMAC_ORHI_MASK            (0x0000ffff) /* Bits 0-15: Received Octets [47:32] */
+
+/* Frames Received Register (32-bit value) */
+/* Broadcast Frames Received Register (32-bit value) */
+/* Multicast Frames Received Register (32-bit value) */
 /* Pause Frames Received Register */
-#define GMAC_PFR_
-/* 64 Byte Frames Received Register */
-#define GMAC_BFR64_
-/* 65 to 127 Byte Frames Received Register */
-#define GMAC_TBFR127_
-/* 128 to 255 Byte Frames Received Register */
-#define GMAC_TBFR255_
-/* 256 to 511Byte Frames Received Register */
-#define GMAC_TBFR511_
-/* 512 to 1023 Byte Frames Received Register */
-#define GMAC_TBFR1023_
-/* 1024 to 1518 Byte Frames Received Register */
-#define GMAC_TBFR1518_
-/* 1519 to Maximum Byte Frames Received Register */
-#define GMAC_TMXBFR_
+
+#define GMAC_PFR_MASK             (0x0000ffff) /* Bits 0-15: Pause Frames Received */
+
+/* 64 Byte Frames Received Register (32-bit value) */
+/* 65 to 127 Byte Frames Received Register (32-bit value) */
+/* 128 to 255 Byte Frames Received Register (32-bit value) */
+/* 256 to 511Byte Frames Received Register (32-bit value) */
+/* 512 to 1023 Byte Frames Received Register (32-bit value) */
+/* 1024 to 1518 Byte Frames Received Register (32-bit value) */
+/* 1519 to Maximum Byte Frames Received Register (32-bit value) */
+
 /* Undersize Frames Received Register */
-#define GMAC_UFR_
+
+#define GMAC_UFR_MASK             (0x000003ff) /* Bits 0-9: Undersize Frames Received */
+
 /* Oversize Frames Received Register */
-#define GMAC_OFR_
+
+#define GMAC_OFR_MASK             (0x000003ff) /* Bits 0-9: Oversized Frames Received */
+
 /* Jabbers Received Register */
-#define GMAC_JR_
+
+#define GMAC_JR_MASK              (0x000003ff) /* Bits 0-9: Jabbers Received */
+
 /* Frame Check Sequence Errors Register */
-#define GMAC_FCSE_
+
+#define GMAC_FCSE_MASK            (0x000003ff) /* Bits 0-9: Frame Check Sequence Errors */
+
 /* Length Field Frame Errors Register */
-#define GMAC_LFFE_
+
+#define GMAC_LFFE_MASK            (0x000003ff) /* Bits 0-9: Length Field Frame Errors */
+
 /* Receive Symbol Errors Register */
-#define GMAC_RSE_
+
+#define GMAC_RSE_MASK             (0x000003ff) /* Bits 0-9: Receive Symbol Errors */
+
 /* Alignment Errors Register */
-#define GMAC_AE_
+
+#define GMAC_AE_MASK              (0x000003ff) /* Bits 0-9: Alignment Errors */
+
 /* Receive Resource Errors Register */
-#define GMAC_RRE_
+
+#define GMAC_RRE_MASK             (0x0003ffff) /* Bits 0-17: Receive Resource Errors */
+
 /* Receive Overrun Register */
-#define GMAC_ROE_
+
+#define GMAC_ROE_MASK             (0x000003ff) /* Bits 0-9: Receive Overruns */
+
 /* IP Header Checksum Errors Register */
-#define GMAC_IHCE_
+
+#define GMAC_IHCE_MASK            (0x000000ff) /* Bits 0-7: IP Header Checksum Errors */
+
 /* TCP Checksum Errors Register */
-#define GMAC_TCE_
+
+#define GMAC_TCE_MASK             (0x000000ff) /* Bits 0-7: TCP Header Checksum Errors */
+
 /* UDP Checksum Errors Register */
-#define GMAC_UCE_
-/* 1588 Timer Sync Strobe Seconds Register */
-#define GMAC_TSSS_
+
+#define GMAC_UCE_MASK             (0x000000ff) /* Bits 0-7: UDP Header Checksum Errors */
+
+/* 1588 Timer Sync Strobe Seconds Register (32-bit value) */
 /* 1588 Timer Sync Strobe Nanoseconds Register */
-#define GMAC_TSSN_
-/* 1588 Timer Seconds Register */
-#define GMAC_TS_
+
+#define GMAC_TSSN_MASK            (0x3fffffff) /* Bits 0-29: Value Timer Nanoseconds Register Capture */
+
+/* 1588 Timer Seconds Register (32-bit value) */
 /* 1588 Timer Nanoseconds Register */
-#define GMAC_TN_
+
+#define GMAC_TN_MASK              (0x3fffffff) /* Bits 0-29: Timer Count in Nanoseconds */
+
 /* 1588 Timer Adjust Register */
-#define GMAC_TA_
+
+#define GMAC_TA_ITDT_SHIFT        (0)       /* Bits 0-29: Increment/Decrement */
+#define GMAC_TA_ITDT_MASK         (0x3fffffff)
+#define GMAC_TA_ADJ               (1 << 31) /* Bit 31: Adjust 1588 Timer */
+
 /* 1588 Timer Increment Register */
-#define GMAC_TI_
-/* PTP Event Frame Transmitted Seconds */
-#define GMAC_EFTS_
+
+#define GMAC_TI_CNS_SHIFT         (0)       /* Bits 0-7: Count Nanoseconds */
+#define GMAC_TI_CNS_MASK          (0xff << GMAC_TI_CNS_SHIFT)
+#  define GMAC_TI_CNS(n)          ((n) << GMAC_TI_CNS_SHIFT)
+#define GMAC_TI_ACNS_SHIFT        (8)       /* Bits 8-15: Alternative Count Nanoseconds */
+#define GMAC_TI_ACNS_MASK         (0xff << GMAC_TI_ACNS_SHIFT)
+#  define GMAC_TI_ACNS(n)         ((n) << GMAC_TI_ACNS_SHIFT)
+#define GMAC_TI_NIT_SHIFT         (16)      /* Bits 16-23: Number of Increments */
+#define GMAC_TI_NIT_MASK          (0xff << GMAC_TI_NIT_SHIFT)
+#  define GMAC_TI_NIT(n)          ((n) << GMAC_TI_NIT_SHIFT)
+
+/* PTP Event Frame Transmitted Seconds (32-bit value) */
 /* PTP Event Frame Transmitted Nanoseconds */
-#define GMAC_EFTN_
-/* PTP Event Frame Received Seconds */
-#define GMAC_EFRS_
+
+#define GMAC_EFTN_MASK              (0x3fffffff) /* Bits 0-29: Register Update */
+
+/* PTP Event Frame Received Seconds (32-bit value) */
 /* PTP Event Frame Received Nanoseconds */
-#define GMAC_EFRN_
-/* PTP Peer Event Frame Transmitted Seconds */
-#define GMAC_PEFTS_
+
+#define GMAC_EFRN_MASK              (0x3fffffff) /* Bits 0-29: Register Update */
+
+/* PTP Peer Event Frame Transmitted Seconds (32-bit value) */
 /* PTP Peer Event Frame Transmitted Nanoseconds */
-#define GMAC_PEFTN_
-/* PTP Peer Event Frame Received Seconds */
-#define GMAC_PEFRN_
+
+#define GMAC_PEFTN_MASK              (0x3fffffff) /* Bits 0-29: Register Update */
+
+/* PTP Peer Event Frame Received Seconds (32-bit value) */
 /* PTP Peer Event Frame Received Nanoseconds */
-#define GMAC_PEFRS_
-/* Interrupt Status Register Priority Queue 0-6 */
-#define GMAC_ISRPQ0_
+
+#define GMAC_PEFRS_MASK              (0x3fffffff) /* Bits 0-29: Register Update */
+
+/* Interrupt Status Register Priority Queue 0-6
+ * Interrupt Enable Register Priority Queue 0-6
+ * Interrupt Disable Register Priority Queue 0-6
+ * Interrupt Mask Register Priority Queue 0-6
+ *
+ * Use these definitions:
+ *
+ *      GMAC_INT_RCOMP                               Bit 1:  Receive Complete
+ *      GMAC_INT_RXUBR                               Bit 2:  Receive Used Bit Read
+ *      GMAC_INT_RLEX                                Bit 5:  Retry Limit Exceeded or Late Collision
+ *      GMAC_INT_TFC                                 Bit 6:  Transmit Frame Corruption due to AHB error
+ *      GMAC_INT_TCOMP                               Bit 7:  Transmit Complete
+ *      GMAC_INT_ROVR                                Bit 10: Receive Overrun
+ *      GMAC_INT_HRESP                               Bit 11: HRESP not OK
+ */
+
 /* Transmit Buffer Queue Base Address Priority Queue 0-6 */
-#define GMAC_TBQBAPQ0_
+
+#define GMAC_TBQBAPQ0_MASK        (0xfffffffc)  /* Bits 2-31: Transmit Buffer Queue Base Address */
+
 /* Receive Buffer Queue Base Address Priority Queue 0-6 */
-#define GMAC_RBQBAPQ0_
+
+#define GMAC_RBQBAPQ0_MASK        (0xfffffffc)  /* Bits 2-31: Receive Buffer Queue Base Address */
+
 /* Receive Buffer Size Register Priority Queue 0-6 */
-#define GMAC_RBSRPQ0_
+
+#define GMAC_RBSRPQ0_MASK         (0x0000ffff)  /* Bits 0-15: Receive Buffer Size */
+
 /* Screening Type1 Register Priority Queue 0-15 */
-#define GMAC_ST1RPQ0_
+
+#define GMAC_ST1RPQ0_QNB_SHIFT    (0)       /* Bits 0-3: Que Number (0->7) */
+#define GMAC_ST1RPQ0_QNB_MASK     (15 << GMAC_ST1RPQ0_QNB_SHIFT)
+#  define GMAC_ST1RPQ0_QNB(n)     ((n) << GMAC_ST1RPQ0_QNB_SHIFT)
+#define GMAC_ST1RPQ0_DSTCM_SHIFT  (4)       /* Bits 4-11: Differentiated Services or Traffic Class Match */
+#define GMAC_ST1RPQ0_DSTCM_MASK   (0xff << GMAC_ST1RPQ0_DSTCM_SHIFT)
+#  define GMAC_ST1RPQ0_DSTCM(n)   ((n) << GMAC_ST1RPQ0_DSTCM_SHIFT)
+#define GMAC_ST1RPQ0_UDPM_SHIFT   (12)      /* Bits 12-27: UDP Port Match */
+#define GMAC_ST1RPQ0_UDPM_MASK    (0xffff << GMAC_ST1RPQ0_UDPM_SHIFT)
+#  define GMAC_ST1RPQ0_UDPM(n)    ((n) << GMAC_ST1RPQ0_UDPM_SHIFT)
+#define GMAC_ST1RPQ0_DSTCE        (1 << 28) /* Bit 28: Differentiated Services or Traffic Class Match Enable */
+#define GMAC_ST1RPQ0_UDPE         (1 << 29) /* Bit 29: UDP Port Match Enable */
+
 /* Screening Type2 Register Priority Queue 0-15 */
-#define GMAC_ST2RPQ0_
-/* Interrupt Enable Register Priority Queue 0-6 */
-#define GMAC_IERPQ0_
-/* Interrupt Disable Register Priority Queue 0-6 */
-#define GMAC_IDRPQ0_
-/* Interrupt Mask Register Priority Queue 0-6 */
-#define GMAC_IMRPQ0_
+
+#define GMAC_ST2RPQ0_QNB_SHIFT    (0)       /* Bits 0-3: Que Number (0->7) */
+#define GMAC_ST2RPQ0_QNB_MASK     (15 << GMAC_ST2RPQ0_QNB_SHIFT)
+#  define GMAC_ST2RPQ0_QNB(n)     ((n) << GMAC_ST2RPQ0_QNB_SHIFT)
+#define GMAC_ST2RPQ0_VLANP_SHIFT  (4)       /* Bits 4-7: VLAN Priority */
+#define GMAC_ST2RPQ0_VLANP_MASK   (15 << GMAC_ST2RPQ0_VLANP_SHIFT)
+#  define GMAC_ST2RPQ0_VLANP(n)   ((n) << GMAC_ST2RPQ0_VLANP_SHIFT)
+#define GMAC_ST2RPQ0_VLANE        (1 << 8)  /* Bit 8:  VLAN Enable */
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_GMAC_H */
