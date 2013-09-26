@@ -55,8 +55,8 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_EXAMPLES_COMPOSITE_DEVMINOR1
-#  define CONFIG_EXAMPLES_COMPOSITE_DEVMINOR1 0
+#ifndef CONFIG_SYSTEM_COMPOSITE_DEVMINOR1
+#  define CONFIG_SYSTEM_COMPOSITE_DEVMINOR1 0
 #endif
 
 /* PORT and SLOT number probably depend on the board configuration */
@@ -105,7 +105,7 @@
 
 int composite_archinitialize(void)
 {
-  /* If examples/composite is built as an NSH command, then SD slot should
+  /* If system/composite is built as an NSH command, then SD slot should
    * already have been initized in nsh_archinitialize() (see up_nsh.c).  In
    * this case, there is nothing further to be done here.
    *
@@ -138,7 +138,7 @@ int composite_archinitialize(void)
   message("composite_archinitialize: Binding SPI port %d to MMC/SD slot %d\n",
           LPC214X_MMCSDSPIPORTNO, LPC214X_MMCSDSLOTNO);
 
-  ret = mmcsd_spislotinitialize(CONFIG_EXAMPLES_COMPOSITE_DEVMINOR1, LPC214X_MMCSDSLOTNO, spi);
+  ret = mmcsd_spislotinitialize(CONFIG_SYSTEM_COMPOSITE_DEVMINOR1, LPC214X_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
       message("composite_archinitialize: Failed to bind SPI port %d to MMC/SD slot %d: %d\n",

@@ -703,7 +703,7 @@ Where <subdir> is one of the following:
 
     This configuration exercises a composite USB interface consisting
     of a CDC/ACM device and a USB mass storage device.  This configuration
-    uses apps/examples/composite.
+    uses apps/system/composite.
 
   nsh and nsh2:
   ------------

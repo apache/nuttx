@@ -110,14 +110,14 @@ config USBDEV_COMPOSITE
 
 if USBDEV_COMPOSITE
 
-#config COMPOSITE_IAD
-#	bool ""
-#	default n
-#	---help---
-#		If one of the members of the composite has multiple interfaces
-#		(such as CDC/ACM), then an Interface Association Descriptor (IAD)
-#		will be necessary.  Default:  IAD will be used automatically if
-#		needed.  It should not be necessary to set this.
+config COMPOSITE_IAD
+	bool "Use Interface Associate Descriptor (IAD)"
+	default n
+	---help---
+		If one of the members of the composite has multiple interfaces
+		(such as CDC/ACM), then an Interface Association Descriptor (IAD)
+		will be necessary.  Default:  IAD will be used automatically if
+		needed.  It should not be necessary to set this.
 
 config COMPOSITE_EP0MAXPACKET
 	int "Max packet size for endpoint 0"
@@ -158,8 +158,8 @@ config COMPOSITE_CONFIGSTR
 		Configuration string
 
 config COMPOSITE_VERSIONNO
-	string "Composite version number"
-	default ""
+	hex "Composite version number"
+	default 0x1010
 	---help---
 		Interface version number.
 endif

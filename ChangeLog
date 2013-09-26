@@ -5633,3 +5633,7 @@
 	  apps/examples/usbmsc to apps/system/usbmsc (2013-9-25).
 	* configs:  Changes to many defconfig files resulting from moving
 	  apps/examples/cdcacm to apps/system/cdcacm (2013-9-25).
+	* configs:  Changes to many defconfig files resulting from moving
+	  apps/examples/composite to apps/system/composite (2013-9-25).
+	* configs/stm3210e-eval/composite:  Converted to use the kconfig-
+	  frontends tool (2013-9-25).
