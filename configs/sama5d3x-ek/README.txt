@@ -1910,142 +1910,178 @@ Configurations
         Address 0x1a is the WM8904.  Address 0x39 is the SIL9022A. I am
         not sure what is at address 0x3d and 0x60
 
-    14. Networking support via the EMAC 10/100Base-T peripheral can be
-        added to NSH be selecting the following configuration options.
-        Remember that only the SAMA5D31 and SAMAD35 support the EMAC
-        peripheral!  This will add several new commands to NSH:  ifconfig,
-        wget, put, get, ping, etc.
+    14. Networking support via the can be added to NSH be selecting the
+        following configuration options.  The SAMA5D3x supports two different
+        Ethernet MAC peripherals:  (1) The 10/100Base-T EMAC peripheral and
+        and (2) the 10/100/1000Base-T GMAC peripheral.  Only the SAMA5D31
+        and SAMAD35 support the EMAC peripheral; Only the SAMA5D33, SAMA5D34,
+        and SAMA5D35 support the GMAC perpheral!  NOTE that the SAMA5D35
+        supports both!
 
-        System Type
-          CONFIG_ARCH_CHIP_ATSAMA5D31=y       : SAMA5D31 or SAMAD35 support EMAC
-          CONFIG_ARCH_CHIP_ATSAMA5D35=y       : (others do not)
+        a) Selecting the EMAC peripheral:
 
-        System Type -> SAMA5 Peripheral Support
-          CONFIG_SAMA5_EMAC=y                 : Enable the EMAC peripheral
+          System Type
+            CONFIG_ARCH_CHIP_ATSAMA5D31=y       : SAMA5D31 or SAMAD35 support EMAC
+            CONFIG_ARCH_CHIP_ATSAMA5D35=y       : (others do not)
 
-        System Type -> EMAC device driver options
-          CONFIG_SAMA5_EMAC_NRXBUFFERS=16     : Set aside some RS and TX buffers
-          CONFIG_SAMA5_EMAC_NTXBUFFERS=4
-          CONFIG_SAMA5_EMAC_PHYADDR=1         : KSZ8051 PHY is at address 1
-          CONFIG_SAMA5_EMAC_AUTONEG=y         : Use autonegotiation
-          CONFIG_SAMA5_EMAC_RMII=y            : Either MII or RMII interface should work
-          CONFIG_SAMA5_EMAC_PHYSR=30          : Address of PHY status register on KSZ8051
-          CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG=y : Needed for KSZ8051
-          CONFIG_SAMA5_EMAC_PHYSR_ALTMODE=0x7 : "    " " " "     "
-          CONFIG_SAMA5_EMAC_PHYSR_10HD=0x1    : "    " " " "     "
-          CONFIG_SAMA5_EMAC_PHYSR_100HD=0x2   : "    " " " "     "
-          CONFIG_SAMA5_EMAC_PHYSR_10FD=0x5    : "    " " " "     "
-          CONFIG_SAMA5_EMAC_PHYSR_100FD=0x6   : "    " " " "     "
+          System Type -> SAMA5 Peripheral Support
+            CONFIG_SAMA5_EMAC=y                 : Enable the EMAC peripheral
 
-        Networking Support
-          CONFIG_NET=y                        : Enable Neworking
-          CONFIG_NET_SOCKOPTS=y               : Enable socket operations
-          CONFIG_NET_BUFSIZE=562              : Maximum packet size (MTD) 1518 is more standard
-          CONFIG_NET_RECEIVE_WINDOW=562       : Should be the same as CONFIG_NET_BUFSIZE
-          CONFIG_NET_TCP=y                    : Enable TCP/IP networking
-          CONFIG_NET_TCPBACKLOG=y             : Support TCP/IP backlog
-          CONFIG_NET_TCP_READAHEAD_BUFSIZE=562  Read-ahead buffer size
-          CONFIG_NET_UDP=y                    : Enable UDP networking
-          CONFIG_NET_ICMP=y                   : Enable ICMP networking
-          CONFIG_NET_ICMP_PING=y              : Needed for NSH ping command
-                                             : Defaults should be okay for other options
-        Device drivers -> Network Device/PHY Support
-          CONFIG_NETDEVICES=y                 : Enabled PHY selection
-          CONFIG_ETH0_PHY_KSZ8051=y           : Select the KSZ8051 PHY
+          System Type -> EMAC device driver options
+            CONFIG_SAMA5_EMAC_NRXBUFFERS=16     : Set aside some RS and TX buffers
+            CONFIG_SAMA5_EMAC_NTXBUFFERS=4
+            CONFIG_SAMA5_EMAC_PHYADDR=1         : KSZ8051 PHY is at address 1
+            CONFIG_SAMA5_EMAC_AUTONEG=y         : Use autonegotiation
+            CONFIG_SAMA5_EMAC_RMII=y            : Either MII or RMII interface should work
+            CONFIG_SAMA5_EMAC_PHYSR=30          : Address of PHY status register on KSZ8051
+            CONFIG_SAMA5_EMAC_PHYSR_ALTCONFIG=y : Needed for KSZ8051
+            CONFIG_SAMA5_EMAC_PHYSR_ALTMODE=0x7 : "    " " " "     "
+            CONFIG_SAMA5_EMAC_PHYSR_10HD=0x1    : "    " " " "     "
+            CONFIG_SAMA5_EMAC_PHYSR_100HD=0x2   : "    " " " "     "
+            CONFIG_SAMA5_EMAC_PHYSR_10FD=0x5    : "    " " " "     "
+            CONFIG_SAMA5_EMAC_PHYSR_100FD=0x6   : "    " " " "     "
 
-        Application Configuration -> Network Utilities
-          CONFIG_NETUTILS_RESOLV=y            : Enable host address resolution
-          CONFIG_NETUTILS_TELNETD=y           : Enable the Telnet daemon
-          CONFIG_NETUTILS_TFTPC=y             : Enable TFTP data file transfers for get and put commands
-          CONFIG_NETUTILS_UIPLIB=y            : Network library support is needed
-          CONFIG_NETUTILS_WEBCLIENT=y         : Needed for wget support
-                                              : Defaults should be okay for other options
-        Application Configuration -> NSH Library
-          CONFIG_NSH_TELNET=y                 : Enable NSH session via Telnet
-          CONFIG_NSH_IPADDR=0x0a000002        : Select an IP address
-          CONFIG_NSH_DRIPADDR=0x0a000001      : IP address of gateway/host PC
-          CONFIG_NSH_NETMASK=0xffffff00       : Netmask
-          CONFIG_NSH_NOMAC=y                  : Need to make up a bogus MAC address
+          PHY selection.  Later in the configuration steps, you will need to
+          select the KSZ8051 PHY for EMAC (See below)
 
-        So what can you do with this networking support.  First you see that
-        NSH has several new network related commands:
+        b) Selecting the GMAC peripheral:
 
-          ifconfig, ifdown, ifup:  Commands to help manage your network
-          get and put:             TFTP file transfers
-          wget:                    HTML file transfers
-          ping:                    Check for access to peers on the network
-          Telnet console:          You can access the NSH remotely via telnet.
-        
-        You can also enable other add on features like full FTP or a Web
-        Server or XML RPC and others.  There are also other features that
-        you can enable like DHCP client (or server) or network name
-        resolution.
+          System Type
+            CONFIG_ARCH_CHIP_ATSAMA5D33=y       : SAMA5D31, SAMA5D33 and SAMAD35
+            CONFIG_ARCH_CHIP_ATSAMA5D34=y       : support GMAC (others do not)
+            CONFIG_ARCH_CHIP_ATSAMA5D35=y       :
 
-        By default, the IP address of the SAMA5D3x-EK will be 10.0.0.2 and
-        it will assume that your host is the gateway and has the IP address
-        10.0.0.1.
+          System Type -> SAMA5 Peripheral Support
+            CONFIG_SAMA5_GMAC=y                 : Enable the GMAC peripheral
 
-          nsh> ifconfig
-          eth0    HWaddr 00:e0:de:ad:be:ef at UP
-                  IPaddr:10.0.0.2 DRaddr:10.0.0.1 Mask:255.255.255.0
+          System Type -> GMAC device driver options
+            CONFIG_SAMA5_GMAC_NRXBUFFERS=16     : Set aside some RS and TX buffers
+            CONFIG_SAMA5_GMAC_NTXBUFFERS=4
+            CONFIG_SAMA5_GMAC_PHYADDR=1         : KSZ8051 PHY is at address 1
+            CONFIG_SAMA5_GMAC_AUTONEG=y         : Use autonegotiation
 
-        You can use ping to test for connectivity to the host (Careful,
-        Window firewalls usually block ping-related ICMP traffic).  On the
-        target side, you can:
+          If both EMAC and GMAC are selected, you will also need:
 
-          nsh> ping 10.0.0.1
-          PING 10.0.0.1 56 bytes of data
-          56 bytes from 10.0.0.1: icmp_seq=1 time=0 ms
-          56 bytes from 10.0.0.1: icmp_seq=2 time=0 ms
-          56 bytes from 10.0.0.1: icmp_seq=3 time=0 ms
-          56 bytes from 10.0.0.1: icmp_seq=4 time=0 ms
-          56 bytes from 10.0.0.1: icmp_seq=5 time=0 ms
-          56 bytes from 10.0.0.1: icmp_seq=6 time=0 ms
-          56 bytes from 10.0.0.1: icmp_seq=7 time=0 ms
-          56 bytes from 10.0.0.1: icmp_seq=8 time=0 ms
-          56 bytes from 10.0.0.1: icmp_seq=9 time=0 ms
-          56 bytes from 10.0.0.1: icmp_seq=10 time=0 ms
-          10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
+            CONFIG_SAMA5_GMAC_ISETH0=y          : GMAC is "eth0"; EMAC is "eth1"
 
-        NOTE: In this configuration is is normal to have packet loss > 0%
-        the first time you ping due to the default handling of the ARP
-        table.
+          PHY selection.  Later in the configuration steps, you will need to
+          select the  KSZ9021/31 PHY for GMAC (See below)
 
-        On the host side, you should also be able to ping the SAMA5D3-EK:
+        c) Common configuration settings
 
-          $ ping 10.0.0.2
+          Networking Support
+            CONFIG_NET=y                        : Enable Neworking
+            CONFIG_NET_SOCKOPTS=y               : Enable socket operations
+            CONFIG_NET_BUFSIZE=562              : Maximum packet size (MTD) 1518 is more standard
+            CONFIG_NET_RECEIVE_WINDOW=562       : Should be the same as CONFIG_NET_BUFSIZE
+            CONFIG_NET_TCP=y                    : Enable TCP/IP networking
+            CONFIG_NET_TCPBACKLOG=y             : Support TCP/IP backlog
+            CONFIG_NET_TCP_READAHEAD_BUFSIZE=562  Read-ahead buffer size
+            CONFIG_NET_UDP=y                    : Enable UDP networking
+            CONFIG_NET_ICMP=y                   : Enable ICMP networking
+            CONFIG_NET_ICMP_PING=y              : Needed for NSH ping command
+                                                : Defaults should be okay for other options
+          Device drivers -> Network Device/PHY Support
+            CONFIG_NETDEVICES=y                 : Enabled PHY selection
+            CONFIG_ETH0_PHY_KSZ8051=y           : Select the KSZ8051 PHY (for EMAC), OR
+            CONFIG_ETH0_PHY_KSZ90x1=y           : Select teh KSZ9021/31 PHY (for GMAC)
 
-        You can also log into the NSH from the host PC like this:
+          Application Configuration -> Network Utilities
+            CONFIG_NETUTILS_RESOLV=y            : Enable host address resolution
+            CONFIG_NETUTILS_TELNETD=y           : Enable the Telnet daemon
+            CONFIG_NETUTILS_TFTPC=y             : Enable TFTP data file transfers for get and put commands
+            CONFIG_NETUTILS_UIPLIB=y            : Network library support is needed
+            CONFIG_NETUTILS_WEBCLIENT=y         : Needed for wget support
+                                                : Defaults should be okay for other options
+          Application Configuration -> NSH Library
+            CONFIG_NSH_TELNET=y                 : Enable NSH session via Telnet
+            CONFIG_NSH_IPADDR=0x0a000002        : Select an IP address
+            CONFIG_NSH_DRIPADDR=0x0a000001      : IP address of gateway/host PC
+            CONFIG_NSH_NETMASK=0xffffff00       : Netmask
+            CONFIG_NSH_NOMAC=y                  : Need to make up a bogus MAC address
+                                                : Defaults should be okay for other options
 
-          $ telnet 10.0.0.2
-          Trying 10.0.0.2...
-          Connected to 10.0.0.2.
-          Escape character is '^]'.
-          sh_telnetmain: Session [3] Started
+        d) Using the network with NSH
 
-          NuttShell (NSH) NuttX-6.31
-          nsh> help
-          help usage:  help [-v] [<cmd>]
+          So what can you do with this networking support?  First you see that
+          NSH has several new network related commands:
 
-            [           echo        ifconfig    mkdir       mw          sleep       
-            ?           exec        ifdown      mkfatfs     ping        test        
-            cat         exit        ifup        mkfifo      ps          umount      
-            cp          free        kill        mkrd        put         usleep      
-            cmp         get         losetup     mh          rm          wget        
-            dd          help        ls          mount       rmdir       xd          
-            df          hexdump     mb          mv          sh          
+            ifconfig, ifdown, ifup:  Commands to help manage your network
+            get and put:             TFTP file transfers
+            wget:                    HTML file transfers
+            ping:                    Check for access to peers on the network
+            Telnet console:          You can access the NSH remotely via telnet.
 
-          Builtin Apps:
-          nsh> 
+          You can also enable other add on features like full FTP or a Web
+          Server or XML RPC and others.  There are also other features that
+          you can enable like DHCP client (or server) or network name
+          resolution.
 
-        NOTE:  If you enable this feature, you experience a delay on booting.
-        That is because the start-up logic waits for the network connection
-        to be established before starting NuttX.  In a real application, you
-        would probably want to do the network bringup on a separate thread
-        so that access to the NSH prompt is not delayed.
-        
-        This delay will be especially long if the board is not connected to
-        a network.
+          By default, the IP address of the SAMA5D3x-EK will be 10.0.0.2 and
+          it will assume that your host is the gateway and has the IP address
+          10.0.0.1.
+
+            nsh> ifconfig
+            eth0    HWaddr 00:e0:de:ad:be:ef at UP
+                    IPaddr:10.0.0.2 DRaddr:10.0.0.1 Mask:255.255.255.0
+
+          You can use ping to test for connectivity to the host (Careful,
+          Window firewalls usually block ping-related ICMP traffic).  On the
+          target side, you can:
+
+            nsh> ping 10.0.0.1
+            PING 10.0.0.1 56 bytes of data
+            56 bytes from 10.0.0.1: icmp_seq=1 time=0 ms
+            56 bytes from 10.0.0.1: icmp_seq=2 time=0 ms
+            56 bytes from 10.0.0.1: icmp_seq=3 time=0 ms
+            56 bytes from 10.0.0.1: icmp_seq=4 time=0 ms
+            56 bytes from 10.0.0.1: icmp_seq=5 time=0 ms
+            56 bytes from 10.0.0.1: icmp_seq=6 time=0 ms
+            56 bytes from 10.0.0.1: icmp_seq=7 time=0 ms
+            56 bytes from 10.0.0.1: icmp_seq=8 time=0 ms
+            56 bytes from 10.0.0.1: icmp_seq=9 time=0 ms
+            56 bytes from 10.0.0.1: icmp_seq=10 time=0 ms
+            10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
+
+          NOTE: In this configuration is is normal to have packet loss > 0%
+          the first time you ping due to the default handling of the ARP
+          table.
+
+          On the host side, you should also be able to ping the SAMA5D3-EK:
+
+            $ ping 10.0.0.2
+
+          You can also log into the NSH from the host PC like this:
+
+            $ telnet 10.0.0.2
+            Trying 10.0.0.2...
+            Connected to 10.0.0.2.
+            Escape character is '^]'.
+            sh_telnetmain: Session [3] Started
+
+            NuttShell (NSH) NuttX-6.31
+            nsh> help
+            help usage:  help [-v] [<cmd>]
+
+              [           echo        ifconfig    mkdir       mw          sleep
+              ?           exec        ifdown      mkfatfs     ping        test
+              cat         exit        ifup        mkfifo      ps          umount
+              cp          free        kill        mkrd        put         usleep
+              cmp         get         losetup     mh          rm          wget
+              dd          help        ls          mount       rmdir       xd
+              df          hexdump     mb          mv          sh
+
+            Builtin Apps:
+            nsh>
+
+          NOTE:  If you enable this feature, you experience a delay on booting.
+          That is because the start-up logic waits for the network connection
+          to be established before starting NuttX.  In a real application, you
+          would probably want to do the network bringup on a separate thread
+          so that access to the NSH prompt is not delayed.
+
+          This delay will be especially long if the board is not connected to
+          a network.
 
     STATUS:
       PCK FREQUENCY
