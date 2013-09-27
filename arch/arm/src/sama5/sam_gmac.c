@@ -1831,7 +1831,7 @@ static void sam_phydump(struct sam_gmac_s *priv)
 static void sam_enablemdio(struct sam_gmac_s *priv)
 {
   uint32_t regval;
-  uint32_t enables;
+  uint32_t ncr;
 
   /* Enable management port */
 
@@ -2489,14 +2489,11 @@ static void sam_mdcclock(struct sam_gmac_s *priv)
 {
   uint32_t ncfgr;
   uint32_t ncr;
-  uint32_t enables;
 
   /* Disable RX and TX momentarily */
 
-  ncr  = sam_getreg(priv, SAM_GMAC_NCR);
-  enables = ncr & (GMAC_NCR_RXEN | GMAC_NCR_TXEN);
-  ncr &= ~(GMAC_NCR_RXEN | GMAC_NCR_TXEN);
-  sam_putreg(priv, SAM_GMAC_NCR, ncr);
+  ncr = sam_getreg(priv, SAM_GMAC_NCR);
+  sam_putreg(priv, SAM_GMAC_NCR, ncr & ~(GMAC_NCR_RXEN | GMAC_NCR_TXEN));
 
   /* Modify the NCFGR register based on the configured board MCK frequency */
 
@@ -2523,7 +2520,6 @@ static void sam_mdcclock(struct sam_gmac_s *priv)
 
   /* Restore RX and TX enable settings */
 
-  ncr |= enables;
   sam_putreg(priv, SAM_GMAC_NCR, ncr);
 }
 
