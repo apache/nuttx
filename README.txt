@@ -985,6 +985,8 @@ nuttx
  |   |   `- README.txt
  |   |- cloudctrl
  |   |   `- README.txt
+ |   |- compal_e86
+ |   |   `- README.txt
  |   |- compal_e88
  |   |   `- README.txt
  |   |- compal_e99

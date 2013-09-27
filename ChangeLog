@@ -5659,4 +5659,6 @@
 	  code complete and readay for test (2013-9-27)
 	* configs/compal_e86: Basic board support for the Motorola C139
 	  (Compal E86) phone.  From Craig Comstock (2013-9-27).
+	* configs/compal_e86: Converted to use the kconfig-frontends
+	  tools (2013-9-27).
 
