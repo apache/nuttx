@@ -5653,3 +5653,8 @@
 	* drivers/net/encx24j600.c:  Removed logic that polls for the
 	  next outgoing packet from the TX done interrupt handling.  From
 	  Max Holtzberg (2013-9-27)
+	* sched/os_start.c:  Should not call group_setupidlefiles() if there
+	  are not file descriptors (and, hence, no file system) (2013-9-27).
+	* arch/arm/src/sama5/sam_gmac.c:  GMAC driver and GMII logic is
+	  code complete and readay for test (2013-9-27)
+

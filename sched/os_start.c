@@ -486,7 +486,9 @@ void os_start(void)
    * inherited by all of the threads created by the IDLE task.
    */
 
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   DEBUGVERIFY(group_setupidlefiles(&g_idletcb));
+#endif
 
   /* Complete initialization of the IDLE group.  Suppress retention
    * of child status in the IDLE group.
