@@ -5646,5 +5646,8 @@
 	  if the packet is being sent out of our subnet (via a router).
 	  The fallback here is just to use "eth0" if the subnet lookup
 	  fails.  This will, of course, will have to be revisited if/when
-	  multiple NICs are supported (2013-9-27).
+	  multiple NICs are supported.  From Max Holtzberg (2013-9-27).
+	* net/send.c:  Fix some backward conditional logic in check
+	  to see if we should check if the ARP address in the table.  From
+	  Max Holzberg (2013-9-27).
 

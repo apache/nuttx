@@ -379,7 +379,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
        * should already be in the ARP table.
        */
 
-#if defined(CONFIG_NET_ETHERNET) && defined (CONFIG_NET_ARP_IPIN)
+#if defined(CONFIG_NET_ETHERNET) && !defined(CONFIG_NET_ARP_IPIN)
       if (pstate->snd_sent != 0 || uip_arp_find(conn->ripaddr) != NULL)
 #endif
         {
