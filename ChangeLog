@@ -5649,5 +5649,7 @@
 	  multiple NICs are supported.  From Max Holtzberg (2013-9-27).
 	* net/send.c:  Fix some backward conditional logic in check
 	  to see if we should check if the ARP address in the table.  From
-	  Max Holzberg (2013-9-27).
-
+	  Max Holtzberg (2013-9-27).
+	* drivers/net/encx24j600.c:  Removed logic that polls for the
+	  next outgoing packet from the TX done interrupt handling.  From
+	  Max Holtzberg (2013-9-27)

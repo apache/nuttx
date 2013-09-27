@@ -1289,10 +1289,6 @@ static void enc_txif(FAR struct enc_driver_s *priv)
 
       enc_transmit(priv);
     }
-
-  /* Then poll uIP for new XMIT data */
-
-  (void)uip_poll(&priv->dev, enc_uiptxpoll);
 }
 
 /****************************************************************************
