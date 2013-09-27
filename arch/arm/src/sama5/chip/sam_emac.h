@@ -237,6 +237,7 @@
 #define EMAC_INT_WOL              (1 << 14) /* Bit 14: Wake On LAN */
 
 #define EMAC_INT_ALL              (0x00007cff)
+#define EMAC_INT_UNUSED           (0xffff8300)
 
 /* Phy Maintenance Register */
 

@@ -314,121 +314,48 @@ config SAMA5_GMAC_PHYINIT
 		provide sam_phyinitialize();  The SAMA5 GMAC driver will call this function
 		one time before it first uses the PHY.
 
-config SAMA5_GMAC_GMII
-	bool "Use MII interface"
-	default n
-	---help---
-		Support Ethernet MII interface (vs RMII).
-
-config SAMA5_GMAC_RGMII
-	bool
-	default y if !SAMA5_GMAC_GMII
-	default n if SAMA5_GMAC_GMII
-
 config SAMA5_GMAC_AUTONEG
 	bool "Use autonegotiation"
 	default y
 	---help---
 		Use PHY autonegotiation to determine speed and mode
 
+if !SAMA5_GMAC_AUTONEG
+
 config SAMA5_GMAC_ETHFD
 	bool "Full duplex"
 	default n
-	depends on !SAMA5_GMAC_AUTONEG
 	---help---
-		If SAMA5_GMAC_AUTONEG is not defined, then this may be defined to select full duplex
-		mode. Default: half-duplex
+		If SAMA5_GMAC_AUTONEG is not defined, then this may be defined to
+		select full duplex mode. Default: half-duplex
+
+choice
+	prompt "GMAC Speed"
+	default SAMA5_GMAC_ETH100MBPS
+	---help---
+		If autonegation is not used, then you must select the fixed speed
+		of the PHY
+
+config SAMA5_GMAC_ETH10MBPS
+	bool "10 Mbps"
+	---help---
+		If SAMA5_GMAC_AUTONEG is not defined, then this may be defined to select 10 MBps
+		speed.  Default: 100 Mbps
 
 config SAMA5_GMAC_ETH100MBPS
 	bool "100 Mbps"
-	default n
-	depends on !SAMA5_GMAC_AUTONEG
 	---help---
 		If SAMA5_GMAC_AUTONEG is not defined, then this may be defined to select 100 MBps
-		speed.  Default: 10 Mbps
+		speed.  Default: 100 Mbps
 
-config SAMA5_GMAC_PHYSR
-	int "PHY Status Register Address (decimal)"
-	depends on SAMA5_GMAC_AUTONEG
+config SAMA5_GMAC_ETH1000MBPS
+	bool "1000 Mbps"
 	---help---
-		This must be provided if SAMA5_GMAC_AUTONEG is defined.  The PHY status register
-		address may diff from PHY to PHY.  This configuration sets the address of
-		the PHY status register.
+		If SAMA5_GMAC_AUTONEG is not defined, then this may be defined to select 1000 MBps
+		speed.  Default: 100 Mbps
 
-config SAMA5_GMAC_PHYSR_ALTCONFIG
-	bool "PHY Status Alternate Bit Layout"
-	default n
-	depends on SAMA5_GMAC_AUTONEG
-	---help---
-		Different PHYs present speed and mode information in different ways.  Some
-		will present separate information for speed and mode (this is the default).
-		Those PHYs, for example, may provide a 10/100 Mbps indication and a separate
-		full/half duplex indication. This options selects an alternative representation
-		where speed and mode information are combined.  This might mean, for example,
-		separate bits for 10HD, 100HD, 10FD and 100FD.
-
-config SAMA5_GMAC_PHYSR_SPEED
-	hex "PHY Speed Mask"
-	depends on SAMA5_GMAC_AUTONEG && !SAMA5_GMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_GMAC_AUTONEG is defined.  This provides bit mask
-		for isolating the 10 or 100MBps speed indication.
-
-config SAMA5_GMAC_PHYSR_100MBPS
-	hex "PHY 100Mbps Speed Value"
-	depends on SAMA5_GMAC_AUTONEG && !SAMA5_GMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_GMAC_AUTONEG is defined.  This provides the value
-		of the speed bit(s) indicating 100MBps speed.
-
-config SAMA5_GMAC_PHYSR_MODE
-	hex "PHY Mode Mask"
-	depends on SAMA5_GMAC_AUTONEG && !SAMA5_GMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_GMAC_AUTONEG is defined.  This provide bit mask
-		for isolating the full or half duplex mode bits.
-
-config SAMA5_GMAC_PHYSR_FULLDUPLEX
-	hex "PHY Full Duplex Mode Value"
-	depends on SAMA5_GMAC_AUTONEG && !SAMA5_GMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_GMAC_AUTONEG is defined.  This provides the
-		value of the mode bits indicating full duplex mode.
-
-config SAMA5_GMAC_PHYSR_ALTMODE
-	hex "PHY Mode Mask"
-	depends on SAMA5_GMAC_AUTONEG && SAMA5_GMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_GMAC_AUTONEG is defined.  This provide bit mask
-		for isolating the speed and full/half duplex mode bits.
-
-config SAMA5_GMAC_PHYSR_10HD
-	hex "10MBase-T Half Duplex Value"
-	depends on SAMA5_GMAC_AUTONEG && SAMA5_GMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_GMAC_AUTONEG is defined.  This is the value
-		under the bit mask that represents the 10Mbps, half duplex setting.
-
-config SAMA5_GMAC_PHYSR_100HD
-	hex "100Base-T Half Duplex Value"
-	depends on SAMA5_GMAC_AUTONEG && SAMA5_GMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_GMAC_AUTONEG is defined.  This is the value
-		under the bit mask that represents the 100Mbps, half duplex setting.
-
-config SAMA5_GMAC_PHYSR_10FD
-	hex "10Base-T Full Duplex Value"
-	depends on SAMA5_GMAC_AUTONEG && SAMA5_GMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_GMAC_AUTONEG is defined.  This is the value
-		under the bit mask that represents the 10Mbps, full duplex setting.
-
-config SAMA5_GMAC_PHYSR_100FD
-	hex "100Base-T Full Duplex Value"
-	depends on SAMA5_GMAC_AUTONEG && SAMA5_GMAC_PHYSR_ALTCONFIG
-	---help---
-		This must be provided if SAMA5_GMAC_AUTONEG is defined.  This is the value
-		under the bit mask that represents the 100Mbps, full duplex setting.
+endchoice # GMAC speed
+endif # !SAMA5_GMAC_AUTONEG
 
 config SAMA5_GMAC_REGDEBUG
 	bool "Register-Level Debug"
