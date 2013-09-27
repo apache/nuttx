@@ -64,16 +64,16 @@
 #define GMII_EXPANSION                MII_EXPANSION   /* Auto-negotiation expansion */
 #define GMII_NEXTPAGE                 MII_NEXTPAGE    /* Auto-negotiation next page */
 #define GMII_LPANEXTPAGE              MII_LPANEXTPAGE /* Auto-negotiation link partner received next page */
-#define GMII_CTRL1000                 9               /* 1000BASE-T control */
-#define GMII_STAT1000                 10              /* 1000BASE-T status */
-#define GMII_PSECR                    11              /* PSE Control register */
+#define GMII_1000BTCR                 9               /* 1000BASE-T control */
+#define GMII_1000BTSR                 10              /* 1000BASE-T status */
+#define GMII_ERCR                     11              /* Extend Register - Control */
 #define GMII_ERDWR                    12              /* Extend Register - Data Write Register */
 #define GMII_ERDRR                    13              /* Extend Register - Data Read Register */
 #define GMII_ESTATUS                  MII_ESTATUS     /* Extended MII status register */
 
 /* Extended Registers: Registers 16-31 may be used for vendor specific abilities */
 
-/* Micrel KSZ9021/31 Vendor Specific Registers */
+/* Micrel KSZ9021/31 Vendor Specific Register Addresses */
 
 #define GMII_KSZ90x1_RLPBK            17              /* Remote loopback, LED mode */
 #define GMII_KSZ90x1_LINKMD           18              /* LinkMD(c) cable diagnostic */
@@ -83,7 +83,7 @@
 #define GMII_KSZ90x1_DBGCTRL1         28              /* Digital debug control 1 */
 #define GMII_KSZ90x1_PHYCTRL          31              /* PHY control */
 
-/* Micrel KSZ9021/31 Extended registers */
+/* Micrel KSZ9021/31 Extended Register Addresses */
 
 #define GMII_KSZ90x1_CCR              256             /* Common control */
 #define GMII_KSZ90x1_SSR              257             /* Strap status */
@@ -130,9 +130,15 @@
 
 /* MII ID2 register bits */
 
-#define GMII_PHYID2_OUI               MII_PHYID2_OUI
-#define GMII_PHYID2_MODEL             MII_PHYID2_MODEL
-#define GMII_PHYID2_REV               MII_PHYID2_REV
+#define GMII_PHYID2_REV_SHIFT         MII_PHYID2_REV_SHIFT
+#define GMII_PHYID2_REV_MASK          MII_PHYID2_REV_MASK
+#define GMII_PHYID2_REV(n)            MII_PHYID2_REV(n)
+#define GMII_PHYID2_MODEL_SHIFT       MII_PHYID2_MODEL_SHIFT
+#define GMII_PHYID2_MODEL_MASK        MII_PHYID2_MODEL
+#  define GMII_PHYID2_MODEL(n)        MII_PHYID2_MODEL(n)
+#define GMII_PHYID2_OUI_SHIFT         MII_PHYID2_OUI_SHIFT
+#define GMII_PHYID2_OUI_MASK          MII_PHYID2_OUI_MASK
+#  define GMII_PHYID2_OUI(n)          MII_PHYID2_OUI(n)
 
 /* Advertisement control register bit definitions */
 
@@ -219,23 +225,48 @@
 #  define GMII_MMDCONTROL_FUNC_RWINCR MII_MMDCONTROL_FUNC_RWINCR
 #  define GMII_MMDCONTROL_FUNC_WINCR  MII_MMDCONTROL_FUNC_WINCR
 
-/* Extended status register */
+/* Extended Status Register */
 
 #define GMII_ESTATUS_1000BASETHALF    MII_ESTATUS_1000BASETHALF
 #define GMII_ESTATUS_1000BASETFULL    MII_ESTATUS_1000BASETFULL
 #define GMII_ESTATUS_1000BASEXHALF    MII_ESTATUS_1000BASEXHALF
 #define GMII_ESTATUS_1000BASEXFULL    MII_ESTATUS_1000BASEXFULL
 
-/* Extend Register - Data Write Register */
+/* 1000BASE-T Control Register */
+                                                /* Bits 0-7: Reserved */
+#define GMII_1000BTCR_1000BASETHALF   (1 << 8)  /* Bit 8:  1000Base-T half duplex able */
+#define GMII_1000BTCR_1000BASETFULL   (1 << 9)  /* Bit 9:  1000Base-T full duplex able */
+#define GMII_1000BTCR_MULTIPLE        (1 << 10) /* Bit 10: Port type:  Prefer multiport device */
+#define GMII_1000BTCR_MMASTER         (1 << 11) /* Bit 11: Configure PHY as master (manual) */
+#define GMII_1000BTCR_MSMC            (1 << 12) /* Bit 12: Master/slave manual configuration */
+#define GMII_1000BTCR_TESTMODE_SHIFT  (13)      /* Bits 13-15: Test Mode */
+#define GMII_1000BTCR_TESTMODE_MASK   (7 << GMII_1000BTCR_TESTMODE_SHIFT)
+#  define GMII_1000BTCR_MODE_NORMAL   (0 << GMII_1000BTCR_TESTMODE_SHIFT)
+#  define GMII_1000BTCR_TESTMODE(n)   ((n) << GMII_1000BTCR_TESTMODE_SHIFT) /* n=1-4 */
 
-#define GMII_ERDWR_ADDR_SHIFT         (0)       /* Bits 0-7: Select extended register address */
-#define GMII_ERDWR_ADDR_MASK          (0xff << GMII_ERDWR_ADDR_SHIFT)
-#  define GMII_ERDWR_ADDR(n)          ((n) << GMII_ERDWR_ADDR_SHIFT)
-#define GMII_ERDWR_PAGE               (1 << 8)  /* Bit 8: Select page for extended register */
+/* 1000BASE-T Status Register */
+
+#define GMII_1000BTSR_IDLERR_SHIFT    (0)       /* Bits 0-7: Idle error count */
+#define GMII_1000BTSR_IDLERR_MASK     (0xff << GMII_1000BTSR_IDLERR_SHIFT)
+                                                /* Bits 8-9: Reserved */
+#define GMII_1000BTSR_LP1000BASETHALF (1 << 10) /* Bit 10: Link partner 1000Base-T half duplex able */
+#define GMII_1000BTSR_LP1000BASETFULL (1 << 11) /* Bit 11: Link partner 1000Base-T full duplex able */
+#define GMII_1000BTSR_RROK            (1 << 12) /* Bit 12: Remote receiver OK */
+#define GMII_1000BTSR_LROK            (1 << 13) /* Bit 13: Local receiver OK */
+#define GMII_1000BTSR_MASTER          (1 << 14) /* Bit 14: Configuration resolved to master */
+#define GMII_1000BTSR_MSFAULT         (1 << 15) /* Bit 15: Master/slave fault detected */
+
+/* Extend Register - Control Register */
+
+#define GMII_ERCR_ADDR_SHIFT          (0)       /* Bits 0-7: Select extended register address */
+#define GMII_ERCR_ADDR_MASK           (0xff << GMII_ERCR_ADDR_SHIFT)
+#  define GMII_ERCR_ADDR(n)           ((n) << GMII_ERCR_ADDR_SHIFT)
+#define GMII_ERCR_PAGE                (1 << 8)  /* Bit 8: Select page for extended register */
                                                 /* Bits 9-14: Reserved */
-#define GMII_ERDWR_READ               (0)       /* Bit 15: 0=Read extended register */
-#define GMII_ERDWR_WRITE              (1 << 15) /* Bit 15: 1=Write extended register */
+#define GMII_ERCR_READ                (0)       /* Bit 15: 0=Read extended register */
+#define GMII_ERCR_WRITE               (1 << 15) /* Bit 15: 1=Write extended register */
 
+/* Extend Register - Data Write Register (16-bit data value) */
 /* Extend Register - Data Read Register (16-bit data value) */
 
 /*********************************************************************************************

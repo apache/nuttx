@@ -202,9 +202,15 @@
 /* MII ID1 register bits: Bits 3-18 of the Organizationally Unique identifier (OUI) */
 /* MII ID2 register bits */
 
-#define MII_PHYID2_OUI               0xfc00    /* Bits 10-15: OUI mask [24:19] */
-#define MII_PHYID2_MODEL             0x03f0    /* Bits 4-9: Model number mask */
-#define MII_PHYID2_REV               0x000f    /* Bits 0-3: Revision number mask */
+#define MII_PHYID2_REV_SHIFT         (0)    /* Bits 0-3: Revision number mask */
+#define MII_PHYID2_REV_MASK          (15 <<  MII_PHYID2_REV_SHIFT)
+#  define MII_PHYID2_REV(n)          ((n) <<  MII_PHYID2_REV_SHIFT)
+#define MII_PHYID2_MODEL_SHIFT       (4)       /* Bits 4-9: Model number mask */
+#define MII_PHYID2_MODEL_MASK        (0x3f <<  MII_PHYID2_MODEL_SHIFT)
+#  define MII_PHYID2_MODEL(n)        ((n) <<  MII_PHYID2_MODEL_SHIFT)
+#define MII_PHYID2_OUI_SHIFT         (10)      /* Bits 10-15: OUI mask [24:19] */
+#define MII_PHYID2_OUI_MASK          (0x3f <<  MII_PHYID2_OUI_SHIFT)
+#  define MII_PHYID2_OUI(n)          ((n) <<  MII_PHYID2_OUI_SHIFT)
 
 /* Advertisement control register bit definitions */
 

@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated August 2, 2013)
+NuttX TODO List (Last updated September 27, 2013)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -748,6 +748,11 @@ o Network (net/, drivers/net)
                   double the rate.  Fix by using bound IP address in TCP
                   connection (lipaddr) and verifying that it is in the subnet
                   served by the driver.
+
+               Another issue:  When sending packets to another subnet, the
+               current logic falls back and uses ETH0 if it cannot find the
+               device for the subnet.  That lookup would need to be smarter...
+               perhaps it needs a routing table.
 
   Status:      Open.  Nothing will probably be done until I have a platform
                with two network interfaces that I need to support.

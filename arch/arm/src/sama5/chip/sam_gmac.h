@@ -583,6 +583,7 @@
 #define GMAC_INT_WOL              (1 << 28) /* Bit 28: Wake On LAN (not in IMR) */
 
 #define GMAC_INT_ALL              (0x17fcfcff)
+#define GMAC_INT_UNUSED           (0xe8030300)
 
 /* PHY Maintenance Register */
 
