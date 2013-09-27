@@ -5642,4 +5642,9 @@
 	  definitions (2013-9-26).
 	* arch/arm/src/sama5/sam_gmac.c and include/nuttx/net/gmii.h:
 	  Beginning of support for GMII/RGMII PHY support (2013-9-26)
+	* net/netdev_txnotify.c:  Look up of device using subnet will fail
+	  if the packet is being sent out of our subnet (via a router).
+	  The fallback here is just to use "eth0" if the subnet lookup
+	  fails.  This will, of course, will have to be revisited if/when
+	  multiple NICs are supported (2013-9-27).
 

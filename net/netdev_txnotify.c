@@ -95,6 +95,20 @@ void netdev_txnotify(const uip_ipaddr_t *raddr)
   /* Find the device driver that serves the subnet of the remote address */
 
   struct uip_driver_s *dev = netdev_findbyaddr(raddr);
+
+  /* The above lookup will fail if the packet is being sent out of our
+   * out subnet to a router.  REVISIT:  For now, we fall back and try "eth0".
+   */ 
+
+  if (dev == NULL)
+    {
+      /* If the destination address is not in our subnet, assume eth0 as the
+       * default device.
+       */
+
+      dev = netdev_findbyname("eth0");
+    }
+
   if (dev && dev->d_txavail)
     {
       /* Notify the device driver that new TX data is available. */
