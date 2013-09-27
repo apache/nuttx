@@ -60,12 +60,20 @@ config ARCH_BOARD_CLOUDCTRL
 		Small network relay development board. Based on the Shenzhou IV development 
 		board design.
 
+config ARCH_BOARD_COMPALE86
+	bool "Compal e86 phone"
+	depends on ARCH_CHIP_CALYPSO
+	---help---
+		This configuration enables board support for Compal e86 phone.
+		This port derives from the Compal E88 port and was provided by Craig
+		Comstock.
+
 config ARCH_BOARD_COMPALE88
 	bool "Compal e88 phone"
 	depends on ARCH_CHIP_CALYPSO
 	---help---
-		These directories contain the board support for compal e88 and e99 phones.
-		These ports are based on patches contributed by Denis Carikli for both the
+		This configuration enables board support for compal e88 phone.
+		This ports is based on patches contributed by Denis Carikli for both the
 		compal e99 and e88.  The patches were made by Alan Carvalho de Assis and
 		Denis Carikli using the Stefan Richter's Osmocom-bb patches.
 
@@ -73,8 +81,8 @@ config ARCH_BOARD_COMPALE99
 	bool "Compal e99 phone"
 	depends on ARCH_CHIP_CALYPSO
 	---help---
-		These directories contain the board support for compal e88 and e99 phones.
-		These ports are based on patches contributed by Denis Carikli for both the
+		This configuration enables board support for compal e88 and e99 phones.
+		This port is based on patches contributed by Denis Carikli for both the
 		compal e99 and e88.  The patches were made by Alan Carvalho de Assis and
 		Denis Carikli using the Stefan Richter's Osmocom-bb patches.
 
@@ -773,6 +781,7 @@ config ARCH_BOARD
 	default "arduino-due"         if ARCH_BOARD_ARDUINO_DUE
 	default "avr32dev1"           if ARCH_BOARD_AVR32DEV1
 	default "c5471evm"            if ARCH_BOARD_C5471EVM
+	default "compal_e86"          if ARCH_BOARD_COMPALE86
 	default "compal_e88"          if ARCH_BOARD_COMPALE88
 	default "compal_e99"          if ARCH_BOARD_COMPALE99
 	default "demo9s12ne64"        if ARCH_BOARD_DEMOS92S12NEC64
@@ -914,6 +923,9 @@ source "configs/avr32dev1/Kconfig"
 endif
 if ARCH_BOARD_C5471EVM
 source "configs/c5471evm/Kconfig"
+endif
+if ARCH_BOARD_COMPALE86
+source "configs/compal_e86/Kconfig"
 endif
 if ARCH_BOARD_COMPALE88
 source "configs/compal_e88/Kconfig"
