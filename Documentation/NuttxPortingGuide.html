@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: August 13, 2013</p>
+      <p>Last Updated: September 28, 2013</p>
     </td>
   </tr>
 </table>
@@ -2806,13 +2806,13 @@ extern void up_ledoff(int led);
     Each character device driver must implement an instance of <code>struct file_operations</code>.
     That structure defines a call table with the following methods:
     <ul>
-     <p><code>int open(FAR struct file *filp);</code><br>
-     <code>int close(FAR struct file *filp);</code><br>
-     <code>ssize_t read(FAR struct file *filp, FAR char *buffer, size_t buflen);</code><br>
-     <code>ssize_t write(FAR struct file *filp, FAR const char *buffer, size_t buflen);</code><br>
-     <code>off_t seek(FAR struct file *filp, off_t offset, int whence);</code><br>
-     <code>int ioctl(FAR struct file *filp, int cmd, unsigned long arg);</code><br>
-     <code>int poll(FAR struct file *filp, struct pollfd *fds, bool setup);</code></p>
+     <p><code>int open(FAR struct file *filep);</code><br>
+     <code>int close(FAR struct file *filep);</code><br>
+     <code>ssize_t read(FAR struct file *filep, FAR char *buffer, size_t buflen);</code><br>
+     <code>ssize_t write(FAR struct file *filep, FAR const char *buffer, size_t buflen);</code><br>
+     <code>off_t seek(FAR struct file *filep, off_t offset, int whence);</code><br>
+     <code>int ioctl(FAR struct file *filep, int cmd, unsigned long arg);</code><br>
+     <code>int poll(FAR struct file *filep, struct pollfd *fds, bool setup);</code></p>
     </ul>
     </p>
   </li>
