@@ -174,9 +174,17 @@ config NET_TCP_SPLIT_SIZE
 	---help---
 		Packets of this size or smaller than this will not be split.
 
-endif
-endif
-endmenu
+endif # NET_TCP_SPLIT
+
+config NET_SENDFILE
+	bool "Optimized network sendfile()"
+	default n
+	---help---
+		Support larger, high performance sendfile() from transferring
+		files out a TCP connection.
+
+endif # NET_TCP
+endmenu # TCP/IP Networking
 
 menu "UDP Networking"
 

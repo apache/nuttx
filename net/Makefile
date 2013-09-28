@@ -68,6 +68,12 @@ ifneq ($(CONFIG_NFILE_STREAMS),0)
 SOCK_CSRCS += net_checksd.c
 endif
 
+# Support for sendfile()
+
+ifeq ($(CONFIG_NET_SENDFILE),y)
+SOCK_CSRCS += net_sendfile.c
+endif
+
 # Support for operations on network devices
 
 NETDEV_ASRCS =

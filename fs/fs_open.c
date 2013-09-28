@@ -38,14 +38,18 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <sys/types.h>
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
+#include <assert.h>
 #ifdef CONFIG_FILE_MODE
 #include <stdarg.h>
 #endif
+
 #include <nuttx/fs/fs.h>
+
 #include "fs_internal.h"
 
 /****************************************************************************
@@ -99,11 +103,7 @@ int open(const char *path, int oflags, ...)
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
-  if (!list)
-    {
-      ret = EMFILE;
-      goto errout;
-    }
+  DEBUGASSERT(list);
 
 #ifdef CONFIG_FILE_MODE
 #  ifdef CONFIG_CPP_HAVE_WARNING

@@ -261,6 +261,14 @@ int net_dup2(int sockfd1, int sockfd2);
 
 int net_clone(FAR struct socket *psock1, FAR struct socket *psock2);
 
+/* net_sendfile.c ************************************************************/
+/* Send files via a TCP connections */
+
+#ifdef CONFIG_NET_SENDFILE
+struct file;
+ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset, size_t count);
+#endif
+
 /* net_vfcntl.c **************************************************************/
 /* Performs fcntl operations on socket */
 

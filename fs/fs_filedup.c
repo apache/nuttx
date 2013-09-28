@@ -41,6 +41,7 @@
 
 #include <sched.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <nuttx/fs/fs.h>
 
@@ -84,11 +85,7 @@ int file_dup(int fildes, int minfd)
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
-  if (!list)
-    {
-      set_errno(EMFILE);
-      return ERROR;
-    }
+  DEBUGASSERT(list);
 
   /* Verify that fildes is a valid, open file descriptor */
 

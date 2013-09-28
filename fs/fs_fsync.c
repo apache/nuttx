@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_fsync.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <assert.h>
+
 #include <nuttx/fs/fs.h>
 #include <nuttx/sched.h>
 
@@ -78,18 +80,14 @@
 int fsync(int fd)
 {
   FAR struct filelist *list;
-  FAR struct file     *this_file;
+  FAR struct file     *filep;
   struct inode        *inode;
   int                  ret;
 
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
-  if (!list)
-    {
-      ret = EMFILE;
-      goto errout;
-    }
+  DEBUGASSERT(list);
 
   /* Did we get a valid file descriptor? */
 
@@ -101,8 +99,8 @@ int fsync(int fd)
 
   /* Was this file opened for write access? */
 
-  this_file = &list->fl_files[fd];
-  if ((this_file->f_oflags & O_WROK) == 0)
+  filep = &list->fl_files[fd];
+  if ((filep->f_oflags & O_WROK) == 0)
     {
       ret = EBADF;
       goto errout;
@@ -113,7 +111,7 @@ int fsync(int fd)
    * the mountpoint operations vtable contains a sync method.
    */
 
-  inode = this_file->f_inode;
+  inode = filep->f_inode;
   if (!inode || !INODE_IS_MOUNTPT(inode) ||
       !inode->u.i_mops || !inode->u.i_mops->sync)
     {
@@ -123,7 +121,7 @@ int fsync(int fd)
 
   /* Yes, then tell the mountpoint to sync this file */
 
-  ret = inode->u.i_mops->sync(this_file);
+  ret = inode->u.i_mops->sync(filep);
   if (ret >= 0)
     {
       return OK;

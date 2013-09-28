@@ -1,5 +1,5 @@
 /************************************************************************
- * libc/misc/lib_streamsem.c
+ * libc/misc/lib_sendfile.c
  *
  *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -70,7 +70,7 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: sendfile
+ * Name: sendfile / lib_sendfile
  *
  * Description:
  *   sendfile() copies data between one file descriptor and another.
@@ -113,7 +113,11 @@
  *
  ************************************************************************/
 
+#ifdef CONFIG_NET_SENDFILE
+ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count)
+#else
 ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
+#endif
 {
   FAR uint8_t *iobuffer;
   FAR uint8_t *wrbuffer;

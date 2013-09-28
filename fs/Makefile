@@ -83,6 +83,12 @@ ifneq ($(CONFIG_NFILE_STREAMS),0)
 CSRCS	+= fs_fdopen.c 
 endif
 
+# Support for sendfile()
+
+ifeq ($(CONFIG_NET_SENDFILE),y)
+CSRCS += fs_sendfile.c
+endif
+
 # System logging to a character device (or file)
 
 ifeq ($(CONFIG_SYSLOG),y)

@@ -245,9 +245,16 @@
 #  if CONFIG_NFILE_STREAMS > 0
 #    define SYS_fs_fdopen              (__SYS_filedesc+16)
 #    define SYS_sched_getstreams       (__SYS_filedesc+17)
-#    define __SYS_mountpoint           (__SYS_filedesc+18)
+#    define __SYS_sendfile             (__SYS_filedesc+18)
 #  else
-#    define __SYS_mountpoint           (__SYS_filedesc+16)
+#    define __SYS_sendfile             (__SYS_filedesc+16)
+#  endif
+
+#  if defined(CONFIG_NET_SENDFILE)
+#    define SYS_sendfile,              __SYS_sendfile
+#    define __SYS_mountpoint           (__SYS_sendfile+1)
+#  else
+#    define __SYS_mountpoint           __SYS_sendfile
 #  endif
 
 #  if !defined(CONFIG_DISABLE_MOUNTPOINT)

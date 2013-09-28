@@ -1,7 +1,7 @@
-/****************************************************************************
- * include/sys/sendfile.h
+/************************************************************************
+ * fs/fs_sendfile.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,54 +31,57 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************/
 
-#ifndef __INCLUDE_SYS_SENDFILE_H
-#define __INCLUDE_SYS_SENDFILE_H
-
-/****************************************************************************
+/************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
+#include <sys/sendfile.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <assert.h>
 
-/****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
-/* Configuration ************************************************************/
+#include <nuttx/sched.h>
+#include <nuttx/net/net.h>
 
-#ifndef CONFIG_LIB_SENDFILE_BUFSIZE
-#  define CONFIG_LIB_SENDFILE_BUFSIZE 512
-#endif
+#if CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NET_SENDFILE
 
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
+/************************************************************************
+ * Private types
+ ************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
+/************************************************************************
+ * Private Variables
+ ************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
+/************************************************************************
+ * Public Variables
+ ************************************************************************/
+
+/************************************************************************
+ * Private Functions
+ ************************************************************************/
+
+/************************************************************************
+ * Public Functions
+ ************************************************************************/
 
 /************************************************************************
  * Name: sendfile
  *
  * Description:
  *   sendfile() copies data between one file descriptor and another.
- *   sendfile() basically just wraps a sequence of reads() and writes()
- *   to perform a copy.  It serves a purpose in systems where there is
- *   a penalty for copies to between user and kernal space, but really
- *   nothing in NuttX but provide some Linux compatible (and adding
- *   another 'almost standard' interface). 
+ *   Used with file descriptors it basically just wraps a sequence of
+ *   reads() and writes() to perform a copy.
+ *
+ *   If the destination descriptor is a socket, it gives a better
+ *   performance than simple reds() and writes(). The data is read directly
+ *   into the net buffer and the whole tcp window is filled if possible.
  *
  *   NOTE: This interface is *not* specified in POSIX.1-2001, or other
  *   standards.  The implementation here is very similar to the Linux
@@ -113,11 +116,39 @@ extern "C" {
  *
  ************************************************************************/
 
-ssize_t sendfile(int outfd, int infd, FAR off_t *offset, size_t count);
+ssize_t sendfile(int outfd, int infd, off_t *offset, size_t count)
+{
+#if defined(CONFIG_NET_TCP) && CONFIG_NSOCKET_DESCRIPTORS > 0
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
+  /* Check the destination file descriptor:  Is it a (probable) file
+   * descriptor?  Check the source file:  Is it a normal file?
+   */
+
+  if ((unsigned int)outfd >= CONFIG_NFILE_DESCRIPTORS &&
+      (unsigned int)infd < CONFIG_NFILE_DESCRIPTORS)
+    {
+      FAR struct filelist *list;
+
+      /* This appears to be a file-to-socket transfer.  Get the thread-
+       * specific file list.
+       */
+
+      list = sched_getfiles();
+      DEBUGASSERT(list);
+
+      /* Then let net_sendfile do the work. */
+
+      return net_sendfile(outfd, &list->fl_files[infd], offset, count);
+    }
+  else
 #endif
+    {
+      /* No... then this is probably a file-to-file transfer.  The generic
+       * lib_sendfile() can handle that case.
+       */
 
-#endif /* __INCLUDE_SYS_SENDFILE_H */
+      return lib_sendfile(outfd, infd, offset, count);
+    }
+}
+
+#endif /* CONFIG_NFILE_DESCRIPTORS > 0 && CONFIG_NET_SENDFILE */

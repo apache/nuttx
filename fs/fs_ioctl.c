@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_ioctl.c
  *
- *   Copyright (C) 2007-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@
 #include <sys/ioctl.h>
 #include <sched.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <net/if.h>
 
@@ -89,7 +90,7 @@ int ioctl(int fd, int req, unsigned long arg)
   int err;
 #if CONFIG_NFILE_DESCRIPTORS > 0
   FAR struct filelist *list;
-  FAR struct file     *this_file;
+  FAR struct file     *filep;
   FAR struct inode    *inode;
   int                  ret = OK;
 
@@ -117,22 +118,18 @@ int ioctl(int fd, int req, unsigned long arg)
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
-  if (!list)
-    {
-      err = EMFILE;
-      goto errout;
-    }
+  DEBUGASSERT(list);
 
   /* Is a driver registered? Does it support the ioctl method? */
 
-  this_file = &list->fl_files[fd];
-  inode     = this_file->f_inode;
+  filep = &list->fl_files[fd];
+  inode = filep->f_inode;
 
   if (inode && inode->u.i_ops && inode->u.i_ops->ioctl)
     {
       /* Yes, then let it perform the ioctl */
 
-      ret = (int)inode->u.i_ops->ioctl(this_file, req, arg);
+      ret = (int)inode->u.i_ops->ioctl(filep, req, arg);
       if (ret < 0)
         {
           err = -ret;

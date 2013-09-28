@@ -594,7 +594,7 @@ struct tcb_s; /* Forward reference */
 FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb);
 #endif
 
-/* lib/stdio/lib_fflush.c **************************************************/
+/* libc/stdio/lib_fflush.c *************************************************/
 /****************************************************************************
  * Name: lib_flushall
  *
@@ -606,6 +606,49 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb);
 
 #if CONFIG_NFILE_STREAMS > 0
 int lib_flushall(FAR struct streamlist *list);
+#endif
+
+/* libc/misc/lib_sendfile.c *************************************************/
+/****************************************************************************
+ * Name: lib_sendfile
+ *
+ * Description:
+ *   Transfer a file
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_SENDFILE
+ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count);
+#endif
+
+/* fs/fs_fileread.c *********************************************************/
+/****************************************************************************
+ * Name: file_read
+ *
+ * Description:
+ *   Equivalent to the standard read() function except that is accepts a
+ *   struct file instance instead of a file descriptor.  Currently used
+ *   only by net_sendfile()
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_NET_SENDFILE)
+ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
+#endif
+
+/* fs/fs_fileread.c *********************************************************/
+/****************************************************************************
+ * Name: file_seek
+ *
+ * Description:
+ *   Equivalent to the standard lseek() function except that is accepts a
+ *   struct file instance instead of a file descriptor.  Currently used
+ *   only by net_sendfile()
+ *
+ ****************************************************************************/
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 && defined(CONFIG_NET_SENDFILE)
+off_t file_seek(FAR struct file *filep, off_t offset, int whence);
 #endif
 
 /* drivers/dev_null.c *******************************************************/

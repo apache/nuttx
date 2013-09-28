@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_write.c
  *
- *   Copyright (C) 2007-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <fcntl.h>
 #include <sched.h>
 #include <errno.h>
+#include <assert.h>
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
 # include <sys/socket.h>
@@ -58,7 +59,7 @@
 static inline ssize_t file_write(int fd, FAR const void *buf, size_t nbytes)
 {
   FAR struct filelist *list;
-  FAR struct file *this_file;
+  FAR struct file *filep;
   FAR struct inode *inode;
   int ret;
   int err;
@@ -66,16 +67,12 @@ static inline ssize_t file_write(int fd, FAR const void *buf, size_t nbytes)
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
-  if (!list)
-    {
-      err = EMFILE;
-      goto errout;
-    }
+  DEBUGASSERT(list);
 
   /* Was this file opened for write access? */
 
-  this_file = &list->fl_files[fd];
-  if ((this_file->f_oflags & O_WROK) == 0)
+  filep = &list->fl_files[fd];
+  if ((filep->f_oflags & O_WROK) == 0)
     {
       err = EBADF;
       goto errout;
@@ -83,7 +80,7 @@ static inline ssize_t file_write(int fd, FAR const void *buf, size_t nbytes)
 
   /* Is a driver registered? Does it support the write method? */
 
-  inode = this_file->f_inode;
+  inode = filep->f_inode;
   if (!inode || !inode->u.i_ops || !inode->u.i_ops->write)
     {
       err = EBADF;
@@ -92,7 +89,7 @@ static inline ssize_t file_write(int fd, FAR const void *buf, size_t nbytes)
 
   /* Yes, then let the driver perform the write */
 
-  ret = inode->u.i_ops->write(this_file, buf, nbytes);
+  ret = inode->u.i_ops->write(filep, buf, nbytes);
   if (ret < 0)
     {
       err = -ret;

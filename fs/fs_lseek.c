@@ -43,6 +43,7 @@
 #include <unistd.h>
 #include <sched.h>
 #include <errno.h>
+#include <assert.h>
 
 #include "fs_internal.h"
 
@@ -51,6 +52,86 @@
 /****************************************************************************
  * Global Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: file_seek
+ *
+ * Description:
+ *   This is the internal implementation of lseek.  See the comments in
+ *   lseek() for further information.
+ *
+ * Parameters:
+ *   file     File structure instance
+ *   offset   Defines the offset to position to
+ *   whence   Defines how to use offset
+ *
+ * Return:
+ *   The resulting offset on success.  -1 on failure withi errno set
+ *   properly (see lseek comments).
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_NET_SENDFILE
+static inline
+#endif
+off_t file_seek(FAR struct file *filep, off_t offset, int whence)
+{
+  FAR struct inode *inode;
+  int ret;
+  int err = OK;
+
+  DEBUGASSERT(seekfile);
+  inode =  filep->f_inode;
+
+  /* Invoke the file seek method if available */
+
+  if (inode && inode->u.i_ops && inode->u.i_ops->seek)
+    {
+      ret = (int)inode->u.i_ops->seek(filep, offset, whence);
+      if (ret < 0)
+        {
+          err = -ret;
+          goto errout;
+        }
+    }
+  else
+    {
+      /* No... Just set the common file position value */
+
+      switch (whence)
+        {
+          case SEEK_CUR:
+            offset += filep->f_pos;
+
+          case SEEK_SET:
+            if (offset >= 0)
+              {
+                filep->f_pos = offset; /* Might be beyond the end-of-file */
+                break;
+              }
+            else
+              {
+                err = EINVAL;
+                goto errout;
+              }
+            break;
+
+          case SEEK_END:
+            err = ENOSYS;
+            goto errout;
+
+          default:
+            err = EINVAL;
+            goto errout;
+        }
+    }
+
+  return filep->f_pos;
+
+errout:
+  set_errno(err);
+  return (off_t)ERROR;
+}
 
 /****************************************************************************
  * Name: lseek
@@ -100,77 +181,18 @@ off_t lseek(int fd, off_t offset, int whence)
 
   if ((unsigned int)fd >= CONFIG_NFILE_DESCRIPTORS)
     {
-      err = EBADF;
-      goto errout;
+      set_errno(EBADF);
+      return (off_t)ERROR;
     }
 
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
-  if (!list)
-    {
-      err = EMFILE;
-      goto errout;
-    }
+  DEBUGASSERT(list);
 
-  /* Is a driver registered? */
+  /* Then let file_seek do the real work */
 
-  filep = &list->fl_files[fd];
-  inode =  filep->f_inode;
-
-  if (inode && inode->u.i_ops)
-    {
-      /* Does it support the seek method */
-
-      if (inode->u.i_ops->seek)
-        {
-          /* Yes, then let it perform the seek */
-
-          err = (int)inode->u.i_ops->seek(filep, offset, whence);
-          if (err < 0)
-            {
-              err = -err;
-              goto errout;
-            }
-         }
-      else
-        {
-          /* No... there are a couple of default actions we can take */
-
-          switch (whence)
-            {
-              case SEEK_CUR:
-                offset += filep->f_pos;
-
-              case SEEK_SET:
-                if (offset >= 0)
-                  {
-                    filep->f_pos = offset; /* Might be beyond the end-of-file */
-                    break;
-                  }
-                else
-                  {
-                    err = EINVAL;
-                    goto errout;
-                  }
-                break;
-
-              case SEEK_END:
-                err = ENOSYS;
-                goto errout;
-
-              default:
-                err = EINVAL;
-                goto errout;
-            }
-        }
-    }
-
-  return filep->f_pos;
-
-errout:
-  set_errno(err);
-  return (off_t)ERROR;
+  return file_seek(&list->fl_files[fd], offset, whence);
 }
 
 #endif

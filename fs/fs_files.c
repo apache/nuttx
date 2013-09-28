@@ -222,11 +222,7 @@ int files_dup(FAR struct file *filep1, FAR struct file *filep2)
     }
 
   list = sched_getfiles();
-  if (!list)
-    {
-      err = EMFILE;
-      goto errout;
-    }
+  DEBUGASSERT(list);
 
   _files_semtake(list);
 
@@ -317,25 +313,23 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
   int i;
 
   list = sched_getfiles();
-  if (list)
-    {
-      _files_semtake(list);
-      for (i = minfd; i < CONFIG_NFILE_DESCRIPTORS; i++)
-        {
-          if (!list->fl_files[i].f_inode)
-            {
-               list->fl_files[i].f_oflags = oflags;
-               list->fl_files[i].f_pos    = pos;
-               list->fl_files[i].f_inode  = inode;
-               list->fl_files[i].f_priv   = NULL;
-               _files_semgive(list);
-               return i;
-            }
-        }
+  DEBUGASSERT(list);
 
-      _files_semgive(list);
+  _files_semtake(list);
+  for (i = minfd; i < CONFIG_NFILE_DESCRIPTORS; i++)
+    {
+      if (!list->fl_files[i].f_inode)
+        {
+           list->fl_files[i].f_oflags = oflags;
+           list->fl_files[i].f_pos    = pos;
+           list->fl_files[i].f_inode  = inode;
+           list->fl_files[i].f_priv   = NULL;
+           _files_semgive(list);
+           return i;
+        }
     }
 
+  _files_semgive(list);
   return ERROR;
 }
 
@@ -358,10 +352,7 @@ int files_close(int filedes)
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
-  if (!list)
-    {
-      return -EMFILE;
-    }
+  DEBUGASSERT(list);
 
   /* If the file was properly opened, there should be an inode assigned */
 
@@ -392,16 +383,15 @@ void files_release(int filedes)
   FAR struct filelist *list;
 
   list = sched_getfiles();
-  if (list)
+  DEBUGASSERT(list);
+
+  if (filedes >=0 && filedes < CONFIG_NFILE_DESCRIPTORS)
     {
-      if (filedes >=0 && filedes < CONFIG_NFILE_DESCRIPTORS)
-        {
-          _files_semtake(list);
-          list->fl_files[filedes].f_oflags  = 0;
-          list->fl_files[filedes].f_pos     = 0;
-          list->fl_files[filedes].f_inode = NULL;
-          _files_semgive(list);
-        }
+      _files_semtake(list);
+      list->fl_files[filedes].f_oflags  = 0;
+      list->fl_files[filedes].f_pos     = 0;
+      list->fl_files[filedes].f_inode = NULL;
+      _files_semgive(list);
     }
 }
 

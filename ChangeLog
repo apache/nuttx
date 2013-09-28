@@ -5663,4 +5663,7 @@
 	  tools (2013-9-27).
 	* drivers/net/encx24j500.c: Use separate pools for RX and TX
 	  descriptors.  From Max Holtzberg (2013-9-28).
+	* nuttx/fs/fs_sendfile.c, nuttx/net/net_sendfile.c, and other file:
+	  Integrate an optimized sendfile() operation from Max Holtzberg
+	  (2013-9-28).
 
