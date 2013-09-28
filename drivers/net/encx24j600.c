@@ -171,6 +171,10 @@
 #define PKTMEM_RX_START (PKTMEM_START + PKTMEM_SIZE / 2)   /* Followed by RX buffer */
 #define PKTMEM_RX_END   (PKTMEM_START + PKTMEM_SIZE - 2)   /* RX buffer goes to the end of SRAM */
 
+/* We use preinitialized TX descriptors */
+
+#define ENC_NTXDESCR ((PKTMEM_RX_START - PKTMEM_START) / PKTMEM_ALIGNED_BUFSIZE)
+
 /* This is a helper pointer for accessing the contents of the Ethernet header */
 
 #define BUF ((struct uip_eth_hdr *)priv->dev.d_buf)
@@ -240,8 +244,11 @@ struct enc_driver_s
   struct work_s         towork;        /* Tx timeout work queue support */
   struct work_s         pollwork;      /* Poll timeout work queue support */
 
-  struct enc_descr_s    descralloc[CONFIG_ENCX24J600_NDESCR];
-  sq_queue_t            freedescr;     /* The free descriptor list */
+  struct enc_descr_s    txdescralloc[ENC_NTXDESCR];
+  struct enc_descr_s    rxdescralloc[CONFIG_ENCX24J600_NRXDESCR];
+
+  sq_queue_t            txfreedescr;   /* Free inititialized TX descriptors */
+  sq_queue_t            rxfreedescr;   /* Free RX descriptors */
   sq_queue_t            txqueue;       /* Enqueued descriptors waiting for transmition */
   sq_queue_t            rxqueue;       /* Unhandled incoming packets waiting for reception */
 
@@ -1088,7 +1095,7 @@ static int enc_transmit(FAR struct enc_driver_s *priv)
 
   /* free the descriptor */
 
-  sq_addlast((sq_entry_t*)descr, &priv->freedescr);
+  sq_addlast((sq_entry_t*)descr, &priv->txfreedescr);
 
   return OK;
 }
@@ -1125,7 +1132,7 @@ static int enc_txenqueue(FAR struct enc_driver_s *priv)
   priv->stats.txrequests++;
 #endif
 
-  descr = (struct enc_descr_s*)sq_remfirst(&priv->freedescr);
+  descr = (struct enc_descr_s*)sq_remfirst(&priv->txfreedescr);
 
   if (descr != NULL)
     {
@@ -1282,6 +1289,10 @@ static void enc_txif(FAR struct enc_driver_s *priv)
       /* If no further xmits are pending, then cancel the TX timeout */
 
       wd_cancel(priv->txtimeout);
+
+      /* Poll for uip packets */
+
+      uip_poll(&priv->dev, enc_uiptxpoll);
     }
   else
     {
@@ -1382,7 +1393,7 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, struct enc_descr_s *descr
       sq_rem((sq_entry_t*)descr, &priv->rxqueue);
     }
 
-  sq_addlast((sq_entry_t*)descr, &priv->freedescr);
+  sq_addlast((sq_entry_t*)descr, &priv->rxfreedescr);
 }
 
 /****************************************************************************
@@ -1580,7 +1591,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
       else
         {
-          descr = (struct enc_descr_s*)sq_remfirst(&priv->freedescr);
+          descr = (struct enc_descr_s*)sq_remfirst(&priv->rxfreedescr);
 
           if (descr != NULL)
             {
@@ -2583,15 +2594,26 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   enc_wrreg(priv, ENC_ERXTAIL, PKTMEM_RX_END);
 
-  sq_init(&priv->freedescr);
+  sq_init(&priv->txfreedescr);
+  sq_init(&priv->rxfreedescr);
   sq_init(&priv->txqueue);
   sq_init(&priv->rxqueue);
 
-  for (i = 0; i < CONFIG_ENCX24J600_NDESCR; i++)
+  /* For transmition we preinitialize the descriptors to aligned NET_BUFFSIZE */
+
+  for (i = 0; i < ENC_NTXDESCR; i++)
     {
-      priv->descralloc[i].addr = PKTMEM_START + PKTMEM_ALIGNED_BUFSIZE * i;
-      sq_addlast((sq_entry_t*)&priv->descralloc[i], &priv->freedescr);
+      priv->txdescralloc[i].addr = PKTMEM_START + PKTMEM_ALIGNED_BUFSIZE * i;
+      sq_addlast((sq_entry_t*)&priv->txdescralloc[i], &priv->txfreedescr);
     }
+
+  /* Receive descriptors addresses are set on reception */
+
+  for (i = 0; i < CONFIG_ENCX24J600_NRXDESCR; i++)
+    {
+      sq_addlast((sq_entry_t*)&priv->rxdescralloc[i], &priv->rxfreedescr);
+    }
+
 
 #if 0
   /* When restarting auto-negotiation, the ESTAT_PHYLINK gets set but the link
@@ -2624,7 +2646,7 @@ static int enc_reset(FAR struct enc_driver_s *priv)
 
   /* Set the maximum packet size which the controller will accept */
 
-  enc_wrreg(priv, ENC_MAMXFL, CONFIG_NET_BUFSIZE);
+  enc_wrreg(priv, ENC_MAMXFL, CONFIG_NET_BUFSIZE + 4);
 
   ret = enc_waitreg(priv, ENC_ESTAT, ESTAT_PHYLNK, ESTAT_PHYLNK);
   if (ret != OK)

@@ -5661,4 +5661,6 @@
 	  (Compal E86) phone.  From Craig Comstock (2013-9-27).
 	* configs/compal_e86: Converted to use the kconfig-frontends
 	  tools (2013-9-27).
+	* drivers/net/encx24j500.c: Use separate pools for RX and TX
+	  descriptors.  From Max Holtzberg (2013-9-28).
 
