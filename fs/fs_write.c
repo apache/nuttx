@@ -67,7 +67,17 @@ static inline ssize_t file_write(int fd, FAR const void *buf, size_t nbytes)
   /* Get the thread-specific file list */
 
   list = sched_getfiles();
-  DEBUGASSERT(list);
+
+  /* The file list can be NULL under one obscure cornercase:  When memory
+   * management debug output is enabled.  Then there may be attempts to
+   * write to stdout from malloc before the group data has been allocated.
+   */
+
+  if (!list)
+    {
+      err = EAGAIN;
+      goto errout;
+    }
 
   /* Was this file opened for write access? */
 

@@ -621,7 +621,7 @@ int lib_flushall(FAR struct streamlist *list);
 ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count);
 #endif
 
-/* fs/fs_fileread.c *********************************************************/
+/* fs/fs_read.c *************************************************************/
 /****************************************************************************
  * Name: file_read
  *
@@ -636,7 +636,7 @@ ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count);
 ssize_t file_read(FAR struct file *filep, FAR void *buf, size_t nbytes);
 #endif
 
-/* fs/fs_fileread.c *********************************************************/
+/* fs/fs_lseek.c ************************************************************/
 /****************************************************************************
  * Name: file_seek
  *

@@ -80,7 +80,7 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
   int ret;
   int err = OK;
 
-  DEBUGASSERT(seekfile);
+  DEBUGASSERT(filep);
   inode =  filep->f_inode;
 
   /* Invoke the file seek method if available */
@@ -173,9 +173,6 @@ errout:
 off_t lseek(int fd, off_t offset, int whence)
 {
   FAR struct filelist *list;
-  FAR struct file     *filep;
-  FAR struct inode    *inode;
-  int                  err;
 
   /* Did we get a valid file descriptor? */
 
@@ -184,15 +181,17 @@ off_t lseek(int fd, off_t offset, int whence)
       set_errno(EBADF);
       return (off_t)ERROR;
     }
+  else
+    {
+      /* Get the thread-specific file list */
 
-  /* Get the thread-specific file list */
+      list = sched_getfiles();
+      DEBUGASSERT(list);
 
-  list = sched_getfiles();
-  DEBUGASSERT(list);
+      /* Then let file_seek do the real work */
 
-  /* Then let file_seek do the real work */
-
-  return file_seek(&list->fl_files[fd], offset, whence);
+      return file_seek(&list->fl_files[fd], offset, whence);
+    }
 }
 
 #endif

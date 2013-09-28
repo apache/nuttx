@@ -165,6 +165,9 @@ I never did get networking to work on the sim target.  It tries to use the tap d
 (/dev/net/tun) to emulate an Ethernet NIC, but I never got it correctly integrated
 with the NuttX networking (I probably should try using raw sockets instead).
 
+Update:  Max Holtzberg reports to me that the tap device actually does work properly,
+but not in an NSH configuration because of stdio operations freeze the simulation.
+
 X11 Issues
 ----------
 There is an X11-based framebuffer driver that you can use exercise the NuttX graphics
