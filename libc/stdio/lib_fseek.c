@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_fseek.c
  *
- *   Copyright (C) 2007, 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -101,7 +101,7 @@
  *   function on the same stream.
  *
  * Returned Value:
- *   Zero on succes; -1 on failure with errno set appropriately. 
+ *   Zero on succes; -1 on failure with errno set appropriately.
  *
  ****************************************************************************/
 
@@ -132,7 +132,5 @@ int fseek(FAR FILE *stream, long int offset, int whence)
 
   /* Perform the fseek on the underlying file descriptor */
 
-  return lseek(stream->fs_filedes, offset, whence) == (off_t)-1 ? ERROR : OK;
+  return lseek(stream->fs_fd, offset, whence) == (off_t)-1 ? ERROR : OK;
 }
-
-

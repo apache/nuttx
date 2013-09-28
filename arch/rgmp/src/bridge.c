@@ -49,16 +49,17 @@
 #include <rgmp/string.h>
 #include <rgmp/stdio.h>
 
-struct bridge {
+struct bridge
+{
 	struct rgmp_bridge *b;
 	sem_t rd_lock;
 	sem_t wr_lock;
 };
 
-static ssize_t up_bridge_read(struct file *filp, char *buffer, size_t len)
+static ssize_t up_bridge_read(struct file *filep, char *buffer, size_t len)
 {
 	ssize_t ret;
-    struct bridge *b = filp->f_inode->i_private;
+    struct bridge *b = filep->f_inode->i_private;
 
 	sem_wait(&b->rd_lock);
     ret = rgmp_bridge_read(b->b, buffer, len, 0);
@@ -66,10 +67,10 @@ static ssize_t up_bridge_read(struct file *filp, char *buffer, size_t len)
 	return ret;
 }
 
-static ssize_t up_bridge_write(struct file *filp, const char *buffer, size_t len)
+static ssize_t up_bridge_write(struct file *filep, const char *buffer, size_t len)
 {
 	ssize_t ret;
-    struct bridge *b = filp->f_inode->i_private;
+    struct bridge *b = filep->f_inode->i_private;
 
 	sem_wait(&b->wr_lock);
     ret = rgmp_bridge_write(b->b, (char *)buffer, len, 0);
@@ -77,17 +78,18 @@ static ssize_t up_bridge_write(struct file *filp, const char *buffer, size_t len
 	return ret;
 }
 
-static int up_bridge_open(struct file *filp)
+static int up_bridge_open(struct file *filep)
 {
     return 0;
 }
 
-static int up_bridge_close(struct file *filp)
+static int up_bridge_close(struct file *filep)
 {
     return 0;
 }
 
-static const struct file_operations up_bridge_fops = {
+static const struct file_operations up_bridge_fops =
+{
     .read = up_bridge_read,
     .write = up_bridge_write,
     .open = up_bridge_open,
@@ -127,5 +129,3 @@ err1:
 err0:
 	return -1;
 }
-
-

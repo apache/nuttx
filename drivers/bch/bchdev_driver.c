@@ -68,11 +68,14 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     bch_open(FAR struct file *filp);
-static int     bch_close(FAR struct file *filp);
-static ssize_t bch_read(FAR struct file *, FAR char *, size_t);
-static ssize_t bch_write(FAR struct file *, FAR const char *, size_t);
-static int     bch_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
+static int     bch_open(FAR struct file *filep);
+static int     bch_close(FAR struct file *filep);
+static ssize_t bch_read(FAR struct file *filep, FAR char *buffer,
+                 size_t buflen);
+static ssize_t bch_write(FAR struct file *filep, FAR const char *buffer,
+                 size_t buflen);
+static int     bch_ioctl(FAR struct file *filep, int cmd,
+                 unsigned long arg);
 
 /****************************************************************************
  * Public Data
@@ -102,9 +105,9 @@ const struct file_operations bch_fops =
  *
  ****************************************************************************/
 
-static int bch_open(FAR struct file *filp)
+static int bch_open(FAR struct file *filep)
 {
-  FAR struct inode *inode = filp->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct bchlib_s *bch;
 
   DEBUGASSERT(inode && inode->i_private);
@@ -133,9 +136,9 @@ static int bch_open(FAR struct file *filp)
  *
  ****************************************************************************/
 
-static int bch_close(FAR struct file *filp)
+static int bch_close(FAR struct file *filep)
 {
-  FAR struct inode *inode = filp->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct bchlib_s *bch;
   int ret = OK;
 
@@ -168,9 +171,9 @@ static int bch_close(FAR struct file *filp)
  * Name:bch_read
  ****************************************************************************/
 
-static ssize_t bch_read(FAR struct file *filp, FAR char *buffer, size_t len)
+static ssize_t bch_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
-  FAR struct inode *inode = filp->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct bchlib_s *bch;
   int ret;
 
@@ -178,10 +181,10 @@ static ssize_t bch_read(FAR struct file *filp, FAR char *buffer, size_t len)
   bch = (FAR struct bchlib_s *)inode->i_private;
 
   bchlib_semtake(bch);
-  ret = bchlib_read(bch, buffer, filp->f_pos, len);
+  ret = bchlib_read(bch, buffer, filep->f_pos, len);
   if (ret > 0)
     {
-      filp->f_pos += len;
+      filep->f_pos += len;
     }
   bchlib_semgive(bch);
   return ret;
@@ -191,9 +194,9 @@ static ssize_t bch_read(FAR struct file *filp, FAR char *buffer, size_t len)
  * Name:bch_write
  ****************************************************************************/
 
-static ssize_t bch_write(FAR struct file *filp, FAR const char *buffer, size_t len)
+static ssize_t bch_write(FAR struct file *filep, FAR const char *buffer, size_t len)
 {
-  FAR struct inode *inode = filp->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct bchlib_s *bch;
   int ret = -EACCES;
 
@@ -203,10 +206,10 @@ static ssize_t bch_write(FAR struct file *filp, FAR const char *buffer, size_t l
   if (!bch->readonly)
     {
       bchlib_semtake(bch);
-      ret = bchlib_write(bch, buffer, filp->f_pos, len);
+      ret = bchlib_write(bch, buffer, filep->f_pos, len);
       if (ret > 0)
         {
-          filp->f_pos += len;
+          filep->f_pos += len;
         }
       bchlib_semgive(bch);
     }
@@ -221,9 +224,9 @@ static ssize_t bch_write(FAR struct file *filp, FAR const char *buffer, size_t l
  *
  ****************************************************************************/
 
-static int bch_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
+static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode = filp->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct bchlib_s *bch;
   int ret = -ENOTTY;
 

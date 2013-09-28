@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_dup2.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,21 +73,21 @@
  *
  ****************************************************************************/
 
-int dup2(int fildes1, int fildes2)
+int dup2(int fd1, int fd2)
 {
   /* Check the range of the descriptor to see if we got a file or a socket
    * descriptor.
    */
 
-  if ((unsigned int)fildes1 >= CONFIG_NFILE_DESCRIPTORS)
+  if ((unsigned int)fd1 >= CONFIG_NFILE_DESCRIPTORS)
     {
       /* Not a valid file descriptor.  Did we get a valid socket descriptor? */
 
-      if ((unsigned int)fildes1 < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+      if ((unsigned int)fd1 < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {
           /* Yes.. dup the socket descriptor */
 
-          return net_dup2(fildes1, fildes2);
+          return net_dup2(fd1, fd2);
         }
       else
         {
@@ -101,7 +101,7 @@ int dup2(int fildes1, int fildes2)
     {
       /* Its a valid file descriptor.. dup the file descriptor */
 
-      return file_dup2(fildes1, fildes2);
+      return file_dup2(fd1, fd2);
     }
 }
 

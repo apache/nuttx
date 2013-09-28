@@ -104,7 +104,7 @@ void lib_streaminit(FAR struct streamlist *list)
 
       /* Indicate not opened */
 
-      list->sl_streams[i].fs_filedes = -1;
+      list->sl_streams[i].fs_fd = -1;
 
       /* Initialize the stream semaphore to one to support one-at-
        * a-time access to private data sets.
@@ -152,5 +152,3 @@ void lib_releaselist(FAR struct streamlist *list)
 
 #endif /* !CONFIG_NUTTX_KERNEL || __KERNEL__ */
 #endif /* CONFIG_NFILE_STREAMS */
-
-

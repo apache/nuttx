@@ -344,7 +344,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd)
  *
  ****************************************************************************/
 
-int files_close(int filedes)
+int files_close(int fd)
 {
   FAR struct filelist *list;
   int                  ret;
@@ -356,7 +356,7 @@ int files_close(int filedes)
 
   /* If the file was properly opened, there should be an inode assigned */
 
-  if (filedes < 0 || filedes >= CONFIG_NFILE_DESCRIPTORS || !list->fl_files[filedes].f_inode)
+  if (fd < 0 || fd >= CONFIG_NFILE_DESCRIPTORS || !list->fl_files[fd].f_inode)
    {
      return -EBADF;
    }
@@ -364,7 +364,7 @@ int files_close(int filedes)
   /* Perform the protected close operation */
 
   _files_semtake(list);
-  ret = _files_close(&list->fl_files[filedes]);
+  ret = _files_close(&list->fl_files[fd]);
   _files_semgive(list);
   return ret;
 }
@@ -378,20 +378,19 @@ int files_close(int filedes)
  *
  ****************************************************************************/
 
-void files_release(int filedes)
+void files_release(int fd)
 {
   FAR struct filelist *list;
 
   list = sched_getfiles();
   DEBUGASSERT(list);
 
-  if (filedes >=0 && filedes < CONFIG_NFILE_DESCRIPTORS)
+  if (fd >=0 && fd < CONFIG_NFILE_DESCRIPTORS)
     {
       _files_semtake(list);
-      list->fl_files[filedes].f_oflags  = 0;
-      list->fl_files[filedes].f_pos     = 0;
-      list->fl_files[filedes].f_inode = NULL;
+      list->fl_files[fd].f_oflags  = 0;
+      list->fl_files[fd].f_pos     = 0;
+      list->fl_files[fd].f_inode = NULL;
       _files_semgive(list);
     }
 }
-

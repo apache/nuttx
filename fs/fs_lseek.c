@@ -138,7 +138,7 @@ errout:
  *
  * Description:
  *   The lseek() function repositions the offset of the open file associated
- *   with the file descriptor fildes to the argument 'offset' according to the
+ *   with the file descriptor fd to the argument 'offset' according to the
  *   directive 'whence' as follows:
  *
  *   SEEK_SET
@@ -161,12 +161,12 @@ errout:
  * Return:
  *   The resulting offset on success.  -1 on failure withi errno set properly:
  *
- *   EBADF      fildes is not an open file descriptor.
+ *   EBADF      fd is not an open file descriptor.
  *   EINVAL     whence  is  not one of SEEK_SET, SEEK_CUR, SEEK_END; or the
  *              resulting file offset would be negative, or beyond the end of a
  *              seekable device.
  *   EOVERFLOW  The resulting file offset cannot be represented in an off_t.
- *   ESPIPE     fildes is associated with a pipe, socket, or FIFO.
+ *   ESPIPE     fd is associated with a pipe, socket, or FIFO.
  *
  ****************************************************************************/
 

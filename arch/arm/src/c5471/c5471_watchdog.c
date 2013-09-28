@@ -1,7 +1,7 @@
 /**************************************************************************
- * c5471/c5471_watchdog.c
+ * arch/arm/src/c5471/c5471_watchdog.c
  *
- *   Copyright (C) 2007, 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,7 +100,7 @@ static int     wdt_open(struct file *filep);
 static int     wdt_close(struct file *filep);
 static ssize_t wdt_read(struct file *filep, char *buffer, size_t buflen);
 static ssize_t wdt_write(struct file *filep, const char *buffer, size_t buflen);
-static int     wdt_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
+static int     wdt_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /**************************************************************************
  * Private Data
@@ -190,7 +190,7 @@ static int wdt_setusec(uint32_t usec)
       if (divisor >= 0x10000)
         {
           if (prescaler == MAX_PRESCALER)
-            { 
+            {
               /* This is the max possible ~2.5 seconds. */
 
               dbg("prescaler=0x%x too big!\n", prescaler);
@@ -289,7 +289,7 @@ static ssize_t wdt_write(struct file *filep, const char *buffer, size_t buflen)
  * Name: wdt_ioctl
  **************************************************************************/
 
-static int wdt_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
+static int wdt_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   dbg("ioctl Call: cmd=0x%x arg=0x%x", cmd, arg);
 

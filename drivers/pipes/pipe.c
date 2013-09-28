@@ -172,11 +172,11 @@ static int pipe_close(FAR struct file *filep)
  *
  * Description:
  *   pipe() creates a pair of file descriptors, pointing to a pipe inode, and
- *   places them in the array pointed to by 'filedes'. filedes[0] is for reading,
- *   filedes[1] is for writing. 
+ *   places them in the array pointed to by 'fd'. fd[0] is for reading,
+ *   fd[1] is for writing.
  *
  * Inputs:
- *   filedes[2] - The user provided array in which to catch the pipe file
+ *   fd[2] - The user provided array in which to catch the pipe file
  *   descriptors
  *
  * Return:
@@ -185,7 +185,7 @@ static int pipe_close(FAR struct file *filep)
  *
  ****************************************************************************/
 
-int pipe(int filedes[2])
+int pipe(int fd[2])
 {
   struct pipe_dev_s *dev = NULL;
   char devname[16];
@@ -249,29 +249,29 @@ int pipe(int filedes[2])
     }
 
   (void)sem_post(&g_pipesem);
- 
+
   /* Get a write file descriptor */
 
-  filedes[1] = open(devname, O_WRONLY);
-  if (filedes[1] < 0)
+  fd[1] = open(devname, O_WRONLY);
+  if (fd[1] < 0)
     {
-      err = -filedes[1];
+      err = -fd[1];
       goto errout_with_driver;
     }
 
   /* Get a read file descriptor */
 
-  filedes[0] = open(devname, O_RDONLY);
-  if (filedes[0] < 0)
+  fd[0] = open(devname, O_RDONLY);
+  if (fd[0] < 0)
     {
-      err = -filedes[0];
+      err = -fd[0];
       goto errout_with_wrfd;
     }
 
   return OK;
 
 errout_with_wrfd:
-  close(filedes[1]);
+  close(fd[1]);
 errout_with_driver:
   unregister_driver(devname);
 errout_with_dev:

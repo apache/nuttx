@@ -1,7 +1,7 @@
 /****************************************************************************
- * up_devconsole.c
+ * arch/sim/src/up_devconsole.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,12 +78,12 @@ static const struct file_operations devconsole_fops =
  * Private Functions
  ****************************************************************************/
 
-static ssize_t devconsole_read(struct file *filp, char *buffer, size_t len)
+static ssize_t devconsole_read(struct file *filep, char *buffer, size_t len)
 {
   return up_hostread(buffer, len);
 }
 
-static ssize_t devconsole_write(struct file *filp, const char *buffer, size_t len)
+static ssize_t devconsole_write(struct file *filep, const char *buffer, size_t len)
 {
   return up_hostwrite(buffer, len);
 }

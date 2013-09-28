@@ -129,62 +129,62 @@ EXTERN int       optopt; /* unrecognized option character */
 
 /* Task Control Interfaces */
 
-EXTERN pid_t   vfork(void);
-EXTERN pid_t   getpid(void);
-EXTERN void    _exit(int status) noreturn_function;
-EXTERN unsigned int sleep(unsigned int seconds);
-EXTERN int     usleep(useconds_t usec);
-EXTERN int     pause(void);
+pid_t   vfork(void);
+pid_t   getpid(void);
+void    _exit(int status) noreturn_function;
+unsigned int sleep(unsigned int seconds);
+int     usleep(useconds_t usec);
+int     pause(void);
 
 /* File descriptor operations */
 
-EXTERN int     close(int fd);
-EXTERN int     dup(int fd);
-EXTERN int     dup2(int fd1, int fd2);
-EXTERN int     fsync(int fd);
-EXTERN off_t   lseek(int fd, off_t offset, int whence);
-EXTERN ssize_t read(int fd, FAR void *buf, size_t nbytes);
-EXTERN ssize_t write(int fd, FAR const void *buf, size_t nbytes);
+int     close(int fd);
+int     dup(int fd);
+int     dup2(int fd1, int fd2);
+int     fsync(int fd);
+off_t   lseek(int fd, off_t offset, int whence);
+ssize_t read(int fd, FAR void *buf, size_t nbytes);
+ssize_t write(int fd, FAR const void *buf, size_t nbytes);
 
 /* Special devices */
 
-EXTERN int     pipe(int filedes[2]);
+int     pipe(int fd[2]);
 
 /* Working directory operations */
 
-EXTERN int     chdir(FAR const char *path);
-EXTERN FAR char *getcwd(FAR char *buf, size_t size);
+int     chdir(FAR const char *path);
+FAR char *getcwd(FAR char *buf, size_t size);
 
 /* File path operations */
 
-EXTERN int     unlink(FAR const char *pathname);
-EXTERN int     rmdir(FAR const char *pathname);
+int     unlink(FAR const char *pathname);
+int     rmdir(FAR const char *pathname);
 
 /* Execution of programs from files */
 
 #ifdef CONFIG_LIBC_EXECFUNCS
-EXTERN int     execl(FAR const char *path, ...);
-EXTERN int     execv(FAR const char *path, FAR char *const argv[]);
+int     execl(FAR const char *path, ...);
+int     execv(FAR const char *path, FAR char *const argv[]);
 
 /* Non-standard functions to manage symbol tables */
 
 struct symtab_s; /* See include/nuttx/binfmt/symtab.h */
-EXTERN void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
-EXTERN void exec_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
+void exec_getsymtab(FAR const struct symtab_s **symtab, FAR int *nsymbols);
+void exec_setsymtab(FAR const struct symtab_s *symtab, int nsymbols);
 #endif
 
 /* Other */
 
-EXTERN int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
+int     getopt(int argc, FAR char *const argv[], FAR const char *optstring);
 
 /* Accessor functions intended for use only by external NXFLAT
  * modules.  The global variables optarg, optind, and optopt cannot
  * be referenced directly from external modules.
  */
 
-EXTERN FAR char **getoptargp(void); /* Optional argument following option */
-EXTERN int       *getopindgp(void); /* Index into argv */
-EXTERN int       *getoptoptp(void); /* unrecognized option character */
+FAR char **getoptargp(void); /* Optional argument following option */
+int       *getopindgp(void); /* Index into argv */
+int       *getoptoptp(void); /* unrecognized option character */
 
 #undef EXTERN
 #if defined(__cplusplus)

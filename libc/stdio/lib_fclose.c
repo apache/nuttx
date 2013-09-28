@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_fclose.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 3013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -80,9 +80,9 @@ int fclose(FAR FILE *stream)
       /* Check that the underlying file descriptor corresponds to an an open
        * file.
        */
- 
+
       ret = OK;
-      if (stream->fs_filedes >= 0)
+      if (stream->fs_fd >= 0)
         {
           /* If the stream was opened for writing, then flush the stream */
 
@@ -94,7 +94,7 @@ int fclose(FAR FILE *stream)
 
           /* Close the underlying file descriptor and save the return status */
 
-          status = close(stream->fs_filedes);
+          status = close(stream->fs_fd);
 
           /* If close() returns an error but flush() did not then make sure
            * that we return the close() error condition.
@@ -132,9 +132,9 @@ int fclose(FAR FILE *stream)
 
       stream->fs_oflags = 0;
 #endif
-      /* Setting the fs_filedescriptor to -1 makes the stream available for reuse */
+      /* Setting the file descriptor to -1 makes the stream available for reuse */
 
-      stream->fs_filedes = -1;
+      stream->fs_fd = -1;
     }
 
   /* On an error, reset the errno to the first error encountered and return
@@ -151,4 +151,3 @@ int fclose(FAR FILE *stream)
 
   return OK;
 }
-

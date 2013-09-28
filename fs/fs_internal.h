@@ -119,7 +119,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN void inode_semtake(void);
+void inode_semtake(void);
 
 /****************************************************************************
  * Name: inode_semgive
@@ -129,7 +129,7 @@ EXTERN void inode_semtake(void);
  *
  ****************************************************************************/
 
-EXTERN void inode_semgive(void);
+void inode_semgive(void);
 
 /****************************************************************************
  * Name: inode_search
@@ -143,10 +143,10 @@ EXTERN void inode_semgive(void);
  *
  ****************************************************************************/
 
-EXTERN FAR struct inode *inode_search(FAR const char **path,
-                                      FAR struct inode **peer,
-                                      FAR struct inode **parent,
-                                      FAR const char **relpath);
+FAR struct inode *inode_search(FAR const char **path,
+                               FAR struct inode **peer,
+                               FAR struct inode **parent,
+                               FAR const char **relpath);
 
 /****************************************************************************
  * Name: inode_free
@@ -156,7 +156,7 @@ EXTERN FAR struct inode *inode_search(FAR const char **path,
  *
  ****************************************************************************/
 
-EXTERN void inode_free(FAR struct inode *node);
+void inode_free(FAR struct inode *node);
 
 /****************************************************************************
  * Name: inode_nextname
@@ -167,7 +167,7 @@ EXTERN void inode_free(FAR struct inode *node);
  *
  ****************************************************************************/
 
-EXTERN const char *inode_nextname(FAR const char *name);
+const char *inode_nextname(FAR const char *name);
 
 /* fs_inodereserver.c *******************************************************/
 /****************************************************************************
@@ -192,7 +192,7 @@ EXTERN const char *inode_nextname(FAR const char *name);
  *
  ****************************************************************************/
 
-EXTERN int inode_reserve(FAR const char *path, FAR struct inode **inode);
+int inode_reserve(FAR const char *path, FAR struct inode **inode);
 
 /* fs_inoderemove.c *********************************************************/
 /****************************************************************************
@@ -205,7 +205,7 @@ EXTERN int inode_reserve(FAR const char *path, FAR struct inode **inode);
  *
  ****************************************************************************/
 
-EXTERN int inode_remove(FAR const char *path);
+int inode_remove(FAR const char *path);
 
 /* fs_inodefind.c ***********************************************************/
 /****************************************************************************
@@ -217,15 +217,15 @@ EXTERN int inode_remove(FAR const char *path);
  *
  ****************************************************************************/
 
-EXTERN FAR struct inode *inode_find(FAR const char *path, const char **relpath);
+FAR struct inode *inode_find(FAR const char *path, const char **relpath);
 
 /* fs_inodeaddref.c *********************************************************/
 
-EXTERN void inode_addref(FAR struct inode *inode);
+void inode_addref(FAR struct inode *inode);
 
 /* fs_inoderelease.c ********************************************************/
 
-EXTERN void inode_release(FAR struct inode *inode);
+void inode_release(FAR struct inode *inode);
 
 /* fs_foreachinode.c ********************************************************/
 /****************************************************************************
@@ -244,7 +244,7 @@ EXTERN void inode_release(FAR struct inode *inode);
  *
  ****************************************************************************/
 
-EXTERN int foreach_inode(foreach_inode_t handler, FAR void *arg);
+int foreach_inode(foreach_inode_t handler, FAR void *arg);
 
 /* fs_files.c ***************************************************************/
 /****************************************************************************
@@ -255,7 +255,7 @@ EXTERN int foreach_inode(foreach_inode_t handler, FAR void *arg);
  *
  ****************************************************************************/
 
-EXTERN void weak_function files_initialize(void);
+void weak_function files_initialize(void);
 
 /****************************************************************************
  * Name: files_allocate
@@ -266,7 +266,7 @@ EXTERN void weak_function files_initialize(void);
  *
  ****************************************************************************/
 
-EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd);
+int files_allocate(FAR struct inode *inode, int oflags, off_t pos, int minfd);
 
 /****************************************************************************
  * Name: files_close
@@ -279,7 +279,7 @@ EXTERN int  files_allocate(FAR struct inode *inode, int oflags, off_t pos, int m
  *
  ****************************************************************************/
 
-EXTERN int  files_close(int filedes);
+int files_close(int fd);
 
 /****************************************************************************
  * Name: files_release
@@ -290,7 +290,7 @@ EXTERN int  files_close(int filedes);
  *
  ****************************************************************************/
 
-EXTERN void files_release(int filedes);
+void files_release(int fd);
 
 /* fs_findblockdriver.c *****************************************************/
 /****************************************************************************
@@ -316,8 +316,8 @@ EXTERN void files_release(int filedes);
  *
  ****************************************************************************/
 
-EXTERN int find_blockdriver(FAR const char *pathname, int mountflags,
-                            FAR struct inode **ppinode);
+int find_blockdriver(FAR const char *pathname, int mountflags,
+                     FAR struct inode **ppinode);
 
 #undef EXTERN
 #if defined(__cplusplus)

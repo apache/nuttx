@@ -111,7 +111,7 @@ int lib_flushall(FAR struct streamlist *list)
             * write data in the stream.
             */
 
-           if (stream->fs_filedes >= 0 && (stream->fs_oflags & O_WROK) != 0)
+           if (stream->fs_fd >= 0 && (stream->fs_oflags & O_WROK) != 0)
              {
                /* Flush the writable FILE */
 

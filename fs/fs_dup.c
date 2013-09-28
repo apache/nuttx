@@ -66,7 +66,7 @@
  *
  ****************************************************************************/
 
-int dup(int fildes)
+int dup(int fd)
 {
  int ret = OK;
 
@@ -74,12 +74,12 @@ int dup(int fildes)
    * descriptor. */
 
 #if CONFIG_NFILE_DESCRIPTORS > 0
-  if ((unsigned int)fildes < CONFIG_NFILE_DESCRIPTORS)
+  if ((unsigned int)fd < CONFIG_NFILE_DESCRIPTORS)
     {
       /* Its a valid file descriptor.. dup the file descriptor using any
        * other file descriptor*/
 
-      ret = file_dup(fildes, 0);
+      ret = file_dup(fd, 0);
     }
   else
 #endif
@@ -87,11 +87,11 @@ int dup(int fildes)
       /* Not a vailid file descriptor.  Did we get a valid socket descriptor? */
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-      if ((unsigned int)fildes < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
+      if ((unsigned int)fd < (CONFIG_NFILE_DESCRIPTORS+CONFIG_NSOCKET_DESCRIPTORS))
         {
           /* Yes.. dup the socket descriptor */
 
-          ret = net_dup(fildes, CONFIG_NFILE_DESCRIPTORS);
+          ret = net_dup(fd, CONFIG_NFILE_DESCRIPTORS);
         }
       else
 #endif

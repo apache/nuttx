@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_libfwrite.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -173,7 +173,6 @@ errout:
 }
 #else
 {
-  return write(stream->fs_filedes, ptr, count);
+  return write(stream->fs_fd, ptr, count);
 }
 #endif /* CONFIG_STDIO_BUFFER_SIZE */
-

@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_fgets.c
  *
- *   Copyright (C) 2007-2008, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -119,7 +119,7 @@ char *fgets(FAR char *buf, int buflen, FILE *stream)
 
   /* Sanity checks */
 
-  if (!stream || !buf || buflen < 1 || stream->fs_filedes < 0)
+  if (!stream || !buf || buflen < 1 || stream->fs_fd < 0)
     {
       return NULL;
     }
@@ -204,4 +204,3 @@ char *fgets(FAR char *buf, int buflen, FILE *stream)
         }
     }
 }
-

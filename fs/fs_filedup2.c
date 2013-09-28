@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_filedup2.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,9 +75,9 @@
  ****************************************************************************/
 
 #if defined(CONFIG_NET) && CONFIG_NSOCKET_DESCRIPTORS > 0
-int file_dup2(int fildes1, int fildes2)
+int file_dup2(int fd1, int fd2)
 #else
-int dup2(int fildes1, int fildes2)
+int dup2(int fd1, int fd2)
 #endif
 {
   FAR struct filelist *list;
@@ -91,9 +91,9 @@ int dup2(int fildes1, int fildes2)
       return ERROR;
     }
 
-  /* Verify that fildes is a valid, open file descriptor */
+  /* Verify that fd is a valid, open file descriptor */
 
-  if (!DUP_ISOPEN(fildes1, list))
+  if (!DUP_ISOPEN(fd1, list))
     {
       set_errno(EBADF);
       return ERROR;
@@ -101,20 +101,20 @@ int dup2(int fildes1, int fildes2)
 
   /* Handle a special case */
 
-  if (fildes1 == fildes2)
+  if (fd1 == fd2)
     {
-      return fildes1;
+      return fd1;
     }
 
-  /* Verify fildes2 */
+  /* Verify fd2 */
 
-  if ((unsigned int)fildes2 >= CONFIG_NFILE_DESCRIPTORS)
+  if ((unsigned int)fd2 >= CONFIG_NFILE_DESCRIPTORS)
     {
       set_errno(EBADF);
       return ERROR;
     }
 
-  return files_dup(&list->fl_files[fildes1], &list->fl_files[fildes2]);
+  return files_dup(&list->fl_files[fd1], &list->fl_files[fd2]);
 }
 
 #endif /* CONFIG_NFILE_DESCRIPTORS > 0 */

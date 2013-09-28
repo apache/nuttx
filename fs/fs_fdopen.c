@@ -210,7 +210,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
   for (i = 0 ; i < CONFIG_NFILE_STREAMS; i++)
     {
       stream = &slist->sl_streams[i];
-      if (stream->fs_filedes < 0)
+      if (stream->fs_fd < 0)
         {
           /* Zero the structure */
 
@@ -245,7 +245,7 @@ FAR struct file_struct *fs_fdopen(int fd, int oflags, FAR struct tcb_s *tcb)
            * file descriptor locks this stream.
            */
 
-          stream->fs_filedes = fd;
+          stream->fs_fd      = fd;
           stream->fs_oflags  = (uint16_t)oflags;
 
           sem_post(&slist->sl_sem);

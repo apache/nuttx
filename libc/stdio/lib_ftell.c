@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_ftell.c
  *
- *   Copyright (C) 2008, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,7 +95,7 @@
  *   stream pointed to by stream.
  *
  * Returned Value:
- *   Zero on succes; -1 on failure with errno set appropriately. 
+ *   Zero on succes; -1 on failure with errno set appropriately.
  *
  ****************************************************************************/
 
@@ -115,7 +115,7 @@ long ftell(FAR FILE *stream)
    * file pointer, but will return its current setting
    */
 
-  position = lseek(stream->fs_filedes, 0, SEEK_CUR);
+  position = lseek(stream->fs_fd, 0, SEEK_CUR);
   if (position != (off_t)-1)
     {
       return (long)position;
@@ -125,5 +125,3 @@ long ftell(FAR FILE *stream)
       return ERROR;
     }
 }
-
-

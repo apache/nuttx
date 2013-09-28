@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/dev_null.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,7 @@
 static ssize_t devnull_read(FAR struct file *, FAR char *, size_t);
 static ssize_t devnull_write(FAR struct file *, FAR const char *, size_t);
 #ifndef CONFIG_DISABLE_POLL
-static int     devnull_poll(FAR struct file *filp, FAR struct pollfd *fds,
+static int     devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
                             bool setup);
 #endif
 
@@ -82,7 +82,7 @@ static const struct file_operations devnull_fops =
  * Name: devnull_read
  ****************************************************************************/
 
-static ssize_t devnull_read(FAR struct file *filp, FAR char *buffer, size_t len)
+static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
   return 0; /* Return EOF */
 }
@@ -91,7 +91,7 @@ static ssize_t devnull_read(FAR struct file *filp, FAR char *buffer, size_t len)
  * Name: devnull_write
  ****************************************************************************/
 
-static ssize_t devnull_write(FAR struct file *filp, FAR const char *buffer, size_t len)
+static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer, size_t len)
 {
   return len; /* Say that everything was written */
 }
@@ -101,7 +101,7 @@ static ssize_t devnull_write(FAR struct file *filp, FAR const char *buffer, size
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static int devnull_poll(FAR struct file *filp, FAR struct pollfd *fds,
+static int devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
   if (setup)
