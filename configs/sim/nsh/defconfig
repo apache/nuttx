@@ -39,6 +39,7 @@ CONFIG_HOST_LINUX=y
 # Debug Options
 #
 # CONFIG_DEBUG is not set
+# CONFIG_ARCH_HAVE_STACKCHECK is not set
 CONFIG_DEBUG_SYMBOLS=y
 
 #
@@ -56,17 +57,12 @@ CONFIG_ARCH_SIM=y
 # CONFIG_ARCH_Z16 is not set
 # CONFIG_ARCH_Z80 is not set
 CONFIG_ARCH="sim"
-CONFIG_BOARD_LOOPSPERMSEC=0
 
 #
 # Simulation Configuration Options
 #
 # CONFIG_SIM_M32 is not set
 # CONFIG_SIM_WALLTIME is not set
-
-#
-# External Memory Configuration
-#
 
 #
 # Architecture Options
@@ -81,12 +77,13 @@ CONFIG_BOARD_LOOPSPERMSEC=0
 # CONFIG_ARCH_STACKDUMP is not set
 # CONFIG_ENDIAN_BIG is not set
 # CONFIG_ARCH_HAVE_RAMFUNCS is not set
+# CONFIG_ARCH_HAVE_RAMVECTORS is not set
 
 #
 # Board Settings
 #
-CONFIG_RAM_START=0x0
-CONFIG_RAM_SIZE=0
+CONFIG_BOARD_LOOPSPERMSEC=0
+# CONFIG_ARCH_CALIBRATION is not set
 
 #
 # Boot options
@@ -96,6 +93,12 @@ CONFIG_BOOT_RUNFROMEXTSRAM=y
 # CONFIG_BOOT_RUNFROMISRAM is not set
 # CONFIG_BOOT_RUNFROMSDRAM is not set
 # CONFIG_BOOT_COPYTORAM is not set
+
+#
+# Boot Memory Configuration
+#
+CONFIG_RAM_START=0x0
+CONFIG_RAM_SIZE=0
 
 #
 # Board Selection
@@ -116,6 +119,7 @@ CONFIG_NSH_MMCSDMINOR=0
 #
 # RTOS Features
 #
+# CONFIG_BOARD_INITIALIZE is not set
 CONFIG_MSEC_PER_TICK=10
 CONFIG_RR_INTERVAL=0
 # CONFIG_SCHED_INSTRUMENTATION is not set
@@ -132,7 +136,6 @@ CONFIG_DEV_CONSOLE=y
 # CONFIG_FDCLONE_DISABLE is not set
 # CONFIG_FDCLONE_STDIO is not set
 CONFIG_SDCLONE_DISABLE=y
-# CONFIG_SCHED_WORKQUEUE is not set
 CONFIG_SCHED_WAITPID=y
 # CONFIG_SCHED_STARTHOOK is not set
 # CONFIG_SCHED_ATEXIT is not set
@@ -194,6 +197,7 @@ CONFIG_DEV_NULL=y
 # CONFIG_RTC is not set
 # CONFIG_WATCHDOG is not set
 # CONFIG_ANALOG is not set
+# CONFIG_AUDIO_DEVICES is not set
 # CONFIG_BCH is not set
 # CONFIG_INPUT is not set
 # CONFIG_LCD is not set
@@ -203,11 +207,16 @@ CONFIG_DEV_NULL=y
 # CONFIG_PM is not set
 # CONFIG_POWER is not set
 # CONFIG_SENSORS is not set
-# CONFIG_SERCOMM_CONSOLE is not set
 CONFIG_SERIAL=y
 # CONFIG_DEV_LOWCONSOLE is not set
 # CONFIG_16550_UART is not set
+
+#
+# USART Configuration
+#
 # CONFIG_STANDARD_SERIAL is not set
+# CONFIG_SERIAL_IFLOWCONTROL is not set
+# CONFIG_SERIAL_OFLOWCONTROL is not set
 # CONFIG_USBDEV is not set
 # CONFIG_USBHOST is not set
 # CONFIG_WIRELESS is not set
@@ -243,11 +252,13 @@ CONFIG_FAT_MAXFNAME=32
 # CONFIG_FAT_DMAMEMORY is not set
 # CONFIG_FS_NXFFS is not set
 CONFIG_FS_ROMFS=y
+# CONFIG_FS_SMARTFS is not set
 CONFIG_FS_BINFS=y
 
 #
 # System Logging
 #
+# CONFIG_SYSLOG_ENABLE is not set
 # CONFIG_SYSLOG is not set
 
 #
@@ -258,9 +269,15 @@ CONFIG_FS_BINFS=y
 #
 # Memory Management
 #
+# CONFIG_MM_MULTIHEAP is not set
 # CONFIG_MM_SMALL is not set
 CONFIG_MM_REGIONS=1
 # CONFIG_GRAN is not set
+
+#
+# Audio Support
+#
+# CONFIG_AUDIO is not set
 
 #
 # Binary Formats
@@ -288,6 +305,7 @@ CONFIG_LIB_HOMEDIR="/"
 # CONFIG_LIBM is not set
 # CONFIG_NOPRINTF_FIELDWIDTH is not set
 # CONFIG_LIBC_FLOATINGPOINT is not set
+CONFIG_LIB_RAND_ORDER=1
 # CONFIG_EOL_IS_CR is not set
 # CONFIG_EOL_IS_LF is not set
 # CONFIG_EOL_IS_BOTH_CRLF is not set
@@ -296,6 +314,7 @@ CONFIG_LIBC_EXECFUNCS=y
 CONFIG_EXECFUNCS_SYMTAB="g_symtab"
 CONFIG_EXECFUNCS_NSYMBOLS=0
 CONFIG_POSIX_SPAWN_PROXY_STACKSIZE=1024
+CONFIG_TASK_SPAWN_DEFAULT_STACKSIZE=2048
 # CONFIG_LIBC_STRERROR is not set
 # CONFIG_LIBC_PERROR_STDOUT is not set
 CONFIG_ARCH_LOWPUTC=y
@@ -304,9 +323,11 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_ARCH_OPTIMIZED_FUNCTIONS is not set
 
 #
-# Non-standard Helper Functions
+# Non-standard Library Support
 #
+# CONFIG_SCHED_WORKQUEUE is not set
 # CONFIG_LIB_KBDCODEC is not set
+# CONFIG_LIB_SLCDCODEC is not set
 
 #
 # Basic CXX Support
@@ -328,8 +349,6 @@ CONFIG_BUILTIN_PROXY_STACKSIZE=1024
 #
 # CONFIG_EXAMPLES_BUTTONS is not set
 # CONFIG_EXAMPLES_CAN is not set
-# CONFIG_SYSTEM_CDCACM is not set
-# CONFIG_SYSTEM_COMPOSITE is not set
 # CONFIG_EXAMPLES_DHCPD is not set
 # CONFIG_EXAMPLES_ELF is not set
 # CONFIG_EXAMPLES_FTPC is not set
@@ -342,8 +361,9 @@ CONFIG_EXAMPLES_HELLO=y
 # CONFIG_EXAMPLES_IGMP is not set
 # CONFIG_EXAMPLES_LCDRW is not set
 # CONFIG_EXAMPLES_MM is not set
-# CONFIG_EXAMPLES_MOUNT is not set
 # CONFIG_EXAMPLES_MODBUS is not set
+# CONFIG_EXAMPLES_MOUNT is not set
+# CONFIG_EXAMPLES_NRF24L01TERM is not set
 CONFIG_EXAMPLES_NSH=y
 # CONFIG_EXAMPLES_NULL is not set
 # CONFIG_EXAMPLES_NX is not set
@@ -363,6 +383,10 @@ CONFIG_EXAMPLES_NSH=y
 # CONFIG_EXAMPLES_ROMFS is not set
 # CONFIG_EXAMPLES_SENDMAIL is not set
 # CONFIG_EXAMPLES_SERLOOP is not set
+# CONFIG_EXAMPLES_SLCD is not set
+# CONFIG_EXAMPLES_SMART_TEST is not set
+# CONFIG_EXAMPLES_SMART is not set
+# CONFIG_EXAMPLES_TCPECHO is not set
 # CONFIG_EXAMPLES_TELNETD is not set
 # CONFIG_EXAMPLES_THTTPD is not set
 # CONFIG_EXAMPLES_TIFF is not set
@@ -370,13 +394,13 @@ CONFIG_EXAMPLES_NSH=y
 # CONFIG_EXAMPLES_UDP is not set
 # CONFIG_EXAMPLES_UIP is not set
 # CONFIG_EXAMPLES_USBSERIAL is not set
-# CONFIG_SYSTEM_USBMSC is not set
 # CONFIG_EXAMPLES_USBTERM is not set
 # CONFIG_EXAMPLES_WATCHDOG is not set
 
 #
-# Interpreters
+# Graphics Support
 #
+# CONFIG_TIFF is not set
 
 #
 # Interpreters
@@ -406,11 +430,7 @@ CONFIG_EXAMPLES_NSH=y
 # CONFIG_NETUTILS_WEBCLIENT is not set
 
 #
-# ModBus
-#
-
-#
-# FreeModbus
+# FreeModBus
 #
 # CONFIG_MODBUS is not set
 
@@ -427,6 +447,7 @@ CONFIG_NSH_FILE_APPS=y
 # CONFIG_NSH_DISABLE_CAT is not set
 # CONFIG_NSH_DISABLE_CD is not set
 # CONFIG_NSH_DISABLE_CP is not set
+# CONFIG_NSH_DISABLE_CMP is not set
 # CONFIG_NSH_DISABLE_DD is not set
 # CONFIG_NSH_DISABLE_ECHO is not set
 # CONFIG_NSH_DISABLE_EXEC is not set
@@ -463,22 +484,34 @@ CONFIG_NSH_FILE_APPS=y
 # CONFIG_NSH_DISABLE_USLEEP is not set
 # CONFIG_NSH_DISABLE_WGET is not set
 # CONFIG_NSH_DISABLE_XD is not set
+
+#
+# Configure Command Options
+#
+# CONFIG_NSH_CMDOPT_DF_H is not set
 CONFIG_NSH_CODECS_BUFSIZE=128
 CONFIG_NSH_FILEIOSIZE=1024
 CONFIG_NSH_LINELEN=80
+CONFIG_NSH_MAXARGUMENTS=6
 CONFIG_NSH_NESTDEPTH=3
 # CONFIG_NSH_DISABLESCRIPT is not set
 # CONFIG_NSH_DISABLEBG is not set
 CONFIG_NSH_ROMFSETC=y
+# CONFIG_NSH_ROMFSRC is not set
 CONFIG_NSH_ROMFSMOUNTPT="/etc"
 CONFIG_NSH_INITSCRIPT="init.d/rcS"
 CONFIG_NSH_ROMFSDEVNO=1
 CONFIG_NSH_ROMFSSECTSIZE=64
+# CONFIG_NSH_ARCHROMFS is not set
 CONFIG_NSH_FATDEVNO=2
 CONFIG_NSH_FATSECTSIZE=512
 CONFIG_NSH_FATNSECTORS=1024
 CONFIG_NSH_FATMOUNTPT="/tmp"
 CONFIG_NSH_CONSOLE=y
+
+#
+# USB Trace Support
+#
 # CONFIG_NSH_CONDEV is not set
 # CONFIG_NSH_ARCHINIT is not set
 
@@ -488,6 +521,14 @@ CONFIG_NSH_CONSOLE=y
 
 #
 # System NSH Add-Ons
+#
+
+#
+# USB CDC/ACM Device Commands
+#
+
+#
+# USB Composite Device Commands
 #
 
 #
@@ -503,6 +544,15 @@ CONFIG_NSH_CONSOLE=y
 # FLASH Program Installation
 #
 # CONFIG_SYSTEM_INSTALL is not set
+
+#
+# FLASH Erase-all Command
+#
+
+#
+# RAM test
+#
+# CONFIG_SYSTEM_RAMTEST is not set
 
 #
 # readline()
@@ -529,3 +579,20 @@ CONFIG_READLINE_ECHO=y
 # Sysinfo
 #
 # CONFIG_SYSTEM_SYSINFO is not set
+
+#
+# USB Monitor
+#
+
+#
+# Stack Monitor
+#
+
+#
+# USB Mass Storage Device Commands
+#
+
+#
+# Zmodem Commands
+#
+# CONFIG_SYSTEM_ZMODEM is not set
