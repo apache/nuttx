@@ -323,9 +323,9 @@ static void slcd_action(enum slcdcode_e code, uint8_t count);
 
 static ssize_t slcd_read(FAR struct file *, FAR char *, size_t);
 static ssize_t slcd_write(FAR struct file *, FAR const char *, size_t);
-static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
+static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int slcd_poll(FAR struct file *filp, FAR struct pollfd *fds, bool setup);
+static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
 #endif
 
 /****************************************************************************
@@ -1085,13 +1085,13 @@ static void slcd_action(enum slcdcode_e code, uint8_t count)
  * Name: slcd_read
  ****************************************************************************/
 
-static ssize_t slcd_read(FAR struct file *filp, FAR char *buffer, size_t len)
+static ssize_t slcd_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
   int ret = 0;
   int i;
 
   /* Try to read the entire display.  Notice that the seek offset
-   * (filp->f_pos) is ignored.  It probably should be taken into account
+   * (filep->f_pos) is ignored.  It probably should be taken into account
    * and also updated after each read and write.
    */
 
@@ -1127,7 +1127,7 @@ static ssize_t slcd_read(FAR struct file *filp, FAR char *buffer, size_t len)
  * Name: slcd_write
  ****************************************************************************/
 
-static ssize_t slcd_write(FAR struct file *filp,
+static ssize_t slcd_write(FAR struct file *filep,
                           FAR const char *buffer, size_t len)
 {
   struct slcd_instream_s instream;
@@ -1314,7 +1314,7 @@ static ssize_t slcd_write(FAR struct file *filp,
  * Name: slcd_poll
  ****************************************************************************/
 
-static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
+static int slcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   switch (cmd)
     {
@@ -1457,7 +1457,7 @@ static int slcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static int slcd_poll(FAR struct file *filp, FAR struct pollfd *fds,
+static int slcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
   if (setup)

@@ -198,9 +198,9 @@ static void lcd_action(enum slcdcode_e code, uint8_t count);
 
 static ssize_t lcd_read(FAR struct file *, FAR char *, size_t);
 static ssize_t lcd_write(FAR struct file *, FAR const char *, size_t);
-static int lcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg);
+static int lcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int lcd_poll(FAR struct file *filp, FAR struct pollfd *fds, bool setup);
+static int lcd_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup);
 #endif
 
 /****************************************************************************
@@ -662,14 +662,14 @@ static void lcd_action(enum slcdcode_e code, uint8_t count)
  * Name: lcd_read
  ****************************************************************************/
 
-static ssize_t lcd_read(FAR struct file *filp, FAR char *buffer, size_t len)
+static ssize_t lcd_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
   uint8_t row;
   uint8_t column;
   int nread;
 
   /* Try to read the entire display.  Notice that the seek offset
-   * (filp->f_pos) is ignored.  It probably should be taken into account
+   * (filep->f_pos) is ignored.  It probably should be taken into account
    * and also updated after each read and write.
    */
 
@@ -696,7 +696,7 @@ static ssize_t lcd_read(FAR struct file *filp, FAR char *buffer, size_t len)
  * Name: lcd_write
  ****************************************************************************/
 
-static ssize_t lcd_write(FAR struct file *filp,  FAR const char *buffer,
+static ssize_t lcd_write(FAR struct file *filep,  FAR const char *buffer,
                          size_t len)
 {
   struct lcd_instream_s instream;
@@ -781,7 +781,7 @@ static ssize_t lcd_write(FAR struct file *filp,  FAR const char *buffer,
  * Name: lcd_ioctl
  ****************************************************************************/
 
-static int lcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
+static int lcd_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   switch (cmd)
     {
@@ -851,7 +851,7 @@ static int lcd_ioctl(FAR struct file *filp, int cmd, unsigned long arg)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static int lcd_poll(FAR struct file *filp, FAR struct pollfd *fds,
+static int lcd_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
   if (setup)
