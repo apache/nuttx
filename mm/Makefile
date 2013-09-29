@@ -100,7 +100,12 @@ endif
 # Dependencies
 
 .depend: Makefile $(SRCS)
-	$(Q) $(MKDEP) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make.dep
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+	$(Q) $(MKDEP) --obj-path ubin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_ubin.dep
+	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_kbin.dep
+else
+	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_bin.dep
+endif
 	$(Q) touch $@
 
 depend: .depend
@@ -122,7 +127,11 @@ distclean: clean
 	$(Q) $(MAKE) -C bin  distclean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C ubin distclean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C kbin distclean TOPDIR=$(TOPDIR)
-	$(call DELFILE, Make.dep)
+	$(call DELFILE, Make_bin.dep)
+	$(call DELFILE, Make_ubin.dep)
+	$(call DELFILE, Make_kbin.dep)
 	$(call DELFILE, .depend)
 
--include Make.dep
+-include Make_bin.dep
+-include Make_ubin.dep
+-include Make_kbin.dep

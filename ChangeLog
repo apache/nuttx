@@ -5666,4 +5666,7 @@
 	* nuttx/fs/fs_sendfile.c, nuttx/net/net_sendfile.c, and other file:
 	  Integrate an optimized sendfile() operation from Max Holtzberg
 	  (2013-9-28).
-
+	* tools/mkdeps.*, nuttx/mm/Makefile, nuttx/libc/Makefile:  Dependency
+	  generation generation was broken for directories that keep objects in
+	  a sub-directory.  Fixed by adding a object path to the mkdeps.c,
+	  mkdeps.bat, mkdeps.sh tools (2013-0-29).

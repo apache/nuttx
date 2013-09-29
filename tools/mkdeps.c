@@ -1,7 +1,7 @@
 /****************************************************************************
  * tools/mkdeps.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@
 #include <string.h>
 #include <limits.h>
 #include <ctype.h>
+#include <libgen.h>
 #include <errno.h>
 
 /****************************************************************************
@@ -68,15 +69,20 @@ enum slashmode_e
  * Private Data
  ****************************************************************************/
 
-static char *g_cc       = NULL;
-static char *g_cflags   = NULL;
-static char *g_files    = NULL;
-static char *g_altpath  = NULL;
-static int   g_debug    = 0;
+static char *g_cc        = NULL;
+static char *g_cflags    = NULL;
+static char *g_files     = NULL;
+static char *g_altpath   = NULL;
+static char *g_objpath   = NULL;
+static char *g_suffix    = ".o";
+static int   g_debug     = 0;
 static bool  g_winnative = false;
 #ifdef HAVE_WINPATH
-static bool  g_winpath  = false;
-static char *g_topdir   = NULL;
+static bool  g_winpath   = false;
+static char *g_topdir    = NULL;
+#define DELIM "\\"
+#else
+#define DELIM "/"
 #endif
 
 static char g_command[MAX_BUFFER];
@@ -217,6 +223,12 @@ static void show_usage(const char *progname, const char *msg, int exitcode)
   fprintf(stderr, "    Do not look in the current directory for the file.  Instead, look in <path> to see\n");
   fprintf(stderr, "    if the file resides there.  --dep-path may be used multiple times to specify\n");
   fprintf(stderr, "    multiple alternative location\n");
+  fprintf(stderr, "  --obj-path <path>\n");
+  fprintf(stderr, "    The final objects will not reside in this path but, rather, at the path provided by\n");
+  fprintf(stderr, "    <path>.  if provided multiple time, only the last --obj-path will be used.\n");
+  fprintf(stderr, "  --obj-suffix <suffix>\n");
+  fprintf(stderr, "    If and object path is provided, then the extension will be assumed to be .o.  This\n");
+  fprintf(stderr, "    default suffix can be overrided with this command line option.\n");
   fprintf(stderr, "  --winnative\n");
   fprintf(stderr, "    By default, a POSIX-style environment is assumed (e.g., Linux, Cygwin, etc.)  This option is\n");
   fprintf(stderr, "    inform the tool that is working in a pure Windows native environment.\n");
@@ -268,6 +280,26 @@ static void parse_args(int argc, char **argv)
               append(&g_altpath, argv[argidx]);              
             }
         }
+      else if (strcmp(argv[argidx], "--obj-path") == 0)
+        {
+          argidx++;
+          if (argidx >= argc)
+            {
+              show_usage(argv[0], "ERROR: Missing argument to --obj-path", EXIT_FAILURE);
+            }
+
+          g_objpath = argv[argidx];
+        }
+      else if (strcmp(argv[argidx], "--obj-suffix") == 0)
+        {
+          argidx++;
+          if (argidx >= argc)
+            {
+              show_usage(argv[0], "ERROR: Missing argument to --obj-suffix", EXIT_FAILURE);
+            }
+
+          g_suffix = argv[argidx];
+        }
       else if (strcmp(argv[argidx], "--winnative") == 0)
         {
           g_winnative = true;
@@ -318,6 +350,16 @@ static void parse_args(int argc, char **argv)
       fprintf(stderr, "  CFLAGS         : [%s]\n", g_cflags ? g_cflags : "(None)");
       fprintf(stderr, "  FILES          : [%s]\n", g_files ? g_files : "(None)");
       fprintf(stderr, "  PATHS          : [%s]\n", g_altpath ? g_altpath : "(None)");
+      if (g_objpath)
+        {
+          fprintf(stderr, "  OBJDIR         : [%s]\n", g_objpath);
+          fprintf(stderr, "  SUFFIX         : [%s]\n", g_suffix);
+        }
+      else
+        {
+          fprintf(stderr, "  OBJDIR         : (None)\n");
+        }
+      
 #ifdef HAVE_WINPATH
       fprintf(stderr, "  Windows Paths  : [%s]\n", g_winpath ? "TRUE" : "FALSE");
       if (g_winpath)
@@ -389,17 +431,60 @@ static void do_dependency(const char *file, char separator)
 
   strcat(g_command, moption);
 
-  /* Copy the CFLAGS into the command buffer */
+  /* Copy " -MT " */
 
-  cmdlen += strlen(g_cflags);
-  if (cmdlen >= MAX_BUFFER)
+  if (g_objpath)
     {
-      fprintf(stderr, "ERROR: CFLAG string is too long [%d/%d]: %s\n",
-              cmdlen, MAX_BUFFER, g_cflags);
-      exit(EXIT_FAILURE);
+      char tmp[NAME_MAX+6];
+      char *dupname;
+      char *objname;
+      char *dotptr;
+
+      dupname = strdup(file);
+      if (!dupname)
+        {
+          fprintf(stderr, "ERROR: Failed to dup: %s\n", file);
+          exit(EXIT_FAILURE);
+        }
+
+      objname = basename(dupname);
+      dotptr  = strrchr(objname, '.');
+      if (dotptr)
+        {
+          dotptr = '\0';
+        }
+
+      snprintf(tmp, NAME_MAX+6, " -MT %s" DELIM "%s%s ",
+               g_objpath, objname, g_suffix);
+
+      cmdlen += strlen(tmp);
+      if (cmdlen >= MAX_BUFFER)
+        {
+          fprintf(stderr, "ERROR: Option string is too long [%d/%d]: %s\n",
+                  cmdlen, MAX_BUFFER, moption);
+          exit(EXIT_FAILURE);
+        }
+
+      strcat(g_command, tmp);
+      free(dupname);
     }
 
-  strcat(g_command, g_cflags);
+  strcat(g_command, moption);
+
+  /* Copy the CFLAGS into the command buffer */
+
+  if (g_cflags)
+    {
+      cmdlen += strlen(g_cflags);
+      if (cmdlen >= MAX_BUFFER)
+        {
+          fprintf(stderr, "ERROR: CFLAG string is too long [%d/%d]: %s\n",
+                  cmdlen, MAX_BUFFER, g_cflags);
+          exit(EXIT_FAILURE);
+        }
+
+      strcat(g_command, g_cflags);
+    }
 
   /* Add a space */
 
@@ -699,7 +784,7 @@ int main(int argc, char **argv, char **envp)
   files = g_files;
   while ((file = strtok_r(files, " ", &lasts)) != NULL)
     {
-      /* Check if we need to do path conversions for a Windows-natvie tool
+      /* Check if we need to do path conversions for a Windows-natvive tool
        * being using in a POSIX/Cygwin environment.
        */
 

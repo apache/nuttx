@@ -2,7 +2,7 @@
 ############################################################################
 # tools/mkdeps.sh
 #
-#   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
-
 #
 # Usage:
 
@@ -58,6 +57,12 @@ show_usage ()
   echo "    Do not look in the current directory for the file.  Instead, look in <path> to see"
   echo "    if the file resides there.  --dep-path may be used multiple times to specify"
   echo "    multiple alternative location"
+  echo "  --obj-path <path>"
+  echo "    The final objects will not reside in this path but, rather, at the path provided by"
+  echo "    <path>.  if provided multiple time, only the last --obj-path will be used."
+  echo "  --obj-suffix <suffix>"
+  echo "    If and object path is provided, then the extension will be assumed to be .o.  This"
+  echo "    default suffix can be overrided with this command line option."
   echo "  --winpaths <TOPDIR>"
   echo "    CC generates dependency lists using Windows paths (e.g., C:\blablah\blabla).  This"
   echo "    switch instructs the script to use 'cygpath' to convert the Windows paths to Cygwin"
@@ -91,7 +96,14 @@ dodep ()
     fi
   fi
 
-  $cc -M $cflags $fullpath || \
+  unset mtarg
+  if [ ! -z "$objpath" ]; then
+    srcname=`basename $1`
+    objname="${srcname%.*}"
+    mtarg="-MT ${objpath}/${objname}${suffix}"
+  fi
+
+  $cc -M $mtarg $cflags $fullpath || \
     ( echo "# ERROR: $cc -M $cflags $fullpath FAILED"; exit 4; )
 }
 
@@ -100,6 +112,8 @@ unset cflags
 unset files
 unset args
 unset altpath
+unset objpath
+suffix=.o
 winpaths=n
 unset topdir
 
@@ -126,6 +140,14 @@ while [ ! -z "$1" ]; do
     else
       args="$args $1"
     fi
+    ;;
+  --obj-path )
+    shift
+    objpath="$1"
+    ;;
+  --obj-suffix )
+    shift
+    suffix="$1"
     ;;
   --winpaths )
     if [ -z "$args" ]; then

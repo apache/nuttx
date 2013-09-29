@@ -180,7 +180,7 @@ config NET_SENDFILE
 	bool "Optimized network sendfile()"
 	default n
 	---help---
-		Support larger, high performance sendfile() from transferring
+		Support larger, higher performance sendfile() for transferring
 		files out a TCP connection.
 
 endif # NET_TCP
