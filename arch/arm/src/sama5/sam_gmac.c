@@ -637,7 +637,8 @@ static int sam_transmit(struct sam_gmac_s *priv)
   uint32_t regval;
   uint32_t status;
 
-  nllvdbg("d_len: %d txhead: %d\n",  dev->d_len, priv->txhead);
+  nllvdbg("d_len: %d txhead: %d txtail: %d\n",
+          dev->d_len, priv->txhead, priv->txtail);
   sam_dumppacket("Transmit packet", dev->d_buf, dev->d_len);
 
   /* Check parameter */
@@ -1184,9 +1185,29 @@ static void sam_txdone(struct sam_gmac_s *priv)
 
       if ((txdesc->status & GMACTXD_STA_USED) == 0)
         {
-          /* Yes ... break out of the loop now */
+          /* Yes.. the descriptor is still in use.  However, I have seen a
+           * case (only repeatable on start-up) where the USED bit is never
+           * set.  Yikes!  If we have encountered the first still busy
+           * descriptor, then we should also have TQBD equal to the descriptor
+           * address.  If it is not, then treat is as used anyway.
+           */
 
-          break;
+#warning REVISIT
+          if (priv->txtail == 0 &&
+              sam_physramaddr(txdesc) != sam_getreg(priv, SAM_GMAC_TBQB))
+            {
+              txdesc->status = (uint32_t)GMACTXD_STA_USED;
+              cp15_clean_dcache((uintptr_t)txdesc,
+                                (uintptr_t)txdesc + sizeof(struct gmac_txdesc_s));
+            }
+          else
+            {
+              /* Otherwise, the descriptor is truly in use.  Break out of the
+               * loop now.
+               */
+
+              break;
+            }
         }
 
       /* Increment the tail index */
