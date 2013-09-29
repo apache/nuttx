@@ -308,6 +308,8 @@ static void sam_phydump(struct sam_gmac_s *priv);
 #  define sam_phydump(priv)
 #endif
 
+static void sam_enablemdio(struct sam_gmac_s *priv);
+static void sam_disablemdio(struct sam_gmac_s *priv);
 static int  sam_phywait(struct sam_gmac_s *priv);
 static int  sam_phyreset(struct sam_gmac_s *priv);
 static int  sam_phyfind(struct sam_gmac_s *priv, uint8_t *phyaddr);
@@ -1532,7 +1534,6 @@ static int sam_ifup(struct uip_driver_s *dev)
 
   /* Initialize for PHY access */
 
-  sam_phyreset(priv);
   ret = sam_phyinit(priv);
   if (ret < 0)
     {
@@ -1746,7 +1747,6 @@ static int sam_rmmac(struct uip_driver_s *dev, const uint8_t *mac)
 #if defined(CONFIG_DEBUG_NET) && defined(CONFIG_DEBUG_VERBOSE)
 static void sam_phydump(struct sam_gmac_s *priv)
 {
-  uint32_t regval;
   uint16_t phyval;
 
   /* Enable management port */
@@ -2048,7 +2048,7 @@ static int sam_phyread(struct sam_gmac_s *priv, uint8_t phyaddr,
   /* Write the PHY Maintenance register */
 
   regval = GMAC_MAN_DATA(0) | GMAC_MAN_WTN | GMAC_MAN_REGA(regaddr) |
-           GMAC_MAN_PHYA(priv->phyaddr) | GMAC_MAN_READ | GMAC_MAN_CLTTO;
+           GMAC_MAN_PHYA(phyaddr) | GMAC_MAN_READ | GMAC_MAN_CLTTO;
   sam_putreg(priv, SAM_GMAC_MAN, regval);
 
   /* Wait until the PHY is again idle */
@@ -2103,7 +2103,7 @@ static int sam_phywrite(struct sam_gmac_s *priv, uint8_t phyaddr,
   /* Write the PHY Maintenance register */
 
   regval = GMAC_MAN_DATA(phyval) | GMAC_MAN_WTN | GMAC_MAN_REGA(regaddr) |
-           GMAC_MAN_PHYA(priv->phyaddr) | GMAC_MAN_WRITE | GMAC_MAN_CLTTO;
+           GMAC_MAN_PHYA(phyaddr) | GMAC_MAN_WRITE | GMAC_MAN_CLTTO;
   sam_putreg(priv, SAM_GMAC_MAN, regval);
 
   /* Wait until the PHY is again IDLE */
@@ -2298,7 +2298,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
   for (;;)
     {
       ret  = sam_phyread(priv, priv->phyaddr, GMII_1000BTSR, &btsr);
-      if (ret == 0)
+      if (ret < 0)
         {
           nlldbg("ERROR: Failed to read 1000BTSR register: %d\n", ret);
           goto errout;
@@ -2326,7 +2326,7 @@ static int sam_autonegotiate(struct sam_gmac_s *priv)
       /* Get the Autonegotiation Link partner base page */
 
       ret  = sam_phyread(priv, priv->phyaddr, GMII_LPA, &lpa);
-      if (ret == 0)
+      if (ret < 0)
         {
           nlldbg("ERROR: Failed to read LPA register: %d\n", ret);
           goto errout;
@@ -2480,17 +2480,17 @@ static void sam_mdcclock(struct sam_gmac_s *priv)
   ncfgr &= ~GMAC_NCFGR_CLK_MASK;
 
 #if BOARD_MCK_FREQUENCY <= 20000000
-  ncfgr = GMAC_NCFGR_CLK_DIV8;          /* MCK divided by 8 (MCK up to 20 MHz) */
+  ncfgr |= GMAC_NCFGR_CLK_DIV8;          /* MCK divided by 8 (MCK up to 20 MHz) */
 #elif BOARD_MCK_FREQUENCY <= 40000000
-  ncfgr = GMAC_NCFGR_CLK_DIV16;         /* MCK divided by 16 (MCK up to 40 MHz) */
+  ncfgr |= GMAC_NCFGR_CLK_DIV16;         /* MCK divided by 16 (MCK up to 40 MHz) */
 #elif BOARD_MCK_FREQUENCY <= 80000000
-  ncfgr = GMAC_NCFGR_CLK_DIV32;         /* MCK divided by 32 (MCK up to 80 MHz) */
+  ncfgr |= GMAC_NCFGR_CLK_DIV32;         /* MCK divided by 32 (MCK up to 80 MHz) */
 #elif BOARD_MCK_FREQUENCY <= 120000000
-  ncfgr = GMAC_NCFGR_CLK_DIV48;         /* MCK divided by 48 (MCK up to 120 MHz) */
+  ncfgr |= GMAC_NCFGR_CLK_DIV48;         /* MCK divided by 48 (MCK up to 120 MHz) */
 #elif BOARD_MCK_FREQUENCY <= 160000000
-  ncfgr = GMAC_NCFGR_CLK_DIV64;         /* MCK divided by 64 (MCK up to 160 MHz) */
+  ncfgr |= GMAC_NCFGR_CLK_DIV64;         /* MCK divided by 64 (MCK up to 160 MHz) */
 #elif BOARD_MCK_FREQUENCY <= 240000000
-  ncfgr = GMAC_NCFGR_CLK_DIV96;         /* MCK divided by 64 (MCK up to 240 MHz) */
+  ncfgr |= GMAC_NCFGR_CLK_DIV96;         /* MCK divided by 64 (MCK up to 240 MHz) */
 #else
 #  error Invalid BOARD_MCK_FREQUENCY
 #endif
@@ -2534,11 +2534,9 @@ static int sam_phyinit(struct sam_gmac_s *priv)
       return ret;
     }
 
-  if (priv->phyaddr != CONFIG_SAMA5_GMAC_PHYADDR)
-    {
-      sam_phyreset(priv);
-    }
+  /* We have a PHY address.  Reset the PHY */
 
+  sam_phyreset(priv);
   return OK;
 }
 

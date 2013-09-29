@@ -2036,7 +2036,7 @@ static int sam_phyread(struct sam_emac_s *priv, uint8_t phyaddr,
   /* Write the PHY Maintenance register */
 
   regval = EMAC_MAN_DATA(0) | EMAC_MAN_CODE | EMAC_MAN_REGA(regaddr) |
-           EMAC_MAN_PHYA(priv->phyaddr) | EMAC_MAN_READ | EMAC_MAN_SOF;
+           EMAC_MAN_PHYA(phyaddr) | EMAC_MAN_READ | EMAC_MAN_SOF;
   sam_putreg(priv, SAM_EMAC_MAN, regval);
 
   /* Wait until the PHY is again idle */
@@ -2091,7 +2091,7 @@ static int sam_phywrite(struct sam_emac_s *priv, uint8_t phyaddr,
   /* Write the PHY Maintenance register */
 
   regval = EMAC_MAN_DATA(phyval) | EMAC_MAN_CODE | EMAC_MAN_REGA(regaddr) |
-           EMAC_MAN_PHYA(priv->phyaddr) | EMAC_MAN_WRITE| EMAC_MAN_SOF;
+           EMAC_MAN_PHYA(phyaddr) | EMAC_MAN_WRITE| EMAC_MAN_SOF;
   sam_putreg(priv, SAM_EMAC_MAN, regval);
 
   /* Wait until the PHY is again IDLE */

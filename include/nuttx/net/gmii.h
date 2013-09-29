@@ -134,7 +134,7 @@
 #define GMII_PHYID2_REV_MASK          MII_PHYID2_REV_MASK
 #define GMII_PHYID2_REV(n)            MII_PHYID2_REV(n)
 #define GMII_PHYID2_MODEL_SHIFT       MII_PHYID2_MODEL_SHIFT
-#define GMII_PHYID2_MODEL_MASK        MII_PHYID2_MODEL
+#define GMII_PHYID2_MODEL_MASK        MII_PHYID2_MODEL_MASK
 #  define GMII_PHYID2_MODEL(n)        MII_PHYID2_MODEL(n)
 #define GMII_PHYID2_OUI_SHIFT         MII_PHYID2_OUI_SHIFT
 #define GMII_PHYID2_OUI_MASK          MII_PHYID2_OUI_MASK
@@ -242,7 +242,7 @@
 #define GMII_1000BTCR_TESTMODE_SHIFT  (13)      /* Bits 13-15: Test Mode */
 #define GMII_1000BTCR_TESTMODE_MASK   (7 << GMII_1000BTCR_TESTMODE_SHIFT)
 #  define GMII_1000BTCR_MODE_NORMAL   (0 << GMII_1000BTCR_TESTMODE_SHIFT)
-#  define GMII_1000BTCR_TESTMODE(n)   ((n) << GMII_1000BTCR_TESTMODE_SHIFT) /* n=1-4 */
+#  define GMII_1000BTCR_TESTMODE(n)   ((uint16_t)(n) << GMII_1000BTCR_TESTMODE_SHIFT) /* n=1-4 */
 
 /* 1000BASE-T Status Register */
 
@@ -260,7 +260,7 @@
 
 #define GMII_ERCR_ADDR_SHIFT          (0)       /* Bits 0-7: Select extended register address */
 #define GMII_ERCR_ADDR_MASK           (0xff << GMII_ERCR_ADDR_SHIFT)
-#  define GMII_ERCR_ADDR(n)           ((n) << GMII_ERCR_ADDR_SHIFT)
+#  define GMII_ERCR_ADDR(n)           ((uint16_t)(n) << GMII_ERCR_ADDR_SHIFT)
 #define GMII_ERCR_PAGE                (1 << 8)  /* Bit 8: Select page for extended register */
                                                 /* Bits 9-14: Reserved */
 #define GMII_ERCR_READ                (0)       /* Bit 15: 0=Read extended register */

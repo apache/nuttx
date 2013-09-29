@@ -204,13 +204,13 @@
 
 #define MII_PHYID2_REV_SHIFT         (0)    /* Bits 0-3: Revision number mask */
 #define MII_PHYID2_REV_MASK          (15 <<  MII_PHYID2_REV_SHIFT)
-#  define MII_PHYID2_REV(n)          ((n) <<  MII_PHYID2_REV_SHIFT)
+#  define MII_PHYID2_REV(n)          ((uint16_t)(n) <<  MII_PHYID2_REV_SHIFT)
 #define MII_PHYID2_MODEL_SHIFT       (4)       /* Bits 4-9: Model number mask */
 #define MII_PHYID2_MODEL_MASK        (0x3f <<  MII_PHYID2_MODEL_SHIFT)
-#  define MII_PHYID2_MODEL(n)        ((n) <<  MII_PHYID2_MODEL_SHIFT)
+#  define MII_PHYID2_MODEL(n)        ((uint16_t)(n) <<  MII_PHYID2_MODEL_SHIFT)
 #define MII_PHYID2_OUI_SHIFT         (10)      /* Bits 10-15: OUI mask [24:19] */
 #define MII_PHYID2_OUI_MASK          (0x3f <<  MII_PHYID2_OUI_SHIFT)
-#  define MII_PHYID2_OUI(n)          ((n) <<  MII_PHYID2_OUI_SHIFT)
+#  define MII_PHYID2_OUI(n)          ((uint16_t)(n) <<  MII_PHYID2_OUI_SHIFT)
 
 /* Advertisement control register bit definitions */
 
@@ -285,9 +285,9 @@
 
 /* MMD access control register */
 
-#define MII_MMDCONTROL_DEVAD_SHIFT    (0)      /* Bits 0-4: Device address */
-#define MII_MMDCONTROL_DEVAD_MASK     (31 << MII_MMDCONTROL_DEVAD_SHIFT)
-#  define MII_MMDCONTROL_DEVAD(n)     ((n) << MII_MMDCONTROL_DEVAD_SHIFT)
+#define MII_MMDCONTROL_DEVAD_SHIFT   (0)      /* Bits 0-4: Device address */
+#define MII_MMDCONTROL_DEVAD_MASK    (31 << MII_MMDCONTROL_DEVAD_SHIFT)
+#  define MII_MMDCONTROL_DEVAD(n)    ((uint16_t)(n) << MII_MMDCONTROL_DEVAD_SHIFT)
                                                /* Bits 5-13: Reserved */
 #define MII_MMDCONTROL_FUNC_SHIFT    (14)      /* Bits 14-15: Function */
 #define MII_MMDCONTROL_FUNC_MASK     (3 << MII_MMDCONTROL_FUNC_SHIFT)
