@@ -525,7 +525,7 @@
 #define GMAC_DCFGR_TXCOEN         (1 << 11) /* Bit 11: Transmitter Checksum Generation Offload Enable */
 #define GMAC_DCFGR_DRBS_SHIFT     (16)      /* Bits 16-23: DMA Receive Buffer Size */
 #define GMAC_DCFGR_DRBS_MASK      (0xff << GMAC_DCFGR_DRBS_SHIFT)
-#  define GMAC_DCFGR_DRBS(n)      ((n) << GMAC_DCFGR_DRBS_SHIFT)
+#  define GMAC_DCFGR_DRBS(n)      ((uint32_t)(n) << GMAC_DCFGR_DRBS_SHIFT)
 #define GMAC_DCFGR_DDRP           (1 << 24) /* Bit 24: DMA Discard Receive Packets */
 
 /* Transmit Status Register */
@@ -618,14 +618,14 @@
 
 #define GMAC_TPSF_TPB1ADR_SHIFT   (0)       /* Bits 0-11: Transmit Partial Store and Forward Address */
 #define GMAC_TPSF_TPB1ADR_MASK    (0xfff << GMAC_TPSF_TPB1ADR_SHIFT)
-#  define GMAC_TPSF_TPB1ADR(n)    ((n) << GMAC_TPSF_TPB1ADR_SHIFT)
+#  define GMAC_TPSF_TPB1ADR(n)    ((uint32_t)(n) << GMAC_TPSF_TPB1ADR_SHIFT)
 #define GMAC_TPSF_ENTXP           (1 << 31) /* Bit 31: Enable TX Partial Store and Forward Operation */
 
 /* RX Partial Store and Forward Register */
 
 #define GMAC_RPSF_RPB1ADR_SHIFT   (0)       /* Bits 0-11: Receive Partial Store and Forward Address */
 #define GMAC_RPSF_RPB1ADR_MASK    (0xfff << GMAC_RPSF_RPB1ADR_SHIFT)
-#  define GMAC_RPSF_RPB1ADR(n)    ((n) << GMAC_RPSF_RPB1ADR_SHIFT)
+#  define GMAC_RPSF_RPB1ADR(n)    ((uint32_t)(n) << GMAC_RPSF_RPB1ADR_SHIFT)
 #define GMAC_RPSF_ENRXP           (1 << 31) /* Bit 31: Enable RX Partial Store and Forward Operation */
 
 /* Hash Register Bottom [31:0] (32-bit value) */
@@ -684,7 +684,7 @@
 
 #define GMAC_SVLAN_VLANTYP_SHIFT  (0)       /* Bits 0-15: User Defined VLAN_TYPE Field */
 #define GMAC_SVLAN_VLANTYP_MASK   (0xffff << GMAC_SVLAN_VLANTYP_SHIFT)
-#  define GMAC_SVLAN_VLANTYP(n)   ((n) << GMAC_SVLAN_VLANTYP_SHIFT)
+#  define GMAC_SVLAN_VLANTYP(n)   ((uint32_t)(n) << GMAC_SVLAN_VLANTYP_SHIFT)
 #define GMAC_SVLAN_ESVLAN         (1 << 31) /* Bit 31: Enable Stacked VLAN Processing Mode */
 
 /* Transmit PFC Pause Register */
@@ -836,13 +836,13 @@
 
 #define GMAC_TI_CNS_SHIFT         (0)       /* Bits 0-7: Count Nanoseconds */
 #define GMAC_TI_CNS_MASK          (0xff << GMAC_TI_CNS_SHIFT)
-#  define GMAC_TI_CNS(n)          ((n) << GMAC_TI_CNS_SHIFT)
+#  define GMAC_TI_CNS(n)          ((uint32_t)(n) << GMAC_TI_CNS_SHIFT)
 #define GMAC_TI_ACNS_SHIFT        (8)       /* Bits 8-15: Alternative Count Nanoseconds */
 #define GMAC_TI_ACNS_MASK         (0xff << GMAC_TI_ACNS_SHIFT)
-#  define GMAC_TI_ACNS(n)         ((n) << GMAC_TI_ACNS_SHIFT)
+#  define GMAC_TI_ACNS(n)         ((uint32_t)(n) << GMAC_TI_ACNS_SHIFT)
 #define GMAC_TI_NIT_SHIFT         (16)      /* Bits 16-23: Number of Increments */
 #define GMAC_TI_NIT_MASK          (0xff << GMAC_TI_NIT_SHIFT)
-#  define GMAC_TI_NIT(n)          ((n) << GMAC_TI_NIT_SHIFT)
+#  define GMAC_TI_NIT(n)          ((uint32_t)(n) << GMAC_TI_NIT_SHIFT)
 
 /* PTP Event Frame Transmitted Seconds (32-bit value) */
 /* PTP Event Frame Transmitted Nanoseconds */
@@ -896,13 +896,13 @@
 
 #define GMAC_ST1RPQ0_QNB_SHIFT    (0)       /* Bits 0-3: Que Number (0->7) */
 #define GMAC_ST1RPQ0_QNB_MASK     (15 << GMAC_ST1RPQ0_QNB_SHIFT)
-#  define GMAC_ST1RPQ0_QNB(n)     ((n) << GMAC_ST1RPQ0_QNB_SHIFT)
+#  define GMAC_ST1RPQ0_QNB(n)     ((uint32_t)(n) << GMAC_ST1RPQ0_QNB_SHIFT)
 #define GMAC_ST1RPQ0_DSTCM_SHIFT  (4)       /* Bits 4-11: Differentiated Services or Traffic Class Match */
 #define GMAC_ST1RPQ0_DSTCM_MASK   (0xff << GMAC_ST1RPQ0_DSTCM_SHIFT)
-#  define GMAC_ST1RPQ0_DSTCM(n)   ((n) << GMAC_ST1RPQ0_DSTCM_SHIFT)
+#  define GMAC_ST1RPQ0_DSTCM(n)   ((uint32_t)(n) << GMAC_ST1RPQ0_DSTCM_SHIFT)
 #define GMAC_ST1RPQ0_UDPM_SHIFT   (12)      /* Bits 12-27: UDP Port Match */
 #define GMAC_ST1RPQ0_UDPM_MASK    (0xffff << GMAC_ST1RPQ0_UDPM_SHIFT)
-#  define GMAC_ST1RPQ0_UDPM(n)    ((n) << GMAC_ST1RPQ0_UDPM_SHIFT)
+#  define GMAC_ST1RPQ0_UDPM(n)    ((uint32_t)(n) << GMAC_ST1RPQ0_UDPM_SHIFT)
 #define GMAC_ST1RPQ0_DSTCE        (1 << 28) /* Bit 28: Differentiated Services or Traffic Class Match Enable */
 #define GMAC_ST1RPQ0_UDPE         (1 << 29) /* Bit 29: UDP Port Match Enable */
 
@@ -910,10 +910,10 @@
 
 #define GMAC_ST2RPQ0_QNB_SHIFT    (0)       /* Bits 0-3: Que Number (0->7) */
 #define GMAC_ST2RPQ0_QNB_MASK     (15 << GMAC_ST2RPQ0_QNB_SHIFT)
-#  define GMAC_ST2RPQ0_QNB(n)     ((n) << GMAC_ST2RPQ0_QNB_SHIFT)
+#  define GMAC_ST2RPQ0_QNB(n)     ((uint32_t)(n) << GMAC_ST2RPQ0_QNB_SHIFT)
 #define GMAC_ST2RPQ0_VLANP_SHIFT  (4)       /* Bits 4-7: VLAN Priority */
 #define GMAC_ST2RPQ0_VLANP_MASK   (15 << GMAC_ST2RPQ0_VLANP_SHIFT)
-#  define GMAC_ST2RPQ0_VLANP(n)   ((n) << GMAC_ST2RPQ0_VLANP_SHIFT)
+#  define GMAC_ST2RPQ0_VLANP(n)   ((uint32_t)(n) << GMAC_ST2RPQ0_VLANP_SHIFT)
 #define GMAC_ST2RPQ0_VLANE        (1 << 8)  /* Bit 8:  VLAN Enable */
 
 /* Descriptors **********************************************************************/
