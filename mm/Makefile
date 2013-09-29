@@ -35,6 +35,16 @@
 
 -include $(TOPDIR)/Make.defs
 
+# CFLAGS
+
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  KDEFINE = ${shell $(TOPDIR)\tools\define.bat "$(CC)" __KERNEL__}
+else
+  KDEFINE = ${shell $(TOPDIR)/tools/define.sh "$(CC)" __KERNEL__}
+endif
+endif
+
 # Core allocator logic
 
 ASRCS  = 
@@ -102,7 +112,7 @@ endif
 .depend: Makefile $(SRCS)
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 	$(Q) $(MKDEP) --obj-path ubin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_ubin.dep
-	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_kbin.dep
+	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >Make_kbin.dep
 else
 	$(Q) $(MKDEP) --obj-path bin --obj-suffix $(OBJEXT) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_bin.dep
 endif
