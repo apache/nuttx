@@ -79,7 +79,8 @@ extern "C"
  *   /dev/inputN where N is the minor device number
  *
  * Input Parameters:
- *   minor   - The input device minor number
+ *   dev   - The ADC device handle received from sam_adc_initialize()
+ *   minor - The input device minor number
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -87,7 +88,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int sam_tsd_register(int minor);
+int sam_tsd_register(FAR struct adc_dev_s *dev, int minor);
 
 /****************************************************************************
  * Interfaces exported from the touchscreen to the ADC driver
@@ -99,14 +100,14 @@ int sam_tsd_register(int minor);
  *   Handles ADC interrupts associated with touchscreen channels
  *
  * Input parmeters:
- *   None
+ *   pending - Current set of pending interrupts being handled
  *
  * Returned Value:
  *   None
- * 
+ *
  ****************************************************************************/
 
-void sam_tsd_interrupt(void);
+void sam_tsd_interrupt(uint32_t pending);
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -289,6 +289,8 @@
 #define ADC_INT_EOC7               (1 << 9)  /* Bit 9:  End of Conversion 9 */
 #define ADC_INT_EOC7               (1 << 10) /* Bit 10: End of Conversion 10 */
 #define ADC_INT_EOC7               (1 << 11) /* Bit 11: End of Conversion 11 */
+#define ADC_INT_EOCALL             (0x00000fff)
+
 #define ADC_INT_XRDY               (1 << 20) /* Bit 20: TS Measure XPOS Ready Interrupt */
 #define ADC_INT_YRDY               (1 << 21) /* Bit 21: TS Measure YPOS Ready Interrupt */
 #define ADC_INT_PRDY               (1 << 22) /* Bit 22: TS Measure Pressure Ready Interrupt */

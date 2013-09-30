@@ -129,7 +129,7 @@ struct adc_ops_s
 };
 
 /* This is the device structure used by the driver.  The caller of
- * can_register() must allocate and initialize this structure.  The
+ * adc_register() must allocate and initialize this structure.  The
  * calling logic need only set all fields to zero except:
  *
  *   The elements of 'ad_ops', and 'ad_priv'
