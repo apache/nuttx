@@ -5678,4 +5678,9 @@
 	* arch/arm/src/sama5/sam_touchscreen.h and .h:  Framework for a
 	  touchscreen driver (also an empty "skeleton" file on the initial
 	  commit) (2013-9-30).
-
+	* arch/arm/src/kl/kl_lowgetc.c and .h:  First cut at low-level
+	  getc() function for operation with no file system (and, hence,
+	  no serial driver) (from Alan Carvalho de Assis, 2013-9-30).
+	* configs/freedom-kl25z/minnsh:  A new configuration that is
+	  an experiement to see how small we can get the NuttX footprint.
+	  From Carvalho de Assis. (2013-9-30).

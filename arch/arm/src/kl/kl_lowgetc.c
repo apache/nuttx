@@ -109,7 +109,7 @@
  *
  **************************************************************************/
 
-uint32_t kl_lowgetc(void)
+int kl_lowgetc(void)
 {
   uint8_t ch = 0;
 
@@ -125,5 +125,5 @@ uint32_t kl_lowgetc(void)
   ch = getreg8(CONSOLE_BASE+KL_UART_D_OFFSET);
 #endif
 
-  return (int) ch;
+  return (int)ch;
 }
