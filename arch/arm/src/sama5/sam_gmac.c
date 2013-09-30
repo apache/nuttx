@@ -1194,7 +1194,7 @@ static void sam_txdone(struct sam_gmac_s *priv)
 
 #warning REVISIT
           if (priv->txtail == 0 &&
-              sam_physramaddr(txdesc) != sam_getreg(priv, SAM_GMAC_TBQB))
+              sam_physramaddr((uintptr_t)txdesc) != sam_getreg(priv, SAM_GMAC_TBQB))
             {
               txdesc->status = (uint32_t)GMACTXD_STA_USED;
               cp15_clean_dcache((uintptr_t)txdesc,

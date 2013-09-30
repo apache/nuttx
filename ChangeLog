@@ -5670,3 +5670,6 @@
 	  generation generation was broken for directories that keep objects in
 	  a sub-directory.  Fixed by adding a object path to the mkdeps.c,
 	  mkdeps.bat, mkdeps.sh tools (2013-0-29).
+	* arch/arm/src/sama5/chip/sam_adc.h:  ADC register definition file.
+	  Incomplete on initial check-in (2013-9-29).
+

@@ -1257,7 +1257,7 @@ static void sam_txdone(struct sam_emac_s *priv)
 #if 0 /* The issue does not exist in the current configuration, but may return */
 #warning REVISIT
           if (priv->txtail == 0 &&
-              sam_physramaddr((uintprt_t)txdesc) != sam_getreg(priv, SAM_EMAC_TBQP))
+              sam_physramaddr((uintptr_t)txdesc) != sam_getreg(priv, SAM_EMAC_TBQP))
             {
               txdesc->status = (uint32_t)EMACTXD_STA_USED;
               cp15_clean_dcache((uintptr_t)txdesc,
