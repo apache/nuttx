@@ -362,7 +362,7 @@ void up_release_pending(void);
  *
  * Description:
  *   Called when the priority of a running or
- *   ready-to-run task changes and the reprioritization will 
+ *   ready-to-run task changes and the reprioritization will
  *   cause a context switch.  Two cases:
  *
  *   1) The priority of the currently running task drops and the next
@@ -1110,6 +1110,16 @@ void relays_powermodes(uint32_t relays_stat);
  ****************************************************************************/
 
 int up_putc(int ch);
+
+/****************************************************************************
+ * Name: up_getc
+ *
+ * Description:
+ *   Get one character on the console
+ *
+ ****************************************************************************/
+
+int up_getc(void);
 
 #ifdef __cplusplus
 }
