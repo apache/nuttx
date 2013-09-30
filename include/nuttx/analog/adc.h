@@ -7,6 +7,7 @@
  *            0.2 remove ao_read
  *
  * Derived from include/nuttx/can.h
+ *
  *   Copyright (C) 2008, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -125,7 +126,6 @@ struct adc_ops_s
   /* All ioctl calls will be routed through this method */
 
   CODE int (*ao_ioctl)(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
-
 };
 
 /* This is the device structure used by the driver.  The caller of
@@ -157,7 +157,8 @@ struct adc_dev_s
  ************************************************************************************/
 
 #if defined(__cplusplus)
-extern "C" {
+extern "C"
+{
 #endif
 
 /************************************************************************************
