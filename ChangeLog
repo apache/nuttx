@@ -5684,3 +5684,6 @@
 	* configs/freedom-kl25z/minnsh:  A new configuration that is
 	  an experiement to see how small we can get the NuttX footprint.
 	  From Carvalho de Assis. (2013-9-30).
+	* net/net_sendfile:  The high performance sendfile logic is
+	  now functional.  From Max Holtzberg (2013-9-30).
+

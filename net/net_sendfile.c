@@ -148,6 +148,8 @@ static uint16_t ack_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 {
   FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
 
+  nllvdbg("flags: %04x\n", flags);
+
   if ((flags & UIP_ACKDATA) != 0)
     {
       /* The current acknowledgement number number is the (relative) offset
@@ -161,9 +163,29 @@ static uint16_t ack_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
              pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
 
       dev->d_sndlen = 0;
+
+      /* Wake up the waiting thread */
+
+      sem_post(&pstate->snd_sem);
+
+      flags &= ~UIP_ACKDATA;
     }
 
-  return OK;
+  /* Check for a loss of connection */
+
+  else if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
+    {
+      /* Report not connected */
+
+      nlldbg("Lost connection\n");
+
+      net_lostconnection(pstate->snd_sock, flags);
+      pstate->snd_sent = -ENOTCONN;
+
+      sem_post(&pstate->snd_sem);
+    }
+
+  return flags;
 }
 
 /****************************************************************************
@@ -240,10 +262,8 @@ static uint16_t sendfile_interrupt(FAR struct uip_driver_s *dev, FAR void *pvcon
         }
 
       /* Check if we have "space" in the window */
-#warning REVISIT
-#if 0 /* Where is wndsize defined? */
-      if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->wndsize)
-#endif
+
+      if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->winsize)
         {
           uint32_t seqno;
 
@@ -314,14 +334,11 @@ static uint16_t sendfile_interrupt(FAR struct uip_driver_s *dev, FAR void *pvcon
 #endif
             }
         }
-#warning REVISIT
-#if 0 /* Where is wndsize defined? */
       else
         {
-          nlldbg("window full, wait for ack\n");
+          nlldbg("Window full, wait for ack\n");
           goto wait;
         }
-#endif
     }
 
   /* All data has been send and we are just waiting for ACK or re-transmit
@@ -432,8 +449,6 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
   uip_lock_t save;
   int err;
 
-  nlldbg("pid: %d\n", getpid());
-
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
   if (!psock || psock->s_crefs <= 0)
@@ -490,33 +505,33 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
   /* Get the initial sequence number that will be used */
 
-  state.snd_isn         = uip_tcpgetsequence(conn->sndseq);
+  state.snd_isn          = uip_tcpgetsequence(conn->sndseq);
 
   /* There is no outstanding, unacknowledged data after this
    * initial sequence number.
    */
 
-  conn->unacked         = 0;
+  conn->unacked          = 0;
 
   /* Set the initial time for calculating timeouts */
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  state.snd_time        = clock_systimer();
+  state.snd_time         = clock_systimer();
 #endif
 
   /* Set up the ACK callback in the connection */
 
-  state.snd_ackcb->flags   = UIP_ACKDATA;
-  state.snd_ackcb->priv    = (void*)&state;
-  state.snd_ackcb->event   = ack_interrupt;
+  state.snd_ackcb->flags = UIP_ACKDATA|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
+  state.snd_ackcb->priv  = (void*)&state;
+  state.snd_ackcb->event = ack_interrupt;
 
   /* Perform the TCP send operation */
 
   do
     {
-      state.snd_datacb->flags   = UIP_REXMIT|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
-      state.snd_datacb->priv    = (void*)&state;
-      state.snd_datacb->event   = sendfile_interrupt;
+      state.snd_datacb->flags = UIP_REXMIT|UIP_POLL;
+      state.snd_datacb->priv  = (void*)&state;
+      state.snd_datacb->event = sendfile_interrupt;
 
       /* Notify the device driver of the availaibilty of TX data */
 

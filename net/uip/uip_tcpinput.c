@@ -298,6 +298,10 @@ reset:
 
 found:
 
+  /* Update the connection's window size */
+
+  conn->winsize = BUF->wnd[0] << 8 | BUF->wnd[1];
+
   flags = 0;
 
   /* We do a very naive form of TCP reset processing; we just accept

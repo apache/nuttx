@@ -133,6 +133,7 @@ struct uip_conn
   uint16_t unacked;       /* Number bytes sent but not yet ACKed */
   uint16_t mss;           /* Current maximum segment size for the
                            * connection */
+  uint16_t winsize;       /* Current window size of the connection */
   uint16_t initialmss;    /* Initial maximum segment size for the
                            * connection */
   uint8_t  crefs;         /* Reference counts on this instance */
