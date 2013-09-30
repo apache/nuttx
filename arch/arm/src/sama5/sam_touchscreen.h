@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include "chip/sam_adc.h"
 
-#ifdef CONFIG_SAMA5_ADC
+#if defined(CONFIG_SAMA5_ADC) && defined(CONFIG_SAMA5_TOUCHSCREEN)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -72,26 +72,46 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_adcinitialize
+ * Name: sam_tsd_register
  *
  * Description:
- *   Initialize the ADC
+ *   Configure the SAMA5 touchscreen.  This will register the driver as
+ *   /dev/inputN where N is the minor device number
+ *
+ * Input Parameters:
+ *   minor   - The input device minor number
  *
  * Returned Value:
- *   Valid can device structure reference on succcess; a NULL on failure
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *sam_adcinitialize(void);
+int sam_tsd_register(int minor);
 
 /****************************************************************************
- * Interfaces exported from the ADC to the touchscreen driver
+ * Interfaces exported from the touchscreen to the ADC driver
  ****************************************************************************/
+/****************************************************************************
+ * Name: sam_tsd_interrupt
+ *
+ * Description:
+ *   Handles ADC interrupts associated with touchscreen channels
+ *
+ * Input parmeters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ * 
+ ****************************************************************************/
+
+void sam_tsd_interrupt(void);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* CONFIG_SAMA5_ADC */
+#endif /* CONFIG_SAMA5_ADC && CONFIG_SAMA5_TOUCHSCREEN */
 #endif /* __ARCH_ARM_SRC_SAMA5_SAM_ADC_H */

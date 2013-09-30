@@ -74,23 +74,42 @@
 
 struct sam_adc_s
 {
+  /* Debug stuff */
+
+#ifdef CONFIG_SAMA5_ADC_REGDEBUG
+   bool               wrlast;     /* Last was a write */
+   uintptr_t          addrlast;   /* Last address */
+   uint32_t           vallast;    /* Last value */
+   int                ntimes;     /* Number of times */
+#endif
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+/* Register operations ******************************************************/
+
+#if defined(CONFIG_SAMA5_ADC_REGDEBUG) && defined(CONFIG_DEBUG)
+static bool sam_adc_checkreg(struct sam_gmac_s *priv, bool wr,
+                         uint32_t regval, uintptr_t address);
+static uint32_t sam_adc_getreg(struct sam_gmac_s *priv, uintptr_t addr);
+static void sam_adc_putreg(struct sam_gmac_s *priv, uintptr_t addr, uint32_t val);
+#else
+# define sam_adc_getreg(priv,addr)      getreg32(addr)
+# define sam_adc_putreg(priv,addr,val)  putreg32(val,addr)
+#endif
 
 /* ADC interrupt handling */
 
-static int  adc_interrupt(int irq, void *context);
+static int  sam_adc_interrupt(int irq, void *context);
 
 /* ADC methods */
 
-static void adc_reset(FAR struct adc_dev_s *dev);
-static int  adc_setup(FAR struct adc_dev_s *dev);
-static void adc_shutdown(FAR struct adc_dev_s *dev);
-static void adc_rxint(FAR struct adc_dev_s *dev, bool enable);
-static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
+static void sam_adc_reset(FAR struct adc_dev_s *dev);
+static int  sam_adc_setup(FAR struct adc_dev_s *dev);
+static void sam_adc_shutdown(FAR struct adc_dev_s *dev);
+static void sam_adc_rxint(FAR struct adc_dev_s *dev, bool enable);
+static int  sam_adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -100,11 +119,11 @@ static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
 
 static const struct adc_ops_s g_adcops =
 {
-  .ao_reset    = adc_reset,
-  .ao_setup    = adc_setup,
-  .ao_shutdown = adc_shutdown,
-  .ao_rxint    = adc_rxint,
-  .ao_ioctl    = adc_ioctl,
+  .ao_reset    = sam_adc_reset,
+  .ao_setup    = sam_adc_setup,
+  .ao_shutdown = sam_adc_shutdown,
+  .ao_rxint    = sam_adc_rxint,
+  .ao_ioctl    = sam_adc_ioctl,
 };
 
 /* ADC internal state */
@@ -126,15 +145,112 @@ static struct adc_dev_s g_adcdev =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: adc_reset
+ * Name: sam_adc_checkreg
  *
  * Description:
- *   Reset the ADC device.  Called early to initialize the hardware. This
- *   is called, before adc_setup() and on error conditions.
+ *   Check if the current register access is a duplicate of the preceding.
+ *
+ * Input Parameters:
+ *   regval  - The value to be written
+ *   address - The address of the register to write to
+ *
+ * Returned Value:
+ *   true:  This is the first register access of this type.
+ *   flase: This is the same as the preceding register access.
  *
  ****************************************************************************/
 
-static void adc_reset(FAR struct adc_dev_s *dev)
+#ifdef CONFIG_SAMA5_ADC_REGDEBUG
+static bool sam_adc_checkreg(struct sam_gmac_s *priv, bool wr,
+                             uint32_t regval, uintptr_t address)
+{
+  if (wr      == priv->wrlast &&   /* Same kind of access? */
+      regval  == priv->vallast &&  /* Same value? */
+      address == priv->addrlast)   /* Same address? */
+    {
+      /* Yes, then just keep a count of the number of times we did this. */
+
+      priv->ntimes++;
+      return false;
+    }
+  else
+    {
+      /* Did we do the previous operation more than once? */
+
+      if (priv->ntimes > 0)
+        {
+          /* Yes... show how many times we did it */
+
+          lldbg("...[Repeats %d times]...\n", priv->ntimes);
+        }
+
+      /* Save information about the new access */
+
+      priv->wrlast   = wr;
+      priv->vallast  = regval;
+      priv->addrlast = address;
+      priv->ntimes   = 0;
+    }
+
+  /* Return true if this is the first time that we have done this operation */
+
+  return true;
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_adc_getreg
+ *
+ * Description:
+ *  Read any 32-bit register using an absolute address.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_ADC_REGDEBUG
+static uint32_t sam_adc_getreg(struct sam_gmac_s *priv, uintptr_t address)
+{
+  uint32_t regval = getreg32(address);
+
+  if (sam_adc_checkreg(priv, false, regval, address))
+    {
+      lldbg("%08x->%08x\n", address, regval);
+    }
+
+  return regval;
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_adc_putreg
+ *
+ * Description:
+ *  Write to any 32-bit register using an absolute address.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_ADC_REGDEBUG
+static void sam_adc_putreg(struct sam_gmac_s *priv, uintptr_t address,
+                       uint32_t regval)
+{
+  if (sam_adc_checkreg(priv, true, regval, address))
+    {
+      lldbg("%08x<-%08x\n", address, regval);
+    }
+
+  putreg32(regval, address);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_adc_reset
+ *
+ * Description:
+ *   Reset the ADC device.  Called early to initialize the hardware. This
+ *   is called, before sam_adc_setup() and on error conditions.
+ *
+ ****************************************************************************/
+
+static void sam_adc_reset(FAR struct adc_dev_s *dev)
 {
   FAR struct sam_adc_s *priv = (FAR struct sam_adc_s *)dev->ad_priv;
   irqstate_t flags;
@@ -147,7 +263,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: adc_setup
+ * Name: sam_adc_setup
  *
  * Description:
  *   Configure the ADC. This method is called the first time that the ADC
@@ -157,14 +273,14 @@ static void adc_reset(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static int adc_setup(FAR struct adc_dev_s *dev)
+static int sam_adc_setup(FAR struct adc_dev_s *dev)
 {
   FAR struct sam_adc_s *priv = (FAR struct sam_adc_s *)dev->ad_priv;
   int ret;
 
   /* Attach the ADC interrupt */
 
-  ret = irq_attach(SAM_IRQ_ADC, adc_interrupt);
+  ret = irq_attach(SAM_IRQ_ADC, sam_adc_interrupt);
   if (ret < 0)
     {
       adbg("ERROR: Failed to attach IRQ %d: %d\n", SAM_IRQ_ADC, ret);
@@ -178,7 +294,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: adc_shutdown
+ * Name: sam_adc_shutdown
  *
  * Description:
  *   Disable the ADC.  This method is called when the ADC device is closed.
@@ -186,7 +302,7 @@ static int adc_setup(FAR struct adc_dev_s *dev)
  *
  ****************************************************************************/
 
-static void adc_shutdown(FAR struct adc_dev_s *dev)
+static void sam_adc_shutdown(FAR struct adc_dev_s *dev)
 {
   FAR struct sam_adc_s *priv = (FAR struct sam_adc_s *)dev->ad_priv;
 
@@ -203,14 +319,14 @@ static void adc_shutdown(FAR struct adc_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: adc_rxint
+ * Name: sam_adc_rxint
  *
  * Description:
  *   Call to enable or disable RX interrupts
  *
  ****************************************************************************/
 
-static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
+static void sam_adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 {
   FAR struct sam_adc_s *priv = (FAR struct sam_adc_s *)dev->ad_priv;
 
@@ -226,14 +342,14 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 }
 
 /****************************************************************************
- * Name: adc_ioctl
+ * Name: sam_adc_ioctl
  *
  * Description:
  *  All ioctl calls will be routed through this method
  *
  ****************************************************************************/
 
-static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
+static int sam_adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
   /* No ioctl commands supported */
 
@@ -241,14 +357,14 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: adc_interrupt
+ * Name: sam_adc_interrupt
  *
  * Description:
  *   ADC interrupt handler
  *
  ****************************************************************************/
 
-static int adc_interrupt(int irq, void *context)
+static int sam_adc_interrupt(int irq, void *context)
 {
   FAR struct sam_adc_s *priv = (FAR struct sam_adc_s *)g_adcdev.ad_priv;
   uint32_t regval;
@@ -273,8 +389,22 @@ static int adc_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *sam_adcinitialize(void)
+FAR struct adc_dev_s *sam_adc_initialize(void)
 {
+  /* Enable the ADC peripheral clock*/
+
+  sam_adc_enableclk();
+
+  /* Reset the ADC controller */
+
+  sam_adc_putreg(priv, SAM_ADC_CR, ADC_CR_SWRST);
+
+  /* Reset Mode Register */
+
+  sam_adc_putreg(priv, SAM_ADC_MR, 0);
+
+  /* Return a pointer to the device structure */
+
   return &g_adcdev;
 }
 
