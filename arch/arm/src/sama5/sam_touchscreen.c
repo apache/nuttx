@@ -94,7 +94,7 @@ enum sam_contact_3
   CONTACT_UP,                   /* Contact lost */
 };
 
-/* This structure describes the results of one ADS7843E sample */
+/* This structure describes the results of one touchscreen sample */
 
 struct sam_sample_s
 {
@@ -105,11 +105,11 @@ struct sam_sample_s
   uint16_t y;                   /* Measured Y position */
 };
 
-/* This structure describes the state of one ADS7843E driver instance */
+/* This structure describes the state of one touchscreen driver instance */
 
 struct sam_dev_s
 {
-  uint8_t nwaiters;             /* Number of threads waiting for ADS7843E data */
+  uint8_t nwaiters;             /* Number of threads waiting for touchscreen data */
   uint8_t id;                   /* Current touch point ID */
   volatile bool penchange;      /* An unreported event is buffered */
   uint16_t threshx;             /* Thresholding X value */
@@ -117,6 +117,7 @@ struct sam_dev_s
   sem_t devsem;                 /* Manages exclusive access to this structure */
   sem_t waitsem;                /* Used to wait for the availability of data */
 
+  struct adc_dev_s *dev;        /* ADC device handle */
   struct work_s work;           /* Supports the interrupt handling "bottom half" */
   struct sam_sample_s sample;   /* Last sampled touch point data */
   WDOG_ID wdog;                 /* Poll the position while the pen is down */
@@ -127,7 +128,7 @@ struct sam_dev_s
    */
 
 #ifndef CONFIG_DISABLE_POLL
-  struct pollfd *fds[CONFIG_ADS7843E_NPOLLWAITERS];
+  struct pollfd *fds[CONFIG_SAMA5_TSD_NPOLLWAITERS];
 #endif
 };
 
@@ -198,14 +199,14 @@ static void sam_notify(FAR struct sam_dev_s *priv)
 
   if (priv->nwaiters > 0)
     {
-      /* After posting this semaphore, we need to exit because the ADS7843E
+      /* After posting this semaphore, we need to exit because the touchscreen
        * is no longer available.
        */
 
       sem_post(&priv->waitsem);
     }
 
-  /* If there are threads waiting on poll() for ADS7843E data to become available,
+  /* If there are threads waiting on poll() for touchscreen data to become available,
    * then wake them up now.  NOTE: we wake up all waiting threads because we
    * do not know that they are going to do.  If they all try to read the data,
    * then some make end up blocking after all.
@@ -242,7 +243,7 @@ static int sam_sample(FAR struct sam_dev_s *priv,
 
   flags = irqsave();
 
-  /* Is there new ADS7843E sample data available? */
+  /* Is there new touchscreen sample data available? */
 
   if (priv->penchange)
     {
@@ -368,10 +369,11 @@ static int sam_schedule(FAR struct sam_dev_s *priv)
 {
   int ret;
 
-  /* Disable further interrupts.  touchscreen ADC interrupts will be re-enabled
-   * after the worker thread executes.
+  /* Disable further touchscreen interrupts.  Touchscreen interrupts will be
+   * re-enabled after the worker thread executes.
    */
-#warning "Missing logic"
+
+  sam_adc_putreg32(priv->dev, SAM_ADC_IDR, ADC_TSD_INTS);
 
   /* Disable the watchdog timer.  It will be re-enabled in the worker thread
    * while the pen remains down.
@@ -545,19 +547,16 @@ static void sam_bottomhalf(FAR void *arg)
   priv->sample.id = priv->id;
   priv->penchange = true;
 
-  /* Notify any waiters that new ADS7843E data is available */
+  /* Notify any waiters that new touchscreen data is available */
 
   sam_notify(priv);
 
-  /* Exit, re-enabling ADS7843E interrupts */
+  /* Exit, re-enabling touchscreen interrupts */
 
 ignored:
+  /* Re-enable touchscreen interrupts. */
 
-  /* Re-enable the PENIRQ interrupts */
-#warning Missing logic
-
-  /* Re-enable the PENIRQ interrupt at the MCU's interrupt controller */
-#warning Missing logic
+  sam_adc_putreg32(priv->dev, SAM_ADC_IER, ADC_TSD_INTS);
 
   /* Release our lock on the state structure */
 
@@ -658,7 +657,7 @@ static ssize_t sam_read(FAR struct file *filep, FAR char *buffer, size_t len)
         }
     }
 
-  /* In any event, we now have sampled ADS7843E data that we can report
+  /* In any event, we now have sampled touchscreen data that we can report
    * to the caller.
    */
 
@@ -870,9 +869,9 @@ errout:
  *
  ****************************************************************************/
 
-int sam_tsd_register(int minor)
+int sam_tsd_register(struct adc_dev_s *dev, int minor)
 {
-  FAR struct sam_dev_s *priv = &g_tsd;
+  struct sam_dev_s *priv = &g_tsd;
   char devname[DEV_NAMELEN];
   int ret;
 
@@ -880,11 +879,12 @@ int sam_tsd_register(int minor)
 
   /* Debug-only sanity checks */
 
-  DEBUGASSERT(minor >= 0 && minor < 100);
+  DEBUGASSERT(dev && minor >= 0 && minor < 100);
 
   /* Initialize the touchscreen device driver instance */
 
   memset(priv, 0, sizeof(struct sam_dev_s));
+  priv->dev     = dev;               /* Save the ADC device handle */
   priv->wdog    = wd_create();       /* Create a watchdog timer */
   priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
   priv->threshy = INVALID_THRESHOLD; /* Initialize thresholding logic */
@@ -945,20 +945,25 @@ errout_with_priv:
  *
  * Returned Value:
  *   None
- * 
+ *
  ****************************************************************************/
 
 void sam_tsd_interrupt(void)
 {
-  FAR struct sam_dev_s *priv = &g_tsd;
+  struct sam_dev_s *priv = &g_tsd;
   int ret;
+
+  /* Disable further touchscreen interrupts */
+
+  sam_adc_putreg32(priv->dev, SAM_ADC_IDR, ADC_TSD_INTS);
 
   /* Schedule sampling to occur on the worker thread */
 
   ret = sam_schedule(priv);
-
-  /* Clear any pending interrupts and return success */
-#warning Missing logic
+  if (ret < 0)
+    {
+      idbg("ERROR: sam_schedule failed: %d\n", ret);
+    }
   return ret;
 }
 

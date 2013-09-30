@@ -50,6 +50,40 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_SAMA5_ADC_REGDEBUG
+#endif
+
+/* ADC channels 0-3 or 0-4 are not available to the ADC driver if touchscreen
+ * support is enabled.
+ */
+
+#ifdef CONFIG_SAMA5_TOUCHSCREEN
+#  undef CONFIG_SAMA5_ADC_CHAN0
+#  undef CONFIG_SAMA5_ADC_CHAN1
+#  undef CONFIG_SAMA5_ADC_CHAN2
+#  undef CONFIG_SAMA5_ADC_CHAN3
+#  ifdef CONFIG_SAMA5_TOUCHSCREEN_5WIRE
+#    undef CONFIG_SAMA5_ADC_CHAN4
+#  endif
+#endif
+
+/* Do we have any ADC channels enabled?  If not, then the ADC driver may
+ * still need to exist to support the touchscreen.
+ */
+
+#undef SAMA5_ADC_HAVE_CHANNELS
+#if defined(CONFIG_SAMA5_ADC_CHAN0) || defined(CONFIG_SAMA5_ADC_CHAN1) || \
+    defined(CONFIG_SAMA5_ADC_CHAN2) || defined(CONFIG_SAMA5_ADC_CHAN3) || \
+    defined(CONFIG_SAMA5_ADC_CHAN4) || defined(CONFIG_SAMA5_ADC_CHAN5) || \
+    defined(CONFIG_SAMA5_ADC_CHAN6) || defined(CONFIG_SAMA5_ADC_CHAN7) || \
+    defined(CONFIG_SAMA5_ADC_CHAN8) || defined(CONFIG_SAMA5_ADC_CHAN9) || \
+    defined(CONFIG_SAMA5_ADC_CHAN10) || defined(CONFIG_SAMA5_ADC_CHAN11)
+#  define SAMA5_ADC_HAVE_CHANNELS 1
+#elif !defined(CONFIG_SAMA5_TOUCHSCREEN)
+#  error "No ADC channels nor touchscreen"
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -87,6 +121,35 @@ FAR struct adc_dev_s *sam_adcinitialize(void);
 /****************************************************************************
  * Interfaces exported from the ADC to the touchscreen driver
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_adc_getreg
+ *
+ * Description:
+ *  Read any 32-bit register using an absolute address.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_ADC_REGDEBUG
+uint32_t sam_adc_getreg(FAR struct adc_dev_s *, uintptr_t address)
+#else
+#  define sam_adc_getreg(handle,addr) getreg32(addr)
+#endif
+
+/****************************************************************************
+ * Name: sam_adc_putreg
+ *
+ * Description:
+ *  Write to any 32-bit register using an absolute address.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_ADC_REGDEBUG
+void sam_adc_putreg(FAR struct adc_dev_s *dev, uintptr_t address,
+                    uint32_t regval)
+#else
+#  define sam_adc_putreg(handle,addr,val) putreg32(val,addr)
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
