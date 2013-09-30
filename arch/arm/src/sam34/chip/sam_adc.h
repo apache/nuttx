@@ -33,8 +33,8 @@
  *
  ****************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM_CHIP_SAM_ADC_H
-#define __ARCH_ARM_SRC_SAM_CHIP_SAM_ADC_H
+#ifndef __ARCH_ARM_SRC_SAM34_CHIP_SAM_ADC_H
+#define __ARCH_ARM_SRC_SAM34_CHIP_SAM_ADC_H
 
 /****************************************************************************************
  * Included Files
@@ -83,11 +83,11 @@
 #define SAM_ADC12B_CHDR            (SAM_ADC12B_BASE+SAM_ADC_CHDR_OFFSET)
 #define SAM_ADC12B_CHSR            (SAM_ADC12B_BASE+SAM_ADC_CHSR_OFFSET)
 #define SAM_ADC12B_SR              (SAM_ADC12B_BASE+SAM_ADC_SR_OFFSET)
-#define SAM_ADC12B_LCDR_           (SAM_ADC12B_BASE+SAM_ADC_LCDR_OFFSET)
+#define SAM_ADC12B_LCDR            (SAM_ADC12B_BASE+SAM_ADC_LCDR_OFFSET)
 #define SAM_ADC12B_IER             (SAM_ADC12B_BASE+SAM_ADC_IER_OFFSET)
 #define SAM_ADC12B_IDR             (SAM_ADC12B_BASE+SAM_ADC_IDR_OFFSET)
 #define SAM_ADC12B_IMR             (SAM_ADC12B_BASE+SAM_ADC_IMR_OFFSET)
-#define SAM_ADC12B_CDR(n))         (SAM_ADC12B_BASE+SAM_ADC_CDR_OFFSET(n))
+#define SAM_ADC12B_CDR(n)          (SAM_ADC12B_BASE+SAM_ADC_CDR_OFFSET(n))
 #define SAM_ADC12B_CDR0            (SAM_ADC12B_BASE+SAM_ADC_CDR0_OFFSET)
 #define SAM_ADC12B_CDR1            (SAM_ADC12B_BASE+SAM_ADC_CDR1_OFFSET)
 #define SAM_ADC12B_CDR2            (SAM_ADC12B_BASE+SAM_ADC_CDR2_OFFSET)
@@ -109,7 +109,7 @@
 #define SAM_ADC_IER                (SAM_ADC_BASE+SAM_ADC_IER_OFFSET)
 #define SAM_ADC_IDR                (SAM_ADC_BASE+SAM_ADC_IDR_OFFSET)
 #define SAM_ADC_IMR                (SAM_ADC_BASE+SAM_ADC_IMR_OFFSET)
-#define SAM_ADC_CDR(n))            (SAM_ADC_BASE+SAM_ADC_CDR_OFFSET(n))
+#define SAM_ADC_CDR(n)             (SAM_ADC_BASE+SAM_ADC_CDR_OFFSET(n))
 #define SAM_ADC_CDR0               (SAM_ADC_BASE+SAM_ADC_CDR0_OFFSET)
 #define SAM_ADC_CDR1               (SAM_ADC_BASE+SAM_ADC_CDR1_OFFSET)
 #define SAM_ADC_CDR2               (SAM_ADC_BASE+SAM_ADC_CDR2_OFFSET)
@@ -135,10 +135,10 @@
 #define ADC_MR_SLEEP               (1 << 5)  /* Bit 5:  Sleep Mode */
 #define ADC_MR_PRESCAL_SHIFT       (8)       /* Bits 8-15: Prescaler Rate Selection */
 #define ADC_MR_PRESCAL_MASK        (0xff << ADC_MR_PRESCAL_SHIFT)
-#define ADB12B_MRSTARTUP_SHIFT     (16)      /* Bits 16-23: Start Up Time (ADC12B) */
-#define ADB12B_MRSTARTUP_MASK      (0xff << ADB12B_MRSTARTUP_SHIFT
-#define ADB10B_MRSTARTUP_SHIFT     (16)      /* Bits 16-22: Start Up Time (ADC10B) */
-#define ADB10B_MRSTARTUP_MASK      (0x7f << ADB10B_MRSTARTUP_SHIFT)
+#define ADB12B_MR_STARTUP_SHIFT    (16)      /* Bits 16-23: Start Up Time (ADC12B) */
+#define ADB12B_MR_STARTUP_MASK     (0xff << ADB12B_MR_STARTUP_SHIFT
+#define ADB10B_MR_STARTUP_SHIFT    (16)      /* Bits 16-22: Start Up Time (ADC10B) */
+#define ADB10B_MR_STARTUP_MASK     (0x7f << ADB10B_MR_STARTUP_SHIFT)
 #define ADC_MR_SHTIM_SHIFT         (24)      /* Bits 24-27: Sample & Hold Time */
 #define ADC_MR_SHTIM_MASK          (15 << ADC_MR_SHTIM_SHIFT)
 
@@ -148,14 +148,14 @@
  */
 
 #define ADC_CH(n)                  (1 << (n))
-#define ADC_CH0                    (1 << 0)  /* Bit 0:  Channel x Enable */
-#define ADC_CH1                    (1 << 1)  /* Bit 1:  Channel x Enable */
-#define ADC_CH2                    (1 << 2)  /* Bit 2:  Channel x Enable */
-#define ADC_CH3                    (1 << 3)  /* Bit 3:  Channel x Enable */
-#define ADC_CH4                    (1 << 4)  /* Bit 4:  Channel x Enable */
-#define ADC_CH5                    (1 << 5)  /* Bit 5:  Channel x Enable */
-#define ADC_CH6                    (1 << 6)  /* Bit 6:  Channel x Enable */
-#define ADC_CH7                    (1 << 7)  /* Bit 7:  Channel x Enable */
+#define ADC_CH0                    (1 << 0)  /* Bit 0:  Channel 0 Enable */
+#define ADC_CH1                    (1 << 1)  /* Bit 1:  Channel 1 Enable */
+#define ADC_CH2                    (1 << 2)  /* Bit 2:  Channel 2 Enable */
+#define ADC_CH3                    (1 << 3)  /* Bit 3:  Channel 3 Enable */
+#define ADC_CH4                    (1 << 4)  /* Bit 4:  Channel 4 Enable */
+#define ADC_CH5                    (1 << 5)  /* Bit 5:  Channel 5 Enable */
+#define ADC_CH6                    (1 << 6)  /* Bit 6:  Channel 6 Enable */
+#define ADC_CH7                    (1 << 7)  /* Bit 7:  Channel 7 Enable */
 
 /* ADC12B Analog Control Register (ADC12B only) */
 
@@ -186,7 +186,7 @@
 #define ADC_INT_EOC4               (1 << 4)  /* Bit 4:  End of Conversion 4 */
 #define ADC_INT_EOC5               (1 << 5)  /* Bit 5:  End of Conversion 5 */
 #define ADC_INT_EOC6               (1 << 6)  /* Bit 6:  End of Conversion 6 */
-#define ADC_INT_EOC7               (1 << 7)  /* Bit 0:  End of Conversion 7 */
+#define ADC_INT_EOC7               (1 << 7)  /* Bit 7:  End of Conversion 7 */
 #define ADC_INT_OVRE(n)            (1<<((n)+8))
 #define ADC_INT_OVRE0              (1 << 8)  /* Bit 8:  Overrun Error 0 */
 #define ADC_INT_OVRE1              (1 << 9)  /* Bit 9:  Overrun Error 1 */
@@ -233,4 +233,4 @@
  * Public Functions
  ****************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM_CHIP_SAM_ADC_H */
+#endif /* __ARCH_ARM_SRC_SAM34_CHIP_SAM_ADC_H */
