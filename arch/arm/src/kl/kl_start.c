@@ -94,7 +94,7 @@ const uint32_t g_idle_topstack = IDLE_STACK;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_DEBUG) && defined(HAVE_SERIAL_CONSOLE)
+#if defined(CONFIG_DEBUG)
 #  define showprogress(c) kl_lowputc((uint32_t)c)
 #else
 #  define showprogress(c)

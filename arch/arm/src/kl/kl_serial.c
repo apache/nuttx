@@ -60,6 +60,7 @@
 
 #include "kl_config.h"
 #include "kl_lowputc.h"
+#include "kl_lowgetc.h"
 #include "chip.h"
 #include "kl_gpio.h"
 #include "chip/kl_uart.h"
@@ -955,5 +956,19 @@ int up_putc(int ch)
   return ch;
 }
 
+/****************************************************************************
+ * Name: up_getc
+ *
+ * Description:
+ *   Provide priority, low-level access to support OS debug writes
+ *
+ ****************************************************************************/
+
+int up_getc(void)
+{
+  /* Check for LF */
+
+  return kl_lowgetc();
+}
 #endif /* USE_SERIALDRIVER */
 
