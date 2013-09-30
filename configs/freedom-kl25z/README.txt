@@ -336,6 +336,13 @@ Where <subdir> is one of the following:
        of an RS-232 serial console.  However, that configuration has not
        been impelmented as of this writing.
 
+  minnsh:
+  ------
+
+    This is a experiment to see just how small we can get a usable NSH
+    configuration.  This configuration has far fewer features than the nsh
+    configuration but is also a fraction of the size.
+
   nsh:
   ---
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
