@@ -236,10 +236,10 @@
 #  define ADC_SEQR2_USCH9(v)       ((uint32_t)(v) << ADC_SEQR2_USCH9_SHIFT)
 #define ADC_SEQR2_USCH10_SHIFT     (4) /* Bits 4-7: User sequence number 10 */
 #define ADC_SEQR2_USCH10_MASK      (15 << ADC_SEQR2_USCH10_SHIFT)
-#  define ADC_SEQR2_USCH2(v)       ((uint32_t)(v) << ADC_SEQR2_USCH10_SHIFT)
+#  define ADC_SEQR2_USCH10(v)      ((uint32_t)(v) << ADC_SEQR2_USCH10_SHIFT)
 #define ADC_SEQR2_USCH11_SHIFT     (8) /* Bits 8-11: User sequence number 11 */
 #define ADC_SEQR2_USCH11_MASK      (15 << ADC_SEQR2_USCH11_SHIFT)
-#  define ADC_SEQR2_USCH3(v)       ((uint32_t)(v) << ADC_SEQR2_USCH11_SHIFT)
+#  define ADC_SEQR2_USCH11(v)      ((uint32_t)(v) << ADC_SEQR2_USCH11_SHIFT)
 
 /* Channel Enable Register, Channel Disable Register, Channel
  * Status Register, ADC Channel Enable Register, ADC Channel Disable Register,
@@ -286,16 +286,16 @@
 #define ADC_INT_EOC7               (1 << 9)  /* Bit 9:  End of Conversion 9 */
 #define ADC_INT_EOC7               (1 << 10) /* Bit 10: End of Conversion 10 */
 #define ADC_INT_EOC7               (1 << 11) /* Bit 11: End of Conversion 11 */
-#define ADC_INT_XRDY               (1 << 20) /* Bit 20: Touchscreen Measure XPOS Ready Interrupt Enable */
-#define ADC_INT_YRDY               (1 << 21) /* Bit 21: Touchscreen Measure YPOS Ready Interrupt Enable */
-#define ADC_INT_PRDY               (1 << 22) /* Bit 22: Touchscreen Measure Pressure Ready Interrupt Enable */
+#define ADC_INT_XRDY               (1 << 20) /* Bit 20: TS Measure XPOS Ready Interrupt */
+#define ADC_INT_YRDY               (1 << 21) /* Bit 21: TS Measure YPOS Ready Interrupt */
+#define ADC_INT_PRDY               (1 << 22) /* Bit 22: TS Measure Pressure Ready Interrupt */
 #define ADC_INT_EOCAL              (1 << 23) /* Bit 23: End of Calibration Sequence */
-#define ADC_INT_DRDY               (1 << 24) /* Bit 24: Data Ready Interrupt Enable */
+#define ADC_INT_DRDY               (1 << 24) /* Bit 24: Data Ready Interrupt */
 #define ADC_INT_GOVRE              (1 << 25) /* Bit 25: General Overrun Error */
-#define ADC_INT_COMPE              (1 << 26) /* Bit 26: Comparison Event Interrupt Enable */
-#define ADC_INT_PEN                (1 << 29) /* Bit 29: Pen Contact Interrupt Enable */
-#define ADC_INT_NOPEN              (1 << 30) /* Bit 30: No Pen Contact Interrupt Enable */
-#define ADC_SR_PENS                (1 << 31) /* Bit 31: Pen detect Status(SR only) */
+#define ADC_INT_COMPE              (1 << 26) /* Bit 26: Comparison Event Interrupt */
+#define ADC_INT_PEN                (1 << 29) /* Bit 29: Pen Contact Interrupt */
+#define ADC_INT_NOPEN              (1 << 30) /* Bit 30: No Pen Contact Interrupt */
+#define ADC_SR_PENS                (1 << 31) /* Bit 31: Pen detect Status (SR only) */
 
 /* Overrun Status Register */
 
@@ -315,15 +315,18 @@
 
 /* Extended Mode Register */
 
-#define ADC_EMR_CMPMODE_SHIFT      (nn)      /* Bit nn-nn: Comparison Mode */
-0 LOW Generates an event when the converted data is lower than the low threshold of the window.
-1 HIGH Generates an event when the converted data is higher than the high threshold of the window.
-2 IN Generates an event when the converted data is in the comparison window.
-3 OUT Generates an event when the converted data is out of the comparison window.
-#define ADC_EMR_CMPSEL_SHIFT       (nn)       /* Bit nn-nn: Comparison Selected Channel */
-#define ADC_EMR_CMPALL             (1 << nn)  /* Bit nn: Compare All Channels */
-#define ADC_EMR_CMPFILTER_SHIFT    (nn)       /* Bit nn-nn: Compare Event Filtering */
-#define ADC_EMR_TAG                (1 << nn)  /* Bit nn: TAG of the ADC_LDCR register */
+#define ADC_EMR_CMPMODE_SHIFT      (0)      /* Bit 0-1: Comparison Mode */
+#define ADC_EMR_CMPMODE_MASK       (3 << ADC_EMR_CMPMODE_SHIFT)
+#  define ADC_EMR_CMPMODE_LOW      (0 << ADC_EMR_CMPMODE_SHIFT) /* Event when lower than low window threshold */
+#  define ADC_EMR_CMPMODE_HIGH     (1 << ADC_EMR_CMPMODE_SHIFT) /* Event when higher than high window threshold */
+#  define ADC_EMR_CMPMODE_IN       (2 << ADC_EMR_CMPMODE_SHIFT) /* Event when in comparison window */
+#  define ADC_EMR_CMPMODE_OUT      (3 << ADC_EMR_CMPMODE_SHIFT) /* Event when out of comparison window */
+#define ADC_EMR_CMPSEL_SHIFT       (4)       /* Bit 4-7: Comparison Selected Channel */
+#define ADC_EMR_CMPSEL_MASK        (15 << ADC_EMR_CMPSEL_SHIFT)
+#define ADC_EMR_CMPALL             (1 << 9)  /* Bit 9:  Compare All Channels */
+#define ADC_EMR_CMPFILTER_SHIFT    (12)      /* Bit 12-13: Compare Event Filtering */
+#define ADC_EMR_CMPFILTER_MASK     (3 << ADC_EMR_CMPFILTER_SHIFT)
+#define ADC_EMR_TAG                (1 << 24) /* Bit 24: TAG of the ADC_LDCR register */
 
 /* Channel Gain Register */
 
@@ -369,109 +372,125 @@
 
 /* Channel Offset Register */
 
-#define ADC_COR_OFF(n)           (1 << (n))
-#define ADC_COR_OFF0             (1 << 0)  /* Bit 0:  Offset for channel 0 */
-#define ADC_COR_OFF1             (1 << 1)  /* Bit 1:  Offset for channel 1 */
-#define ADC_COR_OFF2             (1 << 2)  /* Bit 2:  Offset for channel 2 */
-#define ADC_COR_OFF3             (1 << 3)  /* Bit 3:  Offset for channel 3 */
-#define ADC_COR_OFF4             (1 << 4)  /* Bit 4:  Offset for channel 4 */
-#define ADC_COR_OFF5             (1 << 5)  /* Bit 5:  Offset for channel 5 */
-#define ADC_COR_OFF6             (1 << 6)  /* Bit 6:  Offset for channel 6 */
-#define ADC_COR_OFF7             (1 << 7)  /* Bit 7:  Offset for channel 7 */
-#define ADC_COR_OFF8             (1 << 8)  /* Bit 8:  Offset for channel 8 */
-#define ADC_COR_OFF9             (1 << 9)  /* Bit 9:  Offset for channel 9 */
-#define ADC_COR_OFF10            (1 << 10) /* Bit 10: Offset for channel 10 */
-#define ADC_COR_OFF11            (1 << 11) /* Bit 11: Offset for channel 11 */
-#define ADC_COR_DIFF(n)          (1 << ((n)+16))
-#define ADC_COR_DIFF0            (1 << 16)  /* Bit 16: Offset for channel 0 */
-#define ADC_COR_DIFF1            (1 << 17)  /* Bit 17: Offset for channel 1 */
-#define ADC_COR_DIFF2            (1 << 18)  /* Bit 18: Offset for channel 2 */
-#define ADC_COR_DIFF3            (1 << 19)  /* Bit 19: Offset for channel 3 */
-#define ADC_COR_DIFF4            (1 << 20)  /* Bit 20: Offset for channel 4 */
-#define ADC_COR_DIFF5            (1 << 21)  /* Bit 21: Offset for channel 5 */
-#define ADC_COR_DIFF6            (1 << 22)  /* Bit 22: Offset for channel 6 */
-#define ADC_COR_DIFF7            (1 << 23)  /* Bit 23: Offset for channel 7 */
-#define ADC_COR_DIFF8            (1 << 24)  /* Bit 24: Offset for channel 8 */
-#define ADC_COR_DIFF9            (1 << 25)  /* Bit 25: Offset for channel 9 */
-#define ADC_COR_DIFF10           (1 << 26)  /* Bit 26: Offset for channel 10 */
-#define ADC_COR_DIFF11           (1 << 27)  /* Bit 27: Offset for channel 11 */
+#define ADC_COR_OFF(n)             (1 << (n))
+#define ADC_COR_OFF0               (1 << 0)  /* Bit 0:  Offset for channel 0 */
+#define ADC_COR_OFF1               (1 << 1)  /* Bit 1:  Offset for channel 1 */
+#define ADC_COR_OFF2               (1 << 2)  /* Bit 2:  Offset for channel 2 */
+#define ADC_COR_OFF3               (1 << 3)  /* Bit 3:  Offset for channel 3 */
+#define ADC_COR_OFF4               (1 << 4)  /* Bit 4:  Offset for channel 4 */
+#define ADC_COR_OFF5               (1 << 5)  /* Bit 5:  Offset for channel 5 */
+#define ADC_COR_OFF6               (1 << 6)  /* Bit 6:  Offset for channel 6 */
+#define ADC_COR_OFF7               (1 << 7)  /* Bit 7:  Offset for channel 7 */
+#define ADC_COR_OFF8               (1 << 8)  /* Bit 8:  Offset for channel 8 */
+#define ADC_COR_OFF9               (1 << 9)  /* Bit 9:  Offset for channel 9 */
+#define ADC_COR_OFF10              (1 << 10) /* Bit 10: Offset for channel 10 */
+#define ADC_COR_OFF11              (1 << 11) /* Bit 11: Offset for channel 11 */
+#define ADC_COR_DIFF(n)            (1 << ((n)+16))
+#define ADC_COR_DIFF0              (1 << 16) /* Bit 16: Offset for channel 0 */
+#define ADC_COR_DIFF1              (1 << 17) /* Bit 17: Offset for channel 1 */
+#define ADC_COR_DIFF2              (1 << 18) /* Bit 18: Offset for channel 2 */
+#define ADC_COR_DIFF3              (1 << 19) /* Bit 19: Offset for channel 3 */
+#define ADC_COR_DIFF4              (1 << 20) /* Bit 20: Offset for channel 4 */
+#define ADC_COR_DIFF5              (1 << 21) /* Bit 21: Offset for channel 5 */
+#define ADC_COR_DIFF6              (1 << 22) /* Bit 22: Offset for channel 6 */
+#define ADC_COR_DIFF7              (1 << 23) /* Bit 23: Offset for channel 7 */
+#define ADC_COR_DIFF8              (1 << 24) /* Bit 24: Offset for channel 8 */
+#define ADC_COR_DIFF9              (1 << 25) /* Bit 25: Offset for channel 9 */
+#define ADC_COR_DIFF10             (1 << 26) /* Bit 26: Offset for channel 10 */
+#define ADC_COR_DIFF11             (1 << 27) /* Bit 27: Offset for channel 11 */
 
 /* Channel Data Register */
 
-#define ADC_CDR_DATA_SHIFT       (0)       /* Bits 0-11: Converted Data */
-#define ADC_CDR_DATA_MASK        (0xfff << ADC_CDR_DATA_SHIFT)
+#define ADC_CDR_DATA_SHIFT         (0)       /* Bits 0-11: Converted Data */
+#define ADC_CDR_DATA_MASK          (0xfff << ADC_CDR_DATA_SHIFT)
 
 /* Compare Window Register */
 
-#define ADC_CWR_LOWTHRES_SHIFT   (nn)      /* Bit nn-nn: Low Threshold */
-#define ADC_CWR_HIGHTHRES_SHIFT  (nn)      /* Bit nn-nn: High Threshold */
+#define ADC_CWR_LOWTHRES_SHIFT     (0)      /* Bit 0-11: Low Threshold */
+#define ADC_CWR_LOWTHRES_MASK      (0xfff << ADC_CWR_LOWTHRES_SHIFT)
+#define ADC_CWR_HIGHTHRES_SHIFT    (16)     /* Bit 16-27: High Threshold */
+#define ADC_CWR_HIGHTHRES_MASK     (0xfff << ADC_CWR_HIGHTHRES_SHIFT)
 
 /* Analog Control Register */
 
-#define ADC_ACR_PENDETSENS_SHIFT (0)       /* Bits 0-1: Pen Detection Sensitivity */
-#define ADC_ACR_PENDETSENS_MASK  (3 << ADC_ACR_PENDETSENS_SHIFT)
-#  define ADC_ACR_PENDETSENS(n)  ((uint32_t)(n) << ADC_ACR_PENDETSENS_SHIFT)
+#define ADC_ACR_PENDETSENS_SHIFT   (0)       /* Bits 0-1: Pen Detection Sensitivity */
+#define ADC_ACR_PENDETSENS_MASK    (3 << ADC_ACR_PENDETSENS_SHIFT)
+#  define ADC_ACR_PENDETSENS(n)    ((uint32_t)(n) << ADC_ACR_PENDETSENS_SHIFT)
 
 /* Touchscreen Mode Register */
 
-#define ADC_TSMR_TSMODE_SHIFT    (nn)       /* Bit nn-nn: Touchscreen Mode */
-0 NONE No Touchscreen
-1 4_WIRE_NO_PM 4-wire Touchscreen without pressure measurement */
-2 4_WIRE 4-wire Touchscreen with pressure measurement */
-3 5_WIRE 5-wire Touchscreen */
-#define ADC_TSMR_TSAV_SHIFT      (nn)       /* Bit nn-nn: Touchscreen Average */
-0 NO_FILTER No Filtering. Only one ADC conversion per measure
-1 AVG2CONV Averages 2 ADC conversions
-2 AVG4CONV Averages 4 ADC conversions
-3 AVG8CONV Averages 8 ADC conversions
-#define ADC_TSMR_TSFREQ_SHIFT    (nn)       /* Bit nn-nn: Touchscreen Frequency */
-#define ADC_TSMR_TSSCTIM_SHIFT   (nn)       /* Bit nn-nn: Touchscreen Switches Closure Time */
-#define ADC_TSMR_NOTSDMA         (1 << nn)  /* Bit nn: No TouchScreen DMA */
-#define ADC_TSMR_PENDET          (1 << nn)  /* Bit nn: Pen Contact Detection Enable */
-#define ADC_TSMR_PENDBC_SHIFT    (nn)       /* Bit nn-nn: Pen Detect Debouncing Period */
+#define ADC_TSMR_TSMODE_SHIFT      (0)       /* Bit 0-1: Touchscreen Mode */
+#define ADC_TSMR_TSMODE_MASK       (3 << ADC_TSMR_TSMODE_SHIFT)
+#  define ADC_TSMR_TSMODE_NONE     (0 << ADC_TSMR_TSMODE_SHIFT) /* No Touchscreen */
+#  define ADC_TSMR_TSMODE_4WIRENPM (1 << ADC_TSMR_TSMODE_SHIFT) /* 4-wire TS w/o pressure measurement */
+#  define ADC_TSMR_TSMODE_4WIRE    (2 << ADC_TSMR_TSMODE_SHIFT) /* 4-wire TS w/ pressure measurement */
+#  define ADC_TSMR_TSMODE_5WIRE    (3 << ADC_TSMR_TSMODE_SHIFT) /* 5-wire Touchscreen */
+#define ADC_TSMR_TSAV_SHIFT        (4)       /* Bit 4-5: Touchscreen Average */
+#define ADC_TSMR_TSAV_MASK         (3 << ADC_TSMR_TSAV_SHIFT)
+#  define ADC_TSMR_TSAV_ NFILTER   (0 << ADC_TSMR_TSAV_SHIFT) /* No Filtering */
+#  define ADC_TSMR_TSAV_ 2CONV     (1 << ADC_TSMR_TSAV_SHIFT) /* Average 2 ADC conversions */
+#  define ADC_TSMR_TSAV_ 4CONV     (2 << ADC_TSMR_TSAV_SHIFT) /* Average 4 ADC conversions */
+#  define ADC_TSMR_TSAV_ 8CONV     (3 << ADC_TSMR_TSAV_SHIFT) /* Averages 8 ADC conversions */
+#define ADC_TSMR_TSFREQ_SHIFT      (8)       /* Bit 8-11: Touchscreen Frequency */
+#define ADC_TSMR_TSFREQ_MASK       (15 << ADC_TSMR_TSFREQ_SHIFT)
+#  define ADC_TSMR_TSFREQ(n)       ((uint32_t)(n) << ADC_TSMR_TSFREQ_SHIFT)
+#define ADC_TSMR_TSSCTIM_SHIFT     (16)      /* Bit 16-19: Touchscreen Switches Closure Time */
+#define ADC_TSMR_TSSCTIM_MASK      (15 << ADC_TSMR_TSSCTIM_SHIFT)
+#  define ADC_TSMR_TSSCTIM(n)      ((uint32_t)(n) << ADC_TSMR_TSSCTIM_SHIFT)
+#define ADC_TSMR_NOTSDMA           (1 << 22) /* Bit 22: No TouchScreen DMA */
+#define ADC_TSMR_PENDET            (1 << 24) /* Bit 24: Pen Contact Detection Enable */
+#define ADC_TSMR_PENDBC_SHIFT      (28)       /* Bit 28-31: Pen Detect Debouncing Period */
+#define ADC_TSMR_PENDBC_MASK       (15 << ADC_TSMR_PENDBC_SHIFT)
+#  define ADC_TSMR_PENDBC(n)       ((uint32_t)(n) << ADC_TSMR_PENDBC_SHIFT)
 
 /* Touchscreen X Position Register */
 
-#define ADC_XPOSR_XPOS_SHIFT     (nn)       /* Bit nn-nn: X Position */
-#define ADC_XPOSR_XSCALE_SHIFT   (nn)       /* Bit nn-nn: Scale of XPOS */
+#define ADC_XPOSR_XPOS_SHIFT       (0)       /* Bit 0-11: X Position */
+#define ADC_XPOSR_XPOS_MASK        (0xfff << ADC_XPOSR_XPOS_SHIFT)
+#define ADC_XPOSR_XSCALE_SHIFT     (16)      /* Bit 16-27: Scale of XPOS */
+#define ADC_XPOSR_XSCALE_MASK      (0xfff << ADC_XPOSR_XSCALE_SHIFT)
 
 /* Touchscreen Y Position Register */
-#define ADC_YPOSR_
 
-#define ADC_YPOSR_YPOS_SHIFT     (nn)       /* Bit nn-nn: Y Position */
-#define ADC_YPOSR_YSCALE_SHIFT   (nn)       /* Bit nn-nn: Scale of YPOS */
-
+#define ADC_YPOSR_YPOS_SHIFT       (0)       /* Bit 0-11: Y Position */
+#define ADC_YPOSR_YPOS_MASK        (0xfff << ADC_YPOSR_YPOS_SHIFT)
+#define ADC_YPOSR_YSCALE_SHIFT     (16)      /* Bit 16-27: Scale of YPOS */
+#define ADC_YPOSR_YSCALE_MASK      (0xfff << ADC_YPOSR_YSCALE_SHIFT)
+0xfff
 /* Touchscreen Pressure Register */
 
-#define ADC_PRESSR_Z1_SHIFT      (nn)       /* Bit nn-nn: Data of Z1 Measurement */
-#define ADC_PRESSR_Z2_SHIFT      (nn)       /* Bit nn-nn: Data of Z2 Measuremen */
+#define ADC_PRESSR_Z1_SHIFT        (0)       /* Bit 0-11: Data of Z1 Measurement */
+#define ADC_PRESSR_Z1_MASK         (0xfff << ADC_PRESSR_Z1_SHIFT)
+#define ADC_PRESSR_Z2_SHIFT        (16)      /* Bit 16-27: Data of Z2 Measuremen */
+#define ADC_PRESSR_Z2_MASK         (0xfff << ADC_PRESSR_Z2_SHIFT)
 
 /* Trigger Register */
 
-#define ADC_TRGR_TRGMOD_SHIFT    (nn)       /* Bit nn-nn: Trigger Mode */
-0 NO_TRIGGER No trigger, only software trigger can start conversions */
-1 EXT_TRIG_RISE External Trigger Rising Edge */
-2 EXT_TRIG_FALL External Trigger Falling Edge */
-3 EXT_TRIG_ANY External Trigger Any Edge */
-4 PEN_TRIG Pen Detect Trigger (shall be selected only if PENDET is set and TSAMOD = Touchscreen
-only mode) */
-5 PERIOD_TRIG Periodic Trigger (TRGPER shall be initiated appropriately) */
-6 CONTINUOUS Continuous Mode */
-7 – Reserved
-#define ADC_TRGR_TRGPER_SHIFT    (nn)       /* Bit nn-nn: Trigger Period */
+#define ADC_TRGR_TRGMOD_SHIFT      (0)       /* Bit 0-2: Trigger Mode */
+#define ADC_TRGR_TRGMOD_MASK       (7 << ADC_TRGR_TRGMOD_SHIFT)
+#  define ADC_TRGR_TRGMOD_NOTRIG   (0 << ADC_TRGR_TRGMOD_SHIFT) /* No trigger */
+#  define ADC_TRGR_TRGMOD_EXTRISE  (1 << ADC_TRGR_TRGMOD_SHIFT) /* External Trigger Rising Edge */
+#  define ADC_TRGR_TRGMOD_EXTFALL  (2 << ADC_TRGR_TRGMOD_SHIFT) /* External Trigger Falling Edge */
+#  define ADC_TRGR_TRGMOD_EXTBOTH  (3 << ADC_TRGR_TRGMOD_SHIFT) /* External Trigger Any Edge */
+#  define ADC_TRGR_TRGMOD_PEN      (4 << ADC_TRGR_TRGMOD_SHIFT) /* Pen Detect Trigger */
+#  define ADC_TRGR_TRGMOD_PERIOD   (5 << ADC_TRGR_TRGMOD_SHIFT) /* Periodic Trigger */
+#  define ADC_TRGR_TRGMOD_CONT     (6 << ADC_TRGR_TRGMOD_SHIFT) /* Continuous Mode */
+#define ADC_TRGR_TRGPER_SHIFT      (16)      /* Bit 16-31: Trigger Period */
+#define ADC_TRGR_TRGPER_MASK       (0xffff << ADC_TRGR_TRGPER_SHIFT)
+#  define ADC_TRGR_TRGPER(n)       ((uint32_t)(n) << ADC_TRGR_TRGPER_SHIFT)
 
 /* Write Protect Mode Register */
 
-#define ADC_WPMR_WPEN            (1 << 0)  /* Bit 0:  Write Protect Enable */
-#define ADC_WPMR_WPKEY_SHIFT     (8)       /* Bits 8-31: Write Protect KEY */
-#define ADC_WPMR_WPKEY_MASK      (0x00ffffff << ADC_WPMR_WPKEY_SHIFT)
-#  define ADC_WPMR_WPKEY         (0x00414443 << ADC_WPMR_WPKEY_SHIFT)
+#define ADC_WPMR_WPEN              (1 << 0)  /* Bit 0:  Write Protect Enable */
+#define ADC_WPMR_WPKEY_SHIFT       (8)       /* Bits 8-31: Write Protect KEY */
+#define ADC_WPMR_WPKEY_MASK        (0x00ffffff << ADC_WPMR_WPKEY_SHIFT)
+#  define ADC_WPMR_WPKEY           (0x00414443 << ADC_WPMR_WPKEY_SHIFT)
 
 /* Write Protect Status Register */
 
-#define ADC_WPSR_WPVS            (1 << 0)  /* Bit 0:  Write Protect Violation Status */
-#define ADC_WPSR_WPVSRC_SHIFT    (8)       /* Bits 8-23: Write Protect Violation Source */
-#define ADC_WPSR_WPVSRC_MASK     (0xffff << ADC_WPSR_WPVSRC_SHIFT)
+#define ADC_WPSR_WPVS              (1 << 0)  /* Bit 0:  Write Protect Violation Status */
+#define ADC_WPSR_WPVSRC_SHIFT      (8)       /* Bits 8-23: Write Protect Violation Source */
+#define ADC_WPSR_WPVSRC_MASK       (0xffff << ADC_WPSR_WPVSRC_SHIFT)
 
 /****************************************************************************************
  * Public Types
