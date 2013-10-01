@@ -99,12 +99,28 @@
 #define BOARD_PMC_MCKR_PLLADIV     PMC_MCKR_PLLADIV2
 #define BOARD_PMC_MCKR_MDIV        PMC_MCKR_MDIV_PCKDIV3
 
+/* ADC Configuration
+ *
+ * ADCClock = MCK / ((PRESCAL+1) * 2)
+ *
+ * Given:
+ *   MCK      = 132MHz
+ *   ADCClock = 8MHz
+ * Then:
+ *   PRESCAL  = 7.25
+ *
+ * PRESCAL=7 and MCK=132MHz yields ADC clock of 8.25MHz
+ */
+
+#define BOARD_ADC_PRESCAL          (7)
+
 /* Resulting frequencies */
 
 #define BOARD_MAINOSC_FREQUENCY    (12000000)  /* MAINOSC: 12MHz crystal on-board */
 #define BOARD_PLLA_FREQUENCY       (792000000) /* PLLACK:  66 * 12Mhz / 1 */
 #define BOARD_PCK_FREQUENCY        (396000000) /* CPU:     PLLACK / 2 / 1  */
 #define BOARD_MCK_FREQUENCY        (132000000) /* MCK:     PLLACK / 2 / 1 / 3 */
+#define BOARD_ADCCLK_FREQUENCY     (8250000)   /* ADCCLK:  MCK / ((7+1)*2) */
 
 #if defined(CONFIG_SAMA5_EHCI) || defined(CONFIG_SAMA5_OHCI) || \
     defined(CONFIG_SAMA5_UDPHS)
