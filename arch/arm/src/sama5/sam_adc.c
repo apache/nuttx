@@ -57,6 +57,7 @@
 
 #include "chip.h"
 #include "chip/sam_adc.h"
+#include "sam_dmac.h"
 #include "sam_adc.h"
 
 #if defined(CONFIG_SAMA5_ADC)
@@ -123,6 +124,19 @@
    SAMA5_CHAN6_ENABLE  || SAMA5_CHAN7_ENABLE  || SAMA5_CHAN8_ENABLE  || \
    SAMA5_CHAN9_ENABLE  || SAMA5_CHAN10_ENABLE || SAMA5_CHAN11_ENABLE)
 
+/* DMA configuration flags */
+
+#ifdef CONFIG_SAMA5_ADC_DMA
+#  define DMA_FLAGS \
+     DMACH_FLAG_FIFOCFG_LARGEST | \
+     ((SAM_IRQ_ADC << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF2 | \
+     DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
+     DMACH_FLAG_PERIPHWIDTH_16BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+     ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+     DMACH_FLAG_MEMWIDTH_16BITS | DMACH_FLAG_MEMINCREMENT | \
+     DMACH_FLAG_MEMCHUNKSIZE_1)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -133,6 +147,10 @@ struct sam_adc_s
 {
 #ifdef SAMA5_ADC_HAVE_CHANNELS
   struct adc_dev_s dev; /* The external via of the ADC device */
+
+#ifdef CONFIG_SAMA5_ADC_DMA
+  DMA_HANDLE dma;       /* Handle for DMA channel */
+#endif
 #endif
 
   /* Debug stuff */
@@ -153,6 +171,14 @@ struct sam_adc_s
 #if defined(CONFIG_SAMA5_ADC_REGDEBUG) && defined(CONFIG_DEBUG)
 static bool sam_adc_checkreg(struct sam_adc_s *priv, bool wr,
                              uint32_t regval, uintptr_t address);
+#endif
+
+/* DMA helper functions */
+
+#ifdef CONFIG_SAMA5_ADC_DMA
+static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result);
+static int  sam_adc_dmasetup(struct sam_adc_s *priv, FAR uint8_t *buffer,
+                             size_t buflen)
 #endif
 
 /* ADC interrupt handling */
@@ -207,6 +233,9 @@ static struct adc_dev_s g_adcdev =
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Register Operations
+ ****************************************************************************/
 /****************************************************************************
  * Name: sam_adc_checkreg
  *
@@ -264,6 +293,169 @@ static bool sam_adc_checkreg(struct sam_adc_s *priv, bool wr,
 #ifdef SAMA5_ADC_HAVE_CHANNELS
 
 /****************************************************************************
+ * DMA Helpers
+ ****************************************************************************/
+/****************************************************************************
+ * Name: sam_adc_dmacallback
+ *
+ * Description:
+ *   Called when HSMCI DMA completes
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_ADC_DMA
+static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result)
+{
+  struct sam_dev_s *priv = (struct sam_dev_s *)arg;
+#warning Missing logic
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_adc_dmasetup
+ *
+ * Description:
+ *   Setup to perform a read DMA.  If the processor supports a data cache,
+ *   then this method will also make sure that the contents of the DMA memory
+ *   and the data cache are coherent.  For read transfers this may mean
+ *   invalidating the data cache.
+ *
+ * Input Parameters:
+ *   dev    - An instance of the SDIO device interface
+ *   buffer - The memory to DMA from
+ *   buflen - The size of the DMA transfer in bytes
+ *
+ * Returned Value:
+ *   OK on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_ADC_DMA
+static int sam_adc_dmasetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+                            size_t buflen)
+{
+  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
+  uint32_t paddr;
+  uint32_t maddr;
+
+  DEBUGASSERT(priv != NULL && buffer != NULL && buflen > 0);
+  DEBUGASSERT(((uint32_t)buffer & 3) == 0);
+
+  /* Physical address of the ADC LCDR register and of the buffer location in
+   * RAM.
+   */
+
+  paddr = sam_physregaddr(SAM_ADC_LCDR);
+  maddr = sam_physramaddr((uintptr_t)buffer);
+
+  /* Configure the RX DMA */
+
+  sam_dmarxsetup(priv->dma, paddr, maddr, buflen);
+
+  /* Enable DMA handshaking */
+#warning Missing logic
+
+  /* Start the DMA */
+
+  sam_dmastart(priv->dma, sam_adc_dmacallback, priv);
+
+  /* Configure DMA-related interrupts */
+#warning Missing loic
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * ADC interrupt handling
+ ****************************************************************************/
+/****************************************************************************
+ * Name: sam_adc_endconversion
+ *
+ * Description:
+ *   End of conversion interrupt handler
+ *
+ ****************************************************************************/
+
+static void sam_adc_endconversion(struct sam_adc_s *priv, uint32_t pending)
+{
+  uint32_t regval;
+  int chan;
+
+  /* Check for the end of conversion event on each channel */
+
+  for (chan = 0; chan < SAM_ADC_NCHANNELS && pending != 0; chan++)
+    {
+      uint32_t bit = ADC_INT_EOC(chan);
+      if ((pending & bit) != 0)
+        {
+          /* Read the ADC sample and pass it to the upper half */
+
+          regval   = sam_adc_getreg(priv, SAM_ADC_CDR(chan));
+          ret      = adc_receive(&priv->dev, chan, regval & ADC_CDR_DATA_MASK);
+          pending &= ~bit;
+        }
+    }
+}
+
+#endif /* SAMA5_ADC_HAVE_CHANNELS */
+
+/****************************************************************************
+ * Name: sam_adc_interrupt
+ *
+ * Description:
+ *   ADC interrupt handler
+ *
+ ****************************************************************************/
+
+static int sam_adc_interrupt(int irq, void *context)
+{
+  struct sam_adc_s *priv = (struct sam_adc_s *)g_adcdev.ad_priv;
+  uint32_t isr;
+  uint32_t imr;
+  uint32_t pending;
+  uint32_t regval;
+
+  /* Get the set of unmasked, pending ADC interrupts */
+
+  isr     = sam_adc_getreg(priv, SAM_ADC_ISR);
+  imr     = sam_adc_getreg(priv, SAM_ADC_IMR);
+  pending = isr & imr;
+
+  /* Handle pending touchscreen interrupts */
+
+#ifdef CONFIG_SAMA5_TOUCHSCREEN
+  if ((pending & ADC_TSD_INTS) != 0)
+    {
+      /* Let the touchscreen handle its interrupts */
+
+      sam_tsd_interrupt(pending);
+      pending &= ~ADC_TSD_INTS;
+    }
+#endif
+
+#ifdef SAMA5_ADC_HAVE_CHANNELS
+  /* Check for end-of-conversion interrupts */
+
+  if ((pending & ADC_INT_EOCALL) != 0)
+    {
+      /* Let the touchscreen handle its interrupts */
+
+      sam_adc_endconversion(pending);
+      pending &= ~ADC_INT_EOCALL;
+    }
+#endif
+
+  /* Make sure that all interrupts were handled */
+
+  DEBUGASSERT(pending == 0);
+  return OK;
+}
+
+/****************************************************************************
+ * ADC methods
+ ****************************************************************************/
+/****************************************************************************
  * Name: sam_adc_reset
  *
  * Description:
@@ -277,6 +469,12 @@ static void sam_adc_reset(struct adc_dev_s *dev)
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
   irqstate_t flags;
   uint32_t regval;
+
+#ifdef CONFIG_SAMA5_ADC_DMA
+  /* Stop any ongoing DMA */
+
+  sam_dmastop(priv->dma);
+#endif
 
   /* Reset the ADC controller */
 
@@ -389,90 +587,6 @@ static int sam_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
- * Name: sam_adc_endconversion
- *
- * Description:
- *   End of conversion interrupt handler
- *
- ****************************************************************************/
-
-static void sam_adc_endconversion(struct sam_adc_s *priv, uint32_t pending)
-{
-  uint32_t regval;
-  int chan;
-
-  /* Check for the end of conversion event on each channel */
-
-  for (chan = 0; chan < SAM_ADC_NCHANNELS && pending != 0; chan++)
-    {
-      uint32_t bit = ADC_INT_EOC(chan);
-      if ((pending & bit) != 0)
-        {
-          /* Read the ADC sample and pass it to the upper half */
-
-          regval   = sam_adc_getreg(priv, SAM_ADC_CDR(chan));
-          ret      = adc_receive(&priv->dev, chan, regval & ADC_CDR_DATA_MASK);
-          pending &= ~bit;
-        }
-    }
-}
-
-#endif /* SAMA5_ADC_HAVE_CHANNELS */
-
-/****************************************************************************
- * Name: sam_adc_interrupt
- *
- * Description:
- *   ADC interrupt handler
- *
- ****************************************************************************/
-
-static int sam_adc_interrupt(int irq, void *context)
-{
-  struct sam_adc_s *priv = (struct sam_adc_s *)g_adcdev.ad_priv;
-  uint32_t regval;
-  struct sam_adc_s *priv = &g_adcpriv;
-  uint32_t isr;
-  uint32_t imr;
-  uint32_t pending;
-
-  /* Get the set of unmasked, pending ADC interrupts */
-
-  isr = sam_adc_getreg(priv, SAM_ADC_ISR);
-  imr = sam_adc_getreg(priv, SAM_ADC_IMR);
-  pending = isr & imr;
-
-  /* Handle pending touchscreen interrupts */
-
-#ifdef CONFIG_SAMA5_TOUCHSCREEN
-  if ((pending & ADC_TSD_INTS) != 0)
-    {
-      /* Let the touchscreen handle its interrupts */
-
-      sam_tsd_interrupt(pending);
-      pending &= ~ADC_TSD_INTS;
-    }
-#endif
-
-#ifdef SAMA5_ADC_HAVE_CHANNELS
-  /* Check for end-of-conversion interrupts */
-
-  if ((pending & ADC_INT_EOCALL) != 0)
-    {
-      /* Let the touchscreen handle its interrupts */
-
-      sam_adc_endconversion(pending);
-      pending &= ~ADC_INT_EOCALL;
-    }
-#endif
-
-  /* Make sure that all interrupts were handled */
-
-  DEBUGASSERT(pending == 0);
-  return OK;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -533,6 +647,13 @@ struct adc_dev_s *sam_adc_initialize(void)
 #endif
 #if 0
   sam_configpio(PIO_ADC_TRG);
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_DMA
+  /* Allocate a DMA channel */
+
+  priv->dma = sam_dmachannel(dmac, DMA_FLAGS);
+  DEBUGASSERT(priv->dma);
 #endif
 
   /* Reset the ADC controller */
