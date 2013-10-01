@@ -50,6 +50,7 @@
 #include <arch/board/board.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/analog/adc.h>
 
 #include "up_internal.h"
@@ -147,11 +148,13 @@ struct sam_adc_s
 {
 #ifdef SAMA5_ADC_HAVE_CHANNELS
   struct adc_dev_s dev; /* The external via of the ADC device */
-
+  uint32_t pending;     /* Pending EOC events */
 #ifdef CONFIG_SAMA5_ADC_DMA
   DMA_HANDLE dma;       /* Handle for DMA channel */
 #endif
+  struct work_s work;   /* Supports the interrupt handling "bottom half" */
 #endif
+  sem_t exclsem;        /* Supports exclusive access to the ADC interface */
 
   /* Debug stuff */
 
@@ -184,7 +187,8 @@ static int  sam_adc_dmasetup(struct sam_adc_s *priv, FAR uint8_t *buffer,
 /* ADC interrupt handling */
 
 #ifdef SAMA5_ADC_HAVE_CHANNELS
-static void sam_adc_endconversion(struct sam_adc_s *priv, uint32_t pending);
+static void sam_tsd_bottomhalf(void *arg);
+static int  sam_tsd_schedule(struct sam_tsd_s *priv, uint32_t pending);
 #endif
 static int  sam_adc_interrupt(int irq, void *context);
 
@@ -321,7 +325,7 @@ static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result)
  *   invalidating the data cache.
  *
  * Input Parameters:
- *   dev    - An instance of the SDIO device interface
+ *   priv   - An instance of the ADC device interface
  *   buffer - The memory to DMA from
  *   buflen - The size of the DMA transfer in bytes
  *
@@ -331,10 +335,9 @@ static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_ADC_DMA
-static int sam_adc_dmasetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+static int sam_adc_dmasetup(FAR struct sam_adc_s *priv, FAR uint8_t *buffer,
                             size_t buflen)
 {
-  struct sam_dev_s *priv = (struct sam_dev_s *)dev;
   uint32_t paddr;
   uint32_t maddr;
 
@@ -370,17 +373,39 @@ static int sam_adc_dmasetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  * ADC interrupt handling
  ****************************************************************************/
 /****************************************************************************
- * Name: sam_adc_endconversion
+ * Name: sam_tsd_bottomhalf
  *
  * Description:
- *   End of conversion interrupt handler
+ *   This function executes on the worker thread.  It is scheduled by
+ *   sam_tsd_interrupt whenever any enabled end-of-conversion event occurs.
+ *   All EOC interrupts are disabled when this function runs.  sam_tsd_bottomhalf
+ *   will re-enable EOC interrupts when it completes processing all pending
+ *   EOC events.
+ *
+ * Input Parameters
+ *   arg - The ADC private data structure cast to (void *)
+ * 
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-static void sam_adc_endconversion(struct sam_adc_s *priv, uint32_t pending)
+static void sam_tsd_bottomhalf(void *arg)
 {
+  struct sam_tsd_s *priv = (struct sam_tsd_s *)arg;
   uint32_t regval;
+  uint32_t pending;
   int chan;
+
+  ASSERT(priv != NULL);
+
+  /* Get the set of unmasked, pending ADC interrupts */
+
+  pending = priv->pending;
+
+  /* Get exclusive access to the driver data structure */
+
+  sam_adc_lock(priv->adc);
 
   /* Check for the end of conversion event on each channel */
 
@@ -396,8 +421,54 @@ static void sam_adc_endconversion(struct sam_adc_s *priv, uint32_t pending)
           pending &= ~bit;
         }
     }
+
+
+  /* Exit, re-enabling ADC interrupts */
+
+ignored:
+  /* Re-enable ADC interrupts. */
+
+  sam_adc_putreg32(priv->adc, SAM_ADC_IER, SAMA5_CHAN_ENABLE);
+
+  /* Release our lock on the ADC structure */
+
+  sem_adc_unlock(priv->adc);
 }
 
+/****************************************************************************
+ * Name: sam_tsd_schedule
+ ****************************************************************************/
+
+static int sam_tsd_schedule(struct sam_tsd_s *priv, uint32_t pending)
+{
+  int ret;
+
+  /* Disable further touchscreen interrupts.  Touchscreen interrupts will be
+   * re-enabled after the worker thread executes.
+   */
+
+  sam_adc_putreg32(priv->adc, SAM_ADC_IDR, ADC_INT_EOCALL);
+
+  /* Save the set of pending interrupts for the bottom half (in case any
+   * were cleared by reading the ISR.
+   */
+
+  priv->pending = pending.
+
+  /* Transfer processing to the worker thread.  Since touchscreen ADC interrupts are
+   * disabled while the work is pending, no special action should be required
+   * to protected the work queue.
+   */
+
+  DEBUGASSERT(priv->work.worker == NULL);
+  ret = work_queue(HPWORK, &priv->work, sam_tsd_bottomhalf, priv, 0);
+  if (ret != 0)
+    {
+      illdbg("Failed to queue work: %d\n", ret);
+    }
+
+  return OK;
+}
 #endif /* SAMA5_ADC_HAVE_CHANNELS */
 
 /****************************************************************************
@@ -439,9 +510,16 @@ static int sam_adc_interrupt(int irq, void *context)
 
   if ((pending & ADC_INT_EOCALL) != 0)
     {
-      /* Let the touchscreen handle its interrupts */
+      /* Schedule sampling to occur by the interrupt bottom half on the
+       * worker thread.
+       */
 
-      sam_adc_endconversion(pending);
+      ret = sam_tsd_schedule(priv, pending);
+      if (ret < 0)
+        {
+          idbg("ERROR: sam_tsd_schedule failed: %d\n", ret);
+        }
+
       pending &= ~ADC_INT_EOCALL;
     }
 #endif
@@ -649,6 +727,10 @@ struct adc_dev_s *sam_adc_initialize(void)
   sam_configpio(PIO_ADC_TRG);
 #endif
 
+  /* Initialize the ADC device data structure */
+
+  sem_init(&priv->exclsem,  0, 1);
+
 #ifdef CONFIG_SAMA5_ADC_DMA
   /* Allocate a DMA channel */
 
@@ -670,6 +752,44 @@ struct adc_dev_s *sam_adc_initialize(void)
 }
 
 /****************************************************************************
+ * Name: sam_adc_lock
+ *
+ * Description:
+ *   Get exclusive access to the ADC interface
+ *
+ ****************************************************************************/
+
+void sam_adc_lock(FAR struct sam_adc_s *priv)
+{
+  int ret;
+
+  do
+    {
+      ret = sem_wait(&priv->exclsem);
+
+      /* This should only fail if the wait was canceled by an signal
+       * (and the worker thread will receive a lot of signals).
+       */
+
+      DEBUGASSERT(ret == OK || errno == EINTR);
+    }
+  while (ret < 0);
+}
+
+/****************************************************************************
+ * Name: sam_adc_unlock
+ *
+ * Description:
+ *   Relinquish the lock on the ADC interface
+ *
+ ****************************************************************************/
+
+void sam_adc_unlock(FAR struct sam_adc_s *priv)
+{
+  sem_post(&priv->exclsem)
+}
+
+/****************************************************************************
  * Name: sam_adc_getreg
  *
  * Description:
@@ -678,9 +798,8 @@ struct adc_dev_s *sam_adc_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_ADC_REGDEBUG
-static uint32_t sam_adc_getreg(ADC_HANDLE handle, uintptr_t address)
+static uint32_t sam_adc_getreg(struct sam_adc_s *priv, uintptr_t address)
 {
-  struct sam_adc_s *priv = (struct sam_adc_s *)handle;
   uint32_t regval = getreg32(address);
 
   if (sam_adc_checkreg(priv, false, regval, address))
@@ -701,10 +820,8 @@ static uint32_t sam_adc_getreg(ADC_HANDLE handle, uintptr_t address)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_ADC_REGDEBUG
-void sam_adc_putreg(ADC_HANDLE handle, uintptr_t address, uint32_t regval)
+void sam_adc_putreg(struct sam_adc_s *priv, uintptr_t address, uint32_t regval)
 {
-  struct sam_adc_s *priv = (struct sam_adc_s *)handle;
-
   if (sam_adc_checkreg(priv, true, regval, address))
     {
       lldbg("%08x<-%08x\n", address, regval);

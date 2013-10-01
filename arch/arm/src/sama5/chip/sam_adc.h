@@ -432,12 +432,16 @@
 #  define ADC_TSMR_TSMODE_5WIRE    (3 << ADC_TSMR_TSMODE_SHIFT) /* 5-wire Touchscreen */
 #define ADC_TSMR_TSAV_SHIFT        (4)       /* Bit 4-5: Touchscreen Average */
 #define ADC_TSMR_TSAV_MASK         (3 << ADC_TSMR_TSAV_SHIFT)
-#  define ADC_TSMR_TSAV_ NFILTER   (0 << ADC_TSMR_TSAV_SHIFT) /* No Filtering */
-#  define ADC_TSMR_TSAV_ 2CONV     (1 << ADC_TSMR_TSAV_SHIFT) /* Average 2 ADC conversions */
-#  define ADC_TSMR_TSAV_ 4CONV     (2 << ADC_TSMR_TSAV_SHIFT) /* Average 4 ADC conversions */
-#  define ADC_TSMR_TSAV_ 8CONV     (3 << ADC_TSMR_TSAV_SHIFT) /* Averages 8 ADC conversions */
+#  define ADC_TSMR_TSAV_NFILTER    (0 << ADC_TSMR_TSAV_SHIFT) /* No Filtering */
+#  define ADC_TSMR_TSAV_2CONV      (1 << ADC_TSMR_TSAV_SHIFT) /* Average 2 ADC conversions */
+#  define ADC_TSMR_TSAV_4CONV      (2 << ADC_TSMR_TSAV_SHIFT) /* Average 4 ADC conversions */
+#  define ADC_TSMR_TSAV_8CONV      (3 << ADC_TSMR_TSAV_SHIFT) /* Averages 8 ADC conversions */
 #define ADC_TSMR_TSFREQ_SHIFT      (8)       /* Bit 8-11: Touchscreen Frequency */
 #define ADC_TSMR_TSFREQ_MASK       (15 << ADC_TSMR_TSFREQ_SHIFT)
+#  define ADC_TSMR_TSFREQ_DIV1     (0 << ADC_TSMR_TSFREQ_SHIFT) /* TS freq = trigger freq */
+#  define ADC_TSMR_TSFREQ_DIV2     (1 << ADC_TSMR_TSFREQ_SHIFT) /* TS freq = trigger freq / 2 */
+#  define ADC_TSMR_TSFREQ_DIV4     (2 << ADC_TSMR_TSFREQ_SHIFT) /* TS freq = trigger freq / 4 */
+#  define ADC_TSMR_TSFREQ_DIV8     (3 << ADC_TSMR_TSFREQ_SHIFT) /* TS freq = trigger freq / 8 */
 #  define ADC_TSMR_TSFREQ(n)       ((uint32_t)(n) << ADC_TSMR_TSFREQ_SHIFT)
 #define ADC_TSMR_TSSCTIM_SHIFT     (16)      /* Bit 16-19: Touchscreen Switches Closure Time */
 #define ADC_TSMR_TSSCTIM_MASK      (15 << ADC_TSMR_TSSCTIM_SHIFT)

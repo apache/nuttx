@@ -139,10 +139,9 @@ struct sam_tsd_s
   uint16_t threshx;             /* Thresholding X value */
   uint16_t threshy;             /* Thresholding Y value */
   volatile uint32_t pending;    /* Pending interrupt set set */
-  sem_t devsem;                 /* Manages exclusive access to this structure */
   sem_t waitsem;                /* Used to wait for the availability of data */
 
-  struct adc_dev_s *dev;        /* ADC device handle */
+  struct sam_adc_s *adc;        /* ADC device handle */
   struct work_s work;           /* Supports the interrupt handling "bottom half" */
   struct sam_sample_s sample;   /* Last sampled touch point data */
   WDOG_ID wdog;                 /* Poll the position while the pen is down */
@@ -163,22 +162,22 @@ struct sam_tsd_s
 
 /* Interrupt bottom half logic and data sampling */
 
-static void sam_notify(struct sam_tsd_s *priv);
-static int  sam_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample);
-static int  sam_waitsample(struct sam_tsd_s *priv,
+static void sam_tsd_notify(struct sam_tsd_s *priv);
+static int  sam_tsd_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample);
+static int  sam_tsd_waitsample(struct sam_tsd_s *priv,
               struct sam_sample_s *sample);
-static void sam_bottomhalf(void *arg);
-static int  sam_schedule(struct sam_tsd_s *priv, uint32_t pending);
-static void sam_wdog(int argc, uint32_t arg1, ...);
+static void sam_tsd_bottomhalf(void *arg);
+static int  sam_tsd_schedule(struct sam_tsd_s *priv, uint32_t pending);
+static void sam_tsd_expiry(int argc, uint32_t arg1, ...);
 
 /* Character driver methods */
 
-static int  sam_open(struct file *filep);
-static int  sam_close(struct file *filep);
-static ssize_t sam_read(struct file *filep, char *buffer, size_t len);
-static int  sam_ioctl(struct file *filep, int cmd, unsigned long arg);
+static int  sam_tsd_open(struct file *filep);
+static int  sam_tsd_close(struct file *filep);
+static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len);
+static int  sam_tsd_ioctl(struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int  sam_poll(struct file *filep, struct pollfd *fds, bool setup);
+static int  sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup);
 #endif
 
 /****************************************************************************
@@ -189,14 +188,14 @@ static int  sam_poll(struct file *filep, struct pollfd *fds, bool setup);
 
 static const struct file_operations g_tsdops =
 {
-  sam_open,    /* open */
-  sam_close,   /* close */
-  sam_read,    /* read */
-  0,           /* write */
-  0,           /* seek */
-  sam_ioctl    /* ioctl */
+  sam_tsd_open,    /* open */
+  sam_tsd_close,   /* close */
+  sam_tsd_read,    /* read */
+  0,               /* write */
+  0,               /* seek */
+  sam_tsd_ioctl    /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , sam_poll   /* poll */
+  , sam_tsd_poll   /* poll */
 #endif
 };
 
@@ -209,10 +208,10 @@ static struct sam_tsd_s g_tsd;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_notify
+ * Name: sam_tsd_notify
  ****************************************************************************/
 
-static void sam_notify(struct sam_tsd_s *priv)
+static void sam_tsd_notify(struct sam_tsd_s *priv)
 {
 #ifndef CONFIG_DISABLE_POLL
   int i;
@@ -252,10 +251,10 @@ static void sam_notify(struct sam_tsd_s *priv)
 }
 
 /****************************************************************************
- * Name: sam_sample
+ * Name: sam_tsd_sample
  ****************************************************************************/
 
-static int sam_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
+static int sam_tsd_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
 {
   irqstate_t flags;
   int ret = -EAGAIN;
@@ -305,10 +304,10 @@ static int sam_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
 }
 
 /****************************************************************************
- * Name: sam_waitsample
+ * Name: sam_tsd_waitsample
  ****************************************************************************/
 
-static int sam_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
+static int sam_tsd_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
 {
   irqstate_t flags;
   int ret;
@@ -329,13 +328,13 @@ static int sam_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
    * run, but they cannot run yet because pre-emption is disabled.
    */
 
-  sem_post(&priv->devsem);
+  sam_adc_unlock(priv->adc);
 
   /* Try to get the a sample... if we cannot, then wait on the semaphore
    * that is posted when new sample data is available.
    */
 
-  while (sam_sample(priv, sample) < 0)
+  while (sam_tsd_sample(priv, sample) < 0)
     {
       /* Wait for a sample data */
 
@@ -350,7 +349,7 @@ static int sam_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
            * the failure now.
            */
 
-          idbg("sem_wait: %d\n", errno);
+          idbg("ERROR: sem_wait: %d\n", errno);
           DEBUGASSERT(errno == EINTR);
           ret = -EINTR;
           goto errout;
@@ -364,7 +363,7 @@ static int sam_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
    * Interrupts and pre-emption will be re-enabled while we wait.
    */
 
-  ret = sem_wait(&priv->devsem);
+  sam_adc_lock(priv->adc);
 
 errout:
   /* Then re-enable interrupts.  We might get interrupt here and there
@@ -385,12 +384,71 @@ errout:
 }
 
 /****************************************************************************
- * Name: sam_bottomhalf
+ * Name: sam_tsd_setaverage
+ *
+ * Description:
+ *   The ADC hardware can filter the touchscreen samples by averaging.  The
+ *   function selects (or de-selects) that filtering.
+ *
+ * Input Parameters
+ *   priv - The touchscreen private data structure
+ *   tsav - The new (shifted) value of the TSAV field of the ADC TSMR regsiter.
+ * 
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sam_tsd_setaverage(truct sam_tsd_s *priv, uint32_t tsav)
+{
+  uint32_t regval;
+  uint32_t minfreq;
+  uint32_t tsfreq;
+
+  /* Get the current value of the TSMR register */
+
+  regval = sam_adc_getreg(priv->dev, SAM_ADC_TSMR);
+
+  /* Get the unshifted TSAVE value and compare it to the touchscreen
+   * frequency
+   *
+   *   minfreq = 0: No filtering
+   *   minfreq = 1: Averages 2 ADC conversions
+   *   minfreq = 2: Averages 4 ADC conversions
+   *   minfreq = 3: Averages 8 ADC conversions
+   */
+
+  minfreq = (tsav >> ADC_TSMR_TSAV_SHIF);
+  if (minfreq)
+    {
+      /* TSFREQ: Defines the Touchscreen Frequency compared to the Trigger
+       * Frequency.  --> TSFREQ must be greater or equal to TSAV. <--
+       */
+
+      tsfreq = (regval & ADC_TSMR_TSFREQ_MASK) >> ADC_TSMR_TSFREQ_SHIFT;
+      if (minfreq > tsfreq)
+        {
+          /* Set TSFREQ = TSAV */
+
+          regval &= ~ADC_TSMR_TSFREQ_MASK;
+          regval |=  ADC_TSMR_TSFREQ(minfreq);
+        }
+    }
+
+  /* Save the new filter value */
+
+  regval &= ADC_TSMR_TSAV_MASK
+  regval |= tsav;
+  sam_adc_putreg(priv->dev, SAM_ADC_TSMR, regval);
+}
+
+/****************************************************************************
+ * Name: sam_tsd_bottomhalf
  *
  * Description:
  *   This function executes on the worker thread.  It is scheduled by
  *   sam_tsd_interrupt whenever any interesting, enabled TSD event occurs.
- *   All TSD interrupts are disabled when this function runs.  sam_bottomhalf
+ *   All TSD interrupts are disabled when this function runs.  sam_tsd_bottomhalf
  *   will re-enable TSD interrupts when it completes processing all pending
  *   TSD events.
  *
@@ -402,7 +460,7 @@ errout:
  *
  ****************************************************************************/
 
-static void sam_bottomhalf(void *arg)
+static void sam_tsd_bottomhalf(void *arg)
 {
   struct sam_tsd_s *priv = (struct sam_tsd_s *)arg;
   uint32_t pending;
@@ -428,17 +486,7 @@ static void sam_bottomhalf(void *arg)
 
   /* Get exclusive access to the driver data structure */
 
-  do
-    {
-      ret = sem_wait(&priv->devsem);
-
-      /* This should only fail if the wait was canceled by an signal
-       * (and the worker thread will receive a lot of signals).
-       */
-
-      DEBUGASSERT(ret == OK || errno == EINTR);
-    }
-  while (ret < 0);
+  sam_adc_lock(priv->adc);
 
   /* Check for pen up or down by reading the PENIRQ GPIO. */
 #warning Missing logic
@@ -484,7 +532,7 @@ static void sam_bottomhalf(void *arg)
        * later.
        */
 
-       wd_start(priv->wdog, TSD_WDOG_DELAY, sam_wdog, 1, (uint32_t)priv);
+       wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1, (uint32_t)priv);
        goto ignored;
     }
   else
@@ -502,7 +550,7 @@ static void sam_bottomhalf(void *arg)
 
       /* Continue to sample the position while the pen is down */
 
-      wd_start(priv->wdog, TSD_WDOG_DELAY, sam_wdog, 1, (uint32_t)priv);
+      wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1, (uint32_t)priv);
 
       /* Check the thresholds.  Bail if there is no significant difference */
 
@@ -547,25 +595,25 @@ static void sam_bottomhalf(void *arg)
 
   /* Notify any waiters that new touchscreen data is available */
 
-  sam_notify(priv);
+  sam_tsd_notify(priv);
 
   /* Exit, re-enabling touchscreen interrupts */
 
 ignored:
   /* Re-enable touchscreen interrupts. */
 
-  sam_adc_putreg32(priv->dev, SAM_ADC_IER, ADC_TSD_ALLINTS);
+  sam_adc_putreg32(priv->adc, SAM_ADC_IER, ADC_TSD_ALLINTS);
 
   /* Release our lock on the state structure */
 
-  sem_post(&priv->devsem);
+  sem_adc_unlock(priv->adc);
 }
 
 /****************************************************************************
- * Name: sam_schedule
+ * Name: sam_tsd_schedule
  ****************************************************************************/
 
-static int sam_schedule(struct sam_tsd_s *priv, uint32_t pending)
+static int sam_tsd_schedule(struct sam_tsd_s *priv, uint32_t pending)
 {
   int ret;
 
@@ -579,7 +627,7 @@ static int sam_schedule(struct sam_tsd_s *priv, uint32_t pending)
    * re-enabled after the worker thread executes.
    */
 
-  sam_adc_putreg32(priv->dev, SAM_ADC_IDR, ADC_TSD_ALLINTS);
+  sam_adc_putreg32(priv->adc, SAM_ADC_IDR, ADC_TSD_ALLINTS);
 
   /* Save the set of pending interrupts for the bottom half (in case any
    * were cleared by reading the ISR.
@@ -593,7 +641,7 @@ static int sam_schedule(struct sam_tsd_s *priv, uint32_t pending)
    */
 
   DEBUGASSERT(priv->work.worker == NULL);
-  ret = work_queue(HPWORK, &priv->work, sam_bottomhalf, priv, 0);
+  ret = work_queue(HPWORK, &priv->work, sam_tsd_bottomhalf, priv, 0);
   if (ret != 0)
     {
       illdbg("Failed to queue work: %d\n", ret);
@@ -603,7 +651,7 @@ static int sam_schedule(struct sam_tsd_s *priv, uint32_t pending)
 }
 
 /****************************************************************************
- * Name: sam_wdog
+ * Name: sam_tsd_expiry
  *
  * Description:
  *   While the pen is pressed, pen position is periodically polled via a
@@ -611,7 +659,7 @@ static int sam_schedule(struct sam_tsd_s *priv, uint32_t pending)
  *
  ****************************************************************************/
 
-static void sam_wdog(int argc, uint32_t arg1, ...)
+static void sam_tsd_expiry(int argc, uint32_t arg1, ...)
 {
   struct sam_tsd_s *priv = (struct sam_tsd_s *)((uintptr_t)arg1);
   uint32_t pending;
@@ -621,34 +669,34 @@ static void sam_wdog(int argc, uint32_t arg1, ...)
    */
 
   pending =  sam_adc_getreg(priv, SAM_ADC_ISR) & ADC_TSD_ALLSTATUS;
-  (void)sam_schedule(priv, pending);
+  (void)sam_tsd_schedule(priv, pending);
 }
 
 /****************************************************************************
- * Name: sam_open
+ * Name: sam_tsd_open
  ****************************************************************************/
 
-static int sam_open(struct file *filep)
+static int sam_tsd_open(struct file *filep)
 {
   ivdbg("Opening\n");
   return OK;
 }
 
 /****************************************************************************
- * Name: sam_close
+ * Name: sam_tsd_close
  ****************************************************************************/
 
-static int sam_close(struct file *filep)
+static int sam_tsd_close(struct file *filep)
 {
   ivdbg("Closing\n");
   return OK;
 }
 
 /****************************************************************************
- * Name: sam_read
+ * Name: sam_tsd_read
  ****************************************************************************/
 
-static ssize_t sam_read(struct file *filep, char *buffer, size_t len)
+static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
 {
   struct inode *inode;
   struct sam_tsd_s *priv;
@@ -673,25 +721,17 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t len)
        * handle smaller reads... but why?
        */
 
-      idbg("Unsupported read size: %d\n", len);
+      idbg("ERROR: Unsupported read size: %d\n", len);
       return -ENOSYS;
     }
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
-  if (ret < 0)
-    {
-      /* This should only happen if the wait was canceled by an signal */
-
-      idbg("sem_wait: %d\n", errno);
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
-    }
+  sem_adc_lock(priv->adc);
 
   /* Try to read sample data. */
 
-  ret = sam_sample(priv, &sample);
+  ret = sam_tsd_sample(priv, &sample);
   if (ret < 0)
     {
       /* Sample data is not available now.  We would ave to wait to get
@@ -708,12 +748,12 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t len)
 
       /* Wait for sample data */
 
-      ret = sam_waitsample(priv, &sample);
+      ret = sam_tsd_waitsample(priv, &sample);
       if (ret < 0)
         {
           /* We might have been awakened by a signal */
 
-          idbg("sam_waitsample: %d\n", ret);
+          idbg("ERROR: sam_tsd_waitsample: %d\n", ret);
           goto errout;
         }
     }
@@ -768,16 +808,16 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t len)
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
 
 errout:
-  sem_post(&priv->devsem);
+  sem_adc_unlock(priv->adc);
   ivdbg("Returning: %d\n", ret);
   return ret;
 }
 
 /****************************************************************************
- * Name:sam_ioctl
+ * Name:sam_tsd_ioctl
  ****************************************************************************/
 
-static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
+static int sam_tsd_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   struct inode *inode;
   struct sam_tsd_s *priv;
@@ -792,14 +832,7 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver data structure */
 
-  ret = sem_wait(&priv->devsem);
-  if (ret < 0)
-    {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
-    }
+  sam_adc_lock(priv->adc);
 
   /* Process the IOCTL by command */
 
@@ -810,16 +843,16 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  sem_post(&priv->devsem);
+  sam_adc_unlock(priv->adc);
   return ret;
 }
 
 /****************************************************************************
- * Name: sam_poll
+ * Name: sam_tsd_poll
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static int sam_poll(struct file *filep, struct pollfd *fds, bool setup)
+static int sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup)
 {
   struct inode *inode;
   struct sam_tsd_s *priv;
@@ -833,16 +866,11 @@ static int sam_poll(struct file *filep, struct pollfd *fds, bool setup)
   DEBUGASSERT(inode && inode->i_private);
   priv  = (struct sam_tsd_s *)inode->i_private;
 
+  /* Get exclusive access to the ADC hardware */
+
+  sam_adc_lock(priv->adc);
+
   /* Are we setting up the poll?  Or tearing it down? */
-
-  ret = sem_wait(&priv->devsem);
-  if (ret < 0)
-    {
-      /* This should only happen if the wait was canceled by an signal */
-
-      DEBUGASSERT(errno == EINTR);
-      return -EINTR;
-    }
 
   if (setup)
     {
@@ -883,7 +911,7 @@ static int sam_poll(struct file *filep, struct pollfd *fds, bool setup)
 
       if (priv->penchange)
         {
-          sam_notify(priv);
+          sam_tsd_notify(priv);
         }
     }
   else if (fds->priv)
@@ -900,7 +928,7 @@ static int sam_poll(struct file *filep, struct pollfd *fds, bool setup)
     }
 
 errout:
-  sem_post(&priv->devsem);
+  sam_adc_unlock(priv->adc);
   return ret;
 }
 #endif
@@ -921,7 +949,8 @@ errout:
  *   /dev/inputN where N is the minor device number
  *
  * Input Parameters:
- *   minor   - The input device minor number
+ *   adc   - An opaque reference to the ADC device structure
+ *   minor - The input device minor number
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -929,7 +958,7 @@ errout:
  *
  ****************************************************************************/
 
-int sam_tsd_register(struct adc_dev_s *dev, int minor)
+int sam_tsd_register(struct sam_adc_s *adc, int minor)
 {
   struct sam_tsd_s *priv = &g_tsd;
   char devname[DEV_NAMELEN];
@@ -939,17 +968,16 @@ int sam_tsd_register(struct adc_dev_s *dev, int minor)
 
   /* Debug-only sanity checks */
 
-  DEBUGASSERT(dev && minor >= 0 && minor < 100);
+  DEBUGASSERT(adc && minor >= 0 && minor < 100);
 
   /* Initialize the touchscreen device driver instance */
 
   memset(priv, 0, sizeof(struct sam_tsd_s));
-  priv->dev     = dev;               /* Save the ADC device handle */
+  priv->adc     = adc;               /* Save the ADC device handle */
   priv->wdog    = wd_create();       /* Create a watchdog timer */
   priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
   priv->threshy = INVALID_THRESHOLD; /* Initialize thresholding logic */
 
-  sem_init(&priv->devsem,  0, 1);    /* Initialize device structure semaphore */
   sem_init(&priv->waitsem, 0, 0);    /* Initialize pen event wait semaphore */
 
   /* Make sure that interrupts are disabled and clear any pending interrupts */
@@ -969,7 +997,7 @@ int sam_tsd_register(struct adc_dev_s *dev, int minor)
   ret = register_driver(devname, &g_tsdops, 0666, priv);
   if (ret < 0)
     {
-      idbg("register_driver() failed: %d\n", ret);
+      idbg("ERROR: register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
 
@@ -977,10 +1005,10 @@ int sam_tsd_register(struct adc_dev_s *dev, int minor)
    * availability conditions.
    */
 
-  ret = work_queue(HPWORK, &priv->work, sam_bottomhalf, priv, 0);
+  ret = work_queue(HPWORK, &priv->work, sam_tsd_bottomhalf, priv, 0);
   if (ret != 0)
     {
-      idbg("Failed to queue work: %d\n", ret);
+      idbg("ERROR: Failed to queue work: %d\n", ret);
       goto errout_with_priv;
     }
 
@@ -989,7 +1017,6 @@ int sam_tsd_register(struct adc_dev_s *dev, int minor)
   return OK;
 
 errout_with_priv:
-  sem_destroy(&priv->devsem);
   sem_destroy(&priv->waitsem);
   return ret;
 }
@@ -1017,24 +1044,14 @@ void sam_tsd_interrupt(uint32_t pending)
 
   if ((pending & ADC_TSD_ALLINTS) != 0)
     {
-      /* Disable further touchscreen interrupts */
-
-      sam_adc_putreg32(priv->dev, SAM_ADC_IDR, ADC_TSD_ALLINTS);
-
-      /* Save the set of pending interrupts for the bottom half (in case any
-       * were cleared by reading the ISR.
-       */
-
-      priv->pending = pending & ADC_TSD_ALLSTATUS;
-
       /* Schedule sampling to occur by the interrupt bottom half on the
        * worker thread.
        */
 
-      ret = sam_schedule(priv, pending);
+      ret = sam_tsd_schedule(priv, pending);
       if (ret < 0)
         {
-          idbg("ERROR: sam_schedule failed: %d\n", ret);
+          idbg("ERROR: sam_tsd_schedule failed: %d\n", ret);
         }
     }
 
