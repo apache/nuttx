@@ -429,8 +429,6 @@ static void do_dependency(const char *file, char separator)
       exit(EXIT_FAILURE);
     }
 
-  strcat(g_command, moption);
-
   /* Copy " -MT " */
 
   if (g_objpath)
