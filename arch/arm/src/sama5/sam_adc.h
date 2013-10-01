@@ -50,6 +50,10 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
+#ifndef CONFIG_SCHED_WORKQUEUE
+#  error Work queue support is required (CONFIG_SCHED_WORKQUEUE)
+#endif
+
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_SAMA5_ADC_REGDEBUG
 #endif
@@ -116,22 +120,43 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct adc_dev_s *sam_adcinitialize(void);
+struct sam_adc_s;
+FAR struct sam_adc_s *sam_adcinitialize(void);
 
 /****************************************************************************
  * Interfaces exported from the ADC to the touchscreen driver
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: sam_adc_lock
+ *
+ * Description:
+ *   Get exclusive access to the ADC interface
+ *
+ ****************************************************************************/
+
+void sam_adc_lock(FAR struct sam_adc_s *priv);
+
+/****************************************************************************
+ * Name: sam_adc_unlock
+ *
+ * Description:
+ *   Relinquish the lock on the ADC interface
+ *
+ ****************************************************************************/
+
+void sam_adc_unlock(FAR struct sam_adc_s *priv);
+
+/****************************************************************************
  * Name: sam_adc_getreg
  *
  * Description:
- *  Read any 32-bit register using an absolute address.
+ *   Read any 32-bit register using an absolute address.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_ADC_REGDEBUG
-uint32_t sam_adc_getreg(FAR struct adc_dev_s *, uintptr_t address)
+uint32_t sam_adc_getreg(FAR struct sam_adc_s *priv, uintptr_t address);
 #else
 #  define sam_adc_getreg(handle,addr) getreg32(addr)
 #endif
@@ -140,13 +165,13 @@ uint32_t sam_adc_getreg(FAR struct adc_dev_s *, uintptr_t address)
  * Name: sam_adc_putreg
  *
  * Description:
- *  Write to any 32-bit register using an absolute address.
+ *   Write to any 32-bit register using an absolute address.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_ADC_REGDEBUG
-void sam_adc_putreg(FAR struct adc_dev_s *dev, uintptr_t address,
-                    uint32_t regval)
+void sam_adc_putreg(FAR struct sam_adc_s *priv, uintptr_t address,
+                    uint32_t regval);
 #else
 #  define sam_adc_putreg(handle,addr,val) putreg32(val,addr)
 #endif

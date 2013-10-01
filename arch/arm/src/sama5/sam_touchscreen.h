@@ -88,7 +88,8 @@ extern "C"
  *
  ****************************************************************************/
 
-int sam_tsd_register(FAR struct adc_dev_s *dev, int minor);
+struct sam_adc_s;
+int sam_tsd_register(FAR struct sam_adc_s *adc, int minor);
 
 /****************************************************************************
  * Interfaces exported from the touchscreen to the ADC driver
