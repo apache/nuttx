@@ -48,7 +48,7 @@
 #include "up_arch.h"
 
 #include "kl_config.h"
-#include "kl_getputc.h"
+#include "kl_lowgetc.h"
 
 #include "chip/kl_uart.h"
 
