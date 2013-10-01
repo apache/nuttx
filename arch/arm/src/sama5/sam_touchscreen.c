@@ -67,12 +67,12 @@
  * defined here so that it will be used consistently in all places.
  */
 
-#define DEV_FORMAT      "/dev/input%d"
-#define DEV_NAMELEN     16
+#define DEV_FORMAT          "/dev/input%d"
+#define DEV_NAMELEN         16
 
 /* Poll the pen position while the pen is down at this rate (50MS): */
 
-#define TSD_WDOG_DELAY  ((50 + (MSEC_PER_TICK-1))/ MSEC_PER_TICK)
+#define TSD_WDOG_DELAY      ((50 + (MSEC_PER_TICK-1))/ MSEC_PER_TICK)
 
 /* This is a value for the threshold that guantees a big difference on the
  * first pendown (but can't overflow).
@@ -80,13 +80,36 @@
 
 #define INVALID_THRESHOLD 0x1000
 
+/* Touchscreen interrupt event sets
+ *
+ *   ADC_INT_XRDY           TS Measure XPOS Ready Interrupt
+ *   ADC_INT_YRDY           TS Measure YPOS Ready Interrupt
+ *   ADC_INT_PRDY           TS Measure Pressure Ready Interrupt
+ *   ADC_INT_PEN            Pen Contact Interrupt
+ *   ADC_INT_NOPEN          No Pen Contact Interrupt
+ *   ADC_SR_PENS            Pen detect Status (Not an interrupt)
+ */
+
+#define ADC_TSD_CMNINTS     (ADC_INT_XRDY | ADC_INT_YRDY | ADC_INT_PRDY | ADC_INT_NOPEN)
+#define ADC_TSD_ALLINTS     (ADC_TSD_CMNINTS | ADC_INT_PEN)
+#define ADC_TSD_ALLSTATUS   (ADC_TSD_ALLINTS | ADC_INT_PENS)
+#define ADC_TSD_RELEASEINTS ADC_TSD_CMNINTS
+
+/* Data ready/pen status bit definitions */
+
+#define TSD_XREADY          (1 << 0)  /* X value is ready */
+#define TSD_YREADY          (1 << 1)  /* Y value is ready */
+#define TSD_PREADY          (1 << 2)  /* Pressure value is ready */
+#define TSD_PENDOWN         (1 << 3)  /* Pen is down */
+#define TSD_ALLREADY        (TSD_XREADY | TSD_YREADY | TSD_PREADY)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 /* This describes the state of one contact */
 
-enum sam_contact_3
+enum sam_contact_e
 {
   CONTACT_NONE = 0,             /* No contact */
   CONTACT_DOWN,                 /* First contact */
@@ -107,13 +130,15 @@ struct sam_sample_s
 
 /* This structure describes the state of one touchscreen driver instance */
 
-struct sam_dev_s
+struct sam_tsd_s
 {
   uint8_t nwaiters;             /* Number of threads waiting for touchscreen data */
   uint8_t id;                   /* Current touch point ID */
+  uint8_t status;               /* Data ready/pen status bit set */
   volatile bool penchange;      /* An unreported event is buffered */
   uint16_t threshx;             /* Thresholding X value */
   uint16_t threshy;             /* Thresholding Y value */
+  volatile uint32_t pending;    /* Pending interrupt set set */
   sem_t devsem;                 /* Manages exclusive access to this structure */
   sem_t waitsem;                /* Used to wait for the availability of data */
 
@@ -138,22 +163,22 @@ struct sam_dev_s
 
 /* Interrupt bottom half logic and data sampling */
 
-static void sam_notify(FAR struct sam_dev_s *priv);
-static int  sam_sample(FAR struct sam_dev_s *priv,
-              FAR struct sam_sample_s *sample);
-static int  sam_waitsample(FAR struct sam_dev_s *priv,
-              FAR struct sam_sample_s *sample);
-static void sam_bottomhalf(FAR void *arg);
+static void sam_notify(struct sam_tsd_s *priv);
+static int  sam_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample);
+static int  sam_waitsample(struct sam_tsd_s *priv,
+              struct sam_sample_s *sample);
+static void sam_bottomhalf(void *arg);
+static int  sam_schedule(struct sam_tsd_s *priv, uint32_t pending);
+static void sam_wdog(int argc, uint32_t arg1, ...);
 
 /* Character driver methods */
 
-static int  sam_open(FAR struct file *filep);
-static int  sam_close(FAR struct file *filep);
-static ssize_t sam_read(FAR struct file *filep, FAR char *buffer,
-              size_t len);
-static int  sam_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int  sam_open(struct file *filep);
+static int  sam_close(struct file *filep);
+static ssize_t sam_read(struct file *filep, char *buffer, size_t len);
+static int  sam_ioctl(struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int  sam_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
+static int  sam_poll(struct file *filep, struct pollfd *fds, bool setup);
 #endif
 
 /****************************************************************************
@@ -177,7 +202,7 @@ static const struct file_operations g_tsdops =
 
 /* The driver state structure is pre-allocated. */
 
-static struct sam_dev_s g_tsd;
+static struct sam_tsd_s g_tsd;
 
 /****************************************************************************
  * Private Functions
@@ -187,7 +212,7 @@ static struct sam_dev_s g_tsd;
  * Name: sam_notify
  ****************************************************************************/
 
-static void sam_notify(FAR struct sam_dev_s *priv)
+static void sam_notify(struct sam_tsd_s *priv)
 {
 #ifndef CONFIG_DISABLE_POLL
   int i;
@@ -230,8 +255,7 @@ static void sam_notify(FAR struct sam_dev_s *priv)
  * Name: sam_sample
  ****************************************************************************/
 
-static int sam_sample(FAR struct sam_dev_s *priv,
-                      FAR struct sam_sample_s *sample)
+static int sam_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
 {
   irqstate_t flags;
   int ret = -EAGAIN;
@@ -284,8 +308,7 @@ static int sam_sample(FAR struct sam_dev_s *priv,
  * Name: sam_waitsample
  ****************************************************************************/
 
-static int sam_waitsample(FAR struct sam_dev_s *priv,
-                               FAR struct sam_sample_s *sample)
+static int sam_waitsample(struct sam_tsd_s *priv, struct sam_sample_s *sample)
 {
   irqstate_t flags;
   int ret;
@@ -362,57 +385,28 @@ errout:
 }
 
 /****************************************************************************
- * Name: sam_schedule
- ****************************************************************************/
-
-static int sam_schedule(FAR struct sam_dev_s *priv)
-{
-  int ret;
-
-  /* Disable further touchscreen interrupts.  Touchscreen interrupts will be
-   * re-enabled after the worker thread executes.
-   */
-
-  sam_adc_putreg32(priv->dev, SAM_ADC_IDR, ADC_TSD_INTS);
-
-  /* Disable the watchdog timer.  It will be re-enabled in the worker thread
-   * while the pen remains down.
-   */
-
-  wd_cancel(priv->wdog);
-
-  /* Transfer processing to the worker thread.  Since touchscreen ADC interrupts are
-   * disabled while the work is pending, no special action should be required
-   * to protected the work queue.
-   */
-
-  DEBUGASSERT(priv->work.worker == NULL);
-  ret = work_queue(HPWORK, &priv->work, sam_bottomhalf, priv, 0);
-  if (ret != 0)
-    {
-      illdbg("Failed to queue work: %d\n", ret);
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: sam_wdog
- ****************************************************************************/
-
-static void sam_wdog(int argc, uint32_t arg1, ...)
-{
-  FAR struct sam_dev_s *priv = (FAR struct sam_dev_s *)((uintptr_t)arg1);
-  (void)sam_schedule(priv);
-}
-
-/****************************************************************************
  * Name: sam_bottomhalf
+ *
+ * Description:
+ *   This function executes on the worker thread.  It is scheduled by
+ *   sam_tsd_interrupt whenever any interesting, enabled TSD event occurs.
+ *   All TSD interrupts are disabled when this function runs.  sam_bottomhalf
+ *   will re-enable TSD interrupts when it completes processing all pending
+ *   TSD events.
+ *
+ * Input Parameters
+ *   arg - The touchscreen private data structure cast to (void *)
+ * 
+ * Returned Value:
+ *   None
+ *
  ****************************************************************************/
 
-static void sam_bottomhalf(FAR void *arg)
+static void sam_bottomhalf(void *arg)
 {
-  FAR struct sam_dev_s *priv = (FAR struct sam_dev_s *)arg;
+  struct sam_tsd_s *priv = (struct sam_tsd_s *)arg;
+  uint32_t pending;
+  uint32_t regval;
   uint16_t x;
   uint16_t y;
   uint16_t xdiff;
@@ -427,6 +421,10 @@ static void sam_bottomhalf(FAR void *arg)
    */
 
   wd_cancel(priv->wdog);
+
+  /* Get the set of unmasked, pending ADC interrupts */
+
+  pending = priv->pending;
 
   /* Get exclusive access to the driver data structure */
 
@@ -556,7 +554,7 @@ static void sam_bottomhalf(FAR void *arg)
 ignored:
   /* Re-enable touchscreen interrupts. */
 
-  sam_adc_putreg32(priv->dev, SAM_ADC_IER, ADC_TSD_INTS);
+  sam_adc_putreg32(priv->dev, SAM_ADC_IER, ADC_TSD_ALLINTS);
 
   /* Release our lock on the state structure */
 
@@ -564,10 +562,73 @@ ignored:
 }
 
 /****************************************************************************
+ * Name: sam_schedule
+ ****************************************************************************/
+
+static int sam_schedule(struct sam_tsd_s *priv, uint32_t pending)
+{
+  int ret;
+
+  /* Disable the watchdog timer.  It will be re-enabled in the worker thread
+   * while the pen remains down.
+   */
+
+  wd_cancel(priv->wdog);
+
+  /* Disable further touchscreen interrupts.  Touchscreen interrupts will be
+   * re-enabled after the worker thread executes.
+   */
+
+  sam_adc_putreg32(priv->dev, SAM_ADC_IDR, ADC_TSD_ALLINTS);
+
+  /* Save the set of pending interrupts for the bottom half (in case any
+   * were cleared by reading the ISR.
+   */
+
+  priv->pending = pending.
+
+  /* Transfer processing to the worker thread.  Since touchscreen ADC interrupts are
+   * disabled while the work is pending, no special action should be required
+   * to protected the work queue.
+   */
+
+  DEBUGASSERT(priv->work.worker == NULL);
+  ret = work_queue(HPWORK, &priv->work, sam_bottomhalf, priv, 0);
+  if (ret != 0)
+    {
+      illdbg("Failed to queue work: %d\n", ret);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: sam_wdog
+ *
+ * Description:
+ *   While the pen is pressed, pen position is periodically polled via a
+ *   watchdog timer.  This function handles that timer expiration.
+ *
+ ****************************************************************************/
+
+static void sam_wdog(int argc, uint32_t arg1, ...)
+{
+  struct sam_tsd_s *priv = (struct sam_tsd_s *)((uintptr_t)arg1);
+  uint32_t pending;
+
+  /* There should be no pending TSD interrupts, but we need to get the PENS
+   * status bit as a minimum.
+   */
+
+  pending =  sam_adc_getreg(priv, SAM_ADC_ISR) & ADC_TSD_ALLSTATUS;
+  (void)sam_schedule(priv, pending);
+}
+
+/****************************************************************************
  * Name: sam_open
  ****************************************************************************/
 
-static int sam_open(FAR struct file *filep)
+static int sam_open(struct file *filep)
 {
   ivdbg("Opening\n");
   return OK;
@@ -577,7 +638,7 @@ static int sam_open(FAR struct file *filep)
  * Name: sam_close
  ****************************************************************************/
 
-static int sam_close(FAR struct file *filep)
+static int sam_close(struct file *filep)
 {
   ivdbg("Closing\n");
   return OK;
@@ -587,11 +648,11 @@ static int sam_close(FAR struct file *filep)
  * Name: sam_read
  ****************************************************************************/
 
-static ssize_t sam_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t sam_read(struct file *filep, char *buffer, size_t len)
 {
-  FAR struct inode *inode;
-  FAR struct sam_dev_s *priv;
-  FAR struct touch_sample_s *report;
+  struct inode *inode;
+  struct sam_tsd_s *priv;
+  struct touch_sample_s *report;
   struct sam_sample_s sample;
   int ret;
 
@@ -600,7 +661,7 @@ static ssize_t sam_read(FAR struct file *filep, FAR char *buffer, size_t len)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct sam_dev_s *)inode->i_private;
+  priv  = (struct sam_tsd_s *)inode->i_private;
 
   /* Verify that the caller has provided a buffer large enough to receive
    * the touch data.
@@ -661,12 +722,12 @@ static ssize_t sam_read(FAR struct file *filep, FAR char *buffer, size_t len)
    * to the caller.
    */
 
-  report = (FAR struct touch_sample_s *)buffer;
+  report = (struct touch_sample_s *)buffer;
   memset(report, 0, SIZEOF_TOUCH_SAMPLE_S(1));
-  report->npoints            = 1;
-  report->point[0].id        = sample.id;
-  report->point[0].x         = sample.x;
-  report->point[0].y         = sample.y;
+  report->npoints      = 1;
+  report->point[0].id  = sample.id;
+  report->point[0].x   = sample.x;
+  report->point[0].y   = sample.y;
 
   /* Report the appropriate flags */
 
@@ -716,18 +777,18 @@ errout:
  * Name:sam_ioctl
  ****************************************************************************/
 
-static int sam_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode         *inode;
-  FAR struct sam_dev_s *priv;
-  int                       ret;
+  struct inode *inode;
+  struct sam_tsd_s *priv;
+  int ret;
 
   ivdbg("cmd: %d arg: %ld\n", cmd, arg);
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct sam_dev_s *)inode->i_private;
+  priv  = (struct sam_tsd_s *)inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -758,20 +819,19 @@ static int sam_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
  ****************************************************************************/
 
 #ifndef CONFIG_DISABLE_POLL
-static int sam_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup)
+static int sam_poll(struct file *filep, struct pollfd *fds, bool setup)
 {
-  FAR struct inode         *inode;
-  FAR struct sam_dev_s *priv;
-  int                       ret = OK;
-  int                       i;
+  struct inode *inode;
+  struct sam_tsd_s *priv;
+  int ret = OK;
+  int i;
 
   ivdbg("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct sam_dev_s *)inode->i_private;
+  priv  = (struct sam_tsd_s *)inode->i_private;
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -871,7 +931,7 @@ errout:
 
 int sam_tsd_register(struct adc_dev_s *dev, int minor)
 {
-  struct sam_dev_s *priv = &g_tsd;
+  struct sam_tsd_s *priv = &g_tsd;
   char devname[DEV_NAMELEN];
   int ret;
 
@@ -883,7 +943,7 @@ int sam_tsd_register(struct adc_dev_s *dev, int minor)
 
   /* Initialize the touchscreen device driver instance */
 
-  memset(priv, 0, sizeof(struct sam_dev_s));
+  memset(priv, 0, sizeof(struct sam_tsd_s));
   priv->dev     = dev;               /* Save the ADC device handle */
   priv->wdog    = wd_create();       /* Create a watchdog timer */
   priv->threshx = INVALID_THRESHOLD; /* Initialize thresholding logic */
@@ -941,29 +1001,43 @@ errout_with_priv:
  *   Handles ADC interrupts associated with touchscreen channels
  *
  * Input parmeters:
- *   None
+ *   pending - Current set of pending interrupts being handled
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void sam_tsd_interrupt(void)
+void sam_tsd_interrupt(uint32_t pending)
 {
-  struct sam_dev_s *priv = &g_tsd;
+  struct sam_tsd_s *priv = &g_tsd;
   int ret;
 
-  /* Disable further touchscreen interrupts */
+  /* Are there pending TSD interrupts? */
 
-  sam_adc_putreg32(priv->dev, SAM_ADC_IDR, ADC_TSD_INTS);
-
-  /* Schedule sampling to occur on the worker thread */
-
-  ret = sam_schedule(priv);
-  if (ret < 0)
+  if ((pending & ADC_TSD_ALLINTS) != 0)
     {
-      idbg("ERROR: sam_schedule failed: %d\n", ret);
+      /* Disable further touchscreen interrupts */
+
+      sam_adc_putreg32(priv->dev, SAM_ADC_IDR, ADC_TSD_ALLINTS);
+
+      /* Save the set of pending interrupts for the bottom half (in case any
+       * were cleared by reading the ISR.
+       */
+
+      priv->pending = pending & ADC_TSD_ALLSTATUS;
+
+      /* Schedule sampling to occur by the interrupt bottom half on the
+       * worker thread.
+       */
+
+      ret = sam_schedule(priv, pending);
+      if (ret < 0)
+        {
+          idbg("ERROR: sam_schedule failed: %d\n", ret);
+        }
     }
+
   return ret;
 }
 
