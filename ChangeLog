@@ -5686,4 +5686,6 @@
 	  From Carvalho de Assis. (2013-9-30).
 	* net/net_sendfile:  The high performance sendfile logic is
 	  now functional.  From Max Holtzberg (2013-9-30).
+	* tools/define.sh:  'cut' long because as it once did.  Script
+	  adapted to observed behavior (2013-9-30).
 

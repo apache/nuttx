@@ -170,9 +170,13 @@ unset response
 for vardef in $varlist; do
 
 	varname=`echo $vardef | cut -d'=' -f1`
-	varvalue=`echo $vardef | cut -d'=' -f2`
+	if [ "X$varname" != "X$vardef" ]; then
+		varvalue=`echo $vardef | cut -d'=' -f2`
+	else
+		unset varvalue
+	fi
 
-    # Handle the output depending on if there is a value for the variable or not
+	# Handle the output depending on if there is a value for the variable or not
 
 	if [ -z "$varvalue" ]; then
 
