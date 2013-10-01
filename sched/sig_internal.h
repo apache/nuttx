@@ -155,6 +155,9 @@ extern sq_queue_t  g_sigpendingirqsignal;
  ****************************************************************************/
 
 /* Internal signal-related interfaces ***************************************/
+/* Forward references */
+
+struct task_group_s;
 
 /* sig_intialize.c */
 
