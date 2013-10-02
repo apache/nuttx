@@ -72,7 +72,8 @@
 /* STM32 F103 Low / Medium Density Family */
 #  elif defined(CONFIG_ARCH_CHIP_STM32F103C4) || \
         defined(CONFIG_ARCH_CHIP_STM32F103C8) || \
-        defined(CONFIG_ARCH_CHIP_STM32F103RBT6)
+        defined(CONFIG_ARCH_CHIP_STM32F103CB) || \
+        defined(CONFIG_ARCH_CHIP_STM32F103RB)
 #    include "chip/stm32f103c_pinmap.h"
 
 /* STM32 F103 High Density Family */

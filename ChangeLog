@@ -5693,4 +5693,6 @@
 	  build system (2013-10-1)
 	* include/net/route.h:  Defines the application interface to
 	  the routing table (2013-10-2).
+	* configs/spark:  Add configuratino for the Spark Core.  The
+	  initial check-in is basically the Maple Mini board (2013-10-2).
 

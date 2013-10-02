@@ -2003,6 +2003,10 @@ configs/shenzhou
   This is the port of NuttX to the Shenzhou development board from
   www.armjishu.com. This board features the STMicro STM32F107VCT MCU.
 
+configs/spark
+  Board support for the Spark Core from Spark Devices http://www.sparkdevices.com).
+  This board features the STM32103CBT6 MCU from STMicro.
+
 configs/skp16c26
   Renesas M16C processor on the Renesas SKP16C26 StarterKit.  This port
   uses the GNU m32c toolchain.  STATUS:  The port is complete but untested
