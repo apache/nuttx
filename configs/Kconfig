@@ -334,6 +334,16 @@ config ARCH_BOARD_LPC1766STK
 		This port uses the Olimex LPC1766-STK board and a GNU GCC toolchain* under
 		Linux or Cygwin.  STATUS: Complete and mature.
 
+config ARCH_BOARD_MAPLE
+	bool "maple board"
+	depends on ARCH_CHIP_STM32F103RB || ARCH_CHIP_STM32F103CB
+	select ARCH_HAVE_LEDS
+	---help---
+		A configuration for the LeafLab's Maple and Maple Mini boards.
+		These boards are based on the STM32F103RBT6 chip for the standard
+		version and on the STM32F103CBT6 for the mini version
+		(See http://leaflabs.com/docs/hardware/maple.html)
+
 config ARCH_BOARD_MIRTOO
 	bool "Mirtoo PIC32 Module from Dimitech"
 	depends on ARCH_CHIP_PIC32MX250F128D
@@ -537,15 +547,14 @@ config ARCH_BOARD_SKP16C26
 		uses the GNU m32c toolchain.  STATUS:  The port is complete but untested
 		due to issues with compiler internal errors.
 
-config ARCH_BOARD_MAPLE
-	bool "maple board"
-	depends on ARCH_CHIP_STM32F103RBT6
+config ARCH_BOARD_SPARK
+	bool "Spark Core"
+	depends on ARCH_CHIP_STM32F103CB
 	select ARCH_HAVE_LEDS
 	---help---
-		A configuration for the LeafLab's Maple and Maple Mini boards.
-		These boards are based on the STM32F103RBT6 chip for the standard
-		version and on the STM32F103CBT6 for the mini version
-		(See http://leaflabs.com/docs/hardware/maple.html)
+		A configuration for the Spark Core from Spark Devices
+		(http://www.sparkdevices.com).  This board features the STM32103CBT6
+		MCU from STMicro.
 
 config ARCH_BOARD_STM32_TINY
 	bool "STM32-Tiny board"
@@ -803,6 +812,7 @@ config ARCH_BOARD
 	default "lpc4330-xplorer"     if ARCH_BOARD_LPC4330_XPLORER
 	default "lpcxpresso-lpc1768"  if ARCH_BOARD_LPCXPRESSO
 	default "m68322evb"           if ARCH_BOARD_M68332EVB
+	default "maple"               if ARCH_BOARD_MAPLE
 	default "mbed"                if ARCH_BOARD_MBED
 	default "mcu123-lpc214x"      if ARCH_BOARD_MCU123
 	default "micropendous3"       if ARCH_BOARD_MICROPENDOUS3
@@ -831,7 +841,7 @@ config ARCH_BOARD
 	default "sam4s-xplained"      if ARCH_BOARD_SAM4S_XPLAINED
 	default "shenzhou"            if ARCH_BOARD_SHENZHOU
 	default "skp16c26"            if ARCH_BOARD_SKP16C26
-	default "maple"               if ARCH_BOARD_MAPLE
+	default "spark"               if ARCH_BOARD_SPARK
 	default "stm32_tiny"          if ARCH_BOARD_STM32_TINY
 	default "stm3210e-eval"       if ARCH_BOARD_STM3210E_EVAL
 	default "stm3220g-eval"       if ARCH_BOARD_STM3220G_EVAL
@@ -987,6 +997,9 @@ endif
 if ARCH_BOARD_M68332EVB
 source "configs/m68332evb/Kconfig"
 endif
+if ARCH_BOARD_MAPLE
+source "configs/maple/Kconfig"
+endif
 if ARCH_BOARD_MBED
 source "configs/mbed/Kconfig"
 endif
@@ -1071,8 +1084,8 @@ endif
 if ARCH_BOARD_SKP16C26
 source "configs/skp16c26/Kconfig"
 endif
-if ARCH_BOARD_MAPLE
-source "configs/maple/Kconfig"
+if ARCH_BOARD_SPARK
+source "configs/spark/Kconfig"
 endif
 if ARCH_BOARD_STM32_TINY
 source "configs/stm32_tiny/Kconfig"
