@@ -4,6 +4,16 @@
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * References:
+ *
+ *   SAMA5D3 Series Data Sheet
+ *   Atmel NoOS sample code.
+ *
+ * The Atmel sample code has a BSD compatibile license that requires this
+ * copyright notice:
+ *
+ *   Copyright (c) 2012, Atmel Corporation
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -14,8 +24,8 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
+ * 3. Neither the names NuttX nor Atmel nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -58,6 +68,7 @@
 
 #include "chip.h"
 #include "chip/sam_adc.h"
+#include "chip/sam_pmc.h"
 #include "sam_dmac.h"
 #include "sam_adc.h"
 
@@ -125,6 +136,16 @@
    SAMA5_CHAN6_ENABLE  || SAMA5_CHAN7_ENABLE  || SAMA5_CHAN8_ENABLE  || \
    SAMA5_CHAN9_ENABLE  || SAMA5_CHAN10_ENABLE || SAMA5_CHAN11_ENABLE)
 
+#ifdef CONFIG_SAMA5_TOUCHSCREEN
+#  ifdef CONFIG_SAMA5_TSD_5WIRE
+#    SAMA5_ADC_CHALL             (ADC_CHALL & ~TSD_5WIRE_ALL)
+#  else
+#    SAMA5_ADC_CHALL             (ADC_CHALL & ~TSD_4WIRE_ALL)
+#  endif
+#else
+#  SAMA5_ADC_CHALL                ADC_CHALL
+#endif
+
 /* DMA configuration flags */
 
 #ifdef CONFIG_SAMA5_ADC_DMA
@@ -138,7 +159,53 @@
      DMACH_FLAG_MEMCHUNKSIZE_1)
 #endif
 
-#define ADC_CLOCK_MAX   20000000  /* Max ADC Clock Frequency (Hz) */
+/* Pick an unused channel number */
+
+#if defined(CONFIG_SAMA5_ADC_CHAN0)
+#  define SAMA5_ADC_UNUSED 0
+#elif defined(CONFIG_SAMA5_ADC_CHAN1)
+#  define SAMA5_ADC_UNUSED 1
+#elif defined(CONFIG_SAMA5_ADC_CHAN2)
+#  define SAMA5_ADC_UNUSED 2
+#elif defined(CONFIG_SAMA5_ADC_CHAN3)
+#  define SAMA5_ADC_UNUSED 3
+#elif defined(CONFIG_SAMA5_ADC_CHAN4)
+#  define SAMA5_ADC_UNUSED 4
+#elif defined(CONFIG_SAMA5_ADC_CHAN5)
+#  define SAMA5_ADC_UNUSED 5
+#elif defined(CONFIG_SAMA5_ADC_CHAN6)
+#  define SAMA5_ADC_UNUSED 6
+#elif defined(CONFIG_SAMA5_ADC_CHAN7)
+#  define SAMA5_ADC_UNUSED 7
+#elif defined(CONFIG_SAMA5_ADC_CHAN8)
+#  define SAMA5_ADC_UNUSED 8
+#elif defined(CONFIG_SAMA5_ADC_CHAN9)
+#  define SAMA5_ADC_UNUSED 9
+#elif defined(CONFIG_SAMA5_ADC_CHAN10)
+#  define SAMA5_ADC_UNUSED 10
+#elif defined(CONFIG_SAMA5_ADC_CHAN11)
+#  define SAMA5_ADC_UNUSED 11
+#else
+#  undef SAMA5_ADC_UNUSED
+#endif
+
+/* Clocking */
+
+#if BOARD_MCK_FREQUENCY <= SAM_ADC_MAXPERCLK
+#  define ADC_FREQUENCY BOARD_MCK_FREQUENCY
+#  define ADC_PCR_DIV PMC_PCR_DIV1
+#elif (BOARD_MCK_FREQUENCY >> 1) <= SAM_ADC_MAXPERCLK
+#  define ADC_FREQUENCY (BOARD_MCK_FREQUENCY >> 1)
+#  define ADC_PCR_DIV PMC_PCR_DIV2
+#elif (BOARD_MCK_FREQUENCY >> 2) <= SAM_ADC_MAXPERCLK
+#  define ADC_FREQUENCY (BOARD_MCK_FREQUENCY >> 2)
+#  define ADC_PCR_DIV PMC_PCR_DIV4
+#elif (BOARD_MCK_FREQUENCY >> 3) <= SAM_ADC_MAXPERCLK
+#  define ADC_FREQUENCY (BOARD_MCK_FREQUENCY >> 3)
+#  define ADC_PCR_DIV PMC_PCR_DIV8
+#else
+#  error Cannot realize ADC input frequency
+#endif
 
 /****************************************************************************
  * Private Types
@@ -202,6 +269,11 @@ static int  sam_adc_setup(struct adc_dev_s *dev);
 static void sam_adc_shutdown(struct adc_dev_s *dev);
 static void sam_adc_rxint(struct adc_dev_s *dev, bool enable);
 static int  sam_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
+
+/* Initialization/Configuration */
+
+static void sam_adc_sequencer(struct sam_tsd_s *priv);
+static void sam_adc_channels(truct sam_tsd_s *priv);
 #endif
 
 /****************************************************************************
@@ -547,24 +619,28 @@ static int sam_adc_interrupt(int irq, void *context)
 static void sam_adc_reset(struct adc_dev_s *dev)
 {
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
-  irqstate_t flags;
   uint32_t regval;
 
-#ifdef CONFIG_SAMA5_ADC_DMA
-  /* Stop any ongoing DMA */
+  /* NOTE: We can't really reset the ADC hardware without losing the
+   * touchscreen configuration.
+   */
 
-  sam_dmastop(priv->dma);
-#endif
+  /* Disable all EOC interrupts */
 
-  /* Reset the ADC controller */
+  sam_adc_putreg(priv, SAM_ADC_IDR, ADC_INT_EOCALL);
 
-  flags = irqsave();
-  sam_adc_putreg(priv, SAM_ADC_CR, ADC_CR_SWRST);
+  /* Disable all channels */
 
-  /* Reset Mode Register */
+  sam_adc_putreg(priv, SAM_ADC_CHDR, SAMA5_ADC_CHALL);
 
-  sam_adc_putreg(priv, SAM_ADC_MR, 0);
-  irqrestore(flags);
+  /* Disable the sequencer */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
+  regval &= ~ADC_MR_USEQ;
+  sam_adc_putreg(priv, SAM_ADC_MR, regval);
+
+  /* Gain, offset, autocal, trigger mode, etc */
+#warning Missing logic
 }
 
 /****************************************************************************
@@ -583,6 +659,30 @@ static int sam_adc_setup(struct adc_dev_s *dev)
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
   int ret;
 
+  /* Enable (or disable) the sequencer */
+
+  sam_adc_sequencer(priv);
+
+  /* Enable ADC channels */
+
+  sam_adc_channels(priv);
+
+  /* Set gain and offset (only single ended mode used here) */
+#warning Missing logic
+
+  /* Set Auto Calibration Mode*/
+#warning Missing logic
+
+#ifdef CONFIG_SAMA5_ADC_DMA
+  /* Configure for DMA transfer */
+#warning Missing logic
+
+#else
+  /* Enable end-of-conversion interrupts for all enabled channels. */
+#warning Missing logic
+
+#endif
+
   /* Attach the ADC interrupt */
 
   ret = irq_attach(SAM_IRQ_ADC, sam_adc_interrupt);
@@ -595,6 +695,10 @@ static int sam_adc_setup(struct adc_dev_s *dev)
   /* Enable the ADC interrupt */
 
   up_enable_irq(SAM_IRQ_ADC);
+
+  /* Configure trigger mode and start convention */
+#warning Missing logic
+
   return OK;
 }
 
@@ -655,7 +759,7 @@ static void sam_adc_rxint(struct adc_dev_s *dev, bool enable)
  * Name: sam_adc_ioctl
  *
  * Description:
- *  All ioctl calls will be routed through this method
+ *   All ioctl calls will be routed through this method
  *
  ****************************************************************************/
 
@@ -665,6 +769,206 @@ static int sam_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
   return -ENOTTY;
 }
+
+/****************************************************************************
+ * Name: sam_adc_sequencer
+ *
+ * Description:
+ *   Configure and enable the sequencer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_ADC_SEQUENCER
+static void sam_adc_setseqr(int chan, uint32_t *seqr1, uint32_t *seqr2, int seq)
+{
+  if (seq > 8)
+    {
+      *seqr2 |= ADC_SEQR2_USCH(seq, chan);
+    }
+  else
+    {
+      *seqr1 |= ADC_SEQR1_USCH(seq, chan);
+    }
+}
+#endif
+
+static void sam_adc_sequencer(truct sam_tsd_s *priv)
+{
+#ifdef CONFIG_SAMA5_ADC_SEQUENCER
+  uint32_t seqr1;
+  uint32_t seqr2;
+  int seq;
+
+  /* Set user configured channel sequence */
+
+  seqr1  = 0;
+  seqr2  = 0;
+  seq    = 0;
+
+#ifdef CONFIG_SAMA5_ADC_CHAN0
+  sam_adc_setseqr(0, &seqr1, &seqr2, seq++);
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN1
+  sam_adc_setseqr(1, &seqr1, &seqr2, seq++);
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN2
+  sam_adc_setseqr(2, &seqr1, &seqr2, seq++);
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN3
+  sam_adc_setseqr(3, &seqr1, &seqr2, seq++);
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN4
+  sam_adc_setseqr(4, &seqr1, &seqr2, seq++);
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN5
+  sam_adc_setseqr(5, &seqr1, &seqr2, seq++);
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN6
+  sam_adc_setseqr(6, &seqr1, &seqr2, seq++);
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN7
+  sam_adc_setseqr(7, &seqr1, &seqr2, seq++);
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN8
+  sam_adc_setseqr(8, &seqr1, &seqr2, seq++);
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN9
+  sam_adc_setseqr(9, &seqr1, &seqr2, seq++);
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN10
+  sam_adc_setseqr(10, &seqr1, &seqr2, seq++);
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN11
+  sam_adc_setseqr(11, &seqr1, &seqr2, seq++);
+#endif
+
+  /* If not all channels are used, then program an unused channel number
+   * into the remaining slots.  If we don't do this, we will get multiple
+   * samples for the enabled channels.
+   */
+
+#ifdef SAMA5_ADC_UNUSED
+  for (; seq < 9; seq++)
+    {
+      seqr1 |= ADC_SEQR1_USCH(seq, SAMA5_ADC_UNUSED);
+    }
+
+  for (; seq < 12; seq++)
+    {
+      seqr2 |= ADC_SEQR2_USCH(seq, SAMA5_ADC_UNUSED);
+    }
+#endif
+
+  /* Save the new values to the SEQR1 and SEQR2 registers */
+
+  sam_adc_putreg(priv, SAM_ADC_SEQR1, seqr1);
+  sam_adc_putreg(priv, SAM_ADC_SEQR2, seqr2);
+
+  /* Enable sequencer.  Any channel that is not enabled will be skipped by
+   * the sequencer (that is why we programmed the unused channels above.
+   */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
+  regval |= ADC_MR_USEQ;
+  sam_adc_putreg(priv, SAM_ADC_MR, regval);
+
+#else
+  uint32_t regval;
+
+  /* Disable the sequencer */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
+  regval &= ~ADC_MR_USEQ;
+  sam_adc_putreg(priv, SAM_ADC_MR, regval);
+
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_adc_channels
+ *
+ * Description:
+ *   Configure and enable the channels
+ *
+ ****************************************************************************/
+
+static void sam_adc_channels(truct sam_tsd_s *priv)
+{
+  uint32_t regval;
+
+  /* Disable the sequencer */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
+  regval &= ~ADC_MR_USEQ;
+  sam_adc_putreg(priv, SAM_ADC_MR, regval);
+
+  /* Enable channels. */
+
+  regval = 0;
+
+  #ifdef CONFIG_SAMA5_ADC_CHAN0
+  regval |= ADC_CH0;
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN1
+  regval |= ADC_CH0;
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN2
+  regval |= ADC_CH0;
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN3
+  regval |= ADC_CH0;
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN4
+  regval |= ADC_CH0;
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN5
+  regval |= ADC_CH0;
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN6
+  regval |= ADC_CH0;
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN7
+  regval |= ADC_CH0;
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN8
+  regval |= ADC_CH0;
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN9
+  regval |= ADC_CH0;
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN10
+  regval |= ADC_CH0;
+#endif
+
+#ifdef CONFIG_SAMA5_ADC_CHAN11
+  regval |= ADC_CH0;
+#endif
+
+  sam_adc_putreg(priv, SAM_ADC_CHER, regval);
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -683,9 +987,9 @@ static int sam_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 
 struct adc_dev_s *sam_adc_initialize(void)
 {
-  /* Enable the ADC peripheral clock*/
+  /* Disable ADC peripheral clock */
 
-  sam_adc_enableclk();
+  sam_adc_disableclk();
 
   /* Configure ADC pins */
 
@@ -740,6 +1044,15 @@ struct adc_dev_s *sam_adc_initialize(void)
   DEBUGASSERT(priv->dma);
 #endif
 
+  /* Set the maximum ADC peripheral clock frequency */
+
+  regval = PMC_PCR_PID(SAM_PID_ADC) | PMC_PCR_CMD | ADC_PCR_DIV | PMC_PCR_EN;
+  sam_adc_putreg(priv, SAM_PMC_PCR, regval);
+
+  /* Enable the ADC peripheral clock*/
+
+  sam_adc_enableclk();
+
   /* Reset the ADC controller */
 
   sam_adc_putreg(priv, SAM_ADC_CR, ADC_CR_SWRST);
@@ -747,6 +1060,32 @@ struct adc_dev_s *sam_adc_initialize(void)
   /* Reset Mode Register */
 
   sam_adc_putreg(priv, SAM_ADC_MR, 0);
+
+  /* Set the MCK clock prescaler: ADCClock = MCK / ((PRESCAL+1)*2) */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
+  regval &= ~ADC_MR_PRESCAL_MASK;
+  regval |=  ADC_MR_PRESCAL(BOARD_ADC_PRESCAL);
+  sam_adc_putreg(priv, SAM_ADC_MR, regval);
+
+  /* Formula:
+   *     Startup  Time = startup value / ADCClock
+   *     Transfer Time = (TRANSFER * 2 + 3) / ADCClock
+   *     Tracking Time = (TRACKTIM + 1) / ADCClock
+   *     Settling Time = settling value / ADCClock
+   * For example, ADC clock = 6MHz (166.7 ns)
+   *     Startup time = 512 / 6MHz = 85.3 us
+   *     Transfer Time = (1 * 2 + 3) / 6MHz = 833.3 ns
+   *     Tracking Time = (0 + 1) / 6MHz = 166.7 ns
+   *     Settling Time = 3 / 6MHz = 500 ns
+   */
+
+  /* Set ADC timing */
+
+  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
+  regval &= ~(ADC_MR_STARTUP_MASK | ADC_MR_TRACKTIM_MASK | ADC_MR_SETTLING_MASK);
+  regval |= ADC_MR_STARTUP_SUT512 | ADC_MR_TRACKTIM(0) | ADC_MR_SETTLING_AST17;
+  sam_adc_puttreg(priv, SAM_ADC_MR, regval);
 
   /* Return a pointer to the device structure */
 
