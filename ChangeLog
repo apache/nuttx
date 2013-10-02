@@ -5691,4 +5691,6 @@
 	* include/nuttx/net/route.h and net/net_*route.c:  Partial
 	  implementation of a routing table. Not yet hooked into the
 	  build system (2013-10-1)
+	* include/net/route.h:  Defines the application interface to
+	  the routing table (2013-10-2).
 

@@ -54,6 +54,8 @@
 #define _SIOCVALID(c)   (_IOC_TYPE(c)==_SIOCBASE)
 #define _SIOC(nr)       _IOC(_SIOCBASE,nr)
 
+/* Interface control operations */
+
 #define SIOCGIFADDR      _SIOC(0x0001)  /* Get IP address */
 #define SIOCSIFADDR      _SIOC(0x0002)  /* Set IP address */
 #define SIOCGIFDSTADDR   _SIOC(0x0003)  /* Get P-to-P address */
@@ -67,9 +69,6 @@
 #define SIOCSIFHWADDR    _SIOC(0x000b)  /* Set hardware address */
 #define SIOCDIFADDR      _SIOC(0x000c)  /* Delete IP address */
 #define SIOCGIFCOUNT     _SIOC(0x000d)  /* Get number of devices */
-
-#define SIOCGIPMSFILTER  _SIOC(0x000e)  /* Retrieve source filter addresses */
-#define SIOCSIPMSFILTER  _SIOC(0x000f)  /* Set source filter content */
 
 /* Newer interface ioctls that use the struct lifreq. Can be used for
  * both IPv4 and IPv6.
@@ -85,71 +84,81 @@
 #define SIOCSLIFNETMASK  SIOCSIFNETMASK /* Set network mask */
 #define SIOCGLIFMTU      SIOCGIFMTU     /* Get MTU size */
 
-/* Wireless ioctl commands **************************************************/
-
-#define SIOCSIWCOMMIT    _SIOC(0x0010)  /* Commit pending changes to driver */
-#define SIOCGIWNAME      _SIOC(0x0011)  /* Get name of wireless protocol */
-
-#define SIOCSIWNWID      _SIOC(0x0012)  /* Set network ID (pre-802.11) */
-#define SIOCGIWNWID      _SIOC(0x0013)  /* Get network ID (the cell) */
-#define SIOCSIWFREQ      _SIOC(0x0014)  /* Set channel/frequency (Hz) */
-#define SIOCGIWFREQ      _SIOC(0x0015)  /* Get channel/frequency (Hz) */
-#define SIOCSIWMODE      _SIOC(0x0016)  /* Set operation mode */
-#define SIOCGIWMODE      _SIOC(0x0017)  /* Get operation mode */
-#define SIOCSIWSENS      _SIOC(0x0018)  /* Set sensitivity (dBm) */
-#define SIOCGIWSENS      _SIOC(0x0019)  /* Get sensitivity (dBm) */
-
-#define SIOCGIWRANGE     _SIOC(0x001a)  /* Get range of parameters */
-#define SIOCGIWPRIV      _SIOC(0x001b)  /* Get private ioctl interface info */
-#define SIOCGIWSTATS     _SIOC(0x001c)  /* Get wireless stats */
-
-#define SIOCSIWSPY       _SIOC(0x001d)  /* Set spy addresses */
-#define SIOCGIWSPY       _SIOC(0x001e)  /* Get spy info (quality of link) */
-#define SIOCSIWTHRSPY    _SIOC(0x001f)  /* Set spy threshold (spy event) */
-#define SIOCGIWTHRSPY    _SIOC(0x0020)  /* Get spy threshold */
-
-#define SIOCSIWAP        _SIOC(0x0021)  /* Set access point MAC addresses */
-#define SIOCGIWAP        _SIOC(0x0022)  /* Get access point MAC addresses */
-#define SIOCGIWAPLIST    _SIOC(0x0023)  /* Deprecated in favor of scanning */
-#define SIOCSIWSCAN      _SIOC(0x0024)  /* Trigger scanning (list cells) */
-#define SIOCGIWSCAN      _SIOC(0x0025)  /* Get scanning results */
-
-#define SIOCSIWESSID     _SIOC(0x0026)  /* Set ESSID (network name) */
-#define SIOCGIWESSID     _SIOC(0x0027)  /* Get ESSID */
-#define SIOCSIWNICKN     _SIOC(0x0028)  /* Set node name/nickname */
-#define SIOCGIWNICKN     _SIOC(0x0029)  /* Get node name/nickname */
-
-#define SIOCSIWRATE      _SIOC(0x002a)  /* Set default bit rate (bps) */
-#define SIOCGIWRATE      _SIOC(0x002b)  /* Get default bit rate (bps) */
-#define SIOCSIWRTS       _SIOC(0x002c)  /* Set RTS/CTS threshold (bytes) */
-#define SIOCGIWRTS       _SIOC(0x002d)  /* Get RTS/CTS threshold (bytes) */
-#define SIOCSIWFRAG      _SIOC(0x002e)  /* Set fragmentation thr (bytes) */
-#define SIOCGIWFRAG      _SIOC(0x002f)  /* Get fragmentation thr (bytes) */
-#define SIOCSIWTXPOW     _SIOC(0x0030)  /* Set transmit power (dBm) */
-#define SIOCGIWTXPOW     _SIOC(0x0031)  /* Get transmit power (dBm) */
-#define SIOCSIWRETRY     _SIOC(0x0032)  /* Set retry limits and lifetime */
-#define SIOCGIWRETRY     _SIOC(0x0033)  /* Get retry limits and lifetime */
-
-#define SIOCSIWPOWER     _SIOC(0x0034)  /* Set Power Management settings */
-#define SIOCGIWPOWER     _SIOC(0x0035)  /* Get Power Management settings */
-
-#define SIOCSIWGENIE     _SIOC(0x0030)  /* Set generic IE */
-#define SIOCGIWGENIE     _SIOC(0x0031)  /* Get generic IE */
-
-#define SIOCSIWMLME      _SIOC(0x0016)  /* Request MLME operation */
-
-#define SIOCSIWAUTH      _SIOC(0x0032)  /* Set authentication mode params */
-#define SIOCGIWAUTH      _SIOC(0x0033)  /* Get authentication mode params */
-
-#define SIOCSIWENCODEEXT _SIOC(0x0034) /* Set encoding token & mode */
-#define SIOCGIWENCODEEXT _SIOC(0x0035) /* Get encoding token & mode */
-
-#define SIOCSIWPMKSA     _SIOC(0x0036) /* PMKSA cache operation */
-
 /* Interface flags */
 
-#define SIOCSIFFLAGS     _SIOC(0x0037) /* Sets the interface flags */
-#define SIOCGIFFLAGS     _SIOC(0x0038) /* Gets the interface flags */
+#define SIOCSIFFLAGS     _SIOC(0x000e) /* Sets the interface flags */
+#define SIOCGIFFLAGS     _SIOC(0x000f) /* Gets the interface flags */
+
+#define SIOCGIPMSFILTER  _SIOC(0x0010)  /* Retrieve source filter addresses */
+#define SIOCSIPMSFILTER  _SIOC(0x0011)  /* Set source filter content */
+
+/* Routing table.  Argument is a reference to struct ortentry in
+ * include/net/route.h
+ */
+
+#define SIOCADDRT        _SIOC(0x0012)  /* Add an entry to the routing table */
+#define SIOCDELRT        _SIOC(0x0013)  /* Delete an entry from the routing table */
+
+/* Wireless ioctl commands **************************************************/
+
+#define SIOCSIWCOMMIT    _SIOC(0x0014)  /* Commit pending changes to driver */
+#define SIOCGIWNAME      _SIOC(0x0015)  /* Get name of wireless protocol */
+
+#define SIOCSIWNWID      _SIOC(0x0016)  /* Set network ID (pre-802.11) */
+#define SIOCGIWNWID      _SIOC(0x0017)  /* Get network ID (the cell) */
+#define SIOCSIWFREQ      _SIOC(0x0018)  /* Set channel/frequency (Hz) */
+#define SIOCGIWFREQ      _SIOC(0x0019)  /* Get channel/frequency (Hz) */
+#define SIOCSIWMODE      _SIOC(0x001a)  /* Set operation mode */
+#define SIOCGIWMODE      _SIOC(0x001b)  /* Get operation mode */
+#define SIOCSIWSENS      _SIOC(0x001c)  /* Set sensitivity (dBm) */
+#define SIOCGIWSENS      _SIOC(0x001d)  /* Get sensitivity (dBm) */
+
+#define SIOCGIWRANGE     _SIOC(0x001e)  /* Get range of parameters */
+#define SIOCGIWPRIV      _SIOC(0x001f)  /* Get private ioctl interface info */
+#define SIOCGIWSTATS     _SIOC(0x0020)  /* Get wireless stats */
+
+#define SIOCSIWSPY       _SIOC(0x0021)  /* Set spy addresses */
+#define SIOCGIWSPY       _SIOC(0x0022)  /* Get spy info (quality of link) */
+#define SIOCSIWTHRSPY    _SIOC(0x0023)  /* Set spy threshold (spy event) */
+#define SIOCGIWTHRSPY    _SIOC(0x0024)  /* Get spy threshold */
+
+#define SIOCSIWAP        _SIOC(0x0025)  /* Set access point MAC addresses */
+#define SIOCGIWAP        _SIOC(0x0026)  /* Get access point MAC addresses */
+#define SIOCGIWAPLIST    _SIOC(0x0027)  /* Deprecated in favor of scanning */
+#define SIOCSIWSCAN      _SIOC(0x0028)  /* Trigger scanning (list cells) */
+#define SIOCGIWSCAN      _SIOC(0x0029)  /* Get scanning results */
+
+#define SIOCSIWESSID     _SIOC(0x002a)  /* Set ESSID (network name) */
+#define SIOCGIWESSID     _SIOC(0x002b)  /* Get ESSID */
+#define SIOCSIWNICKN     _SIOC(0x002c)  /* Set node name/nickname */
+#define SIOCGIWNICKN     _SIOC(0x002d)  /* Get node name/nickname */
+
+#define SIOCSIWRATE      _SIOC(0x002e)  /* Set default bit rate (bps) */
+#define SIOCGIWRATE      _SIOC(0x002f)  /* Get default bit rate (bps) */
+#define SIOCSIWRTS       _SIOC(0x0030)  /* Set RTS/CTS threshold (bytes) */
+#define SIOCGIWRTS       _SIOC(0x0031)  /* Get RTS/CTS threshold (bytes) */
+#define SIOCSIWFRAG      _SIOC(0x0032)  /* Set fragmentation thr (bytes) */
+#define SIOCGIWFRAG      _SIOC(0x0033)  /* Get fragmentation thr (bytes) */
+#define SIOCSIWTXPOW     _SIOC(0x0034)  /* Set transmit power (dBm) */
+#define SIOCGIWTXPOW     _SIOC(0x0035)  /* Get transmit power (dBm) */
+#define SIOCSIWRETRY     _SIOC(0x0036)  /* Set retry limits and lifetime */
+#define SIOCGIWRETRY     _SIOC(0x0037)  /* Get retry limits and lifetime */
+
+#define SIOCSIWPOWER     _SIOC(0x0038)  /* Set Power Management settings */
+#define SIOCGIWPOWER     _SIOC(0x0039)  /* Get Power Management settings */
+
+#define SIOCSIWGENIE     _SIOC(0x003a)  /* Set generic IE */
+#define SIOCGIWGENIE     _SIOC(0x003b)  /* Get generic IE */
+
+#define SIOCSIWMLME      _SIOC(0x003c)  /* Request MLME operation */
+
+#define SIOCSIWAUTH      _SIOC(0x003d)  /* Set authentication mode params */
+#define SIOCGIWAUTH      _SIOC(0x003e)  /* Get authentication mode params */
+
+#define SIOCSIWENCODEEXT _SIOC(0x003f) /* Set encoding token & mode */
+#define SIOCGIWENCODEEXT _SIOC(0x0040) /* Get encoding token & mode */
+
+#define SIOCSIWPMKSA     _SIOC(0x0041) /* PMKSA cache operation */
 
 /****************************************************************************
  * Type Definitions
