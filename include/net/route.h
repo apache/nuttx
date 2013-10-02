@@ -56,27 +56,16 @@
  * Public Types
  ****************************************************************************/
 
-struct ifnet
-{
-  uint16_t           if_index;   /* Interface number */
-  uint16_t           if_mtu;     /* MTU of interface */
-  struct sockaddr_in if_addr;    /* Address of interface */
-  struct sockaddr_in if_netmask; /* Netmask of if_addr */
-};
-
 /* This structure describes the route information passed with the SIOCADDRT
  * and SIOCDELRT ioctl commands (see include/nuttx/net/ioctl.h).
  */
 
-struct ortentry
+struct rtentry
 {
-  uint32_t           rt_hash;    /* To speed lookups */
-  struct sockaddr    rt_dst;     /* Key */
-  struct sockaddr    rt_gateway; /* Value */
-  uint16_t           rt_flags;   /* Up/down?, host/net */
-  uint16_t           rt_refcnt;  /* Number of held references */
-  uint32_t           rt_use;     /* Raw number of packets forwarded */
-  struct ifnet      *rt_ifp;     /* The answer: interface to use */
+  uint16_t rt_ifno;                        /* Interface number, e.g., the 0 in "eth0" */
+  FAR struct sockaddr_storage *rt_target;  /* Target address */
+  FAR struct sockaddr_storage *rt_netmask; /* Network mask defining the sub-net */
+  FAR struct sockaddr_storage *rt_gateway; /* Gateway address associated with the hop */
 };
 
 /****************************************************************************
@@ -94,6 +83,49 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: net_addroute
+ *
+ * Description:
+ *   Add a new route to the routing table.  This is just a convenience
+ *   wrapper for the SIOCADDRT ioctl call.
+ *
+ * Parameters:
+ *   sockfd   - Any socket descriptor
+ *   target   - Target address (required)
+ *   netmask  - Network mask defining the sub-net (required)
+ *   gateway  - Gateway address associated with the hop (optional)
+ *   ifno     - Interface number, e.g., the 0 in "eth0"
+ *
+ * Returned Value:
+ *   OK on success; -1 on failure with the errno variable set appropriately.
+ *
+ ****************************************************************************/
+
+int addroute(int sockfd, FAR struct sockaddr_storage *target,
+             FAR struct sockaddr_storage *netmask,
+             FAR struct sockaddr_storage *gateway, int ifno);
+
+/****************************************************************************
+ * Function: net_delroute
+ *
+ * Description:
+ *   Add a new route to the routing table.  This is just a convenience
+ *   wrapper for the SIOCADDRT ioctl call.
+ *
+ * Parameters:
+ *   sockfd   - Any socket descriptor
+ *   target   - Target address (required)
+ *   netmask  - Network mask defining the sub-net (required)
+ *
+ * Returned Value:
+ *   OK on success; -1 on failure with the errno variable set appropriately.
+ *
+ ****************************************************************************/
+
+int delroute(int sockfd, FAR struct sockaddr_storage *target,
+             FAR struct sockaddr_storage *netmask);
 
 #undef EXTERN
 #ifdef __cplusplus

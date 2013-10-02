@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/ioctl.h
  *
- *   Copyright (C) 2007-2008, 2010-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2008, 2010-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -92,7 +92,7 @@
 #define SIOCGIPMSFILTER  _SIOC(0x0010)  /* Retrieve source filter addresses */
 #define SIOCSIPMSFILTER  _SIOC(0x0011)  /* Set source filter content */
 
-/* Routing table.  Argument is a reference to struct ortentry in
+/* Routing table.  Argument is a reference to struct rtentry as defined in
  * include/net/route.h
  */
 

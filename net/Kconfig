@@ -308,7 +308,7 @@ config NET_ROUTE
 	bool "Routing table suport"
 	default n
 	---help---
-		Build in support for a routing table.  See include/nuttx/net/route.h
+		Build in support for a routing table.  See include/net/route.h
 
 config NET_MAXROUTES
 	int "Routing table size"

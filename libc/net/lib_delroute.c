@@ -1,5 +1,5 @@
-/****************************************************************************
- * net/net_foreachroute.c
+/***************************************************************************
+ * libc/net/lib_delroute.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,68 +31,58 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ***************************************************************************/
 
-/****************************************************************************
+/***************************************************************************
+ * Compilation Switches
+ ***************************************************************************/
+
+/***************************************************************************
  * Included Files
- ****************************************************************************/
+ ***************************************************************************/
 
 #include <nuttx/config.h>
 
+#include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <stdint.h>
-#include <errno.h>
+#include <net/route.h>
 
-#include <arch/irq.h>
-
-#include "net_internal.h"
-#include "net_route.h"
-
-#if defined(CONFIG_NET) && defined(CONFIG_NET_ROUTE)
+/***************************************************************************
+ * Global Functions
+ ***************************************************************************/
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/* This is the routing table */
-
-struct net_route_s g_routes[CONFIG_NET_MAXROUTES];
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Function: net_foreachroute
+ * Function: net_delroute
  *
  * Description:
- *   Traverse the route table
+ *   Add a new route to the routing table.  This is just a convenience
+ *   wrapper for the SIOCADDRT ioctl call.
  *
  * Parameters:
+ *   sockfd   - Any socket descriptor
+ *   target   - Target address (required)
+ *   netmask  - Network mask defining the sub-net (required)
  *
  * Returned Value:
- *   0 if in use; 1 if avaialble and the new entry was added
+ *   OK on success; -1 on failure with the errno variable set appropriately.
  *
  ****************************************************************************/
 
-int net_foreachroute(route_handler_t handler, FAR void *arg)
+int delroute(int sockfd, FAR struct sockaddr_storage *target,
+             FAR struct sockaddr_storage *netmask)
 {
-  uip_lock_t save;
-  int ret = 0;
-  int i;
+  struct rtentry entry;
 
-  /* Prevent concurrent access to the routing table */
+  /* Set up the rtentry structure */
 
-  save = uip_lock();
+  entry.rt_target  = target;  /* Target address */
+  entry.rt_netmask = netmask; /* Network mask defining the sub-net */
 
-  for (i = 0; i < CONFIG_NET_MAXROUTES && ret == 0; i++)
-    {
-      ret = handler(&g_routes[i], arg);
-    }
+  entry.rt_ifno    = 0;       /* (not used for deletion) */
+  entry.rt_gateway = NULL;    /* (not used for deletion) */
 
-  /* Unlock uIP */
+  /* Then perform the ioctl */
 
-  uip_unlock(save);
-  return ret;
+  return ioctl(sockfd, SIOCDELRT, (unsigned long)((uintptr_t)&entry));
 }
-
-#endif /* CONFIG_NET && CONFIG_NET_ROUTE */

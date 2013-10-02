@@ -5695,4 +5695,7 @@
 	  the routing table (2013-10-2).
 	* configs/spark:  Add configuratino for the Spark Core.  The
 	  initial check-in is basically the Maple Mini board (2013-10-2).
+	* include/net/route.h and libc/net/lib_addroute.c and delroute.c:
+	  Add an application interface to manage the routing table
+	  (2013-10-2).
 
