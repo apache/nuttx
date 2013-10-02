@@ -295,7 +295,7 @@ config NET_ARPTAB_SIZE
 	int "ARP table size"
 	default 16
 	---help---
-		The size of the ARP table
+		The size of the ARP table (in entries).
 
 config NET_ARP_IPIN
 	bool "ARP address harvesting"
@@ -303,6 +303,19 @@ config NET_ARP_IPIN
 	---help---
 		Harvest IP/MAC address mappings from the ARP table
 		from incoming IP packets.
+
+config NET_ROUTE
+	bool "Routing table suport"
+	default n
+	---help---
+		Build in support for a routing table.  See include/nuttx/net/route.h
+
+config NET_MAXROUTES
+	int "Routing table size"
+	default 4
+	depends on NET_ROUTE
+	---help---
+		The size of the routing table (in entries).
 
 config NET_MULTICAST
 	bool "Multi-cast Tx support"

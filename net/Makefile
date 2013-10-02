@@ -62,6 +62,12 @@ endif
 endif
 endif
 
+# Routing table support
+
+ifeq ($(CONFIG_NET_ROUTE),y)
+SOCK_CSRCS += net_addroute.c net_delroute.c net_findroute.c net_foreachroute.c
+endif
+
 # Support for network access using streams
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)

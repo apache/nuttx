@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <string.h>
 #include <errno.h>
 
 #include <nuttx/net/route.h>
@@ -117,4 +118,4 @@ int net_addroute(uip_ipaddr_t target, uip_ipaddr_t netmask,
   return net_foreachroute(net_available, &route) ? OK : -EAGAIN;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET && CONFIG_NET_ROUTE */

@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <string.h>
 #include <errno.h>
 
 #include <nuttx/net/route.h>
@@ -54,8 +55,8 @@
 
 struct route_match_s
 {
-  uip_ipaddr_t target;   /* The target IP address to match */
-  uip_ipaddr_t netmask;  /* The network mask to match */
+  uip_ipaddr_t target;           /* The target IP address to match */
+  FAR struct net_route_s *route; /* The location to return the route */
 };
 
 /****************************************************************************
@@ -81,17 +82,17 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
 {
   FAR struct route_match_s *match = ( FAR struct route_match_s *)arg;
 
-  /* To match, the entry has to be in use, the masked target address must
-   * be the same, and the masks must be the same.
+  /* To match, the entry has to be in use, the masked target addresses must
+   * be the same.  In the event of multiple matches, only the first is
+   * returned.
    */
 
   if (route->inuse &&
-      uip_ipaddr_maskcmp(route->target, match->target, match->netmask) &&
-      uip_ipaddr_cmp(route->target, match->netmask))
+      uip_ipaddr_maskcmp(route->target, match->target, route->netmask))
     {
       /* They match.. clear the route table entry */
 
-      memset(route, 0, sizeof(struct net_route_s));
+      memcpy(match->route, route, sizeof(struct net_route_s));
       return 1;
     }
 
@@ -103,10 +104,10 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_delroute
+ * Function: net_findroute
  *
  * Description:
- *   Remove an existing route from the routing table
+ *   Given an IP address, return a copy of the routing table contents
  *
  * Parameters:
  *
@@ -115,18 +116,18 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
  *
  ****************************************************************************/
 
-int net_delroute(uip_ipaddr_t target, uip_ipaddr_t netmask);
+int net_findroute(uip_ipaddr_t target, FAR struct net_route_s *route)
 {
   struct route_match_s match;
 
   /* Set up the comparison structure */
 
   uip_ipaddr_copy(match.target, target);
-  uip_ipaddr_copy(match.netmask, netmask);
+  match.route = route;
 
   /* Then remove the entry from the routing table */
 
   return net_foreachroute(net_match, &match) ? OK : -ENOENT;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET && CONFIG_NET_ROUTE */

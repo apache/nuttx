@@ -42,6 +42,7 @@
 #include <stdint.h>
 #include <errno.h>
 
+#include <arch/irq.h>
 #include <nuttx/net/route.h>
 
 #include "net_internal.h"
@@ -85,7 +86,7 @@ int net_foreachroute(route_handler_t handler, FAR void *arg)
 
   for (i = 0; i < CONFIG_NET_MAXROUTES && ret == 0; i++)
     {
-      ret = handler(&g_route[i], arg);
+      ret = handler(&g_routes[i], arg);
     }
 
   /* Unlock uIP */
@@ -94,4 +95,4 @@ int net_foreachroute(route_handler_t handler, FAR void *arg)
   return ret;
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_SOCKOPTS && !CONFIG_DISABLE_CLOCK */
+#endif /* CONFIG_NET && CONFIG_NET_ROUTE */
