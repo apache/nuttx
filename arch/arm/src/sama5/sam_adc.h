@@ -121,7 +121,7 @@ extern "C"
  ****************************************************************************/
 
 struct sam_adc_s;
-FAR struct sam_adc_s *sam_adcinitialize(void);
+FAR struct sam_adc_s *sam_adc_initialize(void);
 
 /****************************************************************************
  * Interfaces exported from the ADC to the touchscreen driver

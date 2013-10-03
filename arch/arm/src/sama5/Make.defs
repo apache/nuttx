@@ -176,7 +176,6 @@ endif
 
 ifeq ($(CONFIG_SAMA5_ADC),y)
 CHIP_CSRCS += sam_adc.c
-else
 ifeq ($(CONFIG_SAMA5_TSD),y)
 CHIP_CSRCS += sam_tsd.c
 endif

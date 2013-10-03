@@ -69,6 +69,7 @@
 #include "chip.h"
 #include "chip/sam_adc.h"
 #include "chip/sam_pmc.h"
+#include "sam_periphclks.h"
 #include "sam_dmac.h"
 #include "sam_tsd.h"
 #include "sam_adc.h"
@@ -286,12 +287,12 @@
 
 #ifdef CONFIG_SAMA5_TSD
 #  ifdef CONFIG_SAMA5_TSD_5WIRE
-#    SAMA5_ADC_CHALL  (ADC_CHALL & ~TSD_5WIRE_ALL)
+#    define SAMA5_ADC_CHALL  (ADC_CHALL & ~TSD_5WIRE_ALL)
 #  else
-#    SAMA5_ADC_CHALL  (ADC_CHALL & ~TSD_4WIRE_ALL)
+#    define SAMA5_ADC_CHALL  (ADC_CHALL & ~TSD_4WIRE_ALL)
 #  endif
 #else
-#  SAMA5_ADC_CHALL    ADC_CHALL
+#  define SAMA5_ADC_CHALL    ADC_CHALL
 #endif
 
 /* DMA configuration flags */
@@ -409,6 +410,7 @@ static bool sam_adc_checkreg(struct sam_adc_s *priv, bool wr,
 
 /* DMA helper functions */
 
+#ifdef SAMA5_ADC_HAVE_CHANNELS
 #ifdef CONFIG_SAMA5_ADC_DMA
 static void sam_adc_dmadone(void *arg);
 static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result);
@@ -418,7 +420,6 @@ static int  sam_adc_dmasetup(struct sam_adc_s *priv, FAR uint8_t *buffer,
 
 /* ADC interrupt handling */
 
-#ifdef SAMA5_ADC_HAVE_CHANNELS
 static void sam_adc_endconversion(void *arg);
 #endif
 static int  sam_adc_interrupt(int irq, void *context);
@@ -440,7 +441,7 @@ static void sam_adc_offset(struct sam_adc_s *priv);
 static void sam_adc_gain(struct sam_adc_s *priv);
 static void sam_adc_analogchange(struct sam_adc_s *priv);
 static void sam_adc_sequencer(struct sam_adc_s *priv);
-static void sam_adc_channels(truct sam_adc_s *priv);
+static void sam_adc_channels(struct sam_adc_s *priv);
 #endif
 
 /****************************************************************************
@@ -772,6 +773,7 @@ ignored:
 
   sem_adc_unlock(priv->adc);
 }
+#endif /* SAMA5_ADC_HAVE_CHANNELS */
 
 /****************************************************************************
  * Name: sam_adc_interrupt
@@ -783,12 +785,10 @@ ignored:
 
 static int sam_adc_interrupt(int irq, void *context)
 {
-  struct sam_adc_s *priv = (struct sam_adc_s *)g_adcdev.ad_priv;
+  struct sam_adc_s *priv = &g_adcpriv;
   uint32_t isr;
   uint32_t imr;
   uint32_t pending;
-  uint32_t regval;
-  int ret;
 
   /* Get the set of unmasked, pending ADC interrupts */
 
@@ -799,12 +799,12 @@ static int sam_adc_interrupt(int irq, void *context)
   /* Handle pending touchscreen interrupts */
 
 #ifdef CONFIG_SAMA5_TSD
-  if ((pending & ADC_TSD_INTS) != 0)
+  if ((pending & ADC_TSD_ALLINTS) != 0)
     {
       /* Let the touchscreen handle its interrupts */
 
-      sam_adc_interrupt(pending);
-      pending &= ~ADC_TSD_INTS;
+      sam_tsd_interrupt(pending);
+      pending &= ~ADC_TSD_ALLINTS;
     }
 #endif
 
@@ -813,6 +813,8 @@ static int sam_adc_interrupt(int irq, void *context)
 
   if ((pending & ADC_INT_EOCALL) != 0)
     {
+      int ret;
+
       /* Disable further end-of-conversion interrupts.  End-of-conversion
        * interrupts will be re-enabled after the worker thread executes.
        */
@@ -846,6 +848,8 @@ static int sam_adc_interrupt(int irq, void *context)
   DEBUGASSERT(pending == 0);
   return OK;
 }
+
+#ifdef SAMA5_ADC_HAVE_CHANNELS
 
 /****************************************************************************
  * ADC methods
@@ -900,7 +904,7 @@ static void sam_adc_reset(struct adc_dev_s *dev)
 
   regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
   regval &= ~ADC_TRGR_TRGMOD_MASK;
-  regval |= ADC_TRGR_TRGMOD_NO_TRIGGER;
+  regval |= ADC_TRGR_TRGMOD_NOTRIG;
   sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
 #endif
 }
@@ -927,7 +931,7 @@ static int sam_adc_setup(struct adc_dev_s *dev)
 
   regval  = sam_adc_getreg(priv, SAM_ADC_EMR);
   regval |= ADC_EMR_TAG;
-  sam_adc_puttreg(priv, SAM_ADC_EMR, regval);
+  sam_adc_putreg(priv, SAM_ADC_EMR, regval);
 
   /* Enable (or disable) the sequencer */
 
@@ -1084,7 +1088,7 @@ static void sam_adc_trigger(struct sam_adc_s *priv)
 
   regval  = sam_adc_getreg(priv, SAM_ADC_TRGR);
   regval &= ~ADC_TRGR_TRGMOD_MASK;
-  regval |= ADC_TRGR_TRGMOD_NO_TRIGGER;
+  regval |= ADC_TRGR_TRGMOD_NOTRIG;
   sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
 
 #elif defined(CONFIG_SAMA5_ADC_ADTRG)
@@ -1418,7 +1422,7 @@ static void sam_adc_setseqr(int chan, uint32_t *seqr1, uint32_t *seqr2, int seq)
 }
 #endif
 
-static void sam_adc_sequencer(truct sam_adc_s *priv)
+static void sam_adc_sequencer(struct sam_adc_s *priv)
 {
 #ifdef CONFIG_SAMA5_ADC_SEQUENCER
   uint32_t seqr1;
@@ -1520,7 +1524,6 @@ static void sam_adc_sequencer(truct sam_adc_s *priv)
 
 #endif
 }
-#endif
 
 /****************************************************************************
  * Name: sam_adc_channels
@@ -1530,7 +1533,7 @@ static void sam_adc_sequencer(truct sam_adc_s *priv)
  *
  ****************************************************************************/
 
-static void sam_adc_channels(truct sam_adc_s *priv)
+static void sam_adc_channels(struct sam_adc_s *priv)
 {
   uint32_t regval;
 
@@ -1594,7 +1597,7 @@ static void sam_adc_channels(truct sam_adc_s *priv)
 
   sam_adc_putreg(priv, SAM_ADC_CHER, regval);
 }
-#endif
+#endif /* SAMA5_ADC_HAVE_CHANNELS */
 
 /****************************************************************************
  * Public Functions
@@ -1611,9 +1614,11 @@ static void sam_adc_channels(truct sam_adc_s *priv)
  *
  ****************************************************************************/
 
-struct adc_dev_s *sam_adc_initialize(void)
+struct sam_adc_s *sam_adc_initialize(void)
 {
   struct sam_adc_s *priv = &g_adcpriv;
+  uint32_t regval;
+  int ret;
 
   /* Have we already been initialzed?  If yes, than just hand out the
    * interface one more time.
@@ -1719,8 +1724,8 @@ struct adc_dev_s *sam_adc_initialize(void)
 
       regval  = sam_adc_getreg(priv, SAM_ADC_MR);
       regval &= ~(ADC_MR_STARTUP_MASK | ADC_MR_TRACKTIM_MASK | ADC_MR_SETTLING_MASK);
-      regval |= ADC_MR_STARTUP_SUT512 | ADC_MR_TRACKTIM(0) | ADC_MR_SETTLING_AST17;
-      sam_adc_puttreg(priv, SAM_ADC_MR, regval);
+      regval |= (ADC_MR_STARTUP_512 | ADC_MR_TRACKTIM(0) | ADC_MR_SETTLING_17);
+      sam_adc_putreg(priv, SAM_ADC_MR, regval);
 
       /* Attach the ADC interrupt */
 
@@ -1741,12 +1746,12 @@ struct adc_dev_s *sam_adc_initialize(void)
 
       /* Now we are initialized */
 
-      priv->intialized = true;
+      priv->initialized = true;
     }
 
   /* Return a pointer to the device structure */
 
-  return &g_adcdev;
+  return &g_adcpriv;
 }
 
 /****************************************************************************
@@ -1784,7 +1789,7 @@ void sam_adc_lock(FAR struct sam_adc_s *priv)
 
 void sam_adc_unlock(FAR struct sam_adc_s *priv)
 {
-  sem_post(&priv->exclsem)
+  sem_post(&priv->exclsem);
 }
 
 /****************************************************************************
@@ -1796,7 +1801,7 @@ void sam_adc_unlock(FAR struct sam_adc_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_ADC_REGDEBUG
-static uint32_t sam_adc_getreg(struct sam_adc_s *priv, uintptr_t address)
+uint32_t sam_adc_getreg(struct sam_adc_s *priv, uintptr_t address)
 {
   uint32_t regval = getreg32(address);
 
