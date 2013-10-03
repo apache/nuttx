@@ -308,6 +308,8 @@
 #define ADC_INT_NOPEN              (1 << 30) /* Bit 30: No Pen Contact Interrupt */
 #define ADC_SR_PENS                (1 << 31) /* Bit 31: Pen detect Status (SR only) */
 
+#define ADC_INT_ALL                (0xe7f00fff)
+
 /* Overrun Status Register */
 
 #define ADC_OVER_OVRE(n)           (1 << (n))
@@ -396,6 +398,7 @@
 #define ADC_COR_OFF9               (1 << 9)  /* Bit 9:  Offset for channel 9 */
 #define ADC_COR_OFF10              (1 << 10) /* Bit 10: Offset for channel 10 */
 #define ADC_COR_OFF11              (1 << 11) /* Bit 11: Offset for channel 11 */
+
 #define ADC_COR_DIFF(n)            (1 << ((n)+16))
 #define ADC_COR_DIFF0              (1 << 16) /* Bit 16: Offset for channel 0 */
 #define ADC_COR_DIFF1              (1 << 17) /* Bit 17: Offset for channel 1 */
