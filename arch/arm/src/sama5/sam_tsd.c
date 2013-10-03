@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_touchsreen.c
+ * arch/arm/src/sama5/sam_tsd.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -65,9 +65,9 @@
 
 #include <nuttx/input/touchscreen.h>
 
-#include "sam_touchscreen.h"
+#include "sam_tsd.h"
 
-#if defined(CONFIG_SAMA5_ADC) && defined(CONFIG_SAMA5_TOUCHSCREEN)
+#if defined(CONFIG_SAMA5_ADC) && defined(CONFIG_SAMA5_TSD)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -929,7 +929,7 @@ static int sam_tsd_close(struct file *filep)
   FAR struct watchdog_upperhalf_s *priv = inode->i_private;
   int ret;
 
-  wdvdbg("crefs: %d\n", priv->crefs);
+  ivdbg("crefs: %d\n", priv->crefs);
 
   /* Get exclusive access to the device structures */
 
@@ -1780,4 +1780,4 @@ void sam_tsd_interrupt(uint32_t pending)
   return ret;
 }
 
-#endif /* CONFIG_SAMA5_ADC && CONFIG_SAMA5_TOUCHSCREEN */
+#endif /* CONFIG_SAMA5_ADC && CONFIG_SAMA5_TSD */

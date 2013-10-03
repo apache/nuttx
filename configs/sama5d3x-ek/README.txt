@@ -1836,7 +1836,7 @@ Configurations
          nsh> cat /mnt/at24/atest.txt
          This is a test
 
-    13. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
+    14. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
         used to peek and poke I2C devices.  That tool cal be enabled by
         setting the following:
 
@@ -1910,7 +1910,7 @@ Configurations
         Address 0x1a is the WM8904.  Address 0x39 is the SIL9022A. I am
         not sure what is at address 0x3d and 0x60
 
-    14. Networking support via the can be added to NSH be selecting the
+    15. Networking support via the can be added to NSH be selecting the
         following configuration options.  The SAMA5D3x supports two different
         Ethernet MAC peripherals:  (1) The 10/100Base-T EMAC peripheral and
         and (2) the 10/100/1000Base-T GMAC peripheral.  Only the SAMA5D31
@@ -2083,7 +2083,38 @@ Configurations
           This delay will be especially long if the board is not connected to
           a network.
 
+    16. You can enable the touchscreen by modifying the configuration
+        in the following ways:
+
+        System Type:
+          CONFIG_SAMA5_ADC=y                     : ADC support is required
+          CONFIG_SAMA5_TSD=y                     : Enabled touchcreen device support
+          SAMA5_TSD_4WIRE=y                      : 4-Wire interface with pressure
+
+        You might want to tinker with the SWAPXY and THRESHX and THRESHY
+        settings to get the result that you want.
+
+        Drivers:
+          CONFIG_INPUT=y                         : (automatically selected)
+
+        Board Selection:
+           CONFIG_SAMA5_TSD_DEVMINOR=0           : Register as /dev/input0
+
+        Library Support:
+          CONFIG_SCHED_WORKQUEUE=y               : Work queue support required
+
+        These options may also be applied to enable a built-in touchscreen
+        test application:
+
+        Applicaton Configuration:
+          CONFIG_EXAMPLES_TOUCHSCREEN=y          : Enable the touchscreen built-int test
+          CONFIG_EXAMPLES_TOUCHSCREEN_MINOR=0    : To match the board selection
+          CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH="/dev/input0"
+
+        Defaults should be okay for all related settings.
+
     STATUS:
+
       PCK FREQUENCY
       2013-7-19:  This configuration (as do the others) run at 396MHz.
         The SAMA5D3 can run at 536MHz.  I still need to figure out the

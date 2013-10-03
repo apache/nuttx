@@ -830,6 +830,674 @@ endif # SAMA5_OHCI || SAMA5_EHCI
 endmenu # USB High Speed Host Controller driver (HCD) options
 endif # SAMA5_UHPHS
 
+if SAMA5_ADC
+menu "ADC configuration"
+
+config SAMA5_ADC_HAVE_CHAN
+	bool
+	default n
+
+menu "ADC Channel selection"
+
+config SAMA5_ADC_CHAN0
+	bool "Channel 0"
+	default n
+	depends on !SAMA5_TSD
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 0
+
+config SAMA5_ADC_CHAN1
+	bool "Channel 1"
+	default n
+	depends on !SAMA5_TSD
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 1
+
+config SAMA5_ADC_CHAN2
+	bool "Channel 2"
+	default n
+	depends on !SAMA5_TSD
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 2
+
+config SAMA5_ADC_CHAN3
+	bool "Channel 3"
+	default n
+	depends on !SAMA5_TSD
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 3
+
+config SAMA5_ADC_CHAN4
+	bool "Channel 4"
+	default n
+	depends on !SAMA5_TSD || !SAMA5_TSD_5WIRE
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 4
+
+config SAMA5_ADC_CHAN5
+	bool "Channel 5"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 5
+
+config SAMA5_ADC_CHAN6
+	bool "Channel 6"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 6
+
+config SAMA5_ADC_CHAN7
+	bool "Channel 7"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 7
+
+config SAMA5_ADC_CHAN8
+	bool "Channel 8"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 8
+
+config SAMA5_ADC_CHAN9
+	bool "Channel 9"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 9
+
+config SAMA5_ADC_CHAN10
+	bool "Channel 10"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 10
+
+config SAMA5_ADC_CHAN11
+	bool "Channel 11"
+	default n
+	select SAMA5_ADC_HAVE_CHAN
+	---help---
+		Enable ADC sampling on ADC channel 11
+
+endmenu # ADC Channel selection
+
+if SAMA5_ADC_HAVE_CHAN
+
+config SAMA5_ADC_DMA
+	bool "DMA Support"
+	default n
+	---help---
+		Enable DMA transfers of converted data.  This option is only
+		useful if you have numerous DMA channels enabled.  The end result
+		is that there will be one DMA interrupt per conversion sequence vs.
+		one interrupt per conversion.
+
+config SAMA5_ADC_AUTOCALIB
+	bool "ADC auto-calibration"
+	default n
+	---help---
+		Perform ADC auto-calibration during the ADC initialization sequence
+
+config SAMA5_ADC_SEQUENCER
+	bool "ADC sequencer"
+	default n
+	---help---
+		Enable the sequencer to perform ADC conversions.  Recommended if you
+		enable several ADC channels.
+
+config SAMA5_ADC_ANARCH
+	bool "Analog changes"
+	default n
+	---help---
+		This option allows you to select different gain, offset, and single
+		vs. differential modes for each channel.
+
+if SAMA5_ADC_ANARCH
+
+menu "Channel gain"
+
+config SAMA5_ADC_GAIN0
+	int "Channel 0 gain"
+	default 0
+	depends on SAMA5_ADC_CHAN0
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN1
+	int "Channel 1 gain"
+	default 0
+	depends on SAMA5_ADC_CHAN1
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN2
+	int "Channel 2 gain"
+	default 0
+	depends on SAMA5_ADC_CHAN2
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN3
+	int "Channel 3 gain"
+	default 0
+	depends on SAMA5_ADC_CHAN3
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN4
+	int "Channel 4 gain"
+	default 0
+	depends on SAMA5_ADC_CHAN4
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN5
+	int "Channel 5 gain"
+	default 0
+	depends on SAMA5_ADC_CHAN5
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN6
+	int "Channel 6 gain"
+	default 0
+	depends on SAMA5_ADC_CHAN6
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN7
+	int "Channel 7 gain"
+	default 0
+	depends on SAMA5_ADC_CHAN7
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN8
+	int "Channel 8 gain"
+	default 0
+	depends on SAMA5_ADC_CHAN8
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN9
+	int "Channel 9 gain"
+	default 0
+	depends on SAMA5_ADC_CHAN9
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN10
+	int "Channel 10 gain"
+	default 0
+	depends on SAMA5_ADC_CHAN10
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+config SAMA5_ADC_GAIN11
+	int "Channel 11 gain"
+	default 0
+	depends on SAMA5_ADC_CHAN11
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channel is configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channel is configured for
+		differential mode.
+
+endmenu # Channel gain
+
+menu "Channel offsets"
+
+config SAMA5_ADC_OFFSET0
+	bool "Channel 0 offset"
+	default n
+	depends on SAMA5_ADC_CHAN0
+	---help---
+		Center the channel 0 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET1
+	bool "Channel 1 offset"
+	default n
+	depends on SAMA5_ADC_CHAN1
+	---help---
+		Center the channel 1 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET2
+	bool "Channel 2 offset"
+	default n
+	depends on SAMA5_ADC_CHAN2
+	---help---
+		Center the channel 2 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET3
+	bool "Channel 3 offset"
+	default n
+	depends on SAMA5_ADC_CHAN3
+	---help---
+		Center the channel 3 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET4
+	bool "Channel 4 offset"
+	default n
+	depends on SAMA5_ADC_CHAN4
+	---help---
+		Center the channel 4 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET5
+	bool "Channel 5 offset"
+	default n
+	depends on SAMA5_ADC_CHAN5
+	---help---
+		Center the channel 5 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET6
+	bool "Channel 6 offset"
+	default n
+	depends on SAMA5_ADC_CHAN6
+	---help---
+		Center the channel 6 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET7
+	bool "Channel 7 offset"
+	default n
+	depends on SAMA5_ADC_CHAN7
+	---help---
+		Center the channel 7 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET8
+	bool "Channel 8 offset"
+	default n
+	depends on SAMA5_ADC_CHAN8
+	---help---
+		Center the channel 8 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET9
+	bool "Channel 9 offset"
+	default n
+	depends on SAMA5_ADC_CHAN9
+	---help---
+		Center the channel 9 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET10
+	bool "Channel 10 offset"
+	default n
+	depends on SAMA5_ADC_CHAN10
+	---help---
+		Center the channel 10 analog signal on Vrefin/2 before the gain
+		scaling.
+
+config SAMA5_ADC_OFFSET11
+	bool "Channel 11 offset"
+	default n
+	depends on SAMA5_ADC_CHAN11
+	---help---
+		Center the channel 11 analog signal on Vrefin/2 before the gain
+		scaling.
+
+endmenu # Channel offsets
+
+menu "Channel differential mode"
+
+config SAMA5_ADC_DIFFMODE0
+	bool "Channel 0 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN0
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 0
+
+config SAMA5_ADC_DIFFMODE1
+	bool "Channel 1 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN1
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 1
+
+config SAMA5_ADC_DIFFMODE2
+	bool "Channel 2 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN2
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 2
+
+config SAMA5_ADC_DIFFMODE3
+	bool "Channel 3 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN3
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 3
+
+config SAMA5_ADC_DIFFMODE4
+	bool "Channel 4 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN4
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 4
+
+config SAMA5_ADC_DIFFMODE5
+	bool "Channel 5 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN5
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 5
+
+config SAMA5_ADC_DIFFMODE6
+	bool "Channel 6 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN6
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 6
+
+config SAMA5_ADC_DIFFMODE7
+	bool "Channel 7 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN7
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 7
+
+config SAMA5_ADC_DIFFMODE8
+	bool "Channel 8 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN8
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 8
+
+config SAMA5_ADC_DIFFMODE9
+	bool "Channel 9 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN9
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 9
+
+config SAMA5_ADC_DIFFMODE10
+	bool "Channel 10 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN10
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 10
+
+config SAMA5_ADC_DIFFMODE11
+	bool "Channel 11 differential mode"
+	default n
+	depends on SAMA5_ADC_CHAN11
+	---help---
+		Selects differential (vs. single-ended mode) for ADC channel 11
+
+endmenu # Differential mode
+endif # SAMA5_ADC_ANARCH
+
+if !SAMA5_ADC_ANARCH
+
+config SAMA5_ADC_GAIN
+	int "Analog gain"
+	depends on SAMA5_ADC_CHAN0
+	range 0 3
+	---help---
+		Valid gain settings are {0, 1, 2, 3} which may be interpreted as
+		either {1, 1, 2, 4} if the channels are configured for single ended
+		mode or as {0.5, 1, 2, 2} if the channels are configured for
+		differential mode.
+
+config SAMA5_ADC_OFFSET
+	bool "Offset"
+	default n
+	---help---
+		Center the analog signal on Vrefin/2 before the gain scaling.
+
+config SAMA5_ADC_DIFFMODE
+	bool "Differential mode"
+	default n
+	---help---
+		Selects differential (vs. single-ended mode)
+
+endif # !SAMA5_ADC_ANARCH
+
+menu "ADC Trigger Selection"
+
+choice
+	prompt "ADC trigger mode"
+	default SAMA5_ADC_SWTRIG
+	---help---
+		Select the event that will trigger the A-to-D conversion sequence.
+
+config SAMA5_ADC_SWTRIG
+	bool "Software trigger"
+	---help---
+		A-to-D Conversion is initiated only by sofware via an ioctl()
+
+config SAMA5_ADC_ADTRG
+	bool "External trigger via the ADTRG pin"
+	---help---
+		A-to-D Conversion is initiated an event on the ADTRG pin.
+
+config SAMA5_ADC_TIOATRIG
+	bool "TC0 ouput A trigger"
+	---help---
+		A-to-D Conversion is initiated the A output from one of
+		Timer/Counter 0 channels.
+
+endchoice # Trigger mode
+
+choice
+	prompt "ADTRG edge"
+	default SAMA5_ADC_ADTRG_BOTH
+	depends on SAMA5_ADC_ADTRG
+
+config SAMA5_ADC_ADTRG_RISING
+	bool "Rising edge"
+	---help---
+		Trigger A-to-D conversion on the rising edge of the ADTRG signal.
+
+config SAMA5_ADC_ADTRG_FALLING
+	bool "Falling edge"
+	---help---
+		Trigger A-to-D conversion on the falling edge of the ADTRG signal.
+
+config SAMA5_ADC_ADTRG_BOTH
+	bool "Both edges"
+	---help---
+		Trigger A-to-D conversion on both edges of the ADTRG signal
+
+endchoice # ADTRG edge
+
+if SAMA5_ADC_TIOATRIG
+
+choice
+	prompt "TC0 channel"
+	default SAMA5_ADC_TIOA0TRIG
+
+config SAMA5_ADC_TIOA0TRIG
+	bool "TC0 Channel 0 Output A"
+	---help---
+		A-to-D conversion is triggered by the TC0 channel 0 output A signal.
+		This output must be enabled independently in the Timer/Counter
+		driver configuration for this to work.
+
+config SAMA5_ADC_TIOA1TRIG
+	bool "TC0 Channel 1 Output A"
+	---help---
+		A-to-D conversion is triggered by the TC0 channel 1 output A signal.
+		This output must be enabled independently in the Timer/Counter
+		driver configuration for this to work.
+
+config SAMA5_ADC_TIOA2TRIG
+	bool "TC0 Channel 2 Output A"
+	---help---
+		A-to-D conversion is triggered by the TC0 channel 2 output A signal.
+		This output must be enabled independently in the Timer/Counter
+		driver configuration for this to work.
+
+endchoice # TC0 channel
+
+choice
+	prompt "TIOAx edge"
+	default SAMA5_ADC_TIOA_BOTH
+	depends on SAMA5_ADC_ADTRG
+
+config SAMA5_ADC_TIOA_RISING
+	bool "Rising edge"
+	---help---
+		Trigger A-to-D conversion on the rising edge of the TIOAx signal.
+
+config SAMA5_ADC_TIOA_FALLING
+	bool "Falling edge"
+	---help---
+		Trigger A-to-D conversion on the falling edge of the TIOAx signal.
+
+config SAMA5_ADC_TIOA_BOTH
+	bool "Both edges"
+	---help---
+		Trigger A-to-D conversion on both edges of the TIOAx signal
+
+endchoice # ADTRG edge
+endif # SAMA5_ADC_TIOATRIG
+endmenu # ADC Trigger Selection
+endif # SAMA5_ADC_HAVE_CHAN
+
+config SAMA5_ADC_REGDEBUG
+	bool "Enable register-level ADC/touchscreen debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low register-level debug output.
+
+endmenu # ADC Configuration
+
+menu "Touchscreen configuration"
+
+config SAMA5_TSD
+	bool "Touchscreen support"
+	default n
+	select INPUT
+	---help---
+		Configure the ADC to support a touchscreen
+
+if SAMA5_TSD
+
+choice
+	prompt "Touchscreen interface"
+	default SAMA5_TSD_4WIRE
+	---help---
+		Select the type of physical interface to the touchscreen
+
+config SAMA5_TSD_4WIRE
+	bool "4-wire interface (with pressure)"
+
+config SAMA5_TSD_4WIRENPM
+	bool "4-wire interface (without pressure)"
+
+config SAMA5_TSD_5WIRE
+	bool "5-wire interface"
+
+endchoice # Touchscreen interface
+
+config SAMA5_TSD_SWAPXY
+	bool "Swap X/Y"
+	default n
+	---help---
+		Reverse the meaning of X and Y to handle different LCD orientations.
+
+config SAMA5_TSD_THRESHX
+	int "X threshold"
+	default 12
+	---help---
+		New touch positions will only be reported when the X or Y data
+		changes by these thresholds. This trades reduces data rate for some
+		loss in dragging accuracy.  For 12-bit values so the raw ranges are
+		0-4095. So for example, if your display is 320x240, then THRESHX=13
+		and THRESHY=17 would correspond to one pixel.  Default: 12
+
+config SAMA5_TSD_THRESHY
+	int "Y threshold"
+	default 12
+	---help---
+		New touch positions will only be reported when the X or Y data
+		changes by these thresholds. This trades reduces data rate for some
+		loss in dragging accuracy.  For 12-bit values so the raw ranges are
+		0-4095. So for example, if your display is 320x240, then THRESHX=13
+		and THRESHY=17 would correspond to one pixel.  Default: 12
+
+config SAMA_TSD_RXP
+	int "X-panel resistance"
+	default 6
+	depends on SAMA5_TSD_4WIRE
+	---help---
+		The method to measure the pressure (Rp) applied to the touchscreen is
+		based on the known resistance of the X-Panel resistance (Rxp).
+
+config SAMA5_TSD_NPOLLWAITERS
+	int "Number poll waiters"
+	default 4
+	depends on !DISABLE_POLL
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+endif # SAMA5_TSD
+endmenu # Touchscreen Configuration
+endif # SAMA5_ADC
+
 menu "External Memory Configuration"
 
 config SAMA5_DDRCS
