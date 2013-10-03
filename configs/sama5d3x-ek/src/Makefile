@@ -114,6 +114,10 @@ ifeq ($(CONFIG_ARCH_FPU),y)
 CSRCS += sam_ostest.c
 endif
 
+ifeq ($(CONFIG_SAMA5_TSD),y)
+CSRCS += sam_touchscreen.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += sam_autoleds.c
 else

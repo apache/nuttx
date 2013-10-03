@@ -42,6 +42,14 @@ config SAMA5_NOR_START
 		option:  If SAMA5_NOR_START is defined, then it will not wait but
 		will, instead, immediately start the program in NOR FLASH.
 
+config SAMA5_TSD_DEVMINOR
+	int "Touchscreen device minor"
+	default 0
+	depends on SAMA5_TSD
+	---help---
+		This touchscreen will be register as /dev/inputN where the value of
+		N is provided by this configuration setting.
+
 config SAMA5_AT25_AUTOMOUNT
 	bool "AT25 serial FLASH auto-mount"
 	default n
