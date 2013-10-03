@@ -482,7 +482,7 @@ static void sam_tsd_setaverage(struct sam_tsd_s *priv, uint32_t tsav)
 
   /* Save the new filter value */
 
-  regval &= ADC_TSMR_TSAV_MASK;
+  regval &= ~ADC_TSMR_TSAV_MASK;
   regval |= tsav;
   sam_adc_putreg(priv->adc, SAM_ADC_TSMR, regval);
 }
@@ -511,13 +511,14 @@ static void sam_tsd_bottomhalf(void *arg)
   uint32_t pending;
   uint32_t ier;
   uint32_t regval;
-  uint32_t xr;
+  uint32_t xraw;
+  uint32_t xscale;
   uint32_t x;
   uint32_t xdiff;
-  uint32_t yr;
+  uint32_t yraw;
+  uint32_t yscale;
   uint32_t y;
   uint32_t ydiff;
-  uint32_t xpos;
   uint32_t z1;
   uint32_t z2;
   uint32_t pressr;
@@ -525,12 +526,6 @@ static void sam_tsd_bottomhalf(void *arg)
   bool pendown;
 
   ASSERT(priv != NULL);
-
-  /* Disable the watchdog timer.  This is safe because it is started only
-   * by this function and this function is serialized on the worker thread.
-   */
-
-  wd_cancel(priv->wdog);
 
   /* Get the set of unmasked, pending ADC interrupts */
 
@@ -545,6 +540,9 @@ static void sam_tsd_bottomhalf(void *arg)
   pendown = ((pending & ADC_SR_PENS) != 0);
 
   /* Handle the change from pen down to pen up */
+
+  ivdbg("pending: %08x pendown: %d contact: %d\n",
+        pending, pendown, priv->sample.contact);
 
   if (!pendown)
     {
@@ -618,14 +616,14 @@ static void sam_tsd_bottomhalf(void *arg)
 
       /* Check X data availability */
 
-      if (pending & ADC_INT_XRDY)
+      if ((pending & ADC_INT_XRDY) != 0)
         {
           priv->valid |= TSD_XREADY;
         }
 
       /* Check Y data availability */
 
-      if (pending & ADC_INT_YRDY)
+      if ((pending & ADC_INT_YRDY) != 0)
         {
           priv->valid |= TSD_YREADY;
         }
@@ -633,11 +631,13 @@ static void sam_tsd_bottomhalf(void *arg)
 #ifdef CONFIG_SAMA5_TSD_4WIRE
       /* Check pressure data availability: (X/1024)*[(Z2/Z1)-1] */
 
-      if (pending & ADC_INT_PRDY)
+      if ((pending & ADC_INT_PRDY) != 0)
         {
           priv->valid |= TSD_PREADY;
         }
 #endif
+
+      ivdbg("valid: %02x\n", priv->valid);
 
       /* While the pen is down we want interrupts on all day ready an pen
        * release events.
@@ -657,26 +657,13 @@ static void sam_tsd_bottomhalf(void *arg)
 
           /* Sample positional values.  Get raw X and Y position data */
 
-          xr = sam_adc_getreg(priv->adc, SAM_ADC_XPOSR);
-          yr = sam_adc_getreg(priv->adc, SAM_ADC_YPOSR);
+          regval = sam_adc_getreg(priv->adc, SAM_ADC_XPOSR);
+          xraw   = (regval & ADC_XPOSR_XPOS_MASK) >> ADC_XPOSR_XPOS_SHIFT;
+          xscale = (regval & ADC_XPOSR_XSCALE_MASK) >> ADC_XPOSR_XSCALE_SHIFT;
 
-#ifdef CONFIG_SAMA5_TSD_SWAPXY
-          /* Scale the measurements */
-
-          x  = ((yr & ADC_YPOSR_YPOS_MASK) >> ADC_YPOSR_YPOS_SHIFT) * 1024;
-          x /= ((yr & ADC_YPOSR_YSCALE_MASK) >> ADC_YPOSR_YSCALE_SHIFT);
-
-          y  = ((xr & ADC_XPOSR_XPOS_MASK) >> ADC_XPOSR_XPOS_SHIFT) * 1024;
-          y /= ((xr & ADC_XPOSR_XSCALE_MASK) >> ADC_XPOSR_XSCALE_SHIFT);
-#else
-          /* Scale the measurements */
-
-          x  = ((xr & ADC_XPOSR_XPOS_MASK) >> ADC_XPOSR_XPOS_SHIFT) * 1024;
-          x /= ((xr & ADC_XPOSR_XSCALE_MASK) >> ADC_XPOSR_XSCALE_SHIFT);
-
-          y  = ((yr & ADC_YPOSR_YPOS_MASK) >> ADC_YPOSR_YPOS_SHIFT) * 1024;
-          y /= ((yr & ADC_YPOSR_YSCALE_MASK) >> ADC_YPOSR_YSCALE_SHIFT);
-#endif
+          regval = sam_adc_getreg(priv->adc, SAM_ADC_YPOSR);
+          yraw   = (regval & ADC_YPOSR_YPOS_MASK) >> ADC_YPOSR_YPOS_SHIFT;
+          yscale = (regval & ADC_YPOSR_YSCALE_MASK) >> ADC_YPOSR_YSCALE_SHIFT;
 
 #ifdef CONFIG_SAMA5_TSD_4WIRE
           /* Read the PRESSR register now, but don't do anything until we
@@ -685,7 +672,21 @@ static void sam_tsd_bottomhalf(void *arg)
 
           pressr = sam_adc_getreg(priv->adc, SAM_ADC_PRESSR);
 #endif
+          /* Scale the X/Y measurements.  The scale value is the maximum
+           * value that the sample can attain.  It should be close to 4095.
+           * Scaling:
+           *
+           *   scaled = raw * 4095 / scale
+           *          = ((raw << 12) - raw) / scale
+           */
 
+#ifdef CONFIG_SAMA5_TSD_SWAPXY
+          x  = ((yraw << 12) - yraw) / yscale;
+          y  = ((xraw << 12) - xraw) / xscale;
+#else
+          x  = ((xraw << 12) - xraw) / xscale;
+          y  = ((yraw << 12) - yraw) / yscale;
+#endif
           /* Perform a thresholding operation so that the results will be
            * more stable.  If the difference from the last sample is small,
            * then ignore the event. REVISIT:  Should a large change in
@@ -726,7 +727,7 @@ static void sam_tsd_bottomhalf(void *arg)
          /* Update the x/y position in the sample data */
 
           priv->sample.x      = MIN(x, UINT16_MAX);
-          priv->sample.y      = MIN(x, UINT16_MAX);
+          priv->sample.y      = MIN(y, UINT16_MAX);
 
 #ifdef CONFIG_SAMA5_TSD_4WIRE
           /* Scale the pressure and update the pressure in the sample data.
@@ -736,13 +737,12 @@ static void sam_tsd_bottomhalf(void *arg)
            * resistance (Rxp). Three conversions (Xpos, Z1, Z2) are
            * necessary to determine the value of Rp (Zaxis resistance).
            *
-           *   Rp = Rxp*(Xpos/1024)*[(Z2/Z1)-1]
+           *   Rp = Rxp * (Xraw / 1024) * [(Z2 / Z1) - 1]
            */
 
-          xpos = (xr & ADC_XPOSR_XPOS_MASK) >> ADC_XPOSR_XPOS_SHIFT;
           z2   = (pressr & ADC_PRESSR_Z2_MASK) >> ADC_PRESSR_Z2_SHIFT;
           z1   = (pressr & ADC_PRESSR_Z1_MASK) >> ADC_PRESSR_Z1_SHIFT;
-          p    = CONFIG_SAMA_TSD_RXP * xpos * (z2 - z1) / z1;
+          p    = CONFIG_SAMA_TSD_RXP * xraw * (z2 - z1) / z1;
 
           priv->sample.p = MIN(p, UINT16_MAX);
 #endif
@@ -850,13 +850,23 @@ static int sam_tsd_schedule(struct sam_tsd_s *priv, uint32_t pending)
 static void sam_tsd_expiry(int argc, uint32_t arg1, ...)
 {
   struct sam_tsd_s *priv = (struct sam_tsd_s *)((uintptr_t)arg1);
+  uint32_t isr;
+  uint32_t imr;
   uint32_t pending;
+
+  /* Get the set of unmasked, pending ADC interrupts. There should be no
+   * pending TSD interrupts, but we need to get the PENS status bit as a
+   * minimum.
+   */
+
+  isr     = sam_adc_getreg(priv->adc, SAM_ADC_ISR);
+  imr     = sam_adc_getreg(priv->adc, SAM_ADC_IMR);
+  pending = isr & (imr | ADC_SR_PENS);
 
   /* There should be no pending TSD interrupts, but we need to get the PENS
    * status bit as a minimum.
    */
 
-  pending =  sam_adc_getreg(priv->adc, SAM_ADC_ISR) & ADC_TSD_ALLSTATUS;
   (void)sam_tsd_schedule(priv, pending);
 }
 

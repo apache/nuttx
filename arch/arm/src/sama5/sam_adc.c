@@ -801,9 +801,11 @@ static int sam_adc_interrupt(int irq, void *context)
 #ifdef CONFIG_SAMA5_TSD
   if ((pending & ADC_TSD_ALLINTS) != 0)
     {
-      /* Let the touchscreen handle its interrupts */
+      /* Let the touchscreen handle its interrupts.  Pass the pending
+       * interrupt set PLUS the pen status bit.
+       */
 
-      sam_tsd_interrupt(pending);
+      sam_tsd_interrupt(isr & (imr | ADC_SR_PENS));
       pending &= ~ADC_TSD_ALLINTS;
     }
 #endif
