@@ -62,12 +62,12 @@
  * support is enabled.
  */
 
-#ifdef CONFIG_SAMA5_TOUCHSCREEN
+#ifdef CONFIG_SAMA5_TSD
 #  undef CONFIG_SAMA5_ADC_CHAN0
 #  undef CONFIG_SAMA5_ADC_CHAN1
 #  undef CONFIG_SAMA5_ADC_CHAN2
 #  undef CONFIG_SAMA5_ADC_CHAN3
-#  ifdef CONFIG_SAMA5_TOUCHSCREEN_5WIRE
+#  ifdef CONFIG_SAMA5_TSD_5WIRE
 #    undef CONFIG_SAMA5_ADC_CHAN4
 #  endif
 #endif
@@ -84,7 +84,7 @@
     defined(CONFIG_SAMA5_ADC_CHAN8) || defined(CONFIG_SAMA5_ADC_CHAN9) || \
     defined(CONFIG_SAMA5_ADC_CHAN10) || defined(CONFIG_SAMA5_ADC_CHAN11)
 #  define SAMA5_ADC_HAVE_CHANNELS 1
-#elif !defined(CONFIG_SAMA5_TOUCHSCREEN)
+#elif !defined(CONFIG_SAMA5_TSD)
 #  error "No ADC channels nor touchscreen"
 #endif
 

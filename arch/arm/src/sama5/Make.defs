@@ -132,6 +132,14 @@ ifeq ($(CONFIG_SAMA5_UDPHS),y)
 CHIP_CSRCS += sam_udphs.c
 endif
 
+ifeq ($(CONFIG_USBHOST_TRACE),y)
+CHIP_CSRCS += sam_usbhost.c
+else
+ifeq ($(CONFIG_DEBUG_USB),y)
+CHIP_CSRCS += sam_usbhost.c
+endif
+endif
+
 ifeq ($(CONFIG_SAMA5_HSMCI0),y)
 CHIP_CSRCS += sam_hsmci.c
 else
@@ -166,10 +174,10 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_USBHOST_TRACE),y)
-CHIP_CSRCS += sam_usbhost.c
+ifeq ($(CONFIG_SAMA5_ADC),y)
+CHIP_CSRCS += sam_adc.c
 else
-ifeq ($(CONFIG_DEBUG_USB),y)
-CHIP_CSRCS += sam_usbhost.c
+ifeq ($(CONFIG_SAMA5_TSD),y)
+CHIP_CSRCS += sam_tsd.c
 endif
 endif

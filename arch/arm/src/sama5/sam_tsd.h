@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_adc.h
+ * arch/arm/src/sama5/sam_tsd.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_SAM_ADC_H
-#define __ARCH_ARM_SRC_SAMA5_SAM_ADC_H
+#ifndef __ARCH_ARM_SRC_SAMA5_SAM_TSD_H
+#define __ARCH_ARM_SRC_SAMA5_SAM_TSD_H
 
 /****************************************************************************
  * Included Files
@@ -43,7 +43,7 @@
 #include <nuttx/config.h>
 #include "chip/sam_adc.h"
 
-#if defined(CONFIG_SAMA5_ADC) && defined(CONFIG_SAMA5_TOUCHSCREEN)
+#if defined(CONFIG_SAMA5_ADC) && defined(CONFIG_SAMA5_TSD)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -119,5 +119,5 @@ void sam_tsd_interrupt(uint32_t pending);
 }
 #endif
 
-#endif /* CONFIG_SAMA5_ADC && CONFIG_SAMA5_TOUCHSCREEN */
-#endif /* __ARCH_ARM_SRC_SAMA5_SAM_ADC_H */
+#endif /* CONFIG_SAMA5_ADC && CONFIG_SAMA5_TSD */
+#endif /* __ARCH_ARM_SRC_SAMA5_SAM_TSD_H */
