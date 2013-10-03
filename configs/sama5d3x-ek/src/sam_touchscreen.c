@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <errno.h>
 #include <debug.h>
 
 #include "sam_adc.h"
@@ -102,7 +104,6 @@ int arch_tcinitialize(int minor)
 {
   struct sam_adc_s *adc;
   static bool initialized = false;
-  FAR struct spi_dev_s *dev;
   int ret;
 
   idbg("initialized:%d minor:%d\n", initialized, minor);
@@ -116,7 +117,7 @@ int arch_tcinitialize(int minor)
     {
       /* Initialize the ADC driver */
 
-      adc = sam_adcinitialize();
+      adc = sam_adc_initialize();
       if (!adc)
         {
           idbg("ERROR: Failed to initialize the ADC driver\n");
