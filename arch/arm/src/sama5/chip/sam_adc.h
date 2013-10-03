@@ -140,7 +140,7 @@
 #define SAM_ADC_XPOSR              (SAM_TSADC_VBASE+SAM_ADC_XPOSR_OFFSET)
 #define SAM_ADC_YPOSR              (SAM_TSADC_VBASE+SAM_ADC_YPOSR_OFFSET)
 #define SAM_ADC_PRESSR             (SAM_TSADC_VBASE+SAM_ADC_PRESSR_OFFSET)
-#define SAM_ADC_TRGR               (SAM_TSADC_VBASE+SAM_ADC_TRGR_OFFSET
+#define SAM_ADC_TRGR               (SAM_TSADC_VBASE+SAM_ADC_TRGR_OFFSET)
 #define SAM_ADC_WPMR               (SAM_TSADC_VBASE+SAM_ADC_WPMR_OFFSET)
 #define SAM_ADC_WPSR               (SAM_TSADC_VBASE+SAM_ADC_WPSR_OFFSET)
 
@@ -169,23 +169,23 @@
 #define ADC_MR_PRESCAL_MASK        (0xff << ADC_MR_PRESCAL_SHIFT)
 #  define ADC_MR_PRESCAL(n)        ((uint32_t)(n) << ADC_MR_PRESCAL_SHIFT)
 #define ADC_MR_STARTUP_SHIFT       (16)      /* Bits 16-19: Start Up Time */
-#define ADC_MR_STARTUP_MASK        (15 << ADC_MR_STARTUP_SHIFT
-#  define ADC_MR_STARTUP_0         (0 << ADC_MR_STARTUP_SHIFT  /* 0 periods of ADCClock */
-#  define ADC_MR_STARTUP_8         (1 << ADC_MR_STARTUP_SHIFT  /* 8 periods of ADCClock */
-#  define ADC_MR_STARTUP_16        (2 << ADC_MR_STARTUP_SHIFT  /* 16 periods of ADCClock */
-#  define ADC_MR_STARTUP_24        (3 << ADC_MR_STARTUP_SHIFT  /* 24 periods of ADCClock */
-#  define ADC_MR_STARTUP_64        (4 << ADC_MR_STARTUP_SHIFT  /* 64 periods of ADCClock */
-#  define ADC_MR_STARTUP_80        (5 << ADC_MR_STARTUP_SHIFT  /* 80 periods of ADCClock */
-#  define ADC_MR_STARTUP_96        (6 << ADC_MR_STARTUP_SHIFT  /* 96 periods of ADCClock */
-#  define ADC_MR_STARTUP_112       (7 << ADC_MR_STARTUP_SHIFT  /* 112 periods of ADCClock */
-#  define ADC_MR_STARTUP_512       (8 << ADC_MR_STARTUP_SHIFT  /* 512 periods of ADCClock */
-#  define ADC_MR_STARTUP_576       (9 << ADC_MR_STARTUP_SHIFT  /* 576 periods of ADCClock */
-#  define ADC_MR_STARTUP_640       (10 << ADC_MR_STARTUP_SHIFT /* 640 periods of ADCClock */
-#  define ADC_MR_STARTUP_704       (11 << ADC_MR_STARTUP_SHIFT /* 704 periods of ADCClock */
-#  define ADC_MR_STARTUP_768       (12 << ADC_MR_STARTUP_SHIFT /* 768 periods of ADCClock */
-#  define ADC_MR_STARTUP_832       (13 << ADC_MR_STARTUP_SHIFT /* 832 periods of ADCClock */
-#  define ADC_MR_STARTUP_896       (14 << ADC_MR_STARTUP_SHIFT /* 896 periods of ADCClock */
-#  define ADC_MR_STARTUP_960       (15 << ADC_MR_STARTUP_SHIFT /* 960 periods of ADCClock */
+#define ADC_MR_STARTUP_MASK        (15 << ADC_MR_STARTUP_SHIFT)
+#  define ADC_MR_STARTUP_0         (0 << ADC_MR_STARTUP_SHIFT)  /* 0 periods of ADCClock */
+#  define ADC_MR_STARTUP_8         (1 << ADC_MR_STARTUP_SHIFT)  /* 8 periods of ADCClock */
+#  define ADC_MR_STARTUP_16        (2 << ADC_MR_STARTUP_SHIFT)  /* 16 periods of ADCClock */
+#  define ADC_MR_STARTUP_24        (3 << ADC_MR_STARTUP_SHIFT)  /* 24 periods of ADCClock */
+#  define ADC_MR_STARTUP_64        (4 << ADC_MR_STARTUP_SHIFT)  /* 64 periods of ADCClock */
+#  define ADC_MR_STARTUP_80        (5 << ADC_MR_STARTUP_SHIFT)  /* 80 periods of ADCClock */
+#  define ADC_MR_STARTUP_96        (6 << ADC_MR_STARTUP_SHIFT)  /* 96 periods of ADCClock */
+#  define ADC_MR_STARTUP_112       (7 << ADC_MR_STARTUP_SHIFT)  /* 112 periods of ADCClock */
+#  define ADC_MR_STARTUP_512       (8 << ADC_MR_STARTUP_SHIFT)  /* 512 periods of ADCClock */
+#  define ADC_MR_STARTUP_576       (9 << ADC_MR_STARTUP_SHIFT)  /* 576 periods of ADCClock */
+#  define ADC_MR_STARTUP_640       (10 << ADC_MR_STARTUP_SHIFT) /* 640 periods of ADCClock */
+#  define ADC_MR_STARTUP_704       (11 << ADC_MR_STARTUP_SHIFT) /* 704 periods of ADCClock */
+#  define ADC_MR_STARTUP_768       (12 << ADC_MR_STARTUP_SHIFT) /* 768 periods of ADCClock */
+#  define ADC_MR_STARTUP_832       (13 << ADC_MR_STARTUP_SHIFT) /* 832 periods of ADCClock */
+#  define ADC_MR_STARTUP_896       (14 << ADC_MR_STARTUP_SHIFT) /* 896 periods of ADCClock */
+#  define ADC_MR_STARTUP_960       (15 << ADC_MR_STARTUP_SHIFT) /* 960 periods of ADCClock */
 #define ADC_MR_SETTLING_SHIFT      (20)      /* Bits 20-21: Analog Settling Time */
 #define ADC_MR_SETTLING_MASK       (15 << ADC_MR_SETTLING_SHIFT)
 #  define ADC_MR_SETTLING_3        (0 << ADC_MR_SETTLING_SHIFT) /* 3 periods of ADCClock */
@@ -291,10 +291,10 @@
 #define ADC_INT_EOC5               (1 << 5)  /* Bit 5:  End of Conversion 5 */
 #define ADC_INT_EOC6               (1 << 6)  /* Bit 6:  End of Conversion 6 */
 #define ADC_INT_EOC7               (1 << 7)  /* Bit 7:  End of Conversion 7 */
-#define ADC_INT_EOC7               (1 << 8)  /* Bit 8:  End of Conversion 8 */
-#define ADC_INT_EOC7               (1 << 9)  /* Bit 9:  End of Conversion 9 */
-#define ADC_INT_EOC7               (1 << 10) /* Bit 10: End of Conversion 10 */
-#define ADC_INT_EOC7               (1 << 11) /* Bit 11: End of Conversion 11 */
+#define ADC_INT_EOC8               (1 << 8)  /* Bit 8:  End of Conversion 8 */
+#define ADC_INT_EOC9               (1 << 9)  /* Bit 9:  End of Conversion 9 */
+#define ADC_INT_EOC10              (1 << 10) /* Bit 10: End of Conversion 10 */
+#define ADC_INT_EOC11              (1 << 11) /* Bit 11: End of Conversion 11 */
 #define ADC_INT_EOCALL             (0x00000fff)
 
 #define ADC_INT_XRDY               (1 << 20) /* Bit 20: TS Measure XPOS Ready Interrupt */
@@ -378,10 +378,10 @@
 #  define ADC_CGR_GAIN9(v)         ((uint32_t)(v) << ADC_CGR_GAIN9_SHIFT)
 #define ADC_CGR_GAIN10_SHIFT       (20)       /* Bits 20-21: User sequence number 10 */
 #define ADC_CGR_GAIN10_MASK        (3 << ADC_CGR_GAIN10_SHIFT)
-#  define ADC_CGR_GAIN2(v)         ((uint32_t)(v) << ADC_CGR_GAIN10_SHIFT)
+#  define ADC_CGR_GAIN10(v)        ((uint32_t)(v) << ADC_CGR_GAIN10_SHIFT)
 #define ADC_CGR_GAIN11_SHIFT       (22)       /* Bits 22-23: User sequence number 11 */
 #define ADC_CGR_GAIN11_MASK        (3 << ADC_CGR_GAIN11_SHIFT)
-#  define ADC_CGR_GAIN3(v)         ((uint32_t)(v) << ADC_CGR_GAIN11_SHIFT)
+#  define ADC_CGR_GAIN11(v)        ((uint32_t)(v) << ADC_CGR_GAIN11_SHIFT)
 
 /* Channel Offset Register */
 
@@ -441,7 +441,7 @@
 #  define ADC_TSMR_TSMODE_5WIRE    (3 << ADC_TSMR_TSMODE_SHIFT) /* 5-wire Touchscreen */
 #define ADC_TSMR_TSAV_SHIFT        (4)       /* Bit 4-5: Touchscreen Average */
 #define ADC_TSMR_TSAV_MASK         (3 << ADC_TSMR_TSAV_SHIFT)
-#  define ADC_TSMR_TSAV_NFILTER    (0 << ADC_TSMR_TSAV_SHIFT) /* No Filtering */
+#  define ADC_TSMR_TSAV_NOFILTER   (0 << ADC_TSMR_TSAV_SHIFT) /* No Filtering */
 #  define ADC_TSMR_TSAV_2CONV      (1 << ADC_TSMR_TSAV_SHIFT) /* Average 2 ADC conversions */
 #  define ADC_TSMR_TSAV_4CONV      (2 << ADC_TSMR_TSAV_SHIFT) /* Average 4 ADC conversions */
 #  define ADC_TSMR_TSAV_8CONV      (3 << ADC_TSMR_TSAV_SHIFT) /* Averages 8 ADC conversions */

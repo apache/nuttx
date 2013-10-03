@@ -54,6 +54,21 @@
 #  define CONFIG_SAMA_TSD_RXP 6
 #endif
 
+/* Touchscreen interrupt event sets
+ *
+ *   ADC_INT_XRDY           TSD Measure XPOS Ready Interrupt
+ *   ADC_INT_YRDY           TSD Measure YPOS Ready Interrupt
+ *   ADC_INT_PRDY           TSD Measure Pressure Ready Interrupt
+ *   ADC_INT_PEN            Pen Contact Interrupt
+ *   ADC_INT_NOPEN          No Pen Contact Interrupt
+ *   ADC_SR_PENS            Pen detect Status (Not an interrupt)
+ */
+
+#define ADC_TSD_CMNINTS     (ADC_INT_XRDY | ADC_INT_YRDY | ADC_INT_PRDY | ADC_INT_NOPEN)
+#define ADC_TSD_ALLINTS     (ADC_TSD_CMNINTS | ADC_INT_PEN)
+#define ADC_TSD_ALLSTATUS   (ADC_TSD_ALLINTS | ADC_SR_PENS)
+#define ADC_TSD_RELEASEINTS ADC_TSD_CMNINTS
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
