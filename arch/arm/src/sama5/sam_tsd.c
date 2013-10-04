@@ -649,130 +649,129 @@ static void sam_tsd_bottomhalf(void *arg)
        * wait until it is.
        */
 
-      if ((priv->valid & TSD_ALLREADY) == TSD_ALLREADY)
+      if ((priv->valid & TSD_ALLREADY) != TSD_ALLREADY)
         {
-          /* Clear data ready bits in the data validity bitset */
+          goto ignored;
+        }
 
-          priv->valid = 0;
+      /* Clear data ready bits in the data validity bitset */
 
-          /* Sample positional values.  Get raw X and Y position data */
+      priv->valid = 0;
 
-          regval = sam_adc_getreg(priv->adc, SAM_ADC_XPOSR);
-          xraw   = (regval & ADC_XPOSR_XPOS_MASK) >> ADC_XPOSR_XPOS_SHIFT;
-          xscale = (regval & ADC_XPOSR_XSCALE_MASK) >> ADC_XPOSR_XSCALE_SHIFT;
+      /* Sample positional values.  Get raw X and Y position data */
 
-          regval = sam_adc_getreg(priv->adc, SAM_ADC_YPOSR);
-          yraw   = (regval & ADC_YPOSR_YPOS_MASK) >> ADC_YPOSR_YPOS_SHIFT;
-          yscale = (regval & ADC_YPOSR_YSCALE_MASK) >> ADC_YPOSR_YSCALE_SHIFT;
+      regval = sam_adc_getreg(priv->adc, SAM_ADC_XPOSR);
+      xraw   = (regval & ADC_XPOSR_XPOS_MASK) >> ADC_XPOSR_XPOS_SHIFT;
+      xscale = (regval & ADC_XPOSR_XSCALE_MASK) >> ADC_XPOSR_XSCALE_SHIFT;
+
+      regval = sam_adc_getreg(priv->adc, SAM_ADC_YPOSR);
+      yraw   = (regval & ADC_YPOSR_YPOS_MASK) >> ADC_YPOSR_YPOS_SHIFT;
+      yscale = (regval & ADC_YPOSR_YSCALE_MASK) >> ADC_YPOSR_YSCALE_SHIFT;
 
 #ifdef CONFIG_SAMA5_TSD_4WIRE
-          /* Read the PRESSR register now, but don't do anything until we
-           * decide if we are going to use this measurement.
-           */
+      /* Read the PRESSR register now, but don't do anything until we
+       * decide if we are going to use this measurement.
+       */
 
-          pressr = sam_adc_getreg(priv->adc, SAM_ADC_PRESSR);
+      pressr = sam_adc_getreg(priv->adc, SAM_ADC_PRESSR);
 #endif
-          /* Scale the X/Y measurements.  The scale value is the maximum
-           * value that the sample can attain.  It should be close to 4095.
-           * Scaling:
-           *
-           *   scaled = raw * 4095 / scale
-           *          = ((raw << 12) - raw) / scale
-           */
+      /* Scale the X/Y measurements.  The scale value is the maximum
+       * value that the sample can attain.  It should be close to 4095.
+       * Scaling:
+       *
+       *   scaled = raw * 4095 / scale
+       *          = ((raw << 12) - raw) / scale
+       */
 
 #ifdef CONFIG_SAMA5_TSD_SWAPXY
-          x  = ((yraw << 12) - yraw) / yscale;
-          y  = ((xraw << 12) - xraw) / xscale;
+      x  = ((yraw << 12) - yraw) / yscale;
+      y  = ((xraw << 12) - xraw) / xscale;
 #else
-          x  = ((xraw << 12) - xraw) / xscale;
-          y  = ((yraw << 12) - yraw) / yscale;
+      x  = ((xraw << 12) - xraw) / xscale;
+      y  = ((yraw << 12) - yraw) / yscale;
 #endif
-          /* Perform a thresholding operation so that the results will be
-           * more stable.  If the difference from the last sample is small,
-           * then ignore the event. REVISIT:  Should a large change in
-           * pressure also generate a event?
+      /* Perform a thresholding operation so that the results will be
+       * more stable.  If the difference from the last sample is small,
+       * then ignore the event. REVISIT:  Should a large change in
+       * pressure also generate a event?
+       */
+
+      xdiff = x > priv->threshx ? (x - priv->threshx) : (priv->threshx - x);
+      ydiff = y > priv->threshy ? (y - priv->threshy) : (priv->threshy - y);
+
+      /* Continue to sample the position while the pen is down */
+
+      wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry, 1, (uint32_t)priv);
+
+      /* Check the thresholds.  Bail if (1) this is not the first
+       * measurement and (2) there is no significant difference from
+       * the last measurement.
+       */
+
+      if (priv->sample.contact == CONTACT_MOVE &&
+          xdiff < CONFIG_SAMA5_TSD_THRESHX &&
+          ydiff < CONFIG_SAMA5_TSD_THRESHY)
+        {
+          /* Little or no change in either direction ... don't report
+           * anything.
            */
 
-          xdiff = x > priv->threshx ? (x - priv->threshx) :
-            (priv->threshx - x);
-          ydiff = y > priv->threshy ? (y - priv->threshy) :
-            (priv->threshy - y);
+          goto ignored;
+        }
 
-          /* Continue to sample the position while the pen is down */
+      /* When we see a big difference, snap to the new x/y thresholds */
 
-          wd_start(priv->wdog, TSD_WDOG_DELAY, sam_tsd_expiry,
-                   1, (uint32_t)priv);
+      priv->threshx       = x;
+      priv->threshy       = y;
 
-          /* Check the thresholds.  Bail if (1) this is not the first
-           * measurement and (2) there is no significant difference from
-           * the last measurement.
-           */
+     /* Update the x/y position in the sample data */
 
-          if (priv->sample.contact == CONTACT_MOVE &&
-              xdiff < CONFIG_SAMA5_TSD_THRESHX &&
-              ydiff < CONFIG_SAMA5_TSD_THRESHY)
-            {
-              /* Little or no change in either direction ... don't report
-               * anything.
-               */
-
-              goto ignored;
-            }
-
-          /* When we see a big difference, snap to the new x/y thresholds */
-
-          priv->threshx       = x;
-          priv->threshy       = y;
-
-         /* Update the x/y position in the sample data */
-
-          priv->sample.x      = MIN(x, UINT16_MAX);
-          priv->sample.y      = MIN(y, UINT16_MAX);
+      priv->sample.x      = MIN(x, UINT16_MAX);
+      priv->sample.y      = MIN(y, UINT16_MAX);
 
 #ifdef CONFIG_SAMA5_TSD_4WIRE
-          /* Scale the pressure and update the pressure in the sample data.
-           *
-           * The method to measure the pressure (Rp) applied to the
-           * touchscreen is based on the known resistance of the X-Panel
-           * resistance (Rxp). Three conversions (Xpos, Z1, Z2) are
-           * necessary to determine the value of Rp (Zaxis resistance).
-           *
-           *   Rp = Rxp * (Xraw / 1024) * [(Z2 / Z1) - 1]
-           */
+      /* Scale the pressure and update the pressure in the sample data.
+       *
+       * The method to measure the pressure (Rp) applied to the
+       * touchscreen is based on the known resistance of the X-Panel
+       * resistance (Rxp). Three conversions (Xpos, Z1, Z2) are
+       * necessary to determine the value of Rp (Zaxis resistance).
+       *
+       *   Rp = Rxp * (Xraw / 1024) * [(Z2 / Z1) - 1]
+       */
 
-          z2   = (pressr & ADC_PRESSR_Z2_MASK) >> ADC_PRESSR_Z2_SHIFT;
-          z1   = (pressr & ADC_PRESSR_Z1_MASK) >> ADC_PRESSR_Z1_SHIFT;
-          p    = CONFIG_SAMA_TSD_RXP * xraw * (z2 - z1) / z1;
+      z2   = (pressr & ADC_PRESSR_Z2_MASK) >> ADC_PRESSR_Z2_SHIFT;
+      z1   = (pressr & ADC_PRESSR_Z1_MASK) >> ADC_PRESSR_Z1_SHIFT;
+      p    = CONFIG_SAMA_TSD_RXP * xraw * (z2 - z1) / z1;
 
-          priv->sample.p = MIN(p, UINT16_MAX);
+      priv->sample.p = MIN(p, UINT16_MAX);
 #endif
 
-          /* The X/Y positional data is now valid */
+      /* The X/Y positional data is now valid */
 
-          priv->sample.valid = true;
+      priv->sample.valid = true;
 
-          /* If this is the first (acknowledged) pen down report, then
-           * report this as the first contact.  If contact == CONTACT_DOWN,
-           * it will be set to set to CONTACT_MOVE after the contact is
-           * first sampled.
-           */
+      /* If this is the first (acknowledged) pen down report, then
+       * report this as the first contact.  If contact == CONTACT_DOWN,
+       * it will be set to set to CONTACT_MOVE after the contact is
+       * first sampled.
+       */
 
-          if (priv->sample.contact != CONTACT_MOVE)
-            {
-              /* First contact.  Handle transitions from pen UP to pen DOWN */
+      if (priv->sample.contact != CONTACT_MOVE)
+        {
+          /* First contact.  Handle transitions from pen UP to pen DOWN */
 
-              priv->sample.contact = CONTACT_DOWN;
+          priv->sample.contact = CONTACT_DOWN;
 
-              /* Configure for periodic trigger */
+          /* Configure for periodic trigger */
 
-              sam_tsd_setaverage(priv, ADC_TSMR_TSAV_8CONV);
-              sam_tsd_debounce(priv, 300);         /* 300ns */
+          sam_tsd_setaverage(priv, ADC_TSMR_TSAV_8CONV);
+          sam_tsd_debounce(priv, 300);         /* 300ns */
 
-              regval  = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
-              regval &= ~ADC_TRGR_TRGMOD_MASK;
-              regval |= ADC_TRGR_TRGMOD_PERIOD;
-              sam_adc_putreg(priv->adc, SAM_ADC_TRGR, regval);
-            }
+          regval  = sam_adc_getreg(priv->adc, SAM_ADC_TRGR);
+          regval &= ~ADC_TRGR_TRGMOD_MASK;
+          regval |= ADC_TRGR_TRGMOD_PERIOD;
+          sam_adc_putreg(priv->adc, SAM_ADC_TRGR, regval);
         }
     }
 
