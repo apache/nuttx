@@ -5698,4 +5698,8 @@
 	* include/net/route.h and libc/net/lib_addroute.c and delroute.c:
 	  Add an application interface to manage the routing table
 	  (2013-10-2).
-
+	* arch/arm/src/sama5/sam_adc.c and sam_tsc.c:  The SAMA5
+	  touschscreen drive is basically functional) (2013-10-3)
+	* arch/arm/src/sama5/chip/sam_lcdc.h:  Add SAMA5 LCD register
+	  definition header file (2013-10-4).
+ 
