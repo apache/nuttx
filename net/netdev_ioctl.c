@@ -645,16 +645,16 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
                 }
 
 #ifdef CONFIG_NET_IPv6
-              addr    = (FAR struct sockaddr_in6 *)&rtentry->rt_target;
+              addr    = (FAR struct sockaddr_in6 *)rtentry->rt_target;
               target  = (uip_ipaddr_t)addr->sin6_addr.u6_addr16;
 
-              addr    = (FAR struct sockaddr_in6 *)&rtentry->rt_netmask;
+              addr    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
               netmask = (uip_ipaddr_t)addr->sin6_addr.u6_addr16;
 #else
-              addr    = (FAR struct sockaddr_in *)&rtentry->rt_target;
+              addr    = (FAR struct sockaddr_in *)rtentry->rt_target;
               target  = (uip_ipaddr_t)addr->sin_addr.s_addr;
 
-              addr    = (FAR struct sockaddr_in *)&rtentry->rt_netmask;
+              addr    = (FAR struct sockaddr_in *)rtentry->rt_netmask;
               netmask = (uip_ipaddr_t)addr->sin_addr.s_addr;
 #endif
               ret = net_delroute(target, netmask);
