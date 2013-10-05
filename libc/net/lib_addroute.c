@@ -61,10 +61,10 @@
  *
  * Parameters:
  *   sockfd   - Any socket descriptor
- *   target   - Target address (required)
- *   netmask  - Network mask defining the sub-net (required)
- *   gateway  - Gateway address associated with the hop (optional)
- *   ifno     - Interface number, e.g., the 0 in "eth0"
+ *   target   - Target address on external network(required)
+ *   netmask  - Network mask defining the external network (required)
+ *   router   - Router address that on our network that can forward to the
+ *              external network.
  *
  * Returned Value:
  *   OK on success; -1 on failure with the errno variable set appropriately.
@@ -73,16 +73,15 @@
 
 int addroute(int sockfd, FAR struct sockaddr_storage *target,
              FAR struct sockaddr_storage *netmask,
-             FAR struct sockaddr_storage *gateway, int ifno)
+             FAR struct sockaddr_storage *router)
 {
   struct rtentry entry;
 
   /* Set up the rtentry structure */
 
-  entry.rt_ifno    = ifno;    /* Interface number, e.g., the 0 in "eth0" */
   entry.rt_target  = target;  /* Target address */
   entry.rt_netmask = netmask; /* Network mask defining the sub-net */
-  entry.rt_gateway = gateway; /* Gateway address associated with the hop */
+  entry.rt_router  = router;  /* Router address associated with the hop */
 
   /* Then perform the ioctl */
 

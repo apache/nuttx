@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_sockets.c
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/kmalloc.h>
 
+#include "net_route.h"
 #include "net_internal.h"
 
 /****************************************************************************
@@ -103,9 +104,15 @@ void net_initialize(void)
 
   uip_initialize();
 
-  /* Initialize the socket layer */
+#ifdef CONFIG_NET_ROUTE
+  /* Initialize the routing table */
+
+  net_initroute();
+#endif
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
+  /* Initialize the socket layer */
+
   netdev_seminit();
 #endif
 

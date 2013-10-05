@@ -177,9 +177,13 @@ static inline void recvfrom_newtcpdata(FAR struct uip_driver_s *dev,
       FAR struct uip_conn *conn   = (FAR struct uip_conn *)pstate->rf_sock->s_conn;
       FAR uint8_t         *buffer = (FAR uint8_t *)dev->d_appdata + recvlen;
       uint16_t             buflen = dev->d_len - recvlen;
+#ifdef CONFIG_DEBUG_NET
       uint16_t             nsaved;
 
       nsaved = uip_datahandler(conn, buffer, buflen);
+#else
+      (void)uip_datahandler(conn, buffer, buflen);
+#endif
 
       /* There are complicated buffering issues that are not addressed fully
        * here.  For example, what if up_datahandler() cannot buffer the

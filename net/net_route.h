@@ -41,6 +41,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <queue.h>
+#include <net/if.h>
+
 #include <nuttx/net/uip/uip.h>
 
 #ifdef CONFIG_NET_ROUTE
@@ -61,11 +65,10 @@
 
 struct net_route_s
 {
-  bool         inuse;    /* TRUE: This entry contains a valid route */
-  uint8_t      minor;    /* Ethernet device minor */
-  uip_ipaddr_t target;   /* The destination network */
-  uip_ipaddr_t netmask;  /* The network address mask */
-  uip_ipaddr_t gateway;  /* Route packets via a gateway */
+  FAR struct net_route_s *flink; /* Supports a singly linked list */
+  uip_ipaddr_t target;           /* The destination network */
+  uip_ipaddr_t netmask;          /* The network address mask */
+  uip_ipaddr_t router;           /* Route packets via this router */
 };
 
 /* Type of the call out function pointer provided to net_foreachroute() */
@@ -86,11 +89,60 @@ extern "C"
 
 /* This is the routing table */
 
-EXTERN struct net_route_s g_routes[CONFIG_NET_MAXROUTES];
+EXTERN sq_queue_t g_routes;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Function: net_initroute
+ *
+ * Description:
+ *   Initialize to the routing table
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void net_initroute(void);
+
+/****************************************************************************
+ * Function: net_allocroute
+ *
+ * Description:
+ *   Allocate one route by removing it from the free list
+ *
+ * Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, a pointer to the newly allocated route table entry is
+ *   returned; NULL is returned on failure.
+ *
+ ****************************************************************************/
+
+FAR struct net_route_s *net_allocroute(void);
+
+/****************************************************************************
+ * Function: net_allocroute
+ *
+ * Description:
+ *   Free one route by adding it from the free list
+ *
+ * Parameters:
+ *   route - The route to be freed
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void net_freeroute(FAR struct net_route_s *route);
 
 /****************************************************************************
  * Function: net_addroute
@@ -99,6 +151,10 @@ EXTERN struct net_route_s g_routes[CONFIG_NET_MAXROUTES];
  *   Add a new route to the routing table
  *
  * Parameters:
+ *   target   - The destination IP address on the destination network
+ *   netmask  - The mask defining the destination sub-net
+ *   router   - The IP address on one of our networks that provides the
+ *              router to the external network
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -106,7 +162,7 @@ EXTERN struct net_route_s g_routes[CONFIG_NET_MAXROUTES];
  ****************************************************************************/
 
 int net_addroute(uip_ipaddr_t target, uip_ipaddr_t netmask,
-                 uip_ipaddr_t gateway, int devno);
+                 uip_ipaddr_t router);
 
 /****************************************************************************
  * Function: net_delroute
@@ -124,10 +180,11 @@ int net_addroute(uip_ipaddr_t target, uip_ipaddr_t netmask,
 int net_delroute(uip_ipaddr_t target, uip_ipaddr_t netmask);
 
 /****************************************************************************
- * Function: net_findroute
+ * Function: net_router
  *
  * Description:
- *   Given an IP address, return a copy of the routing table contents
+ *   Given an IP address on a external network, return the address of the
+ *   router on a local network that can forward to the external network.
  *
  * Parameters:
  *
@@ -136,7 +193,11 @@ int net_delroute(uip_ipaddr_t target, uip_ipaddr_t netmask);
  *
  ****************************************************************************/
 
-int net_findroute(uip_ipaddr_t target, FAR struct net_route_s *route);
+#ifdef CONFIG_NET_IPv6
+int net_router(uip_ipaddr_t target, uip_ipaddr_t *router);
+#else
+int net_router(uip_ipaddr_t target, uip_ipaddr_t router);
+#endif
 
 /****************************************************************************
  * Function: net_foreachroute

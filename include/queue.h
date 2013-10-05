@@ -1,4 +1,4 @@
-/************************************************************************
+/****************************************************************************
  * include/queue.h
  *
  *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
@@ -31,20 +31,20 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************/
+ ****************************************************************************/
 
 #ifndef __INCLUDE_QUEUE_H
 #define __INCLUDE_QUEUE_H
 
-/************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************/
+ ****************************************************************************/
 
 #include <sys/types.h>
 
-/************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************/
+ ****************************************************************************/
 
 #define sq_init(q) do { (q)->head = NULL; (q)->tail = NULL; } while (0)
 #define dq_init(q) do { (q)->head = NULL; (q)->tail = NULL; } while (0)
@@ -59,9 +59,9 @@
 #define sq_peek(q)  ((q)->head)
 #define dq_peek(q)  ((q)->head)
 
-/************************************************************************
+/****************************************************************************
  * Global Type Declarations
- ************************************************************************/
+ ****************************************************************************/
 
 struct sq_entry_s
 {
@@ -90,9 +90,9 @@ struct dq_queue_s
 };
 typedef struct dq_queue_s dq_queue_t;
 
-/************************************************************************
+/****************************************************************************
  * Global Function Prototypes
- ************************************************************************/
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -101,24 +101,24 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-EXTERN void  sq_addfirst(FAR sq_entry_t *node, sq_queue_t *queue);
-EXTERN void  dq_addfirst(FAR dq_entry_t *node, dq_queue_t *queue);
-EXTERN void  sq_addlast(FAR sq_entry_t *node, sq_queue_t *queue);
-EXTERN void  dq_addlast(FAR dq_entry_t *node, dq_queue_t *queue);
-EXTERN void  sq_addafter(FAR sq_entry_t *prev, FAR sq_entry_t *node,
-                         sq_queue_t *queue);
-EXTERN void  dq_addafter(FAR dq_entry_t *prev, FAR dq_entry_t *node,
-                         dq_queue_t *queue);
-EXTERN void  dq_addbefore(FAR dq_entry_t *next, FAR dq_entry_t *node,
-                          dq_queue_t *queue);
+void sq_addfirst(FAR sq_entry_t *node, FAR sq_queue_t *queue);
+void dq_addfirst(FAR dq_entry_t *node, FAR dq_queue_t *queue);
+void sq_addlast(FAR sq_entry_t *node, FAR sq_queue_t *queue);
+void dq_addlast(FAR dq_entry_t *node, FAR dq_queue_t *queue);
+void sq_addafter(FAR sq_entry_t *prev, FAR sq_entry_t *node,
+                 FAR sq_queue_t *queue);
+void dq_addafter(FAR dq_entry_t *prev, FAR dq_entry_t *node,
+                 FAR dq_queue_t *queue);
+void dq_addbefore(FAR dq_entry_t *next, FAR dq_entry_t *node,
+                  FAR dq_queue_t *queue);
 
-EXTERN FAR sq_entry_t *sq_remafter(FAR sq_entry_t *node, sq_queue_t *queue);
-EXTERN void            sq_rem(FAR sq_entry_t *node, sq_queue_t *queue);
-EXTERN void            dq_rem(FAR dq_entry_t *node, dq_queue_t *queue);
-EXTERN FAR sq_entry_t *sq_remlast(sq_queue_t *queue);
-EXTERN FAR dq_entry_t *dq_remlast(dq_queue_t *queue);
-EXTERN FAR sq_entry_t *sq_remfirst(sq_queue_t *queue);
-EXTERN FAR dq_entry_t *dq_remfirst(dq_queue_t *queue);
+FAR sq_entry_t *sq_remafter(FAR sq_entry_t *node, FAR sq_queue_t *queue);
+void sq_rem(FAR sq_entry_t *node, FAR sq_queue_t *queue);
+void dq_rem(FAR dq_entry_t *node, FAR dq_queue_t *queue);
+FAR sq_entry_t *sq_remlast(FAR sq_queue_t *queue);
+FAR dq_entry_t *dq_remlast(FAR dq_queue_t *queue);
+FAR sq_entry_t *sq_remfirst(FAR sq_queue_t *queue);
+FAR dq_entry_t *dq_remfirst(FAR dq_queue_t *queue);
 
 #undef EXTERN
 #ifdef __cplusplus

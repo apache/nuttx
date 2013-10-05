@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/net_delroute.c
+ * net/net_router.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,8 +54,8 @@
 
 struct route_match_s
 {
-  uip_ipaddr_t target;           /* The target IP address to match */
-  FAR struct net_route_s *route; /* The location to return the route */
+  uip_ipaddr_t target;   /* The target IP address on an external network to match */
+  uip_ipaddr_t router;   /* The IP address of the router on one of our networks*/
 };
 
 /****************************************************************************
@@ -81,17 +81,16 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
 {
   FAR struct route_match_s *match = ( FAR struct route_match_s *)arg;
 
-  /* To match, the entry has to be in use, the masked target addresses must
-   * be the same.  In the event of multiple matches, only the first is
-   * returned.
+  /* To match, the masked target addresses must be the same.  In the event
+   * of multiple matches, only the first is returned.  There not (yet) any
+   * concept for the precedence of networks.
    */
 
-  if (route->inuse &&
-      uip_ipaddr_maskcmp(route->target, match->target, route->netmask))
+  if (uip_ipaddr_maskcmp(route->target, match->target, route->netmask))
     {
-      /* They match.. clear the route table entry */
+      /* They match.. Copy the router address */
 
-      memcpy(match->route, route, sizeof(struct net_route_s));
+      uip_ipaddr_copy(match->router, route->router);
       return 1;
     }
 
@@ -103,10 +102,11 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Function: net_findroute
+ * Function: net_router
  *
  * Description:
- *   Given an IP address, return a copy of the routing table contents
+ *   Given an IP address on a external network, return the address of the
+ *   router on a local network that can forward to the external network.
  *
  * Parameters:
  *
@@ -115,18 +115,30 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
  *
  ****************************************************************************/
 
-int net_findroute(uip_ipaddr_t target, FAR struct net_route_s *route)
+#ifdef CONFIG_NET_IPv6
+int net_router(uip_ipaddr_t target, uip_ipaddr_t *router)
+#else
+int net_router(uip_ipaddr_t target, uip_ipaddr_t router)
+#endif
 {
   struct route_match_s match;
+  int ret;
 
   /* Set up the comparison structure */
 
+  memset(&match, 0, sizeof(struct route_match_s));
   uip_ipaddr_copy(match.target, target);
-  match.route = route;
 
   /* Then remove the entry from the routing table */
 
-  return net_foreachroute(net_match, &match) ? OK : -ENOENT;
+  ret = net_foreachroute(net_match, &match) ? OK : -ENOENT;
+#ifdef CONFIG_NET_IPv6
+  uip_ipaddr_copy(*router, match.target);
+#else
+  uip_ipaddr_copy(router, match.target);
+#endif
+
+  return ret;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_ROUTE */

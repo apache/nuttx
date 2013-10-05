@@ -487,7 +487,7 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
         {
           uip_ipaddr_t target;
           uip_ipaddr_t netmask;
-          uip_ipaddr_t gateway;
+          uip_ipaddr_t router;
 #ifdef CONFIG_NET_IPv6
           FAR struct sockaddr_in6 *addr;
 #else
@@ -507,16 +507,16 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
           addr    = (FAR struct sockaddr_in6 *)rtentry->rt_netmask;
           netmask = (uip_ipaddr_t)addr->sin6_addr.u6_addr16;
 
-          /* The gateway is an optional argument */
+          /* The router is an optional argument */
 
-          if (rtentry->rt_gateway)
+          if (rtentry->rt_router)
             {
-              addr    = (FAR struct sockaddr_in6 *)rtentry->rt_gateway;
-              gateway = (uip_ipaddr_t)addr->sin6_addr.u6_addr16;
+              addr   = (FAR struct sockaddr_in6 *)rtentry->rt_router;
+              router = (uip_ipaddr_t)addr->sin6_addr.u6_addr16;
             }
           else
             {
-              gateway = NULL;
+              router = NULL;
             }
 #else
           addr    = (FAR struct sockaddr_in *)rtentry->rt_target;
@@ -525,19 +525,19 @@ static int netdev_rtioctl(FAR struct socket *psock, int cmd,
           addr    = (FAR struct sockaddr_in *)rtentry->rt_netmask;
           netmask = (uip_ipaddr_t)addr->sin_addr.s_addr;
 
-          /* The gateway is an optional argument */
+          /* The router is an optional argument */
 
-          if (rtentry->rt_gateway)
+          if (rtentry->rt_router)
             {
-              addr    = (FAR struct sockaddr_in *)rtentry->rt_gateway;
-              gateway = (uip_ipaddr_t)addr->sin_addr.s_addr;
+              addr   = (FAR struct sockaddr_in *)rtentry->rt_router;
+              router = (uip_ipaddr_t)addr->sin_addr.s_addr;
             }
           else
             {
-              gateway = 0;
+              router = 0;
             }
 #endif
-          ret = net_addroute(target, netmask, gateway, rtentry->rt_ifno);
+          ret = net_addroute(target, netmask, router);
         }
         break;
 

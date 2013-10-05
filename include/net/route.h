@@ -62,10 +62,9 @@
 
 struct rtentry
 {
-  uint16_t rt_ifno;                        /* Interface number, e.g., the 0 in "eth0" */
-  FAR struct sockaddr_storage *rt_target;  /* Target address */
+  FAR struct sockaddr_storage *rt_target;  /* Address of the network */
   FAR struct sockaddr_storage *rt_netmask; /* Network mask defining the sub-net */
-  FAR struct sockaddr_storage *rt_gateway; /* Gateway address associated with the hop */
+  FAR struct sockaddr_storage *rt_router; /* Gateway address associated with the hop */
 };
 
 /****************************************************************************
@@ -93,10 +92,10 @@ extern "C"
  *
  * Parameters:
  *   sockfd   - Any socket descriptor
- *   target   - Target address (required)
- *   netmask  - Network mask defining the sub-net (required)
- *   gateway  - Gateway address associated with the hop (optional)
- *   ifno     - Interface number, e.g., the 0 in "eth0"
+ *   target   - Target address on external network(required)
+ *   netmask  - Network mask defining the external network (required)
+ *   router   - Router address that on our network that can forward to the
+ *              external network.
  *
  * Returned Value:
  *   OK on success; -1 on failure with the errno variable set appropriately.
@@ -105,7 +104,7 @@ extern "C"
 
 int addroute(int sockfd, FAR struct sockaddr_storage *target,
              FAR struct sockaddr_storage *netmask,
-             FAR struct sockaddr_storage *gateway, int ifno);
+             FAR struct sockaddr_storage *router);
 
 /****************************************************************************
  * Function: net_delroute
@@ -116,8 +115,8 @@ int addroute(int sockfd, FAR struct sockaddr_storage *target,
  *
  * Parameters:
  *   sockfd   - Any socket descriptor
- *   target   - Target address (required)
- *   netmask  - Network mask defining the sub-net (required)
+ *   target   - Target address on the remote network (required)
+ *   netmask  - Network mask defining the external network (required)
  *
  * Returned Value:
  *   OK on success; -1 on failure with the errno variable set appropriately.

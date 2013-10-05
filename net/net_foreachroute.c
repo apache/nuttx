@@ -53,10 +53,6 @@
  * Public Data
  ****************************************************************************/
 
-/* This is the routing table */
-
-struct net_route_s g_routes[CONFIG_NET_MAXROUTES];
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -76,17 +72,25 @@ struct net_route_s g_routes[CONFIG_NET_MAXROUTES];
 
 int net_foreachroute(route_handler_t handler, FAR void *arg)
 {
+  FAR struct net_route_s *route;
+  FAR struct net_route_s *next;
   uip_lock_t save;
   int ret = 0;
-  int i;
 
   /* Prevent concurrent access to the routing table */
 
   save = uip_lock();
 
-  for (i = 0; i < CONFIG_NET_MAXROUTES && ret == 0; i++)
+  /* Visit each entry in the routing table */
+
+  for (route = (FAR struct net_route_s *)g_routes.head; route; route = next)
     {
-      ret = handler(&g_routes[i], arg);
+      /* Get the next entry in the to visit.  We do this BEFORE calling the
+       * handler because the hanlder may delete this entry.
+       */
+
+      next = route->flink;
+      ret = handler(route, arg);
     }
 
   /* Unlock uIP */

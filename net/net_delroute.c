@@ -54,8 +54,9 @@
 
 struct route_match_s
 {
-  uip_ipaddr_t target;   /* The target IP address to match */
-  uip_ipaddr_t netmask;  /* The network mask to match */
+  FAR struct net_route_s *prev;     /* Predecessor in the list */
+  uip_ipaddr_t            target;   /* The target IP address to match */
+  uip_ipaddr_t            netmask;  /* The network mask to match */
 };
 
 /****************************************************************************
@@ -81,20 +82,37 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
 {
   FAR struct route_match_s *match = ( FAR struct route_match_s *)arg;
 
-  /* To match, the entry has to be in use, the masked target address must
-   * be the same, and the masks must be the same.
+  /* To match, the masked target address must be the same, and the masks
+   * must be the same.
    */
 
-  if (route->inuse &&
-      uip_ipaddr_maskcmp(route->target, match->target, match->netmask) &&
+  if (uip_ipaddr_maskcmp(route->target, match->target, match->netmask) &&
       uip_ipaddr_cmp(route->target, match->netmask))
     {
-      /* They match.. clear the route table entry */
+      /* They match.. Remove the entry from the routing table */
 
-      memset(route, 0, sizeof(struct net_route_s));
+      if (match->prev)
+        {
+          (void)sq_remafter((FAR sq_entry_t *)match->prev,
+                            (FAR sq_queue_t *)&g_routes);
+        }
+      else
+        {
+          (void)sq_remfirst((FAR sq_queue_t *)&g_routes);
+        }
+
+      /* And free the routing table entry by adding it to the free list */
+
+      net_freeroute(route);
+
+      /* Return a non-zero value to terminate the traversal */
+
       return 1;
     }
 
+  /* Next time we are here, this will be the previous entry */
+
+  match->prev = route;
   return 0;
 }
 
@@ -121,6 +139,7 @@ int net_delroute(uip_ipaddr_t target, uip_ipaddr_t netmask)
 
   /* Set up the comparison structure */
 
+  match.prev = NULL;
   uip_ipaddr_copy(match.target, target);
   uip_ipaddr_copy(match.netmask, netmask);
 

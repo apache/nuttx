@@ -46,6 +46,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <stdint.h>
+#include <string.h>
 #include <net/route.h>
 
 /***************************************************************************
@@ -61,8 +62,8 @@
  *
  * Parameters:
  *   sockfd   - Any socket descriptor
- *   target   - Target address (required)
- *   netmask  - Network mask defining the sub-net (required)
+ *   target   - Target address on the remote network (required)
+ *   netmask  - Network mask defining the external network (required)
  *
  * Returned Value:
  *   OK on success; -1 on failure with the errno variable set appropriately.
@@ -76,11 +77,9 @@ int delroute(int sockfd, FAR struct sockaddr_storage *target,
 
   /* Set up the rtentry structure */
 
+  memset(&entry, 0, sizeof(struct rtentry));
   entry.rt_target  = target;  /* Target address */
   entry.rt_netmask = netmask; /* Network mask defining the sub-net */
-
-  entry.rt_ifno    = 0;       /* (not used for deletion) */
-  entry.rt_gateway = NULL;    /* (not used for deletion) */
 
   /* Then perform the ioctl */
 

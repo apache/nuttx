@@ -40,8 +40,11 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <string.h>
+#include <queue.h>
 #include <errno.h>
+#include <debug.h>
+
+#include <arch/irq.h>
 
 #include "net_internal.h"
 #include "net_route.h"
@@ -55,32 +58,6 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Function: net_available
- *
- * Description:
- *   Return 1 if the route is available
- *
- * Parameters:
- *   route - The next route to examine
- *   arg   - The new route entry (cast to void*)
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- ****************************************************************************/
-
-static int net_available(FAR struct net_route_s *route, FAR void *arg)
-{
-  if (!route->inuse)
-    {
-      memcpy(route, arg, sizeof(struct net_route_s));
-      return 1;
-    }
-
-  return 0;
-}
 
 /****************************************************************************
  * Public Functions
@@ -100,21 +77,35 @@ static int net_available(FAR struct net_route_s *route, FAR void *arg)
  ****************************************************************************/
 
 int net_addroute(uip_ipaddr_t target, uip_ipaddr_t netmask,
-                 uip_ipaddr_t gateway, int devno)
+                 uip_ipaddr_t router)
 {
-  struct net_route_s route;
+  FAR struct net_route_s *route;
+  uip_lock_t save;
+
+  /* Allocate a route entry */
+
+  route = net_allocroute();
+  if (!route)
+    {
+      ndbg("ERROR:  Failed to allocate a route\n");
+      return -ENOMEM;
+    }
 
   /* Format the new route table entry */
 
-  route.inuse = true;
-  route.minor = devno;
-  uip_ipaddr_copy(route.target, target);
-  uip_ipaddr_copy(route.netmask, netmask);
-  uip_ipaddr_copy(route.gateway, gateway);
+  uip_ipaddr_copy(route->target, target);
+  uip_ipaddr_copy(route->netmask, netmask);
+  uip_ipaddr_copy(route->router, router);
+
+  /* Get exclusive address to the networking data structures */
+
+  save = uip_lock();
 
   /* Then add the new entry to the table */
 
-  return net_foreachroute(net_available, &route) ? OK : -EAGAIN;
+  sq_addlast((FAR sq_entry_t *)route, (FAR sq_queue_t *)&g_routes);
+  uip_unlock(save);
+  return OK;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_ROUTE */
