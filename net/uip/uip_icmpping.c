@@ -352,7 +352,7 @@ int uip_ping(uip_ipaddr_t addr, uint16_t id, uint16_t seqno,
 
       /* Notify the device driver of the availaibilty of TX data */
 
-      netdev_txnotify(&state.png_addr);
+      netdev_txnotify(state.png_addr);
 
       /* Wait for either the full round trip transfer to complete or
        * for timeout to occur. (1) uip_lockedwait will also terminate if a

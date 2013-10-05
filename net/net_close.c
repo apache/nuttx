@@ -176,7 +176,7 @@ static inline void netclose_disconnect(FAR struct socket *psock)
 
               /* Notify the device driver of the availaibilty of TX data */
 
-               netdev_txnotify(&conn->ripaddr);
+               netdev_txnotify(conn->ripaddr);
 
                /* Wait for the disconnect event */
 

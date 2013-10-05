@@ -187,6 +187,12 @@ int net_delroute(uip_ipaddr_t target, uip_ipaddr_t netmask);
  *   router on a local network that can forward to the external network.
  *
  * Parameters:
+ *   target - An IP address on a remote network to use in the lookup.
+ *   router - The address of router on a local network that can forward our
+ *     packets to the target.
+ *
+ *   NOTE:  For IPv6, router will be an array, for IPv4 it will be a scalar
+ *   value.  Hence, the change in the function signature.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -194,9 +200,9 @@ int net_delroute(uip_ipaddr_t target, uip_ipaddr_t netmask);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int net_router(uip_ipaddr_t target, uip_ipaddr_t *router);
-#else
 int net_router(uip_ipaddr_t target, uip_ipaddr_t router);
+#else
+int net_router(uip_ipaddr_t target, uip_ipaddr_t *router);
 #endif
 
 /****************************************************************************

@@ -109,6 +109,12 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
  *   router on a local network that can forward to the external network.
  *
  * Parameters:
+ *   target - An IP address on a remote network to use in the lookup.
+ *   router - The address of router on a local network that can forward our
+ *     packets to the target.
+ *
+ *   NOTE:  For IPv6, router will be an array, for IPv4 it will be a scalar
+ *   value.  Hence, the change in the function signature.
  *
  * Returned Value:
  *   OK on success; Negated errno on failure.
@@ -116,9 +122,9 @@ static int net_match(FAR struct net_route_s *route, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_IPv6
-int net_router(uip_ipaddr_t target, uip_ipaddr_t *router)
-#else
 int net_router(uip_ipaddr_t target, uip_ipaddr_t router)
+#else
+int net_router(uip_ipaddr_t target, uip_ipaddr_t *router)
 #endif
 {
   struct route_match_s match;
@@ -133,9 +139,9 @@ int net_router(uip_ipaddr_t target, uip_ipaddr_t router)
 
   ret = net_foreachroute(net_match, &match) ? OK : -ENOENT;
 #ifdef CONFIG_NET_IPv6
-  uip_ipaddr_copy(*router, match.target);
-#else
   uip_ipaddr_copy(router, match.target);
+#else
+  uip_ipaddr_copy(*router, match.target);
 #endif
 
   return ret;

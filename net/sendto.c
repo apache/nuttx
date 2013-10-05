@@ -402,7 +402,7 @@ ssize_t psock_sendto(FAR struct socket *psock, FAR const void *buf,
 
       /* Notify the device driver of the availabilty of TX data */
 
-      netdev_txnotify(&conn->ripaddr);
+      netdev_txnotify(conn->ripaddr);
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
        * NOTES:  (1) uip_lockedwait will also terminate if a signal is received, (2)

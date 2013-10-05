@@ -5702,4 +5702,10 @@
 	  touschscreen drive is basically functional) (2013-10-3)
 	* arch/arm/src/sama5/chip/sam_lcdc.h:  Add SAMA5 LCD register
 	  definition header file (2013-10-4).
+	* net/netdev_findbyaddr.c:  Now (1) uses the routing table
+	  if available to look up the router to get to a remote network,
+	  and (2) if there is only a single network device and no
+	  route, then it will simply return that single device.  The
+	  ARP logic will use the default router address associated with
+	  the interface in this case (2013-10-5).
  

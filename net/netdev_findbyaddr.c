@@ -47,6 +47,7 @@
 
 #include <nuttx/net/uip/uip-arch.h>
 
+#include "net_route.h"
 #include "net_internal.h"
 
 /****************************************************************************
@@ -73,16 +74,40 @@
  * Function: netdev_maskcmp
  ****************************************************************************/
 
-static inline bool netdev_maskcmp(const uip_ipaddr_t *ipaddr,
-                                  const uip_ipaddr_t *raddr,
-                                  const uip_ipaddr_t *netmask)
+/****************************************************************************
+ * Function: netdev_finddevice
+ *
+ * Description:
+ *   Find a previously registered network device by matching a local address
+ *   with the subnet served by the device
+ *
+ * Parameters:
+ *   addr - Pointer to the remote address of a connection
+ *
+ * Returned Value:
+ *  Pointer to driver on success; null on failure
+ *
+ * Assumptions:
+ *  Called from normal user mode
+ *
+ ****************************************************************************/
+
+static FAR struct uip_driver_s *netdev_finddevice(const uip_ipaddr_t addr)
 {
-#ifndef CONFIG_NET_IPv6
-  return (*ipaddr & *netmask) == (*raddr & *netmask);
-#else
-# warning "Not implemented for IPv6"
-  return false;
-#endif
+  struct uip_driver_s *dev;
+
+  netdev_semtake();
+  for (dev = g_netdevices; dev; dev = dev->flink)
+    {
+      if (uip_ipaddr_maskcmp(dev->d_ipaddr, addr, dev->d_netmask))
+        {
+          netdev_semgive();
+          return dev;
+        }
+    }
+
+  netdev_semgive();
+  return NULL;
 }
 
 /****************************************************************************
@@ -93,11 +118,11 @@ static inline bool netdev_maskcmp(const uip_ipaddr_t *ipaddr,
  * Function: netdev_findbyaddr
  *
  * Description:
- *   Find a previously registered network device by matching a remote address
- *   with the subnet served by the device
+ *   Find a previously registered network device by matching an arbitrary
+ *   IP address.
  *
  * Parameters:
- *   raddr - Pointer to the remote address of a connection
+ *   addr - Pointer to the remote address of a connection
  *
  * Returned Value:
  *  Pointer to driver on success; null on failure
@@ -107,24 +132,69 @@ static inline bool netdev_maskcmp(const uip_ipaddr_t *ipaddr,
  *
  ****************************************************************************/
 
-FAR struct uip_driver_s *netdev_findbyaddr(const uip_ipaddr_t *raddr)
+FAR struct uip_driver_s *netdev_findbyaddr(const uip_ipaddr_t addr)
 {
   struct uip_driver_s *dev;
+#ifdef CONFIG_NET_ROUTE
+  uip_ipaddr_t router;
+  int ret;
+#endif
 
-  if (raddr)
+  /* First, see if the address maps to the a local network */
+
+  dev = netdev_finddevice(addr);
+  if (dev)
     {
-      netdev_semtake();
-      for (dev = g_netdevices; dev; dev = dev->flink)
-        {
-          if (netdev_maskcmp(&dev->d_ipaddr, raddr, &dev->d_netmask))
-            {
-              netdev_semgive();
-              return dev;
-            }
-        }
-      netdev_semgive();
+      return dev;
     }
-  return NULL;
+
+  /* No.. The address lies on an external network */
+
+#ifdef CONFIG_NET_ROUTE
+  /* If we have a routing table, then perhaps we can find the the local
+   * address of a router that can forward packets to the external network.
+   */
+
+#ifdef CONFIG_NET_IPv6
+  ret = net_router(addr, router);
+#else
+  ret = net_router(addr, &router);
+#endif
+  if (ret >= 0)
+    {
+      /* Success... try to find the network device associated with the local
+       * router address
+       */
+
+      dev = netdev_finddevice(router);
+      if (dev)
+        {
+          return dev;
+        }
+    }
+#endif /* CONFIG_NET_ROUTE */
+
+  /* The above lookup will fail if the packet is being sent out of our
+   * out subnet to a router and there is no routing information.
+   *
+   * However, if there is only a single, registered network interface, then
+   * the decision is pretty easy.  Use that device and its default router
+   * address.
+   */
+
+  netdev_semtake();
+  if (g_netdevices && !g_netdevices->flink)
+    {
+      dev = g_netdevices;
+    }
+  netdev_semgive();
+
+  /* If we will did not find the network device, then we might as well fail
+   * because we are not configured properly to determine the route to the
+   * target.
+   */
+
+  return dev;
 }
 
 #endif /* CONFIG_NET && CONFIG_NSOCKET_DESCRIPTORS */

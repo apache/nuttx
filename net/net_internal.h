@@ -202,21 +202,21 @@ FAR struct uip_driver_s *netdev_findbyname(FAR const char *ifname);
 /* net_findbyaddr.c **********************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-FAR struct uip_driver_s *netdev_findbyaddr(FAR const uip_ipaddr_t *raddr);
+FAR struct uip_driver_s *netdev_findbyaddr(const uip_ipaddr_t addr);
 #endif
 
 /* net_txnotify.c ************************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
-void netdev_txnotify(const uip_ipaddr_t *raddr);
+void netdev_txnotify(const uip_ipaddr_t addr);
 #endif
 
 /* net_rxnotify.c ************************************************************/
 
 #if CONFIG_NSOCKET_DESCRIPTORS > 0 && defined(CONFIG_NET_RXAVAIL)
-void netdev_rxnotify(const uip_ipaddr_t *raddr);
+void netdev_rxnotify(const uip_ipaddr_t addr);
 #else
-#  define netdev_rxnotify(raddr)
+#  define netdev_rxnotify(addr)
 #endif
 
 /* net_count.c ***************************************************************/
