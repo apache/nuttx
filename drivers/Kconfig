@@ -440,5 +440,3 @@ endif
 comment "System Logging Device Options"
 
 source drivers/syslog/Kconfig
-
-

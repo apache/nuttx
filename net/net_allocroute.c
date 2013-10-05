@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <errno.h>
+#include <assert.h>
 
 #include <arch/irq.h>
 

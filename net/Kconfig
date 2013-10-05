@@ -68,8 +68,7 @@ config NET_SOCKOPTS
 
 config NET_BUFSIZE
 	int "Network packet size"
-	default 562 if !NET_TCP && NET_UDP && !NET_SLIP
-	default 420 if NET_TCP && !NET_UDP && !NET_SLIP
+	default 562 if !NET_SLIP
 	default 296 if NET_SLIP
 	---help---
 		uIP buffer size.  Default: 562
