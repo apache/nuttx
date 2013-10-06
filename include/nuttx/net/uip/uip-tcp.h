@@ -6,7 +6,8 @@
  * of C macros that are used by uIP programs as well as internal uIP
  * structures, TCP/IP header structures and function declarations.
  *
- *   Copyright (C) 2007, 2009-2010, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2010, 2012-2013 Gregory Nutt. All rights
+ *      reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -168,8 +169,8 @@ struct uip_conn
    */
 
 #ifdef CONFIG_NET_TCPBACKLOG
-  struct uip_conn      *blparent;
-  struct uip_backlog_s *backlog;
+  FAR struct uip_conn      *blparent;
+  FAR struct uip_backlog_s *backlog;
 #endif
 
   /* Application callbacks:
@@ -196,14 +197,24 @@ struct uip_conn
    *                 dev->d_len should also be cleared).
    */
 
-  struct uip_callback_s *list;
+  FAR struct uip_callback_s *list;
+
+  /* Close callback. The socket close logic allocates this callback and lets
+   * the connection handle closing itself. So the application won't be
+   * blocked on the close call.  The callback has to be freed together with
+   * this connection structure.
+   */
+
+  FAR struct uip_callback_s *closecb;
 
   /* accept() is called when the TCP logic has created a connection */
 
   FAR void *accept_private;
   int (*accept)(FAR struct uip_conn *listener, struct uip_conn *conn);
 
-  /* connection_event() is called on any of the subset of connection-related events */
+  /* connection_event() is called on any of the subset of connection-related
+   * events.
+   */
 
   FAR void *connection_private;
   void (*connection_event)(FAR struct uip_conn *conn, uint16_t flags);

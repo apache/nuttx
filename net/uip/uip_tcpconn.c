@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpconn.c
  *
- *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Large parts of this file were leveraged from uIP logic:
@@ -34,10 +34,6 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
-
-/****************************************************************************
- * Compilation Switches
  ****************************************************************************/
 
 /****************************************************************************
@@ -221,23 +217,29 @@ struct uip_conn *uip_tcpalloc(void)
 
   conn = (struct uip_conn *)dq_remfirst(&g_free_tcp_connections);
 
-#if 0 /* Revisit */
   /* Is the free list empty? */
 
   if (!conn)
     {
-      /* As a fallback, check for connection structures in the TIME_WAIT
-       * state.  If no CLOSED connections are found, then take the oldest
+      /* As a fallback, check for connection structures which are not
+       * established yet.
+       *
+       * Search the active connection list for the oldest connection
+       * that is not in the UIP_ESTABLISHED state.
        */
 
       struct uip_conn *tmp = g_active_tcp_connections.head;
       while (tmp)
         {
-          /* Is this connectin in the UIP_TIME_WAIT state? */
+          nllvdbg("conn: %p state: %02x\n", tmp, tmp->tcpstateflags);
 
-          if (tmp->tcpstateflags == UIP_TIME_WAIT)
+          /* Is this connection in some state other than UIP_ESTABLISHED
+           * state?
+           */
+
+          if (tmp->tcpstateflags != UIP_ESTABLISHED)
             {
-              /* Is it the oldest one we have seen so far? */
+              /* Yes.. Is it the oldest one we have seen so far? */
 
               if (!conn || tmp->timer > conn->timer)
                 {
@@ -252,11 +254,27 @@ struct uip_conn *uip_tcpalloc(void)
           tmp = tmp->node.flink;
         }
 
-      /* If we found one, remove it from the active connection list */
+      /* Did we find a connection that we can re-use? */
 
-      dq_rem(&conn->node, &g_active_tcp_connections);
+      if (conn != NULL)
+        {
+          nlldbg("Closing unestablished connection: %p\n", conn);
+
+          /* Yes... free it.  This will remove the connection from the list
+           * of active connections and release all resources held by the
+           * connection.
+           *
+           * REVISIT:  Could there be any higher level, socket interface
+           * that needs to be informed that we did this to them?
+           */
+
+          uip_tcpfree(conn);
+
+          /* Now there is guaranteed to be one free connection.  Get it! */
+
+          conn = (struct uip_conn *)dq_remfirst(&g_free_tcp_connections);
+        }
     }
-#endif
 
   uip_unlock(flags);
 
@@ -264,6 +282,7 @@ struct uip_conn *uip_tcpalloc(void)
 
   if (conn)
     {
+      memset(conn, 0, sizeof(struct uip_conn));
       conn->tcpstateflags = UIP_ALLOCATED;
     }
 
@@ -293,6 +312,13 @@ void uip_tcpfree(struct uip_conn *conn)
 
   DEBUGASSERT(conn->crefs == 0);
   flags = uip_lock();
+
+  /* Check if there is an allocated close callback structure */
+
+  if (conn->closecb != NULL)
+    {
+      uip_tcpcallbackfree(conn, conn->closecb);
+    }
 
   /* UIP_ALLOCATED means that that the connection is not in the active list
    * yet.
@@ -354,7 +380,7 @@ void uip_tcpfree(struct uip_conn *conn)
 struct uip_conn *uip_tcpactive(struct uip_tcpip_hdr *buf)
 {
   struct uip_conn *conn      = (struct uip_conn *)g_active_tcp_connections.head;
-  in_addr_t        srcipaddr = uip_ip4addr_conv(buf->srcipaddr);  
+  in_addr_t        srcipaddr = uip_ip4addr_conv(buf->srcipaddr);
 
   while (conn)
     {
@@ -421,7 +447,7 @@ struct uip_conn *uip_tcplistener(uint16_t portno)
   int i;
 
   /* Check if this port number is in use by any active UIP TCP connection */
- 
+
   for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
     {
       conn = &g_tcp_connections[i];
@@ -432,6 +458,7 @@ struct uip_conn *uip_tcplistener(uint16_t portno)
           return conn;
         }
     }
+
   return NULL;
 }
 
@@ -484,6 +511,7 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
 
       dq_addlast(&conn->node, &g_active_tcp_connections);
     }
+
   return conn;
 }
 
@@ -569,7 +597,7 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
   uip_lock_t flags;
   int port;
 
-  /* The connection is expected to be in the UIP_ALLOCATED state.. i.e., 
+  /* The connection is expected to be in the UIP_ALLOCATED state.. i.e.,
    * allocated via up_tcpalloc(), but not yet put into the active connections
    * list.
    */
