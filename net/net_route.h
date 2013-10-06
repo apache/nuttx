@@ -202,7 +202,41 @@ int net_delroute(uip_ipaddr_t target, uip_ipaddr_t netmask);
 #ifdef CONFIG_NET_IPv6
 int net_router(uip_ipaddr_t target, uip_ipaddr_t router);
 #else
-int net_router(uip_ipaddr_t target, uip_ipaddr_t *router);
+int net_router(uip_ipaddr_t target, FAR uip_ipaddr_t *router);
+#endif
+
+/****************************************************************************
+ * Function: netdev_router
+ *
+ * Description:
+ *   Given an IP address on a external network, return the address of the
+ *   router on a local network that can forward to the external network.
+ *   This is similar to net_router().  However, the set of routers is
+ *   constrained to those accessible by the specific device
+ *
+ * Parameters:
+ *   dev    - We are committed to using this device.
+ *   target - An IP address on a remote network to use in the lookup.
+ *   router - The address of router on a local network that can forward our
+ *     packets to the target.
+ *
+ *   NOTE:  For IPv6, router will be an array, for IPv4 it will be a scalar
+ *   value.  Hence, the change in the function signature.
+ *
+ * Returned Value:
+ *   None, a router address is always returned (which may just be, perhaps,
+ *   device's default router address)
+ *
+ ****************************************************************************/
+
+struct uip_driver_s;
+
+#ifdef CONFIG_NET_IPv6
+void netdev_router(FAR struct uip_driver_s *dev, uip_ipaddr_t target,
+                   uip_ipaddr_t router);
+#else
+void netdev_router(FAR struct uip_driver_s *dev, uip_ipaddr_t target,
+                   FAR uip_ipaddr_t *router);
 #endif
 
 /****************************************************************************

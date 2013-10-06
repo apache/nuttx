@@ -370,12 +370,23 @@ void uip_arp_out(struct uip_driver_s *dev)
       destipaddr = uip_ip4addr_conv(pip->eh_destipaddr);
       if (!uip_ipaddr_maskcmp(destipaddr, dev->d_ipaddr, dev->d_netmask))
         {
-          /* Destination address was not on the local network, so we need to
-           * use the default router's IP address instead of the destination
-           * address when determining the MAC address.
+          /* Destination address is not on the local network */
+
+#ifdef CONFIG_NET_ROUTE
+          /* We have a routing table.. find the correct router to use in
+           * this case (or, as a fallback, use the device's default router
+           * address).  We will use the router IP address instead of the
+           * destination address when determining the MAC address.
+           */
+
+          netdev_router(dev, destipaddr, &ipaddr);
+#else
+          /* Use the device's default router IP address instead of the
+           * destination address when determining the MAC address.
            */
 
           uip_ipaddr_copy(ipaddr, dev->d_draddr);
+#endif
         }
       else
         {

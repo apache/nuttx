@@ -66,7 +66,7 @@ endif
 
 ifeq ($(CONFIG_NET_ROUTE),y)
 SOCK_CSRCS += net_addroute.c net_allocroute.c net_delroute.c
-SOCK_CSRCS += net_foreachroute.c net_router.c
+SOCK_CSRCS += net_foreachroute.c net_router.c netdev_router.c
 endif
 
 # Support for network access using streams

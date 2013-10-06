@@ -5708,4 +5708,8 @@
 	  route, then it will simply return that single device.  The
 	  ARP logic will use the default router address associated with
 	  the interface in this case (2013-10-5).
- 
+	* net/netdev_router.c and net/uip/uip-arp.c:  When the target IP address
+	  does not lie on the device's networker when we have a routing table,
+	  looking the the correct router IP address to use in the ARP request.
+	  In that case, we want the MAC address of the router, not of the the
+	  target endpoint (2013-10-5).
