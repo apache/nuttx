@@ -63,7 +63,7 @@
  *   Poll all UDP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the CAN device driver and may be called from
+ *   This function is called from the MAC device driver and may be called from
  *   the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
@@ -88,7 +88,7 @@ static inline int uip_pollicmp(struct uip_driver_s *dev, uip_poll_callback_t cal
  *   Poll all UDP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the CAN device driver and may be called from
+ *   This function is called from the MAC device driver and may be called from
  *   the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
@@ -113,7 +113,7 @@ static inline int uip_polligmp(struct uip_driver_s *dev, uip_poll_callback_t cal
  *   Poll all UDP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the CAN device driver and may be called from
+ *   This function is called from the MAC device driver and may be called from
  *   the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
@@ -149,7 +149,7 @@ static int uip_polludpconnections(struct uip_driver_s *dev,
  *   Poll all UDP connections for available packets to send.
  *
  * Assumptions:
- *   This function is called from the CAN device driver and may be called from
+ *   This function is called from the MAC device driver and may be called from
  *   the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
@@ -188,7 +188,7 @@ static inline int uip_polltcpconnections(struct uip_driver_s *dev,
  *   TCP connection.
  *
  * Assumptions:
- *   This function is called from the CAN device driver and may be called from
+ *   This function is called from the MAC device driver and may be called from
  *   the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
@@ -242,7 +242,7 @@ static inline int uip_polltcptimer(struct uip_driver_s *dev,
  *   out the packet.
  *
  * Assumptions:
- *   This function is called from the CAN device driver and may be called from
+ *   This function is called from the MAC device driver and may be called from
  *   the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/
@@ -301,7 +301,7 @@ int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback)
  *   out the packet.
  *
  * Assumptions:
- *   This function is called from the CAN device driver and may be called from
+ *   This function is called from the MAC device driver and may be called from
  *   the timer interrupt/watchdog handle level.
  *
  ****************************************************************************/

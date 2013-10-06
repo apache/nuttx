@@ -5715,4 +5715,6 @@
 	  target endpoint (2013-10-5).
 	* net/netdev_rxnotify.c and others: Use the new signature of rxnotify
 	  caused by the routing table.  From Max Holtzberg (2013-10-6).
+	* arch/arm/src/sama5/sam_lcdc.c and .h: Empty "skeleton" file that
+	  will eventually become an LCDC driver for the SAMA5 (2013-10-6).
 

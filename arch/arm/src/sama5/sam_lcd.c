@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src//lpc17xx/lpc17_lcd.c
+ * arch/arm/src/sama5/sam_lcd.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -48,66 +48,98 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "chip/lpc17_syscon.h"
-#include "lpc17_gpio.h"
-#include "lpc17_lcd.h"
+#include "chip/sam_syscon.h"
+#include "sam_gpio.h"
+#include "sam_lcd.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#define LPC17_LCD_CLK_PER_LINE \
-  (CONFIG_LPC17_LCD_HWIDTH + CONFIG_LPC17_LCD_HPULSE + \
-   CONFIG_LPC17_LCD_HFRONTPORCH + CONFIG_LPC17_LCD_HBACKPORCH)
-#define LPC17_LCD_LINES_PER_FRAME \
-  (CONFIG_LPC17_LCD_VHEIGHT + CONFIG_LPC17_LCD_VPULSE + \
-   CONFIG_LPC17_LCD_VFRONTPORCH + CONFIG_LPC17_LCD_VBACKPORCH)
-#define LPC17_LCD_PIXEL_CLOCK \
-  (LPC17_LCD_CLK_PER_LINE * LPC17_LCD_LINES_PER_FRAME * \
-   CONFIG_LPC17_LCD_REFRESH_FREQ)
+#define SAM_LCD_CLK_PER_LINE \
+  (CONFIG_SAM_LCD_HWIDTH + CONFIG_SAM_LCD_HPULSE + \
+   CONFIG_SAM_LCD_HFRONTPORCH + CONFIG_SAM_LCD_HBACKPORCH)
+#define SAM_LCD_LINES_PER_FRAME \
+  (CONFIG_SAM_LCD_VHEIGHT + CONFIG_SAM_LCD_VPULSE + \
+   CONFIG_SAM_LCD_VFRONTPORCH + CONFIG_SAM_LCD_VBACKPORCH)
+#define SAM_LCD_PIXEL_CLOCK \
+  (SAM_LCD_CLK_PER_LINE * SAM_LCD_LINES_PER_FRAME * \
+   CONFIG_SAM_LCD_REFRESH_FREQ)
 
 /* Framebuffer characteristics in bytes */
 
-#if defined(CONFIG_LPC17_LCD_BPP1)
-#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 1 + 7) / 8)
-#elif defined(CONFIG_LPC17_LCD_BPP2)
-#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 2 + 7) / 8)
-#elif defined(CONFIG_LPC17_LCD_BPP4)
-#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 4 + 7) / 8)
-#elif defined(CONFIG_LPC17_LCD_BPP8)
-#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 8 + 7) / 8)
-#elif defined(CONFIG_LPC17_LCD_BPP16)
-#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 16 + 7) / 8)
-#elif defined(CONFIG_LPC17_LCD_BPP24)
-#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 32 + 7) / 8)
-#elif defined(CONFIG_LPC17_LCD_BPP16_565)
-#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 16 + 7) / 8)
-#else /* defined(CONFIG_LPC17_LCD_BPP12_444) */
-#  define LPC17_STRIDE ((CONFIG_LPC17_LCD_HWIDTH * 16 + 7) / 8)
+#if defined(CONFIG_SAM_LCD_BPP1)
+#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 1 + 7) / 8)
+#elif defined(CONFIG_SAM_LCD_BPP2)
+#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 2 + 7) / 8)
+#elif defined(CONFIG_SAM_LCD_BPP4)
+#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 4 + 7) / 8)
+#elif defined(CONFIG_SAM_LCD_BPP8)
+#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 8 + 7) / 8)
+#elif defined(CONFIG_SAM_LCD_BPP16)
+#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 16 + 7) / 8)
+#elif defined(CONFIG_SAM_LCD_BPP24)
+#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 32 + 7) / 8)
+#elif defined(CONFIG_SAM_LCD_BPP16_565)
+#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 16 + 7) / 8)
+#else /* defined(CONFIG_SAM_LCD_BPP12_444) */
+#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 16 + 7) / 8)
 #endif
 
-#define LPC17_FBSIZE (LPC17_STRIDE * CONFIG_LPC17_LCD_VHEIGHT)
+#define SAM_FBSIZE (SAM_STRIDE * CONFIG_SAM_LCD_VHEIGHT)
 
 /* Delays */
 
-#define LPC17_LCD_PWRDIS_DELAY 10000
-#define LPC17_LCD_PWREN_DELAY  10000
+#define SAM_LCD_PWRDIS_DELAY 10000
+#define SAM_LCD_PWREN_DELAY  10000
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+/* This structure provides the overall state of the LCDC */
+
+struct sam_lcdc_s
+{
+  struct fb_vtable_s fboject;     /* The framebuffer object */
+
+#ifdef CONFIG_FB_HWCURSOR
+  struct fb_cursorpos_s cpos;     /* Current cursor position */
+#ifdef CONFIG_FB_HWCURSORSIZE
+  struct fb_cursorsize_s csize;   /* Current cursor size */
+#endif
+#endif
+
+  /* Debug stuff */
+
+#ifdef CONFIG_SAMA5_GMAC_REGDEBUG
+   bool wrlast;                   /* True: Last access was a write */
+   uintptr_t addrlast;            /* Last address accessed */
+   uint32_t vallast;              /* Last value read or written */
+   int ntimes;                    /* Number of consecutive accesses */
+#endif
+};
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+/* Register operations ******************************************************/
+
+#if defined(CONFIG_SAMA5_LCDC_REGDEBUG) && defined(CONFIG_DEBUG)
+static bool sam_checkreg(bool wr, uint32_t regval, uintptr_t address);
+static uint32_t sam_getreg(uintptr_t addr);
+static void sam_putreg(uintptr_t addr, uint32_t val);
+#else
+# define sam_getreg(addr)      getreg32(addr)
+# define sam_putreg(addr,val)  putreg32(val,addr)
+#endif
 
 /* Get information about the video controller configuration and the
  * configuration of each color plane.
  */
 
-static int lpc17_getvideoinfo(FAR struct fb_vtable_s *vtable,
+static int sam_getvideoinfo(FAR struct fb_vtable_s *vtable,
              FAR struct fb_videoinfo_s *vinfo);
-static int lpc17_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
+static int sam_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
              FAR struct fb_planeinfo_s *pinfo);
 
 /* The following is provided only if the video hardware supports RGB color
@@ -115,9 +147,9 @@ static int lpc17_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
  */
 
 #ifdef CONFIG_FB_CMAP
-static int lpc17_getcmap(FAR struct fb_vtable_s *vtable,
+static int sam_getcmap(FAR struct fb_vtable_s *vtable,
              FAR struct fb_cmap_s *cmap);
-static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
+static int sam_putcmap(FAR struct fb_vtable_s *vtable,
              FAR const struct fb_cmap_s *cmap);
 #endif
 
@@ -126,9 +158,9 @@ static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
  */
 
 #ifdef CONFIG_FB_HWCURSOR
-static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
+static int sam_getcursor(FAR struct fb_vtable_s *vtable,
              FAR struct fb_cursorattrib_s *attrib);
-static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
+static int sam_setcursor(FAR struct fb_vtable_s *vtable,
              FAR struct fb_setcursor_s *setttings);
 #endif
 
@@ -136,55 +168,29 @@ static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
  * Private Data
  ****************************************************************************/
 
-/* This structure describes the video controller */
+/* This structure describes the simulated video controller */
 
 static const struct fb_videoinfo_s g_videoinfo =
 {
-  .fmt      = LPC17_COLOR_FMT,
-  .xres     = CONFIG_LPC17_LCD_HWIDTH,
-  .yres     = CONFIG_LPC17_LCD_VHEIGHT,
+  .fmt      = SAM_COLOR_FMT,
+  .xres     = CONFIG_SAM_LCD_HWIDTH,
+  .yres     = CONFIG_SAM_LCD_VHEIGHT,
   .nplanes  = 1,
 };
 
-/* This structure describes the single color plane */
+/* This structure describes the single, simulated color plane */
 
 static const struct fb_planeinfo_s g_planeinfo =
 {
-  .fbmem    = (FAR void *)CONFIG_LPC17_LCD_VRAMBASE,
-  .fblen    = LPC17_FBSIZE,
-  .stride   = LPC17_STRIDE,
-  .bpp      = LPC17_BPP,
+  .fbmem    = (FAR void *)CONFIG_SAM_LCD_VRAMBASE,
+  .fblen    = SAM_FBSIZE,
+  .stride   = SAM_STRIDE,
+  .bpp      = SAM_BPP,
 };
 
-/* Current cursor position */
+/* This structure provides the overall state of the LCDC */
 
-#ifdef CONFIG_FB_HWCURSOR
-static struct fb_cursorpos_s g_cpos;
-
-/* Current cursor size */
-
-#ifdef CONFIG_FB_HWCURSORSIZE
-static struct fb_cursorsize_s g_csize;
-#endif
-#endif
-
-/* The framebuffer object -- There is no private state information in this
- * framebuffer driver.
- */
-
-struct fb_vtable_s g_fbobject =
-{
-  .getvideoinfo  = lpc17_getvideoinfo,
-  .getplaneinfo  = lpc17_getplaneinfo,
-#ifdef CONFIG_FB_CMAP
-  .getcmap       = lpc17_getcmap,
-  .putcmap       = lpc17_putcmap,
-#endif
-#ifdef CONFIG_FB_HWCURSOR
-  .getcursor     = lpc17_getcursor,
-  .setcursor     = lpc17_setcursor,
-#endif
-};
+struct sam_lcdc_s g_lcdc;
 
 /****************************************************************************
  * Public Data
@@ -195,10 +201,105 @@ struct fb_vtable_s g_fbobject =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_getvideoinfo
+ * Name: sam_checkreg
+ *
+ * Description:
+ *   Check if the current register access is a duplicate of the preceding.
+ *
+ * Input Parameters:
+ *   regval  - The value to be written
+ *   address - The address of the register to write to
+ *
+ * Returned Value:
+ *   true:  This is the first register access of this type.
+ *   flase: This is the same as the preceding register access.
+ *
  ****************************************************************************/
 
-static int lpc17_getvideoinfo(FAR struct fb_vtable_s *vtable,
+#ifdef CONFIG_SAMA5_LCDC_REGDEBUG
+static bool sam_checkreg(bool wr, uint32_t regval, uintptr_t address)
+{
+  if (wr      == g_lcdc.wrlast &&   /* Same kind of access? */
+      regval  == g_lcdc.vallast &&  /* Same value? */
+      address == g_lcdc.addrlast)   /* Same address? */
+    {
+      /* Yes, then just keep a count of the number of times we did this. */
+
+      g_lcdc.ntimes++;
+      return false;
+    }
+  else
+    {
+      /* Did we do the previous operation more than once? */
+
+      if (g_lcdc.ntimes > 0)
+        {
+          /* Yes... show how many times we did it */
+
+          lldbg("...[Repeats %d times]...\n", g_lcdc.ntimes);
+        }
+
+      /* Save information about the new access */
+
+      g_lcdc.wrlast   = wr;
+      g_lcdc.vallast  = regval;
+      g_lcdc.addrlast = address;
+      g_lcdc.ntimes   = 0;
+    }
+
+  /* Return true if this is the first time that we have done this operation */
+
+  return true;
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_getreg
+ *
+ * Description:
+ *  Read any 32-bit register using an absolute
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_LCDC_REGDEBUG
+static uint32_t sam_getreg(uintptr_t address)
+{
+  uint32_t regval = getreg32(address);
+
+  if (sam_checkreg(false, regval, address))
+    {
+      lldbg("%08x->%08x\n", address, regval);
+    }
+
+  return regval;
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_putreg
+ *
+ * Description:
+ *  Write to any 32-bit register using an absolute address
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_LCDC_REGDEBUG
+static void sam_putreg(uintptr_t address, uint32_t regval)
+{
+  if (sam_checkreg(true, regval, address))
+    {
+      lldbg("%08x<-%08x\n", address, regval);
+    }
+
+  putreg32(regval, address);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_getvideoinfo
+ ****************************************************************************/
+
+static int sam_getvideoinfo(FAR struct fb_vtable_s *vtable,
                               FAR struct fb_videoinfo_s *vinfo)
 {
   gvdbg("vtable=%p vinfo=%p\n", vtable, vinfo);
@@ -213,10 +314,10 @@ static int lpc17_getvideoinfo(FAR struct fb_vtable_s *vtable,
 }
 
 /****************************************************************************
- * Name: lpc17_getplaneinfo
+ * Name: sam_getplaneinfo
  ****************************************************************************/
 
-static int lpc17_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
+static int sam_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
                               FAR struct fb_planeinfo_s *pinfo)
 {
   gvdbg("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
@@ -231,11 +332,11 @@ static int lpc17_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
 }
 
 /****************************************************************************
- * Name: lpc17_getcmap
+ * Name: sam_getcmap
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int lpc17_getcmap(FAR struct fb_vtable_s *vtable,
+static int sam_getcmap(FAR struct fb_vtable_s *vtable,
                          FAR struct fb_cmap_s *cmap)
 {
   uint32_t *pal;
@@ -249,7 +350,7 @@ static int lpc17_getcmap(FAR struct fb_vtable_s *vtable,
   DEBUGASSERT(vtable && cmap &&
               cmap->first < 256 && (cmap->first + cmap->len) < 256);
 
-  pal  = (uint32_t *)LPC17_LCD_PAL(cmap->first >> 1);
+  pal  = (uint32_t *)SAM_LCD_PAL(cmap->first >> 1);
   last = cmap->first + cmap->len;
 
   /* Handle the case where the first color starts on an odd boundary */
@@ -305,11 +406,11 @@ static int lpc17_getcmap(FAR struct fb_vtable_s *vtable,
 #endif
 
 /****************************************************************************
- * Name: lpc17_putcmap
+ * Name: sam_putcmap
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
+static int sam_putcmap(FAR struct fb_vtable_s *vtable,
                          FAR const struct fb_cmap_s *cmap)
 {
   uint32_t *pal;
@@ -323,7 +424,7 @@ static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
 
   DEBUGASSERT(vtable && cmap);
 
-  pal  = (uint32_t *)LPC17_LCD_PAL(cmap->first >> 1);
+  pal  = (uint32_t *)SAM_LCD_PAL(cmap->first >> 1);
   last = cmap->first + cmap->len;
 
   /* Handle the case where the first color starts on an odd boundary */
@@ -375,29 +476,29 @@ static int lpc17_putcmap(FAR struct fb_vtable_s *vtable,
 #endif
 
 /****************************************************************************
- * Name: lpc17_getcursor
+ * Name: sam_getcursor
  ****************************************************************************/
 
 #ifdef CONFIG_FB_HWCURSOR
-static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
+static int sam_getcursor(FAR struct fb_vtable_s *vtable,
                         FAR struct fb_cursorattrib_s *attrib)
 {
   gvdbg("vtable=%p attrib=%p\n", vtable, attrib);
   if (vtable && attrib)
     {
 #ifdef CONFIG_FB_HWCURSORIMAGE
-      attrib->fmt = LPC17_COLOR_FMT;
+      attrib->fmt = SAM_COLOR_FMT;
 #endif
 
-      gvdbg("pos: (x=%d, y=%d)\n", g_cpos.x, g_cpos.y);
-      attrib->pos = g_cpos;
+      gvdbg("pos: (x=%d, y=%d)\n", g_lcdc.cpos.x, g_lcdc.cpos.y);
+      attrib->pos = g_lcdc.cpos;
 
 #ifdef CONFIG_FB_HWCURSORSIZE
-      attrib->mxsize.h = CONFIG_LPC17_LCD_VHEIGHT;
-      attrib->mxsize.w = CONFIG_LPC17_LCD_HWIDTH;
+      attrib->mxsize.h = CONFIG_SAM_LCD_VHEIGHT;
+      attrib->mxsize.w = CONFIG_SAM_LCD_HWIDTH;
 
-      gvdbg("size: (h=%d, w=%d)\n", g_csize.h, g_csize.w);
-      attrib->size = g_csize;
+      gvdbg("size: (h=%d, w=%d)\n", g_lcdc.csize.h, g_lcdc.csize.w);
+      attrib->size = g_lcdc.csize;
 #endif
       return OK;
     }
@@ -408,11 +509,11 @@ static int lpc17_getcursor(FAR struct fb_vtable_s *vtable,
 #endif
 
 /****************************************************************************
- * Name: lpc17_setcursor
+ * Name: sam_setcursor
  ****************************************************************************/
 
 #ifdef CONFIG_FB_HWCURSOR
-static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
+static int sam_setcursor(FAR struct fb_vtable_s *vtable,
                        FAR struct fb_setcursor_s *setttings)
 {
   gvdbg("vtable=%p setttings=%p\n", vtable, setttings);
@@ -421,14 +522,14 @@ static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
       gvdbg("flags: %02x\n", settings->flags);
       if ((flags & FB_CUR_SETPOSITION) != 0)
         {
-          g_cpos = settings->pos;
-          gvdbg("pos: (h:%d, w:%d)\n", g_cpos.x, g_cpos.y);
+          g_lcdc.cpos = settings->pos;
+          gvdbg("pos: (h:%d, w:%d)\n", g_lcdc.cpos.x, g_lcdc.cpos.y);
         }
 #ifdef CONFIG_FB_HWCURSORSIZE
       if ((flags & FB_CUR_SETSIZE) != 0)
         {
-          g_csize = settings->size;
-          gvdbg("size: (h:%d, w:%d)\n", g_csize.h, g_csize.w);
+          g_lcdc.csize = settings->size;
+          gvdbg("size: (h:%d, w:%d)\n", g_lcdc.csize.h, g_lcdc.csize.w);
         }
 #endif
 #ifdef CONFIG_FB_HWCURSORIMAGE
@@ -452,7 +553,7 @@ static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_fbinitialize
+ * Name: sam_fbinitialize
  *
  * Description:
  *   Initialize the framebuffer video hardware
@@ -466,240 +567,133 @@ int up_fbinitialize(void)
 
   gvdbg("Entry\n");
 
-  /* Give LCD bus priority */
-
-  regval = ((SYSCON_MATRIXARB_PRI_ICODE(SYSCON_MATRIXARB_PRI_LOW)) |
-            (SYSCON_MATRIXARB_PRI_DCODE(SYSCON_MATRIXARB_PRI_HIGHEST)) |
-            (SYSCON_MATRIXARB_PRI_LCD(SYSCON_MATRIXARB_PRI_HIGHEST)));
-  putreg32(regval, LPC17_SYSCON_MATRIXARB);
-
-  /* Configure pins */
+  /* Configure PIO pins */
   /* Video data */
 
   gvdbg("Configuring pins\n");
 
-  lpc17_configgpio(GPIO_LCD_VD0);
-  lpc17_configgpio(GPIO_LCD_VD1);
-  lpc17_configgpio(GPIO_LCD_VD2);
-  lpc17_configgpio(GPIO_LCD_VD3);
-  lpc17_configgpio(GPIO_LCD_VD4);
-  lpc17_configgpio(GPIO_LCD_VD5);
-  lpc17_configgpio(GPIO_LCD_VD6);
-  lpc17_configgpio(GPIO_LCD_VD7);
+  sam_configgpio(GPIO_LCD_VD0);
+  sam_configgpio(GPIO_LCD_VD1);
+  sam_configgpio(GPIO_LCD_VD2);
+  sam_configgpio(GPIO_LCD_VD3);
+  sam_configgpio(GPIO_LCD_VD4);
+  sam_configgpio(GPIO_LCD_VD5);
+  sam_configgpio(GPIO_LCD_VD6);
+  sam_configgpio(GPIO_LCD_VD7);
 
-  lpc17_configgpio(GPIO_LCD_VD8);
-  lpc17_configgpio(GPIO_LCD_VD9);
-  lpc17_configgpio(GPIO_LCD_VD10);
-  lpc17_configgpio(GPIO_LCD_VD11);
-  lpc17_configgpio(GPIO_LCD_VD12);
-  lpc17_configgpio(GPIO_LCD_VD13);
-  lpc17_configgpio(GPIO_LCD_VD14);
-  lpc17_configgpio(GPIO_LCD_VD15);
+  sam_configgpio(GPIO_LCD_VD8);
+  sam_configgpio(GPIO_LCD_VD9);
+  sam_configgpio(GPIO_LCD_VD10);
+  sam_configgpio(GPIO_LCD_VD11);
+  sam_configgpio(GPIO_LCD_VD12);
+  sam_configgpio(GPIO_LCD_VD13);
+  sam_configgpio(GPIO_LCD_VD14);
+  sam_configgpio(GPIO_LCD_VD15);
 
-#if LPC17_BPP > 16
-  lpc17_configgpio(GPIO_LCD_VD16);
-  lpc17_configgpio(GPIO_LCD_VD17);
-  lpc17_configgpio(GPIO_LCD_VD18);
-  lpc17_configgpio(GPIO_LCD_VD19);
-  lpc17_configgpio(GPIO_LCD_VD20);
-  lpc17_configgpio(GPIO_LCD_VD21);
-  lpc17_configgpio(GPIO_LCD_VD22);
-  lpc17_configgpio(GPIO_LCD_VD23);
+#if SAM_BPP > 16
+  sam_configgpio(GPIO_LCD_VD16);
+  sam_configgpio(GPIO_LCD_VD17);
+  sam_configgpio(GPIO_LCD_VD18);
+  sam_configgpio(GPIO_LCD_VD19);
+  sam_configgpio(GPIO_LCD_VD20);
+  sam_configgpio(GPIO_LCD_VD21);
+  sam_configgpio(GPIO_LCD_VD22);
+  sam_configgpio(GPIO_LCD_VD23);
 #endif
 
   /* Other pins */
 
-  lpc17_configgpio(GPIO_LCD_DCLK);
-  lpc17_configgpio(GPIO_LCD_LP);
-  lpc17_configgpio(GPIO_LCD_FP);
-  lpc17_configgpio(GPIO_LCD_ENABM);
-  lpc17_configgpio(GPIO_LCD_PWR);
+  sam_configgpio(GPIO_LCD_DCLK);
+  sam_configgpio(GPIO_LCD_LP);
+  sam_configgpio(GPIO_LCD_FP);
+  sam_configgpio(GPIO_LCD_ENABM);
+  sam_configgpio(GPIO_LCD_PWR);
 
   /* Turn on LCD clock */
-
-  modifyreg32(LPC17_SYSCON_PCONP, 0, SYSCON_PCONP_PCLCD);
+#warning Missing lobi
 
   gvdbg("Configuring the LCD controller\n");
 
   /* Disable the cursor */
-
-  regval  = getreg32(LPC17_LCD_CRSR_CRTL);
-  regval &= ~LCD_CRSR_CTRL_CRSON;
-  putreg32(regval, LPC17_LCD_CRSR_CRTL);
+#warning Missing logic
 
   /* Clear any pending interrupts */
+#warning Missing logic
 
-  putreg32(LCD_INTCLR_ALL, LPC17_LCD_INTCLR);
+  /* Disable LCDC controller */
+#warning Missing logic
 
-  /* Disable GLCD controller */
-
-  putreg32(0, LPC17_LCD_CTRL);
-
-  /* Initialize pixel clock (assuming clock source is the peripheral clock) */
-
-  putreg32(((uint32_t)BOARD_PCLK_FREQUENCY / (uint32_t)LPC17_LCD_PIXEL_CLOCK)+1,
-           LPC17_SYSCON_LCDCFG);
+  /* Initialize pixel clock */
+#warning Missing logic
 
   /* Set the bits per pixel */
+#warning Missing logic
 
-  regval  = getreg32(LPC17_LCD_CTRL);
-  regval &= ~LCD_CTRL_LCDBPP_MASK;
-
-#if defined(CONFIG_LPC17_LCD_BPP1)
-  regval |= LCD_CTRL_LCDBPP_1;      /* 1 bpp */
-#elif defined(CONFIG_LPC17_LCD_BPP2)
-  regval |= LCD_CTRL_LCDBPP_2;      /* 2 bpp */
-#elif defined(CONFIG_LPC17_LCD_BPP4)
-  regval |= LCD_CTRL_LCDBPP_4;      /* 4 bpp */
-#elif defined(CONFIG_LPC17_LCD_BPP8)
-  regval |= LCD_CTRL_LCDBPP_8;      /* 8 bpp */
-#elif defined(CONFIG_LPC17_LCD_BPP16)
-  regval |= LCD_CTRL_LCDBPP_16;     /* 16 bpp */
-#elif defined(CONFIG_LPC17_LCD_BPP24)
-  regval |= LCD_CTRL_LCDBPP_24;     /* 24-bit TFT panel only */
-#elif defined(CONFIG_LPC17_LCD_BPP16_565)
-  regval |= LCD_CTRL_LCDBPP_565;    /* 16 bpp, 5:6:5 mode */
-#else /* defined(CONFIG_LPC17_LCD_BPP12_444) */
-  regval |= LCD_CTRL_LCDBPP_444;    /* 12 bpp, 4:4:4 mode */
+#if defined(CONFIG_SAM_LCD_BPP1)
+#  warning Missing logic      /* 1 bpp */
+#elif defined(CONFIG_SAM_LCD_BPP2)
+#  warning Missing logic      /* 2 bpp */
+#elif defined(CONFIG_SAM_LCD_BPP4)
+#  warning Missing logic      /* 4 bpp */
+#elif defined(CONFIG_SAM_LCD_BPP8)
+#  warning Missing logic     /* 8 bpp */
+#elif defined(CONFIG_SAM_LCD_BPP16)
+#  warning Missing logic     /* 16 bpp */
+#elif defined(CONFIG_SAM_LCD_BPP24)
+#  warning Missing logic     /* 24-bit TFT panel only */
+#elif defined(CONFIG_SAM_LCD_BPP16_565)
+#  warning Missing logic    /* 16 bpp, 5:6:5 mode */
+#else /* defined(CONFIG_SAM_LCD_BPP12_444) */
+#  warning Missing logic    /* 12 bpp, 4:4:4 mode */
 #endif
 
   /* TFT panel */
-
-#if CONFIG_LPC17_LCD_TFTPANEL
-  regval |= LCD_CTRL_LCDTFT;
-#endif
-
-  /* Swap red and blue.  The colors will be 0x00RRGGBB, not 0x00BBGGRR. */
-
-  regval |= LCD_CTRL_BGR;
-
-  /* Single panel */
-
-  regval &= ~LCD_CTRL_LCDDUAL;
+#warning Missing logic
 
   /* Select monochrome or color LCD */
 
-#ifdef CONFIG_LPC17_LCD_MONOCHROME
-  /* Select monochrome LCD */
-
-  regval &= ~LCD_CTRL_BGR;
-
-  /* Select 4- or 8-bit monochrome interface */
-
-#  if LPC17_BPP > 4
-  regval |= LCD_CTRL_LCDMONO8;
-#  else
-  regval &= ~LCD_CTRL_LCDMONO8;
-#  endif
+#ifdef CONFIG_SAM_LCD_MONOCHROME
+#warning Missing logic
 
 #else
   /* Select color LCD */
+#warning Missing logic
 
-  regval &= ~(LCD_CTRL_LCDBW | LCD_CTRL_LCDMONO8);
-
-#endif /* CONFIG_LPC17_LCD_MONOCHROME */
-
-  /* Little endian byte order */
-
-  regval &= ~LCD_CTRL_BEBO;
-
-  /* Little endian pixel order */
-
-  regval &= ~LCD_CTRL_BEPO;
-  putreg32(regval, LPC17_LCD_CTRL);
+#endif /* CONFIG_SAM_LCD_MONOCHROME */
 
   /* Initialize horizontal timing */
-
-  putreg32(0, LPC17_LCD_TIMH);
-
-  regval = (((CONFIG_LPC17_LCD_HWIDTH/16) - 1) << LCD_TIMH_PPL_SHIFT |
-            (CONFIG_LPC17_LCD_HPULSE - 1)      << LCD_TIMH_HSW_SHIFT |
-            (CONFIG_LPC17_LCD_HFRONTPORCH - 1) << LCD_TIMH_HFP_SHIFT |
-            (CONFIG_LPC17_LCD_HBACKPORCH - 1)  << LCD_TIMH_HBP_SHIFT);
-  putreg32(regval, LPC17_LCD_TIMH);
+#warning Missing logic
 
   /* Initialize vertical timing */
-
-  putreg32(0, LPC17_LCD_TIMV);
-
-  regval = ((CONFIG_LPC17_LCD_VHEIGHT - 1) << LCD_TIMV_LPP_SHIFT |
-            (CONFIG_LPC17_LCD_VPULSE - 1)  << LCD_TIMV_VSW_SHIFT |
-            (CONFIG_LPC17_LCD_VFRONTPORCH) << LCD_TIMV_VFP_SHIFT |
-            (CONFIG_LPC17_LCD_VBACKPORCH)  << LCD_TIMV_VBP_SHIFT);
-  putreg32(regval, LPC17_LCD_TIMV);
+#warning Missing logic
 
   /* Initialize clock and signal polarity */
-
-  regval = getreg32(LPC17_LCD_POL);
-
-  /* LCDFP pin is active LOW and inactive HIGH */
-
-  regval |= LCD_POL_IVS;
-
-  /* LCDLP pin is active LOW and inactive HIGH */
-
-  regval |= LCD_POL_IHS;
-
-  /* Data is driven out into the LCD on the falling edge */
-
-  regval &= ~LCD_POL_IPC;
-
-  /* Set number of clocks per line */
-
-  regval |= ((CONFIG_LPC17_LCD_HWIDTH-1) << LCD_POL_CPL_SHIFT);
-
-  /* Bypass internal pixel clock divider */
-
-  regval |= LCD_POL_BCD;
-
-  /* LCD_ENAB_M is active high */
-
-  regval &= ~LCD_POL_IOE;
-
-  /* Select CCLK for the LCD block clock source */
-
-  regval &= ~LCD_POL_CLKSEL;
-  putreg32(regval, LPC17_LCD_POL);
-
-  /* Frame base address doubleword aligned */
-
-  putreg32(CONFIG_LPC17_LCD_VRAMBASE & ~7, LPC17_LCD_UPBASE);
-  putreg32(CONFIG_LPC17_LCD_VRAMBASE & ~7, LPC17_LCD_LPBASE);
+#warning Missing logic
 
   /* Clear the display */
+#warning Missing logic
 
-  lpc17_lcdclear(CONFIG_LPC17_LCD_BACKCOLOR);
+  sam_lcdclear(CONFIG_SAM_LCD_BACKCOLOR);
 
-#ifdef CONFIG_LPC17_LCD_BACKLIGHT
+#ifdef CONFIG_SAM_LCD_BACKLIGHT
   /* Turn on the back light */
 
-  lpc17_backlight(true);
+  sam_backlight(true);
 #endif
-
-  putreg32(0, LPC17_LCD_INTMSK);
-  gvdbg("Enabling the display\n");
-
-  for (i = LPC17_LCD_PWREN_DELAY; i; i--);
 
   /* Enable LCD */
 
-  regval  = getreg32(LPC17_LCD_CTRL);
-  regval |= LCD_CTRL_LCDEN;
-  putreg32(regval, LPC17_LCD_CTRL);
+  gvdbg("Enabling the display\n");
+#warning Missing logic
 
   /* Enable LCD power */
-
-  for (i = LPC17_LCD_PWREN_DELAY; i; i--);
-
-  regval  = getreg32(LPC17_LCD_CTRL);
-  regval |= LCD_CTRL_LCDPWR;
-  putreg32(regval, LPC17_LCD_CTRL);
+#warning Missing logic
 
   return OK;
 }
 
 /****************************************************************************
- * Name: lpc17_fbgetvplane
+ * Name: sam_fbgetvplane
  *
  * Description:
  *   Return a a reference to the framebuffer object for the specified video
@@ -718,7 +712,7 @@ FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
   gvdbg("vplane: %d\n", vplane);
   if (vplane == 0)
     {
-      return &g_fbobject;
+      return &g_lcdc.fboject;
     }
   else
     {
@@ -727,7 +721,7 @@ FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
 }
 
 /****************************************************************************
- * Name: lpc17_fbinitialize
+ * Name: sam_fbinitialize
  *
  * Description:
  *   Unitialize the framebuffer support
@@ -743,59 +737,64 @@ void fb_uninitialize(void)
    * worry about mutually exclusive access to the LCD hardware.
    */
 
-#ifdef CONFIG_LPC17_LCD_BACKLIGHT
+#ifdef CONFIG_SAM_LCD_BACKLIGHT
   /* Turn off the back light */
 
-  lpc17_backlight(false);
+  sam_backlight(false);
 #endif
 
   /* Disable the LCD controller */
+#warning Missing logic
 
-  regval = getreg32(LPC17_LCD_CTRL);
-  regval &= ~LCD_CTRL_LCDPWR;
-  putreg32(regval, LPC17_LCD_CTRL);
+  /* Initialize the g_lcdc data structure */
 
-  for (i = LPC17_LCD_PWRDIS_DELAY; i; i--);
-
-  regval &= ~LCD_CTRL_LCDEN;
-  putreg32(regval, LPC17_LCD_CTRL);
+  g_lcdc.fbobject.getvideoinfo  = sam_getvideoinfo;
+  g_lcdc.fbobject.getplaneinfo  = sam_getplaneinfo;
+#ifdef CONFIG_FB_CMAP
+  g_lcdc.fbobject.getcmap       = sam_getcmap;
+  g_lcdc.fbobject.putcmap       = sam_putcmap;
+#endif
+#ifdef CONFIG_FB_HWCURSOR
+  g_lcdc.fbobject.getcursor     = sam_getcursor;
+  g_lcdc.fbobject.setcursor     = sam_setcursor;
+#endif
 
   /* Turn off clocking to the LCD. modifyreg32() can do this atomically. */
 
-  modifyreg32(LPC17_SYSCON_PCONP, SYSCON_PCONP_PCLCD, 0);
+  modifyreg32(SAM_SYSCON_PCONP, SYSCON_PCONP_PCLCD, 0);
   return OK;
 }
 
 /************************************************************************************
- * Name:  lpc17_lcdclear
+ * Name:  sam_lcdclear
  *
  * Description:
- *   This is a non-standard LCD interface just for the LPC17xx.  Clearing the display
+ *   This is a non-standard LCD interface just for the SAMA5.  Clearing the display
  *   in the normal way by writing a sequences of runs that covers the entire display
  *   can be slow.  Here the display is cleared by simply setting all VRAM memory to
  *   the specified color.
  *
  ************************************************************************************/
 
-void lpc17_lcdclear(nxgl_mxpixel_t color)
+void sam_lcdclear(nxgl_mxpixel_t color)
 {
   int i;
-#if LPC17_BPP > 16
-  uint32_t *dest = (uint32_t*)CONFIG_LPC17_LCD_VRAMBASE;
+#if SAM_BPP > 16
+  uint32_t *dest = (uint32_t*)CONFIG_SAM_LCD_VRAMBASE;
 
   gvdbg("Clearing display: color=%08x VRAM=%08x size=%d\n",
-        color, CONFIG_LPC17_LCD_VRAMBASE,
-        CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT * sizeof(uint32_t));
+        color, CONFIG_SAM_LCD_VRAMBASE,
+        CONFIG_SAM_LCD_HWIDTH * CONFIG_SAM_LCD_VHEIGHT * sizeof(uint32_t));
 
 #else
-  uint16_t *dest = (uint16_t*)CONFIG_LPC17_LCD_VRAMBASE;
+  uint16_t *dest = (uint16_t*)CONFIG_SAM_LCD_VRAMBASE;
 
   gvdbg("Clearing display: color=%08x VRAM=%08x size=%d\n",
-        color, CONFIG_LPC17_LCD_VRAMBASE,
-        CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT * sizeof(uint16_t));
+        color, CONFIG_SAM_LCD_VRAMBASE,
+        CONFIG_SAM_LCD_HWIDTH * CONFIG_SAM_LCD_VHEIGHT * sizeof(uint16_t));
 #endif
 
-  for (i = 0; i < (CONFIG_LPC17_LCD_HWIDTH * CONFIG_LPC17_LCD_VHEIGHT); i++)
+  for (i = 0; i < (CONFIG_SAM_LCD_HWIDTH * CONFIG_SAM_LCD_VHEIGHT); i++)
     {
       *dest++ = color;
     }
