@@ -959,7 +959,7 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Notify the device driver of the receive call */
 
-      netdev_rxnotify(&conn->ripaddr);
+      netdev_rxnotify(conn->ripaddr);
 
       /* Wait for either the receive to complete or for an error/timeout to occur.
        * NOTES:  (1) uip_lockedwait will also terminate if a signal is received, (2)

@@ -80,7 +80,7 @@
  *   Notify the device driver that the application waits for RX data.
  *
  * Parameters:
- *   raddr - Pointer to the remote address to send the data
+ *   raddr - The remote address to send the data
  *
  * Returned Value:
  *  None
@@ -90,13 +90,12 @@
  *
  ****************************************************************************/
 
-void netdev_rxnotify(const uip_ipaddr_t *raddr)
+void netdev_rxnotify(const uip_ipaddr_t raddr)
 {
+
   /* Find the device driver that serves the subnet of the remote address */
 
-  /* @HACK how to get the interface with INADDR_ANY? */
-
-  struct uip_driver_s *dev = netdev_findbyname("eth0");
+  struct uip_driver_s *dev = netdev_findbyaddr(raddr);
 
   if (dev && dev->d_rxavail)
     {

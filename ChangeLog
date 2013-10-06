@@ -5713,3 +5713,6 @@
 	  looking the the correct router IP address to use in the ARP request.
 	  In that case, we want the MAC address of the router, not of the the
 	  target endpoint (2013-10-5).
+	* net/netdev_rxnotify.c and others: Use the new signature of rxnotify
+	  caused by the routing table.  From Max Holtzberg (2013-10-6).
+

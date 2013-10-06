@@ -80,7 +80,7 @@
  *   Notify the device driver that new TX data is available.
  *
  * Parameters:
- *   raddr - Pointer to the remote address to send the data
+ *   raddr - The remote address to send the data
  *
  * Returned Value:
  *  None
