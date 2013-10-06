@@ -5719,4 +5719,4 @@
 	  will eventually become an LCDC driver for the SAMA5 (2013-10-6).
 	* net/net_close.c, net/uip/uip_tcpcon, and include/nuttx/net/uip/uip-tcp.h:
 	  Make net_close() nonblocking and free unestablished connections if no
-	  free connections available.  From Max Holtzber (2013-10-6).
+	  free connections available.  From Max Holtzberg (2013-10-6).

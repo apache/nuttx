@@ -200,9 +200,8 @@ struct uip_conn
   FAR struct uip_callback_s *list;
 
   /* Close callback. The socket close logic allocates this callback and lets
-   * the connection handle closing itself. So the application won't be
-   * blocked on the close call.  The callback has to be freed together with
-   * this connection structure.
+   * the connection handle close itself. So the application won't be blocked
+   * on the close call.  The callback has to be freed together with this.
    */
 
   FAR struct uip_callback_s *closecb;
