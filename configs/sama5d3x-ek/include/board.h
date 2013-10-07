@@ -144,6 +144,18 @@
 
 #define BUTTON_USER1_BIT  (1 << BUTTON_USER1)
 
+/* PIO configuration ****************************************************************/
+/* LCDC */
+
+#define PIO_LCD_DAT16     PIO_LCD_DAT16_2
+#define PIO_LCD_DAT17     PIO_LCD_DAT17_2
+#define PIO_LCD_DAT18     PIO_LCD_DAT18_2
+#define PIO_LCD_DAT19     PIO_LCD_DAT19_2
+#define PIO_LCD_DAT20     PIO_LCD_DAT20_2
+#define PIO_LCD_DAT21     PIO_LCD_DAT21_2
+#define PIO_LCD_DAT22     PIO_LCD_DAT22_1
+#define PIO_LCD_DAT23     PIO_LCD_DAT23_1
+
 /************************************************************************************
  * Assembly Language Macros
  ************************************************************************************/

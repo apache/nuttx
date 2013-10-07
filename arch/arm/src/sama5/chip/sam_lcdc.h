@@ -145,7 +145,7 @@
 #define SAM_LCDC_HEOVHEAD_OFFSET    0x037c /* High-End Overlay V DMA Head Register */
 #define SAM_LCDC_HEOVADDR_OFFSET    0x0380 /* High-End Overlay V DMA Address Register */
 #define SAM_LCDC_HEOVCTRL_OFFSET    0x0384 /* High-End Overlay V DMA Control Register */
-#define SAM_LCDC_HEOVNEXT_OFFSET    0x0388 /* High-End Overlay VDMA Next Register */
+#define SAM_LCDC_HEOVNEXT_OFFSET    0x0388 /* High-End Overlay V DMA Next Register */
 #define SAM_LCDC_HEOCFG0_OFFSET     0x038c /* High-End Overlay Configuration Register 0 */
 #define SAM_LCDC_HEOCFG1_OFFSET     0x0390 /* High-End Overlay Configuration Register 1 */
 #define SAM_LCDC_HEOCFG2_OFFSET     0x0394 /* High-End Overlay Configuration Register 2 */
@@ -541,7 +541,7 @@
 #define LCDC_LCDCFG6_PWMPOL         (1 << 4)  /* Bit 4: LCD Controller PWM Signal Polarity */
 #define LCDC_LCDCFG6_PWMCVAL_SHIFT  (8)       /* Bits 8-15: LCD Controller PWM Compare Value */
 #define LCDC_LCDCFG6_PWMCVAL_MASK   (0xff << LCDC_LCDCFG6_PWMCVAL_SHIFT)
-#define LCDC_LCDCFG6_PWMCVAL(n)     ((uint32_t)(n) << LCDC_LCDCFG6_PWMCVAL_SHIFT)
+#  define LCDC_LCDCFG6_PWMCVAL(n)   ((uint32_t)(n) << LCDC_LCDCFG6_PWMCVAL_SHIFT)
 
 /* LCD Controller Enable Register */
 
@@ -583,6 +583,8 @@
 #define LCDC_LCDINT_HEO             (1 << 11) /* Bit 11: High End Overlay Raw Interrupt */
 #define LCDC_LCDINT_HCR             (1 << 12) /* Bit 12: Hardware Cursor Raw Interrupt */
 #define LCDC_LCDINT_PP              (1 << 13) /* Bit 13: Post Processing Raw Interrupt */
+
+#define LCDC_LCDINT_ALL             (0x00003f17)
 
 /* Base Layer Channel Enable Register */
 
@@ -1877,5 +1879,18 @@
 #define LCDC_HCRCLUT_ACLUT_SHIFT    (16)      /* Bits 16-23: Alpha color entry */
 #define LCDC_HCRCLUT_ACLUT_MASK     (0xff << LCDC_HCRCLUT_ACLUT_SHIFT)
 #  define LCDC_HCRCLUT_ACLUT(n)     ((uint32_t)(n) << LCDC_HCRCLUT_ACLUT_SHIFT)
+
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+/* DMA channel descriptor.  This descriptor must be aligned on a 64-bit boundary. */
+
+struct sam_dscr_s
+{
+  uint32_t addr;  /* Frame buffer base address register */
+  uint32_t ctrl;  /*  Transfer Control register */
+  uint32_t next;  /*  Next descriptor address register */
+};
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_LCDC_H */

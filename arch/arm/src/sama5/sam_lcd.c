@@ -4,6 +4,15 @@
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * References:
+ *   SAMA5D3 Series Data Sheet
+ *   Atmel NoOS sample code.
+ *
+ * The Atmel sample code has a BSD compatibile license that requires this
+ * copyright notice:
+ *
+ *   Copyright (c) 2012, Atmel Corporation
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -14,8 +23,8 @@
  *    notice, this list of conditions and the following disclaimer in
  *    the documentation and/or other materials provided with the
  *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
+ * 3. Neither the names NuttX nor Atmel nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -55,6 +64,12 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_SAMA5_LCDC_DEFBACKLIGHT
+#  define CONFIG_SAMA5_LCDC_DEFBACKLIGHT 0xf0
+#endif
+#define SAMA5_LCDC_BACKLIGHT_OFF 0x00
 
 #define SAM_LCD_CLK_PER_LINE \
   (CONFIG_SAM_LCD_HWIDTH + CONFIG_SAM_LCD_HPULSE + \
@@ -96,6 +111,61 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+/* This enumeration names each layer supported by the hardware */
+
+enum sam_layer_e
+{
+  LCDC_BASE = 0,    /* LCD base layer, display fixed size image */
+  LCDC_OVR1,        /* LCD Overlay 1 */
+  LCDC_OVR2,        /* LCD Overlay 2 */
+  LCDC_HEO,         /* LCD HighEndOverlay, support resize */
+  LCDC_CUR          /* LCD Cursor, max size 128x128 */
+};
+
+/* CLUT information */
+
+struct sam_clutinfo_s
+{
+  uint8_t bpp;
+  uint8_t ncolors;
+};
+
+/* LCDC General Layer information */
+
+struct sam_layer_s
+{
+  /* These is the DMA descriptors as seen by the hardware.  This descriptor
+   * must be the first element of the structure and each structure instance
+   * must conform to the alignment requirements of the DMA descriptor.
+   */
+
+  struct sam_dscr_s dscr;
+
+  /* Driver data that accompanies the descriptor may follow */
+
+  void *buffer;
+  struct sam_clutinfo_s clut;
+  uint16_t pad;
+};
+
+/* LCDC HEO Layer information */
+
+struct sam_heolayer_s
+{
+  /* These are the HEO DMA descriptors as seen by the hardware.  This array
+   * must be the first element of the structure and each structure instance
+   * must conform to the alignment requirements of the DMA descriptor.
+   */
+
+  struct sam_dscr_s dscr[3];
+
+  /* Driver data that accompanies the descriptor may follow */
+
+  void *buffer;
+  struct sam_clutinfo_s clut;
+  uint16_t pad;
+};
+
 /* This structure provides the overall state of the LCDC */
 
 struct sam_lcdc_s
@@ -133,6 +203,7 @@ static void sam_putreg(uintptr_t addr, uint32_t val);
 # define sam_putreg(addr,val)  putreg32(val,addr)
 #endif
 
+/* Frame buffer interface ***************************************************/
 /* Get information about the video controller configuration and the
  * configuration of each color plane.
  */
@@ -164,6 +235,19 @@ static int sam_setcursor(FAR struct fb_vtable_s *vtable,
              FAR struct fb_setcursor_s *setttings);
 #endif
 
+/* Initialization ***********************************************************/
+
+static void sam_pio_config(void);
+static void sam_backlight(uint32_t level);
+static void sam_base_disable(void);
+static void sam_ovr1_disable(void);
+static void sam_ovr2_disable(void);
+static void sam_heo_disable(void);
+static void sam_hcr_disable(void);
+static void sam_lcd_disable(void);
+static void sam_layer_config(void);
+static void sam_lcd_enable(void);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -191,6 +275,45 @@ static const struct fb_planeinfo_s g_planeinfo =
 /* This structure provides the overall state of the LCDC */
 
 struct sam_lcdc_s g_lcdc;
+
+/* Preallocated LCDC layer structures */
+
+/* Base layer */
+
+static struct sam_layer_s g_baselayer __attribute__((aligned(64)))
+
+/* Overlay 1/2 Layers */
+
+static struct sam_layer_s g_ovr1layer __attribute__((aligned(64)));
+static struct sam_layer_s g_ovr2layer __attribute__((aligned(64)));
+
+/* High End Overlay (HEO) Layer */
+
+static struct sam_heolayer_s g_heolayer __attribute__((aligned(64)));
+
+/* Hardware cursor (HRC) Layer */
+
+static struct sam_layer_s g_hcrlayer __attribute__((aligned(64)));
+
+/* PIO pin configurations */
+
+static pio_pinset_t g_lcdcpins[] =
+{
+  PIO_LCD_DAT0,  PIO_LCD_DAT2,  PIO_LCD_DAT1,  PIO_LCD_DAT3,
+  PIO_LCD_DAT4,  PIO_LCD_DAT5,  PIO_LCD_DAT6,  PIO_LCD_DAT7,
+
+  PIO_LCD_DAT8,  PIO_LCD_DAT9,  PIO_LCD_DAT10, PIO_LCD_DAT11,
+  PIO_LCD_DAT12, PIO_LCD_DAT13, PIO_LCD_DAT14, PIO_LCD_DAT15,
+
+#if SAM_BPP > 16
+  PIO_LCD_DAT16, PIO_LCD_DAT17, PIO_LCD_DAT18, PIO_LCD_DAT19,
+  PIO_LCD_DAT20, PIO_LCD_DAT21, PIO_LCD_DAT22, PIO_LCD_DAT23,
+#endif
+
+  PIO_LCD_PWM,   PIO_LCD_DISP,  PIO_LCD_VSYNC, PIO_LCD_HSYNC,
+  PIO_LCD_PCK,   PIO_LCD_DEN
+}
+#define SAMA5_LCDC_NPINCONFIGS (sizeof(g_lcdcpins) / sizeof(pio_pinset_t))
 
 /****************************************************************************
  * Public Data
@@ -549,6 +672,618 @@ static int sam_setcursor(FAR struct fb_vtable_s *vtable,
 #endif
 
 /****************************************************************************
+ * Name: sam_pio_config
+ *
+ * Description:
+ *   Configure PIO pins for use with the LCDC
+ *
+ ****************************************************************************/
+
+static void sam_pio_config(void)
+{
+  int i;
+
+  gvdbg("Configuring pins\n");
+
+  /* Configure each pin */
+
+  for (i = 0; i < SAMA5_LCDC_NPINCONFIGS; i++)
+    {
+      sam_configpio(g_lcdcpins[i]);
+    }
+}
+
+/****************************************************************************
+ * Name: sam_backlight
+ *
+ * Description:
+ *   Set the backlight level
+ *
+ ****************************************************************************/
+
+static void sam_backlight(uint32_t level)
+{
+  uint32_t regval;
+
+  /* Are we turning the backlight off? */
+
+  if (level == SAMA5_LCDC_BACKLIGHT_OFF)
+    {
+      /* Disable the backlight */
+
+      sam_putreg(SAM_LCDC_LCDDIS, LCDC_LCDDIS_PWM);
+
+      /* And wait for the PWM to be disabled */
+
+      while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_PWM) != 0);
+    }
+#ifdef CONFIG_SAM_LCD_BACKLIGHT
+  else
+    {
+      /* Set the backight level */
+
+      regval = sam_getreg(SAM_LCDC_LCDCFG6);
+      regval &= ~LCDC_LCDCFG6_PWMCVAL_MASK;
+      regval |=  LCDC_LCDCFG6_PWMCVAL(level);
+      sam_putreg(SAM_LCDC_LCDCFG6, regval);
+
+      /* Enable the backlight */
+
+      sam_putreg(SAM_LCDC_LCDEN, LCDC_LCDEN_PWM);
+    }
+#endif
+}
+
+/****************************************************************************
+ * Name: sam_base_disable
+ *
+ * Description:
+ *   Disable the base layer
+ *
+ ****************************************************************************/
+
+static void sam_base_disable(void)
+{
+  uintptr_t physaddr;
+  uintptr_t dscr;
+  uint32_t regval;
+
+  /* 1. Clear the DFETCH bit in the DSCR.CHXCTRL field of the DSCR structure
+   *    will disable the channel at the end of the frame.
+   */
+
+  g_baselayer.dscr.ctrl &= ~LCDC_BASECTRL_DFETCH;
+
+  regval = sam_getreg(SAM_LCDC_BASECTRL);
+  reval &= ~LCDC_BASECTRL_DFETCH;
+  putreg(SAM_LCDC_BASECTRL, regval);
+
+  /* 2. Set the DSCR.CHXNEXT field of the DSCR structure will disable the
+   *    channel at the end of the frame.
+   */
+
+  dscr                  = (uintptr_t)&g_baselayer.dscr
+  physaddr              = sam_physramaddr(dscr);
+  g_baselayer.dscr.next = physaddr;
+
+  putreg(SAM_LCDC_BASENEXT, physaddr);
+
+  /* Flush the modified DMA descriptor to RAM */
+
+  cp15_clean_dcache(dscr, dscr + sizeof(struct sam_dscr_s));
+
+  /* 3. Writing one to the CHDIS field of the CHXCHDR register will disable
+   *    the channel at the end of the frame.
+   */
+
+  sam_putreg(SAM_LCDC_BASECHDR, LCDC_BASECHDR_CH);
+
+  /* 4. Writing one to the CHRST field of the CHXCHDR register will disable
+   *    the channel immediately. This may occur in the middle of the image.
+   */
+
+  /* 5. Poll CHSR field in the CHXCHSR register until the channel is
+   *    successfully disabled.
+   */
+
+  while ((sam_getreg(SAM_LCDC_BASECHSR & LCDC_BASECHSR_CH) != 0);
+}
+
+/****************************************************************************
+ * Name: sam_ovr1_disable
+ *
+ * Description:
+ *   Disable the overlay 1 layer
+ *
+ ****************************************************************************/
+
+static void sam_ovr1_disable(void)
+{
+  uintptr_t physaddr;
+  uintptr_t dscr;
+  uint32_t regval;
+
+  /* 1. Clear the DFETCH bit in the DSCR.CHXCTRL field of the DSCR structure
+   *    will disable the channel at the end of the frame.
+   */
+
+  g_ovr1layer.dscr.ctrl &= ~LCDC_OVR1CTRL_DFETCH;
+
+  regval = sam_getreg(SAM_LCDC_OVR1CTRL);
+  reval &= ~LCDC_OVR1CTRL_DFETCH;
+  putreg(SAM_LCDC_OVR1CTRL, regval);
+
+  /* 2. Set the DSCR.CHXNEXT field of the DSCR structure will disable the
+   *    channel at the end of the frame.
+   */
+
+  dscr                  = (uintptr_t)&g_ovr1layer.dscr
+  physaddr              = sam_physramaddr(dscr);
+  g_ovr1layer.dscr.next = physaddr;
+
+  putreg(SAM_LCDC_OVR1NEXT, physaddr);
+
+  /* Flush the modified DMA descriptor to RAM */
+
+  cp15_clean_dcache(dscr, dscr + sizeof(struct sam_dscr_s));
+
+  /* 3. Writing one to the CHDIS field of the CHXCHDR register will disable
+   *    the channel at the end of the frame.
+   */
+
+  sam_putreg(SAM_LCDC_OVR1CHDR, LCDC_OVR1CHDR_CH);
+
+  /* 4. Writing one to the CHRST field of the CHXCHDR register will disable
+   *    the channel immediately. This may occur in the middle of the image.
+   */
+
+  /* 5. Poll CHSR field in the CHXCHSR register until the channel is
+   *    successfully disabled.
+   */
+
+  while ((sam_getreg(SAM_LCDC_OVR1CHSR & LCDC_OVR1CHSR_CH) != 0);
+}
+
+/****************************************************************************
+ * Name: sam_ovr2_disable
+ *
+ * Description:
+ *   Disable the overlay 2 layer
+ *
+ ****************************************************************************/
+
+static void sam_ovr2_disable(void)
+{
+  uintptr_t physaddr;
+  uintptr_t dscr;
+  uint32_t regval;
+
+  /* 1. Clear the DFETCH bit in the DSCR.CHXCTRL field of the DSCR structure
+   *    will disable the channel at the end of the frame.
+   */
+
+  g_ovr2layer.dscr.ctrl &= ~LCDC_OVR2CTRL_DFETCH;
+
+  regval = sam_getreg(SAM_LCDC_OVR2CTRL);
+  reval &= ~LCDC_OVR2CTRL_DFETCH;
+  putreg(SAM_LCDC_OVR2CTRL, regval);
+
+  /* 2. Set the DSCR.CHXNEXT field of the DSCR structure will disable the
+   *    channel at the end of the frame.
+   */
+
+  dscr                  = (uintptr_t)&g_ovr1layer.dscr
+  physaddr              = sam_physramaddr(dscr);
+  g_ovr2layer.dscr.next = physaddr;
+
+  putreg(SAM_LCDC_OVR2NEXT, physaddr);
+
+  /* Flush the modified DMA descriptor to RAM */
+
+  cp15_clean_dcache(dscr, dscr + sizeof(struct sam_dscr_s));
+
+  /* 3. Writing one to the CHDIS field of the CHXCHDR register will disable
+   *    the channel at the end of the frame.
+   */
+
+  sam_putreg(SAM_LCDC_OVR2CHDR, LCDC_OVR2CHDR_CH);
+
+  /* 4. Writing one to the CHRST field of the CHXCHDR register will disable
+   *    the channel immediately. This may occur in the middle of the image.
+   */
+
+  /* 5. Poll CHSR field in the CHXCHSR register until the channel is
+   *    successfully disabled.
+   */
+
+  while ((sam_getreg(SAM_LCDC_OVR2CHSR & LCDC_OVR2CHSR_CH) != 0);
+}
+
+/****************************************************************************
+ * Name: sam_heo_disable
+ *
+ * Description:
+ *   Disable the High End Overlay (HEO) layer
+ *
+ ****************************************************************************/
+
+static void sam_heo_disable(void)
+{
+  uintptr_t physaddr;
+  uintptr_t dscr;
+  uint32_t regval;
+
+  /* 1. Clear the DFETCH bit in the DSCR.CHXCTRL field of the DSCR structure
+   *    will disable the channel at the end of the frame.
+   */
+
+  g_heolayer.dscr[0].ctrl &= ~LCDC_HEOCTRL_DFETCH;
+  g_heolayer.dscr[1].ctrl &= ~LCDC_HEOUCTRL_DFETCH;
+  g_heolayer.dscr[2].ctrl &= ~LCDC_HEOVCTRL_DFETCH;
+
+  regval = sam_getreg(SAM_LCDC_HEOCTRL);
+  reval &= ~LCDC_HEOCTRL_DFETCH;
+  putreg(SAM_LCDC_HEOCTRL, regval);
+
+  regval = sam_getreg(SAM_LCDC_HEOUCTRL);
+  reval &= ~LCDC_HEOUCTRL_DFETCH;
+  putreg(SAM_LCDC_HEOUCTRL, regval);
+
+  regval = sam_getreg(SAM_LCDC_HEOVCTRL);
+  reval &= ~LCDC_HEOVCTRL_DFETCH;
+  putreg(SAM_LCDC_HEOVCTRL, regval);
+
+  /* 2. Set the DSCR.CHXNEXT field of the DSCR structure will disable the
+   *    channel at the end of the frame.
+   */
+
+  physaddr = sam_physramaddr((uintptr_t)&g_heolayer.dscr[0]);
+  g_heolayer.dscr[0].next = physaddr;
+  putreg(SAM_LCDC_HEONEXT, physaddr);
+
+  physaddr = sam_physramaddr((uintptr_t)&g_heolayer.dscr[1]);
+  g_heolayer.dscr[1].next = physaddr;
+  putreg(SAM_LCDC_HEOUNEXT, physaddr);
+
+  physaddr = sam_physramaddr((uintptr_t)&g_heolayer.dscr[2]);
+  g_heolayer.dscr[2].next = physaddr;
+  putreg(SAM_LCDC_HEOVNEXT, physaddr);
+
+  /* Flush the modified DMA descriptors to RAM */
+
+  dscr = sam_physramaddr((uintptr_t)g_heolayer.dscr);
+  cp15_clean_dcache(dscr, dscr + sizeof(struct sam_dscr_s));
+
+  /* 3. Writing one to the CHDIS field of the CHXCHDR register will disable
+   *    the channel at the end of the frame.
+   */
+
+  sam_putreg(SAM_LCDC_HEOCHDR, LCDC_HEOCHDR_CH);
+
+  /* 4. Writing one to the CHRST field of the CHXCHDR register will disable
+   *    the channel immediately. This may occur in the middle of the image.
+   */
+
+  /* 5. Poll CHSR field in the CHXCHSR register until the channel is
+   *    successfully disabled.
+   */
+
+  while ((sam_getreg(SAM_LCDC_HEOCHSR & LCDC_HEOCHSR_CH) != 0);
+}
+
+/****************************************************************************
+ * Name: sam_hcr_disable
+ *
+ * Description:
+ *   Disable the Hardware Cursor Channel (HCR) layer
+ *
+ ****************************************************************************/
+
+static void sam_hcr_disable(void)
+{
+  uintptr_t physaddr;
+  uintptr_t dscr;
+  uint32_t regval;
+
+  /* 1. Clear the DFETCH bit in the DSCR.CHXCTRL field of the DSCR structure
+   *    will disable the channel at the end of the frame.
+   */
+
+  g_hcrlayer.dscr.ctrl &= ~LCDC_HCRCTRL_DFETCH;
+
+  regval = sam_getreg(SAM_LCDC_HCRCTRL);
+  reval &= ~LCDC_HCRCTRL_DFETCH;
+  putreg(SAM_LCDC_HCRCTRL, regval);
+
+  /* 2. Set the DSCR.CHXNEXT field of the DSCR structure will disable the
+   *    channel at the end of the frame.
+   */
+
+  dscr                 = (uintptr_t)&g_hcrlayer.dscr
+  physaddr             = sam_physramaddr(dscr);
+  g_hcrlayer.dscr.next = physaddr;
+
+  putreg(SAM_LCDC_HCRNEXT, physaddr);
+
+  /* Flush the modified DMA descriptor to RAM */
+
+  cp15_clean_dcache(dscr, dscr + sizeof(struct sam_dscr_s));
+
+  /* 3. Writing one to the CHDIS field of the CHXCHDR register will disable
+   *    the channel at the end of the frame.
+   */
+
+  sam_putreg(SAM_LCDC_HCRCHDR, LCDC_HCRCHDR_CH);
+
+  /* 4. Writing one to the CHRST field of the CHXCHDR register will disable
+   *    the channel immediately. This may occur in the middle of the image.
+   */
+
+  /* 5. Poll CHSR field in the CHXCHSR register until the channel is
+   *    successfully disabled.
+   */
+
+  while ((sam_getreg(SAM_LCDC_HCRCHSR & LCDC_HCRCHSR_CH) != 0);
+}
+
+/****************************************************************************
+ * Name: sam_lcd_disable
+ *
+ * Description:
+ *   Disable the LCD peripheral
+ *
+ ****************************************************************************/
+
+static void sam_lcd_disable(void)
+{
+  Lcdc *pHw  = LCDC;
+  Pmc  *pPmc = PMC;
+
+  /* Disable layers */
+
+  sam_base_disable();
+  sam_ovr1_disable();
+  sam_ovr2_disable();
+  sam_heo_disable();
+  sam_hcr_disable();
+
+  /* Disable DMA path */
+
+  sam_putreg(SAM_LCDC_BASECFG4, 0);
+
+  /* Turn off the back light */
+
+  sam_backlight(SAMA5_LCDC_BACKLIGHT_OFF);
+
+  /* Timing Engine Power Down Software Operation */
+
+  /* 1. Disable the DISP signal writing DISPDIS field of the LCDC_LCDDIS
+   *    register.
+   */
+
+  sam_putreg(SAM_LCDC_LCDDIS, LCDC_LCDDIS_DISP);
+
+  /* 2. Poll DISPSTS field of the LCDC_LCDSR register to verify that the DISP
+   *    is no longer activated.
+   */
+
+  while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_DISP) != 0);
+
+  /* 3. Disable the hsync and vsync signals by writing one to SYNCDIS field of
+   *    the LCDC_LCDDIS register.
+   */
+
+  sam_putreg(SAM_LCDC_LCDDIS, LCDC_LCDDIS_SYNC);
+
+  /* 4. Poll LCDSTS field of the LCDC_LCDSR register to check that the
+   *    synchronization is off.
+   */
+
+  while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_LCD) != 0);
+
+  /* 5. Disable the Pixel clock by writing one in the CLKDIS field of the
+   *    LCDC_LCDDIS register.
+   */
+
+  sam_putreg(SAM_LCDC_LCDDIS, LCDC_LCDDIS_CLK);
+
+  /* 6. Poll CLKSTS field of the LCDC_CLKSR register to check that Pixel Clock
+   *    is disabled.
+   */
+
+  while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_CLK) != 0);
+
+  /* Disable peripheral clock */
+
+  sam_lcdc_disableclk();
+
+  /* Disable the LCD clock */
+
+  sam_putreg(SAM_PMC_SCDR, PMC_LCDCK);
+}
+
+/****************************************************************************
+ * Name: sam_layer_config
+ *
+ * Description:
+ *   Configure LCDC layers
+ *
+ ****************************************************************************/
+
+static void sam_layer_config(void)
+{
+  /* Base channel */
+
+#ifdef CONFIG_SAMA5_LCDC_BASE_RGB888P
+  sam_putreg(SAM_LCDC_BASECFG0,
+             LCDC_BASECFG0_DLBO | LCDC_BASECFG0_BLEN_INCR16);
+  sam_putreg(SAM_LCDC_BASECFG1,
+             LCDC_BASECFG1_24BPP_RGB888P);
+#else
+# error Support for this resolution is not yet supported
+#endif
+
+#ifdef CONFIG_SAMA5_LCDC_OVR1
+#  ifdef CONFIG_SAMA5_LCDC_OVR1_RGB888P
+  /* Overlay 1, GA 0xff */
+
+  sam_putreg(SAM_LCDC_OVR1CFG0,
+             LCDC_OVR1CFG0_DLBO | LCDC_OVR1CFG0_BLEN_INCR16 |
+             LCDC_OVR1CFG0_ROTDIS);
+  sam_putreg(SAM_LCDC_OVR1CFG1,
+             LCDC_OVR1CFG1_24BPP_RGB888P);
+  sam_putreg(SAM_LCDC_OVR1CFG9,
+             LCDC_OVR1CFG9_GA(0xff) | LCDC_OVR1CFG9_GAEN);
+#  else
+#   error Support for this resolution is not yet supported
+#  endif
+#endif
+
+#ifdef CONFIG_SAMA5_LCDC_OVR2
+#  ifdef CONFIG_SAMA5_LCDC_OVR2_RGB888P
+  /* Overlay 2, GA 0xff */
+
+  sam_putreg(SAM_LCDC_OVR2CFG0,
+             LCDC_OVR2CFG0_DLBO | LCDC_OVR2CFG0_BLEN_INCR16 |
+             LCDC_OVR2CFG0_ROTDIS;
+  sam_putreg(SAM_LCDC_OVR2CFG1,
+             LCDC_OVR2CFG1_24BPP_RGB888P);
+  sam_putreg(SAM_LCDC_OVR2CFG9,
+             LCDC_OVR2CFG9_GA(0xff) | LCDC_OVR2CFG9_GAEN;
+#  else
+#   error Support for this resolution is not yet supported
+#  endif
+#endif
+
+#ifdef CONFIG_SAMA5_LCDC_OVR2
+#  ifdef CONFIG_SAMA5_LCDC_HEO_RGB888P
+  /* High End Overlay, GA 0xff */
+
+  sam_putreg(SAM_LCDC_HEOCFG0,
+             LCDC_HEOCFG0_DLBO | LCDC_HEOCFG0_BLEN_INCR16 |
+             LCDC_HEOCFG0_ROTDIS);
+  sam_putreg(SAM_LCDC_HEOCFG1,
+             LCDC_HEOCFG1_24BPP_RGB888P);
+  sam_putreg(SAM_LCDC_HEOCFG12,
+             LCDC_HEOCFG12_GA(0xff) | LCDC_HEOCFG12_GAEN);
+#  else
+#   error Support for this resolution is not yet supported
+#  endif
+#endif
+
+#ifdef CONFIG_FB_HWCURSOR
+#  ifdef CONFIG_SAMA5_LCDC_HEO_RGB888P
+  /* Hardware Cursor, GA 0xff, Key #000000 */
+
+  sam_putreg(SAM_LCDC_HCRCFG0,
+             LCDC_HCRCFG0_DLBO | LCDC_HCRCFG0_BLEN_INCR16);
+  sam_putreg(SAM_LCDC_HCRCFG1,
+             LCDC_HCRCFG1_24BPP_RGB888P;
+  sam_putreg(SAM_LCDC_HCRCFG7,
+             0x000000);
+  sam_putreg(SAM_LCDC_HCRCFG8,
+             0xffffff);
+  sam_putreg(SAM_LCDC_HCRCFG9,
+             LCDC_HCRCFG9_GAEN(0xff) | LCDC_HCRCFG9_GAEN);
+#  else
+#   error Support for this resolution is not yet supported
+#  endif
+#endif
+}
+
+/****************************************************************************
+ * Name: sam_lcd_enable
+ *
+ * Description:
+ *   Enable the LCD for normal use
+ *
+ ****************************************************************************/
+
+static void sam_lcd_enable(void)
+{
+  uint32_t regval;
+  uint32_t div;
+
+  /* Enable the LCD peripheral clock */
+
+  sam_lcdc_enableclk();
+
+  /* Enable the LCD clock */
+
+  sam_putreg(SAM_PMC_SCER, PMC_LCDCK);
+
+  /* 1. Configure LCD timing parameters, signal polarity and clock period. */
+
+  div = ((2 * BOARD_MCK_FREQUENCY) / BOARD_LCD_PIXELCLOCK) - 2;
+  regval = LCDC_LCDCFG0_CLKDIV(div) | LCDC_LCDCFG0_CGDISHCR |
+           LCDC_LCDCFG0_CGDISHEO | LCDC_LCDCFG0_CGDISOVR1 |
+           LCDC_LCDCFG0_CGDISOVR2 | LCDC_LCDCFG0_CGDISBASE |
+           LCDC_LCDCFG0_CLKPWMSEL | LCDC_LCDCFG0_CLKSEL |
+           LCDC_LCDCFG0_CLKPOL;
+  sam_putreg(SAM_LCDC_LCDCFG0, regval);
+
+  regval = LCDC_LCDCFG1_VSPW(BOARD_LCD_TIMING_VPW - 1) |
+           LCDC_LCDCFG1_HSPW(BOARD_LCD_TIMING_HPW - 1);
+  sam_putreg(SAM_LCDC_LCDCFG1, regval);
+
+  regval = LCDC_LCDCFG2_VBPW(BOARD_LCD_TIMING_VBP) |
+           LCDC_LCDCFG2_VFPW(BOARD_LCD_TIMING_VFP - 1);
+  sam_putreg(SAM_LCDC_LCDCFG2, regval);
+
+  regval = LCDC_LCDCFG3_HBPW(BOARD_LCD_TIMING_HBP - 1) |
+           LCDC_LCDCFG3_HFPW(BOARD_LCD_TIMING_HFP - 1);
+  sam_putreg(SAM_LCDC_LCDCFG3, regval);
+
+  regval = LCDC_LCDCFG4_RPF(BOARD_LCD_HEIGHT - 1) |
+           LCDC_LCDCFG4_PPL(BOARD_LCD_WIDTH - 1);
+  sam_putreg(SAM_LCDC_LCDCFG4, regval);
+
+  regval = LCDC_LCDCFG5_GUARDTIME(30) | LCDC_LCDCFG5_MODE_OUTPUT_24BPP |
+           LCDC_LCDCFG5_DISPDLY | LCDC_LCDCFG5_VSPDLYS | LCDC_LCDCFG5_VSPOL |
+           LCDC_LCDCFG5_HSPOL;
+  sam_putreg(SAM_LCDC_LCDCFG5, regval);
+
+  regval = LCDC_LCDCFG6_PWMCVAL(0xf0) | LCDC_LCDCFG6_PWMPOL |
+           LCDC_LCDCFG6_PWMPS(6);
+  sam_putreg(SAM_LCDC_LCDCFG6, regval);
+
+  /* 2. Enable the Pixel Clock by writing one to the CLKEN field of the
+        LCDC_LCDEN register. */
+
+  sam_putreg(SAM_LCDC_LCDEN, LCDC_LCDEN_CLK);
+
+  /* 3. Poll CLKSTS field of the LCDC_LCDSR register to check that the clock
+   * is running.
+   */
+
+  while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_CLK) == 0);
+
+  /* 4. Enable Horizontal and Vertical Synchronization by writing one to the
+   *    SYNCEN field of the LCDC_LCDEN register.
+   */
+
+  sam_putreg(SAM_LCDC_LCDEN, LCDC_LCDEN_SYNC);
+
+  /* 5. Poll LCDSTS field of the LCDC_LCDSR register to check that the
+   *    synchronization is up.
+   */
+
+  while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_LCD) == 0);
+
+  /* 6. Enable the display power signal writing one to the DISPEN field of the
+   *    LCDC_LCDEN register.
+   */
+
+  sam_putreg(LCDC_LCDEN, LCDC_LCDEN_DISP);
+
+  /* 7. Poll DISPSTS field of the LCDC_LCDSR register to check that the power
+   *    signal is activated.
+   */
+
+  while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_DISP) == 0);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -568,126 +1303,70 @@ int up_fbinitialize(void)
   gvdbg("Entry\n");
 
   /* Configure PIO pins */
-  /* Video data */
 
-  gvdbg("Configuring pins\n");
+  sam_pio_config();
 
-  sam_configgpio(GPIO_LCD_VD0);
-  sam_configgpio(GPIO_LCD_VD1);
-  sam_configgpio(GPIO_LCD_VD2);
-  sam_configgpio(GPIO_LCD_VD3);
-  sam_configgpio(GPIO_LCD_VD4);
-  sam_configgpio(GPIO_LCD_VD5);
-  sam_configgpio(GPIO_LCD_VD6);
-  sam_configgpio(GPIO_LCD_VD7);
+  /* Reset layer information */
 
-  sam_configgpio(GPIO_LCD_VD8);
-  sam_configgpio(GPIO_LCD_VD9);
-  sam_configgpio(GPIO_LCD_VD10);
-  sam_configgpio(GPIO_LCD_VD11);
-  sam_configgpio(GPIO_LCD_VD12);
-  sam_configgpio(GPIO_LCD_VD13);
-  sam_configgpio(GPIO_LCD_VD14);
-  sam_configgpio(GPIO_LCD_VD15);
+  memset(&g_baselayer, 0, sizeof(struct sam_layer_s));
+  memset(&g_ovr1layer, 0, sizeof(struct sam_layer_s));
+  memset(&g_ovr2layer, 0, sizeof(struct sam_layer_s));
+  memset(&g_heolayer,  0, sizeof(struct sam_heolayer_s));
+  memset(&g_hcrlayer,  0, sizeof(struct sam_layer_s));
 
-#if SAM_BPP > 16
-  sam_configgpio(GPIO_LCD_VD16);
-  sam_configgpio(GPIO_LCD_VD17);
-  sam_configgpio(GPIO_LCD_VD18);
-  sam_configgpio(GPIO_LCD_VD19);
-  sam_configgpio(GPIO_LCD_VD20);
-  sam_configgpio(GPIO_LCD_VD21);
-  sam_configgpio(GPIO_LCD_VD22);
-  sam_configgpio(GPIO_LCD_VD23);
+  /* Disable the LCD */
+
+  sam_lcd_disable();
+
+  /* Initialize the g_lcdc data structure */
+
+  g_lcdc.fbobject.getvideoinfo  = sam_getvideoinfo;
+  g_lcdc.fbobject.getplaneinfo  = sam_getplaneinfo;
+#ifdef CONFIG_FB_CMAP
+  g_lcdc.fbobject.getcmap       = sam_getcmap;
+  g_lcdc.fbobject.putcmap       = sam_putcmap;
 #endif
-
-  /* Other pins */
-
-  sam_configgpio(GPIO_LCD_DCLK);
-  sam_configgpio(GPIO_LCD_LP);
-  sam_configgpio(GPIO_LCD_FP);
-  sam_configgpio(GPIO_LCD_ENABM);
-  sam_configgpio(GPIO_LCD_PWR);
-
-  /* Turn on LCD clock */
-#warning Missing lobi
+#ifdef CONFIG_FB_HWCURSOR
+  g_lcdc.fbobject.getcursor     = sam_getcursor;
+  g_lcdc.fbobject.setcursor     = sam_setcursor;
+#endif
 
   gvdbg("Configuring the LCD controller\n");
 
-  /* Disable the cursor */
-#warning Missing logic
+  /* Enable the LCD peripheral clock */
 
-  /* Clear any pending interrupts */
-#warning Missing logic
+  sam_lcdc_enableclk();
 
-  /* Disable LCDC controller */
-#warning Missing logic
+  /* Enable the LCD clock */
 
-  /* Initialize pixel clock */
-#warning Missing logic
+  sam_putreg(SAM_PMC_SCER, PMC_LCDCK);
 
-  /* Set the bits per pixel */
-#warning Missing logic
+  /* Disable LCD interrupts */
 
-#if defined(CONFIG_SAM_LCD_BPP1)
-#  warning Missing logic      /* 1 bpp */
-#elif defined(CONFIG_SAM_LCD_BPP2)
-#  warning Missing logic      /* 2 bpp */
-#elif defined(CONFIG_SAM_LCD_BPP4)
-#  warning Missing logic      /* 4 bpp */
-#elif defined(CONFIG_SAM_LCD_BPP8)
-#  warning Missing logic     /* 8 bpp */
-#elif defined(CONFIG_SAM_LCD_BPP16)
-#  warning Missing logic     /* 16 bpp */
-#elif defined(CONFIG_SAM_LCD_BPP24)
-#  warning Missing logic     /* 24-bit TFT panel only */
-#elif defined(CONFIG_SAM_LCD_BPP16_565)
-#  warning Missing logic    /* 16 bpp, 5:6:5 mode */
-#else /* defined(CONFIG_SAM_LCD_BPP12_444) */
-#  warning Missing logic    /* 12 bpp, 4:4:4 mode */
-#endif
+  sam_putreg(SAM_LCDC_LCDIDR, LCDC_LCDINT_ALL);
 
-  /* TFT panel */
-#warning Missing logic
+  /* Configure layers */
 
-  /* Select monochrome or color LCD */
+  sam_layer_config();
 
-#ifdef CONFIG_SAM_LCD_MONOCHROME
-#warning Missing logic
-
-#else
-  /* Select color LCD */
-#warning Missing logic
-
-#endif /* CONFIG_SAM_LCD_MONOCHROME */
-
-  /* Initialize horizontal timing */
-#warning Missing logic
-
-  /* Initialize vertical timing */
-#warning Missing logic
-
-  /* Initialize clock and signal polarity */
-#warning Missing logic
-
-  /* Clear the display */
-#warning Missing logic
+  /* Clear the display memory */
 
   sam_lcdclear(CONFIG_SAM_LCD_BACKCOLOR);
 
-#ifdef CONFIG_SAM_LCD_BACKLIGHT
-  /* Turn on the back light */
-
-  sam_backlight(true);
-#endif
-
-  /* Enable LCD */
+  /* And turn the LCD on */
 
   gvdbg("Enabling the display\n");
+  sam_lcd_enable();
+
+  /* Show the base layer */
 #warning Missing logic
 
-  /* Enable LCD power */
-#warning Missing logic
+  /* Enable the backlight.
+   *
+   * REVISIT:  Backlight level could be dynamically adjustable
+   */
+
+  sam_backlight(CONFIG_SAMA5_LCDC_DEFBACKLIGHT);
 
   return OK;
 }
@@ -721,7 +1400,7 @@ FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
 }
 
 /****************************************************************************
- * Name: sam_fbinitialize
+ * Name: fb_uninitialize
  *
  * Description:
  *   Unitialize the framebuffer support
@@ -733,35 +1412,20 @@ void fb_uninitialize(void)
   uint32_t regval;
   int i;
 
-  /* We assume there is only one use of the LCD and so we do not need to
+  /* We assume there is only one user of the LCD and so we do not need to
    * worry about mutually exclusive access to the LCD hardware.
    */
 
-#ifdef CONFIG_SAM_LCD_BACKLIGHT
   /* Turn off the back light */
 
-  sam_backlight(false);
-#endif
+  sam_backlight(SAMA5_LCDC_BACKLIGHT_OFF);
 
   /* Disable the LCD controller */
 #warning Missing logic
 
-  /* Initialize the g_lcdc data structure */
+  /* Turn off clocking to the LCD. */
 
-  g_lcdc.fbobject.getvideoinfo  = sam_getvideoinfo;
-  g_lcdc.fbobject.getplaneinfo  = sam_getplaneinfo;
-#ifdef CONFIG_FB_CMAP
-  g_lcdc.fbobject.getcmap       = sam_getcmap;
-  g_lcdc.fbobject.putcmap       = sam_putcmap;
-#endif
-#ifdef CONFIG_FB_HWCURSOR
-  g_lcdc.fbobject.getcursor     = sam_getcursor;
-  g_lcdc.fbobject.setcursor     = sam_setcursor;
-#endif
-
-  /* Turn off clocking to the LCD. modifyreg32() can do this atomically. */
-
-  modifyreg32(SAM_SYSCON_PCONP, SYSCON_PCONP_PCLCD, 0);
+  sam_lcdc_disableclks();
   return OK;
 }
 

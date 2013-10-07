@@ -148,7 +148,9 @@ void netdev_router(FAR struct uip_driver_s *dev, uip_ipaddr_t target,
   match.dev = dev;
   uip_ipaddr_copy(match.target, target);
 
-  /* Then remove the entry from the routing table */
+  /* Find an router entry with the routing table that can forward to this
+   * address using this device.
+   */
 
   ret = net_foreachroute(net_devmatch, &match);
   if (ret > 0)
