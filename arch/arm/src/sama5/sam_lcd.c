@@ -71,37 +71,112 @@
 #endif
 #define SAMA5_LCDC_BACKLIGHT_OFF 0x00
 
-#define SAM_LCD_CLK_PER_LINE \
-  (CONFIG_SAM_LCD_HWIDTH + CONFIG_SAM_LCD_HPULSE + \
-   CONFIG_SAM_LCD_HFRONTPORCH + CONFIG_SAM_LCD_HBACKPORCH)
-#define SAM_LCD_LINES_PER_FRAME \
-  (CONFIG_SAM_LCD_VHEIGHT + CONFIG_SAM_LCD_VPULSE + \
-   CONFIG_SAM_LCD_VFRONTPORCH + CONFIG_SAM_LCD_VBACKPORCH)
-#define SAM_LCD_PIXEL_CLOCK \
-  (SAM_LCD_CLK_PER_LINE * SAM_LCD_LINES_PER_FRAME * \
-   CONFIG_SAM_LCD_REFRESH_FREQ)
+/* Framebuffer sizes in bytes */
 
-/* Framebuffer characteristics in bytes */
-
-#if defined(CONFIG_SAM_LCD_BPP1)
-#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 1 + 7) / 8)
-#elif defined(CONFIG_SAM_LCD_BPP2)
-#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 2 + 7) / 8)
-#elif defined(CONFIG_SAM_LCD_BPP4)
-#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 4 + 7) / 8)
-#elif defined(CONFIG_SAM_LCD_BPP8)
-#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 8 + 7) / 8)
-#elif defined(CONFIG_SAM_LCD_BPP16)
-#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 16 + 7) / 8)
-#elif defined(CONFIG_SAM_LCD_BPP24)
-#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 32 + 7) / 8)
-#elif defined(CONFIG_SAM_LCD_BPP16_565)
-#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 16 + 7) / 8)
-#else /* defined(CONFIG_SAM_LCD_BPP12_444) */
-#  define SAM_STRIDE ((CONFIG_SAM_LCD_HWIDTH * 16 + 7) / 8)
+#ifndef CONFIG_SAMA5_LCDC_BASE_WIDTH
+#  error CONFIG_SAMA5_LCDC_BASE_WIDTH must be defined
 #endif
 
-#define SAM_FBSIZE (SAM_STRIDE * CONFIG_SAM_LCD_VHEIGHT)
+#ifndef CONFIG_SAMA5_LCDC_BASE_HEIGHT
+#  error CONFIG_SAMA5_LCDC_BASE_HEIGHT must be defined
+#endif
+
+#if CONFIG_SAMA5_LCDC_BASE_BPP == 16
+#  define SAMA5_BASE_STRIDE ((CONFIG_SAMA5_LCDC_BASE_WIDTH * 16 + 7) / 8)
+#elif CONFIG_SAMA5_LCDC_BASE_BPP2 == 24
+#  define SAMA5_BASE_STRIDE ((CONFIG_SAMA5_LCDC_BASE_WIDTH * 24 + 7) / 8)
+#else CONFIG_SAMA5_LCDC_BASE_BPP2 == 24
+#  define SAMA5_BASE_STRIDE ((CONFIG_SAMA5_LCDC_BASE_WIDTH * 32 + 7) / 8)
+#endif
+
+#define SAMA5_BASE_FBSIZE (SAMA5_BASE_STRIDE * CONFIG_SAMA5_LCDC_BASE_HEIGHT)
+
+#ifndef CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH
+#  define CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH CONFIG_SAMA5_LCDC_BASE_WIDTH
+#endif
+
+#ifndef CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT
+#  define CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT CONFIG_SAMA5_LCDC_BASE_HEIGHT
+#endif
+
+#if CONFIG_SAMA5_LCDC_OVR1_BPP == 16
+#  define SAMA5_OVR1_STRIDE ((CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH * 16 + 7) / 8)
+#elif CONFIG_SAMA5_LCDC_OVR1_BPP2 == 24
+#  define SAMA5_OVR1_STRIDE ((CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH * 24 + 7) / 8)
+#else CONFIG_SAMA5_LCDC_OVR1_BPP2 == 24
+#  define SAMA5_OVR1_STRIDE ((CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH * 32 + 7) / 8)
+#endif
+
+#define SAMA5_OVR1_FBSIZE (SAMA5_OVR1_STRIDE * CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT)
+
+#ifndef CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH
+#  define CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH CONFIG_SAMA5_LCDC_BASE_WIDTH
+#endif
+
+#ifndef CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT
+#  define CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT CONFIG_SAMA5_LCDC_BASE_HEIGHT
+#endif
+
+#if CONFIG_SAMA5_LCDC_OVR2_BPP == 16
+#  define SAMA5_OVR2_STRIDE ((CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH * 16 + 7) / 8)
+#elif CONFIG_SAMA5_LCDC_OVR2_BPP2 == 24
+#  define SAMA5_OVR2_STRIDE ((CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH * 24 + 7) / 8)
+#else CONFIG_SAMA5_LCDC_OVR2_BPP2 == 24
+#  define SAMA5_OVR2_STRIDE ((CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH * 32 + 7) / 8)
+#endif
+
+#define SAMA5_OVR2_FBSIZE (SAMA5_OVR2_STRIDE * CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT)
+
+#ifndef CONFIG_SAMA5_LCDC_HEO_MAXWIDTH
+#  define CONFIG_SAMA5_LCDC_HEO_MAXWIDTH CONFIG_SAMA5_LCDC_BASE_WIDTH
+#endif
+
+#ifndef CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT
+#  define CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT CONFIG_SAMA5_LCDC_BASE_HEIGHT
+#endif
+
+#if CONFIG_SAMA5_LCDC_HEO_BPP == 16
+#  define SAMA5_HEO_STRIDE ((CONFIG_SAMA5_LCDC_HEO_MAXWIDTH * 16 + 7) / 8)
+#elif CONFIG_SAMA5_LCDC_HEO_BPP2 == 24
+#  define SAMA5_HEO_STRIDE ((CONFIG_SAMA5_LCDC_HEO_MAXWIDTH * 24 + 7) / 8)
+#else CONFIG_SAMA5_LCDC_HEO_BPP2 == 24
+#  define SAMA5_HEO_STRIDE ((CONFIG_SAMA5_LCDC_HEO_MAXWIDTH * 32 + 7) / 8)
+#endif
+
+#define SAMA5_HEO_FBSIZE (SAMA5_HEO_STRIDE * CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT)
+
+#ifndef CONFIG_SAMA5_LCDC_HCR_MAXWIDTH
+#  define CONFIG_SAMA5_LCDC_HCR_MAXWIDTH CONFIG_SAMA5_LCDC_BASE_WIDTH
+#endif
+
+#ifndef CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT
+#  define CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT CONFIG_SAMA5_LCDC_BASE_HEIGHT
+#endif
+
+#if CONFIG_SAMA5_LCDC_HCR_BPP == 16
+#  define SAMA5_HCR_STRIDE ((CONFIG_SAMA5_LCDC_HCR_MAXWIDTH * 16 + 7) / 8)
+#elif CONFIG_SAMA5_LCDC_HCR_BPP2 == 24
+#  define SAMA5_HCR_STRIDE ((CONFIG_SAMA5_LCDC_HCR_MAXWIDTH * 24 + 7) / 8)
+#else CONFIG_SAMA5_LCDC_HCR_BPP2 == 24
+#  define SAMA5_HCR_STRIDE ((CONFIG_SAMA5_LCDC_HCR_MAXWIDTH * 32 + 7) / 8)
+#endif
+
+#define SAMA5_HCR_FBSIZE (SAMA5_HCR_STRIDE * CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT)
+
+/* Where do we get framebuffer memory */
+
+#if defined(CONFIG_SAMA5_LCDC_FBPREALLOCATED)
+#  undef CONFIG_SAMA5_LCDC_FBALLOCATED
+#  undef CONFIG_SAMA5_LCDC_FBFIXED
+#elif defined(CONFIG_SAMA5_LCDC_FBALLOCATED)
+#  undef CONFIG_SAMA5_LCDC_FBALLOCATED
+#elif defined(CONFIG_SAMA5_LCDC_FBALLOCATED)
+#  define CONFIG_SAMA5_LCDC_FBALLOCATED 1
+#endif
+
+#if defined(CONFIG_SAMA5_LCDC_FBFIXED) && !defined(CONFIG_SAMA5_LCDC_FBFIXED_BASE)
+#  error CONFIG_SAMA5_LCDC_FBFIXED_BASE must be defined
+#endif
 
 /* Delays */
 
@@ -119,8 +194,9 @@ enum sam_layer_e
   LCDC_OVR1,        /* LCD Overlay 1 */
   LCDC_OVR2,        /* LCD Overlay 2 */
   LCDC_HEO,         /* LCD HighEndOverlay, support resize */
-  LCDC_CUR          /* LCD Cursor, max size 128x128 */
+  LCDC_HCR          /* LCD Cursor, max size 128x128 */
 };
+#define LCDC_NLAYERS 5
 
 /* CLUT information */
 
@@ -143,7 +219,7 @@ struct sam_layer_s
 
   /* Driver data that accompanies the descriptor may follow */
 
-  void *buffer;
+  uint8_t *framebuffer;
   struct sam_clutinfo_s clut;
   uint16_t pad;
 };
@@ -161,7 +237,7 @@ struct sam_heolayer_s
 
   /* Driver data that accompanies the descriptor may follow */
 
-  void *buffer;
+  void *framebuffer;
   struct sam_clutinfo_s clut;
   uint16_t pad;
 };
@@ -247,6 +323,7 @@ static void sam_hcr_disable(void);
 static void sam_lcd_disable(void);
 static void sam_layer_config(void);
 static void sam_lcd_enable(void);
+static int  sam_fb_allocate(void);
 
 /****************************************************************************
  * Private Data
@@ -256,9 +333,9 @@ static void sam_lcd_enable(void);
 
 static const struct fb_videoinfo_s g_videoinfo =
 {
-  .fmt      = SAM_COLOR_FMT,
-  .xres     = CONFIG_SAM_LCD_HWIDTH,
-  .yres     = CONFIG_SAM_LCD_VHEIGHT,
+  .fmt      = SAMA5_BASE_COLOR_FMT,
+  .xres     = CONFIG_SAMA5_LCDC_BASE_WIDTH,
+  .yres     = CONFIG_SAMA5_LCDC_BASE_HEIGHT,
   .nplanes  = 1,
 };
 
@@ -267,8 +344,8 @@ static const struct fb_videoinfo_s g_videoinfo =
 static const struct fb_planeinfo_s g_planeinfo =
 {
   .fbmem    = (FAR void *)CONFIG_SAM_LCD_VRAMBASE,
-  .fblen    = SAM_FBSIZE,
-  .stride   = SAM_STRIDE,
+  .fblen    = SAMA5_BASE_FBSIZE,
+  .stride   = SAMA5_BASE_STRIDE,
   .bpp      = SAM_BPP,
 };
 
@@ -314,6 +391,163 @@ static pio_pinset_t g_lcdcpins[] =
   PIO_LCD_PCK,   PIO_LCD_DEN
 }
 #define SAMA5_LCDC_NPINCONFIGS (sizeof(g_lcdcpins) / sizeof(pio_pinset_t))
+
+/* Register lookup tables permit common logic to deal with different
+ * layers.
+ */
+
+static const uintptr_t g_layerenable[LCDC_NLAYERS] =
+{
+  SAM_LCDC_BASECHER, SAM_LCDC_OVR1CHER, SAM_LCDC_OVR2CHER, SAM_LCDC_HEOCHER,
+  SAM_LCDC_HCRCHER
+};
+
+static const uintptr_t g_layerdisable[LCDC_NLAYERS] =
+{
+  SAM_LCDC_BASECHDR, SAM_LCDC_OVR1CHDR, SAM_LCDC_OVR2CHDR, SAM_LCDC_HEOCHDR,
+  SAM_LCDC_HCRCHDR
+};
+
+static const uintptr_t g_layerstatus[LCDC_NLAYERS] =
+{
+  SAM_LCDC_BASECHSR, SAM_LCDC_OVR1CHSR, SAM_LCDC_OVR2CHSR, SAM_LCDC_HEOCHSR,
+  SAM_LCDC_HCRCHSR
+};
+
+static const uintptr_t g_layerblend[LCDC_NLAYERS] =
+{
+  SAM_LCDC_BASECFG4, SAM_LCDC_OVR1CFG9, SAM_LCDC_OVR2CFG9, SAM_LCDC_HEOCFG12,
+  SAM_LCDC_HCRCFG9
+};
+
+static const uintptr_t g_layerhead[LCDC_NLAYERS] =
+{
+  SAM_LCDC_BASEHEAD, SAM_LCDC_OVR1HEAD, SAM_LCDC_OVR2HEAD, SAM_LCDC_HEOHEAD,
+  SAM_LCDC_HCRHEAD
+};
+
+static const uintptr_t g_layeraddr[LCDC_NLAYERS] =
+{
+  SAM_LCDC_BASEADDR, SAM_LCDC_OVR1ADDR, SAM_LCDC_OVR2ADDR, SAM_LCDC_HEOADDR,
+  SAM_LCDC_HCRADDR
+};
+
+static const uintptr_t g_layerctrl[LCDC_NLAYERS] =
+{
+  SAM_LCDC_BASECTRL, SAM_LCDC_OVR1CTRL, SAM_LCDC_OVR2CTRL, SAM_LCDC_HEOCTRL,
+  SAM_LCDC_HCRCTRL
+};
+
+static const uintptr_t g_layernext[LCDC_NLAYERS] =
+{
+  SAM_LCDC_BASENEXT, SAM_LCDC_OVR1NEXT, SAM_LCDC_OVR2NEXT, SAM_LCDC_HEONEXT,
+  SAM_LCDC_HCRNEXT
+};
+
+static const uintptr_t g_layercfg[LCDC_NLAYERS] =
+{
+  SAM_LCDC_BASECFG0, SAM_LCDC_OVR1CFG0, SAM_LCDC_OVR2CFG0, SAM_LCDC_HEOCFG0,
+  SAM_LCDC_HCRCFG0
+};
+
+static const uintptr_t g_layercolor[LCDC_NLAYERS] =
+{
+  SAM_LCDC_BASECFG1, SAM_LCDC_OVR1CFG1, SAM_LCDC_OVR2CFG1, SAM_LCDC_HEOCFG1,
+  SAM_LCDC_HCRCFG1
+};
+
+static const uintptr_t g_layerpos[LCDC_NLAYERS] =
+{
+  0,                 SAM_LCDC_OVR1CFG2, SAM_LCDC_OVR2CFG2, SAM_LCDC_HEOCFG2,
+  SAM_LCDC_HCRCFG2
+};
+
+static const uintptr_t g_layersize[LCDC_NLAYERS] =
+{
+  0,                 SAM_LCDC_OVR1CFG3, SAM_LCDC_OVR2CFG3, SAM_LCDC_HEOCFG3,
+  SAM_LCDC_HCRCFG3
+};
+
+static const uintptr_t g_layerstride[LCDC_NLAYERS] =
+{
+  SAM_LCDC_BASECFG2, SAM_LCDC_OVR1CFG4, SAM_LCDC_OVR2CFG4, SAM_LCDC_HEOCFG5,
+  SAM_LCDC_HCRCFG4
+};
+
+static const uintptr_t g_layerpstride[LCDC_NLAYERS] =
+{
+  0,                 SAM_LCDC_OVR1CFG5, SAM_LCDC_OVR2CFG5, SAM_LCDC_HEOCFG6,
+  0
+};
+
+#ifdef CONFIG_FB_CMAP
+static const uintptr_t g_layerclut[LCDC_NLAYERS] =
+{
+  SAM_LCDC_BASECLUT, SAM_LCDC_OVR1CLUT, SAM_LCDC_OVR2CLUT, SAM_LCDC_HEOCLUT,
+  SAM_LCDC_HCRCLUT
+};
+#endif
+
+/* Framebuffer memory */
+
+#if defined(CONFIG_SAMA5_LCDC_FBPREALLOCATED)
+static const uint8_t g_basefb[SAMA5_BASE_FBSIZE];
+
+#  ifdef CONFIG_SAMA5_LCDC_OVR1
+static const uint8_t g_ovr1fb[SAMA5_OVR1_FBSIZE];
+#  endif
+
+#  ifdef CONFIG_SAMA5_LCDC_OVR2
+static const uint8_t g_ovr2fb[SAMA5_OVR2_FBSIZE];
+#  endif
+
+#  ifdef CONFIG_SAMA5_LCDC_HEO
+static const uint8_t g_heofb[SAMA5_HEO_FBSIZE];
+#  endif
+
+#  ifdef CONFIG_FB_HWCURSOR
+static const uint8_t g_hcrfb[SAMA5_HCR_FBSIZE];
+#  endif
+
+#elif defined(CONFIG_SAMA5_LCDC_FBFIXED)
+
+#  define SAMA5_LCDC_BUFFER_BASE   CONFIG_SAMA5_LCDC_FBFIXED_BASE
+#  define SAMA5_LCDC_ENDBUF_BASE   (CONFIG_SAMA5_LCDC_FBFIXED_BASE + SAMA5_BASE_FBSIZE)
+
+#  ifdef CONFIG_SAMA5_LCDC_OVR1
+#    define SAMA5_LCDC_BUFFER_OVR1 SAMA5_LCDC_ENDBUF_BASE
+#    define SAMA5_LCDC_ENDBUF_OVR1 (SAMA5_LCDC_ENDBUF_BASE + SAMA5_OVR1_FBSIZE)
+#  else
+#    define SAMA5_LCDC_ENDBUF_OVR1 SAMA5_LCDC_ENDBUF_BASE
+#  endif
+
+#  ifdef CONFIG_SAMA5_LCDC_OVR2
+#    define SAMA5_LCDC_BUFFER_OVR2 SAMA5_LCDC_ENDBUF_OVR1
+#    define SAMA5_LCDC_ENDBUF_OVR2 (SAMA5_LCDC_ENDBUF_OVR1 + SAMA5_OVR2_FBSIZE)
+#  else
+#    define SAMA5_LCDC_ENDBUF_OVR2 SAMA5_LCDC_ENDBUF_OVR1
+#  endif
+
+#  ifdef CONFIG_SAMA5_LCDC_HEO
+#    define SAMA5_LCDC_BUFFER_HEO  SAMA5_LCDC_ENDBUF_OVR2
+#    define SAMA5_LCDC_ENDBUF_HEO  (SAMA5_LCDC_ENDBUF_OVR2 + SAMA5_HEO_FBSIZE)
+#  else
+#    define SAMA5_LCDC_ENDBUF_HEO  SAMA5_LCDC_ENDBUF_OVR2
+#  endif
+
+#  ifdef CONFIG_FB_HWCURSOR
+#    define SAMA5_LCDC_BUFFER_HCR  SAMA5_LCDC_ENDBUF_HEO
+#    define SAMA5_LCDC_ENDBUF_HCR  (SAMA5_LCDC_ENDBUF_HEO + SAMA5_HCR_FBSIZE)
+#  else
+#    define SAMA5_LCDC_ENDBUF_HCR  SAMA5_LCDC_ENDBUF_HEO
+#  endif
+
+#ifdef CONFIG_SAMA5_LCDC_FBFIXED_SIZE
+#  if SAMA5_LCDC_ENDBUF_HCR > \
+      (CONFIG_SAMA5_LCDC_FBFIXED_BASE + CONFIG_SAMA5_LCDC_FBFIXED_SIZE)
+#    error Fixed memory allocation not large enough
+#  endif
+#endif
 
 /****************************************************************************
  * Public Data
@@ -610,15 +844,15 @@ static int sam_getcursor(FAR struct fb_vtable_s *vtable,
   if (vtable && attrib)
     {
 #ifdef CONFIG_FB_HWCURSORIMAGE
-      attrib->fmt = SAM_COLOR_FMT;
+      attrib->fmt = SAMA5_BASE_COLOR_FMT;
 #endif
 
       gvdbg("pos: (x=%d, y=%d)\n", g_lcdc.cpos.x, g_lcdc.cpos.y);
       attrib->pos = g_lcdc.cpos;
 
 #ifdef CONFIG_FB_HWCURSORSIZE
-      attrib->mxsize.h = CONFIG_SAM_LCD_VHEIGHT;
-      attrib->mxsize.w = CONFIG_SAM_LCD_HWIDTH;
+      attrib->mxsize.h = CONFIG_SAMA5_LCDC_BASE_HEIGHT;
+      attrib->mxsize.w = CONFIG_SAMA5_LCDC_BASE_WIDTH;
 
       gvdbg("size: (h=%d, w=%d)\n", g_lcdc.csize.h, g_lcdc.csize.w);
       attrib->size = g_lcdc.csize;
@@ -1155,7 +1389,7 @@ static void sam_layer_config(void)
 #  endif
 #endif
 
-#ifdef CONFIG_SAMA5_LCDC_OVR2
+#ifdef CONFIG_SAMA5_LCDC_HEO
 #  ifdef CONFIG_SAMA5_LCDC_HEO_RGB888P
   /* High End Overlay, GA 0xff */
 
@@ -1234,8 +1468,8 @@ static void sam_lcd_enable(void)
            LCDC_LCDCFG3_HFPW(BOARD_LCD_TIMING_HFP - 1);
   sam_putreg(SAM_LCDC_LCDCFG3, regval);
 
-  regval = LCDC_LCDCFG4_RPF(BOARD_LCD_HEIGHT - 1) |
-           LCDC_LCDCFG4_PPL(BOARD_LCD_WIDTH - 1);
+  regval = LCDC_LCDCFG4_RPF(CONFIG_SAMA5_LCDC_BASE_HEIGHT - 1) |
+           LCDC_LCDCFG4_PPL(CONFIG_SAMA5_LCDC_BASE_WIDTH - 1);
   sam_putreg(SAM_LCDC_LCDCFG4, regval);
 
   regval = LCDC_LCDCFG5_GUARDTIME(30) | LCDC_LCDCFG5_MODE_OUTPUT_24BPP |
@@ -1284,6 +1518,118 @@ static void sam_lcd_enable(void)
 }
 
 /****************************************************************************
+ * Name: sam_fb_allocate
+ *
+ * Description:
+ *   Allocate framebuffer memory
+ *
+ ****************************************************************************/
+
+static int sam_fb_allocate(void)
+{
+#if defined(CONFIG_SAMA5_LCDC_FBPREALLOCATED)
+  /* Used pre-allocated buffers in .bss */
+
+  g_baselayer = g_basefb;
+
+#ifdef CONFIG_SAMA5_LCDC_OVR1
+  g_ovr1layer = g_ovr1fb;
+#endif
+
+#ifdef CONFIG_SAMA5_LCDC_OVR2
+  g_ovr2layer = g_ovr2fb;
+#endif
+
+#ifdef CONFIG_SAMA5_LCDC_HEO
+  g_heolayer  = g_heofb;
+#endif
+
+#ifdef CONFIG_FB_HWCURSOR
+  g_hcrlayer  = g_hcrfb;
+#endif
+
+  return OK;
+
+#elif defined(CONFIG_SAMA5_LCDC_FBFIXED)
+  /* Use buffers in external memory at an offset from a fixed address */
+
+  g_baselayer = (uint8_t *)SAMA5_LCDC_BUFFER_BASE;
+
+#ifdef CONFIG_SAMA5_LCDC_OVR1
+  g_ovr1layer = (uint8_t *)SAMA5_LCDC_BUFFER_OVR1;
+#endif
+
+#ifdef CONFIG_SAMA5_LCDC_OVR2
+  g_ovr2layer = (uint8_t *)SAMA5_LCDC_BUFFER_OVR2;
+#endif
+
+#ifdef CONFIG_SAMA5_LCDC_HEO
+  g_heolayer  = (uint8_t *)SAMA5_LCDC_BUFFER_HEO;
+#endif
+
+#ifdef CONFIG_FB_HWCURSOR
+  g_hcrlayer  = (uint8_t *)SAMA5_LCDC_BUFFER_HCR;
+#endif
+
+  return OK;
+
+#else
+  /* Allocate frame buffers from the heap */
+
+  g_baselayer.buffer = (uint8_t *)kmalloc(SAMA5_BASE_FBSIZE);
+  if (!g_baselayer.buffer)
+    {
+      goto errout;
+    }
+
+  g_ovr1layer.buffer = (uint8_t *)kmalloc(SAMA5_OVR1_FBSIZE);
+  if (!g_ovr1layer.buffer)
+    {
+      goto errout_with_base;
+    }
+
+  g_ovr2layer.buffer = (uint8_t *)kmalloc(SAMA5_OVR2_FBSIZE);
+  if (!g_ovr2layer.buffer)
+    {
+      goto errout_with_ovr1;
+    }
+
+  g_heolayer.buffer = (uint8_t *)kmalloc(SAMA5_HEO_FBSIZE);
+  if (!g_heolayer.buffer)
+    {
+      goto errout_with_ovr2;
+    }
+
+  g_hcrlayer.buffer = (uint8_t *)kmalloc(SAMA5_HCR_FBSIZE);
+  if (!g_hcrlayer.buffer)
+    {
+      goto errout_with_heo;
+    }
+
+  return OK;
+
+errout_with_heo:
+  kfree(g_heolayer.buffer);
+  g_heolayer.buffer = NULL;
+
+errout_with_ovr2:
+  kfree(g_ovr2layer.buffer);
+  g_ovr2layer.buffer = NULL;
+
+errout_with_ovr1:
+  kfree(g_ovr1layer.buffer);
+  g_ovr1layer.buffer = NULL;
+
+errout_with_base:
+  kfree(g_baselayer.buffer);
+  g_baselayer.buffer = NULL;
+
+errout:
+  return -ENOMEM;
+#endif
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1298,13 +1644,14 @@ static void sam_lcd_enable(void)
 int up_fbinitialize(void)
 {
   uint32_t regval;
+  int ret;
   int i;
 
   gvdbg("Entry\n");
 
-  /* Configure PIO pins */
+  /* Disable the LCD */
 
-  sam_pio_config();
+  sam_lcd_disable();
 
   /* Reset layer information */
 
@@ -1314,9 +1661,18 @@ int up_fbinitialize(void)
   memset(&g_heolayer,  0, sizeof(struct sam_heolayer_s));
   memset(&g_hcrlayer,  0, sizeof(struct sam_layer_s));
 
-  /* Disable the LCD */
+  /* Allocate framebuffer memory */
 
-  sam_lcd_disable();
+  ret = sam_fb_allocate();
+  if (ret < 0)
+    {
+      gdbg("ERROR: Failed to allocate framebuffer memory\n");
+      return ret;
+    }
+
+  /* Configure PIO pins */
+
+  sam_pio_config();
 
   /* Initialize the g_lcdc data structure */
 
@@ -1448,17 +1804,17 @@ void sam_lcdclear(nxgl_mxpixel_t color)
 
   gvdbg("Clearing display: color=%08x VRAM=%08x size=%d\n",
         color, CONFIG_SAM_LCD_VRAMBASE,
-        CONFIG_SAM_LCD_HWIDTH * CONFIG_SAM_LCD_VHEIGHT * sizeof(uint32_t));
+        CONFIG_SAMA5_LCDC_BASE_WIDTH * CONFIG_SAMA5_LCDC_BASE_HEIGHT * sizeof(uint32_t));
 
 #else
   uint16_t *dest = (uint16_t*)CONFIG_SAM_LCD_VRAMBASE;
 
   gvdbg("Clearing display: color=%08x VRAM=%08x size=%d\n",
         color, CONFIG_SAM_LCD_VRAMBASE,
-        CONFIG_SAM_LCD_HWIDTH * CONFIG_SAM_LCD_VHEIGHT * sizeof(uint16_t));
+        CONFIG_SAMA5_LCDC_BASE_WIDTH * CONFIG_SAMA5_LCDC_BASE_HEIGHT * sizeof(uint16_t));
 #endif
 
-  for (i = 0; i < (CONFIG_SAM_LCD_HWIDTH * CONFIG_SAM_LCD_VHEIGHT); i++)
+  for (i = 0; i < (CONFIG_SAMA5_LCDC_BASE_WIDTH * CONFIG_SAMA5_LCDC_BASE_HEIGHT); i++)
     {
       *dest++ = color;
     }
