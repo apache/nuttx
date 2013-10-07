@@ -452,7 +452,7 @@ static int lpc17_setcursor(FAR struct fb_vtable_s *vtable,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_fbinitialize
+ * Name: up_fbinitialize
  *
  * Description:
  *   Initialize the framebuffer video hardware
@@ -727,7 +727,7 @@ FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
 }
 
 /****************************************************************************
- * Name: lpc17_fbinitialize
+ * Name: fb_uninitialize
  *
  * Description:
  *   Unitialize the framebuffer support
