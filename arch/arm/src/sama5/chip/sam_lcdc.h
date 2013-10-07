@@ -805,7 +805,7 @@
 #  define LCDC_OVR1CFG3_YSIZE(n)    ((uint32_t)(n) << LCDC_OVR1CFG3_YSIZE_SHIFT)
 
 /* Overlay 1 Configuration 4 Register (32-bit horizontal stride value) */
-/* Overlay 1 Configuration 5 Register (32-bit pizel stride value) */
+/* Overlay 1 Configuration 5 Register (32-bit pixel stride value) */
 
 /* Overlay 1 Configuration 6 Register */
 
