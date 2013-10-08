@@ -233,7 +233,7 @@ uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
     {
       /* Data was not handled.. dispose of it appropriately */
 
-      flags = uip_dataevent(dev, conn, ret);
+      flags = uip_dataevent(dev, conn, flags);
     }
 
   /* Check if there is a connection-related event and a connection
