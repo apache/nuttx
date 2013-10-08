@@ -242,7 +242,7 @@ uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
    * callback.
    */
 
-  if (((flags & UIP_CONN_EVENTS) != 0) && conn->connection_event)
+  if (ret != 0 && ((flags & UIP_CONN_EVENTS) != 0) && conn->connection_event)
     {
       /* Perform the callback */
 

@@ -56,15 +56,6 @@
  * Private Types
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP
-struct tcp_close_s
-{
-  FAR struct socket         *cl_psock; /* Reference to the TCP socket */
-  FAR struct uip_callback_s *cl_cb;    /* Reference to TCP callback instance */
-  sem_t                       cl_sem;   /* Semaphore signals disconnect completion */
-};
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -95,7 +86,7 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
 
   DEBUGASSERT(conn != NULL);
 
-  nlldbg("flags: %04x\n", flags);
+  nlldbg("conn: %p flags: %04x\n", conn, flags);
 
   /* UIP_CLOSE:    The remote host has closed the connection
    * UIP_ABORT:    The remote host has aborted the connection
@@ -104,15 +95,13 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
 
   if ((flags & (UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT)) != 0)
     {
-      /* The disconnection is complete */
-
-      conn->closecb->flags = 0;
-      conn->closecb->priv  = NULL;
-      conn->closecb->event = NULL;
-
       /* Free connection resources */
 
       uip_tcpfree(conn);
+
+      /* Stop further callbacks */
+
+      flags = 0;
     }
   else
     {
@@ -121,7 +110,7 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
        */
 
       dev->d_len = 0;
-      return (flags & ~UIP_NEWDATA) | UIP_CLOSE;
+      flags = (flags & ~UIP_NEWDATA) | UIP_CLOSE;
     }
 
   return flags;
@@ -148,40 +137,36 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
 #ifdef CONFIG_NET_TCP
 static inline void netclose_disconnect(FAR struct socket *psock)
 {
-  struct tcp_close_s state;
+  FAR struct uip_callback_s *cb;
   uip_lock_t flags;
 
   /* Interrupts are disabled here to avoid race conditions */
 
   flags = uip_lock();
 
-  /* Is the TCP socket in a connected state? */
+  struct uip_conn *conn = (struct uip_conn*)psock->s_conn;
 
-  if (_SS_ISCONNECTED(psock->s_flags))
+  /* There shouldn't be any callbacks registered */
+
+  DEBUGASSERT(conn->list == NULL);
+
+  /* Check for the case where the host beat us and disconnected first */
+
+  if (conn->tcpstateflags == UIP_ESTABLISHED && 
+      (cb = uip_tcpcallbackalloc(conn)) != NULL)
     {
-       struct uip_conn *conn = (struct uip_conn*)psock->s_conn;
+      /* Set up to receive TCP data event callbacks */
 
-       DEBUGASSERT(conn->closecb == NULL);
+      cb->flags = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
+      cb->event = netclose_interrupt;
 
-       /* Check for the case where the host beat us and disconnected first */
+      /* Notify the device driver of the availaibilty of TX data */
 
-       if (conn->tcpstateflags == UIP_ESTABLISHED)
-         {
-           /* This callback will be freed together with conn */
-
-           conn->closecb = uip_tcpcallbackalloc(conn);
-           if (conn->closecb)
-             {
-               /* Set up to receive TCP data event callbacks */
-
-               conn->closecb->flags   = UIP_NEWDATA|UIP_POLL|UIP_CLOSE|UIP_ABORT|UIP_TIMEDOUT;
-               conn->closecb->event   = netclose_interrupt;
-
-               /* Notify the device driver of the availaibilty of TX data */
-
-               netdev_txnotify(conn->ripaddr);
-            }
-        }
+      netdev_txnotify(conn->ripaddr);
+    }
+  else
+    {
+      uip_tcpfree(conn);
     }
 
   uip_unlock(flags);
@@ -244,8 +229,8 @@ int psock_close(FAR struct socket *psock)
                   /* Yes... then perform the disconnection now */
 
                   uip_unlisten(conn);          /* No longer accepting connections */
-                  netclose_disconnect(psock);  /* Break any current connections */
                   conn->crefs = 0;             /* No more references on the connection */
+                  netclose_disconnect(psock);  /* Break any current connections */
                 }
               else
                 {

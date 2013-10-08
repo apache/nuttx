@@ -221,11 +221,10 @@ struct uip_conn *uip_tcpalloc(void)
 
   if (!conn)
     {
-      /* As a fallback, check for connection structures which are not
-       * established yet.
+      /* As a fallback, check for connection structures which can be stalled.
        *
        * Search the active connection list for the oldest connection
-       * that is not in the UIP_ESTABLISHED state.
+       * that is in the UIP_TIME_WAIT or UIP_FIN_WAIT_1 state.
        */
 
       struct uip_conn *tmp = g_active_tcp_connections.head;
@@ -233,11 +232,13 @@ struct uip_conn *uip_tcpalloc(void)
         {
           nllvdbg("conn: %p state: %02x\n", tmp, tmp->tcpstateflags);
 
-          /* Is this connection in some state other than UIP_ESTABLISHED
-           * state?
+          /* Is this connection in a state we can sacrifice.
+           * REVISIT: maybe UIP_FIN_WAIT_1 is too harsh? There should be a
+           *          higher priority for UIP_TIME_WAIT
            */
 
-          if (tmp->tcpstateflags != UIP_ESTABLISHED)
+          if (tmp->tcpstateflags == UIP_TIME_WAIT ||
+              tmp->tcpstateflags == UIP_FIN_WAIT_1)
             {
               /* Yes.. Is it the oldest one we have seen so far? */
 
@@ -300,6 +301,9 @@ struct uip_conn *uip_tcpalloc(void)
 
 void uip_tcpfree(struct uip_conn *conn)
 {
+  FAR struct uip_callback_s *cb;
+  FAR struct uip_callback_s *next;
+
 #if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
   struct uip_readahead_s *readahead;
 #endif
@@ -313,11 +317,14 @@ void uip_tcpfree(struct uip_conn *conn)
   DEBUGASSERT(conn->crefs == 0);
   flags = uip_lock();
 
-  /* Check if there is an allocated close callback structure */
+  /* Free remaining callbacks, actually there should be only the close callback
+   * left.
+   */
 
-  if (conn->closecb != NULL)
+  for (cb = conn->list; cb; cb = next)
     {
-      uip_tcpcallbackfree(conn, conn->closecb);
+      next = cb->flink;
+      uip_tcpcallbackfree(conn, cb);
     }
 
   /* UIP_ALLOCATED means that that the connection is not in the active list

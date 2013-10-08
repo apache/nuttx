@@ -199,13 +199,6 @@ struct uip_conn
 
   FAR struct uip_callback_s *list;
 
-  /* Close callback. The socket close logic allocates this callback and lets
-   * the connection handle close itself. So the application won't be blocked
-   * on the close call.  The callback has to be freed together with this.
-   */
-
-  FAR struct uip_callback_s *closecb;
-
   /* accept() is called when the TCP logic has created a connection */
 
   FAR void *accept_private;
