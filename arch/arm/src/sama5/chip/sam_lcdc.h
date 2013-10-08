@@ -540,7 +540,7 @@
 #  define LCDC_LCDCFG6_PWMPS_DIV8   (3 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/8 */
 #  define LCDC_LCDCFG6_PWMPS_DIV    (4 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/16 */
 #  define LCDC_LCDCFG6_PWMPS_DIV32  (5 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/32 */
-#  define LCDC_LCDCFG6_PWMPS _DIV64 (6 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/64 */
+#  define LCDC_LCDCFG6_PWMPS_DIV64  (6 << LCDC_LCDCFG6_PWMPS_SHIFT) /* Fcounter = Fpwm_selected_clock/64 */
 #define LCDC_LCDCFG6_PWMPOL         (1 << 4)  /* Bit 4: LCD Controller PWM Signal Polarity */
 #define LCDC_LCDCFG6_PWMCVAL_SHIFT  (8)       /* Bits 8-15: LCD Controller PWM Compare Value */
 #define LCDC_LCDCFG6_PWMCVAL_MASK   (0xff << LCDC_LCDCFG6_PWMCVAL_SHIFT)
@@ -686,7 +686,7 @@
 
 #define LCDC_BASECFG4_DMA           (1 << 8)  /* Bit 8:  Use DMA Data Path */
 #define LCDC_BASECFG4_REP           (1 << 9)  /* Bit 9:  Use Replication logic to expand RGB */
-#define LCDC_BASECFG4_DISCEN        (1 << 11) /* Bit 11: Discard Area Enable
+#define LCDC_BASECFG4_DISCEN        (1 << 11) /* Bit 11: Discard Area Enable */
 
 /* Base Configuration register 5 */
 
@@ -1568,7 +1568,7 @@
 #define LCDC_HCRCHSR_A2Q            (1 << 2)  /* Bit 2:  Add To Queue Pending */
 
 /* Hardware Cursor Interrupt Enable Register, Hardware Cursor Interrupt Disable Register,
-/* Hardware Cursor Interrupt Mask Register, and Hardware Cursor Interrupt Status Register
+ * Hardware Cursor Interrupt Mask Register, and Hardware Cursor Interrupt Status Register
  */
 
 #define LCDC_HCRINT_DMA             (1 << 2)  /* Bit 2:  End of DMA Transfer */

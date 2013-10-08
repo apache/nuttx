@@ -15,16 +15,19 @@ config ARCH_CHIP_ATSAMA5D31
 	bool "Atmel ATSAMA5D31"
 	select ARCH_CHIP_SAMA5D3
 	select SAMA5_HAVE_EMAC
+	select SAMA5_HAVE_LCDC
 
 config ARCH_CHIP_ATSAMA5D33
 	bool "Atmel ATSAMA5D33"
 	select ARCH_CHIP_SAMA5D3
 	select SAMA5_HAVE_GMAC
+	select SAMA5_HAVE_LCDC
 
 config ARCH_CHIP_ATSAMA5D34
 	bool "Atmel ATSAMA5D34"
 	select ARCH_CHIP_SAMA5D3
 	select SAMA5_HAVE_GMAC
+	select SAMA5_HAVE_LCDC
 
 config ARCH_CHIP_ATSAMA5D35
 	bool "Atmel ATSAMA5D35"
@@ -173,6 +176,7 @@ config SAMA5_EMAC
 config SAMA5_LCDC
 	bool "LCD Controller (LCDC)"
 	default n
+	depends on SAMA5_HAVE_LCDC
 
 config SAMA5_ISI
 	bool "Image Sensor Interface (ISI)"
@@ -252,6 +256,485 @@ config SAMA5_PIOE_IRQ
 	default n
 
 endif # PIO_IRQ
+
+config SAMA5_HAVE_LCDC
+	bool
+
+if SAMA5_LCDC
+menu "LCDC Configuration"
+
+config SAMA5_LCDC_BACKLIGHT
+	bool "Backlight support"
+	default y
+
+config SAMA5_LCDC_DEFBACKLIGHT
+	hex "Default backlight level"
+	default 0xf0
+
+config SAMA5_LCDC_BACKCOLOR
+	hex "Background color"
+	default 0x0
+
+choice
+	prompt "Frame buffer allocation strategy"
+	default SAMA5_LCDC_FBALLOCATED
+
+config SAMA5_LCDC_FBALLOCATED
+	bool "Allocate from heap"
+
+config SAMA5_LCDC_FBFIXED
+	bool "Fixed allocation outside the heap"
+
+config SAMA5_LCDC_FBPREALLOCATED
+	bool "Pre-allocated in .bss"
+
+endchoice # Frame buffer allocatin strategy
+
+if SAMA5_LCDC_FBFIXED
+
+config SAMA5_LCDC_FBFIXED_BASE
+hex "Framebuffer memory start address"
+
+config SAMA5_LCDC_FBFIXED_SIZE
+int "Framebuffer memory size"
+default 0
+
+endif # SAMA5_LCDC_FBFIXED
+
+comment "Base layer configuration"
+
+config SAMA5_LCDC_BASE_HEIGHT
+	int "Layer height (rows)"
+	default 480
+
+config SAMA5_LCDC_BASE_WIDTH
+	int "Layer width (pixels)"
+	default 800
+
+choice
+	prompt "Base layer rotation"
+	default SAMA5_LCDC_BASE_ROT0
+
+config SAMA5_LCDC_BASE_ROT0
+	bool "No rotation"
+
+config SAMA5_LCDC_BASE_ROT90
+	bool "90 degrees"
+
+config SAMA5_LCDC_BASE_ROT180
+	bool "180 degrees"
+
+config SAMA5_LCDC_BASE_ROT270
+	bool "270 degrees"
+
+endchoice # Base layer rotation
+
+choice
+	prompt "Base layer color format"
+	default SAMA5_LCDC_BASE_RGB888P
+
+config SAMA5_LCDC_BASE_RGB444
+	bool "12 bpp RGB 444"
+
+config SAMA5_LCDC_BASE_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config SAMA5_LCDC_BASE_RGBA4444
+	bool "16 bpp RGBA 4444"
+
+config SAMA5_LCDC_BASE_RGB565
+	bool "16 bpp RGB 565"
+
+config SAMA5_LCDC_BASE_TRGB1555
+	bool "16 bpp TRGB 1555"
+
+config SAMA5_LCDC_BASE_RGB666
+	bool "18 bpp RGB 666"
+
+config SAMA5_LCDC_BASE_RGB666P
+	bool "18 bpp RGB 666 packed"
+
+config SAMA5_LCDC_BASE_TRGB1666
+	bool "19 bpp TRGB 1666"
+
+config SAMA5_LCDC_BASE_TRGBP
+	bool "19 bpp TRGB 1666 packed"
+
+config SAMA5_LCDC_BASE_RGB888
+	bool "24 bpp RGB 888"
+
+config SAMA5_LCDC_BASE_RGB888P
+	bool "24 bpp RGB 888 packed"
+
+config SAMA5_LCDC_BASE_TRGB1888
+	bool "25 bpp TRGB 1888"
+
+config SAMA5_LCDC_BASE_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+config SAMA5_LCDC_BASE_RGBA8888
+	bool "32 bpp RGBA 8888"
+
+endchoice # Base layer color format
+
+menuconfig SAMA5_LCDC_OVR1
+	bool "Enable overlay 1 window"
+	default n
+	depends on EXPERIMENTAL
+
+if SAMA5_LCDC_OVR1
+
+config SAMA5_LCDC_OVR1_MAXHEIGHT
+	int "Overlay 1 height (rows)"
+	default 480
+
+config SAMA5_LCDC_OVR1_MAXWIDTH
+	int "Overlay 1 width (pixels)"
+	default 800
+
+config SAMA5_LCDC_OVR1_BOTTOMUP
+	bool "Raster bottom-up"
+	default n
+
+config SAMA5_LCDC_OVR1_RIGHTLEFT
+	bool "Raster right-to-left"
+	default n
+
+choice
+	prompt "Overlay 1 rotation"
+	default SAMA5_LCDC_OVR1_ROT0
+
+config SAMA5_LCDC_OVR1_ROT0
+	bool "No rotation"
+
+config SAMA5_LCDC_OVR1_ROT90
+	bool "90 degrees"
+
+config SAMA5_LCDC_OVR1_ROT180
+	bool "180 degrees"
+
+config SAMA5_LCDC_OVR1_ROT270
+	bool "270 degrees"
+
+endchoice # Overlay 1 rotation
+
+choice
+	prompt "Overlay 1 color format"
+	default SAMA5_LCDC_OVR1_RGB888P
+
+config SAMA5_LCDC_OVR1_RGB444
+	bool "12 bpp RGB 444"
+
+config SAMA5_LCDC_OVR1_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config SAMA5_LCDC_OVR1_RGBA4444
+	bool "16 bpp RGBA 4444"
+
+config SAMA5_LCDC_OVR1_RGB565
+	bool "16 bpp RGB 565"
+
+config SAMA5_LCDC_OVR1_TRGB1555
+	bool "16 bpp TRGB 1555"
+
+config SAMA5_LCDC_OVR1_RGB666
+	bool "18 bpp RGB 666"
+
+config SAMA5_LCDC_OVR1_RGB666P
+	bool "18 bpp RGB 666 packed"
+
+config SAMA5_LCDC_OVR1_TRGB1666
+	bool "19 bpp TRGB 1666"
+
+config SAMA5_LCDC_OVR1_TRGBP
+	bool "19 bpp TRGB 1666 packed"
+
+config SAMA5_LCDC_OVR1_RGB888
+	bool "24 bpp RGB 888"
+
+config SAMA5_LCDC_OVR1_RGB888P
+	bool "24 bpp RGB 888 packed"
+
+config SAMA5_LCDC_OVR1_TRGB1888
+	bool "25 bpp TRGB 1888"
+
+config SAMA5_LCDC_OVR1_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+config SAMA5_LCDC_OVR1_RGBA8888
+	bool "32 bpp RGBA 8888"
+
+endchoice # Base layer color format
+endif # SAMA5_LCDC_OVR1
+
+menuconfig SAMA5_LCDC_OVR2
+	bool "Enable overlay 2 window"
+	default n
+	depends on EXPERIMENTAL
+
+if SAMA5_LCDC_OVR2
+
+config SAMA5_LCDC_OVR2_MAXHEIGHT
+	int "Overlay 2 height (rows)"
+	default 480
+
+config SAMA5_LCDC_OVR2_MAXWIDTH
+	int "Overlay 2 width (pixels)"
+	default 800
+
+config SAMA5_LCDC_OVR2_BOTTOMUP
+	bool "Raster bottom-up"
+	default n
+
+config SAMA5_LCDC_OVR2_RIGHTLEFT
+	bool "Raster right-to-left"
+	default n
+
+choice
+	prompt "Overlay 2 rotation"
+	default SAMA5_LCDC_OVR2_ROT0
+
+config SAMA5_LCDC_OVR2_ROT0
+	bool "No rotation"
+
+config SAMA5_LCDC_OVR2_ROT90
+	bool "90 degrees"
+
+config SAMA5_LCDC_OVR2_ROT180
+	bool "180 degrees"
+
+config SAMA5_LCDC_OVR2_ROT270
+	bool "270 degrees"
+
+endchoice # Overlay 2 rotation
+
+choice
+	prompt "Overlay 2 layer color format"
+	default SAMA5_LCDC_OVR2_RGB888P
+
+config SAMA5_LCDC_OVR2_RGB444
+	bool "12 bpp RGB 444"
+
+config SAMA5_LCDC_OVR2_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config SAMA5_LCDC_OVR2_RGBA4444
+	bool "16 bpp RGBA 4444"
+
+config SAMA5_LCDC_OVR2_RGB565
+	bool "16 bpp RGB 565"
+
+config SAMA5_LCDC_OVR2_TRGB1555
+	bool "16 bpp TRGB 1555"
+
+config SAMA5_LCDC_OVR2_RGB666
+	bool "18 bpp RGB 666"
+
+config SAMA5_LCDC_OVR2_RGB666P
+	bool "18 bpp RGB 666 packed"
+
+config SAMA5_LCDC_OVR2_TRGB1666
+	bool "19 bpp TRGB 1666"
+
+config SAMA5_LCDC_OVR2_TRGBP
+	bool "19 bpp TRGB 1666 packed"
+
+config SAMA5_LCDC_OVR2_RGB888
+	bool "24 bpp RGB 888"
+
+config SAMA5_LCDC_OVR2_RGB888P
+	bool "24 bpp RGB 888 packed"
+
+config SAMA5_LCDC_OVR2_TRGB1888
+	bool "25 bpp TRGB 1888"
+
+config SAMA5_LCDC_OVR2_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+config SAMA5_LCDC_OVR2_RGBA8888
+	bool "32 bpp RGBA 8888"
+
+endchoice # Base layer color format
+endif # SAMA5 LCDC_OVR2
+
+config SAMA5_LCDC_HEO
+	bool "High end overlay (HEO) window"
+	default n
+	depends on EXPERIMENTAL
+
+if SAMA5_LCDC_HEO
+
+config SAMA5_LCDC_HEO_MAXHEIGHT
+	int "HEO layer height (rows)"
+	default 480
+
+config SAMA5_LCDC_HEO_MAXWIDTH
+	int "HEO layer width (pixels)"
+	default 800
+
+config SAMA5_LCDC_HEO_BOTTOMUP
+	bool "Raster bottom-up"
+	default n
+
+config SAMA5_LCDC_HEO_RIGHTLEFT
+	bool "Raster right-to-left"
+	default n
+
+choice
+	prompt "HEO layer rotation"
+	default SAMA5_LCDC_HEO_ROT0
+
+config SAMA5_LCDC_HEO_ROT0
+	bool "No rotation"
+
+config SAMA5_LCDC_HEO_ROT90
+	bool "90 degrees"
+
+config SAMA5_LCDC_HEO_ROT180
+	bool "180 degrees"
+
+config SAMA5_LCDC_HEO_ROT270
+	bool "270 degrees"
+
+endchoice # HEO layer rotation
+
+choice
+	prompt "HEO layer color format"
+	default SAMA5_LCDC_HEO_RGB888P
+
+config SAMA5_LCDC_HEO_RGB444
+	bool "12 bpp RGB 444"
+
+config SAMA5_LCDC_HEO_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config SAMA5_LCDC_HEO_RGBA4444
+	bool "16 bpp RGBA 4444"
+
+config SAMA5_LCDC_HEO_RGB565
+	bool "16 bpp RGB 565"
+
+config SAMA5_LCDC_HEO_TRGB1555
+	bool "16 bpp TRGB 1555"
+
+config SAMA5_LCDC_HEO_RGB666
+	bool "18 bpp RGB 666"
+
+config SAMA5_LCDC_HEO_RGB666P
+	bool "18 bpp RGB 666 packed"
+
+config SAMA5_LCDC_HEO_TRGB1666
+	bool "19 bpp TRGB 1666"
+
+config SAMA5_LCDC_HEO_TRGBP
+	bool "19 bpp TRGB 1666 packed"
+
+config SAMA5_LCDC_HEO_RGB888
+	bool "24 bpp RGB 888"
+
+config SAMA5_LCDC_HEO_RGB888P
+	bool "24 bpp RGB 888 packed"
+
+config SAMA5_LCDC_HEO_TRGB1888
+	bool "25 bpp TRGB 1888"
+
+config SAMA5_LCDC_HEO_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+config SAMA5_LCDC_HEO_RGBA8888
+	bool "32 bpp RGBA 8888"
+
+endchoice # Base layer color format
+endif # SAMA5_LCDC_HEO
+
+config SAMA5_LCDC_HCR
+	bool "Enable hardware cursor (HCR)"
+	default n
+	depends on EXPERIMENTAL
+
+if SAMA5_LCDC_HCR
+
+config SAMA5_LCDC_HCR_MAXHEIGHT
+	int "Hardware cursor height (rows)"
+	default 32
+
+config SAMA5_LCDC_HCR_MAXWIDTH
+	int "Hardware cursor width (pixels)"
+	default 32
+
+choice
+	prompt "Hardware cursor rotation"
+	default SAMA5_LCDC_HCR_ROT0
+
+config SAMA5_LCDC_HCR_ROT0
+	bool "No rotation"
+
+config SAMA5_LCDC_HCR_ROT90
+	bool "90 degrees"
+
+config SAMA5_LCDC_HCR_ROT180
+	bool "180 degrees"
+
+config SAMA5_LCDC_HCR_ROT270
+	bool "270 degrees"
+
+endchoice # Hardware cursor rotation
+
+choice
+	prompt "Hardware cursor layer color format"
+	default SAMA5_LCDC_HCR_RGB888P
+
+config SAMA5_LCDC_HCR_RGB444
+	bool "12 bpp RGB 444"
+
+config SAMA5_LCDC_HCR_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config SAMA5_LCDC_HCR_RGBA4444
+	bool "16 bpp RGBA 4444"
+
+config SAMA5_LCDC_HCR_RGB565
+	bool "16 bpp RGB 565"
+
+config SAMA5_LCDC_HCR_TRGB1555
+	bool "16 bpp TRGB 1555"
+
+config SAMA5_LCDC_HCR_RGB666
+	bool "18 bpp RGB 666"
+
+config SAMA5_LCDC_HCR_RGB666P
+	bool "18 bpp RGB 666 packed"
+
+config SAMA5_LCDC_HCR_TRGB1666
+	bool "19 bpp TRGB 1666"
+
+config SAMA5_LCDC_HCR_TRGBP
+	bool "19 bpp TRGB 1666 packed"
+
+config SAMA5_LCDC_HCR_RGB888
+	bool "24 bpp RGB 888"
+
+config SAMA5_LCDC_HCR_RGB888P
+	bool "24 bpp RGB 888 packed"
+
+config SAMA5_LCDC_HCR_TRGB1888
+	bool "25 bpp TRGB 1888"
+
+config SAMA5_LCDC_HCR_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+config SAMA5_LCDC_HCR_RGBA8888
+	bool "32 bpp RGBA 8888"
+
+endchoice # Base layer color format
+endif # SAMA5_LCDC_HCR
+
+config SAMA5_LCDC_REGDEBUG
+	bool "Low level register debug"
+	depends on DEBUG
+
+endmenu # LCDC configuration
+endif # SAMA5_LCDC
 
 config SAMA5_HAVE_GMAC
 	bool
