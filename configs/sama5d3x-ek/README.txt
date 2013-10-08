@@ -912,6 +912,10 @@ Configurations
       demo configuration.  The nsh configuration is, however, bare bones.
       It is the simplest possible NSH configuration and is useful as a
       platform for debugging and integrating new features in isolation.
+    nx: A simple test using the NuttX graphics system (NX) that has been
+      used to verify the SAMA5D3x-EK TFT LCD.  This test case focuses on
+      general window controls, movement, mouse and keyboard input.  It
+      requires no user interaction.
     ostest:  This is another configuration that is only useful for bring-up.
       It executes an exhaustive OS test to verify a correct port of NuttX
       to the SAMA5D3-EK.  Since it now passes that test, the configuration
@@ -2177,13 +2181,21 @@ Configurations
         integrated.
 
       EMAC:
-      2013-9-17:  Driver created, but not fully integrated yet.
+      2013-9-17:  Driver created and (subsequently) integrated.
+
+  nx:
+
+    A simple test using the NuttX graphics system (NX) that has been used to
+    verify the SAMA5D3x-EK TFT LCD.  This test case focuses on general
+    window controls, movement, mouse and keyboard input.  It requires no
+    user interaction.
 
   ostest:
     This configuration directory, performs a simple OS test using
     examples/ostest.
 
     NOTES:
+
     1. This configuration uses the default USART1 serial console.  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as

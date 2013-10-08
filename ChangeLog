@@ -5724,4 +5724,6 @@
 	  Max Holtzberg (2013-10-8).
 	* arch/arm/src/sama5/sam_lcd.c: LCDC driver is code complete and
 	  incorporated into the build system (but still untested (2013-10-8).
+	* configs/sama5d3x-ek/nx:  Add an examples/nx configuratino that
+	  will be used for the SAMA5 LCD bring-up (2013-10-8).
 
