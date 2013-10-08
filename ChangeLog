@@ -5722,4 +5722,6 @@
 	  free connections available.  From Max Holtzberg (2013-10-6).
 	* net/net_close.c and other:  Update of change of 2013-10-6 from
 	  Max Holtzberg (2013-10-8).
+	* arch/arm/src/sama5/sam_lcd.c: LCDC driver is code complete but still
+	  untested (2013-10-8).
 
