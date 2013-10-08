@@ -199,8 +199,6 @@ uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
    * explicitly set in the callback.
    */
 
-  uint16_t ret = flags;
-
   nllvdbg("flags: %04x\n", flags);
 
   /* Perform the data callback.  When a data callback is executed from 'list',
@@ -222,7 +220,7 @@ uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
    *                 dev->d_len should also be cleared).
    */
 
-  ret = uip_callbackexecute(dev, conn, flags, conn->list);
+  flags = uip_callbackexecute(dev, conn, flags, conn->list);
 
   /* There may be no new data handler in place at them moment that the new
    * incoming data is received.  If the new incoming data was not handled, then
@@ -231,25 +229,25 @@ uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
    * be re-transmitted at a better time.
    */
 
-  if ((ret & UIP_NEWDATA) != 0)
+  if ((flags & UIP_NEWDATA) != 0)
     {
       /* Data was not handled.. dispose of it appropriately */
 
-      ret = uip_dataevent(dev, conn, ret);
+      flags = uip_dataevent(dev, conn, ret);
     }
 
   /* Check if there is a connection-related event and a connection
    * callback.
    */
 
-  if (ret != 0 && ((flags & UIP_CONN_EVENTS) != 0) && conn->connection_event)
+  if (((flags & UIP_CONN_EVENTS) != 0) && conn->connection_event)
     {
       /* Perform the callback */
 
       conn->connection_event(conn, flags);
     }
 
-  return ret;
+  return flags;
 }
 
 /****************************************************************************
