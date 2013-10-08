@@ -163,6 +163,29 @@
 
 #define SAMA5_HCR_FBSIZE (SAMA5_HCR_STRIDE * CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT)
 
+/* Are size, position, and pixel stride support needed? */
+
+#undef SAMA5_HAVE_POSITION  /* The base layer has none of these */
+#undef SAMA5_HAVE_SIZE
+#undef SAMA5_HAVE_PSTRIDE
+
+#if defined(CONFIG_SAMA5_LCDC_OVR1) || defined(CONFIG_SAMA5_LCDC_OVR2) || \
+    defined(CONFIG_SAMA5_LCDC_HEO)
+#  define SAMA5_HAVE_POSITION 1
+#  define SAMA5_HAVE_SIZE     1
+#  define SAMA5_HAVE_PSTRIDE  1
+#elif defined(CONFIG_SAMA5_LCDC_HCR)
+#  define SAMA5_HAVE_POSITION 1
+#  define SAMA5_HAVE_SIZE     1
+#endif
+
+#ifdef SAMA5_HAVE_PSTRIDE
+static const uintptr_t g_layerpstride[LCDC_NLAYERS] =
+{
+  0,                 SAM_LCDC_OVR1CFG5, SAM_LCDC_OVR2CFG5, SAM_LCDC_HEOCFG6,
+  0
+};
+
 /* Where do we get framebuffer memory */
 
 #if defined(CONFIG_SAMA5_LCDC_FBPREALLOCATED)
@@ -198,14 +221,6 @@ enum sam_layer_e
 };
 #define LCDC_NLAYERS 5
 
-/* CLUT information */
-
-struct sam_clutinfo_s
-{
-  uint8_t bpp;
-  uint8_t ncolors;
-};
-
 /* LCDC General Layer information */
 
 struct sam_layer_s
@@ -219,9 +234,17 @@ struct sam_layer_s
 
   /* Driver data that accompanies the descriptor may follow */
 
-  uint8_t *framebuffer;
-  struct sam_clutinfo_s clut;
-  uint16_t pad;
+  uint8_t *framebuffer;   /* DMA framebuffer memory */
+
+  /* CLUT information */
+
+#ifdef CONFIG_FB_CMAP
+  uint8_t offset;        /* Offset to first value entry in CLUT */
+  uint8_t nclut;         /* Number of colors in the CLUT */
+  uint16_t pad2;
+#else
+  uint32_t pad;
+#endif
 };
 
 /* LCDC HEO Layer information */
@@ -237,17 +260,21 @@ struct sam_heolayer_s
 
   /* Driver data that accompanies the descriptor may follow */
 
-  void *framebuffer;
-  struct sam_clutinfo_s clut;
+  void *framebuffer;     /* DMA framebuffer memory */
+
+#ifdef CONFIG_FB_CMAP
+  uint8_t offset;        /* Offset to first value entry in CLUT */
+  uint8_t nclut;         /* Number of colors in the CLUT */
   uint16_t pad;
+#else
+  uint32_t pad;
+#endif
 };
 
 /* This structure provides the overall state of the LCDC */
 
 struct sam_lcdc_s
 {
-  struct fb_vtable_s fboject;     /* The framebuffer object */
-
 #ifdef CONFIG_FB_HWCURSOR
   struct fb_cursorpos_s cpos;     /* Current cursor position */
 #ifdef CONFIG_FB_HWCURSORSIZE
@@ -275,8 +302,8 @@ static bool sam_checkreg(bool wr, uint32_t regval, uintptr_t address);
 static uint32_t sam_getreg(uintptr_t addr);
 static void sam_putreg(uintptr_t addr, uint32_t val);
 #else
-# define sam_getreg(addr)      getreg32(addr)
-# define sam_putreg(addr,val)  putreg32(val,addr)
+#  define sam_getreg(addr)      getreg32(addr)
+#  define sam_putreg(addr,val)  putreg32(val,addr)
 #endif
 
 /* Frame buffer interface ***************************************************/
@@ -284,20 +311,20 @@ static void sam_putreg(uintptr_t addr, uint32_t val);
  * configuration of each color plane.
  */
 
-static int sam_getvideoinfo(FAR struct fb_vtable_s *vtable,
-             FAR struct fb_videoinfo_s *vinfo);
-static int sam_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
-             FAR struct fb_planeinfo_s *pinfo);
+static int sam_base_getvideoinfo(struct fb_vtable_s *vtable,
+             struct fb_videoinfo_s *vinfo);
+static int sam_base_getplaneinfo(struct fb_vtable_s *vtable,
+             int planeno, struct fb_planeinfo_s *pinfo);
 
 /* The following is provided only if the video hardware supports RGB color
  * mapping
  */
 
 #ifdef CONFIG_FB_CMAP
-static int sam_getcmap(FAR struct fb_vtable_s *vtable,
-             FAR struct fb_cmap_s *cmap);
-static int sam_putcmap(FAR struct fb_vtable_s *vtable,
-             FAR const struct fb_cmap_s *cmap);
+static int sam_base_getcmap(struct fb_vtable_s *vtable,
+             struct fb_cmap_s *cmap);
+static int sam_base_putcmap(struct fb_vtable_s *vtable,
+             const struct fb_cmap_s *cmap);
 #endif
 
 /* The following is provided only if the video hardware supports a hardware
@@ -305,13 +332,24 @@ static int sam_putcmap(FAR struct fb_vtable_s *vtable,
  */
 
 #ifdef CONFIG_FB_HWCURSOR
-static int sam_getcursor(FAR struct fb_vtable_s *vtable,
-             FAR struct fb_cursorattrib_s *attrib);
-static int sam_setcursor(FAR struct fb_vtable_s *vtable,
-             FAR struct fb_setcursor_s *setttings);
+static int sam_hcr_getcursor(struct fb_vtable_s *vtable,
+             struct fb_cursorattrib_s *attrib);
+static int sam_hcr_setcursor(struct fb_vtable_s *vtable,
+             struct fb_setcursor_s *setttings);
 #endif
 
 /* Initialization ***********************************************************/
+
+static void sam_dmasetup(int lid, struct sam_dscr_s *dscr, uint8_t *buffer);
+#if 0 /* #if defined(SAMA5_HAVE_POSITION) && defined(SAMA5_HAVE_SIZE) -- not used */
+static void sam_setposition(int lid, uint32_t x, uint32_t y)
+#endif
+#ifdef CONFIG_FB_CMAP
+static int sam_setclut(struct sam_layer_s *layer,
+             const struct fb_cmap_s *cmap);
+static int sam_getclut(struct sam_layer_s *layer,
+             struct fb_cmap_s *cmap);
+#endif
 
 static void sam_pio_config(void);
 static void sam_backlight(uint32_t level);
@@ -331,7 +369,7 @@ static int  sam_fb_allocate(void);
 
 /* This structure describes the simulated video controller */
 
-static const struct fb_videoinfo_s g_videoinfo =
+static const struct fb_videoinfo_s g_base_videoinfo =
 {
   .fmt      = SAMA5_BASE_COLOR_FMT,
   .xres     = CONFIG_SAMA5_LCDC_BASE_WIDTH,
@@ -341,9 +379,9 @@ static const struct fb_videoinfo_s g_videoinfo =
 
 /* This structure describes the single, simulated color plane */
 
-static const struct fb_planeinfo_s g_planeinfo =
+static const struct fb_planeinfo_s g_base_planeinfo =
 {
-  .fbmem    = (FAR void *)CONFIG_SAM_LCD_VRAMBASE,
+  .fbmem    = (void *)CONFIG_SAM_LCD_VRAMBASE,
   .fblen    = SAMA5_BASE_FBSIZE,
   .stride   = SAMA5_BASE_STRIDE,
   .bpp      = SAM_BPP,
@@ -351,7 +389,23 @@ static const struct fb_planeinfo_s g_planeinfo =
 
 /* This structure provides the overall state of the LCDC */
 
-struct sam_lcdc_s g_lcdc;
+static struct sam_lcdc_s g_lcdc;
+
+/* This structure provides the base layer interface */
+
+static const struct fb_vtable_s g_base_vtable =
+{
+  .getvideoinfo  = sam_base_getvideoinfo,
+  .getplaneinfo  = sam_base_getplaneinfo,
+#ifdef CONFIG_FB_CMAP
+  .getcmap       = sam_base_getcmap,
+  .putcmap       = sam_base_putcmap,
+#endif
+#ifdef CONFIG_FB_HWCURSOR
+  .getcursor     = sam_hcr_getcursor,
+  .setcursor     = sam_hcr_setcursor,
+#endif
+};
 
 /* Preallocated LCDC layer structures */
 
@@ -456,17 +510,21 @@ static const uintptr_t g_layercolor[LCDC_NLAYERS] =
   SAM_LCDC_HCRCFG1
 };
 
+#ifdef SAMA5_HAVE_POSITION
 static const uintptr_t g_layerpos[LCDC_NLAYERS] =
 {
   0,                 SAM_LCDC_OVR1CFG2, SAM_LCDC_OVR2CFG2, SAM_LCDC_HEOCFG2,
   SAM_LCDC_HCRCFG2
 };
+#endif
 
+#ifdef SAMA5_HAVE_SIZE
 static const uintptr_t g_layersize[LCDC_NLAYERS] =
 {
   0,                 SAM_LCDC_OVR1CFG3, SAM_LCDC_OVR2CFG3, SAM_LCDC_HEOCFG3,
   SAM_LCDC_HCRCFG3
 };
+#endif
 
 static const uintptr_t g_layerstride[LCDC_NLAYERS] =
 {
@@ -474,11 +532,13 @@ static const uintptr_t g_layerstride[LCDC_NLAYERS] =
   SAM_LCDC_HCRCFG4
 };
 
+#ifdef SAMA5_HAVE_PSTRIDE
 static const uintptr_t g_layerpstride[LCDC_NLAYERS] =
 {
   0,                 SAM_LCDC_OVR1CFG5, SAM_LCDC_OVR2CFG5, SAM_LCDC_HEOCFG6,
   0
 };
+#endif
 
 #ifdef CONFIG_FB_CMAP
 static const uintptr_t g_layerclut[LCDC_NLAYERS] =
@@ -653,34 +713,34 @@ static void sam_putreg(uintptr_t address, uint32_t regval)
 #endif
 
 /****************************************************************************
- * Name: sam_getvideoinfo
+ * Name: sam_base_getvideoinfo
  ****************************************************************************/
 
-static int sam_getvideoinfo(FAR struct fb_vtable_s *vtable,
-                              FAR struct fb_videoinfo_s *vinfo)
+static int sam_base_getvideoinfo(struct fb_vtable_s *vtable,
+                                 struct fb_videoinfo_s *vinfo)
 {
   gvdbg("vtable=%p vinfo=%p\n", vtable, vinfo);
   if (vtable && vinfo)
     {
-      memcpy(vinfo, &g_videoinfo, sizeof(struct fb_videoinfo_s));
+      memcpy(vinfo, &g_base_videoinfo, sizeof(struct fb_videoinfo_s));
       return OK;
     }
 
-  gdbg("Returning EINVAL\n");
+  gdbg("ERROR: Returning EINVAL\n");
   return -EINVAL;
 }
 
 /****************************************************************************
- * Name: sam_getplaneinfo
+ * Name: sam_base_getplaneinfo
  ****************************************************************************/
 
-static int sam_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
-                              FAR struct fb_planeinfo_s *pinfo)
+static int sam_base_getplaneinfo(struct fb_vtable_s *vtable, int planeno,
+                                 struct fb_planeinfo_s *pinfo)
 {
   gvdbg("vtable=%p planeno=%d pinfo=%p\n", vtable, planeno, pinfo);
   if (vtable && planeno == 0 && pinfo)
     {
-      memcpy(pinfo, &g_planeinfo, sizeof(struct fb_planeinfo_s));
+      memcpy(pinfo, &g_base_planeinfo, sizeof(struct fb_planeinfo_s));
       return OK;
     }
 
@@ -689,156 +749,36 @@ static int sam_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
 }
 
 /****************************************************************************
- * Name: sam_getcmap
+ * Name: sam_base_getcmap
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int sam_getcmap(FAR struct fb_vtable_s *vtable,
-                         FAR struct fb_cmap_s *cmap)
+static int sam_base_getcmap(struct fb_vtable_s *vtable,
+                            struct fb_cmap_s *cmap)
 {
-  uint32_t *pal;
-  uint32_t rgb;
-  int last;
-  int i;
-
-  gvdbg("vtable=%p cmap=%p first=%d len=%d\n",
-        vtable, cmap, cmap->first, cmap->len);
-
-  DEBUGASSERT(vtable && cmap &&
-              cmap->first < 256 && (cmap->first + cmap->len) < 256);
-
-  pal  = (uint32_t *)SAM_LCD_PAL(cmap->first >> 1);
-  last = cmap->first + cmap->len;
-
-  /* Handle the case where the first color starts on an odd boundary */
-
-  i = cmap->first;
-  if ((i & 1) != 0)
-    {
-      rgb  = *pal++;
-      i++;
-
-      /* Save the odd palette value */
-
-      cmap->red[i]    = (rgb & LCD_PAL_R1_MASK) >> LCD_PAL_R1_SHIFT;
-      cmap->green[i]  = (rgb & LCD_PAL_G1_MASK) >> LCD_PAL_G1_SHIFT;
-      cmap->blue[i]   = (rgb & LCD_PAL_B1_MASK) >> LCD_PAL_B1_SHIFT;
-#ifdef CONFIG_FB_TRANSPARENCY
-      cmap->transp[i] = 0;
-#endif
-    }
-
-  /* Handle even colors */
-
-  for (; i < last; i += 2)
-    {
-      rgb  = *pal++;
-
-      /* Save the even palette value */
-
-      cmap->red[i]    = (rgb & LCD_PAL_R0_MASK) >> LCD_PAL_R0_SHIFT;
-      cmap->green[i]  = (rgb & LCD_PAL_G0_MASK) >> LCD_PAL_G0_SHIFT;
-      cmap->blue[i]   = (rgb & LCD_PAL_B0_MASK) >> LCD_PAL_B0_SHIFT;
-#ifdef CONFIG_FB_TRANSPARENCY
-      cmap->transp[i] = 0;
-#endif
-
-      /* Handle the case where the len ends on an odd boudary */
-
-      if ((i + 1) < last)
-        {
-          /* Save the even palette value */
-
-          cmap->red[i+1]    = (rgb & LCD_PAL_R1_MASK) >> LCD_PAL_R1_SHIFT;
-          cmap->green[i+1]  = (rgb & LCD_PAL_G1_MASK) >> LCD_PAL_G1_SHIFT;
-          cmap->blue[i+1]   = (rgb & LCD_PAL_B1_MASK) >> LCD_PAL_B1_SHIFT;
-#ifdef CONFIG_FB_TRANSPARENCY
-          cmap->transp[i+1] = 0;
-#endif
-        }
-    }
-
-  return OK;
+  return sam_getclut(&g_baselayer, cmap);
 }
 #endif
 
 /****************************************************************************
- * Name: sam_putcmap
+ * Name: sam_base_putcmap
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-static int sam_putcmap(FAR struct fb_vtable_s *vtable,
-                         FAR const struct fb_cmap_s *cmap)
+static int sam_base_putcmap(struct fb_vtable_s *vtable,
+                            const struct fb_cmap_s *cmap)
 {
-  uint32_t *pal;
-  uint32_t rgb0;
-  uint32_t rgb1;
-  int last;
-  int i;
-
-  gvdbg("vtable=%p cmap=%p first=%d len=%d\n",
-        vtable, cmap, cmap->first, cmap->len);
-
-  DEBUGASSERT(vtable && cmap);
-
-  pal  = (uint32_t *)SAM_LCD_PAL(cmap->first >> 1);
-  last = cmap->first + cmap->len;
-
-  /* Handle the case where the first color starts on an odd boundary */
-
-  i = cmap->first;
-  if ((i & 1) != 0)
-    {
-      rgb0  = *pal;
-      rgb0 &= (LCD_PAL_R0_MASK | LCD_PAL_G0_MASK | LCD_PAL_B0_MASK | LCD_PAL_I0);
-      rgb1 |= ((uint32_t)cmap->red[i]   << LCD_PAL_R0_SHIFT |
-               (uint32_t)cmap->green[i] << LCD_PAL_G0_SHIFT |
-               (uint32_t)cmap->blue[i]  << LCD_PAL_B0_SHIFT);
-
-      /* Save the new palette value */
-
-      *pal++ = (rgb0 | rgb1);
-      i++;
-    }
-
-  /* Handle even colors */
-
-  for (; i < last; i += 2)
-    {
-      uint32_t rgb0 = ((uint32_t)cmap->red[i]   << LCD_PAL_R0_SHIFT |
-                       (uint32_t)cmap->green[i] << LCD_PAL_G0_SHIFT |
-                       (uint32_t)cmap->blue[i]  << LCD_PAL_B0_SHIFT);
-
-      /* Handle the case where the len ends on an odd boudary */
-
-      if ((i + 1) >= last)
-        {
-          rgb1  = *pal;
-          rgb1 &= (LCD_PAL_R1_MASK | LCD_PAL_G1_MASK | LCD_PAL_B1_MASK | LCD_PAL_I1);
-        }
-      else
-        {
-          rgb1  = ((uint32_t)cmap->red[i+1]   << LCD_PAL_R1_SHIFT |
-                   (uint32_t)cmap->green[i+1] << LCD_PAL_G1_SHIFT |
-                   (uint32_t)cmap->blue[i+1]  << LCD_PAL_B1_SHIFT);
-        }
-
-      /* Save the new pallete value */
-
-      *pal++ = (rgb0 | rgb1);
-    }
-
-  return OK;
+  return sam_setclut(&g_baselayer, cmap);
 }
 #endif
 
 /****************************************************************************
- * Name: sam_getcursor
+ * Name: sam_hcr_getcursor
  ****************************************************************************/
 
 #ifdef CONFIG_FB_HWCURSOR
-static int sam_getcursor(FAR struct fb_vtable_s *vtable,
-                        FAR struct fb_cursorattrib_s *attrib)
+static int sam_hcr_getcursor(struct fb_vtable_s *vtable,
+                             struct fb_cursorattrib_s *attrib)
 {
   gvdbg("vtable=%p attrib=%p\n", vtable, attrib);
   if (vtable && attrib)
@@ -866,12 +806,12 @@ static int sam_getcursor(FAR struct fb_vtable_s *vtable,
 #endif
 
 /****************************************************************************
- * Name: sam_setcursor
+ * Name: sam_hcr_setcursor
  ****************************************************************************/
 
 #ifdef CONFIG_FB_HWCURSOR
-static int sam_setcursor(FAR struct fb_vtable_s *vtable,
-                       FAR struct fb_setcursor_s *setttings)
+static int sam_hcr_setcursor(struct fb_vtable_s *vtable,
+                             struct fb_setcursor_s *setttings)
 {
   gvdbg("vtable=%p setttings=%p\n", vtable, setttings);
   if (vtable && setttings)
@@ -902,6 +842,248 @@ static int sam_setcursor(FAR struct fb_vtable_s *vtable,
 
   gdbg("Returning EINVAL\n");
   return -EINVAL;
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_dmasetup
+ *
+ * Description:
+ *   Configure the channel DMA
+ *
+ ****************************************************************************/
+
+static void sam_dmasetup(int lid, struct sam_dscr_s *dscr, uint8_t *buffer)
+{
+  /* 2. Write the channel descriptor (DSCR) structure in the system memory by
+   *    writing DSCR.CHXADDR Frame base address, DSCR.CHXCTRL channel control
+   *    and DSCR.CHXNEXT next descriptor location.
+   * 3. If more than one descriptor is expected, the DFETCH field of
+   *    DSCR.CHXCTRL is set to one to enable the descriptor fetch operation.
+   * 4. Write the DSCR.CHXNEXT register with the address location of the
+   *    descriptor structure and set DFETCH field of the DSCR.CHXCTRL register
+   *    to one.
+   */
+
+  /* Modify descriptor */
+
+  dscr->addr = (uint32_t)buffer;
+  dscr->ctrl = LCDC_BASECTRL_DFETCH;
+  dscr->next = (uint32_t)dscr;
+
+  /* Flush the modified descriptor to RAM */
+
+  cp15_clean_dcache((uintptr_t)dscr,
+                    (uintptr_t)dscr + sizeof(struct sam_dscr_s));
+
+  /* Modify registers */
+
+  physaddr = sam_physramaddr((uint32_t)buffer);
+  sam_putreg(g_layerhead[lid], physaddr);
+
+  sam_putreg(g_layerctrl[lid], LCDC_BASECTRL_DFETCH);
+ offset
+  physaddr = sam_physramaddr((uint32_t)dscr);
+  sam_putreg(g_layernext[lid], physaddr);
+}
+
+/****************************************************************************
+ * Name: sam_setposition
+ *
+ * Description:
+ *   Set the new position of a move-able layer (any layer except the base
+ *   layer).
+ *
+ ****************************************************************************/
+
+#if 0 /* #if defined(SAMA5_HAVE_POSITION) && defined(SAMA5_HAVE_SIZE) -- not used */
+static void sam_setposition(int lid, uint32_t x, uint32_t y)
+{
+  uintptr_t regaddr;
+  uintptr_t regval;
+  uint32_t h;
+  uint32_t w;
+
+  regaddr = g_layersize[lid];
+  if (regaddr)
+    {
+      /* Get the layer size */
+
+      regval = sam_getreg(regaddr);
+      w = (regval & LCDC_OVR1CFG3_XSIZE_MASK) >> LCDC_OVR1CFG3_XSIZE_SHIFT;
+      h = (regval & LCDC_OVR1CFG3_YSIZE_MASK) >> LCDC_OVR1CFG3_YSIZE_SHIFT;
+
+      /* Clip the position so that the window lies on the physical display */
+
+      if (x + w >= CONFIG_SAMA5_LCDC_BASE_WIDTH)
+        {
+          x = CONFIG_SAMA5_LCDC_BASE_WIDTH - w;
+        }
+
+      if (y + h >= CONFIG_SAMA5_LCDC_BASE_HEIGHT)
+        {
+          y = CONFIG_SAMA5_LCDC_BASE_HEIGHT - h;
+        }
+
+      /* Set the new position of the layer */
+
+      regaddr = g_layerpos[lid];
+      if (regaddr)
+        {
+          sam_putreg(regaddr, LCDC_OVR1CFG2_XPOS(x) | LCDC_OVR1CFG2_YPOS(y));
+
+          /* If the channel is enabled, then update the layer */
+
+          regaddr = g_layerstatus[lid];
+          if ((sam_getreg(regaddr) & LCDC_OVR1CHSR_CH) != 0)
+            {
+              regaddr = g_layerenable[lid];
+              sam_putreg(regaddr, LCDC_OVR1CHER_UPDATE);
+            }
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_setclut
+ *
+ * Description:
+ *   Set a range of CLUT values for any layer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FB_CMAP
+static int sam_setclut(struct sam_layer_s *layer,
+                       const struct fb_cmap_s *cmap)
+{
+  uintptr_t regaddr;
+  uint32_t offset;
+  uint32_t rgb;
+  unsigned int len;
+  unsigned int end;
+  int i;
+
+  gvdbg("layer=%d cmap=%p first=%d len=%d\n",
+        layer->lid, cmap, cmap->first, cmap->len);
+
+  DEBUGASSERT(layer && cmap);
+
+  /* Get and verify the range of CLUT entries to modify */
+
+  offset = (uint32_t)cmap->first;
+  len    = (unsigned int)cmap->len;
+
+  if (offset >= SAM_LCDC_NCLUT)
+    {
+      gdbg("ERROR: CLUT offset is out of range: %d\n", offset);
+      return -EINVAL;
+    }
+
+  if (offset + len > SAM_LCDC_NCLUT)
+    {
+      len = SAM_LCDC_NCLUT - offset;
+    }
+
+  /* Update the valid range of CLUT entries */
+
+  if (offset < layer->offset)
+    {
+      layer->offset = offset;
+    }
+
+  end = offset + len;
+  if (end > (layer->offset + layer->nclut))
+    {
+      layer->nclut = end - layer->offset;offset
+    }
+
+  /* Get the offset address to the first CLUT entry to modify */
+
+  regaddr = g_layerclut[layer->lid] + offset << 2;
+
+  /* Then set the number of CLUT entries beginning at this offset */
+
+  for (i = 0; i < len; i++)
+    {
+      /* Pack the RGB (+transparency?) values as required */
+
+      rgb = (uint32_t)cmap->red[i]   << LCDC_BASECLUT_RCLUT_SHIFT |
+            (uint32_t)cmap->green[i] << LCDC_BASECLUT_GCLUT_SHIFT |
+            (uint32_t)cmap->blue[i]  << LCDC_BASECLUT_BCLUT_SHIFT;
+
+#ifdef CONFIG_FB_TRANSPARENCY
+      if (camp->transp)
+        {
+          rgb |= (uint32_t)cmap->transp[i] << LCDC_OVR1CLUT_ACLUT_SHIFT;
+        }
+#endif
+
+      /* And write to the CLUT register */
+
+      putreg(regaddr, clut[i]);
+      regaddr += sizeof(uint32_t);
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_getclut
+ *
+ * Description:
+ *   Get a range of CLUT values for any layer
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FB_CMAP
+static int sam_getclut(struct sam_layer_s *layer,
+                       struct fb_cmap_s *cmap)
+{
+  uintptr_t regaddr;
+  uintptr_t regval;
+  int i;
+
+  gvdbg("layer=%d cmap=%p first=%d len=%d\n",
+        layer->lid, cmap, layer->offset, layer->nclut);
+
+  DEBUGASSERT(layer && cmap);
+
+  /* Return the range of CLUT entries to modify */
+
+  cmap->first = layer->offset;
+  cmap->len   = layer->nclut;
+
+  /* Get the offset address to the first CLUT entry to modify */
+
+  regaddr = g_layerclut[layer->lid] + (uint32_t)cmap->first << 2;
+
+  /* Then set the number of CLUT entries beginning at this offset */
+
+  for (i = 0; i < (int)cmap->len; i++)
+    {
+      /* Read the CLUT entry */
+
+      regval = getreg(regaddr);
+      regaddr += sizeof(uint32_t);
+
+      /* Unpack and return the RGB (+transparency?) values as required */
+
+      cmap->red[i] = (uint8_t)
+        (regval & LCDC_BASECLUT_RCLUT_MASK) << LCDC_BASECLUT_RCLUT_SHIFT;
+      cmap->green[i] = (uint8_t)
+        (regval & LCDC_BASECLUT_GCLUT_MASK) << LCDC_BASECLUT_GCLUT_SHIFT;
+      cmap->blue[i] = (uint8_t)
+        (regval & LCDC_BASECLUT_GCLUT_MASK) << LCDC_BASECLUT_BCLUT_SHIFT;
+
+#ifdef CONFIG_FB_TRANSPARENCY
+      cmap->transp[i] = (uint8_t)
+        (regval & LCDC_OVR1CLUT_ACLUT_MASK) << LCDC_OVR1CLUT_ACLUT_SHIFT;
+#endif
+    }
+
+  return OK;
 }
 #endif
 
@@ -1661,6 +1843,16 @@ int up_fbinitialize(void)
   memset(&g_heolayer,  0, sizeof(struct sam_heolayer_s));
   memset(&g_hcrlayer,  0, sizeof(struct sam_layer_s));
 
+  /* Mark the CLUT as empty */
+
+#ifdef CONFIG_FB_CMAP
+  g_baselayer.offset = SAM_LCDC_NCLUT - 1;
+  g_ovr1layer.offset = SAM_LCDC_NCLUT - 1;
+  g_ovr2layer.offset = SAM_LCDC_NCLUT - 1;
+  g_heolayer.offset  = SAM_LCDC_NCLUT - 1;
+  g_hcrlayer.offset  = SAM_LCDC_NCLUT - 1;
+#endif
+
   /* Allocate framebuffer memory */
 
   ret = sam_fb_allocate();
@@ -1673,19 +1865,6 @@ int up_fbinitialize(void)
   /* Configure PIO pins */
 
   sam_pio_config();
-
-  /* Initialize the g_lcdc data structure */
-
-  g_lcdc.fbobject.getvideoinfo  = sam_getvideoinfo;
-  g_lcdc.fbobject.getplaneinfo  = sam_getplaneinfo;
-#ifdef CONFIG_FB_CMAP
-  g_lcdc.fbobject.getcmap       = sam_getcmap;
-  g_lcdc.fbobject.putcmap       = sam_putcmap;
-#endif
-#ifdef CONFIG_FB_HWCURSOR
-  g_lcdc.fbobject.getcursor     = sam_getcursor;
-  g_lcdc.fbobject.setcursor     = sam_setcursor;
-#endif
 
   gvdbg("Configuring the LCD controller\n");
 
@@ -1742,12 +1921,12 @@ int up_fbinitialize(void)
  *
  ***************************************************************************/
 
-FAR struct fb_vtable_s *up_fbgetvplane(int vplane)
+struct fb_vtable_s *up_fbgetvplane(int vplane)
 {
   gvdbg("vplane: %d\n", vplane);
   if (vplane == 0)
     {
-      return &g_lcdc.fboject;
+      return (struct fb_vtable_s *)&g_base_vtable;
     }
   else
     {

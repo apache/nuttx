@@ -46,6 +46,9 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+#define SAM_LCDC_NCLUT              256    /* Number of entries in the CLUTs */
+
 /* LCDC Register Offsets ************************************************************/
 
 #define SAM_LCDC_LCDCFG0_OFFSET     0x0000 /* LCD Controller Configuration Register 0 */
