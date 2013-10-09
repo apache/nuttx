@@ -124,7 +124,6 @@
 #define BOARD_BLUE_BIT    (1 << BOARD_BLUE)
 #define BOARD_RED_BIT     (1 << BOARD_RED)
 
-
 /* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
  * defined.  In that case, the usage by the board port is defined in
  * include/board.h and src/sam_leds.c. The LEDs are used to encode OS-related
