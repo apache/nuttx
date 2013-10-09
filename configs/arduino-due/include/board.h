@@ -195,6 +195,32 @@
 /* Button definitions ***************************************************************/
 /*   There are no buttons on the Arduino Due board. */
 
+/* GPIO pin configurations **********************************************************/
+
+#ifdef CONFIG_ADRUINO_DUE_REV3
+/* This port was performed on the Arduino Due Rev 2 board.  A NuttX user reported
+ * issues with the serial port on his Aduino Due Rev 3 board.  That problem was
+ * resolved as follows:
+ *
+ *  "... The issue was in my hardware. I found the difference between Arduino
+ *   Due shematics (revision R2) and actual PCB layout of my Arduino (revision
+ *   R3). On a schematics which I download from arduino.cc was shown that 2nd
+ *   pin of IC10 is connected to the ground, but on my Arduino the 2nd pin
+ *   of IC10 was connected to its 1st pin instead of ground and in my case
+ *   IC10 works in open-drain mode, but RX0 pin on SAM3x doesn't have pull-up
+ *   and thus TX signal from AtMega16U2 can't reach the SAM3x input pin, on
+ *   this pin always '0'.
+ *
+ *  "My solution is to enable internal pull-up in SAM3x. ...
+ *   Now shell console on UART0 (via USB programming connector) of Arduino Due
+ *   Due works as expected."
+ */
+
+#  undef  GPIO_UART0_RXD
+#  define GPIO_UART0_RXD  (GPIO_PERIPHA | GPIO_CFG_DEFAULT | GPIO_PORT_PIOA | \
+                           GPIO_PIN8 | GPIO_CFG_PULLUP)
+#endif
+
 /************************************************************************************
  * Public Data
  ************************************************************************************/

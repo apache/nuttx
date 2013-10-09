@@ -5726,4 +5726,9 @@
 	  incorporated into the build system (but still untested (2013-10-8).
 	* configs/sama5d3x-ek/nx:  Add an examples/nx configuratino that
 	  will be used for the SAMA5 LCD bring-up (2013-10-8).
+	* configs/arduino-due/Kconfig and include/board.h:  Add configuration
+	  to select revision 3 of the Arduino Due which has some small
+	  but important differences.  Suggested by gdi@embedders.org.
 
+D
+	  differences 
