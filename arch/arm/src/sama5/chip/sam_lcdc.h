@@ -501,12 +501,12 @@
 
 /* LCD Controller Configuration Register 4 */
 
-#define LCDC_LCDCFG4_RPF_SHIFT      (0)       /* Bits 0-8: Number of Active Row Per Frame */
-#define LCDC_LCDCFG4_RPF_MASK       (0x1ff << LCDC_LCDCFG4_RPF_SHIFT)
-#  define LCDC_LCDCFG4_RPF(n)       ((uint32_t)(n) << LCDC_LCDCFG4_RPF_SHIFT)
-#define LCDC_LCDCFG4_PPL_SHIFT      (16)      /* Bits 16-24: Number of Pixels Per Line */
-#define LCDC_LCDCFG4_PPL_MASK       (0x1ff << LCDC_LCDCFG4_PPL_SHIFT)
+#define LCDC_LCDCFG4_PPL_SHIFT      (0)       /* Bits 0-10: Number of Pixels Per Line */
+#define LCDC_LCDCFG4_PPL_MASK       (0x7ff << LCDC_LCDCFG4_PPL_SHIFT)
 #  define LCDC_LCDCFG4_PPL(n)       ((uint32_t)(n) << LCDC_LCDCFG4_PPL_SHIFT)
+#define LCDC_LCDCFG4_RPF_SHIFT      (16)      /* Bits 16-26: Number of Active Row Per Frame */
+#define LCDC_LCDCFG4_RPF_MASK       (0x7ff << LCDC_LCDCFG4_RPF_SHIFT)
+#  define LCDC_LCDCFG4_RPF(n)       ((uint32_t)(n) << LCDC_LCDCFG4_RPF_SHIFT)
 
 /* LCD Controller Configuration Register 5 */
 
@@ -672,15 +672,15 @@
 /* Base Configuration register 2 (32-bit value) */
 /* Base Configuration register 3 */
 
-#define LCDC_BASECFG3_RDEF_SHIFT    (0)       /* Bits 0-7: R Default */
-#define LCDC_BASECFG3_RDEF_MASK     (0xff << LCDC_BASECFG3_RDEF_SHIFT)
-#  define LCDC_BASECFG3_RDEF(n)     ((uint32_t)(n) << LCDC_BASECFG3_RDEF_SHIFT)
+#define LCDC_BASECFG3_BDEF_SHIFT    (0)       /* Bits 0-7: B Default */
+#define LCDC_BASECFG3_BDEF_MASK     (0xff << LCDC_BASECFG3_BDEF_SHIFT)
+#  define LCDC_BASECFG3_BDEF(n)     ((uint32_t)(n) << LCDC_BASECFG3_BDEF_SHIFT)
 #define LCDC_BASECFG3_GDEF_SHIFT    (8)       /* Bits 8-15: G Default */
 #define LCDC_BASECFG3_GDEF_MASK     (0xff << LCDC_BASECFG3_GDEF_SHIFT)
 #  define LCDC_BASECFG3_GDEF(n)     ((uint32_t)(n) << LCDC_BASECFG3_GDEF_SHIFT)
-#define LCDC_BASECFG3_BDEF_SHIFT    (16)       /* Bits 16-23: B Default */
-#define LCDC_BASECFG3_BDEF_MASK     (0xff << LCDC_BASECFG3_BDEF_SHIFT)
-#  define LCDC_BASECFG3_BDEF(n)     ((uint32_t)(n) << LCDC_BASECFG3_BDEF_SHIFT)
+#define LCDC_BASECFG3_RDEF_SHIFT    (16)      /* Bits 16-23: R Default */
+#define LCDC_BASECFG3_RDEF_MASK     (0xff << LCDC_BASECFG3_RDEF_SHIFT)
+#  define LCDC_BASECFG3_RDEF(n)     ((uint32_t)(n) << LCDC_BASECFG3_RDEF_SHIFT)
 
 /* Base Configuration register 4 */
 
@@ -812,39 +812,39 @@
 
 /* Overlay 1 Configuration 6 Register */
 
-#define LCDC_OVR1CFG6_RDEF_SHIFT    (0)       /* Bits 0-7: R Default */
-#define LCDC_OVR1CFG6_RDEF_MASK     (0xff << LCDC_OVR1CFG6_RDEF_SHIFT)
-#  define LCDC_OVR1CFG6_RDEF(n)     ((uint32_t)(n) << LCDC_OVR1CFG6_RDEF_SHIFT)
+#define LCDC_OVR1CFG6_BDEF_SHIFT    (0)       /* Bits 0-7: B Default */
+#define LCDC_OVR1CFG6_BDEF_MASK     (0xff << LCDC_OVR1CFG6_BDEF_SHIFT)
+#  define LCDC_OVR1CFG6_BDEF(n)     ((uint32_t)(n) << LCDC_OVR1CFG6_BDEF_SHIFT)
 #define LCDC_OVR1CFG6_GDEF_SHIFT    (8)       /* Bits 8-15: G Default */
 #define LCDC_OVR1CFG6_GDEF_MASK     (0xff << LCDC_OVR1CFG6_GDEF_SHIFT)
 #  define LCDC_OVR1CFG6_GDEF(n)     ((uint32_t)(n) << LCDC_OVR1CFG6_GDEF_SHIFT)
-#define LCDC_OVR1CFG6_BDEF_SHIFT    (16)       /* Bits 16-23: B Default */
-#define LCDC_OVR1CFG6_BDEF_MASK     (0xff << LCDC_OVR1CFG6_BDEF_SHIFT)
-#  define LCDC_OVR1CFG6_BDEF(n)     ((uint32_t)(n) << LCDC_OVR1CFG6_BDEF_SHIFT)
+#define LCDC_OVR1CFG6_RDEF_SHIFT    (16)      /* Bits 16-23: R Default */
+#define LCDC_OVR1CFG6_RDEF_MASK     (0xff << LCDC_OVR1CFG6_RDEF_SHIFT)
+#  define LCDC_OVR1CFG6_RDEF(n)     ((uint32_t)(n) << LCDC_OVR1CFG6_RDEF_SHIFT)
 
 /* Overlay 1 Configuration 7 Register */
 
-#define LCDC_OVR1CFG7_RKEY_SHIFT    (0)       /* Bits 0-7: R Color Component Chroma Key */
-#define LCDC_OVR1CFG7_RKEY_MASK     (0xff << LCDC_OVR1CFG7_RKEY_SHIFT)
-#  define LCDC_OVR1CFG7_RKEY(n)     ((uint32_t)(n) << LCDC_OVR1CFG7_RKEY_SHIFT)
+#define LCDC_OVR1CFG7_BKEY_SHIFT    (0)       /* Bits 0-7: B Color Component Chroma Key */
+#define LCDC_OVR1CFG7_BKEY_MASK     (0xff << LCDC_OVR1CFG7_BKEY_SHIFT)
+#  define LCDC_OVR1CFG7_BKEY(n)     ((uint32_t)(n) << LCDC_OVR1CFG7_BKEY_SHIFT)
 #define LCDC_OVR1CFG7_GKEY_SHIFT    (8)       /* Bits 8-15: G Color Component Chroma Key */
 #define LCDC_OVR1CFG7_GKEY_MASK     (0xff << LCDC_OVR1CFG7_GKEY_SHIFT)
 #  define LCDC_OVR1CFG7_GKEY(n)     ((uint32_t)(n) << LCDC_OVR1CFG7_GKEY_SHIFT)
-#define LCDC_OVR1CFG7_BKEY_SHIFT    (16)       /* Bits 16-23: B Color Component Chroma Key */
-#define LCDC_OVR1CFG7_BKEY_MASK     (0xff << LCDC_OVR1CFG7_BKEY_SHIFT)
-#  define LCDC_OVR1CFG7_BKEY(n)     ((uint32_t)(n) << LCDC_OVR1CFG7_BKEY_SHIFT)
+#define LCDC_OVR1CFG7_RKEY_SHIFT    (16)      /* Bits 16-23: R Color Component Chroma Key */
+#define LCDC_OVR1CFG7_RKEY_MASK     (0xff << LCDC_OVR1CFG7_RKEY_SHIFT)
+#  define LCDC_OVR1CFG7_RKEY(n)     ((uint32_t)(n) << LCDC_OVR1CFG7_RKEY_SHIFT)
 
 /* Overlay 1 Configuration 8 Register */
 
-#define LCDC_OVR1CFG8_RMASK_SHIFT   (0)       /* Bits 0-7: R Color Component Chroma Key Mask */
-#define LCDC_OVR1CFG8_RMASK_MASK    (0xff << LCDC_OVR1CFG8_RMASK_SHIFT)
-#  define LCDC_OVR1CFG8_RMASK(n)    ((uint32_t)(n) << LCDC_OVR1CFG8_RMASK_SHIFT)
+#define LCDC_OVR1CFG8_BMASK_SHIFT   (0)       /* Bits 0-7: B Color Component Chroma Key Mask */
+#define LCDC_OVR1CFG8_BMASK_MASK    (0xff << LCDC_OVR1CFG8_BMASK_SHIFT)
+#  define LCDC_OVR1CFG8_BMASK(n)    ((uint32_t)(n) << LCDC_OVR1CFG8_BMASK_SHIFT)
 #define LCDC_OVR1CFG8_GMASK_SHIFT   (8)       /* Bits 8-15: G Color Component Chroma Key Mask */
 #define LCDC_OVR1CFG8_GMASK_MASK    (0xff << LCDC_OVR1CFG8_GMASK_SHIFT)
 #  define LCDC_OVR1CFG8_GMASK(n)    ((uint32_t)(n) << LCDC_OVR1CFG8_GMASK_SHIFT)
-#define LCDC_OVR1CFG8_BMASK_SHIFT   (16)       /* Bits 16-23: B Color Component Chroma Key Mask */
-#define LCDC_OVR1CFG8_BMASK_MASK    (0xff << LCDC_OVR1CFG8_BMASK_SHIFT)
-#  define LCDC_OVR1CFG8_BMASK(n)    ((uint32_t)(n) << LCDC_OVR1CFG8_BMASK_SHIFT)
+#define LCDC_OVR1CFG8_RMASK_SHIFT   (16)      /* Bits 16-23: R Color Component Chroma Key Mask */
+#define LCDC_OVR1CFG8_RMASK_MASK    (0xff << LCDC_OVR1CFG8_RMASK_SHIFT)
+#  define LCDC_OVR1CFG8_RMASK(n)    ((uint32_t)(n) << LCDC_OVR1CFG8_RMASK_SHIFT)
 
 /* Overlay 1 Configuration 9 Register */
 
@@ -968,39 +968,39 @@
 
 /* Overlay 2 Configuration 6 Register */
 
-#define LCDC_OVR2CFG6_RDEF_SHIFT    (0)       /* Bits 0-7: R Default */
-#define LCDC_OVR2CFG6_RDEF_MASK     (0xff << LCDC_OVR2CFG6_RDEF_SHIFT)
-#  define LCDC_OVR2CFG6_RDEF(n)     ((uint32_t)(n) << LCDC_OVR2CFG6_RDEF_SHIFT)
+#define LCDC_OVR2CFG6_BDEF_SHIFT    (0)       /* Bits 0-7: B Default */
+#define LCDC_OVR2CFG6_BDEF_MASK     (0xff << LCDC_OVR2CFG6_BDEF_SHIFT)
+#  define LCDC_OVR2CFG6_BDEF(n)     ((uint32_t)(n) << LCDC_OVR2CFG6_BDEF_SHIFT)
 #define LCDC_OVR2CFG6_GDEF_SHIFT    (8)       /* Bits 8-15: G Default */
 #define LCDC_OVR2CFG6_GDEF_MASK     (0xff << LCDC_OVR2CFG6_GDEF_SHIFT)
 #  define LCDC_OVR2CFG6_GDEF(n)     ((uint32_t)(n) << LCDC_OVR2CFG6_GDEF_SHIFT)
-#define LCDC_OVR2CFG6_BDEF_SHIFT    (16)       /* Bits 16-23: B Default */
-#define LCDC_OVR2CFG6_BDEF_MASK     (0xff << LCDC_OVR2CFG6_BDEF_SHIFT)
-#  define LCDC_OVR2CFG6_BDEF(n)     ((uint32_t)(n) << LCDC_OVR2CFG6_BDEF_SHIFT)
+#define LCDC_OVR2CFG6_RDEF_SHIFT    (16)      /* Bits 16-23: R Default */
+#define LCDC_OVR2CFG6_RDEF_MASK     (0xff << LCDC_OVR2CFG6_RDEF_SHIFT)
+#  define LCDC_OVR2CFG6_RDEF(n)     ((uint32_t)(n) << LCDC_OVR2CFG6_RDEF_SHIFT)
 
 /* Overlay 2 Configuration 7 Register */
 
-#define LCDC_OVR2CFG7_RKEY_SHIFT    (0)       /* Bits 0-7: R Color Component Chroma Key */
-#define LCDC_OVR2CFG7_RKEY_MASK     (0xff << LCDC_OVR2CFG7_RKEY_SHIFT)
-#  define LCDC_OVR2CFG7_RKEY(n)     ((uint32_t)(n) << LCDC_OVR2CFG7_RKEY_SHIFT)
+#define LCDC_OVR2CFG7_BKEY_SHIFT    (0)       /* Bits 0-7: B Color Component Chroma Key */
+#define LCDC_OVR2CFG7_BKEY_MASK     (0xff << LCDC_OVR2CFG7_BKEY_SHIFT)
+#  define LCDC_OVR2CFG7_BKEY(n)     ((uint32_t)(n) << LCDC_OVR2CFG7_BKEY_SHIFT)
 #define LCDC_OVR2CFG7_GKEY_SHIFT    (8)       /* Bits 8-15: G Color Component Chroma Key */
 #define LCDC_OVR2CFG7_GKEY_MASK     (0xff << LCDC_OVR2CFG7_GKEY_SHIFT)
 #  define LCDC_OVR2CFG7_GKEY(n)     ((uint32_t)(n) << LCDC_OVR2CFG7_GKEY_SHIFT)
-#define LCDC_OVR2CFG7_BKEY_SHIFT    (16)       /* Bits 16-23: B Color Component Chroma Key */
-#define LCDC_OVR2CFG7_BKEY_MASK     (0xff << LCDC_OVR2CFG7_BKEY_SHIFT)
-#  define LCDC_OVR2CFG7_BKEY(n)     ((uint32_t)(n) << LCDC_OVR2CFG7_BKEY_SHIFT)
+#define LCDC_OVR2CFG7_RKEY_SHIFT    (16)      /* Bits 16-23: R Color Component Chroma Key */
+#define LCDC_OVR2CFG7_RKEY_MASK     (0xff << LCDC_OVR2CFG7_RKEY_SHIFT)
+#  define LCDC_OVR2CFG7_RKEY(n)     ((uint32_t)(n) << LCDC_OVR2CFG7_RKEY_SHIFT)
 
 /* Overlay 2 Configuration 8 Register */
 
-#define LCDC_OVR2CFG8_RMASK_SHIFT   (0)       /* Bits 0-7: R Color Component Chroma Key Mask */
-#define LCDC_OVR2CFG8_RMASK_MASK    (0xff << LCDC_OVR2CFG8_RMASK_SHIFT)
-#  define LCDC_OVR2CFG8_RMASK(n)    ((uint32_t)(n) << LCDC_OVR2CFG8_RMASK_SHIFT)
+#define LCDC_OVR2CFG8_BMASK_SHIFT   (0)       /* Bits 0-7: B Color Component Chroma Key Mask */
+#define LCDC_OVR2CFG8_BMASK_MASK    (0xff << LCDC_OVR2CFG8_BMASK_SHIFT)
+#  define LCDC_OVR2CFG8_BMASK(n)    ((uint32_t)(n) << LCDC_OVR2CFG8_BMASK_SHIFT)
 #define LCDC_OVR2CFG8_GMASK_SHIFT   (8)       /* Bits 8-15: G Color Component Chroma Key Mask */
 #define LCDC_OVR2CFG8_GMASK_MASK    (0xff << LCDC_OVR2CFG8_GMASK_SHIFT)
 #  define LCDC_OVR2CFG8_GMASK(n)    ((uint32_t)(n) << LCDC_OVR2CFG8_GMASK_SHIFT)
-#define LCDC_OVR2CFG8_BMASK_SHIFT   (16)       /* Bits 16-23: B Color Component Chroma Key Mask */
-#define LCDC_OVR2CFG8_BMASK_MASK    (0xff << LCDC_OVR2CFG8_BMASK_SHIFT)
-#  define LCDC_OVR2CFG8_BMASK(n)    ((uint32_t)(n) << LCDC_OVR2CFG8_BMASK_SHIFT)
+#define LCDC_OVR2CFG8_RMASK_SHIFT   (16)      /* Bits 16-23: R Color Component Chroma Key Mask */
+#define LCDC_OVR2CFG8_RMASK_MASK    (0xff << LCDC_OVR2CFG8_RMASK_SHIFT)
+#  define LCDC_OVR2CFG8_RMASK(n)    ((uint32_t)(n) << LCDC_OVR2CFG8_RMASK_SHIFT)
 
 /* Overlay 2 Configuration 9 Register */
 
@@ -1176,39 +1176,39 @@
 
 /* High-End Overlay Configuration Register 9 */
 
-#define LCDC_HEOCFG9_RDEF_SHIFT     (0)       /* Bits 0-7: R Default */
-#define LCDC_HEOCFG9_RDEF_MASK      (0xff << LCDC_HEOCFG9_RDEF_SHIFT)
-#  define LCDC_HEOCFG9_RDEF(n)      ((uint32_t)(n) << LCDC_HEOCFG9_RDEF_SHIFT)
+#define LCDC_HEOCFG9_BDEF_SHIFT     (0)       /* Bits 0-7: B Default */
+#define LCDC_HEOCFG9_BDEF_MASK      (0xff << LCDC_HEOCFG9_BDEF_SHIFT)
+#  define LCDC_HEOCFG9_BDEF(n)      ((uint32_t)(n) << LCDC_HEOCFG9_BDEF_SHIFT)
 #define LCDC_HEOCFG9_GDEF_SHIFT     (8)       /* Bits 8-15: G Default */
 #define LCDC_HEOCFG9_GDEF_MASK      (0xff << LCDC_HEOCFG9_GDEF_SHIFT)
 #  define LCDC_HEOCFG9_GDEF(n)      ((uint32_t)(n) << LCDC_HEOCFG9_GDEF_SHIFT)
-#define LCDC_HEOCFG9_BDEF_SHIFT     (16)       /* Bits 16-23: B Default */
-#define LCDC_HEOCFG9_BDEF_MASK      (0xff << LCDC_HEOCFG9_BDEF_SHIFT)
-#  define LCDC_HEOCFG9_BDEF(n)      ((uint32_t)(n) << LCDC_HEOCFG9_BDEF_SHIFT)
+#define LCDC_HEOCFG9_RDEF_SHIFT     (16)      /* Bits 16-23: R Default */
+#define LCDC_HEOCFG9_RDEF_MASK      (0xff << LCDC_HEOCFG9_RDEF_SHIFT)
+#  define LCDC_HEOCFG9_RDEF(n)      ((uint32_t)(n) << LCDC_HEOCFG9_RDEF_SHIFT)
 
 /* High-End Overlay Configuration Register 10 */
 
-#define LCDC_HEOCFG10_RKEY_SHIFT    (0)       /* Bits 0-7: R Color Component Chroma Key */
-#define LCDC_HEOCFG10_RKEY_MASK     (0xff << LCDC_HEOCFG10_RKEY_SHIFT)
-#  define LCDC_HEOCFG10_RKEY(n)     ((uint32_t)(n) << LCDC_HEOCFG10_RKEY_SHIFT)
+#define LCDC_HEOCFG10_BKEY_SHIFT    (0)       /* Bits 0-7: B Color Component Chroma Key */
+#define LCDC_HEOCFG10_BKEY_MASK     (0xff << LCDC_HEOCFG10_BKEY_SHIFT)
+#  define LCDC_HEOCFG10_BKEY(n)     ((uint32_t)(n) << LCDC_HEOCFG10_BKEY_SHIFT)
 #define LCDC_HEOCFG10_GKEY_SHIFT    (8)       /* Bits 8-15: G Color Component Chroma Key */
 #define LCDC_HEOCFG10_GKEY_MASK     (0xff << LCDC_HEOCFG10_GKEY_SHIFT)
 #  define LCDC_HEOCFG10_GKEY(n)     ((uint32_t)(n) << LCDC_HEOCFG10_GKEY_SHIFT)
-#define LCDC_HEOCFG10_BKEY_SHIFT    (16)       /* Bits 16-23: B Color Component Chroma Key */
-#define LCDC_HEOCFG10_BKEY_MASK     (0xff << LCDC_HEOCFG10_BKEY_SHIFT)
-#  define LCDC_HEOCFG10_BKEY(n)     ((uint32_t)(n) << LCDC_HEOCFG10_BKEY_SHIFT)
+#define LCDC_HEOCFG10_RKEY_SHIFT    (16)      /* Bits 16-23: R Color Component Chroma Key */
+#define LCDC_HEOCFG10_RKEY_MASK     (0xff << LCDC_HEOCFG10_RKEY_SHIFT)
+#  define LCDC_HEOCFG10_RKEY(n)     ((uint32_t)(n) << LCDC_HEOCFG10_RKEY_SHIFT)
 
 /* High-End Overlay Configuration Register 11 */
 
-#define LCDC_HEOCFG11_RMASK_SHIFT   (0)       /* Bits 0-7: R Color Component Chroma Key Mask */
-#define LCDC_HEOCFG11_RMASK_MASK    (0xff << LCDC_HEOCFG11_RMASK_SHIFT)
-#  define LCDC_HEOCFG11_RMASK(n)    ((uint32_t)(n) << LCDC_HEOCFG11_RMASK_SHIFT)
+#define LCDC_HEOCFG11_BMASK_SHIFT   (0)       /* Bits 0-7: B Color Component Chroma Key Mask */
+#define LCDC_HEOCFG11_BMASK_MASK    (0xff << LCDC_HEOCFG11_BMASK_SHIFT)
+#  define LCDC_HEOCFG11_BMASK(n)    ((uint32_t)(n) << LCDC_HEOCFG11_BMASK_SHIFT)
 #define LCDC_HEOCFG11_GMASK_SHIFT   (8)       /* Bits 8-15: G Color Component Chroma Key Mask */
 #define LCDC_HEOCFG11_GMASK_MASK    (0xff << LCDC_HEOCFG11_GMASK_SHIFT)
 #  define LCDC_HEOCFG11_GMASK(n)    ((uint32_t)(n) << LCDC_HEOCFG11_GMASK_SHIFT)
-#define LCDC_HEOCFG11_BMASK_SHIFT   (16)       /* Bits 16-23: B Color Component Chroma Key Mask */
-#define LCDC_HEOCFG11_BMASK_MASK    (0xff << LCDC_HEOCFG11_BMASK_SHIFT)
-#  define LCDC_HEOCFG11_BMASK(n)    ((uint32_t)(n) << LCDC_HEOCFG11_BMASK_SHIFT)
+#define LCDC_HEOCFG11_RMASK_SHIFT   (16)      /* Bits 16-23: R Color Component Chroma Key Mask */
+#define LCDC_HEOCFG11_RMASK_MASK    (0xff << LCDC_HEOCFG11_RMASK_SHIFT)
+#  define LCDC_HEOCFG11_RMASK(n)    ((uint32_t)(n) << LCDC_HEOCFG11_RMASK_SHIFT)
 
 /* High-End Overlay Configuration Register 12 */
 
@@ -1653,39 +1653,39 @@
 
 /* Hardware Cursor Configuration 6 Register */
 
-#define LCDC_HCRCFG6_RDEF_SHIFT     (0)       /* Bits 0-7: R Default */
-#define LCDC_HCRCFG6_RDEF_MASK      (0xff << LCDC_HCRCFG6_RDEF_SHIFT)
-#  define LCDC_HCRCFG6_RDEF(n)      ((uint32_t)(n) << LCDC_HCRCFG6_RDEF_SHIFT)
+#define LCDC_HCRCFG6_BDEF_SHIFT     (0)       /* Bits 0-7: B Default */
+#define LCDC_HCRCFG6_BDEF_MASK      (0xff << LCDC_HCRCFG6_BDEF_SHIFT)
+#  define LCDC_HCRCFG6_BDEF(n)      ((uint32_t)(n) << LCDC_HCRCFG6_BDEF_SHIFT)
 #define LCDC_HCRCFG6_GDEF_SHIFT     (8)       /* Bits 8-15: G Default */
 #define LCDC_HCRCFG6_GDEF_MASK      (0xff << LCDC_HCRCFG6_GDEF_SHIFT)
 #  define LCDC_HCRCFG6_GDEF(n)      ((uint32_t)(n) << LCDC_HCRCFG6_GDEF_SHIFT)
-#define LCDC_HCRCFG6_BDEF_SHIFT     (16)       /* Bits 16-23: B Default */
-#define LCDC_HCRCFG6_BDEF_MASK      (0xff << LCDC_HCRCFG6_BDEF_SHIFT)
-#  define LCDC_HCRCFG6_BDEF(n)      ((uint32_t)(n) << LCDC_HCRCFG6_BDEF_SHIFT)
+#define LCDC_HCRCFG6_RDEF_SHIFT     (16)      /* Bits 16-23: R Default */
+#define LCDC_HCRCFG6_RDEF_MASK      (0xff << LCDC_HCRCFG6_RDEF_SHIFT)
+#  define LCDC_HCRCFG6_RDEF(n)      ((uint32_t)(n) << LCDC_HCRCFG6_RDEF_SHIFT)
 
 /* Hardware Cursor Configuration 7 Register */
 
-#define LCDC_HCRCFG7_RKEY_SHIFT     (0)       /* Bits 0-7: R Color Component Chroma Key */
-#define LCDC_HCRCFG7_RKEY_MASK      (0xff << LCDC_HCRCFG7_RKEY_SHIFT)
-#  define LCDC_HCRCFG7_RKEY(n)      ((uint32_t)(n) << LCDC_HCRCFG7_RKEY_SHIFT)
+#define LCDC_HCRCFG7_BKEY_SHIFT     (0)       /* Bits 0-7: B Color Component Chroma Key */
+#define LCDC_HCRCFG7_BKEY_MASK      (0xff << LCDC_HCRCFG7_BKEY_SHIFT)
+#  define LCDC_HCRCFG7_BKEY(n)      ((uint32_t)(n) << LCDC_HCRCFG7_BKEY_SHIFT)
 #define LCDC_HCRCFG7_GKEY_SHIFT     (8)       /* Bits 8-15: G Color Component Chroma Key */
 #define LCDC_HCRCFG7_GKEY_MASK      (0xff << LCDC_HCRCFG7_GKEY_SHIFT)
 #  define LCDC_HCRCFG7_GKEY(n)      ((uint32_t)(n) << LCDC_HCRCFG7_GKEY_SHIFT)
-#define LCDC_HCRCFG7_BKEY_SHIFT     (16)       /* Bits 16-23: B Color Component Chroma Key */
-#define LCDC_HCRCFG7_BKEY_MASK      (0xff << LCDC_HCRCFG7_BKEY_SHIFT)
-#  define LCDC_HCRCFG7_BKEY(n)      ((uint32_t)(n) << LCDC_HCRCFG7_BKEY_SHIFT)
+#define LCDC_HCRCFG7_RKEY_SHIFT     (16)      /* Bits 16-23: R Color Component Chroma Key */
+#define LCDC_HCRCFG7_RKEY_MASK      (0xff << LCDC_HCRCFG7_RKEY_SHIFT)
+#  define LCDC_HCRCFG7_RKEY(n)      ((uint32_t)(n) << LCDC_HCRCFG7_RKEY_SHIFT)
 
 /* Hardware Cursor Configuration 8 Register */
 
-#define LCDC_HCRCFG8_RMASK_SHIFT    (0)       /* Bits 0-7: R Color Component Chroma Key Mask */
-#define LCDC_HCRCFG8_RMASK_MASK     (0xff << LCDC_HCRCFG8_RMASK_SHIFT)
-#  define LCDC_HCRCFG8_RMASK(n)     ((uint32_t)(n) << LCDC_HCRCFG8_RMASK_SHIFT)
+#define LCDC_HCRCFG8_BMASK_SHIFT    (0)       /* Bits 0-7: B Color Component Chroma Key Mask */
+#define LCDC_HCRCFG8_BMASK_MASK     (0xff << LCDC_HCRCFG8_BMASK_SHIFT)
+#  define LCDC_HCRCFG8_BMASK(n)     ((uint32_t)(n) << LCDC_HCRCFG8_BMASK_SHIFT)
 #define LCDC_HCRCFG8_GMASK_SHIFT    (8)       /* Bits 8-15: G Color Component Chroma Key Mask */
 #define LCDC_HCRCFG8_GMASK_MASK     (0xff << LCDC_HCRCFG8_GMASK_SHIFT)
 #  define LCDC_HCRCFG8_GMASK(n)     ((uint32_t)(n) << LCDC_HCRCFG8_GMASK_SHIFT)
-#define LCDC_HCRCFG8_BMASK_SHIFT    (16)       /* Bits 16-23: B Color Component Chroma Key Mask */
-#define LCDC_HCRCFG8_BMASK_MASK     (0xff << LCDC_HCRCFG8_BMASK_SHIFT)
-#  define LCDC_HCRCFG8_BMASK(n)     ((uint32_t)(n) << LCDC_HCRCFG8_BMASK_SHIFT)
+#define LCDC_HCRCFG8_RMASK_SHIFT    (16)      /* Bits 16-23: R Color Component Chroma Key Mask */
+#define LCDC_HCRCFG8_RMASK_MASK     (0xff << LCDC_HCRCFG8_RMASK_SHIFT)
+#  define LCDC_HCRCFG8_RMASK(n)     ((uint32_t)(n) << LCDC_HCRCFG8_RMASK_SHIFT)
 
 /* Hardware Cursor Configuration 9 Register */
 

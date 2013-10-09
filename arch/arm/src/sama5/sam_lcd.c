@@ -301,30 +301,38 @@
 
 /* Framebuffer sizes in bytes */
 
-#ifndef CONFIG_SAMA5_LCDC_BASE_WIDTH
-#  error CONFIG_SAMA5_LCDC_BASE_WIDTH must be defined
+#ifndef BOARD_LCD_WIDTH
+#  error BOARD_LCD_WIDTH must be defined in the board.h header file
 #endif
 
-#ifndef CONFIG_SAMA5_LCDC_BASE_HEIGHT
-#  error CONFIG_SAMA5_LCDC_BASE_HEIGHT must be defined
+#ifndef BOARD_LCD_HEIGHT
+#  error BOARD_LCD_HEIGHT must be defined in the board.h header file
 #endif
 
 #if SAMA5_LCDC_BASE_BPP == 16
-#  define SAMA5_BASE_STRIDE ((CONFIG_SAMA5_LCDC_BASE_WIDTH * 16 + 7) / 8)
+#  define SAMA5_BASE_STRIDE ((BOARD_LCD_WIDTH * 16 + 7) / 8)
 #elif SAMA5_LCDC_BASE_BPP == 24
-#  define SAMA5_BASE_STRIDE ((CONFIG_SAMA5_LCDC_BASE_WIDTH * 24 + 7) / 8)
+#  define SAMA5_BASE_STRIDE ((BOARD_LCD_WIDTH * 24 + 7) / 8)
 #elif SAMA5_LCDC_BASE_BPP == 32
-#  define SAMA5_BASE_STRIDE ((CONFIG_SAMA5_LCDC_BASE_WIDTH * 32 + 7) / 8)
+#  define SAMA5_BASE_STRIDE ((BOARD_LCD_WIDTH * 32 + 7) / 8)
 #endif
 
-#define SAMA5_BASE_FBSIZE (SAMA5_BASE_STRIDE * CONFIG_SAMA5_LCDC_BASE_HEIGHT)
+#define SAMA5_BASE_FBSIZE (SAMA5_BASE_STRIDE * BOARD_LCD_HEIGHT)
 
 #ifndef CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH
-#  define CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH CONFIG_SAMA5_LCDC_BASE_WIDTH
+#  define CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH BOARD_LCD_WIDTH
+#endif
+
+#if CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH > BOARD_LCD_WIDTH
+#  error Width of overlay 1 exceeds the width of the display
 #endif
 
 #ifndef CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT
-#  define CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT CONFIG_SAMA5_LCDC_BASE_HEIGHT
+#  define CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT BOARD_LCD_HEIGHT
+#endif
+
+#if CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT > BOARD_LCD_HEIGHT
+#  error Height of overlay 1 exceeds the height of the display
 #endif
 
 #if SAMA5_LCDC_OVR1_BPP == 16
@@ -338,11 +346,19 @@
 #define SAMA5_OVR1_FBSIZE (SAMA5_OVR1_STRIDE * CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT)
 
 #ifndef CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH
-#  define CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH CONFIG_SAMA5_LCDC_BASE_WIDTH
+#  define CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH BOARD_LCD_WIDTH
+#endif
+
+#if CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH > BOARD_LCD_WIDTH
+#  error Width of overlay 2 exceeds the width of the display
 #endif
 
 #ifndef CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT
-#  define CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT CONFIG_SAMA5_LCDC_BASE_HEIGHT
+#  define CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT BOARD_LCD_HEIGHT
+#endif
+
+#if CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT > BOARD_LCD_HEIGHT
+#  error Height of overlay 2 exceeds the height of the display
 #endif
 
 #if SAMA5_LCDC_OVR2_BPP == 16
@@ -356,11 +372,19 @@
 #define SAMA5_OVR2_FBSIZE (SAMA5_OVR2_STRIDE * CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT)
 
 #ifndef CONFIG_SAMA5_LCDC_HEO_MAXWIDTH
-#  define CONFIG_SAMA5_LCDC_HEO_MAXWIDTH CONFIG_SAMA5_LCDC_BASE_WIDTH
+#  define CONFIG_SAMA5_LCDC_HEO_MAXWIDTH BOARD_LCD_WIDTH
+#endif
+
+#if CONFIG_SAMA5_LCDC_HEO_MAXWIDTH > BOARD_LCD_WIDTH
+#  error Width of HEO exceeds the width of the display
 #endif
 
 #ifndef CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT
-#  define CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT CONFIG_SAMA5_LCDC_BASE_HEIGHT
+#  define CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT BOARD_LCD_HEIGHT
+#endif
+
+#if CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT > BOARD_LCD_HEIGHT
+#  error Height of HEO exceeds the height of the display
 #endif
 
 #if SAMA5_LCDC_HEO_BPP == 16
@@ -374,11 +398,19 @@
 #define SAMA5_HEO_FBSIZE (SAMA5_HEO_STRIDE * CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT)
 
 #ifndef CONFIG_SAMA5_LCDC_HCR_MAXWIDTH
-#  define CONFIG_SAMA5_LCDC_HCR_MAXWIDTH CONFIG_SAMA5_LCDC_BASE_WIDTH
+#  define CONFIG_SAMA5_LCDC_HCR_MAXWIDTH BOARD_LCD_WIDTH
+#endif
+
+#if CONFIG_SAMA5_LCDC_HCR_MAXWIDTH > BOARD_LCD_WIDTH
+#  error Width of the hardware cursor exceeds the width of the display
 #endif
 
 #ifndef CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT
-#  define CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT CONFIG_SAMA5_LCDC_BASE_HEIGHT
+#  define CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT BOARD_LCD_HEIGHT
+#endif
+
+#if CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT > BOARD_LCD_HEIGHT
+#  error Height of the hardware cursor exceeds the height of the display
 #endif
 
 #if SAMA5_LCDC_HCR_BPP == 16
@@ -622,8 +654,8 @@ static void sam_show_hcr(void);
 static const struct fb_videoinfo_s g_base_videoinfo =
 {
   .fmt      = SAMA5_LCDC_BASE_COLOR_FMT,
-  .xres     = CONFIG_SAMA5_LCDC_BASE_WIDTH,
-  .yres     = CONFIG_SAMA5_LCDC_BASE_HEIGHT,
+  .xres     = BOARD_LCD_WIDTH,
+  .yres     = BOARD_LCD_HEIGHT,
   .nplanes  = 1,
 };
 
@@ -1163,14 +1195,14 @@ static void sam_setposition(int lid, uint32_t x, uint32_t y)
 
       /* Clip the position so that the window lies on the physical display */
 
-      if (x + w >= CONFIG_SAMA5_LCDC_BASE_WIDTH)
+      if (x + w >= BOARD_LCD_WIDTH)
         {
-          x = CONFIG_SAMA5_LCDC_BASE_WIDTH - w;
+          x = BOARD_LCD_WIDTH - w;
         }
 
-      if (y + h >= CONFIG_SAMA5_LCDC_BASE_HEIGHT)
+      if (y + h >= BOARD_LCD_HEIGHT)
         {
-          y = CONFIG_SAMA5_LCDC_BASE_HEIGHT - h;
+          y = BOARD_LCD_HEIGHT - h;
         }
 
       /* Set the new position of the layer */
@@ -1450,7 +1482,7 @@ static void sam_base_disable(void)
    *    successfully disabled.
    */
 
-  while (sam_getreg(SAM_LCDC_BASECHSR & LCDC_BASECHSR_CH) != 0);
+  while ((sam_getreg(SAM_LCDC_BASECHSR) & LCDC_BASECHSR_CH) != 0);
 }
 
 /****************************************************************************
@@ -1505,7 +1537,7 @@ static void sam_ovr1_disable(void)
    *    successfully disabled.
    */
 
-  while (sam_getreg(SAM_LCDC_OVR1CHSR & LCDC_OVR1CHSR_CH) != 0);
+  while ((sam_getreg(SAM_LCDC_OVR1CHSR) & LCDC_OVR1CHSR_CH) != 0);
 }
 
 /****************************************************************************
@@ -1560,7 +1592,7 @@ static void sam_ovr2_disable(void)
    *    successfully disabled.
    */
 
-  while (sam_getreg(SAM_LCDC_OVR2CHSR & LCDC_OVR2CHSR_CH) != 0);
+  while ((sam_getreg(SAM_LCDC_OVR2CHSR) & LCDC_OVR2CHSR_CH) != 0);
 }
 
 /****************************************************************************
@@ -1631,7 +1663,7 @@ static void sam_heo_disable(void)
    *    successfully disabled.
    */
 
-  while (sam_getreg(SAM_LCDC_HEOCHSR & LCDC_HEOCHSR_CH) != 0);
+  while ((sam_getreg(SAM_LCDC_HEOCHSR) & LCDC_HEOCHSR_CH) != 0);
 }
 
 /****************************************************************************
@@ -1686,7 +1718,7 @@ static void sam_hcr_disable(void)
    *    successfully disabled.
    */
 
-  while (sam_getreg(SAM_LCDC_HCRCHSR & LCDC_HCRCHSR_CH) != 0);
+  while ((sam_getreg(SAM_LCDC_HCRCHSR) & LCDC_HCRCHSR_CH) != 0);
 }
 
 /****************************************************************************
@@ -2002,40 +2034,41 @@ static void sam_lcd_enable(void)
   /* 1. Configure LCD timing parameters, signal polarity and clock period. */
 
   div = ((2 * BOARD_MCK_FREQUENCY) / BOARD_LCD_PIXELCLOCK) - 2;
-  regval = LCDC_LCDCFG0_CLKDIV(div) | LCDC_LCDCFG0_CGDISHCR |
-           LCDC_LCDCFG0_CGDISHEO | LCDC_LCDCFG0_CGDISOVR1 |
-           LCDC_LCDCFG0_CGDISOVR2 | LCDC_LCDCFG0_CGDISBASE |
-           LCDC_LCDCFG0_CLKPWMSEL | LCDC_LCDCFG0_CLKSEL |
-           LCDC_LCDCFG0_CLKPOL;
+  regval = LCDC_LCDCFG0_CLKPOL | LCDC_LCDCFG0_CLKSEL |
+           LCDC_LCDCFG0_CLKPWMSEL | LCDC_LCDCFG0_CGDISBASE |
+           LCDC_LCDCFG0_CGDISOVR1 | LCDC_LCDCFG0_CGDISOVR2 |
+           LCDC_LCDCFG0_CGDISHEO | LCDC_LCDCFG0_CGDISHCR |
+           LCDC_LCDCFG0_CLKDIV(div);
   sam_putreg(SAM_LCDC_LCDCFG0, regval);
 
-  regval = LCDC_LCDCFG1_VSPW(BOARD_LCD_TIMING_VPW - 1) |
-           LCDC_LCDCFG1_HSPW(BOARD_LCD_TIMING_HPW - 1);
+  regval = LCDC_LCDCFG1_HSPW(BOARD_LCD_TIMING_HPW - 1) |
+           LCDC_LCDCFG1_VSPW(BOARD_LCD_TIMING_VPW - 1);
   sam_putreg(SAM_LCDC_LCDCFG1, regval);
 
-  regval = LCDC_LCDCFG2_VBPW(BOARD_LCD_TIMING_VBP) |
-           LCDC_LCDCFG2_VFPW(BOARD_LCD_TIMING_VFP - 1);
+  regval = LCDC_LCDCFG2_VFPW(BOARD_LCD_TIMING_VFP - 1) |
+           LCDC_LCDCFG2_VBPW(BOARD_LCD_TIMING_VBP);
   sam_putreg(SAM_LCDC_LCDCFG2, regval);
 
-  regval = LCDC_LCDCFG3_HBPW(BOARD_LCD_TIMING_HBP - 1) |
-           LCDC_LCDCFG3_HFPW(BOARD_LCD_TIMING_HFP - 1);
+  regval = LCDC_LCDCFG3_HFPW(BOARD_LCD_TIMING_HFP - 1) |
+           LCDC_LCDCFG3_HBPW(BOARD_LCD_TIMING_HBP - 1);
   sam_putreg(SAM_LCDC_LCDCFG3, regval);
 
-  regval = LCDC_LCDCFG4_RPF(CONFIG_SAMA5_LCDC_BASE_HEIGHT - 1) |
-           LCDC_LCDCFG4_PPL(CONFIG_SAMA5_LCDC_BASE_WIDTH - 1);
+  regval = LCDC_LCDCFG4_PPL(BOARD_LCD_WIDTH - 1) |
+           LCDC_LCDCFG4_RPF(BOARD_LCD_HEIGHT - 1);
   sam_putreg(SAM_LCDC_LCDCFG4, regval);
 
-  regval = LCDC_LCDCFG5_GUARDTIME(30) | LCDC_LCDCFG5_MODE_24BPP |
-           LCDC_LCDCFG5_DISPDLY | LCDC_LCDCFG5_VSPDLYS | LCDC_LCDCFG5_VSPOL |
-           LCDC_LCDCFG5_HSPOL;
+  regval = LCDC_LCDCFG5_HSPOL | LCDC_LCDCFG5_VSPOL |
+           LCDC_LCDCFG5_VSPDLYS | LCDC_LCDCFG5_DISPDLY |
+           LCDC_LCDCFG5_MODE_24BPP | LCDC_LCDCFG5_GUARDTIME(30);
   sam_putreg(SAM_LCDC_LCDCFG5, regval);
 
-  regval = LCDC_LCDCFG6_PWMCVAL(0xf0) | LCDC_LCDCFG6_PWMPOL |
-           LCDC_LCDCFG6_PWMPS_DIV64;
+  regval = LCDC_LCDCFG6_PWMPS_DIV64 | LCDC_LCDCFG6_PWMPOL |
+           LCDC_LCDCFG6_PWMCVAL(CONFIG_SAMA5_LCDC_DEFBACKLIGHT);
   sam_putreg(SAM_LCDC_LCDCFG6, regval);
 
   /* 2. Enable the Pixel Clock by writing one to the CLKEN field of the
-        LCDC_LCDEN register. */
+   *    LCDC_LCDEN register.
+   */
 
   sam_putreg(SAM_LCDC_LCDEN, LCDC_LCDEN_CLK);
 
@@ -2253,14 +2286,14 @@ static void sam_show_layer(struct sam_layer_s *layer,
 
   /* Windows position & size check */
 
-  if (dispx + dispw > CONFIG_SAMA5_LCDC_BASE_WIDTH)
+  if (dispx + dispw > BOARD_LCD_WIDTH)
     {
-      dispw = CONFIG_SAMA5_LCDC_BASE_WIDTH - dispx;
+      dispw = BOARD_LCD_WIDTH - dispx;
     }
 
-  if (dispy + disph > CONFIG_SAMA5_LCDC_BASE_HEIGHT)
+  if (dispy + disph > BOARD_LCD_HEIGHT)
     {
-      disph = CONFIG_SAMA5_LCDC_BASE_HEIGHT - dispy;
+      disph = BOARD_LCD_HEIGHT - dispy;
     }
 
   if (dispw <= 0)
@@ -2706,8 +2739,7 @@ static void sam_show_layer(struct sam_layer_s *layer,
 static void sam_show_base(void)
 {
   sam_show_layer(&g_base.layer, 0, 0,
-      CONFIG_SAMA5_LCDC_BASE_WIDTH, CONFIG_SAMA5_LCDC_BASE_HEIGHT,
-      CONFIG_SAMA5_LCDC_BASE_WIDTH, CONFIG_SAMA5_LCDC_BASE_HEIGHT);
+      BOARD_LCD_WIDTH, BOARD_LCD_HEIGHT, BOARD_LCD_WIDTH, BOARD_LCD_HEIGHT);
 }
 
 /****************************************************************************
@@ -2733,8 +2765,8 @@ static void sam_show_hcr(uint32_t x, uint32_t y)
   /* And show the hardware cursor layer */
 
   sam_show_layer(&g_hcr.layer,
-    (CONFIG_SAMA5_LCDC_BASE_WIDTH - CONFIG_SAMA5_LCDC_HCR_MAXWIDTH) / 2,
-    (CONFIG_SAMA5_LCDC_BASE_HEIGHT - CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT) / 2,
+    (BOARD_LCD_WIDTH - CONFIG_SAMA5_LCDC_HCR_MAXWIDTH) / 2,
+    (BOARD_LCD_HEIGHT - CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT) / 2,
     CONFIG_SAMA5_LCDC_HCR_MAXWIDTH, CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT,
     CONFIG_SAMA5_LCDC_HCR_MAXWIDTH, CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT);
 }
@@ -2914,14 +2946,47 @@ void fb_uninitialize(void)
 
 void sam_lcdclear(nxgl_mxpixel_t color)
 {
+#if SAMA5_LCDC_BASE_BPP == 16
+  uint16_t *dest = (uint16_t*)g_base.layer.framebuffer;
+  int i;
+
+  gvdbg("Clearing display: BPP=16 color=%04x framebuffer=%08x size=%d\n",
+        color, g_base.layer.framebuffer, SAMA5_BASE_FBSIZE);
+
+  for (i = 0; i < SAMA5_BASE_FBSIZE; i += sizeof(uint16_t))
+    {
+      *dest++ = (uint16_t)color;
+    }
+#elif SAMA5_LCDC_BASE_BPP == 24
+  uint8_t *dest = (uint8_t*)g_base.layer.framebuffer;
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+  int i;
+
+  gvdbg("Clearing display: BPP=24 color=%06x framebuffer=%08x size=%d\n",
+        color, g_base.layer.framebuffer, SAMA5_BASE_FBSIZE);
+
+  b =  color        & 0xff;
+  g = (color >> 8)  & 0xff;
+  r = (color >> 16) & 0xff;
+
+  for (i = 0; i < SAMA5_BASE_FBSIZE; i += 3*sizeof(uint8_t))
+    {
+      *dest++ = b;
+      *dest++ = r;
+      *dest++ = g;
+    }
+#elif SAMA5_LCDC_BASE_BPP == 32
   uint32_t *dest = (uint32_t*)g_base.layer.framebuffer;
   int i;
 
-  gvdbg("Clearing display: color=%08x framebuffer=%08x size=%d\n",
+  gvdbg("Clearing display: BPP=32 color=%08x framebuffer=%08x size=%d\n",
         color, g_base.layer.framebuffer, SAMA5_BASE_FBSIZE);
 
   for (i = 0; i < SAMA5_BASE_FBSIZE; i += sizeof(uint32_t))
     {
-      *dest++ = color;
+      *dest++ = (uint32_t)color;
     }
+#endif
 }

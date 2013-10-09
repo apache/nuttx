@@ -7,6 +7,44 @@ if ARCH_CHIP_SAMA5
 
 comment "ATSAMA5 Configuration Options"
 
+# Chip Capabilities
+
+config SAMA5_HAVE_UART0
+	bool
+	default n
+
+config SAMA5_HAVE_UART1
+	bool
+	default n
+
+config SAMA5_HAVE_CAN0
+	bool
+	default n
+
+config SAMA5_HAVE_CAN1
+	bool
+	default n
+
+config SAMA5_HAVE_LCDC
+	bool
+	default n
+
+config SAMA5_HAVE_GMAC
+	bool
+	default n
+
+config SAMA5_HAVE_EMAC
+	bool
+	default n
+
+config SAMA5_HAVE_HSMCI2
+	bool
+	default n
+
+config SAMA5_HAVE_TC1
+	bool
+	default n
+
 choice
 	prompt "Atmel AT91SAMA5 Chip Selection"
 	default ARCH_CHIP_ATSAMA5D33
@@ -15,7 +53,10 @@ config ARCH_CHIP_ATSAMA5D31
 	bool "Atmel ATSAMA5D31"
 	select ARCH_CHIP_SAMA5D3
 	select SAMA5_HAVE_EMAC
+	select SAMA5_HAVE_HSMCI2
 	select SAMA5_HAVE_LCDC
+	select SAMA5_HAVE_UART0
+	select SAMA5_HAVE_UART1
 
 config ARCH_CHIP_ATSAMA5D33
 	bool "Atmel ATSAMA5D33"
@@ -27,13 +68,22 @@ config ARCH_CHIP_ATSAMA5D34
 	bool "Atmel ATSAMA5D34"
 	select ARCH_CHIP_SAMA5D3
 	select SAMA5_HAVE_GMAC
+	select SAMA5_HAVE_HSMCI2
 	select SAMA5_HAVE_LCDC
+	select SAMA5_HAVE_CAN0
+	select SAMA5_HAVE_CAN1
 
 config ARCH_CHIP_ATSAMA5D35
 	bool "Atmel ATSAMA5D35"
 	select ARCH_CHIP_SAMA5D3
 	select SAMA5_HAVE_EMAC
 	select SAMA5_HAVE_GMAC
+	select SAMA5_HAVE_HSMCI2
+	select SAMA5_HAVE_UART0
+	select SAMA5_HAVE_UART1
+	select SAMA5_HAVE_CAN0
+	select SAMA5_HAVE_CAN1
+	select SAMA5_HAVE_TC1
 
 endchoice # Atmel AT91SAMA5 Chip Selection
 
@@ -62,11 +112,13 @@ config SAMA5_SMD
 config SAMA5_UART0
 	bool "UART 0"
 	default y
+	depends on SAMA5_HAVE_UART0
 	select ARCH_HAVE_UART0
 
 config SAMA5_UART1
 	bool "UART 1"
 	default n
+	depends on SAMA5_HAVE_UART1
 	select ARCH_HAVE_UART1
 
 config SAMA5_USART0
@@ -114,6 +166,7 @@ config SAMA5_HSMCI1
 config SAMA5_HSMCI2
 	bool "High Speed Multimedia Card Interface 2 (HSMCI2)"
 	default n
+	depends on SAMA5_HAVE_HSMCI2
 	select ARCH_HAVE_SDIO
 
 config SAMA5_SPI0
@@ -130,6 +183,7 @@ config SAMA5_TC0
 
 config SAMA5_TC1
 	bool "Timer Counter 1 (ch. 3, 4, 5) (TC1)"
+	depends on SAMA5_HAVE_TC1
 	default n
 
 config SAMA5_PWM
@@ -257,9 +311,6 @@ config SAMA5_PIOE_IRQ
 
 endif # PIO_IRQ
 
-config SAMA5_HAVE_LCDC
-	bool
-
 if SAMA5_LCDC
 menu "LCDC Configuration"
 
@@ -302,14 +353,6 @@ default 0
 endif # SAMA5_LCDC_FBFIXED
 
 comment "Base layer configuration"
-
-config SAMA5_LCDC_BASE_HEIGHT
-	int "Layer height (rows)"
-	default 480
-
-config SAMA5_LCDC_BASE_WIDTH
-	int "Layer width (pixels)"
-	default 800
 
 choice
 	prompt "Base layer rotation"
@@ -735,14 +778,6 @@ config SAMA5_LCDC_REGDEBUG
 
 endmenu # LCDC configuration
 endif # SAMA5_LCDC
-
-config SAMA5_HAVE_GMAC
-	bool
-	default n
-
-config SAMA5_HAVE_EMAC
-	bool
-	default n
 
 if SAMA5_GMAC
 
