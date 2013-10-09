@@ -13,6 +13,7 @@ Contents
 ^^^^^^^^
 
   - PIO Pin Usage
+  - Rev 2 vs. Rev 3
   - ITEAD 2.4" TFT with Touch
   - Development Environment
   - GNU Toolchain Options
@@ -104,6 +105,17 @@ PIO Pin Usage
   PD30  N/A         N/A          PE30  N/A          N/A         PF30  N/A         N/A
   PD31  N/A5        N/A          PE31  N/A          N/A         PF31  N/A         N/A
   ----- ---------- ---- -------- ----- ------------ ---- ------ ----- ----------- ---- ---------
+
+Rev 2 vs. Rev 3
+^^^^^^^^^^^^^^^
+
+  This port was performed on the Arduino Due Rev 2 board.  NuttX users
+  have reported issues with the serial port on his Aduino Due Rev 3 board.
+  That problem was resolved as by configuring the UART0 RXD with a pull-up
+  (see include/board.h).  That fix as well as any others that we may find
+  will be enabled by selecting
+
+    CONFIG_ADRUINO_DUE_REV3=y
 
 ITEAD 2.4" TFT with Touch
 ^^^^^^^^^^^^^^^^^^^^^^^^^
