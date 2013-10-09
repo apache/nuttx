@@ -99,7 +99,7 @@ IDEs
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project (There is a simple RIDE project
   in the RIDE subdirectory).
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -196,7 +196,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -245,7 +245,7 @@ DFU and JTAG
 
   The DFU SE PC-based software is available from the STMicro website,
   http://www.st.com.  General usage instructions:
-  
+
   1. Convert the NuttX Intel Hex file (nuttx.hex) into a special DFU
      file (nuttx.dfu)... see below for details.
   2. Connect the STM3210E-EVAL board to your computer using a USB
@@ -389,7 +389,7 @@ RTC
       CONFIG_RTC_FREQUENCY - If CONFIG_RTC_HIRES is defined, then the
       frequency of the high resolution RTC must be provided.  If CONFIG_RTC_HIRES
       is not defined, CONFIG_RTC_FREQUENCY is assumed to be one.
-    CONFIG_RTC_ALARM - Enable if the RTC hardware supports setting of an alarm. 
+    CONFIG_RTC_ALARM - Enable if the RTC hardware supports setting of an alarm.
       A callback function will be executed when the alarm goes off
 
   In hi-res mode, the STM32 RTC operates only at 16384Hz.  Overflow interrupts
@@ -448,7 +448,7 @@ STM3210E-EVAL-specific Configuration Options
        configuration features.
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
- 
+
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
@@ -564,14 +564,14 @@ STM3210E-EVAL-specific Configuration Options
   configuration settings:
 
     CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
- 
+
   NOTE: The STM32 timers are each capable of generating different signals on
   each of the four channels with different duty cycles.  That capability is
   not supported by this driver:  Only one output channel per timer.
 
   Alternate pin mappings.  The STM3210E-EVAL board requires only CAN1 remapping
   On the STM3210E-EVAL board pin PB9 is wired as TX and pin PB8 is wired as RX.
-  Which then makes the proper connection through the CAN transiver SN65HVD230 
+  Which then makes the proper connection through the CAN transiver SN65HVD230
   out to the CAN D-type 9-pn male connector where pin 2 is CANL and pin 7 is CANH.
 
     CONFIG_STM32_TIM1_FULL_REMAP
@@ -621,7 +621,7 @@ STM3210E-EVAL-specific Configuration Options
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
     CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
-    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority. 
+    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
       4-bit transfer mode.
@@ -695,7 +695,7 @@ Where <subdir> is one of the following:
 
     Uses apps/examples/buttons to exercise STM3210E-EVAL buttons and
     button interrupts.
- 
+
     CONFIG_STM32_CODESOURCERYW=y  : CodeSourcery under Windows
 
   composite
@@ -807,7 +807,7 @@ Where <subdir> is one of the following:
 
       CONFG_NX_MULTIUSER=y
       CONFIG_DISABLE_MQUEUE=n
- 
+
     The following definition in the defconfig file to enables the NxConsole
     driver:
 
@@ -873,7 +873,7 @@ Where <subdir> is one of the following:
     CONFIG_PM_CUSTOMINIT moves the PM initialization from arch/arm/src/stm32/stm32_pminitialiaze.c
     to configs/stm3210-eval/src/up_pm.c.  This allows us to support board-
     specific PM initialization.
-    
+
       CONFIG_IDLE_CUSTOM=y
 
     The bulk of the PM activities occur in the IDLE loop.  The IDLE loop is
@@ -888,7 +888,7 @@ Where <subdir> is one of the following:
     Here are some additional things to note in the configuration:
 
       CONFIG_PM_BUTTONS=y
-    
+
     CONFIG_PM_BUTTONS enables button support for PM testing.  Buttons can drive
     EXTI interrupts and EXTI interrrupts can be used to wakeup for certain reduced
     power modes (STOP mode).  The use of the buttons here is for PM testing purposes
@@ -949,7 +949,7 @@ Where <subdir> is one of the following:
       +CONFIG_CDCACM=y
 
     The example can also be converted to use the alternative
-    USB serial example at apps/examples/usbterm by changing the 
+    USB serial example at apps/examples/usbterm by changing the
     following:
 
       -CONFIGURED_APPS += examples/usbserial
