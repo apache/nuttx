@@ -332,12 +332,29 @@ choice
 
 config SAMA5_LCDC_FBALLOCATED
 	bool "Allocate from heap"
+	---help---
+		Allocate frame buffers and layer DMA descriptors from the heap.
+
+		WARNING:  This data cannot reside in internal SRAM; LCDC DMA only
+		works with DDR2 and CS0-3.
 
 config SAMA5_LCDC_FBFIXED
 	bool "Fixed allocation outside the heap"
+	---help---
+		Allocate frame buffers and DMA descriptors at a fixe address outside
+		of either the heap or .bss lying at this address.
+
+		WARNING:  This data cannot reside in internal SRAM; LCDC DMA only
+		works with DDR2 and CS0-3.
 
 config SAMA5_LCDC_FBPREALLOCATED
 	bool "Pre-allocated in .bss"
+	---help---
+		Allocate frame buffers and layer DMA descriptors as normal global
+		variables that will be positioned in .bss.
+
+		WARNING:  This data cannot reside in internal SRAM; LCDC DMA only
+		works with DDR2 and CS0-3.
 
 endchoice # Frame buffer allocatin strategy
 
@@ -2325,8 +2342,26 @@ config SAMA5_DDRCS_HEAP
 		In this case, the remaining SDRAM will automatically be added to the
 		heap (using RAM_END)
 
+if SAMA5_DDRCS_HEAP
+config SAMA5_DDRCS_HEAP_OFFSET
+	int "DDR-SDRAM offset"
+	default 0
+	---help---
+		Preserve this number of bytes at the beginning of SDRAM.  The
+		portion of DRAM beginning at this offset from the DDRCS base will
+		be added to the heap.
+
+config SAMA5_DDRCS_HEAP_SIZE
+	int "DDR-SDRAM size"
+	default 0
+	---help---
+		Add the region of DDR-SDRAM beginning at SAMA5_DDRCS_HEAP_OFFSET
+		and of size SAMA5_DDRCS_HEAP_SIZE to the heap.
+
+endif #SAMA5_DDRCS_HEAP
+
 config SAMA5_EBICS0_HEAP
-	bool "Include SRAM/PSRAM in heap"
+	bool "Include EBICS0 SRAM/PSRAM in heap"
 	default y
 	depends on (SAMA5_EBICS0_SRAM || SAMA5_EBICS0_PSRAM) && !SAMA5_BOOT_CS0SRAM
 	---help---
@@ -2339,8 +2374,26 @@ config SAMA5_EBICS0_HEAP
 		In this case, the remaining SRAM will automatically be added to the
 		heap (using RAM_END).
 
+if SAMA5_EBICS0_HEAP
+config SAMA5_EBICS0_HEAP_OFFSET
+	int "EBICS0 RAM offset"
+	default 0
+	---help---
+		Preserve this number of bytes at the beginning of RAM.  The
+		portion of RAM beginning at this offset from the EBICS0 base will
+		be added to the heap.
+
+config SAMA5_EBICS0_HEAP_SIZE
+	int "EBICS0 RAM size"
+	default 0
+	---help---
+		Add the region of RAM beginning at SAMA5_EBICS0_HEAP_OFFSET
+		and of size SAMA5_EBICS0_HEAP_SIZE to the heap.
+
+endif #SAMA5_EBICS0_HEAP
+
 config SAMA5_EBICS1_HEAP
-	bool "Include SRAM/PSRAM in heap"
+	bool "Include EBICS1 SRAM/PSRAM in heap"
 	default y
 	depends on (SAMA5_EBICS1_SRAM || SAMA5_EBICS1_PSRAM) && !SAMA5_BOOT_CS1SRAM
 	---help---
@@ -2353,8 +2406,26 @@ config SAMA5_EBICS1_HEAP
 		In this case, the remaining SRAM will automatically be added to the
 		heap (using RAM_END).
 
+if SAMA5_EBICS1_HEAP
+config SAMA5_EBICS1_HEAP_OFFSET
+	int "EBICS1 RAM offset"
+	default 0
+	---help---
+		Preserve this number of bytes at the beginning of RAM.  The
+		portion of DRAM beginning at this offset from the EBICS1 base will
+		be added to the heap.
+
+config SAMA5_EBICS1_HEAP_SIZE
+	int "EBICS1 RAM size"
+	default 0
+	---help---
+		Add the region of RAM beginning at SAMA5_EBICS1_HEAP_OFFSET
+		and of size SAMA5_EBICS1_HEAP_SIZE to the heap.
+
+endif #SAMA5_EBICS1_HEAP
+
 config SAMA5_EBICS2_HEAP
-	bool "Include SRAM/PSRAM in heap"
+	bool "Include EBICS2 SRAM/PSRAM in heap"
 	default y
 	depends on (SAMA5_EBICS2_SRAM || SAMA5_EBICS2_PSRAM) && !SAMA5_BOOT_CS2SRAM
 	---help---
@@ -2367,8 +2438,26 @@ config SAMA5_EBICS2_HEAP
 		In this case, the remaining SRAM will automatically be added to the
 		heap (using RAM_END).
 
+if SAMA5_EBICS2_HEAP
+config SAMA5_EBICS2_HEAP_OFFSET
+	int "EBICS2 RAM offset"
+	default 0
+	---help---
+		Preserve this number of bytes at the beginning of RAM.  The
+		portion of DRAM beginning at this offset from the EBICS2 base will
+		be added to the heap.
+
+config SAMA5_EBICS2_HEAP_SIZE
+	int "EBICS2 RAM size"
+	default 0
+	---help---
+		Add the region of RAM beginning at SAMA5_EBICS2_HEAP_OFFSET
+		and of size SAMA5_EBICS2_HEAP_SIZE to the heap.
+
+endif #SAMA5_EBICS2_HEAP
+
 config SAMA5_EBICS3_HEAP
-	bool "Include SRAM/PSRAM in heap"
+	bool "Include EBICS3 SRAM/PSRAM in heap"
 	default y
 	depends on (SAMA5_EBICS3_SRAM || SAMA5_EBICS3_PSRAM) && !SAMA5_BOOT_CS3SRAM
 	---help---
@@ -2378,5 +2467,22 @@ config SAMA5_EBICS3_HEAP
 		In this case, the remaining SRAM will automatically be added to the
 		heap (using RAM_END).
 
+if SAMA5_EBICS3_HEAP
+config SAMA5_EBICS3_HEAP_OFFSET
+	int "EBICS3 RAM offset"
+	default 0
+	---help---
+		Preserve this number of bytes at the beginning of RAM.  The
+		portion of DRAM beginning at this offset from the EBICS3 base will
+		be added to the heap.
+
+config SAMA5_EBICS3_HEAP_SIZE
+	int "EBICS3 RAM size"
+	default 0
+	---help---
+		Add the region of RAM beginning at SAMA5_EBICS3_HEAP_OFFSET
+		and of size SAMA5_EBICS3_HEAP_SIZE to the heap.
+
+endif #SAMA5_EBICS3_HEAP
 endmenu # Heap Configuration
 endif # ARCH_CHIP_SAMA5
