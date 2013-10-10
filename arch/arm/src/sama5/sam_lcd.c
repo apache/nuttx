@@ -1147,9 +1147,10 @@ static void sam_dmasetup(int lid, struct sam_dscr_s *dscr, uint8_t *buffer)
 
   /* Modify descriptor */
 
+  physaddr   = sam_physramaddr((uintptr_t)dscr);
   dscr->addr = (uint32_t)buffer;
   dscr->ctrl = LCDC_BASECTRL_DFETCH;
-  dscr->next = (uint32_t)dscr;
+  dscr->next = (uint32_t)physaddr;
 
   /* Flush the modified descriptor to RAM */
 
@@ -1158,12 +1159,12 @@ static void sam_dmasetup(int lid, struct sam_dscr_s *dscr, uint8_t *buffer)
 
   /* Modify registers */
 
-  physaddr = sam_physramaddr((uint32_t)buffer);
-  sam_putreg(g_layerhead[lid], physaddr);
+  physaddr = sam_physramaddr((uintptr_t)buffer);
+  sam_putreg(g_layeraddr[lid], physaddr);
 
   sam_putreg(g_layerctrl[lid], LCDC_BASECTRL_DFETCH);
 
-  physaddr = sam_physramaddr((uint32_t)dscr);
+  physaddr = sam_physramaddr((uintptr_t)dscr);
   sam_putreg(g_layernext[lid], physaddr);
 }
 
@@ -1568,7 +1569,7 @@ static void sam_ovr2_disable(void)
    *    channel at the end of the frame.
    */
 
-  dscr             = (uintptr_t)&g_ovr1.dscr;
+  dscr             = (uintptr_t)&g_ovr2.dscr;
   physaddr         = sam_physramaddr(dscr);
   g_ovr2.dscr.next = physaddr;
 
@@ -2974,8 +2975,8 @@ void sam_lcdclear(nxgl_mxpixel_t color)
   for (i = 0; i < SAMA5_BASE_FBSIZE; i += 3*sizeof(uint8_t))
     {
       *dest++ = b;
-      *dest++ = r;
       *dest++ = g;
+      *dest++ = r;
     }
 #elif SAMA5_LCDC_BASE_BPP == 32
   uint32_t *dest = (uint32_t*)g_base.layer.framebuffer;
