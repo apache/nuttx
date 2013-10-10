@@ -2752,15 +2752,17 @@ static void sam_show_base(void)
  ****************************************************************************/
 
 #ifdef CONFIG_FB_HWCURSOR
-static void sam_show_hcr(uint32_t x, uint32_t y)
+static void sam_show_hcr(void)
 {
+  uint32_t regval;
+
   /* Enable default transparent keying */
 
   sam_putreg(SAM_LCDC_HCRCFG7, 0x00000000);
   sam_putreg(SAM_LCDC_HCRCFG8, 0xffffffff);
 
   regval  = sam_getreg(SAM_LCDC_HCRCFG9);
-  regval |= LCDC_HCRCFG9_CRKEY);
+  regval |= LCDC_HCRCFG9_CRKEY;
   sam_putreg(SAM_LCDC_HCRCFG9, regval);
 
   /* And show the hardware cursor layer */
@@ -2787,6 +2789,9 @@ static void sam_show_hcr(uint32_t x, uint32_t y)
 
 int up_fbinitialize(void)
 {
+#if defined(CONFIG_SAMA5_LCDC_OVR1) && defined(CONFIG_SAMA5_LCDC_HEO)
+  uint32_t regval;
+#endif
   int ret;
 
   gvdbg("Entry\n");
