@@ -273,40 +273,41 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
 void up_addregion(void)
 {
   int nregions = CONFIG_MM_REGIONS - 1;
+  uintptr_t vaddr;
   size_t size;
 
 #ifdef CONFIG_SAMA5_ISRAM_HEAP
-  size = SAM_ISRAM0_SIZE + SAM_ISRAM1_SIZE;
+  vaddr = (uintptr_t)SAM_ISRAM0_VADDR
+  size  = SAM_ISRAM0_SIZE + SAM_ISRAM1_SIZE;
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
   /* Allow user-mode access to the ISRAM heap */
 
-  sam_uheap((uintptr_t)SAM_ISRAM0_VADDR, size);
+  sam_uheap(vaddr, size);
 
 #endif
 
   /* Add the ISRAM user heap region. */
 
-  kumm_addregion((FAR void*)SAM_ISRAM0_VADDR, size);
-
+  kumm_addregion((void *)vaddr, size);
   nregions--;
 #endif
 
 #ifdef CONFIG_SAMA5_DDRCS_HEAP
   if (nregions > 0)
     {
-      size = SAMA5_DDRCS_SIZE;
+      vaddr = (uintptr_t)SAM_DDRCS_VSECTION + SAMA5_DDRCS_HEAP_OFFSET;
+      size  = SAMA5_DDRCS_HEAP_SIZE;
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-      /* Allow user-mode access to the ISRAM heap */
+      /* Allow user-mode access to the DDR-SDRAM heap */
 
-      sam_uheap((uintptr_t)SAM_DDRCS_VSECTION, size);
+      sam_uheap(vaddr, size);
 #endif
 
-      /* Add the ISRAM user heap region. */
+      /* Add the DDR-SDRAM user heap region. */
 
-      kumm_addregion((FAR void*)SAM_DDRCS_VSECTION, size);
-
+      kumm_addregion((void *)vaddr, size);
       nregions--;
     }
   else
@@ -320,18 +321,18 @@ void up_addregion(void)
 #ifdef SAMA5_EBICS0_HEAP
   if (nregions > 0)
     {
-      size = SAMA5_EBICS0_SIZE;
+      vaddr = (uintptr_t)SAM_EBICS0_VSECTION + SAMA5_EBICS0_HEAP_OFFSET;
+      size  = SAMA5_EBICS0_HEAP_SIZE;
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-      /* Allow user-mode access to the ISRAM heap */
+      /* Allow user-mode access to the EBICS0 heap */
 
-      sam_uheap((uintptr_t)SAM_EBICS0_VSECTION, size);
+      sam_uheap(vaddr, size);
 #endif
 
-      /* Add the ISRAM user heap region. */
+      /* Add the EBICS0 user heap region. */
 
-      kumm_addregion((FAR void*)SAM_EBICS0_VSECTION, size);
-
+      kumm_addregion((void *)vaddr, size);
       nregions--;
     }
   else
@@ -345,18 +346,18 @@ void up_addregion(void)
 #ifdef SAMA5_EBICS1_HEAP
   if (nregions > 0)
     {
-      size = SAMA5_EBICS1_SIZE;
+      vaddr = (uintptr_t)SAM_EBICS1_VSECTION + SAMA5_EBICS1_HEAP_OFFSET;
+      size  = SAMA5_EBICS1_HEAP_SIZE;
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-      /* Allow user-mode access to the ISRAM heap */
+      /* Allow user-mode access to the EBICS1 heap */
 
-      sam_uheap((uintptr_t)SAM_EBICS1_VSECTION, size);
+      sam_uheap(vaddr, size);
 #endif
 
-      /* Add the ISRAM user heap region. */
+      /* Add the EBICS1 user heap region. */
 
-      kumm_addregion((FAR void*)SAM_EBICS1_VSECTION, size);
-
+      kumm_addregion((void *)vaddr, size);
       nregions--;
     }
   else
@@ -370,18 +371,18 @@ void up_addregion(void)
 #ifdef SAMA5_EBICS2_HEAP
   if (nregions > 0)
     {
-      size = SAMA5_EBICS2_SIZE;
+      vaddr = (uintptr_t)SAM_EBICS2_VSECTION + SAMA5_EBICS2_HEAP_OFFSET;
+      size  = SAMA5_EBICS2_HEAP_SIZE;
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-      /* Allow user-mode access to the ISRAM heap */
+      /* Allow user-mode access to the EBICS2 heap */
 
-      sam_uheap((uintptr_t)SAM_EBICS2_VSECTION, size);
+      sam_uheap(vaddr, size);
 #endif
 
-      /* Add the ISRAM user heap region. */
+      /* Add the EBICS2 user heap region. */
 
-      kumm_addregion((FAR void*)SAM_EBICS2_VSECTION, size);
-
+      kumm_addregion((void *)vaddr, size);
       nregions--;
     }
   else
@@ -395,18 +396,18 @@ void up_addregion(void)
 #ifdef SAMA5_EBICS3_HEAP
   if (nregions > 0)
     {
-      size = SAMA5_EBICS3_SIZE;
+      vaddr = (uintptr_t)SAM_EBICS3_VSECTION + SAMA5_EBICS3_HEAP_OFFSET;
+      size  = SAMA5_EBICS3_HEAP_SIZE;
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(CONFIG_MM_KERNEL_HEAP)
-      /* Allow user-mode access to the ISRAM heap */
+      /* Allow user-mode access to the EBICS3 heap */
 
-      sam_uheap((uintptr_t)SAM_EBICS3_VSECTION, size);
+      sam_uheap(vaddr, size);
 #endif
 
-      /* Add the ISRAM user heap region. */
+      /* Add the EBICS3 user heap region. */
 
-      kumm_addregion((FAR void*)SAM_EBICS3_VSECTION, size);
-
+      kumm_addregion(vaddr, size);
       nregions--;
     }
   else
