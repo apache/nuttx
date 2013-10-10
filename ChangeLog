@@ -5729,6 +5729,11 @@
 	* configs/arduino-due/Kconfig and include/board.h:  Add configuration
 	  to select revision 3 of the Arduino Due which has some small
 	  but important differences.  Suggested by gdi@embedders.org.
+	* arch/arm/src/sama5/sam_allocateheap.c, Kconfig, chip/sama5d3_memorymap.h:
+	  Add support so that subsets of the total DRAM (and other external
+	  memory) can be added to the heap, leaving other memory reserved for
+	  other purposes (like LCDC framebuffers) (2013-10-10).
+	* arch/arm/src/sama5/sam_lcd.c:  Change how DMA descriptors are
+	  allocated.  My reading of the SAMA5 MATRIX is that the LCDC will
+	  be unable to DMA from internal SRAM (2012-10-10).
 
-D
-	  differences 
