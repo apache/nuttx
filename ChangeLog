@@ -5754,3 +5754,7 @@
 	* drivers/net/encx24j600.c and Kconfig: ENCX24J600: Improved descriptor
 	  handling, free packets on rx abort interrupt. From Max Holtzberg
 	  (2013-10-11).
+	* arch/arm/src/sama4/sam_lcd.c and configs/sama5d3x-ek/include/board.h:
+	  Fix PWM precealler divider.  This eliminiates the backlight flicker
+	 (2013-10-11).
+

@@ -327,24 +327,6 @@ config SAMA5_LCDC_BACKCOLOR
 	default 0x0
 
 choice
-	prompt "Output resolution"
-	default SAMA5_LCDC_OUTPUT_24BPP
-
-config SAMA5_LCDC_OUTPUT_12BPP
-	bool "12BPP"
-
-config SAMA5_LCDC_OUTPUT_16BPP
-	bool "16BPP"
-
-config SAMA5_LCDC_OUTPUT_18BPP
-	bool "18BPP"
-
-config SAMA5_LCDC_OUTPUT_24BPP
-	bool "24BPP"
-
-endchoice # Output resolution
-
-choice
 	prompt "Frame buffer allocation strategy"
 	default SAMA5_LCDC_FBALLOCATED
 

@@ -79,18 +79,6 @@
 
 /* Color/video formats */
 
-#if defined(CONFIG_SAMA5_LCDC_OUTPUT_12BPP)
-#  define SAMA5_LCDC_OUTPUT_BPP     12
-#elif defined(CONFIG_SAMA5_LCDC_OUTPUT_16BPP)
-#  define SAMA5_LCDC_OUTPUT_BPP     16
-#elif defined(CONFIG_SAMA5_LCDC_OUTPUT_18BPP)
-#  define SAMA5_LCDC_OUTPUT_BPP     18
-#elif defined(CONFIG_SAMA5_LCDC_OUTPUT_24BPP)
-#  define SAMA5_LCDC_OUTPUT_BPP     24
-#else
-#  error No output resolution defined
-#endif
-
 #if defined(CONFIG_SAMA5_LCDC_BASE_RGB444)
 #  define SAMA5_LCDC_BASE_BPP       16  /* 12BPP but must be 16-bit aligned */
 #  define SAMA5_LCDC_BASE_COLOR_FMT FB_FMT_RGB12_444
@@ -133,6 +121,8 @@
 #elif defined(CONFIG_SAMA5_LCDC_BASE_RGBA8888)
 #  define SAMA5_LCDC_BASE_BPP       32
 #  define SAMA5_LCDC_BASE_COLOR_FMT FB_FMT_RGBA32
+#else
+#  error Undefined or unrecognized base color format
 #endif
 
 #if defined(CONFIG_SAMA5_LCDC_OVR1_RGB444)
@@ -177,6 +167,8 @@
 #elif defined(CONFIG_SAMA5_LCDC_OVR1_RGBA8888)
 #  define SAMA5_LCDC_OVR1_BPP       32
 #  define SAMA5_LCDC_OVR1_COLOR_FMT FB_FMT_RGBA32
+#elif defined(CONFIG_SAMA5_LCDC_OVR1)
+#  error Undefined or unrecognized overlay 1 color format
 #endif
 
 #if defined(CONFIG_SAMA5_LCDC_OVR2_RGB444)
@@ -221,6 +213,8 @@
 #elif defined(CONFIG_SAMA5_LCDC_OVR2_RGBA8888)
 #  define SAMA5_LCDC_OVR2_BPP       32
 #  define SAMA5_LCDC_OVR2_COLOR_FMT FB_FMT_RGBA32
+#elif defined(CONFIG_SAMA5_LCDC_OVR2)
+#  error Undefined or unrecognized overlay 2 color format
 #endif
 
 #if defined(CONFIG_SAMA5_LCDC_HEO_RGB444)
@@ -265,6 +259,8 @@
 #elif defined(CONFIG_SAMA5_LCDC_HEO_RGBA8888)
 #  define SAMA5_LCDC_HEO_BPP       32
 #  define SAMA5_LCDC_HEO_COLOR_FMT FB_FMT_RGBA32
+#elif defined(CONFIG_SAMA5_LCDC_HEO)
+#  error Undefined or unrecognized HEO color format
 #endif
 
 #if defined(CONFIG_SAMA5_LCDC_HCR_RGB444)
@@ -309,41 +305,45 @@
 #elif defined(CONFIG_SAMA5_LCDC_HCR_RGBA8888)
 #  define SAMA5_LCDC_HCR_BPP       32
 #  define SAMA5_LCDC_HCR_COLOR_FMT FB_FMT_RGBA32
+#elif defined(CONFIG_SAMA5_LCDC_HCR)
+#  error Undefined or unrecognized cursor color format
 #endif
 
 /* Framebuffer sizes in bytes */
 
-#ifndef BOARD_LCD_WIDTH
-#  error BOARD_LCD_WIDTH must be defined in the board.h header file
+#ifndef BOARD_LCDC_WIDTH
+#  error BOARD_LCDC_WIDTH must be defined in the board.h header file
 #endif
 
-#ifndef BOARD_LCD_HEIGHT
-#  error BOARD_LCD_HEIGHT must be defined in the board.h header file
+#ifndef BOARD_LCDC_HEIGHT
+#  error BOARD_LCDC_HEIGHT must be defined in the board.h header file
 #endif
 
 #if SAMA5_LCDC_BASE_BPP == 16
-#  define SAMA5_BASE_STRIDE ((BOARD_LCD_WIDTH * 16 + 7) / 8)
+#  define SAMA5_BASE_STRIDE ((BOARD_LCDC_WIDTH * 16 + 7) / 8)
 #elif SAMA5_LCDC_BASE_BPP == 24
-#  define SAMA5_BASE_STRIDE ((BOARD_LCD_WIDTH * 24 + 7) / 8)
+#  define SAMA5_BASE_STRIDE ((BOARD_LCDC_WIDTH * 24 + 7) / 8)
 #elif SAMA5_LCDC_BASE_BPP == 32
-#  define SAMA5_BASE_STRIDE ((BOARD_LCD_WIDTH * 32 + 7) / 8)
+#  define SAMA5_BASE_STRIDE ((BOARD_LCDC_WIDTH * 32 + 7) / 8)
+#else
+#  error Undefined or unrecognized base resolution
 #endif
 
-#define SAMA5_BASE_FBSIZE (SAMA5_BASE_STRIDE * BOARD_LCD_HEIGHT)
+#define SAMA5_BASE_FBSIZE (SAMA5_BASE_STRIDE * BOARD_LCDC_HEIGHT)
 
 #ifndef CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH
-#  define CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH BOARD_LCD_WIDTH
+#  define CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH BOARD_LCDC_WIDTH
 #endif
 
-#if CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH > BOARD_LCD_WIDTH
+#if CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH > BOARD_LCDC_WIDTH
 #  error Width of overlay 1 exceeds the width of the display
 #endif
 
 #ifndef CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT
-#  define CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT BOARD_LCD_HEIGHT
+#  define CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT BOARD_LCDC_HEIGHT
 #endif
 
-#if CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT > BOARD_LCD_HEIGHT
+#if CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT > BOARD_LCDC_HEIGHT
 #  error Height of overlay 1 exceeds the height of the display
 #endif
 
@@ -353,23 +353,25 @@
 #  define SAMA5_OVR1_STRIDE ((CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH * 24 + 7) / 8)
 #elif SAMA5_LCDC_OVR1_BPP == 32
 #  define SAMA5_OVR1_STRIDE ((CONFIG_SAMA5_LCDC_OVR1_MAXWIDTH * 32 + 7) / 8)
+#elif defined(CONFIG_SAMA5_LCDC_OVR1)
+#  error Undefined or unrecognized overlay 1 color resolution
 #endif
 
 #define SAMA5_OVR1_FBSIZE (SAMA5_OVR1_STRIDE * CONFIG_SAMA5_LCDC_OVR1_MAXHEIGHT)
 
 #ifndef CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH
-#  define CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH BOARD_LCD_WIDTH
+#  define CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH BOARD_LCDC_WIDTH
 #endif
 
-#if CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH > BOARD_LCD_WIDTH
+#if CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH > BOARD_LCDC_WIDTH
 #  error Width of overlay 2 exceeds the width of the display
 #endif
 
 #ifndef CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT
-#  define CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT BOARD_LCD_HEIGHT
+#  define CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT BOARD_LCDC_HEIGHT
 #endif
 
-#if CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT > BOARD_LCD_HEIGHT
+#if CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT > BOARD_LCDC_HEIGHT
 #  error Height of overlay 2 exceeds the height of the display
 #endif
 
@@ -379,23 +381,25 @@
 #  define SAMA5_OVR2_STRIDE ((CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH * 24 + 7) / 8)
 #elif SAMA5_LCDC_OVR2_BPP == 32
 #  define SAMA5_OVR2_STRIDE ((CONFIG_SAMA5_LCDC_OVR2_MAXWIDTH * 32 + 7) / 8)
+#elif defined(CONFIG_SAMA5_LCDC_OVR2)
+#  error Undefined or unrecognized overlay 2 color resolution
 #endif
 
 #define SAMA5_OVR2_FBSIZE (SAMA5_OVR2_STRIDE * CONFIG_SAMA5_LCDC_OVR2_MAXHEIGHT)
 
 #ifndef CONFIG_SAMA5_LCDC_HEO_MAXWIDTH
-#  define CONFIG_SAMA5_LCDC_HEO_MAXWIDTH BOARD_LCD_WIDTH
+#  define CONFIG_SAMA5_LCDC_HEO_MAXWIDTH BOARD_LCDC_WIDTH
 #endif
 
-#if CONFIG_SAMA5_LCDC_HEO_MAXWIDTH > BOARD_LCD_WIDTH
+#if CONFIG_SAMA5_LCDC_HEO_MAXWIDTH > BOARD_LCDC_WIDTH
 #  error Width of HEO exceeds the width of the display
 #endif
 
 #ifndef CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT
-#  define CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT BOARD_LCD_HEIGHT
+#  define CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT BOARD_LCDC_HEIGHT
 #endif
 
-#if CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT > BOARD_LCD_HEIGHT
+#if CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT > BOARD_LCDC_HEIGHT
 #  error Height of HEO exceeds the height of the display
 #endif
 
@@ -405,23 +409,25 @@
 #  define SAMA5_HEO_STRIDE ((CONFIG_SAMA5_LCDC_HEO_MAXWIDTH * 24 + 7) / 8)
 #elif SAMA5_LCDC_HEO_BPP == 32
 #  define SAMA5_HEO_STRIDE ((CONFIG_SAMA5_LCDC_HEO_MAXWIDTH * 32 + 7) / 8)
+#elif defined(CONFIG_SAMA5_LCDC_HEO)
+#  error Undefined or unrecognized HEO color resolution
 #endif
 
 #define SAMA5_HEO_FBSIZE (SAMA5_HEO_STRIDE * CONFIG_SAMA5_LCDC_HEO_MAXHEIGHT)
 
 #ifndef CONFIG_SAMA5_LCDC_HCR_MAXWIDTH
-#  define CONFIG_SAMA5_LCDC_HCR_MAXWIDTH BOARD_LCD_WIDTH
+#  define CONFIG_SAMA5_LCDC_HCR_MAXWIDTH BOARD_LCDC_WIDTH
 #endif
 
-#if CONFIG_SAMA5_LCDC_HCR_MAXWIDTH > BOARD_LCD_WIDTH
+#if CONFIG_SAMA5_LCDC_HCR_MAXWIDTH > BOARD_LCDC_WIDTH
 #  error Width of the hardware cursor exceeds the width of the display
 #endif
 
 #ifndef CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT
-#  define CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT BOARD_LCD_HEIGHT
+#  define CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT BOARD_LCDC_HEIGHT
 #endif
 
-#if CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT > BOARD_LCD_HEIGHT
+#if CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT > BOARD_LCDC_HEIGHT
 #  error Height of the hardware cursor exceeds the height of the display
 #endif
 
@@ -431,6 +437,8 @@
 #  define SAMA5_HCR_STRIDE ((CONFIG_SAMA5_LCDC_HCR_MAXWIDTH * 24 + 7) / 8)
 #elif SAMA5_LCDC_HCR_BPP == 32
 #  define SAMA5_HCR_STRIDE ((CONFIG_SAMA5_LCDC_HCR_MAXWIDTH * 32 + 7) / 8)
+#elif defined(CONFIG_SAMA5_LCDC_HCR)
+#  error Undefined or unrecognized cursor color resolution
 #endif
 
 #define SAMA5_HCR_FBSIZE (SAMA5_HCR_STRIDE * CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT)
@@ -682,8 +690,8 @@ static void sam_show_hcr(void);
 static const struct fb_videoinfo_s g_base_videoinfo =
 {
   .fmt      = SAMA5_LCDC_BASE_COLOR_FMT,
-  .xres     = BOARD_LCD_WIDTH,
-  .yres     = BOARD_LCD_HEIGHT,
+  .xres     = BOARD_LCDC_WIDTH,
+  .yres     = BOARD_LCDC_HEIGHT,
   .nplanes  = 1,
 };
 
@@ -715,12 +723,12 @@ static pio_pinset_t g_lcdcpins[] =
   PIO_LCD_DAT4,  PIO_LCD_DAT5,  PIO_LCD_DAT6,  PIO_LCD_DAT7,
   PIO_LCD_DAT8,  PIO_LCD_DAT9,  PIO_LCD_DAT10, PIO_LCD_DAT11,
 
-#if SAMA5_LCDC_OUTPUT_BPP > 12
+#if BOARD_LCDC_OUTPUT_BPP > 12
   PIO_LCD_DAT12, PIO_LCD_DAT13, PIO_LCD_DAT14, PIO_LCD_DAT15,
 
-#if SAMA5_LCDC_OUTPUT_BPP > 16
+#if BOARD_LCDC_OUTPUT_BPP > 16
   PIO_LCD_DAT16, PIO_LCD_DAT17,
-#if SAMA5_LCDC_OUTPUT_BPP > 18
+#if BOARD_LCDC_OUTPUT_BPP > 18
                                 PIO_LCD_DAT18, PIO_LCD_DAT19,
   PIO_LCD_DAT20, PIO_LCD_DAT21, PIO_LCD_DAT22, PIO_LCD_DAT23,
 #endif
@@ -1319,14 +1327,14 @@ static void sam_setposition(int lid, uint32_t x, uint32_t y)
 
       /* Clip the position so that the window lies on the physical display */
 
-      if (x + w >= BOARD_LCD_WIDTH)
+      if (x + w >= BOARD_LCDC_WIDTH)
         {
-          x = BOARD_LCD_WIDTH - w;
+          x = BOARD_LCDC_WIDTH - w;
         }
 
-      if (y + h >= BOARD_LCD_HEIGHT)
+      if (y + h >= BOARD_LCDC_HEIGHT)
         {
-          y = BOARD_LCD_HEIGHT - h;
+          y = BOARD_LCDC_HEIGHT - h;
         }
 
       /* Set the new position of the layer */
@@ -2228,11 +2236,21 @@ static void sam_lcd_enable(void)
 
   /* 1. Configure LCD timing parameters, signal polarity and clock period. */
 
-  div = (BOARD_MCK_FREQUENCY + (BOARD_LCD_PIXELCLOCK-1)) / BOARD_LCD_PIXELCLOCK;
+#ifdef BOARD_LCDC_MCK_MUL2
+  div = (2*BOARD_MCK_FREQUENCY + (BOARD_LCDC_PIXELCLOCK-1)) / BOARD_LCDC_PIXELCLOCK;
+#else
+  div = (BOARD_MCK_FREQUENCY + (BOARD_LCDC_PIXELCLOCK-1)) / BOARD_LCDC_PIXELCLOCK;
+#endif
   DEBUGASSERT(div > 1);
 
-  regval  = LCDC_LCDCFG0_CLKPOL | LCDC_LCDCFG0_CGDISBASE |
-            LCDC_LCDCFG0_CLKDIV(div - 2);
+  regval  = LCDC_LCDCFG0_CGDISBASE | LCDC_LCDCFG0_CLKDIV(div - 2);
+
+#ifdef BOARD_LCDC_PIXCLK_INV
+  regval |= LCDC_LCDCFG0_CLKPOL;
+#endif
+#ifdef BOARD_LCDC_MCK_MUL2
+  regval |= LCDC_LCDCFG0_CLKSEL;
+#endif
 #ifdef CONFIG_SAMA5_LCDC_OVR1
   regval |= LCDC_LCDCFG0_CGDISOVR1;
 #endif
@@ -2247,39 +2265,39 @@ static void sam_lcd_enable(void)
 #endif
   sam_putreg(SAM_LCDC_LCDCFG0, regval);
 
-  regval = LCDC_LCDCFG1_HSPW(BOARD_LCD_HSPW - 1) |
-           LCDC_LCDCFG1_VSPW(BOARD_LCD_VSPW - 1);
+  regval = LCDC_LCDCFG1_HSPW(BOARD_LCDC_HSPW - 1) |
+           LCDC_LCDCFG1_VSPW(BOARD_LCDC_VSPW - 1);
   sam_putreg(SAM_LCDC_LCDCFG1, regval);
 
-  regval = LCDC_LCDCFG2_VFPW(BOARD_LCD_VFPW - 1) |
-           LCDC_LCDCFG2_VBPW(BOARD_LCD_VBPW);
+  regval = LCDC_LCDCFG2_VFPW(BOARD_LCDC_VFPW - 1) |
+           LCDC_LCDCFG2_VBPW(BOARD_LCDC_VBPW);
   sam_putreg(SAM_LCDC_LCDCFG2, regval);
 
-  regval = LCDC_LCDCFG3_HFPW(BOARD_LCD_HFPW - 1) |
-           LCDC_LCDCFG3_HBPW(BOARD_LCD_HBPW - 1);
+  regval = LCDC_LCDCFG3_HFPW(BOARD_LCDC_HFPW - 1) |
+           LCDC_LCDCFG3_HBPW(BOARD_LCDC_HBPW - 1);
   sam_putreg(SAM_LCDC_LCDCFG3, regval);
 
-  regval = LCDC_LCDCFG4_PPL(BOARD_LCD_WIDTH - 1) |
-           LCDC_LCDCFG4_RPF(BOARD_LCD_HEIGHT - 1);
+  regval = LCDC_LCDCFG4_PPL(BOARD_LCDC_WIDTH - 1) |
+           LCDC_LCDCFG4_RPF(BOARD_LCDC_HEIGHT - 1);
   sam_putreg(SAM_LCDC_LCDCFG4, regval);
 
   regval = LCDC_LCDCFG5_HSPOL | LCDC_LCDCFG5_VSPOL |
            LCDC_LCDCFG5_VSPDLYS | LCDC_LCDCFG5_DISPDLY |
            LCDC_LCDCFG5_GUARDTIME(BOARD_LCDC_GUARDTIME);
-#if defined(CONFIG_SAMA5_LCDC_OUTPUT_12BPP)
+#if BOARD_LCDC_OUTPUT_BPP == 16
   regval |= LCDC_LCDCFG5_MODE_12BPP;
-#elif defined(CONFIG_SAMA5_LCDC_OUTPUT_16BPP)
+#elif BOARD_LCDC_OUTPUT_BPP == 16
   regval |= LCDC_LCDCFG5_MODE_16BPP;
-#elif defined(CONFIG_SAMA5_LCDC_OUTPUT_18BPP)
+#elif BOARD_LCDC_OUTPUT_BPP == 18
   regval |= LCDC_LCDCFG5_MODE_18BPP;
-#elif defined(CONFIG_SAMA5_LCDC_OUTPUT_24BPP)
+#elif BOARD_LCDC_OUTPUT_BPP == 24
   regval |= LCDC_LCDCFG5_MODE_24BPP;
 #else
-#  error Unknown output resolution
+#  error Unknown or undefined output resolution
 #endif
   sam_putreg(SAM_LCDC_LCDCFG5, regval);
 
-  regval = LCDC_LCDCFG6_PWMPS_DIV64 | LCDC_LCDCFG6_PWMPOL |
+  regval = BOARD_LCDC_PWMPS | BOARD_LCDC_PWMPOL |
            LCDC_LCDCFG6_PWMCVAL(CONFIG_SAMA5_LCDC_DEFBACKLIGHT);
   sam_putreg(SAM_LCDC_LCDCFG6, regval);
 
@@ -2658,14 +2676,14 @@ static void sam_show_layer(struct sam_layer_s *layer,
 
   /* Windows position & size check */
 
-  if (dispx + dispw > BOARD_LCD_WIDTH)
+  if (dispx + dispw > BOARD_LCDC_WIDTH)
     {
-      dispw = BOARD_LCD_WIDTH - dispx;
+      dispw = BOARD_LCDC_WIDTH - dispx;
     }
 
-  if (dispy + disph > BOARD_LCD_HEIGHT)
+  if (dispy + disph > BOARD_LCDC_HEIGHT)
     {
-      disph = BOARD_LCD_HEIGHT - dispy;
+      disph = BOARD_LCDC_HEIGHT - dispy;
     }
 
   if (dispw <= 0)
@@ -3091,7 +3109,7 @@ static void sam_show_layer(struct sam_layer_s *layer,
 static void sam_show_base(void)
 {
   sam_show_layer(LAYER_BASE, 0, 0,
-      BOARD_LCD_WIDTH, BOARD_LCD_HEIGHT, BOARD_LCD_WIDTH, BOARD_LCD_HEIGHT);
+      BOARD_LCDC_WIDTH, BOARD_LCDC_HEIGHT, BOARD_LCDC_WIDTH, BOARD_LCDC_HEIGHT);
 }
 
 /****************************************************************************
@@ -3119,8 +3137,8 @@ static void sam_show_hcr(void)
   /* And show the hardware cursor layer */
 
   sam_show_layer(&g_hcr.layer,
-    (BOARD_LCD_WIDTH - CONFIG_SAMA5_LCDC_HCR_MAXWIDTH) / 2,
-    (BOARD_LCD_HEIGHT - CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT) / 2,
+    (BOARD_LCDC_WIDTH - CONFIG_SAMA5_LCDC_HCR_MAXWIDTH) / 2,
+    (BOARD_LCDC_HEIGHT - CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT) / 2,
     CONFIG_SAMA5_LCDC_HCR_MAXWIDTH, CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT,
     CONFIG_SAMA5_LCDC_HCR_MAXWIDTH, CONFIG_SAMA5_LCDC_HCR_MAXHEIGHT);
 }
