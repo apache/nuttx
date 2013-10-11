@@ -327,6 +327,24 @@ config SAMA5_LCDC_BACKCOLOR
 	default 0x0
 
 choice
+	prompt "Output resolution"
+	default SAMA5_LCDC_OUTPUT_24BPP
+
+config SAMA5_LCDC_OUTPUT_12BPP
+	bool "12BPP"
+
+config SAMA5_LCDC_OUTPUT_16BPP
+	bool "16BPP"
+
+config SAMA5_LCDC_OUTPUT_18BPP
+	bool "18BPP"
+
+config SAMA5_LCDC_OUTPUT_24BPP
+	bool "24BPP"
+
+endchoice # Output resolution
+
+choice
 	prompt "Frame buffer allocation strategy"
 	default SAMA5_LCDC_FBALLOCATED
 
@@ -391,7 +409,7 @@ endchoice # Base layer rotation
 
 choice
 	prompt "Base layer color format"
-	default SAMA5_LCDC_BASE_RGB888P
+	default SAMA5_LCDC_BASE_RGB565
 
 config SAMA5_LCDC_BASE_RGB444
 	bool "12 bpp RGB 444"
@@ -480,7 +498,7 @@ endchoice # Overlay 1 rotation
 
 choice
 	prompt "Overlay 1 color format"
-	default SAMA5_LCDC_OVR1_RGB888P
+	default SAMA5_LCDC_OVR1_RGB565
 
 config SAMA5_LCDC_OVR1_RGB444
 	bool "12 bpp RGB 444"
@@ -570,7 +588,7 @@ endchoice # Overlay 2 rotation
 
 choice
 	prompt "Overlay 2 layer color format"
-	default SAMA5_LCDC_OVR2_RGB888P
+	default SAMA5_LCDC_OVR2_RGB565
 
 config SAMA5_LCDC_OVR2_RGB444
 	bool "12 bpp RGB 444"
@@ -660,7 +678,7 @@ endchoice # HEO layer rotation
 
 choice
 	prompt "HEO layer color format"
-	default SAMA5_LCDC_HEO_RGB888P
+	default SAMA5_LCDC_HEO_RGB565
 
 config SAMA5_LCDC_HEO_RGB444
 	bool "12 bpp RGB 444"
@@ -742,7 +760,7 @@ endchoice # Hardware cursor rotation
 
 choice
 	prompt "Hardware cursor layer color format"
-	default SAMA5_LCDC_HCR_RGB888P
+	default SAMA5_LCDC_HCR_RGB565
 
 config SAMA5_LCDC_HCR_RGB444
 	bool "12 bpp RGB 444"
