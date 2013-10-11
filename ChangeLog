@@ -5736,4 +5736,9 @@
 	* arch/arm/src/sama5/sam_lcd.c:  Change how DMA descriptors are
 	  allocated.  My reading of the SAMA5 MATRIX is that the LCDC will
 	  be unable to DMA from internal SRAM (2012-10-10).
-
+	* arch/arm/src/sama5/Kconfig and configs/sama5d3x-ek/nx/defconfig:  The
+	  default LCD resolution is now RGB565.  Added output resolution selection
+	  which can be different from the software resolution (2013-10-10.
+	* arch/arm/src/sama5/sam_lcd.c wait before modifying register if the LCDC
+	  is re-synchronizing (SIF). Use start-up configuration settings from
+	  Barebox.  They still don't work (2013-10-10).

@@ -77,7 +77,19 @@
 #endif
 #define SAMA5_LCDC_BACKLIGHT_OFF 0x00
 
-/* Color formats */
+/* Color/video formats */
+
+#if defined(CONFIG_SAMA5_LCDC_OUTPUT_12BPP)
+#  define SAMA5_LCDC_OUTPUT_BPP     12
+#elif defined(CONFIG_SAMA5_LCDC_OUTPUT_16BPP)
+#  define SAMA5_LCDC_OUTPUT_BPP     16
+#elif defined(CONFIG_SAMA5_LCDC_OUTPUT_18BPP)
+#  define SAMA5_LCDC_OUTPUT_BPP     18
+#elif defined(CONFIG_SAMA5_LCDC_OUTPUT_24BPP)
+#  define SAMA5_LCDC_OUTPUT_BPP     24
+#else
+#  error No output resolution defined
+#endif
 
 #if defined(CONFIG_SAMA5_LCDC_BASE_RGB444)
 #  define SAMA5_LCDC_BASE_BPP       16  /* 12BPP but must be 16-bit aligned */
@@ -589,6 +601,7 @@ static void sam_putreg(uintptr_t addr, uint32_t val);
 #  define sam_getreg(addr)      getreg32(addr)
 #  define sam_putreg(addr,val)  putreg32(val,addr)
 #endif
+static void sam_wait_lcdstatus(uint32_t mask, uint32_t value);
 
 /* Frame buffer interface ***************************************************/
 /* Get information about the video controller configuration and the
@@ -700,13 +713,18 @@ static pio_pinset_t g_lcdcpins[] =
 {
   PIO_LCD_DAT0,  PIO_LCD_DAT2,  PIO_LCD_DAT1,  PIO_LCD_DAT3,
   PIO_LCD_DAT4,  PIO_LCD_DAT5,  PIO_LCD_DAT6,  PIO_LCD_DAT7,
-
   PIO_LCD_DAT8,  PIO_LCD_DAT9,  PIO_LCD_DAT10, PIO_LCD_DAT11,
+
+#if SAMA5_LCDC_OUTPUT_BPP > 12
   PIO_LCD_DAT12, PIO_LCD_DAT13, PIO_LCD_DAT14, PIO_LCD_DAT15,
 
-#if SAMA5_LCDC_BASE_BPP > 16
-  PIO_LCD_DAT16, PIO_LCD_DAT17, PIO_LCD_DAT18, PIO_LCD_DAT19,
+#if SAMA5_LCDC_OUTPUT_BPP > 16
+  PIO_LCD_DAT16, PIO_LCD_DAT17,
+#if SAMA5_LCDC_OUTPUT_BPP > 18
+                                PIO_LCD_DAT18, PIO_LCD_DAT19,
   PIO_LCD_DAT20, PIO_LCD_DAT21, PIO_LCD_DAT22, PIO_LCD_DAT23,
+#endif
+#endif
 #endif
 
   PIO_LCD_PWM,   PIO_LCD_DISP,  PIO_LCD_VSYNC, PIO_LCD_HSYNC,
@@ -1043,6 +1061,20 @@ static void sam_putreg(uintptr_t address, uint32_t regval)
   putreg32(regval, address);
 }
 #endif
+
+/****************************************************************************
+ * Name: sam_wait_lcdstatus
+ *
+ * Description:
+ *   Wait for the masked set of bits in the LCDC status register to take a
+ *   specific value.
+ *
+ ****************************************************************************/
+
+static void sam_wait_lcdstatus(uint32_t mask, uint32_t value)
+{
+   while ((sam_getreg(SAM_LCDC_LCDSR) & mask) != value);
+}
 
 /****************************************************************************
  * Name: sam_base_getvideoinfo
@@ -1503,7 +1535,7 @@ static void sam_backlight(uint32_t level)
 
       /* And wait for the PWM to be disabled */
 
-      while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_PWM) != 0);
+      sam_wait_lcdstatus(LCDC_LCDSR_SIP | LCDC_LCDSR_PWM, 0);
     }
 #ifdef CONFIG_SAMA5_LCDC_BACKLIGHT
   else
@@ -1865,7 +1897,7 @@ static void sam_lcd_disable(void)
    *    is no longer activated.
    */
 
-  while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_DISP) != 0);
+  sam_wait_lcdstatus(LCDC_LCDSR_SIP | LCDC_LCDSR_DISP, 0);
 
   /* 3. Disable the hsync and vsync signals by writing one to SYNCDIS field of
    *    the LCDC_LCDDIS register.
@@ -1877,7 +1909,7 @@ static void sam_lcd_disable(void)
    *    synchronization is off.
    */
 
-  while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_LCD) != 0);
+  sam_wait_lcdstatus(LCDC_LCDSR_SIP | LCDC_LCDSR_LCD, 0);
 
   /* 5. Disable the Pixel clock by writing one in the CLKDIS field of the
    *    LCDC_LCDDIS register.
@@ -1889,7 +1921,7 @@ static void sam_lcd_disable(void)
    *    is disabled.
    */
 
-  while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_CLK) != 0);
+  sam_wait_lcdstatus(LCDC_LCDSR_SIP | LCDC_LCDSR_CLK, 0);
 
   /* Disable peripheral clock */
 
@@ -2029,21 +2061,30 @@ static void sam_layer_color(void)
 
   /* Base channel color configuration */
 
-#ifdef CONFIG_SAMA5_LCDC_BASE_RGB888P
+#if defined(CONFIG_SAMA5_LCDC_BASE_RGB888P)
   LAYER_BASE->bpp = 24;
 
   sam_putreg(SAM_LCDC_BASECFG0,
              LCDC_BASECFG0_DLBO | LCDC_BASECFG0_BLEN_INCR16);
   sam_putreg(SAM_LCDC_BASECFG1,
              LCDC_BASECFG1_24BPP_RGB888P);
+
+#  elif defined(CONFIG_SAMA5_LCDC_BASE_RGB565)
+  LAYER_BASE->bpp = 16;
+
+  sam_putreg(SAM_LCDC_BASECFG0,
+             LCDC_BASECFG0_DLBO | LCDC_BASECFG0_BLEN_INCR4);
+  sam_putreg(SAM_LCDC_BASECFG1,
+             LCDC_BASECFG1_16BPP_RGB565);
+
 #else
-# error Support for this resolution is not yet supported
+#  error Support for this resolution is not yet supported
 #endif
 
 #ifdef CONFIG_SAMA5_LCDC_OVR1
-#  ifdef CONFIG_SAMA5_LCDC_OVR1_RGB888P
   /* Overlay 1 color configuration, GA 0xff */
 
+#  if defined(CONFIG_SAMA5_LCDC_OVR1_RGB888P)
   LAYER_OVR1->bpp = 24;
 
   sam_putreg(SAM_LCDC_OVR1CFG0,
@@ -2053,15 +2094,27 @@ static void sam_layer_color(void)
              LCDC_OVR1CFG1_24BPP_RGB888P);
   sam_putreg(SAM_LCDC_OVR1CFG9,
              LCDC_OVR1CFG9_GA(0xff) | LCDC_OVR1CFG9_GAEN);
+
+#  elif defined(CONFIG_SAMA5_LCDC_OVR1_RGB565)
+  LAYER_OVR1->bpp = 16;
+
+  sam_putreg(SAM_LCDC_OVR1CFG0,
+             LCDC_OVR1CFG0_DLBO | LCDC_OVR1CFG0_BLEN_INCR4 |
+             LCDC_OVR1CFG0_ROTDIS);
+  sam_putreg(SAM_LCDC_OVR1CFG1,
+             LCDC_OVR1CFG1_16BPP_RGB565);
+  sam_putreg(SAM_LCDC_OVR1CFG9,
+             LCDC_OVR1CFG9_GA(0xff) | LCDC_OVR1CFG9_GAEN);
+
 #  else
-#   error Support for this resolution is not yet supported
+#    error Support for this resolution is not yet supported
 #  endif
 #endif
 
 #ifdef CONFIG_SAMA5_LCDC_OVR2
-#  ifdef CONFIG_SAMA5_LCDC_OVR2_RGB888P
   /* Overlay 2 color configuration, GA 0xff */
 
+#  if defined(CONFIG_SAMA5_LCDC_OVR2_RGB888P)
   LAYER_OVR2->bpp = 24;
 
   sam_putreg(SAM_LCDC_OVR2CFG0,
@@ -2071,15 +2124,27 @@ static void sam_layer_color(void)
              LCDC_OVR2CFG1_24BPP_RGB888P);
   sam_putreg(SAM_LCDC_OVR2CFG9,
              LCDC_OVR2CFG9_GA(0xff) | LCDC_OVR2CFG9_GAEN;
+
+#  elif defined(CONFIG_SAMA5_LCDC_OVR2_RGB565)
+  LAYER_OVR2->bpp = 16;
+
+  sam_putreg(SAM_LCDC_OVR2CFG0,
+             LCDC_OVR2CFG0_DLBO | LCDC_OVR2CFG0_BLEN_INCR4 |
+             LCDC_OVR2CFG0_ROTDIS);
+  sam_putreg(SAM_LCDC_OVR2CFG1,
+             LCDC_OVR2CFG1_16BPP_RGB565);
+  sam_putreg(SAM_LCDC_OVR2CFG9,
+             LCDC_OVR2CFG9_GA(0xff) | LCDC_OVR2CFG9_GAEN);
+
 #  else
-#   error Support for this resolution is not yet supported
+#    error Support for this resolution is not yet supported
 #  endif
 #endif
 
 #ifdef CONFIG_SAMA5_LCDC_HEO
-#  ifdef CONFIG_SAMA5_LCDC_HEO_RGB888P
   /* High End Overlay color configuration, GA 0xff */
 
+#  if defined(CONFIG_SAMA5_LCDC_HEO_RGB888P)
   LAYER_HEO->bpp = 24;
 
   sam_putreg(SAM_LCDC_HEOCFG0,
@@ -2089,15 +2154,27 @@ static void sam_layer_color(void)
              LCDC_HEOCFG1_24BPP_RGB888P);
   sam_putreg(SAM_LCDC_HEOCFG12,
              LCDC_HEOCFG12_GA(0xff) | LCDC_HEOCFG12_GAEN);
+
+#  elif defined(CONFIG_SAMA5_LCDC_HEO_RGB565)
+  LAYER_HEO->bpp = 16;
+
+  sam_putreg(SAM_LCDC_HEOCFG0,
+             LCDC_HEOCFG0_DLBO | LCDC_HEOCFG0_BLEN_INCR4 |
+             LCDC_HEOCFG0_ROTDIS);
+  sam_putreg(SAM_LCDC_HEOCFG1,
+             LCDC_HEOCFG1_16BPP_RGB565);
+  sam_putreg(SAM_LCDC_HEOCFG9,
+             LCDC_HEOCFG9_GA(0xff) | LCDC_HEOCFG9_GAEN);
+
 #  else
-#   error Support for this resolution is not yet supported
+#    error Support for this resolution is not yet supported
 #  endif
 #endif
 
 #ifdef CONFIG_FB_HWCURSOR
-#  ifdef CONFIG_SAMA5_LCDC_HEO_RGB888P
   /* Hardware Cursor color configuration, GA 0xff, Key #000000 */
 
+#  if defined(CONFIG_SAMA5_LCDC_HCR_RGB888P)
   LAYER_HCR->bpp = 24;
 
   sam_putreg(SAM_LCDC_HCRCFG0,
@@ -2110,8 +2187,20 @@ static void sam_layer_color(void)
              0xffffff);
   sam_putreg(SAM_LCDC_HCRCFG9,
              LCDC_HCRCFG9_GAEN(0xff) | LCDC_HCRCFG9_GAEN);
+
+#  elif defined(CONFIG_SAMA5_LCDC_HCR_RGB565)
+  LAYER_HCR->bpp = 16;
+
+  sam_putreg(SAM_LCDC_HCRCFG0,
+             LCDC_HCRCFG0_DLBO | LCDC_HCRCFG0_BLEN_INCR4 |
+             LCDC_HCRCFG0_ROTDIS);
+  sam_putreg(SAM_LCDC_HCRCFG1,
+             LCDC_HCRCFG1_16BPP_RGB565);
+  sam_putreg(SAM_LCDC_HCRCFG9,
+             LCDC_HCRCFG9_GA(0xff) | LCDC_HCRCFG9_GAEN);
+
 #  else
-#   error Support for this resolution is not yet supported
+#    error Support for this resolution is not yet supported
 #  endif
 #endif
 }
@@ -2139,24 +2228,35 @@ static void sam_lcd_enable(void)
 
   /* 1. Configure LCD timing parameters, signal polarity and clock period. */
 
-  div = ((2 * BOARD_MCK_FREQUENCY) / BOARD_LCD_PIXELCLOCK) - 2;
-  regval = LCDC_LCDCFG0_CLKPOL | LCDC_LCDCFG0_CLKSEL |
-           LCDC_LCDCFG0_CLKPWMSEL | LCDC_LCDCFG0_CGDISBASE |
-           LCDC_LCDCFG0_CGDISOVR1 | LCDC_LCDCFG0_CGDISOVR2 |
-           LCDC_LCDCFG0_CGDISHEO | LCDC_LCDCFG0_CGDISHCR |
-           LCDC_LCDCFG0_CLKDIV(div);
+  div = (BOARD_MCK_FREQUENCY + (BOARD_LCD_PIXELCLOCK-1)) / BOARD_LCD_PIXELCLOCK;
+  DEBUGASSERT(div > 1);
+
+  regval  = LCDC_LCDCFG0_CLKPOL | LCDC_LCDCFG0_CGDISBASE |
+            LCDC_LCDCFG0_CLKDIV(div - 2);
+#ifdef CONFIG_SAMA5_LCDC_OVR1
+  regval |= LCDC_LCDCFG0_CGDISOVR1;
+#endif
+#ifdef CONFIG_SAMA5_LCDC_OVR2
+  regval |= LCDC_LCDCFG0_CGDISOVR2;
+#endif
+#ifdef CONFIG_SAMA5_LCDC_HEO
+  regval |= LCDC_LCDCFG0_CGDISHEO;
+#endif
+#ifdef CONFIG_SAMA5_LCDC_HCR
+  regval |= LCDC_LCDCFG0_CGDISHCR;
+#endif
   sam_putreg(SAM_LCDC_LCDCFG0, regval);
 
-  regval = LCDC_LCDCFG1_HSPW(BOARD_LCD_TIMING_HPW - 1) |
-           LCDC_LCDCFG1_VSPW(BOARD_LCD_TIMING_VPW - 1);
+  regval = LCDC_LCDCFG1_HSPW(BOARD_LCD_HSPW - 1) |
+           LCDC_LCDCFG1_VSPW(BOARD_LCD_VSPW - 1);
   sam_putreg(SAM_LCDC_LCDCFG1, regval);
 
-  regval = LCDC_LCDCFG2_VFPW(BOARD_LCD_TIMING_VFP - 1) |
-           LCDC_LCDCFG2_VBPW(BOARD_LCD_TIMING_VBP);
+  regval = LCDC_LCDCFG2_VFPW(BOARD_LCD_VFPW - 1) |
+           LCDC_LCDCFG2_VBPW(BOARD_LCD_VBPW);
   sam_putreg(SAM_LCDC_LCDCFG2, regval);
 
-  regval = LCDC_LCDCFG3_HFPW(BOARD_LCD_TIMING_HFP - 1) |
-           LCDC_LCDCFG3_HBPW(BOARD_LCD_TIMING_HBP - 1);
+  regval = LCDC_LCDCFG3_HFPW(BOARD_LCD_HFPW - 1) |
+           LCDC_LCDCFG3_HBPW(BOARD_LCD_HBPW - 1);
   sam_putreg(SAM_LCDC_LCDCFG3, regval);
 
   regval = LCDC_LCDCFG4_PPL(BOARD_LCD_WIDTH - 1) |
@@ -2165,7 +2265,18 @@ static void sam_lcd_enable(void)
 
   regval = LCDC_LCDCFG5_HSPOL | LCDC_LCDCFG5_VSPOL |
            LCDC_LCDCFG5_VSPDLYS | LCDC_LCDCFG5_DISPDLY |
-           LCDC_LCDCFG5_MODE_24BPP | LCDC_LCDCFG5_GUARDTIME(30);
+           LCDC_LCDCFG5_GUARDTIME(BOARD_LCDC_GUARDTIME);
+#if defined(CONFIG_SAMA5_LCDC_OUTPUT_12BPP)
+  regval |= LCDC_LCDCFG5_MODE_12BPP;
+#elif defined(CONFIG_SAMA5_LCDC_OUTPUT_16BPP)
+  regval |= LCDC_LCDCFG5_MODE_16BPP;
+#elif defined(CONFIG_SAMA5_LCDC_OUTPUT_18BPP)
+  regval |= LCDC_LCDCFG5_MODE_18BPP;
+#elif defined(CONFIG_SAMA5_LCDC_OUTPUT_24BPP)
+  regval |= LCDC_LCDCFG5_MODE_24BPP;
+#else
+#  error Unknown output resolution
+#endif
   sam_putreg(SAM_LCDC_LCDCFG5, regval);
 
   regval = LCDC_LCDCFG6_PWMPS_DIV64 | LCDC_LCDCFG6_PWMPOL |
@@ -2182,7 +2293,7 @@ static void sam_lcd_enable(void)
    * is running.
    */
 
-  while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_CLK) == 0);
+  sam_wait_lcdstatus(LCDC_LCDSR_SIP | LCDC_LCDSR_CLK, LCDC_LCDSR_CLK);
 
   /* 4. Enable Horizontal and Vertical Synchronization by writing one to the
    *    SYNCEN field of the LCDC_LCDEN register.
@@ -2194,7 +2305,7 @@ static void sam_lcd_enable(void)
    *    synchronization is up.
    */
 
-  while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_LCD) == 0);
+  sam_wait_lcdstatus(LCDC_LCDSR_SIP | LCDC_LCDSR_LCD, LCDC_LCDSR_LCD);
 
   /* 6. Enable the display power signal writing one to the DISPEN field of the
    *    LCDC_LCDEN register.
@@ -2206,7 +2317,7 @@ static void sam_lcd_enable(void)
    *    signal is activated.
    */
 
-  while ((sam_getreg(SAM_LCDC_LCDSR) & LCDC_LCDSR_DISP) == 0);
+  sam_wait_lcdstatus(LCDC_LCDSR_SIP | LCDC_LCDSR_DISP, LCDC_LCDSR_DISP);
 }
 
 /****************************************************************************
