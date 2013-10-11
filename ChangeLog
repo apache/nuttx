@@ -5742,3 +5742,7 @@
 	* arch/arm/src/sama5/sam_lcd.c wait before modifying register if the LCDC
 	  is re-synchronizing (SIF). Use start-up configuration settings from
 	  Barebox.  They still don't work (2013-10-10).
+	* net/net_monitor.c: Notify the socket layer if a connection is lost
+	  before the monitoring callback has been registered.  From Max
+	  Holtzberg (2013-10-11).
+
