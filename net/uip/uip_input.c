@@ -292,7 +292,11 @@ nullreturn:
  * Description:
  *
  * Returned Value:
- *   OK if packet could be processed, otherwise ERROR.
+ *   OK    The packet was processed (or dropped) and can be discarded.
+ *   ERROR There is a matching connection, but could not dispatch the packet
+ *         yet.  Currently useful for UDP when a packet arrives before a recv
+ *         call is in place.
+ *
  *
  * Assumptions:
  *
@@ -431,7 +435,7 @@ int uip_input(struct uip_driver_s *dev)
         {
           nlldbg("Possible ping config packet received\n");
           uip_icmpinput(dev);
-          goto done;
+          goto drop;
         }
       else
 #endif
@@ -537,13 +541,16 @@ int uip_input(struct uip_driver_s *dev)
         goto drop;
     }
 
-  /* Return and let the caller do any actual transmission. */
+  /* Return and let the caller do any pending transmission. */
 
   return OK;
 
+  /* Drop the packet.  NOTE that OK is returned meaning that the
+   * packet has been processed (although processed unsuccessfully).
+   */
+
 drop:
   dev->d_len = 0;
-
-  return ERROR;
+  return OK;
 }
 #endif /* CONFIG_NET */

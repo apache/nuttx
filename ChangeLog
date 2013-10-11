@@ -5745,4 +5745,9 @@
 	* net/net_monitor.c: Notify the socket layer if a connection is lost
 	  before the monitoring callback has been registered.  From Max
 	  Holtzberg (2013-10-11).
-
+	* net/recvfrom.c, sendto.c, uip/uip_input.c, uip/uip_udpcallback.c,
+	  uip/uip_udpconn.c, uip/uip_udpinput.c:  Changed the meaning of the
+	  uip_*input functions. They now return success when a packet is
+	  dropped; This is needed for the ENCX24J600 driver that must make
+	  a decision to return the packet or not:  It should not retai
+	  dropped packets. From Max Holtzberg (2013-10-11).

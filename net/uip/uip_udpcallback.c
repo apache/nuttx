@@ -75,27 +75,21 @@
  *
  ****************************************************************************/
 
-int uip_udpcallback(struct uip_driver_s *dev, struct uip_udp_conn *conn,
-                    uint16_t flags)
+uint16_t uip_udpcallback(struct uip_driver_s *dev, struct uip_udp_conn *conn,
+                         uint16_t flags)
 {
-  int ret = ERROR;
-
   nllvdbg("flags: %04x\n", flags);
 
   /* Some sanity checking */
 
   if (conn)
     {
-      /* HACK to check if the packet could be processed */
-
-      ret = (conn->list->event && (flags & conn->list->flags) != 0) ? OK : ERROR;
-
       /* Perform the callback */
 
-      uip_callbackexecute(dev, conn, flags, conn->list);
+      flags = uip_callbackexecute(dev, conn, flags, conn->list);
     }
 
-  return ret;
+  return flags;
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP */

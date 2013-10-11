@@ -953,10 +953,6 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
       state.rf_cb->priv    = (void*)&state;
       state.rf_cb->event   = recvfrom_udpinterrupt;
 
-      /* Enable the UDP socket */
-
-      uip_udpenable(conn);
-
       /* Notify the device driver of the receive call */
 
       netdev_rxnotify(conn->ripaddr);
@@ -971,7 +967,6 @@ static ssize_t udp_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
       /* Make sure that no further interrupts are processed */
 
-      uip_udpdisable(conn);
       uip_udpcallbackfree(conn, state.rf_cb);
       ret = recvfrom_result(ret, &state);
     }

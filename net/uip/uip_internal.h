@@ -192,8 +192,8 @@ int uip_udpinput(struct uip_driver_s *dev);
 
 /* Defined in uip_udpcallback.c *********************************************/
 
-int uip_udpcallback(struct uip_driver_s *dev,
-                    struct uip_udp_conn *conn, uint16_t flags);
+uint16_t uip_udpcallback(struct uip_driver_s *dev,
+                         struct uip_udp_conn *conn, uint16_t flags);
 #endif /* CONFIG_NET_UDP */
 
 #ifdef CONFIG_NET_ICMP

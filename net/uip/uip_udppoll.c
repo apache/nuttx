@@ -107,7 +107,7 @@ void uip_udppoll(struct uip_driver_s *dev, struct uip_udp_conn *conn)
 
       /* Perform the application callback */
 
-      uip_udpcallback(dev, conn, UIP_POLL);
+      (void)uip_udpcallback(dev, conn, UIP_POLL);
 
       /* If the application has data to send, setup the UDP/IP header */
 

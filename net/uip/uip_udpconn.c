@@ -250,6 +250,10 @@ struct uip_udp_conn *uip_udpalloc(void)
       /* Make sure that the connection is marked as uninitialized */
 
       conn->lport = 0;
+
+      /* Enqueue the connection into the active list */
+
+      dq_addlast(&conn->node, &g_active_udp_connections);
     }
   _uip_semgive(&g_free_sem);
   return conn;
@@ -275,6 +279,13 @@ void uip_udpfree(struct uip_udp_conn *conn)
 
   _uip_semtake(&g_free_sem);
   conn->lport = 0;
+
+  /* Remove the connection from the active list */
+
+  dq_rem(&conn->node, &g_active_udp_connections);
+
+  /* Free the connection */
+
   dq_addlast(&conn->node, &g_free_udp_connections);
   _uip_semgive(&g_free_sem);
 }
@@ -452,41 +463,6 @@ int uip_udpconnect(struct uip_udp_conn *conn, const struct sockaddr_in *addr)
 
   conn->ttl   = UIP_TTL;
   return OK;
-}
-
-/****************************************************************************
- * Name: uip_udpenable() uip_udpdisable.
- *
- * Description:
- *   Enable/disable callbacks for the specified connection
- *
- * Assumptions:
- *   This function is called user code.  Interrupts may be enabled.
- *
- ****************************************************************************/
-
-void uip_udpenable(struct uip_udp_conn *conn)
-{
-  /* Add the connection structure to the active connectionlist. This list
-   * is modifiable from interrupt level, we we must disable interrupts to
-   * access it safely.
-   */
-
-  uip_lock_t flags = uip_lock();
-  dq_addlast(&conn->node, &g_active_udp_connections);
-  uip_unlock(flags);
-}
-
-void uip_udpdisable(struct uip_udp_conn *conn)
-{
-  /* Remove the connection structure from the active connectionlist. This list
-   * is modifiable from interrupt level, we we must disable interrupts to
-   * access it safely.
-   */
-
-  uip_lock_t flags = uip_lock();
-  dq_rem(&conn->node, &g_active_udp_connections);
-  uip_unlock(flags);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_UDP */
