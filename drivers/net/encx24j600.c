@@ -169,7 +169,8 @@
 
 #define PKTMEM_ALIGNED_BUFSIZE ((CONFIG_NET_BUFSIZE + 1) & ~1)
 #define PKTMEM_RX_START (PKTMEM_START + PKTMEM_SIZE / 2)   /* Followed by RX buffer */
-#define PKTMEM_RX_END   (PKTMEM_START + PKTMEM_SIZE - 2)   /* RX buffer goes to the end of SRAM */
+#define PKTMEM_RX_SIZE  (PKTMEM_SIZE - PKTMEM_RX_START)
+#define PKTMEM_RX_END   (PKTMEM_START + PKTMEM_SIZE)       /* RX buffer goes to the end of SRAM */
 
 /* We use preinitialized TX descriptors */
 
@@ -330,6 +331,7 @@ static int  enc_uiptxpoll(struct uip_driver_s *dev);
 
 /* Common RX logic */
 
+static struct enc_descr_s *enc_rxgetdescr(FAR struct enc_driver_s *priv);
 static void enc_rxldpkt(FAR struct enc_driver_s *priv, struct enc_descr_s *descr);
 static void enc_rxrmpkt(FAR struct enc_driver_s *priv, struct enc_descr_s *descr);
 static void enc_rxdispatch(FAR struct enc_driver_s *priv);
@@ -365,6 +367,7 @@ static int  enc_rmmac(struct uip_driver_s *dev, FAR const uint8_t *mac);
 
 static void enc_pwrsave(FAR struct enc_driver_s *priv);
 static void enc_setmacaddr(FAR struct enc_driver_s *priv);
+static void enc_resetbuffers(FAR struct enc_driver_s *priv);
 static int  enc_reset(FAR struct enc_driver_s *priv);
 
 /****************************************************************************
@@ -1246,7 +1249,7 @@ static void enc_linkstatus(FAR struct enc_driver_s *priv)
    * FULDPX (MACON2<0>) to match PHYDPX (ESTAT<10>).
    */
 
-  regval = enc_rdphy(priv, ENC_ESTAT);
+  regval = enc_rdreg(priv, ENC_ESTAT);
 
   if (regval & ESTAT_PHYDPX)
     {
@@ -1343,6 +1346,38 @@ static void enc_rxldpkt(FAR struct enc_driver_s *priv,
 }
 
 /****************************************************************************
+ * Function: enc_rxgetdescr
+ *
+ * Description:
+ *   Check for a free descriptor in the free list. If no free descriptor is
+ *   available a pending descriptor will be freed and returned
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   A free rx descriptor
+ *
+ * Assumptions:
+ *   Interrupts are enabled but the caller holds the uIP lock.
+ *
+ ****************************************************************************/
+
+static struct enc_descr_s *enc_rxgetdescr(FAR struct enc_driver_s *priv)
+{
+  if (sq_empty(&priv->rxfreedescr))
+    {
+      DEBUGASSERT(sq_peek(&priv->rxqueue) != NULL);
+
+      /* Packets are held in the enc's SRAM until the space is needed */
+
+      enc_rxrmpkt(priv, (struct enc_descr_s*)sq_peek(&priv->rxqueue));
+    }
+
+  return (struct enc_descr_s*)sq_remfirst(&priv->rxfreedescr);
+}
+
+/****************************************************************************
  * Function: enc_rxrmpkt
  *
  * Description:
@@ -1372,28 +1407,33 @@ static void enc_rxrmpkt(FAR struct enc_driver_s *priv, struct enc_descr_s *descr
    * can be reordered th enc's DMA to free RX space?
    */
 
-  if (descr == (struct enc_descr_s*)sq_peek(&priv->rxqueue))
+  if (descr != NULL)
     {
-      /* @REVISIT wrap around? */
+      if (descr == (struct enc_descr_s*)sq_peek(&priv->rxqueue))
+        {
+          /* Wrap address properly around */
+          addr = (descr->addr - PKTMEM_RX_START + descr->len - 2 + PKTMEM_RX_SIZE)
+            % PKTMEM_RX_SIZE + PKTMEM_RX_START;
 
-      addr = descr->addr + descr->len - 2;
+          DEBUGASSERT(addr >= PKTMEM_RX_START &&  addr < PKTMEM_RX_END);
 
-      nllvdbg("set ERXTAIL to %04x\n", addr);
+          nllvdbg("ERXTAIL %04x\n", addr);
 
-      enc_wrreg(priv, ENC_ERXTAIL, addr);
+          enc_wrreg(priv, ENC_ERXTAIL, addr);
 
-      /* Remove packet from RX queue */
+          /* Remove packet from RX queue */
 
-      sq_remfirst(&priv->rxqueue);
+          sq_remfirst(&priv->rxqueue);
+        }
+      else
+        {
+          /* Remove packet from RX queue */
+
+          sq_rem((sq_entry_t*)descr, &priv->rxqueue);
+        }
+
+      sq_addlast((sq_entry_t*)descr, &priv->rxfreedescr);
     }
-  else
-    {
-      /* Remove packet from RX queue */
-
-      sq_rem((sq_entry_t*)descr, &priv->rxqueue);
-    }
-
-  sq_addlast((sq_entry_t*)descr, &priv->rxfreedescr);
 }
 
 /****************************************************************************
@@ -1525,7 +1565,7 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
   uint16_t curpkt;
   int pktcnt;
 
-  DEBUGASSERT(priv->nextpkt >= PKTMEM_RX_START && priv->nextpkt <= PKTMEM_RX_END);
+  DEBUGASSERT(priv->nextpkt >= PKTMEM_RX_START && priv->nextpkt < PKTMEM_RX_END);
 
   /* Enqueue all pending packets to the RX queue until PKTCNT == 0 or
    * no more descriptors are available.
@@ -1564,13 +1604,33 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
                       (uint32_t)rsv[5] << 8  | (uint32_t)rsv[4];
 
       nllvdbg("Receiving packet, nextpkt: %04x pktlen: %d rxstat: %08x pktcnt: %d\n",
-              priv->nextpkt, pktlen, rxstat, pktcnt);
+             priv->nextpkt, pktlen, rxstat, pktcnt);
+
+      /* We enqueue the packet first and remove it later if its faulty.
+       * This way we avoid freeing packets that are not processed yet.
+       */
+
+      descr = enc_rxgetdescr(priv);
+
+      /* Set current timestamp */
+
+      descr->ts = clock_systimer();
+
+      /* Store the start address of the frame without the enc's header */
+
+      descr->addr = curpkt + 8;
+      descr->len = pktlen;
+      sq_addlast((sq_entry_t*)descr, &priv->rxqueue);
 
       /* Check if the packet was received OK */
 
       if ((rxstat & RXSTAT_OK) == 0)
         {
           nlldbg("ERROR: RXSTAT: %08x\n", rxstat);
+
+          /* Discard packet */
+
+          enc_rxrmpkt(priv, descr);
 
 #ifdef CONFIG_ENCX24J600_STATS
           priv->stats.rxnotok++;
@@ -1582,55 +1642,28 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
       else if (pktlen > (CONFIG_NET_BUFSIZE + 4) || pktlen <= (UIP_LLH_LEN + 4))
         {
           nlldbg("Bad packet size dropped (%d)\n", pktlen);
+
+          /* Discard packet */
+
+          enc_rxrmpkt(priv, descr);
+
 #ifdef CONFIG_ENCX24J600_STATS
           priv->stats.rxpktlen++;
 #endif
         }
 
-      /* Otherwise, enqueue the packet to the RX queue */
-
-      else
-        {
-          descr = (struct enc_descr_s*)sq_remfirst(&priv->rxfreedescr);
-
-          if (descr != NULL)
-            {
-              nllvdbg("allocated RX descriptor: %p\n", descr);
-
-              /* Set current timestamp */
-
-              descr->ts = clock_systimer();
-
-              /* Store the start address of the frame without the enc's header */
-
-              descr->addr = curpkt + 8;
-
-              descr->len = pktlen;
-
-              /* Enqueue packet */
-
-              sq_addlast((sq_entry_t*)descr, &priv->rxqueue);
-
-            }
-          else
-            {
-              nlldbg("no free descriptors\n");
-            }
-        }
-
-
       /* Decrement PKTCNT */
 
       enc_bfs(priv, ENC_ECON1, ECON1_PKTDEC);
+
+      /* Try to process the packet */
+
+      enc_rxdispatch(priv);
 
       /* Read out again, maybe there has another packet arrived */
 
       pktcnt = (enc_rdreg(priv, ENC_ESTAT) & ESTAT_PKTCNT_MASK) >> ESTAT_PKTCNT_SHIFT;
     }
-
-  /* Process the RX queue */
-
-  enc_rxdispatch(priv);
 }
 
 /****************************************************************************
@@ -1648,7 +1681,6 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
  *   filters rejecting a packet. The interrupt should be cleared by software
  *   once it has been serviced."
  *
- *
  * Parameters:
  *   priv  - Reference to the driver state structure
  *
@@ -1662,11 +1694,42 @@ static void enc_pktif(FAR struct enc_driver_s *priv)
 
 static void enc_rxabtif(FAR struct enc_driver_s *priv)
 {
+  struct enc_descr_s *descr;
+
+#if 0
   /* Free the last received packet from the RX queue */
 
   nlldbg("rx abort\n");
+  nlldbg("ESTAT:   %04x\n", enc_rdreg(priv, ENC_ESTAT));
+  nlldbg("EIR:     %04x\n", enc_rdreg(priv, ENC_EIR));
+  nlldbg("ERXTAIL: %04x\n", enc_rdreg(priv, ENC_ERXTAIL));
+  nlldbg("ERXHAED: %04x\n", enc_rdreg(priv, ENC_ERXHEAD));
 
-  enc_rxrmpkt(priv, (struct enc_descr_s*)sq_peek(&priv->rxqueue));
+  descr = (struct enc_descr_s*)sq_peek(&priv->rxqueue);
+
+  while (descr != NULL)
+    {
+      nlldbg("addr: %04x len: %d\n", descr->addr, descr->len);
+      descr = (struct enc_descr_s*)sq_next(descr);
+    }
+
+  DEBUGASSERT(false);
+#endif
+
+  descr = (struct enc_descr_s*)sq_peek(&priv->rxqueue);
+
+  if (descr != NULL)
+    {
+      enc_rxrmpkt(priv, descr);
+
+      nlldbg("pending packet freed\n");
+    }
+  else
+    {
+      /* If no pending packet blocks the reception, reset all buffers */
+
+      enc_resetbuffers(priv);
+    }
 }
 
 /****************************************************************************
@@ -1757,6 +1820,28 @@ static void enc_irqworker(FAR void *arg)
           enc_bfc(priv, ENC_EIR, EIR_TXIF);
         }
 
+      /* The receive abort interrupt occurs when the reception of a frame has
+       * been aborted. A frame being received is aborted when the Head Pointer
+       * attempts to overrun the Tail Pointer, or when the packet counter has
+       * reached FFh. In either case, the receive buffer is full and cannot fit
+       * the incoming frame, so the packet has been dropped. This interrupt does
+       * not occur when packets are dropped due to the receive filters rejecting
+       * a packet. The interrupt should be cleared by software once it has been
+       * serviced.
+       *
+       * To enable the receive abort interrupt, set RXABTIE (EIE<1>).
+       * The corresponding interrupt flag is RXABTIF (EIR<1>).
+       */
+
+      if ((eir & EIR_RXABTIF) != 0) /* Receive Abort */
+        {
+#ifdef CONFIG_ENCX24J600_STATS
+          priv->stats.rxerifs++;
+#endif
+          enc_rxabtif(priv);
+          enc_bfc(priv, ENC_EIR, EIR_RXABTIF);  /* Clear the RXABTIF interrupt */
+        }
+
       /* The received packet pending interrupt occurs when one or more frames
        * have been received and are ready for software processing. This flag is
        * set when the PKTCNT<7:0> (ESTAT<7:0>) bits are non-zero. This interrupt
@@ -1807,28 +1892,6 @@ static void enc_irqworker(FAR void *arg)
           enc_bfc(priv, ENC_EIR, EIR_TXABTIF);  /* Clear the TXABTIF interrupt */
         }
 #endif
-
-      /* The receive abort interrupt occurs when the reception of a frame has
-       * been aborted. A frame being received is aborted when the Head Pointer
-       * attempts to overrun the Tail Pointer, or when the packet counter has
-       * reached FFh. In either case, the receive buffer is full and cannot fit
-       * the incoming frame, so the packet has been dropped. This interrupt does
-       * not occur when packets are dropped due to the receive filters rejecting
-       * a packet. The interrupt should be cleared by software once it has been
-       * serviced.
-       *
-       * To enable the receive abort interrupt, set RXABTIE (EIE<1>).
-       * The corresponding interrupt flag is RXABTIF (EIR<1>).
-       */
-
-      if ((eir & EIR_RXABTIF) != 0) /* Receive Abort */
-        {
-#ifdef CONFIG_ENCX24J600_STATS
-          priv->stats.rxerifs++;
-#endif
-          enc_rxabtif(priv);
-          enc_bfc(priv, ENC_EIR, EIR_RXABTIF);  /* Clear the RXABTIF interrupt */
-        }
     }
 
   /* Enable GPIO interrupts */
@@ -2288,7 +2351,7 @@ static int enc_rxavail(struct uip_driver_s *dev)
 
   if (!sq_empty(&priv->rxqueue))
     {
-      nlldbg("RX queue not empty, trying to dispatch\n");
+      nllvdbg("RX queue not empty, trying to dispatch\n");
       enc_rxdispatch(priv);
     }
 
@@ -2525,6 +2588,56 @@ static void enc_setmacaddr(FAR struct enc_driver_s *priv)
 }
 
 /****************************************************************************
+ * Function: enc_resetbuffers
+ *
+ * Description:
+ *   Initializes the RX/TX queues and configures the enc's RX/TX buffers.
+ *   Called on general reset and on rxabt interrupt.
+ *
+ * Parameters:
+ *   priv  - Reference to the driver state structure
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void enc_resetbuffers(FAR struct enc_driver_s *priv)
+{
+  int i;
+  /* Initialize receive and transmit buffers  */
+
+  priv->nextpkt = PKTMEM_RX_START;
+  enc_wrreg(priv, ENC_ERXST, PKTMEM_RX_START);
+
+  /* Program the Tail Pointer, ERXTAIL, to the last even address of the buffer */
+
+  enc_wrreg(priv, ENC_ERXTAIL, PKTMEM_RX_END - 2);
+
+  sq_init(&priv->txfreedescr);
+  sq_init(&priv->rxfreedescr);
+  sq_init(&priv->txqueue);
+  sq_init(&priv->rxqueue);
+
+  /* For transmition we preinitialize the descriptors to aligned NET_BUFFSIZE */
+
+  for (i = 0; i < ENC_NTXDESCR; i++)
+    {
+      priv->txdescralloc[i].addr = PKTMEM_START + PKTMEM_ALIGNED_BUFSIZE * i;
+      sq_addlast((sq_entry_t*)&priv->txdescralloc[i], &priv->txfreedescr);
+    }
+
+  /* Receive descriptors addresses are set on reception */
+
+  for (i = 0; i < CONFIG_ENCX24J600_NRXDESCR; i++)
+    {
+      sq_addlast((sq_entry_t*)&priv->rxdescralloc[i], &priv->rxfreedescr);
+    }
+}
+
+/****************************************************************************
  * Function: enc_reset
  *
  * Description:
@@ -2543,7 +2656,6 @@ static void enc_setmacaddr(FAR struct enc_driver_s *priv)
 
 static int enc_reset(FAR struct enc_driver_s *priv)
 {
-  int i;
   int ret;
   uint16_t regval;
 
@@ -2585,35 +2697,9 @@ static int enc_reset(FAR struct enc_driver_s *priv)
    */
   up_udelay(256);
 
-  /* Initialize receive and transmit buffers  */
+  /* Initialize RX/TX buffers */
 
-  priv->nextpkt = PKTMEM_RX_START;
-  enc_wrreg(priv, ENC_ERXST, PKTMEM_RX_START);
-
-  /* Program the Tail Pointer, ERXTAIL, to the last even address of the buffer */
-
-  enc_wrreg(priv, ENC_ERXTAIL, PKTMEM_RX_END);
-
-  sq_init(&priv->txfreedescr);
-  sq_init(&priv->rxfreedescr);
-  sq_init(&priv->txqueue);
-  sq_init(&priv->rxqueue);
-
-  /* For transmition we preinitialize the descriptors to aligned NET_BUFFSIZE */
-
-  for (i = 0; i < ENC_NTXDESCR; i++)
-    {
-      priv->txdescralloc[i].addr = PKTMEM_START + PKTMEM_ALIGNED_BUFSIZE * i;
-      sq_addlast((sq_entry_t*)&priv->txdescralloc[i], &priv->txfreedescr);
-    }
-
-  /* Receive descriptors addresses are set on reception */
-
-  for (i = 0; i < CONFIG_ENCX24J600_NRXDESCR; i++)
-    {
-      sq_addlast((sq_entry_t*)&priv->rxdescralloc[i], &priv->rxfreedescr);
-    }
-
+  enc_resetbuffers(priv);
 
 #if 0
   /* When restarting auto-negotiation, the ESTAT_PHYLINK gets set but the link

@@ -135,9 +135,9 @@ config ENCX24J600_FREQUENCY
 	---help---
 		Define to use a different bus frequency
 
-config ENCX24J600_NDESCR
+config ENCX24J600_NRXDESCR
 	int "Descriptor Count"
-	default 16
+	default 8
 	---help---
 		Defines how many descriptors are preallocated for the
 		transmission and reception queues.

@@ -5751,3 +5751,6 @@
 	  dropped; This is needed for the ENCX24J600 driver that must make
 	  a decision to return the packet or not:  It should not retai
 	  dropped packets. From Max Holtzberg (2013-10-11).
+	* drivers/net/encx24j600.c and Kconfig: ENCX24J600: Improved descriptor
+	  handling, free packets on rx abort interrupt. From Max Holtzberg
+	  (2013-10-11).
