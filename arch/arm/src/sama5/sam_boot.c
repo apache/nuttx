@@ -59,6 +59,7 @@
 #include "sam_clockconfig.h"
 #include "sam_lowputc.h"
 #include "sam_serial.h"
+#include "sam_lcd.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -83,6 +84,18 @@
 
 #if !defined(CONFIG_ARCH_LOWVECTORS) && defined(CONFIG_ARCH_ROMPGTABLE)
 #  error High vector remap cannot be performed if we are using a ROM page table
+#endif
+
+/* if SDRAM is used, then it will be configured twice:  It will first be
+ * configured to a temporary state to support low-level ininitialization.
+ * After the SDRAM has been fully initialized, SRAM be used to
+ * set the SDRM in its final, fully cache-able state.
+ */
+
+#undef NEED_SDRAM_REMAPPING
+#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM) && \
+   !defined(CONFIG_ARCH_ROMPGTABLE)
+#  define NEED_SDRAM_REMAPPING 1
 #endif
 
 /****************************************************************************
@@ -135,38 +148,50 @@ static const struct section_mapping_s section_mapping[] =
 
 #if defined(CONFIG_ARCH_LOWVECTORS) && !defined(CONFIG_SAMA5_BOOT_ISRAM)
   { CONFIG_FLASH_VSTART,   0x00000000,
-    MMU_ROMFLAGS,          1 },
+    MMU_ROMFLAGS,          1
+  },
 #else
   { SAM_BOOTMEM_PSECTION,  SAM_BOOTMEM_VSECTION,
-    SAM_BOOTMEM_MMUFLAGS,  SAM_BOOTMEM_NSECTIONS },
+    SAM_BOOTMEM_MMUFLAGS,  SAM_BOOTMEM_NSECTIONS
+  },
 #endif
 
   { SAM_ROM_PSECTION,      SAM_ROM_VSECTION,
-    SAM_ROM_MMUFLAGS,      SAM_ROM_NSECTIONS },
+    SAM_ROM_MMUFLAGS,      SAM_ROM_NSECTIONS
+  },
   { SAM_NFCSRAM_PSECTION,  SAM_NFCSRAM_VSECTION,
-    SAM_NFCSRAM_MMUFLAGS,  SAM_NFCSRAM_NSECTIONS },
+    SAM_NFCSRAM_MMUFLAGS,  SAM_NFCSRAM_NSECTIONS
+  },
 #ifndef CONFIG_PAGING /* Internal SRAM is already fully mapped */
   { SAM_ISRAM_PSECTION,    SAM_ISRAM_VSECTION,
-    SAM_ISRAM_MMUFLAGS,    SAM_ISRAM_NSECTIONS },
+    SAM_ISRAM_MMUFLAGS,    SAM_ISRAM_NSECTIONS
+  },
 #endif
   { SAM_SMD_PSECTION,      SAM_SMD_VSECTION,
-    SAM_SMD_MMUFLAGS,      SAM_SMD_NSECTIONS },
+    SAM_SMD_MMUFLAGS,      SAM_SMD_NSECTIONS
+  },
   { SAM_UDPHSRAM_PSECTION, SAM_UDPHSRAM_VSECTION,
-    SAM_UDPHSRAM_MMUFLAGS, SAM_UDPHSRAM_NSECTIONS },
+    SAM_UDPHSRAM_MMUFLAGS, SAM_UDPHSRAM_NSECTIONS
+  },
   { SAM_UHPOHCI_PSECTION,  SAM_UHPOHCI_VSECTION,
-    SAM_UHPOHCI_MMUFLAGS,  SAM_UHPOHCI_NSECTIONS },
+    SAM_UHPOHCI_MMUFLAGS,  SAM_UHPOHCI_NSECTIONS
+  },
   { SAM_UHPEHCI_PSECTION,  SAM_UHPEHCI_VSECTION,
-    SAM_UHPEHCI_MMUFLAGS,  SAM_UHPEHCI_NSECTIONS },
+    SAM_UHPEHCI_MMUFLAGS,  SAM_UHPEHCI_NSECTIONS
+  },
   { SAM_AXIMX_PSECTION,    SAM_AXIMX_VSECTION,
-    SAM_AXIMX_MMUFLAGS,    SAM_AXIMX_NSECTIONS },
+    SAM_AXIMX_MMUFLAGS,    SAM_AXIMX_NSECTIONS
+  },
   { SAM_DAP_PSECTION,      SAM_DAP_VSECTION,
-    SAM_DAP_MMUFLAGS,      SAM_DAP_NSECTIONS },
+    SAM_DAP_MMUFLAGS,      SAM_DAP_NSECTIONS
+  },
 
 /* SAMA5 CS0 External Memories */
 
 #ifdef CONFIG_SAMA5_EBICS0
   { SAM_EBICS0_PSECTION, SAM_EBICS0_VSECTION,
-    SAM_EBICS0_MMUFLAGS, SAM_EBICS0_NSECTIONS },
+    SAM_EBICS0_MMUFLAGS, SAM_EBICS0_NSECTIONS
+  },
 #endif
 
 /* SAMA5 External SDRAM Memory.  The SDRAM is not usable until it has been
@@ -184,10 +209,12 @@ static const struct section_mapping_s section_mapping[] =
 #ifdef CONFIG_SAMA5_DDRCS
 #ifdef CONFIG_SAMA5_BOOT_SDRAM
   { SAM_DDRCS_PSECTION,    SAM_DDRCS_VSECTION,
-    MMU_STRONGLY_ORDERED,  SAM_DDRCS_NSECTIONS },
+    MMU_STRONGLY_ORDERED,  SAM_DDRCS_NSECTIONS
+  },
 #else
   { SAM_DDRCS_PSECTION,    SAM_DDRCS_VSECTION,
-    SAM_DDRCS_MMUFLAGS,    SAM_DDRCS_NSECTIONS },
+    SAM_DDRCS_MMUFLAGS,    SAM_DDRCS_NSECTIONS
+  },
 #endif
 #endif
 
@@ -195,31 +222,54 @@ static const struct section_mapping_s section_mapping[] =
 
 #ifdef CONFIG_SAMA5_EBICS1
   { SAM_EBICS1_PSECTION,   SAM_EBICS1_VSECTION,
-    SAM_EBICS1_MMUFLAGS,   SAM_EBICS1_NSECTIONS },
+    SAM_EBICS1_MMUFLAGS,   SAM_EBICS1_NSECTIONS
+  },
 #endif
 #ifdef CONFIG_SAMA5_EBICS2
   { SAM_EBICS2_PSECTION,   SAM_EBICS2_VSECTION,
-    SAM_EBICS2_MMUFLAGS,   SAM_EBICS2_NSECTIONS },
+    SAM_EBICS2_MMUFLAGS,   SAM_EBICS2_NSECTIONS
+  },
 #endif
 #ifdef CONFIG_SAMA5_EBICS3
   { SAM_EBICS3_PSECTION,   SAM_EBICS3_VSECTION,
-    SAM_EBICS3_MMUFLAGS,   SAM_EBICS3_NSECTIONS },
+    SAM_EBICS3_MMUFLAGS,   SAM_EBICS3_NSECTIONS
+  },
 #endif
 #ifdef CONFIG_SAMA5_NFCCR
   { SAM_NFCCR_PSECTION,   SAM_NFCCR_VSECTION,
-    SAM_NFCCR_MMUFLAGS,   SAM_NFCCR_NSECTIONS },
+    SAM_NFCCR_MMUFLAGS,   SAM_NFCCR_NSECTIONS
+  },
 #endif
 
 /* SAMA5 Internal Peripherals */
 
   { SAM_PERIPHA_PSECTION, SAM_PERIPHA_VSECTION,
-    SAM_PERIPHA_MMUFLAGS, SAM_PERIPHA_NSECTIONS },
+    SAM_PERIPHA_MMUFLAGS, SAM_PERIPHA_NSECTIONS
+  },
   { SAM_PERIPHB_PSECTION, SAM_PERIPHB_VSECTION,
-    SAM_PERIPHB_MMUFLAGS, SAM_PERIPHB_NSECTIONS },
+    SAM_PERIPHB_MMUFLAGS, SAM_PERIPHB_NSECTIONS
+  },
   { SAM_SYSC_PSECTION,    SAM_SYSC_VSECTION,
-    SAM_SYSC_MMUFLAGS,    SAM_SYSC_NSECTIONS },
+    SAM_SYSC_MMUFLAGS,    SAM_SYSC_NSECTIONS
+  },
+
+/* LCDC Framebuffer.  This entry reprograms a part of one of the above
+ * regions, making it non-cacheable and non-buffereable.
+ *
+ * If SDRAM will be reconfigured, then we will defer setup of the framebuffer
+ * until after the SDRAM remapping (since the framebuffer problem resides) in
+ * SDRAM.
+ */
+
+#if defined(CONFIG_SAMA5_LCDC) && !defined(NEED_SDRAM_REMAPPING)
+  { CONFIG_SAMA5_LCDC_FB_PBASE, CONFIG_SAMA5_LCDC_FB_VBASE,
+    MMU_IOFLAGS, SAMA5_LCDC_FBNSECTIONS
+  },
+#endif
 };
-#define NMAPPINGS (sizeof(section_mapping) / sizeof(struct section_mapping_s))
+
+#define NMAPPINGS \
+  (sizeof(section_mapping) / sizeof(struct section_mapping_s))
 #endif
 
 /* SAMA5 External SDRAM Memory.  Final configuration.  The SDRAM was
@@ -228,12 +278,30 @@ static const struct section_mapping_s section_mapping[] =
  * set the SDRM in its final, fully cache-able state.
  */
 
-#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
-static const struct section_mapping_s operational_mapping =
+#ifdef NEED_SDRAM_REMAPPING
+static const struct section_mapping_s operational_mapping[] =
 {
-  SAM_DDRCS_PSECTION,     SAM_DDRCS_VSECTION,
-  SAM_DDRCS_MMUFLAGS,     SAM_DDRCS_NSECTIONS
+/* This entry reprograms the SDRAM entry, making it cacheable and
+ * bufferable.
+ */
+
+  { SAM_DDRCS_PSECTION, SAM_DDRCS_VSECTION,
+    SAM_DDRCS_MMUFLAGS, SAM_DDRCS_NSECTIONS
+  },
+
+/* LCDC Framebuffer.  This entry reprograms a part of one of the above
+ * regions, making it non-cacheable and non-buffereable.
+ */
+
+#ifdef CONFIG_SAMA5_LCDC
+  { CONFIG_SAMA5_LCDC_FB_PBASE, CONFIG_SAMA5_LCDC_FB_VBASE,
+    MMU_IOFLAGS, SAMA5_LCDC_FBNSECTIONS
+  },
+#endif
 };
+
+#define NREMAPPINGS \
+  (sizeof(operational_mapping) / sizeof(struct section_mapping_s))
 #endif
 
 /****************************************************************************
@@ -244,7 +312,7 @@ static const struct section_mapping_s operational_mapping =
  * Name: sam_setupmappings
  *
  * Description
- *   Map all of the memory regions defined in section_mapping[]
+ *   Map all of the initial memory regions defined in section_mapping[]
  *
  ****************************************************************************/
 
@@ -255,7 +323,27 @@ static inline void sam_setupmappings(void)
 
   for (i = 0; i < NMAPPINGS; i++)
     {
-      mmu_l2_map_region(&section_mapping[i]);
+      mmu_l1_map_region(&section_mapping[i]);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_remap
+ *
+ * Description
+ *   Map all of the final memory regions defined in operation_mapping[]
+ *
+ ****************************************************************************/
+
+#ifdef NEED_SDRAM_REMAPPING
+static inline void sam_remap(void)
+{
+  int i;
+
+  for (i = 0; i < NREMAPPINGS; i++)
+    {
+      mmu_l1_map_region(&operational_mapping[i]);
     }
 }
 #endif
@@ -561,7 +649,7 @@ void up_boot(void)
    * we can reconfigure the SDRAM in its final, fully cache-able state.
    */
 
-#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM)
-  mmu_l2_map_region(&operational_mapping);
+#ifdef NEED_SDRAM_REMAPPING
+  sam_remap();
 #endif
 }

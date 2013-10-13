@@ -146,7 +146,7 @@ void mmu_l2_setentry(uint32_t l2vaddr, uint32_t paddr, uint32_t vaddr,
 #endif
 
 /****************************************************************************
- * Name: mmu_l2_map_region
+ * Name: mmu_l1_map_region
  *
  * Description:
  *   Set multiple level 1 translation table entries in order to map a
@@ -158,7 +158,7 @@ void mmu_l2_setentry(uint32_t l2vaddr, uint32_t paddr, uint32_t vaddr,
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-void mmu_l2_map_region(const struct section_mapping_s *mapping)
+void mmu_l1_map_region(const struct section_mapping_s *mapping)
 {
   uint32_t paddr    = mapping->physbase;
   uint32_t vaddr    = mapping->virtbase;

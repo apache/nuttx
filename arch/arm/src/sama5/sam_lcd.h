@@ -48,9 +48,25 @@
 
 #include "chip/sam_lcd.h"
 
+#ifdef CONFIG_SAMA5_LCDC
+
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+/* These definitions provide the LCDC framebuffer memory description needed to
+ * remap that region to be non-cacheable and non-bufferable
+ */
+
+#if (CONFIG_SAMA5_LCDC_FB_VBASE & 0x000fffff) != 0
+#  error CONFIG_SAMA5_LCDC_FB_VBASE not aligned to 1MB boundary
+#endif
+
+#if (CONFIG_SAMA5_LCDC_FB_PBASE & 0x000fffff) != 0
+#  error CONFIG_SAMA5_LCDC_FB_PBASE not aligned to 1MB boundary
+#endif
+
+#define SAMA5_LCDC_FBNSECTIONS \
+  ((CONFIG_SAMA5_LCDC_FB_SIZE + 0x000fffff) >> 20)
 
 /************************************************************************************
  * Public Types
@@ -93,4 +109,5 @@ void sam_lcdclear(nxgl_mxpixel_t color);
 void sam_backlight(bool blon);
 #endif
 
+#endif /* CONFIG_SAMA5_LCDC */
 #endif /* __ARCH_ARM_SRC_SAMA5_SAM_LCDC_H */
