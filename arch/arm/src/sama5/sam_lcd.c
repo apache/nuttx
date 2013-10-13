@@ -905,8 +905,8 @@ static const uint8_t g_hcrfb[SAMA5_HCR_FBSIZE];
 
 /* Preallocated LCDC layer structures */
 
-#if (CONFIG_SAMA5_LCDC_FBFIXED_BASE & 0x3f) != 0
-#  error "CONFIG_SAMA5_LCDC_FBFIXED_BASE must be aligned to a 64-byte boundary"
+#if (CONFIG_SAMA5_LCDC_FBFIXED_BASE & 7) != 0
+#  error "CONFIG_SAMA5_LCDC_FBFIXED_BASE must be aligned to a 64-bit boundary"
 #endif
 
 /* Base layer */
@@ -2081,7 +2081,7 @@ static void sam_layer_color(void)
   LAYER_BASE->bpp = 16;
 
   sam_putreg(SAM_LCDC_BASECFG0,
-             LCDC_BASECFG0_DLBO | LCDC_BASECFG0_BLEN_INCR4);
+             LCDC_BASECFG0_DLBO | LCDC_BASECFG0_BLEN_INCR16);
   sam_putreg(SAM_LCDC_BASECFG1,
              LCDC_BASECFG1_16BPP_RGB565);
 
@@ -2096,7 +2096,7 @@ static void sam_layer_color(void)
   LAYER_OVR1->bpp = 24;
 
   sam_putreg(SAM_LCDC_OVR1CFG0,
-             LCDC_OVR1CFG0_DLBO | LCDC_OVR1CFG0_BLEN_INCR16 |
+             LCDC_OVR1CFG0_DLBO | LCDC_BASECFG0_BLEN_INCR16 |
              LCDC_OVR1CFG0_ROTDIS);
   sam_putreg(SAM_LCDC_OVR1CFG1,
              LCDC_OVR1CFG1_24BPP_RGB888P);
@@ -2107,7 +2107,7 @@ static void sam_layer_color(void)
   LAYER_OVR1->bpp = 16;
 
   sam_putreg(SAM_LCDC_OVR1CFG0,
-             LCDC_OVR1CFG0_DLBO | LCDC_OVR1CFG0_BLEN_INCR4 |
+             LCDC_OVR1CFG0_DLBO | LCDC_BASECFG0_BLEN_INCR16 |
              LCDC_OVR1CFG0_ROTDIS);
   sam_putreg(SAM_LCDC_OVR1CFG1,
              LCDC_OVR1CFG1_16BPP_RGB565);
@@ -2126,7 +2126,7 @@ static void sam_layer_color(void)
   LAYER_OVR2->bpp = 24;
 
   sam_putreg(SAM_LCDC_OVR2CFG0,
-             LCDC_OVR2CFG0_DLBO | LCDC_OVR2CFG0_BLEN_INCR16 |
+             LCDC_OVR2CFG0_DLBO | LCDC_BASECFG0_BLEN_INCR16 |
              LCDC_OVR2CFG0_ROTDIS;
   sam_putreg(SAM_LCDC_OVR2CFG1,
              LCDC_OVR2CFG1_24BPP_RGB888P);
@@ -2137,7 +2137,7 @@ static void sam_layer_color(void)
   LAYER_OVR2->bpp = 16;
 
   sam_putreg(SAM_LCDC_OVR2CFG0,
-             LCDC_OVR2CFG0_DLBO | LCDC_OVR2CFG0_BLEN_INCR4 |
+             LCDC_OVR2CFG0_DLBO | LCDC_BASECFG0_BLEN_INCR16 |
              LCDC_OVR2CFG0_ROTDIS);
   sam_putreg(SAM_LCDC_OVR2CFG1,
              LCDC_OVR2CFG1_16BPP_RGB565);
@@ -2167,7 +2167,7 @@ static void sam_layer_color(void)
   LAYER_HEO->bpp = 16;
 
   sam_putreg(SAM_LCDC_HEOCFG0,
-             LCDC_HEOCFG0_DLBO | LCDC_HEOCFG0_BLEN_INCR4 |
+             LCDC_HEOCFG0_DLBO | LCDC_HEOCFG0_BLEN_INCR16 |
              LCDC_HEOCFG0_ROTDIS);
   sam_putreg(SAM_LCDC_HEOCFG1,
              LCDC_HEOCFG1_16BPP_RGB565);
@@ -2200,7 +2200,7 @@ static void sam_layer_color(void)
   LAYER_HCR->bpp = 16;
 
   sam_putreg(SAM_LCDC_HCRCFG0,
-             LCDC_HCRCFG0_DLBO | LCDC_HCRCFG0_BLEN_INCR4 |
+             LCDC_HCRCFG0_DLBO | LCDC_HCRCFG0_BLEN_INCR16 |
              LCDC_HCRCFG0_ROTDIS);
   sam_putreg(SAM_LCDC_HCRCFG1,
              LCDC_HCRCFG1_16BPP_RGB565);
@@ -3080,12 +3080,11 @@ static void sam_show_layer(struct sam_layer_s *layer,
   if (buffer)
     {
       regaddr = g_layerblend[lid];
-      regval = sam_getreg(regaddr);
+      regval  = sam_getreg(regaddr);
       regval |= LCDC_HEOCFG12_DMA | LCDC_HEOCFG12_OVR;
       sam_putreg(regaddr, regval);
     }
 
-  /* Enable and Update */
   /* 5. Enable the relevant channel by writing one to the CHEN field of the
    *    CHXCHER register.
    */
