@@ -475,8 +475,8 @@ CONFIG_NX_PACKEDMSFIRST=y
 #
 # Input Devices
 #
-# CONFIG_NX_MOUSE is not set
-# CONFIG_NX_KBD is not set
+CONFIG_NX_MOUSE=y
+CONFIG_NX_KBD=y
 
 #
 # Framed Window Borders
