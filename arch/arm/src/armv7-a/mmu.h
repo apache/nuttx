@@ -1322,7 +1322,7 @@ void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags);
 #endif
 
 /************************************************************************************
- * Name: mmu_l2_map_region
+ * Name: mmu_l1_map_region
  *
  * Description:
  *   Set multiple level 1 translation table entries in order to map a region of
@@ -1334,7 +1334,7 @@ void mmu_l1_setentry(uint32_t paddr, uint32_t vaddr, uint32_t mmuflags);
  ************************************************************************************/
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
-void mmu_l2_map_region(const struct section_mapping_s *mapping);
+void mmu_l1_map_region(const struct section_mapping_s *mapping);
 #endif
 
 /****************************************************************************

@@ -1892,8 +1892,10 @@
 struct sam_dscr_s
 {
   uint32_t addr;  /* Frame buffer base address register */
-  uint32_t ctrl;  /*  Transfer Control register */
-  uint32_t next;  /*  Next descriptor address register */
+  uint32_t ctrl;  /* Transfer Control register */
+  uint32_t next;  /* Next descriptor address register */
+  uint32_t pad;   /* Padding to assure 64-bit aligned when used as an array */
 };
+#define SIZEOF_SAM_DSCR_S 16
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_LCDC_H */

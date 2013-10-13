@@ -5757,4 +5757,10 @@
 	* arch/arm/src/sama4/sam_lcd.c and configs/sama5d3x-ek/include/board.h:
 	  Fix PWM precealler divider.  This eliminiates the backlight flicker
 	 (2013-10-11).
+	* arch/arm/src/sama5/sam_boot.c: Correct how framebuffer memory was
+	  being mapped.  The mapping was getting overrwritten and the
+	  framebuffer memory was ending up cacheable (2013-10-13).
+	* arch/arm/src/sama5/Kconfig, sam_lcdc.c, defconfig, and related files:
+	  Remove options for obtaining framebuffer memory in other ways.  That
+	  option just really cannot work (2013-10-13).
 
