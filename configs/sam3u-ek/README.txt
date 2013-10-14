@@ -688,12 +688,12 @@ Configurations
     UnitTest.  It includes support for both the HX834x LCD and the
     ADS7843E touchscreen controller on board the SAM3U-EK board.
 
-    The NxWM window manager is a tiny window manager tailor for use
+    The NxWM window manager is a tiny window manager tailored for use
     with smaller LCDs.  It supports a toolchain, a start window, and
     multiple application windows.  However, to make the best use of
     the visible LCD space, only one application window is visiable at
     at time.
- 
+
     The NxWM window manager can be found here:
 
       nuttx-git/NxWidgets/nxwm

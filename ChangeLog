@@ -5763,4 +5763,6 @@
 	* arch/arm/src/sama5/Kconfig, sam_lcdc.c, defconfig, and related files:
 	  Remove options for obtaining framebuffer memory in other ways.  That
 	  option just really cannot work (2013-10-13).
+	* configs/sama5d3x-ek/nxwm:  Add NxWM configuration for SAMA5D3x-EK
+	  (2013-10-13).
 
