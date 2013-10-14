@@ -916,7 +916,11 @@ Configurations
       used to verify the SAMA5D3x-EK TFT LCD.  This test case focuses on
       general window controls, movement, mouse and keyboard input.  It
       requires no user interaction.
-    ostest:  This is another configuration that is only useful for bring-up.
+   nxwm: This is a special configuration setup for the NxWM window manager
+      UnitTest.  It integrates support for both the SAMA5 LCDC and the
+      SAMA5 ADC touchscreen controller and provides a more advance
+      graphics demo. It provides an interactive windowing experience.
+   ostest:  This is another configuration that is only useful for bring-up.
       It executes an exhaustive OS test to verify a correct port of NuttX
       to the SAMA5D3-EK.  Since it now passes that test, the configuration
       has little further use other than for reference.
@@ -924,6 +928,7 @@ Configurations
   Now for the gory details:
 
   demo:
+
     This configuration directory provide the NuttShell (NSH).  There are
     two NSH configurations:  nsh and demo.  The difference is that nsh is
     intended to be a very simple NSH configuration upon which you can build
@@ -1322,6 +1327,7 @@ Configurations
         not bring up Windows Explorer with Windows.  No idea why yet.
 
   hello:
+
     This configuration directory, performs the (almost) simplest of all
     possible examples:  examples/hello.  This just comes up, says hello
     on the serial console and terminates.  This configuration is of
@@ -1381,6 +1387,7 @@ Configurations
       2013-7-31:  Delay loop calibrated.
 
   nsh:
+
     This configuration directory provide the NuttShell (NSH).  There are
     two NSH configurations:  nsh and demo.  The difference is that nsh is
     intended to be a very simple NSH configuration upon which you can build
@@ -2190,73 +2197,12 @@ Configurations
     window controls, movement, mouse and keyboard input.  It requires no
     user interaction.
 
-  ostest:
-    This configuration directory, performs a simple OS test using
-    examples/ostest.
-
-    NOTES:
-
-    1. This configuration uses the default USART1 serial console.  That
-       is easily changed by reconfiguring to (1) enable a different
-       serial peripheral, and (2) selecting that serial peripheral as
-       the console device.
-
-    2. By default, this configuration is set up to build on Windows
-       under either a Cygwin or MSYS environment using a recent, Windows-
-       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
-       toolchain).  Both the build environment and the toolchain
-       selection can easily be changed by reconfiguring:
-
-       CONFIG_HOST_WINDOWS=y                   : Windows operating system
-       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
-       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
-
-    3. This configuration executes out of CS0 NOR flash and can only
-       be loaded via SAM-BA.  These are the relevant configuration options
-       the define the NOR FLASH configuration:
-
-       CONFIG_SAMA5_BOOT_CS0FLASH=y            : Boot from FLASH on CS0
-       CONFIG_BOOT_RUNFROMFLASH=y              : Run in place on FLASH (vs copying to RAM)
-
-       CONFIG_SAMA5_EBICS0=y                   : Enable CS0 external memory
-       CONFIG_SAMA5_EBICS0_SIZE=134217728      : Memory size is 128KB
-       CONFIG_SAMA5_EBICS0_NOR=y               : Memory type is NOR FLASH
-
-       CONFIG_FLASH_START=0x10000000           : Physical FLASH start address
-       CONFIG_FLASH_VSTART=0x10000000          : Virtual FLASH start address
-       CONFIG_FLASH_SIZE=134217728             : FLASH size (again)
-
-       CONFIG_RAM_START=0x00300400             : Data stored after page table
-       CONFIG_RAM_VSTART=0x00300400
-       CONFIG_RAM_SIZE=114688                  : Available size of 128KB - 16KB for page table
-
-       NOTE:  In order to boot in this configuration, you need to close the
-       BMS jumper.
-
-    STATUS:
-      2013-7-19:  This configuration (as do the others) run at 396MHz.
-        The SAMA5D3 can run at 536MHz.  I still need to figure out the
-        PLL settings to get that speed.
-
-        If the CPU speed changes, then so must the NOR and SDRAM
-        initialization!
-
-      2013-7-30:  I have been unable to execute this configuration from NOR
-        FLASH by closing the BMS jumper (J9).  As far as I can tell, this
-        jumper does nothing on my board???  I have been using the norboot
-        configuration to start the program in NOR FLASH (see just above).
-        See "Creating and Using NORBOOT" above.
-
-      2013-7-31:  The OS test configuration is functional.
-
-      2013-7-31:  Using delay loop calibration from the hello configuration.
-        That configuration runs out of internal SRAM and, as a result, this
-        configuration needs to be recalibrated.
-
   nxwm:
+
     This is a special configuration setup for the NxWM window manager
-    UnitTest.  It includes support for both the SAMA5 LCDC and the
-    SAMA5 ADC touchscreen controller.
+    UnitTest.  It integrates support for both the SAMA5 LCDC and the
+    SAMA5 ADC touchscreen controller and provides a more advance
+    graphics demo. It provides an interactive windowing experience.
 
     The NxWM window manager is a tiny window manager tailored for use
     with smaller LCDs.  It supports a toolchain, a start window, and
@@ -2323,3 +2269,67 @@ Configurations
 
        $ cd ~/nuttx-git/nuttx
        $ make
+
+  ostest:
+
+    This configuration directory, performs a simple OS test using
+    examples/ostest.
+
+    NOTES:
+
+    1. This configuration uses the default USART1 serial console.  That
+       is easily changed by reconfiguring to (1) enable a different
+       serial peripheral, and (2) selecting that serial peripheral as
+       the console device.
+
+    2. By default, this configuration is set up to build on Windows
+       under either a Cygwin or MSYS environment using a recent, Windows-
+       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
+       toolchain).  Both the build environment and the toolchain
+       selection can easily be changed by reconfiguring:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows operating system
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
+       CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+    3. This configuration executes out of CS0 NOR flash and can only
+       be loaded via SAM-BA.  These are the relevant configuration options
+       the define the NOR FLASH configuration:
+
+       CONFIG_SAMA5_BOOT_CS0FLASH=y            : Boot from FLASH on CS0
+       CONFIG_BOOT_RUNFROMFLASH=y              : Run in place on FLASH (vs copying to RAM)
+
+       CONFIG_SAMA5_EBICS0=y                   : Enable CS0 external memory
+       CONFIG_SAMA5_EBICS0_SIZE=134217728      : Memory size is 128KB
+       CONFIG_SAMA5_EBICS0_NOR=y               : Memory type is NOR FLASH
+
+       CONFIG_FLASH_START=0x10000000           : Physical FLASH start address
+       CONFIG_FLASH_VSTART=0x10000000          : Virtual FLASH start address
+       CONFIG_FLASH_SIZE=134217728             : FLASH size (again)
+
+       CONFIG_RAM_START=0x00300400             : Data stored after page table
+       CONFIG_RAM_VSTART=0x00300400
+       CONFIG_RAM_SIZE=114688                  : Available size of 128KB - 16KB for page table
+
+       NOTE:  In order to boot in this configuration, you need to close the
+       BMS jumper.
+
+    STATUS:
+      2013-7-19:  This configuration (as do the others) run at 396MHz.
+        The SAMA5D3 can run at 536MHz.  I still need to figure out the
+        PLL settings to get that speed.
+
+        If the CPU speed changes, then so must the NOR and SDRAM
+        initialization!
+
+      2013-7-30:  I have been unable to execute this configuration from NOR
+        FLASH by closing the BMS jumper (J9).  As far as I can tell, this
+        jumper does nothing on my board???  I have been using the norboot
+        configuration to start the program in NOR FLASH (see just above).
+        See "Creating and Using NORBOOT" above.
+
+      2013-7-31:  The OS test configuration is functional.
+
+      2013-7-31:  Using delay loop calibration from the hello configuration.
+        That configuration runs out of internal SRAM and, as a result, this
+        configuration needs to be recalibrated.
