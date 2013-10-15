@@ -2,7 +2,7 @@
  * include/nuttx/rgbcolors.h
  * User-friendly RGB color definitions
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 /* Color Creation and Conversion Macros *************************************/
-/* This macro creates RGB24  from 8:8:8 RGB */
+/* This macro creates RGB24 from 8:8:8 RGB */
 
 #define RGBTO24(r,g,b) \
   ((uint32_t)((r) & 0xff) << 16 | (uint32_t)((g) & 0xff) << 8 | (uint32_t)((b) & 0xff))
@@ -268,10 +268,33 @@
 #define RGB8_YELLOW          0xfc
 
 /****************************************************************************
- * Public Data
+ * Public Types
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+
+/* This is a generic representation of an RGB color */
+
+struct rgbcolor_s
+{
+  uint8_t r;  /* Red value */
+  uint8_t b;  /* Blue value */
+  uint8_t g;  /* Green value */
+};
+
+/* This is a generic representation of an RGB color with ALPHA */
+
+struct argbcolor_s
+{
+  uint8_t a;  /* Alpha value (transparency) */
+  uint8_t r;  /* Red value */
+  uint8_t b;  /* Blue value */
+  uint8_t g;  /* Green value */
+};
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
