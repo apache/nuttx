@@ -338,6 +338,8 @@ config ARCH_BOARD_MAPLE
 	bool "maple board"
 	depends on ARCH_CHIP_STM32F103RB || ARCH_CHIP_STM32F103CB
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		A configuration for the LeafLab's Maple and Maple Mini boards.
 		These boards are based on the STM32F103RBT6 chip for the standard
@@ -551,9 +553,11 @@ config ARCH_BOARD_SPARK
 	bool "Spark Core"
 	depends on ARCH_CHIP_STM32F103CB
 	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		A configuration for the Spark Core from Spark Devices
-		(http://www.sparkdevices.com).  This board features the STM32103CBT6
+		(http://www.spark.io).  This board features the STM32103CBT6
 		MCU from STMicro.
 
 config ARCH_BOARD_STM32_TINY
