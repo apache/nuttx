@@ -5769,4 +5769,10 @@
 	  the NxWM taskbar (2013-10-15).
 	* configs/sama5d3x-ek/nxwm/defconfig:  Use the 320x320 NuttX logo as
 	  the NxWM backgroun (2013-10-15).
+	* arch/arm/src/stm32/chip/stm32f103c_pinmap.h:  Pinmapping corrections
+	  from David Sidrane (2013-10-16).
+	* configs/spark:  The Spark device configuration is receiving some
+	  TLC from David Sidrane (2013-10-16).
+	* drivers/mtd/sst25.c:  Add support for the SST25VF016B.  From David
+	  Sidrane (2013-10-16).
 

@@ -5,6 +5,11 @@
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ *   Modifications:
+ *
+ *      - 10/08/2013: David Sidrane <david_s5@nscdg.com>
+ *           - Modified to support SST25VF016B
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -115,13 +120,15 @@
 /* Read ID (RDID) register values */
 
 #define SST25_MANUFACTURER          0xbf  /* SST manufacturer ID */
+#define SST25_VF016_DEVID           0x25  /* SSTVF016B device ID */
 #define SST25_VF032_DEVID           0x20  /* SSTVF032B device ID */
 
 /* JEDEC Read ID register values */
 
 #define SST25_JEDEC_MANUFACTURER    0xbf  /* SST manufacturer ID */
 #define SST25_JEDEC_MEMORY_TYPE     0x25  /* SST25 memory type */
-#define SST25_JEDEC_MEMORY_CAPACITY 0x4a  /* SST25VF032B memory capacity */
+#define SST25_JEDEC_VF032_CAPACITY  0x4a  /* SST25VF032B memory capacity */
+#define SST25_JEDEC_VF016_CAPACITY  0x41  /* SST25VF016B memory capacity */
 
 /* Status register bit definitions */
 
@@ -148,8 +155,12 @@
 /* SST25VF520 capacity is 2Mbit   (256Kbit x 8)  = 256Kb (32Kb x 8) */
 /* SST25VF540 capacity is 4Mbit   (512Kbit x 8)  = 512Kb (64Kb x 8) */
 /* SST25VF080 capacity is 8Mbit   (1024Kbit x 8) =   1Mb (128Kb x 8) */
-/* SST25VF016 capacity is 16Mbit  (2048Kbit x 8) =   2Mb (256Kb x 8) */
 /* Not yet supported */
+
+/* SST25VF016 capacity is 16Mbit  (2048Kbit x 8) =   2Mb (256Kb x 8) */
+
+#define SST25_VF016_SECTOR_SHIFT  12          /* Sector size 1 << 12 = 4Kb */
+#define SST25_VF016_NSECTORS      512        /* 512 sectors x 4096 bytes/sector = 2Mb */
 
 /* SST25VF032 capacity is 32Mbit  (4096Kbit x 8) =   4Mb (512kb x 8) */
 
@@ -218,7 +229,9 @@ static void sst25_unprotect(FAR struct spi_dev_s *dev);
 #endif
 static uint8_t sst25_waitwritecomplete(FAR struct sst25_dev_s *priv);
 static inline void sst25_wren(FAR struct sst25_dev_s *priv);
+#if !defined(CONFIG_SST25_SLOWWRITE) && !defined(CONFIG_SST25_READONLY)
 static inline void sst25_wrdi(FAR struct sst25_dev_s *priv);
+#endif
 static void sst25_sectorerase(FAR struct sst25_dev_s *priv, off_t offset);
 static inline int sst25_chiperase(FAR struct sst25_dev_s *priv);
 static void sst25_byteread(FAR struct sst25_dev_s *priv, FAR uint8_t *buffer,
@@ -329,19 +342,30 @@ static inline int sst25_readid(struct sst25_dev_s *priv)
 
   /* Check for a valid manufacturer and memory type */
 
-  if (manufacturer == SST25_JEDEC_MANUFACTURER && memory == SST25_JEDEC_MEMORY_TYPE)
+  if (manufacturer == SST25_JEDEC_MANUFACTURER &&
+      memory == SST25_JEDEC_MEMORY_TYPE)
     {
-      /* Okay.. is it a FLASH capacity that we understand?  This should be extended
-       * support other members of the SST25 family.
+      /* Okay.. is it a FLASH capacity that we understand?  This should be
+       * extended support other members of the SST25 family.  If so, save
+       * the FLASH geometry.
        */
 
-      if (capacity == SST25_JEDEC_MEMORY_CAPACITY)
+      switch (capacity)
         {
-           /* Save the FLASH geometry */
+           case SST25_JEDEC_VF032_CAPACITY:
+              priv->sectorshift = SST25_VF032_SECTOR_SHIFT;
+              priv->nsectors    = SST25_VF032_NSECTORS;
+              return OK;
 
-           priv->sectorshift = SST25_VF032_SECTOR_SHIFT;
-           priv->nsectors    = SST25_VF032_NSECTORS;
-           return OK;
+           case SST25_JEDEC_VF016_CAPACITY:
+              priv->sectorshift = SST25_VF016_SECTOR_SHIFT;
+              priv->nsectors    = SST25_VF016_NSECTORS;
+              return OK;
+
+            /* Not implemented yet */
+
+            default:
+              break;
         }
     }
 
@@ -478,7 +502,7 @@ static inline void sst25_wren(struct sst25_dev_s *priv)
 /************************************************************************************
  * Name:  sst25_wrdi
  ************************************************************************************/
-
+#if !defined(CONFIG_SST25_SLOWWRITE) && !defined(CONFIG_SST25_READONLY)
 static inline void sst25_wrdi(struct sst25_dev_s *priv)
 {
   /* Select this FLASH part */
@@ -493,6 +517,7 @@ static inline void sst25_wrdi(struct sst25_dev_s *priv)
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
 }
+#endif
 
 /************************************************************************************
  * Name:  sst25_sectorerase
