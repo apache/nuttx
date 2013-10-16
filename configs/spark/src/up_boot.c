@@ -77,13 +77,18 @@ void stm32_boardinitialize(void)
   up_ledinit();
 #endif
 
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
+#ifdef CONFIG_ARCH_HAVE_BUTTONS
+  up_buttoninit();
+#endif
+
+  /* Configure SPI chip selects if 1) SP2 is not disabled, and 2) the weak function
    * stm32_spiinitialize() has been brought into the link.
    */
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2)
-  stm32_spiinitialize();
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
+      stm32_spiinitialize();
 #endif
+
 
   /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
    * disabled, and 3) the weak function stm32_usbinitialize() has been brought
@@ -93,4 +98,37 @@ void stm32_boardinitialize(void)
 #if defined(CONFIG_USBDEV) && defined(CONFIG_STM32_USB)
   stm32_usbinitialize();
 #endif
+
+
 }
+
+/****************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_initialize().  board_initialize() will be
+ *   called immediately after up_intiialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+  /* Perform NSH initialization here instead of from the NSH.  This
+   * alternative NSH initialization is necessary when NSH is ran in user-space
+   * but the initialization function must run in kernel space.
+   */
+
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+	  nsh_archinitialize();
+	  wireless_archinitialize();
+
+#endif
+
+}
+#endif
+
