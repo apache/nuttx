@@ -183,6 +183,11 @@ int HostFlowControlConsumeBuff(int sd)
 /*****************************************************************************
  * Name: socket
  *
+ * Decription:
+ *   create an endpoint for communication. The socket function creates a
+ *   socket that is bound to a specific transport service provider.  This
+ *   function is called by the application layer to obtain a socket handle.
+ *
  * Input Parameters:
  *   domain    selects the protocol family which will be used for
  *    communication. On this version only AF_INET is supported
@@ -195,12 +200,6 @@ int HostFlowControlConsumeBuff(int sd)
  * Returned Value:
  *   On success, socket handle that is used for consequent socket
  *    operations. On error, -1 is returned.
- *
- * Decription:
- *   create an endpoint for communication
- *   The socket function creates a socket that is bound to a specific
- *   transport service provider. This function is called by the
- *   application layer to obtain a socket handle.
  *
  *****************************************************************************/
 
@@ -239,14 +238,14 @@ int socket(long domain, long type, long protocol)
 /*****************************************************************************
  * Name: closesocket
  *
+ * Decription:
+ *   The socket function closes a created socket.
+ *
  * Input Parameters:
  *   sd    socket handle.
  *
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned.
- *
- * Decription:
- *   The socket function closes a created socket.
  *
  *****************************************************************************/
 
@@ -285,6 +284,25 @@ long closesocket(long sd)
 /*****************************************************************************
  * Name: accept
  *
+ * Decription:
+ *   accept a connection on a socket:
+ *   This function is used with connection-based socket types
+ *   (SOCK_STREAM). It extracts the first connection request on the
+ *   queue of pending connections, creates a new connected socket, and
+ *   returns a new file descriptor referring to that socket.
+ *   The newly created socket is not in the listening state.
+ *   The original socket sd is unaffected by this call.
+ *   The argument sd is a socket that has been created with socket(),
+ *   bound to a local address with bind(), and is  listening for
+ *   connections after a listen(). The argument addr is a pointer
+ *   to a sockaddr structure. This structure is filled in with the
+ *   address of the peer socket, as known to the communications layer.
+ *   The exact format of the address returned addr is determined by the
+ *   socket's address family. The addrlen argument is a value-result
+ *   argument: it should initially contain the size of the structure
+ *   pointed to by addr, on return it will contain the actual
+ *   length (in bytes) of the address returned.
+ *
  * Input Parameters:
  *   sd      socket descriptor (handle)
  *   addr    the argument addr is a pointer to a sockaddr structure
@@ -305,25 +323,6 @@ long closesocket(long sd)
  *   - On connection establishment, socket handle
  *   - On connection pending, SOC_IN_PROGRESS (-2)
  *   - On failure, SOC_ERROR  (-1)
- *
- * Decription:
- *   accept a connection on a socket:
- *   This function is used with connection-based socket types
- *   (SOCK_STREAM). It extracts the first connection request on the
- *   queue of pending connections, creates a new connected socket, and
- *   returns a new file descriptor referring to that socket.
- *   The newly created socket is not in the listening state.
- *   The original socket sd is unaffected by this call.
- *   The argument sd is a socket that has been created with socket(),
- *   bound to a local address with bind(), and is  listening for
- *   connections after a listen(). The argument addr is a pointer
- *   to a sockaddr structure. This structure is filled in with the
- *   address of the peer socket, as known to the communications layer.
- *   The exact format of the address returned addr is determined by the
- *   socket's address family. The addrlen argument is a value-result
- *   argument: it should initially contain the size of the structure
- *   pointed to by addr, on return it will contain the actual
- *   length (in bytes) of the address returned.
  *
  *****************************************************************************/
 
@@ -375,15 +374,6 @@ long accept(long sd, sockaddr *addr, socklen_t *addrlen)
 /*****************************************************************************
  * Name: bind
  *
- * Input Parameters:
- *   sd      socket descriptor (handle)
- *   addr    specifies the destination address. On this version
- *    only AF_INET is supported.
- *   addrlen  contains the size of the structure pointed to by addr.
- *
- * Returned Value:
- *   On success, zero is returned. On error, -1 is returned.
- *
  * Decription:
  *   assign a name to a socket
  *   This function gives the socket the local address addr.
@@ -392,6 +382,15 @@ long accept(long sd, sockaddr *addr, socklen_t *addrlen)
  *   family) but has no name assigned.
  *   It is necessary to assign a local address before a SOCK_STREAM
  *   socket may receive connections.
+ *
+ * Input Parameters:
+ *   sd      socket descriptor (handle)
+ *   addr    specifies the destination address. On this version
+ *    only AF_INET is supported.
+ *   addrlen  contains the size of the structure pointed to by addr.
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, -1 is returned.
  *
  *****************************************************************************/
 
@@ -430,14 +429,6 @@ long bind(long sd, const sockaddr *addr, long addrlen)
 /*****************************************************************************
  * Name: listen
  *
- * Input Parameters:
- *   sd      socket descriptor (handle)
- *   backlog  specifies the listen queue depth. On this version
- *    backlog is not supported.
- *
- * Returned Value:
- *   On success, zero is returned. On error, -1 is returned.
- *
  * Decription:
  *   listen for connections on a socket
  *   The willingness to accept incoming connections and a queue
@@ -448,6 +439,14 @@ long bind(long sd, const sockaddr *addr, long addrlen)
  *   pending connections may grow to.
  *
  * NOTE: On this version, backlog is not supported
+ *
+ * Input Parameters:
+ *   sd      socket descriptor (handle)
+ *   backlog  specifies the listen queue depth. On this version
+ *    backlog is not supported.
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, -1 is returned.
  *
  *****************************************************************************/
 
@@ -481,6 +480,14 @@ long listen(long sd, long backlog)
 /*****************************************************************************
  * Name: gethostbyname
  *
+ * Decription:
+ *   Get host IP by name. Obtain the IP Address of machine on network,
+ *   by its name.
+ *
+ * NOTE: On this version, only blocking mode is supported. Also note that
+ *       the function requires DNS server to be configured prior to its
+ *       usage.
+ *
  * Input Parameters:
  *   hostname     host name
  *   usNameLen    name length
@@ -490,14 +497,6 @@ long listen(long sd, long backlog)
  *
  * Returned Value:
  *   On success, positive is returned. On error, negative is returned
- *
- * Decription:
- *   Get host IP by name. Obtain the IP Address of machine on network,
- *   by its name.
- *
- * NOTE: On this version, only blocking mode is supported. Also note that
- *       the function requires DNS server to be configured prior to its
- *       usage.
  *
  *****************************************************************************/
 
@@ -543,15 +542,6 @@ int gethostbyname(char * hostname, uint16_t usNameLen, unsigned long* out_ip_add
 /*****************************************************************************
  * Name: connect
  *
- * Input Parameters:
- *   sd       socket descriptor (handle)
- *   addr     specifies the destination addr. On this version
- *     only AF_INET is supported.
- *   addrlen  contains the size of the structure pointed to by addr
- *
- * Returned Value:
- *   On success, zero is returned. On error, -1 is returned
- *
  * Decription:
  *   initiate a connection on a socket
  *   Function connects the socket referred to by the socket descriptor
@@ -567,6 +557,15 @@ int gethostbyname(char * hostname, uint16_t usNameLen, unsigned long* out_ip_add
  *   socket. Note that the function implements only blocking behavior
  *   thus the caller will be waiting either for the connection
  *   establishment or for the connection establishment failure.
+ *
+ * Input Parameters:
+ *   sd       socket descriptor (handle)
+ *   addr     specifies the destination addr. On this version
+ *     only AF_INET is supported.
+ *   addrlen  contains the size of the structure pointed to by addr
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, -1 is returned
  *
  *****************************************************************************/
 
@@ -604,6 +603,15 @@ long connect(long sd, const sockaddr *addr, long addrlen)
 /*****************************************************************************
  * Name: select
  *
+ * Decription:
+ *   Monitor socket activity
+ *   Select allow a program to monitor multiple file descriptors,
+ *   waiting until one or more of the file descriptors become
+ *   "ready" for some class of I/O operation
+ *
+ * NOTE: If the timeout value set to less than 5ms it will automatically set
+ *   to 5ms to prevent overload of the system
+ *
  * Input Parameters:
  *   nfds       the highest-numbered file descriptor in any of the
  *     three sets, plus 1.
@@ -628,15 +636,6 @@ long connect(long sd, const sockaddr *addr, long addrlen)
  *   *writesds - return the sockets on which Write request
  *     will return without delay.
  *   *exceptsds - return the sockets which closed recently.
- *
- * Decription:
- *   Monitor socket activity
- *   Select allow a program to monitor multiple file descriptors,
- *   waiting until one or more of the file descriptors become
- *   "ready" for some class of I/O operation
- *
- * NOTE: If the timeout value set to less than 5ms it will automatically set
- *   to 5ms to prevent overload of the system
  *
  *****************************************************************************/
 
@@ -724,16 +723,6 @@ int select(long nfds, TICC3000fd_set *readsds, TICC3000fd_set *writesds,
 /*****************************************************************************
  * Name: setsockopt
  *
- * Input Parameters:
- *   sd          socket handle
- *   level       defines the protocol level for this option
- *   optname     defines the option name to Interrogate
- *   optval      specifies a value for the option
- *   optlen      specifies the length of the option value
- *
- * Returned Value:
- *   On success, zero is returned. On error, -1 is returned
- *
  * Decription:
  *   set socket options
  *   This function manipulate the options associated with a socket.
@@ -766,6 +755,16 @@ int select(long nfds, TICC3000fd_set *readsds, TICC3000fd_set *writesds,
  *    2. SOCKOPT_NONBLOCK (optname). sets the socket non-blocking mode on
  *    or off.
  *     In that case optval should be SOCK_ON or SOCK_OFF (optval).
+ *
+ * Input Parameters:
+ *   sd          socket handle
+ *   level       defines the protocol level for this option
+ *   optname     defines the option name to Interrogate
+ *   optval      specifies a value for the option
+ *   optlen      specifies the length of the option value
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, -1 is returned
  *
  *****************************************************************************/
 
@@ -811,16 +810,6 @@ int setsockopt(long sd, long level, long optname, const void *optval, socklen_t 
 /*****************************************************************************
  * Name: getsockopt
  *
- * Input Parameters:
- *   sd          socket handle
- *   level       defines the protocol level for this option
- *   optname     defines the option name to Interrogate
- *   optval      specifies a value for the option
- *   optlen      specifies the length of the option value
- *
- * Returned Value:
- *   On success, zero is returned. On error, -1 is returned
- *
  * Decription:
  *   set socket options
  *   This function manipulate the options associated with a socket.
@@ -853,6 +842,16 @@ int setsockopt(long sd, long level, long optname, const void *optval, socklen_t 
  *    2. SOCKOPT_NONBLOCK (optname). sets the socket non-blocking mode on
  *    or off.
  *     In that case optval should be SOCK_ON or SOCK_OFF (optval).
+ *
+ * Input Parameters:
+ *   sd          socket handle
+ *   level       defines the protocol level for this option
+ *   optname     defines the option name to Interrogate
+ *   optval      specifies a value for the option
+ *   optlen      specifies the length of the option value
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, -1 is returned
  *
  *****************************************************************************/
 
@@ -958,6 +957,11 @@ int simple_link_recv(long sd, void *buf, long len, long flags, sockaddr *from,
 /*****************************************************************************
  * Name: recv
  *
+ * Decription:
+ *     function receives a message from a connection-mode socket
+ *
+ * NOTE: On this version, only blocking mode is supported.
+ *
  * Input Parameters:
  *   sd     socket handle
  *   buf    Points to the buffer where the message should be stored
@@ -970,11 +974,6 @@ int simple_link_recv(long sd, void *buf, long len, long flags, sockaddr *from,
  *     Return the number of bytes received, or -1 if an error
  *     occurred
  *
- * Decription:
- *     function receives a message from a connection-mode socket
- *
- * NOTE: On this version, only blocking mode is supported.
- *
  *****************************************************************************/
 
 int recv(long sd, void *buf, long len, long flags)
@@ -984,6 +983,14 @@ int recv(long sd, void *buf, long len, long flags)
 
 /*****************************************************************************
  * Name: recvfrom
+ *
+ * Decription:
+ *    read data from socket
+ *    function receives a message from a connection-mode or
+ *    connectionless-mode socket. Note that raw sockets are not
+ *    supported.
+ *
+ * NOTE: On this version, only blocking mode is supported.
  *
  * Input Parameters:
  *   sd     socket handle
@@ -1000,14 +1007,6 @@ int recv(long sd, void *buf, long len, long flags)
  * Returned Value:
  *     Return the number of bytes received, or -1 if an error
  *     occurred
- *
- * Decription:
- *    read data from socket
- *    function receives a message from a connection-mode or
- *    connectionless-mode socket. Note that raw sockets are not
- *    supported.
- *
- * NOTE: On this version, only blocking mode is supported.
  *
  *****************************************************************************/
 
@@ -1137,6 +1136,13 @@ int simple_link_send(long sd, const void *buf, long len, long flags,
 /*****************************************************************************
  * Name: send
  *
+ * Decription:
+ *     Write data to TCP socket
+ *     This function is used to transmit a message to another
+ *     socket.
+ *
+ * NOTE: On this version, only blocking mode is supported.
+ *
  * Input Parameters:
  *   sd       socket handle
  *   buf      Points to a buffer containing the message to be sent
@@ -1147,13 +1153,6 @@ int simple_link_send(long sd, const void *buf, long len, long flags,
  *     Return the number of bytes transmitted, or -1 if an
  *     error occurred
  *
- * Decription:
- *     Write data to TCP socket
- *     This function is used to transmit a message to another
- *     socket.
- *
- * NOTE: On this version, only blocking mode is supported.
- *
  *****************************************************************************/
 
 int send(long sd, const void *buf, long len, long flags)
@@ -1163,6 +1162,13 @@ int send(long sd, const void *buf, long len, long flags)
 
 /*****************************************************************************
  * Name: sendto
+ *
+ * Decription:
+ *     Write data to TCP socket
+ *     This function is used to transmit a message to another
+ *     socket.
+ *
+ * NOTE: On this version, only blocking mode is supported.
  *
  * Input Parameters:
  *   sd       socket handle
@@ -1178,13 +1184,6 @@ int send(long sd, const void *buf, long len, long flags)
  *     Return the number of bytes transmitted, or -1 if an
  *     error occurred
  *
- * Decription:
- *     Write data to TCP socket
- *     This function is used to transmit a message to another
- *     socket.
- *
- * NOTE: On this version, only blocking mode is supported.
- *
  *****************************************************************************/
 
 int sendto(long sd, const void *buf, long len, long flags, const sockaddr *to,
@@ -1196,6 +1195,9 @@ int sendto(long sd, const void *buf, long len, long flags, const sockaddr *to,
 /*****************************************************************************
  * Name: mdnsAdvertiser
  *
+ * Decription:
+ *     Set CC3000 in mDNS advertiser mode in order to advertise itself.
+ *
  * Input Parameters:
  *   mdnsEnabled             flag to enable/disable the mDNS feature
  *   deviceServiceName       Service name as part of the published
@@ -1206,9 +1208,6 @@ int sendto(long sd, const void *buf, long len, long flags, const sockaddr *to,
  *   On success, zero is returned, return SOC_ERROR if socket was not
  *   opened successfully, or if an error occurred.
  *
- * Decription:
- *     Set CC3000 in mDNS advertiser mode in order to advertise itself.
- * NOTE: 
  *****************************************************************************/
 
 int mdnsAdvertiser(uint16_t mdnsEnabled, char * deviceServiceName,

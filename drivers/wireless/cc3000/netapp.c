@@ -79,7 +79,7 @@
  *
  *****************************************************************************/
 
-long netapp_config_mac_adrress(uint8_t * mac)
+long netapp_config_mac_adrress(uint8_t *mac)
 {
   return  nvmem_set_mac_address(mac);
 }

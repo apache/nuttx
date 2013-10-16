@@ -12,8 +12,8 @@
  *   CC30000 from Texas Instruments http://processors.wiki.ti.com/index.php/CC3000
  *
  * See also:
- * 		http://processors.wiki.ti.com/index.php/CC3000_Host_Driver_Porting_Guide
- * 		http://processors.wiki.ti.com/index.php/CC3000_Host_Programming_Guide
+ *     http://processors.wiki.ti.com/index.php/CC3000_Host_Driver_Porting_Guide
+ *     http://processors.wiki.ti.com/index.php/CC3000_Host_Programming_Guide
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,8 +44,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_WIRELESS_CC3000_CC3000_INTERNAL_H
-#define __INCLUDE_NUTTX_WIRELESS_CC3000_CC3000_INTERNAL_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_CC3000_INCLUDE_CC3000_UPIFL_H
+#define __INCLUDE_NUTTX_WIRELESS_CC3000_INCLUDE_CC3000_UPIFL_H
 
 /****************************************************************************
  * Included Files
@@ -76,11 +76,12 @@
 #endif
 
 #ifndef CONFIG_CC3000_SPIMODE
-// CPOL = 0, CPHA = 1 Sample Data Falling Edge of Clock
-// See http://processors.wiki.ti.com/index.php/CC3000_Serial_Port_Interface_(SPI)
+/* CPOL = 0, CPHA = 1 Sample Data Falling Edge of Clock
+ * See http://processors.wiki.ti.com/index.php/CC3000_Serial_Port_Interface_(SPI)
+ */
+
 #  define CONFIG_CC3000_SPIMODE SPIDEV_MODE0
 #endif
-
 
 /* Check for some required settings.  This can save the user a lot of time
  * in getting the right configuration.
@@ -113,7 +114,7 @@ struct cc3000_config_s
   /* Device characterization */
 
   uint32_t spi_frequency;  /* SPI frequency */
-  uint32_t spi_mode;	   /* SPI mode */
+  uint32_t spi_mode;     /* SPI mode */
 
   /* If multiple CC3000 devices are supported, then an IRQ number must
    * be provided for each so that their interrupts can be distinguished.
@@ -131,12 +132,12 @@ struct cc3000_config_s
    * CC3000 to host, indicating that the CC3000 core module is ready to accept data.
    *  T2 duration is approximately 7 ms.
    *
-   *   irq_attach 	- Attach the CC3000 interrupt handler to the GPIO interrupt
-   *   irq_enable  	- Enable or disable the GPIO interrupt
-   *   clear_irq	- Acknowledge/clear any pending GPIO interrupt
+   *   irq_attach   - Attach the CC3000 interrupt handler to the GPIO interrupt
+   *   irq_enable   - Enable or disable the GPIO interrupt
+   *   clear_irq    - Acknowledge/clear any pending GPIO interrupt
    *   power_enable - Enable or disable Module enable.
    *   chip_select  - The Chip Select
-   *   busy    		- Return the state of the interrupt GPIO input
+   *   busy         - Return the state of the interrupt GPIO input
    *
    */
 
@@ -178,11 +179,8 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN  int CC3000_register(FAR struct spi_dev_s *spi,
-                             FAR struct cc3000_config_s *config,
-                             int minor);
-
-
+int CC3000_register(FAR struct spi_dev_s *spi,
+                    FAR struct cc3000_config_s *config, int minor);
 
 #undef EXTERN
 #ifdef __cplusplus
@@ -190,4 +188,4 @@ EXTERN  int CC3000_register(FAR struct spi_dev_s *spi,
 #endif
 
 #endif /* CONFIG_WIRELESS && CONFIG_INPUT_CC3000 */
-#endif /* __INCLUDE_NUTTX_WIRELESS_CC3000_CC3000_INTERNAL_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_CC3000_INCLUDE_CC3000_UPIFL_H */

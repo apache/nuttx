@@ -74,7 +74,7 @@
  *
  *****************************************************************************/
 
-uint8_t* UINT32_TO_STREAM_f (uint8_t *p, unsigned long u32)
+uint8_t *UINT32_TO_STREAM_f(uint8_t *p, unsigned long u32)
 {
   *(p)++ = (uint8_t)(u32);
   *(p)++ = (uint8_t)((u32) >> 8);
@@ -99,7 +99,7 @@ uint8_t* UINT32_TO_STREAM_f (uint8_t *p, unsigned long u32)
  *
  *****************************************************************************/
 
-uint8_t* UINT16_TO_STREAM_f (uint8_t *p, uint16_t u16)
+uint8_t *UINT16_TO_STREAM_f(uint8_t *p, uint16_t u16)
 {
   *(p)++ = (uint8_t)(u16);
   *(p)++ = (uint8_t)((u16) >> 8);

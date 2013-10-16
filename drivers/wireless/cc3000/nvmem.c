@@ -231,7 +231,7 @@ uint8_t nvmem_get_mac_address(uint8_t *mac)
  *****************************************************************************/
 
 uint8_t nvmem_write_patch(unsigned long ulFileId, unsigned long spLength,
-                         const uint8_t *spData)
+                          const uint8_t *spData)
 {
   uint8_t   status = 0;
   uint16_t  offset = 0;
@@ -279,7 +279,7 @@ uint8_t nvmem_write_patch(unsigned long ulFileId, unsigned long spLength,
  *****************************************************************************/
 
 #ifndef CC3000_TINY_DRIVER
-uint8_t nvmem_read_sp_version(uint8_t* patchVer)
+uint8_t nvmem_read_sp_version(uint8_t *patchVer)
 {
   uint8_t *ptr;
   /* 1st byte is the status and the rest is the SP version */

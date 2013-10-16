@@ -32,11 +32,11 @@
 *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *
 *****************************************************************************/
-#ifndef __EVENT_HANDLER_H__
-#define __EVENT_HANDLER_H__
+#ifndef _INCLUDE_NUTTX_WIRELESS_CC3000_EVENT_HANDLER_H
+#define _INCLUDE_NUTTX_WIRELESS_CC3000_EVENT_HANDLER_H
 
 #include <nuttx/wireless/cc3000/hci.h>
-#include <nuttx/wireless/cc3000/socket.h>
+#include <nuttx/wireless/cc3000/include/sys/socket.h>
 
 //*****************************************************************************
 //
@@ -163,5 +163,5 @@ typedef struct _bsd_gethostbyname_return_t
 }
 #endif // __cplusplus
 
-#endif // __EVENT_HANDLER_H__
+#endif // _INCLUDE_NUTTX_WIRELESS_CC3000_EVENT_HANDLER_H
 
