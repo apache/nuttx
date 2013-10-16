@@ -119,7 +119,7 @@
 
 int up_wdginitialize(void)
 {
-  /* Initialize tha register the watchdog timer device */
+  /* Initialize and register the watchdog timer device */
 
 #if defined(CONFIG_STM32_WWDG)
   stm32_wwdginitialize(CONFIG_STM32_WDG_DEVPATH);

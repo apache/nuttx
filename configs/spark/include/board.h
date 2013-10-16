@@ -145,16 +145,63 @@
 #endif
 
 /* LED definitions ******************************************************************/
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
+ * way.  The following definitions are used to access individual LEDs.
+ */
 
-/* The board has only one controllable LED */
-#define LED_STARTED       0  /* No LEDs */
-#define LED_HEAPALLOCATE  1  /* LED1 on */
-#define LED_IRQSENABLED   2  /* LED2 on */
-#define LED_STACKCREATED  3  /* LED1 on */
-#define LED_INIRQ         4  /* LED1 off */
-#define LED_SIGNAL        5  /* LED2 on */
-#define LED_ASSERTION     6  /* LED1 + LED2 */
-#define LED_PANIC         7  /* LED1 / LED2 blinking */
+/* LED index values for use with stm32_setled() */
+
+#define BOARD_LED1           0    /* Tied to LED_USR */
+#define BOARD_LED2           1    /* Tied to LED_RGB RED */
+#define BOARD_LED3           2    /* Tied to LED_RGB BLUE */
+#define BOARD_LED4           3    /* Tied to LED_RGB GREEN */
+#define BOARD_NLEDS          4
+
+#define BOARD_USR_LED_BLUE   BOARD_LED1
+#define BOARD_RGB_LED_RED    BOARD_LED2
+#define BOARD_RGB_LED_GREEN  BOARD_LED4
+#define BOARD_RGB_LED_BLUE   BOARD_LED3
+
+/* LED bits for use with stm32_setleds() */
+
+#define BOARD_USR_LED_BIT    (1 << BOARD_USR_LED_BLUE)
+#define BOARD_RED_LED_BIT    (1 << BOARD_RGB_LED_RED)
+#define BOARD_BLUE_LED_BIT   (1 << BOARD_RGB_LED_BLUE)
+#define BOARD_GREEN_LED_BIT  (1 << BOARD_RGB_LED_GREEN)
+
+#define LED_ACTIVE_LOW (BOARD_RED_LED_BIT|BOARD_BLUE_LED_BIT|BOARD_GREEN_LED_BIT)
+
+/* If CONFIG_ARCH_LEDs is defined, then NuttX will control the 4 LEDs on board the
+ * spark.  The following definitions describe how NuttX controls the LEDs:
+ */
+
+                                /*  LED1   LED2    LED3    LED4             */
+                                /*  blue   red     blue    green   Color    */
+#define LED_STARTED          0  /* ------ ------  ------  ------ ---------  */
+#define LED_HEAPALLOCATE     1  /* OFF    ON      OFF     OFF    Red        */
+#define LED_IRQSENABLED      2  /* OFF    OFF     ON      OFF    Blue       */
+#define LED_STACKCREATED     3  /* OFF    ON      OFF     ON     Orange     */
+#define LED_INIRQ            4  /* N/C    OFF     OFF     ON     Green      */
+#define LED_SIGNAL           5  /* N/C    ON      N/C     N/C    Red Glow   */
+#define LED_ASSERTION        6  /* N/C    N/C     ON      N/C    Blue Glow  */
+#define LED_PANIC            7  /* N/C    ON      ON      ON     White      */
+#define LED_NUM_CODES        8
+
+/* Button definitions ***************************************************************/
+/* The Spark supports two buttons; only one button is controllable by software:
+ *
+ *   BTN: user and wake-up button connected to the I/O PB2/BOOT1 of the STM32F103CB.
+ *     N.B. Since BOOT0 is tied to GND it is a moot point that BTN signal is connected
+ *     to the BOOT1 signal.
+ *   RESET: This pushbutton connected to NRST is used to RESET the STM32F103CB.
+ */
+
+#define BUTTON_USER          0
+#define NUM_BUTTONS          1
+
+#define BUTTON_USER_BIT      (1 << BUTTON_USER)
+#define BUTTON_ACTIVE_LOW    (BUTTON_USER_BIT)
+
 
 /************************************************************************************
  * Public Data
@@ -165,7 +212,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -173,6 +221,54 @@ extern "C" {
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/
+/************************************************************************************
+ * Button support.
+ *
+ * Description:
+ *   up_buttoninit() must be called to initialize button resources.  After
+ *   that, up_buttons() may be called to collect the current state of all
+ *   buttons or up_irqbutton() may be called to register button interrupt
+ *   handlers.
+ *
+ *   After up_buttoninit() has been called, up_buttons() may be called to
+ *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
+ *   with each bit associated with a button.  See the BUTTON_*_BIT and JOYSTICK_*_BIT
+ *   definitions in board.h for the meaning of each bit.
+ *
+ *   up_irqbutton() may be called to register an interrupt handler that will
+ *   be called when a button is depressed or released.  The ID value is a
+ *   button enumeration value that uniquely identifies a button resource. See the
+ *   BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of enumeration
+ *   value.  The previous interrupt handler address is returned (so that it may
+ *   restored, if so desired).
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_BUTTONS
+void up_buttoninit(void);
+uint8_t up_buttons(void);
+#ifdef CONFIG_ARCH_IRQBUTTONS
+xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
+#endif
+#endif
+
+/************************************************************************************
+ * Name:  up_ledinit, up_setled, and up_setleds
+ *
+ * Description:
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board LEDs.  If
+ *   CONFIG_ARCH_LEDS is not defined, then the following interfacesare available to
+ *   control the LEDs from user applications.
+ *
+ ************************************************************************************/
+
+#ifndef CONFIG_ARCH_LEDS
+#undef up_ledinit // Remove macro definition to reuse name
+void up_ledinit(void);
+void up_setled(int led, bool ledon);
+void up_setleds(uint8_t ledset, uint8_t led_states_set);
+#endif
+
 /************************************************************************************
  * Name: stm32_boardinitialize
  *
@@ -184,6 +280,25 @@ extern "C" {
  ************************************************************************************/
 
 void stm32_boardinitialize(void);
+
+/************************************************************************************
+ * Name: nsh_archinitialize
+ *
+ * Description:
+ *   Perform architecture specific initialization for NSH.
+ *
+ *   CONFIG_NSH_ARCHINIT=y :
+ *     Called from the NSH library
+ *
+ *   CONFIG_BOARD_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
+ *   CONFIG_NSH_ARCHINIT=n:
+ *     Called from board_initialize().
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_NSH_LIBRARY
+int nsh_archinitialize(void);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
