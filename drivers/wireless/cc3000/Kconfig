@@ -3,8 +3,54 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-config WL_CC3000_DUMMY
-        bool "CC3000 Wireless Module Dummy Test"
-        default n
+config WL_CC3000
+	bool "CC3000 Wireless Module"
+	default n
 	select SPI
+	---help---
+		Enable support for the TI CC3000 Wifi Module
 
+if WL_CC3000
+
+config CC3000_MULTIPLE
+	bool "Multiple CC3000 Devices"
+	default n
+	---help---
+		Can be defined to support multiple CC3000 devices on board.
+
+config CC3000_NPOLLWAITERS
+	int "Number poll waiters"
+	default 4
+	depends on !DISABLE_POLL
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+config CC3000_SPIDEV
+	int "SPI bus number"
+	default 2
+	---help---
+		Selects the SPI bus number identying that SPI interface that
+		connects the CC3000 to the MCU.
+
+config CC3000_DEVMINOR
+	int "Input device minor number"
+	default 0
+	---help---
+		The CC3000 device will be registered as /dev/wirelessN where N is the
+		value provided by this setting.
+
+config CC3000_SPI_MODE
+	int "SPI mode"
+	default 0
+	range 0 3
+	---help---
+		Controls the SPI mode. The device should work in mode 0, but
+		sometimes you need to experiment.
+
+config CC3000_SPI_FREQUENCY
+	int "SPI frequency"
+	default 16000000
+	---help---
+		Define to use a different SPI bus frequency.
+
+endif

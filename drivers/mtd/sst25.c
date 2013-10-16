@@ -362,7 +362,7 @@ static inline int sst25_readid(struct sst25_dev_s *priv)
               priv->nsectors    = SST25_VF016_NSECTORS;
               return OK;
 
-            /* Not implemented yet */
+            /* Support for this part is not implemented yet */
 
             default:
               break;

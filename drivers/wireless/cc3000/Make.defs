@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/wireless/Make.defs
 #
-#   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,8 @@ ifeq ($(CONFIG_WL_CC3000),y)
 
 # Include cc3000 drivers
 
-CSRCS += cc3000_common.c evnt_handler.c hci.c netapp.c nvmem.c security.c socket.c spi.c wlan.c
+CSRCS += cc3000.c cc3000_common.c evnt_handler.c hci.c netapp.c nvmem.c
+CSRCS += security.c socket.c spi.c wlan.c
 
 # Include wireless devices build support
 
