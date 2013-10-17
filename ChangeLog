@@ -5787,5 +5787,7 @@
 	  Max Holtzberg (2013-10-17).
 	* net/uip/uip_tcpinput.c:  Move tcp connection into SYN_RCVD state
 	  after aception instead of bypassing and moving directly into ESTABLISHED.
-	  From Max Holtzber (2013-10-17).
-
+	  From Max Holtzberg (2013-10-17).
+	* net/net_sendfile.c:  Let the ACK callback handle the REXMIT flag and
+	  don't return until all data has been ACK'd. From Max Holtzberg
+	  (2013-10-17).
