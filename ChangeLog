@@ -5775,4 +5775,6 @@
 	  TLC from David Sidrane (2013-10-16).
 	* drivers/mtd/sst25.c:  Add support for the SST25VF016B.  From David
 	  Sidrane (2013-10-16).
+	* net/net_close.c: Changed net_close debug output to verbose.  From
+	  Max Holtzberg (2013-10-17).
 

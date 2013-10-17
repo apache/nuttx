@@ -86,7 +86,7 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
 
   DEBUGASSERT(conn != NULL);
 
-  nlldbg("conn: %p flags: %04x\n", conn, flags);
+  nllvdbg("conn: %p flags: %04x\n", conn, flags);
 
   /* UIP_CLOSE:    The remote host has closed the connection
    * UIP_ABORT:    The remote host has aborted the connection
@@ -152,7 +152,7 @@ static inline void netclose_disconnect(FAR struct socket *psock)
 
   /* Check for the case where the host beat us and disconnected first */
 
-  if (conn->tcpstateflags == UIP_ESTABLISHED && 
+  if (conn->tcpstateflags == UIP_ESTABLISHED &&
       (cb = uip_tcpcallbackalloc(conn)) != NULL)
     {
       /* Set up to receive TCP data event callbacks */
