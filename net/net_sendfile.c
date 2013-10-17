@@ -535,7 +535,7 @@ ssize_t net_sendfile(int outfd, struct file *infile, off_t *offset,
 
       /* Notify the device driver of the availaibilty of TX data */
 
-      netdev_txnotify(&conn->ripaddr);
+      netdev_txnotify(conn->ripaddr);
 
       uip_lockedwait(&state.snd_sem);
     }
