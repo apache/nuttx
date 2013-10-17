@@ -5782,4 +5782,7 @@
 	  checking for timeout.  From Max Holtzberg (2013-10-17).
 	* net/net_sendfile.c:  Correct paramter passed to netdev_txnotify()
 	  from Max Holtzberg (2013-10-17).
+	* include/nuttx/net/uip/uip-tcp.h, net/send.c, uip/uip_tcpconn.c, and
+	  uip/uip_tcpinput.c:  Change how the inital minimum MSS is calculated.
+	  Max Holtzberg (2013-10-17).
 

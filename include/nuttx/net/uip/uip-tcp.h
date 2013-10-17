@@ -105,6 +105,24 @@
 #define UIP_IPTCPH_LEN (UIP_TCPH_LEN + UIP_IPH_LEN)    /* Size of IP + TCP header */
 #define UIP_TCPIP_HLEN UIP_IPTCPH_LEN
 
+/* Initial minimum MSS according to RFC 879
+ *
+ * There have been some assumptions made about using other than the
+ * default size for datagrams with some unfortunate results.
+ *
+ *     HOSTS MUST NOT SEND DATAGRAMS LARGER THAN 576 OCTETS UNLESS THEY
+ *     HAVE SPECIFIC KNOWLEDGE THAT THE DESTINATION HOST IS PREPARED TO
+ *     ACCEPT LARGER DATAGRAMS.
+ *
+ * This is a long established rule.
+ */
+
+#if UIP_TCP_MSS > 576
+#  define UIP_TCP_INITIAL_MSS 576
+#else
+#  define UIP_TCP_INITIAL_MSS UIP_TCP_MSS
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -135,8 +153,6 @@ struct uip_conn
   uint16_t mss;           /* Current maximum segment size for the
                            * connection */
   uint16_t winsize;       /* Current window size of the connection */
-  uint16_t initialmss;    /* Initial maximum segment size for the
-                           * connection */
   uint8_t  crefs;         /* Reference counts on this instance */
   uint8_t  sa;            /* Retransmission time-out calculation state
                            * variable */
@@ -444,18 +460,8 @@ extern int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blc
     (conn)->tcpstateflags &= ~UIP_STOPPED; \
   } while(0)
 
-/* Get the initial maxium segment size (MSS) of the current
- * connection.
- */
-
-#define uip_initialmss(conn) ((conn)->initialmss)
-
 /* Get the current maximum segment size that can be sent on the current
  * connection.
- *
- * The current maxiumum segment size that can be sent on the connection is
- * computed from the receiver's window and the MSS of the connection (which
- * also is available by calling uip_initialmss()).
  */
 
 #define uip_mss(conn) ((conn)->mss)

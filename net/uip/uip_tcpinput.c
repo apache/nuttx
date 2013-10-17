@@ -2,7 +2,7 @@
  * net/uip/uip_tcpinput.c
  * Handling incoming TCP input
  *
- *   Copyright (C) 2007-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -244,8 +244,7 @@ void uip_tcpinput(struct uip_driver_s *dev)
 
                       tmp16 = ((uint16_t)dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + i] << 8) |
                                (uint16_t)dev->d_buf[UIP_IPTCPH_LEN + UIP_LLH_LEN + 3 + i];
-                      conn->initialmss = conn->mss =
-                              tmp16 > UIP_TCP_MSS? UIP_TCP_MSS: tmp16;
+                      conn->mss = tmp16 > UIP_TCP_MSS ? UIP_TCP_MSS : tmp16;
 
                       /* And we are done processing options. */
 
@@ -300,7 +299,7 @@ found:
 
   /* Update the connection's window size */
 
-  conn->winsize = BUF->wnd[0] << 8 | BUF->wnd[1];
+  conn->winsize = ((uint16_t)pbuf->wnd[0] << 8) + (uint16_t)pbuf->wnd[1];
 
   flags = 0;
 
@@ -522,9 +521,7 @@ found:
                         tmp16 =
                           (dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 2 + i] << 8) |
                           dev->d_buf[UIP_TCPIP_HLEN + UIP_LLH_LEN + 3 + i];
-                        conn->initialmss =
-                          conn->mss =
-                          tmp16 > UIP_TCP_MSS? UIP_TCP_MSS: tmp16;
+                        conn->mss = tmp16 > UIP_TCP_MSS ? UIP_TCP_MSS : tmp16;
 
                         /* And we are done processing options. */
 
@@ -595,10 +592,17 @@ found:
 
         if ((pbuf->flags & TCP_FIN) != 0 && (conn->tcpstateflags & UIP_STOPPED) == 0)
           {
+            /* Needs to be investigated further.
+             * Windows often sends FIN packets together with the last ACK for
+             * the received data. So the socket layer has to get this ACK even
+             * if the connection is going to be closed.
+             */
+#if 0
             if (conn->unacked > 0)
               {
                 goto drop;
               }
+#endif
 
             /* Update the sequence number and indicate that the connection has
              * been closed.
@@ -662,26 +666,6 @@ found:
           {
             flags |= UIP_NEWDATA;
           }
-
-        /* Check if the available buffer space advertised by the other end
-         * is smaller than the initial MSS for this connection. If so, we
-         * set the current MSS to the window size to ensure that the
-         * application does not send more data than the other end can
-         * handle.
-         *
-         * If the remote host advertises a zero window, we set the MSS to
-         * the initial MSS so that the application will send an entire MSS
-         * of data. This data will not be acknowledged by the receiver,
-         * and the application will retransmit it. This is called the
-         * "persistent timer" and uses the retransmission mechanim.
-         */
-
-        tmp16 = ((uint16_t)pbuf->wnd[0] << 8) + (uint16_t)pbuf->wnd[1];
-        if (tmp16 > conn->initialmss || tmp16 == 0)
-          {
-            tmp16 = conn->initialmss;
-          }
-        conn->mss = tmp16;
 
         /* If this packet constitutes an ACK for outstanding data (flagged
          * by the UIP_ACKDATA flag), we should call the application since it

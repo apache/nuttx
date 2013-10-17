@@ -496,6 +496,7 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
       conn->nrtx          = 0;
       conn->lport         = buf->destport;
       conn->rport         = buf->srcport;
+      conn->mss           = UIP_TCP_INITIAL_MSS;
       uip_ipaddr_copy(conn->ripaddr, uip_ip4addr_conv(buf->srcipaddr));
       conn->tcpstateflags = UIP_SYN_RCVD;
 
@@ -632,7 +633,7 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
   conn->tcpstateflags = UIP_SYN_SENT;
   uip_tcpinitsequence(conn->sndseq);
 
-  conn->initialmss = conn->mss = UIP_TCP_MSS;
+  conn->mss        = UIP_TCP_INITIAL_MSS;
   conn->unacked    = 1;    /* TCP length of the SYN is one. */
   conn->nrtx       = 0;
   conn->timer      = 1;    /* Send the SYN next time around. */

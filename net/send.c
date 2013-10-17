@@ -356,45 +356,52 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
           sndlen = uip_mss(conn);
         }
 
-      /* Set the sequence number for this packet.  NOTE:  uIP updates
-       * sndseq on recept of ACK *before* this function is called.  In that
-       * case sndseq will point to the next unacknowledge byte (which might
-       * have already been sent).  We will overwrite the value of sndseq
-       * here before the packet is sent.
-       */
+      /* Check if we have "space" in the window */
 
-      seqno = pstate->snd_sent + pstate->snd_isn;
-      nllvdbg("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
-      uip_tcpsetsequence(conn->sndseq, seqno);
+      if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->winsize)
+        {
 
-      /* Then set-up to send that amount of data. (this won't actually
-       * happen until the polling cycle completes).
-       */
+          /* Set the sequence number for this packet.  NOTE:  uIP updates
+           * sndseq on recept of ACK *before* this function is called.  In that
+           * case sndseq will point to the next unacknowledge byte (which might
+           * have already been sent).  We will overwrite the value of sndseq
+           * here before the packet is sent.
+           */
 
-      uip_send(dev, &pstate->snd_buffer[pstate->snd_sent], sndlen);
+          seqno = pstate->snd_sent + pstate->snd_isn;
+          nllvdbg("SEND: sndseq %08x->%08x\n", conn->sndseq, seqno);
+          uip_tcpsetsequence(conn->sndseq, seqno);
 
-      /* Check if the destination IP address is in the ARP table.  If not,
-       * then the send won't actually make it out... it will be replaced with
-       * an ARP request.
-       *
-       * NOTE 1: This could be an expensive check if there are a lot of entries
-       * in the ARP table.  Hence, we only check on the first packet -- when
-       * snd_sent is zero.
-       *
-       * NOTE 2: If we are actually harvesting IP addresses on incomming IP
-       * packets, then this check should not be necessary; the MAC mapping
-       * should already be in the ARP table.
-       */
+          /* Then set-up to send that amount of data. (this won't actually
+           * happen until the polling cycle completes).
+           */
+
+          uip_send(dev, &pstate->snd_buffer[pstate->snd_sent], sndlen);
+
+          /* Check if the destination IP address is in the ARP table.  If not,
+           * then the send won't actually make it out... it will be replaced with
+           * an ARP request.
+           *
+           * NOTE 1: This could be an expensive check if there are a lot of entries
+           * in the ARP table.  Hence, we only check on the first packet -- when
+           * snd_sent is zero.
+           *
+           * NOTE 2: If we are actually harvesting IP addresses on incomming IP
+           * packets, then this check should not be necessary; the MAC mapping
+           * should already be in the ARP table.
+           */
 
 #if defined(CONFIG_NET_ETHERNET) && !defined(CONFIG_NET_ARP_IPIN)
-      if (pstate->snd_sent != 0 || uip_arp_find(conn->ripaddr) != NULL)
+         if (pstate->snd_sent != 0 || uip_arp_find(conn->ripaddr) != NULL)
 #endif
-        {
-          /* Update the amount of data sent (but not necessarily ACKed) */
+            {
+              /* Update the amount of data sent (but not necessarily ACKed) */
 
-          pstate->snd_sent += sndlen;
-          nllvdbg("SEND: acked=%d sent=%d buflen=%d\n",
-                  pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+              pstate->snd_sent += sndlen;
+              nllvdbg("SEND: acked=%d sent=%d buflen=%d\n",
+                      pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+
+            }
         }
     }
 
