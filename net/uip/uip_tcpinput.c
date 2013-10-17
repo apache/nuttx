@@ -190,15 +190,6 @@ void uip_tcpinput(struct uip_driver_s *dev)
                   uip_tcpfree(conn);
                   conn = NULL;
                 }
-              else
-                {
-                  /* TCP state machine should move to the ESTABLISHED state only after
-                   * it has received ACK from the host.  This needs to be investigated
-                   * further.
-                   */
-
-                  conn->tcpstateflags = UIP_ESTABLISHED;
-                }
             }
 
           if (!conn)

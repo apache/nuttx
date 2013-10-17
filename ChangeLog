@@ -5785,4 +5785,7 @@
 	* include/nuttx/net/uip/uip-tcp.h, net/send.c, uip/uip_tcpconn.c, and
 	  uip/uip_tcpinput.c:  Change how the inital minimum MSS is calculated.
 	  Max Holtzberg (2013-10-17).
+	* net/uip/uip_tcpinput.c:  Move tcp connection into SYN_RCVD state
+	  after aception instead of bypassing and moving directly into ESTABLISHED.
+	  From Max Holtzber (2013-10-17).
 
