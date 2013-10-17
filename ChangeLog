@@ -5777,4 +5777,7 @@
 	  Sidrane (2013-10-16).
 	* net/net_close.c: Changed net_close debug output to verbose.  From
 	  Max Holtzberg (2013-10-17).
+	* net/send.c and net_sendfile.c:  Reset the send timeout when the
+	  data is ACKed, not when the data is sent.  Remove concitions on
+	  checking for timeout.  From Max Holtzberg (2013-10-17).
 

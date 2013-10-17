@@ -176,6 +176,12 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
   if ((flags & UIP_ACKDATA) != 0)
     {
+      /* Update the timeout */
+
+#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
+      pstate->snd_time = clock_systimer();
+#endif
+
       /* The current acknowledgement number number is the (relative) offset
        * of the of the next byte needed by the receiver.  The snd_isn is the
        * offset of the first byte to send to the receiver.  The difference
@@ -389,21 +395,15 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
           pstate->snd_sent += sndlen;
           nllvdbg("SEND: acked=%d sent=%d buflen=%d\n",
                   pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
-
-          /* Update the send time */
-
-#if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-          pstate->snd_time = clock_systimer();
-#endif
         }
     }
 
-  /* All data has been send and we are just waiting for ACK or re-transmit
+  /* All data has been sent and we are just waiting for ACK or re-transmit
    * indications to complete the send.  Check for a timeout.
    */
 
 #if defined(CONFIG_NET_SOCKOPTS) && !defined(CONFIG_DISABLE_CLOCK)
-  else if (send_timeout(pstate))
+  if (send_timeout(pstate))
     {
       /* Yes.. report the timeout */
 
