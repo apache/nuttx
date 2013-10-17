@@ -99,14 +99,10 @@
 
 /* Data read bit definitions */
 
-#define TSD_XREADY          (1 << 0)  /* X value is ready */
-#define TSD_YREADY          (1 << 1)  /* Y value is ready */
-
 #ifdef CONFIG_SAMA5_TSD_4WIRE
-#  define TSD_PREADY        (1 << 2)  /* Pressure value is ready */
-#  define TSD_ALLREADY      (TSD_XREADY | TSD_YREADY | TSD_PREADY)
+#  define TSD_ALLREADY      (ADC_INT_XRDY | ADC_INT_YRDY | ADC_INT_PRDY)
 #else
-#  define TSD_ALLREADY      (TSD_XREADY | TSD_YREADY)
+#  define TSD_ALLREADY      (ADC_INT_XRDY | ADC_INT_YRDY)
 #endif
 
 /* Pen sample state bit sets */
@@ -175,7 +171,6 @@ struct sam_tsd_s
   volatile bool penchange;      /* An unreported event is buffered */
   uint32_t threshx;             /* Thresholding X value */
   uint32_t threshy;             /* Thresholding Y value */
-  volatile uint32_t pending;    /* Pending interrupt set set */
   sem_t waitsem;                /* Used to wait for the availability of data */
 
   struct sam_adc_s *adc;        /* ADC device handle */
@@ -204,7 +199,7 @@ static int  sam_tsd_sample(struct sam_tsd_s *priv, struct sam_sample_s *sample);
 static int  sam_tsd_waitsample(struct sam_tsd_s *priv,
               struct sam_sample_s *sample);
 static void sam_tsd_bottomhalf(void *arg);
-static int  sam_tsd_schedule(struct sam_tsd_s *priv, uint32_t pending);
+static int  sam_tsd_schedule(struct sam_tsd_s *priv);
 static void sam_tsd_expiry(int argc, uint32_t arg1, ...);
 
 /* Character driver methods */
@@ -528,9 +523,9 @@ static void sam_tsd_bottomhalf(void *arg)
 
   ASSERT(priv != NULL);
 
-  /* Get the set of unmasked, pending ADC interrupts */
+  /* Get the set of pending ADC interrupts and pen status */
 
-  pending = priv->pending;
+  pending = sam_adc_getreg(priv->adc, SAM_ADC_ISR);
 
   /* Get exclusive access to the driver data structure */
 
@@ -551,10 +546,6 @@ static void sam_tsd_bottomhalf(void *arg)
 
       priv->threshx = INVALID_THRESHOLD;
       priv->threshy = INVALID_THRESHOLD;
-
-      /* Clear data validity bits:  There is no valid data to be sampled */
-
-      priv->valid   = 0;
 
       /* We will enable only the ADC_INT_PEN interrupt on exit.  We don't
        * want to hear anything from the touchscreen until the next touch.
@@ -611,53 +602,25 @@ static void sam_tsd_bottomhalf(void *arg)
     }
   else
     {
-      /* The pen is down and the driver has accepted the last sample values.
-       * check if we have accumulated all of the samples that we need.
-       */
+      /* The pen is down and the driver has accepted the last sample values. */
 
-      /* Check X data availability */
-
-      if ((pending & ADC_INT_XRDY) != 0)
-        {
-          priv->valid |= TSD_XREADY;
-        }
-
-      /* Check Y data availability */
-
-      if ((pending & ADC_INT_YRDY) != 0)
-        {
-          priv->valid |= TSD_YREADY;
-        }
-
-#ifdef CONFIG_SAMA5_TSD_4WIRE
-      /* Check pressure data availability: (X/1024)*[(Z2/Z1)-1] */
-
-      if ((pending & ADC_INT_PRDY) != 0)
-        {
-          priv->valid |= TSD_PREADY;
-        }
-#endif
-
-      ivdbg("valid: %02x\n", priv->valid);
-
-      /* While the pen is down we want interrupts on all day ready an pen
+      /* While the pen is down we want interrupts on all data ready and pen
        * release events.
        */
 
       ier = ADC_TSD_RELEASEINTS;
 
-      /* Check if all data is ready.  If not, just re-enable interrupts and
-       * wait until it is.
+      /* Check if all of the date that we need is available.  If not, just
+       * re-enable interrupts and wait until it is.
        */
 
-      if ((priv->valid & TSD_ALLREADY) != TSD_ALLREADY)
+      if ((pending & TSD_ALLREADY) != TSD_ALLREADY)
         {
+          /* But don't enable interrupts for the data that we already have */
+
+          ier &= ~(pending & TSD_ALLREADY);
           goto ignored;
         }
-
-      /* Clear data ready bits in the data validity bitset */
-
-      priv->valid = 0;
 
       /* Sample positional values.  Get raw X and Y position data */
 
@@ -676,6 +639,14 @@ static void sam_tsd_bottomhalf(void *arg)
 
       pressr = sam_adc_getreg(priv->adc, SAM_ADC_PRESSR);
 #endif
+      /* Discard any bad readings.  This check may not be necessary. */
+
+      if (xraw == 0 || xraw >= xscale || yraw == 0 || yraw > yscale)
+        {
+          idbg("Discarding: x %d:%d y %d:%d\n", xraw, xscale);
+          goto ignored;
+        }
+
       /* Scale the X/Y measurements.  The scale value is the maximum
        * value that the sample can attain.  It should be close to 4095.
        * Scaling:
@@ -691,6 +662,7 @@ static void sam_tsd_bottomhalf(void *arg)
       x  = ((xraw << 12) - xraw) / xscale;
       y  = ((yraw << 12) - yraw) / yscale;
 #endif
+
       /* Perform a thresholding operation so that the results will be
        * more stable.  If the difference from the last sample is small,
        * then ignore the event. REVISIT:  Should a large change in
@@ -722,13 +694,13 @@ static void sam_tsd_bottomhalf(void *arg)
 
       /* When we see a big difference, snap to the new x/y thresholds */
 
-      priv->threshx       = x;
-      priv->threshy       = y;
+      priv->threshx  = x;
+      priv->threshy  = y;
 
      /* Update the x/y position in the sample data */
 
-      priv->sample.x      = MIN(x, UINT16_MAX);
-      priv->sample.y      = MIN(y, UINT16_MAX);
+      priv->sample.x = MIN(x, UINT16_MAX);
+      priv->sample.y = MIN(y, UINT16_MAX);
 
 #ifdef CONFIG_SAMA5_TSD_4WIRE
       /* Scale the pressure and update the pressure in the sample data.
@@ -741,9 +713,9 @@ static void sam_tsd_bottomhalf(void *arg)
        *   Rp = Rxp * (Xraw / 1024) * [(Z2 / Z1) - 1]
        */
 
-      z2   = (pressr & ADC_PRESSR_Z2_MASK) >> ADC_PRESSR_Z2_SHIFT;
-      z1   = (pressr & ADC_PRESSR_Z1_MASK) >> ADC_PRESSR_Z1_SHIFT;
-      p    = CONFIG_SAMA_TSD_RXP * xraw * (z2 - z1) / z1;
+      z2 = (pressr & ADC_PRESSR_Z2_MASK) >> ADC_PRESSR_Z2_SHIFT;
+      z1 = (pressr & ADC_PRESSR_Z1_MASK) >> ADC_PRESSR_Z1_SHIFT;
+      p  = CONFIG_SAMA_TSD_RXP * xraw * (z2 - z1) / z1;
 
       priv->sample.p = MIN(p, UINT16_MAX);
 #endif
@@ -801,7 +773,7 @@ ignored:
  * Name: sam_tsd_schedule
  ****************************************************************************/
 
-static int sam_tsd_schedule(struct sam_tsd_s *priv, uint32_t pending)
+static int sam_tsd_schedule(struct sam_tsd_s *priv)
 {
   int ret;
 
@@ -816,12 +788,6 @@ static int sam_tsd_schedule(struct sam_tsd_s *priv, uint32_t pending)
    */
 
   sam_adc_putreg(priv->adc, SAM_ADC_IDR, ADC_TSD_ALLINTS);
-
-  /* Save the set of pending interrupts for the bottom half (in case any
-   * were cleared by reading the ISR.
-   */
-
-  priv->pending = pending;
 
   /* Transfer processing to the worker thread.  Since touchscreen ADC interrupts are
    * disabled while the work is pending, no special action should be required
@@ -850,24 +816,10 @@ static int sam_tsd_schedule(struct sam_tsd_s *priv, uint32_t pending)
 static void sam_tsd_expiry(int argc, uint32_t arg1, ...)
 {
   struct sam_tsd_s *priv = (struct sam_tsd_s *)((uintptr_t)arg1);
-  uint32_t isr;
-  uint32_t imr;
-  uint32_t pending;
 
-  /* Get the set of unmasked, pending ADC interrupts. There should be no
-   * pending TSD interrupts, but we need to get the PENS status bit as a
-   * minimum.
-   */
+  /* Schedule touchscreen work */
 
-  isr     = sam_adc_getreg(priv->adc, SAM_ADC_ISR);
-  imr     = sam_adc_getreg(priv->adc, SAM_ADC_IMR);
-  pending = isr & (imr | ADC_SR_PENS);
-
-  /* There should be no pending TSD interrupts, but we need to get the PENS
-   * status bit as a minimum.
-   */
-
-  (void)sam_tsd_schedule(priv, pending);
+  (void)sam_tsd_schedule(priv);
 }
 
 /****************************************************************************
@@ -1673,7 +1625,6 @@ static void sam_tsd_uninitialize(struct sam_tsd_s *priv)
 
   priv->sample.contact = CONTACT_NONE;
   priv->sample.valid = false;
-  priv->valid = 0;
 }
 
 /****************************************************************************
@@ -1769,7 +1720,7 @@ void sam_tsd_interrupt(uint32_t pending)
        * worker thread.
        */
 
-      ret = sam_tsd_schedule(priv, pending);
+      ret = sam_tsd_schedule(priv);
       if (ret < 0)
         {
           idbg("ERROR: sam_tsd_schedule failed: %d\n", ret);
