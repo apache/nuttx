@@ -333,7 +333,7 @@ uint8_t *UINT32_TO_STREAM_f(uint8_t *p, unsigned long u32);
  *
  *****************************************************************************/
 
-uint8_t *UINT16_TO_STREAM_f(uint8_t *p, uint16_t u16)
+uint8_t *UINT16_TO_STREAM_f(uint8_t *p, uint16_t u16);
 
 /*****************************************************************************
  * Name: STREAM_TO_UINT16_f

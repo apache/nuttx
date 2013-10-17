@@ -116,7 +116,7 @@ void wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches,
                tWlanReadInteruptPin sReadWlanInterruptPin,
                tWlanInterruptEnable sWlanInterruptEnable,
                tWlanInterruptDisable sWlanInterruptDisable,
-               tWriteWlanPin sWriteWlanPin)'
+               tWriteWlanPin sWriteWlanPin);
 
 
 /*****************************************************************************
@@ -424,7 +424,6 @@ long wlan_ioctl_get_scan_results(unsigned long ulScanTimeout, uint8_t *ucResults
  *
  *****************************************************************************/
 
-#ifndef CC3000_TINY_DRIVER
 long wlan_ioctl_set_scan_params(unsigned long uiEnable,
                                 unsigned long uiMinDwellTime,
                                 unsigned long uiMaxDwellTime,

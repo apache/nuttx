@@ -142,7 +142,7 @@
 #define  HCI_EVNT_SETSOCKOPT                  HCI_CMND_SETSOCKOPT
 #define  HCI_EVNT_GETSOCKOPT                  HCI_CMND_GETSOCKOPT
 #define  HCI_EVNT_BSD_GETHOSTBYNAME           HCI_CMND_GETHOSTNAME
-#define  HCI_EVNT_MDNS_ADVERTISE              CI_CMND_MDNS_ADVERTISE
+#define  HCI_EVNT_MDNS_ADVERTISE              HCI_CMND_MDNS_ADVERTISE
 
 #define  HCI_EVNT_SEND                        0x1003
 #define  HCI_EVNT_WRITE                       0x100E
