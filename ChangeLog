@@ -5793,4 +5793,6 @@
 	  (2013-10-17).
 	* arch/arm/src/stm32/chip/stm32f40xxx_dma.h: Typo fixes for UART7 and
 	  UART8 DMA configs.  From Mike Smit (2013-10-18).
+	* arch/arm/src/stm32/Kconfig:  DMA priority corrections from Mike Smith
+	  (2013-10-18).
 
