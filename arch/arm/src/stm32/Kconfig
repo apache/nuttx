@@ -2631,10 +2631,15 @@ config SDIO_PRI
 
 config SDIO_DMAPRIO
 	hex "SDIO DMA priority"
-	default 0x00010000
-	depends on !STM32_STM32F10XX
+	default 0x00001000 if STM32_STM32F10XX
+	default 0x00010000 if !STM32_STM32F10XX
 	---help---
-		Select SDIO DMA prority.  Options: 0x00000000 low, 0x00010000 medium,
+		Select SDIO DMA prority.
+
+		For STM32 F1 family, options are: 0x00000000 low, 0x00001000 medium,
+		0x00002000 high, 0x00003000 very high.  Default: medium.
+
+		For other STM32's, options are: 0x00000000 low, 0x00010000 medium,
 		0x00020000 high, 0x00030000 very high.  Default: medium.
 
 config SDIO_WIDTH_D1_ONLY
