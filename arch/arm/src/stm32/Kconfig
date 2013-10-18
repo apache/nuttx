@@ -723,6 +723,7 @@ config STM32_SDIO
 	default n
 	depends on !STM32_CONNECTIVITYLINE && !STM32_VALUELINE
 	select ARCH_HAVE_SDIO
+	select SDIO_PREFLIGHT
 
 config STM32_SPI1
 	bool "SPI1"

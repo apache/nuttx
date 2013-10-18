@@ -5801,3 +5801,6 @@
 	  required.  Implemented stm32_dmacapable for stm32f1xx devices. Enhanced
 	  stm32_dmacapable for stm32f2xx and stm32f4xx devices to check for
 	  additional conditions that will cause DMA to fail or lose data (2013-10-18).
+	* include/nuttx/sdio.h:  Add a preflight method to the SDIO interface.
+	  From Mike Smith (2013-10-18).
+
