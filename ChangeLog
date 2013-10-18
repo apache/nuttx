@@ -5803,4 +5803,6 @@
 	  additional conditions that will cause DMA to fail or lose data (2013-10-18).
 	* include/nuttx/sdio.h:  Add a preflight method to the SDIO interface.
 	  From Mike Smith (2013-10-18).
-
+	* drivers/mmcsd/mmscd_sdio.c: Enhanced the mmcdd_sdio driver to perform
+	  DMA preflight operations and fail DMA read/write requests that fail
+	  preflighting. From Mike Smith (2013-10-18).

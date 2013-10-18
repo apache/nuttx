@@ -1285,6 +1285,22 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
       return -EPERM;
     }
 
+#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_SDIO_PREFLIGHT)
+  /* If we think we are going to perform a DMA transfer, make sure that we
+   * will be able to before we commit the card to the operation.
+   */
+
+  if (priv->dma)
+    {
+      ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
+
+      if (ret != OK)
+        {
+          return ret;
+        }
+    }
+#endif
+
   /* Verify that the card is ready for the transfer.  The card may still be
    * busy from the preceding write transfer.  It would be simpler to check
    * for write busy at the end of each write, rather than at the beginning of
@@ -1327,10 +1343,16 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 
   SDIO_BLOCKSETUP(priv->dev, priv->blocksize, 1);
   SDIO_WAITENABLE(priv->dev, SDIOWAIT_TRANSFERDONE|SDIOWAIT_TIMEOUT|SDIOWAIT_ERROR);
+
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
-      SDIO_DMARECVSETUP(priv->dev, buffer, priv->blocksize);
+      ret = SDIO_DMARECVSETUP(priv->dev, buffer, priv->blocksize);
+      if (ret != OK)
+        {
+          fvdbg("SDIO_DMARECVSETUP: error %d\n", ret);
+          return ret;
+        }
     }
   else
 #endif
@@ -1395,6 +1417,22 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
       return -EPERM;
     }
 
+#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_SDIO_PREFLIGHT)
+  /* If we think we are going to perform a DMA transfer, make sure that we
+   * will be able to before we commit the card to the operation.
+   */
+
+  if (priv->dma)
+    {
+      ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
+
+      if (ret != OK)
+        {
+          return ret;
+        }
+    }
+#endif
+
   /* Verify that the card is ready for the transfer.  The card may still be
    * busy from the preceding write transfer.  It would be simpler to check
    * for write busy at the end of each write, rather than at the beginning of
@@ -1440,7 +1478,12 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
-      SDIO_DMARECVSETUP(priv->dev, buffer, nbytes);
+      ret = SDIO_DMARECVSETUP(priv->dev, buffer, nbytes);
+      if (ret != OK)
+        {
+          fvdbg("SDIO_DMARECVSETUP: error %d\n", ret);
+          return ret;
+        }
     }
   else
 #endif
@@ -1576,6 +1619,22 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       return -EPERM;
     }
 
+#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_SDIO_PREFLIGHT)
+  /* If we think we are going to perform a DMA transfer, make sure that we
+   * will be able to before we commit the card to the operation.
+   */
+
+  if (priv->dma)
+    {
+      ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
+
+      if (ret != OK)
+        {
+          return ret;
+        }
+    }
+#endif
+
   /* Verify that the card is ready for the transfer.  The card may still be
    * busy from the preceding write transfer.  It would be simpler to check
    * for write busy at the end of each write, rather than at the beginning of
@@ -1631,7 +1690,12 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
-      SDIO_DMASENDSETUP(priv->dev, buffer, priv->blocksize);
+      ret = SDIO_DMASENDSETUP(priv->dev, buffer, priv->blocksize);
+      if (ret != OK)
+        {
+          fvdbg("SDIO_DMASENDSETUP: error %d\n", ret);
+          return ret;
+        }
     }
   else
 #endif
@@ -1689,6 +1753,22 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       fdbg("ERROR: Card is locked or write protected\n");
       return -EPERM;
     }
+
+#if defined(CONFIG_SDIO_DMA) && defined(CONFIG_SDIO_PREFLIGHT)
+  /* If we think we are going to perform a DMA transfer, make sure that we
+   * will be able to before we commit the card to the operation.
+   */
+
+  if (priv->dma)
+    {
+      ret = SDIO_DMAPREFLIGHT(priv->dev, buffer, priv->blocksize);
+
+      if (ret != OK)
+        {
+          return ret;
+        }
+    }
+#endif
 
   /* Verify that the card is ready for the transfer.  The card may still be
    * busy from the preceding write transfer.  It would be simpler to check
@@ -1777,7 +1857,12 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 #ifdef CONFIG_SDIO_DMA
   if (priv->dma)
     {
-      SDIO_DMASENDSETUP(priv->dev, buffer, nbytes);
+      ret = SDIO_DMASENDSETUP(priv->dev, buffer, nbytes);
+      if (ret != OK)
+        {
+          fvdbg("SDIO_DMASENDSETUP: error %d\n", ret);
+          return ret;
+        }
     }
   else
 #endif
@@ -3180,9 +3265,8 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
             }
         }
 
-      /* Initialize buffering */
-
 #if defined(CONFIG_FS_WRITEBUFFER) || defined(CONFIG_FS_READAHEAD)
+      /* Initialize buffering */
 
       ret = rwb_initialize(&priv->rwbuffer);
       if (ret < 0)
