@@ -5791,3 +5791,6 @@
 	* net/net_sendfile.c:  Let the ACK callback handle the REXMIT flag and
 	  don't return until all data has been ACK'd. From Max Holtzberg
 	  (2013-10-17).
+	* arch/arm/src/stm32/chip/stm32f40xxx_dma.h: Typo fixes for UART7 and
+	  UART8 DMA configs.  From Mike Smit (2013-10-18).
+
