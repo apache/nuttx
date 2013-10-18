@@ -2270,6 +2270,40 @@ Configurations
        $ cd ~/nuttx-git/nuttx
        $ make
 
+    STATUS:
+    2013-10-18.  This example kind of works, but there are still far too
+    many outstanding issues:
+
+    a) It runs of the SAMA5D31 and SAMA5D34, but not on the SAMA5D33.  This
+       board is from a different manufacturer and there may be some SDRAM-
+       related issues?
+    b) There appears to be an SDRAM noise issue on the SAMA5D31 and SAMA5D34.
+       I suspect that the SDRAM setup is non-optimal.  The symptom is that
+       writing into frame buffer (in SDRAM) occasionally corrupts the DMA
+       descriptors (also in SDRAM)  When the bad DMA descriptors are
+       fetched, the channel shuts down and the display goes black.  This
+       problem could also be cause by a bad write outside of the framebuffer,
+       but was not the case in the few examples that I studied.
+    c) There are some occasional start up issues.  It appears that the LCDC
+       is programed incorrectly and groups of pixels in the images are
+       reversed (producing an odd serrated look to the images).
+    d) I think that there may be more issues if GRAPHICS and INPUT debug is
+       off.  I have not tested with DEBUG off.
+    e) The biggest problem is the touchscreen accuracy.  The touchscreen
+       seems stable during calibration, but the first thing that this
+       example requires is a touch in the far, far, upper left corner of
+       the display.  In that region, I cannot get reliable touch measurements
+       and so I cannot get past the opening display.
+    f) The NxWM example was designed tiny displays.  On this large 800x480
+       display, the icons are too tiny to be usable.  I have created a large
+       320x320 logo for the opening screen and added image scaling to expand
+       the images in the taskbar.  The expanded images are not great.  If I
+       ever get past the opening screen, the same problems will exist in the
+       application toolbar and in the start winow.  These icons are not yet
+       scaled.
+
+    Bottom line:  Not ready for prime time.
+
   ostest:
 
     This configuration directory, performs a simple OS test using
