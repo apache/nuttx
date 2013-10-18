@@ -856,8 +856,91 @@ size_t stm32_dmaresidual(DMA_HANDLE handle)
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_DMACAPABLE
-bool stm32_dmacapable(uint32_t maddr)
+bool stm32_dmacapable(uint32_t maddr, uint32_t count, uint32_t ccr)
 {
+  uint32_t transfer_size, burst_length;
+  uint32_t mend;
+
+  /* Verify that the address conforms to the memory transfer size.
+   * Transfers to/from memory performed by the DMA controller are
+   * required to be aligned to their size.
+   *
+   * See ST RM0090 rev4, section 9.3.11
+   *
+   * Compute mend inline to avoid a possible non-constant integer
+   * multiply.
+   */
+
+  switch (ccr & STM32_DMA_SCR_MSIZE_MASK)
+    {
+      case DMA_SCR_MSIZE_8BITS:
+        transfer_size = 1;
+        mend = maddr + count - 1;
+        break;
+
+      case DMA_SCR_MSIZE_16BITS:
+        transfer_size = 2;
+        mend = maddr + (count << 1) - 1;
+        break;
+
+      case DMA_SCR_MSIZE_32BITS:
+        transfer_size = 4;
+        mend = maddr + (count << 2) - 1;
+        break;
+
+      default
+        return false;
+    }
+
+  if ((maddr & (transfer_size - 1)) != 0)
+    {
+      return false;
+    }
+
+  /* Verify that burst transfers do not cross a 1KiB boundary. */
+
+  if ((maddr / 1024) != (mend / 1024))
+    {
+      /* The transfer as a whole crosses a 1KiB boundary.
+       * Verify that no burst does by asserting that the address
+       * is aligned to the burst length.
+       */
+
+      switch (ccr & STM32_DMA_SCR_MBURST_MASK)
+        {
+          case DMA_SCR_MBURST_SINGLE:
+            burst_length = transfer_size;
+            break;
+
+          case DMA_SCR_MBURST_INCR4:
+            burst_length = transfer_size << 2;
+            break;
+
+          case DMA_SCR_MBURST_INCR8:
+            burst_length = transfer_size << 3;
+            break;
+
+          case DMA_SCR_MBURST_INCR16:
+            burst_length = transfer_size << 4;
+            break;
+
+          default:
+            return false;
+        }
+
+      if ((maddr & (burst_length - 1)) != 0)
+        {
+          return false;
+        }
+    }
+
+  /* Verify that the transfer is to a memory region that supports DMA. */
+
+  if ((maddr & STM32_REGION_MASK) != (mend & STM32_REGION_MASK))
+    {
+      return false;
+    }
+
   switch (maddr & STM32_REGION_MASK)
     {
       case STM32_FSMC_BANK1:
@@ -867,10 +950,12 @@ bool stm32_dmacapable(uint32_t maddr)
       case STM32_SRAM_BASE:
       case STM32_CODE_BASE:
         /* All RAM and flash is supported */
+
         return true;
 
       default:
         /* Everything else is unsupported by DMA */
+
         return false;
     }
 }
