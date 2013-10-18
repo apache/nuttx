@@ -5810,3 +5810,9 @@
 	  preflight failures, and to use the file sector buffer as a bounce buffer
 	  when a user-supplied buffer is not suitable for DMA. From Mike Smith
 	  (2013-10-18).
+	* arch/arm/src/sama5/chip/sam_rtc.h and sam_wdt.h:  Add WDT and RTC
+	  register definition header files (2013-10-18).
+	* arch/arm/src/sama5/chip/sam_rtc.c and sam_rtc.h:  Basic RTC driver.
+	  Support for RTC alarms is fragmentary and this has not yet been hooked
+	  into the build system  (2013-10-18).
+
