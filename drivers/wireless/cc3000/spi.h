@@ -37,9 +37,6 @@ typedef void (*gcSpiHandleRx)(void *p);
  * Public Data
  *****************************************************************************/
 
-extern uint16_t SPIInterruptsEnabled;
-extern uint8_t wlan_tx_buffer[];
-
 /*****************************************************************************
  * Public Function Prototypes
  *****************************************************************************/

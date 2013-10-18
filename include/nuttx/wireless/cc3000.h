@@ -149,7 +149,7 @@ EXTERN  void CC3000_wlan_init(tWlanCB sWlanCB,
  *
  ************************************************************************************/
 
-void wireless_archinitialize(void);
+int wireless_archinitialize();
 
 
 #undef EXTERN

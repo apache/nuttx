@@ -258,8 +258,6 @@ void power_nop(unsigned char en)
  *   configure the wireless device.  This function will register the driver
  *   as /dev/wirelessN where N is the minor device number.
  *
- * Input Parameters:
- *   minor   - The input device minor number
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -267,14 +265,14 @@ void power_nop(unsigned char en)
  *
  ****************************************************************************/
 
-int up_wlinitialize(int minor)
+int wireless_archinitialize(void)
 {
   FAR struct spi_dev_s *spi;
 
   /* Init SPI bus */
 
   idbg("minor %d\n", minor);
-  DEBUGASSERT(minor == 0);
+  DEBUGASSERT(CONFIG_CC3000_DEVMINOR == 0);
 
   /* Get an instance of the SPI interface */
 
@@ -287,7 +285,7 @@ int up_wlinitialize(int minor)
 
   /* Initialize and register the SPI CC3000 device */
 
-  int ret = CC3000_register(spi, &g_cc3000_info.dev, CONFIG_CC3000_DEVMINOR);
+  int ret = cc3000_register(spi, &g_cc3000_info.dev, CONFIG_CC3000_DEVMINOR);
   if (ret < 0)
     {
       idbg("Failed to initialize SPI bus %d\n", CONFIG_CC3000_SPIDEV);

@@ -195,7 +195,6 @@ static void *unsoliced_thread_func(void *parameter)
 
 void SpiOpen(gcSpiHandleRx pfRxHandler)
 {
-  pthread_attr_t attr;
   int status;
 
   DEBUGASSERT(spiconf.cc3000fd == 0);
@@ -206,10 +205,7 @@ void SpiOpen(gcSpiHandleRx pfRxHandler)
       spiconf.cc3000fd = fd;
       spiconf.run = true;
 
-      status = pthread_attr_init(&attr);
-      DEBUGASSERT(status == 0)
-
-      status = pthread_create(&spiconf.unsoliced_thread, &attr,
+      status = pthread_create(&spiconf.unsoliced_thread,NULL,
                               unsoliced_thread_func, NULL);
       DEBUGASSERT(status == 0)
    }

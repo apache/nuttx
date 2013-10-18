@@ -161,7 +161,7 @@ extern "C" {
 #endif
 
 /****************************************************************************
- * Name: CC3000_register
+ * Name: cc3000_register
  *
  * Description:
  *   Configure the CC3000 to use the provided SPI device instance.  This
@@ -179,7 +179,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-int CC3000_register(FAR struct spi_dev_s *spi,
+int cc3000_register(FAR struct spi_dev_s *spi,
                     FAR struct cc3000_config_s *config, int minor);
 
 #undef EXTERN

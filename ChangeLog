@@ -5815,4 +5815,5 @@
 	* arch/arm/src/sama5/chip/sam_rtc.c and sam_rtc.h:  Basic RTC driver.
 	  Support for RTC alarms is fragmentary and this has not yet been hooked
 	  into the build system  (2013-10-18).
+	* Various Spark and CC3000 files:  Update by David Sidrane (2013-10-18).
 

@@ -51,6 +51,7 @@
 #ifdef CONFIG_MTD_SST25
 #  include <nuttx/spi/spi.h>
 #  include <nuttx/mtd.h>
+#  include <sys/mount.h>
 #endif
 
 #ifdef CONFIG_SYSTEM_USBMONITOR
@@ -174,7 +175,7 @@ int nsh_archinitialize(void)
   mtd = sst25_initialize(spi);
   if (!mtd)
     {
-      message("nsh_archinitialize: Failed to bind SPI port %d to the SPI FLASH driver\n",CONFIG_SPARK_FLASH_SPI););
+      message("nsh_archinitialize: Failed to bind SPI port %d to the SPI FLASH driver\n",CONFIG_SPARK_FLASH_SPI);
     }
   else
     {
@@ -243,6 +244,7 @@ int nsh_archinitialize(void)
           partno++;
         }
     }
+#endif /* CONFIG_SPARK_FLASH_PART */
 
 #endif /* HAVE_SST25 */
 
