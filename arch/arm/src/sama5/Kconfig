@@ -687,7 +687,7 @@ endif # SAMA5_LCDC_HEO
 config SAMA5_LCDC_HCR
 	bool "Enable hardware cursor (HCR)"
 	default n
-	depends on EXPERIMENTAL
+	depends on EXPERIMENTAL && FB_HWCURSOR
 
 if SAMA5_LCDC_HCR
 
