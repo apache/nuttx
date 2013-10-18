@@ -78,6 +78,10 @@ config SDIO_DMA
 	---help---
 		SDIO driver supports DMA
 
+config SDIO_PREFLIGHT
+	bool
+	default n
+
 config SDIO_MUXBUS
 	bool "SDIO bus share support"
 	default n

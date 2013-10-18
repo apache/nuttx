@@ -271,9 +271,10 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  *
  * Description:
  *   Check if the DMA controller can transfer data to/from given memory
- *   address. This depends on the internal connections in the ARM bus matrix
- *   of the processor. Note that this only applies to memory addresses, it
- *   will return false for any peripheral address.
+ *   address with the given configuration. This depends on the internal
+ *   connections in the ARM bus matrix of the processor. Note that this
+ *   only applies to memory addresses, it will return false for any peripheral
+ *   address.
  *
  * Returned value:
  *   True, if transfer is possible.
@@ -281,9 +282,9 @@ size_t stm32_dmaresidual(DMA_HANDLE handle);
  ****************************************************************************/
 
 #ifdef CONFIG_STM32_DMACAPABLE
-bool stm32_dmacapable(uintptr_t maddr);
+bool stm32_dmacapable(uintptr_t maddr, uint32_t count, uint32_t ccr);
 #else
-#  define stm32_dmacapable(maddr) (true)
+#  define stm32_dmacapable(maddr, count, ccr) (true)
 #endif
 
 /****************************************************************************
