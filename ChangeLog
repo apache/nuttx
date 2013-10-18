@@ -5806,3 +5806,7 @@
 	* drivers/mmcsd/mmscd_sdio.c: Enhanced the mmcdd_sdio driver to perform
 	  DMA preflight operations and fail DMA read/write requests that fail
 	  preflighting. From Mike Smith (2013-10-18).
+	* fs/fat/fs_fat32.c: Enhanced the FAT32 filesystem code to understand DMA
+	  preflight failures, and to use the file sector buffer as a bounce buffer
+	  when a user-supplied buffer is not suitable for DMA. From Mike Smith
+	  (2013-10-18).
