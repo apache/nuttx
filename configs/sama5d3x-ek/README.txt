@@ -925,6 +925,9 @@ Configurations
       to the SAMA5D3-EK.  Since it now passes that test, the configuration
       has little further use other than for reference.
 
+  There may be issues with some of these configurations.  See the details
+  before of the status of individual configurations.
+
   Now for the gory details:
 
   demo:
@@ -995,11 +998,23 @@ Configurations
 
        System Type->Heap Configuration
          CONFIG_SAMA5_DDRCS_HEAP=y             : Add the SDRAM to the heap
+         CONFIG_SAMA5_DDRCS_HEAP_OFFSET=0
+         CONFIG_SAMA5_DDRCS_HEAP_SIZE=268435456
 
        Memory Management
          CONFIG_MM_REGIONS=2                   : Two heap memory regions:  ISRAM and SDRAM
 
-    5. The Embest or Ronetix CPU module includes an Atmel AT25DF321A,
+    5. The Real Time Clock/Calendar RTC) is enabled.  These are the relevant
+       settings:
+    
+        System Type:
+          CONFIG_SAMA5_RTC=y                   : Enable the RTC driver
+
+        Drivers (these values will be selected automatically):
+          CONFIG_RTC=y                         : Use the RTC for system time
+          CONFIG_RTC_DATETIME=y                : RTC supports data/time
+
+    6. The Embest or Ronetix CPU module includes an Atmel AT25DF321A,
        32-megabit, 2.7-volt SPI serial flash.  Support for that serial
        FLASH can is enabled in this configuration.  These are the relevant
        configuration settings:
@@ -1054,7 +1069,7 @@ Configurations
        NOTE:  It appears that if Linux runs out of NAND, it will destroy the
        contents of the AT25.
 
-    6. Support for HSMCI car slots. The SAMA5D3x-EK provides a two SD memory
+    7. Support for HSMCI car slots. The SAMA5D3x-EK provides a two SD memory
        card slots:  (1) a full size SD card slot (J7 labeled MCI0), and (2)
        a microSD memory card slot (J6 labeled MCI1).  The full size SD card
        slot connects via HSMCI0; the microSD connects vi HSMCI1.  Relevant
@@ -1128,7 +1143,7 @@ Configurations
           volume when it is removed.  But those callbacks are not used in
           this configuration.
 
-    7. Support the USB high-speed device (UDPHS) driver is enabled.
+    8. Support the USB high-speed device (UDPHS) driver is enabled.
        These are the relevant NuttX configuration settings:
 
        Device Drivers -> USB Device Driver Support
@@ -1187,7 +1202,7 @@ Configurations
              first have to use mkrd to create the RAM disk and mkfatfs to put
              a FAT file system on it.
 
-    8. The USB high-speed EHCI and the low-/full- OHCI host drivers are supported
+    9. The USB high-speed EHCI and the low-/full- OHCI host drivers are supported
        in this configuration.
 
        Here are the relevant configuration options that enable EHCI support:
@@ -1263,7 +1278,17 @@ Configurations
     The following features are *not* enabled in the demo configuration but
     might be of some use to you:
 
-    9.  Debugging USB.  There is normal console debug output available that
+    10. The RTC supports an alarm that may be enable with the following settings.
+        However, there is nothing in the system that currently makes use of this
+        alarm.
+
+        Drivers:
+          CONFIG_RTC_ALARM=y                   : Enable the RTC alarm
+
+        Library Routines
+         CONFIG_SCHED_WORKQUEUE=y              : Alarm needs work queue support
+
+    11. Debugging USB.  There is normal console debug output available that
         can be enabled with CONFIG_DEBUG + CONFIG_DEBUG_USB.  However, USB
         operation is very time critical and enabling this debug output WILL
         interfere with some operation.  USB tracing is a less invasive way
@@ -1444,22 +1469,24 @@ Configurations
        configuration file:
 
        System Type->ATSAMA5 Peripheral Support
-       CONFIG_SAMA5_MPDDRC=y                   : Enable the DDR controller
+         CONFIG_SAMA5_MPDDRC=y                 : Enable the DDR controller
 
        System Type->External Memory Configuration
-       CONFIG_SAMA5_DDRCS=y                    : Tell the system that DRAM is at the DDR CS
-       CONFIG_SAMA5_DDRCS_SIZE=268435456       : 2Gb DRAM -> 256GB
-       CONFIG_SAMA5_DDRCS_LPDDR2=y             : Its DDR2
-       CONFIG_SAMA5_MT47H128M16RT=y            : This is the type of DDR2
+         CONFIG_SAMA5_DDRCS=y                  : Tell the system that DRAM is at the DDR CS
+         CONFIG_SAMA5_DDRCS_SIZE=268435456     : 2Gb DRAM -> 256GB
+         CONFIG_SAMA5_DDRCS_LPDDR2=y           : Its DDR2
+         CONFIG_SAMA5_MT47H128M16RT=y          : This is the type of DDR2
 
        Now that you have SDRAM enabled, what are you going to do with it?  One
        thing you can is add it to the heap
 
        System Type->Heap Configuration
-       CONFIG_SAMA5_DDRCS_HEAP=y               : Add the SDRAM to the heap
+         CONFIG_SAMA5_DDRCS_HEAP=y             : Add the SDRAM to the heap
+         CONFIG_SAMA5_DDRCS_HEAP_OFFSET=0
+         CONFIG_SAMA5_DDRCS_HEAP_SIZE=268435456
 
        Memory Management
-       CONFIG_MM_REGIONS=2                     : Two memory regions:  ISRAM and SDRAM
+         CONFIG_MM_REGIONS=2                   : Two memory regions:  ISRAM and SDRAM
 
        Another thing you could do is to enable the RAM test built-in
        application:
@@ -1469,15 +1496,15 @@ Configurations
        it can be tested without crashing programs using the memory:
 
        System Type->Heap Configuration
-       CONFIG_SAMA5_DDRCS_HEAP=n               : Don't add the SDRAM to the heap
+         CONFIG_SAMA5_DDRCS_HEAP=n             : Don't add the SDRAM to the heap
 
        Memory Management
-       CONFIG_MM_REGIONS=1                     : One memory regions:  ISRAM
+         CONFIG_MM_REGIONS=1                   : One memory regions:  ISRAM
 
        Then enable the RAM test built-in application:
 
        Application Configuration->System NSH Add-Ons->Ram Test
-       CONFIG_SYSTEM_RAMTEST=y
+         CONFIG_SYSTEM_RAMTEST=y
 
        In this configuration, the SDRAM is not added to heap and so is not
        excessible to the applications.  So the RAM test can be freely
@@ -2123,6 +2150,25 @@ Configurations
           CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH="/dev/input0"
 
         Defaults should be okay for all related settings.
+
+    17. The Real Time Clock/Calendar RTC) may be enabled with these settings:
+    
+        System Type:
+          CONFIG_SAMA5_RTC=y                   : Enable the RTC driver
+
+        Drivers (these values will be selected automatically):
+          CONFIG_RTC=y                         : Use the RTC for system time
+          CONFIG_RTC_DATETIME=y                : RTC supports data/time
+
+        The RTC supports an alarm that may be enable with the following settings.
+        However, there is nothing in the system that currently makes use of this
+        alarm.
+
+        Drivers:
+          CONFIG_RTC_ALARM=y                   : Enable the RTC alarm
+
+        Library Routines
+         CONFIG_SCHED_WORKQUEUE=y              : Alarm needs work queue support
 
     STATUS:
 

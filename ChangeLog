@@ -5819,4 +5819,6 @@
 	* arch/arm/src/sama5/chip/sam_gpbr.h:  Add SAMA5 GPBR register
 	  definitions (2013-10-19).
 	* Kconfig:  Add support for CONFIG_DEBUG_RTC (2013-10-19).
-
+	* configs/sama5d3x-ek/README.txt, demo/defconfig:  Describe how to
+	  enable RTC support for the nsh/ configuration; RTC is now enabled by
+	default in the demo configuration (2013-10-19).
