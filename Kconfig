@@ -449,7 +449,7 @@ config DEBUG_ANALOG
 	---help---
 		Enable low level debug SYSLOG output from the analog device drivers
 		such as A/D and D/A converters (disabled by default).  Support for
-		this debug option is architecgture-specific and may not be available
+		this debug option is architecture-specific and may not be available
 		for some MCUs.
 
 config DEBUG_I2C
@@ -458,7 +458,7 @@ config DEBUG_I2C
 	depends on I2C
 	---help---
 		Enable I2C driver debug SYSLOG output (disabled by default).
-		Support for this debug option is architecgture-specific and may not
+		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
 config DEBUG_SPI
@@ -467,7 +467,7 @@ config DEBUG_SPI
 	depends on SPI
 	---help---
 		Enable I2C driver debug SYSLOG output (disabled by default).
-		Support for this debug option is architecgture-specific and may not
+		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
 config DEBUG_CAN
@@ -476,7 +476,7 @@ config DEBUG_CAN
 	depends on CAN
 	---help---
 		Enable CAN driver debug SYSLOG output (disabled by default).
-		Support for this debug option is architecgture-specific and may not
+		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
 config DEBUG_SDIO
@@ -485,7 +485,7 @@ config DEBUG_SDIO
 	depends on MMCSD_SDIO
 	---help---
 		Enable SDIO driver debug SYSLOG output (disabled by default).
-		Support for this debug option is architecgture-specific and may not
+		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
 config DEBUG_GPIO
@@ -493,7 +493,7 @@ config DEBUG_GPIO
 	default n
 	---help---
 		Enable GPIO-releated debug SYSLOG output (disabled by default).
-		Support for this debug option is architecgture-specific and may not
+		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
 config DEBUG_DMA
@@ -502,7 +502,16 @@ config DEBUG_DMA
 	depends on ARCH_DMA
 	---help---
 		Enable DMA-releated debug SYSLOG output (disabled by default).
-		Support for this debug option is architecgture-specific and may not
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
+config DEBUG_RTC
+	bool "RTC Debug Output"
+	default n
+	depends on RTC
+	---help---
+		Enable RTC driver debug SYSLOG output (disabled by default).
+		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
 config DEBUG_WATCHDOG
@@ -511,7 +520,7 @@ config DEBUG_WATCHDOG
 	depends on WATCHDOG
 	---help---
 		Enable watchdog timer debug SYSLOG output (disabled by default).
-		Support for this debug option is architecgture-specific and may not
+		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
 config DEBUG_AUDIO
@@ -520,7 +529,7 @@ config DEBUG_AUDIO
 	---help---
 		Enable low level debug SYSLOG output from the audio subsystem and
 		device drivers. (disabled by default).  Support for this debug option
-		is architecgture-specific and may not be available for some MCUs.
+		is architecture-specific and may not be available for some MCUs.
 
 endif
 
