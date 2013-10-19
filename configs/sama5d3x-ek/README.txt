@@ -2170,6 +2170,25 @@ Configurations
         Library Routines
          CONFIG_SCHED_WORKQUEUE=y              : Alarm needs work queue support
 
+    18. This example can be configured to exercise the watchdog timer test
+        (apps/examples/watchdog).  This can be selected with the following
+        settings in the NuttX configuration file:
+
+        System Type:
+          CONFIG_SAMA5_WDT=y                  : Enable the WDT peripheral
+                                              : Defaults in "RTC Configuration" should be OK
+
+        Drivers (this will automatically be selected):
+          CONFIG_WATCHDOG=y                   : Enables watchdog timer driver support
+
+        Application Configuration -> Eamples
+          CONFIG_EXAMPLES_WATCHDOG=y          : Enable the apps/examples/watchdog
+
+        The WDT timer is driven off the slow, 32768Hz clock divided by 128.
+        As a result, the watchdog a maximum timeout value of 16 seconds.  The
+        SAMA5 WDT may also only be programmed one time; the processor must be
+        reset before the WDT can be reprogrammed.
+
     STATUS:
 
       PCK FREQUENCY
