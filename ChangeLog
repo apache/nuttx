@@ -5825,4 +5825,6 @@
 	* arch/arm/src/sama5/sam_rtc.h and other files:  Hook the SAMA5 RTC
 	  driver into the build system; Verify the correct operation of the
 	  SAMA5 RTC driver (2013-10-19).
+	* arch/arm/src/sama5/sam_wdt.c and .h:  Add a SAMA5 watchdog timer
+	  drvier. Untested on initial check-in (2013-10-19).
 
