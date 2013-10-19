@@ -110,6 +110,10 @@ ifeq ($(CONFIG_SAMA5_PIO_IRQ),y)
 CHIP_CSRCS += sam_pioirq.c
 endif
 
+ifeq ($(CONFIG_SAMA5_RTC),y)
+CHIP_CSRCS += sam_rtc.c
+endif
+
 ifeq ($(CONFIG_SAMA5_SPI0),y)
 CHIP_CSRCS += sam_spi.c
 else

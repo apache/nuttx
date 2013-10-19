@@ -74,7 +74,7 @@
 
 #define WDT_MR_WDV_SHIFT          (0)       /* Bits 0-11:  Watchdog Counter Value */
 #define WDT_MR_WDV_MASK           (0xfff << WDT_MR_WDV_SHIFT)
-#  define WDT_MR_WDV_MASK(n)      ((uint32_t)(n) << WDT_MR_WDV_SHIFT)
+#  define WDT_MR_WDV(n)           ((uint32_t)(n) << WDT_MR_WDV_SHIFT)
 #define WDT_MR_WDFIEN             (1 << 12) /* Bit 12: Watchdog Fault Interrupt Enable */
 #define WDT_MR_WDRSTEN            (1 << 13) /* Bit 13: Watchdog Reset Enable */
 #define WDT_MR_WDRPROC            (1 << 14) /* Bit 14: Watchdog Reset Processor */

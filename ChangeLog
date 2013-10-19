@@ -5821,4 +5821,8 @@
 	* Kconfig:  Add support for CONFIG_DEBUG_RTC (2013-10-19).
 	* configs/sama5d3x-ek/README.txt, demo/defconfig:  Describe how to
 	  enable RTC support for the nsh/ configuration; RTC is now enabled by
-	default in the demo configuration (2013-10-19).
+	  default in the demo configuration (2013-10-19).
+	* arch/arm/src/sama5/sam_rtc.h and other files:  Hook the SAMA5 RTC
+	  driver into the build system; Verify the correct operation of the
+	  SAMA5 RTC driver (2013-10-19).
+

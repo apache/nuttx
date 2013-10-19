@@ -47,10 +47,10 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/wqueue.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-
 #include "sam_rtc.h"
 
 #ifdef CONFIG_RTC
@@ -69,8 +69,8 @@
 #  error "CONFIG_RTC_HIRES must NOT be set with this driver"
 #endif
 
-#ifndef CONFIG_STM32_PWR
-#  error "CONFIG_STM32_PWR must selected to use this driver"
+#if defined(CONFIG_RTC_ALARM) && !defined(CONFIG_SCHED_WORKQUEUE)
+#  error CONFIG_RTC_ALARM requires CONFIG_SCHED_WORKQUEUE
 #endif
 
 #define RTC_MAGIC 0xdeadbeef
@@ -107,6 +107,7 @@
 
 #ifdef CONFIG_RTC_ALARM
 static alarmcb_t g_alarmcb;
+struct work_s g_alarmwork;
 #endif
 
 /************************************************************************************
@@ -146,7 +147,7 @@ static void rtc_dumpregs(FAR const char *msg)
   rtclldbg("  CALALR: %08x\n", getreg32(SAM_RTC_CALALR));
   rtclldbg("      SR: %08x\n", getreg32(SAM_RTC_SR));
   rtclldbg("     IMR: %08x\n", getreg32(SAM_RTC_IMR));
-  rtclldbg("     VAR: %08x\n", getreg32(SAM_RTC_VER));
+  rtclldbg("     VER: %08x\n", getreg32(SAM_RTC_VER));
 }
 #else
 #  define rtc_dumpregs(msg)
@@ -229,59 +230,36 @@ static int rtc_bcd2bin(uint32_t value)
 }
 
 /************************************************************************************
- * Name: rtc_setup
+ * Name: rtc_worker
  *
  * Description:
- *   Performs first time configuration of the RTC.  A special value written into
- *   back-up register 0 will prevent this function from being called on sub-sequent
- *   resets or power up.
+ *    Perform alarm callback
  *
  * Input Parameters:
- *   None
+ *   Standard work callbacks
  *
  * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
+ *   Zero (OK) on success; A negated errno value on failure.
  *
  ************************************************************************************/
 
-static int rtc_setup(void)
+#if CONFIG_RTC_ALARM
+static void rtc_worker(FAR void *arg)
 {
-#warning Missing logic
+  /* Sample once (atomically) */
 
-  /* Set the 24 hour format */
+  alarmcb_t alarmcb = g_alarmcb;
 
-  putreg32(0, SAM_RTC_MR);
-  return OK;
+  /* Is there a subscriber to the alarm? */
+
+  if (alarmcb)
+    {
+      /* Yes.. perform the callback */
+
+      alarmcb();
+    }
 }
-
-/************************************************************************************
- * Name: rtc_resume
- *
- * Description:
- *   Called when the RTC was already initialized on a previous power cycle.  This
- *   just brings the RTC back into full operation.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno on failure
- *
- ************************************************************************************/
-
-static int rtc_resume(void)
-{
-  int ret;
-
-#warning Missing logic
-
-#ifdef CONFIG_RTC_ALARM
-  /* Clear the RTC alarm flags */
-#warning Missing logic
 #endif
-
-  return ret;
-}
 
 /************************************************************************************
  * Name: rtc_interrupt
@@ -301,7 +279,24 @@ static int rtc_resume(void)
 #if CONFIG_RTC_ALARM
 static int rtc_interrupt(int irq, void *context)
 {
-#warning "Missing logic"
+  int ret;
+
+  /* Schedule the callback to occur on the low-priority worker thread */
+
+  DEBUGASSERT(work_available(&g_alarmwork));
+  ret = work_queue(LPWORK, &g_alarmwork, rtc_worker, NULL, 0);
+  if (ret < 0)
+    {
+      rtclldbg("ERRPR: work_queue failed: %d\n", ret);
+    }
+
+  /* Disable any further alarm interrupts*/
+
+  putreg32(RTC_IDR_ALRDIS, SAM_RTC_IDR);
+
+  /* Clear any pending alarm interrupts */
+
+  putreg32(RTC_SCCR_ALRCLR, SAM_RTC_SCCR);
   return OK;
 }
 #endif
@@ -327,34 +322,23 @@ static int rtc_interrupt(int irq, void *context)
 
 int up_rtcinitialize(void)
 {
-  uint32_t regval;
-  int ret;
+  uint32_t ver;
 
   rtc_dumpregs("On reset");
 
-  /* No clocking setup need be performed. */
-
-  /* Check if the one-time initialization of the RTC has already been performed.
-   * We can determine this by checking if the magic number has been written to
-   * to back-up date register SYS_GPBR0.
+  /* No clocking setup need be performed. The Real-time Clock is continuously clocked
+   * at 32768 Hz (SCLK). The Power Management Controller has no effect on RTC
+   * behavior.
    */
 
-  if (getreg32(SAM_SYS_GPBR0) != RTC_MAGIC)
-    {
-      /* Perform the one-time setup of the LSE clocking to the RTC */
+  /* Set the 24 hour format */
 
-      ret = rtc_setup();
+  putreg32(0, SAM_RTC_MR);
 
-      /* Remember that the RTC is initialized */
+  /* Has the RTC been initialized? */
 
-      putreg32(RTC_MAGIC, SAM_SYS_GPBR0));
-    }
-  else
-    {
-      /* RTC already set-up, just resume normal operation */
-
-      ret = rtc_resume();
-    }
+  ver = getreg32(SAM_RTC_VER);
+  g_rtc_enabled = ((ver & (RTC_VER_NVTIM | RTC_VER_NVCAL)) == 0);
 
 #ifdef CONFIG_RTC_ALARM
   /* Then attach the ALARM interrupt handler */
@@ -362,17 +346,29 @@ int up_rtcinitialize(void)
   irq_attach(SAM_PID_SYS, rtc_interrupt);
 
   /* Should RTC alarm interrupt be enabled at the peripheral?  Let's assume so
-   * for now.
+   * for now.  Let's say yes if the time is valid and a valid alarm has been
+   * programmed.
    */
-#warning REVISIT
-  putreg32(RTC_IER_ALREN, SAM_RTC_IDR);
 
-  /* Enable SYSC interrupts at the AIC */
+  if (g_rtc_enabled && (ver & (RTC_VER_NVTIMALR | RTC_VER_NVCALALR)) == 0)
+    {
+      /* Enable the alarm interrupt at the RTC */
+
+      putreg32(RTC_IER_ALREN, SAM_RTC_IER);
+    }
+  else
+    {
+      /* Disable the alarm interrupt at the RTC */
+
+      putreg32(RTC_IDR_ALRDIS, SAM_RTC_IDR);
+    }
+
+  /* Enable SYSC interrupts at the AIC in any event */
 
   up_enable_irq(SAM_PID_SYS);
+
 #endif
 
-  g_rtc_enabled = true;
   rtc_dumpregs("After Initialization");
   return OK;
 }
@@ -419,7 +415,7 @@ int up_rtc_getdatetime(FAR struct tm *tp)
       timr  = getreg32(SAM_RTC_TIMR);
       tmp   = getreg32(SAM_RTC_CALR);
     }
-  while (tmp != dr);
+  while (tmp != calr);
 
   rtc_dumpregs("Reading Time");
 
@@ -455,16 +451,16 @@ int up_rtc_getdatetime(FAR struct tm *tp)
    * **Day of the week is not supported
    */
 
-  tmp  = (calr & RTC_CALR_DATE_SHIFT) >> RTC_CALR_DATE_MASK;
+  tmp  = (calr & RTC_CALR_DATE_MASK) >> RTC_CALR_DATE_SHIFT;
   tp->tm_mday = rtc_bcd2bin(tmp);
 
-  tmp  = (calr & RTC_CALR_MONTH_SHIFT) >> RTC_CALR_MONTH_MASK;
+  tmp  = (calr & RTC_CALR_MONTH_MASK) >> RTC_CALR_MONTH_SHIFT;
   tp->tm_mon = rtc_bcd2bin(tmp) - 1;
 
-  tmp  = (calr & RTC_CALR_CENT_SHIFT) >> RTC_CALR_CENT_MASK;
-  cent =  rtc_bcd2bin(tmp)
-  tmp  = (calr & RTC_CALR_YEAR_SHIFT) >> RTC_CALR_YEAR_MASK;
-  year =  rtc_bcd2bin(tmp)
+  tmp  = (calr & RTC_CALR_CENT_MASK) >> RTC_CALR_CENT_SHIFT;
+  cent =  rtc_bcd2bin(tmp);
+  tmp  = (calr & RTC_CALR_YEAR_MASK) >> RTC_CALR_YEAR_SHIFT;
+  year =  rtc_bcd2bin(tmp);
   tp->tm_year = cent * 100 + year - 1900;
 
   rtc_dumptime(tp, "Returning");
@@ -494,7 +490,6 @@ int up_rtc_settime(FAR const struct timespec *tp)
   uint32_t calr;
   uint32_t cent;
   uint32_t year;
-  int ret;
 
   /* Break out the time values (note that the time is set only to units of seconds) */
 
@@ -527,12 +522,12 @@ int up_rtc_settime(FAR const struct timespec *tp)
    *                   CENT   (19-20)
    *
    *  *Years since 1900
-   * **Day of the week is not supported
+   * **Day of the week is not supported.  Set to Monday.
    */
 
-  calr  = (rtc_bin2bcd(newtime.tm_mday)  << RTC_CALR_DATE_SHIFT) & RTC_CALR_DATE_MASK;
-  calr |= (rtc_bin2bcd(1)                << RTC_CALR_DAY_SHIFT)  & RTC_CALR_DAY_MASK;
-  calr |= (rtc_bin2bcd(newtime.tm_mon+1) << RTC_CALR_DATE_SHIFT) & RTC_CALR_DATE_MASK;
+  calr  = (rtc_bin2bcd(newtime.tm_mday)  << RTC_CALR_DATE_SHIFT)  & RTC_CALR_DATE_MASK;
+  calr |= (rtc_bin2bcd(1)                << RTC_CALR_DAY_SHIFT)   & RTC_CALR_DAY_MASK;
+  calr |= (rtc_bin2bcd(newtime.tm_mon+1) << RTC_CALR_MONTH_SHIFT) & RTC_CALR_MONTH_MASK;
 
   cent  = newtime.tm_year / 100 + 19;
   year  = newtime.tm_year % 100;
@@ -540,27 +535,13 @@ int up_rtc_settime(FAR const struct timespec *tp)
   calr |= (rtc_bin2bcd(year)             << RTC_CALR_YEAR_SHIFT) & RTC_CALR_YEAR_MASK;
   calr |= (rtc_bin2bcd(cent)             << RTC_CALR_CENT_SHIFT) & RTC_CALR_CENT_MASK;
 
-  /* Stop RTC time counting */
+  /* Stop RTC time and date counting */
 
   regval  = getreg32(SAM_RTC_CR);
-  regval |= RTC_CR_UPDTIM;
+  regval |= (RTC_CR_UPDTIM | RTC_CR_UPDCAL);
   putreg32(regval, SAM_RTC_CR);
 
   /* Wait until the RTC has stopped so that we can update the time */
-
-  while ((getreg32(SAM_RTC_SR) & RTC_SR_ACKUPD) != RTC_SR_ACKUPD);
-
-  /* Clear the ACKUPD bit in the status register */
-
-  putreg32(RTC_SCCR_ACKCLR, SAM_RTC_SCCR);
-
-  /* Stop RTC date counting */
-
-  regval  = getreg32(SAM_RTC_CR);
-  regval |= RTC_CR_UPDCAL;
-  putreg32(regval, SAM_RTC_CR);
-
-  /* Wait until the counting has stopped so that we can update the time */
 
   while ((getreg32(SAM_RTC_SR) & RTC_SR_ACKUPD) != RTC_SR_ACKUPD);
 
@@ -588,11 +569,13 @@ int up_rtc_settime(FAR const struct timespec *tp)
   regval = RTC_SCCR_SECCLR;
   putreg32(regval, SAM_RTC_SCCR);
 
-  DEBUGASSERT((getreg32(SAM_RTC_VER) & RTC_VER_NVTIM) == 0);
-  DEBUGASSERT((getreg32(SAM_RTC_VER) & RTC_VER_NVCAL) == 0);
+  /* The RTC should now be enabled */
+
+  g_rtc_enabled = ((getreg32(SAM_RTC_VER) & (RTC_VER_NVTIM | RTC_VER_NVCAL)) == 0);
+  DEBUGASSERT(g_rtc_enabled);
 
   rtc_dumpregs("New time setting");
-  return ret;
+  return OK;
 }
 
 /************************************************************************************
@@ -615,11 +598,8 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
 {
   FAR struct tm newalarm;
   irqstate_t flags;
-  uint32_t regval;
   uint32_t timalr;
   uint32_t calalr;
-  uint32_t cent;
-  uint32_t year;
   int ret = -EBUSY;
 
   /* Is there already something waiting on the ALARM? */
@@ -654,9 +634,9 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
        *  *To allow for leap seconds.  But these never actuall happen.
        */
 
-      timalr  = (rtc_bin2bcd(newalarm.tm_sec)  << RTC_TIMRALR_SEC_SHIFT)  & RTC_TIMRALR_SEC_MASK;
-      timalr |= (rtc_bin2bcd(newalarm.tm_min)  << RTC_TIMRALR_MIN_SHIFT)  & RTC_TIMRALR_MIN_MASK;
-      timalr |= (rtc_bin2bcd(newalarm.tm_hour) << RTC_TIMRALR_HOUR_SHIFT) & RTC_TIMRALR_HOUR_MASK;
+      timalr  = (rtc_bin2bcd(newalarm.tm_sec)  << RTC_TIMALR_SEC_SHIFT)  & RTC_TIMALR_SEC_MASK;
+      timalr |= (rtc_bin2bcd(newalarm.tm_min)  << RTC_TIMALR_MIN_SHIFT)  & RTC_TIMALR_MIN_MASK;
+      timalr |= (rtc_bin2bcd(newalarm.tm_hour) << RTC_TIMALR_HOUR_SHIFT) & RTC_TIMALR_HOUR_MASK;
       timalr |= (RTC_TIMALR_SECEN | RTC_TIMALR_MINEN | RTC_TIMALR_HOUREN);
 
       /* Convert the struct tm format to RTC date register fields.
@@ -672,13 +652,13 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
        * **Day of the week is not supported
        */
 
-      calalr  = (rtc_bin2bcd(newalarm.tm_mday)  << RTC_CALALR_DATE_SHIFT) & RTC_CALALR_DATE_MASK;
-      calalr |= (rtc_bin2bcd(newalarm.tm_mon+1) << RTC_CALALR_DATE_SHIFT) & RTC_CALALR_DATE_MASK;
-      calalr |= (RTC_CALALR_MTHEN | RTC_CALALR_DATEEN)
+      calalr  = (rtc_bin2bcd(newalarm.tm_mday)  << RTC_CALALR_DATE_SHIFT)  & RTC_CALALR_DATE_MASK;
+      calalr |= (rtc_bin2bcd(newalarm.tm_mon+1) << RTC_CALALR_MONTH_SHIFT) & RTC_CALALR_MONTH_MASK;
+      calalr |= (RTC_CALALR_MTHEN | RTC_CALALR_DATEEN);
 
       /* Set the new date */
 
-      putreg32(calalr, SAM_RTC_CALALRR);
+      putreg32(calalr, SAM_RTC_CALALR);
 
       /* Write the new time */
 
@@ -695,6 +675,7 @@ int up_rtc_setalarm(FAR const struct timespec *tp, alarmcb_t callback)
       ret = OK;
     }
 
+  irqrestore(flags);
   return ret;
 }
 #endif
