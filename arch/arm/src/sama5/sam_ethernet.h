@@ -182,7 +182,7 @@ int sam_emac_initialize(void);
  *   Some boards require specialized initialization of the PHY before it can be used.
  *   This may include such things as configuring GPIOs, resetting the PHY, etc.  If
  *   CONFIG_SAMA5_PHYINIT is defined in the configuration then the board specific
- *   logic must provide sam_phyinitialize();  The STM32 Ethernet driver will call
+ *   logic must provide sam_phyinitialize();  The SAMA5 Ethernet driver will call
  *   this function one time before it first uses the PHY.
  *
  * Parameters:

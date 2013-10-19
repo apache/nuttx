@@ -1,5 +1,5 @@
-/************************************************************************************
- * arch/arm/src/sama5/sam_rtc.h
+/****************************************************************************
+ * arch/arm/src/sama5/sam_wdt.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,23 +31,25 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+#ifndef __ARCH_ARM_SRC_SAMA5_SAM_WDT_H
+#define __ARCH_ARM_SRC_SAMA5_SAM_WDT_H
+
+/****************************************************************************
  * Included Files
- ************************************************************************************/
-
-#ifndef __ARCH_ARM_SRC_SAMA5_SAM_RTC_H
-#define __ARCH_ARM_SRC_SAMA5_SAM_RTC_H
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "chip/sam_rtc.h"
+#include "chip/sam_wdt.h"
 
-/************************************************************************************
+#ifdef CONFIG_WATCHDOG
+
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ASSEMBLY__
 
@@ -59,13 +61,36 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: sam_wdtinitialize
+ *
+ * Description:
+ *   Initialize the WDT watchdog timer.  The watchdog timer is intialized and
+ *   registered as 'devpath.  The initial state of the watchdog time is
+ *   disabled.
+ *
+ * Input Parameters:
+ *   devpath - The full path to the watchdog.  This should be of the form
+ *     /dev/watchdog0
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_WDT
+void sam_wdtinitialize(FAR const char *devpath);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
+
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMA5_SAM_RTC_H */
+#endif /* CONFIG_WATCHDOG */
+#endif /* __ARCH_ARM_SRC_SAMA5_SAM_WDT_H */
