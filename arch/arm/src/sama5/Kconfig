@@ -100,6 +100,13 @@ config SAMA5_PIT
 config SAMA5_WDT
 	bool "Watchdog timer Interrupt (WDT)"
 	default n
+	select WDT
+
+config SAMA5_RTC
+	bool "Real time clock calendar (RTC)"
+	default n
+	select RTC
+	select RTC_DATETIME
 
 config SAMA5_HSMC
 	bool "Static Memory Controller (HSMC)"
@@ -193,6 +200,8 @@ config SAMA5_PWM
 config SAMA5_ADC
 	bool "Touch Screen ADC Controller (ADC)"
 	default n
+	select ANALOG
+	select ADC
 
 config SAMA5_DMAC0
 	bool "DMA Controller 0 (DMAC0)"
@@ -2320,6 +2329,7 @@ config SAMA5_DDRCS_HEAP
 		heap (using RAM_END)
 
 if SAMA5_DDRCS_HEAP
+
 config SAMA5_DDRCS_HEAP_OFFSET
 	int "DDR-SDRAM offset"
 	default 0

@@ -159,7 +159,7 @@
 /* RTC Calendar Register */
 
 #define RTC_CALR_CENT_SHIFT          (0)       /* Bits 0-6:  Current Century */
-#define RTC_CALR_CENT_MASK           (0x7f << RTC_TIMR_HOUR_SHIFT)
+#define RTC_CALR_CENT_MASK           (0x7f << RTC_CALR_CENT_SHIFT)
 #define RTC_CALR_YEAR_SHIFT          (8)       /* Bits 8-15:  Current Year */
 #define RTC_CALR_YEAR_MASK           (0xff << RTC_CALR_YEAR_SHIFT)
 #define RTC_CALR_MONTH_SHIFT         (16)      /* Bits 16-20: Current Month */
