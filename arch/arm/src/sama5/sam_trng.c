@@ -125,84 +125,102 @@ static int sam_interrupt(int irq, void *context)
 {
   uint32_t odata;
 
-  /* Verify that sample data is available */
-
-  if ((getreg32(SAM_TRNG_ISR) & CONFIG_SAMA5_TRNG) == 0)
-    {
-       /* No?  Then why are we here? */
-
-       return OK;
-    }
-
-  /* Read the random sample */
-
-  odata = getreg32(SAM_TRNG_ODATA);
-
-  /* As required by the FIPS PUB (Federal Information Processing Standard
-   * Publication) 140-2, the first random number generated after setting the
-   * RNGEN bit should not be used, but saved for comparison with the next
-   * generated random number. Each subsequent generated random number has to be
-   * compared with the previously generated number. The test fails if any two
-   * compared numbers are equal (continuous random number generator test).
+  /* Loop where there are samples available to be read and/or until the user
+   * buffer is filled.  Each sample requires only 84 clocks it is likely
+   * that we will loop here.
    */
 
-  if (g_trngdev.nsamples == 0)
+  for (;;)
     {
-      /* This is the first sample we have taken.  Save it for subsequent
-       * comparison.
+      /* Read the random sample (before checking DATRDY -- but probably not
+       * necessary)
        */
 
-      g_trngdev.samples[0] = odata;
-      g_trngdev.nsamples   = 1;
-      return OK;
-    }
+      odata = getreg32(SAM_TRNG_ODATA);
 
-  /* This is not the first sample.  Check if the new sample differs from the
-   * preceding sample.
-   */
+      /* Verify that sample data is available (DATARDY is cleared when the
+       * interrupt status regiser is read)
+       */
+
+      if ((getreg32(SAM_TRNG_ISR) & TRNG_INT_DATRDY) == 0)
+        {
+           /* No?  Then return and continue processing on the next interrupt. */
+
+           return OK;
+        }
+
+      /* As required by the FIPS PUB (Federal Information Processing Standard
+       * Publication) 140-2, the first random number generated after setting
+       * the RNGEN bit should not be used, but saved for comparison with the
+       * next generated random number. Each subsequent generated random number
+       * has to be compared with the previously generated number. The test
+       * fails if any two compared numbers are equal (continuous random number
+       * generator test).
+       */
+
+      if (g_trngdev.nsamples == 0)
+        {
+          /* This is the first sample we have taken.  Save it for subsequent
+           * comparison.
+           */
+
+          g_trngdev.samples[0] = odata;
+          g_trngdev.nsamples   = 1;
+          continue;
+        }
+
+      /* This is not the first sample.  Check if the new sample differs from
+       * the preceding sample.
+       */
  
-  else if (odata == g_trngdev.samples[g_trngdev.nsamples - 1])
-    {
-      /* Two ssamples with the same value.  Discard this one and try again. */
+      else if (odata == g_trngdev.samples[g_trngdev.nsamples - 1])
+        {
+          /* Two samples with the same value.  Discard this one and try again. */
 
-      return OK;
+          continue;
+        }
+
+      /* This sample differs from the previous value.  Have we discarded the
+       * first sample yet?
+       */
+
+      if (g_trngdev.first)
+        {
+          /* No, discard it now by replacing it with the new sample */
+
+          g_trngdev.samples[0] = odata;
+          g_trngdev.nsamples   = 1;
+          g_trngdev.first      = false;
+        }
+
+      /* Yes.. the first sample has been dicarded */
+
+      else
+        {
+          /* Add the new random number to the buffer */
+
+          g_trngdev.samples[g_trngdev.nsamples] = odata;
+          g_trngdev.nsamples++;
+        }
+
+      /* Have all of the requested samples been saved? */
+
+      if (g_trngdev.nsamples == g_trngdev.maxsamples)
+        {
+          /* Yes.. disable any further interrupts */
+
+          putreg32(TRNG_INT_DATRDY, SAM_TRNG_IDR);
+
+          /* Disable the TRNG */
+
+          putreg32(TRNG_CR_DISABLE | TRNG_CR_KEY, SAM_TRNG_CR);
+
+          /* And wakeup the waiting read thread. */
+
+          sem_post(&g_trngdev.waitsem);
+          return OK;
+        }
     }
-
-  /* The numbers differ.  Have we discarded the first sample yet? */
-
-  if (g_trngdev.first)
-    {
-      /* No, discard it now by replacing it with the new sample */
-
-      g_trngdev.samples[0] = odata;
-      g_trngdev.nsamples   = 1;
-      g_trngdev.first      = false;
-    }
-
-  /* Yes.. the first sample has been dicarded */
-
-  else
-    {
-      /* Add the new random number to the buffer */
-
-      g_trngdev.samples[g_trngdev.nsamples] = odata;
-      g_trngdev.nsamples++;
-    }
-
-  /* Have all of the requested samples been saved? */
-
-  if (g_trngdev.nsamples == g_trngdev.maxsamples)
-    {
-      /* Yes.. disable any further interrupts */
-
-      putreg32(TRNG_INT_DATRDY, SAM_TRNG_IER);
-
-      /* And wakeup the waiting read thread. */
-
-      sem_post(&g_trngdev.waitsem);
-    }
-
-  return OK;
 }
 
 /****************************************************************************
@@ -245,6 +263,16 @@ static ssize_t sam_read(struct file *filep, char *buffer, size_t buflen)
   g_trngdev.nsamples   = 0;
   g_trngdev.first      = true;
 
+  /* Enable the TRNG */
+
+  putreg32(TRNG_CR_ENABLE | TRNG_CR_KEY, SAM_TRNG_CR);
+
+  /* Clear any pending TRNG interrupts by reading the interrupt status
+   * register
+   */
+
+  (void)getreg32(SAM_TRNG_ISR);
+
   /* Enable TRNG interrupts */
 
   putreg32(TRNG_INT_DATRDY, SAM_TRNG_IER);
@@ -283,6 +311,10 @@ errout:
   /* Disable TRNG interrupts */
 
   putreg32(TRNG_INT_DATRDY, SAM_TRNG_IDR);
+
+  /* Disable the TRNG */
+
+  putreg32(TRNG_CR_DISABLE | TRNG_CR_KEY, SAM_TRNG_CR);
 
   /* Release our lock on the TRNG hardware */
 
@@ -337,6 +369,10 @@ void up_rnginitialize(void)
   /* Disable the interrupts at the TRNG */
 
   putreg32(TRNG_INT_DATRDY, SAM_TRNG_IDR);
+
+  /* Disable the TRNG */
+
+  putreg32(TRNG_CR_DISABLE | TRNG_CR_KEY, SAM_TRNG_CR);
 
   /* Register the character driver */
 

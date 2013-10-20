@@ -68,7 +68,8 @@
 
 /* Control Register */
 
-#define TRNG_CR_ENABLE            (1 << 0)  /* Bit 0:  nables the TRNG */
+#define TRNG_CR_ENABLE            (1 << 0)  /* Bit 0:  1=Enables the TRNG */
+#  define TRNG_CR_DISABLE         (0)       /* Bit 0:  0=Disables the TRNG */
 #define TRNG_CR_KEY_SHIFT         (8)       /* Bits 8-31: Security key */
 #define TRNG_CR_KEY_MASK          (0xffffff << TRNG_CR_KEY_SHIFT)
 # define TRNG_CR_KEY              (0x524e47 << TRNG_CR_KEY_SHIFT) /* RNG in ASCII */
