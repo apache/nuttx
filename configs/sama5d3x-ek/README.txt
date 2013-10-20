@@ -1290,6 +1290,15 @@ Configurations
 
        nsh> cat /dev/kbda
 
+    10. Support SAMA5D3 TRNG peripheral is enabled so that it provides
+        /dev/random.  The following configuration settings are relevant:
+
+        System Type:
+          CONFIG_SAMA5_TRNG=y                 : Enable the TRNG peripheral
+
+        Drivers (automatically selected):
+          CONFIG_DEV_RANDOM=y                 : Enable /dev/random
+
     The following features are *not* enabled in the demo configuration but
     might be of some use to you:
 
