@@ -5831,4 +5831,6 @@
 	  a /dev/random driver based on the SAMA5D3 TRNG peripheral (2013-10-20).
 	* configs/sama5d3x-3k/demo:  The TRNG and /dev/random are now enabled
 	  by default in the demo configuration (2013-10-20).
+	* arch/arm/src/sama5/chip/sam_tc.h:  SAMA5D3 timer/counter register
+	  definition header file (2013-10-20).
 
