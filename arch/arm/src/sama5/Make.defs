@@ -118,6 +118,10 @@ ifeq ($(CONFIG_SAMA5_WDT),y)
 CHIP_CSRCS += sam_wdt.c
 endif
 
+ifeq ($(CONFIG_SAMA5_TRNG),y)
+CHIP_CSRCS += sam_trng.c
+endif
+
 ifeq ($(CONFIG_SAMA5_SPI0),y)
 CHIP_CSRCS += sam_spi.c
 else

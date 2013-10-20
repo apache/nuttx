@@ -276,6 +276,7 @@ config SAMA5_TDES
 config SAMA5_TRNG
 	bool "True Random Number Generator (TRNG)"
 	default n
+	select DEV_RANDOM
 
 config SAMA5_ARM
 	bool "Performance Monitor Unit (ARM)"
