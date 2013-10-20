@@ -2226,6 +2226,22 @@ Configurations
         beware that the default version also disables the watchdog.  You will
         need a special version of norboot with CONFIG_SAMA5_WDT=y.
 
+    19. This example can be configured to enable the SAMA5 TRNG peripheral so
+        that it provides /dev/random.  The following configuration will enable
+        the TRNG, /dev/random, and the simple test of /dev/random at
+        apps/examples/ranadom:
+
+        System Type:
+          CONFIG_SAMA5_TRNG=y                 : Enable the TRNG peripheral
+
+        Drivers (automatically selected):
+          CONFIG_DEV_RANDOM=y                 : Enable /dev/random
+
+        Applications -> Examples
+          CONFIG_EXAMPLES_RANDOM=y            : Enable apps/examples/random
+          CONFIG_EXAMPLES_MAXSAMPLES=64       : Default settings are probably OK
+          CONFIG_EXAMPLES_NSAMPLES=8
+
     STATUS:
 
       PCK FREQUENCY
