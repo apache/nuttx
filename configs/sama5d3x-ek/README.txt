@@ -1006,7 +1006,7 @@ Configurations
 
     5. The Real Time Clock/Calendar RTC) is enabled.  These are the relevant
        settings:
-    
+
         System Type:
           CONFIG_SAMA5_RTC=y                   : Enable the RTC driver
 
@@ -2152,7 +2152,7 @@ Configurations
         Defaults should be okay for all related settings.
 
     17. The Real Time Clock/Calendar RTC) may be enabled with these settings:
-    
+
         System Type:
           CONFIG_SAMA5_RTC=y                   : Enable the RTC driver
 
@@ -2182,12 +2182,23 @@ Configurations
           CONFIG_WATCHDOG=y                   : Enables watchdog timer driver support
 
         Application Configuration -> Eamples
-          CONFIG_EXAMPLES_WATCHDOG=y          : Enable the apps/examples/watchdog
+          CONFIG_EXAMPLES_WATCHDOG=y          : Enable apps/examples/watchdog
 
         The WDT timer is driven off the slow, 32768Hz clock divided by 128.
         As a result, the watchdog a maximum timeout value of 16 seconds.  The
         SAMA5 WDT may also only be programmed one time; the processor must be
         reset before the WDT can be reprogrammed.
+
+        The SAMA5 always boots with the watchdog timer enabled at its maximum
+        timeout (16 seconds).  In the normal case where no watchdog timer driver
+        has been configured, the watchdog timer is disabled as part of the start
+        up logic.  But, since we are permitted only one opportunity to program
+        the WDT, we cannot disable the watchdog time if CONFIG_SAMA5_WDT=y.  So,
+        be forewarned:  You have only 16 seconds to run your watchdog timer test!
+
+        NOTE:  If you are using the norboot program to run from FLASH as I did,
+        beware that the default version also disables the watchdog.  You will
+        need a special version of norboot with CONFIG_SAMA5_WDT=y.
 
     STATUS:
 

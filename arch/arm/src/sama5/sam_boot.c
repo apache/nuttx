@@ -494,14 +494,29 @@ static void sam_copyvectorblock(void)
  * Name: sam_wdtdisable
  *
  * Description:
- *   Disable the watchdog timer
+ *   Disable the watchdog timer.  The SAMA5 always boots with the watchdog
+ *   timer enabled at its maximum timeout (16 seconds).  The watchdog timer
+ *   can disabled by writing to the Watchdog Mode Register (WDT_MR).  The
+ *   WDT_MR, however, can be written only one time after the CPU has been
+ *   reset.
+ *
+ *   So if no watchdog timer driver has been configured, the watchdog timer
+ *   must be disabled as part of the start up logic.  But, on the other
+ *   hand, we must not write to the WDT_MR register if the watchdog timer
+ *   driver is configured.  In that case, some later application will
+ *   configure the WDT and begin periodic pinging (within 16 seconds,
+ *   hopefully).
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SAMA5_WDT
 static inline void sam_wdtdisable(void)
 {
   putreg32(WDT_MR_WDDIS, SAM_WDT_MR);
 }
+#else
+#  define sam_wdtdisable()
+#endif
 
 /****************************************************************************
  * Public Functions
