@@ -427,7 +427,7 @@ static int sam_getstatus(FAR struct watchdog_lowerhalf_s *lower,
   wdvdbg("Status     :\n");
   wdvdbg("  flags    : %08x\n", status->flags);
   wdvdbg("  timeout  : %d\n", status->timeout);
-  wdvdbg("  timeleft : %d\n", status->flags);
+  wdvdbg("  timeleft : %d\n", status->timeleft);
   return OK;
 }
 
