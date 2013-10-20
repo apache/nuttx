@@ -175,7 +175,7 @@ int nor_main(int argc, char *argv)
   cp15_invalidate_dcache_all();
   cp15_invalidate_tlbs();
 
-#ifdef SAMA5_NOR_START
+#ifdef CONFIG_SAMA5_NOR_START
   /* Then jump into NOR flash */
 
 #if 0 /* Trying to printf() in this state is fatal */
