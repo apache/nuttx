@@ -118,11 +118,11 @@ struct sam_lowerhalf_s
 /* Register operations ******************************************************/
 
 #if defined(CONFIG_SAMA5_WDT_REGDEBUG) && defined(CONFIG_DEBUG)
-static uint16_t sam_getreg(uint32_t addr);
-static void     sam_putreg(uint16_t val, uint32_t addr);
+static uint32_t sam_getreg(uintptr_t regaddr);
+static void     sam_putreg(uint32_t regval, uintptr_t regaddr);
 #else
-# define        sam_getreg(addr)     getreg32(addr)
-# define        sam_putreg(val,addr) putreg32(val,addr)
+# define        sam_getreg(regaddr)        getreg32(regaddr)
+# define        sam_putreg(regval,regaddr) putreg32(regval,regaddr)
 #endif
 
 /* Interrupt hanlding *******************************************************/
@@ -178,21 +178,21 @@ static struct sam_lowerhalf_s g_wdtdev;
  ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_WDT_REGDEBUG) && defined(CONFIG_DEBUG)
-static uint16_t sam_getreg(uint32_t addr)
+static uint32_t sam_getreg(uintptr_t regaddr)
 {
   static uint32_t prevaddr = 0;
-  static uint32_t count = 0;
-  static uint16_t preval = 0;
+  static uint32_t count    = 0;
+  static uint32_t preval   = 0;
 
   /* Read the value from the register */
 
-  uint16_t val = getreg16(addr);
+  uint32_t regval = getreg32(regaddr);
 
   /* Is this the same value that we read from the same registe last time?  Are
    * we polling the register?  If so, suppress some of the output.
    */
 
-  if (addr == prevaddr && val == preval)
+  if (regaddr == prevaddr && regval == preval)
     {
       if (count == 0xffffffff || ++count > 3)
         {
@@ -200,7 +200,7 @@ static uint16_t sam_getreg(uint32_t addr)
              {
                lldbg("...\n");
              }
-          return val;
+          return regval;
         }
     }
 
@@ -219,15 +219,15 @@ static uint16_t sam_getreg(uint32_t addr)
 
        /* Save the new address, value, and count */
 
-       prevaddr = addr;
-       preval   = val;
+       prevaddr = regaddr;
+       preval   = regval;
        count    = 1;
     }
 
   /* Show the register value read */
 
-  lldbg("%08x->%04x\n", addr, val);
-  return val;
+  lldbg("%08x->%048\n", regaddr, regval);
+  return regval;
 }
 #endif
 
@@ -240,15 +240,15 @@ static uint16_t sam_getreg(uint32_t addr)
  ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_WDT_REGDEBUG) && defined(CONFIG_DEBUG)
-static void sam_putreg(uint16_t val, uint32_t addr)
+static void sam_putreg(uint32_t regval, uintptr_t regaddr)
 {
   /* Show the register value being written */
 
-  lldbg("%08x<-%04x\n", addr, val);
+  lldbg("%08x<-%08x\n", regaddr, regval);
 
   /* Write the value */
 
-  putreg16(val, addr);
+  putreg32(regval, regaddr);
 }
 #endif
 
@@ -304,6 +304,8 @@ static int sam_interrupt(int irq, FAR void *context)
 
 static int sam_start(FAR struct watchdog_lowerhalf_s *lower)
 {
+  FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
+
   /* The watchdog timer is enabled or disabled by writing to the MR register.
    *
    * NOTE: The Watchdog Mode Register (WDT_MR) can be written only once.  Only
@@ -312,7 +314,7 @@ static int sam_start(FAR struct watchdog_lowerhalf_s *lower)
    */
 
   wdvdbg("Entry\n");
-  return -ENOSYS;
+  return priv->started ? OK : -ENOSYS;
 }
 
 /****************************************************************************
@@ -389,7 +391,7 @@ static int sam_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  ****************************************************************************/
 
 static int sam_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                           FAR struct watchdog_status_s *status)
+                         FAR struct watchdog_status_s *status)
 {
   FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
 
@@ -403,7 +405,7 @@ static int sam_getstatus(FAR struct watchdog_lowerhalf_s *lower,
     {
       status->flags |= WDFLAGS_ACTIVE;
     }
- 
+
 #ifdef CONFIG_SAMA5_WDT_INTERRUPT
   if (priv->handler)
     {
@@ -494,7 +496,7 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   wdvdbg("reload=%d timout: %d->%d\n",
          reload, timeout, priv->timeout);
-  
+
   /* Set the WDT_MR according to calculated value
    *
    * NOTE: The Watchdog Mode Register (WDT_MR) can be written only once.  Only
@@ -624,7 +626,7 @@ static xcpt_t sam_capture(FAR struct watchdog_lowerhalf_s *lower,
 static int sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
                     unsigned long arg)
 {
-  wdvdbg("Entry: cmd=%d arg=%ld\n", cmd, arg);
+  wdvdbg("cmd=%d arg=%ld\n", cmd, arg);
 
   /* No ioctls are supported */
 
@@ -636,7 +638,7 @@ static int sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_wdtinitialize
+ * Name: up_wdginitialize
  *
  * Description:
  *   Initialize the WDT watchdog time.  The watchdog timer is intialized and
@@ -644,21 +646,29 @@ static int sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  *   disabled.
  *
  * Input Parameters:
- *   devpath - The full path to the watchdog.  This should be of the form
- *     /dev/watchdog0
+ *   None
  *
  * Returned Values:
  *   None
  *
  ****************************************************************************/
 
-void sam_wdtinitialize(FAR const char *devpath)
+int up_wdginitialize(void)
 {
   FAR struct sam_lowerhalf_s *priv = &g_wdtdev;
 
-  wdvdbg("Entry: devpath=%s\n", devpath);
+  wdvdbg("Entry: CR: %08x MR: %08x SR: %08x\n",
+         sam_getreg(SAM_WDT_CR), sam_getreg(SAM_WDT_MR),
+         sam_getreg(SAM_WDT_SR));
 
-  /* No clocking setup is required.  The Watchdog Timer uses the Slow Clock
+  /* Check if some previous logic was disabled the watchdog timer.  Since the
+   * MR can be written only one time, we are out of business if that is the
+   * case.
+   */
+
+  DEBUGASSERT((sam_getreg(SAM_WDT_MR) & WDT_MR_WDDIS) != 0);
+
+  /* No clock setup is required.  The Watchdog Timer uses the Slow Clock
    * divided by 128 to establish the maximum Watchdog period to be 16 seconds
    * (with a typical Slow Clock of 32768 kHz).
    */
@@ -678,7 +688,9 @@ void sam_wdtinitialize(FAR const char *devpath)
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
-  (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
+  (void)watchdog_register("/dev/watchdog0",
+                         (FAR struct watchdog_lowerhalf_s *)priv);
+  return OK;
 }
 
 #endif /* CONFIG_WATCHDOG && CONFIG_SAMA5_WDT */

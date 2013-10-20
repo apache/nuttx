@@ -65,27 +65,6 @@ extern "C" {
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: sam_wdtinitialize
- *
- * Description:
- *   Initialize the WDT watchdog timer.  The watchdog timer is intialized and
- *   registered as 'devpath.  The initial state of the watchdog time is
- *   disabled.
- *
- * Input Parameters:
- *   devpath - The full path to the watchdog.  This should be of the form
- *     /dev/watchdog0
- *
- * Returned Values:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMA5_WDT
-void sam_wdtinitialize(FAR const char *devpath);
-#endif
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
