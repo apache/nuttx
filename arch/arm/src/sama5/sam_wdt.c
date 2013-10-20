@@ -452,7 +452,7 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 {
   FAR struct sam_lowerhalf_s *priv = (FAR struct sam_lowerhalf_s *)lower;
   uint32_t reload;
-  uint16_t regval;
+  uint32_t regval;
 
   DEBUGASSERT(priv);
   wdvdbg("Entry: timeout=%d\n", timeout);
@@ -511,9 +511,12 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
 
   regval |= WDT_MR_WDFIEN;
 #else
-  /* Reset (everything) if the watchdog timer expires */
+  /* Reset (everything) if the watchdog timer expires.
+   *
+   * REVISIT:  Set WDT_MR_WDRPROC so that only the processor is reset?
+   */
 
-  regval |= WDT_MR_WDFIEN;
+  regval |= WDT_MR_WDRSTEN;
 #endif
 
 #ifdef CONFIG_SAMA5_WDT_DEBUGHALT
@@ -535,6 +538,11 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
    */
 
   priv->started = true;
+
+  wdvdbg("Setup: CR: %08x MR: %08x SR: %08x\n",
+         sam_getreg(SAM_WDT_CR), sam_getreg(SAM_WDT_MR),
+         sam_getreg(SAM_WDT_SR));
+
   return OK;
 }
 
@@ -666,7 +674,7 @@ int up_wdginitialize(void)
    * case.
    */
 
-  DEBUGASSERT((sam_getreg(SAM_WDT_MR) & WDT_MR_WDDIS) != 0);
+  DEBUGASSERT((sam_getreg(SAM_WDT_MR) & WDT_MR_WDDIS) == 0);
 
   /* No clock setup is required.  The Watchdog Timer uses the Slow Clock
    * divided by 128 to establish the maximum Watchdog period to be 16 seconds
