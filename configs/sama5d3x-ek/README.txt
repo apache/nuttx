@@ -353,7 +353,9 @@ Creating and Using NORBOOT
        cd <nuttx>
        make distclean
 
-  2. Install and build the norboot configuration:
+  2. Install and build the norboot configuration.  This steps will establish
+     the norboot configuration and setup the PATH variable in order to do
+     the build:
 
        cd tools
        ./configure.sh sama5d3x-ek/<subdir>
@@ -363,6 +365,17 @@ Creating and Using NORBOOT
      Before sourcing the setenv.sh file above, you should examine it and
      perform edits as necessary so that TOOLCHAIN_BIN is the correct path
      to the directory than holds your toolchain binaries.
+
+     NOTE:  Be aware that the default norboot also disables the watchdog.
+     Since you will not be able to re-enable the watchdog later, you may
+     need to set CONFIG_SAMA5_WDT=y in the NuttX configuration file.
+
+     Then make norboot:
+
+       make
+
+     This will result in an ELF binary called 'nuttx' and also HEX and
+     binary versions called 'nuttx.hex' and 'nuttx.bin'.
 
   3. Rename the binaries.  Since you will need two versions of NuttX:  this
      norboot version that runs in internal SRAM and another under test in
@@ -402,9 +415,11 @@ Creating and Using NORBOOT
        (gdb) mon go                   # And jump into NOR flash
 
       The norboot program can also be configured to jump directly into
-      NOR FLASH without requiring the final halt and go, but since I
-      have been debugging the early boot sequence, the above sequence has
-      been most convenient for me.
+      NOR FLASH without requiring the final halt and go by setting
+      CONFIG_SAMA5_NOR_START=y in the NuttX configuration.  However,
+      since I have been debugging the early boot sequence, the above
+      sequence has been most convenient for me since it allows me to
+      step into the program in NOR.
 
     STATUS:
       2013-7-30:  I have been unable to execute this configuration from NOR
@@ -1401,8 +1416,19 @@ Configurations
     under debug control.
 
     NOTES:
+
     1. This program derives from the hello configuration.  All of the
        notes there apply to this configuration as well.
+
+    2. The default norboot program initializes the NOR memory,
+       displays a message and halts.  The norboot program can also be
+       configured to jump directly into NOR FLASH without requiring the
+       final halt and go by setting CONFIG_SAMA5_NOR_START=y in the
+       NuttX configuration.
+
+    3. Be aware that the default norboot also disables the watchdog.
+       Since you will not be able to re-enable the watchdog later, you may
+       need to set CONFIG_SAMA5_WDT=y in the NuttX configuration file.
 
     STATUS:
       2013-7-19:  This configuration (as do the others) run at 396MHz.
