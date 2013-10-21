@@ -47,7 +47,8 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define SAM_CAN_NMAILBOXES  8
+#define SAM_CAN_NMAILBOXES       8
+#define SAM_CAN_MAXPERCLK        66000000
 
 /* CAN Register Offsets *************************************************************/
 
@@ -163,6 +164,7 @@
 #define CAN_INT_MB5              (1 << 5)  /* Bit 5:  Mailbox 5 Event */
 #define CAN_INT_MB6              (1 << 6)  /* Bit 6:  Mailbox 6 Event */
 #define CAN_INT_MB7              (1 << 7)  /* Bit 7:  Mailbox 7 Event */
+#define CAN_INT_MBALL            (0x000000ff)
 
 #define CAN_INT_ERRA             (1 << 16) /* Bit 16: Error Active Mode */
 #define CAN_INT_WARN             (1 << 17) /* Bit 17: Warning Limit */
@@ -200,6 +202,8 @@
 #define CAN_BR_BRP_MASK          (0x7f << CAN_BR_BRP_SHIFT)
 #  define CAN_BR_BRP(n)          ((uint32_t)(n) << CAN_BR_BRP_SHIFT)
 #define CAN_BR_SMP               (1 << 24) /* Bit 24: Sampling Mode */
+#  define CAN_BR_ONCE            (0)        /* Bit 24: 0:Bit stream sampled once at sample point */
+#  define CAN_BR_THREE           CAN_BR_SMP /* Bit 24: 1:Sampling three times */
 
 /* Timer Register */
 
