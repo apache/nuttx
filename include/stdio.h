@@ -142,7 +142,7 @@ int    vfprintf(FAR FILE *stream, const char *format, va_list ap);
 int    vsprintf(FAR char *buf, const char *format, va_list ap);
 int    avsprintf(FAR char **ptr, const char *fmt, va_list ap);
 int    vsnprintf(FAR char *buf, size_t size, const char *format, va_list ap);
-int    vsscanf(char *buf, const char *s, va_list ap);
+int    vsscanf(FAR const char *buf, FAR const char *s, va_list ap);
 
 /* Operations on file descriptors including:
  *

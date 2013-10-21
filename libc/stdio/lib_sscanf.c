@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_sscanf.c
  *
- *   Copyright (C) 2007, 2008, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,13 @@
 #include <nuttx/compiler.h>
 
 #include <sys/types.h>
+
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 #include <debug.h>
 
 /****************************************************************************
@@ -61,12 +63,12 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
+/**************************************************************************
  * Global Function Prototypes
  ****************************************************************************/
-
-int vsscanf(char *buf, const char *fmt, va_list ap);
-
+ 
+int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap);
+ 
 /**************************************************************************
  * Global Constant Data
  **************************************************************************/
@@ -157,7 +159,7 @@ int sscanf(FAR const char *buf, FAR const char *fmt, ...)
   int     count;
 
   va_start(ap, fmt);
-  count = vsscanf((FAR char*)buf, fmt, ap);
+  count = vsscanf((FAR const char*)buf, fmt, ap);
   va_end(ap);
   return count;
 }
@@ -170,9 +172,9 @@ int sscanf(FAR const char *buf, FAR const char *fmt, ...)
  *
  ****************************************************************************/
 
-int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
+int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 {
-  FAR char       *bufstart;
+  FAR const char *bufstart;
   FAR char       *tv;
   FAR const char *tc;
   bool            lflag;
@@ -438,12 +440,23 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
                   buf += width;
                   if (!noassign)
                     {
-#ifdef SDCC
                       char *endptr;
-                      long tmplong = strtol(tmp, &endptr, base);
-#else
-                      long tmplong = strtol(tmp, NULL, base);
-#endif
+                      int   errsave;
+                      long  tmplong;
+
+                      errsave = errno;
+                      errno   = 0;
+                      tmplong = strtol(tmp, &endptr, base);
+
+                      /* Number can't be converted */
+
+                      if (tmp == endptr || errno == ERANGE)
+                        {
+                          return count;
+                        }
+
+                      errno = errsave;
+
                       /* We have to check whether we need to return a long
                        * or an int.
                        */
@@ -535,12 +548,24 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
                   if (!noassign)
                     {
                       /* strtod always returns a double */
-#ifdef SDCC
+
                       FAR char *endptr;
-                      double_t dvalue = strtod(tmp,&endptr);
-#else
-                      double_t dvalue = strtod(tmp, NULL);
-#endif
+                      int       errsave;
+                      double_t  dvalue;
+
+                      errsave = errno;
+                      errno   = 0;
+                      dvalue  = strtod(tmp, &endptr);
+
+                      /* Number can't be converted */
+
+                      if (tmp == endptr || errno == ERANGE)
+                        {
+                          return count;
+                        }
+
+                      errno = errsave;
+
                       /* We have to check whether we need to return a float
                        * or a double.
                        */
@@ -599,7 +624,7 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
           fmt++;
         }
 
-    /* Its is not a conversion specifier */
+    /* It is not a conversion specifier */
 
       else if (*buf)
         {
@@ -621,6 +646,12 @@ int vsscanf(FAR char *buf, FAR const char *fmt, va_list ap)
               fmt++;
               buf++;
             }
+        }
+      else
+        {
+          /* NULL terminator encountered */
+
+          break;
         }
     }
 

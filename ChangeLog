@@ -5833,4 +5833,9 @@
 	  by default in the demo configuration (2013-10-20).
 	* arch/arm/src/sama5/chip/sam_tc.h:  SAMA5D3 timer/counter register
 	  definition header file (2013-10-20).
-
+	* libc/stdio/lib_sscanf.c:  scanf() fixes from kfrolov: 1) sscanf()
+	  function hangs in the following example: sscanf("2", "%u,%u,%u,%u", ...),
+	  2) sscanf() returns incorrect number of parsed numbers if some arguments
+	  can't be parsed: sscanf("=2", "%u,%u,%u,%u",...)==1 instead of 0, and
+	  3) using of char* instead of const char* in vsscanf function leads to
+	  warnings from GCC (2013-10-21).
