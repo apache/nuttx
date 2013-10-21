@@ -5839,3 +5839,5 @@
 	  can't be parsed: sscanf("=2", "%u,%u,%u,%u",...)==1 instead of 0, and
 	  3) using of char* instead of const char* in vsscanf function leads to
 	  warnings from GCC (2013-10-21).
+	* arch/arm/src/sama5/chip/sam_can.h:  SAMA5D3X CAN register definition
+	  header file (2013-10-21)
