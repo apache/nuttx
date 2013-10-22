@@ -6,11 +6,11 @@
  *   Authors:
  *     Li Zhuoyi <lzyy.cn@gmail.com>
  *     Gregory Nutt <gnutt@nuttx.org>
- *   History: 
+ *   History:
  *     2011-07-12: Initial version (Li Zhuoyi)
  *     2011-08-03: Support CAN1/CAN2 (Li Zhuoyi)
  *     2012-01-02: Add support for CAN loopback mode (Gregory Nutt)
- * 
+ *
  * This file is a part of NuttX:
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
@@ -675,7 +675,7 @@ static void can_txint(FAR struct can_dev_s *dev, bool enable)
       can_putreg(priv, LPC17_CAN_IER_OFFSET, regval);
       irqrestore(flags);
     }
-    
+
 }
 
 /****************************************************************************
@@ -1167,13 +1167,13 @@ static int can_bittiming(struct up_dev_s *priv)
       if (ts1 == ts2 && ts1 > 1 && ts2 < CAN_BTR_TSEG2_MAX)
         {
           ts1--;
-          ts2++;          
+          ts2++;
         }
     }
 
   /* Otherwise, nquanta is CAN_BIT_QUANTA, ts1 is CONFIG_CAN_TSEG1, ts2 is
    * CONFIG_CAN_TSEG2 and we calculate brp to achieve CAN_BIT_QUANTA quanta
-   * in the bit time 
+   * in the bit time
    */
 
   else
@@ -1183,7 +1183,7 @@ static int can_bittiming(struct up_dev_s *priv)
       brp = (nclks + (CAN_BIT_QUANTA/2)) / CAN_BIT_QUANTA;
       DEBUGASSERT(brp >=1 && brp <= CAN_BTR_BRP_MAX);
     }
-    
+
   sjw = 1;
 
   canllvdbg("TS1: %d TS2: %d BRP: %d SJW= %d\n", ts1, ts2, brp, sjw);
@@ -1235,7 +1235,7 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
 
   flags = irqsave();
 
-#ifdef CONFIG_LPC17_CAN1  
+#ifdef CONFIG_LPC17_CAN1
   if (port == 1)
     {
       /* Enable power to the CAN module */
@@ -1262,7 +1262,7 @@ FAR struct can_dev_s *lpc17_caninitialize(int port)
     }
   else
 #endif
-#ifdef CONFIG_LPC17_CAN2  
+#ifdef CONFIG_LPC17_CAN2
   if (port == 2)
     {
       /* Enable power to the CAN module */
