@@ -256,10 +256,12 @@ config SAMA5_SSC1
 config SAMA5_CAN0
 	bool "CAN controller 0 (CAN0)"
 	default n
+	select CAN
 
 config SAMA5_CAN1
 	bool "CAN controller 1 (CAN1)"
 	default n
+	select CAN
 
 config SAMA5_SHA
 	bool "Secure Hash Algorithm (SHA)"
@@ -1081,12 +1083,223 @@ config SAMA5_EMAC_REGDEBUG
 		Enable very low-level register access debug.  Depends on DEBUG.
 
 config SAMA5_EMAC_ISETH0
-    bool
-    default y if !SAMA5_EMAC || !SAMA5_GMAC_ISETH0
-    default n if SAMA5_EMAC && SAMA5_GMAC_ISETH0
+	bool
+	default y if !SAMA5_EMAC || !SAMA5_GMAC_ISETH0
+	default n if SAMA5_EMAC && SAMA5_GMAC_ISETH0
 
 endmenu # EMAC device driver options
 endif # SAMA5_EMAC
+
+if SAMA5_CAN0 || SAMA5_CAN1
+
+menu "CAN device driver options"
+
+if SAMA5_CAN0
+
+config SAMA5_CAN0_BAUD
+	int "CAN0 BAUD"
+	default 250000
+	depends on SAMA5_CAN0
+	---help---
+		CAN0 BAUD rate.  Required if SAMA5_CAN0 is defined.
+
+config SAMA5_CAN0_NRECVMB
+	int "Number of receive mailboxes"
+	default 1
+	range 1 3
+	---help---
+		The SAMA5 CAN0 peripheral supports 8 mailboxes that can be used for
+		sending and receiving messages.  Up the three of these can be set
+		aside statically for message reception.  The remainder can be
+		configured dynamically to send CAN messages.  Multiple receive
+		mailboxes might needed to either (1) receive bursts of messages, or
+		(2) to support multiple groups of messages filtered on message ID.
+
+		NOTE:  The maximum of 3 is a completely arbitrary design decision
+		and can certainly be changed if you need more.
+
+config SAMA5_CAN0_ADDR0
+	hex "Mailbox 0 address"
+	---help---
+		This setting defines the address for receive mailbox 0.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+config SAMA5_CAN0_MASK0
+	hex "Mailbox 0 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 0.  And
+		address matching SAMA5_CAN0_ADDR0 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+config SAMA5_CAN0_ADDR1
+	hex "Mailbox 1 address"
+	---help---
+		This setting defines the address for receive mailbox 1.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN0_NRECVMB is less than 2.
+
+config SAMA5_CAN0_MASK1
+	hex "Mailbox 1 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 1.  And
+		address matching SAMA5_CAN0_ADDR1 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN0_NRECVMB is less than 2.
+
+config SAMA5_CAN0_ADDR2
+	hex "Mailbox 2 address"
+	---help---
+		This setting defines the address for receive mailbox 2.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN0_NRECVMB is less than 3.
+
+config SAMA5_CAN0_MASK2
+	hex "Mailbox 1 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 2.  And
+		address matching SAMA5_CAN0_ADDR2 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN0_NRECVMB is less than 2.
+
+endif # SAMA5_CAN0
+
+if SAMA5_CAN1
+
+config SAMA5_CAN1_BAUD
+	int "CAN1 BAUD"
+	default 250000
+	depends on SAMA5_CAN1
+	---help---
+		CAN1 BAUD rate.  Required if SAMA5_CAN1 is defined.
+
+config SAMA5_CAN1_NRECVMB
+	int "Number of receive mailboxes"
+	default 1
+	range 1 3
+	---help---
+		The SAMA5 CAN1 peripheral supports 8 mailboxes that can be used for
+		sending and receiving messages.  Up the three of these can be set
+		aside statically for message reception.  The remainder can be
+		configured dynamically to send CAN messages.  Multiple receive
+		mailboxes might needed to either (1) receive bursts of messages, or
+		(2) to support multiple groups of messages filtered on message ID.
+
+		NOTE:  The maximum of 3 is a completely arbitrary design decision
+		and can certainly be changed if you need more.
+
+config SAMA5_CAN1_ADDR0
+	hex "Mailbox 0 address"
+	---help---
+		This setting defines the address for receive mailbox 0.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+config SAMA5_CAN1_MASK0
+	hex "Mailbox 0 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 0.  And
+		address matching SAMA5_CAN1_ADDR0 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+config SAMA5_CAN1_ADDR1
+	hex "Mailbox 1 address"
+	---help---
+		This setting defines the address for receive mailbox 1.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN0_NRECVMB is less than 2.
+
+config SAMA5_CAN1_MASK1
+	hex "Mailbox 1 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 1.  And
+		address matching SAMA5_CAN1_ADDR1 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN1_NRECVMB is less than 2.
+
+config SAMA5_CAN1_ADDR2
+	hex "Mailbox 2 address"
+	---help---
+		This setting defines the address for receive mailbox 2.  If CAN_EXTID
+		is defined, this should be a 29-bit extended CAN address; otherwise
+		it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN1_NRECVMB is less than 3.
+
+config SAMA5_CAN1_MASK2
+	hex "Mailbox 2 address mask"
+	default 0x7fff if !CAN_EXTID
+	default 0x1fffffff if CAN_EXTID
+	---help---
+		This setting defines the address mask for receive mailbox 2.  And
+		address matching SAMA5_CAN1_ADDR2 under this mask are accepted.  The
+		default, all ones, forces an exact match.  A value of zero will accept
+		any address.
+
+		If CAN_EXTID is defined, this should be a 29-bit extended CAN address
+		mask; otherwise it should be an 11-bit standard CAN address.
+
+		This setting is ignored if SAMA5_CAN1_NRECVMB is less than 3.
+
+endif # SAMA5_CAN1
+
+config SAMA5_CAN_AUTOBAUD
+	bool "Enable auto-baud"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		Enable the SAMA5 auto-baud feature.  NOTE:  This feature is not yet
+		fully implemented.
+
+config SAMA5_CAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also DEBUG.
+
+endmenu # SPI device driver options
+endif # SAMA5_CAN0 || SAMA5_CAN1
 
 if SAMA5_SPI0 || SAMA5_SPI1
 
@@ -1123,7 +1336,8 @@ config SAMA5_SPI_REGDEBUG
 	depends on DEBUG
 	default n
 	---help---
-		Output detailed register-level SPI device debug information.  Requires also DEBUG.
+		Output detailed register-level SPI device debug information.
+		Requires also DEBUG.
 
 endmenu # SPI device driver options
 endif # SAMA5_SPI0 || SAMA5_SPI1

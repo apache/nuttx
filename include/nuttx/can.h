@@ -335,7 +335,7 @@ EXTERN int can_register(FAR const char *path, FAR struct can_dev_s *dev);
  *   Called from the CAN interrupt handler when new read data is available
  *
  * Parameters:
- *   dev  - The specifi CAN device
+ *   dev  - The specific CAN device
  *   hdr  - The 16-bit CAN header
  *   data - An array contain the CAN data.
  *
@@ -354,9 +354,7 @@ EXTERN int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
  *   Called from the CAN interrupt handler at the completion of a send operation.
  *
  * Parameters:
- *   dev  - The specifi CAN device
- *   hdr  - The 16-bit CAN header
- *   data - An array contain the CAN data.
+ *   dev  - The specific CAN device
  *
  * Return:
  *   OK on success; a negated errno on failure.

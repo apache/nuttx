@@ -56,12 +56,44 @@
 
 /* CAN BAUD */
 
-#if defined(CONFIG_SAMA5_CAN0) && !defined(CONFIG_CAN0_BAUD)
-#  error "CONFIG_CAN0_BAUD is not defined"
+#if defined(CONFIG_SAMA5_CAN0) && !defined(CONFIG_SAMA5_CAN0_BAUD)
+#  error "CONFIG_SAMA5_CAN0_BAUD is not defined"
 #endif
 
-#if defined(CONFIG_SAMA5_CAN1) && !defined(CONFIG_CAN1_BAUD)
-#  error "CONFIG_CAN1_BAUD is not defined"
+#if defined(CONFIG_SAMA5_CAN1) && !defined(CONFIG_SAMA5_CAN1_BAUD)
+#  error "CONFIG_SAMA5_CAN1_BAUD is not defined"
+#endif
+
+/* There must be at least one but not more than three receive mailboxes */
+
+#ifdef CONFIG_SAMA5_CAN0
+#  if !defined(CONFIG_SAMA5_CAN0_NRECVMB) || CONFIG_SAMA5_CAN0_NRECVMB < 1
+#    undef  CONFIG_SAMA5_CAN0_NRECVMB
+#    define CONFIG_SAMA5_CAN0_NRECVMB 1
+#  endif
+#  if CONFIG_SAMA5_CAN0_NRECVMB > 3
+#    warning Current implementation only supports up to three receive mailboxes
+#    undef  CONFIG_SAMA5_CAN0_NRECVMB
+#    define CONFIG_SAMA5_CAN0_NRECVMB 3
+#  endif
+#else
+#  undef  CONFIG_SAMA5_CAN0_NRECVMB
+#  define CONFIG_SAMA5_CAN0_NRECVMB 0
+#endif
+
+#ifdef CONFIG_SAMA5_CAN1
+#  if !defined(CONFIG_SAMA5_CAN1_NRECVMB) || CONFIG_SAMA5_CAN1_NRECVMB < 1
+#    undef  CONFIG_SAMA5_CAN1_NRECVMB
+#    define CONFIG_SAMA5_CAN1_NRECVMB 1
+#  endif
+#  if CONFIG_SAMA5_CAN1_NRECVMB > 3
+#    warning Current implementation only supports up to three receive mailboxes
+#    undef  CONFIG_SAMA5_CAN1_NRECVMB
+#    define CONFIG_SAMA5_CAN1_NRECVMB 3
+#  endif
+#else
+#  undef  CONFIG_SAMA5_CAN1_NRECVMB
+#  define CONFIG_SAMA5_CAN1_NRECVMB 0
 #endif
 
 /************************************************************************************
@@ -101,7 +133,7 @@ extern "C" {
  ****************************************************************************/
 
 struct can_dev_s;
-FAR struct can_dev_s *sama5_caninitialize(int port);
+FAR struct can_dev_s *sam_caninitialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -77,14 +77,14 @@
 #define SAM_CAN_MDH_OFFSET       0x0018 /* Mailbox Data High Register */
 #define SAM_CAN_MCR_OFFSET       0x001c /* Mailbox Control Register */
 
-#define SAM_CAN_MnMR_OFFSET(n)   (SAM_CAN_MAILBOX_OFFSET(n)+SAM_CAN_MMR_OFFSET)
-#define SAM_CAN_MnAM_OFFSET(n)   (SAM_CAN_MAILBOX_OFFSET(n)+SAM_CAN_MAM_OFFSET)
-#define SAM_CAN_MnID_OFFSET(n)   (SAM_CAN_MAILBOX_OFFSET(n)+SAM_CAN_MID_OFFSET)
-#define SAM_CAN_MnFID_OFFSET(n)  (SAM_CAN_MAILBOX_OFFSET(n)+SAM_CAN_MFID_OFFSET)
-#define SAM_CAN_MnSR_OFFSET(n)   (SAM_CAN_MAILBOX_OFFSET(n)+SAM_CAN_MSR_OFFSET)
-#define SAM_CAN_MnDL_OFFSET(n)   (SAM_CAN_MAILBOX_OFFSET(n)+SAM_CAN_MDL_OFFSET)
-#define SAM_CAN_MnDH_OFFSET(n)   (SAM_CAN_MAILBOX_OFFSET(n)+SAM_CAN_MDH_OFFSET)
-#define SAM_CAN_MnCR_OFFSET(n)   (SAM_CAN_MAILBOX_OFFSET(n)+SAM_CAN_MCR_OFFSET)
+#define SAM_CAN_MnMR_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MMR_OFFSET)
+#define SAM_CAN_MnAM_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MAM_OFFSET)
+#define SAM_CAN_MnID_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MID_OFFSET)
+#define SAM_CAN_MnFID_OFFSET(n)  (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MFID_OFFSET)
+#define SAM_CAN_MnSR_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MSR_OFFSET)
+#define SAM_CAN_MnDL_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MDL_OFFSET)
+#define SAM_CAN_MnDH_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MDH_OFFSET)
+#define SAM_CAN_MnCR_OFFSET(n)   (SAM_CAN_MBn_OFFSET(n)+SAM_CAN_MCR_OFFSET)
 
 /* CAN Register Addresses ***********************************************************/
 
@@ -149,7 +149,7 @@
 #define CAN_MR_TEOF              (1 << 4)  /* Bit 4:  Timestamp Messages at each End of Frame */
 #define CAN_MR_TTM               (1 << 5)  /* Bit 5:  Disable/Enable Time Triggered Mode */
 #define CAN_MR_TIMFRZ            (1 << 6)  /* Bit 6:  Enable Timer Freeze */
-#define CAN_MR_DRPT              (1 << 7)  /* Bit 7: Disable Repeat */
+#define CAN_MR_DRPT              (1 << 7)  /* Bit 7:  Disable Repeat */
 
 /* Interrupt Enable Register, Interrupt Disable Register, Interrupt Mask Register,
  * and Status Register
@@ -171,7 +171,7 @@
 #define CAN_INT_ERRP             (1 << 18) /* Bit 18: Error Passive Mode */
 #define CAN_INT_BOFF             (1 << 19) /* Bit 19: Bus Off Mode */
 #define CAN_INT_SLEEP            (1 << 20) /* Bit 20: CAN Controller in Low-power Mode */
-#define CAN_INT_WAKEUP           (1 << 21) /* Bit 21: Wake-up Interrupt Enable */
+#define CAN_INT_WAKEUP           (1 << 21) /* Bit 21: Wake-up Interrupt */
 #define CAN_INT_TOVF             (1 << 22) /* Bit 22: Timer Overflow */
 #define CAN_INT_TSTP             (1 << 23) /* Bit 23: Timestamp */
 #define CAN_INT_CERR             (1 << 24) /* Bit 24: Mailbox CRC Error */
@@ -179,6 +179,8 @@
 #define CAN_INT_AERR             (1 << 26) /* Bit 26: Acknowledgment Error */
 #define CAN_INT_FERR             (1 << 27) /* Bit 27: Form Error */
 #define CAN_INT_BERR             (1 << 28) /* Bit 28: Bit Error */
+#define CAN_INT_ALLERRORS        (0x1f000000)
+#define CAN_INT_ALL              (0x1fff00ff)
 
 #define CAN_SR_RBSY              (1 << 29) /* Bit 29: Receiver busy */
 #define CAN_SR_TBSY              (1 << 30) /* Bit 30: Transmitter busy */
@@ -251,7 +253,7 @@
 #define CAN_WPMR_WPKEY_SHIFT     (8)       /* Bits 8-31: CAN Write Protection Key Password */
 #define CAN_WPMR_WPKEY_MASK      (0xffffff << CAN_WPMR_WPKEY_SHIFT)
 #  define CAN_WPMR_WPKEY         (0x43414e << CAN_WPMR_WPKEY_SHIFT) /* "CAN" in ASCII */
- 
+
 /* Write Protect Status Register */
 
 #define CAN_WPSR_WPVS            (1 << 0)  /* Bit 0:  Write Protection Violation Status */
@@ -285,6 +287,13 @@
 #  define CAN_MAM_MIDvA(n)       ((uint32_t)(n) << CAN_MAM_MIDvA_SHIFT)
 #define CAN_MAM_MIDE             (1 << 29) /* Bit 29: Identifier Version */
 
+#define CAN_MAM_EXTID_SHIFT      (0)       /* Bits 0-28: 29-bit extended address */
+#define CAN_MAM_EXTID_MASK       (0x1fffffff << CAN_MAM_EXTID_SHIFT)
+#  define CAN_MAM_EXTID(n)       (((uint32_t)(n) << CAN_MAM_EXTID_SHIFT) | CAN_MAM_MIDE)
+#define CAN_MAM_STDID_SHIFT      (18)      /* Bits 18-28: 11-bit standard address */
+#define CAN_MAM_STDID_MASK       (0x7ff << CAN_MAM_STDID_SHIFT)
+#  define CAN_MAM_STDIE(n)       ((uint32_t)(n) << CAN_MAM_STDID_SHIFT)
+
 /* Mailbox ID Register */
 
 #define CAN_MID_MIDvB_SHIFT      (0)       /* Bits 0-17: Complementary bits for identifier */
@@ -294,6 +303,13 @@
 #define CAN_MID_MIDvA_MASK       (0x7ff << CAN_MID_MIDvA_SHIFT)
 #  define CAN_MID_MIDvA(n)       ((uint32_t)(n) << CAN_MID_MIDvA_SHIFT)
 #define CAN_MID_MIDE             (1 << 29) /* Bit 19: Identifier Version */
+
+#define CAN_MID_EXTID_SHIFT      (0)       /* Bits 0-28: 29-bit extended address */
+#define CAN_MID_EXTID_MASK       (0x1fffffff << CAN_MID_EXTID_SHIFT)
+#  define CAN_MID_EXTID(n)       (((uint32_t)(n) << CAN_MID_EXTID_SHIFT) | CAN_MID_MIDE)
+#define CAN_MID_STDID_SHIFT      (18)      /* Bits 18-28: 11-bit standard address */
+#define CAN_MID_STDID_MASK       (0x7ff << CAN_MID_STDIF_SHIFT)
+#  define CAN_MID_STDID(n)       ((uint32_t)(n) << CAN_MID_STDIF_SHIFT)
 
 /* Mailbox Family ID Register */
 

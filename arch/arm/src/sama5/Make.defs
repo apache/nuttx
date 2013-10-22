@@ -178,6 +178,14 @@ CHIP_CSRCS += sam_gmac.c
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_CAN0),y)
+CHIP_CSRCS += sam_can.c
+else
+ifeq ($(CONFIG_SAMA5_CAN1),y)
+CHIP_CSRCS += sam_can.c
+endif
+endif
+
 ifeq ($(CONFIG_SAMA5_TWI0),y)
 CHIP_CSRCS += sam_twi.c
 else

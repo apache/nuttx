@@ -5841,6 +5841,7 @@
 	  warnings from GCC (2013-10-21).
 	* arch/arm/src/sama5/chip/sam_can.h:  SAMA5D3X CAN register definition
 	  header file (2013-10-21)
-	* arch/arm/src/sama5/sam_can.c and .h:  Framework for a SAMA5 CAN drvier.
+	* arch/arm/src/sama5/sam_can.c and .h:  Framework for a SAMA5 CAN driver.
 	  Initial checkin is the STM32 CAN driver with name changes (2013-10-21).
-
+	* arch/arm/src/sama5/sam_can.c and .h: SAMA5 CAN driver is code complete
+	  but still untested (2013-10-22).

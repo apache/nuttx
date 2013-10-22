@@ -22,7 +22,7 @@ config DEV_ZERO
 config ARCH_HAVE_RNG
 	bool
 
-config DEV_RANDOM 
+config DEV_RANDOM
 	bool "Enable /dev/random"
 	default n
 	depends on ARCH_HAVE_RNG
@@ -71,7 +71,7 @@ config CAN_NPENDINGRTR
 		The size of the list of pending RTR requests. Default: 4
 
 config CAN_LOOPBACK
-	bool "CAN extended IDs"
+	bool "CAN loopback mode"
 	default n
 	---help---
 		A CAN driver may or may not support a loopback mode for testing. If the
@@ -202,7 +202,7 @@ config RTC_FREQUENCY
 		must be provided.  If RTC_HIRES is not defined, RTC_FREQUENCY is
 		assumed to be one Hz.
 
-config RTC_ALARM 
+config RTC_ALARM
 	bool "RTC Alarm Support"
 	default n
 	depends on RTC
