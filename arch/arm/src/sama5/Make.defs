@@ -204,3 +204,11 @@ ifeq ($(CONFIG_SAMA5_TSD),y)
 CHIP_CSRCS += sam_tsd.c
 endif
 endif
+
+ifeq ($(CONFIG_SAMA5_TC0),y)
+CHIP_CSRCS += sam_tc.c
+else
+ifeq ($(CONFIG_SAMA5_TC1),y)
+CHIP_CSRCS += sam_tc.c
+endif
+endif

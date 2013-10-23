@@ -104,7 +104,7 @@
 #  define SAM_SPI0_OFFSET        0x00004000 /* 0x00004000-0x00007fff: SPI0 */
 #  define SAM_SSC0_OFFSET        0x00008000 /* 0x00008000-0x0000bfff: SSC0 */
 #  define SAM_CAN0_OFFSET        0x0000c000 /* 0x0000c000-0x0000ffff: CAN0 */
-#  define SAM_TC012_OFFSET       0x00010000 /* 0x00010000-0x00013fff: TC0, TC1, TC2 */
+#  define SAM_TC012_OFFSET       0x00010000 /* 0x00010000-0x00013fff: TC channels 0, 1, and 2 */
 #  define SAM_TWI0_OFFSET        0x00014000 /* 0x00014000-0x00017fff: TWI0 */
 #  define SAM_TWI1_OFFSET        0x00018000 /* 0x00018000-0x0001bfff: TWI1 */
 #  define SAM_USART0_OFFSET      0x0001c000 /* 0x0001c000-0x0001ffff: USART0 */
@@ -123,7 +123,7 @@
 #  define SAM_SPI1_OFFSET        0x00008000 /* 0x00008000-0x0000bfff: SPI1 */
 #  define SAM_SSC1_OFFSET        0x0000c000 /* 0x0000c000-0x0000ffff: SSC1 */
 #  define SAM_CAN1_OFFSET        0x00010000 /* 0x00010000-0x00013fff: CAN1 */
-#  define SAM_TC345_OFFSET       0x00014000 /* 0x00014000-0x00017fff: TC3, TC4, TC5 */
+#  define SAM_TC345_OFFSET       0x00014000 /* 0x00014000-0x00017fff: TC channels 3, 4, and 5 */
 #  define SAM_TSADC_OFFSET       0x00018000 /* 0x00018000-0x0001bfff: TSADC */
 #  define SAM_TWI2_OFFSET        0x0001c000 /* 0x0001c000-0x0001ffff: TWI2 */
 #  define SAM_USART2_OFFSET      0x00020000 /* 0x00020000-0x00023fff: USART2 */

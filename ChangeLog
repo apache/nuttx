@@ -5857,4 +5857,6 @@
 	* arch/arm/src/stm32/stm32f10xxx_dma.c:  DMA fix from David Sidrane:
 	  The DMA_CNDTRx register cannot be modified if the DMA channel is
 	  disabled (2013-10-23).
+	* arch/arm/src/sama5/sam_tc.c and .h:  First but at a timer/counter
+	  library for the SAMA5D3 (2013-10-23).
 

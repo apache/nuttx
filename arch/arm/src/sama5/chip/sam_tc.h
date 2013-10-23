@@ -60,12 +60,12 @@
 #define SAM_TC_SR_OFFSET         0x0020     /* Status Register */
 #define SAM_TC_IER_OFFSET        0x0024     /* Interrupt Enable Register */
 #define SAM_TC_IDR_OFFSET        0x0028     /* Interrupt Disable Register */
-#define SAM_TC_IDR_OFFSET        0x002c     /* Interrupt Mask Register */
+#define SAM_TC_IMR_OFFSET        0x002c     /* Interrupt Mask Register */
 
 #define SAM_TCn_CCR_OFFSET(n)    (SAM_TC_CHAN_OFFSET(n)+SAM_TC_CCR_OFFSET)
 #define SAM_TCn_CMR_OFFSET(n)    (SAM_TC_CHAN_OFFSET(n)+SAM_TC_CMR_OFFSET)
 #define SAM_TCn_SMMR_OFFSET(n)   (SAM_TC_CHAN_OFFSET(n)+SAM_TC_SMMR_OFFSET)
-#define SAM_TCn_SMMR_OFFSET(n)   (SAM_TC_CHAN_OFFSET(n)+SAM_TC_RAB_OFFSET)
+#define SAM_TCn_RAB_OFFSET(n)    (SAM_TC_CHAN_OFFSET(n)+SAM_TC_RAB_OFFSET)
 #define SAM_TCn_CV_OFFSET(n)     (SAM_TC_CHAN_OFFSET(n)+SAM_TC_CV_OFFSET)
 #define SAM_TCn_RA_OFFSET(n)     (SAM_TC_CHAN_OFFSET(n)+SAM_TC_RA_OFFSET)
 #define SAM_TCn_RB_OFFSET(n)     (SAM_TC_CHAN_OFFSET(n)+SAM_TC_RB_OFFSET)
@@ -73,12 +73,12 @@
 #define SAM_TCn_SR_OFFSET(n)     (SAM_TC_CHAN_OFFSET(n)+SAM_TC_SR_OFFSET)
 #define SAM_TCn_IER_OFFSET(n)    (SAM_TC_CHAN_OFFSET(n)+SAM_TC_IER_OFFSET)
 #define SAM_TCn_IDR_OFFSET(n)    (SAM_TC_CHAN_OFFSET(n)+SAM_TC_IDR_OFFSET)
-#define SAM_TCn_IMR_OFFSET(n)    (SAM_TC_CHAN_OFFSET(n)+SAM_TC_IDR_OFFSET)
+#define SAM_TCn_IMR_OFFSET(n)    (SAM_TC_CHAN_OFFSET(n)+SAM_TC_IMR_OFFSET)
 
 #define SAM_TC0_CCR_OFFSET       SAM_TCn_CCR_OFFSET(0)
 #define SAM_TC0_CMR_OFFSET       SAM_TCn_CMR_OFFSET(0)
 #define SAM_TC0_SMMR_OFFSET      SAM_TCn_SMMR_OFFSET(0)
-#define SAM_TC0_RAB_OFFSET       SAM_TCn_SMMR_OFFSET(0)
+#define SAM_TC0_RAB_OFFSET       SAM_TCn_RAB_OFFSET(0)
 #define SAM_TC0_CV_OFFSET        SAM_TCn_CV_OFFSET(0)
 #define SAM_TC0_RA_OFFSET        SAM_TCn_RA_OFFSET(0)
 #define SAM_TC0_RB_OFFSET        SAM_TCn_RB_OFFSET(0)
@@ -91,7 +91,7 @@
 #define SAM_TC1_CCR_OFFSET       SAM_TCn_CCR_OFFSET(1)
 #define SAM_TC1_CMR_OFFSET       SAM_TCn_CMR_OFFSET(1)
 #define SAM_TC1_SMMR_OFFSET      SAM_TCn_SMMR_OFFSET(1)
-#define SAM_TC1_RAB_OFFSET       SAM_TCn_SMMR_OFFSET(1)
+#define SAM_TC1_RAB_OFFSET       SAM_TCn_RAB_OFFSET(1)
 #define SAM_TC1_CV_OFFSET        SAM_TCn_CV_OFFSET(1)
 #define SAM_TC1_RA_OFFSET        SAM_TCn_RA_OFFSET(1)
 #define SAM_TC1_RB_OFFSET        SAM_TCn_RB_OFFSET(1)
@@ -104,7 +104,7 @@
 #define SAM_TC2_CCR_OFFSET       SAM_TCn_CCR_OFFSET(2)
 #define SAM_TC2_CMR_OFFSET       SAM_TCn_CMR_OFFSET(2)
 #define SAM_TC2_SMMR_OFFSET      SAM_TCn_SMMR_OFFSET(2)
-#define SAM_TC2_RAB_OFFSET       SAM_TCn_SMMR_OFFSET(2)
+#define SAM_TC2_RAB_OFFSET       SAM_TCn_RAB_OFFSET(2)
 #define SAM_TC2_CV_OFFSET        SAM_TCn_CV_OFFSET(2)
 #define SAM_TC2_RA_OFFSET        SAM_TCn_RA_OFFSET(2)
 #define SAM_TC2_RB_OFFSET        SAM_TCn_RB_OFFSET(2)
@@ -142,7 +142,7 @@
 #define SAM_TC0_CCR              SAM_TC012_CCR(0)
 #define SAM_TC0_CMR              SAM_TC012_CMR(0)
 #define SAM_TC0_SMMR             SAM_TC012_SMMR(0)
-#define SAM_TC0_RAB              SAM_TC012_SMMR(0)
+#define SAM_TC0_RAB              SAM_TC012_RAB(0)
 #define SAM_TC0_CV               SAM_TC012_CV(0)
 #define SAM_TC0_RA               SAM_TC012_RA(0)
 #define SAM_TC0_RB               SAM_TC012_RB(0)
@@ -155,7 +155,7 @@
 #define SAM_TC1_CCR              SAM_TC012_CCR(1)
 #define SAM_TC1_CMR              SAM_TC012_CMR(1)
 #define SAM_TC1_SMMR             SAM_TC012_SMMR(1)
-#define SAM_TC1_RAB              SAM_TC012_SMMR(1)
+#define SAM_TC1_RAB              SAM_TC012_RAB(1)
 #define SAM_TC1_CV               SAM_TC012_CV(1)
 #define SAM_TC1_RA               SAM_TC012_RA(1)
 #define SAM_TC1_RB               SAM_TC012_RB(1)
@@ -168,7 +168,7 @@
 #define SAM_TC2_CCR              SAM_TC012_CCR(2)
 #define SAM_TC2_CMR              SAM_TC012_CMR(2)
 #define SAM_TC2_SMMR             SAM_TC012_SMMR(2)
-#define SAM_TC2_RAB              SAM_TC012_SMMR(2)
+#define SAM_TC2_RAB              SAM_TC012_RAB(2)
 #define SAM_TC2_CV               SAM_TC012_CV(2)
 #define SAM_TC2_RA               SAM_TC012_RA(2)
 #define SAM_TC2_RB               SAM_TC012_RB(2)
@@ -204,7 +204,7 @@
 #define SAM_TC3_CCR              SAM_TC345_CCR(3)
 #define SAM_TC3_CMR              SAM_TC345_CMR(3)
 #define SAM_TC3_SMMR             SAM_TC345_SMMR(3)
-#define SAM_TC3_RAB              SAM_TC345_SMMR(3)
+#define SAM_TC3_RAB              SAM_TC345_RAB(3)
 #define SAM_TC3_CV               SAM_TC345_CV(3)
 #define SAM_TC3_RA               SAM_TC345_RA(3)
 #define SAM_TC3_RB               SAM_TC345_RB(3)
@@ -217,7 +217,7 @@
 #define SAM_TC4_CCR              SAM_TC345_CCR(4)
 #define SAM_TC4_CMR              SAM_TC345_CMR(4)
 #define SAM_TC4_SMMR             SAM_TC345_SMMR(4)
-#define SAM_TC4_RAB              SAM_TC345_SMMR(4)
+#define SAM_TC4_RAB              SAM_TC345_RAB(4)
 #define SAM_TC4_CV               SAM_TC345_CV(4)
 #define SAM_TC4_RA               SAM_TC345_RA(4)
 #define SAM_TC4_RB               SAM_TC345_RB(4)
@@ -230,7 +230,7 @@
 #define SAM_TC5_CCR              SAM_TC345_CCR(5)
 #define SAM_TC5_CMR              SAM_TC345_CMR(5)
 #define SAM_TC5_SMMR             SAM_TC345_SMMR(5)
-#define SAM_TC5_RAB              SAM_TC345_SMMR(5)
+#define SAM_TC5_RAB              SAM_TC345_RAB(5)
 #define SAM_TC5_CV               SAM_TC345_CV(5)
 #define SAM_TC5_RA               SAM_TC345_RA(5)
 #define SAM_TC5_RB               SAM_TC345_RB(5)
@@ -398,6 +398,7 @@
 #define TC_INT_LDRAS             (1 << 5)  /* Bit 5:  RA Loading Status */
 #define TC_INT_LDRBS             (1 << 6)  /* Bit 6:  RB Loading Status */
 #define TC_INT_ETRGS             (1 << 7)  /* Bit 7:  External Trigger Status */
+#define TC_INT_ALL               (0xff)
 
 #define TC_SR_CLKSTA             (1 << 16) /* Bit 16: Clock Enabling Status */
 #define TC_SR_MTIOA              (1 << 17) /* Bit 17: TIOA Mirror */
