@@ -7,7 +7,7 @@
  * References:
  *
  *   SAMA5D3 Series Data Sheet
- *   Atmel NoOS sample code.
+ *   Atmel NoOS sample code (for bit timing configuration).
  *
  * The Atmel sample code has a BSD compatibile license that requires this
  * copyright notice:

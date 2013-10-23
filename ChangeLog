@@ -5845,3 +5845,9 @@
 	  Initial checkin is the STM32 CAN driver with name changes (2013-10-21).
 	* arch/arm/src/sama5/sam_can.c and .h: SAMA5 CAN driver is code complete
 	  but still untested (2013-10-22).
+	* configs/spark:  Spark configuration updated by David Sidrane (2013-10-23).
+	* drivers/wireless/cc3000:  CC3000 driver updates from David Sidrane
+	  (2013-10-23).
+	* include/nuttx/wireless/cc3000:  More CC3000 driver updates from David
+	  Sidrane (2013-10-23).
+
