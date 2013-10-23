@@ -169,17 +169,17 @@ int nsh_archinitialize(void)
 
   message("nsh_archinitialize: Successfully initialized SPI port  %d\n",CONFIG_SPARK_FLASH_SPI);
 
-    /* Now bind the SPI interface to the SST25 SPI FLASH driver */
+  /* Now bind the SPI interface to the SST25 SPI FLASH driver */
 
   message("nsh_archinitialize: Bind SPI to the SPI flash driver\n");
   mtd = sst25_initialize(spi);
   if (!mtd)
     {
-      message("nsh_archinitialize: Failed to bind SPI port %d to the SPI FLASH driver\n",CONFIG_SPARK_FLASH_SPI);
+      message("nsh_archinitialize: Failed to bind SPI port %d to the SPI FLASH driver\n", CONFIG_SPARK_FLASH_SPI);
     }
   else
     {
-      message("nsh_archinitialize: Successfully bound SPI port %d to the SPI FLASH driver\n",CONFIG_SPARK_FLASH_SPI);
+      message("nsh_archinitialize: Successfully bound SPI port %d to the SPI FLASH driver\n", CONFIG_SPARK_FLASH_SPI);
     }
 
 #ifdef CONFIG_SPARK_FLASH_PART
