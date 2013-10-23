@@ -2484,13 +2484,14 @@ Configurations
     a) It runs of the SAMA5D31 and SAMA5D34, but not on the SAMA5D33.  This
        board is from a different manufacturer and there may be some SDRAM-
        related issues?
-    b) There appears to be an SDRAM noise issue on the SAMA5D31 and SAMA5D34.
+    b) There may be an SDRAM noise issue on the SAMA5D31 and SAMA5D34.
        I suspect that the SDRAM setup is non-optimal.  The symptom is that
        writing into frame buffer (in SDRAM) occasionally corrupts the DMA
        descriptors (also in SDRAM)  When the bad DMA descriptors are
        fetched, the channel shuts down and the display goes black.  This
-       problem could also be cause by a bad write outside of the framebuffer,
-       but was not the case in the few examples that I studied.
+       problem could also be cause by a bad write outside of the framebuffer
+       and, in fact, putting a guard band around the framebuffers seems to
+       eliminate the problem.
     c) There are some occasional start up issues.  It appears that the LCDC
        is programed incorrectly and groups of pixels in the images are
        reversed (producing an odd serrated look to the images).
