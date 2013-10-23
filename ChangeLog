@@ -5854,4 +5854,7 @@
 	  ARCH_HAVE_NET that determines if a network is present or not.  This
 	  currently can happen if CONFIG_NET is set or if CONFIG_WL_CC3000 is
 	  is set (23013-10-23).
+	* arch/arm/src/stm32/stm32f10xxx_dma.c:  DMA fix from David Sidrane:
+	  The DMA_CNDTRx register cannot be modified if the DMA channel is
+	  disabled (2013-10-23).
 
