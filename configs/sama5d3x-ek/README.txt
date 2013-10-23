@@ -77,6 +77,7 @@ Contents
   - HSMCI Card Slots
   - USB Ports
   - AT24 Serial EEPROM
+  - CAN Usage
   - SAMA5D3x-EK Configuration Options
   - Configurations
 
@@ -651,6 +652,85 @@ AT24 Serial EEPROM
 
   By default, PA30 and PA31 are SWJ-DP pins, it can be used as a pin for TWI
   peripheral in the end application.
+
+CAN Usage
+=========
+
+  CAN Configuration
+  -----------------
+
+  The following steps illustrate how to enable CAN0 and/or CAN1 in the NuttX
+  configuration:
+
+    System Type -> SAMA5 Peripheral Support
+       CONFIG_SAMA5_CAN0=y            : Select CAN0 and/or CAN1
+       CONFIG_SAMA5_CAN1=y
+
+    Device Drivers -> CAN Driver Support
+       CONFIG_CAN=y                   : (Automatically selected)
+       CONFIG_CAN_EXTID=y             : For extended, 29-bit CAN IDs
+
+    System Type -> CAN Drive Support
+       CONFIG_SAMA5_CAN0_BAUD=250000  : Select some BAUD for CAN0 (if enabled)
+       CONFIG_SAMA5_CAN0_NRECVMB=1    : Select number of receive mailboxes (see below)
+       CONFIG_SAMA5_CAN1_BAUD=250000  : Select some BAUD for CAN1 (if enabled)
+       CONFIG_SAMA5_CAN1_NRECVMB=1    : Select number of receive mailboxes (see below)
+
+  Receive Mailboxes and Address Filtering
+  ---------------------------------------
+
+  The SAMA5 CAN0 peripheral supports 8 mailboxes that can be used for sending
+  and receiving messages.  Note that the number of dedicated receive mailboxes
+  (CONFIG_SAMA5_CANn_NRECVMB) was set to one in the above configuration.  This
+  could be set to any value from 1 to 3 (the upper limit of 3 is purely
+  arbrary and can be increased with some minor code enhancement).  The
+  remainder can be configured dynamically to send CAN messages.
+
+  Why would you want to use more than one receive mailbox?  There are two
+  reasons. Multiple receive mailboxes might needed to either (1) receive
+  bursts of messages, or (2) to support multiple groups of messages filtered
+  on message ID.
+
+  You must also specify the address filtering for each dedicated receive mailbox:
+
+    System Type -> CAN Drive Support
+       CONFIG_SAMA5_CAN0_ADDR0 and CONFIG_SAMA5_CAN0_MASK0 : If CONFIG_SAMA5_CAN0_NRECVMB >= 1
+       CONFIG_SAMA5_CAN0_ADDR1 and CONFIG_SAMA5_CAN0_MASK1 : If CONFIG_SAMA5_CAN0_NRECVMB >= 2
+       CONFIG_SAMA5_CAN0_ADDR2 and CONFIG_SAMA5_CAN0_MASK2 : If CONFIG_SAMA5_CAN0_NRECVMB >= 3
+       CONFIG_SAMA5_CAN1_ADDR0 and CONFIG_SAMA5_CAN1_MASK0 : If CONFIG_SAMA5_CAN1_NRECVMB >= 1
+       CONFIG_SAMA5_CAN1_ADDR1 and CONFIG_SAMA5_CAN1_MASK1 : If CONFIG_SAMA5_CAN1_NRECVMB >= 2
+       CONFIG_SAMA5_CAN1_ADDR2 and CONFIG_SAMA5_CAN1_MASK2 : If CONFIG_SAMA5_CAN1_NRECVMB >= 3
+
+  Only messages that have IDs that match the CONFIG_SAMA5_CANn_ADDRn when both
+  the received and the configured address are masked by CONFIG_SAMA5_CANn_MASKn
+  will be accepted.  For eacmple, if the mask is all ones, then only messasges
+  with exact address matches will be accepted; if the mask is all zeroes than
+  any address will be accepted.
+
+  CAN connectors
+  --------------
+
+  CAN1 and CAN2 are available via RJ-11 connectors on the SAMA5Dx-EK.  Each
+  is wired as follows.  Also shown below is the matching pins if you want connect
+  the CAN to a device that uses an DB-9 connector.  Both connector types are
+  common.
+
+                    +----------+     RJ-11       DB-9
+                    |    O     |     ----------- -------------- 
+  +------------+    |          |     Pin 1 3v3   Pin 1 N/C
+  |    +--+    |    |  o5      |     Pin 2 5v    Pin 2 CANL
+  |    |  |    |    |       o9 |     Pin 3 N/C   Pin 3 GND
+  |  +-+  +-+  |    |  o4      |     Pin 4 CANL  Pin 4 N/C
+  |  |      |  |    |       o8 |     Pin 5 CANH  Pin 5 N/C
+  |  |654321|  |    |  o3      |     Pin 6 N/C   Pin 6 N/C
+  |  |oooooo|  |    |       o7 |                 Pin 7 CANH
+  |  +------+  |    |  o2      |                 Pin 8 N/C
+  +------------+    |       o6 |                 Pin 9 N/C
+   RJ-11 Female     |  x1      |
+                    |          |
+                    |    O     |
+                    +----------+
+                      DB-9 Male
 
 SAMA5D3x-EK Configuration Options
 =================================
