@@ -38,6 +38,8 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <debug.h>
 #include <stdlib.h>
 #include <nuttx/wireless/cc3000/hci.h>
 #include <nuttx/wireless/cc3000/include/sys/socket.h>
@@ -139,7 +141,14 @@ int HostFlowControlConsumeBuff(int sd)
         {
           return -1;
         }
-  } while (0 == tSLInformation.usNumberOfFreeBuffers);
+
+      /* We must yield here for the the Event to get processed that returns
+       * the buffers
+       */
+
+      usleep(100000);
+    }
+  while (0 == tSLInformation.usNumberOfFreeBuffers);
 
   tSLInformation.usNumberOfFreeBuffers--;
 
@@ -1213,8 +1222,9 @@ int sendto(long sd, const void *buf, long len, long flags, const sockaddr *to,
 int mdnsAdvertiser(uint16_t mdnsEnabled, char * deviceServiceName,
                    uint16_t deviceServiceNameLength)
 {
+  uint8_t *pTxBuffer;
+  uint8_t *pArgs;
   int ret;
-   uint8_t *pTxBuffer, *pArgs;
 
   if (deviceServiceNameLength > MDNS_DEVICE_SERVICE_MAX_LENGTH)
     {

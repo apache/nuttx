@@ -9,8 +9,8 @@
  *   CC30000 from Texas Instruments http://processors.wiki.ti.com/index.php/CC3000
  *
  * See also:
- * 		http://processors.wiki.ti.com/index.php/CC3000_Host_Driver_Porting_Guide
- * 		http://processors.wiki.ti.com/index.php/CC3000_Host_Programming_Guide
+ *     http://processors.wiki.ti.com/index.php/CC3000_Host_Driver_Porting_Guide
+ *     http://processors.wiki.ti.com/index.php/CC3000_Host_Programming_Guide
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -61,19 +61,15 @@
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* CC3000 Interfaces *********************************************************************/
+/* CC3000 Interfaces ********************************************************/
 
-/* Driver support **************************************************************************/
+/* Driver support ***********************************************************/
 /* This format is used to construct the /dev/input[n] device driver path.  It
  * defined here so that it will be used consistently in all places.
  */
 
-
-/********************************************************************************************
- * Public Types
- ********************************************************************************************/
 #define READ                    3
-#define READ_COMMAND		       {READ, 0 , 0 , 0 , 0}
+#define READ_COMMAND           {READ, 0 , 0 , 0 , 0}
 #define READ_OFFSET_TO_LENGTH   3 //cmd  dmy dmy lh  ll
 #define WRITE                   1
 
@@ -82,38 +78,44 @@
 
 #define SPI_HEADER_SIZE         (5)
 
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
 /* This structure describes the state of one CC3000 driver instance */
-typedef enum {
-		eSPI_STATE_POWERUP = 0,
-		eSPI_STATE_INITIALIZED,
-		eSPI_STATE_IDLE,
-		eSPI_STATE_WRITE_WAIT_IRQ,
-		eSPI_STATE_WRITE_PROCEED,
-		eSPI_STATE_WRITE_DONE,
-		eSPI_STATE_READ_IRQ,
-		eSPI_STATE_READ_PROCEED,
-		eSPI_STATE_READ_READY,
 
+typedef enum
+{
+  eSPI_STATE_POWERUP = 0,
+  eSPI_STATE_INITIALIZED,
+  eSPI_STATE_IDLE,
+  eSPI_STATE_WRITE_WAIT_IRQ,
+  eSPI_STATE_WRITE_PROCEED,
+  eSPI_STATE_WRITE_DONE,
+  eSPI_STATE_READ_IRQ,
+  eSPI_STATE_READ_PROCEED,
+  eSPI_STATE_READ_READY,
 } eDeviceStates;
 
 struct cc3000_dev_s
 {
 #ifdef CONFIG_CC3000_MULTIPLE
-  FAR struct cc3000_dev_s *flink;     /* Supports a singly linked list of drivers */
+  FAR struct cc3000_dev_s *flink;       /* Supports a singly linked list of drivers */
 #endif
+  pthread_t workertid;                  /* Handle for the worker thread */
   uint8_t crefs;                        /* Number of times the device has been opened */
   uint8_t nwaiters;                     /* Number of threads waiting for CC3000 data */
   uint8_t minor;                        /* minor */
   sem_t devsem;                         /* Manages exclusive access to this structure */
+  sem_t wrkwaitsem;                     /* Suspend and resume the delivery of messages */
   sem_t waitsem;                        /* Used to wait for the availability of data */
-  sem_t readysem;                        /* Used to wait for Ready Condition from the cc3000 */
+  sem_t irqsem;                         /* Used to signal irq from cc3000 */
+  sem_t readysem;                       /* Used to wait for Ready Condition from the cc3000 */
 
-  FAR struct cc3000_config_s *config; 	/* Board configuration data */
+  FAR struct cc3000_config_s *config;   /* Board configuration data */
   FAR struct spi_dev_s *spi;            /* Saved SPI driver instance */
-  struct work_s work;                   /* Supports the interrupt handling "bottom half" */
-  mqd_t	 queue;							/* For unsolicited data delivery */
-  eDeviceStates state;					/* The device state */
+  mqd_t queue;                          /* For unsolicited data delivery */
+  eDeviceStates state;                  /* The device state */
   uint8_t rx_buffer[CC3000_RX_BUFFER_SIZE];
   ssize_t rx_buffer_len;
 

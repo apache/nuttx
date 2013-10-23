@@ -59,6 +59,10 @@
 #  define spivdbg(x...)
 #endif
 
+/*****************************************************************************
+ * Private Types
+ *****************************************************************************/
+
 static struct
 {
   int cc3000fd;
@@ -66,6 +70,7 @@ static struct
   pthread_t unsoliced_thread;
   bool run;
   uint8_t rx_buffer[CC3000_RX_BUFFER_SIZE];
+  mqd_t  queue;
 
 } spiconf;
 
@@ -140,6 +145,27 @@ long SpiRead(uint8_t *pUserBuffer, uint16_t usLength)
 }
 
 /*****************************************************************************
+ * Name: SpiRead
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *
+ *****************************************************************************/
+
+uint8_t *SpiWait(void)
+{
+  int nbytes;
+  DEBUGASSERT(spiconf.cc3000fd);
+
+  nbytes = mq_receive(spiconf.queue, spiconf.rx_buffer, CC3000_RX_BUFFER_SIZE, 0);
+  return spiconf.rx_buffer;
+}
+
+/*****************************************************************************
  * Name: unsoliced_thread_func
  *
  * Description:
@@ -162,19 +188,20 @@ static void *unsoliced_thread_func(void *parameter)
 
   ioctl(spiconf.cc3000fd, CC3000IOC_GETQUEID, (unsigned long)&minor);
   snprintf(queuename, QUEUE_NAMELEN, QUEUE_FORMAT, minor);
-  mqd_t  queue = mq_open(queuename,O_RDONLY);
+  spiconf.queue = mq_open(queuename,O_RDONLY);
 
   while(spiconf.run)
     {
       memset(spiconf.rx_buffer,0,sizeof(spiconf.rx_buffer));
-      nbytes = mq_receive(queue, spiconf.rx_buffer, CC3000_RX_BUFFER_SIZE, 0);
+      nbytes = mq_receive(spiconf.queue, spiconf.rx_buffer, CC3000_RX_BUFFER_SIZE, 0);
       if (nbytes > 0)
         {
+          spivdbg("%d Processed\n",nbytes);
           spiconf.pfRxHandler(spiconf.rx_buffer);
         }
     }
 
-  mq_close(queue);
+  mq_close(spiconf.queue);
   pthread_exit((pthread_addr_t)status);
   return (pthread_addr_t)status;
 }
@@ -205,7 +232,12 @@ void SpiOpen(gcSpiHandleRx pfRxHandler)
       spiconf.cc3000fd = fd;
       spiconf.run = true;
 
-      status = pthread_create(&spiconf.unsoliced_thread,NULL,
+      pthread_attr_t attr;
+      struct sched_param param;
+      pthread_attr_init(&attr);
+      param.sched_priority = SCHED_PRIORITY_DEFAULT-10;
+      pthread_attr_setschedparam(&attr, &param);
+      status = pthread_create(&spiconf.unsoliced_thread, &attr,
                               unsoliced_thread_func, NULL);
       DEBUGASSERT(status == 0)
    }
@@ -227,15 +259,15 @@ void SpiOpen(gcSpiHandleRx pfRxHandler)
 
 void SpiClose(void)
 {
-   if (spiconf.cc3000fd)
-     {
-       int status;
-       spiconf.run = false;
+  if (spiconf.cc3000fd)
+    {
+      int status;
+      spiconf.run = false;
 
-       pthread_cancel(spiconf.unsoliced_thread);
-       pthread_join(spiconf.unsoliced_thread, (pthread_addr_t*)&status);
+      pthread_cancel(spiconf.unsoliced_thread);
+      pthread_join(spiconf.unsoliced_thread, (pthread_addr_t*)&status);
 
-       close(spiconf.cc3000fd);
-       spiconf.cc3000fd = 0;
-   }
+      close(spiconf.cc3000fd);
+      spiconf.cc3000fd = 0;
+    }
 }

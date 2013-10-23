@@ -36,8 +36,11 @@
  * Included Files
  ******************************************************************************/
 
+#include <nuttx/config.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
+#include <debug.h>
 
 #include <nuttx/wireless/cc3000/cc3000_common.h>
 #include <nuttx/wireless/cc3000/hci.h>
@@ -234,8 +237,7 @@ uint8_t *hci_event_handler(void *pRetParams, uint8_t *from, uint8_t *fromlen)
 
   while (1)
     {
-      if (tSLInformation.usEventOrDataReceived != 0)
-        {
+      if (tSLInformation.usEventOrDataReceived != 0) {
           pucReceivedData = (tSLInformation.pucReceivedData);
 
           if (*pucReceivedData == HCI_TYPE_EVNT)
@@ -363,13 +365,14 @@ uint8_t *hci_event_handler(void *pRetParams, uint8_t *from, uint8_t *fromlen)
 
                         if (((tBsdReadReturnParams *)pRetParams)->iNumberOfBytes ==
                             ERROR_SOCKET_INACTIVE)
-                        {
-                          set_socket_active_status
-                            (((tBsdReadReturnParams *)pRetParams)->iSocketDescriptor,SOCKET_STATUS_INACTIVE);
-                        }
+                          {
+                            set_socket_active_status
+                              (((tBsdReadReturnParams *)pRetParams)->iSocketDescriptor,
+                              SOCKET_STATUS_INACTIVE);
+                          }
                       }
                       break;
-  
+
                     case HCI_EVNT_SEND:
                     case HCI_EVNT_SENDTO:
                       {
@@ -435,7 +438,7 @@ uint8_t *hci_event_handler(void *pRetParams, uint8_t *from, uint8_t *fromlen)
                       pRetParams = ((char *)pRetParams) + 2;
                       memcpy((uint8_t *)pRetParams,
                              (char *)(pucReceivedParams +
-                               GET_SCAN_RESULTS_FRAME_TIME_OFFSET + 2),
+                             GET_SCAN_RESULTS_FRAME_TIME_OFFSET + 2),
                              GET_SCAN_RESULTS_SSID_MAC_LENGTH);
                       break;
 
@@ -902,7 +905,36 @@ void SimpleLinkWaitEvent(uint16_t usOpcode, void *pRetParams)
    */
 
   tSLInformation.usRxEventOpcode = usOpcode;
-  hci_event_handler(pRetParams, 0, 0);
+  nllvdbg("Looking for usOpcode 0x%x\n",usOpcode);
+  uint16_t event_type;
+
+  do
+    {
+      tSLInformation.pucReceivedData = SpiWait();
+      tSLInformation.usEventOrDataReceived = 1;
+      STREAM_TO_UINT16((char *)tSLInformation.pucReceivedData, HCI_EVENT_OPCODE_OFFSET,event_type);
+
+      if (*tSLInformation.pucReceivedData == HCI_TYPE_EVNT)
+        {
+        nllvdbg("Evtn:0x%x\n",event_type);
+      }
+
+      if (event_type != usOpcode)
+        {
+         if (hci_unsolicited_event_handler() == 1)
+           {
+             nllvdbg("Processed Event  0x%x want 0x%x\n",event_type, usOpcode);
+           }
+        }
+      else
+        {
+          nllvdbg("Processing usOpcode 0x%x\n",usOpcode);
+          hci_event_handler(pRetParams, 0, 0);
+        }
+    }
+  while(tSLInformation.usRxEventOpcode != 0);
+
+  nllvdbg("Done for usOpcode 0x%x\n",usOpcode);
 }
 
 /*****************************************************************************
@@ -928,6 +960,37 @@ void SimpleLinkWaitData(uint8_t *pBuf, uint8_t *from, uint8_t *fromlen)
    * after the end of current transaction, i.e. only after data will be received
    */
 
-  tSLInformation.usRxDataPending = 1;
-  hci_event_handler(pBuf, from, fromlen);
+  nllvdbg("Looking for Data\n");
+  uint16_t event_type;
+  uint16_t usOpcode = tSLInformation.usRxEventOpcode;
+
+  do
+    {
+      tSLInformation.pucReceivedData = SpiWait();
+      tSLInformation.usEventOrDataReceived = 1;
+
+      if (*tSLInformation.pucReceivedData == HCI_TYPE_DATA)
+        {
+          tSLInformation.usRxDataPending = 1;
+          hci_event_handler(pBuf, from, fromlen);
+          break;
+        }
+      else
+        {
+          STREAM_TO_UINT16((char *)tSLInformation.pucReceivedData, HCI_EVENT_OPCODE_OFFSET,event_type);
+          nllvdbg("Evtn:0x%x\n",event_type);
+
+          if (hci_unsolicited_event_handler() == 1)
+            {
+              nllvdbg("Processed Event  0x%x want Data! Opcode 0x%x\n",event_type, usOpcode);
+            }
+          else
+            {
+              nllvdbg("!!!!!usOpcode 0x%x\n",usOpcode);
+            }
+        }
+    }
+  while(*tSLInformation.pucReceivedData == HCI_TYPE_EVNT);
+
+  nllvdbg("Done for Data 0x%x\n",usOpcode);
 }

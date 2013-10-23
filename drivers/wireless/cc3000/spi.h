@@ -44,6 +44,7 @@ typedef void (*gcSpiHandleRx)(void *p);
 void SpiOpen(gcSpiHandleRx pfRxHandler);
 void SpiClose(void);
 long SpiWrite(uint8_t *pUserBuffer, uint16_t usLength);
+uint8_t *SpiWait(void);
 long SpiRead(uint8_t *pUserBuffer, uint16_t usLength);
 void SpiResumeSpi(void);
 int CC3000InterruptHandler(int irq, void *context);
