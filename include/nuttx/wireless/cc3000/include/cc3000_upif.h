@@ -80,7 +80,7 @@
  * See http://processors.wiki.ti.com/index.php/CC3000_Serial_Port_Interface_(SPI)
  */
 
-#  define CONFIG_CC3000_SPIMODE SPIDEV_MODE0
+#  define CONFIG_CC3000_SPIMODE SPIDEV_MODE1
 #endif
 
 /* Check for some required settings.  This can save the user a lot of time
@@ -91,9 +91,6 @@
 #  error "Signals are required.  CONFIG_DISABLE_SIGNALS must not be selected."
 #endif
 
-#ifndef CONFIG_SCHED_WORKQUEUE
-#  error "Work queue support required.  CONFIG_SCHED_WORKQUEUE must be selected."
-#endif
 
 /****************************************************************************
  * Public Types
@@ -146,7 +143,8 @@ struct cc3000_config_s
   void (*irq_clear)(FAR struct cc3000_config_s *state);
   void (*power_enable)(FAR struct cc3000_config_s *state,bool enable);
   void (*chip_select)(FAR struct cc3000_config_s *state,bool enable);
-  bool (*busy)(FAR struct cc3000_config_s *state);
+  bool (*irq_read)(FAR struct cc3000_config_s *state);
+
 };
 
 /****************************************************************************

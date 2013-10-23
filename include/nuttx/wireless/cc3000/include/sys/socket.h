@@ -39,6 +39,9 @@
  * Pre-processor Definitions
  *****************************************************************************/
 
+#define CC3000_SOCKETS                /* Indicate using CC3000 sockets */
+#define CC3000_SOCKETS_ST             /* Indicate single threaded version */
+
 #define HOSTNAME_MAX_LENGTH    (230)  /* 230 bytes + header shouldn't exceed 8
                                        * bit value */
 
@@ -46,6 +49,10 @@
 
 #define  AF_INET                2
 #define  AF_INET6               23
+
+#define PF_INET                AF_INET  /* IPv4 Internet protocols */
+#define PF_INET6               AF_INET6 /* IPv6 Internet protocols */
+
 
 /*------------ Socket Types ------------*/
 
@@ -112,12 +119,12 @@
  *   the array isn't too big.
  */
 
-#define __FD_ZERO(set)                               \
-  do {                                                \
-    unsigned int __i;                                 \
-    TICC3000fd_set *__arr = (set);                            \
+#define __FD_ZERO(set) \
+  do { \
+    unsigned int __i; \
+    TICC3000fd_set *__arr = (set); \
     for (__i = 0; __i < sizeof (TICC3000fd_set) / sizeof (__fd_mask); ++__i) \
-      __FDS_BITS (__arr)[__i] = 0;                    \
+      __FDS_BITS (__arr)[__i] = 0; \
   } while (0)
 #define __FD_SET(d, set)       (__FDS_BITS (set)[__FDELT (d)] |= __FDMASK (d))
 #define __FD_CLR(d, set)       (__FDS_BITS (set)[__FDELT (d)] &= ~__FDMASK (d))
@@ -149,11 +156,11 @@
 /* mDNS port - 5353    mDNS multicast address - 224.0.0.251 */
 
 #define SET_mDNS_ADD(sockaddr)            sockaddr.sa_data[0] = 0x14; \
-                                                sockaddr.sa_data[1] = 0xe9; \
-                                                sockaddr.sa_data[2] = 0xe0; \
-                                                sockaddr.sa_data[3] = 0x0; \
-                                                sockaddr.sa_data[4] = 0x0; \
-                                                sockaddr.sa_data[5] = 0xfb;
+                                          sockaddr.sa_data[1] = 0xe9; \
+                                          sockaddr.sa_data[2] = 0xe0; \
+                                          sockaddr.sa_data[3] = 0x0; \
+                                          sockaddr.sa_data[4] = 0x0; \
+                                          sockaddr.sa_data[5] = 0xfb;
 
 /*****************************************************************************
  * Public Types
@@ -164,7 +171,7 @@ typedef struct _in_addr_t
     unsigned long s_addr;                   /* load with inet_aton() */
 } in_addr;
 
-typedef struct _sockaddr_t
+typedef struct sockaddr
 {
     uint16_t   sa_family;
     uint8_t    sa_data[14];
