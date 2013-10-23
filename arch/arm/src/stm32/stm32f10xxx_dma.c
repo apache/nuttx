@@ -457,10 +457,19 @@ void stm32_dmafree(DMA_HANDLE handle)
  *
  ****************************************************************************/
 
-void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t ntransfers, uint32_t ccr)
+void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr,
+                    size_t ntransfers, uint32_t ccr)
 {
   struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
   uint32_t regval;
+
+  /* Then DMA_CNDTRx register can only be modified if the DMA channel is
+   * disabled.
+   */
+
+  regval  = dmachan_getreg(dmach, STM32_DMACHAN_CCR_OFFSET);
+  regval &= ~(DMA_CCR_EN);
+  dmachan_putreg(dmach, STM32_DMACHAN_CCR_OFFSET, regval);
 
   /* Set the peripheral register address in the DMA_CPARx register. The data
    * will be moved from/to this address to/from the memory after the
@@ -508,7 +517,8 @@ void stm32_dmasetup(DMA_HANDLE handle, uint32_t paddr, uint32_t maddr, size_t nt
  *
  ****************************************************************************/
 
-void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool half)
+void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback,
+                    void *arg, bool half)
 {
   struct stm32_dma_s *dmach = (struct stm32_dma_s *)handle;
   uint32_t ccr;
@@ -542,7 +552,6 @@ void stm32_dmastart(DMA_HANDLE handle, dma_callback_t callback, void *arg, bool 
        */
 
       ccr |= (half ? (DMA_CCR_HTIE|DMA_CCR_TEIE) : (DMA_CCR_TCIE|DMA_CCR_TEIE));
-
     }
   else
     {
