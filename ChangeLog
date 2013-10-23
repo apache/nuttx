@@ -5850,4 +5850,8 @@
 	  (2013-10-23).
 	* include/nuttx/wireless/cc3000:  More CC3000 driver updates from David
 	  Sidrane (2013-10-23).
+	* net/Kconfig, drivers/net/wireless/cc3000/Kconfig, and Kconfig:  Add
+	  ARCH_HAVE_NET that determines if a network is present or not.  This
+	  currently can happen if CONFIG_NET is set or if CONFIG_WL_CC3000 is
+	  is set (23013-10-23).
 

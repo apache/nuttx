@@ -352,7 +352,7 @@ config DEBUG_PAGING
 config DEBUG_NET
 	bool "Network Debug Output"
 	default n
-	depends on NET
+	depends on ARCH_HAVE_NET
 	---help---
 		Enable network debug SYSLOG output (disabled by default)
 

@@ -3,14 +3,20 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-config NET
-	bool "Networking support"
+config ARCH_HAVE_NET
+	bool
 	default n
-	---help---
-		Enable or disable all network features
 
 config ARCH_HAVE_PHY
 	bool
+	default n
+
+config NET
+	bool "Networking support"
+	default n
+	select ARCH_HAVE_NET
+	---help---
+		Enable or disable all network features
 
 if NET
 

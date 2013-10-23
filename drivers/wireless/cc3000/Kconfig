@@ -7,6 +7,7 @@ config WL_CC3000
 	bool "CC3000 Wireless Module"
 	default n
 	select SPI
+	select ARCH_HAVE_NET
 	---help---
 		Enable support for the TI CC3000 Wifi Module
 
