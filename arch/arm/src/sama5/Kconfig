@@ -5,7 +5,7 @@
 
 if ARCH_CHIP_SAMA5
 
-comment "ATSAMA5 Configuration Options"
+comment "SAMA5 Configuration Options"
 
 # Chip Capabilities
 
@@ -87,7 +87,7 @@ config ARCH_CHIP_ATSAMA5D35
 
 endchoice # Atmel AT91SAMA5 Chip Selection
 
-menu "ATSAMA5 Peripheral Support"
+menu "SAMA5 Peripheral Support"
 
 config SAMA5_DBGU
 	bool "Debug Unit Interrupt (DBGU)"
@@ -292,7 +292,7 @@ config SAMA5_MPDDRC
 	bool "MPDDR controller (MPDDRC)"
 	default n
 
-endmenu # ATSAMA5 Peripheral Support
+endmenu # SAMA5 Peripheral Support
 
 config SAMA5_PIO_IRQ
 	bool "PIO pin interrupts"
