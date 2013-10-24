@@ -164,7 +164,7 @@ void sam_tc_stop(TC_HANDLE handle);
  *
  * Description:
  *    Set TC_RA, TC_RB, or TC_RB using the provided divisor.  The actual
- *    setting in the regsiter will be the TC input frequency divided by
+ *    setting in the register will be the TC input frequency divided by
  *    the provided divider (which should derive from the divider returned
  *    by sam_tc_divider).
  *    

@@ -657,7 +657,7 @@ static uint8_t sam_channel(uint8_t pid, const struct sam_pidmap_s *table,
         }
     }
 
-  fdbg("No channel found for pid %d\n", pid);
+  dmadbg("No channel found for pid %d\n", pid);
   DEBUGPANIC();
   return 0x3f;
 }
