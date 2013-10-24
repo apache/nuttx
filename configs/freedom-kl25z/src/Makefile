@@ -40,7 +40,11 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS = 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = kl_boardinitialize.c kl_wifi.c
+CSRCS = kl_boardinitialize.c
+
+ifeq ($(CONFIG_WL_CC3000),y)
+CSRCS += kl_wifi.c
+endif
 
 ifeq ($(CONFIG_KL_TSI),y)
 CSRCS += kl_tsi.c
