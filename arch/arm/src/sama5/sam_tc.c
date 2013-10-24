@@ -56,6 +56,7 @@
 #include <semaphore.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include <arch/board/board.h>
 
@@ -90,6 +91,21 @@
 #  error Cannot realize TC input frequency
 #endif
 
+/* Timer debug is enabled if any timer client is enabled */
+
+#undef DEBUG_TC
+#if defined(CONFIG_SAMA5_ADC)
+#  define DEBUG_TC 1
+#endif
+
+#ifdef DEBUG_TC
+#  define tcdbg    dbg
+#  define tcvdbg   vdbg
+#else
+#  define wddbg(x...)
+#  define wdvdbg(x...)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -110,6 +126,7 @@ struct sam_tcconfig_s
   uintptr_t base;          /* TC register base address */
   uint8_t pid;             /* Peripheral ID */
   uint8_t chfirst;         /* First channel number */
+  uint8_t tc;              /* Timer/counter number */
 
   /* Channels */
 
@@ -191,6 +208,7 @@ static const struct sam_tcconfig_s g_tc012config =
   .base    = SAM_TC012_VBASE,
   .pid     = SAM_PID_TC0,
   .chfirst = 0,
+  .tc      = 0,
   .channel =
   {
     {
@@ -257,6 +275,7 @@ static const struct sam_tcconfig_s g_tc345config =
   .base    = SAM_TC345_VBASE,
   .pid     = SAM_PID_TC1,
   .chfirst = 3,
+  .tc      = 1,
   .channel =
   {
     {
@@ -586,7 +605,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
   /* Select the timer/counter and get the index associated with the
    * channel.
    */
- 
+
 #ifdef CONFIG_SAMA5_TC0
   if (channel >= 0 && channel < 3)
     {
@@ -627,6 +646,8 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
       for (i = 0, ch = tcconfig->chfirst; i < SAM_TC_NCHANNELS; i++)
         {
+          tcdbg("Initializing TC%d\n", tcconfig->tc);
+
           /* Initialize the channel data structure */
 
           chan       = &tc->channel[i];
@@ -688,11 +709,16 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       /* No.. return a failure */
 
+      tcdbg("Channel %d is in-used\n", channel);
       sam_givesem(tc);
       return NULL;
     }
 
-  /* OK.. return the channel with the semaphore locked */
+  /* Mark the channel "inuse" */
+
+  chan->inuse = true;
+
+  /* And return the channel with the semaphore locked */
 
   return chan;
 }
@@ -716,7 +742,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
  *   On success, a non-NULL handle value is returned.  This handle may be
  *   used with subsequent timer/counter interfaces to manage the timer.  A
  *   NULL handle value is returned on a failure.
- *   
+ *
  ****************************************************************************/
 
 TC_HANDLE sam_tc_allocate(int channel, int mode)
@@ -726,6 +752,8 @@ TC_HANDLE sam_tc_allocate(int channel, int mode)
   /* Initialize the timer/counter data (if necessary) and get exclusive
    * access to the requested channel.
    */
+
+  tcvdbg("channel=%d mode=%08x\n", channel, mode);
 
   chan = sam_tc_initialize(channel);
   if (chan)
@@ -749,6 +777,7 @@ TC_HANDLE sam_tc_allocate(int channel, int mode)
 
   /* Return an opaque reference to the channel */
 
+  tcvdbg("Returning %p\n", chan);
   return (TC_HANDLE)chan;
 }
 
@@ -763,12 +792,14 @@ TC_HANDLE sam_tc_allocate(int channel, int mode)
  *
  * Returned Value:
  *   None
- *   
+ *
  ****************************************************************************/
 
 void sam_tc_free(TC_HANDLE handle)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
+
+  tcvdbg("Freeing %p channel=%d inuse=%d\n", chan, chan->chan, chan->inuse);
   DEBUGASSERT(chan && chan->inuse);
 
   /* Make sure that the channel is stopped */
@@ -776,7 +807,7 @@ void sam_tc_free(TC_HANDLE handle)
   sam_tc_stop(handle);
 
   /* Mark the channel as available */
- 
+
   chan->inuse = false;
 }
 
@@ -791,14 +822,16 @@ void sam_tc_free(TC_HANDLE handle)
  *   handle Channel handle previously allocated by sam_tc_allocate()
  *
  * Returned Value:
- *   
+ *
  ****************************************************************************/
 
 void sam_tc_start(TC_HANDLE handle)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
 
+  tcvdbg("Starting channel %d inuse=%d\n", chan->chan, chan->inuse);
   DEBUGASSERT(chan && chan->inuse);
+
   sam_chan_putreg(chan, SAM_TC_CCR_OFFSET, TC_CCR_CLKEN | TC_CCR_SWTRG);
 }
 
@@ -812,14 +845,16 @@ void sam_tc_start(TC_HANDLE handle)
  *   handle Channel handle previously allocated by sam_tc_allocate()
  *
  * Returned Value:
- *   
+ *
  ****************************************************************************/
 
 void sam_tc_stop(TC_HANDLE handle)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
 
+  tcvdbg("Stopping channel %d inuse=%d\n", chan->chan, chan->inuse);
   DEBUGASSERT(chan && chan->inuse);
+
   sam_chan_putreg(chan, SAM_TC_CCR_OFFSET, TC_CCR_CLKDIS);
 }
 
@@ -828,10 +863,9 @@ void sam_tc_stop(TC_HANDLE handle)
  *
  * Description:
  *    Set TC_RA, TC_RB, or TC_RB using the provided divisor.  The actual
- *    setting in the regsiter will be the TC input frequency divided by
+ *    setting in the register will be the TC input frequency divided by
  *    the provided divider (which should derive from the divider returned
  *    by sam_tc_divider).
- *    
  *
  * Input Parameters:
  *   handle Channel handle previously allocated by sam_tc_allocate()
@@ -844,9 +878,15 @@ void sam_tc_stop(TC_HANDLE handle)
 void sam_tc_setregister(TC_HANDLE handle, int reg, unsigned int div)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
+  uint32_t regval;
+
   DEBUGASSERT(reg < TC_NREGISTERS);
 
-  sam_chan_putreg(chan, g_regoffset[reg], TC_FREQUENCY / div);
+  regval = TC_FREQUENCY / div;
+  tcvdbg("Channel %d: Set register %d to %d / %d = %d\n",
+         chan->chan, reg, TC_FREQUENCY, div, (unsigned int)regval);
+
+  sam_chan_putreg(chan, g_regoffset[reg], regval);
 }
 
 /****************************************************************************
@@ -855,7 +895,6 @@ void sam_tc_setregister(TC_HANDLE handle, int reg, unsigned int div)
  * Description:
  *   Return the timer input frequency, that is, the MCK frequency divided
  *   down so that the timer/counter is driven within its maximum frequency.
- *   This value needed for 
  *
  * Input Parameters:
  *   None
@@ -899,6 +938,8 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
 {
   int ndx = 0;
 
+  tcvdbg("frequency=%d\n", frequency);
+
   /* Satisfy lower bound */
 
   while (frequency < (g_divfreq[ndx] >> 16))
@@ -907,6 +948,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
         {
           /* If no divisor can be found, return -ERANGE */
 
+          tcdbg("Lower bound search failed\n");
           return -ERANGE;
         }
     }
@@ -925,6 +967,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
 
   if (div)
     {
+      tcvdbg("return div=%d\n", g_divider[ndx]);
       *div = g_divider[ndx];
     }
 
@@ -932,6 +975,7 @@ int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks)
 
   if (tcclks)
     {
+      tcvdbg("return tcclks=%d\n", ndx);
       *tcclks = ndx;
     }
 
