@@ -41,12 +41,12 @@
 
 #include <stdint.h>
 #include <arch/board/board.h>
-#include "p207-internal.h"
+#include "olimex-stm32-p207.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -91,7 +91,7 @@ void up_buttoninit(void)
 {
   int i;
 
-  /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are 
+  /* Configure the GPIO pins as inputs.  NOTE that EXTI interrupts are
    * configured for all pins.
    */
 
@@ -108,23 +108,44 @@ void up_buttoninit(void)
 uint8_t up_buttons(void)
 {
   uint8_t ret = 0;
-  
+
   /* Check that state of each key */
-  if(!stm32_gpioread(g_buttons[BUTTON_TAMPER]))
-    ret |= BUTTON_TAMPER_BIT;
-  if(stm32_gpioread(g_buttons[BUTTON_WKUP]))
-    ret |= BUTTON_WKUP_BIT;
-  if(stm32_gpioread(g_buttons[BUTTON_RIGHT]))
-    ret |= BUTTON_RIGHT_BIT;
-  if(stm32_gpioread(g_buttons[BUTTON_UP]))
-    ret |= BUTTON_UP_BIT;
-  if(stm32_gpioread(g_buttons[BUTTON_LEFT]))
-    ret |= BUTTON_LEFT_BIT;
-  if(stm32_gpioread(g_buttons[BUTTON_DOWN]))
-    ret |= BUTTON_DOWN_BIT;
-  if(stm32_gpioread(g_buttons[BUTTON_CENTER]))
-    ret |= BUTTON_CENTER_BIT;
-  
+
+  if (!stm32_gpioread(g_buttons[BUTTON_TAMPER]))
+    {
+      ret |= BUTTON_TAMPER_BIT;
+    }
+
+  if (stm32_gpioread(g_buttons[BUTTON_WKUP]))
+    {
+      ret |= BUTTON_WKUP_BIT;
+    }
+
+  if (stm32_gpioread(g_buttons[BUTTON_RIGHT]))
+    {
+      ret |= BUTTON_RIGHT_BIT;
+    }
+
+  if (stm32_gpioread(g_buttons[BUTTON_UP]))
+    {
+      ret |= BUTTON_UP_BIT;
+    }
+
+  if (stm32_gpioread(g_buttons[BUTTON_LEFT]))
+    {
+      ret |= BUTTON_LEFT_BIT;
+    }
+
+  if (stm32_gpioread(g_buttons[BUTTON_DOWN]))
+    {
+      ret |= BUTTON_DOWN_BIT;
+    }
+
+  if (stm32_gpioread(g_buttons[BUTTON_CENTER]))
+    {
+      ret |= BUTTON_CENTER_BIT;
+    }
+
   return ret;
 }
 
@@ -162,6 +183,7 @@ xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
     {
       oldhandler = stm32_gpiosetevent(g_buttons[id], true, true, true, irqhandler);
     }
+
   return oldhandler;
 }
 #endif

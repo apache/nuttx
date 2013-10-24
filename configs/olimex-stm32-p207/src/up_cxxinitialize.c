@@ -152,4 +152,3 @@ void up_cxxinitialize(void)
 }
 
 #endif /* CONFIG_HAVE_CXX && CONFIG_HAVE_CXXINITIALIZE */
-

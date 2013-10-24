@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 #include "chip.h"
 #include "stm32_adc.h"
-#include "p207-internal.h"
+#include "olimex-stm32-p207.h"
 
 #ifdef CONFIG_ADC
 
@@ -54,7 +54,7 @@
  * Definitions
  ************************************************************************************/
 
-/* Configuration ************************************************************/
+/* Configuration ********************************************************************/
 /* Up to 3 ADC interfaces are supported */
 
 #if STM32_NADC < 3
@@ -81,7 +81,7 @@
 /************************************************************************************
  * Private Data
  ************************************************************************************/
-/* The Olimex STM32-P207 has a 10 Kohm potentiometer AN_TR connected to PC0 
+/* The Olimex STM32-P207 has a 10 Kohm potentiometer AN_TR connected to PC0
  * ADC123_IN10
  */
 
@@ -117,13 +117,13 @@ int adc_devinit(void)
   return stm32_adc_initialize();
 }
 
-/****************************************************************************************************
+/************************************************************************************
  * Name: stm32_adc_initialize
  *
  * Description:
  *   Called at application startup time to initialize the ADC functionality.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 int stm32_adc_initialize(void)
 {

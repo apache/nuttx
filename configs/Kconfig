@@ -57,7 +57,7 @@ config ARCH_BOARD_CLOUDCTRL
 	bool "Darcy's CloudController stm32f10x board"
 	depends on ARCH_CHIP_STM32F107VC
 	---help---
-		Small network relay development board. Based on the Shenzhou IV development 
+		Small network relay development board. Based on the Shenzhou IV development
 		board design.
 
 config ARCH_BOARD_COMPALE86
@@ -359,7 +359,7 @@ config ARCH_BOARD_NUTINY_NUC120
 	depends on ARCH_CHIP_NUC120LE3AN
 	select ARCH_HAVE_LEDS
 	---help---
-		This is the port to the Nuvoton NuTiny EVB 120 board.  This board uses a 
+		This is the port to the Nuvoton NuTiny EVB 120 board.  This board uses a
 		Nuvoton NUC120 chip, specifically the NUC120LE3AN.  See http://www.nuvoton.com/
 		for further information.
 
@@ -390,6 +390,17 @@ config ARCH_BOARD_OLIMEX_STM32P107
 		This port uses the Olimex STM32 P107 board and a GNU arm-nuttx-elf toolchain* under
 		Linux or Cygwin. See the http://www.olimex.com for further information. This
 		board features the STMicro STM32F107VC MCU
+
+config ARCH_BOARD_OLIMEX_STM32P207
+	bool "Olimex STM32 P207 board"
+	depends on ARCH_CHIP_STM32F207ZE
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This port uses the Olimex STM32 P207 board and a GNU arm-nuttx-elf toolchain* under
+		Linux or Cygwin. See the http://www.olimex.com for further information. This
+		 board features the STMicro STM32F207ZE MCU
 
 config ARCH_BOARD_OPEN1788
 	bool "Wave Share Open1788"
@@ -829,6 +840,7 @@ config ARCH_BOARD
 	default "olimex-lpc1766stk"   if ARCH_BOARD_LPC1766STK
 	default "olimex-lpc2378"      if ARCH_BOARD_OLIMEXLPC2378
 	default "olimex-stm32-p107"   if ARCH_BOARD_OLIMEX_STM32P107
+	default "olimex-stm32-p207"   if ARCH_BOARD_OLIMEX_STM32P207
 	default "olimex-strp711"      if ARCH_BOARD_OLIMEX_STRP711
 	default "open1788"            if ARCH_BOARD_OPEN1788
 	default "p112"                if ARCH_BOARD_P112
@@ -1042,6 +1054,9 @@ source "configs/olimex-lpc2378/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32P107
 source "configs/olimex-stm32-p107/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_STM32P207
+source "configs/olimex-stm32-p207/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STRP711
 source "configs/olimex-strp711/Kconfig"

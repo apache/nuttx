@@ -54,7 +54,7 @@
 #endif
 
 #include "stm32.h"
-#include "p207-internal.h"
+#include "olimex-stm32-p207.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -133,20 +133,20 @@ int nsh_archinitialize(void)
 #if defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR) || defined(CONFIG_ADC)
   int ret;
 #endif
-  
+
 #if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
   /* Configure on-board CAN if CAN support has been selected. */
-  
+
   ret = stm32_can_initialize();
   if (ret != OK)
     {
       message("nsh_archinitialize: Failed to initialize CAN: %d\n", ret);
     }
 #endif
-  
+
 #ifdef CONFIG_ADC
   /* Configure on-board ADCs if ADC support has been selected. */
-  
+
   ret = stm32_adc_initialize();
   if (ret != OK)
     {

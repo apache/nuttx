@@ -45,7 +45,7 @@
 #include <debug.h>
 #include <arch/board/board.h>
 #include "stm32.h"
-#include "p207-internal.h"
+#include "olimex-stm32-p207.h"
 
 #ifndef CONFIG_ARCH_LEDS
 
@@ -70,7 +70,7 @@
  ****************************************************************************/
 /* This array maps an LED number to GPIO pin configuration */
 
-static uint32_t g_ledcfg[BOARD_NLEDS] = 
+static uint32_t g_ledcfg[BOARD_NLEDS] =
 {
   GPIO_LED1, GPIO_LED2, GPIO_LED3, GPIO_LED4
 };
@@ -79,16 +79,13 @@ static uint32_t g_ledcfg[BOARD_NLEDS] =
  * Private Function Protototypes
  ****************************************************************************/
 
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
 
 /****************************************************************************
  * Public Functions
