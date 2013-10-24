@@ -482,11 +482,7 @@ static struct sam_adc_s g_adcpriv;
 #ifdef SAMA5_ADC_HAVE_CHANNELS
 /* ADC device instance */
 
-static struct adc_dev_s g_adcdev =
-{
-  .ad_ops      = &g_adcops,
-  .ad_priv     = &g_adcpriv,
-};
+static struct adc_dev_s g_adcdev;
 #endif
 
 /****************************************************************************
@@ -1432,9 +1428,9 @@ static void sam_adc_offset(struct sam_adc_s *priv)
 
 static void sam_adc_gain(struct sam_adc_s *priv)
 {
+#ifdef CONFIG_SAMA5_ADC_ANARCH
   uint32_t regval;
 
-#ifdef CONFIG_SAMA5_ADC_ANARCH
   /* Set the gain for each enabled channel */
 
   regval = 0;
@@ -1724,7 +1720,7 @@ static void sam_adc_channels(struct sam_adc_s *priv)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_adcinitialize
+ * Name: sam_adc_initialize
  *
  * Description:
  *   Initialize the adc
@@ -1734,7 +1730,7 @@ static void sam_adc_channels(struct sam_adc_s *priv)
  *
  ****************************************************************************/
 
-struct sam_adc_s *sam_adc_initialize(void)
+struct adc_dev_s *sam_adc_initialize(void)
 {
   struct sam_adc_s *priv = &g_adcpriv;
   uint32_t regval;
@@ -1793,7 +1789,12 @@ struct sam_adc_s *sam_adc_initialize(void)
       sam_configpio(PIO_ADC_TRG);
 #endif
 
-      /* Initialize the ADC device data structure */
+      /* Initialize the public ADC device data structure */
+
+      g_adcdev.ad_ops  = &g_adcops;
+      g_adcdev.ad_priv = &priv;
+
+      /* Initialize the private ADC device data structure */
 
       sem_init(&priv->exclsem,  0, 1);
       priv->dev = &g_adcdev;
@@ -1872,7 +1873,7 @@ struct sam_adc_s *sam_adc_initialize(void)
 
   /* Return a pointer to the device structure */
 
-  return priv;
+  return &g_adcdev;
 }
 
 /****************************************************************************
