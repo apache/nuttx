@@ -5871,4 +5871,6 @@
 	  (2013-10-24).
 	* configs/olimex-stm32-p207 and other files:  Support for the Olimex
 	  STM32 P207 board added by Martin Lederhilger (2017-10-24).
-
+	* arch/arm/src/sama5/sam_adc.c, sam_tc.c and sam_tc.h:  Hook in the
+	  timer/counter logic so that it can driver periodic ADC sampling
+	  (2013-10-24).

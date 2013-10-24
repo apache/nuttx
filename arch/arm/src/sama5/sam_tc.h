@@ -62,11 +62,17 @@
 #define TC_CHAN4     4
 #define TC_CHAN5     5
 
+/* Register identifier used with sam_tc_setregister */
+
+#define TC_REGA      0
+#define TC_REGB      1
+#define TC_REGC      2
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-typedef void *TCHANDLE;
+typedef void *TC_HANDLE;
 
 /****************************************************************************
  * Public Data
@@ -104,7 +110,7 @@ extern "C"
  *   
  ****************************************************************************/
 
-TCHANDLE sam_tc_allocate(int channel, int mode);
+TC_HANDLE sam_tc_allocate(int channel, int mode);
 
 /****************************************************************************
  * Name: sam_tc_free
@@ -120,7 +126,7 @@ TCHANDLE sam_tc_allocate(int channel, int mode);
  *   
  ****************************************************************************/
 
-void sam_tc_free(TCHANDLE handle);
+void sam_tc_free(TC_HANDLE handle);
 
 /****************************************************************************
  * Name: sam_tc_start
@@ -136,7 +142,7 @@ void sam_tc_free(TCHANDLE handle);
  *   
  ****************************************************************************/
 
-void sam_tc_start(TCHANDLE handle);
+void sam_tc_start(TC_HANDLE handle);
 
 /****************************************************************************
  * Name: sam_tc_stop
@@ -151,7 +157,44 @@ void sam_tc_start(TCHANDLE handle);
  *   
  ****************************************************************************/
 
-void sam_tc_stop(TCHANDLE handle);
+void sam_tc_stop(TC_HANDLE handle);
+
+/****************************************************************************
+ * Name: sam_tc_setregister
+ *
+ * Description:
+ *    Set TC_RA, TC_RB, or TC_RB using the provided divisor.  The actual
+ *    setting in the regsiter will be the TC input frequency divided by
+ *    the provided divider (which should derive from the divider returned
+ *    by sam_tc_divider).
+ *    
+ *
+ * Input Parameters:
+ *   handle Channel handle previously allocated by sam_tc_allocate()
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sam_tc_setregister(TC_HANDLE handle, int reg, unsigned int div);
+
+/****************************************************************************
+ * Name: sam_tc_frequency
+ *
+ * Description:
+ *   Return the timer input frequency, that is, the MCK frequency divided
+ *   down so that the timer/counter is driven within its maximum frequency.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *  The timer input frequency.
+ *
+ ****************************************************************************/
+
+uint32_t sam_tc_frequency(void);
 
 /****************************************************************************
  * Name: sam_tc_divisor
@@ -160,17 +203,17 @@ void sam_tc_stop(TCHANDLE handle);
  *   Finds the best MCK divisor given the timer frequency and MCK.  The
  *   result is guaranteed to satisfy the following equation:
  *
- *     (MCK / (DIV * 65536)) <= freq <= (MCK / DIV)
+ *     (Ftc / (div * 65536)) <= freq <= (Ftc / dev)
  *
- *   with DIV being the highest possible value.
+ *   where:
+ *     freq - the desitred frequency
+ *     Ftc  - The timer/counter input frequency
+ *     div  - With DIV being the highest possible value.
  *
  * Input Parameters:
- *
  *   frequency  Desired timer frequency.
- *   mck        Master clock frequency.
  *   div        Divisor value.
  *   tcclks     TCCLKS field value for divisor.
- *   boardmck   Board clock frequency.
  *
  * Returned Value:
  *   Zero (OK) if a proper divisor has been found, otherwise a negated errno
@@ -178,8 +221,7 @@ void sam_tc_stop(TCHANDLE handle);
  *
  ****************************************************************************/
 
-uint32_t sam_tc_divisor(uint32_t frequency, uint32_t mck, uint32_t *div,
-                        uint32_t *tcclks, uint32_t boardmck);
+int sam_tc_divisor(uint32_t frequency, uint32_t *div, uint32_t *tcclks);
 
 #undef EXTERN
 #ifdef __cplusplus

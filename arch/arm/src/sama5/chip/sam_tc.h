@@ -46,6 +46,10 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+#define SAM_TC_NCHANNELS         3          /* Number of channels per TC peripheral */
+#define SAM_TC_MAXPERCLK         66000000   /* Maximum peripheral input clock frequency */
+
 /* TC Register Offsets **************************************************************/
 
 #define SAM_TC_CHAN_OFFSET(n)    ((n) << 6) /* Channel n offset */

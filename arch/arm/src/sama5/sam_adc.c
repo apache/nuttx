@@ -71,6 +71,7 @@
 #include "chip/sam_pmc.h"
 #include "sam_periphclks.h"
 #include "sam_dmac.h"
+#include "sam_tc.h"
 #include "sam_tsd.h"
 #include "sam_adc.h"
 
@@ -379,6 +380,9 @@ struct sam_adc_s
 #ifdef CONFIG_SAMA5_ADC_DMA
   DMA_HANDLE dma;        /* Handle for DMA channel */
 #endif
+#ifdef CONFIG_SAMA5_ADC_TIOATRIG
+  TC_HANDLE tc;          /* Handle for the timer channel */
+#endif
 
   /* DMA sample data buffer */
 
@@ -435,6 +439,10 @@ static int  sam_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg);
 
 /* Initialization/Configuration */
 
+#ifdef CONFIG_SAMA5_ADC_TIOATRIG
+static void sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
+                          int channel, boot tioa);
+#endif
 static void sam_adc_trigger(struct sam_adc_s *priv);
 static void sam_adc_autocalibrate(struct sam_adc_s *priv);
 static void sam_adc_offset(struct sam_adc_s *priv);
@@ -878,6 +886,12 @@ static void sam_adc_reset(struct adc_dev_s *dev)
 
   dma_stop(priv->dma);
 
+  /* Stop an release any timer */
+
+#ifdef CONFIG_SAMA5_ADC_TIOATRIG
+  sam_adc_freetimer(priv);
+#endif
+
   /* Disable all EOC interrupts */
 
   sam_adc_putreg(priv, SAM_ADC_IDR, ADC_INT_EOCALL);
@@ -1068,6 +1082,85 @@ static int sam_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: sam_adc_settimer
+ *
+ * Description:
+ *   Configure a timer to trigger the sampling periodically
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_ADC_TIOATRIG
+static void sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
+                             int channel)
+{
+  uint32_t div;
+  uint32_t tcclks;
+
+  /* Configure TC for a 1Hz frequency and trigger on RC compare. */
+
+  ret = sam_tc_divisor(frequency, &div, &tcclks);
+  if (ret < 0)
+    {
+      adbg("ERROR: sam_tc_divisor failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Set the timer/counter waveform mode the the clock input slected by
+   * sam_tc_divisor()
+   */
+
+  mode = ((tcclks << TC_CMR_TCCLKS_SHIFT) |  /* Use selected TCCLKS value */
+          TC_CMR_WAVSEL_UPRC |               /* UP mode w/ trigger on RC Compare */
+          TC_CMR_WAVE |                      /* Wave mode */
+          TC_CMR_ACPA_CLEAR |                /* RA Compare Effect on TIOA: Clear */
+          TC_CMR_ACPC_SET);                  /* RC effect on TIOA: Set
+
+  /* Now allocate and configure the channel */
+
+  priv->tc = sam_tc_allocate(channel, mode);
+  if (!priv->tc)
+    {
+      adbg("ERROR: Failed to allocate channel %d mode %08x\n", channel, mode);
+      return -EINVAL;
+    }
+ 
+  /* Set up TC_RA and TC_RC */
+
+  sam_tc_setregister(priv->tc, TC_REGA, div / 2);
+  sam_tc_setregister(priv->tc, TC_REGC, div);
+
+  /* And start the timer */
+
+  sam_tc_start(priv->tc);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_adc_settimer
+ *
+ * Description:
+ *   Configure a timer to trigger the sampling periodically
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_ADC_TIOATRIG
+static void sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
+                             int channel)
+{
+  /* Is a timer allocated? */
+
+  if (priv->tc)
+    {
+      /* Yes.. stop it and free it */
+
+      sam_tc_stop(priv->tc);
+      sam_tc_free(priv->tc);
+      priv->tc = NULL;
+    }
+}
+#endif
+
+/****************************************************************************
  * Name: sam_adc_trigger
  *
  * Description:
@@ -1119,6 +1212,18 @@ static void sam_adc_trigger(struct sam_adc_s *priv)
   sam_adc_putreg(priv, SAM_ADC_TRGR, regval);
 
 #elif defined(CONFIG_SAMA5_ADC_TIOATRIG)
+  /* Start the timer */
+
+#if defined(CONFIG_SAMA5_ADC_TIOA0TRIG)
+  sam_adc_settimer(priv, CONFIG_SAMA5_ADC_TIOAFREQ, TC_CHAN0);
+#elif defined(CONFIG_SAMA5_ADC_TIOA1TRIG)
+  sam_adc_settimer(priv, CONFIG_SAMA5_ADC_TIOAFREQ, TC_CHAN1);
+#elif defined(CONFIG_SAMA5_ADC_TIOA2TRIG)
+  sam_adc_settimer(priv, CONFIG_SAMA5_ADC_TIOAFREQ, TC_CHAN2);
+#else
+#  error Timer/counter for trigger not defined
+#endif
+
    /* Configure to trigger using Timer/counter 0, channel 1, 2, or 3.
     * NOTE: This trigger option depends on having properly configuer
     * timer/counter 0 to provide this output.  That is done independently

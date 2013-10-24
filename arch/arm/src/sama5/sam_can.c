@@ -116,7 +116,7 @@
 #  define CAN_FREQUENCY (BOARD_MCK_FREQUENCY >> 3)
 #  define CAN_PCR_DIV PMC_PCR_DIV8
 #else
-#  error Cannot realize ADC input frequency
+#  error Cannot realize CAN input frequency
 #endif
 
 /* Debug ********************************************************************/
