@@ -41,6 +41,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <nuttx/analog/adc.h>
+
 #include "chip/sam_adc.h"
 
 #ifdef CONFIG_SAMA5_ADC
@@ -120,8 +123,7 @@ extern "C"
  *
  ****************************************************************************/
 
-struct sam_adc_s;
-FAR struct sam_adc_s *sam_adc_initialize(void);
+FAR struct adc_dev_s *sam_adc_initialize(void);
 
 /****************************************************************************
  * Interfaces exported from the ADC to the touchscreen driver
@@ -135,6 +137,7 @@ FAR struct sam_adc_s *sam_adc_initialize(void);
  *
  ****************************************************************************/
 
+struct sam_adc_s;
 void sam_adc_lock(FAR struct sam_adc_s *priv);
 
 /****************************************************************************

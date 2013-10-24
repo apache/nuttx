@@ -106,6 +106,10 @@ ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += sam_nsh.c
 endif
 
+ifeq ($(CONFIG_ADC),y)
+CSRCS += sam_adc.c
+endif
+
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += sam_usbmsc.c
 endif

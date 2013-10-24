@@ -5877,3 +5877,6 @@
 	* configs/freedom-kl25z/src/Makefile:  Only build kl_wifi.c if
 	  CONFIG_WL_CC3000 is selected.  From Alan Carvalho de Assis
 	  (2013-10-24).
+	* configs/sama5d3x-ek/src/sam_adc.c:  Integrate support for the
+	  apps/examples/adc into the SAMA5D3x-EK configuration (2013-10-24).
+

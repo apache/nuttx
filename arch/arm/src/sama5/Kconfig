@@ -1671,6 +1671,7 @@ if SAMA5_ADC_HAVE_CHAN
 config SAMA5_ADC_DMA
 	bool "DMA Support"
 	default n
+	depends on SAMA5_DMAC1
 	---help---
 		Enable DMA transfers of converted data.  This option is only
 		useful if you have numerous DMA channels enabled.  The end result
@@ -1703,7 +1704,7 @@ menu "Channel gain"
 
 config SAMA5_ADC_GAIN0
 	int "Channel 0 gain"
-	default 0
+	default 1
 	depends on SAMA5_ADC_CHAN0
 	range 0 3
 	---help---
@@ -1714,7 +1715,7 @@ config SAMA5_ADC_GAIN0
 
 config SAMA5_ADC_GAIN1
 	int "Channel 1 gain"
-	default 0
+	default 1
 	depends on SAMA5_ADC_CHAN1
 	range 0 3
 	---help---
@@ -1725,7 +1726,7 @@ config SAMA5_ADC_GAIN1
 
 config SAMA5_ADC_GAIN2
 	int "Channel 2 gain"
-	default 0
+	default 1
 	depends on SAMA5_ADC_CHAN2
 	range 0 3
 	---help---
@@ -1736,7 +1737,7 @@ config SAMA5_ADC_GAIN2
 
 config SAMA5_ADC_GAIN3
 	int "Channel 3 gain"
-	default 0
+	default 1
 	depends on SAMA5_ADC_CHAN3
 	range 0 3
 	---help---
@@ -1747,7 +1748,7 @@ config SAMA5_ADC_GAIN3
 
 config SAMA5_ADC_GAIN4
 	int "Channel 4 gain"
-	default 0
+	default 1
 	depends on SAMA5_ADC_CHAN4
 	range 0 3
 	---help---
@@ -1758,7 +1759,7 @@ config SAMA5_ADC_GAIN4
 
 config SAMA5_ADC_GAIN5
 	int "Channel 5 gain"
-	default 0
+	default 1
 	depends on SAMA5_ADC_CHAN5
 	range 0 3
 	---help---
@@ -1769,7 +1770,7 @@ config SAMA5_ADC_GAIN5
 
 config SAMA5_ADC_GAIN6
 	int "Channel 6 gain"
-	default 0
+	default 1
 	depends on SAMA5_ADC_CHAN6
 	range 0 3
 	---help---
@@ -1780,7 +1781,7 @@ config SAMA5_ADC_GAIN6
 
 config SAMA5_ADC_GAIN7
 	int "Channel 7 gain"
-	default 0
+	default 1
 	depends on SAMA5_ADC_CHAN7
 	range 0 3
 	---help---
@@ -1791,7 +1792,7 @@ config SAMA5_ADC_GAIN7
 
 config SAMA5_ADC_GAIN8
 	int "Channel 8 gain"
-	default 0
+	default 1
 	depends on SAMA5_ADC_CHAN8
 	range 0 3
 	---help---
@@ -1802,7 +1803,7 @@ config SAMA5_ADC_GAIN8
 
 config SAMA5_ADC_GAIN9
 	int "Channel 9 gain"
-	default 0
+	default 1
 	depends on SAMA5_ADC_CHAN9
 	range 0 3
 	---help---
@@ -1813,7 +1814,7 @@ config SAMA5_ADC_GAIN9
 
 config SAMA5_ADC_GAIN10
 	int "Channel 10 gain"
-	default 0
+	default 1
 	depends on SAMA5_ADC_CHAN10
 	range 0 3
 	---help---
@@ -1824,7 +1825,7 @@ config SAMA5_ADC_GAIN10
 
 config SAMA5_ADC_GAIN11
 	int "Channel 11 gain"
-	default 0
+	default 1
 	depends on SAMA5_ADC_CHAN11
 	range 0 3
 	---help---
@@ -2028,6 +2029,7 @@ if !SAMA5_ADC_ANARCH
 
 config SAMA5_ADC_GAIN
 	int "Analog gain"
+	default 1
 	depends on SAMA5_ADC_CHAN0
 	range 0 3
 	---help---
@@ -2263,6 +2265,7 @@ menu "Touchscreen configuration"
 config SAMA5_TSD
 	bool "Touchscreen support"
 	default n
+	depends on !SAMA5_ADC_HAVE_CHAN || EXPERIMENTAL
 	select INPUT
 	---help---
 		Configure the ADC to support a touchscreen
