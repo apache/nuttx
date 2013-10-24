@@ -71,7 +71,7 @@
 
 #include <nuttx/wireless/wireless.h>
 #include <nuttx/wireless/cc3000.h>
-#include <nuttx/wireless/cc3000/include/cc3000_upif.h> // For Lowevel SPI config
+#include <nuttx/wireless/cc3000/include/cc3000_upif.h>
 #include <nuttx/wireless/cc3000/cc3000_common.h>
 #include <nuttx/wireless/cc3000/hci.h>
 #include "cc3000.h"
@@ -131,11 +131,11 @@ static const struct file_operations cc3000_fops =
   cc3000_open,      /* open */
   cc3000_close,     /* close */
   cc3000_read,      /* read */
-  cc3000_write,      /* write */
+  cc3000_write,     /* write */
   0,                /* seek */
-  cc3000_ioctl,    /* ioctl */
+  cc3000_ioctl,     /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  cc3000_poll      /* poll */
+  cc3000_poll       /* poll */
 #endif
 };
 
@@ -223,6 +223,7 @@ static void usdelay(long ustimeout)
  * Assumptions:
  *
  ****************************************************************************/
+
 static inline void cc3000_configspi(FAR struct spi_dev_s *spi)
 {
   idbg("Mode: %d Bits: 8 Frequency: %d\n",
@@ -394,6 +395,7 @@ static inline int cc3000_wait_irq(FAR struct cc3000_dev_s *priv)
  *   Own the devsem on entry
  *
  ****************************************************************************/
+
 static inline int cc3000_wait_ready(FAR struct cc3000_dev_s *priv)
 {
     return cc3000_wait(priv,&priv->readysem);
@@ -466,12 +468,14 @@ static void * cc3000_worker(FAR void *arg)
   sem_post(&priv->readysem);
   while(1)
     {
+      priv->config->probe(config,0, 1);
       cc3000_devtake(priv);
 
       /* Done ? */
 
       if ((cc3000_wait_irq(priv) != -EINTR) && (priv->workertid != -1))
         {
+          priv->config->probe(config,0, 0);
           nllvdbg("State%d\n",priv->state);
           switch (priv->state)
             {
@@ -529,6 +533,8 @@ static void * cc3000_worker(FAR void *arg)
 
                 if (data_to_recv)
                   {
+                    int count;
+
                     priv->state = eSPI_STATE_READ_READY;
                     priv->rx_buffer_len = data_to_recv;
 
@@ -544,7 +550,14 @@ static void * cc3000_worker(FAR void *arg)
                     cc3000_devgive(priv);
                     nllvdbg("Wait On Completion\n");
                     sem_wait(&priv->wrkwaitsem);
-                    nllvdbg("Completed S:%d\n",priv->state);
+                    nllvdbg("Completed S:%d irq :%d\n",priv->state,priv->config->irq_read(priv->config));
+
+                    sem_getvalue(&priv->irqsem, &count);
+                    if (priv->config->irq_read(priv->config) && count==0)
+                      {
+                        sem_post(&priv->irqsem);
+                      }
+
                     if (priv->state == eSPI_STATE_READ_READY)
                       {
                          priv->state = eSPI_STATE_IDLE;
@@ -587,7 +600,9 @@ static int cc3000_interrupt(int irq, FAR void *context)
 
   /* Run the worker thread */
 
+  priv->config->probe(priv->config,1, 0);
   sem_post(&priv->irqsem);
+  priv->config->probe(priv->config,1, 1);
 
   /* Clear any pending interrupts and return success */
 
@@ -610,13 +625,13 @@ static int cc3000_open(FAR struct file *filep)
   uint8_t tmp;
   int ret;
 
-  nllvdbg("Opening\n");
-
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct cc3000_dev_s *)inode->i_private;
+
+  nllvdbg("crefs: %d\n", priv->crefs);
 
   /* Get exclusive access to the driver data structure */
 
@@ -674,6 +689,7 @@ static int cc3000_open(FAR struct file *filep)
       pthread_attr_init(&tattr);
       param.sched_priority = SCHED_PRIORITY_MAX;
       pthread_attr_setschedparam(&tattr, &param);
+
       ret = pthread_create(&priv->workertid, &tattr, cc3000_worker, (pthread_addr_t)priv);
       if (ret < 0)
         {
@@ -715,12 +731,13 @@ static int cc3000_close(FAR struct file *filep)
   FAR struct cc3000_dev_s *priv;
   int                       ret;
 
-  nllvdbg("Closing\n");
   DEBUGASSERT(filep);
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
   priv  = (FAR struct cc3000_dev_s *)inode->i_private;
+
+  nllvdbg("crefs: %d\n", priv->crefs);
 
   /* Get exclusive access to the driver data structure */
 
@@ -747,7 +764,7 @@ static int cc3000_close(FAR struct file *filep)
       priv->config->irq_clear(priv->config);
       priv->config->power_enable(priv->config, false);
       pthread_t workertid = priv->workertid;
-      priv->workertid= -1;
+      priv->workertid = -1;
       pthread_cancel(workertid);
       pthread_join(workertid,NULL);
       mq_close(priv->queue);
@@ -899,19 +916,21 @@ errout_without_sem:
  * Name:cc3000_write
  *
  * Bit of non standard buffer management ahead
- * The buffer is memory allocated in the user space with space for the spi header
+ * The buffer is memory allocated in the user space with space for the spi
+ * header
+ *
  ****************************************************************************/
 
 static ssize_t cc3000_write(FAR struct file *filep, FAR const char *buffer, size_t len)
 {
-  FAR struct inode          *inode;
-  FAR struct cc3000_dev_s   *priv;
-  int                       ret;
-  ssize_t          nwritten = 0;
+  FAR struct inode *inode;
+  FAR struct cc3000_dev_s *priv;
+  int ret;
+  ssize_t nwritten = 0;
 
   /* Set the padding if count(buffer) is even ( as it will be come odd with header) */
 
-  size_t          tx_len = (len & 1) ? len : len +1;
+  size_t tx_len = (len & 1) ? len : len +1;
 
   nllvdbg("buffer:%p len:%d tx_len:%d\n", buffer, len, tx_len );
 
@@ -971,7 +990,7 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *buffer, size
 
   if (priv->state  == eSPI_STATE_INITIALIZED)
     {
-      cc3000_lock_and_select(priv->spi); // Assert CS
+      cc3000_lock_and_select(priv->spi); /* Assert CS */
       usdelay(55);
       SPI_SNDBLOCK(priv->spi, priv->tx_buffer, 4);
       usdelay(55);
@@ -981,7 +1000,7 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *buffer, size
     {
       nllvdbg("Assert CS\n");
       priv->state  = eSPI_STATE_WRITE_WAIT_IRQ;
-      cc3000_lock_and_select(priv->spi); // Assert CS
+      cc3000_lock_and_select(priv->spi); /* Assert CS */
       nllvdbg("Wait on IRQ Active\n");
       ret = cc3000_wait_ready(priv);
       nllvdbg("IRQ Signaled\n");
@@ -1038,6 +1057,7 @@ static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     }
 
   /* Process the IOCTL by command */
+
   ret = OK;
   switch (cmd)
     {
