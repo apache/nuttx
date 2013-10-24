@@ -356,6 +356,11 @@ config ARCH_CHIP_STM32F207IG
 	select ARCH_CORTEXM3
 	select STM32_STM32F20XX
 
+config ARCH_CHIP_STM32F207ZE
+        bool "STM32F207ZE"
+        select ARCH_CORTEXM3
+        select STM32_STM32F20XX
+
 config ARCH_CHIP_STM32F302CB
 	bool "STM32F302CB"
 	select ARCH_CORTEXM4
@@ -2337,7 +2342,7 @@ config USART1_RS485_DIR_POLARITY
 	depends on USART1_RS485
 	---help---
 		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
-		enables TX (0 - low / nTXEN, 1 - high / TXEN).		
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
 
 config USART1_RXDMA
 	bool "USART1 Rx DMA"

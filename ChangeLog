@@ -5863,4 +5863,6 @@
 	  Sidrane (2013-10-24).
 	* drivers/wireless/cc3000/cc3000.c:  CC3000 driver update from David
 	  Sidrane (2013-10-24).
-
+	* arch/arm/include/stm32/chip.h and arch/arm/src/stm32/Kconfig:
+	  Add support for the STM32F207ZE chip. From Martin Lederhilger
+	  (2013-10-24).
