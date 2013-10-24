@@ -2141,7 +2141,7 @@ endchoice # TC0 channel
 choice
 	prompt "TIOAx edge"
 	default SAMA5_ADC_TIOA_BOTH
-	depends on SAMA5_ADC_ADTRG
+	depends on SAMA5_ADC_TIOATRIG
 
 config SAMA5_ADC_TIOA_RISING
 	bool "Rising edge"
