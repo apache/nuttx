@@ -45,7 +45,7 @@
 #include <debug.h>
 #include <arch/board/board.h>
 #include "stm32.h"
-#include "p207-internal.h"
+#include "olimex-stm32-p207.h"
 
 #ifdef CONFIG_ARCH_LEDS
 

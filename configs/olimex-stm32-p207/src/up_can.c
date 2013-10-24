@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 #include "stm32.h"
 #include "stm32_can.h"
-#include "p207-internal.h"
+#include "olimex-stm32-p207.h"
 
 #if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
 

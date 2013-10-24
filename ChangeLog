@@ -5866,3 +5866,9 @@
 	* arch/arm/include/stm32/chip.h and arch/arm/src/stm32/Kconfig:
 	  Add support for the STM32F207ZE chip. From Martin Lederhilger
 	  (2013-10-24).
+	* arch/arm/src/stm32/stm32_adc.c and stm32_pwm.c:  Fix some bits
+	  that should have been cleared in a register.  From Martin Lederhilger
+	  (2013-10-24).
+	* configs/olimex-stm32-p207 and other files:  Support for the Olimex
+	  STM32 P207 board added by Martin Lederhilger (2017-10-24).
+

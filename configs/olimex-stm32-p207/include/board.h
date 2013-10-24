@@ -183,25 +183,25 @@
 
 #define NUM_BUTTONS       7
 
-#define BUTTON_TAMPER_BIT   (1 << BUTTON_TAMPER)
-#define BUTTON_WKUP_BIT     (1 << BUTTON_WKUP)
-#define BUTTON_RIGHT_BIT    (1 << BUTTON_RIGHT)
-#define BUTTON_UP_BIT       (1 << BUTTON_UP)
-#define BUTTON_LEFT_BIT     (1 << BUTTON_LEFT)
-#define BUTTON_DOWN_BIT     (1 << BUTTON_DOWN)
-#define BUTTON_CENTER_BIT   (1 << BUTTON_CENTER)
+#define BUTTON_TAMPER_BIT (1 << BUTTON_TAMPER)
+#define BUTTON_WKUP_BIT   (1 << BUTTON_WKUP)
+#define BUTTON_RIGHT_BIT  (1 << BUTTON_RIGHT)
+#define BUTTON_UP_BIT     (1 << BUTTON_UP)
+#define BUTTON_LEFT_BIT   (1 << BUTTON_LEFT)
+#define BUTTON_DOWN_BIT   (1 << BUTTON_DOWN)
+#define BUTTON_CENTER_BIT (1 << BUTTON_CENTER)
 
 /* Alternate function pin selections ************************************************/
 
 //USART3:
-#define GPIO_USART3_RX   GPIO_USART3_RX_3  //PD9
-#define GPIO_USART3_TX   GPIO_USART3_TX_3  //PD8
-#define GPIO_USART3_CTS  GPIO_USART3_CTS_2 //PD11
-#define GPIO_USART3_RTS  GPIO_USART3_RTS_2 //PD12
+#define GPIO_USART3_RX    GPIO_USART3_RX_3  //PD9
+#define GPIO_USART3_TX    GPIO_USART3_TX_3  //PD8
+#define GPIO_USART3_CTS   GPIO_USART3_CTS_2 //PD11
+#define GPIO_USART3_RTS   GPIO_USART3_RTS_2 //PD12
 
 //CAN:
-#define GPIO_CAN1_RX        GPIO_CAN1_RX_2 //PB8
-#define GPIO_CAN1_TX        GPIO_CAN1_TX_2 //PB9
+#define GPIO_CAN1_RX      GPIO_CAN1_RX_2 //PB8
+#define GPIO_CAN1_TX      GPIO_CAN1_TX_2 //PB9
 
 //Ethernet:
 /*
@@ -266,7 +266,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void stm32_boardinitialize(void);
+void stm32_boardinitialize(void);
 
 /************************************************************************************
  * Name:  stm32_ledinit, stm32_setled, and stm32_setleds

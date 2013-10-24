@@ -42,7 +42,7 @@
 #include <nuttx/arch.h>
 #include <debug.h>
 #include <arch/board/board.h>
-#include "p207-internal.h"
+#include "olimex-stm32-p207.h"
 
 /************************************************************************************
  * Definitions
@@ -69,7 +69,7 @@
 void stm32_boardinitialize(void)
 {
   /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
-   * disabled, and 3) the weak function stm32_usbinitialize() has been brought 
+   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
    * into the build. Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also
    * selected.
    */
@@ -86,13 +86,12 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_ARCH_LEDS
   up_ledinit();
 #endif
-  
+
   /* Configure on-board BUTTONs if BUTTON support has been selected. */
-  
+
 #ifdef CONFIG_ARCH_BUTTONS
   up_buttoninit();
 #endif
-
 }
 
 /****************************************************************************
@@ -119,7 +118,5 @@ void board_initialize(void)
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
   nsh_archinitialize();
 #endif
-  
 }
 #endif
-

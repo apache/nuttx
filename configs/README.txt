@@ -1892,8 +1892,12 @@ configs/olimex-lpc2378
 configs/olimex-stm32-p107
   This port uses the Olimex STM32-P107 board (STM32F107VC) and a GNU arm-nuttx-elf
   toolchain* under Linux or Cygwin. See the https://www.olimex.com/dev/stm32-p107.html
-  for further information.  Contributed by Max Holtzberg.  STATUS: Configurations
-  for the basic OS test and NSH are available and verified.
+  for further information.  Contributed by Max Holtzberg.
+
+configs/olimex-stm32-p207
+  This port uses the Olimex STM32-P207 board (STM32F207ZE) and a GNU arm-nuttx-elf
+  toolchain* under Linux or Cygwin. See the https://www.olimex.com/dev/stm32-p207.html
+  for further information.  Contributed by Martin Lederhilger.
 
 configs/olimex-strp711
   This port uses the Olimex STR-P711 board and a GNU arm-nuttx-elf toolchain* under

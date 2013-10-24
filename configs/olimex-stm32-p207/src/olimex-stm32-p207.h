@@ -1,5 +1,5 @@
 /******************************************************************************
- * configs/olimex-stm32-p107/src/p207-internal.h
+ * configs/olimex-stm32-p107/src/olimex-stm32-p207.h
  *
  *   Copyright (C) 2013 Max Holtzberg. All rights reserved.
  *   Author: Max Holtzberg <mholtzberg@uvc-ingenieure.de>
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
+
 #ifndef __CONFIGS_OLIMEX_STM32_P207_SRC_INTERNAL_H
 #define __CONFIGS_OLIMEX_STM32_P207_SRC_INTERNAL_H
 
@@ -47,7 +48,7 @@
  * Definitions
  ******************************************************************************/
 
-/* Olimex-STM32-P207 GPIOs **************************************************************************/
+/* Olimex-STM32-P207 GPIOs ****************************************************/
 /* LEDs */
 
 #define GPIO_LED1       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
@@ -58,7 +59,7 @@
                          GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN8)
 #define GPIO_LED4       (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_50MHz|\
                          GPIO_OUTPUT_CLEAR|GPIO_PORTF|GPIO_PIN9)
-                         
+
 /* BUTTONS -- NOTE that all have EXTI interrupts configured */
 
 #define MIN_IRQBUTTON   BUTTON_TAMPER
@@ -96,33 +97,34 @@
  * Public Functions
  ************************************************************************************/
 
-/****************************************************************************************************
+/************************************************************************************
  * Name: stm32_usbinitialize
  *
  * Description:
  *   Called from stm32_usbinitialize very early in inialization to setup USB-related
  *   GPIO pins for the STM32F4Discovery board.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_STM32_OTGFS
 void weak_function stm32_usbinitialize(void);
 #endif
 
-/****************************************************************************************************
+/************************************************************************************
  * Name: stm32_usbhost_initialize
  *
  * Description:
- *   Called at application startup time to initialize the USB host functionality. This function will
- *   start a thread that will monitor for device connection/disconnection events.
+ *   Called at application startup time to initialize the USB host functionality.
+ *   This function will start a thread that will monitor for device connection/
+ *   disconnection events.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBHOST)
 int stm32_usbhost_initialize(void);
 #endif
 
-/****************************************************************************
+/************************************************************************************
  * Name: nsh_archinitialize
  *
  * Description:
@@ -135,32 +137,31 @@ int stm32_usbhost_initialize(void);
  *   CONFIG_NSH_ARCHINIT=n :
  *     Called from board_initialize().
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_NSH_LIBRARY
 int nsh_archinitialize(void);
 #endif
 
-
-/****************************************************************************************************
+/************************************************************************************
  * Name: stm32_adc_initialize
  *
  * Description:
  *   Called at application startup time to initialize the ADC functionality.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #ifdef CONFIG_ADC
 int stm32_adc_initialize(void);
 #endif
 
-/****************************************************************************************************
+/************************************************************************************
  * Name: stm32_can_initialize
  *
  * Description:
  *   Called at application startup time to initialize the CAN functionality.
  *
- ****************************************************************************************************/
+ ************************************************************************************/
 
 #if defined(CONFIG_CAN) && (defined(CONFIG_STM32_CAN1) || defined(CONFIG_STM32_CAN2))
 int stm32_can_initialize(void);
