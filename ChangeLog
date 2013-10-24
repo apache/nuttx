@@ -5874,3 +5874,6 @@
 	* arch/arm/src/sama5/sam_adc.c, sam_tc.c and sam_tc.h:  Hook in the
 	  timer/counter logic so that it can driver periodic ADC sampling
 	  (2013-10-24).
+	* configs/freedom-kl25z/src/Makefile:  Only build kl_wifi.c if
+	  CONFIG_WL_CC3000 is selected.  From Alan Carvalho de Assis
+	  (2013-10-24).
