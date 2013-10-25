@@ -41,15 +41,17 @@
 #include <stdint.h>
 
 #include <string.h>
+#include <debug.h>
 
 #include <nuttx/wireless/cc3000/cc3000_common.h>
 #include <nuttx/wireless/cc3000/wlan.h>
 #include <nuttx/wireless/cc3000/hci.h>
-#include "spi.h"
-#include <nuttx/wireless/cc3000/include/sys/socket.h>
 #include <nuttx/wireless/cc3000/nvmem.h>
 #include <nuttx/wireless/cc3000/security.h>
 #include <nuttx/wireless/cc3000/evnt_handler.h>
+
+#include "spi.h"
+#include "cc3000.h"
 
 /*****************************************************************************
  * Preprocessor Definitions
@@ -137,7 +139,8 @@ static void SimpleLink_Init_Start(uint16_t usPatchesAvailableAtHost)
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (uint8_t *)(ptr + HEADERS_SIZE_CMD);
 
-  UINT8_TO_STREAM(args, ((usPatchesAvailableAtHost) ? SL_PATCHES_REQUEST_FORCE_HOST : SL_PATCHES_REQUEST_DEFAULT));
+  UINT8_TO_STREAM(args, ((usPatchesAvailableAtHost) ?
+                  SL_PATCHES_REQUEST_FORCE_HOST : SL_PATCHES_REQUEST_DEFAULT));
 
   /* IRQ Line asserted - send HCI_CMND_SIMPLE_LINK_START to CC3000 */
 
@@ -194,23 +197,14 @@ static void SimpleLink_Init_Start(uint16_t usPatchesAvailableAtHost)
 
 void wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches,
                tDriverPatches sDriverPatches,
-               tBootLoaderPatches sBootLoaderPatches,
-               tWlanReadInteruptPin sReadWlanInterruptPin,
-               tWlanInterruptEnable sWlanInterruptEnable,
-               tWlanInterruptDisable sWlanInterruptDisable,
-               tWriteWlanPin sWriteWlanPin)
+               tBootLoaderPatches sBootLoaderPatches)
 {
+  cc3000_lib_lock();
   tSLInformation.sFWPatches = sFWPatches;
   tSLInformation.sDriverPatches = sDriverPatches;
   tSLInformation.sBootLoaderPatches = sBootLoaderPatches;
 
   /* Init I/O callback */
-
-  tSLInformation.ReadWlanInterruptPin = sReadWlanInterruptPin;
-  tSLInformation.WlanInterruptEnable  = sWlanInterruptEnable;
-  tSLInformation.WlanInterruptDisable = sWlanInterruptDisable;
-  tSLInformation.WriteWlanPin = sWriteWlanPin;
-
   /* Init asynchronous events callback */
 
   tSLInformation.sWlanCB= sWlanCB;
@@ -218,6 +212,7 @@ void wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches,
   /* By default TX Complete events are routed to host too */
 
   tSLInformation.InformHostOnTxComplete = 1;
+  cc3000_lib_unlock();
 }
 
 /*****************************************************************************
@@ -237,8 +232,12 @@ void wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches,
 
 void SpiReceiveHandler(void *pvBuffer)
 {
-  tSLInformation.usEventOrDataReceived = 1;
   tSLInformation.pucReceivedData = (uint8_t *)pvBuffer;
+  tSLInformation.usEventOrDataReceived = 1;
+
+  uint16_t event_type;
+  STREAM_TO_UINT16((char *)tSLInformation.pucReceivedData, HCI_EVENT_OPCODE_OFFSET,event_type);
+  nllvdbg("Evtn:0x%x\n", event_type);
 
   hci_unsolicited_event_handler();
 }
@@ -272,7 +271,7 @@ void SpiReceiveHandler(void *pvBuffer)
 
 void wlan_start(uint16_t usPatchesAvailableAtHost)
 {
-  unsigned long ulSpiIRQState;
+  cc3000_lib_lock();
 
   tSLInformation.NumberOfSentPackets = 0;
   tSLInformation.NumberOfReleasedPackets = 0;
@@ -293,41 +292,13 @@ void wlan_start(uint16_t usPatchesAvailableAtHost)
 
   SpiOpen(SpiReceiveHandler);
 
-  /* Check the IRQ line */
-
-  ulSpiIRQState = tSLInformation.ReadWlanInterruptPin();
-
-  /* ASIC 1273 chip enable: toggle WLAN EN line */
-
-  tSLInformation.WriteWlanPin(WLAN_ENABLE);
-
-  if (ulSpiIRQState)
-    {
-      /* Wait till the IRQ line goes low */
-
-      while (tSLInformation.ReadWlanInterruptPin() != 0)
-        {
-        }
-    }
-  else
-    {
-      /* Wait till the IRQ line goes high and than low */
-
-      while (tSLInformation.ReadWlanInterruptPin() == 0)
-        {
-        }
-
-      while (tSLInformation.ReadWlanInterruptPin() != 0)
-        {
-        }
-    }
-
   SimpleLink_Init_Start(usPatchesAvailableAtHost);
 
   /* Read Buffer's size and finish */
 
   hci_command_send(HCI_CMND_READ_BUFFER_SIZE, tSLInformation.pucTxCommandBuffer, 0);
   SimpleLinkWaitEvent(HCI_CMND_READ_BUFFER_SIZE, 0);
+  cc3000_lib_unlock();
 }
 
 /*****************************************************************************
@@ -346,24 +317,9 @@ void wlan_start(uint16_t usPatchesAvailableAtHost)
 
 void wlan_stop(void)
 {
-  /* ASIC 1273 chip disable */
-
-  tSLInformation.WriteWlanPin(WLAN_DISABLE);
-
-  /* Wait till IRQ line goes high... */
-
-  while (tSLInformation.ReadWlanInterruptPin() == 0)
-    {
-    }
-
-  /* Free the used by WLAN Driver memory */
-
-  if (tSLInformation.pucTxCommandBuffer)
-    {
-      tSLInformation.pucTxCommandBuffer = 0;
-    }
-
+  cc3000_lib_lock();
   SpiClose();
+  cc3000_lib_unlock();
 }
 
 /*****************************************************************************
@@ -407,6 +363,8 @@ long wlan_connect(unsigned long ulSecType, char *ssid, long ssid_len,
   uint8_t *args;
   uint8_t bssid_zero[] = {0, 0, 0, 0, 0, 0};
 
+  cc3000_lib_lock();
+
   ret    = EFAIL;
   ptr    = tSLInformation.pucTxCommandBuffer;
   args   = (ptr + HEADERS_SIZE_CMD);
@@ -447,7 +405,7 @@ long wlan_connect(unsigned long ulSecType, char *ssid, long ssid_len,
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_CONNECT, &ret);
   errno = ret;
-
+  cc3000_lib_unlock();
   return ret;
 }
 #else
@@ -457,6 +415,8 @@ long wlan_connect(char *ssid, long ssid_len)
   uint8_t *ptr;
   uint8_t *args;
   uint8_t bssid_zero[] = {0, 0, 0, 0, 0, 0};
+
+  cc3000_lib_lock();
 
   ret  = EFAIL;
   ptr  = tSLInformation.pucTxCommandBuffer;
@@ -486,6 +446,8 @@ long wlan_connect(char *ssid, long ssid_len)
   SimpleLinkWaitEvent(HCI_CMND_WLAN_CONNECT, &ret);
   errno = ret;
 
+  cc3000_lib_unlock();
+
   return ret;
 }
 #endif
@@ -509,6 +471,8 @@ long wlan_disconnect(void)
   long ret;
   uint8_t *ptr;
 
+  cc3000_lib_lock();
+
   ret = EFAIL;
   ptr = tSLInformation.pucTxCommandBuffer;
 
@@ -518,6 +482,8 @@ long wlan_disconnect(void)
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_DISCONNECT, &ret);
   errno = ret;
+
+  cc3000_lib_unlock();
 
   return ret;
 }
@@ -562,6 +528,8 @@ long wlan_ioctl_set_connection_policy(unsigned long should_connect_to_open_ap,
   uint8_t *ptr;
   uint8_t *args;
 
+  cc3000_lib_lock();
+
   ret = EFAIL;
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (uint8_t *)(ptr + HEADERS_SIZE_CMD);
@@ -581,6 +549,7 @@ long wlan_ioctl_set_connection_policy(unsigned long should_connect_to_open_ap,
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_IOCTL_SET_CONNECTION_POLICY, &ret);
 
+  cc3000_lib_unlock();
   return ret;
 }
 
@@ -627,6 +596,8 @@ long wlan_add_profile(unsigned long ulSecType, uint8_t* ucSsid,
   long i = 0;
   uint8_t *args;
   uint8_t bssid_zero[] = {0, 0, 0, 0, 0, 0};
+
+  cc3000_lib_lock();
 
   ptr  = tSLInformation.pucTxCommandBuffer;
   args = (ptr + HEADERS_SIZE_CMD);
@@ -733,7 +704,7 @@ long wlan_add_profile(unsigned long ulSecType, uint8_t* ucSsid,
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_IOCTL_ADD_PROFILE, &ret);
-
+  cc3000_lib_unlock();
   return ret;
 }
 #else
@@ -770,6 +741,8 @@ long wlan_ioctl_del_profile(unsigned long ulIndex)
   uint8_t *ptr;
   uint8_t *args;
 
+  cc3000_lib_lock();
+
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (uint8_t *)(ptr + HEADERS_SIZE_CMD);
 
@@ -786,6 +759,8 @@ long wlan_ioctl_del_profile(unsigned long ulIndex)
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_IOCTL_DEL_PROFILE, &ret);
+
+  cc3000_lib_unlock();
 
   return ret;
 }
@@ -829,6 +804,8 @@ long wlan_ioctl_get_scan_results(unsigned long ulScanTimeout, uint8_t *ucResults
   uint8_t *ptr;
   uint8_t *args;
 
+  cc3000_lib_lock();
+
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (ptr + HEADERS_SIZE_CMD);
 
@@ -844,6 +821,8 @@ long wlan_ioctl_get_scan_results(unsigned long ulScanTimeout, uint8_t *ucResults
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_IOCTL_GET_SCAN_RESULTS, ucResults);
+
+  cc3000_lib_unlock();
 
   return 0;
 }
@@ -900,6 +879,8 @@ long wlan_ioctl_set_scan_params(unsigned long uiEnable,
   uint8_t *ptr;
   uint8_t *args;
 
+  cc3000_lib_lock();
+
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (ptr + HEADERS_SIZE_CMD);
 
@@ -925,6 +906,8 @@ long wlan_ioctl_set_scan_params(unsigned long uiEnable,
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_IOCTL_SET_SCANPARAM, &uiRes);
+
+  cc3000_lib_unlock();
 
   return uiRes;
 }
@@ -959,6 +942,8 @@ long wlan_set_event_mask(unsigned long ulMask)
   long ret;
   uint8_t *ptr;
   uint8_t *args;
+
+  cc3000_lib_lock();
 
   if ((ulMask & HCI_EVNT_WLAN_TX_COMPLETE) == HCI_EVNT_WLAN_TX_COMPLETE)
     {
@@ -998,6 +983,8 @@ long wlan_set_event_mask(unsigned long ulMask)
 
   SimpleLinkWaitEvent(HCI_CMND_EVENT_MASK, &ret);
 
+  cc3000_lib_unlock();
+
   return ret;
 }
 
@@ -1022,6 +1009,8 @@ long wlan_ioctl_statusget(void)
   long ret;
   uint8_t *ptr;
 
+  cc3000_lib_lock();
+
   ret = EFAIL;
   ptr = tSLInformation.pucTxCommandBuffer;
 
@@ -1031,6 +1020,8 @@ long wlan_ioctl_statusget(void)
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_IOCTL_STATUSGET, &ret);
+
+  cc3000_lib_unlock();
 
   return ret;
 }
@@ -1063,6 +1054,8 @@ long wlan_smart_config_start(unsigned long algoEncryptedFlag)
   uint8_t *ptr;
   uint8_t *args;
 
+  cc3000_lib_lock();
+
   ret  = EFAIL;
   ptr  = tSLInformation.pucTxCommandBuffer;
   args = (uint8_t *)(ptr + HEADERS_SIZE_CMD);
@@ -1079,6 +1072,7 @@ long wlan_smart_config_start(unsigned long algoEncryptedFlag)
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_IOCTL_SIMPLE_CONFIG_START, &ret);
 
+  cc3000_lib_unlock();
   return ret;
 }
 
@@ -1101,6 +1095,8 @@ long wlan_smart_config_stop(void)
   long ret;
   uint8_t *ptr;
 
+  cc3000_lib_lock();
+
   ret = EFAIL;
   ptr = tSLInformation.pucTxCommandBuffer;
 
@@ -1110,6 +1106,7 @@ long wlan_smart_config_stop(void)
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_IOCTL_SIMPLE_CONFIG_STOP, &ret);
 
+  cc3000_lib_unlock();
   return ret;
 }
 
@@ -1135,6 +1132,8 @@ long wlan_smart_config_set_prefix(char* cNewPrefix)
   long ret;
   uint8_t *ptr;
   uint8_t *args;
+
+  cc3000_lib_lock();
 
   ret  = EFAIL;
   ptr  = tSLInformation.pucTxCommandBuffer;
@@ -1162,6 +1161,8 @@ long wlan_smart_config_set_prefix(char* cNewPrefix)
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_IOCTL_SIMPLE_CONFIG_SET_PREFIX, &ret);
+
+  cc3000_lib_unlock();
 
   return ret;
 }

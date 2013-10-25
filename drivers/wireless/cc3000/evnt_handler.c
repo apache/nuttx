@@ -37,6 +37,7 @@
  ******************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
@@ -46,7 +47,7 @@
 #include <nuttx/wireless/cc3000/hci.h>
 #include <nuttx/wireless/cc3000/evnt_handler.h>
 #include <nuttx/wireless/cc3000/wlan.h>
-#include <nuttx/wireless/cc3000/include/sys/socket.h>
+#include "cc3000_socket.h"
 #include <nuttx/wireless/cc3000/netapp.h>
 
 #include "spi.h"
@@ -344,7 +345,7 @@ uint8_t *hci_event_handler(void *pRetParams, uint8_t *from, uint8_t *fromlen)
 
                         memcpy((uint8_t *)pRetParams,
                                pucReceivedParams + ACCEPT_ADDRESS__OFFSET,
-                               sizeof(sockaddr));
+                               sizeof(struct sockaddr));
                       }
                       break;
 
@@ -910,21 +911,22 @@ void SimpleLinkWaitEvent(uint16_t usOpcode, void *pRetParams)
 
   do
     {
+      nllvdbg("SpiWait\n");
       tSLInformation.pucReceivedData = SpiWait();
       tSLInformation.usEventOrDataReceived = 1;
       STREAM_TO_UINT16((char *)tSLInformation.pucReceivedData, HCI_EVENT_OPCODE_OFFSET,event_type);
 
       if (*tSLInformation.pucReceivedData == HCI_TYPE_EVNT)
         {
-        nllvdbg("Evtn:0x%x\n",event_type);
-      }
+          nllvdbg("Evtn:0x%x\n",event_type);
+        }
 
       if (event_type != usOpcode)
         {
-         if (hci_unsolicited_event_handler() == 1)
-           {
-             nllvdbg("Processed Event  0x%x want 0x%x\n",event_type, usOpcode);
-           }
+          if (hci_unsolicited_event_handler() == 1)
+            {
+              nllvdbg("Processed Event  0x%x want 0x%x\n",event_type, usOpcode);
+            }
         }
       else
         {

@@ -71,6 +71,7 @@ static struct
   bool run;
   uint8_t rx_buffer[CC3000_RX_BUFFER_SIZE];
   mqd_t  queue;
+  sem_t *done;
 
 } spiconf;
 
@@ -95,12 +96,9 @@ static struct
 
 void SpiResumeSpi(void)
 {
-  DEBUGASSERT(spiconf.cc3000fd);
-
-  if (ioctl(spiconf.cc3000fd,CC3000IOC_COMPLETE,0))
-    {
-      printf("ioctl:CC3000IOC_COMPLETE failed: %s\n", strerror(errno));
-    }
+  DEBUGASSERT(spiconf.cc3000fd && spiconf.done);
+  sem_post(spiconf.done);
+  nllvdbg("Done\n");
 }
 
 /*****************************************************************************
@@ -158,10 +156,9 @@ long SpiRead(uint8_t *pUserBuffer, uint16_t usLength)
 
 uint8_t *SpiWait(void)
 {
-  int nbytes;
   DEBUGASSERT(spiconf.cc3000fd);
 
-  nbytes = mq_receive(spiconf.queue, spiconf.rx_buffer, CC3000_RX_BUFFER_SIZE, 0);
+  mq_receive(spiconf.queue, spiconf.rx_buffer, CC3000_RX_BUFFER_SIZE, 0);
   return spiconf.rx_buffer;
 }
 
@@ -181,14 +178,19 @@ uint8_t *SpiWait(void)
 
 static void *unsoliced_thread_func(void *parameter)
 {
-  char queuename[QUEUE_NAMELEN];
+  char buff[QUEUE_NAMELEN];
   int status = 0;
   int nbytes = 0;
   int minor = 0;
 
-  ioctl(spiconf.cc3000fd, CC3000IOC_GETQUEID, (unsigned long)&minor);
-  snprintf(queuename, QUEUE_NAMELEN, QUEUE_FORMAT, minor);
-  spiconf.queue = mq_open(queuename,O_RDONLY);
+  ioctl(spiconf.cc3000fd, CC3000IOC_GETQUESEMID, (unsigned long)&minor);
+  snprintf(buff, QUEUE_NAMELEN, QUEUE_FORMAT, minor);
+  spiconf.queue = mq_open(buff,O_RDONLY);
+  DEBUGASSERT(spiconf.queue != (mqd_t) -1);
+  DEBUGASSERT(SEM_NAMELEN == QUEUE_NAMELEN);
+  snprintf(buff, SEM_NAMELEN, SEM_FORMAT, minor);
+  spiconf.done = sem_open(buff,O_RDONLY);
+  DEBUGASSERT(spiconf.done != (sem_t *)-1);
 
   while(spiconf.run)
     {
@@ -196,12 +198,13 @@ static void *unsoliced_thread_func(void *parameter)
       nbytes = mq_receive(spiconf.queue, spiconf.rx_buffer, CC3000_RX_BUFFER_SIZE, 0);
       if (nbytes > 0)
         {
-          spivdbg("%d Processed\n",nbytes);
+          nlldbg("%d Processed\n",nbytes);
           spiconf.pfRxHandler(spiconf.rx_buffer);
         }
     }
 
   mq_close(spiconf.queue);
+  sem_close(spiconf.done);
   pthread_exit((pthread_addr_t)status);
   return (pthread_addr_t)status;
 }
@@ -223,9 +226,11 @@ static void *unsoliced_thread_func(void *parameter)
 void SpiOpen(gcSpiHandleRx pfRxHandler)
 {
   int status;
+  int fd;
 
   DEBUGASSERT(spiconf.cc3000fd == 0);
-  int fd = open("/dev/wireless0",O_RDWR|O_BINARY);
+
+  fd = open("/dev/wireless0",O_RDWR|O_BINARY);
   if (fd > 0)
     {
       spiconf.pfRxHandler = pfRxHandler;

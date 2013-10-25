@@ -41,8 +41,8 @@
 
 #include <nuttx/wireless/cc3000/nvmem.h>
 #include <nuttx/wireless/cc3000/hci.h>
-#include <nuttx/wireless/cc3000/include/sys/socket.h>
 #include <nuttx/wireless/cc3000/evnt_handler.h>
+#include "cc3000.h"
 
 /******************************************************************************
  * Pre-processor Definitions
@@ -88,6 +88,8 @@ signed long nvmem_read(unsigned long ulFileId, unsigned long ulLength,
   uint8_t *ptr;
   uint8_t *args;
 
+  cc3000_lib_lock();
+
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (ptr + HEADERS_SIZE_CMD);
 
@@ -112,6 +114,8 @@ signed long nvmem_read(unsigned long ulFileId, unsigned long ulLength,
    */
 
   SimpleLinkWaitData(buff, 0, 0);
+
+  cc3000_lib_unlock();
 
   return ucStatus;
 }
@@ -146,6 +150,8 @@ signed long nvmem_write(unsigned long ulFileId, unsigned long ulLength,
   uint8_t *ptr;
   uint8_t *args;
 
+  cc3000_lib_lock();
+
   iRes = EFAIL;
 
   ptr = tSLInformation.pucTxCommandBuffer;
@@ -167,6 +173,8 @@ signed long nvmem_write(unsigned long ulFileId, unsigned long ulLength,
                         ulLength);
 
   SimpleLinkWaitEvent(HCI_EVNT_NVMEM_WRITE, &iRes);
+
+  cc3000_lib_unlock();
 
   return iRes;
 }
@@ -285,6 +293,8 @@ uint8_t nvmem_read_sp_version(uint8_t *patchVer)
   /* 1st byte is the status and the rest is the SP version */
   uint8_t  retBuf[5];
 
+  cc3000_lib_lock();
+
   ptr = tSLInformation.pucTxCommandBuffer;
 
   /* Initiate a HCI command, no args are required */
@@ -299,6 +309,8 @@ uint8_t nvmem_read_sp_version(uint8_t *patchVer)
   /* Package build number */
 
   *(patchVer+1) = retBuf[4];
+
+  cc3000_lib_unlock();
 
   return retBuf[0];
 }
@@ -332,6 +344,8 @@ signed long nvmem_create_entry(unsigned long ulFileId, unsigned long ulNewLen)
   uint8_t *args;
   uint16_t retval;
 
+  cc3000_lib_lock();
+
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (ptr + HEADERS_SIZE_CMD);
 
@@ -345,6 +359,8 @@ signed long nvmem_create_entry(unsigned long ulFileId, unsigned long ulNewLen)
   hci_command_send(HCI_CMND_NVMEM_CREATE_ENTRY,ptr, NVMEM_CREATE_PARAMS_LEN);
 
   SimpleLinkWaitEvent(HCI_CMND_NVMEM_CREATE_ENTRY, &retval);
+
+  cc3000_lib_unlock();
 
   return retval;
 }

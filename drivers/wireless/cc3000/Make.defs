@@ -38,7 +38,7 @@ ifeq ($(CONFIG_WL_CC3000),y)
 # Include cc3000 drivers
 
 CSRCS += cc3000.c cc3000_common.c evnt_handler.c hci.c netapp.c nvmem.c
-CSRCS += security.c socket.c spi.c wlan.c
+CSRCS += security.c socket.c socket_imp.c spi.c wlan.c
 
 # Include wireless devices build support
 

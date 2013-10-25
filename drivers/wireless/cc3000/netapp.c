@@ -37,11 +37,14 @@
  ******************************************************************************/
 
 #include <string.h>
+
 #include <nuttx/wireless/cc3000/netapp.h>
 #include <nuttx/wireless/cc3000/hci.h>
-#include <nuttx/wireless/cc3000/include/sys/socket.h>
 #include <nuttx/wireless/cc3000/evnt_handler.h>
 #include <nuttx/wireless/cc3000/nvmem.h>
+
+#include "cc3000.h"
+#include "cc3000_socket.h"
 
 /******************************************************************************
  * Pre-processor Definitions
@@ -118,6 +121,8 @@ long netapp_dhcp(unsigned long *aucIP, unsigned long *aucSubnetMask,
   uint8_t *ptr;
   uint8_t *args;
 
+  cc3000_lib_lock();
+
   scRet = EFAIL;
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (ptr + HEADERS_SIZE_CMD);
@@ -137,6 +142,8 @@ long netapp_dhcp(unsigned long *aucIP, unsigned long *aucSubnetMask,
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_NETAPP_DHCP, &scRet);
+
+  cc3000_lib_unlock();
 
   return(scRet);
 }
@@ -200,6 +207,8 @@ long netapp_timeout_values(unsigned long *aucDHCP, unsigned long *aucARP,
   uint8_t *ptr;
   uint8_t *args;
 
+  cc3000_lib_lock();
+
   scRet = EFAIL;
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (ptr + HEADERS_SIZE_CMD);
@@ -226,10 +235,11 @@ long netapp_timeout_values(unsigned long *aucDHCP, unsigned long *aucARP,
 
   SimpleLinkWaitEvent(HCI_NETAPP_SET_TIMERS, &scRet);
 
+  cc3000_lib_unlock();
+
   return scRet;
 }
 #endif
-
 
 /******************************************************************************
  * Name: netapp_ping_send
@@ -262,6 +272,8 @@ long netapp_ping_send(unsigned long *ip, unsigned long ulPingAttempts,
   int8_t scRet;
   uint8_t *ptr, *args;
 
+  cc3000_lib_lock();
+
   scRet = EFAIL;
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (ptr + HEADERS_SIZE_CMD);
@@ -280,6 +292,8 @@ long netapp_ping_send(unsigned long *ip, unsigned long ulPingAttempts,
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_NETAPP_PING_SEND, &scRet);
+
+  cc3000_lib_unlock();
 
   return scRet;
 }
@@ -319,6 +333,8 @@ void netapp_ping_report(void)
   ptr = tSLInformation.pucTxCommandBuffer;
   int8_t scRet;
 
+  cc3000_lib_lock();
+
   scRet = EFAIL;
 
   /* Initiate a HCI command */
@@ -328,6 +344,8 @@ void netapp_ping_report(void)
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_NETAPP_PING_REPORT, &scRet);
+
+  cc3000_lib_unlock();
 }
 #endif
 
@@ -351,6 +369,8 @@ long netapp_ping_stop(void)
   int8_t scRet;
   uint8_t *ptr;
 
+  cc3000_lib_lock();
+
   scRet = EFAIL;
   ptr = tSLInformation.pucTxCommandBuffer;
 
@@ -361,6 +381,8 @@ long netapp_ping_stop(void)
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_NETAPP_PING_STOP, &scRet);
+
+  cc3000_lib_unlock();
 
   return(scRet);
 }
@@ -401,6 +423,8 @@ void netapp_ipconfig(tNetappIpconfigRetArgs * ipconfig)
 {
   uint8_t *ptr;
 
+  cc3000_lib_lock();
+
   ptr = tSLInformation.pucTxCommandBuffer;
 
   /* Initiate a HCI command */
@@ -410,6 +434,8 @@ void netapp_ipconfig(tNetappIpconfigRetArgs * ipconfig)
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_NETAPP_IPCONFIG, ipconfig);
+
+  cc3000_lib_unlock();
 }
 #else
 void netapp_ipconfig(tNetappIpconfigRetArgs * ipconfig)
@@ -437,6 +463,9 @@ long netapp_arp_flush(void)
   int8_t scRet;
   uint8_t *ptr;
 
+
+  cc3000_lib_lock();
+
   scRet = EFAIL;
   ptr = tSLInformation.pucTxCommandBuffer;
 
@@ -447,6 +476,8 @@ long netapp_arp_flush(void)
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_NETAPP_ARP_FLUSH, &scRet);
+
+  cc3000_lib_unlock();
 
   return scRet;
 }
@@ -484,6 +515,8 @@ long netapp_set_debug_level(unsigned long ulLevel)
   int8_t scRet;
   uint8_t *ptr, *args;
 
+  cc3000_lib_lock();
+
   scRet = EFAIL;
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (ptr + HEADERS_SIZE_CMD);
@@ -499,6 +532,8 @@ long netapp_set_debug_level(unsigned long ulLevel)
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_NETAPP_SET_DEBUG_LEVEL, &scRet);
+
+  cc3000_lib_unlock();
 
   return scRet;
 }

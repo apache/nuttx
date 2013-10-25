@@ -47,19 +47,28 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
 #include <nuttx/config.h>
 
 #include <stdint.h>
 #include <mqueue.h>
+#include <pthread.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/irq.h>
 #include <nuttx/wireless/wireless.h>
 #include <nuttx/wireless/cc3000.h>
+#include <nuttx/wireless/cc3000/cc3000_common.h>
 #include "spi.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+
+#define CONFIG_CC3000_MT              /* Indicate multi threaded version */
+
+#ifdef CONFIG_CC3000_MT
+#  define CONFIG_WL_MAX_SOCKETS 5
+#endif
 
 /* CC3000 Interfaces ********************************************************/
 
@@ -82,7 +91,25 @@
  * Public Types
  ****************************************************************************/
 
+#ifdef CONFIG_CC3000_MT
+/* lock to serialze access to driver (spi protocol is window size 1) */
+extern pthread_mutex_t g_cc3000_mut;
 /* This structure describes the state of one CC3000 driver instance */
+
+typedef struct cc3000_socket_ent
+{
+  int sd;
+  long status;
+  sem_t semwait;
+} cc3000_socket_ent;
+
+typedef struct cc3000_accept_ent
+{
+  cc3000_socket_ent acc;
+  struct sockaddr addr;
+  socklen_t addrlen;
+} cc3000_accept_ent;
+#endif
 
 typedef enum
 {
@@ -107,7 +134,7 @@ struct cc3000_dev_s
   uint8_t nwaiters;                     /* Number of threads waiting for CC3000 data */
   uint8_t minor;                        /* minor */
   sem_t devsem;                         /* Manages exclusive access to this structure */
-  sem_t wrkwaitsem;                     /* Suspend and resume the delivery of messages */
+  sem_t *wrkwaitsem;                    /* Suspend and resume the delivery of messages */
   sem_t waitsem;                        /* Used to wait for the availability of data */
   sem_t irqsem;                         /* Used to signal irq from cc3000 */
   sem_t readysem;                       /* Used to wait for Ready Condition from the cc3000 */
@@ -122,6 +149,15 @@ struct cc3000_dev_s
   uint8_t tx_buffer[CC3000_TX_BUFFER_SIZE];
   ssize_t tx_buffer_len;
 
+  /* The following is a list if socket structures of threads waiting
+   * long operations to finish;
+   */
+#ifdef CONFIG_CC3000_MT
+  pthread_t selecttid;                  /* Handle for the select thread */
+  sem_t selectsem;                      /* Used to sleep the select thread */
+  cc3000_socket_ent sockets[CONFIG_WL_MAX_SOCKETS];
+  cc3000_accept_ent accepting_socket;
+#endif
   /* The following is a list if poll structures of threads waiting for
    * driver events. The 'struct pollfd' reference for each open is also
    * retained in the f_priv field of the 'struct file'.
@@ -142,6 +178,28 @@ extern "C" {
 #else
 #define EXTERN extern
 #endif
+
+static inline void cc3000_lib_lock(void)
+{
+#ifdef CONFIG_CC3000_MT
+  int status = pthread_mutex_lock(&g_cc3000_mut);
+  DEBUGASSERT(status == 0);
+#endif
+}
+
+static inline void cc3000_lib_unlock(void)
+{
+#ifdef CONFIG_CC3000_MT
+  int status = pthread_mutex_unlock(&g_cc3000_mut);
+  DEBUGASSERT(status == 0);
+#endif
+}
+
+int cc3000_do_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+int cc3000_wait_data(int sockfd, int minor);
+int cc3000_accept_socket(int sd, int minor, struct sockaddr *addr, socklen_t *addrlen);
+int cc3000_add_socket(int sd, int minor);
+int cc3000_remove_socket(int sd, int minor);
 
 #undef EXTERN
 #ifdef __cplusplus

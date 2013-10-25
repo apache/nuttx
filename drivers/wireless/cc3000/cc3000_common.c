@@ -38,11 +38,6 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
-#include <nuttx/wireless/cc3000/cc3000_common.h>
-#include <nuttx/wireless/cc3000/include/sys/socket.h>
-#include <nuttx/wireless/cc3000/wlan.h>
-#include <nuttx/wireless/cc3000/evnt_handler.h>
-
 /*****************************************************************************
  * Name:__error__
  *
