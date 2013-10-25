@@ -93,8 +93,13 @@
 
 /* Timer debug is enabled if any timer client is enabled */
 
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_ANALOG
+#  undef CONFIG_SAMA5_TC_REGDEBUG
+#endif
+
 #undef DEBUG_TC
-#if defined(CONFIG_SAMA5_ADC)
+#if defined(CONFIG_SAMA5_ADC) && defined(CONFIG_DEBUG_ANALOG)
 #  define DEBUG_TC 1
 #endif
 
@@ -159,7 +164,7 @@ struct sam_tc_s
 
   /* Debug stuff */
 
-#ifdef CONFIG_SAMA5_HSMCI_REGDEBUG
+#ifdef CONFIG_SAMA5_TC_REGDEBUG
    bool wrlast;            /* Last was a write */
    uint32_t addrlast;      /* Last address */
    uint32_t vallast;       /* Last value */
@@ -176,22 +181,22 @@ struct sam_tc_s
 static void sam_takesem(struct sam_tc_s *tc);
 #define     sam_givesem(tc) (sem_post(&tc->exclsem))
 
-#ifdef CONFIG_SAMA5_HSMCI_REGDEBUG
-static bool sam_checkreg(struct sam_tc_s *tc, bool wr,
-                         uint32_t value, uint32_t regaddr, uint32_t regval);
+#ifdef CONFIG_SAMA5_TC_REGDEBUG
+static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
+                         uint32_t regval);
 #else
-# define    sam_checkreg(tc,wr,value,regaddr) (false)
+# define    sam_checkreg(tc,wr,regaddr,regval) (false)
 #endif
 
 static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
                                      unsigned int offset);
 static inline void sam_tc_putreg(struct sam_chan_s *chan,
-                                 unsigned int offset, uint32_t value);
+                                 unsigned int offset, uint32_t regval);
 
 static inline uint32_t sam_chan_getreg(struct sam_chan_s *chan,
                                        unsigned int offset);
 static inline void sam_chan_putreg(struct sam_chan_s *chan,
-                                   unsigned int offset, uint32_t value);
+                                   unsigned int offset, uint32_t regval);
 
 /* Initialization ***********************************************************/
 
@@ -425,8 +430,10 @@ static void sam_takesem(struct sam_tc_s *tc)
  *   Check if the current register access is a duplicate of the preceding.
  *
  * Input Parameters:
- *   value   - The value to be written
- *   regaddr - The address of the register to write to
+ *   tc      - The timer/counter peripheral state
+ *   wr      - True:write access false:read access
+ *   regval  - The regiser value associated with the access
+ *   regaddr - The address of the register being accessed
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
@@ -434,12 +441,12 @@ static void sam_takesem(struct sam_tc_s *tc)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_HSMCI_REGDEBUG
+#ifdef CONFIG_SAMA5_TC_REGDEBUG
 static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
-                         uint32_t value)
+                         uint32_t regval)
 {
   if (wr      == tc->wrlast &&   /* Same kind of access? */
-      value   == tc->vallast &&  /* Same value? */
+      regval  == tc->vallast &&  /* Same value? */
       regaddr == tc->addrlast)   /* Same regaddr? */
     {
       /* Yes, then just keep a count of the number of times we did this. */
@@ -461,7 +468,7 @@ static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
       /* Save information about the new access */
 
       tc->wrlast   = wr;
-      tc->vallast  = value;
+      tc->vallast  = regval;
       tc->addrlast = regaddr;
       tc->ntimes   = 0;
     }
@@ -487,7 +494,7 @@ static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
   uint32_t regaddr    = tc->base + offset;
   uint32_t regval     = getreg32(regaddr);
 
-#ifdef CONFIG_SAMA5_HSMCI_REGDEBUG
+#ifdef CONFIG_SAMA5_TC_REGDEBUG
   if (sam_checkreg(tc, false, regval, regaddr))
     {
       lldbg("%08x->%08x\n", regaddr, regval);
@@ -511,7 +518,7 @@ static inline void sam_tc_putreg(struct sam_chan_s *chan, uint32_t regval,
   struct sam_tc_s *tc = chan->tc;
   uint32_t regaddr    = tc->base + offset;
 
-#ifdef CONFIG_SAMA5_HSMCI_REGDEBUG
+#ifdef CONFIG_SAMA5_TC_REGDEBUG
   if (sam_checkreg(tc, true, regval, regaddr))
     {
       lldbg("%08x<-%08x\n", regaddr, regval);
@@ -535,7 +542,7 @@ static inline uint32_t sam_chan_getreg(struct sam_chan_s *chan,
   uint32_t regaddr = chan->base + offset;
   uint32_t regval  = getreg32(regaddr);
 
-#ifdef CONFIG_SAMA5_HSMCI_REGDEBUG
+#ifdef CONFIG_SAMA5_TC_REGDEBUG
   if (sam_checkreg(chan->tc, false, regval, regaddr))
     {
       lldbg("%08x->%08x\n", regaddr, regval);
@@ -558,7 +565,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan, unsigned int offset,
 {
   uint32_t regaddr = chan->base + offset;
 
-#ifdef CONFIG_SAMA5_HSMCI_REGDEBUG
+#ifdef CONFIG_SAMA5_TC_REGDEBUG
   if (sam_checkreg(chan->tc, true, regval, regaddr))
     {
       lldbg("%08x<-%08x\n", regaddr, regval);
