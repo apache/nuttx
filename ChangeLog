@@ -5884,4 +5884,6 @@
 	  (2015-10-25).
 	* configs/spark:  Spark configuration updated by David Sidrane
 	  (2013-10-25).
+	* drivers/wireless/cc3000 and include/nuttx/wireless/cc3000:
+	  CC3000 driver update from David Sidrane (2013-10-25).
 

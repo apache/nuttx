@@ -35,170 +35,36 @@
 #ifndef __INCLUDE_NUTTX_WIRELESS_CC3000_INCLUDE_SYS_SOCKET_H
 #define __INCLUDE_NUTTX_WIRELESS_CC3000_INCLUDE_SYS_SOCKET_H
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+
 /*****************************************************************************
  * Pre-processor Definitions
  *****************************************************************************/
 
-#define CC3000_SOCKETS                /* Indicate using CC3000 sockets */
-#define CC3000_SOCKETS_ST             /* Indicate single threaded version */
-
-#define HOSTNAME_MAX_LENGTH    (230)  /* 230 bytes + header shouldn't exceed 8
-                                       * bit value */
-
-/*--------- Address Families --------*/
-
-#define  AF_INET                2
-#define  AF_INET6               23
-
-#define PF_INET                AF_INET  /* IPv4 Internet protocols */
-#define PF_INET6               AF_INET6 /* IPv6 Internet protocols */
-
-
-/*------------ Socket Types ------------*/
-
-#define  SOCK_STREAM            1
-#define  SOCK_DGRAM             2
-#define  SOCK_RAW               3           /* Raw sockets allow new IPv4
-                                             * protocols to be implemented in
-                                             * user space. A raw socket receives
-                                             * or sends the raw datagram not
-                                             * including link level headers */
-#define  SOCK_RDM               4
-#define  SOCK_SEQPACKET         5
-
-/*----------- Socket Protocol ----------*/
-
-#define IPPROTO_IP              0           /* Dummy for IP */
-#define IPPROTO_ICMP            1           /* Control message protocol */
-#define IPPROTO_IPV4            IPPROTO_IP  /* IP inside IP */
-#define IPPROTO_TCP             6           /* TCP */
-#define IPPROTO_UDP             17          /* User datagram protocol */
-#define IPPROTO_IPV6            41          /* IPv6 in IPv6 */
-#define IPPROTO_NONE            59          /* No next header */
-#define IPPROTO_RAW             255         /* Raw IP packet */
-#define IPPROTO_MAX             256
-
-/*----------- Socket retunr codes  -----------*/
-
-#define SOC_ERROR               (-1)        /* Error  */
-#define SOC_IN_PROGRESS         (-2)        /* Socket in progress */
-
-/*----------- Socket Options -----------*/
-#define  SOL_SOCKET              0xffff     /* Socket level */
-#define  SOCKOPT_RECV_NONBLOCK   0          /* recv non block mode, set SOCK_ON or
-                                             * SOCK_OFF (default block mode) */
-#define  SOCKOPT_RECV_TIMEOUT    1          /* optname to configure recv and recvfromtimeout */
-#define  SOCKOPT_ACCEPT_NONBLOCK 2          /* accept non block mode, set SOCK_ON or SOCK_OFF
-                                             * (default block mode) */
-#define  SOCK_ON                 0          /* socket non-blocking mode  is enabled */
-#define  SOCK_OFF                1          /* socket blocking mode is enabled */
-
-#define  TCP_NODELAY             0x0001
-#define  TCP_BSDURGENT           0x7000
-
-#define  MAX_PACKET_SIZE         1500
-#define  MAX_LISTEN_QUEUE        4
-
-#define  IOCTL_SOCKET_EVENTMASK
-
-#define __FD_SETSIZE             32
-
-#define  ASIC_ADDR_LEN           8
-
-#define NO_QUERY_RECIVED        -3
-
-/* It's easier to assume 8-bit bytes than to get CHAR_BIT. */
-
-#define __NFDBITS               (8 * sizeof (__fd_mask))
-#define __FDELT(d)              ((d) / __NFDBITS)
-#define __FDMASK(d)             ((__fd_mask) 1 << ((d) % __NFDBITS))
-
-#define __FDS_BITS(set)        ((set)->fds_bits)
-
-/* We don't use `memset' because this would require a prototype and
- *   the array isn't too big.
- */
-
-#define __FD_ZERO(set) \
-  do { \
-    unsigned int __i; \
-    TICC3000fd_set *__arr = (set); \
-    for (__i = 0; __i < sizeof (TICC3000fd_set) / sizeof (__fd_mask); ++__i) \
-      __FDS_BITS (__arr)[__i] = 0; \
-  } while (0)
-#define __FD_SET(d, set)       (__FDS_BITS (set)[__FDELT (d)] |= __FDMASK (d))
-#define __FD_CLR(d, set)       (__FDS_BITS (set)[__FDELT (d)] &= ~__FDMASK (d))
-#define __FD_ISSET(d, set)     (__FDS_BITS (set)[__FDELT (d)] & __FDMASK (d))
-
-/* Access macros for 'TICC3000fd_set' */
-
-#define FD_SET(fd, fdsetp)      __FD_SET (fd, fdsetp)
-#define FD_CLR(fd, fdsetp)      __FD_CLR (fd, fdsetp)
-#define FD_ISSET(fd, fdsetp)    __FD_ISSET (fd, fdsetp)
-#define FD_ZERO(fdsetp)         __FD_ZERO (fdsetp)
-
-/* Use in case of Big Endian only */
-
-#define htonl(A)    ((((unsigned long)(A) & 0xff000000) >> 24) | \
-                     (((unsigned long)(A) & 0x00ff0000) >> 8) | \
-                     (((unsigned long)(A) & 0x0000ff00) << 8) | \
-                     (((unsigned long)(A) & 0x000000ff) << 24))
-
-#define ntohl                   htonl
-
-/* Use in case of Big Endian only */
-#define htons(A)     ((((unsigned long)(A) & 0xff00) >> 8) | \
-                      (((unsigned long)(A) & 0x00ff) << 8))
-
-
-#define ntohs                   htons
-
-/* mDNS port - 5353    mDNS multicast address - 224.0.0.251 */
-
-#define SET_mDNS_ADD(sockaddr)            sockaddr.sa_data[0] = 0x14; \
-                                          sockaddr.sa_data[1] = 0xe9; \
-                                          sockaddr.sa_data[2] = 0xe0; \
-                                          sockaddr.sa_data[3] = 0x0; \
-                                          sockaddr.sa_data[4] = 0x0; \
-                                          sockaddr.sa_data[5] = 0xfb;
+#define socket(a,t,p)           cc3000_socket(a,t,p)
+#define closesocket(s)          cc3000_closesocket(s)
+#define bind(s,a,l)             cc3000_bind(s,a,l)
+#define connect(s,a,l)          cc3000_connect(s,a,l)
+#define listen(s,b)             cc3000_listen(s,b)
+#define accept(s,a,l)           cc3000_accept(s,a,l)
+#define send(s,b,l,f)           cc3000_send(s,b,l,f)
+#define sendto(s,b,l,f,a,n)     cc3000_sendto(s,b,l,f,a,n)
+#define recv(s,b,l,f)           cc3000_recv(s,b,l,f)
+#define recvfrom(s,b,l,f,a,n)   cc3000_recvfrom(s,b,l,f,a,n)
+#define setsockopt(s,l,o,v,n)   cc3000_setsockopt(s,l,o,v,n)
+#define getsockopt(s,l,o,v,n)   cc3000_getsockopt(s,l,o,v,n)
+#define gethostbyname(h,l,i)    cc3000_gethostbyname(h,l,i)
+#define mdnsadvertiser(e,n,l)   cc3000_mdnsadvertiser(e,n,l)
 
 /*****************************************************************************
  * Public Types
  *****************************************************************************/
-
-typedef struct _in_addr_t
-{
-    unsigned long s_addr;                   /* load with inet_aton() */
-} in_addr;
-
-typedef struct sockaddr
-{
-    uint16_t   sa_family;
-    uint8_t    sa_data[14];
-} sockaddr;
-
-typedef struct _sockaddr_in_t
-{
-    int16_t    sin_family;                  /* e.g. AF_INET */
-    uint16_t   sin_port;                    /* e.g. htons(3490) */
-    in_addr    sin_addr;                    /* see struct in_addr, below */
-    char       sin_zero[8];                 /* zero this if you want to */
-} sockaddr_in;
-
-#if 0 /* acassis: conflict with previous declaration on nuttx */
-typedef unsigned long socklen_t;
-#endif
-
-/* The fd_set member is required to be an array of longs. */
-
-typedef long int __fd_mask;
-
-/* fd_set for select and pselect. */
-
-typedef struct
-{
-  __fd_mask fds_bits[__FD_SETSIZE / __NFDBITS];
-} TICC3000fd_set;
 
 /*****************************************************************************
  * Public Data
@@ -235,7 +101,7 @@ extern "C" {
  *
  *****************************************************************************/
 
-int socket(long domain, long type, long protocol);
+int socket(int domain, int type, int protocol);
 
 /*****************************************************************************
  * Name: closesocket
@@ -244,14 +110,14 @@ int socket(long domain, long type, long protocol);
  *   The socket function closes a created socket.
  *
  * Input Parameters:
- *   sd    socket handle.
+ *   sockfd    socket handle.
  *
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned.
  *
  *****************************************************************************/
 
-long closesocket(long sd);
+int closesocket(int sockfd);
 
 /*****************************************************************************
  * Name: accept
@@ -276,7 +142,7 @@ long closesocket(long sd);
  *   length (in bytes) of the address returned.
  *
  * Input Parameters:
- *   sd      socket descriptor (handle)
+ *   sockfd  socket descriptor (handle)
  *   addr    the argument addr is a pointer to a sockaddr structure
  *           This structure is filled in with the address of the
  *           peer socket, as known to the communications layer.
@@ -298,7 +164,7 @@ long closesocket(long sd);
  *
  *****************************************************************************/
 
-long accept(long sd, sockaddr *addr, socklen_t *addrlen);
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 
 /*****************************************************************************
  * Name: bind
@@ -313,7 +179,7 @@ long accept(long sd, sockaddr *addr, socklen_t *addrlen);
  *   socket may receive connections.
  *
  * Input Parameters:
- *   sd      socket descriptor (handle)
+ *   sockfd  socket descriptor (handle)
  *   addr    specifies the destination address. On this version
  *    only AF_INET is supported.
  *   addrlen  contains the size of the structure pointed to by addr.
@@ -323,7 +189,7 @@ long accept(long sd, sockaddr *addr, socklen_t *addrlen);
  *
  *****************************************************************************/
 
-long bind(long sd, const sockaddr *addr, long addrlen);
+int bind(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
 
 /*****************************************************************************
  * Name: listen
@@ -340,17 +206,303 @@ long bind(long sd, const sockaddr *addr, long addrlen);
  * NOTE: On this version, backlog is not supported
  *
  * Input Parameters:
- *   sd      socket descriptor (handle)
+ *   sockfd   socket descriptor (handle)
  *   backlog  specifies the listen queue depth. On this version
- *    backlog is not supported.
+ *            backlog is not supported.
  *
  * Returned Value:
  *   On success, zero is returned. On error, -1 is returned.
  *
  *****************************************************************************/
 
-long listen(long sd, long backlog);
+int listen(int sockfd, int backlog);
 
+/*****************************************************************************
+ * Name: connect
+ *
+ * Decription:
+ *   initiate a connection on a socket
+ *   Function connects the socket referred to by the socket descriptor
+ *   sd, to the address specified by addr. The addrlen argument
+ *   specifies the size of addr. The format of the address in addr is
+ *   determined by the address space of the socket. If it is of type
+ *   SOCK_DGRAM, this call specifies the peer with which the socket is
+ *   to be associated; this address is that to which datagrams are to be
+ *   sent, and the only address from which datagrams are to be received.
+ *   If the socket is of type SOCK_STREAM, this call attempts to make a
+ *   connection to another socket. The other socket is specified  by
+ *   address, which is an address in the communications space of the
+ *   socket. Note that the function implements only blocking behavior
+ *   thus the caller will be waiting either for the connection
+ *   establishment or for the connection establishment failure.
+ *
+ * Input Parameters:
+ *   sockfd   socket descriptor (handle)
+ *   addr     specifies the destination addr. On this version
+ *     only AF_INET is supported.
+ *   addrlen  contains the size of the structure pointed to by addr
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, -1 is returned
+ *
+ *****************************************************************************/
+
+int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
+
+/*****************************************************************************
+ * Name: select
+ *
+ * Decription:
+ *   Monitor socket activity
+ *   Select allow a program to monitor multiple file descriptors,
+ *   waiting until one or more of the file descriptors become
+ *   "ready" for some class of I/O operation
+ *
+ * NOTE: If the timeout value set to less than 5ms it will automatically set
+ *   to 5ms to prevent overload of the system
+ *
+ * Input Parameters:
+ *   nfds       the highest-numbered file descriptor in any of the
+ *     three sets, plus 1.
+ *   readfds    socket descriptors list for read monitoring
+ *   writefds   socket descriptors list for write monitoring
+ *   exceptfds  socket descriptors list for exception monitoring
+ *   timeout     is an upper bound on the amount of time elapsed
+ *     before select() returns. Null means infinity
+ *     timeout. The minimum timeout is 5 milliseconds,
+ *    less than 5 milliseconds will be set
+ *     automatically to 5 milliseconds.
+ *
+ * Returned Value:
+ *   On success, select() returns the number of file descriptors
+ *   contained in the three returned descriptor sets (that is, the
+ *   total number of bits that are set in readfds, writefds,
+ *   exceptfds) which may be zero if the timeout expires before
+ *   anything interesting  happens.
+ *   On error, -1 is returned.
+ *   *readfds - return the sockets on which Read request will
+ *     return without delay with valid data.
+ *   *writefds - return the sockets on which Write request
+ *     will return without delay.
+ *   *exceptfds - return the sockets which closed recently.
+ *
+ *****************************************************************************/
+
+int select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds,
+           struct timeval *timeout);
+
+#ifndef CC3000_TINY_DRIVER
+/*****************************************************************************
+ * Name: setsockopt
+ *
+ * Decription:
+ *   set socket options
+ *   This function manipulate the options associated with a socket.
+ *   Options may exist at multiple protocol levels; they are always
+ *   present at the uppermost socket level.
+ *   When manipulating socket options the level at which the option
+ *   resides and the name of the option must be specified.
+ *   To manipulate options at the socket level, level is specified as
+ *   SOL_SOCKET. To manipulate options at any other level the protocol
+ *   number of the appropriate protocol controlling the option is
+ *   supplied. For example, to indicate that an option is to be
+ *   interpreted by the TCP protocol, level should be set to the
+ *   protocol number of TCP;
+ *   The parameters value and value_len are used to access value -
+ *   use for setsockopt(). For getsockopt() they identify a buffer
+ *   in which the value for the requested option(s) are to
+ *   be returned. For getsockopt(), value_len is a value-result
+ *   parameter, initially containing the size of the buffer
+ *   pointed to by option_value, and modified on return to
+ *   indicate the actual size of the value returned. If no option
+ *   value is to be supplied or returned, option_value may be NULL.
+ *
+ * NOTE: On this version the following two socket options are enabled:
+ *    The only protocol level supported in this version
+ *   is SOL_SOCKET (level).
+ *    1. SOCKOPT_RECV_TIMEOUT (option)
+ *     SOCKOPT_RECV_TIMEOUT configures recv and recvfrom timeout
+ *    in milliseconds.
+ *     In that case value should be pointer to unsigned long.
+ *    2. SOCKOPT_NONBLOCK (option). sets the socket non-blocking mode on
+ *    or off.
+ *     In that case value should be SOCK_ON or SOCK_OFF (value).
+ *
+ * Input Parameters:
+ *   sockfd      socket handle
+ *   level       defines the protocol level for this option
+ *   option      defines the option name to Interrogate
+ *   value       specifies a value for the option
+ *   value_len   specifies the length of the option value
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, -1 is returned
+ *
+ *****************************************************************************/
+
+int setsockopt(int sockfd, int level, int option, FAR const void *value, socklen_t value_len);
+#endif
+
+/*****************************************************************************
+ * Name: getsockopt
+ *
+ * Decription:
+ *   set socket options
+ *   This function manipulate the options associated with a socket.
+ *   Options may exist at multiple protocol levels; they are always
+ *   present at the uppermost socket level.
+ *   When manipulating socket options the level at which the option
+ *   resides and the name of the option must be specified.
+ *   To manipulate options at the socket level, level is specified as
+ *   SOL_SOCKET. To manipulate options at any other level the protocol
+ *   number of the appropriate protocol controlling the option is
+ *   supplied. For example, to indicate that an option is to be
+ *   interpreted by the TCP protocol, level should be set to the
+ *   protocol number of TCP;
+ *   The parameters value and value_len are used to access value -
+ *   use for setsockopt(). For getsockopt() they identify a buffer
+ *   in which the value for the requested option(s) are to
+ *   be returned. For getsockopt(), value_len is a value-result
+ *   parameter, initially containing the size of the buffer
+ *   pointed to by option_value, and modified on return to
+ *   indicate the actual size of the value returned. If no option
+ *   value is to be supplied or returned, option_value may be NULL.
+ *
+ * NOTE: On this version the following two socket options are enabled:
+ *   The only protocol level supported in this version
+ *   is SOL_SOCKET (level).
+ *
+ *    1. SOCKOPT_RECV_TIMEOUT (option)
+ *       SOCKOPT_RECV_TIMEOUT configures recv and recvfrom timeout
+ *       in milliseconds. In that case value should be pointer to unsigned
+ *       long.
+ *    2. SOCKOPT_NONBLOCK (option). sets the socket non-blocking mode on
+ *       or off. In that case value should be SOCK_ON or SOCK_OFF (value).
+ *
+ * Input Parameters:
+ *   sockfd      socket handle
+ *   level       defines the protocol level for this option
+ *   option      defines the option name to Interrogate
+ *   value       specifies a value for the option
+ *   value_len   specifies the length of the option value
+ *
+ * Returned Value:
+ *   On success, zero is returned. On error, -1 is returned
+ *
+ *****************************************************************************/
+
+int getsockopt(int sockfd, int level, int option, FAR void *value, FAR socklen_t *value_len);
+
+/*****************************************************************************
+ * Name: recv
+ *
+ * Decription:
+ *     function receives a message from a connection-mode socket
+ *
+ * NOTE: On this version, only blocking mode is supported.
+ *
+ * Input Parameters:
+ *   sockfd socket handle
+ *   buf    Points to the buffer where the message should be stored
+ *   len    Specifies the length in bytes of the buffer pointed to
+ *     by the buffer argument.
+ *   flags   Specifies the type of message reception.
+ *     On this version, this parameter is not supported.
+ *
+ * Returned Value:
+ *     Return the number of bytes received, or -1 if an error
+ *     occurred
+ *
+ *****************************************************************************/
+
+ssize_t recv(int sockfd, FAR void *buf, size_t len, int flags);
+
+/*****************************************************************************
+ * Name: recvfrom
+ *
+ * Decription:
+ *    read data from socket
+ *    function receives a message from a connection-mode or
+ *    connectionless-mode socket. Note that raw sockets are not
+ *    supported.
+ *
+ * NOTE: On this version, only blocking mode is supported.
+ *
+ * Input Parameters:
+ *   sockfd socket handle
+ *   buf    Points to the buffer where the message should be stored
+ *   len    Specifies the length in bytes of the buffer pointed to
+ *     by the buffer argument.
+ *   flags   Specifies the type of message reception.
+ *     On this version, this parameter is not supported.
+ *   from   pointer to an address structure indicating the source
+ *    address: sockaddr. On this version only AF_INET is
+ *    supported.
+ *   fromlen   source address tructure size
+ *
+ * Returned Value:
+ *     Return the number of bytes received, or -1 if an error
+ *     occurred
+ *
+ *****************************************************************************/
+
+ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
+                        FAR struct sockaddr *from, FAR socklen_t *fromlen);
+
+/*****************************************************************************
+ * Name: send
+ *
+ * Decription:
+ *     Write data to TCP socket
+ *     This function is used to transmit a message to another
+ *     socket.
+ *
+ * NOTE: On this version, only blocking mode is supported.
+ *
+ * Input Parameters:
+ *   sockfd   socket handle
+ *   buf      Points to a buffer containing the message to be sent
+ *   len      message size in bytes
+ *   flags    On this version, this parameter is not supported
+ *
+ * Returned Value:
+ *     Return the number of bytes transmitted, or -1 if an
+ *     error occurred
+ *
+ *****************************************************************************/
+
+ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags);
+
+/*****************************************************************************
+ * Name: sendto
+ *
+ * Decription:
+ *     Write data to TCP socket
+ *     This function is used to transmit a message to another
+ *     socket.
+ *
+ * NOTE: On this version, only blocking mode is supported.
+ *
+ * Input Parameters:
+ *   sockfd   socket handle
+ *   buf      Points to a buffer containing the message to be sent
+ *   len      message size in bytes
+ *   flags    On this version, this parameter is not supported
+ *   to       pointer to an address structure indicating the destination
+ *     address: sockaddr. On this version only AF_INET is
+ *     supported.
+ *   tolen    destination address structure size
+ *
+ * Returned Value:
+ *     Return the number of bytes transmitted, or -1 if an
+ *     error occurred
+ *
+ *****************************************************************************/
+
+ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
+                      FAR const struct sockaddr *to, socklen_t tolen);
+
+#ifndef CC3000_TINY_DRIVER
 /*****************************************************************************
  * Name: gethostbyname
  *
@@ -374,296 +526,8 @@ long listen(long sd, long backlog);
  *
  *****************************************************************************/
 
-#ifndef CC3000_TINY_DRIVER
 int gethostbyname(char * hostname, uint16_t usNameLen, unsigned long* out_ip_addr);
 #endif
-
-/*****************************************************************************
- * Name: connect
- *
- * Decription:
- *   initiate a connection on a socket
- *   Function connects the socket referred to by the socket descriptor
- *   sd, to the address specified by addr. The addrlen argument
- *   specifies the size of addr. The format of the address in addr is
- *   determined by the address space of the socket. If it is of type
- *   SOCK_DGRAM, this call specifies the peer with which the socket is
- *   to be associated; this address is that to which datagrams are to be
- *   sent, and the only address from which datagrams are to be received.
- *   If the socket is of type SOCK_STREAM, this call attempts to make a
- *   connection to another socket. The other socket is specified  by
- *   address, which is an address in the communications space of the
- *   socket. Note that the function implements only blocking behavior
- *   thus the caller will be waiting either for the connection
- *   establishment or for the connection establishment failure.
- *
- * Input Parameters:
- *   sd       socket descriptor (handle)
- *   addr     specifies the destination addr. On this version
- *     only AF_INET is supported.
- *   addrlen  contains the size of the structure pointed to by addr
- *
- * Returned Value:
- *   On success, zero is returned. On error, -1 is returned
- *
- *****************************************************************************/
-
-long connect(long sd, const sockaddr *addr, long addrlen);
-
-/*****************************************************************************
- * Name: select
- *
- * Decription:
- *   Monitor socket activity
- *   Select allow a program to monitor multiple file descriptors,
- *   waiting until one or more of the file descriptors become
- *   "ready" for some class of I/O operation
- *
- * NOTE: If the timeout value set to less than 5ms it will automatically set
- *   to 5ms to prevent overload of the system
- *
- * Input Parameters:
- *   nfds       the highest-numbered file descriptor in any of the
- *     three sets, plus 1.
- *   writesds   socket descriptors list for write monitoring
- *   readsds    socket descriptors list for read monitoring
- *   exceptsds  socket descriptors list for exception monitoring
- *   timeout     is an upper bound on the amount of time elapsed
- *     before select() returns. Null means infinity
- *     timeout. The minimum timeout is 5 milliseconds,
- *    less than 5 milliseconds will be set
- *     automatically to 5 milliseconds.
- *
- * Returned Value:
- *   On success, select() returns the number of file descriptors
- *   contained in the three returned descriptor sets (that is, the
- *   total number of bits that are set in readfds, writefds,
- *   exceptfds) which may be zero if the timeout expires before
- *   anything interesting  happens.
- *   On error, -1 is returned.
- *   *readsds - return the sockets on which Read request will
- *     return without delay with valid data.
- *   *writesds - return the sockets on which Write request
- *     will return without delay.
- *   *exceptsds - return the sockets which closed recently.
- *
- *****************************************************************************/
-
-int select(long nfds, TICC3000fd_set *readsds, TICC3000fd_set *writesds,
-           TICC3000fd_set *exceptsds, struct timeval *timeout);
-
-/*****************************************************************************
- * Name: setsockopt
- *
- * Decription:
- *   set socket options
- *   This function manipulate the options associated with a socket.
- *   Options may exist at multiple protocol levels; they are always
- *   present at the uppermost socket level.
- *   When manipulating socket options the level at which the option
- *   resides and the name of the option must be specified.
- *   To manipulate options at the socket level, level is specified as
- *   SOL_SOCKET. To manipulate options at any other level the protocol
- *   number of the appropriate protocol controlling the option is
- *   supplied. For example, to indicate that an option is to be
- *   interpreted by the TCP protocol, level should be set to the
- *   protocol number of TCP;
- *   The parameters optval and optlen are used to access optval -
- *   use for setsockopt(). For getsockopt() they identify a buffer
- *   in which the value for the requested option(s) are to
- *   be returned. For getsockopt(), optlen is a value-result
- *   parameter, initially containing the size of the buffer
- *   pointed to by option_value, and modified on return to
- *   indicate the actual size of the value returned. If no option
- *   value is to be supplied or returned, option_value may be NULL.
- *
- * NOTE: On this version the following two socket options are enabled:
- *    The only protocol level supported in this version
- *   is SOL_SOCKET (level).
- *    1. SOCKOPT_RECV_TIMEOUT (optname)
- *     SOCKOPT_RECV_TIMEOUT configures recv and recvfrom timeout
- *    in milliseconds.
- *     In that case optval should be pointer to unsigned long.
- *    2. SOCKOPT_NONBLOCK (optname). sets the socket non-blocking mode on
- *    or off.
- *     In that case optval should be SOCK_ON or SOCK_OFF (optval).
- *
- * Input Parameters:
- *   sd          socket handle
- *   level       defines the protocol level for this option
- *   optname     defines the option name to Interrogate
- *   optval      specifies a value for the option
- *   optlen      specifies the length of the option value
- *
- * Returned Value:
- *   On success, zero is returned. On error, -1 is returned
- *
- *****************************************************************************/
-
-#ifndef CC3000_TINY_DRIVER
-int setsockopt(long sd, long level, long optname, const void *optval,
-               socklen_t optlen);
-#endif
-
-/*****************************************************************************
- * Name: getsockopt
- *
- * Decription:
- *   set socket options
- *   This function manipulate the options associated with a socket.
- *   Options may exist at multiple protocol levels; they are always
- *   present at the uppermost socket level.
- *   When manipulating socket options the level at which the option
- *   resides and the name of the option must be specified.
- *   To manipulate options at the socket level, level is specified as
- *   SOL_SOCKET. To manipulate options at any other level the protocol
- *   number of the appropriate protocol controlling the option is
- *   supplied. For example, to indicate that an option is to be
- *   interpreted by the TCP protocol, level should be set to the
- *   protocol number of TCP;
- *   The parameters optval and optlen are used to access optval -
- *   use for setsockopt(). For getsockopt() they identify a buffer
- *   in which the value for the requested option(s) are to
- *   be returned. For getsockopt(), optlen is a value-result
- *   parameter, initially containing the size of the buffer
- *   pointed to by option_value, and modified on return to
- *   indicate the actual size of the value returned. If no option
- *   value is to be supplied or returned, option_value may be NULL.
- *
- * NOTE: On this version the following two socket options are enabled:
- *    The only protocol level supported in this version
- *   is SOL_SOCKET (level).
- *    1. SOCKOPT_RECV_TIMEOUT (optname)
- *     SOCKOPT_RECV_TIMEOUT configures recv and recvfrom timeout
- *    in milliseconds.
- *     In that case optval should be pointer to unsigned long.
- *    2. SOCKOPT_NONBLOCK (optname). sets the socket non-blocking mode on
- *    or off.
- *     In that case optval should be SOCK_ON or SOCK_OFF (optval).
- *
- * Input Parameters:
- *   sd          socket handle
- *   level       defines the protocol level for this option
- *   optname     defines the option name to Interrogate
- *   optval      specifies a value for the option
- *   optlen      specifies the length of the option value
- *
- * Returned Value:
- *   On success, zero is returned. On error, -1 is returned
- *
- *****************************************************************************/
-
-int getsockopt(long sd, long level, long optname, void *optval,
-               socklen_t *optlen);
-
-/*****************************************************************************
- * Name: recv
- *
- * Decription:
- *     function receives a message from a connection-mode socket
- *
- * NOTE: On this version, only blocking mode is supported.
- *
- * Input Parameters:
- *   sd     socket handle
- *   buf    Points to the buffer where the message should be stored
- *   len    Specifies the length in bytes of the buffer pointed to
- *     by the buffer argument.
- *   flags   Specifies the type of message reception.
- *     On this version, this parameter is not supported.
- *
- * Returned Value:
- *     Return the number of bytes received, or -1 if an error
- *     occurred
- *
- *****************************************************************************/
-
-int recv(long sd, void *buf, long len, long flags);
-
-/*****************************************************************************
- * Name: recvfrom
- *
- * Decription:
- *    read data from socket
- *    function receives a message from a connection-mode or
- *    connectionless-mode socket. Note that raw sockets are not
- *    supported.
- *
- * NOTE: On this version, only blocking mode is supported.
- *
- * Input Parameters:
- *   sd     socket handle
- *   buf    Points to the buffer where the message should be stored
- *   len    Specifies the length in bytes of the buffer pointed to
- *     by the buffer argument.
- *   flags   Specifies the type of message reception.
- *     On this version, this parameter is not supported.
- *   from   pointer to an address structure indicating the source
- *    address: sockaddr. On this version only AF_INET is
- *    supported.
- *   fromlen   source address tructure size
- *
- * Returned Value:
- *     Return the number of bytes received, or -1 if an error
- *     occurred
- *
- *****************************************************************************/
-
-int recvfrom(long sd, void *buf, long len, long flags, sockaddr *from,
-             socklen_t *fromlen);
-
-/*****************************************************************************
- * Name: send
- *
- * Decription:
- *     Write data to TCP socket
- *     This function is used to transmit a message to another
- *     socket.
- *
- * NOTE: On this version, only blocking mode is supported.
- *
- * Input Parameters:
- *   sd       socket handle
- *   buf      Points to a buffer containing the message to be sent
- *   len      message size in bytes
- *   flags    On this version, this parameter is not supported
- *
- * Returned Value:
- *     Return the number of bytes transmitted, or -1 if an
- *     error occurred
- *
- *****************************************************************************/
-
-int send(long sd, const void *buf, long len, long flags);
-
-/*****************************************************************************
- * Name: sendto
- *
- * Decription:
- *     Write data to TCP socket
- *     This function is used to transmit a message to another
- *     socket.
- *
- * NOTE: On this version, only blocking mode is supported.
- *
- * Input Parameters:
- *   sd       socket handle
- *   buf      Points to a buffer containing the message to be sent
- *   len      message size in bytes
- *   flags    On this version, this parameter is not supported
- *   to       pointer to an address structure indicating the destination
- *     address: sockaddr. On this version only AF_INET is
- *     supported.
- *   tolen    destination address structure size
- *
- * Returned Value:
- *     Return the number of bytes transmitted, or -1 if an
- *     error occurred
- *
- *****************************************************************************/
-
-int sendto(long sd, const void *buf, long len, long flags, const sockaddr *to,
-           socklen_t tolen);
 
 /*****************************************************************************
  * Name: mdnsAdvertiser
@@ -683,8 +547,9 @@ int sendto(long sd, const void *buf, long len, long flags, const sockaddr *to,
  *
  *****************************************************************************/
 
-int mdnsAdvertiser(uint16_t mdnsEnabled, char * deviceServiceName,
+int mdnsadvertiser(uint16_t mdnsEnabled, char *deviceServiceName,
                    uint16_t deviceServiceNameLength);
+
 #ifdef  __cplusplus
 }
 #endif // __cplusplus

@@ -141,7 +141,7 @@ struct cc3000_config_s
   void (*irq_enable)(FAR struct cc3000_config_s *state, bool enable);
   void (*irq_clear)(FAR struct cc3000_config_s *state);
   void (*power_enable)(FAR struct cc3000_config_s *state,bool enable);
-  void (*chip_select)(FAR struct cc3000_config_s *state,bool enable);
+  void (*chip_chip_select)(FAR struct cc3000_config_s *state,bool enable);
   bool (*irq_read)(FAR struct cc3000_config_s *state);
   bool (*probe)(FAR struct cc3000_config_s *state, int n, bool s);
 };

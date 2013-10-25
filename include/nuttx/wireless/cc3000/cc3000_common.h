@@ -230,10 +230,6 @@ typedef struct
   tDriverPatches        sDriverPatches;
   tBootLoaderPatches    sBootLoaderPatches;
   tWlanCB               sWlanCB;
-  tWlanReadInteruptPin  ReadWlanInterruptPin;
-  tWlanInterruptEnable  WlanInterruptEnable;
-  tWlanInterruptDisable WlanInterruptDisable;
-  tWriteWlanPin         WriteWlanPin;
 
   signed long           slTransmitDataError;
   uint16_t              usNumberOfFreeBuffers;
