@@ -1083,7 +1083,9 @@ static void sam_adc_rxint(struct adc_dev_s *dev, bool enable)
 
 static int sam_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
+#ifdef CONFIG_SAMA5_ADC_SWTRIG
   struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
+#endif
   int ret = OK;
 
   avdbg("cmd=%d arg=%ld\n", cmd, arg);
