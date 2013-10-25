@@ -2257,6 +2257,14 @@ config SAMA5_TC1_TIOB5
 
 endif # SAMA5_TC1
 
+config SAMA5_TC_REGDEBUG
+	bool "TC Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level Timer/Counter device debug information.
+		Very invasive! Requires also DEBUG.
+
 endmenu # Timer/counter Configuration
 endif # SAMA5_TC0 || SAMA5_TC1
 

@@ -203,7 +203,7 @@
 
 /* Channel Sequence Register 1 */
 
-#define ADC_SEQR1_USCH_SHIFT(n)    (((n)-1) << 4) /* n=1..8 */
+#define ADC_SEQR1_USCH_SHIFT(n)    (((n)-1) << 2) /* n=1..8 */
 #define ADC_SEQR1_USCH_MASK(n)     (15 << ADC_SEQR1_USCH_SHIFT(n))
 #  define ADC_SEQR1_USCH(n,v)      ((uint32_t)(v) << ADC_SEQR1_USCH_SHIFT(n))
 #define ADC_SEQR1_USCH1_SHIFT      (0) /* Bits 0-3: User sequence number 1 */
@@ -233,7 +233,7 @@
 
 /* Channel Sequence Register 2 */
 
-#define ADC_SEQR2_USCH_SHIFT(n)    (((n)-9) << 4) /* n=9..11 */
+#define ADC_SEQR2_USCH_SHIFT(n)    (((n)-9) << 2) /* n=9..11 */
 #define ADC_SEQR2_USCH_MASK(n)     (15 << ADC_SEQR2_USCH_SHIFT(n))
 #  define ADC_SEQR2_USCH(n,v)      ((uint32_t)(v) << ADC_SEQR2_USCH_SHIFT(n))
 #define ADC_SEQR2_USCH9_SHIFT      (0) /* Bits 0-3: User sequence number 9 */

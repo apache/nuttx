@@ -671,7 +671,7 @@ static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result)
 
   sam_adc_dmasetup(priv->dma,
                    priv->odd ? (void *)priv->oddbuf : (void *)priv->evenbuf,
-                   SAMA5_NCHANNELS);
+                   SAMA5_NCHANNELS * sizeof(uint32_t));
 }
 #endif
 
@@ -995,7 +995,7 @@ static int sam_adc_setup(struct adc_dev_s *dev)
   priv->ready   = true;
   priv->enabled = false;
 
-  sam_adc_dmasetup(priv->dma, (void *)priv->evenbuf, SAMA5_NCHANNELS);
+  sam_adc_dmasetup(priv, (void *)priv->evenbuf, SAMA5_NCHANNELS);
 #else
   /* Enable end-of-conversion interrupts for all enabled channels. */
 
@@ -1566,8 +1566,6 @@ static void sam_adc_analogchange(struct sam_adc_s *priv)
 #ifdef CONFIG_SAMA5_ADC_SEQUENCER
 static void sam_adc_setseqr(int chan, uint32_t *seqr1, uint32_t *seqr2, int seq)
 {
-  avdbg("seqr1=%p seqr2=%p seg=%d\n");
-
   if (seq > 8)
     {
       *seqr2 |= ADC_SEQR2_USCH(seq, chan);
@@ -1576,6 +1574,8 @@ static void sam_adc_setseqr(int chan, uint32_t *seqr1, uint32_t *seqr2, int seq)
     {
       *seqr1 |= ADC_SEQR1_USCH(seq, chan);
     }
+
+  avdbg("chan=%d seqr1=%08x seqr2=%08x seq=%d\n", chan, *seqr1, *seqr2, seq);
 }
 #endif
 
@@ -1591,9 +1591,9 @@ static void sam_adc_sequencer(struct sam_adc_s *priv)
 
   /* Set user configured channel sequence */
 
-  seqr1  = 0;
-  seqr2  = 0;
-  seq    = 0;
+  seqr1 = 0;
+  seqr2 = 0;
+  seq   = 1;
 
 #ifdef CONFIG_SAMA5_ADC_CHAN0
   sam_adc_setseqr(0, &seqr1, &seqr2, seq++);
@@ -1700,12 +1700,6 @@ static void sam_adc_channels(struct sam_adc_s *priv)
   uint32_t regval;
 
   avdbg("Entry\n");
-
-  /* Disable the sequencer */
-
-  regval  = sam_adc_getreg(priv, SAM_ADC_MR);
-  regval &= ~ADC_MR_USEQ;
-  sam_adc_putreg(priv, SAM_ADC_MR, regval);
 
   /* Enable channels. */
 
