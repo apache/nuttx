@@ -5882,4 +5882,6 @@
 	* include/nuttx/fs/ioctl.h and arch/arm/src/sama5/sam_adc.c:  Add
 	  and ioctl command that can be used to trigger ADC/DAC conversion
 	  (2015-10-25).
+	* configs/spark:  Spark configuration updated by David Sidrane
+	  (2013-10-25).
 
