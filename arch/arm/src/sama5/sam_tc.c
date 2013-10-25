@@ -107,8 +107,8 @@
 #  define tcdbg    dbg
 #  define tcvdbg   vdbg
 #else
-#  define wddbg(x...)
-#  define wdvdbg(x...)
+#  define tcdbg(x...)
+#  define tcvdbg(x...)
 #endif
 
 /****************************************************************************
@@ -165,9 +165,9 @@ struct sam_tc_s
   /* Debug stuff */
 
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
-   bool wrlast;            /* Last was a write */
-   uint32_t addrlast;      /* Last address */
-   uint32_t vallast;       /* Last value */
+   bool wr;                /* True:Last was a write */
+   uint32_t regaddr;       /* Last address */
+   uint32_t regval;        /* Last value */
    int ntimes;             /* Number of times */
 #endif
 };
@@ -445,9 +445,9 @@ static void sam_takesem(struct sam_tc_s *tc)
 static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
                          uint32_t regval)
 {
-  if (wr      == tc->wrlast &&   /* Same kind of access? */
-      regval  == tc->vallast &&  /* Same value? */
-      regaddr == tc->addrlast)   /* Same regaddr? */
+  if (wr      == tc->wr &&      /* Same kind of access? */
+      regaddr == tc->regaddr && /* Same register address? */
+      regval  == tc->regval)    /* Same register value? */
     {
       /* Yes, then just keep a count of the number of times we did this. */
 
@@ -467,10 +467,10 @@ static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
 
       /* Save information about the new access */
 
-      tc->wrlast   = wr;
-      tc->vallast  = regval;
-      tc->addrlast = regaddr;
-      tc->ntimes   = 0;
+      tc->wr      = wr;
+      tc->regval  = regval;
+      tc->regaddr = regaddr;
+      tc->ntimes  = 0;
     }
 
   /* Return true if this is the first time that we have done this operation */
@@ -495,7 +495,7 @@ static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
   uint32_t regval     = getreg32(regaddr);
 
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
-  if (sam_checkreg(tc, false, regval, regaddr))
+  if (sam_checkreg(tc, false, regaddr, regval))
     {
       lldbg("%08x->%08x\n", regaddr, regval);
     }
@@ -519,7 +519,7 @@ static inline void sam_tc_putreg(struct sam_chan_s *chan, uint32_t regval,
   uint32_t regaddr    = tc->base + offset;
 
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
-  if (sam_checkreg(tc, true, regval, regaddr))
+  if (sam_checkreg(tc, true, regaddr, regval))
     {
       lldbg("%08x<-%08x\n", regaddr, regval);
     }
@@ -543,7 +543,7 @@ static inline uint32_t sam_chan_getreg(struct sam_chan_s *chan,
   uint32_t regval  = getreg32(regaddr);
 
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
-  if (sam_checkreg(chan->tc, false, regval, regaddr))
+  if (sam_checkreg(chan->tc, false, regaddr, regval))
     {
       lldbg("%08x->%08x\n", regaddr, regval);
     }
@@ -566,7 +566,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan, unsigned int offset,
   uint32_t regaddr = chan->base + offset;
 
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
-  if (sam_checkreg(chan->tc, true, regval, regaddr))
+  if (sam_checkreg(chan->tc, true, regaddr, regval))
     {
       lldbg("%08x<-%08x\n", regaddr, regval);
     }
@@ -632,6 +632,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
     {
       /* Timer/counter is not invalid or not enabled */
 
+      tcdbg("ERROR: Bad channel number: %d\n", channel);
       return NULL;
     }
 
@@ -653,13 +654,14 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
       for (i = 0, ch = tcconfig->chfirst; i < SAM_TC_NCHANNELS; i++)
         {
-          tcdbg("Initializing TC%d\n", tcconfig->tc);
+          tcdbg("Initializing TC%d channel %d\n", tcconfig->tc, ch);
 
           /* Initialize the channel data structure */
 
           chan       = &tc->channel[i];
           chconfig   = &tcconfig->channel[i];
 
+          chan->tc   = tc;
           chan->base = chconfig->base;
           chan->chan = ch++;
 
