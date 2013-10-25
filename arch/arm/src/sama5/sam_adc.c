@@ -50,6 +50,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/ioctl.h>
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -1081,18 +1083,29 @@ static void sam_adc_rxint(struct adc_dev_s *dev, bool enable)
 
 static int sam_adc_ioctl(struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
+  struct sam_adc_s *priv = (struct sam_adc_s *)dev->ad_priv;
+  int ret = OK;
+
   avdbg("cmd=%d arg=%ld\n", cmd, arg);
 
-  /* No ioctl commands supported:
-   *
-   * REVISIT:  Need to implement a ioctl to support software triggering
-   */
-
+  switch (cmd)
+    {
 #ifdef CONFIG_SAMA5_ADC_SWTRIG
-#  error Need an ioctl to perform software triggering
+      case ANIOC_TRIGGER: /* Software trigger */
+        {
+          sam_adc_putreg(priv, SAM_ADC_CR, ADC_CR_START); /* Start conversion */
+        }
+        break;
 #endif
 
-  return -ENOTTY;
+      /* Unsupported or invalid command */
+
+      default:
+        ret = -ENOTTY;
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
