@@ -106,12 +106,12 @@ struct stm32_config_s
  * indicating that the CC3000 core module is ready to accept data. T2
  * duration is approximately 7 ms.
  *
- *   irq_attach   - Attach the CC3000 interrupt handler to the GPIO interrupt
- *   irq_enable   - Enable or disable the GPIO interrupt
- *   clear_irq    - Acknowledge/clear any pending GPIO interrupt
- *   power_enable - Enable or disable Module enable.
- *   chip_select  - The Chip Select
- *   busy         - Return the state of the interrupt GPIO input
+ *   irq_attach         - Attach the CC3000 interrupt handler to the GPIO interrupt
+ *   irq_enable         - Enable or disable the GPIO interrupt
+ *   clear_irq          - Acknowledge/clear any pending GPIO interrupt
+ *   power_enable       - Enable or disable Module enable.
+ *   chip_chip_select   - The Chip Select
+ *   wl_read_irq        - Return the state of the interrupt GPIO input
  */
 
 static int  wl_attach_irq(FAR struct cc3000_config_s *state, xcpt_t handler);
@@ -138,17 +138,17 @@ static bool probe(FAR struct cc3000_config_s *state,int n, bool s);
 
 static struct stm32_config_s g_cc3000_info =
 {
-  .dev.spi_frequency = CONFIG_CC3000_SPI_FREQUENCY,
-  .dev.spi_mode      = CONFIG_CC3000_SPI_MODE,
+  .dev.spi_frequency    = CONFIG_CC3000_SPI_FREQUENCY,
+  .dev.spi_mode         = CONFIG_CC3000_SPI_MODE,
 
-  .dev.irq_attach    = wl_attach_irq,
-  .dev.irq_enable    = wl_enable_irq,
-  .dev.irq_clear     = wl_clear_irq,
-  .dev.power_enable  = wl_enable_power,
-  .dev.chip_select   = wl_select,
-  .dev.irq_read      = wl_read_irq,
-  .dev.probe          = probe, /* This is used for debugging */
-  .handler           = NULL,
+  .dev.irq_attach       = wl_attach_irq,
+  .dev.irq_enable       = wl_enable_irq,
+  .dev.irq_clear        = wl_clear_irq,
+  .dev.power_enable     = wl_enable_power,
+  .dev.chip_chip_select = wl_select,
+  .dev.irq_read         = wl_read_irq,
+  .dev.probe            = probe, /* This is used for debugging */
+  .handler              = NULL,
 };
 
 /****************************************************************************
@@ -228,25 +228,6 @@ static bool wl_read_irq(FAR struct cc3000_config_s *state)
   /* Active low*/
 
   return  stm32_gpioread(GPIO_WIFI_INT) ? false : true;
-}
-
-static long read_IRQ(void)
-{
-  static long state = 0; /* Start as a 0 */
-  state ^= 1;
-  return state;
-}
-
-void enable_nop(void)
-{
-}
-
-void disable_nop(void)
-{
-}
-
-void power_nop(unsigned char en)
-{
 }
 
 /****************************************************************************
@@ -358,15 +339,10 @@ static bool probe(FAR struct cc3000_config_s *state,int n, bool s)
  *
  ****************************************************************************/
 
-void CC3000_wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches, tDriverPatches
+void cc3000_wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches, tDriverPatches
                       sDriverPatches,  tBootLoaderPatches sBootLoaderPatches)
 {
-  wlan_init(sWlanCB,
-            sFWPatches, sDriverPatches, sBootLoaderPatches,
-            read_IRQ,
-            enable_nop,
-            disable_nop,
-            power_nop);
+  wlan_init(sWlanCB, sFWPatches, sDriverPatches, sBootLoaderPatches);
 }
 
 #endif /* CONFIG_WL_CC3000 */
