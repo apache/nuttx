@@ -219,7 +219,16 @@
 #define _SNIOCVALID(c)    (_IOC_TYPE(c)==_SNIOCBASE)
 #define _SNIOC(nr)        _IOC(_SNIOCBASE,nr)
 
-/* NuttX PWM ioctl definitions (see nuttx/pwm.h) ***************************/
+/* Nuttx Analog (DAC/ADC_ ioctl commands ************************************/
+
+#define _ANIOCVALID(c)    (_IOC_TYPE(c)==_ANIOCBASE)
+#define _ANIOC(nr)        _IOC(_ANIOCBASE,nr)
+
+#define ANIOC_TRIGGER     _ANIOC(0x0001)  /* Trigger one conversion
+                                           * IN: None
+                                           * OUT: None */
+
+/* NuttX PWM ioctl definitions (see nuttx/pwm.h) ****************************/
 
 #define _PWMIOCVALID(c)   (_IOC_TYPE(c)==_PWMIOCBASE)
 #define _PWMIOC(nr)       _IOC(_PWMIOCBASE,nr)

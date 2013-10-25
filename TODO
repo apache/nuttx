@@ -18,7 +18,7 @@ nuttx/
  (16)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (11)  Libraries (libc/, )
- (10)  File system/Generic drivers (fs/, drivers/)
+ (11)  File system/Generic drivers (fs/, drivers/)
   (5)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -1162,6 +1162,21 @@ o File system / Generic drivers (fs/, drivers/)
   Status:      Open
   Priority:    Low.  Nothing is broken.  This is an enhancement that would
                improve the OS design and possible reduce some FLASH usage
+
+  Title:       UNIFIED DESCRIPTOR REPRESENTATION
+  Descripton:  There are two separate ranges of descriptors for file and
+               socket descriptors: if a descriptor is in one range then it is
+               recognized as a file descriptor; if it is in another range
+               then it is recognized as a socket descriptor.  These separate
+               descriptor ranges can cause problems, for example, they makes
+               dup'ing descriptors with dup2() problematic.  The two groups
+               of descriptors are really indices into two separate tables:
+               On an array of file structures and the other an array of
+               socket structures.  There really should be one array that
+               is a union of file and socket descriptors.  Then socket and
+               file decriptors could lie in the same range.
+  Status:      Open
+  Priority:    Low
 
 o Graphics subystem (graphics/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -5879,4 +5879,7 @@
 	  (2013-10-24).
 	* configs/sama5d3x-ek/src/sam_adc.c:  Integrate support for the
 	  apps/examples/adc into the SAMA5D3x-EK configuration (2013-10-24).
+	* include/nuttx/fs/ioctl.h and arch/arm/src/sama5/sam_adc.c:  Add
+	  and ioctl command that can be used to trigger ADC/DAC conversion
+	  (2015-10-25).
 
