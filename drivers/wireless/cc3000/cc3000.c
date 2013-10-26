@@ -506,7 +506,7 @@ static void * select_thread_func(FAR void *arg)
             {
               if (priv->sockets[s].sd != FREE_SLOT &&                        /* Check that the socket is valid */
                   priv->sockets[s].sd  != priv->accepting_socket.acc.sd  &&  /* Verify this is not an accept socket */
-                  C3000_FD_ISSET(priv->sockets[s].sd, &readsds))             /* and has pending data */
+                  CC3000_FD_ISSET(priv->sockets[s].sd, &readsds))            /* and has pending data */
                 {
                   sem_post(&priv->sockets[s].semwait);                       /* release the semaphore */
                 }
