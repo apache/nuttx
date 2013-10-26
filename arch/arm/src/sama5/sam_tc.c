@@ -156,6 +156,7 @@ struct sam_tc_s
   sem_t exclsem;           /* Assures mutually exclusive access to TC */
   uintptr_t base;          /* Register base address */
   uint8_t pid;             /* Peripheral ID */
+  uint8_t tc;              /* Timer/channel number (0 or 1) */
   bool initialized;        /* True: Timer data has been initialized */
 
   /* Channels */
@@ -182,10 +183,12 @@ static void sam_takesem(struct sam_tc_s *tc);
 #define     sam_givesem(tc) (sem_post(&tc->exclsem))
 
 #ifdef CONFIG_SAMA5_TC_REGDEBUG
+static void sam_regdump(struct sam_chan_s *chan, const char *msg);
 static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
                          uint32_t regval);
 #else
-# define    sam_checkreg(tc,wr,regaddr,regval) (false)
+#  define   sam_regdump(chan,msg)
+#  define   sam_checkreg(tc,wr,regaddr,regval) (false)
 #endif
 
 static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
@@ -216,58 +219,61 @@ static const struct sam_tcconfig_s g_tc012config =
   .tc      = 0,
   .channel =
   {
+    [0] =
     {
-      SAM_TC012_CHAN_BASE(0),
+      .base   = SAM_TC012_CHAN_BASE(0),
 #ifdef CONFIG_SAMA5_TC0_CLK0
-       .clkset = PIO_TC0_CLK,
+      .clkset = PIO_TC0_CLK,
 #else
-       .clkset = 0,
+      .clkset = 0,
 #endif
 #ifdef CONFIG_SAMA5_TC0_TIOA0
-       .tioaset = PIO_TC0_IOA,
+      .tioaset = PIO_TC0_IOA,
 #else
-       .tioaset = 0,
+      .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMA5_TC0_TIOB0
-       .tiobset = PIO_TC0_IOB,
+      .tiobset = PIO_TC0_IOB,
 #else
-       .tiobset = 0,
+      .tiobset = 0,
 #endif
     },
+    [1] =
     {
-      SAM_TC012_CHAN_BASE(1),
+      .base    = SAM_TC012_CHAN_BASE(1),
 #ifdef CONFIG_SAMA5_TC0_CLK1
-       .clkset = PIO_TC1_CLK,
+      .clkset  = PIO_TC1_CLK,
 #else
-       .clkset = 0,
+      .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMA5_TC0_TIOA1
-       .tioaset = PIO_TC1_IOA,
+      .tioaset = PIO_TC1_IOA,
 #else
-       .tioaset = 0,
+      .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMA5_TC0_TIOB1
-       .tiobset = PIO_TC1_IOB,
+      .tiobset = PIO_TC1_IOB,
 #else
-       .tiobset = 0,
+      .tiobset = 0,
 #endif
     },
+    [2] =
     {
-      SAM_TC012_CHAN_BASE(2),
+      .base    = SAM_TC012_CHAN_BASE(2),
 #ifdef CONFIG_SAMA5_TC0_CLK2
-       .clkset = PIO_TC2_CLK,
+      .clkset  = PIO_TC2_CLK,
 #else
-       .clkset = 0,
+      .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMA5_TC0_TIOA2
-       .tioaset = PIO_TC2_IOA,
+      .tioaset = PIO_TC2_IOA,
 #else
-       .tioaset = 0,
+      .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMA5_TC0_TIOB2
-       .tiobset = PIO_TC2_IOB,
+      .tiobset = PIO_TC2_IOB,
 #else
-       .tiobset = 0,
+      .tiobset = 0,
 #endif
     },
   },
@@ -283,58 +289,61 @@ static const struct sam_tcconfig_s g_tc345config =
   .tc      = 1,
   .channel =
   {
+    [0] =
     {
-      SAM_TC345_CHAN_BASE(3),
+      .base    = SAM_TC345_CHAN_BASE(3),
 #ifdef CONFIG_SAMA5_TC1_CLK3
-       .clkset = PIO_TC3_CLK,
+      .clkset  = PIO_TC3_CLK,
 #else
-       .clkset = 0,
+      .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMA5_TC1_TIOA3
-       .tioaset = PIO_TC3_IOA,
+      .tioaset = PIO_TC3_IOA,
 #else
-       .tioaset = 0,
+      .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMA5_TC1_TIOB3
-       .tiobset = PIO_TC3_IOB,
+      .tiobset = PIO_TC3_IOB,
 #else
-       .tiobset = 0,
+      .tiobset = 0,
 #endif
     },
+    [1] =
     {
-      SAM_TC345_CHAN_BASE(4),
+      .base    = SAM_TC345_CHAN_BASE(4),
 #ifdef CONFIG_SAMA5_TC1_CLK4
-       .clkset = PIO_TC4_CLK,
+      .clkset  = PIO_TC4_CLK,
 #else
-       .clkset = 0,
+      .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMA5_TC1_TIOA4
-       .tioaset = PIO_TC4_IOA,
+      .tioaset = PIO_TC4_IOA,
 #else
-       .tioaset = 0,
+      .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMA5_TC1_TIOB4
-       .tiobset = PIO_TC4_IOB,
+      .tiobset = PIO_TC4_IOB,
 #else
-       .tiobset = 0,
+      .tiobset = 0,
 #endif
     },
+    [2] =
     {
-      SAM_TC345_CHAN_BASE(5),
+      .base    = SAM_TC345_CHAN_BASE(5),
 #ifdef CONFIG_SAMA5_TC1_CLK5
-       .clkset = PIO_TC5_CLK,
+      .clkset  = PIO_TC5_CLK,
 #else
-       .clkset = 0,
+      .clkset  = 0,
 #endif
 #ifdef CONFIG_SAMA5_TC1_TIOA5
-       .tioaset = PIO_TC5_IOA,
+      .tioaset = PIO_TC5_IOA,
 #else
-       .tioaset = 0,
+      .tioaset = 0,
 #endif
 #ifdef CONFIG_SAMA5_TC1_TIOB5
-       .tiobset = PIO_TC5_IOB,
+      .tiobset = PIO_TC5_IOB,
 #else
-       .tiobset = 0,
+      .tiobset = 0,
 #endif
     },
   },
@@ -422,6 +431,46 @@ static void sam_takesem(struct sam_tc_s *tc)
       ASSERT(errno == EINTR);
     }
 }
+
+/****************************************************************************
+ * Name: sam_regdump
+ *
+ * Description:
+ *   Dump all timer/counter channel and global registers
+ *
+ * Input Parameters:
+ *   chan  - The timer/counter channel state
+ *   msg   - Message to print with the data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_TC_REGDEBUG
+static void sam_regdump(struct sam_chan_s *chan, const char *msg)
+{
+  struct sam_tc_s *tc = chan->tc;
+  uintptr_t base;
+
+  base = tc->base;
+  lldbg("TC%d [%08x]: %s\n", tc->tc, (int)base, msg);
+  lldbg("  BMR: %08x QIMR: %08x QISR: %08x WPMR: %08x\n",
+        getreg32(base+SAM_TC_BMR_OFFSET), getreg32(base+SAM_TC_QIMR_OFFSET),
+        getreg32(base+SAM_TC_QISR_OFFSET), getreg32(base+SAM_TC_WPMR_OFFSET));
+
+  base = chan->base;
+  lldbg("TC%d Channel %d [%08x]: %s\n", tc->tc, chan->chan, (int)base, msg);
+  lldbg("  CMR: %08x SSMR: %08x  RAB: %08x   CV: %08x\n",
+        getreg32(base+SAM_TC_CMR_OFFSET), getreg32(base+SAM_TC_SMMR_OFFSET),
+        getreg32(base+SAM_TC_RAB_OFFSET), getreg32(base+SAM_TC_CV_OFFSET));
+  lldbg("   RA: %08x   RB: %08x   RC: %08x   SR: %08x\n",
+        getreg32(base+SAM_TC_RA_OFFSET), getreg32(base+SAM_TC_RB_OFFSET),
+        getreg32(base+SAM_TC_RC_OFFSET), getreg32(base+SAM_TC_SR_OFFSET));
+  lldbg("  IMR: %08x\n",
+        getreg32(base+SAM_TC_IMR_OFFSET));
+}
+#endif
 
 /****************************************************************************
  * Name: sam_checkreg
@@ -648,6 +697,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
       memset(tc, 0, sizeof(struct sam_tc_s));
       sem_init(&tc->exclsem, 0, 1);
       tc->base = tcconfig->base;
+      tc->tc   = channel < 3 ? 0 : 1;
       tc->pid  = tcconfig->pid;
 
       /* Initialize the channels */
@@ -729,6 +779,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
   /* And return the channel with the semaphore locked */
 
+  sam_regdump(chan, "Initialized");
   return chan;
 }
 
@@ -782,6 +833,7 @@ TC_HANDLE sam_tc_allocate(int channel, int mode)
       /* And set the requested mode */
 
       sam_chan_putreg(chan, SAM_TC_CMR_OFFSET, mode);
+      sam_regdump(chan, "Allocated");
     }
 
   /* Return an opaque reference to the channel */
@@ -842,6 +894,7 @@ void sam_tc_start(TC_HANDLE handle)
   DEBUGASSERT(chan && chan->inuse);
 
   sam_chan_putreg(chan, SAM_TC_CCR_OFFSET, TC_CCR_CLKEN | TC_CCR_SWTRG);
+  sam_regdump(chan, "Started");
 }
 
 /****************************************************************************
@@ -865,6 +918,7 @@ void sam_tc_stop(TC_HANDLE handle)
   DEBUGASSERT(chan && chan->inuse);
 
   sam_chan_putreg(chan, SAM_TC_CCR_OFFSET, TC_CCR_CLKDIS);
+  sam_regdump(chan, "Stopped");
 }
 
 /****************************************************************************
@@ -896,6 +950,7 @@ void sam_tc_setregister(TC_HANDLE handle, int reg, unsigned int div)
          chan->chan, reg, TC_FREQUENCY, div, (unsigned int)regval);
 
   sam_chan_putreg(chan, g_regoffset[reg], regval);
+  sam_regdump(chan, "Set register");
 }
 
 /****************************************************************************
