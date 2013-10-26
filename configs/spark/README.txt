@@ -414,7 +414,6 @@ Hardware
    A1     JP1-11  PA[01] USART2_RTS/ADC12_IN1/TIM2_CH2              11
    A0     JP1-12  PA[00] WKUP/USART2_CTS/ADC12_IN0/TIM2_CH1_ETR     10
 
-
   +3V3     JP2-1  V3.3 Out of Core                                  NA
    RST     JP2-2  NRST                                              7
    VDDA    JP2-3  ADC Voltage                                       9
@@ -486,7 +485,7 @@ Hardware
     LED_HEAPALLOCATE    Heap has been allocated OFF     ON      OFF    Blue
     LED_IRQSENABLED     Interrupts enabled      ON      OFF     ON     Orange
     LED_STACKCREATED    Idle stack created      OFF     OFF     ON     Green
-    LED_INIRQ           In an interrupt**       ON      N/C     N/C    Red Glow
+    LED_INIRQ           In an interrupt**       ON      N/C     N/C    Orange Glow
     LED_SIGNAL          In a signal handler***  N/C     ON      N/C    Blue Glow
     LED_ASSERTION       An assertion failed     ON      ON      ON     White
     LED_PANIC           The system has crashed  ON      N/C     N/C    Red Flashing
