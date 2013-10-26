@@ -5886,4 +5886,6 @@
 	  (2013-10-25).
 	* drivers/wireless/cc3000 and include/nuttx/wireless/cc3000:
 	  CC3000 driver update from David Sidrane (2013-10-25).
+	* arch/arm/src/sama5/chip/sam_isi.h:  Camera interface register
+	  definitions added (2013-10-26).
 

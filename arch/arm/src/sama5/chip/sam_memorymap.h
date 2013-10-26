@@ -50,4 +50,3 @@
 #endif
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_MEMORYMAP_H */
-
