@@ -884,7 +884,7 @@ static int up_interrupt(int irq, void *context)
 
       priv->sr = up_serialin(priv, SAM_UART_SR_OFFSET);  /* Save for error reporting */
       imr      = up_serialin(priv, SAM_UART_IMR_OFFSET); /* Interrupt mask */
-      pending  = priv->sr & imr;                        /* Mask out disabled interrupt sources */
+      pending  = priv->sr & imr;                         /* Mask out disabled interrupt sources */
 
       /* Handle an incoming, receive byte.  RXRDY: At least one complete character
        * has been received and US_RHR has not yet been read.
