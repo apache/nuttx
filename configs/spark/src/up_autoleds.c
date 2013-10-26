@@ -189,12 +189,12 @@ static inline void phy_led_on(unsigned int on_bitset)
 
   if ((on_bitset & BOARD_RED_LED_BIT) != 0)
     {
-      stm32_gpiowrite(GPIO_LED1, false);
+      stm32_gpiowrite(GPIO_LED2, false);
     }
 
   if ((on_bitset & BOARD_GREEN_LED_BIT) != 0)
     {
-      stm32_gpiowrite(GPIO_LED2, false);
+      stm32_gpiowrite(GPIO_LED4, false);
     }
 
   if ((on_bitset & BOARD_BLUE_LED_BIT) != 0)
@@ -206,7 +206,7 @@ static inline void phy_led_on(unsigned int on_bitset)
 
   if ((on_bitset & BOARD_USR_LED_BIT) != 0)
     {
-      stm32_gpiowrite(GPIO_LED4, true);
+      stm32_gpiowrite(GPIO_LED1, true);
     }
 }
 
@@ -224,12 +224,12 @@ static inline void phy_led_off(unsigned int off_bitset)
 
   if ((off_bitset & BOARD_RED_LED_BIT) != 0)
     {
-      stm32_gpiowrite(GPIO_LED1, true);
+      stm32_gpiowrite(GPIO_LED2, true);
     }
 
   if ((off_bitset & BOARD_GREEN_LED_BIT) != 0)
     {
-      stm32_gpiowrite(GPIO_LED2, true);
+      stm32_gpiowrite(GPIO_LED4, true);
     }
 
   if ((off_bitset & BOARD_BLUE_LED_BIT) != 0)
@@ -241,7 +241,7 @@ static inline void phy_led_off(unsigned int off_bitset)
 
   if ((off_bitset & BOARD_USR_LED_BIT) != 0)
     {
-      stm32_gpiowrite(GPIO_LED4, false);
+      stm32_gpiowrite(GPIO_LED1, false);
     }
 }
 
