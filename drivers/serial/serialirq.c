@@ -153,7 +153,7 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
   while (uart_rxavailable(dev))
     {
-      char ch =  uart_receive(dev, &status);
+      char ch = uart_receive(dev, &status);
       
       /* If the RX buffer becomes full, then the serial data is discarded.  This is
        * necessary because on most serial hardware, you must read the data in order
