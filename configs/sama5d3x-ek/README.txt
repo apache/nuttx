@@ -78,6 +78,7 @@ Contents
   - USB Ports
   - AT24 Serial EEPROM
   - CAN Usage
+  - SAMA5 ADC Support
   - SAMA5D3x-EK Configuration Options
   - Configurations
 
@@ -731,6 +732,68 @@ CAN Usage
                     |    O     |
                     +----------+
                       DB-9 Male
+
+SAMA5 ADC Support
+=================
+
+  ADC support can be added to the NSH configuration.  However, there are no
+  ADC input pins available to the user for ADC testing (the touchscreen ADC
+  inputs are intended for other functionality).  Because of this, there is
+  not much motivation to enable ADC support on the SAMA5D3x-EK.  This
+  paragraph is included here, however, for people using a custom SAMA5D3x
+  board thay requires ADC support.
+
+  Basic driver configuration:
+
+    System Type -> SAMA5 Peripheral Support
+      CONFIG_SAMA5_ADC=y              : Enable ADC driver support
+      CONFIG_SAMA5_TC0=y              : Enable the Timer/counter library need for periodic sampling
+
+    Drivers
+      CONFIG_ANALOG=y                 : Should be automatically selected
+      CONFIG_ADC=y                    : Should be automatically selected
+
+    System Type -> ADC Configuration
+      CONFIG_SAMA5_ADC_CHAN0=y        : These settings enable the sequencer to collect
+      CONFIG_SAMA5_ADC_CHAN1=y        : Samples from ADC channels 0-3 on each trigger
+      CONFIG_SAMA5_ADC_CHAN2=y
+      CONFIG_SAMA5_ADC_CHAN3=y
+      CONFIG_SAMA5_ADC_SEQUENCER=y
+
+      CONFIG_SAMA5_ADC_TIOA0TRIG=y    : Trigger on the TC0, channel 0 output A
+      CONFIG_SAMA5_ADC_TIOAFREQ=2     : At a frequency of 2Hz
+      CONFIG_SAMA5_ADC_TIOA_RISING=y  : Trigger on the rising edge
+
+    Default ADC settings (like gain and offset) may also be set if desired.
+
+    System Type -> Timer/counter Configuration
+      CONFIG_SAMA5_TC0_TIOA0=y        : Should be automatically selected
+
+  Work queue supported is also needed:
+
+    Library routines
+      CONFIG_SCHED_WORKQUEUE=y
+
+  For testing purposes, there is an ADC program at apps/examples/adc that
+  will collect a specified number of samples.  This test program can be
+  enabled as follows:
+
+    Application Configuration -> Examples -> ADC eample
+      CONFIG_EXAMPLES_ADC=y           : Enables the example code
+      CONFIG_EXAMPLES_ADC_DEVPATH="/dev/adc0"
+
+    Other default settings for the ADC example should be okay.
+
+  At 2Hz, DMA is not necessary nor desire-able.  The ADC driver has support
+  for DMA transfers of converted data (although that support has not been
+  tested as of this writing).  DMA support can be added by include the
+  following in the configuration.
+
+    System Type -> SAMA5 Peripheral Support
+      CONFIG_SAMA5_DMAC1=y            : Enable DMAC1 support
+
+    System Type -> ADC Configuration
+      CONFIG_SAMA5_ADC_DMA=y          : Enable ADC DMA transfers
 
 SAMA5D3x-EK Configuration Options
 =================================
