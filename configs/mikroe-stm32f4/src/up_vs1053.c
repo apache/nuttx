@@ -88,6 +88,7 @@ static int  up_attach(FAR const struct vs1053_lower_s *lower, xcpt_t handler);
 static void up_enable(FAR const struct vs1053_lower_s *lower);
 static void up_disable(FAR const struct vs1053_lower_s *lower);
 static void up_reset(FAR const struct vs1053_lower_s *lower, bool state);
+static int  up_read_dreq(FAR const struct vs1053_lower_s *lower);
 
 /****************************************************************************
  * Private Data
@@ -97,17 +98,18 @@ static void up_reset(FAR const struct vs1053_lower_s *lower, bool state);
  * following structure provides an MCU-independent mechanixm for controlling
  * the VS1053 GPIO interrupt.
  */
-
 static struct stm32_lower_s g_vs1053lower =
 {
   .lower =
   {
-    .attach  = up_attach,
-    .enable  = up_enable,
-    .disable = up_disable,
-    .reset   = up_reset  
+    .attach     = up_attach,
+    .enable     = up_enable,
+    .disable    = up_disable,
+    .reset      = up_reset,
+    .read_dreq  = up_read_dreq,
+    .irq        = GPIO_VS1053_DREQ_IRQ
   },
-  .handler = NULL,
+  .handler      = NULL,
 };
 
 /****************************************************************************
@@ -122,10 +124,8 @@ static int up_attach(FAR const struct vs1053_lower_s *lower, xcpt_t handler)
 {
   FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
 
-  /* Just save the handler for use when the interrupt is enabled */
-
-  priv->handler = handler;
-  return OK;
+  priv->handler = handler;    /* Save the handler for later */
+  return 0;
 }
 
 static void up_enable(FAR const struct vs1053_lower_s *lower)
@@ -133,17 +133,22 @@ static void up_enable(FAR const struct vs1053_lower_s *lower)
   FAR struct stm32_lower_s *priv = (FAR struct stm32_lower_s *)lower;
 
   DEBUGASSERT(priv->handler);
-  (void)stm32_gpiosetevent(GPIO_VS1053_DREQ, false, true, true, priv->handler);
+  (void)stm32_gpiosetevent(GPIO_VS1053_DREQ, true, false, false, priv->handler);
 }
 
 static void up_disable(FAR const struct vs1053_lower_s *lower)
 {
-  (void)stm32_gpiosetevent(GPIO_VS1053_DREQ, false, true, true, NULL);
+  (void)stm32_gpiosetevent(GPIO_VS1053_DREQ, false, false, false, NULL);
 }
 
 static void up_reset(FAR const struct vs1053_lower_s *lower, bool state)
 {
   stm32_gpiowrite(GPIO_VS1053_RST, state);
+}
+
+static int up_read_dreq(FAR const struct vs1053_lower_s *lower)
+{
+  return stm32_gpioread(GPIO_VS1053_DREQ);
 }
 
 /****************************************************************************
@@ -157,43 +162,44 @@ static void up_reset(FAR const struct vs1053_lower_s *lower, bool state)
 void up_vs1053initialize(FAR struct spi_dev_s* spi)
 {
   int   ret;
-  int   x;
   char  name[8];
   FAR struct audio_lowerhalf_s *pVs1053;
 
   /* Assumptions:
    * 1) SPI pins were configured in up_spi.c early in the boot-up phase.
-   * 2) Clocking for the SPI1 peripheral was also provided earlier in boot-up.
+   * 2) Clocking for the SPI3 peripheral was also provided earlier in boot-up.
    */
 
-  /* Take VS1053 out of reset (active low)*/
+  /* NOTE:  The RST line should be asserted early in the boot process
+   *        during the boardinitialize function because the VS1053
+   *        generates a low frequency humming noise from power-on reset
+   *        until the RST line is asserted.
+   */
 
-  (void)stm32_configgpio(GPIO_VS1053_RST); 
-  (void)stm32_configgpio(GPIO_VS1053_DREQ); 
+  //(void)stm32_configgpio(GPIO_VS1053_RST);
 
-  stm32_gpiowrite(GPIO_VS1053_RST, 0);
-  for (x = 0; x < 10000; x++);
-  stm32_gpiowrite(GPIO_VS1053_RST, 1);
+  /* Initialize the VS1053 DREQ GPIO line */
+
+  (void)stm32_configgpio(GPIO_VS1053_DREQ);
 
   /* Bind the SPI port to the VS1053 driver */
 
   pVs1053 = vs1053_initialize(spi, &g_vs1053lower.lower, VS1053_DEVNO);
-  if (ret < 0)
+  if (pVs1053 == NULL)
     {
-      audlldbg("Failed to bind SPI port %d VS1053 device: %d\n",
-             VS1053_DEVNO, ret);
+      audlldbg("Failed to bind SPI port %d VS1053 device\n", VS1053_DEVNO);
       return;
     }
 
   /* Now register the audio device */
 
-  sprintf(name, "mp3%d", VS1053_DEVNO);
+  sprintf(name, "vs1053d%d", VS1053_DEVNO);
   ret = audio_register(name, pVs1053);
   if (ret < 0)
     {
       auddbg("up_vs1053initialize: Failed to register VS1053 Audio device\n");
     }
-  
+
   audllvdbg("Bound SPI port to VS1053 device %s\n", name);
 }
 

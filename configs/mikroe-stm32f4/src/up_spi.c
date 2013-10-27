@@ -104,25 +104,20 @@ void weak_function stm32_spiinitialize(void)
 
 #ifdef CONFIG_MTD_M25P
   (void)stm32_configgpio(GPIO_CS_FLASH);    /* FLASH chip select */
-  stm32_gpiowrite(GPIO_CS_FLASH, 1);        /* Ensure the CS is inactive */
 #endif
 
 #if defined(CONFIG_MMCSD)
   (void)stm32_configgpio(GPIO_CS_MMCSD);    /* MMC/SD chip select */
   (void)stm32_configgpio(GPIO_SD_CD);       /* MMC/SD card detect */
-  stm32_gpiowrite(GPIO_CS_MMCSD, 1);        /* Ensure the CS is inactive */
 #endif
 
-#ifdef CONFIG_AUDIO_MP3_CODEC
+#ifdef CONFIG_VS1053
   (void)stm32_configgpio(GPIO_CS_MP3_DATA); /* MP3 codec chip select for DATA */
   (void)stm32_configgpio(GPIO_CS_MP3_CMD);  /* MP3 codec chip select for CMD */
-  stm32_gpiowrite(GPIO_CS_MP3_DATA, 1);     /* Ensure the CS is inactive */
-  stm32_gpiowrite(GPIO_CS_MP3_CMD, 1);      /* Ensure the CS is inactive */
 #endif
 
   /* Configure the EXP I/O cs for SPI3 */
   (void)stm32_configgpio(GPIO_CS_EXP_SPI3); /* Expander chip select */
-  stm32_gpiowrite(GPIO_CS_EXP_SPI3, 1);     /* Ensure the CS is inactive */
 
 #endif
 }
@@ -155,12 +150,17 @@ void weak_function stm32_spiinitialize(void)
 #ifdef CONFIG_STM32_SPI3
 void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
-  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 
-#if defined(CONFIG_MTD_M25P)
-  if (devid == SPIDEV_FLASH)
+  spivdbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+#if defined(CONFIG_VS1053)
+  if (devid == SPIDEV_AUDIO_DATA)
     {
-      stm32_gpiowrite(GPIO_CS_FLASH, !selected);
+      stm32_gpiowrite(GPIO_CS_MP3_DATA, !selected);
+    }
+  else if (devid == SPIDEV_AUDIO_CTRL)
+    {
+      stm32_gpiowrite(GPIO_CS_MP3_CMD, !selected);
     }
   else
 #endif
@@ -173,19 +173,14 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool sele
   else
 #endif
 
-#if defined(CONFIG_AUDIO_MP3_CODEC)
-  if (devid == SPIDEV_AUDIO_DATA)
+#if defined(CONFIG_MTD_M25P)
+  if (devid == SPIDEV_FLASH)
     {
-      stm32_gpiowrite(GPIO_CS_MP3_DATA, !selected);
-    }
-  else if (devid == SPIDEV_AUDIO_CTRL)
-    {
-      stm32_gpiowrite(GPIO_CS_MP3_CMD, !selected);
+      stm32_gpiowrite(GPIO_CS_FLASH, !selected);
     }
   else
-
 #endif
- 
+
   /* Must be the expansion header device */
 
   if (devid == SPIDEV_EXPANDER)
@@ -285,4 +280,3 @@ int stm32_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 #endif /* CONFIG_SPI_CMDDATA */
 
 #endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 */
-
