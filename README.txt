@@ -974,6 +974,8 @@ nuttx
  |   |       |- z80/README.txt
  |   |       `- z180/README.txt, z180_mmu.txt
  |   `- README.txt
+ |- audio/
+ |   `-README.txt
  |- configs/
  |   |- amber/
  |   |   `- README.txt
@@ -1207,6 +1209,8 @@ apps
  |   |- i2c
  |   |  `- README.txt
  |   |- install
+ |   |  `- README.txt
+ |   |- nxplayer
  |   |  `- README.txt
  |   |- usbmsc
  |   |  `- README.txt
