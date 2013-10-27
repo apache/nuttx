@@ -5894,4 +5894,6 @@
 	  VS1053 driver from ken Pettit (2013-10-27).
 	* configs/mikroe-stm32f4/: Updated configuration for the
 	  Mikrow STM32F4 board from Ken Pettit (2013-10-27).
+	* arch/arm/src/stm32/stm32_spi.c:  DMA-related fixe from Ken
+	  Pettit (2013-10-27).
 
