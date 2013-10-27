@@ -173,48 +173,59 @@
 #define SAMA5_CHAN11_ENABLE   0
 
 #if defined(CONFIG_SAMA5_ADC_CHAN0)
-#  undef SAMA5_CHAN0_ENABLE
+#  undef  SAMA5_CHAN0_ENABLE
 #  define SAMA5_CHAN0_ENABLE  ADC_INT_EOC0
-#elif defined(CONFIG_SAMA5_ADC_CHAN1)
-#  undef SAMA5_CHAN1_ENABLE
+#endif
+#if defined(CONFIG_SAMA5_ADC_CHAN1)
+#  undef  SAMA5_CHAN1_ENABLE
 #  define SAMA5_CHAN1_ENABLE  ADC_INT_EOC1
-#elif defined(CONFIG_SAMA5_ADC_CHAN2)
-#  undef SAMA5_CHAN2_ENABLE
+#endif
+#if defined(CONFIG_SAMA5_ADC_CHAN2)
+#  undef  SAMA5_CHAN2_ENABLE
 #  define SAMA5_CHAN2_ENABLE  ADC_INT_EOC2
-#elif defined(CONFIG_SAMA5_ADC_CHAN3)
-#  undef SAMA5_CHAN3_ENABLE
+#endif
+#if defined(CONFIG_SAMA5_ADC_CHAN3)
+#  undef  SAMA5_CHAN3_ENABLE
 #  define SAMA5_CHAN3_ENABLE  ADC_INT_EOC3
-#elif defined(CONFIG_SAMA5_ADC_CHAN4)
-#  undef SAMA5_CHAN4_ENABLE
+#endif
+#if defined(CONFIG_SAMA5_ADC_CHAN4)
+#  undef  SAMA5_CHAN4_ENABLE
 #  define SAMA5_CHAN4_ENABLE  ADC_INT_EOC4
-#elif defined(CONFIG_SAMA5_ADC_CHAN5)
-#  undef SAMA5_CHAN5_ENABLE
+#endif
+#if defined(CONFIG_SAMA5_ADC_CHAN5)
+#  undef  SAMA5_CHAN5_ENABLE
 #  define SAMA5_CHAN5_ENABLE  ADC_INT_EOC5
-#elif defined(CONFIG_SAMA5_ADC_CHAN6)
-#  undef SAMA5_CHAN6_ENABLE
+#endif
+#if defined(CONFIG_SAMA5_ADC_CHAN6)
+#  undef  SAMA5_CHAN6_ENABLE
 #  define SAMA5_CHAN6_ENABLE  ADC_INT_EOC6
-#elif defined(CONFIG_SAMA5_ADC_CHAN7)
-#  undef SAMA5_CHAN7_ENABLE
+#endif
+#if defined(CONFIG_SAMA5_ADC_CHAN7)
+#  undef  SAMA5_CHAN7_ENABLE
 #  define SAMA5_CHAN7_ENABLE  ADC_INT_EOC7
-#elif defined(CONFIG_SAMA5_ADC_CHAN8)
-#  undef SAMA5_CHAN8_ENABLE
+#endif
+#if defined(CONFIG_SAMA5_ADC_CHAN8)
+#  undef  SAMA5_CHAN8_ENABLE
 #  define SAMA5_CHAN8_ENABLE  ADC_INT_EOC8
-#elif defined(CONFIG_SAMA5_ADC_CHAN9)
-#  undef SAMA5_CHAN9_ENABLE
+#endif
+#if defined(CONFIG_SAMA5_ADC_CHAN9)
+#  undef  SAMA5_CHAN9_ENABLE
 #  define SAMA5_CHAN9_ENABLE  ADC_INT_EOC9
-#elif defined(CONFIG_SAMA5_ADC_CHAN10)
-#  undef SAMA5_CHAN10_ENABLE
+#endif
+#if defined(CONFIG_SAMA5_ADC_CHAN10)
+#  undef  SAMA5_CHAN10_ENABLE
 #  define SAMA5_CHAN10_ENABLE  ADC_INT_EOC10
-#elif defined(CONFIG_SAMA5_ADC_CHAN11)
-#  undef SAMA5_CHAN11_ENABLE
+#endif
+#if defined(CONFIG_SAMA5_ADC_CHAN11)
+#  undef  SAMA5_CHAN11_ENABLE
 #  define SAMA5_CHAN11_ENABLE  ADC_INT_EOC11
 #endif
 
 #define SAMA5_CHAN_ENABLE \
-  (SAMA5_CHAN0_ENABLE || SAMA5_CHAN1_ENABLE  || SAMA5_CHAN2_ENABLE  || \
-   SAMA5_CHAN3_ENABLE || SAMA5_CHAN4_ENABLE  || SAMA5_CHAN5_ENABLE  || \
-   SAMA5_CHAN6_ENABLE || SAMA5_CHAN7_ENABLE  || SAMA5_CHAN8_ENABLE  || \
-   SAMA5_CHAN9_ENABLE || SAMA5_CHAN10_ENABLE || SAMA5_CHAN11_ENABLE)
+  (SAMA5_CHAN0_ENABLE | SAMA5_CHAN1_ENABLE  | SAMA5_CHAN2_ENABLE  | \
+   SAMA5_CHAN3_ENABLE | SAMA5_CHAN4_ENABLE  | SAMA5_CHAN5_ENABLE  | \
+   SAMA5_CHAN6_ENABLE | SAMA5_CHAN7_ENABLE  | SAMA5_CHAN8_ENABLE  | \
+   SAMA5_CHAN9_ENABLE | SAMA5_CHAN10_ENABLE | SAMA5_CHAN11_ENABLE)
 
 /* If we are supporting the analog chang feature, then sure that there
  * is a gain setting for each enabled channel.
@@ -1129,9 +1140,11 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
   uint32_t div;
   uint32_t tcclks;
   uint32_t mode;
+  uint32_t fdiv;
   int ret;
 
   avdbg("frequency=%ld channel=%d\n", (long)frequency, channel);
+  DEBUGASSERT(priv && frequency > 0);
 
   /* Configure TC for a 1Hz frequency and trigger on RC compare. */
 
@@ -1161,10 +1174,21 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
       return -EINVAL;
     }
 
-  /* Set up TC_RA and TC_RC */
+  /* The divider returned by sam_tc_divisor() is the reload value that will
+   * achieve a 1HZ rate.  We need to multiply this to get the desired
+   * frequency.  sam_tc_divisor() should have already assure that we can
+   * do this without overflowing a 32-bit unsigned integer.
+   */
 
-  sam_tc_setregister(priv->tc, TC_REGA, div << 1);
-  sam_tc_setregister(priv->tc, TC_REGC, div);
+  fdiv = div * frequency; 
+  DEBUGASSERT(div > 0 && div <= fdiv); /* Will check for integer overflow */
+
+  /* Set up TC_RA and TC_RC.  The frequency is determined by RA and RC:  TIOA is
+   * cleared on RA match; TIOA is set on RC match.
+   */
+
+  sam_tc_setregister(priv->tc, TC_REGA, fdiv << 1);
+  sam_tc_setregister(priv->tc, TC_REGC, fdiv);
 
   /* And start the timer */
 
@@ -1720,52 +1744,52 @@ static void sam_adc_channels(struct sam_adc_s *priv)
 
   regval = 0;
 
-  #ifdef CONFIG_SAMA5_ADC_CHAN0
+#ifdef CONFIG_SAMA5_ADC_CHAN0
   regval |= ADC_CH0;
 #endif
 
 #ifdef CONFIG_SAMA5_ADC_CHAN1
-  regval |= ADC_CH0;
+  regval |= ADC_CH1;
 #endif
 
 #ifdef CONFIG_SAMA5_ADC_CHAN2
-  regval |= ADC_CH0;
+  regval |= ADC_CH2;
 #endif
 
 #ifdef CONFIG_SAMA5_ADC_CHAN3
-  regval |= ADC_CH0;
+  regval |= ADC_CH3;
 #endif
 
 #ifdef CONFIG_SAMA5_ADC_CHAN4
-  regval |= ADC_CH0;
+  regval |= ADC_CH4;
 #endif
 
 #ifdef CONFIG_SAMA5_ADC_CHAN5
-  regval |= ADC_CH0;
+  regval |= ADC_CH5;
 #endif
 
 #ifdef CONFIG_SAMA5_ADC_CHAN6
-  regval |= ADC_CH0;
+  regval |= ADC_CH6;
 #endif
 
 #ifdef CONFIG_SAMA5_ADC_CHAN7
-  regval |= ADC_CH0;
+  regval |= ADC_CH7;
 #endif
 
 #ifdef CONFIG_SAMA5_ADC_CHAN8
-  regval |= ADC_CH0;
+  regval |= ADC_CH8;
 #endif
 
 #ifdef CONFIG_SAMA5_ADC_CHAN9
-  regval |= ADC_CH0;
+  regval |= ADC_CH9;
 #endif
 
 #ifdef CONFIG_SAMA5_ADC_CHAN10
-  regval |= ADC_CH0;
+  regval |= ADC_CH10;
 #endif
 
 #ifdef CONFIG_SAMA5_ADC_CHAN11
-  regval |= ADC_CH0;
+  regval |= ADC_CH11;
 #endif
 
   sam_adc_putreg(priv, SAM_ADC_CHER, regval);
