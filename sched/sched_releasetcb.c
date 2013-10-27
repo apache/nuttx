@@ -168,7 +168,7 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
        */
 
 #ifndef CONFIG_DISABLE_PTHREAD
-      if ((tcb->flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_PTHREAD)
+      if (ttype != TCB_FLAG_TTYPE_PTHREAD)
 #endif
         {
           FAR struct task_tcb_s *ttcb = (FAR struct task_tcb_s *)tcb;

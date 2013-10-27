@@ -5896,4 +5896,8 @@
 	  Mikrow STM32F4 board from Ken Pettit (2013-10-27).
 	* arch/arm/src/stm32/stm32_spi.c:  DMA-related fixe from Ken
 	  Pettit (2013-10-27).
+	* sched/sched_releasetcb.c: Fix a cornercase:  If sched_releasetcb()
+	  is called as part of a failed pthread startup before the flags
+	  field in the TCB has been initialized, then a crash occurs.
+	  Pointed out by David Sidrane (2013-10-27)
 
