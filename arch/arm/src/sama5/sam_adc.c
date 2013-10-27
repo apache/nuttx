@@ -1163,7 +1163,7 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
 
   /* Set up TC_RA and TC_RC */
 
-  sam_tc_setregister(priv->tc, TC_REGA, div / 2);
+  sam_tc_setregister(priv->tc, TC_REGA, div << 1);
   sam_tc_setregister(priv->tc, TC_REGC, div);
 
   /* And start the timer */
