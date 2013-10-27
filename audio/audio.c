@@ -60,6 +60,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/arch.h>
 #include <nuttx/audio/audio.h>
+#include <mqueue.h>
 
 #include <arch/irq.h>
 
@@ -75,6 +76,10 @@
 #  define AUDIO_MAX_DEVICE_PATH 32
 #endif
 
+#ifndef CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO
+#  define CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO  1
+#endif
+
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
@@ -84,10 +89,10 @@
 struct audio_upperhalf_s
 {
   uint8_t           crefs;    /* The number of times the device has been opened */
-  volatile bool     started;  /* True: pulsed output is being generated */
+  volatile bool     started;  /* True: playback is active */
   sem_t             exclsem;  /* Supports mutual exclusion */
-  struct audio_info_s info;     /* Pulsed output characteristics */
   FAR struct audio_lowerhalf_s *dev;  /* lower-half state */
+  mqd_t             usermq;   /* User mode app's message queue */
 };
 
 /****************************************************************************
@@ -98,10 +103,16 @@ static int      audio_open(FAR struct file *filep);
 static int      audio_close(FAR struct file *filep);
 static ssize_t  audio_read(FAR struct file *filep, FAR char *buffer, size_t buflen);
 static ssize_t  audio_write(FAR struct file *filep, FAR const char *buffer, size_t buflen);
-static int      audio_start(FAR struct audio_upperhalf_s *upper, unsigned int oflags);
 static int      audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int      audio_start(FAR struct audio_upperhalf_s *upper, FAR void *session);
+static void     audio_callback(FAR void *priv, uint16_t reason,
+                    FAR struct ap_buffer_s *apb, uint16_t status, FAR void *session);
+#else
+static int      audio_start(FAR struct audio_upperhalf_s *upper);
 static void     audio_callback(FAR void *priv, uint16_t reason,
                     FAR struct ap_buffer_s *apb, uint16_t status);
+#endif /* CONFIG_AUDIO_MULTI_SESSION */
 
 /****************************************************************************
  * Private Data
@@ -113,10 +124,10 @@ static const struct file_operations g_audioops =
   audio_close, /* close */
   audio_read,  /* read */
   audio_write, /* write */
-  0,         /* seek */
+  0,           /* seek */
   audio_ioctl  /* ioctl */
 #ifndef CONFIG_DISABLE_POLL
-  , 0        /* poll */
+  , 0          /* poll */
 #endif
 };
 
@@ -134,10 +145,10 @@ static const struct file_operations g_audioops =
 
 static int audio_open(FAR struct file *filep)
 {
-  FAR struct inode           *inode = filep->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
-  uint8_t                     tmp;
-  int                         ret;
+  uint8_t tmp;
+  int ret;
 
   audvdbg("crefs: %d\n", upper->crefs);
 
@@ -167,6 +178,7 @@ static int audio_open(FAR struct file *filep)
   /* Save the new open count on success */
 
   upper->crefs = tmp;
+  upper->usermq = NULL;
   ret = OK;
 
 errout_with_sem:
@@ -186,9 +198,9 @@ errout:
 
 static int audio_close(FAR struct file *filep)
 {
-  FAR struct inode           *inode = filep->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
-  int                         ret;
+  int ret;
 
   audvdbg("crefs: %d\n", upper->crefs);
 
@@ -243,7 +255,18 @@ errout:
 
 static ssize_t audio_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 {
-  /* Return zero -- usually meaning end-of-file */
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct audio_upperhalf_s *upper = inode->i_private;
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+
+  /* TODO: Should we check permissions here? */
+
+  /* Audio read operations get passed directly to the lower-level */
+
+  if (lower->ops->read != NULL)
+    {
+      return lower->ops->read(lower, buffer, buflen);
+    }
 
   return 0;
 }
@@ -258,6 +281,19 @@ static ssize_t audio_read(FAR struct file *filep, FAR char *buffer, size_t bufle
 
 static ssize_t audio_write(FAR struct file *filep, FAR const char *buffer, size_t buflen)
 {
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct audio_upperhalf_s *upper = inode->i_private;
+  FAR struct audio_lowerhalf_s *lower = upper->dev;
+
+  /* TODO: Should we check permissions here? */
+
+  /* Audio write operations get passed directly to the lower-level */
+
+  if (lower->ops->write != NULL)
+    {
+      return lower->ops->write(lower, buffer, buflen);
+    }
+
   return 0;
 }
 
@@ -269,7 +305,11 @@ static ssize_t audio_write(FAR struct file *filep, FAR const char *buffer, size_
  *
  ************************************************************************************/
 
-static int audio_start(FAR struct audio_upperhalf_s *upper, unsigned int oflags)
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static int audio_start(FAR struct audio_upperhalf_s *upper, FAR void *session)
+#else
+static int audio_start(FAR struct audio_upperhalf_s *upper)
+#endif
 {
   FAR struct audio_lowerhalf_s *lower = upper->dev;
   int ret = OK;
@@ -280,17 +320,21 @@ static int audio_start(FAR struct audio_upperhalf_s *upper, unsigned int oflags)
 
   if (!upper->started)
     {
-      /* Invoke the bottom half method to start the pulse train */
+      /* Invoke the bottom half method to start the audio stream */
 
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      ret = lower->ops->start(lower, session);
+#else
       ret = lower->ops->start(lower);
+#endif
 
-      /* A return value of zero means that the pulse train was started
+      /* A return value of zero means that the audio stream was started
        * successfully.
        */
 
       if (ret == OK)
         {
-          /* Indicate that the pulse train has started */
+          /* Indicate that the audio stream has started */
 
           upper->started = true;
         }
@@ -309,10 +353,14 @@ static int audio_start(FAR struct audio_upperhalf_s *upper, unsigned int oflags)
 
 static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode           *inode = filep->f_inode;
+  FAR struct inode *inode = filep->f_inode;
   FAR struct audio_upperhalf_s *upper = inode->i_private;
   FAR struct audio_lowerhalf_s *lower = upper->dev;
-  int                         ret;
+  FAR struct audio_buf_desc_s  *bufdesc;
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+  FAR void *session;
+#endif
+  int ret;
 
   audvdbg("cmd: %d arg: %ld\n", cmd, arg);
 
@@ -347,14 +395,19 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case AUDIOIOC_CONFIGURE:
         {
-          FAR const struct audio_caps_s *caps = (FAR const struct audio_caps_s*)((uintptr_t)arg);
+          FAR const struct audio_caps_desc_s *caps =
+            (FAR const struct audio_caps_desc_s*)((uintptr_t)arg);
           DEBUGASSERT(lower->ops->configure != NULL);
 
-          audvdbg("AUDIOIOC_INITIALIZE: Device=%d", caps->ac_type);
+          audvdbg("AUDIOIOC_INITIALIZE: Device=%d", caps->caps.ac_type);
 
           /* Call the lower-half driver configure handler */
 
-          ret = lower->ops->configure(lower, caps, &audio_callback, upper);
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+          ret = lower->ops->configure(lower, caps->session, &caps->caps);
+#else
+          ret = lower->ops->configure(lower, &caps->caps);
+#endif
         }
         break;
 
@@ -369,10 +422,10 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      /* AUDIOIOC_START - Start the pulsed output.  The AUDIOIOC_SETCHARACTERISTICS
+      /* AUDIOIOC_START - Start the audio stream.  The AUDIOIOC_SETCHARACTERISTICS
        *   command must have previously been sent.
        *
-       *   ioctl argument:  None
+       *   ioctl argument:  Audio session
        */
 
       case AUDIOIOC_START:
@@ -380,17 +433,23 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           audvdbg("AUDIOIOC_START\n");
           DEBUGASSERT(lower->ops->start != NULL);
 
-          /* Start the pulse train */
+          /* Start the audio stream */
 
-          ret = audio_start(upper, filep->f_oflags);
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+          session = (FAR void *) arg;
+          ret = audio_start(upper, session);
+#else
+          ret = audio_start(upper);
+#endif
         }
         break;
 
-      /* AUDIOIOC_STOP - Stop the pulsed output.
+      /* AUDIOIOC_STOP - Stop the audio stream.
        *
-       *   ioctl argument:  None
+       *   ioctl argument:  Audio session
        */
 
+#ifndef CONFIG_AUDIO_EXCLUDE_STOP
       case AUDIOIOC_STOP:
         {
           audvdbg("AUDIOIOC_STOP\n");
@@ -398,9 +457,189 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           if (upper->started)
             {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+              session = (FAR void *) arg;
+              ret = lower->ops->stop(lower, session);
+#else
               ret = lower->ops->stop(lower);
+#endif
               upper->started = false;
             }
+        }
+        break;
+#endif  /* CONFIG_AUDIO_EXCLUDE_STOP */
+
+      /* AUDIOIOC_PAUSE - Pause the audio stream.
+       *
+       *   ioctl argument:  Audio session
+       */
+
+#ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
+
+      case AUDIOIOC_PAUSE:
+        {
+          audvdbg("AUDIOIOC_PAUSE\n");
+          DEBUGASSERT(lower->ops->pause != NULL);
+
+          if (upper->started)
+            {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+              session = (FAR void *) arg;
+              ret = lower->ops->pause(lower, session);
+#else
+              ret = lower->ops->pause(lower);
+#endif
+            }
+        }
+        break;
+
+      /* AUDIOIOC_RESUME - Resume the audio stream.
+       *
+       *   ioctl argument:  Audio session
+       */
+
+      case AUDIOIOC_RESUME:
+        {
+          audvdbg("AUDIOIOC_RESUME\n");
+          DEBUGASSERT(lower->ops->resume != NULL);
+
+          if (upper->started)
+            {
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+              session = (FAR void *) arg;
+              ret = lower->ops->resume(lower, session);
+#else
+              ret = lower->ops->resume(lower);
+#endif
+            }
+        }
+        break;
+
+#endif  /* CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME */
+
+      /* AUDIOIOC_ALLOCBUFFER - Allocate an audio buffer
+       *
+       *   ioctl argument:  pointer to an audio_buf_desc_s structure
+       */
+
+      case AUDIOIOC_ALLOCBUFFER:
+        {
+          audvdbg("AUDIOIOC_ALLOCBUFFER\n");
+
+          bufdesc = (FAR struct audio_buf_desc_s *) arg;
+          if (lower->ops->allocbuffer)
+            {
+              ret = lower->ops->allocbuffer(lower, bufdesc);
+            }
+          else
+            {
+              /* Perform a simple kumalloc operation assuming 1 session */
+
+              ret = apb_alloc(bufdesc);
+            }
+        }
+        break;
+
+      /* AUDIOIOC_FREEBUFFER - Free an audio buffer
+       *
+       *   ioctl argument:  pointer to an audio_buf_desc_s structure
+       */
+
+      case AUDIOIOC_FREEBUFFER:
+        {
+          audvdbg("AUDIOIOC_FREEBUFFER\n");
+
+          bufdesc = (FAR struct audio_buf_desc_s *) arg;
+          if (lower->ops->freebuffer)
+            {
+              ret = lower->ops->freebuffer(lower, bufdesc);
+            }
+          else
+            {
+              /* Perform a simple kufree operation */
+
+              DEBUGASSERT(bufdesc->u.pBuffer != NULL);
+              apb_free(bufdesc->u.pBuffer);
+              ret = sizeof(struct audio_buf_desc_s);
+            }
+        }
+        break;
+
+      /* AUDIOIOC_ENQUEUEBUFFER - Enqueue an audio buffer
+       *
+       *   ioctl argument:  pointer to an audio_buf_desc_s structure
+       */
+
+      case AUDIOIOC_ENQUEUEBUFFER:
+        {
+          audvdbg("AUDIOIOC_ENQUEUEBUFFER\n");
+
+          DEBUGASSERT(lower->ops->enqueuebuffer != NULL);
+
+          bufdesc = (FAR struct audio_buf_desc_s *) arg;
+          ret = lower->ops->enqueuebuffer(lower, bufdesc->u.pBuffer);
+        }
+        break;
+
+      /* AUDIOIOC_REGISTERMQ - Register a client Message Queue
+       *
+       * TODO:  This needs to have multi session support.
+       */
+
+      case AUDIOIOC_REGISTERMQ:
+        {
+          upper->usermq = (mqd_t) arg;
+          ret = OK;
+        }
+        break;
+
+      /* AUDIOIOC_UNREGISTERMQ - Register a client Message Queue
+       *
+       * TODO:  This needs to have multi session support.
+       */
+
+      case AUDIOIOC_UNREGISTERMQ:
+        {
+          upper->usermq = NULL;
+          ret = OK;
+        }
+        break;
+
+      /* AUDIOIOC_RESERVE - Reserve a session with the driver
+       *
+       *   ioctl argument - pointer to receive the session context
+       */
+
+      case AUDIOIOC_RESERVE:
+        {
+          DEBUGASSERT(lower->ops->reserve != NULL);
+
+          /* Call lower-half to perform the reservation */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+          ret = lower->ops->reserve(lower, (FAR void **) arg);
+#else
+          ret = lower->ops->reserve(lower);
+#endif
+        }
+        break;
+
+      /* AUDIOIOC_RESERVE - Reserve a session with the driver
+       *
+       *   ioctl argument - pointer to receive the session context
+       */
+
+      case AUDIOIOC_RELEASE:
+        {
+          DEBUGASSERT(lower->ops->release != NULL);
+
+          /* Call lower-half to perform the release */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+          ret = lower->ops->release(lower, (FAR void *) arg);
+#else
+          ret = lower->ops->release(lower);
+#endif
         }
         break;
 
@@ -417,6 +656,182 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   sem_post(&upper->exclsem);
   return ret;
+}
+
+/****************************************************************************
+ * Name: audio_dequeuebuffer
+ *
+ * Description:
+ *   Dequeues a previously enqueued Audio Pipeline Buffer.
+ *
+ *   1. The upper half driver calls the enqueuebuffer method, providing the
+ *      lower half driver with the ab_buffer to process.
+ *   2. The lower half driver's enqueuebuffer will either processes the
+ *      buffer directly, or more likely add it to a queue for processing
+ *      by a background thread or worker task.
+ *   3. When the lower half driver has completed processing of the enqueued
+ *      ab_buffer, it will call this routine to indicate processing of the
+ *      buffer is complete.
+ *   4. When this routine is called, it will check if any threads are waiting
+ *      to enqueue additional buffers and "wake them up" for further
+ *      processing.
+ *
+ * Input parameters:
+ *   handle - This is the handle that was provided to the lower-half
+ *     start() method.
+ *   apb - A pointer to the previsously enqueued ap_buffer_s
+ *   status - Status of the dequeue operation
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status,
+                    FAR void *session)
+#else
+static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status)
+#endif
+{
+  struct audio_msg_s    msg;
+
+  audllvdbg("Entry\n");
+
+  /* Send a dequeue message to the user if a message queue is registered */
+
+  if (upper->usermq != NULL)
+    {
+      msg.msgId = AUDIO_MSG_DEQUEUE;
+      msg.u.pPtr = apb;
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      msg.session = session;
+#endif
+      apb->flags |= AUDIO_APB_DEQUEUED;
+      mq_send(upper->usermq, &msg, sizeof(msg), CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+    }
+}
+
+/****************************************************************************
+ * Name: audio_complete
+ *
+ * Description:
+ *   Send an AUDIO_MSG_COMPLETE message to the client to indicate that the
+ *   active playback has completed.  The lower-half driver initiates this
+ *   call via its callback pointer to our upper-half driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status,
+                    FAR void *session)
+#else
+static inline void audio_complete(FAR struct audio_upperhalf_s *upper,
+                    FAR struct ap_buffer_s *apb, uint16_t status)
+#endif
+{
+  struct audio_msg_s    msg;
+
+  audllvdbg("Entry\n");
+
+  /* Send a dequeue message to the user if a message queue is registered */
+
+  upper->started = false;
+  if (upper->usermq != NULL)
+    {
+      msg.msgId = AUDIO_MSG_COMPLETE;
+      msg.u.pPtr = NULL;
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      msg.session = session;
+#endif
+      mq_send(upper->usermq, &msg, sizeof(msg),
+          CONFIG_AUDIO_BUFFER_DEQUEUE_PRIO);
+    }
+}
+
+/****************************************************************************
+ * Name: audio_callback
+ *
+ * Description:
+ *   Provides a callback interface for lower-half drivers to call to the
+ *   upper-half for buffer dequeueing, error reporting, etc.
+ *
+ * Input parameters:
+ *   priv - Private context data owned by the upper-half
+ *   reason - The reason code for the callback
+ *   apb - A pointer to the previsously enqueued ap_buffer_s
+ *   status - Status information associated with the callback
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   This function may be called from an interrupt handler.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+static void audio_callback(FAR void *handle, uint16_t reason,
+        FAR struct ap_buffer_s *apb, uint16_t status,
+        FAR void *session)
+#else
+static void audio_callback(FAR void *handle, uint16_t reason,
+        FAR struct ap_buffer_s *apb, uint16_t status)
+#endif
+{
+  FAR struct audio_upperhalf_s *upper = (FAR struct audio_upperhalf_s *)handle;
+
+  audllvdbg("Entry\n");
+
+  /* Perform operation based on reason code */
+
+  switch (reason)
+    {
+      case AUDIO_CALLBACK_DEQUEUE:
+        {
+          /* Call the dequeue routine */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+          audio_dequeuebuffer(upper, apb, status, session);
+#else
+          audio_dequeuebuffer(upper, apb, status);
+#endif
+          break;
+        }
+
+      /* Lower-half I/O error occurred */
+
+      case AUDIO_CALLBACK_IOERR:
+        {
+        }
+        break;
+
+      /* Lower-half driver has completed a playback */
+
+      case AUDIO_CALLBACK_COMPLETE:
+        {
+          /* Send a complete message to the user if a message queue is registered */
+
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+          audio_complete(upper, apb, status, session);
+#else
+          audio_complete(upper, apb, status);
+#endif
+        }
+        break;
+
+      default:
+        {
+          auddbg("Unknown callback reason code %d\n", reason);
+          break;
+        }
+    }
 }
 
 /****************************************************************************
@@ -451,14 +866,14 @@ static int audio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct audio_upperhalf_s *upper;
-  char  path[AUDIO_MAX_DEVICE_PATH];
+  char path[AUDIO_MAX_DEVICE_PATH];
   static bool dev_audio_created = false;
 #ifndef CONFIG_AUDIO_CUSTOM_DEV_PATH
   const char* devname = "/dev/audio";
 #elif !defined(CONFIG_AUDIO_DEV_ROOT)
   const char* devname = CONFIG_AUDIO_DEV_PATH;
   const char* ptr;
-  char*       pathptr;
+  char* pathptr;
 #endif
 
   /* Allocate the upper-half data structure */
@@ -570,102 +985,13 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
   strncat(path, name, AUDIO_MAX_DEVICE_PATH - 11);
 #endif
 
+  /* Give the lower-half a context to the upper half */
+
+  dev->upper = audio_callback;
+  dev->priv = upper;
+
   audvdbg("Registering %s\n", path);
   return register_driver(path, &g_audioops, 0666, upper);
-}
-
-/****************************************************************************
- * Name: audio_dequeuebuffer
- *
- * Description:
- *   Dequeues a previously enqueued Audio Pipeline Buffer.
- *
- *   1. The upper half driver calls the enqueuebuffer method, providing the
- *      lower half driver with the ab_buffer to process.
- *   2. The lower half driver's enqueuebuffer will either processes the
- *      buffer directly, or more likely add it to a queue for processing
- *      by a background thread or worker task.
- *   3. When the lower half driver has completed processing of the enqueued
- *      ab_buffer, it will call this routine to indicated processing of the
- *      buffer is complete.
- *   4. When this routine is called, it will check if any threads are waiting
- *      to enqueue additional buffers and "wake them up" for further
- *      processing.
- *
- * Input parameters:
- *   handle - This is the handle that was provided to the lower-half
- *     start() method.
- *   apb - A pointer to the previsously enqueued ap_buffer_s
- *   status - Status of the dequeue operation
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   This function may be called from an interrupt handler.
- *
- ****************************************************************************/
-
-static inline void audio_dequeuebuffer(FAR struct audio_upperhalf_s *upper,
-                    FAR struct ap_buffer_s *apb, uint16_t status)
-{
-  audllvdbg("Entry\n");
-
-  /* TODO:  Implement the logic */
-
-}
-
-/****************************************************************************
- * Name: audio_callback
- *
- * Description:
- *   Provides a callback interface for lower-half drivers to call to the
- *   upper-half for buffer dequeueing, error reporting, etc.
- *
- * Input parameters:
- *   priv - Private context data owned by the upper-half
- *   reason - The reason code for the callback
- *   apb - A pointer to the previsously enqueued ap_buffer_s
- *   status - Status information associated with the callback
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   This function may be called from an interrupt handler.
- *
- ****************************************************************************/
-
-static void audio_callback(FAR void *handle, uint16_t reason,
-        FAR struct ap_buffer_s *apb, uint16_t status)
-{
-  FAR struct audio_upperhalf_s *upper = (FAR struct audio_upperhalf_s *)handle;
-
-  audllvdbg("Entry\n");
-
-  /* Perform operation based on reason code */
-
-  switch (reason)
-    {
-      case AUDIO_CALLBACK_DEQUEUE:
-        {
-          /* Call the dequeue routine */
-
-          audio_dequeuebuffer(upper, apb, status);
-          break;
-        }
-
-      case AUDIO_CALLBACK_IOERR:
-        {
-        }
-        break;
-
-      default:
-        {
-          auddbg("Unknown callback reason code %d\n", reason);
-          break;
-        }
-    }
 }
 
 #endif /* CONFIG_AUDIO */

@@ -84,11 +84,11 @@
  *
  ****************************************************************************/
 
-static void apb_semtake(sem_t *sem)
+static void apb_semtake(FAR struct ap_buffer_s *apb)
 {
   /* Take the semaphore (perhaps waiting) */
 
-  while (sem_wait(sem) != 0)
+  while (sem_wait(&apb->sem) != 0)
     {
       /* The only case that an error should occr here is if
        * the wait was awakened by a signal.
@@ -102,7 +102,7 @@ static void apb_semtake(sem_t *sem)
  * Name: apb_semgive
  ****************************************************************************/
 
-#define apb_semgive(s) sem_post(s)
+#define apb_semgive(b) sem_post(&b->sem)
 
 /****************************************************************************
  * Name: apb_alloc
@@ -113,11 +113,41 @@ static void apb_semtake(sem_t *sem)
  *
  ****************************************************************************/
 
-FAR struct ap_buffer_s *apb_alloc(int type, int sampleCount)
+int apb_alloc(FAR struct audio_buf_desc_s * bufdesc)
 {
-  /* TODO:  Implement the alloc logic */
+  uint32_t            bufsize;
+  int                 ret;
+  struct ap_buffer_s  *pBuf;
 
-  return NULL;
+  DEBUGASSERT(bufdesc->u.ppBuffer != NULL);
+
+  /* Perform a user mode allocation */
+
+  bufsize = sizeof(struct ap_buffer_s) + bufdesc->numbytes;
+  pBuf = kumalloc(bufsize);
+  *bufdesc->u.ppBuffer = pBuf;
+
+  /* Test if the allocation was successful or not */
+
+  if (*bufdesc->u.ppBuffer == NULL)
+    ret = -ENOMEM;
+  else
+    {
+      /* Populate the buffer contents */
+
+      memset(pBuf, bufsize, 0);
+      pBuf->i.channels = 1;
+      pBuf->crefs = 1;
+      pBuf->nmaxbytes = bufdesc->numbytes;
+      pBuf->nbytes = 0;
+#ifdef CONFIG_AUDIO_MULTI_SESSION
+      pBuf->session = bufdesc->session;
+#endif
+      sem_init(&pBuf->sem, 0, 1);
+      ret = sizeof(struct audio_buf_desc_s);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -143,8 +173,19 @@ void apb_prepare(FAR struct ap_buffer_s *apb, int8_t allocmode, uint8_t format,
 
 void apb_free(FAR struct ap_buffer_s *apb)
 {
+  int   refcount;
+
   /* Perform a reference count decrement and possibly release the memory */
 
+  apb_semtake(apb);
+  refcount = apb->crefs--;
+  apb_semgive(apb);
+
+  if (refcount == 1)
+    {
+      auddbg("Freeing %p\n", apb);
+      kufree(apb);
+    }
 }
 
 /****************************************************************************
@@ -158,7 +199,11 @@ void apb_free(FAR struct ap_buffer_s *apb)
 
 void apb_reference(FAR struct ap_buffer_s *apb)
 {
-  /* TODO:  Implement the reference logic */
+  /* Do we need any thread protection here?  Almost certaily... */
+
+  apb_semtake(apb);
+  apb->crefs++;
+  apb_semgive(apb);
 }
 
 #endif /* CONFIG_AUDIO */
