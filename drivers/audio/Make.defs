@@ -1,6 +1,6 @@
 ############################################################################
 # drivers/audio/Make.defs
-# These drivers support various Audio devices using the NuttX Audio 
+# These drivers support various Audio devices using the NuttX Audio
 # interface.
 #
 #   Copyright (C) 2013 Ken Pettit. All rights reserved.

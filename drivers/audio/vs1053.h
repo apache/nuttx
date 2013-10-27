@@ -60,7 +60,7 @@
 
 #define VS1053_SCI_MODE             0x00
 #define VS1053_SCI_STATUS           0x01
-#define VS1053_SCI_BASE             0x02
+#define VS1053_SCI_BASS             0x02
 #define VS1053_SCI_CLOCKF           0x03
 #define VS1053_SCI_DECODE_TIME      0x04
 #define VS1053_SCI_AUDATA           0x05
@@ -115,7 +115,7 @@
 #define VS1053_VER_VS1063           6
 #define VS1053_VER_VS1103           7
 
-/* BASE register bit definitions ******************************************/
+/* BASS register bit definitions ******************************************/
 
 #define VS1053_ST_AMPLITUDE         0xF000
 #define VS1053_ST_FREQLIMIT         0x0F00
@@ -125,7 +125,9 @@
 /* CLOCKF register bit definitions ****************************************/
 
 #define VS1053_SC_MULT              0xE000
+#define VS1053_SC_MULT_SHIFT        13
 #define VS1053_SC_ADD               0x1800
+#define VS1053_SC_ADD_SHIFT         11
 #define VS1053_SC_FREQ              0x07FF
 
 #define VS1053_SC_MULT_XTALIx10     0
@@ -205,6 +207,8 @@
 #define VS1053_MP3_MODE_DUAL_CH     2
 #define VS1053_MP3_MODE_JSTEREO     1
 #define VS1053_MP3_MODE_STEREO      0
+
+#define VS1053_END_FILL_BYTE        0x1e06
 
 /****************************************************************************
  * Public Types

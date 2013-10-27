@@ -12,3 +12,35 @@ config VS1053
 		Vorbis format audio.  It also has a general DSP which is user
 		programmable to perform special audio (or any DSP) functions.
 
+if VS1053
+
+config VS1053_DEVICE_COUNT
+	int "Number of VS1053 devices attached"
+	default 1
+	---help---
+		Sets the number of VS1053 type devices availalbe to the system.
+		This is required to reserve global, static lower-half driver
+		context pointers for the DREQ ISR to use for lookup when it needs
+		to signal that additional data is being requested.
+
+if AUDIO_DRIVER_SPECIFIC_BUFFERS
+
+config VS1053_NUM_BUFFERS
+	int "Number of Audio Pipeline Buffers to use"
+	default 2
+	---help---
+		Sets the number of the Audio Pipeline Buffers used to deliver audio
+		data to the VS1053 driver.  The minimum you should set this is
+		2 buffers, which should be adequate for most media types.
+
+config VS1053_BUFFER_SIZE
+	int "Size of Audio Pipeline Buffers to use"
+	default 8192
+	---help---
+		Sets the size of the Audio Pipeline Buffers used to deliver audio
+		data to the VS1053 driver.  The minimum you should set this is
+		2048 bytes.  The larger the buffer, the better CPU performance.
+
+endif
+
+endif

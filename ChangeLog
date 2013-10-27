@@ -5888,4 +5888,8 @@
 	  CC3000 driver update from David Sidrane (2013-10-25).
 	* arch/arm/src/sama5/chip/sam_isi.h:  Camera interface register
 	  definitions added (2013-10-26).
+	* audio/ and include/nuttx/audio/audio.h:  Updated audio subsystem
+	  from Ken Pettit (2013-10-27).
+	* drivers/audio/ and include/nuttx/audio/vs1053.h:  Updated
+	  VS1053 driver from ken Pettit (2013-10-27).
 
