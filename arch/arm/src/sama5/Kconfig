@@ -1678,6 +1678,32 @@ config SAMA5_ADC_DMA
 		is that there will be one DMA interrupt per conversion sequence vs.
 		one interrupt per conversion.
 
+config SAMA5_ADC_DMASAMPLES
+	int "Number of DMA samples"
+	default 2
+	depends on SAMA5_ADC_DMA
+	---help---
+		If DMA is enabled, then this will specify the number of sample to
+		collect before the DMA completes.  This is actually the number of
+		triggers; the number of collected samples will be this value times
+		the number of channels that are enabled.  You should also enable the
+		sequencer if you are DMAing multiple channels.
+
+		A value of "1" would DMA one set of samples.  That is not advised.
+		In that case the processing and data transfer overhead would be
+		greater than if DMA were disabled.  A value of 2 or more should be
+		selected.
+
+		The DMA logic uses ping-pong buffers, so the total buffering
+		requirement will be
+
+			2 Buffers * Number_of_ADC_Channels * SAMA5_ADC_DMASAMPLES * sizeof(uint32_t)
+
+		So, for example, if you had 8 ADC channels and 8 triggers per DMA
+		transfer, then the total DMA buffering requirment would be:
+
+			2 * 8 * 8 * 4 = 512 bytes.
+
 config SAMA5_ADC_AUTOCALIB
 	bool "ADC auto-calibration"
 	default n

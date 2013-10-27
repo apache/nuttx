@@ -357,6 +357,19 @@
 #  undef SAMA5_ADC_UNUSED
 #endif
 
+/* Number of DMA samples to collect */
+
+#if !defined(CONFIG_SAMA5_ADC_DMA)
+#  undef  CONFIG_SAMA5_ADC_DMASAMPLES
+#  define CONFIG_SAMA5_ADC_DMASAMPLES 1
+#elif !defined(CONFIG_SAMA5_ADC_DMASAMPLES)
+#  error CONFIG_SAMA5_ADC_DMASAMPLES must be defined
+#elif CONFIG_SAMA5_ADC_DMASAMPLES < 2
+#  warning Values of ONFIG_SAMA5_ADC_DMASAMPLES < 2 are inefficient
+#endif
+
+#define SAMA5_ADC_SAMPLES (CONFIG_SAMA5_ADC_DMASAMPLES * SAMA5_NCHANNELS)
+
 /* Clocking */
 
 #if BOARD_MCK_FREQUENCY <= SAM_ADC_MAXPERCLK
@@ -405,8 +418,8 @@ struct sam_adc_s
   /* DMA sample data buffer */
 
 #ifdef CONFIG_SAMA5_ADC_DMA
-  uint32_t evenbuf[SAMA5_NCHANNELS];
-  uint32_t oddbuf[SAMA5_NCHANNELS];
+  uint32_t evenbuf[SAMA5_ADC_SAMPLES];
+  uint32_t oddbuf[SAMA5_ADC_SAMPLES];
 #endif
 #endif /* SAMA5_ADC_HAVE_CHANNELS */
 
@@ -617,11 +630,11 @@ static void sam_adc_dmadone(void *arg)
        */
 
       cp15_invalidate_dcache((uintptr_t)buffer,
-                             (uintptr_t)buffer + SAMA5_NCHANNELS * sizeof(uint32_t));
+                             (uintptr_t)buffer + SAMA5_ADC_SAMPLES * sizeof(uint32_t));
 
       /* Process each sample */
 
-      for (i = 0; i < SAMA5_NCHANNELS; i++, buffer++)
+      for (i = 0; i < SAMA5_ADC_SAMPLES; i++, buffer++)
         {
           /* Get the sample and the channel number */
 
@@ -684,7 +697,7 @@ static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result)
 
   sam_adc_dmasetup(priv->dma,
                    priv->odd ? (void *)priv->oddbuf : (void *)priv->evenbuf,
-                   SAMA5_NCHANNELS * sizeof(uint32_t));
+                   SAMA5_ADC_SAMPLES * sizeof(uint32_t));
 }
 #endif
 
@@ -1008,7 +1021,7 @@ static int sam_adc_setup(struct adc_dev_s *dev)
   priv->ready   = true;
   priv->enabled = false;
 
-  sam_adc_dmasetup(priv, (void *)priv->evenbuf, SAMA5_NCHANNELS);
+  sam_adc_dmasetup(priv, (void *)priv->evenbuf, SAMA5_ADC_SAMPLES);
 #else
   /* Enable end-of-conversion interrupts for all enabled channels. */
 
