@@ -1155,7 +1155,7 @@ static int sst25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
 #ifdef CONFIG_SST25_SECTOR512
               geo->blocksize    = (1 << SST25_SECTOR_SHIFT);
               geo->erasesize    = (1 << SST25_SECTOR_SHIFT);
-              geo->neraseblocks = priv->nsectors << (priv->sectorshift - );
+              geo->neraseblocks = priv->nsectors << (priv->sectorshift - 9);
 #else
               geo->blocksize    = (1 << priv->sectorshift);
               geo->erasesize    = (1 << priv->sectorshift);
