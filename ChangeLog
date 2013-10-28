@@ -5587,7 +5587,7 @@
 	  that the you now also have to set CONFIG_NETDEVICES=y if you
 	  need to set a PHY configuration (2013-9-17).
 	* arch/arm/src/lpc17xx/lpc17_spi.c:  Remove undefined spi_select()
-	  prototype.  This was cause compile time warnings (2013-9-17).
+	  prototype.  This was causing compile time warnings (2013-9-17).
 	* configs/sama5d3x-ek/src/sam_ostest.c:  Add OS test support for
 	  the FPU test (2013-9-18).
 	* arch/arm/src/sama5/sam_usbhost.h and include/nuttx/usb/usbhost_trace.h
@@ -5778,12 +5778,12 @@
 	* net/net_close.c: Changed net_close debug output to verbose.  From
 	  Max Holtzberg (2013-10-17).
 	* net/send.c and net_sendfile.c:  Reset the send timeout when the
-	  data is ACKed, not when the data is sent.  Remove concitions on
+	  data is ACKed, not when the data is sent.  Remove conditions on
 	  checking for timeout.  From Max Holtzberg (2013-10-17).
 	* net/net_sendfile.c:  Correct paramter passed to netdev_txnotify()
 	  from Max Holtzberg (2013-10-17).
 	* include/nuttx/net/uip/uip-tcp.h, net/send.c, uip/uip_tcpconn.c, and
-	  uip/uip_tcpinput.c:  Change how the inital minimum MSS is calculated.
+	  uip/uip_tcpinput.c:  Change how the initial minimum MSS is calculated.
 	  Max Holtzberg (2013-10-17).
 	* net/uip/uip_tcpinput.c:  Move tcp connection into SYN_RCVD state
 	  after aception instead of bypassing and moving directly into ESTABLISHED.
@@ -5792,7 +5792,7 @@
 	  don't return until all data has been ACK'd. From Max Holtzberg
 	  (2013-10-17).
 	* arch/arm/src/stm32/chip/stm32f40xxx_dma.h: Typo fixes for UART7 and
-	  UART8 DMA configs.  From Mike Smit (2013-10-18).
+	  UART8 DMA configs.  From Mike Smith (2013-10-18).
 	* arch/arm/src/stm32/Kconfig:  DMA priority corrections from Mike Smith
 	  (2013-10-18).
 	* arch/arm/src/stm32/stm32*_dma.c, stm32_sdio.c, and stm32_dma.h:
@@ -5857,7 +5857,7 @@
 	* arch/arm/src/stm32/stm32f10xxx_dma.c:  DMA fix from David Sidrane:
 	  The DMA_CNDTRx register cannot be modified if the DMA channel is
 	  disabled (2013-10-23).
-	* arch/arm/src/sama5/sam_tc.c and .h:  First but at a timer/counter
+	* arch/arm/src/sama5/sam_tc.c and .h:  First cut at a timer/counter
 	  library for the SAMA5D3 (2013-10-23).
 	* configs/spark/nsh/defconfig:  Spark configuration update from David
 	  Sidrane (2013-10-24).
@@ -5870,7 +5870,7 @@
 	  that should have been cleared in a register.  From Martin Lederhilger
 	  (2013-10-24).
 	* configs/olimex-stm32-p207 and other files:  Support for the Olimex
-	  STM32 P207 board added by Martin Lederhilger (2017-10-24).
+	  STM32 P207 board added by Martin Lederhilger (2013-10-24).
 	* arch/arm/src/sama5/sam_adc.c, sam_tc.c and sam_tc.h:  Hook in the
 	  timer/counter logic so that it can driver periodic ADC sampling
 	  (2013-10-24).

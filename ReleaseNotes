@@ -4934,3 +4934,328 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
         is created in a different task group.
       - apps/nshlib:  Fix NSH listing output for the case of a single file.
         From the PX4 team; provided by Lorenz Meier.
+
+NuttX-6.31
+----------
+
+The 98th release of NuttX, Version 6.31, was made on October 28, 2013,
+and is available for download from the SourceForge website.  Note
+that release consists of two tarballs:  nuttx-6.31.tar.gz and
+apps-6.31.tar.gz.  Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+    * General:
+
+      - Standardized stack checking logic so the interfaces can be used
+        by common stack monitoring logic.
+
+    * Audio Subsystem and Audio Drivers:
+
+      - Ken Pettit has finally released his long awaited audio subsystem.
+        This is a generic audio subsystem that is appropriate for the
+        deeply embedded MCU.  Current testing has, however, been focused
+        on the VS1053 CODEC chip.
+      - Ken Pettit's VS1053 audio CODEC driver is now functional.
+
+    * Networking / Network Drivers
+
+      - Add the prefix ETH0 to all PHY configuration selections.  This
+        will allow us to support to Ethernet MAC drivers with two different
+        PHYs (identified with ETH0 and ETH1).  Enabled with CONFIG_NETDEV_MULTINIC.
+      - Add MII/RMII PHY definitions for the Micrel KSZ8051 PHY.
+      - Add GMII/GRMII PHY definitions for the Micrel KSZ9021/31 PHY.
+      - New network-optimized, higher-performance sendfile() implementation
+        from Max Holtzberg.
+      - Added a simple routing table.  This table is currenly only used (1)
+        when we need to look-up an Ethernet device based on an IP address,
+        and (2) in the ARP logic when we need to request the MAC address of
+        the router, vs the MAC address of the peer.
+      - Make net_close() nonblocking and free unestablished connections if
+        no free connections available.  From Max Holtzberg.
+      - Changed the meaning of the uip_*input functions. They now return
+        success when a packet is dropped; This is needed for the ENCX24J600
+        driver that must make a decision to return the packet or not:  It
+        should not retry dropped packets. From Max Holtzberg.
+      - David Sidrane has completed integration of the CC3000 networking.
+        This is much more than a network driver:  It is a complete
+        replacement for the NuttX networking with off-chip networking support
+        in the CC3000.
+      - Numerous enhancements to the ENCX24J600 driver from Max Holtberg.
+
+    * Other Common Drivers:
+
+      - The SST25 serial FLASH MTD driver now includes support for the
+        SST25VF016B.  From David Sidrane.
+      - Add a preflight method to the SDIO interface to support the STM32
+        DMA usage model. From Mike Smith.
+      - Enhanced the MMC/SD SDIO driver to perform DMA preflight operations
+        and fail DMA read/write requests that fail preflighting. From Mike
+        Smith.
+      - Add an ioctl command that can be used to trigger ADC/DAC conversion
+        under application control.
+
+    * File Systems:
+
+      - Enhanced the FAT32 filesystem code to understand DMA preflight
+        failures, and to use the file sector buffer as a bounce buffer when
+        a user-supplied buffer is not suitable for DMA. From Mike Smith.
+
+    * Atmel AT91 SAMA5D3x
+
+      - Add support so that subsets of the total DRAM (and other external
+        memory) can be added to the heap, leaving other memory reserved for
+        other purposes (like the LCDC framebuffers).
+
+    * Atmel AT91 SAMA5D3x Drivers:
+
+      - Use more descriptive task names when starting the EHCI and OHCI
+        monitor tasks.
+      - Added a 10/100Base-T Ethernet (EMAC) driver.
+      - Added a 1000Base-T Ethernet (GMAC) driver.
+      - Added a Real Time Clock (RTC) driver and integrated with the NuttX
+        system time logic.
+      - Added support for /dev/random using the SAMA5D3x True Random Number
+        Generator (TRNG).
+      - Added a Watchdog Timer (WDT) driver.
+      - Added a Timer/Counter (TC) library with interface that make be used
+        by other drivers that need timer support.
+      - Added an ADC driver that can collect multiple samples using the
+        sequencer, can be trigger by a timer/counter, and supports DMA data
+        transfers.
+      - Added a touchscreen driver based on the special features of the
+        SAMA5D3 ADC peripheral.
+      - Added an LCD controller (LCDC) frame buffer driver.
+      - Added a CAN driver.  However, testing has been delayed because of
+        cabling issues.
+      - Basic header file support is available for the Image Sensor
+        Interface (ISI) camera interface.  Work on the camera driver is
+        underway and is expected in the next release.
+
+    * Atmel AT91 SAMA5D3x-EK Development Boards
+
+      - Add OS test support for the FPU test.
+      - Enable the task name feature board configuration sto provide
+        prettier ps command output.
+      - Added NX and NxWM configurations to verify the LCD and touchscreen.
+        There are still some outstanding issues with the NxWM configuration
+        as of this release.
+      - The TRNG and /dev/random are now enabled by default in the demo
+        configuration.
+
+    * Atmel AT91 SAM3/4 Boards:
+
+      - Add configuration to select revision 3 of the Arduino Due which has
+        some small but important differences.  Suggested by gdi@embedders.org.
+
+    * STMicro STM32:
+
+      - Add support for the STM32F207ZE chip. From Martin Lederhilger.
+
+    * STMicro STM32 Boards:
+
+      - Add configuration for the Spark Core.  The initial check-in is
+        basically the Maple Mini board and subsequent development by David
+        Sidrane is his special Spark emulation hardware.  The configuration
+        should be very mature when actual Spark hardware is available.
+      - Support for the Olimex STM32 P207 board added by Martin Lederhilger.
+      - Configuration for the Mikroe STM32F4 board configuration updated for
+        audio support by Ken Pettit.
+
+    * NXP LPC17xx Boards:
+
+      - zkit-arm-1769:  LED1 is now user controllable after booting. From
+        Rashid Fatah.
+
+    * Kinetis KL Drivers:
+
+      - PIT and TPM register definitions header files for the from Alan
+        Carvalho de Assis.
+      - Added low-level getc() function for operation with no file system.
+        The KL25Z can now support NSH in a very minimal system that does
+        not even have a file system.
+
+    * Kinetis KL Boards
+
+      - A new configuration called minnsh was added is an experiement to
+        see how small we can get the NuttX footprint and still support NSH.
+        From Alan Carvalho de Assis..
+
+    * TI Calypso Phones:
+
+      - Basic board support for the Motorola C139 (Compal E86) phone.  From
+        Craig Comstock.
+
+    * Applications:
+
+      - Moved several useful examples from apps/examples to apps/system.
+        This includes USB MSC, USB CDC/ACM, and USB Composite.
+      - New addroute and delroute commands added to NSH in order to manage
+        the network routing table.
+      - Numerous enhancements and updates to the CC3000 example from David
+        Sidrane.
+      - Add a new stack monitor daemon that can be used to constantly
+        monitor stack usage by all threads.
+      - Numerous changes to get NSH working with no file system.  Basically
+        this suppresses I/O redirection and replaces file I/O with calls to
+        low-level console read/write functions.  Suggested by Alan Carvalho
+        de Assis.
+      - apps/system/nxplayer: A new, command-line media player called
+        'nxplayer' from Ken Pettit.
+      - apps/examples/random:  Add a simple test that dumps values from
+        /dev/random.
+      - apps/examples/adc:  Add support so that a ADC driven by software
+        triggering can be tested.
+
+    * Build System:
+
+      - The MKDEP tools now support a new argument that identifies the
+        object file path.
+
+Efforts In Progress.  The following are features that are partially
+implemented but present in this release.  They are not likely be be
+completed soon.
+
+    * kconfig-fronted Configuration:
+
+      - Conversion of old configurations to use the kconfig-frontends
+        tool is an ongoing effort that will continue for some time.
+        At this time, only 48% of the configurations have been converted
+        to use the kconfig-frontends tools.
+
+Bugfixes (see the ChangeLog for details).  Some of these are very important:
+
+    * Initialzation and Scheduling:
+
+      - IDLE thread initialization logic should not call group_setupidlefiles()
+        if there are no file descriptors (and, hence, no file system).
+      - Fix some cornercase error handling logic:  If sched_releasetcb() is
+        called as part of a failed pthread startup before the flags field in
+        the TCB has been initialized, then a crash occurs. Pointed out by
+        David Sidrane.
+
+    * Networking / Network Drivers:
+
+      - Look up of a device using subnet will fail if the packet is being
+        sent out of our subnet (via a router). The fallback here is just to
+        use the only device ("eth0") if the subnet lookup fails (this logic
+        was extended to handle multiple Ethernet devices by adding a simple
+        routing table).
+      - Fix some backward conditional logic in send() that enabled the
+        check if the ARP address is in the ARP table.  From Max Holtzberg.
+      - Notify the socket layer from the network monitor if a connection is
+        lost before the monitoring callback has been registered.  From Max
+        Holtzberg.
+      - send():  Reset the send timeout when the data is ACKed, not when the
+        data is sent.  Remove conditions on checking for timeout.  From Max
+        Holtzberg.
+      - Correct how the TCP/IP initial minimum MSS is calculated. Max
+        Holtzberg.
+      - TCP state machine: Move tcp connection into SYN_RCVD state after
+        aception instead of bypassing and moving directly into ESTABLISHED.
+        From Max Holtzberg.
+      - Numerous fixes to the ENCX24J600 driver from Max Holtberg.
+
+    * USB Drivers:
+
+      - Change naming of SELFPOWERED and REMOTEWAKEUP to avoid name
+        collisions.  Prepend the name of the driver (for example
+        CDCACM_SELFPOWERED).
+      - CDC/ACM class driver:  Change the interval for the interrupt
+        endpoint from 0xff (invalid) to 10.  This is not a critical
+        change but will avoid a complaint from the Linux driver when
+        it overrides the 0xff value.
+
+    * ARM Cortex-A5:
+
+      - Fix an error in data cache clean and invalidate functions: Fix of
+        addresses to cache line boundaries.
+
+    * Atmel AT91 SAMA5D3x Drivers:
+
+      - Correct some inconsistencies in the way that USB configuration
+        settings are used.  This caused compilation errors in SAMA5 OHCI
+        when USB debug was ON but USB host tracing was off.
+      - When 480MHz UPLL is used to drive OHCI, it should have a divider
+        of 10.  However, that does not work.  A divider of 5 does.  Why?.
+      - OHCI HCD: Fix a place where DMA-related data needed to be flushed
+        to data cache; Fix another where a virtual address was being used
+        in a register where a physical address was required.
+      - HSMCI Driver: TX DMA disabled.  It is just not reliable. No idea
+        why.  RX DMA is still used.
+      - STM32F103C pinmapping corrections from David Sidrane.
+
+    * Atmel SAMA5D3x-EK Board
+
+      - Increase the number of pre-allocated watchdog timers.  The default
+        number of 4 was easily being exhausted in the more complex
+        configurations.
+
+    * STMicro STM32:
+
+      - STM32 F4 DMA definitions: Typo fixes for UART7 and UART8 DMA
+        configs.  From Mike Smith.
+      - DMA priority configuration corrections from Mike Smith.
+      - Changes to the stm32_dmacapable API. In order to correctly
+        verify that a buffer can be transferred, the transfer count and
+        the CCR value are required.  Implemented stm32_dmacapable for
+        stm32f1xx devices. Enhanced stm32_dmacapable for stm32f2xx and
+        stm32f4xx devices to check for additional conditions that will cause
+        DMA to fail or lose data.
+      - STM32 F1 DMA fix from David Sidrane: The DMA_CNDTRx register
+        cannot be modified if the DMA channel is disabled.
+
+    * STMicro STM32 Drivers:
+
+      - Fix compilation errors from bad bit definitions in ADC and PWM
+        register.  From Martin Lederhilger.
+      - DMA-related fixes to the SPI driver from Ken Pettit.
+
+    * NXP LPC17xx Drivers:
+
+      - Remove undefined spi_select() prototype.  This was causing compile
+        time warnings.
+
+    * NXP LPC17xx Boards:
+
+      - zkit-arm-1768:  MMC/SD is on SPI, not SSP0.  From Rashid Fatah.
+
+    * C Library
+
+      - scanf() fixes from kfrolov: 1) sscanf() function hangs in the
+        following example: sscanf("2", "%u,%u,%u,%u", ...), 2) sscanf()
+        returns incorrect number of parsed numbers if some arguments
+        can't be parsed: sscanf("=2", "%u,%u,%u,%u",...)==1 instead of
+        0, and 3) using of char* instead of const char* in vsscanf
+        function leads to warnings from GCC.
+
+    * Build System
+
+      - Dependency generation generation was broken for directories that
+        keep objects in a sub-directory.  The MKDEP tools now support a new
+        argument that identifies the object file path.
+      - tools/define.sh:  'cut' no longer works as it once did.  Script
+        adapted to observed behavior.
+
+    * Applications:
+
+      - Remove a warning from the NSH library when DHCP is not enabled.
+      - Default NSH IP address should be 0x0a000001 (10.0.0.1), not
+        0xa0000001 (160.0.0.1).  Ditto for the gateway.
+      - Add some missing options to the OS test Kconfig file
+      - Fix some bad conditional compilation in the USB monitor.
+      - Fix default I2C frequency used by the I2C tool:  400KHz instead
+        of 4MHz.  Suggested by Max Kriegleder.
+      - Increase stack size for the system/info command. Ken Petit
+        reports that this simple command can exceed its 768 stack size
+        under certain conditions.  The size is marginal and has been
+        increased to 1024 by default but is also now configurable.
+      - apps/Makefile:  Needs to include external/Make.defs if we want
+        allow external applications to participate in the NuttX
+        configuration.  Suggested by gdi@embedders.org.
+      - apps/netutils/telnetd:  Missing argument to debug statement
+        can cause crashes in certain error conditions. From David
+        Sidrane.
+      - apps/examples/can:  Correct an error in a debug statement.  From
+        Martin Lederhilger.
