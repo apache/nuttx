@@ -5559,7 +5559,7 @@
 	  are just hacked out and gutted versions of the corresponding
 	  STM32 files (2013-9-13).
 
-6.31 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+6.31 2013-10-28 Gregory Nutt <gnutt@nuttx.org>
 
 	* nuttx/fs/romfs/fs_romfsutil.c:  Back out part of a recent
 	  ROMFS change (2013-9-14).
@@ -5571,7 +5571,7 @@
 	* configs/ and a few Ethernet drivers:  Add the prefix ETH0
 	  to all PHY configuration selections.  This will allow us
 	  to support to Ethernet MAC drivers with two different
-	  PHYS (identified with ETH0 and ETH1) (2013-9-17).
+	  PHYs (identified with ETH0 and ETH1) (2013-9-17).
 	* net/Kconfig and drivers/net/Kconfig:  Move PHY selections from
 	  net/Kconfig to drivers/net/Kconfig where they belong.  Add the previx
 	  ETH0_ to each PHY selection.  And a new configuration
@@ -5617,7 +5617,7 @@
 	  endpoint from 0xff (invalid) to 10.  This is not a critical change
 	  but will avoid a complaint from the Linux driver when it overrides
 	  the 0xff value (2013-9-22).
-	* configs/zkit-arm-1769:  LED1 is not user controllable after booting.
+	* configs/zkit-arm-1769:  LED1 is now user controllable after booting.
 	  From Rashid Fatah (2013-9-23).
 	* arch/arm/src/sama5/sam_hsmci.c:  TX DMA disabled.  It is just not
 	  reliable. No idea why.  RX DMA is still used (2013-9-23).
@@ -5654,9 +5654,9 @@
 	  next outgoing packet from the TX done interrupt handling.  From
 	  Max Holtzberg (2013-9-27)
 	* sched/os_start.c:  Should not call group_setupidlefiles() if there
-	  are not file descriptors (and, hence, no file system) (2013-9-27).
+	  are no file descriptors (and, hence, no file system) (2013-9-27).
 	* arch/arm/src/sama5/sam_gmac.c:  GMAC driver and GMII logic is
-	  code complete and readay for test (2013-9-27)
+	  code complete and ready for test (2013-9-27)
 	* configs/compal_e86: Basic board support for the Motorola C139
 	  (Compal E86) phone.  From Craig Comstock (2013-9-27).
 	* configs/compal_e86: Converted to use the kconfig-frontends
@@ -5686,14 +5686,14 @@
 	  From Alan Carvalho de Assis. (2013-9-30).
 	* net/net_sendfile:  The high performance sendfile logic is
 	  now functional.  From Max Holtzberg (2013-9-30).
-	* tools/define.sh:  'cut' long because as it once did.  Script
+	* tools/define.sh:  'cut' no longer works as it once did.  Script
 	  adapted to observed behavior (2013-9-30).
 	* include/nuttx/net/route.h and net/net_*route.c:  Partial
 	  implementation of a routing table. Not yet hooked into the
 	  build system (2013-10-1)
 	* include/net/route.h:  Defines the application interface to
 	  the routing table (2013-10-2).
-	* configs/spark:  Add configuratino for the Spark Core.  The
+	* configs/spark:  Add configuration for the Spark Core.  The
 	  initial check-in is basically the Maple Mini board (2013-10-2).
 	* include/net/route.h and libc/net/lib_addroute.c and delroute.c:
 	  Add an application interface to manage the routing table
@@ -5724,7 +5724,7 @@
 	  Max Holtzberg (2013-10-8).
 	* arch/arm/src/sama5/sam_lcd.c: LCDC driver is code complete and
 	  incorporated into the build system (but still untested (2013-10-8).
-	* configs/sama5d3x-ek/nx:  Add an examples/nx configuratino that
+	* configs/sama5d3x-ek/nx:  Add an examples/nx configuration that
 	  will be used for the SAMA5 LCD bring-up (2013-10-8).
 	* configs/arduino-due/Kconfig and include/board.h:  Add configuration
 	  to select revision 3 of the Arduino Due which has some small
@@ -5749,7 +5749,7 @@
 	  uip/uip_udpconn.c, uip/uip_udpinput.c:  Changed the meaning of the
 	  uip_*input functions. They now return success when a packet is
 	  dropped; This is needed for the ENCX24J600 driver that must make
-	  a decision to return the packet or not:  It should not retai
+	  a decision to return the packet or not:  It should not retry
 	  dropped packets. From Max Holtzberg (2013-10-11).
 	* drivers/net/encx24j600.c and Kconfig: ENCX24J600: Improved descriptor
 	  handling, free packets on rx abort interrupt. From Max Holtzberg
@@ -5768,7 +5768,7 @@
 	* configs/sama5d3x-ek/nxwm/defconfig:  Now uses scaled icons in the
 	  the NxWM taskbar (2013-10-15).
 	* configs/sama5d3x-ek/nxwm/defconfig:  Use the 320x320 NuttX logo as
-	  the NxWM backgroun (2013-10-15).
+	  the NxWM background (2013-10-15).
 	* arch/arm/src/stm32/chip/stm32f103c_pinmap.h:  Pinmapping corrections
 	  from David Sidrane (2013-10-16).
 	* configs/spark:  The Spark device configuration is receiving some
@@ -5826,7 +5826,7 @@
 	  driver into the build system; Verify the correct operation of the
 	  SAMA5 RTC driver (2013-10-19).
 	* arch/arm/src/sama5/sam_wdt.c and .h:  Add a SAMA5 watchdog timer
-	  drvier. Untested on initial check-in (2013-10-19).
+	  driver. Untested on initial check-in (2013-10-19).
 	* arch/arm/src/sama5/sam_trng.c, sam_trng.h, and chip/sam_trng.h:  Add
 	  a /dev/random driver based on the SAMA5D3 TRNG peripheral (2013-10-20).
 	* configs/sama5d3x-3k/demo:  The TRNG and /dev/random are now enabled
@@ -5893,8 +5893,8 @@
 	* drivers/audio/ and include/nuttx/audio/vs1053.h:  Updated
 	  VS1053 driver from ken Pettit (2013-10-27).
 	* configs/mikroe-stm32f4/: Updated configuration for the
-	  Mikrow STM32F4 board from Ken Pettit (2013-10-27).
-	* arch/arm/src/stm32/stm32_spi.c:  DMA-related fixe from Ken
+	  Mikroe STM32F4 board from Ken Pettit (2013-10-27).
+	* arch/arm/src/stm32/stm32_spi.c:  DMA-related fixes from Ken
 	  Pettit (2013-10-27).
 	* sched/sched_releasetcb.c: Fix a cornercase:  If sched_releasetcb()
 	  is called as part of a failed pthread startup before the flags
@@ -5904,4 +5904,7 @@
 	  modes:  single channel or multiple channel with sequencer support.
 	  software trigger or timer trigger;  ADC channel interrupts or
 	  DMA (2013-10-28).
+	* nuttx/drivers/audio/vs1053.c and nuttx/include/nuttx/audio/audio.h:
+	  Add logic to verify the audio sub-format.  From Ken Pettit (2013-10-28).
 
+6.32 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>

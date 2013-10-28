@@ -129,33 +129,40 @@
  * is a list of bit-field definitons for defining the device type.
  */
 
-#define AUDIO_TYPE_QUERY            0x0000
-#define AUDIO_TYPE_INPUT            0x0002
-#define AUDIO_TYPE_OUTPUT           0x0004
-#define AUDIO_TYPE_MIXER            0x0008
-#define AUDIO_TYPE_SELECTOR         0x0010
-#define AUDIO_TYPE_FEATURE          0x0020
-#define AUDIO_TYPE_EFFECT           0x0040
-#define AUDIO_TYPE_PROCESSING       0x0080
-#define AUDIO_TYPE_EXTENSION        0x0100
+#define AUDIO_TYPE_QUERY            0x00
+#define AUDIO_TYPE_INPUT            0x02
+#define AUDIO_TYPE_OUTPUT           0x02
+#define AUDIO_TYPE_MIXER            0x04
+#define AUDIO_TYPE_SELECTOR         0x08
+#define AUDIO_TYPE_FEATURE          0x10
+#define AUDIO_TYPE_EFFECT           0x20
+#define AUDIO_TYPE_PROCESSING       0x40
+#define AUDIO_TYPE_EXTENSION        0x80
 
 /* Audio Format Types *******************************************************/
-/* The following defines the audio data format types in NuttX.  */
+/* The following defines the audio data format types in NuttX.  During a
+ * format query, these will be converted to bit positions withing the
+ * ac_format field, meaning we currently only support up to 16 formats. To
+ * support more than that, we will use the FMT_OTHER entry, and the 
+ * interfacing software can perform a second query to get the other formats.
+ */
 
-#define AUDIO_FMT_UNDEF             0x000
-#define AUDIO_FMT_OTHER             0x001
-#define AUDIO_FMT_MPEG              0x002
-#define AUDIO_FMT_AC3               0x004
-#define AUDIO_FMT_WMA               0x008
-#define AUDIO_FMT_DTS               0x010
-#define AUDIO_FMT_PCM               0x020
-#define AUDIO_FMT_WAV               0x020
-#define AUDIO_FMT_MP3               0x040
-#define AUDIO_FMT_MIDI              0x080
-#define AUDIO_FMT_OGG_VORBIS        0x100
+#define AUDIO_FMT_UNDEF             0x00
+#define AUDIO_FMT_OTHER             0x01
+#define AUDIO_FMT_MPEG              0x02
+#define AUDIO_FMT_AC3               0x03
+#define AUDIO_FMT_WMA               0x04
+#define AUDIO_FMT_DTS               0x05
+#define AUDIO_FMT_PCM               0x06
+#define AUDIO_FMT_WAV               0x07
+#define AUDIO_FMT_MP3               0x08
+#define AUDIO_FMT_MIDI              0x09
+#define AUDIO_FMT_OGG_VORBIS        0x0A
+#define AUDIO_FMT_FLAC              0x0B
 
 /* Audio Sub-Format Types ***************************************************/
 
+#define AUDIO_SUBFMT_END            0x00
 #define AUDIO_SUBFMT_PCM_MP1        0x01
 #define AUDIO_SUBFMT_PCM_MP2        0x02
 #define AUDIO_SUBFMT_PCM_MP3        0x03
@@ -167,6 +174,9 @@
 #define AUDIO_SUBFMT_PCM_S16_BE     0x09
 #define AUDIO_SUBFMT_PCM_S16_LE     0x0A
 #define AUDIO_SUBFMT_PCM_U16_BE     0x0B
+#define AUDIO_SUBFMT_MIDI_0         0x0C
+#define AUDIO_SUBFMT_MIDI_1         0x0D
+#define AUDIO_SUBFMT_MIDI_2         0x0E
 
 /* Supported Sampling Rates *************************************************/
 

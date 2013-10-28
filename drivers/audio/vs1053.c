@@ -583,34 +583,54 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
 
         pCaps->ac_channels = 2;       /* Stereo output */
 
-        /* The input formats we can decode / accept */
+        switch (pCaps->ac_subtype)
+          {
+            case AUDIO_TYPE_QUERY:
+              /* The input formats we can decode / accept */
 
-        pCaps->ac_format[0] = 0
+              *((uint16_t *) &pCaps->ac_format[0]) = 0
 #ifdef CONFIG_AUDIO_FORMAT_AC3
-              | AUDIO_FMT_AC3
+                    | (1 << (AUDIO_FMT_AC3 - 1))
 #endif
 #ifdef CONFIG_AUDIO_FORMAT_MP3
-              | AUDIO_FMT_MP3
+                    | (1 << (AUDIO_FMT_MP3 - 1))
 #endif
 #ifdef CONFIG_AUDIO_FORMAT_WMA
-              | AUDIO_FMT_WMA
+                    | (1 << (AUDIO_FMT_WMA - 1))
 #endif
 #ifdef CONFIG_AUDIO_FORMAT_MIDI
-              | AUDIO_FMT_MIDI
+                    | (1 << (AUDIO_FMT_MIDI - 1))
 #endif
 #ifdef CONFIG_AUDIO_FORMAT_PCM
-              | AUDIO_FMT_PCM
+                    | (1 << (AUDIO_FMT_PCM - 1))
 #endif
-          ;
-
 #ifdef CONFIG_AUDIO_FORMAT_OGG_VORBIS
-        pCaps->ac_format[1] = (AUDIO_FMT_OGG_VORBIS) >> 8;
+                    | (1 << (AUDIO_FMT_OGG_VORBIS - 1))
+#endif
+                ;
+
+              /* The types of audio units we implement */
+
+              pCaps->ac_controls[0] = AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
+                                      AUDIO_TYPE_PROCESSING;
+
+              break;
+
+            /* Report sub-formats for MIDI if requested */
+
+#ifdef CONFIG_AUDIO_FORMAT_MIDI
+            case AUDIO_FMT_MIDI:
+              /* We only support Format 0 */
+
+              pCaps->ac_controls[0] = AUDIO_SUBFMT_MIDI_0;
+              pCaps->ac_controls[1] = AUDIO_SUBFMT_END;
+              break;
 #endif
 
-        /* The types of audio units we implement */
-
-        pCaps->ac_controls[0] = AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
-                                AUDIO_TYPE_PROCESSING;
+            default:
+              pCaps->ac_controls[0] = AUDIO_SUBFMT_END;
+              break;
+          }
 
         break;
 
@@ -663,6 +683,7 @@ static int vs1053_getcaps(FAR struct audio_lowerhalf_s *lower, int type,
             /* Fill in the ac_controls section with the Feature Units we have */
 
             pCaps->ac_controls[0] = AUDIO_FU_VOLUME | AUDIO_FU_BASS | AUDIO_FU_TREBLE;
+            pCaps->ac_controls[1] = AUDIO_FU_BALANCE >> 8;
           }
         else
           {
