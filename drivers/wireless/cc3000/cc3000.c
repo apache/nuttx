@@ -77,7 +77,6 @@
 #include "cc3000_socket.h"
 #include "cc3000.h"
 
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -401,7 +400,7 @@ static inline int cc3000_wait_irq(FAR struct cc3000_dev_s *priv)
 
 static inline int cc3000_wait_ready(FAR struct cc3000_dev_s *priv)
 {
-    return cc3000_wait(priv,&priv->readysem);
+  return cc3000_wait(priv,&priv->readysem);
 }
 
 /****************************************************************************
@@ -610,7 +609,7 @@ static void * cc3000_worker(FAR void *arg)
                         /* Odd so make it even */
 
                         data_to_recv++;
-                     }
+                      }
 
                     /* Read the whole payload in at the beginning of the buffer
                      * Will it fit?
@@ -751,7 +750,7 @@ static int cc3000_open(FAR struct file *filep)
    * on the driver.. and an opportunity to do any one-time initialization.
    */
 
-  if (tmp==1)
+  if (tmp == 1)
     {
       /* Ensure the power is off  so we get the falling edge of IRQ*/
 
@@ -782,12 +781,13 @@ static int cc3000_open(FAR struct file *filep)
         }
 
       pthread_attr_init(&tattr);
+      tattr.stacksize = 336;
       param.sched_priority = SCHED_PRIORITY_MAX;
       pthread_attr_setschedparam(&tattr, &param);
 
       ret = pthread_create(&priv->workertid, &tattr, cc3000_worker,
                            (pthread_addr_t)priv);
-      if (ret < 0)
+      if (ret != 0)
         {
           mq_close(priv->queue);
           priv->queue = 0;
@@ -796,16 +796,16 @@ static int cc3000_open(FAR struct file *filep)
         }
 
       pthread_attr_init(&tattr);
+      tattr.stacksize = 460;
       param.sched_priority = SCHED_PRIORITY_DEFAULT+10;
       pthread_attr_setschedparam(&tattr, &param);
       ret = pthread_create(&priv->selecttid, &tattr, select_thread_func,
                            (pthread_addr_t)priv);
-      if (ret < 0)
+      if (ret != 0)
         {
           pthread_t workertid = priv->workertid;
           priv->workertid = -1;
           pthread_cancel(workertid);
-          pthread_join(workertid,NULL);
           mq_close(priv->queue);
           priv->queue = 0;
           ret = -errno;
@@ -1525,6 +1525,7 @@ int cc3000_accept_socket(int sd, int minor, struct sockaddr *addr,
   sem_post(&priv->selectsem);                    /* Wake select thread if need be */
   sem_wait(&priv->accepting_socket.acc.semwait); /* Wait caller on select to finish */
   sem_wait(&priv->selectsem);                    /* Sleep select thread */
+
   if (priv->accepting_socket.acc.status != CC3000_SOC_ERROR)
     {
       *addr = priv->accepting_socket.addr;

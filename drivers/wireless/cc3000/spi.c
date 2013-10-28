@@ -72,7 +72,6 @@ static struct
   uint8_t rx_buffer[CC3000_RX_BUFFER_SIZE];
   mqd_t  queue;
   sem_t *done;
-
 } spiconf;
 
 /*****************************************************************************
@@ -195,7 +194,8 @@ static void *unsoliced_thread_func(void *parameter)
   while(spiconf.run)
     {
       memset(spiconf.rx_buffer,0,sizeof(spiconf.rx_buffer));
-      nbytes = mq_receive(spiconf.queue, spiconf.rx_buffer, CC3000_RX_BUFFER_SIZE, 0);
+      nbytes = mq_receive(spiconf.queue, spiconf.rx_buffer,
+                          CC3000_RX_BUFFER_SIZE, 0);
       if (nbytes > 0)
         {
           nlldbg("%d Processed\n",nbytes);
@@ -240,12 +240,15 @@ void SpiOpen(gcSpiHandleRx pfRxHandler)
       pthread_attr_t attr;
       struct sched_param param;
       pthread_attr_init(&attr);
+      attr.stacksize = 292;
       param.sched_priority = SCHED_PRIORITY_DEFAULT-10;
       pthread_attr_setschedparam(&attr, &param);
       status = pthread_create(&spiconf.unsoliced_thread, &attr,
                               unsoliced_thread_func, NULL);
       DEBUGASSERT(status == 0)
    }
+
+  DEBUGASSERT(spiconf.cc3000fd);
 }
 
 /*****************************************************************************
