@@ -59,7 +59,7 @@
 #define MAX_DEPENDENCIES 100
 #define MAX_LEVELS       100
 #define MAX_SELECT       16
-#define MAX_DEFAULTS     80
+#define MAX_DEFAULTS     128
 #define TAB_SIZE         4
 #define VAR_SIZE         80
 #define HTML_VAR_SIZE    (2*VAR_SIZE + 64)
