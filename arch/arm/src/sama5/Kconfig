@@ -1697,12 +1697,12 @@ config SAMA5_ADC_DMASAMPLES
 		The DMA logic uses ping-pong buffers, so the total buffering
 		requirement will be
 
-			2 Buffers * Number_of_ADC_Channels * SAMA5_ADC_DMASAMPLES * sizeof(uint32_t)
+			2 Buffers * Number_of_ADC_Channels * SAMA5_ADC_DMASAMPLES * sizeof(uint16_t)
 
 		So, for example, if you had 8 ADC channels and 8 triggers per DMA
 		transfer, then the total DMA buffering requirment would be:
 
-			2 * 8 * 8 * 4 = 512 bytes.
+			2 * 8 * 8 * 2 = 256 bytes.
 
 config SAMA5_ADC_AUTOCALIB
 	bool "ADC auto-calibration"

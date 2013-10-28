@@ -158,6 +158,7 @@ static int adc_open(FAR struct file *filep)
 
       sem_post(&dev->ad_closesem);
     }
+
   return ret;
 }
 
@@ -207,6 +208,7 @@ static int adc_close(FAR struct file *filep)
           sem_post(&dev->ad_closesem);
         }
     }
+
   return ret;
 }
 

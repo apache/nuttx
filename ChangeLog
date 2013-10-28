@@ -5900,4 +5900,8 @@
 	  is called as part of a failed pthread startup before the flags
 	  field in the TCB has been initialized, then a crash occurs.
 	  Pointed out by David Sidrane (2013-10-27)
+	* arch/arm/src/sama5/sam_adc.c:  ADC now works in all implemented
+	  modes:  single channel or multiple channel with sequencer support.
+	  software trigger or timer trigger;  ADC channel interrupts or
+	  DMA (2013-10-28).
 

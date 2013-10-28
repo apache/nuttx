@@ -61,7 +61,7 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Default configuration settings that may be overridden in the board configuration.
+/* Default configuration settings that may be overridden in the NuttX configuration
  * file.  The configured size is limited to 255 to fit into a uint8_t.
  */
 
