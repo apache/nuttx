@@ -746,28 +746,28 @@ SAMA5 ADC Support
   Basic driver configuration:
 
     System Type -> SAMA5 Peripheral Support
-      CONFIG_SAMA5_ADC=y              : Enable ADC driver support
-      CONFIG_SAMA5_TC0=y              : Enable the Timer/counter library need for periodic sampling
+      CONFIG_SAMA5_ADC=y               : Enable ADC driver support
+      CONFIG_SAMA5_TC0=y               : Enable the Timer/counter library need for periodic sampling
 
     Drivers
-      CONFIG_ANALOG=y                 : Should be automatically selected
-      CONFIG_ADC=y                    : Should be automatically selected
+      CONFIG_ANALOG=y                  : Should be automatically selected
+      CONFIG_ADC=y                     : Should be automatically selected
 
     System Type -> ADC Configuration
-      CONFIG_SAMA5_ADC_CHAN0=y        : These settings enable the sequencer to collect
-      CONFIG_SAMA5_ADC_CHAN1=y        : Samples from ADC channels 0-3 on each trigger
+      CONFIG_SAMA5_ADC_CHAN0=y         : These settings enable the sequencer to collect
+      CONFIG_SAMA5_ADC_CHAN1=y         : Samples from ADC channels 0-3 on each trigger
       CONFIG_SAMA5_ADC_CHAN2=y
       CONFIG_SAMA5_ADC_CHAN3=y
       CONFIG_SAMA5_ADC_SEQUENCER=y
 
-      CONFIG_SAMA5_ADC_TIOA0TRIG=y    : Trigger on the TC0, channel 0 output A
-      CONFIG_SAMA5_ADC_TIOAFREQ=2     : At a frequency of 2Hz
-      CONFIG_SAMA5_ADC_TIOA_RISING=y  : Trigger on the rising edge
+      CONFIG_SAMA5_ADC_TIOA0TRIG=y     : Trigger on the TC0, channel 0 output A
+      CONFIG_SAMA5_ADC_TIOAFREQ=2      : At a frequency of 2Hz
+      CONFIG_SAMA5_ADC_TIOA_RISING=y   : Trigger on the rising edge
 
     Default ADC settings (like gain and offset) may also be set if desired.
 
     System Type -> Timer/counter Configuration
-      CONFIG_SAMA5_TC0_TIOA0=y        : Should be automatically selected
+      CONFIG_SAMA5_TC0_TIOA0=y         : Should be automatically selected
 
   Work queue supported is also needed:
 
@@ -779,7 +779,7 @@ SAMA5 ADC Support
   enabled as follows:
 
     Application Configuration -> Examples -> ADC eample
-      CONFIG_EXAMPLES_ADC=y           : Enables the example code
+      CONFIG_EXAMPLES_ADC=y            : Enables the example code
       CONFIG_EXAMPLES_ADC_DEVPATH="/dev/adc0"
 
     Other default settings for the ADC example should be okay.
@@ -790,10 +790,17 @@ SAMA5 ADC Support
   following in the configuration.
 
     System Type -> SAMA5 Peripheral Support
-      CONFIG_SAMA5_DMAC1=y            : Enable DMAC1 support
+      CONFIG_SAMA5_DMAC1=y             : Enable DMAC1 support
 
     System Type -> ADC Configuration
-      CONFIG_SAMA5_ADC_DMA=y          : Enable ADC DMA transfers
+      CONFIG_SAMA5_ADC_DMA=y           : Enable ADC DMA transfers
+      CONFIG_SAMA5_ADC_DMASAMPLES=2    : Collect two sets of samples per DMA
+
+    Drivers -> Analog device (ADC/DAC) support
+      CONFIG_ADC_FIFOSIZE=16           : Driver may need a large ring buffer
+
+    Application Configuration -> Examples -> ADC eample
+      CONFIG_EXAMPLES_ADC_GROUPSIZE=16 : Larger buffers in the test
 
 SAMA5D3x-EK Configuration Options
 =================================
