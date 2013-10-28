@@ -418,8 +418,8 @@ struct sam_adc_s
   /* DMA sample data buffer */
 
 #ifdef CONFIG_SAMA5_ADC_DMA
-  uint32_t evenbuf[SAMA5_ADC_SAMPLES];
-  uint32_t oddbuf[SAMA5_ADC_SAMPLES];
+  uint16_t evenbuf[SAMA5_ADC_SAMPLES];
+  uint16_t oddbuf[SAMA5_ADC_SAMPLES];
 #endif
 #endif /* SAMA5_ADC_HAVE_CHANNELS */
 
@@ -451,6 +451,7 @@ static void sam_adc_dmadone(void *arg);
 static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result);
 static int  sam_adc_dmasetup(struct sam_adc_s *priv, FAR uint8_t *buffer,
                              size_t buflen);
+static void sam_adc_dmastart(struct sam_adc_s *priv);
 #endif
 
 /* ADC interrupt handling */
@@ -609,7 +610,8 @@ static bool sam_adc_checkreg(struct sam_adc_s *priv, bool wr,
 static void sam_adc_dmadone(void *arg)
 {
   struct sam_adc_s *priv = (struct sam_adc_s *)arg;
-  uint32_t *buffer;
+  uint16_t *buffer;
+  uint16_t *next;
   uint16_t sample;
   int chan;
   int i;
@@ -617,20 +619,58 @@ static void sam_adc_dmadone(void *arg)
   avdbg("ready=%d enabled=%d\n", priv->enabled, priv->ready);
   ASSERT(priv != NULL && !priv->ready);
 
-  /* If the DMA is disabled, just ignore the data */
+  /* If the DMA transfer is not enabled, just ignore the data (and do not start
+   * the next DMA transfer).
+   */
 
-  if (!priv->enabled)
+  if (priv->enabled)
     {
-      /* Select the completed DMA buffer */
+      /* Toggle to the next buffer.
+       *
+       *   buffer - The buffer on which the DMA has just completed
+       *   next   - The buffer in which to start the next DMA
+       */
 
-      buffer = priv->odd ? priv->evenbuf : priv->oddbuf;
+      if (priv->odd)
+        {
+          buffer    = priv->oddbuf;
+          next      = priv->evenbuf;
+          priv->odd = false;
+        }
+      else
+        {
+          buffer    = priv->evenbuf;
+          next      = priv->oddbuf;
+          priv->odd = true;
+        }
+
+      /* Restart the DMA conversion as quickly as possible using the next
+       * buffer.
+       *
+       * REVISIT: In the original design, toggling the ping-pong buffers and
+       * restarting the DMA was done in the interrupt handler so that the
+       * next buffer could be filling while the current buffer is being
+       * processed here on the worker thread.  But, unfortunately,
+       * sam_adcm_dmasetup() cannot be called from an interrupt handler.
+       *
+       * A consequence of this is that there is a small window from the time
+       * that the last set of samples was taken, the worker thread runs, and
+       * the follow logic restarts the DMA in which samples could be lost!
+       *
+       * Without the interrupt level DMA restart logic, there is not really
+       * any good reason to support the ping-poing buffers at all.
+       */
+
+      sam_adc_dmasetup(priv, (FAR uint8_t *)next,
+                       SAMA5_ADC_SAMPLES * sizeof(uint16_t));
+
 
       /* Invalidate the DMA buffer so that we are guaranteed to reload the
        * newly DMAed data from RAM.
        */
 
       cp15_invalidate_dcache((uintptr_t)buffer,
-                             (uintptr_t)buffer + SAMA5_ADC_SAMPLES * sizeof(uint32_t));
+                             (uintptr_t)buffer + SAMA5_ADC_SAMPLES * sizeof(uint16_t));
 
       /* Process each sample */
 
@@ -639,7 +679,7 @@ static void sam_adc_dmadone(void *arg)
           /* Get the sample and the channel number */
 
           chan   = (int)((*buffer & ADC_LCDR_CHANB_MASK) >> ADC_LCDR_CHANB_SHIFT);
-          sample = (uint16_t)((*buffer & ADC_LCDR_DATA_MASK) >> ADC_LCDR_DATA_SHIFT);
+          sample = ((*buffer & ADC_LCDR_DATA_MASK) >> ADC_LCDR_DATA_SHIFT);
 
           /* And give the sample data to the ADC upper half */
 
@@ -652,6 +692,26 @@ static void sam_adc_dmadone(void *arg)
   priv->ready = true;
 }
 #endif
+
+/****************************************************************************
+ * Name: sam_adc_dmastart
+ *
+ * Description:
+ *   Initiate DMA sampling.
+ *
+ ****************************************************************************/
+
+static void sam_adc_dmastart(struct sam_adc_s *priv)
+{
+  /* Make sure that the worker is available and that DMA is not disabled */
+
+  if (priv->ready && priv->enabled)
+    {
+      priv->odd = false;  /* Start with the even buffer */
+      sam_adc_dmasetup(priv, (FAR uint8_t *)priv->evenbuf,
+                       SAMA5_ADC_SAMPLES * sizeof(uint16_t));
+    }
+}
 
 /****************************************************************************
  * Name: sam_adc_dmacallback
@@ -670,22 +730,28 @@ static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result)
   int ret;
 
   allvdbg("ready=%d enabled=%d\n", priv->enabled, priv->ready);
+  DEBUGASSERT(priv->ready);
 
-  /* Check of the bottom half is keeping up with us */
+  /* Check of the bottom half is keeping up with us.
+   *
+   * ready == false:  Would mean that the worker thready has not ran since
+   *   the the last DMA callback.
+   * enabled == false: Means that the upper half has asked us nicely to stop
+   *   transferring DMA data.
+   */
 
   if (priv->ready && priv->enabled)
     {
-      /* Toggle to the next buffer.  Note that the toggle only occurs if
-       * the bottom half is ready to accept more data.  Otherwise, we
-       * will get a data overrun and just re-use the last buffer.
-       */
-
-      priv->odd   = !priv->odd;
-      priv->ready = false;
-
-      /* Transfer processing to the bottom half */
+      /* Verify that the worker is available */
 
       DEBUGASSERT(priv->work.worker == NULL);
+
+      /* Mark the work as busy and schedule the DMA done processing to
+       * occur on the worker thread.
+       */
+
+      priv->ready = false;
+
       ret = work_queue(HPWORK, &priv->work, sam_adc_dmadone, priv, 0);
       if (ret != 0)
         {
@@ -693,11 +759,20 @@ static void sam_adc_dmacallback(DMA_HANDLE handle, void *arg, int result)
         }
     }
 
-  /* Restart the DMA conversion using the next buffer */
-
-  sam_adc_dmasetup(priv->dma,
-                   priv->odd ? (void *)priv->oddbuf : (void *)priv->evenbuf,
-                   SAMA5_ADC_SAMPLES * sizeof(uint32_t));
+  /* REVISIT: There used to be logic here to toggle the ping-pong buffers and
+   * to restart the DMA conversion.  This would allow refilling one buffer
+   * while the worker processes the other buffer that was just filled. But,
+   * unfortunately, sam_adcm_dmasetup() and dma_rxsetup cannot be called
+   * from an interrupt handler.
+   *
+   * A consequence of this is that there is a small window from the time
+   * that the last set of samples was taken, the worker thread runs, and the
+   * logic on the worker thread restarts the DMA.  Samples trigger during
+   * this window will be be lost!
+   *
+   * Without this logic, there is not really any strong reason to support
+   * the ping-poing buffers at all.
+   */
 }
 #endif
 
@@ -1015,17 +1090,18 @@ static int sam_adc_setup(struct adc_dev_s *dev)
   sam_adc_autocalibrate(priv);
 
 #ifdef CONFIG_SAMA5_ADC_DMA
-  /* Configure for DMA transfer */
+  /* Initiate DMA transfers */
 
-  priv->odd     = false;
-  priv->ready   = true;
-  priv->enabled = false;
+  priv->ready   = true;   /* Worker is avaiable */
+  priv->enabled = true;   /* Transfers are enabled */
 
-  sam_adc_dmasetup(priv, (void *)priv->evenbuf, SAMA5_ADC_SAMPLES);
+  sam_adc_dmastart(priv);
+
 #else
   /* Enable end-of-conversion interrupts for all enabled channels. */
 
   sam_adc_putreg(priv, SAM_ADC_IER, SAMA5_CHAN_ENABLE);
+
 #endif
 
   /* Configure trigger mode and start conversion */
@@ -1048,11 +1124,12 @@ static void sam_adc_shutdown(struct adc_dev_s *dev)
 
   avdbg("Shutdown\n");
 
-  /* Disable ADC interrupts, both at the level of the ADC device and at the
-   * level of the AIC.
-   */
+  /* Reset the ADC peripheral */
 
-  sam_adc_putreg(priv, SAM_ADC_IDR, ADC_INT_ALL);
+  sam_adc_reset(dev);
+
+  /* Disable ADC interrupts at the level of the AIC */
+
   up_disable_irq(SAM_IRQ_ADC);
 
   /* Then detach the ADC interrupt handler. */
@@ -1075,9 +1152,20 @@ static void sam_adc_rxint(struct adc_dev_s *dev, bool enable)
   avdbg("enable=%d\n", enable);
 
 #ifdef CONFIG_SAMA5_ADC_DMA
-  /* We don't stop the DMA when RX is disabled, we just stop the data transfer */
+  /* Ignore redundant requests */
 
-  priv->enabled = enable;
+  if (priv->enabled != enable)
+    {
+      /* Set a flag.  If disabling, the DMA sequence will terminate at the
+       * completion of the next DMA.
+       */
+
+      priv->enabled = enable;
+
+      /* If enabling, then we need to restart the DMA transfer */
+
+      sam_adc_dmastart(priv);
+    }
 
 #else
   /* Are we enabling or disabling? */
@@ -1193,7 +1281,7 @@ static int sam_adc_settimer(struct sam_adc_s *priv, uint32_t frequency,
    * do this without overflowing a 32-bit unsigned integer.
    */
 
-  fdiv = div * frequency; 
+  fdiv = div * frequency;
   DEBUGASSERT(div > 0 && div <= fdiv); /* Will check for integer overflow */
 
   /* Set up TC_RA and TC_RC.  The frequency is determined by RA and RC:  TIOA is
