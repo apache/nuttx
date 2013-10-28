@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: September 14, 2013</p>
+      <p>Last Updated: October 28, 2013</p>
     </td>
   </tr>
 </table>
@@ -71,7 +71,7 @@
 <tr>
   <td valign="top" width="22"><img height="20" width="20" src="favicon.ico"></td>
   <td>
-    <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-6.30/">Release Notes</a>
+    <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-6.31/">Release Notes</a>
     What has changed in the last release of NuttX?
     What has changed in previous releases of NuttX?
     Are there any <a href="#pendingchanges">unreleased changes</a>.
@@ -564,7 +564,7 @@
   <td><br></td>
   <td>
     <p>
-      <li>Audio subsystem: CODECs, audio input and output drivers.</li>
+      <li>Audio subsystem: CODECs, audio input and output drivers.  Command line and graphic media player applications.</li>
     </p>
   </td>
 </tr>
@@ -707,6 +707,16 @@
     <p>
       <li>
         XML RPC Server (Contributed by Richard Cochran).
+      </li>
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>
+        Support for networking modules (e.g., the TI CC3000 WLAN module).
       </li>
     </p>
   </td>
@@ -1106,13 +1116,13 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 6.30.
-  NuttX 6.30 is the 97<sup>th</sup> release of NuttX.
-  It was released on September 14, 2013, and is available for download from the
+  The current release is NuttX 6.31.
+  NuttX 6.31 is the 98<sup>th</sup> release of NuttX.
+  It was released on October 28, 2013, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-6.30.tar.gz</code> and <code>apps-6.20.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-6.31.tar.gz</code> and <code>apps-6.31.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
-  Release notes for NuttX 6.30 are avaialble <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-6.30/">here</a>.
+  Release notes for NuttX 6.31 are avaialble <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-6.31/">here</a>.
   The change log associated with the release is available <a href="ChangeLog.txt">here</a>.
   Unreleased changes after this release are available in GIT.
   These unreleased changes are also listed <a href="#pendingchanges">here</a>.
@@ -1174,8 +1184,8 @@
       <li><a href="#arm926ejs">ARM926EJS</a> (3) </li>
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (1) </li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (2)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (20)</li>
-      <li><a href="#armcortexm4">ARM Cortex-M4</a> (9)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (21)</li>
+      <li><a href="#armcortexm4">ARM Cortex-M4</a> (10)</li>
     </ul>
   <li>Atmel AVR
     <ul>
@@ -1407,7 +1417,7 @@
       This port supports the TI &quot;Calypso&quot; MCU used in various cell phones (and, in particular,
       by the <a href="http://bb.osmocom.org/trac/">Osmocom-bb project</a>).
       Like the c5471, NuttX operates on the  ARM7 of this dual core processor.
-      Board support is available for the Motorola C155 and W220 phones and for the Pirelli DP-L10 phone.
+      Board support is available for the Motorola C139, C155 and W220 phones and for the Pirelli DP-L10 phone.
     </p>
     <ul>
       <p>
@@ -1666,18 +1676,105 @@
         Initial support for the SAMA5D3x-EK was released in NuttX-6.29.
         That initial support was minimal:
         There are simple test configurations that run out of internal SRAM and extended configurations that run out of the on-board NOR FLASH:
-        (1) An OS test configuration that verifies the correct port of NuttX to the part and
-        (2) A barebones NuttShell (<a href="NuttShell.html">NSH</a>) configuration that can be used as the basis for further application development.
-        (3) A full-loaded NuttShell (<a href="NuttShell.html">NSH</a>) configuration that demonstrates all of the SAMA5D3x features.
+      </p>
+      <ul>
+        <li>
+          An OS test configuration that verifies the correct port of NuttX to the part and
+        </li>
+        <li>
+          A barebones NuttShell (<a href="NuttShell.html">NSH</a>) configuration that can be used as the basis for further application development.
+        </li>
+        <li>
+          A full-loaded NuttShell (<a href="NuttShell.html">NSH</a>) configuration that demonstrates all of the SAMA5D3x features.
+        </li>
+      </ul>
+      <p>
+        The following support was added in Nuttx 6.30:
+      </p>
+      <ul>
+        <li>
+          DMA support, and
+        </li>
+        <li>
+          PIO interrupts,
+        </li>
+      </ul>
+      <p>
+        And drivers for
+      </p>
+      <ul>
+        <li>
+          SPI (with DMA support),
+        </li>
+        <li>
+          AT25 Serial Flash,
+        </li>
+        <li>
+          Two Wire Interface (TWI), and
+        </li>
+        <li>
+          HSMCI memory cards.
+        </li>
+      </ul>
+      <p>
+        NuttX-6.30 also introduces full USB support:
+      </p>
+      <ul>
+        <li>
+            High speed device controller driver,
+        </li>
+        <li>
+            OHCI (low- and full-speed) and
+        </li>
+        <li>
+            EHCI (high-speed) host controller driver support.
+        </li>
+      </ul>
+      <p>
+        With NuttX-6.31, these additional drivers were added:
+      </p>
+      <ul>
+        <li>
+          A 10/100Base-T Ethernet (EMAC) driver,
+        </li>
+        <li>
+          A 1000Base-T Ethernet (GMAC) driver,
+        </li>
+        <li>
+          A Real Time Clock (RTC) driver and integrated with the NuttX system time logic
+        </li>
+        <li>
+          <code>/dev/random</code> using the SAMA5D3x True Random Number Generator (TRNG),
+        </li>
+        <li>
+          A Watchdog Timer (WDT) driver,
+        </li>
+        <li>
+          A Timer/Counter (TC) library with interface that make be used by other drivers that need timer support,
+        </li>
+        <li>
+          An ADC driver that can collect multiple samples using the sequencer, can be trigger by a timer/counter, and supports DMA data transfers,
+        </li>
+        <li>
+          A touchscreen driver based on the special features of the SAMA5D3 ADC peripheral,
+          An LCD controller (LCDC) frame buffer driver, and
+        </li>
+        <li>
+          A CAN driver (however, testing of the CAN has been delayed because of cabling issues).
+        </li>
+      </ul>
+      <p>
+        Additional board configurations were added to test and demonstrate these new drivers including new graphics and NxWM configurations.
+        These are expected in NuttX-6.32.
       </p>
       <p>
-        The following drivers and features were added in Nuttx 6.30:
-        DMA and PIO interrupts, drivers for SPI, AT25 Serial Flash, Two Wire Interface (TWI), and HSMCI memory cards included in NuttX-6.30.
-        NuttX-6.30 also introduces full USB support:  High speed device controller driver, and OHCI (low- and full-speed) and EHCI (high-speed) host controller driver support.
         Develop continues.
-        Additional driver developement is underway (include LCD and networking) and there should be available in NuttX-6.31.
+        Work is underway to provide a Image Sensor Interface (ISI) camera interface, a PWM driver, and NAND FLASH support.
+      </p>
+      <p>
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sama5d3x-ek/README.txt">README</a> file for further information.
       </p>
+      <p>
         <b>Development Environments:</b>
         1) Linux with native Linux GNU toolchain, 2) Cygwin/MSYS with Cygwin GNU toolchain, 3) Cygwin/MSYS  with Windows native toolchain, or 4) Native Windows.
         All testing has been perfomed with the CodeSourcery toolchain (GCC version 4.7.3) in the Cygwin environment under Windows.
@@ -2030,35 +2127,59 @@ nsh>
       <a name="stm32f103x"><b>STMicro STM32F103x (STM32 F1 Family)</b>.</a>
       Support for four MCUs and four board configurations are available.
       MCU support includes all of the high density and connectivity line families.
-      Board supported is available specifically for: STM32F103ZET6, STM32F103RET6, STM32F103VCT, and STM32F103VET6.
+      Board supported is available specifically for: STM32F103ZET6, STM32F103RET6, STM32F103VCT, STM32F103VET6, STM32F103RBT6, and STM32103CBT6.
       Boards supported include:
     </p>
     <ol>
       <li>
-        A port for the <a href=" http://www.st.com/">STMicro</a> STM3210E-EVAL development board that
-        features the STM32F103ZET6 MCU.
-        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/stm3210e-eval/README.txt">README</a> file for further information.
+         <p>
+           <b>STM3210E-EVAL</b>.
+           A port for the <a href=" http://www.st.com/">STMicro</a> STM3210E-EVAL development board that
+           features the STM32F103ZET6 MCU.
+           Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/stm3210e-eval/README.txt">README</a> file for further information.
+         </p>
       </li>
       <li>
-        The ISOTEL NetClamps VSN V1.2 ready2go sensor network platform based on the
-        STMicro STM32F103RET6.  Contributed by Uros Platise.
-        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/vsn/README.txt">README</a> file for further information.
+         <p>
+           <b>ISOTEL NetClamps VSN</b>.
+           The ISOTEL NetClamps VSN V1.2 ready2go sensor network platform based on the
+           STMicro STM32F103RET6.  Contributed by Uros Platise.
+           Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/vsn/README.txt">README</a> file for further information.
+         </p>
       </li>
       <li>
-        A port for the HY-Mini STM32v board.  This board is based on the
-        STM32F103VCT chip.  Contributed by Laurent Latil.
-        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/hymini-stm32v/README.txt">README</a> file.
+         <p>
+           <b>HY-Mini STM32v board</b>.
+           This board is based on the STM32F103VCT chip.  Port contributed by Laurent Latil.
+           Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/hymini-stm32v/README.txt">README</a> file.
+         </p>
       </li>
       <li>
-         The M3 Wildfire development board (STM32F103VET6), version 2.
-         See <a href="http://firestm32.taobao.com">http://firestm32.taobao.com</a> (the current board is version 3).
-         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/fire-stm32v2/README.txt">README</a> file for further information.
+         <p>
+            <b>The M3 Wildfire development board (STM32F103VET6), version 2</b>.
+            See <a href="http://firestm32.taobao.com">http://firestm32.taobao.com</a> (the current board is version 3).
+            Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/fire-stm32v2/README.txt">README</a> file for further information.
+         </p>
       </li>
       <li>
-         LeafLab's Maple and Maple Mini boards.
-         These boards are based on the STM32F103RBT6 chip for the standard version and on the STM32F103CBT6 for the mini version.
-         See the <a href="http://leaflabs.com/docs/hardware/maple.html">LeafLabs</a> web site for hardware information;
-         see the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/maple/README.txt">README</a> file for further information about the NuttX port.
+         <p>
+            <b>LeafLab's Maple and Maple Mini boards</b>.
+            These boards are based on the STM32F103RBT6 chip for the standard version and on the STM32F103CBT6 for the mini version.
+            See the <a href="http://leaflabs.com/docs/hardware/maple.html">LeafLabs</a> web site for hardware information;
+            see the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/maple/README.txt">README</a> file for further information about the NuttX port.
+         </p>
+      </li>
+      <li>
+         <p>
+            <b>Spark (and <i>emulated Spark</i>)</b>.
+            The Spark boards are based on the STM32F103CBT6 chip and feature wireless networking using the TI CC3000 WLAN module.
+            See the <a href="http://www.spark.io">Spark</a> web site for hardware information;
+            see the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/spark/README.txt">README</a> file for further information about the NuttX port.
+            Most of this work is the result of the effort of David Sidrane.
+         </p>
+         <p>
+            The <i>emulated Spark</i> is a base board for the Maple Mini board (see above) developed by David Sidrane that supports Spark development while we all way breathlessly for or Spark boards.
+         </p>
       </li>
     </ol>
     <p>
@@ -2069,33 +2190,55 @@ nsh>
         <b>STATUS:</b>
       </p>
       <ul>
-        <li><b>Basic Support/Drivers</b>.
-          The basic STM32 port was released in NuttX version 0.4.12. The basic port includes boot-up
-          logic, interrupt driven serial console, and system timer interrupts.
-          The 0.4.13 release added support for SPI, serial FLASH, and USB device.;
-          The 4.14 release added support for buttons and SDIO-based MMC/SD and verifed DMA support.
-          Verified configurations are available for NuttX OS test, the NuttShell (NSH) example,
-          the USB serial device class, and the USB mass storage device class example.
+        <li>
+          <p>
+            <b>Basic Support/Drivers</b>.
+            The basic STM32 port was released in NuttX version 0.4.12. The basic port includes boot-up
+            logic, interrupt driven serial console, and system timer interrupts.
+            The 0.4.13 release added support for SPI, serial FLASH, and USB device.;
+            The 4.14 release added support for buttons and SDIO-based MMC/SD and verifed DMA support.
+            Verified configurations are available for NuttX OS test, the NuttShell (NSH) example,
+            the USB serial device class, and the USB mass storage device class example.
+          </p>
         </li>
-        <li><b>NetClamps VSN</b>.
-          Support for the NetClamps VSN was included in version 5.18 of NuttX.
-          Uros Platise added support for timers, RTC, I2C, FLASH, extended power management
-          and other features.
+        <li>
+          <p>
+            <b>NetClamps VSN</b>.
+            Support for the NetClamps VSN was included in version 5.18 of NuttX.
+            Uros Platise added support for timers, RTC, I2C, FLASH, extended power management
+            and other features.
+          </p>
         </li>
-        <li><b>Additional Drivers</b>.
-          Additional drivers and configurations were added in NuttX 6.13 and later releases for the STM32 F1 and F4.
-          F1 compatible drivers include an Ethernet driver, ADC driver, DAC driver, PWM driver, IWDG, WWDG, and CAN drivers.
+        <li>
+          <p>
+            <b>Additional Drivers</b>.
+            Additional drivers and configurations were added in NuttX 6.13 and later releases for the STM32 F1 and F4.
+            F1 compatible drivers include an Ethernet driver, ADC driver, DAC driver, PWM driver, IWDG, WWDG, and CAN drivers.
+          </p>
         </li>
-        <li><b>M3 Wildfire</b>.
-          Support for the Wildfire board was included in version 6.22 of NuttX.
-          The board port is basically functional.
-          Not all features have been verified.
-          Support for FAT file system on an an SD card had been verified.
-          The ENC28J60 network is functional (but required lifting the chip select pin on the W25x16 part).
-          Customizations for the v3 version of the Wildfire board are selectable (but untested).
+        <li>
+          <p>
+            <b>M3 Wildfire</b>.
+            Support for the Wildfire board was included in version 6.22 of NuttX.
+            The board port is basically functional.
+            Not all features have been verified.
+            Support for FAT file system on an an SD card had been verified.
+            The ENC28J60 network is functional (but required lifting the chip select pin on the W25x16 part).
+            Customizations for the v3 version of the Wildfire board are selectable (but untested).
+          </p>
         </li>
-        <li><b>Maple</b>.
-          Support for the Maple boards was contributed by Yiran Liao and first appear in NuttX 6-30.
+        <li>
+          <p>
+            <b>Maple</b>.
+            Support for the Maple boards was contributed by Yiran Liao and first appear in NuttX 6-30.
+          </p>
+        </li>
+        <li>
+          <p>
+            <b>Spark</b>.
+              David Sidrane has the <i>emulated</i> Spark board up-and-running with a functional CC3000 network, SST25 FAT file system, an NSH shell, and a composite USB CDC/ACM and USBMSC devices.  This configuration is was first available NuttX 6-31.
+              That is really quite a lot of high end functionality on an STM32 that only has 20KB of RAM!  I am impressed!
+          </p>
         </li>
       </ul>
      </ul>
@@ -2156,8 +2299,15 @@ nsh>
   <td><br></td>
   <td>
     <p>
-      <a name="stm32f207x"><b>STMicro STM32F207IG (STM32 F2 family)</b>.</a>
-      Support for the STMicro STM3220G-EVAL development board was contributed by Gary Teravskis and first released in NuttX-6.16.
+      <a name="stm32f207x"><b>STMicro STM32F207 (STM32 F2 family)</b>.</a>
+      <ul>
+        <li>
+          Support for the STMicro STM3220G-EVAL development board was contributed by Gary Teravskis and first released in NuttX-6.16.  This board uses the STM32F207IG.
+        </li>
+        <li>
+          Martin Lederhilger contributed support for the Olimex STM32 P207 board using the STM32F207ZE MCU.
+        </li>
+      </ul>
     </p>
     <ul>
       <b>STATUS:</b>
