@@ -79,6 +79,7 @@ Contents
   - AT24 Serial EEPROM
   - CAN Usage
   - SAMA5 ADC Support
+  - OV2640 Camera interface
   - SAMA5D3x-EK Configuration Options
   - Configurations
 
@@ -801,6 +802,43 @@ SAMA5 ADC Support
 
     Application Configuration -> Examples -> ADC eample
       CONFIG_EXAMPLES_ADC_GROUPSIZE=16 : Larger buffers in the test
+
+OV2640 Camera interface
+=======================
+
+SAMA5D3x PIN             SAMA5D3x-EK    OV2640
+PIO  PER SIGNAL        ISI Socket J11
+---- --- ------------- --- ------------ ------------
+                        1  VDDISI
+                        2  GND
+                        3  VDDISI
+                        4  GND
+PE28  ?  ?              5  ZB_SLPTR
+PE29  ?  ?              6  ZB_RST
+PC27  B  TWI1_CK        7  TWCK1
+PC26  B  TWI1_D         8  TWD1
+                        9  GND
+PD31  B  PCK1 (ISI_MCK) 10 ISI_MCK
+                        11 GND
+PA30  C  ISI_VSYNC      12 ISI_VSYNC
+                        13 GND
+PA31  C  ISI_HSYNC      14 ISI_HSYNC
+                        15 GND
+PC30  C  ISI_PCK        16 ISI_PCK
+                        17 GND
+PA16  C  ISI_D0         18 ISI_D0
+PA17  C  ISI_D1         19 ISI_D1
+PA18  C  ISI_D2         20 ISI_D2
+PA19  C  ISI_D3         21 ISI_D3
+PA20  C  ISI_D4         22 ISI_D4
+PA21  C  ISI_D5         23 ISI_D5
+PA22  C  ISI_D6         24 ISI_D6
+PA23  C  ISI_D7         25 ISI_D7
+PC29  C  ISI_D8         26 ISI_D8
+PC28  C  ISI_D9         27 ISI_D9
+PC27  C  ISI_D10        28 ISI_D10
+PC26  C  ISI_D11        29 ISI_D11
+                        30 GND
 
 SAMA5D3x-EK Configuration Options
 =================================
