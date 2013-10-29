@@ -296,5 +296,5 @@ config FLASH_SIZE
 		The size in bytes of the installed boot FLASH.  "Boot" FLASH
 		refers to the FLASH that you link program code into.
 
-endif
-endmenu
+endif # BOOT_RUNFROMFLASH && ARCH_HAVE_MMU
+endmenu # Boot Memory Configuration

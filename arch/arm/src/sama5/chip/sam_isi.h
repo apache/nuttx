@@ -325,4 +325,25 @@
 #  define ISI_WPSR_WPVSRC_R2Y_SET1 (8 << ISI_WPSR_WPVSRC_SHIFT) /* Write access in ISI_R2Y_SET1 */
 #  define ISI_WPSR_WPVSRC_R2Y_SET2 (9 << ISI_WPSR_WPVSRC_SHIFT) /* Write access in ISI_R2Y_SET2 */
 
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+/* "The destination frame buffers are defined by a series of Frame Buffer Descriptors
+ *  (FBD). Each FBD controls the transfer of one entire frame and then optionally
+ *  loads a further FBD to switch the DMA operation at another frame buffer address.
+ *
+ * "The FBD is defined by a series of three words. The first one defines the current
+ *  frame buffer address (named DMA_X_ADDR register), the second defines control
+ *  information (named DMA_X_CTRL register) and the third defines the next descriptor
+ *  address (named DMA_X_DSCR). DMA transfer mode with linked list support is
+ *  available for both codec and preview datapath."
+ */
+
+struct isi_dscr_s
+{
+  uint32_t addr;  /* Current framebuffer address */
+  uint32_t ctrl;  /* Control information */
+  uint32_t dscr;  /* Next descriptor address */
+};
+
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_ISI_H */
