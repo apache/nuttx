@@ -120,7 +120,9 @@ static void wl_clear_irq(FAR struct cc3000_config_s *state);
 static void wl_select(FAR struct cc3000_config_s *state, bool enable);
 static void wl_enable_power(FAR struct cc3000_config_s *state, bool enable);
 static bool wl_read_irq(FAR struct cc3000_config_s *state);
+#ifdef CONFIG_CC3000_PROBES
 static bool probe(FAR struct cc3000_config_s *state,int n, bool s);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -147,7 +149,9 @@ static struct stm32_config_s g_cc3000_info =
   .dev.power_enable     = wl_enable_power,
   .dev.chip_chip_select = wl_select,
   .dev.irq_read         = wl_read_irq,
+#ifdef CONFIG_CC3000_PROBES
   .dev.probe            = probe, /* This is used for debugging */
+#endif
   .handler              = NULL,
 };
 
@@ -230,6 +234,23 @@ static bool wl_read_irq(FAR struct cc3000_config_s *state)
   return  stm32_gpioread(GPIO_WIFI_INT) ? false : true;
 }
 
+#ifdef CONFIG_CC3000_PROBES
+static bool probe(FAR struct cc3000_config_s *state,int n, bool s)
+{
+  if (n == 0)
+    {
+      stm32_gpiowrite(GPIO_D0, s);
+    }
+
+  if (n == 1)
+    {
+      stm32_gpiowrite(GPIO_D1, s);
+    }
+
+  return true;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -259,10 +280,12 @@ int wireless_archinitialize(void)
   idbg("minor %d\n", minor);
   DEBUGASSERT(CONFIG_CC3000_DEVMINOR == 0);
 
+#ifdef CONFIG_CC3000_PROBES
   stm32_configgpio(GPIO_D0);
   stm32_configgpio(GPIO_D1);
   stm32_gpiowrite(GPIO_D0, 1);
   stm32_gpiowrite(GPIO_D1, 1);
+#endif
 
   /* Get an instance of the SPI interface */
 
@@ -283,21 +306,6 @@ int wireless_archinitialize(void)
     }
 
   return OK;
-}
-
-static bool probe(FAR struct cc3000_config_s *state,int n, bool s)
-{
-  if (n == 0)
-    {
-      stm32_gpiowrite(GPIO_D0, s);
-    }
-
-  if (n == 1)
-    {
-      stm32_gpiowrite(GPIO_D1, s);
-    }
-
-  return true;
 }
 
 /*****************************************************************************

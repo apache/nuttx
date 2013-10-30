@@ -5908,3 +5908,7 @@
 	  Add logic to verify the audio sub-format.  From Ken Pettit (2013-10-28).
 
 6.32 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* configs/spark:  Spark configuration updated by David Sidrane
+	  (2013-10-30).
+
