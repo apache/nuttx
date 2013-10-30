@@ -2299,7 +2299,7 @@ menu "Touchscreen configuration"
 config SAMA5_TSD
 	bool "Touchscreen support"
 	default n
-	depends on !SAMA5_ADC_HAVE_CHAN || EXPERIMENTAL
+#	depends on !SAMA5_ADC_HAVE_CHAN || EXPERIMENTAL
 	select INPUT
 	---help---
 		Configure the ADC to support a touchscreen

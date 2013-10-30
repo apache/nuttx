@@ -11,7 +11,7 @@ config BOARD_INITIALIZE
 		custom initialization logic:
 
 		1) <arch>_boardinitialize():  This function is used only for
-		initialize of very low-level things like configuration of
+		initialization of very low-level things like configuration of
 		GPIO pins, power setting.  The OS has not been initialized
 		at this point, so you cannot allocate memory or initialize
 		device drivers at this phase.
