@@ -85,8 +85,16 @@
 #error "CONFIG_MQ_MAXMSGSIZE needs to be >= CC3000_RX_BUFFER_SIZE"
 #endif
 
+#ifndef CONFIG_CC3000_WORKER_THREAD_PRIORITY
+#  define CONFIG_CC3000_WORKER_THREAD_PRIORITY (SCHED_PRIORITY_MAX)
+#endif
+
 #ifndef CONFIG_CC3000_WORKER_STACKSIZE
 #  define CONFIG_CC3000_WORKER_STACKSIZE 240
+#endif
+
+#ifndef CONFIG_CC3000_SELECT_THREAD_PRIORITY
+#  define CONFIG_CC3000_SELECT_THREAD_PRIORITY (SCHED_PRIORITY_DEFAULT+10)
 #endif
 
 #ifndef CONFIG_CC3000_SELECT_STACKSIZE
@@ -101,9 +109,14 @@
 #define FREE_SLOT -1
 
 #if defined(CONFIG_CC3000_PROBES)
-#define PROBE(pin,state)  priv->config->probe(priv->config,pin, state)
+#  define CC3000_GUARD (0xc35aa53c)
+#  define INIT_GUARD(p) p->guard = CC3000_GUARD
+#  define CHECK_GUARD(p) DEBUGASSERT(p->guard == CC3000_GUARD)
+#  define PROBE(pin,state)  priv->config->probe(priv->config,pin, state)
 #else
-#define PROBE(pin,state)
+#  define INIT_GUARD(p)
+#  define CHECK_GUARD(p)
+#  define PROBE(pin,state)
 #endif
 
 /****************************************************************************
@@ -129,12 +142,22 @@ static int cc3000_interrupt(int irq, FAR void *context);
 
 static int cc3000_open(FAR struct file *filep);
 static int cc3000_close(FAR struct file *filep);
-static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len);
-static ssize_t cc3000_write(FAR struct file *filep, FAR const char *buffer, size_t len);
+static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer,
+                           size_t len);
+static ssize_t cc3000_write(FAR struct file *filep,
+                            FAR const char *buffer, size_t len);
 static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 #ifndef CONFIG_DISABLE_POLL
-static int cc3000_poll(FAR struct file *filep, struct pollfd *fds, bool setup);
+static int cc3000_poll(FAR struct file *filep, struct pollfd *fds,
+                       bool setup);
 #endif
+
+static int cc3000_wait_data(FAR struct cc3000_dev_s *priv, int sockfd);
+static int cc3000_accept_socket(FAR struct cc3000_dev_s *priv, int sd,
+                                FAR struct sockaddr *addr,
+                                socklen_t *addrlen);
+static int cc3000_add_socket(FAR struct cc3000_dev_s *priv, int sd);
+static int cc3000_remove_socket(FAR struct cc3000_dev_s *priv, int sd);
 
 /****************************************************************************
  * Private Data
@@ -474,12 +497,14 @@ static void * select_thread_func(FAR void *arg)
   int s = 0;
 
   memset(&timeout, 0, sizeof(struct timeval));
-  timeout.tv_sec = 0;
-  timeout.tv_usec = (500 * 1000);          /* 500 msecs */
+  timeout.tv_sec  = 0;
+  timeout.tv_usec = (100);  /* .1 msecs */
 
   while (1)
     {
       sem_wait(&priv->selectsem);
+
+      CHECK_GUARD(priv);
 
       /* Increase the count back by one to be decreased by the original caller */
 
@@ -521,28 +546,22 @@ static void * select_thread_func(FAR void *arg)
                   priv->sockets[s].sd  != priv->accepting_socket.acc.sd  &&  /* Verify this is not an accept socket */
                   CC3000_FD_ISSET(priv->sockets[s].sd, &readsds))            /* and has pending data */
                 {
-                  sem_post(&priv->sockets[s].semwait);                       /* release the semaphore */
+                  sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
                 }
             }
         }
 
-      if (priv->accepting_socket.acc.sd != FREE_SLOT)                        /* if accept polling in needed */
+      if (priv->accepting_socket.acc.sd != FREE_SLOT)                        /* If accept polling in needed */
         {
-          ret = cc3000_do_accept(priv->accepting_socket.acc.sd,
-                                &priv->accepting_socket.addr,
+          ret = cc3000_do_accept(priv->accepting_socket.acc.sd,              /* Send the select command on non blocking */
+                                &priv->accepting_socket.addr,                /* Set up in ioctl */
                                 &priv->accepting_socket.addrlen);
-          if (ret != CC3000_SOC_IN_PROGRESS)
+
+          if (ret != CC3000_SOC_IN_PROGRESS)                                 /* Not waiting => error or accepted */
             {
               priv->accepting_socket.acc.sd = FREE_SLOT;
               priv->accepting_socket.acc.status = ret;
-              if (ret != CC3000_SOC_ERROR)
-                {
-                  /* New Socket */
-
-                  cc3000_add_socket(ret,priv->minor);
-                }
-
-              sem_post(&priv->accepting_socket.acc.semwait);                 /* release the semaphore */
+              sem_post(&priv->accepting_socket.acc.semwait);                 /* Release the waiting thread */
             }
         }
     }
@@ -575,6 +594,7 @@ static void * cc3000_worker(FAR void *arg)
   while(1)
     {
       PROBE(0,1);
+      CHECK_GUARD(priv);
       cc3000_devtake(priv);
 
       /* Done ? */
@@ -739,6 +759,8 @@ static int cc3000_open(FAR struct file *filep)
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct cc3000_dev_s *)inode->i_private;
 
+  CHECK_GUARD(priv);
+
   nllvdbg("crefs: %d\n", priv->crefs);
 
   /* Get exclusive access to the driver data structure */
@@ -796,7 +818,7 @@ static int cc3000_open(FAR struct file *filep)
 
       pthread_attr_init(&tattr);
       tattr.stacksize = CONFIG_CC3000_WORKER_STACKSIZE;
-      param.sched_priority = SCHED_PRIORITY_MAX;
+      param.sched_priority = CONFIG_CC3000_WORKER_THREAD_PRIORITY;
       pthread_attr_setschedparam(&tattr, &param);
 
       ret = pthread_create(&priv->workertid, &tattr, cc3000_worker,
@@ -811,7 +833,7 @@ static int cc3000_open(FAR struct file *filep)
 
       pthread_attr_init(&tattr);
       tattr.stacksize = CONFIG_CC3000_SELECT_STACKSIZE;
-      param.sched_priority = SCHED_PRIORITY_DEFAULT+10;
+      param.sched_priority = CONFIG_CC3000_SELECT_THREAD_PRIORITY;
       pthread_attr_setschedparam(&tattr, &param);
       ret = pthread_create(&priv->selecttid, &tattr, select_thread_func,
                            (pthread_addr_t)priv);
@@ -863,6 +885,8 @@ static int cc3000_close(FAR struct file *filep)
 
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct cc3000_dev_s *)inode->i_private;
+
+  CHECK_GUARD(priv);
 
   nllvdbg("crefs: %d\n", priv->crefs);
 
@@ -926,6 +950,8 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   DEBUGASSERT(inode && inode->i_private);
   priv  = (FAR struct cc3000_dev_s *)inode->i_private;
+
+  CHECK_GUARD(priv);
 
   /* Verify that the caller has provided a buffer large enough to receive
    * the maximum data.
@@ -1075,6 +1101,8 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *buffer, size
   DEBUGASSERT(inode && inode->i_private);
   priv  = (FAR struct cc3000_dev_s *)inode->i_private;
 
+  CHECK_GUARD(priv);
+
   /* Get exclusive access to the driver data structure */
 
   ret = cc3000_devtake(priv);
@@ -1188,6 +1216,8 @@ static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   DEBUGASSERT(inode && inode->i_private);
   priv = (FAR struct cc3000_dev_s *)inode->i_private;
 
+  CHECK_GUARD(priv);
+
   /* Get exclusive access to the driver data structure */
 
   ret = cc3000_devtake(priv);
@@ -1205,9 +1235,41 @@ static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       case CC3000IOC_GETQUESEMID:
         {
-          FAR int *pid = (FAR int *)(arg);
-          DEBUGASSERT(pid != NULL);
-          *pid = priv->minor;
+          FAR int *pminor = (FAR int *)(arg);
+          DEBUGASSERT(pminor != NULL);
+          *pminor = priv->minor;
+          break;
+        }
+
+      case CC3000IOC_ADDSOCKET:
+        {
+          FAR int *pfd = (FAR int *)(arg);
+          DEBUGASSERT(pfd != NULL);
+          *pfd = cc3000_add_socket(priv, *pfd);
+          break;
+        }
+
+      case CC3000IOC_REMOVESOCKET:
+        {
+          FAR int *pfd = (FAR int *)(arg);
+          DEBUGASSERT(pfd != NULL);
+          *pfd = cc3000_remove_socket(priv, *pfd);
+          break;
+        }
+
+      case CC3000IOC_SELECTDATA:
+        {
+          FAR int *pfd = (FAR int *)(arg);
+          DEBUGASSERT(pfd != NULL);
+          *pfd = cc3000_wait_data(priv, *pfd);
+          break;
+        }
+
+      case CC3000IOC_SELECTACCEPT:
+        {
+          FAR cc3000_acceptcfg *pcfg = (FAR cc3000_acceptcfg *)(arg);
+          DEBUGASSERT(pcfg != NULL);
+          pcfg->sockfd = cc3000_accept_socket(priv, pcfg->sockfd, pcfg->addr, pcfg->addrlen);
           break;
         }
 
@@ -1239,6 +1301,8 @@ static int cc3000_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
   DEBUGASSERT(inode && inode->i_private);
   priv  = (FAR struct cc3000_dev_s *)inode->i_private;
+
+  CHECK_GUARD(priv);
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -1371,7 +1435,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   /* Initialize the CC3000 device driver instance */
 
   memset(priv, 0, sizeof(struct cc3000_dev_s));
-
+  INIT_GUARD(priv);
   priv->minor  = minor;              /* Save the minor number */
   priv->spi    = spi;                /* Save the SPI device handle */
   priv->config = config;             /* Save the board configuration */
@@ -1443,9 +1507,11 @@ errout_with_priv:
   sem_destroy(&priv->readysem);
   sem_close(priv->wrkwaitsem);
   sem_unlink(semname);
+
 #ifdef CONFIG_CC3000_MT
   pthread_mutex_destroy(&g_cc3000_mut);
   sem_destroy(&priv->accepting_socket.acc.semwait);
+
   for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
     {
       sem_destroy(&priv->sockets[s].semwait);
@@ -1459,43 +1525,36 @@ errout_with_priv:
 }
 
 /****************************************************************************
- * Name: cc3000_accept_socket
+ * Name: cc3000_wait_data
  *
  * Description:
- *   Adds this socket for monitoring for the accept operation
+ *   Adds this socket for monitoring for the data available
  *
  * Input Parameters:
- *   sd      cc3000 socket handle or -1 tp remove it
- *   minor   - The input device minor number
+ *   priv   - The device cc3000_dev_s instance
+ *   sockfd   cc3000 socket handle
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a -1 value is
- *   returned to indicate socket not found.
+ *   returned to indicate socket not found or shut down occured.
  *
  ****************************************************************************/
 
-int cc3000_wait_data(int sockfd, int minor)
+static int cc3000_wait_data(FAR struct cc3000_dev_s *priv, int sockfd)
 {
-  FAR struct cc3000_dev_s    *priv;
  int s;
-
-#ifndef CONFIG_CC3000_MULTIPLE
-  priv = &g_cc3000;
-#else
-  for (priv = g_cc3000list;
-       priv && priv->minor != minor;
-       priv = priv->flink);
-
-  ASSERT(priv != NULL);
-#endif
 
   for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
     {
       if (priv->sockets[s].sd == sockfd)
         {
+          sched_lock();
+          cc3000_devgive(priv);
           sem_post(&priv->selectsem);           /* Wake select thread if need be */
           sem_wait(&priv->sockets[s].semwait);  /* Wait caller on select to finish */
           sem_wait(&priv->selectsem);           /* Sleep select thread */
+          cc3000_devtake(priv);
+          sched_unlock();
           break;
         }
     }
@@ -1510,40 +1569,35 @@ int cc3000_wait_data(int sockfd, int minor)
  *   Adds this socket for monitoring for the accept operation
  *
  * Input Parameters:
- *   sd      cc3000 socket handle or -1 tp remove it
- *   minor   - The input device minor number
+ *   priv   - The device cc3000_dev_s instance
+ *   sockfd - cc3000 socket handle to monitor
  *
  * Returned Value:
- *   Zero is returned on success.  Otherwise, a -1 value is
- *   returned to indicate socket not found.
+ *   Zero is returned on success.  Otherwise, a negative value is
+ *   returned to indicate an error.
  *
  ****************************************************************************/
 
-int cc3000_accept_socket(int sd, int minor, struct sockaddr *addr,
+static int cc3000_accept_socket(FAR struct cc3000_dev_s *priv, int sd, struct sockaddr *addr,
                          socklen_t *addrlen)
 {
-  FAR struct cc3000_dev_s *priv;
-
-#ifndef CONFIG_CC3000_MULTIPLE
-  priv = &g_cc3000;
-#else
-  for (priv = g_cc3000list;
-       priv && priv->minor != minor;
-       priv = priv->flink);
-
-  ASSERT(priv != NULL);
-#endif
 
   priv->accepting_socket.acc.status = CC3000_SOC_ERROR;
   priv->accepting_socket.acc.sd = sd;
+
+  sched_lock();
+  cc3000_devgive(priv);
   sem_post(&priv->selectsem);                    /* Wake select thread if need be */
   sem_wait(&priv->accepting_socket.acc.semwait); /* Wait caller on select to finish */
-  sem_wait(&priv->selectsem);                    /* Sleep select thread */
+  sem_wait(&priv->selectsem);                    /* Sleep the Thread */
+  cc3000_devtake(priv);
+  sched_unlock();
 
   if (priv->accepting_socket.acc.status != CC3000_SOC_ERROR)
     {
       *addr = priv->accepting_socket.addr;
       *addrlen = priv->accepting_socket.addrlen;
+      cc3000_add_socket(priv, priv->accepting_socket.acc.status);
     }
 
   return priv->accepting_socket.acc.status;
@@ -1565,9 +1619,8 @@ int cc3000_accept_socket(int sd, int minor, struct sockaddr *addr,
  *
  ****************************************************************************/
 
-int cc3000_add_socket(int sd, int minor)
+static int cc3000_add_socket(FAR struct cc3000_dev_s *priv, int sd)
 {
-  FAR struct cc3000_dev_s *priv;
   irqstate_t flags;
   int s;
 
@@ -1575,16 +1628,6 @@ int cc3000_add_socket(int sd, int minor)
     {
       return sd;
     }
-
-#ifndef CONFIG_CC3000_MULTIPLE
-  priv = &g_cc3000;
-#else
-  for (priv = g_cc3000list;
-       priv && priv->minor != minor;
-       priv = priv->flink);
-
-  ASSERT(priv != NULL);
-#endif
 
   flags = irqsave();
   for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
@@ -1616,9 +1659,8 @@ int cc3000_add_socket(int sd, int minor)
  *
  ****************************************************************************/
 
-int cc3000_remove_socket(int sd, int minor)
+static int cc3000_remove_socket(FAR struct cc3000_dev_s *priv, int sd)
 {
-  FAR struct cc3000_dev_s *priv;
   irqstate_t flags;
   int s;
 
@@ -1626,16 +1668,6 @@ int cc3000_remove_socket(int sd, int minor)
     {
       return sd;
     }
-
-#ifndef CONFIG_CC3000_MULTIPLE
-  priv = &g_cc3000;
-#else
-  for (priv = g_cc3000list;
-       priv && priv->minor != minor;
-       priv = priv->flink);
-
-  ASSERT(priv != NULL);
-#endif
 
  flags = irqsave();
  if (priv->accepting_socket.acc.sd == sd)

@@ -66,7 +66,11 @@
 
 /* IOCTL commands */
 
-#define CC3000IOC_GETQUESEMID _WLIOC_USER(0x0001) /* arg: Address of int for number*/
+#define CC3000IOC_GETQUESEMID  _WLIOC_USER(0x0001) /* arg: Address of int for number*/
+#define CC3000IOC_ADDSOCKET    _WLIOC_USER(0x0002) /* arg: Address of int for result*/
+#define CC3000IOC_REMOVESOCKET _WLIOC_USER(0x0003) /* arg: Address of int for result*/
+#define CC3000IOC_SELECTDATA   _WLIOC_USER(0x0004) /* arg: Address of int for result*/
+#define CC3000IOC_SELECTACCEPT _WLIOC_USER(0x0005) /* arg: Address of struct cc3000_acceptcfg_s */
 
 /****************************************************************************
  * Public Types
@@ -76,6 +80,14 @@ typedef char *(*tFWPatches)(unsigned long *usLength);
 typedef char *(*tDriverPatches)(unsigned long *usLength);
 typedef char *(*tBootLoaderPatches)(unsigned long *usLength);
 typedef void (*tWlanCB)(long event_type, char * data, unsigned char length);
+
+typedef struct cc3000_acceptcfg_s
+{
+  int sockfd;
+  struct sockaddr *addr;
+  socklen_t *addrlen;
+
+} cc3000_acceptcfg;
 
 /****************************************************************************
  * Public Function Prototypes

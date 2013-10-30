@@ -48,9 +48,8 @@
 #include <nuttx/wireless/cc3000/evnt_handler.h>
 #include <nuttx/wireless/cc3000/wlan.h>
 #include "cc3000_socket.h"
+#include "cc3000drv.h"
 #include <nuttx/wireless/cc3000/netapp.h>
-
-#include "spi.h"
 
 /*****************************************************************************
  * Pre-processor Definitions
@@ -525,7 +524,7 @@ uint8_t *hci_event_handler(void *pRetParams, uint8_t *from, uint8_t *fromlen)
 
           tSLInformation.usEventOrDataReceived = 0;
 
-          SpiResumeSpi();
+          cc3000_resume();
 
           /* Since we are going to TX - we need to handle this event after the
            * ResumeSPi since we need interrupts
@@ -757,7 +756,7 @@ long hci_unsolicited_event_handler(void)
               tSLInformation.usEventOrDataReceived = 0;
 
               res = 1;
-              SpiResumeSpi();
+              cc3000_resume();
             }
         }
     }
@@ -911,8 +910,8 @@ void SimpleLinkWaitEvent(uint16_t usOpcode, void *pRetParams)
 
   do
     {
-      nllvdbg("SpiWait\n");
-      tSLInformation.pucReceivedData = SpiWait();
+      nllvdbg("cc3000_wait\n");
+      tSLInformation.pucReceivedData = cc3000_wait();
       tSLInformation.usEventOrDataReceived = 1;
       STREAM_TO_UINT16((char *)tSLInformation.pucReceivedData, HCI_EVENT_OPCODE_OFFSET,event_type);
 
@@ -968,7 +967,7 @@ void SimpleLinkWaitData(uint8_t *pBuf, uint8_t *from, uint8_t *fromlen)
 
   do
     {
-      tSLInformation.pucReceivedData = SpiWait();
+      tSLInformation.pucReceivedData = cc3000_wait();
       tSLInformation.usEventOrDataReceived = 1;
 
       if (*tSLInformation.pucReceivedData == HCI_TYPE_DATA)

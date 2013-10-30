@@ -43,7 +43,7 @@
 
 #include <nuttx/wireless/cc3000/cc3000_common.h>
 #include <nuttx/wireless/cc3000/hci.h>
-#include "spi.h"
+#include "cc3000drv.h"
 #include <nuttx/wireless/cc3000/evnt_handler.h>
 #include <nuttx/wireless/cc3000/wlan.h>
 
@@ -72,7 +72,8 @@
  *
  *****************************************************************************/
 
-uint16_t hci_command_send(uint16_t usOpcode, uint8_t *pucBuff, uint8_t ucArgsLength)
+uint16_t hci_command_send(uint16_t usOpcode, uint8_t *pucBuff,
+                          uint8_t ucArgsLength)
 {
   uint8_t *stream;
 
@@ -85,7 +86,7 @@ uint16_t hci_command_send(uint16_t usOpcode, uint8_t *pucBuff, uint8_t ucArgsLen
 
   /* Update the opcode of the event we will be waiting for */
 
-  SpiWrite(pucBuff, ucArgsLength + SIMPLE_LINK_HCI_CMND_HEADER_SIZE);
+  cc3000_write(pucBuff, ucArgsLength + SIMPLE_LINK_HCI_CMND_HEADER_SIZE);
   nllvdbg("Send of 0x%x Completed\n",usOpcode);
 
   return 0;
@@ -124,7 +125,9 @@ long hci_data_send(uint8_t ucOpcode, uint8_t *ucArgs, uint16_t usArgsLength,
 
   /* Send the packet over the SPI */
 
-  SpiWrite(ucArgs, SIMPLE_LINK_HCI_DATA_HEADER_SIZE + usArgsLength + usDataLength + usTailLength);
+  cc3000_write(ucArgs,
+               SIMPLE_LINK_HCI_DATA_HEADER_SIZE + usArgsLength +
+               usDataLength + usTailLength);
 
   return ESUCCESS;
 }
@@ -158,8 +161,9 @@ void hci_data_command_send(uint16_t usOpcode, uint8_t *pucBuff,
 
   /* Send the command over SPI on data channel */
 
-  SpiWrite(pucBuff,
-           ucArgsLength + ucDataLength + SIMPLE_LINK_HCI_DATA_CMND_HEADER_SIZE);
+  cc3000_write(pucBuff,
+               ucArgsLength + ucDataLength +
+               SIMPLE_LINK_HCI_DATA_CMND_HEADER_SIZE);
 }
 
 /******************************************************************************
@@ -188,17 +192,19 @@ void hci_patch_send(uint8_t ucOpcode, uint8_t *pucBuff, char *patch,
 
   UINT8_TO_STREAM(stream, HCI_TYPE_PATCH);
   UINT8_TO_STREAM(stream, ucOpcode);
-  stream = UINT16_TO_STREAM(stream, usDataLength + SIMPLE_LINK_HCI_PATCH_HEADER_SIZE);
+  stream = UINT16_TO_STREAM(stream,
+                            usDataLength + SIMPLE_LINK_HCI_PATCH_HEADER_SIZE);
 
   if (usDataLength <= SL_PATCH_PORTION_SIZE)
     {
       UINT16_TO_STREAM(stream, usDataLength);
       stream = UINT16_TO_STREAM(stream, usDataLength);
-      memcpy((pucBuff + SPI_HEADER_SIZE) + HCI_PATCH_HEADER_SIZE, patch, usDataLength);
+      memcpy((pucBuff + SPI_HEADER_SIZE) + HCI_PATCH_HEADER_SIZE, patch,
+             usDataLength);
 
       /* Update the opcode of the event we will be waiting for */
 
-      SpiWrite(pucBuff, usDataLength + HCI_PATCH_HEADER_SIZE);
+      cc3000_write(pucBuff, usDataLength + HCI_PATCH_HEADER_SIZE);
     }
   else
     {
@@ -214,7 +220,7 @@ void hci_patch_send(uint8_t ucOpcode, uint8_t *pucBuff, char *patch,
 
       /* Update the opcode of the event we will be waiting for */
 
-      SpiWrite(pucBuff, SL_PATCH_PORTION_SIZE + HCI_PATCH_HEADER_SIZE);
+      cc3000_write(pucBuff, SL_PATCH_PORTION_SIZE + HCI_PATCH_HEADER_SIZE);
 
       while (usDataLength)
         {
@@ -236,7 +242,7 @@ void hci_patch_send(uint8_t ucOpcode, uint8_t *pucBuff, char *patch,
 
           /* Update the opcode of the event we will be waiting for */
 
-          SpiWrite((uint8_t *)data_ptr, usTransLength + sizeof(usTransLength));
+          cc3000_write((uint8_t *)data_ptr, usTransLength + sizeof(usTransLength));
         }
     }
 }

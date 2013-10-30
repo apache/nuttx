@@ -50,8 +50,8 @@
 #include <nuttx/wireless/cc3000/security.h>
 #include <nuttx/wireless/cc3000/evnt_handler.h>
 
-#include "spi.h"
 #include "cc3000.h"
+#include "cc3000drv.h"
 
 /*****************************************************************************
  * Preprocessor Definitions
@@ -282,7 +282,7 @@ void wlan_start(uint16_t usPatchesAvailableAtHost)
 
   /* Init spi */
 
-  SpiOpen(SpiReceiveHandler);
+  cc3000_open(SpiReceiveHandler);
 
   SimpleLink_Init_Start(usPatchesAvailableAtHost);
 
@@ -310,7 +310,7 @@ void wlan_start(uint16_t usPatchesAvailableAtHost)
 void wlan_stop(void)
 {
   cc3000_lib_lock();
-  SpiClose();
+  cc3000_close();
   cc3000_lib_unlock();
 }
 

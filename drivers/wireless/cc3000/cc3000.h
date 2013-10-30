@@ -58,7 +58,6 @@
 #include <nuttx/wireless/wireless.h>
 #include <nuttx/wireless/cc3000.h>
 #include <nuttx/wireless/cc3000/cc3000_common.h>
-#include "spi.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -166,6 +165,11 @@ struct cc3000_dev_s
 #ifndef CONFIG_DISABLE_POLL
   struct pollfd *fds[CONFIG_CC3000_NPOLLWAITERS];
 #endif
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_CC3000_PROBES)
+ long guard;
+#endif
+
 };
 
 /********************************************************************************************
@@ -196,10 +200,6 @@ static inline void cc3000_lib_unlock(void)
 }
 
 int cc3000_do_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
-int cc3000_wait_data(int sockfd, int minor);
-int cc3000_accept_socket(int sd, int minor, struct sockaddr *addr, socklen_t *addrlen);
-int cc3000_add_socket(int sd, int minor);
-int cc3000_remove_socket(int sd, int minor);
 
 #undef EXTERN
 #ifdef __cplusplus

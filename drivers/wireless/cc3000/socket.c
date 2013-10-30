@@ -50,6 +50,7 @@
 #include <nuttx/wireless/cc3000/include/sys/socket.h>
 
 #include "cc3000_socket.h"
+#include "cc3000drv.h"
 #include "cc3000.h"
 
 /*****************************************************************************
@@ -162,7 +163,7 @@ int cc3000_socket(int domain, int type, int protocol)
   type = bsd2ti_types[type];
   sd = cc3000_socket_impl(domain,type,protocol);
 #ifdef CONFIG_CC3000_MT
-  cc3000_add_socket(sd, 0);
+  cc3000_add_socket(sd);
 #endif
   cc3000_lib_unlock();
   return sd;
@@ -188,7 +189,7 @@ int cc3000_closesocket(int sockfd)
   cc3000_lib_lock();
   ret = cc3000_closesocket_impl(sockfd);
 #ifdef CONFIG_CC3000_MT
-  cc3000_remove_socket(sockfd, 0);
+  cc3000_remove_socket(sockfd);
 #endif
   cc3000_lib_unlock();
   return ret;
@@ -260,7 +261,7 @@ int cc3000_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
    }
 
   memset(addr,0,*addrlen);
-  return cc3000_accept_socket(sockfd,0,addr,addrlen);
+  return cc3000_accept_socket(sockfd,addr,addrlen);
 }
 #else
 {
@@ -586,7 +587,7 @@ ssize_t cc3000_recv(int sockfd, FAR void *buf, size_t len, int flags)
   ssize_t ret = OK;
 
 #ifdef CONFIG_CC3000_MT
-  ret = cc3000_wait_data(sockfd, 0);
+  ret = cc3000_wait_data(sockfd);
   if (ret != OK )
     {
       return -1;
@@ -634,7 +635,7 @@ ssize_t cc3000_recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
   ssize_t ret = OK;
 
 #ifdef CONFIG_CC3000_MT
-  ret = cc3000_wait_data(sockfd, 0);
+  ret = cc3000_wait_data(sockfd);
   if (ret != OK )
     {
       return -1;
