@@ -176,14 +176,6 @@ static void SimpleLink_Init_Start(uint16_t usPatchesAvailableAtHost)
  *   sFWPatches            0 no patch or pointer to FW patches
  *   sDriverPatches        0 no patch or pointer to driver patches
  *   sBootLoaderPatches    0 no patch or pointer to bootloader patches
- *   sReadWlanInterruptPin init callback. the callback read wlan
- *                         interrupt status.
- *   sWlanInterruptEnable  init callback. the callback enable wlan
- *                         interrupt.
- *   sWlanInterruptDisable init callback. the callback disable wlan
- *                         interrupt.
- *   sWriteWlanPin         init callback. the callback write value
- *                         to device pin.
  *
  * Returned Value:
  *   None

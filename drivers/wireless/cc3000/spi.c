@@ -43,6 +43,10 @@
  * Pre-processor Definitions
  *****************************************************************************/
 
+#ifndef CONFIG_CC3000_UNSOLICED_STACKSIZE
+#  define CONFIG_CC3000_UNSOLICED_STACKSIZE 264
+#endif
+
 #undef SPI_DEBUG   /* Define to enable debug */
 #undef SPI_VERBOSE /* Define to enable verbose debug */
 
@@ -240,7 +244,7 @@ void SpiOpen(gcSpiHandleRx pfRxHandler)
       pthread_attr_t attr;
       struct sched_param param;
       pthread_attr_init(&attr);
-      attr.stacksize = 292;
+      attr.stacksize = CONFIG_CC3000_UNSOLICED_STACKSIZE;
       param.sched_priority = SCHED_PRIORITY_DEFAULT-10;
       pthread_attr_setschedparam(&attr, &param);
       status = pthread_create(&spiconf.unsoliced_thread, &attr,

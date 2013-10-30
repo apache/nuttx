@@ -85,12 +85,26 @@
 #error "CONFIG_MQ_MAXMSGSIZE needs to be >= CC3000_RX_BUFFER_SIZE"
 #endif
 
+#ifndef CONFIG_CC3000_WORKER_STACKSIZE
+#  define CONFIG_CC3000_WORKER_STACKSIZE 240
+#endif
+
+#ifndef CONFIG_CC3000_SELECT_STACKSIZE
+#  define CONFIG_CC3000_SELECT_STACKSIZE 368
+#endif
+
 #ifndef ARRAY_SIZE
 #  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
-#define NUMBER_OF_MSGS 2
+#define NUMBER_OF_MSGS 1
 
 #define FREE_SLOT -1
+
+#if defined(CONFIG_CC3000_PROBES)
+#define PROBE(pin,state)  priv->config->probe(priv->config,pin, state)
+#else
+#define PROBE(pin,state)
+#endif
 
 /****************************************************************************
  * Private Types
@@ -560,14 +574,14 @@ static void * cc3000_worker(FAR void *arg)
   sem_post(&priv->readysem);
   while(1)
     {
-      priv->config->probe(config,0, 1);
+      PROBE(0,1);
       cc3000_devtake(priv);
 
       /* Done ? */
 
       if ((cc3000_wait_irq(priv) != -EINTR) && (priv->workertid != -1))
         {
-          priv->config->probe(config,0, 0);
+          PROBE(0,0);
           nllvdbg("State%d\n",priv->state);
           switch (priv->state)
             {
@@ -694,9 +708,9 @@ static int cc3000_interrupt(int irq, FAR void *context)
 
   /* Run the worker thread */
 
-  priv->config->probe(priv->config,1, 0);
+  PROBE(1,0);
   sem_post(&priv->irqsem);
-  priv->config->probe(priv->config,1, 1);
+  PROBE(1,1);
 
   /* Clear any pending interrupts and return success */
 
@@ -781,7 +795,7 @@ static int cc3000_open(FAR struct file *filep)
         }
 
       pthread_attr_init(&tattr);
-      tattr.stacksize = 336;
+      tattr.stacksize = CONFIG_CC3000_WORKER_STACKSIZE;
       param.sched_priority = SCHED_PRIORITY_MAX;
       pthread_attr_setschedparam(&tattr, &param);
 
@@ -796,7 +810,7 @@ static int cc3000_open(FAR struct file *filep)
         }
 
       pthread_attr_init(&tattr);
-      tattr.stacksize = 460;
+      tattr.stacksize = CONFIG_CC3000_SELECT_STACKSIZE;
       param.sched_priority = SCHED_PRIORITY_DEFAULT+10;
       pthread_attr_setschedparam(&tattr, &param);
       ret = pthread_create(&priv->selecttid, &tattr, select_thread_func,

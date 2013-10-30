@@ -54,4 +54,22 @@ config CC3000_SPI_FREQUENCY
 	---help---
 		Define to use a different SPI bus frequency.
 
+config CC3000_WORKER_STACKSIZE
+	int "Worker thread stack size"
+	default 240
+
+config CC3000_SELECT_STACKSIZE
+	int "Select thread stack size"
+	default 368
+
+config CC3000_UNSOLICED_STACKSIZE
+	int "Unsolicited thread stack size"
+	default 264
+
+config CC3000_PROBES
+	bool "Thread probes"
+	default n
+	---help---
+		Select to use DO and D1 to indicate worker thread and ISR
+
 endif
