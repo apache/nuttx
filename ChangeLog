@@ -5919,4 +5919,9 @@
 	  header file (2013-10-31).
 	* drivers/mtd/mtd_partition.c: Fix erase block vs page block confusion.
 	  From Ken Pettit (2013-10-31).
+	* arch/arm/src/stm32/stm32_usbdev.c: On a failure to bind the class
+	  driver, the driver reference was being nullified too soon.  This
+	  caused an exception in usbdev_reset() later.  The driver reference
+	  will be nullified later usbdev_unregister when the caller gets the
+	  error.  From David Sidrane (2013-10-31).
 
