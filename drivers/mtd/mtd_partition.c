@@ -162,9 +162,9 @@ static int part_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 
   /* Make sure that erase would not extend past the end of the partition */
 
-  if (!part_blockcheck(priv, startblock + nblocks - 1))
+  if (!part_blockcheck(priv, (startblock + nblocks - 1) * priv->blkpererase))
     {
-      fdbg("ERROR: Read beyond the end of the partition\n");
+      fdbg("ERROR: Erase beyond the end of the partition\n");
       return -ENXIO;
     }
 
@@ -379,8 +379,9 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           /* Erase the entire partition */
 
-          ret = priv->parent->erase(priv->parent, priv->firstblock,
-                                    priv->neraseblocks * priv->blkpererase);
+          ret = priv->parent->erase(priv->parent,
+                                    priv->firstblock / priv->blkpererase,
+                                    priv->neraseblocks);
         }
         break;
 
@@ -461,7 +462,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
       fdbg("ERROR: sub-region too small\n");
       return NULL;
     }
-  
+
   /* Verify that the sub-region is valid for this geometry */
 
   devblocks = blkpererase * geo.neraseblocks;
@@ -477,7 +478,7 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
   if (!part)
     {
       fdbg("ERROR: Failed to allocate memory for the partition device\n");
-      return NULL;      
+      return NULL;
     }
 
   /* Initialize the partition device structure. (unsupported methods were

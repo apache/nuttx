@@ -5917,3 +5917,6 @@
 	  header file (2013-10-30).
 	* arch/arm/src/sama5/chip/sam_pwm.h:  PWM register definition
 	  header file (2013-10-31).
+	* drivers/mtd/mtd_partition.c: Fix erase block vs page block confusion.
+	  From Ken Pettit (2013-10-31).
+
