@@ -5914,5 +5914,6 @@
 	* drivers/wireless/cc3000 and include/nuttx/wireless/cc3000:
 	  CC3000 driver updates from David Sidrane (2013-10-13).
 	* arch/arm/src/sama5/chip/sam_ssc.h:  SSC register definition
-	  header files (2013-10-30).
-
+	  header file (2013-10-30).
+	* arch/arm/src/sama5/chip/sam_pwm.h:  PWM register definition
+	  header file (2013-10-31).
