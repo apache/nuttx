@@ -654,6 +654,24 @@ void weak_function sam_netinitialize(void);
 void up_ledinit(void);
 #endif
 
+/************************************************************************************
+ * Name: nsh_archinitialize
+ *
+ * Description:
+ *   Perform architecture specific initialization for NSH.
+ *
+ *   CONFIG_NSH_ARCHINIT=y :
+ *     Called from the NSH library
+ *
+ *   CONFIG_BOARD_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, && CONFIG_NSH_ARCHINIT=n :
+ *     Called from board_initialize().
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_NSH_LIBRARY
+int nsh_archinitialize(void);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_SAMA5D3X_EK_SRC_SAMA5D3X_EK_H */
 
