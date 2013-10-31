@@ -3637,7 +3637,6 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   if (ret)
     {
       usbtrace(TRACE_DEVERROR(STM32_TRACEERR_BINDFAILED), (uint16_t)-ret);
-      priv->driver = NULL;
     }
   else
     {
