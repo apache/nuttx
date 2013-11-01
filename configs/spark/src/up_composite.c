@@ -159,32 +159,68 @@ int composite_archinitialize(void)
 
   /* Get the SPI port */
 
-  message("nsh_archinitialize: Initializing SPI port %d\n",CONFIG_SPARK_FLASH_SPI);
+  message("nsh_archinitialize: Initializing SPI port %d\n",
+          CONFIG_SPARK_FLASH_SPI);
+
   spi = up_spiinitialize(CONFIG_SPARK_FLASH_SPI);
   if (!spi)
     {
-      message("nsh_archinitialize: ERROR: Failed to initialize SPI port  %d\n",CONFIG_SPARK_FLASH_SPI);
+      message("nsh_archinitialize: ERROR: Failed to initialize SPI port %d\n",
+              CONFIG_SPARK_FLASH_SPI);
       return -ENODEV;
     }
 
-  message("nsh_archinitialize: Successfully initialized SPI port  %d\n",CONFIG_SPARK_FLASH_SPI);
+  message("nsh_archinitialize: Successfully initialized SPI port %d\n",
+          CONFIG_SPARK_FLASH_SPI);
 
   /* Now bind the SPI interface to the SST25 SPI FLASH driver */
 
   message("nsh_archinitialize: Bind SPI to the SPI flash driver\n");
-  mtd = sst25_initialize((FAR struct spi_dev_s *)spi);
+  mtd = sst25_initialize(spi);
   if (!mtd)
     {
-      message("nsh_archinitialize: Failed to bind SPI port %d to the SPI FLASH driver\n",CONFIG_SPARK_FLASH_SPI);
-      return -ENODEV;
-
+      message("nsh_archinitialize: Failed to bind SPI port %d to the SPI FLASH driver\n",
+              CONFIG_SPARK_FLASH_SPI);
     }
   else
     {
-      message("nsh_archinitialize: Successfully bound SPI port %d to the SPI FLASH driver\n",CONFIG_SPARK_FLASH_SPI);
+      message("nsh_archinitialize: Successfully bound SPI port %d to the SPI FLASH driver\n",
+              CONFIG_SPARK_FLASH_SPI);
     }
 
-#ifdef CONFIG_SPARK_FLASH_PART
+#ifndef CONFIG_SPARK_FLASH_PART
+
+  /* Use the FTL layer to wrap the MTD driver as a block driver */
+
+  ret = ftl_initialize(CONFIG_SPARK_FLASH_MINOR, mtd);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Initialize the FTL layer\n");
+      return ret;
+    }
+
+#if CONFIG_SPARK_MOUNT_FLASH
+  char  partname[16];
+  char  mntpoint[16];
+
+  /* mount -t vfat /dev/mtdblock0 /mnt/p0 */
+
+  snprintf(partname, sizeof(partname), "/dev/mtdblock%d",
+           CONFIG_SPARK_FLASH_MINOR);
+  snprintf(mntpoint, sizeof(mntpoint)-1, CONFIG_SPARK_FLASH_MOUNT_POINT,
+           CONFIG_SPARK_FLASH_MINOR);
+
+  /* Mount the file system at /mnt/pn  */
+
+  ret = mount(partname, mntpoint, "vfat", 0, NULL);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Failed to mount the FAT volume: %d\n", errno);
+      return ret;
+    }
+
+#endif
+#else
     {
       int partno;
       int partsize;
@@ -205,7 +241,7 @@ int composite_archinitialize(void)
           /* Get the partition size */
 
           partsize = atoi(ptr);
-          mtd_part = mtd_partition(mtd, partoffset, (partsize>>2)*16);
+          mtd_part = mtd_partition(mtd, partoffset, (partsize >> 2) * 16);
           partoffset += (partsize >> 2) * 16;
 
           /* Use the FTL layer to wrap the MTD driver as a block driver */
@@ -218,7 +254,8 @@ int composite_archinitialize(void)
             }
 
           snprintf(partname,sizeof(partname), "/dev/mtdblock%d", partno);
-          snprintf(mntpoint,sizeof(mntpoint)-1,CONFIG_SPARK_FLASH_MOUNT_POINT,partno);
+          snprintf(mntpoint,sizeof(mntpoint)-1, CONFIG_SPARK_FLASH_MOUNT_POINT,
+                   partno);
 
           /* Mount the file system at /mnt/pn  */
 
@@ -246,8 +283,8 @@ int composite_archinitialize(void)
           partno++;
         }
     }
+#endif /* CONFIG_SPARK_FLASH_PART */
 
-#endif /* ONFIG_SPARK_FLASH_PART */
 #endif /* HAVE_SST25 */
 
 #ifdef HAVE_USBMONITOR

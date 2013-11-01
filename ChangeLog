@@ -5933,3 +5933,6 @@
 	* arch/ stack management functions:  Extension and standardization of
 	  stack debug logic.  Now includes coloration of the IDLE and interrupt
 	  stacks as well as the heap.  Suggested by David Sidrane (2013-11-1).
+	* configs/spark/usbmsc:  Add spark USB MSC configuration.  From David
+	  Sidrane (2013-11-1).
+
