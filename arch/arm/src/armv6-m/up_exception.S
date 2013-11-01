@@ -258,7 +258,7 @@ exception_common:
 	.size	exception_common, .-exception_common
 
 /************************************************************************************
- *  Name: up_interruptstack/g_intstackbase
+ *  Name: g_intstackalloc/g_intstackbase
  *
  * Description:
  *   Shouldn't happen
@@ -267,12 +267,13 @@ exception_common:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.bss
-	.global	g_intstackbase
+	.global	g_intstackalloc
+	.global g_intstackbase
 	.align	4
-up_interruptstack:
+g_intstackalloc:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
 g_intstackbase:
-	.size	up_interruptstack, .-up_interruptstack
+	.size	g_intstackalloc, .-g_intstackalloc
 #endif
 
 	.end

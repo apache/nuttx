@@ -411,7 +411,7 @@ _up_vector:
 	.align	2
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 .Lintstack:
-	.long	_up_stackbase
+	.long	_g_intstackbase
 #endif
 .Ldoirq:
         .long   _up_doirq
@@ -501,7 +501,7 @@ _up_fullcontextrestore:
 	.size	_up_fullcontextrestore, .-_up_fullcontextrestore
 
 /************************************************************************************
- *  Name: up_interruptstack/g_userstack
+ *  Name: g_intstackalloc/g_intstackbase
  *
  * Description:
  *   Shouldn't happen
@@ -511,15 +511,16 @@ _up_fullcontextrestore:
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.bss
 	.align	2
-	.globl	_g_userstack
-	.type	_g_userstack, object
-_up_interruptstack:
+	.globl	_g_intstackalloc
+	.type	_g_intstackalloc, object
+	.globl	_g_intstackbase
+	.type	_g_intstackbase, object
+_g_intstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
-_g_userstack:
-_up_stackbase:
+_g_intstackbase:
 	.skip	2
-	.size	_g_userstack, 4
-	.size	_up_interruptstack, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+	.size	_g_intstackbase, 4
+	.size	_g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 #endif
 	.end
 

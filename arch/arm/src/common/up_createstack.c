@@ -83,23 +83,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: memset32
- *
- * On most larger than 8 bit archs this will need to be word aligned so
- * so maybe some checks should be put in place?
- *
- ****************************************************************************/
-
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
-static void *memset32(void *s, uint32_t  c, size_t n)
-{
-  uint32_t *p = (uint32_t *)s;
-  while (n-- > 0) *p++ = c;
-  return s;
-}
-#endif
-
-/****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
@@ -159,7 +142,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
     }
 
   /* Do we need to allocate a new stack? */
- 
+
   if (!tcb->stack_alloc_ptr)
     {
       /* Allocate the stack.  If DEBUG is enabled (but not stack debug),
@@ -240,7 +223,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        */
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
-      memset32(tcb->stack_alloc_ptr, 0xdeadbeef, tcb->adj_stack_size/4);
+      up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
 #endif
 
       up_ledon(LED_STACKCREATED);
@@ -249,3 +232,29 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
    return ERROR;
 }
+
+/****************************************************************************
+ * Name: up_stack_color
+ *
+ * Description:
+ *   Write a well know value into the stack
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+void up_stack_color(FAR void *stackbase, size_t nbytes)
+{
+  /* Take extra care that we do not write outsize the stack boundaries */
+
+  uint32_t *stkptr = (uint32_t *)(((uintptr_t)stackbase + 3) & ~3);
+  uintptr_t stkend = (((uintptr_t)stackbase + nbytes) & ~3);
+  size_t    nwords = (stkend - (uintptr_t)stackbase) >> 2;
+
+  /* Set the entire stack to the coloration value */
+
+  while (nwords-- > 0)
+    {
+      *stkptr++ = STACK_COLOR;
+    }
+}
+#endif

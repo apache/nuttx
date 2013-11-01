@@ -63,7 +63,7 @@
 
 #ifndef __ASSEMBLY__
 #  if CONFIG_ARCH_INTERRUPTSTACK > 3
-     extern uint32_t g_userstack;
+     extern uint32_t g_intstackbase;
 #  endif
 #endif
 

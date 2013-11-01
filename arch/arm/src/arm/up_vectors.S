@@ -149,7 +149,7 @@ up_vectorirq:
 	.word	g_irqtmp
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 .Lirqstackbase:
-	.word	up_stackbase
+	.word	g_intstackbase
 #endif
 	.size	up_vectorirq, . - up_vectorirq
 	.align	5
@@ -427,20 +427,21 @@ up_vectorfiq:
 	.size	up_vectorfiq, . - up_vectorfiq
 
 /************************************************************************************
- *  Name: up_interruptstack/g_userstack
+ *  Name: g_intstackalloc/g_intstackbase
  ************************************************************************************/
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	.bss
 	.align	4
-	.globl	g_userstack
-	.type	g_userstack, object
-up_interruptstack:
+	.globl	g_intstackalloc
+	.type	g_intstackalloc, object
+	.globl	g_intstackbase
+	.type	g_intstackbase, object
+g_intstackalloc:
 	.skip	((CONFIG_ARCH_INTERRUPTSTACK & ~3) - 4)
-g_userstack:
-up_stackbase:
+g_intstackbase:
 	.skip	4
-	.size	g_userstack, 4
-	.size	up_interruptstack, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+	.size	g_intstackbase, 4
+	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
 #endif
 	.end

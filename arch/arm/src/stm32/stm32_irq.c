@@ -299,6 +299,16 @@ void up_irqinitialize(void)
   putreg32(0, NVIC_IRQ0_31_ENABLE);
   putreg32(0, NVIC_IRQ32_63_ENABLE);
 
+  /* Colorize the interrupt stack for debug purposes */
+
+#if defined(CONFIG_DEBUG_STACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+  {
+    size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+    up_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
+                   intstack_size);
+  }
+#endif
+
   /* The standard location for the vector table is at the beginning of FLASH
    * at address 0x0800:0000.  If we are using the STMicro DFU bootloader, then
    * the vector table will be offset to a different location in FLASH and we
