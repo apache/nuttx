@@ -74,22 +74,22 @@ __start:
 
 	/* First, setup initial processor mode */
 
-	mov	r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT )
-	msr	cpsr, r0
+	mov		r0, #(SVC_MODE | PSR_I_BIT | PSR_F_BIT )
+	msr		cpsr, r0
 
 	showprogress 'A'
 
 	/* Setup system stack (and get the BSS range) */
 
-	adr	r0, LC0
-	ldmia   r0, {r4, r5, sp}
+	adr		r0, .Lbssinit
+	ldmia	r0, {r4, r5, sp}
 
 	/* Clear system BSS section */
 
-	mov	r0, #0
-1:	cmp	r4, r5
+	mov		r0, #0
+1:	cmp		r4, r5
 	strcc	r0, [r4], #4
-	bcc	1b
+	bcc		1b
 
 	showprogress 'B'
 
@@ -97,38 +97,57 @@ __start:
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 
-	adr	r3, LC2
+	adr		r3, .Ldatainit
 	ldmia	r3, {r0, r1, r2}
 
 1:	ldmia	r0!, {r3 - r10}
 	stmia	r1!, {r3 - r10}
-	cmp	r1, r2
-	blt	1b
+	cmp		r1, r2
+	blt		1b
 
 #endif
 
 	/* Perform early serial initialization */
 
-	mov	fp, #0
+	mov		fp, #0
+
 #ifdef USE_EARLYSERIALINIT
-	bl	up_earlyserialinit
+	bl		up_earlyserialinit
 #endif
 
 #ifdef CONFIG_DEBUG
-	mov	r0, #'C'
-	bl	up_putc
-	mov	r0, #'\n'
-	bl	up_putc
+	mov		r0, #'C'
+	bl		up_putc
+	mov		r0, #'\n'
+	bl		up_putc
 #endif
+
 	/* Initialize onboard LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
-	bl	up_ledinit
+	bl		up_ledinit
 #endif
 
-	/* Then jump to OS entry */
+#ifdef CONFIG_DEBUG_STACK
+	/* Write a known value to the IDLE thread stack to support stack
+	 * monitoring logic
+	 */
 
-	b	os_start
+	adr		r3, .Lstkinit
+	ldmia	r3, {r0, r1, r2}	/* R0 = start of IDLE stack; R1 = Size of tack; R2 = coloration */
+
+2:								/* Top of the loop */
+	sub		r1, r1, #1			/* R1 = Number of words remaining */
+	cmp		r1, #0				/* Check (nwords == 0) */
+	str		r2, [r0], #4		/* Save stack color word, increment stack address */
+	bne		2b					/* Bottom of the loop */
+
+#endif
+
+	/* Finally branch to the OS entry point */
+
+	mov		lr, #0				/* LR = return address (none) */
+	b		os_start			/* Branch to os_start */
 
 	/* Variables:
 	 * _sbss is the start of the BSS region (see ld.script)
@@ -139,14 +158,25 @@ __start:
 	 * below.
 	 */
 
-LC0:	.long	_sbss
+.Lbssinit:
+	.long	_sbss
 	.long	_ebss
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
-LC2:	.long	_eronly	/* Where .data defaults are stored in FLASH */
+.Ldatainit:
+	.long	_eronly	/* Where .data defaults are stored in FLASH */
 	.long	_sdata	/* Where .data needs to reside in SDRAM */
 	.long	_edata
+#endif
+
+#ifdef CONFIG_DEBUG_STACK
+	.type	.Lstkinit, %object
+.Lstkinit:
+	.long	_ebss					/* Beginning of the IDLE stack, then words of IDLE stack */
+	.long	(CONFIG_IDLETHREAD_STACKSIZE >> 2)
+	.long	STACK_COLOR				/* Stack coloration word */
+	.size	.Lstkinit, . -.Lstkinit
 #endif
 	.size	__start, .-__start
 
@@ -164,4 +194,3 @@ g_idle_topstack:
 	.size	g_idle_topstack, .-g_idle_topstack
 
 	.end
-

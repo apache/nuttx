@@ -298,7 +298,7 @@ void __start(void)
 #ifdef CONFIG_DEBUG_STACK
   /* Set the IDLE stack to the coloration value and jump into os_start() */
 
-  go_os_start((FAR void *)&_ebss, CONFIG_ARCH_INTERRUPTSTACK);
+  go_os_start((FAR void *)&_ebss, CONFIG_IDLETHREAD_STACKSIZE);
 #else
   /* Call os_start() */
 
