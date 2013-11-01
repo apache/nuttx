@@ -217,6 +217,16 @@ void up_irqinitialize(void)
    * access to the AIC.
    */
 
+  /* Colorize the interrupt stack for debug purposes */
+
+#if defined(CONFIG_DEBUG_STACK) && CONFIG_ARCH_INTERRUPTSTACK > 3
+  {
+    size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+    up_stack_color((FAR void *)((uintptr_t)&g_intstackbase - intstack_size),
+                   intstack_size);
+  }
+#endif
+
   /* Unprotect SMR, SVR, SPU and DCR register */
 
   putreg32(AIC_WPMR_WPKEY, SAM_AIC_WPMR);

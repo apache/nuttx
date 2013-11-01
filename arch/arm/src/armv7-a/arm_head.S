@@ -46,6 +46,7 @@
 #include "sctlr.h"
 #include "mmu.h"
 #include "chip.h"
+#include "up_internal.h"
 
 	.file	"arm_head.S"
 
@@ -617,10 +618,26 @@ __start:
 
 	bl		up_boot
 
+#ifdef CONFIG_DEBUG_STACK
+	/* Write a known value to the IDLE thread stack to support stack
+	 * monitoring logic
+	 */
+
+	adr		r3, .Lstkinit
+	ldmia	r3, {r0, r1, r2}	/* R0 = start of IDLE stack; R1 = Size of tack; R2 = coloration */
+
+2:								/* Top of the loop */
+	sub		r1, r1, #1			/* R1 = Number of words remaining */
+	cmp		r1, #0				/* Check (nwords == 0) */
+	str		r2, [r0], #4		/* Save stack color word, increment stack address */
+	bne		2b					/* Bottom of the loop */
+
+#endif
+
 	/* Finally branch to the OS entry point */
 
-	mov		lr, #0
-	b		os_start
+	mov		lr, #0				/* LR = return address (none) */
+	b		os_start			/* Branch to os_start */
 
 	/* Text-section constants:
 	 *
@@ -649,13 +666,22 @@ __start:
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 	.size	.Linitparms, . -.Linitparms
 
-#if defined(CONFIG_BOOT_RUNFROMFLASH)
+#ifdef CONFIG_BOOT_RUNFROMFLASH
 	.type	.Ldatainit, %object
 .Ldatainit:
-	.long	_eronly			/* Where .data defaults are stored in FLASH */
-	.long	_sdata			/* Where .data needs to reside in SDRAM */
+	.long	_eronly					/* Where .data defaults are stored in FLASH */
+	.long	_sdata					/* Where .data needs to reside in SDRAM */
 	.long	_edata
 	.size	.Ldatainit, . -.Ldatainit
+#endif
+
+#ifdef CONFIG_DEBUG_STACK
+	.type	.Lstkinit, %object
+.Lstkinit:
+	.long	_ebss					/* Beginning of the IDLE stack, then words of IDLE stack */
+	.long	(CONFIG_IDLETHREAD_STACKSIZE >> 2)
+	.long	STACK_COLOR				/* Stack coloration word */
+	.size	.Lstkinit, . -.Lstkinit
 #endif
 	.size	.Lvstart, .-.Lvstart
 

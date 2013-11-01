@@ -211,7 +211,7 @@ static void go_os_start(void *pv, unsigned int nbytes)
     "\tstr  r2, [r0], #4\n"     /* Save stack color word, increment stackptr */
     "\tbne  1b\n"               /* Bottom of the loop */
 
-    "2:\n"                      /* Top of the loop */
+    "2:\n"
     "\tmov  r14, #0\n"          /* LR = return address (none) */
     "\tb    os_start\n"         /* Branch to os_start */
   );
@@ -298,7 +298,7 @@ void __start(void)
 #ifdef CONFIG_DEBUG_STACK
   /* Set the IDLE stack to the coloration value and jump into os_start() */
 
-  go_os_start((FAR void *)_ebss, CONFIG_ARCH_INTERRUPTSTACK);
+  go_os_start((FAR void *)&_ebss, CONFIG_ARCH_INTERRUPTSTACK);
 #else
   /* Call os_start() */
 
