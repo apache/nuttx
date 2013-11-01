@@ -85,7 +85,7 @@
  * "seems to relate to stalling the endpoint when a short response is
  * generated which causes a residue to exist when the CSW would be returned.
  * I think there's two issues here.  The first being if the transfer which
- * had just been queued before the stall had not completed then it wouldn’t
+ * had just been queued before the stall had not completed then it wouldn't
  * then complete once the endpoint was stalled?  The second is that the
  * subsequent transfer for the CSW would be dropped on the floor (by the
  * epsubmit() function) if the end point was still stalled as the control
@@ -2678,5 +2678,6 @@ void *usbmsc_workerthread(void *arg)
   /* Transition to the TERMINATED state and exit */
 
   priv->thstate = USBMSC_STATE_TERMINATED;
+  pthread_cond_signal(&priv->cond);             /* See comments in usbmsc_uninitialize() */
   return NULL;
 }

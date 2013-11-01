@@ -5938,3 +5938,9 @@
 	* fs/fat/fs_fat32util.c:  In one error return case, the error return
 	  value was not being set, making the failure look like success. From
 	  David Sidrane (2011-10-1).
+	* drivers/usbdev/usbmsc.c and usbmsc_scsi.c:  pthread_join() does not
+	  work if called from a different task group than the pthread.  This
+	  is correct behavior, but a problem.  The correct solution would be
+	  configure the USB MSC thread to a task, however, this workaround
+	  from David Sidrane plugs the hole for now (2013-11-1).
+

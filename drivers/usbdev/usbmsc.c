@@ -1628,6 +1628,17 @@ int usbmsc_exportluns(FAR void *handle)
       goto errout_with_mutex;
     }
 
+  /* Detach the pthread so that we do not create a memory leak.
+   *
+   * REVISIT:  See related comments in usbmsc_uninitialize()
+   */
+
+  ret = pthread_detach(priv->thread);
+  if (ret != OK)
+    {
+      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_DETACH), (uint16_t)-ret);
+    }
+
   /* Register the USB storage class driver (unless we are part of a composite device) */
 
 #ifndef CONFIG_USBMSC_COMPOSITE
@@ -1752,7 +1763,33 @@ void usbmsc_uninitialize(FAR void *handle)
        * garbage
        */
 
+#if 0
+      /* REVISIT:  pthread_join does not work in all contexts.  In
+       * particular, if usbmsc_uninitialize() executes in a different
+       * task group than the group that includes the SCSI thread, then
+       * pthread_join will fail.
+       *
+       * NOTE: If, for some reason, you wanted to restore this code,
+       * there is now a matching pthread_detach() elsewhere to prevent
+       * memory leaks.
+       */
+
       (void)pthread_join(priv->thread, &value);
+
+#else
+      /* REVISIT:  Calling pthread_mutex_lock and pthread_cond_wait
+       * from outside of the task group is equally non-standard.
+       * However, this actually works.
+       */
+
+      pthread_mutex_lock(&priv->mutex);
+      while ((priv->theventset & USBMSC_EVENT_TERMINATEREQUEST) != 0)
+        {
+          pthread_cond_wait(&priv->cond, &priv->mutex);
+        }
+
+      pthread_mutex_unlock(&priv->mutex);
+#endif
     }
 
   priv->thread = 0;
