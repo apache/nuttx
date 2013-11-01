@@ -272,7 +272,7 @@ extern uint32_t g_idle_topstack; /* Start of the heap */
 
 #ifndef __ASSEMBLY__
 #  if CONFIG_ARCH_INTERRUPTSTACK > 3
-     extern uint16_t g_userstack;
+     extern uint16_t g_intstackbase;
 #  endif
 #endif
 

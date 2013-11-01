@@ -51,28 +51,26 @@
  * Global Data
  ****************************************************************************/
 
-/****************************************************************************
- * Global Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Global Function Prototypes
- ****************************************************************************/
-
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
+/****************************************************************************
+ * Global Function Prototypes
+ ****************************************************************************/
+
 /* This entry point must be supplied by the application */
 
-EXTERN int    CONFIG_USER_ENTRYPOINT(int argc, char *argv[]);
+int CONFIG_USER_ENTRYPOINT(int argc, char *argv[]);
 
 /* Functions contained in os_task.c *****************************************/
+/* OS entry point called by boot logic */
 
-EXTERN void   os_start(void); /* OS entry point called by boot logic */
+void os_start(void) noreturn_function;
 
 #undef EXTERN
 #ifdef __cplusplus

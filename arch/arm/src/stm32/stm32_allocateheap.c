@@ -394,6 +394,23 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_heap_color
+ *
+ * Description:
+ *   Set heap memory to a known, non-zero state to checking heap usage.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_HEAP
+static inline void up_heap_color(FAR void *start, size_t size)
+{
+  memset(start, HEAP_COLOR, size);
+}
+#else
+#  define up_heap_color(start,size)
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -461,6 +478,10 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   *heap_start = (FAR void*)ubase;
   *heap_size  = usize;
 
+  /* Colorize the heap for debug */
+
+  up_heap_color((FAR void*)ubase, usize);
+
   /* Allow user-mode access to the user heap memory */
 
    stm32_mpu_uheap((uintptr_t)ubase, usize);
@@ -471,6 +492,10 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   up_ledon(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_idle_topstack;
   *heap_size  = SRAM1_END - g_idle_topstack;
+
+  /* Colorize the heap for debug */
+
+  up_heap_color(*heap_start, *heap_size);
 #endif
 }
 
@@ -539,6 +564,10 @@ void up_addregion(void)
 
 #endif
 
+  /* Colorize the heap for debug */
+
+  up_heap_color((FAR void*)SRAM2_START, SRAM2_END-SRAM2_START);
+
   /* Add the STM32F20xxx/STM32F40xxx CCM SRAM user heap region. */
 
   kumm_addregion((FAR void*)SRAM2_START, SRAM2_END-SRAM2_START);
@@ -553,9 +582,13 @@ void up_addregion(void)
 
 #endif
 
-   /* Add the external FSMC SRAM user heap region. */
+  /* Colorize the heap for debug */
 
-   kumm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+  up_heap_color((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
+
+  /* Add the external FSMC SRAM user heap region. */
+
+  kumm_addregion((FAR void*)CONFIG_HEAP2_BASE, CONFIG_HEAP2_SIZE);
 #endif
 }
 #endif

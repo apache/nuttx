@@ -171,6 +171,14 @@
 
 #endif
 
+/* This is the value used to mark the stack for subsequent stack monitoring
+ * logic.
+ */
+
+#define STACK_COLOR    0xdeadbeef
+#define INTSTACK_COLOR 0xdeadbeef
+#define HEAP_COLOR     'h'
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -204,9 +212,10 @@ extern const uint32_t g_idle_topstack;
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 #if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM3) || \
     defined(CONFIG_ARCH_CORTEXM4)
-extern uint32_t g_intstackbase;
+extern uint32_t g_intstackalloc; /* Allocated stack base */
+extern uint32_t g_intstackbase;  /* Initial top of interrupt stack */
 #  else
-extern uint32_t g_userstack;
+extern uint32_t g_intstackbase;
 #  endif
 #endif
 
@@ -482,6 +491,12 @@ void up_usbuninitialize(void);
 
 #ifdef CONFIG_DEV_RANDOM
 void up_rnginitialize(void);
+#endif
+
+/* Debug ********************************************************************/
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+void up_stack_color(FAR void *stackbase, size_t nbytes);
 #endif
 
 #endif /* __ASSEMBLY__ */

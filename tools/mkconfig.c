@@ -270,6 +270,7 @@ int main(int argc, char **argv, char **envp)
   printf("# undef CONFIG_DEBUG_GPIO\n");
   printf("# undef CONFIG_DEBUG_SPI\n");
   printf("# undef CONFIG_DEBUG_STACK\n");
+  printf("# undef CONFIG_DEBUG_HEAP\n");
   printf("#endif\n\n");
   printf("/* User entry point. This is provided as a fall-back to keep compatibility\n");
   printf(" * with existing code, for builds which do not define CONFIG_USER_ENTRYPOINT.\n");

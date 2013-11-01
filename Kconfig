@@ -316,6 +316,10 @@ config ARCH_HAVE_STACKCHECK
 	bool
 	default n
 
+config ARCH_HAVE_HEAPCHECK
+	bool
+	default n
+
 if DEBUG
 config DEBUG_VERBOSE
 	bool "Enable Debug Verbose Output"
@@ -412,6 +416,13 @@ config DEBUG_STACK
 	depends on ARCH_HAVE_STACKCHECK
 	---help---
 		Enable hooks to check stack usage.  Only supported by a few architectures.
+
+config DEBUG_HEAP
+	bool "Heap usage debug hooks"
+	default n
+	depends on ARCH_HAVE_HEAPCHECK
+	---help---
+		Enable hooks to check heap usage.  Only supported by a few architectures.
 
 comment "Driver Debug Options"
 

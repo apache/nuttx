@@ -433,7 +433,7 @@ up_fullcontextrestore:
 	.comm	.Lspsave, 2, 1
 
 /************************************************************************************
- *	Name: up_interruptstack/g_userstack
+ *	Name: up_interruptstack/g_intstackbase
  *
  * Description:
  *	 If CONFIG_ARCH_INTERRUPTSTACK is defined, this sets aside memory for the

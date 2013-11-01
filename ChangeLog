@@ -5930,3 +5930,6 @@
 	  media that is wrapped as an MTD device.  From Ken Pettit (2013-11-1).
 	* configs/mikroe-stm32f4:  Now uses /dev/config for configuration data
 	  storage.  From Ken Pettit (2013-11-1).
+	* arch/ stack management functions:  Extension and standardization of
+	  stack debug logic.  Now includes coloration of the IDLE and interrupt
+	  stacks as well as the heap.  Suggested by David Sidrane (2013-11-1).

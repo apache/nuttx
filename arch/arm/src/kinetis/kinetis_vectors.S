@@ -779,7 +779,7 @@ kinetis_common:
 	.size	handlers, .-handlers
 
 /************************************************************************************************
- *  Name: up_interruptstack/g_intstackbase
+ *  Name: g_intstackalloc/g_intstackbase
  *
  * Description:
  *   Shouldn't happen
@@ -790,10 +790,10 @@ kinetis_common:
 	.bss
 	.global	g_intstackbase
 	.align	4
-up_interruptstack:
+g_intstackalloc:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
 g_intstackbase:
-	.size	up_interruptstack, .-up_interruptstack
+	.size	g_intstackalloc, .-g_intstackalloc
 #endif
 #endif /* CONFIG_ARMV7M_CMNVECTOR */
 

@@ -47,6 +47,7 @@
 #include <nuttx/arch.h> 
 
 #include "os_internal.h"
+#include "up_internal.h"
 
 #if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
 
@@ -90,7 +91,7 @@ size_t up_check_tcbstack(FAR struct tcb_s *tcb)
    */
 
   for (ptr = (FAR uint32_t *)tcb->stack_alloc_ptr, mark = tcb->adj_stack_size/4;
-       *ptr == 0xDEADBEEF && mark > 0;
+       *ptr == STACK_COLOR && mark > 0;
        ptr++, mark--);
 
   /* If the stack is completely used, then this might mean that the stack
@@ -114,7 +115,7 @@ size_t up_check_tcbstack(FAR struct tcb_s *tcb)
           for (j = 0; j < 64; j++)
             {
               int ch;
-              if (*ptr++ == 0xDEADBEEF)
+              if (*ptr++ == STACK_COLOR)
                 {
                   ch = '.';
                 }
