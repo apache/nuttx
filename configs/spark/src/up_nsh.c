@@ -299,3 +299,8 @@ int nsh_archinitialize(void)
 
   return OK;
 }
+
+int usbmsc_archinitialize(void)
+{
+ return nsh_archinitialize();
+}
