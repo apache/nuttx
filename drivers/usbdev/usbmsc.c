@@ -423,7 +423,7 @@ static void usbmsc_unbind(FAR struct usbdevclass_driver_s *driver,
    * driver un-initialize logic.
    */
 
-  DEBUGASSERT(priv->thstate == USBMSC_STATE_TERMINATED);
+  DEBUGASSERT(priv->thstate == USBMSC_STATE_TERMINATED || priv->thstate == USBMSC_STATE_NOTSTARTED);
 
   /* Make sure that we are not already unbound */
 

@@ -258,7 +258,7 @@ void cc3000_open(gcSpiHandleRx pfRxHandler)
       pthread_attr_t attr;
       struct sched_param param;
       pthread_attr_init(&attr);
-      attr.stacksize = 364;
+      attr.stacksize = CONFIG_CC3000_UNSOLICED_STACKSIZE;
       param.sched_priority = SCHED_PRIORITY_DEFAULT-10;
       pthread_attr_setschedparam(&attr, &param);
       status = pthread_create(&spiconf.unsoliced_thread, &attr,

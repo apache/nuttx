@@ -302,5 +302,9 @@ int nsh_archinitialize(void)
 
 int usbmsc_archinitialize(void)
 {
+#if defined(CONFIG_NSH_ARCHINIT)
+  return OK;
+#else
  return nsh_archinitialize();
+#endif
 }
