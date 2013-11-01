@@ -5928,3 +5928,5 @@
 	  for an MTD device that can be used to provide a simple, lightweight
 	  interface to configation data storage that resides on some storage
 	  media that is wrapped as an MTD device.  From Ken Pettit (2013-11-1).
+	* configs/mikroe-stm32f4:  Now uses /dev/config for configuration data
+	  storage.  From Ken Pettit (2013-11-1).
