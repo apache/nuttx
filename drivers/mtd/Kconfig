@@ -35,6 +35,13 @@ config MTD_BYTE_WRITE
 		support such writes.  The SMART file system can take advantage of
 		this option if it is enabled.
 
+config MTD_CONFIG
+	bool "Enable Dev Config (MTD based) device"
+	default n
+	---help---
+		Provides a /dev/config device for saving / restoring application
+		configuration data to a standard MTD device or partition.
+
 comment "MTD Device Drivers"
 
 config RAMMTD

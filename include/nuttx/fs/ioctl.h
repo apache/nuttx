@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/ioctl.h
  *
- *   Copyright (C) 2008, 2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,8 @@
 #define _QEIOCBASE      (0x0f00) /* Quadrature encoder ioctl commands */
 #define _AUDIOIOCBASE   (0x1000) /* Audio ioctl commands */
 #define _SLCDIOCBASE    (0x1100) /* Segment LCD ioctl commands */
-#define _WLIOCBASE      (0x1100) /* Wireless modules ioctl commands */
+#define _WLIOCBASE      (0x1200) /* Wireless modules ioctl commands */
+#define _CFGDIOCBASE    (0x1300) /* Config Data device (app config) ioctl commands */
 
 /* Macros used to manage ioctl commands */
 
@@ -251,23 +252,29 @@
 #define _QEIOCVALID(c)    (_IOC_TYPE(c)==_QEIOCBASE)
 #define _QEIOC(nr)        _IOC(_QEIOCBASE,nr)
 
-/* NuttX Audio driver ioctl definitions ************************************/
+/* NuttX Audio driver ioctl definitions *************************************/
 /* (see nuttx/audio/audio.h) */
 
 #define _AUDIOIOCVALID(c)  (_IOC_TYPE(c)==_AUDIOIOCBASE)
 #define _AUDIOIOC(nr)      _IOC(_AUDIOIOCBASE,nr)
 
-/* Segment LCD driver ioctl definitions ************************************/
+/* Segment LCD driver ioctl definitions *************************************/
 /* (see nuttx/include/lcd/slcd_codec.h */
 
 #define _SLCDIOCVALID(c)   (_IOC_TYPE(c)==_SLCDIOCBASE)
 #define _SLCDIOC(nr)       _IOC(_SLCDIOCBASE,nr)
 
-/* Wireless driver ioctl definitions ************************************/
+/* Wireless driver ioctl definitions ****************************************/
 /* (see nuttx/include/wireless/wireless.h */
 
 #define _WLIOCVALID(c)     (_IOC_TYPE(c)==_WLIOCBASE)
 #define _WLIOC(nr)         _IOC(_WLIOCBASE,nr)
+
+/* Application Config Data driver ioctl definitions *************************/
+/* (see nuttx/include/configdata.h */
+
+#define _CFGDIOCVALID(c)   (_IOC_TYPE(c)==_CFGDIOCBASE)
+#define _CFGDIOC(nr)         _IOC(_CFGDIOCBASE,nr)
 
 /****************************************************************************
  * Public Type Definitions

@@ -39,7 +39,7 @@
 
 ifeq ($(CONFIG_MTD),y)
 
-CSRCS += at45db.c flash_eraseall.c ftl.c m25px.c ramtron.c
+CSRCS += at45db.c flash_eraseall.c ftl.c m25px.c ramtron.c mtd_config.c
 
 ifeq ($(CONFIG_MTD_PARTITION),y)
 CSRCS += mtd_partition.c
