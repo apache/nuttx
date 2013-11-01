@@ -5935,4 +5935,6 @@
 	  stacks as well as the heap.  Suggested by David Sidrane (2013-11-1).
 	* configs/spark/usbmsc:  Add spark USB MSC configuration.  From David
 	  Sidrane (2013-11-1).
-
+	* fs/fat/fs_fat32util.c:  In one error return case, the error return
+	  value was not being set, making the failure look like success. From
+	  David Sidrane (2011-10-1).

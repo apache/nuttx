@@ -630,6 +630,7 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
       if (i > 3)
         {
           fdbg("No valid MBR\n");
+          ret = -EINVAL;
           goto errout_with_buffer;
         }
     }
