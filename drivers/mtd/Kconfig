@@ -42,6 +42,37 @@ config MTD_CONFIG
 		Provides a /dev/config device for saving / restoring application
 		configuration data to a standard MTD device or partition.
 
+config MTD_CONFIG_RAM_CONSOLIDATE
+	bool "Always use RAM consolidation method (work in progress)"
+	default n
+	---help---
+		When the MTD device used for /dev/config contains more than one
+		erase block, the "unused entry" consolidation reserves one erase
+		block by default for cleanup purposes.  This consumes the minimum
+		amount of RAM, however it "wastes" one erase block on the device.
+		(For configurations that have only a single erase block assigned
+		to the config device, RAM consolidation is the ONLY option.)
+
+		Another apporach is to allow the driver to use the entire MTD
+		device (or partition) to save config data, and then allocate a
+		RAM buffer (the size of one erase block) to perform the
+		consolidation.  Enabling this feature basically trades off RAM
+		usage for FLASH usage.  If the MTD device used for config data
+		has small erase sizes (4K, etc.) and there is plenty of free RAM
+		available, then this is probably a good option.
+
+		Another benefit of this option is it reduces code space a bit
+		since the "reserved block" consolidate routine is not needed.
+
+config MTD_CONFIG_ERASEDVALUE
+	hex "Erased value of bytes on the MTD device"
+	depends on MTD_CONFIG
+	default 0xff
+	---help---
+		Specifies the value of the erased state of the MTD FLASH.  For
+		most FLASH parts, this is 0xff, but could also be zero depending
+		on the device.
+
 comment "MTD Device Drivers"
 
 config RAMMTD

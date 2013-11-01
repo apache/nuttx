@@ -63,29 +63,43 @@
 
 #ifdef CONFIG_MTD_CONFIG
 
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
+
+/* Define the current format version */
+
+#define CONFIGDATA_FORMAT_VERSION       1
+
+/* Define the erased state of the MTD device, if not already defined */
+
+#ifndef CONFIG_MTD_CONFIG_ERASEDVALUE
+#  define CONFIG_MTD_CONFIG_ERASEDVALUE 0xff
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 struct mtdconfig_struct_s
 {
-  FAR struct mtd_dev_s *mtd;      /* Contained MTD interface */
-  sem_t             exclsem;      /* Supports mutual exclusion */
-  uint16_t          blocksize;    /* Size of blocks in contained MTD */
-  uint16_t          erasesize;    /* Size of erase block  in contained MTD */
-  size_t            nblocks;      /* Number of blocks available */
-  size_t            neraseblocks; /* Number of erase blocks available */
-  off_t             readoff;      /* Read offset (for hexdump) */
-  FAR uint8_t       *buffer;      /* Temp block read buffer */
-  uint8_t           erasedvalue;  /* Value of and erased byte on the MTD */
+  FAR struct mtd_dev_s *mtd; /* Contained MTD interface */
+  sem_t        exclsem;      /* Supports mutual exclusion */
+  uint16_t     blocksize;    /* Size of blocks in contained MTD */
+  uint16_t     erasesize;    /* Size of erase block  in contained MTD */
+  size_t       nblocks;      /* Number of blocks available */
+  size_t       neraseblocks; /* Number of erase blocks available */
+  off_t        readoff;      /* Read offset (for hexdump) */
+  FAR uint8_t *buffer;       /* Temp block read buffer */
+  uint8_t      erasedvalue;  /* Value of and erased byte on the MTD */
 };
 
 struct mtdconfig_header_s
 {
-  uint8_t     flags;        /* Entry control flags */
-  uint16_t    id;           /* ID of the config data item */
-  int         instance;     /* Instance of the item */
-  size_t      len;          /* Length of the data block */
+  uint8_t      flags;        /* Entry control flags */
+  uint8_t      instance;     /* Instance of the item */
+  uint16_t     id;           /* ID of the config data item */
+  uint16_t     len;          /* Length of the data block */
 } packed_struct;
 
 /****************************************************************************
@@ -98,7 +112,7 @@ static ssize_t mtdconfig_read(FAR struct file *, FAR char *, size_t);
 static ssize_t mtdconfig_ioctl(FAR struct file *, int, unsigned long);
 #ifndef CONFIG_DISABLE_POLL
 static int     mtdconfig_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                            bool setup);
+                              bool setup);
 #endif
 
 /****************************************************************************
@@ -240,8 +254,8 @@ static int  mtdconfig_writebytes(FAR struct mtdconfig_struct_s *dev, int offset,
     /* Perform the write using the block write method of the MTD */
 
     {
-      uint16_t  block, index;
-      off_t     bytes_this_block;
+      uint16_t block, index;
+      off_t    bytes_this_block;
 
       while (writelen)
         {
@@ -297,13 +311,13 @@ errout:
 static int  mtdconfig_findfirstentry(FAR struct mtdconfig_struct_s *dev,
                                      FAR struct mtdconfig_header_s *phdr)
 {
-  off_t   offset = 2;
-  uint8_t sig[2];
+  off_t   offset = 3;
+  uint8_t sig[3];
   bool    found = false;
   int     ret;
 
   mtdconfig_readbytes(dev, 0, sig, sizeof(sig));  /* Read the signature bytes */
-  if (sig[0] != 'C' || sig[1] != 'D')
+  if (sig[0] != 'C' || sig[1] != 'D' || sig[2] != CONFIGDATA_FORMAT_VERSION)
     {
       /* Config Data partition not formatted. */
 
@@ -428,7 +442,7 @@ static off_t  mtdconfig_consolidate(FAR struct mtdconfig_struct_s *dev)
   uint16_t    blkper, x, bytes, bytes_left_in_block;
   struct mtdconfig_header_s hdr;
   int         ret;
-  uint8_t     sig[2];
+  uint8_t     sig[3];
 
   /* Prepare to copy block 0 to the last block (erase blocks) */
 
@@ -467,6 +481,7 @@ static off_t  mtdconfig_consolidate(FAR struct mtdconfig_struct_s *dev)
   MTD_ERASE(dev->mtd, 0, 1);
   sig[0] = 'C';
   sig[1] = 'D';
+  sig[2] = CONFIGDATA_FORMAT_VERSION;
   mtdconfig_writebytes(dev, 0, sig, sizeof(sig));
 
   /* Now consolidate entries */
@@ -628,7 +643,7 @@ static ssize_t mtdconfig_read(FAR struct file *filep, FAR char *buffer,
 static int mtdconfig_setconfig(FAR struct mtdconfig_struct_s *dev,
                                FAR struct config_data_s *pdata)
 {
-  uint8_t   sig[2];       /* Format signature bytes ("CD") */
+  uint8_t   sig[3];       /* Format signature bytes ("CD") */
   char      retrycount = 0;
   int       ret = -ENOSYS;
   off_t     offset, bytes_left_in_block, bytes;
@@ -665,6 +680,7 @@ retry:
 
       sig[0] = 'C';
       sig[1] = 'D';
+      sig[2] = CONFIGDATA_FORMAT_VERSION;
       mtdconfig_writebytes(dev, 0, sig, sizeof(sig));
 
       /* Now go try to read the signature again (as verification) */
@@ -984,7 +1000,7 @@ int mtdconfig_register(FAR struct mtd_dev_s *mtd)
       dev->neraseblocks = geo.neraseblocks;
       dev->erasesize = geo.erasesize;
       dev->nblocks = geo.neraseblocks * geo.erasesize / geo.blocksize;
-      dev->erasedvalue = 0xFF;  /* TODO:  fix this */
+      dev->erasedvalue = CONFIG_MTD_CONFIG_ERASEDVALUE;
 
       (void)register_driver("/dev/config", &mtdconfig_fops, 0666, dev);
     }

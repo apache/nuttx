@@ -5924,7 +5924,7 @@
 	  caused an exception in usbdev_reset() later.  The driver reference
 	  will be nullified later usbdev_unregister when the caller gets the
 	  error.  From David Sidrane (2013-10-31).
-	* drivers/mtd_config.c and include/nuttx/configdata.h:  Add a container
+	* drivers/mtd/mtd_config.c and include/nuttx/configdata.h:  Add a container
 	  for an MTD device that can be used to provide a simple, lightweight
 	  interface to configation data storage that resides on some storage
 	  media that is wrapped as an MTD device.  From Ken Pettit (2013-11-1).
@@ -5943,4 +5943,6 @@
 	  is correct behavior, but a problem.  The correct solution would be
 	  configure the USB MSC thread to a task, however, this workaround
 	  from David Sidrane plugs the hole for now (2013-11-1).
+	* drivers/mtd/mtd_config.c:  Reduce configuration header size.  From
+	  Ken Pettit (2013-11-1).
 
