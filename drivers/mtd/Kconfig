@@ -259,7 +259,13 @@ config SST25_SECTOR512
 
 config SST25_SLOWWRITE
 	bool
-	default y
+	default n
+	---help---
+		There used to be a bug in the current code when using the higher speed AAI
+		write sequence. The nature of the bug is that the WRDI instruction is not
+		working. At the end of the AAI sequence, the status register continues to
+		report that the SST25 is write enabled (WEL bit) and in AAI mode (AAI
+		bit).  This has been fixed by David Sidrane!
 
 config SST25_SLOWREAD
 	bool

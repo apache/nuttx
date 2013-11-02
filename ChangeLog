@@ -5945,4 +5945,12 @@
 	  from David Sidrane plugs the hole for now (2013-11-1).
 	* drivers/mtd/mtd_config.c:  Reduce configuration header size.  From
 	  Ken Pettit (2013-11-1).
-
+	* drivers/mtd/sst25.c:  Improved write performance by fixing a bug
+	  that prevented operation in the faster write mode.  The code did
+	  not wait on the last write complete before issuing the WRDI  The
+	  loop in general failed to wait on the fist 2 bytes after the
+	  SST25_AAI if the next 2 were FF FF, then it would reissue the
+	  address but not cancel the write. Reorganized to always wait for
+	  completion after and address with data write and on any data
+	  write so  that the device is complete before WRDI is sent.  From
+	  David Sidrane (2013-11-2).

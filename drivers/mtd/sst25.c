@@ -82,17 +82,6 @@
 #  define CONFIG_SST25_SPIFREQUENCY 20000000
 #endif
 
-/* There is a  bug in the current code when using the higher speed AAI write sequence.
- * The nature of the bug is that the WRDI instruction is not working.  At the end
- * of the AAI sequence, the status register continues to report that the SST25 is
- * write enabled (WEL bit) and in AAI mode (AAI bit).  This *must* be fixed in any
- * production code if you want to have proper write performance.
- */
-
-#warning "REVISIT"
-#undef  CONFIG_SST25_SLOWWRITE
-#define CONFIG_SST25_SLOWWRITE 1
-
 /* SST25 Instructions ***************************************************************/
 /*      Command                    Value      Description               Addr   Data */
 /*                                                                         Dummy    */
@@ -225,9 +214,10 @@ static void sst25_lock(FAR struct spi_dev_s *dev);
 static inline void sst25_unlock(FAR struct spi_dev_s *dev);
 static inline int sst25_readid(FAR struct sst25_dev_s *priv);
 #ifndef CONFIG_SST25_READONLY
-static void sst25_unprotect(FAR struct spi_dev_s *dev);
+static void sst25_unprotect(FAR struct sst25_dev_s *priv);
 #endif
 static uint8_t sst25_waitwritecomplete(FAR struct sst25_dev_s *priv);
+static inline void sst25_cmd(struct sst25_dev_s *priv, uint8_t cmd);
 static inline void sst25_wren(FAR struct sst25_dev_s *priv);
 #if !defined(CONFIG_SST25_SLOWWRITE) && !defined(CONFIG_SST25_READONLY)
 static inline void sst25_wrdi(FAR struct sst25_dev_s *priv);
@@ -377,30 +367,23 @@ static inline int sst25_readid(struct sst25_dev_s *priv)
  ************************************************************************************/
 
 #ifndef CONFIG_SST25_READONLY
-static void sst25_unprotect(FAR struct spi_dev_s *dev)
+static void sst25_unprotect(struct sst25_dev_s *priv)
 {
-  /* Select this FLASH part */
-
-  SPI_SELECT(dev, SPIDEV_FLASH, true);
-
   /* Send "Write enable status (EWSR)" */
 
-  SPI_SEND(dev, SST25_EWSR);
+  sst25_cmd(priv, SST25_EWSR);
 
-  /* Re-select this FLASH part (This might not be necessary... but is it shown in
-   * the timing diagrams)
-   */
+  /* Send "Write enable status (WRSR)" */
 
-  SPI_SELECT(dev, SPIDEV_FLASH, false);
-  SPI_SELECT(dev, SPIDEV_FLASH, true);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
 
-  /* Send "Write enable status (EWSR)" */
+  SPI_SEND(priv->dev, SST25_WRSR);
 
-  SPI_SEND(dev, SST25_WRSR);
+  /* Followed by the new status value */
 
-  /* Following by the new status value */
+  SPI_SEND(priv->dev, 0);
 
-  SPI_SEND(dev, 0);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
 }
 #endif
 
@@ -481,41 +464,45 @@ static uint8_t sst25_waitwritecomplete(struct sst25_dev_s *priv)
 }
 
 /************************************************************************************
- * Name:  sst25_wren
+ * Name:  sst25_cmd
  ************************************************************************************/
 
-static inline void sst25_wren(struct sst25_dev_s *priv)
+static inline void sst25_cmd(struct sst25_dev_s *priv, uint8_t cmd)
 {
   /* Select this FLASH part */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
 
-  /* Send "Write Enable (WREN)" command */
+  /* Send command */
 
-  (void)SPI_SEND(priv->dev, SST25_WREN);
-  
+  (void)SPI_SEND(priv->dev, cmd);
+
   /* Deselect the FLASH */
 
   SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
 }
 
 /************************************************************************************
+ * Name:  sst25_wren
+ ************************************************************************************/
+
+static inline void sst25_wren(struct sst25_dev_s *priv)
+{
+  /* Send "Write Enable (WREN)" command */
+
+  sst25_cmd(priv, SST25_WREN);
+}
+
+/************************************************************************************
  * Name:  sst25_wrdi
  ************************************************************************************/
+
 #if !defined(CONFIG_SST25_SLOWWRITE) && !defined(CONFIG_SST25_READONLY)
 static inline void sst25_wrdi(struct sst25_dev_s *priv)
 {
-  /* Select this FLASH part */
-
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
-
   /* Send "Write Disable (WRDI)" command */
 
-  (void)SPI_SEND(priv->dev, SST25_WRDI);
-  
-  /* Deselect the FLASH */
-
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+  sst25_cmd(priv, SST25_WRDI);
 }
 #endif
 
@@ -770,6 +757,11 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
 
       SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
 
+      /* Wait for the preceding write to complete. */
+
+      status = sst25_waitwritecomplete(priv);
+      DEBUGASSERT((status & (SST25_SR_WEL|SST25_SR_BP_MASK|SST25_SR_AAI)) == (SST25_SR_WEL|SST25_SR_AAI));
+
       /* Decrement the word count and advance the write position */
 
       nwords--;
@@ -785,10 +777,6 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
              (buffer[0] != SST25_ERASED_STATE ||
               buffer[1] != SST25_ERASED_STATE))
         {
-          /* Wait for the preceding write to complete. */
-
-          status = sst25_waitwritecomplete(priv);
-          DEBUGASSERT((status & (SST25_SR_WEL|SST25_SR_BP_MASK|SST25_SR_AAI)) == (SST25_SR_WEL|SST25_SR_AAI));
 
           /* Select this FLASH part */
 
@@ -805,6 +793,11 @@ static void sst25_wordwrite(struct sst25_dev_s *priv, FAR const uint8_t *buffer,
           /* Deselect the FLASH: Chip Select high */
 
           SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
+
+          /* Wait for the preceding write to complete. */
+
+          status = sst25_waitwritecomplete(priv);
+          DEBUGASSERT((status & (SST25_SR_WEL|SST25_SR_BP_MASK|SST25_SR_AAI)) == (SST25_SR_WEL|SST25_SR_AAI));
 
           /* Decrement the word count and advance the write position */
 
@@ -1251,7 +1244,7 @@ FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev)
           /* Make sure that the FLASH is unprotected so that we can write into it */
 
 #ifndef CONFIG_SST25_READONLY
-          sst25_unprotect(priv->dev);
+          sst25_unprotect(priv);
 #endif
 
 #ifdef CONFIG_SST25_SECTOR512        /* Simulate a 512 byte sector */
