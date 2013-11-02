@@ -2678,6 +2678,8 @@ void *usbmsc_workerthread(void *arg)
   /* Transition to the TERMINATED state and exit */
 
   priv->thstate = USBMSC_STATE_TERMINATED;
-  pthread_cond_signal(&priv->cond);             /* REVISIT: See comments in usbmsc_uninitialize() */
+  pthread_mutex_lock(&priv->mutex);             /* REVISIT: See comments in usbmsc_uninitialize() */
+  pthread_cond_signal(&priv->cond);
+  pthread_mutex_unlock(&priv->mutex);
   return NULL;
 }
