@@ -705,7 +705,7 @@ CAN Usage
 
   Only messages that have IDs that match the CONFIG_SAMA5_CANn_ADDRn when both
   the received and the configured address are masked by CONFIG_SAMA5_CANn_MASKn
-  will be accepted.  For eacmple, if the mask is all ones, then only messasges
+  will be accepted.  For example, if the mask is all ones, then only messasges
   with exact address matches will be accepted; if the mask is all zeroes than
   any address will be accepted.
 
