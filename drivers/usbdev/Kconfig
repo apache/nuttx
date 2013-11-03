@@ -431,23 +431,24 @@ config USBMSC
 		References:
 		"Universal Serial Bus Mass Storage Class, Specification Overview,"
 		Revision 1.2,  USB Implementer's Forum, June 23, 2003.
-		
+
 		"Universal Serial Bus Mass Storage Class, Bulk-Only Transport,"
 		Revision 1.0, USB Implementer's Forum, September 31, 1999.
-		
+
 		"SCSI Primary Commands - 3 (SPC-3),"  American National Standard
 		for Information Technology, May 4, 2005
-		
+
 		"SCSI Primary Commands - 4 (SPC-4),"  American National Standard
 		for Information Technology, July 19, 2008
-		
+
 		"SCSI Block Commands -2 (SBC-2)," American National Standard
 		for Information Technology, November 13, 2004
-		
+
 		"SCSI Multimedia Commands - 3 (MMC-3),"  American National Standard
 		for Information Technology, November 12, 2001
 
 if USBMSC
+
 config USBMSC_COMPOSITE
 	bool "Mass storage composite support"
 	default n
@@ -503,6 +504,7 @@ config USBMSC_NWRREQS
 	default 4
 	---help---
 		The number of write/read requests that can be in flight
+
 config USBMSC_NRDREQS
 	int "The number of read requests that can be in flight"
 	default 4
@@ -510,16 +512,29 @@ config USBMSC_NRDREQS
 		The number of write/read requests that can be in flight
 
 config USBMSC_BULKINREQLEN
-	int "Bulk in request size"
-	default 512
-	
-config USBMSC_BULKOUTREQLEN
-	int "Bulk out request size"
-	default 512
+	int "Bulk IN request size"
+	default 512 if USBDEV_DUALSPEED
+	default 64  if !USBDEV_DUALSPEED
 	---help---
-		The size of the buffer in each write/read request.  This
-		value needs to be at least as large as the endpoint
-		maxpacket and ideally as large as a block device sector.
+		The size of the buffer in each WRITE request.  This value should to be
+		at least as large as the endpoint maxpacket size .  Most DCDs can divide
+		a large request buffer down and enqueue the smaller, outgoing packets
+		for better performance.  So, ideally, the size of write request buffer
+		should be the size of one block device sector which is, often, 512
+		bytes.  The default, however, is the minimum size of 512 or 64 bytes
+		(depending upon if dual speed operation is supported or not).
+
+config USBMSC_BULKOUTREQLEN
+	int "Bulk OUT request size"
+	default 512 if USBDEV_DUALSPEED
+	default 64  if !USBDEV_DUALSPEED
+	---help---
+		The size of the buffer in each READ request.  This value should to be
+		at least as large as the endpoint maxpacket size.  Most DCDs will return
+		the completed READ request to the caller as each packet is received.
+		Therefore, there is no benefit in increasing the size of this buffer
+		beyond the maximum size of one packet.  Default:  512 or 64 bytes
+		(depending upon if dual speed operatino is supported or not).
 
 config USBMSC_VENDORID
 	hex "Mass storage Vendor ID"
@@ -556,4 +571,5 @@ config USBMSC_REMOVABLE
 	---help---
 		Select if the media is removable
 		USB Composite Device Configuration
+
 endif
