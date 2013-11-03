@@ -561,17 +561,10 @@ static inline int sst25_chiperase(struct sst25_dev_s *priv)
 
   sst25_wren(priv);
 
-  /* Select this FLASH part */
-
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, true);
-
   /* Send the "Chip Erase (CE)" instruction */
 
-  (void)SPI_SEND(priv->dev, SST25_CE);
+  sst25_cmd(priv, SST25_CE);
 
-  /* Deselect the FLASH */
-
-  SPI_SELECT(priv->dev, SPIDEV_FLASH, false);
   fvdbg("Return: OK\n");
   return OK;
 }
