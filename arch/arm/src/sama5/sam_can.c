@@ -1087,7 +1087,7 @@ static int can_remoterequest(FAR struct can_dev_s *dev, uint16_t id)
 static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 {
   FAR struct sam_can_s *priv;
-  FAR uint32_t *md;
+  FAR uint8_t *ptr;
   uint32_t regval;
   int mbndx;
 
@@ -1159,11 +1159,14 @@ static int can_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 #  warning REVISIT
 #endif
 
-  DEBUGASSERT(((uintptr_t)msg->cm_data & 3) == 0);
-  md = (FAR uint32_t *)msg->cm_data;
+  /* The message buffer is probably not properaly aligned for 32-bit accesses */
 
-  can_putreg(priv, SAM_CAN_MnDL_OFFSET(mbndx), md[0]);
-  can_putreg(priv, SAM_CAN_MnDH_OFFSET(mbndx), md[1]);
+  ptr    = msg->cm_data;
+  regval = CAN_MDL0(ptr[0]) | CAN_MDL1(ptr[1]) | CAN_MDL2(ptr[1]) | CAN_MDL3(ptr[1]);
+  can_putreg(priv, SAM_CAN_MnDL_OFFSET(mbndx), regval);
+
+  regval = CAN_MDH4(ptr[4]) | CAN_MDH5(ptr[5]) | CAN_MDH6(ptr[6]) | CAN_MDH7(ptr[7]);
+  can_putreg(priv, SAM_CAN_MnDH_OFFSET(mbndx), regval);
 
   /* Set the DLC value in the CAN_MCRx register.  Set the MTCR register
    * clearing MRDY, and indicating that the message is ready to be sent.
@@ -1501,7 +1504,7 @@ static void can_interrupt(FAR struct can_dev_s *dev)
    * - Sleep interrupt: This interrupt is generated after a Low-power Mode
    *   enable once all pending messages in transmission have been sent.
    * - Internal timer counter overflow interrupt: This interrupt is
-   *    generated when the internal timer rolls over.
+   *   generated when the internal timer rolls over.
    * - Timestamp interrupt: This interrupt is generated after the reception
    *   or the transmission of a start of frame or an end of frame. The value
    *   of the internal counter is copied in the CAN_TIMESTP register.

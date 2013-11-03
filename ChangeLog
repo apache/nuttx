@@ -5955,5 +5955,5 @@
 	  write so  that the device is complete before WRDI is sent.  From
 	  David Sidrane (2013-11-2).
 	* configs/sama5/src/sam_can.c:  Add CAN initialization logic
-	  (2013-11-3).
+	  and fix a data alignment problem (2013-11-3).
 

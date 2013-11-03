@@ -326,8 +326,44 @@
 #define CAN_MSR_MRDY             (1 << 23) /* Bit 23: Mailbox Ready */
 #define CAN_MSR_MMI              (1 << 24) /* Bit 24: Mailbox Message Ignored */
 
-/* Mailbox Data Low Register (32-bit data low value) */
-/* Mailbox Data High Register (32-bit data high value) */
+/* Mailbox Data Low Register and Mailbox Data High Register.
+ * Bytes are received/sent on the bus in the following order:
+ *
+ *   1. CAN_MDL[7:0]
+ *   2. CAN_MDL[15:8]
+ *   3. CAN_MDL[23:16]
+ *   4. CAN_MDL[31:24]
+ *   5. CAN_MDH[7:0]
+ *   6. CAN_MDH[15:8]
+ *   7. CAN_MDH[23:16]
+ *   8. CAN_MDH[31:24]
+ */
+
+#define CAN_MDL0_SHIFT           (0)       /* Bits 0-7:   Byte 0 */
+#define CAN_MDL0_MASK            (0xff << CAN_MDL0_SHIFT)
+#  define CAN_MDL0(n)            ((uint32_t)(n) << CAN_MDL0_SHIFT)
+#define CAN_MDL1_SHIFT           (8)       /* Bits 8-15:  Byte 1 */
+#define CAN_MDL1_MASK            (0xff << CAN_MDL1_SHIFT)
+#  define CAN_MDL1(n)            ((uint32_t)(n) << CAN_MDL1_SHIFT)
+#define CAN_MDL2_SHIFT           (16)      /* Bits 16-23: Byte 2 */
+#define CAN_MDL2_MASK            (0xff << CAN_MDL2_SHIFT)
+#  define CAN_MDL2(n)            ((uint32_t)(n) << CAN_MDL2_SHIFT)
+#define CAN_MDL3_SHIFT           (24)      /* Bits 24-31: Byte 3 */
+#define CAN_MDL3_MASK            (0xff << CAN_MDL3_SHIFT)
+#  define CAN_MDL3(n)            ((uint32_t)(n) << CAN_MDL3_SHIFT)
+
+#define CAN_MDH4_SHIFT           (0)       /* Bits 0-7:   Byte 4 */
+#define CAN_MDH4_MASK            (0xff << CAN_MDH4_SHIFT)
+#  define CAN_MDH4(n)            ((uint32_t)(n) << CAN_MDH4_SHIFT)
+#define CAN_MDH5_SHIFT           (8)       /* Bits 8-15:  Byte 5 */
+#define CAN_MDH5_MASK            (0xff << CAN_MDH5_SHIFT)
+#  define CAN_MDH5(n)            ((uint32_t)(n) << CAN_MDH5_SHIFT)
+#define CAN_MDH6_SHIFT           (16)      /* Bits 16-23: Byte 6 */
+#define CAN_MDH6_MASK            (0xff << CAN_MDH6_SHIFT)
+#  define CAN_MDH6(n)            ((uint32_t)(n) << CAN_MDH6_SHIFT)
+#define CAN_MDH7_SHIFT           (24)      /* Bits 24-31: Byte 7 */
+#define CAN_MDH7_MASK            (0xff << CAN_MDH7_SHIFT)
+#  define CAN_MDH7(n)            ((uint32_t)(n) << CAN_MDH7_SHIFT)
 
 /* Mailbox Control Register */
 
