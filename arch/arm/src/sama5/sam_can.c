@@ -119,6 +119,31 @@
 #  error Cannot realize CAN input frequency
 #endif
 
+/* Interrupts ***************************************************************/
+/* If debug is enabled, then print some diagnostic info if any of these
+ * events occur:
+ *
+ * CAN_INT_ERRA      YES    Bit 16: Error Active Mode
+ * CAN_INT_WARN      YES    Bit 17: Warning Limit
+ * CAN_INT_ERRP      NO     Bit 18: Error Passive Mode
+ * CAN_INT_BOFF      NO     Bit 19: Bus Off Mode
+ *
+ * CAN_INT_SLEEP     NO     Bit 20: CAN Controller in Low-power Mode
+ * CAN_INT_WAKEUP    NO     Bit 21: Wake-up Interrupt
+ * CAN_INT_TOVF      NO     Bit 22: Timer Overflow
+ * CAN_INT_TSTP      NO     Bit 23: Timestamp
+ *
+ * CAN_INT_CERR      YES    Bit 24: Mailbox CRC Error
+ * CAN_INT_SERR      YES    Bit 25: Mailbox Stuffing Error
+ * CAN_INT_AERR      NO     Bit 26: Acknowledgment Error (uusally means no CAN bus)
+ * CAN_INT_FERR      YES    Bit 27: Form Error
+ *
+ * CAN_INT_BERR      YES    Bit 28: Bit Error
+ */
+
+#define CAN_DEBUG_INTS (CAN_INT_ERRA | CAN_INT_WARN | CAN_INT_CERR | \
+                        CAN_INT_SERR | CAN_INT_FERR | CAN_INT_BERR)
+
 /* Debug ********************************************************************/
 /* Non-standard debug that may be enabled just for testing CAN */
 
@@ -884,7 +909,9 @@ static int can_setup(FAR struct can_dev_s *dev)
 
   /* Enable all error interrupts */
 
-  can_putreg(priv, SAM_CAN_IER_OFFSET, CAN_INT_ALLERRORS);
+#ifdef CONFIG_DEBUG
+  can_putreg(priv, SAM_CAN_IER_OFFSET, CAN_DEBUG_INTS);
+#endif
 
   can_dumpctrlregs(priv, "After receive setup");
   can_dumpmbregs(priv, NULL);
