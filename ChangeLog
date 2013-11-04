@@ -5960,3 +5960,5 @@
 	  Ken Pettit (2013-11-4).
 	* configs/sim/configdata:  MTD configuration driver unit test for
 	  the simulation platform.  From Ken Pettit (2013-11-4).
+	* configs/mikroe-stm32f4/fulldemo: Configuration updated by Ken
+	  Pettit (2013-11-4).
