@@ -191,6 +191,11 @@ X11.  See the discussion "Stack Size Issues" above.
 Configurations
 ^^^^^^^^^^^^^^
 
+configdata
+  Description
+  -----------
+  A unit test for the MTD configuration data driver.
+
 cxxtest
 
   Description
