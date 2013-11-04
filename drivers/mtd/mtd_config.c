@@ -1085,7 +1085,7 @@ retry:
     {
       /* Mark this entry as released */
 
-      hdr.flags = (uint8_t~MTD_ERASED_FLAGS;
+      hdr.flags = (uint8_t)~MTD_ERASED_FLAGS;
       mtdconfig_writebytes(dev, offset, &hdr.flags, sizeof(hdr.flags));
     }
 
