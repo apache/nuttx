@@ -5957,5 +5957,6 @@
 	* configs/sama5/src/sam_can.c:  Add CAN initialization logic
 	  and fix a data alignment problem (2013-11-3).
 	* drivers/mtd/mtd_config.c:  Updated configuration driver from
-	  Ken Pettit (2013-1104).
-
+	  Ken Pettit (2013-11-4).
+	* configs/sim/configdata:  MTD configuration driver unit test for
+	  the simulation platform.  From Ken Pettit (2013-11-4).
