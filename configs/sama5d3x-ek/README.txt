@@ -657,6 +657,9 @@ AT24 Serial EEPROM
 
 CAN Usage
 =========
+  CAN was verifed using the IXXAT USB-to-CAN Compact.  This section provides
+  miscellaneous CAN-related notes, mostly to myself but perhaps of interest
+  to others.
 
   CAN Configuration
   -----------------
@@ -714,8 +717,8 @@ CAN Usage
 
   CAN1 and CAN2 are available via RJ-11 connectors on the SAMA5Dx-EK.  Each
   is wired as follows.  Also shown below is the matching pins if you want connect
-  the CAN to a device that uses an DB-9 connector.  Both connector types are
-  common.
+  the CAN to a device that uses an DB-9 connector (Such as the IXXAT USB-to-CAN
+  Compact).  Both connector types (as well as RJ-45) are common.
 
                     +----------+     RJ-11       DB-9
                     |    O     |     ----------- --------------
@@ -727,8 +730,7 @@ CAN Usage
   |  |654321|  |    |  o3      |     Pin 6 N/C   Pin 6 N/C
   |  |oooooo|  |    |       o7 |                 Pin 7 CANH
   |  +------+  |    |  o2      |                 Pin 8 N/C
-  +------------+    |       o6 |                 Pin 9 N/C
-   RJ-11 Female     |  x1      |
+  +------------+    |       o6 |                 Pin 9 CANV+ (N/C on IXXAT)   RJ-11 Female     |  x1      |
                     |          |
                     |    O     |
                     +----------+
