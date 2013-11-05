@@ -5962,3 +5962,8 @@
 	  the simulation platform.  From Ken Pettit (2013-11-4).
 	* configs/mikroe-stm32f4/fulldemo: Configuration updated by Ken
 	  Pettit (2013-11-4).
+	* arch/arm/src/stm32/stm32_usbdev.c:  Correct EP0 state handling
+	  logic when buffers larger than the EP0 packet size are sent.
+	  Also add support for decoded USB trace strings.  From David
+	  Sidrane (2013-11-5).
+
