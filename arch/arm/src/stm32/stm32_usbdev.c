@@ -435,6 +435,9 @@ static void   stm32_epwrite(struct stm32_usbdev_s *buf,
                 struct stm32_ep_s *privep, const uint8_t *data, uint32_t nbytes);
 static int    stm32_wrrequest(struct stm32_usbdev_s *priv,
                 struct stm32_ep_s *privep);
+inline static int
+              stm32_wrrequest_ep0(struct stm32_usbdev_s *priv,
+                struct stm32_ep_s *privep);
 static int    stm32_rdrequest(struct stm32_usbdev_s *priv,
                 struct stm32_ep_s *privep);
 static void   stm32_cancelrequests(struct stm32_ep_s *privep);
@@ -533,6 +536,77 @@ static const struct usbdev_ops_s g_devops =
 /****************************************************************************
  * Public Data
  ****************************************************************************/
+
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+const struct trace_msg_t g_usb_trace_strings_intdecode[] =
+{
+  TRACE_STR(STM32_TRACEINTID_CLEARFEATURE       ),
+  TRACE_STR(STM32_TRACEINTID_DEVGETSTATUS       ),
+  TRACE_STR(STM32_TRACEINTID_DISPATCH           ),
+  TRACE_STR(STM32_TRACEINTID_EP0IN              ),
+  TRACE_STR(STM32_TRACEINTID_EP0INDONE          ),
+  TRACE_STR(STM32_TRACEINTID_EP0OUTDONE         ),
+  TRACE_STR(STM32_TRACEINTID_EP0SETUPDONE       ),
+  TRACE_STR(STM32_TRACEINTID_EP0SETUPSETADDRESS ),
+  TRACE_STR(STM32_TRACEINTID_EPGETSTATUS        ),
+  TRACE_STR(STM32_TRACEINTID_EPINDONE           ),
+  TRACE_STR(STM32_TRACEINTID_EPINQEMPTY         ),
+  TRACE_STR(STM32_TRACEINTID_EPOUTDONE          ),
+  TRACE_STR(STM32_TRACEINTID_EPOUTPENDING       ),
+  TRACE_STR(STM32_TRACEINTID_EPOUTQEMPTY        ),
+  TRACE_STR(STM32_TRACEINTID_ESOF               ),
+  TRACE_STR(STM32_TRACEINTID_GETCONFIG          ),
+  TRACE_STR(STM32_TRACEINTID_GETSETDESC         ),
+  TRACE_STR(STM32_TRACEINTID_GETSETIF           ),
+  TRACE_STR(STM32_TRACEINTID_GETSTATUS          ),
+  TRACE_STR(STM32_TRACEINTID_HPINTERRUPT        ),
+  TRACE_STR(STM32_TRACEINTID_IFGETSTATUS        ),
+  TRACE_STR(STM32_TRACEINTID_LPCTR              ),
+  TRACE_STR(STM32_TRACEINTID_LPINTERRUPT        ),
+  TRACE_STR(STM32_TRACEINTID_NOSTDREQ           ),
+  TRACE_STR(STM32_TRACEINTID_RESET              ),
+  TRACE_STR(STM32_TRACEINTID_SETCONFIG          ),
+  TRACE_STR(STM32_TRACEINTID_SETFEATURE         ),
+  TRACE_STR(STM32_TRACEINTID_SUSP               ),
+  TRACE_STR(STM32_TRACEINTID_SYNCHFRAME         ),
+  TRACE_STR(STM32_TRACEINTID_WKUP               ),
+  TRACE_STR_END
+};
+#endif
+
+#ifdef CONFIG_USBDEV_TRACE_STRINGS
+const struct trace_msg_t g_usb_trace_strings_deverror[] =
+{
+  TRACE_STR(STM32_TRACEERR_ALLOCFAIL       ),
+  TRACE_STR(STM32_TRACEERR_BADCLEARFEATURE ),
+  TRACE_STR(STM32_TRACEERR_BADDEVGETSTATUS ),
+  TRACE_STR(STM32_TRACEERR_BADEPGETSTATUS  ),
+  TRACE_STR(STM32_TRACEERR_BADEPNO         ),
+  TRACE_STR(STM32_TRACEERR_BADEPTYPE       ),
+  TRACE_STR(STM32_TRACEERR_BADGETCONFIG    ),
+  TRACE_STR(STM32_TRACEERR_BADGETSETDESC   ),
+  TRACE_STR(STM32_TRACEERR_BADGETSTATUS    ),
+  TRACE_STR(STM32_TRACEERR_BADSETADDRESS   ),
+  TRACE_STR(STM32_TRACEERR_BADSETCONFIG    ),
+  TRACE_STR(STM32_TRACEERR_BADSETFEATURE   ),
+  TRACE_STR(STM32_TRACEERR_BINDFAILED      ),
+  TRACE_STR(STM32_TRACEERR_DISPATCHSTALL   ),
+  TRACE_STR(STM32_TRACEERR_DRIVER          ),
+  TRACE_STR(STM32_TRACEERR_DRIVERREGISTERED),
+  TRACE_STR(STM32_TRACEERR_EP0BADCTR       ),
+  TRACE_STR(STM32_TRACEERR_EP0SETUPSTALLED ),
+  TRACE_STR(STM32_TRACEERR_EPBUFFER        ),
+  TRACE_STR(STM32_TRACEERR_EPDISABLED      ),
+  TRACE_STR(STM32_TRACEERR_EPOUTNULLPACKET ),
+  TRACE_STR(STM32_TRACEERR_EPRESERVE       ),
+  TRACE_STR(STM32_TRACEERR_INVALIDCTRLREQ  ),
+  TRACE_STR(STM32_TRACEERR_INVALIDPARMS    ),
+  TRACE_STR(STM32_TRACEERR_IRQREGISTRATION ),
+  TRACE_STR(STM32_TRACEERR_NOTCONFIGURED   ),
+  TRACE_STR(STM32_TRACEERR_REQABORTED      ),
+  TRACE_STR_END
+};
+#endif
 
 /****************************************************************************
  * Private Private Functions
@@ -1212,6 +1286,23 @@ static void stm32_epwrite(struct stm32_usbdev_s *priv,
 }
 
 /****************************************************************************
+ * Name: stm32_wrrequest_ep0
+ *
+ * Description:
+ *   Handle the ep0 state on writes.
+ *
+ *****************************************************************************/
+
+inline static int stm32_wrrequest_ep0(struct stm32_usbdev_s *priv,
+                                      struct stm32_ep_s *privep)
+{
+  int ret;
+  ret = stm32_wrrequest(priv, privep);
+  priv->ep0state = ((ret == OK) ? EP0STATE_WRREQUEST : EP0STATE_IDLE);
+  return ret;
+}
+
+/****************************************************************************
  * Name: stm32_wrrequest
  ****************************************************************************/
 
@@ -1504,7 +1595,14 @@ static void stm32_epdone(struct stm32_usbdev_s *priv, uint8_t epno)
       /* Handle write requests */ 
 
       priv->txstatus = USB_EPR_STATTX_NAK;
-      stm32_wrrequest(priv, privep);
+      if (epno == EP0)
+        {
+          (void)stm32_wrrequest_ep0(priv, privep);
+        }
+      else
+        {
+          (void)stm32_wrrequest(priv, privep);
+        }
 
       /* Set the new TX status */
 
@@ -1551,7 +1649,6 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
   bool                 handled = false;
   uint8_t              epno;
   int                  nbytes = 0; /* Assume zero-length packet */
-  int                  ret;
 
   /* Terminate any pending requests (doesn't work if the pending request
    * was a zero-length transfer!)
@@ -1735,7 +1832,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
               {
                 privep         = &priv->eplist[epno];
                 privep->halted = 0;
-                ret            = stm32_epstall(&privep->ep, true);
+                (void)stm32_epstall(&privep->ep, true);
               }
             else
               {
@@ -1779,7 +1876,7 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
               {
                 privep         = &priv->eplist[epno];
                 privep->halted = 1;
-                ret            = stm32_epstall(&privep->ep, false);
+                (void)stm32_epstall(&privep->ep, false);
               }
             else
               {
@@ -1976,8 +2073,6 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
 
 static void stm32_ep0in(struct stm32_usbdev_s *priv)
 {
-  int ret;
-
   /* There is no longer anything in the EP0 TX packet memory */
 
   priv->eplist[EP0].txbusy = false;
@@ -1988,8 +2083,7 @@ static void stm32_ep0in(struct stm32_usbdev_s *priv)
 
   if (priv->ep0state == EP0STATE_WRREQUEST)
     {
-      ret = stm32_wrrequest(priv, &priv->eplist[EP0]);
-      priv->ep0state = ((ret == OK) ? EP0STATE_WRREQUEST : EP0STATE_IDLE);
+      stm32_wrrequest_ep0(priv, &priv->eplist[EP0]);
     }
 
   /* No.. Are we processing the completion of a status response? */
@@ -2001,7 +2095,8 @@ static void stm32_ep0in(struct stm32_usbdev_s *priv)
        */
 
       if (priv->ctrl.req == USB_REQ_SETADDRESS && 
-          (priv->ctrl.type & REQRECIPIENT_MASK) == (USB_REQ_TYPE_STANDARD | USB_REQ_RECIPIENT_DEVICE))
+          (priv->ctrl.type & REQRECIPIENT_MASK) ==
+           (USB_REQ_TYPE_STANDARD | USB_REQ_RECIPIENT_DEVICE))
         {
           union wb_u value;
           value.w = GETUINT16(priv->ctrl.value);
@@ -2025,7 +2120,7 @@ static void stm32_ep0out(struct stm32_usbdev_s *priv)
   struct stm32_ep_s *privep = &priv->eplist[EP0];
   switch (priv->ep0state)
     {
-      case EP0STATE_RDREQUEST:  /* Write request in progress */
+      case EP0STATE_RDREQUEST:  /* Read request in progress */
       case EP0STATE_IDLE:       /* No transfer in progress */
         ret = stm32_rdrequest(priv, privep);
         priv->ep0state = ((ret == OK) ? EP0STATE_RDREQUEST : EP0STATE_IDLE);
@@ -2869,7 +2964,14 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
       if (!privep->txbusy)
         {
           priv->txstatus = USB_EPR_STATTX_NAK;
-          ret = stm32_wrrequest(priv, privep);
+          if (epno == EP0)
+            {
+              ret = stm32_wrrequest_ep0(priv, privep);
+            }
+          else
+            {
+              ret = stm32_wrrequest(priv, privep);
+            }
 
           /* Set the new TX status */
 
@@ -2918,7 +3020,6 @@ static int stm32_epsubmit(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 static int stm32_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
 {
   struct stm32_ep_s *privep = (struct stm32_ep_s *)ep;
-  struct stm32_usbdev_s *priv;
   irqstate_t flags;
 
 #ifdef CONFIG_DEBUG
@@ -2929,7 +3030,6 @@ static int stm32_epcancel(struct usbdev_ep_s *ep, struct usbdev_req_s *req)
     }
 #endif
   usbtrace(TRACE_EPCANCEL, USB_EPNO(ep->eplog));
-  priv = privep->dev;
 
   flags = irqsave();
   stm32_cancelrequests(privep);
@@ -3010,7 +3110,14 @@ static int stm32_epstall(struct usbdev_ep_s *ep, bool resume)
               /* Restart any queued write requests */
 
               priv->txstatus = USB_EPR_STATTX_NAK;
-              (void)stm32_wrrequest(priv, privep);
+              if (epno == EP0)
+                {
+                  (void)stm32_wrrequest_ep0(priv, privep);
+                }
+              else
+                {
+                  (void)stm32_wrrequest(priv, privep);
+                }
 
               /* Set the new TX status */
 
