@@ -133,22 +133,18 @@
 #endif
 
 /****************************************************************************
- * Private Data
+ * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: nsh_archinitialize
+ * Name: do_composite_archinitialize
  *
  * Description:
  *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-int composite_archinitialize(void)
+static int do_composite_archinitialize(void)
 {
 #ifdef HAVE_SST25
   FAR struct spi_dev_s *spi;
@@ -298,4 +294,25 @@ int composite_archinitialize(void)
 #endif
 
   return OK;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nsh_archinitialize
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
+ ****************************************************************************/
+
+int composite_archinitialize(void)
+{
+#if defined(CONFIG_NSH_ARCHINIT)
+  return OK;
+#else
+  return do_composite_archinitialize();
+#endif
 }

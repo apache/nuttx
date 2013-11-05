@@ -657,9 +657,12 @@ AT24 Serial EEPROM
 
 CAN Usage
 =========
-  CAN was verifed using the IXXAT USB-to-CAN Compact.  This section provides
-  miscellaneous CAN-related notes, mostly to myself but perhaps of interest
-  to others.
+  I planned to verify CAN using the IXXAT USB-to-CAN Compact.  This section
+  provides miscellaneous CAN-related notes, mostly to myself but perhaps of
+  interest to others.
+
+  [Unfortunately, as of this writing, I still do not have a proper CAN test
+   bed to verify the CAN driver.]
 
   CAN Configuration
   -----------------
