@@ -1739,6 +1739,22 @@ void usbmsc_uninitialize(FAR void *handle)
 
   priv = &alloc->dev;
 
+#ifdef CONFIG_USBMSC_COMPOSITE
+  /* Check for pass 2 uninitialization.  We did most of the work on the
+   * first pass uninitialization.
+   */
+
+  if (priv->thread == 0)
+    {
+      /* In this second and final pass, all that remains to be done is to
+       * free the memory resources.
+       */
+
+      kfree(priv);
+      return;
+    }
+#endif
+
   /* If the thread hasn't already exitted, tell it to exit now */
 
   if (priv->thstate != USBMSC_STATE_NOTSTARTED)
@@ -1821,5 +1837,13 @@ void usbmsc_uninitialize(FAR void *handle)
   pthread_mutex_destroy(&priv->mutex);
   pthread_cond_destroy(&priv->cond);
 
+#ifndef CONFIG_USBMSC_COMPOSITE
+  /* For the case of the composite driver, there is a two pass
+   * uninitialization sequence.  We cannot yet free the driver structure.
+   * We will do that on the second pass (and we will know that it is the
+   * second pass because of priv->thread == 0)
+   */
+
   kfree(priv);
+#endif
 }

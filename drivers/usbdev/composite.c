@@ -880,20 +880,12 @@ void composite_uninitialize(FAR void *handle)
 
   DEBUGASSERT(alloc != NULL);
 
-  /* Uninitialize each of the member classes */
+  /* First phase uninitialization each of the member classes */
 
   priv = &alloc->dev;
-  if (priv->dev1)
-    {
-      DEV1_UNINITIALIZE(priv->dev1);
-      priv->dev1 = NULL;
-    }
 
-  if (priv->dev2)
-    {
-      DEV2_UNINITIALIZE(priv->dev2);
-      priv->dev2 = NULL;
-    }
+  DEV1_UNINITIALIZE(priv->dev1);
+  DEV2_UNINITIALIZE(priv->dev2);
 
   /* Then unregister and destroy the composite class */
 
@@ -901,6 +893,11 @@ void composite_uninitialize(FAR void *handle)
 
   /* Free any resources used by the composite driver */
   /* None */
+
+  /* Second phase uninitialization:  Clean up all memory resources */
+
+  DEV1_UNINITIALIZE(priv->dev1);
+  DEV2_UNINITIALIZE(priv->dev2);
 
   /* Then free the composite driver state structure itself */
 

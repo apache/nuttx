@@ -5966,4 +5966,8 @@
 	  logic when buffers larger than the EP0 packet size are sent.
 	  Also add support for decoded USB trace strings.  From David
 	  Sidrane (2013-11-5).
-
+	* drivers/usbdev/cdcacm.c, composite.c, usbmsc.c:  uninitialization
+	  logic cause re-use of a stale pointer.  Changed to a two pass
+	  uninitialization for the case of the composite driver:  Memory
+	  resources are not freed until the second uninitialization pass.
+	  From David Sidrane (2011-1105).

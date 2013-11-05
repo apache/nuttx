@@ -2398,6 +2398,22 @@ void cdcacm_uninitialize(FAR void *handle)
   char devname[CDCACM_DEVNAME_SIZE];
   int ret;
 
+#ifdef CONFIG_CDCACM_COMPOSITE
+  /* Check for pass 2 uninitialization.  We did most of the work on the
+   * first pass uninitialization.
+   */
+
+  if (priv->minor == (uint8_t)-1)
+    {
+      /* In this second and final pass, all that remains to be done is to
+       * free the memory resources.
+       */
+
+      kfree(priv);
+      return;
+    }
+#endif
+
   /* Un-register the CDC/ACM TTY device */
 
   sprintf(devname, CDCACM_DEVNAME_FORMAT, priv->minor);
@@ -2420,9 +2436,19 @@ void cdcacm_uninitialize(FAR void *handle)
 
 #ifndef CONFIG_CDCACM_COMPOSITE
   usbdev_unregister(&drvr->drvr);
-#endif
 
   /* And free the driver structure */
 
   kfree(priv);
+
+#else
+  /* For the case of the composite driver, there is a two pass
+   * uninitialization sequence.  We cannot yet free the driver structure.
+   * We will do that on the second pass.  We mark the fact that we have
+   * already unitialized by setting the minor number to -1.  If/when we
+   * are called again, then we will free the memory resources.
+   */
+
+  priv->minor = (uint8_t)-1;
+#endif
 }
