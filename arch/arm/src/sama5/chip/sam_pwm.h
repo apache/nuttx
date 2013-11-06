@@ -286,6 +286,7 @@
 
 #define PWM_INT1_CHID(n)           (1 << (n))      /* Bits 0-3: Counter Event on Channel n Interrupt, n=0..3 */
 #define PWM_INT1_FCHID(n)          (1 << ((n)+16)) /* Bits 16-19: Fault Protection Trigger on Channel n Interrupt, n=0..3 */
+#define PWM_INT1_ALL               (0x000f000f)
 
 /* PWM Sync Channels Mode Register */
 
@@ -339,6 +340,7 @@
 #  define PWM_INT2_CMPU5           (1 << 21) /* Bit 21:  Comparison 5 Update Interrupt Enable */
 #  define PWM_INT2_CMPU6           (1 << 22) /* Bit 22:  Comparison 6 Update Interrupt Enable */
 #  define PWM_INT2_CMPU7           (1 << 23) /* Bit 23:  Comparison 7 Update Interrupt Enable */
+#define PWM_INT2_ALL               (0x00ffff09)
 
 /* PWM Output Override Value Register */
 
@@ -583,7 +585,8 @@
 
 #define PWM_CMR_CPRE_SHIFT         (0)       /* Bits 0-3: Channel Pre-scaler */
 #define PWM_CMR_CPRE_MASK          (15 << PWM_CMR_CPRE_SHIFT)
-#  define PWM_CMR_CPRE_ MCK        (0 << PWM_CMR_CPRE_SHIFT)  /* Master clock */
+#  define PWM_CMR_CPRE_MCKDIV(n)   ((uint32_t)(n) << PWM_CMR_CPRE_SHIFT)  /* Master clock */
+#  define PWM_CMR_CPRE_MCKDIV1     (0 << PWM_CMR_CPRE_SHIFT)  /* Master clock/2 */
 #  define PWM_CMR_CPRE_MCKDIV2     (1 << PWM_CMR_CPRE_SHIFT)  /* Master clock/2 */
 #  define PWM_CMR_CPRE_MCKDIV4     (2 << PWM_CMR_CPRE_SHIFT)  /* Master clock/4 */
 #  define PWM_CMR_CPRE_MCKDIV8     (3 << PWM_CMR_CPRE_SHIFT)  /* Master clock/8 */

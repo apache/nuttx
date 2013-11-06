@@ -5970,4 +5970,8 @@
 	  logic cause re-use of a stale pointer.  Changed to a two pass
 	  uninitialization for the case of the composite driver:  Memory
 	  resources are not freed until the second uninitialization pass.
-	  From David Sidrane (2011-1105).
+	  From David Sidrane (2011-11-5).
+	* arch/arm/src/sama5/sam_pwm.c and .h:  Add PWM driver for SAMA5
+	  untested on initial checkout (not even incorporated in to build
+	  system) (2013-11-6).
+
