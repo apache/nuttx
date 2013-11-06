@@ -310,7 +310,7 @@ static int do_composite_archinitialize(void)
 
 int composite_archinitialize(void)
 {
-#if defined(CONFIG_NSH_ARCHINIT)
+#if defined(CONFIG_NSH_ARCHINIT) && defined(CONFIG_NSH_BUILTIN_APPS)
   return OK;
 #else
   return do_composite_archinitialize();
