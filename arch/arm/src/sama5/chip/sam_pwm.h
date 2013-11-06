@@ -46,6 +46,9 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+#define SAM_PWM_NCHANNELS          4      /* Four channels numbered 0..3 */
+
 /* PWM Register Offsets *************************************************************/
 
 #define SAM_PWM_CLK_OFFSET         0x0000 /* PWM Clock Register */
