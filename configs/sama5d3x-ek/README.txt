@@ -79,6 +79,7 @@ Contents
   - AT24 Serial EEPROM
   - CAN Usage
   - SAMA5 ADC Support
+  - SAMA5 PWM Support
   - OV2640 Camera interface
   - SAMA5D3x-EK Configuration Options
   - Configurations
@@ -742,14 +743,14 @@ CAN Usage
 SAMA5 ADC Support
 =================
 
+  Basic driver configuration
+  --------------------------
   ADC support can be added to the NSH configuration.  However, there are no
   ADC input pins available to the user for ADC testing (the touchscreen ADC
   inputs are intended for other functionality).  Because of this, there is
   not much motivation to enable ADC support on the SAMA5D3x-EK.  This
   paragraph is included here, however, for people using a custom SAMA5D3x
-  board thay requires ADC support.
-
-  Basic driver configuration:
+  board that requires ADC support.
 
     System Type -> SAMA5 Peripheral Support
       CONFIG_SAMA5_ADC=y               : Enable ADC driver support
@@ -780,16 +781,20 @@ SAMA5 ADC Support
     Library routines
       CONFIG_SCHED_WORKQUEUE=y
 
+  ADC Test Example
+  ----------------
   For testing purposes, there is an ADC program at apps/examples/adc that
   will collect a specified number of samples.  This test program can be
   enabled as follows:
 
-    Application Configuration -> Examples -> ADC eample
+    Application Configuration -> Examples -> ADC example
       CONFIG_EXAMPLES_ADC=y            : Enables the example code
       CONFIG_EXAMPLES_ADC_DEVPATH="/dev/adc0"
 
     Other default settings for the ADC example should be okay.
 
+  ADC DMA Support
+  ---------------
   At 2Hz, DMA is not necessary nor desire-able.  The ADC driver has support
   for DMA transfers of converted data (although that support has not been
   tested as of this writing).  DMA support can be added by include the
@@ -805,8 +810,116 @@ SAMA5 ADC Support
     Drivers -> Analog device (ADC/DAC) support
       CONFIG_ADC_FIFOSIZE=16           : Driver may need a large ring buffer
 
-    Application Configuration -> Examples -> ADC eample
+    Application Configuration -> Examples -> ADC example
       CONFIG_EXAMPLES_ADC_GROUPSIZE=16 : Larger buffers in the test
+
+SAMA5 PWM Support
+=================
+
+  Basic driver configuration
+  --------------------------
+  PWM support can be added to the NSH configuration.  However, there are no
+  PWM output pins available to the user for PWM testing.  Because of this,
+  there is not much motivation to enable PWM support on the SAMA5D3x-EK.  This
+  paragraph is included here, however, for people using a custom SAMA5D3x
+  board that requires PWM support.
+
+  Basic driver configuration:
+
+    System Type -> SAMA5 Peripheral Support
+      CONFIG_SAMA5_PWM=y               : Enable PWM driver support
+
+    Drivers
+      CONFIG_PWM=y                     : Should be automatically selected
+
+    PWM Channel/Output Selection
+    ----------------------------
+    In order to use the PWM, you must enable one or more PWM Channels:
+
+    System Type -> PWM Configuration
+      CONFIG_SAMA5_PWM_CHAN0=y         : Enable one or more of channels 0-3
+      CONFIG_SAMA5_PWM_CHAN1=y
+      CONFIG_SAMA5_PWM_CHAN2=y
+      CONFIG_SAMA5_PWM_CHAN3=y
+
+    For each channel that is enabled, you must also specify the output pins
+    to be enabled and the clocking supplied to the PWM channel.
+
+      CONFIG_SAMA5_PWM_CHANx_FAULTINPUT=n : (not used currently)
+      CONFIG_SAMA5_PWM_CHANx_OUTPUTH=y  : Enable One of both of the H and L output pins
+      CONFIG_SAMA5_PWM_CHANx_OUTPUTL=y
+
+    Where x=0..3.
+
+    Care must be taken because all PWM output pins conflict with some other
+    usage of the pin by other devices:
+
+      -----+---+---+----+--------------------
+       PWM  PIN PER PIO  CONFLICTS
+      -----+---+---+----+--------------------
+       PWM0 FI   B  PC28   SPI1, ISI
+            H    B  PB0    GMAC
+                 B  PA20   LCDC, ISI
+            L    B  PB1    GMAC
+                 B  PA21   LCDC, ISI
+      -----+---+---+----+--------------------
+       PWM1 FI   B  PC31   HDMI
+            H    B  PB4    GMAC
+                 B  PA22   LCDC, ISI
+            L    B  PB5    GMAC
+                 B  PE31   ISI, HDMI
+                 B  PA23   LCDC, ISI
+      -----+---+---+----+--------------------
+       PWM2 FI   B  PC29   UART0, ISI, HDMI
+            H    C  PD5    HSMCI0
+                 B  PB8    GMAC
+            L    C  PD6    HSMCI0
+                 B  PB9    GMAC
+      -----+---+---+----+--------------------
+       PWM3 FI   C  PD16   SPI0, Audio
+            H    C  PD7    HSMCI0
+                 B  PB12   GMAC
+            L    C  PD8    HSMCI0
+                 B  PB13   GMAC
+      -----+---+---+----+--------------------
+
+    Clocking is addressed in the next paragraph.
+
+    PWM Clock Configuration
+    -----------------------
+    PWM Channels can be clocked from either a coarsely divided divided down
+    MCK or from a custom frequency from PWM CLKA and/or CLKB.  If you want
+    to use CLKA or CLKB, you must enable and configuratino them.
+
+    System Type -> PWM Configuration
+      CONFIG_SAMA5_PWM_CLKA=y
+      CONFIG_SAMA5_PWM_CLKA_FREQUENCY=3300
+      CONFIG_SAMA5_PWM_CLKB=y
+      CONFIG_SAMA5_PWM_CLKB_FREQUENCY=3300
+
+    Then for each of the enabled, channels you must select the input clock
+    for that channel:
+
+    System Type -> PWM Configuration
+      CONFIG_SAMA5_PWM_CHANx_CLKA=y     : Pick one of MCK, CLKA, or CLKB
+      CONFIG_SAMA5_PWM_CHANx_CLKB=y
+      CONFIG_SAMA5_PWM_CHANx_MCK=y
+      CONFIG_SAMA5_PWM_CHANx_MCKDIV=128 : If MCK is selected, then the MCK divider must
+                                        : also be provided (1,2,4,8,16,32,64,128,256,512, or 1024).
+
+  PWM Test Example
+  ----------------
+  For testing purposes, there is an PWM program at apps/examples/pwm that
+  will collect a specified number of samples.  This test program can be
+  enabled as follows:
+
+    Application Configuration -> Examples -> PWM example
+      CONFIG_EXAMPLES_PWM=y            : Enables the example code
+
+    Other default settings for the PWM example should be okay.
+
+      CONFIG_EXAMPLES_PWM_DEVPATH="/dev/pwm0"
+      CONFIG_EXAMPLES_PWM_FREQUENCY=100
 
 OV2640 Camera interface
 =======================
@@ -2158,7 +2271,7 @@ Configurations
        o The I2C dev command may have bad side effects on your I2C devices.
          Use only at your own risk.
 
-       As an eample, the I2C dev comman can be used to list all devices
+       As an example, the I2C dev comman can be used to list all devices
        responding on TWI0 (the default) like this:
 
          nsh> i2c dev 0x03 0x77

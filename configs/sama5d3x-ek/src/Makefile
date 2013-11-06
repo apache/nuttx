@@ -110,6 +110,10 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += sam_adc.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += sam_pwm.c
+endif
+
 ifeq ($(CONFIG_CAN),y)
 CSRCS += sam_can.c
 endif

@@ -121,4 +121,16 @@ config SAMA5_AT24_NXFFS
 
 endchoice
 
+config SAMA5D3X_EK_CHANNEL
+	int "PWM channel number"
+	default 0 if SAMA5_PWM_CHAN0
+	default 1 if SAMA5_PWM_CHAN1
+	default 2 if SAMA5_PWM_CHAN2
+	default 3 if SAMA5_PWM_CHAN3
+	range 0 3
+	depends on PWM && SAMA5_PWM
+	---help---
+		Selects the PWM channel number that will be used to perform the PWM
+		test.  See apps/examples/pwm.
+
 endif
