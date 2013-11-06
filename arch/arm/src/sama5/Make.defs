@@ -205,6 +205,10 @@ CHIP_CSRCS += sam_tsd.c
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_PWM),y)
+CHIP_CSRCS += sam_pwm.c
+endif
+
 ifeq ($(CONFIG_SAMA5_TC0),y)
 CHIP_CSRCS += sam_tc.c
 else
