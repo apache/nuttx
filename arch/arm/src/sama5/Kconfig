@@ -196,6 +196,7 @@ config SAMA5_TC1
 config SAMA5_PWM
 	bool "Pulse Width Modulation Controller (PWM)"
 	default n
+	select PWM
 
 config SAMA5_ADC
 	bool "Touch Screen ADC Controller (ADC)"
@@ -2367,6 +2368,239 @@ config SAMA5_TSD_NPOLLWAITERS
 endif # SAMA5_TSD
 endmenu # Touchscreen Configuration
 endif # SAMA5_ADC
+
+if SAMA5_PWM
+menu "PWM configuration"
+
+config SAMA5_PWM_CLKA
+	bool "Enable PWM CLKA"
+	default n
+	---help---
+		Enable the PWM CLKA source.
+
+config SAMA5_PWM_CLKA_FREQUENCY
+	int "CLKA frequency"
+	default 100
+	depends on SAMA5_PWM_CLKA
+	---help---
+		If the CLKA source is enabled, then you must also provide the
+		frequency of the CLKA.  This frequency will be derived from from MCK
+		using a prescaler and divider.  Therefore, a wide range of
+		frequencies are possible.
+
+config SAMA5_PWM_CLKB
+	bool "Enable PWM CLKB"
+	default n
+	---help---
+		Enable the PWM CLKB source.
+
+config SAMA5_PWM_CLKB_FREQUENCY
+	int "CLKB frequency"
+	default 100
+	depends on SAMA5_PWM_CLKB
+	---help---
+		If the CLKB source is enabled, then you must also provide the
+		frequency of the CLKB.  This frequency will be derived from from MCK
+		using a prescaler and divider.  Therefore, a wide range of
+		frequencies are possible.
+
+config SAMA5_PWM_CHAN0
+	bool "Enable PWM channel 0"
+	default n
+
+if SAMA5_PWM_CHAN0
+
+choice
+	prompt "PWM channel 0 clock source"
+	default SAMA5_PWM_CHAN0_MCK
+
+config SAMA5_PWM_CHAN0_MCK
+	bool "MCK (divided)"
+
+config SAMA5_PWM_CHAN0_CLKA
+	bool "CLKA"
+	depends on SAMA5_PWM_CLKA
+
+config SAMA5_PWM_CHAN0_CLKB
+	bool "CLKB"
+	depends on SAMA5_PWM_CLKB
+
+endchoice # PWM channel 0 clock source
+
+config SAMA5_PWM_CHAN0_MCKDIV
+	int "MCK divider"
+	default 1
+	depends on SAMA5_PWM_CHAN0_MCK
+	---help---
+		If source clock for the PWM channel is the MCK, then you must also
+		specify the MCK divider to use with the MCK.  The only valid options
+		are 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, and 1024.  Other
+		selections will cause compile time errors.
+
+config SAMA5_PWM_CHAN0_OUTPUTH
+	bool "Configure OUTPUT H pin"
+	default n
+
+config SAMA5_PWM_CHAN0_OUTPUTL
+	bool "Configure OUTPUT L pin"
+	default n
+
+config SAMA5_PWM_CHAN0_FAULTINPUT
+	bool "Configure Fault Input pin"
+	default n
+
+endif # SAMA5_PWM_CHAN0
+
+config SAMA5_PWM_CHAN1
+	bool "Enable PWM channel 1"
+	default n
+
+if SAMA5_PWM_CHAN1
+
+choice
+	prompt "PWM channel 1 clock source"
+	default SAMA5_PWM_CHAN1_MCK
+
+config SAMA5_PWM_CHAN1_MCK
+	bool "MCK (divided)"
+
+config SAMA5_PWM_CHAN1_CLKA
+	bool "CLKA"
+	depends on SAMA5_PWM_CLKA
+
+config SAMA5_PWM_CHAN1_CLKB
+	bool "CLKB"
+	depends on SAMA5_PWM_CLKB
+
+endchoice # PWM channel 1 clock source
+
+config SAMA5_PWM_CHAN1_MCKDIV
+	int "MCK divider"
+	default 1
+	depends on SAMA5_PWM_CHAN1_MCK
+	---help---
+		If source clock for the PWM channel is the MCK, then you must also
+		specify the MCK divider to use with the MCK.  The only valid options
+		are 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, and 1024.  Other
+		selections will cause compile time errors.
+
+config SAMA5_PWM_CHAN1_OUTPUTH
+	bool "Configure OUTPUT H pin"
+	default n
+
+config SAMA5_PWM_CHAN1_OUTPUTL
+	bool "Configure OUTPUT L pin"
+	default n
+
+config SAMA5_PWM_CHAN1_FAULTINPUT
+	bool "Configure Fault Input pin"
+	default n
+
+endif # SAMA5_PWM_CHAN1
+
+config SAMA5_PWM_CHAN2
+	bool "Enable PWM channel 2"
+	default n
+
+if SAMA5_PWM_CHAN2
+
+choice
+	prompt "PWM channel 2 clock source"
+	default SAMA5_PWM_CHAN2_MCK
+
+config SAMA5_PWM_CHAN2_MCK
+	bool "MCK (divided)"
+
+config SAMA5_PWM_CHAN2_CLKA
+	bool "CLKA"
+	depends on SAMA5_PWM_CLKA
+
+config SAMA5_PWM_CHAN2_CLKB
+	bool "CLKB"
+	depends on SAMA5_PWM_CLKB
+
+endchoice # PWM channel 2 clock source
+
+config SAMA5_PWM_CHAN2_MCKDIV
+	int "MCK divider"
+	default 1
+	depends on SAMA5_PWM_CHAN2_MCK
+	---help---
+		If source clock for the PWM channel is the MCK, then you must also
+		specify the MCK divider to use with the MCK.  The only valid options
+		are 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, and 1024.  Other
+		selections will cause compile time errors.
+
+config SAMA5_PWM_CHAN2_OUTPUTH
+	bool "Configure OUTPUT H pin"
+	default n
+
+config SAMA5_PWM_CHAN2_OUTPUTL
+	bool "Configure OUTPUT L pin"
+	default n
+
+config SAMA5_PWM_CHAN2_FAULTINPUT
+	bool "Configure Fault Input pin"
+	default n
+
+endif # SAMA5_PWM_CHAN2
+
+config SAMA5_PWM_CHAN3
+	bool "Enable PWM channel 3"
+	default n
+
+if SAMA5_PWM_CHAN3
+
+choice
+	prompt "PWM channel 3 clock source"
+	default SAMA5_PWM_CHAN3_MCK
+
+config SAMA5_PWM_CHAN3_MCK
+	bool "MCK (divided)"
+
+config SAMA5_PWM_CHAN3_CLKA
+	bool "CLKA"
+	depends on SAMA5_PWM_CLKA
+
+config SAMA5_PWM_CHAN3_CLKB
+	bool "CLKB"
+	depends on SAMA5_PWM_CLKB
+
+endchoice # PWM channel 3 clock source
+
+config SAMA5_PWM_CHAN3_MCKDIV
+	int "MCK divider"
+	default 1
+	depends on SAMA5_PWM_CHAN3_MCK
+	---help---
+		If source clock for the PWM channel is the MCK, then you must also
+		specify the MCK divider to use with the MCK.  The only valid options
+		are 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, and 1024.  Other
+		selections will cause compile time errors.
+
+config SAMA5_PWM_CHAN3_OUTPUTH
+	bool "Configure OUTPUT H pin"
+	default n
+
+config SAMA5_PWM_CHAN3_OUTPUTL
+	bool "Configure OUTPUT L pin"
+	default n
+
+config SAMA5_PWM_CHAN3_FAULTINPUT
+	bool "Configure Fault Input pin"
+	default n
+
+endif # SAMA5_PWM_CHAN3
+
+config SAMA5_PWM_REGDEBUG
+	bool "Enable register-level PWM debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low register-level debug output.
+
+endmenu # PWM configuration
+endif # SAMA5_PWM
 
 if SAMA5_WDT
 

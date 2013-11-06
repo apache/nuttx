@@ -1215,6 +1215,7 @@ config STM32_TIM1_PWM
 	bool "TIM1 PWM"
 	default n
 	depends on STM32_TIM1
+	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 1 for use by PWM
 
@@ -1236,6 +1237,7 @@ config STM32_TIM2_PWM
 	bool "TIM2 PWM"
 	default n
 	depends on STM32_TIM2
+	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 2 for use by PWM
 
@@ -1257,6 +1259,7 @@ config STM32_TIM3_PWM
 	bool "TIM3 PWM"
 	default n
 	depends on STM32_TIM3
+	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 3 for use by PWM
 
@@ -1278,6 +1281,7 @@ config STM32_TIM4_PWM
 	bool "TIM4 PWM"
 	default n
 	depends on STM32_TIM4
+	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 4 for use by PWM
 
@@ -1299,6 +1303,7 @@ config STM32_TIM5_PWM
 	bool "TIM5 PWM"
 	default n
 	depends on STM32_TIM5
+	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 5 for use by PWM
 
@@ -1320,6 +1325,7 @@ config STM32_TIM8_PWM
 	bool "TIM8 PWM"
 	default n
 	depends on STM32_TIM8
+	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 8 for use by PWM
 
@@ -1341,6 +1347,7 @@ config STM32_TIM9_PWM
 	bool "TIM9 PWM"
 	default n
 	depends on STM32_TIM9
+	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 9 for use by PWM
 
@@ -1362,6 +1369,7 @@ config STM32_TIM10_PWM
 	bool "TIM10 PWM"
 	default n
 	depends on STM32_TIM10
+	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 10 for use by PWM
 
@@ -1383,6 +1391,7 @@ config STM32_TIM11_PWM
 	bool "TIM11 PWM"
 	default n
 	depends on STM32_TIM11
+	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 11 for use by PWM
 
@@ -1404,6 +1413,7 @@ config STM32_TIM12_PWM
 	bool "TIM12 PWM"
 	default n
 	depends on STM32_TIM12
+	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 12 for use by PWM
 
@@ -1425,6 +1435,7 @@ config STM32_TIM13_PWM
 	bool "TIM13 PWM"
 	default n
 	depends on STM32_TIM13
+	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 13 for use by PWM
 
@@ -1446,6 +1457,7 @@ config STM32_TIM14_PWM
 	bool "TIM14 PWM"
 	default n
 	depends on STM32_TIM14
+	select ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Reserve timer 14 for use by PWM
 

@@ -5974,4 +5974,7 @@
 	* arch/arm/src/sama5/sam_pwm.c and .h:  Add PWM driver for SAMA5
 	  untested on initial checkout (not even incorporated in to build
 	  system) (2013-11-6).
+	* arch/arm/src/sama5/Make.defs and Kconfig:  SAMA5 PWM driver now
+	  incorporated into build and configuration system.  Builds with
+	  no errors (2013-11-6).
 

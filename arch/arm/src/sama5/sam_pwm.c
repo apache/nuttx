@@ -48,6 +48,8 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/pwm.h>
+
+#include "chip/sam_pinmap.h"
 #include <arch/board/board.h>
 
 #include "up_internal.h"
@@ -105,48 +107,48 @@
 #    error CONFIG_SAMA5_PWM_CLKA_FREQUENCY is not defined
 
 #  elif (BOARD_MCK_FREQUENCY / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define PWM_CLK_PREA PWM_CLK_PREA_DIV1
-#    define CLKA_PRE     1
+#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV1
+#    define CLKA_PRE      1
 
 #  elif (BOARD_MCK_FREQUENCY / 2 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define PWM_CLK_PREA PWM_CLK_PREA_DIV2
-#    define CLKA_PRE     2
+#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV2
+#    define CLKA_PRE      2
 
 #  elif (BOARD_MCK_FREQUENCY / 4 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define PWM_CLK_PREA PWM_CLK_PREA_DIV4
-#    define CLKA_PRE     4
+#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV4
+#    define CLKA_PRE      4
 
 #  elif (BOARD_MCK_FREQUENCY / 8 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define PWM_CLK_PREA PWM_CLK_PREA_DIV8
-#    define CLKA_PRE     8
+#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV8
+#    define CLKA_PRE      8
 
 #  elif (BOARD_MCK_FREQUENCY / 16 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define PWM_CLK_PREA PWM_CLK_PREA_DIV16
-#    define CLKA_PRE     16
+#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV16
+#    define CLKA_PRE      16
 
 #  elif (BOARD_MCK_FREQUENCY / 32 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define PWM_CLK_PREA PWM_CLK_PREA_DIV32
-#    define CLKA_PRE     32
+#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV32
+#    define CLKA_PRE      32
 
 #  elif (BOARD_MCK_FREQUENCY / 64 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define PWM_CLK_PREA PWM_CLK_PREA_DIV64
-#    define CLKA_PRE     64
+#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV64
+#    define CLKA_PRE      64
 
 #  elif (BOARD_MCK_FREQUENCY / 128 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define PWM_CLK_PREA PWM_CLK_PREA_DIV128
-#    define CLKA_PRE     128
+#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV128
+#    define CLKA_PRE      128
 
 #  elif (BOARD_MCK_FREQUENCY / 256 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define PWM_CLK_PREA PWM_CLK_PREA_DIV256
-#    define CLKA_PRE     256
+#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV256
+#    define CLKA_PRE      256
 
 #  elif (BOARD_MCK_FREQUENCY / 512 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define PWM_CLK_PREA PWM_CLK_PREA_DIV512
-#    define CLKA_PRE     512
+#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV512
+#    define CLKA_PRE      512
 
 #  elif (BOARD_MCK_FREQUENCY / 1024 / CONFIG_SAMA5_PWM_CLKA_FREQUENCY) < 256
-#    define PWM_CLK_PREA PWM_CLK_PREA_DIV1024
-#    define CLKA_PRE     1024
+#    define CLKA_PRE_BITS PWM_CLK_PREA_DIV1024
+#    define CLKA_PRE      1024
 
 #  else
 #    error Cannot realize CONFIG_SAMA5_PWM_CLKA_FREQUENCY
@@ -154,12 +156,12 @@
 
 #  define CLKA_DIV       (BOARD_MCK_FREQUENCY / CLKA_PRE / CONFIG_SAMA5_PWM_CLKA_FREQUENCY)
 #  define CLKA_FREQUENCY (BOARD_MCK_FREQUENCY / CLKA_PRE / CLKA_DIV)
-#  define PWM_CLK_DIVA   PWM_CLK_DIVA(CLKA_DIV)
+#  define CLKA_DIV_BITS   PWM_CLK_DIVA(CLKA_DIV)
 
 #else
-#  undef CONFIG_SAMA5_PWM_CLKA_FREQUENCY
-#  define PWM_CLK_PREA PWM_CLK_PREA_DIV1
-#  define PWM_CLK_DIVA PWM_CLK_DIVA_OFF
+#  undef  CONFIG_SAMA5_PWM_CLKA_FREQUENCY
+#  define CLKA_PRE_BITS PWM_CLK_PREA_DIV1
+#  define CLKA_DIV_BITS PWM_CLK_DIVA_OFF
 #endif
 
 #ifdef CONFIG_SAMA5_PWM_CLKB
@@ -168,61 +170,61 @@
 #    error CONFIG_SAMA5_PWM_CLKB_FREQUENCY is not defined
 
 #  elif (BOARD_MCK_FREQUENCY / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define PWM_CLK_PREB PWM_CLK_PREB_DIV1
-#    define CLKB_PRE     1
+#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV1
+#    define CLKB_PRE      1
 
 #  elif (BOARD_MCK_FREQUENCY / 2 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define PWM_CLK_PREB PWM_CLK_PREB_DIV2
-#    define CLKB_PRE     2
+#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV2
+#    define CLKB_PRE      2
 
 #  elif (BOARD_MCK_FREQUENCY / 4 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define PWM_CLK_PREB PWM_CLK_PREB_DIV4
-#    define CLKB_PRE     4
+#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV4
+#    define CLKB_PRE      4
 
 #  elif (BOARD_MCK_FREQUENCY / 8 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define PWM_CLK_PREB PWM_CLK_PREB_DIV8
-#    define CLKB_PRE     8
+#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV8
+#    define CLKB_PRE      8
 
 #  elif (BOARD_MCK_FREQUENCY / 16 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define PWM_CLK_PREB PWM_CLK_PREB_DIV16
-#    define CLKB_PRE     16
+#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV16
+#    define CLKB_PRE      16
 
 #  elif (BOARD_MCK_FREQUENCY / 32 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define PWM_CLK_PREB PWM_CLK_PREB_DIV32
-#    define CLKB_PRE     32
+#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV32
+#    define CLKB_PRE      32
 
 #  elif (BOARD_MCK_FREQUENCY / 64 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define PWM_CLK_PREB PWM_CLK_PREB_DIV64
-#    define CLKB_PRE     64
+#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV64
+#    define CLKB_PRE      64
 
 #  elif (BOARD_MCK_FREQUENCY / 128 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define PWM_CLK_PREB PWM_CLK_PREB_DIV128
-#    define CLKB_PRE     128
+#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV128
+#    define CLKB_PRE      128
 
 #  elif (BOARD_MCK_FREQUENCY / 256 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define PWM_CLK_PREB PWM_CLK_PREB_DIV256
-#    define CLKB_PRE     256
+#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV256
+#    define CLKB_PRE      256
 
 #  elif (BOARD_MCK_FREQUENCY / 512 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define PWM_CLK_PREB PWM_CLK_PREB_DIV512
-#    define CLKB_PRE     512
+#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV512
+#    define CLKB_PRE      512
 
 #  elif (BOARD_MCK_FREQUENCY / 1024 / CONFIG_SAMA5_PWM_CLKB_FREQUENCY) < 256
-#    define PWM_CLK_PREB PWM_CLK_PREB_DIV1024
-#    define CLKB_PRE     1024
+#    define CLKB_PRE_BITS PWM_CLK_PREB_DIV1024
+#    define CLKB_PRE      1024
 
 #  else
 #    error Cannot realize CONFIG_SAMA5_PWM_CLKB_FREQUENCY
 #  endif
 
-#  define CLKB_DIV       (BOARD_MCK_FREQUENCY / CLKB_PRE / CONFIG_SAMA5_PWM_CLKB_FREQUENCY / )
+#  define CLKB_DIV       (BOARD_MCK_FREQUENCY / CLKB_PRE / CONFIG_SAMA5_PWM_CLKB_FREQUENCY)
 #  define CLKB_FREQUENCY (BOARD_MCK_FREQUENCY / CLKB_PRE / CLKB_DIV)
-#  define PWM_CLK_DIVB   PWM_CLK_DIVB(CLKB_DIV)
+#  define CLKB_DIV_BITS   PWM_CLK_DIVB(CLKB_DIV)
 
 #else
-#  undef CONFIG_SAMA5_PWM_CLKB_FREQUENCY
-#  define PWM_CLK_PREB PWM_CLK_PREB_DIV1
-#  define PWM_CLK_DIVB PWM_CLK_DIVB_OFF
+#  undef  CONFIG_SAMA5_PWM_CLKB_FREQUENCY
+#  define CLKB_PRE_BITS PWM_CLK_PREB_DIV1
+#  define CLKB_DIV_BITS PWM_CLK_DIVB_OFF
 #endif
 
 #ifdef CONFIG_SAMA5_PWM_CHAN0
@@ -230,27 +232,27 @@
 #    undef CONFIG_SAMA5_PWM_CHAN0_CLKA
 #    undef CONFIG_SAMA5_PWM_CHAN0_CLKB
 #    if CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 1
-#      SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 0
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 0
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 2
-#      SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 1
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 1
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 4
-#      SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 2
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 2
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 8
-#      SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 3
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 3
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 16
-#      SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 4
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 4
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 32
-#      SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 5
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 5
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 64
-#      SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 6
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 6
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 128
-#      SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 7
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 7
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 256
-#      SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 8
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 8
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 512
-#      SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 9
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 9
 #    elif CONFIG_SAMA5_PWM_CHAN0_MCKDIV == 1024
-#      SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 10
+#      define SAMA5_PWM_CHAN0_MCKDIV_LOG2 = 10
 #    else
 #      error Unsupported MCK divider value
 #    endif
@@ -269,27 +271,27 @@
 #    undef CONFIG_SAMA5_PWM_CHAN1_CLKA
 #    undef CONFIG_SAMA5_PWM_CHAN1_CLKB
 #    if CONFIG_SAMA5_PWM_CHAN1_MCKDIV == 1
-#      SAMA5_PWM_CHAN1_MCKDIV_LOG2 = 0
+#      define SAMA5_PWM_CHAN1_MCKDIV_LOG2  0
 #    elif CONFIG_SAMA5_PWM_CHAN1_MCKDIV == 2
-#      SAMA5_PWM_CHAN1_MCKDIV_LOG2 = 1
+#      define SAMA5_PWM_CHAN1_MCKDIV_LOG2  1
 #    elif CONFIG_SAMA5_PWM_CHAN1_MCKDIV == 4
-#      SAMA5_PWM_CHAN1_MCKDIV_LOG2 = 2
+#      define SAMA5_PWM_CHAN1_MCKDIV_LOG2  2
 #    elif CONFIG_SAMA5_PWM_CHAN1_MCKDIV == 8
-#      SAMA5_PWM_CHAN1_MCKDIV_LOG2 = 3
+#      define SAMA5_PWM_CHAN1_MCKDIV_LOG2  3
 #    elif CONFIG_SAMA5_PWM_CHAN1_MCKDIV == 16
-#      SAMA5_PWM_CHAN1_MCKDIV_LOG2 = 4
+#      define SAMA5_PWM_CHAN1_MCKDIV_LOG2  4
 #    elif CONFIG_SAMA5_PWM_CHAN1_MCKDIV == 32
-#      SAMA5_PWM_CHAN1_MCKDIV_LOG2 = 5
+#      define SAMA5_PWM_CHAN1_MCKDIV_LOG2  5
 #    elif CONFIG_SAMA5_PWM_CHAN1_MCKDIV == 64
-#      SAMA5_PWM_CHAN1_MCKDIV_LOG2 = 6
+#      define SAMA5_PWM_CHAN1_MCKDIV_LOG2  6
 #    elif CONFIG_SAMA5_PWM_CHAN1_MCKDIV == 128
-#      SAMA5_PWM_CHAN1_MCKDIV_LOG2 = 7
+#      define SAMA5_PWM_CHAN1_MCKDIV_LOG2  7
 #    elif CONFIG_SAMA5_PWM_CHAN1_MCKDIV == 256
-#      SAMA5_PWM_CHAN1_MCKDIV_LOG2 = 8
+#      define SAMA5_PWM_CHAN1_MCKDIV_LOG2  8
 #    elif CONFIG_SAMA5_PWM_CHAN1_MCKDIV == 512
-#      SAMA5_PWM_CHAN1_MCKDIV_LOG2 = 9
+#      define SAMA5_PWM_CHAN1_MCKDIV_LOG2  9
 #    elif CONFIG_SAMA5_PWM_CHAN1_MCKDIV == 1024
-#      SAMA5_PWM_CHAN1_MCKDIV_LOG2 = 10
+#      define SAMA5_PWM_CHAN1_MCKDIV_LOG2  10
 #    else
 #      error Unsupported MCK divider value
 #    endif
@@ -308,27 +310,27 @@
 #    undef CONFIG_SAMA5_PWM_CHAN2_CLKA
 #    undef CONFIG_SAMA5_PWM_CHAN2_CLKB
 #    if CONFIG_SAMA5_PWM_CHAN2_MCKDIV == 1
-#      SAMA5_PWM_CHAN2_MCKDIV_LOG2 = 0
+#      define SAMA5_PWM_CHAN2_MCKDIV_LOG2  0
 #    elif CONFIG_SAMA5_PWM_CHAN2_MCKDIV == 2
-#      SAMA5_PWM_CHAN2_MCKDIV_LOG2 = 1
+#      define SAMA5_PWM_CHAN2_MCKDIV_LOG2  1
 #    elif CONFIG_SAMA5_PWM_CHAN2_MCKDIV == 4
-#      SAMA5_PWM_CHAN2_MCKDIV_LOG2 = 2
+#      define SAMA5_PWM_CHAN2_MCKDIV_LOG2  2
 #    elif CONFIG_SAMA5_PWM_CHAN2_MCKDIV == 8
-#      SAMA5_PWM_CHAN2_MCKDIV_LOG2 = 3
+#      define SAMA5_PWM_CHAN2_MCKDIV_LOG2  3
 #    elif CONFIG_SAMA5_PWM_CHAN2_MCKDIV == 16
-#      SAMA5_PWM_CHAN2_MCKDIV_LOG2 = 4
+#      define SAMA5_PWM_CHAN2_MCKDIV_LOG2  4
 #    elif CONFIG_SAMA5_PWM_CHAN2_MCKDIV == 32
-#      SAMA5_PWM_CHAN2_MCKDIV_LOG2 = 5
+#      define SAMA5_PWM_CHAN2_MCKDIV_LOG2  5
 #    elif CONFIG_SAMA5_PWM_CHAN2_MCKDIV == 64
-#      SAMA5_PWM_CHAN2_MCKDIV_LOG2 = 6
+#      define SAMA5_PWM_CHAN2_MCKDIV_LOG2  6
 #    elif CONFIG_SAMA5_PWM_CHAN2_MCKDIV == 128
-#      SAMA5_PWM_CHAN2_MCKDIV_LOG2 = 7
+#      define SAMA5_PWM_CHAN2_MCKDIV_LOG2  7
 #    elif CONFIG_SAMA5_PWM_CHAN2_MCKDIV == 256
-#      SAMA5_PWM_CHAN2_MCKDIV_LOG2 = 8
+#      define SAMA5_PWM_CHAN2_MCKDIV_LOG2  8
 #    elif CONFIG_SAMA5_PWM_CHAN2_MCKDIV == 512
-#      SAMA5_PWM_CHAN2_MCKDIV_LOG2 = 9
+#      define SAMA5_PWM_CHAN2_MCKDIV_LOG2  9
 #    elif CONFIG_SAMA5_PWM_CHAN2_MCKDIV == 1024
-#      SAMA5_PWM_CHAN2_MCKDIV_LOG2 = 10
+#      define SAMA5_PWM_CHAN2_MCKDIV_LOG2  10
 #    else
 #      error Unsupported MCK divider value
 #    endif
@@ -347,27 +349,27 @@
 #    undef CONFIG_SAMA5_PWM_CHAN3_CLKA
 #    undef CONFIG_SAMA5_PWM_CHAN3_CLKB
 #    if CONFIG_SAMA5_PWM_CHAN3_MCKDIV == 1
-#      SAMA5_PWM_CHAN3_MCKDIV_LOG2 = 0
+#      define SAMA5_PWM_CHAN3_MCKDIV_LOG2  0
 #    elif CONFIG_SAMA5_PWM_CHAN3_MCKDIV == 2
-#      SAMA5_PWM_CHAN3_MCKDIV_LOG2 = 1
+#      define SAMA5_PWM_CHAN3_MCKDIV_LOG2  1
 #    elif CONFIG_SAMA5_PWM_CHAN3_MCKDIV == 4
-#      SAMA5_PWM_CHAN3_MCKDIV_LOG2 = 2
+#      define SAMA5_PWM_CHAN3_MCKDIV_LOG2  2
 #    elif CONFIG_SAMA5_PWM_CHAN3_MCKDIV == 8
-#      SAMA5_PWM_CHAN3_MCKDIV_LOG2 = 3
+#      define SAMA5_PWM_CHAN3_MCKDIV_LOG2  3
 #    elif CONFIG_SAMA5_PWM_CHAN3_MCKDIV == 16
-#      SAMA5_PWM_CHAN3_MCKDIV_LOG2 = 4
+#      define SAMA5_PWM_CHAN3_MCKDIV_LOG2  4
 #    elif CONFIG_SAMA5_PWM_CHAN3_MCKDIV == 32
-#      SAMA5_PWM_CHAN3_MCKDIV_LOG2 = 5
+#      define SAMA5_PWM_CHAN3_MCKDIV_LOG2  5
 #    elif CONFIG_SAMA5_PWM_CHAN3_MCKDIV == 64
-#      SAMA5_PWM_CHAN3_MCKDIV_LOG2 = 6
+#      define SAMA5_PWM_CHAN3_MCKDIV_LOG2  6
 #    elif CONFIG_SAMA5_PWM_CHAN3_MCKDIV == 128
-#      SAMA5_PWM_CHAN3_MCKDIV_LOG2 = 7
+#      define SAMA5_PWM_CHAN3_MCKDIV_LOG2  7
 #    elif CONFIG_SAMA5_PWM_CHAN3_MCKDIV == 256
-#      SAMA5_PWM_CHAN3_MCKDIV_LOG2 = 8
+#      define SAMA5_PWM_CHAN3_MCKDIV_LOG2  8
 #    elif CONFIG_SAMA5_PWM_CHAN3_MCKDIV == 512
-#      SAMA5_PWM_CHAN3_MCKDIV_LOG2 = 9
+#      define SAMA5_PWM_CHAN3_MCKDIV_LOG2  9
 #    elif CONFIG_SAMA5_PWM_CHAN3_MCKDIV == 1024
-#      SAMA5_PWM_CHAN3_MCKDIV_LOG2 = 10
+#      define SAMA5_PWM_CHAN3_MCKDIV_LOG2  10
 #    else
 #      error Unsupported MCK divider value
 #    endif
@@ -413,7 +415,6 @@
 #  define pwmlldbg(x...)
 #  define pwmvdbg(x...)
 #  define pwmllvdbg(x...)
-#  define pwm_dumpgpio(p,m)
 #endif
 
 /****************************************************************************
@@ -523,7 +524,7 @@ static const struct pwm_ops_s g_pwmops =
 
 /* This is the overall state of the PWM peripheral */
 
-static sam_pwm_s g_pwm =
+static struct sam_pwm_s g_pwm =
 {
   .initialized = false,
 #ifndef PWM_SINGLE
@@ -537,7 +538,9 @@ static sam_pwm_s g_pwm =
 static struct sam_pwm_chan_s g_pwm_chan0 =
 {
   .ops         = &g_pwmops,
+#ifndef PWM_SINGLE
   .pwm         = &g_pwm,
+#endif
   .channel     = 0,
   .base        = SAM_PWM_CHAN_BASE(0),
 
@@ -570,7 +573,9 @@ static struct sam_pwm_chan_s g_pwm_chan0 =
 static struct sam_pwm_chan_s g_pwm_chan1 =
 {
   .ops         = &g_pwmops,
+#ifndef PWM_SINGLE
   .pwm         = &g_pwm,
+#endif
   .channel     = 1,
   .base        = SAM_PWM_CHAN_BASE(1),
 
@@ -585,13 +590,13 @@ static struct sam_pwm_chan_s g_pwm_chan1 =
 #  error No clock source for channel 0
 #endif
 
-#ifdef CONFIG_SAMA5_PWM_CHAN0_OUTPUTH
+#ifdef CONFIG_SAMA5_PWM_CHAN1_OUTPUTH
   .ohpincfg    = PIO_PWM1_H,
 #endif
-#ifdef CONFIG_SAMA5_PWM_CHAN0_OUTPUTL
+#ifdef CONFIG_SAMA5_PWM_CHAN1_OUTPUTL
   .olpincfg    = PIO_PWM1_L,
 #endif
-#ifdef CONFIG_SAMA5_PWM_CHAN0_FAULTINPUT
+#ifdef CONFIG_SAMA5_PWM_CHAN1_FAULTINPUT
   .fipincfg    = PIO_PWM1_FI,
 #endif
 };
@@ -603,7 +608,9 @@ static struct sam_pwm_chan_s g_pwm_chan1 =
 static struct sam_pwm_chan_s g_pwm_chan2 =
 {
   .ops         = &g_pwmops,
+#ifndef PWM_SINGLE
   .pwm         = &g_pwm,
+#endif
   .channel     = 2,
   .base        = SAM_PWM_CHAN_BASE(2),
 
@@ -618,13 +625,13 @@ static struct sam_pwm_chan_s g_pwm_chan2 =
 #  error No clock source for channel 0
 #endif
 
-#ifdef CONFIG_SAMA5_PWM_CHAN0_OUTPUTH
+#ifdef CONFIG_SAMA5_PWM_CHAN2_OUTPUTH
   .ohpincfg    = PIO_PWM2_H,
 #endif
-#ifdef CONFIG_SAMA5_PWM_CHAN0_OUTPUTL
+#ifdef CONFIG_SAMA5_PWM_CHAN2_OUTPUTL
   .olpincfg    = PIO_PWM2_L,
 #endif
-#ifdef CONFIG_SAMA5_PWM_CHAN0_FAULTINPUT
+#ifdef CONFIG_SAMA5_PWM_CHAN2_FAULTINPUT
   .fipincfg    = PIO_PWM2_FI,
 #endif
 };
@@ -636,8 +643,11 @@ static struct sam_pwm_chan_s g_pwm_chan2 =
 static struct sam_pwm_chan_s g_pwm_chan3 =
 {
   .ops         = &g_pwmops,
+#ifndef PWM_SINGLE
   .pwm         = &g_pwm,
+#endif
   .channel     = 3,
+  .base        = SAM_PWM_CHAN_BASE(3),
 
 #if defined(CONFIG_SAMA5_PWM_CHAN3_MCK)
   .clksrc      = PWM_CLKSRC_MCK,
@@ -650,13 +660,13 @@ static struct sam_pwm_chan_s g_pwm_chan3 =
 #  error No clock source for channel 0
 #endif
 
-#ifdef CONFIG_SAMA5_PWM_CHAN0_OUTPUTH
+#ifdef CONFIG_SAMA5_PWM_CHAN3_OUTPUTH
   .ohpincfg    = PIO_PWM3_H,
 #endif
-#ifdef CONFIG_SAMA5_PWM_CHAN0_OUTPUTL
+#ifdef CONFIG_SAMA5_PWM_CHAN3_OUTPUTL
   .olpincfg    = PIO_PWM3_L,
 #endif
-#ifdef CONFIG_SAMA5_PWM_CHAN0_FAULTINPUT
+#ifdef CONFIG_SAMA5_PWM_CHAN3_FAULTINPUT
   .fipincfg    = PIO_PWM3_FI,
 #endif
 };
@@ -741,7 +751,7 @@ static uint32_t pwm_getreg(struct sam_pwm_chan_s *chan, int offset)
   uint32_t  regval;
 
 #ifdef PWM_SINGLE
-  regaddr = SAM_PWMC_VBASE + offset
+  regaddr = SAM_PWMC_VBASE + offset;
 #else
   struct sam_pwm_chan_s *pwm = chan->pwm;
   regaddr = pwm->base + offset;
@@ -812,7 +822,7 @@ static void pwm_putreg(struct sam_pwm_chan_s *chan, int offset, uint32_t regval)
   uintptr_t regaddr;
 
 #ifdef PWM_SINGLE
-  regaddr = SAM_PWMC_VBASE + offset
+  regaddr = SAM_PWMC_VBASE + offset;
 #else
   struct sam_pwm_chan_s *pwm = chan->pwm;
   regaddr = pwm->base + offset;
@@ -995,7 +1005,6 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
       (void)sam_configpio(chan->fipincfg);
     }
 
-  pwm_dumpgpio(chan->pincfg, "PWM setup");
   return OK;
 }
 
@@ -1018,9 +1027,8 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
 static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
 {
   FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
-  uint32_t pincfg;
 
-  pwmvdbg("Channel %d pincfg: %08x\n", chan->channel, chan->pincfg);
+  pwmvdbg("Channel %d\n", chan->channel);
 
   /* Make sure that the output has been stopped */
 
@@ -1053,19 +1061,19 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
   FAR struct sam_pwm_chan_s *chan = (FAR struct sam_pwm_chan_s *)dev;
   uint32_t regval;
   uint32_t cprd;
-  uint32_t srcfreq;
+  uint32_t fsrc;
 
   /* Disable the channel (should already be disabled) */
 
-  sam_putreg(priv, SAM_PWM_DIS_OFFSET, PWM_CHID(chan->channel));
+  pwm_putreg(chan, SAM_PWM_DIS_OFFSET, PWM_CHID(chan->channel));
 
   /* Determine the clock source */
 
   switch (chan->clksrc)
     {
     case PWM_CLKSRC_MCK:
-      regval = PWM_CMR_CPRE_MCKDIV(SAMA5_PWM_CHAN0_MCKDIV_LOG2);
-      fsrc   = BOARD_MCK_FREQUENCY >> SAMA5_PWM_CHAN0_MCKDIV_LOG2;
+      regval = PWM_CMR_CPRE_MCKDIV(chan->divlog2);
+      fsrc   = BOARD_MCK_FREQUENCY >> chan->divlog2;
       break;
 
     case PWM_CLKSRC_CLKA:
@@ -1085,7 +1093,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
   /* Configure the channel */
 
-  sam_chan_putreg(priv, SAM_PWM_CMR_OFFSET, PWM_CMR_CPRE_CLKA);
+  pwm_chan_putreg(chan, SAM_PWM_CMR_OFFSET, PWM_CMR_CPRE_CLKA);
 
   /* Set the PWM period.  
    *
@@ -1107,7 +1115,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
    */
 
   cprd = (info->frequency + (fsrc >> 1)) / fsrc;
-  sam_chan_putreg(priv, SAM_PWM_CPRD_OFFSET, cprd);
+  pwm_chan_putreg(chan, SAM_PWM_CPRD_OFFSET, cprd);
 
   /* Set the PWM duty.  Since the PWM is disabled, we can write directly
    * to the CTDY (vs. the CTDYUPD) register.
@@ -1121,11 +1129,11 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
       regval = cprd;
     }
 
-  sam_chan_putreg(priv, SAM_PWM_CDTY_OFFSET, regval);
+  pwm_chan_putreg(chan, SAM_PWM_CDTY_OFFSET, regval);
 
   /* Enable the channel */
 
-  sam_putreg(priv, SAM_PWM_ENA_OFFSET, PWM_CHID(chan->channel));
+  pwm_putreg(chan, SAM_PWM_ENA_OFFSET, PWM_CHID(chan->channel));
   return OK;
 }
 
@@ -1156,12 +1164,12 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
 
   /* Disable further PWM interrupts from this channel */
 
-  sam_putreg(chan, SAM_PWM_IDR1_OFFSET,
+  pwm_putreg(chan, SAM_PWM_IDR1_OFFSET,
              PWM_INT1_CHID(chan->channel) | PWM_INT1_FCHID(chan->channel));
 
   /* Disable the channel */
 
-  sam_putreg(priv, SAM_PWM_DIS_OFFSET, PWM_CHID(chan->channel));
+  pwm_putreg(chan, SAM_PWM_DIS_OFFSET, PWM_CHID(chan->channel));
   pwm_dumpregs(chan, "After stop");
   return OK;
 }
@@ -1236,7 +1244,7 @@ static void pwm_resetpins(FAR struct sam_pwm_chan_s *chan)
  * Name: sam_pwminitialize
  *
  * Description:
- *   Initialize one timer for use with the upper_level PWM driver.
+ *   Initialize one PWM channel for use with the upper_level PWM driver.
  *
  * Input Parameters:
  *   channel - A number identifying the PWM channel use.
@@ -1254,7 +1262,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
 
   pwmvdbg("Channel %d\n", channel);
 
-  switch (timer)
+  switch (channel)
     {
 #ifdef CONFIG_SAMA5_PWM_CHAN0
       case 0:
@@ -1301,17 +1309,17 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
     {
       /* Enable the PWM peripheral clock */
 
-      sam_pwm_enableclks();
+      sam_pwm_enableclk();
 
       /* Set clock A and clock B */
 
-      regval = PWM_CLK_PREA | PWM_CLK_DIVA | PWM_CLK_PREB | PWM_CLK_DIVB;
-      sam_putreg(chan, SAM_PWM_CLK_OFFSET, regval);
+      regval = (CLKA_PRE_BITS | CLKA_DIV_BITS | CLKB_PRE_BITS | CLKB_DIV_BITS);
+      pwm_putreg(chan, SAM_PWM_CLK_OFFSET, regval);
 
       /* Disable all PWM interrupts at the PWM peripheral */
 
-      sam_putreg(chan, SAM_PWM_IDR1_OFFSET, PWM_INT1_ALL);
-      sam_putreg(chan, SAM_PWM_IDR2_OFFSET, PWM_INT2_ALL);
+      pwm_putreg(chan, SAM_PWM_IDR1_OFFSET, PWM_INT1_ALL);
+      pwm_putreg(chan, SAM_PWM_IDR2_OFFSET, PWM_INT2_ALL);
 
       /* Attach the PWM interrupt handler */
 
@@ -1327,8 +1335,8 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
 
       /* Clear any pending PWM interrupts */
 
-      (void)sam_getreg(chan, SAM_PWM_ISR1_OFFSET);
-      (void)sam_getreg(chan, SAM_PWM_ISR2_OFFSET);
+      (void)pwm_getreg(chan, SAM_PWM_ISR1_OFFSET);
+      (void)pwm_getreg(chan, SAM_PWM_ISR2_OFFSET);
 
       /* Enable PWM interrupts at the AIC */
 

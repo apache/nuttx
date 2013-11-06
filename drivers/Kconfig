@@ -80,6 +80,10 @@ config CAN_LOOPBACK
 
 endif
 
+config ARCH_HAVE_PWM_PULSECOUNT
+	bool
+	default n
+
 menuconfig PWM
 	bool "PWM Driver Support"
 	default n
@@ -91,6 +95,7 @@ if PWM
 config PWM_PULSECOUNT
 	bool "PWM Pulse Count Support"
 	default n
+	depends on ARCH_HAVE_PWM_PULSECOUNT
 	---help---
 		Some hardware will support generation of a fixed number of pulses.
 		This might be used, for example to support a stepper motor.  If the
