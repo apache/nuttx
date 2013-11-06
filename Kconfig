@@ -490,6 +490,15 @@ config DEBUG_CAN
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
+config DEBUG_PWM
+	bool "PWM Debug Output"
+	default n
+	depends on PWM
+	---help---
+		Enable PWM driver debug SYSLOG output (disabled by default).
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
 config DEBUG_SDIO
 	bool "SDIO Debug Output"
 	default n

@@ -2380,7 +2380,7 @@ config SAMA5_PWM_CLKA
 
 config SAMA5_PWM_CLKA_FREQUENCY
 	int "CLKA frequency"
-	default 100
+	default 1000
 	depends on SAMA5_PWM_CLKA
 	---help---
 		If the CLKA source is enabled, then you must also provide the
@@ -2396,7 +2396,7 @@ config SAMA5_PWM_CLKB
 
 config SAMA5_PWM_CLKB_FREQUENCY
 	int "CLKB frequency"
-	default 100
+	default 1000
 	depends on SAMA5_PWM_CLKB
 	---help---
 		If the CLKB source is enabled, then you must also provide the
@@ -2439,7 +2439,7 @@ config SAMA5_PWM_CHAN0_MCKDIV
 
 config SAMA5_PWM_CHAN0_OUTPUTH
 	bool "Configure OUTPUT H pin"
-	default n
+	default y
 
 config SAMA5_PWM_CHAN0_OUTPUTL
 	bool "Configure OUTPUT L pin"
@@ -2486,7 +2486,7 @@ config SAMA5_PWM_CHAN1_MCKDIV
 
 config SAMA5_PWM_CHAN1_OUTPUTH
 	bool "Configure OUTPUT H pin"
-	default n
+	default y
 
 config SAMA5_PWM_CHAN1_OUTPUTL
 	bool "Configure OUTPUT L pin"
@@ -2533,7 +2533,7 @@ config SAMA5_PWM_CHAN2_MCKDIV
 
 config SAMA5_PWM_CHAN2_OUTPUTH
 	bool "Configure OUTPUT H pin"
-	default n
+	default y
 
 config SAMA5_PWM_CHAN2_OUTPUTL
 	bool "Configure OUTPUT L pin"
@@ -2580,7 +2580,7 @@ config SAMA5_PWM_CHAN3_MCKDIV
 
 config SAMA5_PWM_CHAN3_OUTPUTH
 	bool "Configure OUTPUT H pin"
-	default n
+	default y
 
 config SAMA5_PWM_CHAN3_OUTPUTL
 	bool "Configure OUTPUT L pin"

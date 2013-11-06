@@ -176,6 +176,74 @@
 #define PIO_LCD_DAT22     PIO_LCD_DAT22_1
 #define PIO_LCD_DAT23     PIO_LCD_DAT23_1
 
+/* PWM.  There are no dedicated PWM output pins available to the user for PWM
+ * testing.  Care must be taken because all PWM output pins conflict with some other
+ * usage of the pin by other devices:
+ *
+ *    -----+---+---+----+--------------------
+ *     PWM  PIN PER PIO  CONFLICTS
+ *    -----+---+---+----+--------------------
+ *     PWM0 FI   B  PC28   SPI1, ISI
+ *          H    B  PB0    GMAC
+ *               B  PA20   LCDC, ISI
+ *          L    B  PB1    GMAC
+ *               B  PA21   LCDC, ISI
+ *    -----+---+---+----+--------------------
+ *     PWM1 FI   B  PC31   HDMI
+ *          H    B  PB4    GMAC
+ *               B  PA22   LCDC, ISI
+ *          L    B  PB5    GMAC
+ *               B  PE31   ISI, HDMI
+ *               B  PA23   LCDC, ISI
+ *    -----+---+---+----+--------------------
+ *     PWM2 FI   B  PC29   UART0, ISI, HDMI
+ *          H    C  PD5    HSMCI0
+ *               B  PB8    GMAC
+ *          L    C  PD6    HSMCI0
+ *               B  PB9    GMAC
+ *    -----+---+---+----+--------------------
+ *     PWM3 FI   C  PD16   SPI0, Audio
+ *          H    C  PD7    HSMCI0
+ *               B  PB12   GMAC
+ *          L    C  PD8    HSMCI0
+ *               B  PB13   GMAC
+ *    -----+---+---+----+--------------------
+ */
+
+#if !defined(CONFIG_SAMA5_GMAC)
+#  define PIO_PWM0_H  PIO_PWM0_H_1
+#  define PIO_PWM0_L  PIO_PWM0_L_1
+#elif !defined(CONFIG_SAMA5_LCDC) && !defined(CONFIG_SAMA5_ISI)
+#  define PIO_PWM0_H  PIO_PWM0_H_2
+#  define PIO_PWM0_L  PIO_PWM0_L_3
+#endif
+
+#if !defined(CONFIG_SAMA5_GMAC)
+#  define PIO_PWM1_H  PIO_PWM1_H_1
+#  define PIO_PWM1_L  PIO_PWM1_L_1
+#elif !defined(CONFIG_SAMA5_LCDC) && !defined(CONFIG_SAMA5_ISI)
+#  define PIO_PWM1_H  PIO_PWM1_H_2
+#  define PIO_PWM1_L  PIO_PWM1_L_3
+#elif !defined(CONFIG_SAMA5_ISI)
+#  define PIO_PWM1_L  PIO_PWM1_L_2
+#endif
+
+#if !defined(CONFIG_SAMA5_HSMCI0)
+#  define PIO_PWM2_H  PIO_PWM2_H_1
+#  define PIO_PWM2_L  PIO_PWM2_L_1
+#elif !defined(CONFIG_SAMA5_GMAC)
+#  define PIO_PWM2_H  PIO_PWM2_H_2
+#  define PIO_PWM2_L  PIO_PWM2_L_2
+#endif
+
+#if !defined(CONFIG_SAMA5_HSMCI0)
+#  define PIO_PWM3_H  PIO_PWM3_H_1
+#  define PIO_PWM3_L  PIO_PWM3_L_1
+#elif !defined(CONFIG_SAMA5_GMAC)
+#  define PIO_PWM3_H  PIO_PWM3_H_2
+#  define PIO_PWM3_L  PIO_PWM3_L_2
+#endif
+
 /************************************************************************************
  * Assembly Language Macros
  ************************************************************************************/

@@ -5977,4 +5977,5 @@
 	* arch/arm/src/sama5/Make.defs and Kconfig:  SAMA5 PWM driver now
 	  incorporated into build and configuration system.  Builds with
 	  no errors (2013-11-6).
-
+	* configs/sama5d3x-ek:  Add support for the PWM test for the
+	  SAMA5D3x-EK board (2013-11-6).

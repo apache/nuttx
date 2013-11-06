@@ -1076,18 +1076,22 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
       fsrc   = BOARD_MCK_FREQUENCY >> chan->divlog2;
       break;
 
+#ifdef CONFIG_SAMA5_PWM_CLKA
     case PWM_CLKSRC_CLKA:
       regval = PWM_CMR_CPRE_CLKA;
       fsrc   = CLKA_FREQUENCY;
       break;
+#endif
 
+#ifdef CONFIG_SAMA5_PWM_CLKB
     case PWM_CLKSRC_CLKB:
       regval = PWM_CMR_CPRE_CLKB;
       fsrc   = CLKB_FREQUENCY;
       break;
+#endif
 
     default:
-      pwmdbg("ERROR: Bad clock source value: %d\n", chan->clksrc);
+      pwmdbg("ERROR: Invalid or unsupported clock source value: %d\n", chan->clksrc);
       return -EINVAL;
     }
 
