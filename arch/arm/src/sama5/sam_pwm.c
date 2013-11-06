@@ -900,42 +900,42 @@ static void pwm_dumpregs(struct sam_pwm_chan_s *chan, FAR const char *msg)
           pwm_getreg(chan, SAM_PWM_OOV_OFFSET),
           pwm_getreg(chan, SAM_PWM_OS_OFFSET),
           pwm_getreg(chan, SAM_PWM_FMR_OFFSET));
-  pwmvdbg("  FSR: %04x    FPV: %04x   FPE: %04x ELMR0: %04x\n",
+  pwmvdbg("   FSR: %04x   FPV: %04x   FPE: %04x ELMR0: %04x\n",
           pwm_getreg(chan, SAM_PWM_FSR_OFFSET),
           pwm_getreg(chan, SAM_PWM_FPV_OFFSET),
           pwm_getreg(chan, SAM_PWM_FPE_OFFSET),
           pwm_getreg(chan, SAM_PWM_ELMR0_OFFSET));
-  pwmvdbg("ELMR1: %04x   SMMR: %04x  WPSR: %04x\n",
+  pwmvdbg(" ELMR1: %04x  SMMR: %04x  WPSR: %04x\n",
           pwm_getreg(chan, SAM_PWM_ELMR1_OFFSET),
           pwm_getreg(chan, SAM_PWM_SMMR_OFFSET),
           pwm_getreg(chan, SAM_PWM_WPSR_OFFSET));
-  pwmvdbg("CMPV0: %04x  CMPM0: %04x CMPV1: %04x CMPM1: %04x\n",
+  pwmvdbg(" CMPV0: %04x CMPM0: %04x CMPV1: %04x CMPM1: %04x\n",
           pwm_getreg(chan, SAM_PWM_CMPV0_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM0_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPV1_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM1_OFFSET));
-  pwmvdbg("CMPV2: %04x  CMPM2: %04x CMPV3: %04x CMPM3: %04x\n",
+  pwmvdbg(" CMPV2: %04x CMPM2: %04x CMPV3: %04x CMPM3: %04x\n",
           pwm_getreg(chan, SAM_PWM_CMPV2_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM2_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPV3_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM3_OFFSET));
-  pwmvdbg("CMPV4: %04x  CMPM4: %04x CMPV5: %04x CMPM5: %04x\n",
+  pwmvdbg(" CMPV4: %04x CMPM4: %04x CMPV5: %04x CMPM5: %04x\n",
           pwm_getreg(chan, SAM_PWM_CMPV4_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM4_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPV5_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM5_OFFSET));
-  pwmvdbg("CMPV6: %04x  CMPM6: %04x CMPV7: %04x CMPM7: %04x\n",
+  pwmvdbg(" CMPV6: %04x CMPM6: %04x CMPV7: %04x CMPM7: %04x\n",
           pwm_getreg(chan, SAM_PWM_CMPV6_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM6_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPV7_OFFSET),
           pwm_getreg(chan, SAM_PWM_CMPM7_OFFSET));
   pwmvdbg("Channel %d: %s\n", chan->channel, msg);
-  pwmvdbg("  CMR: %04x   CDTY: %04x  CPRD: %04x  CCNT: %04x\n",
+  pwmvdbg("   CMR: %04x  CDTY: %04x  CPRD: %04x  CCNT: %04x\n",
           pwm_chan_getreg(chan, SAM_PWM_CMR_OFFSET),
           pwm_chan_getreg(chan, SAM_PWM_CDTY_OFFSET),
           pwm_chan_getreg(chan, SAM_PWM_CPRD_OFFSET),
           pwm_chan_getreg(chan, SAM_PWM_CCNT_OFFSET));
-  pwmvdbg("   CT: %04x\n",
+  pwmvdbg("    CT: %04x\n",
           pwm_chan_getreg(chan, SAM_PWM_DT_OFFSET));
 }
 #endif
@@ -1138,6 +1138,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
   /* Enable the channel */
 
   pwm_putreg(chan, SAM_PWM_ENA_OFFSET, PWM_CHID(chan->channel));
+  pwm_dumpregs(chan, "After start");
   return OK;
 }
 
@@ -1351,6 +1352,7 @@ FAR struct pwm_lowerhalf_s *sam_pwminitialize(int channel)
       /* Now were are initialized */
 
       g_pwm.initialized = true;
+      pwm_dumpregs(chan, "After Initialization");
     }
 
   /* Configure all pins for this channel as inputs */
