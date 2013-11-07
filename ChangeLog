@@ -5979,3 +5979,6 @@
 	  no errors (2013-11-6).
 	* configs/sama5d3x-ek:  Add support for the PWM test for the
 	  SAMA5D3x-EK board (2013-11-6).
+	* arch/arm/src/sama5/sam_pwm.c and .h: SAMA5 PWM driver is now
+	  function (2013-11-7).
+

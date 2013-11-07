@@ -178,55 +178,87 @@
 
 /* PWM.  There are no dedicated PWM output pins available to the user for PWM
  * testing.  Care must be taken because all PWM output pins conflict with some other
- * usage of the pin by other devices:
+ * usage of the pin by other devices. Furthermore, many of these pins have not been
+ * brought out to an external connector:
  *
- *    -----+---+---+----+--------------------
- *     PWM  PIN PER PIO  CONFLICTS
- *    -----+---+---+----+--------------------
- *     PWM0 FI   B  PC28   SPI1, ISI
- *          H    B  PB0    GMAC
- *               B  PA20   LCDC, ISI
- *          L    B  PB1    GMAC
- *               B  PA21   LCDC, ISI
- *    -----+---+---+----+--------------------
- *     PWM1 FI   B  PC31   HDMI
- *          H    B  PB4    GMAC
- *               B  PA22   LCDC, ISI
- *          L    B  PB5    GMAC
- *               B  PE31   ISI, HDMI
- *               B  PA23   LCDC, ISI
- *    -----+---+---+----+--------------------
- *     PWM2 FI   B  PC29   UART0, ISI, HDMI
- *          H    C  PD5    HSMCI0
- *               B  PB8    GMAC
- *          L    C  PD6    HSMCI0
- *               B  PB9    GMAC
- *    -----+---+---+----+--------------------
- *     PWM3 FI   C  PD16   SPI0, Audio
- *          H    C  PD7    HSMCI0
- *               B  PB12   GMAC
- *          L    C  PD8    HSMCI0
- *               B  PB13   GMAC
- *    -----+---+---+----+--------------------
+ *    -----+---+---+----+------+----------------
+ *     PWM  PIN PER PIO   I/O   CONFLICTS
+ *    -----+---+---+----+------+----------------
+ *     PWM0 FI   B  PC28 J2.30  SPI1, ISI
+ *          H    B  PB0   ---   GMAC
+ *               B  PA20 J1.14  LCDC, ISI
+ *          L    B  PB1   ---   GMAC
+ *               B  PA21 J1.16  LCDC, ISI
+ *    -----+---+---+----+------+----------------
+ *     PWM1 FI   B  PC31 J2.36  HDMI
+ *          H    B  PB4   ---   GMAC
+ *               B  PA22 J1.18  LCDC, ISI
+ *          L    B  PB5   ---   GMAC
+ *               B  PE31 J3.20  ISI, HDMI
+ *               B  PA23 J1.20  LCDC, ISI
+ *    -----+---+---+----+------+----------------
+ *     PWM2 FI   B  PC29 J2.29  UART0, ISI, HDMI
+ *          H    C  PD5   ---   HSMCI0
+ *               B  PB8   ---   GMAC
+ *          L    C  PD6   ---   HSMCI0
+ *               B  PB9   ---   GMAC
+ *    -----+---+---+----+------+----------------
+ *     PWM3 FI   C  PD16  ---  SPI0, Audio
+ *          H    C  PD7   ---  HSMCI0
+ *               B  PB12 J3.7  GMAC
+ *          L    C  PD8   ---  HSMCI0
+ *               B  PB13  ---  GMAC
+ *    -----+---+---+----+------+----------------
  */
 
-#if !defined(CONFIG_SAMA5_GMAC)
+/* PWM channel 0:
+ *
+ * PA20 and PA21 can be used if the LCDC or ISI are not selected.  These outputs are
+ * available on J1, pins 14 and 16, respectively.
+ *
+ * If the GMAC is not selected, then PB0 and PB1 could also be used.  However,
+ * these pins are not available at the I/O expansion connectors.
+ */
+
+#if !defined(CONFIG_SAMA5_LCDC) && !defined(CONFIG_SAMA5_ISI)
+#  define PIO_PWM0_H  PIO_PWM0_H_2
+#  define PIO_PWM0_L  PIO_PWM0_L_2
+#elif !defined(CONFIG_SAMA5_GMAC)
 #  define PIO_PWM0_H  PIO_PWM0_H_1
 #  define PIO_PWM0_L  PIO_PWM0_L_1
-#elif !defined(CONFIG_SAMA5_LCDC) && !defined(CONFIG_SAMA5_ISI)
-#  define PIO_PWM0_H  PIO_PWM0_H_2
-#  define PIO_PWM0_L  PIO_PWM0_L_3
 #endif
 
-#if !defined(CONFIG_SAMA5_GMAC)
-#  define PIO_PWM1_H  PIO_PWM1_H_1
-#  define PIO_PWM1_L  PIO_PWM1_L_1
-#elif !defined(CONFIG_SAMA5_LCDC) && !defined(CONFIG_SAMA5_ISI)
+/* PWM channel 1:
+ *
+ * PA22 and PA23 can be used if the LCDC or ISI are not selected.  These outputs are
+ * available on J1, pins 18 and 20, respectively.
+ *
+ * PE31 can be used if the ISI is not selected (and the HDMI is not being used).
+ * That signal is available at J3 pin 20.
+ *
+ * If the GMAC is not selected, then PB4 and PB5 could also be used.  However,
+ * these pins are not available at the I/O expansion connectors.
+ */
+
+#if !defined(CONFIG_SAMA5_LCDC) && !defined(CONFIG_SAMA5_ISI)
 #  define PIO_PWM1_H  PIO_PWM1_H_2
+#elif !defined(CONFIG_SAMA5_GMAC)
+#  define PIO_PWM1_H  PIO_PWM1_H_1
+#endif
+
+#if !defined(CONFIG_SAMA5_LCDC) && !defined(CONFIG_SAMA5_ISI)
 #  define PIO_PWM1_L  PIO_PWM1_L_3
 #elif !defined(CONFIG_SAMA5_ISI)
 #  define PIO_PWM1_L  PIO_PWM1_L_2
+#elif !defined(CONFIG_SAMA5_GMAC)
+#  define PIO_PWM1_L  PIO_PWM1_L_1
 #endif
+
+/* PWM channel 2:
+ *
+ * None of the output pin options are available at any of the I/O expansion
+ * connectors for PWM channel 2
+ */
 
 #if !defined(CONFIG_SAMA5_HSMCI0)
 #  define PIO_PWM2_H  PIO_PWM2_H_1
@@ -236,12 +268,18 @@
 #  define PIO_PWM2_L  PIO_PWM2_L_2
 #endif
 
-#if !defined(CONFIG_SAMA5_HSMCI0)
-#  define PIO_PWM3_H  PIO_PWM3_H_1
-#  define PIO_PWM3_L  PIO_PWM3_L_1
-#elif !defined(CONFIG_SAMA5_GMAC)
+/* PWM channel 3:
+ *
+ * If the GMAC is not selected, then PB12 can used and is available at J3 pin 7.
+ * None of the other output pins are accessible at the I/O expansion connectors.
+ */
+
+#if !defined(CONFIG_SAMA5_GMAC)
 #  define PIO_PWM3_H  PIO_PWM3_H_2
 #  define PIO_PWM3_L  PIO_PWM3_L_2
+#elif !defined(CONFIG_SAMA5_HSMCI0)
+#  define PIO_PWM3_H  PIO_PWM3_H_1
+#  define PIO_PWM3_L  PIO_PWM3_L_1
 #endif
 
 /************************************************************************************
