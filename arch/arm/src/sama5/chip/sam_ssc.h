@@ -68,7 +68,7 @@
 #define SAM_SSC_IMR_OFFSET        0x004c /* Interrupt Mask Register */
 #define SAM_SSC_WPMR_OFFSET       0x00e4 /* Write Protect Mode Register */
 #define SAM_SSC_WPSR_OFFSET       0x00e8 /* Write Protect Status Register */
-                                         /* 0x50-0x124 Reserved 
+                                         /* 0x50-0x124 Reserved */
 
 /* SSC Register Addresses ***********************************************************/
 
@@ -193,9 +193,9 @@
 
 #define SSC_TCMR_CKS_SHIFT        (0)       /* Bits 0-1: Transmit Clock Selection */
 #define SSC_TCMR_CKS_MASK         (3 << SSC_TCMR_CKS_SHIFT)
-#  define SSC_TCMR_CKS_ MCK       (0 << SSC_TCMR_CKS_SHIFT) /* Divided Clock */
-#  define SSC_TCMR_CKS_ RK        (1 << SSC_TCMR_CKS_SHIFT) /* RK Clock signal */
-#  define SSC_TCMR_CKS_ TK        (2 << SSC_TCMR_CKS_SHIFT) /* TK pin */
+#  define SSC_TCMR_CKS_MCK        (0 << SSC_TCMR_CKS_SHIFT) /* Divided Clock */
+#  define SSC_TCMR_CKS_RK         (1 << SSC_TCMR_CKS_SHIFT) /* RK Clock signal */
+#  define SSC_TCMR_CKS_TK         (2 << SSC_TCMR_CKS_SHIFT) /* TK pin */
 #define SSC_TCMR_CKO_SHIFT        (2)       /* Bits 2-3: Transmit Clock Output Mode Selection */
 #define SSC_TCMR_CKO_MASK         (3 << SSC_TCMR_CKO_SHIFT)
 #  define SSC_TCMR_CKO_NONE       (0 << SSC_TCMR_CKO_SHIFT) /* None, TK pin is an input */
