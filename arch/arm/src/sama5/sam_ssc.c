@@ -105,10 +105,25 @@
 /* Clocking *****************************************************************/
 /* Select MCU-specific settings
  *
- * SSC is driven by the main clock.
+ * SSC is driven by the main clock, divided down so that the maximum
+ * peripheral clocking is not exceeded.
  */
 
-#define SAM_SSC_CLOCK     BOARD_MCK_FREQUENCY
+#if BOARD_MCK_FREQUENCY <= SAM_SSC_MAXPERCLK
+#  define SSC_FREQUENCY BOARD_MCK_FREQUENCY
+#  define SSC_PCR_DIV PMC_PCR_DIV1
+#elif (BOARD_MCK_FREQUENCY >> 1) <= SAM_SSC_MAXPERCLK
+#  define SSC_FREQUENCY (BOARD_MCK_FREQUENCY >> 1)
+#  define SSC_PCR_DIV PMC_PCR_DIV2
+#elif (BOARD_MCK_FREQUENCY >> 2) <= SAM_SSC_MAXPERCLK
+#  define SSC_FREQUENCY (BOARD_MCK_FREQUENCY >> 2)
+#  define SSC_PCR_DIV PMC_PCR_DIV4
+#elif (BOARD_MCK_FREQUENCY >> 3) <= SAM_SSC_MAXPERCLK
+#  define SSC_FREQUENCY (BOARD_MCK_FREQUENCY >> 3)
+#  define SSC_PCR_DIV PMC_PCR_DIV8
+#else
+#  error Cannot realize SSC input frequency
+#endif
 
 /* DMA timeout.  The value is not critical; we just don't want the system to
  * hang in the event that a DMA does not finish.  This is set to
@@ -159,13 +174,13 @@
 
 /* The state of the one SSC peripheral */
 
-struct sam_i2s_s
+struct sam_ssc_s
 {
   struct i2s_dev_s dev;        /* Externally visible I2S interface */
   uint32_t base;               /* SSC controller register base address */
   sem_t exclsem;               /* Assures mutually exclusive acess to SSC */
 #if defined(CONFIG_SAMA5_SSC0) || defined(CONFIG_SAMA5_SSC1)
-  uint8_t i2sno;               /* SSC controller number (0 or 1) */
+  uint8_t sscno;               /* SSC controller number (0 or 1) */
 #endif
 
 #ifdef CONFIG_SAMA5_SSC_DMA
@@ -200,67 +215,67 @@ struct sam_i2s_s
 /* Helpers */
 
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
-static bool     i2s_checkreg(struct sam_i2s_s *i2s, bool wr, uint32_t value,
+static bool     ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t value,
                   uint32_t address);
 #else
-# define        i2s_checkreg(i2s,wr,value,address) (false)
+# define        ssc_checkreg(priv,wr,value,address) (false)
 #endif
 
-static inline uint32_t i2s_getreg(struct sam_i2s_s *i2s, unsigned int offset);
-static inline void i2s_putreg(struct sam_i2s_s *i2s, uint32_t value,
+static inline uint32_t ssc_getreg(struct sam_ssc_s *priv, unsigned int offset);
+static inline void ssc_putreg(struct sam_ssc_s *priv, uint32_t value,
                   unsigned int offset);
 #ifdef CONFIG_SAMA5_SSC_DMA
-static inline uintptr_t i2s_physregaddr(struct sam_i2s_s *i2s,
+static inline uintptr_t ssc_physregaddr(struct sam_ssc_s *priv,
                   unsigned int offset);
 #endif
 #if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_VERBOSE)
-static void     i2s_dumpregs(struct sam_i2s_s *i2s, const char *msg);
+static void     ssc_dumpregs(struct sam_ssc_s *priv, const char *msg);
 #else
-# define        i2s_dumpregs(i2s,msg)
+# define        ssc_dumpregs(priv,msg)
 #endif
 
 /* DMA support */
 
 #if defined(CONFIG_SAMA5_SSC_DMADEBUG)
-#  define i2s_rxdma_sample(s,i) sam_dmasample((s)->rxdma, &(s)->rxdmaregs[i])
-#  define i2s_txdma_sample(s,i) sam_dmasample((s)->txdma, &(s)->txdmaregs[i])
-static void     i2s_dma_sampleinit(struct sam_i2s_s *i2s);
-static void     i2s_dma_sampledone(struct sam_i2s_s *i2s);
+#  define ssc_rxdma_sample(s,i) sam_dmasample((s)->rxdma, &(s)->rxdmaregs[i])
+#  define ssc_txdma_sample(s,i) sam_dmasample((s)->txdma, &(s)->txdmaregs[i])
+static void     ssc_dma_sampleinit(struct sam_ssc_s *priv);
+static void     ssc_dma_sampledone(struct sam_ssc_s *priv);
 
 #else
-#  define i2s_rxdma_sample(s,i)
-#  define i2s_txdma_sample(s,i)
-#  define i2s_dma_sampleinit(s)
-#  define i2s_dma_sampledone(s)
+#  define ssc_rxdma_sample(s,i)
+#  define ssc_txdma_sample(s,i)
+#  define ssc_dma_sampleinit(s)
+#  define ssc_dma_sampledone(s)
 
 #endif
 
 #ifdef CONFIG_SAMA5_SSC_DMA
-static void     i2s_rxcallback(DMA_HANDLE handle, void *arg, int result);
-static void     i2s_txcallback(DMA_HANDLE handle, void *arg, int result);
+static void     ssc_rxcallback(DMA_HANDLE handle, void *arg, int result);
+static void     ssc_txcallback(DMA_HANDLE handle, void *arg, int result);
 #endif
 
 /* I2S methods */
 
-static uint32_t i2s_frequency(FAR struct i2s_dev_s *dev, uint32_t frequency);
+static uint32_t ssc_frequency(FAR struct i2s_dev_s *dev, uint32_t frequency);
 #ifdef CONFIG_SAMA5_SSC_DMA
-static void     i2s_send_nodma(FAR struct i2s_dev_s *dev,
+static void     ssc_send_nodma(FAR struct i2s_dev_s *dev,
                    FAR const void *buffer, size_t nbytes);
-static void     i2s_receive_nodma(FAR struct i2s_dev_s *dev, FAR void *buffer,
+static void     ssc_receive_nodma(FAR struct i2s_dev_s *dev, FAR void *buffer,
                    size_t nbytes);
 #endif
-static void     i2s_send(struct i2s_dev_s *dev,
+static void     ssc_send(struct i2s_dev_s *dev,
                    const void *buffer, size_t nbytes);
-static void     i2s_receive(struct i2s_dev_s *dev, void *buffer,
+static void     ssc_receive(struct i2s_dev_s *dev, void *buffer,
                    size_t nbytes);
 
 /* Initialization */
 
 #ifdef CONFIG_SAMA5_SSC0
-static void     i2s_ssc0_configure(struct sam_i2s_s *i2s);
+static void     ssc0_configure(struct sam_ssc_s *priv);
 #endif
 #ifdef CONFIG_SAMA5_SSC1
-static void     i2s_ssc1_configure(struct sam_i2s_s *i2s);
+static void     ssc1_configure(struct sam_ssc_s *priv);
 #endif
 
 /****************************************************************************
@@ -268,11 +283,11 @@ static void     i2s_ssc1_configure(struct sam_i2s_s *i2s);
  ****************************************************************************/
 /* I2S device operations */
 
-static const struct i2s_ops_s g_i2sops =
+static const struct i2s_ops_s g_sscops =
 {
-  .i2s_frequency = i2s_frequency,
-  .i2s_send      = i2s_send,
-  .i2s_receive   = i2s_receive,
+  .i2s_frequency = ssc_frequency,
+  .i2s_send      = ssc_send,
+  .i2s_receive   = ssc_receive,
 };
 
 /****************************************************************************
@@ -284,7 +299,7 @@ static const struct i2s_ops_s g_i2sops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: i2s_checkreg
+ * Name: ssc_checkreg
  *
  * Description:
  *   Check if the current register access is a duplicate of the preceding.
@@ -300,35 +315,35 @@ static const struct i2s_ops_s g_i2sops =
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
-static bool i2s_checkreg(struct sam_i2s_s *i2s, bool wr, uint32_t value,
+static bool ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t value,
                          uint32_t address)
 {
-  if (wr      == i2s->wr &&     /* Same kind of access? */
-      value   == i2s->regval &&  /* Same value? */
-      address == i2s->regaddr)  /* Same address? */
+  if (wr      == priv->wr &&     /* Same kind of access? */
+      value   == priv->regval &&  /* Same value? */
+      address == priv->regaddr)  /* Same address? */
     {
       /* Yes, then just keep a count of the number of times we did this. */
 
-      i2s->count++;
+      priv->count++;
       return false;
     }
   else
     {
       /* Did we do the previous operation more than once? */
 
-      if (i2s->count > 0)
+      if (priv->count > 0)
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", i2s->count);
+          lldbg("...[Repeats %d times]...\n", priv->count);
         }
 
       /* Save information about the new access */
 
-      i2s->wr      = wr;
-      i2s->regval   = value;
-      i2s->regaddr = address;
-      i2s->count      = 0;
+      priv->wr      = wr;
+      priv->regval   = value;
+      priv->regaddr = address;
+      priv->count      = 0;
     }
 
   /* Return true if this is the first time that we have done this operation */
@@ -338,21 +353,21 @@ static bool i2s_checkreg(struct sam_i2s_s *i2s, bool wr, uint32_t value,
 #endif
 
 /****************************************************************************
- * Name: i2s_getreg
+ * Name: ssc_getreg
  *
  * Description:
  *  Read an SSC register
  *
  ****************************************************************************/
 
-static inline uint32_t i2s_getreg(struct sam_i2s_s *i2s,
+static inline uint32_t ssc_getreg(struct sam_ssc_s *priv,
                                   unsigned int offset)
 {
-  uint32_t address = i2s->base + offset;
+  uint32_t address = priv->base + offset;
   uint32_t value = getreg32(address);
 
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
-  if (i2s_checkreg(i2s, false, value, address))
+  if (ssc_checkreg(priv, false, value, address))
     {
       lldbg("%08x->%08x\n", address, value);
     }
@@ -362,20 +377,20 @@ static inline uint32_t i2s_getreg(struct sam_i2s_s *i2s,
 }
 
 /****************************************************************************
- * Name: i2s_putreg
+ * Name: ssc_putreg
  *
  * Description:
  *  Write a value to an SSC register
  *
  ****************************************************************************/
 
-static inline void i2s_putreg(struct sam_i2s_s *i2s, uint32_t value,
+static inline void ssc_putreg(struct sam_ssc_s *priv, uint32_t value,
                               unsigned int offset)
 {
-  uint32_t address = i2s->base + offset;
+  uint32_t address = priv->base + offset;
 
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
-  if (i2s_checkreg(i2s, true, value, address))
+  if (ssc_checkreg(priv, true, value, address))
     {
       lldbg("%08x<-%08x\n", address, value);
     }
@@ -385,7 +400,7 @@ static inline void i2s_putreg(struct sam_i2s_s *i2s, uint32_t value,
 }
 
 /****************************************************************************
- * Name: i2s_physregaddr
+ * Name: ssc_physregaddr
  *
  * Description:
  *   Return the physical address of an HSMCI register
@@ -393,21 +408,21 @@ static inline void i2s_putreg(struct sam_i2s_s *i2s, uint32_t value,
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC_DMA
-static inline uintptr_t i2s_physregaddr(struct sam_i2s_s *i2s,
+static inline uintptr_t ssc_physregaddr(struct sam_ssc_s *priv,
                                         unsigned int offset)
 {
-  return sam_physregaddr(i2s->base + offset);
+  return sam_physregaddr(priv->base + offset);
 }
 #endif
 
 /****************************************************************************
- * Name: i2s_dumpregs
+ * Name: ssc_dumpregs
  *
  * Description:
  *   Dump the contents of all SSC registers
  *
  * Input Parameters:
- *   i2s - The SSC controller to dump
+ *   priv - The SSC controller to dump
  *   msg - Message to print before the register data
  *
  * Returned Value:
@@ -416,34 +431,34 @@ static inline uintptr_t i2s_physregaddr(struct sam_i2s_s *i2s,
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_VERBOSE)
-static void i2s_dumpregs(struct sam_i2s_s *i2s, const char *msg)
+static void ssc_dumpregs(struct sam_ssc_s *priv, const char *msg)
 {
-  i2svdbg("SSC%d: %s\n", i2s->i2sno, msg);
+  i2svdbg("SSC%d: %s\n", priv->sscno, msg);
   i2svdbg("   CMR:%08x RCMR:%08x RFMR:%08x TCMR:%08x\n",
-          getreg32(i2s->base + SAM_SSC_CMR_OFFSET),
-          getreg32(i2s->base + SAM_SSC_RCMR_OFFSET),
-          getreg32(i2s->base + SAM_SSC_RFMR_OFFSET),
-          getreg32(i2s->base + SAM_SSC_TCMR_OFFSET));
+          getreg32(priv->base + SAM_SSC_CMR_OFFSET),
+          getreg32(priv->base + SAM_SSC_RCMR_OFFSET),
+          getreg32(priv->base + SAM_SSC_RFMR_OFFSET),
+          getreg32(priv->base + SAM_SSC_TCMR_OFFSET));
   i2svdbg("  TFMR:%08x RC0R:%08x RC1R:%08x   SR:%08x\n",
-          getreg32(i2s->base + SAM_SSC_TFMR_OFFSET),
-          getreg32(i2s->base + SAM_SSC_RC0R_OFFSET),
-          getreg32(i2s->base + SAM_SSC_RC1R_OFFSET),
-          getreg32(i2s->base + SAM_SSC_SR_OFFSET));
+          getreg32(priv->base + SAM_SSC_TFMR_OFFSET),
+          getreg32(priv->base + SAM_SSC_RC0R_OFFSET),
+          getreg32(priv->base + SAM_SSC_RC1R_OFFSET),
+          getreg32(priv->base + SAM_SSC_SR_OFFSET));
   i2svdbg("   IMR:%08x WPMR:%08x WPSR:%08x\n",
-          getreg32(i2s->base + SAM_SSC_IMR_OFFSET),
-          getreg32(i2s->base + SAM_SSC_WPMR_OFFSET),
-          getreg32(i2s->base + SAM_SSC_WPSR_OFFSET));
+          getreg32(priv->base + SAM_SSC_IMR_OFFSET),
+          getreg32(priv->base + SAM_SSC_WPMR_OFFSET),
+          getreg32(priv->base + SAM_SSC_WPSR_OFFSET));
 }
 #endif
 
 /****************************************************************************
- * Name: i2s_dma_sampleinit
+ * Name: ssc_dma_sampleinit
  *
  * Description:
  *   Initialize sampling of DMA registers (if CONFIG_SAMA5_SSC_DMADEBUG)
  *
  * Input Parameters:
- *   i2s - Chip select doing the DMA
+ *   priv - Chip select doing the DMA
  *
  * Returned Value:
  *   None
@@ -451,28 +466,28 @@ static void i2s_dumpregs(struct sam_i2s_s *i2s, const char *msg)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC_DMADEBUG
-static void i2s_dma_sampleinit(struct sam_i2s_s *i2s)
+static void ssc_dma_sampleinit(struct sam_ssc_s *priv)
 {
   /* Put contents of register samples into a known state */
 
-  memset(i2s->rxdmaregs, 0xff, DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
-  memset(i2s->txdmaregs, 0xff, DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
+  memset(priv->rxdmaregs, 0xff, DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
+  memset(priv->txdmaregs, 0xff, DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
 
   /* Then get the initial samples */
 
-  sam_dmasample(i2s->rxdma, &i2s->rxdmaregs[DMA_INITIAL]);
-  sam_dmasample(i2s->txdma, &i2s->txdmaregs[DMA_INITIAL]);
+  sam_dmasample(priv->rxdma, &priv->rxdmaregs[DMA_INITIAL]);
+  sam_dmasample(priv->txdma, &priv->txdmaregs[DMA_INITIAL]);
 }
 #endif
 
 /****************************************************************************
- * Name: i2s_dma_sampledone
+ * Name: ssc_dma_sampledone
  *
  * Description:
  *   Dump sampled DMA registers
  *
  * Input Parameters:
- *   i2s - Chip select doing the DMA
+ *   priv - Chip select doing the DMA
  *
  * Returned Value:
  *   None
@@ -480,33 +495,33 @@ static void i2s_dma_sampleinit(struct sam_i2s_s *i2s)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC_DMADEBUG
-static void i2s_dma_sampledone(struct sam_i2s_s *i2s)
+static void ssc_dma_sampledone(struct sam_ssc_s *priv)
 {
   /* Sample the final registers */
 
-  sam_dmasample(i2s->rxdma, &i2s->rxdmaregs[DMA_END_TRANSFER]);
-  sam_dmasample(i2s->txdma, &i2s->txdmaregs[DMA_END_TRANSFER]);
+  sam_dmasample(priv->rxdma, &priv->rxdmaregs[DMA_END_TRANSFER]);
+  sam_dmasample(priv->txdma, &priv->txdmaregs[DMA_END_TRANSFER]);
 
   /* Then dump the sampled DMA registers */
   /* Initial register values */
 
-  sam_dmadump(i2s->txdma, &i2s->txdmaregs[DMA_INITIAL],
+  sam_dmadump(priv->txdma, &priv->txdmaregs[DMA_INITIAL],
               "TX: Initial Registers");
-  sam_dmadump(i2s->rxdma, &i2s->rxdmaregs[DMA_INITIAL],
+  sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_INITIAL],
               "RX: Initial Registers");
 
   /* Register values after DMA setup */
 
-  sam_dmadump(i2s->txdma, &i2s->txdmaregs[DMA_AFTER_SETUP],
+  sam_dmadump(priv->txdma, &priv->txdmaregs[DMA_AFTER_SETUP],
               "TX: After DMA Setup");
-  sam_dmadump(i2s->rxdma, &i2s->rxdmaregs[DMA_AFTER_SETUP],
+  sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_AFTER_SETUP],
               "RX: After DMA Setup");
 
   /* Register values after DMA start */
 
-  sam_dmadump(i2s->txdma, &i2s->txdmaregs[DMA_AFTER_START],
+  sam_dmadump(priv->txdma, &priv->txdmaregs[DMA_AFTER_START],
               "TX: After DMA Start");
-  sam_dmadump(i2s->rxdma, &i2s->rxdmaregs[DMA_AFTER_START],
+  sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_AFTER_START],
               "RX: After DMA Start");
 
   /* Register values at the time of the TX and RX DMA callbacks
@@ -517,31 +532,31 @@ static void i2s_dma_sampledone(struct sam_i2s_s *i2s)
    * samples either, but we don't know for sure.
    */
 
-  sam_dmadump(i2s->txdma, &i2s->txdmaregs[DMA_CALLBACK],
+  sam_dmadump(priv->txdma, &priv->txdmaregs[DMA_CALLBACK],
               "TX: At DMA callback");
 
   /* Register values at the end of the DMA */
 
-  if (i2s->result == -ETIMEDOUT)
+  if (priv->result == -ETIMEDOUT)
     {
-      sam_dmadump(i2s->rxdma, &i2s->rxdmaregs[DMA_TIMEOUT],
+      sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_TIMEOUT],
                   "RX: At DMA timeout");
     }
   else
     {
-      sam_dmadump(i2s->rxdma, &i2s->rxdmaregs[DMA_CALLBACK],
+      sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_CALLBACK],
                   "RX: At DMA callback");
     }
 
-  sam_dmadump(i2s->rxdma, &i2s->rxdmaregs[DMA_END_TRANSFER],
+  sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_END_TRANSFER],
               "RX: At End-of-Transfer");
-  sam_dmadump(i2s->txdma, &i2s->txdmaregs[DMA_END_TRANSFER],
+  sam_dmadump(priv->txdma, &priv->txdmaregs[DMA_END_TRANSFER],
               "TX: At End-of-Transfer");
 }
 #endif
 
 /****************************************************************************
- * Name: i2s_dmatimeout
+ * Name: ssc_dmatimeout
  *
  * Description:
  *   The watchdog timeout setup when a has expired without completion of a
@@ -560,29 +575,29 @@ static void i2s_dma_sampledone(struct sam_i2s_s *i2s)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC_DMA
-static void i2s_dmatimeout(int argc, uint32_t arg)
+static void ssc_dmatimeout(int argc, uint32_t arg)
 {
-  struct sam_i2s_s *i2s = (struct sam_i2s_s *)arg;
-  DEBUGASSERT(i2s != NULL);
+  struct sam_ssc_s *priv = (struct sam_ssc_s *)arg;
+  DEBUGASSERT(priv != NULL);
 
   /* Sample DMA registers at the time of the timeout */
 
-  i2s_rxdma_sample(i2s, DMA_CALLBACK);
+  ssc_rxdma_sample(priv, DMA_CALLBACK);
 
   /* Report timeout result, perhaps overwriting any failure reports from
    * the TX callback.
    */
 
-  i2s->result = -ETIMEDOUT;
+  priv->result = -ETIMEDOUT;
 
   /* Then wake up the waiting thread */
 
-  sem_post(&i2s->dmawait);
+  sem_post(&priv->dmawait);
 }
 #endif
 
 /****************************************************************************
- * Name: i2s_rxcallback
+ * Name: ssc_rxcallback
  *
  * Description:
  *   This callback function is invoked at the completion of the SSC RX DMA.
@@ -598,38 +613,38 @@ static void i2s_dmatimeout(int argc, uint32_t arg)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC_DMA
-static void i2s_rxcallback(DMA_HANDLE handle, void *arg, int result)
+static void ssc_rxcallback(DMA_HANDLE handle, void *arg, int result)
 {
-  struct sam_i2s_s *i2s = (struct sam_i2s_s *)arg;
-  DEBUGASSERT(i2s != NULL);
+  struct sam_ssc_s *priv = (struct sam_ssc_s *)arg;
+  DEBUGASSERT(priv != NULL);
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(i2s->dmadog);
+  (void)wd_cancel(priv->dmadog);
 
   /* Sample DMA registers at the time of the callback */
 
-  i2s_rxdma_sample(i2s, DMA_CALLBACK);
+  ssc_rxdma_sample(priv, DMA_CALLBACK);
 
   /* Report the result of the transfer only if the TX callback has not already
    * reported an error.
    */
 
-  if (i2s->result == -EBUSY)
+  if (priv->result == -EBUSY)
     {
       /* Save the result of the transfer if no error was previuosly reported */
 
-      i2s->result = result;
+      priv->result = result;
     }
 
   /* Then wake up the waiting thread */
 
-  sem_post(&i2s->dmawait);
+  sem_post(&priv->dmawait);
 }
 #endif
 
 /****************************************************************************
- * Name: i2s_txcallback
+ * Name: ssc_txcallback
  *
  * Description:
  *   This callback function is invoked at the completion of the SSC TX DMA.
@@ -645,29 +660,29 @@ static void i2s_rxcallback(DMA_HANDLE handle, void *arg, int result)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC_DMA
-static void i2s_txcallback(DMA_HANDLE handle, void *arg, int result)
+static void ssc_txcallback(DMA_HANDLE handle, void *arg, int result)
 {
-  struct sam_i2s_s *i2s = (struct sam_i2s_s *)arg;
-  DEBUGASSERT(i2s != NULL);
+  struct sam_ssc_s *priv = (struct sam_ssc_s *)arg;
+  DEBUGASSERT(priv != NULL);
 
-  i2s_txdma_sample(i2s, DMA_CALLBACK);
+  ssc_txdma_sample(priv, DMA_CALLBACK);
 
   /* Do nothing on the TX callback unless an error is reported.  This
    * callback is not really important because the SSC exchange is not
    * complete until the RX callback is received.
    */
 
-  if (result != OK && i2s->result == -EBUSY)
+  if (result != OK && priv->result == -EBUSY)
     {
       /* Save the result of the transfer if an error is reported */
 
-      i2s->result = result;
+      priv->result = result;
     }
 }
 #endif
 
 /****************************************************************************
- * Name: i2s_frequency
+ * Name: ssc_frequency
  *
  * Description:
  *   Set the SSC frequency.
@@ -681,9 +696,9 @@ static void i2s_txcallback(DMA_HANDLE handle, void *arg, int result)
  *
  ****************************************************************************/
 
-static uint32_t i2s_frequency(struct i2s_dev_s *dev, uint32_t frequency)
+static uint32_t ssc_frequency(struct i2s_dev_s *dev, uint32_t frequency)
 {
-  struct sam_i2s_s *i2s = (struct sam_i2s_s *)dev;
+  struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
   uint32_t actual;
   uint32_t regval;
 
@@ -695,7 +710,7 @@ static uint32_t i2s_frequency(struct i2s_dev_s *dev, uint32_t frequency)
 }
 
 /***************************************************************************
- * Name: i2s_send_nodma
+ * Name: ssc_send_nodma
  *
  * Description:
  *   Send a block of data on SSC without using DMA
@@ -711,21 +726,21 @@ static uint32_t i2s_frequency(struct i2s_dev_s *dev, uint32_t frequency)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC_DMA
-static void i2s_send_nodma(struct i2s_dev_s *dev, const void *buffer,
+static void ssc_send_nodma(struct i2s_dev_s *dev, const void *buffer,
                            size_t nbytes)
 #else
-static void i2s_send(struct i2s_dev_s *dev, const void *buffer, size_t nbytes)
+static void ssc_send(struct i2s_dev_s *dev, const void *buffer, size_t nbytes)
 #endif
 {
-  struct sam_i2s_s *i2s = (struct sam_i2s_s *)dev;
-  DEBUGASSERT(i2s);
+  struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
+  DEBUGASSERT(priv);
 
   i2svdbg("buffer=%p nbytes=%d\n", buffer, (int)nbytes);
 #warning Missing logic
 }
 
 /****************************************************************************
- * Name: i2s_receive_nodma
+ * Name: ssc_receive_nodma
  *
  * Description:
  *   Receive a block of data from SSC without using DMA
@@ -742,21 +757,21 @@ static void i2s_send(struct i2s_dev_s *dev, const void *buffer, size_t nbytes)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC_DMA
-static void i2s_receive_nodma(struct i2s_dev_s *dev, void *buffer,
+static void ssc_receive_nodma(struct i2s_dev_s *dev, void *buffer,
                               size_t nbytes)
 #else
-static void i2s_receive(struct i2s_dev_s *dev, void *buffer, size_t nbytes)
+static void ssc_receive(struct i2s_dev_s *dev, void *buffer, size_t nbytes)
 #endif
 {
-  struct sam_i2s_s *i2s = (struct sam_i2s_s *)dev;
-  DEBUGASSERT(i2s);
+  struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
+  DEBUGASSERT(priv);
 
   i2svdbg("buffer=%p nbytes=%d\n", buffer, (int)nbytes);
 #warning Missing logic
 }
 
 /***************************************************************************
- * Name: i2s_send
+ * Name: ssc_send
  *
  * Description:
  *   Send a block of data on SSC using DMA is possible
@@ -772,20 +787,20 @@ static void i2s_receive(struct i2s_dev_s *dev, void *buffer, size_t nbytes)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC_DMA
-static void i2s_send(struct i2s_dev_s *dev, const void *buffer, size_t nbytes)
+static void ssc_send(struct i2s_dev_s *dev, const void *buffer, size_t nbytes)
 {
-  struct sam_i2s_s *i2s = (struct sam_i2s_s *)dev;
-  DEBUGASSERT(i2s);
+  struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
+  DEBUGASSERT(priv);
 
   i2svdbg("buffer=%p nbytes=%d\n", buffer, (int)nbytes);
 
   /* If we are not configured to do DMA OR is this is a very small transfer,
-   * then defer the operation to i2s_send_nodma().
+   * then defer the operation to ssc_send_nodma().
    */
 
-  if (!i2s->candma || nbytes < CONFIG_SAMA5_SSC_DMATHRESHOLD)
+  if (!priv->candma || nbytes < CONFIG_SAMA5_SSC_DMATHRESHOLD)
     {
-      i2s_send_nodma(dev, buffer, nbytes);
+      ssc_send_nodma(dev, buffer, nbytes);
     }
 
   /* Otherwise, perform the transfer using DMA */
@@ -798,7 +813,7 @@ static void i2s_send(struct i2s_dev_s *dev, const void *buffer, size_t nbytes)
 #endif
 
 /****************************************************************************
- * Name: i2s_receive
+ * Name: ssc_receive
  *
  * Description:
  *   Receive a block of data from SSC using DMA is possible
@@ -815,17 +830,17 @@ static void i2s_send(struct i2s_dev_s *dev, const void *buffer, size_t nbytes)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC_DMA
-static void i2s_receive(struct i2s_dev_s *dev, void *buffer, size_t nbytes)
+static void ssc_receive(struct i2s_dev_s *dev, void *buffer, size_t nbytes)
 {
-  struct sam_i2s_s *i2s = (struct sam_i2s_s *)dev;
+  struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
 
   /* If we are not configured to do DMA OR is this is a very small transfer,
-   * then defer the operation to i2s_send_nodma().
+   * then defer the operation to ssc_send_nodma().
    */
 
-  if (!i2s->candma || nbytes < CONFIG_SAMA5_SSC_DMATHRESHOLD)
+  if (!priv->candma || nbytes < CONFIG_SAMA5_SSC_DMATHRESHOLD)
     {
-      i2s_send_nodma(dev, buffer, nbytes);
+      ssc_send_nodma(dev, buffer, nbytes);
     }
 
   /* Otherwise, perform the transfer using DMA */
@@ -838,7 +853,7 @@ static void i2s_receive(struct i2s_dev_s *dev, void *buffer, size_t nbytes)
 #endif
 
 /****************************************************************************
- * Name: i2s_ssc0/1_configure
+ * Name: ssc0/1_configure
  *
  * Description:
  *   Configure SSC0 and/or SSC1
@@ -853,7 +868,7 @@ static void i2s_receive(struct i2s_dev_s *dev, void *buffer, size_t nbytes)
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC0
-static void i2s_ssc0_configure(struct sam_i2s_s *i2s)
+static void ssc0_configure(struct sam_ssc_s *priv)
 {
   /* Enable clocking to the SSC0 peripheral */
 
@@ -882,16 +897,16 @@ static void i2s_ssc0_configure(struct sam_i2s_s *i2s)
 
   /* Configure driver state specific to this SSC peripheral */
 
-  i2s->base   = SAM_SSC0_VBASE;
+  priv->base   = SAM_SSC0_VBASE;
 #ifdef CONFIG_SAMA5_SSC_DMA
-  i2s->candma = SAMA5_SSC1_DMA;
-  i2s->pid    = SAM_PID_SSC0;
+  priv->candma = SAMA5_SSC1_DMA;
+  priv->pid    = SAM_PID_SSC0;
 #endif
 }
 #endif
 
 #ifdef CONFIG_SAMA5_SSC1
-static void i2s_ssc1_configure(struct sam_i2s_s *i2s)
+static void ssc1_configure(struct sam_ssc_s *priv)
 {
   /* Enable clocking to the SSC1 peripheral */
 
@@ -919,10 +934,10 @@ static void i2s_ssc1_configure(struct sam_i2s_s *i2s)
 
   /* Configure driver state specific to this SSC peripheral */
 
-  i2s->base   = SAM_SSC1_VBASE;
+  priv->base   = SAM_SSC1_VBASE;
 #ifdef CONFIG_SAMA5_SSC_DMA
-  i2s->candma = SAMA5_SSC1_DMA;
-  i2s->pid    = SAM_PID_SSC1;
+  priv->candma = SAMA5_SSC1_DMA;
+  priv->pid    = SAM_PID_SSC1;
 #endif
 }
 #endif
@@ -932,7 +947,7 @@ static void i2s_ssc1_configure(struct sam_i2s_s *i2s)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_i2sinitialize
+ * Name: sam_ssc_initialize
  *
  * Description:
  *   Initialize the selected SSC port
@@ -945,9 +960,9 @@ static void i2s_ssc1_configure(struct sam_i2s_s *i2s)
  *
  ****************************************************************************/
 
-struct i2s_dev_s *up_i2sinitialize(int port)
+struct i2s_dev_s *sam_ssc_initialize(int port)
 {
-  struct sam_i2s_s *i2s;
+  struct sam_ssc_s *priv;
   irqstate_t flags;
 
   /* The support SAM parts have only a single SSC port */
@@ -959,8 +974,8 @@ struct i2s_dev_s *up_i2sinitialize(int port)
    * chip select structures.
    */
 
-  i2s = (struct sam_i2s_s *)zalloc(sizeof(struct sam_i2s_s));
-  if (!i2s)
+  priv = (struct sam_ssc_s *)zalloc(sizeof(struct sam_ssc_s));
+  if (!priv)
     {
       i2sdbg("ERROR: Failed to allocate a chip select structure\n");
       return NULL;
@@ -972,22 +987,22 @@ struct i2s_dev_s *up_i2sinitialize(int port)
 
   /* Initialize the common parts for the SSC device structure  */
 
-  sem_init(&i2s->exclsem, 0, 1);
-  i2s->dev.ops = &g_i2sops;
-  i2s->i2sno   = port;
+  sem_init(&priv->exclsem, 0, 1);
+  priv->dev.ops = &g_sscops;
+  priv->sscno   = port;
 
   flags = irqsave();
 #ifdef CONFIG_SAMA5_SSC0
   if (port == 0)
     {
-      i2s_ssc0_configure(i2s);
+      ssc0_configure(priv);
     }
   else
 #endif /* CONFIG_SAMA5_SSC0 */
 #ifdef CONFIG_SAMA5_SSC1
   if (port == 1)
     {
-      i2s_ssc1_configure(i2s);
+      ssc1_configure(priv);
     }
   else
 #endif /* CONFIG_SAMA5_SSC1 */
@@ -1002,25 +1017,25 @@ struct i2s_dev_s *up_i2sinitialize(int port)
    * the SSC number (port) is the same as the DMAC number.
    */
 
-  if (i2s->candma)
+  if (priv->candma)
     {
-      i2s->rxdma = sam_dmachannel(port, 0);
-      if (!i2s->rxdma)
+      priv->rxdma = sam_dmachannel(port, 0);
+      if (!priv->rxdma)
         {
           i2sdbg("ERROR: Failed to allocate the RX DMA channel\n");
-          i2s->candma = false;
+          priv->candma = false;
         }
     }
 
-  if (i2s->candma)
+  if (priv->candma)
     {
-      i2s->txdma = sam_dmachannel(port, 0);
-      if (!i2s->txdma)
+      priv->txdma = sam_dmachannel(port, 0);
+      if (!priv->txdma)
         {
           i2sdbg("ERROR: Failed to allocate the TX DMA channel\n");
-          sam_dmafree(i2s->rxdma);
-          i2s->rxdma  = NULL;
-          i2s->candma = false;
+          sam_dmafree(priv->rxdma);
+          priv->rxdma  = NULL;
+          priv->candma = false;
         }
     }
 
@@ -1028,24 +1043,24 @@ struct i2s_dev_s *up_i2sinitialize(int port)
    * thread when the DMA transfer completes.
    */
 
-  sem_init(&i2s->dmawait, 0, 0);
+  sem_init(&priv->dmawait, 0, 0);
 
   /* Create a watchdog time to catch DMA timeouts */
 
-  i2s->dmadog = wd_create();
-  DEBUGASSERT(i2s->dmadog);
+  priv->dmadog = wd_create();
+  DEBUGASSERT(priv->dmadog);
 #endif
 
   /* Initialize I2S hardware */
 #warning "Missing logic"
   irqrestore(flags);
-  i2s_dumpregs(i2s, "After initialization");
+  ssc_dumpregs(priv, "After initialization");
 
-  return &i2s->dev;
+  return &priv->dev;
 
 errout_with_alloc:
-  sem_destroy(&i2s->exclsem);
-  kfree(i2s);
+  sem_destroy(&priv->exclsem);
+  kfree(priv);
   return NULL;
 }
 
