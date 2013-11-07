@@ -5990,4 +5990,5 @@
 	  to use the I2S interface.  More coming (2013-11-7).
 	* arch/arm/src/stm32 and arch/arm/include/stm32:  Added support for
 	  the STM32F429.  From Ken Pettit (2013-11-7).
-
+	* configs/stm32f429i-disco:  Support for the STM32F429I-Discovery
+	  board from Ken Pettit (2013-11-7).

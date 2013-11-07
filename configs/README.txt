@@ -2039,6 +2039,9 @@ configs/stm32f100rc_generic
 configs/stm32f4discovery
   STMicro STM32F4-Discovery board based on the STMIcro STM32F407VGT6 MCU.
 
+configs/stm32f429i-disco
+  STMicro STM32F429I-Discovery board based on the STMicro STM32F429ZIT6 MCU.
+
 configs/sure-pic32mx
   The "Advanced USB Storage Demo Board," Model DB-DP11215, from Sure
   Electronics (http://www.sureelectronics.net/).  This board features

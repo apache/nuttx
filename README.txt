@@ -1116,6 +1116,8 @@ nuttx
  |   |   `- README.txt
  |   |- stm32ldiscovery/
  |   |   `- README.txt
+ |   |- stm32f429i-disco/
+ |   |   `- README.txt
  |   |- sure-pic32mx/
  |   |   `- README.txt
  |   |- teensy/
