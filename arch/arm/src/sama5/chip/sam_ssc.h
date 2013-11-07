@@ -46,6 +46,9 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+#define SAM_SSC_MAXPERCLK         66000000 /* Maximum peripheral clock frequency */
+
 /* SSC Register Offsets *************************************************************/
 
 #define SAM_SSC_CR_OFFSET         0x0000 /* Control Register */
