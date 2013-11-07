@@ -5995,3 +5995,6 @@
 	* arch/arm/src/stm32/stm32_usbdev.c:  The long outstanding bug
 	  involviing the handling of OUT SETUP commands has been fixed in
 	  the STM32 F1 USB device driver by David Sidrane (2013-11-7).
+	* configs/spark/composite/cdc-acm.inf:  Windows CDC/ACM driver
+	  provided by David Sidrane (2013-11-7).
+
