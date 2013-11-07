@@ -5988,4 +5988,6 @@
 	  for a forthcoming SSC (aka I2S) driver for the SAMA5.  The
 	  initial check-in is just the SAMA5 SPI driver gutted and hacked
 	  to use the I2S interface.  More coming (2013-11-7).
+	* arch/arm/src/stm32 and arch/arm/include/stm32:  Added support for
+	  the STM32F429.  From Ken Pettit (2013-11-7).
 

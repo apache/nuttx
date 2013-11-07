@@ -622,7 +622,7 @@ static void stm32_stdclockconfig(void)
       putreg32(regval, STM32_RCC_APB1ENR);
 
       regval  = getreg32(STM32_PWR_CR);
-#if defined(CONFIG_STM32_STM32F427)
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
       regval &= ~PWR_CR_VOS_MASK;
       regval |= PWR_CR_VOS_SCALE_1;
 #else
@@ -665,8 +665,29 @@ static void stm32_stdclockconfig(void)
  
       /* Wait until the PLL is ready */
   
-      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0);
+      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0)
+        {
+        }
  
+#if defined(CONFIG_STM32_STM32F429)
+      /* Enable the Over-drive to extend the clock frequency to 180 Mhz */
+
+      regval  = getreg32(STM32_PWR_CR);
+      regval |= PWR_CR_ODEN;
+      putreg32(regval, STM32_PWR_CR);
+      while((getreg32(STM32_PWR_CSR) & PWR_CSR_ODRDY) == 0)
+        {
+        }
+
+      regval = getreg32(STM32_PWR_CR);
+      regval |= PWR_CR_ODSWEN;
+      putreg32(regval, STM32_PWR_CR);
+      while((getreg32(STM32_PWR_CSR) & PWR_CSR_ODSWRDY) == 0)
+        {
+        }
+
+#endif
+
       /* Enable FLASH prefetch, instruction cache, data cache, and 5 wait states */
 
 #ifdef CONFIG_STM32_FLASH_PREFETCH
@@ -685,7 +706,9 @@ static void stm32_stdclockconfig(void)
 
       /* Wait until the PLL source is used as the system clock source */
   
-      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL);
+      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) != RCC_CFGR_SWS_PLL)
+        {
+        }
     }
 }
 #endif

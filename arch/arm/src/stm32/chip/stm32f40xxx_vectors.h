@@ -52,7 +52,7 @@
 
 /* Reserve interrupt table entries for I/O interrupts. */
 
-#  ifdef CONFIG_STM32_STM32F427
+#  if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #    define ARMV7M_PERIPHERAL_INTERRUPTS 87
 #  else
 #    define ARMV7M_PERIPHERAL_INTERRUPTS 82
@@ -143,12 +143,19 @@ VECTOR(stm32_cryp, STM32_IRQ_CRYP)               /* Vector 16+79: CRYP crypto gl
 VECTOR(stm32_hash, STM32_IRQ_HASH)               /* Vector 16+80: Hash and Rng global interrupt */
 VECTOR(stm32_fpu, STM32_IRQ_FPU)                 /* Vector 16+81: FPU global interrupt */
 
-#ifdef CONFIG_STM32_STM32F427
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 VECTOR(stm32_uart7, STM32_IRQ_UART7)             /* Vector 16+82: UART7 interrupt */
 VECTOR(stm32_uart8, STM32_IRQ_UART8)             /* Vector 16+83: UART8 interrupt */
 VECTOR(stm32_spi4, STM32_IRQ_SPI4)               /* Vector 16+84: SPI4 interrupt */
 VECTOR(stm32_spi5, STM32_IRQ_SPI5)               /* Vector 16+85: SPI5 interrupt */
 VECTOR(stm32_spi6, STM32_IRQ_SPI6)               /* Vector 16+86: SPI6 interrupt */
+#endif
+
+#if defined(CONFIG_STM32_STM32F429)
+VECTOR(stm32_sai1, STM32_IRQ_SAI1)               /* Vector 16+87: SAI1 interrupt */
+VECTOR(stm32_ltdcint, STM32_IRQ_LTDCINT)         /* Vector 16+88: LTDC interrupt */
+VECTOR(stm32_ltdcerrint, STM32_IRQ_LTDCERRINT)   /* Vector 16+89: LTDC Error interrupt */
+VECTOR(stm32_dma2d, STM32_IRQ_DMA2D)             /* Vector 16+90: DMA2D interrupt */
 #endif
 
 #endif /* CONFIG_ARMV7M_CMNVECTOR */

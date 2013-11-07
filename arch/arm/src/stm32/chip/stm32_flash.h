@@ -94,7 +94,7 @@
 #  define STM32_FLASH_OPTCR_OFFSET 0x0014
 #endif
 
-#if defined(CONFIG_STM32_STM32F427)
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #  define STM32_FLASH_OPTCR1_OFFSET 0x0018
 #endif
 
@@ -113,7 +113,7 @@
 #elif defined(CONFIG_STM32_STM32F20XX) || defined(CONFIG_STM32_STM32F40XX)
 #  define STM32_FLASH_OPTCR        (STM32_FLASHIF_BASE+STM32_FLASH_OPTCR_OFFSET)
 #endif
-#if defined(CONFIG_STM32_STM32F427)
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #  define STM32_FLASH_OPTCR1       (STM32_FLASHIF_BASE+STM32_FLASH_OPTCR1_OFFSET)
 #endif
 
@@ -193,7 +193,7 @@
 #  define FLASH_CR_MER              (1 << 2)                /* Bit 2: Mass Erase sectors 0..11 */
 #  define FLASH_CR_SNB_SHIFT        (3)                     /* Bits 3-6: Sector number */
 #  define FLASH_CR_SNB_MASK         (15 << FLASH_CR_SNB_SHIFT)
-#if defined(CONFIG_STM32_STM32F427)
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #    define FLASH_CR_SNB(n)         (((n % 12) << FLASH_CR_SNB_SHIFT) | ((n / 12) << 7)) /* Sector n, n=0..23 */
 #else
 #    define FLASH_CR_SNB(n)         ((n) << FLASH_CR_SNB_SHIFT) /* Sector n, n=0..11 */
@@ -208,7 +208,7 @@
 #  define FLASH_CR_ERRIE            (1 << 25)               /* Bit 25: Error interrupt enable */
 #  define FLASH_CR_LOCK             (1 << 31)               /* Bit 31: Lock */
 #endif
-#if defined(CONFIG_STM32_STM32F427)
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #  define FLASH_CR_MER1             (1 << 15)               /* Bit 15: Mass Erase sectors 12..23 */
 #endif
 
@@ -236,7 +236,7 @@
 
 /* Flash Option Control Register (OPTCR1) */
 
-#if defined(CONFIG_STM32_STM32F427)
+#if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #  define FLASH_OPTCR1_NWRP_SHIFT    (16)                   /* Bits 16-27: Not write protect (high bank) */
 #  define FLASH_OPTCR1_NWRP_MASK     (0xfff << FLASH_OPTCR_NWRP_SHIFT)
 #endif
