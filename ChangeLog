@@ -5981,4 +5981,7 @@
 	  SAMA5D3x-EK board (2013-11-6).
 	* arch/arm/src/sama5/sam_pwm.c and .h: SAMA5 PWM driver is now
 	  function (2013-11-7).
+	* include/nuttx/audio/i2s.h:  First cut at an I2S interface
+	  definition.  This initial definition is sparse will will
+	  probably evolve significantly (2011-11-7).
 
