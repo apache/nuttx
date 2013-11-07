@@ -131,6 +131,15 @@ else
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_SSC0),y)
+CHIP_CSRCS += sam_ssc.c
+else
+ifeq ($(CONFIG_SAMA5_SSC1),y)
+CHIP_CSRCS += sam_ssc.c
+else
+endif
+endif
+
 ifeq ($(CONFIG_SAMA5_LCDC),y)
 CHIP_CSRCS += sam_lcd.c
 endif

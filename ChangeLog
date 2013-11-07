@@ -5984,4 +5984,8 @@
 	* include/nuttx/audio/i2s.h:  First cut at an I2S interface
 	  definition.  This initial definition is sparse will will
 	  probably evolve significantly (2011-11-7).
+	* arch/arm/src/sama5/sam_ssc.c and .h:  Skeleton and build setup
+	  for a forthcoming SSC (aka I2S) driver for the SAMA5.  The
+	  initial check-in is just the SAMA5 SPI driver gutted and hacked
+	  to use the I2S interface.  More coming (2013-11-7).
 

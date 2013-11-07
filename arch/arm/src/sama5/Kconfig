@@ -249,10 +249,12 @@ config SAMA5_ISI
 config SAMA5_SSC0
 	bool "Synchronous Serial Controller 0 (SSC0)"
 	default n
+	select I2S
 
 config SAMA5_SSC1
 	bool "Synchronous Serial Controller 1 (SSC1)"
 	default n
+	select I2S
 
 config SAMA5_CAN0
 	bool "CAN controller 0 (CAN0)"
@@ -1372,6 +1374,238 @@ config SAMA5_TWI_REGDEBUG
 
 endmenu # TWI device driver options
 endif # SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2
+
+if SAMA5_SSC0 || SAMA5_SSC1
+menu "SSC Configuration"
+
+config SAMA5_SSC_DMA
+	bool "Enable SSC DMA"
+	default n
+	depends on (SAMA5_DMAC0 && SAMA5_SSC0) || (SAMA5_DMAC1 && SAMA5_SSC1)
+	---help---
+		Enable use of DMA in I2C tranfers
+
+config SAMA5_SSC_DMATHRESHOLD
+	int "DMA transfer threshold"
+	default 4
+	depends on SAMA5_SSC_DMA
+	---help---
+		Small I2S transfers are better performed without using DMA.  This
+		setting defines a threshold to select when small transfer should
+		be performed without using DMA.
+
+if SAMA5_SSC0
+comment "SSC0 Configuration"
+
+config SAMA5_SSC0_RX
+	bool "Enable I2C receive"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+if SAMA5_SSC0_RX
+
+choice
+	prompt "Receiver clock source"
+	default SAMA5_SSC0_RX_INTCLK
+
+config SAMA5_SSC0_RX_EXTCLK
+	bool "External Clock"
+	---help---
+		The SSC receiver clock is an external clock provided on the RK input
+		pin.
+
+config SAMA5_SSC0_RX_TXCLK
+	bool "Transmitter Clock"
+	---help---
+		The SSC receiver clock is transmitter clock.
+
+config SAMA5_SSC0_RX_INTCLK
+	bool "MCK/2"
+	---help---
+		The SSC receiver clock is the MCK/2 divided by a up to 4095.
+
+endchoice # Receiver clock source
+
+config SAMA5_SSC0_RX_EXTFREQ
+	int "External reciver clock frequency"
+	default 100
+	depends on SAMA5_SSC0_RX_EXTCLK
+	---help---
+		If the receiver clock is provided via a clock input on the RK pin,
+		then the frequency of the receiver clock must be provided.
+
+endif # SAMA5_SSC0_RX
+
+config SAMA5_SSC0_TX
+	bool "Enable I2C transmit"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+if SAMA5_SSC0_TX
+
+choice
+	prompt "Transmitter clock source"
+	default SAMA5_SSC0_TX_INTCLK
+
+config SAMA5_SSC0_TX_EXTCLK
+	bool "External Clock"
+	---help---
+		The SSC transmitter clock is an external clock provided on the TK input
+		pin.
+
+config SAMA5_SSC0_TX_RXCLK
+	bool "Receiver Clock"
+	---help---
+		The SSC transmitter clock is receiver clock.
+
+config SAMA5_SSC0_TX_INTCLK
+	bool "MCK/2"
+	---help---
+		The SSC transmitter clock is the MCK/2 divided by a up to 4095.
+
+endchoice # Transmitter clock source
+
+config SAMA5_SSC0_TX_EXTFREQ
+	int "External transmitter clock frequency"
+	default 100
+	depends on SAMA5_SSC0_TX_EXTCLK
+	---help---
+		If the transmitter clock is provided via a clock input on the TK pin,
+		then the frequency of the transmitter clock must be provided.
+
+endif # SAMA5_SSC0_TX
+
+config SAMA5_SSC0_TX_INTCLK_FREQUENCY
+	int "Internal transmitter clock frequency"
+	default 100
+	depends on SAMA5_SSC0_RX_INTCLK || SAMA5_SSC0_TX_INTCLK
+	---help---
+		If the either the receiver or transmitter clock is provided by MCK/2 divided
+		down, then the target frequency must be provided.  The SSC driver will
+		determine the best divider to obtain that frequency (up to 4095).  If the
+		frequency is too low to be obtained by dividing down the MCK/2, a compile
+		time error will occur.
+
+endif # SAMA5_SSC0
+
+if SAMA5_SSC1
+comment "SSC1 Configuration"
+
+config SAMA5_SSC1_RX
+	bool "Enable I2C receive"
+	default n
+	---help---
+		Enable I2S receipt logic
+
+if SAMA5_SSC1_RX
+
+choice
+	prompt "Receiver clock source"
+	default SAMA5_SSC1_RX_INTCLK
+
+config SAMA5_SSC1_RX_EXTCLK
+	bool "External Clock"
+	---help---
+		The SSC receiver clock is an external clock provided on the RK input
+		pin.
+
+config SAMA5_SSC1_RX_TXCLK
+	bool "Transmitter Clock"
+	---help---
+		The SSC receiver clock is transmitter clock.
+
+config SAMA5_SSC1_RX_INTCLK
+	bool "MCK/2"
+	---help---
+		The SSC receiver clock is the MCK/2 divided by a up to 4095.
+
+endchoice # Receiver clock source
+
+config SAMA5_SSC1_RX_EXTFREQ
+	int "External reciver clock frequency"
+	default 100
+	depends on SAMA5_SSC1_RX_EXTCLK
+	---help---
+		If the receiver clock is provided via a clock input on the RK pin,
+		then the frequency of the receiver clock must be provided.
+
+endif # SAMA5_SSC0_RX
+
+config SAMA5_SSC1_TX
+	bool "Enable I2C transmit"
+	default n
+	---help---
+		Enable I2S transmission logic
+
+if SAMA5_SSC1_TX
+
+choice
+	prompt "Transmitter clock source"
+	default SAMA5_SSC1_TX_INTCLK
+
+config SAMA5_SSC1_TX_EXTCLK
+	bool "External Clock"
+	---help---
+		The SSC transmitter clock is an external clock provided on the TK input
+		pin.
+
+config SAMA5_SSC1_TX_RXCLK
+	bool "Receiver Clock"
+	---help---
+		The SSC transmitter clock is receiver clock.
+
+config SAMA5_SSC1_TX_INTCLK
+	bool "MCK/2"
+	---help---
+		The SSC transmitter clock is the MCK/2 divided by a up to 4095.
+
+endchoice # Transmitter clock source
+
+config SAMA5_SSC1_TX_EXTFREQ
+	int "External transmitter clock frequency"
+	default 100
+	depends on SAMA5_SSC1_TX_EXTCLK
+	---help---
+		If the transmitter clock is provided via a clock input on the TK pin,
+		then the frequency of the transmitter clock must be provided.
+
+endif # SAMA5_SSC1_TX
+
+config SAMA5_SSC1_TX_INTCLK_FREQUENCY
+	int "Internal transmitter clock frequency"
+	default 100
+	depends on SAMA5_SSC1_RX_INTCLK || SAMA5_SSC1_TX_INTCLK
+	---help---
+		If the either the receiver or transmitter clock is provided by MCK/2 divided
+		down, then the target frequency must be provided.  The SSC driver will
+		determine the best divider to obtain that frequency (up to 4095).  If the
+		frequency is too low to be obtained by dividing down the MCK/2, a compile
+		time error will occur.
+
+endif # SAMA5_SSC1
+
+config SAMA5_SSC_DMADEBUG
+	bool "SSC DMA transfer debug"
+	depends on SAMA5_SSC_DMA && DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze SSC DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
+
+config SAMA5_SSC_REGDEBUG
+	bool "SSC Register level debug"
+	depends on DEBUG
+	default n
+	---help---
+		Output detailed register-level SSC device debug information.
+		Very invasive! Requires also DEBUG.
+
+endmenu # SSC Configuration
+endif # SAMA5_SSC0 || SAMA5_SSC1
 
 if SAMA5_HSMCI0 || SAMA5_HSMCI1 || SAMA5_HSMCI2
 menu "HSMCI device driver options"

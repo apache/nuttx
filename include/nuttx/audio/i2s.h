@@ -46,6 +46,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef CONFIG_I2S
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -68,7 +70,7 @@
  *
  ****************************************************************************/
 
-#define I2S_FREQUENCY(d,f) ((d)->ops->frequency(d,f))
+#define I2S_FREQUENCY(d,f) ((d)->ops->i2s_frequency(d,f))
 
 /****************************************************************************
  * Name: I2S_SEND
@@ -86,8 +88,7 @@
  *
  ****************************************************************************/
 
-#define I2S_SEND(d,b,n) ((d)->ops->send(d,b,n))
-#endif
+#define I2S_SEND(d,b,n) ((d)->ops->i2s_send(d,b,n))
 
 /****************************************************************************
  * Name: I2S_RECEIVE
@@ -106,7 +107,7 @@
  *
  ****************************************************************************/
 
-#define I2S_RECEIVE(d,b,n) ((d)->ops->recvblock(d,b,n))
+#define I2S_RECEIVE(d,b,n) ((d)->ops->i2s_receive(d,b,n))
 
 /****************************************************************************
  * Public Types
@@ -117,11 +118,11 @@
 struct i2s_dev_s;
 struct i2s_ops_s
 {
-  uint32_t (*frequency)(FAR struct i2s_dev_s *dev, uint32_t frequency);
-  void     (*send)(FAR struct i2s_dev_s *dev, FAR const void *buffer,
-                   size_t nbytes);
-  void     (*receive)(FAR struct i2s_dev_s *dev, FAR void *buffer,
-                      size_t nbytes);
+  uint32_t (*i2s_frequency)(FAR struct i2s_dev_s *dev, uint32_t frequency);
+  void     (*i2s_send)(FAR struct i2s_dev_s *dev, FAR const void *buffer,
+                       size_t nbytes);
+  void     (*i2s_receive)(FAR struct i2s_dev_s *dev, FAR void *buffer,
+                          size_t nbytes);
 };
 
 /* I2S private data.  This structure only defines the initial fields of the
@@ -135,7 +136,7 @@ struct i2s_dev_s
 };
 
 /****************************************************************************
- * Public Functions
+ * Public Data
  ****************************************************************************/
 
 #undef EXTERN
@@ -148,30 +149,13 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: up_i2cinitialize
- *
- * Description:
- *   Initialize the selected I2S port.
- *
- *   This is a generic prototype for the I2S initialize logic.  Specific
- *   architectures may support different I2S initialization functions if,
- *   for example, those architectures support multiple, incompatible I2S
- *   implementations.  In any event, the prototype of those architecture-
- *   specific initialization functions should be the same as
- *   up_i2cinitialize()
- *
- * Input Parameter:
- *   Port number (for hardware that has mutiple I2S interfaces)
- *
- * Returned Value:
- *   Valid I2S device structure reference on succcess; a NULL on failure
- *
+ * Public Functions
  ****************************************************************************/
-
-FAR struct i2s_dev_s *up_i2cinitialize(int port);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
+
+#endif /* CONFIG_I2S */
 #endif /* __INCLUDE_NUTTX_AUDIO_I2S_H */

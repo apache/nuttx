@@ -161,6 +161,17 @@ if SPI
 source drivers/spi/Kconfig
 endif
 
+menuconfig I2S
+	bool "I2S Driver Support"
+	default n
+	---help---
+		This selection enables selection of common I2S options.  This option
+		should be enabled by all platforms that support I2S interfaces.
+		See include/nuttx/audio/i2s.h for further I2S driver information.
+
+if I2S
+endif # I2S
+
 menuconfig RTC
 	bool "RTC Driver Support"
 	default n
@@ -170,10 +181,11 @@ menuconfig RTC
 		Most RTC drivers are MCU specific and may require other specific
 		settings.
 
+if RTC
+
 config RTC_DATETIME
 	bool "Date/Time RTC Support"
 	default n
-	depends on RTC
 	---help---
 		There are two general types of RTC:  (1) A simple battery backed
 		counter that keeps the time when power is down, and (2) a full
@@ -182,10 +194,11 @@ config RTC_DATETIME
 		of RTC. In this case, the RTC is used to "seed" the normal NuttX timer
 		and the NuttX system timer provides for higher resolution time.
 
+if !RTC_DATETIME
+
 config RTC_HIRES
 	bool "Hi-Res RTC Support"
 	default n
-	depends on RTC && !RTC_DATETIME
 	---help---
 		If RTC_DATETIME not selected, then the simple, battery backed counter
 		is used.  There are two different implementations of such simple
@@ -201,19 +214,22 @@ config RTC_HIRES
 config RTC_FREQUENCY
 	int "Hi-Res RTC frequency"
 	default 1
-	depends on RTC && !RTC_DATETIME && RTC_HIRES
+	depends on RTC_HIRES
 	---help---
 		If RTC_HIRES is defined, then the frequency of the high resolution RTC
 		must be provided.  If RTC_HIRES is not defined, RTC_FREQUENCY is
 		assumed to be one Hz.
 
+endif # !RTC_DATETIME
+
 config RTC_ALARM
 	bool "RTC Alarm Support"
 	default n
-	depends on RTC
 	---help---
 		Enable if the RTC hardware supports setting of an alarm.  A callback
 		function will be executed when the alarm goes off.
+
+endif # RTC
 
 menuconfig WATCHDOG
 	bool "Watchdog Timer Support"
@@ -224,7 +240,7 @@ menuconfig WATCHDOG
 		information.
 
 if WATCHDOG
-endif
+endif # WATCHDOG
 
 menuconfig ANALOG
 	bool "Analog Device(ADC/DAC) Support"

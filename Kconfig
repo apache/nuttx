@@ -481,6 +481,15 @@ config DEBUG_SPI
 		Support for this debug option is architecture-specific and may not
 		be available for some MCUs.
 
+config DEBUG_I2S
+	bool "I2S Debug Output"
+	default n
+	depends on I2S
+	---help---
+		Enable I2S driver debug SYSLOG output (disabled by default).
+		Support for this debug option is architecture-specific and may not
+		be available for some MCUs.
+
 config DEBUG_CAN
 	bool "CAN Debug Output"
 	default n
