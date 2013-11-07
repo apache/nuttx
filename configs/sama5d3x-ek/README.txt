@@ -852,36 +852,40 @@ SAMA5 PWM Support
     Where x=0..3.
 
     Care must be taken because all PWM output pins conflict with some other
-    usage of the pin by other devices:
+    usage of the pin by other devices.  Furthermore, many of these pins have
+    not been brought out to an external connector:
 
+      -----+---+---+----+------+----------------
+       PWM  PIN PER PIO   I/O   CONFLICTS
+      -----+---+---+----+------+----------------
+       PWM0 FI   B  PC28 J2.30  SPI1, ISI
+            H    B  PB0   ---   GMAC
+                 B  PA20 J1.14  LCDC, ISI
+            L    B  PB1   ---   GMAC
+                 B  PA21 J1.16  LCDC, ISI
+      -----+---+---+----+------+----------------
+       PWM1 FI   B  PC31 J2.36  HDMI
+            H    B  PB4   ---   GMAC
+                 B  PA22 J1.18  LCDC, ISI
+            L    B  PB5   ---   GMAC
+                 B  PE31 J3.20  ISI, HDMI
+                 B  PA23 J1.20  LCDC, ISI
+      -----+---+---+----+------+----------------
+       PWM2 FI   B  PC29 J2.29  UART0, ISI, HDMI
+            H    C  PD5   ---   HSMCI0
+                 B  PB8   ---   GMAC
+            L    C  PD6   ---   HSMCI0
+                 B  PB9   ---   GMAC
+      -----+---+---+----+------+----------------
+       PWM3 FI   C  PD16  ---  SPI0, Audio
+            H    C  PD7   ---  HSMCI0
+                 B  PB12 J3.7  GMAC
+            L    C  PD8   ---  HSMCI0
+                 B  PB13  ---  GMAC
       -----+---+---+----+--------------------
-       PWM  PIN PER PIO  CONFLICTS
-      -----+---+---+----+--------------------
-       PWM0 FI   B  PC28   SPI1, ISI
-            H    B  PB0    GMAC
-                 B  PA20   LCDC, ISI
-            L    B  PB1    GMAC
-                 B  PA21   LCDC, ISI
-      -----+---+---+----+--------------------
-       PWM1 FI   B  PC31   HDMI
-            H    B  PB4    GMAC
-                 B  PA22   LCDC, ISI
-            L    B  PB5    GMAC
-                 B  PE31   ISI, HDMI
-                 B  PA23   LCDC, ISI
-      -----+---+---+----+--------------------
-       PWM2 FI   B  PC29   UART0, ISI, HDMI
-            H    C  PD5    HSMCI0
-                 B  PB8    GMAC
-            L    C  PD6    HSMCI0
-                 B  PB9    GMAC
-      -----+---+---+----+--------------------
-       PWM3 FI   C  PD16   SPI0, Audio
-            H    C  PD7    HSMCI0
-                 B  PB12   GMAC
-            L    C  PD8    HSMCI0
-                 B  PB13   GMAC
-      -----+---+---+----+--------------------
+
+    See configs/sama5d3x-ek/include/board.h for all of the default PWM
+    pin selections.  I used PWM channel 0, pins PA20 and PA21 for testing.
 
     Clocking is addressed in the next paragraph.
 
@@ -889,7 +893,7 @@ SAMA5 PWM Support
     -----------------------
     PWM Channels can be clocked from either a coarsely divided divided down
     MCK or from a custom frequency from PWM CLKA and/or CLKB.  If you want
-    to use CLKA or CLKB, you must enable and configuratino them.
+    to use CLKA or CLKB, you must enable and configure them.
 
     System Type -> PWM Configuration
       CONFIG_SAMA5_PWM_CLKA=y
@@ -901,7 +905,7 @@ SAMA5 PWM Support
     for that channel:
 
     System Type -> PWM Configuration
-      CONFIG_SAMA5_PWM_CHANx_CLKA=y     : Pick one of MCK, CLKA, or CLKB
+      CONFIG_SAMA5_PWM_CHANx_CLKA=y     : Pick one of MCK, CLKA, or CLKB (only)
       CONFIG_SAMA5_PWM_CHANx_CLKB=y
       CONFIG_SAMA5_PWM_CHANx_MCK=y
       CONFIG_SAMA5_PWM_CHANx_MCKDIV=128 : If MCK is selected, then the MCK divider must
@@ -920,6 +924,21 @@ SAMA5 PWM Support
 
       CONFIG_EXAMPLES_PWM_DEVPATH="/dev/pwm0"
       CONFIG_EXAMPLES_PWM_FREQUENCY=100
+
+  Usage of the example is straightforward:
+
+    nsh> pwm -h
+    Usage: pwm [OPTIONS]
+
+    Arguments are "sticky".  For example, once the PWM frequency is
+    specified, that frequency will be re-used until it is changed.
+
+    "sticky" OPTIONS include:
+      [-p devpath] selects the PWM device.  Default: /dev/pwm0 Current: /dev/pwm0
+      [-f frequency] selects the pulse frequency.  Default: 100 Hz Current: 100 Hz
+      [-d duty] selects the pulse duty as a percentage.  Default: 50 % Current: 50 %
+      [-t duration] is the duration of the pulse train in seconds.  Default: 5 Current: 5
+      [-h] shows this message and exits
 
 OV2640 Camera interface
 =======================
