@@ -961,6 +961,10 @@ o USB (drivers/usbdev, drivers/usbhost)
                correctly supports OUT SETUP data following the same design as
                per above.
 
+               Update 2013-11-7: David Sidrane has fixed with issue with the
+               STM32 F1 USB device driver.  Still a few more to go before this
+               can be closed out.
+
   Status:      Open
   Priority:    High for class drivers that need EP0 data.  For example, the
                CDC/ACM serial driver might need the line coding data (that

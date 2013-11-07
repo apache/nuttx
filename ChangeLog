@@ -5992,3 +5992,6 @@
 	  the STM32F429.  From Ken Pettit (2013-11-7).
 	* configs/stm32f429i-disco:  Support for the STM32F429I-Discovery
 	  board from Ken Pettit (2013-11-7).
+	* arch/arm/src/stm32/stm32_usbdev.c:  The long outstanding bug
+	  involviing the handling of OUT SETUP commands has been fixed in
+	  the STM32 F1 USB device driver by David Sidrane (2013-11-7).
