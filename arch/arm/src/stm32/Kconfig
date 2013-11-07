@@ -508,6 +508,41 @@ config ARCH_CHIP_STM32F427I
 	select STM32_STM32F427
 	select ARCH_HAVE_FPU
 
+config ARCH_CHIP_STM32F429V
+	bool "STM32F429V"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F429
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F429Z
+	bool "STM32F429Z"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F429
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F429I
+	bool "STM32F429I"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F429
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F429B
+	bool "STM32F429B"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F429
+	select ARCH_HAVE_FPU
+
+config ARCH_CHIP_STM32F429N
+	bool "STM32F429N"
+	select ARCH_CORTEXM4
+	select STM32_STM32F40XX
+	select STM32_STM32F429
+	select ARCH_HAVE_FPU
+
 endchoice
 
 config STM32_STM32L15XX
@@ -560,6 +595,10 @@ config STM32_STM32F40XX
 
 # This is really 427/437, but we treat the two the same.
 config STM32_STM32F427
+	bool
+
+# This is really 429/439, but we treat the two the same.
+config STM32_STM32F429
 	bool
 
 config STM32_DFU
@@ -753,21 +792,21 @@ config STM32_SPI3
 config STM32_SPI4
 	bool "SPI4"
 	default n
-	depends on STM32_STM32F427
+	depends on STM32_STM32F427 || STM32_STM32F429
 	select SPI
 	select STM32_SPI
 
 config STM32_SPI5
 	bool "SPI5"
 	default n
-	depends on STM32_STM32F427
+	depends on STM32_STM32F427 || STM32_STM32F429
 	select SPI
 	select STM32_SPI
 
 config STM32_SPI6
 	bool "SPI6"
 	default n
-	depends on STM32_STM32F427
+	depends on STM32_STM32F427 || STM32_STM32F429
 	select SPI
 	select STM32_SPI
 
@@ -904,14 +943,14 @@ config STM32_USART6
 config STM32_UART7
 	bool "UART7"
 	default n
-	depends on STM32_STM32F427
+	depends on STM32_STM32F427 || STM32_STM32F429
 	select ARCH_HAVE_UART7
 	select STM32_USART
 
 config STM32_UART8
 	bool "UART8"
 	default n
-	depends on STM32_STM32F427
+	depends on STM32_STM32F427 || STM32_STM32F429
 	select ARCH_HAVE_UART8
 	select STM32_USART
 
@@ -1133,7 +1172,7 @@ endmenu
 config STM32_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
 	depends on STM32_STM32F20XX || STM32_STM32F40XX
-	default y if STM32_STM32F427
+	default y if STM32_STM32F427 || STM32_STM32F429
 	default n
 	---help---
 	Enable FLASH prefetch and F2 and F4 parts (FLASH pre-fetch is always enabled
