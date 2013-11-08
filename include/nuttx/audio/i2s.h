@@ -76,53 +76,89 @@
  * Name: I2S_SEND
  *
  * Description:
- *   Send a block of data on I2S. Required.
+ *   Send a block of data on I2S.
  *
  * Input Parameters:
  *   dev    - Device-specific state data
  *   buffer - A pointer to the buffer of data to be sent
  *   nbytes - the length of data to send from the buffer in number of bytes.
+ *   callback - A user provided callback function that will be called at
+ *              the completion of the transfer.  The callback will be
+ *              performed in the context of the worker thread.
+ *   arg      - An opaque argument that will be provided to the callback
+ *              when the transfer complete.
+ *   timeout  - The timeout value to use.  The transfer will be canceled
+ *              and an ETIMEDOUT error will be reported if this timeout
+ *              elapsed without completion of the DMA transfer.  Units
+ *              are system clock ticks.  Zero means no timeout.
  *
  * Returned Value:
- *   None
+ *   OK on success; a negated errno value on failure.  NOTE:  This function
+ *   only enqueues the transfer and returns immediately.  Success here only
+ *   means that the transfer was enqueued correctly.
+ *
+ *   When the transfer is complete, a 'result' value will be provided as
+ *   an argument to the callback function that will indicate if the transfer
+ *   failed.
  *
  ****************************************************************************/
 
-#define I2S_SEND(d,b,n) ((d)->ops->i2s_send(d,b,n))
+#define I2S_SEND(d,b,n,c,a,t) ((d)->ops->i2s_send(d,b,n,c,a,t))
 
 /****************************************************************************
  * Name: I2S_RECEIVE
  *
  * Description:
- *   Receive a block of data from I2S. Required.
+ *   Receive a block of data from I2S.
  *
  * Input Parameters:
- *   dev -    Device-specific state data
- *   buffer - A pointer to the buffer in which to recieve data
- *   nbytes - The length of data that can be received in the buffer in number
- *            of bytes.
+ *   dev      - Device-specific state data
+ *   buffer   - A pointer to the buffer in which to recieve data
+ *   nbytes   - The length of data that can be received in the buffer in number
+ *              of bytes.
+ *   callback - A user provided callback function that will be called at
+ *              the completion of the transfer.  The callback will be
+ *              performed in the context of the worker thread.
+ *   arg      - An opaque argument that will be provided to the callback
+ *              when the transfer complete.
+ *   timeout  - The timeout value to use.  The transfer will be canceled
+ *              and an ETIMEDOUT error will be reported if this timeout
+ *              elapsed without completion of the DMA transfer.  Units
+ *              are system clock ticks.  Zero means no timeout.
  *
  * Returned Value:
- *   None
+ *   OK on success; a negated errno value on failure.  NOTE:  This function
+ *   only enqueues the transfer and returns immediately.  Success here only
+ *   means that the transfer was enqueued correctly.
+ *
+ *   When the transfer is complete, a 'result' value will be provided as
+ *   an argument to the callback function that will indicate if the transfer
+ *   failed.
  *
  ****************************************************************************/
 
-#define I2S_RECEIVE(d,b,n) ((d)->ops->i2s_receive(d,b,n))
+#define I2S_RECEIVE(d,b,n,c,a,t) ((d)->ops->i2s_receive(d,b,n,c,a,t))
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+/* Transfer complete callback */
 
+typedef CODE void (*i2s_callback_t)(FAR struct i2s_dev_s *dev,
+                                    FAR const void *buffer, size_t nbytes,
+                                    FAR void *arg, int result);
 /* The I2S vtable */
 
 struct i2s_dev_s;
 struct i2s_ops_s
 {
   uint32_t (*i2s_frequency)(FAR struct i2s_dev_s *dev, uint32_t frequency);
-  void     (*i2s_send)(FAR struct i2s_dev_s *dev, FAR const void *buffer,
-                       size_t nbytes);
-  void     (*i2s_receive)(FAR struct i2s_dev_s *dev, FAR void *buffer,
-                          size_t nbytes);
+  int      (*i2s_send)(FAR struct i2s_dev_s *dev, FAR const void *buffer,
+                       size_t nbytes, i2s_callback_t callback,
+                       FAR void *arg, uint32_t timeout);
+  int      (*i2s_receive)(FAR struct i2s_dev_s *dev, FAR void *buffer,
+                          size_t nbytes, i2s_callback_t callback,
+                          FAR void *arg, uint32_t timeout);
 };
 
 /* I2S private data.  This structure only defines the initial fields of the

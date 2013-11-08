@@ -1380,6 +1380,15 @@ endif # SAMA5_TWI0 || SAMA5_TWI1 || SAMA5_TWI2
 if SAMA5_SSC0 || SAMA5_SSC1
 menu "SSC Configuration"
 
+config SAMA5_SSC_MAXINFLIGHT
+	int "SSC queue size"
+	default 16
+	---help---
+		This is the total number of transfers, both RX and TX, that can be
+		enqueue before the caller is required to wait.  This setting
+		determines the number certain queue data structures that will be
+		pre-allocated.
+
 if SAMA5_SSC0
 comment "SSC0 Configuration"
 
