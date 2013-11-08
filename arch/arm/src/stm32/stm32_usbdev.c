@@ -1774,17 +1774,8 @@ static void stm32_ep0setup(struct stm32_usbdev_s *priv)
 
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EP0SETUPOUT), len.w);
 
-          /* At this point priv->ctrl is the setup packet.  Just ACK the
-           * setup packet So we can get the data.
-           *
-           * REVISIT:  I suspect that this should not be here?
-           */
+          /* At this point priv->ctrl is the setup packet. */
 
-          stm32_epwrite(priv, ep0, response.b, 0);
-
-          /* Enable and Wait for the data phase. */
-
-          priv->rxstatus = USB_EPR_STATRX_VALID;
           priv->ep0state = EP0STATE_SETUP_OUT;
           return;
         }
