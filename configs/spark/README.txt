@@ -13,7 +13,7 @@ This README discusses issues unique to NuttX configurations for the Spark Core b
   Other:          Sleep, stop, and standby modes; serial wire debug and JTAG interfaces
 
   During the development of the SparkCore, the hardware was in limited supply
-  As a work around DAvid Sidrane <david_s5@nscdg.com> created a SparkCore Big board
+  As a work around David Sidrane <david_s5@nscdg.com> created a SparkCore Big board
   (http://nscdg.com/spark/sparkBB.png) that will interface with a maple mini
   (http://leaflabs.com/docs/hardware/maple-mini.html), and a CC3000BOOST
   (https://estore.ti.com/CC3000BOOST-CC3000-BoosterPack-P4258.aspx)
@@ -61,10 +61,10 @@ GNU Toolchain Options
   4. Raisonance GNU toolchain, or
   5. The NuttX buildroot Toolchain (see below).
 
-  All testing has been conducted using the CodeSourcery toolchain for Linux.  To use
-  the Atollic, devkitARM, Raisonance GNU, or NuttX buildroot toolchain, you simply need to
-  add one of the following configuration options to your .config (or defconfig)
-  file:
+  All testing has been conducted using the CodeSourcery toolchain for Linux. 
+  To use the Atollic, devkitARM, Raisonance GNU, or NuttX buildroot toolchain,
+  you simply need to add one of the following configuration options to your
+  .config (or defconfig) file:
 
     CONFIG_STM32_CODESOURCERYW=n  : CodeSourcery under Windows
     CONFIG_STM32_CODESOURCERYL=y  : CodeSourcery under Linux
@@ -103,7 +103,7 @@ GNU Toolchain Options
      because the dependencies are generated using Windows pathes which do not
      work with the Cygwin make.
 
-       MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
+       MKDEP = $(TOPDIR)/tools/mknulldeps.sh
 
   The CodeSourcery Toolchain (2009q1)
   -----------------------------------
@@ -167,12 +167,15 @@ IDEs
   there is a lot of help on the internet).
 
   Using Sourcery CodeBench from http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/overview
-   1) Download and install the latest version (as of this writting it was sourceryg++-2013.05-64-arm-none-eabi)
+    Download and install the latest version (as of this writting it was
+    sourceryg++-2013.05-64-arm-none-eabi)
+
    Import the  project from git.
-     File->import->Git-URI, then import a Exiting code as a Makefile progject from the working directory the
-     git clone was done to.
-     Select the Sourcery CodeBench for ARM EABI. N.B. You must do one command line build,
-     before the make will work in CodeBench.
+     File->import->Git-URI, then import a Exiting code as a Makefile progject
+     from the working directory the git clone was done to.
+
+   Select the Sourcery CodeBench for ARM EABI. N.B. You must do one command line
+     build, before the make will work in CodeBench.
 
   Native Build
   ------------
@@ -379,7 +382,7 @@ DFU and JTAG
   which disable JTAG-DP and SW-DP.
 
 Hardware
-=======================
+========
 
   The Spark comprises a STM32F103CB 72 Mhz, 128 Flash, 20K Ram, with 37 IO Pins, and
   a TI CC3000 Wifi Module. It has a 2MB serial flash, onboad regulation and 2 led's
@@ -394,8 +397,9 @@ Hardware
   wires in the spark LEDs and serial flash to the same I/O as the sparkcore. It has a Jlink
   compatible Jtag connector on it.
 
- Core Pin out
-^^^^^^^^^^^^^^^^
+Core Pin out
+============
+
   There are 24 pis on the Spark Core module.
 
   Spark     Spark Function                                         STM32F103CBT6
@@ -427,8 +431,9 @@ Hardware
    D1     JP2-11  PB[06] I2C1_SCL/TIM4_CH1                          42
    D0     JP2-12  PB[07] I2C1_SDA/TIM4_CH2                          43
 
- Core Internal IO
-^^^^^^^^^^^^^^^^^
+Core Internal IO
+================
+
   Spark       Function                                          STM32F103CBT6
     Name                                    Pin #
   --------     ------------------------------------------------ ---------------
@@ -446,8 +451,9 @@ Hardware
   WIFI_EN      PB[08] TIM4_CH3                                   45        CC3000 Module enable
   WIFI_INT     PB[11] I2C2_SDA/USART3_RX                         22        CC3000 Host interface SPI interrupt
 
- Buttons and LEDs
-^^^^^^^^^^^^^^^^
+Buttons and LEDs
+================
+
   Buttons
   -------
   The Spark has two mechanical buttons. One button is the RESET button
@@ -499,7 +505,7 @@ Hardware
   *** LED3 may also flicker normally if signals are processed.
 
 Serial Consoles
-^^^^^^^^^^^^^^^
+===============
 
   USART2
   -----
@@ -524,18 +530,91 @@ Spark -specific Configuration Options
 
 Configurations
 ==============
-    WIP
 
-    1) SPI2 is enabled and support is included for the FAT file system
-       on the 16Mbit (2M) SST25 device on the spark core.
+  Composite: The composite is a super set of all the functions in nsh,
+  usbserial, usbmsc. (usbnsh has not been rung out).
 
-       CONFIG_STM32_SPI2=y
-       CONFIG_MTD_SST25=y
-       CONFIG_SST25_SECTOR512=y
-       CONFIG_DISABLE_MOUNTPOINT=n
-       CONFIG_FS_FAT=y
-       CONFIG_NSH_ARCHINIT=y
+  Build it with
 
-       When the system boots, you should have the FAT file system mounted
-       at /mnt/sst25 that will ba exported as MSD on the USB on insertion
-       of the USB connector
+    make distclean;cd tools;./configure.sh spark/composite;cd ..
+
+  then run make menuconfig if you wish to customize things.
+
+  N.B. Memory is tight, both Flash and RAM are taxed. If you enable
+  debugging you will need to add -Os following the line -g in the line:
+
+    ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+      ARCHOPTIMIZATION = -g
+
+  in the top level Make.degs or the code will not fit.
+
+  Stack space has been hand optimized using the stack coloring by enabling
+  "Stack usage debug hooks" (CONFIG_DEBUG_STACK) in Build Setup-> Debug
+  Options. I have selected values that have 8-16 bytes of headroom with
+  network debugging on. If you enable more debugging and get a hard fault
+  or any weirdness like commands hanging. Then the Idle, main or Interrupt
+  stack my be too small. Stop the target and have a look a memory for a
+  blown stack: No DEADBEEF at the lowest address of a given stack.
+
+  Given the RAM memory constraints it is not possible to be running the
+  network and USB CDC/ACM and MSC at the same time. But on the bright
+  side, you can export the FLASH memory to the PC. Write files on the
+  Flash. Reboot and mount the FAT FS and run network code that will have
+  access the files.
+
+  You can use the scripts/cdc-acm.inf file to install the windows
+  composite device.
+
+  SPI2 is enabled and support is included for the FAT file system on the
+  16Mbit (2M) SST25 device and control of the CC3000 on the spark core.
+
+  When the system boots, you should have a dev/mtdblock0 that can be
+  mounted using the command:
+
+     mount -t vfat /dev/mtdblock0 /mnt/p0
+
+  or /dev/mtdblock0 can be exported as MSC on the USB interface along with
+  a Virtual serial port as a CDC/ACM interface.
+
+  Use the command conn* and disconn to manage the USB interface.
+
+  N.B. *If /dev/mtdblock0 is mounted then You must unmount it prior to
+  exporting it via the conn command.  Bad things will happen if not.
+
+  Network control is facilitated by running the c3b (cc3000basic) application.
+
+  Run c3b from the nsh prompt.
+
+    +-------------------------------------------+
+    |      Nuttx CC3000 Demo Program            |
+    +-------------------------------------------+
+
+      01 - Initialize the CC3000
+      02 - Show RX & TX buffer sizes, & free RAM
+      03 - Start Smart Config
+      04 - Manually connect to AP
+      05 - Manually add connection profile
+      06 - List access points
+      07 - Show CC3000 information
+      08 - Telnet
+
+     Type 01-07 to select above option:
+
+  Select 01. Then use 03 and the TI Smart config application running on an
+  IOS or Android device to configure join your network.
+
+  Use 07 to see the IP address of the device.
+
+  (On the next reboot running c3b 01 the CC3000 will automaticaly rejoin the
+  network after the 01 give it a few seconds and enter 07 or 08)
+
+  Use 08 to start Telnet. Then you can connect to the device using the
+  address listed in command 07.
+
+  qq will exit the c3b with the telnet deamon running (if started)
+
+  Slow.... You will be thinking 300 bps. This is because of packet sizes and
+  how the select thread runs in the telnet session. Telnet is not the best
+  showcase for the CC3000, but simply a proof of network connectivity.
+
+  http POST and GET should be more efficient.
