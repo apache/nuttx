@@ -5999,4 +5999,6 @@
 	  provided by David Sidrane (2013-11-7).
 	* configs/spark/usbserial.c:  Add an apps/examples/usbserial
 	  configuration for the Spark.  From David Sidran (2013-11-7).
+	* arch/arm/src/sama5/sam_ssc.c and .h:  First cut of SAMA5
+	  SSC/I2S driver is code complete (2013-11-9).
 

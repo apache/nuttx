@@ -51,59 +51,45 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
 /* Access macros ************************************************************/
 
 /****************************************************************************
- * Name: I2S_FREQUENCY
+ * Name: I2S_RXSAMPLERATE
  *
  * Description:
- *   Set the I2S frequency. Required.
+ *   Set the I2S RX sample rate.  NOTE:  This will have no effect if (1) the
+ *   driver does not support an I2C receiver or if (2) the sample rate is
+ *   driven by the I2C frame clock.  This may also have unexpected side-
+ *   effects of the RX sample is coupled with the TX sample rate.
  *
  * Input Parameters:
- *   dev -       Device-specific state data
- *   frequency - The I2S frequency requested
+ *   dev  - Device-specific state data
+ *   rate - The I2S sample rate in samples (not bits) per second
  *
  * Returned Value:
- *   Returns the actual frequency selected
+ *   Returns the resulting bitrate
  *
  ****************************************************************************/
 
-#define I2S_FREQUENCY(d,f) ((d)->ops->i2s_frequency(d,f))
+#define I2S_RXSAMPLERATE(d,f) ((d)->ops->i2s_rxsamplerate(d,r))
 
 /****************************************************************************
- * Name: I2S_SEND
+ * Name: I2S_RXDATAWIDTH
  *
  * Description:
- *   Send a block of data on I2S.
+ *   Set the I2S RX data width.  The RX bitrate is determined by
+ *   sample_rate * data_width.
  *
  * Input Parameters:
- *   dev    - Device-specific state data
- *   buffer - A pointer to the buffer of data to be sent
- *   nbytes - the length of data to send from the buffer in number of bytes.
- *   callback - A user provided callback function that will be called at
- *              the completion of the transfer.  The callback will be
- *              performed in the context of the worker thread.
- *   arg      - An opaque argument that will be provided to the callback
- *              when the transfer complete.
- *   timeout  - The timeout value to use.  The transfer will be canceled
- *              and an ETIMEDOUT error will be reported if this timeout
- *              elapsed without completion of the DMA transfer.  Units
- *              are system clock ticks.  Zero means no timeout.
+ *   dev   - Device-specific state data
+ *   width - The I2S data with in bits.
  *
  * Returned Value:
- *   OK on success; a negated errno value on failure.  NOTE:  This function
- *   only enqueues the transfer and returns immediately.  Success here only
- *   means that the transfer was enqueued correctly.
- *
- *   When the transfer is complete, a 'result' value will be provided as
- *   an argument to the callback function that will indicate if the transfer
- *   failed.
+ *   Returns the resulting bitrate
  *
  ****************************************************************************/
 
-#define I2S_SEND(d,b,n,c,a,t) ((d)->ops->i2s_send(d,b,n,c,a,t))
+#define I2S_RXDATAWIDTH(d,b) ((d)->ops->i2s_rxdatawidth(d,b))
 
 /****************************************************************************
  * Name: I2S_RECEIVE
@@ -140,6 +126,77 @@
 #define I2S_RECEIVE(d,b,n,c,a,t) ((d)->ops->i2s_receive(d,b,n,c,a,t))
 
 /****************************************************************************
+ * Name: I2S_TXSAMPLERATE
+ *
+ * Description:
+ *   Set the I2S TX sample rate.  NOTE:  This will have no effect if (1) the
+ *   driver does not support an I2C transmitter or if (2) the sample rate is
+ *   driven by the I2C frame clock.  This may also have unexpected side-
+ *   effects of the TX sample is coupled with the RX sample rate.
+ *
+ * Input Parameters:
+ *   dev  - Device-specific state data
+ *   rate - The I2S sample rate in samples (not bits) per second
+ *
+ * Returned Value:
+ *   Returns the resulting bitrate
+ *
+ ****************************************************************************/
+
+#define I2S_TXSAMPLERATE(d,f) ((d)->ops->i2s_txsamplerate(d,r))
+
+/****************************************************************************
+ * Name: I2S_TXDATAWIDTH
+ *
+ * Description:
+ *   Set the I2S TX data width.  The TX bitrate is determined by
+ *   sample_rate * data_width.
+ *
+ * Input Parameters:
+ *   dev   - Device-specific state data
+ *   width - The I2S data with in bits.
+ *
+ * Returned Value:
+ *   Returns the resulting bitrate
+ *
+ ****************************************************************************/
+
+#define I2S_TXDATAWIDTH(d,b) ((d)->ops->i2s_txdatawidth(d,b))
+
+/****************************************************************************
+ * Name: I2S_SEND
+ *
+ * Description:
+ *   Send a block of data on I2S.
+ *
+ * Input Parameters:
+ *   dev    - Device-specific state data
+ *   buffer - A pointer to the buffer of data to be sent
+ *   nbytes - the length of data to send from the buffer in number of bytes.
+ *   callback - A user provided callback function that will be called at
+ *              the completion of the transfer.  The callback will be
+ *              performed in the context of the worker thread.
+ *   arg      - An opaque argument that will be provided to the callback
+ *              when the transfer complete.
+ *   timeout  - The timeout value to use.  The transfer will be canceled
+ *              and an ETIMEDOUT error will be reported if this timeout
+ *              elapsed without completion of the DMA transfer.  Units
+ *              are system clock ticks.  Zero means no timeout.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure.  NOTE:  This function
+ *   only enqueues the transfer and returns immediately.  Success here only
+ *   means that the transfer was enqueued correctly.
+ *
+ *   When the transfer is complete, a 'result' value will be provided as
+ *   an argument to the callback function that will indicate if the transfer
+ *   failed.
+ *
+ ****************************************************************************/
+
+#define I2S_SEND(d,b,n,c,a,t) ((d)->ops->i2s_send(d,b,n,c,a,t))
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 /* Transfer complete callback */
@@ -152,13 +209,21 @@ typedef CODE void (*i2s_callback_t)(FAR struct i2s_dev_s *dev,
 struct i2s_dev_s;
 struct i2s_ops_s
 {
-  uint32_t (*i2s_frequency)(FAR struct i2s_dev_s *dev, uint32_t frequency);
-  int      (*i2s_send)(FAR struct i2s_dev_s *dev, FAR const void *buffer,
-                       size_t nbytes, i2s_callback_t callback,
-                       FAR void *arg, uint32_t timeout);
+  /* Receiver methods */
+
+  uint32_t (*i2s_rxsamplerate)(FAR struct i2s_dev_s *dev, uint32_t rate);
+  uint32_t (*i2s_rxdatawidth)(FAR struct i2s_dev_s *dev, int bits);
   int      (*i2s_receive)(FAR struct i2s_dev_s *dev, FAR void *buffer,
-                          size_t nbytes, i2s_callback_t callback,
-                          FAR void *arg, uint32_t timeout);
+             size_t nbytes, i2s_callback_t callback, FAR void *arg,
+             uint32_t timeout);
+
+  /* Transmitter methods */
+
+  uint32_t (*i2s_txsamplerate)(FAR struct i2s_dev_s *dev, uint32_t rate);
+  uint32_t (*i2s_txdatawidth)(FAR struct i2s_dev_s *dev, int bits);
+  int      (*i2s_send)(FAR struct i2s_dev_s *dev, FAR const void *buffer,
+             size_t nbytes, i2s_callback_t callback, FAR void *arg,
+             uint32_t timeout);
 };
 
 /* I2S private data.  This structure only defines the initial fields of the
