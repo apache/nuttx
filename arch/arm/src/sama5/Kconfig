@@ -1402,7 +1402,8 @@ config SAMA5_SSC0_DATALEN
 	int "Data width (bits)"
 	default 16
 	---help---
-		Data width in bits.
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
 
 config SAMA5_SSC0_RX
 	bool "Enable I2C receiver"
@@ -1516,16 +1517,16 @@ endchoice # Receiver output clock
 endif # !SAMA5_SSC0_TX_TKINPUT
 endif # SAMA5_SSC0_TX
 
-config SAMA5_SSC0_MCKDIV_FREQUENCY
+config SAMA5_SSC0_MCKDIV_SAMPLERATE
 	int "Internal transmitter clock frequency"
 	default 100
 	depends on SAMA5_SSC0_RX_MCKDIV || SAMA5_SSC0_TX_MCKDIV
 	---help---
 		If the either the receiver or transmitter clock is provided by MCK/2 divided
-		down, then the target frequency must be provided.  The SSC driver will
-		determine the best divider to obtain that frequency (up to 4095).  If the
-		frequency is too low to be obtained by dividing down the MCK/2, a compile
-		time error will occur.
+		down, then the samplerate must be provided.  The bitrate will be the product
+		of the sample rate and the data width.  The SSC driver will determine the best
+		divider to obtain that bitrate (up to 4095).  If the bitrate can be realized
+		by dividing down the MCK/2, a compile time error will occur.
 
 endif # SAMA5_SSC0
 
@@ -1542,7 +1543,8 @@ config SAMA5_SSC1_DATALEN
 	int "Data width (bits)"
 	default 16
 	---help---
-		Data width in bits.
+		Data width in bits.  This is a default value and may be change
+		via the I2S interface
 
 config SAMA5_SSC1_RX
 	bool "Enable I2C receiver"
@@ -1656,16 +1658,16 @@ endchoice # Receiver output clock
 endif # !SAMA5_SSC1_TX_TKINPUT
 endif # SAMA5_SSC1_TX
 
-config SAMA5_SSC1_MCKDIV_FREQUENCY
+config SAMA5_SSC1_MCKDIV_SAMPLERATE
 	int "Internal transmitter clock frequency"
 	default 100
 	depends on SAMA5_SSC1_RX_MCKDIV || SAMA5_SSC1_TX_MCKDIV
 	---help---
 		If the either the receiver or transmitter clock is provided by MCK/2 divided
-		down, then the target frequency must be provided.  The SSC driver will
-		determine the best divider to obtain that frequency (up to 4095).  If the
-		frequency is too low to be obtained by dividing down the MCK/2, a compile
-		time error will occur.
+		down, then the samplerate must be provided.  The bitrate will be the product
+		of the sample rate and the data width.  The SSC driver will determine the best
+		divider to obtain that bitrate (up to 4095).  If the bitrate can be realized
+		by dividing down the MCK/2, a compile time error will occur.
 
 endif # SAMA5_SSC1
 
