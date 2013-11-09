@@ -358,24 +358,24 @@ static void     ssc_buf_initialize(struct sam_ssc_s *priv);
 #if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
 #  define       ssc_rxdma_sample(s,i) sam_dmasample((s)->rxdma, &(s)->rxdmaregs[i])
 static void     ssc_rxdma_sampleinit(struct sam_ssc_s *priv);
-static void     ssc_rxdma_sampledone(struct sam_ssc_s *priv);
+static void     ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result);
 
 #else
 #  define       ssc_rxdma_sample(s,i)
 #  define       ssc_rxdma_sampleinit(s)
-#  define       ssc_rxdma_sampledone(s)
+#  define       ssc_rxdma_sampledone(s,r)
 
 #endif
 
 #if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
 #  define ssc_txdma_sample(s,i) sam_dmasample((s)->txdma, &(s)->txdmaregs[i])
 static void     ssc_txdma_sampleinit(struct sam_ssc_s *priv);
-static void     ssc_txdma_sampledone(struct sam_ssc_s *priv);
+static void     ssc_txdma_sampledone(struct sam_ssc_s *priv, int result);
 
 #else
 #  define       ssc_txdma_sample(s,i)
 #  define       ssc_txdma_sampleinit(s)
-#  define       ssc_txdma_sampledone(s)
+#  define       ssc_txdma_sampledone(s,r)
 
 #endif
 
@@ -846,8 +846,10 @@ static void ssc_txdma_sampleinit(struct sam_ssc_s *priv)
  ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
-static void ssc_rxdma_sampledone(struct sam_ssc_s *priv)
+static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
 {
+  lldbg("result: %d\n", result);
+
   /* Sample the final registers */
 
   sam_dmasample(priv->rxdma, &priv->rxdmaregs[DMA_END_TRANSFER]);
@@ -876,7 +878,7 @@ static void ssc_rxdma_sampledone(struct sam_ssc_s *priv)
    * samples either, but we don't know for sure.
    */
 
-  if (priv->result == -ETIMEDOUT)
+  if (result == -ETIMEDOUT)
     {
       sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_TIMEOUT],
                   "RX: At DMA timeout");
@@ -907,8 +909,10 @@ static void ssc_rxdma_sampledone(struct sam_ssc_s *priv)
  ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
-static void ssc_txdma_sampledone(struct sam_ssc_s *priv)
+static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
 {
+  lldbg("result: %d\n", result);
+
   /* Sample the final registers */
 
   sam_dmasample(priv->txdma, &priv->txdmaregs[DMA_END_TRANSFER]);
@@ -933,7 +937,7 @@ static void ssc_txdma_sampledone(struct sam_ssc_s *priv)
    * -OR- DMA timeout.
    */
 
-  if (priv->result == -ETIMEDOUT)
+  if (result == -ETIMEDOUT)
     {
       sam_dmadump(priv->txdma, &priv->txdmaregs[DMA_TIMEOUT],
                   "TX: At DMA timeout");
@@ -1127,15 +1131,21 @@ static void ssc_rx_worker(FAR void *arg)
    * So we have to start the next DMA here.
    */
 
-  i2svdbg("trxact=%p rxdone.head=%p\n", priv->trxact, priv->txdone.head);
+  i2svdbg("txact=%p rxdone.head=%p\n", priv->txact, priv->txdone.head);
 
   /* Check if the DMA is IDLE */
 
   if (priv->rxact == NULL)
     {
-      /* Dump the DMA registers only if the DMA is IDLE */
+#ifdef CONFIG_SAMA5_SSC_DMADEBUG
+      bfcontainer = (struct sam_buffer_s *)sq_peek(&priv->rxdone);
+      if (bfcontainer)
+        {
+          /* Dump the DMA registers */
 
-      ssc_rxdma_sampledone(priv);
+          ssc_rxdma_sampledone(priv, bfcontainer->result);
+        }
+#endif
 
       /* Then start the next DMA.  This must be done with interrupts
        * disabled.
@@ -1161,7 +1171,7 @@ static void ssc_rx_worker(FAR void *arg)
 
       /* Perform the TX transfer done callback */
 
-      DEBUGASSERT(bfcontainter && bfcontainer->callback);
+      DEBUGASSERT(bfcontainer && bfcontainer->callback);
       bfcontainer->callback(&priv->dev, bfcontainer->buffer,
                             bfcontainer->nbytes, bfcontainer->arg,
                             bfcontainer->result);
@@ -1455,9 +1465,18 @@ static void ssc_tx_worker(FAR void *arg)
 
   if (priv->txact == NULL)
     {
+#ifdef CONFIG_SAMA5_SSC_DMADEBUG
+      bfcontainer = (struct sam_buffer_s *)sq_peek(&priv->txdone);
+      if (bfcontainer)
+        {
+          /* Dump the DMA registers */
+
+          ssc_txdma_sampledone(priv, bfcontainer->result);
+        }
+#endif
+
       /* Dump the DMA registers only if the DMA is IDLE */
 
-      ssc_txdma_sampledone(priv);
 
       /* Then start the next DMA.  This must be done with interrupts
        * disabled.
@@ -1483,7 +1502,7 @@ static void ssc_tx_worker(FAR void *arg)
 
       /* Perform the TX transfer done callback */
 
-      DEBUGASSERT(bfcontainter && bfcontainer->callback);
+      DEBUGASSERT(bfcontainer && bfcontainer->callback);
       bfcontainer->callback(&priv->dev, bfcontainer->buffer,
                             bfcontainer->nbytes, bfcontainer->arg,
                             bfcontainer->result);
