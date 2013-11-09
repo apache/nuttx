@@ -275,16 +275,16 @@ struct sam_ssc_s
   DMA_HANDLE rxdma;            /* SSC RX DMA handle */
   WDOG_ID rxdog;               /* Watchdog that handles RX DMA timeouts */
   sq_queue_t rxpend;           /* A queue of pending RX transfers */
+  sq_queue_t rxact;            /* A queue of active RX transfers */
   sq_queue_t rxdone;           /* A queue of completed RX transfers */
-  struct sam_buffer_s *rxact;  /* The active RX transfer */
   struct work_s rxwork;        /* Supports worker thread RX operations */
 #endif
 #ifdef SSC_HAVE_TX
   DMA_HANDLE txdma;            /* SSC TX DMA handle */
   WDOG_ID txdog;               /* Watchdog that handles TX DMA timeouts */
   sq_queue_t txpend;           /* A queue of pending TX transfers */
+  sq_queue_t txact;            /* A queue of active TX transfers */
   sq_queue_t txdone;           /* A queue of completed TX transfers */
-  struct sam_buffer_s *txact;  /* The active TX transfer */
   struct work_s txwork;        /* Supports worker thread TX operations */
 #endif
 
@@ -1014,24 +1014,22 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
   struct sam_buffer_s *bfcontainer;
   uintptr_t paddr;
   uintptr_t maddr;
+  uint32_t timeout;
+  bool notimeout;
   int ret;
 
   /* If there is already an active transmission in progress, then bail
    * returning success.
    */
 
-  if (priv->rxact != NULL)
+  if (!sq_empty(&priv->rxact))
     {
       return OK;
     }
 
-  /* Remove the pending RX transfer at the head of the RX pending queue. */
-
-  bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rxpend);
-
   /* If there are no pending transfer, then bail returning success */
 
-  if (!bfcontainer)
+  if (sq_empty(&priv->rxpend))
     {
       return OK;
     }
@@ -1040,16 +1038,47 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
   ssc_rxdma_sampleinit(priv);
 
-  /* Physical address of the SSC RHR register and of the buffer location in
-   * RAM.
-   */
+  /* Loop, adding each pending DMA */
 
-  paddr = ssc_physregaddr(priv, SAM_SSC_RHR_OFFSET);
-  maddr = sam_physramaddr((uintptr_t)bfcontainer->buffer);
+  timeout = 0;
+  notimeout = false;
 
-  /* Configure the RX DMA */
+  do
+    {
+      /* Remove the pending RX transfer at the head of the RX pending queue. */
 
-  sam_dmarxsetup(priv->rxdma, paddr, maddr, bfcontainer->nbytes);
+      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rxpend);
+
+      /* Physical address of the SSC RHR register and of the buffer location
+       * in RAM.
+       */
+
+      paddr = ssc_physregaddr(priv, SAM_SSC_RHR_OFFSET);
+      maddr = sam_physramaddr((uintptr_t)bfcontainer->buffer);
+
+      /* Configure the RX DMA */
+
+      sam_dmarxsetup(priv->rxdma, paddr, maddr, bfcontainer->nbytes);
+
+      /* Increment the DMA timeout */
+
+      if (bfcontainer->timeout > 0)
+        {
+          timeout += timeout;
+        }
+      else
+        {
+          notimeout = true;
+        }
+
+      /* Add the container to the list of active DMAs */
+
+      sq_addlast((sq_entry_t *)bfcontainer, &priv->rxact);
+    }
+  while (!sq_empty(&priv->rxpend));
+
+  /* Sample DMA registers */
+
   ssc_rxdma_sample(priv, DMA_AFTER_SETUP);
 
   /* Invalidate the data cache so that nothing gets flush into the
@@ -1061,7 +1090,6 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
   /* Start the DMA, saving the container as the current active transfer */
 
-  priv->rxact = bfcontainer;
   sam_dmastart(priv->rxdma, ssc_rxdma_callback, priv);
   ssc_rxdma_sample(priv, DMA_AFTER_START);
 
@@ -1071,10 +1099,10 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
   /* Start a watchdog to catch DMA timeouts */
 
-  if (priv->rxact->timeout > 0)
+  if (!notimeout)
     {
-      ret = wd_start(priv->rxdog, priv->rxact->timeout,
-                     (wdentry_t)ssc_rxdma_timeout, 1, (uint32_t)priv);
+      ret = wd_start(priv->rxdog, timeout, (wdentry_t)ssc_rxdma_timeout,
+                     1, (uint32_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We
@@ -1115,14 +1143,14 @@ static void ssc_rx_worker(FAR void *arg)
 
   DEBUGASSERT(priv);
 
-  /* When the transfer was started, the active buffer container was removed
-   * from the rxpend queue and saved in as rxact.  We get here when the
-   * DMA if finished... either successfully, with a DMA error, or with a DMA
+  /* When the transfer was started, the active buffer containers were removed
+   * from the rxpend queue and saved in the rxact queue.  We get here when the
+   * DMA is finished... either successfully, with a DMA error, or with a DMA
    * timeout.
    *
-   * In any case, the buffer container in rxact will be moved to the end
-   * of the rxdone queue and rxact will be nullified before this worker is
-   * started.
+   * In any case, the buffer containers in rxact will be moved to the end
+   * of the rxdone queue and rxact queue will be emptied before this worker
+   * is started.
    *
    * REVISIT: Normal DMA callback processing should restart the DMA
    * immediately to avoid audio artifacts at the boundaries between DMA
@@ -1131,11 +1159,12 @@ static void ssc_rx_worker(FAR void *arg)
    * So we have to start the next DMA here.
    */
 
-  i2svdbg("txact=%p rxdone.head=%p\n", priv->txact, priv->txdone.head);
+  i2svdbg("rxact.head=%p rxdone.head=%p\n",
+          priv->rxact.head, priv->rxdone.head);
 
   /* Check if the DMA is IDLE */
 
-  if (priv->rxact == NULL)
+  if (sq_empty(&priv->rxact))
     {
 #ifdef CONFIG_SAMA5_SSC_DMADEBUG
       bfcontainer = (struct sam_buffer_s *)sq_peek(&priv->rxdone);
@@ -1206,22 +1235,31 @@ static void ssc_rx_worker(FAR void *arg)
 #ifdef SSC_HAVE_RX
 static void ssc_rx_schedule(struct sam_ssc_s *priv, int result)
 {
+  struct sam_buffer_s *bfcontainer;
   int ret;
 
-  /* Upon entry, the transfer that just complete is the one at head at
-   * priv->rxact.  It does not reside in any queue.
+  /* Upon entry, the transfer that just complete is the one at tail of the
+   * priv->rxact queue.
    */
 
-  DEBUGASSERT(priv->rxact != NULL);
+  DEBUGASSERT(!sq_empty(&priv->rxact));
 
-  /* Report the result of the transfer */
+  /* Move all entries from the rxact queue to the rxdone queue */
 
-  priv->rxact->result = result;
+  while (!sq_empty(&priv->rxact))
+    {
+      /* Remove the next buffer container from the rxact list */
 
-  /* Add the completed buffer to the tail of the txdone queue */
+      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rxact);
 
-  sq_addlast((sq_entry_t *)priv->rxact, &priv->rxdone);
-  priv->rxact = NULL;
+      /* Report the result of the transfer */
+
+      bfcontainer->result = result;
+
+      /* Add the completed buffer container to the tail of the rxdone queue */
+
+      sq_addlast((sq_entry_t *)bfcontainer, &priv->rxdone);
+    }
 
   /* If the worker has completed running, then reschedule the working thread.
    * REVISIT:  There may be a race condition here.
@@ -1342,24 +1380,22 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
   struct sam_buffer_s *bfcontainer;
   uintptr_t paddr;
   uintptr_t maddr;
+  uint32_t timeout;
+  bool notimeout;
   int ret;
 
   /* If there is already an active transmission in progress, then bail
    * returning success.
    */
 
-  if (priv->txact)
+  if (!sq_empty(&priv->txact))
     {
       return OK;
     }
 
-  /* Remove the pending TX transfer at the head of the TX pending queue. */
-
-  bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->txpend);
-
   /* If there are no pending transfer, then bail returning success */
 
-  if (!bfcontainer)
+  if (sq_empty(&priv->txpend))
     {
       return OK;
     }
@@ -1368,16 +1404,48 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
   ssc_txdma_sampleinit(priv);
 
-  /* Physical address of the SSC THR register and of the buffer location in
-   * RAM.
-   */
+  /* Loop, adding each pending DMA */
 
-  paddr = ssc_physregaddr(priv, SAM_SSC_THR_OFFSET);
-  maddr = sam_physramaddr((uintptr_t)bfcontainer->buffer);
+  timeout = 0;
+  notimeout = false;
 
-  /* Configure the TX DMA */
+  do
+    {
+      /* Remove the pending TX transfer at the head of the TX pending queue. */
 
-  sam_dmatxsetup(priv->txdma, paddr, maddr, bfcontainer->nbytes);
+      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->txpend);
+
+      /* Physical address of the SSC THR register and of the buffer location
+       * in
+       * RAM.
+       */
+
+      paddr = ssc_physregaddr(priv, SAM_SSC_THR_OFFSET);
+      maddr = sam_physramaddr((uintptr_t)bfcontainer->buffer);
+
+      /* Configure the TX DMA */
+
+      sam_dmatxsetup(priv->txdma, paddr, maddr, bfcontainer->nbytes);
+
+      /* Increment the DMA timeout */
+
+      if (bfcontainer->timeout > 0)
+        {
+          timeout += timeout;
+        }
+      else
+        {
+          notimeout = true;
+        }
+
+      /* Add the container to the list of active DMAs */
+
+      sq_addlast((sq_entry_t *)bfcontainer, &priv->txact);
+    }
+  while (!sq_empty(&priv->txpend));
+
+  /* Sample DMA registers */
+  
   ssc_txdma_sample(priv, DMA_AFTER_SETUP);
 
   /* Flush the data cache so that everything is in the physical memory
@@ -1389,7 +1457,6 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
   /* Start the DMA, saving the container as the current active transfer */
 
-  priv->txact = bfcontainer;
   sam_dmastart(priv->txdma, ssc_txdma_callback, priv);
   ssc_txdma_sample(priv, DMA_AFTER_START);
 
@@ -1399,10 +1466,10 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
   /* Start a watchdog to catch DMA timeouts */
 
-  if (priv->txact->timeout > 0)
+  if (!notimeout)
     {
-      ret = wd_start(priv->txdog, priv->txact->timeout,
-                     (wdentry_t)ssc_txdma_timeout, 1, (uint32_t)priv);
+      ret = wd_start(priv->txdog, timeout, (wdentry_t)ssc_txdma_timeout,
+                     1, (uint32_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
        * that we do nothing in the case of failure to start the timer.  We
@@ -1443,13 +1510,13 @@ static void ssc_tx_worker(FAR void *arg)
 
   DEBUGASSERT(priv);
 
-  /* When the transfer was started, the active buffer container was removed
-   * from the txpend queue and saved in as txact.  We get here when the
-   * DMA if finished... either successfully, with a DMA error, or with a DMA
+  /* When the transfer was started, the active buffer containers were removed
+   * from the txpend queue and saved in the txact queue.  We get here when the
+   * DMA is finished... either successfully, with a DMA error, or with a DMA
    * timeout.
    *
-   * In any case, the buffer container in txact will be moved to the end
-   * of the txdone queue and txact will be nullified before this worker is
+   * In any case, the buffer containers in txact will be moved to the end
+   * of the txdone queue and txact will be emptied before this worker is
    * started.
    *
    * REVISIT: Normal DMA callback processing should restart the DMA
@@ -1459,11 +1526,12 @@ static void ssc_tx_worker(FAR void *arg)
    * So we have to start the next DMA here.
    */
 
-  i2svdbg("txact=%p txdone.head=%p\n", priv->txact, priv->txdone.head);
+  i2svdbg("txact.head=%p txdone.head=%p\n",
+           priv->txact.head, priv->txdone.head);
 
   /* Check if the DMA is IDLE */
 
-  if (priv->txact == NULL)
+  if (sq_empty(&priv->txact))
     {
 #ifdef CONFIG_SAMA5_SSC_DMADEBUG
       bfcontainer = (struct sam_buffer_s *)sq_peek(&priv->txdone);
@@ -1474,9 +1542,6 @@ static void ssc_tx_worker(FAR void *arg)
           ssc_txdma_sampledone(priv, bfcontainer->result);
         }
 #endif
-
-      /* Dump the DMA registers only if the DMA is IDLE */
-
 
       /* Then start the next DMA.  This must be done with interrupts
        * disabled.
@@ -1538,22 +1603,31 @@ static void ssc_tx_worker(FAR void *arg)
 #ifdef SSC_HAVE_TX
 static void ssc_tx_schedule(struct sam_ssc_s *priv, int result)
 {
+  struct sam_buffer_s *bfcontainer;
   int ret;
 
-  /* Upon entry, the transfer that just complete is the one at head at
-   * priv->txact.  It does not reside in any queue.
+  /* Upon entry, the transfer that just completed is the one at head at
+   * end of the priv->txact queue.
    */
 
-  DEBUGASSERT(priv->txact != NULL);
+  DEBUGASSERT(!sq_empty(&priv->txact));
 
-  /* Report the result of the transfer */
+  /* Move all entries from the txact queue to the txdone queue */
 
-  priv->txact->result = result;
+  while (!sq_empty(&priv->txact))
+    {
+      /* Remove the next buffer container from the txact list */
 
-  /* Add the completed buffer to the tail of the txdone queue */
+      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->txact);
 
-  sq_addlast((sq_entry_t *)priv->txact, &priv->txdone);
-  priv->txact = NULL;
+      /* Report the result of the transfer */
+
+      bfcontainer->result = result;
+
+      /* Add the completed buffer container to the tail of the txdone queue */
+
+      sq_addlast((sq_entry_t *)bfcontainer, &priv->txdone);
+    }
 
   /* If the worker has completed running, then reschedule the working thread.
    * REVISIT:  There may be a race condition here.
