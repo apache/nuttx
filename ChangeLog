@@ -6017,3 +6017,6 @@
 	  Kinetis KL family from Alan Carvalho de Assis (2013-11-10).
 	* configs/freedom-kl25z:  Add PWM support.  From Alan Carvalho de Assis
 	  (2013-11-10).
+	* drivers/audio/vs1053:  VS1053 worker thread stack size is now
+	  configurable and assigned a name via pthread_setname_np(). From Ken
+	  Pettit (2013-11-10).

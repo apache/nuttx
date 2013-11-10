@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/prctl.h
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,8 +65,8 @@
  *      prctl(PR_GET_NAME, myname, 0);
  */
 
- #define PR_SET_NAME 1
- #define PR_GET_NAME 2
+#define PR_SET_NAME 1
+#define PR_GET_NAME 2
  
 /****************************************************************************
  * Public Type Definitions
@@ -79,7 +79,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -104,7 +105,7 @@ extern "C" {
  *   
  ****************************************************************************/
 
-EXTERN int prctl(int option, ...);
+int prctl(int option, ...);
 
 #undef EXTERN
 #if defined(__cplusplus)

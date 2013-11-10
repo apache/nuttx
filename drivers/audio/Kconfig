@@ -35,6 +35,12 @@ config VS1053_DEVICE_COUNT
 		context pointers for the DREQ ISR to use for lookup when it needs
 		to signal that additional data is being requested.
 
+config VS1053_WORKER_STACKSIZE
+	int "VS1053 worker thread stack size"
+	default 768
+	---help---
+		Stack size to use with the VS1053 worker thread.
+
 if AUDIO_DRIVER_SPECIFIC_BUFFERS
 
 config VS1053_NUM_BUFFERS

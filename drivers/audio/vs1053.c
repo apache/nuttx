@@ -88,6 +88,10 @@
 #  define CONFIG_VS1053_NUM_BUFFERS       2
 #endif
 
+#ifndef CONFIG_VS1053_WORKER_STACKSIZE
+#  define CONFIG_VS1053_WORKER_STACKSIZE  768
+#endif
+
 #define VS1053_DUMMY                      0xFF
 #define VS1053_DEFAULT_XTALI              12288000
 #define VS1053_DATA_FREQ                  20000000
@@ -1474,7 +1478,8 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
 
   pthread_attr_init(&tattr);
   sparam.sched_priority = sched_get_priority_max(SCHED_FIFO) - 3;
-  pthread_attr_setschedparam(&tattr, &sparam);
+  (void)pthread_attr_setschedparam(&tattr, &sparam);
+  (void)pthread_attr_setstacksize(&tattr, CONFIG_VS1053_WORKER_STACKSIZE);
 
   auddbg("Starting workerthread\n");
   ret = pthread_create(&dev->threadid, &tattr, vs1053_workerthread,
@@ -1484,7 +1489,10 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
       auddbg("Can't create worker thread, errno=%d\n", errno);
     }
   else
+    {
+      pthread_setname_np(dev->threadid, "vs1053");
       auddbg("Created worker thread\n");
+    }
 
   return ret;
 }
