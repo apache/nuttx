@@ -1528,6 +1528,17 @@ config SAMA5_SSC0_MCKDIV_SAMPLERATE
 		divider to obtain that bitrate (up to 4095).  If the bitrate can be realized
 		by dividing down the MCK/2, a compile time error will occur.
 
+config SAMA5_SSC0_LOOPBACK
+	bool "Loopback mode"
+	default n
+	depends on SAMA5_SSC0_TX && SAMA5_SSC0_RX
+	---help---
+		If both the receiver and transmitter are enabled, then the SSC can
+		be configured in loopback mode.  This setting selects SSC loopback
+		and will cause the LOOP bit to be set in the SSC_RFMR regsiter. In
+		this case, RD is connected to TD, RF is connected to TF and RK is
+		connected to TK.
+
 endif # SAMA5_SSC0
 
 if SAMA5_SSC1
@@ -1668,6 +1679,17 @@ config SAMA5_SSC1_MCKDIV_SAMPLERATE
 		of the sample rate and the data width.  The SSC driver will determine the best
 		divider to obtain that bitrate (up to 4095).  If the bitrate can be realized
 		by dividing down the MCK/2, a compile time error will occur.
+
+config SAMA5_SSC1_LOOPBACK
+	bool "Loopback mode"
+	default n
+	depends on SAMA5_SSC1_TX && SAMA5_SSC1_RX
+	---help---
+		If both the receiver and transmitter are enabled, then the SSC can
+		be configured in loopback mode.  This setting selects SSC loopback
+		and will cause the LOOP bit to be set in the SSC_RFMR regsiter. In
+		this case, RD is connected to TD, RF is connected to TF and RK is
+		connected to TK.
 
 endif # SAMA5_SSC1
 
