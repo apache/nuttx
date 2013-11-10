@@ -82,16 +82,39 @@
 
 #if defined(CONFIG_NUTTX_KERNEL) && defined(__KERNEL__)
 #  include <nuttx/kmalloc.h>
-#  define lib_malloc(s)    kmalloc(s)
-#  define lib_zalloc(s)    kzalloc(s)
-#  define lib_realloc(p,s) krealloc(p,s)
-#  define lib_free(p)      kfree(p)
+
+   /* Domain-specific allocations */
+
+#  define lib_malloc(s)     kmalloc(s)
+#  define lib_zalloc(s)     kzalloc(s)
+#  define lib_realloc(p,s)  krealloc(p,s)
+#  define lib_memalign(p,s) krealloc(p,s)
+#  define lib_free(p)       kfree(p)
+
+   /* User-accesssible allocations */
+
+#  define lib_umalloc(s)    kumalloc(s)
+#  define lib_uzalloc(s)    kuzalloc(s)
+#  define lib_urealloc(p,s) kurealloc(p,s)
+#  define lib_ufree(p)      kufree(p)
+
 #else
 #  include <stdlib.h>
-#  define lib_malloc(s)    malloc(s)
-#  define lib_zalloc(s)    zalloc(s)
-#  define lib_realloc(p,s) realloc(p,s)
-#  define lib_free(p)      free(p)
+
+   /* Domain-specific allocations */
+
+#  define lib_malloc(s)     malloc(s)
+#  define lib_zalloc(s)     zalloc(s)
+#  define lib_realloc(p,s)  realloc(p,s)
+#  define lib_free(p)       free(p)
+
+   /* User-accesssible allocations */
+
+#  define lib_umalloc(s)    malloc(s)
+#  define lib_uzalloc(s)    zalloc(s)
+#  define lib_urealloc(p,s) realloc(p,s)
+#  define lib_ufree(p)      free(p)
+
 #endif
 
 #define LIB_BUFLEN_UNKNOWN INT_MAX

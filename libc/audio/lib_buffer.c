@@ -49,9 +49,10 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/audio/audio.h>
 #include <nuttx/usb/audio.h>
+
+#include "lib_internal.h"
 
 #if defined(CONFIG_AUDIO)
 
@@ -113,7 +114,7 @@ static void apb_semtake(FAR struct ap_buffer_s *apb)
  *
  ****************************************************************************/
 
-int apb_alloc(FAR struct audio_buf_desc_s * bufdesc)
+int apb_alloc(FAR struct audio_buf_desc_s *bufdesc)
 {
   uint32_t            bufsize;
   int                 ret;
@@ -124,13 +125,15 @@ int apb_alloc(FAR struct audio_buf_desc_s * bufdesc)
   /* Perform a user mode allocation */
 
   bufsize = sizeof(struct ap_buffer_s) + bufdesc->numbytes;
-  pBuf = kumalloc(bufsize);
+  pBuf = lib_umalloc(bufsize);
   *bufdesc->u.ppBuffer = pBuf;
 
   /* Test if the allocation was successful or not */
 
   if (*bufdesc->u.ppBuffer == NULL)
-    ret = -ENOMEM;
+    {
+      ret = -ENOMEM;
+    }
   else
     {
       /* Populate the buffer contents */
@@ -158,7 +161,7 @@ int apb_alloc(FAR struct audio_buf_desc_s * bufdesc)
  ****************************************************************************/
 
 void apb_prepare(FAR struct ap_buffer_s *apb, int8_t allocmode, uint8_t format,
-    uint8_t subformat, apb_samp_t maxsamples)
+                 uint8_t subformat, apb_samp_t maxsamples)
 {
   /* Perform a reference count decrement and possibly release the memory */
 }
@@ -172,7 +175,7 @@ void apb_prepare(FAR struct ap_buffer_s *apb, int8_t allocmode, uint8_t format,
 
 void apb_free(FAR struct ap_buffer_s *apb)
 {
-  int   refcount;
+  int refcount;
 
   /* Perform a reference count decrement and possibly release the memory */
 
@@ -180,10 +183,10 @@ void apb_free(FAR struct ap_buffer_s *apb)
   refcount = apb->crefs--;
   apb_semgive(apb);
 
-  if (refcount == 1)
+  if (refcount <= 1)
     {
       auddbg("Freeing %p\n", apb);
-      kufree(apb);
+      lib_ufree(apb);
     }
 }
 
