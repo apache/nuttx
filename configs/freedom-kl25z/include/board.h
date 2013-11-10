@@ -133,6 +133,26 @@
 #  define BOARD_SDHC_SD4MODE_DIVISOR   SDHC_SYSCTL_DVS_DIV(15)
 #endif
 
+/* PWM Configuration */
+/* TPM0 Channels */
+
+#define GPIO_TPM0_CH0OUT PIN_TPM0_CH0_3 //PIN_TPM0_CH0_1
+#define GPIO_TPM0_CH1OUT PIN_TPM0_CH1_1
+#define GPIO_TPM0_CH2OUT PIN_TPM0_CH2_1
+#define GPIO_TPM0_CH3OUT PIN_TPM0_CH3_1
+#define GPIO_TPM0_CH4OUT PIN_TPM0_CH4_1
+#define GPIO_TPM0_CH5OUT PIN_TPM0_CH5_1
+
+/* TPM1 Channels */
+
+#define GPIO_TPM1_CH0OUT PIN_TPM1_CH0_1
+#define GPIO_TPM1_CH1OUT PIN_TPM1_CH1_1
+
+/* TPM2 Channels */
+
+#define GPIO_TPM1_CH0OUT PIN_TPM2_CH0_1
+#define GPIO_TPM1_CH1OUT PIN_TPM2_CH1_1
+
 /* LED definitions ******************************************************************/
 /* The Freedom KL25Z has a single RGB LED driven by the KL25Z as follows:
  *
