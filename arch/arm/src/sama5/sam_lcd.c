@@ -89,10 +89,10 @@
 #  define SAMA5_LCDC_BASE_COLOR_FMT FB_FMT_RGB12_444
 #elif defined(CONFIG_SAMA5_LCDC_BASE_ARGB4444)
 #  define SAMA5_LCDC_BASE_BPP       16
-#  define SAMA5_LCDC_BASE_COLOR_FMT ???
+#  define SAMA5_LCDC_BASE_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_BASE_RGBA4444)
 #  define SAMA5_LCDC_BASE_BPP       16
-#  define SAMA5_LCDC_BASE_COLOR_FMT ???
+#  define SAMA5_LCDC_BASE_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_BASE_RGB565)
 #  define SAMA5_LCDC_BASE_BPP       16
 #  define SAMA5_LCDC_BASE_COLOR_FMT FB_FMT_RGB16_565
@@ -104,25 +104,25 @@
 #  define SAMA5_LCDC_BASE_COLOR_FMT RGB666
 #elif defined(CONFIG_SAMA5_LCDC_BASE_RGB666P)
 #  define SAMA5_LCDC_BASE_BPP       24  /* 18BPP but must be byte aligned */
-#  define SAMA5_LCDC_BASE_COLOR_FMT ???
+#  define SAMA5_LCDC_BASE_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_BASE_TRGB1666)
 #  define SAMA5_LCDC_BASE_BPP       32  /* 19BPP but must be 32-bit aligned */
-#  define SAMA5_LCDC_BASE_COLOR_FMT ???
+#  define SAMA5_LCDC_BASE_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_BASE_TRGBP)
 #  define SAMA5_LCDC_BASE_BPP       24  /* 19BPP but must be byte aligned */
-#  define SAMA5_LCDC_BASE_COLOR_FMT ???
-#elif defined(CONFIG_SAMA5_LCDC_BASE_RGB888)
-#  define SAMA5_LCDC_BASE_BPP       24
-#  define SAMA5_LCDC_BASE_COLOR_FMT FB_FMT_RGB12_444
+#  define SAMA5_LCDC_BASE_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_BASE_RGB888P)
 #  define SAMA5_LCDC_BASE_BPP       24
 #  define SAMA5_LCDC_BASE_COLOR_FMT FB_FMT_RGB24
+#elif defined(CONFIG_SAMA5_LCDC_BASE_RGB888)
+#  define SAMA5_LCDC_BASE_BPP       32
+#  define SAMA5_LCDC_BASE_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_BASE_TRGB1888)
 #  define SAMA5_LCDC_BASE_BPP       32  /* 25BPP but must be byte aligned */
-#  define SAMA5_LCDC_BASE_COLOR_FMT ???
+#  define SAMA5_LCDC_BASE_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_BASE_ARGB8888)
 #  define SAMA5_LCDC_BASE_BPP       32
-#  define SAMA5_LCDC_BASE_COLOR_FMT ???
+#  define SAMA5_LCDC_BASE_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_BASE_RGBA8888)
 #  define SAMA5_LCDC_BASE_BPP       32
 #  define SAMA5_LCDC_BASE_COLOR_FMT FB_FMT_RGBA32
@@ -135,10 +135,10 @@
 #  define SAMA5_LCDC_OVR1_COLOR_FMT FB_FMT_RGB12_444
 #elif defined(CONFIG_SAMA5_LCDC_OVR1_ARGB4444)
 #  define SAMA5_LCDC_OVR1_BPP       16
-#  define SAMA5_LCDC_OVR1_COLOR_FMT ???
+#  define SAMA5_LCDC_OVR1_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR1_RGBA4444)
 #  define SAMA5_LCDC_OVR1_BPP       16
-#  define SAMA5_LCDC_OVR1_COLOR_FMT ???
+#  define SAMA5_LCDC_OVR1_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR1_RGB565)
 #  define SAMA5_LCDC_OVR1_BPP       16
 #  define SAMA5_LCDC_OVR1_COLOR_FMT FB_FMT_RGB16_565
@@ -150,25 +150,25 @@
 #  define SAMA5_LCDC_OVR1_COLOR_FMT RGB666
 #elif defined(CONFIG_SAMA5_LCDC_OVR1_RGB666P)
 #  define SAMA5_LCDC_OVR1_BPP       24  /* 18BPP but must be byte aligned */
-#  define SAMA5_LCDC_OVR1_COLOR_FMT ???
+#  define SAMA5_LCDC_OVR1_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR1_TRGB1666)
 #  define SAMA5_LCDC_OVR1_BPP       32  /* 19BPP but must be 32-bit aligned */
-#  define SAMA5_LCDC_OVR1_COLOR_FMT ???
+#  define SAMA5_LCDC_OVR1_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR1_TRGBP)
 #  define SAMA5_LCDC_OVR1_BPP       24  /* 19BPP but must be byte aligned */
-#  define SAMA5_LCDC_OVR1_COLOR_FMT ???
-#elif defined(CONFIG_SAMA5_LCDC_OVR1_RGB888)
-#  define SAMA5_LCDC_OVR1_BPP       24
-#  define SAMA5_LCDC_OVR1_COLOR_FMT FB_FMT_RGB12_444
+#  define SAMA5_LCDC_OVR1_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR1_RGB888P)
 #  define SAMA5_LCDC_OVR1_BPP       24
 #  define SAMA5_LCDC_OVR1_COLOR_FMT FB_FMT_RGB24
+#elif defined(CONFIG_SAMA5_LCDC_OVR1_RGB888)
+#  define SAMA5_LCDC_OVR1_BPP       32
+#  define SAMA5_LCDC_OVR1_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR1_TRGB1888)
 #  define SAMA5_LCDC_OVR1_BPP       32  /* 25BPP but must be byte aligned */
-#  define SAMA5_LCDC_OVR1_COLOR_FMT ???
+#  define SAMA5_LCDC_OVR1_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR1_ARGB8888)
 #  define SAMA5_LCDC_OVR1_BPP       32
-#  define SAMA5_LCDC_OVR1_COLOR_FMT ???
+#  define SAMA5_LCDC_OVR1_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR1_RGBA8888)
 #  define SAMA5_LCDC_OVR1_BPP       32
 #  define SAMA5_LCDC_OVR1_COLOR_FMT FB_FMT_RGBA32
@@ -181,10 +181,10 @@
 #  define SAMA5_LCDC_OVR2_COLOR_FMT FB_FMT_RGB12_444
 #elif defined(CONFIG_SAMA5_LCDC_OVR2_ARGB4444)
 #  define SAMA5_LCDC_OVR2_BPP       16
-#  define SAMA5_LCDC_OVR2_COLOR_FMT ???
+#  define SAMA5_LCDC_OVR2_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR2_RGBA4444)
 #  define SAMA5_LCDC_OVR2_BPP       16
-#  define SAMA5_LCDC_OVR2_COLOR_FMT ???
+#  define SAMA5_LCDC_OVR2_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR2_RGB565)
 #  define SAMA5_LCDC_OVR2_BPP       16
 #  define SAMA5_LCDC_OVR2_COLOR_FMT FB_FMT_RGB16_565
@@ -196,25 +196,25 @@
 #  define SAMA5_LCDC_OVR2_COLOR_FMT RGB666
 #elif defined(CONFIG_SAMA5_LCDC_OVR2_RGB666P)
 #  define SAMA5_LCDC_OVR2_BPP       24  /* 18BPP but must be byte aligned */
-#  define SAMA5_LCDC_OVR2_COLOR_FMT ???
+#  define SAMA5_LCDC_OVR2_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR2_TRGB1666)
 #  define SAMA5_LCDC_OVR2_BPP       32  /* 19BPP but must be 32-bit aligned */
-#  define SAMA5_LCDC_OVR2_COLOR_FMT ???
+#  define SAMA5_LCDC_OVR2_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR2_TRGBP)
 #  define SAMA5_LCDC_OVR2_BPP       24  /* 19BPP but must be byte aligned */
-#  define SAMA5_LCDC_OVR2_COLOR_FMT ???
-#elif defined(CONFIG_SAMA5_LCDC_OVR2_RGB888)
-#  define SAMA5_LCDC_OVR2_BPP       24
-#  define SAMA5_LCDC_OVR2_COLOR_FMT FB_FMT_RGB12_444
+#  define SAMA5_LCDC_OVR2_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR2_RGB888P)
 #  define SAMA5_LCDC_OVR2_BPP       24
 #  define SAMA5_LCDC_OVR2_COLOR_FMT FB_FMT_RGB24
+#elif defined(CONFIG_SAMA5_LCDC_OVR2_RGB888)
+#  define SAMA5_LCDC_OVR2_BPP       32
+#  define SAMA5_LCDC_OVR2_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR2_TRGB1888)
 #  define SAMA5_LCDC_OVR2_BPP       32  /* 25BPP but must be byte aligned */
-#  define SAMA5_LCDC_OVR2_COLOR_FMT ???
+#  define SAMA5_LCDC_OVR2_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR2_ARGB8888)
 #  define SAMA5_LCDC_OVR2_BPP       32
-#  define SAMA5_LCDC_OVR2_COLOR_FMT ???
+#  define SAMA5_LCDC_OVR2_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_OVR2_RGBA8888)
 #  define SAMA5_LCDC_OVR2_BPP       32
 #  define SAMA5_LCDC_OVR2_COLOR_FMT FB_FMT_RGBA32
@@ -227,10 +227,10 @@
 #  define SAMA5_LCDC_HEO_COLOR_FMT FB_FMT_RGB12_444
 #elif defined(CONFIG_SAMA5_LCDC_HEO_ARGB4444)
 #  define SAMA5_LCDC_HEO_BPP       16
-#  define SAMA5_LCDC_HEO_COLOR_FMT ???
+#  define SAMA5_LCDC_HEO_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HEO_RGBA4444)
 #  define SAMA5_LCDC_HEO_BPP       16
-#  define SAMA5_LCDC_HEO_COLOR_FMT ???
+#  define SAMA5_LCDC_HEO_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HEO_RGB565)
 #  define SAMA5_LCDC_HEO_BPP       16
 #  define SAMA5_LCDC_HEO_COLOR_FMT FB_FMT_RGB16_565
@@ -242,25 +242,25 @@
 #  define SAMA5_LCDC_HEO_COLOR_FMT RGB666
 #elif defined(CONFIG_SAMA5_LCDC_HEO_RGB666P)
 #  define SAMA5_LCDC_HEO_BPP       24  /* 18BPP but must be byte aligned */
-#  define SAMA5_LCDC_HEO_COLOR_FMT ???
+#  define SAMA5_LCDC_HEO_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HEO_TRGB1666)
 #  define SAMA5_LCDC_HEO_BPP       32  /* 19BPP but must be 32-bit aligned */
-#  define SAMA5_LCDC_HEO_COLOR_FMT ???
+#  define SAMA5_LCDC_HEO_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HEO_TRGBP)
 #  define SAMA5_LCDC_HEO_BPP       24  /* 19BPP but must be byte aligned */
-#  define SAMA5_LCDC_HEO_COLOR_FMT ???
-#elif defined(CONFIG_SAMA5_LCDC_HEO_RGB888)
-#  define SAMA5_LCDC_HEO_BPP       24
-#  define SAMA5_LCDC_HEO_COLOR_FMT FB_FMT_RGB12_444
+#  define SAMA5_LCDC_HEO_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HEO_RGB888P)
 #  define SAMA5_LCDC_HEO_BPP       24
 #  define SAMA5_LCDC_HEO_COLOR_FMT FB_FMT_RGB24
+#elif defined(CONFIG_SAMA5_LCDC_HEO_RGB888)
+#  define SAMA5_LCDC_HEO_BPP       32
+#  define SAMA5_LCDC_HEO_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HEO_TRGB1888)
 #  define SAMA5_LCDC_HEO_BPP       32  /* 25BPP but must be byte aligned */
-#  define SAMA5_LCDC_HEO_COLOR_FMT ???
+#  define SAMA5_LCDC_HEO_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HEO_ARGB8888)
 #  define SAMA5_LCDC_HEO_BPP       32
-#  define SAMA5_LCDC_HEO_COLOR_FMT ???
+#  define SAMA5_LCDC_HEO_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HEO_RGBA8888)
 #  define SAMA5_LCDC_HEO_BPP       32
 #  define SAMA5_LCDC_HEO_COLOR_FMT FB_FMT_RGBA32
@@ -273,10 +273,10 @@
 #  define SAMA5_LCDC_HCR_COLOR_FMT FB_FMT_RGB12_444
 #elif defined(CONFIG_SAMA5_LCDC_HCR_ARGB4444)
 #  define SAMA5_LCDC_HCR_BPP       16
-#  define SAMA5_LCDC_HCR_COLOR_FMT ???
+#  define SAMA5_LCDC_HCR_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HCR_RGBA4444)
 #  define SAMA5_LCDC_HCR_BPP       16
-#  define SAMA5_LCDC_HCR_COLOR_FMT ???
+#  define SAMA5_LCDC_HCR_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HCR_RGB565)
 #  define SAMA5_LCDC_HCR_BPP       16
 #  define SAMA5_LCDC_HCR_COLOR_FMT FB_FMT_RGB16_565
@@ -288,25 +288,25 @@
 #  define SAMA5_LCDC_HCR_COLOR_FMT RGB666
 #elif defined(CONFIG_SAMA5_LCDC_HCR_RGB666P)
 #  define SAMA5_LCDC_HCR_BPP       24  /* 18BPP but must be byte aligned */
-#  define SAMA5_LCDC_HCR_COLOR_FMT ???
+#  define SAMA5_LCDC_HCR_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HCR_TRGB1666)
 #  define SAMA5_LCDC_HCR_BPP       32  /* 19BPP but must be 32-bit aligned */
-#  define SAMA5_LCDC_HCR_COLOR_FMT ???
+#  define SAMA5_LCDC_HCR_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HCR_TRGBP)
 #  define SAMA5_LCDC_HCR_BPP       24  /* 19BPP but must be byte aligned */
-#  define SAMA5_LCDC_HCR_COLOR_FMT ???
-#elif defined(CONFIG_SAMA5_LCDC_HCR_RGB888)
-#  define SAMA5_LCDC_HCR_BPP       24
-#  define SAMA5_LCDC_HCR_COLOR_FMT FB_FMT_RGB12_444
+#  define SAMA5_LCDC_HCR_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HCR_RGB888P)
 #  define SAMA5_LCDC_HCR_BPP       24
 #  define SAMA5_LCDC_HCR_COLOR_FMT FB_FMT_RGB24
+#elif defined(CONFIG_SAMA5_LCDC_HCR_RGB888)
+#  define SAMA5_LCDC_HCR_BPP       32
+#  define SAMA5_LCDC_HCR_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HCR_TRGB1888)
 #  define SAMA5_LCDC_HCR_BPP       32  /* 25BPP but must be byte aligned */
-#  define SAMA5_LCDC_HCR_COLOR_FMT ???
+#  define SAMA5_LCDC_HCR_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HCR_ARGB8888)
 #  define SAMA5_LCDC_HCR_BPP       32
-#  define SAMA5_LCDC_HCR_COLOR_FMT ???
+#  define SAMA5_LCDC_HCR_COLOR_FMT ??? /* No color format definition */
 #elif defined(CONFIG_SAMA5_LCDC_HCR_RGBA8888)
 #  define SAMA5_LCDC_HCR_BPP       32
 #  define SAMA5_LCDC_HCR_COLOR_FMT FB_FMT_RGBA32
