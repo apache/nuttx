@@ -6025,3 +6025,6 @@
 	  that must be available to audio applications.  If it was left in the
 	  audio/ directory then it would not be available to applications in the
 	  NuttX Kernel build (2013-11-10).
+	* arch/arm/src/sama5/sam_ssc.c and Kconfig:  Add configurable support
+	  for SSC loopback mode (2013-11-10).
+

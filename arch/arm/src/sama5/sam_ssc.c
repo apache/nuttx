@@ -260,6 +260,7 @@ struct sam_ssc_s
   uint16_t master:1;           /* True: Master mode transfers */
   uint16_t rx:1;               /* True: RX transfers supported */
   uint16_t tx:1;               /* True: TX transfers supported */
+  uint16_t loopback:1;         /* True: Loopback mode */
   uint16_t sscno:1;            /* SSC controller number (0 or 1) */
   uint16_t rxclk:2;            /* Receiver clock source. See SSC_CLKSRC_* definitions */
   uint16_t txclk:2;            /* Transmitter clock source. See SSC_CLKSRC_* definitions */
@@ -2132,7 +2133,7 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
    * Currently hardcoded to:
    *
    *  SSC_RFMR_DATLEN(n)    'n' deterimined by configuration
-   *  SSC_RFMR_LOOP         Loop mode not selected
+   *  SSC_RFMR_LOOP         Determined by configuration
    *  SSC_RFMR_MSBF         Most significant bit first
    *  SSC_RFMR_DATNB(n)     Data number 'n' per frame (hard-coded)
    *  SSC_RFMR_FSLEN(0)     Receive frame sync length = 0
@@ -2144,6 +2145,14 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
   regval = (SSC_RFMR_DATLEN(CONFIG_SAMA5_SSC0_DATALEN - 1) | SSC_RFMR_MSBF |
             SSC_RFMR_DATNB(SSC_DATNB - 1) | SSC_RFMR_FSLEN(0) |
             SSC_RFMR_FSOS_NONE | SSC_RFMR_FSLENEXT(0));
+
+  /* Loopback mode? */
+
+  if (priv->loopback)
+    {
+      regval |= SSC_RFMR_LOOP;
+    }
+
   ssc_putreg(priv, SAM_SSC_RFMR_OFFSET, regval);
 
 #else
@@ -2614,6 +2623,15 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 
 #endif /* CONFIG_SAMA5_SSC0_TX */
 
+  /* Set/clear loopback mode */
+
+#if defined(CONFIG_SAMA5_SSC0_TX) && defined(CONFIG_SAMA5_SSC0_TX) && \
+    defined(SAMA5_SSC0_LOOPBACK)
+  priv->loopback = true;
+#else
+  priv->loopback = false;
+#endif
+
   /* Does the receiver or transmitter need to have the MCK divider set up? */
 
 #if defined(SSC0_HAVE_MCK2)
@@ -2739,6 +2757,15 @@ static void ssc1_configure(struct sam_ssc_s *priv)
   priv->txout = SSC_CLKOUT_NONE; /* No output clock */
 
 #endif /* CONFIG_SAMA5_SSC1_TX */
+
+  /* Set/clear loopback mode */
+
+#if defined(CONFIG_SAMA5_SSC1_TX) && defined(CONFIG_SAMA5_SSC1_TX) && \
+    defined(SAMA5_SSC1_LOOPBACK)
+  priv->loopback = true;
+#else
+  priv->loopback = false;
+#endif
 
   /* Does the receiver or transmitter need to have the MCK divider set up? */
 
