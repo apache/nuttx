@@ -16,22 +16,21 @@ memory and 256kbytes. The board features:
   - Easy access to most MCU pins.
 
 NOTE:  The STM32F429I-DISCO port is in early stages and has only limited
-       support at this point.  I have basic NSH command support with 
+       support at this point.  I have basic NSH command support with
        full 8MByte SDRAM + the internal 256K.  Unsupported are the LCD
        and USB interfaces.
-       
-       The board pin configuration to support on-board SDRAM and LCD 
-       prevents use of the OTG FS module which is normally used for USB 
-       NSH sessions.  Instead, the board routes the OTG HS pins to the 
-       USB OTG connector.  Until the port has been updated to use the 
-       OTG HS module of the MCU, USB functions are not available.  
+
+       The board pin configuration to support on-board SDRAM and LCD
+       prevents use of the OTG FS module which is normally used for USB
+       NSH sessions.  Instead, the board routes the OTG HS pins to the
+       USB OTG connector.  Until the port has been updated to use the
+       OTG HS module of the MCU, USB functions are not available.
 
        The NSH configuration / testing that has been done so far was
        performed by connecting an external RS-232 line driver to pins
        PA9 and PA10 and configuring UART1 as the NSH console.
 
-
-Refer to the http://www.st.com website for further information about this 
+Refer to the http://www.st.com website for further information about this
 board (search keyword: 429i-disco)
 
 Contents
@@ -51,8 +50,8 @@ Development Environment
 =======================
 
   The Development environments for the STM32F429I-DISCO board are identical
-  to the environments for other STM32F boards.  For full details on the 
-  environment options and setup, see the README.txt file in the 
+  to the environments for other STM32F boards.  For full details on the
+  environment options and setup, see the README.txt file in the
   config/stm32f4discovery directory.
 
 LEDs
@@ -70,8 +69,8 @@ events as follows:
   LED_STARTED          NuttX has been started   ON       OFF
   LED_HEAPALLOCATE     Heap has been allocated  OFF      ON
   LED_IRQSENABLED      Interrupts enabled       ON       ON
-  LED_STACKCREATED     Idle stack created       OFF      ON 
-  LED_INIRQ            In an interrupt**        ON       ON 
+  LED_STACKCREATED     Idle stack created       OFF      ON
+  LED_INIRQ            In an interrupt**        ON       ON
   LED_SIGNAL           In a signal handler      N/C      ON
   LED_ASSERTION        An assertion failed      ON       ON
   LED_PANIC            The system has crashed   ON       BLINK
@@ -87,8 +86,8 @@ UARTs
 
 On the STM32F429I-DISCO board, because of pin mappings to support the
 onboard SDRAM and LCD, the only UARTs that has both RX and TX pins
-avilalbe are USART1 and UART5.  Other USARTS could be used for RX or TX 
-only, or they could be used for full-duplex if the other pin functions 
+avilalbe are USART1 and UART5.  Other USARTS could be used for RX or TX
+only, or they could be used for full-duplex if the other pin functions
 aren't being used (i.e. LCD or SDRAM).
 
 UART/USART PINS
@@ -130,11 +129,11 @@ UART7
 
  * Indicates pins that have other on-board functions and should be used only
    with care (See table 6 in the STM32F429I-DISCO User Guide for a list of free
-   I/O pins on the board).  
- 
+   I/O pins on the board).
+
 Default USART/UART Configuration
 --------------------------------
- 
+
 USART1 is enabled in all configurations (see */defconfig).  RX and TX are
 configured on pins PA3 and PA2, respectively (see include/board.h).
 
@@ -248,7 +247,7 @@ the following lines in each Make.defs file:
 If you are using a toolchain other than the Atollic toolchain, then to use the FPU
 you will also have to modify the CFLAGS to enable compiler support for the ARMv7-M
 FPU.  As of this writing, there are not many GCC toolchains that will support the
-ARMv7-M FPU.  
+ARMv7-M FPU.
 
 As a minimum you will need to add CFLAG options to (1) enable hardware floating point
 code generation, and to (2) select the FPU implementation.  You might try the same
@@ -288,7 +287,7 @@ FMC SDRAM
 
 On-board SDRAM
 --------------
-The STM32F429I-DISCO has 8 MBytes on-board SDRAM connected to the MCU's 
+The STM32F429I-DISCO has 8 MBytes on-board SDRAM connected to the MCU's
 SDRAM Bank 2 connections (Bank 6 of the FSMC).  This means the 8 MBytes
 (when enabled) is mapped to address 0xD0000000-0xD07FFFFF.  The port for
 the STM32F429I-DISCO board includes support for using the onboard 8M SDRAM.
@@ -367,7 +366,7 @@ STM32F429I-DISCO-specific Configuration Options
        configuration features.
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
- 
+
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
@@ -517,7 +516,7 @@ STM32F429I-DISCO-specific Configuration Options
   configuration settings:
 
     CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
- 
+
   NOTE: The STM32 timers are each capable of generating different signals on
   each of the four channels with different duty cycles.  That capability is
   not supported by this driver:  Only one output channel per timer.
@@ -574,7 +573,7 @@ STM32F429I-DISCO-specific Configuration Options
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
     CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
-    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority. 
+    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
       4-bit transfer mode.
@@ -582,15 +581,15 @@ STM32F429I-DISCO-specific Configuration Options
   STM32 USB OTG FS Host Driver Support
 
   Pre-requisites
- 
+
    CONFIG_USBDEV          - Enable USB device support
    CONFIG_USBHOST         - Enable USB host support
    CONFIG_STM32_OTGFS     - Enable the STM32 USB OTG FS block
    CONFIG_STM32_SYSCFG    - Needed
    CONFIG_SCHED_WORKQUEUE - Worker thread support is required
- 
+
   Options:
- 
+
    CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
      Default 128 (512 bytes)
    CONFIG_STM32_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
@@ -631,7 +630,7 @@ Where <subdir> is one of the following:
     builtin applications are selected (see NOTES below).
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -748,7 +747,7 @@ Where <subdir> is one of the following:
           you can still use certain kinds of debug output (see include/debug.h, all
           of the interfaces based on lowsyslog will work in this configuration).
 
-        - But don't enable USB debug output!  Since USB is console is used for 
+        - But don't enable USB debug output!  Since USB is console is used for
           USB debug output and you are using a USB console, there will be
           infinite loops and deadlocks:  Debug output generates USB debug
           output which generatates USB debug output, etc.  If you want USB
@@ -823,7 +822,7 @@ Where <subdir> is one of the following:
     apps/examples/ostest.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -839,7 +838,7 @@ Where <subdir> is one of the following:
 
     3. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
- 
+
     4. If you use the Atollic toolchain, then the FPU test can be enabled in the
       examples/ostest by adding the following your NuttX configuration file:
 
@@ -867,5 +866,47 @@ Where <subdir> is one of the following:
       bytes (see arch/arm/include/armv7-m/irq_lazyfpu.h):
 
       -CONFIG_EXAMPLES_OSTEST_FPUSIZE=(4*33)
- 
 
+  usbnsh:
+  ------
+
+    This is another NSH example.  If differs from other 'nsh' configurations
+    in that this configurations uses a USB serial device for console I/O.
+    Such a configuration is useful on the stm32f429i-disco which has no
+    builtin RS-232 drivers.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. This configuration does have UART1 output enabled and set up as
+       the system logging device.  To use this UART, you must add an
+       external RS-232 line driver to the UART1 pins of the DISCO board
+       on PA9 and PA10 of connector P1.
+
+  usbmsc:
+  ------
+
+    This is an example of enabling the FS OTG port on the DISCO board for
+    mass storage use.  It provides an NSH session on UART1 to allow
+    accessing the connected USB mass storage device.  Such a configuration
+    is useful on the stm32f429i-disco which has no onboard SD card or mass
+    storage solution.
+
+    NOTES:
+
+    1. This configuration uses UART1 as the system console.  To use this
+       UART, you must add an external RS-232 line driver to the UART1 pins
+       of the DISCO board on PA9 and PA10 of connector P1.
+
+    2. The mass storage device will appear as /dev/sda and supports FAT
+       formatted "thumb" flash drives with:
+
+          nsh> mount -t vfat /dev/sda /mount_name

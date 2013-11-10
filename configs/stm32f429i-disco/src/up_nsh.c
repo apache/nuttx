@@ -54,7 +54,7 @@
 #  include <apps/usbmonitor.h>
 #endif
 
-#ifdef CONFIG_STM32_OTGFS
+#ifdef CONFIG_STM32_OTGFS2
 #  include "stm32_usbhost.h"
 #endif
 
@@ -71,9 +71,9 @@
 #define HAVE_USBHOST    1
 #define HAVE_USBMONITOR 1
 
-/* Can't support USB host or device features if USB OTG FS is not enabled */
+/* Can't support USB host or device features if USB OTG HS is not enabled */
 
-#ifndef CONFIG_STM32_OTGFS
+#ifndef CONFIG_STM32_OTGFS2
 #  undef HAVE_USBDEV
 #  undef HAVE_USBHOST
 #  undef HAVE_USBMONITOR
@@ -150,6 +150,19 @@ int nsh_archinitialize(void)
       message("nsh_archinitialize: Failed to initialize USB host: %d\n", ret);
       return ret;
     }
+
+#ifdef CONFIG_USBHOST_MSC
+  /* Initialize the USB storage class */
+
+  ret = usbhost_storageinit();
+  if (ret != OK)
+    {
+      message("nsh_archinitialize: Failed to initialize USB host storage: %d\n", ret);
+      return ret;
+    }
+
+#endif
+
 #endif
 
 #ifdef HAVE_USBMONITOR
