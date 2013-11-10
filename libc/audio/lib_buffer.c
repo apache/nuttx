@@ -1,5 +1,5 @@
 /****************************************************************************
- * audio/buffer.c
+ * libc/audio/lib_buffer.c
  *
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
@@ -161,7 +161,6 @@ void apb_prepare(FAR struct ap_buffer_s *apb, int8_t allocmode, uint8_t format,
     uint8_t subformat, apb_samp_t maxsamples)
 {
   /* Perform a reference count decrement and possibly release the memory */
-
 }
 
 /****************************************************************************
@@ -207,4 +206,3 @@ void apb_reference(FAR struct ap_buffer_s *apb)
 }
 
 #endif /* CONFIG_AUDIO */
-

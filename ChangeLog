@@ -6020,3 +6020,8 @@
 	* drivers/audio/vs1053:  VS1053 worker thread stack size is now
 	  configurable and assigned a name via pthread_setname_np(). From Ken
 	  Pettit (2013-11-10).
+	* libc/audio/lib_buffer.c:  Moved audio/buffer/c to libc/audio/lib_buffer.c.
+	  This file was moved because it contains buffer management functions
+	  that must be available to audio applications.  If it was left in the
+	  audio/ directory then it would not be available to applications in the
+	  NuttX Kernel build (2013-11-10).

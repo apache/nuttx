@@ -21,13 +21,18 @@ layer for specific lower-half audio device drivers.
               drivers/audio subdirectory.  For each attached audio device, there
               will be an instance of this upper-half driver bound to the
               instance of the lower half driver context.
+  pcm.c     - Routines to manage PCM / WAV type data.  Currently just a placeholder.
+  README    - This file!
+
+Portions of the the audio system interface have application interfaces.  Those
+portions reside in the nuttx/libc/audio directory where the will be built for
+access by both OS driver logic and user application logic.  Those relevant
+files in nuttx/libc/audio include:
+
   buffer.c  - Routines to manage creattion and destruction of audio pipeline buffers
               (apb) used in the audio subsystem.  Audio pipeline buffers are passed
               between user applications and the audio drivers to deliver audio
               content for playback (or possibly recording in the future).
-  pcm.c     - Routines to manage PCM / WAV type data.  Currently just a placeholder.
-  README    - This file!
-
 
 Related Header Files
 ^^^^^^^^^^^^^^^^^^^^

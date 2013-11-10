@@ -42,7 +42,7 @@ endif
 
 DEPPATH = --dep-path .
 ASRCS =
-CSRCS = audio.c buffer.c
+CSRCS = audio.c
 VPATH = .
 
 # Include support for various drivers.  Each Make.defs file will add its
