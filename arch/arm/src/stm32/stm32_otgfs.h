@@ -47,7 +47,7 @@
 #include "stm32.h"
 #include "chip/stm32_otgfs.h"
 
-#ifdef CONFIG_STM32_OTGFS
+#if defined(CONFIG_STM32_OTGFS) || defined (CONFIG_STM32_OTGFS2)
 
 /************************************************************************************
  * Pre-processor Definitions
