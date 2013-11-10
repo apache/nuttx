@@ -2625,7 +2625,7 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 
   /* Set/clear loopback mode */
 
-#if defined(CONFIG_SAMA5_SSC0_TX) && defined(CONFIG_SAMA5_SSC0_TX) && \
+#if defined(CONFIG_SAMA5_SSC0_RX) && defined(CONFIG_SAMA5_SSC0_TX) && \
     defined(SAMA5_SSC0_LOOPBACK)
   priv->loopback = true;
 #else
@@ -2636,10 +2636,8 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 
 #if defined(SSC0_HAVE_MCK2)
   priv->samplerate = CONFIG_SAMA5_SSC0_MCKDIV_SAMPLERATE;
-
 #elif defined(SSC_HAVE_MCK2)
   priv->samplerate = 0;
-
 #endif
 
   /* Configure driver state specific to this SSC peripheral */
@@ -2760,7 +2758,7 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 
   /* Set/clear loopback mode */
 
-#if defined(CONFIG_SAMA5_SSC1_TX) && defined(CONFIG_SAMA5_SSC1_TX) && \
+#if defined(CONFIG_SAMA5_SSC1_RX) && defined(CONFIG_SAMA5_SSC1_TX) && \
     defined(SAMA5_SSC1_LOOPBACK)
   priv->loopback = true;
 #else
@@ -2771,10 +2769,8 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 
 #if defined(SSC1_HAVE_MCK2)
   priv->samplerate = CONFIG_SAMA5_SSC1_MCKDIV_SAMPLERATE;
-
 #elif defined(SSC_HAVE_MCK2)
   priv->samplerate = 0;
-
 #endif
 
   /* Configure driver state specific to this SSC peripheral */
