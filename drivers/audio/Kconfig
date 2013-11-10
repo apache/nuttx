@@ -4,7 +4,7 @@
 #
 
 config AUDIO_I2SCHAR
-	bool "I2S character driver (for testing only)
+	bool "I2S character driver (for testing only)"
 	default n
 	depends on I2S
 	---help---
