@@ -83,6 +83,10 @@ CHIP_CSRCS += kl_spi.c
 endif
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CHIP_CSRCS += kl_pwm.c
+endif
+
 ifeq ($(CONFIG_DEBUG),y)
 CHIP_CSRCS += kl_dumpgpio.c
 endif
