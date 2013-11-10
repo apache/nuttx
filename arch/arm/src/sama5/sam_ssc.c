@@ -1053,6 +1053,10 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
       apb = bfcontainer->apb;
       DEBUGASSERT(((uintptr_t)apb->samp & 3) == 0);
 
+      /* No data received yet */
+
+      apb->nbytes = 0;
+
       /* Physical address of the SSC RHR register and of the buffer location
        * in RAM.
        */
@@ -1203,13 +1207,25 @@ static void ssc_rx_worker(void *arg)
       bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rxdone);
       irqrestore(flags);
 
-      /* Perform the TX transfer done callback */
-
       DEBUGASSERT(bfcontainer && bfcontainer->callback);
+
+      /* If the DMA was successful, then update the number of valid bytes in
+       * the audio buffer.
+       */
+
+      if (bfcontainer->result == OK)
+        {
+          bfcontainer->apb->nbytes = bfcontainer->apb->nmaxbytes;
+        }
+
+      /* Perform the RX transfer done callback */
+
       bfcontainer->callback(&priv->dev, bfcontainer->apb,
                             bfcontainer->arg, bfcontainer->result);
 
-      /* Release our reference on the audio buffer */
+      /* Release our reference on the audio buffer.  This may very likely
+       * cause the audio buffer to be freed.
+       */
 
       apb_free(bfcontainer->apb);
 
@@ -1585,7 +1601,9 @@ static void ssc_tx_worker(void *arg)
       bfcontainer->callback(&priv->dev, bfcontainer->apb,
                             bfcontainer->arg, bfcontainer->result);
 
-      /* Release our reference on the audio buffer */
+      /* Release our reference on the audio buffer.  This may very likely
+       * cause the audio buffer to be freed.
+       */
 
       apb_free(bfcontainer->apb);
 
