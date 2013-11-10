@@ -242,11 +242,10 @@
 struct sam_buffer_s
 {
   struct sam_buffer_s *flink;  /* Supports a singly linked list */
-  void *callback;              /* Function to call when the transfer completes */
+  i2s_callback_t callback;     /* Function to call when the transfer completes */
   uint32_t timeout;            /* The timeout value to use with DMA transfers */
   void *arg;                   /* The argument to be returned with the callback */
-  void *buffer;                /* I/O buffer */
-  size_t nbytes;               /* Number of valid bytes in the buffer */
+  struct ap_buffer_s *apb;     /* The audio buffer */
   int result;                  /* The result of the transfer */
 };
 
@@ -399,13 +398,12 @@ static void     ssc_txdma_callback(DMA_HANDLE handle, void *arg, int result);
 
 static uint32_t ssc_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
 static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits);
-static int      ssc_receive(struct i2s_dev_s *dev, void *buffer,
-                  size_t nbytes, i2s_rxcallback_t callback, void *arg,
-                  uint32_t timeout);
+static int      ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                  i2s_callback_t callback, void *arg, uint32_t timeout);
 static uint32_t ssc_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
 static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits);
-static int      ssc_send(struct i2s_dev_s *dev, const void *buffer,
-                  size_t nbytes, i2s_txcallback_t callback, void *arg,
+static int      ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                  i2s_callback_t callback, void *arg,
                   uint32_t timeout);
 
 /* Initialization */
@@ -1013,6 +1011,7 @@ static void ssc_rxdma_timeout(int argc, uint32_t arg)
 static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 {
   struct sam_buffer_s *bfcontainer;
+  struct ap_buffer_s *apb;
   uintptr_t paddr;
   uintptr_t maddr;
   uint32_t timeout;
@@ -1049,17 +1048,21 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
       /* Remove the pending RX transfer at the head of the RX pending queue. */
 
       bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rxpend);
+      DEBUGASSERT(bfcontainer && bfcontainer->apb);
+
+      apb = bfcontainer->apb;
+      DEBUGASSERT(((uintptr_t)apb->samp & 3) == 0);
 
       /* Physical address of the SSC RHR register and of the buffer location
        * in RAM.
        */
 
       paddr = ssc_physregaddr(priv, SAM_SSC_RHR_OFFSET);
-      maddr = sam_physramaddr((uintptr_t)bfcontainer->buffer);
+      maddr = sam_physramaddr((uintptr_t)apb->samp);
 
       /* Configure the RX DMA */
 
-      sam_dmarxsetup(priv->rxdma, paddr, maddr, bfcontainer->nbytes);
+      sam_dmarxsetup(priv->rxdma, paddr, maddr, apb->nmaxbytes);
 
       /* Increment the DMA timeout */
 
@@ -1075,19 +1078,20 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
       /* Add the container to the list of active DMAs */
 
       sq_addlast((sq_entry_t *)bfcontainer, &priv->rxact);
+
+      /* Invalidate the data cache so that nothing gets flush into the
+       * DMA buffer after starting the DMA transfer.
+       */
+
+      cp15_invalidate_dcache((uintptr_t)apb->samp,
+                             (uintptr_t)apb->samp + apb->nmaxbytes);
+
     }
   while (!sq_empty(&priv->rxpend));
 
   /* Sample DMA registers */
 
   ssc_rxdma_sample(priv, DMA_AFTER_SETUP);
-
-  /* Invalidate the data cache so that nothing gets flush into the
-   * DMA buffer after starting the DMA transfer.
-   */
-
-  cp15_invalidate_dcache((uintptr_t)bfcontainer->buffer,
-                         (uintptr_t)bfcontainer->buffer + bfcontainer->nbytes);
 
   /* Start the DMA, saving the container as the current active transfer */
 
@@ -1140,7 +1144,6 @@ static void ssc_rx_worker(void *arg)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)arg;
   struct sam_buffer_s *bfcontainer;
-  i2s_rxcallback_t callback;
   irqstate_t flags;
 
   DEBUGASSERT(priv);
@@ -1203,10 +1206,12 @@ static void ssc_rx_worker(void *arg)
       /* Perform the TX transfer done callback */
 
       DEBUGASSERT(bfcontainer && bfcontainer->callback);
+      bfcontainer->callback(&priv->dev, bfcontainer->apb,
+                            bfcontainer->arg, bfcontainer->result);
 
-      callback = (i2s_rxcallback_t)bfcontainer->callback;
-      callback(&priv->dev, bfcontainer->buffer, bfcontainer->nbytes,
-               bfcontainer->arg, bfcontainer->result);
+      /* Release our reference on the audio buffer */
+
+      apb_free(bfcontainer->apb);
 
       /* And release the buffer container */
 
@@ -1381,6 +1386,7 @@ static void ssc_txdma_timeout(int argc, uint32_t arg)
 static int ssc_txdma_setup(struct sam_ssc_s *priv)
 {
   struct sam_buffer_s *bfcontainer;
+  struct ap_buffer_s *apb;
   uintptr_t paddr;
   uintptr_t maddr;
   uint32_t timeout;
@@ -1417,6 +1423,10 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
       /* Remove the pending TX transfer at the head of the TX pending queue. */
 
       bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->txpend);
+      DEBUGASSERT(bfcontainer && bfcontainer->apb);
+
+      apb = bfcontainer->apb;
+      DEBUGASSERT(((uintptr_t)apb->samp & 3) == 0);
 
       /* Physical address of the SSC THR register and of the buffer location
        * in
@@ -1424,11 +1434,11 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
        */
 
       paddr = ssc_physregaddr(priv, SAM_SSC_THR_OFFSET);
-      maddr = sam_physramaddr((uintptr_t)bfcontainer->buffer);
+      maddr = sam_physramaddr((uintptr_t)apb->samp);
 
       /* Configure the TX DMA */
 
-      sam_dmatxsetup(priv->txdma, paddr, maddr, bfcontainer->nbytes);
+      sam_dmatxsetup(priv->txdma, paddr, maddr, apb->nbytes);
 
       /* Increment the DMA timeout */
 
@@ -1444,19 +1454,20 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
       /* Add the container to the list of active DMAs */
 
       sq_addlast((sq_entry_t *)bfcontainer, &priv->txact);
+
+      /* Flush the data cache so that everything is in the physical memory
+       * before starting the DMA.
+       */
+
+      cp15_clean_dcache((uintptr_t)apb->samp,
+                        (uintptr_t)apb->samp + apb->nbytes);
+
     }
   while (!sq_empty(&priv->txpend));
 
   /* Sample DMA registers */
   
   ssc_txdma_sample(priv, DMA_AFTER_SETUP);
-
-  /* Flush the data cache so that everything is in the physical memory
-   * before starting the DMA.
-   */
-
-  cp15_clean_dcache((uintptr_t)bfcontainer->buffer,
-                    (uintptr_t)bfcontainer->buffer + bfcontainer->nbytes);
 
   /* Start the DMA, saving the container as the current active transfer */
 
@@ -1509,7 +1520,6 @@ static void ssc_tx_worker(void *arg)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)arg;
   struct sam_buffer_s *bfcontainer;
-  i2s_txcallback_t callback;
   irqstate_t flags;
 
   DEBUGASSERT(priv);
@@ -1572,10 +1582,12 @@ static void ssc_tx_worker(void *arg)
       /* Perform the TX transfer done callback */
 
       DEBUGASSERT(bfcontainer && bfcontainer->callback);
+      bfcontainer->callback(&priv->dev, bfcontainer->apb,
+                            bfcontainer->arg, bfcontainer->result);
 
-      callback = (i2s_txcallback_t)bfcontainer->callback;
-      callback(&priv->dev, bfcontainer->buffer, bfcontainer->nbytes,
-               bfcontainer->arg, bfcontainer->result);
+      /* Release our reference on the audio buffer */
+
+      apb_free(bfcontainer->apb);
 
       /* And release the buffer container */
 
@@ -1780,9 +1792,7 @@ static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
  *
  * Input Parameters:
  *   dev      - Device-specific state data
- *   buffer   - A pointer to the buffer in which to recieve data
- *   nbytes   - The length of data that can be received in the buffer in number
- *              of bytes.
+ *   apb      - A pointer to the audio buffer in which to recieve data
  *   callback - A user provided callback function that will be called at
  *              the completion of the transfer.  The callback will be
  *              performed in the context of the worker thread.
@@ -1804,18 +1814,17 @@ static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
  *
  ****************************************************************************/
 
-static int ssc_receive(struct i2s_dev_s *dev, void *buffer,
-                       size_t nbytes, i2s_rxcallback_t callback,
-                       void *arg, uint32_t timeout)
+static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                       i2s_callback_t callback, void *arg, uint32_t timeout)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
   struct sam_buffer_s *bfcontainer;
   irqstate_t flags;
   int ret;
 
-  i2svdbg("buffer=%p nbytes=%d\n", buffer, (int)nbytes);
-  DEBUGASSERT(priv && buffer && ((uintptr_t)buffer & 3) == 0);
-
+  DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & 3) == 0);
+  i2svdbg("apb=%p nmaxbytes=%d\n", apb, apb->nmaxbytes);
+ 
 #ifdef SSC_HAVE_RX
   /* Allocate a buffer container in advance */
 
@@ -1835,13 +1844,16 @@ static int ssc_receive(struct i2s_dev_s *dev, void *buffer,
       goto errout_with_exclsem;
     }
 
+  /* Add a reference to the audio buffer */
+
+  apb_reference(apb);
+
   /* Initialize the buffer container structure */
 
   bfcontainer->callback = (void *)callback;
   bfcontainer->timeout  = timeout;
   bfcontainer->arg      = arg;
-  bfcontainer->buffer   = buffer;
-  bfcontainer->nbytes   = nbytes;
+  bfcontainer->apb      = apb;
   bfcontainer->result   = -EBUSY;
 
   /* Add the buffer container to the end of the RX pending queue */
@@ -1957,9 +1969,8 @@ static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
  *   Send a block of data on I2S.
  *
  * Input Parameters:
- *   dev    - Device-specific state data
- *   buffer - A pointer to the buffer of data to be sent
- *   nbytes - the length of data to send from the buffer in number of bytes.
+ *   dev      - Device-specific state data
+ *   apb      - A pointer to the audio buffer from which to send data
  *   callback - A user provided callback function that will be called at
  *              the completion of the transfer.  The callback will be
  *              performed in the context of the worker thread.
@@ -1981,17 +1992,16 @@ static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
  *
  ****************************************************************************/
 
-static int ssc_send(struct i2s_dev_s *dev, const void *buffer,
-                    size_t nbytes, i2s_txcallback_t callback,
-                    void *arg, uint32_t timeout)
+static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
+                    i2s_callback_t callback, void *arg, uint32_t timeout)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
   struct sam_buffer_s *bfcontainer;
   irqstate_t flags;
   int ret;
 
-  i2svdbg("buffer=%p nbytes=%d\n", buffer, (int)nbytes);
-  DEBUGASSERT(priv && buffer && ((uintptr_t)buffer & 3) == 0);
+  DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & 3) == 0);
+  i2svdbg("apb=%p nbytes=%d\n", apb, apb->nbytes);
 
 #ifdef SSC_HAVE_TX
   /* Allocate a buffer container in advance */
@@ -2012,13 +2022,16 @@ static int ssc_send(struct i2s_dev_s *dev, const void *buffer,
       goto errout_with_exclsem;
     }
 
+  /* Add a reference to the audio buffer */
+
+  apb_reference(apb);
+
   /* Initialize the buffer container structure */
 
   bfcontainer->callback = (void *)callback;
   bfcontainer->timeout  = timeout;
   bfcontainer->arg      = arg;
-  bfcontainer->buffer   = (void *)buffer;
-  bfcontainer->nbytes   = nbytes;
+  bfcontainer->apb      = apb;
   bfcontainer->result   = -EBUSY;
 
   /* Add the buffer container to the end of the TX pending queue */

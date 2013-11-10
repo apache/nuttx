@@ -6027,4 +6027,6 @@
 	  NuttX Kernel build (2013-11-10).
 	* arch/arm/src/sama5/sam_ssc.c and Kconfig:  Add configurable support
 	  for SSC loopback mode (2013-11-10).
-
+	* include/nuttx/audio/i2s.h, arch/arm/src/sama5/sam_ssc.c, and
+	  drivers/audio/i2schar.c:  Improvied I2S interface design:  Simplified
+	  audio buffer queuing (2013-11-10).

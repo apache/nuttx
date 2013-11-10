@@ -52,7 +52,6 @@
 #include <string.h>
 #include <debug.h>
 #include <errno.h>
-#include <queue.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
@@ -100,8 +99,6 @@ struct i2schar_dev_s
 {
   FAR struct i2s_dev_s *i2s;  /* The lower half i2s driver */
   sem_t exclsem;              /* Assures mutually exclusive access */
-  dq_queue_t rxq;             /* RX audio buffers awaiting transfer */
-  dq_queue_t txq;             /* TX audio buffers awaiting transfer */
 };
 
 /****************************************************************************
@@ -110,9 +107,9 @@ struct i2schar_dev_s
 /* I2S callback function */
 
 static void    i2schar_rxcallback(FAR struct i2s_dev_s *dev,
-                 FAR void *buffer, size_t nbytes, FAR void *arg, int result);
+                 FAR struct ap_buffer_s *apb, FAR void *arg, int result);
 static void    i2schar_txcallback(FAR struct i2s_dev_s *dev,
-                 FAR const void *buffer, size_t nbytes, FAR void *arg,
+                 FAR struct ap_buffer_s *apb, FAR void *arg,
                  int result);
 
 /* Character driver methods */
@@ -161,47 +158,25 @@ static const struct file_operations i2schar_fops =
  ****************************************************************************/
 
 static void i2schar_rxcallback(FAR struct i2s_dev_s *dev,
-                               FAR void *buffer, size_t nbytes,
+                               FAR struct ap_buffer_s *apb,
                                FAR void *arg, int result)
 {
   FAR struct i2schar_dev_s *priv = (FAR struct i2schar_dev_s *)arg;
-  FAR struct ap_buffer_s *apb;
 
-  i2svdbg("buffer=%p nbytes=%d result=%d\n", buffer, (int)nbytes, result);
-  DEBUGASSERT(dev && buffer && priv);
+  DEBUGASSERT(priv && apb);
+  i2svdbg("apb=%p nbytes=%d result=%d\n", apb, apb->nbytes, result);
 
-  /* The returned buffer should match the buffer at the head of the RX audio
-   * buffer queue.
+  /* REVISIT: If you want this to actually do something other than
+   * test I2S data transfer, then this is the point where you would
+   * want to pass the received I2S to some application.
    */
 
-  apb = (FAR struct ap_buffer_s *)dq_peek(&priv->rxq);
-  if ((FAR const void *)apb->samp != buffer)
-    {
-      i2sdbg("ERROR: apb=%p apb->samp=%p buffer=%p\n",
-             apb, apb->samp, buffer);
-    }
-  else
-    {
-      if (apb->nmaxbytes != nbytes)
-        {
-          i2sdbg("ERROR: apb->nmaxbytes=%d nbytes=%d\n",
-                 (int)apb->nmaxbytes, (int)nbytes);
-        }
+  /* Release our reference to the audio buffer. Hopefully it will be freed
+   * now.
+   */
 
-      /* REVISIT: If you want this to actually do something other than
-       * test I2S data transfer, then this is the point where you would
-       * want to pass the received I2S to some application.
-       */
-
-      /* Remove the buffer from the beginning of the RX queue and release
-       * our reference to it.  Hopefully it will be freed now.
-       */
-
-      (void)dq_remfirst(&priv->rxq);
-
-      i2svdbg("Freeing apb=%p crefs=%d\n", apb, apb->crefs);
-      apb_free(apb);
-    }
+  i2svdbg("Freeing apb=%p crefs=%d\n", apb, apb->crefs);
+  apb_free(apb);
 }
 
 /****************************************************************************
@@ -218,47 +193,25 @@ static void i2schar_rxcallback(FAR struct i2s_dev_s *dev,
  ****************************************************************************/
 
 static void i2schar_txcallback(FAR struct i2s_dev_s *dev,
-                               FAR const void *buffer, size_t nbytes,
+                               FAR struct ap_buffer_s *apb,
                                FAR void *arg, int result)
 {
   FAR struct i2schar_dev_s *priv = (FAR struct i2schar_dev_s *)arg;
-  FAR struct ap_buffer_s *apb;
 
-  i2svdbg("buffer=%p nbytes=%d result=%d\n", buffer, (int)nbytes, result);
-  DEBUGASSERT(dev && buffer && priv);
+  DEBUGASSERT(priv && apb);
+  i2svdbg("apb=%p nbytes=%d result=%d\n", apb, apb->nbytes, result);
 
-  /* The returned buffer should match the buffer at the head of the RX audio
-   * buffer queue.
+  /* REVISIT: If you want this to actually do something other than
+   * test I2S data transfer, then this is the point where you would
+   * want to let some application know that the transfer has complete.
    */
 
-  apb = (FAR struct ap_buffer_s *)dq_peek(&priv->txq);
-  if ((FAR const void *)apb->samp != buffer)
-    {
-      i2sdbg("ERROR: apb=%p apb->samp=%p buffer=%p\n",
-             apb, apb->samp, buffer);
-    }
-  else
-    {
-      if (apb->nmaxbytes != nbytes)
-        {
-          i2sdbg("ERROR: apb->nmaxbytes=%d nbytes=%d\n",
-                 (int)apb->nmaxbytes, (int)nbytes);
-        }
+  /* Release our reference to the audio buffer.  Hopefully it will be freed
+   * now.
+   */
 
-      /* REVISIT: If you want this to actually do something other than
-       * test I2S data transfer, then this is the point where you would
-       * want to pass the received I2S to some application.
-       */
-
-      /* Remove the buffer from the beginning of the RX queue and release
-       * our reference to it.  Hopefully it will be freed now.
-       */
-
-      (void)dq_remfirst(&priv->txq);
-
-      i2svdbg("Freeing apb=%p crefs=%d\n", apb, apb->crefs);
-      apb_free(apb);
-    }
+  i2svdbg("Freeing apb=%p crefs=%d\n", apb, apb->crefs);
+  apb_free(apb);
 }
 
 /****************************************************************************
@@ -298,7 +251,7 @@ static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
   nbytes = apb->nmaxbytes;
   DEBUGASSERT(buflen >= (sizeof(struct ap_buffer_s) + nbytes));
 
-  /* Add our buffer reference */
+  /* Add a reference to the audio buffer */
 
   apb_reference(apb);
 
@@ -313,13 +266,9 @@ static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
       goto errout_with_reference;
     }
 
-  /* Add the audio buffer to the I2S receiver queue */
- 
-  dq_addlast(&apb->dq_entry, &priv->rxq);
+  /* Give the buffer to the I2S driver */
 
-  /* And give the buffer to the I2S driver */
-
-  ret = I2S_RECEIVE(priv->i2s, apb->samp, nbytes, i2schar_rxcallback, priv, 0);
+  ret = I2S_RECEIVE(priv->i2s, apb, i2schar_rxcallback, priv, 0);
   if (ret < 0)
     {
       i2sdbg("ERROR: I2S_RECEIVE returned: %d\n", ret);
@@ -376,7 +325,7 @@ static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
   nbytes = apb->nmaxbytes;
   DEBUGASSERT(buflen >= (sizeof(struct ap_buffer_s) + nbytes));
 
-  /* Add our buffer reference */
+  /* Add a reference to the audio buffer */
 
   apb_reference(apb);
 
@@ -391,13 +340,9 @@ static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
       goto errout_with_reference;
     }
 
-  /* Add the audio buffer to the I2S transmitter queue */
- 
-  dq_addlast(&apb->dq_entry, &priv->txq);
+  /* Give the audio buffer to the I2S driver */
 
-  /* And give the buffer to the I2S driver */
-
-  ret = I2S_SEND(priv->i2s, apb->samp, nbytes, i2schar_txcallback, priv, 0);
+  ret = I2S_SEND(priv->i2s, apb, i2schar_txcallback, priv, 0);
   if (ret < 0)
     {
       i2sdbg("ERROR: I2S_SEND returned: %d\n", ret);
@@ -457,8 +402,6 @@ int i2schar_register(FAR struct i2s_dev_s *i2s, int minor)
 
       priv->i2s = i2s;
       sem_init(&priv->exclsem, 0, 1);
-      dq_init(&priv->rxq);
-      dq_init(&priv->txq);
 
       /* Create the character device name */
 
