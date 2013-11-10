@@ -43,6 +43,10 @@ ifeq ($(CONFIG_VS1053),y)
 CSRCS += vs1053.c
 endif
 
+ifeq ($(CONFIG_AUDIO_I2SCHAR),y)
+CSRCS += i2schar.c
+endif
+
 # Include Audio driver support
 
 DEPPATH += --dep-path audio

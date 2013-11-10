@@ -242,7 +242,7 @@
 struct sam_buffer_s
 {
   struct sam_buffer_s *flink;  /* Supports a singly linked list */
-  i2s_callback_t callback;     /* Function to call when the transfer completes */
+  void *callback;              /* Function to call when the transfer completes */
   uint32_t timeout;            /* The timeout value to use with DMA transfers */
   void *arg;                   /* The argument to be returned with the callback */
   void *buffer;                /* I/O buffer */
@@ -339,10 +339,10 @@ static void     ssc_dumpregs(struct sam_ssc_s *priv, const char *msg);
 
 /* Semaphore helpers */
 
-static void     ssc_exclsem_take(FAR struct sam_ssc_s *priv);
+static void     ssc_exclsem_take(struct sam_ssc_s *priv);
 #define         ssc_exclsem_give(priv) sem_post(&priv->exclsem)
 
-static void     ssc_bufsem_take(FAR struct sam_ssc_s *priv);
+static void     ssc_bufsem_take(struct sam_ssc_s *priv);
 #define         ssc_bufsem_give(priv) sem_post(&priv->bufsem)
 
 /* Buffer container helpers */
@@ -381,30 +381,30 @@ static void     ssc_txdma_sampledone(struct sam_ssc_s *priv, int result);
 
 #ifdef SSC_HAVE_RX
 static void     ssc_rxdma_timeout(int argc, uint32_t arg);
-static int      ssc_rxdma_setup(FAR struct sam_ssc_s *priv);
-static void     ssc_rx_worker(FAR void *arg);
-static void     ssc_rx_schedule(FAR struct sam_ssc_s *priv, int result);
+static int      ssc_rxdma_setup(struct sam_ssc_s *priv);
+static void     ssc_rx_worker(void *arg);
+static void     ssc_rx_schedule(struct sam_ssc_s *priv, int result);
 static void     ssc_rxdma_callback(DMA_HANDLE handle, void *arg, int result);
 #endif
 #ifdef SSC_HAVE_TX
 static void     ssc_txdma_timeout(int argc, uint32_t arg);
-static int      ssc_txdma_setup(FAR struct sam_ssc_s *priv);
-static void     ssc_tx_worker(FAR void *arg);
-static void     ssc_tx_schedule(FAR struct sam_ssc_s *priv, int result);
+static int      ssc_txdma_setup(struct sam_ssc_s *priv);
+static void     ssc_tx_worker(void *arg);
+static void     ssc_tx_schedule(struct sam_ssc_s *priv, int result);
 static void     ssc_txdma_callback(DMA_HANDLE handle, void *arg, int result);
 #endif
 
 /* I2S methods */
 
-static uint32_t ssc_rxsamplerate(FAR struct i2s_dev_s *dev, uint32_t rate);
-static uint32_t ssc_rxdatawidth(FAR struct i2s_dev_s *dev, int bits);
-static int      ssc_receive(FAR struct i2s_dev_s *dev, FAR void *buffer,
-                  size_t nbytes, i2s_callback_t callback, FAR void *arg,
+static uint32_t ssc_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits);
+static int      ssc_receive(struct i2s_dev_s *dev, void *buffer,
+                  size_t nbytes, i2s_rxcallback_t callback, void *arg,
                   uint32_t timeout);
-static uint32_t ssc_txsamplerate(FAR struct i2s_dev_s *dev, uint32_t rate);
-static uint32_t ssc_txdatawidth(FAR struct i2s_dev_s *dev, int bits);
-static int      ssc_send(FAR struct i2s_dev_s *dev, FAR const void *buffer,
-                  size_t nbytes, i2s_callback_t callback, FAR void *arg,
+static uint32_t ssc_txsamplerate(struct i2s_dev_s *dev, uint32_t rate);
+static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits);
+static int      ssc_send(struct i2s_dev_s *dev, const void *buffer,
+                  size_t nbytes, i2s_txcallback_t callback, void *arg,
                   uint32_t timeout);
 
 /* Initialization */
@@ -619,7 +619,7 @@ static void ssc_dumpregs(struct sam_ssc_s *priv, const char *msg)
  *
  ****************************************************************************/
 
-static void ssc_exclsem_take(FAR struct sam_ssc_s *priv)
+static void ssc_exclsem_take(struct sam_ssc_s *priv)
 {
   int ret;
 
@@ -650,7 +650,7 @@ static void ssc_exclsem_take(FAR struct sam_ssc_s *priv)
  *
  ****************************************************************************/
 
-static void ssc_bufsem_take(FAR struct sam_ssc_s *priv)
+static void ssc_bufsem_take(struct sam_ssc_s *priv)
 {
   int ret;
 
@@ -1135,10 +1135,11 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
  ****************************************************************************/
 
 #ifdef SSC_HAVE_RX
-static void ssc_rx_worker(FAR void *arg)
+static void ssc_rx_worker(void *arg)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)arg;
   struct sam_buffer_s *bfcontainer;
+  i2s_rxcallback_t callback;
   irqstate_t flags;
 
   DEBUGASSERT(priv);
@@ -1201,9 +1202,10 @@ static void ssc_rx_worker(FAR void *arg)
       /* Perform the TX transfer done callback */
 
       DEBUGASSERT(bfcontainer && bfcontainer->callback);
-      bfcontainer->callback(&priv->dev, bfcontainer->buffer,
-                            bfcontainer->nbytes, bfcontainer->arg,
-                            bfcontainer->result);
+
+      callback = (i2s_rxcallback_t)bfcontainer->callback;
+      callback(&priv->dev, bfcontainer->buffer, bfcontainer->nbytes,
+               bfcontainer->arg, bfcontainer->result);
 
       /* And release the buffer container */
 
@@ -1502,10 +1504,11 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
  ****************************************************************************/
 
 #ifdef SSC_HAVE_TX
-static void ssc_tx_worker(FAR void *arg)
+static void ssc_tx_worker(void *arg)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)arg;
   struct sam_buffer_s *bfcontainer;
+  i2s_txcallback_t callback;
   irqstate_t flags;
 
   DEBUGASSERT(priv);
@@ -1568,9 +1571,10 @@ static void ssc_tx_worker(FAR void *arg)
       /* Perform the TX transfer done callback */
 
       DEBUGASSERT(bfcontainer && bfcontainer->callback);
-      bfcontainer->callback(&priv->dev, bfcontainer->buffer,
-                            bfcontainer->nbytes, bfcontainer->arg,
-                            bfcontainer->result);
+
+      callback = (i2s_txcallback_t)bfcontainer->callback;
+      callback(&priv->dev, bfcontainer->buffer, bfcontainer->nbytes,
+               bfcontainer->arg, bfcontainer->result);
 
       /* And release the buffer container */
 
@@ -1705,7 +1709,7 @@ static void ssc_txdma_callback(DMA_HANDLE handle, void *arg, int result)
  *
  ****************************************************************************/
 
-static uint32_t ssc_rxsamplerate(FAR struct i2s_dev_s *dev, uint32_t rate)
+static uint32_t ssc_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
 #if defined(SSC_HAVE_RX) && defined(SSC_HAVE_MCK)
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
@@ -1741,7 +1745,7 @@ static uint32_t ssc_rxsamplerate(FAR struct i2s_dev_s *dev, uint32_t rate)
  *
  ****************************************************************************/
 
-static uint32_t ssc_rxdatawidth(FAR struct i2s_dev_s *dev, int bits)
+static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
 {
 #ifdef SSC_HAVE_RX
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
@@ -1799,9 +1803,9 @@ static uint32_t ssc_rxdatawidth(FAR struct i2s_dev_s *dev, int bits)
  *
  ****************************************************************************/
 
-static int ssc_receive(FAR struct i2s_dev_s *dev, FAR void *buffer,
-                       size_t nbytes, i2s_callback_t callback,
-                       FAR void *arg, uint32_t timeout)
+static int ssc_receive(struct i2s_dev_s *dev, void *buffer,
+                       size_t nbytes, i2s_rxcallback_t callback,
+                       void *arg, uint32_t timeout)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
   struct sam_buffer_s *bfcontainer;
@@ -1809,7 +1813,7 @@ static int ssc_receive(FAR struct i2s_dev_s *dev, FAR void *buffer,
   int ret;
 
   i2svdbg("buffer=%p nbytes=%d\n", buffer, (int)nbytes);
-  DEBUGASSERT(priv);
+  DEBUGASSERT(priv && buffer && ((uintptr_t)buffer & 3) == 0);
 
 #ifdef SSC_HAVE_RX
   /* Allocate a buffer container in advance */
@@ -1832,12 +1836,12 @@ static int ssc_receive(FAR struct i2s_dev_s *dev, FAR void *buffer,
 
   /* Initialize the buffer container structure */
 
-  bfcontainer->callback = callback; /* Function to call when the transfer completes */
-  bfcontainer->timeout  = timeout;  /* The timeout value to use with DMA transfers */
-  bfcontainer->arg      = arg;      /* The argument to be returned with the callback */
-  bfcontainer->buffer   = buffer;   /* I/O buffer */
-  bfcontainer->nbytes   = nbytes;   /* Number of valid bytes in the buffer */
-  bfcontainer->result   = -EBUSY;   /* The result of the transfer */
+  bfcontainer->callback = (void *)callback;
+  bfcontainer->timeout  = timeout;
+  bfcontainer->arg      = arg;
+  bfcontainer->buffer   = buffer;
+  bfcontainer->nbytes   = nbytes;
+  bfcontainer->result   = -EBUSY;
 
   /* Add the buffer container to the end of the RX pending queue */
 
@@ -1883,7 +1887,7 @@ errout_with_exclsem:
  *
  ****************************************************************************/
 
-static uint32_t ssc_txsamplerate(FAR struct i2s_dev_s *dev, uint32_t rate)
+static uint32_t ssc_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
 #if defined(SSC_HAVE_TX) && defined(SSC_HAVE_MCK)
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
@@ -1919,7 +1923,7 @@ static uint32_t ssc_txsamplerate(FAR struct i2s_dev_s *dev, uint32_t rate)
  *
  ****************************************************************************/
 
-static uint32_t ssc_txdatawidth(FAR struct i2s_dev_s *dev, int bits)
+static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
 {
 #ifdef SSC_HAVE_TX
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
@@ -1976,9 +1980,9 @@ static uint32_t ssc_txdatawidth(FAR struct i2s_dev_s *dev, int bits)
  *
  ****************************************************************************/
 
-static int ssc_send(FAR struct i2s_dev_s *dev, FAR const void *buffer,
-                    size_t nbytes, i2s_callback_t callback,
-                    FAR void *arg, uint32_t timeout)
+static int ssc_send(struct i2s_dev_s *dev, const void *buffer,
+                    size_t nbytes, i2s_txcallback_t callback,
+                    void *arg, uint32_t timeout)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
   struct sam_buffer_s *bfcontainer;
@@ -1986,7 +1990,7 @@ static int ssc_send(FAR struct i2s_dev_s *dev, FAR const void *buffer,
   int ret;
 
   i2svdbg("buffer=%p nbytes=%d\n", buffer, (int)nbytes);
-  DEBUGASSERT(priv);
+  DEBUGASSERT(priv && buffer && ((uintptr_t)buffer & 3) == 0);
 
 #ifdef SSC_HAVE_TX
   /* Allocate a buffer container in advance */
@@ -2009,12 +2013,12 @@ static int ssc_send(FAR struct i2s_dev_s *dev, FAR const void *buffer,
 
   /* Initialize the buffer container structure */
 
-  bfcontainer->callback = callback; /* Function to call when the transfer completes */
-  bfcontainer->timeout  = timeout;  /* The timeout value to use with DMA transfers */
-  bfcontainer->arg      = arg;      /* The argument to be returned with the callback */
-  bfcontainer->buffer   = (FAR void *)buffer;   /* I/O buffer */
-  bfcontainer->nbytes   = nbytes;   /* Number of valid bytes in the buffer */
-  bfcontainer->result   = -EBUSY;   /* The result of the transfer */
+  bfcontainer->callback = (void *)callback;
+  bfcontainer->timeout  = timeout;
+  bfcontainer->arg      = arg;
+  bfcontainer->buffer   = (void *)buffer;
+  bfcontainer->nbytes   = nbytes;
+  bfcontainer->result   = -EBUSY;
 
   /* Add the buffer container to the end of the TX pending queue */
 

@@ -6009,3 +6009,7 @@
 	* configs/stm32f429i-disco:  Add support for the usbnsh and
 	  usbmsc configurations using the OTG HS peripheral in FS mode.
 	  From Ken Pettit (2013-11-10)
+	* drivers/audio/i2schar.c:  A simple character driver to support I2S
+	  accesses.  This driver in its current state is intended only to
+	  support I2C testing and would not be appropriate to used for any real
+	  driver application. (2013-11-10).

@@ -199,31 +199,35 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* Transfer complete callback */
-
-typedef CODE void (*i2s_callback_t)(FAR struct i2s_dev_s *dev,
-                                    FAR const void *buffer, size_t nbytes,
-                                    FAR void *arg, int result);
-/* The I2S vtable */
+/* Transfer complete callbacks */
 
 struct i2s_dev_s;
+typedef CODE void (*i2s_rxcallback_t)(FAR struct i2s_dev_s *dev,
+                  FAR void *buffer, size_t nbytes, FAR void *arg,
+                  int result);
+typedef CODE void (*i2s_txcallback_t)(FAR struct i2s_dev_s *dev,
+                  FAR const void *buffer, size_t nbytes, FAR void *arg,
+                  int result);
+
+/* The I2S vtable */
+
 struct i2s_ops_s
 {
   /* Receiver methods */
 
-  uint32_t (*i2s_rxsamplerate)(FAR struct i2s_dev_s *dev, uint32_t rate);
-  uint32_t (*i2s_rxdatawidth)(FAR struct i2s_dev_s *dev, int bits);
-  int      (*i2s_receive)(FAR struct i2s_dev_s *dev, FAR void *buffer,
-             size_t nbytes, i2s_callback_t callback, FAR void *arg,
-             uint32_t timeout);
+  CODE uint32_t (*i2s_rxsamplerate)(FAR struct i2s_dev_s *dev, uint32_t rate);
+  CODE uint32_t (*i2s_rxdatawidth)(FAR struct i2s_dev_s *dev, int bits);
+  CODE int      (*i2s_receive)(FAR struct i2s_dev_s *dev, FAR void *buffer,
+                  size_t nbytes, i2s_rxcallback_t callback, FAR void *arg,
+                  uint32_t timeout);
 
   /* Transmitter methods */
 
-  uint32_t (*i2s_txsamplerate)(FAR struct i2s_dev_s *dev, uint32_t rate);
-  uint32_t (*i2s_txdatawidth)(FAR struct i2s_dev_s *dev, int bits);
-  int      (*i2s_send)(FAR struct i2s_dev_s *dev, FAR const void *buffer,
-             size_t nbytes, i2s_callback_t callback, FAR void *arg,
-             uint32_t timeout);
+  CODE uint32_t (*i2s_txsamplerate)(FAR struct i2s_dev_s *dev, uint32_t rate);
+  CODE uint32_t (*i2s_txdatawidth)(FAR struct i2s_dev_s *dev, int bits);
+  CODE int      (*i2s_send)(FAR struct i2s_dev_s *dev, FAR const void *buffer,
+                  size_t nbytes, i2s_txcallback_t callback, FAR void *arg,
+                  uint32_t timeout);
 };
 
 /* I2S private data.  This structure only defines the initial fields of the

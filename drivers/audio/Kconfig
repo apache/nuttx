@@ -3,6 +3,18 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+config AUDIO_I2SCHAR
+	bool "I2S character driver (for testing only)
+	default n
+	depends on I2S
+	---help---
+		This selection enables a simple character driver that supports I2S
+		transfers via a read() and write().  The intent of this driver is to
+		support I2S testing.  It is not an audio driver but does conform to
+		some of the buffer management heuristics of an audio driver.  It is
+		not suitable for use in any real driver application in its current
+		form.
+
 config VS1053
 	bool "VS1053 codec chip"
 	default n
@@ -41,6 +53,6 @@ config VS1053_BUFFER_SIZE
 		data to the VS1053 driver.  The minimum you should set this is
 		2048 bytes.  The larger the buffer, the better CPU performance.
 
-endif
+endif # AUDIO_DRIVER_SPECIFIC_BUFFERS
 
-endif
+endif # VS1053
