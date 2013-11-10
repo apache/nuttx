@@ -752,6 +752,19 @@ config STM32_OTGHS
 	default n
 	depends on STM32_STM32F20XX || STM32_STM32F40XX
 
+config STM32_OTGHS_FS_MODE
+	bool "Use OTG HS in FS mode"
+	default n
+	depends on STM32_OTGHS && !STM32_OTGFS
+	select STM32_OTGFS2
+	---help---
+		The STM32 USB HS module can operate in legacy FS mode using the
+		built-in FS PHY in the HS module.  This mode can only be used if
+		the OTG FS block is not being used since they use on the same
+		driver, and all the base address are different (the driver
+		uses #define defined addresses which are re-mapped when this
+		option is selected).
+
 config STM32_PWR
 	bool "PWR"
 	default n
@@ -990,6 +1003,9 @@ config STM32_I2C
 	bool
 
 config STM32_CAN
+	bool
+
+config STM32_OTGFS2
 	bool
 
 menu "Alternate Pin Mapping"

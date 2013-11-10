@@ -52,8 +52,10 @@
 
 /* Reserve interrupt table entries for I/O interrupts. */
 
-#  if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
+#  if defined(CONFIG_STM32_STM32F427)
 #    define ARMV7M_PERIPHERAL_INTERRUPTS 87
+#  elif defined(CONFIG_STM32_STM32F429)
+#    define ARMV7M_PERIPHERAL_INTERRUPTS 91
 #  else
 #    define ARMV7M_PERIPHERAL_INTERRUPTS 82
 #  endif
