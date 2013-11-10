@@ -80,7 +80,8 @@ Contents
   - CAN Usage
   - SAMA5 ADC Support
   - SAMA5 PWM Support
-  - OV2640 Camera interface
+  - OV2640 Camera Interface
+  - WM8904 Audio Codec Interface
   - SAMA5D3x-EK Configuration Options
   - Configurations
 
@@ -940,42 +941,69 @@ SAMA5 PWM Support
       [-t duration] is the duration of the pulse train in seconds.  Default: 5 Current: 5
       [-h] shows this message and exits
 
-OV2640 Camera interface
+OV2640 Camera Interface
 =======================
 
-SAMA5D3x PIN             SAMA5D3x-EK    OV2640
-PIO  PER SIGNAL        ISI Socket J11
----- --- ------------- --- ------------ ------------
-                        1  VDDISI
-                        2  GND
-                        3  VDDISI
-                        4  GND
-PE28  ?  ?              5  ZB_SLPTR
-PE29  ?  ?              6  ZB_RST
-PC27  B  TWI1_CK        7  TWCK1
-PC26  B  TWI1_D         8  TWD1
-                        9  GND
-PD31  B  PCK1 (ISI_MCK) 10 ISI_MCK
-                        11 GND
-PA30  C  ISI_VSYNC      12 ISI_VSYNC
-                        13 GND
-PA31  C  ISI_HSYNC      14 ISI_HSYNC
-                        15 GND
-PC30  C  ISI_PCK        16 ISI_PCK
-                        17 GND
-PA16  C  ISI_D0         18 ISI_D0
-PA17  C  ISI_D1         19 ISI_D1
-PA18  C  ISI_D2         20 ISI_D2
-PA19  C  ISI_D3         21 ISI_D3
-PA20  C  ISI_D4         22 ISI_D4
-PA21  C  ISI_D5         23 ISI_D5
-PA22  C  ISI_D6         24 ISI_D6
-PA23  C  ISI_D7         25 ISI_D7
-PC29  C  ISI_D8         26 ISI_D8
-PC28  C  ISI_D9         27 ISI_D9
-PC27  C  ISI_D10        28 ISI_D10
-PC26  C  ISI_D11        29 ISI_D11
-                        30 GND
+    SAMA5D3x PIN             SAMA5D3x-EK    OV2640
+    PIO  PER SIGNAL        ISI Socket J11
+    ---- --- ------------- --- ------------ ------------
+                            1  VDDISI
+                            2  GND
+                            3  VDDISI
+                            4  GND
+    PE28  ?  ?              5  ZB_SLPTR
+    PE29  ?  ?              6  ZB_RST
+    PC27  B  TWI1_CK        7  TWCK1
+    PC26  B  TWI1_D         8  TWD1
+                                9  GND
+    PD31  B  PCK1 (ISI_MCK) 10 ISI_MCK
+                            11 GND
+    PA30  C  ISI_VSYNC      12 ISI_VSYNC
+                            13 GND
+    PA31  C  ISI_HSYNC      14 ISI_HSYNC
+                            15 GND
+    PC30  C  ISI_PCK        16 ISI_PCK
+                            17 GND
+    PA16  C  ISI_D0         18 ISI_D0
+    PA17  C  ISI_D1         19 ISI_D1
+    PA18  C  ISI_D2         20 ISI_D2
+    PA19  C  ISI_D3         21 ISI_D3
+    PA20  C  ISI_D4         22 ISI_D4
+    PA21  C  ISI_D5         23 ISI_D5
+    PA22  C  ISI_D6         24 ISI_D6
+    PA23  C  ISI_D7         25 ISI_D7
+    PC29  C  ISI_D8         26 ISI_D8
+    PC28  C  ISI_D9         27 ISI_D9
+    PC27  C  ISI_D10        28 ISI_D10
+    PC26  C  ISI_D11        29 ISI_D11
+                            30 GND
+
+WM8904 Audio Codec Interface
+============================
+
+  Connectivity
+  ------------
+
+    ------------- ---------------- -----------------
+    WM8904        SAMA5D3          NuttX Pin Name
+    ------------- ---------------- -----------------
+     3 SDA        PA30 TWD0        PIO_TWI0_D
+     2 SCLK       PA31 TWCK0       PIO_TWI0_CK
+    28 MCLK       PD30 PCK0        PIO_PMC_PCK0
+    29 BCLK/GPIO4 PC16 TK          PIO_SSC0_TK
+    "" "        " PC19 RK          PIO_SSC0_RK
+    30 LRCLK      PC17 TF          PIO_SSC0_TF
+    "" "   "      PC20 RF          PIO_SSC0_RF
+    31 ADCDAT     PC21 RD          PIO_SSC0_RD
+    32 DACDAT     PC18 TD          PIO_SSC0_TD
+     1 IRQ/GPIO1  PD16 INT_AUDIO   N/A
+    ------------- ---------------- -----------------
+
+  Configuration
+  -------------
+
+  nxplayer
+  --------
 
 SAMA5D3x-EK Configuration Options
 =================================
