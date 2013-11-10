@@ -66,7 +66,10 @@ endif
 
 ifeq ($(CONFIG_STM32_FSMC),y)
 CSRCS += up_extmem.c
+endif
 
+ifeq ($(CONFIG_STM32_OTGFS2),y)
+CSRCS += up_usb.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

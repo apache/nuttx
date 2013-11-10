@@ -6005,5 +6005,7 @@
 	  drivers extended so that they can support either the OTG FS
 	  peripheral or the OTG HS peripheral (in FS mode).  This was
 	  done as a quick way to get USB support on the STM32F429 which
-	  has only OTG HS.  From Ken Pettit (2013-11-9).
-
+	  has only OTG HS.  From Ken Pettit (2013-11-10).
+	* configs/stm32f429i-disco:  Add support for the usbnsh and
+	  usbmsc configurations using the OTG HS peripheral in FS mode.
+	  From Ken Pettit (2013-11-10)

@@ -1,5 +1,5 @@
 ############################################################################
-# configs/mikroe-stm32f4/usbnsh/Make.defs
+# configs/stm32f429i-disco/usbnsh/Make.defs
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
