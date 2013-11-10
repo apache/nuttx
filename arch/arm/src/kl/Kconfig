@@ -269,6 +269,71 @@ config KL_SYSTICK_CORECLK_DIV16
 
 endchoice
 
+config KL_TPM0_PWM
+	bool "TPM0 PWM"
+	default n
+	depends on KL_TPM0
+	---help---
+		Reserve timer 0 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If KL_TPM0
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config KL_TPM0_CHANNEL
+	int "TPM0 PWM Output Channel"
+	default 0
+	range 0 5
+	depends on KL_TPM0_PWM
+	---help---
+		If TIM0 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,..,5}
+
+config KL_TPM1_PWM
+	bool "TPM1 PWM"
+	default n
+	depends on KL_TPM1
+	---help---
+		Reserve timer 1 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If KL_TPM1
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config KL_TPM1_CHANNEL
+	int "TPM1 PWM Output Channel"
+	default 0
+	range 0 1 if ARCH_CHIP_MKL25Z128
+	range 0 5 if !ARCH_CHIP_MKL25Z128
+	depends on KL_TPM1_PWM
+	---help---
+		If TIM1 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,..,5}
+
+config KL_TPM2_PWM
+	bool "TPM2 PWM"
+	default n
+	depends on KL_TPM2
+	---help---
+		Reserve timer 2 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If KL_TPM2
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+config KL_TPM2_CHANNEL
+	int "TPM2 PWM Output Channel"
+	default 0
+	range 0 1 if ARCH_CHIP_MKL25Z128
+	range 0 5 if !ARCH_CHIP_MKL25Z128
+	depends on KL_TPM2_PWM
+	---help---
+		If TIM2 is enabled for PWM usage, you also need specifies the timer output
+		channel {0,..,5}
+
 comment "Kinetis GPIO Interrupt Configuration"
 
 config GPIO_IRQ

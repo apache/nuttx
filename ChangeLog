@@ -6013,3 +6013,5 @@
 	  accesses.  This driver in its current state is intended only to
 	  support I2C testing and would not be appropriate to used for any real
 	  driver application. (2013-11-10).
+	* arch/arm/src/kl/kl_pwm.c and .h:  PWM driver for the Freescale
+	  Kinetis KL family from Alan Carvalho de Assis (2013-11-10).
