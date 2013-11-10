@@ -67,7 +67,7 @@ CSRCS += kl_usb.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
-CSRCS += kl_pwm.c
+CSRCS += up_pwm.c
 endif
 
 ifeq ($(CONFIG_QENCODER),y)

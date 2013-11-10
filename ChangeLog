@@ -6015,3 +6015,5 @@
 	  driver application. (2013-11-10).
 	* arch/arm/src/kl/kl_pwm.c and .h:  PWM driver for the Freescale
 	  Kinetis KL family from Alan Carvalho de Assis (2013-11-10).
+	* configs/freedom-kl25z:  Add PWM support.  From Alan Carvalho de Assis
+	  (2013-11-10).
