@@ -252,6 +252,31 @@ extern "C"
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: i2schar_register
+ *
+ * Description:
+ *   Create and register the I2S character driver.
+ *
+ *   The I2S character driver is a simple character driver that supports I2S
+ *   transfers via a read() and write().  The intent of this driver is to
+ *   support I2S testing.  It is not an audio driver but does conform to some
+ *   of the buffer management heuristics of an audio driver.  It is not
+ *   suitable for use in any real driver application in its current form.
+ *
+ * Input Parameters:
+ *   i2s - An instance of the lower half I2S driver
+ *   minor - The device minor number.  The I2S character device will be
+ *     registers as /dev/i2scharN where N is the minor number
+ *
+ * Returned Value:
+ *   OK if the driver was successfully register; A negated errno value is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
+
+int i2schar_register(FAR struct i2s_dev_s *i2s, int minor);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

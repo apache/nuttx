@@ -280,7 +280,7 @@ static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
    */
 
   sem_post(&priv->exclsem);
-  return nbytes;
+  return sizeof(struct ap_buffer_s) + nbytes;
 
 errout_with_reference:
   apb_free(apb);
@@ -354,7 +354,7 @@ static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
    */
 
   sem_post(&priv->exclsem);
-  return nbytes;
+  return sizeof(struct ap_buffer_s) + nbytes;
 
 errout_with_reference:
   apb_free(apb);
@@ -370,7 +370,13 @@ errout_with_reference:
  * Name: i2schar_register
  *
  * Description:
- *   Create and register the i2s character driver.
+ *   Create and register the I2S character driver.
+ *
+ *   The I2S character driver is a simple character driver that supports I2S
+ *   transfers via a read() and write().  The intent of this driver is to
+ *   support I2S testing.  It is not an audio driver but does conform to some
+ *   of the buffer management heuristics of an audio driver.  It is not
+ *   suitable for use in any real driver application in its current form.
  *
  * Input Parameters:
  *   i2s - An instance of the lower half I2S driver

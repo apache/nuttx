@@ -6036,3 +6036,6 @@
 	  (2013-11-11).
 	* arch/arm/src/stm32:  Added header files and driver framework for the
 	  STM32F429 LTDC framebuffer driver.  From Ken Pettit (2013-11-11).
+	* configs/sama5d3x-ek/src/sam_i2schar.c: Add support for the
+	  apps/examples/i2schar test (2011-11-11).
+
