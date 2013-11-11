@@ -254,7 +254,7 @@ struct sam_buffer_s
 struct sam_ssc_s
 {
   struct i2s_dev_s dev;        /* Externally visible I2S interface */
-  uint32_t base;               /* SSC controller register base address */
+  uintptr_t base;              /* SSC controller register base address */
   sem_t exclsem;               /* Assures mutually exclusive acess to SSC */
   uint16_t master:1;           /* True: Master mode transfers */
   uint16_t rx:1;               /* True: RX transfers supported */
@@ -319,15 +319,15 @@ struct sam_ssc_s
 /* Register helpers */
 
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
-static bool     ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t value,
-                  uint32_t address);
+static bool     ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t regval,
+                  uint32_t regaddr);
 #else
-# define        ssc_checkreg(priv,wr,value,address) (false)
+# define        ssc_checkreg(priv,wr,regval,regaddr) (false)
 #endif
 
 static inline uint32_t ssc_getreg(struct sam_ssc_s *priv, unsigned int offset);
-static inline void ssc_putreg(struct sam_ssc_s *priv, uint32_t value,
-                  unsigned int offset);
+static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
+                              uint32_t regval);
 static inline uintptr_t ssc_physregaddr(struct sam_ssc_s *priv,
                   unsigned int offset);
 
@@ -459,8 +459,8 @@ static const struct i2s_ops_s g_sscops =
  *   Check if the current register access is a duplicate of the preceding.
  *
  * Input Parameters:
- *   value   - The value to be written
- *   address - The address of the register to write to
+ *   regval  - The value to be written
+ *   regaddr - The address of the register to write to
  *
  * Returned Value:
  *   true:  This is the first register access of this type.
@@ -469,12 +469,12 @@ static const struct i2s_ops_s g_sscops =
  ****************************************************************************/
 
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
-static bool ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t value,
-                         uint32_t address)
+static bool ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t regval,
+                         uint32_t regaddr)
 {
   if (wr      == priv->wr &&     /* Same kind of access? */
-      value   == priv->regval &&  /* Same value? */
-      address == priv->regaddr)  /* Same address? */
+      regval  == priv->regval && /* Same value? */
+      regaddr == priv->regaddr)  /* Same address? */
     {
       /* Yes, then just keep a count of the number of times we did this. */
 
@@ -495,9 +495,9 @@ static bool ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t value,
       /* Save information about the new access */
 
       priv->wr      = wr;
-      priv->regval   = value;
-      priv->regaddr = address;
-      priv->count      = 0;
+      priv->regval  = regval;
+      priv->regaddr = regaddr;
+      priv->count   = 0;
     }
 
   /* Return true if this is the first time that we have done this operation */
@@ -517,17 +517,17 @@ static bool ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t value,
 static inline uint32_t ssc_getreg(struct sam_ssc_s *priv,
                                   unsigned int offset)
 {
-  uint32_t address = priv->base + offset;
-  uint32_t value = getreg32(address);
+  uint32_t regaddr = priv->base + offset;
+  uint32_t regval = getreg32(regaddr);
 
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
-  if (ssc_checkreg(priv, false, value, address))
+  if (ssc_checkreg(priv, false, regval, regaddr))
     {
-      lldbg("%08x->%08x\n", address, value);
+      lldbg("%08x->%08x\n", regaddr, regval);
     }
 #endif
 
-  return value;
+  return regval;
 }
 
 /****************************************************************************
@@ -538,19 +538,19 @@ static inline uint32_t ssc_getreg(struct sam_ssc_s *priv,
  *
  ****************************************************************************/
 
-static inline void ssc_putreg(struct sam_ssc_s *priv, uint32_t value,
-                              unsigned int offset)
+static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
+                              uint32_t regval)
 {
-  uint32_t address = priv->base + offset;
+  uint32_t regaddr = priv->base + offset;
 
 #ifdef CONFIG_SAMA5_SSC_REGDEBUG
-  if (ssc_checkreg(priv, true, value, address))
+  if (ssc_checkreg(priv, true, regval, regaddr))
     {
-      lldbg("%08x<-%08x\n", address, value);
+      lldbg("%08x<-%08x\n", regaddr, regval);
     }
 #endif
 
-  putreg32(value, address);
+  putreg32(regval, regaddr);
 }
 
 /****************************************************************************
