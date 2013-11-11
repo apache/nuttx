@@ -681,7 +681,7 @@ static void ssc_bufsem_take(struct sam_ssc_s *priv)
  *   there are no available buffer containers.
  *
  * Assumptions:
- *   The caller does NOT have exclusive acces to the SSC state structure.
+ *   The caller does NOT have exclusive access to the SSC state structure.
  *   That would result in a deadlock!
  *
  ****************************************************************************/
