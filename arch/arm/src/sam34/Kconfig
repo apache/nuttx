@@ -231,6 +231,10 @@ config ARCH_CHIP_SAM4L
 	default n
 	select ARCH_RAMFUNCS
 
+config ARCH_CHIP_SAM4E
+	bool
+	default n
+
 config ARCH_CHIP_SAM4S
 	bool
 	default n

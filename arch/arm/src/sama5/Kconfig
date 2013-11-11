@@ -1418,30 +1418,24 @@ choice
 	default SAMA5_SSC0_RX_MCKDIV
 
 config SAMA5_SSC0_RX_RKINPUT
-	bool "External Clock"
+	bool "RK input"
 	---help---
 		The SSC receiver clock is an external clock provided on the RK input
-		pin.
+		pin.  Sample rate determined by the external clock frequency.
 
 config SAMA5_SSC0_RX_TXCLK
 	bool "Transmitter Clock"
 	---help---
-		The SSC receiver clock is transmitter clock.
+		The SSC receiver clock is transmitter clock.  RX sample rate is the same
+		as the TX sample rate.
 
 config SAMA5_SSC0_RX_MCKDIV
 	bool "MCK/2"
 	---help---
-		The SSC receiver clock is the MCK/2 divided by a up to 4095.
+		The SSC receiver clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
 
 endchoice # Receiver clock source
-
-config SAMA5_SSC0_RX_EXTFREQ
-	int "External reciver clock frequency"
-	default 100
-	depends on SAMA5_SSC0_RX_RKINPUT
-	---help---
-		If the receiver clock is provided via a clock input on the RK pin,
-		then the frequency of the receiver clock must be provided.
 
 if !SAMA5_SSC0_RX_RKINPUT
 choice
@@ -1474,30 +1468,24 @@ choice
 	default SAMA5_SSC0_TX_MCKDIV
 
 config SAMA5_SSC0_TX_TKINPUT
-	bool "External Clock"
+	bool "TK input"
 	---help---
 		The SSC transmitter clock is an external clock provided on the TK input
-		pin.
+		pin.  Sample rate determined by the external clock frequency.
 
 config SAMA5_SSC0_TX_RXCLK
 	bool "Receiver Clock"
 	---help---
-		The SSC transmitter clock is receiver clock.
+		The SSC transmitter clock is receiver clock.  TX sample rate is the same
+		as the RX sample rate.
 
 config SAMA5_SSC0_TX_MCKDIV
 	bool "MCK/2"
 	---help---
-		The SSC transmitter clock is the MCK/2 divided by a up to 4095.
+		The SSC transmitter clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
 
 endchoice # Transmitter clock source
-
-config SAMA5_SSC0_TX_EXTFREQ
-	int "External transmitter clock frequency"
-	default 100
-	depends on SAMA5_SSC0_TX_TKINPUT
-	---help---
-		If the transmitter clock is provided via a clock input on the TK pin,
-		then the frequency of the transmitter clock must be provided.
 
 if !SAMA5_SSC0_TX_TKINPUT
 choice
@@ -1518,8 +1506,8 @@ endif # !SAMA5_SSC0_TX_TKINPUT
 endif # SAMA5_SSC0_TX
 
 config SAMA5_SSC0_MCKDIV_SAMPLERATE
-	int "Internal transmitter clock frequency"
-	default 100
+	int "Sample rate"
+	default 48000
 	depends on SAMA5_SSC0_RX_MCKDIV || SAMA5_SSC0_TX_MCKDIV
 	---help---
 		If the either the receiver or transmitter clock is provided by MCK/2 divided
@@ -1570,30 +1558,24 @@ choice
 	default SAMA5_SSC1_RX_MCKDIV
 
 config SAMA5_SSC1_RX_RKINPUT
-	bool "External Clock"
+	bool "RK input"
 	---help---
 		The SSC receiver clock is an external clock provided on the RK input
-		pin.
+		pin.  Sample rate determined by the external clock frequency.
 
 config SAMA5_SSC1_RX_TXCLK
 	bool "Transmitter Clock"
 	---help---
-		The SSC receiver clock is transmitter clock.
+		The SSC receiver clock is transmitter clock.  RX sample rate is the same
+		as the TX sample rate.
 
 config SAMA5_SSC1_RX_MCKDIV
 	bool "MCK/2"
 	---help---
-		The SSC receiver clock is the MCK/2 divided by a up to 4095.
+		The SSC receiver clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
 
 endchoice # Receiver clock source
-
-config SAMA5_SSC1_RX_EXTFREQ
-	int "External reciver clock frequency"
-	default 100
-	depends on SAMA5_SSC1_RX_RKINPUT
-	---help---
-		If the receiver clock is provided via a clock input on the RK pin,
-		then the frequency of the receiver clock must be provided.
 
 if !SAMA5_SSC1_RX_RKINPUT
 choice
@@ -1626,30 +1608,24 @@ choice
 	default SAMA5_SSC1_TX_MCKDIV
 
 config SAMA5_SSC1_TX_TKINPUT
-	bool "External Clock"
+	bool "TK input"
 	---help---
 		The SSC transmitter clock is an external clock provided on the TK input
-		pin.
+		pin.  Sample rate determined by the external clock frequency.
 
 config SAMA5_SSC1_TX_RXCLK
 	bool "Receiver Clock"
 	---help---
-		The SSC transmitter clock is receiver clock.
+		The SSC transmitter clock is receiver clock.  TX sample rate is the same
+		as the RX sample rate.
 
 config SAMA5_SSC1_TX_MCKDIV
 	bool "MCK/2"
 	---help---
-		The SSC transmitter clock is the MCK/2 divided by a up to 4095.
+		The SSC transmitter clock is the MCK/2 divided by a up to 4095.  Desired
+		sample rate must be provided below.
 
 endchoice # Transmitter clock source
-
-config SAMA5_SSC1_TX_EXTFREQ
-	int "External transmitter clock frequency"
-	default 100
-	depends on SAMA5_SSC1_TX_TKINPUT
-	---help---
-		If the transmitter clock is provided via a clock input on the TK pin,
-		then the frequency of the transmitter clock must be provided.
 
 if !SAMA5_SSC1_TX_TKINPUT
 choice
@@ -1670,8 +1646,8 @@ endif # !SAMA5_SSC1_TX_TKINPUT
 endif # SAMA5_SSC1_TX
 
 config SAMA5_SSC1_MCKDIV_SAMPLERATE
-	int "Internal transmitter clock frequency"
-	default 100
+	int "Sample rate"
+	default 48000
 	depends on SAMA5_SSC1_RX_MCKDIV || SAMA5_SSC1_TX_MCKDIV
 	---help---
 		If the either the receiver or transmitter clock is provided by MCK/2 divided
