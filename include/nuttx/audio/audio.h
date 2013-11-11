@@ -670,9 +670,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev);
  *
  * Description:
  *   Allocated an AP Buffer and prepares it for use.  This allocates a dynamically
- *   allocated buffer that has no special DMA capabilities.  If a static buffer
- *   or a buffer with DMA ability is needed, then it must be allocated manually
- *   and then call apb_prepare, passing it the allocated memory.
+ *   allocated buffer that has no special DMA capabilities.
  *
  * Input parameters:
  *   bufdesc:   Pointer to a buffer descriptor
@@ -683,28 +681,6 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev);
  ****************************************************************************/
 
 int apb_alloc(FAR struct audio_buf_desc_s *bufdesc);
-
-/****************************************************************************
- * Name: abp_prepare
- *
- * Description:
- *   Prepare a pre-allocated AP Buffer for use in the Audio Pipeline.
- *
- * Input parameters:
- *   apb - The pre-allocated AP Buffer
- *   size - The size of the pre-allocated buffer (for verification)
- *   allocmode - Indicates if the buffer is static or dynamic memory
- *   format - The format of samples to be used in the buffer
- *   subformat - The sub-format of samples
- *   maxsamples - The size, in samples, of the buffer
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void apb_prepare(struct ap_buffer_s *apb, int8_t allocmode, uint8_t format,
-                 uint8_t subformat, apb_samp_t maxsamples);
 
 /****************************************************************************
  * Name: apb_free

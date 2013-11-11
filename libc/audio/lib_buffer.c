@@ -154,19 +154,6 @@ int apb_alloc(FAR struct audio_buf_desc_s *bufdesc)
 }
 
 /****************************************************************************
- * Name: apb_prepare
- *
- * Prepare an AP Buffer for use in the Audio Pipeline.
- *
- ****************************************************************************/
-
-void apb_prepare(FAR struct ap_buffer_s *apb, int8_t allocmode, uint8_t format,
-                 uint8_t subformat, apb_samp_t maxsamples)
-{
-  /* Perform a reference count decrement and possibly release the memory */
-}
-
-/****************************************************************************
  * Name: apb_free
  *
  * Free's a previously allocated or referenced Audio Pipeline Buffer

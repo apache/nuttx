@@ -6032,4 +6032,6 @@
 	  audio buffer queuing (2013-11-10).
 	* arch/arm/src/sam34 and arch/arm/include/sam34:  Basic support for
 	  the Atmal SAM4E family.  From Mitko (2013-11-11).
+	* libc/audio/lib_buffer.c:  Remove unused apb_prepare() function
+	  (2013-11-11).
 
