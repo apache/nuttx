@@ -66,6 +66,7 @@
 #define STM32_RCC_SSCGR_OFFSET      0x0080  /* Spread spectrum clock generation register */
 #define STM32_RCC_PLLI2SCFGR_OFFSET 0x0084  /* PLLI2S configuration register */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
+#  define STM32_RCC_PLLSAICFGR_OFFSET 0x0088  /* PLLSAI configuration register */
 #  define STM32_RCC_DCKCFGR_OFFSET  0x008c  /* Dedicated clocks configuration register */
 #endif
 
@@ -95,6 +96,7 @@
 #define STM32_RCC_SSCGR             (STM32_RCC_BASE+STM32_RCC_SSCGR_OFFSET)
 #define STM32_RCC_PLLI2SCFGR        (STM32_RCC_BASE+STM32_RCC_PLLI2SCFGR_OFFSET)
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
+#  define STM32_RCC_PLLSAICFGR      (STM32_RCC_BASE+STM32_RCC_PLLSAICFGR_OFFSET)
 #  define STM32_RCC_DCKCFGR         (STM32_RCC_BASE+STM32_RCC_DCKCFGR_OFFSET)
 #endif
 
@@ -116,6 +118,8 @@
 #define RCC_CR_PLLRDY               (1 << 25) /* Bit 25: PLL clock ready flag */
 #define RCC_CR_PLLI2SON             (1 << 26) /* Bit 26: PLLI2S enable */
 #define RCC_CR_PLLI2SRDY            (1 << 27) /* Bit 27: PLLI2S clock ready flag */
+#define RCC_CR_PLLSAION             (1 << 28) /* Bit 28: PLLSAI enable */
+#define RCC_CR_PLLSAIRDY            (1 << 29) /* Bit 29: PLLSAI clock ready flag */
 
 /* PLL configuration register */
 
@@ -227,12 +231,14 @@
 #define RCC_CIR_HSERDYIE            (1 << 11) /* Bit 11: HSE Ready Interrupt Enable */
 #define RCC_CIR_PLLRDYIE            (1 << 12) /* Bit 12: PLL Ready Interrupt Enable */
 #define RCC_CIR_PLLI2SRDYIE         (1 << 13) /* Bit 13: PLLI2S Ready Interrupt enable */
+#define RCC_CIR_PLLSAIRDYIE         (1 << 14) /* Bit 14: PLLSAI Ready Interrupt enable */
 #define RCC_CIR_LSIRDYC             (1 << 16) /* Bit 16: LSI Ready Interrupt Clear */
 #define RCC_CIR_LSERDYC             (1 << 17) /* Bit 17: LSE Ready Interrupt Clear */
 #define RCC_CIR_HSIRDYC             (1 << 18) /* Bit 18: HSI Ready Interrupt Clear */
 #define RCC_CIR_HSERDYC             (1 << 19) /* Bit 19: HSE Ready Interrupt Clear */
 #define RCC_CIR_PLLRDYC             (1 << 20) /* Bit 20: PLL Ready Interrupt Clear */
 #define RCC_CIR_PLLI2SRDYC          (1 << 21) /* Bit 21: PLLI2S Ready Interrupt clear */
+#define RCC_CIR_PLLSAIRDYC          (1 << 22) /* Bit 22: PLLSAI Ready Interrupt clear */
 #define RCC_CIR_CSSC                (1 << 23) /* Bit 23: Clock Security System Interrupt Clear */
 
 /* AHB1 peripheral reset register */
@@ -245,9 +251,13 @@
 #define RCC_AHB1RSTR_GPIOFRST       (1 << 5)  /* Bit 5:  IO port F reset */
 #define RCC_AHB1RSTR_GPIOGRST       (1 << 6)  /* Bit 6:  IO port G reset */
 #define RCC_AHB1RSTR_GPIOHRST       (1 << 7)  /* Bit 7:  IO port H reset */
-#define RCC_AHB1RSTR_CRCRST         (1 << 12) /* Bit 12  IO port I reset */
+#define RCC_AHB1RSTR_GPIOIRST       (1 << 8)  /* Bit 8:  IO port I reset */
+#define RCC_AHB1RSTR_GPIOJRST       (1 << 9)  /* Bit 9:  IO port J reset */
+#define RCC_AHB1RSTR_GPIOKRST       (1 << 10) /* Bit 10: IO port K reset */
+#define RCC_AHB1RSTR_CRCRST         (1 << 12) /* Bit 12  CRC reset */
 #define RCC_AHB1RSTR_DMA1RST        (1 << 21) /* Bit 21: DMA1 reset */
 #define RCC_AHB1RSTR_DMA2RST        (1 << 22) /* Bit 22: DMA2 reset */
+#define RCC_AHB1RSTR_DMA2DRST       (1 << 23) /* Bit 23: DMA2D reset */
 #define RCC_AHB1RSTR_ETHMACRST      (1 << 25) /* Bit 25: Ethernet MAC reset */
 #define RCC_AHB1RSTR_OTGHSRST       (1 << 29) /* Bit 29: USB OTG HS module reset */
 
@@ -312,6 +322,10 @@
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
 #  define RCC_APB2RSTR_SPI5RST      (1 << 20) /* Bit 20: SPI 5 reset */
 #  define RCC_APB2RSTR_SPI6RST      (1 << 21) /* Bit 21: SPI 6 reset */
+#  define RCC_APB2RSTR_SAI1RST      (1 << 22) /* Bit 22: SAI 1 reset */
+#endif
+#if defined(CONFIG_STM32_STM32F429)
+#  define RCC_APB2RSTR_LTDCRST      (1 << 26) /* Bit 26: LTDC reset */
 #endif
 
 /* AHB1 Peripheral Clock enable register */
@@ -331,6 +345,7 @@
 #define RCC_AHB1ENR_CCMDATARAMEN    (1 << 20) /* Bit 20: CCM data RAM clock enable */
 #define RCC_AHB1ENR_DMA1EN          (1 << 21) /* Bit 21: DMA1 clock enable */
 #define RCC_AHB1ENR_DMA2EN          (1 << 22) /* Bit 22: DMA2 clock enable */
+#define RCC_AHB1ENR_DMA2DEN         (1 << 23) /* Bit 23: DMA2D clock enable */
 #define RCC_AHB1ENR_ETHMACEN        (1 << 25) /* Bit 25: Ethernet MAC clock enable */
 #define RCC_AHB1ENR_ETHMACTXEN      (1 << 26) /* Bit 26: Ethernet Transmission clock enable */
 #define RCC_AHB1ENR_ETHMACRXEN      (1 << 27) /* Bit 27: Ethernet Reception clock enable */
@@ -352,166 +367,175 @@
 
 /* APB1 Peripheral Clock enable register */
 
-#define RCC_APB1ENR_TIM2EN           (1 << 0)  /* Bit 0:  TIM2 clock enable */
-#define RCC_APB1ENR_TIM3EN           (1 << 1)  /* Bit 1:  TIM3 clock enable */
-#define RCC_APB1ENR_TIM4EN           (1 << 2)  /* Bit 2:  TIM4 clock enable */
-#define RCC_APB1ENR_TIM5EN           (1 << 3)  /* Bit 3:  TIM5 clock enable */
-#define RCC_APB1ENR_TIM6EN           (1 << 4)  /* Bit 4:  TIM6 clock enable */
-#define RCC_APB1ENR_TIM7EN           (1 << 5)  /* Bit 5:  TIM7 clock enable */
-#define RCC_APB1ENR_TIM12EN          (1 << 6)  /* Bit 6:  TIM12 clock enable */
-#define RCC_APB1ENR_TIM13EN          (1 << 7)  /* Bit 7:  TIM13 clock enable */
-#define RCC_APB1ENR_TIM14EN          (1 << 8)  /* Bit 8:  TIM14 clock enable */
-#define RCC_APB1ENR_WWDGEN           (1 << 11) /* Bit 11: Window watchdog clock enable */
-#define RCC_APB1ENR_SPI2EN           (1 << 14) /* Bit 14: SPI2 clock enable */
-#define RCC_APB1ENR_SPI3EN           (1 << 15) /* Bit 15: SPI3 clock enable */
-#define RCC_APB1ENR_USART2EN         (1 << 17) /* Bit 17: USART 2 clock enable */
-#define RCC_APB1ENR_USART3EN         (1 << 18) /* Bit 18: USART3 clock enable */
-#define RCC_APB1ENR_UART4EN          (1 << 19) /* Bit 19: UART4 clock enable */
-#define RCC_APB1ENR_UART5EN          (1 << 20) /* Bit 20: UART5 clock enable */
-#define RCC_APB1ENR_I2C1EN           (1 << 21) /* Bit 21: I2C1 clock enable */
-#define RCC_APB1ENR_I2C2EN           (1 << 22) /* Bit 22: I2C2 clock enable */
-#define RCC_APB1ENR_I2C3EN           (1 << 23) /* Bit 23: I2C3 clock enable */
-#define RCC_APB1ENR_CAN1EN           (1 << 25) /* Bit 25: CAN 1 clock enable */
-#define RCC_APB1ENR_CAN2EN           (1 << 26) /* Bit 26: CAN 2 clock enable */
-#define RCC_APB1ENR_PWREN            (1 << 28) /* Bit 28: Power interface clock enable */
-#define RCC_APB1ENR_DACEN            (1 << 29) /* Bit 29: DAC interface clock enable */
+#define RCC_APB1ENR_TIM2EN          (1 << 0)  /* Bit 0:  TIM2 clock enable */
+#define RCC_APB1ENR_TIM3EN          (1 << 1)  /* Bit 1:  TIM3 clock enable */
+#define RCC_APB1ENR_TIM4EN          (1 << 2)  /* Bit 2:  TIM4 clock enable */
+#define RCC_APB1ENR_TIM5EN          (1 << 3)  /* Bit 3:  TIM5 clock enable */
+#define RCC_APB1ENR_TIM6EN          (1 << 4)  /* Bit 4:  TIM6 clock enable */
+#define RCC_APB1ENR_TIM7EN          (1 << 5)  /* Bit 5:  TIM7 clock enable */
+#define RCC_APB1ENR_TIM12EN         (1 << 6)  /* Bit 6:  TIM12 clock enable */
+#define RCC_APB1ENR_TIM13EN         (1 << 7)  /* Bit 7:  TIM13 clock enable */
+#define RCC_APB1ENR_TIM14EN         (1 << 8)  /* Bit 8:  TIM14 clock enable */
+#define RCC_APB1ENR_WWDGEN          (1 << 11) /* Bit 11: Window watchdog clock enable */
+#define RCC_APB1ENR_SPI2EN          (1 << 14) /* Bit 14: SPI2 clock enable */
+#define RCC_APB1ENR_SPI3EN          (1 << 15) /* Bit 15: SPI3 clock enable */
+#define RCC_APB1ENR_USART2EN        (1 << 17) /* Bit 17: USART 2 clock enable */
+#define RCC_APB1ENR_USART3EN        (1 << 18) /* Bit 18: USART3 clock enable */
+#define RCC_APB1ENR_UART4EN         (1 << 19) /* Bit 19: UART4 clock enable */
+#define RCC_APB1ENR_UART5EN         (1 << 20) /* Bit 20: UART5 clock enable */
+#define RCC_APB1ENR_I2C1EN          (1 << 21) /* Bit 21: I2C1 clock enable */
+#define RCC_APB1ENR_I2C2EN          (1 << 22) /* Bit 22: I2C2 clock enable */
+#define RCC_APB1ENR_I2C3EN          (1 << 23) /* Bit 23: I2C3 clock enable */
+#define RCC_APB1ENR_CAN1EN          (1 << 25) /* Bit 25: CAN 1 clock enable */
+#define RCC_APB1ENR_CAN2EN          (1 << 26) /* Bit 26: CAN 2 clock enable */
+#define RCC_APB1ENR_PWREN           (1 << 28) /* Bit 28: Power interface clock enable */
+#define RCC_APB1ENR_DACEN           (1 << 29) /* Bit 29: DAC interface clock enable */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
-#  define RCC_APB1ENR_UART7EN        (1 << 30) /* Bit 30: UART7 clock enable */
-#  define RCC_APB1ENR_UART8EN        (1 << 31) /* Bit 31: UART8 clock enable */
+#  define RCC_APB1ENR_UART7EN       (1 << 30) /* Bit 30: UART7 clock enable */
+#  define RCC_APB1ENR_UART8EN       (1 << 31) /* Bit 31: UART8 clock enable */
 #endif
 
 /* APB2 Peripheral Clock enable register */
 
-#define RCC_APB2ENR_TIM1EN           (1 << 0)  /* Bit 0:  TIM1 clock enable */
-#define RCC_APB2ENR_TIM8EN           (1 << 1)  /* Bit 1:  TIM8 clock enable */
-#define RCC_APB2ENR_USART1EN         (1 << 4)  /* Bit 4:  USART1 clock enable */
-#define RCC_APB2ENR_USART6EN         (1 << 5)  /* Bit 5:  USART6 clock enable */
-#define RCC_APB2ENR_ADC1EN           (1 << 8)  /* Bit 8:  ADC1 clock enable */
-#define RCC_APB2ENR_ADC2EN           (1 << 9)  /* Bit 9:  ADC2 clock enable */
-#define RCC_APB2ENR_ADC3EN           (1 << 10) /* Bit 10: ADC3 clock enable */
-#define RCC_APB2ENR_SDIOEN           (1 << 11) /* Bit 11: SDIO clock enable */
-#define RCC_APB2ENR_SPI1EN           (1 << 12) /* Bit 12: SPI1 clock enable */
+#define RCC_APB2ENR_TIM1EN          (1 << 0)  /* Bit 0:  TIM1 clock enable */
+#define RCC_APB2ENR_TIM8EN          (1 << 1)  /* Bit 1:  TIM8 clock enable */
+#define RCC_APB2ENR_USART1EN        (1 << 4)  /* Bit 4:  USART1 clock enable */
+#define RCC_APB2ENR_USART6EN        (1 << 5)  /* Bit 5:  USART6 clock enable */
+#define RCC_APB2ENR_ADC1EN          (1 << 8)  /* Bit 8:  ADC1 clock enable */
+#define RCC_APB2ENR_ADC2EN          (1 << 9)  /* Bit 9:  ADC2 clock enable */
+#define RCC_APB2ENR_ADC3EN          (1 << 10) /* Bit 10: ADC3 clock enable */
+#define RCC_APB2ENR_SDIOEN          (1 << 11) /* Bit 11: SDIO clock enable */
+#define RCC_APB2ENR_SPI1EN          (1 << 12) /* Bit 12: SPI1 clock enable */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
-#  define RCC_APB2ENR_SPI4EN         (1 << 13) /* Bit 13: SPI4 clock enable */
+#  define RCC_APB2ENR_SPI4EN        (1 << 13) /* Bit 13: SPI4 clock enable */
 #endif
-#define RCC_APB2ENR_SYSCFGEN         (1 << 14) /* Bit 14: System configuration controller clock enable */
-#define RCC_APB2ENR_TIM9EN           (1 << 16) /* Bit 16: TIM9 clock enable */
-#define RCC_APB2ENR_TIM10EN          (1 << 17) /* Bit 17: TIM10 clock enable */
-#define RCC_APB2ENR_TIM11EN          (1 << 18) /* Bit 18: TIM11 clock enable */
+#define RCC_APB2ENR_SYSCFGEN        (1 << 14) /* Bit 14: System configuration controller clock enable */
+#define RCC_APB2ENR_TIM9EN          (1 << 16) /* Bit 16: TIM9 clock enable */
+#define RCC_APB2ENR_TIM10EN         (1 << 17) /* Bit 17: TIM10 clock enable */
+#define RCC_APB2ENR_TIM11EN         (1 << 18) /* Bit 18: TIM11 clock enable */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
-#  define RCC_APB2ENR_SPI5EN         (1 << 20) /* Bit 20: SPI5 clock enable */
-#  define RCC_APB2ENR_SPI6EN         (1 << 21) /* Bit 21: SPI6 clock enable */
+#  define RCC_APB2ENR_SPI5EN        (1 << 20) /* Bit 20: SPI5 clock enable */
+#  define RCC_APB2ENR_SPI6EN        (1 << 21) /* Bit 21: SPI6 clock enable */
+#  define RCC_APB2ENR_SAI1EN        (1 << 22) /* Bit 22: SAI1 clock enable */
+#endif
+#if defined(CONFIG_STM32_STM32F429)
+#  define RCC_APB2ENR_LTDCEN        (1 << 26) /* Bit 26: LTDC clock enable */
 #endif
 
 /* RCC AHB1 low power modeperipheral clock enable register */
 
-#define RCC_AHB1LPENR_GPIOLPEN(n)    (1 << (n))
-#define RCC_AHB1LPENR_GPIOALPEN      (1 << 0)  /* Bit 0:  IO port A clock enable during Sleep mode */
-#define RCC_AHB1LPENR_GPIOBLPEN      (1 << 1)  /* Bit 1:  IO port B clock enable during Sleep mode */
-#define RCC_AHB1LPENR_GPIOCLPEN      (1 << 2)  /* Bit 2:  IO port C clock enable during Sleep mode */
-#define RCC_AHB1LPENR_GPIODLPEN      (1 << 3)  /* Bit 3:  IO port D clock enable during Sleep mode */
-#define RCC_AHB1LPENR_GPIOELPEN      (1 << 4)  /* Bit 4:  IO port E clock enable during Sleep mode */
-#define RCC_AHB1LPENR_GPIOFLPEN      (1 << 5)  /* Bit 5:  IO port F clock enable during Sleep mode */
-#define RCC_AHB1LPENR_GPIOGLPEN      (1 << 6)  /* Bit 6:  IO port G clock enable during Sleep mode */
-#define RCC_AHB1LPENR_GPIOHLPEN      (1 << 7)  /* Bit 7:  IO port H clock enable during Sleep mode */
-#define RCC_AHB1LPENR_GPIOILPEN      (1 << 8)  /* Bit 8:  IO port I clock enable during Sleep mode */
-#define RCC_AHB1LPENR_CRCLPEN        (1 << 12) /* Bit 12: CRC clock enable during Sleep mode */
-#define RCC_AHB1LPENR_FLITFLPEN      (1 << 15) /* Bit 15: Flash interface clock enable during Sleep mode */
-#define RCC_AHB1LPENR_SRAM1LPEN      (1 << 16) /* Bit 16: SRAM 1 interface clock enable during Sleep mode */
-#define RCC_AHB1LPENR_SRAM2LPEN      (1 << 17) /* Bit 17: SRAM 2 interface clock enable during Sleep mode */
-#define RCC_AHB1LPENR_BKPSRAMLPEN    (1 << 18) /* Bit 18: Backup SRAM interface clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOLPEN(n)   (1 << (n))
+#define RCC_AHB1LPENR_GPIOALPEN     (1 << 0)  /* Bit 0:  IO port A clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOBLPEN     (1 << 1)  /* Bit 1:  IO port B clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOCLPEN     (1 << 2)  /* Bit 2:  IO port C clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIODLPEN     (1 << 3)  /* Bit 3:  IO port D clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOELPEN     (1 << 4)  /* Bit 4:  IO port E clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOFLPEN     (1 << 5)  /* Bit 5:  IO port F clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOGLPEN     (1 << 6)  /* Bit 6:  IO port G clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOHLPEN     (1 << 7)  /* Bit 7:  IO port H clock enable during Sleep mode */
+#define RCC_AHB1LPENR_GPIOILPEN     (1 << 8)  /* Bit 8:  IO port I clock enable during Sleep mode */
+#define RCC_AHB1LPENR_CRCLPEN       (1 << 12) /* Bit 12: CRC clock enable during Sleep mode */
+#define RCC_AHB1LPENR_FLITFLPEN     (1 << 15) /* Bit 15: Flash interface clock enable during Sleep mode */
+#define RCC_AHB1LPENR_SRAM1LPEN     (1 << 16) /* Bit 16: SRAM 1 interface clock enable during Sleep mode */
+#define RCC_AHB1LPENR_SRAM2LPEN     (1 << 17) /* Bit 17: SRAM 2 interface clock enable during Sleep mode */
+#define RCC_AHB1LPENR_BKPSRAMLPEN   (1 << 18) /* Bit 18: Backup SRAM interface clock enable during Sleep mode */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
-#  define RCC_AHB1LPENR_SRAM3LPEN    (1 << 19) /* Bit 19: SRAM 3 interface clock enable during Sleep mode */
+#  define RCC_AHB1LPENR_SRAM3LPEN   (1 << 19) /* Bit 19: SRAM 3 interface clock enable during Sleep mode */
 #endif
 #define RCC_AHB1LPENR_CCMDATARAMLPEN (1 << 20) /* Bit 20: CCM data RAM clock enable during Sleep mode */
-#define RCC_AHB1LPENR_DMA1LPEN       (1 << 21) /* Bit 21: DMA1 clock enable during Sleep mode */
-#define RCC_AHB1LPENR_DMA2LPEN       (1 << 22) /* Bit 22: DMA2 clock enable during Sleep mode */
-#define RCC_AHB1LPENR_ETHMACLPEN     (1 << 25) /* Bit 25: Ethernet MAC clock enable during Sleep mode */
-#define RCC_AHB1LPENR_ETHMACTXLPEN   (1 << 26) /* Bit 26: Ethernet Transmission clock enable during Sleep mode */
-#define RCC_AHB1LPENR_ETHMACRXLPEN   (1 << 27) /* Bit 27: Ethernet Reception clock enable during Sleep mode */
-#define RCC_AHB1LPENR_ETHMACPTPLPEN  (1 << 28) /* Bit 28: Ethernet PTP clock enable during Sleep mode */
-#define RCC_AHB1LPENR_OTGHSLPEN      (1 << 29) /* Bit 29: USB OTG HS clock enable during Sleep mode */
-#define RCC_AHB1LPENR_OTGHSULPILPEN  (1 << 30) /* Bit 30: USB OTG HSULPI clock enable during Sleep mode */
+#define RCC_AHB1LPENR_DMA1LPEN      (1 << 21) /* Bit 21: DMA1 clock enable during Sleep mode */
+#define RCC_AHB1LPENR_DMA2LPEN      (1 << 22) /* Bit 22: DMA2 clock enable during Sleep mode */
+#define RCC_AHB1LPENR_DMA2DLPEN     (1 << 23) /* Bit 23: DMA2D clock enable during Sleep mode */
+#define RCC_AHB1LPENR_ETHMACLPEN    (1 << 25) /* Bit 25: Ethernet MAC clock enable during Sleep mode */
+#define RCC_AHB1LPENR_ETHMACTXLPEN  (1 << 26) /* Bit 26: Ethernet Transmission clock enable during Sleep mode */
+#define RCC_AHB1LPENR_ETHMACRXLPEN  (1 << 27) /* Bit 27: Ethernet Reception clock enable during Sleep mode */
+#define RCC_AHB1LPENR_ETHMACPTPLPEN (1 << 28) /* Bit 28: Ethernet PTP clock enable during Sleep mode */
+#define RCC_AHB1LPENR_OTGHSLPEN     (1 << 29) /* Bit 29: USB OTG HS clock enable during Sleep mode */
+#define RCC_AHB1LPENR_OTGHSULPILPEN (1 << 30) /* Bit 30: USB OTG HSULPI clock enable during Sleep mode */
 
 /* RCC AHB2 low power modeperipheral clock enable register */
 
-#define RCC_AHB2LPENR_DCMILPEN       (1 << 0)  /* Bit 0: Camera interface enable during Sleep mode */
-#define RCC_AHB2LPENR_CRYPLPEN       (1 << 4)  /* Bit 4: Cryptographic modules clock enable during Sleep mode */
-#define RCC_AHB2LPENR_HASHLPEN       (1 << 5)  /* Bit 5: Hash modules clock enable during Sleep mode */
-#define RCC_AHB2LPENR_RNGLPEN        (1 << 6)  /* Bit 6: Random number generator clock enable during Sleep mode */
-#define RCC_AHB2LPENR_OTGFLPSEN      (1 << 7)  /* Bit 7: USB OTG FS clock enable during Sleep mode */
+#define RCC_AHB2LPENR_DCMILPEN      (1 << 0)  /* Bit 0: Camera interface enable during Sleep mode */
+#define RCC_AHB2LPENR_CRYPLPEN      (1 << 4)  /* Bit 4: Cryptographic modules clock enable during Sleep mode */
+#define RCC_AHB2LPENR_HASHLPEN      (1 << 5)  /* Bit 5: Hash modules clock enable during Sleep mode */
+#define RCC_AHB2LPENR_RNGLPEN       (1 << 6)  /* Bit 6: Random number generator clock enable during Sleep mode */
+#define RCC_AHB2LPENR_OTGFLPSEN     (1 << 7)  /* Bit 7: USB OTG FS clock enable during Sleep mode */
 
 /* RCC AHB3 low power modeperipheral clock enable register */
 
-#define RCC_AHB3LPENR_FSMLPEN        (1 << 0) /* Bit 0: Flexible static memory controller module clock
+#define RCC_AHB3LPENR_FSMLPEN       (1 << 0) /* Bit 0: Flexible static memory controller module clock
                                                *        enable during Sleep mode */
 
 /* RCC APB1 low power modeperipheral clock enable register */
 
-#define RCC_APB1LPENR_TIM2LPEN       (1 << 0)  /* Bit 0:  TIM2 clock enable during Sleep mode */
-#define RCC_APB1LPENR_TIM3LPEN       (1 << 1)  /* Bit 1:  TIM3 clock enable during Sleep mode */
-#define RCC_APB1LPENR_TIM4LPEN       (1 << 2)  /* Bit 2:  TIM4 clock enable during Sleep mode */
-#define RCC_APB1LPENR_TIM5LPEN       (1 << 3)  /* Bit 3:  TIM5 clock enable during Sleep mode */
-#define RCC_APB1LPENR_TIM6LPEN       (1 << 4)  /* Bit 4:  TIM6 clock enable during Sleep mode */
-#define RCC_APB1LPENR_TIM7LPEN       (1 << 5)  /* Bit 5:  TIM7 clock enable during Sleep mode */
-#define RCC_APB1LPENR_TIM12LPEN      (1 << 6)  /* Bit 6:  TIM12 clock enable during Sleep mode */
-#define RCC_APB1LPENR_TIM13LPEN      (1 << 7)  /* Bit 7:  TIM13 clock enable during Sleep mode */
-#define RCC_APB1LPENR_TIM14LPEN      (1 << 8)  /* Bit 8:  TIM14 clock enable during Sleep mode */
-#define RCC_APB1LPENR_WWDGLPEN       (1 << 11) /* Bit 11: Window watchdog clock enable during Sleep mode */
-#define RCC_APB1LPENR_SPI2LPEN       (1 << 14) /* Bit 14: SPI2 clock enable during Sleep mode */
-#define RCC_APB1LPENR_SPI3LPEN       (1 << 15) /* Bit 15: SPI3 clock enable during Sleep mode */
-#define RCC_APB1LPENR_USART2LPEN     (1 << 17) /* Bit 17: USART 2 clock enable during Sleep mode */
-#define RCC_APB1LPENR_USART3LPEN     (1 << 18) /* Bit 18: USART3 clock enable during Sleep mode */
-#define RCC_APB1LPENR_UART4LPEN      (1 << 19) /* Bit 19: UART4 clock enable during Sleep mode */
-#define RCC_APB1LPENR_UART5LPEN      (1 << 20) /* Bit 20: UART5 clock enable during Sleep mode */
-#define RCC_APB1LPENR_I2C1LPEN       (1 << 21) /* Bit 21: I2C1 clock enable during Sleep mode */
-#define RCC_APB1LPENR_I2C2LPEN       (1 << 22) /* Bit 22: I2C2 clock enable during Sleep mode */
-#define RCC_APB1LPENR_I2C3LPEN       (1 << 23) /* Bit 23: I2C3 clock enable during Sleep mode */
-#define RCC_APB1LPENR_CAN1LPEN       (1 << 25) /* Bit 25: CAN 1 clock enable during Sleep mode */
-#define RCC_APB1LPENR_CAN2LPEN       (1 << 26) /* Bit 26: CAN 2 clock enable during Sleep mode */
-#define RCC_APB1LPENR_PWRLPEN        (1 << 28) /* Bit 28: Power interface clock enable during Sleep mode */
-#define RCC_APB1LPENR_DACLPEN        (1 << 29) /* Bit 29: DAC interface clock enable during Sleep mode */
+#define RCC_APB1LPENR_TIM2LPEN      (1 << 0)  /* Bit 0:  TIM2 clock enable during Sleep mode */
+#define RCC_APB1LPENR_TIM3LPEN      (1 << 1)  /* Bit 1:  TIM3 clock enable during Sleep mode */
+#define RCC_APB1LPENR_TIM4LPEN      (1 << 2)  /* Bit 2:  TIM4 clock enable during Sleep mode */
+#define RCC_APB1LPENR_TIM5LPEN      (1 << 3)  /* Bit 3:  TIM5 clock enable during Sleep mode */
+#define RCC_APB1LPENR_TIM6LPEN      (1 << 4)  /* Bit 4:  TIM6 clock enable during Sleep mode */
+#define RCC_APB1LPENR_TIM7LPEN      (1 << 5)  /* Bit 5:  TIM7 clock enable during Sleep mode */
+#define RCC_APB1LPENR_TIM12LPEN     (1 << 6)  /* Bit 6:  TIM12 clock enable during Sleep mode */
+#define RCC_APB1LPENR_TIM13LPEN     (1 << 7)  /* Bit 7:  TIM13 clock enable during Sleep mode */
+#define RCC_APB1LPENR_TIM14LPEN     (1 << 8)  /* Bit 8:  TIM14 clock enable during Sleep mode */
+#define RCC_APB1LPENR_WWDGLPEN      (1 << 11) /* Bit 11: Window watchdog clock enable during Sleep mode */
+#define RCC_APB1LPENR_SPI2LPEN      (1 << 14) /* Bit 14: SPI2 clock enable during Sleep mode */
+#define RCC_APB1LPENR_SPI3LPEN      (1 << 15) /* Bit 15: SPI3 clock enable during Sleep mode */
+#define RCC_APB1LPENR_USART2LPEN    (1 << 17) /* Bit 17: USART 2 clock enable during Sleep mode */
+#define RCC_APB1LPENR_USART3LPEN    (1 << 18) /* Bit 18: USART3 clock enable during Sleep mode */
+#define RCC_APB1LPENR_UART4LPEN     (1 << 19) /* Bit 19: UART4 clock enable during Sleep mode */
+#define RCC_APB1LPENR_UART5LPEN     (1 << 20) /* Bit 20: UART5 clock enable during Sleep mode */
+#define RCC_APB1LPENR_I2C1LPEN      (1 << 21) /* Bit 21: I2C1 clock enable during Sleep mode */
+#define RCC_APB1LPENR_I2C2LPEN      (1 << 22) /* Bit 22: I2C2 clock enable during Sleep mode */
+#define RCC_APB1LPENR_I2C3LPEN      (1 << 23) /* Bit 23: I2C3 clock enable during Sleep mode */
+#define RCC_APB1LPENR_CAN1LPEN      (1 << 25) /* Bit 25: CAN 1 clock enable during Sleep mode */
+#define RCC_APB1LPENR_CAN2LPEN      (1 << 26) /* Bit 26: CAN 2 clock enable during Sleep mode */
+#define RCC_APB1LPENR_PWRLPEN       (1 << 28) /* Bit 28: Power interface clock enable during Sleep mode */
+#define RCC_APB1LPENR_DACLPEN       (1 << 29) /* Bit 29: DAC interface clock enable during Sleep mode */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
-#  define RCC_APB1LPENR_UART7LPEN    (1 << 30) /* Bit 30: UART7 clock enable during Sleep mode */
-#  define RCC_APB1LPENR_UART8LPEN    (1 << 31) /* Bit 31: UART8 clock enable during Sleep mode */
+#  define RCC_APB1LPENR_UART7LPEN   (1 << 30) /* Bit 30: UART7 clock enable during Sleep mode */
+#  define RCC_APB1LPENR_UART8LPEN   (1 << 31) /* Bit 31: UART8 clock enable during Sleep mode */
 #endif
 
 /* RCC APB2 low power modeperipheral clock enable register */
 
-#define RCC_APB2LPENR_TIM1LPEN       (1 << 0)  /* Bit 0:  TIM1 clock enable during Sleep mode */
-#define RCC_APB2LPENR_TIM8LPEN       (1 << 1)  /* Bit 1:  TIM8 clock enable during Sleep mode */
-#define RCC_APB2LPENR_USART1LPEN     (1 << 4)  /* Bit 4:  USART1 clock enable during Sleep mode */
-#define RCC_APB2LPENR_USART6LPEN     (1 << 5)  /* Bit 5:  USART6 clock enable during Sleep mode */
-#define RCC_APB2LPENR_ADC1LPEN       (1 << 8)  /* Bit 8:  ADC1 clock enable during Sleep mode */
-#define RCC_APB2LPENR_ADC2LPEN       (1 << 9)  /* Bit 9:  ADC2 clock enable during Sleep mode */
-#define RCC_APB2LPENR_ADC3LPEN       (1 << 10) /* Bit 10: ADC3 clock enable during Sleep mode */
-#define RCC_APB2LPENR_SDIOLPEN       (1 << 11) /* Bit 11: SDIO clock enable during Sleep mode */
-#define RCC_APB2LPENR_SPI1LPEN       (1 << 12) /* Bit 12: SPI1 clock enable during Sleep mode */
+#define RCC_APB2LPENR_TIM1LPEN      (1 << 0)  /* Bit 0:  TIM1 clock enable during Sleep mode */
+#define RCC_APB2LPENR_TIM8LPEN      (1 << 1)  /* Bit 1:  TIM8 clock enable during Sleep mode */
+#define RCC_APB2LPENR_USART1LPEN    (1 << 4)  /* Bit 4:  USART1 clock enable during Sleep mode */
+#define RCC_APB2LPENR_USART6LPEN    (1 << 5)  /* Bit 5:  USART6 clock enable during Sleep mode */
+#define RCC_APB2LPENR_ADC1LPEN      (1 << 8)  /* Bit 8:  ADC1 clock enable during Sleep mode */
+#define RCC_APB2LPENR_ADC2LPEN      (1 << 9)  /* Bit 9:  ADC2 clock enable during Sleep mode */
+#define RCC_APB2LPENR_ADC3LPEN      (1 << 10) /* Bit 10: ADC3 clock enable during Sleep mode */
+#define RCC_APB2LPENR_SDIOLPEN      (1 << 11) /* Bit 11: SDIO clock enable during Sleep mode */
+#define RCC_APB2LPENR_SPI1LPEN      (1 << 12) /* Bit 12: SPI1 clock enable during Sleep mode */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
-#  define RCC_APB2LPENR_SPI4LPEN     (1 << 13) /* Bit 13: SPI4 clock enable during Sleep mode */
+#  define RCC_APB2LPENR_SPI4LPEN    (1 << 13) /* Bit 13: SPI4 clock enable during Sleep mode */
 #endif
-#define RCC_APB2LPENR_SYSCFGLPEN     (1 << 14) /* Bit 14: System configuration controller clock enable during Sleep mode */
-#define RCC_APB2LPENR_TIM9LPEN       (1 << 16) /* Bit 16: TIM9 clock enable during Sleep mode */
-#define RCC_APB2LPENR_TIM10LPEN      (1 << 17) /* Bit 17: TIM10 clock enable during Sleep mode */
-#define RCC_APB2LPENR_TIM11LPEN      (1 << 18) /* Bit 18: TIM11 clock enable during Sleep mode */
+#define RCC_APB2LPENR_SYSCFGLPEN    (1 << 14) /* Bit 14: System configuration controller clock enable during Sleep mode */
+#define RCC_APB2LPENR_TIM9LPEN      (1 << 16) /* Bit 16: TIM9 clock enable during Sleep mode */
+#define RCC_APB2LPENR_TIM10LPEN     (1 << 17) /* Bit 17: TIM10 clock enable during Sleep mode */
+#define RCC_APB2LPENR_TIM11LPEN     (1 << 18) /* Bit 18: TIM11 clock enable during Sleep mode */
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
-#  define RCC_APB2LPENR_SPI5LPEN     (1 << 20) /* Bit 20: SPI5 clock enable during Sleep mode */
-#  define RCC_APB2LPENR_SPI6LPEN     (1 << 21) /* Bit 21: SPI6 clock enable during Sleep mode */
+#  define RCC_APB2LPENR_SPI5LPEN    (1 << 20) /* Bit 20: SPI5 clock enable during Sleep mode */
+#  define RCC_APB2LPENR_SPI6LPEN    (1 << 21) /* Bit 21: SPI6 clock enable during Sleep mode */
+#  define RCC_APB2LPENR_SAI1LPEN    (1 << 22) /* Bit 22: SAI1 clock enable during Sleep mode */
+#endif
+#if defined(CONFIG_STM32_STM32F429)
+#  define RCC_APB2LPENR_LTDCLPEN    (1 << 26) /* Bit 26: LTDC clock enable during Sleep mode */
 #endif
 
 /* Backup domain control register */
 
-#define RCC_BDCR_LSEON               (1 << 0)  /* Bit 0: External Low Speed oscillator enable */
-#define RCC_BDCR_LSERDY              (1 << 1)  /* Bit 1: External Low Speed oscillator Ready */
-#define RCC_BDCR_LSEBYP              (1 << 2)  /* Bit 2: External Low Speed oscillator Bypass */
-#define RCC_BDCR_RTCSEL_SHIFT        (8)       /* Bits 9:8: RTC clock source selection */
-#define RCC_BDCR_RTCSEL_MASK         (3 << RCC_BDCR_RTCSEL_SHIFT)
-#  define RCC_BDCR_RTCSEL_NOCLK      (0 << RCC_BDCR_RTCSEL_SHIFT) /* 00: No clock */
-#  define RCC_BDCR_RTCSEL_LSE        (1 << RCC_BDCR_RTCSEL_SHIFT) /* 01: LSE oscillator clock used as RTC clock */
-#  define RCC_BDCR_RTCSEL_LSI        (2 << RCC_BDCR_RTCSEL_SHIFT) /* 10: LSI oscillator clock used as RTC clock */
-#  define RCC_BDCR_RTCSEL_HSE        (3 << RCC_BDCR_RTCSEL_SHIFT) /* 11: HSE oscillator clock divided by 128 used as RTC clock */
-#define RCC_BDCR_RTCEN               (1 << 15) /* Bit 15: RTC clock enable */
-#define RCC_BDCR_BDRST               (1 << 16) /* Bit 16: Backup domain software reset */
+#define RCC_BDCR_LSEON              (1 << 0)  /* Bit 0: External Low Speed oscillator enable */
+#define RCC_BDCR_LSERDY             (1 << 1)  /* Bit 1: External Low Speed oscillator Ready */
+#define RCC_BDCR_LSEBYP             (1 << 2)  /* Bit 2: External Low Speed oscillator Bypass */
+#define RCC_BDCR_RTCSEL_SHIFT       (8)       /* Bits 9:8: RTC clock source selection */
+#define RCC_BDCR_RTCSEL_MASK        (3 << RCC_BDCR_RTCSEL_SHIFT)
+#  define RCC_BDCR_RTCSEL_NOCLK     (0 << RCC_BDCR_RTCSEL_SHIFT) /* 00: No clock */
+#  define RCC_BDCR_RTCSEL_LSE       (1 << RCC_BDCR_RTCSEL_SHIFT) /* 01: LSE oscillator clock used as RTC clock */
+#  define RCC_BDCR_RTCSEL_LSI       (2 << RCC_BDCR_RTCSEL_SHIFT) /* 10: LSI oscillator clock used as RTC clock */
+#  define RCC_BDCR_RTCSEL_HSE       (3 << RCC_BDCR_RTCSEL_SHIFT) /* 11: HSE oscillator clock divided by 128 used as RTC clock */
+#define RCC_BDCR_RTCEN              (1 << 15) /* Bit 15: RTC clock enable */
+#define RCC_BDCR_BDRST              (1 << 16) /* Bit 16: Backup domain software reset */
 
 /* Control/status register */
 
@@ -531,7 +555,7 @@
 #define RCC_SSCGR_MODPER_SHIFT      (0)        /* Bit 0-12: Modulation period */
 #define RCC_SSCGR_MODPER_MASK       (0x1fff << RCC_SSCGR_MODPER_SHIFT)
 #  define RCC_SSCGR_MODPER(n)       ((n) << RCC_SSCGR_MODPER_SHIFT)
-#define RCC_SSCGR_INCSTEP_SHIFT     (13)        /* Bit 13-27: Incrementation step */
+#define RCC_SSCGR_INCSTEP_SHIFT     (13)       /* Bit 13-27: Incrementation step */
 #define RCC_SSCGR_INCSTEP_MASK      (0x7fff << RCC_SSCGR_INCSTEP_SHIFT)
 #  define RCC_SSCGR_INCSTEP(n)      ((n) << RCC_SSCGR_INCSTEP_SHIFT)
 #define RCC_SSCGR_SPREADSEL         (1 << 30)  /* Bit 30: Spread Select */
@@ -541,14 +565,50 @@
 
 #define RCC_PLLI2SCFGR_PLLI2SN_SHIFT (6)      /* Bits 6-14: PLLI2S multiplication factor for VCO */
 #define RCC_PLLI2SCFGR_PLLI2SN_MASK  (0x1ff << RCC_PLLI2SCFGR_PLLI2SN_SHIFT)
-#define RCC_PLLI2SCFGR_PLLI2SR_SHIFT (28)      /* Bits 28-30: PLLI2S division factor for I2S clocks */
+#define RCC_PLLI2SCFGR_PLLI2SR_SHIFT (28)     /* Bits 28-30: PLLI2S division factor for I2S clocks */
 #define RCC_PLLI2SCFGR_PLLI2SR_MASK  (7 << RCC_PLLI2SCFGR_PLLI2SR_SHIFT)
+
+/* PLLSAI configuration register */
+
+#define RCC_PLLSAICFG_PLLSAIN_SHIFT  (6)      /* Bits 6-14: PLLSAI divider (N) for VCO */
+#define RCC_PLLSAICFG_PLLSAIN_MASK   (0x1ff << RCC_PLLSAICFG_PLLSAIN_SHIFT)
+#  define RCC_PLLSAICFG_PLLSAIN(n)   ((n) << RCC_PLLSAICFG_PLLSAIN_SHIFT)
+#define RCC_PLLSAICFGR_PLLSAIQ_SHIFT (24)     /* Bits 24-27: PLLSAI division factor for SAI clock */
+#define RCC_PLLSAICFGR_PLLSAIQ_MASK  (0x0F << RCC_PLLSAICFGR_PLLSAIQ_SHIFT)
+#  define RCC_PLLSAICFG_PLLSAIQ(n)   ((n) << RCC_PLLSAICFG_PLLSAIQ_SHIFT)
+#define RCC_PLLSAICFGR_PLLSAIR_SHIFT (28)     /* Bits 28-30: PLLSAI division factor for LCD clock */
+#define RCC_PLLSAICFGR_PLLSAIR_MASK  (7 << RCC_PLLSAICFGR_PLLSAIR_SHIFT)
+#  define RCC_PLLSAICFG_PLLSAIR(n)   ((n) << RCC_PLLSAICFG_PLLSAIR_SHIFT)
 
 /* Dedicated clocks configuration register */
 
 #if defined(CONFIG_STM32_STM32F427) || defined(CONFIG_STM32_STM32F429)
-#  define RCC_DCKCFGR_TIMPRE        (1 << 24) /* Bit 24: Timer clock prescaler selection */
+#  define RCC_DCKCFGR_PLLI2SDIVQ_SHIFT (0)      /* Bits 0-4: PLLI2S division factor for I2S clock */
+#  define RCC_DCKCFGR_PLLI2SDIVQ_MASK  (0x1F << RCC_DCKCFGR_PLLI2SDIVQ_SHIFT)
+#  define RCC_DCKCFGR_PLLI2SDIVQ(n)    ((n) << RCC_DCKCFGR_PLLI2SDIVQ_SHIFT)
+#  define RCC_DCKCFGR_PLLSAIDIVQ_SHIFT (8)      /* Bits 8-12: PLLSAI division factor for SAI clock */
+#  define RCC_DCKCFGR_PLLSAIDIVQ_MASK  (0x1F << RCC_DCKCFGR_PLLSAIDIVQ_SHIFT)
+#  define RCC_DCKCFGR_PLLSAIDIVQ(n)    ((n) << RCC_DCKCFGR_PLLSAIDIVQ_SHIFT)
+#  define RCC_DCKCFGR_PLLSAIDIVR_SHIFT (16)     /* Bits 16-17: PLLSAI division factor for LCD_CLK clock */
+#  define RCC_DCKCFGR_PLLSAIDIVR_MASK  (0x3 << RCC_DCKCFGR_PLLSAIDIVR_SHIFT)
+#  define RCC_DCKCFGR_PLLSAIDIVR(n)    ((n) << RCC_DCKCFGR_PLLSAIDIVR_SHIFT)
+#  define RCC_DCKCFGR_SAI1ASRC_SHIFT   (20)     /* Bits 20-21: SAI1-A clock source selection */
+#  define RCC_DCKCFGR_SAI1ASRC_MASK    (0x3 << RCC_DCKCFGR_SAI1ASRC_SHIFT)
+#  define RCC_DCKCFGR_SAI1ASRC(n)      ((n) << RCC_DCKCFGR_SAI1ASRC_SHIFT)
+#  define RCC_DCKCFGR_SAI1BSRC_SHIFT   (22)     /* Bits 22-23: SAI1-B clock source selection */
+#  define RCC_DCKCFGR_SAI1BSRC_MASK    (0x3 << RCC_DCKCFGR_SAI1BSRC_SHIFT)
+#  define RCC_DCKCFGR_SAI1BSRC(n)      ((n) << RCC_DCKCFGR_SAI1BSRC_SHIFT)
+#  define RCC_DCKCFGR_TIMPRE           (1 << 24) /* Bit 24: Timer clock prescaler selection */
 #endif
+
+#define RCC_SAICLKSRC_PLLSAI        0
+#define RCC_SAICLKSRC_PLLI2S        1
+#define RCC_SAICLKSRC_ALTERNATE     2
+
+#define RCC_PLLSAIDIVR_DIV2         0
+#define RCC_PLLSAIDIVR_DIV4         1
+#define RCC_PLLSAIDIVR_DIV8         2
+#define RCC_PLLSAIDIVR_DIV16        3
 
 #endif /* __ARCH_ARM_SRC_STM32_CHIP_STM32F40XXX_RCC_H */
 

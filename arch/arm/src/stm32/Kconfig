@@ -357,9 +357,9 @@ config ARCH_CHIP_STM32F207IG
 	select STM32_STM32F20XX
 
 config ARCH_CHIP_STM32F207ZE
-        bool "STM32F207ZE"
-        select ARCH_CORTEXM3
-        select STM32_STM32F20XX
+	bool "STM32F207ZE"
+	select ARCH_CORTEXM3
+	select STM32_STM32F20XX
 
 config ARCH_CHIP_STM32F302CB
 	bool "STM32F302CB"
@@ -741,6 +741,16 @@ config STM32_I2C3
 	default n
 	depends on STM32_STM32F20XX || STM32_STM32F40XX
 	select STM32_I2C
+
+config STM32_LTDC
+	bool "LTDC"
+	default n
+	depends on STM32_STM32F429
+	---help---
+		The STM32 LTDC is an LCD-TFT Display Controller available on
+		the STM32F429 and STM32F439 devices.  It is a standard parallel
+		video interface (HSYNC, VSYNC, etc.) for controlling TFT
+		LCD displays.
 
 config STM32_OTGFS
 	bool "OTG FS"
@@ -3008,18 +3018,120 @@ menu "CAN driver configuration"
 	depends on STM32_CAN1 || STM32_CAN2
 
 config CAN1_BAUD
-        int "CAN1 BAUD"
-        default 250000
-        depends on STM32_CAN1
-        ---help---
-                CAN1 BAUD rate.  Required if STM32_CAN1 is defined.
+	int "CAN1 BAUD"
+	default 250000
+	depends on STM32_CAN1
+	---help---
+		CAN1 BAUD rate.  Required if STM32_CAN1 is defined.
 
 config CAN2_BAUD
-        int "CAN2 BAUD"
-        default 250000
-        depends on STM32_CAN2
-        ---help---
-                CAN2 BAUD rate.  Required if STM32_CAN2 is defined.
+	int "CAN2 BAUD"
+	default 250000
+	depends on STM32_CAN2
+	---help---
+		CAN2 BAUD rate.  Required if STM32_CAN2 is defined.
 
 endmenu
+
+if STM32_LTDC
+
+menu "LTDC Configuration"
+
+config STM32_LTDC_BACKLIGHT
+	bool "Backlight support"
+	default y
+
+config STM32_LTDC_DEFBACKLIGHT
+	hex "Default backlight level"
+	default 0xf0
+
+config STM32_LTDC_BACKCOLOR
+	hex "Background color"
+	default 0x0
+	---help---
+		This is the background color that will be used as the LTDC
+		background layer color.  It is an RGB888 format value.
+
+config STM32_LTDC_FB_BASE
+	hex "Framebuffer memory start address"
+	---help---
+		If you are using the the LTDC, then you must provide the address
+		of the start of the framebuffer.  This address will typically
+		be in the SRAM or SDRAM memory region of the FSMC.
+
+config STM32_LTDC_FB_SIZE
+	int "Framebuffer memory size (bytes)"
+	default 0
+
+choice
+	prompt "Layer 1 color format"
+	default STM32_LTDC_L1_RGB565
+
+config STM32_LTDC_L1_L8
+	bool "8 bpp L8 (8-bit CLUT)"
+
+config STM32_LTDC_L1_AL44
+	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+
+config STM32_LTDC_L1_AL88
+	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+
+config STM32_LTDC_L1_RGB565
+	bool "16 bpp RGB 565"
+
+config STM32_LTDC_L1_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config STM32_LTDC_L1_ARGB1555
+	bool "16 bpp ARGB 1555"
+
+config STM32_LTDC_L1_RGB888
+	bool "24 bpp RGB 888"
+
+config STM32_LTDC_L1_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+endchoice # Layer 1 color format
+
+config STM32_LTDC_L2
+	bool "Enable Layer 2 support"
+	default y
+
+if STM32_LTDC_L2
+
+choice
+	prompt "Layer 2 (top layer) color format"
+	default STM32_LTDC_L2_RGB565
+
+config STM32_LTDC_L2_L8
+	bool "8 bpp L8 (8-bit CLUT)"
+
+config STM32_LTDC_L2_AL44
+	bool "8 bpp AL44 (4-bit alpha + 4-bit CLUT)"
+
+config STM32_LTDC_L2_AL88
+	bool "16 bpp AL88 (8-bit alpha + 8-bit CLUT)"
+
+config STM32_LTDC_L2_RGB565
+	bool "16 bpp RGB 565"
+
+config STM32_LTDC_L2_ARGB4444
+	bool "16 bpp ARGB 4444"
+
+config STM32_LTDC_L2_ARGB1555
+	bool "16 bpp ARGB 1555"
+
+config STM32_LTDC_L2_RGB888
+	bool "24 bpp RGB 888"
+
+config STM32_LTDC_L2_ARGB8888
+	bool "32 bpp ARGB 8888"
+
+endchoice # Layer 2 color format
+
+endif # STM32_LTDC_L2
+
+endmenu
+
+endif # STM32_LTDC
 

@@ -1,10 +1,8 @@
 /************************************************************************************
- * arch/arm/src/stm32/stm32.h
+ * arch/arm/src/stm32/stm32_ltdc.h
  *
- *   Copyright (C) 2011 Uros Platise. All rights reserved.
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
- *   Authors: Uros Platise <uros.platise@isotel.eu>
- *            Gregory Nutt <gnutt@nuttx.org>
+ *   Copyright (C) 2013 Ken Pettit. All rights reserved.
+ *   Author: Ken Pettit <pettitkd@gmail.com>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,64 +33,67 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_H
-#define __ARCH_ARM_SRC_STM32_STM32_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_LTDC_H
+#define __ARCH_ARM_SRC_STM32_STM32_LTDC_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <sys/types.h>
-#include <stdint.h>
+
 #include <stdbool.h>
 
-#include "up_internal.h"
+#include <nuttx/nx/nxglib.h>
+
+#include "chip/stm32_ltdc.h"
+
+#ifdef CONFIG_STM32_LTDC
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
 
-/* Additional Configuration *********************************************************/
-/* Custom debug settings used in the STM32 port.  These are managed by STM32-specific
- * logic and not the common logic in include/debug.h.  NOTE:  Some of these also
- * depend on CONFIG_DEBUG_VERBOSE
+/************************************************************************************
+ * Public Types
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Data
+ ************************************************************************************/
+
+/************************************************************************************
+ * Public Functions
+ ************************************************************************************/
+/* The STM32 LTDC driver uses the common framebuffer interfaces declared in
+ * include/nuttx/fb.h.
  */
 
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_DMA
-#  undef CONFIG_DEBUG_RTC
-#  undef CONFIG_DEBUG_I2C
-#  undef CONFIG_DEBUG_CAN
-#  undef CONFIG_DEBUG_PWM
-#  undef CONFIG_DEBUG_QENCODER
+/************************************************************************************
+ * Name: stm32_lcdclear
+ *
+ * Description:
+ *   This is a non-standard LCD interface just for the STM32.  Clearing the display
+ *   in the normal way by writing a sequences of runs that covers the entire display
+ *   can be slow.  Here the display is cleared by simply setting all buffer memory to
+ *   the specified color.
+ *
+ ************************************************************************************/
+
+void stm32_lcdclear(nxgl_mxpixel_t color);
+
+/************************************************************************************
+ * Name: stm32_lcd_backlight
+ *
+ * Description:
+ *   If CONFIG_STM32_LCD_BACKLIGHT is defined, then the board-specific logic must
+ *   provide this interface to turn the backlight on and off.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_STM_LCD_BACKLIGHT
+void sam_lcd_backlight(bool blon);
 #endif
 
-/* Peripherals **********************************************************************/
-
-#include "chip.h"
-#include "stm32_adc.h"
-//#include "stm32_bkp.h"
-#include "stm32_can.h"
-#include "stm32_dbgmcu.h"
-#include "stm32_dma.h"
-#include "stm32_exti.h"
-#include "stm32_flash.h"
-#include "stm32_fsmc.h"
-#include "stm32_gpio.h"
-#include "stm32_i2c.h"
-#include "stm32_ltdc.h"
-#include "stm32_pwr.h"
-#include "stm32_rcc.h"
-#include "stm32_rtc.h"
-#include "stm32_sdio.h"
-#include "stm32_spi.h"
-#include "stm32_tim.h"
-#include "stm32_uart.h"
-#include "stm32_usbdev.h"
-#include "stm32_wdg.h"
-#include "stm32_lowputc.h"
-#include "stm32_eth.h"
-
-#endif /* __ARCH_ARM_SRC_STM32_STM32_H */
-
+#endif /* CONFIG_STM32_LTDC */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_LTDC_H */
