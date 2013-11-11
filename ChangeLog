@@ -6034,4 +6034,5 @@
 	  the Atmal SAM4E family.  From Mitko (2013-11-11).
 	* libc/audio/lib_buffer.c:  Remove unused apb_prepare() function
 	  (2013-11-11).
-
+	* arch/arm/src/stm32:  Added header files and driver framework for the
+	  STM32F429 LTDC framebuffer driver.  From Ken Pettit (2013-11-11).

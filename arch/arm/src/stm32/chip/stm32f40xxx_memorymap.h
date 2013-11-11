@@ -164,6 +164,8 @@
 #define STM32_TIM11_BASE     0x40014800     /* 0x40014800-0x40014bff: TIM11 timer */
 #define STM32_SPI5_BASE      0x40015000     /* 0x40015000-0x400153ff: SPI5 */
 #define STM32_SPI6_BASE      0x40015400     /* 0x40015400-0x400157ff: SPI6 */
+#define STM32_SAI1_BASE      0x40015800     /* 0x40015800-0x40015Bff: SAI1 */
+#define STM32_LTDC_BASE      0x40016800     /* 0x40016800-0x40016Bff: LTDC (LCD-TFT) */
 
 /* AHB1 Base Addresses **************************************************************/
 
@@ -176,6 +178,7 @@
 #define STM32_GPIOG_BASE     0x40021800     /* 0x40021800-0x40021bff: GPIO Port G */
 #define STM32_GPIOH_BASE     0x40021C00     /* 0x40021C00-0x40021fff: GPIO Port H */
 #define STM32_GPIOI_BASE     0x40022000     /* 0x40022000-0x400223ff: GPIO Port I */
+#define STM32_GPIOK_BASE     0x40022800     /* 0x40022800-0x40022Bff: GPIO Port K */
 #define STM32_CRC_BASE       0x40023000     /* 0x40023000-0x400233ff: CRC */
 #define STM32_RCC_BASE       0x40023800     /* 0x40023800-0x40023bff: Reset and Clock control RCC */
 #define STM32_FLASHIF_BASE   0x40023c00     /* 0x40023c00-0x40023fff: Flash memory interface */
@@ -187,6 +190,7 @@
                                             /* 0x40028800-0x40028bff: Ethernet MAC */
                                             /* 0x40028c00-0x40028fff: Ethernet MAC */
                                             /* 0x40029000-0x400293ff: Ethernet MAC */
+#define STM32_DMA2D_BASE     0x4002B000     /* 0x4002B000-0x4002BBFF: DMA2D */
 #define STM32_OTGHS_BASE     0x40040000     /* 0x40040000-0x4007ffff: USB OTG HS */
 #define STM32_PERIPHBB_BASE  0x42000000     /* Peripheral bit-band region */
 

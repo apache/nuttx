@@ -572,6 +572,12 @@ static inline void rcc_enableapb2(void)
   regval |= RCC_APB2ENR_SPI6EN;
 #endif
 
+#ifdef CONFIG_STM32_LTDC
+  /* LTDC clock enable */
+
+  regval |= RCC_APB2ENR_LTDCEN;
+#endif
+
   putreg32(regval, STM32_RCC_APB2ENR);   /* Enable peripherals */
 }
 
