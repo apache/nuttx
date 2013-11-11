@@ -118,6 +118,16 @@ ifeq ($(CONFIG_CAN),y)
 CSRCS += sam_can.c
 endif
 
+ifeq ($(CONFIG_AUDIO_I2SCHAR),y)
+ifeq ($(CONFIG_SAMA5_SSC0),y)
+CSRCS += sam_i2schar.c
+else
+ifeq ($(CONFIG_SAMA5_SSC1),y)
+CSRCS += sam_i2schar.c
+endif
+endif
+endif
+
 ifeq ($(CONFIG_USBMSC),y)
 CSRCS += sam_usbmsc.c
 endif

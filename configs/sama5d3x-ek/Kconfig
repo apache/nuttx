@@ -20,7 +20,7 @@ config SAMA5_MT47H64M16HR
 	---help---
 		Micron 1Gbit x16 DDR2-800 64Mb
 
-endchoice
+endchoice # SAMA5D3x-EK DRAM Type
 
 config SAMA5_NOR_MAIN
 	bool "Build nor_main"
@@ -78,7 +78,7 @@ config SAMA5_AT25_NXFFS
 		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
 		NXFFS is that it can be very slow.
 
-endchoice
+endchoice # AT25 serial FLASH configuration
 
 config SAMA5_AT24_AUTOMOUNT
 	bool "AT24 Serial EEPROM auto-mount"
@@ -119,7 +119,7 @@ config SAMA5_AT24_NXFFS
 		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
 		NXFFS is that it can be very slow.
 
-endchoice
+endchoice # AT24 serial EPPROM configuration
 
 config SAMA5D3X_EK_CHANNEL
 	int "PWM channel number"
@@ -134,3 +134,33 @@ config SAMA5D3X_EK_CHANNEL
 		test.  See apps/examples/pwm.
 
 endif
+
+if AUDIO_I2SCHAR && (SAMA5_SSC0 || SAMA5_SSC1)
+
+if SAMA5_SSC0 && SAMA5_SSC1
+
+config SAMA5D3X_EK_SSC_PORT
+	int "SSC port number"
+	default 0
+	range 0 1
+	---help---
+		Specify the I2S port to use, i.e., 0 for SSC0 or 1 for SSC1
+
+else
+
+config SAMA5D3X_EK_SSC_PORT
+	int
+	default 0 if SAMA5_SSC0
+	default 1 if SAMA5_SSC1
+
+endif # SAMA5_SSC0 && SAMA5_SSC1
+
+config SAMA5D3X_EK_I2SCHAR_MINOR
+	int "I2S character driver minor number"
+	default 0
+	---help---
+		The minor device number to use when registering the I2S character
+		device.  The driver will be registered at /dev/is2charN where N is
+		the value provided by this setting.
+
+endif # ARCH_BOARD_SAMA5D3X_EK
