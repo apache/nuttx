@@ -6030,3 +6030,6 @@
 	* include/nuttx/audio/i2s.h, arch/arm/src/sama5/sam_ssc.c, and
 	  drivers/audio/i2schar.c:  Improvied I2S interface design:  Simplified
 	  audio buffer queuing (2013-11-10).
+	* arch/arm/src/sam34 and arch/arm/include/sam34:  Basic support for
+	  the Atmal SAM4E family.  From Mitko (2013-11-11).
+
