@@ -1777,21 +1777,12 @@ Configurations
        asynchronous with the trace output and, hence, difficult to
        interpret.
 
+    12. See also the sections above for additional configuration options:
+        "AT24 Serial EEPROM", "CAN Usage", "SAMA5 ADC Support", "SAMA5 PWM
+        Support", "OV2640 Camera Interface", "I2S Audio Support"
+
     STATUS:
-      AT25
-      2013-9-6:  I have not confirmed this, but it appears that the AT25 does not
-        retain its formatting across power cycles.  I think that the contents of
-        the AT25 are destroyed (i.e., reformatted for different use) by Linux when
-        it runs out of NAND.
-
-      OHCI WITH EHCI
-      2013-9-19:  OHCI works correctly with EHCI.  EHCI will handle high-speed
-        device connections; full- and low-speed device connections will be
-        handed-off to the OHCI HCD.
-
-      UDPHS
-      2013-9-23: The exports AT25 (or RAM disk) works fine with Linux but does
-        not bring up Windows Explorer with Windows.  No idea why yet.
+       See the To-Do list below
 
   hello:
 
@@ -1824,13 +1815,7 @@ Configurations
        CONFIG_BOOT_RUNFROMISRAM=y              : Run from internal SRAM
 
     STATUS:
-      2013-7-19:  This configuration (as do the others) run at 396MHz.
-        The SAMA5D3 can run at 536MHz.  I still need to figure out the
-        PLL settings to get that speed.
-
-      2013-7-28:  This configuration was verified functional.
-
-      2013-7-31:  Delay loop calibrated.
+       See the To-Do list below
 
   norboot:
     This is a little program to help debug of code in NOR flash.  It
@@ -1858,11 +1843,7 @@ Configurations
        need to set CONFIG_SAMA5_WDT=y in the NuttX configuration file.
 
     STATUS:
-      2013-7-19:  This configuration (as do the others) run at 396MHz.
-        The SAMA5D3 can run at 536MHz.  I still need to figure out the
-        PLL settings to get that speed.
-
-      2013-7-31:  Delay loop calibrated.
+       See the To-Do list below
 
   nsh:
 
@@ -2669,57 +2650,12 @@ Configurations
           CONFIG_EXAMPLES_MAXSAMPLES=64       : Default settings are probably OK
           CONFIG_EXAMPLES_NSAMPLES=8
 
+    20. See also the sections above for additional configuration options:
+        "AT24 Serial EEPROM", "CAN Usage", "SAMA5 ADC Support", "SAMA5 PWM
+        Support", "OV2640 Camera Interface", "I2S Audio Support"
+
     STATUS:
-
-      PCK FREQUENCY
-      2013-7-19:  This configuration (as do the others) run at 396MHz.
-        The SAMA5D3 can run at 536MHz.  I still need to figure out the
-        PLL settings to get that speed.
-
-        If the CPU speed changes, then so must the NOR and SDRAM
-        initialization!
-
-      BOOT FROM NOT FLASH
-      2013-7-31:  I have been unable to execute this configuration from NOR
-        FLASH by closing the BMS jumper (J9).  As far as I can tell, this
-        jumper does nothing on my board???  I have been using the norboot
-        configuration to start the program in NOR FLASH (see just above).
-        See "Creating and Using NORBOOT" above.
-
-      2013-7-31:  The basic NSH configuration appears to be fully functional.
-
-      CALIBRATION
-      2013-7-31:  Using delay loop calibration from the hello configuration.
-        That configuration runs out of internal SRAM and, as a result, this
-        configuration should be recalibrated.
-
-      SDRAM
-      2013-8-3:  SDRAM configuration and RAM test usage have been verified
-        and are functional.  I note some issues; occassionally, SDRAM is
-        not functional on initial boot or is initially not functional but
-        improves with accesses.  Clearly, more work needs to be done.
-
-      AT25 SERIAL FLASH
-      2013-8-5:  The AT25 configuration has been verified to be functional.
-      2013-8-9:  The AT25 configuration has been verified with DMA
-        enabled.
-
-      2013-9-11: Basic HSCMI0/1 functionality (with DMA) has been verified.
-
-      OHCI
-      2013-8-16: The OCHI configuration is functional.
-        Testing is not yet extensive, however:
-        a) I have tested only control and bulk endpoints.  I still need
-           to test interrupt endpoints.
-
-      EHCI
-      2013-8-28: EHCI is functional.
-      2013-9-19:  OHCI works correctly with EHCI.  EHCI will handle high-speed
-        device connections; full- and low-speed device connections will be
-        handed-off to the OHCI HCD.
-
-      UDPHS
-      2013-9-5: The UDPHS driver is functional.
+       See the To-Do list below
 
       I2C
       2013-9-12:  I have been unusuccessful getting the external serial
@@ -2731,9 +2667,6 @@ Configurations
         enumerates the devices on the bus and successfully exchanges a few
         commands.  The real test of the come later when a real I2C device is
         integrated.
-
-      EMAC:
-      2013-9-17:  Driver created and (subsequently) integrated.
 
   nx:
 
@@ -2816,6 +2749,8 @@ Configurations
        $ make
 
     STATUS:
+    See the To-Do list below
+
     2013-10-18.  This example kind of works, but there are still far too
     many outstanding issues:
 
@@ -2895,24 +2830,7 @@ Configurations
        BMS jumper.
 
     STATUS:
-      2013-7-19:  This configuration (as do the others) run at 396MHz.
-        The SAMA5D3 can run at 536MHz.  I still need to figure out the
-        PLL settings to get that speed.
-
-        If the CPU speed changes, then so must the NOR and SDRAM
-        initialization!
-
-      2013-7-30:  I have been unable to execute this configuration from NOR
-        FLASH by closing the BMS jumper (J9).  As far as I can tell, this
-        jumper does nothing on my board???  I have been using the norboot
-        configuration to start the program in NOR FLASH (see just above).
-        See "Creating and Using NORBOOT" above.
-
-      2013-7-31:  The OS test configuration is functional.
-
-      2013-7-31:  Using delay loop calibration from the hello configuration.
-        That configuration runs out of internal SRAM and, as a result, this
-        configuration needs to be recalibrated.
+       See the To-Do list below
 
 To-Do List
 ==========
@@ -2923,7 +2841,13 @@ To-Do List
    of running at 528MHz, however.  The setup for that configuration exists
    in the Bareboard assembly language setup and should be incorporated.
 
-2) Currently, these configurations keep all .bss and .data in internal SRAM.
+2) Most of these configurations execute from NOR FLASH. I have been unable
+   to execute these configurations from NOR FLASH by closing the BMS jumper
+   (J9).  As far as I can tell, this jumper does nothing on my board???  I
+   have been using the norboot configuration to start the program in NOR
+   FLASH (see just above).  See "Creating and Using NORBOOT" above.
+
+3) Currently, these configurations keep all .bss and .data in internal SRAM.
    The SDRAM is available for heap, but not for static data.  This is
    because the SDRAM does not get configured until after the system has
    booted; until after .bss and .data have been initialized.  To change
@@ -2931,35 +2855,35 @@ To-Do List
    setup into the NuttX assembly language startup and execute it BEFORE
    initializing .bss and .data.
 
-3) Neither USB OHCI nor EHCI support Isochronous endpoints.  Interrupt
+4) Neither USB OHCI nor EHCI support Isochronous endpoints.  Interrupt
    endpoint support in the EHCI driver is untested.
 
-4) HSCMI TX DMA support is currently commented out.
+5) HSCMI TX DMA support is currently commented out.
 
-5) I believe that there is an issue when the internal AT25 FLASH is
+6) I believe that there is an issue when the internal AT25 FLASH is
    formatted by NuttX.  That format works fine with Linux, but does not
    appear to work with Windows.  Reformatting on Windows can resolve this.
    NOTE:  This is not a SAMA5Dx issue.
 
-6) CAN testing has not yet been performed due to issues with cabling.  I
+7) CAN testing has not yet been performed due to issues with cabling.  I
    just do not have a good test bed (or sufficient CAN knowledge) for
    good CAN testing.
 
-7) The NxWM example does not work well.  This example was designed to work
+8) The NxWM example does not work well.  This example was designed to work
    with much smaller displays and does not look good or work well with the
-   SAMA5Dx-EKs 800x480 display.
+   SAMA5Dx-EKs 800x480 display.  See above for details.
 
-8) There are lots of LCDC hardware features that are not tested with NuttX.
+9) There are lots of LCDC hardware features that are not tested with NuttX.
    The simple NuttX graphics system does not have support for all of the
    layers and other features of the LCDC.
 
-9) I have a Camera, but there is still no ISI driver.  I am not sure what to
-   do with the camera.  NuttX needs something liek V4L to provide the
-   definition for what a camera driver is supposed to do.
+10) I have a Camera, but there is still no ISI driver.  I am not sure what to
+    do with the camera.  NuttX needs something liek V4L to provide the
+    definition for what a camera driver is supposed to do.
 
-10) NAND.  There is no NAND support.  A NAND driver is a complex thing
+11) NAND.  There is no NAND support.  A NAND driver is a complex thing
     because it must support not only basic NAND access but also bad block
     detection, sparing and ECC.  Lots of work!
 
-11) GMAC has only been tested on a 10/100Base-T network.  I don't have a
+12) GMAC has only been tested on a 10/100Base-T network.  I don't have a
     1000Base-T network to support additional testing.
