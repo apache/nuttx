@@ -241,15 +241,13 @@
 #ifndef CONFIG_DEBUG
 #  undef CONFIG_DEBUG_VERBOSE
 #  undef CONFIG_DEBUG_I2S
-#  undef CONFIG_SAMA5_SSC_DMADEBUG
-#  undef CONFIG_SAMA5_SSC_REGDEBUG
-#  undef CONFIG_SAMA5_SSC_QDEBUG
 #endif
 
-#if !defined(CONFIG_DEBUG_I2S)
+#ifndef CONFIG_DEBUG_I2S
 #  undef CONFIG_SAMA5_SSC_DMADEBUG
 #  undef CONFIG_SAMA5_SSC_REGDEBUG
 #  undef CONFIG_SAMA5_SSC_QDEBUG
+#  undef CONFIG_SAMA5_SSC_DUMPBUFFERS
 #endif
 
 #ifndef CONFIG_DEBUG_DMA
@@ -388,6 +386,14 @@ static void     ssc_dump_queues(struct sam_transport_s *xpt,
 #else
 #  define       ssc_dump_rxqueues(s,m)
 #  define       ssc_dump_txqueues(s,m)
+#endif
+
+#ifdef CONFIG_SAMA5_SSC_DUMPBUFFERS
+#  define       ssc_init_buffer(b,s)   memset(b, 0x55, s);
+#  define       ssc_dump_buffer(m,b,s) lib_dumpbuffer(m,b,s)
+#else
+#  define       ssc_init_buffer(b,s)
+#  define       ssc_dump_buffer(m,b,s)
 #endif
 
 /* Semaphore helpers */
@@ -1250,6 +1256,7 @@ static void ssc_rx_worker(void *arg)
 {
   struct sam_ssc_s *priv = (struct sam_ssc_s *)arg;
   struct sam_buffer_s *bfcontainer;
+  struct ap_buffer_s *apb;
   irqstate_t flags;
 
   DEBUGASSERT(priv);
@@ -1310,7 +1317,8 @@ static void ssc_rx_worker(void *arg)
       bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rx.done);
       irqrestore(flags);
 
-      DEBUGASSERT(bfcontainer && bfcontainer->callback);
+      DEBUGASSERT(bfcontainer && bfcontainer->apb && bfcontainer->callback);
+      apb = bfcontainer->apb;
 
       /* If the DMA was successful, then update the number of valid bytes in
        * the audio buffer.
@@ -1318,19 +1326,21 @@ static void ssc_rx_worker(void *arg)
 
       if (bfcontainer->result == OK)
         {
-          bfcontainer->apb->nbytes = bfcontainer->apb->nmaxbytes;
+          apb->nbytes = apb->nmaxbytes;
         }
+
+      ssc_dump_buffer("Received", apb->samp, apb->nbytes);
 
       /* Perform the RX transfer done callback */
 
-      bfcontainer->callback(&priv->dev, bfcontainer->apb,
-                            bfcontainer->arg, bfcontainer->result);
+      bfcontainer->callback(&priv->dev, apb, bfcontainer->arg,
+                            bfcontainer->result);
 
       /* Release our reference on the audio buffer.  This may very likely
        * cause the audio buffer to be freed.
        */
 
-      apb_free(bfcontainer->apb);
+      apb_free(apb);
 
       /* And release the buffer container */
 
@@ -1992,6 +2002,8 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   i2svdbg("apb=%p nmaxbytes=%d arg=%p timeout=%d\n",
           apb, apb->nmaxbytes, arg, timeout);
 
+  ssc_init_buffer(apb->samp, apb->nmaxbytes);
+
 #ifdef SSC_HAVE_RX
   /* Allocate a buffer container in advance */
 
@@ -2192,6 +2204,8 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & 3) == 0);
   i2svdbg("apb=%p nbytes=%d arg=%p timeout=%d\n",
           apb, apb->nbytes, arg, timeout);
+
+  ssc_dump_buffer("Sending", apb->samp, apb->nbytes);
 
 #ifdef SSC_HAVE_TX
   /* Allocate a buffer container in advance */
