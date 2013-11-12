@@ -926,7 +926,7 @@ static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
    * samples either, but we don't know for sure.
    */
 
-  if (result == -ETIMEDOUT)
+  if (result == -ETIMEDOUT || result == -EINTR)
     {
       sam_dmadump(priv->rx.dma, &priv->rx.dmaregs[DMA_TIMEOUT],
                   "RX: At DMA timeout");
@@ -987,7 +987,7 @@ static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
    * -OR- DMA timeout.
    */
 
-  if (result == -ETIMEDOUT)
+  if (result == -ETIMEDOUT || result == -EINTR)
     {
       sam_dmadump(priv->tx.dma, &priv->tx.dmaregs[DMA_TIMEOUT],
                   "TX: At DMA timeout");
@@ -1037,7 +1037,11 @@ static void ssc_rxdma_timeout(int argc, uint32_t arg)
 
   sam_dmastop(priv->rx.dma);
 
-  /* Then schedule completion of the transfer to occur on the worker thread */
+  /* Then schedule completion of the transfer to occur on the worker thread.
+   * NOTE: sam_dmastop() will call the DMA complete callback with an error
+   * of -EINTR.  So the following is just insurance and should have no
+   * effect if the worker is already schedule.
+   */
 
   ssc_rx_schedule(priv, -ETIMEDOUT);
 }
@@ -1125,7 +1129,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
       if (bfcontainer->timeout > 0)
         {
-          timeout += timeout;
+          timeout += bfcontainer->timeout;
         }
       else
         {
@@ -1320,9 +1324,11 @@ static void ssc_rx_schedule(struct sam_ssc_s *priv, int result)
   int ret;
 
   /* Upon entry, the transfer(s) that just completed are the ones in the
-   * priv->rx.act queue.  NOTE: In certain race conditions, this function
-   * may be called an additional time, hence, we can't assert this to be
-   * true.
+   * priv->rx.act queue.  NOTE: In certain conditions, this function may
+   * be called an additional time, hence, we can't assert this to be true.
+   * For example, in the case of a timeout, this function will be called by
+   * both indirectly via the sam_dmastop() logic and directly via the
+   * ssc_rxdma_timeout() logic.
    */
 
   ssc_dump_rxqueues(priv, "RX schedule");
@@ -1435,7 +1441,11 @@ static void ssc_txdma_timeout(int argc, uint32_t arg)
 
   sam_dmastop(priv->tx.dma);
 
-  /* Then schedule completion of the transfer to occur on the worker thread */
+  /* Then schedule completion of the transfer to occur on the worker thread.
+   * NOTE: sam_dmastop() will call the DMA complete callback with an error
+   * of -EINTR.  So the following is just insurance and should have no
+   * effect if the worker is already schedule.
+   */
 
   ssc_tx_schedule(priv, -ETIMEDOUT);
 }
@@ -1520,7 +1530,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
       if (bfcontainer->timeout > 0)
         {
-          timeout += timeout;
+          timeout += bfcontainer->timeout;
         }
       else
         {
@@ -1706,9 +1716,11 @@ static void ssc_tx_schedule(struct sam_ssc_s *priv, int result)
   int ret;
 
   /* Upon entry, the transfer(s) that just completed are the ones in the
-   * priv->tx.act queue.  NOTE: In certain race conditions, this function
-   * may be called an additional time, hence, we can't assert this to be
-   * true.
+   * priv->tx.act queue.  NOTE: In certain conditions, this function may
+   * be called an additional time, hence, we can't assert this to be true.
+   * For example, in the case of a timeout, this function will be called by
+   * both indirectly via the sam_dmastop() logic and directly via the
+   * ssc_txdma_timeout() logic.
    */
 
   ssc_dump_txqueues(priv, "TX schedule");
