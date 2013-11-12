@@ -61,7 +61,17 @@
 /****************************************************************************
  * Private Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
 
+#ifndef CONFIG_AUDIO_I2SCHAR_RXTIMEOUT
+#  define CONFIG_AUDIO_I2SCHAR_RXTIMEOUT 0
+#endif
+
+#ifndef CONFIG_AUDIO_I2SCHAR_TXTIMEOUT
+#  define CONFIG_AUDIO_I2SCHAR_TXTIMEOUT 0
+#endif
+
+/* Device naming ************************************************************/
 #define DEVNAME_FMT    "/dev/i2schar%d"
 #define DEVNAME_FMTLEN (12 + 3 + 1)
 
@@ -268,7 +278,8 @@ static ssize_t i2schar_read(FAR struct file *filep, FAR char *buffer,
 
   /* Give the buffer to the I2S driver */
 
-  ret = I2S_RECEIVE(priv->i2s, apb, i2schar_rxcallback, priv, 0);
+  ret = I2S_RECEIVE(priv->i2s, apb, i2schar_rxcallback, priv,
+                    CONFIG_AUDIO_I2SCHAR_RXTIMEOUT);
   if (ret < 0)
     {
       i2sdbg("ERROR: I2S_RECEIVE returned: %d\n", ret);
@@ -342,7 +353,8 @@ static ssize_t i2schar_write(FAR struct file *filep, FAR const char *buffer,
 
   /* Give the audio buffer to the I2S driver */
 
-  ret = I2S_SEND(priv->i2s, apb, i2schar_txcallback, priv, 0);
+  ret = I2S_SEND(priv->i2s, apb, i2schar_txcallback, priv,
+                 CONFIG_AUDIO_I2SCHAR_TXTIMEOUT);
   if (ret < 0)
     {
       i2sdbg("ERROR: I2S_SEND returned: %d\n", ret);

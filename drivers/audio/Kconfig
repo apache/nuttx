@@ -15,6 +15,26 @@ config AUDIO_I2SCHAR
 		not suitable for use in any real driver application in its current
 		form.
 
+if AUDIO_I2SCHAR
+
+config AUDIO_I2SCHAR_RXTIMEOUT
+	int "RX timeout"
+	default 0
+	---help---
+		This is a fixed timeout value that will be used for all receiver
+		transfers.  This is in units of system clock ticks (configurable).
+		The special value of zero disables RX timeouts.  Default: 0
+
+config AUDIO_I2SCHAR_TXTIMEOUT
+	int "TX timeout"
+	default 0
+	---help---
+		This is a fixed timeout value that will be used for all transmitter
+		transfers.  This is in units of system clock ticks (configurable).
+		The special value of zero disables RX timeouts.  Default: 0
+
+endif #AUDIO_I2SCHAR
+
 config VS1053
 	bool "VS1053 codec chip"
 	default n
