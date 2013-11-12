@@ -200,13 +200,31 @@
 
 /* DMA configuration */
 
-#define DMA_FLAGS(pid) \
-  (((pid) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF2 | \
-  DMACH_FLAG_PERIPHH2SEL | DMACH_FLAG_PERIPHISPERIPH |  \
-  DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-  ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
-  DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
-  DMACH_FLAG_MEMCHUNKSIZE_4)
+#define DMA_PID(pid)      ((pid) << DMACH_FLAG_PERIPHPID_SHIFT)
+
+#define DMA8_FLAGS \
+  (DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHH2SEL | \
+   DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_8BITS | \
+   DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+   ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+   DMACH_FLAG_MEMWIDTH_16BITS | DMACH_FLAG_MEMINCREMENT | \
+   DMACH_FLAG_MEMCHUNKSIZE_4)
+
+#define DMA16_FLAGS \
+  (DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHH2SEL | \
+   DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_16BITS | \
+   DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+   ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+   DMACH_FLAG_MEMWIDTH_16BITS | DMACH_FLAG_MEMINCREMENT | \
+   DMACH_FLAG_MEMCHUNKSIZE_4)
+
+#define DMA32_FLAGS \
+  (DMACH_FLAG_PERIPHAHB_AHB_IF2 | DMACH_FLAG_PERIPHH2SEL | \
+   DMACH_FLAG_PERIPHISPERIPH | DMACH_FLAG_PERIPHWIDTH_32BITS | \
+   DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+   ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+   DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
+   DMACH_FLAG_MEMCHUNKSIZE_4)
 
 /* DMA timeout.  The value is not critical; we just don't want the system to
  * hang in the event that a DMA does not finish.  This is set to
@@ -456,6 +474,7 @@ static int      ssc_tx_configure(struct sam_ssc_s *priv);
 #endif
 static uint32_t ssc_mck2divider(struct sam_ssc_s *priv);
 static void     ssc_clocking(struct sam_ssc_s *priv);
+static int      ssc_dma_flags(struct sam_ssc_s *priv, uint32_t *dmaflags);
 static int      ssc_dma_allocate(struct sam_ssc_s *priv);
 static void     ssc_dma_free(struct sam_ssc_s *priv);
 #ifdef CONFIG_SAMA5_SSC0
@@ -1888,11 +1907,33 @@ static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
 {
 #ifdef SSC_HAVE_RX
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
+  uint32_t dmaflags;
+  int ret;
+
   DEBUGASSERT(priv && bits > 1);
 
   /* Save the new data width */
 
   priv->datalen = bits;
+
+  /* Upate the DMA flags */
+
+  ret = ssc_dma_flags(priv, &dmaflags);
+  if (ret < 0)
+    {
+      i2sdbg("ERROR: ssc_dma_flags failed: %d\n", ret);
+      return 0;
+    }
+
+  /* Reconfigure the RX DMA (and TX DMA if applicable) */
+
+  sam_dmaconfig(priv->rx.dma, dmaflags);
+#ifdef SSC_HAVE_RX
+  if (priv->txenab)
+    {
+      sam_dmaconfig(priv->tx.dma, dmaflags);
+    }
+#endif
 
 #ifdef SSC_HAVE_MCK2
   /* Check if the receiver is driven by the MCK/2 */
@@ -2067,14 +2108,36 @@ static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
 {
 #ifdef SSC_HAVE_TX
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
+  uint32_t dmaflags;
+  int ret;
+
   DEBUGASSERT(priv && bits > 1);
 
   /* Save the new data width */
 
   priv->datalen = bits;
 
+  /* Upate the DMA flags */
+
+  ret = ssc_dma_flags(priv, &dmaflags);
+  if (ret < 0)
+    {
+      i2sdbg("ERROR: ssc_dma_flags failed: %d\n", ret);
+      return 0;
+    }
+
+  /* Reconfigure the RX DMA (and RX DMA if applicable) */
+
+  sam_dmaconfig(priv->tx.dma, dmaflags);
+#ifdef SSC_HAVE_RX
+  if (priv->rxenab)
+    {
+      sam_dmaconfig(priv->rx.dma, dmaflags);
+    }
+#endif
+
 #ifdef SSC_HAVE_MCK2
-  /* Check if the receiver is driven by the MCK/2 */
+  /* Check if the transmitter is driven by the MCK/2 */
 
   if (priv->txclk == SSC_CLKSRC_MCKDIV)
     {
@@ -2545,6 +2608,48 @@ static void ssc_clocking(struct sam_ssc_s *priv)
 }
 
 /****************************************************************************
+ * Name: ssc_dma_flags
+ *
+ * Description:
+ *   Determine DMA FLAGS based on PID and data width
+ *
+ * Input Parameters:
+ *   priv - Partially initialized I2C device structure.
+ *   dmaflags - Location to return the DMA flags.
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure
+ *
+ ****************************************************************************/
+
+static int ssc_dma_flags(struct sam_ssc_s *priv, uint32_t *dmaflags)
+{
+  uint32_t regval;
+
+  switch (priv->datalen)
+    {
+    case 8:
+      regval = DMA8_FLAGS;
+      break;
+
+    case 16:
+      regval = DMA16_FLAGS;
+      break;
+
+    case 32:
+      regval = DMA32_FLAGS;
+      break;
+
+    default:
+      i2sdbg("ERROR: Unsupported data width: %d\n", priv->datalen);
+      return -ENOSYS;
+    }
+
+  *dmaflags = (regval | DMA_PID(priv->pid));
+  return OK;
+}
+
+/****************************************************************************
  * Name: ssc_dma_allocate
  *
  * Description:
@@ -2561,6 +2666,18 @@ static void ssc_clocking(struct sam_ssc_s *priv)
 
 static int ssc_dma_allocate(struct sam_ssc_s *priv)
 {
+  uint32_t dmaflags;
+  int ret;
+
+  /* Get the DMA flags for this channel */
+
+  ret = ssc_dma_flags(priv, &dmaflags);
+  if (ret < 0)
+    {
+      i2sdbg("ERROR: ssc_dma_flags failed: %d\n", ret);
+      return ret;
+    }
+
   /* Allocate DMA channels.  These allocations exploit that fact that
    * SSC0 is managed by DMAC0 and SSC1 is managed by DMAC1.  Hence,
    * the SSC number (sscno) is the same as the DMAC number.
@@ -2571,7 +2688,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
     {
       /* Allocate an RX DMA channel */
 
-      priv->rx.dma = sam_dmachannel(priv->sscno, DMA_FLAGS(priv->pid));
+      priv->rx.dma = sam_dmachannel(priv->sscno, dmaflags);
       if (!priv->rx.dma)
         {
           i2sdbg("ERROR: Failed to allocate the RX DMA channel\n");
@@ -2594,7 +2711,7 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
     {
       /* Allocate a TX DMA channel */
 
-      priv->tx.dma = sam_dmachannel(priv->sscno, DMA_FLAGS(priv->pid));
+      priv->tx.dma = sam_dmachannel(priv->sscno, dmaflags);
       if (!priv->tx.dma)
         {
           i2sdbg("ERROR: Failed to allocate the TX DMA channel\n");
