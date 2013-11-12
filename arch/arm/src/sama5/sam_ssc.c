@@ -204,6 +204,13 @@
 #  undef CONFIG_DEBUG_I2S
 #  undef CONFIG_SAMA5_SSC_DMADEBUG
 #  undef CONFIG_SAMA5_SSC_REGDEBUG
+#  undef CONFIG_SAMA5_SSC_QDEBUG
+#endif
+
+#if !defined(CONFIG_DEBUG_I2S)
+#  undef CONFIG_SAMA5_SSC_DMADEBUG
+#  undef CONFIG_SAMA5_SSC_REGDEBUG
+#  undef CONFIG_SAMA5_SSC_QDEBUG
 #endif
 
 #ifndef CONFIG_DEBUG_DMA
@@ -249,6 +256,22 @@ struct sam_buffer_s
   int result;                  /* The result of the transfer */
 };
 
+/* This structure describes the state of one receiver or transmitter transport */
+
+struct sam_transport_s
+{
+  DMA_HANDLE dma;             /* SSC DMA handle */
+  WDOG_ID dog;                /* Watchdog that handles DMA timeouts */
+  sq_queue_t pend;            /* A queue of pending transfers */
+  sq_queue_t act;             /* A queue of active transfers */
+  sq_queue_t done;            /* A queue of completed transfers */
+  struct work_s work;         /* Supports worker thread operations */
+
+#ifdef CONFIG_SAMA5_SSC_DMADEBUG
+  struct sam_dmaregs_s dmaregs[DMA_NSAMPLES];
+#endif
+};
+
 /* The state of the one SSC peripheral */
 
 struct sam_ssc_s
@@ -256,9 +279,8 @@ struct sam_ssc_s
   struct i2s_dev_s dev;        /* Externally visible I2S interface */
   uintptr_t base;              /* SSC controller register base address */
   sem_t exclsem;               /* Assures mutually exclusive acess to SSC */
-  uint16_t master:1;           /* True: Master mode transfers */
-  uint16_t rx:1;               /* True: RX transfers supported */
-  uint16_t tx:1;               /* True: TX transfers supported */
+  uint16_t rxenab:1;           /* True: RX transfers enabled */
+  uint16_t txenab:1;           /* True: TX transfers enabled */
   uint16_t loopback:1;         /* True: Loopback mode */
   uint16_t sscno:1;            /* SSC controller number (0 or 1) */
   uint16_t rxclk:2;            /* Receiver clock source. See SSC_CLKSRC_* definitions */
@@ -272,20 +294,10 @@ struct sam_ssc_s
 #endif
 
 #ifdef SSC_HAVE_RX
-  DMA_HANDLE rxdma;            /* SSC RX DMA handle */
-  WDOG_ID rxdog;               /* Watchdog that handles RX DMA timeouts */
-  sq_queue_t rxpend;           /* A queue of pending RX transfers */
-  sq_queue_t rxact;            /* A queue of active RX transfers */
-  sq_queue_t rxdone;           /* A queue of completed RX transfers */
-  struct work_s rxwork;        /* Supports worker thread RX operations */
+  struct sam_transport_s rx;   /* RX transport state */
 #endif
 #ifdef SSC_HAVE_TX
-  DMA_HANDLE txdma;            /* SSC TX DMA handle */
-  WDOG_ID txdog;               /* Watchdog that handles TX DMA timeouts */
-  sq_queue_t txpend;           /* A queue of pending TX transfers */
-  sq_queue_t txact;            /* A queue of active TX transfers */
-  sq_queue_t txdone;           /* A queue of completed TX transfers */
-  struct work_s txwork;        /* Supports worker thread TX operations */
+  struct sam_transport_s tx;   /* TX transport state */
 #endif
 
   /* Pre-allocated pool of buffer containers */
@@ -302,14 +314,6 @@ struct sam_ssc_s
    uint32_t regval;            /* Last value */
    int      count;             /* Number of times */
 #endif /* CONFIG_SAMA5_SSC_REGDEBUG */
-
-#if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
-  struct sam_dmaregs_s rxdmaregs[DMA_NSAMPLES];
-#endif
-
-#if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
-  struct sam_dmaregs_s txdmaregs[DMA_NSAMPLES];
-#endif
 };
 
 /****************************************************************************
@@ -327,14 +331,24 @@ static bool     ssc_checkreg(struct sam_ssc_s *priv, bool wr, uint32_t regval,
 
 static inline uint32_t ssc_getreg(struct sam_ssc_s *priv, unsigned int offset);
 static inline void ssc_putreg(struct sam_ssc_s *priv, unsigned int offset,
-                              uint32_t regval);
+                  uint32_t regval);
 static inline uintptr_t ssc_physregaddr(struct sam_ssc_s *priv,
                   unsigned int offset);
 
 #if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_VERBOSE)
-static void     ssc_dumpregs(struct sam_ssc_s *priv, const char *msg);
+static void     scc_dump_regs(struct sam_ssc_s *priv, const char *msg);
 #else
-# define        ssc_dumpregs(priv,msg)
+#  define       scc_dump_regs(s,m)
+#endif
+
+#ifdef CONFIG_SAMA5_SSC_QDEBUG
+static void     ssc_dump_queues(struct sam_transport_s *xpt,
+                  const char *msg);
+#  define       ssc_dump_rxqueues(s,m) ssc_dump_queues(&(s)->rx,m)
+#  define       ssc_dump_txqueues(s,m) ssc_dump_queues(&(s)->tx,m)
+#else
+#  define       ssc_dump_rxqueues(s,m)
+#  define       ssc_dump_txqueues(s,m)
 #endif
 
 /* Semaphore helpers */
@@ -355,9 +369,14 @@ static void     ssc_buf_initialize(struct sam_ssc_s *priv);
 
 /* DMA support */
 
+#ifdef CONFIG_SAMA5_SSC_DMADEBUG
+static void     ssc_dma_sampleinit(struct sam_ssc_s *priv,
+                  struct sam_transport_s *xpt);
+#endif
+
 #if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
-#  define       ssc_rxdma_sample(s,i) sam_dmasample((s)->rxdma, &(s)->rxdmaregs[i])
-static void     ssc_rxdma_sampleinit(struct sam_ssc_s *priv);
+#  define       ssc_rxdma_sample(s,i) sam_dmasample((s)->rx.dma, &(s)->rx.dmaregs[i])
+#  define       ssc_rxdma_sampleinit(s) ssc_dma_sampleinit(s, &(s)->rx)
 static void     ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result);
 
 #else
@@ -368,8 +387,8 @@ static void     ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result);
 #endif
 
 #if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
-#  define ssc_txdma_sample(s,i) sam_dmasample((s)->txdma, &(s)->txdmaregs[i])
-static void     ssc_txdma_sampleinit(struct sam_ssc_s *priv);
+#  define       ssc_txdma_sample(s,i) sam_dmasample((s)->tx.dma, &(s)->tx.dmaregs[i])
+#  define       ssc_txdma_sampleinit(s) ssc_dma_sampleinit(s, &(s)->tx)
 static void     ssc_txdma_sampledone(struct sam_ssc_s *priv, int result);
 
 #else
@@ -414,6 +433,7 @@ static int      ssc_rx_configure(struct sam_ssc_s *priv);
 #ifdef SSC_HAVE_TX
 static int      ssc_tx_configure(struct sam_ssc_s *priv);
 #endif
+static uint32_t ssc_mck2divider(struct sam_ssc_s *priv);
 static void     ssc_clocking(struct sam_ssc_s *priv);
 static int      ssc_dma_allocate(struct sam_ssc_s *priv);
 static void     ssc_dma_free(struct sam_ssc_s *priv);
@@ -568,7 +588,7 @@ static inline uintptr_t ssc_physregaddr(struct sam_ssc_s *priv,
 }
 
 /****************************************************************************
- * Name: ssc_dumpregs
+ * Name: scc_dump_regs
  *
  * Description:
  *   Dump the contents of all SSC registers
@@ -583,7 +603,7 @@ static inline uintptr_t ssc_physregaddr(struct sam_ssc_s *priv,
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_I2S) && defined(CONFIG_DEBUG_VERBOSE)
-static void ssc_dumpregs(struct sam_ssc_s *priv, const char *msg)
+static void scc_dump_regs(struct sam_ssc_s *priv, const char *msg)
 {
   i2svdbg("SSC%d: %s\n", priv->sscno, msg);
   i2svdbg("   CMR:%08x RCMR:%08x RFMR:%08x TCMR:%08x\n",
@@ -603,6 +623,61 @@ static void ssc_dumpregs(struct sam_ssc_s *priv, const char *msg)
 }
 #endif
 
+/****************************************************************************
+ * Name: ssc_dump_queues
+ *
+ * Description:
+ *   Dump the contents of transport queues
+ *
+ * Input Parameters:
+ *   priv - The SSC controller to dump
+ *   xpt - The transport to be dumped
+ *   msg - Message to print before the register data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_SSC_QDEBUG
+static void ssc_dump_queue(sq_queue_t *queue)
+{
+  struct sam_buffer_s *bfcontainer;
+  struct ap_buffer_s *apb;
+  sq_entry_t *entry;
+
+  for (entry = queue->head; entry; entry = entry->flink)
+    {
+      bfcontainer = (struct sam_buffer_s *)entry;
+      apb = bfcontainer->apb;
+
+      if (!apb)
+        {
+          i2sllvdbg("    %p: No buffer\n", bfcontainer);
+        }
+      else
+        {
+          i2sllvdbg("    %p: buffer=%p nmaxbytes=%d nbytes=%d\n",
+                    bfcontainer, apb, apb->nmaxbytes, apb->nbytes);
+        }
+    }
+}
+
+static void ssc_dump_queues(struct sam_transport_s *xpt, const char *msg)
+{
+  irqstate_t flags;
+
+  flags = irqsave();
+  i2sllvdbg("%s\n", msg);
+  i2sllvdbg("  Pending:\n");
+  ssc_dump_queue(&xpt->pend);
+  i2sllvdbg("  Active:\n");
+  ssc_dump_queue(&xpt->act);
+  i2sllvdbg("  Done:\n");
+  ssc_dump_queue(&xpt->done);
+  irqrestore(flags);
+}
+#endif
 
 /****************************************************************************
  * Name: ssc_exclsem_take
@@ -777,7 +852,7 @@ static void ssc_buf_initialize(struct sam_ssc_s *priv)
 }
 
 /****************************************************************************
- * Name: ssc_rxdma_sampleinit
+ * Name: ssc_dma_sampleinit
  *
  * Description:
  *   Initialize sampling of RX DMA registers (if CONFIG_SAMA5_SSC_DMADEBUG)
@@ -791,42 +866,16 @@ static void ssc_buf_initialize(struct sam_ssc_s *priv)
  ****************************************************************************/
 
 #if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_RX)
-static void ssc_rxdma_sampleinit(struct sam_ssc_s *priv)
+static void ssc_dma_sampleinit(struct sam_ssc_s *priv,
+                               struct sam_transport_s *xpt)
 {
   /* Put contents of register samples into a known state */
 
-  memset(priv->rxdmaregs, 0xff, DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
+  memset(xpt->dmaregs, 0xff, DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
 
   /* Then get the initial samples */
 
-  sam_dmasample(priv->rxdma, &priv->rxdmaregs[DMA_INITIAL]);
-}
-#endif
-
-/****************************************************************************
- * Name: ssc_txdma_sampleinit
- *
- * Description:
- *   Initialize sampling of TX DMA registers (if CONFIG_SAMA5_SSC_DMADEBUG)
- *
- * Input Parameters:
- *   priv - SSC state instance
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SAMA5_SSC_DMADEBUG) && defined(SSC_HAVE_TX)
-static void ssc_txdma_sampleinit(struct sam_ssc_s *priv)
-{
-  /* Put contents of register samples into a known state */
-
-  memset(priv->txdmaregs, 0xff, DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
-
-  /* Then get the initial samples */
-
-  sam_dmasample(priv->txdma, &priv->txdmaregs[DMA_INITIAL]);
+  sam_dmasample(xpt->dma, &xpt->dmaregs[DMA_INITIAL]);
 }
 #endif
 
@@ -851,22 +900,22 @@ static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
 
   /* Sample the final registers */
 
-  sam_dmasample(priv->rxdma, &priv->rxdmaregs[DMA_END_TRANSFER]);
+  sam_dmasample(priv->rx.dma, &priv->rx.dmaregs[DMA_END_TRANSFER]);
 
   /* Then dump the sampled DMA registers */
   /* Initial register values */
 
-  sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_INITIAL],
+  sam_dmadump(priv->rx.dma, &priv->rx.dmaregs[DMA_INITIAL],
               "RX: Initial Registers");
 
   /* Register values after DMA setup */
 
-  sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_AFTER_SETUP],
+  sam_dmadump(priv->rx.dma, &priv->rx.dmaregs[DMA_AFTER_SETUP],
               "RX: After DMA Setup");
 
   /* Register values after DMA start */
 
-  sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_AFTER_START],
+  sam_dmadump(priv->rx.dma, &priv->rx.dmaregs[DMA_AFTER_START],
               "RX: After DMA Start");
 
   /* Register values at the time of the TX and RX DMA callbacks
@@ -879,17 +928,19 @@ static void ssc_rxdma_sampledone(struct sam_ssc_s *priv, int result)
 
   if (result == -ETIMEDOUT)
     {
-      sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_TIMEOUT],
+      sam_dmadump(priv->rx.dma, &priv->rx.dmaregs[DMA_TIMEOUT],
                   "RX: At DMA timeout");
     }
   else
     {
-      sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_CALLBACK],
+      sam_dmadump(priv->rx.dma, &priv->rx.dmaregs[DMA_CALLBACK],
                   "RX: At DMA callback");
     }
 
-  sam_dmadump(priv->rxdma, &priv->rxdmaregs[DMA_END_TRANSFER],
+  sam_dmadump(priv->rx.dma, &priv->rx.dmaregs[DMA_END_TRANSFER],
               "RX: At End-of-Transfer");
+
+  scc_dump_regs(priv, "RX: At End-of-Transfer");
 }
 #endif
 
@@ -914,22 +965,22 @@ static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
 
   /* Sample the final registers */
 
-  sam_dmasample(priv->txdma, &priv->txdmaregs[DMA_END_TRANSFER]);
+  sam_dmasample(priv->tx.dma, &priv->tx.dmaregs[DMA_END_TRANSFER]);
 
   /* Then dump the sampled DMA registers */
   /* Initial register values */
 
-  sam_dmadump(priv->txdma, &priv->txdmaregs[DMA_INITIAL],
+  sam_dmadump(priv->tx.dma, &priv->tx.dmaregs[DMA_INITIAL],
               "TX: Initial Registers");
 
   /* Register values after DMA setup */
 
-  sam_dmadump(priv->txdma, &priv->txdmaregs[DMA_AFTER_SETUP],
+  sam_dmadump(priv->tx.dma, &priv->tx.dmaregs[DMA_AFTER_SETUP],
               "TX: After DMA Setup");
 
   /* Register values after DMA start */
 
-  sam_dmadump(priv->txdma, &priv->txdmaregs[DMA_AFTER_START],
+  sam_dmadump(priv->tx.dma, &priv->tx.dmaregs[DMA_AFTER_START],
               "TX: After DMA Start");
 
   /* Register values at the time of the TX and RX DMA callbacks
@@ -938,17 +989,19 @@ static void ssc_txdma_sampledone(struct sam_ssc_s *priv, int result)
 
   if (result == -ETIMEDOUT)
     {
-      sam_dmadump(priv->txdma, &priv->txdmaregs[DMA_TIMEOUT],
+      sam_dmadump(priv->tx.dma, &priv->tx.dmaregs[DMA_TIMEOUT],
                   "TX: At DMA timeout");
     }
   else
     {
-      sam_dmadump(priv->txdma, &priv->txdmaregs[DMA_CALLBACK],
+      sam_dmadump(priv->tx.dma, &priv->tx.dmaregs[DMA_CALLBACK],
                   "TX: At DMA callback");
     }
 
-  sam_dmadump(priv->txdma, &priv->txdmaregs[DMA_END_TRANSFER],
+  sam_dmadump(priv->tx.dma, &priv->tx.dmaregs[DMA_END_TRANSFER],
               "TX: At End-of-Transfer");
+
+  scc_dump_regs(priv, "TX: At End-of-Transfer");
 }
 #endif
 
@@ -982,7 +1035,7 @@ static void ssc_rxdma_timeout(int argc, uint32_t arg)
 
   /* Cancel the DMA */
 
-  sam_dmastop(priv->rxdma);
+  sam_dmastop(priv->rx.dma);
 
   /* Then schedule completion of the transfer to occur on the worker thread */
 
@@ -1022,14 +1075,14 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
    * returning success.
    */
 
-  if (!sq_empty(&priv->rxact))
+  if (!sq_empty(&priv->rx.act))
     {
       return OK;
     }
 
   /* If there are no pending transfer, then bail returning success */
 
-  if (sq_empty(&priv->rxpend))
+  if (sq_empty(&priv->rx.pend))
     {
       return OK;
     }
@@ -1047,7 +1100,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
     {
       /* Remove the pending RX transfer at the head of the RX pending queue. */
 
-      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rxpend);
+      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rx.pend);
       DEBUGASSERT(bfcontainer && bfcontainer->apb);
 
       apb = bfcontainer->apb;
@@ -1066,7 +1119,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
       /* Configure the RX DMA */
 
-      sam_dmarxsetup(priv->rxdma, paddr, maddr, apb->nmaxbytes);
+      sam_dmarxsetup(priv->rx.dma, paddr, maddr, apb->nmaxbytes);
 
       /* Increment the DMA timeout */
 
@@ -1081,7 +1134,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
       /* Add the container to the list of active DMAs */
 
-      sq_addlast((sq_entry_t *)bfcontainer, &priv->rxact);
+      sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.act);
 
       /* Invalidate the data cache so that nothing gets flush into the
        * DMA buffer after starting the DMA transfer.
@@ -1091,7 +1144,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
                              (uintptr_t)apb->samp + apb->nmaxbytes);
 
     }
-  while (!sq_empty(&priv->rxpend));
+  while (!sq_empty(&priv->rx.pend));
 
   /* Sample DMA registers */
 
@@ -1099,7 +1152,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
   /* Start the DMA, saving the container as the current active transfer */
 
-  sam_dmastart(priv->rxdma, ssc_rxdma_callback, priv);
+  sam_dmastart(priv->rx.dma, ssc_rxdma_callback, priv);
   ssc_rxdma_sample(priv, DMA_AFTER_START);
 
   /* Enable the receiver */
@@ -1110,7 +1163,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
 
   if (!notimeout)
     {
-      ret = wd_start(priv->rxdog, timeout, (wdentry_t)ssc_rxdma_timeout,
+      ret = wd_start(priv->rx.dog, timeout, (wdentry_t)ssc_rxdma_timeout,
                      1, (uint32_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
@@ -1125,6 +1178,7 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
         }
     }
 
+  ssc_dump_rxqueues(priv, "RX DMA started");
   return OK;
 }
 #endif
@@ -1153,12 +1207,12 @@ static void ssc_rx_worker(void *arg)
   DEBUGASSERT(priv);
 
   /* When the transfer was started, the active buffer containers were removed
-   * from the rxpend queue and saved in the rxact queue.  We get here when the
+   * from the rx.pend queue and saved in the rx.act queue.  We get here when the
    * DMA is finished... either successfully, with a DMA error, or with a DMA
    * timeout.
    *
-   * In any case, the buffer containers in rxact will be moved to the end
-   * of the rxdone queue and rxact queue will be emptied before this worker
+   * In any case, the buffer containers in rx.act will be moved to the end
+   * of the rx.done queue and rx.act queue will be emptied before this worker
    * is started.
    *
    * REVISIT: Normal DMA callback processing should restart the DMA
@@ -1168,15 +1222,16 @@ static void ssc_rx_worker(void *arg)
    * So we have to start the next DMA here.
    */
 
-  i2svdbg("rxact.head=%p rxdone.head=%p\n",
-          priv->rxact.head, priv->rxdone.head);
+  i2svdbg("rx.act.head=%p rx.done.head=%p\n",
+          priv->rx.act.head, priv->rx.done.head);
+  ssc_dump_rxqueues(priv, "RX worker start");
 
   /* Check if the DMA is IDLE */
 
-  if (sq_empty(&priv->rxact))
+  if (sq_empty(&priv->rx.act))
     {
 #ifdef CONFIG_SAMA5_SSC_DMADEBUG
-      bfcontainer = (struct sam_buffer_s *)sq_peek(&priv->rxdone);
+      bfcontainer = (struct sam_buffer_s *)sq_peek(&priv->rx.done);
       if (bfcontainer)
         {
           /* Dump the DMA registers */
@@ -1194,17 +1249,17 @@ static void ssc_rx_worker(void *arg)
       irqrestore(flags);
     }
 
-  /* Process each buffer in the rxdone queue */
+  /* Process each buffer in the rx.done queue */
 
-  while (sq_peek(&priv->rxdone) != NULL)
+  while (sq_peek(&priv->rx.done) != NULL)
     {
-      /* Remove the buffer container from the rxdone queue.  NOTE that
-       * interupts must be enabled to do this because the rxdone queue is
+      /* Remove the buffer container from the rx.done queue.  NOTE that
+       * interupts must be enabled to do this because the rx.done queue is
        * also modified from the interrupt level.
        */
 
       flags = irqsave();
-      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rxdone);
+      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rx.done);
       irqrestore(flags);
 
       DEBUGASSERT(bfcontainer && bfcontainer->callback);
@@ -1233,6 +1288,8 @@ static void ssc_rx_worker(void *arg)
 
       ssc_buf_free(priv, bfcontainer);
     }
+
+  ssc_dump_rxqueues(priv, "RX worker done");
 }
 #endif
 
@@ -1262,38 +1319,41 @@ static void ssc_rx_schedule(struct sam_ssc_s *priv, int result)
   struct sam_buffer_s *bfcontainer;
   int ret;
 
-  /* Upon entry, the transfer that just complete is the one at tail of the
-   * priv->rxact queue.
+  /* Upon entry, the transfer(s) that just completed are the ones in the
+   * priv->rx.act queue.  NOTE: In certain race conditions, this function
+   * may be called an additional time, hence, we can't assert this to be
+   * true.
    */
 
-  DEBUGASSERT(!sq_empty(&priv->rxact));
+  ssc_dump_rxqueues(priv, "RX schedule");
 
-  /* Move all entries from the rxact queue to the rxdone queue */
+  /* Move all entries from the rx.act queue to the rx.done queue */
 
-  while (!sq_empty(&priv->rxact))
+  while (!sq_empty(&priv->rx.act))
     {
-      /* Remove the next buffer container from the rxact list */
+      /* Remove the next buffer container from the rx.act list */
 
-      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rxact);
+      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->rx.act);
 
       /* Report the result of the transfer */
 
       bfcontainer->result = result;
 
-      /* Add the completed buffer container to the tail of the rxdone queue */
+      /* Add the completed buffer container to the tail of the rx.done queue */
 
-      sq_addlast((sq_entry_t *)bfcontainer, &priv->rxdone);
+      sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.done);
     }
 
   /* If the worker has completed running, then reschedule the working thread.
-   * REVISIT:  There may be a race condition here.
+   * REVISIT:  There may be a race condition here.  So we do nothing is the
+   * worker is not available.
    */
 
-  if (work_available(&priv->rxwork))
+  if (work_available(&priv->rx.work))
     {
       /* Schedule the TX DMA done processing to occur on the worker thread. */
 
-      ret = work_queue(HPWORK, &priv->rxwork, ssc_rx_worker, priv, 0);
+      ret = work_queue(HPWORK, &priv->rx.work, ssc_rx_worker, priv, 0);
       if (ret != 0)
         {
           i2slldbg("ERROR: Failed to queue RX work: %d\n", ret);
@@ -1326,7 +1386,7 @@ static void ssc_rxdma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->rxdog);
+  (void)wd_cancel(priv->rx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -1373,7 +1433,7 @@ static void ssc_txdma_timeout(int argc, uint32_t arg)
 
   /* Cancel the DMA */
 
-  sam_dmastop(priv->txdma);
+  sam_dmastop(priv->tx.dma);
 
   /* Then schedule completion of the transfer to occur on the worker thread */
 
@@ -1413,14 +1473,14 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
    * returning success.
    */
 
-  if (!sq_empty(&priv->txact))
+  if (!sq_empty(&priv->tx.act))
     {
       return OK;
     }
 
   /* If there are no pending transfer, then bail returning success */
 
-  if (sq_empty(&priv->txpend))
+  if (sq_empty(&priv->tx.pend))
     {
       return OK;
     }
@@ -1438,7 +1498,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
     {
       /* Remove the pending TX transfer at the head of the TX pending queue. */
 
-      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->txpend);
+      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->tx.pend);
       DEBUGASSERT(bfcontainer && bfcontainer->apb);
 
       apb = bfcontainer->apb;
@@ -1454,7 +1514,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
       /* Configure the TX DMA */
 
-      sam_dmatxsetup(priv->txdma, paddr, maddr, apb->nbytes);
+      sam_dmatxsetup(priv->tx.dma, paddr, maddr, apb->nbytes);
 
       /* Increment the DMA timeout */
 
@@ -1469,7 +1529,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
       /* Add the container to the list of active DMAs */
 
-      sq_addlast((sq_entry_t *)bfcontainer, &priv->txact);
+      sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.act);
 
       /* Flush the data cache so that everything is in the physical memory
        * before starting the DMA.
@@ -1479,15 +1539,15 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
                         (uintptr_t)apb->samp + apb->nbytes);
 
     }
-  while (!sq_empty(&priv->txpend));
+  while (!sq_empty(&priv->tx.pend));
 
   /* Sample DMA registers */
-  
+
   ssc_txdma_sample(priv, DMA_AFTER_SETUP);
 
   /* Start the DMA, saving the container as the current active transfer */
 
-  sam_dmastart(priv->txdma, ssc_txdma_callback, priv);
+  sam_dmastart(priv->tx.dma, ssc_txdma_callback, priv);
   ssc_txdma_sample(priv, DMA_AFTER_START);
 
   /* Enable the transmitter */
@@ -1498,7 +1558,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
 
   if (!notimeout)
     {
-      ret = wd_start(priv->txdog, timeout, (wdentry_t)ssc_txdma_timeout,
+      ret = wd_start(priv->tx.dog, timeout, (wdentry_t)ssc_txdma_timeout,
                      1, (uint32_t)priv);
 
       /* Check if we have successfully started the watchdog timer.  Note
@@ -1513,6 +1573,7 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
         }
     }
 
+  ssc_dump_txqueues(priv, "TX DMA started");
   return OK;
 }
 #endif
@@ -1541,12 +1602,12 @@ static void ssc_tx_worker(void *arg)
   DEBUGASSERT(priv);
 
   /* When the transfer was started, the active buffer containers were removed
-   * from the txpend queue and saved in the txact queue.  We get here when the
+   * from the tx.pend queue and saved in the tx.act queue.  We get here when the
    * DMA is finished... either successfully, with a DMA error, or with a DMA
    * timeout.
    *
-   * In any case, the buffer containers in txact will be moved to the end
-   * of the txdone queue and txact will be emptied before this worker is
+   * In any case, the buffer containers in tx.act will be moved to the end
+   * of the tx.done queue and tx.act will be emptied before this worker is
    * started.
    *
    * REVISIT: Normal DMA callback processing should restart the DMA
@@ -1556,15 +1617,16 @@ static void ssc_tx_worker(void *arg)
    * So we have to start the next DMA here.
    */
 
-  i2svdbg("txact.head=%p txdone.head=%p\n",
-           priv->txact.head, priv->txdone.head);
+  i2svdbg("tx.act.head=%p tx.done.head=%p\n",
+           priv->tx.act.head, priv->tx.done.head);
+  ssc_dump_txqueues(priv, "TX worker start");
 
   /* Check if the DMA is IDLE */
 
-  if (sq_empty(&priv->txact))
+  if (sq_empty(&priv->tx.act))
     {
 #ifdef CONFIG_SAMA5_SSC_DMADEBUG
-      bfcontainer = (struct sam_buffer_s *)sq_peek(&priv->txdone);
+      bfcontainer = (struct sam_buffer_s *)sq_peek(&priv->tx.done);
       if (bfcontainer)
         {
           /* Dump the DMA registers */
@@ -1582,17 +1644,17 @@ static void ssc_tx_worker(void *arg)
       irqrestore(flags);
     }
 
-  /* Process each buffer in the txdone queue */
+  /* Process each buffer in the tx.done queue */
 
-  while (sq_peek(&priv->txdone) != NULL)
+  while (sq_peek(&priv->tx.done) != NULL)
     {
-      /* Remove the buffer container from the txdone queue.  NOTE that
-       * interupts must be enabled to do this because the txdone queue is
+      /* Remove the buffer container from the tx.done queue.  NOTE that
+       * interupts must be enabled to do this because the tx.done queue is
        * also modified from the interrupt level.
        */
 
       flags = irqsave();
-      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->txdone);
+      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->tx.done);
       irqrestore(flags);
 
       /* Perform the TX transfer done callback */
@@ -1611,6 +1673,8 @@ static void ssc_tx_worker(void *arg)
 
       ssc_buf_free(priv, bfcontainer);
     }
+
+  ssc_dump_txqueues(priv, "TX worker done");
 }
 #endif
 
@@ -1641,38 +1705,41 @@ static void ssc_tx_schedule(struct sam_ssc_s *priv, int result)
   struct sam_buffer_s *bfcontainer;
   int ret;
 
-  /* Upon entry, the transfer that just completed is the one at head at
-   * end of the priv->txact queue.
+  /* Upon entry, the transfer(s) that just completed are the ones in the
+   * priv->tx.act queue.  NOTE: In certain race conditions, this function
+   * may be called an additional time, hence, we can't assert this to be
+   * true.
    */
 
-  DEBUGASSERT(!sq_empty(&priv->txact));
+  ssc_dump_txqueues(priv, "TX schedule");
 
-  /* Move all entries from the txact queue to the txdone queue */
+  /* Move all entries from the tx.act queue to the tx.done queue */
 
-  while (!sq_empty(&priv->txact))
+  while (!sq_empty(&priv->tx.act))
     {
-      /* Remove the next buffer container from the txact list */
+      /* Remove the next buffer container from the tx.act list */
 
-      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->txact);
+      bfcontainer = (struct sam_buffer_s *)sq_remfirst(&priv->tx.act);
 
       /* Report the result of the transfer */
 
       bfcontainer->result = result;
 
-      /* Add the completed buffer container to the tail of the txdone queue */
+      /* Add the completed buffer container to the tail of the tx.done queue */
 
-      sq_addlast((sq_entry_t *)bfcontainer, &priv->txdone);
+      sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.done);
     }
 
   /* If the worker has completed running, then reschedule the working thread.
-   * REVISIT:  There may be a race condition here.
+   * REVISIT:  There may be a race condition here.  So we do nothing is the
+   * worker is not available.
    */
 
-  if (work_available(&priv->txwork))
+  if (work_available(&priv->tx.work))
     {
       /* Schedule the TX DMA done processing to occur on the worker thread. */
 
-      ret = work_queue(HPWORK, &priv->txwork, ssc_tx_worker, priv, 0);
+      ret = work_queue(HPWORK, &priv->tx.work, ssc_tx_worker, priv, 0);
       if (ret != 0)
         {
           i2slldbg("ERROR: Failed to queue TX work: %d\n", ret);
@@ -1705,7 +1772,7 @@ static void ssc_txdma_callback(DMA_HANDLE handle, void *arg, int result)
 
   /* Cancel the watchdog timeout */
 
-  (void)wd_cancel(priv->txdog);
+  (void)wd_cancel(priv->tx.dog);
 
   /* Sample DMA registers at the time of the DMA completion */
 
@@ -1742,7 +1809,7 @@ static void ssc_txdma_callback(DMA_HANDLE handle, void *arg, int result)
 
 static uint32_t ssc_rxsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
-#if defined(SSC_HAVE_RX) && defined(SSC_HAVE_MCK)
+#if defined(SSC_HAVE_RX) && defined(SSC_HAVE_MCK2)
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
   DEBUGASSERT(priv && priv->samplerate > 0 && rate > 0);
 
@@ -1786,14 +1853,13 @@ static uint32_t ssc_rxdatawidth(struct i2s_dev_s *dev, int bits)
 
   priv->datalen = bits;
 
-#ifdef SSC_HAVE_MCK
+#ifdef SSC_HAVE_MCK2
   /* Check if the receiver is driven by the MCK/2 */
 
   if (priv->rxclk == SSC_CLKSRC_MCKDIV)
     {
-      /* Update the MCK/2 divider */
+      /* Update the MCK/2 divider.  bitrate is samplerate * datawidth. */
 
-      priv->samplerate = rate;
       return ssc_mck2divider(priv);
     }
 #endif
@@ -1841,8 +1907,9 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   int ret;
 
   DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & 3) == 0);
-  i2svdbg("apb=%p nmaxbytes=%d\n", apb, apb->nmaxbytes);
- 
+  i2svdbg("apb=%p nmaxbytes=%d arg=%p timeout=%d\n",
+          apb, apb->nmaxbytes, arg, timeout);
+
 #ifdef SSC_HAVE_RX
   /* Allocate a buffer container in advance */
 
@@ -1853,9 +1920,9 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   ssc_exclsem_take(priv);
 
-  /* Has the RX channel been configured? */
+  /* Has the RX channel been enabled? */
 
-  if (!priv->rx)
+  if (!priv->rxenab)
     {
       i2sdbg("ERROR: SSC%d has no receiver\n", priv->sscno);
       ret = -EAGAIN;
@@ -1877,7 +1944,8 @@ static int ssc_receive(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   /* Add the buffer container to the end of the RX pending queue */
 
   flags = irqsave();
-  sq_addlast((sq_entry_t *)bfcontainer, &priv->rxpend);
+  sq_addlast((sq_entry_t *)bfcontainer, &priv->rx.pend);
+  ssc_dump_rxqueues(priv, "Receving");
 
   /* Then start the next transfer.  If there is already a transfer in progess,
    * then this will do nothing.
@@ -1920,7 +1988,7 @@ errout_with_exclsem:
 
 static uint32_t ssc_txsamplerate(struct i2s_dev_s *dev, uint32_t rate)
 {
-#if defined(SSC_HAVE_TX) && defined(SSC_HAVE_MCK)
+#if defined(SSC_HAVE_TX) && defined(SSC_HAVE_MCK2)
   struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
   DEBUGASSERT(priv && priv->samplerate > 0 && rate > 0);
 
@@ -1964,14 +2032,13 @@ static uint32_t ssc_txdatawidth(struct i2s_dev_s *dev, int bits)
 
   priv->datalen = bits;
 
-#ifdef SSC_HAVE_MCK
+#ifdef SSC_HAVE_MCK2
   /* Check if the receiver is driven by the MCK/2 */
 
   if (priv->txclk == SSC_CLKSRC_MCKDIV)
     {
-      /* Update the MCK/2 divider */
+      /* Update the MCK/2 divider.  bitrate is samplerate * datawidth. */
 
-      priv->samplerate = rate;
       return ssc_mck2divider(priv);
     }
 #endif
@@ -2019,7 +2086,8 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   int ret;
 
   DEBUGASSERT(priv && apb && ((uintptr_t)apb->samp & 3) == 0);
-  i2svdbg("apb=%p nbytes=%d\n", apb, apb->nbytes);
+  i2svdbg("apb=%p nbytes=%d arg=%p timeout=%d\n",
+          apb, apb->nbytes, arg, timeout);
 
 #ifdef SSC_HAVE_TX
   /* Allocate a buffer container in advance */
@@ -2031,9 +2099,9 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   ssc_exclsem_take(priv);
 
-  /* Has the TX channel been configured? */
+  /* Has the TX channel been enabled? */
 
-  if (!priv->tx)
+  if (!priv->txenab)
     {
       i2sdbg("ERROR: SSC%d has no transmitter\n", priv->sscno);
       ret = -EAGAIN;
@@ -2055,7 +2123,8 @@ static int ssc_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
   /* Add the buffer container to the end of the TX pending queue */
 
   flags = irqsave();
-  sq_addlast((sq_entry_t *)bfcontainer, &priv->txpend);
+  sq_addlast((sq_entry_t *)bfcontainer, &priv->tx.pend);
+  ssc_dump_txqueues(priv, "Transmitting");
 
   /* Then start the next transfer.  If there is already a transfer in progess,
    * then this will do nothing.
@@ -2258,16 +2327,16 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
    *   SSC_RCMR_CKG_CONT      No transmit clock gating
    *   SSC_TCMR_STTDLY(1)     Receive start delay = 1
    *
-   * If master:
+   * If master (i.e., provides clocking):
    *   SSC_TCMR_START_FALLING Detection of a falling edge on TF signal
    *   SSC_TCMR_PERIOD(n)     'n' depends on the datawidth
    *
-   * If slave:
+   * If slave (i.e., receives clocking):
    *   SSC_TCMR_START_EDGE    Detection of any edge on TF signal
    *   SSC_TCMR_PERIOD(0)     Receive period divider = 0
    */
 
-  if (priv->master)
+  if (priv->txclk == SSC_CLKSRC_MCKDIV)
     {
       regval |= (SSC_TCMR_CKG_CONT | SSC_TCMR_START_FALLING | SSC_TCMR_STTDLY(1) |
                  SSC_TCMR_PERIOD(((CONFIG_SAMA5_SSC0_DATALEN * SSC_DATNB) / 2) - 1));
@@ -2290,16 +2359,16 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
    *  SSC_TFMR_FSDEN         Frame sync data is not enabled
    *  SSC_TFMR_FSLENEXT(0)   FSLEN field extension = 0
    *
-   * If master:
+   * If master (i.e., provides clocking):
    *  SSC_TFMR_FSLEN(n)      Receive frame sync length depends on data width
    *  SSC_TFMR_FSOS_NEGATIVE Negative pulse TF output
    *
-   * If slave:
+   * If slave (i.e, receives clocking):
    *  SSC_TFMR_FSLEN(0)      Receive frame sync length = 0
    *  SSC_TFMR_FSOS_NONE     TF is an output
    */
 
-  if (priv->master)
+  if (priv->txclk == SSC_CLKSRC_MCKDIV)
     {
       regval = (SSC_TFMR_DATLEN(CONFIG_SAMA5_SSC0_DATALEN - 1) |
                 SSC_TFMR_MSBF | SSC_TFMR_DATNB(SSC_DATNB - 1) |
@@ -2346,11 +2415,10 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
 
 static uint32_t ssc_mck2divider(struct sam_ssc_s *priv)
 {
-#ifdef SSC_HAVE_MCK
-  struct sam_ssc_s *priv = (struct sam_ssc_s *)dev;
+#ifdef SSC_HAVE_MCK2
   uint32_t bitrate;
   uint32_t regval;
-  DEBUGASSERT(priv && priv->samplerate > 0 && rate > 0);
+  DEBUGASSERT(priv && priv->samplerate > 0 && priv->datalen > 0);
 
   /* A zero sample rate means to disable the MCK/2 clock */
 
@@ -2365,7 +2433,15 @@ static uint32_t ssc_mck2divider(struct sam_ssc_s *priv)
 
       bitrate = priv->samplerate * priv->datalen;
 
-      /* Calculate the new MCK/2 divider from the bitrate */
+      /* Calculate the new MCK/2 divider from the bitrate. The divided clock
+       * equals:
+       *
+       *   bitrate = MCK / (2 * div)
+       *   div     = MCK / (2 * bitrate)
+       *
+       * The maximum bit rate is MCK/2. The minimum bit rate is
+       * MCK/2 x 4095 = MCK/8190.
+       */
 
       regval =  BOARD_MCK_FREQUENCY / (bitrate << 1);
     }
@@ -2414,6 +2490,10 @@ static void ssc_clocking(struct sam_ssc_s *priv)
   /* Enable peripheral clocking */
 
   sam_enableperiph1(priv->pid);
+
+  i2svdbg("PCSR1=%08x PCR=%08x CMR=%08x\n",
+          getreg32(SAM_PMC_PCSR1), getreg32(SAM_PMC_PCR),
+          ssc_getreg(priv, SAM_SSC_CMR_OFFSET));
 }
 
 /****************************************************************************
@@ -2439,12 +2519,12 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
    */
 
 #ifdef SSC_HAVE_RX
-  if (priv->rx)
+  if (priv->rxenab)
     {
       /* Allocate an RX DMA channel */
 
-      priv->rxdma = sam_dmachannel(priv->sscno, DMA_FLAGS(priv->pid));
-      if (!priv->rxdma)
+      priv->rx.dma = sam_dmachannel(priv->sscno, DMA_FLAGS(priv->pid));
+      if (!priv->rx.dma)
         {
           i2sdbg("ERROR: Failed to allocate the RX DMA channel\n");
           goto errout;
@@ -2452,8 +2532,8 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
 
       /* Create a watchdog time to catch RX DMA timeouts */
 
-      priv->rxdog = wd_create();
-      if (!priv->rxdog)
+      priv->rx.dog = wd_create();
+      if (!priv->rx.dog)
         {
           i2sdbg("ERROR: Failed to create the RX DMA watchdog\n");
           goto errout;
@@ -2462,12 +2542,12 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
 #endif
 
 #ifdef SSC_HAVE_TX
-  if (priv->tx)
+  if (priv->txenab)
     {
       /* Allocate a TX DMA channel */
 
-      priv->txdma = sam_dmachannel(priv->sscno, DMA_FLAGS(priv->pid));
-      if (!priv->txdma)
+      priv->tx.dma = sam_dmachannel(priv->sscno, DMA_FLAGS(priv->pid));
+      if (!priv->tx.dma)
         {
           i2sdbg("ERROR: Failed to allocate the TX DMA channel\n");
           goto errout;
@@ -2475,8 +2555,8 @@ static int ssc_dma_allocate(struct sam_ssc_s *priv)
 
       /* Create a watchdog time to catch TX DMA timeouts */
 
-      priv->txdog = wd_create();
-      if (!priv->txdog)
+      priv->tx.dog = wd_create();
+      if (!priv->tx.dog)
         {
           i2sdbg("ERROR: Failed to create the TX DMA watchdog\n");
           goto errout;
@@ -2512,26 +2592,26 @@ errout:
 static void ssc_dma_free(struct sam_ssc_s *priv)
 {
 #ifdef SSC_HAVE_TX
-  if (priv->txdog)
+  if (priv->tx.dog)
     {
-       wd_delete(priv->txdog);
+       wd_delete(priv->tx.dog);
     }
 
-  if (priv->txdma)
+  if (priv->tx.dma)
     {
-      sam_dmafree(priv->txdma);
+      sam_dmafree(priv->tx.dma);
     }
 #endif
 
 #ifdef SSC_HAVE_RX
-  if (priv->rxdog)
+  if (priv->rx.dog)
     {
-       wd_delete(priv->rxdog);
+       wd_delete(priv->rx.dog);
     }
 
-  if (priv->rxdma)
+  if (priv->rx.dma)
     {
-      sam_dmafree(priv->rxdma);
+      sam_dmafree(priv->rx.dma);
     }
 #endif
 }
@@ -2559,7 +2639,7 @@ static void ssc0_configure(struct sam_ssc_s *priv)
    */
 
 #ifdef CONFIG_SAMA5_SSC0_RX
-  priv->rx = true;
+  priv->rxenab = true;
 
   /* Configure the receiver data (RD) and receiver frame synchro (RF) pins */
 
@@ -2599,14 +2679,14 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 #endif
 
 #else
-  priv->rx    = false;
-  priv->rxclk = SSC_CLKSRC_NONE; /* No input clock */
-  priv->rxout = SSC_CLKOUT_NONE; /* No output clock */
+  priv->rxenab = false;
+  priv->rxclk  = SSC_CLKSRC_NONE; /* No input clock */
+  priv->rxout  = SSC_CLKOUT_NONE; /* No output clock */
 
 #endif /* CONFIG_SAMA5_SSC0_RX */
 
 #ifdef CONFIG_SAMA5_SSC0_TX
-  priv->tx = true;
+  priv->txenab = true;
 
   /* Configure the transmitter data (TD) and transmitter frame synchro (TF)
    * pins
@@ -2648,9 +2728,9 @@ static void ssc0_configure(struct sam_ssc_s *priv)
 #endif
 
 #else
-  priv->tx    = false;
-  priv->txclk = SSC_CLKSRC_NONE; /* No input clock */
-  priv->txout = SSC_CLKOUT_NONE; /* No output clock */
+  priv->txenab = false;
+  priv->txclk  = SSC_CLKSRC_NONE; /* No input clock */
+  priv->txout  = SSC_CLKOUT_NONE; /* No output clock */
 
 #endif /* CONFIG_SAMA5_SSC0_TX */
 
@@ -2674,11 +2754,6 @@ static void ssc0_configure(struct sam_ssc_s *priv)
   /* Configure driver state specific to this SSC peripheral */
 
   priv->base    = SAM_SSC0_VBASE;
-#ifdef CONFIG_SAMA5_SSC0_MASTER
-  priv->master  = true;
-#else
-  priv->master  = false;
-#endif
   priv->datalen = CONFIG_SAMA5_SSC0_DATALEN;
   priv->pid     = SAM_PID_SSC0;
 }
@@ -2692,7 +2767,7 @@ static void ssc1_configure(struct sam_ssc_s *priv)
    */
 
 #ifdef CONFIG_SAMA5_SSC1_RX
-  priv->rx = true;
+  priv->rxenab = true;
 
   /* Configure the receiver data (RD) and receiver frame synchro (RF) pins */
 
@@ -2732,14 +2807,14 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 #endif
 
 #else
-  priv->rx    = false;
-  priv->rxclk = SSC_CLKSRC_NONE; /* No input clock */
-  priv->rxout = SSC_CLKOUT_NONE; /* No output clock */
+  priv->rxenab = false;
+  priv->rxclk  = SSC_CLKSRC_NONE; /* No input clock */
+  priv->rxout  = SSC_CLKOUT_NONE; /* No output clock */
 
 #endif /* CONFIG_SAMA5_SSC1_RX */
 
 #ifdef CONFIG_SAMA5_SSC1_TX
-  priv->tx = true;
+  priv->txenab = true;
 
   /* Configure the transmitter data (TD) and transmitter frame synchro (TF)
    * pins
@@ -2781,9 +2856,9 @@ static void ssc1_configure(struct sam_ssc_s *priv)
 #endif
 
 #else
-  priv->tx    = false;
-  priv->txclk = SSC_CLKSRC_NONE; /* No input clock */
-  priv->txout = SSC_CLKOUT_NONE; /* No output clock */
+  priv->txenab = false;
+  priv->txclk  = SSC_CLKSRC_NONE; /* No input clock */
+  priv->txout  = SSC_CLKOUT_NONE; /* No output clock */
 
 #endif /* CONFIG_SAMA5_SSC1_TX */
 
@@ -2807,11 +2882,6 @@ static void ssc1_configure(struct sam_ssc_s *priv)
   /* Configure driver state specific to this SSC peripheral */
 
   priv->base    = SAM_SSC1_VBASE;
-#ifdef CONFIG_SAMA5_SSC1_MASTER
-  priv->master  = true;
-#else
-  priv->master  = false;
-#endif
   priv->datalen = CONFIG_SAMA5_SSC1_DATALEN;
   priv->pid     = SAM_PID_SSC1;
 }
@@ -2922,7 +2992,7 @@ struct i2s_dev_s *sam_ssc_initialize(int port)
     }
 
   irqrestore(flags);
-  ssc_dumpregs(priv, "After initialization");
+  scc_dump_regs(priv, "After initialization");
 
   /* Success exit */
 
