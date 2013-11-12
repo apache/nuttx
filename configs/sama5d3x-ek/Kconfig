@@ -146,14 +146,23 @@ config SAMA5D3X_EK_SSC_PORT
 	---help---
 		Specify the I2S port to use, i.e., 0 for SSC0 or 1 for SSC1
 
-else
+endif # SAMA5_SSC0 && SAMA5_SSC1
+
+if SAMA5_SSC0 && !SAMA5_SSC1
 
 config SAMA5D3X_EK_SSC_PORT
 	int
-	default 0 if SAMA5_SSC0
-	default 1 if SAMA5_SSC1
+	default 0
 
-endif # SAMA5_SSC0 && SAMA5_SSC1
+endif # SAMA5_SSC0 && !SAMA5_SSC1
+
+if !SAMA5_SSC0 && SAMA5_SSC1
+
+config SAMA5D3X_EK_SSC_PORT
+	int
+	default 1
+
+endif # SAMA5_SSC0 && !SAMA5_SSC1
 
 config SAMA5D3X_EK_I2SCHAR_MINOR
 	int "I2S character driver minor number"
