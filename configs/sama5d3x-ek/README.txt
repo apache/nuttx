@@ -1037,7 +1037,7 @@ I2S Audio Support
       CONFIG_SAMA5_SSC0_TX=y           : Support a transmitter
       CONFIG_SAMA5_SSC0_TX_MCKDIV=y    : Transmitter gets clock from MCK/2
       CONFIG_SAMA5_SSC0_MCKDIV_SAMPLERATE=48000 : Sampling at 48K samples/sec
-      CONFIG_SAMA5_SSC0_TX_TKOUTPUT_CONT=y      : Outputs clock on TK
+      CONFIG_SAMA5_SSC0_TX_TKOUTPUT_XFR=y  : Outputs clock on TK when transferring data
       CONFIG_SAMA5_SSC0_LOOPBACK=y     : Loopmode mode connects RD/TD and RK/TK
 
     Audio
@@ -1062,6 +1062,10 @@ I2S Audio Support
       CONFIG_EXAMPLES_I2SCHAR_RXSTACKSIZE=1536
       CONFIG_EXAMPLES_I2SCHAR_BUFSIZE=256
       CONFIG_EXAMPLES_I2SCHAR_DEVINIT=y
+
+    Board Selection
+      CONFIG_SAMA5D3X_EK_I2SCHAR_MINOR=0
+      CONFIG_SAMA5D3X_EK_SSC_PORT=0     : 0 or SSC0, 1 for SSC1
 
     Library Routines
       CONFIG_SCHED_WORKQUEUE=y          : Driver needs work queue support
@@ -2959,5 +2963,3 @@ To-Do List
 
 11) GMAC has only been tested on a 10/100Base-T network.  I don't have a
     1000Base-T network to support additional testing.
-
-12) I2S testing.  Underway now.
