@@ -2340,7 +2340,7 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
    *   SSC_TCMR_STTDLY(1)     Receive start delay = 1
    *
    * If master (i.e., provides clocking):
-   *   SSC_TCMR_START_FALLING Detection of a falling edge on TF signal
+   *   SSC_TCMR_START_CONT    When data written to THR
    *   SSC_TCMR_PERIOD(n)     'n' depends on the datawidth
    *
    * If slave (i.e., receives clocking):
@@ -2350,7 +2350,7 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
 
   if (priv->txclk == SSC_CLKSRC_MCKDIV)
     {
-      regval |= (SSC_TCMR_CKG_CONT | SSC_TCMR_START_FALLING | SSC_TCMR_STTDLY(1) |
+      regval |= (SSC_TCMR_CKG_CONT | SSC_TCMR_START_CONT | SSC_TCMR_STTDLY(1) |
                  SSC_TCMR_PERIOD(((CONFIG_SAMA5_SSC0_DATALEN * SSC_DATNB) / 2) - 1));
     }
   else
@@ -2361,14 +2361,14 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
 
   ssc_putreg(priv, SAM_SSC_TCMR_OFFSET, regval);
 
-  /* RFMR settings. Some of these settings will need to be configurable as well.
+  /* TFMR settings. Some of these settings will need to be configurable as well.
    * Currently hardcoded to:
    *
    *  SSC_TFMR_DATLEN(n)    'n' deterimined by configuration
    *  SSC_TFMR_DATDEF        Data default = 0
    *  SSC_TFMR_MSBF          Most significant bit first
    *  SSC_TFMR_DATNB(n)      Data number 'n' per frame (hard-coded)
-   *  SSC_TFMR_FSDEN         Frame sync data is not enabled
+   *  SSC_TFMR_FSDEN         Frame sync data is enabled
    *  SSC_TFMR_FSLENEXT(0)   FSLEN field extension = 0
    *
    * If master (i.e., provides clocking):
@@ -2385,14 +2385,15 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
       regval = (SSC_TFMR_DATLEN(CONFIG_SAMA5_SSC0_DATALEN - 1) |
                 SSC_TFMR_MSBF | SSC_TFMR_DATNB(SSC_DATNB - 1) |
                 SSC_TFMR_FSLEN(CONFIG_SAMA5_SSC0_DATALEN - 1) |
-                SSC_TFMR_FSOS_NEGATIVE | SSC_TFMR_FSLENEXT(0));
+                SSC_TFMR_FSOS_NEGATIVE | SSC_TFMR_FSDEN |
+                SSC_TFMR_FSLENEXT(0));
     }
   else
     {
       regval = (SSC_TFMR_DATLEN(CONFIG_SAMA5_SSC0_DATALEN - 1) |
                 SSC_TFMR_MSBF | SSC_TFMR_DATNB(SSC_DATNB - 1) |
                 SSC_TFMR_FSLEN(0) | SSC_TFMR_FSOS_NONE |
-                SSC_TFMR_FSLENEXT(0));
+                SSC_TFMR_FSDEN | SSC_TFMR_FSLENEXT(0));
     }
 
   ssc_putreg(priv, SAM_SSC_TFMR_OFFSET, regval);
@@ -2455,7 +2456,7 @@ static uint32_t ssc_mck2divider(struct sam_ssc_s *priv)
        * MCK/2 x 4095 = MCK/8190.
        */
 
-      regval =  BOARD_MCK_FREQUENCY / (bitrate << 1);
+      regval =  (BOARD_MCK_FREQUENCY + bitrate) / (bitrate << 1);
     }
 
   /* Configure MCK/2 divider */
@@ -2504,7 +2505,7 @@ static void ssc_clocking(struct sam_ssc_s *priv)
   sam_enableperiph1(priv->pid);
 
   i2svdbg("PCSR1=%08x PCR=%08x CMR=%08x\n",
-          getreg32(SAM_PMC_PCSR1), getreg32(SAM_PMC_PCR),
+          getreg32(SAM_PMC_PCSR1), regval,
           ssc_getreg(priv, SAM_SSC_CMR_OFFSET));
 }
 
@@ -2749,7 +2750,7 @@ static void ssc0_configure(struct sam_ssc_s *priv)
   /* Set/clear loopback mode */
 
 #if defined(CONFIG_SAMA5_SSC0_RX) && defined(CONFIG_SAMA5_SSC0_TX) && \
-    defined(SAMA5_SSC0_LOOPBACK)
+    defined(CONFIG_SAMA5_SSC0_LOOPBACK)
   priv->loopback = true;
 #else
   priv->loopback = false;
@@ -2877,7 +2878,7 @@ static void ssc1_configure(struct sam_ssc_s *priv)
   /* Set/clear loopback mode */
 
 #if defined(CONFIG_SAMA5_SSC1_RX) && defined(CONFIG_SAMA5_SSC1_TX) && \
-    defined(SAMA5_SSC1_LOOPBACK)
+    defined(CONFIG_SAMA5_SSC1_LOOPBACK)
   priv->loopback = true;
 #else
   priv->loopback = false;
