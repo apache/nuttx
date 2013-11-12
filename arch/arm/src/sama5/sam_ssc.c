@@ -117,8 +117,6 @@
 #  define SSC_HAVE_TX
 #endif
 
-#define SSC_DATNB  (1) /*  Data number per frame */
-
 /* Check if we need the sample rate to set MCK/2 divider */
 
 #undef SSC_HAVE_MCK2
@@ -138,6 +136,29 @@
 #if defined(SSC0_HAVE_MCK2) || defined(SSC1_HAVE_MCK2)
 #  define SSC_HAVE_MCK2 1
 #endif
+
+/* Waveform:
+ *
+ *      |<---------------- PERIOD --------------->|
+ *  ----+     +-----------------------------------+    +---
+ *      |     |                                   |    |
+ *      +-----+                                   +----+
+ *      |FSLEN|
+ *      |<-STTDLY->|<--DATALEN-->|<--DATALEN-->|  |
+ *                 |<-----DATALEN * DATNB----->|
+ *
+ * TK/RK is assumed to be a negative pulse
+ * DATALEN is configurable: CONFIG_SAMA5_SSC0_DATALEN
+ * FSLEN and STTDLY are fixed at two clocks
+ * DATNB is fixed a one work
+ *
+ * REVISIT:  These will probably need to be configurable
+ */
+
+#define SSC_FSLEN  (2) /* TF/RF plus width in clocks */
+#define SSC_STTDLY (2) /* Delay to data start in clocks (same as FSLEN) */
+#define SSC_DATNB  (1) /* Number words per per frame */
+#define SCC_PERIOD (SSC_FSLEN + CONFIG_SAMA5_SSC0_DATALEN * SSC_DATNB)
 
 /* Clocking *****************************************************************/
 /* Select MCU-specific settings
@@ -1148,7 +1169,11 @@ static int ssc_rxdma_setup(struct sam_ssc_s *priv)
                              (uintptr_t)apb->samp + apb->nmaxbytes);
 
     }
+#if 1 /* REVISIT: Chained RX transfers */
+  while (0);
+#else
   while (!sq_empty(&priv->rx.pend));
+#endif
 
   /* Sample DMA registers */
 
@@ -1549,7 +1574,11 @@ static int ssc_txdma_setup(struct sam_ssc_s *priv)
                         (uintptr_t)apb->samp + apb->nbytes);
 
     }
+#if 1 /* REVISIT: Chained TX transfers */
+  while (0);
+#else
   while (!sq_empty(&priv->tx.pend));
+#endif
 
   /* Sample DMA registers */
 
@@ -2233,12 +2262,15 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
    *   SSC_RCMR_CKG_CONT    No receive clock gating
    *   SSC_RCMR_START_EDGE  Detection of any edge on RF signal
    *   SSC_RCMR_STOP        Not selected
-   *   SSC_RCMR_STTDLY(1)   Receive start delay = 1
+   *   SSC_RCMR_STTDLY(1)   Receive start delay = 1 (same as FSLEN)
    *   SSC_RCMR_PERIOD(0)   Receive period divider = 0
+   *
+   * REVISIT:  This implementation assumes that on the transmitter
+   * can be the master (i.e, can generate the TK/RK clocking.
    */
 
   regval |= (SSC_RCMR_CKI | SSC_RCMR_CKG_CONT | SSC_RCMR_START_EDGE |
-             SSC_RCMR_STTDLY(1) | SSC_RCMR_PERIOD(0));
+             SSC_RCMR_STTDLY(SSC_STTDLY - 1) | SSC_RCMR_PERIOD(0));
   ssc_putreg(priv, SAM_SSC_RCMR_OFFSET, regval);
 
   /* RFMR settings. Some of these settings will need to be configurable as well.
@@ -2248,14 +2280,14 @@ static int ssc_rx_configure(struct sam_ssc_s *priv)
    *  SSC_RFMR_LOOP         Determined by configuration
    *  SSC_RFMR_MSBF         Most significant bit first
    *  SSC_RFMR_DATNB(n)     Data number 'n' per frame (hard-coded)
-   *  SSC_RFMR_FSLEN(0)     Receive frame sync length = 0
+   *  SSC_RFMR_FSLEN(1)     Pulse length = FSLEN + (FSLEN_EXT * 16) + 1 = 2 clocks
    *  SSC_RFMR_FSOS_NONE    RF pin is always in input
    *  SSC_RFMR_FSEDGE_POS   Positive frame sync edge detection
    *  SSC_RFMR_FSLENEXT(0)  FSLEN field extension = 0
    */
 
   regval = (SSC_RFMR_DATLEN(CONFIG_SAMA5_SSC0_DATALEN - 1) | SSC_RFMR_MSBF |
-            SSC_RFMR_DATNB(SSC_DATNB - 1) | SSC_RFMR_FSLEN(0) |
+            SSC_RFMR_DATNB(SSC_DATNB - 1) | SSC_RFMR_FSLEN(SSC_FSLEN - 1) |
             SSC_RFMR_FSOS_NONE | SSC_RFMR_FSLENEXT(0));
 
   /* Loopback mode? */
@@ -2337,7 +2369,7 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
    *
    *   SSC_RCMR_CKI           No transmitter clock inversion
    *   SSC_RCMR_CKG_CONT      No transmit clock gating
-   *   SSC_TCMR_STTDLY(1)     Receive start delay = 1
+   *   SSC_TCMR_STTDLY(1)     Receive start delay = 2 clocks (same as FSLEN)
    *
    * If master (i.e., provides clocking):
    *   SSC_TCMR_START_CONT    When data written to THR
@@ -2346,16 +2378,21 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
    * If slave (i.e., receives clocking):
    *   SSC_TCMR_START_EDGE    Detection of any edge on TF signal
    *   SSC_TCMR_PERIOD(0)     Receive period divider = 0
+   *
+   * The period signal is generated at clocks = 2 x (PERIOD+1), or
+   * PERIOD = (clocks / 2) - 1.
    */
 
   if (priv->txclk == SSC_CLKSRC_MCKDIV)
     {
-      regval |= (SSC_TCMR_CKG_CONT | SSC_TCMR_START_CONT | SSC_TCMR_STTDLY(1) |
-                 SSC_TCMR_PERIOD(((CONFIG_SAMA5_SSC0_DATALEN * SSC_DATNB) / 2) - 1));
+      regval |= (SSC_TCMR_CKG_CONT | SSC_TCMR_START_CONT |
+                 SSC_TCMR_STTDLY(SSC_STTDLY - 1) |
+                 SSC_TCMR_PERIOD(SCC_PERIOD / 2 - 1));
     }
   else
     {
-      regval |= (SSC_TCMR_CKG_CONT | SSC_TCMR_START_EDGE | SSC_TCMR_STTDLY(1) |
+      regval |= (SSC_TCMR_CKG_CONT | SSC_TCMR_START_EDGE |
+                 SSC_TCMR_STTDLY(SSC_STTDLY - 1) |
                  SSC_TCMR_PERIOD(0));
     }
 
@@ -2369,14 +2406,13 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
    *  SSC_TFMR_MSBF          Most significant bit first
    *  SSC_TFMR_DATNB(n)      Data number 'n' per frame (hard-coded)
    *  SSC_TFMR_FSDEN         Frame sync data is enabled
+   *  SSC_TFMR_FSLEN(1)      Pulse length = + (FSLEN_EXT * 16) + 1 = 2 TX clocks
    *  SSC_TFMR_FSLENEXT(0)   FSLEN field extension = 0
    *
    * If master (i.e., provides clocking):
-   *  SSC_TFMR_FSLEN(n)      Receive frame sync length depends on data width
    *  SSC_TFMR_FSOS_NEGATIVE Negative pulse TF output
    *
    * If slave (i.e, receives clocking):
-   *  SSC_TFMR_FSLEN(0)      Receive frame sync length = 0
    *  SSC_TFMR_FSOS_NONE     TF is an output
    */
 
@@ -2384,15 +2420,14 @@ static int ssc_tx_configure(struct sam_ssc_s *priv)
     {
       regval = (SSC_TFMR_DATLEN(CONFIG_SAMA5_SSC0_DATALEN - 1) |
                 SSC_TFMR_MSBF | SSC_TFMR_DATNB(SSC_DATNB - 1) |
-                SSC_TFMR_FSLEN(CONFIG_SAMA5_SSC0_DATALEN - 1) |
-                SSC_TFMR_FSOS_NEGATIVE | SSC_TFMR_FSDEN |
-                SSC_TFMR_FSLENEXT(0));
+                SSC_TFMR_FSLEN(SSC_FSLEN - 1) | SSC_TFMR_FSOS_NEGATIVE |
+                SSC_TFMR_FSDEN | SSC_TFMR_FSLENEXT(0));
     }
   else
     {
       regval = (SSC_TFMR_DATLEN(CONFIG_SAMA5_SSC0_DATALEN - 1) |
                 SSC_TFMR_MSBF | SSC_TFMR_DATNB(SSC_DATNB - 1) |
-                SSC_TFMR_FSLEN(0) | SSC_TFMR_FSOS_NONE |
+                SSC_TFMR_FSLEN(SSC_FSLEN - 1) | SSC_TFMR_FSOS_NONE |
                 SSC_TFMR_FSDEN | SSC_TFMR_FSLENEXT(0));
     }
 
