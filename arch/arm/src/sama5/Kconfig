@@ -1682,6 +1682,13 @@ config SAMA5_SSC_QDEBUG
 	---help---
 		Enable instrumentation to debug audio buffer queue logic.
 
+config SAMA5_SSC_DUMPBUFFERS
+	bool "Dump Buffers"
+	depends on DEBUG_I2S
+	default n
+	---help---
+		Enable instrumentation to dump TX and RX buffers.
+
 endmenu # SSC Configuration
 endif # SAMA5_SSC0 || SAMA5_SSC1
 
