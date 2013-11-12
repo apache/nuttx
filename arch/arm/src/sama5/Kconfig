@@ -1392,12 +1392,6 @@ config SAMA5_SSC_MAXINFLIGHT
 if SAMA5_SSC0
 comment "SSC0 Configuration"
 
-config SAMA5_SSC0_MASTER
-	bool "Master mode"
-	default n
-	---help---
-		Selects master (vs. slave) mode data transfers
-
 config SAMA5_SSC0_DATALEN
 	int "Data width (bits)"
 	default 16
@@ -1531,12 +1525,6 @@ endif # SAMA5_SSC0
 
 if SAMA5_SSC1
 comment "SSC1 Configuration"
-
-config SAMA5_SSC1_MASTER
-	bool "Master mode"
-	default n
-	---help---
-		Selects master (vs. slave) mode data transfers
 
 config SAMA5_SSC1_DATALEN
 	int "Data width (bits)"
@@ -1686,6 +1674,13 @@ config SAMA5_SSC_REGDEBUG
 	---help---
 		Output detailed register-level SSC device debug information.
 		Very invasive! Requires also DEBUG.
+
+config SAMA5_SSC_QDEBUG
+	bool "SSC Queue debug"
+	depends on DEBUG_I2S
+	default n
+	---help---
+		Enable instrumentation to debug audio buffer queue logic.
 
 endmenu # SSC Configuration
 endif # SAMA5_SSC0 || SAMA5_SSC1
