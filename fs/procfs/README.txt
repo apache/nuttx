@@ -46,5 +46,6 @@ Example
    0/
    1/
    2/
+
   nsh> cat /proc/2/cmdline
   <pthread> 0x527420

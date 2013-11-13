@@ -6041,4 +6041,5 @@
 	* arch/arm/src/sama5/sam_ssc.c:  I2S loopback test finally works
 	  (2013-11-11).
 	* fs/procfs:  Add a little, primitive procfs file system. (2013-11-13).
+	* fs/binfs/README.txt:  Add a README file for binfs (2013-11-13).
 

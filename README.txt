@@ -1159,6 +1159,8 @@ nuttx
  |   |   `- README.txt
  |   `- README.txt
  |- fs/
+ |   |- binfs/
+ |   |   `- README.txt
  |   |- mmap/
  |   |   `- README.txt
  |   |- nxffs/
