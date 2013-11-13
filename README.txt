@@ -1161,7 +1161,9 @@ nuttx
  |- fs/
  |   |- mmap/
  |   |   `- README.txt
- |   `- nxffs/
+ |   |- nxffs/
+ |   |   `- README.txt
+ |   `- procfs/
  |       `- README.txt
  |- graphics/
  |   `- README.txt

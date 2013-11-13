@@ -1,0 +1,13 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config FS_PROCFS
+	bool "PROCFS File System"
+	default n
+	---help---
+		The PROCFS file system is provides access to task status through the
+		NuttX file system.  The PROCFS may, for example, be mount at /proc.
+		Then information about all of the currently active tasks and threads
+		will be available in proc/.

@@ -258,7 +258,6 @@ int  sched_reprioritize(FAR struct tcb_s *tcb, int sched_priority);
 #else
 #  define sched_reprioritize(tcb,sched_priority) sched_setpriority(tcb,sched_priority)
 #endif
-FAR struct tcb_s *sched_gettcb(pid_t pid);
 bool sched_verifytcb(FAR struct tcb_s *tcb);
 
 int  sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype);

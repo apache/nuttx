@@ -16,6 +16,7 @@ source fs/nxffs/Kconfig
 source fs/romfs/Kconfig
 source fs/smartfs/Kconfig
 source fs/binfs/Kconfig
+source fs/procfs/Kconfig
 
 comment "System Logging"
 

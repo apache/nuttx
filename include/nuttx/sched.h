@@ -624,6 +624,10 @@ FAR struct tcb_s *sched_self(void);
 
 void sched_foreach(sched_foreach_t handler, FAR void *arg);
 
+/* Give a task ID, look up the corresponding TCB */
+
+FAR struct tcb_s *sched_gettcb(pid_t pid);
+
 /* File system helpers **********************************************************/
 /* These functions all extract lists from the group structure assocated with the
  * currently executing task.
