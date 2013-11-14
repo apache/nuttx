@@ -2507,7 +2507,7 @@ void up_usbinitialize(void)
         }
     }
 
-  /* Enable USB to AHB clock and to Event router*/
+  /* Enable USB to AHB clock and to Event router */
 
   lpc31_enableclock (CLKID_USBOTGAHBCLK);
   lpc31_enableclock (CLKID_EVENTROUTERPCLK);
