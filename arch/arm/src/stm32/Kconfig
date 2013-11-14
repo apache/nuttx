@@ -3031,6 +3031,17 @@ config CAN2_BAUD
 	---help---
 		CAN2 BAUD rate.  Required if STM32_CAN2 is defined.
 
+config CAN_TSEG1
+	int "TSEG1 quanta"
+	default 6
+	---help---
+		The number of CAN time quanta in segment 1. Default: 6
+
+config CAN_TSEG2
+	int "TSEG2 quanta"
+	default 7
+	---help---
+		The number of CAN time quanta in segment 2. Default: 7
 endmenu
 
 if STM32_LTDC
