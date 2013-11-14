@@ -6048,6 +6048,8 @@
 	  clock outputs (2013-11-14).
 	* configs/ea3131/nsh:  Converted to use kconfig-frontend tools
 	  (2013-11-14).
-	* arch/arm/lpc31: Create configuration and build support for a fortcoming
-	  USB host controller driver (2013-11-14).
+	* arch/arm/src/lpc31: Create configuration and build support for a
+	  forthcoming USB host controller driver (2013-11-14).
+	* arch/arm/src/lpc31/lpc31_ehci.c:  First cut at an EHCI driver
+	  tailed for the LPC31 (2013-11-14).
 
