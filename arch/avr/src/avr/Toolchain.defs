@@ -47,16 +47,19 @@ ifeq ($(filter y, \
     ),y)
   CONFIG_AVR_TOOLCHAIN ?= BUILDROOT
 endif
+
 ifeq ($(filter y, \
       $(CONFIG_AVR_CROSSPACK) \
     ),y)
   CONFIG_AVR_TOOLCHAIN ?= CROSSPACK
 endif
+
 ifeq ($(filter y, \
       $(CONFIG_AVR_LINUXGCC) \
     ),y)
   CONFIG_AVR_TOOLCHAIN ?= LINUXGCC
 endif
+
 ifeq ($(filter y, \
       $(CONFIG_AVR_WINAVR) \
     ),y)

@@ -6046,3 +6046,8 @@
 	  TSEG2 values.  From Martin Lederhilger (2013-11-14).
 	* arch/arm/src/sama5/sam_pck.c and .h:  Add support for programmable
 	  clock outputs (2013-11-14).
+	* configs/ea3131/nsh:  Converted to use kconfig-frontend tools
+	  (2013-11-14).
+	* arch/arm/lpc31: Create configuration and build support for a fortcoming
+	  USB host controller driver (2013-11-14).
+

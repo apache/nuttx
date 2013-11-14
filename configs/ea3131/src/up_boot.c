@@ -95,7 +95,7 @@ void lpc31_boardinitialize(void)
     * into the build.
     */
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_LPC31_USB)
+#if defined(CONFIG_USBDEV) && defined(CONFIG_LPC31_USBOTG)
   if (lpc31_usbinitialize)
     {
       lpc31_usbinitialize();

@@ -169,4 +169,3 @@ ifeq ($(CONFIG_ARM_TOOLCHAIN),GNU_EABIW)
     WINTOOL = y
   endif
 endif
-
