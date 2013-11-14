@@ -171,7 +171,7 @@
 
 /* ISI Preview Decimation Factor Register */
 
-#define ISI_PDECF_MASK             (0xff) /* Bits 0-7: Decimation Factor /
+#define ISI_PDECF_MASK             (0xff) /* Bits 0-7: Decimation Factor */
 
 /* ISI CSC YCrCb To RGB Set 0 Register */
 
