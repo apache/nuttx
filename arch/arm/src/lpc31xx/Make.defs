@@ -33,39 +33,47 @@
 #
 ############################################################################
 
-HEAD_ASRC	= up_head.S
+HEAD_ASRC = up_head.S
 
-CMN_ASRCS	= up_cache.S up_fullcontextrestore.S up_saveusercontext.S \
-		  up_vectors.S up_vectoraddrexcptn.S up_vectortab.S vfork.S
-CMN_CSRCS	= up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c \
-		  up_dataabort.c up_mdelay.c up_udelay.c up_exit.c up_idle.c \
-		  up_initialize.c up_initialstate.c up_interruptcontext.c \
-		  up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c \
-		  up_prefetchabort.c up_releasepending.c up_releasestack.c \
-		  up_reprioritizertr.c up_schedulesigaction.c \
-		  up_sigdeliver.c up_syscall.c up_unblocktask.c \
-		  up_undefinedinsn.c up_usestack.c up_vfork.c
+CMN_ASRCS  = up_cache.S up_fullcontextrestore.S up_saveusercontext.S
+CMN_ASRCS += up_vectors.S up_vectoraddrexcptn.S up_vectortab.S vfork.S
+
+CMN_CSRCS  = up_assert.c up_blocktask.c up_copyfullstate.c up_createstack.c
+CMN_CSRCS += up_dataabort.c up_mdelay.c up_udelay.c up_exit.c up_idle.c
+CMN_CSRCS += up_initialize.c up_initialstate.c up_interruptcontext.c
+CMN_CSRCS += up_modifyreg8.c up_modifyreg16.c up_modifyreg32.c
+CMN_CSRCS += up_prefetchabort.c up_releasepending.c up_releasestack.c
+CMN_CSRCS += up_reprioritizertr.c up_schedulesigaction.c
+CMN_CSRCS += up_sigdeliver.c up_syscall.c up_unblocktask.c
+CMN_CSRCS += up_undefinedinsn.c up_usestack.c up_vfork.c
 
 ifeq ($(CONFIG_PAGING),y)
-CMN_CSRCS	+= up_pginitialize.c up_checkmapping.c up_allocpage.c up_va2pte.c
+CMN_CSRCS += up_pginitialize.c up_checkmapping.c up_allocpage.c up_va2pte.c
 endif
 
 ifeq ($(CONFIG_ELF),y)
 CMN_CSRCS += up_elf.c
 endif
 
-CGU_ASRCS	= 
-CGU_CSRCS	= lpc31_bcrndx.c lpc31_clkdomain.c lpc31_clkexten.c \
-		  lpc31_clkfreq.c lpc31_clkinit.c lpc31_defclk.c \
-		  lpc31_esrndx.c lpc31_fdcndx.c lpc31_fdivinit.c \
-		  lpc31_freqin.c lpc31_pllconfig.c lpc31_resetclks.c \
-		  lpc31_setfreqin.c lpc31_setfdiv.c lpc31_softreset.c
+CGU_ASRCS  =
 
-CHIP_ASRCS	= $(CGU_ASRCS)
-CHIP_CSRCS	= lpc31_allocateheap.c lpc31_boot.c lpc31_decodeirq.c \
-		  lpc31_irq.c lpc31_lowputc.c lpc31_serial.c lpc31_i2c.c \
-		  lpc31_spi.c lpc31_timerisr.c $(CGU_CSRCS)
+CGU_CSRCS  = lpc31_bcrndx.c lpc31_clkdomain.c lpc31_clkexten.c
+CGU_CSRCS += lpc31_clkfreq.c lpc31_clkinit.c lpc31_defclk.c
+CGU_CSRCS += lpc31_esrndx.c lpc31_fdcndx.c lpc31_fdivinit.c
+CGU_CSRCS += lpc31_freqin.c lpc31_pllconfig.c lpc31_resetclks.c
+CGU_CSRCS += lpc31_setfreqin.c lpc31_setfdiv.c lpc31_softreset.c
 
+CHIP_ASRCS  = $(CGU_ASRCS)
+
+CHIP_CSRCS  = lpc31_allocateheap.c lpc31_boot.c lpc31_decodeirq.c
+CHIP_CSRCS += lpc31_irq.c lpc31_lowputc.c lpc31_serial.c lpc31_i2c.c
+CHIP_CSRCS += lpc31_spi.c lpc31_timerisr.c $(CGU_CSRCS)
+
+ifeq ($(CONFIG_LPC31_USBOTG),y)
+ifeq ($(CONFIG_USBHOST),y)
+CHIP_CSRCS += lpc31_ehci.c
+endif
 ifeq ($(CONFIG_USBDEV),y)
-CHIP_CSRCS	+= lpc31_usbdev.c
+CHIP_CSRCS += lpc31_usbdev.c
+endif
 endif

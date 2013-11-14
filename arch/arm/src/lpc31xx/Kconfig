@@ -40,30 +40,6 @@ config ARCH_CHIP_LPC3154
 
 endchoice # LPC31xx Configuration Options
 
-choice
-	prompt "Toolchain Selection"
-	default LPC31_BUILDROOT if !HOST_WINDOWS
-	default LPC31_CODESOURCERYW if HOST_WINDOWS
-	depends on ARCH_CHIP_LPC31XX
-
-config LPC31_CODESOURCERYW
-	bool "CodeSourcery GNU toolchain under Windows"
-	depends on HOST_WINDOWS
-
-config LPC31_CODESOURCERYL
-	bool "CodeSourcery GNU toolchain under Linux"
-	depends on HOST_LINUX
-
-config LPC31_DEVKITARM
-	bool "devkitARM GNU toolchain"
-	depends on HOST_WINDOWS
-
-config LPC31_BUILDROOT
-	bool "Buildroot"
-	depends on !WINDOWS_NATIVE
-
-endchoice # Toolchain Selection
-
 config LPC31_SDRAMHCLK
 	int "External SDRAM HCLK"
 	depends on LPC31_EXTSDRAM
@@ -81,8 +57,8 @@ config LPC31_SPI
 	bool "SPI"
 	default n
 
-config LPC31_USB
-	bool "USB"
+config LPC31_USBOTG
+	bool "USB OTG"
 	default n
 
 config LPC31_MCI
@@ -215,6 +191,12 @@ endmenu # External Memory Configuration
 menu "LPC31xx UART Configuration"
 	depends on LPC31_UART
 
+config LPC31_UART_PRECALCULATED
+	bool "Use pre-calculated BAD configuration"
+	default n
+
+if LPC31_UART_PRECALCULATED
+
 config LPC31_UART_DIVADDVAL
 	int "BAUD pre-scaler divisor"
 	---help---
@@ -230,20 +212,21 @@ config LPC31_UART_MULVAL
 	---help---
 		BAUD multiplier
 
+endif # LPC31_UART_PRECALCULATED
 endmenu # LPC31xx UART Configuration
 
-menu "USB device driver options"
+if LPC31_USBOTG && USBDEV
+
+menu "USB device controller driver (DCD) options"
 
 config LPC31_USBDEV_EP0_MAXSIZE
 	int "EP0 Max packet size"
-	depends on USBDEV
 	default 64
 	---help---
 		Endpoint 0 maximum packet size.  Default: 64
 
 config LPC31_USBDEV_FRAME_INTERRUPT
 	bool "USB frame interrupt"
-	depends on USBDEV
 	default n
 	---help---
 		Handle USB Start-Of-Frame events.  Enable reading SOF from interrupt
@@ -252,19 +235,61 @@ config LPC31_USBDEV_FRAME_INTERRUPT
 
 config LPC31_USBDEV_DMA
 	bool "Enable USB device DMA"
-	depends on USBDEV
 	default n
 	---help---
 		Enable lpc31xx-specific DMA support
 
 config LPC31_USBDEV_REGDEBUG
 	bool "Register level debug"
-	depends on USBDEV && DEBUG
+	depends on DEBUG
 	default n
 	---help---
 		Output detailed register-level USB device debug information.  Requires also DEBUG.
 
-endmenu # USB device driver options
+endmenu # USB device driver controller (DCD) options
+endif # LPC31_USBOTG && USBDEV
+
+if LPC31_USBOTG && USBHOST
+
+menu "USB host controller driver (HCD) options"
+
+config LPC31_EHCI_NQHS
+	int "Number of Queue Head (QH) structures"
+	default 4
+	---help---
+		Configurable number of Queue Head (QH) structures.  The default is
+		one per Root hub port plus one for EP0 (4).
+
+config LPC31_EHCI_NQTDS
+	int "Number of Queue Element Transfer Descriptor (qTDs)"
+	default 6
+	---help---
+		Configurable number of Queue Element Transfer Descriptor (qTDs).
+		The default is one per root hub plus three from EP0 (6).
+
+config LPC31_EHCI_BUFSIZE
+	int "Size of one request/descriptor buffer"
+	default 128
+	---help---
+		The size of one request/descriptor buffer in bytes.  The TD buffe
+		size must be an even number of 32-bit words and must be large enough
+		to hangle the largest transfer via a SETUP request.
+
+config LPC31_EHCI_PREALLOCATE
+	bool "Preallocate descriptor pool"
+	default y
+	---help---
+		Select this option to pre-allocate EHCI queue and descriptor
+		structure pools in .bss.  Otherwise, these pools will be
+		dynamically allocated using kmemalign().
+
+config LPC31_EHCI_REGDEBUG
+	bool "Enable low-level EHCI register debug"
+	default n
+	depends on DEBUG
+
+endmenu # USB host controller driver (HCD) options
+endif # LPC31_USBOTG && USBHOST
 
 menu "SPI device driver options"
 

@@ -2604,7 +2604,6 @@ void up_usbuninitialize(void)
   lpc31_disableclock (CLKID_USBOTGAHBCLK);
   lpc31_disableclock (CLKID_EVENTROUTERPCLK);
 
-
   irqrestore(flags);
 }
 
@@ -2666,6 +2665,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 
       lpc31_pullup(&g_usbdev.usbdev, true);
     }
+
   return ret;
 }
 

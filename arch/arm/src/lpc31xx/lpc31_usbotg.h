@@ -47,6 +47,8 @@
  * Pre-processor Definitions
  ************************************************************************************************/
 
+#define LPC31_EHCI_NRHPORT                1      /* There is only a single root hub port */
+
 /* USBOTG register base address offset into the USBOTG domain ***********************************/
 
 #define LPC31_USBOTG_VBASE                (LPC31_USBOTG_VSECTION)
