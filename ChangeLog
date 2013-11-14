@@ -6042,4 +6042,6 @@
 	  (2013-11-11).
 	* fs/procfs:  Add a little, primitive procfs file system. (2013-11-13).
 	* fs/binfs/README.txt:  Add a README file for binfs (2013-11-13).
+	* arch/arm/src/stm32/Kconfig:  Add missing setup of CAN TSEG1 and
+	  TSEG2 values.  From Martin Lederhilger (2013-11014).
 
