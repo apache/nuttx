@@ -41,6 +41,7 @@
 
 #include <debug.h>
 
+#include "sam_memories.h"
 #include "sam_pio.h"
 #include "sam_pck.h"
 #include "sam_isi.h"
@@ -172,6 +173,11 @@ int sam_isi_initialize(void)
   /* Configure color */
 #warning Missing logic
 
+  /* Configure decimation */
+#warning Missing logic
+
+  /* Configure DMA */
+#warning Missing logic
 }
 
 #endif /* CONFIG_SAMA5_ISI && CONFIG_SAMA5_EMAC */
