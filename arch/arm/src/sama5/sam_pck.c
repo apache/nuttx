@@ -41,6 +41,8 @@
 
 #include <debug.h>
 
+#include "chip/sam_pinmap.h"
+#include "sam_pio.h"
 #include "sam_isi.h"
 
 #ifdef CONFIG_SAMA5_ISI
@@ -159,22 +161,27 @@ uint32_t sam_pck_configure(enum pckid_e pckid, uint32_t frequency)
       return -ERANGE;
     }
 
-  /* Disable the programmable clock then set the selected configuration */
+  /* Disable the programmable clock, configure the PCK output pin, then set
+   * the selected configuration.
+   */
 
   switch (pckid)
     {
     case PCK0:
       putreg32(PMC_PCK0, SAM_PMC_SCDR);
+      (void)sam_configpio(PIO_PMC_PCK0);
       putreg32(regval, SAM_PMC_PCK0);
       break;
 
     case PCK1:
       putreg32(PMC_PCK1, SAM_PMC_SCDR);
+      (void)sam_configpio(PIO_PMC_PCK1);
       putreg32(regval, SAM_PMC_PCK1);
       break;
 
     case PCK2:
       putreg32(PMC_PCK2, SAM_PMC_SCDR);
+      (void)sam_configpio(PIO_PMC_PCK2);
       putreg32(regval, SAM_PMC_PCK2);
       break;
 
