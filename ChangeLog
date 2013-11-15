@@ -6052,4 +6052,7 @@
 	  forthcoming USB host controller driver (2013-11-14).
 	* arch/arm/src/lpc31/lpc31_ehci.c:  First cut at an EHCI driver
 	  tailed for the LPC31 (2013-11-14).
+	* fs/fs_mount.c:  SMART FS must be included in the conditional
+	  compilation for the set of file systems that require block
+	  drivers.  From Daniel Palmer (2013-11-15).
 

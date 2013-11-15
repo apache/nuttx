@@ -68,7 +68,8 @@
  * These file systems all require block drivers:
  */
 
-#if defined(CONFIG_FS_FAT) || defined(CONFIG_FS_ROMFS)
+#if defined(CONFIG_FS_FAT) || defined(CONFIG_FS_ROMFS) || \
+    defined(CONFIG_FS_SMARTFS)
 #  define BDFS_SUPPORT 1
 #endif
 
