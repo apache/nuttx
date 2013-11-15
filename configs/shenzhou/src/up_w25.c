@@ -49,7 +49,7 @@
 
 #ifdef CONFIG_STM32_SPI1
 #  include <nuttx/spi/spi.h>
-#  include <nuttx/mtd.h>
+#  include <nuttx/mtd/mtd.h>
 #  include <nuttx/fs/nxffs.h>
 #endif
 

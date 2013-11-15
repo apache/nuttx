@@ -66,7 +66,7 @@
 #  include <sys/ioctl.h>
 #  include <nuttx/fs/ioctl.h>
 #  include <nuttx/spi/spi.h>
-#  include <nuttx/mtd.h>
+#  include <nuttx/mtd/mtd.h>
 #endif
 
 /****************************************************************************

@@ -47,7 +47,7 @@
 #include "chip.h"
 
 #ifdef CONFIG_LPC43_SPIFI
-#  include <nuttx/mtd.h>
+#  include <nuttx/mtd/mtd.h>
 #  include "lpc43_spifi.h"
 
 #  ifdef CONFIG_SPFI_NXFFS

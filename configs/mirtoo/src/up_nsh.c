@@ -49,7 +49,7 @@
 
 #ifdef CONFIG_PIC32MX_SPI2
 #  include <nuttx/spi/spi.h>
-#  include <nuttx/mtd.h>
+#  include <nuttx/mtd/mtd.h>
 #  include <nuttx/fs/nxffs.h>
 #endif
 
