@@ -58,8 +58,12 @@ ifeq ($(CONFIG_SAMA5_DDRCS),y)
 CSRCS += sam_sdram.c
 endif
 
-ifeq ($(CONFIG_SAMA5_BOOT_CS0FLASH),y)
+ifeq ($(CONFIG_SAMA5_EBICS0_NOR),y)
 CSRCS += sam_norflash.c
+endif
+
+ifeq ($(CONFIG_SAMA5_EBICS3_NAND),y)
+CSRCS += sam_nandflash.c
 endif
 
 ifeq ($(CONFIG_SAMA5_NOR_MAIN),y)
