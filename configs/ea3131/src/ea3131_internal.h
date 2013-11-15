@@ -87,7 +87,7 @@
  ************************************************************************************/
 
 #ifdef CONFIG_LPC31_EXTDRAM
-extern void lpc31_meminitialize(void);
+void lpc31_meminitialize(void);
 #endif
 
 /************************************************************************************
@@ -98,17 +98,46 @@ extern void lpc31_meminitialize(void);
  *
  ************************************************************************************/
 
-extern void weak_function lpc31_spiinitialize(void);
+void weak_function lpc31_spiinitialize(void);
 
 /************************************************************************************
- * Name: lpc31_usbinitialize
+ * Name: lpc31_usbdev_initialize
  *
  * Description:
  *   Called to setup USB-related GPIO pins for the EA3131 board.
  *
  ************************************************************************************/
 
-extern void weak_function lpc31_usbinitialize(void);
+#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBDEV)
+void weak_function lpc31_usbdev_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: lpc31_usbhost_bootinitialize
+ *
+ * Description:
+ *   Called from lpc31_boardinitialize very early in inialization to setup USB
+ *   host-related GPIO pins for the EA3131 board.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
+void weak_function lpc31_usbhost_bootinitialize(void);
+#endif
+
+/***********************************************************************************
+ * Name: lpc31_usbhost_initialize
+ *
+ * Description:
+ *   Called at application startup time to initialize the USB host functionality.
+ *   This function will start a thread that will monitor for device
+ *   connection/disconnection events.
+ *
+ ***********************************************************************************/
+
+#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
+int lpc31_usbhost_initialize(void);
+#endif
 
 /************************************************************************************
  * Name: lpc31_pginitialize
@@ -119,7 +148,7 @@ extern void weak_function lpc31_usbinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_PAGING
-extern void weak_function lpc31_pginitialize(void);
+void weak_function lpc31_pginitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

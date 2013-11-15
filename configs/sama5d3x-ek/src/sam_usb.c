@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/sama5d3x-ek/src/up_usb.c
+ * configs/sama5d3x-ek/src/sam_usb.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -533,4 +533,4 @@ void sam_usbsuspend(FAR struct usbdev_s *dev, bool resume)
 }
 #endif
 
-#endif /* CONFIG_SAMA5_UHPHS || CONFIG_SAMA5_UDPHS*/
+#endif /* CONFIG_SAMA5_UHPHS || CONFIG_SAMA5_UDPHS */

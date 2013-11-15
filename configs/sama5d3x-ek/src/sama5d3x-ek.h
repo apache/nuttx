@@ -613,7 +613,7 @@ bool sam_writeprotected(int slotno);
  *
  * Description:
  *   Called from sam_usbinitialize very early in inialization to setup USB-related
- *   GPIO pins for the STM32F4Discovery board.
+ *   PIO pins for the SAMA5D3x-EK board.
  *
  ************************************************************************************/
 

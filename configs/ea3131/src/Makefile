@@ -35,45 +35,56 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= -I$(TOPDIR)/sched
+CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS		= 
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
+ASRCS =
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= up_boot.c up_clkinit.c
+CSRCS = up_boot.c up_clkinit.c
+
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS		+= up_buttons.c
+CSRCS += up_buttons.c
 endif
+
 ifeq ($(CONFIG_LPC31_EXTDRAM),y)
-CSRCS		+= up_mem.c
+CSRCS += up_mem.c
 endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS		+= up_leds.c
+CSRCS += up_leds.c
 endif
+
 ifeq ($(CONFIG_LPC31_SPI),y)
-CSRCS		+= up_spi.c
+CSRCS += up_spi.c
 endif
+
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= up_nsh.c
+CSRCS += up_nsh.c
 endif
+
 ifeq ($(CONFIG_PAGING),y)
-CSRCS		+= up_fillpage.c
+CSRCS += up_fillpage.c
+endif
+
+ifeq ($(CONFIG_LPC31_USBOTG),y)
+ifeq ($(CONFIG_USBHOST),y)
+CSRCS += up_usbhost.c
 endif
 ifeq ($(CONFIG_USBMSC),y)
-CSRCS		+= up_usbmsc.c
+CSRCS += up_usbmsc.c
 endif
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+endif
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
+
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(WINTOOL),y)
-  CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-  		   -I "${shell cygpath -w $(ARCH_SRCDIR)/arm}"
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" -I "${shell cygpath -w $(ARCH_SRCDIR)/arm}"
 else
-  CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/arm
+  CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/arm
 endif
 
 all: libboard$(LIBEXT)
