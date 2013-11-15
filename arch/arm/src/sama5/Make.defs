@@ -226,3 +226,19 @@ ifeq ($(CONFIG_SAMA5_TC1),y)
 CHIP_CSRCS += sam_tc.c
 endif
 endif
+
+ifeq ($(CONFIG_SAMA5_EBICS0_NAND),y)
+CHIP_CSRCS += sam_nand.c
+else
+ifeq ($(CONFIG_SAMA5_EBICS1_NAND),y)
+CHIP_CSRCS += sam_nand.c
+else
+ifeq ($(CONFIG_SAMA5_EBICS2_NAND),y)
+CHIP_CSRCS += sam_nand.c
+else
+ifeq ($(CONFIG_SAMA5_EBICS3_NAND),y)
+CHIP_CSRCS += sam_nand.c
+endif
+endif
+endif
+endif
