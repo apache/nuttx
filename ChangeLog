@@ -6055,4 +6055,7 @@
 	* fs/fs_mount.c:  SMART FS must be included in the conditional
 	  compilation for the set of file systems that require block
 	  drivers.  From Daniel Palmer (2013-11-15).
+	* tools/mkconfig.c:  SMART FS must be included in the conditional
+	  compilation for the set of writable file systems.  Noted by
+	  Daniel Palmer (2013-11-15).
 
