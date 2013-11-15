@@ -86,7 +86,7 @@ if MTD_NAND
 config MTD_NAND_EMBEDDEDECC
 	bool "Support devices with Embedded ECC"
 	default n
-	---help--
+	---help---
 		Some NAND devices have internal, embedded ECC function.  One (the
 		only one supported) is Micron, 4-bit ECC, device size = 1Gb or 2Gb
 		or 4Gb.

@@ -91,14 +91,27 @@ void lpc31_boardinitialize(void)
 #endif
 
    /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-    * disabled, and 3) the weak function lpc31_usbinitialize() has been brought
+    * disabled, and 3) the weak function lpc31_usbdev_initialize() has been brought
     * into the build.
     */
 
 #if defined(CONFIG_USBDEV) && defined(CONFIG_LPC31_USBOTG)
-  if (lpc31_usbinitialize)
+  if (lpc31_usbdev_initialize)
     {
-      lpc31_usbinitialize();
+      lpc31_usbdev_initialize();
+    }
+#endif
+
+  /* Initialize USB if the 1) the HS host or device controller is in the
+   * configuration and 2) the weak function sam_usbinitialize() has been brought
+   * into the build. Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also
+   * selected.
+   */
+
+#if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
+  if (lpc31_usbhost_bootinitialize)
+    {
+      lpc31_usbhost_bootinitialize();
     }
 #endif
 

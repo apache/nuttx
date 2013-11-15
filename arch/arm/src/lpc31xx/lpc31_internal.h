@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/lpc31xx/lpc31_internal.h
  *
- *   Copyright (C) 2009-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -76,7 +76,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -157,7 +158,7 @@ static inline void gpio_outputhigh(uint32_t ioconfig, uint32_t bit)
  *
  ************************************************************************************/
 
-EXTERN void lpc31_lowsetup(void);
+void lpc31_lowsetup(void);
 
 /************************************************************************************
  * Name: lpc31_clockconfig
@@ -167,7 +168,7 @@ EXTERN void lpc31_lowsetup(void);
  *
  ************************************************************************************/
 
-EXTERN void lpc31_clockconfig(void);
+void lpc31_clockconfig(void);
 
 /************************************************************************************
  * Name:  lpc31_spiselect and lpc31_spistatus
@@ -200,10 +201,10 @@ EXTERN void lpc31_clockconfig(void);
 
 struct spi_dev_s;
 enum spi_dev_e;
-EXTERN void  lpc31_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
-EXTERN uint8_t lpc31_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
+void  lpc31_spiselect(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected);
+uint8_t lpc31_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid);
 #ifdef CONFIG_SPI_CMDDATA
-EXTERN int lpc31_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
+int lpc31_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd);
 #endif
 
 /************************************************************************************
@@ -218,8 +219,10 @@ EXTERN int lpc31_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, boo
  *
  ************************************************************************************/
 
+#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBDEV)
 struct usbdev_s;
-EXTERN int lpc31_usbpullup(FAR struct usbdev_s *dev,  bool enable);
+int lpc31_usbpullup(FAR struct usbdev_s *dev,  bool enable);
+#endif
 
 /************************************************************************************
  * Name:  lpc31_usbsuspend
@@ -232,8 +235,61 @@ EXTERN int lpc31_usbpullup(FAR struct usbdev_s *dev,  bool enable);
  *
  ************************************************************************************/
 
+#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBDEV)
 struct usbdev_s;
-EXTERN void lpc31_usbsuspend(FAR struct usbdev_s *dev, bool resume);
+void lpc31_usbsuspend(FAR struct usbdev_s *dev, bool resume);
+#endif
+
+/*******************************************************************************
+ * Name: lpc31_ehci_initialize
+ *
+ * Description:
+ *   Initialize USB EHCI host controller hardware.
+ *
+ * Input Parameters:
+ *   controller -- If the device supports more than one EHCI interface, then
+ *     this identifies which controller is being intialized.  Normally, this
+ *     is just zero.
+ *
+ * Returned Value:
+ *   And instance of the USB host interface.  The controlling task should
+ *   use this interface to (1) call the wait() method to wait for a device
+ *   to be connected, and (2) call the enumerate() method to bind the device
+ *   to a class driver.
+ *
+ * Assumptions:
+ * - This function should called in the initialization sequence in order
+ *   to initialize the USB device functionality.
+ * - Class drivers should be initialized prior to calling this function.
+ *   Otherwise, there is a race condition if the device is already connected.
+ *
+ *******************************************************************************/
+
+#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
+struct usbhost_connection_s;
+FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller);
+#endif
+
+/***********************************************************************************
+ * Name: lpc31_usbhost_vbusdrive
+ *
+ * Description:
+ *   Enable/disable driving of VBUS 5V output.  This function must be provided by
+ *   each platform that implements the EHCI host interface
+ *
+ * Input Parameters:
+ *   rhport - Selects root hub port to be powered host interface.  This is not used
+ *      with the LPC31 since it supports only a single root hub port.
+ *   enable - true: enable VBUS power; false: disable VBUS power
+ *
+ * Returned Value:
+ *   None
+ *
+ ***********************************************************************************/
+
+#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
+void lpc31_usbhost_vbusdrive(int rhport, bool enable);
+#endif
 
 /****************************************************************************
  * Name: sdio_initialize
@@ -250,7 +306,7 @@ EXTERN void lpc31_usbsuspend(FAR struct usbdev_s *dev, bool resume);
  ****************************************************************************/
 
 struct sdio_dev_s; /* See include/nuttx/sdio.h */
-EXTERN FAR struct sdio_dev_s *sdio_initialize(int slotno);
+FAR struct sdio_dev_s *sdio_initialize(int slotno);
 
 /****************************************************************************
  * Name: sdio_mediachange
@@ -271,7 +327,7 @@ EXTERN FAR struct sdio_dev_s *sdio_initialize(int slotno);
  *
  ****************************************************************************/
 
-EXTERN void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
+void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
 
 /****************************************************************************
  * Name: sdio_wrprotect
@@ -289,7 +345,7 @@ EXTERN void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
  *
  ****************************************************************************/
 
-EXTERN void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
+void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
 
 #undef EXTERN
 #if defined(__cplusplus)

@@ -2545,7 +2545,6 @@ void up_usbinitialize(void)
       goto errout;
     }
 
-
   /* Program the controller to be the USB device controller */
 
   lpc31_putreg (USBDEV_USBMODE_SDIS | USBDEV_USBMODE_SLOM | USBDEV_USBMODE_CMDEVICE,
