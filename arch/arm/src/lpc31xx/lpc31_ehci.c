@@ -57,6 +57,7 @@
 
 #include "up_arch.h"
 
+#include "lpc31_internal.h"
 #include "lpc31_cgudrvr.h"
 #include "lpc31_syscreg.h"
 #include "lpc31_evntrtr.h"
@@ -4125,6 +4126,19 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
   while ((getreg32(LPC31_USBDEV_USBCMD) & USBDEV_USBCMD_RST) != 0)
       ;
 
+  /* Program the controller to be the USB host controller
+   *
+   * CM   = Host mode
+   * ES   = 0, Little endian mode.
+   * SLOM   Not used in host mode.
+   * SDIS = 1, Stream disable mode.  Eliminates overruns/underruns at
+   *        the expense of some performance.
+   * VBPS = 1, off chip power source
+   */
+
+  putreg32(USBHOST_USBMODE_CMHOST | USBHOST_USBMODE_SDIS | USBHOST_USBMODE_VBPS,
+           LPC31_USBDEV_USBMODE);
+
   /* "In order to initialize the host controller, software should perform the
    *  following steps:
    *
@@ -4315,7 +4329,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
    *   PORTSC register to enable power.
    */
 
-  lpc31_usbhost_vbusdrive(true);
+  lpc31_usbhost_vbusdrive(0, true);
   up_mdelay(50);
 
   /* If there is a USB device in the slot at power up, then we will not
