@@ -6065,3 +6065,7 @@
 	* include/nuttx/mtd/mtd.h:  Move include/nutt/mtd.h to
 	  include/nuttx/mtd/mtd.h where it will, hopefully, soon be joined by
 	  other MTD-related header files (2013-11-15).
+	* drivers/mtd/mtd_onfi.c and include/nuttx/mtd/onfi.h:  Add sharedi
+	  NAND routines for use with ONFI compatible NAND FLASH devices
+	  (2013-11-15).
+

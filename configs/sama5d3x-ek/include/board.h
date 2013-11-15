@@ -164,6 +164,20 @@
 
 #define BUTTON_USER1_BIT  (1 << BUTTON_USER1)
 
+/* NAND *****************************************************************************/
+
+/* Address for transferring command bytes to the nandflash, CLE A22*/
+
+#define BOARD_NF_COMMAND_ADDR   0x60400000
+
+/* Address for transferring address bytes to the nandflash, ALE A21*/
+
+#define BOARD_NF_ADDRESS_ADDR   0x60200000
+
+/* Address for transferring data bytes to the nandflash.*/
+
+#define BOARD_NF_DATA_ADDR      0x60000000
+
 /* PIO configuration ****************************************************************/
 /* LCDC */
 
