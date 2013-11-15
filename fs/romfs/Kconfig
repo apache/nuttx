@@ -7,6 +7,7 @@ config FS_ROMFS
 	bool "ROMFS file system"
 	default n
 	depends on !DISABLE_MOUNTPOINT
+	select FS_READABLE
 	---help---
 		Enable ROMFS filesystem support
 

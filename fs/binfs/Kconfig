@@ -7,6 +7,7 @@ config FS_BINFS
 	bool "BINFS File System"
 	default n
 	depends on BUILTIN
+	select FS_READABLE
 	---help---
 		The BINFS file system is provides access to builtin applications through
 		the NuttX file system.  The BINFS may, for example, be mount at /bin.

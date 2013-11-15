@@ -7,6 +7,8 @@ config FS_FAT
 	bool "FAT file system"
 	default n
 	depends on !DISABLE_MOUNTPOINT
+	select FS_READABLE
+	select FS_WRITABLE
 	---help---
 		Enable FAT filesystem support
 

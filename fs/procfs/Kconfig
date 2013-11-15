@@ -6,6 +6,7 @@
 config FS_PROCFS
 	bool "PROCFS File System"
 	default n
+	select FS_WRITABLE
 	---help---
 		The PROCFS file system is provides access to task status through the
 		NuttX file system.  The PROCFS may, for example, be mount at /proc.
