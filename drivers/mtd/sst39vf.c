@@ -51,7 +51,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/mtd.h>
+#include <nuttx/mtd/mtd.h>
 
 /****************************************************************************
  * Pre-processor Definitions

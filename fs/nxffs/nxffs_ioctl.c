@@ -48,7 +48,7 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/mtd.h>
+#include <nuttx/mtd/mtd.h>
 
 #include "nxffs.h"
 

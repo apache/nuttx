@@ -19,7 +19,7 @@ config MTD_PARTITION
 		each managed by a separate MTD driver.  The MTD parition interface
 		is described in:
 
-			include/nuttx/mtd.h
+			include/nuttx/mtd/mtd.h
 			FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t offset, off_t nblocks);
 
 		Each call to mtd_partition() will create a new MTD driver instance
@@ -74,6 +74,15 @@ config MTD_CONFIG_ERASEDVALUE
 		on the device.
 
 comment "MTD Device Drivers"
+
+config MTD_NAND
+	bool "Enable NAND support"
+	default n
+	---help---
+		Enable support for NAND FLASH devices.
+
+if MTD_NAND
+endif # MTD_NAND
 
 config RAMMTD
 	bool "RAM-based MTD driver"

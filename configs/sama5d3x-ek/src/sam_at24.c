@@ -65,7 +65,7 @@
 #include <debug.h>
 
 #include <nuttx/i2c.h>
-#include <nuttx/mtd.h>
+#include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
 
 #include "sama5d3x-ek.h"

@@ -46,7 +46,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/mtd.h>
+#include <nuttx/mtd/mtd.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
 

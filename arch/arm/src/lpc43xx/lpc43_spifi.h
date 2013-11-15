@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/mtd.h>
+#include <nuttx/mtd/mtd.h>
 
 #include "chip.h"
 #include "chip/lpc43_spifi.h"

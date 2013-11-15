@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/mtd.h
+ * include/nuttx/mtd/mtd.h
  * Memory Technology Device (MTD) interface
  *
  *   Copyright (C) 2009-2013 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MTD_H
-#define __INCLUDE_NUTTX_MTD_H
+#ifndef __INCLUDE_NUTTX_MTD_MTD_H
+#define __INCLUDE_NUTTX_MTD_MTD_H
 
 /****************************************************************************
  * Included Files
@@ -346,4 +346,4 @@ FAR struct mtd_dev_s *up_flashinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_MTD_H */
+#endif /* __INCLUDE_NUTTX_MTD_MTD_H */

@@ -85,7 +85,7 @@ mmcsd/
 mtd/
   Memory Technology Device (MTD) drivers.  Some simple drivers for
   memory technologies like FLASH, EEPROM, NVRAM, etc.  See
-  include/nuttx/mtd.h
+  include/nuttx/mtd/mtd.h
 
   (Note: This is a simple memory interface and should not be
   confused with the "real" MTD developed at infradead.org.  This

@@ -6059,6 +6059,9 @@
 	  compilation for the set of writable file systems.  Noted by
 	  Daniel Palmer (2013-11-15).
 	* arch/arm/src/sama5/sam_nand.c and .h:  Framework for an MTD driver
-	  that will provide raw access to NAND (2013-11015).
+	  that will provide raw access to NAND (2013-11-15).
 	* configs/sama5d3x-ek/src/sam_nandflash.c:  Provides board-specific
-	  memory controller initialize for NAND flash (2013-11015).
+	  memory controller initialize for NAND flash (2013-11-15).
+	* include/nuttx/mtd/mtd.h:  Move include/nutt/mtd.h to
+	  include/nuttx/mtd/mtd.h where it will, hopefully, soon be joined by
+	  other MTD-related header files (2013-11-15).

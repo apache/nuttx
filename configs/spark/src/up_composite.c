@@ -50,7 +50,7 @@
 
 #ifdef CONFIG_MTD_SST25
 #  include <nuttx/spi/spi.h>
-#  include <nuttx/mtd.h>
+#  include <nuttx/mtd/mtd.h>
 #  include <sys/mount.h>
 #endif
 

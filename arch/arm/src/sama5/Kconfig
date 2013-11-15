@@ -3033,6 +3033,8 @@ config SAMA5_EBICS0_NOR
 
 config SAMA5_EBICS0_NAND
 	bool "NAND Flash"
+	select MTD
+	select MTD_NAND
 
 endchoice # CS0 Memory Type
 endif # SAMA5_EBICS0
@@ -3082,6 +3084,8 @@ config SAMA5_EBICS1_NOR
 
 config SAMA5_EBICS1_NAND
 	bool "NAND Flash"
+	select MTD
+	select MTD_NAND
 
 endchoice # CS1 Memory Type
 endif # SAMA5_EBICS1
@@ -3131,6 +3135,8 @@ config SAMA5_EBICS2_NOR
 
 config SAMA5_EBICS2_NAND
 	bool "NAND Flash"
+	select MTD
+	select MTD_NAND
 
 endchoice # CS2 Memory Type
 endif # SAMA5_EBICS2
@@ -3180,6 +3186,8 @@ config SAMA5_EBICS3_NOR
 
 config SAMA5_EBICS3_NAND
 	bool "NAND Flash"
+	select MTD
+	select MTD_NAND
 
 endchoice # CS3 Memory Type
 endif # SAMA5_EBICS3

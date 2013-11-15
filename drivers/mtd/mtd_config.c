@@ -58,7 +58,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/mtd.h>
+#include <nuttx/mtd/mtd.h>
 #include <nuttx/configdata.h>
 
 #ifdef CONFIG_MTD_CONFIG

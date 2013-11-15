@@ -52,7 +52,7 @@
 #endif
 
 #ifdef CONFIG_MTD_M25P
-#  include <nuttx/mtd.h>
+#  include <nuttx/mtd/mtd.h>
 #endif
 
 #ifdef CONFIG_SYSTEM_USBMONITOR

@@ -45,7 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/mtd.h>
+#include <nuttx/mtd/mtd.h>
 
 #include "nxffs.h"
 
