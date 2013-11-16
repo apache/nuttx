@@ -6235,4 +6235,7 @@
 	  (2013-12-15).
 	* arch/arm/src/armv7-a/cp15.h:  Review A9 TRM and updated CP15
 	  register definitions accordinglyg (2013-12-16).
+	* Makefile.unix: Now has supports qconfig and gconfig targets.
+	  These tools will use the Qt and GTK versions of the kconfig-
+	  frontends configuration tools (if you built them) (2013-12-16)
 

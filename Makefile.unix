@@ -696,6 +696,12 @@ oldconfig:
 menuconfig:
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-mconf Kconfig
 
+qconfig:
+	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-qconf Kconfig
+
+gconfig:
+	$(Q) APPSDIR=${CONFIG_APPS_DIR} kconfig-gconf Kconfig
+
 # export
 #
 # The export target will package the NuttX libraries and header files into
