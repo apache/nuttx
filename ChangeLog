@@ -6073,3 +6073,6 @@
 	* drivers/mtd/mtd_nand.c, include/nuttx/mtd/nand.h, nand_config.h,
 	  and nand_scheme.h:  Further NAND support (still incomplete).
 	  (2013-11-16).
+	* drivers/mtd/mtd_modeltab.c:  Further NAND support (still incomplete).
+	  (2013-11-16).
+

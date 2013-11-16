@@ -47,8 +47,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <nuttx/mtd/nand_config.h>
+
+#include <stdint.h>
 
 /****************************************************************************
  * Pre-Processor Definitions

@@ -1,15 +1,12 @@
 /****************************************************************************
- * arch/arm/src/sama5/sam_nand.c
+ * drivers/mtd/mtd_nand.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *   SAMA5D3 Series Data Sheet
- *   Atmel NoOS sample code.
- *
- * The Atmel sample code has a BSD compatibile license that requires this
- * copyright notice:
+ * This logic was based largely on Atmel sample code with modifications for
+ * better integration with NuttX.  The Atmel sample code has a BSD
+ * compatibile license that requires this copyright notice:
  *
  *   Copyright (c) 2011, 2012, Atmel Corporation
  *
