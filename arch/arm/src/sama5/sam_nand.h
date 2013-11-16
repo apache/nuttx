@@ -112,6 +112,50 @@ struct mtd_dev_s *sam_nand_initialize(int cs);
 
 int board_nandflash_config(int cs);
 
+/****************************************************************************
+ * Name: board_nand_busy
+ *
+ * Description:
+ *   Must be provided if the board logic supports and interface to detect
+ *   NAND Busy/Ready signal.
+ *
+ * Input Parameters:
+ *   cs - Chip select number (in the event that multiple NAND devices
+ *        are connected on-board).
+ *
+ * Returned Values:
+ *   True:  NAND is busy, False: NAND is ready
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_NAND_READYBUSY
+bool board_nand_busy(int cs);
+#endif
+
+/****************************************************************************
+ * Name: board_nandflash_config
+ *
+ * Description:
+ *   Must be provided if the board logic supports and interface to control
+ *   the NAND Chip Enable signal.
+ *
+ * Input Parameters:
+ *   cs - Chip select number (in the event that multiple NAND devices
+ *        are connected on-board).
+ *   enable - True: enable Chip Select, False: Disable Chip select
+ *
+ * Returned Values:
+ *   OK if the HSMC was successfully configured for this CS.  A negated
+ *   errno value is returned on a failure.  This would fail with -ENODEV,
+ *   for example, if the board does not support NAND FLASH on the requested
+ *   CS.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_NAND_CE
+void board_nand_ce(int cs, bool enable);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

@@ -51,6 +51,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include <nuttx/mtd/mtd.h>
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
@@ -84,6 +86,7 @@ extern "C"
  *   Probe and initialize NAND.
  *
  * Input parameters:
+ *   raw      - Raw NAND FLASH MTD interface
  *   cmdaddr  - NAND command address base
  *   addraddr - NAND address address base
  *   dataaddr - NAND data address
@@ -93,7 +96,8 @@ extern "C"
  *
  ****************************************************************************/
 
-int nand_initialize(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr);
+int nand_initialize(FAR struct mtd_dev_s *raw,
+                    uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr);
 
 #undef EXTERN
 #ifdef __cplusplus

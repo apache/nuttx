@@ -89,6 +89,7 @@
  *   Probe and initialize NAND.
  *
  * Input parameters:
+ *   raw      - Raw NAND FLASH MTD interface
  *   cmdaddr  - NAND command address base
  *   addraddr - NAND address address base
  *   dataaddr - NAND data address
@@ -98,7 +99,8 @@
  *
  ****************************************************************************/
 
-int nand_initialize(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr)
+int nand_initialize(FAR struct mtd_dev_s *raw,
+                    uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr)
 {
   struct onfi_pgparam_s onfi;
   struct nand_model_s model;
