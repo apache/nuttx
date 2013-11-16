@@ -3195,6 +3195,29 @@ config SAMA5_EBICS3_NAND
 
 endchoice # CS3 Memory Type
 endif # SAMA5_EBICS3
+
+if SAMA5_EBICS0_NAND || SAMA5_EBICS1_NAND || SAMA5_EBICS2_NAND || SAMA5_EBICS3_NAND
+
+config SAMA5_NAND_READYBUSY
+	bool "NAND Ready/Busy"
+	default n
+	---help---
+		Board logic supports and interface to detect NAND Busy/Ready signal.
+		If defined, the board must provide:
+
+			bool board_nand_busy(int cs);
+
+config SAMA5_NAND_CE
+	bool "NAND Chip Enable"
+	default n
+	---help---
+		Board logic supports and interface to control the NAND Chip Enable signal.
+		If defined, the board must provide:
+
+			void board_nand_ce(int cs, bool enable);
+
+endif # SAMA5_EBICS0_NAND
+
 endmenu # External Memory Configuration
 
 choice

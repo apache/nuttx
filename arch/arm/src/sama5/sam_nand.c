@@ -80,6 +80,9 @@ struct nand_dev_s
 {
   struct mtd_dev_s mtd;  /* Externally visible part of the driver */
   uint8_t cs;            /* Chip select number (0..3) */
+  uintptr_t cmdaddr;     /* NAND command address base */
+  uintptr_t addraddr;    /* NAND address address base */
+  uintptr_t dataaddr;    /* NAND data address */
 };
 
 /****************************************************************************
@@ -260,6 +263,10 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *   be bound to other functions (such as a block or character driver front
  *   end).
  *
+ *   This MTD devices implements a RAW NAND interface:  No ECC or sparing is
+ *   performed here.  Those necessary NAND features are provided by common,
+ *   higher level MTD layers found in drivers/mtd.
+ *
  * Input parameters:
  *   cs - Chip select number (in the event that multiple NAND devices
  *        are connected on-board).
@@ -362,6 +369,9 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   priv->mtd.bwrite = nand_bwrite;
   priv->mtd.ioctl  = nand_ioctl;
   priv->cs         = cs;
+  priv->cmdaddr    = cmdaddr;
+  priv->addraddr   = addraddr;
+  priv->dataaddr   = dataaddr;
 
   /* Initialize the NAND hardware */
   /* Perform board-specific SMC intialization for this CS */
@@ -376,7 +386,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 
   /* Probe the NAND part */
 
-  ret = nand_initialize(cmdaddr, addraddr, dataaddr);
+  ret = nand_initialize(&priv->mtd, cmdaddr, addraddr, dataaddr);
   if (ret < 0)
     {
       fdbg("ERROR: CS%d nand_initialize failed: %d at (%p, %p, %p)\n",
@@ -389,5 +399,5 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 
   /* Return the implementation-specific state structure as the MTD device */
 
-  return (struct mtd_dev_s *)priv;
+  return &priv->mtd;
 }
