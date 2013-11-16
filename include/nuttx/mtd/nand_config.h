@@ -1,17 +1,12 @@
 /****************************************************************************
- * include/nuttx/mtd/nand_model.h
- *
- * ONFI Support.  The Open NAND Flash Interface (ONFI) is an industry
- * Workgroup made up of more than 100 companies that build, design-in, or
- * enable NAND Flash memory. This file provides definitions for standardized
- * ONFI NAND interfaces.
+ * include/nuttx/mtd/nand_config.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This logic was based largely on Atmel sample code for the SAMA5D3x with
- * modifications for better integration with NuttX.  The Atmel sample code
- * has a BSD compatibile license that requires this copyright notice:
+ * This logic was based largely on Atmel sample code with modifications for
+ * better integration with NuttX.  The Atmel sample code has a BSD
+ * compatibile license that requires this copyright notice:
  *
  *   Copyright (c) 2012, Atmel Corporation
  *
@@ -44,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MTD_NAND_MODEL_H
-#define __INCLUDE_NUTTX_MTD_NAND_MODEL_H
+#ifndef __INCLUDE_NUTTX_MTD_NAND_CONFIG_H
+#define __INCLUDE_NUTTX_MTD_NAND_CONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -53,43 +48,57 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************
+/* Maximum number of blocks in a device */
 
-/* Number of NAND FLASH models inside the model list */
+#ifndef CONFIG_MTD_NAND_MAXNUMBLOCKS
+#  define CONFIG_MTD_NAND_MAXNUMBLOCKS        1024
+#endif
 
-#define NAND_NMODELS 60
+/* Maximum number of pages in one block */
 
-/* Bit definitions for the NAND model options field */
+#ifndef CONFIG_MTD_NAND_MAXNUMPAGESPERBLOCK
+#  define CONFIG_MTD_NAND_MAXNUMPAGESPERBLOCK 256
+#endif
 
-#define NANDMODEL_DATAWIDTH8  (0 << 0)  /* NAND uses an 8-bit databus */
-#define NANDMODEL_DATAWIDTH16 (1 << 0)  /* NAND uses a 16-bit databus */
-#define NANDMODEL_COPYBACK    (1 << 1)  /* NAND supports the copy-back function
-                                         * (internal page-to-page copy) */
+/* Maximum size of the data area of one page, in bytes. */
+
+#ifndef CONFIG_MTD_NAND_MAXPAGEDATASIZE
+#  define CONFIG_MTD_NAND_MAXPAGEDATASIZE     4096
+#endif
+
+/* Maximum size of the spare area of one page, in bytes. */
+
+#ifndef CONFIG_MTD_NAND_MAXPAGESPARESIZE
+#  define CONFIG_MTD_NAND_MAXPAGESPARESIZE    256
+#endif
+
+/* Maximum number of ecc bytes stored in the spare for one single page. */
+
+#ifndef CONFIG_MTD_NAND_MAXSPAREECCBYTES
+#  define CONFIG_MTD_NAND_MAXSPAREECCBYTES    48
+#endif
+
+/* Maximum number of extra free bytes inside the spare area of a page. */
+
+#ifndef CONFIG_MTD_NAND_MAXSPAREEXTRABYTES
+#  define CONFIG_MTD_NAND_MAXSPAREEXTRABYTES  206
+#endif
+
+/* Maximum PMECC size */
+
+#ifdef CONFIG_ARCH_NAND_HWECC
+#  ifndef CONFIG_MTD_NAND_MAX_HWECCSIZE
+#    define CONFIG_MTD_NAND_MAX_HWECCSIZE        200
+#  endif
+#endif
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-
-/* Describes a particular model of NAND FLASH device. */
-
-struct nand_model_s
-{
-  uint8_t  devid;         /* Identifier for the device */
-  uint8_t  options;       /* Special options for the NandFlash */
-  uint16_t pagesize;      /* Size of the data area of a page in bytes */
-  uint16_t sparesize;     /* Size of the spare area of a page in bytes */
-  uint16_t devsize;       /* Size of the device in MB */
-  uint16_t blocksize;     /* Size of one block in kilobytes */
-
-  /* Spare area placement scheme */
-
-  FAR const struct nand_scheme_s *scheme;
-};
 
 /****************************************************************************
  * Public Data
@@ -105,10 +114,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* List of NandFlash models which can be recognized by the software */
-
-EXTERN const struct nand_model_s g_nandmodels[NAND_NMODELS];
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -119,4 +124,4 @@ EXTERN const struct nand_model_s g_nandmodels[NAND_NMODELS];
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_MTD_NAND_MODEL_H */
+#endif /* __INCLUDE_NUTTX_MTD_NAND_CONFIG_H */

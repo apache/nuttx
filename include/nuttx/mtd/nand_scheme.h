@@ -1,17 +1,12 @@
 /****************************************************************************
- * include/nuttx/mtd/nand_model.h
- *
- * ONFI Support.  The Open NAND Flash Interface (ONFI) is an industry
- * Workgroup made up of more than 100 companies that build, design-in, or
- * enable NAND Flash memory. This file provides definitions for standardized
- * ONFI NAND interfaces.
+ * include/nuttx/mtd/nand_scheme.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This logic was based largely on Atmel sample code for the SAMA5D3x with
- * modifications for better integration with NuttX.  The Atmel sample code
- * has a BSD compatibile license that requires this copyright notice:
+ * This logic was based largely on Atmel sample code with modifications for
+ * better integration with NuttX.  The Atmel sample code has a BSD
+ * compatibile license that requires this copyright notice:
  *
  *   Copyright (c) 2012, Atmel Corporation
  *
@@ -44,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MTD_NAND_MODEL_H
-#define __INCLUDE_NUTTX_MTD_NAND_MODEL_H
+#ifndef __INCLUDE_NUTTX_MTD_SCHEME_H
+#define __INCLUDE_NUTTX_MTD_SCHEME_H
 
 /****************************************************************************
  * Included Files
@@ -53,42 +48,29 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <nuttx/mtd/nand_config.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* Number of NAND FLASH models inside the model list */
-
-#define NAND_NMODELS 60
-
-/* Bit definitions for the NAND model options field */
-
-#define NANDMODEL_DATAWIDTH8  (0 << 0)  /* NAND uses an 8-bit databus */
-#define NANDMODEL_DATAWIDTH16 (1 << 0)  /* NAND uses a 16-bit databus */
-#define NANDMODEL_COPYBACK    (1 << 1)  /* NAND supports the copy-back function
-                                         * (internal page-to-page copy) */
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/* Describes a particular model of NAND FLASH device. */
-
-struct nand_model_s
+struct nand_scheme_s
 {
-  uint8_t  devid;         /* Identifier for the device */
-  uint8_t  options;       /* Special options for the NandFlash */
-  uint16_t pagesize;      /* Size of the data area of a page in bytes */
-  uint16_t sparesize;     /* Size of the spare area of a page in bytes */
-  uint16_t devsize;       /* Size of the device in MB */
-  uint16_t blocksize;     /* Size of one block in kilobytes */
+  uint8_t bbpos;        /* Bad block position marker */
+  uint8_t eccsize;      /* Number of bytes of ECC correction */
+  uint8_t nxbytes;      /* Number of extra bytes */
 
-  /* Spare area placement scheme */
+  /* ECC byte positions */
 
-  FAR const struct nand_scheme_s *scheme;
+  uint8_t eccbytepos[CONFIG_MTD_NAND_MAXSPAREECCBYTES];
+
+  /* Extra byte positions */
+
+  uint8_t xbytepos[CONFIG_MTD_NAND_MAXSPAREEXTRABYTES];
 };
 
 /****************************************************************************
@@ -105,9 +87,10 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/* List of NandFlash models which can be recognized by the software */
-
-EXTERN const struct nand_model_s g_nandmodels[NAND_NMODELS];
+EXTERN const struct nand_scheme_s g_nand_sparescheme256;
+EXTERN const struct nand_scheme_s g_nand_sparescheme512;
+EXTERN const struct nand_scheme_s g_nand_sparescheme2048;
+EXTERN const struct nand_scheme_s g_nand_sparescheme4096;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -119,4 +102,4 @@ EXTERN const struct nand_model_s g_nandmodels[NAND_NMODELS];
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_MTD_NAND_MODEL_H */
+#endif /* __INCLUDE_NUTTX_MTD_SCHEME_H */

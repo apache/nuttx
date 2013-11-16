@@ -9,9 +9,9 @@
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This ONFI logic was based largely on Atmel sample code with modifications
- * for better integration with NuttX.  The Atmel sample code has a BSD
- * compatibile license that requires this copyright notice:
+ * This ONFI logic was based largely on Atmel sample code for the SAMA5D3x
+ * with modifications for better integration with NuttX.  The Atmel sample
+ * code has a BSD compatibile license that requires this copyright notice:
  *
  *   Copyright (c) 2010, Atmel Corporation
  *
@@ -64,9 +64,20 @@
  * Public Types
  ****************************************************************************/
 
-/* Opaque handler used to interact with the ONFI module */
+/* Describes memory organization block information in ONFI parameter page*/
 
-typedef FAR void *ONFI_HANDLE;
+struct onfi_pgparam_s
+{
+  uint8_t manufacturer;   /* JEDEC manufacturer ID */
+  uint8_t buswidth;       /* Bus width */
+  uint8_t luns;           /* Number of logical units */
+  uint8_t eccsize;        /* Number of bits of ECC correction */
+  uint8_t model;          /* Device model */
+  uint16_t sparesize;     /* Number of spare bytes per page */
+  uint16_t pagesperblock; /* Number of pages per block */
+  uint16_t blocksperlun;  /* Number of blocks per logical unit (LUN) */
+  uint32_t pagesize;      /* Number of data bytes per page */
+};
 
 /****************************************************************************
  * Public Data
@@ -107,45 +118,27 @@ bool onfi_compatible(uintptr_t cmdaddr, uintptr_t addraddr,
                      uintptr_t dataaddr);
 
 /****************************************************************************
- * Name: onfi_create
+ * Name: onfi_read
  *
  * Description:
- *   If the addresses refere to a compatible ONFI device, then create the
- *   ONFI handle that can be used to interact with the device.
+ *   If the addresses refer to a compatible ONFI device, then read the ONFI
+ *   parameters from the FLASH into the user provided data staructure.
  *
  * Input Parameters:
  *   cmdaddr  - NAND command address base
  *   addraddr - NAND address address base
  *   dataaddr - NAND data address
+ *   onfi     - The ONFI data structure to populate.
  *
  * Returned Value:
- *   On success, a non-NULL ONFI handle is returned.  This handle must be
- *   freed by calling onfi_destroy with it is no longer needed.
- *   NULL is returned on any failure.  Failures include such things as
- *   memory allocation failures, ONFI incompatibility, timeouts, etc.
+ *   OK is returned on success and the the ONFI data structure is initialized
+ *   with NAND data.  A negated errno value is returned in the event of an
+ *   error.
  *
  ****************************************************************************/
 
-ONFI_HANDLE *onfi_create(uintptr_t cmdaddr, uintptr_t addraddr,
-                         uintptr_t dataaddr);
-
-/****************************************************************************
- * Name: onfi_destroy
- *
- * Description:
- *   Free resources allocated on onfi_create() when the ONFI handle was
- *   created.  Upon return, the ONFI handle is no longer valid and should not
- *   be used further.
- *
- * Input Parameters:
- *   handle - An ONFI handle previously created by onfi_create().
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void onfi_destroy(ONFI_HANDLE handle);
+int onfi_read(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr,
+              FAR struct onfi_pgparam_s *onfi);
 
 /****************************************************************************
  * Name: onfi_embeddedecc
@@ -154,7 +147,10 @@ void onfi_destroy(ONFI_HANDLE handle);
  *   Enable or disable the NAND's embedded ECC controller.
  *
  * Input Parameters:
- *   handle - An ONFI handle previously created by onfi_create().
+ *   onfi     - An initialized ONFI data structure.
+ *   cmdaddr  - NAND command address base
+ *   addraddr - NAND address address base
+ *   dataaddr - NAND data address
  *   enable - True: enabled the embedded ECC function; False: disable it
  *
  * Returned Value:
@@ -164,7 +160,11 @@ void onfi_destroy(ONFI_HANDLE handle);
  ****************************************************************************/
 
 #ifdef CONFIG_MTD_NAND_EMBEDDEDECC
-bool onfi_embeddedecc(ONFI_HANDLE handle, bool enable);
+bool onfi_embeddedecc(FAR const struct onfi_pgparam_s *onfi,
+                      uintptr_t cmdaddr, uintptr_t addraddr,
+                      uintptr_t dataaddr, bool enable);
+#else
+# define onfi_embeddedecc(o,c,a,d,e) (false)
 #endif
 
 /****************************************************************************

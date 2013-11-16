@@ -6070,4 +6070,6 @@
 	  (2013-11-15).
 	* configs/ea3131/src/up_usbhost.c:  Board-specific USB host support
 	  for the EA3131 board (2013-11-15).
-
+	* drivers/mtd/mtd_nand.c, include/nuttx/mtd/nand.h, nand_config.h,
+	  and nand_scheme.h:  Further NAND support (still incomplete).
+	  (2013-11-16).

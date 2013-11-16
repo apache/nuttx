@@ -47,6 +47,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mtd/nand_config.h>
 
 #include <sys/types.h>
 #include <stdint.h>
@@ -56,6 +57,9 @@
 
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/mtd/nand.h>
+
+#include <arch/board/board.h>
 
 #include "sam_nand.h"
 
@@ -160,7 +164,7 @@ static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startblock,
    */
 
   /* Read the specified blocks into the provided user buffer and return status
-   * (The positive, number of blocks actually read or a negated errno). 
+   * (The positive, number of blocks actually read or a negated errno).
    */
 #warning Missing logic
 
@@ -233,7 +237,7 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
           ret = OK;
         }
         break;
- 
+
       case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
@@ -251,19 +255,15 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
  * Name: sam_nand_initialize
  *
  * Description:
- *   Create and initialize a raw NAND MTD device instance.  MTD devices are
+ *   Create and initialize an NAND MTD device instance.  MTD devices are
  *   not registered in the file system, but are created as instances that can
  *   be bound to other functions (such as a block or character driver front
  *   end).
  *
- *   This MTD devices implements a RAW NAND interface:  No ECC or sparing is
- *   performed here.  Those necessary NAND features are provided by common,
- *   higher level MTD layers found in drivers/mtd.
- * 
  * Input parameters:
  *   cs - Chip select number (in the event that multiple NAND devices
  *        are connected on-board).
- * 
+ *
  * Returned value.
  *   On success a non-NULL pointer to an MTD device structure is returned;
  *   NULL is returned on a failure.
@@ -273,6 +273,9 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
 struct mtd_dev_s *sam_nand_initialize(int cs)
 {
   struct nand_dev_s *priv;
+  uintptr_t cmdaddr;
+  uintptr_t addraddr;
+  uintptr_t dataaddr;
   int ret;
 
   fvdbg("CS%d\n", cs);
@@ -282,28 +285,67 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 #ifdef CONFIG_SAMA5_EBICS0_NAND
   if (cs == HSMC_CS0)
     {
+      /* Refer to the pre-allocated NAND device structure */
+
       priv = &g_cs0nand;
-    }
+
+      /* Set up the NAND addresses.  These must be provided in the board.h
+       * header file.
+       */
+
+      cmdaddr  = BOARD_EBICS0_NAND_CMDADDR;
+      addraddr = BOARD_EBICS0_NAND_ADDRADDR;
+      dataaddr = BOARD_EBICS0_NAND_DATAADDR;
   else
 #endif
 #ifdef CONFIG_SAMA5_EBICS1_NAND
   if (cs == HSMC_CS1)
     {
+      /* Refer to the pre-allocated NAND device structure */
+
       priv = &g_cs1nand;
+
+      /* Set up the NAND addresses.  These must be provided in the board.h
+       * header file.
+       */
+
+      cmdaddr  = BOARD_EBICS1_NAND_CMDADDR;
+      addraddr = BOARD_EBICS1_NAND_ADDRADDR;
+      dataaddr = BOARD_EBICS1_NAND_DATAADDR;
     }
   else
 #endif
 #ifdef CONFIG_SAMA5_EBICS2_NAND
   if (cs == HSMC_CS2)
     {
+      /* Refer to the pre-allocated NAND device structure */
+
       priv = &g_cs2nand;
+
+      /* Set up the NAND addresses.  These must be provided in the board.h
+       * header file.
+       */
+
+      cmdaddr  = BOARD_EBICS2_NAND_CMDADDR;
+      addraddr = BOARD_EBICS2_NAND_ADDRADDR;
+      dataaddr = BOARD_EBICS2_NAND_DATAADDR;
     }
   else
 #endif
 #ifdef CONFIG_SAMA5_EBICS3_NAND
   if (cs == HSMC_CS3)
     {
+      /* Refer to the pre-allocated NAND device structure */
+
       priv = &g_cs3nand;
+
+      /* Set up the NAND addresses.  These must be provided in the board.h
+       * header file.
+       */
+
+      cmdaddr  = BOARD_EBICS3_NAND_CMDADDR;
+      addraddr = BOARD_EBICS3_NAND_ADDRADDR;
+      dataaddr = BOARD_EBICS3_NAND_DATAADDR;
     }
   else
 #endif
@@ -327,11 +369,22 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   ret = board_nandflash_config(cs);
   if (ret < 0)
     {
-      fdbg("ERROR: board_nandflash_config failed for CS%d: %d\n", cs, ret);
+      fdbg("ERROR: board_nandflash_config failed for CS%d: %d\n",
+           cs, ret);
       return NULL;
     }
 
-  /* Initialize the NAND */
+  /* Probe the NAND part */
+
+  ret = nand_initialize(cmdaddr, addraddr, dataaddr);
+  if (ret < 0)
+    {
+      fdbg("ERROR: CS%d nand_initialize failed: %d at (%p, %p, %p)\n",
+           cs, ret,
+           (FAR void *)cmdaddr, (FAR void *)addraddr, (FAR void *)dataaddr);
+      return NULL;
+    }
+
 #warning Missing logic
 
   /* Return the implementation-specific state structure as the MTD device */

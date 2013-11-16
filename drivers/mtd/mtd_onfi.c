@@ -49,6 +49,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mtd/nand_config.h>
 
 #include <sys/types.h>
 
@@ -59,7 +60,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/mtd/nand_model.h>
 #include <nuttx/mtd/onfi.h>
 
@@ -89,20 +89,20 @@
 #define EBICSA_NAND_D0_ON_D16    (1 << 24)
 
  /* Misc. definitions */
- 
+
 #define MAX_READ_STATUS_COUNT    100000 /* Read status timeout */
 #define ONFI_PARAM_TABLE_SIZE    116    /* Not all 256 bytes are useful */
 
 /* NAND access macros */
 
-#define WRITE_NAND_COMMAND(d,a,c) \
+#define WRITE_NAND_COMMAND(d,c) \
   do { \
-    *(volatile uint8_t *)((uintptr_t)(a) | (uintptr_t)(c)) = (uint8_t)(d); \
+    *(volatile uint8_t *)((uintptr_t)(c)) = (uint8_t)(d); \
   } while (0)
 
-#define WRITE_NAND_ADDRESS(d,a,b) \
+#define WRITE_NAND_ADDRESS(d,b) \
   do { \
-    *(volatile uint8_t *)((uintptr_t)(a) | (uintptr_t)(b)) = (uint8_t)(d); \
+    *(volatile uint8_t *)((uintptr_t)(b)) = (uint8_t)(d); \
   } while (0)
 
 #define READ_NAND(a) \
@@ -116,24 +116,6 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-/* Describes memory organization block information in ONFI parameter page*/
-
-struct onfi_pgparam_s
-{   
-  uint8_t manufacturer;   /* JEDEC manufacturer ID */
-  uint8_t buswidth;       /* Bus width */
-  uint8_t luns;           /* Number of logical units */
-  uint8_t eccsize;        /* Number of bits of ECC correction */
-  uint8_t model;          /* Device model */
-  uint16_t sparesize;     /* Number of spare bytes per page */
-  uint16_t pagesperblock; /* Number of pages per block */
-  uint16_t blocksperlun;  /* Number of blocks per logical unit (LUN) */
-  uint32_t pagesize;      /* Number of data bytes per page */
-  uintptr_t cmdaddr;      /* Base address for NAND commands */
-  uintptr_t addraddr;     /* Base address for NAND addresses */
-  uintptr_t dataaddr;     /* NAND data address */
-};
 
 /****************************************************************************
  * Private Data
@@ -167,7 +149,7 @@ static int onfi_readstatus(uintptr_t cmdaddr, uintptr_t dataaddr)
 
   /* Issue command */
 
-  WRITE_NAND_COMMAND(NAND_CMD_STATUS, dataaddr, cmdaddr);
+  WRITE_NAND_COMMAND(NAND_CMD_STATUS, cmdaddr);
   timeout = 0;
 
   while (timeout < MAX_READ_STATUS_COUNT)
@@ -205,7 +187,7 @@ static int onfi_readstatus(uintptr_t cmdaddr, uintptr_t dataaddr)
  *   This function check if the Nandflash has an embedded ECC controller.
  *
  * Input Parameters:
- *   handle - An ONFI handle previously created by onfi_create().
+ *   onfi  - An initialized ONFI data structure.
  *
  * Returned Value:
  *   True  - Internal ECC supported
@@ -258,8 +240,8 @@ bool onfi_compatible(uintptr_t cmdaddr, uintptr_t addraddr,
 
   /* Check if the Nandflash is ONFI compliant */
 
-  WRITE_NAND_COMMAND(NAND_CMD_READID, dataaddr, cmdaddr);
-  WRITE_NAND_ADDRESS(0x20, dataaddr, addraddr);
+  WRITE_NAND_COMMAND(NAND_CMD_READID, cmdaddr);
+  WRITE_NAND_ADDRESS(0x20, addraddr);
 
   parmtab[0] = READ_NAND(dataaddr);
   parmtab[1] = READ_NAND(dataaddr);
@@ -272,29 +254,28 @@ bool onfi_compatible(uintptr_t cmdaddr, uintptr_t addraddr,
 }
 
 /****************************************************************************
- * Name: onfi_create
+ * Name: onfi_read
  *
  * Description:
- *   If the addresses refer to a compatible ONFI device, then create the
- *   ONFI handle that can be used to interact with the device.
+ *   If the addresses refer to a compatible ONFI device, then read the ONFI
+ *   parameters from the FLASH into the user provided data staructure.
  *
  * Input Parameters:
  *   cmdaddr  - NAND command address base
  *   addraddr - NAND address address base
  *   dataaddr - NAND data address
+ *   onfi     - The ONFI data structure to populate.
  *
  * Returned Value:
- *   On success, a non-NULL ONFI handle is returned.  This handle must be
- *   freed by calling onfi_destroy with it is no longer needed.
- *   NULL is returned on any failure.  Failures include such things as
- *   memory allocation failures, ONFI incompatibility, timeouts, etc.
+ *   OK is returned on success and the the ONFI data structure is initialized
+ *   with NAND data.  A negated errno value is returned in the event of an
+ *   error.
  *
  ****************************************************************************/
 
-ONFI_HANDLE *onfi_create(uintptr_t cmdaddr, uintptr_t addraddr,
-                         uintptr_t dataaddr)
+int onfi_read(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr,
+              FAR struct onfi_pgparam_s *onfi)
 {
-  FAR struct onfi_pgparam_s *onfi;
   uint8_t parmtab[ONFI_PARAM_TABLE_SIZE];
   int i;
 
@@ -303,126 +284,95 @@ ONFI_HANDLE *onfi_create(uintptr_t cmdaddr, uintptr_t addraddr,
 
   if (onfi_compatible(cmdaddr, addraddr, dataaddr))
     {
-      /* Allocate the ONFI structure */
-
-      onfi = (FAR struct onfi_pgparam_s *)kzalloc(sizeof(struct onfi_pgparam_s));
-      if (!onfi)
-        {
-          fdbg("ERROR: Failed to allocate ONFI structure\n");
-          return (ONFI_HANDLE)NULL;
-        }
-
-      /* Save the NAND base addresses */
- 
-      onfi->cmdaddr  = cmdaddr;
-      onfi->addraddr = addraddr;
-      onfi->dataaddr = dataaddr;
-
-      /* Initialize the ONFI parameter table */
-
-      memset(parmtab, 0xff, ONFI_PARAM_TABLE_SIZE);
-
-      /* Perform Read Parameter Page command */
-
-      WRITE_NAND_COMMAND(NAND_CMD_READ_PARAM_PAGE, dataaddr, cmdaddr);
-      WRITE_NAND_ADDRESS(0x0, dataaddr, addraddr);
-
-      /* Wait NF ready */
-
-      onfi_readstatus(cmdaddr, dataaddr);
-
-      /* Re-enable data output mode required after Read Status command */
-
-      WRITE_NAND_COMMAND(NAND_CMD_READ0, dataaddr, cmdaddr);
-
-      /* Read the parameter table */
-
-      for (i = 0; i < ONFI_PARAM_TABLE_SIZE; i++)
-        {
-          parmtab[i] = READ_NAND(dataaddr);
-        }
-
-      for (i = 0; i < ONFI_PARAM_TABLE_SIZE; i++)
-        {
-          if (parmtab[i] != 0xff)
-            {
-              break;
-            }
-        }
-
-      if (i == ONFI_PARAM_TABLE_SIZE)
-        {
-          kfree(onfi);
-          return (ONFI_HANDLE)NULL;
-        }
-        
-      /* JEDEC manufacturer ID */
-
-      onfi->manufacturer = *(uint8_t *)(parmtab + 64);
-      fvdbg("ONFI manufacturer %x \n\r", onfi->manufacturer);
-
-      /* Bus width */
-
-      onfi->buswidth = (*(uint8_t *)(parmtab + 6)) & 0x01;
-
-      /* Get number of data bytes per page (bytes 80-83 in the param table) */
-
-      onfi->pagesize =  *(uint32_t *)(void*)(parmtab + 80);
-      fvdbg("ONFI pagesize %x \n\r", (unsigned int)onfi->pagesize);
-
-      /* Get number of spare bytes per page (bytes 84-85 in the param table) */
-
-      onfi->sparesize =  *(uint16_t *)(void*)(parmtab + 84);
-      fvdbg("ONFI sparesize %x \n\r", (unsigned int)onfi->sparesize);
-
-      /* Number of pages per block. */
-
-      onfi->pagesperblock = *(uint32_t *)(void*)(parmtab + 92);
-
-      /* Number of blocks per logical unit (LUN). */
-
-      onfi->blocksperlun = *(uint32_t *)(void*)(parmtab + 96);
-
-      /* Number of logical units. */
-
-      onfi->luns = *(uint8_t *)(parmtab + 100);
-
-      /* Number of bits of ECC correction */
-
-      onfi->eccsize = *(uint8_t *)(parmtab + 112);
-      fvdbg("ONFI eccsize %x \n\r", onfi->eccsize);
-
-      /* Device model */
-
-      onfi->model= *(uint8_t *)(parmtab + 49);
-
-      fvdbg("Returning %p\n", onfi);
-      return (ONFI_HANDLE)onfi;
+      fdbg("ERROR: No ONFI compatible device detected\n");
+      return -ENODEV;
     }
 
-  return (ONFI_HANDLE)NULL;
-}
+  /* Initialize the ONFI parameter table */
 
-/****************************************************************************
- * Name: onfi_destroy
- *
- * Description:
- *   Free resources allocated on onfi_create() when the ONFI handle was
- *   created.  Upon return, the ONFI handle is no longer valid and should not
- *   be used further.
- *
- * Input Parameters:
- *   handle - An ONFI handle previously created by onfi_create().
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
+  memset(parmtab, 0xff, ONFI_PARAM_TABLE_SIZE);
 
-void onfi_destroy(ONFI_HANDLE handle)
-{
-  DEBUGASSERT(handle);
-  kfree(handle);
+  /* Perform Read Parameter Page command */
+
+  WRITE_NAND_COMMAND(NAND_CMD_READ_PARAM_PAGE, cmdaddr);
+  WRITE_NAND_ADDRESS(0x0, addraddr);
+
+  /* Wait NF ready */
+
+  onfi_readstatus(cmdaddr, dataaddr);
+
+  /* Re-enable data output mode required after Read Status command */
+
+  WRITE_NAND_COMMAND(NAND_CMD_READ0, cmdaddr);
+
+  /* Read the parameter table */
+
+  for (i = 0; i < ONFI_PARAM_TABLE_SIZE; i++)
+    {
+      parmtab[i] = READ_NAND(dataaddr);
+    }
+
+  for (i = 0; i < ONFI_PARAM_TABLE_SIZE; i++)
+    {
+      if (parmtab[i] != 0xff)
+        {
+          break;
+        }
+    }
+
+  if (i == ONFI_PARAM_TABLE_SIZE)
+    {
+      fdbg("ERROR: Failed to read ONFI parameter table\n");
+      return -EIO;
+   }
+
+  /* JEDEC manufacturer ID */
+
+  onfi->manufacturer = *(uint8_t *)(parmtab + 64);
+
+  /* Bus width */
+
+  onfi->buswidth = (*(uint8_t *)(parmtab + 6)) & 0x01;
+
+  /* Get number of data bytes per page (bytes 80-83 in the param table) */
+
+  onfi->pagesize =  *(uint32_t *)(void*)(parmtab + 80);
+
+  /* Get number of spare bytes per page (bytes 84-85 in the param table) */
+
+  onfi->sparesize =  *(uint16_t *)(void*)(parmtab + 84);
+
+  /* Number of pages per block. */
+
+  onfi->pagesperblock = *(uint32_t *)(void*)(parmtab + 92);
+
+  /* Number of blocks per logical unit (LUN). */
+
+  onfi->blocksperlun = *(uint32_t *)(void*)(parmtab + 96);
+
+  /* Number of logical units. */
+
+  onfi->luns = *(uint8_t *)(parmtab + 100);
+
+  /* Number of bits of ECC correction */
+
+  onfi->eccsize = *(uint8_t *)(parmtab + 112);
+
+  /* Device model */
+
+  onfi->model= *(uint8_t *)(parmtab + 49);
+
+  fvdbg("Returning:\n");
+  fvdbg("  manufacturer:  0x%02x\n", onfi->manufacturer);
+  fvdbg("  buswidth:      %d\n",     onfi->buswidth);
+  fvdbg("  luns:          %d\n",     onfi->luns);
+  fvdbg("  eccsize:       %d\n",     onfi->eccsize);
+  fvdbg("  model:         0x%02s\n", onfi->model);
+  fvdbg("  sparesize:     %d\n",     onfi->sparesize);
+  fvdbg("  pagesperblock: %d\n",     onfi->pagesperblock);
+  fvdbg("  blocksperlun:  %d\n",     onfi->blocksperlun);
+  fvdbg("  pagesize:      %d\n",     onfi->pagesize);
+  return OK;
 }
 
 /****************************************************************************
@@ -432,7 +382,10 @@ void onfi_destroy(ONFI_HANDLE handle)
  *   Enable or disable the NAND's embedded ECC controller.
  *
  * Input Parameters:
- *   handle - An ONFI handle previously created by onfi_create().
+ *   onfi     - An initialized ONFI data structure.
+ *   cmdaddr  - NAND command address base
+ *   addraddr - NAND address address base
+ *   dataaddr - NAND data address
  *   enable - True: enabled the embedded ECC function; False: disable it
  *
  * Returned Value:
@@ -442,11 +395,10 @@ void onfi_destroy(ONFI_HANDLE handle)
  ****************************************************************************/
 
 #ifdef CONFIG_MTD_NAND_EMBEDDEDECC
-bool onfi_embeddedecc(ONFI_HANDLE handle, bool enable)
+bool onfi_embeddedecc(FAR const struct onfi_pgparam_s *onfi,
+                      uintptr_t cmdaddr, uintptr_t addraddr,
+                      uintptr_t dataaddr, bool enable)
 {
-  FAR struct onfi_pgparam_s *onfi = (FAR struct onfi_pgparam_s *)handle;
-  DEBUGASSERT(onfi);
-
   /* Does the NAND supported the embedded ECC function? */
 
   if (onfi_have_embeddedecc(onfi))
@@ -454,27 +406,27 @@ bool onfi_embeddedecc(ONFI_HANDLE handle, bool enable)
       /* Yes... enable or disable it */
       /* Perform common setup */
 
-      WRITE_NAND_COMMAND(NAND_CMD_SET_FEATURE, onfi->dataaddr, onfi->cmdaddr);
-      WRITE_NAND_ADDRESS(0x90, onfi->dataaddr, onfi->addraddr);
+      WRITE_NAND_COMMAND(NAND_CMD_SET_FEATURE, cmdaddr);
+      WRITE_NAND_ADDRESS(0x90, addraddr);
 
       if (enable)
         {
           /* Activate the internal ECC controller */
 
-          WRITE_NAND(0x08, onfi->dataaddr);
-          WRITE_NAND(0x00, onfi->dataaddr);
-          WRITE_NAND(0x00, onfi->dataaddr);
-          WRITE_NAND(0x00, onfi->dataaddr);
+          WRITE_NAND(0x08, dataaddr);
+          WRITE_NAND(0x00, dataaddr);
+          WRITE_NAND(0x00, dataaddr);
+          WRITE_NAND(0x00, dataaddr);
           setSmcOpEccType(SMC_ECC_INTERNAL);
         }
       else
         {
           /* De-activate the internal ECC controller */
 
-          WRITE_NAND(0x00, onfi->dataaddr);
-          WRITE_NAND(0x00, onfi->dataaddr);
-          WRITE_NAND(0x00, onfi->dataaddr);
-          WRITE_NAND(0x00, onfi->dataaddr);
+          WRITE_NAND(0x00, dataaddr);
+          WRITE_NAND(0x00, dataaddr);
+          WRITE_NAND(0x00, dataaddr);
+          WRITE_NAND(0x00, dataaddr);
         }
 
       return true;
@@ -514,7 +466,7 @@ bool onfi_ebidetect(uintptr_t cmdaddr, uintptr_t addraddr,
 
   /* Send Reset command */
 
-  WRITE_NAND_COMMAND(NAND_CMD_RESET, dataaddr, cmdaddr);
+  WRITE_NAND_COMMAND(NAND_CMD_RESET, cmdaddr);
 
   /* If a Nandflash is connected, it should answer to a read status command */
 
@@ -523,8 +475,8 @@ bool onfi_ebidetect(uintptr_t cmdaddr, uintptr_t addraddr,
       rc = onfi_readstatus(cmdaddr, dataaddr);
       if (rc == OK)
         {
-          WRITE_NAND_COMMAND(NAND_CMD_READID, dataaddr, cmdaddr);
-          WRITE_NAND_ADDRESS(0, dataaddr, addraddr);
+          WRITE_NAND_COMMAND(NAND_CMD_READID, cmdaddr);
+          WRITE_NAND_ADDRESS(0, addraddr);
 
           ids[0] = READ_NAND(dataaddr);
           ids[1] = READ_NAND(dataaddr);
