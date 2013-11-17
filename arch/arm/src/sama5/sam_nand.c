@@ -76,8 +76,7 @@
 
 /* This type represents the state of the raw NAND MTD device.  The struct
  * nand_raw_s must appear at the beginning of the definition so that you can
- * freely cast between pointers to struct mtd_dev_s, struct nand_raw_s, and
- * struct sam_rawnand_s.
+ * freely cast between pointers to struct nand_raw_s and struct sam_rawnand_s.
  */
 
 struct sam_rawnand_s
@@ -92,14 +91,11 @@ struct sam_rawnand_s
 
 /* MTD driver methods */
 
-static int     nand_erase(struct mtd_dev_s *dev, off_t startblock,
-                 size_t nblocks);
-static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startblock,
-                 size_t nblocks, uint8_t *buf);
-static ssize_t nand_bwrite(struct mtd_dev_s *dev, off_t startblock,
-                 size_t nblocks, const uint8_t *buf);
-static int     nand_ioctl(struct mtd_dev_s *dev, int cmd,
-                 unsigned long arg);
+static int nand_eraseblock(struct nand_raw_s *raw, off_t block);
+static int nand_readpage(struct nand_raw_s *raw, off_t block,
+             unsigned int page, void *data, void *spare);
+static int nand_writepage(struct nand_raw_s *raw, off_t block,
+             unsigned int page, const void *data, const void *spare);
 
 /****************************************************************************
  * Private Data
@@ -126,129 +122,82 @@ static struct sam_rawnand_s g_cs3nand;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nand_erase
+ * Name: nand_eraseblock
  *
  * Description:
- *   Erase several blocks, each of the size previously reported.
+ *   Erases the specified block of the device.
+ *
+ * Input parameters:
+ *   raw    - Lower-half, raw NAND FLASH interface
+ *   block  - Number of the physical block to erase.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-static int nand_erase(struct mtd_dev_s *dev, off_t startblock,
-                      size_t nblocks)
+static int nand_eraseblock(struct nand_raw_s *raw, off_t block)
 {
-  struct sam_rawnand_s *priv = (struct sam_rawnand_s *)dev;
-
-  /* The interface definition assumes that all erase blocks are the same size.
-   * If that is not true for this particular device, then transform the
-   * start block and nblocks as necessary.
-   */
+  struct sam_rawnand_s *priv = (struct sam_rawnand_s *)raw;
+  DEBUGASSERT(raw);
 #warning Missing logic
-
-  /* Erase the specified blocks and return status (OK or a negated errno) */
-
-  return OK;
+  return -ENOSYS;
 }
 
 /****************************************************************************
- * Name: nand_bread
+ * Name: nand_readpage
  *
  * Description:
- *   Read the specified number of blocks into the user provided buffer.
+ *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
+ *   provided buffers.
+ *
+ * Input parameters:
+ *   raw   - Lower-half, raw NAND FLASH interface
+ *   block - Number of the block where the page to read resides.
+ *   page  - Number of the page to read inside the given block.
+ *   data  - Buffer where the data area will be stored.
+ *   spare - Buffer where the spare area will be stored.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startblock,
-                          size_t nblocks, uint8_t *buf)
+static int nand_readpage(struct nand_raw_s *raw, off_t block,
+                         unsigned int page, void *data, void *spare)
 {
-  struct sam_rawnand_s *priv = (struct sam_rawnand_s *)dev;
-
-  /* The interface definition assumes that all read/write blocks are the same size.
-   * If that is not true for this particular device, then transform the
-   * start block and nblocks as necessary.
-   */
-
-  /* Read the specified blocks into the provided user buffer and return status
-   * (The positive, number of blocks actually read or a negated errno).
-   */
+  struct sam_rawnand_s *priv = (struct sam_rawnand_s *)raw;
+  DEBUGASSERT(raw);
 #warning Missing logic
-
-  return 0;
+  return -ENOSYS;
 }
 
 /****************************************************************************
- * Name: nand_bwrite
+ * Name: nand_writepage
  *
  * Description:
- *   Write the specified number of blocks from the user provided buffer.
+ *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
+ *
+ * Input parameters:
+ *   raw   - Lower-half, raw NAND FLASH interface
+ *   block - Number of the block where the page to write resides.
+ *   page  - Number of the page to write inside the given block.
+ *   data  - Buffer containing the data to be writting
+ *   spare - Buffer conatining the spare data to be written.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-static ssize_t nand_bwrite(struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, const uint8_t *buf)
+static int nand_writepage(struct nand_raw_s *raw, off_t block,
+                          unsigned int page, const void *data,
+                          const void *spare)
 {
-  struct sam_rawnand_s *priv = (struct sam_rawnand_s *)dev;
-
-  /* The interface definition assumes that all read/write blocks are the same size.
-   * If that is not true for this particular device, then transform the
-   * start block and nblocks as necessary.
-   */
-
-  /* Write the specified blocks from the provided user buffer and return status
-   * (The positive, number of blocks actually written or a negated errno)
-   */
+  struct sam_rawnand_s *priv = (struct sam_rawnand_s *)raw;
+  DEBUGASSERT(raw);
 #warning Missing logic
-
-  return 0;
-}
-
-/****************************************************************************
- * Name: nand_ioctl
- ****************************************************************************/
-
-static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
-{
-  struct sam_rawnand_s *priv = (struct sam_rawnand_s *)dev;
-  int ret = -EINVAL; /* Assume good command with bad parameters */
-
-  switch (cmd)
-    {
-      case MTDIOC_GEOMETRY:
-        {
-          struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
-          if (geo)
-            {
-              /* Populate the geometry structure with information needed to know
-               * the capacity and how to access the device.
-               *
-               * NOTE: that the device is treated as though it where just an array
-               * of fixed size blocks.  That is most likely not true, but the client
-               * will expect the device logic to do whatever is necessary to make it
-               * appear so.
-               */
-
-              geo->blocksize    = 512;  /* Size of one read/write block */
-              geo->erasesize    = 4096; /* Size of one erase block */
-              geo->neraseblocks = 1024; /* Number of erase blocks */
-              ret               = OK;
-          }
-        }
-        break;
-
-      case MTDIOC_BULKERASE:
-        {
-          /* Erase the entire device */
-
-          ret = OK;
-        }
-        break;
-
-      case MTDIOC_XIPBASE:
-      default:
-        ret = -ENOTTY; /* Bad command */
-        break;
-    }
-
-  return ret;
+  return -ENOSYS;
 }
 
 /****************************************************************************
@@ -259,14 +208,10 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
  * Name: sam_nand_initialize
  *
  * Description:
- *   Create and initialize an NAND MTD device instance.  MTD devices are
- *   not registered in the file system, but are created as instances that can
- *   be bound to other functions (such as a block or character driver front
- *   end).
- *
- *   This MTD devices implements a RAW NAND interface:  No ECC or sparing is
+ *   Create and initialize an raw NAND device instance.  This driver
+ *   implements the RAW NAND interface:  No software ECC or sparing is
  *   performed here.  Those necessary NAND features are provided by common,
- *   higher level MTD layers found in drivers/mtd.
+ *   higher level NAND MTD layers found in drivers/mtd.
  *
  * Input parameters:
  *   cs - Chip select number (in the event that multiple NAND devices
@@ -366,13 +311,12 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   /* Initialize the device structure */
 
   memset(priv, 0, sizeof(struct sam_rawnand_s));
-  priv->raw.mtd.erase  = nand_erase;
-  priv->raw.mtd.bread  = nand_bread;
-  priv->raw.mtd.bwrite = nand_bwrite;
-  priv->raw.mtd.ioctl  = nand_ioctl;
   priv->raw.cmdaddr    = cmdaddr;
   priv->raw.addraddr   = addraddr;
   priv->raw.dataaddr   = dataaddr;
+  priv->raw.eraseblock = nand_eraseblock;
+  priv->raw.readpage   = nand_readpage;
+  priv->raw.writepage  = nand_writepage;
   priv->cs             = cs;
 
   /* Initialize the NAND hardware */
