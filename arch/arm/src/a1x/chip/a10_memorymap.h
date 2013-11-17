@@ -468,10 +468,10 @@
    */
 
   #if defined(CONFIG_ARCH_LOWVECTORS)
-  /* In this case, table must lie in SRAM A1 after the vectors */
+  /* In this case, table must lie in SRAM A2 after the vectors in SRAM A1 */
 
-#    define PGTABLE_BASE_PADDR (A1X_SRAMA1_PADDR + 16384)
-#    define PGTABLE_BASE_VADDR (A1X_SRAMA1_VADDR + 16384)
+#    define PGTABLE_BASE_PADDR  A1X_SRAMA2_PADDR
+#    define PGTABLE_BASE_VADDR  A1X_SRAMA2_VADDR
 
 #  else /* CONFIG_ARCH_LOWVECTORS */
 
