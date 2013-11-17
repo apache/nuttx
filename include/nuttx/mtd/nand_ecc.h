@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/mtd/nand.h
+ * include/nuttx/mtd/nand_ecc.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,21 +39,17 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MTD_NAND_H
-#define __INCLUDE_NUTTX_MTD_NAND_H
+#ifndef __INCLUDE_NUTTX_MTD_ECC_H
+#define __INCLUDE_NUTTX_MTD_ECC_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mtd/nand_config.h>
 
 #include <stdint.h>
-#include <stdbool.h>
-#include <semaphore.h>
-
-#include <nuttx/mtd/mtd.h>
-#include <nuttx/mtd/nand_raw.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -62,18 +58,6 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* This type represents the state of the upper-half NAND MTD device.  The
- * struct mtd_dev_s must appear at the beginning of the definition so that
- * you can freely cast between pointers to struct mtd_dev_s and struct
- * nand_dev_s.
- */
-
-struct nand_dev_s
-{
-  struct mtd_dev_s mtd;       /* Externally visible part of the driver */
-  FAR struct nand_raw_s *raw; /* Retained reference to the lower half */
-  sem_t exclsem;              /* For exclusive access to the NAND flas */
-};
 
 /****************************************************************************
  * Public Data
@@ -94,21 +78,48 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nand_initialize
+ * Name: nandecc_readpage
  *
  * Description:
- *   Probe and initialize NAND.
+ *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
+ *   provided buffers.
  *
  * Input parameters:
- *   raw      - Lower-half, raw NAND FLASH interface
+ *   nand  - Upper-half, NAND FLASH interface
+ *   block - Number of the block where the page to read resides.
+ *   page  - Number of the page to read inside the given block.
+ *   data  - Buffer where the data area will be stored.
+ *   spare - Buffer where the spare area will be stored.
  *
  * Returned value.
- *   A non-NULL MTD driver intstance is returned on success.  NULL is
- *   returned on any failaure.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw);
+int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
+                     unsigned int page, FAR void *data, FAR void *spare);
+
+/****************************************************************************
+ * Name: nandecc_writepage
+ *
+ * Description:
+ *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
+ *
+ * Input parameters:
+ *   nand  - Upper-half, NAND FLASH interface
+ *   block - Number of the block where the page to write resides.
+ *   page  - Number of the page to write inside the given block.
+ *   data  - Buffer containing the data to be writting
+ *   spare - Buffer conatining the spare data to be written.
+ *
+ * Returned value.
+ *   OK is returned in success; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int nandecc_writepage(FAR struct nand_dev_s *nand, off_t block,
+                      unsigned int page, FAR const void *data,
+                      FAR const void *spare);
 
 #undef EXTERN
 #ifdef __cplusplus
@@ -116,4 +127,4 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_MTD_NAND_H */
+#endif /* __INCLUDE_NUTTX_MTD_ECC_H */

@@ -193,7 +193,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
 #define nandmodel_getdevid(m) ((m)->devid)
 
 /****************************************************************************
- * Name: nandmodel_getdevblocksize
+ * Name: nandmodel_getdevblocks
  *
  * Description:
  *   Returns the number of blocks in the entire device.
@@ -206,7 +206,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  *
  ****************************************************************************/
 
-#define nandmodel_getdevblocksize(m) \
+#define nandmodel_getdevblocks(m) \
   ((off_t)((m)->devsize << 10) / (m)->blocksize)
 
 /****************************************************************************
@@ -244,23 +244,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
 #define nandmodel_getdevmbsize(m) ((uint32_t)((m)->devsize))
 
 /****************************************************************************
- * Name: nandmodel_getblocksize
- *
- * Description:
- *   Returns the number of pages in one single block of a device.
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *
- *
- ****************************************************************************/
-
-unsigned int nandmodel_getblocksize(FAR const struct nand_model_s *model);
-
-/****************************************************************************
- * Name: nandmodel_getpageblocksize
+ * Name: nandmodel_pagesperblock
  *
  * Description:
  *   Returns the number of pages in one single block of a device.
@@ -273,7 +257,7 @@ unsigned int nandmodel_getblocksize(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-#define nandmodel_getpageblocksize(m) \
+#define nandmodel_pagesperblock(m) \
   ((uint32_t)((m)->blocksize << 10) / model->pagesize)
 
 /****************************************************************************
@@ -291,7 +275,7 @@ unsigned int nandmodel_getblocksize(FAR const struct nand_model_s *model);
  ****************************************************************************/
 
 #define nandmodel_getdevpagesize(m) \
-  ((uint32_t)nandmodel_getdevblocksize(m) * nandmodel_getpageblocksize(m))
+  ((uint32_t)nandmodel_getdevblocks(m) * nandmodel_pagesperblock(m))
 
 /****************************************************************************
  * Name: nandmodel_getbyteblocksize
