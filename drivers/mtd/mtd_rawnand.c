@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/mtd/nand.h
+ * drivers/mtd/mtd_rawnand.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -8,7 +8,7 @@
  * better integration with NuttX.  The Atmel sample code has a BSD
  * compatibile license that requires this copyright notice:
  *
- *   Copyright (c) 2012, Atmel Corporation
+ *   Copyright (c) 2011, 2012, Atmel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,79 +39,77 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MTD_NAND_H
-#define __INCLUDE_NUTTX_MTD_NAND_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mtd/nand_config.h>
 
 #include <stdint.h>
-#include <stdbool.h>
+#include <assert.h>
+#include <debug.h>
 
-#include <nuttx/mtd/mtd.h>
 #include <nuttx/mtd/nand_raw.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-/* This type represents the state of the upper-half NAND MTD device.  The
- * struct mtd_dev_s must appear at the beginning of the definition so that
- * you can freely cast between pointers to struct mtd_dev_s and struct
- * nand_dev_s.
- */
-
-struct nand_dev_s
-{
-  struct mtd_dev_s mtd;       /* Externally visible part of the driver */
-  FAR struct nand_raw_s *raw; /* Retained reference to the lower half */
-};
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
+ * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nand_initialize
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nand_chipid
  *
  * Description:
- *   Probe and initialize NAND.
+ *   Reads and returns the identifiers of a NAND FLASH chip
  *
- * Input parameters:
- *   raw      - Lower-half, raw NAND FLASH interface
+ * Input Parameters:
+ *   raw - Pointer to a struct nand_raw_s instance.
  *
- * Returned value.
- *   A non-NULL MTD driver intstance is returned on success.  NULL is
- *   returned on any failaure.
+ * Returned Value:
+ *   id1|(id2<<8)|(id3<<16)|(id4<<24)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw);
+uint32_t nand_chipid(struct nand_raw_s *raw)
+{
+  uint8_t id[5];
 
-#undef EXTERN
-#ifdef __cplusplus
+  DEBUGASSERT(raw);
+
+  WRITE_COMMAND8(raw, COMMAND_READID);
+  WRITE_ADDRESS8(raw, 0);
+
+  id[0] = READ_DATA8(raw);
+  id[1] = READ_DATA8(raw);
+  id[2] = READ_DATA8(raw);
+  id[3] = READ_DATA8(raw);
+  id[4] = READ_DATA8(raw);
+
+  fvdbg("Chip ID: %02x %02x %02x %02x %02x\n",
+        id[0], id[1], id[2], id[3], id[4]);
+
+  return  (uint32_t)id[0]        |
+         ((uint32_t)id[1] << 8)  |
+         ((uint32_t)id[2] << 16) |
+         ((uint32_t)id[3] << 24);
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_MTD_NAND_H */

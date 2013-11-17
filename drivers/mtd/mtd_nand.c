@@ -59,6 +59,7 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mtd/nand.h>
 #include <nuttx/mtd/onfi.h>
+#include <nuttx/mtd/nand_raw.h>
 #include <nuttx/mtd/nand_scheme.h>
 #include <nuttx/mtd/nand_model.h>
 
@@ -230,7 +231,7 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *   Probe and initialize NAND.
  *
  * Input parameters:
- *   raw      - Raw NAND FLASH MTD interface
+ *   raw      - Lower-half, raw NAND FLASH interface
  *   cmdaddr  - NAND command address base
  *   addraddr - NAND address address base
  *   dataaddr - NAND data address
@@ -243,43 +244,53 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *nand_initialize(FAR struct mtd_dev_s *raw,
-                                      uintptr_t cmdaddr, uintptr_t addraddr,
-                                      uintptr_t dataaddr,
-                                      FAR struct nand_model_s *model)
+FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
 {
   FAR struct nand_dev_s *priv;
   struct onfi_pgparam_s onfi;
-  bool compatible;
-  bool havemodel = false;
   int ret;
 
   fvdbg("cmdaddr=%p addraddr=%p dataaddr=%p\n",
-        (FAR void *)cmdaddr, (FAR void *)addraddr, (FAR void *)dataaddr);
+        (FAR void *)raw->cmdaddr, (FAR void *)raw->addraddr,
+        (FAR void *)raw->dataaddr);
 
   /* Check if there is NAND connected on the EBI */
 
-  if (!onfi_ebidetect(cmdaddr, addraddr, dataaddr))
+  if (!onfi_ebidetect(raw->cmdaddr, raw->addraddr, raw->dataaddr))
     {
       fdbg("ERROR: No NAND device detected at: %p %p %p\n",
-           (FAR void *)cmdaddr, (FAR void *)addraddr, (FAR void *)dataaddr);
+           (FAR void *)raw->cmdaddr, (FAR void *)raw->addraddr,
+           (FAR void *)raw->dataaddr);
       return NULL;
     }
 
   /* Read the ONFI page parameters from the NAND device */
 
-  ret = onfi_read(cmdaddr, addraddr, dataaddr, &onfi);
+  ret = onfi_read(raw->cmdaddr, raw->addraddr, raw->dataaddr, &onfi);
   if (ret < 0)
     {
-      fvdbg("ERROR: Failed to get ONFI page parameters: %d\n", ret);
-      compatible = false;
+      uint32_t chipid;
+
+      fvdbg("Failed to get ONFI page parameters: %d\n", ret);
+
+      /* If the ONFI model is not supported, determine the NAND
+       * model from a lookup of known FLASH parts.
+       */
+
+      chipid = nand_chipid(raw);
+      if (nandmodel_find(g_nandmodels, NAND_NMODELS, chipid,
+                         &raw->model))
+       {
+          fdbg("ERROR: Could not determine NAND model\n");
+          return NULL;
+        }
     }
   else
     {
+      FAR struct nand_model_s *model = &raw->model;
       uint64_t size;
 
       fvdbg("Found ONFI compliant NAND FLASH\n");
-      compatible = true;
 
       /* Construct the NAND model structure */
 
@@ -320,8 +331,6 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct mtd_dev_s *raw,
             break;
         }
 
-      havemodel = true;
-
       /* Disable any internal, embedded ECC function */
 
       (void)onfi_embeddedecc(&onfi, cmdaddr, addraddr, dataaddr, false);
@@ -343,7 +352,6 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct mtd_dev_s *raw,
   priv->mtd.bwrite = nand_bwrite;
   priv->mtd.ioctl  = nand_ioctl;
   priv->raw        = raw;
-  priv->model      = model;
 
   #warning Missing logic
 

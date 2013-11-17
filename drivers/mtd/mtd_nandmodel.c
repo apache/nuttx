@@ -89,8 +89,8 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
   bool found = false;
   int i;
 
-  id2 = (uint8_t)(chipid>>8);
-  id4 = (uint8_t)(chipid>>24);
+  id2 = (uint8_t)(chipid >> 8);
+  id4 = (uint8_t)(chipid >> 24);
 
   fvdbg("NAND ID is 0x%08x\n", (int)chipid);
 
@@ -206,14 +206,13 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
 
   if ((address + size) > nandmodel_getdevbytesize(model))
     {
-
       fvdbg("nandmodel_translate: out-of-bounds access.\n");
       return -ESPIPE;
     }
 
   /* Get Nand info */
 
-  blocksize = nandmodel_getblocksize(model);
+  blocksize = nandmodel_getbyteblocksize(model);
   pagesize  = nandmodel_getpagesize(model);
 
   /* Translate address */
@@ -246,183 +245,6 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
 }
 
 /****************************************************************************
- * Name: nandmodel_getscheme
- *
- * Description:
- *   Returns the spare area placement scheme used by a particular nandflash
- *   model.
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *  Spare placement scheme
- *
- ****************************************************************************/
-
-FAR const struct nand_dev_scheme_s *
-nandmodel_getscheme(FAR const struct nand_model_s *model)
-{
-  return model->scheme;
-}
-
-/****************************************************************************
- * Name: nandmodel_getdevid
- *
- * Description:
- *   Returns the device ID of a particular NAND FLASH model.
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *   Device ID
- *
- ****************************************************************************/
-
-uint8_t nandmodel_getdevid(FAR const struct nand_model_s *model)
-{
-  return model->devid;
-}
-
-/****************************************************************************
- * Name: nandmodel_getdevblocksize
- *
- * Description:
- *   Returns the number of blocks in the entire device.
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *   Number of blocks in the device
- *
- ****************************************************************************/
-
-off_t nandmodel_getdevblocksize(FAR const struct nand_model_s *model)
-{
-  return (1024 * model->devsize) / model->blocksize;
-}
-
-/****************************************************************************
- * Name: nandmodel_getdevpagesize
- *
- * Description:
- *   Returns the number of pages in the entire device.
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *   Number of pages in the device
- *
- ****************************************************************************/
-
-size_t nandmodel_getdevpagesize(FAR const struct nand_model_s *model)
-{
-  return (uint32_t)nandmodel_getdevblocksize(model) //* 8 // HACK
-                   * nandmodel_getblocksize(model);
-}
-
-/****************************************************************************
- * Name: nandmodel_getdevbytesize
- *
- * Description:
- *   Returns the size of the whole device in bytes (this does not include
- *   the size of the spare zones).
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *   Size of the device in bytes
- *
- ****************************************************************************/
-
-uint64_t nandmodel_getdevbytesize(FAR const struct nand_model_s *model)
-{
-  return ((uint64_t)model->devsize) << 20;
-}
-
-/****************************************************************************
- * Name: nandmodel_getdevmbsize
- *
- * Description:
- *   Returns the size of the whole device in Mega bytes (this does not
- *   include the size of the spare zones).
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *  size of the device in MB.
- *
- ****************************************************************************/
-
-uint32_t nandmodel_getdevmbsize(FAR const struct nand_model_s *model)
-{
-  return ((uint32_t)model->devsize);
-}
-
-/****************************************************************************
- * Name: nandmodel_getblockpagesize
- *
- * Description:
- *   Returns the number of pages in one single block of a device.
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *    Block size in pages
- *
- ****************************************************************************/
-
-unsigned int nandmodel_getblockpagesize(FAR const struct nand_model_s *model)
-{
-  return model->blocksize * 1024 / model->pagesize;
-}
-
-/****************************************************************************
- * Name: nandmodel_getblockbytesize
- *
- * Description:
- *   Returns the size in bytes of one single block of a device. This does not
- *   take into account the spare zones size.
- *
- * Input Parameters:
- *  model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *  Block size in bytes
- *
- ****************************************************************************/
-
-unsigned int nandmodel_getblockbytesize(FAR const struct nand_model_s *model)
-{
-  return model->blocksize * 1024;
-}
-
-/****************************************************************************
- * Name: nandmodel_getpagesize
- *
- * Description:
- *   Returns the size of the data area of a page in bytes.
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *   Size of data area in bytes
- *
- ****************************************************************************/
-
-unsigned int nandmodel_getpagesize(FAR const struct nand_model_s *model)
-{
-  return model->pagesize;
-}
-
-/****************************************************************************
  * Name: nandmodel_getsparesize
  *
  * Description:
@@ -446,65 +268,4 @@ unsigned int nandmodel_getsparesize(FAR const struct nand_model_s *model)
     {
       return (model->pagesize >> 5); /* Spare size is 16/512 of data size */
     }
-}
-
-/****************************************************************************
- * Name: nandmodel_getbuswidth
- *
- * Description:
- *   Returns the number of bits used by the data bus of a NAND FLASH device.
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *  data width
- *
- ****************************************************************************/
-
-unsigned int nandmodel_getbuswidth(FAR const struct nand_model_s *model)
-{
-  return (model->options & NANDMODEL_DATAWIDTH16)? 16 : 8;
-}
-
-/****************************************************************************
- * Name: nandmodel_havesmallblocks
- *
- * Description:
- *   Returns true if the given NAND FLASH model uses the "small blocks/pages"
- *   command set; otherwise returns false.
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *   Returns true if the given NAND FLASH model uses the "small blocks/pages"
- *   command set; otherwise returns false.
- *
- ****************************************************************************/
-
-bool nandmodel_havesmallblocks(FAR const struct nand_model_s *model)
-{
-  return (model->pagesize <= 512 )? 1: 0;
-}
-
-/****************************************************************************
- * Name: nandmodel_havecopyback
- *
- * Description:
- *   Returns true if the device supports the copy-back operation. Otherwise
- *   returns false.
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *   Returns true if the device supports the copy-back operation. Otherwise
- *   returns false.
- *
- ****************************************************************************/
-
-bool nandmodel_havecopyback(FAR const struct nand_model_s *model)
-{
-  return ((model->options & NANDMODEL_COPYBACK) != 0);
 }

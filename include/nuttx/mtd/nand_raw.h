@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/mtd/nand.h
+ * include/nuttx/mtd/nand_raw.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MTD_NAND_H
-#define __INCLUDE_NUTTX_MTD_NAND_H
+#ifndef __INCLUDE_NUTTX_MTD_NAND_RAW_H
+#define __INCLUDE_NUTTX_MTD_NAND_RAW_H
 
 /****************************************************************************
  * Included Files
@@ -52,25 +52,74 @@
 #include <stdbool.h>
 
 #include <nuttx/mtd/mtd.h>
-#include <nuttx/mtd/nand_raw.h>
+#include <nuttx/mtd/nand_model.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Nand flash commands */
+
+#define COMMAND_READ_1                  0x00
+#define COMMAND_READ_2                  0x30
+#define COMMAND_COPYBACK_READ_1         0x00
+#define COMMAND_COPYBACK_READ_2         0x35
+#define COMMAND_COPYBACK_PROGRAM_1      0x85
+#define COMMAND_COPYBACK_PROGRAM_2      0x10
+#define COMMAND_RANDOM_OUT              0x05
+#define COMMAND_RANDOM_OUT_2            0xe0
+#define COMMAND_RANDOM_IN               0x85
+#define COMMAND_READID                  0x90
+#define COMMAND_WRITE_1                 0x80
+#define COMMAND_WRITE_2                 0x10
+#define COMMAND_ERASE_1                 0x60
+#define COMMAND_ERASE_2                 0xd0
+#define COMMAND_STATUS                  0x70
+#define COMMAND_RESET                   0xff
+
+/* Nand flash commands (small blocks) */
+
+#define COMMAND_READ_A                  0x00
+#define COMMAND_READ_C                  0x50
+
+/* NAND access macros */
+
+#define WRITE_COMMAND8(raw, command) \
+    {*((volatile uint8_t *)raw->cmdaddr) = (uint8_t)command;}
+#define WRITE_COMMAND16(raw, command) \
+    {*((volatile uint16_t *)raw->cmdaddr) = (uint16_t)command;}
+#define WRITE_ADDRESS8(raw, address) \
+    {*((volatile uint8_t *)raw->addraddr) = (uint8_t)address;}
+#define WRITE_ADDRESS16(raw, address) \
+    {*((volatile uint16_t *)raw->addraddr) = (uint16_t)address;}
+#define WRITE_DATA8(raw, data) \
+    {*((volatile uint8_t *)raw->dataaddr) = (uint8_t)data;}
+#define READ_DATA8(raw) \
+    (*((volatile uint8_t *)raw->dataaddr))
+#define WRITE_DATA16(raw, data) \
+    {*((volatile uint16_t *) raw->dataaddr) = (uint16_t)data;}
+#define READ_DATA16(raw) \
+    (*((volatile uint16_t *)raw->dataaddr))
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* This type represents the state of the upper-half NAND MTD device.  The
- * struct mtd_dev_s must appear at the beginning of the definition so that
- * you can freely cast between pointers to struct mtd_dev_s and struct
- * nand_dev_s.
+/* This type represents the visible portion of the lower-half, raw NAND MTD
+ * device.  Rules:
+ *
+ * 1. The struct mtd_dev_s must appear at the beginning of the definition so
+ *    that you can freely cast between pointers to struct mtd_dev_s and struct
+ *    nand_raw_s.
+ * 2. The lower-half driver may freely append additional information after
+ *    this required header information.
  */
 
-struct nand_dev_s
+struct nand_raw_s
 {
-  struct mtd_dev_s mtd;       /* Externally visible part of the driver */
-  FAR struct nand_raw_s *raw; /* Retained reference to the lower half */
+  struct mtd_dev_s mtd;      /* Externally visible part of the driver */
+  struct nand_model_s model; /* The NAND model storage */
+  uintptr_t cmdaddr;         /* NAND command address base */
+  uintptr_t addraddr;        /* NAND address address base */
+  uintptr_t dataaddr;        /* NAND data address */
 };
 
 /****************************************************************************
@@ -92,21 +141,20 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nand_initialize
+ * Name: nand_chipid
  *
  * Description:
- *   Probe and initialize NAND.
+ *   Reads and returns the identifiers of a NAND FLASH chip
  *
- * Input parameters:
- *   raw      - Lower-half, raw NAND FLASH interface
+ * Input Parameters:
+ *   raw - Pointer to a struct nand_raw_s instance.
  *
- * Returned value.
- *   A non-NULL MTD driver intstance is returned on success.  NULL is
- *   returned on any failaure.
+ * Returned Value:
+ *   id1|(id2<<8)|(id3<<16)|(id4<<24)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw);
+uint32_t nand_chipid(FAR struct nand_raw_s *raw);
 
 #undef EXTERN
 #ifdef __cplusplus
@@ -114,4 +162,4 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_MTD_NAND_H */
+#endif /* __INCLUDE_NUTTX_MTD_NAND_RAW_H */
