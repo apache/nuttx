@@ -87,6 +87,12 @@ config ARCH_NAND_HWECC
 
 if MTD_NAND
 
+config MTD_NAND_BLOCKCHECK
+	bool "Block check"
+	default y
+	---help---
+		Enable support for bad block checking.
+
 config MTD_NAND_MAXNUMBLOCKS
 	int "Max blocks"
 	default 1024

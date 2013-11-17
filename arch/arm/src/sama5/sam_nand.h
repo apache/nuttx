@@ -67,19 +67,15 @@ extern "C" {
  * Name: sam_nand_initialize
  *
  * Description:
- *   Create and initialize a raw NAND MTD device instance.  MTD devices are
- *   not registered in the file system, but are created as instances that can
- *   be bound to other functions (such as a block or character driver front
- *   end).
- *
- *   This MTD devices implements a RAW NAND interface:  No ECC or sparing is
+ *   Create and initialize an raw NAND device instance.  This driver
+ *   implements the RAW NAND interface:  No software ECC or sparing is
  *   performed here.  Those necessary NAND features are provided by common,
- *   higher level MTD layers found in drivers/mtd.
- * 
+ *   higher level NAND MTD layers found in drivers/mtd.
+ *
  * Input parameters:
  *   cs - Chip select number (in the event that multiple NAND devices
  *        are connected on-board).
- * 
+ *
  * Returned value.
  *   On success a non-NULL pointer to an MTD device structure is returned;
  *   NULL is returned on a failure.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/mtd/mtd_rawnand.c
+ * drivers/mtd/mtd_nandraw.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

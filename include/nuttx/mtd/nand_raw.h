@@ -100,26 +100,92 @@
 #define READ_DATA16(raw) \
     (*((volatile uint16_t *)raw->dataaddr))
 
+/* struct nand_raw_s operations */
+
+/****************************************************************************
+ * Name: NAND_ERASEBLOCK
+ *
+ * Description:
+ *   Erases the specified block of the device.
+ *
+ * Input parameters:
+ *   raw    - Lower-half, raw NAND FLASH interface
+ *   block  - Number of the physical block to erase.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#define NAND_ERASEBLOCK(r,b) ((r)->eraseblock(r,b))
+
+/****************************************************************************
+ * Name: NAND_READPAGE
+ *
+ * Description:
+ *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
+ *   provided buffers.
+ *
+ * Input parameters:
+ *   raw   - Lower-half, raw NAND FLASH interface
+ *   block - Number of the block where the page to read resides.
+ *   page  - Number of the page to read inside the given block.
+ *   data  - Buffer where the data area will be stored.
+ *   spare - Buffer where the spare area will be stored.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#define NAND_READPAGE(r,b,p,d,s) ((r)->readpage(r,b,p,d,s))
+
+/****************************************************************************
+ * Name: NAND_WRITEPAGE
+ *
+ * Description:
+ *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
+ *
+ * Input parameters:
+ *   raw   - Lower-half, raw NAND FLASH interface
+ *   block - Number of the block where the page to write resides.
+ *   page  - Number of the page to write inside the given block.
+ *   data  - Buffer containing the data to be writting
+ *   spare - Buffer conatining the spare data to be written.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#define NAND_WRITEPAGE(r,b,p,d,s) ((r)->writepage(r,b,p,d,s))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
 /* This type represents the visible portion of the lower-half, raw NAND MTD
- * device.  Rules:
- *
- * 1. The struct mtd_dev_s must appear at the beginning of the definition so
- *    that you can freely cast between pointers to struct mtd_dev_s and struct
- *    nand_raw_s.
- * 2. The lower-half driver may freely append additional information after
- *    this required header information.
+ * device.  The lower-half driver may freely append additional information
+ * after this required header information.
  */
 
 struct nand_raw_s
 {
-  struct mtd_dev_s mtd;      /* Externally visible part of the driver */
+  /* NAND data */
+
   struct nand_model_s model; /* The NAND model storage */
   uintptr_t cmdaddr;         /* NAND command address base */
   uintptr_t addraddr;        /* NAND address address base */
   uintptr_t dataaddr;        /* NAND data address */
+
+  /* NAND operations */
+
+  CODE int (*eraseblock)(FAR struct nand_raw_s *raw, off_t block);
+  CODE int (*readpage)(FAR struct nand_raw_s *raw, off_t block,
+                       unsigned int page, FAR void *data, FAR void *spare);
+  CODE int (*writepage)(FAR struct nand_raw_s *raw, off_t block,
+                        unsigned int page, FAR const void *data,
+                        FAR const void *spare);
 };
 
 /****************************************************************************

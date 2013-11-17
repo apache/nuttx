@@ -6079,4 +6079,5 @@
 	  (2013-11-16).
 	* drivers/mtd/mtd_rawnand.c and include/nuttx/mtd/nand_raw.h: More
 	  NAND support (2013-11-17).
+	* drivers/mtd/mtd_nandscheme.c:  More NAND support (2013-11-17).
 
