@@ -148,11 +148,21 @@ static void a1x_dumpintc(const char *msg, int irq)
 
 void up_irqinitialize(void)
 {
+  int i;
 
   /* The following operations need to be atomic, but since this function is
    * called early in the initialization sequence, we expect to have exclusive
    * access to the INTC.
    */
+
+  /* Disable, mask, and clear all interrupts */
+
+  for (i = 0; i < A1X_IRQ_NINT; i += 32)
+    {
+      putreg32(0x00000000, A1X_INTC_EN(i));   /* 0 disables corresponding interrupt */
+      putreg32(0xffffffff, A1X_INTC_MASK(i)); /* 1 masks corresponding interrupt */
+      (void)getreg32(A1X_INTC_IRQ_PEND(i));   /* Reading status clears pending interrupts */
+    }
 
   /* Colorize the interrupt stack for debug purposes */
 

@@ -98,7 +98,7 @@ extern uint32_t _vector_end;   /* End+1 of vector block */
 #ifndef CONFIG_ARCH_ROMPGTABLE
 static const struct section_mapping_s section_mapping[] =
 {
-  { A1X_INTMEM_PSECTION,  A1X_INTMEM_VSECTION,
+  { A1X_INTMEM_PSECTION,  A1X_INTMEM_VSECTION,  /* Includes vectors and page table */
     A1X_INTMEM_MMUFLAGS,  A1X_INTMEM_NSECTIONS
   },
   { A1X_PERIPH_PSECTION,  A1X_PERIPH_VSECTION,
