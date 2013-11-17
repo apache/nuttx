@@ -52,6 +52,7 @@
 #include <stdbool.h>
 
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/mtd/nand_model.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -60,6 +61,18 @@
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* This type represents the state of the NAND MTD device.  The struct
+ * mtd_dev_s must appear at the beginning of the definition so that you can
+ * freely cast between pointers to struct mtd_dev_s and struct nand_dev_s.
+ */
+
+struct nand_dev_s
+{
+  struct mtd_dev_s mtd;       /* Externally visible part of the driver */
+  struct mtd_dev_s *raw;      /* The lower-half, "raw" nand MTD driver */
+  struct nand_model_s *model; /* Reference to the model (in the raw data structure) */
+};
 
 /****************************************************************************
  * Public Data
@@ -90,14 +103,18 @@ extern "C"
  *   cmdaddr  - NAND command address base
  *   addraddr - NAND address address base
  *   dataaddr - NAND data address
+ *   model    - A pointer to the model data (probably in the raw MTD
+ *              driver instance.
  *
  * Returned value.
- *   OK is returned on success; A negated errno value is returned on failure.
+ *   A non-NULL MTD driver intstance is returned on success.  NULL is
+ *   returned on any failaure.
  *
  ****************************************************************************/
 
-int nand_initialize(FAR struct mtd_dev_s *raw,
-                    uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr);
+FAR struct mtd_dev_s *nand_initialize(FAR struct mtd_dev_s *raw,
+                      uintptr_t cmdaddr, uintptr_t addraddr,
+                      uintptr_t dataaddr, FAR struct nand_model_s *model);
 
 #undef EXTERN
 #ifdef __cplusplus

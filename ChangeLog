@@ -6075,4 +6075,6 @@
 	  (2013-11-16).
 	* drivers/mtd/mtd_modeltab.c:  Further NAND support (still incomplete).
 	  (2013-11-16).
+	* drivers/mtd/mtd_nandmodel.c: More NAND support (same story).
+	  (2013-11-16).
 

@@ -1,19 +1,14 @@
 /****************************************************************************
- * include/nuttx/mtd/nand_model.h
- *
- * ONFI Support.  The Open NAND Flash Interface (ONFI) is an industry
- * Workgroup made up of more than 100 companies that build, design-in, or
- * enable NAND Flash memory. This file provides definitions for standardized
- * ONFI NAND interfaces.
+ * drivers/mtd/mtd_nand.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This logic was based largely on Atmel sample code for the SAMA5D3x with
- * modifications for better integration with NuttX.  The Atmel sample code
- * has a BSD compatibile license that requires this copyright notice:
+ * This logic was based largely on Atmel sample code with modifications for
+ * better integration with NuttX.  The Atmel sample code has a BSD
+ * compatibile license that requires this copyright notice:
  *
- *   Copyright (c) 2012, Atmel Corporation
+ *   Copyright (c) 2011, 2012, Atmel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -44,73 +39,28 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MTD_NAND_MODEL_H
-#define __INCLUDE_NUTTX_MTD_NAND_MODEL_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mtd/nand_config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
-#include <stdbool.h>
+#include <string.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/mtd/nand.h>
+#include <nuttx/mtd/nand_model.h>
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/* Number of NAND FLASH models inside the model list */
-
-#define NAND_NMODELS 60
-
-/* Bit definitions for the NAND model options field */
-
-#define NANDMODEL_DATAWIDTH8  (0 << 0)  /* NAND uses an 8-bit databus */
-#define NANDMODEL_DATAWIDTH16 (1 << 0)  /* NAND uses a 16-bit databus */
-#define NANDMODEL_COPYBACK    (1 << 1)  /* NAND supports the copy-back function
-                                         * (internal page-to-page copy) */
-
 /****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/* Describes a particular model of NAND FLASH device. */
-
-struct nand_model_s
-{
-  uint8_t  devid;         /* Identifier for the device */
-  uint8_t  options;       /* Special options for the NandFlash */
-  uint16_t pagesize;      /* Size of the data area of a page in bytes */
-  uint16_t sparesize;     /* Size of the spare area of a page in bytes */
-  uint16_t devsize;       /* Size of the device in MB */
-  uint16_t blocksize;     /* Size of one block in kilobytes */
-
-  /* Spare area placement scheme */
-
-  FAR const struct nand_scheme_s *scheme;
-};
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
-/* List of NandFlash models which can be recognized by the software */
-
-EXTERN const struct nand_model_s g_nandmodels[NAND_NMODELS];
-
-/****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -132,7 +82,94 @@ EXTERN const struct nand_model_s g_nandmodels[NAND_NMODELS];
  ****************************************************************************/
 
 int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
-                   uint32_t chipid, FAR struct nand_model_s *model);
+                   uint32_t chipid, FAR struct nand_model_s *model)
+{
+  uint8_t id2;
+  uint8_t id4;
+  bool found = false;
+  int i;
+
+  id2 = (uint8_t)(chipid>>8);
+  id4 = (uint8_t)(chipid>>24);
+
+  fvdbg("NAND ID is 0x%08x\n", (int)chipid);
+
+  for (i = 0; i < size; i++)
+    {
+      if (modeltab[i].devid == id2)
+        {
+          found = true;
+
+          if (model)
+            {
+              memcpy(model, &modeltab[i], sizeof(struct nand_model_s));
+
+              if (model->blocksize == 0 || model->pagesize == 0)
+                {
+                  fvdbg("Fetch from ID4(0x%.2x):\n", id4);
+
+                  /* Fetch from the extended ID4
+                   * ID4 D5  D4 BlockSize || D1  D0  PageSize
+                   *     0   0   64K      || 0   0   1K
+                   *     0   1   128K     || 0   1   2K
+                   *     1   0   256K     || 1   0   4K
+                   *     1   1   512K     || 1   1   8k
+                   */
+
+                  switch (id4 & 0x03)
+                    {
+                      case 0x00:
+                        model->pagesize = 1024;
+                        break;
+
+                      case 0x01:
+                        model->pagesize = 2048;
+                        break;
+
+                      case 0x02:
+                        model->pagesize = 4096;
+                        break;
+
+                      case 0x03:
+                        model->pagesize = 8192;
+                        break;
+                    }
+
+                  switch (id4 & 0x30)
+                    {
+                      case 0x00:
+                        model->blocksize = 64; 
+                        break;
+
+                      case 0x10:
+                        model->blocksize = 128;
+                        break;
+
+                      case 0x20:
+                        model->blocksize = 256;
+                        break;
+
+                      case 0x30:
+                        model->blocksize = 512;
+                        break;
+                    }
+                }
+            }
+
+          fvdbg("NAND Model found:\n");
+          fvdbg("  devid:     0x%02x\n", model->devid);
+          fvdbg("  devsize:   %d\n",     model->devsize);
+          fvdbg("  blocksize: %d\n",     model->blocksize);
+          fvdbg("  pagesize:  %d\n",     model->pagesize);
+          fvdbg("  options:   0x%02x\n", model->options);
+          break;
+        }
+    }
+
+  /* Check if chip has been detected */
+
+  return found ? OK : -ENODEV;
+}
 
 /****************************************************************************
  * Name: nandmodel_translate
@@ -157,7 +194,56 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
 
 int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
                         size_t size, FAR off_t *block, off_t *page,
-                        off_t *offset);
+                        off_t *offset)
+{
+  size_t blocksize;
+  size_t pagesize;
+  off_t  tmpblock;
+  off_t  tmppage;
+  off_t  tmpoffset;
+
+  /* Check that access is not too big */
+
+  if ((address + size) > nandmodel_getdevbytesize(model))
+    {
+
+      fvdbg("nandmodel_translate: out-of-bounds access.\n");
+      return -ESPIPE;
+    }
+
+  /* Get Nand info */
+
+  blocksize = nandmodel_getblocksize(model);
+  pagesize  = nandmodel_getpagesize(model);
+
+  /* Translate address */
+
+  tmpblock  = address / blocksize;
+  address  -= tmpblock * blocksize;
+
+  tmppage   = address / pagesize;
+  address  -= tmppage * pagesize;
+  tmpoffset = address;
+
+  /* Save results */
+
+  if (block)
+    {
+      *block = tmpblock;
+    }
+
+  if (page)
+    {
+      *page = tmppage;
+    }
+
+  if (offset)
+    {
+      *offset = tmpoffset;
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: nandmodel_getscheme
@@ -175,7 +261,10 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  ****************************************************************************/
 
 FAR const struct nand_dev_scheme_s *
-nandmodel_getscheme(FAR const struct nand_model_s *model);
+nandmodel_getscheme(FAR const struct nand_model_s *model)
+{
+  return model->scheme;
+}
 
 /****************************************************************************
  * Name: nandmodel_getdevid
@@ -191,7 +280,10 @@ nandmodel_getscheme(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-uint8_t nandmodel_getdevid(FAR const struct nand_model_s *model);
+uint8_t nandmodel_getdevid(FAR const struct nand_model_s *model)
+{
+  return model->devid;
+}
 
 /****************************************************************************
  * Name: nandmodel_getdevblocksize
@@ -207,7 +299,10 @@ uint8_t nandmodel_getdevid(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-off_t nandmodel_getdevblocksize(FAR const struct nand_model_s *model);
+off_t nandmodel_getdevblocksize(FAR const struct nand_model_s *model)
+{
+  return (1024 * model->devsize) / model->blocksize;
+}
 
 /****************************************************************************
  * Name: nandmodel_getdevpagesize
@@ -223,7 +318,11 @@ off_t nandmodel_getdevblocksize(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-size_t nandmodel_getdevpagesize(FAR const struct nand_model_s *model);
+size_t nandmodel_getdevpagesize(FAR const struct nand_model_s *model)
+{
+  return (uint32_t)nandmodel_getdevblocksize(model) //* 8 // HACK
+                   * nandmodel_getblocksize(model);
+}
 
 /****************************************************************************
  * Name: nandmodel_getdevbytesize
@@ -240,7 +339,10 @@ size_t nandmodel_getdevpagesize(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-uint64_t nandmodel_getdevbytesize(FAR const struct nand_model_s *model);
+uint64_t nandmodel_getdevbytesize(FAR const struct nand_model_s *model)
+{
+  return ((uint64_t)model->devsize) << 20;
+}
 
 /****************************************************************************
  * Name: nandmodel_getdevmbsize
@@ -257,23 +359,10 @@ uint64_t nandmodel_getdevbytesize(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-uint32_t nandmodel_getdevmbsize(FAR const struct nand_model_s *model);
-
-/****************************************************************************
- * Name: nandmodel_getblocksize
- *
- * Description:
- *   Returns the number of pages in one single block of a device.
- *
- * Input Parameters:
- *   model  Pointer to a nand_model_s instance.
- *
- * Returned Values:
- *
- *
- ****************************************************************************/
-
-unsigned int nandmodel_getblocksize(FAR const struct nand_model_s *model);
+uint32_t nandmodel_getdevmbsize(FAR const struct nand_model_s *model)
+{
+  return ((uint32_t)model->devsize);
+}
 
 /****************************************************************************
  * Name: nandmodel_getblockpagesize
@@ -289,7 +378,10 @@ unsigned int nandmodel_getblocksize(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-unsigned int nandmodel_getblockpagesize(FAR const struct nand_model_s *model);
+unsigned int nandmodel_getblockpagesize(FAR const struct nand_model_s *model)
+{
+  return model->blocksize * 1024 / model->pagesize;
+}
 
 /****************************************************************************
  * Name: nandmodel_getblockbytesize
@@ -306,7 +398,10 @@ unsigned int nandmodel_getblockpagesize(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-unsigned int nandmodel_getblockbytesize(FAR const struct nand_model_s *model);
+unsigned int nandmodel_getblockbytesize(FAR const struct nand_model_s *model)
+{
+  return model->blocksize * 1024;
+}
 
 /****************************************************************************
  * Name: nandmodel_getpagesize
@@ -322,7 +417,10 @@ unsigned int nandmodel_getblockbytesize(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-unsigned int nandmodel_getpagesize(FAR const struct nand_model_s *model);
+unsigned int nandmodel_getpagesize(FAR const struct nand_model_s *model)
+{
+  return model->pagesize;
+}
 
 /****************************************************************************
  * Name: nandmodel_getsparesize
@@ -338,7 +436,17 @@ unsigned int nandmodel_getpagesize(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-unsigned int nandmodel_getsparesize(FAR const struct nand_model_s *model);
+unsigned int nandmodel_getsparesize(FAR const struct nand_model_s *model)
+{
+  if (model->sparesize)
+    {
+      return model->sparesize;
+    }
+  else
+    {
+      return (model->pagesize >> 5); /* Spare size is 16/512 of data size */
+    }
+}
 
 /****************************************************************************
  * Name: nandmodel_getbuswidth
@@ -354,7 +462,10 @@ unsigned int nandmodel_getsparesize(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-unsigned int nandmodel_getbuswidth(FAR const struct nand_model_s *model);
+unsigned int nandmodel_getbuswidth(FAR const struct nand_model_s *model)
+{
+  return (model->options & NANDMODEL_DATAWIDTH16)? 16 : 8;
+}
 
 /****************************************************************************
  * Name: nandmodel_havesmallblocks
@@ -372,7 +483,10 @@ unsigned int nandmodel_getbuswidth(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-bool nandmodel_havesmallblocks(FAR const struct nand_model_s *model);
+bool nandmodel_havesmallblocks(FAR const struct nand_model_s *model)
+{
+  return (model->pagesize <= 512 )? 1: 0;
+}
 
 /****************************************************************************
  * Name: nandmodel_havecopyback
@@ -390,12 +504,7 @@ bool nandmodel_havesmallblocks(FAR const struct nand_model_s *model);
  *
  ****************************************************************************/
 
-bool nandmodel_havecopyback(FAR const struct nand_model_s *model);
-
-#undef EXTERN
-#ifdef __cplusplus
+bool nandmodel_havecopyback(FAR const struct nand_model_s *model)
+{
+  return ((model->options & NANDMODEL_COPYBACK) != 0);
 }
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_MTD_NAND_MODEL_H */

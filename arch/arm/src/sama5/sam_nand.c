@@ -58,6 +58,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/mtd/nand.h>
+#include <nuttx/mtd/nand_model.h>
 
 #include <arch/board/board.h>
 
@@ -71,18 +72,19 @@
  * Private Types
  ****************************************************************************/
 
-/* This type represents the state of the NAND MTD device.  The struct
+/* This type represents the state of the raw NAND MTD device.  The struct
  * mtd_dev_s must appear at the beginning of the definition so that you can
- * freely cast between pointers to struct mtd_dev_s and struct nand_dev_s.
+ * freely cast between pointers to struct mtd_dev_s and struct nand_raw_s.
  */
 
-struct nand_dev_s
+struct nand_raw_s
 {
-  struct mtd_dev_s mtd;  /* Externally visible part of the driver */
-  uint8_t cs;            /* Chip select number (0..3) */
-  uintptr_t cmdaddr;     /* NAND command address base */
-  uintptr_t addraddr;    /* NAND address address base */
-  uintptr_t dataaddr;    /* NAND data address */
+  struct mtd_dev_s mtd;      /* Externally visible part of the driver */
+  uint8_t cs;                /* Chip select number (0..3) */
+  struct nand_model_s model; /* The NAND model */
+  uintptr_t cmdaddr;         /* NAND command address base */
+  uintptr_t addraddr;        /* NAND address address base */
+  uintptr_t dataaddr;        /* NAND data address */
 };
 
 /****************************************************************************
@@ -108,16 +110,16 @@ static int     nand_ioctl(struct mtd_dev_s *dev, int cmd,
  */
 
 #ifdef CONFIG_SAMA5_EBICS0_NAND
-static struct nand_dev_s g_cs0nand;
+static struct nand_raw_s g_cs0nand;
 #endif
 #ifdef CONFIG_SAMA5_EBICS1_NAND
-static struct nand_dev_s g_cs1nand;
+static struct nand_raw_s g_cs1nand;
 #endif
 #ifdef CONFIG_SAMA5_EBICS2_NAND
-static struct nand_dev_s g_cs2nand;
+static struct nand_raw_s g_cs2nand;
 #endif
 #ifdef CONFIG_SAMA5_EBICS3_NAND
-static struct nand_dev_s g_cs3nand;
+static struct nand_raw_s g_cs3nand;
 #endif
 
 /****************************************************************************
@@ -135,7 +137,7 @@ static struct nand_dev_s g_cs3nand;
 static int nand_erase(struct mtd_dev_s *dev, off_t startblock,
                       size_t nblocks)
 {
-  struct nand_dev_s *priv = (struct nand_dev_s *)dev;
+  struct nand_raw_s *priv = (struct nand_raw_s *)dev;
 
   /* The interface definition assumes that all erase blocks are the same size.
    * If that is not true for this particular device, then transform the
@@ -159,7 +161,7 @@ static int nand_erase(struct mtd_dev_s *dev, off_t startblock,
 static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startblock,
                           size_t nblocks, uint8_t *buf)
 {
-  struct nand_dev_s *priv = (struct nand_dev_s *)dev;
+  struct nand_raw_s *priv = (struct nand_raw_s *)dev;
 
   /* The interface definition assumes that all read/write blocks are the same size.
    * If that is not true for this particular device, then transform the
@@ -185,7 +187,7 @@ static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startblock,
 static ssize_t nand_bwrite(struct mtd_dev_s *dev, off_t startblock,
                            size_t nblocks, const uint8_t *buf)
 {
-  struct nand_dev_s *priv = (struct nand_dev_s *)dev;
+  struct nand_raw_s *priv = (struct nand_raw_s *)dev;
 
   /* The interface definition assumes that all read/write blocks are the same size.
    * If that is not true for this particular device, then transform the
@@ -206,7 +208,7 @@ static ssize_t nand_bwrite(struct mtd_dev_s *dev, off_t startblock,
 
 static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
 {
-  struct nand_dev_s *priv = (struct nand_dev_s *)dev;
+  struct nand_raw_s *priv = (struct nand_raw_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
   switch (cmd)
@@ -279,7 +281,8 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
 
 struct mtd_dev_s *sam_nand_initialize(int cs)
 {
-  struct nand_dev_s *priv;
+  struct nand_raw_s *priv;
+  struct mtd_s *mtd;
   uintptr_t cmdaddr;
   uintptr_t addraddr;
   uintptr_t dataaddr;
@@ -363,7 +366,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 
   /* Initialize the device structure */
 
-  memset(priv, 0, sizeof(struct nand_dev_s));
+  memset(priv, 0, sizeof(struct nand_raw_s));
   priv->mtd.erase  = nand_erase;
   priv->mtd.bread  = nand_bread;
   priv->mtd.bwrite = nand_bwrite;
@@ -384,20 +387,21 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
       return NULL;
     }
 
-  /* Probe the NAND part */
+  /* Probe the NAND part.  On success, an MTD interface that wraps
+   * our raw NAND interface is returned.
+   */
 
-  ret = nand_initialize(&priv->mtd, cmdaddr, addraddr, dataaddr);
-  if (ret < 0)
+  mtd = nand_initialize(&priv->mtd, cmdaddr, addraddr, dataaddr, &priv->model);
+  if (!mtd)
     {
       fdbg("ERROR: CS%d nand_initialize failed: %d at (%p, %p, %p)\n",
-           cs, ret,
-           (FAR void *)cmdaddr, (FAR void *)addraddr, (FAR void *)dataaddr);
+           cs, (FAR void *)cmdaddr, (FAR void *)addraddr, (FAR void *)dataaddr);
       return NULL;
     }
 
 #warning Missing logic
 
-  /* Return the implementation-specific state structure as the MTD device */
+  /* Return the MTD wrapper interface as the MTD device */
 
-  return &priv->mtd;
+  return mtd;
 }
