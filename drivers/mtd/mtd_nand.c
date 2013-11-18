@@ -432,7 +432,7 @@ static int nand_readpage(FAR struct nand_dev_s *nand, off_t block,
   /* nandecc_readpage will handle the software ECC case */
 
   DEBUGASSERT(nand && nand->raw);
-  if (nand->raw->ecc == NANDECC_SWECC)
+  if (nand->raw->ecctype == NANDECC_SWECC)
     {
       /* Read data with software ECC verification */
 
@@ -485,7 +485,7 @@ static int nand_writepage(FAR struct nand_dev_s *nand, off_t block,
   /* nandecc_writepage will handle the software ECC case */
 
   DEBUGASSERT(nand && nand->raw);
-  if (nand->raw->ecc == NANDECC_SWECC)
+  if (nand->raw->ecctype == NANDECC_SWECC)
     {
       /* Write data with software ECC calculation */
 

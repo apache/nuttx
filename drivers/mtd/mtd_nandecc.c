@@ -48,10 +48,14 @@
 
 #include <sys/types.h>
 #include <stdint.h>
+#include <string.h>
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/mtd/nand.h>
+#include <nuttx/mtd/hamming.h>
+#include <nuttx/mtd/nand_scheme.h>
 #include <nuttx/mtd/nand_ecc.h>
 
 /****************************************************************************
@@ -86,8 +90,68 @@
 int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
                      unsigned int page, FAR void *data, FAR void *spare)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct nand_raw_s *raw;
+  FAR struct nand_model_s *model;
+  FAR const struct nand_scheme_s *scheme;
+  unsigned int pagesize;
+  unsigned int sparesize;
+  int ret;
+
+  /* Get convenience pointers */
+
+  DEBUGASSERT(nand && nand->raw);
+  raw   = nand->raw;
+  model = &raw->model;
+
+  /* Get size parameters */
+
+  pagesize  = nandmodel_getpagesize(model);
+  sparesize = nandmodel_getsparesize(model);
+
+  /* Store code in spare buffer, either the buffer provided by the caller or
+   * the scatch buffer in the raw NAND structure.
+   */
+
+  if (!spare)
+    {
+      spare = raw->spare;
+      memset(spare, 0xff, sparesize);
+    }
+
+  /* Start by reading the spare data */
+
+  ret = NAND_READPAGE(raw, block, page, 0, spare);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Failed to read page:d\n", ret);
+      return ret;
+    }
+
+  /* Then reading the data */
+
+  ret = NAND_READPAGE(nand->raw, block, page, data, 0);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Failed to read page:d\n", ret);
+      return ret;
+    }
+
+  /* Retrieve ECC information from page */
+
+  scheme = nandmodel_getscheme(model);
+  nandscheme_readecc(scheme, spare, raw->ecc);
+
+  /* Use the ECC data to verify the page */
+
+  ret = hamming_verify256x(data, pagesize, raw->ecc);
+  if (ret && (ret != HAMMING_ERROR_SINGLEBIT))
+    {
+      fdbg("ERROR: Blockd paged Unrecoverable error:d\n",
+           block, page, ret);
+      return -EIO;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -116,6 +180,59 @@ int nandecc_writepage(FAR struct nand_dev_s *nand, off_t block,
                       unsigned int page,  FAR const void *data,
                       FAR void *spare)
 {
-#warning Missing logic
-  return -ENOSYS;
+  FAR struct nand_raw_s *raw;
+  FAR struct nand_model_s *model;
+  FAR const struct nand_scheme_s *scheme;
+  unsigned int pagesize;
+  unsigned int sparesize;
+  int ret;
+
+  /* Get convenience pointers */
+
+  DEBUGASSERT(nand && nand->raw);
+  raw   = nand->raw;
+  model = &raw->model;
+
+  /* Get size parameters */
+
+  pagesize  = nandmodel_getpagesize(model);
+  sparesize = nandmodel_getsparesize(model);
+
+  /* Set hamming code set to 0xffff.. to keep existing bytes */
+
+  memset(raw->ecc, 0xff, CONFIG_MTD_NAND_MAXSPAREECCBYTES);
+
+  /* Compute ECC on the new data, if provided */
+
+  if (data)
+    {
+      /* Compute hamming code on data */
+
+      hamming_compute256x(data, pagesize, raw->ecc);
+    }
+
+  /* Store code in spare buffer, either the buffer provided by the caller or
+   * the scatch buffer in the raw NAND structure.
+   */
+
+  if (!spare)
+    {
+      spare = raw->spare;
+      memset(spare, 0xff, sparesize);
+    }
+
+  /* Write the ECC */
+
+  scheme = nandmodel_getscheme(model);
+  nandscheme_writeecc(scheme, spare, raw->ecc);
+
+  /* Perform page write operation */
+
+  ret = NAND_WRITEPAGE(nand->raw, block, page, data, spare);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Failed to write page:d\n", ret);
+    }
+
+  return ret;
 }

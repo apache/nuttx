@@ -96,6 +96,46 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: hamming_compute256x
+ *
+ * Description:
+ *   Computes 3-bytes hamming codes for a data block whose size is multiple
+ *   of 256 bytes. Each 256 bytes block gets its own code.
+ *
+ * Input Parameters:
+ *   data - Data to compute code for
+ *   size - Data size in bytes
+ *   code - Codes buffer
+ *
+ * Returned Values:
+ *   None
+ *
+ ****************************************************************************/
+
+void hamming_compute256x(FAR const uint8_t *data, size_t size, uint8_t *code);
+
+/****************************************************************************
+ * Name: hamming_verify256x
+ *
+ * Description:
+ *   Verifies 3-bytes hamming codes for a data block whose size is multiple
+ *   of 256 bytes. Each 256-bytes block is verified with its own code.
+ *
+ * Input Parameters:
+ *   data - Data buffer to verify
+ *   size - Size of the data in bytes
+ *   code - Original codes
+ *
+ * Returned Values:
+ *   Return 0 if the data is correct, HAMMING_ERROR_SINGLEBIT if one or more
+ *   block(s) have had a single bit corrected, or either HAMMING_ERROR_ECC
+ *   or HAMMING_ERROR_MULTIPLEBITS.
+ *
+ ****************************************************************************/
+
+int hamming_verify256x(FAR uint8_t *data, size_t size, FAR const uint8_t *code);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

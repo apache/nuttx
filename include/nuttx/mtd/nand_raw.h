@@ -47,6 +47,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mtd/nand_config.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -81,13 +82,19 @@
 #define COMMAND_READ_A                  0x00
 #define COMMAND_READ_C                  0x50
 
-/* Type of ECC to be performed (must be enabled in the configuration)
+/* Type of ECC to be performed (may also need to be enabled in the
+ * configuration)
+ *
  *   NANDECC_NONE     No ECC, only raw NAND FLASH accesses
  *   NANDECC_SWECC    Software ECC.  Handled by the common MTD logic.
  *   NANDECC_HWECC    Values >= 2 are various hardware ECC implementations
  *                    all handled by the lower-half, raw NAND FLASH driver.
  *                    These hardware ECC types may be extended beginning
  *                    with the value NANDECC_HWECC.
+ *
+ * Software ECC is performed by common, upper-half MTD logic;  All
+ * hardware assisted ECC operations are handled by the platform-specific,
+ * lower-half driver.
  */
 
 #define NANDECC_NONE                    0
@@ -191,12 +198,6 @@ struct nand_raw_s
   uintptr_t addraddr;        /* NAND address address base */
   uintptr_t dataaddr;        /* NAND data address */
 
-#ifdef CONFIG_MTD_NAND_BLOCKCHECK
-  /* ECC */
-
-  uint8_t ecc;               /* See enum nand_ecc_e */
-#endif
-
   /* NAND operations */
 
   CODE int (*eraseblock)(FAR struct nand_raw_s *raw, off_t block);
@@ -205,6 +206,15 @@ struct nand_raw_s
   CODE int (*writepage)(FAR struct nand_raw_s *raw, off_t block,
                         unsigned int page, FAR const void *data,
                         FAR const void *spare);
+
+#ifdef CONFIG_MTD_NAND_BLOCKCHECK
+  /* ECC */
+
+  uint8_t ecctype;            /* See enum nand_ecc_e */
+  uint8_t spare[CONFIG_MTD_NAND_MAXPAGESPARESIZE];
+  uint8_t ecc[CONFIG_MTD_NAND_MAXSPAREECCBYTES];
+
+#endif
 };
 
 /****************************************************************************

@@ -407,7 +407,7 @@ void hamming_compute256x(FAR const uint8_t *data, size_t size, uint8_t *code)
  *
  ****************************************************************************/
 
-int hamming_verify256x(uint8_t *data, size_t size, const uint8_t *code)
+int hamming_verify256x(FAR uint8_t *data, size_t size, FAR const uint8_t *code)
 {
   ssize_t remaining = (ssize_t)size;
   int result = HAMMING_SUCCESS;

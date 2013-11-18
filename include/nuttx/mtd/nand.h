@@ -72,7 +72,7 @@ struct nand_dev_s
 {
   struct mtd_dev_s mtd;       /* Externally visible part of the driver */
   FAR struct nand_raw_s *raw; /* Retained reference to the lower half */
-  sem_t exclsem;              /* For exclusive access to the NAND flas */
+  sem_t exclsem;              /* For exclusive access to the NAND FLASH */
 };
 
 /****************************************************************************
