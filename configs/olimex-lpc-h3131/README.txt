@@ -239,19 +239,19 @@ Buttons and LEDs
 Image Format
 ============
 
-  In order to use the bootrom bootloader, a special header must be added to the
-  beginning of the binary image that includes information about the binary (things
-  like the entry point, the size, and CRC's to verify the image.
+  In order to use the bootrom bootloader, a special header must be added to
+  the beginning of the binary image that includes information about the
+  binary (things like the entry point, the size, and CRC's to verify the image.
 
-  NXP provides a Windows program to append such a header to the binary image.
-  However, (1) that program won't run under Linux, and (2) when I try it under
-  WinXP, Symantec immediately claims that the program is misbehaving and deletes
-  it!
+  NXP provides a Windows program to append such a header to the binary
+  image.  However, (1) that program won't run under Linux, and (2) when I
+  try it under WinXP, Symantec immediately claims that the program is
+  misbehaving and deletes it!
 
   To work around both of these issues, I have created a small program under
-  configs/olimex-lpc-h3131/tools to add the header.  This program can be built under
-  either Linux or Cygwin (and probably other tool environments as well).  That
-  tool can be built as follows:
+  configs/olimex-lpc-h3131/tools to add the header.  This program can be
+  built under either Linux or Cygwin (and probably other tool environments
+  as well).  That tool can be built as follows:
 
   - cd configs/olimex-lpc-h3131/tools
   - make
@@ -267,15 +267,16 @@ Image Format
   - mklpc.sh                      # Make the bootloader binary (nuttx.lpc)
 
   NOTES:
-  
+
     1. setenv.sh just sets up pathes to the toolchain and also to
-       configs/olimex-lpc-h3131/tools where mklpc.sh resides. Use of setenv.sh is optional.
-       If you don't use setenv.sh, then just set your PATH variable appropriately or
-       use the full path to mklpc.sh in the final step.
-    2. You can instruct Symantec to ignore the errors and it will stop quarantining
-       the NXP program.
-    3. The CRC32 logic in configs/olimex-lpc-h3131/tools doesn't seem to work.  As a result,
-       the CRC is currently disabled in the header:
+       configs/olimex-lpc-h3131/tools where mklpc.sh resides. Use of
+       setenv.sh is optional.  If you don't use setenv.sh, then just set
+       your PATH variable appropriately or use the full path to mklpc.sh
+       in the final step.
+    2. You can instruct Symantec to ignore the errors and it will stop
+       quarantining the NXP program.
+    3. The CRC32 logic in configs/olimex-lpc-h3131/tools doesn't seem to
+       work.  As a result, the CRC is currently disabled in the header:
 
        RCS file: /cvsroot/nuttx/nuttx/configs/olimex-lpc-h3131/tools/lpchdr.c,v
        retrieving revision 1.2
@@ -292,6 +293,15 @@ Assuming that you already have the FTDI driver installed*, then here is the
 are the steps that I use for loading new code into the LPC-H3131:
 
 - Create the bootloader binary, nuttx.lpc, as described above.
+- With the power off, set the boot jumpers to enable booting from UART.
+  The boot jumpers are the block of three jumper just in-board from the
+  JTAG connector; Jumper pair 1-2 is the pair furthest from the JTAG
+  connector:
+
+    1-2: Closed
+    3-4: Closed
+    5-6: Open
+
 - Connected the LPC-H3131 using the FTDI USB port (not the lpc3131 USB port)
   This will power up the LPC-H3131 and start the bootloader.
 - Start a terminal emulator (such as TeraTerm) at 115200 8NI.
@@ -316,7 +326,7 @@ Using OpenOCD and GDB
   I used to start the OpenOCD daemon on my system called oocd.sh.  That
   script would probably require some modifications to work in another
   environment:
-  
+
     - possibly the value of OPENOCD_PATH
     - If you are working under Linux you will need to change any
       occurances of `cygpath -w blablabla` to just blablabla
