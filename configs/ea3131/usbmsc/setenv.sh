@@ -58,7 +58,7 @@ export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ 
 
 # This is the path to the tools subdirectory
 
-export LPCTOOL_DIR="${WD}/configs/ea3152/tools"
+export LPCTOOL_DIR="${WD}/configs/ea3131/tools"
 
 # Add the path to the toolchain to the PATH varialble
 

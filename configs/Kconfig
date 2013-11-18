@@ -372,6 +372,14 @@ config ARCH_BOARD_OLIMEXLPC2378
 		Linux or Cygwin.  STATUS: ostest and NSH configurations available.
 		This port for the NXP LPC2378 was contributed by Rommel Marcelo.
 
+config ARCH_BOARD_OLIMEX_LPC_H3131
+	bool "Olimex LPC-H3131 Development board"
+	depends on ARCH_CHIP_LPC3131
+	select ARCH_HAVE_LEDS
+	---help---
+		Olimex LPC-H3131 development board.  This board is based on the the
+		NXP LPC3131 MCU.
+
 config ARCH_BOARD_OLIMEX_STRP711
 	bool "Olimex STR-P711 board"
 	depends on ARCH_CHIP_STR71X
@@ -848,6 +856,7 @@ config ARCH_BOARD
 	default "nutiny-nuc120"       if ARCH_BOARD_NUTINY_NUC120
 	default "olimex-lpc1766stk"   if ARCH_BOARD_LPC1766STK
 	default "olimex-lpc2378"      if ARCH_BOARD_OLIMEXLPC2378
+	default "olimex-lpc-h3131"    if ARCH_BOARD_OLIMEX_LPC_H3131
 	default "olimex-stm32-p107"   if ARCH_BOARD_OLIMEX_STM32P107
 	default "olimex-stm32-p207"   if ARCH_BOARD_OLIMEX_STM32P207
 	default "olimex-strp711"      if ARCH_BOARD_OLIMEX_STRP711
@@ -1061,6 +1070,9 @@ source "configs/olimex-lpc1766stk/Kconfig"
 endif
 if ARCH_BOARD_OLIMEXLPC2378
 source "configs/olimex-lpc2378/Kconfig"
+endif
+if ARCH_BOARD_OLIMEX_LPC_H3131
+source "configs/olimex-lpc-h3131/Kconfig"
 endif
 if ARCH_BOARD_OLIMEX_STM32P107
 source "configs/olimex-stm32-p107/Kconfig"

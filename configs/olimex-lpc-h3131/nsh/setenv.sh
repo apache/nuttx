@@ -1,7 +1,7 @@
 #!/bin/bash
-# configs/ea3131/usbserial/setenv.sh
+# configs/olimex-lpc-h3131/nsh/setenv.sh
 #
-#   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@ export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ 
 
 # This is the path to the tools subdirectory
 
-export LPCTOOL_DIR="${WD}/configs/ea3131/tools"
+export LPCTOOL_DIR="${WD}/configs/olimex-lpc-h3131/tools"
 
 # Add the path to the toolchain to the PATH varialble
 
