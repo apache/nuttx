@@ -1,7 +1,7 @@
-#!/bin/bash
-# configs/ea3131/usbserial/setenv.sh
+############################################################################
+# configs/olimex-lpc-h3131/src/Makefile
 #
-#   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,36 +31,70 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+############################################################################
 
-if [ "$_" = "$0" ] ; then
-  echo "You must source this script, not run it!" 1>&2
-  exit 1
-fi
+-include $(TOPDIR)/Make.defs
 
-WD=`pwd`
-if [ ! -x "setenv.sh" ]; then
-  echo "This script must be executed from the top-level NuttX build directory"
-  exit 1
-fi
+CFLAGS += -I$(TOPDIR)/sched
 
-if [ -z "${PATH_ORIG}" ]; then
-  export PATH_ORIG="${PATH}"
-fi
+ASRCS =
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-# This is the Cygwin path to the location where I installed the CodeSourcery
-# toolchain under windows.  You will also have to edit this if you install
-# the CodeSourcery toolchain in any other location
-export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
+CSRCS = lpc31_boot.c lpc31_clkinit.c
 
-# This is the Cygwin path to the location where I build the buildroot
-# toolchain.
-#export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
+ifeq ($(CONFIG_ARCH_LEDS),y)
+CSRCS += lpc31_leds.c
+endif
 
-# This is the path to the tools subdirectory
+ifeq ($(CONFIG_LPC31_SPI),y)
+CSRCS += lpc31_spi.c
+endif
 
-export LPCTOOL_DIR="${WD}/configs/ea3131/tools"
+ifeq ($(CONFIG_NSH_ARCHINIT),y)
+CSRCS += lpc31_nsh.c
+endif
 
-# Add the path to the toolchain to the PATH varialble
+ifeq ($(CONFIG_LPC31_USBOTG),y)
+ifeq ($(CONFIG_USBHOST),y)
+CSRCS += lpc31_usbhost.c
+endif
+endif
 
-export PATH="${TOOLCHAIN_BIN}:${LPCTOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
-echo "PATH : ${PATH}"
+COBJS = $(CSRCS:.c=$(OBJEXT))
+
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
+
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+ifeq ($(WINTOOL),y)
+  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" -I "${shell cygpath -w $(ARCH_SRCDIR)/arm}"
+else
+  CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/arm
+endif
+
+all: libboard$(LIBEXT)
+
+$(AOBJS): %$(OBJEXT): %.S
+	$(call ASSEMBLE, $<, $@)
+
+$(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
+	$(call COMPILE, $<, $@)
+
+libboard$(LIBEXT): $(OBJS)
+	$(call ARCHIVE, $@, $(OBJS))
+
+.depend: Makefile $(SRCS)
+	$(Q) $(MKDEP) $(CC) -- $(CFLAGS) -- $(SRCS) >Make.dep
+	$(Q) touch $@
+
+depend: .depend
+
+clean:
+	$(call DELFILE, libboard$(LIBEXT))
+	$(call CLEAN)
+
+distclean: clean
+	$(call DELFILE, Make.dep)
+	$(call DELFILE, .depend)
+
+-include Make.dep

@@ -1,7 +1,7 @@
-#!/bin/bash
-# configs/ea3131/usbserial/setenv.sh
+############################################################################
+# configs/olimex-lpc-h3131/tools/Makefile
 #
-#   Copyright (C) 2010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,36 +31,23 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
+############################################################################
 
-if [ "$_" = "$0" ] ; then
-  echo "You must source this script, not run it!" 1>&2
-  exit 1
-fi
+OBJS		= lpchdr.o crc32.o
+BIN		= lpchdr
 
-WD=`pwd`
-if [ ! -x "setenv.sh" ]; then
-  echo "This script must be executed from the top-level NuttX build directory"
-  exit 1
-fi
+CFLAGS		+= -Wall -g
 
-if [ -z "${PATH_ORIG}" ]; then
-  export PATH_ORIG="${PATH}"
-fi
+all: $(BIN)
+.PHONY: clean
 
-# This is the Cygwin path to the location where I installed the CodeSourcery
-# toolchain under windows.  You will also have to edit this if you install
-# the CodeSourcery toolchain in any other location
-export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
+$(OBJS): %.o: %.c
+	$(CC) -c $(CFLAGS) $< -o $@
 
-# This is the Cygwin path to the location where I build the buildroot
-# toolchain.
-#export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
+lpchdr: $(OBJS)
+	$(CC) -o $@ $^
 
-# This is the path to the tools subdirectory
+clean:
+	@rm -f $(BIN) *.o *~
 
-export LPCTOOL_DIR="${WD}/configs/ea3131/tools"
 
-# Add the path to the toolchain to the PATH varialble
-
-export PATH="${TOOLCHAIN_BIN}:${LPCTOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
-echo "PATH : ${PATH}"
