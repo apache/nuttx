@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/child/skeleton.c
+ * drivers/mtd/mtd_partition.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

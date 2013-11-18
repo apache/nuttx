@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/mtd/nand_scheme.c
+ * include/nuttx/mtd/mtd_nandscheme.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

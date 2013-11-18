@@ -81,6 +81,19 @@
 #define COMMAND_READ_A                  0x00
 #define COMMAND_READ_C                  0x50
 
+/* Type of ECC to be performed (must be enabled in the configuration)
+ *   NANDECC_NONE     No ECC, only raw NAND FLASH accesses
+ *   NANDECC_SWECC    Software ECC.  Handled by the common MTD logic.
+ *   NANDECC_HWECC    Values >= 2 are various hardware ECC implementations
+ *                    all handled by the lower-half, raw NAND FLASH driver.
+ *                    These hardware ECC types may be extended beginning
+ *                    with the value NANDECC_HWECC.
+ */
+
+#define NANDECC_NONE                    0
+#define NANDECC_SWECC                   1
+#define NANDECC_HWECC                   2
+
 /* NAND access macros */
 
 #define WRITE_COMMAND8(raw, command) \
@@ -151,7 +164,7 @@
  *   block - Number of the block where the page to write resides.
  *   page  - Number of the page to write inside the given block.
  *   data  - Buffer containing the data to be writting
- *   spare - Buffer conatining the spare data to be written.
+ *   spare - Buffer containing the spare data to be written.
  *
  * Returned value.
  *   OK is returned in succes; a negated errno value is returned on failure.
@@ -171,12 +184,18 @@
 
 struct nand_raw_s
 {
-  /* NAND data */
+  /* NAND data description */
 
   struct nand_model_s model; /* The NAND model storage */
   uintptr_t cmdaddr;         /* NAND command address base */
   uintptr_t addraddr;        /* NAND address address base */
   uintptr_t dataaddr;        /* NAND data address */
+
+#ifdef CONFIG_MTD_NAND_BLOCKCHECK
+  /* ECC */
+
+  uint8_t ecc;               /* See enum nand_ecc_e */
+#endif
 
   /* NAND operations */
 
@@ -205,22 +224,6 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: nand_chipid
- *
- * Description:
- *   Reads and returns the identifiers of a NAND FLASH chip
- *
- * Input Parameters:
- *   raw - Pointer to a struct nand_raw_s instance.
- *
- * Returned Value:
- *   id1|(id2<<8)|(id3<<16)|(id4<<24)
- *
- ****************************************************************************/
-
-uint32_t nand_chipid(FAR struct nand_raw_s *raw);
 
 #undef EXTERN
 #ifdef __cplusplus

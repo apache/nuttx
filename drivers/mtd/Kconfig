@@ -87,12 +87,6 @@ config ARCH_NAND_HWECC
 
 if MTD_NAND
 
-config MTD_NAND_BLOCKCHECK
-	bool "Block check"
-	default y
-	---help---
-		Enable support for bad block checking.
-
 config MTD_NAND_MAXNUMBLOCKS
 	int "Max blocks"
 	default 1024
@@ -123,6 +117,28 @@ config MTD_NAND_MAXSPAREECCBYTES
 	---help---
 		Maximum number of ECC bytes stored in the spare for one single page.
 
+config MTD_NAND_BLOCKCHECK
+	bool "Block check"
+	default y
+	---help---
+		Enable support for ECC and bad block checking.
+
+if MTD_NAND_BLOCKCHECK
+
+config MTD_NAND_SWECC
+	bool "Sofware ECC support"
+	default n if ARCH_NAND_HWECC
+	default y if !ARCH_NAND_HWECC
+	---help---
+		Build in logic to support software calculation of ECC.
+
+config MTD_NAND_HWECC
+	bool "Hardware ECC support"
+	default n
+	depends on ARCH_NAND_HWECC
+	---help---
+		Build in logic to support hardware calculation of ECC.
+
 config MTD_NAND_MAXSPAREEXTRABYTES
 	int "Max extra free bytes"
 	default 206
@@ -132,7 +148,7 @@ config MTD_NAND_MAXSPAREEXTRABYTES
 config MTD_NAND_MAX_HWECCSIZE
 	int "Max H/W ECC size"
 	default 200
-	depends on ARCH_NAND_HWECC
+	depends on MTD_NAND_HWECC
 	---help---
 		Maximum HW ECC size
 

@@ -88,7 +88,7 @@
 static int      nand_lock(FAR struct nand_dev_s *nand);
 #define         nand_unlock(n) sem_post(&(n)->exclsem)
 
-/* Sparing logic */
+/* Bad block checking */
 
 #ifdef CONFIG_MTD_NAND_BLOCKCHECK
 static int     nand_checkblock(FAR struct nand_dev_s *nand, off_t block);
@@ -98,8 +98,15 @@ static int     nand_devscan(FAR struct nand_dev_s *nand);
 #  define      nand_devscan(n)
 #endif
 
+/* Misc. NAND helpers */
+
+static uint32_t nand_chipid(struct nand_raw_s *raw);
 static int      nand_eraseblock(FAR struct nand_dev_s *nand,
                   off_t block, bool scrub);
+static int      nand_readpage(FAR struct nand_dev_s *nand, off_t block,
+                  unsigned int page, FAR uint8_t *buf);
+static int      nand_writepage(FAR struct nand_dev_s *nand, off_t block,
+                  unsigned int page, FAR const void *buf);
 
 /* MTD driver methods */
 
@@ -284,6 +291,44 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
 #endif /* CONFIG_MTD_NAND_BLOCKCHECK */
 
 /****************************************************************************
+ * Name: nand_chipid
+ *
+ * Description:
+ *   Reads and returns the identifiers of a NAND FLASH chip
+ *
+ * Input Parameters:
+ *   raw - Pointer to a struct nand_raw_s instance.
+ *
+ * Returned Value:
+ *   id1|(id2<<8)|(id3<<16)|(id4<<24)
+ *
+ ****************************************************************************/
+
+static uint32_t nand_chipid(struct nand_raw_s *raw)
+{
+  uint8_t id[5];
+
+  DEBUGASSERT(raw);
+
+  WRITE_COMMAND8(raw, COMMAND_READID);
+  WRITE_ADDRESS8(raw, 0);
+
+  id[0] = READ_DATA8(raw);
+  id[1] = READ_DATA8(raw);
+  id[2] = READ_DATA8(raw);
+  id[3] = READ_DATA8(raw);
+  id[4] = READ_DATA8(raw);
+
+  fvdbg("Chip ID: %02x %02x %02x %02x %02x\n",
+        id[0], id[1], id[2], id[3], id[4]);
+
+  return  (uint32_t)id[0]        |
+         ((uint32_t)id[1] << 8)  |
+         ((uint32_t)id[2] << 16) |
+         ((uint32_t)id[3] << 24);
+}
+
+/****************************************************************************
  * Name: nand_eraseblock
  *
  * Description:
@@ -383,12 +428,27 @@ static int nand_readpage(FAR struct nand_dev_s *nand, off_t block,
       return -EAGAIN;
    }
 
-  /* Read data with ECC verification */
+#ifdef CONFIG_MTD_NAND_SWECC
+  /* nandecc_readpage will handle the software ECC case */
 
-  return nandecc_readpage(nand, block, page, buf, NULL);
-#else
-  return NAND_READPAGE(nand->raw, block, page, buf, NULL);
+  DEBUGASSERT(nand && nand->raw);
+  if (nand->raw->ecc == NANDECC_SWECC)
+    {
+      /* Read data with software ECC verification */
+
+      return nandecc_readpage(nand, block, page, buf, NULL);
+    }
+
+  /* The lower half will handle the No ECC and all hardware assisted
+   * ECC calculations.
+   */
+
+  else
 #endif
+#endif
+    {
+      return NAND_READPAGE(nand->raw, block, page, buf, NULL);
+    }
 }
 
 /****************************************************************************
@@ -420,11 +480,28 @@ static int nand_writepage(FAR struct nand_dev_s *nand, off_t block,
       fdbg("ERROR: Block is BAD\n");
       return -EAGAIN;
     }
+
+#ifdef CONFIG_MTD_NAND_SWECC
+  /* nandecc_writepage will handle the software ECC case */
+
+  DEBUGASSERT(nand && nand->raw);
+  if (nand->raw->ecc == NANDECC_SWECC)
+    {
+      /* Write data with software ECC calculation */
+
+      return nandecc_writepage(nand, block, page, buf, NULL);
+    }
+
+  /* The lower half will handle the No ECC and all hardware assisted
+   * ECC calculations.
+   */
+
+ else
 #endif
-
-  /* Write data with ECC calculation */
-
-  return nandecc_writepage(nand, block, page, buf, NULL);
+#endif
+    {
+      return NAND_WRITEPAGE(nand->raw, block, page, buf, NULL);
+    }
 }
 
 /****************************************************************************
@@ -614,7 +691,7 @@ static ssize_t nand_bwrite(struct mtd_dev_s *dev, off_t startpage,
       ret = nand_writepage(nand, block, page, buf);
       if (ret < 0)
         {
-          fdbg("ERROR: nand_readpage failed block=%ld page=%d: %d\n",
+          fdbg("ERROR: nand_writepage failed block=%ld page=%d: %d\n",
                (long)block, page, ret);
           goto errout_with_lock;
         }
@@ -656,7 +733,13 @@ errout_with_lock:
 static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
 {
   FAR struct nand_dev_s *nand = (FAR struct nand_dev_s *)dev;
+  FAR struct nand_raw_s *raw;
+  FAR struct nand_model_s *model;
   int ret = -EINVAL; /* Assume good command with bad parameters */
+
+  DEBUGASSERT(nand && nand->raw);
+  raw   = nand->raw;
+  model = &raw->model;
 
   switch (cmd)
     {
@@ -666,17 +749,16 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
           if (geo)
             {
               /* Populate the geometry structure with information needed to know
-               * the capacity and how to access the device.
+               * the capacity and how to access the device.  Returns:
                *
-               * NOTE: that the device is treated as though it where just an array
-               * of fixed size blocks.  That is most likely not true, but the client
-               * will expect the device logic to do whatever is necessary to make it
-               * appear so.
+               *   blocksize    Size of one read/write block in bytes
+               *   erasesize    Size of one erase block in bytes
+               *   neraseblocks The number of erase blocks in the device
                */
 
-              geo->blocksize    = 512;  /* Size of one read/write block */
-              geo->erasesize    = 4096; /* Size of one erase block */
-              geo->neraseblocks = 1024; /* Number of erase blocks */
+              geo->blocksize    = model->pagesize;
+              geo->erasesize    = nandmodel_getbyteblocksize(model);
+              geo->neraseblocks = nandmodel_getdevblocks(model);
               ret               = OK;
           }
         }
@@ -686,7 +768,7 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
         {
           /* Erase the entire device */
 
-          ret = OK;
+          ret = nand_erase(dev, 0, nandmodel_getdevblocks(model));
         }
         break;
 

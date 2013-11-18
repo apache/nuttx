@@ -6081,4 +6081,6 @@
 	  NAND support (2013-11-17).
 	* drivers/mtd/mtd_nandscheme.c:  More NAND support (2013-11-17).
 	* include/nuttx/mtd/nand_ecc.h: More NAND (2013-11-17).
-
+	* drivers/mtd/hamming.c and mtd_nandecc.c and
+	  include/nuttx/mtd/hamming.h:  Beginning of NAND software ECC
+	  calculations. (2013-11-18).

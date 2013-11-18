@@ -1,14 +1,14 @@
 /****************************************************************************
- * include/nuttx/mtd/nand_ecc.h
+ * include/nuttx/mtd/hamming.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * This logic was based largely on Atmel sample code with modifications for
- * better integration with NuttX.  The Atmel sample code has a BSD
- * compatibile license that requires this copyright notice:
+ * This logic was taken directly from Atmel sample code with only
+ * modifications for better integration with NuttX.  The Atmel sample
+ * code has a BSD compatibile license that requires this copyright notice:
  *
- *   Copyright (c) 2012, Atmel Corporation
+ *   Copyright (c) 2011, Atmel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,21 +39,40 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MTD_ECC_H
-#define __INCLUDE_NUTTX_MTD_ECC_H
+#ifndef __INCLUDE_NUTTX_HAMMING_H
+#define __INCLUDE_NUTTX_HAMMING_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/mtd/nand_config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
+#include <semaphore.h>
+
+#include <nuttx/mtd/mtd.h>
+#include <nuttx/mtd/nand_raw.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* These are the possible errors when trying to verify a block of data
+ * encoded using a Hamming code:
+ *
+ *   HAMMING_SUCCESS            - Block verified without errors
+ *   HAMMING_ERROR_SINGLEBIT    - A single bit was incorrect but has been
+ *                                recovered
+ *   HAMMING_ERROR_ECC          - The original code has been corrupted
+ *   HAMMING_ERROR_MULTIPLEBITS - Multiple bits are incorrect in the data
+ *                                and they cannot be corrected
+ */
+
+#define HAMMING_SUCCESS                 0
+#define HAMMING_ERROR_SINGLEBIT         1
+#define HAMMING_ERROR_ECC               2
+#define HAMMING_ERROR_MULTIPLEBITS      3
 
 /****************************************************************************
  * Public Types
@@ -77,60 +96,10 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: nandecc_readpage
- *
- * Description:
- *   Reads the data and/or spare areas of a page of a NAND FLASH chip and
- *   verifies that the data is valid using the ECC information contained in
- *   the spare area. If a buffer pointer is NULL, then the corresponding area
- *   is not saved.
- *
- * Input parameters:
- *   nand  - Upper-half, NAND FLASH interface
- *   block - Number of the block where the page to read resides.
- *   page  - Number of the page to read inside the given block.
- *   data  - Buffer where the data area will be stored.
- *   spare - Buffer where the spare area will be stored.
- *
- * Returned value.
- *   OK is returned in success; a negated errno value is returned on failure.
- *
- ****************************************************************************/
-
-int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
-                     unsigned int page, FAR void *data, FAR void *spare);
-
-/****************************************************************************
- * Name: nandecc_writepage
- *
- * Description:
- *   Writes the data and/or spare area of a NAND FLASH page after
- *   calculating an ECC for the data area and storing it in the spare. If no
- *   data buffer is provided, the ECC is read from the existing page spare.
- *   If no spare buffer is provided, the spare area is still written with the
- *   ECC information calculated on the data buffer.
- *
- * Input parameters:
- *   nand  - Upper-half, NAND FLASH interface
- *   block - Number of the block where the page to write resides.
- *   page  - Number of the page to write inside the given block.
- *   data  - Buffer containing the data to be writting
- *   spare - Buffer containing the spare data to be written.
- *
- * Returned value.
- *   OK is returned in success; a negated errno value is returned on failure.
- *
- ****************************************************************************/
-
-int nandecc_writepage(FAR struct nand_dev_s *nand, off_t block,
-                      unsigned int page,  FAR const void *data,
-                      FAR void *spare);
-
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_MTD_ECC_H */
+#endif /* __INCLUDE_NUTTX_HAMMING_H */

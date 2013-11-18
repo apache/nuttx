@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/mtd/mtd_nandraw.c
+ * drivers/mtd/mtd_nandecc.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,30 +46,16 @@
 #include <nuttx/config.h>
 #include <nuttx/mtd/nand_config.h>
 
+#include <sys/types.h>
 #include <stdint.h>
-#include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/mtd/nand_raw.h>
+#include <nuttx/mtd/nand.h>
+#include <nuttx/mtd/nand_ecc.h>
 
 /****************************************************************************
  * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
@@ -77,39 +63,59 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nand_chipid
+ * Name: nandecc_readpage
  *
  * Description:
- *   Reads and returns the identifiers of a NAND FLASH chip
+ *   Reads the data and/or spare areas of a page of a NAND FLASH chip and
+ *   verifies that the data is valid using the ECC information contained in
+ *   the spare area. If a buffer pointer is NULL, then the corresponding area
+ *   is not saved.
  *
- * Input Parameters:
- *   raw - Pointer to a struct nand_raw_s instance.
+ * Input parameters:
+ *   nand  - Upper-half, NAND FLASH interface
+ *   block - Number of the block where the page to read resides.
+ *   page  - Number of the page to read inside the given block.
+ *   data  - Buffer where the data area will be stored.
+ *   spare - Buffer where the spare area will be stored.
  *
- * Returned Value:
- *   id1|(id2<<8)|(id3<<16)|(id4<<24)
+ * Returned value.
+ *   OK is returned in success; a negated errno value is returned on failure.
  *
  ****************************************************************************/
 
-uint32_t nand_chipid(struct nand_raw_s *raw)
+int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
+                     unsigned int page, FAR void *data, FAR void *spare)
 {
-  uint8_t id[5];
+#warning Missing logic
+  return -ENOSYS;
+}
 
-  DEBUGASSERT(raw);
+/****************************************************************************
+ * Name: nandecc_writepage
+ *
+ * Description:
+ *   Writes the data and/or spare area of a NAND FLASH page after
+ *   calculating an ECC for the data area and storing it in the spare. If no
+ *   data buffer is provided, the ECC is read from the existing page spare.
+ *   If no spare buffer is provided, the spare area is still written with the
+ *   ECC information calculated on the data buffer.
+ *
+ * Input parameters:
+ *   nand  - Upper-half, NAND FLASH interface
+ *   block - Number of the block where the page to write resides.
+ *   page  - Number of the page to write inside the given block.
+ *   data  - Buffer containing the data to be writting
+ *   spare - Buffer containing the spare data to be written.
+ *
+ * Returned value.
+ *   OK is returned in success; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
 
-  WRITE_COMMAND8(raw, COMMAND_READID);
-  WRITE_ADDRESS8(raw, 0);
-
-  id[0] = READ_DATA8(raw);
-  id[1] = READ_DATA8(raw);
-  id[2] = READ_DATA8(raw);
-  id[3] = READ_DATA8(raw);
-  id[4] = READ_DATA8(raw);
-
-  fvdbg("Chip ID: %02x %02x %02x %02x %02x\n",
-        id[0], id[1], id[2], id[3], id[4]);
-
-  return  (uint32_t)id[0]        |
-         ((uint32_t)id[1] << 8)  |
-         ((uint32_t)id[2] << 16) |
-         ((uint32_t)id[3] << 24);
+int nandecc_writepage(FAR struct nand_dev_s *nand, off_t block,
+                      unsigned int page,  FAR const void *data,
+                      FAR void *spare)
+{
+#warning Missing logic
+  return -ENOSYS;
 }
