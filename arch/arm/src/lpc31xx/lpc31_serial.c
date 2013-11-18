@@ -577,8 +577,10 @@ static int up_interrupt(int irq, void *context)
 static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   struct inode      *inode = filep->f_inode;
+#ifdef CONFIG_SERIAL_TIOCSERGSTRUCT
   struct uart_dev_s *dev   = inode->i_private;
-  int                ret    = OK;
+#endif
+  int                ret   = OK;
 
   switch (cmd)
     {
