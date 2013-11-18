@@ -88,6 +88,24 @@ struct sam_rawnand_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+/* NAND Helpers */
+
+static int nand_readpage_noecc(struct sam_rawnand_s *priv, off_t block,
+             unsigned int page, void *data, void *spare);
+#ifdef CONFIG_MTD_NAND_BLOCKCHECK
+static int nand_readpage_hwecc(struct sam_rawnand_s *priv, off_t block,
+             unsigned int page, void *data, void *spare);
+static int nand_readpage_pmecc(struct sam_rawnand_s *priv, off_t block,
+             unsigned int page, void *data, void *spare);
+#endif
+static int nand_writepage_noecc(struct sam_rawnand_s *priv, off_t block,
+             unsigned int page, const void *data, const void *spare);
+#ifdef CONFIG_MTD_NAND_BLOCKCHECK
+static int nand_writepage_hwecc(struct sam_rawnand_s *priv, off_t block,
+             unsigned int page, const void *data, const void *spare);
+static int nand_writepage_pmecc(struct sam_rawnand_s *priv, off_t block,
+             unsigned int page, const void *data, const void *spare);
+#endif
 
 /* MTD driver methods */
 
@@ -120,6 +138,171 @@ static struct sam_rawnand_s g_cs3nand;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nand_readpage_noecc
+ *
+ * Description:
+ *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
+ *   provided buffers.  The raw NAND contents are returned with no ECC
+ *   corrections.
+ *
+ * Input parameters:
+ *   priv  - Lower-half, private NAND FLASH device state
+ *   block - Number of the block where the page to read resides.
+ *   page  - Number of the page to read inside the given block.
+ *   data  - Buffer where the data area will be stored.
+ *   spare - Buffer where the spare area will be stored.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+static int nand_readpage_noecc(struct sam_rawnand_s *priv, off_t block,
+             unsigned int page, void *data, void *spare)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: nand_readpage_hwecc
+ *
+ * Description:
+ *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
+ *   provided buffers.  HSIAO ECC is used
+ *
+ * Input parameters:
+ *   priv  - Lower-half, private NAND FLASH device state
+ *   block - Number of the block where the page to read resides.
+ *   page  - Number of the page to read inside the given block.
+ *   data  - Buffer where the data area will be stored.
+ *   spare - Buffer where the spare area will be stored.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_NAND_BLOCKCHECK
+static int nand_readpage_hwecc(struct sam_rawnand_s *priv, off_t block,
+             unsigned int page, void *data, void *spare)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+#endif /* CONFIG_MTD_NAND_BLOCKCHECK */
+
+/****************************************************************************
+ * Name: nand_readpage_pmecc
+ *
+ * Description:
+ *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
+ *   provided buffers.  PMECC is used
+ *
+ * Input parameters:
+ *   priv  - Lower-half, private NAND FLASH device state
+ *   block - Number of the block where the page to read resides.
+ *   page  - Number of the page to read inside the given block.
+ *   data  - Buffer where the data area will be stored.
+ *   spare - Buffer where the spare area will be stored.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_NAND_BLOCKCHECK
+static int nand_readpage_pmecc(struct sam_rawnand_s *priv, off_t block,
+             unsigned int page, void *data, void *spare)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+#endif /* CONFIG_MTD_NAND_BLOCKCHECK */
+
+/****************************************************************************
+ * Name: nand_writepage_noecc
+ *
+ * Description:
+ *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
+ *   No ECC calculations are performed.
+ *
+ * Input parameters:
+ *   priv  - Lower-half, private NAND FLASH device state
+ *   block - Number of the block where the page to write resides.
+ *   page  - Number of the page to write inside the given block.
+ *   data  - Buffer containing the data to be writting
+ *   spare - Buffer conatining the spare data to be written.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+static int nand_writepage_noecc(struct sam_rawnand_s *priv, off_t block,
+             unsigned int page, const void *data, const void *spare)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+
+/****************************************************************************
+ * Name: nand_writepage_noecc
+ *
+ * Description:
+ *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
+ *   HSIAO ECC calculations are performed.
+ *
+ * Input parameters:
+ *   priv  - Lower-half, private NAND FLASH device state
+ *   block - Number of the block where the page to write resides.
+ *   page  - Number of the page to write inside the given block.
+ *   data  - Buffer containing the data to be writting
+ *   spare - Buffer conatining the spare data to be written.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_NAND_BLOCKCHECK
+static int nand_writepage_hwecc(struct sam_rawnand_s *priv, off_t block,
+             unsigned int page, const void *data, const void *spare)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+#endif /* CONFIG_MTD_NAND_BLOCKCHECK */
+
+/****************************************************************************
+ * Name: nand_writepage_noecc
+ *
+ * Description:
+ *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
+ *   PMECC calculations are performed.
+ *
+ * Input parameters:
+ *   priv  - Lower-half, private NAND FLASH device state
+ *   block - Number of the block where the page to write resides.
+ *   page  - Number of the page to write inside the given block.
+ *   data  - Buffer containing the data to be writting
+ *   spare - Buffer conatining the spare data to be written.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_NAND_BLOCKCHECK
+static int nand_writepage_pmecc(struct sam_rawnand_s *priv, off_t block,
+             unsigned int page, const void *data, const void *spare)
+{
+#warning Missing logic
+  return -ENOSYS;
+}
+#endif /* CONFIG_MTD_NAND_BLOCKCHECK */
 
 /****************************************************************************
  * Name: nand_eraseblock
@@ -168,8 +351,25 @@ static int nand_readpage(struct nand_raw_s *raw, off_t block,
 {
   struct sam_rawnand_s *priv = (struct sam_rawnand_s *)raw;
   DEBUGASSERT(raw);
-#warning Missing logic
-  return -ENOSYS;
+
+#ifndef CONFIG_MTD_NAND_BLOCKCHECK
+  return nand_readpage_noecc(priv, block, page, data, spare);
+#else
+  DEBUGASSERT(raw->ecctype != NANDECC_SWECC);
+  switch (raw->ecctype)
+    {
+    case NANDECC_NONE:
+      return nand_readpage_noecc(priv, block, page, data, spare);
+    case NANDECC_HWECC:
+      return nand_readpage_hwecc(priv, block, page, data, spare);
+    case NANDECC_PMECC:
+      return nand_readpage_pmecc(priv, block, page, data, spare);
+
+    case NANDECC_SWECC:
+    default:
+      return -EINVAL;
+    }
+#endif
 }
 
 /****************************************************************************
@@ -196,8 +396,25 @@ static int nand_writepage(struct nand_raw_s *raw, off_t block,
 {
   struct sam_rawnand_s *priv = (struct sam_rawnand_s *)raw;
   DEBUGASSERT(raw);
-#warning Missing logic
-  return -ENOSYS;
+
+#ifndef CONFIG_MTD_NAND_BLOCKCHECK
+  return nand_writepage_noecc(priv, block, page, data, spare);
+#else
+  DEBUGASSERT(raw->ecctype != NANDECC_SWECC);
+  switch (raw->ecctype)
+    {
+    case NANDECC_NONE:
+      return nand_writepage_noecc(priv, block, page, data, spare);
+    case NANDECC_HWECC:
+      return nand_writepage_hwecc(priv, block, page, data, spare);
+    case NANDECC_PMECC:
+      return nand_writepage_pmecc(priv, block, page, data, spare);
+
+    case NANDECC_SWECC:
+    default:
+      return -EINVAL;
+    }
+#endif
 }
 
 /****************************************************************************
@@ -226,7 +443,7 @@ static int nand_writepage(struct nand_raw_s *raw, off_t block,
 struct mtd_dev_s *sam_nand_initialize(int cs)
 {
   struct sam_rawnand_s *priv;
-  struct mtd_s *mtd;
+  struct mtd_dev_s *mtd;
   uintptr_t cmdaddr;
   uintptr_t addraddr;
   uintptr_t dataaddr;
