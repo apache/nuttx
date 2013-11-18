@@ -42,11 +42,28 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/mtd/nand_raw.h>
+
 #include "chip.h"
 #include "chip/sam_hsmc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
+ ****************************************************************************/
+/* Hardware ECC types.  These are extensions to the NANDECC_HWECC value
+ * defined in include/nuttx/mtd/nand_raw.h.
+ *
+ *   NANDECC_CHIPECC ECC is performed internal to chip
+ *   NANDECC_PMECC   Programmable Multibit Error Correcting Code (PMECC)
+ *   NANDECC_HSIAO   HSIAO ECC
+ */
+
+#define NANDECC_CHIPECC (NANDECC_HWECC + 0)
+#define NANDECC_PMECC   (NANDECC_HWECC + 1)
+#define NANDECC_HSIAO   (NANDECC_HWECC + 2)
+
+/****************************************************************************
+ * Public Data
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
