@@ -197,7 +197,7 @@ Buttons and LEDs
   Buttons
   -------
 
-  There are not user buttons on the H3131
+  There are no user buttons on the H3131
 
   LEDs
   ----
@@ -289,30 +289,58 @@ Image Format
 Image Download to ISRAM
 =======================
 
-Assuming that you already have the FTDI driver installed*, then here is the
-are the steps that I use for loading new code into the LPC-H3131:
+  Assuming that you already have the FTDI driver installed*, then here is the
+  are the steps that I use for loading new code into the LPC-H3131:
 
-- Create the bootloader binary, nuttx.lpc, as described above.
-- With the power off, set the boot jumpers to enable booting from UART.
-  The boot jumpers are the block of three jumper just in-board from the
-  JTAG connector; Jumper pair 1-2 is the pair furthest from the JTAG
-  connector:
+  1. Create the bootloader binary, nuttx.lpc, as described above.
 
-    1-2: Closed
-    3-4: Closed
-    5-6: Open
+  2. With the power off, set the boot jumpers to enable booting from UART.
+     The boot jumpers are the block of three jumper just in-board from the
+     JTAG connector; Jumper pair 1-2 is the pair furthest from the JTAG
+     connector:
 
-- Connected the LPC-H3131 using the FTDI USB port (not the lpc3131 USB port)
-  This will power up the LPC-H3131 and start the bootloader.
-- Start a terminal emulator (such as TeraTerm) at 115200 8NI.
-- Reset the LPC-H3131 and you should see:
-  LPC31xx READY FOR PLAIN IMAGE>
-- Send the nuttx.lpc file and you should see:
-  Download finished
+       1-2: Closed
+       3-4: Closed
+       5-6: Open
 
-That will load the NuttX binary into ISRAM and attempt to execute it.
+  3. Connected the LPC-H3131 using the FTDI USB port (not the lpc3131 USB port)
+     This will power up the LPC-H3131 and start the bootloader.
 
-*See the LPC313x documentation if you do not have the FTDI driver installed.
+  4. Start a terminal emulator (such as TeraTerm) at 115200 8NI.
+
+  5. Reset the LPC-H3131 and you should see:
+
+       LPC31xx READY FOR PLAIN IMAGE>
+
+  6. Send the nuttx.lpc file and you should see:
+
+       Download finished
+
+  That will load the NuttX binary into ISRAM and attempt to execute it.
+
+  *See the LPC313x documentation if you do not have the FTDI driver installed.
+
+  TeraTerm Note:  This is how to send a file from TeraTerm.  It is essentially
+  step 6 exploded in more detail for the case of TeraTerm:
+
+  1. Start the ROM bootloader as described above.
+
+  2. At the "LPC31xx READY FOR PLAIN IMAGE>" prompt, open the File menu and
+     select the "Send File..." option.
+
+  3. Select the file to send,
+
+  4. Before "Open" -ing the file MAKE SURE TO CHECK THE "Binary" BOX!  This
+     has cost me a few hours a few times because I forget to do this.  The
+     program will NOT RUN is sent non-binary.
+
+     [NO, I am not SHOUTING.  I am just making sure that I never forget to
+      do this again].
+
+  5. "Open"-ing the file will send it to the ROM bootloader.
+
+  6. You should see "Download finished" from the bootloader followed
+     immediately by any serial console output from your program.
 
 Using OpenOCD and GDB
 =====================
