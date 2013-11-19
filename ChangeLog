@@ -6085,5 +6085,6 @@
 	  include/nuttx/mtd/hamming.h:  Beginning of NAND software ECC
 	  calculations. (2013-11-18).
 	* configs/olimex-lpc-h3131:  Add support for the Olimex LPC-H3131
-	  board.  Does not yet boot (2013-11-18).
-
+	* board.  Does not yet boot (2013-11-18).
+	* arch/arm/src/lpc31xx/lpc31_ehci.c:  Add USB host trace support
+	  (2013-11-19).
