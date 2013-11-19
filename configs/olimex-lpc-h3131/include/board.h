@@ -100,17 +100,48 @@
  (0)
 
 /* LED definitions ******************************************************************/
+/* If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in any
+ * way.  The following definitions are used to access individual LEDs.
+ */
 
-#define LED_STARTED       0
-#define LED_HEAPALLOCATE  1
-#define LED_IRQSENABLED   2
-#define LED_STACKCREATED  3
-#define LED_INIRQ         4
-#define LED_SIGNAL        5
-#define LED_ASSERTION     6
-#define LED_PANIC         7
+/* LED index values for use with lpc31_setled() */
+
+#define BOARD_LED1        0
+#define BOARD_LED2        1
+#define BOARD_NLEDS       2
+
+/* LED bits for use with lpc31_setleds() */
+
+#define BOARD_LED1_BIT    (1 << BOARD_LED1)
+#define BOARD_LED2_BIT    (1 << BOARD_LED2)
+
+/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is as follows:
+ *
+ *   SYMBOL                     Meaning                      LED state
+ *                                                         LED2   LED1
+ *   ------------------------  --------------------------  ------ ------ */
+
+#define LED_STARTED          0 /* NuttX has been started   OFF    OFF    */
+#define LED_HEAPALLOCATE     0 /* Heap has been allocated  OFF    OFF    */
+#define LED_IRQSENABLED      0 /* Interrupts enabled       OFF    OFF    */
+#define LED_STACKCREATED     1 /* Idle stack created       ON     OFF    */
+#define LED_INIRQ            2 /* In an interrupt          N/C    N/C    */
+#define LED_SIGNAL           2 /* In a signal handler      N/C    N/C    */
+#define LED_ASSERTION        2 /* An assertion failed      N/C    N/C    */
+#define LED_PANIC            3 /* The system has crashed   N/C  Blinking */
+#undef  LED_IDLE               /* MCU is is sleep mode       Not used    */
+
+/* Thus if LED2 is statically on, NuttX has successfully booted and is,
+ * apparently, running normmally.  If LED1 is flashing at approximately
+ * 2Hz, then a fatal error has been detected and the system has halted.
+ *
+ * NOTE: That LED2 is not used after completion of booting and may
+ * be used by other board-specific logic.
+ */
 
 /* Button definitions ***************************************************************/
+/* The Olimex LPC_H3131 has no user buttons */
 
 /************************************************************************************
  * Public Data
@@ -141,26 +172,28 @@ extern "C" {
 
 void lpc31_boardinitialize(void);
 
-/************************************************************************************
- * Button support.
- *
- * Description:
- *   up_buttoninit() must be called to initialize button resources.  After that,
- *   up_buttons() may be called to collect the state of all buttons.  up_buttons()
- *   returns an 8-bit bit set with each bit associated with a button.  See the
- *   BUTTON_* definitions above for the meaning of each bit.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_BUTTONS
-void up_buttoninit(void);
-uint8_t up_buttons(void);
-#endif
-
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
+
+/************************************************************************************
+ * Name:  lpc31_setled, and lpc31_setleds
+ *
+ * Description:
+ *   These interfaces allow user control of the board LEDs.
+ *
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board LEDs up
+ *   until the completion of boot.  The it will continue to control LED1; LED2 is
+ *   avaiable for application use.
+ *
+ *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available for application
+ *   use.
+ *
+ ************************************************************************************/
+
+void lpc31_setled(int led, bool ledon);
+void lpc31_setleds(uint8_t ledset);
 
 #endif /* __ASSEMBLY__ */
 #endif  /* __CONFIGS_OLIMEX_LPC_H3131_INCLUDE_BOARD_H */

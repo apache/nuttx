@@ -61,6 +61,9 @@
  * LED2   Green  GPIO18 High output illuminates
  */
 
+#define GPIO_LED1       IOCONFIG_GPIO_GPIO17
+#define GPIO_LED2       IOCONFIG_GPIO_GPIO18
+
 /* USB HOST
  *
  * SIGNAL      GPIO
@@ -68,6 +71,9 @@
  * #OTG_PWR_E  GPIO19
  * #OTG_OVRCR  GPIO20
  */
+
+#define GPIO_NOTG_PWR_E IOCONFIG_GPIO_GPIO19
+#define GPIO_NOTG_OVRCR IOCONFIG_GPIO_GPIO20
 
 /* SPI Chip Selects */
 /* SPI NOR flash is the only device on SPI. SPI_CS_OUT0 is its chip select */
@@ -150,6 +156,16 @@ void weak_function lpc31_usbhost_bootinitialize(void);
 #if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
 int lpc31_usbhost_initialize(void);
 #endif
+
+/****************************************************************************
+ * Name: up_ledinit
+ *
+ * Description:
+ *   Configure LEDs.  LEDs are left in the OFF state.
+ *
+ ****************************************************************************/
+
+void up_ledinit(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_OLIMEX_LPC_H3131_SRC_LPC_H3131_H */

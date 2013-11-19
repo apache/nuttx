@@ -158,10 +158,15 @@ static int ehci_waiter(int argc, char *argv[])
 
 void weak_function lpc31_usbhost_bootinitialize(void)
 {
-  /* Configure pin to drive VBUS power */
-#warning Missing logic
+  /* Configure output pin to drive VBUS power (initial state: power off) */
 
-  /* Configure pin to detect overrcurrent errors */
+  gpio_outputhigh(LPC31_IOCONFIG_GPIO, GPIO_NOTG_PWR_E);
+
+  /* Configure input pin to detect overrcurrent errors */
+
+  gpio_outputhigh(LPC31_IOCONFIG_GPIO, GPIO_NOTG_OVRCR);
+
+  /* Configure to receive interrupts on the overrcurrent input pin */
 #warning Missing logic
 }
 
@@ -256,12 +261,14 @@ void lpc31_usbhost_vbusdrive(int rhport, bool enable)
       if (enable)
         {
           /* Enable the Power Switch by driving the enable pin low */
-#warning Missing logic
+
+          gpio_outputlow(LPC31_IOCONFIG_GPIO, GPIO_NOTG_PWR_E);
         }
       else
         {
           /* Disable the Power Switch by driving the enable pin high */
-#warning Missing logic
+
+          gpio_outputhigh(LPC31_IOCONFIG_GPIO, GPIO_NOTG_PWR_E);
         }
     }
 }

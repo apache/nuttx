@@ -114,9 +114,7 @@ void lpc31_boardinitialize(void)
     }
 #endif
 
-  /* Configure on-board LEDs if LED support has been selected. */
+  /* Configure on-board LEDs in all cases */
 
-#ifdef CONFIG_ARCH_LEDS
   up_ledinit();
-#endif
 }
