@@ -6088,3 +6088,7 @@
 	* board.  Does not yet boot (2013-11-18).
 	* arch/arm/src/lpc31xx/lpc31_ehci.c:  Add USB host trace support
 	  (2013-11-19).
+	* configs/olimex-lpc-h3131/include/board.h, src/lpc31_boot.c,
+	  lpc31_leds.c, lpc31_usbhost.c, and lpc_h3131.h:  Add GPIO 
+	  support for LED1/2 and for USB power enable and overcurrent
+	  detection (2013-11-19).

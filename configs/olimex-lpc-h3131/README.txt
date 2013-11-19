@@ -3,6 +3,11 @@ README
 
   This README file discusses the port of NuttX to the Olimex LPC-H3131 board.
 
+  NOTE:  This is a minimal port to the Olimex LPC-H3131.  According to Olimex
+  documentation, the LPC-H3131 is similar in design to the Embedded Artists
+  EA3131.  As a consequence, it should be possible to leverage additional
+  functionality from configs/ea3131 without too much difficulty.
+
 Contents
 ========
 

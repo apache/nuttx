@@ -50,6 +50,8 @@
 #include "up_internal.h"
 #include "lpc31_internal.h"
 
+#include "lpc_h3131.h"
+
 /****************************************************************************
  * Definitions
  ****************************************************************************/
@@ -80,27 +82,153 @@
 
 /****************************************************************************
  * Name: up_ledinit
+ *
+ * Description:
+ *   Configure LEDs.  LEDs are left in the OFF state.
+ *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_LEDS
 void up_ledinit(void)
 {
+  /* Turn off both LEDs */
+
+  gpio_outputlow(LPC31_IOCONFIG_GPIO, GPIO_LED1);
+  gpio_outputlow(LPC31_IOCONFIG_GPIO, GPIO_LED2);
 }
 
 /****************************************************************************
  * Name: up_ledon
+ *
+ * Description:
+ *   Select the "logical" ON state:
+ *
+ *    SYMBOL          Value  Meaning                     LED state
+ *                                                   LED2     LED1
+ *   ---------------- -----  -----------------------  -------- --------
+ *   LED_STARTED        0  NuttX has been started     OFF      OFF
+ *   LED_HEAPALLOCATE   0  Heap has been allocated    OFF      OFF
+ *   LED_IRQSENABLED    0  Interrupts enabled         OFF      OFF
+ *   LED_STACKCREATED   1  Idle stack created         ON       OFF
+ *   LED_INIRQ          2  In an interrupt            N/C      N/C
+ *   LED_SIGNAL         2  In a signal handler        N/C      N/C
+ *   LED_ASSERTION      2  An assertion failed        N/C      N/C
+ *   LED_PANIC          3  The system has crashed     N/C      Blinking
+ *   LED_IDLE           -  MCU is is sleep mode         Not used
+ *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_LEDS
 void up_ledon(int led)
 {
+  switch (led)
+    {
+    case 0:
+      gpio_outputlow(LPC31_IOCONFIG_GPIO, GPIO_LED1);
+      gpio_outputlow(LPC31_IOCONFIG_GPIO, GPIO_LED2);
+      break;
+
+    case 1:
+      gpio_outputlow(LPC31_IOCONFIG_GPIO, GPIO_LED1);
+      gpio_outputhigh(LPC31_IOCONFIG_GPIO, GPIO_LED2);
+      break;
+
+    case 2:
+      break;
+
+    case 3:
+      gpio_outputhigh(LPC31_IOCONFIG_GPIO, GPIO_LED1);
+      break;
+    }
 }
+#endif
 
 /****************************************************************************
  * Name: up_ledoff
+ *
+ * Description:
+ *   Select the "logical" OFF state:
+ *
+ *    SYMBOL          Value  Meaning                     LED state
+ *                                                   LED2     LED1
+ *   ---------------- -----  -----------------------  -------- --------
+ *   LED_STARTED        0  NuttX has been started     OFF      OFF
+ *   LED_HEAPALLOCATE   0  Heap has been allocated    OFF      OFF
+ *   LED_IRQSENABLED    0  Interrupts enabled         OFF      OFF
+ *   LED_STACKCREATED   1  Idle stack created         ON       OFF
+ *   LED_INIRQ          2  In an interrupt            N/C      N/C
+ *   LED_SIGNAL         2  In a signal handler        N/C      N/C
+ *   LED_ASSERTION      2  An assertion failed        N/C      N/C
+ *   LED_PANIC          3  The system has crashed     N/C      Blinking
+ *   LED_IDLE           -  MCU is is sleep mode         Not used
+ *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_LEDS
 void up_ledoff(int led)
 {
+  switch (led)
+    {
+    case 0:
+    case 1:
+    case 2:
+      break;
+
+    case 3:
+      gpio_outputlow(LPC31_IOCONFIG_GPIO, GPIO_LED1);
+      break;
+    }
+}
+#endif
+
+/************************************************************************************
+ * Name:  lpc31_setled, and lpc31_setleds
+ *
+ * Description:
+ *   These interfaces allow user control of the board LEDs.
+ *
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board LEDs up
+ *   until the completion of boot.  The it will continue to control LED2; LED1 is
+ *   avaiable for application use.
+ *
+ *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available for application
+ *   use.
+ *
+ ************************************************************************************/
+
+void lpc31_setled(int led, bool ledon)
+{
+  uint32_t bit;
+
+#ifndef CONFIG_ARCH_LEDS
+  if (led == BOARD_LED1)
+    {
+      bit = GPIO_LED1;
+    }
+  else
+#endif
+  if (led == BOARD_LED2)
+    {
+      bit = GPIO_LED2;
+    }
+  else
+   {
+      return;
+   }
+
+  if (ledon)
+    {
+      gpio_outputhigh(LPC31_IOCONFIG_GPIO, bit);
+    }
+  else
+    {
+      gpio_outputlow(LPC31_IOCONFIG_GPIO, bit);
+    }
 }
 
-#endif /* CONFIG_ARCH_LEDS */
+void lpc31_setleds(uint8_t ledset)
+{
+#ifndef CONFIG_ARCH_LEDS
+  lpc31_setled(BOARD_LED1, (ledset & BOARD_LED1_BIT) != 0);
+#endif
+  lpc31_setled(BOARD_LED2, (ledset & BOARD_LED2_BIT) != 0);
+}
