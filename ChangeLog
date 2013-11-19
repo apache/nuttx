@@ -6092,3 +6092,7 @@
 	  lpc31_leds.c, lpc31_usbhost.c, and lpc_h3131.h:  Add GPIO 
 	  support for LED1/2 and for USB power enable and overcurrent
 	  detection (2013-11-19).
+	* configs/olimex-lpc-h3131/nsh/defconfig:  Drop loops-per-msec
+	  count for the Olimex-LPC-H3131.  It seems to be about 25% as
+	  fast as the Embedded Artists EA3131 at the same clocking.
+	  (2013-11-19).
