@@ -197,7 +197,7 @@ static int nand_checkblock(FAR struct nand_dev_s *nand, off_t block)
 
   /* Read spare area of first page of block */
 
-  ret = NAND_READPAGE(raw, block, 0, 0, spare);
+  ret = NAND_RAWREAD(raw, block, 0, 0, spare);
   if (ret < 0)
     {
       fdbg("ERROR: Cannot read page #0 of block #%d\n", block);
@@ -212,7 +212,7 @@ static int nand_checkblock(FAR struct nand_dev_s *nand, off_t block)
 
   /* Read spare area of second page of block */
 
-  ret = NAND_READPAGE(raw, block, 1, 0, spare);
+  ret = NAND_RAWREAD(raw, block, 1, 0, spare);
   if (ret < 0)
     {
       fdbg("ERROR: Cannot read page #1 of block #%d\n", block);
@@ -220,7 +220,7 @@ static int nand_checkblock(FAR struct nand_dev_s *nand, off_t block)
     }
 
   nandscheme_readbadblockmarker(scheme, spare, &marker);
-  if (marker != 0xFF)
+  if (marker != 0xff)
     {
       return BADBLOCK;
     }

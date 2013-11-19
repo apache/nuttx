@@ -140,11 +140,11 @@
 #define NAND_ERASEBLOCK(r,b) ((r)->eraseblock(r,b))
 
 /****************************************************************************
- * Name: NAND_READPAGE
+ * Name: NAND_RAWREAD
  *
  * Description:
  *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
- *   provided buffers.
+ *   provided buffers.  This is a raw read of the flash contents.
  *
  * Input parameters:
  *   raw   - Lower-half, raw NAND FLASH interface
@@ -158,13 +158,14 @@
  *
  ****************************************************************************/
 
-#define NAND_READPAGE(r,b,p,d,s) ((r)->readpage(r,b,p,d,s))
+#define NAND_RAWREAD(r,b,p,d,s) ((r)->rawread(r,b,p,d,s))
 
 /****************************************************************************
- * Name: NAND_WRITEPAGE
+ * Name: NAND_RAWWRITE
  *
  * Description:
  *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
+ *   This is a raw write of the flash contents.
  *
  * Input parameters:
  *   raw   - Lower-half, raw NAND FLASH interface
@@ -178,7 +179,58 @@
  *
  ****************************************************************************/
 
-#define NAND_WRITEPAGE(r,b,p,d,s) ((r)->writepage(r,b,p,d,s))
+#define NAND_RAWWRITE(r,b,p,d,s) ((r)->rawwrite(r,b,p,d,s))
+
+/****************************************************************************
+ * Name: NAND_READPAGE
+ *
+ * Description:
+ *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
+ *   provided buffers.  Hardware ECC checking will be performed if so
+ *   configured.
+ *
+ * Input parameters:
+ *   raw   - Lower-half, raw NAND FLASH interface
+ *   block - Number of the block where the page to read resides.
+ *   page  - Number of the page to read inside the given block.
+ *   data  - Buffer where the data area will be stored.
+ *   spare - Buffer where the spare area will be stored.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef MTD_NAND_HWECC
+#  define NAND_READPAGE(r,b,p,d,s) ((r)->readpage(r,b,p,d,s))
+#else
+#  define NAND_READPAGE(r,b,p,d,s) ((r)->rawread(r,b,p,d,s))
+#endif
+
+/****************************************************************************
+ * Name: NAND_WRITEPAGE
+ *
+ * Description:
+ *   Writes the data and/or the spare area of a page on a NAND FLASH chip.
+ *   Hardware ECC checking will be performed if so configured.
+ *
+ * Input parameters:
+ *   raw   - Lower-half, raw NAND FLASH interface
+ *   block - Number of the block where the page to write resides.
+ *   page  - Number of the page to write inside the given block.
+ *   data  - Buffer containing the data to be writting
+ *   spare - Buffer containing the spare data to be written.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef MTD_NAND_HWECC
+#  define NAND_WRITEPAGE(r,b,p,d,s) ((r)->writepage(r,b,p,d,s))
+#else
+#  define NAND_WRITEPAGE(r,b,p,d,s) ((r)->rawwrite(r,b,p,d,s))
+#endif
 
 /****************************************************************************
  * Public Types
@@ -201,11 +253,19 @@ struct nand_raw_s
   /* NAND operations */
 
   CODE int (*eraseblock)(FAR struct nand_raw_s *raw, off_t block);
+  CODE int (*rawread)(FAR struct nand_raw_s *raw, off_t block,
+                      unsigned int page, FAR void *data, FAR void *spare);
+  CODE int (*rawwrite)(FAR struct nand_raw_s *raw, off_t block,
+                       unsigned int page, FAR const void *data,
+                       FAR const void *spare);
+
+#ifdef CONFIG_MTD_NAND_HWECC
   CODE int (*readpage)(FAR struct nand_raw_s *raw, off_t block,
                        unsigned int page, FAR void *data, FAR void *spare);
   CODE int (*writepage)(FAR struct nand_raw_s *raw, off_t block,
                         unsigned int page, FAR const void *data,
                         FAR const void *spare);
+#endif
 
 #ifdef CONFIG_MTD_NAND_BLOCKCHECK
   /* ECC */

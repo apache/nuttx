@@ -50,6 +50,40 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+/* Block checking and H/W ECC support must be enabled for HSIAO ECC */
+
+#if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(MTD_NAND_HWECC)
+#  undef CONFIG_SAMA5_EBICS0_HSIAO
+#  undef CONFIG_SAMA5_EBICS1_HSIAO
+#  undef CONFIG_SAMA5_EBICS2_HSIAO
+#  undef CONFIG_SAMA5_EBICS3_HSIAO
+#endif
+
+/* Disable HSIAO support for any banks not enabled or configured for NAND */
+
+#if !defined(SAMA5_EBICS0) || !defined(SAMA5_EBICS0_NAND)
+#  undef CONFIG_SAMA5_EBICS0_HSIAO
+#endif
+
+#if !defined(SAMA5_EBICS1) || !defined(SAMA5_EBICS1_NAND)
+#  undef CONFIG_SAMA5_EBICS1_HSIAO
+#endif
+
+#if !defined(SAMA5_EBICS2) || !defined(SAMA5_EBICS2_NAND)
+#  undef CONFIG_SAMA5_EBICS2_HSIAO
+#endif
+
+#if !defined(SAMA5_EBICS3) || !defined(SAMA5_EBICS3_NAND)
+#  undef CONFIG_SAMA5_EBICS3_HSIAO
+#endif
+
+#undef NAND_HAVE_HSIAO
+#if defined(CONFIG_SAMA5_EBICS0_HSIAO) || defined(CONFIG_SAMA5_EBICS1_HSIAO) || \
+    defined(CONFIG_SAMA5_EBICS2_HSIAO) || defined(CONFIG_SAMA5_EBICS3_HSIAO)
+#  define NAND_HAVE_HSIAO
+#endif
+
 /* Hardware ECC types.  These are extensions to the NANDECC_HWECC value
  * defined in include/nuttx/mtd/nand_raw.h.
  *

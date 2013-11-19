@@ -6084,3 +6084,6 @@
 	* drivers/mtd/hamming.c and mtd_nandecc.c and
 	  include/nuttx/mtd/hamming.h:  Beginning of NAND software ECC
 	  calculations. (2013-11-18).
+	* configs/olimex-lpc-h3131:  Add support for the Olimex LPC-H3131
+	  board.  Does not yet boot (2013-11-18).
+

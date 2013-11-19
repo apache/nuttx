@@ -120,7 +120,7 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
 
   /* Start by reading the spare data */
 
-  ret = NAND_READPAGE(raw, block, page, 0, spare);
+  ret = NAND_RAWREAD(raw, block, page, 0, spare);
   if (ret < 0)
     {
       fdbg("ERROR: Failed to read page:d\n", ret);
@@ -129,7 +129,7 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
 
   /* Then reading the data */
 
-  ret = NAND_READPAGE(nand->raw, block, page, data, 0);
+  ret = NAND_RAWREAD(nand->raw, block, page, data, 0);
   if (ret < 0)
     {
       fdbg("ERROR: Failed to read page:d\n", ret);
@@ -228,7 +228,7 @@ int nandecc_writepage(FAR struct nand_dev_s *nand, off_t block,
 
   /* Perform page write operation */
 
-  ret = NAND_WRITEPAGE(nand->raw, block, page, data, spare);
+  ret = NAND_RAWWRITE(nand->raw, block, page, data, spare);
   if (ret < 0)
     {
       fdbg("ERROR: Failed to write page:d\n", ret);

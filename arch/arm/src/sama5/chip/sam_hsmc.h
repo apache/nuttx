@@ -357,19 +357,35 @@
 
 /* PMECC Configuration Register */
 
-#define HSMC_PMECCFG_BCH_ERR_SHIFT    (0)       /* Bit 0-2: Error Correcting Capability */
-#define HSMC_PMECCFG_BCH_ERR_MASK     (7 << HSMC_PMECCFG_BCH_ERR_SHIFT)
-#  define HSMC_PMECCFG_BCH_ERR_2      (0 << HSMC_PMECCFG_BCH_ERR_SHIFT) /* 2 errors */
-#  define HSMC_PMECCFG_BCH_ERR_4      (1 << HSMC_PMECCFG_BCH_ERR_SHIFT) /* 4 errors */
-#  define HSMC_PMECCFG_BCH_ERR_8      (2 << HSMC_PMECCFG_BCH_ERR_SHIFT) /* 8 errors */
-#  define HSMC_PMECCFG_BCH_ERR_12     (3 << HSMC_PMECCFG_BCH_ERR_SHIFT) /* 12 errors */
-#  define HSMC_PMECCFG_BCH_ERR_24     (4 << HSMC_PMECCFG_BCH_ERR_SHIFT) /* 24 errors */
-#define HSMC_PMECCFG_SECTORSZ         (1 << 4)  /* Bit 4:  Sector Size */
+#define HSMC_PMECCFG_BCHERR_SHIFT     (0)       /* Bit 0-2: Error Correcting Capability */
+#define HSMC_PMECCFG_BCHERR_MASK      (7 << HSMC_PMECCFG_BCHERR_SHIFT)
+#  define HSMC_PMECCFG_BCHERR_2       (0 << HSMC_PMECCFG_BCHERR_SHIFT) /* 2 errors */
+#  define HSMC_PMECCFG_BCHERR_4       (1 << HSMC_PMECCFG_BCHERR_SHIFT) /* 4 errors */
+#  define HSMC_PMECCFG_BCHERR_8       (2 << HSMC_PMECCFG_BCHERR_SHIFT) /* 8 errors */
+#  define HSMC_PMECCFG_BCHERR_12      (3 << HSMC_PMECCFG_BCHERR_SHIFT) /* 12 errors */
+#  define HSMC_PMECCFG_BCHERR_24      (4 << HSMC_PMECCFG_BCHERR_SHIFT) /* 24 errors */
+#define HSMC_PMECCFG_SECTORSZ_SHIFT   (4)       /* Bit 4:  Sector Size */
+#define HSMC_PMECCFG_SECTORSZ_MASK    (1 << HSMC_PMECCFG_SECTORSZ_SHIFT)
+#  define HSMC_PMECCFG_SECTORSZ_512   (0 << HSMC_PMECCFG_SECTORSZ_SHIFT)
+#  define HSMC_PMECCFG_SECTORSZ_1024  (1 << HSMC_PMECCFG_SECTORSZ_SHIFT)
 #define HSMC_PMECCFG_PAGESIZE_SHIFT   (8)       /* Bit 8-9: Number of Sectors in the Page */
 #define HSMC_PMECCFG_PAGESIZE_MASK    (3 << HSMC_PMECCFG_PAGESIZE_SHIFT)
-#define HSMC_PMECCFG_NANDWR           (1 << 12) /* Bit 12: NAND Write Access */
-#define HSMC_PMECCFG_SPAREEN          (1 << 16) /* Bit 16: Spare Enable */
-#define HSMC_PMECCFG_AUTO             (1 << 20) /* Bit 20: Automatic Mode Enable */
+#  define HSMC_PMECCFG_PAGESIZE_1SEC  (0 << HSMC_PMECCFG_PAGESIZE_SHIFT) /* 1 sector (5121K) */
+#  define HSMC_PMECCFG_PAGESIZE_2SEC  (1 << HSMC_PMECCFG_PAGESIZE_SHIFT) /* 2 sectors (1/2K) */
+#  define HSMC_PMECCFG_PAGESIZE_4SEC  (2 << HSMC_PMECCFG_PAGESIZE_SHIFT) /* 4 sectors (2/4K) */
+#  define HSMC_PMECCFG_PAGESIZE_8SEC  (3 << HSMC_PMECCFG_PAGESIZE_SHIFT) /* 8 sectors (4/8K) */
+#define HSMC_PMECCFG_NANDWR_SHIFT     (12)      /* Bit 12: NAND Write Access */
+#define HSMC_PMECCFG_NANDWR_MASK      (1 << HSMC_PMECCFG_NANDWR_SHIFT)
+#  define HSMC_PMECCFG_NANDWR_READ    (0 << HSMC_PMECCFG_NANDWR_SHIFT)
+#  define HSMC_PMECCFG_NANDWR_WRITE   (1 << HSMC_PMECCFG_NANDWR_SHIFT)
+#define HSMC_PMECCFG_SPAREEN_SHIFT    (16)      /* Bit 16: Spare Enable */
+#define HSMC_PMECCFG_SPAREEN_MASK     (1 << HSMC_PMECCFG_SPAREEN_SHIFT)
+#  define HSMC_PMECCFG_SPARE_DISABLE  (0 << HSMC_PMECCFG_SPAREEN_SHIFT)
+#  define HSMC_PMECCFG_SPARE_ENABLE   (1 << HSMC_PMECCFG_SPAREEN_SHIFT)
+#define HSMC_PMECCFG_AUTO_SHIFT       (20)      /* Bit 20: Automatic Mode Enable */
+#define HSMC_PMECCFG_AUTO_MASK        (1 << HSMC_PMECCFG_AUTO_SHIFT)
+#  define HSMC_PMECCFG_AUTO_DISABLE   (0 << HSMC_PMECCFG_AUTO_SHIFT)
+#  define HSMC_PMECCFG_AUTO_ENABLE    (1 << HSMC_PMECCFG_AUTO_SHIFT)
 
 /* PMECC Spare Area Size Register */
 
