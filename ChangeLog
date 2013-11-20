@@ -6096,3 +6096,6 @@
 	  count for the Olimex-LPC-H3131.  It seems to be about 25% as
 	  fast as the Embedded Artists EA3131 at the same clocking.
 	  (2013-11-19).
+	* arch/arm/src/arm/up_cache.S and cache.h:  More cache management
+	  functions.
+
