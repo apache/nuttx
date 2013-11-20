@@ -40,30 +40,7 @@ CONFIG_RAW_BINARY=y
 #
 # CONFIG_DEBUG is not set
 CONFIG_ARCH_HAVE_STACKCHECK=y
-# CONFIG_DEBUG_VERBOSE is not set
-
-#
-# Subsystem Debug Options
-#
-# CONFIG_DEBUG_MM is not set
-# CONFIG_DEBUG_SCHED is not set
-# CONFIG_DEBUG_USB is not set
-# CONFIG_DEBUG_FS is not set
-# CONFIG_DEBUG_LIB is not set
-# CONFIG_DEBUG_BINFMT is not set
-# CONFIG_DEBUG_GRAPHICS is not set
-# CONFIG_DEBUG_IRQ is not set
-# CONFIG_DEBUG_STACK is not set
-
-#
-# Driver Debug Options
-#
-# CONFIG_DEBUG_LEDS is not set
-# CONFIG_DEBUG_ANALOG is not set
-# CONFIG_DEBUG_SPI is not set
-# CONFIG_DEBUG_GPIO is not set
-# CONFIG_DEBUG_AUDIO is not set
-CONFIG_DEBUG_SYMBOLS=y
+# CONFIG_DEBUG_SYMBOLS is not set
 
 #
 # System Type
@@ -117,7 +94,6 @@ CONFIG_ARCH_HAVE_CMNVECTOR=y
 # CONFIG_ARCH_HAVE_FPU is not set
 CONFIG_ARCH_HAVE_MPU=y
 # CONFIG_ARMV7M_MPU is not set
-# CONFIG_DEBUG_HARDFAULT is not set
 
 #
 # ARMV7M Configuration Options
