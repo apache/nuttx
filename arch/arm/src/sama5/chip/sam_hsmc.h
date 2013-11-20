@@ -53,6 +53,9 @@
 #define HSMC_CS2                      2
 #define HSMC_CS3                      3
 
+#define NFCSRAM_BASE                  SAM_NFCSRAM_VSECTION
+#define NFCCMD_BASE                   SAM_NFCCR_VSECTION
+
 /* SMC Register Offsets *************************************************************/
 
 #define SAM_HSMC_CFG_OFFSET           0x0000 /* HSMC NFC Configuration Register */
@@ -571,5 +574,51 @@
 #define HSMC_WPSR_WPVS_MASK           (15 << HSMC_WPSR_WPVS_SHIFT)
 #define HSMC_WPSR_WPVSRC_SHIFT        (8)       /* Bit 8-23: Write Protection Violation Source */
 #define HSMC_WPSR_WPVSRC_MASK         (0xffff << HSMC_WPSR_WPVSRC_SHIFT)
+
+/* NFC Command/Data Registers *******************************************************/
+
+#define NFCADDR_CMD_CMD1_SHIFT        (2)        /* Bits 2-9: Command Register Value for Cycle 1 */
+#define NFCADDR_CMD_CMD1_MASK         (0xff <<  NFCADDR_CMD_CMD1_SHIFT)
+#  define NFCADDR_CMD_CMD1(n)         ((uint32_t)(n) <<  NFCADDR_CMD_CMD1_SHIFT)
+#define NFCADDR_CMD_CMD2_SHIFT        (10)       /* Bits 10-17: Command Register Value for Cycle 1 */
+#define NFCADDR_CMD_CMD2_MASK         (0xff <<  NFCADDR_CMD_CMD2_SHIFT)
+#  define NFCADDR_CMD_CMD2(n)         ((uint32_t)(n) <<  NFCADDR_CMD_CMD2_SHIFT)
+#define NFCADDR_CMD_VCMD2             (1 << 18)  /* Bit 18:Valid Cycle 2 Command */
+#define NFCADDR_CMD_ACYCLE_SHIFT      (19)       /* Bits 19-21: Number of Address required for command */
+#define NFCADDR_CMD_ACYCLE_MASK       (7 << NFCADDR_CMD_ACYCLE_SHIFT)
+#  define   NFCADDR_CMD_ACYCLE_NONE   (0 << NFCADDR_CMD_ACYCLE_SHIFT) /* No address cycle */
+#  define   NFCADDR_CMD_ACYCLE_ONE    (1 << NFCADDR_CMD_ACYCLE_SHIFT) /* One address cycle */
+#  define   NFCADDR_CMD_ACYCLE_TWO    (2 << NFCADDR_CMD_ACYCLE_SHIFT) /* Two address cycles */
+#  define   NFCADDR_CMD_ACYCLE_THREE  (3 << NFCADDR_CMD_ACYCLE_SHIFT) /* Three address cycles */
+#  define   NFCADDR_CMD_ACYCLE_FOUR   (4 << NFCADDR_CMD_ACYCLE_SHIFT) /* Four address cycles */
+#  define   NFCADDR_CMD_ACYCLE_FIVE   (5 << NFCADDR_CMD_ACYCLE_SHIFT) /* Five address cycles */
+#define NFCADDR_CMD_CSID_SHIFT        (22)       /* Bits 22-24: Chip Select Identifier */
+#define NFCADDR_CMD_CSID_MASK         (7 << NFCADDR_CMD_CSID_SHIFT)  /* Bits 22-24: Chip Select Identifier */
+#  define   NFCADDR_CMD_CSID_0        (0 << NFCADDR_CMD_CSID_SHIFT) /* CS0 */
+#  define   NFCADDR_CMD_CSID_1        (1 << NFCADDR_CMD_CSID_SHIFT) /* CS1 */
+#  define   NFCADDR_CMD_CSID_2        (2 << NFCADDR_CMD_CSID_SHIFT) /* CS2 */
+#  define   NFCADDR_CMD_CSID_3        (3 << NFCADDR_CMD_CSID_SHIFT) /* CS3 */
+#  define   NFCADDR_CMD_CSID_4        (4 << NFCADDR_CMD_CSID_SHIFT) /* CS4 */
+#  define   NFCADDR_CMD_CSID_5        (5 << NFCADDR_CMD_CSID_SHIFT) /* CS5 */
+#  define   NFCADDR_CMD_CSID_6        (6 << NFCADDR_CMD_CSID_SHIFT) /* CS6 */
+#  define   NFCADDR_CMD_CSID_7        (7 << NFCADDR_CMD_CSID_SHIFT) /* CS7 */
+#define NFCADDR_CMD_DATAEN            (1 << 25) /* Bit 25: 1=NFC Data Enable */
+#define NFCADDR_CMD_DATADIS           (0 << 25) /* Bit 25: 0=NFC Data disable */
+#define NFCADDR_CMD_NFCRD             (0 << 26) /* Bit 26: 0=NFC Read Enable */
+#define NFCADDR_CMD_NFCWR             (1 << 26) /* Bit 26: 1=NFC Write Enable */
+#define NFCADDR_CMD_NFCCMD            (1 << 27) /* Bit 27: 1=NFC Command Enable */
+
+#define NFCDATA_ADDT_CYCLE1_SHIFT     (0)      /* Bits 0-7: NAND Flash Array Address Cycle 1 */
+#define NFCDATA_ADDT_CYCLE1_MASK      (0xff << NFCDATA_ADDT_CYCLE1_SHIFT)
+#  define NFCDATA_ADDT_CYCLE1(n)      ((uint32_t)(n) << NFCDATA_ADDT_CYCLE1_SHIFT)
+#define NFCDATA_ADDT_CYCLE2_SHIFT     (8)      /* Bits 8-15: NAND Flash Array Address Cycle 2 */
+#define NFCDATA_ADDT_CYCLE2_MASK      (0xff << NFCDATA_ADDT_CYCLE2_SHIFT)
+#  define NFCDATA_ADDT_CYCLE2(n)      ((uint32_t)(n) << NFCDATA_ADDT_CYCLE2_SHIFT)
+#define NFCDATA_ADDT_CYCLE3_SHIFT     (nn)      /* Bits 16-23: NAND Flash Array Address Cycle 3 */
+#define NFCDATA_ADDT_CYCLE3_MASK      (16 << NFCDATA_ADDT_CYCLE3_SHIFT)
+#  define NFCDATA_ADDT_CYCLE3(n)      ((uint32_t)(n) << NFCDATA_ADDT_CYCLE3_SHIFT)
+#define NFCDATA_ADDT_CYCLE4_SHIFT     (24)      /* Bits 24-31: NAND Flash Array Address Cycle 4 */
+#define NFCDATA_ADDT_CYCLE4_MASK      (0xff << NFCDATA_ADDT_CYCLE4_SHIFT)
+#  define NFCDATA_ADDT_CYCLE4(n)      ((uint32_t)(n) << NFCDATA_ADDT_CYCLE4_SHIFT)
 
 #endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAM_HSMC_H */

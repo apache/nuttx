@@ -42,6 +42,10 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
+
 #include <nuttx/mtd/nand_raw.h>
 
 #include "chip.h"
@@ -97,6 +101,36 @@
 #define NANDECC_HSIAO   (NANDECC_HWECC + 2)
 
 /****************************************************************************
+ * Public Types
+ ****************************************************************************/
+/* This type represents the state of a raw NAND MTD device on a single chip
+ * select.  The struct nand_raw_s must appear at the beginning of the
+ * definition so that you can freely cast between pointers to struct
+ * nand_raw_s and struct sam_nandcs_s.
+ */
+
+struct sam_nandcs_s
+{
+  struct nand_raw_s raw;     /* Externally visible part of the driver */
+  uint8_t cs      :2;        /* Chip select number (0..3) */
+  uint8_t nfcen   :1;        /* True: NFC is enabled */
+  uint8_t nfcsram :1;        /* True: Use NFC SRAM */
+  uint8_t dmaxfr  :1;        /* True: Use DMA transfers */
+};
+
+/* Register debug state */
+
+#ifdef CONFIG_SAMA5_NAND_REGDEBUG
+struct sam_nanddbg_s
+{
+   bool wr;             /* Last was a write */
+   uint32_t regadddr;   /* Last address */
+   uint32_t regval;     /* Last value */
+   int ntimes;          /* Number of times */
+};
+#endif
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -108,6 +142,12 @@
 extern "C" {
 #else
 #define EXTERN extern
+#endif
+
+/* NAND regiser debug state */
+
+#ifdef CONFIG_SAMA5_NAND_REGDEBUG
+EXTERN struct sam_nanddbg_s g_nanddbg;
 #endif
 
 /****************************************************************************
@@ -202,6 +242,241 @@ bool board_nand_busy(int cs);
 #ifdef CONFIG_SAMA5_NAND_CE
 void board_nand_ce(int cs, bool enable);
 #endif
+
+/****************************************************************************
+ * Name: nand_checkreg
+ *
+ * Description:
+ *   Check if the current HSMC register access is a duplicate of the preceding.
+ *
+ * Input Parameters:
+ *   regval   - The value to be written
+ *   regaddr - The address of the register to write to
+ *
+ * Returned Value:
+ *   true:  This is the first register access of this type.
+ *   flase: This is the same as the preceding register access.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_NAND_REGDEBUG
+bool nand_checkreg(bool wr, uintptr_t regaddr, uint32_t regval);
+#endif
+
+/****************************************************************************
+ * Name: nand_getreg
+ *
+ * Description:
+ *  Read an HSMC register
+ *
+ ****************************************************************************/
+
+static inline uint32_t nand_getreg(uintptr_t regaddr)
+{
+  uint32_t regval = getreg32(regaddr);
+
+#ifdef CONFIG_SAMA5_NAND_REGDEBUG
+  if (nand_checkreg(false, regaddr, regval))
+    {
+      lldbg("%08x->%08x\n", regaddr, regval);
+    }
+#endif
+
+  return regval;
+}
+
+/****************************************************************************
+ * Name: nand_putreg
+ *
+ * Description:
+ *  Write a value to an HSMC register
+ *
+ ****************************************************************************/
+
+static inline void nand_putreg(uintptr_t regaddr, uint32_t regval)
+{
+#ifdef CONFIG_SAMA5_NAND_REGDEBUG
+  if (nand_checkreg(true, regaddr, regval))
+    {
+      lldbg("%08x<-%08x\n", regaddr, regval);
+    }
+#endif
+
+  putreg32(regval, regaddr);
+}
+
+/****************************************************************************
+ * Name: nand_nfc_enable
+ *
+ * Description:
+ *   Enable the NAND FLASH controller
+ *
+ * Input Parameters:
+ *  None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void nand_nfc_enable(struct sam_nandcs_s *priv)
+{
+  priv->nfcen = true;
+  nand_putreg(SAM_HSMC_CTRL, HSMC_CTRL_NFCEN);
+}
+
+/****************************************************************************
+ * Name: nand_nfc_enable
+ *
+ * Description:
+ *   Enable the NAND FLASH controller
+ *
+ * Input Parameters:
+ *  priv - A reference to the NAND chip select data structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void nand_nfc_disable(struct sam_nandcs_s *priv)
+{
+  priv->nfcen = false;
+  nand_putreg(SAM_HSMC_CTRL, HSMC_CTRL_NFCDIS);
+}
+
+/****************************************************************************
+ * Name: nand_nfc_enabled
+ *
+ * Description:
+ *   Return the state of the NAND FLASH controller
+ *
+ * Input Parameters:
+ *  priv - A reference to the NAND chip select data structure
+ *
+ * Returned Value:
+ *   True if the NAND FLASH controller is enabled
+ *
+ ****************************************************************************/
+
+static inline uint8_t nand_nfc_enabled(struct sam_nandcs_s *priv)
+{
+   return (bool)priv->nfcen;
+}
+
+/****************************************************************************
+ * Name: nand_nfcsram_enable
+ *
+ * Description:
+ *   Enable use of NFC Host SRAM
+ *
+ * Input Parameters:
+ *  priv - A reference to the NAND chip select data structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void nand_nfcsram_enable(struct sam_nandcs_s *priv)
+{
+  priv->nfcsram = true;
+}
+
+/****************************************************************************
+ * Name: nand_nfcsram_disable
+ *
+ * Description:
+ *   Disable use of NFC Host SRAM
+ *
+ * Input Parameters:
+ *  priv - A reference to the NAND chip select data structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void nand_nfcsram_disable(struct sam_nandcs_s *priv)
+{
+  priv->nfcsram = false;
+}
+
+/****************************************************************************
+ * Name: nand_nfcsram_enabled
+ *
+ * Description:
+ *   Returrn the state of the NFS Host SRAM
+ *
+ * Input Parameters:
+ *  priv - A reference to the NAND chip select data structure
+ *
+ * Returned Value:
+ *   True if the NFC Host SRAM is used
+ *
+ ****************************************************************************/
+
+static inline bool nand_nfcsram_enabled(struct sam_nandcs_s *priv)
+{
+   return (bool)priv->nfcsram;
+}
+
+/****************************************************************************
+ * Name: nand_nanddma_enable
+ *
+ * Description:
+ *   Enable use of DMA to perform transfers
+ *
+ * Input Parameters:
+ *  priv - A reference to the NAND chip select data structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static inline void nand_nanddma_enable(struct sam_nandcs_s *priv)
+{
+   priv->dmaxfr = true;
+}
+
+/****************************************************************************
+ * Name: nand_nanddma_disable
+ *
+ * Description:
+ *   Disable use of DMA to perform transfers
+ *
+ * Input Parameters:
+ *  priv - A reference to the NAND chip select data structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nand_nanddma_disable(struct sam_nandcs_s *priv)
+{
+   priv->dmaxfr = false;
+}
+
+/****************************************************************************
+ * Name: nand_nanddma_enabled
+ *
+ * Description:
+ *   Returrn the state of the DMA usage
+ *
+ * Input Parameters:
+ *  priv - A reference to the NAND chip select data structure
+ *
+ * Returned Value:
+ *   True if transfers are performed using DMA
+ *
+ ****************************************************************************/
+
+bool nand_nanddma_enabled(struct sam_nandcs_s *priv)
+{
+   return priv->dmaxfr;
+}
 
 #undef EXTERN
 #if defined(__cplusplus)
