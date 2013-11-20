@@ -94,7 +94,6 @@ CONFIG_ARCH_HAVE_CMNVECTOR=y
 # CONFIG_ARCH_HAVE_FPU is not set
 CONFIG_ARCH_HAVE_MPU=y
 # CONFIG_ARMV7M_MPU is not set
-# CONFIG_DEBUG_HARDFAULT is not set
 
 #
 # ARMV7M Configuration Options
