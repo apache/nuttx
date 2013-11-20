@@ -149,6 +149,9 @@ cp15_invalidate_icache:
 
 /* Invalidate D-Cache in the region described by r0=start and r1=end. */
 
+	.globl	cp15_invalidate_dcache
+	.type	cp15_invalidate_dcache, function
+
 cp15_invalidate_dcache:
 	bic		r0, r0, #CACHE_DLINESIZE - 1
 	mcr		p15, 0, r0, c7, c6, 1		/* Invalidate D entry */
@@ -161,8 +164,8 @@ cp15_invalidate_dcache:
 #if 0 /* Not used */
 /* Invalidate Dcache */
 
-	.globl	cp15_invalidate_dcache
-	.type	cp15_invalidate_dcache, function
+	.globl	cp15_invalidate_dcache_all
+	.type	cp15_invalidate_dcache_all, function
 
 cp15_invalidate_dcache_all:
 	mov		r0, #0
@@ -176,7 +179,7 @@ cp15_invalidate_dcache_all:
 	nop
 	nop
 	bx		lr
-	.size	cp15_invalidate_dcache, . - cp15_invalidate_dcache
+	.size	cp15_invalidate_dcache_all, . - cp15_invalidate_dcache_all
 
 /* CP15 Prefetch Icache line c7
  * Performs an Icache lookup of the specified modified virtual address.
