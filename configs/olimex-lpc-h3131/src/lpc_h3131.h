@@ -49,6 +49,42 @@
 /************************************************************************************
  * Definitions
  ************************************************************************************/
+/* Configuration ************************************************************/
+
+/* PORT and SLOT number probably depend on the board configuration */
+
+#define HAVE_MMCSD      1
+#undef  HAVE_USBDEV
+#define HAVE_USBHOST    1
+#define HAVE_USBMONITOR 1
+
+/* Can't support MMC/SD features if mountpoints are disabled or if SDIO support
+ * is not enabled.
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_LPC31_MCI)
+#  undef HAVE_MMCSD
+#endif
+
+#ifndef CONFIG_NSH_MMCSDMINOR
+#  define CONFIG_NSH_MMCSDMINOR 0
+#endif
+
+/* Can't support USB host features if USB host is not enabled */
+
+#if !defined(CONFIG_LPC31_USBOTG) || !defined(CONFIG_USBHOST)
+#  undef HAVE_USBHOST
+#endif
+
+/* Check if we need to support the USB monitor */
+
+#ifndef HAVE_USBHOST
+#  undef CONFIG_USBHOST_TRACE
+#endif
+
+#if !defined(CONFIG_SYSTEM_USBMONITOR) || !defined(CONFIG_USBHOST_TRACE)
+#  undef HAVE_USBMONITOR
+#endif
 
 /* LPC-H3131 GPIOs ******************************************************************/
 /* BUTTONS.  There are no user accessible buttons on the LPC-H3131 */
@@ -126,7 +162,7 @@ void weak_function lpc31_spiinitialize(void);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBDEV)
+#ifdef HAVE_USBDEV
 void weak_function lpc31_usbdev_initialize(void);
 #endif
 
@@ -139,7 +175,7 @@ void weak_function lpc31_usbdev_initialize(void);
  *
  ************************************************************************************/
 
-#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
+#ifdef HAVE_USBHOST
 void weak_function lpc31_usbhost_bootinitialize(void);
 #endif
 
@@ -153,8 +189,20 @@ void weak_function lpc31_usbhost_bootinitialize(void);
  *
  ***********************************************************************************/
 
-#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
+#ifdef HAVE_USBHOST
 int lpc31_usbhost_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: lpc31_mmcsd_initialize
+ *
+ * Description:
+ *   Create the SDIO-based MMC/SD device
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_MMCSD
+int lpc31_mmcsd_initialize(int slot, int minor)
 #endif
 
 /****************************************************************************

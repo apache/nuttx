@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/olimex-lpc-h3131/src/lpc31_nsh.c
+ * configs/olimex-lpc-h3131/src/lpc31_mmcsd.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,102 +44,65 @@
 #include <debug.h>
 #include <errno.h>
 
-#ifdef CONFIG_SYSTEM_USBMONITOR
-#  include <apps/usbmonitor.h>
-#endif
+#include <nuttx/sdio.h>
+#include <nuttx/mmcsd.h>
 
 #include "lpc31_internal.h"
 
 #include "lpc_h3131.h"
 
+#ifdef HAVE_MMCSD
+
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-/* PORT and SLOT number probably depend on the board configuration */
-
-#ifdef HAVE_MMCSD
-#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
-#    error "Only one MMC/SD slot"
-#    undef CONFIG_NSH_MMCSDSLOTNO
-#  endif
-#  ifndef CONFIG_NSH_MMCSDSLOTNO
-#    define CONFIG_NSH_MMCSDSLOTNO 0
-#  endif
-#endif
-
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CPP_HAVE_VARARGS
-#  ifdef CONFIG_DEBUG
-#    define message(...) lowsyslog(__VA_ARGS__)
-#  else
-#    define message(...) printf(__VA_ARGS__)
-#  endif
-#else
-#  ifdef CONFIG_DEBUG
-#    define message lowsyslog
-#  else
-#    define message printf
-#  endif
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nsh_archinitialize
+ * Name: lpc31_mmcsd_initialize
  *
  * Description:
- *   Perform architecture specific initialization
+ *   Create the SDIO-based MMC/SD device
  *
  ****************************************************************************/
 
-int nsh_archinitialize(void)
+int lpc31_mmcsd_initialize(int slot, int minor)
 {
-#if defined(HAVE_MMCSD) || defined(HAVE_USBHOST)
+  FAR struct sdio_dev_s *sdio;
   int ret;
-#endif
 
-#ifdef HAVE_MMCSD
-  /* Create the SDIO-based MMC/SD device */
+  /* First, get an instance of the SDIO interface */
 
-  message("nsh_archinitialize: Create the MMC/SD device\n");
-  ret = lpc31_mmcsd_initialize(CONFIG_NSH_MMCSDSLOTNO);
+  fvdbg("Initializing SDIO slot %d\n", slot);
+  sdio = sdio_initialize(slot);
   if (!sdio)
     {
-      message("nsh_archinitialize: Failed to initialize SDIO slot %d\n",
-              CONFIG_NSH_MMCSDSLOTNO, CONFIG_NSH_MMCSDMINOR);
+      fdbg("ERROR: Failed to initialize SDIO slot %d\n", slot);
       return -ENODEV;
     }
-#endif
 
-#ifdef HAVE_USBHOST
-  /* Initialize USB host operation.  lpc31_usbhost_initialize() starts a thread
-   * will monitor for USB connection and disconnection events.
-   */
+  /* Now bind the SPI interface to the MMC/SD driver */
 
-  message("nsh_archinitialize: Start USB host services\n");
-  ret = lpc31_usbhost_initialize();
+  fvdbg("Bind SDIO to the MMC/SD driver, minor=%d\n", minor);
+  ret = mmcsd_slotinitialize(minor, sdio);
   if (ret != OK)
     {
-      message("ERROR: Failed to start USB host services: %d\n", ret);
+      fdbg("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
       return ret;
     }
-#endif
 
-#ifdef HAVE_USBMONITOR
-  /* Start the USB Monitor */
+  fvdbg("Successfully bound SDIO to the MMC/SD driver\n");
+  
+  /* Then let's guess and say that there is a card in the slot.  I need to check to
+   * see if the LPC-H3131 board supports a GPIO to detect if there is a card in
+   * the slot.
+   */
 
-  message("nsh_archinitialize: Start the USB monitor\n");
-  ret = usbmonitor_start(0, NULL);
-  if (ret != OK)
-    {
-      message("nsh_archinitialize: Failed to start USB monitor: %d\n", ret);
-    }
-#endif
-
+  sdio_mediachange(sdio, true);
   return OK;
 }
+
+#endif /* HAVE_MMCSD */
