@@ -569,3 +569,43 @@ Configurations
   nsh:
     Configures the NuttShell (nsh) located at examples/nsh.  The
     Configuration enables only the serial NSH interface.
+
+    General Configuration.  These are easily change by modifying the NuttX
+    configuration:
+
+      - Console on UART -> UART-to-USB converter
+      - Platform: Windows with Cygwin
+      - Toolchain:  CodeSourcery for Windows
+
+    NOTES:
+    1. This configuration has been used to test USB host functionaly.  USB
+       host is *not* enabled by default.  If you will to enable USB host
+       support in the NSH configuration, please modify the NuttX
+       configuration as follows:
+
+         Drivers -> USB Host Driver Support
+           CONFIG_USBHOST=y              : General USB host support
+           CONFIG_USBHOST_MSC=y          : Mass storage class support
+           CONFIG_USBHOST_INT_DISABLE=y  : Not needed
+           CONFIG_USBHOST_ISOC_DISABLE=y : Not needed
+
+         System Type -> Peripherals
+           CONFIG_LPC31_USBOTG=y         : Enable the USB OTG peripheral
+
+         System Type -> USB host configuration
+           CONFIG_LPC31_EHCI_BUFSIZE=128
+           CONFIG_LPC31_EHCI_PREALLOCATE=y
+
+         Library Routines
+           CONFIG_SCHED_WORKQUEUE=y      : Work queue support is needed
+
+       The USB monitor can also be enabled:
+
+         Drivers -> USB Host Driver Support
+           CONFIG_USBHOST_TRACE=y
+           CONFIG_USBHOST_TRACE_NRECORDS=128
+           CONFIG_USBHOST_TRACE_VERBOSE=y
+
+         Application Configuration -> System Add-Ons
+           CONFIG_SYSTEM_USBMONITOR=y
+           CONFIG_SYSTEM_USBMONITOR_INTERVAL=1

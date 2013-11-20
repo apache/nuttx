@@ -56,7 +56,7 @@
 #include "lpc31_internal.h"
 #include "lpc_h3131.h"
 
-#if defined(CONFIG_LPC31_USBOTG) || defined(CONFIG_USBHOST)
+#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -68,10 +68,6 @@
 
 #ifndef CONFIG_USBHOST_STACKSIZE
 #  define CONFIG_USBHOST_STACKSIZE 1024
-#endif
-
-#ifdef HAVE_USBDEV
-#  undef CONFIG_LPC31_USBOTG_RHPORT1
 #endif
 
 /************************************************************************************
@@ -239,8 +235,9 @@ int lpc31_usbhost_initialize(void)
  *   each platform that implements the OHCI or EHCI host interface
  *
  * Input Parameters:
- *   rhport - Selects root hub port to be powered host interface.  See SAM_RHPORT_*
- *            definitions above.
+ *   rhport - Selects root hub port to be powered host interface. Since the LPC31
+ *     has only a downstream port, zero is the only possible value for this
+ *     parameter.
  *   enable - true: enable VBUS power; false: disable VBUS power
  *
  * Returned Value:

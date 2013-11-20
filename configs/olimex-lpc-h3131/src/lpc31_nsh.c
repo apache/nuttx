@@ -49,7 +49,13 @@
 #  include <nuttx/mmcsd.h>
 #endif
 
+#ifdef CONFIG_SYSTEM_USBMONITOR
+#  include <apps/usbmonitor.h>
+#endif
+
 #include "lpc31_internal.h"
+
+#include "lpc_h3131.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -59,7 +65,9 @@
 
 /* PORT and SLOT number probably depend on the board configuration */
 
-#define NSH_HAVEMMCSD  1
+#define HAVE_MMCSD     1
+#define HAVE_USBHOST   1
+#define HAVE_USBMONTOR 1
 
 #if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != 0
 #  error "Only one MMC/SD slot"
@@ -74,11 +82,27 @@
  */
 
 #if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_LPC31_MCI)
-#  undef NSH_HAVEMMCSD
+#  undef HAVE_MMCSD
 #endif
 
 #ifndef CONFIG_NSH_MMCSDMINOR
 #  define CONFIG_NSH_MMCSDMINOR 0
+#endif
+
+/* Can't support USB host features if USB host is not enabled */
+
+#if !defined(CONFIG_LPC31_USBOTG) || !defined(CONFIG_USBHOST)
+#  undef HAVE_USBHOST
+#endif
+
+/* Check if we need to support the USB monitor */
+
+#ifndef HAVE_USBHOST
+#  undef CONFIG_USBHOST_TRACE
+#endif
+
+#if !defined(CONFIG_SYSTEM_USBMONITOR) || !defined(CONFIG_USBHOST_TRACE)
+#  undef HAVE_USBMONITOR
 #endif
 
 /* Debug ********************************************************************/
@@ -111,10 +135,14 @@
 
 int nsh_archinitialize(void)
 {
-#ifdef NSH_HAVEMMCSD
+#ifdef HAVE_MMCSD
   FAR struct sdio_dev_s *sdio;
+#endif
+#if defined(HAVE_MMCSD) || defined(HAVE_USBHOST)
   int ret;
+#endif
 
+#ifdef HAVE_MMCSD
   /* First, get an instance of the SDIO interface */
 
   message("nsh_archinitialize: Initializing SDIO slot %d\n",
@@ -146,5 +174,29 @@ int nsh_archinitialize(void)
 
    sdio_mediachange(sdio, true);
 #endif
+
+#ifdef HAVE_USBHOST
+  /* Initialize USB host operation.  lpc31_usbhost_initialize() starts a thread
+   * will monitor for USB connection and disconnection events.
+   */
+
+  ret = lpc31_usbhost_initialize();
+  if (ret != OK)
+    {
+      message("ERROR: Failed to initialize USB host: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef HAVE_USBMONITOR
+  /* Start the USB Monitor */
+
+  ret = usbmonitor_start(0, NULL);
+  if (ret != OK)
+    {
+      message("nsh_archinitialize: Start USB monitor: %d\n", ret);
+    }
+#endif
+
   return OK;
 }

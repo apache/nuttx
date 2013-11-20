@@ -107,11 +107,8 @@ void lpc31_boardinitialize(void)
    * selected.
    */
 
-#if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
-  if (lpc31_usbhost_bootinitialize)
-    {
-      lpc31_usbhost_bootinitialize();
-    }
+#if defined(CONFIG_USBHOST) || defined(CONFIG_LPC31_USBOTG)
+  lpc31_usbhost_bootinitialize();
 #endif
 
   /* Configure on-board LEDs in all cases */
