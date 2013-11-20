@@ -259,7 +259,7 @@ int nandmodel_translate(FAR const struct nand_model_s *model, off_t address,
  ****************************************************************************/
 
 #define nandmodel_pagesperblock(m) \
-  ((uint32_t)((m)->blocksize << 10) / model->pagesize)
+  ((uint32_t)((m)->blocksize << 10) / (m)->pagesize)
 
 /****************************************************************************
  * Name: nandmodel_getdevpagesize

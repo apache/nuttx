@@ -681,7 +681,7 @@ static bool sam_checkreg(struct sam_dev_s *priv, bool wr, uint32_t value,
  * Name: sam_getreg
  *
  * Description:
- *  Read an SPI register
+ *  Read an HSMCI register
  *
  ****************************************************************************/
 
@@ -704,7 +704,7 @@ static inline uint32_t sam_getreg(struct sam_dev_s *priv, unsigned int offset)
  * Name: sam_putreg
  *
  * Description:
- *  Write a value to an SPI register
+ *  Write a value to an HSMCI register
  *
  ****************************************************************************/
 

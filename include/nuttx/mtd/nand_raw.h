@@ -104,21 +104,21 @@
 /* NAND access macros */
 
 #define WRITE_COMMAND8(raw, command) \
-    {*((volatile uint8_t *)raw->cmdaddr) = (uint8_t)command;}
+    {*((volatile uint8_t *)(raw)->cmdaddr) = (uint8_t)command;}
 #define WRITE_COMMAND16(raw, command) \
-    {*((volatile uint16_t *)raw->cmdaddr) = (uint16_t)command;}
+    {*((volatile uint16_t *)(raw)->cmdaddr) = (uint16_t)command;}
 #define WRITE_ADDRESS8(raw, address) \
-    {*((volatile uint8_t *)raw->addraddr) = (uint8_t)address;}
+    {*((volatile uint8_t *)(raw)->addraddr) = (uint8_t)address;}
 #define WRITE_ADDRESS16(raw, address) \
-    {*((volatile uint16_t *)raw->addraddr) = (uint16_t)address;}
+    {*((volatile uint16_t *)(raw)->addraddr) = (uint16_t)address;}
 #define WRITE_DATA8(raw, data) \
-    {*((volatile uint8_t *)raw->dataaddr) = (uint8_t)data;}
+    {*((volatile uint8_t *)(raw)->dataaddr) = (uint8_t)data;}
 #define READ_DATA8(raw) \
-    (*((volatile uint8_t *)raw->dataaddr))
+    (*((volatile uint8_t *)(raw)->dataaddr))
 #define WRITE_DATA16(raw, data) \
-    {*((volatile uint16_t *) raw->dataaddr) = (uint16_t)data;}
+    {*((volatile uint16_t *)(raw)->dataaddr) = (uint16_t)data;}
 #define READ_DATA16(raw) \
-    (*((volatile uint16_t *)raw->dataaddr))
+    (*((volatile uint16_t *)(raw)->dataaddr))
 
 /* struct nand_raw_s operations */
 
