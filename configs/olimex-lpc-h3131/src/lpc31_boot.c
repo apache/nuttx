@@ -94,7 +94,7 @@ void lpc31_boardinitialize(void)
     * into the build.
     */
 
-#if defined(CONFIG_USBDEV) && defined(CONFIG_LPC31_USBOTG)
+#ifdef HAVE_USBDEV
   if (lpc31_usbdev_initialize)
     {
       lpc31_usbdev_initialize();
@@ -107,7 +107,7 @@ void lpc31_boardinitialize(void)
    * selected.
    */
 
-#if defined(CONFIG_USBHOST) || defined(CONFIG_LPC31_USBOTG)
+#ifdef HAVE_USBHOST
   lpc31_usbhost_bootinitialize();
 #endif
 

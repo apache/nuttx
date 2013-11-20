@@ -50,6 +50,10 @@ ifeq ($(CONFIG_LPC31_SPI),y)
 CSRCS += lpc31_spi.c
 endif
 
+ifeq ($(CONFIG_LPC31_MCI),y)
+CSRCS += lpc31_mmcsd.c
+endif
+
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
 CSRCS += lpc31_nsh.c
 endif

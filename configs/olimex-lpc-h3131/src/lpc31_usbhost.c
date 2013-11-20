@@ -56,7 +56,7 @@
 #include "lpc31_internal.h"
 #include "lpc_h3131.h"
 
-#if defined(CONFIG_LPC31_USBOTG) && defined(CONFIG_USBHOST)
+#ifdef HAVE_USBHOST
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -312,4 +312,4 @@ xcpt_t lpc31_setup_overcurrent(xcpt_t handler)
 }
 #endif /* 0 */
 
-#endif /* CONFIG_LPC31_USBOTG || CONFIG_USBHOST */
+#endif /* HAVE_USBHOST */
