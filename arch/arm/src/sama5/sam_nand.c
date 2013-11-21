@@ -52,6 +52,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <string.h>
+#include <semaphore.h>
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
@@ -65,7 +66,10 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
+#include "cache.h"
 
+#include "sam_memories.h"
+#include "sam_dmac.h"
 #include "sam_pmecc.h"
 #include "sam_nand.h"
 
@@ -86,14 +90,33 @@
 #define STATUS_ERROR       (1 << 0)
 #define STATUS_READY       (1 << 6)
 
-/*
- * NFC ALE CLE command paramter
- */
+/* NFC ALE CLE command parameter */
+
 #define SMC_ALE_COL_EN     (1 << 0)
 #define SMC_ALE_ROW_EN     (1 << 1)
 #define SMC_CLE_WRITE_EN   (1 << 2)
 #define SMC_CLE_DATA_EN    (1 << 3)
 #define SMC_CLE_VCMD2_EN   (1 << 4)
+
+/* DMA Configuration */
+
+#define DMA_FLAGS8 \
+   DMACH_FLAG_FIFOCFG_LARGEST | \
+   (((0x3f) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF0 | \
+   DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_PERIPHINCREMENT | \
+   DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+   ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+   DMACH_FLAG_MEMWIDTH_8BITS | DMACH_FLAG_MEMINCREMENT | \
+   DMACH_FLAG_MEMCHUNKSIZE_1)
+
+#define DMA_FLAGS16 \
+   DMACH_FLAG_FIFOCFG_LARGEST | \
+   (((0x3f) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF0 | \
+   DMACH_FLAG_PERIPHWIDTH_16BITS | DMACH_FLAG_PERIPHINCREMENT | \
+   DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+   ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+   DMACH_FLAG_MEMWIDTH_16BITS | DMACH_FLAG_MEMINCREMENT | \
+   DMACH_FLAG_MEMCHUNKSIZE_1)
 
 /****************************************************************************
  * Private Types
@@ -104,9 +127,9 @@
  ****************************************************************************/
 /* Low-level HSMC Helpers */
 
-static void     nand_nfccmd_waitdone(void);
-static void     nand_nfccmd_send(uint32_t cmd, uint32_t acycle,
-                  uint32_t cycle0);
+static void     nand_wait_ready(struct sam_nandcs_s *priv);
+static void     nand_cmdsend(struct sam_nandcs_s *priv, uint32_t cmd,
+                  uint32_t acycle, uint32_t cycle0);
 static bool     nand_operation_complete(struct sam_nandcs_s *priv);
 static void     nand_coladdr_write(struct sam_nandcs_s *priv,
                   uint16_t coladdr);
@@ -119,6 +142,36 @@ static uint32_t nand_get_acycle(int ncycles);
 static void     nand_nfc_configure(struct sam_nandcs_s *priv,
                    uint8_t mode, uint32_t cmd1, uint32_t cmd2,
                    uint32_t coladdr, uint32_t rowaddr);
+
+/* Interrupt Handling */
+
+static void     nand_wait_cmddone(struct sam_nandcs_s *priv);
+static void     nand_wait_xfrdone(struct sam_nandcs_s *priv);
+static void     nand_wait_rbedge(struct sam_nandcs_s *priv);
+
+/* DMA Helpers */
+
+static int      nand_wait_dma(struct sam_nandcs_s *priv);
+static void     nand_dmacallback(DMA_HANDLE handle, void *arg, int result);
+
+/* Raw Data Transfer Helpers */
+
+static int      nand_nfcsram_read(uintptr_t src, uint8_t *dest,
+                  size_t buflen);
+static int      nand_smc_read8(uintptr_t src, uint8_t *dest, size_t buflen);
+static int      nand_smc_read16(uintptr_t src, uint8_t *dest,
+                  size_t buflen);
+static int      nand_read(struct sam_nandcs_s *priv, bool nfcsram,
+                  uint8_t *buffer, size_t buflen);
+
+static int      nand_nfcsram_write(const uint8_t *src, uintptr_t dest,
+                  size_t buflen);
+static int      nand_smc_write8(const uint8_t *src, uintptr_t dest,
+                  size_t buflen);
+static int      nand_smc_write16(const uint8_t *src, uintptr_t dest,
+                  size_t buflen);
+static int      nand_write(struct sam_nandcs_s *priv, bool nfcsram,
+                  uint8_t *buffer, size_t buflen, off_t offset);
 
 /* NAND Access Helpers */
 
@@ -187,37 +240,16 @@ static struct sam_nandcs_s g_cs3nand;
  * Public Data
  ****************************************************************************/
 
-/* NAND regiser debug state */
+/* NAND global state */
 
-#ifdef CONFIG_SAMA5_NAND_REGDEBUG
-struct sam_nanddbg_s g_nanddbg;
-#endif
+struct sam_nand_s g_nand;
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nand_nfccmd_waitdone
- *
- * Description:
- *   Wait for NFC command done
- *
- * Input parameters:
- *   None
- *
- * Returned value.
- *   None
- *
- ****************************************************************************/
-
-static void nand_nfccmd_waitdone(void)
-{
-#warning Missing logic
-}
-
-/****************************************************************************
- * Name: nand_nfccmd_waitdone
+ * Name: nand_wait_ready
  *
  * Description:
  *   Waiting for the completion of a page program, erase and random read
@@ -231,7 +263,7 @@ static void nand_nfccmd_waitdone(void)
  *
  ****************************************************************************/
 
-static void nand_waitready(struct sam_nandcs_s *priv)
+static void nand_wait_ready(struct sam_nandcs_s *priv)
 {
 #ifdef SAMA5_NAND_READYBUSY
   while (board_nand_busy(priv->cs));
@@ -241,12 +273,13 @@ static void nand_waitready(struct sam_nandcs_s *priv)
 }
 
 /****************************************************************************
- * Name: nand_nfccmd_send
+ * Name: nand_cmdsend
  *
  * Description:
  *   Use the HOST nandflash controller to send a command to the NFC.
  *
  * Input parameters:
+ *   priv - Lower-half, private NAND FLASH device state
  *   cmd    - command to send
  *   acycle - address cycle when command access id decoded
  *   cycle0 - address at first cycle
@@ -256,13 +289,15 @@ static void nand_waitready(struct sam_nandcs_s *priv)
  *
  ****************************************************************************/
 
-static void nand_nfccmd_send(uint32_t cmd, uint32_t acycle, uint32_t cycle0)
+static void nand_cmdsend(struct sam_nandcs_s *priv, uint32_t cmd,
+                         uint32_t acycle, uint32_t cycle0)
 {
   uintptr_t cmdaddr;
 
   /* Wait until host controller is not busy. */
 
   while ((nand_getreg(NFCCMD_BASE + NFCADDR_CMD_NFCCMD) & 0x8000000) != 0);
+  priv->cmddone = false;
 
   /* Send the command plus the ADDR_CYCLE */
 
@@ -272,11 +307,11 @@ static void nand_nfccmd_send(uint32_t cmd, uint32_t acycle, uint32_t cycle0)
 
   /* Wait for the command transfer to complete */
 
-  nand_nfccmd_waitdone();
+  nand_wait_cmddone(priv);
 }
 
 /****************************************************************************
- * Name: nand_coladdr_write
+ * Name: nand_operation_complete
  *
  * Description:
  *   Check if a program or erase operation completed successfully
@@ -569,70 +604,628 @@ static void nand_nfc_configure(struct sam_nandcs_s *priv, uint8_t mode,
   uint32_t acycle1234 = 0;
   int ncycles;
 
-  /* Issue CLE and ALE through EBI */
-
-  if (!nand_nfc_enabled(priv))
+  if ((mode & SMC_CLE_WRITE_EN) != 0)
     {
-      WRITE_COMMAND8(&priv->raw, cmd1);
-      if ((mode & SMC_ALE_COL_EN) == SMC_ALE_COL_EN)
-        {
-          nand_coladdr_write(priv, coladdr);
-        }
+      rw = NFCADDR_CMD_NFCWR;
+    }
+  else
+    {
+      rw = NFCADDR_CMD_NFCRD;
+    }
 
-      if ((mode & SMC_ALE_ROW_EN)== SMC_ALE_ROW_EN)
-        {
-          nand_rowaddr_write(priv, rowaddr);
-        }
+  if ((mode & SMC_CLE_DATA_EN) != 0 && priv->nfcsram)
+    {
+      regval = NFCADDR_CMD_DATAEN;
+    }
+  else
+    {
+      regval = NFCADDR_CMD_DATADIS;
+    }
 
-      if ((mode & SMC_CLE_VCMD2_EN) == SMC_CLE_VCMD2_EN)
-        {
-          /* When set, the CMD2 field is issued after the address cycle */
+  if (((mode & SMC_ALE_COL_EN) == SMC_ALE_COL_EN) ||
+      ((mode & SMC_ALE_ROW_EN) == SMC_ALE_ROW_EN))
+    {
+      bool rowonly = (((mode & SMC_ALE_COL_EN) == 0) &&
+                      ((mode & SMC_ALE_ROW_EN) == SMC_ALE_ROW_EN));
+      nand_translate_address(priv, coladdr, rowaddr, &acycle0, &acycle1234, rowonly);
+      acycle = nand_get_acycle(ncycles);
+    }
+  else
+    {
+      acycle = NFCADDR_CMD_ACYCLE_NONE;
+    }
 
-          WRITE_COMMAND8(&priv->raw, cmd2);
+  cmd = (rw | regval | NFCADDR_CMD_CSID_3 | acycle |
+         (((mode & SMC_CLE_VCMD2_EN) == SMC_CLE_VCMD2_EN) ? NFCADDR_CMD_VCMD2 : 0) |
+         (cmd1 << NFCADDR_CMD_CMD1_SHIFT) | (cmd2 << NFCADDR_CMD_CMD2_SHIFT));
+
+  nand_cmdsend(priv, cmd, acycle1234, acycle0);
+}
+
+/****************************************************************************
+ * Name: nand_wait_cmddone
+ *
+ * Description:
+ *   Wait for NFC command done
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned value.
+ *   None
+ *
+ ****************************************************************************/
+
+static void nand_wait_cmddone(struct sam_nandcs_s *priv)
+{
+  int ret;
+
+  while (!priv->cmddone)
+    {
+      ret = sem_wait(&priv->waitsem);
+      if (ret < 0)
+        {
+          DEBUGASSERT(errno == EINTR);
         }
     }
 
-  /* Issue CLE and ALE using NFC */
+  priv->cmddone = false;
+}
 
+/****************************************************************************
+ * Name: nand_wait_xfrdone
+ *
+ * Description:
+ *   Wait for a transfer to complete
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned value.
+ *   None
+ *
+ ****************************************************************************/
+
+static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
+{
+  int ret;
+
+  while (!priv->xfrdone)
+    {
+      ret = sem_wait(&priv->waitsem);
+      if (ret < 0)
+        {
+          DEBUGASSERT(errno == EINTR);
+        }
+    }
+
+  priv->xfrdone = false;
+}
+
+/****************************************************************************
+ * Name: nand_wait_rbedge
+ *
+ * Description:
+ *   Wait for read/busy edge detection
+ *
+ * Input parameters:
+ *   None
+ *
+ * Returned value.
+ *   None
+ *
+ ****************************************************************************/
+
+static void nand_wait_rbedge(struct sam_nandcs_s *priv)
+{
+  int ret;
+
+  while (!priv->rbedge)
+    {
+      ret = sem_wait(&priv->waitsem);
+      if (ret < 0)
+        {
+          DEBUGASSERT(errno == EINTR);
+        }
+    }
+
+  priv->rbedge = false;
+}
+
+/****************************************************************************
+ * Name: nand_wait_dma
+ *
+ * Description:
+ *   Wait for the completion of a DMA transfer
+ *
+ * Input parameters:
+ *   Wait for read/busy edge detection
+ *
+ * Returned value.
+ *   The result of the DMA.  OK on success; a negated ernno value on failure.
+ *
+ ****************************************************************************/
+
+static int nand_wait_dma(struct sam_nandcs_s *priv)
+{
+  int ret;
+
+  while (!priv->dmadone)
+    {
+      ret = sem_wait(&priv->waitsem);
+      if (ret < 0)
+        {
+          DEBUGASSERT(errno == EINTR);
+        }
+    }
+
+  priv->dmadone = false;
+  return priv->result;
+}
+
+/****************************************************************************
+ * Name: sam_adc_dmacallback
+ *
+ * Description:
+ *   Called when one NAND DMA sequence completes.  This function just wakes
+ *   the the waiting NAND driver logic.
+ *
+ ****************************************************************************/
+
+static void nand_dmacallback(DMA_HANDLE handle, void *arg, int result)
+{
+  struct sam_nandcs_s *priv = (struct sam_nandcs_s *)arg;
+
+  DEBUGASSERT(priv);
+
+  /* Wake up the thread that is waiting for the DMA result */
+
+  priv->result  = result;
+  priv->dmadone = true;
+  sem_post(&priv->waitsem);
+}
+
+/****************************************************************************
+ * Name: nand_dma_read
+ *
+ * Description:
+ *   Transfer data to NAND from the provided buffer via DMA.
+ *
+ * Input Parameters:
+ *   priv   - Lower-half, private NAND FLASH device state
+ *   vsrc   - NAND data destination address.
+ *   vdest  - Buffer where data read from NAND will be returned.
+ *   nbytes - The number of bytes to transfer
+ *
+ * Returned Value
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int nand_dma_read(struct sam_nandcs_s *priv,
+                          uintptr_t vsrc, uintptr_t vdest, size_t nbytes)
+{
+  uint32_t psrc;
+  uint32_t pdest;
+  int ret;
+
+  DEBUGASSERT(priv->dma);
+
+  /* Invalidate the destination memory buffer before performing the DMA (so
+   * that nothing gets flushed later, corrupting the DMA transfer, and so
+   * that memory will be re-cached after the DMA completes).
+   */
+
+  cp15_invalidate_dcache(vdest, vdest + nbytes);
+
+  /* DMA will need physical addresses. */
+
+  psrc  = sam_physregaddr(vsrc);   /* Source is NAND */
+  pdest = sam_physramaddr(vdest);  /* Destination is normal memory */
+
+  /* Setup the Memory-to-Memory DMA.  The semantics of the DMA module are
+   * awkward here.  We will treat the NAND (src) as the peripheral source
+   * and memory as the destination.  Internally, the DMA module will realize
+   * that this is a memory to memory transfer and should do the right thing.
+   */
+
+  ret = sam_dmarxsetup(priv->dma, psrc, pdest, nbytes);
+  if (ret < 0)
+    {
+      fdbg("ERROR: sam_dmarxsetup failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Start the DMA */
+
+  priv->dmadone = false;
+  priv->result  = -EBUSY;
+
+  sam_dmastart(priv->dma, nand_dmacallback, priv);
+
+  /* Wait for the DMA to complete */
+
+  ret = nand_wait_dma(priv);
+  if (ret < 0)
+    {
+      fdbg("ERROR: DMA failed: %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nand_dma_write
+ *
+ * Description:
+ *   Transfer data to NAND from the provided buffer via DMA.
+ *
+ * Input Parameters:
+ *   priv   - Lower-half, private NAND FLASH device state
+ *   vsrc   - Buffer that provides the data for the write
+ *   vdest  - NAND data destination address
+ *   nbytes - The number of bytes to transfer
+ *
+ * Returned Value
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int nand_dma_write(struct sam_nandcs_s *priv,
+                          uintptr_t vsrc, uintptr_t vdest, size_t nbytes)
+{
+  uint32_t psrc;
+  uint32_t pdest;
+  int ret;
+
+  DEBUGASSERT(priv->dma);
+
+  /* Clean the D-Cache associated with the source data buffer so that all of
+   * the data to be transferred lies in physical memory
+   */
+
+  cp15_clean_dcache(vsrc, vsrc + nbytes);
+
+  /* DMA will need physical addresses. */
+
+  psrc  = sam_physramaddr(vsrc);   /* Source is normal memory */
+  pdest = sam_physregaddr(vdest);  /* Destination is NAND (or NAND host SRAM) */
+
+  /* Setup the Memory-to-Memory DMA.  The semantics of the DMA module are
+   * awkward here.  We will treat the NAND (dest) as the peripheral destination
+   * and memory as the source.  Internally, the DMA module will realize taht
+   * this is a memory to memory transfer and should do the right thing.
+   */
+
+  ret = sam_dmatxsetup(priv->dma, pdest, psrc, nbytes);
+  if (ret < 0)
+    {
+      fdbg("ERROR: sam_dmatxsetup failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Start the DMA */
+
+  priv->dmadone = false;
+  priv->result  = -EBUSY;
+
+  sam_dmastart(priv->dma, nand_dmacallback, priv);
+
+  /* Wait for the DMA to complete */
+
+  ret = nand_wait_dma(priv);
+  if (ret < 0)
+    {
+      fdbg("ERROR: DMA failed: %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nand_nfcsram_read
+ *
+ * Description:
+ *   Read data from NAND using the NFC SRAM (without DMA)
+ *
+ * Input Parameters:
+ *   src    - NAND data source address
+ *   dest   - Buffer that will receive the data from the read
+ *   buflen - The number of bytes to transfer
+ *
+ * Returned Value
+ *   OK always
+ *
+ ****************************************************************************/
+
+static int nand_nfcsram_read(uintptr_t src, uint8_t *dest, size_t buflen)
+{
+  uint8_t *src8 = (uint8_t *)src;
+
+  for (; buflen > 0; buflen--)
+    {
+      *dest++ = *src8++;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nand_smc_read8
+ *
+ * Description:
+ *   Read 8-bit data from NAND using the NAND data address (without DMA)
+ *
+ * Input Parameters:
+ *   src    - NAND data source address
+ *   dest   - Buffer that will receive the data from the read
+ *   buflen - The number of bytes to transfer
+ *
+ * Returned Value
+ *   OK always
+ *
+ ****************************************************************************/
+
+static int nand_smc_read8(uintptr_t src, uint8_t *dest, size_t buflen)
+{
+  volatile uint8_t *src8  = (volatile uint8_t *)src;
+
+  for (; buflen > 0; buflen--)
+    {
+      *dest++ = *src8;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nand_smc_read16
+ *
+ * Description:
+ *   Read 16-bit data from NAND using the NAND data address (without DMA)
+ *
+ * Input Parameters:
+ *   src    - NAND data source address
+ *   dest   - Buffer that will receive the data from the read
+ *   buflen - The number of bytes to transfer
+ *
+ * Returned Value
+ *   OK always
+ *
+ ****************************************************************************/
+
+static int nand_smc_read16(uintptr_t src, uint8_t *dest, size_t buflen)
+{
+  volatile uint16_t *src16  = (volatile uint16_t *)src;
+  uint16_t *dest16 = (uint16_t *)dest;
+
+  DEBUGASSERT(((uintptr_t)dest & 1) == 0);
+
+  for (; buflen > 1; buflen -= sizeof(uint16_t))
+    {
+      *dest16++ = *src16;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nand_write
+ *
+ * Description:
+ *   Read data from NAND using the appropriate method
+ *
+ * Input Parameters:
+ *   priv     - Lower-half, private NAND FLASH device state
+ *   nfcsram  - True: Use NFC Host SRAM
+ *   buffer   - Buffer that provides the data for the write
+ *
+ * Returned Value
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
+                      uint8_t *buffer, size_t buflen)
+{
+  uintptr_t src;
+  int buswidth;
+
+  /* Pick the data destination:  The NFC SRAM or the NAND data address */
+
+  if (nfcsram)
+    {
+      src = NFCSRAM_BASE;
+    }
   else
     {
-      if ((mode & SMC_CLE_WRITE_EN) == SMC_CLE_WRITE_EN)
+      src = priv->raw.dataaddr;
+    }
+
+  /* Then perform the transfer via DMA or not */
+
+  if (priv->dmaxfr)
+    {
+      /* Transfer using DMA */
+
+      return nand_dma_read(priv, src, (uintptr_t)buffer, buflen);
+    }
+
+  /* Transfer without DMA */
+
+  else if (nfcsram)
+    {
+      return nand_nfcsram_read(src, buffer, buflen);
+    }
+  else
+    {
+      /* Check the data bus width of the NAND FLASH */
+
+      buswidth = nandmodel_getbuswidth(&priv->raw.model);
+      if (buswidth == 16)
         {
-          rw = NFCADDR_CMD_NFCWR;
+          return nand_smc_read16(src, buffer, buflen);
         }
       else
         {
-          rw = NFCADDR_CMD_NFCRD;
+          return nand_smc_read8(src, buffer, buflen);
         }
+    }
+}
 
-      if (((mode & SMC_CLE_DATA_EN) == SMC_CLE_DATA_EN) &&
-          nand_nfcsram_enabled(priv))
+/****************************************************************************
+ * Name: nand_nfcsram_write
+ *
+ * Description:
+ *   Write data to NAND using the NFC SRAM (without DMA)
+ *
+ * Input Parameters:
+ *   src    - Buffer that provides the data for the write
+ *   dest   - NAND data destination address
+ *   buflen - The number of bytes to transfer
+ *
+ * Returned Value
+ *   OK always
+ *
+ ****************************************************************************/
+
+static int nand_nfcsram_write(const uint8_t *src, uintptr_t dest, size_t buflen)
+{
+  uint8_t *dest8 = (uint8_t *)dest;
+
+  for (; buflen > 0; buflen--)
+    {
+      *dest8++ = *src++;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nand_smc_write8
+ *
+ * Description:
+ *   Write 8-bit wide data to NAND using the NAND data address (without DMA)
+ *
+ * Input Parameters:
+ *   src    - Buffer that provides the data for the write
+ *   dest   - NAND data destination address
+ *   buflen - The number of bytes to transfer
+ *
+ * Returned Value
+ *   OK always
+ *
+ ****************************************************************************/
+
+static int nand_smc_write8(const uint8_t *src, uintptr_t dest, size_t buflen)
+{
+  volatile uint8_t *dest8  = (volatile uint8_t *)dest;
+
+  for (; buflen > 0; buflen--)
+    {
+      *dest8 = *src++;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nand_smc_write16
+ *
+ * Description:
+ *   Write 16-bit wide data to NAND using the NAND data address (without DMA)
+ *
+ * Input Parameters:
+ *   src    - Buffer that provides the data for the write
+ *   dest   - NAND data destination address
+ *   buflen - The number of bytes to transfer
+ *
+ * Returned Value
+ *   OK always
+ *
+ ****************************************************************************/
+
+static int nand_smc_write16(const uint8_t *src, uintptr_t dest, size_t buflen)
+{
+  volatile uint16_t *dest16  = (volatile uint16_t *)dest;
+  const uint16_t *src16 = (const uint16_t *)src;
+
+  DEBUGASSERT(((uintptr_t)src & 1) == 0);
+
+  for (; buflen > 1; buflen -=  sizeof(uint16_t))
+    {
+      *dest16 = *src16++;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: nand_write
+ *
+ * Description:
+ *   Write data to NAND using the appropriate method
+ *
+ * Input Parameters:
+ *   priv     - Lower-half, private NAND FLASH device state
+ *   nfcsram  - True: Use NFC Host SRAM
+ *   buffer   - Buffer that provides the data for the write
+ *   offset   - Data offset in bytes
+ *
+ * Returned Value
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int nand_write(struct sam_nandcs_s *priv, bool nfcsram,
+                      uint8_t *buffer, size_t buflen, off_t offset)
+{
+  uintptr_t dest;
+  int buswidth;
+
+  /* Pick the data source:  The NFC SRAM or the NAND data address */
+
+  if (nfcsram)
+    {
+      dest = NFCSRAM_BASE;
+    }
+  else
+    {
+      dest = priv->raw.dataaddr;
+    }
+
+  /* Apply the offset to the source address */
+
+  dest += offset;
+
+  /* Then perform the transfer via DMA or not */
+
+  if (priv->dmaxfr)
+    {
+      /* Transfer using DMA */
+
+      return nand_dma_write(priv, (uintptr_t)buffer, dest, buflen);
+    }
+
+  /* Transfer without DMA */
+
+  else if (nfcsram)
+    {
+      return nand_nfcsram_write(buffer, dest, buflen);
+    }
+  else
+    {
+      /* Check the data bus width of the NAND FLASH */
+
+      buswidth = nandmodel_getbuswidth(&priv->raw.model);
+      if (buswidth == 16)
         {
-          regval = NFCADDR_CMD_DATAEN;
+          return nand_smc_write16(buffer, dest, buflen);
         }
       else
         {
-          regval = NFCADDR_CMD_DATADIS;
+          return nand_smc_write8(buffer, dest, buflen);
         }
-
-      if (((mode & SMC_ALE_COL_EN) == SMC_ALE_COL_EN) ||
-          ((mode & SMC_ALE_ROW_EN) == SMC_ALE_ROW_EN))
-        {
-          bool rowonly = (((mode & SMC_ALE_COL_EN) == 0) &&
-                          ((mode & SMC_ALE_ROW_EN) == SMC_ALE_ROW_EN));
-          nand_translate_address(priv, coladdr, rowaddr, &acycle0, &acycle1234, rowonly);
-          acycle = nand_get_acycle(ncycles);
-        }
-      else
-        {
-          acycle = NFCADDR_CMD_ACYCLE_NONE;
-        }
-
-      cmd = (rw | regval | NFCADDR_CMD_CSID_3 | acycle |
-             (((mode & SMC_CLE_VCMD2_EN) == SMC_CLE_VCMD2_EN) ? NFCADDR_CMD_VCMD2 : 0) |
-             (cmd1 << NFCADDR_CMD_CMD1_SHIFT) | (cmd2 << NFCADDR_CMD_CMD2_SHIFT));
-
-      nand_nfccmd_send( cmd, acycle1234, acycle0);
     }
 }
 
@@ -740,8 +1333,144 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
 static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
              unsigned int page, const void *data, const void *spare)
 {
-#warning Missing logic
-  return -ENOSYS;
+  uint32_t regval;
+  uint16_t pagesize;
+  uint16_t sparesize;
+  off_t rawaddr;
+  int ret = OK;
+
+  /* Get page and spare sizes */
+
+  pagesize = nandmodel_getpagesize(&priv->raw.model);
+  sparesize = nandmodel_getsparesize(&priv->raw.model);
+
+  /* Convert the page size to something understood by the hardware */
+
+  switch (pagesize)
+    {
+    case 512:
+      regval = HSMC_CFG_PAGESIZE_512;
+      break;
+
+    case 1024:
+      regval = HSMC_CFG_PAGESIZE_1024;
+      break;
+
+    case 2048:
+      regval = HSMC_CFG_PAGESIZE_2048;
+      break;
+
+    case 4096:
+      regval = HSMC_CFG_PAGESIZE_4096;
+      break;
+
+    case 8192:
+      regval = HSMC_CFG_PAGESIZE_8192;
+      break;
+
+    default:
+      fdbg("ERROR:  Unsupported page size: %d\n", pagesize);
+      return -EINVAL;
+    }
+
+  /* Configure the SMC */
+
+  regval |= (HSMC_CFG_RBEDGE | HSMC_CFG_DTOCYC(15) | HSMC_CFG_DTOMUL_1048576 |
+             HSMC_CFG_NFCSPARESIZE((sparesize-1) >> 2));
+
+  if (spare)
+    {
+      /* Write spare area */
+
+      regval |= HSMC_CFG_WSPARE;
+    }
+
+  nand_putreg(SAM_HSMC_CFG, regval);
+
+  /* Calculate physical address of the page */
+
+  rawaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
+  fvdbg("Block %d Page %d\n", block, page);
+
+  /* Handle the case where we use NFC SRAM */
+
+  if (priv->nfcsram)
+    {
+      if (data)
+        {
+          nand_write(priv, true, (uint8_t *)data, pagesize, 0);
+
+          if (spare)
+            {
+              nand_write(priv, true, (uint8_t *)spare, sparesize, pagesize);
+            }
+        }
+      else if (spare)
+        {
+          nand_write(priv, true, (uint8_t *)spare, sparesize, 0);
+        }
+    }
+
+  /* Write data area if needed */
+
+  if (data)
+    {
+      /* Start a Data Phase */
+
+      if (priv->nfcsram)
+        {
+          priv->xfrdone = false;
+          nand_nfc_configure(priv,
+                             SMC_CLE_WRITE_EN | SMC_ALE_COL_EN |SMC_ALE_ROW_EN |SMC_CLE_DATA_EN,
+                             COMMAND_WRITE_1, 0, 0, rawaddr);
+          nand_wait_xfrdone(priv);
+        }
+      else
+        {
+          nand_nfc_configure(priv,
+                             SMC_CLE_WRITE_EN | SMC_ALE_COL_EN |SMC_ALE_ROW_EN,
+                             COMMAND_WRITE_1, 0, 0, rawaddr);
+        }
+
+      if (!priv->nfcsram)
+        {
+          nand_write(priv, false, (uint8_t *)data, pagesize, 0);
+          if (spare)
+            {
+              nand_write(priv, false, (uint8_t *)spare, sparesize, pagesize);
+            }
+        }
+
+      nand_nfc_configure(priv, SMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
+      nand_wait_rbedge(priv);
+
+      if (!nand_operation_complete(priv))
+        {
+          fdbg("ERROR: Failed writing data area\n");
+          ret = -EPERM;
+        }
+    }
+
+  /* Write spare area alone if needed */
+
+  else if (spare)
+    {
+      nand_nfc_configure(priv,
+                         SMC_CLE_WRITE_EN|SMC_ALE_COL_EN|SMC_ALE_ROW_EN,
+                         COMMAND_WRITE_1,0,  pagesize, rawaddr);
+
+      ret = nand_write(priv, false, (uint8_t *)spare, sparesize, 0);
+      if (ret < 0)
+        {
+          fdbg("ERROR: Failed writing data area\n");
+          ret = -EPERM;
+        }
+
+      nand_nfc_configure(priv, SMC_CLE_WRITE_EN, COMMAND_WRITE_2,0, 0, 0);
+      nand_wait_ready(priv);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -852,7 +1581,7 @@ static int nand_eraseblock(struct nand_raw_s *raw, off_t block)
 
   /* Wait for the erase operation to complete */
 
-  nand_waitready(priv);
+  nand_wait_ready(priv);
   if (!nand_operation_complete(priv))
     {
       fdbg("ERROR: Could not erase block %d\n", block);
@@ -1154,6 +1883,8 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 #endif
   priv->cs             = cs;
 
+  sem_init(&priv->waitsem, 0, 0);
+
   /* Initialize the NAND hardware */
   /* Perform board-specific SMC intialization for this CS */
 
@@ -1176,7 +1907,33 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
       return NULL;
     }
 
+  /* Allocate a DMA channel for NAND transfers
+   * REVISIT:  Need DMA channel setup.
+   */
+
+  if (nandmodel_getbuswidth(&priv->raw.model) == 16)
+    {
+      priv->dma = sam_dmachannel(1, DMA_FLAGS16);
+    }
+  else
+    {
+      priv->dma = sam_dmachannel(1, DMA_FLAGS8);
+    }
+
+  if (!priv->dma)
+    {
+      fdbg("ERROR: Failed to allocate the DMA channel for CS%d\n", cs);
+    }
+
+  /* Enable the NAND FLASH controller */
+
+  if (!g_nand.initialized)
+    {
+      nand_putreg(SAM_HSMC_CTRL, HSMC_CTRL_NFCEN);
+
 #warning Missing logic
+      g_nand.initialized = true;
+    }
 
   /* Return the MTD wrapper interface as the MTD device */
 
@@ -1202,32 +1959,32 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 #ifdef CONFIG_SAMA5_NAND_REGDEBUG
 bool nand_checkreg(bool wr, uintptr_t regaddr, uint32_t regval)
 {
-  if (wr      == g_nanddbg.wr &&      /* Same kind of access? */
-      regval  == g_nanddbg.regval &&  /* Same regval? */
-      regaddr == g_nanddbg.regadddr)  /* Same address? */
+  if (wr      == g_nand.wr &&      /* Same kind of access? */
+      regval  == g_nand.regval &&  /* Same regval? */
+      regaddr == g_nand.regadddr)  /* Same address? */
     {
       /* Yes, then just keep a count of the number of times we did this. */
 
-      g_nanddbg.ntimes++;
+      g_nand.ntimes++;
       return false;
     }
   else
     {
       /* Did we do the previous operation more than once? */
 
-      if (g_nanddbg.ntimes > 0)
+      if (g_nand.ntimes > 0)
         {
           /* Yes... show how many times we did it */
 
-          lldbg("...[Repeats %d times]...\n", g_nanddbg.ntimes);
+          lldbg("...[Repeats %d times]...\n", g_nand.ntimes);
         }
 
       /* Save information about the new access */
 
-      g_nanddbg.wr   = wr;
-      g_nanddbg.regval  = regval;
-      g_nanddbg.regadddr = regaddr;
-      g_nanddbg.ntimes   = 0;
+      g_nand.wr   = wr;
+      g_nand.regval  = regval;
+      g_nand.regadddr = regaddr;
+      g_nand.ntimes   = 0;
     }
 
   /* Return true if this is the first time that we have done this operation */

@@ -309,6 +309,7 @@
 #define HSMC_CFG_RBEDGE               (1 << 13) /* Bit 13: Ready/Busy Signal Edge Detection */
 #define HSMC_CFG_DTOCYC_SHIFT         (16)      /* Bit 16-19: Data Timeout Cycle Number */
 #define HSMC_CFG_DTOCYC_MASK          (15 << HSMC_CFG_DTOCYC_SHIFT)
+#  define HSMC_CFG_DTOCYC(n)          ((uint32_t)(n) << HSMC_CFG_DTOCYC_SHIFT)
 #define HSMC_CFG_DTOMUL_SHIFT         (20)      /* Bit 20-22: Data Timeout Multiplier */
 #define HSMC_CFG_DTOMUL_MASK          (7 << HSMC_CFG_DTOMUL_SHIFT)
 #  define HSMC_CFG_DTOMUL_1           (0 << HSMC_CFG_DTOMUL_SHIFT) /* DTOCYC */
@@ -321,6 +322,7 @@
 #  define HSMC_CFG_DTOMUL_1048576     (7 << HSMC_CFG_DTOMUL_SHIFT) /* DTOCYC x 1048576 */
 #define HSMC_CFG_NFCSPARESIZE_SHIFT   (24)      /* Bit 24-30: NAND Flash Spare Area Size */
 #define HSMC_CFG_NFCSPARESIZE_MASK    (0x7f << HSMC_CFG_NFCSPARESIZE_SHIFT)
+#  define HSMC_CFG_NFCSPARESIZE(n)    ((uint32_t)(n) << HSMC_CFG_NFCSPARESIZE_SHIFT)
 
 /* HSMC NFC Control Register */
 
