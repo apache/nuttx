@@ -42,6 +42,10 @@ AOBJS = $(ASRCS:.S=$(OBJEXT))
 
 CSRCS = lpc31_boot.c lpc31_clkinit.c
 
+ifeq ($(CONFIG_LPC31_EXTDRAM),y)
+CSRCS += lpc31_mem.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += lpc31_leds.c
 endif

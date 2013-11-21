@@ -6097,5 +6097,7 @@
 	  fast as the Embedded Artists EA3131 at the same clocking.
 	  (2013-11-19).
 	* arch/arm/src/arm/up_cache.S and cache.h:  More cache management
-	  functions.
+	  functions (2013-11-20).
+	* configs/olimex-lpc-h3131/src/Makefile:  Add SDRAM support.
+	  Untested and probably needs some fine tuining (2013-11-21)
 

@@ -95,7 +95,7 @@ int lpc31_mmcsd_initialize(int slot, int minor)
     }
 
   fvdbg("Successfully bound SDIO to the MMC/SD driver\n");
-  
+
   /* Then let's guess and say that there is a card in the slot.  I need to check to
    * see if the LPC-H3131 board supports a GPIO to detect if there is a card in
    * the slot.
