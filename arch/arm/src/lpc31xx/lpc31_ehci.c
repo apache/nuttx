@@ -4045,12 +4045,19 @@ static int lpc31_reset(void)
   uint32_t regval;
   unsigned int timeout;
 
-  /* "... Software should not set [HCRESET] to a one when the HCHalted bit in
-   *  the USBSTS register is a zero. Attempting to reset an actively running
-   *   host controller will result in undefined behavior."
+  /* Make sure that the EHCI is halted:  "When [the Run/Stop] bit is set to 0,
+   * the Host Controller completes the current transaction on the USB and then
+   * halts. The HC Halted bit in the status register indicates when the Hos
+   * Controller has finished the transaction and has entered the stopped state..."
    */
 
   lpc31_putreg(0, &HCOR->usbcmd);
+
+  /* "... Software should not set [HCRESET] to a one when the HCHalted bit in
+   *  the USBSTS register is a zero. Attempting to reset an actively running
+   *  host controller will result in undefined behavior."
+   */
+
   timeout = 0;
   do
     {
@@ -4059,7 +4066,7 @@ static int lpc31_reset(void)
       up_udelay(1);
       timeout++;
 
-      /* Get the current valud of the USBSTS register.  This loop will terminate
+      /* Get the current value of the USBSTS register.  This loop will terminate
        * when either the timeout exceeds one millisecond or when the HCHalted
        * bit is no longer set in the USBSTS register.
        */
@@ -4091,7 +4098,7 @@ static int lpc31_reset(void)
       up_udelay(5);
       timeout += 5;
 
-      /* Get the current valud of the USBCMD register.  This loop will terminate
+      /* Get the current value of the USBCMD register.  This loop will terminate
        * when either the timeout exceeds one second or when the HCReset
        * bit is no longer set in the USBSTS register.
        */
@@ -4264,16 +4271,6 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
     }
 
   /* EHCI Hardware Configuration ***********************************************/
-  /* Host Controller Initialization. Paragraph 4.1 */
-  /* Reset the EHCI hardware */
-
-  ret = lpc31_reset();
-  if (ret < 0)
-    {
-      usbhost_trace1(EHCI_TRACE1_RESET_FAILED, -ret);
-      return NULL;
-    }
-
   /* Enable USB to AHB clock and to Event router */
 
   lpc31_enableclock(CLKID_USBOTGAHBCLK);
@@ -4297,7 +4294,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   lpc31_enableclock (CLKID_USBOTGAHBCLK);
 
-  /* Reset the controller */
+  /* Reset the controller from the OTG peripheral */
 
   putreg32(USBDEV_USBCMD_RST, LPC31_USBDEV_USBCMD);
   while ((getreg32(LPC31_USBDEV_USBCMD) & USBDEV_USBCMD_RST) != 0)
@@ -4315,6 +4312,16 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   putreg32(USBHOST_USBMODE_CMHOST | USBHOST_USBMODE_SDIS | USBHOST_USBMODE_VBPS,
            LPC31_USBDEV_USBMODE);
+
+  /* Host Controller Initialization. Paragraph 4.1 */
+  /* Reset the EHCI hardware */
+
+  ret = lpc31_reset();
+  if (ret < 0)
+    {
+      usbhost_trace1(EHCI_TRACE1_RESET_FAILED, -ret);
+      return NULL;
+    }
 
   /* "In order to initialize the host controller, software should perform the
    *  following steps:
