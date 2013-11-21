@@ -109,8 +109,10 @@
 
 static uint32_t lpc31_ns2clk(uint32_t ns, uint32_t hclk2)
 {
- /* Example: ns=80, hclk2=90000000
-  * clocks = 80 * 90000000 / 1000000000 + 1 = 8
+ /* delay (ns) * hclk (Hz) / scale (ns/sec) = cycles
+  *
+  * Example: ns=80, hclk2=90000000
+  * clocks = 80 * 90000000 / 1000000000 + 1 = 8 (actual 7.2 cycles)
   */
 
   uint64_t tmp = (uint64_t)ns * (uint64_t)hclk2 / 1000000000ull;
