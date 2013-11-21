@@ -227,7 +227,7 @@ static void lpc31_sdraminitialize(void)
   putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_INOP),
            LPC31_MPMC_DYNCONTROL);
 
-  /* Load ~200us delay value to timer1 */
+  /* Wait ~200us  */
 
   up_udelay(200);
   
@@ -243,7 +243,7 @@ static void lpc31_sdraminitialize(void)
   putreg32(NS2HCLKS(EA3131_SDRAM_REFRESH, HCLK, MPMC_DYNREFRESH_TIMER_MASK),
            LPC31_MPMC_DYNREFRESH);
 
-  /* Load ~250us delay value to timer1 */
+  /* Wait ~250us  */
 
   up_udelay(250);
   
