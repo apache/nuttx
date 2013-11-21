@@ -113,7 +113,7 @@
 #    error "External SRAM1 is selected for heap"
 #  endif
 #  if defined(CONFIG_LPC31_EXTDRAM) && defined(CONFIG_LPC31_EXTDRAMHEAP)
-#    error "External SRAM1 is selected for heap"
+#    error "External DRAM is selected for heap"
 #  endif
 #endif
 
