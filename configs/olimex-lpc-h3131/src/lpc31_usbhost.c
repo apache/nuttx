@@ -160,7 +160,7 @@ void weak_function lpc31_usbhost_bootinitialize(void)
 
   /* Configure input pin to detect overrcurrent errors */
 
-  gpio_outputhigh(LPC31_IOCONFIG_GPIO, GPIO_NOTG_OVRCR);
+  gpio_configinput(LPC31_IOCONFIG_GPIO, GPIO_NOTG_OVRCR);
 
   /* Configure to receive interrupts on the overrcurrent input pin */
 #warning Missing logic
