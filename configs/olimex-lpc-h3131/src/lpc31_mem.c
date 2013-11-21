@@ -1,13 +1,11 @@
 /****************************************************************************
- * configs/ea3131/src/up_mem.c
- * arch/arm/src/board/up_mem.c
+ * configs/olimex-lpc-h3131/src/lp31_mem.c
  *
- *   Copyright (C) 2009-2010,2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * References:
- *   - NXP UM10314 LPC3130/31 User manual Rev. 1.01 — 9 September 2009
- *   - NXP lpc313x.cdl.drivers.zip example driver code
+ * Based on the EA3131 SDRAM initialization logic with adjustments to the
+ * timing parameters taken from Olimex LPC-H3131 sample code.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -65,25 +63,25 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The MPMC delay based on trace lengths between SDRAM and the chip and on
- * the delay strategy used for SDRAM.
+/* My LPC-H3131 is fitted with a Samsung K4S561632J-UC/L75 256Mbit DRAM.
+ * The FLASH organization is 16Mbit x 16
  */
 
 /* Command, address, and data delay (DEL2) */
 
-#define H3131_MPMC_DELAY          (0x00 << SYSCREG_MPMC_DELAYMODES_DEL1_SHIFT) | \
-                                  (0x20 << SYSCREG_MPMC_DELAYMODES_DEL2_SHIFT) | \
-                                  (0x24 << SYSCREG_MPMC_DELAYMODES_DEL3_SHIFT);
+#define H3131_MPMC_DELAY          ((0x00 << SYSCREG_MPMC_DELAYMODES_DEL1_SHIFT) | \
+                                   (0x20 << SYSCREG_MPMC_DELAYMODES_DEL2_SHIFT) | \
+                                   (0x24 << SYSCREG_MPMC_DELAYMODES_DEL3_SHIFT))
 
 
-/* Delay constants in nanosecondss for MT48LC32M16LF SDRAM on board */
+/* Delay constants in nanosecondss for K4S561632J-UC/L75 SDRAM on board */
 /* 90MHz SDRAM Clock */
 
 #define H3131_SDRAM_TRP            (20)  /* ns */
 #define H3131_SDRAM_TRFC           (80)  /* ns */
 #define H3131_SDRAM_TRAS           (48)  /* ns */
 #define H3131_SDRAM_TREX           (80)  /* ns */
-#define H3131_SDRAM_TAPR           2
+#define H3131_SDRAM_TAPR           2     /* clocks */
 #define H3131_SDRAM_TWR            (15)  /* ns */
 #define H3131_SDRAM_TRC            (72)  /* ns */
 #define H3131_SDRAM_TRRD           (2)   /* clocks */
@@ -111,7 +109,7 @@
 
 #endif
 
-#define NS2HCLKS(ns,hclk2,mask)  (_NS2HCLKS & mask)
+#define NS2HCLKS(ns,hclk2,mask)  (_NS2HCLKS(ns,hclk2) & mask)
 
 /****************************************************************************
  * Private Data
@@ -127,53 +125,12 @@
  * Description:
  *   Configure SDRAM on the Olimex LPC-H3131 board
  *
- * Micron Initialization Sequence from their data sheet for the Micron
- * MT48LC32M16A2 32M x 16 SDRAM chip:
- *
- *   "SDRAMs must be powered up and initialized in a predefined manner.
- *    Operational procedures other than those specified may result in
- *    undefined operation. Once power is applied to VDD and VDDQ
- *    (simultaneously) and the clock is stable (stable clock is defined as
- *    a signal cycling within timing constraints specified for the clock
- *    pin), the SDRAM requires a 100µs delay prior to issuing any command
- *    other than a COMMAND INHIBIT or NOP.
- *
- *   "Starting at some point during this 100µs period and continuing at least
- *    through the end of this period, COMMAND INHIBIT or NOP commands should
- *    be applied.  Once the 100µs delay has been satisfied with at least one
- *    COMMAND INHIBIT or NOP command having been applied, a PRECHARGE command
- *    should be applied. All banks must then be precharged, thereby placing
- *    the device in the all banks idle state.
- *
- *   "Once in the idle state, two AUTO REFRESH cycles must be performed. After
- *    the AUTO REFRESH cycles are complete, the SDRAM is ready for mode
- *    register programming.
- *
- *   "Because the mode register will power up in an unknown state, it should
- *    be loaded prior to applying any operational command."
- *
- *  The JEDEC recommendation for initializing SDRAM is:
- *
- *    APPLY POWER (Vdd/Vddq equally, and CLK is stable)
- *    Wait 200uS
- *    PRECHARGE all
- *    8 AUTO REFRESH COMMANDS
- *    LOAD MODE REGISTER
- *    SDRAM is ready for operation
- *
- *  The Micron SDRAM parts will work fine with the JEDEC sequence, but also
- *  allow for a quicker init sequence of:
- *
- *    APPLY POWER (Vdd/Vddq equally, and CLK is stable)
- *    Wait at least 100uS (during which time start applying and
- *       continue applying NOP or COMMAND INHIBIT)
- *    PRECHARGE all
- *    2 AUTO REFRESH COMMANDS (min requirement, more than 2 is also ok)
- *    LOAD MODE REGISTER
- *    SDRAM is ready for operation
+ *   My LPC-H3131 is fitted with a Samsung K4S561632J-UC/L75 256Mbit DRAM.
+ *   The FLASH organization is 16Mbit x 16
  *
  ****************************************************************************/
 
+static inline void lpc31_sdraminitialize(void)
 {
   uint32_t tmp;
   uint32_t regval;
@@ -226,7 +183,7 @@
   putreg32(NS2HCLKS(H3131_SDRAM_TREX, HCLK2, MPMC_DYNTSREX_MASK),
            LPC31_MPMC_DYNTSREX);
   putreg32(H3131_SDRAM_TAPR, LPC31_MPMC_DYNTAPR);
-  putreg32(((H3131_SDRAM_TDAL + _NS2HCLKS(H3131_SDRAM_TRP, HCLK2)) MPMC_DYNTDAL_MASK),
+  putreg32(((H3131_SDRAM_TDAL + _NS2HCLKS(H3131_SDRAM_TRP, HCLK2)) & MPMC_DYNTDAL_MASK),
            LPC31_MPMC_DYNTDAL);
   putreg32(NS2HCLKS(H3131_SDRAM_TWR,  HCLK2, MPMC_DYNTWR_MASK),
            LPC31_MPMC_DYNTWR);
@@ -273,6 +230,8 @@
   /* Recommended refresh interval for normal operation of the Micron
    * MT48LC16LFFG = 7.8125usec (128KHz rate). ((HCLK / 128000) - 1) =
    * refresh counter interval rate, (subtract one for safety margin).
+   *
+   * REVISIT:  Is this okay for the Samsung part?
    */
 
   putreg32(NS2HCLKS(H3131_SDRAM_OPERREFRESH, HCLK, MPMC_DYNREFRESH_TIMER_MASK),
@@ -375,7 +334,7 @@ void lpc31_meminitialize(void)
 
   putreg32(H3131_MPMC_DELAY, LPC31_SYSCREG_MPMC_DELAYMODES);
 
-  /* Configure Micron MT48LC32M16A2 SDRAM on the H3131 board */
+  /* Configure Samsung K4S561632J-UC/L75 DRAM on the H3131 board */
 
   lpc31_sdraminitialize();
 }

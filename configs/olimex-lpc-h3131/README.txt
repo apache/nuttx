@@ -578,7 +578,79 @@ Configurations
       - Toolchain:  CodeSourcery for Windows
 
     NOTES:
-    1. This configuration has been used to test USB host functionaly.  USB
+    1. Built-in applications are not supported by default.  To enable NSH
+       built-in applications:
+
+       Binary
+         CONFIG_BUILTIN=y                      : Support built-in applications
+
+       Application Configuration -> NSH Library
+         CONFIG_NSH_BUILTIN_APPS=y             : Enable built-in applications
+
+    2. SDRAM support is not enabled by default.  SDRAM support can be enabled
+       by adding the following to your NuttX configuration file:
+
+       System Type->LPC31xx Peripheral Support
+         CONFIG_LPC31_EXTDRAM=y                : Enable external DRAM support
+         CONFIG_LPC31_EXTDRAMSIZE=33554432     : 256Mbit -> 32Mbyte
+         CONFIG_LPC31_SDRAM_16BIT=y            : Organized 16Mbit x 16 bits wide
+
+       Now that you have SDRAM enabled, what are you going to do with it?  One
+       thing you can is add it to the heap
+
+       System Type->Heap Configuration
+         CONFIG_LPC31_EXTDRAMHEAP=y            : Add the SDRAM to the heap
+
+       Memory Management
+         CONFIG_MM_REGIONS=2                   : Two memory regions: ISRAM and SDRAM
+
+       Another thing you could do is to enable the RAM test built-in
+       application:
+
+    3. You can enable the NuttX RAM test that may be used to verify the
+       external SDAM.  To do this, keep the SDRAM out of the heap so that
+       it can be tested without crashing programs using the memory.
+
+       First enable built-in applications as described above, then make
+       the following additional modifications to the NuttX configuration:
+
+       System Type->Heap Configuration
+         CONFIG_LPC31_EXTDRAMHEAP=n            : Don't add the SDRAM to the heap
+
+       Memory Management
+         CONFIG_MM_REGIONS=1                   : One memory regions:  ISRAM
+
+       Then enable the RAM test built-in application:
+
+       Application Configuration->System NSH Add-Ons->Ram Test
+         CONFIG_SYSTEM_RAMTEST=y
+
+       In this configuration, the SDRAM is not added to heap and so is not
+       excessible to the applications.  So the RAM test can be freely
+       executed against the SRAM memory beginning at address 0x2000:0000
+       (DDR CS):
+
+       nsh> ramtest -h
+       Usage: ramtest [-w|h|b] <hex-address> <decimal-size>
+
+       Where:
+         <hex-address> starting address of the test.
+         <decimal-size> number of memory locations (in bytes).
+         -w Sets the width of a memory location to 32-bits.
+         -h Sets the width of a memory location to 16-bits (default).
+         -b Sets the width of a memory location to 8-bits.
+
+       To test the entire external 256MB SRAM:
+
+       nsh> ramtest -w 30000000 33554432
+       RAMTest: Marching ones: 30000000 33554432
+       RAMTest: Marching zeroes: 30000000 33554432
+       RAMTest: Pattern test: 30000000 33554432 55555555 aaaaaaaa
+       RAMTest: Pattern test: 30000000 33554432 66666666 99999999
+       RAMTest: Pattern test: 30000000 33554432 33333333 cccccccc
+       RAMTest: Address-in-address test: 30000000 33554432
+
+    4. This configuration has been used to test USB host functionaly.  USB
        host is *not* enabled by default.  If you will to enable USB host
        support in the NSH configuration, please modify the NuttX
        configuration as follows:
