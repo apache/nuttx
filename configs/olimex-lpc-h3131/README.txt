@@ -590,6 +590,9 @@ Configurations
     2. SDRAM support is not enabled by default.  SDRAM support can be enabled
        by adding the following to your NuttX configuration file:
 
+       [NOTE: There is still something wrong with the SDRAM setup.  At present
+        it hangs on the first access from SDRAM during configuration.]
+
        System Type->LPC31xx Peripheral Support
          CONFIG_LPC31_EXTDRAM=y                : Enable external DRAM support
          CONFIG_LPC31_EXTDRAMSIZE=33554432     : 256Mbit -> 32Mbyte
@@ -654,6 +657,8 @@ Configurations
        host is *not* enabled by default.  If you will to enable USB host
        support in the NSH configuration, please modify the NuttX
        configuration as follows:
+
+       [NOTE: USB host is under development.  It is not yet functional.]
 
          Drivers -> USB Host Driver Support
            CONFIG_USBHOST=y              : General USB host support

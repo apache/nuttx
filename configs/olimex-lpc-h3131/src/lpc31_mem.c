@@ -77,39 +77,19 @@
 /* Delay constants in nanosecondss for K4S561632J-UC/L75 SDRAM on board */
 /* 90MHz SDRAM Clock */
 
+#define H3131_SDRAM_REFRESH        (15625)
+
 #define H3131_SDRAM_TRP            (20)  /* ns */
-#define H3131_SDRAM_TRFC           (80)  /* ns */
 #define H3131_SDRAM_TRAS           (48)  /* ns */
-#define H3131_SDRAM_TREX           (80)  /* ns */
-#define H3131_SDRAM_TAPR           2     /* clocks */
+#define H3131_SDRAM_TAPR           (2)   /* clocks */
 #define H3131_SDRAM_TWR            (15)  /* ns */
 #define H3131_SDRAM_TRC            (72)  /* ns */
-#define H3131_SDRAM_TRRD           (2)   /* clocks */
-#define H3131_SDRAM_TMRD           (2)   /* clocks */
+#define H3131_SDRAM_TRFC           (80)  /* ns */
+#define H3131_SDRAM_TREX           (80)  /* ns */
 #define H3131_SDRAM_TXSR           (80)  /* ns */
 #define H3131_SDRAM_TDAL           (5)   /* clocks */
-
-#define H3131_SDRAM_REFRESH        (15625)
-#define H3131_SDRAM_OPERREFRESH    (7812)
-
-#if 1
-/* Macro used to convert the above values (in nanoseconds) into units of
- * the HCLK.
- */
-
-#  define _NS2HCLKS(ns,hclk2) \
-    (uint32_t)(((uint64_t)ns * (uint64_t)hclk2) / 1000000000ull)
-
-#else
-/* At 90MHz, the the clock period is: */
-
-#  define SDRAM_PERIOD          11.11111 /* ns */
-#  define _NS2HCLKS(ns,hclk2) \
-    (((ns < SDRAM_PERIOD) ? 0 : (uint32_t)((float)ns / SDRAM_PERIOD)) + 1)
-
-#endif
-
-#define NS2HCLKS(ns,hclk2,mask)  (_NS2HCLKS(ns,hclk2) & mask)
+#define H3131_SDRAM_TRRD           (2)   /* clocks */
+#define H3131_SDRAM_TMRD           (2)   /* clocks */
 
 /****************************************************************************
  * Private Data
@@ -118,6 +98,29 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: lpc31_ns2clk
+ *
+ * Description:
+ *   Convert nanoseconds to units of HCLK clocks
+ *
+ ****************************************************************************/
+
+static uint32_t lpc31_ns2clk(uint32_t ns, uint32_t hclk2)
+{
+ /* Example: ns=80, hclk2=90000000
+  * clocks = 80 * 90000000 / 1000000000 + 1 = 8
+  */
+
+  uint64_t tmp = (uint64_t)ns * (uint64_t)hclk2 / 1000000000ull;
+  if (tmp > 0)
+    {
+      tmp++;
+    }
+
+  return (uint32_t)tmp;
+}
 
 /****************************************************************************
  * Name: lpc31_sdraminitialize
@@ -165,34 +168,36 @@ static inline void lpc31_sdraminitialize(void)
   putreg32(MPMC_DYNREADCONFIG_CMDDEL, LPC31_MPMC_DYNREADCONFIG);
 
   /* Configure device config register nSDCE0 for proper width SDRAM:
-   * Type: SDRAM, 512Mb (32Mx16), 4 banks, row length = 13, column length = 9
+   * Type: 256Mb (16Mx16), 4 banks, row length=13, column length=9
    * Buffer disabled, writes not protected.
    */
 
-  putreg32((MPMC_DYNCONFIG0_MDSDRAM | MPMC_DYNCONFIG_HP16_32MX16),
+  putreg32((MPMC_DYNCONFIG0_MDSDRAM | MPMC_DYNCONFIG_HP16_16MX16),
            LPC31_MPMC_DYNCONFIG0);
+
+  /* Disable buffers + writes not protected */
+
+  regval  = getreg32(LPC31_MPMC_DYNCONFIG0);
+  regval &= ~(MPMC_DYNCONFIG0_B | MPMC_DYNCONFIG0_P);
+  putreg32(regval, LPC31_MPMC_DYNCONFIG0);
+
+  /* Set RAS/CAS delays*/
+
   putreg32((MPMC_DYNRASCAS0_RAS2CLK | MPMC_DYNRASCAS0_CAS2CLK),
            LPC31_MPMC_DYNRASCAS0);
 
-  /* Min 20ns program 1 so that at least 2 HCLKs are used */
+  /* Configure SDRAM timing */
 
-  putreg32(NS2HCLKS(H3131_SDRAM_TRP,  HCLK2, MPMC_DYNTRP_MASK),
-           LPC31_MPMC_DYNTRP);
-  putreg32(NS2HCLKS(H3131_SDRAM_TRAS, HCLK2, MPMC_DYNTRAS_MASK),
-           LPC31_MPMC_DYNTRAS);
-  putreg32(NS2HCLKS(H3131_SDRAM_TREX, HCLK2, MPMC_DYNTSREX_MASK),
-           LPC31_MPMC_DYNTSREX);
+  putreg32(lpc31_ns2clk(H3131_SDRAM_TRP,  HCLK2), LPC31_MPMC_DYNTRP);
+  putreg32(lpc31_ns2clk(H3131_SDRAM_TRAS, HCLK2), LPC31_MPMC_DYNTRAS);
+  putreg32(lpc31_ns2clk(H3131_SDRAM_TREX, HCLK2), LPC31_MPMC_DYNTSREX);
   putreg32(H3131_SDRAM_TAPR, LPC31_MPMC_DYNTAPR);
-  putreg32(((H3131_SDRAM_TDAL + _NS2HCLKS(H3131_SDRAM_TRP, HCLK2)) & MPMC_DYNTDAL_MASK),
+  putreg32(H3131_SDRAM_TDAL + lpc31_ns2clk(H3131_SDRAM_TRP, HCLK2),
            LPC31_MPMC_DYNTDAL);
-  putreg32(NS2HCLKS(H3131_SDRAM_TWR,  HCLK2, MPMC_DYNTWR_MASK),
-           LPC31_MPMC_DYNTWR);
-  putreg32(NS2HCLKS(H3131_SDRAM_TRC,  HCLK2, MPMC_DYNTRC_MASK),
-           LPC31_MPMC_DYNTRC);
-  putreg32(NS2HCLKS(H3131_SDRAM_TRFC, HCLK2, MPMC_DYNTRFC_MASK),
-           LPC31_MPMC_DYNTRFC);
-  putreg32(NS2HCLKS(H3131_SDRAM_TXSR, HCLK2, MPMC_DYNTXSR_MASK),
-           LPC31_MPMC_DYNTXSR);
+  putreg32(lpc31_ns2clk(H3131_SDRAM_TWR,  HCLK2), LPC31_MPMC_DYNTWR);
+  putreg32(lpc31_ns2clk(H3131_SDRAM_TRC,  HCLK2), LPC31_MPMC_DYNTRC);
+  putreg32(lpc31_ns2clk(H3131_SDRAM_TRFC, HCLK2), LPC31_MPMC_DYNTRFC);
+  putreg32(lpc31_ns2clk(H3131_SDRAM_TXSR, HCLK2), LPC31_MPMC_DYNTXSR);
   putreg32(H3131_SDRAM_TRRD, LPC31_MPMC_DYNTRRD);
   putreg32(H3131_SDRAM_TMRD, LPC31_MPMC_DYNTMRD);
 
@@ -207,7 +212,7 @@ static inline void lpc31_sdraminitialize(void)
   putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_INOP),
            LPC31_MPMC_DYNCONTROL);
 
-  /* Load ~200us delay value to timer1 */
+  /* Wait ~200us */
 
   up_udelay(200);
 
@@ -220,10 +225,9 @@ static inline void lpc31_sdraminitialize(void)
    * 100nsec provides more than adequate interval.
    */
 
-  putreg32(NS2HCLKS(H3131_SDRAM_REFRESH, HCLK, MPMC_DYNREFRESH_TIMER_MASK),
-           LPC31_MPMC_DYNREFRESH);
+  putreg32(1, LPC31_MPMC_DYNREFRESH);
 
-  /* Load ~250us delay value to timer1 */
+  /* Wait ~250us */
 
   up_udelay(250);
 
@@ -234,7 +238,7 @@ static inline void lpc31_sdraminitialize(void)
    * REVISIT:  Is this okay for the Samsung part?
    */
 
-  putreg32(NS2HCLKS(H3131_SDRAM_OPERREFRESH, HCLK, MPMC_DYNREFRESH_TIMER_MASK),
+  putreg32(lpc31_ns2clk(H3131_SDRAM_REFRESH, HCLK) >> 4,
            LPC31_MPMC_DYNREFRESH);
 
   /* Select mode register update mode */
@@ -244,30 +248,21 @@ static inline void lpc31_sdraminitialize(void)
 
   /* Program the SDRAM internal mode registers on bank nSDCE0 and reconfigure
    * the SDRAM chips.  Bus speeds up to 90MHz requires use of a CAS latency = 2.
-   * To get correct value on address bus CAS cycle, requires a shift by 13 for
+   * To get correct value on address bus CAS cycle, requires a shift by 12 for
    * 16bit mode
    */
 
-  tmp = getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 13));
-
-  putreg32((MPMC_DYNCONFIG0_MDSDRAM|MPMC_DYNCONFIG_HP16_32MX16),
-           LPC31_MPMC_DYNCONFIG0);
-  putreg32((MPMC_DYNRASCAS0_RAS2CLK|MPMC_DYNRASCAS0_CAS2CLK),
-           LPC31_MPMC_DYNRASCAS0);
+  tmp = getreg32(LPC31_EXTSDRAM0_VSECTION | (0x23 << 12));
 
   /* Select normal operating mode */
 
-  putreg32((MPMC_DYNCONTROL_CE|MPMC_DYNCONTROL_CS|MPMC_DYNCONTROL_INORMAL),
-           LPC31_MPMC_DYNCONTROL);
+  putreg32(MPMC_DYNCONTROL_INORMAL, LPC31_MPMC_DYNCONTROL);
 
   /* Enable buffers */
 
   regval  = getreg32(LPC31_MPMC_DYNCONFIG0);
   regval |= MPMC_DYNCONFIG0_B;
   putreg32(regval, LPC31_MPMC_DYNCONFIG0);
-
-  putreg32((MPMC_DYNCONTROL_INORMAL|MPMC_DYNCONTROL_CS),
-           LPC31_MPMC_DYNCONTROL);
 }
 
 /****************************************************************************
