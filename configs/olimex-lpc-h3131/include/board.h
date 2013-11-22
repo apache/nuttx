@@ -196,5 +196,24 @@ void lpc31_boardinitialize(void);
 void lpc31_setled(int led, bool ledon);
 void lpc31_setleds(uint8_t ledset);
 
+/************************************************************************************
+ * Name: lpc31_setup_overcurrent
+ *
+ * Description:
+ *   Setup to receive an interrupt-level callback if an overcurrent condition is
+ *   detected.
+ *
+ * Input parameter:
+ *   handler - New overcurrent interrupt handler
+ *
+ * Returned value:
+ *   Old overcurrent interrupt handler
+ *
+ ************************************************************************************/
+
+#if 0 /* Not ready yet */
+xcpt_t lpc31_setup_overcurrent(xcpt_t handler);
+#endif
+
 #endif /* __ASSEMBLY__ */
 #endif  /* __CONFIGS_OLIMEX_LPC_H3131_INCLUDE_BOARD_H */
