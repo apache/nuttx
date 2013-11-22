@@ -55,7 +55,7 @@
 /* Configuration ************************************************************/
 /* Block checking and H/W ECC support must be enabled for PMECC */
 
-#if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(MTD_NAND_HWECC)
+#if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_HWECC)
 #  undef CONFIG_SAMA5_EBICS0_PMECC
 #  undef CONFIG_SAMA5_EBICS1_PMECC
 #  undef CONFIG_SAMA5_EBICS2_PMECC
@@ -64,19 +64,19 @@
 
 /* Disable PMECC support for any banks not enabled or configured for NAND */
 
-#if !defined(SAMA5_EBICS0) || !defined(SAMA5_EBICS0_NAND)
+#if !defined(CONFIG_SAMA5_EBICS0) || !defined(CONFIG_SAMA5_EBICS0_NAND)
 #  undef CONFIG_SAMA5_EBICS0_PMECC
 #endif
 
-#if !defined(SAMA5_EBICS1) || !defined(SAMA5_EBICS1_NAND)
+#if !defined(CONFIG_SAMA5_EBICS1) || !defined(CONFIG_SAMA5_EBICS1_NAND)
 #  undef CONFIG_SAMA5_EBICS1_PMECC
 #endif
 
-#if !defined(SAMA5_EBICS2) || !defined(SAMA5_EBICS2_NAND)
+#if !defined(CONFIG_SAMA5_EBICS2) || !defined(CONFIG_SAMA5_EBICS2_NAND)
 #  undef CONFIG_SAMA5_EBICS2_PMECC
 #endif
 
-#if !defined(SAMA5_EBICS3) || !defined(SAMA5_EBICS3_NAND)
+#if !defined(CONFIG_SAMA5_EBICS3) || !defined(CONFIG_SAMA5_EBICS3_NAND)
 #  undef CONFIG_SAMA5_EBICS3_PMECC
 #endif
 
@@ -88,40 +88,40 @@
 #ifdef CONFIG_SAMA5_EBICS0_PMECC
 #  undef  NAND_HAVE_PMECC
 #  define NAND_HAVE_PMECC 1
-#  define NAND_HAVE_EBIS0_PMECC 1
+#  define NAND_HAVE_EBICS0_PMECC 1
 #else
-#  define NAND_HAVE_EBIS0_PMECC 0
+#  define NAND_HAVE_EBICS0_PMECC 0
 #endif
 
 #ifdef CONFIG_SAMA5_EBICS1_PMECC
 #  undef  NAND_HAVE_PMECC
 #  define NAND_HAVE_PMECC 1
-#  define NAND_HAVE_EBIS1_PMECC 1
+#  define NAND_HAVE_EBICS1_PMECC 1
 #else
-#  define NAND_HAVE_EBIS1_PMECC 0
+#  define NAND_HAVE_EBICS1_PMECC 0
 #endif
 
 #ifdef CONFIG_SAMA5_EBICS2_PMECC
 #  undef  NAND_HAVE_PMECC
 #  define NAND_HAVE_PMECC 1
-#  define NAND_HAVE_EBIS2_PMECC 1
+#  define NAND_HAVE_EBICS2_PMECC 1
 #else
-#  define NAND_HAVE_EBIS2_PMECC 0
+#  define NAND_HAVE_EBICS2_PMECC 0
 #endif
 
 #ifdef CONFIG_SAMA5_EBICS3_PMECC
 #  undef  NAND_HAVE_PMECC
 #  define NAND_HAVE_PMECC 1
-#  define NAND_HAVE_EBIS3_PMECC 1
+#  define NAND_HAVE_EBICS3_PMECC 1
 #else
-#  define NAND_HAVE_EBIS3_PMECC 0
+#  define NAND_HAVE_EBICS3_PMECC 0
 #endif
 
 /* Count the number of banks using PMECC */
 
 #define NAND_NPMECC_BANKS \
-   (NAND_HAVE_EBIS0_PMECC + NAND_HAVE_EBIS1_PMECC + \
-    NAND_HAVE_EBIS2_PMECC + NAND_HAVE_EBIS3_PMECC
+   (NAND_HAVE_EBICS0_PMECC + NAND_HAVE_EBICS1_PMECC + \
+    NAND_HAVE_EBICS2_PMECC + NAND_HAVE_EBICS3_PMECC)
 
 /* Compile this logic only if there is at least one CS configure for NAND
  * and with PMECC support enabled.

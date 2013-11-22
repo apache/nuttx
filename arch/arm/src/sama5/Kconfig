@@ -3042,27 +3042,35 @@ config SAMA5_EBICS0_NAND
 
 endchoice # CS0 Memory Type
 
-if SAMA5_EBICS0_NAND && MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
-	config SAMA5_EBICS0_HWECC
-	bool "NAND H/W ECC support"
-	default n
+choice
+	prompt "NAND ECC type"
+	default SAMA5_EBICS0_ECCNONE
+	depends on  SAMA5_EBICS0_NAND
+
+config SAMA5_EBICS0_ECCNONE
+	bool "No ECC"
+	---help---
+		Only raw transfers to/from NAND are supported
+
+config SAMA5_EBICS0_SWECC
+	bool "Software ECC"
+	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_SWECC
+	---help---
+		ECC is performed by higher level software logic
+
+config SAMA5_EBICS0_PMECC
+	bool "NAND H/W PMECC Support"
+	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
 	---help---
 		Enable hardware assisted support for ECC calculations
 
-if SAMA5_EBICS0_HWECC
-choice
-	prompt "H/W ECC method"
-	default SAMA5_EBICS0_PMECC
+config SAMA5_EBICS0_CHIPECC
+	bool "Embedded chip ECC"
+	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_EMBEDDEDECC
+	---help---
+		Some NAND devices have internal, embedded ECC function.
 
-config SAMA5_EBICS0_PMECC
-	bool "PMECC"
-
-config SAMA5_EBICS0_HSIAO
-	bool "HSIAO ECC"
-
-endchoice # H/W ECC method
-endif # SAMA5_EBICS0_HWECC
-endif # SAMA5_EBICS0_NAND && MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
+endchoice # NAND ECC type
 endif # SAMA5_EBICS0
 
 config SAMA5_EBICS1
@@ -3115,27 +3123,35 @@ config SAMA5_EBICS1_NAND
 
 endchoice # CS1 Memory Type
 
-if SAMA5_EBICS1_NAND && MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
-	config SAMA5_EBICS1_HWECC
-	bool "NAND H/W ECC support"
-	default n
+choice
+	prompt "NAND ECC type"
+	default SAMA5_EBICS1_ECCNONE
+	depends on  SAMA5_EBICS1_NAND
+
+config SAMA5_EBICS1_ECCNONE
+	bool "No ECC"
+	---help---
+		Only raw transfers to/from NAND are supported
+
+config SAMA5_EBICS1_SWECC
+	bool "Software ECC"
+	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_SWECC
+	---help---
+		ECC is performed by higher level software logic
+
+config SAMA5_EBICS1_PMECC
+	bool "NAND H/W PMECC Support"
+	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
 	---help---
 		Enable hardware assisted support for ECC calculations
 
-if SAMA5_EBICS1_HWECC
-choice
-	prompt "H/W ECC method"
-	default SAMA5_EBICS1_PMECC
+config SAMA5_EBICS1_CHIPECC
+	bool "Embedded chip ECC"
+	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_EMBEDDEDECC
+	---help---
+		Some NAND devices have internal, embedded ECC function.
 
-config SAMA5_EBICS1_PMECC
-	bool "PMECC"
-
-config SAMA5_EBICS1_HSIAO
-	bool "HSIAO ECC"
-
-endchoice # H/W ECC method
-endif # SAMA5_EBICS1_HWECC
-endif # SAMA5_EBICS1_NAND && MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
+endchoice # NAND ECC type
 endif # SAMA5_EBICS1
 
 config SAMA5_EBICS2
@@ -3188,27 +3204,35 @@ config SAMA5_EBICS2_NAND
 
 endchoice # CS2 Memory Type
 
-if SAMA5_EBICS2_NAND && MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
-	config SAMA5_EBICS2_HWECC
-	bool "NAND H/W ECC support"
-	default n
+choice
+	prompt "NAND ECC type"
+	default SAMA5_EBICS2_ECCNONE
+	depends on  SAMA5_EBICS2_NAND
+
+config SAMA5_EBICS2_ECCNONE
+	bool "No ECC"
+	---help---
+		Only raw transfers to/from NAND are supported
+
+config SAMA5_EBICS2_SWECC
+	bool "Software ECC"
+	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_SWECC
+	---help---
+		ECC is performed by higher level software logic
+
+config SAMA5_EBICS2_PMECC
+	bool "NAND H/W PMECC Support"
+	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
 	---help---
 		Enable hardware assisted support for ECC calculations
 
-if SAMA5_EBICS2_HWECC
-choice
-	prompt "H/W ECC method"
-	default SAMA5_EBICS2_PMECC
+config SAMA5_EBICS2_CHIPECC
+	bool "Embedded chip ECC"
+	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_EMBEDDEDECC
+	---help---
+		Some NAND devices have internal, embedded ECC function.
 
-config SAMA5_EBICS2_PMECC
-	bool "PMECC"
-
-config SAMA5_EBICS2_HSIAO
-	bool "HSIAO ECC"
-
-endchoice # H/W ECC method
-endif # SAMA5_EBICS2_HWECC
-endif # SAMA5_EBICS2_NAND && MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
+endchoice # NAND ECC type
 endif # SAMA5_EBICS2
 
 config SAMA5_EBICS3
@@ -3261,27 +3285,35 @@ config SAMA5_EBICS3_NAND
 
 endchoice # CS3 Memory Type
 
-if SAMA5_EBICS3_NAND && MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
-	config SAMA5_EBICS3_HWECC
-	bool "NAND H/W ECC support"
-	default n
+choice
+	prompt "NAND ECC type"
+	default SAMA5_EBICS3_ECCNONE
+	depends on  SAMA5_EBICS3_NAND
+
+config SAMA5_EBICS3_ECCNONE
+	bool "No ECC"
+	---help---
+		Only raw transfers to/from NAND are supported
+
+config SAMA5_EBICS3_SWECC
+	bool "Software ECC"
+	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_SWECC
+	---help---
+		ECC is performed by higher level software logic
+
+config SAMA5_EBICS3_PMECC
+	bool "NAND H/W PMECC Support"
+	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
 	---help---
 		Enable hardware assisted support for ECC calculations
 
-if SAMA5_EBICS3_HWECC
-choice
-	prompt "H/W ECC method"
-	default SAMA5_EBICS3_PMECC
+config SAMA5_EBICS3_CHIPECC
+	bool "Embedded chip ECC"
+	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_EMBEDDEDECC
+	---help---
+		Some NAND devices have internal, embedded ECC function.
 
-config SAMA5_EBICS3_PMECC
-	bool "PMECC"
-
-config SAMA5_EBICS3_HSIAO
-	bool "HSIAO ECC"
-
-endchoice # H/W ECC method
-endif # SAMA5_EBICS3_HWECC
-endif # SAMA5_EBICS3_NAND && MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
+endchoice # NAND ECC type
 endif # SAMA5_EBICS3
 
 if SAMA5_EBICS0_NAND || SAMA5_EBICS1_NAND || SAMA5_EBICS2_NAND || SAMA5_EBICS3_NAND

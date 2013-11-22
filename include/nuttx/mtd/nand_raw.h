@@ -249,6 +249,7 @@ struct nand_raw_s
   uintptr_t cmdaddr;         /* NAND command address base */
   uintptr_t addraddr;        /* NAND address address base */
   uintptr_t dataaddr;        /* NAND data address */
+  uint8_t ecctype;           /* See NANDECC_* definitions */
 
   /* NAND operations */
 
@@ -268,12 +269,10 @@ struct nand_raw_s
 #endif
 
 #ifdef CONFIG_MTD_NAND_BLOCKCHECK
-  /* ECC */
+  /* ECC working buffers*/
 
-  uint8_t ecctype;            /* See enum nand_ecc_e */
   uint8_t spare[CONFIG_MTD_NAND_MAXPAGESPARESIZE];
   uint8_t ecc[CONFIG_MTD_NAND_MAXSPAREECCBYTES];
-
 #endif
 };
 
