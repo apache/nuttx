@@ -421,7 +421,7 @@ static uint32_t g_framelist[FRAME_LIST_SIZE] __attribute__ ((aligned(4096)));
 #else
 static uint32_t *g_framelist;
 #endif
-#endif
+#endif /* CONFIG_USBHOST_INT_DISABLE */
 
 #ifdef CONFIG_SAMA5_EHCI_PREALLOCATE
 /* Pools of pre-allocated data structures.  These will all be linked into the
@@ -4046,7 +4046,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
 #ifdef CONFIG_SAMA5_EHCI_PREALLOCATE
   DEBUGASSERT(((uintptr_t)g_framelist & 0xfff) == 0);
 #endif
-#endif
+#endif /* CONFIG_USBHOST_INT_DISABLE */
 
   /* SAMA5 Configuration *******************************************************/
   /* For High-speed operations, the user has to perform the following:
@@ -4182,7 +4182,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
     }
 #endif
 
-#ifndef CONFIG_SAMA5_EHCI_PREALLOCATE
+#if !defined(CONFIG_SAMA5_EHCI_PREALLOCATE) || !defined(CONFIG_USBHOST_INT_DISABLE)
   /* Allocate the periodic framelist  */
 
   g_framelist = (uint32_t *)
