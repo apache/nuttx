@@ -41,6 +41,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mtd/nand_config.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -49,6 +50,7 @@
 
 #include <nuttx/mtd/nand_raw.h>
 
+#include "up_arch.h"
 #include "chip.h"
 #include "chip/sam_hsmc.h"
 
@@ -58,39 +60,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* Block checking and H/W ECC support must be enabled for HSIAO ECC */
-
-#if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(MTD_NAND_HWECC)
-#  undef CONFIG_SAMA5_EBICS0_HSIAO
-#  undef CONFIG_SAMA5_EBICS1_HSIAO
-#  undef CONFIG_SAMA5_EBICS2_HSIAO
-#  undef CONFIG_SAMA5_EBICS3_HSIAO
-#endif
-
-/* Disable HSIAO support for any banks not enabled or configured for NAND */
-
-#if !defined(SAMA5_EBICS0) || !defined(SAMA5_EBICS0_NAND)
-#  undef CONFIG_SAMA5_EBICS0_HSIAO
-#endif
-
-#if !defined(SAMA5_EBICS1) || !defined(SAMA5_EBICS1_NAND)
-#  undef CONFIG_SAMA5_EBICS1_HSIAO
-#endif
-
-#if !defined(SAMA5_EBICS2) || !defined(SAMA5_EBICS2_NAND)
-#  undef CONFIG_SAMA5_EBICS2_HSIAO
-#endif
-
-#if !defined(SAMA5_EBICS3) || !defined(SAMA5_EBICS3_NAND)
-#  undef CONFIG_SAMA5_EBICS3_HSIAO
-#endif
-
-#undef NAND_HAVE_HSIAO
-#if defined(CONFIG_SAMA5_EBICS0_HSIAO) || defined(CONFIG_SAMA5_EBICS1_HSIAO) || \
-    defined(CONFIG_SAMA5_EBICS2_HSIAO) || defined(CONFIG_SAMA5_EBICS3_HSIAO)
-#  define NAND_HAVE_HSIAO
-#endif
-
 #ifndef CONFIG_SAMA5_DMAC1
 #  warning CONFIG_SAMA5_DMAC1 should be enabled for DMA transfers
 #endif
@@ -100,12 +69,120 @@
  *
  *   NANDECC_CHIPECC ECC is performed internal to chip
  *   NANDECC_PMECC   Programmable Multibit Error Correcting Code (PMECC)
- *   NANDECC_HSIAO   HSIAO ECC
  */
 
 #define NANDECC_CHIPECC (NANDECC_HWECC + 0)
 #define NANDECC_PMECC   (NANDECC_HWECC + 1)
-#define NANDECC_HSIAO   (NANDECC_HWECC + 2)
+
+/* Per NAND bank ECC selections */
+
+#if defined(CONFIG_SAMA5_EBICS0_NAND)
+#  if defined(CONFIG_SAMA5_EBICS0_ECCNONE)
+#    define SAMA5_EBICS0_ECCTYPE NANDECC_NONE
+
+#  elif defined(CONFIG_SAMA5_EBICS0_SWECC)
+#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_SWECC)
+#      error CONFIG_SAMA5_EBICS0_SWECC is an invalid selection
+#    endif
+#    define SAMA5_EBICS0_ECCTYPE NANDECC_SWECC
+
+#  elif defined(CONFIG_SAMA5_EBICS0_PMECC)
+#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_HWECC)
+#      error CONFIG_SAMA5_EBICS0_PMECC is an invalid selection
+#    endif
+#    define SAMA5_EBICS0_ECCTYPE NANDECC_PMECC
+
+#  elif defined(CONFIG_SAMA5_EBICS0_CHIPECC)
+#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_EMBEDDEDECC)
+#      error CONFIG_SAMA5_EBICS0_CHIPECC is an invalid selection
+#    endif
+#    define SAMA5_EBICS0_ECCTYPE NANDECC_CHIPECC
+
+#  else
+#    error "No ECC type specified for CS0"
+#  endif
+#endif /* CONFIG_SAMA5_EBICS0_NAND */
+
+#if defined(CONFIG_SAMA5_EBICS1_NAND)
+#  if defined(CONFIG_SAMA5_EBICS1_ECCNONE)
+#    define SAMA5_EBICS1_ECCTYPE NANDECC_NONE
+
+#  elif defined(CONFIG_SAMA5_EBICS1_SWECC)
+#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_SWECC)
+#      error CONFIG_SAMA5_EBICS1_SWECC is an invalid selection
+#    endif
+#    define SAMA5_EBICS1_ECCTYPE NANDECC_SWECC
+
+#  elif defined(CONFIG_SAMA5_EBICS1_PMECC)
+#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_HWECC)
+#      error CONFIG_SAMA5_EBICS1_PMECC is an invalid selection
+#    endif
+#    define SAMA5_EBICS1_ECCTYPE NANDECC_PMECC
+
+#  elif defined(CONFIG_SAMA5_EBICS1_CHIPECC)
+#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_EMBEDDEDECC)
+#      error CONFIG_SAMA5_EBICS1_CHIPECC is an invalid selection
+#    endif
+#    define SAMA5_EBICS1_ECCTYPE NANDECC_CHIPECC
+
+#  else
+#    error "No ECC type specified for CS1"
+#  endif
+#endif /* CONFIG_SAMA5_EBICS1_NAND */
+
+#if defined(CONFIG_SAMA5_EBICS2_NAND)
+#  if defined(CONFIG_SAMA5_EBICS2_ECCNONE)
+#    define SAMA5_EBICS2_ECCTYPE NANDECC_NONE
+
+#  elif defined(CONFIG_SAMA5_EBICS2_SWECC
+#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_SWECC)
+#      error CONFIG_SAMA5_EBICS2_SWECC is an invalid selection
+#    endif
+#    define SAMA5_EBICS2_ECCTYPE NANDECC_SWECC
+
+#  elif defined(CONFIG_SAMA5_EBICS2_PMECC)
+#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_HWECC)
+#      error CONFIG_SAMA5_EBICS2_PMECC is an invalid selection
+#    endif
+#    define SAMA5_EBICS2_ECCTYPE NANDECC_PMECC
+
+#  elif defined(CONFIG_SAMA5_EBICS2_CHIPECC)
+#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_EMBEDDEDECC)
+#      error CONFIG_SAMA5_EBICS2_CHIPECC is an invalid selection
+#    endif
+#    define SAMA5_EBICS2_ECCTYPE NANDECC_CHIPECC
+
+#  else
+#    error "No ECC type specified for CS2"
+#  endif
+#endif /* CONFIG_SAMA5_EBICS2_NAND */
+
+#if defined(CONFIG_SAMA5_EBICS3_NAND)
+#  if defined(CONFIG_SAMA5_EBICS3_ECCNONE)
+#    define SAMA5_EBICS3_ECCTYPE NANDECC_NONE
+
+#  elif defined(CONFIG_SAMA5_EBICS3_SWECC)
+#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_SWECC)
+#      error CONFIG_SAMA5_EBICS3_SWECC is an invalid selection
+#    endif
+#    define SAMA5_EBICS3_ECCTYPE NANDECC_SWECC
+
+#  elif defined(CONFIG_SAMA5_EBICS3_PMECC)
+#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_HWECC)
+#      error CONFIG_SAMA5_EBICS3_PMECC is an invalid selection
+#    endif
+#    define SAMA5_EBICS3_ECCTYPE NANDECC_PMECC
+
+#  elif defined(CONFIG_SAMA5_EBICS3_CHIPECC)
+#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_EMBEDDEDECC)
+#      error CONFIG_SAMA5_EBICS3_CHIPECC is an invalid selection
+#    endif
+#    define SAMA5_EBICS3_ECCTYPE NANDECC_CHIPECC
+
+#  else
+#    error "No ECC type specified for CS3"
+#  endif
+#endif /* CONFIG_SAMA5_EBICS3_NAND */
 
 /****************************************************************************
  * Public Types
@@ -122,9 +199,7 @@ struct sam_nandcs_s
 
   /* Static configuration */
 
-  uint8_t cs      :2;        /* Chip select number (0..3) */
-  uint8_t nfcsram :1;        /* True: Use NFC SRAM */
-  uint8_t dmaxfr  :1;        /* True: Use DMA transfers */
+  uint8_t cs;                /* Chip select number (0..3) */
 
   /* Dynamic state */
 
