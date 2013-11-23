@@ -50,6 +50,8 @@
 #include <nuttx/mtd/nand_config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
+#include <semaphore.h>
 #include <assert.h>
 
 #include "sam_pmecc.h"
@@ -76,7 +78,14 @@
 
 struct sam_pmecc_s
 {
-  uint8_t nsectors;          /* Number of sectors in data */
+  bool configured;           /* True: Configured for some HSMC NAND bank */
+#if NAND_NPMECC_BANKS > 1
+  sem_t exclem;              /* For mutually exclusive access to the PMECC */
+  uint8_t cs;                /* Currently configured for this bank */
+#endif
+  bool    sector1k;          /* True: 1024B sector size; False: 512B sector size */
+  uint8_t nsectors;          /* Number of sectors per page */
+  uint8_t correctability;    /* Number of correctable bits per sector */
   struct pmecc_desc_s desc;  /* Atmel PMECC descriptor */
 };
 
@@ -213,6 +222,7 @@ static void pmecc_pagelayout(uint16_t datasize, uint16_t sparesize,
   uint8_t nsectors1k;
   uint8_t bcherr512;
   uint8_t bcherr1k;
+  uint8_t bcherr;
 
   /* ECC must not start at address zero, since bad block tags are at offset
    * zero.
@@ -249,8 +259,9 @@ static void pmecc_pagelayout(uint16_t datasize, uint16_t sparesize,
   DEBUGASSERT(bcherr512 > 0 || bcherr1k > 0);
   if (bcherr1k == 0)
     {
-      g_pmecc.nsectors    = nsectors512;
-      g_pmecc.desc.bcherr = bcherr512;
+      g_pmecc.sector1k = false;
+      g_pmecc.nsectors = nsectors512;
+      bcherr           = bcherr512;
     }
   else
     {
@@ -258,20 +269,52 @@ static void pmecc_pagelayout(uint16_t datasize, uint16_t sparesize,
       correctability1K  = nsectors1k * g_correctability[bcherr1k];
       if (correctability512 >= correctability1K)
         {
-          g_pmecc.nsectors    = nsectors512;
-          g_pmecc.desc.bcherr = ((uint32_t)bcherr512 << HSMC_PMECCFG_BCHERR_SHIFT);
+          g_pmecc.sector1k = false;
+          g_pmecc.nsectors = nsectors512;
+          bcherr           = bcherr512;
         }
       else
         {
-          g_pmecc.nsectors    = nsectors1k;
-          g_pmecc.desc.bcherr = ((uint32_t)bcherr1k << HSMC_PMECCFG_BCHERR_SHIFT);
+          g_pmecc.sector1k = true;
+          g_pmecc.nsectors = nsectors1k;
+          bcherr           = bcherr1k;
         }
     }
+
+  /* Save the correctability value */
+
+  g_pmecc.correctability = g_correctability[bcherr];
+
+  /* And the correctly shifted BCH_ERR register value */
+
+  g_pmecc.desc.bcherr = ((uint32_t)bcherr << HSMC_PMECCFG_BCHERR_SHIFT);
 }
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: pmecc_initialize
+ *
+ * Description:
+ *   Perform one-time PMECC initialization.  This must be called before any
+ *   other PMECC interfaces are used.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if NAND_NPMECC_BANKS > 1
+void pmecc_initialize(void)
+{
+  sem_init(&g_pmecc.exclsem, 0, 1);
+}
+#endif
 
 /****************************************************************************
  * Name: pmecc_configure
@@ -280,4 +323,53 @@ static void pmecc_pagelayout(uint16_t datasize, uint16_t sparesize,
  *   Configure the PMECC for use by this CS
  *
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: pmecc_lock
+ *
+ * Description:
+ *   Get exclusive access to PMECC hardware
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if NAND_NPMECC_BANKS > 1
+void pmecc_lock(void)
+{
+  int ret;
+
+  do
+    {
+      ret = sem_wait(&g_pmecc.exclsem);
+      DEBUGASSERT(ret == OK || errno == EINTR);
+    }
+  while (ret != OK);
+}
+#endif
+
+/****************************************************************************
+ * Name: pmecc_unlock
+ *
+ * Description:
+ *   Relinquish exclusive access to PMECC hardware
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if NAND_NPMECC_BANKS > 1
+void pmecc_unlock(void)
+{
+  sem_post(&g_pmecc.exclsem);
+}
+#endif
 
