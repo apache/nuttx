@@ -6100,4 +6100,5 @@
 	  functions (2013-11-20).
 	* configs/olimex-lpc-h3131/src/Makefile:  Add SDRAM support.
 	  Untested and probably needs some fine tuining (2013-11-21)
-
+	* fs/smartfs/README.txt:  Add README for SMARTFS file system.  From
+	  Ken Pettit (2013-11-23)

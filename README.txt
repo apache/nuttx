@@ -1167,6 +1167,8 @@ nuttx
  |   |   `- README.txt
  |   |- nxffs/
  |   |   `- README.txt
+ |   |- smartfs/
+ |   |   `- README.txt
  |   `- procfs/
  |       `- README.txt
  |- graphics/
