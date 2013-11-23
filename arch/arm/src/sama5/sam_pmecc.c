@@ -58,12 +58,15 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Number of bits of correction.  These much match the (unshifted) values
+ * in the SMC_PMECCFG register BCH_ERR field.
+ */
 
-#define BCH_ERR2  0 /* 2 errors */
-#define BCH_ERR4  1 /* 4 errors */
-#define BCH_ERR8  2 /* 8 errors */
-#define BCH_ERR12 3 /* 12 errors */
-#define BCH_ERR24 4 /* 24 errors */
+#define BCH_ERR2  0 /* 2 bit errors */
+#define BCH_ERR4  1 /* 4 bit errors */
+#define BCH_ERR8  2 /* 8 bit errors */
+#define BCH_ERR12 3 /* 12 bit errors */
+#define BCH_ERR24 4 /* 24 bit errors */
 
 /****************************************************************************
  * Private Types
@@ -73,8 +76,8 @@
 
 struct sam_pmecc_s
 {
-  uint8_t nsectors  : 4; /* Number of sectors in data */
-  uint8_t bcherr    : 3; /* BCH_ERR correctability code */
+  uint8_t nsectors;          /* Number of sectors in data */
+  struct pmecc_desc_s desc;  /* Atmel PMECC descriptor */
 };
 
 /****************************************************************************
@@ -211,6 +214,12 @@ static void pmecc_pagelayout(uint16_t datasize, uint16_t sparesize,
   uint8_t bcherr512;
   uint8_t bcherr1k;
 
+  /* ECC must not start at address zero, since bad block tags are at offset
+   * zero.
+   */
+
+  DEBUGASSERT(offset > 0);
+
   /* Decrease the spare size by the offset */
 
   sparesize -= offset;
@@ -240,8 +249,8 @@ static void pmecc_pagelayout(uint16_t datasize, uint16_t sparesize,
   DEBUGASSERT(bcherr512 > 0 || bcherr1k > 0);
   if (bcherr1k == 0)
     {
-      g_pmecc.nsectors = nsectors512;
-      g_pmecc.bcherr   = bcherr512;
+      g_pmecc.nsectors    = nsectors512;
+      g_pmecc.desc.bcherr = bcherr512;
     }
   else
     {
@@ -249,13 +258,13 @@ static void pmecc_pagelayout(uint16_t datasize, uint16_t sparesize,
       correctability1K  = nsectors1k * g_correctability[bcherr1k];
       if (correctability512 >= correctability1K)
         {
-          g_pmecc.nsectors = nsectors512;
-          g_pmecc.bcherr   = bcherr512;
+          g_pmecc.nsectors    = nsectors512;
+          g_pmecc.desc.bcherr = ((uint32_t)bcherr512 << HSMC_PMECCFG_BCHERR_SHIFT);
         }
       else
         {
-          g_pmecc.nsectors = nsectors1k;
-          g_pmecc.bcherr   = bcherr1k;
+          g_pmecc.nsectors    = nsectors1k;
+          g_pmecc.desc.bcherr = ((uint32_t)bcherr1k << HSMC_PMECCFG_BCHERR_SHIFT);
         }
     }
 }

@@ -3336,7 +3336,51 @@ config SAMA5_NAND_CE
 
 			void board_nand_ce(int cs, bool enable);
 
-endif # SAMA5_EBICS0_NAND
+if SAMA5_EBICS0_NAND || SAMA5_EBICS1_NAND || SAMA5_EBICS2_NAND || SAMA5_EBICS3_NAND
+
+config SAMA5_PMECC_EMBEDDEDALGO
+	bool "ROM ECC detection/correction"
+	default y
+	---help---
+		The SAMA5D3 ROM code embeds the software used in the process of ECC
+		detection/correction: function pmecc_correctionalgo(). If this
+		option is selected, the ROM code will be used.  If not, then the an
+		implementation pmecc_correctionalgo() will be built into the NuttX
+		image.
+
+config SAMA5_PMECC_EMBEDDEDALGO_ADDR
+	hex "Address of ROM ECC detection/correction"
+	default 0x00104510
+	---help---
+		The ROM code embeds the software used in the process of ECC
+		detection/correction at this address.  Don't change this address
+		unless you know what you are doing.
+
+config SAMA5_PMECC_GALOIS_ROMTABLES
+	bool "ROM Galois Tables"
+	default y
+	---help---
+		Support the PMECC algorithm using Galois tables in ROM.
+
+if SAMA5_PMECC_GALOIS_ROMTABLES
+
+config SAMA5_PMECC_GALOIS_TABLE512_ROMADDR
+	hex "Address of Galois Table 512"
+	default 0x00110000
+	---help---
+		Address of Galois Field Table 512 mapping in ROM.  Don't change this
+		address unless you know what you are doing.
+
+config SAMA5_PMECC_GALOIS_TABLE1024_ROMADDR
+	hex "Address of Galois Table 1024"
+	default 0x00118000
+	---help---
+		Address of Galois Field Table 1024 mapping in ROM.  Don't change this
+		address unless you know what you are doing.
+
+endif # SAMA5_PMECC_GALOIS_ROMTABLES
+endif # SAMA5_EBICS*_PMECC
+endif # SAMA5_EBICS*_NAND
 
 endmenu # External Memory Configuration
 
