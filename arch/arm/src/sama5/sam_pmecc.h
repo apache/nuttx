@@ -288,6 +288,52 @@ void pmecc_enable(void);
 
 void pmecc_disable(void);
 
+/****************************************************************************
+ * Name: pmecc_initialize
+ *
+ * Description:
+ *   Perform one-time PMECC initialization.  This must be called before any
+ *   other PMECC interfaces are used.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if NAND_NPMECC_BANKS > 1
+void pmecc_initialize(void);
+#else
+#  define pmecc_initialize()
+#endif
+
+/****************************************************************************
+ * Name: pmecc_configure
+ *
+ * Description:
+ *   Configure and Initialie the PMECC peripheral.
+ *
+ * Input Parameters:
+ *  priv      - Pointer to a struct sam_nandcs_s instance.
+ *  eccoffset - offset of the first ecc byte in spare zone.
+ *  protected - True:  The spare area is protected with the last sector of
+ *                     data.
+ *              False: The spare area is skipped in read or write mode.
+ *
+ * Returned Value:
+ *  OK on success; a negated errno value on failure.
+ *
+ * Assumptions:
+ *  The caller holds the PMECC lock.
+ *
+ ****************************************************************************/
+
+struct sam_nandcs_s;
+int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
+                    bool protected);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
@@ -303,6 +349,8 @@ void pmecc_disable(void);
 #  define pmecc_unlock()
 #  define pmecc_enable()
 #  define pmecc_disable()
+#  define pmecc_initialize()
+#  define pmecc_configure(a,b,c) (0)
 
 #endif /* NAND_HAVE_PMECC */
 #endif /* __ARCH_ARM_SRC_SAMA5_PMECC_H */

@@ -1976,7 +1976,12 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 
       nand_putreg(SAM_HSMC_CTRL, HSMC_CTRL_NFCEN);
 
-#ifndef NAND_HAVE_PMECC
+#ifdef NAND_HAVE_PMECC
+      /* Perform one-time initialization of the PMECC */
+
+      pmecc_initialize();
+
+#else
       /* Disable the PMECC if it is not being used */
 
       nand_putreg(SAM_SMC_PMECCTRL, SMC_PMECCTRL_RST);
