@@ -6102,3 +6102,5 @@
 	  Untested and probably needs some fine tuining (2013-11-21)
 	* fs/smartfs/README.txt:  Add README for SMARTFS file system.  From
 	  Ken Pettit (2013-11-23)
+	* tools/mkctags.sh:  A script for creating ctags from Ken Pettit
+	  (2013-11-23)
