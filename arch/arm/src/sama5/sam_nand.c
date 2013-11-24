@@ -179,7 +179,7 @@ static int      nand_smc_read16(uintptr_t src, uint8_t *dest,
 static int      nand_read(struct sam_nandcs_s *priv, bool nfcsram,
                   uint8_t *buffer, size_t buflen);
 
-#ifdef NAND_HAVE_PMECC
+#ifdef CONFIG_SAMA5_HAVE_PMECC
 static int      nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
                   unsigned int page, void *data);
 #endif
@@ -198,7 +198,7 @@ static int      nand_write(struct sam_nandcs_s *priv, bool nfcsram,
 static int      nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
                   unsigned int page, void *data, void *spare);
 
-#ifdef NAND_HAVE_PMECC
+#ifdef CONFIG_SAMA5_HAVE_PMECC
 static int      nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
                   unsigned int page, void *data);
 #endif
@@ -206,7 +206,7 @@ static int      nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
 static int      nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
                   unsigned int page, const void *data, const void *spare);
 
-#ifdef NAND_HAVE_PMECC
+#ifdef CONFIG_SAMA5_HAVE_PMECC
 static int      nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
                   unsigned int page, const void *data);
 #endif
@@ -1246,7 +1246,7 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
  *
  ****************************************************************************/
 
-#ifdef NAND_HAVE_PMECC
+#ifdef CONFIG_SAMA5_HAVE_PMECC
 static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
                            unsigned int page, void *data)
 {
@@ -1619,7 +1619,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
  *
  ****************************************************************************/
 
-#ifdef NAND_HAVE_PMECC
+#ifdef CONFIG_SAMA5_HAVE_PMECC
 static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
              unsigned int page, void *data)
 {
@@ -1684,7 +1684,7 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
   nand_unlock();
   return ret;
 }
-#endif /* NAND_HAVE_PMECC */
+#endif /* CONFIG_SAMA5_HAVE_PMECC */
 
 /****************************************************************************
  * Name: nand_writepage_noecc
@@ -1845,7 +1845,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
  *
  ****************************************************************************/
 
-#ifdef NAND_HAVE_PMECC
+#ifdef CONFIG_SAMA5_HAVE_PMECC
 static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
              unsigned int page, const void *data)
 {
@@ -1953,8 +1953,8 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   eccpersector = (pmecc_get_eccsize()) / sectersperpage;
   sectornumber = 1 << pmecc_get_pagesize();
 
-#if 0 /* REVISIT.  See original Atmel RawNandFlash.c */
-  if (isNandTrimffs() && page >= NandGetTrimPage())
+#ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
+  if (nand_trrimffs(priv) && page >= nand_get_trimpage(priv))
     {
       /* This behaviour was found to fix both UBI and JFFS2 images written to
        * cleanly erased NAND partitions
@@ -2000,7 +2000,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   nand_unlock();
   return ret;
 }
-#endif /* NAND_HAVE_PMECC */
+#endif /* CONFIG_SAMA5_HAVE_PMECC */
 
 /****************************************************************************
  * Name: nand_eraseblock
@@ -2202,7 +2202,7 @@ static int nand_readpage(struct nand_raw_s *raw, off_t block,
     case NANDECC_CHIPECC:
       ret = nand_readpage_noecc(priv, block, page, data, spare);
 
-#ifdef NAND_HAVE_PMECC
+#ifdef CONFIG_SAMA5_HAVE_PMECC
     case NANDECC_PMECC:
       DEBUGASSERT(!spare);
       ret = nand_readpage_pmecc(priv, block, page, data);
@@ -2266,7 +2266,7 @@ static int nand_writepage(struct nand_raw_s *raw, off_t block,
     case NANDECC_CHIPECC:
       ret = nand_writepage_noecc(priv, block, page, data, spare);
 
-#ifdef NAND_HAVE_PMECC
+#ifdef CONFIG_SAMA5_HAVE_PMECC
     case NANDECC_PMECC:
       DEBUGASSERT(!spare);
       ret = nand_writepage_pmecc(priv, block, page, data);
@@ -2505,7 +2505,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 
       nand_putreg(SAM_HSMC_CTRL, HSMC_CTRL_NFCEN);
 
-#ifdef NAND_HAVE_PMECC
+#ifdef CONFIG_SAMA5_HAVE_PMECC
       /* Perform one-time initialization of the PMECC */
 
       pmecc_initialize();

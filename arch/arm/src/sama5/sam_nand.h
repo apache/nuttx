@@ -188,30 +188,30 @@
  * enabled.
  */
 
-#undef HAVE_NAND
+#undef CONFIG_SAMA5_HAVE_NAND
 #ifdef CONFIG_SAMA5_EBICS0_NAND
-#  define HAVE_NAND 1
+#  define CONFIG_SAMA5_HAVE_NAND 1
 #  define NAND_HAVE_EBICS0 1
 #else
 #  define NAND_HAVE_EBICS0 0
 #endif
 
 #ifdef CONFIG_SAMA5_EBICS1_NAND
-#  define HAVE_NAND 1
+#  define CONFIG_SAMA5_HAVE_NAND 1
 #  define NAND_HAVE_EBICS1 1
 #else
 #  define NAND_HAVE_EBICS1 0
 #endif
 
 #ifdef CONFIG_SAMA5_EBICS2_NAND
-#  define HAVE_NAND 1
+#  define CONFIG_SAMA5_HAVE_NAND 1
 #  define NAND_HAVE_EBICS2 1
 #else
 #  define NAND_HAVE_EBICS2 0
 #endif
 
 #ifdef CONFIG_SAMA5_EBICS3_NAND
-#  define HAVE_NAND 1
+#  define CONFIG_SAMA5_HAVE_NAND 1
 #  define NAND_HAVE_EBICS3 1
 #else
 #  define NAND_HAVE_EBICS3 0
@@ -222,7 +222,7 @@
 #define NAND_NBANKS \
    (NAND_HAVE_EBICS0 + NAND_HAVE_EBICS1 + NAND_HAVE_EBICS2 + NAND_HAVE_EBICS3)
 
-#ifdef HAVE_NAND
+#ifdef CONFIG_SAMA5_HAVE_NAND
 
 /****************************************************************************
  * Public Types
@@ -242,6 +242,10 @@ struct sam_nandcs_s
   uint8_t cs;                /* Chip select number (0..3) */
   volatile bool dmadone;     /* True:  DMA has completed */
   sem_t waitsem;             /* Used to wait for DMA done */
+#ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
+  bool dropjss;              /* Enable page trimming */
+  uint16_t g_trimpage;       /* Trim page number boundary */
+#endif
 
   DMA_HANDLE dma;            /* DMA channel assigned to this CS */
   int result;                /* The result of the DMA */
@@ -259,7 +263,7 @@ struct sam_nand_s
   volatile bool rbedge;      /* True:  Ready/busy edge detected */
   sem_t waitsem;             /* Used to wait for one of the above states */
 
-#ifdef NAND_HAVE_PMECC
+#ifdef CONFIG_SAMA5_HAVE_PMECC
   uint8_t ecctab[CONFIG_MTD_NAND_MAX_PMECCSIZE];
 #endif
 
@@ -446,11 +450,101 @@ static inline void nand_putreg(uintptr_t regaddr, uint32_t regval)
   putreg32(regval, regaddr);
 }
 
+/****************************************************************************
+ * Name: nand_trimffs_enable
+ *
+ * Description:
+ *   Set current trimffs status.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
+static inline void nand_trimffs_enable(struct sam_nandcs_s *priv, bool enable)
+{
+  priv->dropjss = enable;
+}
+#else
+#  define nand_trimffs_enable(p,e)
+#endif
+
+/****************************************************************************
+ * Name: nand_trrimffs
+ *
+ * Description:
+ *   Get current trimffs status.
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
+static inline bool nand_trrimffs(struct sam_nandcs_s *priv)
+{
+  return priv->dropjss;
+}
+#else
+#  define nand_trrimffs(p) (false)
+#endif
+
+/****************************************************************************
+ * Name: nand_set_trimpage
+ *
+ * Description:
+ *   Set current trimffs page.
+ *
+ * Input Parameters:
+ *   page - Start trim page.
+ *
+ * Returned Value:
+ *
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
+static inline void nand_set_trimpage(struct sam_nandcs_s *priv, uint16_t page)
+{
+  priv->trimpage = page;
+}
+#else
+#  define nand_set_trimpage(p,t)
+#endif
+
+/****************************************************************************
+ * Name: nand_get_trimpage
+ *
+ * Description:
+ *   Get current trimffs page.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *    Start trim page.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
+uint16_t nand_get_trimpage(struct sam_nandcs_s *priv)
+{
+  return priv->trimpage;
+}
+#else
+#  define nand_get_trimpage(p) (0)
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* HAVE_NAND */
+#endif /* CONFIG_SAMA5_HAVE_NAND */
 #endif /* __ARCH_ARM_SRC_SAMA5_SAM_NAND_H */

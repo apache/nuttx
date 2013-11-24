@@ -87,34 +87,30 @@
  * enabled.
  */
 
-#undef NAND_HAVE_PMECC
+#undef CONFIG_SAMA5_HAVE_PMECC
 #ifdef CONFIG_SAMA5_EBICS0_PMECC
-#  undef  NAND_HAVE_PMECC
-#  define NAND_HAVE_PMECC 1
+#  define CONFIG_SAMA5_HAVE_PMECC 1
 #  define NAND_HAVE_EBICS0_PMECC 1
 #else
 #  define NAND_HAVE_EBICS0_PMECC 0
 #endif
 
 #ifdef CONFIG_SAMA5_EBICS1_PMECC
-#  undef  NAND_HAVE_PMECC
-#  define NAND_HAVE_PMECC 1
+#  define CONFIG_SAMA5_HAVE_PMECC 1
 #  define NAND_HAVE_EBICS1_PMECC 1
 #else
 #  define NAND_HAVE_EBICS1_PMECC 0
 #endif
 
 #ifdef CONFIG_SAMA5_EBICS2_PMECC
-#  undef  NAND_HAVE_PMECC
-#  define NAND_HAVE_PMECC 1
+#  define CONFIG_SAMA5_HAVE_PMECC 1
 #  define NAND_HAVE_EBICS2_PMECC 1
 #else
 #  define NAND_HAVE_EBICS2_PMECC 0
 #endif
 
 #ifdef CONFIG_SAMA5_EBICS3_PMECC
-#  undef  NAND_HAVE_PMECC
-#  define NAND_HAVE_PMECC 1
+#  define CONFIG_SAMA5_HAVE_PMECC 1
 #  define NAND_HAVE_EBICS3_PMECC 1
 #else
 #  define NAND_HAVE_EBICS3_PMECC 0
@@ -130,7 +126,7 @@
  * and with PMECC support enabled.
  */
 
-#ifdef NAND_HAVE_PMECC
+#ifdef CONFIG_SAMA5_HAVE_PMECC
 
 /* Maximum PMECC size */
 
@@ -381,7 +377,7 @@ uint32_t pmecc_get_pagesize(void);
 }
 #endif
 
-#else /* NAND_HAVE_PMECC */
+#else /* CONFIG_SAMA5_HAVE_PMECC */
 /****************************************************************************/
 /* Stub definitions to minimize conditional compilation when PMECC is
  * disabled
@@ -396,5 +392,5 @@ uint32_t pmecc_get_pagesize(void);
 #  define pmecc_get_eccsize()    (0)
 #  define pmecc_get_pagesize()   (0)
 
-#endif /* NAND_HAVE_PMECC */
+#endif /* CONFIG_SAMA5_HAVE_PMECC */
 #endif /* __ARCH_ARM_SRC_SAMA5_PMECC_H */
