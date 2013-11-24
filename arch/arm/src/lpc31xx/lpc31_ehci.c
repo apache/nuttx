@@ -3055,7 +3055,7 @@ static void lpc31_ehci_bottomhalf(FAR void *arg)
   lpc31_givesem(&g_ehci.exclsem);
 
   /* Re-enable relevant EHCI interrupts.  Interrupts should still be enabled
-   * at the level of the AIC.
+   * at the level of the interrupt controller.
    */
 
   lpc31_putreg(EHCI_HANDLED_INTS, &HCOR->usbintr);
@@ -4497,7 +4497,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
     }
 
   /* Enable EHCI interrupts.  Interrupts are still disabled at the level of
-   * the AIC.
+   * the interrupt controller.
    */
 
   lpc31_putreg(EHCI_HANDLED_INTS, &HCOR->usbintr);

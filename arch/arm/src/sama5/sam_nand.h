@@ -184,6 +184,46 @@
 #  endif
 #endif /* CONFIG_SAMA5_EBICS3_NAND */
 
+/* Count the number of banks that configured for NAND with PMECC support
+ * enabled.
+ */
+
+#undef HAVE_NAND
+#ifdef CONFIG_SAMA5_EBICS0_NAND
+#  define HAVE_NAND 1
+#  define NAND_HAVE_EBICS0 1
+#else
+#  define NAND_HAVE_EBICS0 0
+#endif
+
+#ifdef CONFIG_SAMA5_EBICS1_NAND
+#  define HAVE_NAND 1
+#  define NAND_HAVE_EBICS1 1
+#else
+#  define NAND_HAVE_EBICS1 0
+#endif
+
+#ifdef CONFIG_SAMA5_EBICS2_NAND
+#  define HAVE_NAND 1
+#  define NAND_HAVE_EBICS2 1
+#else
+#  define NAND_HAVE_EBICS2 0
+#endif
+
+#ifdef CONFIG_SAMA5_EBICS3_NAND
+#  define HAVE_NAND 1
+#  define NAND_HAVE_EBICS3 1
+#else
+#  define NAND_HAVE_EBICS3 0
+#endif
+
+/* Count the number of banks configured for NAND */
+
+#define NAND_NBANKS \
+   (NAND_HAVE_EBICS0 + NAND_HAVE_EBICS1 + NAND_HAVE_EBICS2 + NAND_HAVE_EBICS3)
+
+#ifdef HAVE_NAND
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -200,14 +240,8 @@ struct sam_nandcs_s
   /* Static configuration */
 
   uint8_t cs;                /* Chip select number (0..3) */
-
-  /* Dynamic state */
-
-  volatile bool cmddone;     /* True:  NFC commnad has completed */
-  volatile bool xfrdone;     /* True:  Transfer has completed */
-  volatile bool rbedge;      /* True:  Ready/busy edge detected */
   volatile bool dmadone;     /* True:  DMA has completed */
-  sem_t waitsem;             /* Used to wait for one of the above states */
+  sem_t waitsem;             /* Used to wait for DMA done */
 
   DMA_HANDLE dma;            /* DMA channel assigned to this CS */
   int result;                /* The result of the DMA */
@@ -216,6 +250,14 @@ struct sam_nandcs_s
 struct sam_nand_s
 {
   bool initialized;          /* True:  One time initialization is complete */
+  sem_t exclsem;             /* Enforce exclusive access to the SMC hardware */
+
+  /* Dynamic state */
+
+  volatile bool cmddone;     /* True:  NFC commnad has completed */
+  volatile bool xfrdone;     /* True:  Transfer has completed */
+  volatile bool rbedge;      /* True:  Ready/busy edge detected */
+  sem_t waitsem;             /* Used to wait for one of the above states */
 
 #ifdef NAND_HAVE_PMECC
   uint8_t ecctab[CONFIG_MTD_NAND_MAX_PMECCSIZE];
@@ -410,4 +452,5 @@ static inline void nand_putreg(uintptr_t regaddr, uint32_t regval)
 #endif
 
 #endif /* __ASSEMBLY__ */
+#endif /* HAVE_NAND */
 #endif /* __ARCH_ARM_SRC_SAMA5_SAM_NAND_H */

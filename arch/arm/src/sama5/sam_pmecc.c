@@ -134,11 +134,29 @@ struct sam_pmecc_s
   struct pmecc_desc_s desc;  /* Atmel PMECC descriptor */
 };
 
+/* This is the type of the ROM detection/correction function
+ *
+ * REVISIT:  Whare are the types Pmecc and Pmerrloc?
+ */
+
+#ifdef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
+typedef uint32_t (*pmecc_correctionalgo_t)(Pmecc *, Pmerrloc *,
+                                           struct pmecc_desc_s *desc,
+                                           uint32_t isr, uintptr_t data);
+#endif
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
- /****************************************************************************
+#ifdef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
+#  define pmecc_correctionalgo \
+    (pmecc_correctionalgo_t)CONFIG_SAMA5_PMECC_EMBEDDEDALGO_ADDR)
+#else
+static uint32_t pmecc_correctionalgo(uint32_t isr, uintptr_t data);
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 /* PMECC state data */
@@ -417,6 +435,39 @@ void pmecc_unlock(void)
   sem_post(&g_pmecc.exclsem);
 }
 #endif
+
+/****************************************************************************
+ * Name: pmecc_correction
+ *
+ * Description:
+ *   Perform the PMECC correction algorithm
+ *
+ * Input Parameters:
+ *   isr  - Value of the PMECC ISR register
+ *   data - Data to be corrected
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure
+ *
+ * Assumptions:
+ *  PMECC has been initialized for the CS and the caller holds the PMECC
+ *  lock.
+ *
+ ****************************************************************************/
+
+int pmecc_correction(uint32_t isr, uintptr_t data)
+{
+#ifdef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
+  /* REVISIT:  Whare are the types Pmecc and Pmerrloc? */
+  /* REVISIT:  Check returned value */
+
+  return pmecc_correctionalgo(??, ??, &g_pmecc, isr, data);
+#else
+  /* REVISIT:  Check returned value */
+
+  return pmecc_correctionalgo(isr, data);
+#endif
+}
 
 /****************************************************************************
  * Name: pmecc_get*
