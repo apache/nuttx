@@ -228,16 +228,16 @@ endif
 endif
 
 ifeq ($(CONFIG_SAMA5_EBICS0_NAND),y)
-CHIP_CSRCS += sam_nand.c sam_pmecc.c
+CHIP_CSRCS += sam_nand.c sam_pmecc.c sam_gf512.c sam_gf1024.c
 else
 ifeq ($(CONFIG_SAMA5_EBICS1_NAND),y)
-CHIP_CSRCS += sam_nand.c sam_pmecc.c
+CHIP_CSRCS += sam_nand.c sam_pmecc.c sam_gf512.c sam_gf1024.c
 else
 ifeq ($(CONFIG_SAMA5_EBICS2_NAND),y)
-CHIP_CSRCS += sam_nand.c sam_pmecc.c
+CHIP_CSRCS += sam_nand.c sam_pmecc.c sam_gf512.c sam_gf1024.c
 else
 ifeq ($(CONFIG_SAMA5_EBICS3_NAND),y)
-CHIP_CSRCS += sam_nand.c sam_pmecc.c
+CHIP_CSRCS += sam_nand.c sam_pmecc.c sam_gf512.c sam_gf1024.c
 endif
 endif
 endif
