@@ -129,6 +129,12 @@
 
 #ifdef NAND_HAVE_PMECC
 
+/* Maximum PMECC size */
+
+#ifndef CONFIG_MTD_NAND_MAX_PMECCSIZE
+#  define CONFIG_MTD_NAND_MAX_PMECCSIZE        200
+#endif
+
 /* The ROM code embeds the software used in the process of ECC
  * detection/correction
  */
@@ -149,55 +155,9 @@
 #  endif
 #endif
 
-/* Other PMECC Definitions **************************************************/
-/* Defines the maximum value of the error correcting capability */
-
-#define PMECC_MAX_CORRECTABILITY 25
-
-/* Start address of ECC cvalue in spare zone, this must not be 0 since bad
- * block tags are at address 0.
- */
-
-#define PMECC_ECC_STARTOFFSET 2
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
-/* This is the form of the PMECC descriptor that is passed to the ECC
- * detection correction algorithm in ROM.  The binary for of this structure
- * cannot be altered!
- */
-
-struct pmecc_desc_s
-{
-  uint32_t pagesize;     /*   0-3: See HSMC_PMECCFG_PAGESIZE_* definitions */
-  uint32_t sparesize;    /*   4-7: The spare area size is equal to (SPARESIZE+1) bytes */
-  uint32_t sectorsz;     /*  8-11: See HSMC_PMECCFG_SECTORSZ_* definitions*/
-  uint32_t bcherr;       /* 12-15: See HSMC_PMECCFG_BCHERR_* definitions */
-  uint32_t eccsize;      /* 16-19: Real size in bytes of ECC in spare */
-  uint32_t eccstart;     /* 20-23: The first byte address of the ECC area */
-  uint32_t eccend;       /* 24-27: The last byte address of the ECC area */
-  uint32_t nandwr;       /* 28-31: NAND Write Access */
-  uint32_t sparena;      /* 32-35: Spare Enable */
-  uint32_t automode;     /* 36-39: Automatic Mode */
-  uint32_t clkctrl;      /* 40-43: PMECC Module data path Setup Time is CLKCTRL+1. */
-  uint32_t interrupt;    /* 44-47: */
-  int32_t tt;            /* 48-51: Error correcting capability */
-  int32_t mm;            /* 52-55: Degree of the remainders, GF(2**mm) */
-  int32_t nn;            /* 56-59: Length of codeword =  nn=2**mm -1 */
-  int16_t *alphato;      /* 60-63: Gallois field table */
-  int16_t *indexof;      /* 64-67: Index of Gallois field table */
-  int16_t partsyn[100];  /* 68-267: */
-  int16_t si[100];       /* 268-467: Current syndrome value */
-
-  /* 468-: Sigma table */
-
-  int16_t smu[PMECC_MAX_CORRECTABILITY + 2][2 * PMECC_MAX_CORRECTABILITY + 1];
-
-  /* Polynomial order */
-
-  int16_t lmu[PMECC_MAX_CORRECTABILITY + 1];
-};
 
 /****************************************************************************
  * Public Data
@@ -334,6 +294,30 @@ struct sam_nandcs_s;
 int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
                     bool protected);
 
+/****************************************************************************
+ * Name: pmecc_get*
+ *
+ * Description:
+ *   Various PMECC accessor functions
+ *
+ *   pmecc_get_eccsize()  - Returns the raw ECS size in bytes
+ *   pmecc_get_pagesize() - Returns encoded HSMC_PMECCFG_PAGESIZE_* value
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *  The requested value
+ *
+ * Assumptions:
+ *  PMECC has been initialized for the CS and the caller holds the PMECC
+ *  lock.
+ *
+ ****************************************************************************/
+
+uint32_t pmecc_get_eccsize(void);
+uint32_t pmecc_get_pagesize(void);
+
 #undef EXTERN
 #ifdef __cplusplus
 }
@@ -351,6 +335,8 @@ int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
 #  define pmecc_disable()
 #  define pmecc_initialize()
 #  define pmecc_configure(a,b,c) (0)
+#  define pmecc_get_eccsize()    (0)
+#  define pmecc_get_pagesize()   (0)
 
 #endif /* NAND_HAVE_PMECC */
 #endif /* __ARCH_ARM_SRC_SAMA5_PMECC_H */
