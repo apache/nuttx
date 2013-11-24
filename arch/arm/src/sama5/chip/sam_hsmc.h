@@ -79,6 +79,7 @@
 #define SAM_HSMC_PMECCIMR_OFFSET      0x0094 /* PMECC Interrupt Mask Register */
 #define SAM_HSMC_PMECCISR_OFFSET      0x0098 /* PMECC Interrupt Status Register */
                                              /* 0x009c-0x00ac Reserved */
+#define SAM_HSMC_PMECC_OFFSET(sec)    (0x00b0+((sec) << 6))      /* PMECC sector offset */
 #define SAM_HSMC_PMECC0_OFFSET(sec)   (0x00b0+0x00+((sec) << 6)) /* PMECC Redundancy 0 Register */
 #define SAM_HSMC_PMECC1_OFFSET(sec)   (0x00b0+0x04+((sec) << 6)) /* PMECC Redundancy 1 Register */
 #define SAM_HSMC_PMECC2_OFFSET(sec)   (0x00b0+0x08+((sec) << 6)) /* PMECC Redundancy 2 Register */
@@ -198,6 +199,7 @@
 #define SAM_HSMC_PMECCIDR             (SAM_HSMC_VBASE+SAM_HSMC_PMECCIDR_OFFSET)
 #define SAM_HSMC_PMECCIMR             (SAM_HSMC_VBASE+SAM_HSMC_PMECCIMR_OFFSET)
 #define SAM_HSMC_PMECCISR             (SAM_HSMC_VBASE+SAM_HSMC_PMECCISR_OFFSET)
+#define SAM_HSMC_PMECC_BASE(sec)      (SAM_HSMC_VBASE+SAM_HSMC_PMECC_OFFSET(sec))
 #define SAM_HSMC_PMECC0(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC0_OFFSET(sec))
 #define SAM_HSMC_PMECC1(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC1_OFFSET(sec))
 #define SAM_HSMC_PMECC2(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC2_OFFSET(sec))

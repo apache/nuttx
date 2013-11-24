@@ -139,13 +139,6 @@ config MTD_NAND_HWECC
 	---help---
 		Build in logic to support hardware calculation of ECC.
 
-config MTD_NAND_MAX_HWECCSIZE
-	int "Max H/W ECC size"
-	default 200
-	depends on MTD_NAND_HWECC
-	---help---
-		Maximum HW ECC size
-
 config MTD_NAND_MAXSPAREEXTRABYTES
 	int "Max extra free bytes"
 	default 206

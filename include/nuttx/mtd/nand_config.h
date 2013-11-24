@@ -88,14 +88,6 @@
 #  define CONFIG_MTD_NAND_MAXSPAREEXTRABYTES  206
 #endif
 
-/* Maximum PMECC size */
-
-#ifdef CONFIG_ARCH_NAND_HWECC
-#  ifndef CONFIG_MTD_NAND_MAX_HWECCSIZE
-#    define CONFIG_MTD_NAND_MAX_HWECCSIZE        200
-#  endif
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/

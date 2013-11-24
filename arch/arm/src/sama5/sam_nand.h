@@ -215,7 +215,11 @@ struct sam_nandcs_s
 
 struct sam_nand_s
 {
-  bool initialized;
+  bool initialized;          /* True:  One time initialization is complete */
+
+#ifdef NAND_HAVE_PMECC
+  uint8_t ecctab[CONFIG_MTD_NAND_MAX_PMECCSIZE];
+#endif
 
 #ifdef CONFIG_SAMA5_NAND_REGDEBUG
   /* Register debug state */

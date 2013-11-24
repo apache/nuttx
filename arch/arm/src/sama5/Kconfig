@@ -3338,6 +3338,13 @@ config SAMA5_NAND_CE
 
 if SAMA5_EBICS0_NAND || SAMA5_EBICS1_NAND || SAMA5_EBICS2_NAND || SAMA5_EBICS3_NAND
 
+config MTD_NAND_MAX_PMECCSIZE
+	int "Max H/W ECC size"
+	default 200
+	depends on MTD_NAND_HWECC
+	---help---
+		Maximum HW ECC size
+
 config SAMA5_PMECC_EMBEDDEDALGO
 	bool "ROM ECC detection/correction"
 	default y

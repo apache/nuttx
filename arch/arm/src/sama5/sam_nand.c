@@ -92,11 +92,11 @@
 
 /* NFC ALE CLE command parameter */
 
-#define SMC_ALE_COL_EN       (1 << 0)
-#define SMC_ALE_ROW_EN       (1 << 1)
-#define SMC_CLE_WRITE_EN     (1 << 2)
-#define SMC_CLE_DATA_EN      (1 << 3)
-#define SMC_CLE_VCMD2_EN     (1 << 4)
+#define HSMC_ALE_COL_EN      (1 << 0)
+#define HSMC_ALE_ROW_EN      (1 << 1)
+#define HSMC_CLE_WRITE_EN    (1 << 2)
+#define HSMC_CLE_DATA_EN     (1 << 3)
+#define HSMC_CLE_VCMD2_EN    (1 << 4)
 
 /* Number of tries for erasing or writing block */
 
@@ -168,6 +168,11 @@ static int      nand_smc_read16(uintptr_t src, uint8_t *dest,
                   size_t buflen);
 static int      nand_read(struct sam_nandcs_s *priv, bool nfcsram,
                   uint8_t *buffer, size_t buflen);
+
+#ifdef NAND_HAVE_PMECC
+static int      nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
+                  unsigned int page, const void *data);
+#endif
 
 static int      nand_nfcsram_write(const uint8_t *src, uintptr_t dest,
                   size_t buflen);
@@ -603,7 +608,7 @@ static void nand_nfc_configure(struct sam_nandcs_s *priv, uint8_t mode,
   uint32_t acycle1234 = 0;
   int ncycles;
 
-  if ((mode & SMC_CLE_WRITE_EN) != 0)
+  if ((mode & HSMC_CLE_WRITE_EN) != 0)
     {
       rw = NFCADDR_CMD_NFCWR;
     }
@@ -612,7 +617,7 @@ static void nand_nfc_configure(struct sam_nandcs_s *priv, uint8_t mode,
       rw = NFCADDR_CMD_NFCRD;
     }
 
-  if ((mode & SMC_CLE_DATA_EN) != 0)
+  if ((mode & HSMC_CLE_DATA_EN) != 0)
     {
       regval = NFCADDR_CMD_DATAEN;
     }
@@ -621,11 +626,11 @@ static void nand_nfc_configure(struct sam_nandcs_s *priv, uint8_t mode,
       regval = NFCADDR_CMD_DATADIS;
     }
 
-  if (((mode & SMC_ALE_COL_EN) == SMC_ALE_COL_EN) ||
-      ((mode & SMC_ALE_ROW_EN) == SMC_ALE_ROW_EN))
+  if (((mode & HSMC_ALE_COL_EN) == HSMC_ALE_COL_EN) ||
+      ((mode & HSMC_ALE_ROW_EN) == HSMC_ALE_ROW_EN))
     {
-      bool rowonly = (((mode & SMC_ALE_COL_EN) == 0) &&
-                      ((mode & SMC_ALE_ROW_EN) == SMC_ALE_ROW_EN));
+      bool rowonly = (((mode & HSMC_ALE_COL_EN) == 0) &&
+                      ((mode & HSMC_ALE_ROW_EN) == HSMC_ALE_ROW_EN));
       nand_translate_address(priv, coladdr, rowaddr, &acycle0, &acycle1234, rowonly);
       acycle = nand_get_acycle(ncycles);
     }
@@ -635,7 +640,7 @@ static void nand_nfc_configure(struct sam_nandcs_s *priv, uint8_t mode,
     }
 
   cmd = (rw | regval | NFCADDR_CMD_CSID_3 | acycle |
-         (((mode & SMC_CLE_VCMD2_EN) == SMC_CLE_VCMD2_EN) ? NFCADDR_CMD_VCMD2 : 0) |
+         (((mode & HSMC_CLE_VCMD2_EN) == HSMC_CLE_VCMD2_EN) ? NFCADDR_CMD_VCMD2 : 0) |
          (cmd1 << NFCADDR_CMD_CMD1_SHIFT) | (cmd2 << NFCADDR_CMD_CMD2_SHIFT));
 
   nand_cmdsend(priv, cmd, acycle1234, acycle0);
@@ -1075,6 +1080,121 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
 }
 
 /****************************************************************************
+ * Name: nand_read_pmecc
+ *
+ * Description:
+ *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
+ *   provided buffers.
+ *
+ * Input parameters:
+ *   priv   - Lower-half, raw NAND FLASH interface
+ *   block - Number of the block where the page to read resides.
+ *   page  - Number of the page to read inside the given block.
+ *   data  - Buffer where the data area will be stored.
+ *
+ * Returned value.
+ *   OK is returned in succes; a negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef NAND_HAVE_PMECC
+static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
+                           unsigned int page, const void *data)
+{
+  uint32_t eccpagesize;
+  uint32_t rawaddr;
+  uint32_t regval;
+  uint16_t pagesize;
+  uint16_t sparesize;
+
+  fvdbg("Block %d Page %d\n", block, page);
+  DEBUGASSERT(priv && data);
+
+  /* Get page and spare sizes */
+
+  pagesize  = nandmodel_getpagesize(&priv->raw.model);
+  sparesize = nandmodel_getsparesize(&priv->raw.model);
+
+  /* Convert the page size to something understood by the hardware */
+
+  switch (pagesize)
+    {
+    case 512:
+      regval = HSMC_CFG_PAGESIZE_512;
+      break;
+
+    case 1024:
+      regval = HSMC_CFG_PAGESIZE_1024;
+      break;
+
+    case 2048:
+      regval = HSMC_CFG_PAGESIZE_2048;
+      break;
+
+    case 4096:
+      regval = HSMC_CFG_PAGESIZE_4096;
+      break;
+
+    case 8192:
+      regval = HSMC_CFG_PAGESIZE_8192;
+      break;
+
+    default:
+      fdbg("ERROR:  Unsupported page size: %d\n", pagesize);
+      return -EINVAL;
+    }
+
+  /* Configure the SMC */
+
+  regval |= (HSMC_CFG_RSPARE |HSMC_CFG_RBEDGE | HSMC_CFG_DTOCYC(15) |
+             HSMC_CFG_DTOMUL_1048576 |
+             HSMC_CFG_NFCSPARESIZE((sparesize-1) >> 2));
+  nand_putreg(SAM_HSMC_CFG, regval);
+
+
+  /* Calculate actual address of the page */
+
+  rawaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
+
+  /* Reset and enable the PMECC */
+
+  nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_RST);
+  nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_ENABLE);
+
+  regval = nand_getreg(SAM_HSMC_PMECCFG);
+  if ((regval & HSMC_PMECCFG_SPAREEN_MASK) == HSMC_PMECCFG_SPARE_DISABLE)
+    {
+      regval |= HSMC_PMECCFG_AUTO_ENABLE;
+    }
+
+  regval |= HSMC_PMECCTRL_DATA;
+  nand_putreg(SAM_HSMC_PMECCFG, regval);
+
+  nand_nfc_configure(priv,
+                     HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN | HSMC_CLE_VCMD2_EN | HSMC_CLE_DATA_EN,
+                     COMMAND_READ_1, COMMAND_READ_2, 0, rawaddr);
+
+  /* Reset the ECC module*/
+
+  nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_RST);
+
+  /* Start a Data Phase */
+
+  regval  = nand_getreg(SAM_HSMC_PMECCTRL);
+  regval |= HSMC_PMECCTRL_DATA;
+  nand_putreg(SAM_HSMC_PMECCFG, regval);
+
+  regval = nand_getreg(SAM_HSMC_PMECCEADDR);
+  nand_read(priv, true, (uint8_t *)data, pagesize + (regval + 1));
+
+  /* Wait until the kernel of the PMECC is not busy */
+
+  while((nand_getreg(SAM_HSMC_PMECCSR) & HSMC_PMECCSR_BUSY) != 0);
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: nand_nfcsram_write
  *
  * Description:
@@ -1258,7 +1378,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
   uint32_t regval;
   uint16_t pagesize;
   uint16_t sparesize;
-  off_t rawaddr;
+  off_t rowaddr;
   off_t coladdr;
 
   fvdbg("Block %d Page %d\n", (int)block, page);
@@ -1297,22 +1417,24 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
       fdbg("ERROR:  Unsupported page size: %d\n", pagesize);
       return -EINVAL;
     }
+
   /* Configure the SMC */
 
   regval |= (HSMC_CFG_RBEDGE | HSMC_CFG_DTOCYC(15) | HSMC_CFG_DTOMUL_1048576 |
              HSMC_CFG_NFCSPARESIZE((sparesize-1) >> 2));
+  nand_putreg(SAM_HSMC_CFG, regval);
 
   /* Calculate actual address of the page */
 
-  rawaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
+  rowaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
   coladdr = data ? 0 : pagesize;
 
   /* Initialize the NFC */
 
   priv->xfrdone = false;
   nand_nfc_configure(priv,
-                     SMC_ALE_COL_EN | SMC_ALE_ROW_EN | SMC_CLE_VCMD2_EN | SMC_CLE_DATA_EN,
-                     COMMAND_READ_1, COMMAND_READ_2, coladdr, rawaddr);
+                     HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN | HSMC_CLE_VCMD2_EN | HSMC_CLE_DATA_EN,
+                     COMMAND_READ_1, COMMAND_READ_2, coladdr, rowaddr);
   nand_wait_xfrdone(priv);
 
   /* Read data area if so requested */
@@ -1354,7 +1476,12 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
 static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
              unsigned int page, void *data)
 {
+  /* Get exclusive access to the PMECC */
+
+  pmecc_lock();
+
 #warning Missing logic
+  pmecc_unlock();
   return -ENOSYS;
 }
 #endif /* NAND_HAVE_PMECC */
@@ -1384,7 +1511,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
   uint32_t regval;
   uint16_t pagesize;
   uint16_t sparesize;
-  off_t rawaddr;
+  off_t rowaddr;
   int ret = OK;
 
   /* Get page and spare sizes */
@@ -1437,7 +1564,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
 
   /* Calculate physical address of the page */
 
-  rawaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
+  rowaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
   fvdbg("Block %d Page %d\n", block, page);
 
   /* Handle the case where we use NFC SRAM */
@@ -1460,11 +1587,12 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
 
       priv->xfrdone = false;
       nand_nfc_configure(priv,
-                         SMC_CLE_WRITE_EN | SMC_ALE_COL_EN |SMC_ALE_ROW_EN |SMC_CLE_DATA_EN,
-                         COMMAND_WRITE_1, 0, 0, rawaddr);
+                         HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN |
+                         HSMC_ALE_ROW_EN | HSMC_CLE_DATA_EN,
+                         COMMAND_WRITE_1, 0, 0, rowaddr);
       nand_wait_xfrdone(priv);
 
-      nand_nfc_configure(priv, SMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
+      nand_nfc_configure(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
       nand_wait_rbedge(priv);
 
       if (!nand_operation_complete(priv))
@@ -1479,8 +1607,8 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
   else if (spare)
     {
       nand_nfc_configure(priv,
-                         SMC_CLE_WRITE_EN|SMC_ALE_COL_EN|SMC_ALE_ROW_EN,
-                         COMMAND_WRITE_1,0,  pagesize, rawaddr);
+                         HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN,
+                         COMMAND_WRITE_1,0,  pagesize, rowaddr);
 
       ret = nand_write(priv, false, (uint8_t *)spare, sparesize, 0);
       if (ret < 0)
@@ -1489,7 +1617,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
           ret = -EPERM;
         }
 
-      nand_nfc_configure(priv, SMC_CLE_WRITE_EN, COMMAND_WRITE_2,0, 0, 0);
+      nand_nfc_configure(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2,0, 0, 0);
       nand_wait_ready(priv);
     }
 
@@ -1520,14 +1648,157 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
 static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
              unsigned int page, const void *data)
 {
-  int ret = -ENOSYS;
+  uint32_t pagesize;
+  uint32_t rowaddr;
+  uint32_t startaddr;
+  uint32_t eccpersector;
+  uint32_t sectornumber;
+  uint32_t sectorindex;
+  uint32_t regval;
+  uint8_t *pmecc[8];
+  uint8_t sectersperpage;
+  int i;
+  int ret = 0;
 
-  /* Perform write operation */
-# warning Missing logic
+  /* Get exclusive access to the PMECC */
+
+  pmecc_lock();
+
+  /* Calculate physical address of the page */
+
+  rowaddr   = block * nandmodel_pagesperblock(&priv->raw.model) + page;
+
+  regval    = nand_getreg(SAM_HSMC_PMECCSADDR);
+  pagesize  = nandmodel_getpagesize(&priv->raw.model);
+  startaddr = regval + pagesize;
+
+  fvdbg("Block %d Page %d\n", block, page);
+
+  /* Calculate physical address of the page */
+
+  rowaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
+
+  /* Write data area if needed */
+
+  if (data)
+    {
+      nand_write(priv, true, (uint8_t *)data, pagesize, 0);
+    }
+
+  /* Get the number of sectors per page */
+
+  switch (pmecc_get_pagesize())
+    {
+    case HSMC_PMECCFG_PAGESIZE_1SEC:
+      sectersperpage = 1;
+      break;
+
+    case HSMC_PMECCFG_PAGESIZE_2SEC:
+      sectersperpage = 2;
+      break;
+
+    case HSMC_PMECCFG_PAGESIZE_4SEC:
+      sectersperpage = 4;
+      break;
+
+    case HSMC_PMECCFG_PAGESIZE_8SEC:
+      sectersperpage = 8;
+      break;
+
+    default:
+      sectersperpage = 1;
+      break;
+    }
+
+  /* Reset and enable the PMECC */
+
+  nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_RST);
+  nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_ENABLE);
+
+  /* Read the PMECC redundancy base address for each of (up to) 8 sectors */
+
+  for (i = 0; i < 8; i++)
+    {
+      pmecc[i] = (uint8_t*)(SAM_HSMC_PMECC_BASE(i));
+    }
+
+  /* Start a data phase */
+
+  regval  = nand_getreg(SAM_HSMC_PMECCTRL);
+  regval |= HSMC_PMECCTRL_DATA;
+  nand_putreg(SAM_HSMC_PMECCTRL, regval);
+
+  regval  = nand_getreg(SAM_HSMC_PMECCFG);
+  regval |= HSMC_PMECCFG_NANDWR_WRITE;
+  nand_putreg(SAM_HSMC_PMECCFG, regval);
+
+  /* Configure the NFC */
+
+  priv->xfrdone = false;
+  nand_nfc_configure(priv,
+                     HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN |
+                     HSMC_ALE_ROW_EN | HSMC_CLE_DATA_EN,
+                     COMMAND_WRITE_1, 0, 0, rowaddr);
+  nand_wait_xfrdone(priv);
+
+  nand_nfc_configure(priv,
+                    HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN,
+                    COMMAND_RANDOM_IN, 0, startaddr, 0);
+
+  /* Wait until the kernel of the PMECC is not busy */
+
+  while ((nand_getreg(SAM_HSMC_PMECCSR) & HSMC_PMECCSR_BUSY) != 0);
+
+  /* Write the ECC */
+
+  eccpersector = (pmecc_get_eccsize()) / sectersperpage;
+  sectornumber = 1 << pmecc_get_pagesize();
+
+#if 0 /* REVISIT.  See original Atmel RawNandFlash.c */
+  if (isNandTrimffs() && page >= NandGetTrimPage())
+    {
+      /* This behaviour was found to fix both UBI and JFFS2 images written to
+       * cleanly erased NAND partitions
+       */
+
+      for (sectorindex = 0; sectorindex < sectornumber; sectorindex++)
+        {
+          for (i = 0; i < eccpersector; i++)
+            {
+              g_nand.ecctab[sectorindex * eccpersector + i] = 0xff;
+            }
+        }
+    }
+  else
+#endif
+    {
+      /* Read all ECC registers */
+
+      for (sectorindex = 0; sectorindex < sectornumber; sectorindex++)
+        {
+          for(i = 0; i < eccpersector; i++)
+            {
+              g_nand.ecctab[sectorindex * eccpersector + i] = pmecc[sectorindex][i];
+            }
+        }
+    }
+
+  nand_write(priv, false, (uint8_t *)(uint8_t *)g_nand.ecctab, sectornumber * eccpersector, 0);
+  nand_nfc_configure(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
+  nand_wait_ready(priv);
+
+  /* Check for success */
+
+  if (!nand_operation_complete(priv))
+    {
+      fdbg("ERROR: Failed writing data area\n");
+      ret = -EPERM;
+    }
 
   /* Disable the PMECC */
 
-  pmecc_disable();
+  nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DISABLE);
+  pmecc_unlock();
   return ret;
 }
 #endif /* NAND_HAVE_PMECC */
@@ -1549,17 +1820,17 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
 
 static inline int nand_tryeraseblock(struct sam_nandcs_s *priv, off_t block)
 {
-  uint32_t rawaddr;
+  uint32_t rowaddr;
   int ret = OK;
 
   /* Calculate address used for erase */
 
-  rawaddr = block * nandmodel_pagesperblock(&priv->raw.model);
+  rowaddr = block * nandmodel_pagesperblock(&priv->raw.model);
 
   /* Configure the NFC for the block erase */
 
-  nand_nfc_configure(priv, (SMC_CLE_VCMD2_EN | SMC_ALE_ROW_EN),
-                     COMMAND_ERASE_1, COMMAND_ERASE_2, 0, rawaddr);
+  nand_nfc_configure(priv, HSMC_CLE_VCMD2_EN | HSMC_ALE_ROW_EN,
+                     COMMAND_ERASE_1, COMMAND_ERASE_2, 0, rowaddr);
 
   /* Wait for the erase operation to complete */
 
@@ -1984,8 +2255,8 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 #else
       /* Disable the PMECC if it is not being used */
 
-      nand_putreg(SAM_SMC_PMECCTRL, SMC_PMECCTRL_RST);
-      nand_putreg(SAM_SMC_PMECCTRL, SMC_PMECCTRL_DISABLE);
+      nand_putreg(SAM_SMC_PMECCTRL, HSMC_PMECCTRL_RST);
+      nand_putreg(SAM_SMC_PMECCTRL, HSMC_PMECCTRL_DISABLE);
       nand_putreg(SAM_SMC_PMECCFG, 0);
 #endif
 
