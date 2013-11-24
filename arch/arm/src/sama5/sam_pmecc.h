@@ -49,6 +49,9 @@
 #include <nuttx/config.h>
 #include <nuttx/mtd/nand_config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -80,7 +83,7 @@
 #  undef CONFIG_SAMA5_EBICS3_PMECC
 #endif
 
-/* Count the number of banks that confaigured for NAND with PMECC support
+/* Count the number of banks that configured for NAND with PMECC support
  * enabled.
  */
 
@@ -155,6 +158,20 @@
 #  endif
 #endif
 
+/* Gallois Field Tables *****************************************************/
+
+/* Indexes of tables in Gallois Field tables */
+
+#define PMECC_GF_INDEX_OF     0
+#define PMECC_GF_ALPHA_TO     1
+
+/* Gallois Field tables for 512 and 1024 bytes sectors
+ * First raw is "index_of" and second one is "alpha_to"
+ */
+
+#define PMECC_GF_SIZEOF_512   0x2000
+#define PMECC_GF_SIZEOF_1024  0x4000
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -170,6 +187,26 @@ extern "C"
 {
 #else
 #define EXTERN extern
+#endif
+
+/* Gallois Field tables for 512 bytes sectors. First raw is "index_of" and
+ * second one is "alpha_to"
+ */
+
+#ifdef CONFIG_SAMA5_PMECC_GALOIS_TABLE512_ROMADDR
+#  ifndef CONFIG_SAMA5_PMECC_GALOIS_TABLE512_ROMADDR
+#     error CONFIG_SAMA5_PMECC_GALOIS_TABLE512_ROMADDR is not defined
+#  endif
+#  define pmecc_gf512  ((const int16_t *)CONFIG_SAMA5_PMECC_GALOIS_TABLE512_ROMADDR)
+
+#  ifndef CONFIG_SAMA5_PMECC_GALOIS_TABLE1024_ROMADDR
+#     error CONFIG_SAMA5_PMECC_GALOIS_TABLE1024_ROMADDR is not defined
+#  endif
+#  define pmecc_gf1024 ((const int16_t *)CONFIG_SAMA5_PMECC_GALOIS_TABLE1024_ROMADDR)
+
+#else
+  EXTERN const uint16_t pmecc_gf512[2][PMECC_GF_SIZEOF_512];
+  EXTERN const uint16_t pmecc_gf1024[2][PMECC_GF_SIZEOF_1024];
 #endif
 
 /****************************************************************************
