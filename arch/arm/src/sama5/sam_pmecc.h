@@ -295,6 +295,27 @@ int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
                     bool protected);
 
 /****************************************************************************
+ * Name: pmecc_correction
+ *
+ * Description:
+ *   Perform the PMECC correction algorithm
+ *
+ * Input Parameters:
+ *   isr  - Value of the PMECC ISR register
+ *   data - Data to be corrected
+ *
+ * Returned Value:
+ *   OK on success; a negated errno value on failure
+ *
+ * Assumptions:
+ *  PMECC has been initialized for the CS and the caller holds the PMECC
+ *  lock.
+ *
+ ****************************************************************************/
+
+int pmecc_correction(uint32_t isr, uintptr_t data);
+
+/****************************************************************************
  * Name: pmecc_get*
  *
  * Description:

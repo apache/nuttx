@@ -352,7 +352,9 @@
 #define HSMC_NFCINT_UNDEF             (1 << 21) /* Bit 21: Undefined Area Access Interrupt */
 #define HSMC_NFCINT_AWB               (1 << 22) /* Bit 22: Accessing While Busy Interrupt */
 #define HSMC_NFCINT_NFCASE            (1 << 23) /* Bit 23: NFC Access Size Error Interrupt */
-#define HSMC_NFCINT_RB_EDGE0          (1 << 24) /* Bit 24: Ready/Busy Line 0 Interrupt */
+#define HSMC_NFCINT_RBEDGE0           (1 << 24) /* Bit 24: Ready/Busy Line 0 Interrupt */
+
+#define HSMC_NFCINT_ALL               (0x01f300030)
 
 /* HSMC NFC Address Cycle Zero Register */
 
