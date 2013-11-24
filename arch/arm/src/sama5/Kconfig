@@ -3039,6 +3039,7 @@ config SAMA5_EBICS0_NAND
 	bool "NAND Flash"
 	select MTD
 	select MTD_NAND
+	select SAMA5_HAVE_NAND
 
 endchoice # CS0 Memory Type
 
@@ -3061,6 +3062,7 @@ config SAMA5_EBICS0_SWECC
 config SAMA5_EBICS0_PMECC
 	bool "NAND H/W PMECC Support"
 	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
+	select SAMA5_HAVE_PMECC
 	---help---
 		Enable hardware assisted support for ECC calculations
 
@@ -3120,6 +3122,7 @@ config SAMA5_EBICS1_NAND
 	bool "NAND Flash"
 	select MTD
 	select MTD_NAND
+	select SAMA5_HAVE_NAND
 
 endchoice # CS1 Memory Type
 
@@ -3142,6 +3145,7 @@ config SAMA5_EBICS1_SWECC
 config SAMA5_EBICS1_PMECC
 	bool "NAND H/W PMECC Support"
 	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
+	select SAMA5_HAVE_PMECC
 	---help---
 		Enable hardware assisted support for ECC calculations
 
@@ -3201,6 +3205,7 @@ config SAMA5_EBICS2_NAND
 	bool "NAND Flash"
 	select MTD
 	select MTD_NAND
+	select SAMA5_HAVE_NAND
 
 endchoice # CS2 Memory Type
 
@@ -3223,6 +3228,7 @@ config SAMA5_EBICS2_SWECC
 config SAMA5_EBICS2_PMECC
 	bool "NAND H/W PMECC Support"
 	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
+	select SAMA5_HAVE_PMECC
 	---help---
 		Enable hardware assisted support for ECC calculations
 
@@ -3282,6 +3288,7 @@ config SAMA5_EBICS3_NAND
 	bool "NAND Flash"
 	select MTD
 	select MTD_NAND
+	select SAMA5_HAVE_NAND
 
 endchoice # CS3 Memory Type
 
@@ -3304,6 +3311,7 @@ config SAMA5_EBICS3_SWECC
 config SAMA5_EBICS3_PMECC
 	bool "NAND H/W PMECC Support"
 	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
+	select SAMA5_HAVE_PMECC
 	---help---
 		Enable hardware assisted support for ECC calculations
 
@@ -3316,7 +3324,15 @@ config SAMA5_EBICS3_CHIPECC
 endchoice # NAND ECC type
 endif # SAMA5_EBICS3
 
-if SAMA5_EBICS0_NAND || SAMA5_EBICS1_NAND || SAMA5_EBICS2_NAND || SAMA5_EBICS3_NAND
+config SAMA5_HAVE_NAND
+bool
+default n
+
+config SAMA5_HAVE_PMECC
+bool
+default n
+
+if SAMA5_HAVE_NAND
 
 config SAMA5_NAND_READYBUSY
 	bool "NAND Ready/Busy"
@@ -3336,14 +3352,22 @@ config SAMA5_NAND_CE
 
 			void board_nand_ce(int cs, bool enable);
 
-if SAMA5_EBICS0_NAND || SAMA5_EBICS1_NAND || SAMA5_EBICS2_NAND || SAMA5_EBICS3_NAND
+if SAMA5_HAVE_PMECC
 
 config MTD_NAND_MAX_PMECCSIZE
 	int "Max H/W ECC size"
 	default 200
-	depends on MTD_NAND_HWECC
 	---help---
 		Maximum HW ECC size
+
+config SAMA5_PMECC_TRIMPAGE
+	bool "Trim page support"
+	default n
+	---help---
+		Support page trimming.  This behavior was found to fix both UBI and
+		JFFS2 images written to cleanly erased NAND partitions.  NOTE:
+		Nothing in the code base now uses these trim pages.  Option support
+		is provided in case it becomes necessary in the future.
 
 config SAMA5_PMECC_EMBEDDEDALGO
 	bool "ROM ECC detection/correction"
@@ -3386,9 +3410,8 @@ config SAMA5_PMECC_GALOIS_TABLE1024_ROMADDR
 		address unless you know what you are doing.
 
 endif # SAMA5_PMECC_GALOIS_ROMTABLES
-endif # SAMA5_EBICS*_PMECC
-endif # SAMA5_EBICS*_NAND
-
+endif # SAMA5_HAVE_PMECC
+endif # SAMA5_HAVE_NAND
 endmenu # External Memory Configuration
 
 choice
