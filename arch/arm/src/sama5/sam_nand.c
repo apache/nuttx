@@ -678,10 +678,12 @@ static void nand_setup_cmddone(struct sam_nandcs_s *priv)
 {
   irqstate_t flags;
 
-  /* Clear all pending interrupts */
+  /* Clear all pending interrupts.  This must be done with interrupts
+   * enabled or we could lose interrupts.
+   */
 
-  flags = irqsave();
   nand_getreg(SAM_HSMC_SR);
+  flags = irqsave();
 
   /* Mark CMDDONE not received */
 
@@ -749,10 +751,12 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
 {
   irqstate_t flags;
 
-  /* Clear all pending interrupts */
+  /* Clear all pending interrupts.  This must be done with interrupts
+   * enabled or we could lose interrupts.
+   */
 
-  flags = irqsave();
   nand_getreg(SAM_HSMC_SR);
+  flags = irqsave();
 
   /* Mark XFRDONE not received */
 
@@ -820,10 +824,12 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
 {
   irqstate_t flags;
 
-  /* Clear all pending interrupts */
+  /* Clear all pending interrupts.  This must be done with interrupts
+   * enabled or we could lose interrupts.
+   */
 
-  flags = irqsave();
   nand_getreg(SAM_HSMC_SR);
+  flags = irqsave();
 
   /* Mark RBEDGE0 not received */
 
@@ -915,6 +921,7 @@ static int nand_wait_dma(struct sam_nandcs_s *priv)
         }
     }
 
+  fvdbg("Awakened: result=%d\n", priv->result);
   priv->dmadone = false;
   return priv->result;
 }
@@ -966,6 +973,9 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
   int ret;
 
   DEBUGASSERT(priv->dma);
+
+  fvdbg("vsrc=%08x vdest=%08x nbytes=%d\n",
+        (int)vsrc, (int)vdest, (int)nbytes);
 
   /* Invalidate the destination memory buffer before performing the DMA (so
    * that nothing gets flushed later, corrupting the DMA transfer, and so
@@ -1254,7 +1264,7 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
 static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
                            unsigned int page, void *data)
 {
-  uint32_t rawaddr;
+  uint32_t rowaddr;
   uint32_t regval;
   uint16_t pagesize;
   uint16_t sparesize;
@@ -1305,7 +1315,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   /* Calculate actual address of the page */
 
-  rawaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
+  rowaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
 
   /* Reset and enable the PMECC */
 
@@ -1323,7 +1333,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   nand_nfc_configure(priv,
                      HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN | HSMC_CLE_VCMD2_EN | HSMC_CLE_DATA_EN,
-                     COMMAND_READ_1, COMMAND_READ_2, 0, rawaddr);
+                     COMMAND_READ_1, COMMAND_READ_2, 0, rowaddr);
 
   /* Reset the ECC module*/
 
