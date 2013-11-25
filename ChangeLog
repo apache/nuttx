@@ -6104,3 +6104,5 @@
 	  Ken Pettit (2013-11-23)
 	* tools/mkctags.sh:  A script for creating ctags from Ken Pettit
 	  (2013-11-23)
+	* configs/sama5d3x-ek/src/sam_nand.c:  Add support for auto-mounting
+	  NAND MTD block or NXFFS devices (2013-11-25).

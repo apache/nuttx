@@ -235,7 +235,7 @@ static const struct section_mapping_s section_mapping[] =
     SAM_EBICS3_MMUFLAGS,   SAM_EBICS3_NSECTIONS
   },
 #endif
-#ifdef CONFIG_SAMA5_NFCCR
+#ifdef CONFIG_SAMA5_HAVE_NAND
   { SAM_NFCCR_PSECTION,   SAM_NFCCR_VSECTION,
     SAM_NFCCR_MMUFLAGS,   SAM_NFCCR_NSECTIONS
   },

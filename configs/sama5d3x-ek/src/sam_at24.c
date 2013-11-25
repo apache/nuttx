@@ -81,14 +81,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_at24_initialize
+ * Name: sam_at24_automount
  *
  * Description:
  *   Initialize and configure the AT24 serial EEPROM
  *
  ****************************************************************************/
 
-int sam_at24_initialize(int minor)
+int sam_at24_automount(int minor)
 {
   FAR struct i2c_dev_s *i2c;
   FAR struct mtd_dev_s *mtd;
@@ -127,7 +127,7 @@ int sam_at24_initialize(int minor)
       ret = ftl_initialize(AT24_MINOR, mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: Initialize the FTL layer\n");
+          fdbg("ERROR: Failed to initialize the FTL layer: %d\n", ret);
           return ret;
         }
 
@@ -138,7 +138,7 @@ int sam_at24_initialize(int minor)
       ret = nxffs_initialize(mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: NXFFS initialization failed: %d\n", -ret);
+          fdbg("ERROR: NXFFS initialization failed: %d\n", ret);
           return ret;
         }
 

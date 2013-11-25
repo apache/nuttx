@@ -110,10 +110,10 @@ int usbmsc_archinitialize(void)
   /* Initialize the AT25 MTD driver */
 
 #ifdef HAVE_AT25
-  int ret = sam_at25_initialize(AT25_MINOR);
+  int ret = sam_at25_automount(AT25_MINOR);
   if (ret < 0)
     {
-      message("ERROR: sam_at25_initialize failed: %d\n", ret);
+      message("ERROR: sam_at25_automount failed: %d\n", ret);
     }
 
   return ret;

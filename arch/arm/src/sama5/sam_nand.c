@@ -359,7 +359,7 @@ static void nand_cmdsend(struct sam_nandcs_s *priv, uint32_t cmd,
 
   /* Wait until host controller is not busy. */
 
-  while ((nand_getreg(NFCCMD_BASE + NFCADDR_CMD_NFCCMD) & 0x8000000) != 0);
+  while ((nand_getreg(NFCCMD_BASE + NFCADDR_CMD_NFCCMD) & 0x08000000) != 0);
   nand_setup_cmddone(priv);
 
   /* Send the command plus the ADDR_CYCLE */
@@ -604,11 +604,9 @@ static void nand_nfc_configure(struct sam_nandcs_s *priv, uint8_t mode,
       regval = NFCADDR_CMD_DATADIS;
     }
 
-  if (((mode & HSMC_ALE_COL_EN) == HSMC_ALE_COL_EN) ||
-      ((mode & HSMC_ALE_ROW_EN) == HSMC_ALE_ROW_EN))
+  if (((mode & HSMC_ALE_COL_EN) != 0) || ((mode & HSMC_ALE_ROW_EN) != 0))
     {
-      bool rowonly = (((mode & HSMC_ALE_COL_EN) == 0) &&
-                      ((mode & HSMC_ALE_ROW_EN) == HSMC_ALE_ROW_EN));
+      bool rowonly = ((mode & HSMC_ALE_COL_EN) == 0);
       nand_translate_address(priv, coladdr, rowaddr, &acycle0, &acycle1234, rowonly);
       acycle = nand_get_acycle(ncycles);
     }
@@ -643,7 +641,7 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
   irqstate_t flags;
   int ret;
 
-  /* Wait for the XFRDONE interrupt to occur */
+  /* Wait for the CMDDONE interrupt to occur */
 
   flags = irqsave();
   while (!g_nand.cmddone)
@@ -654,6 +652,8 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
           DEBUGASSERT(errno == EINTR);
         }
     }
+
+  /* Disable further CMDDONE interrupts */
 
   g_nand.cmddone = false;
   nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_CMDDONE);
@@ -689,7 +689,7 @@ static void nand_setup_cmddone(struct sam_nandcs_s *priv)
 
   /* Enable the CMDDONE interrupt */
 
-  nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_CMDDONE);
+  nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_CMDDONE);
   irqrestore(flags);
 }
 
@@ -723,6 +723,8 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
           DEBUGASSERT(errno == EINTR);
         }
     }
+
+  /* Disable further XFRDONE interrupts */
 
   g_nand.xfrdone = false;
   nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_XFRDONE);
@@ -758,7 +760,7 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
 
   /* Enable the XFRDONE interrupt */
 
-  nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_XFRDONE);
+  nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_XFRDONE);
   irqrestore(flags);
 }
 
@@ -792,6 +794,8 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
           DEBUGASSERT(errno == EINTR);
         }
     }
+
+  /* Disable further RBEDGE interrupts */
 
   g_nand.rbedge = false;
   nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_RBEDGE0);
@@ -827,7 +831,7 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
 
   /* Enable the EBEDGE0 interrupt */
 
-  nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_RBEDGE0);
+  nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_RBEDGE0);
   irqrestore(flags);
 }
 
@@ -1714,6 +1718,8 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
   off_t rowaddr;
   int ret = OK;
 
+  fvdbg("Block %d Page %d\n", block, page);
+
   /* Get page and spare sizes */
 
   pagesize  = nandmodel_getpagesize(&priv->raw.model);
@@ -1765,7 +1771,6 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
   /* Calculate physical address of the page */
 
   rowaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
-  fvdbg("Block %d Page %d\n", block, page);
 
   /* Handle the case where we use NFC SRAM */
 
@@ -2448,51 +2453,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 
   sem_init(&priv->waitsem, 0, 0);
 
-  /* Initialize the NAND hardware */
-  /* Perform board-specific SMC intialization for this CS */
-
-  ret = board_nandflash_config(cs);
-  if (ret < 0)
-    {
-      fdbg("ERROR: board_nandflash_config failed for CS%d: %d\n",
-           cs, ret);
-      return NULL;
-    }
-
-  /* Reset the NAND FLASH part */
-
-  nand_reset(priv);
-
-  /* Probe the NAND part.  On success, an MTD interface that wraps
-   * our raw NAND interface is returned.
-   */
-
-  mtd = nand_initialize(&priv->raw);
-  if (!mtd)
-    {
-      fdbg("ERROR: CS%d nand_initialize failed %d\n", cs);
-      return NULL;
-    }
-
-  /* Allocate a DMA channel for NAND transfers
-   * REVISIT:  Need DMA channel setup.
-   */
-
-  if (nandmodel_getbuswidth(&priv->raw.model) == 16)
-    {
-      priv->dma = sam_dmachannel(1, DMA_FLAGS16);
-    }
-  else
-    {
-      priv->dma = sam_dmachannel(1, DMA_FLAGS8);
-    }
-
-  if (!priv->dma)
-    {
-      fdbg("ERROR: Failed to allocate the DMA channel for CS%d\n", cs);
-    }
-
-  /* Enable the NAND FLASH controller */
+  /* Perform one-time, global NFC/PMECC initialization */
 
   if (!g_nand.initialized)
     {
@@ -2535,6 +2496,48 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 
       up_enable_irq(SAM_IRQ_HSMC);
       g_nand.initialized = true;
+    }
+
+  /* Initialize the NAND hardware for this CS */
+  /* Perform board-specific SMC intialization for this CS */
+
+  ret = board_nandflash_config(cs);
+  if (ret < 0)
+    {
+      fdbg("ERROR: board_nandflash_config failed for CS%d: %d\n",
+           cs, ret);
+      return NULL;
+    }
+
+  /* Reset the NAND FLASH part */
+
+  nand_reset(priv);
+
+  /* Probe the NAND part.  On success, an MTD interface that wraps
+   * our raw NAND interface is returned.
+   */
+
+  mtd = nand_initialize(&priv->raw);
+  if (!mtd)
+    {
+      fdbg("ERROR: CS%d nand_initialize failed %d\n", cs);
+      return NULL;
+    }
+
+  /* Allocate a DMA channel for NAND transfers */
+
+  if (nandmodel_getbuswidth(&priv->raw.model) == 16)
+    {
+      priv->dma = sam_dmachannel(1, DMA_FLAGS16);
+    }
+  else
+    {
+      priv->dma = sam_dmachannel(1, DMA_FLAGS8);
+    }
+
+  if (!priv->dma)
+    {
+      fdbg("ERROR: Failed to allocate the DMA channel for CS%d\n", cs);
     }
 
   /* Return the MTD wrapper interface as the MTD device */

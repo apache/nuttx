@@ -58,6 +58,7 @@
 #define HAVE_HSMCI      1
 #define HAVE_AT24       1
 #define HAVE_AT25       1
+#define HAVE_NAND       1
 #define HAVE_USBHOST    1
 #define HAVE_USBDEV     1
 #define HAVE_USBMONITOR 1
@@ -82,6 +83,39 @@
 #if defined(HAVE_HSMCI) && !defined(CONFIG_SAMA5_PIOD_IRQ)
 #  warning PIOD interrupts not enabled.  No MMC/SD support.
 #  undef HAVE_HSMCI
+#endif
+
+/* NAND FLASH */
+/* Can't support the NAND device if NAND flash is not configured on EBI CS3 */
+
+#ifndef CONFIG_SAMA5_EBICS3_NAND
+#  undef HAVE_NAND
+#endif
+
+/* Can't support NAND features if mountpoints are disabled or if we were not
+ * asked to mount the NAND part
+ */
+
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5_NAND_AUTOMOUNT)
+#  undef HAVE_NAND
+#endif
+
+/* If we are going to mount the NAND, then they user must also have told
+ * us what to do with it by setting one of these.
+ */
+
+#ifndef CONFIG_FS_NXFFS
+#  undef CONFIG_SAMA5_NAND_NXFFS
+#endif
+
+#if !defined(CONFIG_SAMA5_NAND_FTL) && !defined(CONFIG_SAMA5_NAND_NXFFS)
+#  undef HAVE_NAND
+#endif
+
+#if defined(CONFIG_SAMA5_NAND_FTL) && defined(CONFIG_SAMA5_NAND_NXFFS)
+#  warning Both CONFIG_SAMA5_NAND_FTL and CONFIG_SAMA5_NAND_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5_NAND_NXFFS
+#  undef CONFIG_SAMA5_NAND_NXFFS
 #endif
 
 /* AT25 Serial FLASH */
@@ -167,15 +201,28 @@
 #  undef CONFIG_SAMA5_AT24_NXFFS
 #endif
 
-/* Assign minor device numbers.  We will also use MINOR number 0 for the AT25.
- * It should appear as /dev/mtdblock0
+/* Assign minor device numbers.  For example, if we also use MINOR number 0
+ * for the AT25, it should appear as /dev/mtdblock0
  */
 
-#ifdef HAVE_AT25
-#  define AT25_MINOR 0
-#  define AT24_MINOR 1
+#define _NAND_MINOR 0
+
+#ifdef HAVE_NAND
+#  define NAND_MINOR  _NAND_MINOR
+#  define _AT25_MINOR (_NAND_MINOR+1)
 #else
-#  define AT24_MINOR 0
+#  define _AT25_MINOR _NAND_MINOR
+#endif
+
+#ifdef HAVE_AT25
+#  define AT25_MINOR  _AT25_MINOR
+#  define _AT24_MINOR (_AT25_MINOR+1)
+#else
+#  define _AT24_MINOR _AT25_MINOR
+#endif
+
+#ifdef HAVE_AT24
+#  define AT24_MINOR  _AT24_MINOR
 #endif
 
 /* MMC/SD minor numbers:  The NSH device minor extended is extened to support
@@ -549,7 +596,19 @@ void sam_sdram_config(void);
 #endif
 
 /****************************************************************************
- * Name: sam_at25_initialize
+ * Name: sam_nand_automount
+ *
+ * Description:
+ *   Initialize and configure the NAND on CS3
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_NAND
+int sam_nand_automount(int minor);
+#endif
+
+/****************************************************************************
+ * Name: sam_at25_automount
  *
  * Description:
  *   Initialize and configure the AT25 serial FLASH
@@ -557,11 +616,11 @@ void sam_sdram_config(void);
  ****************************************************************************/
 
 #ifdef HAVE_AT25
-int sam_at25_initialize(int minor);
+int sam_at25_automount(int minor);
 #endif
 
 /****************************************************************************
- * Name: sam_at24_initialize
+ * Name: sam_at24_automount
  *
  * Description:
  *   Initialize and configure the AT24 serial EEPROM
@@ -569,7 +628,7 @@ int sam_at25_initialize(int minor);
  ****************************************************************************/
 
 #ifdef HAVE_AT24
-int sam_at24_initialize(int minor);
+int sam_at24_automount(int minor);
 #endif
 
 /****************************************************************************

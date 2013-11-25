@@ -702,7 +702,7 @@ static uint32_t pmecc_correctionalgo(uint32_t isr, uint32_t data)
     }
 
 #define HSMC_PAGESIZE \
-  ((1 << ((nand_getreg(SAM_HSMC_PMECCFG) & HSMC_PMECCFG_PAGESIZE_MASK) >> \
+  (1 << ((nand_getreg(SAM_HSMC_PMECCFG) & HSMC_PMECCFG_PAGESIZE_MASK) >> \
    HSMC_PMECCFG_PAGESIZE_SHIFT))
 
   while (sector < (uint32_t)HSMC_PAGESIZE && isr != 0)

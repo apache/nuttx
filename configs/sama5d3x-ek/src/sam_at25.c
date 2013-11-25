@@ -64,14 +64,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_at25_initialize
+ * Name: sam_at25_automount
  *
  * Description:
  *   Initialize and configure the AT25 serial FLASH
  *
  ****************************************************************************/
 
-int sam_at25_initialize(int minor)
+int sam_at25_automount(int minor)
 {
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
@@ -106,7 +106,7 @@ int sam_at25_initialize(int minor)
       ret = ftl_initialize(AT25_MINOR, mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: Initialize the FTL layer\n");
+          fdbg("ERROR: Failed to initialize the FTL layer: %d\n", ret);
           return ret;
         }
 
@@ -116,7 +116,7 @@ int sam_at25_initialize(int minor)
       ret = nxffs_initialize(mtd);
       if (ret < 0)
         {
-          fdbg("ERROR: NXFFS initialization failed: %d\n", -ret);
+          fdbg("ERROR: NXFFS initialization failed: %d\n", ret);
           return ret;
         }
 

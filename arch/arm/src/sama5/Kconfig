@@ -3046,7 +3046,7 @@ endchoice # CS0 Memory Type
 choice
 	prompt "NAND ECC type"
 	default SAMA5_EBICS0_ECCNONE
-	depends on  SAMA5_EBICS0_NAND
+	depends on SAMA5_EBICS0_NAND
 
 config SAMA5_EBICS0_ECCNONE
 	bool "No ECC"
@@ -3129,7 +3129,7 @@ endchoice # CS1 Memory Type
 choice
 	prompt "NAND ECC type"
 	default SAMA5_EBICS1_ECCNONE
-	depends on  SAMA5_EBICS1_NAND
+	depends on SAMA5_EBICS1_NAND
 
 config SAMA5_EBICS1_ECCNONE
 	bool "No ECC"
@@ -3212,7 +3212,7 @@ endchoice # CS2 Memory Type
 choice
 	prompt "NAND ECC type"
 	default SAMA5_EBICS2_ECCNONE
-	depends on  SAMA5_EBICS2_NAND
+	depends on SAMA5_EBICS2_NAND
 
 config SAMA5_EBICS2_ECCNONE
 	bool "No ECC"
@@ -3295,7 +3295,7 @@ endchoice # CS3 Memory Type
 choice
 	prompt "NAND ECC type"
 	default SAMA5_EBICS3_ECCNONE
-	depends on  SAMA5_EBICS3_NAND
+	depends on SAMA5_EBICS3_NAND
 
 config SAMA5_EBICS3_ECCNONE
 	bool "No ECC"
