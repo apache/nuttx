@@ -644,7 +644,7 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
   /* Wait for the CMDDONE interrupt to occur */
 
   flags = irqsave();
-  while (!g_nand.cmddone)
+  do
     {
       ret = sem_wait(&g_nand.waitsem);
       if (ret < 0)
@@ -652,6 +652,7 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
           DEBUGASSERT(errno == EINTR);
         }
     }
+  while (!g_nand.cmddone);
 
   /* Disable further CMDDONE interrupts */
 
@@ -717,7 +718,7 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
   /* Wait for the XFRDONE interrupt to occur */
 
   flags = irqsave();
-  while (!g_nand.xfrdone)
+  do
     {
       ret = sem_wait(&g_nand.waitsem);
       if (ret < 0)
@@ -725,6 +726,7 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
           DEBUGASSERT(errno == EINTR);
         }
     }
+  while (!g_nand.xfrdone);
 
   /* Disable further XFRDONE interrupts */
 
@@ -790,7 +792,7 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
   /* Wait for the RBEDGE interrupt to occur */
 
   flags = irqsave();
-  while (!g_nand.rbedge)
+  do
     {
       ret = sem_wait(&g_nand.waitsem);
       if (ret < 0)
@@ -798,6 +800,7 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
           DEBUGASSERT(errno == EINTR);
         }
     }
+  while (!g_nand.rbedge);
 
   /* Disable further RBEDGE interrupts */
 

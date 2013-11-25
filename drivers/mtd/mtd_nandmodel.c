@@ -157,11 +157,11 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
             }
 
           fvdbg("NAND Model found:\n");
-          fvdbg("  devid:     0x%02x\n", model->devid);
-          fvdbg("  devsize:   %d\n",     model->devsize);
-          fvdbg("  blocksize: %d\n",     model->blocksize);
-          fvdbg("  pagesize:  %d\n",     model->pagesize);
-          fvdbg("  options:   0x%02x\n", model->options);
+          fvdbg("  devid:     0x%02x\n",  model->devid);
+          fvdbg("  devsize:   %d (MB)\n", model->devsize);
+          fvdbg("  blocksize: %d (KB)\n", model->blocksize);
+          fvdbg("  pagesize:  %d (B)\n",  model->pagesize);
+          fvdbg("  options:   0x%02x\n",  model->options);
           break;
         }
     }
