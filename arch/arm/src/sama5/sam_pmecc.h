@@ -306,7 +306,7 @@ void pmecc_initialize(void);
  * Name: pmecc_configure
  *
  * Description:
- *   Configure and Initialie the PMECC peripheral.
+ *   Configure and Initialize the PMECC peripheral for this CS.
  *
  * Input Parameters:
  *  priv      - Pointer to a struct sam_nandcs_s instance.
@@ -317,9 +317,6 @@ void pmecc_initialize(void);
  *
  * Returned Value:
  *  OK on success; a negated errno value on failure.
- *
- * Assumptions:
- *  The caller holds the PMECC lock.
  *
  ****************************************************************************/
 
@@ -371,6 +368,26 @@ int pmecc_correction(uint32_t isr, uintptr_t data);
 
 uint32_t pmecc_get_eccsize(void);
 uint32_t pmecc_get_pagesize(void);
+
+/****************************************************************************
+ * Name: pmecc_buildgf
+ *
+ * Description:
+ *   This function is able to build Galois Field.
+ *
+ * Input Parameters:
+ *   mm      - Degree of the remainders.
+ *   indexof - Pointer to a buffer for indexof table.
+ *   alphato - Pointer to a buffer for alphato table.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_PMECC_GALOIS_CUSTOM
+void pmecc_buildgf(uint32_t mm, int16_t* indexof, int16_t* alphato);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
