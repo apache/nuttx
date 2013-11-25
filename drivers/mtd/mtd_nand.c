@@ -200,13 +200,14 @@ static int nand_checkblock(FAR struct nand_dev_s *nand, off_t block)
   ret = NAND_RAWREAD(raw, block, 0, 0, spare);
   if (ret < 0)
     {
-      fdbg("ERROR: Cannot read page #0 of block #%d\n", block);
+      fdbg("ERROR: Failed to read page 0 of block %d\n", block);
       return ret;
     }
 
   nandscheme_readbadblockmarker(scheme, spare, &marker);
   if (marker != 0xff)
     {
+      fvdbg("Page 0 block %d marker=%02x\n", block, marker);
       return BADBLOCK;
     }
 
@@ -215,13 +216,14 @@ static int nand_checkblock(FAR struct nand_dev_s *nand, off_t block)
   ret = NAND_RAWREAD(raw, block, 1, 0, spare);
   if (ret < 0)
     {
-      fdbg("ERROR: Cannot read page #1 of block #%d\n", block);
+      fdbg("ERROR: Failed to read page 1 of block %d\n", block);
       return ret;
     }
 
   nandscheme_readbadblockmarker(scheme, spare, &marker);
   if (marker != 0xff)
     {
+      fvdbg("Page 1 block %d marker=%02x\n", block, marker);
       return BADBLOCK;
     }
 
@@ -239,7 +241,7 @@ static int nand_checkblock(FAR struct nand_dev_s *nand, off_t block)
  *   nand - Pointer to a struct nand_dev_s instance.
  *
  * Returned Value:
- *   None
+ *   OK (always)
  *
  ****************************************************************************/
 
@@ -250,6 +252,10 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
   FAR struct nand_model_s *model;
   off_t nblocks;
   off_t block;
+#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+  off_t good;
+  unsigned int ngood;
+#endif
   int ret;
 
   DEBUGASSERT(nand && nand->raw);
@@ -263,9 +269,13 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
 
   /* Initialize block statuses */
 
-  fvdbg("Retrieving bad block information ...\n");
+  fvdbg("Retrieving bad block information. nblocks=%d\n", nblocks);
 
   /* Retrieve block status from their first page spare area */
+
+#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+  ngood = 0;
+#endif
 
   for (block = 0; block < nblocks; block++)
     {
@@ -274,6 +284,13 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
       ret = nand_checkblock(nand, block);
       if (ret != GOODBLOCK)
         {
+#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+          if (ngood > 0)
+            {
+              fvdbg("Good blocks: %u - %u\n", good, good + ngood);
+              ngood = 0;
+            }
+#endif
           if (ret == BADBLOCK)
             {
               fvdbg("Block %u is bad\n", (unsigned int)block);
@@ -284,7 +301,25 @@ static int nand_devscan(FAR struct nand_dev_s *nand)
                    (unsigned int)block, ret);
             }
         }
+#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+      else
+        {
+           if (ngood == 0)
+             {
+               good = block;
+             }
+
+           ngood++;
+        }
+#endif
     }
+
+#if defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
+  if (ngood > 0)
+    {
+      fvdbg("Good blocks: %u - %u\n", good, good + ngood);
+    }
+#endif
 
   return OK;
 }
@@ -918,13 +953,7 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
 
   /* Scan the device for bad blocks */
 
-  ret = nand_devscan(nand);
-  if (ret < 0)
-    {
-      fdbg("ERROR: nandspare_intialize failed\n", ret);
-      kfree(nand);
-      return NULL;
-    }
+  (void)nand_devscan(nand);
 
   /* Return the implementation-specific state structure as the MTD device */
 
