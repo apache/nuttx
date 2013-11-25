@@ -80,29 +80,30 @@
 #define SAM_HSMC_PMECCISR_OFFSET      0x0098 /* PMECC Interrupt Status Register */
                                              /* 0x009c-0x00ac Reserved */
 #define SAM_HSMC_PMECC_OFFSET(sec)    (0x00b0+((sec) << 6))      /* PMECC sector offset */
-#define SAM_HSMC_PMECC0_OFFSET(sec)   (0x00b0+0x00+((sec) << 6)) /* PMECC Redundancy 0 Register */
-#define SAM_HSMC_PMECC1_OFFSET(sec)   (0x00b0+0x04+((sec) << 6)) /* PMECC Redundancy 1 Register */
-#define SAM_HSMC_PMECC2_OFFSET(sec)   (0x00b0+0x08+((sec) << 6)) /* PMECC Redundancy 2 Register */
-#define SAM_HSMC_PMECC3_OFFSET(sec)   (0x00b0+0x0c+((sec) << 6)) /* PMECC Redundancy 3 Register */
-#define SAM_HSMC_PMECC4_OFFSET(sec)   (0x00b0+0x10+((sec) << 6)) /* PMECC Redundancy 4 Register */
-#define SAM_HSMC_PMECC5_OFFSET(sec)   (0x00b0+0x14+((sec) << 6)) /* PMECC Redundancy 5 Register */
-#define SAM_HSMC_PMECC6_OFFSET(sec)   (0x00b0+0x18+((sec) << 6)) /* PMECC Redundancy 6 Register */
-#define SAM_HSMC_PMECC7_OFFSET(sec)   (0x00b0+0x1c+((sec) << 6)) /* PMECC Redundancy 7 Register */
-#define SAM_HSMC_PMECC8_OFFSET(sec)   (0x00b0+0x20+((sec) << 6)) /* PMECC Redundancy 8 Register */
-#define SAM_HSMC_PMECC9_OFFSET(sec)   (0x00b0+0x24+((sec) << 6)) /* PMECC Redundancy 9 Register */
-#define SAM_HSMC_PMECC10_OFFSET(sec)  (0x00b0+0x28+((sec) << 6)) /* PMECC Redundancy 10 Register */
-#define SAM_HSMC_REM0_OFFSET(sec)     (0x02b0+0x00+((sec) << 6)) /* PMECC Remainder 0 Register */
-#define SAM_HSMC_REM1_OFFSET(sec)     (0x02b0+0x04+((sec) << 6)) /* PMECC Remainder 1 Register */
-#define SAM_HSMC_REM2_OFFSET(sec)     (0x02b0+0x08+((sec) << 6)) /* PMECC Remainder 2 Register */
-#define SAM_HSMC_REM3_OFFSET(sec)     (0x02b0+0x0c+((sec) << 6)) /* PMECC Remainder 3 Register */
-#define SAM_HSMC_REM4_OFFSET(sec)     (0x02b0+0x10+((sec) << 6)) /* PMECC Remainder 4 Register */
-#define SAM_HSMC_REM5_OFFSET(sec)     (0x02b0+0x14+((sec) << 6)) /* PMECC Remainder 5 Register */
-#define SAM_HSMC_REM6_OFFSET(sec)     (0x02b0+0x18+((sec) << 6)) /* PMECC Remainder 6 Register */
-#define SAM_HSMC_REM7_OFFSET(sec)     (0x02b0+0x1c+((sec) << 6)) /* PMECC Remainder 7 Register */
-#define SAM_HSMC_REM8_OFFSET(sec)     (0x02b0+0x20+((sec) << 6)) /* PMECC Remainder 8 Register */
-#define SAM_HSMC_REM9_OFFSET(sec)     (0x02b0+0x24+((sec) << 6)) /* PMECC Remainder 9 Register */
-#define SAM_HSMC_REM10_OFFSET(sec)    (0x02b0+0x28+((sec) << 6)) /* PMECC Remainder 10 Register */
-#define SAM_HSMC_REM11_OFFSET(sec)    (0x02b0+0x1c+((sec) << 6)) /* PMECC Remainder 11 Register */
+#define SAM_HSMC_PMECC0_OFFSET(sec)   (0x00b0+((sec) << 6)) /* PMECC Redundancy 0 Register */
+#define SAM_HSMC_PMECC1_OFFSET(sec)   (0x00b4+((sec) << 6)) /* PMECC Redundancy 1 Register */
+#define SAM_HSMC_PMECC2_OFFSET(sec)   (0x00b8+((sec) << 6)) /* PMECC Redundancy 2 Register */
+#define SAM_HSMC_PMECC3_OFFSET(sec)   (0x00bc+((sec) << 6)) /* PMECC Redundancy 3 Register */
+#define SAM_HSMC_PMECC4_OFFSET(sec)   (0x00c0+((sec) << 6)) /* PMECC Redundancy 4 Register */
+#define SAM_HSMC_PMECC5_OFFSET(sec)   (0x00c4+((sec) << 6)) /* PMECC Redundancy 5 Register */
+#define SAM_HSMC_PMECC6_OFFSET(sec)   (0x00c8+((sec) << 6)) /* PMECC Redundancy 6 Register */
+#define SAM_HSMC_PMECC7_OFFSET(sec)   (0x00cc+((sec) << 6)) /* PMECC Redundancy 7 Register */
+#define SAM_HSMC_PMECC8_OFFSET(sec)   (0x00d0+((sec) << 6)) /* PMECC Redundancy 8 Register */
+#define SAM_HSMC_PMECC9_OFFSET(sec)   (0x00d4+((sec) << 6)) /* PMECC Redundancy 9 Register */
+#define SAM_HSMC_PMECC10_OFFSET(sec)  (0x00d8+((sec) << 6)) /* PMECC Redundancy 10 Register */
+#define SAM_HSMC_PEM_OFFSET(sec)      (0x02b0+((sec) << 6)) /* PMECC Remainder offset */
+#define SAM_HSMC_REM0_OFFSET(sec)     (0x02b0+((sec) << 6)) /* PMECC Remainder 0 Register */
+#define SAM_HSMC_REM1_OFFSET(sec)     (0x02b4+((sec) << 6)) /* PMECC Remainder 1 Register */
+#define SAM_HSMC_REM2_OFFSET(sec)     (0x02b8+((sec) << 6)) /* PMECC Remainder 2 Register */
+#define SAM_HSMC_REM3_OFFSET(sec)     (0x02bc+((sec) << 6)) /* PMECC Remainder 3 Register */
+#define SAM_HSMC_REM4_OFFSET(sec)     (0x02b0+((sec) << 6)) /* PMECC Remainder 4 Register */
+#define SAM_HSMC_REM5_OFFSET(sec)     (0x02b4+((sec) << 6)) /* PMECC Remainder 5 Register */
+#define SAM_HSMC_REM6_OFFSET(sec)     (0x02b8+((sec) << 6)) /* PMECC Remainder 6 Register */
+#define SAM_HSMC_REM7_OFFSET(sec)     (0x02bc+((sec) << 6)) /* PMECC Remainder 7 Register */
+#define SAM_HSMC_REM8_OFFSET(sec)     (0x02b0+((sec) << 6)) /* PMECC Remainder 8 Register */
+#define SAM_HSMC_REM9_OFFSET(sec)     (0x02b4+((sec) << 6)) /* PMECC Remainder 9 Register */
+#define SAM_HSMC_REM10_OFFSET(sec)    (0x02b8+((sec) << 6)) /* PMECC Remainder 10 Register */
+#define SAM_HSMC_REM11_OFFSET(sec)    (0x02bc+((sec) << 6)) /* PMECC Remainder 11 Register */
                                              /* 0x04a0-0x04fc Reserved */
 #define SAM_HSMC_ELCFG_OFFSET         0x0500 /* PMECC Error Location Configuration Register */
 #define SAM_HSMC_ELPRIM_OFFSET        0x0504 /* PMECC Error Location Primitive Register */
@@ -200,29 +201,30 @@
 #define SAM_HSMC_PMECCIMR             (SAM_HSMC_VBASE+SAM_HSMC_PMECCIMR_OFFSET)
 #define SAM_HSMC_PMECCISR             (SAM_HSMC_VBASE+SAM_HSMC_PMECCISR_OFFSET)
 #define SAM_HSMC_PMECC_BASE(sec)      (SAM_HSMC_VBASE+SAM_HSMC_PMECC_OFFSET(sec))
-#define SAM_HSMC_PMECC0(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC0_OFFSET(sec))
-#define SAM_HSMC_PMECC1(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC1_OFFSET(sec))
-#define SAM_HSMC_PMECC2(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC2_OFFSET(sec))
-#define SAM_HSMC_PMECC3(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC3_OFFSET(sec))
-#define SAM_HSMC_PMECC4(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC4_OFFSET(sec))
-#define SAM_HSMC_PMECC5(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC5_OFFSET(sec))
-#define SAM_HSMC_PMECC6(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC6_OFFSET(sec))
-#define SAM_HSMC_PMECC7(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC7_OFFSET(sec))
-#define SAM_HSMC_PMECC8(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC8_OFFSET(sec))
-#define SAM_HSMC_PMECC9(sec)          (SAM_HSMC_VBASE+SAM_HSMC_PMECC9_OFFSET(sec))
-#define SAM_HSMC_PMECC10(sec)         (SAM_HSMC_VBASE+SAM_HSMC_PMECC10_OFFSET(sec))
-#define SAM_HSMC_REM0(sec)            (SAM_HSMC_VBASE+SAM_HSMC_REM0_OFFSET(sec))
-#define SAM_HSMC_REM1(sec)            (SAM_HSMC_VBASE+SAM_HSMC_REM1_OFFSET(sec))
-#define SAM_HSMC_REM2(sec)            (SAM_HSMC_VBASE+SAM_HSMC_REM2_OFFSET(sec))
-#define SAM_HSMC_REM3(sec)            (SAM_HSMC_VBASE+SAM_HSMC_REM3_OFFSET(sec))
-#define SAM_HSMC_REM4(sec)            (SAM_HSMC_VBASE+SAM_HSMC_REM4_OFFSET(sec))
-#define SAM_HSMC_REM5(sec)            (SAM_HSMC_VBASE+SAM_HSMC_REM5_OFFSET(sec))
-#define SAM_HSMC_REM6(sec)            (SAM_HSMC_VBASE+SAM_HSMC_REM6_OFFSET(sec))
-#define SAM_HSMC_REM7(sec)            (SAM_HSMC_VBASE+SAM_HSMC_REM7_OFFSET(sec))
-#define SAM_HSMC_REM8(sec)            (SAM_HSMC_VBASE+SAM_HSMC_REM8_OFFSET(sec))
-#define SAM_HSMC_REM9(sec)            (SAM_HSMC_VBASE+SAM_HSMC_REM9_OFFSET(sec))
-#define SAM_HSMC_REM10(sec)           (SAM_HSMC_VBASE+SAM_HSMC_REM10_OFFSET(sec))
-#define SAM_HSMC_REM11(sec)           (SAM_HSMC_VBASE+SAM_HSMC_REM11_OFFSET(sec))
+#  define SAM_HSMC_PMECC0(sec)        (SAM_HSMC_VBASE+SAM_HSMC_PMECC0_OFFSET(sec))
+#  define SAM_HSMC_PMECC1(sec)        (SAM_HSMC_VBASE+SAM_HSMC_PMECC1_OFFSET(sec))
+#  define SAM_HSMC_PMECC2(sec)        (SAM_HSMC_VBASE+SAM_HSMC_PMECC2_OFFSET(sec))
+#  define SAM_HSMC_PMECC3(sec)        (SAM_HSMC_VBASE+SAM_HSMC_PMECC3_OFFSET(sec))
+#  define SAM_HSMC_PMECC4(sec)        (SAM_HSMC_VBASE+SAM_HSMC_PMECC4_OFFSET(sec))
+#  define SAM_HSMC_PMECC5(sec)        (SAM_HSMC_VBASE+SAM_HSMC_PMECC5_OFFSET(sec))
+#  define SAM_HSMC_PMECC6(sec)        (SAM_HSMC_VBASE+SAM_HSMC_PMECC6_OFFSET(sec))
+#  define SAM_HSMC_PMECC7(sec)        (SAM_HSMC_VBASE+SAM_HSMC_PMECC7_OFFSET(sec))
+#  define SAM_HSMC_PMECC8(sec)        (SAM_HSMC_VBASE+SAM_HSMC_PMECC8_OFFSET(sec))
+#  define SAM_HSMC_PMECC9(sec)        (SAM_HSMC_VBASE+SAM_HSMC_PMECC9_OFFSET(sec))
+#  define SAM_HSMC_PMECC10(sec)       (SAM_HSMC_VBASE+SAM_HSMC_PMECC10_OFFSET(sec))
+#define SAM_HSMC_REM_BASE(sec)        (SAM_HSMC_VBASE+SAM_HSMC_PEM_OFFSET(sec))
+#  define SAM_HSMC_REM0(sec)          (SAM_HSMC_VBASE+SAM_HSMC_REM0_OFFSET(sec))
+#  define SAM_HSMC_REM1(sec)          (SAM_HSMC_VBASE+SAM_HSMC_REM1_OFFSET(sec))
+#  define SAM_HSMC_REM2(sec)          (SAM_HSMC_VBASE+SAM_HSMC_REM2_OFFSET(sec))
+#  define SAM_HSMC_REM3(sec)          (SAM_HSMC_VBASE+SAM_HSMC_REM3_OFFSET(sec))
+#  define SAM_HSMC_REM4(sec)          (SAM_HSMC_VBASE+SAM_HSMC_REM4_OFFSET(sec))
+#  define SAM_HSMC_REM5(sec)          (SAM_HSMC_VBASE+SAM_HSMC_REM5_OFFSET(sec))
+#  define SAM_HSMC_REM6(sec)          (SAM_HSMC_VBASE+SAM_HSMC_REM6_OFFSET(sec))
+#  define SAM_HSMC_REM7(sec)          (SAM_HSMC_VBASE+SAM_HSMC_REM7_OFFSET(sec))
+#  define SAM_HSMC_REM8(sec)          (SAM_HSMC_VBASE+SAM_HSMC_REM8_OFFSET(sec))
+#  define SAM_HSMC_REM9(sec)          (SAM_HSMC_VBASE+SAM_HSMC_REM9_OFFSET(sec))
+#  define SAM_HSMC_REM10(sec)         (SAM_HSMC_VBASE+SAM_HSMC_REM10_OFFSET(sec))
+#  define SAM_HSMC_REM11(sec)         (SAM_HSMC_VBASE+SAM_HSMC_REM11_OFFSET(sec))
 #define SAM_HSMC_ELCFG                (SAM_HSMC_VBASE+SAM_HSMC_ELCFG_OFFSET)
 #define SAM_HSMC_ELPRIM               (SAM_HSMC_VBASE+SAM_HSMC_ELPRIM_OFFSET)
 #define SAM_HSMC_ELEN                 (SAM_HSMC_VBASE+SAM_HSMC_ELEN_OFFSET)
@@ -232,7 +234,7 @@
 #define SAM_HSMC_ELIDR                (SAM_HSMC_VBASE+SAM_HSMC_ELIDR_OFFSET)
 #define SAM_HSMC_ELIMR                (SAM_HSMC_VBASE+SAM_HSMC_ELIMR_OFFSET)
 #define SAM_HSMC_ELISR                (SAM_HSMC_VBASE+SAM_HSMC_ELISR_OFFSET)
-#define SAM_HSMC_SIGMA(n)             (SAM_HSMC_VBASE+SAM_HSMC_SIGMA_OFFSET(n))
+#define SAM_HSMC_SIGMA_BASE(n)        (SAM_HSMC_VBASE+SAM_HSMC_SIGMA_OFFSET(n))
 #  define SAM_HSMC_SIGMA0             (SAM_HSMC_VBASE+SAM_HSMC_SIGMA0_OFFSET)
 #  define SAM_HSMC_SIGMA1             (SAM_HSMC_VBASE+SAM_HSMC_SIGMA1_OFFSET)
 #  define SAM_HSMC_SIGMA2             (SAM_HSMC_VBASE+SAM_HSMC_SIGMA2_OFFSET)
@@ -258,7 +260,7 @@
 #  define SAM_HSMC_SIGMA22            (SAM_HSMC_VBASE+SAM_HSMC_SIGMA22_OFFSET)
 #  define SAM_HSMC_SIGMA23            (SAM_HSMC_VBASE+SAM_HSMC_SIGMA23_OFFSET)
 #  define SAM_HSMC_SIGMA24            (SAM_HSMC_VBASE+SAM_HSMC_SIGMA24_OFFSET)
-#define SAM_HSMC_ERRLOC(n)            (SAM_HSMC_VBASE+SAM_HSMC_ERRLOC_OFFSET(n))
+#define SAM_HSMC_ERRLOC_BASE(n)       (SAM_HSMC_VBASE+SAM_HSMC_ERRLOC_OFFSET(n))
 #  define SAM_HSMC_ERRLOC0            (SAM_HSMC_VBASE+SAM_HSMC_ERRLOC0_OFFSET)
 #  define SAM_HSMC_ERRLOC1            (SAM_HSMC_VBASE+SAM_HSMC_ERRLOC1_OFFSET)
 #  define SAM_HSMC_ERRLOC2            (SAM_HSMC_VBASE+SAM_HSMC_ERRLOC2_OFFSET)
@@ -442,9 +444,13 @@
 
 /* PMECC Error Location Configuration Register */
 
-#define HSMC_ELCFG_SECTORSZ           (1 << 0)  /* Bit 0:  Sector Size */
+#define HSMC_ELCFG_SECTORSZ_SHIFT     (0)      /* Bit 0:  Sector Size */
+#define HSMC_ELCFG_SECTORSZ_MASK      (1 << HSMC_ELCFG_SECTORSZ_SHIFT)
+#  define HSMC_ELCFG_SECTORSZ_512     (0 << HSMC_ELCFG_SECTORSZ_SHIFT)
+#  define HSMC_ELCFG_SECTORSZ_1024    (1 << HSMC_ELCFG_SECTORSZ_SHIFT)
 #define HSMC_ELCFG_ERRNUM_SHIFT       (16)      /* Bit 16-20: Number of Errors */
 #define HSMC_ELCFG_ERRNUM_MASK        (0x1f << HSMC_ELCFG_ERRNUM_SHIFT)
+#  define HSMC_ELCFG_ERRNUM(n)        ((uint32_t)(n) << HSMC_ELCFG_ERRNUM_SHIFT)
 
 /* PMECC Error Location Primitive Register */
 
@@ -467,7 +473,6 @@
 /* PMECC Error Location Interrupt Mask Register */
 
 #define HSMC_ELIINT_DONE              (1 << 0)  /* Bit 0:  Computation Terminated Interrupt */
-
 #define HSMC_ELISR_ERRCNT_SHIFT       (8)       /* Bit 8-12: Error Counter value (SR only) */
 #define HSMC_ELISR_ERRCNT_MASK        (0x1f << HSMC_ELISR_ERRCNT_SHIFT)
 

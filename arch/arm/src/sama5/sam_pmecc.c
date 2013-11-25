@@ -8,8 +8,9 @@
  *   SAMA5D3 Series Data Sheet
  *   Atmel NoOS sample code.
  *
- * The Atmel sample code has a BSD compatibile license that requires this
- * copyright notice:
+ * All of the detailed PMECC operations are taken directly from the Atmel
+ * NoOS sample code.  The Atmel sample code has a BSD compatibile license
+ * that requires this copyright notice:
  *
  *   Copyright (c) 2012, Atmel Corporation
  *
@@ -53,6 +54,8 @@
 #include <stdbool.h>
 #include <semaphore.h>
 #include <assert.h>
+#include <errno.h>
+#include <debug.h>
 
 #include "sam_pmecc.h"
 #include "sam_nand.h"
@@ -78,7 +81,7 @@
  * block tags are at address 0.
  */
 
-#define PMECC_ECC_STARTOFFSET 2
+#define PMECC_ECC_DEFAULT_STARTOFFSET 2
 
 /****************************************************************************
  * Private Types
@@ -151,7 +154,7 @@ typedef uint32_t (*pmecc_correctionalgo_t)(Pmecc *, Pmerrloc *,
 
 #ifdef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
 #  define pmecc_correctionalgo \
-    (pmecc_correctionalgo_t)CONFIG_SAMA5_PMECC_EMBEDDEDALGO_ADDR)
+    ((pmecc_correctionalgo_t)CONFIG_SAMA5_PMECC_EMBEDDEDALGO_ADDR)
 #else
 static uint32_t pmecc_correctionalgo(uint32_t isr, uintptr_t data);
 #endif
@@ -170,6 +173,571 @@ static const uint8_t g_correctability[5] = {2, 4, 8, 12, 24};
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: pmecc_gensyn
+ *
+ * Description:
+ *   Build the pseudo syndromes table
+ *
+ * Input Parameters:
+ *   sector - Targetted sector.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
+static void pmecc_gensyn(uint32_t sector)
+{
+  int16_t *remainder;
+  int i;
+
+  remainder = (int16_t *)SAM_HSMC_REM_BASE(sector);
+
+  for (i = 0; i < (uint32_t)g_pmecc.desc.tt; i++)
+    {
+      /* Fill odd syndromes */
+
+      g_pmecc.desc.partsyn[1 + (2 * i)] = remainder[i];
+    }
+}
+#endif /* CONFIG_SAMA5_PMECC_EMBEDDEDALGO */
+
+/****************************************************************************
+ * Name: pmecc_substitute
+ *
+ * Description:
+ *   The pmecc_substitute function evaluates the polynomial remainder, with
+ *   different values of the field primitive elements.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (always)
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
+static uint32_t pmecc_substitute(void)
+{
+  int16_t *si      = g_pmecc.desc.si;
+  int16_t *partsyn = g_pmecc.desc.partsyn;
+  int16_t *alphato = g_pmecc.desc.alphato;
+  int16_t *indexof = g_pmecc.desc.indexof;
+  int i;
+  int j;
+
+  /* si[] is a table that holds the current syndrome value, an element of
+   * that table belongs to the field.
+   */
+
+  for (i = 1; i < 2 * PMECC_MAX_CORRECTABILITY; i++)
+    {
+      si[i] = 0;
+    }
+
+  /* Computation 2t syndromes based on S(x) */
+  /* Odd syndromes */
+
+  for (i = 1; i <= 2 * g_pmecc.desc.tt - 1; i = i + 2)
+    {
+      si[i] = 0;
+      for (j = 0; j < g_pmecc.desc.mm; j++)
+        {
+          if (partsyn[i] & ((uint16_t)0x1 << j))
+            {
+              si[i] = alphato[(i * j)] ^ si[i];
+            }
+        }
+    }
+
+  /* Even syndrome = (Odd syndrome) ** 2 */
+
+  for (i = 2; i <= 2 * g_pmecc.desc.tt; i = i + 2)
+    {
+      j = i / 2;
+      if (si[j] == 0)
+        {
+          si[i] = 0;
+        }
+      else
+        {
+          si[i] = alphato[(2 * indexof[si[j]]) % g_pmecc.desc.nn];
+        }
+    }
+
+  return 0;
+}
+#endif /* CONFIG_SAMA5_PMECC_EMBEDDEDALGO */
+
+/****************************************************************************
+ * Name: pmecc_getsigma
+ *
+ * Description:
+ *   The substitute function finding the value of the error location
+ *   polynomial.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (always)
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
+static uint32_t pmecc_getsigma(void)
+{
+  uint32_t dmu0count;
+  int16_t *lmu = g_pmecc.desc.lmu;
+  int16_t *si = g_pmecc.desc.si;
+  int16_t tt = g_pmecc.desc.tt;
+  int32_t mu[PMECC_MAX_CORRECTABILITY+1];       /* Mu */
+  int32_t dmu[PMECC_MAX_CORRECTABILITY+1];      /* Discrepancy */
+  int32_t delta[PMECC_MAX_CORRECTABILITY+1];    /* Delta order   */
+  int32_t largest;
+  int32_t diff;
+  int ro;                                       /* Index of largest delta */
+  int i;
+  int j;
+  int k;
+
+  dmu0count = 0;
+
+  /* First Row */
+  /* Mu */
+
+  mu[0] = -1; /* Actually -1/2 */
+
+  /* Sigma(x) set to 1 */
+
+  for (i = 0; i < (2 * PMECC_MAX_CORRECTABILITY + 1); i++)
+    {
+      g_pmecc.desc.smu[0][i] = 0;
+    }
+
+  g_pmecc.desc.smu[0][0] = 1;
+
+  /* Discrepancy set to 1 */
+
+  dmu[0] = 1;
+
+  /* Polynom order set to 0 */
+
+  lmu[0] = 0;
+
+  /* delta set to -1 */
+
+  delta[0] = (mu[0] * 2 - lmu[0]) >> 1;
+
+  /* Second row */
+  /* Mu */
+
+  mu[1]  = 0;
+
+  /* Sigma(x) set to 1 */
+
+  for (i = 0; i < (2 * PMECC_MAX_CORRECTABILITY + 1); i++)
+    {
+      g_pmecc.desc.smu[1][i] = 0;
+    }
+
+  g_pmecc.desc.smu[1][0] = 1;
+
+  /* Discrepancy set to S1 */
+
+  dmu[1] = si[1];
+
+  /* Polynom order set to 0 */
+
+  lmu[1] = 0;
+
+  /* Delta set to 0 */
+
+  delta[1]  = (mu[1] * 2 - lmu[1]) >> 1;
+
+  /* Initialize the Sigma(x) last row */
+
+  for (i = 0; i < (2 * PMECC_MAX_CORRECTABILITY + 1); i++)
+    {
+      g_pmecc.desc.smu[tt + 1][i] = 0;
+    }
+
+  for (i = 1; i <= tt; i++)
+    {
+      mu[i+1] = i << 1;
+
+      /* Compute Sigma (Mu+1) and L(mu). */
+      /* check if discrepancy is set to 0 */
+
+      if (dmu[i] == 0)
+        {
+          dmu0count++;
+          if ((tt - (lmu[i] >> 1) - 1) & 0x1)
+            {
+              if (dmu0count == (uint32_t)((tt - (lmu[i] >> 1) - 1) / 2) + 2)
+                {
+                  for (j = 0; j <= (lmu[i] >> 1) + 1; j++)
+                    {
+                      g_pmecc.desc.smu[tt+1][j] = g_pmecc.desc.smu[i][j];
+                    }
+                  lmu[tt + 1] = lmu[i];
+                  return 0;
+                }
+            }
+          else
+            {
+              if (dmu0count == (uint32_t)((tt - (lmu[i] >> 1) - 1) / 2) + 1)
+                {
+                  for (j = 0; j <= (lmu[i] >> 1) + 1; j++)
+                    {
+                      g_pmecc.desc.smu[tt + 1][j] = g_pmecc.desc.smu[i][j];
+                    }
+                  lmu[tt + 1] = lmu[i];
+                  return 0;
+                }
+            }
+
+          /* Copy polynom */
+
+          for (j = 0; j <= lmu[i] >> 1; j++)
+            {
+              g_pmecc.desc.smu[i + 1][j] = g_pmecc.desc.smu[i][j];
+            }
+
+          /* Copy previous polynom order to the next */
+
+          lmu[i + 1] = lmu[i];
+        }
+      else
+        {
+          ro = 0;
+          largest = -1;
+
+          /* find largest delta with dmu != 0 */
+
+          for (j = 0; j < i; j++)
+            {
+              if (dmu[j])
+                {
+                  if (delta[j] > largest)
+                    {
+                      largest = delta[j];
+                      ro = j;
+                    }
+                }
+            }
+
+          /* Compute difference */
+
+          diff = (mu[i] - mu[ro]);
+
+          /* Compute degree of the new smu polynomial */
+
+          if ((lmu[i]>>1) > ((lmu[ro]>>1) + diff))
+            {
+              lmu[i + 1] = lmu[i];
+            }
+          else
+            {
+              lmu[i + 1] = ((lmu[ro]>>1) + diff) * 2;
+            }
+
+          /* Init smu[i+1] with 0 */
+
+          for (k = 0; k < (2 * PMECC_MAX_CORRECTABILITY+1); k ++)
+            {
+              g_pmecc.desc.smu[i+1][k] = 0;
+            }
+
+          /* Compute smu[i+1] */
+
+          for (k = 0; k <= lmu[ro]>>1; k ++)
+            {
+              if (g_pmecc.desc.smu[ro][k] && dmu[i])
+                {
+                   g_pmecc.desc.smu[i + 1][k + diff] =
+                     g_pmecc.desc.alphato[(g_pmecc.desc.indexof[dmu[i]] +
+                     (g_pmecc.desc.nn - g_pmecc.desc.indexof[dmu[ro]]) +
+                     g_pmecc.desc.indexof[g_pmecc.desc.smu[ro][k]]) % g_pmecc.desc.nn];
+                }
+            }
+
+          for (k = 0; k <= lmu[i]>>1; k ++)
+            {
+              g_pmecc.desc.smu[i+1][k] ^= g_pmecc.desc.smu[i][k];
+            }
+        }
+
+      /* End Compute Sigma (Mu+1) and L(mu) */
+      /* In either case compute delta */
+
+      delta[i + 1]  = (mu[i + 1] * 2 - lmu[i + 1]) >> 1;
+
+      /* Do not compute discrepancy for the last iteration */
+
+      if (i < tt)
+        {
+          for (k = 0 ; k <= (lmu[i + 1] >> 1); k++)
+            {
+              if (k == 0)
+                {
+                  dmu[i + 1] = si[2 * (i - 1) + 3];
+                }
+
+              /* Check if one operand of the multiplier is null, its index is -1 */
+
+              else if (g_pmecc.desc.smu[i+1][k] && si[ 2 * (i - 1) + 3 - k])
+                {
+                  dmu[i + 1] =
+                    g_pmecc.desc.alphato[(g_pmecc.desc.indexof[g_pmecc.desc.smu[ i + 1 ][ k ]] +
+                    g_pmecc.desc.indexof[si[ 2 * (i - 1) + 3 - k]]) % g_pmecc.desc.nn] ^ dmu[ i + 1];
+                }
+            }
+        }
+    }
+
+  return 0;
+}
+#endif /* CONFIG_SAMA5_PMECC_EMBEDDEDALGO */
+
+/****************************************************************************
+ * Name: pmecc_errorlocation
+ *
+ * Description:
+ *   Initialize the PMECC Error Location peripheral and start the error
+ *   location processing
+ *
+ * Input Parameters:
+ *   bitsize - Size of the sector in bits.
+ *
+ * Returned Value:
+ *   Number of errors (or -1 on an error)
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
+static int32_t pmecc_errorlocation(uint32_t bitsize)
+{
+  uint32_t *sigma;
+  uint32_t errornumber;
+  uint32_t nroots;
+  uint32_t regval;
+  uint32_t alphax;
+
+  /* Disable PMECC Error Location IP */
+
+  nand_putreg(SAM_HSMC_ELDIS, 0xffffffff);
+
+  errornumber = 0;
+  alphax = 0;
+
+  sigma = (uint32_t *)SAM_HSMC_SIGMA0;
+  for (alphax = 0;
+       alphax <= (uint32_t)(g_pmecc.desc.lmu[g_pmecc.desc.tt + 1] >> 1);
+       alphax++)
+    {
+      *sigma++ = g_pmecc.desc.smu[g_pmecc.desc.tt + 1][alphax];
+      errornumber++;
+    }
+
+  regval  = nand_getreg(SAM_HSMC_ELCFG);
+  regval |= HSMC_ELCFG_ERRNUM(errornumber - 1);
+  nand_putreg(SAM_HSMC_ELCFG, regval);
+
+  /* Enable error location process */
+
+  nand_putreg(SAM_HSMC_ELEN, bitsize);
+  while ((nand_getreg(SAM_HSMC_ELISR) & HSMC_ELIINT_DONE) == 0);
+
+  nroots = (nand_getreg(SAM_HSMC_ELISR) & HSMC_ELISR_ERRCNT_MASK) >>
+            HSMC_ELISR_ERRCNT_SHIFT;
+
+  /* Number of roots == degree of smu hence <= tt */
+
+  if (nroots == (uint32_t)(g_pmecc.desc.lmu[g_pmecc.desc.tt + 1] >> 1))
+    {
+      return (errornumber - 1);
+    }
+
+  /* Number of roots not match the degree of smu ==> unable to correct
+   * error
+   */
+
+  return -1;
+}
+#endif /* CONFIG_SAMA5_PMECC_EMBEDDEDALGO */
+
+/****************************************************************************
+ * Name: pmecc_errorcorrection
+ *
+ * Description:
+ *   Correct errors indicated in the PMECCEL error location registers.
+ *
+ * Input Parameters:
+ *   sectorbase - Base address of the sector.
+ *   extrabytes - Number of extra bytes of the sector (encoded spare area,
+ *                only for the last sector)
+ *   nerrors Number of error to correct
+ *
+ * Returned Value:
+ *   Number of errors
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
+static uint32_t pmecc_errorcorrection(uint32_t sectorbase,
+                                      uint32_t extrabytes, uint32_t nerrors)
+{
+  uint32_t *errpos;
+  uint32_t bytepos;
+  uint32_t bitpos;
+  uint32_t sectorsz;
+  uint32_t eccsize;
+  uint32_t eccend;
+
+  errpos = (uint32_t *)SAM_HSMC_ERRLOC_BASE(0);
+
+  if ((nand_getreg(SAM_HSMC_PMECCFG) & HSMC_PMECCFG_SECTORSZ_MASK) ==
+       HSMC_PMECCFG_SECTORSZ_512)
+    {
+      sectorsz = 512;
+    }
+  else
+    {
+      sectorsz = 1024;
+    }
+
+  /* Get number of ECC bytes */
+
+  eccend = nand_getreg(SAM_HSMC_PMECCEADDR);
+  eccsize = (eccend - nand_getreg(SAM_HSMC_PMECCSADDR)) + 1;
+
+  while (nerrors)
+    {
+      bytepos = (*errpos - 1) / 8;
+      bitpos  = (*errpos - 1) % 8;
+
+      /* If error is located in the data area (not in ECC) */
+
+      if (bytepos < (sectorsz + extrabytes))
+        {
+          /* If the error position is before ECC area */
+
+          if (bytepos < sectorsz + nand_getreg(SAM_HSMC_PMECCSADDR))
+            {
+              fdbg("Correct error bit @[Byte %d, Bit %d]\n",
+                      (int)bytepos, (int)bitpos);
+
+              if (*(uint8_t*)(sectorbase + bytepos) & (1 << bitpos))
+                {
+                  *(uint8_t*)(sectorbase + bytepos) &= (0xff ^ (1 << bitpos));
+                }
+              else
+                {
+                  *(uint8_t*)(sectorbase + bytepos) |= (1 << bitpos);
+                }
+            }
+          else
+            {
+              if (*(uint8_t*)(sectorbase + bytepos + eccsize)& (1 << bitpos))
+                {
+                  *(uint8_t*)(sectorbase + bytepos + eccsize) &= (0xff ^ (1 << bitpos));
+                }
+              else
+                {
+                  *(uint8_t*)(sectorbase + bytepos + eccsize) |= (1 << bitpos);
+                }
+            }
+        }
+
+      errpos++;
+      nerrors--;
+    }
+
+  return 0;
+}
+#endif /* CONFIG_SAMA5_PMECC_EMBEDDEDALGO */
+
+/****************************************************************************
+ * Name: pmecc_correctionalgo
+ *
+ * Description:
+ *   Launch error detection functions and correct corrupted bits.
+ *
+ * Input Parameters:
+ *   isr  - Value of the PMECC status register.
+ *   data - Base address of the buffer containing the page to be corrected.
+ *
+ * Returned Value:
+ *    0 if all errors have been corrected, 1 if too many errors detected
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
+static uint32_t pmecc_correctionalgo(uint32_t isr, uint32_t data)
+{
+  uint32_t sector = 0;
+  uint32_t sectorbase;
+  uint32_t sectorsz;
+  int32_t nerrors;
+  unsigned int mm;
+
+  /* Set the sector size (512 or 1024 bytes) */
+
+  if ((g_pmecc.desc.sectorsz & HSMC_PMECCFG_SECTORSZ_MASK) != 0)
+    {
+      sectorsz = 1024;
+      mm       = 14;
+      nand_putreg(SAM_HSMC_ELCFG, HSMC_ELCFG_SECTORSZ_1024);
+    }
+  else
+    {
+      sectorsz = 512;
+      mm       = 13;
+      nand_putreg(SAM_HSMC_ELCFG, HSMC_ELCFG_SECTORSZ_512);
+    }
+
+#define HSMC_PAGESIZE \
+  ((1 << ((nand_getreg(SAM_HSMC_PMECCFG) & HSMC_PMECCFG_PAGESIZE_MASK) >> \
+   HSMC_PMECCFG_PAGESIZE_SHIFT))
+
+  while (sector < (uint32_t)HSMC_PAGESIZE && isr != 0)
+    {
+      nerrors = 0;
+      if ((isr & 1) != 0)
+        {
+          sectorbase = data + (sector * sectorsz);
+
+          pmecc_gensyn(sector);
+          pmecc_substitute();
+          pmecc_getsigma();
+
+          /* Number of bits of the sector + ecc */
+
+          nerrors = pmecc_errorlocation((sectorsz * 8) + (g_pmecc.desc.tt * mm));
+          if (nerrors == -1)
+            {
+              return 1;
+            }
+          else
+            {
+              /* Extra byte is 0 */
+
+              pmecc_errorcorrection(sectorbase, 0, nerrors);
+            }
+        }
+
+      sector++;
+      isr = isr >> 1;
+    }
+
+  return 0;
+}
+#endif /* CONFIG_SAMA5_PMECC_EMBEDDEDALGO */
 
 /****************************************************************************
  * Name: pmecc_bcherr512
@@ -201,7 +769,7 @@ static int pmecc_bcherr512(uint8_t nsectors, uint16_t sparesize)
     {
       return BCH_ERR8;
     }
-  
+
   /* 7-bytes per 512 byte sector are required correctability of 4 errors */
 
   else if (sparesize <= (7 *(unsigned int) nsectors))
@@ -215,7 +783,7 @@ static int pmecc_bcherr512(uint8_t nsectors, uint16_t sparesize)
     {
       return BCH_ERR2;
     }
-  
+
   return 0;
 }
 
@@ -249,7 +817,7 @@ static int pmecc_bcherr1k(uint8_t nsectors, uint16_t sparesize)
     {
       return BCH_ERR8;
     }
-  
+
   /* 7-bytes per 1024 byte sector are required correctability of 4 errors */
 
   else if (sparesize <= (7 *(unsigned int) nsectors))
@@ -263,7 +831,7 @@ static int pmecc_bcherr1k(uint8_t nsectors, uint16_t sparesize)
     {
       return BCH_ERR2;
     }
-  
+
   return 0;
 }
 
@@ -300,7 +868,7 @@ static void pmecc_pagelayout(uint16_t datasize, uint16_t sparesize,
   /* Try for 512 byte sectors */
 
   DEBUGASSERT((datasize & 0xfffffe00) == 0 && datasize >= 512);
-  
+
   nsectors512 = (datasize >> 9);
   bcherr512   = pmecc_bcherr512(nsectors512, sparesize);
 
@@ -383,9 +951,193 @@ void pmecc_initialize(void)
  * Name: pmecc_configure
  *
  * Description:
- *   Configure the PMECC for use by this CS
+ *   Configure and Initialize the PMECC peripheral for this CS.
+ *
+ * Input Parameters:
+ *  priv      - Pointer to a struct sam_nandcs_s instance.
+ *  eccoffset - offset of the first ecc byte in spare zone.
+ *  protected - True:  The spare area is protected with the last sector of
+ *                     data.
+ *              False: The spare area is skipped in read or write mode.
+ *
+ * Returned Value:
+ *  OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
+
+int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
+                    bool protected)
+{
+  unsigned int sectorsperpage = 0;
+  uint32_t regval;
+
+  /* Check if we need to re-configure */
+
+#if NAND_NPMECC_BANKS > 1
+  if (g_pmecc.configured && g_pmecc.cs == priv->cs)
+#else
+  if (g_pmecc.configured)
+#endif
+    {
+      /* No, we are already configured */
+
+      return OK;
+    }
+
+  /* Make sure that the requested offset greater than or equal to the
+   * minimum.  The first few bytes of the spare ares is reserved for
+   * bad block indications.  Therefore, ECC data must begin at an offset
+   * to skip over the bad block indicators.
+   */
+
+  if (eccoffset < PMECC_ECC_DEFAULT_STARTOFFSET)
+    {
+      eccoffset = PMECC_ECC_DEFAULT_STARTOFFSET;
+    }
+
+  /* Get the number of sectors and the error correction per sector.  This
+   * function will set the following structure values in order to get the
+   * best overall correctability:
+   *
+   * g_pmecc.sector1k   : True if we are using 1024B sectors
+   * g_pmecc.nsectors   : The number of sectors per page
+   * g_pmecc.correctability : Number of correctable bits per sector
+   * g_pmecc.desc.bcherr : The BCH_ERR value for the PMECC CFG register
+   */
+
+  pmecc_pagelayout(priv->raw.model.pagesize, priv->raw.model.sparesize, eccoffset);
+
+  /* Number of Sectors in one Page */
+
+  if (g_pmecc.sector1k)
+    {
+      /* 1024 bytes per sector */
+
+      g_pmecc.desc.sectorsz = HSMC_PMECCFG_SECTORSZ_1024;
+      sectorsperpage = (priv->raw.model.pagesize >> 10);
+      g_pmecc.desc.mm = 14;
+#if defined (CONFIG_SAMA5_PMECC_GALOIS_TABLE1024_ROMADDR) && defined (CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES)
+      g_pmecc.desc.alphato = (int16_t *)&(pmecc_gf1024[PMECC_GF_SIZEOF_1024]);
+      g_pmecc.desc.indexof = (int16_t *)&(pmecc_gf1024[0]);
+#else
+      g_pmecc.desc.alphato = (int16_t *)&(pmecc_gf1024[PMECC_GF_ALPHA_TO]);
+      g_pmecc.desc.indexof = (int16_t *)&(pmecc_gf1024[PMECC_GF_INDEX_OF]);
+#endif
+    }
+  else
+    {
+      /* 512 bytes per sector */
+
+      g_pmecc.desc.sectorsz = HSMC_PMECCFG_SECTORSZ_512;
+      sectorsperpage = (priv->raw.model.pagesize >> 9);
+      g_pmecc.desc.mm = 13;
+#if defined (CONFIG_SAMA5_PMECC_GALOIS_TABLE512_ROMADDR) && defined (CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES)
+      g_pmecc.desc.alphato = (int16_t *)&(pmecc_gf512[PMECC_GF_SIZEOF_512]);
+      g_pmecc.desc.indexof = (int16_t *)&(pmecc_gf512[0]);
+#else
+      g_pmecc.desc.alphato = (int16_t *)&(pmecc_gf512[PMECC_GF_ALPHA_TO]);
+      g_pmecc.desc.indexof = (int16_t *)&(pmecc_gf512[PMECC_GF_INDEX_OF]);
+#endif
+    }
+
+  switch (sectorsperpage)
+    {
+      case 1:
+          g_pmecc.desc.pagesize = HSMC_PMECCFG_PAGESIZE_1SEC;
+          break;
+      case 2:
+          g_pmecc.desc.pagesize = HSMC_PMECCFG_PAGESIZE_2SEC;
+          break;
+      case 4:
+          g_pmecc.desc.pagesize = HSMC_PMECCFG_PAGESIZE_4SEC;
+          break;
+      case 8:
+          g_pmecc.desc.pagesize = HSMC_PMECCFG_PAGESIZE_8SEC;
+          break;
+      default:
+        fdbg("ERROR:  Unsupported sectors per page: %d\n", sectorsperpage);
+        return -EINVAL;
+    }
+
+  g_pmecc.desc.nn = (1 << g_pmecc.desc.mm) - 1;
+
+  /* Real value of ECC bit number correction (2, 4, 8, 12, 24) */
+
+  g_pmecc.desc.tt = g_pmecc.correctability;
+  if (((g_pmecc.desc.mm * g_pmecc.correctability) % 8) == 0)
+    {
+      g_pmecc.desc.eccsize = ((g_pmecc.desc.mm * g_pmecc.correctability) / 8) * sectorsperpage;
+    }
+  else
+    {
+      g_pmecc.desc.eccsize = (((g_pmecc.desc.mm * g_pmecc.correctability) / 8) + 1) * sectorsperpage;
+    }
+
+  g_pmecc.desc.eccstart = eccoffset;
+  g_pmecc.desc.eccend   = eccoffset + g_pmecc.desc.eccsize;
+  if (g_pmecc.desc.eccend > priv->raw.model.sparesize)
+    {
+      return -ENOSPC;
+    }
+
+  g_pmecc.desc.sparesize = g_pmecc.desc.eccend;
+
+  //g_pmecc.desc.nandwr = PMECC_CFG_NANDWR;  /* NAND write access */
+  g_pmecc.desc.nandwr = 0;  /* NAND Read access */
+  if (protected)
+    {
+      g_pmecc.desc.sparena = HSMC_PMECCFG_SPARE_ENABLE;
+    }
+  else
+    {
+      g_pmecc.desc.sparena = 0;
+    }
+
+  /* PMECC_CFG_AUTO indicates that the spare is error protected. In this
+   * case, the ECC computation takes into account the whole spare area
+   * minus the ECC area in the ECC computation operation
+   *
+   * NOTE:  At 133 Mhz, the clkctrl field must be programmed with 2,
+   * indicating that the setup time is 3 clock cycles.
+   */
+
+  g_pmecc.desc.automode  = 0;
+  g_pmecc.desc.clkctrl   = 2;
+  g_pmecc.desc.interrupt = 0;
+
+   /* Disable ECC module */
+
+  nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DISABLE);
+
+  /* Reset the ECC module */
+
+  nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_RST);
+
+  regval = g_pmecc.desc.bcherr | g_pmecc.desc.sectorsz |
+           g_pmecc.desc.pagesize | g_pmecc.desc.nandwr |
+           g_pmecc.desc.sparena | g_pmecc.desc.automode;
+  nand_putreg(SAM_HSMC_PMECCFG, regval);
+
+  nand_putreg(SAM_HSMC_PMECCSAREA, g_pmecc.desc.sparesize - 1);
+  nand_putreg(SAM_HSMC_PMECCSADDR, g_pmecc.desc.eccstart);
+  nand_putreg(SAM_HSMC_PMECCEADDR, g_pmecc.desc.eccend - 1);
+
+  /* Disable all interrupts */
+
+  nand_putreg(SAM_HSMC_PMECCIDR, 0xff);
+
+  /* Enable ECC module */
+
+  nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_ENABLE);
+
+  /* Now we are configured */
+
+  g_pmecc.configured = true;
+#if NAND_NPMECC_BANKS > 1
+  g_pmecc.cs = priv->cs;
+#endif
+  return 0;
+}
 
 /****************************************************************************
  * Name: pmecc_lock
@@ -499,3 +1251,161 @@ uint32_t pmecc_get_pagesize(void)
 {
   return g_pmecc.desc.pagesize;
 }
+
+/****************************************************************************
+ * Name: pmecc_buildgf
+ *
+ * Description:
+ *   This function is able to build Galois Field.
+ *
+ * Input Parameters:
+ *   mm      - Degree of the remainders.
+ *   indexof - Pointer to a buffer for indexof table.
+ *   alphato - Pointer to a buffer for alphato table.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_PMECC_GALOIS_CUSTOM
+void pmecc_buildgf(uint32_t mm, int16_t* indexof, int16_t* alphato)
+{
+  uint32_t i;
+  uint32_t mask;
+  uint32_t nn;
+  uint32_t p[15];
+
+  nn = (1 << mm) - 1;
+
+  /* Set default value */
+
+  for (i = 1; i < mm; i++)
+    {
+      p[i] = 0;
+    }
+
+  /* 1 + X^mm */
+
+  p[0]  = 1;
+  p[mm] = 1;
+
+  /* others */
+
+  if (mm == 3)
+    {
+      p[1] = 1;
+    }
+  else if (mm == 4)
+    {
+      p[1] = 1;
+    }
+  else if (mm == 5)
+    {
+      p[2] = 1;
+    }
+  else if (mm == 6)
+    {
+      p[1] = 1;
+    }
+  else if (mm == 7)
+    {
+      p[3] = 1;
+    }
+  else if (mm == 8)
+    {
+      p[2] = p[3] = p[4] = 1;
+    }
+  else if (mm == 9)
+    {
+      p[4] = 1;
+    }
+  else if (mm == 10)
+    {
+      p[3] = 1;
+    }
+  else if (mm == 11)
+    {
+      p[2] = 1;
+    }
+  else if (mm == 12)
+    {
+      p[1] = p[4] = p[6] = 1;
+    }
+  else if (mm == 13)
+    {
+      p[1] = p[3] = p[4] = 1;
+    }
+  else if (mm == 14)
+    {
+      p[1] = p[6] = p[10] = 1;
+    }
+  else if (mm == 15)
+    {
+      p[1] = 1;
+    }
+
+  /* First
+   *
+   * build alpha ^ mm it will help to generate the field (primitiv)
+   */
+
+  alphato[mm] = 0;
+  for (i = 0; i < mm; i++)
+    {
+      if (p[i])
+        {
+          alphato[mm] |= 1 << i;
+        }
+    }
+
+  /* Second
+   *
+   * Build elements from 0 to mm - 1.  Very easy because degree is less than
+    * mm so it is just a logical shift ! (only the remainder)
+    */
+
+  mask = 1;
+  for (i = 0; i < mm; i++)
+    {
+      alphato[i] = mask;
+      indexof[alphato[i]] = i;
+      mask <<= 1;
+    }
+
+  indexof[alphato[mm]] = mm ;
+
+  /* Use a mask to select the MSB bit of the LFSR ! */
+
+  mask >>= 1; /* Previous value moust be decremented */
+
+  /* Then finish the building */
+
+  for (i = mm + 1; i <= nn; i++)
+    {
+      /* Check if the msb bit of the lfsr is set */
+
+      if (alphato[i-1] & mask)
+        {
+          /* Feedback loop is set */
+
+          alphato[i] = alphato[mm] ^ ((alphato[i-1] ^ mask) << 1);
+        }
+      else
+        {
+          /* Only shift is enabled */
+
+          alphato[i] = alphato[i-1] << 1;
+        }
+
+      /* lookup table */
+
+      //indexof[alphato[i]] = i;
+      indexof[alphato[i]] = i % nn;
+    }
+
+  /* Of course index of 0 is undefined in a multiplicative field */
+
+  indexof[0] = -1;
+}
+#endif /* CONFIG_SAMA5_PMECC_GALOIS_CUSTOM */

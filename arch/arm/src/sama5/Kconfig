@@ -3382,6 +3382,7 @@ config SAMA5_PMECC_EMBEDDEDALGO
 config SAMA5_PMECC_EMBEDDEDALGO_ADDR
 	hex "Address of ROM ECC detection/correction"
 	default 0x00104510
+	depends on SAMA5_PMECC_EMBEDDEDALGO
 	---help---
 		The ROM code embeds the software used in the process of ECC
 		detection/correction at this address.  Don't change this address
@@ -3410,6 +3411,14 @@ config SAMA5_PMECC_GALOIS_TABLE1024_ROMADDR
 		address unless you know what you are doing.
 
 endif # SAMA5_PMECC_GALOIS_ROMTABLES
+
+config SAMA5_PMECC_GALOIS_CUSTOM
+	bool "Custom Galois Tables"
+	default n
+	---help---
+		Build in support to build Galois tables on-the-fly.  No current used
+		by any NuttX logic.
+
 endif # SAMA5_HAVE_PMECC
 endif # SAMA5_HAVE_NAND
 endmenu # External Memory Configuration
