@@ -86,18 +86,29 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(HAVE_AT25) || defined(HAVE_AT24) || defined(HAVE_HSMCI) || \
-    defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
+#if defined(HAVE_NAND) || defined(HAVE_AT25) || defined(HAVE_AT24) || \
+    defined(HAVE_HSMCI) || defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
   int ret;
+#endif
+
+#ifdef HAVE_NAND
+  /* Initialize the NAND driver */
+
+  ret = sam_nand_automount(NAND_MINOR);
+  if (ret < 0)
+    {
+      message("ERROR: sam_nand_automount failed: %d\n", ret);
+      return ret;
+    }
 #endif
 
 #ifdef HAVE_AT25
   /* Initialize the AT25 driver */
 
-  ret = sam_at25_initialize(AT25_MINOR);
+  ret = sam_at25_automount(AT25_MINOR);
   if (ret < 0)
     {
-      message("ERROR: sam_at25_initialize failed: %d\n", ret);
+      message("ERROR: sam_at25_automount failed: %d\n", ret);
       return ret;
     }
 #endif
@@ -105,10 +116,10 @@ int nsh_archinitialize(void)
 #ifdef HAVE_AT24
   /* Initialize the AT24 driver */
 
-  ret = sam_at24_initialize(AT24_MINOR);
+  ret = sam_at24_automount(AT24_MINOR);
   if (ret < 0)
     {
-      message("ERROR: sam_at24_initialize failed: %d\n", ret);
+      message("ERROR: sam_at24_automount failed: %d\n", ret);
       return ret;
     }
 #endif

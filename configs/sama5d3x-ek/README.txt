@@ -640,6 +640,48 @@ USB Ports
     ---- ----------- -------------------------------------------------------
     PD28 OVCUR_USB   Combined overrcurrent indication from port A and B
 
+NAND Support
+============
+  NAND Support can be added to the the NSH configuration by modifying the
+  NuttX configuration file as follows:
+
+    System Type -> SAMA5 Peripheal support
+      CONFIG_SAMA5_DMAC1=y              : Use DMA1 for memory-to-memory DMA
+      CONFIG_SAMA5_HSMC=y               : Make sure that the SMC is enabled
+
+    Drivers -> Memory Technology Device (MTD) Support
+      CONFIG_MTD=y                      : Enable MTD support
+      CONFIG_MTD_NAND=y                 : Enable NAND support
+      CONFIG_MTD_NAND_BLOCKCHECK=y      : Enable bad block checking support
+      CONFIG_MTD_NAND_HWECC=y           : Use H/W ECC calculation
+
+      Defaults for all other NAND settings should be okay
+
+    System Type -> External Memory Configuration
+      CONFIG_SAMA5_EBICS3=y             : Enable External CS3 memory
+      CONFIG_SAMA5_EBICS3_NAND=y        : Select NAND memory type
+      CONFIG_SAMA5_EBICS3_SIZE=8388608  : Use this size
+      CONFIG_SAMA5_EBICS3_PMECC=y       : Use H/W ECC calculation
+      CONFIG_SAMA5_PMECC_EMBEDDEDALGO=n : Use the software PMECC algorithm
+      CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES=y : use the ROM Galois tables
+
+      Defaults for ROM page table addresses should be okay
+
+    File Systems:
+      CONFIG_FS_NXFFS=y                 : Enable the NXFFS file system
+
+      Defaults for all other NXFFS settings should be okay
+
+    Board Selection
+      CONFIG_SAMA5_NAND_AUTOMOUNT=y     : Enable FS support on NAND
+      CONFIG_SAMA5_NAND_NXFFS=y         : Use the NXFFS file system
+
+      Other file systems are not recommended because only NXFFS can handle
+      bad blocks and only NXFFS performs wear-leveling.
+
+    Application Configuration -> NSH Library
+     CONFIG_NSH_ARCHINIT=y              : Use architecture-specific initialization
+
 AT24 Serial EEPROM
 ==================
 
@@ -2881,9 +2923,5 @@ To-Do List
     do with the camera.  NuttX needs something liek V4L to provide the
     definition for what a camera driver is supposed to do.
 
-11) NAND.  There is no NAND support.  A NAND driver is a complex thing
-    because it must support not only basic NAND access but also bad block
-    detection, sparing and ECC.  Lots of work!
-
-12) GMAC has only been tested on a 10/100Base-T network.  I don't have a
+11) GMAC has only been tested on a 10/100Base-T network.  I don't have a
     1000Base-T network to support additional testing.
