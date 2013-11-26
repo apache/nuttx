@@ -3337,6 +3337,13 @@ default n
 
 if SAMA5_HAVE_NAND
 
+config SAMA5_NAND_DMA
+	bool "NAND DMA Transfers"
+	default y
+	depends on SAMA5_DMAC0 || SAMA5_DMAC1
+	---help---
+		Use DMA to perform NAND data transfers (highly recommended)
+
 config SAMA5_NAND_READYBUSY
 	bool "NAND Ready/Busy"
 	default n

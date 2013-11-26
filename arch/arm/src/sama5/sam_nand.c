@@ -166,8 +166,14 @@ static int      hsmc_interrupt(int irq, void *context);
 
 /* DMA Helpers */
 
+#ifdef CONFIG_SAMA5_NAND_DMA
 static int      nand_wait_dma(struct sam_nandcs_s *priv);
 static void     nand_dmacallback(DMA_HANDLE handle, void *arg, int result);
+static int      nand_dma_read(struct sam_nandcs_s *priv,
+                  uintptr_t vsrc, uintptr_t vdest, size_t nbytes);
+static int      nand_dma_write(struct sam_nandcs_s *priv,
+                  uintptr_t vsrc, uintptr_t vdest, size_t nbytes)
+#endif
 
 /* Raw Data Transfer Helpers */
 
@@ -915,6 +921,7 @@ static int hsmc_interrupt(int irq, void *context)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SAMA5_NAND_DMA
 static int nand_wait_dma(struct sam_nandcs_s *priv)
 {
   int ret;
@@ -932,6 +939,7 @@ static int nand_wait_dma(struct sam_nandcs_s *priv)
   priv->dmadone = false;
   return priv->result;
 }
+#endif
 
 /****************************************************************************
  * Name: sam_adc_dmacallback
@@ -942,6 +950,7 @@ static int nand_wait_dma(struct sam_nandcs_s *priv)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SAMA5_NAND_DMA
 static void nand_dmacallback(DMA_HANDLE handle, void *arg, int result)
 {
   struct sam_nandcs_s *priv = (struct sam_nandcs_s *)arg;
@@ -954,6 +963,7 @@ static void nand_dmacallback(DMA_HANDLE handle, void *arg, int result)
   priv->dmadone = true;
   sem_post(&priv->waitsem);
 }
+#endif
 
 /****************************************************************************
  * Name: nand_dma_read
@@ -972,6 +982,7 @@ static void nand_dmacallback(DMA_HANDLE handle, void *arg, int result)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SAMA5_NAND_DMA
 static int nand_dma_read(struct sam_nandcs_s *priv,
                           uintptr_t vsrc, uintptr_t vdest, size_t nbytes)
 {
@@ -1026,6 +1037,7 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: nand_dma_write
@@ -1044,6 +1056,7 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SAMA5_NAND_DMA
 static int nand_dma_write(struct sam_nandcs_s *priv,
                           uintptr_t vsrc, uintptr_t vdest, size_t nbytes)
 {
@@ -1094,6 +1107,7 @@ static int nand_dma_write(struct sam_nandcs_s *priv,
 
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: nand_nfcsram_read
@@ -1215,6 +1229,7 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
       src = priv->raw.dataaddr;
     }
 
+#ifdef CONFIG_SAMA5_NAND_DMA
   /* Then perform the transfer via DMA or not, depending on if we have
    * a DMA channel assigned.
    */
@@ -1225,10 +1240,12 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
 
       return nand_dma_read(priv, src, (uintptr_t)buffer, buflen);
     }
+  else
+#endif
 
   /* Transfer without DMA */
 
-  else if (nfcsram)
+  if (nfcsram)
     {
       return nand_nfcsram_read(src, buffer, buflen);
     }
@@ -1497,16 +1514,19 @@ static int nand_write(struct sam_nandcs_s *priv, bool nfcsram,
    * a DMA channel assigned.
    */
 
+#ifdef CONFIG_SAMA5_NAND_DMA
   if (priv->dma)
     {
       /* Transfer using DMA */
 
       return nand_dma_write(priv, (uintptr_t)buffer, dest, buflen);
     }
+  else
+#endif
 
   /* Transfer without DMA */
 
-  else if (nfcsram)
+  if (nfcsram)
     {
       return nand_nfcsram_write(buffer, dest, buflen);
     }
@@ -2516,7 +2536,9 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 #endif
   priv->cs             = cs;
 
+#ifdef CONFIG_SAMA5_NAND_DMA
   sem_init(&priv->waitsem, 0, 0);
+#endif
 
   /* Perform one-time, global NFC/PMECC initialization */
 
@@ -2591,19 +2613,21 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 
   /* Allocate a DMA channel for NAND transfers */
 
+#ifdef CONFIG_SAMA5_NAND_DMA
   if (nandmodel_getbuswidth(&priv->raw.model) == 16)
     {
-      priv->dma = sam_dmachannel(1, DMA_FLAGS16);
+      priv->dma = sam_dmachannel(NAND_DMAC, DMA_FLAGS16);
     }
   else
     {
-      priv->dma = sam_dmachannel(1, DMA_FLAGS8);
+      priv->dma = sam_dmachannel(NAND_DMAC, DMA_FLAGS8);
     }
 
   if (!priv->dma)
     {
       fdbg("ERROR: Failed to allocate the DMA channel for CS%d\n", cs);
     }
+#endif
 
   /* Return the MTD wrapper interface as the MTD device */
 
