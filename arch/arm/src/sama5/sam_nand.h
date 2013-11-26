@@ -60,8 +60,17 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-#ifndef CONFIG_SAMA5_DMAC1
-#  warning CONFIG_SAMA5_DMAC1 should be enabled for DMA transfers
+/* DMA */
+
+#ifdef CONFIG_SAMA5_NAND_DMA
+#  if defined(CONFIG_SAMA5_DMAC1)
+#    define NAND_DMAC 1
+#  elif defined(CONFIG_SAMA5_DMAC0)
+#    define NAND_DMAC 0
+#  else
+#    error "A DMA controller must be enabled to perform DMA transfers"
+#    undef CONFIG_SAMA5_NAND_DMA
+#  endif
 #endif
 
 /* Hardware ECC types.  These are extensions to the NANDECC_HWECC value
@@ -240,15 +249,20 @@ struct sam_nandcs_s
   /* Static configuration */
 
   uint8_t cs;                /* Chip select number (0..3) */
+#ifdef CONFIG_SAMA5_NAND_DMA
   volatile bool dmadone;     /* True:  DMA has completed */
-  sem_t waitsem;             /* Used to wait for DMA done */
+#endif
+
 #ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
   bool dropjss;              /* Enable page trimming */
   uint16_t g_trimpage;       /* Trim page number boundary */
 #endif
 
+#ifdef CONFIG_SAMA5_NAND_DMA
+  sem_t waitsem;             /* Used to wait for DMA done */
   DMA_HANDLE dma;            /* DMA channel assigned to this CS */
   int result;                /* The result of the DMA */
+#endif
 };
 
 struct sam_nand_s
