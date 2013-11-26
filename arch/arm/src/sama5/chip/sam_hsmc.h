@@ -339,15 +339,12 @@
 /* HSMC NFC Interrupt Mask Register */
 
 #define HSMC_SR_SMCSTS                (1 << 0)  /* Bit 0:  NAND Flash Controller Status (SR only) */
-
 #define HSMC_NFCINT_RB_RISE           (1 << 4)  /* Bit 4:  Ready Busy Rising Edge Detection Interrupt */
 #define HSMC_NFCINT_RB_FALL           (1 << 5)  /* Bit 5:  Ready Busy Falling Edge Detection Interrupt */
-
 #define HSMC_SR_NFCBUSY               (1 << 8)  /* Bit 8:  NFC Busy (SR only) */
 #define HSMC_SR_NFCWR                 (1 << 11) /* Bit 11: NFC Write/Read Operation (SR only) */
 #define HSMC_SR_NFCSID_SHIFT          (12)      /* Bits 12-14:  NFC Chip Select ID (SR only) */
 #define HSMC_SR_NFCSID_MASK           (7 << HSMC_SR_NFCSID_SHIFT)
-
 #define HSMC_NFCINT_XFRDONE           (1 << 16) /* Bit 16: Transfer Done Interrupt */
 #define HSMC_NFCINT_CMDDONE           (1 << 17) /* Bit 17: Command Done Interrupt */
 #define HSMC_NFCINT_DTOE              (1 << 20) /* Bit 20: Data Timeout Error Interrupt Enable */
@@ -356,7 +353,7 @@
 #define HSMC_NFCINT_NFCASE            (1 << 23) /* Bit 23: NFC Access Size Error Interrupt */
 #define HSMC_NFCINT_RBEDGE0           (1 << 24) /* Bit 24: Ready/Busy Line 0 Interrupt */
 
-#define HSMC_NFCINT_ALL               (0x01f300030)
+#define HSMC_NFCINT_ALL               (0x01f30030)
 
 /* HSMC NFC Address Cycle Zero Register */
 
@@ -597,22 +594,24 @@
 #define NFCADDR_CMD_VCMD2             (1 << 18)  /* Bit 18:Valid Cycle 2 Command */
 #define NFCADDR_CMD_ACYCLE_SHIFT      (19)       /* Bits 19-21: Number of Address required for command */
 #define NFCADDR_CMD_ACYCLE_MASK       (7 << NFCADDR_CMD_ACYCLE_SHIFT)
-#  define   NFCADDR_CMD_ACYCLE_NONE   (0 << NFCADDR_CMD_ACYCLE_SHIFT) /* No address cycle */
-#  define   NFCADDR_CMD_ACYCLE_ONE    (1 << NFCADDR_CMD_ACYCLE_SHIFT) /* One address cycle */
-#  define   NFCADDR_CMD_ACYCLE_TWO    (2 << NFCADDR_CMD_ACYCLE_SHIFT) /* Two address cycles */
-#  define   NFCADDR_CMD_ACYCLE_THREE  (3 << NFCADDR_CMD_ACYCLE_SHIFT) /* Three address cycles */
-#  define   NFCADDR_CMD_ACYCLE_FOUR   (4 << NFCADDR_CMD_ACYCLE_SHIFT) /* Four address cycles */
-#  define   NFCADDR_CMD_ACYCLE_FIVE   (5 << NFCADDR_CMD_ACYCLE_SHIFT) /* Five address cycles */
+#  define NFCADDR_CMD_ACYCLE(n)       ((uint32_t)(n) << NFCADDR_CMD_ACYCLE_SHIFT) /* n address cycles, n=0-5 */
+#  define NFCADDR_CMD_ACYCLE_NONE     (0 << NFCADDR_CMD_ACYCLE_SHIFT) /* No address cycle */
+#  define NFCADDR_CMD_ACYCLE_ONE      (1 << NFCADDR_CMD_ACYCLE_SHIFT) /* One address cycle */
+#  define NFCADDR_CMD_ACYCLE_TWO      (2 << NFCADDR_CMD_ACYCLE_SHIFT) /* Two address cycles */
+#  define NFCADDR_CMD_ACYCLE_THREE    (3 << NFCADDR_CMD_ACYCLE_SHIFT) /* Three address cycles */
+#  define NFCADDR_CMD_ACYCLE_FOUR     (4 << NFCADDR_CMD_ACYCLE_SHIFT) /* Four address cycles */
+#  define NFCADDR_CMD_ACYCLE_FIVE     (5 << NFCADDR_CMD_ACYCLE_SHIFT) /* Five address cycles */
 #define NFCADDR_CMD_CSID_SHIFT        (22)       /* Bits 22-24: Chip Select Identifier */
-#define NFCADDR_CMD_CSID_MASK         (7 << NFCADDR_CMD_CSID_SHIFT)  /* Bits 22-24: Chip Select Identifier */
-#  define   NFCADDR_CMD_CSID_0        (0 << NFCADDR_CMD_CSID_SHIFT) /* CS0 */
-#  define   NFCADDR_CMD_CSID_1        (1 << NFCADDR_CMD_CSID_SHIFT) /* CS1 */
-#  define   NFCADDR_CMD_CSID_2        (2 << NFCADDR_CMD_CSID_SHIFT) /* CS2 */
-#  define   NFCADDR_CMD_CSID_3        (3 << NFCADDR_CMD_CSID_SHIFT) /* CS3 */
-#  define   NFCADDR_CMD_CSID_4        (4 << NFCADDR_CMD_CSID_SHIFT) /* CS4 */
-#  define   NFCADDR_CMD_CSID_5        (5 << NFCADDR_CMD_CSID_SHIFT) /* CS5 */
-#  define   NFCADDR_CMD_CSID_6        (6 << NFCADDR_CMD_CSID_SHIFT) /* CS6 */
-#  define   NFCADDR_CMD_CSID_7        (7 << NFCADDR_CMD_CSID_SHIFT) /* CS7 */
+#define NFCADDR_CMD_CSID_MASK         (7 << NFCADDR_CMD_CSID_SHIFT)
+#  define NFCADDR_CMD_CSID(n)         ((uint32_t)(n) << NFCADDR_CMD_CSID_SHIFT) /* CSn, n=0-7 */
+#  define NFCADDR_CMD_CSID_0          (0 << NFCADDR_CMD_CSID_SHIFT) /* CS0 */
+#  define NFCADDR_CMD_CSID_1          (1 << NFCADDR_CMD_CSID_SHIFT) /* CS1 */
+#  define NFCADDR_CMD_CSID_2          (2 << NFCADDR_CMD_CSID_SHIFT) /* CS2 */
+#  define NFCADDR_CMD_CSID_3          (3 << NFCADDR_CMD_CSID_SHIFT) /* CS3 */
+#  define NFCADDR_CMD_CSID_4          (4 << NFCADDR_CMD_CSID_SHIFT) /* CS4 */
+#  define NFCADDR_CMD_CSID_5          (5 << NFCADDR_CMD_CSID_SHIFT) /* CS5 */
+#  define NFCADDR_CMD_CSID_6          (6 << NFCADDR_CMD_CSID_SHIFT) /* CS6 */
+#  define NFCADDR_CMD_CSID_7          (7 << NFCADDR_CMD_CSID_SHIFT) /* CS7 */
 #define NFCADDR_CMD_DATAEN            (1 << 25) /* Bit 25: 1=NFC Data Enable */
 #define NFCADDR_CMD_DATADIS           (0 << 25) /* Bit 25: 0=NFC Data disable */
 #define NFCADDR_CMD_NFCRD             (0 << 26) /* Bit 26: 0=NFC Read Enable */
