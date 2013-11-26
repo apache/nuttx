@@ -615,7 +615,7 @@ static void nand_nfc_configure(struct sam_nandcs_s *priv, uint8_t mode,
       acycle = NFCADDR_CMD_ACYCLE_NONE;
     }
 
-  cmd = (rw | regval | NFCADDR_CMD_CSID_3 | acycle |
+  cmd = (rw | regval | NFCADDR_CMD_CSID(priv->cs) | acycle |
          (((mode & HSMC_CLE_VCMD2_EN) == HSMC_CLE_VCMD2_EN) ? NFCADDR_CMD_VCMD2 : 0) |
          (cmd1 << NFCADDR_CMD_CMD1_SHIFT) | (cmd2 << NFCADDR_CMD_CMD2_SHIFT));
 
@@ -860,13 +860,17 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
 
 static int hsmc_interrupt(int irq, void *context)
 {
-  uint32_t status = nand_getreg(SAM_HSMC_SR);
+  uint32_t sr      = nand_getreg(SAM_HSMC_SR);
+  uint32_t imr     = nand_getreg(SAM_HSMC_IMR);
+  uint32_t pending = sr & imr;
+
+  fllvdbg("sr=%08x imr=%08x pending=%08x\n", sr, imr, pending);
 
   /* When set to one, this XFRDONE indicates that the NFC has terminated
    * the data transfer. This flag is reset after the status read.
    */
 
-  if ((status & HSMC_NFCINT_XFRDONE) != 0)
+  if ((pending & HSMC_NFCINT_XFRDONE) != 0)
     {
       g_nand.xfrdone = true;
       sem_post(&g_nand.waitsem);
@@ -876,7 +880,7 @@ static int hsmc_interrupt(int irq, void *context)
    * the Command. This flag is reset after the status read.
    */
 
-  if ((status & HSMC_NFCINT_CMDDONE) != 0)
+  if ((pending & HSMC_NFCINT_CMDDONE) != 0)
     {
       g_nand.cmddone = true;
       sem_post(&g_nand.waitsem);
@@ -888,7 +892,7 @@ static int hsmc_interrupt(int irq, void *context)
   * reset after the status read.
   */
 
-  if ((status & HSMC_NFCINT_RBEDGE0) != 0)
+  if ((pending & HSMC_NFCINT_RBEDGE0) != 0)
     {
       g_nand.rbedge = true;
       sem_post(&g_nand.waitsem);
@@ -1179,7 +1183,7 @@ static int nand_smc_read16(uintptr_t src, uint8_t *dest, size_t buflen)
 }
 
 /****************************************************************************
- * Name: nand_write
+ * Name: nand_read
  *
  * Description:
  *   Read data from NAND using the appropriate method
@@ -1271,8 +1275,9 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
   uint32_t regval;
   uint16_t pagesize;
   uint16_t sparesize;
+  int ret;
 
-  fvdbg("Block %d Page %d\n", block, page);
+  fvdbg("block=%d page=%d data=%p\n", (int)block, page, data);
   DEBUGASSERT(priv && data);
 
   /* Get page and spare sizes */
@@ -1349,7 +1354,12 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
   nand_putreg(SAM_HSMC_PMECCFG, regval);
 
   regval = nand_getreg(SAM_HSMC_PMECCEADDR);
-  nand_read(priv, true, (uint8_t *)data, pagesize + (regval + 1));
+  ret = nand_read(priv, true, (uint8_t *)data, pagesize + (regval + 1));
+  if (ret < 0)
+    {
+      fdbg("ERROR: nand_read for data region failed: %d\n", ret);
+      return ret;
+    }
 
   /* Wait until the kernel of the PMECC is not busy */
 
@@ -1544,8 +1554,9 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
   uint16_t sparesize;
   off_t rowaddr;
   off_t coladdr;
+  int ret;
 
-  fvdbg("Block %d Page %d\n", (int)block, page);
+  fvdbg("block=%d page=%d data=%p spare=%p\n", (int)block, page, data, spare);
   DEBUGASSERT(priv && (data || spare));
 
   /* Get page and spare sizes */
@@ -1605,14 +1616,24 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
 
   if (data)
     {
-      nand_read(priv, true, (uint8_t *)data, pagesize);
+      ret = nand_read(priv, true, (uint8_t *)data, pagesize);
+      if (ret < 0)
+        {
+          fdbg("ERROR: nand_read for data region failed: %d\n", ret);
+          return ret;
+        }
     }
 
   /* Read the spare are is so requested */
 
   if (spare)
     {
-      nand_read(priv, true, (uint8_t *)spare, sparesize);
+      ret = nand_read(priv, true, (uint8_t *)spare, sparesize);
+      if (ret < 0)
+        {
+          fdbg("ERROR: nand_read for spare region failed: %d\n", ret);
+          return ret;
+        }
     }
 
   return OK;
@@ -1647,18 +1668,22 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   DEBUGASSERT(priv && data);
 
-  /* Get exclusive access to the PMECC */
+  /* Make sure that we have exclusive access to the PMECC and that the PMECC
+   * is properly configured for this CS.
+   */
 
-  nand_lock();
-  sparesize = nandmodel_getsparesize(&priv->raw.model);
+  pmecc_lock();
+  pmecc_configure(priv, 0, false);
 
   /* Start by reading the spare data */
+
+  sparesize = nandmodel_getsparesize(&priv->raw.model);
 
   ret = nand_read_pmecc(priv, block, page, data);
   if (ret < 0)
     {
       fdbg("ERROR: Failed to read page\n");
-      return ret;
+      goto errout;
     }
 
   regval = nand_getreg(SAM_HSMC_PMECCISR);
@@ -1688,17 +1713,18 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
   ret = pmecc_correction(regval, (uintptr_t)data);
   if (ret < 0)
     {
-      fdbg("ERROR: Block %d page %d Unrecoverable data\n", block, page);
+      fdbg("ERROR: block=%d page=%d Unrecoverable data\n", block, page);
     }
 
-  /* Disable the HSMC */
+  /* Disable auto mode */
 
+errout:
   regval  = nand_getreg(SAM_HSMC_PMECCFG);
   regval &= ~HSMC_PMECCFG_AUTO_MASK;
   nand_putreg(SAM_HSMC_PMECCFG, regval);
 
   nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DISABLE);
-  nand_unlock();
+  pmecc_unlock();
   return ret;
 }
 #endif /* CONFIG_SAMA5_HAVE_PMECC */
@@ -1731,7 +1757,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
   off_t rowaddr;
   int ret = OK;
 
-  fvdbg("Block %d Page %d\n", block, page);
+  fvdbg("block=%d page=%d data=%p spare=%p\n", (int)block, page, data, spare);
 
   /* Get page and spare sizes */
 
@@ -1789,11 +1815,21 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
 
   if (data)
     {
-      nand_write(priv, true, (uint8_t *)data, pagesize, 0);
+      ret = nand_write(priv, true, (uint8_t *)data, pagesize, 0);
+      if (ret < 0)
+        {
+          fdbg("ERROR: nand_write for data region failed: %d\n", ret);
+          return ret;
+        }
 
       if (spare)
         {
-          nand_write(priv, true, (uint8_t *)spare, sparesize, pagesize);
+          ret = nand_write(priv, true, (uint8_t *)spare, sparesize, pagesize);
+          if (ret < 0)
+            {
+              fdbg("ERROR: nand_write for data region failed: %d\n", ret);
+              return ret;
+            }
         }
     }
 
@@ -1832,7 +1868,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
       ret = nand_write(priv, false, (uint8_t *)spare, sparesize, 0);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed writing data area\n");
+          fdbg("ERROR: nand_write for spare region failed: %d\n", ret);
           ret = -EPERM;
         }
 
@@ -1879,11 +1915,14 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   int i;
   int ret = 0;
 
-  fvdbg("Block %d Page %d\n", block, page);
+  fvdbg("block=%d page=%d data=%p\n", (int)block, page, data);
 
-  /* Get exclusive access to the PMECC */
+  /* Make sure that we have exclusive access to the PMECC and that the PMECC
+   * is properly configured for this CS.
+   */
 
-  nand_lock();
+  pmecc_lock();
+  pmecc_configure(priv, 0, false);
 
   /* Calculate the start page address */
 
@@ -1899,7 +1938,12 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   if (data)
     {
-      nand_write(priv, true, (uint8_t *)data, pagesize, 0);
+      ret = nand_write(priv, true, (uint8_t *)data, pagesize, 0);
+      if (ret < 0)
+        {
+          fdbg("ERROR: nand_write for data region failed: %d\n", ret);
+          goto errout;
+        }
     }
 
   /* Get the number of sectors per page */
@@ -2000,7 +2044,14 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
         }
     }
 
-  nand_write(priv, false, (uint8_t *)(uint8_t *)g_nand.ecctab, sectornumber * eccpersector, 0);
+  ret = nand_write(priv, false, (uint8_t *)(uint8_t *)g_nand.ecctab,
+                   sectornumber * eccpersector, 0);
+  if (ret < 0)
+    {
+      fdbg("ERROR: nand_write for spare region failed: %d\n", ret);
+      goto errout;
+    }
+
   nand_nfc_configure(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
   nand_wait_ready(priv);
 
@@ -2014,8 +2065,9 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   /* Disable the PMECC */
 
+errout:
   nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DISABLE);
-  nand_unlock();
+  pmecc_unlock();
   return ret;
 }
 #endif /* CONFIG_SAMA5_HAVE_PMECC */
@@ -2069,7 +2121,7 @@ static int nand_eraseblock(struct nand_raw_s *raw, off_t block)
 
   DEBUGASSERT(priv);
 
-  fvdbg("Block %d\n", (int)block);
+  fvdbg("block=%d\n", (int)block);
 
   /* Get exclusvie access to the HSMC hardware.
    * REVISIT:  The scope of this exclusivity is just NAND.

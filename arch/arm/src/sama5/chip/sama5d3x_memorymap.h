@@ -254,7 +254,6 @@
 
 #define SAM_BOOTMEM_MMUFLAGS     MMU_ROMFLAGS
 #define SAM_ROM_MMUFLAGS         MMU_ROMFLAGS
-#define SAM_NFCSRAM_MMUFLAGS     MMU_IOFLAGS
 #define SAM_ISRAM_MMUFLAGS       MMU_MEMFLAGS
 #define SAM_SMD_MMUFLAGS         MMU_MEMFLAGS
 #define SAM_UDPHSRAM_MMUFLAGS    MMU_IOFLAGS
@@ -262,6 +261,17 @@
 #define SAM_UHPEHCI_MMUFLAGS     MMU_IOFLAGS
 #define SAM_AXIMX_MMUFLAGS       MMU_IOFLAGS
 #define SAM_DAP_MMUFLAGS         MMU_IOFLAGS
+
+/* If the NFC is not being used, the NFC SRAM can be used as general purpose
+ * SRAM (cached).  If the NFC is used, then the NFC SRAM should be treated
+ * as an I/O devices (uncached).
+ */
+
+#ifdef CONFIG_SAMA5_HAVE_NAND
+#  define SAM_NFCSRAM_MMUFLAGS   MMU_IOFLAGS
+#else
+#  define SAM_NFCSRAM_MMUFLAGS   MMU_MEMFLAGS
+#endif
 
 /* SDRAM is a special case because it requires non-cached access of its
  * initial configuration, then caached access thereafter.

@@ -788,8 +788,11 @@ endchoice # Base layer color format
 endif # SAMA5_LCDC_HCR
 
 config SAMA5_LCDC_REGDEBUG
-	bool "Low level register debug"
+	bool "Register-Level Debug"
+	default n
 	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
 
 endmenu # LCDC configuration
 endif # SAMA5_LCDC
@@ -3420,6 +3423,14 @@ config SAMA5_PMECC_GALOIS_CUSTOM
 		by any NuttX logic.
 
 endif # SAMA5_HAVE_PMECC
+
+config SAMA5_NAND_REGDEBUG
+	bool "Register-Level NAND Debug"
+	default n
+	depends on DEBUG
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG.
+
 endif # SAMA5_HAVE_NAND
 endmenu # External Memory Configuration
 
