@@ -90,19 +90,19 @@
 #    define SAMA5_EBICS0_ECCTYPE NANDECC_NONE
 
 #  elif defined(CONFIG_SAMA5_EBICS0_SWECC)
-#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_SWECC)
+#    ifndef CONFIG_MTD_NAND_SWECC
 #      error CONFIG_SAMA5_EBICS0_SWECC is an invalid selection
 #    endif
 #    define SAMA5_EBICS0_ECCTYPE NANDECC_SWECC
 
 #  elif defined(CONFIG_SAMA5_EBICS0_PMECC)
-#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_HWECC)
+#    ifndef CONFIG_MTD_NAND_HWECC
 #      error CONFIG_SAMA5_EBICS0_PMECC is an invalid selection
 #    endif
 #    define SAMA5_EBICS0_ECCTYPE NANDECC_PMECC
 
 #  elif defined(CONFIG_SAMA5_EBICS0_CHIPECC)
-#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_EMBEDDEDECC)
+#    ifndef CONFIG_MTD_NAND_EMBEDDEDECC
 #      error CONFIG_SAMA5_EBICS0_CHIPECC is an invalid selection
 #    endif
 #    define SAMA5_EBICS0_ECCTYPE NANDECC_CHIPECC
@@ -117,19 +117,19 @@
 #    define SAMA5_EBICS1_ECCTYPE NANDECC_NONE
 
 #  elif defined(CONFIG_SAMA5_EBICS1_SWECC)
-#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_SWECC)
+#    ifndef CONFIG_MTD_NAND_SWECC
 #      error CONFIG_SAMA5_EBICS1_SWECC is an invalid selection
 #    endif
 #    define SAMA5_EBICS1_ECCTYPE NANDECC_SWECC
 
 #  elif defined(CONFIG_SAMA5_EBICS1_PMECC)
-#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_HWECC)
+#    ifndef CONFIG_MTD_NAND_HWECC
 #      error CONFIG_SAMA5_EBICS1_PMECC is an invalid selection
 #    endif
 #    define SAMA5_EBICS1_ECCTYPE NANDECC_PMECC
 
 #  elif defined(CONFIG_SAMA5_EBICS1_CHIPECC)
-#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_EMBEDDEDECC)
+#    ifndef CONFIG_MTD_NAND_EMBEDDEDECC
 #      error CONFIG_SAMA5_EBICS1_CHIPECC is an invalid selection
 #    endif
 #    define SAMA5_EBICS1_ECCTYPE NANDECC_CHIPECC
@@ -144,19 +144,19 @@
 #    define SAMA5_EBICS2_ECCTYPE NANDECC_NONE
 
 #  elif defined(CONFIG_SAMA5_EBICS2_SWECC
-#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_SWECC)
+#    ifndef CONFIG_MTD_NAND_SWECC
 #      error CONFIG_SAMA5_EBICS2_SWECC is an invalid selection
 #    endif
 #    define SAMA5_EBICS2_ECCTYPE NANDECC_SWECC
 
 #  elif defined(CONFIG_SAMA5_EBICS2_PMECC)
-#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_HWECC)
+#    ifndef CONFIG_MTD_NAND_HWECC
 #      error CONFIG_SAMA5_EBICS2_PMECC is an invalid selection
 #    endif
 #    define SAMA5_EBICS2_ECCTYPE NANDECC_PMECC
 
 #  elif defined(CONFIG_SAMA5_EBICS2_CHIPECC)
-#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_EMBEDDEDECC)
+#    ifndef CONFIG_MTD_NAND_EMBEDDEDECC
 #      error CONFIG_SAMA5_EBICS2_CHIPECC is an invalid selection
 #    endif
 #    define SAMA5_EBICS2_ECCTYPE NANDECC_CHIPECC
@@ -171,19 +171,19 @@
 #    define SAMA5_EBICS3_ECCTYPE NANDECC_NONE
 
 #  elif defined(CONFIG_SAMA5_EBICS3_SWECC)
-#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_SWECC)
+#    ifndef CONFIG_MTD_NAND_SWECC
 #      error CONFIG_SAMA5_EBICS3_SWECC is an invalid selection
 #    endif
 #    define SAMA5_EBICS3_ECCTYPE NANDECC_SWECC
 
 #  elif defined(CONFIG_SAMA5_EBICS3_PMECC)
-#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_HWECC)
+#    ifndef CONFIG_MTD_NAND_HWECC
 #      error CONFIG_SAMA5_EBICS3_PMECC is an invalid selection
 #    endif
 #    define SAMA5_EBICS3_ECCTYPE NANDECC_PMECC
 
 #  elif defined(CONFIG_SAMA5_EBICS3_CHIPECC)
-#    if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_EMBEDDEDECC)
+#    ifndef CONFIG_MTD_NAND_EMBEDDEDECC
 #      error CONFIG_SAMA5_EBICS3_CHIPECC is an invalid selection
 #    endif
 #    define SAMA5_EBICS3_ECCTYPE NANDECC_CHIPECC
@@ -255,7 +255,7 @@ struct sam_nandcs_s
 
 #ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
   bool dropjss;              /* Enable page trimming */
-  uint16_t g_trimpage;       /* Trim page number boundary */
+  uint16_t trimpage;         /* Trim page number boundary */
 #endif
 
 #ifdef CONFIG_SAMA5_NAND_DMA

@@ -855,11 +855,13 @@ static void pmecc_pagelayout(uint16_t datasize, uint16_t sparesize,
   uint8_t bcherr1k;
   uint8_t bcherr;
 
+  fvdbg("datasize=%d sparesize=%d offset=%d\n", datasize, sparesize, offset);
+
   /* ECC must not start at address zero, since bad block tags are at offset
    * zero.
    */
 
-  DEBUGASSERT(offset > 0);
+  DEBUGASSERT(datasize != 0 && offset > 0);
 
   /* Decrease the spare size by the offset */
 
@@ -867,14 +869,14 @@ static void pmecc_pagelayout(uint16_t datasize, uint16_t sparesize,
 
   /* Try for 512 byte sectors */
 
-  DEBUGASSERT((datasize & 0xfffffe00) == 0 && datasize >= 512);
+  DEBUGASSERT((datasize & 0x000001ff) == 0 && datasize >= 512);
 
   nsectors512 = (datasize >> 9);
   bcherr512   = pmecc_bcherr512(nsectors512, sparesize);
 
   /* Try for 1024 byte sectors */
 
-  if ((datasize & 0xfffffc00) == 0)
+  if ((datasize & 0x000003ff) == 0)
     {
       nsectors1k = (datasize >> 9);
       bcherr1k   = pmecc_bcherr1k(nsectors1k, sparesize);
@@ -1014,14 +1016,14 @@ int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
       /* 1024 bytes per sector */
 
       g_pmecc.desc.sectorsz = HSMC_PMECCFG_SECTORSZ_1024;
-      sectorsperpage = (priv->raw.model.pagesize >> 10);
-      g_pmecc.desc.mm = 14;
+      sectorsperpage        = (priv->raw.model.pagesize >> 10);
+      g_pmecc.desc.mm       = 14;
 #if defined (CONFIG_SAMA5_PMECC_GALOIS_TABLE1024_ROMADDR) && defined (CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES)
-      g_pmecc.desc.alphato = (int16_t *)&(pmecc_gf1024[PMECC_GF_SIZEOF_1024]);
-      g_pmecc.desc.indexof = (int16_t *)&(pmecc_gf1024[0]);
+      g_pmecc.desc.alphato  = (int16_t *)&(pmecc_gf1024[PMECC_GF_SIZEOF_1024]);
+      g_pmecc.desc.indexof  = (int16_t *)&(pmecc_gf1024[0]);
 #else
-      g_pmecc.desc.alphato = (int16_t *)&(pmecc_gf1024[PMECC_GF_ALPHA_TO]);
-      g_pmecc.desc.indexof = (int16_t *)&(pmecc_gf1024[PMECC_GF_INDEX_OF]);
+      g_pmecc.desc.alphato  = (int16_t *)&(pmecc_gf1024[PMECC_GF_ALPHA_TO]);
+      g_pmecc.desc.indexof  = (int16_t *)&(pmecc_gf1024[PMECC_GF_INDEX_OF]);
 #endif
     }
   else
@@ -1029,14 +1031,14 @@ int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
       /* 512 bytes per sector */
 
       g_pmecc.desc.sectorsz = HSMC_PMECCFG_SECTORSZ_512;
-      sectorsperpage = (priv->raw.model.pagesize >> 9);
-      g_pmecc.desc.mm = 13;
+      sectorsperpage        = (priv->raw.model.pagesize >> 9);
+      g_pmecc.desc.mm       = 13;
 #if defined (CONFIG_SAMA5_PMECC_GALOIS_TABLE512_ROMADDR) && defined (CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES)
-      g_pmecc.desc.alphato = (int16_t *)&(pmecc_gf512[PMECC_GF_SIZEOF_512]);
-      g_pmecc.desc.indexof = (int16_t *)&(pmecc_gf512[0]);
+      g_pmecc.desc.alphato  = (int16_t *)&(pmecc_gf512[PMECC_GF_SIZEOF_512]);
+      g_pmecc.desc.indexof  = (int16_t *)&(pmecc_gf512[0]);
 #else
-      g_pmecc.desc.alphato = (int16_t *)&(pmecc_gf512[PMECC_GF_ALPHA_TO]);
-      g_pmecc.desc.indexof = (int16_t *)&(pmecc_gf512[PMECC_GF_INDEX_OF]);
+      g_pmecc.desc.alphato  = (int16_t *)&(pmecc_gf512[PMECC_GF_ALPHA_TO]);
+      g_pmecc.desc.indexof  = (int16_t *)&(pmecc_gf512[PMECC_GF_INDEX_OF]);
 #endif
     }
 

@@ -123,8 +123,6 @@ config MTD_NAND_BLOCKCHECK
 	---help---
 		Enable support for ECC and bad block checking.
 
-if MTD_NAND_BLOCKCHECK
-
 config MTD_NAND_SWECC
 	bool "Sofware ECC support"
 	default n if ARCH_NAND_HWECC
@@ -144,8 +142,6 @@ config MTD_NAND_MAXSPAREEXTRABYTES
 	default 206
 	---help---
 		Maximum number of extra free bytes inside the spare area of a page.
-
-endif # MTD_NAND_BLOCKCHECK
 
 config MTD_NAND_EMBEDDEDECC
 	bool "Support devices with Embedded ECC"

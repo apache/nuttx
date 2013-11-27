@@ -201,7 +201,7 @@
  *
  ****************************************************************************/
 
-#ifdef MTD_NAND_HWECC
+#ifdef CONFIG_MTD_NAND_HWECC
 #  define NAND_READPAGE(r,b,p,d,s) ((r)->readpage(r,b,p,d,s))
 #else
 #  define NAND_READPAGE(r,b,p,d,s) ((r)->rawread(r,b,p,d,s))
@@ -226,7 +226,7 @@
  *
  ****************************************************************************/
 
-#ifdef MTD_NAND_HWECC
+#ifdef CONFIG_MTD_NAND_HWECC
 #  define NAND_WRITEPAGE(r,b,p,d,s) ((r)->writepage(r,b,p,d,s))
 #else
 #  define NAND_WRITEPAGE(r,b,p,d,s) ((r)->rawwrite(r,b,p,d,s))
@@ -268,7 +268,7 @@ struct nand_raw_s
                         FAR const void *spare);
 #endif
 
-#ifdef CONFIG_MTD_NAND_BLOCKCHECK
+#if defined(CONFIG_MTD_NAND_SWECC) || defined(CONFIG_MTD_NAND_HWECC)
   /* ECC working buffers*/
 
   uint8_t spare[CONFIG_MTD_NAND_MAXPAGESPARESIZE];

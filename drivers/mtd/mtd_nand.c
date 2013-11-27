@@ -95,7 +95,7 @@ static int     nand_checkblock(FAR struct nand_dev_s *nand, off_t block);
 static int     nand_devscan(FAR struct nand_dev_s *nand);
 #else
 #  define      nand_checkblock(n,b) (GOODBLOCK)
-#  define      nand_devscan(n)
+#  define      nand_devscan(n) (0)
 #endif
 
 /* Misc. NAND helpers */
@@ -237,6 +237,11 @@ static int nand_checkblock(FAR struct nand_dev_s *nand, off_t block)
  * Description:
  *   Scans the device to retrieve or create block status information.
  *
+ *   Currently, this functin does nothing but scan the NAND and eat up time.
+ *   This is a goot thing to do if you are debugging NAND, but otherwise,
+ *   just a waste of time.  This logic could, however, be integrated into
+ *   some bad block checking logic at sometime in the future.
+ *
  * Input Parameters:
  *   nand - Pointer to a struct nand_dev_s instance.
  *
@@ -245,7 +250,8 @@ static int nand_checkblock(FAR struct nand_dev_s *nand, off_t block)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MTD_NAND_BLOCKCHECK
+//#ifdef CONFIG_MTD_NAND_BLOCKCHECK
+#if defined(CONFIG_MTD_NAND_BLOCKCHECK) && defined(CONFIG_DEBUG_VERBOSE) && defined(CONFIG_DEBUG_FS)
 static int nand_devscan(FAR struct nand_dev_s *nand)
 {
   FAR struct nand_raw_s *raw;

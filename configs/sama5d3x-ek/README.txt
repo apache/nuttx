@@ -676,7 +676,7 @@ NAND Support
     Drivers -> Memory Technology Device (MTD) Support
       CONFIG_MTD=y                      : Enable MTD support
       CONFIG_MTD_NAND=y                 : Enable NAND support
-      CONFIG_MTD_NAND_BLOCKCHECK=y      : Enable bad block checking support
+      CONFIG_MTD_NAND_BLOCKCHECK=n      : Interferes with NXFFS bad block checking
       CONFIG_MTD_NAND_HWECC=y           : Use H/W ECC calculation
 
       Defaults for all other NAND settings should be okay

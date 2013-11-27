@@ -3058,20 +3058,20 @@ config SAMA5_EBICS0_ECCNONE
 
 config SAMA5_EBICS0_SWECC
 	bool "Software ECC"
-	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_SWECC
+	depends on MTD_NAND_SWECC
 	---help---
 		ECC is performed by higher level software logic
 
 config SAMA5_EBICS0_PMECC
 	bool "NAND H/W PMECC Support"
-	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
+	depends on MTD_NAND_HWECC
 	select SAMA5_HAVE_PMECC
 	---help---
 		Enable hardware assisted support for ECC calculations
 
 config SAMA5_EBICS0_CHIPECC
 	bool "Embedded chip ECC"
-	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_EMBEDDEDECC
+	depends on MTD_NAND_EMBEDDEDECC
 	---help---
 		Some NAND devices have internal, embedded ECC function.
 
@@ -3141,20 +3141,20 @@ config SAMA5_EBICS1_ECCNONE
 
 config SAMA5_EBICS1_SWECC
 	bool "Software ECC"
-	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_SWECC
+	depends on MTD_NAND_SWECC
 	---help---
 		ECC is performed by higher level software logic
 
 config SAMA5_EBICS1_PMECC
 	bool "NAND H/W PMECC Support"
-	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
+	depends on MTD_NAND_HWECC
 	select SAMA5_HAVE_PMECC
 	---help---
 		Enable hardware assisted support for ECC calculations
 
 config SAMA5_EBICS1_CHIPECC
 	bool "Embedded chip ECC"
-	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_EMBEDDEDECC
+	depends on MTD_NAND_EMBEDDEDECC
 	---help---
 		Some NAND devices have internal, embedded ECC function.
 
@@ -3224,20 +3224,20 @@ config SAMA5_EBICS2_ECCNONE
 
 config SAMA5_EBICS2_SWECC
 	bool "Software ECC"
-	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_SWECC
+	depends on MTD_NAND_SWECC
 	---help---
 		ECC is performed by higher level software logic
 
 config SAMA5_EBICS2_PMECC
 	bool "NAND H/W PMECC Support"
-	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
+	depends on MTD_NAND_HWECC
 	select SAMA5_HAVE_PMECC
 	---help---
 		Enable hardware assisted support for ECC calculations
 
 config SAMA5_EBICS2_CHIPECC
 	bool "Embedded chip ECC"
-	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_EMBEDDEDECC
+	depends on MTD_NAND_EMBEDDEDECC
 	---help---
 		Some NAND devices have internal, embedded ECC function.
 
@@ -3307,20 +3307,20 @@ config SAMA5_EBICS3_ECCNONE
 
 config SAMA5_EBICS3_SWECC
 	bool "Software ECC"
-	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_SWECC
+	depends on MTD_NAND_SWECC
 	---help---
 		ECC is performed by higher level software logic
 
 config SAMA5_EBICS3_PMECC
 	bool "NAND H/W PMECC Support"
-	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_HWECC
+	depends on MTD_NAND_HWECC
 	select SAMA5_HAVE_PMECC
 	---help---
 		Enable hardware assisted support for ECC calculations
 
 config SAMA5_EBICS3_CHIPECC
 	bool "Embedded chip ECC"
-	depends on MTD_NAND_BLOCKCHECK && MTD_NAND_EMBEDDEDECC
+	depends on MTD_NAND_EMBEDDEDECC
 	---help---
 		Some NAND devices have internal, embedded ECC function.
 
