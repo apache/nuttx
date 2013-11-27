@@ -211,7 +211,8 @@ static inline uintptr_t sdram_physramaddr(uintptr_t virtramaddr)
  *
  * Description:
  *   Given the virtual address of an NFC SRAM memory location, return the
- *   physical address of that location
+ *   physical address of that location.  If NFC SRAM is not being used by
+ *   the NAND logic, then it may be used a general purpose SRAM.
  *
  ****************************************************************************/
 
@@ -465,10 +466,12 @@ static inline uintptr_t sdram_virtramaddr(uintptr_t physramaddr)
  *
  * Description:
  *   Given the physical address of an NFC SRAM memory location, return the
- *   virtual address of that location
+ *   virtual address of that location.  If NFC SRAM is not being used by
+ *   the NAND logic, then it may be used a general purpose SRAM.
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SAMA5_HAVE_NAND
 static inline uintptr_t nfcsram_virtramaddr(uintptr_t physramaddr)
 {
 #if SAM_NFCSRAM_PSECTION != SAM_NFCSRAM_VSECTION
@@ -489,6 +492,7 @@ static inline uintptr_t nfcsram_virtramaddr(uintptr_t physramaddr)
 
 #endif
 }
+#endif
 
 /****************************************************************************
  * Name: udphsram_virtramaddr
@@ -691,6 +695,18 @@ uintptr_t sam_physregaddr(uintptr_t virtregaddr)
       return sysc_physregaddr(virtregaddr);
     }
 
+  /* Check for NFCS SRAM.  If NFC SRAM is being used by the NAND logic,
+   * then it will be treated as peripheral space.
+   */
+
+#ifdef CONFIG_SAMA5_HAVE_NAND
+  if (virtregaddr >= SAM_NFCSRAM_VSECTION &&
+      virtregaddr < (SAM_NFCSRAM_VSECTION + SAM_NFCSRAM_SIZE))
+    {
+      return nfcsram_physramaddr(virtregaddr);
+    }
+#endif
+
   /* We will not get here unless we are called with an invalid register
    * address
    */
@@ -731,13 +747,17 @@ uintptr_t sam_physramaddr(uintptr_t virtramaddr)
     }
 #endif
 
-  /* Check for NFCS SRAM.  */
+  /* Check for NFCS SRAM.  If NFC SRAM is not being used by the NAND logic,
+   * then it may be used a general purpose SRAM.
+   */
 
+#ifndef CONFIG_SAMA5_HAVE_NAND
   if (virtramaddr >= SAM_NFCSRAM_VSECTION &&
       virtramaddr < (SAM_NFCSRAM_VSECTION + SAM_NFCSRAM_SIZE))
     {
       return nfcsram_physramaddr(virtramaddr);
     }
+#endif
 
   /* Check for UDPH SRAM.  */
 
@@ -835,13 +855,17 @@ uintptr_t sam_virtramaddr(uintptr_t physramaddr)
     }
 #endif
 
-  /* Check for NFCS SRAM.  */
+  /* Check for NFCS SRAM.  If NFC SRAM is not being used by the NAND logic,
+   * then it may be used a general purpose SRAM.
+   */
 
+#ifndef CONFIG_SAMA5_HAVE_NAND
   if (physramaddr >= SAM_NFCSRAM_PSECTION &&
       physramaddr < (SAM_NFCSRAM_PSECTION + SAM_NFCSRAM_SIZE))
     {
       return nfcsram_virtramaddr(physramaddr);
     }
+#endif
 
   /* Check for UDPH SRAM.  */
 
