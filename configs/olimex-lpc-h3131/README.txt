@@ -686,3 +686,10 @@ Configurations
          Application Configuration -> System Add-Ons
            CONFIG_SYSTEM_USBMONITOR=y
            CONFIG_SYSTEM_USBMONITOR_INTERVAL=1
+
+       NOTE:  I have found that if you enable USB DEBUG and/or USB tracing,
+       the resulting image requires to much memory to execute out of
+       internal SRAM.  I was able to get the configurations to run out of
+       SRAM with debug/tracing enabled by carefully going through the
+       configuration and reducing stack sizes, disabling unused OS features,
+       disabling un-necessary NSH commands, etc.
