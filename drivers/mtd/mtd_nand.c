@@ -904,14 +904,14 @@ FAR struct mtd_dev_s *nand_initialize(FAR struct nand_raw_s *raw)
       size             = (uint64_t)onfi.pagesperblock *
                          (uint64_t)onfi.blocksperlun *
                          (uint64_t)onfi.pagesize;
-      DEBUGASSERT(size < (uint64_t)(1 << 21));
 
+      DEBUGASSERT(size < ((uint64_t)1 << 36));
       model->devsize   = (uint16_t)(size >> 20);
 
       size             = (uint64_t)onfi.pagesperblock *
                          (uint64_t)onfi.pagesize;
-      DEBUGASSERT(size < (uint64_t)(1 << 11));
 
+      DEBUGASSERT(size < ((uint64_t)1 << 26));
       model->blocksize = (uint16_t)(size >> 10);
 
       switch (onfi.pagesize)

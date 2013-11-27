@@ -282,7 +282,7 @@ int onfi_read(uintptr_t cmdaddr, uintptr_t addraddr, uintptr_t dataaddr,
   fvdbg("cmdaddr=%08x addraddr=%08x dataaddr=%08x\n",
         (int)cmdaddr, (int)addraddr, (int)dataaddr);
 
-  if (onfi_compatible(cmdaddr, addraddr, dataaddr))
+  if (!onfi_compatible(cmdaddr, addraddr, dataaddr))
     {
       fdbg("ERROR: No ONFI compatible device detected\n");
       return -ENODEV;
@@ -457,7 +457,7 @@ bool onfi_ebidetect(uintptr_t cmdaddr, uintptr_t addraddr,
 {
   uint32_t timer;
   uint8_t rc;
-  bool found = 0;
+  bool found = false;
   uint8_t ids[4];
   uint8_t i;
 
