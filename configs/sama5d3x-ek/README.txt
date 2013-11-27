@@ -76,6 +76,8 @@ Contents
   - Serial FLASH
   - HSMCI Card Slots
   - USB Ports
+  - SDRAM Support
+  - NAND Support
   - AT24 Serial EEPROM
   - CAN Usage
   - SAMA5 ADC Support
@@ -640,6 +642,28 @@ USB Ports
     ---- ----------- -------------------------------------------------------
     PD28 OVCUR_USB   Combined overrcurrent indication from port A and B
 
+SDRAM Support
+=============
+  In these configurations, .data and .bss are retained in ISRAM.  SDRAM can
+  be initialized and included in the heap.  Relevant configuration settings:
+
+    System Type->ATSAMA5 Peripheral Support
+      CONFIG_SAMA5_MPDDRC=y                 : Enable the DDR controller
+
+    System Type->External Memory Configuration
+      CONFIG_SAMA5_DDRCS=y                  : Tell the system that DRAM is at the DDR CS
+      CONFIG_SAMA5_DDRCS_SIZE=268435456     : 2Gb DRAM -> 256GB
+      CONFIG_SAMA5_DDRCS_LPDDR2=y           : Its DDR2
+      CONFIG_SAMA5_MT47H128M16RT=y          : This is the type of DDR2
+
+    System Type->Heap Configuration
+      CONFIG_SAMA5_DDRCS_HEAP=y             : Add the SDRAM to the heap
+      CONFIG_SAMA5_DDRCS_HEAP_OFFSET=0
+      CONFIG_SAMA5_DDRCS_HEAP_SIZE=268435456
+
+    Memory Management
+      CONFIG_MM_REGIONS=2                   : Two heap memory regions:  ISRAM and SDRAM
+
 NAND Support
 ============
   NAND Support can be added to the the NSH configuration by modifying the
@@ -670,7 +694,11 @@ NAND Support
     File Systems:
       CONFIG_FS_NXFFS=y                 : Enable the NXFFS file system
 
-      Defaults for all other NXFFS settings should be okay
+      Defaults for all other NXFFS settings should be okay.
+
+      NOTE:  NXFFS will require some significant buffering because of
+      the large size of the NAND flash blocks.  You will also need
+      to enable SDRAM as described above.
 
     Board Selection
       CONFIG_SAMA5_NAND_AUTOMOUNT=y     : Enable FS support on NAND

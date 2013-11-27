@@ -107,7 +107,7 @@
 
 /* DMA Configuration */
 
-#define DMA_FLAGS8 \
+#define NFCSRAM_DMA_FLAGS8 \
    DMACH_FLAG_FIFOCFG_LARGEST | \
    (((0x3f) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF0 | \
    DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_PERIPHINCREMENT | \
@@ -116,11 +116,27 @@
    DMACH_FLAG_MEMWIDTH_8BITS | DMACH_FLAG_MEMINCREMENT | \
    DMACH_FLAG_MEMCHUNKSIZE_1)
 
-#define DMA_FLAGS16 \
+#define NAND_DMA_FLAGS8 \
+   DMACH_FLAG_FIFOCFG_LARGEST | \
+   (((0x3f) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF0 | \
+   DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+   ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+   DMACH_FLAG_MEMWIDTH_8BITS | DMACH_FLAG_MEMINCREMENT | \
+   DMACH_FLAG_MEMCHUNKSIZE_1)
+
+#define NFCSRAM_DMA_FLAGS16 \
    DMACH_FLAG_FIFOCFG_LARGEST | \
    (((0x3f) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF0 | \
    DMACH_FLAG_PERIPHWIDTH_16BITS | DMACH_FLAG_PERIPHINCREMENT | \
    DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
+   ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
+   DMACH_FLAG_MEMWIDTH_16BITS | DMACH_FLAG_MEMINCREMENT | \
+   DMACH_FLAG_MEMCHUNKSIZE_1)
+
+#define NAND_DMA_FLAGS16 \
+   DMACH_FLAG_FIFOCFG_LARGEST | \
+   (((0x3f) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF0 | \
+   DMACH_FLAG_PERIPHWIDTH_16BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
    ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
    DMACH_FLAG_MEMWIDTH_16BITS | DMACH_FLAG_MEMINCREMENT | \
    DMACH_FLAG_MEMCHUNKSIZE_1)
@@ -170,9 +186,11 @@ static int      hsmc_interrupt(int irq, void *context);
 static int      nand_wait_dma(struct sam_nandcs_s *priv);
 static void     nand_dmacallback(DMA_HANDLE handle, void *arg, int result);
 static int      nand_dma_read(struct sam_nandcs_s *priv,
-                  uintptr_t vsrc, uintptr_t vdest, size_t nbytes);
+                  uintptr_t vsrc, uintptr_t vdest, size_t nbytes,
+                  uint32_t dmaflags);
 static int      nand_dma_write(struct sam_nandcs_s *priv,
-                  uintptr_t vsrc, uintptr_t vdest, size_t nbytes)
+                  uintptr_t vsrc, uintptr_t vdest, size_t nbytes,
+                  uint32_t dmaflags)
 #endif
 
 /* Raw Data Transfer Helpers */
@@ -972,10 +990,11 @@ static void nand_dmacallback(DMA_HANDLE handle, void *arg, int result)
  *   Transfer data to NAND from the provided buffer via DMA.
  *
  * Input Parameters:
- *   priv   - Lower-half, private NAND FLASH device state
- *   vsrc   - NAND data destination address.
- *   vdest  - Buffer where data read from NAND will be returned.
- *   nbytes - The number of bytes to transfer
+ *   priv     - Lower-half, private NAND FLASH device state
+ *   vsrc     - NAND data destination address.
+ *   vdest    - Buffer where data read from NAND will be returned.
+ *   nbytes   - The number of bytes to transfer
+ *   dmaflags - Describes the DMA configuration
  *
  * Returned Value
  *   OK on success; a negated errno value on failure.
@@ -984,7 +1003,8 @@ static void nand_dmacallback(DMA_HANDLE handle, void *arg, int result)
 
 #ifdef CONFIG_SAMA5_NAND_DMA
 static int nand_dma_read(struct sam_nandcs_s *priv,
-                          uintptr_t vsrc, uintptr_t vdest, size_t nbytes)
+                          uintptr_t vsrc, uintptr_t vdest, size_t nbytes,
+                         uint32_t dmaflags)
 {
   uint32_t psrc;
   uint32_t pdest;
@@ -1006,6 +1026,10 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
 
   psrc  = sam_physregaddr(vsrc);   /* Source is NAND */
   pdest = sam_physramaddr(vdest);  /* Destination is normal memory */
+
+  /* Configure the DMA:  8- vs 16-bit, NFC SRAM or NAND */
+
+  sam_dmaconfig(priv->dma, dmaflags);
 
   /* Setup the Memory-to-Memory DMA.  The semantics of the DMA module are
    * awkward here.  We will treat the NAND (src) as the peripheral source
@@ -1046,10 +1070,11 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
  *   Transfer data to NAND from the provided buffer via DMA.
  *
  * Input Parameters:
- *   priv   - Lower-half, private NAND FLASH device state
- *   vsrc   - Buffer that provides the data for the write
- *   vdest  - NAND data destination address
- *   nbytes - The number of bytes to transfer
+ *   priv     - Lower-half, private NAND FLASH device state
+ *   vsrc     - Buffer that provides the data for the write
+ *   vdest    - NAND data destination address
+ *   nbytes   - The number of bytes to transfer
+ *   dmaflags - Describes the DMA configuration
  *
  * Returned Value
  *   OK on success; a negated errno value on failure.
@@ -1058,7 +1083,8 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
 
 #ifdef CONFIG_SAMA5_NAND_DMA
 static int nand_dma_write(struct sam_nandcs_s *priv,
-                          uintptr_t vsrc, uintptr_t vdest, size_t nbytes)
+                          uintptr_t vsrc, uintptr_t vdest, size_t nbytes,
+                          uint32_t dmaflags)
 {
   uint32_t psrc;
   uint32_t pdest;
@@ -1076,6 +1102,10 @@ static int nand_dma_write(struct sam_nandcs_s *priv,
 
   psrc  = sam_physramaddr(vsrc);   /* Source is normal memory */
   pdest = sam_physregaddr(vdest);  /* Destination is NAND (or NAND host SRAM) */
+
+  /* Configure the DMA:  8- vs 16-bit, NFC SRAM or NAND */
+
+  sam_dmaconfig(priv->dma, dmaflags);
 
   /* Setup the Memory-to-Memory DMA.  The semantics of the DMA module are
    * awkward here.  We will treat the NAND (dest) as the peripheral destination
@@ -1216,17 +1246,40 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
                       uint8_t *buffer, size_t buflen)
 {
   uintptr_t src;
+#ifdef CONFIG_SAMA5_NAND_DMA
+  uint32_t dmaflags;
+#endif
   int buswidth;
 
-  /* Pick the data destination:  The NFC SRAM or the NAND data address */
+  /* Get the buswidth */
+
+  buswidth = nandmodel_getbuswidth(&priv->raw.model);
+
+  /* Pick the data source:  The NFC SRAM or the NAND data address */
 
   if (nfcsram)
     {
+      /* Source is NFC SRAM */
+
       src = NFCSRAM_BASE;
+
+#ifdef CONFIG_SAMA5_NAND_DMA
+      /* Select NFC SRAM DMA */
+
+      dmaflags = (buswidth == 16 ? NFCSRAM_DMA_FLAGS16 : NFCSRAM_DMA_FLAGS8);
+#endif
     }
   else
     {
+      /* Source is NFC NAND */
+
       src = priv->raw.dataaddr;
+
+#ifdef CONFIG_SAMA5_NAND_DMA
+      /* Select NAND DMA */
+
+      dmaflags = (buswidth == 16 ? NAND_DMA_FLAGS16 : NAND_DMA_FLAGS8);
+#endif
     }
 
 #ifdef CONFIG_SAMA5_NAND_DMA
@@ -1238,7 +1291,7 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
     {
       /* Transfer using DMA */
 
-      return nand_dma_read(priv, src, (uintptr_t)buffer, buflen);
+      return nand_dma_read(priv, src, (uintptr_t)buffer, buflen, dmaflags);
     }
   else
 #endif
@@ -1253,7 +1306,6 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
     {
       /* Check the data bus width of the NAND FLASH */
 
-      buswidth = nandmodel_getbuswidth(&priv->raw.model);
       if (buswidth == 16)
         {
           return nand_smc_read16(src, buffer, buflen);
@@ -1493,17 +1545,40 @@ static int nand_write(struct sam_nandcs_s *priv, bool nfcsram,
                       uint8_t *buffer, size_t buflen, off_t offset)
 {
   uintptr_t dest;
+#ifdef CONFIG_SAMA5_NAND_DMA
+  uint32_t dmaflags;
+#endif
   int buswidth;
 
-  /* Pick the data source:  The NFC SRAM or the NAND data address */
+  /* Get the buswidth */
+
+  buswidth = nandmodel_getbuswidth(&priv->raw.model);
+
+  /* Pick the data destination:  The NFC SRAM or the NAND data address */
 
   if (nfcsram)
     {
+      /* Destination is NFC SRAM */
+
       dest = NFCSRAM_BASE;
+
+#ifdef CONFIG_SAMA5_NAND_DMA
+      /* Select NFC SRAM DMA */
+
+      dmaflags = (buswidth == 16 ? NFCSRAM_DMA_FLAGS16 : NFCSRAM_DMA_FLAGS8);
+#endif
     }
   else
     {
+      /* Destination is NFC NAND */
+
       dest = priv->raw.dataaddr;
+
+#ifdef CONFIG_SAMA5_NAND_DMA
+      /* Select NAND DMA */
+
+      dmaflags = (buswidth == 16 ? NAND_DMA_FLAGS16 : NAND_DMA_FLAGS8);
+#endif
     }
 
   /* Apply the offset to the source address */
@@ -1519,7 +1594,7 @@ static int nand_write(struct sam_nandcs_s *priv, bool nfcsram,
     {
       /* Transfer using DMA */
 
-      return nand_dma_write(priv, (uintptr_t)buffer, dest, buflen);
+      return nand_dma_write(priv, (uintptr_t)buffer, dest, buflen, dmaflags);
     }
   else
 #endif
@@ -1534,7 +1609,6 @@ static int nand_write(struct sam_nandcs_s *priv, bool nfcsram,
     {
       /* Check the data bus width of the NAND FLASH */
 
-      buswidth = nandmodel_getbuswidth(&priv->raw.model);
       if (buswidth == 16)
         {
           return nand_smc_write16(buffer, dest, buflen);
@@ -2611,16 +2685,18 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
       return NULL;
     }
 
-  /* Allocate a DMA channel for NAND transfers */
+  /* Allocate a DMA channel for NAND transfers.  The channels will be
+   * configured as needed on-the-fly
+   */
 
 #ifdef CONFIG_SAMA5_NAND_DMA
   if (nandmodel_getbuswidth(&priv->raw.model) == 16)
     {
-      priv->dma = sam_dmachannel(NAND_DMAC, DMA_FLAGS16);
+      priv->dma = sam_dmachannel(NAND_DMAC, 0);
     }
   else
     {
-      priv->dma = sam_dmachannel(NAND_DMAC, DMA_FLAGS8);
+      priv->dma = sam_dmachannel(NAND_DMAC, 0);
     }
 
   if (!priv->dma)
