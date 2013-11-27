@@ -58,7 +58,7 @@
 /* Configuration ************************************************************/
 /* Block checking and H/W ECC support must be enabled for PMECC */
 
-#if !defined(CONFIG_MTD_NAND_BLOCKCHECK) || !defined(CONFIG_MTD_NAND_HWECC)
+#ifndef CONFIG_MTD_NAND_HWECC
 #  undef CONFIG_SAMA5_EBICS0_PMECC
 #  undef CONFIG_SAMA5_EBICS1_PMECC
 #  undef CONFIG_SAMA5_EBICS2_PMECC

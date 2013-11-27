@@ -1003,7 +1003,7 @@ static void nand_dmacallback(DMA_HANDLE handle, void *arg, int result)
 
 #ifdef CONFIG_SAMA5_NAND_DMA
 static int nand_dma_read(struct sam_nandcs_s *priv,
-                          uintptr_t vsrc, uintptr_t vdest, size_t nbytes,
+                         uintptr_t vsrc, uintptr_t vdest, size_t nbytes,
                          uint32_t dmaflags)
 {
   uint32_t psrc;
@@ -2356,9 +2356,6 @@ static int nand_readpage(struct nand_raw_s *raw, off_t block,
 
   /* Read the page */
 
-#ifndef CONFIG_MTD_NAND_BLOCKCHECK
-  ret = nand_readpage_noecc(priv, block, page, data, spare);
-#else
   DEBUGASSERT(raw->ecctype != NANDECC_SWECC);
   switch (raw->ecctype)
     {
@@ -2376,7 +2373,6 @@ static int nand_readpage(struct nand_raw_s *raw, off_t block,
     default:
       ret = -EINVAL;
     }
-#endif
 
   nand_unlock();
   return ret;
@@ -2420,9 +2416,6 @@ static int nand_writepage(struct nand_raw_s *raw, off_t block,
 
   /* Write the page */
 
-#ifndef CONFIG_MTD_NAND_BLOCKCHECK
-  ret = nand_writepage_noecc(priv, block, page, data, spare);
-#else
   DEBUGASSERT(raw->ecctype != NANDECC_SWECC);
   switch (raw->ecctype)
     {
@@ -2440,7 +2433,6 @@ static int nand_writepage(struct nand_raw_s *raw, off_t block,
     default:
       ret = -EINVAL;
     }
-#endif
 
   nand_unlock();
   return ret;
