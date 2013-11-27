@@ -4307,7 +4307,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
    * SLOM   Not used in host mode.
    * SDIS = 1, Stream disable mode.  Eliminates overruns/underruns at
    *        the expense of some performance.
-   * VBPS = 1, off chip power source
+   * VBPS = 1, off-chip power source
    */
 
   putreg32(USBHOST_USBMODE_CMHOST | USBHOST_USBMODE_SDIS | USBHOST_USBMODE_VBPS,
@@ -4322,6 +4322,14 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
       usbhost_trace1(EHCI_TRACE1_RESET_FAILED, -ret);
       return NULL;
     }
+
+  /* Re-program the USB host controller.  As implemented, lpc31_reset()
+   * requires the host mode setup in order to work.  However, we lose the
+   * host configuration in the reset.
+   */
+
+  putreg32(USBHOST_USBMODE_CMHOST | USBHOST_USBMODE_SDIS | USBHOST_USBMODE_VBPS,
+           LPC31_USBDEV_USBMODE);
 
   /* "In order to initialize the host controller, software should perform the
    *  following steps:
