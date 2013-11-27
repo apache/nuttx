@@ -6106,3 +6106,7 @@
 	  (2013-11-23)
 	* configs/sama5d3x-ek/src/sam_nand.c:  Add support for auto-mounting
 	  NAND MTD block or NXFFS devices (2013-11-25).
+	* include/mtd/mtd.h:  Packed the geometry structure so that it can
+	  support larger erase block sizes without increasing the size of
+	  the geometry structure (2013-11-27).
+
