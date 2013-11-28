@@ -220,9 +220,15 @@
 
 /* SPI - There is a MEMS device on SPI1 using these pins: */
 
-#define GPIO_SPI1_MISO GPIO_SPI1_MISO_1
-#define GPIO_SPI1_MOSI GPIO_SPI1_MOSI_1
-#define GPIO_SPI1_SCK  GPIO_SPI1_SCK_1
+#define GPIO_SPI5_MISO GPIO_SPI5_MISO_1
+#define GPIO_SPI5_MOSI GPIO_SPI5_MOSI_1
+#define GPIO_SPI5_SCK  GPIO_SPI5_SCK_1
+
+/* SPI - External SPI flash may be connected on SPI4: */
+
+#define GPIO_SPI4_MISO GPIO_SPI4_MISO_1
+#define GPIO_SPI4_MOSI GPIO_SPI4_MOSI_1
+#define GPIO_SPI4_SCK  GPIO_SPI4_SCK_1
 
 /* Timer Inputs/Outputs (see the README.txt file for options) */
 
@@ -231,6 +237,16 @@
 
 #define GPIO_TIM8_CH1IN  GPIO_TIM8_CH1IN_1
 #define GPIO_TIM8_CH2IN  GPIO_TIM8_CH2IN_1
+
+/* LCD
+ *
+ * The STM32F429I-DISCO board contains an onboard TFT LCD connected to the
+ * LTDC interface of the uC.  The LCD is 240x320 pixels.  Define the parameters
+ * of the LCD and the interface here.
+ */
+
+#define BOARD_LTDC_WIDTH    240
+#define BOARD_LTDC_HEIGHT   320
 
 /************************************************************************************
  * Public Data

@@ -6119,3 +6119,7 @@
 	  Pettit (2013-11-28).
 	* arch/arm/src/stm32/chip/stm32f40xxx_gpio.h: Add support for GPIOK and
 	  GPIOJ.  From Ken Pettit (2013-11-28).
+	* configs/stm32f429i-disco/extflash, Kconfig, include/board.h,
+	  src/stm32f429i-disco-internal.h, up_nsh.c, and up_spi.h:  Add a
+	  configuration and board support for an external SST25 FLASH.  From Ken
+	  Pettit (2013-11-28).
