@@ -6109,4 +6109,7 @@
 	* include/mtd/mtd.h:  Packed the geometry structure so that it can
 	  support larger erase block sizes without increasing the size of
 	  the geometry structure (2013-11-27).
-
+	* drivers/mtd/sst25xx.c:  Add another SST25 SerialFlash driver.  This
+	  one differs from sst25.c because it supports larger SST25 parts:  In
+	  the larger parts support page write instead of byte/word writes like
+	  the smaller parts.  From Ken Pettit (2013-11-28).

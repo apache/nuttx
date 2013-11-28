@@ -297,7 +297,7 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size);
  * Name: sst25_initialize
  *
  * Description:
- *   Initializes the drvier for SPI-based SST25 FLASH
+ *   Initializes the driver for SPI-based SST25 FLASH
  *
  *   Supports SST25VF512, SST25VF010, SST25VF520, SST25VF540, SST25VF080,
  *   and SST25VF016
@@ -305,6 +305,18 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size);
  ****************************************************************************/
 
 FAR struct mtd_dev_s *sst25_initialize(FAR struct spi_dev_s *dev);
+
+/****************************************************************************
+ * Name: sst25xx_initialize
+ *
+ * Description:
+ *   Initializes the driver for SPI-based SST25XX FLASH
+ *
+ *   Supports SST25VF064
+ *
+ ****************************************************************************/
+
+FAR struct mtd_dev_s *sst25xx_initialize(FAR struct spi_dev_s *dev);
 
 /****************************************************************************
  * Name: sst39vf_initialize

@@ -351,6 +351,42 @@ config SST25_SLOWREAD
 
 endif
 
+config MTD_SST25XX
+	bool "SPI-based SST25XX FLASH (64-MBit and larger)"
+	default n
+	select SPI
+	---help---
+		With the 64 MBit and larger parts, SST changed the write mechanism to
+		support page write instead of byte/word write like the smaller parts.
+		As a result, the SST25 driver is not compatible with the larger density
+		parts, and the SST25XX driver must be used instead.
+
+if MTD_SST25XX
+
+config SST25XX_SPIMODE
+	int "SST25 SPI Mode"
+	default 0
+
+config SST25XX_SPIFREQUENCY
+	int "SST25 SPI Frequency"
+	default 20000000
+
+config SST25XX_MANUFACTURER
+	hex "Manufacturers ID"
+	default 0xBF
+	---help---
+		Various manufacturers may have produced the parts.  0xBF is the manufacturer ID
+		for the parts manufactured by SST.
+
+config SST25XX_MEMORY_TYPE
+	hex "Memory type ID"
+	default 0x25
+	---help---
+		The memory type for SST25VF065 series is 0x25, but this can be modified if needed
+		to support compatible devices from different manufacturers.
+
+endif
+
 config MTD_SST39FV
 	bool "SST39FV NOR FLASH"
 	default n
