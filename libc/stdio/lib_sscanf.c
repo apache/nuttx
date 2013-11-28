@@ -356,6 +356,9 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
           else if (strchr("dobxu", *fmt))
             {
+              FAR long *plong = NULL;
+              FAR int  *pint  = NULL;
+
               lvdbg("vsscanf: Performing integer conversion\n");
 
               /* Get a pointer to the integer value.  We need to do this even
@@ -363,8 +366,6 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                * update the 'ap' variable.
                */
 
-              FAR long *plong = NULL;
-              FAR int  *pint  = NULL;
               if (!noassign)
                 {
                   /* We have to check whether we need to return a long or an
@@ -481,6 +482,11 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
 
           else if (*fmt == 'f')
             {
+#ifdef CONFIG_HAVE_DOUBLE
+              FAR double_t *pd = NULL;
+#endif
+              FAR float    *pf = NULL;
+
               lvdbg("vsscanf: Performing floating point conversion\n");
 
               /* Get a pointer to the double value.  We need to do this even
@@ -488,10 +494,6 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                * update the 'ap' variable.
                */
 
-#ifdef CONFIG_HAVE_DOUBLE
-              FAR double_t *pd = NULL;
-#endif
-              FAR float    *pf = NULL;
               if (!noassign)
                 {
                   /* We have to check whether we need to return a float or a

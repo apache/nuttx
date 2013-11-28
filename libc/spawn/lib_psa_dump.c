@@ -122,6 +122,6 @@ void posix_spawnattr_dump(posix_spawnattr_t *attr)
 #ifndef CONFIG_DISABLE_SIGNALS
   dbg("  sigmask:  %08x\n", attr->sigmask);
 #endif
-};
+}
 
 #endif /* CONFIG_DEBUG */

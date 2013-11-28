@@ -360,7 +360,7 @@ enum spi_dev_e
   SPIDEV_EXPANDER,    /* Select SPI I/O expander device */
   SPIDEV_MUX,         /* Select SPI multiplexer device */
   SPIDEV_AUDIO_DATA,  /* Select SPI audio codec device data port */
-  SPIDEV_AUDIO_CTRL,  /* Select SPI audio codec device control port */
+  SPIDEV_AUDIO_CTRL   /* Select SPI audio codec device control port */
 };
 
 /* Certain SPI devices may required differnt clocking modes */
