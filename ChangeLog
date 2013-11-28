@@ -6117,3 +6117,5 @@
 	  reporting (that would only be seen if both partition support and
 	  multi-root directory support are enabled at the same time).  From Ken
 	  Pettit (2013-11-28).
+	* arch/arm/src/stm32/chip/stm32f40xxx_gpio.h: Add support for GPIOK and
+	  GPIOJ.  From Ken Pettit (2013-11-28).
