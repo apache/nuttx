@@ -227,7 +227,9 @@ struct uip_conn *uip_tcpalloc(void)
        * that is in the UIP_TIME_WAIT or UIP_FIN_WAIT_1 state.
        */
 
-      struct uip_conn *tmp = g_active_tcp_connections.head;
+      FAR struct uip_conn *tmp =
+        (FAR struct uip_conn *)g_active_tcp_connections.head;
+
       while (tmp)
         {
           nllvdbg("conn: %p state: %02x\n", tmp, tmp->tcpstateflags);
@@ -252,7 +254,7 @@ struct uip_conn *uip_tcpalloc(void)
 
           /* Look at the next active connection */
 
-          tmp = tmp->node.flink;
+          tmp = (FAR struct uip_conn *)tmp->node.flink;
         }
 
       /* Did we find a connection that we can re-use? */

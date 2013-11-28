@@ -137,14 +137,14 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
 #ifdef CONFIG_NET_TCP
 static inline void netclose_disconnect(FAR struct socket *psock)
 {
+  FAR struct uip_conn *conn;
   FAR struct uip_callback_s *cb;
   uip_lock_t flags;
 
   /* Interrupts are disabled here to avoid race conditions */
 
   flags = uip_lock();
-
-  struct uip_conn *conn = (struct uip_conn*)psock->s_conn;
+  conn = (struct uip_conn*)psock->s_conn;
 
   /* There shouldn't be any callbacks registered */
 

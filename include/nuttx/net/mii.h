@@ -84,21 +84,6 @@
 #define MII_DP83840_10BTSR           0x1b      /* 10BASE-T status register */
 #define MII_DP83840_10BTCR           0x1c      /* 10BASE-T configuration register */
 
-/* National Semiconductor DP83848C: 0x8-0x15, 0x13, 0x1c reserved */
-
-#define MII_DP83848C_PHYSTS          0x10      /* RO PHY Status Register */
-#define MII_DP83848C_MICR            0x11      /* RW MII Interrupt Control Register */
-#define MII_DP83848C_MISR            0x12      /* RO MII Interrupt Status Register */
-#define MII_DP83848C_FCSCR           0x14      /* RO False Carrier Sense Counter Register */
-#define MII_DP83848C_RECR            0x15      /* RO Receive Error Counter Register */
-#define MII_DP83848C_PCSR            0x16      /* RW PCS Sub-Layer Configuration and Status Register */
-#define MII_DP83848C_RBR             0x17      /* RW RMII and Bypass Register */
-#define MII_DP83848C_LEDCR           0x18      /* RW LED Direct Control Register */
-#define MII_DP83848C_PHYCR           0x19      /* RW PHY Control Register */
-#define MII_DP83848C_10BTSCR         0x1a      /* RW 10Base-T Status/Control Register */
-#define MII_DP83848C_CDCTRL1         0x1b      /* RW CD Test Control Register and BIST Extensions Register */
-#define MII_DP83848C_EDCR            0x1e      /* RW Energy Detect */
-
 /* Am79c874: 0x08-0x0f, 0x14, 0x16, 0x19-0x1f reserved */
 
 #define MII_AM79C874_NPADVERTISE     0x07      /* Auto-negotiation next page advertisement */
@@ -133,24 +118,24 @@
 #define MII_KSZ8051_OMSS             0x17      /* Operation Mode Strap Status */
 #define MII_KSZ8051_XCTRL            0x18      /* Expanded Control */
 #define MII_KSZ8051_INT              0x1b      /* Interrupt Control/Status */
-#define MII_KSZ8051+LINKMD           0x1d      /* LinkMD(c) Control/Status */
+#define MII_KSZ8051_LINKMD           0x1d      /* LinkMD(c) Control/Status */
 #define MII_KSZ8051_PHYCTRL1         0x1e      /* PHY Control 1 */
 #define MII_KSZ8051_PHYCTRL2         0x1f      /* PHY Control 2 */
 
-/* National Semiconductor DP83848C PHY Extended Registers */
+/* National Semiconductor DP83848C PHY Extended Registers. 0x8-0x15, 0x13, 0x1c reserved */
 
-#define MII_DP83848C_STS             0x10      /* Status Register */
-#define MII_DP83848C_MICR            0x11      /* MII Interrupt Control Register */
-#define MII_DP83848C_MISR            0x12      /* MII Interrupt Status Register */
-#define MII_DP83848C_FCSCR           0x14      /* False Carrier Sense Counter */
-#define MII_DP83848C_RECR            0x15      /* Receive Error Counter */
-#define MII_DP83848C_PCSR            0x16      /* PCS Sublayer Config. and Status */
-#define MII_DP83848C_RBR             0x17      /* RMII and Bypass Register */
-#define MII_DP83848C_LEDCR           0x18      /* LED Direct Control Register */
-#define MII_DP83848C_PHYCR           0x19      /* PHY Control Register */
-#define MII_DP83848C_10BTSCR         0x1a      /* 10Base-T Status/Control Register */
-#define MII_DP83848C_CDCTRL1         0x1b      /* CD Test Control and BIST Extens */
-#define MII_DP83848C_EDCR            0x1d      /* Energy Detect Control Register */
+#define MII_DP83848C_STS             0x10      /* RO PHY Status Register */
+#define MII_DP83848C_MICR            0x11      /* RW MII Interrupt Control Register */
+#define MII_DP83848C_MISR            0x12      /* RO MII Interrupt Status Register */
+#define MII_DP83848C_FCSCR           0x14      /* RO False Carrier Sense Counter Register */
+#define MII_DP83848C_RECR            0x15      /* RO Receive Error Counter Register */
+#define MII_DP83848C_PCSR            0x16      /* RW PCS Sub-Layer Configuration and Status Register */
+#define MII_DP83848C_RBR             0x17      /* RW RMII and Bypass Register */
+#define MII_DP83848C_LEDCR           0x18      /* RW LED Direct Control Register */
+#define MII_DP83848C_PHYCR           0x19      /* RW PHY Control Register */
+#define MII_DP83848C_10BTSCR         0x1a      /* RW 10Base-T Status/Control Register */
+#define MII_DP83848C_CDCTRL1         0x1b      /* RW CD Test Control Register and BIST Extensions Register */
+#define MII_DP83848C_EDCR            0x1e      /* RW Energy Detect Control Register */
 
 /* SMSC LAN8720 PHY Extended Registers */
 

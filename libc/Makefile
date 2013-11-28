@@ -92,9 +92,11 @@ all: $(BIN)
 
 $(AOBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
+	$(call MOVEOBJ,$(patsubst $(BINDIR)$(DELIM)%$(OBJEXT),%,$@),$(BINDIR))
 
 $(COBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
+	$(call MOVEOBJ,$(patsubst $(BINDIR)$(DELIM)%$(OBJEXT),%,$@),$(BINDIR))
 
 # C library for the flat build
 

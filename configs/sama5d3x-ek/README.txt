@@ -1660,7 +1660,7 @@ Configurations
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
 
-       The Mass Storage Class (MSC) class driver is seleced for use with
+       The Mass Storage Class (MSC) class driver is selected for use with
        UDPHS:
 
        Device Drivers -> USB Device Driver Support
