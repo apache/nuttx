@@ -6123,3 +6123,12 @@
 	  src/stm32f429i-disco-internal.h, up_nsh.c, and up_spi.h:  Add a
 	  configuration and board support for an external SST25 FLASH.  From Ken
 	  Pettit (2013-11-28).
+	* fs/fs_inode.c: The inode semaphore must be re-entrant.  Here is the
+	  re-entering path that I found:  (1) USB host connects to FLASH drive
+	  and creates /dev/sda, (2) /dev/sda is mounted, (3) FLASH drive is
+	  removed but /dev/sda is not destroyed because there is still a\
+	  reference on the device because of the mount, (4) umount() is called,
+	  taking the inode semaphore, now the driver tries to destroy the block
+	  driver by calling unregister_blockdriver().  But (5)
+	  unregister_blockdriver() also takes the inode semaphore causing a
+	  deadlock if the inode semaphore is not re-entry. (2013-11-28).
