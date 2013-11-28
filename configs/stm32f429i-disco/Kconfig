@@ -3,7 +3,78 @@
 # see misc/tools/kconfig-language.txt.
 #
 
-if ARCH_BOARD_STM32F429_DISCO
+if ARCH_BOARD_STM32F429I_DISCO
+
+config STM32F429I_DISCO_FLASH
+	bool "MTD driver for external 8Mbyte SST25 FLASH on SPI4"
+	default n
+	select MTD
+	select MTD_SST25XX
+	select MTD_SMART
+	select FS_SMARTFS
+	select STM32_SPI4
+	select MTD_BYTE_WRITE
+	---help---
+		Configures an MTD device for use with the onboard flash
+
+config STM32F429I_DISCO_FLASH_MINOR
+	int "Minor number for the FLASH /dev/smart entry"
+	default 0
+	depends on STM32F429I_DISCO_FLASH
+	---help---
+		Sets the minor number for the FLASH MTD /dev entry
+
+config STM32F429I_DISCO_FLASH_PART
+	bool "Enable partition support on FLASH"
+	default n
+	depends on STM32F429I_DISCO_FLASH
+	---help---
+		Enables creation of partitions on the FLASH
+
+config STM32F429I_DISCO_FLASH_CONFIG_PART
+	bool "Create application config data partition on FLASH"
+	default y
+	depends on STM32F429I_DISCO_FLASH_PART
+	depends on PLATFORM_CONFIGDATA
+	---help---
+		Enables creation of a /dev/config partition on the FLASH
+
+config STM32F429I_DISCO_FLASH_CONFIG_PART_NUMBER
+	int "Index number of config partition (in list below)"
+	default 0
+	depends on STM32F429I_DISCO_FLASH_CONFIG_PART
+	---help---
+		Specifies the index number of the config data partition
+		from the partition list.
+
+config STM32F429I_DISCO_FLASH_PART_LIST
+	string "Flash partition size list"
+	default "4,8188"
+	depends on STM32F429I_DISCO_FLASH_PART
+	---help---
+		Comma separated list of partition sizes in KB.
+
+config STM32F429I_DISCO_RAMMTD
+	bool "MTD driver for SMARTFS RAM disk"
+	default n
+	select MTD
+	select RAMMTD
+	---help---
+		Configures an MTD based RAM device for use with SMARTFS.
+
+config STM32F429I_DISCO_RAMMTD_MINOR
+	int "Minor number for RAM /dev/smart entry"
+	default 1
+	depends on STM32F429I_DISCO_RAMMTD
+	---help---
+		Sets the minor number for the RAM MTD /dev entry
+
+config STM32F429I_DISCO_RAMMTD_SIZE
+	int "Size in KB of the RAM device to create"
+	default 32
+	depends on STM32F429I_DISCO_RAMMTD
+	---help---
+		Sets the size of static RAM allocation for the SMART RAM device
 
 config PM_BUTTONS
 	bool "PM Button support"

@@ -53,7 +53,8 @@
 #include "stm32.h"
 #include "stm32f429i-disco-internal.h"
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
+#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3) ||\
+	defined(CONFIG_STM32_SPI4) || defined(CONFIG_STM32_SPI5)
 
 /************************************************************************************
  * Definitions
@@ -89,28 +90,25 @@
  * Name: stm32_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the stm32fr29i-disco board.
+ *   Called to configure SPI chip select GPIO pins for the stm32f429i-disco board.
  *
  ************************************************************************************/
 
 void weak_function stm32_spiinitialize(void)
 {
-#ifdef CONFIG_STM32_SPI1
+#ifdef CONFIG_STM32_SPI5
   (void)stm32_configgpio(GPIO_CS_MEMS);    /* MEMS chip select */
+  (void)stm32_configgpio(GPIO_CS_LCD);     /* LCD chip select */
+  (void)stm32_configgpio(GPIO_LCD_DC);     /* LCD Data/Command select */
+  (void)stm32_configgpio(GPIO_LCD_ENABLE); /* LCD enable select */
 #endif
-#if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
-  (void)stm32_configgpio(GPIO_OLED_CS);    /* OLED chip select */
-# if defined(CONFIG_LCD_UG2864AMBAG01)
-  (void)stm32_configgpio(GPIO_OLED_A0);    /* OLED Command/Data */
-# endif
-# if defined(CONFIG_LCD_UG2864HSWEG01)
-  (void)stm32_configgpio(GPIO_OLED_DC);    /* OLED Command/Data */
-# endif
+#if defined(CONFIG_STM32_SPI4) && defined(CONFIG_MTD_SST25XX)
+  (void)stm32_configgpio(GPIO_CS_SST25);   /* SST25 FLASH chip select */
 #endif
 }
 
 /****************************************************************************
- * Name:  stm32_spi1/2/3select and stm32_spi1/2/3status
+ * Name:  stm32_spi1/2/3/4/5select and stm32_spi1/2/3/4/5status
  *
  * Description:
  *   The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status must be
@@ -138,17 +136,6 @@ void weak_function stm32_spiinitialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
-
-#if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
-  if (devid == SPIDEV_DISPLAY)
-    {
-      stm32_gpiowrite(GPIO_OLED_CS, !selected);
-    }
-  else
-#endif
-    {
-      stm32_gpiowrite(GPIO_CS_MEMS, !selected);
-    }
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -181,6 +168,47 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
+#ifdef CONFIG_STM32_SPI4
+void stm32_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+#if defined(CONFIG_MTD_SST25XX)
+  if (devid == SPIDEV_FLASH)
+    {
+      stm32_gpiowrite(GPIO_CS_SST25, !selected);
+    }
+#endif
+}
+
+uint8_t stm32_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  return 0;
+}
+#endif
+
+#ifdef CONFIG_STM32_SPI5
+void stm32_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+{
+  spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+#if defined(CONFIG_STM32_LTDC)
+  if (devid == SPIDEV_DISPLAY)
+    {
+      stm32_gpiowrite(GPIO_CS_LCD, !selected);
+    }
+  else
+#endif
+
+    {
+      stm32_gpiowrite(GPIO_CS_MEMS, !selected);
+    }
+}
+
+uint8_t stm32_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  return 0;
+}
+#endif
+
 /****************************************************************************
  * Name: stm32_spi1cmddata
  *
@@ -208,27 +236,6 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 #ifdef CONFIG_STM32_SPI1
 int stm32_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
-#if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
-  if (devid == SPIDEV_DISPLAY)
-    {
-      /* "This is the Data/Command control pad which determines whether the
-       *  data bits are data or a command.
-       *
-       *  A0 = "H": the inputs at D0 to D7 are treated as display data.
-       *  A0 = "L": the inputs at D0 to D7 are transferred to the command
-       *       registers."
-       */
-
-# if defined(CONFIG_LCD_UG2864AMBAG01)
-      (void)stm32_gpiowrite(GPIO_OLED_A0, !cmd);
-# endif
-# if defined(CONFIG_LCD_UG2864HSWEG01)
-      (void)stm32_gpiowrite(GPIO_OLED_DC, !cmd);
-# endif
-      return OK;
-    }
-#endif
-
   return -ENODEV;
 }
 #endif
@@ -246,6 +253,35 @@ int stm32_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
   return -ENODEV;
 }
 #endif
+
+#ifdef CONFIG_STM32_SPI4
+int stm32_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+  return -ENODEV;
+}
+#endif
+
+#ifdef CONFIG_STM32_SPI5
+int stm32_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+#if defined(CONFIG_STM32_LTDC)
+  if (devid == SPIDEV_DISPLAY)
+    {
+      /* "This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
+
+# if defined(CONFIG_STM32_LTDC)
+      (void)stm32_gpiowrite(GPIO_LCD_DC, !cmd);
+# endif
+      return OK;
+    }
+#endif
+
+  return -ENODEV;
+}
+#endif
+
 #endif /* CONFIG_SPI_CMDDATA */
 
 #endif /* CONFIG_STM32_SPI1 || CONFIG_STM32_SPI2 */

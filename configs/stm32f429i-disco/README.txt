@@ -816,6 +816,30 @@ Where <subdir> is one of the following:
 
        nsh> umount /mnt/stuff
 
+  extflash:
+  ---------
+
+    This is another NSH example.  If differs from other 'nsh' configurations
+    in that this configuration defines an external 8 MByte SPI FLASH (the
+    SST25VF064C part from Silicon Storage Technology, Inc.) which must be
+    be connected to the Discovery board's SPI4 pins on the expansion pins.
+    Additionally, this demo uses UART1 for the console
+
+    NOTES:
+
+    1. This configuration assumes an SST25VF064C 8Mbyte SPI FLASH is
+       connected to SPI4 on the following Discovery board Pins:
+
+       SCK:   Port PE2   Board Connector P1, Pin 15
+       MOSI:  Port PE6   Board Connector P1, Pin 11
+       MISO:  Port PE5   Board Connector P1, Pin 14
+       CS:    Port PE4   Board Connector P1, Pin 13
+
+    2. This configuration does have UART1 output enabled and set up as
+       the system logging device.  To use this UART, you must add an
+       external RS-232 line driver to the UART1 pins of the DISCO board
+       on PA9 and PA10 of connector P1.
+
   ostest:
   ------
     This configuration directory, performs a simple OS test using

@@ -45,13 +45,24 @@
 #include <debug.h>
 #include <errno.h>
 
-#ifdef CONFIG_STM32_SDIO
-#  include <nuttx/sdio.h>
+#include <nuttx/kmalloc.h>
+
+#ifdef CONFIG_STM32_SPI4
 #  include <nuttx/mmcsd.h>
+#endif
+
+#ifdef CONFIG_MTD_SST25XX
+#  include <nuttx/mtd/mtd.h>
 #endif
 
 #ifdef CONFIG_SYSTEM_USBMONITOR
 #  include <apps/usbmonitor.h>
+#endif
+
+#ifdef CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART
+#ifdef CONFIG_PLATFORM_CONFIGDATA
+#  include <nuttx/configdata.h>
+#endif
 #endif
 
 #ifdef CONFIG_STM32_OTGFS2
@@ -138,6 +149,133 @@ int nsh_archinitialize(void)
 #if defined(HAVE_USBHOST) || defined(HAVE_USBMONITOR)
   int ret;
 #endif
+#if defined(CONFIG_STM32_SPI5) || defined(CONFIG_STM32_SPI4)
+  FAR struct spi_dev_s *spi;
+  FAR struct mtd_dev_s *mtd;
+#endif
+
+  /* Configure SPI-based devices */
+
+#ifdef CONFIG_STM32_SPI4
+  /* Get the SPI port */
+
+  message("nsh_archinitialize: Initializing SPI port 4\n");
+  spi = up_spiinitialize(4);
+  if (!spi)
+    {
+      message("nsh_archinitialize: Failed to initialize SPI port 4\n");
+      return -ENODEV;
+    }
+
+  message("nsh_archinitialize: Successfully initialized SPI port 4\n");
+
+  /* Now bind the SPI interface to the SST25F064 SPI FLASH driver.  This
+   * is a FLASH device that has been added external to the board (i.e.
+   * the board does not ship from STM with any on-board FLASH.
+   */
+
+#if defined(CONFIG_MTD) && defined(CONFIG_MTD_SST25XX)
+  message("nsh_archinitialize: Bind SPI to the SPI flash driver\n");
+  mtd = sst25xx_initialize(spi);
+  if (!mtd)
+    {
+      message("nsh_archinitialize: Failed to bind SPI port 4 to the SPI FLASH driver\n");
+    }
+  else
+    {
+      message("nsh_archinitialize: Successfully bound SPI port 4 to the SPI FLASH driver\n");
+
+#ifdef CONFIG_STM32F429I_DISCO_FLASH_PART
+      {
+        int partno;
+        int partsize;
+        int partoffset;
+        const char *partstring = CONFIG_STM32F429I_DISCO_FLASH_PART_LIST;
+        const char *ptr;
+        FAR struct mtd_dev_s *mtd_part;
+        char  partname[4];
+
+        /* Now create a partition on the FLASH device */
+
+        partno = 0;
+        ptr = partstring;
+        partoffset = 0;
+
+        while (*ptr != '\0')
+          {
+            /* Get the partition size */
+
+            partsize = atoi(ptr);
+            mtd_part = mtd_partition(mtd, partoffset, (partsize>>2) * 16);
+            partoffset += (partsize >> 2) * 16;
+
+#ifdef CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART
+            /* Test if this is the config partition */
+
+            if (CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART_NUMBER == partno)
+              {
+                /* Register the partition as the config device */
+
+                mtdconfig_register(mtd_part);
+              }
+            else
+#endif
+              {
+                /* Now initialize a SMART Flash block device and bind it
+                 * to the MTD device.
+                 */
+
+#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
+                sprintf(partname, "p%d", partno);
+                smart_initialize(CONFIG_STM32F429I_DISCO_FLASH_MINOR, mtd_part, partname);
+#endif
+              }
+
+            /* Update the pointer to point to the next size in the list */
+
+            while ((*ptr >= '0') && (*ptr <= '9'))
+              {
+                ptr++;
+              }
+
+            if (*ptr == ',')
+              {
+                ptr++;
+              }
+
+            /* Increment the part number */
+
+            partno++;
+          }
+      }
+#else /* CONFIG_STM32F429I_DISCO_FLASH_PART */
+
+      /* Configure the device with no partition support */
+
+      smart_initialize(CONFIG_STM32F429I_DISCO_FLASH_MINOR, mtd, NULL);
+
+#endif /* CONFIG_STM32F429I_DISCO_FLASH_PART */
+    }
+
+#endif /* CONFIG_MTD */
+#endif /* CONFIG_STM32_SPI4 */
+
+  /* Create a RAM MTD device if configured */
+
+#if defined(CONFIG_RAMMTD) && defined(CONFIG_STM32F429I_DISCO_RAMMTD)
+  {
+    uint8_t *start = (uint8_t *) kmalloc(CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
+    mtd = rammtd_initialize(start, CONFIG_STM32F429I_DISCO_RAMMTD_SIZE * 1024);
+    mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
+
+    /* Now initialize a SMART Flash block device and bind it to the MTD device */
+
+#if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
+    smart_initialize(CONFIG_STM32F429I_DISCO_RAMMTD_MINOR, mtd, NULL);
+#endif
+  }
+
+#endif /* CONFIG_RAMMTD && CONFIG_STM32F429I_DISCO_RAMMTD */
 
 #ifdef HAVE_USBHOST
   /* Initialize USB host operation.  stm32_usbhost_initialize() starts a thread
