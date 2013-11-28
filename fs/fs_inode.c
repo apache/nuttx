@@ -61,7 +61,7 @@
  * because there can be cycles.  For example, it may be necessary to destroy
  * a block driver inode on umount() after a removable block device has been
  * removed.  In that case umount() hold the inode semaphore, but the block
- * driver may callback to unregister_blockdriver() after the un-mount, 
+ * driver may callback to unregister_blockdriver() after the un-mount,
  * requiring the seamphore again.
  */
 
@@ -187,7 +187,7 @@ void fs_initialize(void)
   (void)sem_init(&g_inode_sem.sem, 0, 1);
   g_inode_sem.holder = NO_HOLDER;
   g_inode_sem.count  = 0;
-  
+
   /* Initialize files array (if it is used) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
@@ -218,7 +218,7 @@ void inode_semtake(void)
       /* Yes... just increment the count */
 
       g_inode_sem.count++;
-      DEBUGASSERT(g_inode_sem.count > 0); 
+      DEBUGASSERT(g_inode_sem.count > 0);
     }
 
   /* Take the semaphore (perhaps waiting) */

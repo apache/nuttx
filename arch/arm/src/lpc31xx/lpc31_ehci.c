@@ -4310,7 +4310,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
    * VBPS = 1, off-chip power source
    */
 
-  putreg32(USBHOST_USBMODE_CMHOST | USBHOST_USBMODE_SDIS | USBHOST_USBMODE_VBPS,
+  putreg32(USBHOST_USBMODE_CMHOST /* | USBHOST_USBMODE_SDIS */ | USBHOST_USBMODE_VBPS,
            LPC31_USBDEV_USBMODE);
 
   /* Host Controller Initialization. Paragraph 4.1 */
