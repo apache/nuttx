@@ -658,11 +658,10 @@ Configurations
        support in the NSH configuration, please modify the NuttX
        configuration as follows:
 
-       [NOTE: USB host is under development.  It is not yet functional.]
-
          Drivers -> USB Host Driver Support
            CONFIG_USBHOST=y              : General USB host support
            CONFIG_USBHOST_MSC=y          : Mass storage class support
+           CONFIG_USBHOST_HIDKBD=?       : HID keyboard class support
            CONFIG_USBHOST_INT_DISABLE=y  : Not needed
            CONFIG_USBHOST_ISOC_DISABLE=y : Not needed
 
