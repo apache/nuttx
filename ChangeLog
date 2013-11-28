@@ -6113,3 +6113,7 @@
 	  one differs from sst25.c because it supports larger SST25 parts:  In
 	  the larger parts support page write instead of byte/word writes like
 	  the smaller parts.  From Ken Pettit (2013-11-28).
+	* drivers/mtd/smart.c: Fixes a minor bug with SMART partition number
+	  reporting (that would only be seen if both partition support and
+	  multi-root directory support are enabled at the same time).  From Ken
+	  Pettit (2013-11-28).
