@@ -48,7 +48,7 @@
 
 #include "sam_pmecc.h"
 
-#ifndef CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES
+#if defined(CONFIG_SAMA5_HAVE_PMECC) && !defined(CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES)
 
 /**********************************************************************************************************************************
  * Public Data
@@ -1092,4 +1092,4 @@ const uint16_t pmecc_gf512[2][PMECC_GF_SIZEOF_512] =
   }
 };
 
-#endif /* CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES */
+#endif /* CONFIG_SAMA5_HAVE_PMECC && !CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES */

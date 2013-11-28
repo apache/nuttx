@@ -60,6 +60,12 @@
 #include "sam_pmecc.h"
 #include "sam_nand.h"
 
+/* Compile this logic only if there is at least one CS configure for NAND
+ * and with PMECC support enabled.
+ */
+
+#ifdef CONFIG_SAMA5_HAVE_PMECC
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -1411,3 +1417,5 @@ void pmecc_buildgf(uint32_t mm, int16_t* indexof, int16_t* alphato)
   indexof[0] = -1;
 }
 #endif /* CONFIG_SAMA5_PMECC_GALOIS_CUSTOM */
+
+#endif /* CONFIG_SAMA5_HAVE_PMECC */
