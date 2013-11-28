@@ -422,10 +422,11 @@
 /* Port Status and Control register PRTSC1 (address 0x19000184) -- Device Mode */
 
 #define USBDEV_PRTSC1_PSPD_SHIFT             (26)      /* Bits 26-27: Port speed */
-#  define USBDEV_PRTSC1_PSPD_MASK            (3 << USBDEV_PRTSC1_PSPD_SHIFT)
+#define USBDEV_PRTSC1_PSPD_MASK              (3 << USBDEV_PRTSC1_PSPD_SHIFT)
 #  define USBDEV_PRTSC1_PSPD_FS              (0 << USBDEV_PRTSC1_PSPD_SHIFT) /* Full-speed */
+#  define USBDEV_PRTSC1_PSPD_LS              (1 << USBDEV_PRTSC1_PSPD_SHIFT) /* Low-speed */
 #  define USBDEV_PRTSC1_PSPD_HS              (2 << USBDEV_PRTSC1_PSPD_SHIFT) /* High-speed */
-#  define USBDEV_PRTSC1_PFSC                 (1 << 24) /* Bit 24: Port force full speed connect */
+#define USBDEV_PRTSC1_PFSC                   (1 << 24) /* Bit 24: Port force full speed connect */
 #define USBDEV_PRTSC1_PHCD                   (1 << 23) /* Bit 23: PHY low power suspend - clock disable (PLPSCD) */
 #define USBDEV_PRTSC1_PTC_SHIFT              (16)      /* Bits 16-19: 19: Port test control */
 #define USBDEV_PRTSC1_PTC_MASK               (15 << USBDEV_PRTSC1_PTC_SHIFT)

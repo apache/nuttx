@@ -3262,12 +3262,16 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
    *   00b         SE0       Not Low-speed device, perform EHCI reset
    *   10b         J-state   Not Low-speed device, perform EHCI reset
    *   01b         K-state   Low-speed device, release ownership of port
+   *
+   * NOTE: Low-speed devices could be detected by examining the PORTSC PSPD
+   * field after resetting the device.  The more convential way here, however,
+   * also appears to work.
    */
 
   regval = lpc31_getreg(&HCOR->portsc[rhpndx]);
   if ((regval & EHCI_PORTSC_LSTATUS_MASK) == EHCI_PORTSC_LSTATUS_KSTATE)
     {
-      /* Paragraph 2.3.9:
+      /* EHCI Paragraph 2.3.9:
        *
        *   "Port Owner ... This bit unconditionally goes to a 0b when the
        *    Configured bit in the CONFIGFLAG register makes a 0b to 1b
@@ -3281,7 +3285,7 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
        *    device. A one in this bit means that a companion host
        *    controller owns and controls the port. ....
        *
-       * Paragraph 4.2:
+       * EHCI Paragraph 4.2:
        *
        *   "When a port is routed to a companion HC, it remains under the
        *    control of the companion HC until the device is disconnected
@@ -3296,6 +3300,8 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
        */
 
       rhport->ep0.speed = EHCI_LOW_SPEED;
+
+#if 0 /* The LPC31xx does not support a companion host controller */
       regval |= EHCI_PORTSC_OWNER;
       lpc31_putreg(regval, &HCOR->portsc[rhpndx]);
 
@@ -3303,6 +3309,7 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 
       rhport->connected = false;
       return -EPERM;
+#endif
     }
   else
     {
@@ -3322,7 +3329,7 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 
   DEBUGASSERT((lpc31_getreg(&HCOR->usbsts) & EHCI_USBSTS_HALTED) == 0);
 
-  /* paragraph 2.3.9:
+  /* EHCI paragraph 2.3.9:
    *
    *  "When software writes a one to [the Port Reset] bit (from a zero), the
    *   bus reset sequence as defined in the USB Specification Revision 2.0 is
@@ -3351,7 +3358,7 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 
   /* Wait for the port reset to complete
    *
-   * Paragraph 2.3.9:
+   * EHCI Paragraph 2.3.9:
    *
    *  "Note that when software writes a zero to this bit there may be a
    *   delay before the bit status changes to a zero. The bit status will
@@ -3366,7 +3373,7 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
   while ((lpc31_getreg(regaddr) & EHCI_PORTSC_RESET) != 0);
   usleep(200*1000);
 
-  /* Paragraph 4.2.2:
+  /* EHCI Paragraph 4.2.2:
    *
    *  "... The reset process is actually complete when software reads a zero
    *   in the PortReset bit. The EHCI Driver checks the PortEnable bit in the
@@ -3380,20 +3387,38 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
    *   indicate that a full-speed device is attached. In either case the EHCI
    *   driver sets the PortOwner bit in the PORTSC register to a one to
    *   release port ownership to a companion host controller."
+   *
+   * LPC31xx User Manual Paragraph 6.1.3:
+   *
+   *  "In a standard EHCI controller design, the EHCI host controller driver
+   *   detects a Full speed (FS) or Low speed (LS) device by noting if the
+   *   port enable bit is set after the port reset operation. The port enable
+   *   will only be set in a standard EHCI controller implementation after the
+   *   port reset operation and when the host and device negotiate a High-Speed
+   *   connection (i.e. Chirp completes successfully). Since this controller has
+   *   an embedded Transaction Translator, the port enable will always be set
+   *   after the port reset operation regardless of the result of the host device
+   *   chirp result and the resulting port speed will be indicated by the PSPD
+   *   field in PORTSC1.
    */
 
   regval = lpc31_getreg(&HCOR->portsc[rhpndx]);
+
+#if 0 /* LPC31xx detects high- vs full-speed devices using the PSPD field */
   if ((regval & EHCI_PORTSC_PE) != 0)
+#else
+  if ((regval & USBDEV_PRTSC1_PSPD_MASK) == USBDEV_PRTSC1_PSPD_HS)
+#endif
     {
       /* High speed device */
 
       rhport->ep0.speed = EHCI_HIGH_SPEED;
     }
-  else
+  else if ((regval & USBDEV_PRTSC1_PSPD_MASK) == USBDEV_PRTSC1_PSPD_FS)
     {
       /* Low- or Full- speed device.  Set the port ownership bit.
        *
-       * Paragraph 4.2:
+       * EHCI Paragraph 4.2:
        *
        *   "When a port is routed to a companion HC, it remains under the
        *    control of the companion HC until the device is disconnected
@@ -3407,6 +3432,9 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
        *    repeat."
        */
 
+      DEBUGASSERT(rhport->ep0.speed = EHCI_FULL_SPEED);
+
+#if 0 /* The LPC31xx does not support a companion host controller */
       regval |= EHCI_PORTSC_OWNER;
       lpc31_putreg(regval, &HCOR->portsc[rhpndx]);
 
@@ -3414,6 +3442,15 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 
       rhport->connected = false;
       return -EPERM;
+#endif
+    }
+
+  /* Otherwise it must be a low speed device */
+
+  else
+    {
+      DEBUGASSERT(rhport->ep0.speed = EHCI_LOW_SPEED);
+      DEBUGASSERT((regval & USBDEV_PRTSC1_PSPD_MASK) == USBDEV_PRTSC1_PSPD_LS)
     }
 
   /* Let the common usbhost_enumerate do all of the real work.  Note that the
@@ -4302,16 +4339,25 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
 
   /* Program the controller to be the USB host controller
    *
-   * CM   = Host mode
-   * ES   = 0, Little endian mode.
-   * SLOM   Not used in host mode.
-   * SDIS = 1, Stream disable mode.  Eliminates overruns/underruns at
-   *        the expense of some performance.
-   * VBPS = 1, off-chip power source
+   * Fixed selections:
+   *
+   *   CM   = Host mode
+   *   ES   = 0, Little endian mode.
+   *   SLOM   Not used in host mode.
+   *   VBPS = 1, off-chip power source
+   *
+   * Configurable selections:
+   *
+   *   SDIS = 1, Stream disable mode.  Eliminates overruns/underruns at
+   *          the expense of some performance.
    */
 
-  putreg32(USBHOST_USBMODE_CMHOST /* | USBHOST_USBMODE_SDIS */ | USBHOST_USBMODE_VBPS,
+#ifdef CONFIG_LPC31_EHCI_SDIS
+  putreg32(USBHOST_USBMODE_CMHOST | USBHOST_USBMODE_SDIS | USBHOST_USBMODE_VBPS,
            LPC31_USBDEV_USBMODE);
+#else
+  putreg32(USBHOST_USBMODE_CMHOST | USBHOST_USBMODE_VBPS, LPC31_USBDEV_USBMODE);
+#endif
 
   /* Host Controller Initialization. Paragraph 4.1 */
   /* Reset the EHCI hardware */
