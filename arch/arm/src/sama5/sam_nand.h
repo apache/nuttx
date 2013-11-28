@@ -268,11 +268,13 @@ struct sam_nandcs_s
 struct sam_nand_s
 {
   bool initialized;          /* True:  One time initialization is complete */
+#if NAND_NBANKS > 1
   sem_t exclsem;             /* Enforce exclusive access to the SMC hardware */
+#endif
 
   /* Dynamic state */
 
-  volatile bool cmddone;     /* True:  NFC commnad has completed */
+  volatile bool cmddone;     /* True:  NFC command has completed */
   volatile bool xfrdone;     /* True:  Transfer has completed */
   volatile bool rbedge;      /* True:  Ready/busy edge detected */
   sem_t waitsem;             /* Used to wait for one of the above states */

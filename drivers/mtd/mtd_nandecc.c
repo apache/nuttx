@@ -97,6 +97,8 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
   unsigned int sparesize;
   int ret;
 
+  fvdbg("block=%d page=%d data=%p spare=%d\n", (int)block, page, data, spare);
+
   /* Get convenience pointers */
 
   DEBUGASSERT(nand && nand->raw);
@@ -146,7 +148,7 @@ int nandecc_readpage(FAR struct nand_dev_s *nand, off_t block,
   ret = hamming_verify256x(data, pagesize, raw->ecc);
   if (ret && (ret != HAMMING_ERROR_SINGLEBIT))
     {
-      fdbg("ERROR: Blockd paged Unrecoverable error:d\n",
+      fdbg("ERROR: Block=%d page=%d Unrecoverable error: %d\n",
            block, page, ret);
       return -EIO;
     }
@@ -186,6 +188,8 @@ int nandecc_writepage(FAR struct nand_dev_s *nand, off_t block,
   unsigned int pagesize;
   unsigned int sparesize;
   int ret;
+
+  fvdbg("block=%d page=%d data=%p spare=%d\n", (int)block, page, data, spare);
 
   /* Get convenience pointers */
 

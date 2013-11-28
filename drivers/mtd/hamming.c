@@ -258,7 +258,7 @@ static void compute256(FAR const uint8_t *data, FAR uint8_t *code)
   code[1] = (~(uint32_t)code[1]);
   code[2] = (~(uint32_t)code[2]);
 
-  fvdbg("Computed code = %02X %02X %02X\n", code[0], code[1], code[2]);
+  fvdbg("Computed code: %02x %02x %02x\n", code[0], code[1], code[2]);
 }
 
 /****************************************************************************

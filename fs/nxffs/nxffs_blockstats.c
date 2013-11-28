@@ -107,8 +107,19 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
       ret = MTD_BREAD(volume->mtd, ioblock, volume->blkper, volume->pack);
       if (ret < volume->blkper)
         {
-          fdbg("Failed to read erase block %d: %d\n", ioblock / volume->blkper, -ret);
-          return ret;
+          /* This should not happen at all on most FLASH.  A bad read will
+           * happen normally with a NAND device that has uncorrectable blocks.
+           * So, just for NAND, we keep the count of unreadable blocks.
+           */
+
+          fdbg("Failed to read erase block %d: %d\n",
+               ioblock / volume->blkper, ret);
+
+          /* Declare all blocks in the eraseblock as bad */
+
+          stats->nblocks  += volume->blkper;
+          stats->nbadread += volume->blkper;
+          continue;
         }
 
       /* Process each logical block */
@@ -146,7 +157,6 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
   fdbg("  Bad blocks:         %d\n", stats->nbad);
   fdbg("  Unformatted blocks: %d\n", stats->nunformat);
   fdbg("  Corrupt blocks:     %d\n", stats->ncorrupt);
+  fdbg("  Undreadable blocks: %d\n", stats->nbadread);
   return OK;
 }
-
-

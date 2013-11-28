@@ -1420,7 +1420,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   regval  = nand_getreg(SAM_HSMC_PMECCTRL);
   regval |= HSMC_PMECCTRL_DATA;
-  nand_putreg(SAM_HSMC_PMECCFG, regval);
+  nand_putreg(SAM_HSMC_PMECCTRL, regval);
 
   regval = nand_getreg(SAM_HSMC_PMECCEADDR);
   ret = nand_read(priv, true, (uint8_t *)data, pagesize + (regval + 1));
@@ -2612,7 +2612,9 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
     {
       /* Initialize the global nand state structure */
 
+#if NAND_NBANKS > 1
       sem_init(&g_nand.exclsem, 0, 1);
+#endif
       sem_init(&g_nand.waitsem, 0, 0);
 
       /* Enable the NAND FLASH Controller (The NFC is always used) */
@@ -2627,9 +2629,9 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 #else
       /* Disable the PMECC if it is not being used */
 
-      nand_putreg(SAM_SMC_PMECCTRL, HSMC_PMECCTRL_RST);
-      nand_putreg(SAM_SMC_PMECCTRL, HSMC_PMECCTRL_DISABLE);
-      nand_putreg(SAM_SMC_PMECCFG, 0);
+      nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_RST);
+      nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DISABLE);
+      nand_putreg(SAM_HSMC_PMECCFG, 0);
 #endif
 
       /* Attach the CAN interrupt handler */
@@ -2743,8 +2745,8 @@ bool nand_checkreg(bool wr, uintptr_t regaddr, uint32_t regval)
 
       /* Save information about the new access */
 
-      g_nand.wr   = wr;
-      g_nand.regval  = regval;
+      g_nand.wr       = wr;
+      g_nand.regval   = regval;
       g_nand.regadddr = regaddr;
       g_nand.ntimes   = 0;
     }

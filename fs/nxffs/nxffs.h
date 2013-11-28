@@ -311,7 +311,8 @@ struct nxffs_blkstats_s
   off_t                     ngood;      /* Number of good FLASH blocks found */
   off_t                     nbad;       /* Number of well-formatted FLASH blocks marked as bad */
   off_t                     nunformat;  /* Number of unformatted FLASH blocks */
-  off_t                     ncorrupt;   /* Number of blocks with correupted format info */
+  off_t                     ncorrupt;   /* Number of blocks with corrupted format info */
+  off_t                     nbadread;   /* Number of blocks that could not be read */
 };
 
 /****************************************************************************
