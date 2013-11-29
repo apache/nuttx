@@ -215,6 +215,12 @@ define ASSEMBLE
 	$(Q) (wfile=`cygpath -w "$1"`; "$(AS)" $(AFLAGS) $$wfile)
 endef
 
+define MOVEOBJ
+	$(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
+	$(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
+	$(call MOVEFILE, "$1.src", "$2$(DELIM)$1.src")
+endef
+
 define ARCHIVE
 	$(Q) for __obj in $(2) ; do \
 		echo "AR: $$__obj"; \
