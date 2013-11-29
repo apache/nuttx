@@ -212,6 +212,12 @@ define MOVEOBJ
 	$(call MOVEFILE, "$1.src", "$2$(DELIM)$1.src")
 endef
 
+define MOVEOBJ
+	$(call MOVEFILE, "$1.obj", "$2$(DELIM)$1.obj")
+	$(call MOVEFILE, "$1.lst", "$2$(DELIM)$1.lst")
+	$(call MOVEFILE, "$1.src", "$2$(DELIM)$1.src")
+endef
+
 define ARCHIVE
 	@echo AR: $2
 	$(Q) for %%G in ($(2)) do ( "$(AR)" $(ARFLAGS) $1=-+%%G )
