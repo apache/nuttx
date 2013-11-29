@@ -233,6 +233,17 @@
 
 #ifdef CONFIG_SAMA5_HAVE_NAND
 
+/* An early version of this driver used SMC interrupts to determine when
+ * NAND commands completed, transfers completed, and RB edges occurred.  It
+ * turns out that those interrupts occurred so quickly that some really
+ * nasty race conditions were created.  Rather than resolve those, I simply
+ * disabled the interrupt logic with this setting.  The setting is retained
+ * in case, for some reason, someone wants to restore the interrupt-driven
+ * logic. Polling should be better solution in this case.
+ */
+
+#undef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -274,10 +285,12 @@ struct sam_nand_s
 
   /* Dynamic state */
 
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   volatile bool cmddone;     /* True:  NFC command has completed */
   volatile bool xfrdone;     /* True:  Transfer has completed */
   volatile bool rbedge;      /* True:  Ready/busy edge detected */
   sem_t waitsem;             /* Used to wait for one of the above states */
+#endif
 
 #ifdef CONFIG_SAMA5_HAVE_PMECC
   uint8_t ecctab[CONFIG_MTD_NAND_MAX_PMECCSIZE];
