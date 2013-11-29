@@ -328,13 +328,7 @@ int sam_usbhost_initialize(void)
       udbg("ERROR: Failed to register the KBD class\n");
     }
 
-  /* Then get an instance of the USB host interface.
-   *
-   * REVISIT:  This logic needs to be modified.  There must be a call-out to
-   * platform specific logic to get the connection hangle.  usbhost_initialize()
-   * is not longer common to all platforms and is no longer prototyped in
-   * include/nuttx/usb/usbhost.h.
-   */
+  /* Then get an instance of the USB host interface. */
 
 #ifdef CONFIG_SAMA5_OHCI
   /* Get an instance of the USB OHCI interface */

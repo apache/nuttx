@@ -300,7 +300,7 @@ static int nsh_usbhostinitialize(void)
   /* Then get an instance of the USB host interface */
 
   message("nsh_usbhostinitialize: Initialize USB host\n");
-  g_usbconn = usbhost_initialize(0);
+  g_usbconn = pic32_usbhost_initialize(0);
   if (g_usbconn)
     {
       /* Start a thread to handle device connection. */
