@@ -70,7 +70,7 @@ extern "C"
 #endif
 
 /*******************************************************************************
- * Name: usbhost_initialize
+ * Name: lpc17_usbhost_initialize
  *
  * Description:
  *   Initialize USB host device controller hardware.
@@ -96,7 +96,7 @@ extern "C"
 
 #ifdef CONFIG_USBHOST
 struct usbhost_connection_s;
-FAR struct usbhost_connection_s *usbhost_initialize(int controller);
+FAR struct usbhost_connection_s *lpc17_usbhost_initialize(int controller);
 #endif
 
 #undef EXTERN
