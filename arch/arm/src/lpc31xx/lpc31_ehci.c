@@ -4284,7 +4284,7 @@ FAR struct usbhost_connection_s *lpc31_ehci_initialize(int controller)
     }
 #endif
 
-#if !defined(CONFIG_LPC31_EHCI_PREALLOCATE) || !defined(CONFIG_USBHOST_INT_DISABLE)
+#if !defined(CONFIG_LPC31_EHCI_PREALLOCATE) && !defined(CONFIG_USBHOST_INT_DISABLE)
   /* Allocate the periodic framelist  */
 
   g_framelist = (uint32_t *)
