@@ -658,24 +658,150 @@ Configurations
        support in the NSH configuration, please modify the NuttX
        configuration as follows:
 
-         Drivers -> USB Host Driver Support
-           CONFIG_USBHOST=y              : General USB host support
-           CONFIG_USBHOST_MSC=y          : Mass storage class support
-           CONFIG_USBHOST_HIDKBD=?       : HID keyboard class support
-           CONFIG_USBHOST_INT_DISABLE=y  : Not needed
-           CONFIG_USBHOST_ISOC_DISABLE=y : Not needed
+       a) Basic USB Host support
 
-         System Type -> Peripherals
-           CONFIG_LPC31_USBOTG=y         : Enable the USB OTG peripheral
+          Drivers -> USB Host Driver Support
+            CONFIG_USBHOST=y              : General USB host support
+            CONFIG_USBHOST_INT_DISABLE=y  : Not needed (unless you use the keyboard)
+            CONFIG_USBHOST_ISOC_DISABLE=y : Not needed (or supported)
 
-         System Type -> USB host configuration
-           CONFIG_LPC31_EHCI_BUFSIZE=128
-           CONFIG_LPC31_EHCI_PREALLOCATE=y
+          System Type -> Peripherals
+            CONFIG_LPC31_USBOTG=y         : Enable the USB OTG peripheral
 
-         Library Routines
-           CONFIG_SCHED_WORKQUEUE=y      : Work queue support is needed
+          System Type -> USB host configuration
+            CONFIG_LPC31_EHCI_BUFSIZE=128
+            CONFIG_LPC31_EHCI_PREALLOCATE=y
 
-       The USB monitor can also be enabled:
+          Library Routines
+            CONFIG_SCHED_WORKQUEUE=y      : Work queue support is needed
+            CONFIG_SCHED_WORKSTACKSIZE=1536
+
+       b. USB Mass Storage Class.  With this class enabled, you can support
+          connection of USB FLASH storage drives.  Support for the USB
+          mass storage class is enabled like this:
+
+          Drivers -> USB Host Driver Support
+            CONFIG_USBHOST_MSC=y          : Mass storage class support
+
+          The MSC class will work like this.  When you first start NSH, you
+          can look at the available devices like this:
+
+            NuttShell (NSH) NuttX-6.31
+            nsh> ls -l /dev
+            /dev:
+             crw-rw-rw-       0 console
+             crw-rw-rw-       0 null
+             crw-rw-rw-       0 ttyS0
+
+          The crw-rw-rw- indicates a readable, write-able character device.
+
+            nsh> ls -l /dev
+            /dev:
+             crw-rw-rw-       0 console
+             crw-rw-rw-       0 null
+             brw-rw-rw-       0 sda
+             crw-rw-rw-       0 ttyS0
+
+          The brw-rw-rw- indicates a readable, write-able block device.
+          This block device can then be mounted like this:
+
+            nsh> mount -t vfat /dev/sda /mnt/flash
+
+          The USB FLASH drive contents are then visible under /mnt/flash and
+          can be operated on with normal file system commands like:
+
+            nsh> mount -t vfat /dev/sda /mnt/flash
+            nsh> cat /mnt/flash/filec.c
+            etc.
+
+          It is recommended that the drive by unmounted BEFORE it is
+          removed.  That is not always possible so if the USB FLASH is
+          removed BEFORE the drive is unmounted, the device at /dev/sda will
+          persist in an unusable stack until it is unmounted with the
+          following command (NOTE:  If the FLASH drive is re-inserted in
+          this state, it will appear as /dev/sdb):
+
+            nsh> umount /mnt/flash
+
+       c. HID Keyboard support.  The following support will enable support
+          for certain keyboard devices (only the so-called "boot" keyboard
+          class is supported):
+
+          Drivers -> USB Host Driver Support
+            CONFIG_USBHOST_HIDKBD=y       : HID keyboard class support
+
+          Drivers -> USB Host Driver Support
+            CONFIG_USBHOST_INT_DISABLE=n  : Interrupt endpoint support needed
+
+          In this case, when the HID keyboard is installed, you see a new
+          character device called /dev/kbda.
+
+          There is a HID keyboard test example that can be enabled with the
+          following settings.  NOTE:  In this case, NSH is disabled because
+          the HID keyboard test is a standalone test.
+
+          This selects the HIDKBD example:
+
+          Application Configuration -> Examples
+            CONFIG_EXAMPLES_HIDKBD=y
+            CONFIG_EXAMPLES_HIDKBD_DEVNAME="/dev/kbda"
+
+          RTOS Features
+            CONFIG_USER_ENTRYPOINT="hidkbd_main"
+
+          These settings disable NSH:
+
+          Application Configuration -> Examples
+            CONFIG_EXAMPLES_NSH=n
+
+          Application Configuration -> NSH Library
+            CONFIG_NSH_LIBRARY=y
+
+          Using the HID Keyboard example:  Anything typed on the keyboard
+          should be echoed on the serial console.  Here is some sample of
+          a session:
+
+          Initialization
+
+            hidkbd_main: Register class drivers
+            hidkbd_main: Initialize USB host keyboard driver
+            hidkbd_main: Start hidkbd_waiter
+            hidkbd_waiter: Running
+
+          The test example will periodically attempt to open /dev/kbda
+
+            Opening device /dev/kbda
+            Failed: 2
+            Opening device /dev/kbda
+            Failed: 2
+            etc.
+
+          The open will fail each time because there is no keyboard
+          attached.  When a USB keyboard is attached, the open of /dev/kbda
+          will succeed and the test will begin echoing data to the serial
+          console:
+
+            hidkbd_waiter: connected
+            Opening device /dev/kbda
+            Device /dev/kbda opened
+
+          For example, this text was entered from the keyboard:
+
+            Now is the time for all good men to come to the aid of their party.
+
+          Then when the device is removed, the test will resume attempting
+          to open the driver until the next time it is connected
+
+            Closing device /dev/kbda: -1
+            Opening device /dev/kbda
+            Failed: 19
+            hidkbd_waiter: disconnected
+
+            Opening device /dev/kbda
+            Failed: 2
+            etc.
+
+       d. The USB monitor can also be enabled:
 
          Drivers -> USB Host Driver Support
            CONFIG_USBHOST_TRACE=y
@@ -692,3 +818,60 @@ Configurations
        SRAM with debug/tracing enabled by carefully going through the
        configuration and reducing stack sizes, disabling unused OS features,
        disabling un-necessary NSH commands, etc.
+
+    5. Making the Configuration Smaller.  This configuration runs out of
+       internal SRAM.  If you enable many features, then your code image
+       may outgrow the available SRAM; even if the code can be loaded into
+       SRAM, it may still fail at runtime due to insufficient memory.
+
+       Since SDRAM is not currently working (see above) and NAND support
+       has not be integrated, the only really option is to put NSH "on a
+       diet" to reduct the size so that it will fit into memory.
+
+       Here are a few things you can do:
+
+       1. Try using smaller stack sizes,
+
+       2. Disable operating system features.  Here some that can go:
+
+          CONFIG_DISABLE_ENVIRON=y
+          CONFIG_DISABLE_MQUEUE=y
+          CONFIG_DISABLE_POSIX_TIMERS=y
+          CONFIG_DISABLE_PTHREAD=y
+          CONFIG_MQ_MAXMSGSIZE=0
+          CONFIG_NPTHREAD_KEYS=0
+          CONFIG_NUNGET_CHARS=0
+          CONFIG_PREALLOC_MQ_MSGS=0
+
+       3. Disable NSH commands.  I can life fine without these:
+
+          CONFIG_NSH_DISABLE_ADDROUTE=y
+          CONFIG_NSH_DISABLE_CD=y
+          CONFIG_NSH_DISABLE_CMP=y
+          CONFIG_NSH_DISABLE_CP=y
+          CONFIG_NSH_DISABLE_DD=y
+          CONFIG_NSH_DISABLE_DELROUTE=y
+          CONFIG_NSH_DISABLE_EXEC=y
+          CONFIG_NSH_DISABLE_EXIT=y
+          CONFIG_NSH_DISABLE_GET=y
+          CONFIG_NSH_DISABLE_HEXDUMP=y
+          CONFIG_NSH_DISABLE_IFCONFIG=y
+          CONFIG_NSH_DISABLE_LOSETUP=y
+          CONFIG_NSH_DISABLE_MB=y
+          CONFIG_NSH_DISABLE_MH=y
+          CONFIG_NSH_DISABLE_MKFIFO=y
+          CONFIG_NSH_DISABLE_MKRD=y
+          CONFIG_NSH_DISABLE_NSFMOUNT=y
+          CONFIG_NSH_DISABLE_PING=y
+          CONFIG_NSH_DISABLE_PUT=y
+          CONFIG_NSH_DISABLE_PWD=y
+          CONFIG_NSH_DISABLE_RM=y
+          CONFIG_NSH_DISABLE_RMDIR=y
+          CONFIG_NSH_DISABLE_SET=y
+          CONFIG_NSH_DISABLE_SH=y
+          CONFIG_NSH_DISABLE_SLEEP=y
+          CONFIG_NSH_DISABLE_TEST=y
+          CONFIG_NSH_DISABLE_UNSET=y
+          CONFIG_NSH_DISABLE_USLEEP=y
+          CONFIG_NSH_DISABLE_WGET=y
+          CONFIG_NSH_DISABLE_XD=y
