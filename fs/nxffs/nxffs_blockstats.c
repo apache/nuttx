@@ -157,6 +157,6 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
   fdbg("  Bad blocks:         %d\n", stats->nbad);
   fdbg("  Unformatted blocks: %d\n", stats->nunformat);
   fdbg("  Corrupt blocks:     %d\n", stats->ncorrupt);
-  fdbg("  Undreadable blocks: %d\n", stats->nbadread);
+  fdbg("  Unreadable blocks:  %d\n", stats->nbadread);
   return OK;
 }

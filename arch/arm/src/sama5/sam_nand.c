@@ -662,6 +662,7 @@ static void nand_nfc_configure(struct sam_nandcs_s *priv, uint8_t mode,
 
 static void nand_wait_cmddone(struct sam_nandcs_s *priv)
 {
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   irqstate_t flags;
   int ret;
 
@@ -683,6 +684,12 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
   g_nand.cmddone = false;
   nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_CMDDONE);
   irqrestore(flags);
+
+#else
+  /* Poll for the CMDDONE event */
+
+  while((nand_getreg(SAM_HSMC_SR) & HSMC_NFCINT_CMDDONE) == 0);
+#endif
 }
 
 /****************************************************************************
@@ -701,6 +708,7 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
 
 static void nand_setup_cmddone(struct sam_nandcs_s *priv)
 {
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   irqstate_t flags;
 
   /* Clear all pending interrupts.  This must be done with interrupts
@@ -718,6 +726,11 @@ static void nand_setup_cmddone(struct sam_nandcs_s *priv)
 
   nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_CMDDONE);
   irqrestore(flags);
+#else
+  /* Just clear any pending CMDDONE status */
+
+  nand_getreg(SAM_HSMC_SR);
+#endif
 }
 
 /****************************************************************************
@@ -736,6 +749,7 @@ static void nand_setup_cmddone(struct sam_nandcs_s *priv)
 
 static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
 {
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   irqstate_t flags;
   int ret;
 
@@ -757,6 +771,12 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
   g_nand.xfrdone = false;
   nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_XFRDONE);
   irqrestore(flags);
+
+#else
+  /* Poll for the XFRDONE event */
+
+  while((nand_getreg(SAM_HSMC_SR) & HSMC_NFCINT_XFRDONE) == 0);
+#endif
 }
 
 /****************************************************************************
@@ -775,6 +795,7 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
 
 static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
 {
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   irqstate_t flags;
 
   /* Clear all pending interrupts.  This must be done with interrupts
@@ -792,6 +813,11 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
 
   nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_XFRDONE);
   irqrestore(flags);
+#else
+  /* Just clear any pending XFRDONE status */
+
+  nand_getreg(SAM_HSMC_SR);
+#endif
 }
 
 /****************************************************************************
@@ -810,6 +836,7 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
 
 static void nand_wait_rbedge(struct sam_nandcs_s *priv)
 {
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   irqstate_t flags;
   int ret;
 
@@ -831,6 +858,12 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
   g_nand.rbedge = false;
   nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_RBEDGE0);
   irqrestore(flags);
+
+#else
+  /* Poll for the RBEDGE0 event */
+
+  while((nand_getreg(SAM_HSMC_SR) & HSMC_NFCINT_RBEDGE0) == 0);
+#endif
 }
 
 /****************************************************************************
@@ -849,6 +882,7 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
 
 static void nand_setup_rbedge(struct sam_nandcs_s *priv)
 {
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   irqstate_t flags;
 
   /* Clear all pending interrupts.  This must be done with interrupts
@@ -866,6 +900,12 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
 
   nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_RBEDGE0);
   irqrestore(flags);
+
+#else
+  /* Just clear any pending RBEDGE0 status */
+
+  nand_getreg(SAM_HSMC_SR);
+#endif
 }
 
 /****************************************************************************
@@ -882,6 +922,7 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
 static int hsmc_interrupt(int irq, void *context)
 {
   uint32_t sr      = nand_getreg(SAM_HSMC_SR);
@@ -924,6 +965,7 @@ static int hsmc_interrupt(int irq, void *context)
 
   return OK;
 }
+#endif /* CONFIG_SAMA5_NAND_HSMCINTERRUPTS */
 
 /****************************************************************************
  * Name: nand_wait_dma
@@ -1251,6 +1293,8 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
 #endif
   int buswidth;
 
+  fvdbg("nfcsram=%d buffer=%p buflen=%d\n", nfcsram, buffer, (int)buflen);
+
   /* Get the buswidth */
 
   buswidth = nandmodel_getbuswidth(&priv->raw.model);
@@ -1549,6 +1593,9 @@ static int nand_write(struct sam_nandcs_s *priv, bool nfcsram,
   uint32_t dmaflags;
 #endif
   int buswidth;
+
+  fvdbg("nfcsram=%d buffer=%p buflen=%d offset=%d\n",
+        nfcsram, buffer, (int)buflen, (int)offset);
 
   /* Get the buswidth */
 
@@ -2615,7 +2662,9 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 #if NAND_NBANKS > 1
       sem_init(&g_nand.exclsem, 0, 1);
 #endif
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
       sem_init(&g_nand.waitsem, 0, 0);
+#endif
 
       /* Enable the NAND FLASH Controller (The NFC is always used) */
 
@@ -2634,6 +2683,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
       nand_putreg(SAM_HSMC_PMECCFG, 0);
 #endif
 
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
       /* Attach the CAN interrupt handler */
 
       ret = irq_attach(SAM_IRQ_HSMC, hsmc_interrupt);
@@ -2642,15 +2692,17 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
           fdbg("Failed to attach HSMC IRQ (%d)", SAM_IRQ_HSMC);
           return NULL;
         }
-
+#endif
       /* Disable all interrupts at the HSMC */
 
       nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_ALL);
 
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
       /* Enable the HSMC interrupts at the interrupt controller */
 
       up_enable_irq(SAM_IRQ_HSMC);
       g_nand.initialized = true;
+#endif
     }
 
   /* Initialize the NAND hardware for this CS */
