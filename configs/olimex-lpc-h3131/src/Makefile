@@ -65,6 +65,9 @@ endif
 ifeq ($(CONFIG_LPC31_USBOTG),y)
 ifeq ($(CONFIG_USBHOST),y)
 CSRCS += lpc31_usbhost.c
+ifeq ($(CONFIG_EXAMPLES_HIDKBD),y)
+CSRCS += lpc31_hidkbd.c
+endif
 endif
 endif
 
