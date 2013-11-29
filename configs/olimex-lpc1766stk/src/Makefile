@@ -60,6 +60,10 @@ ifeq ($(CONFIG_CAN),y)
 CSRCS		+= up_can.c
 endif
 
+ifeq ($(CONFIG_EXAMPLES_HIDKBD),y)
+CSRCS		+= up_hidkbd.c
+endif
+
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 COBJS		= $(CSRCS:.c=$(OBJEXT))
 
