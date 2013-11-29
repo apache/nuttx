@@ -4182,7 +4182,7 @@ FAR struct usbhost_connection_s *sam_ehci_initialize(int controller)
     }
 #endif
 
-#if !defined(CONFIG_SAMA5_EHCI_PREALLOCATE) || !defined(CONFIG_USBHOST_INT_DISABLE)
+#if !defined(CONFIG_SAMA5_EHCI_PREALLOCATE) && !defined(CONFIG_USBHOST_INT_DISABLE)
   /* Allocate the periodic framelist  */
 
   g_framelist = (uint32_t *)
