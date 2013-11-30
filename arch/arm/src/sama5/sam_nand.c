@@ -159,14 +159,14 @@ void            nand_unlock(void);
 #endif
 
 static void     nand_wait_ready(struct sam_nandcs_s *priv);
-static void     nand_cmdsend(struct sam_nandcs_s *priv, uint32_t cmd,
+static void     nand_nfc_cmdsend(struct sam_nandcs_s *priv, uint32_t cmd,
                   uint32_t acycle, uint32_t cycle0);
-static bool     nand_operation_complete(struct sam_nandcs_s *priv);
+static int      nand_operation_complete(struct sam_nandcs_s *priv);
 static int      nand_translate_address(struct sam_nandcs_s *priv,
                   uint16_t coladdr, uint32_t rowaddr, uint32_t *acycle0,
                   uint32_t *acycle1234, bool rowonly);
 static uint32_t nand_get_acycle(int ncycles);
-static void     nand_nfc_configure(struct sam_nandcs_s *priv,
+static void     nand_nfc_cleale(struct sam_nandcs_s *priv,
                    uint8_t mode, uint32_t cmd1, uint32_t cmd2,
                    uint32_t coladdr, uint32_t rowaddr);
 
@@ -176,9 +176,11 @@ static void     nand_wait_cmddone(struct sam_nandcs_s *priv);
 static void     nand_setup_cmddone(struct sam_nandcs_s *priv);
 static void     nand_wait_xfrdone(struct sam_nandcs_s *priv);
 static void     nand_setup_xfrdone(struct sam_nandcs_s *priv);
-static void     nand_wait_rbedge(struct sam_nandcs_s *priv);
-static void     nand_setup_rbedge(struct sam_nandcs_s *priv);
+static void     nand_wait_nfcbusy(struct sam_nandcs_s *priv);
+static uint32_t nand_nfc_poll(void);
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
 static int      hsmc_interrupt(int irq, void *context);
+#endif
 
 /* DMA Helpers */
 
@@ -355,15 +357,15 @@ static void nand_wait_ready(struct sam_nandcs_s *priv)
 #ifdef SAMA5_NAND_READYBUSY
   while (board_nand_busy(priv->cs));
 #endif
-  nand_nfc_configure(priv, 0, COMMAND_STATUS, 0, 0, 0);
+  nand_nfc_cleale(priv, 0, COMMAND_STATUS, 0, 0, 0);
   while ((READ_DATA8(&priv->raw) & STATUS_READY) == 0);
 }
 
 /****************************************************************************
- * Name: nand_cmdsend
+ * Name: nand_nfc_cmdsend
  *
  * Description:
- *   Use the HOST nandflash controller to send a command to the NFC.
+ *   Use the HOST NAND FLASH controller to send a command to the NFC.
  *
  * Input parameters:
  *   priv - Lower-half, private NAND FLASH device state
@@ -376,8 +378,8 @@ static void nand_wait_ready(struct sam_nandcs_s *priv)
  *
  ****************************************************************************/
 
-static void nand_cmdsend(struct sam_nandcs_s *priv, uint32_t cmd,
-                         uint32_t acycle, uint32_t cycle0)
+static void nand_nfc_cmdsend(struct sam_nandcs_s *priv, uint32_t cmd,
+                             uint32_t acycle, uint32_t cycle0)
 {
   uintptr_t cmdaddr;
 
@@ -407,15 +409,15 @@ static void nand_cmdsend(struct sam_nandcs_s *priv, uint32_t cmd,
  *   priv - Lower-half, private NAND FLASH device state
  *
  * Returned value.
- *   None
+ *   OK on success, a negated errnor value on failure
  *
  ****************************************************************************/
 
-static bool nand_operation_complete(struct sam_nandcs_s *priv)
+static int nand_operation_complete(struct sam_nandcs_s *priv)
 {
   uint8_t status;
 
-  nand_nfc_configure(priv, 0, COMMAND_STATUS, 0, 0, 0);
+  nand_nfc_cleale(priv, 0, COMMAND_STATUS, 0, 0, 0);
   status = READ_DATA8(&priv->raw);
 
   if (((status & STATUS_READY) == 0) || ((status & STATUS_ERROR) != 0))
@@ -580,10 +582,10 @@ static uint32_t nand_get_acycle(int ncycles)
 }
 
 /****************************************************************************
- * Name: nand_nfc_configure
+ * Name: nand_nfc_cleale
  *
  * Description:
- *   Sets NFC configuration.
+ *   Sends NAND CLE/ALE command.
  *
  * Input parameters:
  *   priv    - Pointer to a sam_nandcs_s instance.
@@ -598,9 +600,9 @@ static uint32_t nand_get_acycle(int ncycles)
  *
  ****************************************************************************/
 
-static void nand_nfc_configure(struct sam_nandcs_s *priv, uint8_t mode,
-                               uint32_t cmd1, uint32_t cmd2,
-                               uint32_t coladdr, uint32_t rowaddr)
+static void nand_nfc_cleale(struct sam_nandcs_s *priv, uint8_t mode,
+                            uint32_t cmd1, uint32_t cmd2,
+                            uint32_t coladdr, uint32_t rowaddr)
 {
   uint32_t cmd;
   uint32_t regval;
@@ -643,7 +645,7 @@ static void nand_nfc_configure(struct sam_nandcs_s *priv, uint8_t mode,
          (((mode & HSMC_CLE_VCMD2_EN) == HSMC_CLE_VCMD2_EN) ? NFCADDR_CMD_VCMD2 : 0) |
          (cmd1 << NFCADDR_CMD_CMD1_SHIFT) | (cmd2 << NFCADDR_CMD_CMD2_SHIFT));
 
-  nand_cmdsend(priv, cmd, acycle1234, acycle0);
+  nand_nfc_cmdsend(priv, cmd, acycle1234, acycle0);
 }
 
 /****************************************************************************
@@ -653,7 +655,7 @@ static void nand_nfc_configure(struct sam_nandcs_s *priv, uint8_t mode,
  *   Wait for NFC command done
  *
  * Input parameters:
- *   None
+ *   priv - CS state structure instance
  *
  * Returned value.
  *   None
@@ -679,16 +681,19 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
     }
   while (!g_nand.cmddone);
 
-  /* Disable further CMDDONE interrupts */
+  /* CMDDONE received */
 
   g_nand.cmddone = false;
-  nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_CMDDONE);
   irqrestore(flags);
 
 #else
-  /* Poll for the CMDDONE event */
+  /* Poll for the CMDDONE event (latching other events as necessary) */
 
-  while((nand_getreg(SAM_HSMC_SR) & HSMC_NFCINT_CMDDONE) == 0);
+  do
+    {
+      (void)nand_nfc_poll();
+    }
+  while (!g_nand.cmddone);
 #endif
 }
 
@@ -699,7 +704,7 @@ static void nand_wait_cmddone(struct sam_nandcs_s *priv)
  *   Setup to wait for CMDDONE event
  *
  * Input parameters:
- *   None
+ *   priv - CS state structure instance
  *
  * Returned value.
  *   None
@@ -727,9 +732,10 @@ static void nand_setup_cmddone(struct sam_nandcs_s *priv)
   nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_CMDDONE);
   irqrestore(flags);
 #else
-  /* Just clear any pending CMDDONE status */
+  /* Just sample and clear any pending NFC status, then clear CMDDONE status */
 
-  nand_getreg(SAM_HSMC_SR);
+  (void)nand_nfc_poll();
+  g_nand.cmddone = false;
 #endif
 }
 
@@ -740,7 +746,7 @@ static void nand_setup_cmddone(struct sam_nandcs_s *priv)
  *   Wait for a transfer to complete
  *
  * Input parameters:
- *   None
+ *   priv - CS state structure instance
  *
  * Returned value.
  *   None
@@ -766,16 +772,19 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
     }
   while (!g_nand.xfrdone);
 
-  /* Disable further XFRDONE interrupts */
+  /* XFRDONE received */
 
   g_nand.xfrdone = false;
-  nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_XFRDONE);
   irqrestore(flags);
 
 #else
-  /* Poll for the XFRDONE event */
+  /* Poll for the XFRDONE event (latching other events as necessary) */
 
-  while((nand_getreg(SAM_HSMC_SR) & HSMC_NFCINT_XFRDONE) == 0);
+  do
+    {
+      (void)nand_nfc_poll();
+    }
+  while (!g_nand.xfrdone);
 #endif
 }
 
@@ -786,7 +795,7 @@ static void nand_wait_xfrdone(struct sam_nandcs_s *priv)
  *   Setup to wait for XFDONE event
  *
  * Input parameters:
- *   None
+ *   priv - CS state structure instance
  *
  * Returned value.
  *   None
@@ -814,98 +823,103 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
   nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_XFRDONE);
   irqrestore(flags);
 #else
-  /* Just clear any pending XFRDONE status */
+  /* Just sample and clear any pending NFC status, then clear XFRDONE status */
 
-  nand_getreg(SAM_HSMC_SR);
+  (void)nand_nfc_poll();
+  g_nand.xfrdone = false;
 #endif
 }
 
 /****************************************************************************
- * Name: nand_wait_rbedge
+ * Name: nand_wait_nfcbusy
  *
  * Description:
- *   Wait for read/busy edge detection
+ *   Wait for NFC not busy
  *
  * Input parameters:
- *   None
+ *   priv - CS state structure instance
  *
  * Returned value.
  *   None
  *
  ****************************************************************************/
 
-static void nand_wait_rbedge(struct sam_nandcs_s *priv)
+static void nand_wait_nfcbusy(struct sam_nandcs_s *priv)
 {
-#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
-  irqstate_t flags;
-  int ret;
+  uint32_t sr;
 
-  /* Wait for the RBEDGE interrupt to occur */
+  /* Poll for the NFC not busy state (latching other events as necessary) */
 
-  flags = irqsave();
   do
     {
-      ret = sem_wait(&g_nand.waitsem);
-      if (ret < 0)
-        {
-          DEBUGASSERT(errno == EINTR);
-        }
+      sr = nand_nfc_poll();
     }
-  while (!g_nand.rbedge);
-
-  /* Disable further RBEDGE interrupts */
-
-  g_nand.rbedge = false;
-  nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_RBEDGE0);
-  irqrestore(flags);
-
-#else
-  /* Poll for the RBEDGE0 event */
-
-  while((nand_getreg(SAM_HSMC_SR) & HSMC_NFCINT_RBEDGE0) == 0);
-#endif
+  while ((sr & HSMC_SR_NFCBUSY) != 0);
 }
 
 /****************************************************************************
- * Name: nand_setup_rbedge
+ * Name: nand_nfc_poll
  *
  * Description:
- *   Setup to wait for RBEDGE0 event
+ *   Sample, latch, and return NFC status.  Some pending status is cleared.
+ *   This latching capability function is needed to prevent loss of pending
+ *   status when sampling the HSMC_SR register.
  *
  * Input parameters:
  *   None
  *
  * Returned value.
- *   None
+ *   Current HSMC_SR register value;
  *
  ****************************************************************************/
 
-static void nand_setup_rbedge(struct sam_nandcs_s *priv)
+static uint32_t nand_nfc_poll(void)
 {
+  uint32_t sr;
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   irqstate_t flags;
 
-  /* Clear all pending interrupts.  This must be done with interrupts
-   * enabled or we could lose interrupts.
+  /* Disable interrupts while we sample NFS status as this may be done from
+   * the interrupt level as well.
    */
 
-  nand_getreg(SAM_HSMC_SR);
   flags = irqsave();
-
-  /* Mark RBEDGE0 not received */
-
-  g_nand.rbedge = false;
-
-  /* Enable the EBEDGE0 interrupt */
-
-  nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_RBEDGE0);
-  irqrestore(flags);
-
-#else
-  /* Just clear any pending RBEDGE0 status */
-
-  nand_getreg(SAM_HSMC_SR);
 #endif
+
+  /* Read the current HSMC status, clearing most pending conditions */
+
+  sr = nand_getreg(SAM_HSMC_SR);
+
+#ifndef CONFIG_SAMA5_NAND_REGDEBUG
+  fllvdbg("sr=%08x\n", sr);
+#endif
+
+  /* When set to one, this XFRDONE indicates that the NFC has terminated
+   * the data transfer. This flag is reset after the status read.
+   */
+
+  if ((sr & HSMC_NFCINT_XFRDONE) != 0)
+    {
+      /* Set the latching XFRDONE status */
+
+      g_nand.xfrdone = true;
+    }
+
+  /* When set to one, the CMDDONE flag indicates that the NFC has terminated
+   * the Command. This flag is reset after the status read.
+   */
+
+  if ((sr & HSMC_NFCINT_CMDDONE) != 0)
+    {
+      /* Set the latching CMDDONE status */
+
+      g_nand.cmddone = true;
+    }
+
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
+  irqrestore(flags);
+#endif
+  return sr;
 }
 
 /****************************************************************************
@@ -925,42 +939,42 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
 static int hsmc_interrupt(int irq, void *context)
 {
-  uint32_t sr      = nand_getreg(SAM_HSMC_SR);
+  uint32_t sr      = nand_nfc_poll();
   uint32_t imr     = nand_getreg(SAM_HSMC_IMR);
   uint32_t pending = sr & imr;
 
-  fllvdbg("sr=%08x imr=%08x pending=%08x\n", sr, imr, pending);
+#ifndef CONFIG_SAMA5_NAND_REGDEBUG
+  fllvdbg("sr=%08x imr=%08x\n", sr, imr);
+#endif
 
   /* When set to one, this XFRDONE indicates that the NFC has terminated
    * the data transfer. This flag is reset after the status read.
    */
 
-  if ((pending & HSMC_NFCINT_XFRDONE) != 0)
+  if ((g_nand.xfrdone && (imr & HSMC_NFCINT_XFRDONE) != 0)
     {
-      g_nand.xfrdone = true;
+      /* Post the XFRDONE event */
+
       sem_post(&g_nand.waitsem);
+
+      /* Disable further XFRDONE interrupts */
+
+      nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_XFRDONE);
     }
 
   /* When set to one, the CMDDONE flag indicates that the NFC has terminated
    * the Command. This flag is reset after the status read.
    */
 
-  if ((pending & HSMC_NFCINT_CMDDONE) != 0)
+  if (g_nand.xfrdone && (imr & HSMC_NFCINT_CMDDONE) != 0)
     {
-      g_nand.cmddone = true;
-      sem_post(&g_nand.waitsem);
-    }
+      /* Post the CMDDONE event */
 
- /* If set to one, the RBEDGE0 flag indicates that an edge has been detected
-  * on the Ready/Busy Line x. Depending on the EDGE CTRL field located in the
-  * SMC_CFG register, only rising or falling edge is detected. This flag is
-  * reset after the status read.
-  */
-
-  if ((pending & HSMC_NFCINT_RBEDGE0) != 0)
-    {
-      g_nand.rbedge = true;
       sem_post(&g_nand.waitsem);
+
+      /* Disable further CMDDONE interrupts */
+
+      nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_CMDDONE);
     }
 
   return OK;
@@ -1429,7 +1443,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   /* Configure the SMC */
 
-  regval |= (HSMC_CFG_RSPARE |HSMC_CFG_RBEDGE | HSMC_CFG_DTOCYC(15) |
+  regval |= (HSMC_CFG_RSPARE | HSMC_CFG_RBEDGE | HSMC_CFG_DTOCYC(15) |
              HSMC_CFG_DTOMUL_1048576 |
              HSMC_CFG_NFCSPARESIZE((sparesize-1) >> 2));
   nand_putreg(SAM_HSMC_CFG, regval);
@@ -1452,9 +1466,9 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
   regval |= HSMC_PMECCTRL_DATA;
   nand_putreg(SAM_HSMC_PMECCFG, regval);
 
-  nand_nfc_configure(priv,
-                     HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN | HSMC_CLE_VCMD2_EN | HSMC_CLE_DATA_EN,
-                     COMMAND_READ_1, COMMAND_READ_2, 0, rowaddr);
+  nand_nfc_cleale(priv,
+                  HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN | HSMC_CLE_VCMD2_EN | HSMC_CLE_DATA_EN,
+                  COMMAND_READ_1, COMMAND_READ_2, 0, rowaddr);
 
   /* Reset the ECC module*/
 
@@ -1748,9 +1762,9 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
   /* Initialize the NFC */
 
   nand_setup_xfrdone(priv);
-  nand_nfc_configure(priv,
-                     HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN | HSMC_CLE_VCMD2_EN | HSMC_CLE_DATA_EN,
-                     COMMAND_READ_1, COMMAND_READ_2, coladdr, rowaddr);
+  nand_nfc_cleale(priv,
+                  HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN | HSMC_CLE_VCMD2_EN | HSMC_CLE_DATA_EN,
+                  COMMAND_READ_1, COMMAND_READ_2, coladdr, rowaddr);
   nand_wait_xfrdone(priv);
 
   /* Read data area if so requested */
@@ -1952,7 +1966,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
 
   rowaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
 
-  /* Handle the case where we use NFC SRAM */
+  /* Write the data and, if present, the spare bytes. */
 
   if (data)
     {
@@ -1981,20 +1995,19 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
       /* Start a Data Phase */
 
       nand_setup_xfrdone(priv);
-      nand_nfc_configure(priv,
-                         HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN |
-                         HSMC_ALE_ROW_EN | HSMC_CLE_DATA_EN,
-                         COMMAND_WRITE_1, 0, 0, rowaddr);
+      nand_nfc_cleale(priv,
+                      HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN |
+                      HSMC_ALE_ROW_EN | HSMC_CLE_DATA_EN,
+                      COMMAND_WRITE_1, 0, 0, rowaddr);
       nand_wait_xfrdone(priv);
 
-      nand_setup_rbedge(priv);
-      nand_nfc_configure(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
-      nand_wait_rbedge(priv);
+      nand_nfc_cleale(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
+      nand_wait_nfcbusy(priv);
 
-      if (!nand_operation_complete(priv))
+      ret = nand_operation_complete(priv);
+      if (ret < 0)
         {
-          fdbg("ERROR: Failed writing data area\n");
-          ret = -EPERM;
+          fdbg("ERROR: Failed writing data area: %d\n", ret);
         }
     }
 
@@ -2002,9 +2015,9 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
 
   else if (spare)
     {
-      nand_nfc_configure(priv,
-                         HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN,
-                         COMMAND_WRITE_1,0,  pagesize, rowaddr);
+      nand_nfc_cleale(priv,
+                      HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN,
+                      COMMAND_WRITE_1,0,  pagesize, rowaddr);
 
       ret = nand_write(priv, false, (uint8_t *)spare, sparesize, 0);
       if (ret < 0)
@@ -2013,7 +2026,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
           ret = -EPERM;
         }
 
-      nand_nfc_configure(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2,0, 0, 0);
+      nand_nfc_cleale(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2,0, 0, 0);
       nand_wait_ready(priv);
     }
 
@@ -2137,15 +2150,15 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   /* Configure the NFC */
 
   nand_setup_xfrdone(priv);
-  nand_nfc_configure(priv,
-                     HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN |
-                     HSMC_ALE_ROW_EN | HSMC_CLE_DATA_EN,
-                     COMMAND_WRITE_1, 0, 0, rowaddr);
+  nand_nfc_cleale(priv,
+                  HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN |
+                  HSMC_ALE_ROW_EN | HSMC_CLE_DATA_EN,
+                  COMMAND_WRITE_1, 0, 0, rowaddr);
   nand_wait_xfrdone(priv);
 
-  nand_nfc_configure(priv,
-                    HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN,
-                    COMMAND_RANDOM_IN, 0, startaddr, 0);
+  nand_nfc_cleale(priv,
+                  HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN,
+                  COMMAND_RANDOM_IN, 0, startaddr, 0);
 
   /* Wait until the kernel of the PMECC is not busy */
 
@@ -2193,15 +2206,15 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
       goto errout;
     }
 
-  nand_nfc_configure(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
+  nand_nfc_cleale(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
   nand_wait_ready(priv);
 
   /* Check for success */
 
-  if (!nand_operation_complete(priv))
+  ret = nand_operation_complete(priv);
+  if (ret < 0)
     {
-      fdbg("ERROR: Failed writing data area\n");
-      ret = -EPERM;
+      fdbg("ERROR: Failed writing data area: %d\n", ret);
     }
 
   /* Disable the PMECC */
@@ -2239,16 +2252,17 @@ static inline int nand_tryeraseblock(struct sam_nandcs_s *priv, off_t block)
 
   /* Configure the NFC for the block erase */
 
-  nand_nfc_configure(priv, HSMC_CLE_VCMD2_EN | HSMC_ALE_ROW_EN,
-                     COMMAND_ERASE_1, COMMAND_ERASE_2, 0, rowaddr);
+  nand_nfc_cleale(priv, HSMC_CLE_VCMD2_EN | HSMC_ALE_ROW_EN,
+                  COMMAND_ERASE_1, COMMAND_ERASE_2, 0, rowaddr);
 
   /* Wait for the erase operation to complete */
 
   nand_wait_ready(priv);
-  if (!nand_operation_complete(priv))
+
+  ret = nand_operation_complete(priv);
+  if (ret < 0)
     {
-      fdbg("ERROR: Could not erase block %d\n", block);
-      ret = -ENOEXEC;
+      fdbg("ERROR: Could not erase block %d: %d\n", block, ret);
     }
 
   return ret;
@@ -2503,7 +2517,7 @@ static int nand_writepage(struct nand_raw_s *raw, off_t block,
 static void nand_reset(struct sam_nandcs_s *priv)
 {
   fvdbg("Resetting\n");
-  nand_nfc_configure(priv, 0, COMMAND_RESET, 0, 0, 0);
+  nand_nfc_cleale(priv, 0, COMMAND_RESET, 0, 0, 0);
   nand_wait_ready(priv);
 }
 
