@@ -286,10 +286,12 @@ struct sam_nand_s
   /* Dynamic state */
 
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
-  volatile bool cmddone;     /* True:  NFC command has completed */
-  volatile bool xfrdone;     /* True:  Transfer has completed */
-  volatile bool rbedge;      /* True:  Ready/busy edge detected */
+  volatile bool cmddone;     /* True:  NFC command has completed (latching) */
+  volatile bool xfrdone;     /* True:  Transfer has completed (latching)  */
   sem_t waitsem;             /* Used to wait for one of the above states */
+#else
+  bool cmddone;              /* True:  NFC command has completed (latching)  */
+  bool xfrdone;              /* True:  Transfer has completed (latching)  */
 #endif
 
 #ifdef CONFIG_SAMA5_HAVE_PMECC
