@@ -724,6 +724,16 @@ config ARCH_BOARD_US7032EVB1
 		This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
 		STATUS:  Work has just began on this port.
 
+config ARCH_BOARD_VIEWTOOL_STM32F107
+	bool "ViewTool STM32F103/F107 with STM32F107"
+	depends on ARCH_CHIP_STM32F107VC
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	---help---
+		This port uses the ViewTool STM32F103/F107 V1.2 board.  This
+		board may be fitted with either: (1) STM32F107VCT6 or (2) STM32F103VCT6.
+		See http://www.viewtool.com/ for further information.
+
 config ARCH_BOARD_VSN
 	bool "SOTEL NetClamps VSN sensor network platform"
 	depends on ARCH_CHIP_STM32F103RET6
@@ -891,6 +901,7 @@ config ARCH_BOARD
 	default "twr-k60n512"         if ARCH_BOARD_TWR_K60N512
 	default "ubw32"               if ARCH_BOARD_UBW32
 	default "us7032evb1"          if ARCH_BOARD_US7032EVB1
+	default "viewtool-stm32f107"  if ARCH_BOARD_VIEWTOOL_STM32F107
 	default "vsn"                 if ARCH_BOARD_VSN
 	default "xtrs"                if ARCH_BOARD_XTRS
 	default "z16f2800100zcog"     if ARCH_BOARD_Z16F2800100ZCOG
@@ -1166,6 +1177,9 @@ source "configs/ubw32/Kconfig"
 endif
 if ARCH_BOARD_US7032EVB1
 source "configs/us7032evb1/Kconfig"
+endif
+if ARCH_BOARD_VIEWTOOL_STM32F107
+source "configs/viewtool-stm32f107/Kconfig"
 endif
 if ARCH_BOARD_VSN
 source "configs/vsn/Kconfig"

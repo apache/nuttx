@@ -2070,6 +2070,11 @@ configs/us7032evb1
   This is a port of the Hitachi SH-1 on the Hitachi SH-1/US7032EVB1 board.
   STATUS:  Work has just began on this port.
 
+configs/viewtool-stm32f107
+  NuttX configurations for the ViewTool STM32F103/F107 V1.2 board.  This
+  board may be fitted with either: (1) STM32F107VCT6 or (2) STM32F103VCT6.
+  See http://www.viewtool.com/ for further information.
+
 configs/vsn
   ISOTEL NetClamps VSN V1.2 ready2go sensor network platform based on the
   STMicro STM32F103RET6.  Contributed by Uros Platise.  See

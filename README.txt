@@ -1130,6 +1130,8 @@ nuttx
  |   |   `- README.txt
  |   |- us7032evb1/
  |   |   `- README.txt
+ |   |- viewtool-stm32f107/
+ |   |   `- README.txt
  |   |- vsn/
  |   |   |- src/README.txt
  |   |   `- README.txt

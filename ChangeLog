@@ -6132,3 +6132,8 @@
 	  driver by calling unregister_blockdriver().  But (5)
 	  unregister_blockdriver() also takes the inode semaphore causing a
 	  deadlock if the inode semaphore is not re-entry. (2013-11-28).
+	* configs/viewtool-stm32f107:  Add board support for the ViewTool
+	  STM32F103/F107 board with the STM32F107VCT6 installed.  Initial
+	  check-in is the unverfied board-support framework only
+	  (2013-11-30).
+
