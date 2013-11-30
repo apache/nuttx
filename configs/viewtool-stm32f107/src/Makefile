@@ -40,10 +40,14 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = stm32_boot.c stm32_spi.c
+CSRCS = stm32_boot.c stm32_leds.c stm32_spi.c
 
 ifeq ($(CONFIG_CAN),y)
 CSRCS += stm32_can.c
+endif
+
+ifeq ($(CONFIG_ARCH_BUTTONS),y)
+CSRCS += stm32_buttons.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

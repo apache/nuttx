@@ -46,12 +46,52 @@
 /******************************************************************************
  * Pre-processor Definitions
  ******************************************************************************/
+/* LEDs
+ *
+ * There are four LEDs on the ViewTool STM32F103/F107 board that can be controlled
+ * by software:  LED1 through LED4.  All pulled high and can be illuminated by
+ * driving the output to low
+ *
+ *   LED1 PA6
+ *   LED2 PA7
+ *   LED3 PB12
+ *   LED4 PB13
+ */
 
-#ifndef __ASSEMBLY__
+#define GPIO_LED1       (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN6)
+#define GPIO_LED2       (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN7)
+#define GPIO_LED3       (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN12)
+#define GPIO_LED4       (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz|\
+                         GPIO_OUTPUT_SET | GPIO_PORTB | GPIO_PIN13)
+
+
+/* Buttons **************************************************************************/
+/* All pulled high and will be sensed low when depressed.
+ *
+ *   SW2 PC11  Needs J42 closed
+ *   SW3 PC12  Needs J43 closed
+ *   SW4 PA0   Needs J44 closed
+ */
+
+#define MIN_IRQBUTTON   BUTTON_SW2
+#define MAX_IRQBUTTON   BUTTON_SW4
+#define NUM_IRQBUTTONS  (BUTTON_SW4 - BUTTON_SW2 + 1)
+
+#define GPIO_SW2        (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT | \
+                         GPIO_EXTI | GPIO_PORTC | GPIO_PIN11)
+#define GPIO_SW3        (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT | \
+                         GPIO_EXTI | GPIO_PORTC | GPIO_PIN12)
+#define GPIO_SW4        (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT | \
+                         GPIO_EXTI | GPIO_PORTA | GPIO_PIN10)
 
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /************************************************************************************
  * Name: stm32_spiinitialize
@@ -62,6 +102,16 @@
  ************************************************************************************/
 
 void weak_function stm32_spiinitialize(void);
+
+/****************************************************************************
+ * Name: up_ledinit
+ *
+ * Description:
+ *   Configure LEDs.  LEDs are left in the OFF state.
+ *
+ ****************************************************************************/
+
+void stm32_ledinit(void);
 
 #endif  /* __ASSEMBLY__ */
 #endif /* __CONFIGS_VIEWTOOLS_STM32F107_SRC_INTERNAL_H */
