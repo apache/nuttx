@@ -6136,4 +6136,7 @@
 	  STM32F103/F107 board with the STM32F107VCT6 installed.  Initial
 	  check-in is the unverfied board-support framework only
 	  (2013-11-30).
+	* configs/viewtool-stm32f107/src/stm32_buttons.c and stm32_leds.c:
+	  Add support for LEDs an buttons on the ViewTools STM32F107 board
+	  (2013-11-30).
 
