@@ -3434,9 +3434,18 @@ endif # SAMA5_HAVE_PMECC
 config SAMA5_NAND_REGDEBUG
 	bool "Register-Level NAND Debug"
 	default n
-	depends on DEBUG
+	depends on DEBUG && DEBUG_FS
 	---help---
-		Enable very low-level register access debug.  Depends on DEBUG.
+		Enable very low-level register access debug.  Depends on DEBUG and
+		DEBUG_FS.
+
+config SAMA5_NAND_DUMP
+	bool "NAND data dump"
+	default n
+	depends on DEBUG && DEBUG_FS
+	---help---
+		Dump the contents of all data read and written to FLAH.  Depends on
+		DEBUG and DEBUG_FS.
 
 endif # SAMA5_HAVE_NAND
 endmenu # External Memory Configuration

@@ -158,6 +158,12 @@ void            nand_unlock(void);
 #  define       nand_unlock()
 #endif
 
+#ifdef CONFIG_SAMA5_NAND_DUMP
+#  define nand_dump(m,b,s) lib_dumpbuffer(m,b,s)
+#else
+#  define nand_dump(m,b,s)
+#endif
+
 static void     nand_wait_ready(struct sam_nandcs_s *priv);
 static void     nand_nfc_cmdsend(struct sam_nandcs_s *priv, uint32_t cmd,
                   uint32_t acycle, uint32_t cycle0);
@@ -176,7 +182,12 @@ static void     nand_wait_cmddone(struct sam_nandcs_s *priv);
 static void     nand_setup_cmddone(struct sam_nandcs_s *priv);
 static void     nand_wait_xfrdone(struct sam_nandcs_s *priv);
 static void     nand_setup_xfrdone(struct sam_nandcs_s *priv);
+#ifdef USE_RBEDGE
+static void     nand_wait_rbedge(struct sam_nandcs_s *priv);
+static void     nand_setup_rbedge(struct sam_nandcs_s *priv);
+#else
 static void     nand_wait_nfcbusy(struct sam_nandcs_s *priv);
+#endif
 static uint32_t nand_nfc_poll(void);
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
 static int      hsmc_interrupt(int irq, void *context);
@@ -455,7 +466,7 @@ static int nand_translate_address(struct sam_nandcs_s *priv,
                                   bool rowonly)
 {
   uint16_t maxsize;
-  uint32_t page;
+  uint32_t maxpage;
   uint32_t accum0;
   uint32_t accum1234;
   uint8_t bytes[8];
@@ -467,7 +478,7 @@ static int nand_translate_address(struct sam_nandcs_s *priv,
 
   maxsize   = nandmodel_getpagesize(&priv->raw.model) +
               nandmodel_getsparesize(&priv->raw.model) - 1;
-  page      = nandmodel_getdevpagesize(&priv->raw.model) - 1;
+  maxpage   = nandmodel_getdevpagesize(&priv->raw.model) - 1;
   ncycles   = 0;
   accum0    = 0;
   accum1234 = 0;
@@ -499,10 +510,10 @@ static int nand_translate_address(struct sam_nandcs_s *priv,
 
   /* Convert row address */
 
-  while (page > 0)
+  while (maxpage > 0)
     {
       bytes[ncycles++] = rowaddr & 0xff;
-      page >>= 8;
+      maxpage >>= 8;
       rowaddr >>= 8;
     }
 
@@ -633,12 +644,13 @@ static void nand_nfc_cleale(struct sam_nandcs_s *priv, uint8_t mode,
   if (((mode & HSMC_ALE_COL_EN) != 0) || ((mode & HSMC_ALE_ROW_EN) != 0))
     {
       bool rowonly = ((mode & HSMC_ALE_COL_EN) == 0);
-      nand_translate_address(priv, coladdr, rowaddr, &acycle0, &acycle1234, rowonly);
-      acycle = nand_get_acycle(ncycles);
+      ncycles = nand_translate_address(priv, coladdr, rowaddr,
+                                       &acycle0, &acycle1234, rowonly);
+      acycle  = nand_get_acycle(ncycles);
     }
   else
     {
-      acycle = NFCADDR_CMD_ACYCLE_NONE;
+      acycle  = NFCADDR_CMD_ACYCLE_NONE;
     }
 
   cmd = (rw | regval | NFCADDR_CMD_CSID(priv->cs) | acycle |
@@ -831,6 +843,101 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
 }
 
 /****************************************************************************
+ * Name: nand_wait_rbedge
+ *
+ * Description:
+ *   Wait for read/busy edge detection
+ *
+ * Input parameters:
+ *   priv - CS state structure instance
+ *
+ * Returned value.
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef USE_RBEDGE
+static void nand_wait_rbedge(struct sam_nandcs_s *priv)
+{
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
+  irqstate_t flags;
+  int ret;
+
+  /* Wait for the RBEDGE0 interrupt to occur */
+
+  flags = irqsave();
+  do
+    {
+      ret = sem_wait(&g_nand.waitsem);
+      if (ret < 0)
+        {
+          DEBUGASSERT(errno == EINTR);
+        }
+    }
+  while (!g_nand.rbedge);
+
+  /* RBEDGE0 received */
+
+  g_nand.rbedge = false;
+  irqrestore(flags);
+
+#else
+  /* Poll for the RBEDGE0 event (latching other events as necessary) */
+
+  do
+    {
+      (void)nand_nfc_poll();
+    }
+  while (!g_nand.rbedge);
+#endif
+}
+#endif
+
+/****************************************************************************
+ * Name: nand_setup_rbedge
+ *
+ * Description:
+ *   Setup to wait for RBEDGE0 event
+ *
+ * Input parameters:
+ *   priv - CS state structure instance
+ *
+ * Returned value.
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef USE_RBEDGE
+static void nand_setup_rbedge(struct sam_nandcs_s *priv)
+{
+#ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
+  irqstate_t flags;
+
+  /* Clear all pending interrupts.  This must be done with interrupts
+   * enabled or we could lose interrupts.
+   */
+
+  nand_getreg(SAM_HSMC_SR);
+  flags = irqsave();
+
+  /* Mark RBEDGE0 not received */
+
+  g_nand.rbedge = false;
+
+  /* Enable the RBEDGE0 interrupt */
+
+  nand_putreg(SAM_HSMC_IER, HSMC_NFCINT_RBEDGE0);
+  irqrestore(flags);
+#else
+  /* Just sample and clear any pending NFC status, then clear RBEDGE0 status */
+
+  (void)nand_nfc_poll();
+  g_nand.rbedge = false;
+#endif
+}
+#endif
+
+/****************************************************************************
  * Name: nand_wait_nfcbusy
  *
  * Description:
@@ -844,6 +951,7 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
  *
  ****************************************************************************/
 
+#ifndef USE_RBEDGE
 static void nand_wait_nfcbusy(struct sam_nandcs_s *priv)
 {
   uint32_t sr;
@@ -856,6 +964,7 @@ static void nand_wait_nfcbusy(struct sam_nandcs_s *priv)
     }
   while ((sr & HSMC_SR_NFCBUSY) != 0);
 }
+#endif
 
 /****************************************************************************
  * Name: nand_nfc_poll
@@ -915,6 +1024,21 @@ static uint32_t nand_nfc_poll(void)
 
       g_nand.cmddone = true;
     }
+
+#ifdef USE_RBEDGE
+ /* If set to one, the RBEDGE0 flag indicates that an edge has been detected
+  * on the Ready/Busy Line x. Depending on the EDGE CTRL field located in the
+  * SMC_CFG register, only rising or falling edge is detected. This flag is
+  * reset after the status read.
+  */
+
+  if ((pending & HSMC_NFCINT_RBEDGE0) != 0)
+    {
+      /* Set the latching RBEDGE0 status */
+
+      g_nand.rbedge = true;
+    }
+#endif
 
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   irqrestore(flags);
@@ -976,6 +1100,25 @@ static int hsmc_interrupt(int irq, void *context)
 
       nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_CMDDONE);
     }
+
+#ifdef USE_RBEDGE
+ /* If set to one, the RBEDGE0 flag indicates that an edge has been detected
+  * on the Ready/Busy Line x. Depending on the EDGE CTRL field located in the
+  * SMC_CFG register, only rising or falling edge is detected. This flag is
+  * reset after the status read.
+  */
+
+  if (g_nand.rbedge && (imr & HSMC_NFCINT_RBEDGE0) != 0)
+    {
+      /* Post the RBEDGE0 event */
+
+      sem_post(&g_nand.waitsem);
+
+      /* Disable further RBEDGE0 interrupts */
+
+      nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_RBEDGE0);
+    }
+#endif
 
   return OK;
 }
@@ -1306,6 +1449,7 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
   uint32_t dmaflags;
 #endif
   int buswidth;
+  int ret;
 
   fvdbg("nfcsram=%d buffer=%p buflen=%d\n", nfcsram, buffer, (int)buflen);
 
@@ -1349,7 +1493,7 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
     {
       /* Transfer using DMA */
 
-      return nand_dma_read(priv, src, (uintptr_t)buffer, buflen, dmaflags);
+      ret = nand_dma_read(priv, src, (uintptr_t)buffer, buflen, dmaflags);
     }
   else
 #endif
@@ -1358,7 +1502,7 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
 
   if (nfcsram)
     {
-      return nand_nfcsram_read(src, buffer, buflen);
+      ret = nand_nfcsram_read(src, buffer, buflen);
     }
   else
     {
@@ -1366,13 +1510,16 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
 
       if (buswidth == 16)
         {
-          return nand_smc_read16(src, buffer, buflen);
+          ret = nand_smc_read16(src, buffer, buflen);
         }
       else
         {
-          return nand_smc_read8(src, buffer, buflen);
+          ret = nand_smc_read8(src, buffer, buflen);
         }
     }
+
+  nand_dump("NAND Read", buffer, buflen);
+  return ret;
 }
 
 /****************************************************************************
@@ -1610,6 +1757,8 @@ static int nand_write(struct sam_nandcs_s *priv, bool nfcsram,
 
   fvdbg("nfcsram=%d buffer=%p buflen=%d offset=%d\n",
         nfcsram, buffer, (int)buflen, (int)offset);
+
+  nand_dump("NAND Write", buffer, buflen);
 
   /* Get the buswidth */
 
@@ -2001,9 +2150,14 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
                       COMMAND_WRITE_1, 0, 0, rowaddr);
       nand_wait_xfrdone(priv);
 
+#ifdef USE_RBEDGE
+      nand_setup_rbedge(priv);
+      nand_nfc_cleale(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
+      nand_wait_rbedge(priv);
+#else
       nand_nfc_cleale(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
       nand_wait_nfcbusy(priv);
-
+#endif
       ret = nand_operation_complete(priv);
       if (ret < 0)
         {
