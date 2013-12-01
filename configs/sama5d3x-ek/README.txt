@@ -707,6 +707,18 @@ NAND Support
       Other file systems are not recommended because only NXFFS can handle
       bad blocks and only NXFFS performs wear-leveling.
 
+      NOTE:  NXFFS is very slow.  The first time that you start the system,
+      be prepared for a long wait.  I have lots of debug on so I don't know
+      what the optimized wait will be.  But with debug ON, the wait is in
+      units of hours.
+
+      NOTE:  There is another NXFFS related issue:  When the FLASH is
+      fully used, NXFFS will restructure the entire FLASH, the delay to
+      restructure the entire FLASH will probably be even larger.  This
+      solution in this case is to implement an NXFSS clean-up daemon that
+      does the job a little-at-a-time so that there is no massive clean-up
+      when the FLASH becomes full.
+
     Application Configuration -> NSH Library
      CONFIG_NSH_ARCHINIT=y              : Use architecture-specific initialization
 
