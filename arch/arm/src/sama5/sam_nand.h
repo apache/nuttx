@@ -226,12 +226,20 @@
 #  define NAND_HAVE_EBICS3 0
 #endif
 
+#ifdef CONFIG_SAMA5_HAVE_NAND
+
 /* Count the number of banks configured for NAND */
 
 #define NAND_NBANKS \
    (NAND_HAVE_EBICS0 + NAND_HAVE_EBICS1 + NAND_HAVE_EBICS2 + NAND_HAVE_EBICS3)
 
-#ifdef CONFIG_SAMA5_HAVE_NAND
+/* Debug */
+
+#if !defined(CONFIG_DEBUG)
+#  undef CONFIG_DEBUG_FS
+#  undef CONFIG_SAMA5_NAND_REGDEBUG
+#  undef CONFIG_SAMA5_NAND_DUMP
+#endif
 
 /* An early version of this driver used SMC interrupts to determine when
  * NAND commands completed, transfers completed, and RB edges occurred.  It
@@ -243,6 +251,13 @@
  */
 
 #undef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
+
+/* In the write sequence, there is a step where we should wait on an R/B
+ * edge transition.  The step currently hangs but, presumably must be
+ * restored when NAND is working.
+ */
+
+#undef USE_RBEDGE
 
 /****************************************************************************
  * Public Types
@@ -288,10 +303,17 @@ struct sam_nand_s
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   volatile bool cmddone;     /* True:  NFC command has completed (latching) */
   volatile bool xfrdone;     /* True:  Transfer has completed (latching)  */
+#ifdef USE_RBEDGE
+  volatile bool rbedge;      /* True:  Ready/busy edge detected (latching) */
+#endif
   sem_t waitsem;             /* Used to wait for one of the above states */
+
 #else
   bool cmddone;              /* True:  NFC command has completed (latching)  */
   bool xfrdone;              /* True:  Transfer has completed (latching)  */
+#ifdef USE_RBEDGE
+  bool rbedge;               /* True:  Ready/busy edge detected (latching) */
+#endif
 #endif
 
 #ifdef CONFIG_SAMA5_HAVE_PMECC
