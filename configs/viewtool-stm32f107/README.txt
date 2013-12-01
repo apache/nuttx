@@ -21,11 +21,15 @@ Contents
   o User and Wake-Up keys
   o LEDs
   o Serial Console
+    - Console Configuration
+    - J5 - USART1
+    - PL-2013 USB-to-Serial Intface
+    - RS-232 Module
   o Toolchains
     - NOTE about Windows native toolchains
   o Configurations
     - Information Common to All Configurations
-    - Configuration sub-directories
+    - Configuration Sub-directories
 
 User and Wake-Up keys
 =====================
@@ -73,20 +77,46 @@ LEDs
 Serial Console
 ==============
 
+  Console Configuration
+  ---------------------
+  The NuttX console is configurated by default on USART1 at 115200 BAUD 8N1
+  (8-bits, not parity, one stop bit).  These setting can, of course, easily
+  be changed by reconfiguring NuttX.
+
+  J5 - USART1
+  -----------
   The boards come with a PL-2303 based USB-to-serial board.  Also available
   as an option is an RS-232 board.  Both have the same pin out on a 6-pin
   connector that mates with the upper row of J5.
 
-  PIN MODULE BOARD J5
-  --- ------ ---------------------------
-   1   5V    1  POWER Power jumper
-   2   GND   3  GND   Ground
-   3   TXD   5  RXD1  PA10    USART1_RXD
-   4   RXD   7  TXD1  PA9     USART1_TXD
-   5   RTS?  9  CTS?  PA12    USART1_RTS
-   6   CTS?  11 RTS?  PA11    USART1_CTS
+    PIN MODULE BOARD J5
+    --- ------ ---------------------------
+     1   5V    1  POWER Power jumper
+     2   GND   3  GND   Ground
+     3   TXD   5  RXD1  PA10    USART1_RXD
+     4   RXD   7  TXD1  PA9     USART1_TXD
+     5   RTS?  9  CTS?  PA12    USART1_RTS
+     6   CTS?  11 RTS?  PA11    USART1_CTS
 
-   Note:  This requires USART1 pin remapping
+  PL-2013 USB-to-Serial Intface
+  -----------------------------
+
+    J37 - CON4.  Jumper Settings:
+      1 <-> 3 : Connects PA9 to the RXD1 output pin
+      2 <-> 4 : Connects PA10 to the TXD1 input pin
+
+    J35 - CON2.  Jumper Setting:
+      Open.  the PL2303 adapter receives its power from the USB host.
+
+  RS-232 Module
+  -------------
+
+    J37 - CON4.  Jumper Settings:
+      1 <-> 3 : Connects PA9 to the RXD1 output pin
+      2 <-> 4 : Connects PA10 to the TXD1 input pin
+
+    J35 - CON2.  Jumper Setting:
+      1 <-> 2 : Proves 3.3V to the RS-232 module.
 
 Toolchains
 ==========
@@ -182,7 +212,7 @@ Configurations
      See also the "NOTE about Windows native toolchains" in the section call
      "GNU Toolchain Options" above.
 
-  Configuration sub-directories
+  Configuration Sub-directories
   -----------------------------
 
   nsh:
