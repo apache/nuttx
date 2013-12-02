@@ -89,6 +89,7 @@ Contents
   - RTC
   - Watchdog Timer
   - TRNG and /dev/random
+  - Touchscreen Testing
   - OV2640 Camera Interface
   - I2S Audio Support
   - SAMA5D3x-EK Configuration Options
@@ -440,6 +441,11 @@ Creating and Using NORBOOT
       Serial FLASH.  Then, the system will boot from Serial FLASH by
       copying the NORBOOT image in SRAM which will run and then start the
       image in NOR FLASH automatically.
+
+      NOTES: (1) There is jumper on the CM module that must be closed to
+      enable use of the AT25 Serial Flash.  (2) If using SAM-BA, make sure
+      that you load the NOR boot program into the boot area via the pull-
+      down menu.
 
     STATUS:
       2013-7-30:  I have been unable to execute these configurations from NOR
@@ -1388,18 +1394,18 @@ NAND Support
       bad blocks and only NXFFS performs wear-leveling.
 
       NOTE:  NXFFS is very slow.  The first time that you start the system,
-      be prepared for a long wait; NXFFS will need to scan the entire NAND,
-      erase it, reformat, and rescan the NAND.  I have lots of debug on so I
-      don't know what the optimized wait would be.  But with debug ON,
-      software ECC, and no DMA the wait is in many tens of minutes, perhaps
-      hours.
+      be prepared for a long wait; NXFFS will need to format the NAND
+      volume.  I have lots of debug on so I don't yet know what the
+      optimized wait would be.  But with debug ON, software ECC, and no
+      DMA the wait is in many tens of minutes, even hours if many debug
+      options are enabled.
 
-      On subsequent boots, after the NXFFS file system has been created,
-      the boot time can still be substantial.  This is because NXFFS needs
-      to scan the entire NAND device and build the in-memory dataset need
-      to access NAND.  It is recommended you create a separated thread at
-      boot time to bring up NXFFS so that you don't delay the boot-to-prompt
-      time excessively.
+      On subsequent boots, after the NXFFS file system has been created the
+      delay will be less.  But the NAND-related boot time can still be
+      substantial.  This is because NXFFS needs to scan the NAND device
+      and build the in-memory dataset needed to access NAND.  It is
+      recommended you create a separated thread at boot time to bring up
+      NXFFS so that you don't delay the boot-to-prompt time excessively.
 
       NOTE:  There is another NXFFS related issue:  When the FLASH is
       fully used, NXFFS will restructure the entire FLASH, the delay to
@@ -1418,6 +1424,11 @@ NAND Support
       NORBOOT image in SRAM which will run and then start the image in NOR
       FLASH.  See the discussion of the NORBOOT configuration in the
       "Creating and Using NORBOOT" section above.
+
+      NOTES: (1) There is jumper on the CM module that must be closed to
+      enable use of the AT25 Serial Flash.  (2) If using SAM-BA, make sure
+      that you load the NOR boot program into the boot area via the pull-
+      down menu.
 
     Application Configuration -> NSH Library
      CONFIG_NSH_ARCHINIT=y              : Use architecture-specific initialization
@@ -1926,6 +1937,39 @@ TRNG and /dev/random
       CONFIG_EXAMPLES_MAXSAMPLES=64       : Default settings are probably OK
       CONFIG_EXAMPLES_NSAMPLES=8
 
+Touchscreen Testing
+===================
+
+  You can enable the touchscreen by modifying the configuration in the
+  following ways:
+
+    System Type:
+      CONFIG_SAMA5_ADC=y                  : ADC support is required
+      CONFIG_SAMA5_TSD=y                  : Enabled touchcreen device support
+      SAMA5_TSD_4WIRE=y                   : 4-Wire interface with pressure
+
+  You might want to tinker with the SWAPXY and THRESHX and THRESHY settings
+  to get the result that you want.
+
+    Drivers:
+      CONFIG_INPUT=y                      : (automatically selected)
+
+    Board Selection:
+       CONFIG_SAMA5_TSD_DEVMINOR=0        : Register as /dev/input0
+
+    Library Support:
+      CONFIG_SCHED_WORKQUEUE=y            : Work queue support required
+
+  These options may also be applied to enable a built-in touchscreen test
+  application:
+
+    Applicaton Configuration:
+      CONFIG_EXAMPLES_TOUCHSCREEN=y       : Enable the touchscreen built-int test
+      CONFIG_EXAMPLES_TOUCHSCREEN_MINOR=0 : To match the board selection
+      CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH="/dev/input0"
+
+  Defaults should be okay for all related settings.
+
 OV2640 Camera Interface
 =======================
 
@@ -2414,60 +2458,6 @@ Configurations
         /dev/random.  See the section entitled "TRNG and /dev/random"
         above for detailed configuration information.
 
-    The following features are *not* enabled in the demo configuration but
-    might be of some use to you:
-
-    11. Debugging USB.  There is normal console debug output available that
-        can be enabled with CONFIG_DEBUG + CONFIG_DEBUG_USB.  However, USB
-        operation is very time critical and enabling this debug output WILL
-        interfere with some operation.  USB tracing is a less invasive way
-        to get debug information:  If tracing is enabled, the USB driver(s)
-        will save encoded trace output in in-memory buffers; if the USB
-        monitor is also enabled, those trace buffers will be periodically
-        emptied and dumped to the system logging device (the serial console
-        in this configuration):
-
-        Either or both USB device or host controller driver tracing can
-        be enabled:
-
-        Device Drivers -> "USB Device Driver Support:
-          CONFIG_USBDEV_TRACE=y                   : Enable USB device trace feature
-          CONFIG_USBDEV_TRACE_NRECORDS=256        : Buffer 256 records in memory
-          CONFIG_USBDEV_TRACE_STRINGS=y           : (optional)
-
-        Device Drivers -> "USB Host Driver Support:
-          CONFIG_USBHOST_TRACE=y                   : Enable USB host trace feature
-          CONFIG_USBHOST_TRACE_NRECORDS=256        : Buffer 256 records in memory
-          CONFIG_USBHOST_TRACE_VERBOSE=y           : Buffer everything
-
-        These settings will configure the USB monitor thread which will dump the
-        buffered USB debug data once every second:
-
-        Application Configuration -> NSH LIbrary:
-          CONFIG_NSH_USBDEV_TRACE=n               : No builtin tracing from NSH (USB device only)
-          CONFIG_NSH_ARCHINIT=y                   : Automatically start the USB monitor
-
-        Application Configuration -> System NSH Add-Ons:
-          CONFIG_SYSTEM_USBMONITOR=y              : Enable the USB monitor daemon
-          CONFIG_SYSTEM_USBMONITOR_STACKSIZE=2048 : USB monitor daemon stack size
-          CONFIG_SYSTEM_USBMONITOR_PRIORITY=50    : USB monitor daemon priority
-          CONFIG_SYSTEM_USBMONITOR_INTERVAL=1     : Dump trace data every second
-
-          CONFIG_SYSTEM_USBMONITOR_TRACEINIT=y    : Enable TRACE output (USB device tracing only)
-          CONFIG_SYSTEM_USBMONITOR_TRACECLASS=y
-          CONFIG_SYSTEM_USBMONITOR_TRACETRANSFERS=y
-          CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
-          CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
-
-       NOTE: If USB debug output is also enabled, both outpus will appear
-       on the serial console.  However, the debug output will be
-       asynchronous with the trace output and, hence, difficult to
-       interpret.
-
-    12. See also the sections above for additional configuration options:
-        "AT24 Serial EEPROM", "CAN Usage", "SAMA5 ADC Support", "SAMA5 PWM
-        Support", "OV2640 Camera Interface", "I2S Audio Support"
-
     STATUS:
        See the To-Do list below
 
@@ -2609,35 +2599,9 @@ Configurations
         configuration.  See the "Networking" section above for detailed
         configuration settings.
 
-    14. You can enable the touchscreen by modifying the configuration
-        in the following ways:
-
-        System Type:
-          CONFIG_SAMA5_ADC=y                     : ADC support is required
-          CONFIG_SAMA5_TSD=y                     : Enabled touchcreen device support
-          SAMA5_TSD_4WIRE=y                      : 4-Wire interface with pressure
-
-        You might want to tinker with the SWAPXY and THRESHX and THRESHY
-        settings to get the result that you want.
-
-        Drivers:
-          CONFIG_INPUT=y                         : (automatically selected)
-
-        Board Selection:
-           CONFIG_SAMA5_TSD_DEVMINOR=0           : Register as /dev/input0
-
-        Library Support:
-          CONFIG_SCHED_WORKQUEUE=y               : Work queue support required
-
-        These options may also be applied to enable a built-in touchscreen
-        test application:
-
-        Applicaton Configuration:
-          CONFIG_EXAMPLES_TOUCHSCREEN=y          : Enable the touchscreen built-int test
-          CONFIG_EXAMPLES_TOUCHSCREEN_MINOR=0    : To match the board selection
-          CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH="/dev/input0"
-
-        Defaults should be okay for all related settings.
+    14. You can enable the touchscreen and a touchscreen by following the
+        configuration instrcutions in the section entitled "Touchscreen
+        Testing" above.
 
     15. The Real Time Clock/Calendar RTC) may be enabled by reconfiguring NuttX.
         See the section entitled "RTC" above for detailed configuration settings.

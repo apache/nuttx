@@ -88,11 +88,16 @@ int nor_main(int argc, char *argv)
 {
   uint32_t regval;
 
+#ifdef CONFIG_SAMA5_NOR_START
+  printf("Configuring and booting from NOR FLASH on CS0\n");
+#else
+  printf("Configuring NOR FLASH on CS0 and halting\n");
+#endif
+
   /* Make sure that the SMC peripheral is enabled (But of course it is... we
    * are executing from NOR FLASH now).
    */
 
-  printf("Configuring NOR flash on CS0 and halting\n");
   sam_hsmc_enableclk();
 
   /* The SAMA5D3x-EK has 118MB of 16-bit NOR FLASH at CS0.  The NOR FLASH
@@ -178,23 +183,13 @@ int nor_main(int argc, char *argv)
 #ifdef CONFIG_SAMA5_NOR_START
   /* Then jump into NOR flash */
 
-#if 0 /* Trying to printf() in this state is fatal */
-  printf("Jumping to NOR flash on CS0\n");
-  fflush(stdout);
-  usleep(500*1000);
-#endif
-
   NOR_ENTRY();
+
 #else
   /* Or just wait patiently for the user to break in with GDB. */
-
-#if 0 /* Trying to printf() in this state is fatal */
-  printf("Waiting for GDB halt\n");
-  fflush(stdout);
-#endif
 
   for (;;);
 #endif
 
-  return 0; /* NOR_ENTRY() should not return */
+  return 0; /* We should not get here in either case */
 }

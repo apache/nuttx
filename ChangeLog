@@ -6149,4 +6149,13 @@
 	* fs/nxffs/nxffs_dump.c: Do not abort on a read error.  Just not
 	  the error and continue.  Otherwise, we would not be able to dump
 	  NAND FLASH (2013-11-30).
-
+	* fs/nxffs:  All read error logic has been revisited and modified in
+	  most places.  If we are using NAND, then read errors probably mean
+	  that the block that was read contains uncorrectable bit errors.  In
+	  this case, we cannot just give up and abort the operations.  Rather,
+	  we need to treat read error like normal bad blocks in order to work
+	  with NAND (2013-12-2).
+	* fs/nxffs/Kconfig and nxffs_initialize.c:  Make the start up scan of
+	  the media option. It just takes to long! (2013-12-02).
+	* drivers/mtd/mtd_nand.c: Fix a typo in calculation of page number
+	  (2013-12-02).
