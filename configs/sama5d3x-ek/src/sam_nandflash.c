@@ -57,8 +57,10 @@
 
 #include "up_arch.h"
 #include "sam_periphclks.h"
+#include "sam_pio.h"
 #include "sam_nand.h"
 #include "chip/sam_hsmc.h"
+#include "chip/sam_pinmap.h"
 
 #include "sama5d3x-ek.h"
 
@@ -137,6 +139,22 @@ int board_nandflash_config(int cs)
       regval = HSMC_MODE_READMODE | HSMC_MODE_WRITEMODE |
                HSMC_MODE_BIT_8 | HSMC_MODE_TDFCYCLES(1);
       putreg32(regval, SAM_HSMC_MODE(HSMC_CS3));
+
+      /* Configure NAND PIO pins
+       *
+       * NAND Interface:
+       *
+       *   NCS3/NANDCE - Dedicated pin; no configuration needed
+       *   NANDCLE     - PE21
+       *   NANDALE     - PE22
+       *   NRD/NANDOE  - Dedicated pin; no configuration needed
+       *   NWE/NANDWE  - Dedicated pin; no configuration needed
+       *   NANDRDY     - Dedicated pin; no configuration needed
+       *   M_EBI_D0-7  - Dedicated pins; no configuration needed
+       */
+
+      sam_configpio(PIO_HSMC_NANDALE);
+      sam_configpio(PIO_HSMC_NANDCLE);
 
       return OK;
     }
