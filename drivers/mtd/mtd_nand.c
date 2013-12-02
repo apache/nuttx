@@ -609,7 +609,7 @@ static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startpage,
   off_t block;
   int ret;
 
-  fvdbg("startpage: %08lx npages: %d\n", (long)startpage, (int)npages);
+  fvdbg("startpage: %ld npages: %d\n", (long)startpage, (int)npages);
   DEBUGASSERT(nand && nand->raw);
 
   /* Retrieve the model */
@@ -628,7 +628,7 @@ static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startpage,
   /* Get the block and page offset associated with the startpage */
 
   block = startpage / pagesperblock;
-  page  = pagesperblock % pagesperblock;
+  page  = startpage % pagesperblock;
 
   /* Lock access to the NAND until we complete the read */
 
@@ -719,7 +719,7 @@ static ssize_t nand_bwrite(struct mtd_dev_s *dev, off_t startpage,
   /* Get the block and page offset associated with the startpage */
 
   block = startpage / pagesperblock;
-  page  = pagesperblock % pagesperblock;
+  page  = startpage % pagesperblock;
 
   /* Lock access to the NAND until we complete the write */
 

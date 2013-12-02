@@ -259,8 +259,6 @@ static void hamming_compute256(FAR const uint8_t *data, FAR uint8_t *code)
   code[0] = (~(uint32_t)code[0]);
   code[1] = (~(uint32_t)code[1]);
   code[2] = (~(uint32_t)code[2]);
-
-  fvdbg("Computed:   %02x %02x %02x\n", code[0], code[1], code[2]);
 }
 
 /****************************************************************************
@@ -294,15 +292,21 @@ static int hamming_verify256(FAR uint8_t *data, FAR const uint8_t *original)
   correction[1] = computed[1] ^ original[1];
   correction[2] = computed[2] ^ original[2];
 
-  fvdbg("Correction:  %02x %02x %02x\n",
-        correction[0], correction[1], correction[2]);
-
   /* If all bytes are 0, there is no error */
 
   if ((correction[0] == 0) && (correction[1] == 0) && (correction[2] == 0))
     {
       return 0;
     }
+
+  /* There are bit errors */
+
+  fvdbg("Read:       %02x %02x %02x\n",
+        original[0], original[1], original[2]);
+  fvdbg("Computed:   %02x %02x %02x\n",
+        computed[0], computed[1], computed[2]);
+  fvdbg("Correction: %02x %02x %02x\n",
+        correction[0], correction[1], correction[2]);
 
   /* If there is a single bit error, there are 11 bits set to 1 */
 
@@ -339,13 +343,15 @@ static int hamming_verify256(FAR uint8_t *data, FAR const uint8_t *original)
 
   if (hamming_bitsincode256(correction) == 1)
     {
+      fdbg("ERROR: ECC has been correupted\n");
       return HAMMING_ERROR_ECC;
     }
 
-  /* Otherwise, this is a multi-bit error */
+  /* Otherwise, there are multiple bit errors */
 
   else
     {
+      fdbg("ERROR: Multiple bit errors\n");
       return HAMMING_ERROR_MULTIPLEBITS;
     }
 }
@@ -421,8 +427,6 @@ int hamming_verify256x(FAR uint8_t *data, size_t size, FAR const uint8_t *code)
 
   while (remaining > 0)
     {
-      fvdbg("Code:       %02x %02x %02x\n", code[0], code[1], code[2]);
-
       result = hamming_verify256(data, code);
       if (result != HAMMING_SUCCESS)
         {
