@@ -97,8 +97,10 @@ choice
 	prompt "Serial Console Selection"
 	default SERIAL_CONSOLE_NONE
 
-config SERCOMM_CONSOLE
+# See drivers/Kconfig
+config USE_SERCOMM_CONSOLE
 	bool "SERCOMM console"
+	select SERCOMM_CONSOLE
 
 config SERIAL_MODEM_CONSOLE
 	bool "Serial console on modem UART"
