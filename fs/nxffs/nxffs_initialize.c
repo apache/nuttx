@@ -415,7 +415,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
               return OK;
             }
 
-          // No?  Then it is some other failure that we do not know how to handle
+          /* No?  Then it is some other failure that we do not know how to handle */
 
           fdbg("ERROR: nxffs_getc failed: %d\n", -ch);
           return ch;

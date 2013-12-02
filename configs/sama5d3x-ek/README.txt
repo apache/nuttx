@@ -2529,6 +2529,10 @@ Configurations
        Since you will not be able to re-enable the watchdog later, you may
        need to set CONFIG_SAMA5_WDT=y in the NuttX configuration file.
 
+    4. If you put norboot on the Serial FLASH, you can automatically
+       boot to NOR on reset.  See the section "Creating and Using NORBOOT"
+       above.
+
     STATUS:
        See the To-Do list below
 
@@ -2852,7 +2856,8 @@ To-Do List
    initializing .bss and .data.
 
 4) Neither USB OHCI nor EHCI support Isochronous endpoints.  Interrupt
-   endpoint support in the EHCI driver is untested.
+   endpoint support in the EHCI driver is untested (but works in similar
+   EHCI drivers).
 
 5) HSCMI TX DMA support is currently commented out.
 
@@ -2874,8 +2879,11 @@ To-Do List
    layers and other features of the LCDC.
 
 10) I have a Camera, but there is still no ISI driver.  I am not sure what to
-    do with the camera.  NuttX needs something liek V4L to provide the
+    do with the camera.  NuttX needs something like V4L to provide the
     definition for what a camera driver is supposed to do.
+
+    I will probably develop a test harness for ISI, but it is of only
+    minimal value with no OS infrastructure to deal with images and video.
 
 11) GMAC has only been tested on a 10/100Base-T network.  I don't have a
     1000Base-T network to support additional testing.

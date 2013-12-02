@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_dump.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -138,7 +138,7 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
 
       return ERROR;
     }
-  
+
 
   /* Can we verify the inode?  We need to have the inode name in the same
    * block to do that (or get access to the next block)
@@ -169,7 +169,7 @@ static inline ssize_t nxffs_analyzeinode(FAR struct nxffs_blkinfo_s *blkinfo,
   nextblock = blkinfo->offset + blkinfo->geo.blocksize;
   if (noffs > nextblock)
     {
-      /* Not than we cannot verify the inode header */
+      /* Note than we cannot verify the inode header */
 
       if (blkinfo->verbose)
         {
@@ -281,6 +281,7 @@ static inline ssize_t nxffs_analyzedata(FAR struct nxffs_blkinfo_s *blkinfo,
     {
       fdbg(g_format, blkinfo->block, offset, "DATA ", "OK     ", datlen);
     }
+
   return SIZEOF_NXFFS_DATA_HDR + datlen;
 }
 #endif
@@ -322,6 +323,7 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
               fdbg(g_format, blkinfo->block, 0, "BLOCK", "ERASED ",
                    blkinfo->geo.blocksize);
             }
+
           return;
         }
 #if 0 /* Too much output, to little information */
@@ -365,6 +367,7 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
                 {
                   i = hdrndx + nbytes - 1;
                 }
+
               inndx = 0;
             }
         }
@@ -381,6 +384,7 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
                 {
                   i = hdrndx + nbytes - 1;
                 }
+
               datndx = 0;
             }
         }
@@ -427,7 +431,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
   if (ret < 0)
     {
       fdbg("ERROR: MTD ioctl(MTDIOC_GEOMETRY) failed: %d\n", -ret);
-      goto errout;
+      return ret;
     }
 
   /* Save the verbose output indication */
@@ -440,8 +444,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
   if (!blkinfo.buffer)
     {
       fdbg("ERROR: Failed to allocate block cache\n");
-      ret = -ENOMEM;
-      goto errout;
+      return -ENOMEM;
     }
 
   /* Now read every block on the device */
@@ -459,20 +462,27 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
       ret = MTD_BREAD(mtd, blkinfo.block, 1, blkinfo.buffer);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to read block %d\n", blkinfo.block);
-          goto errout_with_block;
+          /* A read error is probably fatal on all media but NAND.
+           * On NAND, the read error probably just signifies a block
+           * with an uncorrectable ECC failure.  So, to handle NAND,
+           * just report the read error and continue.
+           */
+
+          fdbg(g_format, blkinfo.block, 0, "BLOCK", "RD FAIL",
+               blkinfo.geo.blocksize);
         }
+      else
+        {
+          /* Analyze the block that we just read */
 
-      /* Analyze the block */
-
-      nxffs_analyze(&blkinfo);
+          nxffs_analyze(&blkinfo);
+        }
     }
+
   fdbg("%d blocks analyzed\n", blkinfo.nblocks);
 
-errout_with_block:
   kfree(blkinfo.buffer);
-errout:
-  return ret;
+  return OK;
 
 #else
   return -ENOSYS;

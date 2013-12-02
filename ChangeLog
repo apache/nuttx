@@ -6146,4 +6146,7 @@
 	* drivers/mtd/mtd_nand* and arch/arm/src/sama5/sam_nand.c:  NAND
 	  accesses now work (at least with software ECC and now DMA).  Still
 	  lots of testing to be done (2013-11-30).
+	* fs/nxffs/nxffs_dump.c: Do not abort on a read error.  Just not
+	  the error and continue.  Otherwise, we would not be able to dump
+	  NAND FLASH (2013-11-30).
 
