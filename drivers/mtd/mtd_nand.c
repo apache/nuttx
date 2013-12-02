@@ -523,6 +523,7 @@ static int nand_writepage(FAR struct nand_dev_s *nand, off_t block,
       fdbg("ERROR: Block is BAD\n");
       return -EAGAIN;
     }
+#endif
 
 #ifdef CONFIG_MTD_NAND_SWECC
   /* nandecc_writepage will handle the software ECC case */
@@ -540,7 +541,6 @@ static int nand_writepage(FAR struct nand_dev_s *nand, off_t block,
    */
 
  else
-#endif
 #endif
     {
       return NAND_WRITEPAGE(nand->raw, block, page, data, NULL);

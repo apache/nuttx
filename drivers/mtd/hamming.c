@@ -300,9 +300,9 @@ static int hamming_verify256(FAR uint8_t *data, FAR const uint8_t *original)
   /* If all bytes are 0, there is no error */
 
   if ((correction[0] == 0) && (correction[1] == 0) && (correction[2] == 0))
-  {
+    {
       return 0;
-  }
+    }
 
   /* If there is a single bit error, there are 11 bits set to 1 */
 
@@ -333,7 +333,7 @@ static int hamming_verify256(FAR uint8_t *data, FAR const uint8_t *original)
       data[byte] ^= (1 << bit);
 
       return HAMMING_ERROR_SINGLEBIT;
-  }
+    }
 
   /* Check if ECC has been corrupted */
 
