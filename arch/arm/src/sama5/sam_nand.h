@@ -60,15 +60,16 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* DMA */
+/* DMA.  DMA support requires that DMAC0 be enabled.  According to
+ * "Table 15-2. SAMA5 Master to Slave Access", DMAC1 does not have access
+ * to NFC SRAM.
+ */
 
 #ifdef CONFIG_SAMA5_NAND_DMA
-#  if defined(CONFIG_SAMA5_DMAC1)
-#    define NAND_DMAC 1
-#  elif defined(CONFIG_SAMA5_DMAC0)
+#  ifdef CONFIG_SAMA5_DMAC0
 #    define NAND_DMAC 0
 #  else
-#    error "A DMA controller must be enabled to perform DMA transfers"
+#    error "DMA controller 0 (DMAC0) must be enabled to perform DMA transfers"
 #    undef CONFIG_SAMA5_NAND_DMA
 #  endif
 #endif
@@ -235,10 +236,15 @@
 
 /* Debug */
 
-#if !defined(CONFIG_DEBUG)
+#if !defined(CONFIG_DEBUG) || !defined(CONFIG_DEBUG_FS)
 #  undef CONFIG_DEBUG_FS
+#  undef CONFIG_SAMA5_NAND_DMADEBUG
 #  undef CONFIG_SAMA5_NAND_REGDEBUG
 #  undef CONFIG_SAMA5_NAND_DUMP
+#endif
+
+#if !defined(CONFIG_SAMA5_NAND_DMA) || !defined(CONFIG_DEBUG_DMA)
+#  undef CONFIG_SAMA5_NAND_DMADEBUG
 #endif
 
 /* An early version of this driver used SMC interrupts to determine when
@@ -251,6 +257,16 @@
  */
 
 #undef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
+
+/* DMA Debug */
+
+#define DMA_INITIAL      0
+#define DMA_AFTER_SETUP  1
+#define DMA_AFTER_START  2
+#define DMA_CALLBACK     3
+#define DMA_TIMEOUT      3 /* No timeout */
+#define DMA_END_TRANSFER 4
+#define DMA_NSAMPLES     5
 
 /****************************************************************************
  * Public Types
@@ -284,6 +300,10 @@ struct sam_nandcs_s
   sem_t waitsem;             /* Used to wait for DMA done */
   DMA_HANDLE dma;            /* DMA channel assigned to this CS */
   int result;                /* The result of the DMA */
+
+#ifdef CONFIG_SAMA5_NAND_DMADEBUG
+  struct sam_dmaregs_s dmaregs[DMA_NSAMPLES];
+#endif
 #endif
 };
 
@@ -374,7 +394,12 @@ struct mtd_dev_s *sam_nand_initialize(int cs);
  *   If CONFIG_SAMA5_BOOT_CS3FLASH is defined, then NAND FLASH support is
  *   enabled.  This function provides the board-specific implementation of
  *   the logic to reprogram the SMC to support NAND FLASH on the specified
- *   CS.
+ *   CS.  As a minimum, this board-specific initialization should do the
+ *   following:
+ *
+ *     1. Enable clocking to the HSMC
+ *     2. Configure timing for the HSMC CS
+ *     3. Configure NAND PIO pins
  *
  * Input Parameters:
  *   cs - Chip select number (in the event that multiple NAND devices
@@ -411,7 +436,7 @@ bool board_nand_busy(int cs);
 #endif
 
 /****************************************************************************
- * Name: board_nandflash_config
+ * Name: board_nand_ce
  *
  * Description:
  *   Must be provided if the board logic supports and interface to control

@@ -1807,7 +1807,8 @@ static int sam_dmac_interrupt(struct sam_dmac_s *dmac)
                 {
                    /* Yes... Terminate the transfer with an error? */
 
-                  sam_dmaterminate(dmach, -EIO);
+                   dmalldbg("ERROR: DMA failed: %08x\n", regval);
+                   sam_dmaterminate(dmach, -EIO);
                 }
 
               /* Is the transfer complete? */

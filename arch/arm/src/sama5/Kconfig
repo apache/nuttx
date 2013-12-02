@@ -3340,9 +3340,10 @@ if SAMA5_HAVE_NAND
 config SAMA5_NAND_DMA
 	bool "NAND DMA Transfers"
 	default y
-	depends on SAMA5_DMAC0 || SAMA5_DMAC1
+	depends on SAMA5_DMAC0
 	---help---
-		Use DMA to perform NAND data transfers (highly recommended)
+		Use DMA to perform NAND data transfers.  NOTE that DMAC0 must be
+		selected (DMAC1 cannot access NFC SRAM). (highly recommended)
 
 config SAMA5_NAND_READYBUSY
 	bool "NAND Ready/Busy"
@@ -3430,6 +3431,16 @@ config SAMA5_PMECC_GALOIS_CUSTOM
 		by any NuttX logic.
 
 endif # SAMA5_HAVE_PMECC
+
+config SAMA5_NAND_DMADEBUG
+	bool "NAND DMA transfer debug"
+	depends on SAMA5_NAND_DMA && DEBUG && DEBUG_DMA
+	default n
+	---help---
+		Enable special debug instrumentation analyze NAND DMA data transfers.
+		This logic is as non-invasive as possible:  It samples DMA
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.
 
 config SAMA5_NAND_REGDEBUG
 	bool "Register-Level NAND Debug"
