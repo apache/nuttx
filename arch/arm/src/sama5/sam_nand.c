@@ -182,10 +182,9 @@ static void     nand_wait_cmddone(struct sam_nandcs_s *priv);
 static void     nand_setup_cmddone(struct sam_nandcs_s *priv);
 static void     nand_wait_xfrdone(struct sam_nandcs_s *priv);
 static void     nand_setup_xfrdone(struct sam_nandcs_s *priv);
-#ifdef USE_RBEDGE
 static void     nand_wait_rbedge(struct sam_nandcs_s *priv);
 static void     nand_setup_rbedge(struct sam_nandcs_s *priv);
-#else
+#if 0 /* Not used */
 static void     nand_wait_nfcbusy(struct sam_nandcs_s *priv);
 #endif
 static uint32_t nand_nfc_poll(void);
@@ -431,12 +430,18 @@ static int nand_operation_complete(struct sam_nandcs_s *priv)
   nand_nfc_cleale(priv, 0, COMMAND_STATUS, 0, 0, 0);
   status = READ_DATA8(&priv->raw);
 
-  if (((status & STATUS_READY) == 0) || ((status & STATUS_ERROR) != 0))
+  /* On successful completion, the NAND will be READY with no ERROR conditions */
+
+  if ((status & STATUS_ERROR) != 0)
     {
-      return false;
+      return -EIO;
+    }
+  else if ((status & STATUS_READY) == 0)
+    {
+      return -EBUSY;
     }
 
-  return true;
+  return OK;
 }
 
 /****************************************************************************
@@ -856,7 +861,6 @@ static void nand_setup_xfrdone(struct sam_nandcs_s *priv)
  *
  ****************************************************************************/
 
-#ifdef USE_RBEDGE
 static void nand_wait_rbedge(struct sam_nandcs_s *priv)
 {
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
@@ -891,7 +895,6 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
   while (!g_nand.rbedge);
 #endif
 }
-#endif
 
 /****************************************************************************
  * Name: nand_setup_rbedge
@@ -907,7 +910,6 @@ static void nand_wait_rbedge(struct sam_nandcs_s *priv)
  *
  ****************************************************************************/
 
-#ifdef USE_RBEDGE
 static void nand_setup_rbedge(struct sam_nandcs_s *priv)
 {
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
@@ -935,7 +937,6 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
   g_nand.rbedge = false;
 #endif
 }
-#endif
 
 /****************************************************************************
  * Name: nand_wait_nfcbusy
@@ -951,7 +952,7 @@ static void nand_setup_rbedge(struct sam_nandcs_s *priv)
  *
  ****************************************************************************/
 
-#ifndef USE_RBEDGE
+#if 0 /* Not used */
 static void nand_wait_nfcbusy(struct sam_nandcs_s *priv)
 {
   uint32_t sr;
@@ -1000,7 +1001,7 @@ static uint32_t nand_nfc_poll(void)
   sr = nand_getreg(SAM_HSMC_SR);
 
 #ifndef CONFIG_SAMA5_NAND_REGDEBUG
-  fllvdbg("sr=%08x\n", sr);
+  // fllvdbg("sr=%08x\n", sr);
 #endif
 
   /* When set to one, this XFRDONE indicates that the NFC has terminated
@@ -1025,20 +1026,18 @@ static uint32_t nand_nfc_poll(void)
       g_nand.cmddone = true;
     }
 
-#ifdef USE_RBEDGE
  /* If set to one, the RBEDGE0 flag indicates that an edge has been detected
   * on the Ready/Busy Line x. Depending on the EDGE CTRL field located in the
   * SMC_CFG register, only rising or falling edge is detected. This flag is
   * reset after the status read.
   */
 
-  if ((pending & HSMC_NFCINT_RBEDGE0) != 0)
+  if ((sr & HSMC_NFCINT_RBEDGE0) != 0)
     {
       /* Set the latching RBEDGE0 status */
 
       g_nand.rbedge = true;
     }
-#endif
 
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   irqrestore(flags);
@@ -1101,7 +1100,6 @@ static int hsmc_interrupt(int irq, void *context)
       nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_CMDDONE);
     }
 
-#ifdef USE_RBEDGE
  /* If set to one, the RBEDGE0 flag indicates that an edge has been detected
   * on the Ready/Busy Line x. Depending on the EDGE CTRL field located in the
   * SMC_CFG register, only rising or falling edge is detected. This flag is
@@ -1118,7 +1116,6 @@ static int hsmc_interrupt(int irq, void *context)
 
       nand_putreg(SAM_HSMC_IDR, HSMC_NFCINT_RBEDGE0);
     }
-#endif
 
   return OK;
 }
@@ -2150,14 +2147,12 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
                       COMMAND_WRITE_1, 0, 0, rowaddr);
       nand_wait_xfrdone(priv);
 
-#ifdef USE_RBEDGE
       nand_setup_rbedge(priv);
       nand_nfc_cleale(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
       nand_wait_rbedge(priv);
-#else
-      nand_nfc_cleale(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
-      nand_wait_nfcbusy(priv);
-#endif
+
+      /* Check if the transfer completed successfully */
+
       ret = nand_operation_complete(priv);
       if (ret < 0)
         {
@@ -2874,7 +2869,15 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
     }
 
   /* Initialize the NAND hardware for this CS */
-  /* Perform board-specific SMC intialization for this CS */
+  /* Perform board-specific SMC intialization for this CS.  This should include:
+   *
+   *   1. Enable clocking to the HSMC
+   *   2. Configuration timing for the HSMC CS
+   *   3. Configuration of PIO pins
+   *
+   * Other than enabling the HSMC, these are all things that the board-cognizant
+   * logic is best prepared to handle.
+   */
 
   ret = board_nandflash_config(cs);
   if (ret < 0)
