@@ -252,13 +252,6 @@
 
 #undef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
 
-/* In the write sequence, there is a step where we should wait on an R/B
- * edge transition.  The step currently hangs but, presumably must be
- * restored when NAND is working.
- */
-
-#undef USE_RBEDGE
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -266,6 +259,9 @@
  * select.  The struct nand_raw_s must appear at the beginning of the
  * definition so that you can freely cast between pointers to struct
  * nand_raw_s and struct sam_nandcs_s.
+ *
+ * NOTE: Currently, only SAMA5D3x CS3 can support NAND.  The logic here would
+ * support NAND on any CS, but that capability is not needed.
  */
 
 struct sam_nandcs_s
@@ -303,17 +299,14 @@ struct sam_nand_s
 #ifdef CONFIG_SAMA5_NAND_HSMCINTERRUPTS
   volatile bool cmddone;     /* True:  NFC command has completed (latching) */
   volatile bool xfrdone;     /* True:  Transfer has completed (latching)  */
-#ifdef USE_RBEDGE
   volatile bool rbedge;      /* True:  Ready/busy edge detected (latching) */
-#endif
   sem_t waitsem;             /* Used to wait for one of the above states */
 
 #else
   bool cmddone;              /* True:  NFC command has completed (latching)  */
   bool xfrdone;              /* True:  Transfer has completed (latching)  */
-#ifdef USE_RBEDGE
   bool rbedge;               /* True:  Ready/busy edge detected (latching) */
-#endif
+
 #endif
 
 #ifdef CONFIG_SAMA5_HAVE_PMECC
