@@ -6139,4 +6139,11 @@
 	* configs/viewtool-stm32f107/src/stm32_buttons.c and stm32_leds.c:
 	  Add support for LEDs an buttons on the ViewTools STM32F107 board
 	  (2013-11-30).
+	* fs/nxffs/nxffs_initialize.c:  First of probably several changes for
+	  NAND FLASH.  NAND can report read errors because of bad ECC.  Logic
+	  in NXFFS must account for it and not just throw in th towel every
+	  time a read fails (2013-11-30).
+	* drivers/mtd/mtd_nand* and arch/arm/src/sama5/sam_nand.c:  NAND
+	  accesses now work (at least with software ECC and now DMA).  Still
+	  lots of testing to be done (2013-11-30).
 

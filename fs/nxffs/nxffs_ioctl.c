@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_ioctl.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -104,7 +104,7 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   if (ret != OK)
     {
       ret = -errno;
-      fdbg("sem_wait failed: %d\n", ret);
+      fdbg("ERROR: sem_wait failed: %d\n", ret);
       goto errout;
     }
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_unlink.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -127,7 +127,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   ret = nxffs_rdcache(volume, volume->ioblock);
   if (ret < 0)
     {
-      fdbg("Failed to read data into cache: %d\n", ret);
+      fdbg("ERROR: Failed to read data into cache: %d\n", ret);
       goto errout_with_entry;
     }
 
@@ -141,7 +141,7 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   ret = nxffs_wrcache(volume);
   if (ret < 0)
     {
-      fdbg("Failed to read data into cache: %d\n", ret);
+      fdbg("ERROR: Failed to read data into cache: %d\n", ret);
     }
 
 errout_with_entry:
@@ -180,7 +180,7 @@ int nxffs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
   /* Then remove the NXFFS inode */
 
   ret = nxffs_rminode(volume, relpath);
-  
+
   sem_post(&volume->exclsem);
 errout:
   return ret;

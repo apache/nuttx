@@ -91,62 +91,76 @@
 int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
                      FAR struct nxffs_blkstats_s *stats)
 {
-  FAR uint8_t *bptr;     /* Pointer to next block data */
-  off_t ioblock;         /* I/O block number */
-  int lblock;            /* Logical block index */
+  FAR struct nxffs_block_s *blkhdr; /* Pointer to FLASH block header */
+  off_t ioblock;                    /* I/O block number */
   int ret;
 
   /* Process each erase block */
 
   memset(stats, 0, sizeof(struct nxffs_blkstats_s));
 
-  for (ioblock = 0; ioblock < volume->nblocks; ioblock += volume->blkper)
+  for (ioblock = 0; ioblock < volume->nblocks; ioblock++)
     {
-      /* Read the full erase block */
+      /* Increment the total count of blocks examined */
 
-      ret = MTD_BREAD(volume->mtd, ioblock, volume->blkper, volume->pack);
-      if (ret < volume->blkper)
+      stats->nblocks++;
+
+      /* Read each logical block, one at a time.  We could read all of the
+       * blocks in the erase block into volume->pack at once.  But this would
+       * be a problem for NAND which may generate read errors due to bad ECC
+       * on individual blocks.
+       */
+
+      ret = MTD_BREAD(volume->mtd, ioblock, 1, volume->pack);
+      if (ret < 1)
         {
-          /* This should not happen at all on most FLASH.  A bad read will
-           * happen normally with a NAND device that has uncorrectable blocks.
-           * So, just for NAND, we keep the count of unreadable blocks.
+          /* This should not happen at all on most kinds of FLASH.  But a
+           * bad read will happen normally with a NAND device that has
+           * uncorrectable blocks.  So, just for NAND, we keep the count
+           * of unreadable blocks.
            */
 
-          fdbg("Failed to read erase block %d: %d\n",
-               ioblock / volume->blkper, ret);
+          fdbg("ERROR: Failed to read block %d: %d\n", ioblock, ret);
 
-          /* Declare all blocks in the eraseblock as bad */
+          /* Increment the count of un-readable blocks */
 
-          stats->nblocks  += volume->blkper;
-          stats->nbadread += volume->blkper;
-          continue;
+          stats->nbadread++;
         }
-
-      /* Process each logical block */
-
-      for (bptr = volume->pack, lblock = 0;
-           lblock < volume->blkper;
-           bptr += volume->geo.blocksize, lblock++)
+      else
         {
-          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)bptr;
+          /* We read the block successfully, now check for errors tagged
+           * in the NXFFS data.
+           */
+
+          blkhdr = (FAR struct nxffs_block_s*)volume->pack;
 
           /* Collect statistics */
+          /* Check if this is a block that should be recognized by NXFFS */
 
-          stats->nblocks++;
           if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0)
             {
+              /* Nope.. block must not be formatted */
+
               stats->nunformat++;
             }
           else if (blkhdr->state == BLOCK_STATE_BAD)
             {
+              /* The block is marked as bad */
+
               stats->nbad++;
             }
           else if (blkhdr->state == BLOCK_STATE_GOOD)
             {
-             stats-> ngood++;
+               /* The block is marked as good */
+
+               stats-> ngood++;
             }
           else
             {
+              /* The good/bad mark is not recognized.  Let's call this
+               * corrupt (vs. unformatted).
+               */
+
               stats->ncorrupt++;
             }
         }

@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_block.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -101,7 +101,7 @@ int nxffs_verifyblock(FAR struct nxffs_volume_s *volume, off_t block)
     {
       /* Perhaps we are at the end of the media */
 
-      fvdbg("Failed to read data into cache: %d\n", ret);
+      fdbg("ERROR: Failed to read data into cache: %d\n", ret);
       return ret;
     }
 

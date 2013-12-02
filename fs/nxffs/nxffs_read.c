@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_read.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -118,10 +118,10 @@ static ssize_t nxffs_rdseek(FAR struct nxffs_volume_s *volume,
       ret = nxffs_nextblock(volume, offset, blkentry);
       if (ret < 0)
         {
-          fdbg("nxffs_nextblock failed: %d\n", -ret);
+          fdbg("ERROR: nxffs_nextblock failed: %d\n", -ret);
           return ret;
         }
- 
+
       /* Get the range of data offsets for this data block */
 
       datstart  = datend;
@@ -185,7 +185,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
   if (ret != OK)
     {
       ret = -errno;
-      fdbg("sem_wait failed: %d\n", ret);
+      fdbg("ERROR: sem_wait failed: %d\n", ret);
       goto errout;
     }
 
@@ -217,7 +217,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
       ret = nxffs_rdseek(volume, &ofile->entry, filep->f_pos, &blkentry);
       if (ret < 0)
         {
-          fdbg("nxffs_rdseek failed: %d\n", -ret);
+          fdbg("ERROR: nxffs_rdseek failed: %d\n", -ret);
           ret = -EACCES;
           goto errout_with_semaphore;
         }
@@ -263,7 +263,7 @@ errout:
  * Input Parameters:
  *   volume - Describes the NXFFS volume.
  *   datlen  - A memory location to return the data block length.
- *  
+ *
  * Returned Value:
  *   Zero is returned on success. Otherwise, a negated errno is returned
  *   that indicates the nature of the failure.
@@ -290,7 +290,7 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
     }
 
   /* Then begin searching */
-  
+
   nerased = 0;
   nmagic  = 0;
 
@@ -301,7 +301,7 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
       ch = nxffs_getc(volume, SIZEOF_NXFFS_DATA_HDR - nmagic);
       if (ch < 0)
         {
-          fvdbg("nxffs_getc failed: %d\n", -ch);
+          fdbg("ERROR: nxffs_getc failed: %d\n", -ch);
           return ch;
         }
 
@@ -357,7 +357,7 @@ int nxffs_nextblock(FAR struct nxffs_volume_s *volume, off_t offset,
            * indicate the beginning of an NXFFS data block.
            */
 
-          else 
+          else
             {
               /* The offset to the header must be 4 bytes before the current
                * FLASH seek location.
@@ -424,7 +424,7 @@ int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
   ret = nxffs_rdcache(volume, volume->ioblock);
   if (ret < 0)
     {
-      fvdbg("Failed to read data into cache: %d\n", ret);
+      fdbg("ERROR: Failed to read data into cache: %d\n", ret);
       return ret;
     }
 
@@ -448,7 +448,7 @@ int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
       fdbg("Data length=%d is unreasonable at offset=%d\n", dlen, doffset);
       return -EIO;
     }
- 
+
   /* Extract the expected CRC and calculate the CRC of the data block */
 
   ecrc = nxffs_rdle32(blkhdr.crc);
@@ -459,7 +459,7 @@ int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
 
   if (crc != ecrc)
     {
-      fdbg("CRC failure\n");
+      fdbg("ERROR: CRC failure\n");
       return -EIO;
     }
 
@@ -468,6 +468,3 @@ int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
   *datlen = dlen;
   return OK;
 }
-
-
-

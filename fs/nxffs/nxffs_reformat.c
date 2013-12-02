@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/nxffs/nxffs_reformat.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * References: Linux/Documentation/filesystems/romfs.txt
@@ -111,7 +111,7 @@ static int nxffs_format(FAR struct nxffs_volume_s *volume)
       ret = MTD_ERASE(volume->mtd, eblock, 1);
       if (ret < 0)
         {
-          fdbg("Erase block %d failed: %d\n", eblock, ret);
+          fdbg("ERROR: Erase block %d failed: %d\n", eblock, ret);
           return ret;
         }
 
@@ -121,7 +121,7 @@ static int nxffs_format(FAR struct nxffs_volume_s *volume)
       nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->pack);
       if (nxfrd != volume->blkper)
         {
-          fdbg("Write erase block %d failed: %d\n", lblock, nxfrd);
+          fdbg("ERROR: Write erase block %d failed: %d\n", lblock, nxfrd);
           return -EIO;
         }
     }
@@ -165,7 +165,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
       nxfrd  = MTD_BREAD(volume->mtd, lblock, volume->blkper, volume->pack);
       if (nxfrd != volume->blkper)
         {
-          fdbg("Read erase block %d failed: %d\n", lblock, nxfrd);
+          fdbg("ERROR: Read erase block %d failed: %d\n", lblock, nxfrd);
           return -EIO;
         }
 
@@ -216,7 +216,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
           nxfrd = MTD_BWRITE(volume->mtd, lblock, volume->blkper, volume->pack);
           if (nxfrd != volume->blkper)
             {
-              fdbg("Write erase block %d failed: %d\n", lblock, nxfrd);
+              fdbg("ERROR: Write erase block %d failed: %d\n", lblock, nxfrd);
               return -EIO;
             }
         }
@@ -255,7 +255,7 @@ int nxffs_reformat(FAR struct nxffs_volume_s *volume)
   ret = nxffs_format(volume);
   if (ret < 0)
     {
-      fdbg("Failed to reformat the volume: %d\n", -ret);
+      fdbg("ERROR: Failed to reformat the volume: %d\n", -ret);
       return ret;
     }
 
@@ -264,7 +264,8 @@ int nxffs_reformat(FAR struct nxffs_volume_s *volume)
   ret = nxffs_badblocks(volume);
   if (ret < 0)
     {
-      fdbg("Bad block check failed: %d\n", -ret);
+      fdbg("ERROR: Bad block check failed: %d\n", -ret);
     }
+
   return ret;
 }
