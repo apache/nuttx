@@ -901,7 +901,7 @@ static void ssc_buf_initialize(struct sam_ssc_s *priv)
  * Name: ssc_dma_sampleinit
  *
  * Description:
- *   Initialize sampling of RX DMA registers (if CONFIG_SAMA5_SSC_DMADEBUG)
+ *   Initialize sampling of DMA registers (if CONFIG_SAMA5_SSC_DMADEBUG)
  *
  * Input Parameters:
  *   priv - SSC state instance

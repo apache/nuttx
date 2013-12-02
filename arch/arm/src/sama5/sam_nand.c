@@ -195,6 +195,18 @@ static int      hsmc_interrupt(int irq, void *context);
 /* DMA Helpers */
 
 #ifdef CONFIG_SAMA5_NAND_DMA
+#ifdef CONFIG_SAMA5_NAND_DMADEBUG
+static void     nand_dma_sampleinit(struct sam_nandcs_s *priv);
+#  define       nand_dma_sample(p,i) sam_dmasample((p)->dma, &(p)->dmaregs[i])
+static void     nand_dma_sampledone(struct sam_nandcs_s *priv, int result);
+
+#else
+#  define       nand_dma_sampleinit(p)
+#  define       nand_dma_sample(p,i)
+#  define       nand_dma_sampledone(p,r)
+
+#endif
+
 static int      nand_wait_dma(struct sam_nandcs_s *priv);
 static void     nand_dmacallback(DMA_HANDLE handle, void *arg, int result);
 static int      nand_dma_read(struct sam_nandcs_s *priv,
@@ -202,7 +214,7 @@ static int      nand_dma_read(struct sam_nandcs_s *priv,
                   uint32_t dmaflags);
 static int      nand_dma_write(struct sam_nandcs_s *priv,
                   uintptr_t vsrc, uintptr_t vdest, size_t nbytes,
-                  uint32_t dmaflags)
+                  uint32_t dmaflags);
 #endif
 
 /* Raw Data Transfer Helpers */
@@ -1122,6 +1134,92 @@ static int hsmc_interrupt(int irq, void *context)
 #endif /* CONFIG_SAMA5_NAND_HSMCINTERRUPTS */
 
 /****************************************************************************
+ * Name: nand_dma_sampleinit
+ *
+ * Description:
+ *   Initialize sampling of DMA registers (if CONFIG_SAMA5_NAND_DMADEBUG)
+ *
+ * Input Parameters:
+ *   priv - Lower-half, private NAND FLASH device state
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_NAND_DMADEBUG
+static void nand_dma_sampleinit(struct sam_nandcs_s *priv)
+{
+  /* Put contents of register samples into a known state */
+
+  memset(priv->dmaregs, 0xff, DMA_NSAMPLES * sizeof(struct sam_dmaregs_s));
+
+  /* Then get the initial samples */
+
+  sam_dmasample(priv->dma, &priv->dmaregs[DMA_INITIAL]);
+}
+#endif
+
+/****************************************************************************
+ * Name: nand_dma_sampledone
+ *
+ * Description:
+ *   Dump sampled RX DMA registers
+ *
+ * Input Parameters:
+ *   priv - Lower-half, private NAND FLASH device state
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_NAND_DMADEBUG
+static void nand_dma_sampledone(struct sam_nandcs_s *priv, int result)
+{
+  lldbg("result: %d\n", result);
+
+  /* Sample the final registers */
+
+  sam_dmasample(priv->dma, &priv->dmaregs[DMA_END_TRANSFER]);
+
+  /* Then dump the sampled DMA registers */
+  /* Initial register values */
+
+  sam_dmadump(priv->dma, &priv->dmaregs[DMA_INITIAL], "Initial Registers");
+
+  /* Register values after DMA setup */
+
+  sam_dmadump(priv->dma, &priv->dmaregs[DMA_AFTER_SETUP], "After DMA Setup");
+
+  /* Register values after DMA start */
+
+  sam_dmadump(priv->dma, &priv->dmaregs[DMA_AFTER_START], "After DMA Start");
+
+  /* Register values at the time of the TX and RX DMA callbacks
+   * -OR- DMA timeout.
+   *
+   * If the DMA timedout, then there will not be any RX DMA
+   * callback samples.  There is probably no TX DMA callback
+   * samples either, but we don't know for sure.
+   */
+
+#if 0 /* No timeout */
+  if (result == -ETIMEDOUT || result == -EINTR)
+    {
+      sam_dmadump(priv->dma, &priv->dmaregs[DMA_TIMEOUT], "At DMA timeout");
+    }
+  else
+#endif
+    {
+      sam_dmadump(priv->dma, &priv->dmaregs[DMA_CALLBACK], "At DMA callback");
+    }
+
+  sam_dmadump(priv->dma, &priv->dmaregs[DMA_END_TRANSFER], "At End-of-Transfer");
+}
+#endif
+
+/****************************************************************************
  * Name: nand_wait_dma
  *
  * Description:
@@ -1170,6 +1268,7 @@ static void nand_dmacallback(DMA_HANDLE handle, void *arg, int result)
   struct sam_nandcs_s *priv = (struct sam_nandcs_s *)arg;
 
   DEBUGASSERT(priv);
+  nand_dma_sample(priv, DMA_CALLBACK);
 
   /* Wake up the thread that is waiting for the DMA result */
 
@@ -1211,6 +1310,10 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
   fvdbg("vsrc=%08x vdest=%08x nbytes=%d\n",
         (int)vsrc, (int)vdest, (int)nbytes);
 
+  /* Initialize sampling */
+
+  nand_dma_sampleinit(priv);
+
   /* Invalidate the destination memory buffer before performing the DMA (so
    * that nothing gets flushed later, corrupting the DMA transfer, and so
    * that memory will be re-cached after the DMA completes).
@@ -1240,12 +1343,15 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
       return ret;
     }
 
+  nand_dma_sample(priv, DMA_AFTER_SETUP);
+
   /* Start the DMA */
 
   priv->dmadone = false;
   priv->result  = -EBUSY;
 
   sam_dmastart(priv->dma, nand_dmacallback, priv);
+  nand_dma_sample(priv, DMA_AFTER_START);
 
   /* Wait for the DMA to complete */
 
@@ -1255,6 +1361,8 @@ static int nand_dma_read(struct sam_nandcs_s *priv,
       fdbg("ERROR: DMA failed: %d\n", ret);
     }
 
+  nand_dma_sample(priv, DMA_END_TRANSFER);
+  nand_dma_sampledone(priv, ret);
   return ret;
 }
 #endif
@@ -1288,6 +1396,10 @@ static int nand_dma_write(struct sam_nandcs_s *priv,
 
   DEBUGASSERT(priv->dma);
 
+  /* Initialize sampling */
+
+  nand_dma_sampleinit(priv);
+
   /* Clean the D-Cache associated with the source data buffer so that all of
    * the data to be transferred lies in physical memory
    */
@@ -1316,12 +1428,15 @@ static int nand_dma_write(struct sam_nandcs_s *priv,
       return ret;
     }
 
+  nand_dma_sample(priv, DMA_AFTER_SETUP);
+
   /* Start the DMA */
 
   priv->dmadone = false;
   priv->result  = -EBUSY;
 
   sam_dmastart(priv->dma, nand_dmacallback, priv);
+  nand_dma_sample(priv, DMA_AFTER_START);
 
   /* Wait for the DMA to complete */
 
@@ -1331,6 +1446,8 @@ static int nand_dma_write(struct sam_nandcs_s *priv,
       fdbg("ERROR: DMA failed: %d\n", ret);
     }
 
+  nand_dma_sample(priv, DMA_END_TRANSFER);
+  nand_dma_sampledone(priv, ret);
   return ret;
 }
 #endif
@@ -2871,8 +2988,8 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
   /* Initialize the NAND hardware for this CS */
   /* Perform board-specific SMC intialization for this CS.  This should include:
    *
-   *   1. Enable clocking to the HSMC
-   *   2. Configuration timing for the HSMC CS
+   *   1. Enabling of clocking to the HSMC
+   *   2. Configuration of timing for the HSMC NAND CS
    *   3. Configuration of PIO pins
    *
    * Other than enabling the HSMC, these are all things that the board-cognizant
