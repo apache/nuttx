@@ -78,7 +78,7 @@ config CAN_LOOPBACK
 		driver does support loopback mode, the setting will enable it. (If the
 		driver does not, this setting will have no effect).
 
-endif
+endif # CAN
 
 config ARCH_HAVE_PWM_PULSECOUNT
 	bool
@@ -102,7 +102,11 @@ config PWM_PULSECOUNT
 		hardware will support a fixed pulse count, then this configuration
 		should be set to enable the capability.
 
-endif
+endif # PWM
+
+config ARCH_HAVE_I2CRESET
+	bool
+	default n
 
 menuconfig I2C
 	bool "I2C Driver Support"
@@ -111,43 +115,39 @@ menuconfig I2C
 		This selection enables building of the "upper-half" I2C driver.
 		See include/nuttx/i2c.h for further I2C driver information.
 
+if I2C
+
 config I2C_SLAVE
 	bool "I2C Slave"
 	default n
-	depends on I2C
 
 config I2C_TRANSFER
 	bool "Support the I2C transfer() method"
 	default n
-	depends on I2C
 
 config I2C_WRITEREAD
 	bool "Support the I2C writeread() method"
 	default n
-	depends on I2C
 
 config I2C_POLLED
 	bool "Polled I2C (no interrupts)"
 	default n
-	depends on I2C
 
 config I2C_TRACE
 	bool "Enable I2C trace debug"
 	default n
-	depends on I2C
 
 config I2C_NTRACE
-	bool "Enable I2C trace debug"
-	default n
+	int "Number of I2C trace records"
+	default 32
 	depends on I2C_TRACE
-
-config ARCH_HAVE_I2CRESET
-	bool
 
 config I2C_RESET
 	bool "Support up_i2creset"
 	default n
-	depends on I2C && ARCH_HAVE_I2CRESET
+	depends on ARCH_HAVE_I2CRESET
+
+endif # I2C
 
 menuconfig SPI
 	bool "SPI Driver Support"
@@ -159,7 +159,7 @@ menuconfig SPI
 
 if SPI
 source drivers/spi/Kconfig
-endif
+endif # SPI
 
 menuconfig I2S
 	bool "I2S Driver Support"
@@ -253,7 +253,7 @@ menuconfig ANALOG
 
 if ANALOG
 source drivers/analog/Kconfig
-endif
+endif # ANALOG
 
 menuconfig AUDIO_DEVICES
 	bool "Audio Device Support"
@@ -266,7 +266,7 @@ menuconfig AUDIO_DEVICES
 
 if AUDIO_DEVICES
 source drivers/audio/Kconfig
-endif
+endif # AUDIO_DEVICES
 
 menuconfig BCH
 	bool "Block-to-Character (BCH) Support"
@@ -279,7 +279,7 @@ menuconfig BCH
 
 if BCH
 source drivers/bch/Kconfig
-endif
+endif # BCH
 
 menuconfig INPUT
 	bool "Input Device Support"
@@ -291,7 +291,7 @@ menuconfig INPUT
 
 if INPUT
 source drivers/input/Kconfig
-endif
+endif # INPUT
 
 menuconfig LCD
 	bool "LCD Driver Support"
@@ -307,7 +307,7 @@ menuconfig LCD
 
 if LCD
 source drivers/lcd/Kconfig
-endif
+endif # LCD
 
 menuconfig MMCSD
 	bool "MMC/SD Driver Support"
@@ -319,7 +319,7 @@ menuconfig MMCSD
 
 if MMCSD
 source drivers/mmcsd/Kconfig
-endif
+endif # MMCSD
 
 menuconfig MTD
 	bool "Memory Technology Device (MTD) Support"
@@ -336,7 +336,7 @@ menuconfig MTD
 
 if MTD
 source drivers/mtd/Kconfig
-endif
+endif # MTD
 
 menuconfig NETDEVICES
 	bool "Network Device/PHY Support"
@@ -356,7 +356,7 @@ menuconfig NETDEVICES
 
 if NETDEVICES
 source drivers/net/Kconfig
-endif
+endif # NETDEVICES
 
 menuconfig PIPES
 	bool "FIFO and named pipe drivers"
@@ -367,7 +367,7 @@ menuconfig PIPES
 
 if PIPES
 source drivers/pipes/Kconfig
-endif
+endif # PIPES
 
 config PM
 	bool "Power management (PM) driver interfaces"
@@ -387,7 +387,7 @@ menuconfig POWER
 
 if POWER
 source drivers/power/Kconfig
-endif
+endif # POWER
 
 menuconfig SENSORS
 	bool "Sensor Device Support"
@@ -397,7 +397,7 @@ menuconfig SENSORS
 
 if SENSORS
 source drivers/sensors/Kconfig
-endif
+endif # SENSORS
 
 menuconfig SERCOMM_CONSOLE
 	bool "Osmocom-bb Sercomm Driver Support"
@@ -412,9 +412,9 @@ menuconfig SERCOMM_CONSOLE
 		osmocom-bb, you will get compilation errors because of header files
 		that are needed from the osmocom-bb.
 
-if SERCOMM
+if SERCOMM_CONSOLE
 source drivers/sercomm/Kconfig
-endif
+endif # SERCOMM_CONSOLE
 
 menuconfig SERIAL
 	bool "Serial Driver Support"
@@ -426,7 +426,7 @@ menuconfig SERIAL
 
 if SERIAL
 source drivers/serial/Kconfig
-endif
+endif # SERIAL
 
 menuconfig USBDEV
 	bool "USB Device Driver Support"
@@ -436,7 +436,7 @@ menuconfig USBDEV
 
 if USBDEV
 source drivers/usbdev/Kconfig
-endif
+endif # USBDEV
 
 menuconfig USBHOST
 	bool "USB Host Driver Support"
@@ -446,7 +446,7 @@ menuconfig USBHOST
 
 if USBHOST
 source drivers/usbhost/Kconfig
-endif
+endif # USBHOST
 
 menuconfig WIRELESS
 	bool "Wireless Device Support"
@@ -456,7 +456,7 @@ menuconfig WIRELESS
 
 if WIRELESS
 source drivers/wireless/Kconfig
-endif
+endif # WIRELESS
 
 comment "System Logging Device Options"
 
