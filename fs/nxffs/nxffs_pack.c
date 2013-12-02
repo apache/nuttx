@@ -1409,20 +1409,39 @@ start_pack:
        eblock < volume->geo.neraseblocks;
        eblock++)
     {
-      /* Read the erase block into the pack buffer.  We need to do this even
-       * if we are overwriting the entire block so that we skip over
-       * previously marked bad blocks.
-       */
+      /* Get the starting block number of the erase block */
 
       pack.block0 = eblock * volume->blkper;
-      ret = MTD_BREAD(volume->mtd, pack.block0, volume->blkper, volume->pack);
-      if (ret < 0)
-        {
-          fdbg("ERROR: Failed to read erase block %d: %d\n", eblock, -ret);
-          goto errout_with_pack;
-        }
+
+      /* Read the entire erase block into the pack buffer, one-block-at-a-
+       * time.  We need to do this even if we are overwriting the entire
+       * block so that (1) we skip over previously marked bad blocks, and
+       * (2) we can handle individual block read failures.
+       *
+       * For most FLASH, a read failure indicates a fatal hardware failure.
+       * But for NAND FLASH, the read failure probably indicates a block
+       * with uncorrectable bit errors.
+       */
 
       /* Pack each I/O block */
+
+      for (i = 0, block = pack.block0, pack.iobuffer = volume->pack;
+           i < volume->blkper;
+           i++, block++, pack.iobuffer += volume->geo.blocksize)
+        {
+          /* Read the next block in the erase block */
+
+          ret = MTD_BREAD(volume->mtd, block, 1, pack.iobuffer);
+          if (ret < 0)
+            {
+              /* Force a the block to be an NXFFS bad block */
+
+              fdbg("ERROR: Failed to read block %d: %d\n", block, ret);
+              nxffs_blkinit(volume, pack.iobuffer, BLOCK_STATE_BAD);
+            }
+        }
+
+      /* Now ack each I/O block */
 
       for (i = 0, block = pack.block0, pack.iobuffer = volume->pack;
            i < volume->blkper;

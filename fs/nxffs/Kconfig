@@ -14,6 +14,36 @@ config FS_NXFFS
 
 if FS_NXFFS
 
+config NXFFS_SCAN_VOLUME
+	bool "Scan volume"
+	default n
+	---help---
+		Scan the media for bad blocks on start-up.  If too many bad or
+		unformatted blocks are found, then re-format the volume.  Otherwise,
+		the volume will be reformatted only if no NXFFS file system is
+		found.
+
+		Why might you want to do this?  If too many bad blocks accumulate
+		over time, then attempting to reformat my be the only way to
+		recover.  And what if you power down the device while formatting
+		the FLASH so that you have only a partially formatted device?
+		Scanning the volume can get you out of these situations.
+
+		The down side is that scanning the volume can adversely affect
+		your start-up time.  An option is to just erase the FLASH and
+		reboot in these cases.  That can be done with
+		apps/system/flash_eraseall.
+
+config NXFFS_REFORMAT_THRESH
+	int "Reformat percentage"
+	default 20
+	range 0 100
+	depends on NXFFS_SCAN_VOLUME
+	---help---
+		This defines the threshold for re-formatting.  Is less than this
+		percentage of good blocks are found, then the volume is re-
+		formatted.
+
 config NXFFS_PREALLOCATED
 	bool "Single, preallocated volume"
 	default y

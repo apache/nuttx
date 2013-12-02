@@ -127,7 +127,8 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   ret = nxffs_rdcache(volume, volume->ioblock);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to read data into cache: %d\n", ret);
+      fdbg("ERROR: Failed to read block %d into cache: %d\n",
+           volume->ioblock, ret);
       goto errout_with_entry;
     }
 
@@ -141,7 +142,8 @@ int nxffs_rminode(FAR struct nxffs_volume_s *volume, FAR const char *name)
   ret = nxffs_wrcache(volume);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to read data into cache: %d\n", ret);
+      fdbg("ERROR: Failed to write block %d: %d\n",
+           volume->ioblock, ret);
     }
 
 errout_with_entry:

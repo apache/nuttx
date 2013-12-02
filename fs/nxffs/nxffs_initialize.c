@@ -157,7 +157,9 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 {
   FAR struct nxffs_volume_s *volume;
   struct nxffs_blkstats_s stats;
+#ifdef CONFIG_NXFFS_SCAN_VOLUME
   off_t threshold;
+#endif
   int ret;
 
   /* If CONFIG_NXFFS_PREALLOCATED is defined, then this is the single, pre-
@@ -230,6 +232,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
   volume->nblocks = volume->geo.neraseblocks * volume->blkper;
   DEBUGASSERT((off_t)volume->blkper * volume->geo.blocksize == volume->geo.erasesize);
 
+#ifdef CONFIG_NXFFS_SCAN_VOLUME
   /* Check if there is a valid NXFFS file system on the flash */
 
   ret = nxffs_blockstats(volume, &stats);
@@ -243,7 +246,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
    * blocks is high, then reformat the FLASH.
    */
 
-  threshold = stats.nblocks / 5;
+  threshold = (stats.nblocks * CONFIG_NXFFS_REFORMAT_THRESH) / 100;
   if (stats.ngood < threshold || stats.nunformat > threshold)
     {
       /* Reformat the volume */
@@ -266,6 +269,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
         }
 #endif
     }
+#endif /* CONFIG_NXFFS_SCAN_VOLUME */
 
   /* Get the file system limits */
 
@@ -274,6 +278,37 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
     {
       return OK;
     }
+
+  /* We may need to format the volume.  Try that before giving up. */
+
+  fdbg("WARNING: Failed to calculate file system limits: %d\n", -ret);
+  ret = nxffs_reformat(volume);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Failed to reformat the volume: %d\n", -ret);
+      goto errout_with_buffer;
+    }
+
+  /* Get statistics on the re-formatted volume */
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
+  ret = nxffs_blockstats(volume, &stats);
+  if (ret < 0)
+    {
+      fdbg("ERROR: Failed to collect block statistics: %d\n", -ret);
+      goto errout_with_buffer;
+    }
+#endif
+
+  /* Now try to get the file system limits again */
+
+  ret = nxffs_limits(volume);
+  if (ret == OK)
+    {
+      return OK;
+    }
+
+  /* Now give up */
 
   fdbg("ERROR: Failed to calculate file system limits: %d\n", -ret);
 
@@ -382,6 +417,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
           offset = nxffs_inodeend(volume, &entry);
           nxffs_freeentry(&entry);
         }
+
       fvdbg("Last inode before offset %d\n", offset);
     }
 
@@ -412,6 +448,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
                   volume->inoffset = volume->froffset;
                   fvdbg("No inodes, inoffset: %d\n", volume->inoffset);
                 }
+
               return OK;
             }
 
@@ -444,6 +481,7 @@ int nxffs_limits(FAR struct nxffs_volume_s *volume)
                   volume->inoffset = offset;
                   fvdbg("First inode at offset %d\n", volume->inoffset);
                 }
+
               return OK;
             }
         }

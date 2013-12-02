@@ -83,9 +83,13 @@
  *   block - The (logical) block number to load and verify.
  *
  * Returned Values:
- *   Zero is returned on success.  Otherwise, a negated errno value is
- *   returned indicating the nature of the failure.  -ENOENT is returned
- *   if the block is a bad block.
+ *   OK (zero( is returned on success.  Otherwise, a negated errno value is
+ *   returned indicating the nature of the failure:
+ *
+ *     -EIO is returned if we failed to read the block.  If we are using
+ *        NAND memory, then this probably means that the block has
+ *        uncorrectable bit errors.
+ *     -ENOENT is returned if the block is a bad block.
  *
  ****************************************************************************/
 
@@ -102,7 +106,7 @@ int nxffs_verifyblock(FAR struct nxffs_volume_s *volume, off_t block)
       /* Perhaps we are at the end of the media */
 
       fdbg("ERROR: Failed to read data into cache: %d\n", ret);
-      return ret;
+      return -EIO;
     }
 
   /* Check if the block has a magic number (meaning that it is not

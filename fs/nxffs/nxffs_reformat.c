@@ -92,14 +92,11 @@ static int nxffs_format(FAR struct nxffs_volume_s *volume)
 
   /* Create an image of one properly formatted erase sector */
 
-  memset(volume->pack, CONFIG_NXFFS_ERASEDSTATE, volume->geo.erasesize);
   for (blkptr = volume->pack, i = 0;
        i < volume->blkper;
        blkptr += volume->geo.blocksize, i++)
     {
-      FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)blkptr;
-      memcpy(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE);
-      blkhdr->state = BLOCK_STATE_GOOD;
+      nxffs_blkinit(volume, blkptr, BLOCK_STATE_GOOD);
     }
 
   /* Erase and format each erase block */
@@ -149,7 +146,8 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
 {
   FAR uint8_t *blkptr;   /* Pointer to next block data */
   off_t eblock;          /* Erase block number */
-  off_t lblock;          /* Logical block number */
+  off_t lblock;          /* Logical block number of the erase block */
+  off_t block;           /* Working block number */
   ssize_t nxfrd;         /* Number of blocks transferred */
   bool good;             /* TRUE: block is good */
   bool modified;         /* TRUE: The erase block has been modified */
@@ -159,31 +157,50 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
 
   for (eblock = 0; eblock < volume->geo.neraseblocks; eblock++)
     {
-      /* Read the entire erase block */
+      /* Get the logical block number of the erase block */
 
       lblock = eblock * volume->blkper;
-      nxfrd  = MTD_BREAD(volume->mtd, lblock, volume->blkper, volume->pack);
-      if (nxfrd != volume->blkper)
-        {
-          fdbg("ERROR: Read erase block %d failed: %d\n", lblock, nxfrd);
-          return -EIO;
-        }
 
-      /* Process each logical block */
+      /* Read the entire erase block into memory, processing each block one-
+       * at-a-time.  We could read the entire erase block at once.  That
+       * would be more efficient.  However, for the case of NAND FLASH, each
+       * individual block can fail independently due to uncorrectable bit
+       * errors in that block.
+       */
 
       modified = false;
-      for (blkptr = volume->pack, i = 0;
+      for (i = 0, block = lblock, blkptr = volume->pack;
            i < volume->blkper;
-           blkptr += volume->geo.blocksize, i++)
+           i++, block++, blkptr += volume->geo.blocksize)
         {
           FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)blkptr;
 
-          /* Check block header */
+          /* Read the next block in the erase block */
 
-          good = true;
-          if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0 ||
-              blkhdr->state != BLOCK_STATE_GOOD)
+          good  = true;
+          nxfrd = MTD_BREAD(volume->mtd, block, i, blkptr);
+          if (nxfrd < 0)
             {
+              /* Failed to read the block.  This should never happen with
+               * most FLASH.  However, for NAND this probably means that we
+               * read a block with uncorrectable bit errors.
+               */
+
+              fdbg("ERROR: Failed to read block %d: %d\n",
+                   block, (int)nxfrd);
+
+              good = false;
+            }
+
+          /* Check the block header */
+
+          else if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0 ||
+                          blkhdr->state != BLOCK_STATE_GOOD)
+            {
+              /* The block is not formated with the NXFFS magic bytes or else
+               * the block is specifically marked bad.
+               */
+
               good = false;
             }
 
@@ -196,15 +213,14 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
               good = (blocksize == erasesize);
             }
 
-          /* If the block is bad, attempt to re-write the block header indicating
-           * a bad block (of course, if the block has failed, this may not be
-           * possible, depending upon failure modes.
+          /* If the block is bad, attempt to re-write the block header
+           * indicating a bad block (of course, if the block has failed,
+           * this may not be possible, depending upon failure modes.
            */
 
           if (!good)
             {
-              memcpy(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE);
-              blkhdr->state = BLOCK_STATE_BAD;
+              nxffs_blkinit(volume, blkptr, BLOCK_STATE_BAD);
               modified = true;
             }
         }
@@ -268,4 +284,31 @@ int nxffs_reformat(FAR struct nxffs_volume_s *volume)
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: nxffs_blkinit
+ *
+ * Description:
+ *   Initialize an NXFFS block to the erased state with the specified block
+ *   status.
+ *
+ * Input Parameters:
+ *   volume - Describes the NXFFS volume (needed for the blocksize).
+ *   blkptr - Pointer to the logic block to initialize.
+ *   state  - Either BLOCK_STATE_GOOD or BLOCK_STATE_BAD.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void nxffs_blkinit(FAR struct nxffs_volume_s *volume, FAR uint8_t *blkptr,
+                   uint8_t state)
+{
+  FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)blkptr;
+
+  memset(blkptr, CONFIG_NXFFS_ERASEDSTATE, volume->geo.blocksize);
+  memcpy(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE);
+  blkhdr->state = state;
 }

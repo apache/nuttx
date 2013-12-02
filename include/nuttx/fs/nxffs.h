@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/fs/nxffs.h
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -93,6 +93,19 @@
 
 #undef CONFIG_NXFSS_PREALLOCATED
 #define CONFIG_NXFSS_PREALLOCATED 1
+
+/* If we were asked to scan the volume, then a re-formatting threshold must
+ * also be provided.
+ */
+
+#ifdef CONFIG_NXFFS_SCAN_VOLUME
+#  ifndef CONFIG_NXFFS_REFORMAT_THRESH
+#    define CONFIG_NXFFS_REFORMAT_THRESH 20
+#  endif
+#  if CONFIG_NXFFS_REFORMAT_THRESH < 0 || CONFIG_NXFFS_REFORMAT_THRESH > 100
+#    error CONFIG_NXFFS_REFORMAT_THRESH is not a valid percentage
+#  endif
+#endif
 
 /****************************************************************************
  * Public Function Prototypes

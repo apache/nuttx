@@ -705,52 +705,64 @@ int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size)
       ret = nxffs_rdcache(volume, volume->ioblock);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to read block %d: %d\n", volume->ioblock, -ret);
-          return ret;
+          /* Ignore the error... just skip to the next block.  This should
+           * never happen with normal FLASH, but could occur with NAND if
+           * the block has uncorrectable bit errors.
+           */
+
+          fdbg("ERROR: Failed to read block %d: %d\n",
+               volume->ioblock, -ret);
         }
 
       /* Search to the very end of this block if we have to */
 
-      iooffset = volume->iooffset;
-      nerased  = 0;
-
-      for (i = volume->iooffset; i < volume->geo.blocksize; i++)
+      else
         {
-          /* Is this byte erased? */
+          iooffset = volume->iooffset;
+          nerased  = 0;
 
-          if (volume->cache[i] == CONFIG_NXFFS_ERASEDSTATE)
+          for (i = volume->iooffset; i < volume->geo.blocksize; i++)
             {
-              /* Yes.. increment the count of contiguous, erased bytes */
+              /* Is this byte erased? */
 
-              nerased++;
-
-              /* Is the whole header memory erased? */
-
-              if (nerased >= size)
+              if (volume->cache[i] == CONFIG_NXFFS_ERASEDSTATE)
                 {
-                   /* Yes.. this this is where we will put the object */
+                  /* Yes.. increment the count of contiguous, erased bytes */
 
-                   off_t offset = volume->ioblock * volume->geo.blocksize + iooffset;
+                  nerased++;
 
-                   /* Update the free flash offset and return success */
+                  /* Is the whole header memory erased? */
 
-                   volume->froffset = offset + size;
-                   return OK;
+                  if (nerased >= size)
+                    {
+                       /* Yes.. this this is where we will put the object */
+
+                       off_t offset =
+                         volume->ioblock * volume->geo.blocksize + iooffset;
+
+                       /* Update the free flash offset and return success */
+
+                       volume->froffset = offset + size;
+                       return OK;
+                    }
                 }
-            }
 
-          /* This byte is not erased!  (It should be unless the block is bad) */
+              /* This byte is not erased!  (It should be unless the block is
+               * bad)
+               */
 
-          else
-            {
-              nerased  = 0;
-              iooffset = i + 1;
+              else
+                {
+                  nerased  = 0;
+                  iooffset = i + 1;
+                }
             }
         }
 
-      /* If we get here, then we have looked at every byte in the block
-       * and did not find any sequence of erased bytes long enough to hold
-       * the object.  Skip to the next, valid block.
+      /* If we get here, then either (1) this block is not read-able, or
+       * (2) we have looked at every byte in the block and did not find
+       * any sequence of erased bytes long enough to hold the object.
+       * Skip to the next, valid block.
        */
 
       volume->ioblock++;
