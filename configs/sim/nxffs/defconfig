@@ -38,24 +38,9 @@ CONFIG_HOST_LINUX=y
 #
 # Debug Options
 #
-CONFIG_DEBUG=y
-# CONFIG_DEBUG_VERBOSE is not set
-
-#
-# Subsystem Debug Options
-#
-# CONFIG_DEBUG_MM is not set
-# CONFIG_DEBUG_SCHED is not set
-CONFIG_DEBUG_FS=y
-# CONFIG_DEBUG_LIB is not set
-# CONFIG_DEBUG_BINFMT is not set
-# CONFIG_DEBUG_GRAPHICS is not set
-
-#
-# Driver Debug Options
-#
-# CONFIG_DEBUG_ANALOG is not set
-# CONFIG_DEBUG_GPIO is not set
+# CONFIG_DEBUG is not set
+# CONFIG_ARCH_HAVE_STACKCHECK is not set
+# CONFIG_ARCH_HAVE_HEAPCHECK is not set
 CONFIG_DEBUG_SYMBOLS=y
 
 #
@@ -81,10 +66,6 @@ CONFIG_ARCH="sim"
 # CONFIG_SIM_WALLTIME is not set
 
 #
-# External Memory Configuration
-#
-
-#
 # Architecture Options
 #
 # CONFIG_ARCH_NOINTC is not set
@@ -104,8 +85,6 @@ CONFIG_ARCH="sim"
 #
 CONFIG_BOARD_LOOPSPERMSEC=5000
 # CONFIG_ARCH_CALIBRATION is not set
-CONFIG_RAM_START=
-CONFIG_RAM_SIZE=
 
 #
 # Boot options
@@ -115,6 +94,12 @@ CONFIG_BOOT_RUNFROMFLASH=y
 # CONFIG_BOOT_RUNFROMISRAM is not set
 # CONFIG_BOOT_RUNFROMSDRAM is not set
 # CONFIG_BOOT_COPYTORAM is not set
+
+#
+# Boot Memory Configuration
+#
+CONFIG_RAM_START=0x0
+CONFIG_RAM_SIZE=0
 
 #
 # Board Selection
@@ -195,28 +180,48 @@ CONFIG_DEV_NULL=y
 # CONFIG_LOOP is not set
 # CONFIG_RAMDISK is not set
 # CONFIG_CAN is not set
+# CONFIG_ARCH_HAVE_PWM_PULSECOUNT is not set
 # CONFIG_PWM is not set
+# CONFIG_ARCH_HAVE_I2CRESET is not set
 # CONFIG_I2C is not set
 # CONFIG_SPI is not set
+# CONFIG_I2S is not set
 # CONFIG_RTC is not set
 # CONFIG_WATCHDOG is not set
 # CONFIG_ANALOG is not set
+# CONFIG_AUDIO_DEVICES is not set
 # CONFIG_BCH is not set
 # CONFIG_INPUT is not set
 # CONFIG_LCD is not set
 # CONFIG_MMCSD is not set
 CONFIG_MTD=y
+
+#
+# MTD Configuration
+#
 # CONFIG_MTD_PARTITION is not set
+# CONFIG_MTD_BYTE_WRITE is not set
+# CONFIG_MTD_CONFIG is not set
+# CONFIG_MTD_CONFIG_RAM_CONSOLIDATE is not set
+
+#
+# MTD Device Drivers
+#
+# CONFIG_MTD_NAND is not set
+# CONFIG_ARCH_NAND_HWECC is not set
 CONFIG_RAMMTD=y
 CONFIG_RAMMTD_BLOCKSIZE=512
 CONFIG_RAMMTD_ERASESIZE=4096
 CONFIG_RAMMTD_ERASESTATE=0xff
 CONFIG_RAMMTD_FLASHSIM=y
 # CONFIG_MTD_AT24XX is not set
+# CONFIG_MTD_AT25 is not set
 # CONFIG_MTD_AT45DB is not set
 # CONFIG_MTD_M25P is not set
+# CONFIG_MTD_SMART is not set
 # CONFIG_MTD_RAMTRON is not set
 # CONFIG_MTD_SST25 is not set
+# CONFIG_MTD_SST25XX is not set
 # CONFIG_MTD_SST39FV is not set
 # CONFIG_MTD_W25 is not set
 # CONFIG_PIPES is not set
@@ -227,7 +232,13 @@ CONFIG_RAMMTD_FLASHSIM=y
 CONFIG_SERIAL=y
 # CONFIG_DEV_LOWCONSOLE is not set
 # CONFIG_16550_UART is not set
+
+#
+# USART Configuration
+#
 # CONFIG_STANDARD_SERIAL is not set
+# CONFIG_SERIAL_IFLOWCONTROL is not set
+# CONFIG_SERIAL_OFLOWCONTROL is not set
 # CONFIG_USBDEV is not set
 # CONFIG_USBHOST is not set
 # CONFIG_WIRELESS is not set
@@ -244,6 +255,8 @@ CONFIG_SERIAL=y
 #
 # Networking Support
 #
+# CONFIG_ARCH_HAVE_NET is not set
+# CONFIG_ARCH_HAVE_PHY is not set
 # CONFIG_NET is not set
 
 #
@@ -254,6 +267,8 @@ CONFIG_SERIAL=y
 # File system configuration
 #
 # CONFIG_DISABLE_MOUNTPOINT is not set
+CONFIG_FS_READABLE=y
+CONFIG_FS_WRITABLE=y
 # CONFIG_FS_RAMMAP is not set
 CONFIG_FS_FAT=y
 # CONFIG_FAT_LCNAMES is not set
@@ -261,12 +276,16 @@ CONFIG_FS_FAT=y
 # CONFIG_FS_FATTIME is not set
 # CONFIG_FAT_DMAMEMORY is not set
 CONFIG_FS_NXFFS=y
+CONFIG_NXFFS_SCAN_VOLUME=y
+CONFIG_NXFFS_REFORMAT_THRESH=20
 CONFIG_NXFFS_PREALLOCATED=y
 CONFIG_NXFFS_ERASEDSTATE=0xff
 CONFIG_NXFFS_PACKTHRESHOLD=32
 CONFIG_NXFFS_MAXNAMLEN=255
 CONFIG_NXFFS_TAILTHRESHOLD=8192
 # CONFIG_FS_ROMFS is not set
+# CONFIG_FS_SMARTFS is not set
+# CONFIG_FS_PROCFS is not set
 
 #
 # System Logging
@@ -286,6 +305,11 @@ CONFIG_NXFFS_TAILTHRESHOLD=8192
 # CONFIG_MM_SMALL is not set
 CONFIG_MM_REGIONS=1
 # CONFIG_GRAN is not set
+
+#
+# Audio Support
+#
+# CONFIG_AUDIO is not set
 
 #
 # Binary Formats
@@ -331,6 +355,7 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 # Non-standard Library Support
 #
 # CONFIG_LIB_KBDCODEC is not set
+# CONFIG_LIB_SLCDCODEC is not set
 
 #
 # Basic CXX Support
@@ -351,7 +376,7 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 #
 # CONFIG_EXAMPLES_BUTTONS is not set
 # CONFIG_EXAMPLES_CAN is not set
-# CONFIG_SYSTEM_COMPOSITE is not set
+# CONFIG_EXAMPLES_CONFIGDATA is not set
 # CONFIG_EXAMPLES_DHCPD is not set
 # CONFIG_EXAMPLES_ELF is not set
 # CONFIG_EXAMPLES_FTPC is not set
@@ -366,7 +391,7 @@ CONFIG_LIB_SENDFILE_BUFSIZE=512
 # CONFIG_EXAMPLES_MM is not set
 # CONFIG_EXAMPLES_MODBUS is not set
 # CONFIG_EXAMPLES_MOUNT is not set
-# CONFIG_EXAMPLES_MTDPART is not set
+# CONFIG_EXAMPLES_NRF24L01TERM is not set
 # CONFIG_EXAMPLES_NSH is not set
 # CONFIG_EXAMPLES_NULL is not set
 # CONFIG_EXAMPLES_NX is not set
@@ -396,6 +421,9 @@ CONFIG_EXAMPLES_NXFFS_NLOOPS=100
 # CONFIG_EXAMPLES_ROMFS is not set
 # CONFIG_EXAMPLES_SENDMAIL is not set
 # CONFIG_EXAMPLES_SERLOOP is not set
+# CONFIG_EXAMPLES_SLCD is not set
+# CONFIG_EXAMPLES_SMART is not set
+# CONFIG_EXAMPLES_TCPECHO is not set
 # CONFIG_EXAMPLES_TELNETD is not set
 # CONFIG_EXAMPLES_THTTPD is not set
 # CONFIG_EXAMPLES_TIFF is not set
@@ -403,7 +431,6 @@ CONFIG_EXAMPLES_NXFFS_NLOOPS=100
 # CONFIG_EXAMPLES_UDP is not set
 # CONFIG_EXAMPLES_UIP is not set
 # CONFIG_EXAMPLES_USBSERIAL is not set
-# CONFIG_SYSTEM_USBMSC is not set
 # CONFIG_EXAMPLES_USBTERM is not set
 # CONFIG_EXAMPLES_WATCHDOG is not set
 
@@ -454,7 +481,20 @@ CONFIG_EXAMPLES_NXFFS_NLOOPS=100
 #
 
 #
+# Platform-specific Support
+#
+# CONFIG_PLATFORM_CONFIGDATA is not set
+
+#
 # System NSH Add-Ons
+#
+
+#
+# USB CDC/ACM Device Commands
+#
+
+#
+# USB Composite Device Commands
 #
 
 #
@@ -472,7 +512,16 @@ CONFIG_EXAMPLES_NXFFS_NLOOPS=100
 # CONFIG_SYSTEM_INSTALL is not set
 
 #
-# RAM Test
+# FLASH Erase-all Command
+#
+
+#
+# NxPlayer media player library / command Line
+#
+# CONFIG_SYSTEM_NXPLAYER is not set
+
+#
+# RAM test
 #
 # CONFIG_SYSTEM_RAMTEST is not set
 
@@ -504,3 +553,16 @@ CONFIG_EXAMPLES_NXFFS_NLOOPS=100
 #
 # USB Monitor
 #
+
+#
+# Stack Monitor
+#
+
+#
+# USB Mass Storage Device Commands
+#
+
+#
+# Zmodem Commands
+#
+# CONFIG_SYSTEM_ZMODEM is not set
