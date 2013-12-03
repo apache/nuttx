@@ -1413,6 +1413,20 @@ start_pack:
 
       pack.block0 = eblock * volume->blkper;
 
+#ifndef CONFIG_NXFFS_NAND
+      /* Read the erase block into the pack buffer.  We need to do this even
+       * if we are overwriting the entire block so that we skip over
+       * previously marked bad blocks.
+       */
+
+      ret = MTD_BREAD(volume->mtd, pack.block0, volume->blkper, volume->pack);
+      if (ret < 0)
+        {
+          fdbg("ERROR: Failed to read erase block %d: %d\n", eblock,-ret);
+          goto errout_with_pack;
+        }
+
+#else
       /* Read the entire erase block into the pack buffer, one-block-at-a-
        * time.  We need to do this even if we are overwriting the entire
        * block so that (1) we skip over previously marked bad blocks, and
@@ -1440,6 +1454,7 @@ start_pack:
               nxffs_blkinit(volume, pack.iobuffer, BLOCK_STATE_BAD);
             }
         }
+#endif
 
       /* Now pack each I/O block */
 
@@ -1579,7 +1594,7 @@ start_pack:
       ret = MTD_BWRITE(volume->mtd, pack.block0, volume->blkper, volume->pack);
       if (ret < 0)
         {
-          fdbg("ERROR: Failed to write erase block %d [%]: %d\n",
+          fdbg("ERROR: Failed to write erase block %d [%d]: %d\n",
                eblock, pack.block0, -ret);
           goto errout_with_pack;
         }

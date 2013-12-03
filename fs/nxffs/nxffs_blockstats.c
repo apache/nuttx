@@ -91,14 +91,85 @@
 int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
                      FAR struct nxffs_blkstats_s *stats)
 {
-  FAR struct nxffs_block_s *blkhdr; /* Pointer to FLASH block header */
-  off_t ioblock;                    /* I/O block number */
+#ifndef CONFIG_NXFFS_NAND
+  FAR uint8_t *bptr;     /* Pointer to next block data */
+  int lblock;            /* Logical block index */
+#endif
+  off_t ioblock;         /* I/O block number */
   int ret;
 
   /* Process each erase block */
 
   memset(stats, 0, sizeof(struct nxffs_blkstats_s));
 
+#ifndef CONFIG_NXFFS_NAND
+  for (ioblock = 0; ioblock < volume->nblocks; ioblock += volume->blkper)
+    {
+      /* Read the full erase block */
+
+      ret = MTD_BREAD(volume->mtd, ioblock, volume->blkper, volume->pack);
+      if (ret < volume->blkper)
+        {
+          fdbg("ERROR: Failed to read erase block %d: %d\n",
+               ioblock / volume->blkper, ret);
+          return ret;
+        }
+
+      /* Then examine each logical block in the erase block */
+
+      for (bptr = volume->pack, lblock = 0;
+           lblock < volume->blkper;
+           bptr += volume->geo.blocksize, lblock++)
+        {
+          /* We read the block successfully, now check for errors tagged
+           * in the NXFFS data.
+           */
+
+          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)bptr;
+
+          /* Increment the total count of blocks examined */
+
+          stats->nblocks++;
+
+          /* Collect statistics */
+          /* Check if this is a block that should be recognized by NXFFS */
+
+          if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0)
+            {
+              /* Nope.. block must not be formatted */
+
+              stats->nunformat++;
+            }
+          else if (blkhdr->state == BLOCK_STATE_BAD)
+            {
+              /* The block is marked as bad */
+
+               stats->nbad++;
+            }
+          else if (blkhdr->state == BLOCK_STATE_GOOD)
+            {
+              /* The block is marked as good */
+
+              stats-> ngood++;
+            }
+          else
+            {
+              /* The good/bad mark is not recognized.  Let's call this
+               * corrupt (vs. unformatted).
+               */
+
+              stats->ncorrupt++;
+            }
+        }
+    }
+
+  fdbg("Number blocks:        %d\n", stats->nblocks);
+  fdbg("  Good blocks:        %d\n", stats->ngood);
+  fdbg("  Bad blocks:         %d\n", stats->nbad);
+  fdbg("  Unformatted blocks: %d\n", stats->nunformat);
+  fdbg("  Corrupt blocks:     %d\n", stats->ncorrupt);
+
+#else
   for (ioblock = 0; ioblock < volume->nblocks; ioblock++)
     {
       /* Increment the total count of blocks examined */
@@ -132,7 +203,7 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
            * in the NXFFS data.
            */
 
-          blkhdr = (FAR struct nxffs_block_s*)volume->pack;
+          FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)volume->pack;
 
           /* Collect statistics */
           /* Check if this is a block that should be recognized by NXFFS */
@@ -151,9 +222,9 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
             }
           else if (blkhdr->state == BLOCK_STATE_GOOD)
             {
-               /* The block is marked as good */
+              /* The block is marked as good */
 
-               stats-> ngood++;
+              stats-> ngood++;
             }
           else
             {
@@ -172,5 +243,7 @@ int nxffs_blockstats(FAR struct nxffs_volume_s *volume,
   fdbg("  Unformatted blocks: %d\n", stats->nunformat);
   fdbg("  Corrupt blocks:     %d\n", stats->ncorrupt);
   fdbg("  Unreadable blocks:  %d\n", stats->nbadread);
+
+#endif
   return OK;
 }

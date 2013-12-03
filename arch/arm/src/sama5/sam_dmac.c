@@ -1482,11 +1482,13 @@ static void sam_freelinklist(struct sam_dmach_s *dmach)
 
   while (desc != NULL)
     {
+      /* Valid, in-use descriptors never have saddr == 0 */
+
+      DEBUGASSERT(desc->saddr != 0);
+
       /* Get the physical address of the next desriptor in the list */
 
       paddr = desc->dscr;
-
-      DEBUGASSERT(desc->saddr != 0);
 
       /* Free the descriptor by simply nullifying it */
 

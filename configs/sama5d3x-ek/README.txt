@@ -1351,12 +1351,20 @@ SDRAM Support
 
 NAND Support
 ============
+  NAND support is only partial and there is no file system that works with
+  it properly.  It should be considered a work in progress.  You will not
+  want to use NAND unless you are interested in investing a little effort.
+  See the STATUS section below.
 
   NAND Support
   ------------
 
   NAND Support can be added to the NSH configuration by modifying the
   NuttX configuration file as follows:
+
+    Build Setup
+      CONFIG_EXPERIMENTAL=y             : NXFFS implemention is incomplete and
+                                        : not yet fully functional.
 
     System Type -> SAMA5 Peripheal support
       CONFIG_SAMA5_DMAC1=y              : Use DMA1 for memory-to-memory DMA
@@ -1366,7 +1374,7 @@ NAND Support
       CONFIG_MTD=y                      : Enable MTD support
       CONFIG_MTD_NAND=y                 : Enable NAND support
       CONFIG_MTD_NAND_BLOCKCHECK=n      : Interferes with NXFFS bad block checking
-      CONFIG_MTD_NAND_HWECC=y           : Use H/W ECC calculation
+      CONFIG_MTD_NAND_SWECC=y           : Use S/W ECC calculation
 
       Defaults for all other NAND settings should be okay
 
@@ -1374,9 +1382,7 @@ NAND Support
       CONFIG_SAMA5_EBICS3=y             : Enable External CS3 memory
       CONFIG_SAMA5_EBICS3_NAND=y        : Select NAND memory type
       CONFIG_SAMA5_EBICS3_SIZE=8388608  : Use this size
-      CONFIG_SAMA5_EBICS3_PMECC=y       : Use H/W ECC calculation
-      CONFIG_SAMA5_PMECC_EMBEDDEDALGO=n : Use the software PMECC algorithm
-      CONFIG_SAMA5_PMECC_GALOIS_ROMTABLES=y : use the ROM Galois tables
+      CONFIG_SAMA5_EBICS3_SWECC=y       : Use S/W ECC calculation
 
       Defaults for ROM page table addresses should be okay
 
@@ -1423,24 +1429,24 @@ NAND Support
       does the job a little-at-a-time so that there is no massive clean-up
       when the FLASH becomes full.
 
-      WARNING:  This will wipe out everything that you may have on the NAND
-      FLASH!  I have found that using the JTAG with no valid image on NAND
-      or Serial FLASH is a problem:  In that case, the code always ends up
-      in the SAM-BA bootloader.
-
-      The work around for this case is to put the NORBOOT image into Serial
-      FLASH.  Then, the system will boot from Serial FLASH by copying the
-      NORBOOT image in SRAM which will run and then start the image in NOR
-      FLASH.  See the discussion of the NORBOOT configuration in the
-      "Creating and Using NORBOOT" section above.
-
-      NOTES: (1) There is jumper on the CM module that must be closed to
-      enable use of the AT25 Serial Flash.  (2) If using SAM-BA, make sure
-      that you load the NOR boot program into the boot area via the pull-
-      down menu.
-
     Application Configuration -> NSH Library
      CONFIG_NSH_ARCHINIT=y              : Use architecture-specific initialization
+
+    WARNING:  This will wipe out everything that you may have on the NAND
+    FLASH!  I have found that using the JTAG with no valid image on NAND
+    or Serial FLASH is a problem:  In that case, the code always ends up
+    in the SAM-BA bootloader.
+
+    The work around for this case is to put the NORBOOT image into Serial
+    FLASH.  Then, the system will boot from Serial FLASH by copying the
+    NORBOOT image in SRAM which will run and then start the image in NOR
+    FLASH.  See the discussion of the NORBOOT configuration in the
+    "Creating and Using NORBOOT" section above.
+
+    NOTES: (1) There is jumper on the CM module that must be closed to
+    enable use of the AT25 Serial Flash.  (2) If using SAM-BA, make sure
+    that you load the NOR boot program into the boot area via the pull-
+    down menu.
 
     Using NAND
     ----------
@@ -1473,6 +1479,38 @@ NAND Support
       nsh> mount -t nxffs /mnt/mystuff
       nsh> mount
         /mnt/mystuff type nxffs
+
+  STATUS
+  ------
+
+  1. PMECC has not been test and is, most likely, non-functional.
+
+  2. DMA works (with software ECC), but is see occasional wild memory
+     clobbering.  DMA should not be used until this problem can be
+     worked out.
+
+  3. NXFFS does not work with NAND. NAND differs from other other FLASH
+     types several ways.  For one thing, NAND requires error correction
+     (ECC) bytes that must be set in order to work around bit failures.
+     This affects NXFFS in two ways:
+
+     a. First, write failures are not fatal. Rather, they should be tried by
+        bad blocks and simply ignored.  This is because unrecoverable bit
+        failures will cause read failures when reading from NAND.  Setting
+        the CONFIG_EXPERIMENTAL+CONFIG_NXFFS_NANDs option will enable this
+        behavior.
+
+     b. Secondly, NXFFS will write a block many times.  It tries to keep
+        bits in the erased state and assumes that it can overwrite those bits
+        to change them from the erased to the non-erased state.  This works
+        will with NOR-like FLASH.  NAND behaves this way too.  But the
+        problem with NAND is that the ECC bits cannot be re-written in this
+        way.  So once a block has been written, it cannot be modified.  This
+        behavior has NOT been fixed in NXFFS.  Currently, NXFFS will attempt
+        to re-write the ECC bits causing the ECC to become corrupted because
+        the ECC bits cannot be overwritten without erasing the entire block.
+
+     This may prohibit NXFFS from ever being used with NAND.
 
 AT24 Serial EEPROM
 ==================

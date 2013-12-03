@@ -246,6 +246,12 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume, uint16_t reserve)
       ret = nxffs_verifyblock(volume, volume->ioblock);
       if (ret < 0 && ret != -ENOENT)
         {
+#ifndef CONFIG_NXFFS_NAND
+          /* Read errors are fatal */
+
+          fdbg("ERROR: Failed to read valid data into cache: %d\n", ret);
+          return ret;
+#else
           /* A read error occurred.  This probably means that we are
            * using NAND memory this block has an uncorrectable bit error.
            * Ignore the error (after complaining) and try the next
@@ -253,6 +259,7 @@ int nxffs_getc(FAR struct nxffs_volume_s *volume, uint16_t reserve)
            */
 
           fdbg("ERROR: Failed to read valid data into cache: %d\n", ret);
+#endif
         }
     }
   while (ret != OK);

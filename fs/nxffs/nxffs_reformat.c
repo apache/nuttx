@@ -147,7 +147,9 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
   FAR uint8_t *blkptr;   /* Pointer to next block data */
   off_t eblock;          /* Erase block number */
   off_t lblock;          /* Logical block number of the erase block */
+#ifdef CONFIG_NXFFS_NAND
   off_t block;           /* Working block number */
+#endif
   ssize_t nxfrd;         /* Number of blocks transferred */
   bool good;             /* TRUE: block is good */
   bool modified;         /* TRUE: The erase block has been modified */
@@ -161,24 +163,43 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
 
       lblock = eblock * volume->blkper;
 
-      /* Read the entire erase block into memory, processing each block one-
-       * at-a-time.  We could read the entire erase block at once.  That
-       * would be more efficient.  However, for the case of NAND FLASH, each
-       * individual block can fail independently due to uncorrectable bit
-       * errors in that block.
-       */
+#ifndef CONFIG_NXFFS_NAND
+      /* Read the entire erase block */
 
-      modified = false;
+      nxfrd  = MTD_BREAD(volume->mtd, lblock, volume->blkper, volume->pack);
+      if (nxfrd != volume->blkper)
+        {
+          fdbg("ERROR: Read erase block %d failed: %d\n", lblock, nxfrd);
+          return -EIO;
+        }
+#endif
+
+      /* Keep track if any part of the erase block gets modified */
+
+       modified = false;
+
+      /* Process each logical block */
+
+#ifndef CONFIG_NXFFS_NAND
+      for (blkptr = volume->pack, i = 0;
+           i < volume->blkper;
+           blkptr += volume->geo.blocksize, i++)
+#else
       for (i = 0, block = lblock, blkptr = volume->pack;
            i < volume->blkper;
            i++, block++, blkptr += volume->geo.blocksize)
+#endif
         {
           FAR struct nxffs_block_s *blkhdr = (FAR struct nxffs_block_s*)blkptr;
 
+          /* Assume that this is a good block until we learn otherwise */
+
+          good = true;
+
+#ifdef CONFIG_NXFFS_NAND
           /* Read the next block in the erase block */
 
-          good  = true;
-          nxfrd = MTD_BREAD(volume->mtd, block, i, blkptr);
+          nxfrd = MTD_BREAD(volume->mtd, block, 1, blkptr);
           if (nxfrd < 0)
             {
               /* Failed to read the block.  This should never happen with
@@ -191,11 +212,12 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
 
               good = false;
             }
+          else
+#endif
+          /* Check block header */
 
-          /* Check the block header */
-
-          else if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0 ||
-                          blkhdr->state != BLOCK_STATE_GOOD)
+          if (memcmp(blkhdr->magic, g_blockmagic, NXFFS_MAGICSIZE) != 0 ||
+              blkhdr->state != BLOCK_STATE_GOOD)
             {
               /* The block is not formated with the NXFFS magic bytes or else
                * the block is specifically marked bad.

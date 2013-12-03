@@ -34,6 +34,33 @@ config NXFFS_SCAN_VOLUME
 		reboot in these cases.  That can be done with
 		apps/system/flash_eraseall.
 
+config NXFFS_NAND
+	bool "Enable NAND support"
+	default n
+	depends on EXPERIMENTAL
+	---help---
+		NAND differs from other other FLASH types several ways.  For one
+		thing, NAND requires error correction (ECC) bytes that must be set
+		in order to work around bit failures.  This affects NXFFS in two
+		ways:
+
+		First, write failures are not fatal. Rather, they should be tried by
+		bad blocks and simply ignored.  This is because unrecoverable bit
+		failures will cause read failures when reading from NAND.  Setting
+		this option will enable this behavior.
+
+		Secondly, NXFFS will write a block many times.  It tries to keep
+		bits in the erased state and assumes that it can overwrite those
+ 		bits to change them from the erased to the non-erased state.  This
+		works will with NOR-like FLASH.  NAND behaves this way too.  But the
+		problem with NAND is that the ECC bits cannot be re-written in this
+		way.  So once a block has been written, it cannot be modified.  This
+		behavior has NOT been fixed in NXFFS.  Currently, NXFFS will attempt
+		to re-write the ECC bits causing the ECC to become corrupted because
+		the ECC bits cannot be overwritten without erasing the entire block.
+
+		This may prohibit NXFFS from ever being used with NAND.
+
 config NXFFS_REFORMAT_THRESH
 	int "Reformat percentage"
 	default 20

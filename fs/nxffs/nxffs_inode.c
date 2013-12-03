@@ -85,8 +85,6 @@
  *   Zero on success.  Otherwise, a negated errno value is returned
  *   indicating the nature of the failure.
  *
- *   On return, the
- *
  ****************************************************************************/
 
 static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,

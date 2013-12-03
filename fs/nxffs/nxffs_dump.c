@@ -389,7 +389,6 @@ static inline void nxffs_analyze(FAR struct nxffs_blkinfo_s *blkinfo)
             }
         }
     }
-
 }
 #endif
 
@@ -462,6 +461,13 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
       ret = MTD_BREAD(mtd, blkinfo.block, 1, blkinfo.buffer);
       if (ret < 0)
         {
+#ifndef CONFIG_NXFFS_NAND
+          /* Read errors are fatal */
+
+          fdbg("ERROR: Failed to read block %d\n", blkinfo.block);
+          kfree(blkinfo.buffer);
+          return ret;
+#else
           /* A read error is probably fatal on all media but NAND.
            * On NAND, the read error probably just signifies a block
            * with an uncorrectable ECC failure.  So, to handle NAND,
@@ -470,6 +476,7 @@ int nxffs_dump(FAR struct mtd_dev_s *mtd, bool verbose)
 
           fdbg(g_format, blkinfo.block, 0, "BLOCK", "RD FAIL",
                blkinfo.geo.blocksize);
+#endif
         }
       else
         {
