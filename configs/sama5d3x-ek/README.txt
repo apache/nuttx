@@ -1352,6 +1352,9 @@ SDRAM Support
 NAND Support
 ============
 
+  NAND Support
+  ------------
+
   NAND Support can be added to the NSH configuration by modifying the
   NuttX configuration file as follows:
 
@@ -1393,19 +1396,25 @@ NAND Support
       Other file systems are not recommended because only NXFFS can handle
       bad blocks and only NXFFS performs wear-leveling.
 
-      NOTE:  NXFFS is very slow.  The first time that you start the system,
-      be prepared for a long wait; NXFFS will need to format the NAND
+      NOTE:  NXFFS can be very slow.  The first time that you start the
+      system, be prepared for a wait; NXFFS will need to format the NAND
       volume.  I have lots of debug on so I don't yet know what the
-      optimized wait would be.  But with debug ON, software ECC, and no
-      DMA the wait is in many tens of minutes, even hours if many debug
-      options are enabled.
+      optimized wait will be.  But with debug ON, software ECC, and no
+      DMA the wait is in many tens of minutes (and substantially  longer
+      if many debug options are enabled.
+
+      [I don't yet have data for the more optimal cases. It will be
+       significantly less, but still not fast.]
 
       On subsequent boots, after the NXFFS file system has been created the
-      delay will be less.  But the NAND-related boot time can still be
-      substantial.  This is because NXFFS needs to scan the NAND device
-      and build the in-memory dataset needed to access NAND.  It is
-      recommended you create a separated thread at boot time to bring up
-      NXFFS so that you don't delay the boot-to-prompt time excessively.
+      delay will be less.  When the new file system is empty, it will be
+      very fast.  But the NAND-related boot time can become substantial when
+      there has been a lot of usage of the NAND.  This is because NXFFS
+      needs to scan the NAND device and build the in-memory dataset needed
+      to access NAND and there is more that must be scanned after the device
+      has been used.  You may want tocreate a separate thread at boot time
+      to bring up NXFFS so that you don't delay the boot-to-prompt time
+      excessively in these longer delay cases.
 
       NOTE:  There is another NXFFS related issue:  When the FLASH is
       fully used, NXFFS will restructure the entire FLASH, the delay to
@@ -1432,6 +1441,38 @@ NAND Support
 
     Application Configuration -> NSH Library
      CONFIG_NSH_ARCHINIT=y              : Use architecture-specific initialization
+
+    Using NAND
+    ----------
+
+    With the options CONFIG_SAMA5_NAND_AUTOMOUNT=y and
+    CONFIG_SAMA5_NAND_NXFFS=y, the NAND FLASH will be mounted in the NSH
+    start-up logic before the NSH prompt appears.  There is no feedback as
+    to whether or not the mount was successful.  You can, however, see the
+    mounted file systems using the nsh 'mount' command:
+
+      nsh> mount
+      /mnt/nand type nxffs
+
+    Then NAND can be used like any other file system:
+
+      nsh> echo "This is a test" >/mnt/nand/atest.txt
+      nsh> ls -l /mnt/nand
+      /mnt/nand:
+       ---x--x--x      16 atest.txt
+      nsh> cat /mnt/nand/atest.txt
+      This is a test
+
+    The NAND volume can be un-mounted with this comment:
+
+      nsh> umount /mnt/nand
+      nsh> mount
+
+    And re-mounted with this command:
+
+      nsh> mount -t nxffs /mnt/mystuff
+      nsh> mount
+        /mnt/mystuff type nxffs
 
 AT24 Serial EEPROM
 ==================
