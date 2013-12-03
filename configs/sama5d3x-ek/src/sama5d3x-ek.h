@@ -100,11 +100,23 @@
 #  undef HAVE_NAND
 #endif
 
+/* Can't support NAND if the MTD feature is not enabled */
+
+#if !defined(CONFIG_MTD) || !defined(CONFIG_MTD_NAND)
+#  undef HAVE_NAND
+#endif
+
 /* If we are going to mount the NAND, then they user must also have told
- * us what to do with it by setting one of these.
+ * us what to do with it by setting one of CONFIG_SAMA5_NAND_FTL or
+ * CONFIG_SAMA5_NAND_NXFFS.
  */
 
-#ifndef CONFIG_FS_NXFFS
+#ifndef CONFIG_MTD
+#  undef CONFIG_SAMA5_NAND_NXFFS
+#  undef CONFIG_SAMA5_NAND_FTL
+#endif
+
+#if !defined(CONFIG_FS_NXFFS) || !defined(CONFIG_NXFFS_NAND)
 #  undef CONFIG_SAMA5_NAND_NXFFS
 #endif
 

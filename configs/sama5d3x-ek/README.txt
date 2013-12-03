@@ -1428,42 +1428,17 @@ NAND Support
       Other file systems are not recommended because only NXFFS can handle
       bad blocks and only NXFFS performs wear-leveling.
 
-      NOTE:  NXFFS can be very slow.  The first time that you start the
-      system, be prepared for a wait; NXFFS will need to format the NAND
-      volume.  I have lots of debug on so I don't yet know what the
-      optimized wait will be.  But with debug ON, software ECC, and no
-      DMA the wait is in many tens of minutes (and substantially  longer
-      if many debug options are enabled.
-
-      [I don't yet have data for the more optimal cases. It will be
-       significantly less, but still not fast.]
-
-      On subsequent boots, after the NXFFS file system has been created the
-      delay will be less.  When the new file system is empty, it will be
-      very fast.  But the NAND-related boot time can become substantial when
-      there has been a lot of usage of the NAND.  This is because NXFFS
-      needs to scan the NAND device and build the in-memory dataset needed
-      to access NAND and there is more that must be scanned after the device
-      has been used.  You may want tocreate a separate thread at boot time
-      to bring up NXFFS so that you don't delay the boot-to-prompt time
-      excessively in these longer delay cases.
-
-      NOTE:  There is another NXFFS related issue:  When the FLASH is
-      fully used, NXFFS will restructure the entire FLASH, the delay to
-      restructure the entire FLASH will probably be even larger.  This
-      solution in this case is to implement an NXFSS clean-up daemon that
-      does the job a little-at-a-time so that there is no massive clean-up
-      when the FLASH becomes full.
-
     FAT
     ---
 
     Another option is FAT.  FAT, however, will not handle bad blocks and
     does not perform any wear leveling.
 
-
     File Systems:
-      CONFIG_FS_NXFFS=y                 : Enable the NXFFS file system
+      CONFIG_FS_FAT=y                   : Enable the FAT FS
+      CONFIG_FAT_LCNAMES=y              : With lower case name support
+      CONFIG_FAT_LFN=y                  : And (patented) FAT long file name support
+      CONFIG_FS_NXFFS=n                 : Don't need NXFFS
 
       Defaults for all other NXFFS settings should be okay.
 
@@ -1507,27 +1482,111 @@ NAND Support
       nsh> mount
         /mnt/mystuff type nxffs
 
+    NOTES:
+      1. NXFFS can be very slow.  The first time that you start the system,
+         be prepared for a wait; NXFFS will need to format the NAND volume.
+         I have lots of debug on so I don't yet know what the optimized wait
+         will be.  But with debug ON, software ECC, and no DMA the wait is
+         in many tens of minutes (and substantially  longer if many debug
+         options are enabled.
+
+         [I don't yet have data for the more optimal cases. It will be
+          significantly less, but still not fast.]
+
+      2. On subsequent boots, after the NXFFS file system has been created
+         the delay will be less.  When the new file system is empty, it will
+         be very fast.  But the NAND-related boot time can become substantial
+         whenthere has been a lot of usage of the NAND.  This is because
+         NXFFS needs to scan the NAND device and build the in-memory dataset
+         needed to access NAND and there is more that must be scanned after
+         the device has been used.  You may want tocreate a separate thread at
+         boot time to bring up NXFFS so that you don't delay the boot-to-prompt
+         time excessively in these longer delay cases.
+
+      3. There is another NXFFS related performance issue:  When the FLASH
+         is fully used, NXFFS will restructure the entire FLASH, the delay
+         to restructure the entire FLASH will probably be even larger.  This
+         solution in this case is to implement an NXFSS clean-up daemon that
+         does the job a little-at-a-time so that there is no massive clean-up
+         when the FLASH becomes full.
+
+      4. Bad NXFFS behavior with NAND:  If you restart NuttX, the files that
+         you wrote to NAND will be gone.  Why?  Because the multiple writes
+         have corrupted the NAND ECC bits.  See STATUS below.  NXFFS would
+         require a major overhaul to be usable with NAND.
+
     Using NAND with FAT
     -------------------
 
-    [Unverified]
-
     If configured for FAT, the system will create block driver at
-    /dev/mtdblock0.  The NSH mkfatfs command can be used to format a FAT
-    file system on NAND.
+    /dev/mtdblock0:
+
+      NuttShell (NSH)
+      nsh> ls /dev
+      /dev:
+       console
+       mtdblock0
+       null
+       ttyS0
+
+    You will not that the system comes up immediately because there is not
+    need to scan the volume in this case..
+
+    The NSH 'mkfatfs' command can be used to format a FATfile system on
+    NAND.
 
       nsh> mkfatfs /dev/mtdblock0
+
+    This step, on the other hand, requires quite a bit of time.
 
     And the FAT file system can be mounted like:
 
       nsh> mount -t vfat /dev/mtdblock0 /mnt/nand
+      nsh> ls /mnt/nand
+      /mnt/nand:
+
+      nsh> echo "This is a test" > /mnt/nand/atest.txt
+
+        NOTE:  This will take a long time because it will require reading,
+        modifying, and re-writting the 128KB erase page!
+
+      nsh> ls -l /mnt/nand
+      /mnt/nand:
+       -rw-rw-rw-      16 atest.txt
+
+      nsh> cat /mnt/fat/atest.txt
+      This is a test
+
+    NOTES:
+
+    1. Unlike NXFFS, FAT can work with NAND.  But there are some
+       signifcant issues.
+
+    2. First, each NAND write access will cause a 256KB data transefer:  It
+       will read the entire 128KB erase block, modify it and write it back
+       to memory.  There is some caching logic so that this cached erase
+       block can be re-used if possible and writes will be deferred as long
+       as possible.
+
+    3. If you hit a bad block, then FAT is finished.  There is no mechanism
+       in place in FAT not to mark and skip over bad blocks.
+
+    What is Needed
+    --------------
+
+    What is needed to work with FAT properly would be another MTD layer
+    between the FTL layer and the NAND FLASH layer.  That layer would
+    perform bad block detection and sparing so that FAT works transparently
+    on top of the NAND.
+
+    Another, less general option would be support bad blocks within FAT.
 
   STATUS
   ------
 
-  1. PMECC has not been test and is, most likely, non-functional.
+  1. PMECC has not been tested and is, most likely, non-functional.
 
-  2. DMA works (with software ECC), but is see occasional wild memory
+  2. DMA works (with software ECC), but I see occasional wild memory
      clobbering.  DMA should not be used until this problem can be
      worked out.
 
@@ -1553,6 +1612,9 @@ NAND Support
         the ECC bits cannot be overwritten without erasing the entire block.
 
      This may prohibit NXFFS from ever being used with NAND.
+
+  4. As mentioned above, FAT does work but (1) has some performance issues on
+     writes and (2) cannot handle bad blocks.
 
 AT24 Serial EEPROM
 ==================
