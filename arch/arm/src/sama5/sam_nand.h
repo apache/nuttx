@@ -85,6 +85,11 @@
 #define NANDECC_PMECC   (NANDECC_HWECC + 1)
 
 /* Per NAND bank ECC selections */
+/* Only CS3 can support NAND.  The rest is a fantasy */
+
+# undef CONFIG_SAMA5_EBICS0_NAND
+# undef CONFIG_SAMA5_EBICS1_NAND
+# undef CONFIG_SAMA5_EBICS2_NAND
 
 #if defined(CONFIG_SAMA5_EBICS0_NAND)
 #  if defined(CONFIG_SAMA5_EBICS0_ECCNONE)

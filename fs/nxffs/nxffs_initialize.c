@@ -156,8 +156,8 @@ struct nxffs_volume_s g_volume;
 int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 {
   FAR struct nxffs_volume_s *volume;
-  struct nxffs_blkstats_s stats;
 #ifdef CONFIG_NXFFS_SCAN_VOLUME
+  struct nxffs_blkstats_s stats;
   off_t threshold;
 #endif
   int ret;
