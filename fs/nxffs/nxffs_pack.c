@@ -1423,7 +1423,7 @@ start_pack:
        * with uncorrectable bit errors.
        */
 
-      /* Pack each I/O block */
+      /* Read each I/O block */
 
       for (i = 0, block = pack.block0, pack.iobuffer = volume->pack;
            i < volume->blkper;
@@ -1441,7 +1441,7 @@ start_pack:
             }
         }
 
-      /* Now ack each I/O block */
+      /* Now pack each I/O block */
 
       for (i = 0, block = pack.block0, pack.iobuffer = volume->pack;
            i < volume->blkper;

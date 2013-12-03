@@ -204,7 +204,9 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
               good = false;
             }
 
-          /* Check that block data is erased */
+          /* This is a properly formatted, good NXFFS block. Check that the
+           * block data payload is erased.
+           */
 
           else
             {
@@ -215,7 +217,7 @@ static int nxffs_badblocks(FAR struct nxffs_volume_s *volume)
 
           /* If the block is bad, attempt to re-write the block header
            * indicating a bad block (of course, if the block has failed,
-           * this may not be possible, depending upon failure modes.
+           * this may not be possible, depending upon failure modes).
            */
 
           if (!good)

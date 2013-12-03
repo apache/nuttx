@@ -101,8 +101,10 @@ int nxffs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
       goto errout;
     }
 
-  /* Fill in the statfs info */
-#warning "Need f_bfree, f_bavail, f_files, f_ffree calculation"
+  /* Fill in the statfs info
+   *
+   * REVISIT: Need f_bfree, f_bavail, f_files, f_ffree calculation
+   */
 
   memset(buf, 0, sizeof(struct statfs));
   buf->f_type    = NXFFS_MAGIC;
@@ -160,7 +162,7 @@ int nxffs_stat(FAR struct inode *mountpt, FAR const char *relpath,
       ret = nxffs_findinode(volume, relpath, &entry);
       if (ret < 0)
         {
-          fdbg("Inode '%s' not found: %d\n", -ret);
+          fdbg("ERROR: Inode '%s' not found: %d\n", -ret);
           goto errout_with_semaphore;
         }
 

@@ -193,7 +193,7 @@ ssize_t nxffs_read(FAR struct file *filep, FAR char *buffer, size_t buflen)
 
   if ((ofile->oflags & O_RDOK) == 0)
     {
-      fdbg("File not open for read access\n");
+      fdbg("ERROR: File not open for read access\n");
       ret = -EACCES;
       goto errout_with_semaphore;
     }
@@ -445,7 +445,7 @@ int nxffs_rdblkhdr(FAR struct nxffs_volume_s *volume, off_t offset,
 
   if ((uint32_t)doffset + (uint32_t)dlen > (uint32_t)volume->geo.blocksize)
     {
-      fdbg("Data length=%d is unreasonable at offset=%d\n", dlen, doffset);
+      fdbg("ERROR: Data length=%d is unreasonable at offset=%d\n", dlen, doffset);
       return -EIO;
     }
 

@@ -169,7 +169,7 @@ static int nxffs_rdentry(FAR struct nxffs_volume_s *volume, off_t offset,
   crc = crc32part((FAR const uint8_t *)entry->name, namlen, crc);
   if (crc != ecrc)
     {
-      fdbg("CRC entry: %08x CRC calculated: %08x\n", ecrc, crc);
+      fdbg("ERROR: CRC entry: %08x CRC calculated: %08x\n", ecrc, crc);
       ret = -EIO;
       goto errout_with_name;
     }

@@ -185,6 +185,6 @@ int nxffs_validblock(struct nxffs_volume_s *volume, off_t *block)
    * valid blocks left in the volume.
    */
 
-  fdbg("No valid block found\n");
+  fdbg("ERROR: No valid block found\n");
   return -ENOSPC;
 }

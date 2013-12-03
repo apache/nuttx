@@ -437,7 +437,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
            * Limitation:  Files cannot be open both for reading and writing.
            */
 
-          fdbg("File is open for reading\n");
+          fdbg("ERROR: File is open for reading\n");
           ret = -ENOSYS;
           goto errout_with_exclsem;
         }
@@ -448,7 +448,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
 
       else if ((oflags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))
         {
-          fdbg("File exists, can't create O_EXCL\n");
+          fdbg("ERROR: File exists, can't create O_EXCL\n");
           ret = -EEXIST;
           goto errout_with_exclsem;
         }
@@ -474,7 +474,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
 
       else
         {
-          fdbg("File %s exists and we were not asked to truncate it\n");
+          fdbg("ERROR: File %s exists and we were not asked to truncate it\n");
           ret = -ENOSYS;
           goto errout_with_exclsem;
         }
@@ -486,7 +486,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
 
   if ((oflags & O_CREAT) == 0)
     {
-      fdbg("Not asked to create the file\n");
+      fdbg("ERROR: Not asked to create the file\n");
       ret = -ENOENT;
       goto errout_with_exclsem;
     }
@@ -496,7 +496,7 @@ static inline int nxffs_wropen(FAR struct nxffs_volume_s *volume,
   namlen = strlen(name);
   if (namlen > CONFIG_NXFFS_MAXNAMLEN)
     {
-      fdbg("Name is too long: %d\n", namlen);
+      fdbg("ERROR: Name is too long: %d\n", namlen);
       ret = -EINVAL;
       goto errout_with_exclsem;
     }
@@ -726,7 +726,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
 
       if ((ofile->oflags & O_WROK) != 0)
         {
-          fdbg("File is open for writing\n");
+          fdbg("ERROR: File is open for writing\n");
           ret = -ENOSYS;
           goto errout_with_exclsem;
         }
@@ -734,7 +734,7 @@ static inline int nxffs_rdopen(FAR struct nxffs_volume_s *volume,
       /* Just increment the reference count on the ofile */
 
       ofile->crefs++;
-      fdbg("crefs: %d\n", ofile->crefs);
+      fvdbg("crefs: %d\n", ofile->crefs);
     }
 
   /* The file has not yet been opened.
@@ -1036,7 +1036,7 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
      {
        case 0:
        default:
-         fdbg("One of O_WRONLY/O_RDONLY must be provided\n");
+         fdbg("ERROR: One of O_WRONLY/O_RDONLY must be provided\n");
          return -EINVAL;
 
        case O_WROK:
@@ -1048,7 +1048,7 @@ int nxffs_open(FAR struct file *filep, FAR const char *relpath,
          break;
 
        case O_WROK|O_RDOK:
-         fdbg("O_RDWR is not supported\n");
+         fdbg("ERROR: O_RDWR is not supported\n");
          return -ENOSYS;
      }
 

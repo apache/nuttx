@@ -118,7 +118,7 @@ int nxffs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       if (volume->ofiles)
         {
-          fdbg("Open files\n");
+          fdbg("ERROR: Open files\n");
           ret = -EBUSY;
           goto errout_with_semaphore;
         }

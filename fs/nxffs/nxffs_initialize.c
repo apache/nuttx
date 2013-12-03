@@ -291,7 +291,7 @@ int nxffs_initialize(FAR struct mtd_dev_s *mtd)
 
   /* Get statistics on the re-formatted volume */
 
-#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
+#if defined(CONFIG_NXFFS_SCAN_VOLUME) && defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_FS)
   ret = nxffs_blockstats(volume, &stats);
   if (ret < 0)
     {

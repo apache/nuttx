@@ -483,7 +483,7 @@ ssize_t nxffs_write(FAR struct file *filep, FAR const char *buffer, size_t bufle
 
   if ((wrfile->ofile.oflags & O_WROK) == 0)
     {
-      fdbg("File not open for write access\n");
+      fdbg("ERROR: File not open for write access\n");
       ret = -EACCES;
       goto errout_with_semaphore;
     }
@@ -623,7 +623,7 @@ int nxffs_wrreserve(FAR struct nxffs_volume_s *volume, size_t size)
         {
           /* Return -ENOSPC to indicate that the volume is full */
 
-          fdbg("No space in last block\n");
+          fdbg("ERROR: No space in last block\n");
           return -ENOSPC;
         }
 
@@ -635,9 +635,10 @@ int nxffs_wrreserve(FAR struct nxffs_volume_s *volume, size_t size)
       ret = nxffs_validblock(volume, &volume->ioblock);
       if (ret < 0)
         {
-          fdbg("No more valid blocks\n");
+          fdbg("ERROR: No more valid blocks\n");
           return ret;
         }
+
       volume->iooffset = SIZEOF_NXFFS_BLOCK_HDR;
     }
 
@@ -769,7 +770,7 @@ int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size)
       ret = nxffs_validblock(volume, &volume->ioblock);
       if (ret < 0)
         {
-          fdbg("No more valid blocks\n");
+          fdbg("ERROR: No more valid blocks\n");
           return ret;
         }
 
@@ -781,7 +782,7 @@ int nxffs_wrverify(FAR struct nxffs_volume_s *volume, size_t size)
    * the object.
    */
 
-  fdbg("Not enough memory left to hold the file header\n");
+  fdbg("ERROR: Not enough memory left to hold the file header\n");
   return -ENOSPC;
 }
 
