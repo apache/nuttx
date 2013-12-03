@@ -1351,6 +1351,7 @@ SDRAM Support
 
 NAND Support
 ============
+
   NAND support is only partial and there is no file system that works with
   it properly.  It should be considered a work in progress.  You will not
   want to use NAND unless you are interested in investing a little effort.
@@ -1385,6 +1386,31 @@ NAND Support
       CONFIG_SAMA5_EBICS3_SWECC=y       : Use S/W ECC calculation
 
       Defaults for ROM page table addresses should be okay
+
+    Application Configuration -> NSH Library
+      CONFIG_NSH_ARCHINIT=y             : Use architecture-specific initialization
+
+    WARNING:  This will wipe out everything that you may have on the NAND
+    FLASH!  I have found that using the JTAG with no valid image on NAND
+    or Serial FLASH is a problem:  In that case, the code always ends up
+    in the SAM-BA bootloader.
+
+    The work around for this case is to put the NORBOOT image into Serial
+    FLASH.  Then, the system will boot from Serial FLASH by copying the
+    NORBOOT image in SRAM which will run and then start the image in NOR
+    FLASH.  See the discussion of the NORBOOT configuration in the
+    "Creating and Using NORBOOT" section above.
+
+    NOTES: (1) There is jumper on the CM module that must be closed to
+    enable use of the AT25 Serial Flash.  (2) If using SAM-BA, make sure
+    that you load the NOR boot program into the boot area via the pull-
+    down menu.
+
+    NXFFS
+    -----
+
+    The NuttX FLASH File System (NXFFS) works will with NOR-like FLASH
+    but does not work well with NAND (See comments below under STATUS)
 
     File Systems:
       CONFIG_FS_NXFFS=y                 : Enable the NXFFS file system
@@ -1429,27 +1455,28 @@ NAND Support
       does the job a little-at-a-time so that there is no massive clean-up
       when the FLASH becomes full.
 
-    Application Configuration -> NSH Library
-     CONFIG_NSH_ARCHINIT=y              : Use architecture-specific initialization
+    FAT
+    ---
 
-    WARNING:  This will wipe out everything that you may have on the NAND
-    FLASH!  I have found that using the JTAG with no valid image on NAND
-    or Serial FLASH is a problem:  In that case, the code always ends up
-    in the SAM-BA bootloader.
+    Another option is FAT.  FAT, however, will not handle bad blocks and
+    does not perform any wear leveling.
 
-    The work around for this case is to put the NORBOOT image into Serial
-    FLASH.  Then, the system will boot from Serial FLASH by copying the
-    NORBOOT image in SRAM which will run and then start the image in NOR
-    FLASH.  See the discussion of the NORBOOT configuration in the
-    "Creating and Using NORBOOT" section above.
 
-    NOTES: (1) There is jumper on the CM module that must be closed to
-    enable use of the AT25 Serial Flash.  (2) If using SAM-BA, make sure
-    that you load the NOR boot program into the boot area via the pull-
-    down menu.
+    File Systems:
+      CONFIG_FS_NXFFS=y                 : Enable the NXFFS file system
 
-    Using NAND
-    ----------
+      Defaults for all other NXFFS settings should be okay.
+
+      NOTE:  NXFFS will require some significant buffering because of
+      the large size of the NAND flash blocks.  You will also need
+      to enable SDRAM as described above.
+
+    Board Selection
+      CONFIG_SAMA5_NAND_AUTOMOUNT=y     : Enable FS support on NAND
+      CONFIG_SAMA5_NAND_FTL=y           : Use an flash translation layer
+
+    Using NAND with NXFFS
+    ---------------------
 
     With the options CONFIG_SAMA5_NAND_AUTOMOUNT=y and
     CONFIG_SAMA5_NAND_NXFFS=y, the NAND FLASH will be mounted in the NSH
@@ -1479,6 +1506,21 @@ NAND Support
       nsh> mount -t nxffs /mnt/mystuff
       nsh> mount
         /mnt/mystuff type nxffs
+
+    Using NAND with FAT
+    -------------------
+
+    [Unverified]
+
+    If configured for FAT, the system will create block driver at
+    /dev/mtdblock0.  The NSH mkfatfs command can be used to format a FAT
+    file system on NAND.
+
+      nsh> mkfatfs /dev/mtdblock0
+
+    And the FAT file system can be mounted like:
+
+      nsh> mount -t vfat /dev/mtdblock0 /mnt/nand
 
   STATUS
   ------
