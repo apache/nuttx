@@ -6159,3 +6159,5 @@
 	  the media option. It just takes to long! (2013-12-02).
 	* drivers/mtd/mtd_nand.c: Fix a typo in calculation of page number
 	  (2013-12-02).
+	* drivers/mtd/README.txt:  New README file (2013-12-04).
+
