@@ -3432,7 +3432,7 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
        *    repeat."
        */
 
-      DEBUGASSERT(rhport->ep0.speed = EHCI_FULL_SPEED);
+      DEBUGASSERT(rhport->ep0.speed == EHCI_FULL_SPEED);
 
 #if 0 /* The LPC31xx does not support a companion host controller */
       regval |= EHCI_PORTSC_OWNER;
@@ -3449,7 +3449,7 @@ static int lpc31_enumerate(FAR struct usbhost_connection_s *conn, int rhpndx)
 
   else
     {
-      DEBUGASSERT(rhport->ep0.speed = EHCI_LOW_SPEED);
+      DEBUGASSERT(rhport->ep0.speed == EHCI_LOW_SPEED);
       DEBUGASSERT((regval & USBDEV_PRTSC1_PSPD_MASK) == USBDEV_PRTSC1_PSPD_LS)
     }
 
