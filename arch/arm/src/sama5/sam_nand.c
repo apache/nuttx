@@ -2052,7 +2052,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
         }
     }
 
-  /* Read the spare are is so requested */
+  /* Read the spare area if so requested */
 
   if (spare)
     {
