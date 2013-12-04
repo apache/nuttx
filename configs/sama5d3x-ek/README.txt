@@ -1466,7 +1466,8 @@ NAND Support
 
     Another option is Smart FS.  Smart FS is another small file system
     designed to work with FLASH.  Properties:  It does support some wear-
-    leveling, but like FAT, cannot handle bad blocks.
+    leveling like NXFFS, but like FAT, cannot handle bad blocks and like
+    NXFFS, it will try to re-write erased bits.
 
     Using NAND with NXFFS
     ---------------------
