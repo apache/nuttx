@@ -75,15 +75,16 @@ config MTD_CONFIG_ERASEDVALUE
 
 comment "MTD Device Drivers"
 
-config MTD_NAND
-	bool "Enable NAND support"
-	default n
-	---help---
-		Enable support for NAND FLASH devices.
 
 config ARCH_NAND_HWECC
 	bool
 	default n
+
+menuconfig MTD_NAND
+	bool "MTD NAND support"
+	default n
+	---help---
+		Enable support for NAND FLASH devices.
 
 if MTD_NAND
 

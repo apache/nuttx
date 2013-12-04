@@ -65,11 +65,11 @@ struct nand_scheme_s
   uint8_t eccsize;      /* Number of bytes of ECC correction */
   uint8_t nxbytes;      /* Number of extra bytes */
 
-  /* ECC byte positions */
+  /* ECC byte position offsets */
 
   uint8_t eccbytepos[CONFIG_MTD_NAND_MAXSPAREECCBYTES];
 
-  /* Extra byte positions */
+  /* Extra byte position offsets */
 
   uint8_t xbytepos[CONFIG_MTD_NAND_MAXSPAREEXTRABYTES];
 };
@@ -139,6 +139,41 @@ void nandscheme_writebadblockmarker(FAR const struct nand_scheme_s *scheme,
                                     FAR uint8_t *spare, uint8_t marker);
 
 /****************************************************************************
+ * Name: nandscheme_eccoffset
+ *
+ * Description:
+ *   Return the offset to the first byte of ECC information.  This define
+ *   makes the assumption that the first byte of the eccbytepos[] array
+ *   is an offset to beginning of the ECC area.  This might not necessarily
+ *   be true!
+ *
+ * Input Parameters:
+ *   scheme  Pointer to a nand_scheme_s instance.
+ *
+ * Returned Values:
+ *   Offset in the spare area to the first ECC byte
+ *
+ ****************************************************************************/
+
+#define nandscheme_eccoffset(s) ((s)->eccbytepos[0])
+
+/****************************************************************************
+ * Name: nandscheme_eccsize
+ *
+ * Description:
+ *   Return the size of the ECC information in the spare area
+ *
+ * Input Parameters:
+ *   scheme  Pointer to a nand_scheme_s instance.
+ *
+ * Returned Values:
+ *   Size of the ECC information in the spare area.
+ *
+ ****************************************************************************/
+
+#define nandscheme_eccsize(s) ((s)->eccsize)
+
+/****************************************************************************
  * Name: nandscheme_readecc
  *
  * Description:
@@ -175,6 +210,41 @@ void nandscheme_readecc(FAR const struct nand_scheme_s *scheme,
 
 void nandscheme_writeecc(FAR const struct nand_scheme_s *scheme,
                          FAR uint8_t *spare, FAR const uint8_t *ecc);
+
+/****************************************************************************
+ * Name: nandscheme_xoffset
+ *
+ * Description:
+ *   Return the offset to the first byte of extra information.  This define
+ *   makes the assumption that the first byte of the xbytepos[] array
+ *   is an offset to the beginning of the extra information area.  This
+ *   might not necessarily be true!
+ *
+ * Input Parameters:
+ *   scheme  Pointer to a nand_scheme_s instance.
+ *
+ * Returned Values:
+ *   Offset in the spare area to the first extra byte
+ *
+ ****************************************************************************/
+
+#define nandscheme_xoffset(s) ((s)->xbytepos[0])
+
+/****************************************************************************
+ * Name: nandscheme_xsize
+ *
+ * Description:
+ *   Return the size of the extra information in the spare area
+ *
+ * Input Parameters:
+ *   scheme  Pointer to a nand_scheme_s instance.
+ *
+ * Returned Values:
+ *   Size of the extra information in the spare area.
+ *
+ ****************************************************************************/
+
+#define nandscheme_xsize(s) ((s)->nxbytes)
 
 /****************************************************************************
  * Name: nandscheme_readextra

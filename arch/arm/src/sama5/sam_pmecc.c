@@ -57,6 +57,9 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/mtd/nand_model.h>
+#include <nuttx/mtd/nand_scheme.h>
+
 #include "sam_pmecc.h"
 #include "sam_nand.h"
 
@@ -82,12 +85,6 @@
 /* Defines the maximum value of the error correcting capability */
 
 #define PMECC_MAX_CORRECTABILITY 25
-
-/* Start address of ECC cvalue in spare zone, this must not be 0 since bad
- * block tags are at address 0.
- */
-
-#define PMECC_ECC_DEFAULT_STARTOFFSET 2
 
 /****************************************************************************
  * Private Types
@@ -753,44 +750,44 @@ static uint32_t pmecc_correctionalgo(uint32_t isr, uint32_t data)
  *
  ****************************************************************************/
 
-static int pmecc_bcherr512(uint8_t nsectors, uint16_t sparesize)
+static int pmecc_bcherr512(uint8_t nsectors, uint16_t eccsize)
 {
   /* 39-bytes per 512 byte sector are required correctability of 24 errors */
 
-  if (sparesize <= 39 * ((unsigned int)nsectors))
+  if (eccsize >= 39 * ((unsigned int)nsectors))
     {
       return BCH_ERR24;
     }
 
   /* 20-bytes per 512 byte sector are required correctability of 12 errors */
 
-  else if (sparesize <= (20 * (unsigned int)nsectors))
+  else if (eccsize >= (20 * (unsigned int)nsectors))
     {
       return BCH_ERR12;
     }
 
   /* 13-bytes per 512 byte sector are required correctability of 8 errors */
 
-  else if (sparesize <= (13 * (unsigned int)nsectors))
+  else if (eccsize >= (13 * (unsigned int)nsectors))
     {
       return BCH_ERR8;
     }
 
   /* 7-bytes per 512 byte sector are required correctability of 4 errors */
 
-  else if (sparesize <= (7 *(unsigned int) nsectors))
+  else if (eccsize >= (7 *(unsigned int) nsectors))
     {
       return BCH_ERR4;
     }
 
   /* 4-bytes per 512 byte sector are required correctability of 2 errors */
 
-  else if (sparesize <= (4 *(unsigned int) nsectors))
+  else if (eccsize >= (4 *(unsigned int) nsectors))
     {
       return BCH_ERR2;
     }
 
-  return 0;
+  return -EINVAL;
 }
 
 /****************************************************************************
@@ -801,123 +798,156 @@ static int pmecc_bcherr512(uint8_t nsectors, uint16_t sparesize)
  *
  ****************************************************************************/
 
-static int pmecc_bcherr1k(uint8_t nsectors, uint16_t sparesize)
+static int pmecc_bcherr1k(uint8_t nsectors, uint16_t eccsize)
 {
   /* 42-bytes per 1024 byte sector are required correctability of 24 errors */
 
-  if (sparesize <= 42 * ((unsigned int)nsectors))
+  if (eccsize >= 42 * ((unsigned int)nsectors))
     {
       return BCH_ERR24;
     }
 
   /* 21-bytes per 1024 byte sector are required correctability of 12 errors */
 
-  else if (sparesize <= (20 * (unsigned int)nsectors))
+  else if (eccsize >= (21 * (unsigned int)nsectors))
     {
       return BCH_ERR12;
     }
 
   /* 14-bytes per 1024 byte sector are required correctability of 8 errors */
 
-  else if (sparesize <= (13 * (unsigned int)nsectors))
+  else if (eccsize >= (14 * (unsigned int)nsectors))
     {
       return BCH_ERR8;
     }
 
   /* 7-bytes per 1024 byte sector are required correctability of 4 errors */
 
-  else if (sparesize <= (7 *(unsigned int) nsectors))
+  else if (eccsize >= (7 *(unsigned int) nsectors))
     {
       return BCH_ERR4;
     }
 
   /* 4-bytes per 1024 byte sector are required correctability of 2 errors */
 
-  else if (sparesize <= (4 *(unsigned int) nsectors))
+  else if (eccsize >= (4 *(unsigned int) nsectors))
     {
       return BCH_ERR2;
     }
 
-  return 0;
+  return -EINVAL;
 }
 
 /****************************************************************************
  * Name: pmecc_pagelayout
  *
  * Description:
- *   Given the data size and the spare size, determine the optimal sector
- *   size and correctability.
+ *   Given the size of the data region and the size of the ECC region,
+ *   determine the optimal sector size and correctability.
  *
  ****************************************************************************/
 
-static void pmecc_pagelayout(uint16_t datasize, uint16_t sparesize,
-                             uint16_t offset)
+static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
 {
   uint16_t correctability512;
   uint16_t correctability1K;
   uint8_t nsectors512;
   uint8_t nsectors1k;
-  uint8_t bcherr512;
-  uint8_t bcherr1k;
   uint8_t bcherr;
+  int bcherr512;
+  int bcherr1k;
+  int selector;
 
-  fvdbg("datasize=%d sparesize=%d offset=%d\n", datasize, sparesize, offset);
-
-  /* ECC must not start at address zero, since bad block tags are at offset
-   * zero.
-   */
-
-  DEBUGASSERT(datasize != 0 && offset > 0);
-
-  /* Decrease the spare size by the offset */
-
-  sparesize -= offset;
+  fvdbg("datasize=%d eccsize=%d\n", datasize, eccsize);
+  DEBUGASSERT(datasize > 0 && eccsize > 0);
 
   /* Try for 512 byte sectors */
 
   DEBUGASSERT((datasize & 0x000001ff) == 0 && datasize >= 512);
 
+  selector    = 0;
   nsectors512 = (datasize >> 9);
-  bcherr512   = pmecc_bcherr512(nsectors512, sparesize);
+  bcherr512   = pmecc_bcherr512(nsectors512, eccsize);
+  if (bcherr512 < 0)
+    {
+      fdbg("WARNING: Cannot realize 512B sectors\n");
+    }
+  else
+    {
+      selector = 1;
+    }
+
+  fvdbg("nsectors512=%d bcherr512=%d selector=%d\n",
+        nsectors512, bcherr512, selector);
 
   /* Try for 1024 byte sectors */
 
   if ((datasize & 0x000003ff) == 0)
     {
-      nsectors1k = (datasize >> 9);
-      bcherr1k   = pmecc_bcherr1k(nsectors1k, sparesize);
+      nsectors1k = (datasize >> 10);
+      bcherr1k   = pmecc_bcherr1k(nsectors1k, eccsize);
     }
   else
     {
       nsectors1k = 0;
-      bcherr1k   = 0;
+      bcherr1k   = -EINVAL;
     }
 
-  /* Now pick the best (most likely 1024) */
-
-  DEBUGASSERT(bcherr512 > 0 || bcherr1k > 0);
-  if (bcherr1k == 0)
+  if (bcherr1k < 0)
     {
-      g_pmecc.sector1k = false;
-      g_pmecc.nsectors = nsectors512;
-      bcherr           = bcherr512;
+      fdbg("WARNING: Cannot realize 1KB sectors\n");
     }
   else
     {
-      correctability512 = nsectors512 * g_correctability[bcherr512];
-      correctability1K  = nsectors1k * g_correctability[bcherr1k];
-      if (correctability512 >= correctability1K)
+      selector |= 2;
+    }
+
+  fvdbg("nsectors1k=%d bcherr1k=%d selector=%d\n",
+        nsectors1k, bcherr1k, selector);
+
+  /* Now pick the best (most likely 1024) */
+
+  DEBUGASSERT(bcherr512 >= 0 || bcherr1k >= 0);
+  switch (selector)
+    {
+      case 1:  /* 512B sectors possible; 1KB sectors not possible */
         {
           g_pmecc.sector1k = false;
           g_pmecc.nsectors = nsectors512;
           bcherr           = bcherr512;
+          DEBUGASSERT(bcherr512 >= 0);
         }
-      else
+        break;
+
+      case 3:  /* Both 512B and 1KB sectors possible */
+        {
+          correctability512 = nsectors512 * g_correctability[bcherr512];
+          correctability1K  = nsectors1k * g_correctability[bcherr1k];
+
+          /* Use 1K sectors unless we can do better with 512B sectors */
+
+          if (correctability512 > correctability1K)
+            {
+              g_pmecc.sector1k = false;
+              g_pmecc.nsectors = nsectors512;
+              bcherr           = bcherr512;
+              DEBUGASSERT(bcherr512 >= 0);
+              break;
+            }
+        } /* Otherwise, fall through for the 1KB sectors */
+
+      case 2:  /* 512B sectors not possible; 1KB sectors possible */
         {
           g_pmecc.sector1k = true;
           g_pmecc.nsectors = nsectors1k;
           bcherr           = bcherr1k;
+          DEBUGASSERT(bcherr1k >= 0);
         }
+        break;
+
+      case 0: /* Either 512B and 1KB sectors possible */
+      default:
+        return -ENOSYS;
     }
 
   /* Save the correctability value */
@@ -927,6 +957,11 @@ static void pmecc_pagelayout(uint16_t datasize, uint16_t sparesize,
   /* And the correctly shifted BCH_ERR register value */
 
   g_pmecc.desc.bcherr = ((uint32_t)bcherr << HSMC_PMECCFG_BCHERR_SHIFT);
+
+  fvdbg("sector1k=%d nsectors=%d bcherr=%d correctability=%d\n",
+        g_pmecc.sector1k, g_pmecc.nsectors, bcherr, g_pmecc.correctability);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -963,7 +998,6 @@ void pmecc_initialize(void)
  *
  * Input Parameters:
  *  priv      - Pointer to a struct sam_nandcs_s instance.
- *  eccoffset - offset of the first ecc byte in spare zone.
  *  protected - True:  The spare area is protected with the last sector of
  *                     data.
  *              False: The spare area is skipped in read or write mode.
@@ -973,11 +1007,16 @@ void pmecc_initialize(void)
  *
  ****************************************************************************/
 
-int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
-                    bool protected)
+int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
 {
+  struct nand_model_s *model;
   unsigned int sectorsperpage = 0;
+  uint16_t eccoffset;
+  uint16_t eccsize;
   uint32_t regval;
+  int ret;
+
+  fvdbg("protected=%d configured=%d\n", protected, g_pmecc.configured);
 
   /* Check if we need to re-configure */
 
@@ -989,19 +1028,21 @@ int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
     {
       /* No, we are already configured */
 
+      fvdbg("Already configured\n");
       return OK;
     }
 
-  /* Make sure that the requested offset greater than or equal to the
-   * minimum.  The first few bytes of the spare ares is reserved for
-   * bad block indications.  Therefore, ECC data must begin at an offset
-   * to skip over the bad block indicators.
+  /* Get a convenience pointer to the NAND model */
+
+  model = &priv->raw.model;
+
+  /* Get the offset and size of the ECC information in the spare area from
+   * the NAND scheme.
    */
 
-  if (eccoffset < PMECC_ECC_DEFAULT_STARTOFFSET)
-    {
-      eccoffset = PMECC_ECC_DEFAULT_STARTOFFSET;
-    }
+  DEBUGASSERT(model->scheme);
+  eccoffset = nandscheme_eccoffset(model->scheme);
+  eccsize   = nandscheme_eccsize(model->scheme);
 
   /* Get the number of sectors and the error correction per sector.  This
    * function will set the following structure values in order to get the
@@ -1013,7 +1054,12 @@ int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
    * g_pmecc.desc.bcherr : The BCH_ERR value for the PMECC CFG register
    */
 
-  pmecc_pagelayout(priv->raw.model.pagesize, priv->raw.model.sparesize, eccoffset);
+  ret = pmecc_pagelayout(priv->raw.model.pagesize, eccsize);
+  if (ret < 0)
+    {
+      fdbg("ERROR: pmecc_pagelayout failed: %d\n", ret);
+      return ret;
+    }
 
   /* Number of Sectors in one Page */
 
@@ -1048,6 +1094,9 @@ int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
 #endif
     }
 
+  fvdbg("sectorsz=%08x sectorsperpage=%d mm=%d\n",
+        g_pmecc.desc.sectorsz, sectorsperpage, g_pmecc.desc.mm);
+
   switch (sectorsperpage)
     {
       case 1:
@@ -1063,28 +1112,43 @@ int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
           g_pmecc.desc.pagesize = HSMC_PMECCFG_PAGESIZE_8SEC;
           break;
       default:
-        fdbg("ERROR:  Unsupported sectors per page: %d\n", sectorsperpage);
+        fdbg("ERROR: Unsupported sectors per page: %d\n", sectorsperpage);
         return -EINVAL;
     }
 
   g_pmecc.desc.nn = (1 << g_pmecc.desc.mm) - 1;
 
+  fvdbg("pagesize=%08x nn=%d\n", g_pmecc.desc.pagesize, g_pmecc.desc.nn);
+
   /* Real value of ECC bit number correction (2, 4, 8, 12, 24) */
 
   g_pmecc.desc.tt = g_pmecc.correctability;
-  if (((g_pmecc.desc.mm * g_pmecc.correctability) % 8) == 0)
+  if (((g_pmecc.desc.mm * g_pmecc.correctability) & 7) == 0)
     {
-      g_pmecc.desc.eccsize = ((g_pmecc.desc.mm * g_pmecc.correctability) / 8) * sectorsperpage;
+      g_pmecc.desc.eccsize =
+        ((g_pmecc.desc.mm * g_pmecc.correctability) >> 3) * sectorsperpage;
     }
   else
     {
-      g_pmecc.desc.eccsize = (((g_pmecc.desc.mm * g_pmecc.correctability) / 8) + 1) * sectorsperpage;
+      g_pmecc.desc.eccsize =
+        (((g_pmecc.desc.mm * g_pmecc.correctability) >> 3) + 1) * sectorsperpage;
     }
+
+  fvdbg("mm=%d correctability=%d eccsize=%d\n",
+        g_pmecc.desc.mm, g_pmecc.correctability, g_pmecc.desc.eccsize);
 
   g_pmecc.desc.eccstart = eccoffset;
   g_pmecc.desc.eccend   = eccoffset + g_pmecc.desc.eccsize;
+
+  fvdbg("eccstart=%d eccend=%d sparesize=%d\n",
+        g_pmecc.desc.eccstart, g_pmecc.desc.eccend,
+        priv->raw.model.sparesize);
+
   if (g_pmecc.desc.eccend > priv->raw.model.sparesize)
     {
+      fdbg("ERROR: No room for ECC in spare bytes %d > %d\n",
+           g_pmecc.desc.eccend, priv->raw.model.sparesize);
+
       return -ENOSPC;
     }
 
@@ -1144,7 +1208,7 @@ int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
 #if NAND_NPMECC_BANKS > 1
   g_pmecc.cs = priv->cs;
 #endif
-  return 0;
+  return OK;
 }
 
 /****************************************************************************

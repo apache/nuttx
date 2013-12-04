@@ -1739,9 +1739,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   /* Start a Data Phase */
 
-  regval  = nand_getreg(SAM_HSMC_PMECCTRL);
-  regval |= HSMC_PMECCTRL_DATA;
-  nand_putreg(SAM_HSMC_PMECCTRL, regval);
+  nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DATA);
 
   regval = nand_getreg(SAM_HSMC_PMECCEADDR);
   ret = nand_read(priv, true, (uint8_t *)data, pagesize + (regval + 1));
@@ -2088,6 +2086,7 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
   int ret;
   int i;
 
+  fvdbg("block=%d page=%d data=%p\n", (int)block, page, data);
   DEBUGASSERT(priv && data);
 
   /* Make sure that we have exclusive access to the PMECC and that the PMECC
@@ -2095,7 +2094,12 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
    */
 
   pmecc_lock();
-  pmecc_configure(priv, 0, false);
+  ret = pmecc_configure(priv, false);
+  if (ret < 0)
+    {
+      fdbg("ERROR: pmecc_configure failed: %d\n", ret);
+      goto errout;
+    }
 
   /* Start by reading the spare data */
 
@@ -2340,13 +2344,19 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   int ret = 0;
 
   fvdbg("block=%d page=%d data=%p\n", (int)block, page, data);
+  DEBUGASSERT(priv && data);
 
   /* Make sure that we have exclusive access to the PMECC and that the PMECC
    * is properly configured for this CS.
    */
 
   pmecc_lock();
-  pmecc_configure(priv, 0, false);
+  ret = pmecc_configure(priv, false);
+  if (ret < 0)
+    {
+      fdbg("ERROR: pmecc_configure failed: %d\n", ret);
+      goto errout;
+    }
 
   /* Calculate the start page address */
 
@@ -2409,9 +2419,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   /* Start a data phase */
 
-  regval  = nand_getreg(SAM_HSMC_PMECCTRL);
-  regval |= HSMC_PMECCTRL_DATA;
-  nand_putreg(SAM_HSMC_PMECCTRL, regval);
+  nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DATA);
 
   regval  = nand_getreg(SAM_HSMC_PMECCFG);
   regval |= HSMC_PMECCFG_NANDWR_WRITE;

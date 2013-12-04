@@ -65,6 +65,16 @@
 #  undef CONFIG_SAMA5_EBICS3_PMECC
 #endif
 
+/* Only CS3 can support NAND.  The rest of what follows is a fantasy */
+
+# undef CONFIG_SAMA5_EBICS0_NAND
+# undef CONFIG_SAMA5_EBICS1_NAND
+# undef CONFIG_SAMA5_EBICS2_NAND
+
+# undef CONFIG_SAMA5_EBICS0_PMECC
+# undef CONFIG_SAMA5_EBICS1_PMECC
+# undef CONFIG_SAMA5_EBICS2_PMECC
+
 /* Disable PMECC support for any banks not enabled or configured for NAND */
 
 #if !defined(CONFIG_SAMA5_EBICS0) || !defined(CONFIG_SAMA5_EBICS0_NAND)
@@ -310,7 +320,6 @@ void pmecc_initialize(void);
  *
  * Input Parameters:
  *  priv      - Pointer to a struct sam_nandcs_s instance.
- *  eccoffset - offset of the first ecc byte in spare zone.
  *  protected - True:  The spare area is protected with the last sector of
  *                     data.
  *              False: The spare area is skipped in read or write mode.
@@ -321,8 +330,7 @@ void pmecc_initialize(void);
  ****************************************************************************/
 
 struct sam_nandcs_s;
-int pmecc_configure(struct sam_nandcs_s *priv, uint16_t eccoffset,
-                    bool protected);
+int pmecc_configure(struct sam_nandcs_s *priv, bool protected);
 
 /****************************************************************************
  * Name: pmecc_correction
@@ -405,7 +413,7 @@ void pmecc_buildgf(uint32_t mm, int16_t* indexof, int16_t* alphato);
 #  define pmecc_enable()
 #  define pmecc_disable()
 #  define pmecc_initialize()
-#  define pmecc_configure(a,b,c) (0)
+#  define pmecc_configure(a,b)   (0)
 #  define pmecc_get_eccsize()    (0)
 #  define pmecc_get_pagesize()   (0)
 
