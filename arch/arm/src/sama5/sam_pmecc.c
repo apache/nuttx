@@ -1153,7 +1153,9 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
     }
 
   /* Save the size of the spare area.
-   * REVISIT: Could we save a bit by setting this to eccend?
+   *
+   * REVISIT: Could we save a bit by setting this to eccend since there is
+   * no need to read beyond that?
    */
 
   g_pmecc.desc.sparesize = priv->raw.model.sparesize;

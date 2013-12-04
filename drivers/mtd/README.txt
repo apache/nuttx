@@ -123,11 +123,12 @@ NAND MEMORY
     SMART FS
     --------
 
-    I have not yet tried SmartFS.  But I know that it does not perform bad
-    block checking (like FAT).  I do not know if it assumes that it can write
-    into erased regions of a sector multiple times (like NXFFS).
+    I have not yet tried SmartFS.  It does support some wear-leveling
+    similar to NXFFS, but like FAT, cannot handle bad blocks and like NXFFS,
+    it will try to re-write erased bits.  So SmartFS is not really an
+    option either.
 
-     What is Needed
+    What is Needed
     --------------
 
     What is needed to work with FAT properly would be another MTD layer
@@ -136,3 +137,5 @@ NAND MEMORY
     on top of the NAND.
 
     Another, less general, option would be support bad blocks within FAT.
+    Such a solution migh be possible for SLC NAND, but would not be
+    sufficiently general for all NAND types.
