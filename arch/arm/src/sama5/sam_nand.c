@@ -1556,7 +1556,7 @@ static int nand_smc_read16(uintptr_t src, uint8_t *dest, size_t buflen)
  ****************************************************************************/
 
 static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
-                      uint8_t *buffer, size_t buflen)
+                     uint8_t *buffer, size_t buflen)
 {
   uintptr_t src;
 #ifdef CONFIG_SAMA5_NAND_DMA
@@ -1642,15 +1642,13 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
  * Name: nand_read_pmecc
  *
  * Description:
- *   Reads the data and/or the spare areas of a page of a NAND FLASH into the
- *   provided buffers.
+ *   Reads the data area of a page of a NAND FLASH into the provided buffer.
  *
  * Input parameters:
  *   priv   - Lower-half, raw NAND FLASH interface
  *   block - Number of the block where the page to read resides.
  *   page  - Number of the page to read inside the given block.
  *   data  - Buffer where the data area will be stored.
- *   spare - Buffer where the spare area will be stored.
  *
  * Returned value.
  *   OK is returned in succes; a negated errno value is returned on failure.
@@ -1733,7 +1731,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
                   HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN | HSMC_CLE_VCMD2_EN | HSMC_CLE_DATA_EN,
                   COMMAND_READ_1, COMMAND_READ_2, 0, rowaddr);
 
-  /* Reset the ECC module*/
+  /* Reset the PMECC module */
 
   nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_RST);
 
@@ -1741,11 +1739,21 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DATA);
 
-  regval = nand_getreg(SAM_HSMC_PMECCEADDR);
-  ret = nand_read(priv, true, (uint8_t *)data, pagesize + (regval + 1));
+  /* Read the data area */
+
+  ret = nand_read(priv, true, (uint8_t *)data, pagesize);
   if (ret < 0)
     {
       fdbg("ERROR: nand_read for data region failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Read the spare area into priv->raw.spare */
+
+  ret = nand_read(priv, true, priv->raw.spare, priv->raw.model.sparesize);
+  if (ret < 0)
+    {
+      fdbg("ERROR: nand_read for spare region failed: %d\n", ret);
       return ret;
     }
 
@@ -2079,7 +2087,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
 
 #ifdef CONFIG_SAMA5_HAVE_PMECC
 static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
-             unsigned int page, void *data)
+                               unsigned int page, void *data)
 {
   uint32_t regval;
   uint16_t sparesize;
@@ -2101,9 +2109,9 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
       goto errout;
     }
 
-  /* Start by reading the spare data */
-
-  sparesize = nandmodel_getsparesize(&priv->raw.model);
+  /* Read page data into the user data buffer and spared data
+   * into the priv->raw.spare buffer.
+   */
 
   ret = nand_read_pmecc(priv, block, page, data);
   if (ret < 0)
@@ -2112,12 +2120,22 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
       goto errout;
     }
 
+  /* Check if any sector is corrupted */
+
   regval = nand_getreg(SAM_HSMC_PMECCISR);
   if (regval)
     {
-      /* Check if the spare area was erased */
+      fdbg("ERROR: block=%d page=%d Corrupted sectors: %08x\n",
+           block, page, regval);
 
-      nand_readpage_noecc(priv, block, page, NULL, priv->raw.spare);
+      /* Check if the spare area was erased
+       * REVISIT: Necessary to re-read.  Isn't the spare data alread
+       * intack in priv->raw.spare from nand_read_pmecc()?
+       */
+
+      //nand_readpage_noecc(priv, block, page, NULL, priv->raw.spare);
+
+      sparesize = nandmodel_getsparesize(&priv->raw.model);
       for (i = 0 ; i < sparesize; i++)
         {
           if (priv->raw.spare[i] != 0xff)
@@ -2130,6 +2148,8 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
 
       if (i >= sparesize)
         {
+          /* Clear sector errors */
+
           regval = 0;
         }
     }
@@ -2300,7 +2320,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
           ret = -EPERM;
         }
 
-      nand_nfc_cleale(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2,0, 0, 0);
+      nand_nfc_cleale(priv, HSMC_CLE_WRITE_EN, COMMAND_WRITE_2, 0, 0, 0);
       nand_wait_ready(priv);
     }
 

@@ -592,7 +592,7 @@ static int32_t pmecc_errorlocation(uint32_t bitsize)
  ****************************************************************************/
 
 #ifndef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
-static uint32_t pmecc_errorcorrection(uint32_t sectorbase,
+static uint32_t pmecc_errorcorrection(uintptr_t sectorbase,
                                       uint32_t extrabytes, uint32_t nerrors)
 {
   uint32_t *errpos;
@@ -681,10 +681,10 @@ static uint32_t pmecc_errorcorrection(uint32_t sectorbase,
  ****************************************************************************/
 
 #ifndef CONFIG_SAMA5_PMECC_EMBEDDEDALGO
-static uint32_t pmecc_correctionalgo(uint32_t isr, uint32_t data)
+static uint32_t pmecc_correctionalgo(uint32_t isr, uintptr_t data)
 {
+  uintptr_t sectorbase;
   uint32_t sector = 0;
-  uint32_t sectorbase;
   uint32_t sectorsz;
   int32_t nerrors;
   unsigned int mm;
@@ -1152,7 +1152,11 @@ int pmecc_configure(struct sam_nandcs_s *priv, bool protected)
       return -ENOSPC;
     }
 
-  g_pmecc.desc.sparesize = g_pmecc.desc.eccend;
+  /* Save the size of the spare area.
+   * REVISIT: Could we save a bit by setting this to eccend?
+   */
+
+  g_pmecc.desc.sparesize = priv->raw.model.sparesize;
 
   //g_pmecc.desc.nandwr = PMECC_CFG_NANDWR;  /* NAND write access */
   g_pmecc.desc.nandwr = 0;  /* NAND Read access */
