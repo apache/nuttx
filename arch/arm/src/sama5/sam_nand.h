@@ -74,6 +74,24 @@
 #  endif
 #endif
 
+/* If memory-to-memory DMAs are used, then two context switches will occur:
+ * (1) when the NAND logic waits for the DMA to complete, and (2) again when
+ * the DMA completes and the NAND logic is re-awakened.  Each context switch
+ * will required saving and restoring a set of registers defining the task
+ * state.  Those register include the PSR, 16 general purpose registers, and
+ * 32 floating point registers or about 196 bytes per task state.  That is
+ * then 392*2 bytes per context and 784 bytes for both.  Plus there is
+ * processing overhead. So certainly, there is no reason to use a memory-to-
+ * memory DMA transfer for much smaller blocks of data.
+ */
+
+#ifdef CONFIG_SAMA5_NAND_DMA
+#  ifndef CONFIG_SAMA5_NAND_DMA_THRESHOLD
+#    define CONFIG_SAMA5_NAND_DMA_THRESHOLD 784
+#  endif
+#endif
+
+
 /* Hardware ECC types.  These are extensions to the NANDECC_HWECC value
  * defined in include/nuttx/mtd/nand_raw.h.
  *

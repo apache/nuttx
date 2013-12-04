@@ -1599,11 +1599,13 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
     }
 
 #ifdef CONFIG_SAMA5_NAND_DMA
-  /* Then perform the transfer via DMA or not, depending on if we have
-   * a DMA channel assigned.
+  /* Then perform the transfer via memory-to-memory DMA or not, depending
+   * on if we have a DMA channel assigned and if the transfer is
+   * sufficiently large.  Small DMAs (e.g., for spare data) are not peformed
+   * because the DMA context switch can take more time that the DMA itself.
    */
 
-  if (priv->dma)
+  if (priv->dma && buflen > CONFIG_SAMA5_NAND_DMA_THRESHOLD)
     {
       /* Transfer using DMA */
 
@@ -1909,12 +1911,14 @@ static int nand_write(struct sam_nandcs_s *priv, bool nfcsram,
 
   dest += offset;
 
-  /* Then perform the transfer via DMA or not, depending on if we have
-   * a DMA channel assigned.
+#ifdef CONFIG_SAMA5_NAND_DMA
+  /* Then perform the transfer via memory-to-memory DMA or not, depending
+   * on if we have a DMA channel assigned and if the transfer is
+   * sufficiently large.  Small DMAs (e.g., for spare data) are not peformed
+   * because the DMA context switch can take more time that the DMA itself.
    */
 
-#ifdef CONFIG_SAMA5_NAND_DMA
-  if (priv->dma)
+  if (priv->dma && buflen > CONFIG_SAMA5_NAND_DMA_THRESHOLD)
     {
       /* Transfer using DMA */
 
