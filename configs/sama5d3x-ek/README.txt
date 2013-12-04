@@ -440,7 +440,7 @@ Creating and Using NORBOOT
    7. An option is to use the SAM-BA tool to write the NORBOOT image into
       Serial FLASH.  Then, the system will boot from Serial FLASH by
       copying the NORBOOT image in SRAM which will run and then start the
-      image in NOR FLASH automatically.
+      image in NOR FLASH automatically.  This is a very convenient usage!
 
       NOTES: (1) There is jumper on the CM module that must be closed to
       enable use of the AT25 Serial Flash.  (2) If using SAM-BA, make sure
@@ -1278,7 +1278,8 @@ NOR FLASH Support
   STATUS:  I have been unable to execute these configurations from NOR FLASH
   by closing the BMS jumper (J9).  As far as I can tell, this jumper does
   nothing on my board???  So I have been using the norboot configuration
-  exclusively to start the program-under-test in NOR FLASH (see below).
+  exclusively to start the program-under-test in NOR FLASH (see the section
+  entitled "Creating and Using NORBOOT" above.)
 
 SDRAM Support
 =============
@@ -1396,6 +1397,10 @@ NAND Support
        FLASH!  I have found that using the JTAG with no valid image on NAND
        or Serial FLASH is a problem:  In that case, the code always ends up
        in the SAM-BA bootloader.
+
+       My understanding is that you can enable JTAG in this case by simply
+       entering any data on the DBG serial port.  I have not tried this.
+       Instead, I just changed to boot from Serial Flash:
 
     2. Booting from Serial Flash. The work around for this case is to put
        the NORBOOT image into Serial FLASH.  Then, the system will boot from
@@ -2698,7 +2703,8 @@ Configurations
     - Waits for you to break in with GDB.
 
     At that point, you can set the PC and begin executing from NOR FLASH
-    under debug control.
+    under debug control.  See the section entitled "Creating and Using
+    NORBOOT" above.
 
     NOTES:
 
