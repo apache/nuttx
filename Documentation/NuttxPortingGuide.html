@@ -2257,7 +2257,7 @@ else
   <li><code>up_rtc_time()</code>.
     Get the current time in seconds.  This is similar to the standard <code>time()</code> function.
     This interface is only required if the low-resolution RTC/counter hardware implementation selected.
-    It is only used by the RTOS during intialization to set up the system time when <code>CONFIG_RTC</code> is set
+    It is only used by the RTOS during initializeation to set up the system time when <code>CONFIG_RTC</code> is set
     but neither <code>CONFIG_RTC_HIRES</code> nor <code>CONFIG_RTC_DATETIME</code> are set.
   </li>
   <li><code>up_rtc_gettime()</code>.
@@ -3511,7 +3511,7 @@ extern void up_ledoff(int led);
       <ol>
         <li>
           <p>
-            Each USB host class driver includes an intialization entry point that is called from the
+            Each USB host class driver includes an initializeation entry point that is called from the
             application at initialization time.
             This driver calls <code>usbhost_registerclass()</code> during this initialization in order to makes itself available in the event the device that it supports is connected.
           </p>
@@ -3599,7 +3599,7 @@ extern void up_ledoff(int led);
       <ol>
         <li>
           <p>
-            Each USB device class driver includes an intialization entry point that is called from the
+            Each USB device class driver includes an initializeation entry point that is called from the
             application at initialization time.
           </p>
           <p>
@@ -4134,7 +4134,7 @@ void pm_initialize(void);
 </pre></ul>
 <p><b>Description:</b>
 This function is called by MCU-specific one-time at power on reset in order to initialize the power management capabilities.
-This function must be called <i>very</i> early in the intialization sequence <i>before</i> any other device drivers are initialize (since they may attempt to register with the power management subsystem).
+This function must be called <i>very</i> early in the initializeation sequence <i>before</i> any other device drivers are initialize (since they may attempt to register with the power management subsystem).
 </p>
 <p><b>Input Parameters:</b>
 None
