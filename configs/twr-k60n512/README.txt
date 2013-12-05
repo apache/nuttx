@@ -725,4 +725,4 @@ Where <subdir> is one of the following:
 
       CONFIG_SCHED_WORKQUEUE=y             : Enable the NuttX workqueue
 
-      CONFIG_NSH_ARCHINIT=y                : Provide NSH intialization logic
+      CONFIG_NSH_ARCHINIT=y                : Provide NSH initializeation logic

@@ -452,7 +452,7 @@ nx11
   2. You must first up_fbinitialize() before calling up_simtouchscreen()
      or you will get a crash.
 
-  3. Call sim_tcuninintialize() when you are finished with the
+  3. Call sim_tcunininitializee() when you are finished with the
      simulated touchscreen.
 
   4. Enable CONFIG_DEBUG_INPUT=y for touchscreen debug output.

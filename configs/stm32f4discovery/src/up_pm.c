@@ -75,7 +75,7 @@
  * Description:
  *   This function is called by MCU-specific logic at power-on reset in
  *   order to provide one-time initialization the power management subystem.
- *   This function must be called *very* early in the intialization sequence
+ *   This function must be called *very* early in the initializeation sequence
  *   *before* any other device drivers are initialized (since they may
  *   attempt to register with the power management subsystem).
  *

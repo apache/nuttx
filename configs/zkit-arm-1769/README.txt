@@ -316,7 +316,7 @@ LEDs
   - The LED is not illuminated until the ZKit-ARM completes initialization.
 
     If the LED is stuck in the OFF state, this means that the ZKit-ARM did not
-    complete intialization.
+    complete initializeation.
 
   - Each time the OS enters an interrupt (or a signal) it will turn the LED OFF and
     restores its previous stated upon return from the interrupt (or signal).

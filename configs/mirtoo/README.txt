@@ -585,7 +585,7 @@ Analog Input
 
   When CONFIG_PIC32MX_ADC=y is defined, the Mirtoo boot up logic will
   automatically configure pin 18 (AN0) as an analog input (see configs/mirtoo/src/up_adc.c).
-  To intialize and use the PGA117, you to add logic something like the
+  To initializee and use the PGA117, you to add logic something like the
   following in your application code:
 
   #include <nuttx/spi/spi.h>
