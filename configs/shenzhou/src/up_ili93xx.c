@@ -1784,7 +1784,7 @@ static inline int stm32_lcdinitialize(FAR struct stm32_dev_s *priv)
   stm32_lcdoutput(priv);
   up_mdelay(10);
 
-  /* Intialize the LCD hardware */
+  /* Initialize the LCD hardware */
 
 #ifndef CONFIG_STM32_ILI9300_DISABLE
   if (id == ILI9300_ID)

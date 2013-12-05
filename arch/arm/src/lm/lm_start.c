@@ -119,7 +119,8 @@ void __start(void)
     }
   showprogress('B');
 
-  /* Move the intialized data section from his temporary holding spot in
+#ifdef CONFIG_BOOT_RUNFROMFLASH
+  /* Move the initialized data section from his temporary holding spot in
    * FLASH into the correct place in SRAM.  The correct place in SRAM is
    * give by _sdata and _edata.  The temporary location is in FLASH at the
    * end of all of the other read-only data (.text, .rodata) at _eronly.
@@ -130,6 +131,7 @@ void __start(void)
       *dest++ = *src++;
     }
   showprogress('C');
+#endif
 
   /* Perform early serial initialization */
 

@@ -386,7 +386,7 @@ EXTERN void i486_dmadump(DMA_HANDLE handle, const struct i486_dmaregs_s *regs,
  * Description:
  *   These are the various ISR/IRQ vector address exported from
  *   qemu_vectors.S.  These addresses need to have global scope so that they
- *   can be known to the interrupt intialization logic in qemu_irq.c.
+ *   can be known to the interrupt initializeation logic in qemu_irq.c.
  *
  ****************************************************************************/
 

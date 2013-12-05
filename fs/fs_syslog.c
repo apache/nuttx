@@ -445,7 +445,7 @@ int syslog_putc(int ch)
         {
           /* Try again to initialize the device.  We may do this repeatedly
            * because the log device might be something that was not ready
-           * the first time that syslog_intialize() was called (such as a
+           * the first time that syslog_initializee() was called (such as a
            * USB serial device that has not yet been connected or a file in
            * an NFS mounted file system that has not yet been mounted).
            */

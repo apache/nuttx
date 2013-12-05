@@ -4283,7 +4283,7 @@ void up_usbinitialize(void)
 
   pic32mx_stateinit(priv);
 
-  /* Then perform a few one-time intialization operstions.  First, initialize
+  /* Then perform a few one-time initialization operstions.  First, initialize
    * the watchdog timer that is used to perform a delayed queue restart
    * after recovering from a stall.
    */

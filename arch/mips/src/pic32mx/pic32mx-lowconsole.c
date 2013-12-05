@@ -321,7 +321,7 @@ void pic32mx_uartconfigure(uintptr_t uart_base, uint32_t baudrate,
  *
  * Description:
  *   Initialize a low-level console for debug output.  This function is called
- *   very early in the intialization sequence to configure the serial console
+ *   very early in the initialization sequence to configure the serial console
  *   UART (only).
  *
  ******************************************************************************/

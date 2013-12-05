@@ -80,7 +80,7 @@
  *
  * Parameters:
  *   once_control - Determines if init_routine should be called.  once_control
- *      should be declared and intialized as follows:
+ *      should be declared and initializeed as follows:
  *
  *        pthread_once_t once_control = PTHREAD_ONCE_INIT;
  *

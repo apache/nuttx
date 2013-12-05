@@ -4000,7 +4000,7 @@ static int sam_reset(void)
  *
  * Input Parameters:
  *   controller -- If the device supports more than one EHCI interface, then
- *     this identifies which controller is being intialized.  Normally, this
+ *     this identifies which controller is being initialized.  Normally, this
  *     is just zero.
  *
  * Returned Value:

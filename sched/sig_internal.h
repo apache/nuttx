@@ -159,7 +159,7 @@ extern sq_queue_t  g_sigpendingirqsignal;
 
 struct task_group_s;
 
-/* sig_intialize.c */
+/* sig_initializee.c */
 
 void weak_function sig_initialize(void);
 void               sig_allocateactionblock(void);

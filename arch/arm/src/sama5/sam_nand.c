@@ -221,11 +221,8 @@ static int      nand_dma_write(struct sam_nandcs_s *priv,
 
 static int      nand_nfcsram_read(uintptr_t src, uint8_t *dest,
                   size_t buflen);
-static int      nand_smc_read8(uintptr_t src, uint8_t *dest, size_t buflen);
-static int      nand_smc_read16(uintptr_t src, uint8_t *dest,
-                  size_t buflen);
-static int      nand_read(struct sam_nandcs_s *priv, bool nfcsram,
-                  uint8_t *buffer, size_t buflen);
+static int      nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
+                  uint16_t buflen, uint16_t offset);
 
 #ifdef CONFIG_SAMA5_HAVE_PMECC
 static int      nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
@@ -1481,82 +1478,25 @@ static int nand_nfcsram_read(uintptr_t src, uint8_t *dest, size_t buflen)
 }
 
 /****************************************************************************
- * Name: nand_smc_read8
- *
- * Description:
- *   Read 8-bit data from NAND using the NAND data address (without DMA)
- *
- * Input Parameters:
- *   src    - NAND data source address
- *   dest   - Buffer that will receive the data from the read
- *   buflen - The number of bytes to transfer
- *
- * Returned Value
- *   OK always
- *
- ****************************************************************************/
-
-static int nand_smc_read8(uintptr_t src, uint8_t *dest, size_t buflen)
-{
-  volatile uint8_t *src8  = (volatile uint8_t *)src;
-
-  for (; buflen > 0; buflen--)
-    {
-      *dest++ = *src8;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: nand_smc_read16
- *
- * Description:
- *   Read 16-bit data from NAND using the NAND data address (without DMA)
- *
- * Input Parameters:
- *   src    - NAND data source address
- *   dest   - Buffer that will receive the data from the read
- *   buflen - The number of bytes to transfer
- *
- * Returned Value
- *   OK always
- *
- ****************************************************************************/
-
-static int nand_smc_read16(uintptr_t src, uint8_t *dest, size_t buflen)
-{
-  volatile uint16_t *src16  = (volatile uint16_t *)src;
-  uint16_t *dest16 = (uint16_t *)dest;
-
-  DEBUGASSERT(((uintptr_t)dest & 1) == 0);
-
-  for (; buflen > 1; buflen -= sizeof(uint16_t))
-    {
-      *dest16++ = *src16;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
  * Name: nand_read
  *
  * Description:
- *   Read data from NAND using the appropriate method
+ *   Read data from NAND using the NFC SRAM
  *
  * Input Parameters:
  *   priv     - Lower-half, private NAND FLASH device state
- *   nfcsram  - True: Use NFC Host SRAM
  *   buffer   - Buffer that provides the data for the write
+ *   buflen   - The amount of data to read into the buffer
+ *   offset   - If reading from NFC SRAM, this is the offset into
+ *              the SRAM.
  *
  * Returned Value
  *   OK on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
-                     uint8_t *buffer, size_t buflen)
+static int nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
+                     uint16_t buflen, uint16_t offset)
 {
   uintptr_t src;
 #ifdef CONFIG_SAMA5_NAND_DMA
@@ -1565,48 +1505,32 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
   int buswidth;
   int ret;
 
-  fvdbg("nfcsram=%d buffer=%p buflen=%d\n", nfcsram, buffer, (int)buflen);
+  fvdbg("buffer=%p buflen=%d offset=%d\n", buffer, buflen, offset);
+
+  /* Get the data source:  NFC SRAM (perhaps with an offset)
+   * NOTE: We could use the address priv->raw.dataaddr if we want to
+   * bypass NFC SRAM.
+   */
+
+  src = NFCSRAM_BASE + offset;
 
   /* Get the buswidth */
 
   buswidth = nandmodel_getbuswidth(&priv->raw.model);
 
-  /* Pick the data source:  The NFC SRAM or the NAND data address */
-
-  if (nfcsram)
-    {
-      /* Source is NFC SRAM */
-
-      src = NFCSRAM_BASE;
-
-#ifdef CONFIG_SAMA5_NAND_DMA
-      /* Select NFC SRAM DMA */
-
-      dmaflags = (buswidth == 16 ? NFCSRAM_DMA_FLAGS16 : NFCSRAM_DMA_FLAGS8);
-#endif
-    }
-  else
-    {
-      /* Source is NFC NAND */
-
-      src = priv->raw.dataaddr;
-
-#ifdef CONFIG_SAMA5_NAND_DMA
-      /* Select NAND DMA */
-
-      dmaflags = (buswidth == 16 ? NAND_DMA_FLAGS16 : NAND_DMA_FLAGS8);
-#endif
-    }
-
 #ifdef CONFIG_SAMA5_NAND_DMA
   /* Then perform the transfer via memory-to-memory DMA or not, depending
    * on if we have a DMA channel assigned and if the transfer is
-   * sufficiently large.  Small DMAs (e.g., for spare data) are not peformed
+   * sufficiently large.  Small DMAs (e.g., for spare data) are not performed
    * because the DMA context switch can take more time that the DMA itself.
    */
 
   if (priv->dma && buflen > CONFIG_SAMA5_NAND_DMA_THRESHOLD)
     {
+      /* Select NFC SRAM DMA */
+
+      dmaflags = (buswidth == 16 ? NFCSRAM_DMA_FLAGS16 : NFCSRAM_DMA_FLAGS8);
+
       /* Transfer using DMA */
 
       ret = nand_dma_read(priv, src, (uintptr_t)buffer, buflen, dmaflags);
@@ -1616,22 +1540,8 @@ static int nand_read(struct sam_nandcs_s *priv, bool nfcsram,
 
   /* Transfer without DMA */
 
-  if (nfcsram)
     {
       ret = nand_nfcsram_read(src, buffer, buflen);
-    }
-  else
-    {
-      /* Check the data bus width of the NAND FLASH */
-
-      if (buswidth == 16)
-        {
-          ret = nand_smc_read16(src, buffer, buflen);
-        }
-      else
-        {
-          ret = nand_smc_read8(src, buffer, buflen);
-        }
     }
 
   nand_dump("NAND Read", buffer, buflen);
@@ -1724,9 +1634,11 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
       regval |= HSMC_PMECCFG_AUTO_ENABLE;
     }
 
-  regval |= HSMC_PMECCTRL_DATA;
   nand_putreg(SAM_HSMC_PMECCFG, regval);
 
+  /* Start the data phase and perform the transfer */
+
+  nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DATA);
   nand_nfc_cleale(priv,
                   HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN | HSMC_CLE_VCMD2_EN | HSMC_CLE_DATA_EN,
                   COMMAND_READ_1, COMMAND_READ_2, 0, rowaddr);
@@ -1739,18 +1651,20 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DATA);
 
-  /* Read the data area */
+  /* Read the data area into the caller provided buffer (pagesize bytes) */
 
-  ret = nand_read(priv, true, (uint8_t *)data, pagesize);
+  ret = nand_read(priv, (uint8_t *)data, pagesize, 0);
   if (ret < 0)
     {
       fdbg("ERROR: nand_read for data region failed: %d\n", ret);
       return ret;
     }
 
-  /* Read the spare area into priv->raw.spare */
+  /* Read the spare area into priv->raw.spare.  The data to be read lies at
+   * offset pagesize in NFC SRAM.
+   */
 
-  ret = nand_read(priv, true, priv->raw.spare, priv->raw.model.sparesize);
+  ret = nand_read(priv, priv->raw.spare, priv->raw.model.sparesize, pagesize);
   if (ret < 0)
     {
       fdbg("ERROR: nand_read for spare region failed: %d\n", ret);
@@ -2044,7 +1958,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
 
   if (data)
     {
-      ret = nand_read(priv, true, (uint8_t *)data, pagesize);
+      ret = nand_read(priv, (uint8_t *)data, pagesize, 0);
       if (ret < 0)
         {
           fdbg("ERROR: nand_read for data region failed: %d\n", ret);
@@ -2052,11 +1966,14 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
         }
     }
 
-  /* Read the spare area if so requested */
+  /* Read the spare area if so requested.  Read NFS SRAM from offset 0 in any
+   * case because the coladdr was appropiately set above for the case where
+   * there is no data.
+   */
 
   if (spare)
     {
-      ret = nand_read(priv, true, (uint8_t *)spare, sparesize);
+      ret = nand_read(priv, (uint8_t *)spare, sparesize, 0);
       if (ret < 0)
         {
           fdbg("ERROR: nand_read for spare region failed: %d\n", ret);
@@ -3018,7 +2935,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
     }
 
   /* Initialize the NAND hardware for this CS */
-  /* Perform board-specific SMC intialization for this CS.  This should include:
+  /* Perform board-specific SMC initialization for this CS.  This should include:
    *
    *   1. Enabling of clocking to the HSMC
    *   2. Configuration of timing for the HSMC NAND CS

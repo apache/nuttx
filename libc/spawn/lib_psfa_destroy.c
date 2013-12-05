@@ -56,7 +56,7 @@
  *
  * Description:
  *   The posix_spawn_file_actions_destroy() function destroys the object
- *   referenced by file_actions which was previously intialized by
+ *   referenced by file_actions which was previously initializeed by
  *   posix_spawn_file_actions_init(), returning any resources obtained at the
  *   time of initialization to the system for subsequent reuse.  A
  *   posix_spawn_file_actions_t may be reinitialized after having been

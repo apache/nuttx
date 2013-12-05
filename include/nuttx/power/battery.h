@@ -195,7 +195,7 @@ EXTERN int battery_register(FAR const char *devpath,
  *   frequency - The I2C frequency
  *
  * Returned Value:
- *   A pointer to the intialized battery driver instance.  A NULL pointer
+ *   A pointer to the initializeed battery driver instance.  A NULL pointer
  *   is returned on a failure to initialize the MAX1704x lower half.
  *
  ****************************************************************************/

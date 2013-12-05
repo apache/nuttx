@@ -1000,7 +1000,7 @@ int posix_spawn_file_actions_destroy(FAR posix_spawn_file_actions_t *file_action
 </pre></ul>
 <p>
   <b>Description:</b>
-  The <code>posix_spawn_file_actions_destroy()</code> function destroys the object referenced by <code>file_actions</code> which was previously intialized by <code>posix_spawn_file_actions_init()</code>, returning any resources obtained at the time of initialization to the system for subsequent reuse.
+  The <code>posix_spawn_file_actions_destroy()</code> function destroys the object referenced by <code>file_actions</code> which was previously initializeed by <code>posix_spawn_file_actions_init()</code>, returning any resources obtained at the time of initialization to the system for subsequent reuse.
   A <code>posix_spawn_file_actions_t</code> may be reinitialized after having been destroyed, but must not be reused after destruction, unless it has been reinitialized.
 </p>
 <p>

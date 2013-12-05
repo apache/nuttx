@@ -80,7 +80,7 @@
  * up_decodeirq()
  *
  * Description:
- *   Read the IRQ number from the IVR register.  During intialization, the IVR
+ *   Read the IRQ number from the IVR register.  During initialization, the IVR
  *   register was set to zero.  Each SIR[n] register was programmed to contain
  *   the IRQ number.  At IRQ processing time (when this function run), the IVR
  *   should contain the desired IRQ number.

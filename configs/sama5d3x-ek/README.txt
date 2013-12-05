@@ -2629,7 +2629,7 @@ Configurations
     in the nsh configuration:
 
     4. SDRAM is supported.  .data and .bss is still retained in ISRAM, but
-       SDRAM is intialized and the SDRAM memory is included in the heap.
+       SDRAM is initializeed and the SDRAM memory is included in the heap.
        Relevant configuration settings are provided in the paragraph entitled
        "SDRAM Support" above.
 
@@ -2762,7 +2762,7 @@ Configurations
        However, no built-in applications are selected in the base configuration.
 
     5. This configuration has support for the FAT file system built in.  However,
-       by default, there are no block drivers intialized.  The FAT file system can
+       by default, there are no block drivers initializeed.  The FAT file system can
        still be used to create RAM disks.
 
     6. SDRAM support can be enabled by modifying your NuttX configuration as

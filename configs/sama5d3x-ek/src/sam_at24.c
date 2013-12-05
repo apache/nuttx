@@ -152,7 +152,7 @@ int sam_at24_automount(int minor)
           return ret;
         }
 #endif
-      /* Now we are intialized */
+      /* Now we are initializeed */
 
       initialized = true;
     }

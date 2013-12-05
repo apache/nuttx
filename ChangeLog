@@ -630,7 +630,7 @@
 	  wrong by 64 bytes (Kevin Franzen).
 	* eZ80Acclaim!: Corrected some stack handling errors during interrupt handling
 	   context save and restore (Kevin Franzen).
-	* eZ80Acclaim!: Corrected vector intialization logic (Kevin Franzen).
+	* eZ80Acclaim!: Corrected vector initializeation logic (Kevin Franzen).
 	* eZ80Acclaim!: Corrected overflow problem in the calculation of UART baud rate
 		divisor, the system timer divisor, and the EMAC poll timer.
 	* eZ80Acclaim!: Fixed GPIO pin configuration get serial output
@@ -4639,7 +4639,7 @@
 6.28 2013-06-14 Gregory Nutt <gnutt@nuttx.org>
 
 	* arch/arm/src/lpc17xx/lpc17_i2c.c:  Interrupts were not being
-	  re-enabled in the I2C intialization function (2013-4-30).
+	  re-enabled in the I2C initializeation function (2013-4-30).
 	* net/sendto.c:  Added skeleton of implementation of send timeouts
 	  for UDP.  However, this functionality really does not make
 	  sense, so it is disabled in the code (2013-4-30).
@@ -6160,4 +6160,7 @@
 	* drivers/mtd/mtd_nand.c: Fix a typo in calculation of page number
 	  (2013-12-02).
 	* drivers/mtd/README.txt:  New README file (2013-12-04).
+	* arch/arm/src/lm/lm_start.c:  Don't initialize .data if not running
+	  from FLASH (2013-12-05).
+
 

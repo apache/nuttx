@@ -516,7 +516,7 @@ static int max1704x_capacity(struct battery_dev_s *dev, b16_t *value)
  *   frequency - The I2C frequency
  *
  * Returned Value:
- *   A pointer to the intialized lower-half driver instance.  A NULL pointer
+ *   A pointer to the initializeed lower-half driver instance.  A NULL pointer
  *   is returned on a failure to initialize the MAX1704x lower half.
  *
  ****************************************************************************/

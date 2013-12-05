@@ -248,7 +248,7 @@ void lpc31_usbsuspend(FAR struct usbdev_s *dev, bool resume);
  *
  * Input Parameters:
  *   controller -- If the device supports more than one EHCI interface, then
- *     this identifies which controller is being intialized.  Normally, this
+ *     this identifies which controller is being initializeed.  Normally, this
  *     is just zero.
  *
  * Returned Value:

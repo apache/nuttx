@@ -83,7 +83,7 @@ void weak_const_function lib_initialize(void)
 
 #if CONFIG_NFILE_STREAMS > 0
 /* The following function is called when a new task is allocated.  It
- * intializes the streamlist instance that is stored in the task group.
+ * initializees the streamlist instance that is stored in the task group.
  */
 
 void lib_streaminit(FAR struct streamlist *list)

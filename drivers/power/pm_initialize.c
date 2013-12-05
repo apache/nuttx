@@ -85,7 +85,7 @@ struct pm_global_s g_pmglobals;
  * Description:
  *   This function is called by MCU-specific one-time at power on reset in
  *   order to initialize the power management capabilities.  This function
- *   must be called *very* early in the intialization sequence *before* any
+ *   must be called *very* early in the initializeation sequence *before* any
  *   other device drivers are initialize (since they may attempt to register
  *   with the power management subsystem).
  *

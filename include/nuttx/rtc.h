@@ -159,7 +159,7 @@ EXTERN int up_rtcinitialize(void);
  *   Get the current time in seconds.  This is similar to the standard time()
  *   function.  This interface is only required if the low-resolution RTC/counter
  *   hardware implementation selected.  It is only used by the RTOS during
- *   intialization to set up the system time when CONFIG_RTC is set but neither
+ *   initializeation to set up the system time when CONFIG_RTC is set but neither
  *   CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
  *
  * Input Parameters:
@@ -201,7 +201,7 @@ EXTERN int up_rtc_gettime(FAR struct timespec *tp);
  *   Get the current date and time from the date/time RTC.  This interface
  *   is only supported by the date/time RTC hardware implementation.
  *   It is used to replace the system timer.  It is only used by the RTOS during
- *   intialization to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
+ *   initializeation to set up the system time when CONFIG_RTC and CONFIG_RTC_DATETIME
  *   are selected (and CONFIG_RTC_HIRES is not).
  *
  *   NOTE: Some date/time RTC hardware is capability of sub-second accuracy.  That
