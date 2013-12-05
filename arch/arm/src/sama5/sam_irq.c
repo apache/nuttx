@@ -213,7 +213,7 @@ void up_irqinitialize(void)
   int i;
 
   /* The following operations need to be atomic, but since this function is
-   * called early in the intialization sequence, we expect to have exclusive
+   * called early in the initialization sequence, we expect to have exclusive
    * access to the AIC.
    */
 

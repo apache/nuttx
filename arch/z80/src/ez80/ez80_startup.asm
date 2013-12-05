@@ -139,7 +139,7 @@ _ez80_datadone:
 	ldir				; Copy the code section
 _ez80_codedone:
 
-	; Perform board-specific intialization
+	; Perform board-specific initializeation
 
 	call	_ez80_lowinit
 

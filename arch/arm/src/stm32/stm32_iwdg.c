@@ -641,7 +641,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  * Name: stm32_iwdginitialize
  *
  * Description:
- *   Initialize the IWDG watchdog time.  The watchdog timer is intialized and
+ *   Initialize the IWDG watchdog time.  The watchdog timer is initialized and
  *   registers as 'devpath.  The initial state of the watchdog time is
  *   disabled.
  *

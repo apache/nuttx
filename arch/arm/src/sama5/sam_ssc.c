@@ -879,7 +879,7 @@ static void ssc_buf_free(struct sam_ssc_s *priv, struct sam_buffer_s *bfcontaine
  *   None
  *
  * Assumptions:
- *   Called early in SSC intialization so that there are no issues with
+ *   Called early in SSC initialization so that there are no issues with
  *   concurrency.
  *
  ****************************************************************************/

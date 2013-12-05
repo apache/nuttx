@@ -84,7 +84,7 @@ void up_initialize(void)
     extern void vdev_init(void);
     extern void nuttx_arch_init(void);
 
-    // intialize the current_task to g_idletcb
+    // initialize the current_task to g_idletcb
     current_task = g_pidhash[PIDHASH(0)].tcb;
 
     // OS memory alloc system is ready

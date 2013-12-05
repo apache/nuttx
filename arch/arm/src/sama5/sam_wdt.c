@@ -649,7 +649,7 @@ static int sam_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  * Name: up_wdginitialize
  *
  * Description:
- *   Initialize the WDT watchdog time.  The watchdog timer is intialized and
+ *   Initialize the WDT watchdog time.  The watchdog timer is initialized and
  *   registered as 'devpath.  The initial state of the watchdog time is
  *   disabled.
  *

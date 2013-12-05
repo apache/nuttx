@@ -742,7 +742,7 @@ static int stm32_ioctl(FAR struct watchdog_lowerhalf_s *lower, int cmd,
  * Name: stm32_wwdginitialize
  *
  * Description:
- *   Initialize the WWDG watchdog time.  The watchdog timer is intialized and
+ *   Initialize the WWDG watchdog time.  The watchdog timer is initialized and
  *   registers as 'devpath.  The initial state of the watchdog time is
  *   disabled.
  *

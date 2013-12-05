@@ -924,9 +924,9 @@ static int pmecc_pagelayout(uint16_t datasize, uint16_t eccsize)
           correctability512 = nsectors512 * g_correctability[bcherr512];
           correctability1K  = nsectors1k * g_correctability[bcherr1k];
 
-          /* Use 1K sectors unless we can do better with 512B sectors */
+          /* Use 512B sectors unless we can do better with 1K sectors */
 
-          if (correctability512 > correctability1K)
+          if (correctability512 >= correctability1K)
             {
               g_pmecc.sector1k = false;
               g_pmecc.nsectors = nsectors512;

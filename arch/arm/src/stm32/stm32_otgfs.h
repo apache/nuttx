@@ -81,7 +81,7 @@ extern "C"
  *
  * Input Parameters:
  *   controller -- If the device supports more than USB host controller, then
- *     this identifies which controller is being intialized.  Normally, this
+ *     this identifies which controller is being initializeed.  Normally, this
  *     is just zero.
  *
  * Returned Value:

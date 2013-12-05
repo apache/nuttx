@@ -106,7 +106,7 @@ void up_initial_state(FAR struct tcb_s *tcb)
   frame[FRAME_IE] = 0x80;
 
   /* Save the number of bytes in the frame (which will be used
-   * to intialize the stack pointer when the task is started).
+   * to initialize the stack pointer when the task is started).
    */
 
   tcb->xcp.nbytes = FRAME_SIZE;

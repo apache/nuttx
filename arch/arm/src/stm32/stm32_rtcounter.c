@@ -413,7 +413,7 @@ int up_rtcinitialize(void)
  *   Get the current time in seconds.  This is similar to the standard time()
  *   function.  This interface is only required if the low-resolution RTC/counter
  *   hardware implementation selected.  It is only used by the RTOS during
- *   intialization to set up the system time when CONFIG_RTC is set but neither
+ *   initialization to set up the system time when CONFIG_RTC is set but neither
  *   CONFIG_RTC_HIRES nor CONFIG_RTC_DATETIME are set.
  *
  * Input Parameters:

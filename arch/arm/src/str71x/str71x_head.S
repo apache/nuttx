@@ -336,7 +336,7 @@ eicloop:
 	add	\irqno, \irqno, #1
 
 	/* Continue to loop until all of the SIR registers have been
-	 * intialized.
+	 * initializeed.
 	 */
 
 	cmp	\irqno, #STR71X_EIC_NCHANNELS

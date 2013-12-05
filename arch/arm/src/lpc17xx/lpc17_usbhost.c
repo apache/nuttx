@@ -2509,7 +2509,7 @@ static inline void lpc17_ep0init(struct lpc17_usbhost_s *priv)
  *
  * Input Parameters:
  *   controller -- If the device supports more than USB host controller, then
- *     this identifies which controller is being intialized.  Normally, this
+ *     this identifies which controller is being initialized.  Normally, this
  *     is just zero.
  *
  * Returned Value:

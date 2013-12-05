@@ -69,7 +69,7 @@ extern "C" {
  * Name: stm32_iwdginitialize
  *
  * Description:
- *   Initialize the IWDG watchdog time.  The watchdog timer is intialized and
+ *   Initialize the IWDG watchdog time.  The watchdog timer is initializeed and
  *   registers as 'devpath.  The initial state of the watchdog time is
  *   disabled.
  *
@@ -91,7 +91,7 @@ EXTERN void stm32_iwdginitialize(FAR const char *devpath, uint32_t lsifreq);
  * Name: stm32_wwdginitialize
  *
  * Description:
- *   Initialize the WWDG watchdog time.  The watchdog timer is intialized and
+ *   Initialize the WWDG watchdog time.  The watchdog timer is initializeed and
  *   registers as 'devpath.  The initial state of the watchdog time is
  *   disabled.
  *
