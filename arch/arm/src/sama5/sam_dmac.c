@@ -58,6 +58,7 @@
 #include "chip.h"
 #include "sam_dmac.h"
 #include "sam_periphclks.h"
+#include "sam_memories.h"
 #include "chip/sam_pmc.h"
 #include "chip/sam_dmac.h"
 
