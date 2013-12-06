@@ -638,6 +638,17 @@ static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startpage,
 
   for (remaining = npages; remaining > 0; remaining--)
     {
+      /* Check for attempt to read beyond the end of NAND */
+
+      if (block > maxblock)
+        {
+          fdbg("ERROR: Read beyond the end of FLASH, block=%ld\n",
+               (long)block);
+
+          ret = -ESPIPE;
+          goto errout_with_lock;
+        }
+
       /* Read the next page from NAND */
 
       ret = nand_readpage(nand, block, page, buffer);
@@ -656,13 +667,7 @@ static ssize_t nand_bread(struct mtd_dev_s *dev, off_t startpage,
       if (++page >= pagesperblock)
         {
           page = 0;
-          if (++block > maxblock)
-            {
-              fdbg("ERROR: Read beyond the end of FLASH, block=%d\n",
-                   block);
-              ret = -ESPIPE;
-              goto errout_with_lock;
-            }
+          block++;
         }
 
       /* Increment the buffer point by the size of one page */
@@ -729,6 +734,17 @@ static ssize_t nand_bwrite(struct mtd_dev_s *dev, off_t startpage,
 
   for (remaining = npages; remaining > 0; remaining--)
     {
+      /* Check for attempt to write beyond the end of NAND */
+
+      if (block > maxblock)
+        {
+          fdbg("ERROR: Write beyond the end of FLASH, block=%ld\n",
+               (long)block);
+
+          ret = -ESPIPE;
+          goto errout_with_lock;
+        }
+
       /* Write the next page into NAND */
 
       ret = nand_writepage(nand, block, page, buffer);
@@ -747,13 +763,7 @@ static ssize_t nand_bwrite(struct mtd_dev_s *dev, off_t startpage,
       if (++page >= pagesperblock)
         {
           page = 0;
-          if (++block > maxblock)
-            {
-              fdbg("ERROR: Write beyond the end of FLASH, block=%d\n",
-                   block);
-              ret = -ESPIPE;
-              goto errout_with_lock;
-            }
+          block++;
         }
 
       /* Increment the buffer point by the size of one page */
