@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: October 5, 2013</p>
+      <p>Last Updated: December 5, 2013</p>
     </td>
   </tr>
 </table>
@@ -1668,11 +1668,16 @@ nsh>
 
 <p><b>Command Syntax:</b></p>
 <ul><pre>
-mkfatfs &lt;path&gt;
+mkfatfs [-F &lt;fatsize&gt;] &lt;block-driver&gt;
 </pre></ul>
 <p>
   <b>Synopsis</b>.
-  Format a fat file system on the block device specified by <code>&lt;path&gt;</code>.
+  Format a fat file system on the block device specified by <code>&lt;block-driver&gt;</code> path.
+  The FAT size may be provided as an option.
+  Without the <code>&lt;fatsize&gt;</code> option, <code>mkfatfs</code> will select either the FAT12 or FAT16 format.
+  For historical reasons, if you want the FAT32 format, it must be explicitly specified on the command line.
+</p>
+<p>
   NSH provides this command to access the <a href="mkfatfs"><code>mkfatfs()</code></a> NuttX API.
   This block device must reside in the NuttX <a href="NuttxUserGuide.html#FileSystemOverview"><i>pseudo</i> filesystem</a> and
   must have been created by some call to <code>register_blockdriver()</code> (see <code>include/nuttx/fs/fs.h</code>).
