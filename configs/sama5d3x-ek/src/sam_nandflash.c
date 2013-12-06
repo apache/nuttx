@@ -219,7 +219,7 @@ int sam_nand_automount(int minor)
           return ret;
         }
 #endif
-      /* Now we are initializeed */
+      /* Now we are initialized */
 
       initialized = true;
     }

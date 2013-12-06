@@ -99,7 +99,7 @@ Contents
 Development Environment
 =======================
 
-  Several possibile development enviorments may be use:
+  Several possible development environments may be use:
 
   - Linux or OSX native
   - Cygwin unders Windows
@@ -160,7 +160,7 @@ GNU Toolchain Options
      An alias in your .bashrc file might make that less painful.
 
   3. Dependencies are not made when using Windows versions of the GCC.  This is
-     because the dependencies are generated using Windows pathes which do not
+     because the dependencies are generated using Windows paths which do not
      work with the Cygwin make.
 
        MKDEP                = $(TOPDIR)/tools/mknulldeps.sh
@@ -253,9 +253,9 @@ NuttX OABI "buildroot" Toolchain
 ================================
 
   The older, OABI buildroot toolchain is also available.  To use the OABI
-  toolchain, use the build instructtions above, but (1) modify the
+  toolchain, use the build instructions above, but (1) modify the
   cortexm3-eabi-defconfig-4.6.3 configuration to use OABI (using 'make
-  menuconfig'), or (2) use an exising OABI configuration such as
+  menuconfig'), or (2) use an existing OABI configuration such as
   cortexm3-defconfig-4.3.3
 
 NXFLAT Toolchain
@@ -321,9 +321,9 @@ Writing to FLASH using SAM-BA
 
   Assumed starting configuration:
 
-    1. You have installed the J-Lnk CDC USB driver (Windows only, there is
+    1. You have installed the J-Link CDC USB driver (Windows only, there is
         no need to install a driver on any regular Linux distribution),
-    2. You have the USB connected to DBGU poort (J14)
+    2. You have the USB connected to DBGU port (J14)
     3. Terminal configuration:  115200 8N1
 
   Using SAM-BA to write to FLASH:
@@ -507,7 +507,7 @@ Buttons and LEDs
     LED_IDLE             MCU is is sleep mode         Not used
 
   Thus if the blue LED is statically on, NuttX has successfully booted and
-  is, apparently, running normmally.  If the red is flashing at
+  is, apparently, running normally.  If the red is flashing at
   approximately 2Hz, then a fatal error has been detected and the system
   has halted.
 
@@ -817,11 +817,11 @@ HSMCI Card Slots
   --------------
 
   The SAMA5D3x-EK provides a two SD memory card slots:  (1) a full size SD
-  card slot (J7 labeled MCI0), and (2) a microSD memory card slot (J6
-  labeled MCI1).
+  card slot (J7 labelled MCI0), and (2) a microSD memory card slot (J6
+  labelled MCI1).
 
   The full size SD card slot connects via HSMCI0.  The card detect discrete
-  is available on PB17 (pulled high).  The write protect descrete is tied to
+  is available on PB17 (pulled high).  The write protect discrete is tied to
   ground (via PP6) and not available to software.  The slot supports 8-bit
   wide transfer mode, but the NuttX driver currently uses only the 4-bit
   wide transfer mode
@@ -853,9 +853,9 @@ HSMCI Card Slots
   ----------------------
 
   Enabling HSMCI support. The SAMA5D3x-EK provides a two SD memory card
-  slots:  (1) a full size SD card slot (J7 labeled MCI0), and (2) a
-  microSD memory card slot (J6 labeled MCI1).  The full size SD card slot
-  connects via HSMCI0; the microSD connects vi HSMCI1.  Supportfor both SD
+  slots:  (1) a full size SD card slot (J7 labelled MCI0), and (2) a
+  microSD memory card slot (J6 labelled MCI1).  The full size SD card slot
+  connects via HSMCI0; the microSD connects vi HSMCI1.  Support for both SD
   slots can be enabled with the following settings:
 
     System Type->ATSAMA5 Peripheral Support
@@ -942,7 +942,7 @@ USB Ports
       lower port
 
   All three USB host ports are equipped with 500 mA high-side power switch
-  for self-powered and buspowered applications. The USB device port feature
+  for self-powered and bus powered applications. The USB device port feature
   VBUS inserts detection function.
 
   Port A
@@ -1073,7 +1073,7 @@ USB High-Speed Device
 
   There is normal console debug output available that can be enabled with
   CONFIG_DEBUG + CONFIG_DEBUG_USB.  However, USB device operation is very
-  time critical and enabling this debug ouput WILL interfere with the
+  time critical and enabling this debug output WILL interfere with the
   operation of the UDPHS.  USB device tracing is a less invasive way to get
   debug information:  If tracing is enabled, the USB device will save
   encoded trace output in in-memory buffer; if the USB monitor is also
@@ -1100,7 +1100,7 @@ USB High-Speed Device
       CONFIG_SYSTEM_USBMONITOR_TRACECONTROLLER=y
       CONFIG_SYSTEM_USBMONITOR_TRACEINTERRUPTS=y
 
-  NOTE: If USB debug output is also enabled, both outpus will appear on the
+  NOTE: If USB debug output is also enabled, both outputs will appear on the
   serial console.  However, the debug output will be asynchronous with the
   trace output and, hence, difficult to interpret.
 
@@ -1354,9 +1354,13 @@ NAND Support
 ============
 
   NAND support is only partial in that there is no file system that works
-  with it properly.  It should be considered a work in progress.  You will
-  not want to use NAND unless you are interested in investing a little
-  effort. See the STATUS section below.
+  with it properly.  Lower-level NAND support has been developed and
+  verified, but there is no way to use it in the current NuttX architecture
+  other than through the raw MTD interface.
+
+  NAND should be considered a work in progress.  You will not want to use
+  NAND unless you are interested in investing a little effort, particularly
+  in infrastructure. See the "STATUS SUMMARY" section below.
 
   NAND Support
   ------------
@@ -1365,11 +1369,10 @@ NAND Support
   NuttX configuration file as follows:
 
     Build Setup
-      CONFIG_EXPERIMENTAL=y             : NXFFS implemention is incomplete and
+      CONFIG_EXPERIMENTAL=y             : NXFFS implementation is incomplete and
                                         : not yet fully functional.
 
-    System Type -> SAMA5 Peripheal support
-      CONFIG_SAMA5_DMAC1=y              : Use DMA1 for memory-to-memory DMA
+    System Type -> SAMA5 Peripheral support
       CONFIG_SAMA5_HSMC=y               : Make sure that the SMC is enabled
 
     Drivers -> Memory Technology Device (MTD) Support
@@ -1408,7 +1411,7 @@ NAND Support
        then start the image in NOR FLASH.  See the discussion of the NORBOOT
        configuration in the "Creating and Using NORBOOT" section above.
 
-       NOTE thathere is jumper on the CM module that must be closed to enable
+       NOTE that there is jumper on the CM module that must be closed to enable
        use of the AT25 Serial Flash.  Also, if you are using using SAM-BA,
        make sure that you load the NOR boot program into the boot area via
        the pull-down menu.
@@ -1416,6 +1419,43 @@ NAND Support
     3. Unfortunately, there are no appropriate NAND file system in NuttX as
        of this writing.  The following sections discussion issues/problems
        with using NXFFS and FAT.
+
+    PMECC
+    -----
+
+    Hardware ECC calculation using the SAMA5D3's PMECC can be enable as
+    follows:
+
+    Drivers -> Memory Technology Device (MTD) Support
+      CONFIG_MTD_NAND_SWECC=y           : Don't use S/W ECC calculation
+      CONFIG_MTD_NAND_HWECC=y           : Use H/W ECC instead
+
+    System Type -> External Memory Configuration
+      CONFIG_SAMA5_EBICS3_SWECC=n       : Don't use S/W ECC calculation
+      CONFIG_SAMA5_HAVE_PMECC=n         : Use H/W ECC instead
+
+    Other PMECC-related default settings should be okay.
+
+    STATUS:  As of the writing, NAND transfers using PMECC appear to
+    work correctly.  However, the PMECC based systems do not work as
+    as well with FAT or NXFFS.  My belief that that the FAT/NXFFS layers
+    are inappropriate for NAND and, as a result, happen not to work with
+    the PMECC ECC calculation.  See also the "STATUS SUMMARY" section below.
+
+    DMA Support
+    -----------
+
+    DMA support can be enabled as follows:
+
+    System Type -> SAMA5 Peripheral support
+      CONFIG_SAMA5_DMAC0=y              : Use DMAC0 for memory-to-memory DMA
+
+    System Type -> External Memory Configuration
+      CONFIG_SAMA5_NAND_DMA=y           : Use DMAC0 for NAND data transfers
+
+    STATUS:  DMA appears to be functional, but probably has not been
+    exercised enough to claim that with any certainty.  See also the "STATUS
+    SUMMARY" section below.
 
     NXFFS
     -----
@@ -1437,13 +1477,16 @@ NAND Support
       CONFIG_SAMA5_NAND_NXFFS=y         : Use the NXFFS file system
 
       Other file systems are not recommended because only NXFFS can handle
-      bad blocks and only NXFFS performs wear-leveling.
+      bad blocks and only NXFFS performs wear-levelling.
 
     FAT
     ---
 
-    Another option is FAT.  FAT, however, will not handle bad blocks and
-    does not perform any wear leveling.
+    Another option is FAT.  FAT, however, is not appropriate for use with
+    NAND: FAT will not handle bad blocks, does not perform any wear
+    levelling, and may not conform to writing ordering requirements of NAND.
+    Also, there appear to be issues with FAT when PMECC is enabled (see
+    "STATUS SUMMARY" below).
 
     File Systems:
       CONFIG_FS_FAT=y                   : Enable the FAT FS
@@ -1515,10 +1558,10 @@ NAND Support
       2. On subsequent boots, after the NXFFS file system has been created
          the delay will be less.  When the new file system is empty, it will
          be very fast.  But the NAND-related boot time can become substantial
-         whenthere has been a lot of usage of the NAND.  This is because
+         when there has been a lot of usage of the NAND.  This is because
          NXFFS needs to scan the NAND device and build the in-memory dataset
          needed to access NAND and there is more that must be scanned after
-         the device has been used.  You may want tocreate a separate thread at
+         the device has been used.  You may want to create a separate thread at
          boot time to bring up NXFFS so that you don't delay the boot-to-prompt
          time excessively in these longer delay cases.
 
@@ -1567,7 +1610,7 @@ NAND Support
       nsh> echo "This is a test" > /mnt/nand/atest.txt
 
         NOTE:  This will take a long time because it will require reading,
-        modifying, and re-writting the 128KB erase page!
+        modifying, and re-writing the 128KB erase page!
 
       nsh> ls -l /mnt/nand
       /mnt/nand:
@@ -1578,10 +1621,10 @@ NAND Support
 
     NOTES:
 
-    1. Unlike NXFFS, FAT can work with NAND.  But there are some
-       signifcant issues.
+    1. Unlike NXFFS, FAT can work with NAND (at least with PMECC disabled).
+       But there are some significant issues.
 
-    2. First, each NAND write access will cause a 256KB data transefer:  It
+    2. First, each NAND write access will cause a 256KB data transfer:  It
        will read the entire 128KB erase block, modify it and write it back
        to memory.  There is some caching logic so that this cached erase
        block can be re-used if possible and writes will be deferred as long
@@ -1600,14 +1643,23 @@ NAND Support
 
     Another, less general, option would be support bad blocks within FAT.
 
-  STATUS
-  ------
+  STATUS SUMMARY
+  --------------
 
-  1. PMECC has not been tested and is, most likely, non-functional.
+  1. PMECC appears to be working in that I can write a NAND block with its
+     ECC and read the block back and verify that that is are no bit
+     failures.  However, when attempting to work with FAT, it does not
+     work correctly:  The MBR is written and read back correctly, but gets
+     corrupted later for unknown reasons.
 
-  2. DMA works (with software ECC), but I see occasional wild memory
-     clobbering.  DMA should not be used until this problem can be
-     worked out.
+  2. DMA works (with software ECC), but I have seen occasional failurs.  I
+     believe that these issue have been resolved but I recommend enabling
+     DMA with caution.
+
+     In NuttX, DMA will also cost two context switches (and, hence, four
+     register state transfers).  With smaller NAND page sizes (say 2KiB and
+     below), I would not expect a great  performance improvement with DMA
+     for this reason.
 
   3. NXFFS does not work with NAND. NAND differs from other other FLASH
      types several ways.  For one thing, NAND requires error correction
@@ -2102,7 +2154,7 @@ Watchdog Timer
     Drivers (this will automatically be selected):
       CONFIG_WATCHDOG=y                   : Enables watchdog timer driver support
 
-    Application Configuration -> Eamples
+    Application Configuration -> Examples
       CONFIG_EXAMPLES_WATCHDOG=y          : Enable apps/examples/watchdog
 
   The WDT timer is driven off the slow, 32768Hz clock divided by 128. As a
@@ -2165,7 +2217,7 @@ Touchscreen Testing
   These options may also be applied to enable a built-in touchscreen test
   application:
 
-    Applicaton Configuration:
+    Application Configuration:
       CONFIG_EXAMPLES_TOUCHSCREEN=y       : Enable the touchscreen built-int test
       CONFIG_EXAMPLES_TOUCHSCREEN_MINOR=0 : To match the board selection
       CONFIG_EXAMPLES_TOUCHSCREEN_DEVPATH="/dev/input0"
@@ -2213,7 +2265,7 @@ I2S Audio Support
 =================
 
   The SAMA5D3x-EK has two devices on-board that can be used for verification
-  of I2S functionaly:  HDMI and a WM8904 audio CODEC.  As of this writing,
+  of I2S functionality:  HDMI and a WM8904 audio CODEC.  As of this writing,
   the I2S driver is present, but there are not drivers for either the HDMI
   or the WM8904.
 
@@ -2377,7 +2429,7 @@ SAMA5D3x-EK Configuration Options
 
   CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
   cause a 100 second delay during boot-up.  This 100 second delay
-  serves no purpose other than it allows you to calibratre
+  serves no purpose other than it allows you to calibrate
   CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
   the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
   the delay actually is 100 seconds.
@@ -2642,8 +2694,8 @@ Configurations
        entitle "AT25 Serial FLASH" for detailed configuration settings.
 
     7. Support for HSMCI car slots. The SAMA5D3x-EK provides a two SD memory
-       card slots:  (1) a full size SD card slot (J7 labeled MCI0), and (2)
-       a microSD memory card slot (J6 labeled MCI1).  The full size SD card
+       card slots:  (1) a full size SD card slot (J7 labelled MCI0), and (2)
+       a microSD memory card slot (J6 labelled MCI1).  The full size SD card
        slot connects via HSMCI0; the microSD connects vi HSMCI1.  Relevant
        configuration settings can be found in the section entitle "HSMCI
        Card Slots" above.
@@ -2762,7 +2814,7 @@ Configurations
        However, no built-in applications are selected in the base configuration.
 
     5. This configuration has support for the FAT file system built in.  However,
-       by default, there are no block drivers initializeed.  The FAT file system can
+       by default, there are no block drivers initialized.  The FAT file system can
        still be used to create RAM disks.
 
     6. SDRAM support can be enabled by modifying your NuttX configuration as
@@ -2825,7 +2877,7 @@ Configurations
        See the To-Do list below
 
       I2C
-      2013-9-12:  I have been unusuccessful getting the external serial
+      2013-9-12:  I have been unsuccessful getting the external serial
         AT24 EEPROM to work.  I am pretty sure that this is a problem with
         my external AT24 board (the TWI0 bus hangs when the AT24 is plugged
         in).  I will skip the AT24 integration since it is not on the critical
@@ -2852,7 +2904,7 @@ Configurations
     The NxWM window manager is a tiny window manager tailored for use
     with smaller LCDs.  It supports a toolchain, a start window, and
     multiple application windows.  However, to make the best use of
-    the visible LCD space, only one application window is visiable at
+    the visible LCD space, only one application window is visible at
     at time.
 
     The NxWM window manager can be found here:
