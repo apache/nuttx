@@ -219,24 +219,22 @@ static int      nand_dma_write(struct sam_nandcs_s *priv,
 
 /* Raw Data Transfer Helpers */
 
-static int      nand_nfcsram_read(uintptr_t src, uint8_t *dest,
-                  size_t buflen);
+static int      nand_nfcsram_read(struct sam_nandcs_s *priv,
+                  uint8_t *buffer, uint16_t buflen);
+#ifdef CONFIG_SAMA5_HAVE_PMECC
 static int      nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
-                  uint16_t buflen, uint16_t offset);
+                  uint16_t buflen);
+#endif
 
 #ifdef CONFIG_SAMA5_HAVE_PMECC
 static int      nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
                   unsigned int page, void *data);
 #endif
 
-static int      nand_nfcsram_write(const uint8_t *src, uintptr_t dest,
-                  size_t buflen);
-static int      nand_smc_write8(const uint8_t *src, uintptr_t dest,
-                  size_t buflen);
-static int      nand_smc_write16(const uint8_t *src, uintptr_t dest,
-                  size_t buflen);
-static int      nand_write(struct sam_nandcs_s *priv, bool nfcsram,
-                  uint8_t *buffer, size_t buflen, off_t offset);
+static int      nand_nfcsram_write(struct sam_nandcs_s *priv,
+                  uint8_t *buffer, uint16_t buflen, uint16_t offset);
+static int      nand_write(struct sam_nandcs_s *priv, uint8_t *buffer,
+                  uint16_t buflen, uint16_t offset);
 
 /* NAND Access Helpers */
 
@@ -1453,34 +1451,6 @@ static int nand_dma_write(struct sam_nandcs_s *priv,
  * Name: nand_nfcsram_read
  *
  * Description:
- *   Read data from NAND using the NFC SRAM (without DMA)
- *
- * Input Parameters:
- *   src    - NAND data source address
- *   dest   - Buffer that will receive the data from the read
- *   buflen - The number of bytes to transfer
- *
- * Returned Value
- *   OK always
- *
- ****************************************************************************/
-
-static int nand_nfcsram_read(uintptr_t src, uint8_t *dest, size_t buflen)
-{
-  uint8_t *src8 = (uint8_t *)src;
-
-  for (; buflen > 0; buflen--)
-    {
-      *dest++ = *src8++;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: nand_read
- *
- * Description:
  *   Read data from NAND using the NFC SRAM
  *
  * Input Parameters:
@@ -1495,28 +1465,13 @@ static int nand_nfcsram_read(uintptr_t src, uint8_t *dest, size_t buflen)
  *
  ****************************************************************************/
 
-static int nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
-                     uint16_t buflen, uint16_t offset)
+static int nand_nfcsram_read(struct sam_nandcs_s *priv, uint8_t *buffer,
+                             uint16_t buflen)
 {
-  uintptr_t src;
-#ifdef CONFIG_SAMA5_NAND_DMA
-  uint32_t dmaflags;
-#endif
-  int buswidth;
+  int remaining;
   int ret;
 
-  fvdbg("buffer=%p buflen=%d offset=%d\n", buffer, buflen, offset);
-
-  /* Get the data source:  NFC SRAM (perhaps with an offset)
-   * NOTE: We could use the address priv->raw.dataaddr if we want to
-   * bypass NFC SRAM.
-   */
-
-  src = NFCSRAM_BASE + offset;
-
-  /* Get the buswidth */
-
-  buswidth = nandmodel_getbuswidth(&priv->raw.model);
+  fvdbg("buffer=%p buflen=%d\n", buffer, buflen);
 
 #ifdef CONFIG_SAMA5_NAND_DMA
   /* Then perform the transfer via memory-to-memory DMA or not, depending
@@ -1527,13 +1482,19 @@ static int nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
 
   if (priv->dma && buflen > CONFIG_SAMA5_NAND_DMA_THRESHOLD)
     {
+      /* Get the buswidth */
+
+      int buswidth = nandmodel_getbuswidth(&priv->raw.model);
+
       /* Select NFC SRAM DMA */
 
-      dmaflags = (buswidth == 16 ? NFCSRAM_DMA_FLAGS16 : NFCSRAM_DMA_FLAGS8);
+      uint32_t dmaflags =
+        (buswidth == 16 ? NFCSRAM_DMA_FLAGS16 : NFCSRAM_DMA_FLAGS8);
 
       /* Transfer using DMA */
 
-      ret = nand_dma_read(priv, src, (uintptr_t)buffer, buflen, dmaflags);
+      ret = nand_dma_read(priv, NFCSRAM_BASE, (uintptr_t)buffer, buflen,
+            dmaflags);
     }
   else
 #endif
@@ -1541,12 +1502,110 @@ static int nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
   /* Transfer without DMA */
 
     {
-      ret = nand_nfcsram_read(src, buffer, buflen);
+      uint8_t *src8 = (uint8_t *)NFCSRAM_BASE;
+      uint8_t *dest8 = buffer;
+
+      for (remaining = buflen; remaining > 0; remaining--)
+        {
+          *dest8++ = *src8++;
+        }
+
+      ret = OK;
+    }
+
+  nand_dump("NFS SRAM Read", buffer, buflen);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nand_read
+ *
+ * Description:
+ *   Read data directly from the NAND data address.  Currently this only used
+ *   by the PMECC logic which I could not get working if I read from NFC SRAM.
+ *
+ * Input Parameters:
+ *   priv     - Lower-half, private NAND FLASH device state
+ *   nfcsram  - True: Use NFC Host SRAM
+ *   buffer   - Buffer that provides the data for the write
+ *
+ * Returned Value
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMA5_HAVE_PMECC
+static int nand_read(struct sam_nandcs_s *priv, uint8_t *buffer,
+                     uint16_t buflen)
+{
+  int remaining;
+  int buswidth;
+  int ret;
+
+  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+
+  /* Get the buswidth */
+
+  buswidth = nandmodel_getbuswidth(&priv->raw.model);
+
+#ifdef CONFIG_SAMA5_NAND_DMA
+  /* Then perform the transfer via memory-to-memory DMA or not, depending
+   * on if we have a DMA channel assigned and if the transfer is
+   * sufficiently large.  Small DMAs (e.g., for spare data) are not peformed
+   * because the DMA context switch can take more time that the DMA itself.
+   */
+
+  if (priv->dma && buflen > CONFIG_SAMA5_NAND_DMA_THRESHOLD)
+    {
+      /* Select NFC DATA DMA */
+
+      uint32_t dmaflags =
+        (buswidth == 16 ? NAND_DMA_FLAGS16 : NAND_DMA_FLAGS8);
+
+      /* Transfer using DMA */
+
+      ret = nand_dma_read(priv, priv->raw.dataaddr, (uintptr_t)buffer,
+                          buflen, dmaflags);
+    }
+  else
+#endif
+
+  /* Transfer without DMA */
+
+    {
+      /* Check the data bus width of the NAND FLASH */
+
+      remaining = buflen;
+      if (buswidth == 16)
+        {
+          volatile uint16_t *src16  = (volatile uint16_t *)priv->raw.dataaddr;
+          uint16_t *dest16 = (uint16_t *)buffer;
+
+          DEBUGASSERT(((uintptr_t)buffer & 1) == 0);
+
+          for (; remaining > 1; remaining -= sizeof(uint16_t))
+            {
+              *dest16++ = *src16;
+            }
+        }
+      else
+        {
+          volatile uint8_t *src8  = (volatile uint8_t *)priv->raw.dataaddr;
+          uint8_t *dest8 = (uint8_t *)buffer;
+
+          for (; remaining > 0; remaining--)
+            {
+              *dest8++ = *src8;
+            }
+        }
+
+      ret = OK;
     }
 
   nand_dump("NAND Read", buffer, buflen);
   return ret;
 }
+#endif
 
 /****************************************************************************
  * Name: nand_read_pmecc
@@ -1616,7 +1675,7 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   regval |= (HSMC_CFG_RSPARE | HSMC_CFG_RBEDGE | HSMC_CFG_DTOCYC(15) |
              HSMC_CFG_DTOMUL_1048576 |
-             HSMC_CFG_NFCSPARESIZE((sparesize-1) >> 2));
+             HSMC_CFG_NFCSPARESIZE((sparesize - 1) >> 2));
   nand_putreg(SAM_HSMC_CFG, regval);
 
   /* Calculate actual address of the page */
@@ -1639,9 +1698,12 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
   /* Start the data phase and perform the transfer */
 
   nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DATA);
+
+  nand_setup_rbedge(priv);
   nand_nfc_cleale(priv,
-                  HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN | HSMC_CLE_VCMD2_EN | HSMC_CLE_DATA_EN,
+                  HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN | HSMC_CLE_VCMD2_EN,
                   COMMAND_READ_1, COMMAND_READ_2, 0, rowaddr);
+  nand_wait_rbedge(priv);
 
   /* Reset the PMECC module */
 
@@ -1651,20 +1713,21 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DATA);
 
-  /* Read the data area into the caller provided buffer (pagesize bytes) */
+  /* Read the data area into the caller provided buffer (pagesize bytes).
+   * NOTE: NFC SRAM is not used.  In that case, the wait for PMECC not
+   * busy below would hang.
+   */
 
-  ret = nand_read(priv, (uint8_t *)data, pagesize, 0);
+  ret = nand_read(priv, (uint8_t *)data, pagesize);
   if (ret < 0)
     {
       fdbg("ERROR: nand_read for data region failed: %d\n", ret);
       return ret;
     }
 
-  /* Read the spare area into priv->raw.spare.  The data to be read lies at
-   * offset pagesize in NFC SRAM.
-   */
+  /* Now read the spare area into priv->raw.spare (sparesize bytes). */
 
-  ret = nand_read(priv, priv->raw.spare, priv->raw.model.sparesize, pagesize);
+  ret = nand_read(priv, priv->raw.spare, sparesize);
   if (ret < 0)
     {
       fdbg("ERROR: nand_read for spare region failed: %d\n", ret);
@@ -1682,98 +1745,10 @@ static int nand_read_pmecc(struct sam_nandcs_s *priv, off_t block,
  * Name: nand_nfcsram_write
  *
  * Description:
- *   Write data to NAND using the NFC SRAM (without DMA)
- *
- * Input Parameters:
- *   src    - Buffer that provides the data for the write
- *   dest   - NAND data destination address
- *   buflen - The number of bytes to transfer
- *
- * Returned Value
- *   OK always
- *
- ****************************************************************************/
-
-static int nand_nfcsram_write(const uint8_t *src, uintptr_t dest, size_t buflen)
-{
-  uint8_t *dest8 = (uint8_t *)dest;
-
-  for (; buflen > 0; buflen--)
-    {
-      *dest8++ = *src++;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: nand_smc_write8
- *
- * Description:
- *   Write 8-bit wide data to NAND using the NAND data address (without DMA)
- *
- * Input Parameters:
- *   src    - Buffer that provides the data for the write
- *   dest   - NAND data destination address
- *   buflen - The number of bytes to transfer
- *
- * Returned Value
- *   OK always
- *
- ****************************************************************************/
-
-static int nand_smc_write8(const uint8_t *src, uintptr_t dest, size_t buflen)
-{
-  volatile uint8_t *dest8  = (volatile uint8_t *)dest;
-
-  for (; buflen > 0; buflen--)
-    {
-      *dest8 = *src++;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: nand_smc_write16
- *
- * Description:
- *   Write 16-bit wide data to NAND using the NAND data address (without DMA)
- *
- * Input Parameters:
- *   src    - Buffer that provides the data for the write
- *   dest   - NAND data destination address
- *   buflen - The number of bytes to transfer
- *
- * Returned Value
- *   OK always
- *
- ****************************************************************************/
-
-static int nand_smc_write16(const uint8_t *src, uintptr_t dest, size_t buflen)
-{
-  volatile uint16_t *dest16  = (volatile uint16_t *)dest;
-  const uint16_t *src16 = (const uint16_t *)src;
-
-  DEBUGASSERT(((uintptr_t)src & 1) == 0);
-
-  for (; buflen > 1; buflen -=  sizeof(uint16_t))
-    {
-      *dest16 = *src16++;
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: nand_write
- *
- * Description:
- *   Write data to NAND using the appropriate method
+ *   Write data to NAND using NAND NFC SRAM
  *
  * Input Parameters:
  *   priv     - Lower-half, private NAND FLASH device state
- *   nfcsram  - True: Use NFC Host SRAM
  *   buffer   - Buffer that provides the data for the write
  *   offset   - Data offset in bytes
  *
@@ -1782,54 +1757,18 @@ static int nand_smc_write16(const uint8_t *src, uintptr_t dest, size_t buflen)
  *
  ****************************************************************************/
 
-static int nand_write(struct sam_nandcs_s *priv, bool nfcsram,
-                      uint8_t *buffer, size_t buflen, off_t offset)
+static int nand_nfcsram_write(struct sam_nandcs_s *priv, uint8_t *buffer,
+                              uint16_t buflen, uint16_t offset)
 {
   uintptr_t dest;
-#ifdef CONFIG_SAMA5_NAND_DMA
-  uint32_t dmaflags;
-#endif
-  int buswidth;
+  int ret;
 
-  fvdbg("nfcsram=%d buffer=%p buflen=%d offset=%d\n",
-        nfcsram, buffer, (int)buflen, (int)offset);
+  fvdbg("buffer=%p buflen=%d offset=%d\n", buffer, buflen, offset);
+  nand_dump("NFC SRAM Write", buffer, buflen);
 
-  nand_dump("NAND Write", buffer, buflen);
+  /* Apply the offset to the destination address */
 
-  /* Get the buswidth */
-
-  buswidth = nandmodel_getbuswidth(&priv->raw.model);
-
-  /* Pick the data destination:  The NFC SRAM or the NAND data address */
-
-  if (nfcsram)
-    {
-      /* Destination is NFC SRAM */
-
-      dest = NFCSRAM_BASE;
-
-#ifdef CONFIG_SAMA5_NAND_DMA
-      /* Select NFC SRAM DMA */
-
-      dmaflags = (buswidth == 16 ? NFCSRAM_DMA_FLAGS16 : NFCSRAM_DMA_FLAGS8);
-#endif
-    }
-  else
-    {
-      /* Destination is NFC NAND */
-
-      dest = priv->raw.dataaddr;
-
-#ifdef CONFIG_SAMA5_NAND_DMA
-      /* Select NAND DMA */
-
-      dmaflags = (buswidth == 16 ? NAND_DMA_FLAGS16 : NAND_DMA_FLAGS8);
-#endif
-    }
-
-  /* Apply the offset to the source address */
-
-  dest += offset;
+  dest = NFCSRAM_BASE + offset;
 
 #ifdef CONFIG_SAMA5_NAND_DMA
   /* Then perform the transfer via memory-to-memory DMA or not, depending
@@ -1840,32 +1779,124 @@ static int nand_write(struct sam_nandcs_s *priv, bool nfcsram,
 
   if (priv->dma && buflen > CONFIG_SAMA5_NAND_DMA_THRESHOLD)
     {
+      /* Get the buswidth */
+
+      int buswidth = nandmodel_getbuswidth(&priv->raw.model);
+
+      /* Select NFC SRAM DMA */
+
+      uint32_t dmaflags =
+        (buswidth == 16 ? NFCSRAM_DMA_FLAGS16 : NFCSRAM_DMA_FLAGS8);
+
       /* Transfer using DMA */
 
-      return nand_dma_write(priv, (uintptr_t)buffer, dest, buflen, dmaflags);
+      ret = nand_dma_write(priv, (uintptr_t)buffer, dest, buflen, dmaflags);
     }
   else
 #endif
 
   /* Transfer without DMA */
 
-  if (nfcsram)
     {
-      return nand_nfcsram_write(buffer, dest, buflen);
+      uint8_t *dest8 = (uint8_t *)dest;
+
+      for (; buflen > 0; buflen--)
+        {
+          *dest8++ = *buffer++;
+        }
+
+      ret = OK;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: nand_write
+ *
+ * Description:
+ *   Write data to NAND using the NAND data address.
+ *
+ * Input Parameters:
+ *   priv     - Lower-half, private NAND FLASH device state
+ *   buffer   - Buffer that provides the data for the write
+ *   offset   - Data offset in bytes
+ *
+ * Returned Value
+ *   OK on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int nand_write(struct sam_nandcs_s *priv, uint8_t *buffer,
+                      uint16_t buflen, uint16_t offset)
+{
+  uintptr_t dest;
+  int buswidth;
+  int ret;
+
+  fvdbg("buffer=%p buflen=%d offset=%d\n", buffer, buflen, offset);
+  nand_dump("NAND Write", buffer, buflen);
+
+  /* Apply the offset to the destination address */
+
+  dest =  priv->raw.dataaddr + offset;
+
+  /* Get the buswidth */
+
+  buswidth = nandmodel_getbuswidth(&priv->raw.model);
+
+#ifdef CONFIG_SAMA5_NAND_DMA
+  /* Then perform the transfer via memory-to-memory DMA or not, depending
+   * on if we have a DMA channel assigned and if the transfer is
+   * sufficiently large.  Small DMAs (e.g., for spare data) are not peformed
+   * because the DMA context switch can take more time that the DMA itself.
+   */
+
+  if (priv->dma && buflen > CONFIG_SAMA5_NAND_DMA_THRESHOLD)
+    {
+      /* Select NFC DATA DMA */
+
+      uint32_t dmaflags =
+        (buswidth == 16 ? NAND_DMA_FLAGS16 : NAND_DMA_FLAGS8);
+
+      /* Transfer using DMA */
+
+      ret = nand_dma_write(priv, (uintptr_t)buffer, dest, buflen, dmaflags);
     }
   else
+#endif
+
+  /* Transfer without DMA */
+
     {
       /* Check the data bus width of the NAND FLASH */
 
       if (buswidth == 16)
         {
-          return nand_smc_write16(buffer, dest, buflen);
+          volatile uint16_t *dest16  = (volatile uint16_t *)dest;
+          const uint16_t *src16 = (const uint16_t *)buffer;
+
+          DEBUGASSERT(((uintptr_t)buffer & 1) == 0);
+
+          for (; buflen > 1; buflen -=  sizeof(uint16_t))
+            {
+              *dest16 = *src16++;
+            }
         }
       else
         {
-          return nand_smc_write8(buffer, dest, buflen);
+          volatile uint8_t *dest8  = (volatile uint8_t *)dest;
+
+          for (; buflen > 0; buflen--)
+            {
+              *dest8 = *buffer++;
+            }
         }
+
+      ret = OK;
     }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1938,7 +1969,7 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
   /* Configure the SMC */
 
   regval |= (HSMC_CFG_RBEDGE | HSMC_CFG_DTOCYC(15) | HSMC_CFG_DTOMUL_1048576 |
-             HSMC_CFG_NFCSPARESIZE((sparesize-1) >> 2));
+             HSMC_CFG_NFCSPARESIZE((sparesize -1 ) >> 2));
   nand_putreg(SAM_HSMC_CFG, regval);
 
   /* Calculate actual address of the page */
@@ -1958,10 +1989,10 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
 
   if (data)
     {
-      ret = nand_read(priv, (uint8_t *)data, pagesize, 0);
+      ret = nand_nfcsram_read(priv, (uint8_t *)data, pagesize);
       if (ret < 0)
         {
-          fdbg("ERROR: nand_read for data region failed: %d\n", ret);
+          fdbg("ERROR: nand_nfcsram_read for data region failed: %d\n", ret);
           return ret;
         }
     }
@@ -1973,10 +2004,10 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
 
   if (spare)
     {
-      ret = nand_read(priv, (uint8_t *)spare, sparesize, 0);
+      ret = nand_nfcsram_read(priv, (uint8_t *)spare, sparesize);
       if (ret < 0)
         {
-          fdbg("ERROR: nand_read for spare region failed: %d\n", ret);
+          fdbg("ERROR: nand_nfcsram_read for spare region failed: %d\n", ret);
           return ret;
         }
     }
@@ -2033,7 +2064,8 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
   ret = nand_read_pmecc(priv, block, page, data);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed to read page\n");
+      fdbg("ERROR: Block %d page %d Failed to read page\n",
+           block, page, ret);
       goto errout;
     }
 
@@ -2042,15 +2074,18 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
   regval = nand_getreg(SAM_HSMC_PMECCISR);
   if (regval)
     {
-      fdbg("ERROR: block=%d page=%d Corrupted sectors: %08x\n",
-           block, page, regval);
+      /* Bad sectors.  Check if this is because spare area has been erased */
+      /* First, re-read the spare area.  REVISIT:  Is this necessary? */
 
-      /* Check if the spare area was erased
-       * REVISIT: Necessary to re-read.  Isn't the spare data alread
-       * intack in priv->raw.spare from nand_read_pmecc()?
-       */
+      ret = nand_readpage_noecc(priv, block, page, NULL, priv->raw.spare);
+      if (ret < 0)
+        {
+          fdbg("ERROR: Block %d page %d Failed to re-read spare area: %d\n",
+               block, page, ret);
+          goto errout;
+        }
 
-      //nand_readpage_noecc(priv, block, page, NULL, priv->raw.spare);
+      /* Then check if all bytes are in the erased state */
 
       sparesize = nandmodel_getsparesize(&priv->raw.model);
       for (i = 0 ; i < sparesize; i++)
@@ -2061,13 +2096,20 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
             }
         }
 
-      /* The spare area has been erased */
+      /* Has the spare area has been erased? */
 
       if (i >= sparesize)
         {
-          /* Clear sector errors */
+          /* Yes.. clear sector errors */
 
+          fdbg("Block=%d page=%d has been erased: %08x\n",
+               block, page, regval);
           regval = 0;
+        }
+      else
+        {
+          fdbg("ERROR: block=%d page=%d Corrupted sectors: %08x\n",
+               block, page, regval);
         }
     }
 
@@ -2076,7 +2118,8 @@ static int nand_readpage_pmecc(struct sam_nandcs_s *priv, off_t block,
   ret = pmecc_correction(regval, (uintptr_t)data);
   if (ret < 0)
     {
-      fdbg("ERROR: block=%d page=%d Unrecoverable data\n", block, page);
+      fdbg("ERROR: block=%d page=%d Unrecoverable data error: %d\n",
+           block, page, ret);
     }
 
   /* Disable auto mode */
@@ -2159,7 +2202,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
   /* Configure the SMC */
 
   regval |= (HSMC_CFG_RBEDGE | HSMC_CFG_DTOCYC(15) | HSMC_CFG_DTOMUL_1048576 |
-             HSMC_CFG_NFCSPARESIZE((sparesize-1) >> 2));
+             HSMC_CFG_NFCSPARESIZE((sparesize - 1) >> 2));
 
   if (spare)
     {
@@ -2178,19 +2221,19 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
 
   if (data)
     {
-      ret = nand_write(priv, true, (uint8_t *)data, pagesize, 0);
+      ret = nand_nfcsram_write(priv, (uint8_t *)data, pagesize, 0);
       if (ret < 0)
         {
-          fdbg("ERROR: nand_write for data region failed: %d\n", ret);
+          fdbg("ERROR: nand_nfcsram_write for data region failed: %d\n", ret);
           return ret;
         }
 
       if (spare)
         {
-          ret = nand_write(priv, true, (uint8_t *)spare, sparesize, pagesize);
+          ret = nand_nfcsram_write(priv, (uint8_t *)spare, sparesize, pagesize);
           if (ret < 0)
             {
-              fdbg("ERROR: nand_write for data region failed: %d\n", ret);
+              fdbg("ERROR: nand_nfcsram_write for data region failed: %d\n", ret);
               return ret;
             }
         }
@@ -2230,7 +2273,7 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
                       HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN | HSMC_ALE_ROW_EN,
                       COMMAND_WRITE_1,0,  pagesize, rowaddr);
 
-      ret = nand_write(priv, false, (uint8_t *)spare, sparesize, 0);
+      ret = nand_write(priv, (uint8_t *)spare, sparesize, 0);
       if (ret < 0)
         {
           fdbg("ERROR: nand_write for spare region failed: %d\n", ret);
@@ -2268,16 +2311,17 @@ static int nand_writepage_noecc(struct sam_nandcs_s *priv, off_t block,
 static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
              unsigned int page, const void *data)
 {
-  uint32_t pagesize;
-  uint32_t rowaddr;
-  uint32_t startaddr;
-  uint32_t eccpersector;
-  uint32_t sectornumber;
-  uint32_t sectorindex;
   uint32_t regval;
-  uint8_t *pmecc[8];
-  uint8_t sectersperpage;
-  int i;
+  volatile uint8_t *pmecc;
+  uint8_t *ecc;
+  unsigned int pagesize;
+  unsigned int rowaddr;
+  unsigned int eccsaddr;
+  unsigned int eccpersector;
+  unsigned int sectersperpage;
+  unsigned int eccsize;
+  unsigned int sector;
+  unsigned int i;
   int ret = 0;
 
   fvdbg("block=%d page=%d data=%p\n", (int)block, page, data);
@@ -2297,22 +2341,25 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   /* Calculate the start page address */
 
-  regval    = nand_getreg(SAM_HSMC_PMECCSADDR);
-  pagesize  = nandmodel_getpagesize(&priv->raw.model);
-  startaddr = regval + pagesize;
+  regval   = nand_getreg(SAM_HSMC_PMECCSADDR);
+  pagesize = nandmodel_getpagesize(&priv->raw.model);
+  eccsaddr = pagesize + regval;
 
   /* Calculate physical address of the page */
 
-  rowaddr   = block * nandmodel_pagesperblock(&priv->raw.model) + page;
+  rowaddr = block * nandmodel_pagesperblock(&priv->raw.model) + page;
+
+  fvdbg("pagesize=%d eccsaddr=%d rowaddr=%d\n", pagesize, eccsaddr, rowaddr);
 
   /* Write data area if needed */
 
   if (data)
     {
-      ret = nand_write(priv, true, (uint8_t *)data, pagesize, 0);
+      ret = nand_nfcsram_write(priv, (uint8_t *)data, pagesize, 0);
       if (ret < 0)
         {
-          fdbg("ERROR: nand_write for data region failed: %d\n", ret);
+          fdbg("ERROR: Block %d page %d nand_nfcsram_write for data region failed: %d\n",
+               block, page, ret);
           goto errout;
         }
     }
@@ -2347,13 +2394,6 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_RST);
   nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_ENABLE);
 
-  /* Read the PMECC redundancy base address for each of (up to) 8 sectors */
-
-  for (i = 0; i < 8; i++)
-    {
-      pmecc[i] = (uint8_t*)(SAM_HSMC_PMECC_BASE(i));
-    }
-
   /* Start a data phase */
 
   nand_putreg(SAM_HSMC_PMECCTRL, HSMC_PMECCTRL_DATA);
@@ -2373,7 +2413,7 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
 
   nand_nfc_cleale(priv,
                   HSMC_CLE_WRITE_EN | HSMC_ALE_COL_EN,
-                  COMMAND_RANDOM_IN, 0, startaddr, 0);
+                  COMMAND_RANDOM_IN, 0, eccsaddr, 0);
 
   /* Wait until the kernel of the PMECC is not busy */
 
@@ -2382,7 +2422,10 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   /* Write the ECC */
 
   eccpersector = (pmecc_get_eccsize()) / sectersperpage;
-  sectornumber = 1 << pmecc_get_pagesize();
+  eccsize      = sectersperpage * eccpersector;
+
+  fvdbg("sectersperpage=%d eccpersector=%d eccsize=%d\n",
+        sectersperpage, eccpersector, eccsize);
 
 #ifdef CONFIG_SAMA5_PMECC_TRIMPAGE
   if (nand_trrimffs(priv) && page >= nand_get_trimpage(priv))
@@ -2391,33 +2434,32 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
        * cleanly erased NAND partitions
        */
 
-      for (sectorindex = 0; sectorindex < sectornumber; sectorindex++)
-        {
-          for (i = 0; i < eccpersector; i++)
-            {
-              g_nand.ecctab[sectorindex * eccpersector + i] = 0xff;
-            }
-        }
+      memset(g_nand.ecctab, 0xff, eccsize);
     }
   else
 #endif
     {
-      /* Read all ECC registers */
+      /* Read ECC registers for each sector in the page */
 
-      for (sectorindex = 0; sectorindex < sectornumber; sectorindex++)
+      ecc = g_nand.ecctab;
+      for (sector = 0; sector < sectersperpage; sector++)
         {
-          for(i = 0; i < eccpersector; i++)
+          pmecc = (volatile uint8_t *)SAM_HSMC_PMECC_BASE(sector);
+
+          /* Read all EEC registers for this page */
+
+          for (i = 0; i < eccpersector; i++)
             {
-              g_nand.ecctab[sectorindex * eccpersector + i] = pmecc[sectorindex][i];
+              *ecc++ = *pmecc++;
             }
         }
     }
 
-  ret = nand_write(priv, false, (uint8_t *)(uint8_t *)g_nand.ecctab,
-                   sectornumber * eccpersector, 0);
+  ret = nand_write(priv, (uint8_t *)g_nand.ecctab, eccsize, 0);
   if (ret < 0)
     {
-      fdbg("ERROR: nand_write for spare region failed: %d\n", ret);
+      fdbg("ERROR: Block %d page %d nand_write for spare region failed: %d\n",
+           block, page, ret);
       goto errout;
     }
 
@@ -2429,7 +2471,8 @@ static int nand_writepage_pmecc(struct sam_nandcs_s *priv, off_t block,
   ret = nand_operation_complete(priv);
   if (ret < 0)
     {
-      fdbg("ERROR: Failed writing data area: %d\n", ret);
+      fdbg("ERROR: Block %d page %d Failed writing data area: %d\n",
+           block, page, ret);
     }
 
   /* Disable the PMECC */
@@ -2477,7 +2520,7 @@ static inline int nand_tryeraseblock(struct sam_nandcs_s *priv, off_t block)
   ret = nand_operation_complete(priv);
   if (ret < 0)
     {
-      fdbg("ERROR: Could not erase block %d: %d\n", block, ret);
+      fdbg("ERROR: Block %d Could not erase: %d\n", block, ret);
     }
 
   return ret;
@@ -2513,7 +2556,7 @@ static int nand_eraseblock(struct nand_raw_s *raw, off_t block)
       retries--;
     }
 
-  fdbg("ERROR: Failed to erase %d after %d tries\n",
+  fdbg("ERROR: Block %d Failed to erase after %d tries\n",
        (int)block, NAND_ERASE_NRETRIES);
 
   nand_unlock();
@@ -2638,16 +2681,19 @@ static int nand_readpage(struct nand_raw_s *raw, off_t block,
     case NANDECC_NONE:
     case NANDECC_CHIPECC:
       ret = nand_readpage_noecc(priv, block, page, data, spare);
+      break;
 
 #ifdef CONFIG_SAMA5_HAVE_PMECC
     case NANDECC_PMECC:
       DEBUGASSERT(!spare);
       ret = nand_readpage_pmecc(priv, block, page, data);
+      break;
 #endif
 
     case NANDECC_SWECC:
     default:
       ret = -EINVAL;
+      break;
     }
 
   nand_unlock();
@@ -2698,16 +2744,19 @@ static int nand_writepage(struct nand_raw_s *raw, off_t block,
     case NANDECC_NONE:
     case NANDECC_CHIPECC:
       ret = nand_writepage_noecc(priv, block, page, data, spare);
+      break;
 
 #ifdef CONFIG_SAMA5_HAVE_PMECC
     case NANDECC_PMECC:
       DEBUGASSERT(!spare);
       ret = nand_writepage_pmecc(priv, block, page, data);
+      break;
 #endif
 
     case NANDECC_SWECC:
     default:
       ret = -EINVAL;
+      break;
     }
 
   nand_unlock();
@@ -2771,7 +2820,7 @@ struct mtd_dev_s *sam_nand_initialize(int cs)
 
   fvdbg("CS%d\n", cs);
 
-  /* Select the device structure */
+  /* Select the device structure (In SAMA5D3, NAND is only supported on CS3). */
 
 #ifdef CONFIG_SAMA5_EBICS0_NAND
   if (cs == HSMC_CS0)
