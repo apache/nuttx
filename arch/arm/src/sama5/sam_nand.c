@@ -107,13 +107,13 @@
 
 /* DMA Configuration */
 
-#define NFCSRAM_DMA_FLAGS8 \
+#define NFCSRAM_DMA_FLAGS \
    DMACH_FLAG_FIFOCFG_LARGEST | \
    (((0x3f) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF0 | \
-   DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_PERIPHINCREMENT | \
+   DMACH_FLAG_PERIPHWIDTH_32BITS | DMACH_FLAG_PERIPHINCREMENT | \
    DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
    ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
-   DMACH_FLAG_MEMWIDTH_8BITS | DMACH_FLAG_MEMINCREMENT | \
+   DMACH_FLAG_MEMWIDTH_32BITS | DMACH_FLAG_MEMINCREMENT | \
    DMACH_FLAG_MEMCHUNKSIZE_1)
 
 #define NAND_DMA_FLAGS8 \
@@ -122,15 +122,6 @@
    DMACH_FLAG_PERIPHWIDTH_8BITS | DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
    ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
    DMACH_FLAG_MEMWIDTH_8BITS | DMACH_FLAG_MEMINCREMENT | \
-   DMACH_FLAG_MEMCHUNKSIZE_1)
-
-#define NFCSRAM_DMA_FLAGS16 \
-   DMACH_FLAG_FIFOCFG_LARGEST | \
-   (((0x3f) << DMACH_FLAG_PERIPHPID_SHIFT) | DMACH_FLAG_PERIPHAHB_AHB_IF0 | \
-   DMACH_FLAG_PERIPHWIDTH_16BITS | DMACH_FLAG_PERIPHINCREMENT | \
-   DMACH_FLAG_PERIPHCHUNKSIZE_1 | \
-   ((0x3f) << DMACH_FLAG_MEMPID_SHIFT) | DMACH_FLAG_MEMAHB_AHB_IF0 | \
-   DMACH_FLAG_MEMWIDTH_16BITS | DMACH_FLAG_MEMINCREMENT | \
    DMACH_FLAG_MEMCHUNKSIZE_1)
 
 #define NAND_DMA_FLAGS16 \
@@ -1487,18 +1478,11 @@ static int nand_nfcsram_read(struct sam_nandcs_s *priv, uint8_t *buffer,
 
   if (priv->dma && buflen > CONFIG_SAMA5_NAND_DMA_THRESHOLD)
     {
-      /* Get the buswidth */
-
-      int buswidth = nandmodel_getbuswidth(&priv->raw.model);
-
-      /* Select NFC SRAM DMA */
-
-      uint32_t dmaflags =
-        (buswidth == 16 ? NFCSRAM_DMA_FLAGS16 : NFCSRAM_DMA_FLAGS8);
+      DEBUGASSERT(((uintptr_t)buffer & 3) == 0 && ((uintptr_t)src & 3) == 0);
 
       /* Transfer using DMA */
 
-      ret = nand_dma_read(priv, src, (uintptr_t)buffer, buflen, dmaflags);
+      ret = nand_dma_read(priv, src, (uintptr_t)buffer, buflen, NFCSRAM_DMA_FLAGS);
     }
   else
 #endif
@@ -1797,18 +1781,11 @@ static int nand_nfcsram_write(struct sam_nandcs_s *priv, uint8_t *buffer,
 
   if (priv->dma && buflen > CONFIG_SAMA5_NAND_DMA_THRESHOLD)
     {
-      /* Get the buswidth */
-
-      int buswidth = nandmodel_getbuswidth(&priv->raw.model);
-
-      /* Select NFC SRAM DMA */
-
-      uint32_t dmaflags =
-        (buswidth == 16 ? NFCSRAM_DMA_FLAGS16 : NFCSRAM_DMA_FLAGS8);
+      DEBUGASSERT(((uintptr_t)buffer & 3) == 0 && ((uintptr_t)dest & 3) == 0);
 
       /* Transfer using DMA */
 
-      ret = nand_dma_write(priv, (uintptr_t)buffer, dest, buflen, dmaflags);
+      ret = nand_dma_write(priv, (uintptr_t)buffer, dest, buflen, NFCSRAM_DMA_FLAGS);
     }
   else
 #endif
@@ -2015,14 +1992,15 @@ static int nand_readpage_noecc(struct sam_nandcs_s *priv, off_t block,
         }
     }
 
-  /* Read the spare area if so requested.  Read NFS SRAM from offset 0 in any
-   * case because the coladdr was appropiately set above for the case where
-   * there is no data.
+  /* Read the spare area if so requested.  If there is no data, then the
+   * spare data will appear at offset 0; If there is data, thenthe spare data
+   * will appear followign the data at offset pagesize.
    */
 
   if (spare)
     {
-      ret = nand_nfcsram_read(priv, (uint8_t *)spare, sparesize, 0);
+      uint16_t offset = data ? pagesize : 0;
+      ret = nand_nfcsram_read(priv, (uint8_t *)spare, sparesize, offset);
       if (ret < 0)
         {
           fdbg("ERROR: nand_nfcsram_read for spare region failed: %d\n", ret);
