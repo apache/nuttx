@@ -149,7 +149,7 @@ static int fat_checkbootrecord(struct fat_mountpt_s *fs)
   /* Verify the FAT32 file system type. The determination of the file
    * system type is based on the number of clusters on the volume:  FAT12
    * volume has <= FAT_MAXCLUST12 (4084) clusters, a FAT16 volume has <=
-   * FAT_MINCLUST16 (Microsoft says < 65,525) clusters, and any larger
+   * FAT_MAXCLUST16 (Microsoft says < 65,525) clusters, and any larger
    * is FAT32.
    *
    * Get the number of 32-bit directory entries in root directory (zero
@@ -568,7 +568,7 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
   ret = fat_checkbootrecord(fs);
   if (ret != OK)
     {
-      /* The contents of sector 0 is not a boot record.  It could be a
+      /* The contents of sector 0 is not a boot record.  It could be a DOS
        * partition, however.  Assume it is a partition and get the offset
        * into the partition table.  This table is at offset MBR_TABLE and is
        * indexed by 16x the partition number.
@@ -603,7 +603,9 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
             {
               /* Failed to read the sector */
 
-              goto errout_with_buffer;
+              fdbg("ERROR: Failed to read sector %ld: %d\n",
+                   (long)fs->fs_fatbase, ret);
+              continue;
             }
 
           /* Check if this is a boot record */
@@ -623,6 +625,7 @@ int fat_mount(struct fat_mountpt_s *fs, bool writeable)
           ret = fat_hwread(fs, fs->fs_buffer, 0, 1);
           if (ret < 0)
             {
+              fdbg("ERROR: Failed to re-read sector 0: %d\n", ret);
               goto errout_with_buffer;
             }
         }
@@ -1866,5 +1869,3 @@ int fat_currentsector(struct fat_mountpt_s *fs, struct fat_file_s *ff,
 
   return -ENOSPC;
 }
-
-

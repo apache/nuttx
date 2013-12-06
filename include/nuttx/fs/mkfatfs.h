@@ -114,7 +114,9 @@ extern "C" {
  * Name: mkfatfs
  *
  * Description:
- *   Make a FAT file system image on the specified block device
+ *   Make a FAT file system image on the specified block device.  This
+ *   function can automatically format a FAT12 or FAT16 file system.  By
+ *   tradition, FAT32 will only be selected is explicitly requested.
  *
  * Inputs:
  *   pathname - the full path to a registered block driver

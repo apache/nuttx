@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fat/fs_configfat.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,7 +91,7 @@ struct fat_config_s
  * Message begins at offset 29; Sector relative offset must be poked into
  * offset 3.
  */
- 
+
 static uint8_t g_bootcodeblob[] =
 {
   0x0e, 0x1f, 0xbe, 0x00, 0x7c, 0xac, 0x22, 0xc0, 0x74, 0x0b, 0x56,
@@ -132,6 +132,7 @@ static uint8_t g_bootcodeblob[] =
  *  >0: The size of one FAT in sectors.
  *
  ****************************************************************************/
+
 static inline uint32_t
 mkfatfs_nfatsect12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                    uint32_t navailsects)
@@ -158,14 +159,14 @@ mkfatfs_nfatsect12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
    *
    * The solution to this set of linear equations is:
    *
-   *   nfatsects  = (3 * navailsects + 6 * clustersize) / 
+   *   nfatsects  = (3 * navailsects + 6 * clustersize) /
    *                (3 * nfats + 2 * sectorsize * clustersize)
    *
    * The numerator would overflow uint32_t if:
    *
    *   3 * navailsects + 6 * clustersize > 0xffffffff
    *
-   * Or 
+   * Or
    *
    *   navailsects > 0x55555555 - 2 * clustersize
    */
@@ -209,6 +210,7 @@ mkfatfs_nfatsect12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
  *    The size of one FAT in sectors.
  *
  ****************************************************************************/
+
 static inline uint32_t
 mkfatfs_nfatsect16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                    uint32_t navailsects)
@@ -235,7 +237,7 @@ mkfatfs_nfatsect16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
    *
    * The solution to this set of linear equations is:
    *
-   *   nfatsects  = (navailsects + 2 * clustersize) / 
+   *   nfatsects  = (navailsects + 2 * clustersize) /
    *                (nfats + sectorsize * clustersize / 2)
    *
    * Overflow in the calculation of the numerator could occur if:
@@ -253,7 +255,8 @@ mkfatfs_nfatsect16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
       denom = fmt->ff_nfats + (var->fv_sectorsize << (fmt->ff_clustshift - 1));
       numer = navailsects + (1 << (fmt->ff_clustshift + 1));
     }
-   return (uint32_t)((numer + denom - 1) / denom);
+
+  return (uint32_t)((numer + denom - 1) / denom);
 }
 
 /****************************************************************************
@@ -275,6 +278,7 @@ mkfatfs_nfatsect16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
  *   The size of one FAT in sectors.
  *
  ****************************************************************************/
+
 static inline uint32_t
 mkfatfs_nfatsect32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                    uint32_t navailsects)
@@ -301,7 +305,7 @@ mkfatfs_nfatsect32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
    *
    * The solution to this set of linear equations is:
    *
-   *   nfatsects  = (navailsects + 3 * clustersize) / 
+   *   nfatsects  = (navailsects + 3 * clustersize) /
    *                (nfats + sectorsize * clustersize / 4)
    *
    * Overflow in the 32-bit calculation of the numerator could occur if:
@@ -324,7 +328,8 @@ mkfatfs_nfatsect32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
       denom = fmt->ff_nfats + (var->fv_sectorsize << (fmt->ff_clustshift - 2));
       numer = navailsects + (1 << (fmt->ff_clustshift + 1)) + (1 << fmt->ff_clustshift);
     }
-   return (uint32_t)((numer + denom - 1) / denom);
+
+  return (uint32_t)((numer + denom - 1) / denom);
 }
 
 /****************************************************************************
@@ -344,11 +349,12 @@ mkfatfs_nfatsect32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
  *   size is the returned value.
  *
  ****************************************************************************/
+
 static inline uint8_t
 mkfatfs_clustersearchlimits(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 {
   uint8_t mxclustshift;
-  
+
   /* Did the caller already pick the cluster size?  If not, the clustshift value
    * will be 0xff
    */
@@ -381,7 +387,7 @@ mkfatfs_clustersearchlimits(FAR struct fat_format_s *fmt, FAR struct fat_var_s *
         {
           /* 32k sectors, start with 16 sector/cluster. */
           fmt->ff_clustshift = 4;
-        }   
+        }
       else
         {
           /* Otherwise, 32 sector/cluster. */
@@ -399,9 +405,10 @@ mkfatfs_clustersearchlimits(FAR struct fat_format_s *fmt, FAR struct fat_var_s *
       /* The caller has selected a cluster size.  There will be no search!
        * Just set the maximum to the caller specificed value.
        */
- 
+
       mxclustshift = fmt->ff_clustshift;
     }
+
   return mxclustshift;
 }
 
@@ -416,13 +423,14 @@ mkfatfs_clustersearchlimits(FAR struct fat_format_s *fmt, FAR struct fat_var_s *
  *   fmt - Caller specified format parameters
  *   var - Other format parameters that are not caller specifiable. (Most
  *     set by mkfatfs_configfatfs()).
- *   fatconfig - FAT12-specific configuration
+ *   config - FAT12-specific configuration
  *
  * Return:
  *    Zero on success configuration of a FAT12 file system; negated errno
  *    on failure
  *
  ****************************************************************************/
+
 static inline int
 mkfatfs_tryfat12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                  FAR struct fat_config_s *config)
@@ -455,6 +463,7 @@ mkfatfs_tryfat12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
         {
           maxnclusters = FAT_MAXCLUST12;
         }
+
       fvdbg("nfatsects=%u nclusters=%u (max=%u)\n",
             config->fc_nfatsects, config->fc_nclusters, maxnclusters);
 
@@ -464,13 +473,16 @@ mkfatfs_tryfat12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
 
       if (config->fc_nclusters + 2 > maxnclusters)
         {
-          fvdbg("Too many clusters for FAT12\n");
+          fdbg("Too many clusters for FAT12: %d > %d\n",
+               config->fc_nclusters, maxnclusters - 2);
+
           return -ENFILE;
         }
     }
+
   return 0;
 }
- 
+
 /****************************************************************************
  * Name:  mkfatfs_tryfat16
  *
@@ -482,13 +494,14 @@ mkfatfs_tryfat12(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
  *   fmt - Caller specified format parameters
  *   var - Other format parameters that are not caller specifiable. (Most
  *     set by mkfatfs_configfatfs()).
- *   fatconfig - FAT16-specific configuration
+ *   config - FAT16-specific configuration
  *
  * Return:
  *    Zero on success configuration of a FAT16 file system; negated errno
  *    on failure
  *
  ****************************************************************************/
+
 static inline int
 mkfatfs_tryfat16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                  FAR struct fat_config_s *config)
@@ -516,13 +529,15 @@ mkfatfs_tryfat16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
        *   maxnclusters = nfatsects * sectorsize / 2 - 2
        */
 
-      maxnclusters = config->fc_nfatsects << (var->fv_sectorsize - 1);
+      maxnclusters = config->fc_nfatsects << (var->fv_sectshift - 1);
       if (maxnclusters > FAT_MAXCLUST16)
         {
           maxnclusters = FAT_MAXCLUST16;
         }
+
       fvdbg("nfatsects=%u nclusters=%u (min=%u max=%u)\n",
-            config->fc_nfatsects, config->fc_nclusters, FAT_MINCLUST16, maxnclusters);
+            config->fc_nfatsects, config->fc_nclusters, FAT_MINCLUST16,
+            maxnclusters);
 
       /* Check if this number of clusters would overflow the maximum for
        * FAT16 (remembering that two FAT cluster slots are reserved).
@@ -535,10 +550,13 @@ mkfatfs_tryfat16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
       if ((config->fc_nclusters + 2 > maxnclusters) ||
           (config->fc_nclusters < FAT_MINCLUST16))
         {
-          fvdbg("Too few or too many clusters for FAT16\n");
+          fdbg("Too few or too many clusters for FAT16: %d < %d < %d\n",
+               FAT_MINCLUST16, config->fc_nclusters, maxnclusters - 2);
+
           return -ENFILE;
         }
     }
+
   return 0;
 }
 
@@ -553,13 +571,14 @@ mkfatfs_tryfat16(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
  *   fmt - Caller specified format parameters
  *   var - Other format parameters that are not caller specifiable. (Most
  *     set by mkfatfs_configfatfs()).
- *   fatconfig - FAT32-specific configuration
+ *   config - FAT32-specific configuration
  *
  * Return:
  *    Zero on success configuration of a FAT32 file system; negated errno
  *    on failure
  *
  ****************************************************************************/
+
 static inline int
 mkfatfs_tryfat32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
                  FAR struct fat_config_s *config)
@@ -592,6 +611,7 @@ mkfatfs_tryfat32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
         {
           maxnclusters = FAT_MAXCLUST32;
         }
+
       fvdbg("nfatsects=%u nclusters=%u (max=%u)\n",
             config->fc_nfatsects, config->fc_nclusters, maxnclusters);
 
@@ -600,12 +620,15 @@ mkfatfs_tryfat32(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var,
        */
 
       if ((config->fc_nclusters + 3 > maxnclusters) ||
-          (config->fc_nclusters < FAT_MINCLUST32 && fmt->ff_fattype != 32))
+          (config->fc_nclusters < FAT_MINCLUST32))
         {
-          fvdbg("Too few or too many clusters for FAT32\n");
+          fdbg("Too few or too many clusters for FAT32: %d < %d < %d\n",
+               FAT_MINCLUST32, config->fc_nclusters, maxnclusters - 3);
+
           return -ENFILE;
         }
     }
+
   return 0;
 }
 
@@ -631,7 +654,8 @@ mkfatfs_selectfat(int fattype, FAR struct fat_format_s *fmt,
 {
   /* Return the appropriate information about the selected file system. */
 
-  fdbg("Selected FAT%d\n", fattype);
+  fvdbg("Selected FAT%d\n", fattype);
+
   var->fv_fattype      = fattype;
   var->fv_nclusters    = config->fc_nclusters;
   var->fv_nfatsects    = config->fc_nfatsects;
@@ -672,7 +696,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
       if (fmt->ff_rsvdseccount < 2)
         {
-          fvdbg("At least 2 reserved sectors needed by FAT32\n");
+          fdbg("At least 2 reserved sectors needed by FAT32\n");
           fatconfig32.fc_rsvdseccount = 2;
         }
       else
@@ -702,7 +726,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
       var->fv_nrootdirsects =
         ((fmt->ff_rootdirentries << DIR_SHIFT) + var->fv_sectorsize - 1) >> var->fv_sectshift;
- 
+
       /* The number of data sectors available (includes the fat itself)
        * This value is a constant for FAT12/16, but not FAT32 because the
        * size of the root directory cluster changes
@@ -713,7 +737,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
           fmt->ff_nsectors - var->fv_nrootdirsects - fatconfig12.fc_rsvdseccount;
    }
 
-  /* Select an initial and terminal clustersize to use in the search (if these
+  /* Select an initial and terminal cluster size to use in the search (if these
    * values were not provided by the caller)
    */
 
@@ -721,21 +745,22 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
   do
     {
-      fvdbg("Configuring with %d sectors/cluster...\n", 1 << fmt->ff_clustshift);
- 
+      fvdbg("Configuring with %d sectors/cluster...\n",
+            1 << fmt->ff_clustshift);
+
       /* Check if FAT12 has not been excluded */
 
       if (var->fv_fattype == 0 || var->fv_fattype == 12)
         {
-          /* Try to configure a FAT12 filesystem with this cluster size */
+          /* Try to configure a FAT12 file system with this cluster size */
 
           if (mkfatfs_tryfat12(fmt, var, &fatconfig12) != 0)
             {
-                {
-                  fvdbg("Cannot format FAT12 at %u sectors/cluster\n", 1 << fmt->ff_clustshift);
-                  fatconfig12.fc_nfatsects = 0;
-                  fatconfig12.fc_nclusters = 0;
-                }
+              fdbg("Cannot format FAT12 at %u sectors/cluster\n",
+                   1 << fmt->ff_clustshift);
+
+              fatconfig12.fc_nfatsects = 0;
+              fatconfig12.fc_nclusters = 0;
             }
         }
 
@@ -743,15 +768,15 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
       if (var->fv_fattype == 0 || var->fv_fattype == 16)
         {
-          /* Try to configure a FAT16 filesystem with this cluster size */
+          /* Try to configure a FAT16 file system with this cluster size */
 
           if (mkfatfs_tryfat16(fmt, var, &fatconfig16) != 0)
             {
-                {
-                  fvdbg("Cannot format FAT16 at %u sectors/cluster\n", 1 << fmt->ff_clustshift);
-                  fatconfig16.fc_nfatsects = 0;
-                  fatconfig16.fc_nclusters = 0;
-                }
+              fdbg("Cannot format FAT16 at %u sectors/cluster\n",
+                   1 << fmt->ff_clustshift);
+
+              fatconfig16.fc_nfatsects = 0;
+              fatconfig16.fc_nclusters = 0;
             }
         }
 
@@ -778,12 +803,19 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
               mkfatfs_selectfat(12, fmt, var, &fatconfig12);
             }
-         return OK;
+
+          return OK;
         }
 
+#if 0
       /* Check if FAT32 has not been excluded */
 
       if (var->fv_fattype == 0 || var->fv_fattype == 32)
+#else
+      /* FAT32 must be explicitly requested */
+
+      if (var->fv_fattype == 32)
+#endif
         {
           /* The number of data sectors available (includes the fat itself)
            * This value is a constant with respect to cluster sizefor FAT12/16, but not FAT32
@@ -792,15 +824,15 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
 
           fatconfig32.fc_navailsects = fmt->ff_nsectors - (1 << fmt->ff_clustshift) - fatconfig32.fc_rsvdseccount;
 
-          /* Try to configure a FAT32 filesystem with this cluster size */
+          /* Try to configure a FAT32 file system with this cluster size */
 
           if (mkfatfs_tryfat32(fmt, var, &fatconfig32) != 0)
             {
-                {
-                  fvdbg("Cannot format FAT32 at %u sectors/cluster\n", 1 << fmt->ff_clustshift);
-                  fatconfig32.fc_nfatsects = 0;
-                  fatconfig32.fc_nclusters = 0;
-                }
+              fdbg("Cannot format FAT32 at %u sectors/cluster\n",
+                   1 << fmt->ff_clustshift);
+
+              fatconfig32.fc_nfatsects = 0;
+              fatconfig32.fc_nclusters = 0;
             }
           else
             {
@@ -816,6 +848,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
       fmt->ff_clustshift++;
     }
   while (fmt->ff_clustshift <= mxclustshift);
+
   return -ENFILE;
 }
 
@@ -839,6 +872,7 @@ mkfatfs_clustersearch(FAR struct fat_format_s *fmt, FAR struct fat_var_s *var)
  *    Zero on success; negated errno on failure
  *
  ****************************************************************************/
+
 int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
                         FAR struct fat_var_s *var)
 {
@@ -863,7 +897,7 @@ int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
   ret = mkfatfs_clustersearch(fmt, var);
   if (ret < 0)
     {
-       fdbg("Failed to set cluster size\n");
+       fdbg("ERROR: Failed to set cluster size\n");
        return ret;
     }
 
@@ -881,7 +915,7 @@ int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
       /* Set up additional, non-zero FAT12/16 fields */
 
       /* Patch in the correct offset to the boot code */
- 
+
       var->fv_jump[1]   = BS16_BOOTCODE - 2;
       g_bootcodeblob[3] = BS16_BOOTCODE + BOOTCODE_MSGOFFSET;
     }
@@ -893,7 +927,7 @@ int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
       g_bootcodeblob[3] = BS32_BOOTCODE + BOOTCODE_MSGOFFSET;
 
       /* The root directory is a cluster chain... its is initialize size is one cluster */
-  
+
       var->fv_nrootdirsects = 1 << fmt->ff_clustshift;
 
       /* The number of reported root directory entries should should be zero for
@@ -940,24 +974,25 @@ int mkfatfs_configfatfs(FAR struct fat_format_s *fmt,
   /* Describe the configured filesystem */
 
 #ifdef CONFIG_DEBUG
-  fdbg("Sector size:          %d bytes\n", var->fv_sectorsize);
-  fdbg("Number of sectors:    %d sectors\n", fmt->ff_nsectors);
-  fdbg("FAT size:             %d bits\n", var->fv_fattype);
-  fdbg("Number FATs:          %d\n", fmt->ff_nfats);
-  fdbg("Sectors per cluster:  %d sectors\n", 1 << fmt->ff_clustshift);
-  fdbg("FS size:              %d sectors\n", var->fv_nfatsects);
+  fdbg("Sector size:          %d bytes\n",    var->fv_sectorsize);
+  fdbg("Number of sectors:    %d sectors\n",  fmt->ff_nsectors);
+  fdbg("FAT size:             %d bits\n",     var->fv_fattype);
+  fdbg("Number FATs:          %d\n",          fmt->ff_nfats);
+  fdbg("Sectors per cluster:  %d sectors\n",  1 << fmt->ff_clustshift);
+  fdbg("FS size:              %d sectors\n",  var->fv_nfatsects);
   fdbg("                      %d clusters\n", var->fv_nclusters);
+
   if (var->fv_fattype != 32)
     {
        fdbg("Root directory slots: %d\n", fmt->ff_rootdirentries);
     }
+
   fdbg("Volume ID:            %08x\n", fmt->ff_volumeid);
   fdbg("Volume Label:         \"%c%c%c%c%c%c%c%c%c%c%c\"\n",
-    fmt->ff_volumelabel[0], fmt->ff_volumelabel[1], fmt->ff_volumelabel[2], 
-    fmt->ff_volumelabel[3], fmt->ff_volumelabel[4], fmt->ff_volumelabel[5], 
-    fmt->ff_volumelabel[6], fmt->ff_volumelabel[7], fmt->ff_volumelabel[8], 
+    fmt->ff_volumelabel[0], fmt->ff_volumelabel[1], fmt->ff_volumelabel[2],
+    fmt->ff_volumelabel[3], fmt->ff_volumelabel[4], fmt->ff_volumelabel[5],
+    fmt->ff_volumelabel[6], fmt->ff_volumelabel[7], fmt->ff_volumelabel[8],
     fmt->ff_volumelabel[9], fmt->ff_volumelabel[10]);
 #endif
   return OK;
 }
-

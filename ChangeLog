@@ -6162,5 +6162,6 @@
 	* drivers/mtd/README.txt:  New README file (2013-12-04).
 	* arch/arm/src/lm/lm_start.c:  Don't initialize .data if not running
 	  from FLASH (2013-12-05).
-
+	* fs/fat/fs_configfat.c: Fix a typo in the FAT16 formatting logic.
+	  Was this ever able to format a FAT16 disk? (2013-12-05).
 

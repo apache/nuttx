@@ -70,7 +70,7 @@
 #define BS_NUMFATS         16 /*  1@16: Number of FAT data structures: always 2 */
 #define BS_ROOTENTCNT      17 /*  2@17: FAT12/16: Must be 0 for FAT32 */
 #define BS_TOTSEC16        19 /*  2@19: FAT12/16: Must be 0, see BS_TOTSEC32 */
-#define BS_MEDIA           21 /*  1@21: Media code: f0, f8, f9-fa, fc-ff */ 
+#define BS_MEDIA           21 /*  1@21: Media code: f0, f8, f9-fa, fc-ff */
 #define BS_FATSZ16         22 /*  2@22: FAT12/16: Must be 0, see BS_FATSZ32 */
 #define BS_SECPERTRK       24 /*  2@24: Sectors per track geometry value */
 #define BS_NUMHEADS        26 /*  2@26: Number of heads geometry value */
@@ -92,7 +92,7 @@
 /* The following fields are only valid for FAT32 */
 
 #define BS32_FATSZ32       36 /*  4@36: Count of sectors occupied by one FAT */
-#define BS32_EXTFLAGS      40 /*  2@40: 0-3:Active FAT, 7=0 both FATS, 7=1 one FAT */ 
+#define BS32_EXTFLAGS      40 /*  2@40: 0-3:Active FAT, 7=0 both FATS, 7=1 one FAT */
 #define BS32_FSVER         42 /*  2@42: MSB:Major LSB:Minor revision number (0.0) */
 #define BS32_ROOTCLUS      44 /*  4@44: Cluster no. of 1st cluster of root dir */
 #define BS32_FSINFO        48 /*  2@48: Sector number of fsinfo structure. Usually 1. */
@@ -177,7 +177,7 @@
  */
 
 #define DIR_MAXFNAME      11  /* Max short name size is 8+3 = 11 */
- 
+
 /* The following define offsets relative to the beginning of a directory
  * entry.
  */
@@ -316,7 +316,8 @@
 
 /* FAT32: M$ reserves the MS 4 bits of a FAT32 FAT entry so only 18 bits are
  * available.  For M$, the calculation is ((1 << 28) - 19). (The uint32_t cast
- * is needed for architectures where int is only 16 bits).
+ * is needed for architectures where int is only 16 bits).  M$ also claims
+ * that the minimum size is 65,527.
  */
 
 #define FAT_MINCLUST32  65524
@@ -811,7 +812,7 @@ struct fat_dirinfo_s
   uint8_t fd_name[DIR_MAXFNAME];   /* Short 8.3 alias filename (no terminator) */
 
   /* NT flags are not used */
-  
+
 #ifdef CONFIG_FAT_LCNAMES
   uint8_t  fd_ntflags;             /* NTRes lower case flags */
 #endif
