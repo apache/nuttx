@@ -37,8 +37,8 @@
  * nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_SAM34_SAMA5_SAMA5D3_IRQ_H
-#define __ARCH_ARM_INCLUDE_SAM34_SAMA5_SAMA5D3_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_SAMA5_SAMA5D3_IRQ_H
+#define __ARCH_ARM_INCLUDE_SAMA5_SAMA5D3_IRQ_H
 
 /****************************************************************************************
  * Included Files
@@ -392,5 +392,4 @@ extern "C" {
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_SAM34_SAMA5_SAMA5D3_IRQ_H */
-
+#endif /* __ARCH_ARM_INCLUDE_SAMA5_SAMA5D3_IRQ_H */

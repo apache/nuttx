@@ -6169,3 +6169,8 @@
 	  transfer with the out-of-range block before we test it (2013-12-05).
 
 6.33 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/include/a1x and src/a1x:  Directory structure to support
+	  the Allwinner A10.  Not much there on the initial check-in
+	  (2013-12-7).
+
