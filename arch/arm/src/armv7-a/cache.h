@@ -896,7 +896,7 @@ extern "C" {
  * Description:
  *   Ensure that the I and D caches are coherent within specified region
  *   by cleaning the D cache (i.e., flushing the D cache contents to memory
- *   and invalidating the I cache. This is typically used when code has been
+ *   and invalidating the I cache). This is typically used when code has been
  *   written to a memory region, and will be executed.
  *
  * Input Parameters:

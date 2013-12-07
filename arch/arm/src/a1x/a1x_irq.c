@@ -304,7 +304,7 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
               else
                 {
-                  if ((pending & 0x00000001) == 0)
+                  if ((pending & 0x00000001) != 0)
                     {
                       /* Yes.. dispatch the interrupt */
 
