@@ -16,4 +16,21 @@ config ARCH_CHIP_A10
 
 endchoice
 
+choice
+	prompt "Boot device"
+	default A1X_BOOT_SDCARD
+
+config A1X_BOOT_NAND
+	bool "NAND FLASH"
+
+config A1X_BOOT_SPINOR
+	bool "SPI NOR FLASH"
+
+config A1X_BOOT_SDCARD
+	bool "SD card"
+
+config A1X_BOOT_USB
+	bool "USB"
+
+endchoice # Boot device
 endif # ARCH_CHIP_A1X
