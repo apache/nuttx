@@ -40,7 +40,7 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = a1x_boot.c a2x_leds.c
+CSRCS = a1x_boot.c a1x_leds.c
 
 ifeq ($(CONFIG_HAVE_CXX),y)
 CSRCS += a1x_cxxinitialize.c

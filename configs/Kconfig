@@ -462,6 +462,9 @@ config ARCH_BOARD_PCBLOGICPIC32MX
 config ARCH_BOARD_PCDUINO_A10
 	bool "pcDuino A10"
 	depends on ARCH_CHIP_A10
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This is the port of NuttX to the Allwinner A10-based pcDuino v1
 		board.  See http://www.pcduino.com/ for information about pcDuino Lite, v1,
