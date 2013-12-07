@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: October 28, 2013</p>
+      <p>Last Updated: December 7, 2013</p>
     </td>
   </tr>
 </table>
@@ -470,6 +470,13 @@
   <td><br></td>
   <td>
     <p>
+      <li><code>procfs/</code> pseudo-filesystem support.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
       <li>
         A <a href="NuttXBinfmt.html">binary loader</a> with support for the following formats:
         <ul>
@@ -529,7 +536,7 @@
   <td>
     <p>
       <li>
-        Network, USB (host), USB (device), serial, CAN, ADC, DAC, PWM, Quadrature Encoder, Wireless, and watchdog timer driver architectures.
+        Network, USB (host), USB (device), serial, I2C, I2S, NAND, CAN, ADC, DAC, PWM, Quadrature Encoder, Wireless, and watchdog timer driver architectures.
       </li>
     </p>
   </td>
@@ -733,6 +740,13 @@
   <td>
     <p>
       <li><i>MTD</i>-inspired interface for <i>M</i>emory <i>T</i>echnology <i>D</i>evices.</li>
+    </p>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <li>NAND support.</li>
     </p>
 </tr>
 <tr>
@@ -1116,16 +1130,15 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 6.31.
-  NuttX 6.31 is the 98<sup>th</sup> release of NuttX.
-  It was released on October 28, 2013, and is available for download from the
+  The current release is NuttX 6.32.
+  NuttX 6.32 is the 99<sup>th</sup> release of NuttX.
+  It was released on December 7, 2013, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-6.31.tar.gz</code> and <code>apps-6.31.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-6.32.tar.gz</code> and <code>apps-6.32.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
-  Release notes for NuttX 6.31 are avaialble <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-6.31/">here</a>.
+  Release notes for NuttX 6.32 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-6.32/">here</a>.
   The change log associated with the release is available <a href="ChangeLog.txt">here</a>.
-  Unreleased changes after this release are available in GIT.
-  These unreleased changes are also listed <a href="#pendingchanges">here</a>.
+  Unreleased changes after this release are available in GIT (see below).
 </p>
 
 <h2><a name="pendingchanges"><b>Unreleased Changes</b>:</a></h2>
@@ -1181,10 +1194,10 @@
     <ul>
       <li><a href="#arm7tdmi">ARM7TDMI</b></a> (5)</li>
       <li><a href="#arm920t">ARM920T</a> (1) </li>
-      <li><a href="#arm926ejs">ARM926EJS</a> (3) </li>
+      <li><a href="#arm926ejs">ARM926EJS</a> (4) </li>
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (1) </li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (2)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (21)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (24)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (10)</li>
     </ul>
   <li>Atmel AVR
@@ -1250,6 +1263,7 @@
       <li><a href="#at91sam3x">Atmel SAM3X</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#at91sam4l">Atmel SAM4L</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#at91sam4s">Atmel SAM4S</a> <small>(ARM Cortex-M4)</small></li>
+      <li><a href="#at91sam4e">Atmel SAM4E</a> <small>(ARM Cortex-M4)</small></li>
       <li><a href="#at91sama5d3">Atmel SAMA5D3</a> <small>(ARM Cortex-A5)</small></li>
     </ul>
   </li>
@@ -1316,6 +1330,7 @@
       <li><a href="#stm32303x">STMicro STM32F303x <small>(STM32 F3 family, ARM Cortex-M4)</small></b>.</a></li>
       <li><a href="#stm32f407x">STMicro STM32F407x</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
       <li><a href="#stm32f427x">STMicro STM32 F427/437</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
+      <li><a href="#stm32f429x">STMicro STM32 F429</a> <small>(STM32 F4 family, ARM Cortex-M4)</small></li>
     </ul>
   </li>
   </td>
@@ -1592,30 +1607,50 @@
 <tr>
   <td><br></td>
   <td>
-    <a name="nxplpc3131"><b>NXP LPC3131</b>.</a>
-    The port for the NXP <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC3131</a> on the <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a>
-    development board was first released in NuttX-5.1 with a GNU arm-nuttx-elf or arm-eabi toolchain* under Linux or Cygwin
-    (but was not functional until NuttX-5.2).
+    <p>
+      <a name="nxplpc3131"><b>NXP LPC3131</b>.</a>
+      Two boards based on the NXP LPC3131 are supported:
     </p>
     <ul>
-      <p>
-        <b>STATUS:</b>
-        The basic EA3131 port is complete and verified in NuttX-5.2
-        This basic port includes basic boot-up, serial console, and timer interrupts.
-        This port was extended in NuttX 5.3 with a USB high speed driver contributed by David Hewson.
-        David also contributed I2C and SPI drivers plus several important LPC313x USB bug fixes
-        that appear in the NuttX 5.6 release.
-        This port has been verified using the NuttX OS test, USB serial and mass storage
-        tests and includes a working implementation of the NuttShell (<a href="NuttShell.html">NSH</a>).
-      </p>
-      <p>
-        Support for <a href="NuttXDemandPaging.html">on-demand paging</a> has been developed for the EA3131.
-        That support would all execute of a program in SPI FLASH by paging code sections out of SPI flash as needed.
-        However, as of this writing, I have not had the opportunity to verify this new feature.
-      </p>
-      <p>
-        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/ea3131/README.txt">README</a> file for further information.
-      </p>
+      <li>
+         <p>
+            First, a port for the NXP <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC3131</a> on the <a href="http://www.embeddedartists.com/products/kits/lpc3131_kit.php">Embedded Artists EA3131</a> development board was first released in NuttX-5.1 (but was not functional until NuttX-5.2).
+        </p>
+        <ul>
+          <p>
+            <b>STATUS:</b>
+            The basic EA3131 port is complete and verified in NuttX-5.2.
+            This basic port includes basic boot-up, serial console, and timer interrupts.
+            This port was extended in NuttX 5.3 with a USB high speed driver contributed by David Hewson.
+            David also contributed I2C and SPI drivers plus several important LPC313x USB bug fixes that appear in the NuttX 5.6 release.
+            This port has been verified using the NuttX OS test, USB serial and mass storage tests and includes a working implementation of the NuttShell (<a href="NuttShell.html">NSH</a>).
+          </p>
+          <p>
+            Support for <a href="NuttXDemandPaging.html">on-demand paging</a> has been developed for the EA3131.
+            That support would all execute of a program in SPI FLASH by paging code sections out of SPI flash as needed.
+            However, as of this writing, I have not had the opportunity to verify this new feature.
+          </p>
+          <p>
+            Refer to the Embedded Artists EA3131 board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/ea3131/README.txt">README</a> file for further information.
+          </p>
+        </ul>
+      </li>
+      <li>
+         <p>
+            A second port to the NXP <a href="http://ics.nxp.com/products/lpc3000/lpc313x.lpc314x.lpc315x/">LPC3131</a> on the <a href="https://www.olimex.com/Products/ARM/NXP/LPC-H3131/">Olimex LPC-H3131</a> development board was added in NuttX-6.32.
+        </p>
+        <ul>
+          <p>
+            <b>STATUS:</b>
+            The basic H3131 port is complete and verified in NuttX-6.3.
+            It is similar to the EA3131 port except:  (1) I have not yet gotten the SDRAM to work, and (2) this board was used to develop and verify the USB 2.0, low-/full-/high-speed EHCI host controller driver.
+            NOTE: That driver should work on the EA3131 as well.  However, the EA3131 uses a PCA9532 PWM part to controller the port power so the it would not quite be a simple drop-in.
+          </p>
+          <p>
+            Refer to the Olimex LPC-H3131 board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/olimex-lpc-h3131/README.txt">README</a> file for further information.
+          </p>
+        </ul>
+      </li>
     </ul>
   </td>
 </tr>
@@ -1760,16 +1795,32 @@
           An LCD controller (LCDC) frame buffer driver, and
         </li>
         <li>
-          A CAN driver (however, testing of the CAN has been delayed because of cabling issues).
+          A CAN driver (Testing of the CAN has been delayed because of cabling issues).
         </li>
       </ul>
       <p>
         Additional board configurations were added to test and demonstrate these new drivers including new graphics and NxWM configurations.
-        These are expected in NuttX-6.32.
       </p>
       <p>
+        These drivers were added in NuttX-6.32:
+      </p>
+      <ul>
+        <li>
+          A PWM driver with DMA support
+        </li>
+        <li>
+          An SSC-based I2S driver
+        </li>
+        <li>
+          Support for Programmable clock outputs
+        </li>
+        <li>
+          NAND support including support for the PMECC hardware ECC and for DMA transfers.
+        </li>
+      </ul>
+      <p>
         Develop continues.
-        Work is underway to provide a Image Sensor Interface (ISI) camera interface, a PWM driver, and NAND FLASH support.
+        Work is underway to provide a Image Sensor Interface (ISI) camera interface.
       </p>
       <p>
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sama5d3x-ek/README.txt">README</a> file for further information.
@@ -1861,7 +1912,8 @@ nsh>
         There is a working OS test configuration that verifies the correct port of NuttX to the part and a working NuttShell (<a href="NuttShell.html">NSH</a>) configuration that might be the basis for an application development.
         As of NuttX-6.28 more device driver development would be needed to make this a complete port, particularly to support USB OTG.
         A TSI and a SPI driver were added in NuttX-6.29.
-        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/freedom-kl25z/README.txt">README</a> file for further information.
+        Alan contributed a PWM driver in NuttX-6.32.
+        Refer to the Freedom KL25Z board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/freedom-kl25z/README.txt">README</a> file for further information.
       </p>
     </ul>
   </td>
@@ -2092,7 +2144,6 @@ nsh>
       Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/stm32f100rc_generic/README.txt">README</a> file for further information.
     </p>
 </tr>
-      <li><a href="#stm32f103cx">STMicro STM32F103C48</a> <small>(STM32 F1 &quot;Low- and Medium-Density Line&quot;Family, ARM Cortex-M3)</small></li>
 <tr>
   <td><br></td>
   <td><hr></td>
@@ -2174,11 +2225,12 @@ nsh>
             <b>Spark (and <i>emulated Spark</i>)</b>.
             The Spark boards are based on the STM32F103CBT6 chip and feature wireless networking using the TI CC3000 WLAN module.
             See the <a href="http://www.spark.io">Spark</a> web site for hardware information;
-            see the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/spark/README.txt">README</a> file for further information about the NuttX port.
-            Most of this work is the result of the effort of David Sidrane.
-         </p>
-         <p>
             The <i>emulated Spark</i> is a base board for the Maple Mini board (see above) developed by David Sidrane that supports Spark development while we all way breathlessly for or Spark boards.
+            see the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/spark/README.txt">README</a> file for further information about the NuttX port.
+         <p>
+         </p>
+            Intially Spark support was introduced in NuttX 6.31 and completed in NuttX 6.32.
+            Most of this work is the result of the effort of David Sidrane.
          </p>
       </li>
     </ol>
@@ -2236,7 +2288,7 @@ nsh>
         <li>
           <p>
             <b>Spark</b>.
-              David Sidrane has the <i>emulated</i> Spark board up-and-running with a functional CC3000 network, SST25 FAT file system, an NSH shell, and a composite USB CDC/ACM and USBMSC devices.  This configuration is was first available NuttX 6-31.
+              David Sidrane has the <i>emulated</i> Spark board up-and-running with a functional CC3000 network, SST25 FAT file system, an NSH shell, and a composite USB CDC/ACM and USBMSC devices.  This configuration is was first available NuttX 6.31 and completed in NuttX 6.32.
               That is really quite a lot of high end functionality on an STM32 that only has 20KB of RAM!  I am impressed!
           </p>
         </li>
@@ -2263,7 +2315,8 @@ nsh>
       <a name="stm32f107x"><b>STMicro STM32F107x (STM32 F1 &quot;Connectivity Line&quot; family)</b>.</a>
       Chip support for the STM32 F1 &quot;Connectivity Line&quot; family has been present in NuttX for some time and users have reported that they have successful brought up NuttX on there proprietary boards using this logic.
     </p>
-    <p>
+    <ul>
+    <li><p>
       <b>Olimex STM32-P107</b>
       Support for the <a href="https://www.olimex.com/dev/stm32-p107.html">Olimex STM32-P107</a> was contributed by Max Holtzberg and first appeared in NuttX-6.21.  That port features the STMicro STM32F107VC MCU.
       <ul>
@@ -2272,11 +2325,10 @@ nsh>
         Networking is functional.
         Support for an external ENCX24J600 network was added in NuttX 6.30.
       </ul>
-    </p>
-    <p>
+    </p></li>
+    <li><p>
       <b>Shenzhou IV</b>
-      Work is underway as of this writing to port NuttX to the Shenzhou IV development board (See <a href="http://www.armjishu.com">www.armjishu.com</a>) featuring the STMicro STM32F107VCT MCU.
-      If all goes according to plan, this port should be verified and available in NuttX-6.22.
+      A port of NuttX to the Shenzhou IV development board (See <a href="http://www.armjishu.com">www.armjishu.com</a>) featuring the STMicro STM32F107VCT MCU was added in NuttX-6.22.
       <ul>
         <p>
           <b>STATUS:</b>
@@ -2288,8 +2340,20 @@ nsh>
           Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/shenzhou/README.txt">README</a> file for further information.
         </p>
       </ul>
-    </p>
-   </td>
+    </p></li>
+    <li><p>
+      <b>ViewTool STM32F103/F107</b>
+      Support for the <a href="https://http://www.viewtool.com/">Viewtool STM32F103/F107</a> board was added in NuttX-6.32.  That port features the STMicro STM32F107VCT6 MCU.
+      <ul>
+        <p>
+          <b>STATUS:</b>
+          A basic NuttShell (NSH) configuration is available.
+          Because of commonality with other STM32 F107 boards, this basic configuration could easily to extended to support things like USB or networking.
+          Refer to the SViewtool STM32F103/F107 <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/viewtool-stm32f107/README.txt">README</a> file for further information.
+        </p>
+      </ul>
+    </p></li>
+  </td>
 </tr>
 <tr>
   <td><br></td>
@@ -2755,13 +2819,29 @@ nsh>
   <td>
     <p>
       <a name="stm32f427x"><b>STMicro STM32 F427/437</b>.</a>
-      General architectural support was provided for the F427/437 family in NuttX 4.27.
+      General architectural support was provided for the F427/437 family in NuttX 6.27.
       Specific support includes the STM32F427I, STM32F427Z, and STM32F427V chips.
       This is <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but not support for any publically available boards is included..
       This support was contributed by Mike Smith.
     </p>
     <p>
       The F427/f37 port adds (1) additional SPI ports, (2) additional UART ports, (3) analog and digital noise filters on the I2C ports, (4) up to 2MB of flash, (5) an additional lower-power mode for the internal voltage regulator, (6) a new prescaling option for timer clock, (7) a larger FSMSC write FIFO, and (8) additional crypto modes (F437 only).
+    </p>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="stm32f429x"><b>STMicro STM32 F429</b>.</a>
+      Support for STMicro STM32F429I-Discovery development board featuring the STM32F429ZIT6 MCU was contributed in NuttX-6.32 by Ken Pettit.
+      The F429 port adds support for the STM32F439 LCDC and OTG HS (in FS mode).
+      The STM32F429ZIT6 is a 180MHz Cortex-M4 operation with 2Mbit Flash memory and 256kbytes.
+      Refer to the STM32F429I-Discovery board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/stm32f429i-disco/README.txt">README</a> file for further information.
     </p>
   </td>
 </tr>
@@ -2804,7 +2884,7 @@ nsh>
             <li>
               The LPC43xx USB0 peripheral appears to be the same as the USB OTG peripheral for the LPC31xx.
               The LPC31xx USB0 device-side driver has been copied from the LPC31xx port but also integration into the LPC43xx (clocking and pin configuration).
-              It should be possible to complete poriting of this LPC31xx driver with a small porting effort.
+              It should be possible to complete porting of this LPC31xx driver with a small porting effort.
             </li>
             <li>
               The Ethernet block looks to be based on the same IP as the STM32 Ethernet and, as a result, it should be possible to leverage the NuttX STM32 Ethernet driver with a little more effort.
@@ -2926,6 +3006,21 @@ Mem:         29232       5920      23312      23312
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/sam4s-xplained/README.txt">README</a> file for further information.
       </p>
     </ul>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="at91sam4e"><b>Atmel SAM4E</b>.</a>
+      General architectural support was provided for the SAM4E family in NuttX 6.32.
+      This is <i>architecture-only</i> support, meaning that support for the boards with these chips is available, but not support for any publicly available boards is included..
+      This support was contributed by Mitko.
+    </p>
   </td>
 </tr>
 <tr>

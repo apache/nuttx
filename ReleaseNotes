@@ -5259,3 +5259,263 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
         Sidrane.
       - apps/examples/can:  Correct an error in a debug statement.  From
         Martin Lederhilger.
+
+NuttX-6.32
+----------
+
+The 99th release of NuttX, Version 6.32, was made on December 7, 2013,
+and is available for download from the SourceForge website.  Note
+that release consists of two tarballs:  nuttx-6.32.tar.gz and
+apps-6.32.tar.gz.  Both may be needed (see the top-level nuttx/README.txt
+file for build information).
+
+Additional new features and extended functionality:
+
+    * General:
+
+      - Extension and standardization of stack debug logic.  Now includes
+        coloration of the IDLE and interrupt stacks as well as the heap.
+        Suggested by David Sidrane.
+
+    * Audio Subsystem and Audio Drivers:
+
+      - I2S interface definition.  Integrates with audio sub-system.
+      - VS1053 worker thread stack size is now configurable and assigned a
+        name via pthread_setname_np(). From Ken Pettit.
+
+    * Networking / Network Drivers
+
+      - Updates and adaptations to support for TI CC3000 wireless module
+        from David Sidrane.  These updates include multi-threading support
+        and interface and header file changes to integrate more seamlessly
+        with NuttX applications.
+
+    * File Systems:
+
+      - procfs:  Add support for a tiny procfs file system.  The initial
+        offering is little more that a proof of concept but may be developed
+        further in subsequent releases.
+      - NXFFS:  An initial attempt was made to integrate NXFFS with the NAND
+        MTD driver.  Changes were made to handle bad blocks.  However, I
+        later realized that NXFFS cannot handle NAND because the way that
+        is re-writes blocks is incompatible with the NAND ECC handling.
+        These changes were backed-out so as not to introduce turmoil, but
+        can be re-enabled if needed via configuration option.
+      - NXFFS: Make the start up scan of the media a configuration option.
+        It just takes to long and is not really necessary!  Those rare cases
+        where the scan was helpful can be fixed using flash_eraseall().
+
+    * General Drivers:
+
+      - I2S:  A simple character driver was added to support I2S accesses.
+        This driver in its current state is intended only to support I2C
+        testing and would not be appropriate to used for any real driver
+        application.
+
+    * MTD Drivers
+
+      - Add a container for an MTD device that can be used to provide a
+        simple, lightweight interface to configuration data storage that
+        resides on some storage media that is wrapped as an MTD device.
+        From Ken Pettit.
+      - New interface definition for lower half NAND drivers.
+      - MTD Nand:  Add MTD NAND driver that will support ONFI devices,
+        non-ONFI devices (via table lookup), bad block checking, software
+        ECC (Hamming), and will interact with the lower-half, hardware-
+        specific, NAND driver.  Based on BSD-compatible Atmel sample code.
+      - MTD geometry structure is now packed so that it can support larger
+        erase block sizes needed by NAND without increasing the size of
+        the geometry structure.
+      - SST25:  Add another SST25 SerialFlash driver, sst25xx.c.  This one
+        differs from sst25.c in that it supports larger SST25 parts:  In
+        the larger parts support page write instead of byte/word writes
+        like the smaller parts.  From Ken Pettit.
+
+    * USB Drivers
+
+      - STM32 F1 USB Device: Add support for decoded USB trace strings.
+        From David Sidrane.
+
+    * ARM
+
+      - Add more ARM9 cache management functions to flush and invalidate
+        D-Cache for DMA support.
+
+    * Atmel AT91 SAMA5D3x Drivers:
+
+      - Many new drivers including CAN, PWM, SSC/I2S
+      - PCK:  Add support for programmable clock outputs.
+      - NAND: Driver with hardware ECC and DMA support
+ 
+    * Atmel AT91 SAMA5D3x Boards:
+
+      - SAMA5D3x-EK: Add support for the apps/examples/i2schar test.
+      - SAMA5D3x-EK: Provides board-specific memory controller initialize
+        for NAND flash.
+      - SAMA5D3x-EK: Add support for "auto-mounting" NAND MTD block driver
+        or NXFFS file system.
+
+    * Atmel AT91 SAM3/4 Boards:
+
+      - Basic support for the Atmel SAM4E family.  From Mitko.
+
+    * STMicro STM32:
+
+      - Added support for the STM32F429.  From Ken Pettit.
+      - Added support for GPIOK and GPIOJ.  From Ken Pettit.
+
+    * STMicro STM32 Drivers
+
+      - STM32 F4 OTG FS/HS Device:  OTG FS device and host drivers extended
+        so that they can support either the OTG FS peripheral or the OTG HS
+        peripheral (in FS mode).  This was done as a quick way to get USB
+        support on the STM32F429 which has only OTG HS.  From Ken Pettit.
+      - Added header files and driver framework for the STM32F429 LTDC
+        framebuffer driver.  From Ken Pettit.
+
+    * STMicro STM32 Boards:
+
+      - Support for the Spark board was completely by Davide Sidrane.  The
+        Spark configuration includes integrated CC3000 wireless support, FAT
+        file system on the SerialFlash and a composite device that can be
+        used both to export the FAT file system and to provide a serial
+        interface.
+      - The Mikroe-stm32f4 now uses /dev/config for configuration data
+        storage.  From Ken Pettit.
+      - Added support for the STM32F429I-Discovery board from Ken Pettit.
+      - Added board support for the ViewTool STM32F103/F107 board with the
+        STM32F107VCT6 installed.
+
+    * NXP LPC31xx Drivers:
+
+      - USB ECHI HCD:  Add a driver for the low-/full-/high-speed variant
+        of the EHCI host controller.
+
+    * NXP LPC31xx Boards:
+
+      - Board-specific USB host support for the Emedded Artists EA3131 board.
+        (Missing PCA9532 controls).
+      - Add support for the Olimex LPC-H3131 board.  Including USB host
+        support (which does not depend on the PCA8532 interface).
+
+    * Kinetis KL Drivers:
+
+      - PWM driver for the Freescale Kinetis KL family from Alan Carvalho
+        de Assis.
+
+    * Kinetis KL Boards
+
+      - Freedom-KL25Z:  Add PWM support from Alan Carvalho de Assis.
+
+    * TI Stellaris LM3S
+
+      - Don't initialize .data in start-up logic if not running from FLASH.
+
+    * Applications:
+
+      - apps/platform:  A new home for platform-specific application code.
+      - Define a common interface that can be used to manage platform-
+        specific configuration data.  From Ken Pettit.
+      - apps/examples/configdata:  A unit test for the MTD configuration
+        data driver from Ken Pettit.
+      - Aapps/platform/mikroe-stm32f4: dd platform-specific storage of
+        configuration data for the Mikroe-stm32f4.  From Ken Pettit.
+      - apps/examples/cc3000: Fine tuning of memory usage from David Sidrane.
+      - apps/system/nxplayer: Play thread stack size is now configurable.
+        All NxPlayer threads now have names assigned via pthread_setname_np().
+        From Ken Pettit.
+      - apps/examples/i2schar:  The I2S test based on the I2S character
+        driver.
+      - apps/examples/hidkbd/hidkbd_main.c:  Now calls a function named
+        arch_usbhost_initialize() that must be provided by the platform-
+        specific code.
+      - NSH:
+
+          - hexdump:  Add skip= and count= options to the hexdump command.  From Ken Pettit.
+          - Allow USB trace without a USB console. From David Sidrane.
+          - Mount command updates from Ken Pettit.
+          - Add an option to the mkfatfs command to specify FAT12, FAT16, or FAT32.
+
+    * Tools
+
+      - tools/mkctags.sh:  A script for creating ctags from Ken Pettit.
+
+Efforts In Progress.  The following are features that are partially
+implemented but present in this release.  They are not likely be be
+completed soon.
+
+    * kconfig-fronted Configuration:
+
+      - Conversion of old configurations to use the kconfig-frontends
+        tool is an ongoing effort that will continue for some time.
+        At this time, only 50% of the configurations have been converted
+        to use the kconfig-frontends tools.
+
+Bugfixes (see the ChangeLog for details).  Some of these are very important:
+
+    * File Systems
+
+      - FAT:  In one error return case, the error return value was not being
+        set, making the failure look like success. From David Sidrane.
+      - mount:  SMART FS must be included in the conditional compilation for
+        the set of file systems that require block drivers.  From Daniel
+        Palmer.
+      - SmartFS: Fixed a minor bug with SMART partition number reporting
+        that would only be seen if both partition support and multi-root
+        directory support are enabled at the same time.  From Ken Pettit.
+      - Deadlock: The inode semaphore must be re-entrant.  Here is the re-
+        entrant path that I found:  (1) USB host connects to FLASH drive and
+        creates /dev/sda, (2) /dev/sda is mounted, (3) FLASH drive is
+        removed but /dev/sda is not destroyed because there is still a
+        reference on the device because of the mount, (4) umount() is
+        called, taking the inode semaphore, now the driver tries to destroy
+        the block driver by calling unregister_blockdriver().  But (5)
+        unregister_blockdriver() also takes the inode semaphore causing a
+        deadlock if the inode semaphore is not re-entrant.
+      - FAT: Fix a typo in the FAT16 formatting logic. Was this ever able to
+        format a FAT16 volume?
+
+    * MTD Drivers
+
+      - MTD Partitions:  Fix erase block vs page block confusion. From Ken
+        Pettit 
+      - SST25 Serial Flash:  Improved write performance by fixing a bug that
+        prevented operation in the faster write mode.  From David Sidrane.
+
+    * USB Drivers:
+
+      - USB MSC Device:  pthread_join() does not work if called from a
+        different task group than the pthread.  This is correct behavior,
+        but still a problem.  The correct solution would be configure the
+        USB MSC thread to a task, however, this workaround from David 
+        Sidrane plugs the hole for now.
+      - USB CDC/ACM, USB MSC, and Composite Device Classes: Un-initialization
+        logic caused re-use of a stale pointer.  Changed to a two pass
+        un-initialization for the case of the composite driver:  Memory
+        resources are not freed until the second un-initialization pass.
+        From David Sidrane.
+
+    * STMicro STM32 Drivers:
+
+      - STM32 F1 USB Device: Fix some errors that cause crashes when the USB
+        was disconnected.  From David Sidrane.
+      - STM32 F1 USB Device: Correct EP0 state handling logic when buffers
+        larger than the EP0 packet size are sent.  From David Sidrane.
+      - STM32 F1 USB Device: The long outstanding bug involving the handling
+        of OUT SETUP commands has been fixed in the STM32 F1 USB device
+        driver by David Sidrane.
+      - Kconfig:  Add missing setup of CAN TSEG1 and TSEG2 values.  From
+        Martin Lederhilger.
+
+    * Tools
+
+      - tools/mkconfig.c:  SMART FS must be included in the conditional
+        compilation for the set of writable file systems.  Noted by Daniel
+        Palmer.
+
+    * Applications:
+
+      - apps/platform/Makefile:  Was not dealing with the bin sub-directory
+        correctly.
+      - apps/system/composite/composite_main.c:  The wrong handle was getting
+        nullified.  From David Sidrane.

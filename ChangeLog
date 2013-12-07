@@ -3343,7 +3343,7 @@
 	  (submitted by Max Holtzberg).
 	* configs/stm3240g-eval/xmlrpc: An example configuration for the
 	  Embeddable Lightweight XML-RPC Server at apps/examples/xmlrpc.
-	  See http://www.drdobbs.com/web-development/\
+	  See http://www.drdobbs.com/web-development/
 	  an-embeddable-lightweight-xml-rpc-server/184405364 for more info.
 	  Contributed by Max Holtzberg.
 	* configs/*/nxwm/defconfig and sched/task_exithook.c: Fixes for
@@ -5174,7 +5174,7 @@
 	  (2013-7-23).
 	* arch/arm/src/armv7-a/arm_restorefpu.S, arm_savefpu.S, arm_doirq.c,
 	  arm_fullcontextrestore.S, arm_saveusercontext.S:  Add hardware
-	  floating point register save/restore logic for the Cortex-A5\
+	  floating point register save/restore logic for the Cortex-A5
 	  (2013-7-23).
 	* arch/Kconfig:  Attempt at generic external memory configuration is not
 	  flexible enough, especially for the SAMA5.  Move external memory
@@ -5907,7 +5907,7 @@
 	* nuttx/drivers/audio/vs1053.c and nuttx/include/nuttx/audio/audio.h:
 	  Add logic to verify the audio sub-format.  From Ken Pettit (2013-10-28).
 
-6.32 2013-xx-xx Gregory Nutt <gnutt@nuttx.org>
+6.32 2013-12-07 Gregory Nutt <gnutt@nuttx.org>
 
 	* configs/spark:  Spark configuration updated by David Sidrane
 	  (2013-10-30).
@@ -5926,7 +5926,7 @@
 	  error.  From David Sidrane (2013-10-31).
 	* drivers/mtd/mtd_config.c and include/nuttx/configdata.h:  Add a container
 	  for an MTD device that can be used to provide a simple, lightweight
-	  interface to configation data storage that resides on some storage
+	  interface to configuration data storage that resides on some storage
 	  media that is wrapped as an MTD device.  From Ken Pettit (2013-11-1).
 	* configs/mikroe-stm32f4:  Now uses /dev/config for configuration data
 	  storage.  From Ken Pettit (2013-11-1).
@@ -5980,7 +5980,7 @@
 	* configs/sama5d3x-ek:  Add support for the PWM test for the
 	  SAMA5D3x-EK board (2013-11-6).
 	* arch/arm/src/sama5/sam_pwm.c and .h: SAMA5 PWM driver is now
-	  function (2013-11-7).
+	  functional (2013-11-7).
 	* include/nuttx/audio/i2s.h:  First cut at an I2S interface
 	  definition.  This initial definition is sparse will will
 	  probably evolve significantly (2011-11-7).
@@ -5993,7 +5993,7 @@
 	* configs/stm32f429i-disco:  Support for the STM32F429I-Discovery
 	  board from Ken Pettit (2013-11-7).
 	* arch/arm/src/stm32/stm32_usbdev.c:  The long outstanding bug
-	  involviing the handling of OUT SETUP commands has been fixed in
+	  involving the handling of OUT SETUP commands has been fixed in
 	  the STM32 F1 USB device driver by David Sidrane (2013-11-7).
 	* configs/spark/composite/cdc-acm.inf:  Windows CDC/ACM driver
 	  provided by David Sidrane (2013-11-7).
@@ -6028,10 +6028,10 @@
 	* arch/arm/src/sama5/sam_ssc.c and Kconfig:  Add configurable support
 	  for SSC loopback mode (2013-11-10).
 	* include/nuttx/audio/i2s.h, arch/arm/src/sama5/sam_ssc.c, and
-	  drivers/audio/i2schar.c:  Improvied I2S interface design:  Simplified
+	  drivers/audio/i2schar.c:  Improved I2S interface design:  Simplified
 	  audio buffer queuing (2013-11-10).
 	* arch/arm/src/sam34 and arch/arm/include/sam34:  Basic support for
-	  the Atmal SAM4E family.  From Mitko (2013-11-11).
+	  the Atmel SAM4E family.  From Mitko (2013-11-11).
 	* libc/audio/lib_buffer.c:  Remove unused apb_prepare() function
 	  (2013-11-11).
 	* arch/arm/src/stm32:  Added header files and driver framework for the
@@ -6062,10 +6062,10 @@
 	  that will provide raw access to NAND (2013-11-15).
 	* configs/sama5d3x-ek/src/sam_nandflash.c:  Provides board-specific
 	  memory controller initialize for NAND flash (2013-11-15).
-	* include/nuttx/mtd/mtd.h:  Move include/nutt/mtd.h to
+	* include/nuttx/mtd/mtd.h:  Move include/nuttx/mtd.h to
 	  include/nuttx/mtd/mtd.h where it will, hopefully, soon be joined by
 	  other MTD-related header files (2013-11-15).
-	* drivers/mtd/mtd_onfi.c and include/nuttx/mtd/onfi.h:  Add sharedi
+	* drivers/mtd/mtd_onfi.c and include/nuttx/mtd/onfi.h:  Add shared
 	  NAND routines for use with ONFI compatible NAND FLASH devices
 	  (2013-11-15).
 	* configs/ea3131/src/up_usbhost.c:  Board-specific USB host support
@@ -6104,8 +6104,8 @@
 	  Ken Pettit (2013-11-23)
 	* tools/mkctags.sh:  A script for creating ctags from Ken Pettit
 	  (2013-11-23)
-	* configs/sama5d3x-ek/src/sam_nand.c:  Add support for auto-mounting
-	  NAND MTD block or NXFFS devices (2013-11-25).
+	* configs/sama5d3x-ek/src/sam_nand.c:  Add support for "auto-mounting"
+	  NAND MTD block driver or NXFFS file system (2013-11-25).
 	* include/mtd/mtd.h:  Packed the geometry structure so that it can
 	  support larger erase block sizes without increasing the size of
 	  the geometry structure (2013-11-27).
@@ -6126,22 +6126,22 @@
 	* fs/fs_inode.c: The inode semaphore must be re-entrant.  Here is the
 	  re-entering path that I found:  (1) USB host connects to FLASH drive
 	  and creates /dev/sda, (2) /dev/sda is mounted, (3) FLASH drive is
-	  removed but /dev/sda is not destroyed because there is still a\
+	  removed but /dev/sda is not destroyed because there is still a
 	  reference on the device because of the mount, (4) umount() is called,
 	  taking the inode semaphore, now the driver tries to destroy the block
 	  driver by calling unregister_blockdriver().  But (5)
 	  unregister_blockdriver() also takes the inode semaphore causing a
-	  deadlock if the inode semaphore is not re-entry. (2013-11-28).
+	  deadlock if the inode semaphore is not re-entrant. (2013-11-28).
 	* configs/viewtool-stm32f107:  Add board support for the ViewTool
 	  STM32F103/F107 board with the STM32F107VCT6 installed.  Initial
-	  check-in is the unverfied board-support framework only
+	  check-in is the unverified board-support framework only
 	  (2013-11-30).
 	* configs/viewtool-stm32f107/src/stm32_buttons.c and stm32_leds.c:
 	  Add support for LEDs an buttons on the ViewTools STM32F107 board
 	  (2013-11-30).
 	* fs/nxffs/nxffs_initialize.c:  First of probably several changes for
 	  NAND FLASH.  NAND can report read errors because of bad ECC.  Logic
-	  in NXFFS must account for it and not just throw in th towel every
+	  in NXFFS must account for it and not just throw in the towel every
 	  time a read fails (2013-11-30).
 	* drivers/mtd/mtd_nand* and arch/arm/src/sama5/sam_nand.c:  NAND
 	  accesses now work (at least with software ECC and now DMA).  Still
@@ -6163,8 +6163,9 @@
 	* arch/arm/src/lm/lm_start.c:  Don't initialize .data if not running
 	  from FLASH (2013-12-05).
 	* fs/fat/fs_configfat.c: Fix a typo in the FAT16 formatting logic.
-	  Was this ever able to format a FAT16 disk? (2013-12-05).
+	  Was this ever able to format a FAT16 volume? (2013-12-05).
 	* drivers/mtd/mtd_nand.c:  Check if block number is within range at
 	  the top of the loop not the bottom.  Otherwise, we will do a bogus
 	  transfer with the out-of-range block before we test it (2013-12-05).
 
+6.33 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
