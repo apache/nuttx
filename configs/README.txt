@@ -1913,6 +1913,14 @@ configs/pcblogic-pic32mx
   STATUS:  Code complete but testing has been stalled due to tool related problems
   (PICkit 2 does not work with the PIC32).
 
+configs/pcduino-a10
+  This directory contains the port of NuttX to the pcDuino v1 board
+  See http://www.pcduino.com/ for information about pcDuino Lite, v1,
+  and v2.  These boards are based around the Allwinner A10 Cortex-A8 CPU.
+  I have not compared these boards in detail, but I believe that the
+  differences are cosmetic.  This port was developed on the v1 board, but
+  the others may be compatible.
+
 configs/p112
   The P112 is notable because it was the first of the hobbyist single board
   computers to reach the production stage. The P112 hobbyist computers

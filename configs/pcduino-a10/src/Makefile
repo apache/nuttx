@@ -1,5 +1,5 @@
 ############################################################################
-# configs/sama5d3x-ek/src/Makefile
+# configs/pcduino-a10/src/Makefile
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -40,118 +40,18 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = sam_boot.c
+CSRCS = a1x_boot.c a2x_leds.c
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += sam_cxxinitialize.c
-endif
-
-ifeq ($(CONFIG_SAMA5_SPI0),y)
-CSRCS += sam_spi.c
-else
-ifeq ($(CONFIG_SAMA5_SPI1),y)
-CSRCS += sam_spi.c
-endif
-endif
-
-ifeq ($(CONFIG_SAMA5_DDRCS),y)
-CSRCS += sam_sdram.c
-endif
-
-ifeq ($(CONFIG_SAMA5_EBICS0_NOR),y)
-CSRCS += sam_norflash.c
-endif
-
-ifeq ($(CONFIG_SAMA5_EBICS3_NAND),y)
-CSRCS += sam_nandflash.c
-endif
-
-ifeq ($(CONFIG_SAMA5_NOR_MAIN),y)
-CSRCS += nor_main.c
-endif
-
-ifeq ($(CONFIG_MTD_AT25),y)
-ifeq ($(CONFIG_SAMA5_SPI0),y)
-CSRCS += sam_at25.c
-endif
-endif
-
-ifeq ($(CONFIG_MTD_AT24XX),y)
-ifeq ($(CONFIG_SAMA5_TWI0),y)
-CSRCS += sam_at24.c
-endif
-endif
-
-ifeq ($(CONFIG_SAMA5_HSMCI0),y)
-CSRCS += sam_hsmci.c
-else
-ifeq ($(CONFIG_SAMA5_HSMCI1),y)
-CSRCS += sam_hsmci.c
-endif
-endif
-
-ifeq ($(CONFIG_SAMA5_UHPHS),y)
-CSRCS += sam_usb.c
-else
-ifeq ($(CONFIG_SAMA5_UDPHS),y)
-CSRCS += sam_usb.c
-endif
-endif
-
-ifeq ($(CONFIG_SAMA5_EMAC),y)
-CSRCS += sam_ethernet.c
-else
-ifeq ($(CONFIG_SAMA5_GMAC),y)
-CSRCS += sam_ethernet.c
-endif
+CSRCS += a1x_cxxinitialize.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS += sam_nsh.c
-endif
-
-ifeq ($(CONFIG_ADC),y)
-CSRCS += sam_adc.c
-endif
-
-ifeq ($(CONFIG_PWM),y)
-CSRCS += sam_pwm.c
-endif
-
-ifeq ($(CONFIG_CAN),y)
-CSRCS += sam_can.c
-endif
-
-ifeq ($(CONFIG_AUDIO_I2SCHAR),y)
-ifeq ($(CONFIG_SAMA5_SSC0),y)
-CSRCS += sam_i2schar.c
-else
-ifeq ($(CONFIG_SAMA5_SSC1),y)
-CSRCS += sam_i2schar.c
-endif
-endif
-endif
-
-ifeq ($(CONFIG_USBMSC),y)
-CSRCS += sam_usbmsc.c
-endif
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CSRCS += sam_ostest.c
-endif
-
-ifeq ($(CONFIG_SAMA5_TSD),y)
-CSRCS += sam_touchscreen.c
-endif
-
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += sam_autoleds.c
-else
-CSRCS += sam_userleds.c
+CSRCS += a1x_nsh.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS += sam_buttons.c
+CSRCS += a1x_buttons.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

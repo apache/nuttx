@@ -1,5 +1,5 @@
 README
-=====
+======
 
   This README file describes the port of NuttX to the SAMA5D3x-EK
   development boards. These boards feature the Atmel SAMA5D3
