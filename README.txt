@@ -1073,6 +1073,8 @@ nuttx
  |   |   `- README.txt
  |   |- pcblogic-pic32mx/
  |   |   `- README.txt
+ |   |- pcduino-a10/
+ |   |   `- README.txt
  |   |- pic32-starterkit/
  |   |   `- README.txt
  |   |- pic32mx7mmb/

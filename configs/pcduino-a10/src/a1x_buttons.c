@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sama5d3x-ek/src/sam_buttons.c
+ * configs/pcduino-a10/src/a1x_buttons.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,21 +32,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* There are five push button switches on the SAMA5D3X-EK base board:
- *
- *   1. One Reset, board reset (BP1)
- *   2. One Wake up, push button to bring the processor out of low power mode
- *     (BP2)
- *   3. One User momentary Push Button
- *   4. One Disable CS Push Button
- *
- * Only the momentary push button is controllable by software (labeled
- * "PB_USER1" on the board):
- *
- *   - PE27.  Pressing the switch connect PE27 to grounded.  Therefore, PE27
- *     must be pulled high internally.  When the button is pressed the SAMA5
- *     will sense "0" is on PE27.
- */
 
 /****************************************************************************
  * Included Files
@@ -61,8 +46,7 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "sam_pio.h"
-#include "sama5d3x-ek.h"
+#include "pcduino_a10.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 
@@ -74,8 +58,8 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_PIOE_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-static xcpt_t g_irquser1;
+#ifdef CONFIG_ARCH_IRQBUTTONS
+static xcpt_t g_irqbutton[BOARD_NBUTTONS];
 #endif
 
 /****************************************************************************
@@ -99,7 +83,7 @@ static xcpt_t g_irquser1;
 
 void up_buttoninit(void)
 {
-  (void)sam_configpio(PIO_USER1);
+# warning Missing logic
 }
 
 /****************************************************************************
@@ -115,7 +99,7 @@ void up_buttoninit(void)
 
 uint8_t up_buttons(void)
 {
-  return sam_pioread(PIO_USER1) ? 0 : BUTTON_USER1_BIT;
+# warning Missing logic
 }
 
 /****************************************************************************
@@ -128,18 +112,17 @@ uint8_t up_buttons(void)
  *   handler address isreturned (so that it may restored, if so desired).
  *
  * Configuration Notes:
- *   Configuration CONFIG_SAMA5_PIO_IRQ must be selected to enable the
- *   overall PIO IRQ feature and CONFIG_SAMA5_PIOE_IRQ must be enabled to
- *   select PIOs to support interrupts on PIOE.
+ *   Configuration CONFIG_ARCH_IRQBUTTONS must be selected to enable the
+ *   overall GPIO IRQ feature.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_PIOE_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+#ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
 {
   xcpt_t oldhandler = NULL;
 
-  if (id == BUTTON_USER1)
+  if (id < BOARD_NBUTTONS)
     {
       irqstate_t flags;
 
@@ -151,14 +134,14 @@ xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
 
       /* Get the old button interrupt handler and save the new one */
 
-      oldhandler = g_irquser1;
-      g_irquser1 = irqhandler;
+      oldhandler      = g_irqbutton[id];
+      g_irqbutton[id] = irqhandler;
 
       /* Configure the interrupt */
 
-      sam_pioirq(IRQ_USER1);
-      (void)irq_attach(IRQ_USER1, irqhandler);
-      sam_pioirqenable(IRQ_USER1);
+      a1x_pioirq(xxx);
+      (void)irq_attach(xxx, irqhandler);
+      a1x_pioirqenable(xxx);
       irqrestore(flags);
     }
 

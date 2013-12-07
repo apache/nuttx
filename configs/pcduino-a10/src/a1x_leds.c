@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/sama5d3x-ek/src/sam_buttons.c
+ * configs/pcduino-a10/src/a1x_leds.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -32,21 +32,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-/* There are five push button switches on the SAMA5D3X-EK base board:
- *
- *   1. One Reset, board reset (BP1)
- *   2. One Wake up, push button to bring the processor out of low power mode
- *     (BP2)
- *   3. One User momentary Push Button
- *   4. One Disable CS Push Button
- *
- * Only the momentary push button is controllable by software (labeled
- * "PB_USER1" on the board):
- *
- *   - PE27.  Pressing the switch connect PE27 to grounded.  Therefore, PE27
- *     must be pulled high internally.  When the button is pressed the SAMA5
- *     will sense "0" is on PE27.
- */
 
 /****************************************************************************
  * Included Files
@@ -55,28 +40,36 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
+#include <debug.h>
 
-#include <nuttx/irq.h>
-
-#include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "sam_pio.h"
-#include "sama5d3x-ek.h"
+#include "chip.h"
+#include "up_arch.h"
+#include "up_internal.h"
 
-#ifdef CONFIG_ARCH_BUTTONS
+#include "pcduino_a10.h"
 
 /****************************************************************************
  * Definitions
  ****************************************************************************/
 
+/* CONFIG_DEBUG_LEDS enables debug output from this file (needs CONFIG_DEBUG
+ * with CONFIG_DEBUG_VERBOSE too)
+ */
+
+#ifdef CONFIG_DEBUG_LEDS
+#  define leddbg  lldbg
+#  define ledvdbg llvdbg
+#else
+#  define leddbg(x...)
+#  define ledvdbg(x...)
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-#if defined(CONFIG_SAMA5_PIOE_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-static xcpt_t g_irquser1;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -87,85 +80,95 @@ static xcpt_t g_irquser1;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_buttoninit
+ * Name: a1x_led_initialize
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
- *   handlers.
+ *   Configure LEDs.  LEDs are left in the OFF state.
  *
  ****************************************************************************/
 
-void up_buttoninit(void)
+void a1x_led_initialize(void)
 {
-  (void)sam_configpio(PIO_USER1);
+#warning Missing Logic
 }
 
 /****************************************************************************
- * Name: up_buttons
+ * Name: up_ledon
  *
  * Description:
- *   After up_buttoninit() has been called, up_buttons() may be called to
- *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON* definitions
- *   above for the meaning of each bit in the returned value.
+ *   Select the "logical" ON state:
+ *
+ *    SYMBOL          Value  Meaning                     LED state
+ *                                                   LED2     LED1
+ *   ---------------- -----  -----------------------  -------- --------
+ *   LED_STARTED        0  NuttX has been started     OFF      OFF
+ *   LED_HEAPALLOCATE   0  Heap has been allocated    OFF      OFF
+ *   LED_IRQSENABLED    0  Interrupts enabled         OFF      OFF
+ *   LED_STACKCREATED   1  Idle stack created         ON       OFF
+ *   LED_INIRQ          2  In an interrupt            N/C      N/C
+ *   LED_SIGNAL         2  In a signal handler        N/C      N/C
+ *   LED_ASSERTION      2  An assertion failed        N/C      N/C
+ *   LED_PANIC          3  The system has crashed     N/C      Blinking
+ *   LED_IDLE           -  MCU is is sleep mode         Not used
  *
  ****************************************************************************/
 
-uint8_t up_buttons(void)
+#ifdef CONFIG_ARCH_LEDS
+void up_ledon(int led)
 {
-  return sam_pioread(PIO_USER1) ? 0 : BUTTON_USER1_BIT;
-}
-
-/****************************************************************************
- * Name: up_irqbutton
- *
- * Description:
- *   This function may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is one
- *   of the BUTTON* definitions provided above. The previous interrupt
- *   handler address isreturned (so that it may restored, if so desired).
- *
- * Configuration Notes:
- *   Configuration CONFIG_SAMA5_PIO_IRQ must be selected to enable the
- *   overall PIO IRQ feature and CONFIG_SAMA5_PIOE_IRQ must be enabled to
- *   select PIOs to support interrupts on PIOE.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SAMA5_PIOE_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
-{
-  xcpt_t oldhandler = NULL;
-
-  if (id == BUTTON_USER1)
-    {
-      irqstate_t flags;
-
-      /* Disable interrupts until we are done.  This guarantees that the
-       * following operations are atomic.
-       */
-
-      flags = irqsave();
-
-      /* Get the old button interrupt handler and save the new one */
-
-      oldhandler = g_irquser1;
-      g_irquser1 = irqhandler;
-
-      /* Configure the interrupt */
-
-      sam_pioirq(IRQ_USER1);
-      (void)irq_attach(IRQ_USER1, irqhandler);
-      sam_pioirqenable(IRQ_USER1);
-      irqrestore(flags);
-    }
-
-  /* Return the old button handler (so that it can be restored) */
-
-  return oldhandler;
+#warning Missing logic
 }
 #endif
 
-#endif /* CONFIG_ARCH_BUTTONS */
+/****************************************************************************
+ * Name: up_ledoff
+ *
+ * Description:
+ *   Select the "logical" OFF state:
+ *
+ *    SYMBOL          Value  Meaning                     LED state
+ *                                                   LED2     LED1
+ *   ---------------- -----  -----------------------  -------- --------
+ *   LED_STARTED        0  NuttX has been started     OFF      OFF
+ *   LED_HEAPALLOCATE   0  Heap has been allocated    OFF      OFF
+ *   LED_IRQSENABLED    0  Interrupts enabled         OFF      OFF
+ *   LED_STACKCREATED   1  Idle stack created         ON       OFF
+ *   LED_INIRQ          2  In an interrupt            N/C      N/C
+ *   LED_SIGNAL         2  In a signal handler        N/C      N/C
+ *   LED_ASSERTION      2  An assertion failed        N/C      N/C
+ *   LED_PANIC          3  The system has crashed     N/C      Blinking
+ *   LED_IDLE           -  MCU is is sleep mode         Not used
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_LEDS
+void up_ledoff(int led)
+{
+#warning Missing logic
+}
+#endif
+
+/************************************************************************************
+ * Name:  a1x_setled and a1x_setleds
+ *
+ * Description:
+ *   These interfaces allow user control of the board LEDs.
+ *
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control both on-board LEDs up
+ *   until the completion of boot.  The it will continue to control LED2; LED1 is
+ *   avaiable for application use.
+ *
+ *   If CONFIG_ARCH_LEDS is not defined, then both LEDs are available for application
+ *   use.
+ *
+ ************************************************************************************/
+
+void a1x_setled(int led, bool ledon)
+{
+#warning Missing logic
+}
+
+void a1x_setleds(uint8_t ledset)
+{
+#warning Missing logic
+}

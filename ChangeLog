@@ -6173,4 +6173,5 @@
 	* arch/arm/include/a1x and src/a1x:  Directory structure to support
 	  the Allwinner A10.  Not much there on the initial check-in
 	  (2013-12-7).
-
+	* configs/pcduino-a10:  Directory structure for the pcDuino board.  This
+	  board is based on the Allwinner A10 (2013-12-7).
