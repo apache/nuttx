@@ -1173,12 +1173,17 @@ static int uart_interrupt(struct uart_dev_s *dev)
               break;
             }
 
+          /* Busy detect.  Just ignore.  Cleared by reading the status register */
+
+          case UART_IIR_IID_BUSY:
+              break;
+
           /* Otherwise, there is no (handled) interrupt pending */
 
           case UART_IIR_IID_NONE:
           default:
             {
-              dbg("Unexpected IIR: %02x\n", status);
+              lldbg("Unexpected IIR: %02x\n", status);
               break;
             }
         }
