@@ -14,7 +14,9 @@ config ARCH_CHIP_A1X
 	bool "Allwinner A1X"
 	select ARCH_CORTEXA8
 	select ARCH_HAVE_FPU
+	select ARCH_HAVE_MMU
 	select ARCH_HAVE_LOWVECTORS
+	select BOOT_RUNFROMSDRAM
 	---help---
 		Allwinner A1X family: A10, A10S (A12), A13 (ARM Cortex-A8)
 
@@ -202,6 +204,7 @@ config ARCH_FAMILY
 
 config ARCH_CHIP
 	string
+	default "a1x"		if ARCH_CHIP_A1X
 	default "c5471"		if ARCH_CHIP_C5471
 	default "calypso"	if ARCH_CHIP_CALYPSO
 	default "dm320"		if ARCH_CHIP_DM320
