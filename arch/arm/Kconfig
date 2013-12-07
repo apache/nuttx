@@ -10,6 +10,14 @@ choice
 	prompt "ARM chip selection"
 	default ARCH_CHIP_STM32
 
+config ARCH_CHIP_A1X
+	bool "Allwinner A1X"
+	select ARCH_CORTEXA8
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_LOWVECTORS
+	---help---
+		Allwinner A1X family: A10, A10S (A12), A13 (ARM Cortex-A8)
+
 config ARCH_CHIP_C5471
 	bool "TMS320 C5471"
 	select ARCH_ARM7TDMI
@@ -320,6 +328,9 @@ source arch/arm/src/armv7-m/Kconfig
 endif
 if ARCH_ARM7TDMI || ARCH_ARM926EJS
 source arch/arm/src/arm/Kconfig
+endif
+if ARCH_CHIP_A1X
+source arch/arm/src/a1x/Kconfig
 endif
 if ARCH_CHIP_C5471
 source arch/arm/src/c5471/Kconfig

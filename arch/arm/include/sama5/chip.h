@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_SAMAD5_CHIP_H
-#define __ARCH_ARM_INCLUDE_SAMAD5_CHIP_H
+#ifndef __ARCH_ARM_INCLUDE_SAMA5_CHIP_H
+#define __ARCH_ARM_INCLUDE_SAMA5_CHIP_H
 
 /************************************************************************************
  * Included Files
@@ -131,4 +131,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_INCLUDE_SAMAD5_CHIP_H */
+#endif /* __ARCH_ARM_INCLUDE_SAMA5_CHIP_H */

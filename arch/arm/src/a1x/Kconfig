@@ -1,0 +1,19 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_CHIP_A1X
+
+comment "A1x Configuration Options"
+
+choice
+	prompt "Allwinner A1X Chip Selection"
+	default ARCH_CHIP_A10
+
+config ARCH_CHIP_A10
+	bool "A10"
+
+endchoice
+
+endif # ARCH_CHIP_A1X
