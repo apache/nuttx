@@ -1358,9 +1358,9 @@ NAND Support
   verified, but there is no way to use it in the current NuttX architecture
   other than through the raw MTD interface.
 
-  NAND should be considered a work in progress.  You will not want to use
-  NAND unless you are interested in investing a little effort, particularly
-  in infrastructure. See the "STATUS SUMMARY" section below.
+  NAND should still be considered a work in progress.  You will not want to
+  use NAND unless you are interested in investing a little effort,
+  particularly in infrastructure. See the "STATUS SUMMARY" section below.
 
   NAND Support
   ------------
@@ -1652,13 +1652,12 @@ NAND Support
      work correctly:  The MBR is written and read back correctly, but gets
      corrupted later for unknown reasons.
 
-  2. DMA works (with software ECC), but I have seen occasional failurs.  I
-     believe that these issue have been resolved but I recommend enabling
-     DMA with caution.
+  2. DMA works (at least with software ECC), but I have seen occasional
+     failures.  I recommend enabling DMA with caution.
 
      In NuttX, DMA will also cost two context switches (and, hence, four
      register state transfers).  With smaller NAND page sizes (say 2KiB and
-     below), I would not expect a great  performance improvement with DMA
+     below), I would expect little or no performance improvement with DMA
      for this reason.
 
   3. NXFFS does not work with NAND. NAND differs from other other FLASH
