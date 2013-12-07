@@ -182,7 +182,7 @@ int main(int argc, char **argv, char **envp)
   printf(" * of RAM plus the RAM size.\n");
   printf(" */\n\n");
   printf("#ifndef CONFIG_RAM_END\n");
-  printf("# define CONFIG_RAM_END (CONFIG_RAM_START+(unsigned)CONFIG_RAM_SIZE)\n");
+  printf("# define CONFIG_RAM_END (CONFIG_RAM_START+CONFIG_RAM_SIZE)\n");
   printf("#endif\n\n");
   printf("#ifndef CONFIG_RAM_VEND\n");
   printf("# define CONFIG_RAM_VEND (CONFIG_RAM_VSTART+CONFIG_RAM_SIZE)\n");

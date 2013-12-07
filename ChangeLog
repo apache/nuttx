@@ -6374,3 +6374,8 @@
 	  missing interrupt handling logic for UART4-7 (2014-1-6).
 	* nuttx/tools/mkconfig.c: Cast size to unsigned in calculation of
 	  CONFIG_RAM_END to avoid complains about integer overflow (2013-1-6).
+	* nuttx/tools/mkconfig.c: Back out the last change, this causes
+	  problems for assembly language.  How to prevent the integer over-
+	  flow warnings? (2014-1-6).
+	* arch/arm/src/a1x/a1x_serial.c: Handle BUSY interrupt (2014-1-6).
+
