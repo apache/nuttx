@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_SAMA5D3X_MEMORYMAP_H
-#define __ARCH_ARM_SRC_SAMA5_SAMA5D3X_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D3X_MEMORYMAP_H
+#define __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D3X_MEMORYMAP_H
 
 /************************************************************************************
  * Included Files
@@ -274,7 +274,7 @@
 #endif
 
 /* SDRAM is a special case because it requires non-cached access of its
- * initial configuration, then caached access thereafter.
+ * initial configuration, then cached access thereafter.
  */
 
 #define SAM_DDRCS_MMUFLAGS       MMU_MEMFLAGS
@@ -734,4 +734,4 @@
  * Public Functions
  ************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMA5_SAMA5D3X_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_CHIP_SAMA5D3X_MEMORYMAP_H */
