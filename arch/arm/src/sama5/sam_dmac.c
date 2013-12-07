@@ -1487,11 +1487,13 @@ static void sam_freelinklist(struct sam_dmach_s *dmach)
 
       DEBUGASSERT(desc->saddr != 0);
 
-      /* Get the physical address of the next desriptor in the list */
+      /* Get the physical address of the next descriptor in the list */
 
       paddr = desc->dscr;
 
-      /* Free the descriptor by simply nullifying it */
+      /* Free the descriptor by simply nullifying it and bumping up the
+       * semaphore count.
+       */
 
       memset(desc, 0, sizeof(struct dma_linklist_s));
       sam_givedsem(dmac);
