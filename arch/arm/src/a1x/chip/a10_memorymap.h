@@ -576,9 +576,13 @@
  *   A1X_VECTOR_PADDR - Unmapped, physical address of vector table in SRAM
  *   A1X_VECTOR_VSRAM - Virtual address of vector table in SRAM
  *   A1X_VECTOR_VADDR - Virtual address of vector table (0x00000000 or 0xffff0000)
+ *
+ * NOTE: When using LOWVECTORS, the actual base of the vectors appears to be
+ * offset to address 0x0000:0040
  */
 
 #define VECTOR_TABLE_SIZE         0x00010000
+#define VECTOR_TABLE_OFFSET       0x00000040
 
 #ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
 

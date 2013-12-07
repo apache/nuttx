@@ -270,7 +270,7 @@ static void a1x_copyvectorblock(void)
 
   src  = (uint32_t*)&_vector_start;
   end  = (uint32_t*)&_vector_end;
-  dest = (uint32_t*)A1X_VECTOR_VSRAM;
+  dest = (uint32_t*)(A1X_VECTOR_VSRAM + VECTOR_TABLE_OFFSET);
 
   while (src < end)
     {
