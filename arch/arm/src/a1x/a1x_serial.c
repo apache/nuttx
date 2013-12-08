@@ -1472,7 +1472,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
-      priv->ier |= UART_IER_PTIME;
+      priv->ier |= UART_IER_ETBEI;
       up_serialout(priv, A1X_UART_IER_OFFSET, priv->ier);
 
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
@@ -1484,7 +1484,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-      priv->ier &= ~UART_IER_PTIME;
+      priv->ier &= ~UART_IER_ETBEI;
       up_serialout(priv, A1X_UART_IER_OFFSET, priv->ier);
     }
 
