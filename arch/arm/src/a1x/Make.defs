@@ -93,4 +93,4 @@ CHIP_ASRCS  =
 
 # A1x-specific C source files
 
-CHIP_CSRCS  = 
+CHIP_CSRCS  = a1x_boot.c

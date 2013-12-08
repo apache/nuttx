@@ -6175,3 +6175,6 @@
 	  (2013-12-7).
 	* configs/pcduino-a10:  Directory structure for the pcDuino board.  This
 	  board is based on the Allwinner A10 (2013-12-7).
+	* arch/arm/src/a1x/a1x_boot.c and chip/a1x_intc.h:  More A10 logic
+	  (2013-12-8).
+
