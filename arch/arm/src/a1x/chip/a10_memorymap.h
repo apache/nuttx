@@ -103,7 +103,7 @@
 #define A1X_ACE_OFFSET       0x0001a000 /* ACE             0x01c1:A000-0x01c1:afff 4K */
 #define A1X_TVE1_OFFSET      0x0001b000 /* TVE 1           0x01c1:B000-0x01c1:bfff 4K */
 #define A1X_USB2_OFFSET      0x0001c000 /* USB 2           0x01c1:C000-0x01c1:cfff 4K */
-#define A1X_CSI1_OFFSET     0x0001d000 /* CSI 1           0x01c1:D000-0x01c1:dfff 4K */
+#define A1X_CSI1_OFFSET      0x0001d000 /* CSI 1           0x01c1:D000-0x01c1:dfff 4K */
 #define A1X_TZASC_OFFSET     0x0001e000 /* TZASC           0x01c1:E000-0x01c1:efff 4K */
 #define A1X_SPI3_OFFSET      0x0001f000 /* SPI3            0x01c1:F000-0x01c1:ffff 4K */
 #define A1X_CCM_OFFSET       0x00020000 /* CCM             0x01c2:0000-0x01c2:03ff 1K */
@@ -159,7 +159,7 @@
 #define A1X_SRAMA2_PADDR     (A1X_INTMEM_PSECTION+A1X_SRAMA2_OFFSET)
 #define A1X_SRAMA3_PADDR     (A1X_INTMEM_PSECTION+A1X_SRAMA3_OFFSET)
 #define A1X_SRAMA4_PADDR     (A1X_INTMEM_PSECTION+A1X_SRAMA4_OFFSET)
-#define A1X_SRAMNAND_PADDR 
+#define A1X_SRAMNAND_PADDR
 #define A1X_SRAMD_PADDR      (A1X_INTMEM_PSECTION+A1X_SRAMD_OFFSET)
 #define A1X_SRAMDSEC_PADDR   (A1X_INTMEM_PSECTION+A1X_SRAMDSEC_OFFSET)
 
@@ -273,13 +273,16 @@
  * span the entire physical address space.  The definitions below specify
  * the number of 1Mb entries that are required to span a particular address
  * region.
+ *
+ * NOTE: the size of the mapped SDRAM region depends on the configured size
+ * of DRAM, not on the size of the address space assigned to DRAM.
  */
 
 #define A1X_INTMEM_NSECTIONS _NSECTIONS(A1X_INTMEM_SIZE)
 #define A1X_PERIPH_NSECTIONS _NSECTIONS(A1X_PERIPH_SIZE)
 #define A1X_SRAMC_NSECTIONS  _NSECTIONS(A1X_SRAMC_SIZE)
 #define A1X_DE_NSECTIONS     _NSECTIONS(A1X_DE_SIZE)
-#define A1X_DDR_NSECTIONS    _NSECTIONS(A1X_DDR_SIZE)
+#define A1X_DDR_NSECTIONS    _NSECTIONS(CONFIG_RAM_SIZE)
 #define A1X_BROM_NSECTIONS   _NSECTIONS(A1X_BROM_SIZE)
 
 /* Section MMU Flags */
@@ -325,7 +328,7 @@
 #define A1X_SRAMA2_VADDR     (A1X_INTMEM_VSECTION+A1X_SRAMA2_OFFSET)
 #define A1X_SRAMA3_VADDR     (A1X_INTMEM_VSECTION+A1X_SRAMA3_OFFSET)
 #define A1X_SRAMA4_VADDR     (A1X_INTMEM_VSECTION+A1X_SRAMA4_OFFSET)
-#define A1X_SRAMNAND_VADDR 
+#define A1X_SRAMNAND_VADDR
 #define A1X_SRAMD_VADDR      (A1X_INTMEM_VSECTION+A1X_SRAMD_OFFSET)
 #define A1X_SRAMDSEC_VADDR   (A1X_INTMEM_VSECTION+A1X_SRAMDSEC_OFFSET)
 
@@ -410,7 +413,7 @@
 
 #define A1X_BROM_VADDR       (A1X_BROM_VSECTION+A1X_BROM_OFFSET)
 
-/* NuttX vitual base address
+/* NuttX virtual base address
  *
  * The boot logic will create a temporarily mapping based on where NuttX is
  * executing in memory.  In this case, NuttX will be running from either
@@ -478,37 +481,45 @@
  *
  * 16Kb of memory is reserved hold the page table for the virtual mappings.  A
  * portion of this table is not accessible in the virtual address space (for
- * normal operation).   There is this large whole in the physcal address space
- * for which there will never be level 1 mappings:
+ * normal operation).   There are several large holes in the physical address
+ * space for which there will never be level 1 mappings:
  *
- *   0x80000000-0xefffffff: Undefined (1.75 GB)
+ *                                    LI PAGE TABLE
+ *   ADDRESS RANGE           SIZE     ENTRIES       SECTIONS
+ *   ----------------------- ------- -------------- ---------
+ *   0x0003:0000-0x01eb:ffff 275MB   0x0004-0x006c 26
+ *                                  *(none usable) 0
+ *   0x01ec:0000-0x3fff:ffff 993MB   0x0078-0x0ffc 993
+ *                                  *0x0400-0x0ffc 767
  *
- * That is the offset where the main L2 page tables will be positioned.  This
- * corresponds to page table offsets 0x000002000 up to 0x000003c00.  That
- * is 1792 entries, each mapping 4KB of address for a total of 7MB of virtual
- * address space)
+ * And the largest is probably from the end of SDRAM through 0xfff0:0000.
+ * But the size of that region varies with the size of the installed SDRAM.
+ * It is at least:
  *
- * Up to two L2 page tables may be used:
+ *                                    LI PAGE TABLE
+ *   ADDRESS RANGE           SIZE     ENTRIES       SECTIONS
+ *   ----------------------- ------- -------------- ---------
+ *   0xc000:0000-0xffef:ffff 1022MB  *0x3000-0x3ff8 1022
  *
- * 1) One mapping the vector table.  However, L2 page tables must be aligned
- *    to 1KB address boundaries, so the minimum L2 page table size is then
- *    1KB, mapping up a full megabyte of virtual address space.
+ * And probably much larger.
  *
- *    This L2 page table is only allocated if CONFIG_ARCH_LOWVECTORS is *not*
- *    defined.  The A1X boot-up logic will map the beginning of the boot
- *    memory to address 0x0000:0000 using both the MMU and the AXI matrix
- *    REMAP register.  So no L2 page table is required.
+ *   * NOTE that the L2 page table entries must be aligned 1KB address
+ *     boundaries.
  *
+ * These two larger regions is where L2 page tables will positioned.  Up to
+ * two L2 page tables may be used:
+ *
+ * 1) One mapping the vector table (only when CONFIG_ARCH_LOWVECTORS is not
+ *    defined).
  * 2) If on-demand paging is supported (CONFIG_PAGING=y), than an additional
- *    L2 page table is needed.  This page table will use the remainder of
- *    the address space.
+ *    L2 page table is needed.
  */
 
 #ifndef CONFIG_ARCH_LOWVECTORS
 /* Vector L2 page table offset/size */
 
-#  define VECTOR_L2_OFFSET        0x000002000
-#  define VECTOR_L2_SIZE          0x000000400
+#  define VECTOR_L2_OFFSET        0x000000400
+#  define VECTOR_L2_SIZE          0x000000bfc
 
 /* Vector L2 page table base addresses */
 
@@ -519,18 +530,15 @@
 
 #  define VECTOR_L2_END_PADDR     (VECTOR_L2_PBASE+VECTOR_L2_SIZE)
 #  define VECTOR_L2_END_VADDR     (VECTOR_L2_VBASE+VECTOR_L2_SIZE)
-
-/* Paging L2 page table offset/size */
-
-#  define PGTABLE_L2_OFFSET       0x000002400
-#  define PGTABLE_L2_SIZE         0x000001800
-
-#else
-/* Paging L2 page table offset/size */
-
-#  define PGTABLE_L2_OFFSET       0x000002000
-#  define PGTABLE_L2_SIZE         0x000001c00
 #endif
+
+/* Paging L2 page table offset/size */
+
+#define PGTABLE_START_PADDR       (A1X_DDR_PSECTION+CONFIG_RAM_SIZE)
+#define PGTABLE_BROM_OFFSET       0x3ffc
+
+#define PGTABLE_L2_OFFSET         ((PGTABLE_START_PADDR >> 18) & ~3)
+#define PGTABLE_L2_SIZE           (PGTABLE_BROM_OFFSET - PGTABLE_L2_OFFSET)
 
 /* Paging L2 page table base addresses
  *
@@ -556,15 +564,15 @@
 #define VECTOR_TABLE_SIZE         0x00010000
 #ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
 #  define A1X_VECTOR_PADDR        A1X_SRAMA1_PADDR
-#  define A1X_VECTOR_VSRAM        A1X_ISRAM0_VADDR
+#  define A1X_VECTOR_VSRAM        A1X_SRAMA1_VADDR
 #  define A1X_VECTOR_VADDR        0x00000000
 #else  /* Vectors located at 0xffff:0000 -- this probably does not work */
 #  ifdef A1X_ISRAM1_SIZE >= VECTOR_TABLE_SIZE
 #    define A1X_VECTOR_PADDR      (A1X_SRAMA1_PADDR+A1X_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
-#    define A1X_VECTOR_VSRAM      (A1X_ISRAM1_VADDR+A1X_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
+#    define A1X_VECTOR_VSRAM      (A1X_SRAMA1_VADDR+A1X_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
 #  else
 #    define A1X_VECTOR_PADDR      (A1X_SRAMA1_PADDR+A1X_ISRAM0_SIZE-VECTOR_TABLE_SIZE)
-#    define A1X_VECTOR_VSRAM      (A1X_ISRAM0_VADDR+A1X_ISRAM0_SIZE-VECTOR_TABLE_SIZE)
+#    define A1X_VECTOR_VSRAM      (A1X_SRAMA1_VADDR+A1X_ISRAM0_SIZE-VECTOR_TABLE_SIZE)
 #  endif
 #  define A1X_VECTOR_VADDR        0xffff0000
 #endif
