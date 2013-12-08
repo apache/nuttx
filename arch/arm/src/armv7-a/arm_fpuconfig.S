@@ -93,6 +93,6 @@ arm_fpuconfig:
 	fmrx	r0, fpexc
 	orr		r0, r0, #0x40000000
 	fmxr	fpexc, r0
-    bx      lr
+	bx		lr
 	.size	arm_fpuconfig, . - arm_fpuconfig
 	.end
