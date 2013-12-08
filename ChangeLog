@@ -6381,4 +6381,6 @@
 	* arch/arm/src/armv7-a/arm_head.S and arm_pghead.S:  Add more nop's
 	  after enabling the MMU.  The cortex-a8 seems to need these
 	  (2014-1-7).
+	* arch/arm/src/a1x/a1x_serial.c: Correct handling of the BUSY
+	  interrupt (2014-1-7).
 
