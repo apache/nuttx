@@ -41,7 +41,7 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/a1x/chip.h>
+#include "chip/a1x_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -184,6 +184,9 @@
 #  define INTC_FF2(n)                (1 << ((n) - 64))  /* n=64-95: Enable fast forcing feature */
 
 /* Interrupt Source Priority 0-4 */
+
+#define INTC_PRIO_MIN                0
+#define INTC_PRIO_MAX                3
 
 #define INTC_PRIO_SHIFT(n)           ((n) << 1)         /* n=0-15: Priority level */
 #define INTC_PRIO_MASK(n)            (3 << INTC_PRIO_SHIFT(n))

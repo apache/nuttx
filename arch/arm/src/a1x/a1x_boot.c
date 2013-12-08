@@ -74,18 +74,6 @@
 #  error High vector remap cannot be performed if we are using a ROM page table
 #endif
 
-/* if SDRAM is used, then it will be configured twice:  It will first be
- * configured to a temporary state to support low-level ininitialization.
- * After the SDRAM has been fully initialized, SRAM be used to
- * set the SDRM in its final, fully cache-able state.
- */
-
-#undef NEED_SDRAM_REMAPPING
-#if defined(CONFIG_SAMA5_DDRCS) && !defined(CONFIG_SAMA5_BOOT_SDRAM) && \
-   !defined(CONFIG_ARCH_ROMPGTABLE)
-#  define NEED_SDRAM_REMAPPING 1
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -250,9 +238,6 @@ static void a1x_vectormapping(void)
  *   Copy the interrupt block to its final destination.  Vectors are already
  *   positioned at the beginning of the text region and only need to be
  *   copied in the case where we are using high vectors.
- *
- *   NOTE: We don't actually have to copy the vector block.  We could simply
- *   set the the INTC vector address.
  *
  ****************************************************************************/
 
