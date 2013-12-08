@@ -2577,13 +2577,7 @@ Configurations
   2. Unless stated otherwise, all configurations generate console
      output on UART0 (J3).
 
-  3. Unless otherwise stated, the configurations are setup for
-     Linux (or any other POSIX environment like Cygwin under Windows):
-
-     Build Setup:
-       CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
-
-  4. All of these configurations use the Code Sourcery for Windows toolchain
+  3. All of these configurations use the Code Sourcery for Windows toolchain
      (unless stated otherwise in the description of the configuration).  That
      toolchain selection can easily be reconfigured using 'make menuconfig'.
      Here are the relevant current settings:
