@@ -51,6 +51,10 @@
 /* External interrupts numbers */
 #warning Missing logic
 
+/* Total number of interrupts */
+
+#define A1X_IRQ_NINT 0
+
 /* Total number of IRQ numbers */
 
 #define NR_IRQS 0
