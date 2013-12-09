@@ -174,14 +174,6 @@ void up_irqinitialize(void)
   current_regs = NULL;
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  /* Initialize logic to support a second level of interrupt decoding for
-   * PIO pins.
-   */
-
-#ifdef CONFIG_A1X_GPIO_IRQ
-  a1x_gpio_irqinitialize();
-#endif
-
   /* And finally, enable interrupts */
 
   (void)irqenable();
@@ -205,6 +197,14 @@ void up_irqinitialize(void)
 
 uint32_t *arm_decodeirq(uint32_t *regs)
 {
+  /* REVISIT:  I think that if you want to have prioritized interrupts, you
+   * would have to get the highest priority pending interrupt from the VECTOR
+   * register.  But, in that case, you would also need to clear the pending
+   * interrupt by reading the PEND register.  However, won't that clear up
+   * to 32 pending interrupts?
+   */
+
+#if 0 /* Use PEND registers instead */
   uint32_t regval;
 
  /* During initialization, the BASE address register was set to zero.
@@ -214,14 +214,92 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 
   regval = getreg32(A1X_INTC_VECTOR);
 
-  /* REVISIT:  I am thinking that we need to read the PEND0-2 registers
-   * in order to clear the pending interrupt.
-   */
-#warning Missing logic
-
   /* Dispatch the interrupt */
 
   return arm_doirq((int)(regval >> 2), regs);
+#else
+  uintptr_t regaddr;
+  uint32_t pending;
+  int startirq;
+  int lastirq;
+  int irq;
+
+  /* Check each PEND register for pending interrupts.  Since the unused
+   * interrupts are disabled, we do not have to be concerned about which
+   * are MASKed.
+   */
+
+  for (startirq = 0, regaddr = A1X_INTC_IRQ_PEND0;
+       startirq < A1X_IRQ_NINT;
+       startirq += 32, regaddr += 4)
+    {
+      /* Check this register for pending interrupts */
+
+      pending = getreg32(regaddr);
+      if (pending != 0)
+        {
+          /* The last interrupt in this register */
+
+          lastirq = startirq + 32;
+          if (lastirq > A1X_IRQ_NINT)
+            {
+              lastirq = A1X_IRQ_NINT;
+            }
+
+          for (irq = startirq; irq < lastirq && pending != 0; )
+            {
+              /* Check for pending interrupts in any of the lower 16-bits */
+
+              if ((pending & 0x0000ffff) == 0)
+                {
+                  irq      += 16;
+                  pending >>= 16;
+                }
+
+              /* Check for pending interrupts in any of the lower 16-bits */
+
+              else if ((pending & 0x000000ff) == 0)
+                {
+                  irq      += 8;
+                  pending >>= 8;
+                }
+
+              /* Check for pending interrupts in any of the lower 4-bits */
+
+              else if ((pending & 0x0000000f) == 0)
+                {
+                  irq      += 4;
+                  pending >>= 4;
+                }
+
+              /* Check for pending interrupts in any of the lower 2-bits */
+
+              else if ((pending & 0x00000003) == 0)
+                {
+                  irq      += 2;
+                  pending >>= 2;
+                }
+
+              /* Check for pending interrupts in any of the last bits */
+
+              else
+                {
+                  if ((pending & 0x00000001) == 0)
+                    {
+                      /* Yes.. dispatch the interrupt */
+
+                      regs = arm_doirq(irq, regs);
+                    }
+
+                  irq++;
+                  pending >>= 1;
+                }
+            }
+        }
+    }
+
+  return regs;
+#endif
 }
 
 /****************************************************************************
@@ -235,71 +313,32 @@ uint32_t *arm_decodeirq(uint32_t *regs)
 void up_disable_irq(int irq)
 {
   irqstate_t flags;
-  uintptr_t enabreg;
-  uintptr_t maskreg;
+  uintptr_t regaddr;
   uint32_t regval;
-  uint32_t bit;
 
   if (irq < A1X_IRQ_NINT)
     {
-      DEBUGASSERT(irg < 96);
-
       /* These operations must be atomic */
 
       flags = irqsave();
 
-      /* Select the register set associated with this irq */
+      /* Make sure that the interrupt is disabled. */
 
-      if (irq < 32)
-        {
-          enabreg = A1X_INTC_EN0;
-          maskreg = A1X_INTC_MASK0;
-          bit     = irq;
-        }
-      else if (irq < 64)
-        {
-          enabreg = A1X_INTC_EN1;
-          maskreg = A1X_INTC_MASK1;
-          bit     = irq - 32;
-        }
-      else if (irq < 64)
-        {
-          enabreg = A1X_INTC_EN2;
-          maskreg = A1X_INTC_MASK2;
-          bit     = irq - 64;
-        }
-      else
-        {
-          /* Will not happen */
-
-          return;
-        }
+      regaddr = A1X_INTC_EN(irq);
+      regval  = getreg32(regaddr);
+      regval &= ~INTC_EN(irq);
+      putreg32(regval, regaddr);
 
       /* Mask the interrupt by setting the bit in the mask register */
 
-      regval = getreg32(maskreg);
-      regval |= (1 << bit);
-      putreg32(regval, maskreg);
-
-      /* Make sure that the interrupt is enabled.  The interrupt must still
-       * be enabled in order for interrupts to pend while masked.
-       */
-
-      regval = getreg32(enabreg);
-      regval |= (1 << bit);
-      putreg32(regval, enabreg);
+      regaddr = A1X_INTC_MASK(irq);
+      regval  = getreg32(regaddr);
+      regval |= INTC_MASK(irq);
+      putreg32(regval, regaddr);
 
       a1x_dumpintc("disable", irq);
       irqrestore(flags);
     }
-#ifdef CONFIG_A1X_GPIO_IRQ
-  else
-    {
-      /* Maybe it is a (derived) PIO IRQ */
-
-      a1x_gpio_irqdisable(irq);
-    }
-#endif
 }
 
 /****************************************************************************
@@ -313,10 +352,8 @@ void up_disable_irq(int irq)
 void up_enable_irq(int irq)
 {
   irqstate_t flags;
-  uintptr_t enabreg;
-  uintptr_t maskreg;
+  uintptr_t regaddr;
   uint32_t regval;
-  uint32_t bit;
 
   if (irq < A1X_IRQ_NINT)
     {
@@ -324,73 +361,23 @@ void up_enable_irq(int irq)
 
       flags = irqsave();
 
-      /* Select the register set associated with this irq */
-
-      if (irq < 32)
-        {
-          enabreg = A1X_INTC_EN0;
-          maskreg = A1X_INTC_MASK0;
-          bit     = irq;
-        }
-      else if (irq < 64)
-        {
-          enabreg = A1X_INTC_EN1;
-          maskreg = A1X_INTC_MASK1;
-          bit     = irq - 32;
-        }
-      else if (irq < 64)
-        {
-          enabreg = A1X_INTC_EN2;
-          maskreg = A1X_INTC_MASK2;
-          bit     = irq - 64;
-        }
-      else
-        {
-          /* Will not happen */
-
-          return;
-        }
-
       /* Make sure that the interrupt is enabled. */
 
-      regval  = getreg32(enabreg);
-      regval |= (1 << bit);
-      putreg32(regval, enabreg);
+      regaddr = A1X_INTC_EN(irq);
+      regval  = getreg32(regaddr);
+      regval |= INTC_EN(irq);
+      putreg32(regval, regaddr);
 
       /* Un-mask the interrupt by clearing the bit in the mask register */
 
-      regval = getreg32(maskreg);
-      regval &= ~(1 << bit);
-      putreg32(regval, maskreg);
+      regaddr = A1X_INTC_MASK(irq);
+      regval  = getreg32(regaddr);
+      regval &= ~INTC_MASK(irq);
+      putreg32(regval, regaddr);
 
       a1x_dumpintc("enable", irq);
       irqrestore(flags);
     }
-#ifdef CONFIG_A1X_GPIO_IRQ
-  else
-    {
-      /* Maybe it is a (derived) PIO IRQ */
-
-      a1x_gpio_irqenable(irq);
-    }
-#endif
-}
-
-/****************************************************************************
- * Name: up_ack_irq
- *
- * Description:
- *   Acknowledge the interrupt
- *
- ****************************************************************************/
-
-void up_ack_irq(int irq)
-{
-  /* It is not clear to me how the interrupts are acknowledge.  Perhaps it
-   * is simply by reading the IRQ pending register?  If so, where is that
-   * done?
-   */
-#warning Missing logic
 }
 
 /****************************************************************************
@@ -407,9 +394,9 @@ void up_maskack_irq(int irq)
 
   up_disable_irq(irq);
 
-  /* Then acknowledge it */
-
-  up_ack_irq(irq);
+  /* There is no need to acknowledge the interrupt.  The pending interrupt
+   * was cleared in arm_decodeirq() when the PEND register was read.
+   */
 }
 
 /****************************************************************************
@@ -429,7 +416,6 @@ int up_prioritize_irq(int irq, int priority)
   irqstate_t flags;
   uintptr_t regaddr;
   uint32_t regval;
-  int offset;
 
   DEBUGASSERT(irq < A1X_IRQ_NINT && (unsigned)priority <= INTC_PRIO_MAX);
   if (irq < A1X_IRQ_NINT)
@@ -438,45 +424,12 @@ int up_prioritize_irq(int irq, int priority)
 
       flags = irqsave();
 
-      /* Select the register set associated with this irq */
-
-      if (irq < 16)
-        {
-          regaddr = A1X_INTC_PRIO0;
-          offset  = irq;
-        }
-      else if (irq < 32)
-        {
-          regaddr = A1X_INTC_PRIO1;
-          offset  = irq - 16;
-        }
-      else if (irq < 48)
-        {
-          regaddr = A1X_INTC_PRIO2;
-          offset  = irq - 32;
-        }
-      else if (irq < 64)
-        {
-          regaddr = A1X_INTC_PRIO3;
-          offset  = irq - 48;
-        }
-      else if (irq < 80)
-        {
-          regaddr = A1X_INTC_PRIO4;
-          offset  = irq - 64;
-        }
-      else
-        {
-          /* Should not happen */
-
-          return -EINVAL;
-        }
-
       /* Set the new priority */
 
+      regaddr = A1X_INTC_PRIO_OFFSET(irq);
       regval  = getreg32(regaddr);
-      regval &= ~INTC_PRIO_MASK(offset);
-      regval |= INTC_PRIO(offset, priority);
+      regval &= ~INTC_PRIO_MASK(irq);
+      regval |= INTC_PRIO(irq, priority);
       putreg32(regval, regaddr);
 
       a1x_dumpintc("prioritize", irq);
