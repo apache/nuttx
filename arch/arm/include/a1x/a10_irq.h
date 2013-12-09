@@ -74,18 +74,18 @@
 #define A1X_IRQ_UART5      18 /* UART 5 interrupt */
 #define A1X_IRQ_UART6      19 /* UART 6 interrupt */
 #define A1X_IRQ_UART7      20 /* UART 7 interrupt */
-#define A1X_IRQ_Keypad     21 /* Keypad interrupt */
-#define A1X_IRQ_Timer0     22 /* Timer port 0 */
-#define A1X_IRQ_Timer1     23 /* Timer port 1 */
-#define A1X_IRQ_Timer2     24 /* Timer 2 */
+#define A1X_IRQ_KEYPAD     21 /* Keypad interrupt */
+#define A1X_IRQ_TIMER0     22 /* Timer port 0 */
+#define A1X_IRQ_TIMER1     23 /* Timer port 1 */
+#define A1X_IRQ_TIMER2     24 /* Timer 2 */
 #  define A1X_IRQ_Alarm    24 /* Alarm */
 #  define A1X_IRQ_WD       24 /* Watchdog */
-#define A1X_IRQ_Timer3     25 /* Timer 3 interrupt */
+#define A1X_IRQ_TIMER3     25 /* Timer 3 interrupt */
 #define A1X_IRQ_CAN        26 /* CAN Bus controller interrupt */
 #define A1X_IRQ_DMA        27 /* DMA channel interrupt */
 #define A1X_IRQ_PIO        28 /* PIO interrupt */
 #define A1X_IRQ_TOUCH      29 /* Touch Panel interrupt */
-#define A1X_IRQ_AUDIO      30 /* Analog Aduio Codec interrupt */
+#define A1X_IRQ_AUDIO      30 /* Analog Audio Codec interrupt */
 #define A1X_IRQ_LRADC      31 /* LRADC interrupt */
 #define A1X_IRQ_SDMMC0     32 /* SD/MMC Host Controller 0 interrupt */
 #define A1X_IRQ_SDMMC1     33 /* SD/MMC Host Controller 1 interrupt */
@@ -125,8 +125,8 @@
 #define A1X_IRQ_USB4       65 /* USB 4 wakeup, connect, disconnect interrupt */
 #define A1X_IRQ_PLE        66 /* PLE interrupts */
 #  define A1X_IRQ_PERFMU   66 /* Performance monitor interrupt */
-#define A1X_IRQ_Timer4     67 /* Timer 4 interrupt */
-#define A1X_IRQ_Timer5     68 /* Timer 5 interrupt */
+#define A1X_IRQ_TIMER4     67 /* Timer 4 interrupt */
+#define A1X_IRQ_TIMER5     68 /* Timer 5 interrupt */
 #define A1X_IRQ_GPU_GP     69
 #define A1X_IRQ_GPU_GPMMU  70
 #define A1X_IRQ_GPU_PP0    71
