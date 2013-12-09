@@ -39,11 +39,19 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+#include <errno.h>
 #include <debug.h>
 
+#include <arch/board/board.h>
+
 #include "chip/sam_pinmap.h"
+
+#include "up_arch.h"
 #include "sam_pio.h"
 #include "sam_isi.h"
+
+#include "sam_pck.h"
 
 #ifdef CONFIG_SAMA5_ISI
 
@@ -96,12 +104,13 @@ uint32_t sam_pck_configure(enum pckid_e pckid, uint32_t frequency)
 {
   uint32_t regval;
   uint32_t clkin;
+  uint32_t actual;
 
   /* Pick a clock source.  Several are possible but only MCK or PLLA is
    * chosen here.
    */
 
-  DEBUGASSERT(BOARD_MCK_FREQUENCY < BOARD_PLLA_FREQUENCY)
+  DEBUGASSERT(BOARD_MCK_FREQUENCY < BOARD_PLLA_FREQUENCY);
   if (frequency <= BOARD_MCK_FREQUENCY ||
       frequency < BOARD_PLLA_FREQUENCY / 64)
     {
@@ -158,7 +167,7 @@ uint32_t sam_pck_configure(enum pckid_e pckid, uint32_t frequency)
       sdbg("ERROR: frequency cannot be realized.\n");
       sdbg("       frequency=%d MCK=%d\n",
            frequency, clkin);
-      return -ERANGE;
+      return 0;
     }
 
   /* Disable the programmable clock, configure the PCK output pin, then set
