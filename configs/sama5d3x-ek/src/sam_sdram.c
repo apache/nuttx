@@ -86,7 +86,7 @@
 #  define DDR2_BA1    (1 << 26)
 
 #else
-#  error Unknwon SDRAM type
+#  error Unknown SDRAM type
 #endif
 
 /****************************************************************************

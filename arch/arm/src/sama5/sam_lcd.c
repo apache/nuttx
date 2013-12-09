@@ -2814,7 +2814,6 @@ int up_fbinitialize(void)
 #if defined(CONFIG_SAMA5_LCDC_OVR1) && defined(CONFIG_SAMA5_LCDC_HEO)
   uint32_t regval;
 #endif
-  int ret;
 
   gvdbg("Entry\n");
 

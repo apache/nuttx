@@ -46,7 +46,7 @@
 
 #include <nuttx/nx/nxglib.h>
 
-#include "chip/sam_lcd.h"
+#include "chip/sam_lcdc.h"
 
 #ifdef CONFIG_SAMA5_LCDC
 
