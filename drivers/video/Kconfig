@@ -1,0 +1,117 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+config VIDEO_OV2640
+	bool "OV2640 camera chip"
+	default n
+	select I2C
+
+if VIDEO_OV2640
+
+config OV2640_MULTIPLE
+	bool "Multiple OV2640 devices"
+	default n
+	---help---
+		Build in support for multiple on-board OV2640 devices
+
+config OV2640_I2CADDR
+	hex "I2C address (7-bit)"
+	default 0x21
+	---help---
+		OV2640 I2C address in 7-bit format
+
+config OV2640_FREQUENCY
+	int "I2C frequency"
+	default 400000
+	---help---
+		OV2640 I2C frequency
+choice
+	prompt "Color format"
+	default OV2640_RGB565_COLORFMT
+
+config OV2640_RGB565_COLORFMT
+	bool "RGB565"
+
+config OV2640_YUV422_COLORFMT
+	bool "YUV422"
+
+endchoice
+
+config OV2640_JPEG
+	bool "JPEG output format"
+	default n
+	---help---
+	Select JPEG output format
+
+choice
+	prompt "JPEG resolution"
+	default OV2640_JPEG_SVGA_RESOLUTION
+	depends on OV2640_JPEG
+
+config OV2640_JPEG_QCIF_RESOLUTION
+	bool "QCIF (176x144)"
+
+config OV2640_JPEG_QVGA_RESOLUTION
+	bool "QVGA (320x240)"
+
+config OV2640_JPEG_CIF_RESOLUTION
+	bool "CIF (352x288)"
+
+config OV2640_JPEG_VGA_RESOLUTION
+	bool "VGA (640x480)"
+
+config OV2640_JPEG_SVGA_RESOLUTION
+	bool "SVGA (800x600)"
+
+config OV2640_JPEG_XVGA_RESOLUTION
+	bool "XVGA (1024x768)"
+
+config OV2640_JPEG_SXVGA_RESOLUTION
+	bool "SXVGA (1280x1024)"
+
+config OV2640_JPEG_UXGA_RESOLUTION
+	bool "UXVGA (1600x1200)"
+
+endchoice
+
+choice
+	prompt "Output resolution"
+	default OV2640_SVGA_RESOLUTION
+	depends on !OV2640_JPEG
+
+config OV2640_QCIF_RESOLUTION
+	bool "QCIF (176x144)"
+
+config OV2640_QVGA_RESOLUTION
+	bool "QVGA (320x240)"
+
+config OV2640_CIF_RESOLUTION
+	bool "CIF (352x288)"
+
+config OV2640_VGA_RESOLUTION
+	bool "VGA (640x480)"
+
+config OV2640_SVGA_RESOLUTION
+	bool "SVGA (800x600)"
+
+config OV2640_XVGA_RESOLUTION
+	bool "XVGA (1024x768)"
+
+config OV2640_SXGA_RESOLUTION
+	bool "SXVGA (1280x1024)"
+
+config OV2640_UXGA_RESOLUTION
+	bool "UXVGA (1600x1200)"
+
+endchoice
+
+config OV2640_REGDEBUG
+	bool "Register level debug output"
+	default n
+	depends on DEBUG
+	---help---
+		Enable details, register level debug output.
+
+endif

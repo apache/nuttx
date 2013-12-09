@@ -268,12 +268,12 @@
 /* PMC Programmable Clock Register (0,1,2) */
 
 #define PMC_PCK_CSS_SHIFT              (0)       /* Bits 0-2: Master Clock Source Selection */
-#define PMC_PCK_CSS_MASK               (7 << PMC_PCK_CSS_MASK)
-#  define PMC_PCK_CSS_SLOW             (0 << PMC_PCK_CSS_MASK) /* Slow Clock */
-#  define PMC_PCK_CSS_MAIN             (1 << PMC_PCK_CSS_MASK) /* Main Clock */
-#  define PMC_PCK_CSS_PLLA             (2 << PMC_PCK_CSS_MASK) /* PLLA Clock */
-#  define PMC_PCK_CSS_UPLL             (3 << PMC_PCK_CSS_MASK) /* UPLL Clock */
-#  define PMC_PCK_CSS_MCK              (4 << PMC_PCK_CSS_MASK) /* Master Clock */
+#define PMC_PCK_CSS_MASK               (7 << PMC_PCK_CSS_SHIFT)
+#  define PMC_PCK_CSS_SLOW             (0 << PMC_PCK_CSS_SHIFT) /* Slow Clock */
+#  define PMC_PCK_CSS_MAIN             (1 << PMC_PCK_CSS_SHIFT) /* Main Clock */
+#  define PMC_PCK_CSS_PLLA             (2 << PMC_PCK_CSS_SHIFT) /* PLLA Clock */
+#  define PMC_PCK_CSS_UPLL             (3 << PMC_PCK_CSS_SHIFT) /* UPLL Clock */
+#  define PMC_PCK_CSS_MCK              (4 << PMC_PCK_CSS_SHIFT) /* Master Clock */
 #define PMC_PCK_PRES_SHIFT             (4)       /* Bits 4-6: Programmable Clock Prescaler */
 #define PMC_PCK_PRES_MASK              (7 << PMC_PCK_PRES_SHIFT)
 #  define PMC_PCK_PRES_DIV1            (0 << PMC_PCK_PRES_SHIFT) /* Selected clock */

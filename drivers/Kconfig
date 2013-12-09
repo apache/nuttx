@@ -259,7 +259,7 @@ menuconfig AUDIO_DEVICES
 	bool "Audio Device Support"
 	default n
 	---help---
-		This directory holds implementations of audio device drivers.
+		Enable support for audio device drivers.
 		This includes drivers for MP3, WMA and Ogg Vorbis encoding,
 		decoding, as well as drivers for interfacing with external
 		DSP chips to perform custom audio functions.
@@ -267,6 +267,16 @@ menuconfig AUDIO_DEVICES
 if AUDIO_DEVICES
 source drivers/audio/Kconfig
 endif # AUDIO_DEVICES
+
+menuconfig VIDEO_DEVICES
+	bool "Video Device Support"
+	default n
+	---help---
+		Enable support for video device drivers.
+
+if VIDEO_DEVICES
+source drivers/video/Kconfig
+endif # VIDEO_DEVICES
 
 menuconfig BCH
 	bool "Block-to-Character (BCH) Support"

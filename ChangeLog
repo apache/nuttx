@@ -6179,4 +6179,7 @@
 	  (2013-12-8).
 	* arch/arm/src/a1x/a1x_irq.c:  A10 interrupt handling logic (partial)
 	  (2013-12-8).
-
+	* drivers/video/ov2640.c: An OV2640 camera driver that will be used to
+	  verify the SAMA5D3x-EK ISI peripheral (2013-1209).
+	* sama5d3x-ek/ov2640 and src/sam_ov2640.c.  Board logic to test the SAMA5D3
+	  ISI peripheral usign the OV2640 camera (2013-12-9).

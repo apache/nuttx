@@ -233,3 +233,14 @@ Documents/rss.gif
   * share alike – If you alter, transform, or build upon this work,
     you may distribute the resulting work only under the same or
     similar license to this one.
+
+drivers/video/ov2640
+^^^^^^^^^^^^^^^^^^^^
+
+  WARNING:  Some of the information in the data tables in this file came
+  from other projects with conflicting licenses:  Linux and ArduCAM.  Those
+  both have GPL licenses.  I am not sure if it is proper or not to lift the
+  content of those tables and still retain this BSD license.  I am guessing
+  so, but I am not copyright attorney so you should use this driver in
+  products at your own risk.
+ 

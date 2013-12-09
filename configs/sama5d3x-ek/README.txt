@@ -2638,6 +2638,7 @@ Configurations
       It executes an exhaustive OS test to verify a correct port of NuttX
       to the SAMA5D3-EK.  Since it now passes that test, the configuration
       has little further use other than for reference.
+   ov2640:  A test of the SAMA5 ISI using an OV2640 camera.
 
   There may be issues with some of these configurations.  See the details
   before of the status of individual configurations.
@@ -3049,6 +3050,10 @@ Configurations
 
     STATUS:
        See the To-Do list below
+
+  ov2640:
+
+    A test of the SAMA5 ISI using an OV2640 camera.
 
 To-Do List
 ==========
