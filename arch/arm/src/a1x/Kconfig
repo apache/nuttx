@@ -16,6 +16,302 @@ config ARCH_CHIP_A10
 
 endchoice
 
+menu "Allwinner A1X Peripheral Support"
+
+config A1X_UART0
+	bool "UART 0"
+	default n
+	select ARCH_HAVE_UART0
+
+config A1X_UART1
+	bool "UART 1"
+	default n
+	select ARCH_HAVE_UART1
+
+config A1X_UART2
+	bool "UART 2"
+	default n
+	select ARCH_HAVE_UART2
+
+config A1X_UART3
+	bool "UART 3"
+	default n
+	select ARCH_HAVE_UART3
+
+config A1X_UART4
+	bool "UART 4"
+	default n
+	select ARCH_HAVE_UART4
+
+config A1X_UART5
+	bool "UART 5"
+	default n
+	select ARCH_HAVE_UART5
+
+config A1X_UART6
+	bool "UART 6"
+	default n
+	select ARCH_HAVE_UART6
+
+config A1X_UART7
+	bool "UART 7"
+	default n
+	select ARCH_HAVE_UART7
+
+config A1X_IR0
+	bool "IR 0"
+	default n
+
+config A1X_IR1
+	bool "IR 1"
+	default n
+
+config A1X_TWI0
+	bool "TWI 0"
+	default n
+
+config A1X_TWI1
+	bool "TWI 1"
+	default n
+
+config A1X_TWI2
+	bool "TWI 2"
+	default n
+
+config A1X_SPI0
+	bool "SPI 0"
+	default n
+
+config A1X_SPI1
+	bool "SPI 1"
+	default n
+
+config A1X_SPI2
+	bool "SPI 2"
+	default n
+
+config A1X_SPI3
+	bool "SPI3"
+	default n
+
+config A1X_NC
+	bool "NC"
+	default n
+
+config A1X_AC97
+	bool "AC97"
+	default n
+
+config A1X_TS
+	bool "TS"
+	default n
+
+config A1X_IIS
+	bool "Digital Audio Controller"
+	default n
+
+config A1X_KEYPAD
+	bool "Keypad"
+	default n
+
+config A1X_TIMER0
+	bool "Timer port 0"
+	default n
+
+config A1X_TIMER1
+	bool "Timer port 1"
+	default n
+
+config A1X_TIMER2
+	bool "Timer 2"
+	default n
+
+config A1X_TIMER3
+	bool "Timer 3"
+	default n
+
+config A1X_TIMER4
+	bool "Timer 4"
+	default n
+
+config A1X_TIMER5
+	bool "Timer 5"
+	default n
+
+config A1X_IRQ_Alarm
+	bool "Alarm"
+	default n
+
+config A1X_IRQ_WD
+	bool "Watchdog"
+	default n
+
+config A1X_CAN
+	bool "CAN Bus controller"
+	default n
+
+config A1X_DMA
+	bool "DMA"
+	default n
+
+config A1X_PIO
+	bool "PIO"
+	default n
+
+config A1X_TOUCH
+	bool "Touch Panel"
+	default n
+
+config A1X_AUDIO
+	bool "Analog Audio Codec"
+	default n
+
+config A1X_LRADC
+	bool "LRADC"
+	default n
+
+config A1X_SDMMC0
+	bool "SD/MMC Host Controller 0"
+	default n
+
+config A1X_SDMMC1
+	bool "SD/MMC Host Controller 1"
+	default n
+
+config A1X_SDMMC2
+	bool "SD/MMC Host Controller 2"
+	default n
+
+config A1X_SDMMC3
+	bool "SD/MMC Host Controller 3"
+	default n
+
+config A1X_NAND
+	bool "NAND Flash Controller (NFC)"
+	default n
+
+config A1X_USB0
+	bool "USB 0"
+	default n
+
+config A1X_USB1
+	bool "USB 1"
+	default n
+
+config A1X_USB2
+	bool "USB 2"
+	default n
+
+config A1X_USB3
+	bool "USB 3"
+	default n
+
+config A1X_USB4
+	bool "USB 4"
+	default n
+
+config A1X_SCR
+	bool "SCR"
+	default n
+
+config A1X_CSI0
+	bool "CSI 0"
+	default n
+
+config A1X_CSI1
+	bool "CSI 1"
+	default n
+
+config A1X_LCDC0
+	bool "LCD Controller 0"
+	default n
+
+config A1X_LCDC1
+	bool "LCD Controller 1"
+	default n
+
+config A1X_MP
+	bool "MP"
+	default n
+
+config A1X_DEFE0
+	bool "DE-FE0"
+	default n
+
+config A1X_IRQ_DEBE0
+	bool "DE-BE0"
+	default n
+
+config A1X_DEFE1
+	bool "DE-FE1"
+	default n
+
+config A1X_IRQ_DEBE1
+	bool "DE-BE1"
+	default n
+
+config A1X_PMU
+	bool "PMU"
+	default n
+
+config A1X_TZASC
+	bool "TZASC"
+	default n
+
+config A1X_PATA
+	bool "PATA"
+	default n
+
+config A1X_VE
+	bool "VE"
+	default n
+
+config A1X_SS
+	bool "Security System"
+	default n
+
+config A1X_EMAC
+	bool "EMAC"
+	default n
+
+config A1X_HDMI
+	bool "HDMI"
+	default n
+
+config A1X_TVE
+	bool "TV encoder 0/1"
+	default n
+
+config A1X_ACE
+	bool "ACE"
+	default n
+
+config A1X_TVD
+	bool "TV decoder"
+	default n
+
+config A1X_PS20
+	bool "PS2-0"
+	default n
+
+config A1X_PS21
+	bool "PS2-1"
+	default n
+
+config A1X_PLE
+	bool "PLE"
+	default n
+
+config A1X_IRQ_PERFMU
+	bool "Performance monitor"
+	default n
+
+config A1X_GPU
+	bool GPU"
+	default n
+
+endmenu
+
 choice
 	prompt "Boot device"
 	default A1X_BOOT_SDCARD
