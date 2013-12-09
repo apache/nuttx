@@ -6183,3 +6183,6 @@
 	  verify the SAMA5D3x-EK ISI peripheral (2013-1209).
 	* sama5d3x-ek/ov2640 and src/sam_ov2640.c.  Board logic to test the SAMA5D3
 	  ISI peripheral usign the OV2640 camera (2013-12-9).
+	* arch/arm/src/a1x/chip/a1x_uart.h:  A10 UART register definition
+	  header file (2013-12-9).
+
