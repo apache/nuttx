@@ -144,6 +144,10 @@ ifeq ($(CONFIG_SAMA5_TSD),y)
 CSRCS += sam_touchscreen.c
 endif
 
+ifeq ($(CONFIG_VIDEO_OV2640),y)
+CSRCS += sam_ov2640.c
+endif
+
 ifeq ($(CONFIG_ARCH_LEDS),y)
 CSRCS += sam_autoleds.c
 else

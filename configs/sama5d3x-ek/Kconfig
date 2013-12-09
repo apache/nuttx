@@ -213,4 +213,13 @@ config SAMA5D3X_EK_I2SCHAR_MINOR
 
 endif # AUDIO_I2SCHAR && (SAMA5_SSC0 || SAMA5_SSC1)
 
+if VIDEO_OV2640
+
+config SAMA5_OV2640_DEMO
+	bool "SAMA5 OV2640 camera demo"
+	default n
+	---help---
+		Enable the SAMA5 OV2640 camera demo
+
+endif # VIDEO_OV2640
 endif # ARCH_BOARD_SAMA5D3X_EK
