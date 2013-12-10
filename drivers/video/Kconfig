@@ -10,12 +10,6 @@ config VIDEO_OV2640
 
 if VIDEO_OV2640
 
-config OV2640_MULTIPLE
-	bool "Multiple OV2640 devices"
-	default n
-	---help---
-		Build in support for multiple on-board OV2640 devices
-
 config OV2640_I2CADDR
 	hex "I2C address (7-bit)"
 	default 0x21

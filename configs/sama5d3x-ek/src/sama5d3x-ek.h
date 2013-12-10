@@ -63,6 +63,7 @@
 #define HAVE_USBDEV     1
 #define HAVE_USBMONITOR 1
 #define HAVE_NETWORK    1
+#define HAVE_CAMERA     1
 
 /* HSMCI */
 /* Can't support MMC/SD if the card interface(s) are not enable */
@@ -315,6 +316,24 @@
 
 #if !defined(CONFIG_NET) || (!defined(CONFIG_SAMA5_EMAC) && !defined(CONFIG_SAMA5_GMAC))
 #  undef HAVE_NETWORK
+#endif
+
+/* Camera */
+
+#define OV2640_BUS 1
+
+#ifndef CONFIG_SAMA5_OV2640_DEMO
+#  undef HAVE_CAMERA
+#endif
+
+#if defined(HAVE_CAMERA) && !defined(CONFIG_SAMA5_ISI)
+#  warning OV2640 camera demo requires CONFIG_SAMA5_ISI
+#  undef HAVE_CAMERA
+#endif
+
+#if defined(HAVE_CAMERA) && !defined(CONFIG_SAMA5_TWI1)
+#  warning OV2640 camera demo requires CONFIG_SAMA5_TWI1
+#  undef HAVE_CAMERA
 #endif
 
 /* LEDs *****************************************************************************/

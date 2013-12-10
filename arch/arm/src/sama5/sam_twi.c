@@ -190,7 +190,7 @@ static inline void twi_putrel(struct twi_dev_s *priv, unsigned int offset,
 /* I2C transfer helper functions */
 
 static int twi_wait(struct twi_dev_s *priv);
-static int twi_wakeup(struct twi_dev_s *priv, int result);
+static void twi_wakeup(struct twi_dev_s *priv, int result);
 static int twi_interrupt(struct twi_dev_s *priv);
 #ifdef CONFIG_SAMA5_TWI0
 static int twi0_interrupt(int irq, FAR void *context);
@@ -473,7 +473,7 @@ static int twi_wait(struct twi_dev_s *priv)
  *
  *******************************************************************************/
 
-static int twi_wakeup(struct twi_dev_s *priv, int result)
+static void twi_wakeup(struct twi_dev_s *priv, int result)
 {
   /* Cancel any pending timeout */
 

@@ -54,6 +54,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/i2c.h>
+#include <nuttx/video/ov2640.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -268,11 +269,6 @@ struct ovr2640_reg_s
 };
 #define ARRAY_NENTRIES(a) (sizeof(a)/sizeof(struct ovr2640_reg_s))
 
-struct ov2640_dev_s
-{
-  struct i2c_dev_s *i2c;
-};
-
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -296,10 +292,6 @@ static int     ov2640_reset(FAR struct i2c_dev_s *i2c);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-#ifndef CONFIG_OV2640_MULTIPLE
-static struct ov2640_dev_s g_ov2640;
-#endif
 
 /* OV2640 reset */
 
@@ -892,46 +884,20 @@ static int ov2640_reset(FAR struct i2c_dev_s *i2c)
  * Function: ov2640_initialize
  *
  * Description:
- *   Initialize the OV2640.
+ *   Initialize the OV2640 camera.
  *
  * Parameters:
  *   i2c - Reference to the I2C driver structure
  *
  * Returned Value:
- *   On success, a non-NULL reference tot he ov2640 driver structure is
- *   returned; NULL is returned on any failure.
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-FAR struct ov2640_dev_s *ov2640_initialize(struct i2c_dev_s *i2c)
+int ov2640_initialize(FAR struct i2c_dev_s *i2c)
 {
-  FAR struct ov2640_dev_s *priv;
   int ret;
-
-#ifdef CONFIG_OV2640_MULTIPLE
-  /* Allocate a new OV2640 device structure */
-
-  priv = (FAR struct ov2640_dev_s *)kmalloc(sizeof(struct ov2640_dev_s));
-  if (!priv)
-    {
-      gdbg("ERROR: Failed to allocate OV2640 device structure\n");
-      return -ENOMEM;
-    }
-
-#else /* CONFIG_OV2640_MULTIPLE */
-
-  /* There is only a single OV2640.  Use the single, pre-allocated device
-   * structure
-   */
-
-  priv = &g_ov2640;
-
-#endif /* CONFIG_OV2640_MULTIPLE */
-
-  /* Initialize the OV2640 device structure */
-
-  memset(priv, 0, sizeof(struct ov2640_dev_s));
-  priv->i2c = i2c;
 
   /* Configure I2C bus for the OV2640 */
 
@@ -943,6 +909,7 @@ FAR struct ov2640_dev_s *ov2640_initialize(struct i2c_dev_s *i2c)
   ret = ov2640_reset(i2c);
   if (ret < 0)
     {
+      gdbg("ERROR: ov2640_reset failed: %d\n", ret);
       goto errout;
     }
 
@@ -951,6 +918,7 @@ FAR struct ov2640_dev_s *ov2640_initialize(struct i2c_dev_s *i2c)
   ret = ovr2640_chipid(i2c);
   if (ret < 0)
     {
+      gdbg("ERROR: ovr2640_chipid failed: %d\n", ret);
       goto errout;
     }
 
@@ -1040,7 +1008,7 @@ FAR struct ov2640_dev_s *ov2640_initialize(struct i2c_dev_s *i2c)
 
   /* Setup initial register values */
 
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_initialregs,
+  ret = ov2640_putreglist(i2c, g_ov2640_initialregs,
                           OV2640_INITIALREGS_NENTRIES);
   if (ret < 0)
     {
@@ -1050,7 +1018,7 @@ FAR struct ov2640_dev_s *ov2640_initialize(struct i2c_dev_s *i2c)
 
   /* Setup image resolution */
 
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_resolution_common,
+  ret = ov2640_putreglist(i2c, g_ov2640_resolution_common,
                           OV2640_RESOLUTION_COMMON_NENTRIES);
   if (ret < 0)
     {
@@ -1059,35 +1027,35 @@ FAR struct ov2640_dev_s *ov2640_initialize(struct i2c_dev_s *i2c)
     }
 
 #if defined(CONFIG_OV2640_QCIF_RESOLUTION)
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_qcif_resolution,
+  ret = ov2640_putreglist(i2c, g_ov2640_qcif_resolution,
                           OV2640_QCIF_RESOLUTION_NENTRIES);
 
 #elif defined(CONFIG_OV2640_QVGA_RESOLUTION)
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_qvga_resolution,
+  ret = ov2640_putreglist(i2c, g_ov2640_qvga_resolution,
                           OV2640_QVGA_RESOLUTION_NENTRIES);
 
 #elif defined(CONFIG_OV2640_CIF_RESOLUTION)
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_cif_resolution,
+  ret = ov2640_putreglist(i2c, g_ov2640_cif_resolution,
                           OV2640_CIF_RESOLUTION_NENTRIES);
 
 #elif defined(CONFIG_OV2640_VGA_RESOLUTION)
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_vga_resolution,
+  ret = ov2640_putreglist(i2c, g_ov2640_vga_resolution,
                           OV2640_VGA_RESOLUTION_NENTRIES);
 
 #elif defined(CONFIG_OV2640_SVGA_RESOLUTION)
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_svga_resolution,
+  ret = ov2640_putreglist(i2c, g_ov2640_svga_resolution,
                           OV2640_SVGA_RESOLUTION_NENTRIES);
 
 #elif defined(CONFIG_OV2640_XGA_RESOLUTION)
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_xga_resolution,
+  ret = ov2640_putreglist(i2c, g_ov2640_xga_resolution,
                           OV2640_XGA_RESOLUTION_NENTRIES);
 
 #elif defined(CONFIG_OV2640_SXGA_RESOLUTION)
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_sxga_resolution,
+  ret = ov2640_putreglist(i2c, g_ov2640_sxga_resolution,
                           OV2640_SXGA_RESOLUTION_NENTRIES);
 
 #elif defined(CONFIG_OV2640_UXGA_RESOLUTION)
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_uxga_resolution,
+  ret = ov2640_putreglist(i2c, g_ov2640_uxga_resolution,
                           OV2640_UXGA_RESOLUTION_NENTRIES);
 
 #else
@@ -1102,7 +1070,7 @@ FAR struct ov2640_dev_s *ov2640_initialize(struct i2c_dev_s *i2c)
 
 /* Color format register settings */
 
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_colorfmt_common,
+  ret = ov2640_putreglist(i2c, g_ov2640_colorfmt_common,
                     OV2640_COLORFMT_COMMON_NENTRIES);
   if (ret < 0)
     {
@@ -1111,11 +1079,11 @@ FAR struct ov2640_dev_s *ov2640_initialize(struct i2c_dev_s *i2c)
     }
 
 #if defined(CONFIG_OV2640_YUV422_COLORFMT)
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_yuv422_colorfmt,
+  ret = ov2640_putreglist(i2c, g_ov2640_yuv422_colorfmt,
                     OV2640_YUV422_COLORFMT_NENTRIES);
 
 #elif defined(CONFIG_OV2640_RGB565_COLORFMT)
-  ret = ov2640_putreglist(priv->i2c, g_ov2640_rgb565_colorfmt,
+  ret = ov2640_putreglist(i2c, g_ov2640_rgb565_colorfmt,
                     OV2640_RGB565_COLORFMT_NENTRIES);
 
 #else
@@ -1128,19 +1096,12 @@ FAR struct ov2640_dev_s *ov2640_initialize(struct i2c_dev_s *i2c)
       goto errout;
     }
 
-  return OK;
-
 #endif /* CONFIG_OV2640_JPEG */
 
-  return priv;
+  return OK;
 
 errout:
-  gdbg("ERROR: Failed to intialize the OV2640: %d\n", ret);
-
-#ifdef CONFIG_OV2640_MULTIPLE
-  kfree(priv);
-#endif /* CONFIG_OV2640_MULTIPLE */
-
+  gdbg("ERROR: Failed to initialize the OV2640: %d\n", ret);
   (void)ov2640_reset(i2c);
-  return NULL;
+  return ret;
 }
