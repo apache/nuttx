@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/smart.h
+ * include/nuttx/fs/smart.h
  * Sector Mapped Allocation for Really Tiny (SMART) FLASH interface
  *
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.

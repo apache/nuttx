@@ -6189,4 +6189,6 @@
 	  (2013-12-10).
 	* include/nuttx/video/rgbcolors.h:  Move rgbcolors.h to include/nuttx/video.
 	  (2013-12-10).
+	* include/nuttx/fs/smart.h:  Move smart.h to include/fs/smart.h
+	  (2013-12-10).
 

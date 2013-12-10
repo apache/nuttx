@@ -50,7 +50,7 @@
 #include <semaphore.h>
 
 #include <nuttx/mtd/mtd.h>
-#include <nuttx/smart.h>
+#include <nuttx/fs/smart.h>
 
 /****************************************************************************
  * Pre-processor Definitions
