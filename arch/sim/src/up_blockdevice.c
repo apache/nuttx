@@ -44,7 +44,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <nuttx/ramdisk.h>
+#include <nuttx/fs/ramdisk.h>
 
 #include "up_internal.h"
 
