@@ -49,7 +49,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/mkfatfs.h>
-#include <nuttx/ramdisk.h>
+#include <nuttx/fs/ramdisk.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
