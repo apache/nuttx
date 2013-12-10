@@ -250,6 +250,10 @@ int ov2640_main(int argc, char *argv[])
       return  EXIT_FAILURE;
     }
 
+  /* Now if everything is set up properly, the camera output should be
+   * visible on the LCD.
+   */
+
   return EXIT_SUCCESS;
 }
 
