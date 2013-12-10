@@ -3085,7 +3085,7 @@ extern void up_ledoff(int led);
 <ul>
   <li>
     <p>
-      <b><code>include/nuttx/fb.h</code></b>.
+      <b><code>include/nuttx/video/fb.h</code></b>.
       All structures and APIs needed to work with frame buffer drivers are provided in this header file.
     </p>
   </li>
@@ -3147,7 +3147,7 @@ extern void up_ledoff(int led);
     <p>
       <b><code>include/nuttx/lcd/lcd.h</code></b>.
       Structures and APIs needed to work with LCD drivers are provided in this header file.
-      This header file also depends on some of the same definitions used for the frame buffer driver as privided in <code>include/nuttx/fb.h</code>.
+      This header file also depends on some of the same definitions used for the frame buffer driver as privided in <code>include/nuttx/video/fb.h</code>.
     </p>
   </li>
   <li>
@@ -6550,7 +6550,7 @@ int ret = sigaction(SIGCHLD, &sa, NULL);
   </li>
   <li>
     <code>CONFIG_NX_LCDDRIVER</code>:
-    By default, NX builds to use a framebuffer driver (see <code>include/nuttx/fb.h</code>).
+    By default, NX builds to use a framebuffer driver (see <code>include/nuttx/video/fb.h</code>).
     If this option is defined, NX will build to use an LCD driver (see <code>include/nuttx/lcd/lcd.h</code>).
   </li>
   <li>
