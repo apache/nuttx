@@ -17,7 +17,7 @@ config NX_LCDDRIVER
 	depends on LCD
 	---help---
 		By default, the NX graphics system uses the frame buffer driver interface
-		defined in include/nuttx/fb.h.  However, if LCD is support is enabled,
+		defined in include/nuttx/video/fb.h.  However, if LCD is support is enabled,
 		this this option is provide to select, instead, the LCD driver interface
 		defined in include/nuttx/lcd/lcd.h.
 

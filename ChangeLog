@@ -1465,7 +1465,7 @@
 	  Dean Camera.
 	* examples/nsh: Correct an usage of getopt(): If you stop calling getopt()
 	  before all parameters are parsed, you can leave getopt() in a strange state.
-	* include/nuttx/fb.h: Restore missing RGB type that was accidentally removed
+	* include/nuttx/video/fb.h: Restore missing RGB type that was accidentally removed
 	  when Nokia 6100 support was added.
 	* Rename arch/pjrc-8051 to arch/8051
 	* configs/ne64badge: Add a configuration for the Future Electronics Group
@@ -6185,4 +6185,6 @@
 	  ISI peripheral usign the OV2640 camera (2013-12-9).
 	* arch/arm/src/a1x/chip/a1x_uart.h:  A10 UART register definition
 	  header file (2013-12-9).
+	* include/nuttx/video/fb.h:  Move fb.h to include/nuttx/video/
+	  (2013-12-10).
 

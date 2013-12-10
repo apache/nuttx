@@ -22,7 +22,7 @@ LCD Header files
       Structures and APIs needed to work with LCD drivers are provided in
       this header file.  This header file also depends on some of the same
       definitions used for the frame buffer driver as privided in
-      include/nuttx/fb.h.
+      include/nuttx/video/fb.h.
 
   struct lcd_dev_s
 

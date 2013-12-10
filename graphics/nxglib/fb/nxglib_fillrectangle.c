@@ -41,7 +41,7 @@
 
 #include <stdint.h>
 
-#include <nuttx/fb.h>
+#include <nuttx/video/fb.h>
 #include <nuttx/nx/nxglib.h>
 
 #include "nxglib_bitblit.h"

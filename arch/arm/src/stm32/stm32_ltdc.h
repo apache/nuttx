@@ -66,7 +66,7 @@
  * Public Functions
  ************************************************************************************/
 /* The STM32 LTDC driver uses the common framebuffer interfaces declared in
- * include/nuttx/fb.h.
+ * include/nuttx/video/fb.h.
  */
 
 /************************************************************************************

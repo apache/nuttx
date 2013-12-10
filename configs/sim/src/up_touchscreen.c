@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/fb.h>
+#include <nuttx/video/fb.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxglib.h>

@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/fb.h
+ * include/nuttx/video/fb.h
  *
  *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_FB_H
-#define _INCLUDE_NUTTX_FB_H
+#ifndef _INCLUDE_NUTTX_VIDEO_FB_H
+#define _INCLUDE_NUTTX_VIDEO_FB_H
 
 /****************************************************************************
  * Included Files
@@ -356,4 +356,4 @@ void fb_uninitialize(void);
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_FB_H */
+#endif /* _INCLUDE_NUTTX_VIDEO_FB_H */
