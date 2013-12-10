@@ -44,7 +44,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/fb.h>
+#include <nuttx/video/fb.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"

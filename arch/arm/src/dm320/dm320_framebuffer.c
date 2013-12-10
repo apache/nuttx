@@ -45,7 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/fb.h>
+#include <nuttx/video/fb.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/nx/nxglib.h>
 
