@@ -43,7 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/i2c.h>
-#include <nuttx/fb.h>
+#include <nuttx/video/fb.h>
 #include <nuttx/video/ov2640.h>
 
 #include "up_arch.h"
