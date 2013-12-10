@@ -34,7 +34,7 @@ pwm.c
 ramdisk.c
   Can be used to set up a block of memory or (read-only) FLASH as
   a block driver that can be mounted as a files system.  See
-  include/nuttx/ramdisk.h.
+  include/nuttx/fs/ramdisk.h.
 
 ramlog.c
   This is a driver that was intended to support debugging output,

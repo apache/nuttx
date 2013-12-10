@@ -1,7 +1,7 @@
 /****************************************************************************
- * include/nuttx/ramdisk.h
+ * include/nuttx/fs/ramdisk.h
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_RAMDISK_H
-#define __INCLUDE_NUTTX_RAMDISK_H
+#ifndef __INCLUDE_NUTTX_FS_RAMDISK_H
+#define __INCLUDE_NUTTX_FS_RAMDISK_H
 
 /****************************************************************************
  * Included Files
@@ -96,4 +96,4 @@ EXTERN int romdisk_register(int minor, FAR uint8_t *buffer, uint32_t nsectors,
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_RAMDISK_H */
+#endif /* __INCLUDE_NUTTX_FS_RAMDISK_H */

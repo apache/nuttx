@@ -51,7 +51,7 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/ramdisk.h>
+#include <nuttx/fs/ramdisk.h>
 
 /****************************************************************************
  * Private Definitions

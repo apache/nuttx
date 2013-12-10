@@ -86,7 +86,7 @@ struct smart_read_write_s
   uint16_t logsector;     /* The logical sector number */
   uint16_t offset;        /* Offset within the sector to write to */
   uint16_t count;         /* Number of bytes to write */
-  const uint8_t *buffer;        /* Pointer to the data to write */
+  const uint8_t *buffer;  /* Pointer to the data to write */
 };
 
 /****************************************************************************
