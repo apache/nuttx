@@ -2172,7 +2172,7 @@
 	  interfaces to read from graphics memory
 	* graphics/nxbe/nxbe_bitmap.c: Fix an error in the error handling that
 	  can cause valid bitmaps to fail to render.
-	* include/nuttx/rgbcolors.h: Fix errors in some 16- and 8-bit color
+	* include/nuttx/video/rgbcolors.h: Fix errors in some 16- and 8-bit color
 	  conversion macros.
 	* tools/incdir.sh: Fix issues when g++ is used as the compiler.  It was
 	  not being recognized and handled properly.
@@ -2192,7 +2192,7 @@
 	  supports using "clusters" of AT24 pages as blocks.  This allows bigger
 	  block sizes and more efficient use of EEPROM when the AT24 is used to
 	  support a file system (such as NXFFS). (Contributed by Hal Glenn).
-	* include/nuttx/rgbcolors.h: More fixes to RGB color conversion
+	* include/nuttx/video/rgbcolors.h: More fixes to RGB color conversion
 	  macros.
 	* arch/arm/src/common/up_createstack.c and up_usestack.c:  For ARM EABI
 	  the stack must be aligned to 8-byte boundaries.  This is necessary for
@@ -6186,5 +6186,7 @@
 	* arch/arm/src/a1x/chip/a1x_uart.h:  A10 UART register definition
 	  header file (2013-12-9).
 	* include/nuttx/video/fb.h:  Move fb.h to include/nuttx/video/
+	  (2013-12-10).
+	* include/nuttx/video/rgbcolors.h:  Move rgbcolors.h to include/nuttx/video.
 	  (2013-12-10).
 

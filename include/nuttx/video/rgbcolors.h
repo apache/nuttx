@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/rgbcolors.h
+ * include/nuttx/video/rgbcolors.h
  * User-friendly RGB color definitions
  *
  *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_RGBCOLOR_H
-#define __INCLUDE_NUTTX_RGBCOLOR_H
+#ifndef __INCLUDE_NUTTX_VIDEO_RGBCOLOR_H
+#define __INCLUDE_NUTTX_VIDEO_RGBCOLOR_H
 
 /****************************************************************************
  * Included Files
@@ -313,4 +313,4 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_RGBCOLOR_H */
+#endif /* __INCLUDE_NUTTX_VIDEO_RGBCOLOR_H */
