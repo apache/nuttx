@@ -198,8 +198,9 @@ Serial Console
 LEDs
 ====
 
-  The pcDuino v1 has four green LEDs.  Two are tied to ground and, hence,
-  illuminated by driving the output pins to a high value:
+  The pcDuino v1 has four green LEDs; three can be controlled from software.
+  Two are tied to ground and, hence, illuminated by driving the output pins
+  to a high value:
 
     1. LED1 SPI0_CLK  SPI0_CLK/UART5_RX/EINT23/PI11
     2. LED5 IPSOUT    From the PMU (not controllable by software)
@@ -208,6 +209,28 @@ LEDs
 
     3. LED3 RX_LED    LCD1_D16/ATAD12/KP_IN6/SMC_DET/EINT16/CSI1_D16/PH16
     4. LED4 TX_LED    LCD1_D15/ATAD11/KP_IN5/SMC_VPPPP/EINT15/CSI1_D15/PH15
+
+  These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+  defined.  In that case, the usage by the board port is defined in
+  include/board.h and src/stm32_leds.c. The LEDs are used to encode OS-related
+  events as follows:
+
+    SYMBOL            Meaning                      LED state
+                                               LED1 LED3 LED4
+    ----------------- -----------------------  ---- ---- ------------
+    LED_STARTED       NuttX has been started   ON   OFF  OFF
+    LED_HEAPALLOCATE  Heap has been allocated  OFF  ON   OFF
+    LED_IRQSENABLED   Interrupts enabled       ON   ON   OFF
+    LED_STACKCREATED  Idle stack created       ON   ON   OFF
+    LED_INIRQ         In an interrupt          N/C  N/C  Soft glow
+    LED_SIGNAL        In a signal handler      N/C  N/C  Soft glow
+    LED_ASSERTION     An assertion failed      N/C  N/C  Soft glow
+    LED_PANIC         The system has crashed   N/C  N/C  2Hz Flashing
+    LED_IDLE          MCU is is sleep mode         Not used
+
+  After booting, LED1 and 3 are not longer used by the system and can be used for
+  other purposes by the application (Of course, all LEDs are available to the
+  application if CONFIG_ARCH_LEDS is not defined.
 
 Buttons
 =======
