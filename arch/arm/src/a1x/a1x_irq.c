@@ -51,6 +51,7 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
+#include "a1x_pio.h"
 #include "a1x_irq.h"
 
 /****************************************************************************
@@ -174,6 +175,12 @@ void up_irqinitialize(void)
   current_regs = NULL;
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
+#ifdef CONFIG_A1X_PIO_IRQ
+  /* Initialize logic to support a second level of interrupt decoding for PIO pins. */
+
+  a1x_pio_irqinitialize();
+#endif
+
   /* And finally, enable interrupts */
 
   (void)irqenable();
@@ -339,6 +346,15 @@ void up_disable_irq(int irq)
       a1x_dumpintc("disable", irq);
       irqrestore(flags);
     }
+
+#ifdef CONFIG_A1X_PIO_IRQ
+  /* Perhaps this is a second level PIO interrupt */
+
+  else
+    {
+      a1x_pio_irqdisable(irq);
+    }
+#endif
 }
 
 /****************************************************************************
@@ -378,6 +394,15 @@ void up_enable_irq(int irq)
       a1x_dumpintc("enable", irq);
       irqrestore(flags);
     }
+
+#ifdef CONFIG_A1X_PIO_IRQ
+  /* Perhaps this is a second level PIO interrupt */
+
+  else
+    {
+      a1x_pio_irqenable(irq);
+    }
+#endif
 }
 
 /****************************************************************************
