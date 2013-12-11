@@ -49,7 +49,7 @@ float sqrtf(float x)
 
   if (x < 0.0)
     {
-      errno = EDOM;
+      set_errno(EDOM);
       return NAN;
     }
 

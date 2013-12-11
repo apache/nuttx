@@ -446,7 +446,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                       long  tmplong;
 
                       errsave = errno;
-                      errno   = 0;
+                      set_errno(0);
                       tmplong = strtol(tmp, &endptr, base);
 
                       /* Number can't be converted */
@@ -456,7 +456,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                           return count;
                         }
 
-                      errno = errsave;
+                      set_errno(errno);
 
                       /* We have to check whether we need to return a long
                        * or an int.
@@ -556,7 +556,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                       double_t  dvalue;
 
                       errsave = errno;
-                      errno   = 0;
+                      set_errno(0);
                       dvalue  = strtod(tmp, &endptr);
 
                       /* Number can't be converted */
@@ -566,7 +566,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                           return count;
                         }
 
-                      errno = errsave;
+                      set_errno(errsave);
 
                       /* We have to check whether we need to return a float
                        * or a double.
