@@ -47,34 +47,34 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#define PIO_PORTA         0
-#define PIO_PORTB         1
-#define PIO_PORTC         2
-#define PIO_PORTD         3
-#define PIO_PORTE         4
-#define PIO_PORTF         5
-#define PIO_PORTG         6
-#define PIO_PORTH         7
-#define PIO_PORTI         8
-#define PIO_PORTS         9
+#define PIO_REG_PORTA         0
+#define PIO_REG_PORTB         1
+#define PIO_REG_PORTC         2
+#define PIO_REG_PORTD         3
+#define PIO_REG_PORTE         4
+#define PIO_REG_PORTF         5
+#define PIO_REG_PORTG         6
+#define PIO_REG_PORTH         7
+#define PIO_REG_PORTI         8
+#define PIO_REG_PORTS         9
 
-#define PIO_CFG_INPUT     0
-#define PIO_CFG_OUTPUT    1
+#define PIO_REG_CFG_INPUT     0
+#define PIO_REG_CFG_OUTPUT    1
 
-#define PIO_DRV_LEVEL0    0
-#define PIO_DRV_LEVEL1    1
-#define PIO_DRV_LEVEL2    2
-#define PIO_DRV_LEVEL3    3
+#define PIO_REG_DRV_LEVEL0    0
+#define PIO_REG_DRV_LEVEL1    1
+#define PIO_REG_DRV_LEVEL2    2
+#define PIO_REG_DRV_LEVEL3    3
 
-#define PIO_PULL_NONE     0
-#define PIO_PULL_UP       1
-#define PIO_PULL_DOWN     2
+#define PIO_REG_PULL_NONE     0
+#define PIO_REG_PULL_UP       1
+#define PIO_REG_PULL_DOWN     2
 
-#define PIO_INT_POSEDGE   0
-#define PIO_INT_NEGEDGE   1
-#define PIO_INT_HILEVEL   2
-#define PIO_INT_LOWLEVEL  3
-#define PIO_INT_BOTHEDGES 4
+#define PIO_REG_INT_POSEDGE   0
+#define PIO_REG_INT_NEGEDGE   1
+#define PIO_REG_INT_HILEVEL   2
+#define PIO_REG_INT_LOWLEVEL  3
+#define PIO_REG_INT_BOTHEDGES 4
 
 /* Register offsets *****************************************************************/
 
@@ -144,14 +144,6 @@
 #define PIO_CFG3_MASK(n))         (7 << PIO_CFG3_SHIFT(n))
 #  define PIO_CFG3(m,v)           ((uint32_t)(v) << PIO_CFG3_SHIFT(n))
 
-/* Then bring-in CPU-specific PIO CFG register definitions */
-
-#if defined(CONFIG_ARCH_CHIP_A10)
-#  include "chip/a10_piocfg.h"
-#else
-#  error Unrecognized A1X architecture
-#endif
-
 /* Port n Data Register, n=0-9 */
 
 #define PIO_DAT(n)                 (1 << (n)) /* PA data, n=0-31 */
@@ -160,25 +152,25 @@
 
 #define PIO_DRV0_SHIFT(n)          ((n) << 1) /* PA DRV0, n=0-15 */
 #define PIO_DRV0_MASK(n)           (3 << PIO_DRV0_SHIFT(n))
-#  define PIO_DRV0_MASK(n,v)       ((uint32_t)(v) << PIO_DRV0_SHIFT(n))
+#  define PIO_DRV0(n,v)            ((uint32_t)(v) << PIO_DRV0_SHIFT(n))
 
 /* Port n Multi-Driving Register 1, n=0-9 */
 
 #define PIO_DRV1_SHIFT(n)          (((n) - 16) << 1) /* PA DRV1, n=16-31 */
 #define PIO_DRV1_MASK(n)           (3 << PIO_DRV1_SHIFT(n))
-#  define PIO_DRV1_MASK(n,v)       ((uint32_t)(v) << PIO_DRV1_SHIFT(n))
+#  define PIO_DRV1(n,v)            ((uint32_t)(v) << PIO_DRV1_SHIFT(n))
 
 /* Port n Pull Register 0, n=0-9 */
 
 #define PIO_PUL0_SHIFT(n)          ((n) << 1) /* PA PUL0, n=0-15 */
 #define PIO_PUL0_MASK(n)           (3 << PIO_PUL0_SHIFT(n))
-#  define PIO_PUL0_MASK(n,v)       ((uint32_t)(v) << PIO_PUL0_SHIFT(n))
+#  define PIO_PUL0(n,v)            ((uint32_t)(v) << PIO_PUL0_SHIFT(n))
 
 /* Port n Pull Register 1, n=0-9 */
 
 #define PIO_PUL1_SHIFT(n)          (((n) - 16) << 1) /* PA PUL1, n=16-31 */
 #define PIO_PUL1_MASK(n)           (3 << PIO_PUL1_SHIFT(n))
-#  define PIO_PUL1_MASK(n,v)       ((uint32_t)(v) << PIO_PUL1_SHIFT(n))
+#  define PIO_PUL1(n,v)            ((uint32_t)(v) << PIO_PUL1_SHIFT(n))
 
 /* PIO Interrupt Configure Register 0 */
 

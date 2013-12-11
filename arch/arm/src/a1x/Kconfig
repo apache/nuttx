@@ -312,6 +312,14 @@ config A1X_GPU
 
 endmenu
 
+config A1X_PIO_IRQ
+	bool "External PIO interrupts"
+	default n
+	---help---
+		Select to enable support for 32 external PIO interrupts.  These will
+		be handled through a second level of interrupt decoding and will
+		otherwise appear as any other interrupt.
+
 choice
 	prompt "Boot device"
 	default A1X_BOOT_SDCARD

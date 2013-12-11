@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/pcduino-a10/scripts/ddram.ld
+ * configs/pcduino-a10/scripts/sdram.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

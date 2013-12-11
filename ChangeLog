@@ -6195,4 +6195,6 @@
 	  (2013-12-10).
 	* arch/arm/src/a1x/chip/a1x_pio.h and a10_piocfg.h:  PIO register
 	  defintion header files (2013-12-10).
+	* arch/arm/src/a1x/a1x_pio.c and .h:  Support for PIO configuration
+	  (2013-12-11).
 

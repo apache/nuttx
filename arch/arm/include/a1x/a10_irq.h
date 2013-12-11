@@ -144,9 +144,49 @@
 
 #define A1X_IRQ_NINT       81
 
+/* Up to 32 external PIO interrupts */
+
+#ifdef CONFIG_A1X_PIO_IRQ
+#  define A1X_PIO_EINT0    (A1X_IRQ_NINT+0)
+#  define A1X_PIO_EINT1    (A1X_IRQ_NINT+1)
+#  define A1X_PIO_EINT2    (A1X_IRQ_NINT+2)
+#  define A1X_PIO_EINT3    (A1X_IRQ_NINT+3)
+#  define A1X_PIO_EINT4    (A1X_IRQ_NINT+4)
+#  define A1X_PIO_EINT5    (A1X_IRQ_NINT+5)
+#  define A1X_PIO_EINT6    (A1X_IRQ_NINT+6)
+#  define A1X_PIO_EINT7    (A1X_IRQ_NINT+7)
+#  define A1X_PIO_EINT8    (A1X_IRQ_NINT+8)
+#  define A1X_PIO_EINT9    (A1X_IRQ_NINT+9)
+#  define A1X_PIO_EINT10   (A1X_IRQ_NINT+10)
+#  define A1X_PIO_EINT11   (A1X_IRQ_NINT+11)
+#  define A1X_PIO_EINT12   (A1X_IRQ_NINT+12)
+#  define A1X_PIO_EINT13   (A1X_IRQ_NINT+13)
+#  define A1X_PIO_EINT14   (A1X_IRQ_NINT+14)
+#  define A1X_PIO_EINT15   (A1X_IRQ_NINT+15)
+#  define A1X_PIO_EINT16   (A1X_IRQ_NINT+16)
+#  define A1X_PIO_EINT17   (A1X_IRQ_NINT+17)
+#  define A1X_PIO_EINT18   (A1X_IRQ_NINT+18)
+#  define A1X_PIO_EINT19   (A1X_IRQ_NINT+19)
+#  define A1X_PIO_EINT20   (A1X_IRQ_NINT+20)
+#  define A1X_PIO_EINT21   (A1X_IRQ_NINT+21)
+#  define A1X_PIO_EINT22   (A1X_IRQ_NINT+22)
+#  define A1X_PIO_EINT23   (A1X_IRQ_NINT+23)
+#  define A1X_PIO_EINT24   (A1X_IRQ_NINT+24)
+#  define A1X_PIO_EINT25   (A1X_IRQ_NINT+25)
+#  define A1X_PIO_EINT26   (A1X_IRQ_NINT+26)
+#  define A1X_PIO_EINT27   (A1X_IRQ_NINT+27)
+#  define A1X_PIO_EINT28   (A1X_IRQ_NINT+28)
+#  define A1X_PIO_EINT29   (A1X_IRQ_NINT+29)
+#  define A1X_PIO_EINT30   (A1X_IRQ_NINT+30)
+#  define A1X_PIO_EINT31   (A1X_IRQ_NINT+31)
+#  define A1X_PIO_NINT     32
+#else
+#  define A1X_PIO_NINT     0
+#endif
+
 /* Total number of IRQ numbers */
 
-#define NR_IRQS            81
+#define NR_IRQS            (A1X_IRQ_NINT + A1X_PIO_NINT)
 
 /****************************************************************************************
  * Public Types

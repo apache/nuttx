@@ -47,22 +47,81 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-#warning Missing Logic
+/* Since NuttX is booted from a loader on the A10, clocking should already be setup
+ * when NuttX starts.
+ */
 
 /* LED definitions ******************************************************************/
-#warning Missing Logic
+/* The pcDuino v1 has four green LEDs; three can be controlled from software. Two
+ * are tied to ground and, hence, illuminated by driving the output pins to a high
+ * value:
+ *
+ *  1. LED1 SPI0_CLK  SPI0_CLK/UART5_RX/EINT23/PI11
+ *  2. LED5 IPSOUT    From the PMU (not controllable by software)
+ *
+ * And two are pull high and, hence, illuminated by grounding the output:
+ *
+ *   3. LED3 RX_LED    LCD1_D16/ATAD12/KP_IN6/SMC_DET/EINT16/CSI1_D16/PH16
+ *   4. LED4 TX_LED    LCD1_D15/ATAD11/KP_IN5/SMC_VPPPP/EINT15/CSI1_D15/PH15
+ */
 
-#define LED_STARTED                 0
-#define LED_HEAPALLOCATE            1
-#define LED_IRQSENABLED             2
-#define LED_STACKCREATED            3
-#define LED_INIRQ                   4
-#define LED_SIGNAL                  5
-#define LED_ASSERTION               6
-#define LED_PANIC                   7
+/* LED index values for use with a1x_setled() */
+
+#define BOARD_LED1        0
+#define BOARD_LED3        1
+#define BOARD_LED4        2
+#define BOARD_NLEDS       3
+
+/* LED bits for use with a1x_setleds() */
+
+#define BOARD_LED1_BIT    (1 << BOARD_LED1)
+#define BOARD_LED3_BIT    (1 << BOARD_LED3)
+#define BOARD_LED4_BIT    (1 << BOARD_LED4)
+
+/* These LEDs are not used by the board port unless CONFIG_ARCH_LEDS is
+ * defined.  In that case, the usage by the board port is defined in
+ * include/board.h and src/a1x_leds.c. The LEDs are used to encode OS-related
+ * events as follows:
+ *
+ *      SYMBOL            Value Meaning                    LED state
+ *                                                    LED1 LED3 LED4
+ *      ----------------- ----- -----------------------  ---- ---- ------------ */
+
+#define LED_STARTED         0   /* NuttX has been started   ON   OFF  OFF */
+#define LED_HEAPALLOCATE    1   /* Heap has been allocated  OFF  ON   OFF */
+#define LED_IRQSENABLED     2   /* Interrupts enabled       ON   ON   OFF */
+#define LED_STACKCREATED    2   /* Idle stack created       ON   ON   OFF */
+#define LED_INIRQ           3   /* In an interrupt          N/C  N/C  Soft glow */
+#define LED_SIGNAL          3   /* In a signal handler      N/C  N/C  Soft glow */
+#define LED_ASSERTION       3   /* An assertion failed      N/C  N/C  Soft glow */
+#define LED_PANIC           3   /* The system has crashed   N/C  N/C  2Hz Flashing */
+
+/*      LED_IDLE           ---  /* MCU is is sleep mode         Not used
+ *
+ * After booting, LED1 and 3 are not longer used by the system and can be used for
+ * other purposes by the application (Of course, all LEDs are available to the
+ * application if CONFIG_ARCH_LEDS is not defined.
+ */
 
 /* Button definitions ***************************************************************/
-#warning Missing Logic
+/* There are a total of five switches on-board.  All pulled high and, hence, will be
+ * sensed as low when closed.
+ *
+ *   SW1 Reset     (not available to software)
+ *   SW2 UBOOT     UBOOT_SEL (?)
+ *   SW3 Key_Back  LCD1_D17/ATAD13/KP_IN7/SMC_VCCEN/EINT17/CSI1_D17/PH17
+ *   SW4 Key_Home  LCD1_D18/ATAD14/KP_OUT0/SMC_SLK/EINT18/CSI1_D18/PH18
+ *   SW5 Key_Menu  LCD1_D19/ATAD15/KP_OUT1/SMC_SDA/EINT19/CSI1_D19/PH19
+ */
+
+#define BUTTON_KEY_BACK     0
+#define BUTTON_KEY_HOME     1
+#define BUTTON_KEY_MENU     2
+#define NUM_BUTTONS         3
+
+#define BUTTON_KEY_BACK_BIT (1 << BUTTON_KEY_BACK)
+#define BUTTON_KEY_HOME_BIT (1 << BUTTON_KEY_HOME)
+#define BUTTON_KEY_MENU_BIT (1 << BUTTON_KEY_MENU)
 
 /* NAND *****************************************************************************/
 #warning Missing Logic
@@ -160,7 +219,7 @@ uint8_t up_buttons(void);
  *
  ************************************************************************************/
 
-#ifdef CONFIG_ARCH_IRQBUTTONS
+#ifdef CONFIG_A1X_PIO_IRQ
 xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 #endif /* CONFIG_ARCH_BUTTONS */

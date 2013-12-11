@@ -1,6 +1,5 @@
 /************************************************************************************
- * arch/arm/src/sama5/sam_pio.h
- * Parallel Input/Output (PIO) definitions for the SAMA5
+ * arch/arm/src/a1x/a1x_pio.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_SAM_PIO_H
-#define __ARCH_ARM_SRC_SAMA5_SAM_PIO_H
+#ifndef __ARCH_ARM_SRC_A1X_A1X_PIO_H
+#define __ARCH_ARM_SRC_A1X_A1X_PIO_H
 
 /************************************************************************************
  * Included Files
@@ -46,117 +45,136 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "chip/a1x_pio.h"
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
-/* Configuration ********************************************************************/
-
-#undef CONFIG_SAMA5_PIO_IRQ
-#if defined(CONFIG_SAMA5_PIOA_IRQ) || defined(CONFIG_SAMA5_PIOB_IRQ) || \
-    defined(CONFIG_SAMA5_PIOC_IRQ) || defined(CONFIG_SAMA5_PIOD_IRQ) || \
-    defined(CONFIG_SAMA5_PIOD_IRQ)
-#  define CONFIG_SAMA5_PIO_IRQ 1
-#endif
-
-#ifndef CONFIG_DEBUG
-#  undef CONFIG_DEBUG_GPIO
-#endif
-
-#define PIO_HAVE_PULLDOWN         1
-#define PIO_HAVE_PERIPHCD         1
-#define PIO_HAVE_SCHMITT          1
-#define PIO_HAVE_DRIVE            1
-
-/* Bit-encoded input to sam_configpio() ********************************************/
+/* Bit-encoded input to a1x_configpio() ********************************************/
 
 /* 32-bit Encoding:
  *
- *   ..MM MCCC CCDD IIIV PPPB BBBB
+ *   3322 2222 2222 1111 1111 11
+ *   1098 7654 3210 9876 5432 1098 7654 3210
+ *   ---- ---- ---- ---- ---- ---- ---- ----
+ *   .... .... MMMM PPDD IIIV ...P PPPB BBBB
  */
 
 /* Input/Output mode:
  *
- *   ..MM M... .... .... .... ....
+ *   3322 2222 2222 1111 1111 11
+ *   1098 7654 3210 9876 5432 1098 7654 3210
+ *   ---- ---- ---- ---- ---- ---- ---- ----
+ *   .... .... MMMX .... .... .... .... ....
  */
 
-#define PIO_MODE_SHIFT            (19)        /* Bits 19-21: PIO mode */
+#define PIO_MODE_SHIFT            (21)        /* Bits 21-23: PIO mode */
 #define PIO_MODE_MASK             (7 << PIO_MODE_SHIFT)
-#  define PIO_INPUT               (0 << PIO_MODE_SHIFT) /* Input */
-#  define PIO_OUTPUT              (1 << PIO_MODE_SHIFT) /* Output */
-#  define PIO_PERIPHA             (2 << PIO_MODE_SHIFT) /* Controlled by periph A signal */
-#  define PIO_PERIPHB             (3 << PIO_MODE_SHIFT) /* Controlled by periph B signal */
-#  define PIO_PERIPHC             (4 << PIO_MODE_SHIFT) /* Controlled by periph C signal */
-#  define PIO_PERIPHD             (5 << PIO_MODE_SHIFT) /* Controlled by periph D signal */
+#  define PIO_PERIPH0             (PIO_REG_CFG_INPUT << PIO_MODE_SHIFT)
+#  define PIO_PERIPH1             (PIO_REG_CFG_OUTPUT << PIO_MODE_SHIFT)
+#  define PIO_PERIPH2             (2 << PIO_MODE_SHIFT)
+#  define PIO_PERIPH3             (3 << PIO_MODE_SHIFT)
+#  define PIO_PERIPH4             (4 << PIO_MODE_SHIFT)
+#  define PIO_PERIPH5             (5 << PIO_MODE_SHIFT)
+#  define PIO_PERIPH6             (6 << PIO_MODE_SHIFT)
+#  define PIO_PERIPH7             (7 << PIO_MODE_SHIFT)
 
-/* These bits set the configuration of the pin:
- * NOTE: No definitions for parallel capture mode
+#  define PIO_INPUT               PIO_PERIPH0 /* Input */
+#  define PIO_OUTPUT              PIO_PERIPH1 /* Output */
+
+/* Bit 20 also specifies an external interrupt which must go with ID=6 */
+
+#define PIO_EINT_BIT              (1 << 20)   /* Bit 20: External PIO interrupt */
+#define PIO_EINT_SHIFT            (20)        /* Bits 20-23: Extended PIO mode */
+#define PIO_EINT_MASK             (15 << PIO_EINT_SHIFT)
+#  define PIO_EINT                (PIO_EINT_BIT | PIO_PERIPH6)
+
+/* These bits set the pull-up/down configuration of the pin:
  *
- *   .... .CCC CC.. .... .... ....
+ *   3322 2222 2222 1111 1111 11
+ *   1098 7654 3210 9876 5432 1098 7654 3210
+ *   ---- ---- ---- ---- ---- ---- ---- ----
+ *   .... .... .... PP.. .... .... .... ....
  */
 
-#define PIO_CFG_SHIFT             (14)        /* Bits 14-18: PIO configuration bits */
-#define PIO_CFG_MASK              (31 << PIO_CFG_SHIFT)
-#  define PIO_CFG_DEFAULT         (0  << PIO_CFG_SHIFT) /* Default, no attribute */
-#  define PIO_CFG_PULLUP          (1  << PIO_CFG_SHIFT) /* Bit 11: Internal pull-up */
-#  define PIO_CFG_PULLDOWN        (2  << PIO_CFG_SHIFT) /* Bit 11: Internal pull-down */
-#  define PIO_CFG_DEGLITCH        (4  << PIO_CFG_SHIFT) /* Bit 12: Internal glitch filter */
-#  define PIO_CFG_OPENDRAIN       (8  << PIO_CFG_SHIFT) /* Bit 13: Open drain */
-#  define PIO_CFG_SCHMITT         (16 << PIO_CFG_SHIFT) /* Bit 13: Schmitt trigger */
+#define PIO_PULL_SHIFT            (18)        /* Bits 18-19: PIO configuration bits */
+#define PIO_PULL_MASK             (3 << PIO_PULL_SHIFT)
+#  define PIO_PULL_NONE           (PIO_REG_PULL_NONE  << PIO_PULL_SHIFT)
+#  define PIO_PULL_PULLUP         (PIO_REG_PULL_UP  << PIO_PULL_SHIFT)
+#  define PIO_PULL_PULLDOWN       (PIO_REG_PULL_DOWN  << PIO_PULL_SHIFT)
 
-/* Drive Strength:
+/* Drive (outputs only):
  *
- *   .... .... ..DD .... .... ....
+ *   3322 2222 2222 1111 1111 11
+ *   1098 7654 3210 9876 5432 1098 7654 3210
+ *   ---- ---- ---- ---- ---- ---- ---- ----
+ *   .... .... .... ..DD .... .... .... ....
  */
 
-#define PIO_DRIVE_SHIFT           (12)        /* Bits 12-13: Drive strength */
-#define PIO_DRIVE_MASK            (7 << PIO_DRIVE_SHIFT)
-#  define PIO_DRIVE_LOW           (0 << PIO_DRIVE_SHIFT)
-#  define PIO_DRIVE_MEDIUM        (2 << PIO_DRIVE_SHIFT)
-#  define PIO_DRIVE_HIGH          (3 << PIO_DRIVE_SHIFT)
+#define PIO_DRIVE_SHIFT           (16)        /* Bits 16-17: Drive strength */
+#define PIO_DRIVE_MASK            (3 << PIO_DRIVE_SHIFT)
+#  define PIO_DRIVE_NONE          (0 << PIO_DRIVE_SHIFT)
+#  define PIO_DRIVE_LOW           (PIO_REG_DRV_LEVEL0 << PIO_DRIVE_SHIFT)
+#  define PIO_DRIVE_MEDLOW        (PIO_REG_DRV_LEVEL1 << PIO_DRIVE_SHIFT)
+#  define PIO_DRIVE_MEDHIGH       (PIO_REG_DRV_LEVEL2 << PIO_DRIVE_SHIFT)
+#  define PIO_DRIVE_HIGH          (PIO_REG_DRV_LEVEL3 << PIO_DRIVE_SHIFT)
 
-/* Additional interrupt modes:
+/* Interrupt modes (inputs only):
  *
- *   .... .... .... III. .... ....
+ *   3322 2222 2222 1111 1111 11
+ *   1098 7654 3210 9876 5432 1098 7654 3210
+ *   ---- ---- ---- ---- ---- ---- ---- ----
+ *   .... .... ... ....  III. .... .... ....
  */
 
-#define PIO_INT_SHIFT             (9)         /* Bits 9-11: PIO interrupt bits */
+#define PIO_INT_SHIFT             (13)        /* Bits 13-15: PIO interrupt bits */
 #define PIO_INT_MASK              (7 << PIO_INT_SHIFT)
-#  define _PIO_INT_AIM            (1 << 10)   /* Bit 10: Additional Interrupt modes */
-#  define _PIO_INT_LEVEL          (1 << 9)    /* Bit 9: Level detection interrupt */
-#  define _PIO_INT_EDGE           (0)         /*        (vs. Edge detection interrupt) */
-#  define _PIO_INT_RH             (1 << 8)    /* Bit 9: Rising edge/High level detection interrupt */
-#  define _PIO_INT_FL             (0)         /*        (vs. Falling edge/Low level detection interrupt) */
-
-#  define PIO_INT_HIGHLEVEL       (_PIO_INT_AIM | _PIO_INT_LEVEL | _PIO_INT_RH)
-#  define PIO_INT_LOWLEVEL        (_PIO_INT_AIM | _PIO_INT_LEVEL | _PIO_INT_FL)
-#  define PIO_INT_RISING          (_PIO_INT_AIM | _PIO_INT_EDGE  | _PIO_INT_RH)
-#  define PIO_INT_FALLING         (_PIO_INT_AIM | _PIO_INT_EDGE  | _PIO_INT_FL)
-#  define PIO_INT_BOTHEDGES       (0)
+#  define PIO_INT_NONE            (0 << PIO_INT_SHIFT)
+#  define PIO_INT_RISING          (PIO_REG_INT_POSEDGE << PIO_INT_SHIFT)
+#  define PIO_INT_FALLING         (PIO_REG_INT_NEGEDGE << PIO_INT_SHIFT)
+#  define PIO_INT_HIGHLEVEL       (PIO_REG_INT_HILEVEL << PIO_INT_SHIFT)
+#  define PIO_INT_LOWLEVEL        (PIO_REG_INT_LOWLEVEL << PIO_INT_SHIFT)
+#  define PIO_INT_BOTHEDGES       (PIO_REG_INT_BOTHEDGES << PIO_INT_SHIFT)
 
 /* If the pin is an PIO output, then this identifies the initial output value:
  *
- *   .... .... .... ...V .... ....
+ *   3322 2222 2222 1111 1111 11
+ *   1098 7654 3210 9876 5432 1098 7654 3210
+ *   ---- ---- ---- ---- ---- ---- ---- ----
+ *   .... .... .... .... ...V .... .... ....
+ *   V
  */
 
-#define PIO_OUTPUT_SET            (1 << 8)    /* Bit 8: Inital value of output */
+#define PIO_OUTPUT_SET            (1 << 12)   /* Bit 12: Initial value of output */
 #define PIO_OUTPUT_CLEAR          (0)
 
 /* This identifies the PIO port:
  *
- *   .... .... .... .... PPP. ....
+ *   3322 2222 2222 1111 1111 11
+ *   1098 7654 3210 9876 5432 1098 7654 3210
+ *   ---- ---- ---- ---- ---- ---- ---- ----
+ *   .... .... .... .... .... ...P PPP. ....
+ *   PPPP
  */
 
-#define PIO_PORT_SHIFT            (5)         /* Bit 5-7:  Port number */
-#define PIO_PORT_MASK             (7 << PIO_PORT_SHIFT)
-#  define PIO_PORT_PIOA           (0 << PIO_PORT_SHIFT)
-#  define PIO_PORT_PIOB           (1 << PIO_PORT_SHIFT)
-#  define PIO_PORT_PIOC           (2 << PIO_PORT_SHIFT)
-#  define PIO_PORT_PIOD           (3 << PIO_PORT_SHIFT)
-#  define PIO_PORT_PIOE           (4 << PIO_PORT_SHIFT)
+#define PIO_PORT_SHIFT            (5)         /* Bit 5-8:  Port number */
+#define PIO_PORT_MASK             (15 << PIO_PORT_SHIFT)
+#  define PIO_PORT_PIOA           (PIO_REG_PORTA << PIO_PORT_SHIFT)
+#  define PIO_PORT_PIOB           (PIO_REG_PORTB << PIO_PORT_SHIFT)
+#  define PIO_PORT_PIOC           (PIO_REG_PORTC << PIO_PORT_SHIFT)
+#  define PIO_PORT_PIOD           (PIO_REG_PORTD << PIO_PORT_SHIFT)
+#  define PIO_PORT_PIOE           (PIO_REG_PORTE << PIO_PORT_SHIFT)
+#  define PIO_PORT_PIOF           (PIO_REG_PORTF << PIO_PORT_SHIFT)
+#  define PIO_PORT_PIOG           (PIO_REG_PORTG << PIO_PORT_SHIFT)
+#  define PIO_PORT_PIOH           (PIO_REG_PORTH << PIO_PORT_SHIFT)
+#  define PIO_PORT_PIOI           (PIO_REG_PORTI << PIO_PORT_SHIFT)
 
 /* This identifies the bit in the port:
  *
- *   .... .... .... .... ...B BBBB
+ *   3322 2222 2222 1111 1111 11
+ *   1098 7654 3210 9876 5432 1098 7654 3210
+ *   ---- ---- ---- ---- ---- ---- ---- ----
+ *   .... .... .... .... .... .... ...B BBBB
  */
 
 #define PIO_PIN_SHIFT             (0)         /* Bits 0-4: PIO number: 0-31 */
@@ -226,103 +244,75 @@ extern "C"
  ************************************************************************************/
 
 /************************************************************************************
- * Name: sam_pioirqinitialize
+ * Name: a1x_pio_irqinitialize
  *
  * Description:
  *   Initialize logic to support a second level of interrupt decoding for PIO pins.
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAMA5_PIO_IRQ
-void sam_pioirqinitialize(void);
+#ifdef CONFIG_A1X_PIO_IRQ
+void a1x_pio_irqinitialize(void);
 #else
-#  define sam_pioirqinitialize()
+#  define a1x_pio_irqinitialize()
 #endif
 
 /************************************************************************************
- * Name: sam_configpio
+ * Name: a1x_configpio
  *
  * Description:
  *   Configure a PIO pin based on bit-encoded description of the pin.
  *
  ************************************************************************************/
 
-int sam_configpio(pio_pinset_t cfgset);
+int a1x_configpio(pio_pinset_t cfgset);
 
 /************************************************************************************
- * Name: sam_piowrite
+ * Name: a1x_pio_write
  *
  * Description:
  *   Write one or zero to the selected PIO pin
  *
  ************************************************************************************/
 
-void sam_piowrite(pio_pinset_t pinset, bool value);
+void a1x_pio_write(pio_pinset_t pinset, bool value);
 
 /************************************************************************************
- * Name: sam_pioread
+ * Name: a1x_pio_read
  *
  * Description:
  *   Read one or zero from the selected PIO pin
  *
  ************************************************************************************/
 
-bool sam_pioread(pio_pinset_t pinset);
+bool a1x_pio_read(pio_pinset_t pinset);
 
 /************************************************************************************
- * Name: sam_pioirq
- *
- * Description:
- *   Configure an interrupt for the specified PIO pin.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_SAMA5_PIO_IRQ
-void sam_pioirq(pio_pinset_t pinset);
-#else
-#  define sam_pioirq(pinset)
-#endif
-
-/************************************************************************************
- * Name: sam_pioirqenable
+ * Name: a1x_pio_irqenable
  *
  * Description:
  *   Enable the interrupt for specified PIO IRQ
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAMA5_PIO_IRQ
-void sam_pioirqenable(int irq);
+#ifdef CONFIG_A1X_PIO_IRQ
+void a1x_pio_irqenable(int irq);
 #else
-#  define sam_pioirqenable(irq)
+#  define a1x_pio_irqenable(irq)
 #endif
 
 /************************************************************************************
- * Name: sam_pioirqdisable
+ * Name: a1x_pio_irqdisable
  *
  * Description:
  *   Disable the interrupt for specified PIO IRQ
  *
  ************************************************************************************/
 
-#ifdef CONFIG_SAMA5_PIO_IRQ
-void sam_pioirqdisable(int irq);
+#ifdef CONFIG_A1X_PIO_IRQ
+void a1x_pio_irqdisable(int irq);
 #else
-#  define sam_pioirqdisable(irq)
-#endif
-
-/************************************************************************************
- * Function:  sam_dumppio
- *
- * Description:
- *   Dump all PIO registers associated with the base address of the provided pinset.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_DEBUG_GPIO
-int sam_dumppio(uint32_t pinset, const char *msg);
-#else
-#  define sam_dumppio(p,m)
+#  define a1x_pio_irqdisable(irq)
 #endif
 
 #undef EXTERN
@@ -331,4 +321,4 @@ int sam_dumppio(uint32_t pinset, const char *msg);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMA5_SAM_PIO_H */
+#endif /* __ARCH_ARM_SRC_A1X_A1X_PIO_H */
