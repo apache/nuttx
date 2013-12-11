@@ -83,7 +83,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   if (alignment <= MM_MIN_CHUNK)
     {
-      return malloc(size);
+      return mm_malloc(heap, size);
     }
 
   /* Adjust the size to account for (1) the size of the allocated node, (2)
@@ -103,7 +103,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   /* Then malloc that size */
 
-  rawchunk = (size_t)malloc(allocsize);
+  rawchunk = (size_t)mm_malloc(heap, allocsize);
   if (rawchunk == 0)
     {
       return NULL;

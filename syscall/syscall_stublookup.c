@@ -38,6 +38,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <sys/types.h>
 #include <syscall.h>
 
 /* The content of this file is only meaningful during the kernel phase of
