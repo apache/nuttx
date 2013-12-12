@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/time/lib_strftime.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -138,7 +138,7 @@ static const char * const g_monthname[12] =
  *   The strftime() function returns the number of characters placed in  the
  *    array s, not including the terminating null byte, provided the string,
  *    including the terminating null byte, fits.  Otherwise,  it returns 0,
- *    and the contents of the array is undefined. 
+ *    and the contents of the array is undefined.
  *
  ****************************************************************************/
 
@@ -177,7 +177,7 @@ size_t strftime(char *s, size_t max, const char *format, const struct tm *tm)
                len = snprintf(dest, chleft, "Day"); /* Not supported */
              }
              break;
-           
+
            /* %h: Equivalent to %b */
 
            case 'h':
@@ -392,6 +392,13 @@ size_t strftime(char *s, size_t max, const char *format, const struct tm *tm)
 
       dest   += len;
       chleft -= len;
+    }
+
+  /* Append terminating null byte (if there is space for it) */
+
+  if (chleft > 0)
+    {
+      *dest = '\0';
     }
 
   return max - chleft;
