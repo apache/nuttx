@@ -5,8 +5,10 @@
  * This pattern matcher only handles '?', '*' and '**', and  multiple
  * patterns separated by '|'.
  *
- *   Copyright © 1995,2000 by Jef Poskanzer <jef@mail.acme.com>.
+ *   Copyright © 1995, 2000 by Jef Poskanzer <jef@mail.acme.com>.
  *   All rights reserved.
+ *
+ * With extensions by Ken Pettit.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -57,6 +59,8 @@
 static int match_one(const char *pattern, int patlen, const char *string)
 {
   const char *p;
+  char first;
+  char last;
   int pl;
   int i;
 
@@ -65,6 +69,63 @@ static int match_one(const char *pattern, int patlen, const char *string)
       if (*p == '?' && *string != '\0')
         {
           continue;
+        }
+
+      /* Match single character from a set:  "[a-zA-Z]" for instance */
+
+      if (*p == '[' && *string != '\0')
+        {
+          i = 0;
+          while (*p != ']' && *p != '\0')
+            {
+              p++;
+
+              if (*string == *p)
+              {
+                /* Match found.  Advance to the ']' */
+
+                i = 1;
+                while (*p != ']' && *p != '\0')
+                  {
+                    p++;
+                  }
+
+                break;
+              }
+
+              /* Prepare to test for range */
+
+              if (*p != '\0')
+                {
+                  first = *p++;
+                  if (*p == '-')
+                    {
+                      p++;
+                      last = *p++;
+                      if (*string >= first && *string <= *p)
+                        {
+                          /* Match found.  Advance to the ']' */
+
+                          i = 1;
+                          while (*p != ']' && *p != '\0')
+                            {
+                              p++;
+                            }
+
+                          break;
+                        }
+                    }
+                }
+            }
+
+          /* We reuse 'i' above to indicate match found */
+
+          if (i)
+            {
+              continue;
+            }
+
+          return 0;
         }
 
       if (*p == '*')
@@ -92,6 +153,7 @@ static int match_one(const char *pattern, int patlen, const char *string)
                   return 1;
                 }
             }
+
           return 0;
         }
 
@@ -105,6 +167,7 @@ static int match_one(const char *pattern, int patlen, const char *string)
     {
       return 1;
     }
+
   return 0;
 }
 
@@ -116,9 +179,10 @@ static int match_one(const char *pattern, int patlen, const char *string)
  * Name: match
  *
  * Description:
- *   Simple shell-style filename pattern matcher written by Jef Poskanzer
- *   This pattern matcher only handles '?', '*' and '**', and  multiple
- *   patterns separated by '|'.
+ *   Simple shell-style filename pattern matcher originally written by
+ *   Jef Poskanzer and extended by Ken Pettit.  This pattern matcher handles
+ *   '?', '*', '**', sets like [a-zA-z], and multiple  patterns separated
+ *   by '|'.
  *
  * Returned Value:
  *   Returns 1 (match) or 0 (no-match).
@@ -145,4 +209,3 @@ int match(const char *pattern, const char *string)
       pattern = or + 1;
     }
 }
-

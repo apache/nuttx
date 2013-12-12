@@ -6197,4 +6197,6 @@
 	  defintion header files (2013-12-10).
 	* arch/arm/src/a1x/a1x_pio.c and .h:  Support for PIO configuration
 	  (2013-12-11).
-
+	* libc/misc/lib_match.c:  Pattern matching logic extended to handle
+	  matches to sets of characters and ranges of character values.  From
+	  Ken Pettit (2013-12-12).
