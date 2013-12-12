@@ -844,6 +844,12 @@ FAR struct mtd_dev_s *sst39vf_initialize(void)
       return NULL;
     }
 
+  /* Register the MTD with the procfs system if enabled */
+
+#ifdef CONFIG_MTD_REGISTRATION
+  mtd_register(&priv->mtd, "sst39vf");
+#endif
+
   /* Return the state structure as the MTD device */
 
   return (FAR struct mtd_dev_s *)&g_sst39vf;

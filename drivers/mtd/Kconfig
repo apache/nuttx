@@ -26,6 +26,16 @@ config MTD_PARTITION
 		managing the sub-region of flash beginning at 'offset' (in blocks)
 		and of size 'nblocks' on the device specified by 'mtd'.
 
+config MTD_PARTITION_NAMES
+	bool "Support MTD partition naming"
+	depends on FS_PROCFS
+	depends on MTD_PARTITION
+	default n
+	---help---
+		MTD partitions can be assigned a name for reporting via the procfs
+		file system interface.  This adds an API which must be called to
+		specify the partition name.
+
 config MTD_BYTE_WRITE
 	bool "Byte write"
 	default n

@@ -6,9 +6,45 @@
 config FS_PROCFS
 	bool "PROCFS File System"
 	default n
-	select FS_WRITABLE
+	select FS_READABLE
 	---help---
-		The PROCFS file system is provides access to task status through the
-		NuttX file system.  The PROCFS may, for example, be mount at /proc.
-		Then information about all of the currently active tasks and threads
-		will be available in proc/.
+		The PROCFS file system provides access to task status and other driver
+		status through the NuttX file system.  The PROCFS may, for example, be
+		mount at /proc.  Then information about all of the currently active
+		tasks and threads will be available in /proc.
+
+if FS_PROCFS
+
+menu "Exclude individual procfs entries"
+
+config FS_PROCFS_EXCLUDE_MOUNTS
+	bool "Exclude mounts"
+	depends on !DISABLE_MOUNTPOINT
+	default n
+
+config FS_PROCFS_EXCLUDE_MTD
+	bool "Exclude mtd"
+	depends on MTD
+	default n
+
+config FS_PROCFS_EXCLUDE_PROCESS
+	bool "Exclude process information"
+	default n
+	---help---
+		Causes the process information to be excluded from the procfs system.
+		This will reduce code space, but then giving access to process info
+		was kinda the whole point of procfs, but hey, whatever.
+
+config FS_PROCFS_EXCLUDE_PARTITIONS
+	bool "Exclude partitions"
+	depends on MTD_PARTITION
+	default n
+
+config FS_PROCFS_EXCLUDE_SMARTFS
+	bool "Exclude fs/smartfs"
+	depends on FS_SMARTFS
+	default n
+
+endmenu
+
+endif

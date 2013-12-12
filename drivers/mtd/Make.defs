@@ -86,6 +86,12 @@ CSRCS += smart.c
 endif
 endif
 
+ifeq ($(CONFIG_FS_PROCFS),y)
+ifneq ($(CONFIG_FS_PROCFS_EXCLUDE_MTD),y)
+CSRCS += mtd_procfs.c
+endif
+endif
+
 # Include MTD driver support
 
 DEPPATH += --dep-path mtd

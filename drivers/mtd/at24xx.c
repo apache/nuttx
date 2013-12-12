@@ -429,6 +429,12 @@ FAR struct mtd_dev_s *at24c_initialize(FAR struct i2c_dev_s *dev)
       priv->dev        = dev;
     }
 
+  /* Register the MTD with the procfs system if enabled */
+
+#ifdef CONFIG_MTD_REGISTRATION
+  mtd_register(&priv->mtd, "at24xx");
+#endif
+
   /* Return the implementation-specific state structure as the MTD device */
 
   fvdbg("Return %p\n", priv);

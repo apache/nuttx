@@ -6200,3 +6200,7 @@
 	* libc/misc/lib_match.c:  Pattern matching logic extended to handle
 	  matches to sets of characters and ranges of character values.  From
 	  Ken Pettit (2013-12-12).
+	* fs/procfs, drivers/mtd, fs/smartfs, includes/nuttx/fs, .. to many
+	  files to list:  Extensive changes by Ken Pettit to extend procfs/
+	  functionality.  Includes some incomplete changes related to
+	  SmartFS (2013-12-12).

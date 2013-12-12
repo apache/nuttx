@@ -45,10 +45,17 @@
 #include <errno.h>
 #include <assert.h>
 #include <debug.h>
+#include <string.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <sys/stat.h>
 
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/ioctl.h>
+#ifdef CONFIG_FS_PROCFS
+#include <nuttx/fs/procfs.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -81,7 +88,24 @@ struct mtd_partition_s
                                  * sub-region */
   off_t blocksize;              /* The size of one read/write block */
   uint16_t blkpererase;         /* Number of R/W blocks in one erase block */
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_PROCFS_EXCLUDE_PARTITIONS)
+  struct mtd_partition_s  *pnext; /* Pointer to next partition struct */
+#endif
+#ifdef CONFIG_MTD_PARTITION_NAMES
+  FAR const char *name;         /* Name of the partition */
+#endif
 };
+
+/* This structure describes one open "file" */
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_PROCFS_EXCLUDE_PARTITIONS)
+struct part_procfs_file_s
+{
+  struct procfs_file_s  base;        /* Base open file structure */
+  struct mtd_partition_s *nextpart;
+};
+#endif
 
 /****************************************************************************
  * Private Function Prototypes
@@ -89,22 +113,69 @@ struct mtd_partition_s
 
 /* MTD driver methods */
 
-static int part_erase(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks);
-static ssize_t part_bread(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                          FAR uint8_t *buf);
-static ssize_t part_bwrite(FAR struct mtd_dev_s *dev, off_t startblock, size_t nblocks,
-                           FAR const uint8_t *buf);
-static ssize_t part_read(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                         FAR uint8_t *buffer);
+static int     part_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+                 size_t nblocks);
+static ssize_t part_bread(FAR struct mtd_dev_s *dev, off_t startblock,
+                 size_t nblocks, FAR uint8_t *buf);
+static ssize_t part_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
+                 size_t nblocks, FAR const uint8_t *buf);
+static ssize_t part_read(FAR struct mtd_dev_s *dev, off_t offset,
+                 size_t nbytes, FAR uint8_t *buffer);
 #ifdef CONFIG_MTD_BYTE_WRITE
-static ssize_t part_write(FAR struct mtd_dev_s *dev, off_t offset, size_t nbytes,
-                          FAR const uint8_t *buffer);
+static ssize_t part_write(FAR struct mtd_dev_s *dev, off_t offset,
+                  size_t nbytes, FAR const uint8_t *buffer);
 #endif
-static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+static int     part_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+                  unsigned long arg);
+
+/* File system methods */
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_PROCFS_EXCLUDE_PARTITIONS)
+static int     part_procfs_open(FAR struct file *filep,
+                 FAR const char *relpath, int oflags, mode_t mode);
+static int     part_procfs_close(FAR struct file *filep);
+static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
+                 size_t buflen);
+
+static int     part_procfs_dup(FAR const struct file *oldp,
+                 FAR struct file *newp);
+
+#if 0 /* Not implemented */
+static int     part_procfs_opendir(const char *relpath,
+                 FAR struct fs_dirent_s *dir);
+static int     part_procfs_closedir(FAR struct fs_dirent_s *dir);
+static int     part_procfs_readdir(FAR struct fs_dirent_s *dir);
+static int     part_procfs_rewinddir(FAR struct fs_dirent_s *dir);
+#endif
+
+static int     part_procfs_stat(FAR const char *relpath,
+                 FAR struct stat *buf);
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_PROCFS_EXCLUDE_PARTITIONS)
+struct mtd_partition_s *g_pfirstpartition = NULL;
+
+const struct procfs_operations part_procfsoperations =
+{
+  part_procfs_open,       /* open */
+  part_procfs_close,      /* close */
+  part_procfs_read,       /* read */
+  NULL,                   /* write */
+
+  part_procfs_dup,        /* dup */
+
+  NULL,                   /* opendir */
+  NULL,                   /* closedir */
+  NULL,                   /* readdir */
+  NULL,                   /* rewinddir */
+
+  part_procfs_stat        /* stat */
+};
+#endif
 
 /****************************************************************************
  * Name: part_blockcheck
@@ -397,6 +468,269 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   return ret;
 }
 
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_PROCFS_EXCLUDE_PARTITIONS)
+
+/****************************************************************************
+ * Name: part_procfs_open
+ ****************************************************************************/
+
+static int part_procfs_open(FAR struct file *filep, FAR const char *relpath,
+                      int oflags, mode_t mode)
+{
+  FAR struct part_procfs_file_s *attr;
+
+  fvdbg("Open '%s'\n", relpath);
+
+  /* PROCFS is read-only.  Any attempt to open with any kind of write
+   * access is not permitted.
+   *
+   * REVISIT:  Write-able proc files could be quite useful.
+   */
+
+  if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
+    {
+      fdbg("ERROR: Only O_RDONLY supported\n");
+      return -EACCES;
+    }
+
+  /* Allocate a container to hold the task and attribute selection */
+
+  attr = (FAR struct part_procfs_file_s *)kzalloc(sizeof(struct part_procfs_file_s));
+  if (!attr)
+    {
+      fdbg("ERROR: Failed to allocate file attributes\n");
+      return -ENOMEM;
+    }
+
+  /* Initialize the file attributes */
+
+  attr->nextpart = g_pfirstpartition;
+
+  /* Save the index as the open-specific state in filep->f_priv */
+
+  filep->f_priv = (FAR void *)attr;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: part_procfs_close
+ ****************************************************************************/
+
+static int part_procfs_close(FAR struct file *filep)
+{
+  FAR struct part_procfs_file_s *attr;
+
+  /* Recover our private data from the struct file instance */
+
+  attr = (FAR struct part_procfs_file_s *)filep->f_priv;
+  DEBUGASSERT(attr);
+
+  /* Release the file attributes structure */
+
+  kfree(attr);
+  filep->f_priv = NULL;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: part_procfs_read
+ ****************************************************************************/
+
+static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
+                                size_t buflen)
+{
+  FAR struct part_procfs_file_s *attr;
+  ssize_t ret, total = 0, blkpererase;
+  FAR struct mtd_geometry_s geo;
+#ifdef CONFIG_MTD_PARTITION_NAMES
+  char    partname[11];
+  FAR const char *ptr;
+  uint8_t x;
+#endif
+
+  fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
+
+  /* Recover our private data from the struct file instance */
+
+  attr = (FAR struct part_procfs_file_s *)filep->f_priv;
+  DEBUGASSERT(attr);
+
+  /* Provide the requested data */
+
+  if (attr->nextpart == g_pfirstpartition)
+    {
+#ifdef CONFIG_MTD_PARTITION_NAMES
+      total = snprintf(buffer, buflen, "Name        Start    Size");
+#else
+      total = snprintf(buffer, buflen, "  Start    Size");
+#endif
+
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_MTD
+      total += snprintf(&buffer[total], buflen - total, "   MTD\n");
+#else
+      total += snprintf(&buffer[total], buflen - total, "\n");
+#endif
+    }
+
+  while (attr->nextpart)
+  {
+    /* Get the geometry of the FLASH device */
+
+    ret = attr->nextpart->parent->ioctl(attr->nextpart->parent, MTDIOC_GEOMETRY,
+        (unsigned long)((uintptr_t)&geo));
+    if (ret < 0)
+      {
+        fdbg("ERROR: mtd->ioctl failed: %d\n", ret);
+        return 0;
+      }
+
+    /* Get the number of blocks per erase.  There must be an even number of
+     * blocks in one erase blocks.
+     */
+
+    blkpererase = geo.erasesize / geo.blocksize;
+
+    /* Copy data from the next known partition */
+
+#ifdef CONFIG_MTD_PARTITION_NAMES
+    if (attr->nextpart->name == NULL)
+      {
+        strcpy(partname, "(noname)  ");
+      }
+    else
+      {
+        ptr = attr->nextpart->name;
+        for (x = 0; x < sizeof(partname) - 1; x++)
+          {
+            /* Test for end of partition name */
+
+            if (*ptr == ',' || *ptr == '\0')
+              {
+                /* Perform space fill for alignment */
+
+                partname[x] = ' ';
+              }
+            else
+              {
+                /* Copy next byte of partition name */
+
+                partname[x] = *ptr++;
+              }
+          }
+
+        partname[x] = '\0';
+      }
+
+    /* Terminate the partition name and add to output buffer */
+
+    ret = snprintf(&buffer[total], buflen - total, "%s%7d %7d",
+        partname, attr->nextpart->firstblock / blkpererase,
+        attr->nextpart->neraseblocks);
+#else
+    ret = snprintf(&buffer[total], buflen - total, "%7d %7d",
+        attr->nextpart->firstblock / blkpererase,
+        attr->nextpart->neraseblocks);
+#endif
+
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_MTD
+    if (ret + total < buflen)
+      {
+        ret += snprintf(&buffer[total + ret], buflen - (total + ret),
+            "   %s\n", attr->nextpart->parent->name);
+      }
+#else
+    if (ret + total < buflen)
+      {
+        ret += snprintf(&buffer[total + ret], buflen - (total + ret), "\n");
+      }
+#endif
+
+    if (ret + total < buflen)
+      {
+        /* It fit in the buffer totally.  Advance total and move to
+         * next partition.
+         */
+        total += ret;
+        attr->nextpart = attr->nextpart->pnext;
+      }
+    else
+      {
+        /* This one didn't fit completely.  Truncate the partial
+         * entry and break the loop.
+         */
+        buffer[total] = '\0';
+        break;
+      }
+  }
+
+  /* Update the file offset */
+
+  if (total > 0)
+    {
+      filep->f_pos += total;
+    }
+
+  return total;
+}
+
+/****************************************************************************
+ * Name: part_procfs_dup
+ *
+ * Description:
+ *   Duplicate open file data in the new file structure.
+ *
+ ****************************************************************************/
+
+static int part_procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
+{
+  FAR struct part_procfs_file_s *oldattr;
+  FAR struct part_procfs_file_s *newattr;
+
+  fvdbg("Dup %p->%p\n", oldp, newp);
+
+  /* Recover our private data from the old struct file instance */
+
+  oldattr = (FAR struct part_procfs_file_s *)oldp->f_priv;
+  DEBUGASSERT(oldattr);
+
+  /* Allocate a new container to hold the task and attribute selection */
+
+  newattr = (FAR struct part_procfs_file_s *)kzalloc(sizeof(struct part_procfs_file_s));
+  if (!newattr)
+    {
+      fdbg("ERROR: Failed to allocate file attributes\n");
+      return -ENOMEM;
+    }
+
+  /* The copy the file attribtes from the old attributes to the new */
+
+  memcpy(newattr, oldattr, sizeof(struct part_procfs_file_s));
+
+  /* Save the new attributes in the new file structure */
+
+  newp->f_priv = (FAR void *)newattr;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: part_procfs_stat
+ *
+ * Description: Return information about a file or directory
+ *
+ ****************************************************************************/
+
+static int part_procfs_stat(const char *relpath, struct stat *buf)
+{
+  /* File/directory size, access block size */
+
+  buf->st_mode = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
+  buf->st_size    = 0;
+  buf->st_blksize = 0;
+  buf->st_blocks  = 0;
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -500,8 +834,59 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd, off_t firstblock,
   part->blocksize    = geo.blocksize;
   part->blkpererase  = blkpererase;
 
+#ifdef CONFIG_MTD_PARTITION_NAMES
+  part->name         = NULL;
+#endif
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_PROCFS_EXCLUDE_PARTITIONS)
+  /* Add this parition to the list of known partitions */
+
+  if (g_pfirstpartition == NULL)
+    {
+      g_pfirstpartition = part;
+    }
+  else
+    {
+      struct mtd_partition_s *plast;
+
+      /* Add the partition to the end of the list */
+      part->pnext = NULL;
+
+      plast = g_pfirstpartition;
+      while (plast->pnext != NULL)
+        {
+          /* Get pointer to next partition */
+          plast = plast->pnext;
+        }
+
+      plast->pnext = part;
+    }
+#endif
+
   /* Return the implementation-specific state structure as the MTD device */
 
   return &part->child;
 }
+
+/****************************************************************************
+ * Name: mtd_setpartitionname
+ *
+ * Description:
+ *   Sets the name of the specified partition.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_MTD_PARTITION_NAMES
+
+int mtd_setpartitionname(FAR struct mtd_dev_s *mtd, FAR const char *name)
+{
+  FAR struct mtd_partition_s *priv = (FAR struct mtd_partition_s *)mtd;
+
+  DEBUGASSERT(mtd);
+  DEBUGASSERT(name);
+
+  /* Allocate space for the name */
+  priv->name = name;
+  return OK;
+}
+#endif
 

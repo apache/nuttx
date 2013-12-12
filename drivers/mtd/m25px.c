@@ -1032,6 +1032,12 @@ FAR struct mtd_dev_s *m25p_initialize(FAR struct spi_dev_s *dev)
         }
     }
 
+  /* Register the MTD with the procfs system if enabled */
+
+#ifdef CONFIG_MTD_REGISTRATION
+  mtd_register(&priv->mtd, "m25px");
+#endif
+
   /* Return the implementation-specific state structure as the MTD device */
 
   fvdbg("Return %p\n", priv);

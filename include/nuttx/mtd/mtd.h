@@ -67,6 +67,10 @@
 #  define CONFIG_MTD_SUBSECTOR_ERASE 1
 #endif
 
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MTD)
+#define CONFIG_MTD_REGISTRATION   1
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -142,6 +146,20 @@ struct mtd_dev_s
    */
 
   int (*ioctl)(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg);
+
+#ifdef CONFIG_MTD_REGISTRATION
+  /* An assigned MTD number for procfs reporting */
+
+  uint8_t mtdno;
+
+  /* Pointer to the next registered MTD device */
+
+  FAR struct mtd_dev_s  *pnext;
+
+  /* Name of this MTD device */
+
+  FAR const char *name;
+#endif
 };
 
 /****************************************************************************
@@ -184,6 +202,17 @@ extern "C"
 
 FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
                                     off_t firstblock, off_t nblocks);
+
+/****************************************************************************
+ * Name: mtd_setpartitionname
+ *
+ * Description:
+ *   Sets the name of the specified partition.
+ *
+ ****************************************************************************/
+#ifdef CONFIG_MTD_PARTITION_NAMES
+int mtd_setpartitionname(FAR struct mtd_dev_s *mtd, FAR const char *name);
+#endif
 
 /****************************************************************************
  * Name: ftl_initialize
@@ -351,6 +380,23 @@ FAR struct mtd_dev_s *w25_initialize(FAR struct spi_dev_s *dev);
  ****************************************************************************/
 
 FAR struct mtd_dev_s *up_flashinitialize(void);
+
+/****************************************************************************
+ * Name: mtd_register
+ *
+ * Description:
+ *   Registers MTD device with the procfs file system.  This assigns a unique
+ *   MTD number and associates the given device name, then  add adds it to 
+ *   the list of registered devices.
+ *
+ * In an embedded system, this all is really unnecessary, but is provided
+ * in the procfs system simply for information purposes (if desired).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_MTD_REGISTRATION
+int mtd_register(FAR struct mtd_dev_s *mtd, FAR const char *name);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

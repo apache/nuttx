@@ -57,7 +57,9 @@
 #include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
+#include <nuttx/regex.h>
 
 #include <arch/irq.h>
 
@@ -67,65 +69,42 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define STATUS_LINELEN 32
+#define PROCFS_NATTRS     2
 
-#ifndef MIN
-#  define MIN(a,b) ((a < b) ? a : b)
-#endif
+/****************************************************************************
+ * External Definitons
+ ****************************************************************************/
+
+extern const struct procfs_operations process_operations;
+extern const struct procfs_operations mtd_procfsoperations;
+extern const struct procfs_operations part_procfsoperations;
+extern const struct procfs_operations smartfs_procfsoperations;
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This enumeration identifies all of the thread attributes that can be
- * accessed via the procfs file system.
- */
+/* Table of all known / pre-registered procfs handlers / participants. */
 
-enum procfs_attr_e
+static const struct procfs_entry_s g_procfsentries[] =
 {
-  PROCFS_STATUS = 0,                 /* Task/thread status */
-  PROCFS_CMDLINE,                    /* Command line */
-};
-#define PROCFS_NATTRS 2
-
-/* This structure describes one open "file" */
-
-struct procfs_file_s
-{
-  pid_t    pid;                      /* Task/thread ID */
-  uint8_t  attr;                     /* See enum procfs_attr_e */
-  char     line[STATUS_LINELEN];     /* Pre-allocated buffer for formatted lines */
-};
-
-/* The generic proc/ pseudo directory structure */
-
-struct procfs_level_s
-{
-  uint8_t  level;                    /* Directory level.  Currently 0 or 1 */
-  uint16_t index;                    /* Index to the next directory entry */
-  uint16_t nentries;                 /* Number of directory entries */
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
+  { "[0-9]*/*",         &process_operations },
+  { "[0-9]*",           &process_operations },
+#endif
+#if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
+//{ "fs/smartfs",       &smartfs_procfsoperations },
+  { "fs/smartfs**",     &smartfs_procfsoperations },
+#endif
+#if defined(CONFIG_MTD) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MTD)
+  { "mtd",              &mtd_procfsoperations },
+#endif
+#if defined(CONFIG_MTD_PARTITION) && !defined(CONFIG_FS_PROCFS_EXCLUDE_PARTITON)
+  { "partitions",       &part_procfsoperations },
+#endif
 };
 
-/* Level 0 is the directory of active tasks */
-
-struct procfs_level0_s
-{
-  uint8_t  level;                    /* Directory level.  Currently 0 or 1 */
-  uint16_t index;                    /* Index to the next directory entry */
-  uint16_t nentries;                 /* Number of directory entries */
-
-  pid_t    pid[CONFIG_MAX_TASKS];    /* Snapshot of all active task IDs */
-};
-
-/* Level 1 is the directory of task attributes */
-
-struct procfs_level1_s
-{
-  uint8_t  level;                    /* Directory level.  Currently 0 or 1 */
-  uint16_t index;                    /* Index to the next directory entry */
-  uint16_t nentries;                 /* Number of directory entries */
-
-  pid_t    pid;                      /* ID of task for attributes */
-};
+static const uint8_t g_procfsentrycount = sizeof(g_procfsentries) /
+                            sizeof(struct procfs_entry_s);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -133,16 +112,6 @@ struct procfs_level1_s
 /* Helpers */
 
 static void    procfs_enum(FAR struct tcb_s *tcb, FAR void *arg);
-static int     procfs_findattr(FAR const char *attr);
-static size_t  procfs_addline(FAR struct procfs_file_s *attr,
-                 FAR char *buffer, size_t buflen, size_t linesize,
-                 off_t *offset);
-static ssize_t procfs_status(FAR struct procfs_file_s *attr,
-                 FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
-                 off_t offset);
-static ssize_t procfs_cmdline(FAR struct procfs_file_s *attr,
-                 FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
-                 off_t offset);
 
 /* File system methods */
 
@@ -216,44 +185,51 @@ const struct mountpt_operations procfs_operations =
   procfs_stat        /* stat */
 };
 
-/* This is the list of all attribute strings.  Indexing is with the same
- * values as enum procfs_attr_e.
+/* Level 0 contains the directory of active tasks in addition to other
+ * statically registered entries with custom handlers.  This strcture
+ * contains a snapshot of the active tasks when the directory is first
+ * opened.
  */
 
-static const char *g_attrstrings[PROCFS_NATTRS] =
+struct procfs_level0_s
 {
-  "status",
-  "cmdline"
+  uint8_t level;                     /* Directory level.  Currently 0 or 1 */
+  uint8_t lastlen;                   /* length of last reported static dir */
+  uint16_t index;                    /* Index to the next directory entry */
+  uint16_t nentries;                 /* Number of directory entries */
+  pid_t pid[CONFIG_MAX_TASKS];       /* Snapshot of all active task IDs */
+  FAR const char *lastread;          /* Pointer to last static dir read */
+
+ /* Pointer to procfs handler entry */
+
+  FAR const struct procfs_entry_s *procfsentry;
 };
 
-static const char *g_statenames[] =
-{
-  "Invalid",
-  "Pending unlock",
-  "Ready",
-  "Running",
-  "Inactive",
-  "Semaphore wait",
-#ifndef CONFIG_DISABLE_MQUEUE
-  "Signal wait",
-#endif
-#ifndef CONFIG_DISABLE_MQUEUE
-  "MQ not empty wait",
-  "MQ no full wait"
-#endif
-};
+/* Level 1 is an internal virtual directory (such as /proc/fs) which
+ * will contain one or more additional static entries based on the
+ * configuration.
+ */
 
-static const char *g_ttypenames[4] =
+struct procfs_level1_s
 {
-  "Task",
-  "pthread",
-  "Kernel thread",
-  "--?--"
+  uint8_t level;                     /* Directory level.  Currently 0 or 1 */
+  uint8_t lastlen;                   /* length of last reported static dir */
+  uint8_t subdirlen;                 /* Length of the subdir search */
+  uint16_t index;                    /* Index to the next directory entry */
+  uint16_t nentries;                 /* Number of directory entries */
+  uint16_t firstindex;               /* Index of 1st entry matching this subdir */
+  FAR const char *lastread;          /* Pointer to last static dir read */
+
+  /* Pointer to procfs handler entry */
+
+  FAR const struct procfs_entry_s *procfsentry;
 };
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
 
 /****************************************************************************
  * Name: procfs_enum
@@ -274,263 +250,7 @@ static void procfs_enum(FAR struct tcb_s *tcb, FAR void *arg)
   dir->pid[index] = tcb->pid;
   dir->nentries = index + 1;
 }
-
-/****************************************************************************
- * Name: procfs_findattr
- ****************************************************************************/
-
-static int procfs_findattr(FAR const char *attr)
-{
-  int i;
-
-  /* Search every string in g_attrstrings or until a match is found */
-
-  for (i = 0; i < PROCFS_NATTRS; i++)
-    {
-      if (strcmp(g_attrstrings[i], attr) == 0)
-        {
-          return i;
-        }
-    }
-
-  /* Not found */
-
-  return -ENOENT;
-}
-
-/****************************************************************************
- * Name: procfs_addline
- ****************************************************************************/
-
-static size_t procfs_addline(FAR struct procfs_file_s *attr,
-                             FAR char *buffer, size_t buflen,
-                             size_t linesize, off_t *offset)
-{
-  size_t copysize;
-  size_t lnoffset;
-
-  /* Will this line take us past the offset? */
-
-  lnoffset = *offset;
-  if (linesize < lnoffset)
-    {
-      /* No... decrement the offset and return without doing anything */
-
-      *offset -= linesize;
-      return 0;
-    }
-
-  /* Handle the remaining offset */
-
-  linesize -= lnoffset;
-  buffer   += lnoffset;
-  *offset   = 0;
-
-  /* Copy the line into the user buffer */
-
-  copysize = MIN(linesize, buflen);
-  memcpy(buffer, &attr->line[lnoffset], copysize);
-  return copysize;
-}
-
-/****************************************************************************
- * Name: procfs_status
- ****************************************************************************/
-
-static ssize_t procfs_status(FAR struct procfs_file_s *attr,
-                             FAR struct tcb_s *tcb, FAR char *buffer,
-                             size_t buflen, off_t offset)
-{
-  FAR const char *name;
-  size_t remaining;
-  size_t linesize;
-  size_t copysize;
-  size_t totalsize;
-
-  remaining = buflen;
-  totalsize = 0;
-
-  /* Show the task name */
-
-#if CONFIG_TASK_NAME_SIZE > 0
-  name       = tcb->name;
-#else
-  name       = "<noname>";
-#endif 
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%s\n",
-                        "Name:", name);
-  copysize   = procfs_addline(attr, buffer, remaining, linesize, &offset);
-
-  totalsize += copysize;
-  buffer    += copysize;
-  remaining -= copysize;
-
-  if (totalsize >= buflen)
-    {
-      return totalsize;
-    }
-
-  /* Show the thread type */
-
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%s\n", "Type:",
-                        g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK) >>
-                        TCB_FLAG_TTYPE_SHIFT]);
-  copysize   = procfs_addline(attr, buffer, remaining, linesize, &offset);
-
-  totalsize += copysize;
-  buffer    += copysize;
-  remaining -= copysize;
-
-  if (totalsize >= buflen)
-    {
-      return totalsize;
-    }
-
-  /* Show the thread state */
-
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%s\n", "State:",
-                        g_statenames[tcb->task_state]);
-  copysize   = procfs_addline(attr, buffer, remaining, linesize, &offset);
-
-  totalsize += copysize;
-  buffer    += copysize;
-  remaining -= copysize;
-
-  if (totalsize >= buflen)
-    {
-      return totalsize;
-    }
-
-  /* Show the thread priority */
-
-#ifdef CONFIG_PRIORITY_INHERITANCE
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%d (%d)\n", "Priority:",
-                        tcb->sched_priority, tcb->base_priority);
-#else
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%d\n", "Priority:",
-                        tcb->sched_priority);
 #endif
-  copysize   = procfs_addline(attr, buffer, remaining, linesize, &offset);
-
-  totalsize += copysize;
-  buffer    += copysize;
-  remaining -= copysize;
-
-  if (totalsize >= buflen)
-    {
-      return totalsize;
-    }
-
-  /* Show the scheduler */
-
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%s\n", "Scheduler:",
-                        tcb->flags & TCB_FLAG_ROUND_ROBIN ? "SCHED_RR" : "SCHED_FIFO");
-  copysize   = procfs_addline(attr, buffer, remaining, linesize, &offset);
-
-  totalsize += copysize;
-  buffer    += copysize;
-  remaining -= copysize;
-
-  if (totalsize >= buflen)
-    {
-      return totalsize;
-    }
-
-  /* Show the signal mast */
-
-#ifndef CONFIG_DISABLE_SIGNALS
-  linesize = snprintf(attr->line, STATUS_LINELEN, "%-12s%08x\n", "SigMask:",
-                      tcb->sigprocmask);
-  copysize = procfs_addline(attr, buffer, remaining, linesize, &offset);
-
-  totalsize += copysize;
-#endif
-
-  return totalsize;
-}
-
-/****************************************************************************
- * Name: procfs_cmdline
- ****************************************************************************/
-
-static ssize_t procfs_cmdline(FAR struct procfs_file_s *attr,
-                             FAR struct tcb_s *tcb, FAR char *buffer,
-                             size_t buflen, off_t offset)
-{
-  FAR struct task_tcb_s *ttcb;
-  FAR const char *name;
-  FAR char **argv;
-  size_t remaining;
-  size_t linesize;
-  size_t copysize;
-  size_t totalsize;
-
-  remaining = buflen;
-  totalsize = 0;
-
-  /* Show the task name */
-
-#if CONFIG_TASK_NAME_SIZE > 0
-  name       = tcb->name;
-#else
-  name       = "<noname>";
-#endif 
-  linesize   = strlen(name);
-  memcpy(attr->line, name, linesize);
-  copysize   = procfs_addline(attr, buffer, remaining, linesize, &offset);
-
-  totalsize += copysize;
-  buffer    += copysize;
-  remaining -= copysize;
-
-  if (totalsize >= buflen)
-    {
-      return totalsize;
-    }
-
-#ifndef CONFIG_DISABLE_PTHREAD
-  /* Show the pthread argument */
-
-  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
-    {
-      FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)tcb;
-
-      linesize   = snprintf(attr->line, STATUS_LINELEN, " 0x%p\n", ptcb->arg);
-      copysize   = procfs_addline(attr, buffer, remaining, linesize, &offset);
-
-      totalsize += copysize;
-      buffer    += copysize;
-      remaining -= copysize;
-
-      return totalsize;
-    }
-#endif
-
-  /* Show the task argument list (skipping over the name) */
-
-  ttcb = (FAR struct task_tcb_s *)tcb;
-
-  for (argv = ttcb->argv + 1; *argv; argv++)
-    {
-      linesize   = snprintf(attr->line, STATUS_LINELEN, " %s", *argv);
-      copysize   = procfs_addline(attr, buffer, remaining, linesize, &offset);
-
-      totalsize += copysize;
-      buffer    += copysize;
-      remaining -= copysize;
-
-      if (totalsize >= buflen)
-        {
-          return totalsize;
-        }
-    }
-
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "\n");
-  copysize   = procfs_addline(attr, buffer, remaining, linesize, &offset);
-
-  totalsize += copysize;
-  return totalsize;
-}
 
 /****************************************************************************
  * Name: procfs_open
@@ -539,96 +259,36 @@ static ssize_t procfs_cmdline(FAR struct procfs_file_s *attr,
 static int procfs_open(FAR struct file *filep, FAR const char *relpath,
                       int oflags, mode_t mode)
 {
-  FAR struct procfs_file_s *attr;
-  FAR struct tcb_s *tcb;
-  FAR char *ptr;
-  irqstate_t flags;
-  unsigned long tmp;
-  pid_t pid;
-  int attrndx;
+  int x, ret = -ENOENT;
 
   fvdbg("Open '%s'\n", relpath);
 
-  /* PROCFS is read-only.  Any attempt to open with any kind of write
-   * access is not permitted.
-   *
-   * REVISIT:  Write-able proc files could be quite useful.
-   */
+  /* Perform the stat based on the procfs_entry operations */
 
-  if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
+  for (x = 0; x < g_procfsentrycount; x++)
     {
-      fdbg("ERROR: Only O_RDONLY supported\n");
-      return -EACCES;
+      /* Test if the path matches this entry's specification */
+
+      if (match(g_procfsentries[x].pathpattern, relpath))
+        {
+          /* Match found!  Stat using this procfs entry */
+
+          DEBUGASSERT(g_procfsentries[x].ops &&
+              g_procfsentries[x].ops->open);
+
+          ret = g_procfsentries[x].ops->open(filep, relpath, oflags, mode);
+
+          if (ret == OK)
+            {
+              DEBUGASSERT(filep->f_priv);
+
+              ((struct procfs_file_s *) filep->f_priv)->procfsentry =
+                                    &g_procfsentries[x];
+            }
+        }
     }
 
-  /* The first segment of the relative path should be a task/thread ID */
-
-  ptr = NULL;
-  tmp = strtoul(relpath, &ptr, 10);
-
-  if (!ptr || *ptr != '/')
-    {
-      fdbg("ERROR: Invalid path \"%s\"\n", relpath);
-      return -ENOENT;
-    }
-
-  /* Skip over the slash */
-
-  ptr++;
-
-  /* A valid PID would be in the range of 0-32767 (0 is reserved for the
-   * IDLE thread).
-   */
-
-  if (tmp >= 32768)
-    {
-      fdbg("ERROR: Invalid PID %ld\n", tmp);
-      return -ENOENT;
-    }
-
-  /* Now verify that a task with this task/thread ID exists */
-
-  pid = (pid_t)tmp;
-
-  flags = irqsave();
-  tcb = sched_gettcb(pid);
-  irqrestore(flags);
-
-  if (!tcb)
-    {
-      fdbg("ERROR: PID %d is no longer valid\n", (int)pid);
-      return -ENOENT;
-    }
-
-  /* The second segment of the relpath should be a well known attribute of
-   * the task/thread.
-   */
-
-  attrndx = procfs_findattr(ptr);
-  if (attrndx < 0)
-    {
-      fdbg("ERROR: Invalid attribute %s\n", ptr);
-      return -ENOENT;
-    }
-
-  /* Allocate a container to hold the task and attribute selection */
-
-  attr = (FAR struct procfs_file_s *)kzalloc(sizeof(struct procfs_file_s));
-  if (!attr)
-    {
-      fdbg("ERROR: Failed to allocate file attributes\n");
-      return -ENOMEM;
-    }
-
-  /* Initialize the file attributes */
-
-  attr->pid  = pid;
-  attr->attr = attrndx;
-
-  /* Save the index as the open-specific state in filep->f_priv */
-
-  filep->f_priv = (FAR void *)attr;
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -658,52 +318,19 @@ static int procfs_close(FAR struct file *filep)
 static ssize_t procfs_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen)
 {
-  FAR struct procfs_file_s *attr;
-  FAR struct tcb_s *tcb;
-  irqstate_t flags;
-  ssize_t ret;
+  FAR struct procfs_file_s *handler;
+  ssize_t ret = 0;
 
   fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
   /* Recover our private data from the struct file instance */
 
-  attr = (FAR struct procfs_file_s *)filep->f_priv;
-  DEBUGASSERT(attr);
+  handler = (FAR struct procfs_file_s *)filep->f_priv;
+  DEBUGASSERT(handler);
 
-  /* Verify that the thread is still valid */
+  /* Call the handler's read routine */
 
-  flags = irqsave();
-  tcb = sched_gettcb(attr->pid);
-
-  if (!tcb)
-    {
-      fdbg("ERROR: PID %d is not valid\n", (int)attr->pid);
-      irqrestore(flags);
-      return -ENODEV;
-    }
-
-  /* Provide the requested data */
-
-  switch (attr->attr)
-    {
-    default:
-    case PROCFS_STATUS:  /* Task/thread status */
-      ret = procfs_status(attr, tcb, buffer, buflen, filep->f_pos);
-      break;
- 
-    case PROCFS_CMDLINE: /* Command line */
-      ret = procfs_cmdline(attr, tcb, buffer, buflen, filep->f_pos);
-      break;
-    }
-
-  irqrestore(flags);
-
-  /* Update the file offset */
-
-  if (ret > 0)
-    {
-      filep->f_pos += ret;
-    }
+  ret = handler->procfsentry->ops->read(filep, buffer, buflen);
 
   return ret;
 }
@@ -732,7 +359,6 @@ static int procfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
   FAR struct procfs_file_s *oldattr;
-  FAR struct procfs_file_s *newattr;
 
   fvdbg("Dup %p->%p\n", oldp, newp);
 
@@ -741,23 +367,9 @@ static int procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   oldattr = (FAR struct procfs_file_s *)oldp->f_priv;
   DEBUGASSERT(oldattr);
 
-  /* Allocate a new container to hold the task and attribute selection */
+  /* Allow lower-level handler do the dup to get it's extra data */
 
-  newattr = (FAR struct procfs_file_s *)kzalloc(sizeof(struct procfs_file_s));
-  if (!newattr)
-    {
-      fdbg("ERROR: Failed to allocate file attributes\n");
-      return -ENOMEM;
-    }
-
-  /* The copy the file attribtes from the old attributes to the new */
-
-  memcpy(newattr, oldattr, sizeof(struct procfs_file_s));
-
-  /* Save the new attributes in the new file structure */
-
-  newp->f_priv = (FAR void *)newattr;
-  return OK;
+  return oldattr->procfsentry->ops->dup(oldp, newp);
 }
 
 /****************************************************************************
@@ -771,7 +383,7 @@ static int procfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                           FAR struct fs_dirent_s *dir)
 {
-  FAR struct tcb_s *tcb;
+  FAR struct procfs_level0_s *level0;
   FAR void *priv = NULL;
   irqstate_t flags;
 
@@ -786,8 +398,6 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   if (!relpath || relpath[0] == '\0')
     {
-      FAR struct procfs_level0_s *level0;
-
       /* The path refers to the top level directory.  Allocate the level0
        * dirent structure.
        */
@@ -808,84 +418,87 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
        * NOTE that interrupts must be disabled throughout the traversal.
        */
 
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
       flags = irqsave();
       sched_foreach(procfs_enum, level0);
       irqrestore(flags);
+#else
+      level0->index = 0;
+      level0->nentries = 0;
+#endif
+
+      /* Initialze lastread entries */
+
+      level0->lastread = "";
+      level0->lastlen = 0;
+      level0->procfsentry = NULL;
 
       priv = (FAR void *)level0;
     }
   else
     {
-      FAR struct procfs_level1_s *level1;
-      unsigned long tmp;
-      FAR char *ptr;
-      pid_t pid;
+      int x, ret;
+      int len = strlen(relpath);
 
-      /* Otherwise, the relative path should be a valid task/thread ID */
+      /* Search the static array of procfs_entries */
 
-      ptr = NULL;
-      tmp = strtoul(relpath, &ptr, 10);
-
-      if (!ptr || (*ptr != '\0' && strcmp(ptr, "/") != 0))
+      for (x = 0; x < g_procfsentrycount; x++)
         {
-          /* strtoul failed or there is something in the path after the pid */
+          /* Test if the path matches this entry's specification */
 
-          fdbg("ERROR: Invalid path \"%s\"\n", relpath);
-          return -ENOENT;
-       }
+          if (match(g_procfsentries[x].pathpattern, relpath))
+            {
+              /* Match found!  Call the handler's opendir routine */
 
-      /* A valid PID would be in the range of 0-32767 (0 is reserved for the
-       * IDLE thread).
-       */
+              DEBUGASSERT(g_procfsentries[x].ops && g_procfsentries[x].ops->opendir);
+              ret = g_procfsentries[x].ops->opendir(relpath, dir);
 
-      if (tmp >= 32768)
-        {
-          fdbg("ERROR: Invalid PID %ld\n", tmp);
-          return -ENOENT;
+              if (ret == OK)
+                {
+                  DEBUGASSERT(dir->u.procfs);
+
+                  /* Set the procfs_entry handler */
+
+                  level0 = (FAR struct procfs_level0_s *) dir->u.procfs;
+                  level0->procfsentry = &g_procfsentries[x];
+                }
+
+              return ret;
+            }
+
+            /* Test for a sub-string match (e.g. "ls /proc/fs") */
+
+          else if (strncmp(g_procfsentries[x].pathpattern, relpath, len) == 0)
+            {
+              FAR struct procfs_level1_s *level1;
+
+              /* Doing an intermediate directory search */
+
+              /* The path refers to the top level directory.  Allocate the level0
+               * dirent structure.
+               */
+
+              level1 = (FAR struct procfs_level1_s *)
+                 kzalloc(sizeof(struct procfs_level1_s));
+
+              if (!level1)
+                {
+                  fdbg("ERROR: Failed to allocate the level0 directory structure\n");
+                  return -ENOMEM;
+                }
+
+              level1->level = 1;
+              level1->index = x;
+              level1->firstindex = x;
+              level1->subdirlen = len;
+              level1->lastread = "";
+              level1->lastlen = 0;
+              level1->procfsentry = NULL;
+
+              priv = (FAR void *)level1;
+              break;
+            }
         }
-
-      /* Now verify that a task with this task/thread ID exists */
-
-      pid = (pid_t)tmp;
-
-      flags = irqsave();
-      tcb = sched_gettcb(pid);
-      irqrestore(flags);
-
-      if (!tcb)
-        {
-          fdbg("ERROR: PID %d is not valid\n", (int)pid);
-          return -ENOENT;
-        }
-
-      /* Was the <pid> the final element of the path? */
-
-      if (*ptr != '\0' && strcmp(ptr, "/") != 0)
-        {
-          /* There is something in the path after the pid */
-
-          fdbg("ERROR: Invalid path \"%s\"\n", relpath);
-          return -ENOENT;
-        }
-
-      /* The path refers to the 1st level sbdirectory.  Allocate the level1
-       * dirent structure.
-       */
-
-      level1 = (FAR struct procfs_level1_s *)
-         kzalloc(sizeof(struct procfs_level1_s));
-
-      if (!level1)
-        {
-          fdbg("ERROR: Failed to allocate the level1 directory structure\n");
-          return -ENOMEM;
-        }
-
-      level1->level    = 1;
-      level1->nentries = PROCFS_NATTRS;
-      level1->pid      = pid;
-
-      priv = (FAR void *)level1;
     }
 
   dir->u.procfs = priv;
@@ -902,7 +515,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 static int procfs_closedir(FAR struct inode *mountpt,
                            FAR struct fs_dirent_s *dir)
 {
-  FAR struct procfs_level_s *priv;
+  FAR struct procfs_dir_priv_s *priv;
 
   DEBUGASSERT(mountpt && dir && dir->u.procfs);
   priv = dir->u.procfs;
@@ -925,95 +538,204 @@ static int procfs_closedir(FAR struct inode *mountpt,
 
 static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 {
-  FAR struct procfs_level_s *priv;
+  FAR struct procfs_dir_priv_s *priv;
+  FAR struct procfs_level0_s *level0;
   FAR struct tcb_s *tcb;
+  FAR const char *name;
   unsigned int index;
   irqstate_t flags;
   pid_t pid;
-  int ret;
+  int ret = -ENOENT;
 
   DEBUGASSERT(mountpt && dir && dir->u.procfs);
   priv = dir->u.procfs;
 
-  /* Have we reached the end of the directory */
+  /* Are we reading the 1st directory level with dynamic PID and static
+   * entries?
+   */
 
-  index = priv->index;
-  if (index >= priv->nentries)
+  if (priv->level == 0)
     {
-      /* We signal the end of the directory by returning the special
-       * error -ENOENT
-       */
+      level0 = (FAR struct procfs_level0_s *)priv;
 
-      fvdbg("Entry %d: End of directory\n", index);
-      ret = -ENOENT;
-    }
+      /* Have we reached the end of the PID information */
 
-  /* Are tranversing a first level directory of task IDs */
-
-  else if (priv->level == 0)
-    {
-      FAR struct procfs_level0_s *level0 = (FAR struct procfs_level0_s *)priv;
-
-      /* Verify that the pid still refers to an active task/thread */
-
-      pid = level0->pid[index];
-
-      flags = irqsave();
-      tcb = sched_gettcb(pid);
-      irqrestore(flags);
-
-      if (!tcb)
+      index = priv->index;
+      if (index >= priv->nentries)
         {
-          fdbg("ERROR: PID %d is no longer valid\n", (int)pid);
-          return -ENOENT;
+          /* We must report the next static entry ... no more PID entries.
+           * skip any entries with wildcards in the first segment of the
+           * directory name.
+           */
+
+          while (index < priv->nentries + g_procfsentrycount)
+            {
+              name = g_procfsentries[index - priv->nentries].pathpattern;
+              while (*name != '/' && *name != '\0')
+                {
+                  if (*name == '*' || *name == '[' || *name == '?')
+                    {
+                      /* Wildcard found.  Skip this entry */
+
+                      index++;
+                      name = NULL;
+                      break;
+                    }
+
+                  name++;
+                }
+
+              /* Test if we skipped this entry */
+
+              if (name != NULL)
+              {
+                /* This entry is okay to report. Test if it has a duplicate
+                 * first level name as the one we just reported.  This could
+                 * happen in the event of procfs_entry_s such as:
+                 *
+                 *    fs/smartfs
+                 *    fs/nfs
+                 *    fs/nxffs
+                 */
+
+                name = g_procfsentries[index - priv->nentries].pathpattern;
+                if (!level0->lastlen || (strncmp(name, level0->lastread,
+                      level0->lastlen) != 0))
+                  {
+                    /* Not a duplicate, return the first segment of this
+                     * entry
+                     */
+
+                    break;
+                  }
+                else
+                  {
+                    /* Skip this entry ... duplicate 1st level name found */
+
+                    index++;
+                  }
+              }
+            }
+
+          /* Test if we are at the end of the directory */
+
+          if (index >= priv->nentries + g_procfsentrycount)
+            {
+              /* We signal the end of the directory by returning the special
+               * error -ENOENT
+               */
+
+              fvdbg("Entry %d: End of directory\n", index);
+              ret = -ENOENT;
+            }
+          else
+            {
+              /* Report the next static entry */
+
+              level0->lastlen = strcspn(name, "/");
+              level0->lastread = name;
+              strncpy(dir->fd_dir.d_name, name, level0->lastlen);
+              dir->fd_dir.d_name[level0->lastlen] = '\0';
+
+              if (name[level0->lastlen] == '/')
+                {
+                  dir->fd_dir.d_type = DTYPE_DIRECTORY;
+                }
+              else
+                {
+                  dir->fd_dir.d_type = DTYPE_FILE;
+                }
+
+              /* Advance to next entry for the next read */
+
+              priv->index = index;
+              ret = OK;
+            }
         }
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
+      else
+        {
+          /* Verify that the pid still refers to an active task/thread */
 
-      /* Save the filename=pid and file type=directory */
+          pid = level0->pid[index];
 
-      dir->fd_dir.d_type = DTYPE_DIRECTORY;
-      snprintf(dir->fd_dir.d_name, NAME_MAX+1, "%d", (int)pid);
+          flags = irqsave();
+          tcb = sched_gettcb(pid);
+          irqrestore(flags);
 
-      /* Set up the next directory entry offset.  NOTE that we could use the
-       * standard f_pos instead of our own private index.
-       */
+          if (!tcb)
+            {
+              fdbg("ERROR: PID %d is no longer valid\n", (int)pid);
+              return -ENOENT;
+            }
 
-      level0->index = index + 1;
-      ret = OK;
+          /* Save the filename=pid and file type=directory */
+
+          dir->fd_dir.d_type = DTYPE_DIRECTORY;
+          snprintf(dir->fd_dir.d_name, NAME_MAX+1, "%d", (int)pid);
+
+          /* Set up the next directory entry offset.  NOTE that we could use the
+           * standard f_pos instead of our own private index.
+           */
+
+          level0->index = index + 1;
+          ret = OK;
+        }
+#endif /* CONFIG_FS_PROCFS_EXCLUDE_PROCESS */
     }
 
-  /* No.. We must be tranversing a subdirectory of task attributes */
+    /* Are we reading in intermediate subdirectory? */
 
+  else if (priv->level == 1 && priv->procfsentry == NULL)
+    {
+      FAR struct procfs_level1_s *level1;
+
+      level1 = (FAR struct procfs_level1_s *) priv;
+
+      /* Test if this entry matches.  We assume all entries of the same
+       * subdirectory are listed in order in the procfs_entry array.
+       */
+
+      if (strncmp(g_procfsentries[level1->index].pathpattern,
+              g_procfsentries[level1->firstindex].pathpattern,
+              level1->subdirlen) == 0)
+        {
+          /* This entry matches.  Report the subdir entry */
+
+          name = &g_procfsentries[level1->index].pathpattern[
+                    level1->subdirlen + 1];
+          level1->lastlen = strcspn(name, "/");
+          level1->lastread = name;
+          strncpy(dir->fd_dir.d_name, name, level1->lastlen);
+          dir->fd_dir.d_name[level1->lastlen] = '\0';
+
+          if (name[level1->lastlen] == '/')
+            {
+              dir->fd_dir.d_type = DTYPE_DIRECTORY;
+            }
+          else
+            {
+              dir->fd_dir.d_type = DTYPE_FILE;
+            }
+
+          level1->index++;
+          ret = OK;
+        }
+      else
+        {
+          /* No more entries in the subdirectory */
+
+          ret = -ENOENT;
+        }
+    }
   else
     {
-      FAR struct procfs_level1_s *level1 = (FAR struct procfs_level1_s *)priv;
-
-      DEBUGASSERT(priv->level == 1);
-
-      /* Verify that the pid still refers to an active task/thread */
-
-      pid = level1->pid;
-
-      flags = irqsave();
-      tcb = sched_gettcb(pid);
-      irqrestore(flags);
-
-      if (!tcb)
-        {
-          fdbg("ERROR: PID %d is no longer valid\n", (int)pid);
-          return -ENOENT;
-        }
-
-      /* Save the filename=pid and file type=directory */
-
-      dir->fd_dir.d_type = DTYPE_FILE;
-      strncpy(dir->fd_dir.d_name, g_attrstrings[index], NAME_MAX+1);
-
-      /* Set up the next directory entry offset.  NOTE that we could use the
-       * standard f_pos instead of our own private index.
+      /* We are performing a directory search of one of the subdirectories
+       * and we must let the handler perform the read.
        */
 
-      level1->index = index + 1;
-      ret = OK;
+      DEBUGASSERT(priv->procfsentry && priv->procfsentry->ops->readdir);
+      ret = priv->procfsentry->ops->readdir(dir);
     }
 
   return ret;
@@ -1028,12 +750,20 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
 static int procfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
 {
-  FAR struct procfs_level_s *priv;
+  FAR struct procfs_dir_priv_s *priv;
 
   DEBUGASSERT(mountpt && dir && dir->u.procfs);
   priv = dir->u.procfs;
 
-  priv->index = 0;
+  if (priv->level == 1 && priv->procfsentry == NULL)
+    {
+      priv->index = ((struct procfs_level1_s *) priv)->firstindex;
+    }
+  else
+    {
+      priv->index = 0;
+    }
+
   return OK;
 }
 
@@ -1098,12 +828,7 @@ static int procfs_statfs(struct inode *mountpt, struct statfs *buf)
 static int procfs_stat(struct inode *mountpt, const char *relpath,
                        struct stat *buf)
 {
-  FAR struct tcb_s *tcb;
-  unsigned long tmp;
-  FAR char *ptr;
-  irqstate_t flags;
-  pid_t pid;
-  int ret;
+  int ret = -ENOSYS;
 
   /* Three path forms are accepted:
    *
@@ -1120,71 +845,39 @@ static int procfs_stat(struct inode *mountpt, const char *relpath,
       /* It's a read-only directory */
 
       buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
-
+      ret = OK;
     }
   else
     {
-      /* Otherwise, the first segment of the relative path should be a valid
-       * task/thread ID
-       */
+      int x;
+      int len = strlen(relpath);
 
-      ptr = NULL;
-      tmp = strtoul(relpath, &ptr, 10);
+      /* Perform the stat based on the procfs_entry operations */
 
-      if (!ptr)
+      for (x = 0; x < g_procfsentrycount; x++)
         {
-          fdbg("ERROR: Invalid path \"%s\"\n", relpath);
-          return -ENOENT;
-       }
+          /* Test if the path matches this entry's specification */
 
-      /* A valid PID would be in the range of 0-32767 (0 is reserved for the
-       * IDLE thread).
-       */
-
-      if (tmp >= 32768)
-        {
-          fdbg("ERROR: Invalid PID %ld\n", tmp);
-          return -ENOENT;
-        }
-
-      /* Now verify that a task with this task/thread ID exists */
-
-      pid = (pid_t)tmp;
-
-      flags = irqsave();
-      tcb = sched_gettcb(pid);
-      irqrestore(flags);
-
-      if (!tcb)
-        {
-          fdbg("ERROR: PID %d is no longer valid\n", (int)pid);
-          return -ENOENT;
-        }
-
-      /* Was the <pid> the final element of the path? */
-
-      if (*ptr == '\0' || strcmp(ptr, "/") == 0)
-        {
-          /* Yes ... It's a read-only directory */
-
-          buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
-        }
-      else
-        {
-          /* Otherwise, the second segment of the relpath should be a well
-           * known attribute of the task/thread.
-           */
-
-          ret = procfs_findattr(ptr);
-          if (ret < 0)
+          if (match(g_procfsentries[x].pathpattern, relpath))
             {
-              fdbg("ERROR: Invalid attribute %s\n", ptr);
-              return -ENOENT;
+              /* Match found!  Stat using this procfs entry */
+
+              DEBUGASSERT(g_procfsentries[x].ops &&
+                  g_procfsentries[x].ops->stat);
+
+              return g_procfsentries[x].ops->stat(relpath, buf);
             }
 
-          /* It's a read-only file name */
+          /* Test for an internal subdirectory stat */
 
-          buf->st_mode = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
+          else if (strncmp(g_procfsentries[x].pathpattern, relpath, len) == 0)
+            {
+              /* It's an internal subdirectory */
+
+              buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+              ret = OK;
+              break;
+            }
         }
     }
 
@@ -1193,7 +886,7 @@ static int procfs_stat(struct inode *mountpt, const char *relpath,
   buf->st_size    = 0;
   buf->st_blksize = 0;
   buf->st_blocks  = 0;
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
