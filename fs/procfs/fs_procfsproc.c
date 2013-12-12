@@ -708,7 +708,6 @@ static int process_dup(FAR const struct file *oldp, FAR struct file *newp)
 static int process_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 {
   FAR struct tcb_s *tcb;
-  FAR void *priv = NULL;
   irqstate_t flags;
 
   fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
@@ -784,14 +783,15 @@ static int process_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
       return -ENOMEM;
     }
 
-  level1->base.level    = 1;
-  level1->base.nentries = PROCFS_NATTRS;
-  level1->base.index    = 0;
-  level1->pid           = pid;
+  /* Note that the index and procentry pointer were implicitly nullified
+   * by kzalloc().  Only the remaining, non-zero entries need be initialized.
+   */
 
-  priv = (FAR void *)level1;
+  level1->base.level       = 1;
+  level1->base.nentries    = PROCFS_NATTRS;
+  level1->pid              = pid;
 
-  dir->u.procfs = priv;
+  dir->u.procfs = (FAR void *)level1;
   return OK;
 }
 
@@ -969,11 +969,27 @@ static int process_stat(const char *relpath, struct stat *buf)
 
       buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
     }
+
+  /* Verify that the process ID is followed by valid path segment delimiter */
+
+  else if (*ptr != '/')
+    {
+      /* We are required to return -ENOENT all all invalid paths */
+
+      fdbg("ERROR: Bad delimiter '%c' in relpath '%s'\n", *ptr, relpath);
+      return -ENOENT;
+    }
   else
     {
       /* Otherwise, the second segment of the relpath should be a well
        * known attribute of the task/thread.
        */
+
+      /* Skip over the path segment delimiter */
+
+      ptr++;
+
+      /* Lookup the well-known attribute string. */
 
       ret = process_findattr(ptr);
       if (ret < 0)
@@ -982,7 +998,7 @@ static int process_stat(const char *relpath, struct stat *buf)
           return -ENOENT;
         }
 
-      /* It's a read-only file name */
+      /* If the attribute exists, it is the name for a read-only file. */
 
       buf->st_mode = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
     }

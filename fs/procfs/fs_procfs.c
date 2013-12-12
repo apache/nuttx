@@ -384,6 +384,7 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                           FAR struct fs_dirent_s *dir)
 {
   FAR struct procfs_level0_s *level0;
+  FAR struct procfs_dir_priv_s *dirpriv;
   FAR void *priv = NULL;
   irqstate_t flags;
 
@@ -448,7 +449,10 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
           if (match(g_procfsentries[x].pathpattern, relpath))
             {
-              /* Match found!  Call the handler's opendir routine */
+              /* Match found!  Call the handler's opendir routine.  If successful,
+               * this opendir routine will create an entry derived from struct
+               * procfs_dir_priv_s as dir->u.procfs.
+               */
 
               DEBUGASSERT(g_procfsentries[x].ops && g_procfsentries[x].ops->opendir);
               ret = g_procfsentries[x].ops->opendir(relpath, dir);
@@ -459,8 +463,8 @@ static int procfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
                   /* Set the procfs_entry handler */
 
-                  level0 = (FAR struct procfs_level0_s *) dir->u.procfs;
-                  level0->procfsentry = &g_procfsentries[x];
+                  dirpriv = (FAR struct procfs_dir_priv_s *)dir->u.procfs;
+                  dirpriv->procfsentry = &g_procfsentries[x];
                 }
 
               return ret;
@@ -684,7 +688,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 #endif /* CONFIG_FS_PROCFS_EXCLUDE_PROCESS */
     }
 
-    /* Are we reading in intermediate subdirectory? */
+    /* Are we reading an intermediate subdirectory? */
 
   else if (priv->level == 1 && priv->procfsentry == NULL)
     {

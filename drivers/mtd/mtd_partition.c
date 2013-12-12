@@ -540,10 +540,12 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
                                 size_t buflen)
 {
   FAR struct part_procfs_file_s *attr;
-  ssize_t ret, total = 0, blkpererase;
   FAR struct mtd_geometry_s geo;
+  ssize_t total = 0;
+  ssize_t blkpererase;
+  ssize_t ret;
 #ifdef CONFIG_MTD_PARTITION_NAMES
-  char    partname[11];
+  char partname[11];
   FAR const char *ptr;
   uint8_t x;
 #endif
@@ -555,113 +557,127 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
   attr = (FAR struct part_procfs_file_s *)filep->f_priv;
   DEBUGASSERT(attr);
 
-  /* Provide the requested data */
+  /* If we are at the end of the list, then return 0 signifying the
+   * end-of-file.  This also handles the special case when there are
+   * no registered MTD partitions.
+   */
 
-  if (attr->nextpart == g_pfirstpartition)
+  if (attr->nextpart)
     {
+      /* Output a header before the first entry */
+
+      if (attr->nextpart == g_pfirstpartition)
+        {
 #ifdef CONFIG_MTD_PARTITION_NAMES
-      total = snprintf(buffer, buflen, "Name        Start    Size");
+          total = snprintf(buffer, buflen, "Name        Start    Size");
 #else
-      total = snprintf(buffer, buflen, "  Start    Size");
+          total = snprintf(buffer, buflen, "  Start    Size");
 #endif
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MTD
-      total += snprintf(&buffer[total], buflen - total, "   MTD\n");
+          total += snprintf(&buffer[total], buflen - total, "   MTD\n");
 #else
-      total += snprintf(&buffer[total], buflen - total, "\n");
+          total += snprintf(&buffer[total], buflen - total, "\n");
 #endif
+        }
+
+      /* Provide the requested data */
+
+      do
+        {
+          /* Get the geometry of the FLASH device */
+
+          ret = attr->nextpart->parent->ioctl(attr->nextpart->parent,
+                  MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
+          if (ret < 0)
+            {
+              fdbg("ERROR: mtd->ioctl failed: %d\n", ret);
+              return 0;
+            }
+
+          /* Get the number of blocks per erase.  There must be an even number
+           * of blocks in one erase blocks.
+           */
+
+          blkpererase = geo.erasesize / geo.blocksize;
+
+          /* Copy data from the next known partition */
+
+#ifdef CONFIG_MTD_PARTITION_NAMES
+          if (attr->nextpart->name == NULL)
+            {
+              strcpy(partname, "(noname)  ");
+            }
+          else
+            {
+              ptr = attr->nextpart->name;
+              for (x = 0; x < sizeof(partname) - 1; x++)
+                {
+                  /* Test for end of partition name */
+
+                  if (*ptr == ',' || *ptr == '\0')
+                    {
+                      /* Perform space fill for alignment */
+
+                      partname[x] = ' ';
+                    }
+                  else
+                    {
+                      /* Copy next byte of partition name */
+
+                      partname[x] = *ptr++;
+                    }
+                }
+
+              partname[x] = '\0';
+            }
+
+          /* Terminate the partition name and add to output buffer */
+
+          ret = snprintf(&buffer[total], buflen - total, "%s%7d %7d",
+                  partname, attr->nextpart->firstblock / blkpererase,
+                  attr->nextpart->neraseblocks);
+#else
+          ret = snprintf(&buffer[total], buflen - total, "%7d %7d",
+                  attr->nextpart->firstblock / blkpererase,
+                  attr->nextpart->neraseblocks);
+#endif
+
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_MTD
+          if (ret + total < buflen)
+            {
+              ret += snprintf(&buffer[total + ret], buflen - (total + ret),
+                        "   %s\n", attr->nextpart->parent->name);
+            }
+#else
+          if (ret + total < buflen)
+            {
+              ret += snprintf(&buffer[total + ret], buflen - (total + ret),
+                        "\n");
+            }
+#endif
+
+          if (ret + total < buflen)
+            {
+              /* It fit in the buffer totally.  Advance total and move to
+               * next partition.
+               */
+
+              total += ret;
+              attr->nextpart = attr->nextpart->pnext;
+            }
+          else
+            {
+              /* This one didn't fit completely.  Truncate the partial
+               * entry and break the loop.
+               */
+
+              buffer[total] = '\0';
+              break;
+            }
+        }
+      while (attr->nextpart);
     }
-
-  while (attr->nextpart)
-  {
-    /* Get the geometry of the FLASH device */
-
-    ret = attr->nextpart->parent->ioctl(attr->nextpart->parent, MTDIOC_GEOMETRY,
-        (unsigned long)((uintptr_t)&geo));
-    if (ret < 0)
-      {
-        fdbg("ERROR: mtd->ioctl failed: %d\n", ret);
-        return 0;
-      }
-
-    /* Get the number of blocks per erase.  There must be an even number of
-     * blocks in one erase blocks.
-     */
-
-    blkpererase = geo.erasesize / geo.blocksize;
-
-    /* Copy data from the next known partition */
-
-#ifdef CONFIG_MTD_PARTITION_NAMES
-    if (attr->nextpart->name == NULL)
-      {
-        strcpy(partname, "(noname)  ");
-      }
-    else
-      {
-        ptr = attr->nextpart->name;
-        for (x = 0; x < sizeof(partname) - 1; x++)
-          {
-            /* Test for end of partition name */
-
-            if (*ptr == ',' || *ptr == '\0')
-              {
-                /* Perform space fill for alignment */
-
-                partname[x] = ' ';
-              }
-            else
-              {
-                /* Copy next byte of partition name */
-
-                partname[x] = *ptr++;
-              }
-          }
-
-        partname[x] = '\0';
-      }
-
-    /* Terminate the partition name and add to output buffer */
-
-    ret = snprintf(&buffer[total], buflen - total, "%s%7d %7d",
-        partname, attr->nextpart->firstblock / blkpererase,
-        attr->nextpart->neraseblocks);
-#else
-    ret = snprintf(&buffer[total], buflen - total, "%7d %7d",
-        attr->nextpart->firstblock / blkpererase,
-        attr->nextpart->neraseblocks);
-#endif
-
-#ifndef CONFIG_FS_PROCFS_EXCLUDE_MTD
-    if (ret + total < buflen)
-      {
-        ret += snprintf(&buffer[total + ret], buflen - (total + ret),
-            "   %s\n", attr->nextpart->parent->name);
-      }
-#else
-    if (ret + total < buflen)
-      {
-        ret += snprintf(&buffer[total + ret], buflen - (total + ret), "\n");
-      }
-#endif
-
-    if (ret + total < buflen)
-      {
-        /* It fit in the buffer totally.  Advance total and move to
-         * next partition.
-         */
-        total += ret;
-        attr->nextpart = attr->nextpart->pnext;
-      }
-    else
-      {
-        /* This one didn't fit completely.  Truncate the partial
-         * entry and break the loop.
-         */
-        buffer[total] = '\0';
-        break;
-      }
-  }
 
   /* Update the file offset */
 

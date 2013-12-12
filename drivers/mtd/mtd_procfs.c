@@ -199,7 +199,8 @@ static ssize_t mtd_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen)
 {
   FAR struct mtd_file_s *priv;
-  ssize_t total = 0, ret;
+  ssize_t total = 0;
+  ssize_t ret;
 
   fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
@@ -208,28 +209,39 @@ static ssize_t mtd_read(FAR struct file *filep, FAR char *buffer,
   priv = (FAR struct mtd_file_s *)filep->f_priv;
   DEBUGASSERT(priv);
 
-  /* Provide the requested data */
+  /* If we are at the end of the list, then return 0 signifying the
+   * end-of-file.  This also handles the special case when there are
+   * no registered MTD devices.
+   */
 
-  if (priv->pnextmtd == g_pfirstmtd)
+  if (priv->pnextmtd)
     {
-      total = snprintf(buffer, buflen, "Num  Device\n");
-    }
+      /* Output a header before the first entry */
 
-  while (priv->pnextmtd)
-    {
-      ret = snprintf(&buffer[total], buflen - total, "%-5d%s\n",
-          priv->pnextmtd->mtdno, priv->pnextmtd->name);
+      if (priv->pnextmtd == g_pfirstmtd)
+        {
+          total = snprintf(buffer, buflen, "Num  Device\n");
+        }
 
-      if (ret + total < buflen)
+      /* The provide the requested data */
+
+      do
         {
-          total += ret;
-          priv->pnextmtd = priv->pnextmtd->pnext;
+          ret = snprintf(&buffer[total], buflen - total, "%-5d%s\n",
+                         priv->pnextmtd->mtdno, priv->pnextmtd->name);
+
+          if (ret + total < buflen)
+            {
+              total += ret;
+              priv->pnextmtd = priv->pnextmtd->pnext;
+            }
+          else
+            {
+              buffer[total] = '\0';
+              break;
+            }
         }
-      else
-        {
-          buffer[total] = '\0';
-          break;
-        }
+      while (priv->pnextmtd);
     }
 
   /* Update the file offset */

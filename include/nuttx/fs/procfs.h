@@ -52,9 +52,9 @@
 
 struct procfs_operations
 {
-  /* The mountpoint open method differs from the driver open method
-   * because it receives (1) the inode that contains the mountpoint
-   * private data, (2) the relative path into the mountpoint, and (3)
+  /* The procfs open method differs from the driver open method
+   * because it receives (1) the inode that contains the procfs
+   * private data, (2) the relative path into the procfs, and (3)
    * information to manage privileges.
    */
 
@@ -74,7 +74,7 @@ struct procfs_operations
    * are extended methods needed to deal with the unique needs of mounted
    * file systems.
    *
-   * Additional open-file-specific mountpoint operations:
+   * Additional open-file-specific procfs operations:
    */
 
   int     (*dup)(FAR const struct file *oldp, FAR struct file *newp);
@@ -99,8 +99,8 @@ struct procfs_operations
 
 struct procfs_entry_s
 {
-  FAR const char                  *pathpattern;
-  const struct procfs_operations  *ops;
+  FAR const char *pathpattern;
+  FAR const struct procfs_operations *ops;
 };
 
 /* Specifies the common elements for an open file in the procfs 
@@ -110,17 +110,17 @@ struct procfs_entry_s
 
 struct procfs_file_s
 {
-  const struct procfs_entry_s   *pProcfsEntry;
+  FAR const struct procfs_entry_s *procfsentry;
 };
 
 /* The generic proc/ pseudo directory structure */
 
 struct procfs_dir_priv_s
 {
-  uint8_t  level;                    /* Directory level.  Currently 0 or 1 */
-  uint16_t index;                    /* Index to the next directory entry */
-  uint16_t nentries;                 /* Number of directory entries */
-  struct procfs_entry_s *pProcfsEntry; /* Pointer to procfs handler entry */
+  uint8_t level;                                /* Directory level.  Currently 0 or 1 */
+  uint16_t index;                               /* Index to the next directory entry */
+  uint16_t nentries;                            /* Number of directory entries */
+  FAR const struct procfs_entry_s *procfsentry; /* Pointer to procfs handler entry */
 };
 
 /****************************************************************************
