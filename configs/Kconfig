@@ -1174,7 +1174,7 @@ endif
 if ARCH_BOARD_STM32F4_DISCOVERY
 source "configs/stm32f4discovery/Kconfig"
 endif
-if ARCH_BOARD_STM32F49I_DISCO
+if ARCH_BOARD_STM32F429I_DISCO
 source "configs/stm32f429i-disco/Kconfig"
 endif
 if ARCH_BOARD_STM32L_DISCOVERY
