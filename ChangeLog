@@ -6206,4 +6206,6 @@
 	  SmartFS (2013-12-12).
 	* configs/stm32f429i-disco: Add support for procfs/ MTD part names.
 	  From Ken Pettit (2013-12-12)
+	* arch/arm/src/a1x/chip/a1x_timer.h:  Timer register bit definitions
+	  (incomplete on initial check-in) (2013-12-12).
 
