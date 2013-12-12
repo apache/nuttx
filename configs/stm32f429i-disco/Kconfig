@@ -54,6 +54,14 @@ config STM32F429I_DISCO_FLASH_PART_LIST
 	---help---
 		Comma separated list of partition sizes in KB.
 
+config STM32F429I_DISCO_FLASH_PART_NAMES
+	string "Flash partition name list"
+	default "config,rfs"
+	depends on STM32F429I_DISCO_FLASH_PART
+	depends on MTD_PARTITION_NAMES
+	---help---
+		Comma separated list of partition names.
+
 config STM32F429I_DISCO_RAMMTD
 	bool "MTD driver for SMARTFS RAM disk"
 	default n

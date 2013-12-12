@@ -59,6 +59,10 @@
 #  include <apps/usbmonitor.h>
 #endif
 
+#ifndef CONFIG_STM32F429I_DISCO_FLASH_MINOR
+#define CONFIG_STM32F429I_DISCO_FLASH_MINOR 0
+#endif
+
 #ifdef CONFIG_STM32F429I_DISCO_FLASH_CONFIG_PART
 #ifdef CONFIG_PLATFORM_CONFIGDATA
 #  include <nuttx/configdata.h>
@@ -153,6 +157,9 @@ int nsh_archinitialize(void)
   FAR struct spi_dev_s *spi;
   FAR struct mtd_dev_s *mtd;
 #endif
+#if defined(CONFIG_MTD_PARTITION_NAMES)
+  FAR const char *partname = CONFIG_STM32F429I_DISCO_FLASH_PART_NAMES;
+#endif
 
   /* Configure SPI-based devices */
 
@@ -193,7 +200,7 @@ int nsh_archinitialize(void)
         const char *partstring = CONFIG_STM32F429I_DISCO_FLASH_PART_LIST;
         const char *ptr;
         FAR struct mtd_dev_s *mtd_part;
-        char  partname[4];
+        char  partref[4];
 
         /* Now create a partition on the FLASH device */
 
@@ -226,10 +233,33 @@ int nsh_archinitialize(void)
                  */
 
 #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-                sprintf(partname, "p%d", partno);
-                smart_initialize(CONFIG_STM32F429I_DISCO_FLASH_MINOR, mtd_part, partname);
+                sprintf(partref, "p%d", partno);
+                smart_initialize(CONFIG_STM32F429I_DISCO_FLASH_MINOR, mtd_part, partref);
 #endif
               }
+
+            /* Set the partition name */
+
+#if defined(CONFIG_MTD_PARTITION_NAMES)
+            mtd_setpartitionname(mtd_part, partname);
+
+            /* Now skip to next name.  We don't need to split the string here
+             * because the MTD partition logic will only display names up to
+             * the comma, thus allowing us to use a single static name
+             * in the code.
+             */
+
+            while (*partname != ',' && *partname != '\0')
+              {
+                /* Skip to next ',' */
+
+                partname++;
+              }
+            if (*partname == ',')
+              {
+                partname++;
+              }
+#endif
 
             /* Update the pointer to point to the next size in the list */
 
