@@ -6204,3 +6204,6 @@
 	  files to list:  Extensive changes by Ken Pettit to extend procfs/
 	  functionality.  Includes some incomplete changes related to
 	  SmartFS (2013-12-12).
+	* configs/stm32f429i-disco: Add support for procfs/ MTD part names.
+	  From Ken Pettit (2013-12-12)
+
