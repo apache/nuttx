@@ -1,7 +1,7 @@
 /********************************************************************************
  * clock_abstime2ticks.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -120,7 +120,7 @@ int clock_abstime2ticks(clockid_t clockid, FAR const struct timespec *abstime,
       reltime.tv_sec  -= 1;
     }
 
-  /* Convert this relative time into microseconds. */
+  /* Convert this relative time into clock ticks. */
 
   return clock_time2ticks(&reltime, ticks);
 }

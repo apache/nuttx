@@ -114,7 +114,7 @@ WDOG_SRCS += wd_gettime.c
 TIME_SRCS = sched_processtimer.c
 
 ifneq ($(CONFIG_DISABLE_SIGNALS),y)
-TIME_SRCS += sleep.c usleep.c
+TIME_SRCS += sleep.c usleep.c nanosleep.c
 endif
 
 CLOCK_SRCS  = clock_initialize.c clock_settime.c clock_gettime.c clock_getres.c

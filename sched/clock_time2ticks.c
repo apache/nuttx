@@ -98,7 +98,7 @@ int clock_time2ticks(FAR const struct timespec *reltime, FAR int *ticks)
 
   relnsec = (int64_t)reltime->tv_sec * NSEC_PER_SEC +
             (int64_t)reltime->tv_nsec;
-  
+
   /* Convert nanoseconds to clock ticks, rounding up to the smallest integer
    * that is greater than or equal to the exact number of tick.
    */
