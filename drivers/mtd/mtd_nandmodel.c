@@ -98,6 +98,7 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
     {
       if (modeltab[i].devid == id2)
         {
+          fvdbg("NAND Model found: ID2=0x%02x ID4=0x%02x\n", id2, id4);
           found = true;
 
           if (model)
@@ -106,9 +107,8 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
 
               if (model->blocksize == 0 || model->pagesize == 0)
                 {
-                  fvdbg("Fetch from ID4(0x%.2x):\n", id4);
-
-                  /* Fetch from the extended ID4
+                  /* Decode the extended ID4
+                   *
                    * ID4 D5  D4 BlockSize || D1  D0  PageSize
                    *     0   0   64K      || 0   0   1K
                    *     0   1   128K     || 0   1   2K
@@ -154,14 +154,13 @@ int nandmodel_find(FAR const struct nand_model_s *modeltab, size_t size,
                         break;
                     }
                 }
-            }
 
-          fvdbg("NAND Model found:\n");
-          fvdbg("  devid:     0x%02x\n",  model->devid);
-          fvdbg("  devsize:   %d (MB)\n", model->devsize);
-          fvdbg("  blocksize: %d (KB)\n", model->blocksize);
-          fvdbg("  pagesize:  %d (B)\n",  model->pagesize);
-          fvdbg("  options:   0x%02x\n",  model->options);
+              fvdbg("  devid:     0x%02x\n",  model->devid);
+              fvdbg("  devsize:   %d (MB)\n", model->devsize);
+              fvdbg("  blocksize: %d (KB)\n", model->blocksize);
+              fvdbg("  pagesize:  %d (B)\n",  model->pagesize);
+              fvdbg("  options:   0x%02x\n",  model->options);
+            }
           break;
         }
     }

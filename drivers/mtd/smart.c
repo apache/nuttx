@@ -2153,6 +2153,7 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd, const char *partname)
           ret = -EINVAL;
           goto errout;
         }
+
       dev->freesectors = (uint16_t) totalsectors;
 
       /* Mark the device format status an unknown */
@@ -2176,9 +2177,13 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd, const char *partname)
 
 #ifdef CONFIG_SMARTFS_MULTI_ROOT_DIRS
       if (partname != NULL)
-        snprintf(dev->rwbuffer, 18, "/dev/smart%d%sd1", minor, partname);
+        {
+          snprintf(dev->rwbuffer, 18, "/dev/smart%d%sd1", minor, partname);
+        }
       else
-        snprintf(dev->rwbuffer, 18, "/dev/smart%dd1", minor);
+        {
+          snprintf(dev->rwbuffer, 18, "/dev/smart%dd1", minor);
+        }
 
       /* Inode private data is a reference to a struct containing
        * the SMART device structure and the root directory number.
@@ -2203,9 +2208,13 @@ int smart_initialize(int minor, FAR struct mtd_dev_s *mtd, const char *partname)
 
 #else
       if (partname != NULL)
-        snprintf(dev->rwbuffer, 18, "/dev/smart%d%s", minor, partname);
+        {
+          snprintf(dev->rwbuffer, 18, "/dev/smart%d%s", minor, partname);
+        }
       else
-        snprintf(dev->rwbuffer, 18, "/dev/smart%d", minor);
+        {
+          snprintf(dev->rwbuffer, 18, "/dev/smart%d", minor);
+        }
 
       /* Inode private data is a reference to the SMART device structure */
 
