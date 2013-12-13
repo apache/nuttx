@@ -118,8 +118,7 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
   SYSCALL_LOOKUP(sigsuspend,              1, STUB_sigsuspend)
   SYSCALL_LOOKUP(sigtimedwait,            3, STUB_sigtimedwait)
   SYSCALL_LOOKUP(sigwaitinfo,             2, STUB_sigwaitinfo)
-  SYSCALL_LOOKUP(sleep,                   1, STUB_sleep)
-  SYSCALL_LOOKUP(usleep,                  1, STUB_usleep)
+  SYSCALL_LOOKUP(nanosleep,               2, STUB_nanosleep)
 #endif
 
 /* The following are only defined if the system clock is enabled in the
@@ -148,7 +147,7 @@ SYSCALL_LOOKUP(up_assert,                 2, STUB_up_assert)
  * enabled.
  */
 
-#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0 
+#if CONFIG_NFILE_DESCRIPTORS > 0 || CONFIG_NSOCKET_DESCRIPTORS > 0
   SYSCALL_LOOKUP(close,                   1, STUB_close)
   SYSCALL_LOOKUP(ioctl,                   3, STUB_ioctl)
   SYSCALL_LOOKUP(read,                    3, STUB_read)

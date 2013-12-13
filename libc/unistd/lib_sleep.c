@@ -1,7 +1,7 @@
 /****************************************************************************
- * sched/usleep.c
+ * lib/lib_sleep.c
  *
- *   Copyright (C) 2007, 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,18 +37,20 @@
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
+#include <nuttx/config.h>
+
 #include <unistd.h>
 #include <signal.h>
-#include <assert.h>
-#include <errno.h>
+
+#include <nuttx/clock.h>
+#include <arch/irq.h>
 
 /****************************************************************************
- * Definitions
+ * Preprocessor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Private Type Declarations
+ * Private Type Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -68,38 +70,36 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: usleep
+ * Name: sleep
  *
  * Description:
- *   The usleep() function will cause the calling thread to be suspended
- *   from execution until either the number of real-time microseconds
- *   specified by the argument 'usec' has elapsed or a signal is delivered
- *   to the calling thread. The suspension time may be longer than requested
+ *   The sleep() function will cause the calling thread to be suspended from
+ *   execution until either the number of real-time seconds specified by the
+ *   argument 'seconds' has elapsed or a signal is delivered to the calling
+ *   thread and its action is to invoke a signal-catching function or to
+ *   terminate the process. The suspension time may be longer than requested
  *   due to the scheduling of other activity by the system.
  *
- *   The 'usec' argument must be less than 1,000,000. If the value of
- *   'usec' is 0, then the call has no effect.
- *
  *   If a SIGALRM signal is generated for the calling process during
- *   execution of usleep() and if the SIGALRM signal is being ignored or
- *   blocked from delivery, it is unspecified whether usleep() returns
+ *   execution of sleep() and if the SIGALRM signal is being ignored or
+ *   blocked from delivery, it is unspecified whether sleep() returns
  *   when the SIGALRM signal is scheduled. If the signal is being blocked, it
- *   is also unspecified whether it remains pending after usleep() returns or
+ *   is also unspecified whether it remains pending after sleep() returns or
  *   it is discarded.
  *
  *   If a SIGALRM signal is generated for the calling process during
- *   execution of usleep(), except as a result of a prior call to alarm(),
+ *   execution of sleep(), except as a result of a prior call to alarm(),
  *   and if the SIGALRM signal is not being ignored or blocked from delivery,
  *   it is unspecified whether that signal has any effect other than causing
- *   usleep() to return.
+ *   sleep() to return.
  *
- *   If a signal-catching function interrupts usleep() and examines or changes
+ *   If a signal-catching function interrupts sleep() and examines or changes
  *   either the time a SIGALRM is scheduled to be generated, the action
  *   associated with the SIGALRM signal, or whether the SIGALRM signal is
  *   blocked from delivery, the results are unspecified.
  *
- *   If a signal-catching function interrupts usleep() and calls siglongjmp()
- *   or longjmp() to restore an environment saved prior to the usleep() call,
+ *   If a signal-catching function interrupts sleep() and calls siglongjmp()
+ *   or longjmp() to restore an environment saved prior to the sleep() call,
  *   the action associated with the SIGALRM signal and the time at which a
  *   SIGALRM signal is scheduled to be generated are unspecified. It is also
  *   unspecified whether the SIGALRM signal is blocked, unless the process'
@@ -108,61 +108,59 @@
  *   Implementations may place limitations on the granularity of timer values.
  *   For each interval timer, if the requested timer value requires a finer
  *   granularity than the implementation supports, the actual timer value will
- *   be rounded up to the next supported value. 
+ *   be rounded up to the next supported value.
  *
- *   Interactions between usleep() and any of the following are unspecified:
+ *   Interactions between sleep() and any of setitimer(), ualarm() or sleep()
+ *   are unspecified.
  *
- *   nanosleep(), setitimer(), timer_create(), timer_delete(), timer_getoverrun(),
- *   timer_gettime(), timer_settime(), ualarm(), sleep()
-
  * Parameters:
- *   usec - the number of microseconds to wait.
+ *   seconds
  *
  * Returned Value:
- *   On successful completion, usleep() returns 0. Otherwise, it returns -1
- *   and sets errno to indicate the error. 
+ *   If sleep() returns because the requested time has elapsed, the value
+ *   returned will be 0. If sleep() returns because of premature arousal due
+ *   to delivery of a signal, the return value will be the "unslept" amount
+ *   (the requested time minus the time actually slept) in seconds.
  *
  * Assumptions:
  *
  ****************************************************************************/
 
-int usleep(useconds_t usec)
+unsigned int sleep(unsigned int seconds)
 {
-  sigset_t set;
-  struct timespec ts;
-  struct siginfo value;
-  int errval;
-  int ret = 0;
+  struct timespec rqtp;
+  struct timespec rmtp;
+  unsigned int remaining = 0;
+  int ret;
 
-  if (usec)
+  /* Don't sleep if seconds == 0 */
+
+  if (seconds)
     {
-      /* Set up for the sleep.  Using the empty set means that we are not
-       * waiting for any particular signal.  However, any unmasked signal
-       * can still awaken sigtimedwait().
+      /* Let nanosleep() do all of the work. */
+
+      rqtp.tv_sec  = seconds;
+      rqtp.tv_nsec = 0;
+
+      ret = nanosleep(&rqtp, &rmtp);
+
+      /* nanosleep() should only fail if it was interrupted by a signal,
+       * but we treat all errors the same,
        */
 
-      (void)sigemptyset(&set);
-      ts.tv_sec  = usec / 1000000;
-      ts.tv_nsec = (usec % 1000000) * 1000;
-
-      /* usleep is a simple application of sigtimedwait. */
-
-      ret = sigtimedwait(&set, &value, &ts);
-
-      /* sigtimedwait() cannot succeed.  It should always return error with
-       * either (1) EAGAIN meaning that the timeout occurred, or (2) EINTR
-       * meaning that some other unblocked signal was caught.
-       */
-
-      errval = errno;
-      DEBUGASSERT(ret < 0 && (errval == EAGAIN || errval == EINTR));
-      if (errval == EAGAIN)
+      if (ret < 0)
         {
-          /* The timeout "error" is the normal, successful result */
+          remaining = rmtp.tv_nsec;
+          if (remaining < seconds && rmtp.tv_nsec >= 500000000)
+            {
+              /* Round up */
 
-          ret = 0;
+              remaining++;
+            }
         }
+
+      return remaining;
     }
 
-  return ret;
+  return 0;
 }

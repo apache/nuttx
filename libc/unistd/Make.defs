@@ -39,12 +39,16 @@ CSRCS += lib_getopt.c lib_getoptargp.c lib_getoptindp.c lib_getoptoptp.c
 
 ifneq ($(CONFIG_NFILE_DESCRIPTORS),0)
 ifneq ($(CONFIG_DISABLE_ENVIRON),y)
-CSRCS +=  lib_chdir.c lib_getcwd.c
+CSRCS += lib_chdir.c lib_getcwd.c
 endif
 
 ifeq ($(CONFIG_LIBC_EXECFUNCS),y)
-CSRCS +=  lib_execl.c lib_execv.c lib_execsymtab.c
+CSRCS += lib_execl.c lib_execv.c lib_execsymtab.c
 endif
+endif
+
+ifneq ($(CONFIG_DISABLE_SIGNALS),y)
+CSRCS += lib_sleep.c lib_usleep.c
 endif
 
 # Add the unistd directory to the build

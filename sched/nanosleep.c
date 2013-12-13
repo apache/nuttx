@@ -89,7 +89,7 @@
  *   measured by the system clock, CLOCK_REALTIME.
  *
  *   The use of the nanosleep() function has no effect on the action or
- *   blockage of any signal. 
+ *   blockage of any signal.
  *
  * Parameters:
  *   rqtp - The amount of time to be suspended from execution.
@@ -115,9 +115,9 @@
  *
  *     EINTR - The nanosleep() function was interrupted by a signal.
  *     EINVAL - The rqtp argument specified a nanosecond value less than
- *       zero or greater than or equal to 1000 million. 
+ *       zero or greater than or equal to 1000 million.
  *     ENOSYS - The nanosleep() function is not supported by this
- *       implementation. 
+ *       implementation.
  *
  ****************************************************************************/
 
@@ -140,7 +140,7 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
    * timer interrupts while we do tick-related calculations before and
    * after the wait.
    */
- 
+
   flags     = irqsave();
   starttick = clock_systimer();
 
@@ -208,7 +208,7 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
     }
 
   irqrestore(flags);
-  
+
 errout:
   set_errno(errval);
   return ERROR;
