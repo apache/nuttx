@@ -128,7 +128,9 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
   sigset_t set;
   struct siginfo value;
   int errval;
+#ifdef CONFIG_DEBUG /* Warning avoidance */
   int ret;
+#endif
 
   if (!rqtp || rqtp->tv_nsec < 0 || rqtp->tv_nsec >= 1000000000)
     {
@@ -153,7 +155,11 @@ int nanosleep(FAR const struct timespec *rqtp, FAR struct timespec *rmtp)
 
   /* nanosleep is a simple application of sigtimedwait. */
 
+#ifdef CONFIG_DEBUG /* Warning avoidance */
   ret = sigtimedwait(&set, &value, rqtp);
+#else
+  (void)sigtimedwait(&set, &value, rqtp);
+#endif
 
   /* sigtimedwait() cannot succeed.  It should always return error with
    * either (1) EAGAIN meaning that the timeout occurred, or (2) EINTR

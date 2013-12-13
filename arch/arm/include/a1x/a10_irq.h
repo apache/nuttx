@@ -78,7 +78,7 @@
 #define A1X_IRQ_TIMER0     22 /* Timer port 0 */
 #define A1X_IRQ_TIMER1     23 /* Timer port 1 */
 #define A1X_IRQ_TIMER2     24 /* Timer 2 */
-#  define A1X_IRQ_Alarm    24 /* Alarm */
+#  define A1X_IRQ_ALARM    24 /* Alarm */
 #  define A1X_IRQ_WD       24 /* Watchdog */
 #define A1X_IRQ_TIMER3     25 /* Timer 3 interrupt */
 #define A1X_IRQ_CAN        26 /* CAN Bus controller interrupt */

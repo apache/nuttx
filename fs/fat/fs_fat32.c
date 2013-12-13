@@ -518,7 +518,9 @@ static ssize_t fat_read(FAR struct file *filep, char *buffer, size_t buflen)
     {
       bytesread  = 0;
 
+#ifdef CONFIG_FAT_DMAMEMORY /* Warning avoidance */
 fat_read_restart:
+#endif
 
       /* Check if the user has provided a buffer large enough to
        * hold one or more complete sectors -AND- the read is
@@ -756,7 +758,9 @@ static ssize_t fat_write(FAR struct file *filep, const char *buffer,
        * hold one or more complete sectors.
        */
 
+#ifdef CONFIG_FAT_DMAMEMORY /* Warning avoidance */
 fat_write_restart:
+#endif
 
       nsectors = buflen / fs->fs_hwsectorsize;
       if (nsectors > 0 && sectorindex == 0 && !force_indirect)

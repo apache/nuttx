@@ -6216,4 +6216,6 @@
 	  functions now just call nanosleep(). (2013-12-13).
 	* syscall/ and include/sys/syscall.h:  Remove sleep and usleep
 	  system calls.  Add nanosleep system call (2013-12-13).
+	* arch/arm/src/a1x/a1x_timerisr.c:  Timer interrupt handler for the
+	  A10 (2013-12-13).
 
