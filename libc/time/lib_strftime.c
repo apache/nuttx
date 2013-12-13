@@ -136,9 +136,9 @@ static const char * const g_monthname[12] =
  *
  * Returned Value:
  *   The strftime() function returns the number of characters placed in  the
- *    array s, not including the terminating null byte, provided the string,
- *    including the terminating null byte, fits.  Otherwise,  it returns 0,
- *    and the contents of the array is undefined.
+ *   array s, not including the terminating null byte, provided the string,
+ *   including the terminating null byte, fits.  Otherwise,  it returns 0,
+ *   and the contents of the array is undefined.
  *
  ****************************************************************************/
 
@@ -394,12 +394,30 @@ size_t strftime(char *s, size_t max, const char *format, const struct tm *tm)
       chleft -= len;
     }
 
-  /* Append terminating null byte (if there is space for it) */
+  /* We get here because either we have reached the end of the format string
+   * or because there is no more space in the user-provided buffer and the
+   * resulting string has been truncated.
+   *
+   * Is there space remaining in the user-provided buffer for the NUL
+   * terminator?
+   */
 
   if (chleft > 0)
     {
+      /* Yes, append terminating NUL byte */
+
       *dest = '\0';
+
+      /* And return the number of bytes in the resulting string (excluding
+       * the NUL terminator).
+       */
+
+      return max - chleft;
     }
 
-  return max - chleft;
+  /* The string was truncated and/or not properly terminated.  Return
+   * zero.
+   */
+
+  return 0;
 }
