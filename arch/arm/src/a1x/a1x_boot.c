@@ -55,6 +55,8 @@
 #include "up_internal.h"
 #include "up_arch.h"
 
+#include "a1x_lowputc.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -339,7 +341,7 @@ void up_boot(void)
    */
 
 #ifdef USE_EARLYSERIALINIT
-  a1x_earlyserialinit();
+  up_earlyserialinit();
 #endif
 
   /* For the case of the separate user-/kernel-space build, perform whatever
