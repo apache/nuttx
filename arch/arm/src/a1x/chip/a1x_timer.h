@@ -173,25 +173,15 @@
 
 /* Register bit field definitions ***************************************************/
 
-/* Timer IRQ Enable */
+/* Timer IRQ Enable and Timer Status */
 
-#define TMR_IRQ_EN_TMR0            (1 << 0)  /* Bit 0:  Timer 0 Interrupt Enable */
-#define TMR_IRQ_EN_TMR1            (1 << 1)  /* Bit 1:  Timer 1 Interrupt Enable */
-#define TMR_IRQ_EN_TMR2            (1 << 2)  /* Bit 2:  Timer 2 Interrupt Enable */
-#define TMR_IRQ_EN_TMR3            (1 << 3)  /* Bit 3:  Timer 3 Interrupt Enable */
-#define TMR_IRQ_EN_TMR4            (1 << 4)  /* Bit 4:  Timer 4 Interrupt Enable */
-#define TMR_IRQ_EN_TMR5            (1 << 5)  /* Bit 5:  Timer 5 Interrupt Enable */
-#define TMR_IRQ_EN_WDOG            (1 << 8)  /* Bit 8:  Watchdog Interrupt Enable */
-
-/* Timer Status */
-
-#define TMR_IRQ_STA_TMR0           (1 << 0)  /* Bit 0:  Timer 0 Interrupt Pending */
-#define TMR_IRQ_STA_TMR1           (1 << 1)  /* Bit 1:  Timer 1 Interrupt Pending */
-#define TMR_IRQ_STA_TMR2           (1 << 2)  /* Bit 2:  Timer 2 Interrupt Pending */
-#define TMR_IRQ_STA_TMR3           (1 << 3)  /* Bit 3:  Timer 3 Interrupt Pending */
-#define TMR_IRQ_STA_TMR4           (1 << 4)  /* Bit 4:  Timer 4 Interrupt Pending */
-#define TMR_IRQ_STA_TMR5           (1 << 5)  /* Bit 5:  Timer 5 Interrupt Pending */
-#define TMR_IRQ_STA_WDOG           (1 << 8)  /* Bit 8:  Watchdog Interrupt Pending */
+#define TMR_IRQ_TMR0               (1 << 0)  /* Bit 0:  Timer 0 Interrupt */
+#define TMR_IRQ_TMR1               (1 << 1)  /* Bit 1:  Timer 1 Interrupt */
+#define TMR_IRQ_TMR2               (1 << 2)  /* Bit 2:  Timer 2 Interrupt */
+#define TMR_IRQ_TMR3               (1 << 3)  /* Bit 3:  Timer 3 Interrupt */
+#define TMR_IRQ_TMR4               (1 << 4)  /* Bit 4:  Timer 4 Interrupt */
+#define TMR_IRQ_TMR5               (1 << 5)  /* Bit 5:  Timer 5 Interrupt */
+#define TMR_IRQ_WDOG               (1 << 8)  /* Bit 8:  Watchdog Interrupt */
 
 /* Timer 0-2,/4-5 Control */
 
@@ -214,7 +204,9 @@
 #  define TMR_CTRL_CLK_PRES_DIV32  (5 << TMR_CTRL_CLK_PRES_SHIFT) /* /32 (Not Timer 0) */
 #  define TMR_CTRL_CLK_PRES_DIV64  (6 << TMR_CTRL_CLK_PRES_SHIFT) /* /64 (Not Timer 0) */
 #  define TMR_CTRL_CLK_PRES_DIV128 (7 << TMR_CTRL_CLK_PRES_SHIFT) /* /128 (Not Timer 0) */
-#define TMR_CTRL_MODE              (1 << 7)  /* Bit 7:  Timer n mode, n={0,1,2,4,5}
+#define TMR_CTRL_MODE              (1 << 7)  /* Bit 7:  Timer n mode, n={0,1,2,4,5} */
+#  define TMR_CTRL_MODE_SINGLE     (1 << 7)  /*         1=single mode */
+#  define TMR_CTRL_MODE_CONTINUOUS (0 << 7)  /*         0=continuous mode */
 
 /* Timer 3 Control */
 
@@ -345,7 +337,7 @@
 #define ALRAM_DD_HMS_HOUR_SHIFT    (16)      /* Bits 16-20: Hour (0-23) */
 #define ALRAM_DD_HMS_HOUR_MASK     (0x1f << ALRAM_DD_HMS_HOUR_SHIFT)
 #  define ALRAM_DD_HMS_HOUR(n)     ((uint32_t)(n) << ALRAM_DD_HMS_HOUR_SHIFT)
-#define ALRAM_DD_HMS_DAY_SHIFT     (24)      /* Bits 24-31: /* Day (0-255) */
+#define ALRAM_DD_HMS_DAY_SHIFT     (24)      /* Bits 24-31: Day (0-255) */
 #define ALRAM_DD_HMS_DAY_MASK      (0xff << ALRAM_DD_HMS_DAY_SHIFT)
 #  define ALRAM_DD_HMS_DAY(n)      ((uint32_t)(n) << ALRAM_DD_HMS_DAY_SHIFT)
 

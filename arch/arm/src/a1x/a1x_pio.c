@@ -218,8 +218,8 @@ void a1x_pio_irqinitialize(void)
 
 int a1x_configpio(pio_pinset_t cfgset)
 {
-  unsigned int port = a1x_pioport(cfgset);
-  unsigned int pin  = a1x_piopin(cfgset);
+  unsigned int port = a1x_pio_port(cfgset);
+  unsigned int pin  = a1x_pio_pin(cfgset);
   unsigned int shift;
   unsigned int value;
   uintptr_t cfgaddr;

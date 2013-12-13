@@ -67,6 +67,10 @@ CMN_CSRCS += arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
 CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
 
+# Use common heap allocation for now (may need to be customized later)
+
+CMN_CSRCS += up_allocateheap.c
+
 # Configuration dependent C and assembly language files
 
 ifeq ($(CONFIG_PAGING),y)
@@ -93,4 +97,4 @@ CHIP_ASRCS  =
 
 # A1x-specific C source files
 
-CHIP_CSRCS  = a1x_boot.c a1x_irq.c a1x_pio.c
+CHIP_CSRCS  = a1x_boot.c a1x_irq.c a1x_pio.c a1x_timerisr.c

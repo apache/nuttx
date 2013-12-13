@@ -114,12 +114,8 @@ config A1X_KEYPAD
 	bool "Keypad"
 	default n
 
-config A1X_TIMER0
-	bool "Timer port 0"
-	default n
-
 config A1X_TIMER1
-	bool "Timer port 1"
+	bool "Timer 1"
 	default n
 
 config A1X_TIMER2
