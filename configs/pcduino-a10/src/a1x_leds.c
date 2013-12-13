@@ -123,9 +123,9 @@
 
 void a1x_led_initialize(void)
 {
-  a1x_configpio(PIO_LED1);
-  a1x_configpio(PIO_LED3);
-  a1x_configpio(PIO_LED4);
+  a1x_pio_config(PIO_LED1);
+  a1x_pio_config(PIO_LED3);
+  a1x_pio_config(PIO_LED4);
 }
 
 /****************************************************************************

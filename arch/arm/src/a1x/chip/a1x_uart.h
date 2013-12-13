@@ -246,6 +246,7 @@
 #define UART_IER_ELSI             (1 << 2) /* Bit 2:  Enable Receiver Line Status Interrupt */
 #define UART_IER_EDSSI            (1 << 3) /* Bit 3:  Enable Modem Status Interrupt */
 #define UART_IER_PTIME            (1 << 7) /* Bit 7:  Programmable THRE Interrupt Mode Enable */
+#define UART_IER_ALLIE            0x0000008f
 
 /* UART Interrupt Identity Register */
 

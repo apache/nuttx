@@ -209,14 +209,14 @@ void a1x_pio_irqinitialize(void)
 #endif
 
 /****************************************************************************
- * Name: a1x_configpio
+ * Name: a1x_pio_config
  *
  * Description:
  *   Configure a PIO pin based on bit-encoded description of the pin.
  *
  ****************************************************************************/
 
-int a1x_configpio(pio_pinset_t cfgset)
+int a1x_pio_config(pio_pinset_t cfgset)
 {
   unsigned int port = a1x_pio_port(cfgset);
   unsigned int pin  = a1x_pio_pin(cfgset);

@@ -6220,4 +6220,6 @@
 	  A10 (2013-12-13).
 	* arch/arm/src/a1x/a1x_config.h:  Header file to keep track of A10
 	  configuration decisions (2013-12-13).
-
+	* arch/arm/src/a1x/a1x_lowputc.c, a1x_serial.c, and a1x_serila.h:
+	  Beginning of an A10 serial driver.  From Alan Carvalho de Assis
+	  (2013-12-13).

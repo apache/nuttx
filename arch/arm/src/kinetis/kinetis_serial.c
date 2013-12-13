@@ -108,6 +108,7 @@
 #elif defined(CONFIG_UART5_SERIAL_CONSOLE)
 #    define CONSOLE_DEV         g_uart5port /* UART5 is console */
 #    define TTYS5_DEV           g_uart5port /* UART5 is ttyS0 */
+#    define UART5_ASSIGNED      1
 #else
 #  undef CONSOLE_DEV                        /* No console */
 #  if defined(CONFIG_KINETIS_UART0)

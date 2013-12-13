@@ -42,6 +42,8 @@
 
 #include <nuttx/config.h>
 
+#include "chip/a1x_piocfg.h"
+
 /************************************************************************************
  * Definitions
  ************************************************************************************/
@@ -126,6 +128,25 @@
 /* NAND *****************************************************************************/
 
 /* GPIO pin disambiguation **********************************************************/
+/* UARTs ****************************************************************************/
+/* Two UART connections are available:
+ *
+ * 1. UART0 is available on J5 Debug Port.
+ *
+ *    J15 Pin 1 Rx                UART0-RX  UART0_RX/IR1_RX/PB23
+ *    J15 Pin 2 Tx                UART0-TX  UART0_TX/IR1_TX/PB22
+ *
+ * 2. UART2 is available on J11
+ *
+ *    J11 Pin1  UART-Rx / GPIO0   UART2_RX  EINT31/SPI1_MISO/UART2_RX/PI19
+ *    J11 Pin2  UART-Tx / GPIO1   UART2_TX  EINT30/SPI1_MOSI/UART2_TX/PI18
+ */
+
+#define PIO_UART0_RX    PIO_UART0_RX_1
+#define PIO_UART0_TX    PIO_UART0_TX_1
+
+#define PIO_UART2_RX    PIO_UART2_RX_1
+#define PIO_UART2_TX    PIO_UART2_TX_1
 
 /************************************************************************************
  * Assembly Language Macros
