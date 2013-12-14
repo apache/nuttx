@@ -80,6 +80,11 @@
 struct uptime_file_s
 {
   struct procfs_file_s  base;        /* Base open file structure */
+#ifdef CONFIG_SYSTEM_TIME64
+  uint64_t ticktime;                 /* Sampled 64-bit timer */
+#else
+  uint32_t ticktime;                 /* Sampled 32-bit timer */
+#endif
   char line[UPTIME_LINELEN];         /* Pre-allocated buffer for formatted lines */
 };
 
@@ -213,33 +218,23 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
   ssize_t ret;
 
 #ifdef CONFIG_SYSTEM_TIME64
-  /* 32-bit timer */
+  uint64_t ticktime;
+#if !defined(CONFIG_HAVE_DOUBLE) || !defined(CONFIG_LIBC_FLOATINGPOINT)
+  uint64_t sec;
+#endif
 
-  uint64_t upticks       =  clock_systimer64();
+#else
+  uint32_t ticktime;
+#if !defined(CONFIG_HAVE_DOUBLE) || !defined(CONFIG_LIBC_FLOATINGPOINT)
+  uint32_t sec;
+#endif
+#endif
 
 #if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
-  double now             = (double)upticks / (double)CLOCKS_PER_SEC;
-
+  double now;
 #else
-  uint64_t     sec       = upticks / CLOCKS_PER_SEC;
-  unsigned int remainder = (unsigned int)(upticks % CLOCKS_PER_SEC);
-  unsigned int csec      = (100 * remainder + (CLOCKS_PER_SEC / 2)) / CLOCKS_PER_SEC;
-
-#endif
-#else
-  /* 32-bit timer */
-
-  uint32_t upticks       = clock_systimer();
-
-#if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
-  double now             = (double)upticks / (double)CLOCKS_PER_SEC;
-
-#else
-  uint32_t     sec       = upticks / CLOCKS_PER_SEC;
-  unsigned int remainder = (unsigned int)(upticks % CLOCKS_PER_SEC);
-  unsigned int csec      = (100 * remainder + (CLOCKS_PER_SEC / 2)) / CLOCKS_PER_SEC;
-
-#endif
+  unsigned int remainder;
+  unsigned int csec;
 #endif
 
   fvdbg("buffer=%p buflen=%d\n", buffer, (int)buflen);
@@ -249,12 +244,41 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
   attr = (FAR struct uptime_file_s *)filep->f_priv;
   DEBUGASSERT(attr);
 
-#if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
-  /* Convert the system up time to seconds + hundredths of seconds */
+  /* If f_pos is zero, then sample the system time.  Otherwise, use
+   * the cached system time from the previous read().  It is necessary
+   * save the cached value in case, for example, the user is reading
+   * the time one byte at a time.  In that case, the time must remain
+   * stable throughout the reads.
+   */
 
-  linesize = snprintf(attr->line, UPTIME_LINELEN, "%10.2f\n", now);
+  if (filep->f_pos == 0)
+    {
+#ifdef CONFIG_SYSTEM_TIME64
+      /* 64-bit timer */
+
+      attr->ticktime = clock_systimer64();
+#else
+      /* 32-bit timer */
+
+      attr->ticktime = clock_systimer();
+#endif
+    }
+
+  ticktime  = attr->ticktime;
+
+#if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
+  /* Convert the system up time to a seconds + hundredths of seconds string */
+
+  now       = (double)ticktime / (double)CLOCKS_PER_SEC;
+  linesize  = snprintf(attr->line, UPTIME_LINELEN, "%10.2f\n", now);
 
 #else
+  /* Convert the system up time to seconds + hundredths of seconds */
+
+  sec       = ticktime / CLOCKS_PER_SEC;
+  remainder = (unsigned int)(ticktime % CLOCKS_PER_SEC);
+  csec      = (100 * remainder + (CLOCKS_PER_SEC / 2)) / CLOCKS_PER_SEC;
+
   /* Make sure that rounding did not force the hundredths of a second above 99 */
 
   if (csec > 99)
@@ -263,7 +287,7 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
       csec -= 100;
     }
 
-  /* Convert the system up time to seconds + hundredths of seconds */
+  /* Convert the seconds + hundredths of seconds to a string */
 
   linesize = snprintf(attr->line, UPTIME_LINELEN, "%7lu.%02u\n", sec, csec);
 
@@ -306,16 +330,16 @@ static int uptime_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newattr = (FAR struct uptime_file_s *)kzalloc(sizeof(struct uptime_file_s));
+  newattr = (FAR struct uptime_file_s *)kmalloc(sizeof(struct uptime_file_s));
   if (!newattr)
     {
       fdbg("ERROR: Failed to allocate file attributes\n");
       return -ENOMEM;
     }
 
-  /* The copy the file attribtes from the old attributes to the new */
+  /* The copy the file attributes from the old attributes to the new */
 
-  memcpy(&newattr->base, &oldattr->base, sizeof(struct procfs_file_s));
+  memcpy(newattr, oldattr, sizeof(struct uptime_file_s));
 
   /* Save the new attributes in the new file structure */
 

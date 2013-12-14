@@ -39,6 +39,20 @@ config MSEC_PER_TICK
 		may be defined to inform NuttX that the processor hardware is providing
 		system timer interrupts at some interrupt interval other than 10 msec.
 
+config SYSTEM_TIME64
+	bool "64-bit system clock"
+	default n
+	---help---
+		The system timer is incremented at the rate determined by
+		MSEC_PER_TICK, typically at 100Hz. The count at any given time is
+		then the "uptime" in units of system timer ticks.  By default, the
+		system time is 32-bits wide.  Those defaults provide a range of about
+		13.6 years which is probably a sufficient range for "uptime".
+
+		However, if the system timer rate is significantly higher than 100Hz
+		and/or if a very long "uptime" is required, then this option can be
+		selected to support a 64-bit wide timer.
+
 config RR_INTERVAL
 	int "Round robin timeslice (MSEC)"
 	default 0

@@ -641,7 +641,7 @@ static int process_dup(FAR const struct file *oldp, FAR struct file *newp)
 
   /* Allocate a new container to hold the task and attribute selection */
 
-  newattr = (FAR struct process_file_s *)kzalloc(sizeof(struct process_file_s));
+  newattr = (FAR struct process_file_s *)kmalloc(sizeof(struct process_file_s));
   if (!newattr)
     {
       fdbg("ERROR: Failed to allocate file attributes\n");
