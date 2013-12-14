@@ -147,6 +147,7 @@ static Bigint *Balloc(int k)
       rv->k = k;
       rv->maxwds = x;
     }
+
   rv->sign = rv->wds = 0;
   return rv;
 }
@@ -189,6 +190,7 @@ static Bigint *multadd(Bigint * b, int m, int a)
 #endif
     }
   while (++i < wds);
+
   if (a)
     {
       if (wds >= b->maxwds)
@@ -201,6 +203,7 @@ static Bigint *multadd(Bigint * b, int m, int a)
       b->x[wds++] = a;
       b->wds = wds;
     }
+
   return b;
 }
 
@@ -240,6 +243,7 @@ static int hi0bits(unsigned long x)
           return 32;
         }
     }
+
   return k;
 }
 
@@ -254,11 +258,13 @@ static int lo0bits(unsigned long *y)
         {
           return 0;
         }
+
       if (x & 2)
         {
           *y = x >> 1;
           return 1;
         }
+
       *y = x >> 2;
       return 2;
     }
@@ -297,6 +303,7 @@ static int lo0bits(unsigned long *y)
           return 32;
         }
     }
+
   *y = x;
   return k;
 }
@@ -336,11 +343,13 @@ static Bigint *mult(Bigint * a, Bigint * b)
     {
       k++;
     }
+
   c = Balloc(k);
   for (x = c->x, xa = x + wc; x < xa; x++)
     {
       *x = 0;
     }
+
   xa = a->x;
   xae = xa + wa;
   xb = b->x;
@@ -363,8 +372,10 @@ static Bigint *mult(Bigint * a, Bigint * b)
               Storeinc(xc, z2, z);
             }
           while (x < xae);
+
           *xc = carry;
         }
+
       if ((y = *xb >> 16))
         {
           x = xa;
@@ -380,6 +391,7 @@ static Bigint *mult(Bigint * a, Bigint * b)
               carry = z2 >> 16;
             }
           while (x < xae);
+
           *xc = z2;
         }
     }
@@ -398,10 +410,12 @@ static Bigint *mult(Bigint * a, Bigint * b)
               *xc++ = z & 0xffff;
             }
           while (x < xae);
+
           *xc = carry;
         }
     }
 #endif
+
   for (xc0 = c->x, xc = xc0 + wc; wc > 0 && !*--xc; --wc);
   c->wds = wc;
   return c;
@@ -438,6 +452,7 @@ static Bigint *pow5mult(Bigint * b, int k)
           Bfree(b);
           b = b1;
         }
+
       if (!(k >>= 1))
         {
           break;
@@ -448,8 +463,10 @@ static Bigint *pow5mult(Bigint * b, int k)
           p51 = p5->next = mult(p5, p5);
           p51->next = 0;
         }
+
       p5 = p51;
     }
+
   return b;
 }
 
@@ -470,12 +487,14 @@ static Bigint *lshift(Bigint * b, int k)
     {
       k1++;
     }
+
   b1 = Balloc(k1);
   x1 = b1->x;
   for (i = 0; i < n; i++)
     {
       *x1++ = 0;
     }
+
   x = b->x;
   xe = x + b->wds;
 #ifdef Pack_32
@@ -489,6 +508,7 @@ static Bigint *lshift(Bigint * b, int k)
           z = *x++ >> k1;
         }
       while (x < xe);
+
       if ((*x1 = z))
         {
           ++n1;
@@ -505,6 +525,7 @@ static Bigint *lshift(Bigint * b, int k)
           z = *x++ >> k1;
         }
       while (x < xe);
+
       if ((*x1 = z))
         {
           ++n1;
@@ -512,11 +533,14 @@ static Bigint *lshift(Bigint * b, int k)
     }
 #endif
   else
-    do
-      {
-        *x1++ = *x++;
-      }
-    while (x < xe);
+    {
+      do
+        {
+          *x1++ = *x++;
+        }
+      while (x < xe);
+    }
+
   b1->wds = n1 - 1;
   Bfree(b);
   return b1;
@@ -534,13 +558,18 @@ static int cmp(Bigint * a, Bigint * b)
    {
     ldbg("cmp called with a->x[a->wds-1] == 0\n");
    }
+
   if (j > 1 && !b->x[j - 1])
    {
     ldbg("cmp called with b->x[b->wds-1] == 0\n");
    }
 #endif
+
   if (i -= j)
-    return i;
+    {
+      return i;
+    }
+
   xa0 = a->x;
   xa = xa0 + j;
   xb0 = b->x;
@@ -548,9 +577,14 @@ static int cmp(Bigint * a, Bigint * b)
   for (;;)
     {
       if (*--xa != *--xb)
-        return *xa < *xb ? -1 : 1;
+        {
+          return *xa < *xb ? -1 : 1;
+        }
+
       if (xa <= xa0)
-        break;
+        {
+          break;
+        }
     }
   return 0;
 }
@@ -573,6 +607,7 @@ static Bigint *diff(Bigint * a, Bigint * b)
       c->x[0] = 0;
       return c;
     }
+
   if (i < 0)
     {
       c = a;
@@ -581,7 +616,10 @@ static Bigint *diff(Bigint * a, Bigint * b)
       i = 1;
     }
   else
-    i = 0;
+    {
+      i = 0;
+    }
+
   c = Balloc(a->k);
   c->sign = i;
   wa = a->wds;
@@ -604,6 +642,7 @@ static Bigint *diff(Bigint * a, Bigint * b)
       Storeinc(xc, z, y);
     }
   while (xb < xbe);
+
   while (xa < xae)
     {
       y = (*xa & 0xffff) + borrow;
@@ -623,6 +662,7 @@ static Bigint *diff(Bigint * a, Bigint * b)
       *xc++ = y & 0xffff;
     }
   while (xb < xbe);
+
   while (xa < xae)
     {
       y = *xa++ + borrow;
@@ -631,8 +671,12 @@ static Bigint *diff(Bigint * a, Bigint * b)
       *xc++ = y & 0xffff;
     }
 #endif
+
   while (!*--xc)
-    wa--;
+    {
+      wa--;
+    }
+
   c->wds = wa;
   return c;
 }
@@ -663,7 +707,10 @@ static Bigint *d2b(double d, int *e, int *bits)
           z >>= k;
         }
       else
-        x[0] = y;
+        {
+          x[0] = y;
+        }
+
       i = b->wds = (x[1] = z) ? 2 : 1;
     }
   else
@@ -727,6 +774,7 @@ static Bigint *d2b(double d, int *e, int *bits)
           x[1] = z >> 16;
           i = 1;
         }
+
       k += 32;
     }
   while (!x[i])
@@ -747,10 +795,12 @@ static Bigint *d2b(double d, int *e, int *bits)
       *bits = (i + 2) * 16 - hi0bits(x[i]);
 #endif
     }
+
   return b;
 }
 
-static const double tens[] = {
+static const double tens[] =
+{
   1e0, 1e1, 1e2, 1e3, 1e4, 1e5, 1e6, 1e7, 1e8, 1e9,
   1e10, 1e11, 1e12, 1e13, 1e14, 1e15, 1e16, 1e17, 1e18, 1e19,
   1e20, 1e21, 1e22
@@ -790,6 +840,7 @@ static int quorem(Bigint * b, Bigint * S)
     {
       return 0;
     }
+
   sx = S->x;
   sxe = sx + --n;
   bx = b->x;
@@ -801,6 +852,7 @@ static int quorem(Bigint * b, Bigint * S)
      ldbg("oversized quotient in quorem\n");
    }
 #endif
+
   if (q)
     {
       borrow = 0;
@@ -829,11 +881,15 @@ static int quorem(Bigint * b, Bigint * S)
 #endif
         }
       while (sx <= sxe);
+
       if (!*bxe)
         {
           bx = b->x;
           while (--bxe > bx && !*bxe)
-            --n;
+            {
+              --n;
+            }
+
           b->wds = n;
         }
     }
@@ -877,6 +933,7 @@ static int quorem(Bigint * b, Bigint * S)
           b->wds = n;
         }
     }
+
   return q;
 }
 
@@ -921,14 +978,14 @@ static int quorem(Bigint * b, Bigint * S)
 char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
 {
   /* Arguments ndigits, decpt, sign are similar to those of ecvt and fcvt;
-   * trailing zeros are suppressed from the returned string.  If not null, *rve 
+   * trailing zeros are suppressed from the returned string.  If not null, *rve
    * is set to point to the end of the return value.  If d is +-Infinity or
    * NaN, then *decpt is set to 9999.
-   * 
+   *
    * mode: 0 ==> shortest string that yields d when read in and rounded to
    * nearest. 1 ==> like 0, but with Steele & White stopping rule; e.g. with
    * IEEE P754 arithmetic , mode 0 gives 1e23 whereas mode 1 gives
-   * 9.999999999999999e22. 2 ==> max(1,ndigits) significant digits.  This gives 
+   * 9.999999999999999e22. 2 ==> max(1,ndigits) significant digits.  This gives
    * a return value similar to that of ecvt, except that trailing zeros are
    * suppressed. 3 ==> through ndigits past the decimal point.  This gives a
    * return value similar to that from fcvt, except that trailing zeros are
@@ -938,9 +995,9 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
    * sometimes faster than modes 2-3. 4,5,8,9 ==> left-to-right digit
    * generation. 6-9 ==> don't try fast floating-point estimate (if
    * applicable).
-   * 
+   *
    * Values of mode other than 0-9 are treated as mode 0.
-   * 
+   *
    * Sufficient space is allocated to the return value to hold the suppressed
    * trailing zeros. */
 
@@ -989,11 +1046,14 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
 #endif
         "NaN";
       if (rve)
-        *rve =
+        {
+          *rve =
 #ifdef IEEE_Arith
-          s[3] ? s + 8 :
+            s[3] ? s + 8 :
 #endif
-          s + 3;
+            s + 3;
+        }
+
       return s;
     }
 #endif
@@ -1002,7 +1062,10 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
       *decpt = 1;
       s = "0";
       if (rve)
-        *rve = s + 1;
+        {
+          *rve = s + 1;
+        }
+
       return s;
     }
 
@@ -1017,10 +1080,10 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
        * log(1.5)/log(10) + (x-1.5)/(1.5*log(10)) log10(d) =
        * (i-Bias)*log(2)/log(10) + log10(d2) This suggests computing an
        * approximation k to log10(d) by k = (i - Bias)*0.301029995663981 + (
-       * (d2-1.5)*0.289529654602168 + 0.176091259055681 ); We want k to be too 
+       * (d2-1.5)*0.289529654602168 + 0.176091259055681 ); We want k to be too
        * large rather than too small. The error in the first-order Taylor
-       * series approximation is in our favor, so we just round up the constant 
-       * enough to compensate for any error in the multiplication of (i - Bias) 
+       * series approximation is in our favor, so we just round up the constant
+       * enough to compensate for any error in the multiplication of (i - Bias)
        * by 0.301029995663981; since |i - Bias| <= 1077, and 1077 * 0.30103 *
        * 2^-52 ~=~ 7.2e-14, adding 1e-13 to the constant term more than
        * suffices. Hence we adjust the constant term to 0.1760912590558. (We
@@ -1049,6 +1112,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
     {
       k--;  /* want k = floor(ds) */
     }
+
   k_check = 1;
 
   if (k >= 0 && k <= Ten_pmax)
@@ -1226,11 +1290,20 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
               d -= L;
               *s++ = '0' + (int)L;
               if (d < eps)
-                goto ret1;
+                {
+                  goto ret1;
+                }
+
               if (1. - d < eps)
-                goto bump_up;
+                {
+                  goto bump_up;
+                }
+
               if (++i >= ilim)
-                break;
+                {
+                  break;
+                }
+
               eps *= 10.;
               d *= 10.;
             }
@@ -1239,7 +1312,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
         {
 #endif
           /* Generate ilim digits, then fix them up. */
-          
+
           eps *= tens[ilim - 1];
           for (i = 1;; i++, d *= 10.)
             {
@@ -1249,13 +1322,16 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
               if (i == ilim)
                 {
                   if (d > 0.5 + eps)
-                    goto bump_up;
+                    {
+                      goto bump_up;
+                    }
                   else if (d < 0.5 - eps)
                     {
                       while (*--s == '0');
                       s++;
                       goto ret1;
                     }
+
                   break;
                 }
             }
@@ -1280,7 +1356,10 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
         {
           S = mhi = 0;
           if (ilim < 0 || d <= 5 * ds)
-            goto no_digits;
+            {
+              goto no_digits;
+            }
+
           goto one_digit;
         }
 
@@ -1310,10 +1389,12 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
                         *s = '0';
                         break;
                       }
+
                   ++*s++;
                 }
               break;
             }
+
           if (!(d *= 10.))
             {
               break;
@@ -1343,6 +1424,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
               b5 += j;
               m5 = 0;
             }
+
           if ((i = ilim) < 0)
             {
               m2 -= i;
@@ -1374,8 +1456,11 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
               Bfree(b);
               b = b1;
             }
+
           if ((j = b5 - m5))
-            b = pow5mult(b, j);
+            {
+              b = pow5mult(b, j);
+            }
         }
       else
         {
@@ -1471,10 +1556,12 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
       if (ilim < 0 || cmp(b, S = multadd(S, 5, 0)) <= 0)
         {
           /* no digits, fcvt style */
+
         no_digits:
           k = -1 - ndigits;
           goto ret;
         }
+
     one_digit:
       *s++ = '1';
       k++;
@@ -1603,6 +1690,7 @@ char *__dtoa(double d, int mode, int ndigits, int *decpt, int *sign, char **rve)
             *s++ = '1';
             goto ret;
           }
+
       ++*s++;
     }
   else
@@ -1625,7 +1713,7 @@ ret:
 ret1:
   Bfree(b);
   if (s == s0)
-    {                           /* don't return empty string */
+    {                           /* Don't return empty string */
       *s++ = '0';
       k = 0;
     }

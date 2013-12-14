@@ -37,7 +37,7 @@ ifeq ($(CONFIG_FS_PROCFS),y)
 # Files required for procfs file system support
 
 ASRCS +=
-CSRCS += fs_procfs.c fs_procfsproc.c fs_procfsutil.c
+CSRCS += fs_procfs.c fs_procfsutil.c fs_procfsproc.c fs_procfsuptime.c
 
 # Include procfs build support
 

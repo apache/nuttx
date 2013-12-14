@@ -6225,4 +6225,5 @@
 	  (2013-12-13).
 	* fs/procfs/procfs_utils.c:  Move some re-usable functions out of
 	  fs_procfsproc.c into a utility file (2013-12-14).
+	* fs/procfs/fs_procfsuptime.c:  Supports /proc/uptime (2013-12-14).
 

@@ -35,6 +35,10 @@ config FS_PROCFS_EXCLUDE_PROCESS
 		This will reduce code space, but then giving access to process info
 		was kinda the whole point of procfs, but hey, whatever.
 
+config FS_PROCFS_EXCLUDE_UPTIME
+	bool "Exclude uptime"
+	default n
+
 config FS_PROCFS_EXCLUDE_PARTITIONS
 	bool "Exclude partitions"
 	depends on MTD_PARTITION

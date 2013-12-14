@@ -76,6 +76,7 @@
  ****************************************************************************/
 
 extern const struct procfs_operations process_operations;
+extern const struct procfs_operations uptime_operations;
 extern const struct procfs_operations mtd_procfsoperations;
 extern const struct procfs_operations part_procfsoperations;
 extern const struct procfs_operations smartfs_procfsoperations;
@@ -100,6 +101,9 @@ static const struct procfs_entry_s g_procfsentries[] =
 #endif
 #if defined(CONFIG_MTD_PARTITION) && !defined(CONFIG_FS_PROCFS_EXCLUDE_PARTITON)
   { "partitions",       &part_procfsoperations },
+#endif
+#if !defined(CONFIG_FS_PROCFS_EXCLUDE_UPTIME)
+  { "uptime",           &uptime_operations },
 #endif
 };
 
