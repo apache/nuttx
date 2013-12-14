@@ -1,8 +1,8 @@
 /****************************************************************************
- * include/nuttx/fs/procfs.h
+ * fs/procfs/fs_procfsutil.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Ken Pettit <pettitkd@gmail.com>
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,106 +33,50 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_FS_PROCFS_H
-#define __INCLUDE_NUTTX_FS_PROCFS_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/fs/fs.h>
+
+#include <sys/types.h>
+#include <string.h>
+
+#include <nuttx/fs/procfs.h>
+
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_PROCFS)
 
 /****************************************************************************
- * Pre-Processor Definitions
- ****************************************************************************/
-/* Data entry declaration prototypes ****************************************/
-
-/* Procfs operations are a subset of the mountpt_operations */
-
-struct procfs_operations
-{
-  /* The procfs open method differs from the driver open method
-   * because it receives (1) the inode that contains the procfs
-   * private data, (2) the relative path into the procfs, and (3)
-   * information to manage privileges.
-   */
-
-  int     (*open)(FAR struct file *filep, FAR const char *relpath,
-                  int oflags, mode_t mode);
-
-  /* The following methods must be identical in signature and position because
-   * the struct file_operations and struct mountp_operations are treated like
-   * unions.
-   */
-
-  int     (*close)(FAR struct file *filep);
-  ssize_t (*read)(FAR struct file *filep, FAR char *buffer, size_t buflen);
-  ssize_t (*write)(FAR struct file *filep, FAR const char *buffer, size_t buflen);
-
-  /* The two structures need not be common after this point. The following
-   * are extended methods needed to deal with the unique needs of mounted
-   * file systems.
-   *
-   * Additional open-file-specific procfs operations:
-   */
-
-  int     (*dup)(FAR const struct file *oldp, FAR struct file *newp);
-
-  /* Directory operations */
-
-  int     (*opendir)(FAR const char *relpath, FAR struct fs_dirent_s *dir);
-  int     (*closedir)(FAR struct fs_dirent_s *dir);
-  int     (*readdir)(FAR struct fs_dirent_s *dir);
-  int     (*rewinddir)(FAR struct fs_dirent_s *dir);
-
-  /* Operations on paths */
-
-  int     (*stat)(FAR const char *relpath, FAR struct stat *buf);
-};
-
-/* Procfs handler prototypes ************************************************/
-
-/* This is a procfs entry that each handler should provide to supply
- * specific operations for file and directory handling.
- */
-
-struct procfs_entry_s
-{
-  FAR const char *pathpattern;
-  FAR const struct procfs_operations *ops;
-};
-
-/* Specifies the common elements for an open file in the procfs 
- * file system.  This structure should be sub-classed by handlers
- * to add their own specific data elements to the context.
- */
-
-struct procfs_file_s
-{
-  FAR const struct procfs_entry_s *procfsentry;
-};
-
-/* The generic proc/ pseudo directory structure */
-
-struct procfs_dir_priv_s
-{
-  uint8_t level;                                /* Directory level.  Currently 0 or 1 */
-  uint16_t index;                               /* Index to the next directory entry */
-  uint16_t nentries;                            /* Number of directory entries */
-  FAR const struct procfs_entry_s *procfsentry; /* Pointer to procfs handler entry */
-};
-
-/****************************************************************************
- * Public Function Prototypes
+ * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
+#ifndef MIN
+#  define MIN(a,b) ((a < b) ? a : b)
 #endif
+
+#ifndef MAX
+#  define MAX(a,b) ((a > b) ? a : b)
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: procfs_memcpy
@@ -177,11 +121,33 @@ extern "C" {
 
 size_t procfs_memcpy(FAR const char *src, size_t srclen,
                      FAR char *dest, size_t destlen,
-                     off_t *offset);
+                     off_t *offset)
+{
+  size_t copysize;
+  size_t lnoffset;
 
-#undef EXTERN
-#ifdef __cplusplus
+  /* Will this line take us past the offset? */
+
+  lnoffset = *offset;
+  if (srclen < lnoffset)
+    {
+      /* No... decrement the offset and return without doing anything */
+
+      *offset -= srclen;
+      return 0;
+    }
+
+  /* Handle the remaining offset */
+
+  srclen -= lnoffset;
+  dest   += lnoffset;
+  *offset = 0;
+
+  /* Copy the line into the user destination buffer */
+
+  copysize = MIN(srclen, destlen);
+  memcpy(dest, src, copysize);
+  return copysize;
 }
-#endif
 
-#endif /* __INCLUDE_NUTTX_FS_PROCFS_H */
+#endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */

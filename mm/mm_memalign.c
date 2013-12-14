@@ -47,6 +47,16 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* If multiple heaps are used, then the heap must be passed as a parameter to
+ * mm_malloc().  In the single heap case, mm_malloc() is not available and
+ * we have to use malloc() (which, internally, will use the same heap).
+ */
+
+#ifdef CONFIG_MM_MULTIHEAP
+#  define MM_MALLOC(h,s) mm_malloc(h,s)
+#else
+#  define MM_MALLOC(h,s) malloc(s)
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -83,7 +93,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   if (alignment <= MM_MIN_CHUNK)
     {
-      return mm_malloc(heap, size);
+      return MM_MALLOC(heap, size);
     }
 
   /* Adjust the size to account for (1) the size of the allocated node, (2)
@@ -103,7 +113,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   /* Then malloc that size */
 
-  rawchunk = (size_t)mm_malloc(heap, allocsize);
+  rawchunk = (size_t)MM_MALLOC(heap, allocsize);
   if (rawchunk == 0)
     {
       return NULL;

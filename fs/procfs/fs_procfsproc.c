@@ -71,10 +71,6 @@
 
 #define STATUS_LINELEN 32
 
-#ifndef MIN
-#  define MIN(a,b) ((a < b) ? a : b)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -128,9 +124,6 @@ struct process_level1_s
 /* Helpers */
 
 static int     process_findattr(FAR const char *attr);
-static size_t  process_addline(FAR struct process_file_s *attr,
-                 FAR char *buffer, size_t buflen, size_t linesize,
-                 off_t *offset);
 static ssize_t process_status(FAR struct process_file_s *attr,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
@@ -249,41 +242,6 @@ static int process_findattr(FAR const char *attr)
 }
 
 /****************************************************************************
- * Name: process_addline
- ****************************************************************************/
-
-static size_t process_addline(FAR struct process_file_s *attr,
-                             FAR char *buffer, size_t buflen,
-                             size_t linesize, off_t *offset)
-{
-  size_t copysize;
-  size_t lnoffset;
-
-  /* Will this line take us past the offset? */
-
-  lnoffset = *offset;
-  if (linesize < lnoffset)
-    {
-      /* No... decrement the offset and return without doing anything */
-
-      *offset -= linesize;
-      return 0;
-    }
-
-  /* Handle the remaining offset */
-
-  linesize -= lnoffset;
-  buffer   += lnoffset;
-  *offset   = 0;
-
-  /* Copy the line into the user buffer */
-
-  copysize = MIN(linesize, buflen);
-  memcpy(buffer, &attr->line[lnoffset], copysize);
-  return copysize;
-}
-
-/****************************************************************************
  * Name: process_status
  ****************************************************************************/
 
@@ -309,7 +267,7 @@ static ssize_t process_status(FAR struct process_file_s *attr,
 #endif 
   linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%s\n",
                         "Name:", name);
-  copysize   = process_addline(attr, buffer, remaining, linesize, &offset);
+  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -325,7 +283,7 @@ static ssize_t process_status(FAR struct process_file_s *attr,
   linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%s\n", "Type:",
                         g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK) >>
                         TCB_FLAG_TTYPE_SHIFT]);
-  copysize   = process_addline(attr, buffer, remaining, linesize, &offset);
+  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -340,7 +298,7 @@ static ssize_t process_status(FAR struct process_file_s *attr,
 
   linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%s\n", "State:",
                         g_statenames[tcb->task_state]);
-  copysize   = process_addline(attr, buffer, remaining, linesize, &offset);
+  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -360,7 +318,7 @@ static ssize_t process_status(FAR struct process_file_s *attr,
   linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%d\n", "Priority:",
                         tcb->sched_priority);
 #endif
-  copysize   = process_addline(attr, buffer, remaining, linesize, &offset);
+  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -375,7 +333,7 @@ static ssize_t process_status(FAR struct process_file_s *attr,
 
   linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%s\n", "Scheduler:",
                         tcb->flags & TCB_FLAG_ROUND_ROBIN ? "SCHED_RR" : "SCHED_FIFO");
-  copysize   = process_addline(attr, buffer, remaining, linesize, &offset);
+  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -391,7 +349,7 @@ static ssize_t process_status(FAR struct process_file_s *attr,
 #ifndef CONFIG_DISABLE_SIGNALS
   linesize = snprintf(attr->line, STATUS_LINELEN, "%-12s%08x\n", "SigMask:",
                       tcb->sigprocmask);
-  copysize = process_addline(attr, buffer, remaining, linesize, &offset);
+  copysize = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
 #endif
@@ -427,7 +385,7 @@ static ssize_t process_cmdline(FAR struct process_file_s *attr,
 #endif 
   linesize   = strlen(name);
   memcpy(attr->line, name, linesize);
-  copysize   = process_addline(attr, buffer, remaining, linesize, &offset);
+  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -446,7 +404,7 @@ static ssize_t process_cmdline(FAR struct process_file_s *attr,
       FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)tcb;
 
       linesize   = snprintf(attr->line, STATUS_LINELEN, " 0x%p\n", ptcb->arg);
-      copysize   = process_addline(attr, buffer, remaining, linesize, &offset);
+      copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
 
       totalsize += copysize;
       buffer    += copysize;
@@ -463,7 +421,7 @@ static ssize_t process_cmdline(FAR struct process_file_s *attr,
   for (argv = ttcb->argv + 1; *argv; argv++)
     {
       linesize   = snprintf(attr->line, STATUS_LINELEN, " %s", *argv);
-      copysize   = process_addline(attr, buffer, remaining, linesize, &offset);
+      copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
 
       totalsize += copysize;
       buffer    += copysize;
@@ -476,7 +434,7 @@ static ssize_t process_cmdline(FAR struct process_file_s *attr,
     }
 
   linesize   = snprintf(attr->line, STATUS_LINELEN, "\n");
-  copysize   = process_addline(attr, buffer, remaining, linesize, &offset);
+  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   return totalsize;

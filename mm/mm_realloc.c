@@ -49,10 +49,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* If multiple heaps are used, then the heap must be passed as a paramter to
- * mm_malloc() and mm_free().  If the single heap case, mm_malloc() and
+/* If multiple heaps are used, then the heap must be passed as a parameter to
+ * mm_malloc() and mm_free().  In the single heap case, mm_malloc() and
  * mm_free() are not available and we have to use malloc() and free() (which,
- * internally will use the same heap).
+ * internally, will use the same heap).
  */
 
 #ifdef CONFIG_MM_MULTIHEAP

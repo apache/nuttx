@@ -6223,3 +6223,6 @@
 	* arch/arm/src/a1x/a1x_lowputc.c, a1x_serial.c, and a1x_serila.h:
 	  Beginning of an A10 serial driver.  From Alan Carvalho de Assis
 	  (2013-12-13).
+	* fs/procfs/procfs_utils.c:  Move some re-usable functions out of
+	  fs_procfsproc.c into a utility file (2013-12-14).
+
