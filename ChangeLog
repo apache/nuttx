@@ -6228,4 +6228,7 @@
 	* fs/procfs/fs_procfsuptime.c:  Supports /proc/uptime (2013-12-14).
 	* graphics/nxconsole/nxcon_font.c:  Fix a typo that causes a compile
 	  error when CONFIG_NXCONSOLE_BPP < 8.  From Librae (2013-12-15).
+	* fs/procfs/fs_procfsproc.c:  procfs now shows information about
+	  the group that each thread belongs:  Like parents, group member,
+	  open file, and open sockets (2013-12-15).
 

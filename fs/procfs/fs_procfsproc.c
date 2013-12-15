@@ -330,7 +330,7 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
   name       = tcb->name;
 #else
   name       = "<noname>";
-#endif 
+#endif
   linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
                         "Name:", name);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
@@ -448,7 +448,7 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
   name       = tcb->name;
 #else
   name       = "<noname>";
-#endif 
+#endif
   linesize   = strlen(name);
   memcpy(procfile->line, name, linesize);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
@@ -514,8 +514,128 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
                                 FAR struct tcb_s *tcb, FAR char *buffer,
                                 size_t buflen, off_t offset)
 {
-#warning Missing logic
-  return -ENOENT;
+  FAR struct task_group_s *group = tcb->group;
+  size_t remaining;
+  size_t linesize;
+  size_t copysize;
+  size_t totalsize;
+#ifdef HAVE_GROUP_MEMBERS
+  int i;
+#endif
+
+  DEBUGASSERT(group);
+
+  remaining = buflen;
+  totalsize = 0;
+
+  /* Show the group IDs */
+
+#ifdef HAVE_GROUP_MEMBERS
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
+                        "Group ID:", group->tg_gid);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
+                        "Parent ID:", group->tg_pgid);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+#endif
+
+#if !defined(CONFIG_DISABLE_PTHREAD) && defined(CONFIG_SCHED_HAVE_PARENT)
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
+                        "Main task:", group->tg_task);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+#endif
+
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s0x%02x\n",
+                        "Flags:", group->tg_flags);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
+                        "Members:", group->tg_nmembers);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+#ifdef HAVE_GROUP_MEMBERS
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "Member IDs:");
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  for (i = 0; i < group->tg_nmembers; i++)
+    {
+      linesize   = snprintf(procfile->line, STATUS_LINELEN, " %d");
+      copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+      totalsize += copysize;
+      buffer    += copysize;
+      remaining -= copysize;
+
+      if (totalsize >= buflen)
+        {
+          return totalsize;
+        }
+    }
+
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n");
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+#endif
+
+  return totalsize;
 }
 
 /****************************************************************************
@@ -526,8 +646,102 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
                             FAR struct tcb_s *tcb, FAR char *buffer,
                             size_t buflen, off_t offset)
 {
-#warning Missing logic
-  return -ENOENT;
+  FAR struct task_group_s *group = tcb->group;
+#if CONFIG_NFILE_DESCRIPTORS > 0 /* Guaranteed to be true */
+  FAR struct file *file;
+#endif
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+  FAR struct socket *socket;
+#endif
+  size_t remaining;
+  size_t linesize;
+  size_t copysize;
+  size_t totalsize;
+  int i;
+
+  DEBUGASSERT(group);
+
+  remaining = buflen;
+  totalsize = 0;
+
+#if CONFIG_NFILE_DESCRIPTORS > 0 /* Guaranteed to be true */
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n%3-s %-8s %s\n",
+                        "FD", "POS", "OFLAGS");
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  /* Examine each open file descriptor */
+
+  for (i = 0, file = group->tg_filelist.fl_files; i < CONFIG_NFILE_DESCRIPTORS; i++, file++)
+    {
+      /* Is there an inode associated with the file descriptor? */
+
+      if (file->f_inode)
+        {
+          linesize   = snprintf(procfile->line, STATUS_LINELEN, "%3d %8ld %04x\n",
+                                i, (long)file->f_pos, file->f_oflags);
+          copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+          totalsize += copysize;
+          buffer    += copysize;
+          remaining -= copysize;
+
+          if (totalsize >= buflen)
+            {
+              return totalsize;
+            }
+        }
+    }
+#endif
+
+#if CONFIG_NSOCKET_DESCRIPTORS > 0
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n%3-s %-2s %-3s %s\n",
+                        "SD", "RF", "TYP", "FLAGS");
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  /* Examine each open socket descriptor */
+
+  for (i = 0, socket = group->tg_socketlist.sl_sockets; i < CONFIG_NSOCKET_DESCRIPTORS; i++, socket++)
+    {
+      /* Is there an connection associated with the socket descriptor? */
+
+      if (socket->s_conn)
+        {
+          linesize   = snprintf(procfile->line, STATUS_LINELEN, "%3d %2d %3d %02x",
+                                i + CONFIG_NFILE_DESCRIPTORS,
+                                (long)socket->s_crefs, socket->s_type, socket->s_flags);
+          copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+          totalsize += copysize;
+          buffer    += copysize;
+          remaining -= copysize;
+
+          if (totalsize >= buflen)
+            {
+              return totalsize;
+            }
+        }
+    }
+#endif
+
+  return totalsize;
 }
 
 /****************************************************************************
@@ -603,7 +817,7 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
    */
 
   node = proc_findnode(ptr);
-  if (node < 0)
+  if (!node)
     {
       fdbg("ERROR: Invalid path \"%s\"\n", relpath);
       return -ENOENT;
@@ -695,7 +909,7 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
     case PROC_STATUS: /* Task/thread status */
       ret = proc_status(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
- 
+
     case PROC_CMDLINE: /* Task Command line */
       ret = proc_cmdline(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
@@ -850,7 +1064,7 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 
       ptr++;
       node = proc_findnode(ptr);
-      if (node < 0)
+      if (!node)
         {
           fdbg("ERROR: Invalid path \"%s\"\n", relpath);
           kfree(procdir);
@@ -1029,7 +1243,6 @@ static int proc_stat(const char *relpath, struct stat *buf)
   FAR char *ptr;
   irqstate_t flags;
   pid_t pid;
-  int ret;
 
   /* Two path forms are accepted:
    *
@@ -1103,7 +1316,7 @@ static int proc_stat(const char *relpath, struct stat *buf)
       /* Lookup the well-known node associated with the relative path. */
 
       node = proc_findnode(ptr);
-      if (ret < 0)
+      if (!node)
         {
           fdbg("ERROR: Invalid path \"%s\"\n", relpath);
           return -ENOENT;
