@@ -6231,4 +6231,6 @@
 	* fs/procfs/fs_procfsproc.c:  procfs now shows information about
 	  the group that each thread belongs:  Like parents, group member,
 	  open file, and open sockets (2013-12-15).
+	* fs/procfs/fs_procfsproc.c:  Now shows task stack information
+	  (2013-12-15).
 

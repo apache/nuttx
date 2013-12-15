@@ -85,7 +85,8 @@ enum proc_node_e
 {
   PROC_LEVEL0 = 0,                    /* The top-level directory */
   PROC_STATUS,                        /* Task/thread status */
-  PROC_CMDLINE,                       /* Task Command line */
+  PROC_CMDLINE,                       /* Task command line */
+  PROC_STACK,                         /* Task stack info */
   PROC_GROUP,                         /* Group directory */
   PROC_GROUP_STATUS,                  /* Task group status */
   PROC_GROUP_FD                       /* Group file descriptors */
@@ -133,6 +134,9 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
 static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
+                 FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
+                 off_t offset);
+static ssize_t proc_stack(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
 static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
@@ -204,7 +208,12 @@ static const struct proc_node_s g_status =
 
 static const struct proc_node_s g_cmdline =
 {
-  "cmdline",      "cmdline", (uint8_t)PROC_CMDLINE,      DTYPE_FILE        /* Task Command line */
+  "cmdline",      "cmdline", (uint8_t)PROC_CMDLINE,      DTYPE_FILE        /* Task command line */
+};
+
+static const struct proc_node_s g_stack =
+{
+  "stack",        "stack",   (uint8_t)PROC_STACK,        DTYPE_FILE        /* Task stack info */
 };
 
 static const struct proc_node_s g_group =
@@ -227,7 +236,8 @@ static const struct proc_node_s g_groupfd =
 static FAR const struct proc_node_s * const g_nodeinfo[] =
 {
   &g_status,       /* Task/thread status */
-  &g_cmdline,      /* Task Command line */
+  &g_cmdline,      /* Task command line */
+  &g_stack,        /* Task stack info */
   &g_group,        /* Group directory */
   &g_groupstatus,  /* Task group status */
   &g_groupfd       /* Group file descriptors */
@@ -239,7 +249,8 @@ static FAR const struct proc_node_s * const g_nodeinfo[] =
 static const struct proc_node_s * const g_level0info[] =
 {
   &g_status,       /* Task/thread status */
-  &g_cmdline,      /* Task Command line */
+  &g_cmdline,      /* Task command line */
+  &g_stack,        /* Task stack info */
   &g_group,        /* Group directory */
 };
 #define PROC_NLEVEL0NODES (sizeof(g_level0info)/sizeof(FAR const struct proc_node_s * const))
@@ -503,6 +514,67 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
+  return totalsize;
+}
+
+/****************************************************************************
+ * Name: proc_stack
+ ****************************************************************************/
+
+static ssize_t proc_stack(FAR struct proc_file_s *procfile,
+                 FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
+                 off_t offset)
+{
+  size_t remaining;
+  size_t linesize;
+  size_t copysize;
+  size_t totalsize;
+
+  remaining = buflen;
+  totalsize = 0;
+
+  /* Show the stack base address */
+
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s0x%p\n",
+                        "StackBase:", tcb->adj_stack_ptr);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  /* Show the stack size */
+
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%ld\n",
+                        "StackSize:", (long)tcb->adj_stack_size);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+#if defined(CONFIG_DEBUG) && defined(CONFIG_DEBUG_STACK)
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  /* Show the stack size */
+
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%ld\n",
+                        "StackUsed:", (long)up_check_tcbstack(tcb));
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+#endif
+
   return totalsize;
 }
 
@@ -910,8 +982,12 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
       ret = proc_status(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
 
-    case PROC_CMDLINE: /* Task Command line */
+    case PROC_CMDLINE: /* Task command line */
       ret = proc_cmdline(procfile, tcb, buffer, buflen, filep->f_pos);
+      break;
+
+    case PROC_STACK: /* Task stack info */
+      ret = proc_stack(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
 
     case PROC_GROUP_STATUS: /* Task group status */
