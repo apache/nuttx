@@ -77,48 +77,49 @@
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-/* This enumeration identifies all of the thread attributes that can be
+/* This enumeration identifies all of the task/thread nodes that can be
  * accessed via the procfs file system.
  */
 
-enum process_attr_e
+enum proc_node_e
 {
-  PROCFS_STATUS = 0,                 /* Task/thread status */
-  PROCFS_CMDLINE,                    /* Command line */
+  PROC_LEVEL0 = 0,                    /* The top-level directory */
+  PROC_STATUS,                        /* Task/thread status */
+  PROC_CMDLINE,                       /* Task Command line */
+  PROC_GROUP,                         /* Group directory */
+  PROC_GROUP_STATUS,                  /* Task group status */
+  PROC_GROUP_FD                       /* Group file descriptors */
 };
-#define PROCFS_NATTRS 2
+
+/* This structure associates a relative path name with an node in the task
+ * procfs
+ */
+
+struct proc_node_s
+{
+  FAR const char *relpath;            /* Relative path to the node */
+  FAR const char *name;               /* Terminal node segment name */
+  uint8_t node;                       /* Type of node (see enum proc_node_e) */
+  uint8_t dtype;                      /* dirent type (see include/dirent.h) */
+};
 
 /* This structure describes one open "file" */
 
-struct process_file_s
+struct proc_file_s
 {
-  struct procfs_file_s  base;        /* Base open file structure */
-  uint8_t  type;                     /* See enum process_type_e */
-  pid_t    pid;                      /* Task/thread ID */
-  uint8_t  attr;                     /* See enum process_attr_e */
-  char     line[STATUS_LINELEN];     /* Pre-allocated buffer for formatted lines */
+  struct procfs_file_s base;          /* Base open file structure */
+  FAR const struct proc_node_s *node; /* Describes the file node */
+  pid_t pid;                          /* Task/thread ID */
+  char line[STATUS_LINELEN];          /* Pre-allocated buffer for formatted lines */
 };
 
-/* Level 0 is the directory of active tasks */
+/* This structure describes one open "directory" */
 
-struct process_level0_s
+struct proc_dir_s
 {
-  uint8_t  level;                    /* Directory level.  Currently 0 or 1 */
-  uint16_t index;                    /* Index to the next directory entry */
-  uint16_t nentries;                 /* Number of directory entries */
-
-  pid_t    pid[CONFIG_MAX_TASKS];    /* Snapshot of all active task IDs */
-};
-
-/* Level 1 is the directory of task attributes */
-
-struct process_level1_s
-{
-  struct procfs_dir_priv_s  base;    /* Base directory private data */
-
-  /* Our specific data for context control */
-
-  pid_t    pid;                      /* ID of task for attributes */
+  struct procfs_dir_priv_s  base;     /* Base directory private data */
+  FAR const struct proc_node_s *node; /* Directory node description */
+  pid_t pid;                       /* ID of task/thread for attributes */
 };
 
 /****************************************************************************
@@ -126,31 +127,38 @@ struct process_level1_s
  ****************************************************************************/
 /* Helpers */
 
-static int     process_findattr(FAR const char *attr);
-static ssize_t process_status(FAR struct process_file_s *attr,
+static FAR const struct proc_node_s *
+               proc_findnode(FAR const char *relpath);
+static ssize_t proc_status(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
-static ssize_t process_cmdline(FAR struct process_file_s *attr,
+static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
+                 FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
+                 off_t offset);
+static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
+                 FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
+                 off_t offset);
+static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
 
 /* File system methods */
 
-static int     process_open(FAR struct file *filep, FAR const char *relpath,
+static int     proc_open(FAR struct file *filep, FAR const char *relpath,
                  int oflags, mode_t mode);
-static int     process_close(FAR struct file *filep);
-static ssize_t process_read(FAR struct file *filep, FAR char *buffer,
+static int     proc_close(FAR struct file *filep);
+static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 
-static int     process_dup(FAR const struct file *oldp,
+static int     proc_dup(FAR const struct file *oldp,
                  FAR struct file *newp);
 
-static int     process_opendir(const char *relpath, FAR struct fs_dirent_s *dir);
-static int     process_closedir(FAR struct fs_dirent_s *dir);
-static int     process_readdir(FAR struct fs_dirent_s *dir);
-static int     process_rewinddir(FAR struct fs_dirent_s *dir);
+static int     proc_opendir(const char *relpath, FAR struct fs_dirent_s *dir);
+static int     proc_closedir(FAR struct fs_dirent_s *dir);
+static int     proc_readdir(FAR struct fs_dirent_s *dir);
+static int     proc_rewinddir(FAR struct fs_dirent_s *dir);
 
-static int     process_stat(FAR const char *relpath, FAR struct stat *buf);
+static int     proc_stat(FAR const char *relpath, FAR struct stat *buf);
 
 /****************************************************************************
  * Private Variables
@@ -165,32 +173,87 @@ static int     process_stat(FAR const char *relpath, FAR struct stat *buf);
  * with any compiler.
  */
 
-const struct procfs_operations process_operations =
+const struct procfs_operations proc_operations =
 {
-  process_open,       /* open */
-  process_close,      /* close */
-  process_read,       /* read */
+  proc_open,          /* open */
+  proc_close,         /* close */
+  proc_read,          /* read */
   NULL,               /* write */
 
-  process_dup,        /* dup */
+  proc_dup,           /* dup */
 
-  process_opendir,    /* opendir */
-  process_closedir,   /* closedir */
-  process_readdir,    /* readdir */
-  process_rewinddir,  /* rewinddir */
+  proc_opendir,       /* opendir */
+  proc_closedir,      /* closedir */
+  proc_readdir,       /* readdir */
+  proc_rewinddir,     /* rewinddir */
 
-  process_stat        /* stat */
+  proc_stat           /* stat */
 };
 
-/* This is the list of all attribute strings.  Indexing is with the same
- * values as enum process_attr_e.
- */
+/* These structures provide information about every node */
 
-static const char *g_attrstrings[PROCFS_NATTRS] =
+static const struct proc_node_s g_level0node =
 {
-  "status",
-  "cmdline"
+  "",             "",        (uint8_t)PROC_LEVEL0,       DTYPE_DIRECTORY   /* Top-level directory */
 };
+
+static const struct proc_node_s g_status =
+{
+  "status",       "status",  (uint8_t)PROC_STATUS,       DTYPE_FILE        /* Task/thread status */
+};
+
+static const struct proc_node_s g_cmdline =
+{
+  "cmdline",      "cmdline", (uint8_t)PROC_CMDLINE,      DTYPE_FILE        /* Task Command line */
+};
+
+static const struct proc_node_s g_group =
+{
+  "group",        "group",   (uint8_t)PROC_GROUP,        DTYPE_DIRECTORY   /* Group directory */
+};
+
+static const struct proc_node_s g_groupstatus =
+{
+  "group/status", "status",  (uint8_t)PROC_GROUP_STATUS, DTYPE_FILE        /* Task group status */
+};
+
+static const struct proc_node_s g_groupfd =
+{
+  "group/fd",     "fd",      (uint8_t)PROC_GROUP_FD,     DTYPE_FILE        /* Group file descriptors */
+};
+
+/* This is the list of all nodes */
+
+static FAR const struct proc_node_s * const g_nodeinfo[] =
+{
+  &g_status,       /* Task/thread status */
+  &g_cmdline,      /* Task Command line */
+  &g_group,        /* Group directory */
+  &g_groupstatus,  /* Task group status */
+  &g_groupfd       /* Group file descriptors */
+};
+#define PROC_NNODES (sizeof(g_nodeinfo)/sizeof(FAR const struct proc_node_s * const))
+
+/* This is the list of all level0 nodes */
+
+static const struct proc_node_s * const g_level0info[] =
+{
+  &g_status,       /* Task/thread status */
+  &g_cmdline,      /* Task Command line */
+  &g_group,        /* Group directory */
+};
+#define PROC_NLEVEL0NODES (sizeof(g_level0info)/sizeof(FAR const struct proc_node_s * const))
+
+/* This is the list of all group sub-directory nodes */
+
+static const struct proc_node_s * const g_groupinfo[] =
+{
+  &g_groupstatus,  /* Task group status */
+  &g_groupfd       /* Group file descriptors */
+};
+#define PROC_NGROUPNODES (sizeof(g_groupinfo)/sizeof(FAR const struct proc_node_s * const))
+
+/* Names of task/thread states */
 
 static const char *g_statenames[] =
 {
@@ -222,35 +285,35 @@ static const char *g_ttypenames[4] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: process_findattr
+ * Name: proc_findnode
  ****************************************************************************/
 
-static int process_findattr(FAR const char *attr)
+static FAR const struct proc_node_s *proc_findnode(FAR const char *relpath)
 {
   int i;
 
-  /* Search every string in g_attrstrings or until a match is found */
+  /* Search every string in g_nodeinfo or until a match is found */
 
-  for (i = 0; i < PROCFS_NATTRS; i++)
+  for (i = 0; i < PROC_NNODES; i++)
     {
-      if (strcmp(g_attrstrings[i], attr) == 0)
+      if (strcmp(g_nodeinfo[i]->relpath, relpath) == 0)
         {
-          return i;
+          return g_nodeinfo[i];
         }
     }
 
   /* Not found */
 
-  return -ENOENT;
+  return NULL;
 }
 
 /****************************************************************************
- * Name: process_status
+ * Name: proc_status
  ****************************************************************************/
 
-static ssize_t process_status(FAR struct process_file_s *attr,
-                             FAR struct tcb_s *tcb, FAR char *buffer,
-                             size_t buflen, off_t offset)
+static ssize_t proc_status(FAR struct proc_file_s *procfile,
+                           FAR struct tcb_s *tcb, FAR char *buffer,
+                           size_t buflen, off_t offset)
 {
   FAR const char *name;
   size_t remaining;
@@ -268,9 +331,9 @@ static ssize_t process_status(FAR struct process_file_s *attr,
 #else
   name       = "<noname>";
 #endif 
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%s\n",
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n",
                         "Name:", name);
-  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -283,10 +346,10 @@ static ssize_t process_status(FAR struct process_file_s *attr,
 
   /* Show the thread type */
 
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%s\n", "Type:",
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n", "Type:",
                         g_ttypenames[(tcb->flags & TCB_FLAG_TTYPE_MASK) >>
                         TCB_FLAG_TTYPE_SHIFT]);
-  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -299,9 +362,9 @@ static ssize_t process_status(FAR struct process_file_s *attr,
 
   /* Show the thread state */
 
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%s\n", "State:",
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n", "State:",
                         g_statenames[tcb->task_state]);
-  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -315,13 +378,13 @@ static ssize_t process_status(FAR struct process_file_s *attr,
   /* Show the thread priority */
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%d (%d)\n", "Priority:",
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d (%d)\n", "Priority:",
                         tcb->sched_priority, tcb->base_priority);
 #else
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%d\n", "Priority:",
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n", "Priority:",
                         tcb->sched_priority);
 #endif
-  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -334,9 +397,9 @@ static ssize_t process_status(FAR struct process_file_s *attr,
 
   /* Show the scheduler */
 
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "%-12s%s\n", "Scheduler:",
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "%-12s%s\n", "Scheduler:",
                         tcb->flags & TCB_FLAG_ROUND_ROBIN ? "SCHED_RR" : "SCHED_FIFO");
-  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -350,9 +413,9 @@ static ssize_t process_status(FAR struct process_file_s *attr,
   /* Show the signal mask */
 
 #ifndef CONFIG_DISABLE_SIGNALS
-  linesize = snprintf(attr->line, STATUS_LINELEN, "%-12s%08x\n", "SigMask:",
+  linesize = snprintf(procfile->line, STATUS_LINELEN, "%-12s%08x\n", "SigMask:",
                       tcb->sigprocmask);
-  copysize = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
+  copysize = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
 #endif
@@ -361,12 +424,12 @@ static ssize_t process_status(FAR struct process_file_s *attr,
 }
 
 /****************************************************************************
- * Name: process_cmdline
+ * Name: proc_cmdline
  ****************************************************************************/
 
-static ssize_t process_cmdline(FAR struct process_file_s *attr,
-                             FAR struct tcb_s *tcb, FAR char *buffer,
-                             size_t buflen, off_t offset)
+static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
+                            FAR struct tcb_s *tcb, FAR char *buffer,
+                            size_t buflen, off_t offset)
 {
   FAR struct task_tcb_s *ttcb;
   FAR const char *name;
@@ -387,8 +450,8 @@ static ssize_t process_cmdline(FAR struct process_file_s *attr,
   name       = "<noname>";
 #endif 
   linesize   = strlen(name);
-  memcpy(attr->line, name, linesize);
-  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
+  memcpy(procfile->line, name, linesize);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   buffer    += copysize;
@@ -406,8 +469,8 @@ static ssize_t process_cmdline(FAR struct process_file_s *attr,
     {
       FAR struct pthread_tcb_s *ptcb = (FAR struct pthread_tcb_s *)tcb;
 
-      linesize   = snprintf(attr->line, STATUS_LINELEN, " 0x%p\n", ptcb->arg);
-      copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
+      linesize   = snprintf(procfile->line, STATUS_LINELEN, " 0x%p\n", ptcb->arg);
+      copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
       totalsize += copysize;
       buffer    += copysize;
@@ -423,8 +486,8 @@ static ssize_t process_cmdline(FAR struct process_file_s *attr,
 
   for (argv = ttcb->argv + 1; *argv; argv++)
     {
-      linesize   = snprintf(attr->line, STATUS_LINELEN, " %s", *argv);
-      copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
+      linesize   = snprintf(procfile->line, STATUS_LINELEN, " %s", *argv);
+      copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
       totalsize += copysize;
       buffer    += copysize;
@@ -436,27 +499,51 @@ static ssize_t process_cmdline(FAR struct process_file_s *attr,
         }
     }
 
-  linesize   = snprintf(attr->line, STATUS_LINELEN, "\n");
-  copysize   = procfs_memcpy(attr->line, linesize, buffer, remaining, &offset);
+  linesize   = snprintf(procfile->line, STATUS_LINELEN, "\n");
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining, &offset);
 
   totalsize += copysize;
   return totalsize;
 }
 
 /****************************************************************************
- * Name: process_open
+ * Name: proc_groupstatus
  ****************************************************************************/
 
-static int process_open(FAR struct file *filep, FAR const char *relpath,
-                      int oflags, mode_t mode)
+static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
+                                FAR struct tcb_s *tcb, FAR char *buffer,
+                                size_t buflen, off_t offset)
 {
-  FAR struct process_file_s *attr;
+#warning Missing logic
+  return -ENOENT;
+}
+
+/****************************************************************************
+ * Name: proc_groupfd
+ ****************************************************************************/
+
+static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
+                            FAR struct tcb_s *tcb, FAR char *buffer,
+                            size_t buflen, off_t offset)
+{
+#warning Missing logic
+  return -ENOENT;
+}
+
+/****************************************************************************
+ * Name: proc_open
+ ****************************************************************************/
+
+static int proc_open(FAR struct file *filep, FAR const char *relpath,
+                     int oflags, mode_t mode)
+{
+  FAR struct proc_file_s *procfile;
+  FAR const struct proc_node_s *node;
   FAR struct tcb_s *tcb;
   FAR char *ptr;
   irqstate_t flags;
   unsigned long tmp;
   pid_t pid;
-  int attrndx;
 
   fvdbg("Open '%s'\n", relpath);
 
@@ -511,65 +598,73 @@ static int process_open(FAR struct file *filep, FAR const char *relpath,
       return -ENOENT;
     }
 
-  /* The second segment of the relpath should be a well known attribute of
-   * the task/thread.
+  /* The remaining segments of the relpath should be a well known node in
+   * the task/thread tree.
    */
 
-  attrndx = process_findattr(ptr);
-  if (attrndx < 0)
+  node = proc_findnode(ptr);
+  if (node < 0)
     {
-      fdbg("ERROR: Invalid attribute %s\n", ptr);
+      fdbg("ERROR: Invalid path \"%s\"\n", relpath);
       return -ENOENT;
     }
 
-  /* Allocate a container to hold the task and attribute selection */
+  /* The node must be a file, not a directory */
 
-  attr = (FAR struct process_file_s *)kzalloc(sizeof(struct process_file_s));
-  if (!attr)
+  if (node->dtype != DTYPE_FILE)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      fdbg("ERROR: Path \"%s\" is a directory\n", relpath);
+      return -EISDIR;
+    }
+
+  /* Allocate a container to hold the task and node selection */
+
+  procfile = (FAR struct proc_file_s *)kzalloc(sizeof(struct proc_file_s));
+  if (!procfile)
+    {
+      fdbg("ERROR: Failed to allocate file container\n");
       return -ENOMEM;
     }
 
-  /* Initialize the file attributes */
+  /* Initialize the file container */
 
-  attr->pid  = pid;
-  attr->attr = attrndx;
+  procfile->pid  = pid;
+  procfile->node = node;
 
   /* Save the index as the open-specific state in filep->f_priv */
 
-  filep->f_priv = (FAR void *)attr;
+  filep->f_priv = (FAR void *)procfile;
   return OK;
 }
 
 /****************************************************************************
- * Name: process_close
+ * Name: proc_close
  ****************************************************************************/
 
-static int process_close(FAR struct file *filep)
+static int proc_close(FAR struct file *filep)
 {
-  FAR struct process_file_s *attr;
+  FAR struct proc_file_s *procfile;
 
   /* Recover our private data from the struct file instance */
 
-  attr = (FAR struct process_file_s *)filep->f_priv;
-  DEBUGASSERT(attr);
+  procfile = (FAR struct proc_file_s *)filep->f_priv;
+  DEBUGASSERT(procfile);
 
-  /* Release the file attributes structure */
+  /* Release the file container structure */
 
-  kfree(attr);
+  kfree(procfile);
   filep->f_priv = NULL;
   return OK;
 }
 
 /****************************************************************************
- * Name: process_read
+ * Name: proc_read
  ****************************************************************************/
 
-static ssize_t process_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen)
+static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
+                         size_t buflen)
 {
-  FAR struct process_file_s *attr;
+  FAR struct proc_file_s *procfile;
   FAR struct tcb_s *tcb;
   irqstate_t flags;
   ssize_t ret;
@@ -578,32 +673,43 @@ static ssize_t process_read(FAR struct file *filep, FAR char *buffer,
 
   /* Recover our private data from the struct file instance */
 
-  attr = (FAR struct process_file_s *)filep->f_priv;
-  DEBUGASSERT(attr);
+  procfile = (FAR struct proc_file_s *)filep->f_priv;
+  DEBUGASSERT(procfile);
 
   /* Verify that the thread is still valid */
 
   flags = irqsave();
-  tcb = sched_gettcb(attr->pid);
+  tcb = sched_gettcb(procfile->pid);
 
   if (!tcb)
     {
-      fdbg("ERROR: PID %d is not valid\n", (int)attr->pid);
+      fdbg("ERROR: PID %d is not valid\n", (int)procfile->pid);
       irqrestore(flags);
       return -ENODEV;
     }
 
   /* Provide the requested data */
 
-  switch (attr->attr)
+  switch (procfile->node->node)
     {
-    default:
-    case PROCFS_STATUS:  /* Task/thread status */
-      ret = process_status(attr, tcb, buffer, buflen, filep->f_pos);
+    case PROC_STATUS: /* Task/thread status */
+      ret = proc_status(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
  
-    case PROCFS_CMDLINE: /* Command line */
-      ret = process_cmdline(attr, tcb, buffer, buflen, filep->f_pos);
+    case PROC_CMDLINE: /* Task Command line */
+      ret = proc_cmdline(procfile, tcb, buffer, buflen, filep->f_pos);
+      break;
+
+    case PROC_GROUP_STATUS: /* Task group status */
+      ret = proc_groupstatus(procfile, tcb, buffer, buflen, filep->f_pos);
+      break;
+
+    case PROC_GROUP_FD: /* Group file descriptors */
+      ret = proc_groupfd(procfile, tcb, buffer, buflen, filep->f_pos);
+      break;
+
+     default:
+      ret = -EINVAL;
       break;
     }
 
@@ -620,76 +726,77 @@ static ssize_t process_read(FAR struct file *filep, FAR char *buffer,
 }
 
 /****************************************************************************
- * Name: process_dup
+ * Name: proc_dup
  *
  * Description:
  *   Duplicate open file data in the new file structure.
  *
  ****************************************************************************/
 
-static int process_dup(FAR const struct file *oldp, FAR struct file *newp)
+static int proc_dup(FAR const struct file *oldp, FAR struct file *newp)
 {
-  FAR struct process_file_s *oldattr;
-  FAR struct process_file_s *newattr;
+  FAR struct proc_file_s *oldfile;
+  FAR struct proc_file_s *newfile;
 
   fvdbg("Dup %p->%p\n", oldp, newp);
 
   /* Recover our private data from the old struct file instance */
 
-  oldattr = (FAR struct process_file_s *)oldp->f_priv;
-  DEBUGASSERT(oldattr);
+  oldfile = (FAR struct proc_file_s *)oldp->f_priv;
+  DEBUGASSERT(oldfile);
 
-  /* Allocate a new container to hold the task and attribute selection */
+  /* Allocate a new container to hold the task and node selection */
 
-  newattr = (FAR struct process_file_s *)kmalloc(sizeof(struct process_file_s));
-  if (!newattr)
+  newfile = (FAR struct proc_file_s *)kmalloc(sizeof(struct proc_file_s));
+  if (!newfile)
     {
-      fdbg("ERROR: Failed to allocate file attributes\n");
+      fdbg("ERROR: Failed to allocate file container\n");
       return -ENOMEM;
     }
 
-  /* The copy the file attribtes from the old attributes to the new */
+  /* The copy the file information from the old container to the new */
 
-  memcpy(newattr, oldattr, sizeof(struct process_file_s));
+  memcpy(newfile, oldfile, sizeof(struct proc_file_s));
 
-  /* Save the new attributes in the new file structure */
+  /* Save the new container in the new file structure */
 
-  newp->f_priv = (FAR void *)newattr;
+  newp->f_priv = (FAR void *)newfile;
   return OK;
 }
 
 /****************************************************************************
- * Name: process_opendir
+ * Name: proc_opendir
  *
  * Description:
  *   Open a directory for read access
  *
  ****************************************************************************/
 
-static int process_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
+static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
 {
+  FAR struct proc_dir_s *procdir;
+  FAR const struct proc_node_s *node;
   FAR struct tcb_s *tcb;
   irqstate_t flags;
+  unsigned long tmp;
+  FAR char *ptr;
+  pid_t pid;
 
   fvdbg("relpath: \"%s\"\n", relpath ? relpath : "NULL");
   DEBUGASSERT(relpath && dir && !dir->u.procfs);
 
-  /* The relative must be:
+  /* The relative must be either:
    *
-   * "<pid>" - The sub-directory of task/thread attributes
+   *  (1) "<pid>" - The sub-directory of task/thread attributes, or
+   *  (2) The name of a directory node under <pid>
    */
-
-  FAR struct process_level1_s *level1;
-  unsigned long tmp;
-  FAR char *ptr;
-  pid_t pid;
 
   /* Otherwise, the relative path should be a valid task/thread ID */
 
   ptr = NULL;
   tmp = strtoul(relpath, &ptr, 10);
 
-  if (!ptr || (*ptr != '\0' && strcmp(ptr, "/") != 0))
+  if (!ptr || (*ptr != '\0' && *ptr != '/'))
     {
       /* strtoul failed or there is something in the path after the pid */
 
@@ -721,51 +828,74 @@ static int process_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
       return -ENOENT;
     }
 
+  /* Allocate the directory structure.  Note that the index and procentry
+   * pointer are implicitly nullified by kzalloc().  Only the remaining,
+   * non-zero entries will need be initialized.
+   */
+
+  procdir = (FAR struct proc_dir_s *)kzalloc(sizeof(struct proc_dir_s));
+  if (!procdir)
+    {
+      fdbg("ERROR: Failed to allocate the directory structure\n");
+      return -ENOMEM;
+    }
+
   /* Was the <pid> the final element of the path? */
 
   if (*ptr != '\0' && strcmp(ptr, "/") != 0)
     {
-      /* There is something in the path after the pid */
+      /* There is something in the path after the pid.  Skip over the path
+       * segment delimiter and see if we can identify the node of interest.
+       */
 
-      fdbg("ERROR: Invalid path \"%s\"\n", relpath);
-      return -ENOENT;
+      ptr++;
+      node = proc_findnode(ptr);
+      if (node < 0)
+        {
+          fdbg("ERROR: Invalid path \"%s\"\n", relpath);
+          kfree(procdir);
+          return -ENOENT;
+        }
+
+      /* The node must be a directory, not a file */
+
+      if (node->dtype != DTYPE_DIRECTORY)
+        {
+          fdbg("ERROR: Path \"%s\" is not a directory\n", relpath);
+          kfree(procdir);
+          return -ENOTDIR;
+        }
+
+      /* This is a second level directory */
+
+      procdir->base.level    = 2;
+      procdir->base.nentries = PROC_NGROUPNODES;
+      procdir->node          = node;
     }
-
-  /* The path refers to the 1st level sbdirectory.  Allocate the level1
-   * dirent structure.
-   */
-
-  level1 = (FAR struct process_level1_s *)
-     kzalloc(sizeof(struct process_level1_s));
-
-  if (!level1)
+  else
     {
-      fdbg("ERROR: Failed to allocate the level1 directory structure\n");
-      return -ENOMEM;
+      /* Use the special level0 node */
+
+      procdir->base.level    = 1;
+      procdir->base.nentries = PROC_NLEVEL0NODES;
+      procdir->node          = &g_level0node;
     }
 
-  /* Note that the index and procentry pointer were implicitly nullified
-   * by kzalloc().  Only the remaining, non-zero entries need be initialized.
-   */
-
-  level1->base.level       = 1;
-  level1->base.nentries    = PROCFS_NATTRS;
-  level1->pid              = pid;
-
-  dir->u.procfs = (FAR void *)level1;
-  return OK;
+   procdir->pid  = pid;
+   dir->u.procfs = (FAR void *)procdir;
+   return OK;
 }
 
 /****************************************************************************
- * Name: process_closedir
+ * Name: proc_closedir
  *
  * Description: Close the directory listing
  *
  ****************************************************************************/
 
-static int process_closedir(FAR struct fs_dirent_s *dir)
+static int proc_closedir(FAR struct fs_dirent_s *dir)
 {
-  FAR struct process_level0_s *priv;
+  FAR struct proc_dir_s *priv;
 
   DEBUGASSERT(dir && dir->u.procfs);
   priv = dir->u.procfs;
@@ -780,15 +910,16 @@ static int process_closedir(FAR struct fs_dirent_s *dir)
 }
 
 /****************************************************************************
- * Name: process_readdir
+ * Name: proc_readdir
  *
  * Description: Read the next directory entry
  *
  ****************************************************************************/
 
-static int process_readdir(struct fs_dirent_s *dir)
+static int proc_readdir(struct fs_dirent_s *dir)
 {
-  FAR struct process_level1_s *level1;
+  FAR struct proc_dir_s *procdir;
+  FAR const struct proc_node_s *node;
   FAR struct tcb_s *tcb;
   unsigned int index;
   irqstate_t flags;
@@ -796,12 +927,12 @@ static int process_readdir(struct fs_dirent_s *dir)
   int ret;
 
   DEBUGASSERT(dir && dir->u.procfs);
-  level1 = dir->u.procfs;
+  procdir = dir->u.procfs;
 
   /* Have we reached the end of the directory */
 
-  index = level1->base.index;
-  if (index >= level1->base.nentries)
+  index = procdir->base.index;
+  if (index >= procdir->base.nentries)
     {
       /* We signal the end of the directory by returning the special
        * error -ENOENT
@@ -811,15 +942,13 @@ static int process_readdir(struct fs_dirent_s *dir)
       ret = -ENOENT;
     }
 
-  /* We are tranversing a subdirectory of task attributes */
+  /* No, we are not at the end of the directory */
 
   else
     {
-      DEBUGASSERT(level1->base.level == 1);
-
       /* Verify that the pid still refers to an active task/thread */
 
-      pid = level1->pid;
+      pid = procdir->pid;
 
       flags = irqsave();
       tcb = sched_gettcb(pid);
@@ -831,16 +960,36 @@ static int process_readdir(struct fs_dirent_s *dir)
           return -ENOENT;
         }
 
-      /* Save the filename=pid and file type=directory */
+      /* The TCB is still valid (or at least was when we entered this function) */
+      /* Handle the directory listing by the node type */
 
-      dir->fd_dir.d_type = DTYPE_FILE;
-      strncpy(dir->fd_dir.d_name, g_attrstrings[index], NAME_MAX+1);
+      switch (procdir->node->node)
+        {
+         case PROC_LEVEL0: /* Top level directory */
+           DEBUGASSERT(procdir->base.level == 1);
+           node = g_level0info[index];
+           break;
+
+         case PROC_GROUP:  /* Group sub-directory */
+           DEBUGASSERT(procdir->base.level == 2);
+           node = g_groupinfo[index];
+           break;
+
+          default:
+            ret = -ENOENT;
+           break;
+        }
+
+      /* Save the filename and file type */
+
+      dir->fd_dir.d_type = node->dtype;
+      strncpy(dir->fd_dir.d_name, node->name, NAME_MAX+1);
 
       /* Set up the next directory entry offset.  NOTE that we could use the
        * standard f_pos instead of our own private index.
        */
 
-      level1->base.index = index + 1;
+      procdir->base.index = index + 1;
       ret = OK;
     }
 
@@ -848,32 +997,33 @@ static int process_readdir(struct fs_dirent_s *dir)
 }
 
 /****************************************************************************
- * Name: process_rewindir
+ * Name: proc_rewindir
  *
  * Description: Reset directory read to the first entry
  *
  ****************************************************************************/
 
-static int process_rewinddir(struct fs_dirent_s *dir)
+static int proc_rewinddir(struct fs_dirent_s *dir)
 {
-  FAR struct process_level0_s *priv;
+  FAR struct proc_dir_s *priv;
 
   DEBUGASSERT(dir && dir->u.procfs);
   priv = dir->u.procfs;
 
-  priv->index = 0;
+  priv->base.index = 0;
   return OK;
 }
 
 /****************************************************************************
- * Name: process_stat
+ * Name: proc_stat
  *
  * Description: Return information about a file or directory
  *
  ****************************************************************************/
 
-static int process_stat(const char *relpath, struct stat *buf)
+static int proc_stat(const char *relpath, struct stat *buf)
 {
+  FAR const struct proc_node_s *node;
   FAR struct tcb_s *tcb;
   unsigned long tmp;
   FAR char *ptr;
@@ -885,8 +1035,8 @@ static int process_stat(const char *relpath, struct stat *buf)
    *
    * "<pid>" - If <pid> refers to a currently active task/thread, then it
    *   is a directory
-   * "<pid>/<attr>" - If <attr> is a recognized attribute then, then it
-   *   is a file.
+   * "<pid>/<node>" - If <node> is a recognized node then, then it
+   *   is a file or directory.
    */
 
   ptr = NULL;
@@ -943,25 +1093,34 @@ static int process_stat(const char *relpath, struct stat *buf)
   else
     {
       /* Otherwise, the second segment of the relpath should be a well
-       * known attribute of the task/thread.
+       * known node of the task/thread directory structure.
        */
 
       /* Skip over the path segment delimiter */
 
       ptr++;
 
-      /* Lookup the well-known attribute string. */
+      /* Lookup the well-known node associated with the relative path. */
 
-      ret = process_findattr(ptr);
+      node = proc_findnode(ptr);
       if (ret < 0)
         {
-          fdbg("ERROR: Invalid attribute %s\n", ptr);
+          fdbg("ERROR: Invalid path \"%s\"\n", relpath);
           return -ENOENT;
         }
 
-      /* If the attribute exists, it is the name for a read-only file. */
+      /* If the node exists, it is the name for a read-only file or
+       * directory.
+       */
 
-      buf->st_mode = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
+      if (node->dtype == DTYPE_FILE)
+        {
+          buf->st_mode = S_IFREG|S_IROTH|S_IRGRP|S_IRUSR;
+        }
+      else
+        {
+          buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
+        }
     }
 
   /* File/directory size, access block size */
@@ -976,5 +1135,5 @@ static int process_stat(const char *relpath, struct stat *buf)
  * Public Functions
  ****************************************************************************/
 
-#endif /* CONFIG_FS_PROCFS_EXCLUDE_PROCESS */
+#endif /* CONFIG_FS_PROC_EXCLUDE_PROCESS */
 #endif /* !CONFIG_DISABLE_MOUNTPOINT && CONFIG_FS_PROCFS */

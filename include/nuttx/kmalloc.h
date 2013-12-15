@@ -62,7 +62,7 @@
 #undef KMALLOC_EXTERN
 #if defined(__cplusplus)
 # define KMALLOC_EXTERN extern "C"
-extern "C" 
+extern "C"
 {
 #else
 # define KMALLOC_EXTERN extern
@@ -77,7 +77,7 @@ extern "C"
  * be used for both the kernel- and user-mode objects.
  */
 
-/* This familiy of allocators is used to manage user-accessible memory
+/* This family of allocators is used to manage user-accessible memory
  * from the kernel.  In the flat build, the following are declared in
  * stdlib.h and are directly callable.  In the kernel-phase of the kernel
  * build, the following are defined in userspace.h as macros that call
@@ -114,7 +114,7 @@ extern "C"
 
 #endif
 
-/* This familiy of allocators is used to manage kernel protected memory */
+/* This family of allocators is used to manage kernel protected memory */
 
 #if !defined(CONFIG_NUTTX_KERNEL)
 /* If this is not a kernel build, then these map to the same interfaces

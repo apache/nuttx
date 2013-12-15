@@ -75,7 +75,7 @@
  * External Definitons
  ****************************************************************************/
 
-extern const struct procfs_operations process_operations;
+extern const struct procfs_operations proc_operations;
 extern const struct procfs_operations uptime_operations;
 extern const struct procfs_operations mtd_procfsoperations;
 extern const struct procfs_operations part_procfsoperations;
@@ -89,8 +89,8 @@ extern const struct procfs_operations smartfs_procfsoperations;
 static const struct procfs_entry_s g_procfsentries[] =
 {
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_PROCESS
-  { "[0-9]*/*",         &process_operations },
-  { "[0-9]*",           &process_operations },
+  { "[0-9]*/**",        &proc_operations },
+  { "[0-9]*",           &proc_operations },
 #endif
 #if defined(CONFIG_FS_SMARTFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_SMARTFS)
 //{ "fs/smartfs",       &smartfs_procfsoperations },
@@ -694,7 +694,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
     /* Are we reading an intermediate subdirectory? */
 
-  else if (priv->level == 1 && priv->procfsentry == NULL)
+  else if (priv->level > 0 && priv->procfsentry == NULL)
     {
       FAR struct procfs_level1_s *level1;
 
@@ -763,7 +763,7 @@ static int procfs_rewinddir(struct inode *mountpt, struct fs_dirent_s *dir)
   DEBUGASSERT(mountpt && dir && dir->u.procfs);
   priv = dir->u.procfs;
 
-  if (priv->level == 1 && priv->procfsentry == NULL)
+  if (priv->level > 0 && priv->procfsentry == NULL)
     {
       priv->index = ((struct procfs_level1_s *) priv)->firstindex;
     }

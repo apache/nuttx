@@ -353,8 +353,6 @@ static int uptime_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int uptime_stat(const char *relpath, struct stat *buf)
 {
-  int ret;
-
   /* "uptime" is the only acceptable value for the relpath */
 
   if (strcmp(relpath, "uptime") != 0)
