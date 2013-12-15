@@ -80,11 +80,7 @@
 struct uptime_file_s
 {
   struct procfs_file_s  base;        /* Base open file structure */
-#ifdef CONFIG_SYSTEM_TIME64
-  uint64_t ticktime;                 /* Sampled 64-bit timer */
-#else
-  uint32_t ticktime;                 /* Sampled 32-bit timer */
-#endif
+  unsigned int linesize;             /* Number of valid characters in line[] */
   char line[UPTIME_LINELEN];         /* Pre-allocated buffer for formatted lines */
 };
 
@@ -256,47 +252,48 @@ static ssize_t uptime_read(FAR struct file *filep, FAR char *buffer,
 #ifdef CONFIG_SYSTEM_TIME64
       /* 64-bit timer */
 
-      attr->ticktime = clock_systimer64();
+      ticktime = clock_systimer64();
 #else
       /* 32-bit timer */
 
-      attr->ticktime = clock_systimer();
+      ticktime = clock_systimer();
 #endif
-    }
-
-  ticktime  = attr->ticktime;
 
 #if defined(CONFIG_HAVE_DOUBLE) && defined(CONFIG_LIBC_FLOATINGPOINT)
-  /* Convert the system up time to a seconds + hundredths of seconds string */
+      /* Convert the system up time to a seconds + hundredths of seconds string */
 
-  now       = (double)ticktime / (double)CLOCKS_PER_SEC;
-  linesize  = snprintf(attr->line, UPTIME_LINELEN, "%10.2f\n", now);
+      now       = (double)ticktime / (double)CLOCKS_PER_SEC;
+      linesize  = snprintf(attr->line, UPTIME_LINELEN, "%10.2f\n", now);
 
 #else
-  /* Convert the system up time to seconds + hundredths of seconds */
+      /* Convert the system up time to seconds + hundredths of seconds */
 
-  sec       = ticktime / CLOCKS_PER_SEC;
-  remainder = (unsigned int)(ticktime % CLOCKS_PER_SEC);
-  csec      = (100 * remainder + (CLOCKS_PER_SEC / 2)) / CLOCKS_PER_SEC;
+      sec       = ticktime / CLOCKS_PER_SEC;
+      remainder = (unsigned int)(ticktime % CLOCKS_PER_SEC);
+      csec      = (100 * remainder + (CLOCKS_PER_SEC / 2)) / CLOCKS_PER_SEC;
 
-  /* Make sure that rounding did not force the hundredths of a second above 99 */
+      /* Make sure that rounding did not force the hundredths of a second above 99 */
 
-  if (csec > 99)
-    {
-      sec++;
-      csec -= 100;
-    }
+      if (csec > 99)
+        {
+          sec++;
+          csec -= 100;
+        }
 
-  /* Convert the seconds + hundredths of seconds to a string */
+      /* Convert the seconds + hundredths of seconds to a string */
 
-  linesize = snprintf(attr->line, UPTIME_LINELEN, "%7lu.%02u\n", sec, csec);
+      linesize = snprintf(attr->line, UPTIME_LINELEN, "%7lu.%02u\n", sec, csec);
 
 #endif
+      /* Save the linesize in case we are re-entered with f_pos > 0 */
+
+      attr->linesize = linesize;
+    }
 
   /* Transfer the system up time to user receive buffer */
 
   offset = filep->f_pos;
-  ret    = procfs_memcpy(attr->line, linesize, buffer, buflen, &offset);
+  ret    = procfs_memcpy(attr->line, attr->linesize, buffer, buflen, &offset);
 
   /* Update the file offset */
 
