@@ -257,7 +257,7 @@ nxcon_renderglyph(FAR struct nxcon_state_s *priv,
        */
 
 #if CONFIG_NXCONSOLE_BPP < 8
-      pixel  = priv->wcolor[0];
+      pixel  = priv->wndo.wcolor[0];
 
 #  if CONFIG_NXCONSOLE_BPP == 1
 

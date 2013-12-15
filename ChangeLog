@@ -6226,4 +6226,6 @@
 	* fs/procfs/procfs_utils.c:  Move some re-usable functions out of
 	  fs_procfsproc.c into a utility file (2013-12-14).
 	* fs/procfs/fs_procfsuptime.c:  Supports /proc/uptime (2013-12-14).
+	* graphics/nxconsole/nxcon_font.c:  Fix a typo that causes a compile
+	  error when CONFIG_NXCONSOLE_BPP < 8.  From Librae (2013-12-15).
 
