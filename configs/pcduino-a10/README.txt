@@ -101,6 +101,7 @@ Contents
   - Serial Console
   - LEDs
   - Buttons
+  - Booting NuttX from an SD card
 
 pcDuino v1 Connectors
 =====================
@@ -249,3 +250,17 @@ Buttons
     SW4 Key_Home  LCD1_D18/ATAD14/KP_OUT0/SMC_SLK/EINT18/CSI1_D18/PH18
     SW5 Key_Menu  LCD1_D19/ATAD15/KP_OUT1/SMC_SDA/EINT19/CSI1_D19/PH19
 
+Booting NuttX from an SD card
+=============================
+
+  These are the steps to get U-Boot booting from SD Card:
+
+  $ git clone https://github.com/yuq/u-boot-sunxi.git
+  $ cd u-boot-sunxi
+  $ make pcduino CROSS_COMPILE=arm-linux-gnueabi-
+  $ sudo dd if=./spl/sunxi-spl.bin of=/dev/sdb bs=1024 seek=8
+  $ sudo dd if=u-boot.bin of=/dev/sdb bs=1024 seek=32
+
+  We need to replace u-boot.bin by nuttx.bin.
+
+  Reference: https://www.olimex.com/wiki/Bare_Metal_programming_A13#Stand_alone_program_running_with_uboot
