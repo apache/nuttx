@@ -540,7 +540,8 @@
 
 #  define VECTOR_L2_END_PADDR     (VECTOR_L2_PBASE+VECTOR_L2_SIZE)
 #  define VECTOR_L2_END_VADDR     (VECTOR_L2_VBASE+VECTOR_L2_SIZE)
-#endif
+
+#endif /* !CONFIG_ARCH_LOWVECTORS */
 
 /* Paging L2 page table offset/size */
 
@@ -572,11 +573,15 @@
  */
 
 #define VECTOR_TABLE_SIZE         0x00010000
+
 #ifdef CONFIG_ARCH_LOWVECTORS  /* Vectors located at 0x0000:0000  */
+
 #  define A1X_VECTOR_PADDR        A1X_SRAMA1_PADDR
 #  define A1X_VECTOR_VSRAM        A1X_SRAMA1_VADDR
 #  define A1X_VECTOR_VADDR        0x00000000
+
 #else  /* Vectors located at 0xffff:0000 -- this probably does not work */
+
 #  ifdef A1X_ISRAM1_SIZE >= VECTOR_TABLE_SIZE
 #    define A1X_VECTOR_PADDR      (A1X_SRAMA1_PADDR+A1X_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
 #    define A1X_VECTOR_VSRAM      (A1X_SRAMA1_VADDR+A1X_ISRAM1_SIZE-VECTOR_TABLE_SIZE)
@@ -585,6 +590,7 @@
 #    define A1X_VECTOR_VSRAM      (A1X_SRAMA1_VADDR+A1X_ISRAM0_SIZE-VECTOR_TABLE_SIZE)
 #  endif
 #  define A1X_VECTOR_VADDR        0xffff0000
+
 #endif
 
 /************************************************************************************
