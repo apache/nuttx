@@ -78,9 +78,11 @@
 #define CP15_TCMTR(r)      _CP15(0, r, c0, c0, 2)   /* TCM Type Register */
 #define CP15_TLBTR(r)      _CP15(0, r, c0, c0, 3)   /* TLB Type Register */
 #define CP15_MPIDR(r)      _CP15(0, r, c0, c0, 5)   /* Multiprocessor Affinity Register */
+#define CP15_REVIDR(r)     _CP15(0, r, c0, c0, 6)   /* Multiprocessor Affinity Register (Cortex-A8/9) */
 #define CP15_MID_PFR0(r)   _CP15(0, r, c0, c1, 0)   /* Processor Feature Register 0 */
-#define CP15_MD_PFR1(r)    _CP15(0, r, c0, c1, 1)   /* Processor Feature Register 1 */
+#define CP15_MID_PFR1(r)   _CP15(0, r, c0, c1, 1)   /* Processor Feature Register 1 */
 #define CP15_MID_DFR0(r)   _CP15(0, r, c0, c1, 2)   /* Debug Feature Register 0 */
+#define CP15_MID_AFR0(r)   _CP15(0, r, c0, c1, 3)   /* Auxiliary Feature Register 0 (Cortex-A8/9) */
 #define CP15_MID_MMFR0(r)  _CP15(0, r, c0, c1, 4)   /* Memory Model Features Register 0 */
 #define CP15_MID_MMFR1(r)  _CP15(0, r, c0, c1, 5)   /* Memory Model Features Register 1 */
 #define CP15_MID_MMFR2(r)  _CP15(0, r, c0, c1, 6)   /* Memory Model Features Register 2 */
@@ -90,7 +92,7 @@
 #define CP15_ID_ISAR2(r)   _CP15(0, r, c0, c2, 2)   /* Instruction Set Attributes Register 2 */
 #define CP15_ID_ISAR3(r)   _CP15(0, r, c0, c2, 3)   /* Instruction Set Attributes Register 3 */
 #define CP15_ID_ISAR4(r)   _CP15(0, r, c0, c2, 4)   /* Instruction Set Attributes Register 4 */
-#define CP15_ID_ISAR5(r)   _CP15(0, r, c0, c2, 5)   /* Instruction Set Attributes Register 5 */
+#define CP15_ID_ISAR5(r)   _CP15(0, r, c0, c2, 5)   /* Instruction Set Attributes Register 5 (Cortex-A5) */
 #define CP15_CCSIDR(r)     _CP15(1, r, c0, c0, 0)   /* Cache Size Identification Register */
 #define CP15_CLIDR(r)      _CP15(1, r, c0, c0, 1)   /* Cache Level ID Register */
 #define CP15_AIDR(r)       _CP15(1, r, c0, c0, 7)   /* Auxiliary ID Register */
@@ -126,7 +128,7 @@
 #define CP15_ICIMVAU(r)    _CP15(0, r, c7, c5, 1)
 #define CP15_ISB(r)        _CP15(0, r, c7, c5, 4)
 #define CP15_BPIALL(r)     _CP15(0, r, c7, c5, 6)   /* Cache Operations Registers */
-#define CP15_BPIMVA(r)     _CP15(0, r, c7, c5, 7)
+#define CP15_BPIMVA(r)     _CP15(0, r, c7, c5, 7)   /* Cortex-A5 */
 #define CP15_DCIMVAC(r)    _CP15(0, r, c7, c6, 1)
 #define CP15_DCISW(r)      _CP15(0, r, c7, c6, 2)
 #define CP15_V2PCWPR(r,n)  _CP15(0, r, c7, c8, (n)) /* VA to PA operations, n=0-3 */
@@ -139,7 +141,7 @@
 #  define CP15_V2POWPR1(r) _CP15(0, r, c7, c8, 5)
 #  define CP15_V2POWPR2(r) _CP15(0, r, c7, c8, 6)
 #  define CP15_V2POWPR3(r) _CP15(0, r, c7, c8, 7)
-#define CP15_DCCMVAC(r)    _CP15(0, r, c7, c10, 1)  /* Cache Operations Registers */
+#define CP15_DCCMVAC(r)    _CP15(0, r, c7, c10, 1)  /* Cache Operations Registers (aka DCCVAC) */
 #define CP15_DCCSW(r)      _CP15(0, r, c7, c10, 2)
 #define CP15_DSB(r)        _CP15(0, r, c7, c10, 4)
 #define CP15_DMB(r)        _CP15(0, r, c7, c10, 5)
@@ -162,18 +164,25 @@
 #define CP15_MOVSR(r)      _CP15(0, r, c9, c12, 3)  /* Overflow Flag Status Register */
 #define CP15_PMSWINC(r)    _CP15(0, r, c9, c12, 4)  /* Software Increment Register */
 #define CP15_PMSELR(r)     _CP15(0, r, c9, c12, 5)  /* Event Counter Selection Register */
-#define CP15_PMCEID0(r)    _CP15(0, r, c9, c12, 6)  /* Common Event Identification Registers */
+#define CP15_PMCEID0(r)    _CP15(0, r, c9, c12, 6)  /* Common Event Identification Registers (Cortex-A5) */
 #define CP15_PMCEID1(r)    _CP15(0, r, c9, c12, 7)
 #define CP15_PMCCNTR(r)    _CP15(0, r, c9, c13, 0)  /* Cycle Count Register */
 #define CP15_PMXEVTYPER(r) _CP15(0, r, c9, c13, 1)  /* Event Type Select Register */
 #define CP15_PMCCFILTR(r)  _CP15(0, r, c9, c13, 1)  /* Cycle Count Filter Control Register */
-#define CP15_MXEVCNTR(r)   _CP15(0, r, c9, c13, 2)  /* Event Count Registers */
+#define CP15_MXEVCNTR(r)   _CP15(0, r, c9, c13, 2)  /* Event Count Registers (Cortex-A5) */
 #define CP15_PMUSERENR(r)  _CP15(0, r, c9, c14, 0)  /* User Enable Register */
 #define CP15_PMINTENSET(r) _CP15(0, r, c9, c14, 1)  /* Interrupt Enable Set Register */
 #define CP15_PMINTENCLR(r) _CP15(0, r, c9, c14, 2)  /* Interrupt Enable Clear Register */
 
+#define CP15_TLBLCKDOWN(r) _CP15(0, r, c10, c0, 0)  /* TLB Lockdown register (Cortex-A8/9) */
 #define CP15_PPRRR(r)      _CP15(0, r, c10, c2, 0)  /* Memory region remap */
 #define CP15_PNMRR(r)      _CP15(0, r, c10, c2, 1)
+
+#define CP15_PLEIDR(r)     _CP15(0, r, c11, c0, 0)  /* PLE ID Register (Cortex-A8/9) */
+#define CP15_PLEASR(r)     _CP15(0, r, c11, c0, 2)  /* PLE Activity Status Register (Cortex-A8/9) */
+#define CP15_PLEFSR(r)     _CP15(0, r, c11, c0, 4)  /* PLE FIFO Status Register (Cortex-A8/9) */
+#define CP15_PLEUAR(r)     _CP15(0, r, c11, c1, 0)  /* Preload Engine User Accessibility Register (Cortex-A8/9) */
+#define CP15_PLEPCR(r)     _CP15(0, r, c11, c1, 1)  /* Preload Engine Parameters Control Register (Cortex-A8/9) */
 
 #define CP15_VBAR(r)       _CP15(0, r, c12, c0, 0)  /* Vector Base Address Register */
 #define CP15_MVBAR(r)      _CP15(0, r, c12, c0, 1)  /* Monitor Vector Base Address Register */
@@ -186,14 +195,21 @@
 #define CP15_TPIDRURO(r)   _CP15(0, r, c13, c0, 3)
 #define CP15_TPIDRPRW(r)   _CP15(0, r, c13, c0, 4)
 
-#define CP15_DR0(r)        _CP15(3, r, c15, c0, 0)  /* Data Register */
-#define CP15_DR1(r)        _CP15(3, r, c15, c0, 1)  /* Data Register */
-#define CP15_DTAGR(r)      _CP15(3, r, c15, c2, 0)  /* Data Cache Tag Read Operation Register */
-#define CP15_ITAGR(r)      _CP15(3, r, c15, c2, 1)  /* Instruction Cache Tag Read Operation Register */
-#define CP15_DDATAR(r)     _CP15(3, r, c15, c4, 0)  /* Data Cache Data Read Operation Register */
-#define CP15_IDATAR(r)     _CP15(3, r, c15, c4, 1)  /* Instruction Cache Data Read Operation Register */
-#define CP15_TLBR(r)       _CP15(3, r, c15, c4, 2)  /* TLB Data Read Operation Register */
+#define CP15_PWRCTRL(r)    _CP15(0, r, c15, c0, 0)  /* Power Control Register (Cortex-A8/9) */
+#define CP15_NEONBUSY(r)   _CP15(0, r, c15, c1, 1)  /* NEON Busy Register (Cortex-A8/9) */
+#define CP15_DR0(r)        _CP15(3, r, c15, c0, 0)  /* Data Register (Cortex-A5) */
+#define CP15_DR1(r)        _CP15(3, r, c15, c0, 1)  /* Data Register (Cortex-A5) */
+#define CP15_DTAGR(r)      _CP15(3, r, c15, c2, 0)  /* Data Cache Tag Read Operation Register (Cortex-A5) */
+#define CP15_ITAGR(r)      _CP15(3, r, c15, c2, 1)  /* Instruction Cache Tag Read Operation Register (Cortex-A5) */
+#define CP15_DDATAR(r)     _CP15(3, r, c15, c4, 0)  /* Data Cache Data Read Operation Register (Cortex-A5) */
+#define CP15_IDATAR(r)     _CP15(3, r, c15, c4, 1)  /* Instruction Cache Data Read Operation Register (Cortex-A5) */
+#define CP15_TLBR(r)       _CP15(3, r, c15, c4, 2)  /* TLB Data Read Operation Register (Cortex-A5) */
 #define CP15_CBADDR(r)     _CP15(4, r, c15, c0, 0)  /* Configuration Base Address Register */
-#define CP15_TLBHITMAP(r)  _CP15(5, r, c15, c0, 0)  /* TLB access and attributes */
+#define CP15_TLBHITMAP(r)  _CP15(5, r, c15, c0, 0)  /* TLB access and attributes (Cortex-A5) */
+#define CP15_RTLBLCKDWN(r) _CP15(5, r, c15, c4, 2)  /* Select Lockdown TLB Entry for read (Cortex-A8/9) */
+#define CP15_WTLBLCKDWN(r) _CP15(5, r, c15, c4, 4)  /* Select Lockdown TLB Entry for write (Cortex-A8/9) */
+#define CP15_MAINTLBVA(r)  _CP15(5, r, c15, c5, 2)  /* Main TLB VA register (Cortex-A8/9) */
+#define CP15_MAINTLBPA(r)  _CP15(5, r, c15, c6, 2)  /* Main TLB PA register (Cortex-A8/9) */
+#define CP15_MAINTLBAT(r)  _CP15(5, r, c15, c7, 2)  /* Main TLB Attribute register (Cortex-A8/9) */
 
 #endif /* __ARCH_ARM_SRC_ARMV7_A_CP15_H */
