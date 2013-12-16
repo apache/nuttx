@@ -6233,4 +6233,6 @@
 	  open file, and open sockets (2013-12-15).
 	* fs/procfs/fs_procfsproc.c:  Now shows task stack information
 	  (2013-12-15).
+	* arch/arm/src/armv7-a/cp15.h:  Review A9 TRM and updated CP15
+	  register definitions accordinglyg (2013-12-16).
 
