@@ -456,7 +456,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                           return count;
                         }
 
-                      set_errno(errno);
+                      set_errno(errsave);
 
                       /* We have to check whether we need to return a long
                        * or an int.
