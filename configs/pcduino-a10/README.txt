@@ -155,7 +155,7 @@ pcDuino v1 Connectors
   - J5 Debug Port
      1. Rx                         UART0-RX
      2. Gnd                        GND
-     2. Tx                         UART0-TX
+     3. Tx                         UART0-TX
 
   - J6 SPI2
      1. SPI2_MISO
@@ -191,7 +191,7 @@ Serial Console
   1. UART0 is available on J5 Debug Port.
 
      J15 Pin 1 Rx                UART0-RX  UART0_RX/IR1_RX/PB23
-     J15 Pin 2 Tx                UART0-TX  UART0_TX/IR1_TX/PB22
+     J15 Pin 3 Tx                UART0-TX  UART0_TX/IR1_TX/PB22
 
   2. UART2 is available on J11
 
@@ -255,12 +255,10 @@ Booting NuttX from an SD card
 
   These are the steps to get U-Boot booting from SD Card:
 
-  $ git clone https://github.com/yuq/u-boot-sunxi.git
-  $ cd u-boot-sunxi
-  $ make pcduino CROSS_COMPILE=arm-linux-gnueabi-
-  $ sudo dd if=./spl/sunxi-spl.bin of=/dev/sdb bs=1024 seek=8
-  $ sudo dd if=u-boot.bin of=/dev/sdb bs=1024 seek=32
-
-  We need to replace u-boot.bin by nuttx.bin.
+    $ git clone https://github.com/yuq/u-boot-sunxi.git
+    $ cd u-boot-sunxi
+    $ make pcduino CROSS_COMPILE=arm-none-eabi-
+    $ sudo dd if=./spl/sunxi-spl.bin of=/dev/sdb bs=1024 seek=8
+    $ sudo dd if=nuttx.bin of=/dev/sdb bs=1024 seek=32
 
   Reference: https://www.olimex.com/wiki/Bare_Metal_programming_A13#Stand_alone_program_running_with_uboot
