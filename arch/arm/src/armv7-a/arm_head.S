@@ -225,7 +225,7 @@ __start:
 	 * mapped RAM in either case.  So we will need to create a special
 	 * mapping for the page table.
 	 *
-	 * Load informtion needed to map the page table.  After the ldmia, we
+	 * Load information needed to map the page table.  After the ldmia, we
 	 * will have
 	 *
 	 *   R1 = The aligned, physical base address of the page table

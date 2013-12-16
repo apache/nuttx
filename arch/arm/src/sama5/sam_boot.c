@@ -321,6 +321,8 @@ static inline void sam_setupmappings(void)
 {
   int i;
 
+  /* Set up each group of section mappings */
+
   for (i = 0; i < NMAPPINGS; i++)
     {
       mmu_l1_map_region(&section_mapping[i]);
@@ -340,6 +342,8 @@ static inline void sam_setupmappings(void)
 static inline void sam_remap(void)
 {
   int i;
+
+  /* Re-map each group of section */
 
   for (i = 0; i < NREMAPPINGS; i++)
     {
@@ -364,7 +368,7 @@ static void sam_vectorpermissions(uint32_t mmuflags)
 
   uint32_t pte = mmu_l2_getentry(PG_L2_VECT_VADDR, 0);
 
-  /* String the MMU flags from the page table entry.
+  /* Mask out the old MMU flags from the page table entry.
    *
    * The pte might be zero the first time this function is called.
    */

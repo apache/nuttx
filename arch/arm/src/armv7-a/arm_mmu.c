@@ -165,7 +165,7 @@ void mmu_l1_map_region(const struct section_mapping_s *mapping)
   uint32_t mmuflags = mapping->mmuflags;
   int i;
 
-  /* Loop, writting each mapping into the L1 page table */
+  /* Loop, writing each mapping into the L1 page table */
 
   for (i = 0; i < mapping->nsections; i++)
     {
@@ -194,7 +194,7 @@ void mmu_invalidate_region(uint32_t vstart, size_t size)
   uint32_t vaddr = vstart & 0xfffff000;
   uint32_t vend  = vaddr + size;
 
-  /* Loop, writting each mapping into the L1 page table */
+  /* Loop, writing each mapping into the L1 page table */
 
   while (vaddr < vend)
     {
