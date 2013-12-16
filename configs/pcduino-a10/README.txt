@@ -255,10 +255,28 @@ Booting NuttX from an SD card
 
   These are the steps to get U-Boot booting from SD Card:
 
-    $ git clone https://github.com/yuq/u-boot-sunxi.git
-    $ cd u-boot-sunxi
-    $ make pcduino CROSS_COMPILE=arm-none-eabi-
-    $ sudo dd if=./spl/sunxi-spl.bin of=/dev/sdb bs=1024 seek=8
-    $ sudo dd if=nuttx.bin of=/dev/sdb bs=1024 seek=32
+    1. Get the U-Boot sources for the pcDuino
+
+      $ git clone https://github.com/yuq/u-boot-sunxi.git
+
+    2. Build U-Boot.  We really only want the SPL program; this builds
+       the whole thing:
+
+      $ cd u-boot-sunxi
+      $ make pcduino CROSS_COMPILE=arm-none-eabi-
+
+      NOTES:
+      a. You may need to use a different tool prefix for the CROSS_COMPILE=
+         value, depending upon what toolchain you have installed and upon
+         which platform your are working.
+      b. When I try this on Cygwin, I get a make failure that is, apparently,
+         due to some script incompatibility.
+
+    3. Insert a FLASH stick.  Use dmesg to get the name of the new USB
+       device.  Make sure that it is not mounted, then (assuming that the
+       USB device is /dev/sdb):
+
+      $ sudo dd if=./spl/sunxi-spl.bin of=/dev/sdb bs=1024 seek=8
+      $ sudo dd if=nuttx.bin of=/dev/sdb bs=1024 seek=32
 
   Reference: https://www.olimex.com/wiki/Bare_Metal_programming_A13#Stand_alone_program_running_with_uboot
