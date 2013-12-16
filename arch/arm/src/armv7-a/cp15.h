@@ -78,11 +78,11 @@
 #define CP15_TCMTR(r)      _CP15(0, r, c0, c0, 2)   /* TCM Type Register */
 #define CP15_TLBTR(r)      _CP15(0, r, c0, c0, 3)   /* TLB Type Register */
 #define CP15_MPIDR(r)      _CP15(0, r, c0, c0, 5)   /* Multiprocessor Affinity Register */
-#define CP15_REVIDR(r)     _CP15(0, r, c0, c0, 6)   /* Multiprocessor Affinity Register (Cortex-A8/9) */
+#define CP15_REVIDR(r)     _CP15(0, r, c0, c0, 6)   /* Revision ID register (Cortex-A9) */
 #define CP15_MID_PFR0(r)   _CP15(0, r, c0, c1, 0)   /* Processor Feature Register 0 */
 #define CP15_MID_PFR1(r)   _CP15(0, r, c0, c1, 1)   /* Processor Feature Register 1 */
 #define CP15_MID_DFR0(r)   _CP15(0, r, c0, c1, 2)   /* Debug Feature Register 0 */
-#define CP15_MID_AFR0(r)   _CP15(0, r, c0, c1, 3)   /* Auxiliary Feature Register 0 (Cortex-A8/9) */
+#define CP15_MID_AFR0(r)   _CP15(0, r, c0, c1, 3)   /* Auxiliary Feature Register 0 (Cortex-A9) */
 #define CP15_MID_MMFR0(r)  _CP15(0, r, c0, c1, 4)   /* Memory Model Features Register 0 */
 #define CP15_MID_MMFR1(r)  _CP15(0, r, c0, c1, 5)   /* Memory Model Features Register 1 */
 #define CP15_MID_MMFR2(r)  _CP15(0, r, c0, c1, 6)   /* Memory Model Features Register 2 */
@@ -174,15 +174,15 @@
 #define CP15_PMINTENSET(r) _CP15(0, r, c9, c14, 1)  /* Interrupt Enable Set Register */
 #define CP15_PMINTENCLR(r) _CP15(0, r, c9, c14, 2)  /* Interrupt Enable Clear Register */
 
-#define CP15_TLBLCKDOWN(r) _CP15(0, r, c10, c0, 0)  /* TLB Lockdown register (Cortex-A8/9) */
-#define CP15_PPRRR(r)      _CP15(0, r, c10, c2, 0)  /* Memory region remap */
-#define CP15_PNMRR(r)      _CP15(0, r, c10, c2, 1)
+#define CP15_TLBLCKDOWN(r) _CP15(0, r, c10, c0, 0)  /* TLB Lockdown register (Cortex-A9) */
+#define CP15_PPRRR(r)      _CP15(0, r, c10, c2, 0)  /* Primary Region Remap Register */
+#define CP15_NMRR(r)       _CP15(0, r, c10, c2, 1)  /* Normal Memory Remap Register */
 
-#define CP15_PLEIDR(r)     _CP15(0, r, c11, c0, 0)  /* PLE ID Register (Cortex-A8/9) */
-#define CP15_PLEASR(r)     _CP15(0, r, c11, c0, 2)  /* PLE Activity Status Register (Cortex-A8/9) */
-#define CP15_PLEFSR(r)     _CP15(0, r, c11, c0, 4)  /* PLE FIFO Status Register (Cortex-A8/9) */
-#define CP15_PLEUAR(r)     _CP15(0, r, c11, c1, 0)  /* Preload Engine User Accessibility Register (Cortex-A8/9) */
-#define CP15_PLEPCR(r)     _CP15(0, r, c11, c1, 1)  /* Preload Engine Parameters Control Register (Cortex-A8/9) */
+#define CP15_PLEIDR(r)     _CP15(0, r, c11, c0, 0)  /* PLE ID Register (Cortex-A9) */
+#define CP15_PLEASR(r)     _CP15(0, r, c11, c0, 2)  /* PLE Activity Status Register (Cortex-A9) */
+#define CP15_PLEFSR(r)     _CP15(0, r, c11, c0, 4)  /* PLE FIFO Status Register (Cortex-A9) */
+#define CP15_PLEUAR(r)     _CP15(0, r, c11, c1, 0)  /* Preload Engine User Accessibility Register (Cortex-A9) */
+#define CP15_PLEPCR(r)     _CP15(0, r, c11, c1, 1)  /* Preload Engine Parameters Control Register (Cortex-A9) */
 
 #define CP15_VBAR(r)       _CP15(0, r, c12, c0, 0)  /* Vector Base Address Register */
 #define CP15_MVBAR(r)      _CP15(0, r, c12, c0, 1)  /* Monitor Vector Base Address Register */
@@ -195,8 +195,8 @@
 #define CP15_TPIDRURO(r)   _CP15(0, r, c13, c0, 3)
 #define CP15_TPIDRPRW(r)   _CP15(0, r, c13, c0, 4)
 
-#define CP15_PWRCTRL(r)    _CP15(0, r, c15, c0, 0)  /* Power Control Register (Cortex-A8/9) */
-#define CP15_NEONBUSY(r)   _CP15(0, r, c15, c1, 1)  /* NEON Busy Register (Cortex-A8/9) */
+#define CP15_PWRCTRL(r)    _CP15(0, r, c15, c0, 0)  /* Power Control Register (Cortex-A9) */
+#define CP15_NEONBUSY(r)   _CP15(0, r, c15, c1, 1)  /* NEON Busy Register (Cortex-A9) */
 #define CP15_DR0(r)        _CP15(3, r, c15, c0, 0)  /* Data Register (Cortex-A5) */
 #define CP15_DR1(r)        _CP15(3, r, c15, c0, 1)  /* Data Register (Cortex-A5) */
 #define CP15_DTAGR(r)      _CP15(3, r, c15, c2, 0)  /* Data Cache Tag Read Operation Register (Cortex-A5) */
@@ -206,10 +206,10 @@
 #define CP15_TLBR(r)       _CP15(3, r, c15, c4, 2)  /* TLB Data Read Operation Register (Cortex-A5) */
 #define CP15_CBADDR(r)     _CP15(4, r, c15, c0, 0)  /* Configuration Base Address Register */
 #define CP15_TLBHITMAP(r)  _CP15(5, r, c15, c0, 0)  /* TLB access and attributes (Cortex-A5) */
-#define CP15_RTLBLCKDWN(r) _CP15(5, r, c15, c4, 2)  /* Select Lockdown TLB Entry for read (Cortex-A8/9) */
-#define CP15_WTLBLCKDWN(r) _CP15(5, r, c15, c4, 4)  /* Select Lockdown TLB Entry for write (Cortex-A8/9) */
-#define CP15_MAINTLBVA(r)  _CP15(5, r, c15, c5, 2)  /* Main TLB VA register (Cortex-A8/9) */
-#define CP15_MAINTLBPA(r)  _CP15(5, r, c15, c6, 2)  /* Main TLB PA register (Cortex-A8/9) */
-#define CP15_MAINTLBAT(r)  _CP15(5, r, c15, c7, 2)  /* Main TLB Attribute register (Cortex-A8/9) */
+#define CP15_RTLBLCKDWN(r) _CP15(5, r, c15, c4, 2)  /* Select Lockdown TLB Entry for read (Cortex-A9) */
+#define CP15_WTLBLCKDWN(r) _CP15(5, r, c15, c4, 4)  /* Select Lockdown TLB Entry for write (Cortex-A9) */
+#define CP15_MAINTLBVA(r)  _CP15(5, r, c15, c5, 2)  /* Main TLB VA register (Cortex-A9) */
+#define CP15_MAINTLBPA(r)  _CP15(5, r, c15, c6, 2)  /* Main TLB PA register (Cortex-A9) */
+#define CP15_MAINTLBAT(r)  _CP15(5, r, c15, c7, 2)  /* Main TLB Attribute register (Cortex-A9) */
 
 #endif /* __ARCH_ARM_SRC_ARMV7_A_CP15_H */
