@@ -283,12 +283,6 @@ Booting NuttX from an SD card
        $ sudo dd if=nuttx.bin of=/dev/sdb bs=1024 seek=32
 
     4. Remove the FLASH stick from the host pc.  Insert into the pcDuino
-       microSD slot.  Reset the pcDuino and press any key to keep the
-       boot loader from starting Linux.
-
-    5. Enter the following commands to run NuttX:
-
-      fatls mmc 0x4a000000 nuttx.bin
-      go 0x4a000000
+       microSD slot.  Reset the pcDuino and NuttX should be running.
 
   Reference: https://www.olimex.com/wiki/Bare_Metal_programming_A13#Stand_alone_program_running_with_uboot
