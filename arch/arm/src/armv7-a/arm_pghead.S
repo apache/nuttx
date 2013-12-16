@@ -247,8 +247,33 @@ __start:
 	teq		r0, r2
 	bne		.Lpgtableclear
 
+#ifdef ARMV7A_PGTABLE_MAPPING
+	/* If the page table does not lie in the same address space as does the
+	 * mapped RAM in either case.  So we will need to create a special
+	 * mapping for the page table.
+	 *
+	 * Load information needed to map the page table.  After the ldmia, we
+	 * will have
+	 *
+	 *   R1 = The aligned, physical base address of the page table
+	 *   R2 = The aligned, virtual base address of the page table
+	 *   R3 = The MMU flags to use with the .text space mapping
+	 *   R5 = The physical address of the L1 page table (from above)
+	 *
+	 * The value in R1 could have been obtained by simply masking R5.
+	 */
+
+	adr		r0, .LCptinfo			/* Address of page table description */
+	ldmia	r0, {r1, r2, r3}		/* Load the page table description */
+
+	/* A single page is sufficient to map the page table */
+
+	orr		r0, r1, r3				/* OR MMU flags into physical address */
+	str		r0, [r5, r2, lsr #18]	/* Map using the virtual address as an index */
+#endif
+
 	/* Create identity mapping for first MB of the .text section to support
-	 * this startup logic executing out of the physical address space.  This
+	 * this start-up logic executing out of the physical address space.  This
 	 * identity mapping will be removed by .Lvstart (see below).  Of course,
 	 * we would only do this if the physical-virtual mapping is not already
 	 * the identity mapping.
@@ -481,6 +506,23 @@ __start:
 .LCvstart:
 	.long	.Lvstart
 	.size	.LCvstart, . -.LCvstart
+
+#ifdef ARMV7A_PGTABLE_MAPPING
+	/* Page table region description.  The order of these fields must not
+	 * change because the values are loaded using ldmia:
+	 *
+	 * 1) The aligned, physical base address of the page table
+	 * 2) The aligned, virtual base address of the page table
+	 * 3) The MMU flags to use with the .text space mapping
+	 */
+
+	.type	.LCptinfo, %object
+.LCptinfo:
+	.long	(PGTABLE_BASE_PADDR & 0xfff00000)	/* Physical base address */
+	.long	(PGTABLE_BASE_VADDR & 0xfff00000)	/* Virtual base address */
+	.long	MMU_MEMFLAGS						/* MMU flags for text section in RAM */
+	.size	.LCptinfo, . -.LCptinfo
+#endif
 
 	/* The aligned, physical base address of the .text section */
 
