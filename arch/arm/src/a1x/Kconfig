@@ -333,4 +333,51 @@ config A1X_BOOT_USB
 	bool "USB"
 
 endchoice # Boot device
+
+config A1X_DDR_MAPOFFSET
+	int "Installed SDRAM offset"
+	default 0
+	---help---
+		The size of the installed SRAM memory is required in order to
+		properly configure memory mapping.  The mapping will begin at the
+		start of SDRAM plus A1X_DDR_MAPOFFSET and extend for DDR_MAPSIZE
+		bytes.  NOTE typically A1X_MAP_OFFSET is zero and A1X_DDR_MAPSIZE is
+		the full, installed size of the DRAM.  But these values can be
+		modified to set aside memory at the beginning or end of SRAM that is
+		unmapped (or mapped differently).  NOTE also that this value relates
+		closely to other settings:
+
+			RAM_START and RAM_VSTART give this physical and virtual addresses
+			of the start of usable memory (begining with .text).  NOTE that
+			this may not necessarily be the actual start of the mapped SDRAM
+			region.  It will be larger if NuttX begins at an offset from
+			beginning of mapped SDRAM (which is the normal case).
+
+			RAM_SIZE gives the size of the .text, .data, and .bss sections
+			plus the size of the available heap.  NOTE that RAM_SIZE may not
+			include all of SDRAM up to the end of mapped region.
+
+config A1X_DDR_MAPSIZE
+	int "Installed SDRAM size"
+	default 1073741824
+	---help---
+		The size of the installed SRAM memory is required in order to
+		properly configure memory mapping.  The mapping will begin at the
+		start of SDRAM plus A1X_DDR_MAPOFFSET and extend for DDR_MAPSIZE
+		bytes.  NOTE typically A1X_MAP_OFFSET is zero and A1X_DDR_MAPSIZE is
+		the full, installed size of the DRAM.  But these values can be
+		modified to set aside memory at the beginning or end of SRAM that is
+		unmapped (or mapped differently).  NOTE also that this value relates
+		closely to other settings:
+
+			RAM_START and RAM_VSTART give this physical and virtual addresses
+			of the start of usable memory (begining with .text).  NOTE that
+			this may not necessarily be the actual start of the mapped SDRAM
+			region.  It will be larger if NuttX begins at an offset from
+			beginning of mapped SDRAM (which is the normal case).
+
+			RAM_SIZE gives the size of the .text, .data, and .bss sections
+			plus the size of the available heap.  NOTE that RAM_SIZE may not
+			include all of SDRAM up to the end of mapped region.
+
 endif # ARCH_CHIP_A1X
