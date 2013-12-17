@@ -110,7 +110,7 @@ static const struct section_mapping_s section_mapping[] =
   { A1X_DE_PSECTION,      A1X_DE_VSECTION,
     A1X_DE_MMUFLAGS,      A1X_DE_NSECTIONS
   },
-  { A1X_DDR_PSECTION,     A1X_DDR_VSECTION,
+  { A1X_DDR_MAPPADDR,     A1X_DDR_MAPVADDR,
     A1X_DDR_MMUFLAGS,     A1X_DDR_NSECTIONS
   },
   { A1X_BROM_PSECTION,    A1X_BROM_VSECTION,
