@@ -92,11 +92,7 @@ static void a1x_dumpintc(const char *msg, int irq)
   flags = irqsave();
   lldbg("INTC (%s, irq=%d):\n", msg, irq);
 
-  /* Select the register set associated with this irq */
-
-  putreg32(irq, A1X_INTC_SSR);
-
-  /* Then dump all of the (readable) register contents */
+  /* Dump all of the (readable) register contents */
 
   lldbg("  VECTOR: %08x BASE: %08x PROTECT: %08x NMICTRL: %08x\n",
         getreg32(A1X_INTC_VECTOR),    getreg32(A1X_INTC_BASEADDR),
