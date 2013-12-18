@@ -6238,4 +6238,6 @@
 	* Makefile.unix: Now has supports qconfig and gconfig targets.
 	  These tools will use the Qt and GTK versions of the kconfig-
 	  frontends configuration tools (if you built them) (2013-12-16)
+	* arch/arm/src/armv7-a/arm_head.h:  Fixe some errors in the cache
+	  invalidation logic (only seem to matter for Cortex-A8) (21-3-12-19).
 

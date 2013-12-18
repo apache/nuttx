@@ -283,7 +283,7 @@ __start:
 	add		r2, r5, r2, lsr #18		/* R2=Offset page table address */
 
 	/* No loop until each page table entry has been written for the .text
-	 * regtion.
+	 * region.
 	 */
 
 .Lpgtextloop:
@@ -295,7 +295,7 @@ __start:
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 	/* If we are executing from FLASH, then we will need additional mappings for
-	 * the primay RAM region that holds the .data, .bss, stack, and heap memory.
+	 * the primary RAM region that holds the .data, .bss, stack, and heap memory.
 	 *
 	 *   Here we expect to have:
 	 *   r5 = Address of the base of the L1 table
@@ -357,8 +357,11 @@ __start:
 	 */
 
 	mov		r0, #0
-	mcr		CP15_ICIALLUIS(r0)	/* Invalidate entire instruction cache Inner Shareable */
-	mcr		CP15_TLBIALLIS(r0)	/* Invalidate entire Unified TLB Inner Shareable */
+	mcr		CP15_TLBIALL(r0,c7)	/* Invalidate the entire unified TLB */
+	mcr		CP15_TLBIALL(r0,c6)
+	mcr		CP15_TLBIALL(r0,c5)
+	mcr		CP15_BPIALL(r0)		/* Invalidate entire branch prediction array */
+	mcr		CP15_ICIALLU(r0)	/* Invalidate I-cache */
 
 	/* Load the page table address.
 	 *
@@ -366,7 +369,7 @@ __start:
 	 * - Here we assume that the page table address is aligned to at least
 	 *   least a 16KB boundary (bits 0-13 are zero).  No masking is provided
 	 *   to protect against an unaligned page table address.
-	 * - The Cortex-A5 has two page table address registers, TTBR0 and 1.
+	 * - The ARMv7-A has two page table address registers, TTBR0 and 1.
 	 *   Only TTBR0 is used in this implementation but both are initialized.
 	 *
 	 * Here we expect to have:
@@ -374,8 +377,9 @@ __start:
 	 *   r5 = Address of the base of the L1 table
 	 */
 
-	mcr		CP15_TTBR0(r5)
-	mcr		CP15_TTBR1(r5)
+	orr		r1, r5, #0x48
+	mcr		CP15_TTBR0(r1)
+	mcr		CP15_TTBR1(r1)
 
 	/* Set the TTB control register (TTBCR) to indicate that we are using
 	 * TTBR0.  r0 still holds the value of zero.
@@ -435,8 +439,11 @@ __start:
 	 *   SCTLR_Z     Bit 11: Program flow prediction control always enabled on A5
 	 */
 
-	orr		r0, r0, #(SCTLR_M /* | SCTLR_Z */)
-	
+	orr		r0, r0, #(SCTLR_M)
+#ifndef CONFIG_ARCH_CORTEXA5
+	orr		r0, r0, #(SCTLR_Z)
+#endif
+
 	/* Position vectors to 0xffff0000 if so configured.
 	 *
 	 *   SCTLR_V    Bit 13: High vectors
@@ -452,7 +459,8 @@ __start:
 	 *                      replacement strategy.
 	 */
 
-#ifndef CPU_CACHE_ROUND_ROBIN
+#if defined(CPU_CACHE_ROUND_ROBIN) && !defined(CONFIG_ARCH_CORTEXA5)
+	orr		r0, r0, #(SCTLR_RR)
 #endif
 
 	/* Dcache enable
