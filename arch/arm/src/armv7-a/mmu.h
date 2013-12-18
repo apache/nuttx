@@ -88,7 +88,8 @@
 
 /* Translation Table Base Register 0 (TTBR0)*/
 
-#define TTBR0_IRGN1          (1 << 0)  /* Bit 0:  Inner cacheability for table walk */
+#define TTBR0_IRGN1          (1 << 0)  /* Bit 0:  Inner cacheability IRGN[1] (MP extensions) */
+#define TTBR0_C              (1 << 0)  /* Bit 0:  Inner cacheability for table walk */
 #define TTBR0_S              (1 << 1)  /* Bit 1:  Translation table walk */
                                        /* Bit 2:  Reserved */
 #define TTBR0_RGN_SHIFT      (3)       /* Bits 3-4: Outer cacheable attributes for table walk */
@@ -97,8 +98,8 @@
 #  define TTBR0_RGN_WBWA     (1 << TTBR0_RGN_SHIFT) /* Write-Back cached + Write-Allocate */
 #  define TTBR0_RGN_WT       (2 << TTBR0_RGN_SHIFT) /* Write-Through */
 #  define TTBR0_RGN_WB       (3 << TTBR0_RGN_SHIFT) /* Write-Back */
-                                       /* Bit 5:  Reserved */
-#define TTBR0_IRGN0          (1 << 6)  /* Bit 6:  Inner cacheability (with IRGN0) */
+#define TTBR0_NOS            (1 << 5)  /* Bit 5:  Not Outer Shareable bit */
+#define TTBR0_IRGN0          (1 << 6)  /* Bit 6:  Inner cacheability IRGN[0] (MP extensions) */
                                        /* Bits 7-n: Reserved, n=7-13 */
 #define _TTBR0_LOWER(n)      (0xffffffff << (n))
                                        /* Bits (n+1)-31: Translation table base 0 */
@@ -106,7 +107,8 @@
 
 /* Translation Table Base Register 1 (TTBR1) */
 
-#define TTBR1_IRGN1          (1 << 0)  /* Bit 0:  Inner cacheability for table walk */
+#define TTBR1_IRGN1          (1 << 0)  /* Bit 0:  Inner cacheability IRGN[1] (MP extensions) */
+#define TTBR1_C              (1 << 0)  /* Bit 0:  Inner cacheability for table walk */
 #define TTBR1_S              (1 << 1)  /* Bit 1:  Translation table walk */
                                        /* Bit 2:  Reserved */
 #define TTBR1_RGN_SHIFT      (3)       /* Bits 3-4: Outer cacheable attributes for table walk */
@@ -115,8 +117,8 @@
 #  define TTBR1_RGN_WBWA     (1 << TTBR1_RGN_SHIFT) /* Write-Back cached + Write-Allocate */
 #  define TTBR1_RGN_WT       (2 << TTBR1_RGN_SHIFT) /* Write-Through */
 #  define TTBR1_RGN_WB       (3 << TTBR1_RGN_SHIFT) /* Write-Back */
-                                       /* Bit 5:  Reserved */
-#define TTBR1_IRGN0          (1 << 6)  /* Bit 6:  Inner cacheability (with IRGN0) */
+#define TTBR1_NOS            (1 << 5)  /* Bit 5:  Not Outer Shareable bit */
+#define TTBR1_IRGN0          (1 << 6)  /* Bit 6:  Inner cacheability IRGN[0] (MP extensions) */
                                        /* Bits 7-13: Reserved */
 #define TTBR1_BASE_SHIFT     (14)      /* Bits 14-31: Translation table base 1 */
 #define TTBR1_BASE_MASK      (0xffffc000)

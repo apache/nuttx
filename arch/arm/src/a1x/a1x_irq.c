@@ -96,7 +96,7 @@ static void a1x_dumpintc(const char *msg, int irq)
   lldbg("ARMv7 (%s, irq=%d):\n", msg, irq);
   lldbg("  CPSR: %08x SCTLR: %08x\n", flags, cp15_rdsctlr());
 
-  /* Dump all of the (readable) register contents */
+  /* Dump all of the (readable) INTC register contents */
 
   lldbg("INTC (%s, irq=%d):\n", msg, irq);
   lldbg("  VECTOR: %08x BASE: %08x PROTECT: %08x NMICTRL: %08x\n",
