@@ -50,6 +50,7 @@
 #include "up_arch.h"
 #include "os_internal.h"
 #include "up_internal.h"
+#include "sctlr.h"
 
 #include "a1x_pio.h"
 #include "a1x_irq.h"
@@ -89,11 +90,15 @@ static void a1x_dumpintc(const char *msg, int irq)
 {
   irqstate_t flags;
 
+  /* Dump some relevant ARMv7 register contents */
+
   flags = irqsave();
-  lldbg("INTC (%s, irq=%d):\n", msg, irq);
+  lldbg("ARMv7 (%s, irq=%d):\n", msg, irq);
+  lldbg("  CPSR: %08x SCTLR: %08x\n", flags, cp15_rdsctlr());
 
   /* Dump all of the (readable) register contents */
 
+  lldbg("INTC (%s, irq=%d):\n", msg, irq);
   lldbg("  VECTOR: %08x BASE: %08x PROTECT: %08x NMICTRL: %08x\n",
         getreg32(A1X_INTC_VECTOR),    getreg32(A1X_INTC_BASEADDR),
         getreg32(A1X_INTC_PROTECT),   getreg32(A1X_INTC_NMICTRL));
@@ -191,6 +196,8 @@ void up_irqinitialize(void)
 
   (void)irqenable();
 #endif
+
+  a1x_dumpintc("initial", 0);
 }
 
 /****************************************************************************
