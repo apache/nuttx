@@ -377,7 +377,7 @@ __start:
 	 *   r5 = Address of the base of the L1 table
 	 */
 
-	orr		r1, r5, #0x48		/* Select cache properties */
+	orr		r1, r5, #(TTBR0_RGN_WBWA | TTBR0_IRGN0)	/* Select cache properties */
 	mcr		CP15_TTBR0(r1)
 	mcr		CP15_TTBR1(r1)
 
