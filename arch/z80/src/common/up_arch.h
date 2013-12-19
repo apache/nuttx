@@ -1,7 +1,7 @@
 /************************************************************************************
- * common/up_arch.h
+ * arch/z80/src/common/up_arch.h
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@
 #include "chip/chip.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 #endif  /* __ARCH_Z80_SRC_COMMON_UP_ARCH_H */

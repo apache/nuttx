@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/z16f/irq.h
- * arch/chip/irq.h
+ * arch/z16/include/z16f/irq.h
  *
  *   Copyright (C) 2008, 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,8 +37,8 @@
  * only indirectly through nuttx/irq.h (via arch/irq.h)
  */
 
-#ifndef __ARCH_Z16F_IRQ_H
-#define __ARCH_Z16F_IRQ_H
+#ifndef __ARCH_Z16_INCLUDE_Z16F_IRQ_H
+#define __ARCH_Z16_INCLUDE_Z16F_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -50,7 +49,7 @@
 #endif
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Interrupt Vectors (excluding reset and sysexec which are handled differently) */
@@ -245,5 +244,5 @@ EXTERN void       irqrestore(irqstate_t flags);
 #endif
 #endif
 
-#endif /* __ARCH_Z16F_IRQ_H */
+#endif /* __ARCH_Z16_INCLUDE_Z16F_IRQ_H */
 

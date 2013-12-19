@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/z16/include/z16f/arch.h
+ * arch/z16f/chip.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,8 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directed but, rather,
- * only indirectly through nuttx/arch.h (via arch/arch.h)
- */
-
-#ifndef __ARCH_Z16_INCLUDE_Z16F_IRQ_H
-#define __ARCH_Z16_INCLUDE_Z16F_IRQ_H
+#ifndef __ARCH_Z16_INCLUDE_Z16F_CHIP_H
+#define __ARCH_Z16_INCLUDE_Z16F_CHIP_H
 
 /****************************************************************************
  * Included Files
@@ -72,5 +68,4 @@ extern "C" {
 }
 #endif
 
-#endif /* __ARCH_Z16_INCLUDE_Z16F_IRQ_H */
-
+#endif /* __ARCH_Z16_INCLUDE_Z16F_CHIP_H */
