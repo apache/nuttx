@@ -191,7 +191,7 @@ static inline void task_saveparent(FAR struct tcb_s *tcb, uint8_t ttype)
       /* This is a new task in a new task group, we have to copy the ID from
        * the parent's task group structure to child's task group.
        */
- 
+
       tcb->group->tg_pgid = rtcb->group->tg_gid;
     }
 
@@ -509,7 +509,7 @@ static int task_tcbargsetup(FAR struct task_tcb_s *tcb,
  ****************************************************************************/
 
 #if !defined(CONFIG_CUSTOM_STACK) && defined(CONFIG_NUTTX_KERNEL)
-static int task_stackargsetup(FAR struct task_tcb_s *tcb, 
+static int task_stackargsetup(FAR struct task_tcb_s *tcb,
                               FAR char * const argv[])
 {
   FAR char **stackargv;
@@ -575,7 +575,7 @@ static int task_stackargsetup(FAR struct task_tcb_s *tcb,
    */
 
   str          = (FAR char *)stackargv + argvlen;
-  
+
   /* Copy the task name.  Increment str to skip over the task name and its
    * NUL terminator in the string buffer.
    */

@@ -1,7 +1,7 @@
-/****************************************************************************
- * arch/z16/include/z16f/arch.h
+/************************************************************************************
+ * common/up_arch.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,46 +31,22 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
-/* This file should never be included directed but, rather,
- * only indirectly through nuttx/arch.h (via arch/arch.h)
- */
+#ifndef __ARCH_Z16_SRC_COMMON_UP_ARCH_H
+#define __ARCH_Z16_SRC_COMMON_UP_ARCH_H
 
-#ifndef __ARCH_Z16_INCLUDE_Z16F_IRQ_H
-#define __ARCH_Z16_INCLUDE_Z16F_IRQ_H
-
-/****************************************************************************
+/************************************************************************************
  * Included Files
- ****************************************************************************/
+ ************************************************************************************/
 
-/****************************************************************************
- * Definitions
- ****************************************************************************/
+#include <nuttx/config.h>
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
+#include <arch/board/board.h>
+#include "chip/chip.h"
 
-/****************************************************************************
- * Public Variables
- ****************************************************************************/
+/************************************************************************************
+ * Pre-processor Definitions
+ ************************************************************************************/
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef __cplusplus
-#define EXTERN extern "C"
-extern "C" {
-#else
-#define EXTERN extern
-#endif
-
-#undef EXTERN
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __ARCH_Z16_INCLUDE_Z16F_IRQ_H */
-
+#endif  /* __ARCH_Z16_SRC_COMMON_UP_ARCH_H */
