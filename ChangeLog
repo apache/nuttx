@@ -6240,4 +6240,6 @@
 	  frontends configuration tools (if you built them) (2013-12-16)
 	* arch/arm/src/armv7-a/arm_head.h:  Fixe some errors in the cache
 	  invalidation logic (only seem to matter for Cortex-A8) (21-3-12-19).
-
+	* Kconfig and all Make.defs files:  Add CONFIG_DEBUG_NOOPT.  Now
+	  you can indepenently enable/disable debug symbols and optimization
+	  (2013-12-20).

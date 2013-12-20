@@ -765,7 +765,7 @@ kinetis_common:
     /* Restore the interrupt state */
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-	msr		basepri, r3				/* Restore interrupts priority masking*/
+	msr		basepri, r3				/* Restore interrupts priority masking */
 	cpsie	i						/* Re-enable interrupts */
 #else
 	msr		primask, r3				/* Restore interrupts */
