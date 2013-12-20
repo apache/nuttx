@@ -66,3 +66,4 @@ ifeq ($(CONFIG_AVR32_TOOLCHAIN),AVRTOOLSW)
 else
   # AVR Tools or avr32-toolchain from https://github.com/jsnyder/avr32-toolchain
 endif
+

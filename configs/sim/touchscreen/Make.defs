@@ -40,8 +40,10 @@ HOSTOS			= ${shell uname -o 2>/dev/null || echo "Other"}
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION	= -g
-else
-  ARCHOPTIMIZATION	= -O2
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION	+= -O2
 endif
 
 ARCHCPUFLAGS		= -fno-builtin
