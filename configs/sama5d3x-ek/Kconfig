@@ -56,7 +56,6 @@ choice
 
 config SAMA5_NAND_FTL
 	bool "Create NAND FLASH block driver"
-	default n
 	depends on MTD && MTD_NAND
 	---help---
 		Create the MTD driver for the NAND and "wrap" the NAND as a standard
@@ -71,7 +70,6 @@ config SAMA5_NAND_FTL
 
 config SAMA5_NAND_NXFFS
 	bool "Create NAND FLASH NXFFS file system"
-	default n
 	depends on MTD && MTD_NAND && FS_NXFFS && NXFFS_NAND
 	---help---
 		Create the MTD driver for the NAND and mount the NAND device as
