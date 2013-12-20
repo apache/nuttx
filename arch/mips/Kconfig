@@ -11,7 +11,7 @@ choice
 config ARCH_CHIP_PIC32MX
 	bool "PIC32MX"
 	select ARCH_MIPS32
-	select ARCH_IRQPRIO
+	select ARCH_HAVE_IRQPRIO
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_RAMFUNCS
 	---help---

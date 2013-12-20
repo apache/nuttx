@@ -169,30 +169,30 @@ config ARCH_ARM920T
 config ARCH_CORTEXM0
 	bool
 	default n
-	select ARCH_IRQPRIO
+	select ARCH_HAVE_IRQPRIO
 
 config ARCH_CORTEXM3
 	bool
 	default n
-	select ARCH_IRQPRIO
+	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
 
 config ARCH_CORTEXM4
 	bool
 	default n
-	select ARCH_IRQPRIO
+	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
 
 config ARCH_CORTEXA5
 	bool
 	default n
-	select ARCH_IRQPRIO
+	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MMU
 
 config ARCH_CORTEXA8
 	bool
 	default n
-	select ARCH_IRQPRIO
+	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_MMU
 
 config ARCH_FAMILY
