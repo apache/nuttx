@@ -566,8 +566,15 @@ config DEBUG_SYMBOLS
 	bool "Generate Debug Symbols"
 	default n
 	---help---
-		Build without optimization and with debug symbols (needed
-		for use with a debugger).
+		Build with debug symbols (needed for use with a debugger).
+
+config DEBUG_NOOPT
+	bool "Suppress optimization"
+	default y if DEBUG_SYMBOLS
+	default n if !DEBUG_SYMBOLS
+	---help---
+		Build without optimization.  This is often helpful when debugging code.
+
 endmenu
 endmenu
 

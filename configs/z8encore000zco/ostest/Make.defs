@@ -145,9 +145,15 @@ AFLAGS = $(ARCHASMCPUFLAGS) $(ARCHASMINCLUDES) $(ARCHASMLIST) $(ARCHASMWARNINGS)
 # Compiler definitions
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -debug -NOregvar -reduceopt
+  ARCHOPTIMIZATION = -debug
 else
-  ARCHOPTIMIZATION = -nodebug -regvar
+  ARCHOPTIMIZATION = -nodebug
+endif
+
+ifeq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -NOregvar -reduceopt
+else
+  ARCHOPTIMIZATION += -regvar
 endif
 
 ARCHCPUFLAGS = -chartype:S -model:L -const:RAM -NOoptlink -promote -cpu:$(ARCHCPU) $(ARCHREVAA) -NOgenprintf \
