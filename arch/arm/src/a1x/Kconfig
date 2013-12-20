@@ -303,7 +303,7 @@ config A1X_IRQ_PERFMU
 	default n
 
 config A1X_GPU
-	bool GPU"
+	bool "GPU"
 	default n
 
 endmenu

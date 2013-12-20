@@ -118,7 +118,7 @@ config ARCH_DMA
 	bool
 	default n
 
-config ARCH_IRQPRIO
+config ARCH_HAVE_IRQPRIO
 	bool
 	default n
 
@@ -136,6 +136,19 @@ config ARCH_HAVE_VFORK
 
 config ARCH_HAVE_MMU
 	bool
+
+config ARCH_IRQPRIO
+	bool "Prioritized interrupt support"
+	default n
+	depends on ARCH_HAVE_IRQPRIO
+	---help---
+		Enable support for prioritized interrupts.
+
+		NOTE: The use of interrupt priorities implies that you also have
+		support for nested interrupts.  Most architectures do not support
+		nesting of interupts or, if they do, they only supported nested
+		interrupts with certain configuration options.  So this selection
+		should be used with caution.
 
 config ARCH_STACKDUMP
 	bool "Dump stack on assertions"
