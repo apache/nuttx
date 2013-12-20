@@ -66,9 +66,11 @@ ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gc
 ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-else
-  ARCHOPTIMIZATION = -Os -ffunction-sections -fdata-sections -fno-strict-aliasing
+  ARCHOPTIMIZATION	= -g
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += -Os -ffunction-sections -fdata-sections -fno-strict-aliasing
 endif
 
 ARCHCFLAGS = -fno-builtin -muse-rodata-section

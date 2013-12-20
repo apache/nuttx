@@ -38,9 +38,10 @@ include ${TOPDIR}/tools/Config.mk
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION	= -g
-else
-  ARCHOPTIMIZATION	= -Os -fno-strict-aliasing -fno-strength-reduce \
-			  -fomit-frame-pointer
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION	+= -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
 ARCHCPUFLAGS		= -m1 -fno-builtin

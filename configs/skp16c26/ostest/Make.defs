@@ -50,8 +50,10 @@ ARCHCCMAJOR		= ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION	= -g
-else
-  ARCHOPTIMIZATION	= -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION	+= -Os -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
 endif
 
 ARCHCPUFLAGS		= -mcpu=m16c -fno-builtin
@@ -73,7 +75,6 @@ EXEEXT			=
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS		+= -g
 endif
-
 
 MKDEP			= $(TOPDIR)/tools/mkdeps.sh
 
