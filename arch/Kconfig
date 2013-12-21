@@ -281,6 +281,23 @@ config ARCH_HIPRI_INTERRUPT
 
 			   int up_prioritize_irq(int irq, int priority)
 
+		NOTE: ARCH_INTERRUPTSTACK must be set in kernel mode (NUTTX_KERNEL).
+		In kernel mode without an interrupt stack, the interrupt handler
+		will set the MSP to the stack pointer of the interrupted thread.  If
+		the interrupted thread was a privileged thread, that will be the MSP
+		otherwise it will be the PSP.  If the PSP is used, then the value of
+		the MSP will be invalid when the interrupt handler returns because
+		it will be a pointer to an old position in the unprivileged stack.
+		Then when the high priority interrupt occurs and uses this stale MSP,
+		there will most likely be a system failure.
+
+		If the interrupt stack is selected, on the other hand, then the
+		interrupt handler will always set the the MSP to the interrupt
+		stack.  So when the high priority interrupt occurs, it will either
+		use the MSP of the last privileged thread to run or, in the case of
+		the nested interrupt, the interrupt stack if no privileged task has
+		run
+
 config ARCH_INT_DISABLEALL
 	bool "Disable high priority interrupts"
 	default y

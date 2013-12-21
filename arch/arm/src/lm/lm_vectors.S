@@ -2,7 +2,7 @@
  * arch/arm/src/lm/lm_vectors.S
  * arch/arm/src/chip/lm_vectors.S
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,39 @@
 /************************************************************************************
  * Preprocessor Definitions
  ************************************************************************************/
+/* Configuration ********************************************************************/
 
-/* Memory Map:
- *
+#ifdef CONFIG_ARCH_HIPRI_INTERRUPT
+  /* In kernel mode without an interrupt stack, this interrupt handler will set the
+   * MSP to the stack pointer of the interrupted thread.  If the interrupted thread
+   * was a privileged thread, that will be the MSP otherwise it will be the PSP.  If
+   * the PSP is used, then the value of the MSP will be invalid when the interrupt
+   * handler returns because it will be a pointer to an old position in the
+   * unprivileged stack.  Then when the high priority interrupt occurs and uses this
+   * stale MSP, there will most likely be a system failure.
+   *
+   * If the interrupt stack is selected, on the other hand, then the interrupt
+   * handler will always set the the MSP to the interrupt stack.  So when the high
+   * priority interrupt occurs, it will either use the MSP of the last privileged
+   * thread to run or, in the case of the nested interrupt, the interrupt stack if
+   * no privileged task has run.
+   */
+
+#  if defined(CONFIG_NUTTX_KERNEL) && CONFIG_ARCH_INTERRUPTSTACK < 4
+#    error Interrupt stack must be used with high priority interrupts in kernel mode
+#  endif
+
+  /* Use the the BASEPRI to control interrupts is required if nested, high
+   * priority interrupts are supported.
+   */
+
+#  ifndef CONFIG_ARMV7M_USEBASEPRI
+#    error CONFIG_ARMV7M_USEBASEPRI must be used with CONFIG_ARCH_HIPRI_INTERRUPT
+#  endif
+#endif
+
+/* Memory Map ***********************************************************************/
+/*
  * 0x0000:0000 - Beginning of FLASH. Address of vectors (if not using bootloader)
  * 0x0002:0000 - Address of vectors if using bootloader
  * 0x0003:ffff - End of flash
@@ -240,23 +270,39 @@ lm_irqcommon:
 	stmdb	r1!, {r2-r11}			/* Save the remaining registers plus the SP value */
 #endif
 
+#ifndef CONFIG_ARCH_HIPRI_INTERRUPT
 	/* Disable interrupts, select the stack to use for interrupt handling
 	 * and call up_doirq to handle the interrupt
 	 */
 
 	cpsid	i						/* Disable further interrupts */
 
-	/* If CONFIG_ARCH_INTERRUPTSTACK is defined, we will use a special interrupt
-	 * stack pointer.  The way that this is done here prohibits nested interrupts!
-	 * Otherwise, we will re-use the main stack for interrupt level processing.
+#else
+	/* Set the BASEPRI register so that further normal interrupts will be
+	 * masked.  Nested, high priority may still occur, however.
 	 */
 
+	mov		r2, #NVIC_SYSH_DISABLE_PRIORITY
+	msr		basepri, r2				/* Set the BASEPRI */
+#endif
+
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
+	/* If CONFIG_ARCH_INTERRUPTSTACK is defined, we will set the MSP to use
+	 * a special special interrupt stack pointer.  The way that this is done
+	 * here prohibits nested interrupts without some additional logic!
+	 */
+
 	ldr		sp, =g_intstackbase
 	str		r1, [sp, #-4]!			/* Save the MSP on the interrupt stack */
 	bl		up_doirq				/* R0=IRQ, R1=register save (msp) */
 	ldr		r1, [sp, #+4]!			/* Recover R1=main stack pointer */
+
 #else
+	/* Otherwise, we will re-use the interrupted thread's stack.  That may
+	 * mean using either MSP or PSP stack for interrupt level processing (in
+	 * kernel mode).
+	 */
+
 	mov		sp, r1					/* We are using the main stack pointer */
 	bl		up_doirq				/* R0=IRQ, R1=register save (msp) */
 	mov		r1, sp					/* Recover R1=main stack pointer */
@@ -369,7 +415,10 @@ lm_irqcommon:
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
 	msr		basepri, r3				/* Restore interrupts priority masking */
+#ifndef CONFIG_ARCH_HIPRI_INTERRUPT
 	cpsie	i						/* Re-enable interrupts */
+#endif
+
 #else
 	msr		primask, r3				/* Restore interrupts */
 #endif
