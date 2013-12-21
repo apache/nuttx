@@ -6,7 +6,7 @@
  *
  * This logic was based largely on Atmel sample code with modifications for
  * better integration with NuttX.  The Atmel sample code has a BSD
- * compatibile license that requires this copyright notice:
+ * compatible license that requires this copyright notice:
  *
  *   Copyright (c) 2012, Atmel Corporation
  *

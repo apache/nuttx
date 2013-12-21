@@ -8,7 +8,7 @@
  *   SAMA5D3 Series Data Sheet
  *   Atmel NoOS sample code.
  *
- * The Atmel sample code has a BSD compatibile license that requires this
+ * The Atmel sample code has a BSD compatible license that requires this
  * copyright notice:
  *
  *    Copyright (c) 2011, Atmel Corporation

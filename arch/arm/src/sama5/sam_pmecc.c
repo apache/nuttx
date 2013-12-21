@@ -9,7 +9,7 @@
  *   Atmel NoOS sample code.
  *
  * All of the detailed PMECC operations are taken directly from the Atmel
- * NoOS sample code.  The Atmel sample code has a BSD compatibile license
+ * NoOS sample code.  The Atmel sample code has a BSD compatible license
  * that requires this copyright notice:
  *
  *   Copyright (c) 2012, Atmel Corporation
