@@ -4,7 +4,7 @@
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
- * Taken from Atmel NoOS sample code.  The Atmel sample code has a BSD compatibile license that requires this copyright notice:
+ * Taken from Atmel NoOS sample code.  The Atmel sample code has a BSD compatible license that requires this copyright notice:
  *
  *   Copyright (c) 2012, Atmel Corporation
  *
