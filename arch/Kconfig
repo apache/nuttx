@@ -44,7 +44,7 @@ config ARCH_MIPS
 config ARCH_RGMP
 	bool "RGMP"
 	---help---
-		RTOS and GPOS on Multi-Processor (RGMP) architecture.  See 
+		RTOS and GPOS on Multi-Processor (RGMP) architecture.  See
 		http://rgmp.sourceforge.net/wiki/index.php/Main_Page.
 
 config ARCH_SH
@@ -208,8 +208,11 @@ config ARCH_CALIBRATION
 		watch to measure the actual delay then adjust BOARD_LOOPSPERMSEC until
 		the actual delay is 100 seconds.
 
+comment "Interrupt options"
+
 config ARCH_HAVE_INTERRUPTSTACK
 	bool
+	default n
 
 config ARCH_INTERRUPTSTACK
 	int "Interrupt Stack Size"
@@ -220,6 +223,96 @@ config ARCH_INTERRUPTSTACK
 		will be the size of the interrupt stack in bytes.  If not defined (or
 		defined to be zero), the user task stacks will be used during interrupt
 		handling.
+
+config ARCH_HAVE_HIPRI_INTERRUPT
+	bool
+	default n
+
+config ARCH_HIPRI_INTERRUPT
+	bool "High priority interrupts"
+	default n
+	depends on ARCH_HAVE_HIPRI_INTERRUPT && ARCH_HAVE_IRQPRIO
+	select ARMV7M_USEBASEPRI
+	select ARCH_IRQPRIO
+	---help---
+		NOTE: This description is currently unique to the Cortex-M family
+		which is the only family that currently supports this feature.  The
+		general feature is not conceptually unique to the Cortex-M but it
+		is extended to any other family, then this discussion will have to
+		be generalized.
+
+		If ARMV7M_USEBASEPRI is selected, then interrupts will be disabled
+		by setting the BASEPRI register to NVIC_SYSH_DISABLE_PRIORITY so
+		that most interrupts will not have execution priority.  SVCall must
+		have execution priority in all cases.
+
+		In the normal cases, interrupts are not nest-able and all interrupts
+		run at an execution priority between NVIC_SYSH_PRIORITY_MIN and
+		NVIC_SYSH_PRIORITY_MAX (with NVIC_SYSH_PRIORITY_MAX reserved for
+		SVCall).
+
+		If, in addition, ARCH_HIPRI_INTERRUPT is defined, then special high
+		priority interrupts are supported.  These are not "nested" in the
+		normal sense of the word.  These high priority interrupts can
+		interrupt normal processing but execute outside of OS (although they
+		can "get back into the game" via a PendSV interrupt).
+
+		How do you specify a high priority interrupt?  You need to do two
+		things:
+
+			1) You need to change the address in the vector table so that
+			   the high priority interrupt vectors to your special C
+			   interrupt handler.  There are two ways to do this:
+
+			   a) If you select CONFIG_ARCH_RAMVECTORS, then vectors will
+			      be kept in RAM and the system will support the interface:
+
+			      int up_ramvec_attach(int irq, up_vector_t vector)
+
+			      that can be used to attach your C interrupt handler to the
+			      vector at run time.
+
+			   b) Alternatively, you could keep your vectors in FLASH but in
+			      order to this, you would have to develop your own custom
+			      vector table.
+
+			2) Then set the priority of your interrupt to NVIC to
+			   NVIC_SYSH_HIGH_PRIORITY using the standard interface:
+
+			   int up_prioritize_irq(int irq, int priority)
+
+config ARCH_INT_DISABLEALL
+	bool "Disable high priority interrupts"
+	default y
+	depends on ARCH_HIPRI_INTERRUPT
+	---help---
+		If ARCH_HIPRI_INTERRUPT is defined, then special high priority
+		interrupts are supported.  These are not "nested" in the normal
+		sense of the word.  These high priority interrupts can interrupt
+		normal processing but execute outside of OS (although they can "get
+		back into the game" via a PendSV interrupt).
+
+		In the normal course of things, interrupts must occasionally be
+		disabled using the irqsave() inline function to prevent contention
+		in use of resources that may be shared between interrupt level and
+		non-interrupt level logic.  Now the question arises, if
+		ARCH_HIPRI_INTERRUPT, do we disable all interrupts (except SVCall),
+		or do we only disable the "normal" interrupts.  Since the high
+		priority interrupts cannot interact with the OS, you may want to
+		permit the high priority interrupts even if interrupts are
+		disabled.  The setting ARCH_INT_DISABLEALL can be used to select
+		either behavior:
+
+		----------------------------+--------------+----------------------------
+		CONFIG_ARCH_HIPRI_INTERRUPT |      NO      |             YES
+		----------------------------+--------------+--------------+-------------
+		CONFIG_ARCH_INT_DISABLEALL  |     N/A      |     YES      |      NO
+		----------------------------+--------------+--------------+-------------
+		                            |              |              |    SVCall
+		                            |    SVCall    |    SVCall    |    HIGH
+		Disable here and below --------> MAXNORMAL ---> HIGH --------> MAXNORMAL
+		                            |              |    MAXNORMAL |
+		----------------------------+--------------+--------------+-------------
 
 comment "Boot options"
 

@@ -535,14 +535,8 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-#ifdef CONFIG_ARMV7M_USEBASEPRI
-  DEBUGASSERT(irq >= SAM_IRQ_MEMFAULT && irq < SAM_IRQ_NIRQS &&
-              priority >= NVIC_SYSH_DISABLE_PRIORITY &&
-              priority <= NVIC_SYSH_PRIORITY_MIN);
-#else
   DEBUGASSERT(irq >= SAM_IRQ_MEMFAULT && irq < SAM_IRQ_NIRQS &&
               (unsigned)priority <= NVIC_SYSH_PRIORITY_MIN);
-#endif
 
   if (irq < SAM_IRQ_EXTINT)
     {
