@@ -94,7 +94,7 @@
 #  define LM_NQEI            2  /* Two quadrature encoders */
 #  define LM_NPORTS          7  /* 7 Ports (GPIOA-G), 0-42 GPIOs */
 #  define LM_NCANCONTROLLER  0  /* No CAN controllers */
-#elif defined(CONFIG_ARCH_CHIP_LM3S9B96) 
+#elif defined(CONFIG_ARCH_CHIP_LM3S9B96)
 #  define LM3S               1  /* LM3S family */
 #  undef  LM4F                  /* Not LM4F family */
 #  define LM_NTIMERS         4  /* Four general purpose timers */
@@ -153,8 +153,54 @@
 #define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
 #define NVIC_SYSH_PRIORITY_STEP    0x20 /* Three bits of interrupt priority used */
 
-#define NVIC_SYSH_DISABLE_PRIORITY (NVIC_SYSH_PRIORITY_MAX + NVIC_SYSH_PRIORITY_STEP)
-#define NVIC_SYSH_SVCALL_PRIORITY  NVIC_SYSH_PRIORITY_MAX
+/* If CONFIG_ARMV7M_USEBASEPRI is selected, then interrupts will be disabled
+ * by setting the BASEPRI register to NVIC_SYSH_DISABLE_PRIORITY so that most
+ * interrupts will not have execution priority.  SVCall must have execution
+ * priority in all cases.
+ *
+ * In the normal cases, interrupts are not nest-able and all interrupts run
+ * at an execution priority between NVIC_SYSH_PRIORITY_MIN and
+ * NVIC_SYSH_PRIORITY_MAX (with NVIC_SYSH_PRIORITY_MAX reserved for SVCall).
+ *
+ * If, in addition, CONFIG_ARCH_HIPRI_INTERRUPT is defined, then special
+ * high priority interrupts are supported.  These are not "nested" in the
+ * normal sense of the word.  These high priority interrupts can interrupt
+ * normal processing but execute outside of OS (although they can "get back
+ * into the game" via a PendSV interrupt).
+ *
+ * In the normal course of things, interrupts must occasionally be disabled
+ * using the irqsave() inline function to prevent contention in use of
+ * resources that may be shared between interrupt level and non-interrupt
+ * level logic.  Now the question arises, if CONFIG_ARCH_HIPRI_INTERRUPT,
+ * do we disable all interrupts (except SVCall), or do we only disable the
+ * "normal" interrupts.  Since the high priority interrupts cannot interact
+ * with the OS, you may want to permit the high priority interrupts even if
+ * interrupts are disabled.  The setting CONFIG_ARCH_INT_DISABLEALL can be
+ * used to select either behavior:
+ *
+ *   ----------------------------+--------------+----------------------------
+ *   CONFIG_ARCH_HIPRI_INTERRUPT |      NO      |             YES
+ *   ----------------------------+--------------+--------------+-------------
+ *   CONFIG_ARCH_INT_DISABLEALL  |     N/A      |     YES      |      NO
+ *   ----------------------------+--------------+--------------+-------------
+ *                               |              |              |    SVCall
+ *                               |    SVCall    |    SVCall    |    HIGH
+ *   Disable here and below --------> MAXNORMAL ---> HIGH --------> MAXNORMAL
+ *                               |              |    MAXNORMAL |
+ *   ----------------------------+--------------+--------------+-------------
+ */
+
+#if defined(CONFIG_ARCH_HIPRI_INTERRUPT) && defined(CONFIG_ARCH_INT_DISABLEALL)
+#  define NVIC_SYSH_MAXNORMAL_PRIORITY  (NVIC_SYSH_PRIORITY_MAX + 2*NVIC_SYSH_PRIORITY_STEP)
+#  define NVIC_SYSH_HIGH_PRIORITY       (NVIC_SYSH_PRIORITY_MAX + NVIC_SYSH_PRIORITY_STEP)
+#  define NVIC_SYSH_DISABLE_PRIORITY    NVIC_SYSH_HIGH_PRIORITY
+#  define NVIC_SYSH_SVCALL_PRIORITY     NVIC_SYSH_PRIORITY_MAX
+#else
+#  define NVIC_SYSH_MAXNORMAL_PRIORITY  (NVIC_SYSH_PRIORITY_MAX + NVIC_SYSH_PRIORITY_STEP)
+#  define NVIC_SYSH_HIGH_PRIORITY       NVIC_SYSH_PRIORITY_MAX
+#  define NVIC_SYSH_DISABLE_PRIORITY    NVIC_SYSH_MAXNORMAL_PRIORITY
+#  define NVIC_SYSH_SVCALL_PRIORITY     NVIC_SYSH_PRIORITY_MAX
+#endif
 
 /************************************************************************************
  * Public Types

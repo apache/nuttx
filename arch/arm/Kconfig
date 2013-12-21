@@ -176,12 +176,14 @@ config ARCH_CORTEXM3
 	default n
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
+	select ARCH_HAVE_HIPRI_INTERRUPT
 
 config ARCH_CORTEXM4
 	bool
 	default n
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RAMVECTORS
+	select ARCH_HAVE_HIPRI_INTERRUPT
 
 config ARCH_CORTEXA5
 	bool
