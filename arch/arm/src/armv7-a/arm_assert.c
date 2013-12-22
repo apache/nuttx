@@ -121,7 +121,7 @@ static void up_stackdump(uint32_t sp, uint32_t stack_base)
     }
 }
 #else
-# define up_stackdump()
+#  define up_stackdump(sp,stack_base)
 #endif
 
 /****************************************************************************
