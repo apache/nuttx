@@ -427,7 +427,8 @@ void up_disable_irq(int irq)
       regval &= ~bit;
       putreg32(regval, regaddr);
     }
-  stm32_dumpnvic("disable", irq);
+
+  // stm32_dumpnvic("disable", irq);
 }
 
 /****************************************************************************
@@ -452,7 +453,8 @@ void up_enable_irq(int irq)
       regval |= bit;
       putreg32(regval, regaddr);
     }
-  stm32_dumpnvic("enable", irq);
+
+  // stm32_dumpnvic("enable", irq);
 }
 
 /****************************************************************************
