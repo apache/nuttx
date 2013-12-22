@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/viewtool-stm32f107/scripts/ld.script.dfu
+ * configs/viewtool-stm32f107/scripts/flash.ld
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,11 +33,11 @@
  *
  ****************************************************************************/
 
-/* Don't know if this is correct. Just 256K-48K (not testet) */
 MEMORY
 {
-    flash (rx) : ORIGIN = 0x08003000, LENGTH = 208K
-    sram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+	flash (rx) : ORIGIN = 0x08000000, LENGTH = 256K
+	sram (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+
 }
 
 OUTPUT_ARCH(arm)
@@ -78,7 +78,7 @@ SECTIONS
 
 	_eronly = ABSOLUTE(.);
 
-	/* The STM32F103Z has 64Kb of SRAM beginning at the following address */
+	/* The STM32F107VC has 64Kb of SRAM beginning at the following address */
 
 	.data : {
 		_sdata = ABSOLUTE(.);

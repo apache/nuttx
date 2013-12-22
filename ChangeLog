@@ -6267,3 +6267,9 @@
 	  README.txt, and src/stm32_highpri.c:  This is the initial framework
 	  for a test of the high priority, nested interrupt logic.  Still
 	  incomplete and does not yet run (2013-12-22).
+	* arch/arm/src/armv7-m/ram_vectors.h and up_ramvec_initialize.c: 
+	  Correct alignment of the RAM vector table (2013-12-22).
+	* Kconfig: Support configuration of interrupt controller debug output
+	  (2013-12-22).
+	* configs/viewtool-stm32f107/scripts:  Need to do some special things
+	  in linking of the common vectors are used (2013-12-22).

@@ -79,10 +79,12 @@
  * irq_dispatch.  In this case, it is also assumed that the ARM vector
  * table resides in RAM, has the name up_ram_vectors, and has been
  * properly positioned and aligned in memory by the linker script.
+ *
+ * REVISIT: Can this alignment requirement vary from core-to-core?
  */
 
 extern up_vector_t g_ram_vectors[ARMV7M_VECTAB_SIZE]
-  __attribute__((section(".ram_vectors")));
+  __attribute__ ((section (".ram_vectors"), aligned (64)));
 
 /************************************************************************************
  * Public Function Prototypes

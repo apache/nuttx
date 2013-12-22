@@ -38,9 +38,9 @@ include ${TOPDIR}/tools/Config.mk
 include ${TOPDIR}/arch/arm/src/armv7-m/Toolchain.defs
 
 ifeq ($(CONFIG_STM32_DFU),y)
-  LDSCRIPT = ld.script.dfu
+  LDSCRIPT = dfu.ld
 else
-  LDSCRIPT = ld.script
+  LDSCRIPT = flash.ld
 endif
 
 ifeq ($(WINTOOL),y)

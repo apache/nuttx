@@ -560,6 +560,14 @@ config DEBUG_AUDIO
 		device drivers. (disabled by default).  Support for this debug option
 		is architecture-specific and may not be available for some MCUs.
 
+config DEBUG_IRQ
+	bool "Interrupt Controller Debug Output"
+	default n
+	---help---
+		Enable debug SYSLOG output from logic that managers the interrupt
+		control logic (disabled by default).  Support for this debug option
+		is architecture-specific and may not be available for some MCUs.
+
 endif
 
 config DEBUG_SYMBOLS
