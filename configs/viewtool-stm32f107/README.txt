@@ -4,16 +4,16 @@ README
   This README discusses issues unique to NuttX configurations for the
   ViewTool STM32F103/F107 V1.2 board.  This board may be fitted with either
 
-  - STM32F107VCT6, or
-  - STM32F103VCT6
+    - STM32F107VCT6, or
+    - STM32F103VCT6
 
-  The board is vary module with connectors for a variety of peripherals.
+  The board is vary modular with connectors for a variety of peripherals.
   Features on the base board include:
 
-  - User and Wake-Up Keys
-  - LEDs
+    - User and Wake-Up Keys
+    - LEDs
 
-  http://www.viewtool.com/ for further information.
+  See http://www.viewtool.com/ for further information.
 
 Contents
 ========
@@ -23,7 +23,7 @@ Contents
   o Serial Console
     - Console Configuration
     - J5 - USART1
-    - PL-2013 USB-to-Serial Intface
+    - PL-2013 USB-to-Serial Interface
     - RS-232 Module
   o Toolchains
     - NOTE about Windows native toolchains
@@ -79,7 +79,7 @@ Serial Console
 
   Console Configuration
   ---------------------
-  The NuttX console is configurated by default on USART1 at 115200 BAUD 8N1
+  The NuttX console is configured by default on USART1 at 115200 BAUD 8N1
   (8-bits, not parity, one stop bit).  These setting can, of course, easily
   be changed by reconfiguring NuttX.
 
@@ -98,8 +98,8 @@ Serial Console
      5   RTS?  9  CTS?  PA12    USART1_RTS
      6   CTS?  11 RTS?  PA11    USART1_CTS
 
-  PL-2013 USB-to-Serial Intface
-  -----------------------------
+  PL-2013 USB-to-Serial Interface
+  -------------------------------
 
     J37 - CON4.  Jumper Settings:
       1 <-> 3 : Connects PA9 to the RXD1 output pin
@@ -197,7 +197,7 @@ Configurations
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
 
-  4. All of these configurations use the Code Sourcery for Windows toolchain
+  4. All of these configurations use the CodeSourcery for Windows toolchain
      (unless stated otherwise in the description of the configuration).  That
      toolchain selection can easily be reconfigured using 'make menuconfig'.
      Here are the relevant current settings:
@@ -211,6 +211,15 @@ Configurations
 
      See also the "NOTE about Windows native toolchains" in the section call
      "GNU Toolchain Options" above.
+
+  4. These configurations all assume that the STM32F107VCT6 is mounted on
+     board.  This is configurable; you can select the STM32F103VCT6 as an
+     alternative.
+
+  5. These configurations all assume that you are loading code using
+     something like the ST-Link v2 JTAG.  None of these configurations are
+     setup to use the DFU bootloader but should be easily reconfigured to
+     use that bootloader is so desired.
 
   Configuration Sub-directories
   -----------------------------
