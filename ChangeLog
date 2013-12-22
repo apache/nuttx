@@ -6258,3 +6258,8 @@
 	  where  x={kinetis, lm, lpc17xx, lpc43xx, sam34, or stm32}: completes
 	  the basic implementation of nested, high priority interreupts.
 	  Still untested and need documentation (2013-12-21).
+	* configs/stm3210e-eval/buttons: Converted to use kconfig-frontends
+	  tools (untested) (2013-12-22).
+	* configs/Kconfig, configs/viewtool-stm32f107/include/board-stm32f103vct6.h,
+	  and /board-stm32f107vct6.h:  The viewtools board can now be configured
+	  to support either the STM32F103VCT6 or the STM32F107VCT6 (2013-12-22).
