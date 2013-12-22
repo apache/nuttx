@@ -5,7 +5,7 @@
 
 if ARCH_BOARD_VIEWTOOL_STM32F107
 
-config VIEWTOOLS_HIGHPRI
+config VIEWTOOL_HIGHPRI
 	bool "High priority interrupt test"
 	default n
 	depends on ARCH_CHIP_STM32F103VCT6 && ARCH_HIPRI_INTERRUPT
@@ -16,4 +16,23 @@ config VIEWTOOLS_HIGHPRI
 		(ARCH_CHIP_STM32F103VCT6) but should be easily ported to other STM32
 		architectures.
 
-endif
+if VIEWTOOL_HIGHPRI
+
+config VIEWTOOL_TIM6_FREQUENCY
+	int "TIM6 Frequency"
+	default 36000000
+	---help---
+		TIM6 is used to drive the high priority, nested interrupt in the
+		test enabled with VIEWTOOL_HIGHPRI.  This setting specifies the
+		frequency of the TIM6 input clock.
+
+config VIEWTOOL_TIM6_PERIOD
+	int "TIM6 Period"
+	default 36000
+	---help---
+		TIM6 is used to drive the high priority, nested interrupt in the
+		test enabled with VIEWTOOL_HIGHPRI.  This setting specifies
+		period of the TIM6 interrupt in units of VIEWTOOL_TIM6_FREQUENCY.
+
+endif # VIEWTOOL_HIGHPRI
+endif # ARCH_BOARD_VIEWTOOL_STM32F107

@@ -32,8 +32,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
-#ifndef __CONFIGS_VIEWTOOLS_STM32F107_SRC_INTERNAL_H
-#define __CONFIGS_VIEWTOOLS_STM32F107_SRC_INTERNAL_H
+#ifndef __CONFIGS_VIEWTOOL_STM32F107_SRC_INTERNAL_H
+#define __CONFIGS_VIEWTOOL_STM32F107_SRC_INTERNAL_H
 
 /******************************************************************************
  * Included Files
@@ -114,4 +114,4 @@ void weak_function stm32_spiinitialize(void);
 void stm32_ledinit(void);
 
 #endif  /* __ASSEMBLY__ */
-#endif /* __CONFIGS_VIEWTOOLS_STM32F107_SRC_INTERNAL_H */
+#endif /* __CONFIGS_VIEWTOOL_STM32F107_SRC_INTERNAL_H */
