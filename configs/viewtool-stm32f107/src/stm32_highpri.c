@@ -78,14 +78,18 @@
 #  error CONFIG_STM32_TIM6 is required
 #endif
 
-#ifndef VIEWTOOL_TIM6_FREQUENCY
-#  warning VIEWTOOL_TIM6_FREQUENCY defaulting to STM32_APB1_TIM6_CLKIN
-#  define VIEWTOOL_TIM6_FREQUENCY STM32_APB1_TIM6_CLKIN
+#ifndef CONFIG_VIEWTOOL_TIM6_FREQUENCY
+#  warning CONFIG_VIEWTOOL_TIM6_FREQUENCY defaulting to STM32_APB1_TIM6_CLKIN
+#  define CONFIG_VIEWTOOL_TIM6_FREQUENCY STM32_APB1_TIM6_CLKIN
 #endif
 
-#ifndef VIEWTOOL_TIM6_PERIOD
-#  warning VIEWTOOL_TIM6_PERIOD defaulting to 1MS
-#  define VIEWTOOL_TIM6_PERIOD (VIEWTOOL_TIM6_FREQUENCY / 1000)
+#ifndef CONFIG_VIEWTOOL_TIM6_PERIOD
+#  warning CONFIG_VIEWTOOL_TIM6_PERIOD defaulting to 1MS
+#  define CONFIG_VIEWTOOL_TIM6_PERIOD (CONFIG_VIEWTOOL_TIM6_FREQUENCY / 1000)
+#endif
+
+#ifndef CONFIG_ARCH_IRQPRIO
+#  error CONFIG_ARCH_IRQPRIO is required
 #endif
 
 /****************************************************************************
@@ -182,6 +186,7 @@ int highpri_main(int argc, char *argv[])
   uint64_t handler;
   uint64_t thread;
   uint64_t total;
+  uint32_t seconds;
   int prescaler;
   int ret;
 
@@ -198,15 +203,16 @@ int highpri_main(int argc, char *argv[])
 
   g_highpri.dev = dev;
 
-  prescaler = STM32_TIM_SETCLOCK(dev, VIEWTOOL_TIM6_FREQUENCY);
+  prescaler = STM32_TIM_SETCLOCK(dev, CONFIG_VIEWTOOL_TIM6_FREQUENCY);
   printf("TIM6 CLKIN=%d Hz, Frequency=%d Hz, prescaler=%d\n",
-         STM32_APB1_TIM6_CLKIN, VIEWTOOL_TIM6_FREQUENCY, prescaler);
+         STM32_APB1_TIM6_CLKIN, CONFIG_VIEWTOOL_TIM6_FREQUENCY, prescaler);
 
-  STM32_TIM_SETPERIOD(dev, VIEWTOOL_TIM6_PERIOD);
+  STM32_TIM_SETPERIOD(dev, CONFIG_VIEWTOOL_TIM6_PERIOD);
   printf("TIM6 period=%d cyles; interrupt rate=%d Hz\n",
-         VIEWTOOL_TIM6_PERIOD, VIEWTOOL_TIM6_FREQUENCY/VIEWTOOL_TIM6_PERIOD);
+         CONFIG_VIEWTOOL_TIM6_PERIOD,
+         CONFIG_VIEWTOOL_TIM6_FREQUENCY/CONFIG_VIEWTOOL_TIM6_PERIOD);
 
-  /* Attach and enable the TIM6 ram vector */
+  /* Attach TIM6 ram vector */
 
   ret = up_ramvec_attach(STM32_IRQ_TIM6, tim6_handler);
   if (ret < 0)
@@ -215,17 +221,30 @@ int highpri_main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
+  /* Set the priority of the TIM6 interrupt vector */
+
+  ret = up_prioritize_irq(STM32_IRQ_TIM6, NVIC_SYSH_HIGH_PRIORITY);
+  if (ret < 0)
+    {
+      fprintf(stderr, "highpri_main: ERROR: up_prioritize_irq failed: %d\n", ret);
+      return EXIT_FAILURE;
+    }
+
+  /* Enable the timer interrupt at the NVIC and at TIM6 */
+
   up_enable_irq(STM32_IRQ_TIM6);
   STM32_TIM_ENABLEINT(dev, 0);
 
   /* Monitor interrupts */
 
+  seconds = 0;
   for (;;)
     {
       /* Flush stdout and wait a bit */
 
       fflush(stdout);
       sleep(1);
+      seconds++;
 
       /* Sample counts so that they are not volatile.  Missing a count now
        * and then is a normal consequence of this design.
@@ -239,19 +258,26 @@ int highpri_main(int argc, char *argv[])
 
       /* Then print out what is happening */
 
+      printf("Elapsed time: %d seconds\n\n", seconds);
       total = enabled + nested + other;
-      printf("  Enabled: %lld (%d%%)\n",
-             enabled, (int)((100*enabled + (total / 2)) / total));
-      printf("  Nested:  %lld (%d%%)\n",
-             nested,  (int)((100*nested + (total / 2)) / total));
-      printf("  Other:   %lld (%d%%)\n\n",
-             other,   (int)((100*other + (total / 2)) / total));
+      if (total > 0)
+        {
+          printf("  Enabled: %lld (%d%%)\n",
+                 enabled, (int)((100*enabled + (total / 2)) / total));
+          printf("  Nested:  %lld (%d%%)\n",
+                 nested,  (int)((100*nested + (total / 2)) / total));
+          printf("  Other:   %lld (%d%%)\n\n",
+                 other,   (int)((100*other + (total / 2)) / total));
+        }
 
       total = handler + thread;
-      printf("  Handler: %lld (%d%%)\n",
-             handler,  (int)((100*handler + (total / 2)) / total));
-      printf("  Thread:  %lld (%d%%)\n\n",
-             thread,   (int)((100*thread + (total / 2)) / total));
+      if (total > 0)
+        {
+          printf("  Handler: %lld (%d%%)\n",
+                 handler,  (int)((100*handler + (total / 2)) / total));
+          printf("  Thread:  %lld (%d%%)\n\n",
+                 thread,   (int)((100*thread + (total / 2)) / total));
+        }
     }
 
   return EXIT_SUCCESS;
