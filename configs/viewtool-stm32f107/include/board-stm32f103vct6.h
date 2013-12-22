@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_VIEWTOOLS_STM32F107_INCLUDE_BOARD_STM32F103VCT6_H
-#define __CONFIGS_VIEWTOOLS_STM32F107_INCLUDE_BOARD_STM32F103VCT6_H 1
+#ifndef __CONFIGS_VIEWTOOL_STM32F107_INCLUDE_BOARD_STM32F103VCT6_H
+#define __CONFIGS_VIEWTOOL_STM32F107_INCLUDE_BOARD_STM32F103VCT6_H 1
 
 /************************************************************************************
  * Included Files
@@ -137,4 +137,4 @@ extern "C" {
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_VIEWTOOLS_STM32F107_INCLUDE_BOARD_STM32F103VCT6_H */
+#endif /* __CONFIGS_VIEWTOOL_STM32F107_INCLUDE_BOARD_STM32F103VCT6_H */

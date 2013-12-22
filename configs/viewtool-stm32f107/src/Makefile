@@ -54,7 +54,7 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += stm32_buttons.c
 endif
 
-ifeq ($(CONFIG_VIEWTOOLS_HIGHPRI),y)
+ifeq ($(CONFIG_VIEWTOOL_HIGHPRI),y)
 CSRCS += stm32_highpri.c
 endif
 

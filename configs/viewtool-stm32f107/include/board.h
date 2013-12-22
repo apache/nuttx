@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_VIEWTOOLS_STM32F107_INCLUDE_BOARD_H
-#define __CONFIGS_VIEWTOOLS_STM32F107_INCLUDE_BOARD_H 1
+#ifndef __CONFIGS_VIEWTOOL_STM32F107_INCLUDE_BOARD_H
+#define __CONFIGS_VIEWTOOL_STM32F107_INCLUDE_BOARD_H 1
 
 /************************************************************************************
  * Included Files
@@ -222,4 +222,4 @@ xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_VIEWTOOLS_STM32F107_INCLUDE_BOARD_H */
+#endif /* __CONFIGS_VIEWTOOL_STM32F107_INCLUDE_BOARD_H */
