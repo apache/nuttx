@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
@@ -49,6 +51,19 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+/* Debug ********************************************************************/
+/* Non-standard debug that may be enabled just for testing the interrupt
+ * config.  NOTE: that only lldbg types are used so that the output is
+ * immediately available.
+ */
+
+#ifdef CONFIG_DEBUG_IRQ
+#  define intdbg    lldbg
+#  define intvdbg   llvdbg
+#else
+#  define intdbg(x...)
+#  define intvdbg(x...)
+#endif
 
 /****************************************************************************
  * Private Type Declarations
@@ -86,6 +101,8 @@ void exception_common(void);
 int up_ramvec_attach(int irq, up_vector_t vector)
 {
   int ret = ERROR;
+
+  intvdbg("%s IRQ%d\n", vector ? "Attaching" : "Detaching", irq);
 
   if ((unsigned)irq < ARMV7M_PERIPHERAL_INTERRUPTS)
     {
