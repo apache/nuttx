@@ -243,3 +243,12 @@ Configurations
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+  highpri:
+
+    This configuration was used to verify the NuttX high priority, nested
+    interrupt feature.  This is a board-specific test and probably not
+    of much interest now other than for reference.
+
+    This configuration targets the viewtool board with the STM32F103VCT6
+    mounted.  It uses TIM6 to generated high rate interrupts for the test.
