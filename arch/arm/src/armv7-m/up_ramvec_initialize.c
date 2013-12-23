@@ -84,7 +84,10 @@
  * table resides in RAM, has the name up_ram_vectors, and has been
  * properly positioned and aligned in memory by the linker script.
  *
- * REVISIT: Can this alignment requirement vary from core-to-core?
+ * REVISIT: Can this alignment requirement vary from core-to-core?  Yes, it
+ * depends on the number of vectors supported by the MCU. The safest thing
+ * to do is to put the vector table at the beginning of RAM in order toforce
+ * the highest alignment possible.
  */
 
 up_vector_t g_ram_vectors[ARMV7M_VECTAB_SIZE]

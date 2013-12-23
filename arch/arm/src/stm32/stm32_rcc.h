@@ -83,7 +83,7 @@ extern "C"
  * and we will need to set the NVIC vector location to this alternative location.
  */
 
-extern uint32_t stm32_vectors[];  /* See stm32_vectors.S */
+extern uint32_t _vectors[];  /* See stm32_vectors.S */
 
 /************************************************************************************
  * Inline Functions

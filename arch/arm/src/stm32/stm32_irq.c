@@ -95,7 +95,7 @@ static void stm32_dumpnvic(const char *msg, int irq)
 
   flags = irqsave();
   lldbg("NVIC (%s, irq=%d):\n", msg, irq);
-  lldbg("  INTCTRL:    %08x VECTAB: %08x\n",
+  lldbg("  INTCTRL:    %08x VECTAB:  %08x\n",
         getreg32(NVIC_INTCTRL), getreg32(NVIC_VECTAB));
 #if 0
   lldbg("  SYSH ENABLE MEMFAULT: %08x BUSFAULT: %08x USGFAULT: %08x SYSTICK: %08x\n",
@@ -151,7 +151,7 @@ static int stm32_nmi(int irq, FAR void *context)
 static int stm32_busfault(int irq, FAR void *context)
 {
   (void)irqsave();
-  dbg("PANIC!!! Bus fault recived\n");
+  dbg("PANIC!!! Bus fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
@@ -159,7 +159,7 @@ static int stm32_busfault(int irq, FAR void *context)
 static int stm32_usagefault(int irq, FAR void *context)
 {
   (void)irqsave();
-  dbg("PANIC!!! Usage fault received\n");
+  dbg("PANIC!!! Usage fault received: %08x\n", getreg32(NVIC_CFAULTS));
   PANIC();
   return 0;
 }
@@ -321,7 +321,7 @@ void up_irqinitialize(void)
 #if defined(CONFIG_ARCH_RAMVECTORS)
   up_ramvec_initialize();
 #elif defined(CONFIG_STM32_DFU)
-  putreg32((uint32_t)stm32_vectors, NVIC_VECTAB);
+  putreg32((uint32_t)_vectors, NVIC_VECTAB);
 #endif
 
   /* Set all interrupts (and exceptions) to the default priority */

@@ -121,7 +121,7 @@
 	.thumb_func
 \label:
 	mov		r0, #\irqno
-	b		lpc17_common
+	b		exception_common
 	.endm
 
 /************************************************************************************************
@@ -131,10 +131,10 @@
 	.section	.vectors, "ax"
 	.code		16
 	.align		2
-	.globl		lpc17_vectors
-	.type		lpc17_vectors, function
+	.globl		_vectors
+	.type		_vectors, function
 
-lpc17_vectors:
+_vectors:
 
 /* Processor Exceptions */
 
@@ -171,7 +171,7 @@ lpc17_vectors:
 #  error "Unrecognized LPC17xx family"
 #endif
 
-	.size	lpc17_vectors, .-lpc17_vectors
+	.size	_vectors, .-_vectors
 
 /************************************************************************************************
  * .text
@@ -226,7 +226,10 @@ handlers:
  *      We are in handler mode and the current SP is the MSP
  */
 
-lpc17_common:
+	.globl		exception_common
+	.type		exception_common, function
+
+exception_common:
 
 	/* Complete the context save */
 

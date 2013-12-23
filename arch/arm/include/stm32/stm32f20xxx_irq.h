@@ -150,6 +150,7 @@
 #define STM32_IRQ_HASH        (STM32_IRQ_INTERRUPTS+80) /* 80: Hash and Rng global interrupt */
 #define STM32_IRQ_RNG         (STM32_IRQ_INTERRUPTS+80) /* 80: Hash and Rng global interrupt */
 
+#define NR_VECTORS            (STM32_IRQ_INTERRUPTS+81)
 #define NR_IRQS               (STM32_IRQ_INTERRUPTS+81)
 
 /****************************************************************************************************

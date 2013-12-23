@@ -120,7 +120,7 @@
 	.thumb_func
 \label:
 	mov		r0, #\irqno
-	b		sam_common
+	b		exception_common
 	.endm
 
 /************************************************************************************************
@@ -130,10 +130,10 @@
 	.section	.vectors, "ax"
 	.code		16
 	.align		2
-	.globl		sam_vectors
-	.type		sam_vectors, function
+	.globl		_vectors
+	.type		_vectors, function
 
-sam_vectors:
+_vectors:
 
 /* Processor Exceptions */
 
@@ -174,7 +174,7 @@ sam_vectors:
 #  error Unrecognized SAM architecture
 #endif
 
-	.size	sam_vectors, .-sam_vectors
+	.size	_vectors, .-_vectors
 
 /************************************************************************************************
  * .text
@@ -231,7 +231,10 @@ handlers:
  *      We are in handler mode and the current SP is the MSP
  */
 
-sam_common:
+	.globl		exception_common
+	.type		exception_common, function
+
+exception_common:
 
 	/* Complete the context save */
 

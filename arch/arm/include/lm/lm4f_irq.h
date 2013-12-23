@@ -211,6 +211,7 @@
 #  define LM_RESERVED_153  (153) /* Vector 153: Reserved */
 #  define LM_RESERVED_154  (154) /* Vector 154: Reserved */
 
+#  define NR_VECTORS       (155)
 #  define NR_IRQS          (123) /* (Really fewer because of reserved vectors) */
 
 #else

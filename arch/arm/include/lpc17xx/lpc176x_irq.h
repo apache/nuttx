@@ -223,6 +223,7 @@
 
 /* Total number of IRQ numbers */
 
+#define NR_VECTORS              LPC17_IRQ_NIRQS
 #define NR_IRQS                 (LPC17_IRQ_EXTINT+LPC17_IRQ_NEXTINT+LPC17_NGPIOAIRQS)
 
 /****************************************************************************
