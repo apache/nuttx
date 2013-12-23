@@ -301,7 +301,7 @@ config ARCH_HIPRI_INTERRUPT
 config ARCH_INT_DISABLEALL
 	bool "Disable high priority interrupts"
 	default y
-	depends on ARCH_HIPRI_INTERRUPT
+	depends on ARCH_HIPRI_INTERRUPT && EXPERIMENTAL
 	---help---
 		If ARCH_HIPRI_INTERRUPT is defined, then special high priority
 		interrupts are supported.  These are not "nested" in the normal
@@ -330,6 +330,11 @@ config ARCH_INT_DISABLEALL
 		Disable here and below --------> MAXNORMAL ---> HIGH --------> MAXNORMAL
 		                            |              |    MAXNORMAL |
 		----------------------------+--------------+--------------+-------------
+
+		NOTE: This does not work now because interrupts get disabled in the
+		standard interrupt handling, prohibiting nesting.  Fix is simple:  Need
+		to used more priority levels so that we can make a cleaner distinction
+		with the standard interrupt handler.
 
 comment "Boot options"
 
