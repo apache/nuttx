@@ -40,6 +40,7 @@ MEMORY
 }
 
 OUTPUT_ARCH(arm)
+EXTERN(_vectors)
 ENTRY(_stext)
 SECTIONS
 {
@@ -77,7 +78,11 @@ SECTIONS
 
 	_eronly = ABSOLUTE(.);
 
-	/* The STM32F103Z has 64Kb of SRAM beginning at the following address */
+	/* The RAM vector table (if present) should lie at the beginning of SRAM */
+
+	.ram_vectors : {
+		*(.ram_vectors)
+	} > sram
 
 	.data : {
 		_sdata = ABSOLUTE(.);
