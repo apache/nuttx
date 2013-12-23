@@ -71,6 +71,10 @@ ifeq ($(CONFIG_LCD_ST7567),y)
   CSRCS += st7567.c
 endif
 
+ifeq ($(CONFIG_LCD_SHARP_MEMLCD),y)
+  CSRCS += memlcd.c
+endif
+
 # Include LCD driver build support
 
 DEPPATH += --dep-path lcd

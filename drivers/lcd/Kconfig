@@ -21,7 +21,7 @@ config LCD_NOGETRUN
 
 config LCD_MAXCONTRAST
 	int "LCD maximum contrast"
-	default 63 if NOKIA6100_S1D15G10
+	default 63 if NOKIA6100_S1D15G10 || LCD_SHARP_MEMLCD
 	default 127 if NOKIA6100_PCF8833
 	default 255 if LCD_P14201 || LCD_LCD1602
 	default 63
@@ -431,6 +431,56 @@ config SSD1289_PROFILE3
 	bool "Profile 3"
 
 endchoice
+endif
+
+config LCD_SHARP_MEMLCD
+	bool "Sharp Memory LCD Suite"
+	default n
+	---help---
+		memlcd.c. Driver for Sharp Memory LCD Suite.
+
+if LCD_SHARP_MEMLCD
+
+choice MEMLCD_MODEL
+	prompt "Choose Model"
+	default MEMLCD_LS013B7DH03
+
+config MEMLCD_LS013B7DH01
+	bool "LS013B7DH01"
+	---help---
+		Selects the LS013B7DH01 model
+
+config MEMLCD_LS013B7DH03
+	bool "LS013B7DH03"
+	---help---
+		Selects the LS013B7DH03 model
+
+endchoice
+
+config MEMLCD_NINTERFACES
+	int "Number of physical Memory LCD devices"
+	default 1
+	range 1 1
+	---help---
+		Specifies the number of physical Memory LCD devices that will
+		be supported.
+
+config MEMLCD_EXTCOMIN_MODE_HW
+	bool "Use hardware mode for EXTCOMIN"
+	default n
+	---help---
+		If use hardware mode to toggle VCOM, we need to send specific
+		command at a constant frequency to trigger the LCD intenal
+		hardware logic.  While use software mode, we set up a timer to
+		toggle EXTCOMIN connected IO, basically, it is a hardware
+		timer to ensure a constant frequency.
+
+config MEMLCD_SPI_FREQUENCY
+	int "SPI frequency"
+	default 3500000
+	---help---
+		Define to use a different bus frequency, FIXME DEFAULT VALUE OK?
+
 endif
 
 choice

@@ -108,6 +108,12 @@ Re-usable LCD drivers reside in the drivers/lcd directory:
   st7567.c.  LCD Display Module, ST7567, Univision Technology Inc. Used
     with the LPCXpresso and Embedded Artists base board.
 
+  memlcd.c.  Sharp Memory LCD Suite, LS013B7DH01, LS013B7DH03, etc.
+    There are some more different models, they are basically controlled
+    by similar logics, thus this driver can be extended.  Example usage:
+
+      configs/maple
+
   OLEDs:
   -----
   p14201.c.  Driver for RiT P14201 series display with SD1329 IC
