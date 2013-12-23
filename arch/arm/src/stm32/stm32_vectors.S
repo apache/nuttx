@@ -254,12 +254,12 @@ exception_common:
 	 * EXC_RETURN is 0xfffffffd (unprivileged thread)
 	 */
 
-	adds	r2, r14, #3				/* If R14=0xfffffffd, then r2 == 0 */
-	ite		ne						/* Next two instructions are conditional */
-	mrsne	r1, msp					/* R1=The main stack pointer */
-	mrseq	r1, psp					/* R1=The process stack pointer */
-#else
-	mrs		r1, msp					/* R1=The main stack pointer */
+	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
+	beq		1f						/* Branch if context already on the MSP */
+	mrs		r1, psp					/* R1=The process stack pointer (PSP) */
+	mov     sp, r1					/* Set the MSP to the PSP */
+
+1:
 #endif
 
 	/* r1 holds the value of the stack pointer AFTER the excption handling logic
@@ -267,7 +267,7 @@ exception_common:
 	 * stack pointer BEFORE the interrupt modified it.
 	 */
 
-	mov		r2, r1					/* R2=Copy of the main/process stack pointer */
+	mov		r2, sp					/* R2=Copy of the main/process stack pointer */
 	add		r2, #HW_XCPT_SIZE		/* R2=MSP/PSP before the interrupt was taken */
 #ifdef CONFIG_ARMV7M_USEBASEPRI
 	mrs		r3, basepri				/* R3=Current BASEPRI setting */
@@ -282,7 +282,7 @@ exception_common:
 	 * cannot be used in interrupt processing).
 	 */
 
-	sub		r1, #(4*SW_FPU_REGS)
+	sub		sp, #(4*SW_FPU_REGS)
 #endif
 
 	/* Save the remaining registers on the stack after the registers pushed
@@ -291,9 +291,9 @@ exception_common:
 	 */
 
 #ifdef CONFIG_NUTTX_KERNEL
-	stmdb	r1!, {r2-r11,r14}		/* Save the remaining registers plus the SP value */
+	stmdb	sp!, {r2-r11,r14}		/* Save the remaining registers plus the SP value */
 #else
-	stmdb	r1!, {r2-r11}			/* Save the remaining registers plus the SP value */
+	stmdb	sp!, {r2-r11}			/* Save the remaining registers plus the SP value */
 #endif
 
 #ifndef CONFIG_ARCH_HIPRI_INTERRUPT
@@ -312,6 +312,14 @@ exception_common:
 	msr		basepri, r2				/* Set the BASEPRI */
 #endif
 
+	/* There are two arguments to up_doirq:
+	 *
+	 *   R0 = The IRQ number
+	 *   R1 = The top of the stack points to the saved state
+	 */
+
+	mov		r1, sp
+
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	/* If CONFIG_ARCH_INTERRUPTSTACK is defined, we will set the MSP to use
 	 * a special special interrupt stack pointer.  The way that this is done
@@ -329,7 +337,6 @@ exception_common:
 	 * kernel mode).
 	 */
 
-	mov		sp, r1					/* We are using the main stack pointer */
 	bl		up_doirq				/* R0=IRQ, R1=register save (msp) */
 	mov		r1, sp					/* Recover R1=main stack pointer */
 #endif

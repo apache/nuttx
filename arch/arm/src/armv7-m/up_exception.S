@@ -126,11 +126,12 @@ exception_common:
 	/* The EXC_RETURN value tells us whether the context is on the MSP or PSP */
 
 	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
-	ite		eq						/* next two instructions conditional */
-	mrseq	r1, msp					/* R1=The main stack pointer */
-	mrsne	r1, psp					/* R1=The process stack pointer */
+	beq		1f						/* Branch if context already on the MSP */
+	mrs		r1, psp					/* R1=The process stack pointer (PSP) */
+	mov     sp, r1					/* Set the MSP to the PSP */
 
-	mov		r2, r1					/* R2=Copy of the main/process stack pointer */
+1:
+	mov		r2, sp					/* R2=Copy of the main/process stack pointer */
 	add		r2, #HW_XCPT_SIZE		/* R2=MSP/PSP before the interrupt was taken */
 									/* (ignoring the xPSR[9] alignment bit) */
 #ifdef CONFIG_ARMV7M_USEBASEPRI
@@ -152,11 +153,11 @@ exception_common:
 	 * where to put the registers.
 	 */
 
-	vstmdb	r1!, {s16-s31}			/* Save the non-volatile FP context */
+	vstmdb	sp!, {s16-s31}			/* Save the non-volatile FP context */
 
 #endif
 
-	stmdb	r1!, {r2-r11,r14}		/* Save the remaining registers plus the SP/PRIMASK values */
+	stmdb	sp!, {r2-r11,r14}		/* Save the remaining registers plus the SP/PRIMASK values */
 
 #ifndef CONFIG_ARCH_HIPRI_INTERRUPT
 	/* Disable interrupts, select the stack to use for interrupt handling
@@ -173,6 +174,14 @@ exception_common:
 	mov		r2, #NVIC_SYSH_DISABLE_PRIORITY
 	msr		basepri, r2				/* Set the BASEPRI */
 #endif
+
+	/* There are two arguments to up_doirq:
+	 *
+	 *   R0 = The IRQ number
+	 *   R1 = The top of the stack points to the saved state
+	 */
+
+	mov		r1, sp
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 	/* If CONFIG_ARCH_INTERRUPTSTACK is defined, we will set the MSP to use
@@ -191,9 +200,8 @@ exception_common:
 	 * kernel mode).
 	 */
 
-	msr	 msp, r1					/* We are using the main stack pointer */
 	bl		up_doirq				/* R0=IRQ, R1=register save area on stack */
-	mrs	 r1, msp					/* Recover R1=main stack pointer */
+	mrs		r1, msp					/* Get R1=main stack pointer */
 #endif
 
 	/* On return from up_doirq, R0 will hold a pointer to register context
@@ -202,7 +210,7 @@ exception_common:
 	 */
 
 	cmp		r0, r1					/* Context switch? */
-	beq		1f						/* Branch if no context switch */
+	beq		2f						/* Branch if no context switch */
 
 	/* We are returning with a pending context switch.  This case is different
 	 * because in this case, the register save structure does not lie on the
@@ -235,9 +243,9 @@ exception_common:
 	vldmia	r0, {s16-s31}			/* Recover S16-S31 */
 #endif
 
-	b		2f						/* Re-join common logic */
+	b		3f						/* Re-join common logic */
 
-1:
+2:
 	/* We are returning with no context switch.  We simply need to "unwind"
 	 * the same stack frame that we created at entry.
 	 */
@@ -247,7 +255,7 @@ exception_common:
 	vldmia  r1!, {s16-s31}			/* Recover S16-S31 */
 #endif
 
-2:
+3:
 	/* The EXC_RETURN value tells us whether we are returning on the MSP or PSP
 	 */
 
@@ -259,15 +267,15 @@ exception_common:
 
 	mrs		r2, control				/* R2=Contents of the control register */
 	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
-	beq		3f						/* Branch if privileged */
+	beq		4f						/* Branch if privileged */
 
 	orr		r2, r2, #1				/* Unprivileged mode */
 	msr		psp, r1					/* R1=The process stack pointer */
-	b		4f
-3:
+	b		5f
+4:
 	bic		r2, r2, #1				/* Privileged mode */
 	msr		msp, r1					/* R1=The main stack pointer */
-4:
+5:
 	msr		control, r2				/* Save the updated control register */
 #else
 	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
