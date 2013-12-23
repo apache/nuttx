@@ -6295,3 +6295,5 @@
 	  too, defeating the nesting of interrupts.  The fix is easy: It just
 	  needs more levels of priority of disabling interrupts vs interrupt
 	  handling (2013-12-23).
+	* configs/viewtool-stm32f107/src/stm32_highpri.c:  Improved debug output
+	  (2013-12-23).
