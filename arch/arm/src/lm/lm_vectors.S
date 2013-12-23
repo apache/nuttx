@@ -126,7 +126,7 @@
 	.thumb_func
 \label:
 	mov		r0, #\irqno
-	b		lm_irqcommon
+	b		exception_common
 	.endm
 
 /************************************************************************************
@@ -136,10 +136,10 @@
 	.section	.vectors, "ax"
 	.code		16
 	.align		2
-	.globl		lm_vectors
-	.type		lm_vectors, function
+	.globl		_vectors
+	.type		_vectors, function
 
-lm_vectors:
+_vectors:
 
 /* Processor Exceptions */
 
@@ -171,7 +171,7 @@ lm_vectors:
 #define UNUSED(i) .word lm_reserved
 
 #include "chip/chip/lm_vectors.h"
-	.size	lm_vectors, .-lm_vectors
+	.size	_vectors, .-_vectors
 
 /************************************************************************************
  * .text
@@ -218,7 +218,9 @@ handlers:
  *      We are in handler mode and the current SP is the MSP
  */
 
-lm_irqcommon:
+	.globl		exception_common
+	.type		exception_common, function
+exception_common:
 
 	/* Complete the context save */
 

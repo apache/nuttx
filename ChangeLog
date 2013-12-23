@@ -6273,3 +6273,13 @@
 	  (2013-12-22).
 	* configs/viewtool-stm32f107/scripts:  Need to do some special things
 	  in linking of the common vectors are used (2013-12-22).
+	* arch/arm/include/*/irq*.h:  Add definition NR_VECTORS so that the RAM
+	  vector logic can know how many vectors there are.  NR_IRQS is often
+	  not equal to NR_VECTORS (2013-12-23).
+	* arch/arm/src/*_vectors.S:  Standardize the name of the vector table
+	  and the name of the common vector handling logic so that the MCU-
+	  independent logic and work with these (2013-12-23).
+	* configs/viewtool-stm32f107/scripts: Move the RAM vector tables to the
+	  beginning of SRAM.  It seems to require this alignament.  Also, we
+	  don't need different scripts for the CMNVECTOR case now that the vector
+	  table has a common name.

@@ -127,7 +127,7 @@
 	.thumb_func
 \label:
 	mov		r0, #\irqno
-	b		stm32_common
+	b		exception_common
 	.endm
 
 /************************************************************************************
@@ -137,10 +137,10 @@
 	.section	.vectors, "ax"
 	.code		16
 	.align		2
-	.globl		stm32_vectors
-	.type		stm32_vectors, function
+	.globl		_vectors
+	.type		_vectors, function
 
-stm32_vectors:
+_vectors:
 
 /* Processor Exceptions */
 
@@ -182,7 +182,7 @@ stm32_vectors:
 #else
 #  error "No vectors for STM32 chip"
 #endif
-	.size	stm32_vectors, .-stm32_vectors
+	.size	_vectors, .-_vectors
 
 /************************************************************************************
  * .text
@@ -241,7 +241,10 @@ handlers:
  *      We are in handler mode and the current SP is the MSP
  */
 
-stm32_common:
+	.globl		exception_common
+	.type		exception_common, function
+
+exception_common:
 
 	/* Complete the context save */
 

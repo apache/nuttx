@@ -128,6 +128,8 @@
 #  define STM32_IRQ_DMA2CH3     (74) /* 58: DMA2 Channel 3 global interrupt */
 #  define STM32_IRQ_DMA2CH45    (75) /* 59: DMA2 Channel 4 and 5 global interrupt */
 #  define STM32_IRQ_DMA2CH5     (76) /* 60: DMA2 Channel 5 global interrupt */
+
+#  define NR_VECTORS            (77)
 #  define NR_IRQS               (77)
 
 /* Connectivity Line Devices */
@@ -201,6 +203,8 @@
 #  define STM32_IRQ_CAN2RX1     (81) /* 65: CAN2 RX1 interrupt */
 #  define STM32_IRQ_CAN2SCE     (82) /* 66: CAN2 SCE interrupt */
 #  define STM32_IRQ_OTGFS       (83) /* 67: USB On The Go FS global interrupt */
+
+#  define NR_VECTORS            (84)
 #  define NR_IRQS               (84)
 
 /* Medium and High Density Devices */
@@ -266,6 +270,8 @@
 #  define STM32_IRQ_DMA2CH2     (73) /* 57: DMA2 Channel 2 global interrupt */
 #  define STM32_IRQ_DMA2CH3     (74) /* 58: DMA2 Channel 3 global interrupt */
 #  define STM32_IRQ_DMA2CH45    (75) /* 59: DMA2 Channel 4&5 global interrupt */
+
+#  define NR_VECTORS            (76)
 #  define NR_IRQS               (76)
 
 /* Convenience definitions for interrupts with multiple functions */

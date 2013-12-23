@@ -119,7 +119,7 @@
 	.thumb_func
 \label:
 	mov		r0, #\irqno
-	b		kinetis_common
+	b		exception_common
 	.endm
 
 /************************************************************************************************
@@ -129,10 +129,10 @@
 	.section	.vectors, "ax"
 	.code		16
 	.align		2
-	.globl		kinetis_vectors
-	.type		kinetis_vectors, function
+	.globl		_vectors
+	.type		_vectors, function
 
-kinetis_vectors:
+_vectors:
 
 /* Processor Exceptions *************************************************************************/
 
@@ -614,7 +614,10 @@ handlers:
  *      We are in handler mode and the current SP is the MSP
  */
 
-kinetis_common:
+	.globl		exception_common
+	.type		exception_common, function
+
+exception_common:
 
 	/* Complete the context save */
 

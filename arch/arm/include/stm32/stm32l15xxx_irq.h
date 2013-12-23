@@ -108,6 +108,7 @@
 #  define STM32_IRQ_TIM6        (STM32_IRQ_INTERRUPTS+43) /* 43: TIM6 global interrupt */
 #  define STM32_IRQ_TIM7        (STM32_IRQ_INTERRUPTS+44) /* 44: TIM7 global interrupt */
 
+#  define NR_VECTORS            (STM32_IRQ_INTERRUPTS+45)
 #  define NR_IRQS               (STM32_IRQ_INTERRUPTS+45)
 
 /* External interrupts (vectors >= 16) medium+ density devices */
@@ -170,6 +171,7 @@
 #  define STM32_IRQ_AES         (STM32_IRQ_INTERRUPTS+52) /* 52: AES global interrupt */
 #  define STM32_IRQ_COMPACQ     (STM32_IRQ_INTERRUPTS+53) /* 53: Comparator Channel Acquisition Interrupt */
 
+#  define NR_VECTORS            (STM32_IRQ_INTERRUPTS+54)
 #  define NR_IRQS               (STM32_IRQ_INTERRUPTS+54)
 
 /* External interrupts (vectors >= 16) high density devices */
@@ -235,6 +237,7 @@
 #  define STM32_IRQ_AES         (STM32_IRQ_INTERRUPTS+55) /* 55: AES global interrupt */
 #  define STM32_IRQ_COMPACQ     (STM32_IRQ_INTERRUPTS+56) /* 56: Comparator Channel Acquisition Interrupt */
 
+#  define NR_VECTORS            (STM32_IRQ_INTERRUPTS+57)
 #  define NR_IRQS               (STM32_IRQ_INTERRUPTS+57)
 #else
 #  error "Unknown STM32L density"

@@ -161,6 +161,7 @@
 #define STM32_IRQ_RESERVED80  (STM32_IRQ_INTERRUPTS+80) /* 80: Reserved */
 #define STM32_IRQ_FPU         (STM32_IRQ_INTERRUPTS+81) /* 81: FPU global interrupt */
 
+#define NR_VECTORS            (STM32_IRQ_INTERRUPTS+82)
 #define NR_IRQS               (STM32_IRQ_INTERRUPTS+82)
 
 /****************************************************************************************************

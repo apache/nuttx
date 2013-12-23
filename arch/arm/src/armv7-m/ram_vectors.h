@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * arch/arm/src/armv7-m/ram_vectors.h
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
@@ -31,48 +31,37 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifndef __ARCH_ARM_SRC_COMMON_ARMV7_M_RAM_VECTORS_H
 #define __ARCH_ARM_SRC_COMMON_ARMV7_M_RAM_VECTORS_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <arch/irq.h>
 
-/* If CONFIG_ARMV7M_CMNVECTOR is defined then the number of peripheral interrupts
- * is provided in chip.h.
- */
-
-#include "chip.h"
 #include "up_internal.h"
 
 #ifdef CONFIG_ARCH_RAMVECTORS
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
-/* This logic currently only works if CONFIG_ARMV7M_CMNVECTOR is defined.  That is
- * because CONFIG_ARMV7M_CMNVECTOR is needed to induce chip.h into giving us the
- * number of peripheral interrupts. "Oh want a tangled web we weave..."
+ ****************************************************************************/
+
+/* This is the size of the vector table (in 4-byte entries).  This size
+ * includes the (1) the peripheral interrupts, (2) space for 15 Cortex-M
+ * exceptions, and (3) IDLE stack pointer which lies at the beginning of the
+ * table.
  */
 
-#ifndef CONFIG_ARMV7M_CMNVECTOR
-#  error "This logic requires CONFIG_ARMV7M_CMNVECTOR"
-#endif
+#define ARMV7M_VECTAB_SIZE (NR_VECTORS + 16)
 
-/* This, then is the size of the vector table (in 4-byte entries).  This size
- * includes the (1) the device interrupts, (2) space for 15 Cortex-M excpetions, and
- * (3) IDLE stack pointer which lies at the beginning of the table.
- */
-
-#define ARMV7M_VECTAB_SIZE (ARMV7M_PERIPHERAL_INTERRUPTS + 16)
-
-/************************************************************************************
+/****************************************************************************
  * Public Data
- ************************************************************************************/
+ ****************************************************************************/
 
 /* If CONFIG_ARCH_RAMVECTORS is defined, then the ARM logic must provide
  * ARM-specific implementations of irq_initialize(), irq_attach(), and
@@ -80,15 +69,18 @@
  * table resides in RAM, has the name up_ram_vectors, and has been
  * properly positioned and aligned in memory by the linker script.
  *
- * REVISIT: Can this alignment requirement vary from core-to-core?
+ * REVISIT: Can this alignment requirement vary from core-to-core?  Yes, it
+ * depends on the number of vectors supported by the MCU. The safest thing
+ * to do is to put the vector table at the beginning of RAM in order toforce
+ * the highest alignment possible.
  */
 
 extern up_vector_t g_ram_vectors[ARMV7M_VECTAB_SIZE]
   __attribute__ ((section (".ram_vectors"), aligned (128)));
 
-/************************************************************************************
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: up_ramvec_initialize

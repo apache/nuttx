@@ -105,7 +105,7 @@ int up_ramvec_attach(int irq, up_vector_t vector)
 
   intvdbg("%s IRQ%d\n", vector ? "Attaching" : "Detaching", irq);
 
-  if ((unsigned)irq < (STM32_IRQ_INTERRUPTS + ARMV7M_PERIPHERAL_INTERRUPTS))
+  if ((unsigned)irq < NR_VECTORS)
     {
       irqstate_t flags;
 
