@@ -1,5 +1,5 @@
 #!/bin/bash
-# configs/maple/nsh/setenv.sh
+# configs/maple/nx/setenv.sh
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>

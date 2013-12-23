@@ -47,22 +47,17 @@ if [ -z "${PATH_ORIG}" ]; then
   export PATH_ORIG="${PATH}"
 fi
 
-# This is the Cygwin path to the location where I installed the RIDE
-# toolchain
-
-export RIDE_BIN="/cygdrive/c/Program Files/Raisonance/Ride/arm-gcc/bin"
-
 # This is the Cygwin path to the location where I build the buildroot
 # toolchain.
 
 export BUILDROOT_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
 
-# This is the path to the LM3S6995-EK tools directory
+# This is the path to the Spark tools directory
 
-export TOOL_BIN="${WD}/configs/lm3s6965-ek/tools"
+export TOOL_BIN="${WD}/configs/maple/tools"
 
 # Update the PATH variable
 
-export PATH="${BUILDROOT_BIN}:${TOOL_BIN:${RIDE_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+export PATH="${BUILDROOT_BIN}:${TOOL_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
 
 echo "PATH : ${PATH}"

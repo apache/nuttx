@@ -23,6 +23,7 @@ Contents
 
   - Development Environment
   - DFU
+  - Configurations
 
 Development Environment
 =======================
@@ -98,3 +99,128 @@ DFU
   nutt.hex in the top-level directory. That is the file that you should
   provide to the DFU File Manager. You will end up with a file called
   nuttx.dfu that you can use with the STMicro DFU SE program.
+
+Configurations
+==============
+
+  Information Common to All Configurations
+  ----------------------------------------
+  Each Maple configuration is maintained in a sub-directory and
+  can be selected as follow:
+
+    cd tools
+    ./configure.sh maple/<subdir>
+    cd -
+    . ./setenv.sh
+
+  Before sourcing the setenv.sh file above, you should examine it and perform
+  edits as necessary so that TOOLCHAIN_BIN is the correct path to the directory
+  than holds your toolchain binaries.
+
+  And then build NuttX by simply typing the following.  At the conclusion of
+  the make, the nuttx binary will reside in an ELF file called, simply, nuttx.
+
+    make
+
+  The <subdir> that is provided above as an argument to the tools/configure.sh
+  must be is one of the following.
+
+  NOTES:
+
+  1. These configurations use the mconf-based configuration tool.  To
+    change any of these configurations using that tool, you should:
+
+    a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+       and misc/tools/
+
+    b. Execute 'make menuconfig' in nuttx/ in order to start the
+       reconfiguration process.
+
+  Configuration Sub-directories
+  -----------------------------
+
+  nsh:
+
+    This configuration directory provide the basic NuttShell (NSH).
+    A serial console is provided on USART1.
+
+    NOTES:
+    1. Currently configured for the STM32F103CB.  But this is easily
+       reconfigured:
+
+       CONFIG_ARCH_CHIP_STM32F103RB=n
+       CONFIG_ARCH_CHIP_STM32F103CB=y
+
+    2. Support for the I2C tool has been disabled, but can be restored
+       with following configure options:
+
+       System Type -> Peripherals
+         CONFIG_STM32_I2C1=y
+         CONFIG_STM32_I2C2=y
+         CONFIG_STM32_I2CTIMEOSEC=1
+         CONFIG_STM32_I2CTIMEOMS=500
+         CONFIG_STM32_I2CTIMEOTICKS=500
+
+       Drivers
+        CONFIG_I2C=y
+        CONFIG_I2C_TRANSFER=y
+
+       Applications -> System Add-Ons
+         CONFIG_SYSTEM_I2CTOOL=y
+         CONFIG_I2CTOOL_MINBUS=1
+         CONFIG_I2CTOOL_MAXBUS=2
+         CONFIG_I2CTOOL_MINADDR=0x0
+         CONFIG_I2CTOOL_MAXADDR=0xf0
+         CONFIG_I2CTOOL_MAXREGADDR=0xff
+         CONFIG_I2CTOOL_DEFFREQ=100000
+
+  nx:
+
+    This configuration has been used to bring up the  Sharp Memory LCD
+    on a custom board.  This NX configuration was used for testing that
+    LCD.  Debug output will appear on USART1.
+
+    NOTES:
+    1. Currently configured for the STM32F103CB.  But this is easily
+       reconfigured:
+
+       CONFIG_ARCH_CHIP_STM32F103RB=n
+       CONFIG_ARCH_CHIP_STM32F103CB=y
+
+    2. You won't be able to buy a Sharp Memory LCD to use with your
+       Maple.  If you want one, you will have to make one yourself.
+
+  usbnsh:
+
+    This is an alternative NuttShell (NSH) configuration that uses a USB
+    serial console for interaction.
+
+    NOTES:
+    1. Currently configured for the STM32F103CB.  But this is easily
+       reconfigured:
+
+       CONFIG_ARCH_CHIP_STM32F103RB=n
+       CONFIG_ARCH_CHIP_STM32F103CB=y
+
+    2. Support for the I2C tool has been disabled, but can be restored
+       with following configure options:
+
+       System Type -> Peripherals
+         CONFIG_STM32_I2C1=y
+         CONFIG_STM32_I2C2=y
+         CONFIG_STM32_I2CTIMEOSEC=1
+         CONFIG_STM32_I2CTIMEOMS=500
+         CONFIG_STM32_I2CTIMEOTICKS=500
+
+       Drivers
+        CONFIG_I2C=y
+        CONFIG_I2C_TRANSFER=y
+
+       Applications -> System Add-Ons
+         CONFIG_SYSTEM_I2CTOOL=y
+         CONFIG_I2CTOOL_MINBUS=1
+         CONFIG_I2CTOOL_MAXBUS=2
+         CONFIG_I2CTOOL_MINADDR=0x0
+         CONFIG_I2CTOOL_MAXADDR=0xf0
+         CONFIG_I2CTOOL_MAXREGADDR=0xff
+         CONFIG_I2CTOOL_DEFFREQ=100000

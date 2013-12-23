@@ -46,7 +46,7 @@
 #include <stdint.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* How many SPI modules does this chip support? The LM3S6918 supports 2 SPI
@@ -62,18 +62,33 @@
 #endif
 
 /* GPIOs **************************************************************/
+/* GPIO settings for LEDs and USB */
 
 #ifdef CONFIG_MAPLE_MINI
-#define GPIO_LED        (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
-#define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN9)
+#  define GPIO_LED           (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                              GPIO_OUTPUT_CLEAR|GPIO_PORTB|GPIO_PIN1)
+#  define GPIO_USB_PULLUP    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                              GPIO_OUTPUT_SET|GPIO_PORTB|GPIO_PIN9)
 #else
-#define GPIO_LED        (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN5)
-#define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
-                         GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN12)
+#  define GPIO_LED           (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                              GPIO_OUTPUT_CLEAR|GPIO_PORTA|GPIO_PIN5)
+#  define GPIO_USB_PULLUP    (GPIO_OUTPUT|GPIO_CNF_OUTPP|GPIO_MODE_50MHz|\
+                              GPIO_OUTPUT_SET|GPIO_PORTC|GPIO_PIN12)
 #endif
+
+/* The Maple configuration has been used to very the Sharp Memory LCD
+ * on a custom board.  These are pin definitions for that custom
+ * board interface.  If you should decide to integrate the Sharp
+ * Memory LCD with your Maple board, you may need to changes these
+ * settings.
+ */
+
+#define GPIO_MEMLCD_EXTCOMIN (GPIO_PORTA | GPIO_PIN13 | GPIO_OUTPUT_CLEAR | \
+                              GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz)
+#define GPIO_MEMLCD_DISP     (GPIO_PORTA | GPIO_PIN14 | GPIO_OUTPUT_CLEAR | \
+                              GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz)
+#define GPIO_MEMLCD_CS       (GPIO_PORTA | GPIO_PIN15 | GPIO_OUTPUT_CLEAR | \
+                              GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz)
 
 /************************************************************************************
  * Public Types
@@ -108,16 +123,6 @@ void stm32_spiinitialize(void);
  ************************************************************************************/
 
 void stm32_usbinitialize(void);
-
-/************************************************************************************
- * Name: up_wlinitialize
- *
- * Description:
- *   Called to configure wireless module (nRF24L01).
- *
- ************************************************************************************/
-
-void up_wlinitialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_MAPLE_SRC_MAPLE_INTERNAL_H */
