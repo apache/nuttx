@@ -6283,3 +6283,9 @@
 	  beginning of SRAM.  It seems to require this alignament.  Also, we
 	  don't need different scripts for the CMNVECTOR case now that the vector
 	  table has a common name.
+	* arch/arm/src: armv-7/up_exception.S and xxx/xxx_vectors.S where
+	  xxx={kinetis, lm, lpc17xx, sam34, and stm32}:  Modified register usage
+	  when saving the context on the stack:  In order to handler nested
+	  interrupts, the stack pointer must be used so that when it is
+	  decremented, the contents on the stack are protected from the nested
+	  interrupt handling (2013-12-23).
