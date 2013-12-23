@@ -41,9 +41,10 @@ CFLAGS		+= -I$(TOPDIR)/sched
 ASRCS		=
 AOBJS		= $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= up_boot.c up_leds.c up_usbdev.c
+CSRCS		= up_boot.c up_leds.c up_usbdev.c up_spi.c
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
+CSRCS		+= up_lcd.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)

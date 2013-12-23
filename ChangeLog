@@ -6297,3 +6297,8 @@
 	  handling (2013-12-23).
 	* configs/viewtool-stm32f107/src/stm32_highpri.c:  Improved debug output
 	  (2013-12-23).
+	* drivers/lcd/memlcd.c and include/nuttx/lcd/memlcd.h:  Support for the
+	  Sharp Memory LCD from Librae (2013-12-23).
+	* configs/maple/nx and src/:  Add support for a custom Sharp Memory
+	  LCD on the Maple board.  From Librae (2013-12-23).
+

@@ -208,6 +208,10 @@ that makes then less re-usable:
 
     configs/hymini-stm32v/src/up_r61505u.c
 
+  Sharp Memory LCD:
+
+    configs/maple/src/up_lcd.c
+
   OLEDs:
 
     configs/stm32f4discovery/src/up_ug2864ambag01.c
