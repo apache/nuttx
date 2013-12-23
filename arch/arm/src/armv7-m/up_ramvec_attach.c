@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <errno.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -94,17 +95,17 @@ void exception_common(void);
  *
  * Description:
  *   Configure the ram vector table so that IRQ number 'irq' will be
- *   dipatched by hardware to 'vector'
+ *   dispatched by hardware to 'vector'
  *
  ****************************************************************************/
 
 int up_ramvec_attach(int irq, up_vector_t vector)
 {
-  int ret = ERROR;
+  int ret = -EINVAL;
 
   intvdbg("%s IRQ%d\n", vector ? "Attaching" : "Detaching", irq);
 
-  if ((unsigned)irq < ARMV7M_PERIPHERAL_INTERRUPTS)
+  if ((unsigned)irq < (STM32_IRQ_INTERRUPTS + ARMV7M_PERIPHERAL_INTERRUPTS))
     {
       irqstate_t flags;
 
@@ -129,7 +130,7 @@ int up_ramvec_attach(int irq, up_vector_t vector)
            vector = exception_common;
         }
 
-      /* Save the new vector in the vector table. */
+      /* Save the new vector in the vector table */
 
       g_ram_vectors[irq] = vector;
       irqrestore(flags);

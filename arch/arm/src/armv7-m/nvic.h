@@ -442,7 +442,6 @@
 #define NVIC_INTCTRL_VECTACTIVE_MASK    (0x1ff << NVIC_INTCTRL_VECTACTIVE_SHIFT)
 
 /* System control register (SYSCON) */
-
                                                   /* Bit 0:  Reserved */
 #define NVIC_SYSCON_SLEEPONEXIT         (1 << 1)  /* Bit 1:  Sleep-on-exit (returning from Handler to Thread mode) */
 #define NVIC_SYSCON_SLEEPDEEP           (1 << 2)  /* Bit 2: Use deep sleep in low power mode */
@@ -484,11 +483,11 @@
 #define NVIC_SYSH_PRIORITY_PR15_MASK    (0xff << NVIC_SYSH_PRIORITY_PR15_SHIFT)
 
 /* Vector Table Offset Register (VECTAB).  This mask seems to vary among
- * ARMv7-M implementations.  It may be be redefined in the architecture-
- * specific chip.h header file.
+ * ARMv7-M implementations.  It may need to be redefined in some
+ * architecture-specific header file.
  */
 
-#define NVIC_VECTAB_TBLOFF_MASK         (0xffffffc0)
+#define NVIC_VECTAB_TBLOFF_MASK         (0xffffff80)
 
 /* Application Interrupt and Reset Control Register (AIRCR) */
 

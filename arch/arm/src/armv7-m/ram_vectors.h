@@ -64,8 +64,8 @@
 #endif
 
 /* This, then is the size of the vector table (in 4-byte entries).  This size
- * includes the IDLE stack pointer which lies at the beginning of
- * the table.
+ * includes the (1) the device interrupts, (2) space for 15 Cortex-M excpetions, and
+ * (3) IDLE stack pointer which lies at the beginning of the table.
  */
 
 #define ARMV7M_VECTAB_SIZE (ARMV7M_PERIPHERAL_INTERRUPTS + 16)
@@ -84,7 +84,7 @@
  */
 
 extern up_vector_t g_ram_vectors[ARMV7M_VECTAB_SIZE]
-  __attribute__ ((section (".ram_vectors"), aligned (64)));
+  __attribute__ ((section (".ram_vectors"), aligned (128)));
 
 /************************************************************************************
  * Public Function Prototypes
