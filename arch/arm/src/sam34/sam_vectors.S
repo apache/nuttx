@@ -337,7 +337,7 @@ exception_common:
 	 */
 
 	cmp		r0, r1					/* Context switch? */
-	beq		1f						/* Branch if no context switch */
+	beq		2f						/* Branch if no context switch */
 
 	/* We are returning with a pending context switch.
 	 *
@@ -373,7 +373,7 @@ exception_common:
 #else
 	ldmia	r0, {r2-r11}			/* Recover R4-R11 + 2 temp values */
 #endif
-	b		2f						/* Re-join common logic */
+	b		3f						/* Re-join common logic */
 
 	/* We are returning with no context switch.  We simply need to "unwind"
 	 * the same stack frame that we created
@@ -381,7 +381,8 @@ exception_common:
 	 * Here:
 	 *   r1 = Address of the return stack (same as r0)
 	 */
-1:
+
+2:
 #ifdef CONFIG_NUTTX_KERNEL
 	ldmia	r1!, {r2-r11,r14}		/* Recover R4-R11, r14 + 2 temp values */
 #else
@@ -404,7 +405,8 @@ exception_common:
 	 *   r3 = primask or basepri
 	 *   r4-r11 = restored register values
 	 */
-2:
+
+3:
 
 #ifdef CONFIG_NUTTX_KERNEL
 	/* The EXC_RETURN value will be 0xfffffff9 (privileged thread) or 0xfffffff1
@@ -414,15 +416,15 @@ exception_common:
 
 	mrs		r2, control				/* R2=Contents of the control register */
 	tst		r14, #EXC_RETURN_PROCESS_STACK /* nonzero if context on process stack */
-	beq		3f						/* Branch if privileged */
+	beq		4f						/* Branch if privileged */
 
 	orr		r2, r2, #1				/* Unprivileged mode */
 	msr		psp, r1					/* R1=The process stack pointer */
-	b		4f
-3:
+	b		5f
+4:
 	bic		r2, r2, #1				/* Privileged mode */
 	msr		msp, r1					/* R1=The main stack pointer */
-4:
+5:
 	msr		control, r2				/* Save the updated control register */
 #else
 	msr		msp, r1					/* Recover the return MSP value */
