@@ -99,9 +99,7 @@
 struct highpri_s
 {
   FAR struct stm32_tim_dev_s *dev;  /* TIM6 driver instance */
-  volatile uint64_t enabled;
-  volatile uint64_t nested;
-  volatile uint64_t other;
+  volatile uint64_t basepri[16];
   volatile uint64_t handler;
   volatile uint64_t thread;
 };
@@ -127,6 +125,7 @@ static struct highpri_s g_highpri;
 void tim6_handler(void)
 {
   uint8_t basepri;
+  int index;
 
   /* Acknowledge the timer interrupt */
 
@@ -135,20 +134,8 @@ void tim6_handler(void)
   /* Increment the count associated with the current basepri */
 
   basepri = getbasepri();
-  switch (basepri)
-    {
-    case 0: /* BASEPRI==0 disabled all masking */
-      g_highpri.enabled++;
-      break;
-
-    case NVIC_SYSH_DISABLE_PRIORITY: /* Normal interrupts are disabled */
-      g_highpri.nested++;
-      break;
-
-    default: /* There should not be any other values of BASEPRI */
-      g_highpri.other++;
-      break;
-    }
+  index   = ((basepri >> 4) & 15);
+  g_highpri.basepri[index]++;
 
   /* Check if we are in an interrupt handle */
 
@@ -180,15 +167,14 @@ void tim6_handler(void)
 int highpri_main(int argc, char *argv[])
 {
   FAR struct stm32_tim_dev_s *dev;
-  uint64_t enabled;
-  uint64_t nested;
-  uint64_t other;
+  uint64_t basepri[16];
   uint64_t handler;
   uint64_t thread;
   uint64_t total;
   uint32_t seconds;
   int prescaler;
   int ret;
+  int i;
 
   printf("highpri_main: Started\n");
 
@@ -250,32 +236,41 @@ int highpri_main(int argc, char *argv[])
        * and then is a normal consequence of this design.
        */
 
-      enabled = g_highpri.enabled;
-      nested  = g_highpri.nested;
-      other   = g_highpri.other;
+      for (i = 0; i < 16; i++)
+        {
+          basepri[i] = g_highpri.basepri[i];
+        }
+
       handler = g_highpri.handler;
       thread  = g_highpri.thread;
 
       /* Then print out what is happening */
 
       printf("Elapsed time: %d seconds\n\n", seconds);
-      total = enabled + nested + other;
+      for (i = 0, total = 0; i < 16; i++)
+        {
+          total += basepri[i];
+        }
+
       if (total > 0)
         {
-          printf("  Enabled: %lld (%d%%)\n",
-                 enabled, (int)((100*enabled + (total / 2)) / total));
-          printf("  Nested:  %lld (%d%%)\n",
-                 nested,  (int)((100*nested + (total / 2)) / total));
-          printf("  Other:   %lld (%d%%)\n\n",
-                 other,   (int)((100*other + (total / 2)) / total));
+          for (i = 0; i < 16; i++)
+            {
+              if (basepri[i] > 0)
+                {
+                  printf("  basepri[%02x]: %lld (%d%%)\n",
+                         i << 4, basepri[i],
+                         (int)((100* basepri[i] + (total / 2)) / total));
+                }
+            }
         }
 
       total = handler + thread;
       if (total > 0)
         {
-          printf("  Handler: %lld (%d%%)\n",
+          printf("  Handler:     %lld (%d%%)\n",
                  handler,  (int)((100*handler + (total / 2)) / total));
-          printf("  Thread:  %lld (%d%%)\n\n",
+          printf("  Thread:      %lld (%d%%)\n\n",
                  thread,   (int)((100*thread + (total / 2)) / total));
         }
     }
