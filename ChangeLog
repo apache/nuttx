@@ -6289,3 +6289,9 @@
 	  interrupts, the stack pointer must be used so that when it is
 	  decremented, the contents on the stack are protected from the nested
 	  interrupt handling (2013-12-23).
+	* arch/Kconfig: The CONFIG_ARCH_INT_DISABLEALL feature is disabled (i.e.,
+	  depends on EXPERIMENTAL).  That is because the current implementation
+	  will not work because interrupts get disabled in the interrupt handler
+	  too, defeating the nesting of interrupts.  The fix is easy: It just
+	  needs more levels of priority of disabling interrupts vs interrupt
+	  handling (2013-12-23).
