@@ -6301,4 +6301,6 @@
 	  Sharp Memory LCD from Librae (2013-12-23).
 	* configs/maple/nx and src/:  Add support for a custom Sharp Memory
 	  LCD on the Maple board.  From Librae (2013-12-23).
+	* configs/viewtool-stm32f107/netnsh:  Add a NSH configuration that
+	  supports networking with the DP83848C module installed (2013-12-25).
 
