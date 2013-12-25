@@ -6303,4 +6303,7 @@
 	  LCD on the Maple board.  From Librae (2013-12-23).
 	* configs/viewtool-stm32f107/netnsh:  Add a NSH configuration that
 	  supports networking with the DP83848C module installed (2013-12-25).
-
+	* configs/viewtool-stm32f107/src/stm32_nsh.c, stm32_mmcsd.c, stm32_usb.c,
+	  and stm32_usbmsc.c:  Lay out basic framework for USB and SD card
+	  support.  Code is incomplete and has been neither built nor tested
+	  (2013-12-25).

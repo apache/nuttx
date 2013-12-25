@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/viewtool-stm32f107/src/stm32_boot.c
+ * configs/viewtool-stm32f107/src/stm32_usbdev.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -38,14 +38,31 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
-#include <debug.h>
-#include <arch/board/board.h>
 
-#include "up_arch.h"
+#include <sys/types.h>
+#include <stdbool.h>
+#include <debug.h>
+
+#include <nuttx/usb/usbdev.h>
+
+#include "stm32_otgfs.h"
 #include "viewtool_stm32f107.h"
+
+#ifdef CONFIG_STM32_OTGFS
 
 /************************************************************************************
  * Pre-processor Definitions
+ ************************************************************************************/
+
+#ifdef CONFIG_USBDEV
+#  define HAVE_USB 1
+#else
+#  warning CONFIG_STM32_OTGFS is enabled but CONFIG_USBDEV is not
+#  undef HAVE_USB
+#endif
+
+/************************************************************************************
+ * Private Data
  ************************************************************************************/
 
 /************************************************************************************
@@ -57,41 +74,40 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: stm32_boardinitialize
+ * Name: stm32_usbdev_initialize
  *
  * Description:
- *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
- *   and mapped but before any devices have been initialized.
+ *   Called from stm32_boardinitialize very early in initialization to setup USB-
+ *   related GPIO pins for the Viewtool STM32F107 board.
  *
  ************************************************************************************/
 
-void stm32_boardinitialize(void)
+void stm32_usbdev_initialize(void)
 {
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak function
-   * stm32_spiinitialize() has been brought into the link.
-   */
+  /* The OTG FS has an internal soft pull-up.  No GPIO configuration is required */
+#warning REVISIT: The Viewtool board does, indeed, have a soft connect GPIO
 
-#if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
-  if (stm32_spiinitialize)
-    {
-      stm32_spiinitialize();
-    }
+  /* Configure the OTG FS VBUS sensing GPIO, Power On, and Overcurrent GPIOs */
+
+#ifdef CONFIG_STM32_OTGFS
+#warning REVISIT: GPIO setup
 #endif
-
-  /* Initialize USB is 1) USBDEV is selected, 2) the USB controller is not
-   * disabled, and 3) the weak function stm32_usbdev_initialize() has been brought
-   * into the build.
-   */
-
-#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBDEV)
-  if (stm32_usbdev_initialize)
-    {
-      stm32_usbdev_initialize();
-    }
-#endif
-
-  /* Configure on-board LEDs (unconditionally). */
-
-  stm32_ledinit();
 }
+
+/************************************************************************************
+ * Name:  stm32_usbsuspend
+ *
+ * Description:
+ *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
+ *   used.  This function is called whenever the USB enters or leaves suspend mode.
+ *   This is an opportunity for the board logic to shutdown clocks, power, etc.
+ *   while the USB is suspended.
+ *
+ ************************************************************************************/
+
+void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
+{
+  ulldbg("resume: %d\n", resume);
+}
+
+#endif /* CONFIG_STM32_OTGFS */

@@ -87,6 +87,63 @@
 #define GPIO_SW4        (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT | \
                          GPIO_EXTI | GPIO_PORTA | GPIO_PIN10)
 
+/* microSD Card Interface
+ *
+ * microSD Connector
+ * -----------------
+ *
+ *   ----------------------------- ------------------------- --------------------------------
+ *          Connector J17            GPIO CONFIGURATION(s)
+ *   PIN SIGNAL        LEGEND          (no remapping)                 DP83848C Board
+ *   --- ------------- ----------- ------------------------- --------------------------------
+ *   1   VDD 3.3       N/A         N/A                       3.3
+ *   2   GND           N/A         N/A                       GND
+ *   3   PC8           SDIO_D0     GPIO_SDIO_D0              D0
+ *   4   PD2           SDIO_CMD    GPIO_SDIO_CMD             CMD
+ *   5   PC12          SDIO_CLK    GPIO_SDIO_CK              CLK
+ *   6   PC11          SDIO_D3     GPIO_SDIO_D3              D3
+ *   7   PC10          SDIO_D2     GPIO_SDIO_D2              D2
+ *   8   PC9           SDIO_D1     GPIO_SDIO_D1              D1
+ *   9   PA8           CD          Board-specific GPIO input CD
+ *   --- ------------- ----------- ------------------------- --------------------------------
+ *
+ *   NOTES:
+ *   1. The STM32F107 does not support the SDIO/memory card interface.  So the SD card
+ *      cannot be used with the STM32F107 (unless the pin-out just happens to match up
+ *      with an SPI-based card interface???)
+ */
+
+#ifdef CONFIG_ARCH_CHIP_STM32F103VCT6
+#  define GPIO_SD_CD    (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN8)
+#endif
+
+/* USB
+ *
+ * The Viewtool base board has a USB Mini-B connector.  Only USB device can
+ * be supported with this connector.
+ *
+ *  ------------------------- ------------------------------------
+ *        USB Connector
+ *        J10 mini-USB       GPIO CONFIGURATION(s)
+ * --- --------- ----------- ------------------------------------
+ * Pin Signal
+ * --- --------- ----------- ------------------------------------
+ *  1  USB_VBUS  VDD_USB     (No sensing available)
+ *  2  OTG_DM    PA11        GPIO_OTG_FSDM
+ *  3  OTG_DP    PA12        GPIO_OTG_FSDP
+ *  4  OTG_ID    PA10        GPIO_OTG_FSID
+ *  5  Shield    N/A         N/A
+ *  6  Shield    N/A         N/A
+ *  7  Shield    N/A         N/A
+ *  8  Shield    N/A         N/A
+ *  9  Shield    N/A         N/A
+ *               PE11 USB_EN   GPIO controlled soft pull-up
+ *
+ *  NOTES:
+ *  1. GPIO_OTG_FSVBUS should not be configured.  No VBUS sensing
+ *  2. GPIO_OTG_FSSOF is not used
+ */
+
 /************************************************************************************
  * Public Functions
  ************************************************************************************/
@@ -103,13 +160,37 @@
 
 void weak_function stm32_spiinitialize(void);
 
-/****************************************************************************
+/************************************************************************************
+ * Name: stm32_usbdev_initialize
+ *
+ * Description:
+ *   Called from stm32_usbdev_initialize very early in initialization to setup USB-related
+ *   GPIO pins for the Viewtool STM32F107 board.
+ *
+ ************************************************************************************/
+
+#if defined(CONFIG_STM32_OTGFS) && defined(CONFIG_USBDEV)
+void weak_function stm32_usbdev_initialize(void);
+#endif
+
+/************************************************************************************
+ * Name: stm32_sdinitialize
+ *
+ * Description:
+ *   Initialize the SPI-based SD card.  Requires CONFIG_DISABLE_MOUNTPOINT=n
+ *   and CONFIG_STM32_SPI1=y
+ *
+ ************************************************************************************/
+
+int stm32_sdinitialize(int minor);
+
+/************************************************************************************
  * Name: up_ledinit
  *
  * Description:
  *   Configure LEDs.  LEDs are left in the OFF state.
  *
- ****************************************************************************/
+ ************************************************************************************/
 
 void stm32_ledinit(void);
 
