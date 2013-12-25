@@ -296,10 +296,10 @@ void stm32_setled(int led, bool ledon)
 void stm32_setleds(uint8_t ledset)
 {
 #ifdef CONFIG_ARCH_LEDS
-  led_offbits(ledset & ~BOARD_LED4_BIT);
+  led_onbits(ledset & ~BOARD_LED4_BIT);
   led_offbits(~(ledset | BOARD_LED4_BIT));
 #else
-  led_offbits(ledset);
+  led_onbits(ledset);
   led_offbits(~ledset);
 #endif
 }

@@ -25,6 +25,7 @@ Contents
     - J5 - USART1
     - PL-2013 USB-to-Serial Interface
     - RS-232 Module
+  o ViewTool DP83848 Ethernet Module
   o Toolchains
     - NOTE about Windows native toolchains
   o Configurations
@@ -117,6 +118,93 @@ Serial Console
 
     J35 - CON2.  Jumper Setting:
       1 <-> 2 : Proves 3.3V to the RS-232 module.
+
+ViewTool DP83848 Ethernet Module
+================================
+
+  Ethernet Connector
+  ------------------
+
+    ----------------------------- ------------------------ --------------------------------
+           Connector J2            GPIO CONFIGURATION(s)
+    PIN SIGNAL        LEGEND         (no remapping)                 DP83848C Board
+    --- ------------- ----------- ------------------------ --------------------------------
+    1   PA0           MII_CRS     N/A                      N/C
+    2   PB11/SDA2     COM_TX_EN   GPIO_ETH_RMII_TX_EN      TX_EN
+    3   PA3/LED_G2    MII_COL     N/A                      N/C
+    4   PB12/NSS2     COM_TXD0    GPIO_ETH_RMII_TXD0       TXD0
+    5   PA1           MII_RX_CLK  GPIO_ETH_RMII_REF_CLK    OSCIN
+    6   PB13/SCK2     COM_TXD1    GPIO_ETH_RMII_TXD1       TXD1
+    7   PB1/CD_RESET  MII_RXD3    N/A                      N/C
+    8   PC4/LCDTP     COM_RXD0    GPIO_ETH_RMII_RXD0       RXD0
+    9   PB0/BL_PWM    MII_RXD2    N/A                      N/C
+    10  PC5           COM_RXD1    GPIO_ETH_RMII_RXD1       RXD1
+    11  PB8/CAN1_RX   MII_TXD3    N/A                      N/C
+    12  PC1/LED_R1    COM_MDC     GPIO_ETH_MDC             MDC
+    13  PC2/LED_R2    MII_TXD2    N/A                      N/C
+    14  PA2/LED_G1    COM_MDIO    GPIO_ETH_MDIO            MDIO
+    15  PC3/ONEW      MII_TX_CLK  N/A                      N/C
+    16  PB10/SCL2     RX_ER       N/A                      N/C
+    17  PD2           GPIO1       N/A                      N/C
+    18  PA7/MOSI1     COM_RX_DV   GPIO_ETH_RMII_CRS_DV     CRS_DIV
+    19  PD3           GPIO2       N/A                      N/C
+    20  PB5           COM_PPS_OUT N/A                      N/C
+    21  VDD 3.3       VDD_3.3     N/A                      3.3V
+    22  VDD 3.3       VDD_3.3     N/A                      3.3V
+    23  GND           GND         N/A                      GND
+    24  GND           GND         N/A                      GND
+    --- ------------- ----------- ------------------------ --------------------------------
+
+    NOTES:
+    1. RMII interface is used
+    2. There is a 50MHz clock on board the DP83848.  No MCO clock need be provided.
+
+  Configuration
+  -------------
+
+    System Type -> STM32 Peripheral Support
+     CONFIG_STM32_ETHMAC=y
+
+    System Type -> Ethernet MAC Configuration
+     CONFIG_STM32_RMII=y
+     CONFIG_STM32_AUTONEG=y
+     CONFIG_STM32_PHYADDR=1
+     CONFIG_STM32_PHYSR=16
+     CONFIG_STM32_PHYSR_SPEED=0x0002
+     CONFIG_STM32_PHYSR_100MBPS=0x0000
+     CONFIG_STM32_PHYSR_MODE=0x0004
+     CONFIG_STM32_PHYSR_FULLDUPLEX=0x0004
+     CONFIG_STM32_RMII_EXTCLK=y
+
+    Device Drivers -> Networking Devices
+     CONFIG_NETDEVICES=y
+     CONFIG_ETH0_PHY_DP83848C=y
+
+    Networking (required)
+     CONFIG_NET=y
+     CONFIG_NET_MULTIBUFFER=y
+     CONFIG_NSH_NOMAC=y
+
+    Networking (recommended/typical)
+     CONFIG_NSOCKET_DESCRIPTORS=10
+     CONFIG_NET_SOCKOPTS=y
+
+     CONFIG_NET_BUFSIZE=650
+     CONFIG_NET_RECEIVE_WINDOW=650
+     CONFIG_NET_TCP_READAHEAD_BUFSIZE=650
+
+     CONFIG_NET_TCP=y
+     CONFIG_NET_NTCP_READAHEAD_BUFFERS=8
+
+     CONFIG_NET_UDP=y
+     CONFIG_NET_UDP_CONNS=8
+
+     CONFIG_NET_ICMP=y
+     CONFIG_NET_ICMP_PING=y
+
+     CONFIG_NSH_DRIPADDR=0x0a000001
+     CONFIG_NSH_IPADDR=0x0a000002
+     CONFIG_NSH_NETMASK=0xffffff00
 
 Toolchains
 ==========
@@ -224,17 +312,64 @@ Configurations
   Configuration Sub-directories
   -----------------------------
 
-  nsh:
+  netnsh:
 
-    This configuration directory provide the basuic NuttShell (NSH).
+    This configuration directory provide the NuttShell (NSH) with
+    networking support.
 
     NOTES:
-    1. This configuration uses the default USART1 serial console.  That
+    1. This configuration will work only on the version the viewtool
+       board with the the STM32F107VCT6 installed.  If you have a board
+       with the STM32F103VCT6 installed, please use the nsh configuration
+       described below.
+
+    2. There is no PHY on the base viewtool stm32f107 board.  You must
+       also have the "ViewTool DP83848 Ethernet Module" installed on J2
+       in order to support networking.
+
+    3. Since networking is enabled, you will see some boot-up delays when
+       the network connection is established.  These delays can be quite
+       large is no network is attached (A production design to bring up the
+       network asynchronously to avoid these start up delays).
+
+    4. This configuration uses the default USART1 serial console.  That
        is easily changed by reconfiguring to (1) enable a different
        serial peripheral, and (2) selecting that serial peripheral as
        the console device.
 
-    2. By default, this configuration is set up to build on Windows
+    5. By default, this configuration is set up to build on Windows
+       under either a Cygwin or MSYS environment using a recent, Windows-
+       native, generic ARM EABI GCC toolchain (such as the CodeSourcery
+       toolchain).  Both the build environment and the toolchain
+       selection can easily be changed by reconfiguring:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows operating system
+       CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+    STATUS: As of this writing (2013-12-25), the STM32 communicates with the
+    PHY, but the DP83848 fails to return good linkstatus from the STM32.
+
+  nsh:
+
+    This configuration directory provide the basic NuttShell (NSH).
+
+    NOTES:
+    1. This configuration will work with either the version of the board
+       with STM32F107VCT6 or STM32F103VCT6 installed.  The default
+       configuration is for the STM32F107VCT6.  To use this configuration
+       with a STM32F103VCT6, it would have to be modified as follows:
+
+      System Type -> STM32 Configuration Options
+         CONFIG_ARCH_CHIP_STM32F103VCT6=y
+         CONFIG_ARCH_CHIP_STM32F107VC=n
+
+    2. This configuration uses the default USART1 serial console.  That
+       is easily changed by reconfiguring to (1) enable a different
+       serial peripheral, and (2) selecting that serial peripheral as
+       the console device.
+
+    3. By default, this configuration is set up to build on Windows
        under either a Cygwin or MSYS environment using a recent, Windows-
        native, generic ARM EABI GCC toolchain (such as the CodeSourcery
        toolchain).  Both the build environment and the toolchain
