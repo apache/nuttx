@@ -25,6 +25,8 @@ Contents
     - J5 - USART1
     - PL-2013 USB-to-Serial Interface
     - RS-232 Module
+  o USB Interface
+  o microSD Card Interface
   o ViewTool DP83848 Ethernet Module
   o Toolchains
     - NOTE about Windows native toolchains
@@ -119,6 +121,72 @@ Serial Console
     J35 - CON2.  Jumper Setting:
       1 <-> 2 : Proves 3.3V to the RS-232 module.
 
+USB Interface
+=============
+
+  USB Connector
+  -------------
+
+  The Viewtool base board has a USB Mini-B connector.  Only USB device can
+  be supported with this connector.
+
+  ------------------------- ------------------------------------
+         USB Connector
+         J10 mini-USB       GPIO CONFIGURATION(s)
+  --- --------- ----------- ------------------------------------
+  Pin Signal
+  --- --------- ----------- ------------------------------------
+   1  USB_VBUS  VDD_USB     (No sensing available)
+   2  OTG_DM    PA11        GPIO_OTG_FSDM
+   3  OTG_DP    PA12        GPIO_OTG_FSDP
+   4  OTG_ID    PA10        GPIO_OTG_FSID
+   5  Shield    N/A         N/A
+   6  Shield    N/A         N/A
+   7  Shield    N/A         N/A
+   8  Shield    N/A         N/A
+   9  Shield    N/A         N/A
+                PE11 USB_EN   GPIO controlled soft pull-up
+
+   NOTES:
+   1. GPIO_OTG_FSVBUS should not be configured.  No VBUS sensing
+   2. GPIO_OTG_FSSOF is not used
+
+  Configuration
+  -------------
+  To be provided.  Some logic is in place, leveraged from other boards.
+  But this logic is not full implemented, not has it ever been built or\
+  tested.
+
+microSD Card Interface
+======================
+
+  microSD Connector
+  -----------------
+
+    ----------------------------- ------------------------- --------------------------------
+           Connector J17            GPIO CONFIGURATION(s)
+    PIN SIGNAL        LEGEND          (no remapping)                 DP83848C Board
+    --- ------------- ----------- ------------------------- --------------------------------
+    1   VDD 3.3       N/A         N/A                       3.3
+    2   GND           N/A         N/A                       GND
+    3   PC8           SDIO_D0     GPIO_SDIO_D0              D0
+    4   PD2           SDIO_CMD    GPIO_SDIO_CMD             CMD
+    5   PC12          SDIO_CLK    GPIO_SDIO_CK              CLK
+    6   PC11          SDIO_D3     GPIO_SDIO_D3              D3
+    7   PC10          SDIO_D2     GPIO_SDIO_D2              D2
+    8   PC9           SDIO_D1     GPIO_SDIO_D1              D1
+    9   PA8           CD          Board-specific GPIO input CD
+    --- ------------- ----------- ------------------------- --------------------------------
+
+    NOTES:
+    1. The STM32F107 does not support the SDIO/memory card interface.  So the SD card
+       cannot be used with the STM32F107 (unless the pin-out just happens to match up
+       with an SPI-based card interface???)
+
+  Configuration
+  -------------
+  To be provided (for the STM32F103 only)
+
 ViewTool DP83848 Ethernet Module
 ================================
 
@@ -163,48 +231,57 @@ ViewTool DP83848 Ethernet Module
   -------------
 
     System Type -> STM32 Peripheral Support
-     CONFIG_STM32_ETHMAC=y
+      CONFIG_STM32_ETHMAC=y                  : Enable Ethernet driver
 
     System Type -> Ethernet MAC Configuration
-     CONFIG_STM32_RMII=y
-     CONFIG_STM32_AUTONEG=y
-     CONFIG_STM32_PHYADDR=1
-     CONFIG_STM32_PHYSR=16
-     CONFIG_STM32_PHYSR_SPEED=0x0002
-     CONFIG_STM32_PHYSR_100MBPS=0x0000
-     CONFIG_STM32_PHYSR_MODE=0x0004
-     CONFIG_STM32_PHYSR_FULLDUPLEX=0x0004
-     CONFIG_STM32_RMII_EXTCLK=y
+      CONFIG_STM32_RMII=y                    : Configuration RM-II DP83848C PHY
+      CONFIG_STM32_AUTONEG=y
+      CONFIG_STM32_PHYADDR=1
+      CONFIG_STM32_PHYSR=16
+      CONFIG_STM32_PHYSR_SPEED=0x0002
+      CONFIG_STM32_PHYSR_100MBPS=0x0000
+      CONFIG_STM32_PHYSR_MODE=0x0004
+      CONFIG_STM32_PHYSR_FULLDUPLEX=0x0004
+      CONFIG_STM32_RMII_EXTCLK=y
 
     Device Drivers -> Networking Devices
-     CONFIG_NETDEVICES=y
-     CONFIG_ETH0_PHY_DP83848C=y
+      CONFIG_NETDEVICES=y                    : More PHY stuff
+      CONFIG_ETH0_PHY_DP83848C=y
 
     Networking (required)
-     CONFIG_NET=y
-     CONFIG_NET_MULTIBUFFER=y
-     CONFIG_NSH_NOMAC=y
+      CONFIG_NET=y                           : Enabled networking support
+      CONFIG_NET_MULTIBUFFER=y               : Required by driver
+      CONFIG_NSH_NOMAC=y
 
     Networking (recommended/typical)
-     CONFIG_NSOCKET_DESCRIPTORS=10
-     CONFIG_NET_SOCKOPTS=y
+      CONFIG_NSOCKET_DESCRIPTORS=10          : Socket-related
+      CONFIG_NET_SOCKOPTS=y
 
-     CONFIG_NET_BUFSIZE=650
-     CONFIG_NET_RECEIVE_WINDOW=650
-     CONFIG_NET_TCP_READAHEAD_BUFSIZE=650
+      CONFIG_NET_BUFSIZE=650                 : Maximum packet size
+      CONFIG_NET_RECEIVE_WINDOW=650
+      CONFIG_NET_TCP_READAHEAD_BUFSIZE=650
 
-     CONFIG_NET_TCP=y
-     CONFIG_NET_NTCP_READAHEAD_BUFFERS=8
+      CONFIG_NET_TCP=y                       : TCP support
+      CONFIG_NET_NTCP_READAHEAD_BUFFERS=8
 
-     CONFIG_NET_UDP=y
-     CONFIG_NET_UDP_CONNS=8
+      CONFIG_NET_UDP=y                       : UDP support
+      CONFIG_NET_UDP_CONNS=8
 
-     CONFIG_NET_ICMP=y
-     CONFIG_NET_ICMP_PING=y
+      CONFIG_NET_ICMP=y                      : ICMP support
+      CONFIG_NET_ICMP_PING=y
 
-     CONFIG_NSH_DRIPADDR=0x0a000001
-     CONFIG_NSH_IPADDR=0x0a000002
-     CONFIG_NSH_NETMASK=0xffffff00
+      CONFIG_NSH_DRIPADDR=0x0a000001         : Network identity
+      CONFIG_NSH_IPADDR=0x0a000002
+      CONFIG_NSH_NETMASK=0xffffff00
+
+    Network Utilities (basic)
+      CONFIG_NETUTILS_TFTPC=y                : Needed by NSH unless to disable TFTP commands
+      CONFIG_NETUTILS_DHCPC=y                : Fun stuff
+      CONFIG_NETUTILS_TELNETD=y              : Support for a Telnet NSH console
+      CONFIG_NSH_TELNET=y
+
+      (also FTP, TFTP, WGET, NFS, etc. if you also have a mass storage
+      device).
 
 Toolchains
 ==========
@@ -346,9 +423,6 @@ Configurations
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
-
-    STATUS: As of this writing (2013-12-25), the STM32 communicates with the
-    PHY, but the DP83848 fails to return good linkstatus from the STM32.
 
   nsh:
 
