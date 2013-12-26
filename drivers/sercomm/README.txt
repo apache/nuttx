@@ -15,5 +15,5 @@ at same level as the nuttx project:
   `- osmocom-bb
 
 If you attempt to build this driver without osmocom-bb, you will get
-compilation errors  because ofheader files that are needed from the
+compilation errors because of header files that are needed from the
 osmocom-bb directory.
