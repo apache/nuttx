@@ -54,13 +54,6 @@
  * Pre-processor Definitions
  ************************************************************************************/
 
-#ifdef CONFIG_USBDEV
-#  define HAVE_USB 1
-#else
-#  warning CONFIG_STM32_OTGFS (F107) or CONFIG_STM32_USB (F103) is enabled but CONFIG_USBDEV is not
-#  undef HAVE_USB
-#endif
-
 /************************************************************************************
  * Private Data
  ************************************************************************************/
@@ -85,11 +78,32 @@
 void stm32_usbdev_initialize(void)
 {
   /* The OTG FS has an internal soft pull-up.  No GPIO configuration is required */
-#warning REVISIT: The Viewtool board does, indeed, have a soft connect GPIO
 
-  /* Configure the OTG FS VBUS sensing GPIO and power enable GPIO */
-#warning REVISIT: GPIO setup
+#ifdef CONFIG_ARCH_CHIP_STM32F103VCT6
+  stm32_configgpio(GPIO_USB_PULLUP);
+#endif
 }
+
+/************************************************************************************
+ * Name:  stm32_usbpullup
+ *
+ * Description:
+ *   If USB is supported and the board supports a pullup via GPIO (for USB software
+ *   connect and disconnect), then the board software must provide stm32_pullup.
+ *   See include/nuttx/usb/usbdev.h for additional description of this method.
+ *   Alternatively, if no pull-up GPIO the following EXTERN can be redefined to be
+ *   NULL.
+ *
+ ************************************************************************************/
+
+#ifdef CONFIG_ARCH_CHIP_STM32F103VCT6
+int stm32_usbpullup(FAR struct usbdev_s *dev, bool enable)
+{
+  usbtrace(TRACE_DEVPULLUP, (uint16_t)enable);
+  stm32_gpiowrite(GPIO_USB_PULLUP, !enable);
+  return OK;
+}
+#endif
 
 /************************************************************************************
  * Name: stm32_usbsuspend

@@ -145,17 +145,95 @@ USB Interface
    7  Shield    N/A         N/A
    8  Shield    N/A         N/A
    9  Shield    N/A         N/A
-                PE11 USB_EN   GPIO controlled soft pull-up
+                PE11 USB_EN   GPIO controlled soft pull-up (if J51 closed)
 
    NOTES:
    1. GPIO_OTGFS_VBUS (F107) should not be configured.  No VBUS sensing
    2. GPIO_OTGFS_SOF (F107) is not used
+   3. The OTG FS module has is own, internal soft pull-up logic.  J51 should
+      be open so that PE11 activity does effect USB.
 
-  Configuration
-  -------------
-  To be provided.  Some logic is in place, leveraged from other boards.
-  But this logic is not full implemented, not has it ever been built or\
-  tested.
+
+  STM32F103 Configuration
+  -----------------------
+
+    System Type -> STM32 Peripheral Support
+      CONFIG_STM32_USB=y                 : Enable USB FS device
+
+    Device Drivers
+      CONFIG_USBDEV                      : USB device support
+
+    STATUS:  All of the code is in place, but no testing has been performed.
+
+  STM32F107 Configuration
+  -----------------------
+
+    System Type -> STM32 Peripheral Support
+      CONFIG_STM32_OTGFS=y               : Enable OTG FS
+
+    Device Drivers
+      CONFIG_USBDEV                      : USB device support
+
+    STATUS:  All of the code is in place, but USB is not yet functional.
+
+  CDC/ACM Configuration
+  ---------------------
+
+  This will select the CDC/ACM serial device.  Defaults for the other
+  options should be okay.
+
+    Device Drivers -> USB Device Driver Support
+      CONFIG_CDCACM=y                     : Enable the CDC/ACM device
+
+  The following setting enables an example that can can be used to control
+  the CDC/ACM device.  It will add two new NSH commands:
+
+    a. sercon will connect the USB serial device (creating /dev/ttyACM0), and
+    b. serdis which will disconnect the USB serial device (destroying
+        /dev/ttyACM0).
+
+    Application Configuration -> Examples:
+      CONFIG_SYSTEM_CDCACM=y              : Enable an CDC/ACM example
+
+  USB MSC Configuration
+  ---------------------
+  [WARNING: This configuration has not yet been verified]
+
+  The Mass Storage Class (MSC) class driver can be selected in order to
+  export the microSD card to the host computer.  MSC support is selected:
+
+    Device Drivers -> USB Device Driver Support
+      CONFIG_USBMSC=y                       : Enable the USB MSC class driver
+      CONFIG_USBMSC_EPBULKOUT=1             : Use EP1 for the BULK OUT endpoint
+      CONFIG_USBMSC_EPBULKIN=2              : Use EP2 for the BULK IN endpoint
+
+  The following setting enables an add-on that can can be used to control
+  the USB MSC device.  It will add two new NSH commands:
+
+    a. msconn will connect the USB serial device and export the microSD
+       card to the host, and
+    b. msdis which will disconnect the USB serial device.
+
+    Application Configuration -> System Add-Ons:
+      CONFIG_SYSTEM_USBMSC=y                : Enable the USBMSC add-on
+      CONFIG_SYSTEM_USBMSC_NLUNS=1          : One LUN
+      CONFIG_SYSTEM_USBMSC_DEVMINOR1=0      : Minor device zero
+      CONFIG_SYSTEM_USBMSC_DEVPATH1="/dev/mmcsd0"
+                                            : Use a single, LUN:  The microSD
+                                            : block driver.
+
+    NOTES:
+
+    a. To prevent file system corruption, make sure that the microSD is un-
+       mounted *before* exporting the mass storage device to the host:
+
+         nsh> umount /mnt/sdcard
+         nsh> mscon
+
+       The microSD can be re-mounted after the mass storage class is disconnected:
+
+        nsh> msdis
+        nsh> mount -t vfat /dev/mtdblock0 /mnt/at25
 
 microSD Card Interface
 ======================
@@ -183,9 +261,44 @@ microSD Card Interface
        cannot be used with the STM32F107 (unless the pin-out just happens to match up
        with an SPI-based card interface???)
 
-  Configuration
-  -------------
-  To be provided (for the STM32F103 only)
+  Configuration (STM32F103 only)
+  ------------------------------
+  [WARNING: This configuration has not yet been verified]
+
+  Enabling SDIO-based MMC/SD support:
+
+    System Type->STM32 Peripheral Support
+      CONFIG_STM32_SDIO=y                   : Enable SDIO support
+      CONFIG_STM32_DMA2=y                   : DMA2 is needed by the driver
+
+    Device Drivers -> MMC/SD Driver Support
+      CONFIG_MMCSD=y                        : Enable MMC/SD support
+      CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
+      CONFIG_MMCSD_HAVECARDDETECT=y         : Supports card-detect PIOs
+      CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
+      CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
+      CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
+      CONFIG_SDIO_DMA=y                     : Use SDIO DMA
+      CONFIG_SDIO_BLOCKSETUP=y              : Needs to know block sizes
+
+    Library Routines
+      CONFIG_SCHED_WORKQUEUE=y              : Driver needs work queue support
+
+    Application Configuration -> NSH Library
+      CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization
+
+    Using the SD card
+    -----------------
+
+    1) After booting, an SDIO device will appear as /dev/mmcsd0
+
+    2) If you try mounting an SD card with nothing in the slot, the
+       mount will fail:
+
+         nsh> mount -t vfat /dev/mmcsd1 /mnt/sd1
+         nsh: mount: mount failed: 19
+
+    STATUS:  All of the code is in place, but no testing has been performed.
 
 ViewTool DP83848 Ethernet Module
 ================================
@@ -424,6 +537,9 @@ Configurations
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
+    6. USB support is disabled by default.  See the section above entitled,
+       "USB Interface"
+
   nsh:
 
     This configuration directory provide the basic NuttShell (NSH).
@@ -452,6 +568,9 @@ Configurations
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+    4. USB support is disabled by default.  See the section above entitled,
+       "USB Interface"
 
   highpri:
 

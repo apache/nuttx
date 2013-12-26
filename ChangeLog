@@ -6314,3 +6314,9 @@
 	* stm32l15xxx_pinmap.h: Fix a typo in USB pin definitions (2013-12-25).
 	* configs/viewtools-stm32f107:  Fix building of USB for F103 and F107.
 	  F103 has device only; F107 has OTG FS (2013-12-25).
+	* arch/arm/src/stm32/stm32f10xxx_rcc.c and chip/stm32f10xxx_rcc.h:  Add
+	  clocking support for STM32F107 USB OTG FS (which does not work)
+	  (2013-12-26).
+	* configs/viewtool-stm32f107:  Updates to USB for F103 and USB OTG FS
+	  for F107 (2013-12-16).
+

@@ -46,6 +46,51 @@
 /******************************************************************************
  * Pre-processor Definitions
  ******************************************************************************/
+/* Configuration **************************************************************/
+/* Assume that everything is supported */
+
+#define HAVE_USBDEV   1
+#define HAVE_MMCSD    1
+
+/* Handle chip differences */
+
+#if defined(CONFIG_ARCH_CHIP_STM32F103VCT6)
+#  undef CONFIG_STM32_OTGFS
+#elif defined(CONFIG_ARCH_CHIP_STM32F107VC)
+#  undef CONFIG_STM32_USB
+#  undef CONFIG_STM32_SDIO
+#else
+#  error Unknown chip on Viewtool board
+#  undef HAVE_USBDEV
+#  undef HAVE_MMCSD
+#endif
+
+/* Check if USB is enabled */
+
+#if !defined(CONFIG_STM32_OTGFS) && !defined(CONFIG_STM32_USB)
+#  undef HAVE_USBDEV
+#elif !defined(CONFIG_USBDEV)
+#  warning CONFIG_STM32_OTGFS (F107) or CONFIG_STM32_USB (F103) is enabled but CONFIG_USBDEV is not
+#  undef HAVE_USB
+#endif
+
+/* Can't support MMC/SD features if the SDIO peripheral is disabled */
+
+#ifndef CONFIG_STM32_SDIO
+#  undef HAVE_MMCSD
+#endif
+
+/* Can't support MMC/SD features if mountpoints are disabled */
+
+#ifdef CONFIG_DISABLE_MOUNTPOINT
+#  undef HAVE_MMCSD
+#endif
+
+/* Default MMC/SD slot number/device minor number */
+
+#define VIEWTOOL_MMCSD_SLOTNO 0
+
+/* GPIO Configuration *********************************************************/
 /* LEDs
  *
  * There are four LEDs on the ViewTool STM32F103/F107 board that can be controlled
@@ -114,7 +159,7 @@
  */
 
 #ifdef CONFIG_ARCH_CHIP_STM32F103VCT6
-#  define GPIO_SD_CD    (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN8)
+#  define GPIO_SD_CD      (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN8)
 #endif
 
 /* USB
@@ -137,12 +182,19 @@
  *  7  Shield    N/A         N/A
  *  8  Shield    N/A         N/A
  *  9  Shield    N/A         N/A
- *               PE11 USB_EN   GPIO controlled soft pull-up
+ *               PE11 USB_EN   GPIO controlled soft pull-up (if J51 closed)
  *
  *  NOTES:
  *  1. GPIO_OTGFS_VBUS (F107) should not be configured.  No VBUS sensing
  *  2. GPIO_OTGFS_SOF (F107) is not used
+ *  3. The OTG FS module has is own, internal soft pull-up logic.  J51 should
+ *     be open so that PE11 activity does effect USB.
  */
+
+#ifdef CONFIG_ARCH_CHIP_STM32F103VCT6
+#  define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTOD|GPIO_MODE_50MHz|\
+                           GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN11)
+#endif
 
 /************************************************************************************
  * Public Functions

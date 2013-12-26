@@ -106,9 +106,19 @@
 #define STM32_APB1_TIM6_CLKIN   (STM32_PCLK1_FREQUENCY)
 #define STM32_APB1_TIM7_CLKIN   (STM32_PCLK1_FREQUENCY)
 
+/* USB divider -- Divide PLL clock by 1.5
+ *
+ * USB clock = PLLOUT / 1.5 = 72MHz / 1.5 = 48MHz
+ */
+
+#define STM32_CFGR_USBPRE       0
+
 /* MCO output driven by PLL3. From above, we already have PLL3 input frequency as:
  *
- *  STM32_PLL_PREDIV2 = 5, 25MHz / 5 => 5MHz 
+ *  STM32_PLL_PREDIV2 = 5, 25MHz / 5 => 5MHz
+ *
+ * NOTE: The Viewtool DP83848C module has its on, on-board 50MHz clock.  No
+ * MCO clock need be provided on that board.
  */
  
 #if defined(CONFIG_STM32_MII_MCO) || defined(CONFIG_STM32_RMII_MCO)
