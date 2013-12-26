@@ -540,6 +540,12 @@ Configurations
     6. USB support is disabled by default.  See the section above entitled,
        "USB Interface"
 
+    STATUS.  The first time I build the configuration, I get some undefined
+    external references.  No idea why.  Simply cleaning the apps/ directory
+    and rebuilding fixes the problem:
+
+      make apps_clean all
+
   nsh:
 
     This configuration directory provide the basic NuttShell (NSH).
