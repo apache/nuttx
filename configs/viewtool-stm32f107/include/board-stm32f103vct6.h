@@ -110,7 +110,7 @@
 #define STM32_CFGR_USBPRE       0
 
 /* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
- * otherwise frequency is 2xAPBx. 
+ * otherwise frequency is 2xAPBx.
  * Note: TIM1,8 are on APB2, others on APB1 */
 
 #define STM32_TIM18_FREQUENCY   STM32_HCLK_FREQUENCY
