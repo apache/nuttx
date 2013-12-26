@@ -137,9 +137,9 @@ USB Interface
   Pin Signal
   --- --------- ----------- ------------------------------------
    1  USB_VBUS  VDD_USB     (No sensing available)
-   2  OTG_DM    PA11        GPIO_OTG_FSDM
-   3  OTG_DP    PA12        GPIO_OTG_FSDP
-   4  OTG_ID    PA10        GPIO_OTG_FSID
+   2  OTG_DM    PA11        GPIO_OTGFS_DM (F107) GPIO_USB_DM (F103)
+   3  OTG_DP    PA12        GPIO_OTGFS_DP (F107) GPIO_USB_DP (F103)
+   4  OTG_ID    PA10        GPIO_OTGFS_ID (F107)
    5  Shield    N/A         N/A
    6  Shield    N/A         N/A
    7  Shield    N/A         N/A
@@ -148,8 +148,8 @@ USB Interface
                 PE11 USB_EN   GPIO controlled soft pull-up
 
    NOTES:
-   1. GPIO_OTG_FSVBUS should not be configured.  No VBUS sensing
-   2. GPIO_OTG_FSSOF is not used
+   1. GPIO_OTGFS_VBUS (F107) should not be configured.  No VBUS sensing
+   2. GPIO_OTGFS_SOF (F107) is not used
 
   Configuration
   -------------

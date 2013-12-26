@@ -54,8 +54,12 @@ ifeq ($(CONFIG_MMCSD),y)
 CSRCS += stm32_mmcsd.c
 endif
 
-ifeq ($(CONFIG_STM32_OTGFS),y)
+ifeq ($(CONFIG_STM32_OTGFS),y) # F107
 CSRCS += stm32_usbdev.c
+else
+ifeq ($(CONFIG_STM32_USB),y) # F103
+CSRCS += stm32_usbdev.c
+endif
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
