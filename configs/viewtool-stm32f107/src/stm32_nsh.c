@@ -46,6 +46,22 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+/* Default MMC/SD SLOT number */
+
+#ifdef HAVE_MMCSD
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != VIEWTOOL_MMCSD_SLOTNO
+#    error "Only one MMC/SD slot:  VIEWTOOL_MMCSD_SLOTNO"
+#    undef  CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO VIEWTOOL_MMCSD_SLOTNO
+#  endif
+
+#  ifndef CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO VIEWTOOL_MMCSD_SLOTNO
+#  endif
+#endif
+#endif
 
 /* Debug ********************************************************************/
 
@@ -77,5 +93,9 @@
 
 int nsh_archinitialize(void)
 {
+#ifdef HAVE_MMCSD
+  return stm32_sdinitialize(CONFIG_NSH_MMCSDSLOTNO);
+#else
   return OK;
+#endif
 }
