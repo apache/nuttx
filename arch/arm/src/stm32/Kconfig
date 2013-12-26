@@ -548,6 +548,7 @@ endchoice
 config STM32_STM32L15XX
 	bool
 	default n
+	select STM32_HAVE_USBDEV
 
 config STM32_ENERGYLITE
 	bool
@@ -564,10 +565,12 @@ config STM32_VALUELINE
 config STM32_CONNECTIVITYLINE
 	bool
 	default n
+	select STM32_HAVE_OTGFS
 
 config STM32_PERFORMANCELINE
 	bool
 	default n
+	select STM32_HAVE_USBDEV
 
 config STM32_HIGHDENSITY
 	bool
@@ -584,14 +587,17 @@ config STM32_LOWDENSITY
 config STM32_STM32F20XX
 	bool
 	default n
+	select STM32_HAVE_OTGFS
 
 config STM32_STM32F30XX
 	bool
 	default n
+	select STM32_HAVE_USBDEV
 
 config STM32_STM32F40XX
 	bool
 	default n
+	select STM32_HAVE_OTGFS
 
 # This is really 427/437, but we treat the two the same.
 config STM32_STM32F427
@@ -610,6 +616,14 @@ config STM32_DFU
 		not select this option if you will load code using JTAG/SWM.
 
 menu "STM32 Peripheral Support"
+
+config STM32_HAVE_USBDEV
+	bool
+	default n
+
+config STM32_HAVE_OTGFS
+	bool
+	default n
 
 config STM32_ADC1
 	bool "ADC1"
@@ -755,7 +769,7 @@ config STM32_LTDC
 config STM32_OTGFS
 	bool "OTG FS"
 	default n
-	depends on STM32_STM32F20XX || STM32_STM32F40XX
+	depends on STM32_HAVE_OTGFS
 
 config STM32_OTGHS
 	bool "OTG HS"
@@ -980,7 +994,7 @@ config STM32_UART8
 config STM32_USB
 	bool "USB Device"
 	default n
-	depends on (STM32_STM32F10XX && !STM32_VALUELINE) || STM32_STM32L15XX || STM32_STM32F30XX
+	depends on STM32_HAVE_USBDEV
 	select USBDEV
 
 config STM32_LCD

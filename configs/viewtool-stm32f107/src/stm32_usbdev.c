@@ -48,7 +48,7 @@
 #include "stm32_otgfs.h"
 #include "viewtool_stm32f107.h"
 
-#ifdef CONFIG_STM32_OTGFS
+#if defined(CONFIG_STM32_OTGFS) || defined(CONFIG_STM32_USB)
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -57,7 +57,7 @@
 #ifdef CONFIG_USBDEV
 #  define HAVE_USB 1
 #else
-#  warning CONFIG_STM32_OTGFS is enabled but CONFIG_USBDEV is not
+#  warning CONFIG_STM32_OTGFS (F107) or CONFIG_STM32_USB (F103) is enabled but CONFIG_USBDEV is not
 #  undef HAVE_USB
 #endif
 
@@ -87,15 +87,12 @@ void stm32_usbdev_initialize(void)
   /* The OTG FS has an internal soft pull-up.  No GPIO configuration is required */
 #warning REVISIT: The Viewtool board does, indeed, have a soft connect GPIO
 
-  /* Configure the OTG FS VBUS sensing GPIO, Power On, and Overcurrent GPIOs */
-
-#ifdef CONFIG_STM32_OTGFS
+  /* Configure the OTG FS VBUS sensing GPIO and power enable GPIO */
 #warning REVISIT: GPIO setup
-#endif
 }
 
 /************************************************************************************
- * Name:  stm32_usbsuspend
+ * Name: stm32_usbsuspend
  *
  * Description:
  *   Board logic must provide the stm32_usbsuspend logic if the USBDEV driver is
@@ -110,4 +107,4 @@ void stm32_usbsuspend(FAR struct usbdev_s *dev, bool resume)
   ulldbg("resume: %d\n", resume);
 }
 
-#endif /* CONFIG_STM32_OTGFS */
+#endif /* CONFIG_STM32_OTGFS || CONFIG_STM32_USB*/
