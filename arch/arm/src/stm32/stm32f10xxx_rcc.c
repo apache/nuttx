@@ -114,6 +114,18 @@ static inline void rcc_enableahb(void)
 {
   uint32_t regval;
 
+#if defined(CONFIG_STM32_CONNECTIVITYLINE) && defined(CONFIG_STM32_OTGFS)
+  /* USB clock divider for USB OTG FS.  This bit must be valid before
+   * enabling the USB clock in the RCC_AHBENR register.  This bit can't be
+   * reset if the USB clock is enabled.
+   */
+
+  regval  = getreg32(STM32_RCC_CFGR);
+  regval &= ~RCC_CFGR_OTGFSPRE;
+  regval |= STM32_CFGR_OTGFSPRE;
+  putreg32(regval, STM32_RCC_CFGR);
+#endif
+
   /* Always enable FLITF clock and SRAM clock */
 
   regval = RCC_AHBENR_FLITFEN|RCC_AHBENR_SRAMEN;
@@ -176,15 +188,12 @@ static inline void rcc_enableahb(void)
 static inline void rcc_enableapb1(void)
 {
   uint32_t regval;
-
-#if defined(CONFIG_STM32_USB) || defined(CONFIG_STM32_OTGFS)
-  /* USB clock divider for USB FD device or USB OTG FS (OTGFS naming for this
-   * bit is different, but it is the same bit.
-   *
-   * This bit must be valid before enabling the either the USB clock in the
-   * RCC_APB1ENR register ro the OTG FS clock in the AHBENR reigser. This
-   * bit can’t be reset if the USB clock is enabled.
+#ifdef CONFIG_STM32_USB
+  /* USB clock divider for USB FS device.  This bit must be valid before
+   * enabling the USB clock in the RCC_APB1ENR register. This bit can't be
+   * reset if the USB clock is enabled.
    */
+
 
   regval  = getreg32(STM32_RCC_CFGR);
   regval &= ~RCC_CFGR_USBPRE;
