@@ -148,10 +148,18 @@ static inline void rcc_enableahb(void)
   regval |=  RCC_AHBENR_SDIOEN;
 #endif
 
-#if defined(CONFIG_STM32_ETHMAC) && defined(CONFIG_STM32_CONNECTIVITYLINE)
+#ifdef CONFIG_STM32_CONNECTIVITYLINE
+#ifdef CONFIG_STM32_OTGFS
+  /* USB OTG FS clock enable */
+
+  regval |= RCC_AHBENR_OTGFSEN;
+#endif
+
+#ifdef CONFIG_STM32_ETHMAC
   /* Ethernet clock enable */
 
   regval |= (RCC_AHBENR_ETHMACEN | RCC_AHBENR_ETHMACTXEN | RCC_AHBENR_ETHMACRXEN);
+#endif
 #endif
 
   putreg32(regval, STM32_RCC_AHBENR);   /* Enable peripherals */
@@ -169,10 +177,13 @@ static inline void rcc_enableapb1(void)
 {
   uint32_t regval;
 
-#ifdef CONFIG_STM32_USB
-  /* USB clock divider. This bit must be valid before enabling the USB
-   * clock in the RCC_APB1ENR register. This bit can’t be reset if the USB
-   * clock is enabled.
+#if defined(CONFIG_STM32_USB) || defined(CONFIG_STM32_OTGFS)
+  /* USB clock divider for USB FD device or USB OTG FS (OTGFS naming for this
+   * bit is different, but it is the same bit.
+   *
+   * This bit must be valid before enabling the either the USB clock in the
+   * RCC_APB1ENR register ro the OTG FS clock in the AHBENR reigser. This
+   * bit can’t be reset if the USB clock is enabled.
    */
 
   regval  = getreg32(STM32_RCC_CFGR);

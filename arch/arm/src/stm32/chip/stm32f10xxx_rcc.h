@@ -164,7 +164,7 @@
 #  define RCC_CFGR_PLLMUL_CLKx15    (13 << RCC_CFGR_PLLMUL_SHIFT) /* 1101: PLL input clock x 15 */
 #  define RCC_CFGR_PLLMUL_CLKx16    (14 << RCC_CFGR_PLLMUL_SHIFT) /* 111x: PLL input clock x 16 */
 #ifndef CONFIG_STM32_VALUELINE
-#  define RCC_CFGR_USBPRE           (1 << 22) /* Bit 22: USB prescaler */
+#  define RCC_CFGR_USBPRE           (1 << 22) /* Bit 22: USB/OTG FS prescaler */
 #endif
 #define RCC_CFGR_MCO_SHIFT          (24)      /* Bits 27-24: Microcontroller Clock Output */
 #define RCC_CFGR_MCO_MASK           (15 << RCC_CFGR_MCO_SHIFT)
@@ -272,6 +272,7 @@
 #  define RCC_AHBENR_SDIOEN         (1 << 10) /* Bit 10: SDIO clock enable */
 #endif
 #ifdef CONFIG_STM32_CONNECTIVITYLINE
+#  define RCC_AHBENR_OTGFSEN        (1 << 12) /* Bit 12: USB OTG FS clock enable */
 #  define RCC_AHBENR_ETHMACEN       (1 << 14) /* Bit 14: Ethernet MAC clock enable */
 #  define RCC_AHBENR_ETHMACTXEN     (1 << 15) /* Bit 15: Ethernet MAC TX clock enable */
 #  define RCC_AHBENR_ETHMACRXEN     (1 << 16) /* Bit 16: Ethernet MAC RX clock enable */
