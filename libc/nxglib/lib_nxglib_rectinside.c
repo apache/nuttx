@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxglib_rectsize.c
+ * libc/nxglib/nxglib_rectinside.c
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
@@ -66,16 +68,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_rectsize
+ * Name: nxgl_rectinside
  *
  * Description:
- *   Return the size of the specified rectangle.
+ *   Return true if the point pt lies within rect.
  *
  ****************************************************************************/
 
-void nxgl_rectsize(FAR struct nxgl_size_s *size,
-                   FAR const struct nxgl_rect_s *rect)
+bool nxgl_rectinside(FAR const struct nxgl_rect_s *rect,
+                     FAR const struct nxgl_point_s *pt)
 {
-  size->w = rect->pt2.x - rect->pt1.x + 1;
-  size->h = rect->pt2.y - rect->pt1.y + 1;
+  return (pt->x >= rect->pt1.x && pt->x <= rect->pt2.x &&
+          pt->y >= rect->pt1.y && pt->y <= rect->pt2.y);
 }

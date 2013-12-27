@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_rectcopy.c
+ * libc/nxglib/lib_nxsglib_vectoradd.c
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,19 +66,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_rectcopy
+ * Name: nxgl_vectoradd
  *
  * Description:
- *   This is essentially memcpy for rectangles.  We don't do structure
- *   assignements because some compilers are not good at that.
+ *   Add two 2x1 vectors and save the result to a third.
  *
  ****************************************************************************/
 
-void nxgl_rectcopy(FAR struct nxgl_rect_s *dest,
-                   FAR const struct nxgl_rect_s *src)
+void nxgl_vectoradd(FAR struct nxgl_point_s *dest,
+                    FAR const struct nxgl_point_s *v1,
+                    FAR const struct nxgl_point_s *v2)
 {
-  dest->pt1.x = src->pt1.x;
-  dest->pt1.y = src->pt1.y;
-  dest->pt2.x = src->pt2.x;
-  dest->pt2.y = src->pt2.y;
+  dest->x = v1->x + v2->x;
+  dest->y = v1->y + v2->y;
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_vectoradd.c
+ * lbic/nxglib/lib_nxsglib_rectoffset.c
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,19 +66,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_vectoradd
+ * Name: nxgl_rectoffset
  *
  * Description:
- *   Add two 2x1 vectors and save the result to a third.
+ *   Offset the rectangle position by the specified dx, dy values.
  *
  ****************************************************************************/
 
-void nxgl_vectoradd(FAR struct nxgl_point_s *dest,
-                    FAR const struct nxgl_point_s *v1,
-                    FAR const struct nxgl_point_s *v2)
+void nxgl_rectoffset(FAR struct nxgl_rect_s *dest,
+                     FAR const struct nxgl_rect_s *src,
+                     nxgl_coord_t dx, nxgl_coord_t dy)
 {
-  dest->x = v1->x + v2->x;
-  dest->y = v1->y + v2->y;
+  dest->pt1.x = src->pt1.x + dx;
+  dest->pt1.y = src->pt1.y + dy;
+  dest->pt2.x = src->pt2.x + dx;
+  dest->pt2.y = src->pt2.y + dy;
 }
-
-

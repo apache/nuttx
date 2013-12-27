@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_nulloverlap.c
+ * libc/nxglib/lib_nxglib_colorcopy.c
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-
 #include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
@@ -68,23 +66,22 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_rectoverlap
+ * Name: nxgl_colorcopy
  *
  * Description:
- *   Return true if the two rectangles overlap
+ *   This is essentially memcpy for colors.  This does very little for us
+ *   other than hide all of the conditional compilation for planar colors
+ *   in one place.
  *
  ****************************************************************************/
 
-bool nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
-                      FAR struct nxgl_rect_s *rect2)
+void nxgl_colorcopy(nxgl_mxpixel_t dest[CONFIG_NX_NPLANES],
+                    const nxgl_mxpixel_t src[CONFIG_NX_NPLANES])
 {
-  /* The neither is wholly above, below, right, or left of the other, then
-   * the two rectangles overlap in some fashion.
-   */
+  int i;
 
-  return (rect1->pt1.x <= rect2->pt2.x) &&  /* false: rect1 is wholly to the right */
-         (rect2->pt1.x <= rect1->pt2.x) &&  /* false: rect2 is wholly to the right */
-         (rect1->pt1.y <= rect2->pt2.y) &&  /* false: rect1 is wholly below rect2 */
-         (rect2->pt1.y <= rect1->pt2.y);    /* false: rect2 is wholly below rect1 */
+  for (i = 0; i < CONFIG_NX_NPLANES; i++)
+    {
+      dest[i] = src[i];
+    }
 }
-

@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_intersecting.c
+ * libc/nxglib/lib_nxglib_nulloverlap.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,16 +68,22 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_intersecting
+ * Name: nxgl_rectoverlap
  *
  * Description:
- *   Return true if the rectangles intersect.
+ *   Return true if the two rectangles overlap
  *
  ****************************************************************************/
 
-bool nxgl_intersecting(FAR const struct nxgl_rect_s *rect1,
-                       FAR const struct nxgl_rect_s *rect2)
+bool nxgl_rectoverlap(FAR struct nxgl_rect_s *rect1,
+                      FAR struct nxgl_rect_s *rect2)
 {
-  return ((rect1->pt2.x > rect2->pt1.x) && (rect1->pt2.y > rect2->pt1.y) &&
-          (rect1->pt1.x < rect2->pt2.x) && (rect1->pt1.y < rect2->pt1.y));
+  /* The neither is wholly above, below, right, or left of the other, then
+   * the two rectangles overlap in some fashion.
+   */
+
+  return (rect1->pt1.x <= rect2->pt2.x) &&  /* false: rect1 is wholly to the right */
+         (rect2->pt1.x <= rect1->pt2.x) &&  /* false: rect2 is wholly to the right */
+         (rect1->pt1.y <= rect2->pt2.y) &&  /* false: rect1 is wholly below rect2 */
+         (rect2->pt1.y <= rect1->pt2.y);    /* false: rect2 is wholly below rect1 */
 }

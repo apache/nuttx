@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_vectorsubtract.c
+ * libc/nxglib/lib_nxglib_rectcopy.c
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,19 +66,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_vectsubtract
+ * Name: nxgl_rectcopy
  *
  * Description:
- *   Add subtract vector v2 from vector v1 and return the result in vector dest
+ *   This is essentially memcpy for rectangles.  We don't do structure
+ *   assignments because some compilers are not good at that.
  *
  ****************************************************************************/
 
-void nxgl_vectsubtract(FAR struct nxgl_point_s *dest,
-                       FAR const struct nxgl_point_s *v1,
-                       FAR const struct nxgl_point_s *v2)
+void nxgl_rectcopy(FAR struct nxgl_rect_s *dest,
+                   FAR const struct nxgl_rect_s *src)
 {
-  dest->x = v1->x - v2->x;
-  dest->y = v1->y - v2->y;
+  dest->pt1.x = src->pt1.x;
+  dest->pt1.y = src->pt1.y;
+  dest->pt2.x = src->pt2.x;
+  dest->pt2.y = src->pt2.y;
 }
-
-

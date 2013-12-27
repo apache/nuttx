@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/color/nxglib_yuv2rgb.c
+ * libc/nxglib/lib_nxglib_trapcopy.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,32 +39,22 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <debug.h>
-#include <fixedmath.h>
-
 #include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-#define b16_P3441 0x0000581a    /*   0.344147 */
-#define b16_P7141 0x0000b6d2    /*   0.714142 */
-#define b16_1P402 0x000166ea    /*   1.402008 */
-#define b16_1P772 0x0001c5a2    /*   1.722003 */
-#define b16_128P0 0x00800000    /* 128.000000 */
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Private Function Prototypes
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -76,27 +66,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_yuv2rgb
+ * Name: nxgl_trapcopy
  *
  * Description:
- *   Convert 8-bit RGB triplet to 8-bit YUV triplet
+ *   This is essentially memcpy for trapezoids.  We don't do structure
+ *   assignments because some compilers are not good at that.
  *
  ****************************************************************************/
 
-void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v,
-                  uint8_t *r, uint8_t *g, uint8_t *b)
+void nxgl_trapcopy(FAR struct nxgl_trapezoid_s *dest,
+                   FAR const struct nxgl_trapezoid_s *src)
 {
-  b16_t vm128 = itob16(v) - b16_128P0;
-  b16_t um128 = itob16(u) - b16_128P0;
-
-  /* Per the JFIF specification:
-   *
-   * R = Y                         + 1.40200 * (V - 128.0)
-   * G = Y - 0.34414 * (U - 128.0) - 0.71414 * (V - 128.0)
-   * B = Y + 1.77200 * (U - 128.0)
-   */
-
-  *r = (uint8_t)b16toi(itob16(y) +                             b16muli(b16_1P402, vm128));
-  *g = (uint8_t)b16toi(itob16(y) - b16muli(b16_P3441, um128) - b16muli(b16_P7141, vm128));
-  *b = (uint8_t)b16toi(itob16(y) + b16muli(b16_1P772, um128));
+  nxgl_runcopy(&dest->top, &src->top);
+  nxgl_runcopy(&dest->bot, &src->bot);
 }

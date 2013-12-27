@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_trapoffset.c
+ * libc/nxglib/lib_nxglib_nullrect.c
  *
- *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
@@ -66,17 +68,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_trapoffset
+ * Name: nxgl_nullrect
  *
  * Description:
- *   Offset the trapezoid position by the specified dx, dy values.
+ *   Return true if the area of the retangle is <= 0.
  *
  ****************************************************************************/
 
-void nxgl_trapoffset(FAR struct nxgl_trapezoid_s *dest,
-                     FAR const struct nxgl_trapezoid_s *src,
-                     nxgl_coord_t dx, nxgl_coord_t dy)
+bool nxgl_nullrect(FAR const struct nxgl_rect_s *rect)
 {
-  nxgl_runoffset(&dest->top, &src->top, dx, dy);
-  nxgl_runoffset(&dest->bot, &src->bot, dx, dy);
+  return (rect->pt1.x > rect->pt2.x || rect->pt1.y > rect->pt2.y);
 }

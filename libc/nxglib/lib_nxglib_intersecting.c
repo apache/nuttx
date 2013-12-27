@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_rectintersect.c
+ * libc/nxglib/lib_nxglib_intersecting.c
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
+
 #include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
@@ -66,19 +68,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_rectintersect
+ * Name: nxgl_intersecting
  *
  * Description:
- *   Return the rectangle representing the intersection of the two rectangles.
+ *   Return true if the rectangles intersect.
  *
  ****************************************************************************/
 
-void nxgl_rectintersect(FAR struct nxgl_rect_s *dest,
-                        FAR const struct nxgl_rect_s *src1,
-                        FAR const struct nxgl_rect_s *src2)
+bool nxgl_intersecting(FAR const struct nxgl_rect_s *rect1,
+                       FAR const struct nxgl_rect_s *rect2)
 {
-  dest->pt1.x = ngl_max(src1->pt1.x, src2->pt1.x);
-  dest->pt1.y = ngl_max(src1->pt1.y, src2->pt1.y);
-  dest->pt2.x = ngl_min(src1->pt2.x, src2->pt2.x);
-  dest->pt2.y = ngl_min(src1->pt2.y, src2->pt2.y);
+  return ((rect1->pt2.x > rect2->pt1.x) && (rect1->pt2.y > rect2->pt1.y) &&
+          (rect1->pt1.x < rect2->pt2.x) && (rect1->pt1.y < rect2->pt1.y));
 }

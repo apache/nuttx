@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_nullrect.c
+ * libc/nxglib/lib_nxglib_runoffset.c
  *
- *   Copyright (C) 2008-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,8 +39,7 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-
+#include <fixedmath.h>
 #include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
@@ -68,15 +67,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_nullrect
+ * Name: nxgl_runoffset
  *
  * Description:
- *   Return true if the area of the retangle is <= 0.
+ *   Offset the run position by the specified (integer) dx, dy values.
  *
  ****************************************************************************/
 
-bool nxgl_nullrect(FAR const struct nxgl_rect_s *rect)
+void nxgl_runoffset(FAR struct nxgl_run_s *dest,
+                    FAR const struct nxgl_run_s *src,
+                    nxgl_coord_t dx, nxgl_coord_t dy)
 {
-  return (rect->pt1.x > rect->pt2.x || rect->pt1.y > rect->pt2.y);
+  b16_t b16dx = itob16(dx);
+  dest->x1    = src->x1 + b16dx;
+  dest->x2    = src->x2 + b16dx;
+  dest->y     = src->y  + dy;
 }
-

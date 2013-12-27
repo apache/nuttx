@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_colorcopy.c
+ * libc/nxglib/lib_nxglib_rectintersect.c
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,22 +66,19 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_colorcopy
+ * Name: nxgl_rectintersect
  *
  * Description:
- *   This is essentially memcpy for colors.  This does very little for us
- *   other than hide all of the conditional compilation for planar colors
- *   in one place.
+ *   Return the rectangle representing the intersection of the two rectangles.
  *
  ****************************************************************************/
 
-void nxgl_colorcopy(nxgl_mxpixel_t dest[CONFIG_NX_NPLANES],
-                    const nxgl_mxpixel_t src[CONFIG_NX_NPLANES])
+void nxgl_rectintersect(FAR struct nxgl_rect_s *dest,
+                        FAR const struct nxgl_rect_s *src1,
+                        FAR const struct nxgl_rect_s *src2)
 {
-  int i;
-
-  for (i = 0; i < CONFIG_NX_NPLANES; i++)
-    {
-      dest[i] = src[i];
-    }
+  dest->pt1.x = ngl_max(src1->pt1.x, src2->pt1.x);
+  dest->pt1.y = ngl_max(src1->pt1.y, src2->pt1.y);
+  dest->pt2.x = ngl_min(src1->pt2.x, src2->pt2.x);
+  dest->pt2.y = ngl_min(src1->pt2.y, src2->pt2.y);
 }

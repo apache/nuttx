@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_runcopy.c
+ * libc/nxglib/lib_nxsglib_rectunion.c
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,17 +66,20 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_runcopy
+ * Name: nxgl_rectunion
  *
  * Description:
- *   This is essentially memcpy for runs.  We don't do structure assignments
- *   because some compilers are not good at that.
+ *   Given two rectanges, src1 and src2, return the larger rectangle that 
+ *   contains both, dest.
  *
  ****************************************************************************/
 
-void nxgl_runcopy(FAR struct nxgl_run_s *dest, FAR const struct nxgl_run_s *src)
+void nxgl_rectunion(FAR struct nxgl_rect_s *dest,
+                    FAR const struct nxgl_rect_s *src1,
+                    FAR const struct nxgl_rect_s *src2)
 {
-  dest->x1 = src->x1;
-  dest->x2 = src->x2;
-  dest->y  = src->y;
+  dest->pt1.x = ngl_min(src1->pt1.x, src2->pt1.x);
+  dest->pt1.y = ngl_min(src1->pt1.y, src2->pt1.y);
+  dest->pt2.x = ngl_max(src1->pt2.x, src2->pt2.x);
+  dest->pt2.y = ngl_max(src1->pt2.y, src2->pt2.y);
 }

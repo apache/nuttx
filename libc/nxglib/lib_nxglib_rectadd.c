@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_rectunion.c
+ * libc/nxglib/lib_nxsglib_rectadd.c
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,17 +66,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_rectunion
+ * Name: nxgl_rectadd
  *
  * Description:
- *   Given two rectanges, src1 and src2, return the larger rectangle that 
- *   contains both, dest.
+ *   Return the rectangle that contains exactly two other rectanges.
  *
  ****************************************************************************/
 
-void nxgl_rectunion(FAR struct nxgl_rect_s *dest,
-                    FAR const struct nxgl_rect_s *src1,
-                    FAR const struct nxgl_rect_s *src2)
+void nxgl_rectadd(FAR struct nxgl_rect_s *dest,
+                  FAR const struct nxgl_rect_s *src1,
+                  FAR const struct nxgl_rect_s *src2)
 {
   dest->pt1.x = ngl_min(src1->pt1.x, src2->pt1.x);
   dest->pt1.y = ngl_min(src1->pt1.y, src2->pt1.y);

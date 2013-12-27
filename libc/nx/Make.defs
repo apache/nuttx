@@ -1,5 +1,5 @@
 ############################################################################
-# libc/nxgl/Make.defs
+# libc/nx/Make.defs
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,10 +37,9 @@
 
 ifeq ($(CONFIG_NX),y)
 
-# Add the nxgl/ directory to the build
+# Add the nx/ directory to the build
 
-DEPPATH += --dep-path nxgl
-VPATH += :nxgl
+DEPPATH += --dep-path nx
+VPATH += :nx
 
 endif
-

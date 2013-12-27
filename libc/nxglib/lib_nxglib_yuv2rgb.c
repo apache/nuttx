@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_rectoffset.c
+ * libc/nxglib/lib_nxglib_yuv2rgb.c
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,22 +39,32 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <debug.h>
+#include <fixedmath.h>
+
 #include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
+#define b16_P3441 0x0000581a    /*   0.344147 */
+#define b16_P7141 0x0000b6d2    /*   0.714142 */
+#define b16_1P402 0x000166ea    /*   1.402008 */
+#define b16_1P772 0x0001c5a2    /*   1.722003 */
+#define b16_128P0 0x00800000    /* 128.000000 */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
 /****************************************************************************
- * Private Data
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -66,22 +76,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxgl_rectoffset
+ * Name: nxgl_yuv2rgb
  *
  * Description:
- *   Offset the rectangle position by the specified dx, dy values.
+ *   Convert 8-bit RGB triplet to 8-bit YUV triplet
  *
  ****************************************************************************/
 
-void nxgl_rectoffset(FAR struct nxgl_rect_s *dest,
-                     FAR const struct nxgl_rect_s *src,
-                     nxgl_coord_t dx, nxgl_coord_t dy)
+void nxgl_yuv2rgb(uint8_t y, uint8_t u, uint8_t v,
+                  uint8_t *r, uint8_t *g, uint8_t *b)
 {
-  dest->pt1.x = src->pt1.x + dx;
-  dest->pt1.y = src->pt1.y + dy;
-  dest->pt2.x = src->pt2.x + dx;
-  dest->pt2.y = src->pt2.y + dy;
+  b16_t vm128 = itob16(v) - b16_128P0;
+  b16_t um128 = itob16(u) - b16_128P0;
+
+  /* Per the JFIF specification:
+   *
+   * R = Y                         + 1.40200 * (V - 128.0)
+   * G = Y - 0.34414 * (U - 128.0) - 0.71414 * (V - 128.0)
+   * B = Y + 1.77200 * (U - 128.0)
+   */
+
+  *r = (uint8_t)b16toi(itob16(y) +                             b16muli(b16_1P402, vm128));
+  *g = (uint8_t)b16toi(itob16(y) - b16muli(b16_P3441, um128) - b16muli(b16_P7141, vm128));
+  *b = (uint8_t)b16toi(itob16(y) + b16muli(b16_1P772, um128));
 }
-
-
-
