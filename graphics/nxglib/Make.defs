@@ -35,7 +35,7 @@
 
 NXGLIB_ASRCS  =
 
-SETP_CSRCS    = nxglib_setpixel_1bpp.c nxglib_setpixel_2bpp.c 
+SETP_CSRCS    = nxglib_setpixel_1bpp.c nxglib_setpixel_2bpp.c
 SETP_CSRCS   += nxglib_setpixel_4bpp.c nxglib_setpixel_8bpp.c
 SETP_CSRCS   += nxglib_setpixel_16bpp.c nxglib_setpixel_24bpp.c
 SETP_CSRCS   += nxglib_setpixel_32bpp.c
@@ -56,7 +56,7 @@ TFILL_CSRCS  += nxglib_filltrapezoid_16bpp.c nxglib_filltrapezoid_24bpp.c
 TFILL_CSRCS  += nxglib_filltrapezoid_32bpp.c
 
 RMOVE_CSRCS   = nxglib_moverectangle_1bpp.c nxglib_moverectangle_2bpp.c
-RMOVE_CSRCS  += nxglib_moverectangle_4bpp.cnxglib_moverectangle_8bpp.c
+RMOVE_CSRCS  += nxglib_moverectangle_4bpp.c nxglib_moverectangle_8bpp.c
 RMOVE_CSRCS  += nxglib_moverectangle_16bpp.c nxglib_moverectangle_24bpp.c
 RMOVE_CSRCS  += nxglib_moverectangle_32bpp.c
 
@@ -65,7 +65,5 @@ RCOPY_CSRCS  += nxglib_copyrectangle_4bpp.c nxglib_copyrectangle_8bpp.c
 RCOPY_CSRCS  += nxglib_copyrectangle_16bpp.c nxglib_copyrectangle_24bpp.c
 RCOPY_CSRCS  += nxglib_copyrectangle_32bpp.c
 
-DRAW_CSRCS    = nxglib_splitline.c nxglib_circlepts.c nxglib_circletraps.c
-
 NXGLIB_CSRCS  = $(SETP_CSRCS) $(RFILL_CSRCS) $(RGET_CSRCS) $(TFILL_CSRCS)
-NXGLIB_CSRCS += $(RMOVE_CSRCS) $(RCOPY_CSRCS) $(DRAW_CSRCS)
+NXGLIB_CSRCS += $(RMOVE_CSRCS) $(RCOPY_CSRCS)

@@ -6321,4 +6321,9 @@
 	  for F107 (2013-12-16).
 	* arch/arm/src/stm32/chip/stm32f3xxxx_pinmap.h:  Fix pin definitioni names
 	  for SPI2 MOSI and MISO. Noted by Brian Webb (2013-12-27).
+	* graphics/nxmu, nxsu, and nxglib and libc/nx, nxmu, and nxglib:  Massive
+	  reshuffling of files with (hopefully) no logic changes.   This
+	  reshuffling is necessary if we ever want to build graphics applications
+	  as kernel builds.  There is still more today (NXTK and NXFONTS need to
+	  be moved to libc as well) (2013-12-27).
 

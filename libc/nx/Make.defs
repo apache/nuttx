@@ -37,6 +37,8 @@
 
 ifeq ($(CONFIG_NX),y)
 
+CSRCS += lib_nx_drawcircle.c lib_nx_drawline.c lib_nx_fillcircle.c
+
 # Add the nx/ directory to the build
 
 DEPPATH += --dep-path nx

@@ -96,7 +96,7 @@
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately.  In the
- *   case of ERROR, NX will have dealloated the pre-allocated window.
+ *   case of ERROR, NX will have deallocated the pre-allocated window.
  *
  ****************************************************************************/
 
