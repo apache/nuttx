@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_setbgcolor.c
+ * libc/lib/lib_nx_openwindow.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,15 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
+
+#include "lib_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -70,40 +74,66 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_setbgcolor
+ * Name: nxfe_constructwindow
  *
  * Description:
- *  Set the color of the background
+ *   This function is the same a nx_openwindow EXCEPT that the client provides
+ *   the window structure instance.  nx_constructwindow will initialize the
+ *   the pre-allocated window structure for use by NX.  This function is
+ *   provided in addition to nx_open window in order to support a kind of
+ *   inheritance:  The caller's window structure may include extensions that
+ *   are not visible to NX.
+ *
+ *   NOTE:  wnd must have been allocated using kmalloc() (or related allocators)
+ *   Once provided to nxfe_constructwindow() that memory is owned and managed
+ *   by NX.  On certain error conditions or when the window is closed, NX will
+ *   free the window.
  *
  * Input Parameters:
- *   handle  - The connection handle
- *   color - The color to use in the background
+ *   handle - The handle returned by nx_connect
+ *   wnd    - The pre-allocated window structure.
+ *   cb     - Callbacks used to process window events
+ *   arg    - User provided value that will be returned with NX callbacks.
  *
  * Return:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately.  In the
+ *   case of ERROR, NX will have deallocated the pre-allocated window.
  *
  ****************************************************************************/
 
-int nx_setbgcolor(NXHANDLE handle,
-                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+int nxfe_constructwindow(NXHANDLE handle, FAR struct nxbe_window_s *wnd,
+                         FAR const struct nx_callback_s *cb, FAR void *arg)
 {
   FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
-  struct nxsvrmsg_setbgcolor_s outmsg;
+  struct nxsvrmsg_openwindow_s outmsg;
 
 #ifdef CONFIG_DEBUG
-  if (!conn)
+  if (!wnd)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
+      return ERROR;
+    }
+
+  if (!conn || !cb)
+    {
+      lib_free(wnd);
+      set_errno(EINVAL);
       return ERROR;
     }
 #endif
 
-  /* Format the fill command */
+  /* Setup only the connection structure, callbacks and client private data
+   * reference. The server will set everything else up.
+   */
 
-  outmsg.msgid = NX_SVRMSG_SETBGCOLOR;
-  nxgl_colorcopy(outmsg.color, color);
+  wnd->conn   = conn;
+  wnd->cb     = cb;
+  wnd->arg    = arg;
 
-  /* Forward the fill command to the server */
+  /* Request initialization the new window from the server */
 
-  return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_setbgcolor_s));
+  outmsg.msgid = NX_SVRMSG_OPENWINDOW;
+  outmsg.wnd   = wnd;
+
+  return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_openwindow_s));
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_releasebkgd.c
+ * libc/lib/lib_nx_mousein.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include <nuttx/nx/nxmu.h>
+
+#ifdef CONFIG_NX_MOUSE
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -70,36 +73,28 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_releasebkgd
+ * Name: nx_mousein
  *
  * Description:
- *   Release the background window previously acquired using nx_openbgwindow
- *   and return control of the background to NX.
- *
- * Input Parameters:
- *   hwnd - The handle returned (indirectly) by nx_requestbkgd
- *
- * Return:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   Used by a thread or interrupt handler that manages some kind of pointing
+ *   hardware to report new positional data to the NX server.  That positional
+ *   data will be routed by the NX server to the appropriate window client.
  *
  ****************************************************************************/
 
-int nx_releasebkgd(NXWINDOW hwnd)
+int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons)
 {
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_releasebkgd_s outmsg;
+  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  struct nxsvrmsg_mousein_s outmsg;
 
-#ifdef CONFIG_DEBUG
-  if (!wnd)
-    {
-      errno = EINVAL;
-      return ERROR;
-    }
-#endif
+  /* Inform the server that this client no longer exists */
 
-  /* Request access to the background window from the server */
+  outmsg.msgid   = NX_SVRMSG_MOUSEIN;
+  outmsg.pt.x    = x;
+  outmsg.pt.y    = y;
+  outmsg.buttons = buttons;
 
-  outmsg.msgid = NX_SVRMSG_RELEASEBKGD;
-  return nxmu_sendserver(wnd->conn, &outmsg, sizeof(struct nxsvrmsg_releasebkgd_s));
+  return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_mousein_s));
 }
 
+#endif /* CONFIG_NX_MOUSE */

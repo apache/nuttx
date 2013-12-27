@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_closewindow.c
+ * libc/lib/lib_nx_closewindow.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,8 @@
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -69,7 +70,6 @@
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
 
 /****************************************************************************
  * Name: nx_closewindow
@@ -97,4 +97,3 @@ int nx_closewindow(NXWINDOW hwnd)
 
   return nxmu_sendserver(wnd->conn, &outmsg, sizeof(struct nxsvrmsg_closewindow_s));
 }
-

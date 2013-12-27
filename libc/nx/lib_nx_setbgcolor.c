@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_mousein.c
+ * libc/lib/lib_nx_setbgcolor.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,11 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
-
-#ifdef CONFIG_NX_MOUSE
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,28 +70,40 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_mousein
+ * Name: nx_setbgcolor
  *
  * Description:
- *   Used by a thread or interrupt handler that manages some kind of pointing
- *   hardware to report new positional data to the NX server.  That positional
- *   data will be routed by the NX server to the appropriate window client.
+ *  Set the color of the background
+ *
+ * Input Parameters:
+ *   handle  - The connection handle
+ *   color - The color to use in the background
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons)
+int nx_setbgcolor(NXHANDLE handle,
+                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
-  struct nxsvrmsg_mousein_s outmsg;
+  struct nxsvrmsg_setbgcolor_s outmsg;
 
-  /* Inform the server that this client no longer exists */
+#ifdef CONFIG_DEBUG
+  if (!conn)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+#endif
 
-  outmsg.msgid   = NX_SVRMSG_MOUSEIN;
-  outmsg.pt.x    = x;
-  outmsg.pt.y    = y;
-  outmsg.buttons = buttons;
+  /* Format the fill command */
 
-  return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_mousein_s));
+  outmsg.msgid = NX_SVRMSG_SETBGCOLOR;
+  nxgl_colorcopy(outmsg.color, color);
+
+  /* Forward the fill command to the server */
+
+  return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_setbgcolor_s));
 }
-
-#endif /* CONFIG_NX_MOUSE */

@@ -91,7 +91,7 @@
 #  define lib_memalign(p,s) krealloc(p,s)
 #  define lib_free(p)       kfree(p)
 
-   /* User-accesssible allocations */
+   /* User-accessible allocations */
 
 #  define lib_umalloc(s)    kumalloc(s)
 #  define lib_uzalloc(s)    kuzalloc(s)
@@ -108,7 +108,7 @@
 #  define lib_realloc(p,s)  realloc(p,s)
 #  define lib_free(p)       free(p)
 
-   /* User-accesssible allocations */
+   /* User-accessible allocations */
 
 #  define lib_umalloc(s)    malloc(s)
 #  define lib_uzalloc(s)    zalloc(s)

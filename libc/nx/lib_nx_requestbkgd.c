@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_requestbkgd.c
+ * libc/lib/lib_nx_requestbkgd.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -119,7 +119,7 @@ int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb,
 #ifdef CONFIG_DEBUG
   if (!conn || !cb)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 #endif
@@ -133,4 +133,3 @@ int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb,
 
   return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_requestbkgd_s));
 }
-

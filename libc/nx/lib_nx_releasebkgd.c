@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_openwindow.c
+ * libc/lib/lib_nx_releasebkgd.c
  *
- *   Copyright (C) 2008, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nx.h>
-
-#include "nxfe.h"
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,67 +71,35 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxfe_constructwindow
+ * Name: nx_releasebkgd
  *
  * Description:
- *   This function is the same a nx_openwindow EXCEPT that the client provides
- *   the window structure instance.  nx_constructwindow will initialize the
- *   the pre-allocated window structure for use by NX.  This function is
- *   provided in addition to nx_open window in order to support a kind of
- *   inheritance:  The caller's window structure may include extensions that
- *   are not visible to NX.
- *
- *   NOTE:  wnd must have been allocated using kmalloc() (or related allocators)
- *   Once provided to nxfe_constructwindow() that memory is owned and managed
- *   by NX.  On certain error conditions or when the window is closed, NX will
- *   free the window.
+ *   Release the background window previously acquired using nx_openbgwindow
+ *   and return control of the background to NX.
  *
  * Input Parameters:
- *   handle - The handle returned by nx_connect
- *   wnd    - The pre-allocated window structure.
- *   cb     - Callbacks used to process window events
- *   arg    - User provided value that will be returned with NX callbacks.
+ *   hwnd - The handle returned (indirectly) by nx_requestbkgd
  *
  * Return:
- *   OK on success; ERROR on failure with errno set appropriately.  In the
- *   case of ERROR, NX will have dealloated the pre-allocated window.
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nxfe_constructwindow(NXHANDLE handle, FAR struct nxbe_window_s *wnd,
-                         FAR const struct nx_callback_s *cb, FAR void *arg)
+int nx_releasebkgd(NXWINDOW hwnd)
 {
-  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
-  struct nxsvrmsg_openwindow_s outmsg;
+  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_releasebkgd_s outmsg;
 
 #ifdef CONFIG_DEBUG
   if (!wnd)
     {
-      errno = EINVAL;
-      return ERROR;
-    }
-
-  if (!conn || !cb)
-    {
-      kfree(wnd);
-      errno = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 #endif
 
-  /* Setup only the connection structure, callbacks and client private data
-   * reference. The server will set everything else up.
-   */
+  /* Request access to the background window from the server */
 
-  wnd->conn   = conn;
-  wnd->cb     = cb;
-  wnd->arg    = arg;
-
-  /* Request initialization the new window from the server */
-
-  outmsg.msgid = NX_SVRMSG_OPENWINDOW;
-  outmsg.wnd   = wnd;
-
-  return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_openwindow_s));
+  outmsg.msgid = NX_SVRMSG_RELEASEBKGD;
+  return nxmu_sendserver(wnd->conn, &outmsg, sizeof(struct nxsvrmsg_releasebkgd_s));
 }
-

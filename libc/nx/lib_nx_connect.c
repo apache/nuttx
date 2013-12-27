@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxmu/nx_connect.c
+ * libc/lib/lib_nx_connect.c
  *
  *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -47,10 +47,10 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxmu.h>
 
-#include "nxfe.h"
+#include "lib_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -125,17 +125,17 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
 #ifdef CONFIG_DEBUG
   if (!svrmqname)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return NULL;
     }
 #endif
 
   /* Allocate the NX client structure */
 
-  conn = (FAR struct nxfe_conn_s *)kzalloc(sizeof(struct nxfe_conn_s));
+  conn = (FAR struct nxfe_conn_s *)lib_zalloc(sizeof(struct nxfe_conn_s));
   if (!conn)
     {
-      errno = ENOMEM;
+      set_errno(ENOMEM);
       goto errout;
     }
 
@@ -215,8 +215,7 @@ errout_with_wmq:
 errout_with_rmq:
   mq_close(conn->crdmq);
 errout_with_conn:
-  kfree(conn);
+  lib_free(conn);
 errout:
   return NULL;
 }
-

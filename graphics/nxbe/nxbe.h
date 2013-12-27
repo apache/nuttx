@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxbe/nxbe.h
  *
- *   Copyright (C) 2008-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,22 +47,12 @@
 
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxglib.h>
+#include <nuttx/nx/nxbe.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_NX_NPLANES
-#  define CONFIG_NX_NPLANES      1  /* Max number of color planes supported */
-#endif
-
-#ifndef CONFIG_NX_NCOLORS
-#  define CONFIG_NX_NCOLORS 256
-#endif
-
-/* NXBE Definitions *********************************************************/
 /* These are the values for the clipping order provided to nx_clipper */
 
 #define NX_CLIPORDER_TLRB    (0)   /* Top-left-right-bottom */
@@ -70,14 +60,6 @@
 #define NX_CLIPORDER_BLRT    (2)   /* Bottom-left-right-top */
 #define NX_CLIPORDER_BRLT    (3)   /* Bottom-right-left-top */
 #define NX_CLIPORDER_DEFAULT NX_CLIPORDER_TLRB
-
-/* Window flags and helper macros */
-
-#define NXBE_WINDOW_BLOCKED  (1 << 0) /* The window is blocked and will not
-                                       * receive further input. */
-
-#define NXBE_ISBLOCKED(wnd)  (((wnd)->flags & NXBE_WINDOW_BLOCKED) != 0)
-#define NXBE_SETBLOCKED(wnd) do { (wnd)->flags |= NXBE_WINDOW_BLOCKED; } while (0)
 
 /****************************************************************************
  * Public Types
@@ -137,46 +119,6 @@ struct nxbe_clipops_s
                    FAR const struct nxgl_rect_s *rect);
 };
 
-/* Windows ******************************************************************/
-
-/* This structure represents one window. */
-
-struct nxbe_state_s;
-struct nxfe_conn_s;
-struct nxbe_window_s
-{
-  /* State information */
-
-  FAR struct nxbe_state_s *be;        /* The back-end state structure */
-#ifdef CONFIG_NX_MULTIUSER
-  FAR struct nxfe_conn_s *conn;       /* Connection to the window client */
-#endif
-  FAR const struct nx_callback_s *cb; /* Event handling callbacks */
-
-  /* The following links provide the window's vertical position using a
-   * singly linked list.
-   */
-
-  FAR struct nxbe_window_s *above;    /* The window "above" this window */
-  FAR struct nxbe_window_s *below;    /* The window "below this one */
-
-  /* Window geometry.  The window is described by a rectangle in the
-   * absolute screen coordinate system (0,0)->(xres,yres)
-   */
-
-  struct nxgl_rect_s bounds;          /* The bounding rectangle of window */
-
-  /* Window flags (see the NXBE_* bit definitions above) */
-
-#ifdef CONFIG_NX_MULTIUSER            /* Currently used only in multi-user mode */
-  uint8_t flags;
-#endif
-
-  /* Client state information this is provide in window callbacks */
-
-  FAR void *arg;
-};
-
 /* Back-end state ***********************************************************/
 
 /* This structure describes the overall back-end window state */
@@ -228,12 +170,12 @@ extern "C" {
  * Name: nxbe_colormap
  *
  * Description:
- *   Set the harware color map to the palette expected by NX
+ *   Set the hardware color map to the palette expected by NX
  *
  ****************************************************************************/
 
 #ifdef CONFIG_FB_CMAP
-EXTERN int nxbe_colormap(FAR NX_DRIVERTYPE *dev);
+int nxbe_colormap(FAR NX_DRIVERTYPE *dev);
 #endif
 
 /****************************************************************************
@@ -245,8 +187,7 @@ EXTERN int nxbe_colormap(FAR NX_DRIVERTYPE *dev);
  *
  ****************************************************************************/
 
-EXTERN int nxbe_configure(FAR NX_DRIVERTYPE *dev,
-                          FAR struct nxbe_state_s *be);
+int nxbe_configure(FAR NX_DRIVERTYPE *dev, FAR struct nxbe_state_s *be);
 
 /****************************************************************************
  * Name: nxbe_closewindow
@@ -262,7 +203,7 @@ EXTERN int nxbe_configure(FAR NX_DRIVERTYPE *dev,
  *
  ****************************************************************************/
 
-EXTERN void nxbe_closewindow(struct nxbe_window_s *wnd);
+void nxbe_closewindow(struct nxbe_window_s *wnd);
 
 /****************************************************************************
  * Name: nxbe_setposition
@@ -273,8 +214,8 @@ EXTERN void nxbe_closewindow(struct nxbe_window_s *wnd);
  *
  ****************************************************************************/
 
-EXTERN void nxbe_setposition(FAR struct nxbe_window_s *wnd,
-                             FAR const struct nxgl_point_s *pos);
+void nxbe_setposition(FAR struct nxbe_window_s *wnd,
+                      FAR const struct nxgl_point_s *pos);
 
 /****************************************************************************
  * Name: nxbe_setsize
@@ -285,8 +226,8 @@ EXTERN void nxbe_setposition(FAR struct nxbe_window_s *wnd,
  *
  ****************************************************************************/
 
-EXTERN void nxbe_setsize(FAR struct nxbe_window_s *wnd,
-                         FAR const struct nxgl_size_s *size);
+void nxbe_setsize(FAR struct nxbe_window_s *wnd,
+                  FAR const struct nxgl_size_s *size);
 
 /****************************************************************************
  * Name: nxbe_raise
@@ -296,7 +237,7 @@ EXTERN void nxbe_setsize(FAR struct nxbe_window_s *wnd,
  *
  ****************************************************************************/
 
-EXTERN void nxbe_raise(FAR struct nxbe_window_s *wnd);
+void nxbe_raise(FAR struct nxbe_window_s *wnd);
 
 /****************************************************************************
  * Name: nxbe_lower
@@ -306,7 +247,7 @@ EXTERN void nxbe_raise(FAR struct nxbe_window_s *wnd);
  *
  ****************************************************************************/
 
-EXTERN void nxbe_lower(FAR struct nxbe_window_s *wnd);
+void nxbe_lower(FAR struct nxbe_window_s *wnd);
 
 /****************************************************************************
  * Name: nxbe_setpixel
@@ -325,9 +266,9 @@ EXTERN void nxbe_lower(FAR struct nxbe_window_s *wnd);
  *
  ****************************************************************************/
 
-EXTERN void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
-                          FAR const struct nxgl_point_s *pos,
-                          nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
+                   FAR const struct nxgl_point_s *pos,
+                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxbe_fill
@@ -345,9 +286,9 @@ EXTERN void nxbe_setpixel(FAR struct nxbe_window_s *wnd,
  *
  ****************************************************************************/
 
-EXTERN void nxbe_fill(FAR struct nxbe_window_s *wnd,
-                      FAR const struct nxgl_rect_s *rect,
-                      nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+void nxbe_fill(FAR struct nxbe_window_s *wnd,
+               FAR const struct nxgl_rect_s *rect,
+               nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxbe_filltrapezoid
@@ -366,10 +307,10 @@ EXTERN void nxbe_fill(FAR struct nxbe_window_s *wnd,
  *
  ****************************************************************************/
 
-EXTERN void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
-                               FAR const struct nxgl_rect_s *clip,
-                               FAR const struct nxgl_trapezoid_s *trap,
-                               nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
+                        FAR const struct nxgl_rect_s *clip,
+                        FAR const struct nxgl_trapezoid_s *trap,
+                        nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nxbe_getrectangle
@@ -392,10 +333,10 @@ EXTERN void nxbe_filltrapezoid(FAR struct nxbe_window_s *wnd,
  *
  ****************************************************************************/
 
-EXTERN void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
-                              FAR const struct nxgl_rect_s *rect,
-                              unsigned int plane,
-                              FAR uint8_t *dest, unsigned int deststride);
+void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
+                       FAR const struct nxgl_rect_s *rect,
+                       unsigned int plane,
+                       FAR uint8_t *dest, unsigned int deststride);
 
 /****************************************************************************
  * Name: nxbe_move
@@ -413,9 +354,9 @@ EXTERN void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
  *
  ****************************************************************************/
 
-EXTERN void nxbe_move(FAR struct nxbe_window_s *wnd,
-                      FAR const struct nxgl_rect_s *rect,
-                      FAR const struct nxgl_point_s *offset);
+void nxbe_move(FAR struct nxbe_window_s *wnd,
+               FAR const struct nxgl_rect_s *rect,
+               FAR const struct nxgl_point_s *offset);
 
 /****************************************************************************
  * Name: nxbe_bitmap
@@ -439,29 +380,29 @@ EXTERN void nxbe_move(FAR struct nxbe_window_s *wnd,
  *
  ****************************************************************************/
 
-EXTERN void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
-                       FAR const struct nxgl_rect_s *dest,
-                       FAR const void *src[CONFIG_NX_NPLANES],
-                       FAR const struct nxgl_point_s *origin,
-                       unsigned int stride);
+void nxbe_bitmap(FAR struct nxbe_window_s *wnd,
+                 FAR const struct nxgl_rect_s *dest,
+                 FAR const void *src[CONFIG_NX_NPLANES],
+                 FAR const struct nxgl_point_s *origin,
+                 unsigned int stride);
 
 /****************************************************************************
  * Name: nxbe_redraw
  *
- * Descripton:
+ * Description:
  *   Re-draw the visible portions of the rectangular region for the
  *   specified window
  *
  ****************************************************************************/
 
-EXTERN void nxbe_redraw(FAR struct nxbe_state_s *be,
-                        FAR struct nxbe_window_s *wnd,
-                        FAR const struct nxgl_rect_s *rect);
+void nxbe_redraw(FAR struct nxbe_state_s *be,
+                 FAR struct nxbe_window_s *wnd,
+                 FAR const struct nxgl_rect_s *rect);
 
 /****************************************************************************
  * Name: nxbe_redrawbelow
  *
- * Descripton:
+ * Description:
  *   Re-draw the visible portions of the rectangular region for all windows
  *   below (and including) the specified window.  This function is called
  *   whenever a window is closed, moved, lowered or re-sized in order to
@@ -469,28 +410,28 @@ EXTERN void nxbe_redraw(FAR struct nxbe_state_s *be,
  *
  ****************************************************************************/
 
-EXTERN void nxbe_redrawbelow(FAR struct nxbe_state_s *be,
-                             FAR struct nxbe_window_s *wnd,
-                             FAR const struct nxgl_rect_s *rect);
+void nxbe_redrawbelow(FAR struct nxbe_state_s *be,
+                      FAR struct nxbe_window_s *wnd,
+                      FAR const struct nxgl_rect_s *rect);
 
 /****************************************************************************
  * Name: nxbe_visible
  *
- * Descripton:
+ * Description:
  *   Return true if the point, pt, in window wnd is visible.  pt is in
  *   absolute screen coordinates
  *
  ****************************************************************************/
 
-EXTERN bool nxbe_visible(FAR struct nxbe_window_s *wnd,
-                         FAR const struct nxgl_point_s *pos);
+bool nxbe_visible(FAR struct nxbe_window_s *wnd,
+                  FAR const struct nxgl_point_s *pos);
 
 /****************************************************************************
  * Name: nxbe_clipper
  *
- * Descripton:
+ * Description:
  *   Perform flexible clipping operations.  Callbacks are executed for
- *   each oscured and visible portions of the window.
+ *   each obscured and visible portions of the window.
  *
  * Input Parameters:
  *   wnd  - The window to be clipped.
@@ -507,22 +448,22 @@ EXTERN bool nxbe_visible(FAR struct nxbe_window_s *wnd,
  *
  ****************************************************************************/
 
-EXTERN void nxbe_clipper(FAR struct nxbe_window_s *wnd,
-                         FAR const struct nxgl_rect_s *dest, uint8_t order,
-                         FAR struct nxbe_clipops_s *cops,
-                         FAR struct nxbe_plane_s *plane);
+void nxbe_clipper(FAR struct nxbe_window_s *wnd,
+                  FAR const struct nxgl_rect_s *dest, uint8_t order,
+                  FAR struct nxbe_clipops_s *cops,
+                  FAR struct nxbe_plane_s *plane);
 
 /****************************************************************************
  * Name: nxbe_clipnull
  *
- * Descripton:
+ * Description:
  *   The do-nothing clipping callback function
  *
  ****************************************************************************/
 
-EXTERN void nxbe_clipnull(FAR struct nxbe_clipops_s *cops,
-                          FAR struct nxbe_plane_s *plane,
-                          FAR const struct nxgl_rect_s *rect);
+void nxbe_clipnull(FAR struct nxbe_clipops_s *cops,
+                   FAR struct nxbe_plane_s *plane,
+                   FAR const struct nxgl_rect_s *rect);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -530,4 +471,3 @@ EXTERN void nxbe_clipnull(FAR struct nxbe_clipops_s *cops,
 #endif
 
 #endif /* __GRAPHICS_NXBE_NXBE_H */
-

@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nxmu_sendserver.c
+ * libc/nx/lib_nxmu_sendserver.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "nxfe.h"
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions

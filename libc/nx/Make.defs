@@ -1,7 +1,7 @@
 ############################################################################
-# graphics/nxmu/Make.defs
+# libc/nx/Make.defs
 #
-#   Copyright (C) 2008, 2011-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,16 +33,23 @@
 #
 ############################################################################
 
-NX_ASRCS     =
+# Check if the NX graphics subsystem is enabled
 
-NXAPI_CSRCS  = nx_bitmap.c nx_eventhandler.c nx_eventnotify.c nx_fill.c
-NXAPI_CSRCS += nx_filltrapezoid.c nx_getposition.c nx_getrectangle.c
-NXAPI_CSRCS += nx_lower.c nx_move.c nx_openwindow.c nx_raise.c
-NXAPI_CSRCS += nx_setpixel.c nx_setsize.c nx_setposition.c nx_drawcircle.c
-NXAPI_CSRCS += nx_drawline.c nx_fillcircle.c
+ifeq ($(CONFIG_NX),y)
 
-NXMU_CSRCS   = nxmu_kbdin.c nxmu_mouse.c nxmu_openwindow.c nxmu_redrawreq.c
-NXMU_CSRCS  += nxmu_releasebkgd.c nxmu_requestbkgd.c nxmu_reportposition.c
-NXMU_CSRCS  += nxmu_sendclient.c nxmu_sendwindow.c nxmu_semtake.c nxmu_server.c
+# All of user-space hooks must be built in for the multi-user NX
+# implementation so that they are available to the application in the kernel
+# build (single use mode cannot be used with the kernel build)
 
-NX_CSRCS     = $(NXAPI_CSRCS) $(NXMU_CSRCS)
+ifeq ($(CONFIG_NX_MULTIUSER),y)
+CSRCS += lib_nxmu_sendserver.c lib_nx_connect.c lib_nx_disconnect.c lib_nx_block.c
+CSRCS += lib_nx_kbdchin.c lib_nx_kbdin.c lib_nx_mousein.c
+CSRCS += lib_nx_closewindow.c lib_nxmu_constructwindow.c lib_nx_releasebkgd.c
+CSRCS += lib_nx_requestbkgd.c lib_nx_setbgcolor.c
+endif
+
+# Add the nx/ directory to the build
+
+DEPPATH += --dep-path nx
+VPATH += :nx
+endif

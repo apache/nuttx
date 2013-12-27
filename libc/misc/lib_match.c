@@ -60,7 +60,6 @@ static int match_one(const char *pattern, int patlen, const char *string)
 {
   const char *p;
   char first;
-  char last;
   int pl;
   int i;
 
@@ -101,7 +100,6 @@ static int match_one(const char *pattern, int patlen, const char *string)
                   if (*p == '-')
                     {
                       p++;
-                      last = *p++;
                       if (*string >= first && *string <= *p)
                         {
                           /* Match found.  Advance to the ']' */

@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nxmu_sendserver.c
+ * libc/lib/lib_nx_kbdin.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,15 @@
 
 #include <nuttx/config.h>
 
-#include <mqueue.h>
+#include <stdint.h>
 #include <errno.h>
-#include <debug.h>
 
-#include "nxfe.h"
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxmu.h>
+
+#include "lib_internal.h"
+
+#ifdef CONFIG_NX_KBD
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -70,89 +74,49 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxmu_sendwindow
+ * Name: nx_kbdin
  *
  * Description:
- *  Send a message to the server destined for a specific window at
- *  NX_SVRMSG_PRIO priority
- *
- * Input Parameters:
- *   wnd    - A pointer to the back-end window structure
- *   msg    - A pointer to the message to send
- *   msglen - The length of the message in bytes.
- *
- * Return:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   Used by a thread or interrupt handler that manages some kind of keypad
+ *   hardware to report text information to the NX server.  That text
+ *   data will be routed by the NX server to the appropriate window client.
  *
  ****************************************************************************/
 
-int nxmu_sendwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
-                    size_t msglen)
+int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch)
 {
-  int ret = OK;
+  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  FAR struct nxsvrmsg_kbdin_s *outmsg;
+  int size;
+  int ret;
+  int i;
 
-  /* Sanity checking */
+  /* Allocate a bigger message to account for the variable amount of character
+   * data.
+   */
 
-#ifdef CONFIG_DEBUG
-  if (!wnd || !wnd->conn)
+  size = sizeof(struct nxsvrmsg_kbdin_s) + nch - 1;
+  outmsg = (FAR struct nxsvrmsg_kbdin_s *)lib_malloc(size);
+  if (!outmsg)
     {
-      errno = EINVAL;
+      set_errno(ENOMEM);
       return ERROR;
     }
-#endif
 
-  /* Ignore messages destined to a blocked window (no errors reported) */
+  /* Inform the server of the new keypad data */
 
-  if (!NXBE_ISBLOCKED(wnd))
+  outmsg->msgid = NX_SVRMSG_KBDIN;
+  outmsg->nch   = nch;
+
+  for (i = 0; i < nch; i++)
     {
-      /* Send the message to the server */
-
-      ret = nxmu_sendserver(wnd->conn, msg, msglen);
+      outmsg->ch[i] = ch[i];
     }
 
+  ret = nxmu_sendserver(conn, outmsg, size);
+
+  lib_free(outmsg);
   return ret;
 }
 
-/****************************************************************************
- * Name: nxmu_sendclientwindow
- *
- * Description:
- *  Send a message to the client at NX_CLIMSG_PRIO priority
- *
- * Input Parameters:
- *   wnd    - A pointer to the back-end window structure
- *   msg    - A pointer to the message to send
- *   msglen - The length of the message in bytes.
- *
- * Return:
- *   OK on success; ERROR on failure with errno set appropriately
- *
- ****************************************************************************/
-
-int nxmu_sendclientwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
-                    size_t msglen)
-{
-    int ret = OK;
-
-  /* Sanity checking */
-
-#ifdef CONFIG_DEBUG
-  if (!wnd || !wnd->conn)
-    {
-      errno = EINVAL;
-      return ERROR;
-    }
-#endif
-
-  /* Ignore messages destined to a blocked window (no errors reported) */
-
-  if (!NXBE_ISBLOCKED(wnd))
-    {
-      /* Send the message to the server */
-
-      ret = nxmu_sendclient(wnd->conn, msg, msglen);
-    }
-
-  return ret;
-}
-
+#endif /* CONFIG_NX_KBD */

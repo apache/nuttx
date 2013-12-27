@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_block.c
+ * libc/lib/lib_nx_disconnect.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,13 +39,12 @@
 
 #include <nuttx/config.h>
 
+#include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-
-#include "nxbe.h"
-#include "nxfe.h"
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -72,77 +71,37 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_block
+ * Name: nx_disconnect
  *
  * Description:
- *   This is callback will do to things:  (1) any queue a 'blocked' callback
- *   to the window and then (2) block any further window messaging.
- *
- *   The 'blocked' callback is the response from nx_block (or nxtk_block).
- *   Those blocking interfaces are used to assure that no further messages are
- *   are directed to the window. Receipt of the blocked callback signifies
- *   that (1) there are no further pending callbacks and (2) that the
- *   window is now 'defunct' and will receive no further callbacks.
- *
- *   This callback supports coordinated destruction of a window in multi-
- *   user mode.  In multi-use mode, the client window logic must stay
- *   intact until all of the queued callbacks are processed.  Then the
- *   window may be safely closed.  Closing the window prior with pending
- *   callbacks can lead to bad behavior when the callback is executed.
- *
- *   Multiple user mode only!
+ *   Disconnect a client from the NX server and/or free resources reserved
+ *   by nx_connect/nx_connectinstance.
  *
  * Input Parameters:
- *   wnd - The window to be blocked
- *   arg - An argument that will accompany the block messages (This is arg2
- *         in the blocked callback).
+ *   handle - the handle returned by nx_connect
  *
  * Return:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   OK on success; ERROR on failure with the errno set appropriately.
+ *   NOTE that handle will no long be valid upon return.
  *
  ****************************************************************************/
 
-int nx_block(NXWINDOW hwnd, FAR void *arg)
+void nx_disconnect(NXHANDLE handle)
 {
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_blocked_s outmsg;
-  int ret = OK;
+  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  struct nxsvrmsg_s       outmsg;
+  int                     ret;
 
-#ifdef CONFIG_DEBUG
-  if (!hwnd)
+  /* Inform the server that this client no longer exists */
+
+  outmsg.msgid = NX_SVRMSG_DISCONNECT;
+  outmsg.conn  = conn;
+
+  /* We will finish the teardown upon receipt of the DISCONNECTED message */
+
+  ret = nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_s));
+  if (ret < 0)
     {
-      set_errno(EINVAL);
-      return ERROR;
+      gdbg("ERROR: nxmu_sendserver() returned %d\n", ret);
     }
-#endif
-
-  /* Ignore additional attempts to block messages (no errors reported) */
-
-  if (!NXBE_ISBLOCKED(wnd))
-    {
-      /* Mark the window as blocked.  This will stop all messages to the window
-       * (EXCEPT the NX_SVRMSG_BLOCKED).  Blocking the messages before sending the
-       * blocked message is awkward but assures that no other messages sneak into
-       * the message queue before we can set the blocked state.
-       */
-
-      NXBE_SETBLOCKED(wnd);
-
-      /* Send the message inicating that the window is blocked (and because of
-       * queue also that there are no additional queue messages for the window)
-       */
-
-      outmsg.msgid = NX_SVRMSG_BLOCKED;
-      outmsg.wnd   = wnd;
-      outmsg.arg   = arg;
-
-      /* Send the window message via nxmu_sendserver (vs. nxmu_sendwindow) so
-       * that it will not be blocked.
-       */
-
-      ret = nxmu_sendserver(wnd->conn, &outmsg, sizeof(struct nxsvrmsg_blocked_s));
-    }
-
-  return ret;
 }
-

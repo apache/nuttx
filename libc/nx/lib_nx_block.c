@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_kbdin.c
+ * libc/lib/lib_nx_block.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,17 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nx.h>
-
-#include "nxfe.h"
-
-#ifdef CONFIG_NX_KBD
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -76,49 +71,76 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_kbdin
+ * Name: nx_block
  *
  * Description:
- *   Used by a thread or interrupt handler that manages some kind of keypad
- *   hardware to report text information to the NX server.  That text
- *   data will be routed by the NX server to the appropriate window client.
+ *   This is callback will do to things:  (1) any queue a 'blocked' callback
+ *   to the window and then (2) block any further window messaging.
+ *
+ *   The 'blocked' callback is the response from nx_block (or nxtk_block).
+ *   Those blocking interfaces are used to assure that no further messages are
+ *   are directed to the window. Receipt of the blocked callback signifies
+ *   that (1) there are no further pending callbacks and (2) that the
+ *   window is now 'defunct' and will receive no further callbacks.
+ *
+ *   This callback supports coordinated destruction of a window in multi-
+ *   user mode.  In multi-use mode, the client window logic must stay
+ *   intact until all of the queued callbacks are processed.  Then the
+ *   window may be safely closed.  Closing the window prior with pending
+ *   callbacks can lead to bad behavior when the callback is executed.
+ *
+ *   Multiple user mode only!
+ *
+ * Input Parameters:
+ *   wnd - The window to be blocked
+ *   arg - An argument that will accompany the block messages (This is arg2
+ *         in the blocked callback).
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch)
+int nx_block(NXWINDOW hwnd, FAR void *arg)
 {
-  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
-  FAR struct nxsvrmsg_kbdin_s *outmsg;
-  int size;
-  int ret;
-  int i;
+  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_blocked_s outmsg;
+  int ret = OK;
 
-  /* Allocate a bigger message to account for the variable amount of character
-   * data.
-   */
-
-  size = sizeof(struct nxsvrmsg_kbdin_s) + nch - 1;
-  outmsg = (FAR struct nxsvrmsg_kbdin_s *)kmalloc(size);
-  if (!outmsg)
+#ifdef CONFIG_DEBUG
+  if (!hwnd)
     {
-      errno = ENOMEM;
+      set_errno(EINVAL);
       return ERROR;
     }
+#endif
 
-  /* Inform the server of the new keypad data */
+  /* Ignore additional attempts to block messages (no errors reported) */
 
-  outmsg->msgid = NX_SVRMSG_KBDIN;
-  outmsg->nch   = nch;
-
-  for (i = 0; i < nch; i++)
+  if (!NXBE_ISBLOCKED(wnd))
     {
-      outmsg->ch[i] = ch[i];
+      /* Mark the window as blocked.  This will stop all messages to the window
+       * (EXCEPT the NX_SVRMSG_BLOCKED).  Blocking the messages before sending the
+       * blocked message is awkward but assures that no other messages sneak into
+       * the message queue before we can set the blocked state.
+       */
+
+      NXBE_SETBLOCKED(wnd);
+
+      /* Send the message inicating that the window is blocked (and because of
+       * queue also that there are no additional queue messages for the window)
+       */
+
+      outmsg.msgid = NX_SVRMSG_BLOCKED;
+      outmsg.wnd   = wnd;
+      outmsg.arg   = arg;
+
+      /* Send the window message via nxmu_sendserver (vs. nxmu_sendwindow) so
+       * that it will not be blocked.
+       */
+
+      ret = nxmu_sendserver(wnd->conn, &outmsg, sizeof(struct nxsvrmsg_blocked_s));
     }
 
-  ret = nxmu_sendserver(conn, outmsg, size);
-
-  kfree(outmsg);
   return ret;
 }
-
-#endif /* CONFIG_NX_KBD */

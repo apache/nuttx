@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_kbdchin.c
+ * include/nuttx/nx/nxbe.h
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,9 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_NX_NXBE_H
+#define __INCLUDE_NUTTX_NX_NXBE_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -40,60 +43,97 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <errno.h>
-#include <debug.h>
+#include <stdbool.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
-
-#ifdef CONFIG_NX_KBD
+#include <nuttx/nx/nxglib.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Configuration ************************************************************/
+
+#ifndef CONFIG_NX_NPLANES
+#  define CONFIG_NX_NPLANES      1  /* Max number of color planes supported */
+#endif
+
+#ifndef CONFIG_NX_NCOLORS
+#  define CONFIG_NX_NCOLORS 256
+#endif
+
+/* NXBE Definitions *********************************************************/
+/* Window flags and helper macros */
+
+#define NXBE_WINDOW_BLOCKED  (1 << 0) /* The window is blocked and will not
+                                       * receive further input. */
+
+#define NXBE_ISBLOCKED(wnd)  (((wnd)->flags & NXBE_WINDOW_BLOCKED) != 0)
+#define NXBE_SETBLOCKED(wnd) do { (wnd)->flags |= NXBE_WINDOW_BLOCKED; } while (0)
 
 /****************************************************************************
- * Private Types
+ * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+/* Windows ******************************************************************/
+
+/* This structure represents one window. */
+
+struct nxbe_state_s;
+struct nxfe_conn_s;
+struct nxbe_window_s
+{
+  /* State information */
+
+  FAR struct nxbe_state_s *be;        /* The back-end state structure */
+#ifdef CONFIG_NX_MULTIUSER
+  FAR struct nxfe_conn_s *conn;       /* Connection to the window client */
+#endif
+  FAR const struct nx_callback_s *cb; /* Event handling callbacks */
+
+  /* The following links provide the window's vertical position using a
+   * singly linked list.
+   */
+
+  FAR struct nxbe_window_s *above;    /* The window "above" this window */
+  FAR struct nxbe_window_s *below;    /* The window "below this one */
+
+  /* Window geometry.  The window is described by a rectangle in the
+   * absolute screen coordinate system (0,0)->(xres,yres)
+   */
+
+  struct nxgl_rect_s bounds;          /* The bounding rectangle of window */
+
+  /* Window flags (see the NXBE_* bit definitions above) */
+
+#ifdef CONFIG_NX_MULTIUSER            /* Currently used only in multi-user mode */
+  uint8_t flags;
+#endif
+
+  /* Client state information this is provide in window callbacks */
+
+  FAR void *arg;
+};
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C" {
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: nx_kbdchin
- *
- * Description:
- *   Used by a thread or interrupt handler that manages some kind of keypad
- *   hardware to report text information to the NX server.  That text
- *   data will be routed by the NX server to the appropriate window client.
- *
- ****************************************************************************/
-
-int nx_kbdchin(NXHANDLE handle, uint8_t ch)
-{
-  FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
-  struct nxsvrmsg_kbdin_s outmsg;
-
-  /* Inform the server of the new keypad data */
-
-  outmsg.msgid = NX_SVRMSG_KBDIN;
-  outmsg.nch   = 1;
-  outmsg.ch[0] = ch;
-
-  return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_kbdin_s));
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-#endif /* CONFIG_NX_KBD */
+#endif /* __INCLUDE_NUTTX_NX_NXBE_H */
+

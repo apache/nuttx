@@ -36,7 +36,7 @@
 ifeq ($(CONFIG_AUDIO),y)
 CSRCS += lib_buffer.c
 
-# Add the misc directory to the build
+# Add the audio/ directory to the build
 
 DEPPATH += --dep-path audio
 VPATH += :audio

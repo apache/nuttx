@@ -44,6 +44,7 @@
 
 #include <nuttx/userspace.h>
 
+#include "sam_mpuinit.h"
 #include "sam_userspace.h"
 
 #ifdef CONFIG_NUTTX_KERNEL

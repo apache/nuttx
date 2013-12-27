@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_disconnect.c
+ * libc/lib/lib_nx_kbdchin.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,12 +39,14 @@
 
 #include <nuttx/config.h>
 
-#include <mqueue.h>
+#include <stdint.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include <nuttx/nx/nxmu.h>
+
+#ifdef CONFIG_NX_KBD
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -71,38 +73,27 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_disconnect
+ * Name: nx_kbdchin
  *
  * Description:
- *   Disconnect a client from the NX server and/or free resources reserved
- *   by nx_connect/nx_connectinstance.
- *
- * Input Parameters:
- *   handle - the handle returned by nx_connect
- *
- * Return:
- *   OK on success; ERROR on failure with the errno set appropriately.
- *   NOTE that handle will no long be valid upon return.
+ *   Used by a thread or interrupt handler that manages some kind of keypad
+ *   hardware to report text information to the NX server.  That text
+ *   data will be routed by the NX server to the appropriate window client.
  *
  ****************************************************************************/
 
-void nx_disconnect(NXHANDLE handle)
+int nx_kbdchin(NXHANDLE handle, uint8_t ch)
 {
   FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
-  struct nxsvrmsg_s       outmsg;
-  int                     ret;
+  struct nxsvrmsg_kbdin_s outmsg;
 
-  /* Inform the server that this client no longer exists */
+  /* Inform the server of the new keypad data */
 
-  outmsg.msgid = NX_SVRMSG_DISCONNECT;
-  outmsg.conn  = conn;
+  outmsg.msgid = NX_SVRMSG_KBDIN;
+  outmsg.nch   = 1;
+  outmsg.ch[0] = ch;
 
-  /* We will finish the teardown upon receipt of the DISCONNECTED message */
-
-  ret = nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_s));
-  if (ret < 0)
-    {
-      gdbg("ERROR: nxmu_sendserver() returned %d\n", ret);
-    }
+  return nxmu_sendserver(conn, &outmsg, sizeof(struct nxsvrmsg_kbdin_s));
 }
 
+#endif /* CONFIG_NX_KBD */
