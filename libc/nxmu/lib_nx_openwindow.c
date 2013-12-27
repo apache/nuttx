@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/nx/lib_nx_fill.c
+ * libc/nxmu/lib_nx_openwindow.c
  *
  *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,14 +39,14 @@
 
 #include <nuttx/config.h>
 
-#include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxbe.h>
 #include <nuttx/nx/nxmu.h>
+
+#include "lib_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,44 +73,60 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_fill
+ * Name: nx_openwindow
  *
  * Description:
- *  Fill the specified rectangle in the window with the specified color
+ *   Create a new window.
  *
  * Input Parameters:
- *   hwnd  - The window handle
- *   rect  - The location to be filled
- *   color - The color to use in the fill
+ *   handle - The handle returned by nx_connect
+ *   cb     - Callbacks used to process windo events
+ *   arg    - User provided value that will be returned with NX callbacks.
  *
  * Return:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   Success: A non-NULL handle used with subsequent NX accesses
+ *   Failure:  NULL is returned and errno is set appropriately
  *
  ****************************************************************************/
 
-int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-            nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
+                       FAR void *arg)
 {
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_fill_s  outmsg;
+  FAR struct nxbe_window_s *wnd;
+  int ret;
 
 #ifdef CONFIG_DEBUG
-  if (!wnd || !rect || !color)
+  if (!handle || !cb)
     {
       set_errno(EINVAL);
-      return ERROR;
+      return NULL;
     }
 #endif
 
-  /* Format the fill command */
+  /* Pre-allocate the window structure */
 
-  outmsg.msgid = NX_SVRMSG_FILL;
-  outmsg.wnd   = wnd;
+  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
+  if (!wnd)
+    {
+      set_errno(ENOMEM);
+      return NULL;
+    }
 
-  nxgl_rectcopy(&outmsg.rect, rect);
-  nxgl_colorcopy(outmsg.color, color);
+  /* Then let nxfe_constructwindow do the rest */
 
-  /* Forward the fill command to the server */
+  ret = nxfe_constructwindow(handle, wnd, cb, arg);
+  if (ret < 0)
+    {
+      /* An error occurred, the window has been freed */
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_fill_s));
+      return NULL;
+    }
+
+  /* Return the uninitialized window reference.  Since the server
+   * serializes all operations, we can be assured that the window will
+   * be initialized before the first operation on the window.
+   */
+
+  return (NXWINDOW)wnd;
 }
+

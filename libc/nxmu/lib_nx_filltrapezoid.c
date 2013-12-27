@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/nx/lib_nx_lower.c
+ * libc/nxmu/lib_nx_filltrapezoid.c
  *
  *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,6 +39,8 @@
 
 #include <nuttx/config.h>
 
+#include <string.h>
+#include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -71,29 +73,70 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_raise
+ * Name: nx_filltrapezoid
  *
  * Description:
- *   Lower the specified window to the bottom of the display.
+ *  Fill the specified trapezoidal region in the window with the specified color
  *
- * Input parameters:
- *   hwnd - the window to be lowered
+ * Input Parameters:
+ *   hwnd  - The window handle
+ *   clip - Clipping region (may be null)
+ *   trap  - The trapezoidal region to be filled
+ *   color - The color to use in the fill
  *
- * Returned value:
+ * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_lower(NXWINDOW hwnd)
+int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
+                     FAR const struct nxgl_trapezoid_s *trap,
+                     nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_lower_s   outmsg;
+  struct nxsvrmsg_filltrapezoid_s outmsg;
+  int i;
 
-  /* Send the RAISE message */
+  /* Some debug-only sanity checks */
 
-  outmsg.msgid = NX_SVRMSG_LOWER;
+#ifdef CONFIG_DEBUG
+  if (!wnd || !trap || !color)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+#endif
+
+  /* Format the fill command */
+
+  outmsg.msgid = NX_SVRMSG_FILLTRAP;
   outmsg.wnd   = wnd;
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_lower_s));
-}
+  /* If no clipping window was provided, then use the size of the entire window */
 
+  if (clip)
+    {
+      nxgl_rectcopy(&outmsg.clip, clip);
+    }
+  else
+    {
+      nxgl_rectcopy(&outmsg.clip, &wnd->bounds);
+    }
+
+  /* Copy the trapezod and the color into the message */
+
+  nxgl_trapcopy(&outmsg.trap, trap);
+
+#if CONFIG_NX_NPLANES > 1
+  for (i = 0; i < CONFIG_NX_NPLANES; i++)
+#else
+  i = 0;
+#endif
+    {
+      outmsg.color[i] = color[i];
+    }
+
+  /* Forward the trapezoid fill command to the server */
+
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_filltrapezoid_s));
+}

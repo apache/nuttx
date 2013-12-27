@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/nx/lib_nx_raise.c
+ * libc/nxmu/lib_nx_setposition.c
  *
  *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -71,29 +71,39 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_raise
+ * Name: nx_setposition
  *
  * Description:
- *   Bring the specified window to the top of the display.
+ *  Set the position and size for the selected window
  *
- * Input parameters:
- *   hwnd - the window to be raised
+ * Input Parameters:
+ *   hwnd  - The window handle
+ *   pos   - The new position of the window
  *
- * Returned value:
+ * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_raise(NXWINDOW hwnd)
+int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos)
 {
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_raise_s outmsg;
+  FAR struct nxbe_window_s     *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_setposition_s outmsg;
 
-  /* Send the RAISE message */
+#ifdef CONFIG_DEBUG
+  if (!wnd || !pos)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+#endif
 
-  outmsg.msgid = NX_SVRMSG_RAISE;
+  /* Inform the server of the changed position */
+
+  outmsg.msgid = NX_SVRMSG_SETPOSITION;
   outmsg.wnd   = wnd;
+  outmsg.pos.x = pos->x;
+  outmsg.pos.y = pos->y;
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_raise_s));
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setposition_s));
 }
-

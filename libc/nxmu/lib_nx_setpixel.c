@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/nx/lib_nxmu_sendserver.c
+ * libc/nxmu/lib_nx_setpixel.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,9 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/nx/nxglib.h>
+#include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxbe.h>
 #include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
@@ -70,43 +73,46 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxmu_sendserver
+ * Name: nx_setpixel
  *
  * Description:
- *  Send a message to the server at NX_SVRMSG_PRIO priority
+ *  Set a single pixel in the window to the specified color.  This is simply
+ *  a degenerate case of nx_fill(), but may be optimized in some architectures.
  *
  * Input Parameters:
- *   conn   - A pointer to the server connection structure
- *   msg    - A pointer to the message to send
- *   msglen - The length of the message in bytes.
+ *   wnd  - The window structure reference
+ *   pos  - The pixel location to be set
+ *   col  - The color to use in the set
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nxmu_sendserver(FAR struct nxfe_conn_s *conn, FAR const void *msg,
-                    size_t msglen)
+int nx_setpixel(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
+                nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
-  int ret;
-
-  /* Sanity checking */
+  FAR struct nxbe_window_s  *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_setpixel_s outmsg;
 
 #ifdef CONFIG_DEBUG
-  if (!conn || !conn->cwrmq)
+  if (!wnd || !pos || !color)
     {
       set_errno(EINVAL);
       return ERROR;
     }
 #endif
 
-  /* Send the message to the server */
+  /* Format the fill command */
 
-  ret = mq_send(conn->cwrmq, msg, msglen, NX_SVRMSG_PRIO);
-  if (ret < 0)
-    {
-      gdbg("mq_send failed: %d\n", errno);
-    }
+  outmsg.msgid = NX_SVRMSG_SETPIXEL;
+  outmsg.wnd   = wnd;
+  outmsg.pos.x = pos->x;
+  outmsg.pos.y = pos->y;
 
-  return ret;
+  nxgl_colorcopy(outmsg.color, color);
+
+  /* Forward the fill command to the server */
+
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setpixel_s));
 }

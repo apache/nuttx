@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/nx/lib_nx_setpixel.c
+ * libc/nxmu/lib_nx_bitmap.c
  *
- *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,9 @@
 
 #include <nuttx/config.h>
 
-#include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxbe.h>
 #include <nuttx/nx/nxmu.h>
@@ -73,46 +71,86 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_setpixel
+ * Name: nx_bitmap
  *
  * Description:
- *  Set a single pixel in the window to the specified color.  This is simply
- *  a degenerate case of nx_fill(), but may be optimized in some architectures.
+ *   Copy a rectangular region of a larger image into the rectangle in the
+ *   specified window.
  *
  * Input Parameters:
- *   wnd  - The window structure reference
- *   pos  - The pixel location to be set
- *   col  - The color to use in the set
+ *   hwnd   - The window that will receive the bitmap image
+ *   dest   - Describes the rectangular region on the display that will receive the
+ *            the bit map.
+ *   src    - The start of the source image.
+ *   origin - The origin of the upper, left-most corner of the full bitmap.
+ *            Both dest and origin are in window coordinates, however, origin
+ *            may lie outside of the display.
+ *   stride - The width of the full source image in pixels.
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_setpixel(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
+              FAR const void *src[CONFIG_NX_NPLANES],
+              FAR const struct nxgl_point_s *origin, unsigned int stride)
 {
-  FAR struct nxbe_window_s  *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_setpixel_s outmsg;
+  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_bitmap_s outmsg;
+  int i;
+  int ret;
+  sem_t sem_done;
 
 #ifdef CONFIG_DEBUG
-  if (!wnd || !pos || !color)
+  if (!wnd || !dest || !src || !origin)
     {
       set_errno(EINVAL);
       return ERROR;
     }
 #endif
 
-  /* Format the fill command */
+  /* Format the bitmap command */
 
-  outmsg.msgid = NX_SVRMSG_SETPIXEL;
-  outmsg.wnd   = wnd;
-  outmsg.pos.x = pos->x;
-  outmsg.pos.y = pos->y;
+  outmsg.msgid      = NX_SVRMSG_BITMAP;
+  outmsg.wnd        = wnd;
+  outmsg.stride     = stride;
 
-  nxgl_colorcopy(outmsg.color, color);
+  for (i = 0; i < CONFIG_NX_NPLANES; i++)
+    {
+      outmsg.src[i] = src[i];
+    }
 
+  outmsg.origin.x   = origin->x;
+  outmsg.origin.y   = origin->y;
+  nxgl_rectcopy(&outmsg.dest, dest);
+
+  
+  /* Create a semaphore for tracking command completion */
+
+  outmsg.sem_done = &sem_done;
+  ret = sem_init(&sem_done, 0, 0);
+  
+  if (ret != OK)
+    {
+      gdbg("sem_init failed: %d\n", errno);
+      return ret;
+    }
+  
   /* Forward the fill command to the server */
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setpixel_s));
+  ret = nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_bitmap_s));
+  
+  /* Wait that the command is completed, so that caller can release the buffer. */
+  
+  if (ret == OK)
+    {
+      ret = sem_wait(&sem_done);
+    }
+  
+  /* Destroy the semaphore and return. */
+  
+  sem_destroy(&sem_done);
+  
+  return ret;
 }

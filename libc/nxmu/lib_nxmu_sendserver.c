@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/nx/lib_nx_move.c
+ * libc/nxmu/lib_nxmu_sendserver.c
  *
- *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,10 @@
 
 #include <nuttx/config.h>
 
+#include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
 #include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
@@ -71,45 +70,43 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_move
+ * Name: nxmu_sendserver
  *
  * Description:
- *   Move a rectangular region within the window
+ *  Send a message to the server at NX_SVRMSG_PRIO priority
  *
  * Input Parameters:
- *   hwnd   - The window within which the move is to be done
- *   rect   - Describes the rectangular region to move
- *   offset - The offset to move the region
+ *   conn   - A pointer to the server connection structure
+ *   msg    - A pointer to the message to send
+ *   msglen - The length of the message in bytes.
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-            FAR const struct nxgl_point_s *offset)
+int nxmu_sendserver(FAR struct nxfe_conn_s *conn, FAR const void *msg,
+                    size_t msglen)
 {
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_move_s    outmsg;
+  int ret;
+
+  /* Sanity checking */
 
 #ifdef CONFIG_DEBUG
-  if (!wnd)
+  if (!conn || !conn->cwrmq)
     {
       set_errno(EINVAL);
       return ERROR;
     }
 #endif
 
-  /* Format the fill command */
+  /* Send the message to the server */
 
-  outmsg.msgid      = NX_SVRMSG_MOVE;
-  outmsg.wnd        = wnd;
-  outmsg.offset.x   = offset->x;
-  outmsg.offset.y   = offset->y;
+  ret = mq_send(conn->cwrmq, msg, msglen, NX_SVRMSG_PRIO);
+  if (ret < 0)
+    {
+      gdbg("mq_send failed: %d\n", errno);
+    }
 
-  nxgl_rectcopy(&outmsg.rect, rect);
-
-  /* Forward the fill command to the server */
-
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_move_s));
+  return ret;
 }

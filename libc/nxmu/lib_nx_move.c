@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/nx/lib_nx_getposition.c
+ * libc/nxmu/lib_nx_move.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,25 +71,26 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_getposition
+ * Name: nx_move
  *
  * Description:
- *  Request the position and size information for the selected window.  The
- *  values will be return asynchronously through the client callback function
- *  pointer.
+ *   Move a rectangular region within the window
  *
  * Input Parameters:
- *   hwnd   - The window handle
+ *   hwnd   - The window within which the move is to be done
+ *   rect   - Describes the rectangular region to move
+ *   offset - The offset to move the region
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_getposition(NXWINDOW hwnd)
+int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+            FAR const struct nxgl_point_s *offset)
 {
-  FAR struct nxbe_window_s     *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_getposition_s outmsg;
+  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_move_s    outmsg;
 
 #ifdef CONFIG_DEBUG
   if (!wnd)
@@ -99,17 +100,16 @@ int nx_getposition(NXWINDOW hwnd)
     }
 #endif
 
-  /* Request the size/position info.
-   *
-   * It is tempting to just take the positional information from the window
-   * structure that we have in our hands now.  However, we need to run this through
-   * the server to keep things serialized.  There might, for example, be a pending
-   * size/position change and, in that case, this function would return the
-   * wrong info.
-   */
+  /* Format the fill command */
 
-  outmsg.msgid = NX_SVRMSG_GETPOSITION;
-  outmsg.wnd   = wnd;
+  outmsg.msgid      = NX_SVRMSG_MOVE;
+  outmsg.wnd        = wnd;
+  outmsg.offset.x   = offset->x;
+  outmsg.offset.y   = offset->y;
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_getposition_s));
+  nxgl_rectcopy(&outmsg.rect, rect);
+
+  /* Forward the fill command to the server */
+
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_move_s));
 }

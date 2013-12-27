@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/nx/lib_nx_filltrapezoid.c
+ * libc/nxmu/lib_nx_getposition.c
  *
  *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,8 +39,6 @@
 
 #include <nuttx/config.h>
 
-#include <string.h>
-#include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -73,70 +71,45 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_filltrapezoid
+ * Name: nx_getposition
  *
  * Description:
- *  Fill the specified trapezoidal region in the window with the specified color
+ *  Request the position and size information for the selected window.  The
+ *  values will be return asynchronously through the client callback function
+ *  pointer.
  *
  * Input Parameters:
- *   hwnd  - The window handle
- *   clip - Clipping region (may be null)
- *   trap  - The trapezoidal region to be filled
- *   color - The color to use in the fill
+ *   hwnd   - The window handle
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
-                     FAR const struct nxgl_trapezoid_s *trap,
-                     nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+int nx_getposition(NXWINDOW hwnd)
 {
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_filltrapezoid_s outmsg;
-  int i;
-
-  /* Some debug-only sanity checks */
+  FAR struct nxbe_window_s     *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_getposition_s outmsg;
 
 #ifdef CONFIG_DEBUG
-  if (!wnd || !trap || !color)
+  if (!wnd)
     {
       set_errno(EINVAL);
       return ERROR;
     }
 #endif
 
-  /* Format the fill command */
+  /* Request the size/position info.
+   *
+   * It is tempting to just take the positional information from the window
+   * structure that we have in our hands now.  However, we need to run this through
+   * the server to keep things serialized.  There might, for example, be a pending
+   * size/position change and, in that case, this function would return the
+   * wrong info.
+   */
 
-  outmsg.msgid = NX_SVRMSG_FILLTRAP;
+  outmsg.msgid = NX_SVRMSG_GETPOSITION;
   outmsg.wnd   = wnd;
 
-  /* If no clipping window was provided, then use the size of the entire window */
-
-  if (clip)
-    {
-      nxgl_rectcopy(&outmsg.clip, clip);
-    }
-  else
-    {
-      nxgl_rectcopy(&outmsg.clip, &wnd->bounds);
-    }
-
-  /* Copy the trapezod and the color into the message */
-
-  nxgl_trapcopy(&outmsg.trap, trap);
-
-#if CONFIG_NX_NPLANES > 1
-  for (i = 0; i < CONFIG_NX_NPLANES; i++)
-#else
-  i = 0;
-#endif
-    {
-      outmsg.color[i] = color[i];
-    }
-
-  /* Forward the trapezoid fill command to the server */
-
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_filltrapezoid_s));
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_getposition_s));
 }

@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/nx/lib_nx_setposition.c
+ * libc/nxmu/lib_nx_getrectangle.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,7 @@
 
 #include <nuttx/config.h>
 
+#include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -71,39 +72,79 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_setposition
+ * Name: nx_getrectangle
  *
  * Description:
- *  Set the position and size for the selected window
+ *  Get the raw contents of graphic memory within a rectangular region. NOTE:
+ *  Since raw graphic memory is returned, the returned memory content may be
+ *  the memory of windows above this one and may not necessarily belong to
+ *  this window unless you assure that this is the top window.
  *
  * Input Parameters:
- *   hwnd  - The window handle
- *   pos   - The new position of the window
+ *   wnd  - The window structure reference
+ *   rect - The location to be copied
+ *   plane - Specifies the color plane to get from.
+ *   dest - The location to copy the memory region
+ *   deststride - The width, in bytes, of the dest memory
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos)
+int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                    unsigned int plane, FAR uint8_t *dest,
+                    unsigned int deststride)
 {
-  FAR struct nxbe_window_s     *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_setposition_s outmsg;
-
+  FAR struct nxbe_window_s        *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_getrectangle_s  outmsg;
+  int ret;
+  sem_t sem_done;
+  
 #ifdef CONFIG_DEBUG
-  if (!wnd || !pos)
+  if (!hwnd || !rect || !dest)
     {
+      gvdbg("Invalid parameters\n");
       set_errno(EINVAL);
       return ERROR;
     }
 #endif
 
-  /* Inform the server of the changed position */
+  /* Format the fill command */
 
-  outmsg.msgid = NX_SVRMSG_SETPOSITION;
-  outmsg.wnd   = wnd;
-  outmsg.pos.x = pos->x;
-  outmsg.pos.y = pos->y;
+  outmsg.msgid      = NX_SVRMSG_GETRECTANGLE;
+  outmsg.wnd        = wnd;
+  outmsg.plane      = plane;
+  outmsg.dest       = dest;
+  outmsg.deststride = deststride;
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setposition_s));
+  nxgl_rectcopy(&outmsg.rect, rect);
+
+  /* Create a semaphore for tracking command completion */
+
+  outmsg.sem_done = &sem_done;
+  ret = sem_init(&sem_done, 0, 0);
+  
+  if (ret != OK)
+    {
+      gdbg("sem_init failed: %d\n", errno);
+      return ret;
+    }
+  
+  /* Forward the fill command to the server */
+
+  ret = nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_getrectangle_s));
+  
+  /* Wait that the command is completed, so that caller can release the buffer. */
+  
+  if (ret == OK)
+    {
+      ret = sem_wait(&sem_done);
+    }
+  
+  /* Destroy the semaphore and return. */
+  
+  sem_destroy(&sem_done);
+  
+  return ret;
 }

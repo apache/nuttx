@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/nx/lib_nxmu_sendserver.c
+ * libc/nxmu/lib_nx_fill.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/nx/nxglib.h>
+#include <nuttx/nx/nx.h>
 #include <nuttx/nx/nxbe.h>
 #include <nuttx/nx/nxmu.h>
 
@@ -71,45 +73,44 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxmu_sendwindow
+ * Name: nx_fill
  *
  * Description:
- *  Send a message to the server destined for a specific window at
- *  NX_SVRMSG_PRIO priority
+ *  Fill the specified rectangle in the window with the specified color
  *
  * Input Parameters:
- *   wnd    - A pointer to the back-end window structure
- *   msg    - A pointer to the message to send
- *   msglen - The length of the message in bytes.
+ *   hwnd  - The window handle
+ *   rect  - The location to be filled
+ *   color - The color to use in the fill
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nxmu_sendwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
-                    size_t msglen)
+int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+            nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
-  int ret = OK;
-
-  /* Sanity checking */
+  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_fill_s  outmsg;
 
 #ifdef CONFIG_DEBUG
-  if (!wnd || !wnd->conn)
+  if (!wnd || !rect || !color)
     {
       set_errno(EINVAL);
       return ERROR;
     }
 #endif
 
-  /* Ignore messages destined to a blocked window (no errors reported) */
+  /* Format the fill command */
 
-  if (!NXBE_ISBLOCKED(wnd))
-    {
-      /* Send the message to the server */
+  outmsg.msgid = NX_SVRMSG_FILL;
+  outmsg.wnd   = wnd;
 
-      ret = nxmu_sendserver(wnd->conn, msg, msglen);
-    }
+  nxgl_rectcopy(&outmsg.rect, rect);
+  nxgl_colorcopy(outmsg.color, color);
 
-  return ret;
+  /* Forward the fill command to the server */
+
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_fill_s));
 }

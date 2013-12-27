@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/nx/lib_nx_bitmap.c
+ * libc/nxmu/lib_nx_setsize.c
  *
  *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -71,86 +71,39 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_bitmap
+ * Name: nx_setsize
  *
  * Description:
- *   Copy a rectangular region of a larger image into the rectangle in the
- *   specified window.
+ *  Set the size of the selected window
  *
  * Input Parameters:
- *   hwnd   - The window that will receive the bitmap image
- *   dest   - Describes the rectangular region on the display that will receive the
- *            the bit map.
- *   src    - The start of the source image.
- *   origin - The origin of the upper, left-most corner of the full bitmap.
- *            Both dest and origin are in window coordinates, however, origin
- *            may lie outside of the display.
- *   stride - The width of the full source image in pixels.
+ *   hwnd   - The window handle
+ *   size   - The new size of the window.
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
-              FAR const void *src[CONFIG_NX_NPLANES],
-              FAR const struct nxgl_point_s *origin, unsigned int stride)
+int nx_setsize(NXWINDOW hwnd, FAR const struct nxgl_size_s *size)
 {
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_bitmap_s outmsg;
-  int i;
-  int ret;
-  sem_t sem_done;
+  struct nxsvrmsg_setsize_s outmsg;
 
 #ifdef CONFIG_DEBUG
-  if (!wnd || !dest || !src || !origin)
+  if (!wnd || !size)
     {
       set_errno(EINVAL);
       return ERROR;
     }
 #endif
 
-  /* Format the bitmap command */
+  /* Then inform the server of the changed position */
 
-  outmsg.msgid      = NX_SVRMSG_BITMAP;
-  outmsg.wnd        = wnd;
-  outmsg.stride     = stride;
+  outmsg.msgid  = NX_SVRMSG_SETSIZE;
+  outmsg.wnd    = wnd;
+  outmsg.size.w = size->w;
+  outmsg.size.h = size->h;
 
-  for (i = 0; i < CONFIG_NX_NPLANES; i++)
-    {
-      outmsg.src[i] = src[i];
-    }
-
-  outmsg.origin.x   = origin->x;
-  outmsg.origin.y   = origin->y;
-  nxgl_rectcopy(&outmsg.dest, dest);
-
-  
-  /* Create a semaphore for tracking command completion */
-
-  outmsg.sem_done = &sem_done;
-  ret = sem_init(&sem_done, 0, 0);
-  
-  if (ret != OK)
-    {
-      gdbg("sem_init failed: %d\n", errno);
-      return ret;
-    }
-  
-  /* Forward the fill command to the server */
-
-  ret = nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_bitmap_s));
-  
-  /* Wait that the command is completed, so that caller can release the buffer. */
-  
-  if (ret == OK)
-    {
-      ret = sem_wait(&sem_done);
-    }
-  
-  /* Destroy the semaphore and return. */
-  
-  sem_destroy(&sem_done);
-  
-  return ret;
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setsize_s));
 }

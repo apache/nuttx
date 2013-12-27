@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/nx/lib_nx_openwindow.c
+ * libc/nxmu/lib_nx_lower.c
  *
  *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,8 +46,6 @@
 #include <nuttx/nx/nxbe.h>
 #include <nuttx/nx/nxmu.h>
 
-#include "lib_internal.h"
-
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
@@ -73,60 +71,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nx_raise
  *
  * Description:
- *   Create a new window.
+ *   Lower the specified window to the bottom of the display.
  *
- * Input Parameters:
- *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
- *   arg    - User provided value that will be returned with NX callbacks.
+ * Input parameters:
+ *   hwnd - the window to be lowered
  *
- * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ * Returned value:
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+int nx_lower(NXWINDOW hwnd)
 {
-  FAR struct nxbe_window_s *wnd;
-  int ret;
+  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_lower_s   outmsg;
 
-#ifdef CONFIG_DEBUG
-  if (!handle || !cb)
-    {
-      set_errno(EINVAL);
-      return NULL;
-    }
-#endif
+  /* Send the RAISE message */
 
-  /* Pre-allocate the window structure */
+  outmsg.msgid = NX_SVRMSG_LOWER;
+  outmsg.wnd   = wnd;
 
-  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
-    {
-      set_errno(ENOMEM);
-      return NULL;
-    }
-
-  /* Then let nxfe_constructwindow do the rest */
-
-  ret = nxfe_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
-
-      return NULL;
-    }
-
-  /* Return the uninitialized window reference.  Since the server
-   * serializes all operations, we can be assured that the window will
-   * be initialized before the first operation on the window.
-   */
-
-  return (NXWINDOW)wnd;
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_lower_s));
 }
 

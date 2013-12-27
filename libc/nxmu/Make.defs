@@ -1,5 +1,5 @@
 ############################################################################
-# libc/nx/Make.defs
+# libc/nxmu/Make.defs
 #
 #   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,15 +33,13 @@
 #
 ############################################################################
 
-# Check if the NX graphics subsystem is enabled
-
-ifeq ($(CONFIG_NX),y)
-
 # All of user-space hooks must be built in for the multi-user NX
 # implementation so that they are available to the application in the kernel
 # build (single use mode cannot be used with the kernel build)
 
+ifeq ($(CONFIG_NX),y)
 ifeq ($(CONFIG_NX_MULTIUSER),y)
+
 CSRCS += lib_nxmu_sendserver.c lib_nx_connect.c lib_nx_disconnect.c
 CSRCS += lib_nxmu_semtake.c lib_nx_block.c
 CSRCS += lib_nx_kbdchin.c lib_nx_kbdin.c lib_nx_mousein.c
@@ -51,10 +49,12 @@ CSRCS += lib_nxmu_sendwindow.c lib_nx_closewindow.c lib_nxmu_constructwindow.c
 CSRCS += lib_nx_bitmap.c lib_nx_fill.c lib_nx_filltrapezoid.c lib_nx_getposition.c
 CSRCS += lib_nx_getrectangle.c lib_nx_lower.c lib_nx_move.c lib_nx_openwindow.c
 CSRCS += lib_nx_raise.c lib_nx_setpixel.c lib_nx_setposition.c lib_nx_setsize.c
+
+# Add the nxmu/ directory to the build
+
+DEPPATH += --dep-path nxmu
+VPATH += :nxmu
+
+endif
 endif
 
-# Add the nx/ directory to the build
-
-DEPPATH += --dep-path nx
-VPATH += :nx
-endif

@@ -65,7 +65,8 @@ include mqueue/Make.defs
 include math/Make.defs
 include fixedmath/Make.defs
 include net/Make.defs
-include nx/Make.defs
+include nxgl/Make.defs
+include nxmu/Make.defs
 include time/Make.defs
 include libgen/Make.defs
 include dirent/Make.defs
