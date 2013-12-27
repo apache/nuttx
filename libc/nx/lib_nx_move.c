@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_openwindow.c
+ * libc/nx/lib_nx_move.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,8 @@
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include <nuttx/kmalloc.h>
-
-#include "nxfe.h"
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -72,60 +71,45 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nx_move
  *
  * Description:
- *   Create a new window.
+ *   Move a rectangular region within the window
  *
  * Input Parameters:
- *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
- *   arg    - User provided value that will be returned with NX callbacks.
+ *   hwnd   - The window within which the move is to be done
+ *   rect   - Describes the rectangular region to move
+ *   offset - The offset to move the region
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+            FAR const struct nxgl_point_s *offset)
 {
-  FAR struct nxbe_window_s *wnd;
-  int ret;
+  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_move_s    outmsg;
 
 #ifdef CONFIG_DEBUG
-  if (!handle || !cb)
+  if (!wnd)
     {
-      errno = EINVAL;
-      return NULL;
+      set_errno(EINVAL);
+      return ERROR;
     }
 #endif
 
-  /* Pre-allocate the window structure */
+  /* Format the fill command */
 
-  wnd = (FAR struct nxbe_window_s *)kzalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
-    {
-      errno = ENOMEM;
-      return NULL;
-    }
+  outmsg.msgid      = NX_SVRMSG_MOVE;
+  outmsg.wnd        = wnd;
+  outmsg.offset.x   = offset->x;
+  outmsg.offset.y   = offset->y;
 
-  /* Then let nxfe_constructwindow do the rest */
+  nxgl_rectcopy(&outmsg.rect, rect);
 
-  ret = nxfe_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
+  /* Forward the fill command to the server */
 
-      return NULL;
-    }
-
-  /* Return the uninitialized window reference.  Since the server
-   * serializes all operations, we can be assured that the window will
-   * be initialized before the first operation on the window.
-   */
-
-  return (NXWINDOW)wnd;
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_move_s));
 }
-

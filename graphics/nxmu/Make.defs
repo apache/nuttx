@@ -35,14 +35,11 @@
 
 NX_ASRCS     =
 
-NXAPI_CSRCS  = nx_bitmap.c nx_eventhandler.c nx_eventnotify.c nx_fill.c
-NXAPI_CSRCS += nx_filltrapezoid.c nx_getposition.c nx_getrectangle.c
-NXAPI_CSRCS += nx_lower.c nx_move.c nx_openwindow.c nx_raise.c
-NXAPI_CSRCS += nx_setpixel.c nx_setsize.c nx_setposition.c nx_drawcircle.c
-NXAPI_CSRCS += nx_drawline.c nx_fillcircle.c
+NXAPI_CSRCS  = nx_eventhandler.c nx_eventnotify.c
+NXAPI_CSRCS += nx_drawcircle.c nx_drawline.c nx_fillcircle.c
 
 NXMU_CSRCS   = nxmu_kbdin.c nxmu_mouse.c nxmu_openwindow.c nxmu_redrawreq.c
 NXMU_CSRCS  += nxmu_releasebkgd.c nxmu_requestbkgd.c nxmu_reportposition.c
-NXMU_CSRCS  += nxmu_sendclient.c nxmu_sendwindow.c nxmu_semtake.c nxmu_server.c
+NXMU_CSRCS  += nxmu_sendclient.c nxmu_sendclientwindow.c nxmu_server.c
 
 NX_CSRCS     = $(NXAPI_CSRCS) $(NXMU_CSRCS)

@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_setpixel.c
+ * libc/nx/lib_nx_lower.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
-
-#include "nxfe.h"
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,46 +71,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_setpixel
+ * Name: nx_raise
  *
  * Description:
- *  Set a single pixel in the window to the specified color.  This is simply
- *  a degenerate case of nx_fill(), but may be optimized in some architectures.
+ *   Lower the specified window to the bottom of the display.
  *
- * Input Parameters:
- *   wnd  - The window structure reference
- *   pos  - The pixel location to be set
- *   col  - The color to use in the set
+ * Input parameters:
+ *   hwnd - the window to be lowered
  *
- * Return:
+ * Returned value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_setpixel(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+int nx_lower(NXWINDOW hwnd)
 {
-  FAR struct nxbe_window_s  *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_setpixel_s outmsg;
+  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_lower_s   outmsg;
 
-#ifdef CONFIG_DEBUG
-  if (!wnd || !pos || !color)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-#endif
+  /* Send the RAISE message */
 
-  /* Format the fill command */
-
-  outmsg.msgid = NX_SVRMSG_SETPIXEL;
+  outmsg.msgid = NX_SVRMSG_LOWER;
   outmsg.wnd   = wnd;
-  outmsg.pos.x = pos->x;
-  outmsg.pos.y = pos->y;
 
-  nxgl_colorcopy(outmsg.color, color);
-
-  /* Forward the fill command to the server */
-
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setpixel_s));
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_lower_s));
 }
+

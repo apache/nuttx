@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_move.c
+ * libc/nx/lib_nx_setposition.c
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,8 @@
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -70,45 +71,39 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_move
+ * Name: nx_setposition
  *
  * Description:
- *   Move a rectangular region within the window
+ *  Set the position and size for the selected window
  *
  * Input Parameters:
- *   hwnd   - The window within which the move is to be done
- *   rect   - Describes the rectangular region to move
- *   offset - The offset to move the region
+ *   hwnd  - The window handle
+ *   pos   - The new position of the window
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-            FAR const struct nxgl_point_s *offset)
+int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos)
 {
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_move_s    outmsg;
+  FAR struct nxbe_window_s     *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_setposition_s outmsg;
 
 #ifdef CONFIG_DEBUG
-  if (!wnd)
+  if (!wnd || !pos)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 #endif
 
-  /* Format the fill command */
+  /* Inform the server of the changed position */
 
-  outmsg.msgid      = NX_SVRMSG_MOVE;
-  outmsg.wnd        = wnd;
-  outmsg.offset.x   = offset->x;
-  outmsg.offset.y   = offset->y;
+  outmsg.msgid = NX_SVRMSG_SETPOSITION;
+  outmsg.wnd   = wnd;
+  outmsg.pos.x = pos->x;
+  outmsg.pos.y = pos->y;
 
-  nxgl_rectcopy(&outmsg.rect, rect);
-
-  /* Forward the fill command to the server */
-
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_move_s));
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setposition_s));
 }

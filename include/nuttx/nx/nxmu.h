@@ -83,6 +83,10 @@
 #define NX_CLIMSG_PRIO 42
 #define NX_SVRMSG_PRIO 42
 
+/* Handy macros */
+
+#define nxmu_semgive(sem)    sem_post(sem) /* To match nxmu_semtake() */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

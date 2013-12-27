@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_lower.c
+ * libc/nx/lib_nxmu_sendserver.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,12 @@
 
 #include <nuttx/config.h>
 
+#include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -70,29 +71,45 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_raise
+ * Name: nxmu_sendwindow
  *
  * Description:
- *   Lower the specified window to the bottom of the display.
+ *  Send a message to the server destined for a specific window at
+ *  NX_SVRMSG_PRIO priority
  *
- * Input parameters:
- *   hwnd - the window to be lowered
+ * Input Parameters:
+ *   wnd    - A pointer to the back-end window structure
+ *   msg    - A pointer to the message to send
+ *   msglen - The length of the message in bytes.
  *
- * Returned value:
+ * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_lower(NXWINDOW hwnd)
+int nxmu_sendwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
+                    size_t msglen)
 {
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_lower_s   outmsg;
+  int ret = OK;
 
-  /* Send the RAISE message */
+  /* Sanity checking */
 
-  outmsg.msgid = NX_SVRMSG_LOWER;
-  outmsg.wnd   = wnd;
+#ifdef CONFIG_DEBUG
+  if (!wnd || !wnd->conn)
+    {
+      set_errno(EINVAL);
+      return ERROR;
+    }
+#endif
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_lower_s));
+  /* Ignore messages destined to a blocked window (no errors reported) */
+
+  if (!NXBE_ISBLOCKED(wnd))
+    {
+      /* Send the message to the server */
+
+      ret = nxmu_sendserver(wnd->conn, msg, msglen);
+    }
+
+  return ret;
 }
-

@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_setposition.c
+ * libc/nx/lib_nx_setpixel.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <mqueue.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -70,39 +73,46 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_setposition
+ * Name: nx_setpixel
  *
  * Description:
- *  Set the position and size for the selected window
+ *  Set a single pixel in the window to the specified color.  This is simply
+ *  a degenerate case of nx_fill(), but may be optimized in some architectures.
  *
  * Input Parameters:
- *   hwnd  - The window handle
- *   pos   - The new position of the window
+ *   wnd  - The window structure reference
+ *   pos  - The pixel location to be set
+ *   col  - The color to use in the set
  *
  * Return:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos)
+int nx_setpixel(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
+                nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
 {
-  FAR struct nxbe_window_s     *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_setposition_s outmsg;
+  FAR struct nxbe_window_s  *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_setpixel_s outmsg;
 
 #ifdef CONFIG_DEBUG
-  if (!wnd || !pos)
+  if (!wnd || !pos || !color)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 #endif
 
-  /* Inform the server of the changed position */
+  /* Format the fill command */
 
-  outmsg.msgid = NX_SVRMSG_SETPOSITION;
+  outmsg.msgid = NX_SVRMSG_SETPIXEL;
   outmsg.wnd   = wnd;
   outmsg.pos.x = pos->x;
   outmsg.pos.y = pos->y;
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setposition_s));
+  nxgl_colorcopy(outmsg.color, color);
+
+  /* Forward the fill command to the server */
+
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setpixel_s));
 }

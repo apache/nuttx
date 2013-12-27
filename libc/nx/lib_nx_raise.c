@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_setsize.c
+ * libc/nx/lib_nx_raise.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,8 @@
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include "nxfe.h"
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -70,39 +71,29 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_setsize
+ * Name: nx_raise
  *
  * Description:
- *  Set the size of the selected window
+ *   Bring the specified window to the top of the display.
  *
- * Input Parameters:
- *   hwnd   - The window handle
- *   size   - The new size of the window.
+ * Input parameters:
+ *   hwnd - the window to be raised
  *
- * Return:
+ * Returned value:
  *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-int nx_setsize(NXWINDOW hwnd, FAR const struct nxgl_size_s *size)
+int nx_raise(NXWINDOW hwnd)
 {
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_setsize_s outmsg;
+  struct nxsvrmsg_raise_s outmsg;
 
-#ifdef CONFIG_DEBUG
-  if (!wnd || !size)
-    {
-      errno = EINVAL;
-      return ERROR;
-    }
-#endif
+  /* Send the RAISE message */
 
-  /* Then inform the server of the changed position */
+  outmsg.msgid = NX_SVRMSG_RAISE;
+  outmsg.wnd   = wnd;
 
-  outmsg.msgid  = NX_SVRMSG_SETSIZE;
-  outmsg.wnd    = wnd;
-  outmsg.size.w = size->w;
-  outmsg.size.h = size->h;
-
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_setsize_s));
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_raise_s));
 }
+

@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_getrectangle.c
+ * libc/nx/lib_nx_getrectangle.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,8 +44,8 @@
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-
-#include "nxfe.h"
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
 /****************************************************************************
  * Pre-Processor Definitions

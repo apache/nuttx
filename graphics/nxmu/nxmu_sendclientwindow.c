@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nxmu_sendserver.c
+ * graphics/nxmu/nxmu_sendclientwindow.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,50 +70,6 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nxmu_sendwindow
- *
- * Description:
- *  Send a message to the server destined for a specific window at
- *  NX_SVRMSG_PRIO priority
- *
- * Input Parameters:
- *   wnd    - A pointer to the back-end window structure
- *   msg    - A pointer to the message to send
- *   msglen - The length of the message in bytes.
- *
- * Return:
- *   OK on success; ERROR on failure with errno set appropriately
- *
- ****************************************************************************/
-
-int nxmu_sendwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
-                    size_t msglen)
-{
-  int ret = OK;
-
-  /* Sanity checking */
-
-#ifdef CONFIG_DEBUG
-  if (!wnd || !wnd->conn)
-    {
-      errno = EINVAL;
-      return ERROR;
-    }
-#endif
-
-  /* Ignore messages destined to a blocked window (no errors reported) */
-
-  if (!NXBE_ISBLOCKED(wnd))
-    {
-      /* Send the message to the server */
-
-      ret = nxmu_sendserver(wnd->conn, msg, msglen);
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: nxmu_sendclientwindow
  *
  * Description:
@@ -139,7 +95,7 @@ int nxmu_sendclientwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
 #ifdef CONFIG_DEBUG
   if (!wnd || !wnd->conn)
     {
-      errno = EINVAL;
+      set_errno(EINVAL);
       return ERROR;
     }
 #endif
@@ -155,4 +111,3 @@ int nxmu_sendclientwindow(FAR struct nxbe_window_s *wnd, FAR const void *msg,
 
   return ret;
 }
-

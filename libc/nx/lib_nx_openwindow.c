@@ -1,7 +1,7 @@
 /****************************************************************************
- * graphics/nxmu/nx_bitmap.c
+ * libc/nx/lib_nx_openwindow.c
  *
- *   Copyright (C) 2008-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,9 +43,10 @@
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
-#include "nxbe.h"
-#include "nxfe.h"
+#include "lib_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -72,86 +73,60 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_bitmap
+ * Name: nx_openwindow
  *
  * Description:
- *   Copy a rectangular region of a larger image into the rectangle in the
- *   specified window.
+ *   Create a new window.
  *
  * Input Parameters:
- *   hwnd   - The window that will receive the bitmap image
- *   dest   - Describes the rectangular region on the display that will receive the
- *            the bit map.
- *   src    - The start of the source image.
- *   origin - The origin of the upper, left-most corner of the full bitmap.
- *            Both dest and origin are in window coordinates, however, origin
- *            may lie outside of the display.
- *   stride - The width of the full source image in pixels.
+ *   handle - The handle returned by nx_connect
+ *   cb     - Callbacks used to process windo events
+ *   arg    - User provided value that will be returned with NX callbacks.
  *
  * Return:
- *   OK on success; ERROR on failure with errno set appropriately
+ *   Success: A non-NULL handle used with subsequent NX accesses
+ *   Failure:  NULL is returned and errno is set appropriately
  *
  ****************************************************************************/
 
-int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
-              FAR const void *src[CONFIG_NX_NPLANES],
-              FAR const struct nxgl_point_s *origin, unsigned int stride)
+NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
+                       FAR void *arg)
 {
-  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
-  struct nxsvrmsg_bitmap_s outmsg;
-  int i;
+  FAR struct nxbe_window_s *wnd;
   int ret;
-  sem_t sem_done;
 
 #ifdef CONFIG_DEBUG
-  if (!wnd || !dest || !src || !origin)
+  if (!handle || !cb)
     {
-      errno = EINVAL;
-      return ERROR;
+      set_errno(EINVAL);
+      return NULL;
     }
 #endif
 
-  /* Format the bitmap command */
+  /* Pre-allocate the window structure */
 
-  outmsg.msgid      = NX_SVRMSG_BITMAP;
-  outmsg.wnd        = wnd;
-  outmsg.stride     = stride;
-
-  for (i = 0; i < CONFIG_NX_NPLANES; i++)
+  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
+  if (!wnd)
     {
-      outmsg.src[i] = src[i];
+      set_errno(ENOMEM);
+      return NULL;
     }
 
-  outmsg.origin.x   = origin->x;
-  outmsg.origin.y   = origin->y;
-  nxgl_rectcopy(&outmsg.dest, dest);
+  /* Then let nxfe_constructwindow do the rest */
 
-  
-  /* Create a semaphore for tracking command completion */
-
-  outmsg.sem_done = &sem_done;
-  ret = sem_init(&sem_done, 0, 0);
-  
-  if (ret != OK)
+  ret = nxfe_constructwindow(handle, wnd, cb, arg);
+  if (ret < 0)
     {
-      gdbg("sem_init failed: %d\n", errno);
-      return ret;
-    }
-  
-  /* Forward the fill command to the server */
+      /* An error occurred, the window has been freed */
 
-  ret = nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_bitmap_s));
-  
-  /* Wait that the command is completed, so that caller can release the buffer. */
-  
-  if (ret == OK)
-    {
-      ret = sem_wait(&sem_done);
+      return NULL;
     }
-  
-  /* Destroy the semaphore and return. */
-  
-  sem_destroy(&sem_done);
-  
-  return ret;
+
+  /* Return the uninitialized window reference.  Since the server
+   * serializes all operations, we can be assured that the window will
+   * be initialized before the first operation on the window.
+   */
+
+  return (NXWINDOW)wnd;
 }
+
