@@ -6319,4 +6319,6 @@
 	  (2013-12-26).
 	* configs/viewtool-stm32f107:  Updates to USB for F103 and USB OTG FS
 	  for F107 (2013-12-16).
+	* arch/arm/src/stm32/chip/stm32f3xxxx_pinmap.h:  Fix pin definitioni names
+	  for SPI2 MOSI and MISO. Noted by Brian Webb (2013-12-27).
 
