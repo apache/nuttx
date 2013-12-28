@@ -103,6 +103,7 @@
 "sem_destroy","semaphore.h","","int","FAR sem_t*"
 "sem_open","semaphore.h","","FAR sem_t*","FAR const char*","int","..."
 "sem_post","semaphore.h","","int","FAR sem_t*"
+"sem_timedwait","semaphore.h","","int","FAR sem_t*","FAR const struct timespec *"
 "sem_trywait","semaphore.h","","int","FAR sem_t*"
 "sem_unlink","semaphore.h","","int","FAR const char*"
 "sem_wait","semaphore.h","","int","FAR sem_t*"

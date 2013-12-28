@@ -92,6 +92,7 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect)
 {
   FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
   struct nxsvrmsg_redrawreq_s outmsg;
+  int ret;
 
 #ifdef CONFIG_DEBUG
   if (!wnd || !rect)
@@ -107,5 +108,9 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect)
   outmsg.wnd   = wnd;
   nxgl_rectcopy(&outmsg.rect, rect);
 
-  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_redrawreq_s));
+  ret = nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_redrawreq_s));
+  if (ret < 0)
+    {
+      gdbg("ERROR: nxmu_sendwindow failed: %d\n", errno);
+    }
 }
