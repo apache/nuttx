@@ -1183,6 +1183,8 @@ nuttx
  |   `- README.txt
  |- libc/
  |   `- README.txt
+ |- libnx/
+ |   `- README.txt
  |- libxx/
  |   `- README.txt
  |- mm/

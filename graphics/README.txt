@@ -52,7 +52,21 @@ include/nuttx/nx/nxfont.h   -- Describe sthe NXFONT C interfaces
 Directories
 ^^^^^^^^^^^
 
+  The graphics capability consist both of components internal to the RTOS
+  and of user-callable interfaces.  In the NuttX kernel mode build there are
+  some components of the graphics subsystem are callable in user mode and other
+  components that are internal to the RTOS.  This directory, nuttx/graphics,
+  contains only those components that are internal to the RTOS.
+
+  User callable functions must, instead, be part of a library that can be
+  linked against user applications.  This user callable interfaces are
+  provided in sub-directories under nuttx/libnx.
+
+libnx/nx
+  Common callable interfaces that are, logically, part of both nxmu and nxsu.
+
 graphics/nxglib
+libnx/nxglib
   The NuttX tiny graphics library.  The directory contains generic utilities
   support operations on primitive graphics objects and logic to rasterize directly
   into a framebuffer.  It has no concept of windows (other than the one, framebuffer
@@ -71,7 +85,12 @@ graphics/nxsu
   single user front-end is selected when CONFIG_NX_MULTIUSER is not defined in the
   NuttX configuration file.
 
+  NOTE:  There is no nxsu sub-directory in nuttx/libnx.  That is because this
+  separation of interfaces is only required in the kernel build mode and
+  only the multi-user interfaces can be used with the kernel build.
+
 graphics/nxmu
+libnx/nxmu
   This is the NX multi user "front end".  When combined with the generic "back-end"
   (nxbe), it implements a multi-threaded, multi-user windowing system.  The files
   in this directory present the window APIs described in include/nuttx/nx/nx.h.  The

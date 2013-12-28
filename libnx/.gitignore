@@ -1,0 +1,6 @@
+/Make_bin.dep
+/Make_ubin.dep
+/Make_kbin.dep
+/.depend
+/*.lib
+

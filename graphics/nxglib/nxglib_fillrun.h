@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxglib/nxsglib_fullrun.h
+ * graphics/nxglib/nxglib_fullrun.h
  *
  *   Copyright (C) 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

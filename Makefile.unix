@@ -134,10 +134,10 @@ endif
 endif
 
 ifeq ($(CONFIG_NX),y)
-NONFSDIRS += graphics
-CONTEXTDIRS += graphics
+NONFSDIRS += graphics libnx
+CONTEXTDIRS += graphics libnx
 else
-OTHERDIRS += graphics
+OTHERDIRS += graphics libnx
 endif
 
 ifeq ($(CONFIG_AUDIO),y)
@@ -256,6 +256,12 @@ endif
 
 ifeq ($(CONFIG_NX),y)
 NUTTXLIBS += lib/libgraphics$(LIBEXT)
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+NUTTXLIBS += lib/libknx$(LIBEXT)
+USERLIBS  += lib/libunx$(LIBEXT)
+else
+NUTTXLIBS += lib/libnx$(LIBEXT)
+endif
 endif
 
 # Add libraries for the audio sub-system
@@ -471,6 +477,12 @@ libc/libkc$(LIBEXT): context
 lib/libkc$(LIBEXT): libc/libkc$(LIBEXT)
 	$(Q) install libc/libkc$(LIBEXT) lib/libkc$(LIBEXT)
 
+libnx/libknx$(LIBEXT): context
+	$(Q) $(MAKE) -C libnx TOPDIR="$(TOPDIR)" libknx$(LIBEXT) EXTRADEFINES=$(KDEFINE)
+
+lib/libknx$(LIBEXT): libnx/libknx$(LIBEXT)
+	$(Q) install libnx/libknx$(LIBEXT) lib/libknx$(LIBEXT)
+
 mm/libkmm$(LIBEXT): context
 	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libkmm$(LIBEXT) EXTRADEFINES=$(KDEFINE)
 
@@ -540,6 +552,12 @@ libc/libuc$(LIBEXT): context
 lib/libuc$(LIBEXT): libc/libuc$(LIBEXT)
 	$(Q) install libc/libuc$(LIBEXT) lib/libuc$(LIBEXT)
 
+libnx/libunx$(LIBEXT): context
+	$(Q) $(MAKE) -C libnx TOPDIR="$(TOPDIR)" libunx$(LIBEXT)
+
+lib/libunx$(LIBEXT): libnx/libunx$(LIBEXT)
+	$(Q) install libnx/libunx$(LIBEXT) lib/libunx$(LIBEXT)
+
 mm/libumm$(LIBEXT): context
 	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libumm$(LIBEXT)
 
@@ -578,6 +596,12 @@ libc/libc$(LIBEXT): context
 
 lib/libc$(LIBEXT): libc/libc$(LIBEXT)
 	$(Q) install libc/libc$(LIBEXT) lib/libc$(LIBEXT)
+
+libnx/libnx$(LIBEXT): context
+	$(Q) $(MAKE) -C libnx TOPDIR="$(TOPDIR)" libnx$(LIBEXT)
+
+lib/libnx$(LIBEXT): libnx/libnx$(LIBEXT)
+	$(Q) install libnx/libnx$(LIBEXT) lib/libnx$(LIBEXT)
 
 mm/libmm$(LIBEXT): context
 	$(Q) $(MAKE) -C mm TOPDIR="$(TOPDIR)" libmm$(LIBEXT)

@@ -1,7 +1,7 @@
 ############################################################################
-# libc/Makefile
+# libnx/Makefile
 #
-#   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -53,27 +53,9 @@ CSRCS =
 DEPPATH := --dep-path .
 VPATH := .
 
-include stdio/Make.defs
-include stdlib/Make.defs
-include unistd/Make.defs
-include sched/Make.defs
-include string/Make.defs
-include pthread/Make.defs
-include semaphore/Make.defs
-include signal/Make.defs
-include mqueue/Make.defs
-include math/Make.defs
-include fixedmath/Make.defs
-include net/Make.defs
-include time/Make.defs
-include libgen/Make.defs
-include dirent/Make.defs
-include termios/Make.defs
-include spawn/Make.defs
-include queue/Make.defs
-include wqueue/Make.defs
-include misc/Make.defs
-include audio/Make.defs
+include nxglib/Make.defs
+include nx/Make.defs
+include nxmu/Make.defs
 
 BINDIR ?= bin
 
@@ -83,9 +65,9 @@ COBJS = $(patsubst %.c, $(BINDIR)$(DELIM)%$(OBJEXT), $(CSRCS))
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
-UBIN = libuc$(LIBEXT)
-KBIN = libkc$(LIBEXT)
-BIN ?= libc$(LIBEXT)
+UBIN = libunx$(LIBEXT)
+KBIN = libknx$(LIBEXT)
+BIN ?= libnx$(LIBEXT)
 
 all: $(BIN)
 .PHONY: clean distclean
@@ -98,19 +80,19 @@ $(COBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 	$(call MOVEOBJ,$(patsubst $(BINDIR)$(DELIM)%$(OBJEXT),%,$@),$(BINDIR))
 
-# C library for the flat build
+# NX library for the flat build
 
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-# C library for the user phase of the two-pass kernel build
+# NX library for the user phase of the two-pass kernel build
 
 ifneq ($(BIN),$(UBIN))
 $(UBIN):
 	$(Q) $(MAKE) $(UBIN) BIN=$(UBIN) BINDIR=ubin TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
 endif
 
-# C library for the kernel phase of the two-pass kernel build
+# NX library for the kernel phase of the two-pass kernel build
 
 ifneq ($(BIN),$(KBIN))
 $(KBIN):
@@ -129,6 +111,10 @@ endif
 	$(Q) touch $@
 
 depend: .depend
+
+# Generate configuration context
+
+context:
 
 # Clean most derived files, retaining the configuration
 
