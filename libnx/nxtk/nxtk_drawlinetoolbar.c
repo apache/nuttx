@@ -1,7 +1,7 @@
 /****************************************************************************
- * libnx/nxmu/nx_openwindow.c
+ * libnx/nxtk/nxtk_drawlinetoolbar.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,13 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
+#include <sys/types.h>
 #include <debug.h>
+#include <errno.h>
 
+#include <nuttx/nx/nxglib.h>
 #include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
-#include <nuttx/nx/nxmu.h>
-
-#include "nxcontext.h"
+#include <nuttx/nx/nxtk.h>
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,60 +72,68 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nxtk_drawlinetoolbar
  *
  * Description:
- *   Create a new window.
+ *  Fill the specified line in the toolbar sub-window with the specified
+ *  color.  This is simply a wrapper that uses nxgl_splitline() to break the
+ *  line into trapezoids and then calls nxtk_filltrapwindow() to render the
+ *  line.
  *
  * Input Parameters:
- *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
- *   arg    - User provided value that will be returned with NX callbacks.
+ *   hfwnd - The window handle returned by nxtk_openwindow
+ *   vector - Describes the line to be drawn
+ *   width  - The width of the line
+ *   color  - The color to use to fill the line
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
-{
-  FAR struct nxbe_window_s *wnd;
+int nxtk_drawlinetoolbar(NXTKWINDOW hfwnd,  FAR struct nxgl_vector_s *vector,
+                         nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES])
+
+{  
+  struct nxgl_trapezoid_s trap[3];
+  struct nxgl_rect_s rect;
   int ret;
 
 #ifdef CONFIG_DEBUG
-  if (!handle || !cb)
+  if (!hfwnd || !vector || width < 1 || !color)
     {
       set_errno(EINVAL);
-      return NULL;
+      return ERROR;
     }
 #endif
 
-  /* Pre-allocate the window structure */
-
-  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
+  ret = nxgl_splitline(vector, trap, &rect, width);
+  switch (ret)
     {
-      set_errno(ENOMEM);
-      return NULL;
+      case 0:
+        ret = nxtk_filltraptoolbar(hfwnd, &trap[0], color);
+        if (ret == OK)
+          {
+            ret = nxtk_filltraptoolbar(hfwnd, &trap[1], color);
+            if (ret == OK)
+              {
+                ret = nxtk_filltraptoolbar(hfwnd, &trap[2], color);
+              }
+          }
+        break;
+
+      case 1:
+        ret = nxtk_filltraptoolbar(hfwnd, &trap[1], color);
+         break;
+
+      case 2:
+         ret = nxtk_filltoolbar(hfwnd, &rect, color);
+         break;
+
+      default:
+         set_errno(EINVAL);
+         return ERROR;
     }
 
-  /* Then let nx_constructwindow do the rest */
-
-  ret = nx_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
-
-      return NULL;
-    }
-
-  /* Return the uninitialized window reference.  Since the server
-   * serializes all operations, we can be assured that the window will
-   * be initialized before the first operation on the window.
-   */
-
-  return (NXWINDOW)wnd;
+  return ret;
 }
-

@@ -1,7 +1,7 @@
 /****************************************************************************
- * libnx/nxmu/nx_openwindow.c
+ * libnx/nxtk/nxtk_setsize.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
-#include <nuttx/nx/nxmu.h>
+#include <nuttx/nx/nxtk.h>
 
-#include "nxcontext.h"
+#include "nxtk_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,60 +73,41 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nxtk_setsize
  *
  * Description:
- *   Create a new window.
+ *  Set the size for the selected client window.  This size does not
+ *  include the sizes of the borders nor for any toolbar.  Those sizes
+ *  will be added in to set the full window size.
  *
  * Input Parameters:
- *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
- *   arg    - User provided value that will be returned with NX callbacks.
+ *   hfwnd - The window handle returned by nxtk_openwindow
+ *   size  - The new size of the client sub-window.
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+int nxtk_setsize(NXTKWINDOW hfwnd, FAR const struct nxgl_size_s *size)
 {
-  FAR struct nxbe_window_s *wnd;
-  int ret;
+  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
+  struct nxgl_size_s newsize;
 
 #ifdef CONFIG_DEBUG
-  if (!handle || !cb)
+  if (!hfwnd || !size)
     {
       set_errno(EINVAL);
-      return NULL;
+      return ERROR;
     }
 #endif
 
-  /* Pre-allocate the window structure */
+  /* Add the sizes need for the toolbar and the borders */
 
-  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
-    {
-      set_errno(ENOMEM);
-      return NULL;
-    }
+  newsize.w = size->w + 2 * CONFIG_NXTK_BORDERWIDTH;
+  newsize.h = size->h + fwnd->tbheight + 2 * CONFIG_NXTK_BORDERWIDTH;
 
-  /* Then let nx_constructwindow do the rest */
+  /* Then set the window size */
 
-  ret = nx_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
-
-      return NULL;
-    }
-
-  /* Return the uninitialized window reference.  Since the server
-   * serializes all operations, we can be assured that the window will
-   * be initialized before the first operation on the window.
-   */
-
-  return (NXWINDOW)wnd;
+  return nx_setsize((NXWINDOW)hfwnd, &newsize);
 }
-

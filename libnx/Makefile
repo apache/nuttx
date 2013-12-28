@@ -57,6 +57,7 @@ include nxglib/Make.defs
 include nx/Make.defs
 include nxmu/Make.defs
 include nxfonts/Make.defs
+include nxtk/Make.defs
 
 BINDIR ?= bin
 

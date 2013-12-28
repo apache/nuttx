@@ -1,7 +1,7 @@
 /****************************************************************************
- * libnx/nxmu/nx_openwindow.c
+ * libnx/nxmu/nx_redrawreq.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,8 +46,6 @@
 #include <nuttx/nx/nxbe.h>
 #include <nuttx/nx/nxmu.h>
 
-#include "nxcontext.h"
-
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
@@ -73,60 +71,41 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nx_redrawreq
  *
- * Description:
- *   Create a new window.
+ * Descripton:
+ *   This will cause a NX re-draw callback to the client that owns the
+ *   window.  This is not normally called from user code, but may be
+ *   used within middle-ware layers when redrawing is needed.
  *
  * Input Parameters:
- *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
- *   arg    - User provided value that will be returned with NX callbacks.
+ *   hwnd - Window handle
+ *   rect - The rectangle that needs to be re-drawn (in window relative
+ *          coordinates)
  *
- * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect)
 {
-  FAR struct nxbe_window_s *wnd;
-  int ret;
+  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
+  struct nxsvrmsg_redrawreq_s outmsg;
 
 #ifdef CONFIG_DEBUG
-  if (!handle || !cb)
+  if (!wnd || !rect)
     {
       set_errno(EINVAL);
-      return NULL;
+      return ERROR;
     }
 #endif
 
-  /* Pre-allocate the window structure */
+  /* Inform the server of the changed position */
 
-  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
-    {
-      set_errno(ENOMEM);
-      return NULL;
-    }
+  outmsg.msgid = NX_SVRMSG_REDRAWREQ;
+  outmsg.wnd   = wnd;
+  nxgl_rectcopy(&outmsg.rect, rect);
 
-  /* Then let nx_constructwindow do the rest */
-
-  ret = nx_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
-
-      return NULL;
-    }
-
-  /* Return the uninitialized window reference.  Since the server
-   * serializes all operations, we can be assured that the window will
-   * be initialized before the first operation on the window.
-   */
-
-  return (NXWINDOW)wnd;
+  return nxmu_sendwindow(wnd, &outmsg, sizeof(struct nxsvrmsg_redrawreq_s));
 }
-

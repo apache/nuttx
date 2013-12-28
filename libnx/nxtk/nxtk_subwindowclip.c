@@ -1,7 +1,7 @@
 /****************************************************************************
- * libnx/nxmu/nx_openwindow.c
+ * libnx/nxtk/nxtk_subwindowclip.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
-#include <nuttx/nx/nxmu.h>
+#include <nuttx/nx/nxtk.h>
 
-#include "nxcontext.h"
+#include "nxtk_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,60 +73,45 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nxtk_subwindowclip
  *
  * Description:
- *   Create a new window.
+ *   We are given a 'src' rectangle in sub-window, relative coordinates
+ *   (i.e., (0,0) is the top left corner of the sub-window).  This function
+ *   will (1) clip that src rectangle so that it lies within the sub-window
+ *   bounds, and then (2) move the rectangle to that it is relative to the
+ *   containing window (i.e., (0,0) is the top left corner of the containing
+ *   window).
  *
- * Input Parameters:
- *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
- *   arg    - User provided value that will be returned with NX callbacks.
+ * Input parameters:
+ *   fwnd   - The framed window to be used
+ *   dest   - The locaton to put the result
+ *   src    - The src rectangle in relative sub-window coordinates
+ *   bounds - The subwindow bounds in absolute screen coordinates.
  *
- * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ * Returned value:
+ *   None
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+void nxtk_subwindowclip(FAR struct nxtk_framedwindow_s *fwnd,
+                        FAR struct nxgl_rect_s *dest,
+                        FAR const struct nxgl_rect_s *src,
+                        FAR const struct nxgl_rect_s *bounds)
 {
-  FAR struct nxbe_window_s *wnd;
-  int ret;
+  struct nxgl_rect_s tmp;
 
-#ifdef CONFIG_DEBUG
-  if (!handle || !cb)
-    {
-      set_errno(EINVAL);
-      return NULL;
-    }
-#endif
+  /* Temporarily, position the src rectangle in absolute screen coordinates */
 
-  /* Pre-allocate the window structure */
+  nxgl_rectoffset(&tmp, src, bounds->pt1.x, bounds->pt1.y);
 
-  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
-    {
-      set_errno(ENOMEM);
-      return NULL;
-    }
+  /* Clip the src rectangle to lie within the client window region */
 
-  /* Then let nx_constructwindow do the rest */
+  nxgl_rectintersect(&tmp, &tmp, bounds);
 
-  ret = nx_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
-
-      return NULL;
-    }
-
-  /* Return the uninitialized window reference.  Since the server
-   * serializes all operations, we can be assured that the window will
-   * be initialized before the first operation on the window.
+  /* Then move the rectangle so that is relative to the containing window, not the
+   * client subwindow
    */
 
-  return (NXWINDOW)wnd;
+  nxgl_rectoffset(dest, &tmp, -fwnd->wnd.bounds.pt1.x, -fwnd->wnd.bounds.pt1.y);
 }
-

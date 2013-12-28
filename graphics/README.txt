@@ -99,11 +99,11 @@ libnx/nxmu
   queue to serialize window operations from many threads. The multi-user front-end
   is selected when CONFIG_NX_MULTIUSER is defined in the NuttX configuration file.
 
-graphics/nxfonts
+libnx/nxfonts
   This is where the NXFONTS implementation resides.  This is a relatively low-
   level set of charset set/glyph management APIs.  See include/nuttx/nx/nxfonts.h
 
-graphics/nxtk
+libnx/nxtk
   This is where the NXTOOLKIT implementation resides.  This toolkit is built on
   top of NX and works with either the single-user or multi-user NX version. See
   include/nuttx/nx/nxtk.h

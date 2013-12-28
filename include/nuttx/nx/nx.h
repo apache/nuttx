@@ -230,7 +230,8 @@ struct nx_callback_s
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -264,7 +265,7 @@ extern "C" {
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MULTIUSER
-EXTERN int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
+int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
 #  define nx_run(dev) nx_runinstance(NX_DEFAULT_SERVER_MQNAME, dev)
 #endif
 
@@ -298,7 +299,7 @@ EXTERN int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MULTIUSER
-EXTERN NXHANDLE nx_connectinstance(FAR const char *svrmqname);
+NXHANDLE nx_connectinstance(FAR const char *svrmqname);
 #  define nx_connect(cb) nx_connectinstance(NX_DEFAULT_SERVER_MQNAME)
 #endif
 
@@ -323,7 +324,7 @@ EXTERN NXHANDLE nx_connectinstance(FAR const char *svrmqname);
  ****************************************************************************/
 
 #ifndef CONFIG_NX_MULTIUSER
-EXTERN NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev);
+NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev);
 #endif
 
 /****************************************************************************
@@ -345,7 +346,7 @@ EXTERN NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MULTIUSER
-EXTERN void nx_disconnect(NXHANDLE handle);
+void nx_disconnect(NXHANDLE handle);
 #endif
 
 /****************************************************************************
@@ -366,7 +367,7 @@ EXTERN void nx_disconnect(NXHANDLE handle);
  ****************************************************************************/
 
 #ifndef CONFIG_NX_MULTIUSER
-EXTERN void nx_close(NXHANDLE handle);
+void nx_close(NXHANDLE handle);
 #endif
 
 /****************************************************************************
@@ -397,7 +398,7 @@ EXTERN void nx_close(NXHANDLE handle);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MULTIUSER
-EXTERN int nx_eventhandler(NXHANDLE handle);
+int nx_eventhandler(NXHANDLE handle);
 #else
 #  define nx_eventhandler(handle) (OK)
 #endif
@@ -423,7 +424,7 @@ EXTERN int nx_eventhandler(NXHANDLE handle);
  ****************************************************************************/
 
 #if defined(CONFIG_NX_MULTIUSER) && !defined(CONFIG_DISABLE_SIGNALS)
-EXTERN int nx_eventnotify(NXHANDLE handle, int signo);
+int nx_eventnotify(NXHANDLE handle, int signo);
 #else
 #  define nx_eventnotify(handle, signo) (OK)
 #endif
@@ -445,9 +446,8 @@ EXTERN int nx_eventnotify(NXHANDLE handle, int signo);
  *
  ****************************************************************************/
 
-EXTERN NXWINDOW nx_openwindow(NXHANDLE handle,
-                              FAR const struct nx_callback_s *cb,
-                              FAR void *arg);
+NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
+                       FAR void *arg);
 
 /****************************************************************************
  * Name: nx_closewindow
@@ -463,7 +463,7 @@ EXTERN NXWINDOW nx_openwindow(NXHANDLE handle,
  *
  ****************************************************************************/
 
-EXTERN int nx_closewindow(NXWINDOW hwnd);
+int nx_closewindow(NXWINDOW hwnd);
 
 /****************************************************************************
  * Name: nx_block
@@ -497,7 +497,7 @@ EXTERN int nx_closewindow(NXWINDOW hwnd);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MULTIUSER
-EXTERN int nx_block(NXWINDOW hwnd, FAR void *arg);
+int nx_block(NXWINDOW hwnd, FAR void *arg);
 #endif
 
 /****************************************************************************
@@ -540,9 +540,8 @@ EXTERN int nx_block(NXWINDOW hwnd, FAR void *arg);
  *
  ****************************************************************************/
 
-EXTERN int nx_requestbkgd(NXHANDLE handle,
-                          FAR const struct nx_callback_s *cb,
-                          FAR void *arg);
+int nx_requestbkgd(NXHANDLE handle, FAR const struct nx_callback_s *cb,
+                   FAR void *arg);
 
 /****************************************************************************
  * Name: nx_releasebkgd
@@ -559,7 +558,7 @@ EXTERN int nx_requestbkgd(NXHANDLE handle,
  *
  ****************************************************************************/
 
-EXTERN int nx_releasebkgd(NXWINDOW hwnd);
+int nx_releasebkgd(NXWINDOW hwnd);
 
 /****************************************************************************
  * Name: nx_getposition
@@ -577,7 +576,7 @@ EXTERN int nx_releasebkgd(NXWINDOW hwnd);
  *
  ****************************************************************************/
 
-EXTERN int nx_getposition(NXWINDOW hwnd);
+int nx_getposition(NXWINDOW hwnd);
 
 /****************************************************************************
  * Name: nx_setposition
@@ -594,7 +593,7 @@ EXTERN int nx_getposition(NXWINDOW hwnd);
  *
  ****************************************************************************/
 
-EXTERN int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos);
+int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos);
 
 /****************************************************************************
  * Name: nx_setsize
@@ -611,7 +610,7 @@ EXTERN int nx_setposition(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos);
  *
  ****************************************************************************/
 
-EXTERN int nx_setsize(NXWINDOW hwnd, FAR const struct nxgl_size_s *size);
+int nx_setsize(NXWINDOW hwnd, FAR const struct nxgl_size_s *size);
 
 /****************************************************************************
  * Name: nx_raise
@@ -627,7 +626,7 @@ EXTERN int nx_setsize(NXWINDOW hwnd, FAR const struct nxgl_size_s *size);
  *
  ****************************************************************************/
 
-EXTERN int nx_raise(NXWINDOW hwnd);
+int nx_raise(NXWINDOW hwnd);
 
 /****************************************************************************
  * Name: nx_lower
@@ -643,7 +642,7 @@ EXTERN int nx_raise(NXWINDOW hwnd);
  *
  ****************************************************************************/
 
-EXTERN int nx_lower(NXWINDOW hwnd);
+int nx_lower(NXWINDOW hwnd);
 
 /****************************************************************************
  * Name: nx_setpixel
@@ -662,8 +661,8 @@ EXTERN int nx_lower(NXWINDOW hwnd);
  *
  ****************************************************************************/
 
-EXTERN int nx_setpixel(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
-                       nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nx_setpixel(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
+                nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nx_fill
@@ -681,8 +680,8 @@ EXTERN int nx_setpixel(NXWINDOW hwnd, FAR const struct nxgl_point_s *pos,
  *
  ****************************************************************************/
 
-EXTERN int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+            nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nx_getrectangle
@@ -710,9 +709,9 @@ EXTERN int nx_fill(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  *
  ****************************************************************************/
 
-EXTERN int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                           unsigned int plane, FAR uint8_t *dest,
-                           unsigned int deststride);
+int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+                    unsigned int plane, FAR uint8_t *dest,
+                    unsigned int deststride);
 
 /****************************************************************************
  * Name: nx_filltrapezoid
@@ -731,9 +730,9 @@ EXTERN int nx_getrectangle(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  *
  ****************************************************************************/
 
-EXTERN int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
-                            FAR const struct nxgl_trapezoid_s *trap,
-                            nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
+                     FAR const struct nxgl_trapezoid_s *trap,
+                     nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nx_drawline
@@ -754,8 +753,8 @@ EXTERN int nx_filltrapezoid(NXWINDOW hwnd, FAR const struct nxgl_rect_s *clip,
  *
  ****************************************************************************/
 
-EXTERN int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
-                       nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
+                nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nx_drawcircle
@@ -775,9 +774,9 @@ EXTERN int nx_drawline(NXWINDOW hwnd, FAR struct nxgl_vector_s *vector,
  *
  ****************************************************************************/
 
-EXTERN int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
-                         nxgl_coord_t radius, nxgl_coord_t width,
-                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
+                  nxgl_coord_t radius, nxgl_coord_t width,
+                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nx_fillcircle
@@ -796,9 +795,9 @@ EXTERN int nx_drawcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
  *
  ****************************************************************************/
 
-EXTERN int nx_fillcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
-                         nxgl_coord_t radius,
-                         nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nx_fillcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
+                  nxgl_coord_t radius,
+                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nx_setbgcolor
@@ -815,8 +814,7 @@ EXTERN int nx_fillcircle(NXWINDOW hwnd, FAR const struct nxgl_point_s *center,
  *
  ****************************************************************************/
 
-int nx_setbgcolor(NXHANDLE handle,
-                  nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
+int nx_setbgcolor(NXHANDLE handle, nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
 /****************************************************************************
  * Name: nx_move
@@ -835,8 +833,8 @@ int nx_setbgcolor(NXHANDLE handle,
  *
  ****************************************************************************/
 
-EXTERN int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
-                   FAR const struct nxgl_point_s *offset);
+int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
+            FAR const struct nxgl_point_s *offset);
 
 /****************************************************************************
  * Name: nx_bitmap
@@ -861,10 +859,9 @@ EXTERN int nx_move(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect,
  *
  ****************************************************************************/
 
-EXTERN int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
-                     FAR const void *src[CONFIG_NX_NPLANES],
-                     FAR const struct nxgl_point_s *origin,
-                     unsigned int stride);
+int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
+              FAR const void *src[CONFIG_NX_NPLANES],
+              FAR const struct nxgl_point_s *origin, unsigned int stride);
 
 /****************************************************************************
  * Name: nx_kbdin
@@ -877,8 +874,8 @@ EXTERN int nx_bitmap(NXWINDOW hwnd, FAR const struct nxgl_rect_s *dest,
  ****************************************************************************/
 
 #ifdef CONFIG_NX_KBD
-EXTERN int nx_kbdchin(NXHANDLE handle, uint8_t ch);
-EXTERN int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
+int nx_kbdchin(NXHANDLE handle, uint8_t ch);
+int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
 #endif
 
 /****************************************************************************
@@ -892,8 +889,67 @@ EXTERN int nx_kbdin(NXHANDLE handle, uint8_t nch, FAR const uint8_t *ch);
  ****************************************************************************/
 
 #ifdef CONFIG_NX_MOUSE
-EXTERN int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons);
+int nx_mousein(NXHANDLE handle, nxgl_coord_t x, nxgl_coord_t y, uint8_t buttons);
 #endif
+
+/****************************************************************************
+ * NX-Internal Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: nx_redrawreq
+ *
+ * Description:
+ *   This will cause a NX re-draw callback to the client that owns the
+ *   window.  This is not normally called from user code, but may be
+ *   used within middle-ware layers when redrawing is needed.
+ *
+ *   NXTK uses this function, for example, when a change in the main window
+ *   necessitates redrawing of the toolbar window.
+ *
+ * Input Parameters:
+ *   hwnd - Window handle
+ *   rect - The rectangle that needs to be re-drawn (in window relative
+ *          coordinates)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect);
+
+/****************************************************************************
+ * Name: nx_constructwindow
+ *
+ * Description:
+ *   This function is the same a nx_openwindow EXCEPT that the client provides
+ *   the window structure instance.  nx_constructwindow will initialize the
+ *   the pre-allocated window structure for use by NX.  This function is
+ *   provided in addition to nx_open window in order to support a kind of
+ *   inheritance:  The caller's window structure may include extensions that
+ *   are not visible to NX.
+ *
+ *   NOTE:  wnd must have been allocated using kmalloc() (or related allocators)
+ *   Once provided to nx_constructwindow() that memory is owned and managed
+ *   by NX.  On certain error conditions or when the window is closed, NX will
+ *   free the window.
+ *
+ * Input Parameters:
+ *   handle - The handle returned by nx_connect
+ *   wnd    - The pre-allocated window structure.
+ *   cb     - Callbacks used to process window events
+ *   arg    - User provided value that will be returned with NX callbacks.
+ *
+ * Return:
+ *   OK on success; ERROR on failure with errno set appropriately.  In the
+ *   case of ERROR, NX will have deallocated the pre-allocated window.
+ *
+ ****************************************************************************/
+
+struct nxbe_window_s; /* Forward reference */
+int nx_constructwindow(NXHANDLE handle, FAR struct nxbe_window_s *wnd,
+                       FAR const struct nx_callback_s *cb, FAR void *arg);
 
 #undef EXTERN
 #if defined(__cplusplus)

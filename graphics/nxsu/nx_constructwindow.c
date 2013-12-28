@@ -1,7 +1,7 @@
 /****************************************************************************
- * libnx/nxmu/nx_openwindow.c
+ * graphics/nxsu/nx_constructwindow.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
-#include <nuttx/nx/nxmu.h>
 
-#include "nxcontext.h"
+#include "nxfe.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,60 +73,80 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nx_constructwindow
  *
  * Description:
- *   Create a new window.
+ *   This function is the same a nx_openwindow EXCEPT that the client provides
+ *   the window structure instance.  nx_constructwindow will initialize the
+ *   the pre-allocated window structure for use by NX.  This function is
+ *   provided in addition to nx_open window in order to support a kind of
+ *   inheritance:  The caller's window structure may include extensions that
+ *   are not visible to NX.
+ *
+ *   NOTE:  wnd must have been allocated using kmalloc() (or related allocators)
+ *   Once provided to nx_constructwindow() that memory is owned and managed
+ *   by NX.  On certain error conditions or when the window is closed, NX will
+ *   free the window.
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
+ *   wnd    - The pre-allocated window structure.
+ *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately.  In the
+ *   case of ERROR, NX will have deallocated the pre-allocated window.
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+int nx_constructwindow(NXHANDLE handle, FAR struct nxbe_window_s *wnd,
+                       FAR const struct nx_callback_s *cb, FAR void *arg)
 {
-  FAR struct nxbe_window_s *wnd;
-  int ret;
+  FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)handle;
+  FAR struct nxbe_state_s *be = &fe->be;
 
 #ifdef CONFIG_DEBUG
-  if (!handle || !cb)
+  if (!wnd)
     {
-      set_errno(EINVAL);
-      return NULL;
+      errno = EINVAL;
+      return ERROR;
+    }
+
+  if (!fe || !cb)
+    {
+      kfree(wnd);
+      errno = EINVAL;
+      return ERROR;
     }
 #endif
 
-  /* Pre-allocate the window structure */
+  /* Initialize the window structure */
 
-  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
-    {
-      set_errno(ENOMEM);
-      return NULL;
-    }
+  wnd->be           = be;
+  wnd->cb           = cb;
+  wnd->arg          = arg;
 
-  /* Then let nx_constructwindow do the rest */
-
-  ret = nx_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
-
-      return NULL;
-    }
-
-  /* Return the uninitialized window reference.  Since the server
-   * serializes all operations, we can be assured that the window will
-   * be initialized before the first operation on the window.
+  /* Insert the new window at the top on the display.  topwnd is
+   * never NULL (it may point only at the background window, however)
    */
 
-  return (NXWINDOW)wnd;
+  wnd->above        = NULL;
+  wnd->below        = be->topwnd;
+
+  be->topwnd->above = wnd;
+  be->topwnd        = wnd;
+
+  /* Report the initialize size/position of the window */
+
+  nxfe_reportposition((NXWINDOW)wnd);
+
+  /* Provide the initial mouse settings */
+
+#ifdef CONFIG_NX_MOUSE
+  nxsu_mousereport(wnd);
+#endif
+
+  return OK;
 }
 

@@ -45,10 +45,11 @@ CSRCS += nxmu_semtake.c nx_block.c
 CSRCS += nx_kbdchin.c nx_kbdin.c nx_mousein.c
 CSRCS += nx_releasebkgd.c nx_requestbkgd.c nx_setbgcolor.c
 
-CSRCS += nxmu_sendwindow.c nx_closewindow.c nxmu_constructwindow.c
+CSRCS += nxmu_sendwindow.c nx_closewindow.c nx_constructwindow.c
 CSRCS += nx_bitmap.c nx_fill.c nx_filltrapezoid.c nx_getposition.c
 CSRCS += nx_getrectangle.c nx_lower.c nx_move.c nx_openwindow.c
-CSRCS += nx_raise.c nx_setpixel.c nx_setposition.c nx_setsize.c
+CSRCS += nx_raise.c nx_redrawreq.c nx_setpixel.c nx_setposition.c
+CSRCS += nx_setsize.c
 
 # Add the nxmu/ directory to the build
 

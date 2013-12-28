@@ -1,7 +1,7 @@
 /****************************************************************************
- * libnx/nxmu/nx_openwindow.c
+ * libnx/nxtk/nxtk_subwindowmove.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
-#include <nuttx/nx/nxmu.h>
+#include <nuttx/nx/nxtk.h>
 
-#include "nxcontext.h"
+#include "nxtk_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,60 +73,77 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nxtk_subwindowmove
  *
  * Description:
- *   Create a new window.
+ *   Perform common clipping operations in preparatons for calling nx_move()
  *
  * Input Parameters:
- *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
- *   arg    - User provided value that will be returned with NX callbacks.
+ *   fwnd       - The framed window within which the move is to be done.
+ *                This must have been previously created by nxtk_openwindow().
+ *   destrect   - The loccation to receive the clipped rectangle relative
+ *                to containing window
+ *   destoffset - The location to received the clipped offset.
+ *   srcrect    - Describes the rectangular region relative to the client
+ *                sub-window to move relative to the sub-window
+ *   srcoffset  - The offset to move the region
+ *   bounds     - The subwindow bounds in absolute screen coordinates.
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+void nxtk_subwindowmove(FAR struct nxtk_framedwindow_s *fwnd,
+                        FAR struct nxgl_rect_s *destrect,
+                        FAR struct nxgl_point_s *destoffset,
+                        FAR const struct nxgl_rect_s *srcrect,
+                        FAR const struct nxgl_point_s *srcoffset,
+                        FAR const struct nxgl_rect_s *bounds)
 {
-  FAR struct nxbe_window_s *wnd;
-  int ret;
+  struct nxgl_rect_s abssrc;
 
-#ifdef CONFIG_DEBUG
-  if (!handle || !cb)
+  /* Temporarily, position the src rectangle in absolute screen coordinates */
+
+  nxgl_rectoffset(&abssrc, srcrect, bounds->pt1.x, bounds->pt1.y);
+
+  /* Clip the src rectangle to lie within the client window region */
+
+  nxgl_rectintersect(&abssrc, &abssrc, &fwnd->fwrect);
+
+  /* Clip the source rectangle so that destination area is within the window. */
+
+  destoffset->x = srcoffset->x;
+  if (destoffset->x < 0)
     {
-      set_errno(EINVAL);
-      return NULL;
+      if (abssrc.pt1.x + destoffset->x < bounds->pt1.x)
+        {
+           abssrc.pt1.x = bounds->pt1.x - destoffset->x;
+        }
     }
-#endif
-
-  /* Pre-allocate the window structure */
-
-  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
+  else if (abssrc.pt2.x + destoffset->x > bounds->pt2.x)
     {
-      set_errno(ENOMEM);
-      return NULL;
-    }
-
-  /* Then let nx_constructwindow do the rest */
-
-  ret = nx_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
-
-      return NULL;
+       abssrc.pt2.x = bounds->pt2.x - destoffset->x;
     }
 
-  /* Return the uninitialized window reference.  Since the server
-   * serializes all operations, we can be assured that the window will
-   * be initialized before the first operation on the window.
+  destoffset->y = srcoffset->y;
+  if (destoffset->y < 0)
+    {
+      if (abssrc.pt1.y + destoffset->y < bounds->pt1.y)
+        {
+           abssrc.pt1.y = bounds->pt1.y - destoffset->y;
+        }
+    }
+  else if (abssrc.pt2.y + destoffset->y > bounds->pt2.y)
+    {
+       abssrc.pt2.y = bounds->pt2.y - destoffset->y;
+    }
+
+
+  /* Then move the rectangle so that is relative to the containing window,
+   * not the client subwindow
    */
 
-  return (NXWINDOW)wnd;
+  nxgl_rectoffset(destrect, &abssrc, -fwnd->wnd.bounds.pt1.x,
+                  -fwnd->wnd.bounds.pt1.y);
 }
-

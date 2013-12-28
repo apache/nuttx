@@ -1,7 +1,7 @@
 /****************************************************************************
  * graphics/nxsu/nxsu_redrawreq.c
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009,2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,7 @@
 /****************************************************************************
  * Name: nxfe_redrawreq
  *
- * Descripton:
+ * Description:
  *   Request the client that has this window to redraw the rectangular region.
  *
  ****************************************************************************/
@@ -100,5 +100,3 @@ void nxfe_redrawreq(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s 
       wnd->cb->redraw((NXWINDOW)wnd, &relrect, false, wnd->arg);
     }
 }
-
-

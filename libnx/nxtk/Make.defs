@@ -1,5 +1,5 @@
 ############################################################################
-# graphics/nxsu/Make.defs
+# libnx/nxtk/Make.defs
 #
 #   Copyright (C) 2008, 2011, 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,12 +33,28 @@
 #
 ############################################################################
 
-NX_ASRCS  =
+# Expose NXTK interfaces to applications
 
-NX_CSRCS  = nx_bitmap.c nx_close.c nx_closewindow.c nx_fill.c
-NX_CSRCS += nx_filltrapezoid.c nx_getposition.c nx_getrectangle.c nx_kbdchin.c
-NX_CSRCS += nx_kbdin.c nx_lower.c nx_mousein.c nx_move.c nx_open.c
-NX_CSRCS += nx_openwindow.c nx_raise.c nx_redrawreq.c nx_releasebkgd.c
-NX_CSRCS += nx_requestbkgd.c nx_setpixel.c nx_setsize.c nx_setbgcolor.c
-NX_CSRCS += nx_setposition.c nxsu_constructwindow.c nxsu_redrawreq.c
-NX_CSRCS += nxsu_reportposition.c
+ifeq ($(CONFIG_NX),y)
+
+CSRCS += nxtk_openwindow.c nxtk_closewindow.c nxtk_getposition.c
+CSRCS += nxtk_setposition.c nxtk_setsize.c nxtk_raise.c nxtk_lower.c
+CSRCS += nxtk_fillwindow.c nxtk_getwindow.c nxtk_filltrapwindow.c
+CSRCS += nxtk_movewindow.c nxtk_bitmapwindow.c nxtk_events.c
+CSRCS += nxtk_setsubwindows.c nxtk_drawcirclewindow.c nxtk_drawlinewindow.c
+CSRCS += nxtk_fillcirclewindow.c nxtk_block.c
+
+CSRCS += nxtk_opentoolbar.c nxtk_closetoolbar.c nxtk_filltoolbar.c
+CSRCS += nxtk_gettoolbar.c nxtk_filltraptoolbar.c nxtk_movetoolbar.c
+CSRCS += nxtk_bitmaptoolbar.c nxtk_drawcircletoolbar.c nxtk_drawlinetoolbar.c
+CSRCS += nxtk_fillcircletoolbar.c nxtk_toolbarbounds.c
+
+CSRCS += nxtk_subwindowclip.c nxtk_containerclip.c nxtk_subwindowmove.c
+CSRCS += nxtk_drawframe.c
+
+# Add the nxtk/ directory to the build
+
+DEPPATH += --dep-path nxtk
+VPATH += :nxtk
+
+endif

@@ -1,7 +1,7 @@
 /****************************************************************************
- * libnx/nxmu/nx_openwindow.c
+ * libnx/nxtk/nxtk_movetoolbar.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
-#include <nuttx/nx/nxmu.h>
+#include <nuttx/nx/nxtk.h>
 
-#include "nxcontext.h"
+#include "nxtk_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,60 +73,47 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nxtk_movetoolbar
  *
  * Description:
- *   Create a new window.
+ *   Move a rectangular region within the toolbar sub-window of a framed
+ *   window
  *
  * Input Parameters:
- *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
- *   arg    - User provided value that will be returned with NX callbacks.
+ *   hfwnd  - The sub-window containing the toolbar within which the move is
+ *            to be done. This must have been previously created by
+ *            nxtk_openwindow().
+ *   rect   - Describes the rectangular region relative to the toolbar
+ *            sub-window to move
+ *   offset - The offset to move the region
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+int nxtk_movetoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect,
+                     FAR const struct nxgl_point_s *offset)
 {
-  FAR struct nxbe_window_s *wnd;
-  int ret;
+  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
+  struct nxgl_rect_s srcrect;
+  struct nxgl_point_s clipoffset;
 
 #ifdef CONFIG_DEBUG
-  if (!handle || !cb)
+  if (!hfwnd || !rect || !offset)
     {
       set_errno(EINVAL);
-      return NULL;
+      return ERROR;
     }
 #endif
 
-  /* Pre-allocate the window structure */
-
-  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
-    {
-      set_errno(ENOMEM);
-      return NULL;
-    }
-
-  /* Then let nx_constructwindow do the rest */
-
-  ret = nx_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
-
-      return NULL;
-    }
-
-  /* Return the uninitialized window reference.  Since the server
-   * serializes all operations, we can be assured that the window will
-   * be initialized before the first operation on the window.
+  /* Make sure that both the source and dest rectangle lie within the
+   * toolbar sub-window 
    */
 
-  return (NXWINDOW)wnd;
-}
+  nxtk_subwindowmove(fwnd, &srcrect, &clipoffset, rect, offset, &fwnd->tbrect);
 
+  /* Then move it within the toolbar window */
+
+  return nx_move((NXWINDOW)hfwnd, &srcrect, &clipoffset);
+}

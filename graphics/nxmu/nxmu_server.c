@@ -509,7 +509,14 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev)
            break;
 #endif
 
-         /* Messages sent to the backgound window ***************************/
+         case NX_SVRMSG_REDRAWREQ: /* Request re-drawing of rectangular region */
+           {
+             FAR struct nxsvrmsg_redrawreq_s *redrawmsg = (FAR struct nxsvrmsg_redrawreq_s *)buffer;
+             nxfe_redrawreq(redrawmsg->wnd, &redrawmsg->rect);
+           }
+           break;
+
+         /* Messages sent to the background window **************************/
 
          case NX_CLIMSG_REDRAW: /* Re-draw the background window */
             {

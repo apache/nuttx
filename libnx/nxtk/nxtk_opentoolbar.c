@@ -1,7 +1,7 @@
 /****************************************************************************
- * libnx/nxmu/nx_openwindow.c
+ * libnx/nxtk/nxtk_opentoolbar.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,14 @@
 
 #include <nuttx/config.h>
 
+#include <stdlib.h>
 #include <errno.h>
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
-#include <nuttx/nx/nxmu.h>
+#include <nuttx/nx/nxtk.h>
 
-#include "nxcontext.h"
+#include "nxtk_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,60 +73,54 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nxtk_opentoolbar
  *
  * Description:
- *   Create a new window.
+ *   Create a tool bar at the top of the specified framed window
  *
  * Input Parameters:
- *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
- *   arg    - User provided value that will be returned with NX callbacks.
+ *   hfwnd  - The handle returned by nxtk_openwindow
+ *   height - The request height of the toolbar in pixels
+ *   cb     - Callbacks used to process toolbar events
+ *   arg    - User provided value that will be returned with toolbar
+ *            callbacks.
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+int nxtk_opentoolbar(NXTKWINDOW hfwnd, nxgl_coord_t height,
+                     FAR const struct nx_callback_s *cb,
+                     FAR void *arg)
 {
-  FAR struct nxbe_window_s *wnd;
-  int ret;
+  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
 
 #ifdef CONFIG_DEBUG
-  if (!handle || !cb)
+  if (!hfwnd || !cb)
     {
       set_errno(EINVAL);
-      return NULL;
+      return ERROR;
     }
 #endif
 
-  /* Pre-allocate the window structure */
+  /* Initialize the toolbar info */
 
-  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
-    {
-      set_errno(ENOMEM);
-      return NULL;
-    }
+  fwnd->tbheight = height;
+  fwnd->tbcb     = cb;
+  fwnd->tbarg    = arg;
 
-  /* Then let nx_constructwindow do the rest */
+  /* Calculate the new dimensions of the toolbar and client windows */
 
-  ret = nx_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
+  nxtk_setsubwindows(fwnd);
 
-      return NULL;
-    }
-
-  /* Return the uninitialized window reference.  Since the server
-   * serializes all operations, we can be assured that the window will
-   * be initialized before the first operation on the window.
+  /* Then redraw the entire window, even the client window must be
+   * redrawn because it has changed its vertical position and size.
    */
 
-  return (NXWINDOW)wnd;
-}
+  nx_redrawreq(&fwnd->wnd, &fwnd->wnd.bounds);
 
+  /* Return the initialized toolbar reference */
+
+  return OK;
+}

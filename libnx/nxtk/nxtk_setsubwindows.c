@@ -1,7 +1,7 @@
 /****************************************************************************
- * libnx/nxmu/nx_openwindow.c
+ * libnx/nxtk/nxtk_setsubwindows.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,21 +39,24 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
+#include <stdlib.h>
+#include <semaphore.h>
 #include <debug.h>
+#include <errno.h>
 
 #include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
-#include <nuttx/nx/nxmu.h>
-
-#include "nxcontext.h"
+#include "nxtk_internal.h"
 
 /****************************************************************************
- * Pre-Processor Definitions
+ * Definitions
  ****************************************************************************/
 
 /****************************************************************************
  * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
@@ -73,60 +76,90 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nxtk_setsubwindows
  *
  * Description:
- *   Create a new window.
- *
- * Input Parameters:
- *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
- *   arg    - User provided value that will be returned with NX callbacks.
- *
- * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   Give the window dimensions, border width, and toolbar height,
+ *   calculate the new dimensions of the toolbar region and client window
+ *   region
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+void nxtk_setsubwindows(FAR struct nxtk_framedwindow_s *fwnd)
 {
-  FAR struct nxbe_window_s *wnd;
-  int ret;
+  nxgl_coord_t fullheight;
+  nxgl_coord_t bdrheight = 0;
+  nxgl_coord_t tbtop     = fwnd->wnd.bounds.pt1.y;
+  nxgl_coord_t tbheight  = 0;
+  nxgl_coord_t fwtop     = fwnd->wnd.bounds.pt1.y;
+  nxgl_coord_t fwheight  = 0;
+  nxgl_coord_t fullwidth;
+  nxgl_coord_t bdrwidth;
+  nxgl_coord_t fwwidth;
+  nxgl_coord_t fwleft;
 
-#ifdef CONFIG_DEBUG
-  if (!handle || !cb)
+  /* Divide up the vertical dimension of the window */
+
+  fullheight = fwnd->wnd.bounds.pt2.y - fwnd->wnd.bounds.pt1.y + 1;
+
+  /* Is it tall enough for a border? */
+
+  if (fullheight > 0)
     {
-      set_errno(EINVAL);
-      return NULL;
-    }
+      /* Get the border height */
+
+      bdrheight = ngl_min(2 * CONFIG_NXTK_BORDERWIDTH, fullheight);
+
+      /* Position the toolbar and client window just under the top border */
+
+#if CONFIG_NXTK_BORDERWIDTH > 1
+      tbtop += CONFIG_NXTK_BORDERWIDTH - 1;
+      fwtop = tbtop + 1;
+#else
+      tbtop += CONFIG_NXTK_BORDERWIDTH;
+      fwtop = tbtop;
 #endif
 
-  /* Pre-allocate the window structure */
+      /* Is it big enough for any part of the toolbar? */
 
-  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
-    {
-      set_errno(ENOMEM);
-      return NULL;
+      if (fullheight > 2 * CONFIG_NXTK_BORDERWIDTH)
+        {
+           /* Yes.. get the height of the toolbar */
+
+          tbheight  = fwnd->tbheight;
+          if (tbheight >= fullheight - bdrheight)
+            {
+              tbheight = fullheight - bdrheight;
+            }
+          else
+            {
+              /* And the client window gets whatever is left */
+
+              fwheight = fullheight - bdrheight - tbheight;
+            }
+
+          /* Position the client window just under the toolbar */
+
+          fwtop += tbheight;
+        }
     }
 
-  /* Then let nx_constructwindow do the rest */
+  /* Divide up the horizontal dimensions of the window */
 
-  ret = nx_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
+  fullwidth = fwnd->wnd.bounds.pt2.x - fwnd->wnd.bounds.pt1.x + 1;
+  bdrwidth  = ngl_min(2 * CONFIG_NXTK_BORDERWIDTH, fullwidth);
+  fwwidth   = fullwidth - bdrwidth;
+  fwleft    = fwnd->wnd.bounds.pt1.x + bdrwidth / 2;
 
-      return NULL;
-    }
+  /* Realize the positions/dimensions */
 
-  /* Return the uninitialized window reference.  Since the server
-   * serializes all operations, we can be assured that the window will
-   * be initialized before the first operation on the window.
-   */
+  fwnd->tbrect.pt1.x = fwleft;
+  fwnd->tbrect.pt1.y = tbtop;
+  fwnd->tbrect.pt2.x = fwleft + fwwidth - 1;
+  fwnd->tbrect.pt2.y = tbtop + tbheight - 1;
 
-  return (NXWINDOW)wnd;
+  fwnd->fwrect.pt1.x = fwleft;
+  fwnd->fwrect.pt1.y = fwtop;
+  fwnd->fwrect.pt2.x = fwleft + fwwidth - 1;
+  fwnd->fwrect.pt2.y = fwtop + fwheight - 1;
 }
-

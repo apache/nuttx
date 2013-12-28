@@ -158,6 +158,7 @@ enum nxmsg_e
   NX_SVRMSG_SETBGCOLOR,       /* Set the color of the background */
   NX_SVRMSG_MOUSEIN,          /* New mouse report from mouse client */
   NX_SVRMSG_KBDIN,            /* New keyboard report from keyboard client */
+  NX_SVRMSG_REDRAWREQ         /* Request re-drawing of rectangular region */
 };
 
 /* Server-to-Client Message Structures **************************************/
@@ -346,7 +347,7 @@ struct nxsvrmsg_lower_s
 
 struct nxsvrmsg_setpixel_s
 {
-  uint32_t  msgid;                 /* NX_SVRMSG_SETPIXEL */
+  uint32_t msgid;                  /* NX_SVRMSG_SETPIXEL */
   FAR struct nxbe_window_s *wnd;   /* The window to fill  */
   struct nxgl_point_s pos;         /* The position of the pixel in the window */
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the fill */
@@ -356,7 +357,7 @@ struct nxsvrmsg_setpixel_s
 
 struct nxsvrmsg_fill_s
 {
-  uint32_t  msgid;                 /* NX_SVRMSG_FILL */
+  uint32_t msgid;                  /* NX_SVRMSG_FILL */
   FAR struct nxbe_window_s *wnd;   /* The window to fill  */
   struct nxgl_rect_s rect;         /* The rectangle in the window to fill */
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the fill */
@@ -366,7 +367,7 @@ struct nxsvrmsg_fill_s
 
 struct nxsvrmsg_getrectangle_s
 {
-  uint32_t  msgid;                 /* NX_SVRMSG_GETRECTANGLE */
+  uint32_t msgid;                  /* NX_SVRMSG_GETRECTANGLE */
   FAR struct nxbe_window_s *wnd;   /* The window to get from  */
   struct nxgl_rect_s rect;         /* The rectangle in the window to get from */
   unsigned int plane;              /* The plane number to read */
@@ -379,7 +380,7 @@ struct nxsvrmsg_getrectangle_s
 
 struct nxsvrmsg_filltrapezoid_s
 {
-  uint32_t  msgid;                 /* NX_SVRMSG_FILLTRAP */
+  uint32_t msgid;                  /* NX_SVRMSG_FILLTRAP */
   FAR struct nxbe_window_s *wnd;   /* The window to fill  */
   FAR struct nxgl_rect_s clip;     /* The clipping window */
   struct nxgl_trapezoid_s trap;    /* The trapezoidal region in the window to fill */
@@ -413,7 +414,7 @@ struct nxsvrmsg_bitmap_s
 
 struct nxsvrmsg_setbgcolor_s
 {
-  uint32_t  msgid;                 /* NX_SVRMSG_SETBGCOLOR */
+  uint32_t msgid;                  /* NX_SVRMSG_SETBGCOLOR */
   nxgl_mxpixel_t color[CONFIG_NX_NPLANES]; /* Color to use in the background */
 };
 
@@ -439,11 +440,20 @@ struct nxsvrmsg_mousein_s
 #ifdef CONFIG_NX_KBD
 struct nxsvrmsg_kbdin_s
 {
-  uint32_t   msgid;                /* NX_SVRMSG_KBDIN */
-  uint8_t    nch ;                 /* Number of characters received */
-  uint8_t    ch[1];                /* Array of received characters */
+  uint32_t msgid;                  /* NX_SVRMSG_KBDIN */
+  uint8_t nch ;                    /* Number of characters received */
+  uint8_t ch[1];                   /* Array of received characters */
 };
 #endif
+
+/* Request re-drawing of rectangular region */
+
+struct nxsvrmsg_redrawreq_s
+{
+  uint32_t msgid;                  /* NX_SVRMSG_REDRAWREQ */
+  FAR struct nxbe_window_s *wnd;   /* The window to be redrawn  */
+  struct nxgl_rect_s rect;         /* Describes the rectangular region to be redrawn */
+};
 
 /****************************************************************************
  * Public Data

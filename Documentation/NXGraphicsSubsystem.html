@@ -3196,19 +3196,18 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       The multi-user front-end is selected when <code>CONFIG_NX_MULTIUSER</code> is defined
       in the NuttX configuration file.
 
-    <dt><code>graphics/nxfonts</code>
+    <dt><code>libnx/nxfonts</code>
       <dd>This is where the NXFONTS implementation resides.
       This is a relatively low-level set of charset set/glyph management APIs.
       See <code>include/nuttx/nx/nxfonts.h</code>.
 
-    <dt><code>graphics/nxtk</code>
+    <dt><code>libnx/nxtk</code>
       <dd>This is where the NXTOOLKIT implementation resides.
       This toolkit is built on top of NX and works with either the single-user or multi-user NX version.
       See <code>include/nuttx/nx/nxtk.h</code>.
 
     <dt><code>nuttx/../nxwidgets</code>
-      <dd>The <a href="NxWidgets.html">NxWidgets</a> code is provided as a separate package located outside of the
-  NuttX source tree (probably at this location).
+      <dd>The <a href="NxWidgets.html">NxWidgets</a> code is provided as a separate package located outside of the NuttX source tree (probably at this location).
 
     <dt><code>graphics/nxconsole</code>
       <dd>The NxConsole driver is built on top of NX and works with either the single-user or multi-user NX version.

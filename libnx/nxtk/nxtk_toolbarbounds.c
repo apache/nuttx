@@ -1,7 +1,7 @@
 /****************************************************************************
- * libnx/nxmu/nx_openwindow.c
+ * libnx/nxtk/nxtk_toolbarbounds.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,14 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
-#include <debug.h>
+#include <assert.h>
 
 #include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxbe.h>
-#include <nuttx/nx/nxmu.h>
+#include <nuttx/nx/nxtk.h>
 
-#include "nxcontext.h"
+#include "nxtk_internal.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -73,60 +71,35 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_openwindow
+ * Name: nxtk_toolbarbounds
  *
  * Description:
- *   Create a new window.
+ *   Return a bounding box that contains the toolbar in the coordinates of
+ *   the containing, framed window.  For example, the recturned  origin
+ *  (rect.pt1) is the offset toolbar in the framed window.
+ *
+ *   NOTE: This function is unsafe in the case of the multi-user NX server
+ *   where the width of the window may be being changed asynchronously!  It
+ *   may return the old size in this case.
  *
  * Input Parameters:
- *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
- *   arg    - User provided value that will be returned with NX callbacks.
+ *   hfwnd  - The handle returned by nxtk_openwindow
+ *   bounds - User provided location in which to return the bounding box.
  *
  * Return:
- *   Success: A non-NULL handle used with subsequent NX accesses
- *   Failure:  NULL is returned and errno is set appropriately
+ *   OK on success; ERROR on failure with errno set appropriately
  *
  ****************************************************************************/
 
-NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
-                       FAR void *arg)
+int nxtk_toolbarbounds(NXTKWINDOW hfwnd, FAR struct nxgl_rect_s *bounds)
 {
-  FAR struct nxbe_window_s *wnd;
-  int ret;
+  FAR struct nxtk_framedwindow_s *fwnd = (FAR struct nxtk_framedwindow_s *)hfwnd;
 
-#ifdef CONFIG_DEBUG
-  if (!handle || !cb)
-    {
-      set_errno(EINVAL);
-      return NULL;
-    }
-#endif
+  DEBUGASSERT(hfwnd && bounds);
 
-  /* Pre-allocate the window structure */
+  /* Offset the rectangle by subtracting the current position of the window. */
 
-  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
-  if (!wnd)
-    {
-      set_errno(ENOMEM);
-      return NULL;
-    }
-
-  /* Then let nx_constructwindow do the rest */
-
-  ret = nx_constructwindow(handle, wnd, cb, arg);
-  if (ret < 0)
-    {
-      /* An error occurred, the window has been freed */
-
-      return NULL;
-    }
-
-  /* Return the uninitialized window reference.  Since the server
-   * serializes all operations, we can be assured that the window will
-   * be initialized before the first operation on the window.
-   */
-
-  return (NXWINDOW)wnd;
+  nxgl_rectoffset(bounds, &fwnd->tbrect,
+                  -fwnd->wnd.bounds.pt1.x, -fwnd->wnd.bounds.pt1.y);
+  return OK;
 }
-

@@ -59,10 +59,6 @@ DEPPATH		+= --dep-path nxsu
 CFLAGS		+= ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxsu}
 endif
 
-include nxtk/Make.defs
-DEPPATH		+= --dep-path nxtk
-CFLAGS		+= ${shell $(INCDIR) $(INCDIROPT) "$(CC)" $(TOPDIR)/graphics/nxtk}
-
 ifeq ($(CONFIG_NXCONSOLE),y)
 include nxconsole/Make.defs
 DEPPATH		+= --dep-path nxconsole
@@ -81,9 +77,9 @@ OBJS		= $(AOBJS) $(COBJS)
 BIN		= libgraphics$(LIBEXT)
 
 ifeq ($(CONFIG_NX_MULTIUSER),y)
-VPATH		= nxglib:nxbe:nxmu:nxtk:nxconsole
+VPATH		= nxglib:nxbe:nxmu:nxconsole
 else
-VPATH		= nxglib:nxbe:nxsu:nxtk:nxconsole
+VPATH		= nxglib:nxbe:nxsu:nxconsole
 endif
 
 all:	mklibgraphics

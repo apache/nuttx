@@ -90,4 +90,3 @@ void nxfe_redrawreq(FAR struct nxbe_window_s *wnd, FAR const struct nxgl_rect_s 
   (void)nxmu_sendclientwindow(wnd, &outmsg, sizeof(struct nxclimsg_redraw_s));
 }
 
-

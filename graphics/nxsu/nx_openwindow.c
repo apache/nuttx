@@ -112,9 +112,9 @@ NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
       return NULL;
     }
 
-  /* Then let nxfe_constructwindow do the rest */
+  /* Then let nx_constructwindow do the rest */
 
-  ret = nxfe_constructwindow(handle, wnd, cb, arg);
+  ret = nx_constructwindow(handle, wnd, cb, arg);
   if (ret < 0)
     {
       /* An error occurred, the window has been freed */
