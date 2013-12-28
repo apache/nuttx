@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxfonts/nxfonts_getfont.c
+ * libnx/nxfonts/nxfonts_getfont.c
  *
  *   Copyright (C) 2008-2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

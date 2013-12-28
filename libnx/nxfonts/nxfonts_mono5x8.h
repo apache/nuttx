@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxfonts/nxfonts_mono5x8.h
+ * libnx/nxfonts/nxfonts_mono5x8.h
  *
  *   Copyright (C) 2011-2012 NX Engineering, S.A., All rights reserved.
  *   Author: Petteri Aimonen <jpa@nx.mail.kapsi.fi>

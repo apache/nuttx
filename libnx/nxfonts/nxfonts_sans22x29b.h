@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxfonts/nxfonts_sans22x29b.h
+ * libnx/nxfonts/nxfonts_sans22x29b.h
  *
  *   Copyright (C) 2011-2012 NX Engineering, S.A., All rights reserved.
  *   Author: Jose Pablo Carballo Gomez <jcarballo@nx-engineering.com>

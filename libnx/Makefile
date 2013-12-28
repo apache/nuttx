@@ -56,6 +56,7 @@ VPATH := .
 include nxglib/Make.defs
 include nx/Make.defs
 include nxmu/Make.defs
+include nxfonts/Make.defs
 
 BINDIR ?= bin
 
@@ -71,6 +72,87 @@ BIN ?= libnx$(LIBEXT)
 
 all: $(BIN)
 .PHONY: clean distclean
+.PHONY : context depend clean distclean gensources gen1bppsources gen2bppsource \
+	 gen4bppsource gen8bppsource gen16bppsource gen24bppsource gen32bppsources genfontsources
+
+gen1bppsources:
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_BITSPERPIXEL=1 EXTRADEFINES=$(EXTRADEFINES)
+
+gen2bppsource:
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_BITSPERPIXEL=2 EXTRADEFINES=$(EXTRADEFINES)
+
+gen4bppsource:
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_BITSPERPIXEL=4 EXTRADEFINES=$(EXTRADEFINES)
+
+gen8bppsource:
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_BITSPERPIXEL=8 EXTRADEFINES=$(EXTRADEFINES)
+
+gen16bppsource:
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_BITSPERPIXEL=16 EXTRADEFINES=$(EXTRADEFINES)
+
+gen24bppsource:
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_BITSPERPIXEL=24 EXTRADEFINES=$(EXTRADEFINES)
+
+gen32bppsources:
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_BITSPERPIXEL=32 EXTRADEFINES=$(EXTRADEFINES)
+
+genfontsources:
+ifeq ($(CONFIG_NXFONT_MONO5X8),y)
+	@$(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=18 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SANS23X27),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=1 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SANS22X29),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=2 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SANS28X37),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=3 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SANS39X48),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=4 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SANS17X23B),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=16 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SANS20X27B),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=17 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SANS22X29B),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=5 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SANS28X37B),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=6 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SANS40X49B),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=7 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SERIF22X29),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=8 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SERIF29X37),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=9 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SERIF38X48),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=10 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SERIF22X28B),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=11 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SERIF27X38B),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=12 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SERIF38X49B),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=13 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SANS17X22),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=14 EXTRADEFINES=$(EXTRADEFINES)
+endif
+ifeq ($(CONFIG_NXFONT_SANS20X26),y)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources TOPDIR=$(TOPDIR) NXFONTS_FONTID=15 EXTRADEFINES=$(EXTRADEFINES)
+endif
+
+gensources: gen1bppsources gen2bppsource gen4bppsource gen8bppsource gen16bppsource gen24bppsource gen32bppsources genfontsources
 
 $(AOBJS): $(BINDIR)$(DELIM)%$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -101,7 +183,7 @@ endif
 
 # Dependencies
 
-.depend: Makefile $(SRCS)
+.depend: Makefile gensources $(SRCS)
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 	$(Q) $(MKDEP) --obj-path ubin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) -- $(SRCS) >Make_ubin.dep
 	$(Q) $(MKDEP) --obj-path kbin --obj-suffix $(OBJEXT) $(DEPPATH) "$(CC)" -- $(CFLAGS) $(KDEFINE) -- $(SRCS) >Make_kbin.dep
@@ -114,7 +196,7 @@ depend: .depend
 
 # Generate configuration context
 
-context:
+context: gensources
 
 # Clean most derived files, retaining the configuration
 
@@ -122,6 +204,7 @@ clean:
 	$(Q) $(MAKE) -C bin  clean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C ubin clean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C kbin clean TOPDIR=$(TOPDIR)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources clean TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
 	$(call DELFILE, $(BIN))
 	$(call DELFILE, $(UBIN))
 	$(call DELFILE, $(KBIN))
@@ -133,6 +216,7 @@ distclean: clean
 	$(Q) $(MAKE) -C bin  distclean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C ubin distclean TOPDIR=$(TOPDIR)
 	$(Q) $(MAKE) -C kbin distclean TOPDIR=$(TOPDIR)
+	$(Q) $(MAKE) -C nxfonts -f Makefile.sources distclean TOPDIR=$(TOPDIR) EXTRADEFINES=$(EXTRADEFINES)
 	$(call DELFILE, Make_bin.dep)
 	$(call DELFILE, Make_ubin.dep)
 	$(call DELFILE, Make_kbin.dep)

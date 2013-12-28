@@ -1,7 +1,7 @@
 ############################################################################
-# graphics/nxfonts/Make.defs
+# libnx/nxfonts/Make.defs
 #
-#   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2008, 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,96 +33,101 @@
 #
 ############################################################################
 
-NXFCONV_ASRCS	=
-NXFCONV_CSRCS	= nxfonts_convert_1bpp.c nxfonts_convert_2bpp.c \
-		  nxfonts_convert_4bpp.c nxfonts_convert_8bpp.c \
-		  nxfonts_convert_16bpp.c nxfonts_convert_24bpp.c \
-		  nxfonts_convert_32bpp.c
+# Expose NXFONT interfaces to applications
 
-NXFSET_ASRCS	=
-NXFSET_CSRCS	=
+ifeq ($(CONFIG_NX),y)
+
+CSRCS += nxfonts_getfont.c
+CSRCS += nxfonts_convert_1bpp.c nxfonts_convert_2bpp.c
+CSRCS += nxfonts_convert_4bpp.c nxfonts_convert_8bpp.c
+CSRCS += nxfonts_convert_16bpp.c nxfonts_convert_24bpp.c
+CSRCS += nxfonts_convert_32bpp.c
 
 # Monospace fonts
 
 ifeq ($(CONFIG_NXFONT_MONO5X8),y)
-NXFSET_CSRCS    += nxfonts_bitmaps_mono5x8.c
+CSRCS += nxfonts_bitmaps_mono5x8.c
 endif
 
 # Sans serif fonts
 
 ifeq ($(CONFIG_NXFONT_SANS17X22),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_sans17x22.c
+CSRCS += nxfonts_bitmaps_sans17x22.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SANS20X26),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_sans20x26.c
+CSRCS += nxfonts_bitmaps_sans20x26.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SANS23X27),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_sans23x27.c
+CSRCS += nxfonts_bitmaps_sans23x27.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SANS22X29),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_sans22x29.c
+CSRCS += nxfonts_bitmaps_sans22x29.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SANS28X37),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_sans28x37.c
+CSRCS += nxfonts_bitmaps_sans28x37.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SANS39X48),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_sans39x48.c
+CSRCS += nxfonts_bitmaps_sans39x48.c
 endif
 
 # Sans serif bold fonts
 
 ifeq ($(CONFIG_NXFONT_SANS17X23B),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_sans17x23b.c
+CSRCS += nxfonts_bitmaps_sans17x23b.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SANS20X27B),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_sans20x27b.c
+CSRCS += nxfonts_bitmaps_sans20x27b.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SANS22X29B),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_sans22x29b.c
+CSRCS += nxfonts_bitmaps_sans22x29b.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SANS28X37B),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_sans28x37b.c
+CSRCS += nxfonts_bitmaps_sans28x37b.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SANS40X49B),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_sans40x49b.c
+CSRCS += nxfonts_bitmaps_sans40x49b.c
 endif
 
 # Serif fonts
 
 ifeq ($(CONFIG_NXFONT_SERIF22X29),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_serif22x29.c
+CSRCS += nxfonts_bitmaps_serif22x29.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SERIF29X37),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_serif29x37.c
+CSRCS += nxfonts_bitmaps_serif29x37.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SERIF38X48),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_serif38x48.c
+CSRCS += nxfonts_bitmaps_serif38x48.c
 endif
 
 # Serif bold fonts
 
 ifeq ($(CONFIG_NXFONT_SERIF22X28B),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_serif22x28b.c
+CSRCS += nxfonts_bitmaps_serif22x28b.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SERIF27X38B),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_serif27x38b.c
+CSRCS += nxfonts_bitmaps_serif27x38b.c
 endif
 
 ifeq ($(CONFIG_NXFONT_SERIF38X49B),y)
-NXFSET_CSRCS	+= nxfonts_bitmaps_serif38x49b.c
+CSRCS += nxfonts_bitmaps_serif38x49b.c
 endif
 
-NXFONTS_ASRCS	= $(NXFCONV_ASRCS) $(NXFSET_ASRCS)
-NXFONTS_CSRCS	= nxfonts_getfont.c $(NXFCONV_CSRCS) $(NXFSET_CSRCS)
+# Add the nxfont/ directory to the build
+
+DEPPATH += --dep-path nxfonts
+VPATH += :nxfonts
+
+endif

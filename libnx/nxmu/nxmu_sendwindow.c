@@ -1,5 +1,5 @@
 /****************************************************************************
- * libnx/nxmu/nxmu_sendserver.c
+ * libnx/nxmu/nxmu_sendwindow.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

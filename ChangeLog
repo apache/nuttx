@@ -6328,3 +6328,5 @@
 	  be moved to libc as well) (2013-12-27).
 	* Move libc/nx, nxmu, and nxglib to a new library, libnx.  The NX
 	  graphics is not properly a part of libc (2013-12-28).
+	* Move graphics/nxfonts to libnx/nxfonts (2013-12-28).
+
