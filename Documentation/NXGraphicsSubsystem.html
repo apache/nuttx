@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NX Graphics Subsystem</i>
       </font></big></h1>
-      <p>Last Updated: May 7, 2012</p>
+      <p>Last Updated: December 28, 2013</p>
     </td>
   </tr>
 </table>
@@ -3144,9 +3144,20 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
   </tr>
 </table>
 
+<p>
+  The graphics capability consist both of components internal to the RTOS and of user-callable interfaces.
+  In the NuttX kernel mode build there are some components of the graphics subsystem are callable in user mode and other components that are internal to the RTOS.
+  The directory <code>nuttx/graphics</code> contains only those components that are internal to the RTOS.
+
+  User callable functions must be part of a library that can be linked against user applications.
+  This user callable interfaces are provided in sub-directories under <code>nuttx/libnx</code>.
+<p>
 <ul>
   <dl>
-    <dt><code>graphics/nxglib</code>
+    <dt><code>libnx/nx</code>
+      <dd>Common callable interfaces that are, logically, part of both nxmu and nxsu.
+
+    <dt><code>graphics/nxglib</code> and <code>libnx/nxglib</code>
       <dd>The NuttX tiny graphics library.
       The directory contains generic utilities support operations on primitive graphics objects
       and logic to rasterize directly into a framebuffer or through an LCD driver interface.
@@ -3168,7 +3179,12 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       The single user front-end is selected when <code>CONFIG_NX_MULTIUSER</code> is not
       defined in the NuttX configuration file.
 
-    <dt><code>graphics/nxsu</code>
+      <blockquote>
+        NOTE:  There is no nxsu sub-directory in nuttx/libnx.
+        That is because this separation of interfaces is only required in the kernel build mode and only the multi-user interfaces can be used with the kernel build.
+      </blockquote>
+
+    <dt><code>graphics/nxmu</code> and <code>libnx/nxmu</code>
       <dd>This is the NX multi user <i>front end</i>.
       When combined with the generic <i>back-end</i> (<code>nxbe</code>), it implements a
       multi-threaded, multi-user windowing system.
