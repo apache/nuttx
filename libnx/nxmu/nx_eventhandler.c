@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/nxmu/nx_eventhandler.c
+ * libnx/nxmu/nx_eventhandler.c
  *
  *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -46,10 +46,11 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nx.h>
+#include <nuttx/nx/nxbe.h>
+#include <nuttx/nx/nxmu.h>
 
-#include "nxfe.h"
+#include "nxcontext.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -98,7 +99,7 @@ static inline void nx_disconnected(FAR struct nxfe_conn_s *conn)
 
   /* And free the client structure */
 
-  kfree(conn);
+  lib_free(conn);
 }
 
 /****************************************************************************
@@ -117,7 +118,7 @@ static inline void nx_disconnected(FAR struct nxfe_conn_s *conn)
  *   caution in the looping to assure that it does not eat up all of
  *   the CPU bandwidth calling nx_eventhandler repeatedly.  nx_eventnotify
  *   may be called to get a signal event whenever a new incoming server
- *   event is avaiable.
+ *   event is available.
  *
  * Input Parameters:
  *   handle - the handle returned by nx_connect
@@ -185,7 +186,7 @@ int nx_eventhandler(NXHANDLE handle)
 
     case NX_CLIMSG_DISCONNECTED:
       nx_disconnected(conn);
-      errno = EHOSTDOWN;
+      set_errno(EHOSTDOWN);
       return ERROR;
 
     case NX_CLIMSG_REDRAW:
@@ -259,4 +260,3 @@ int nx_eventhandler(NXHANDLE handle)
 
   return OK;
 }
-

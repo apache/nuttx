@@ -6331,4 +6331,5 @@
 	* Move graphics/nxfonts to libnx/nxfonts (2013-12-28).
 	* Move graphics/nxtk to libnx/nxtk (2013-12-28).
 	* syscalls: Need to add sem_timedwait() (2013-12-28)
+	* Move more files from graphics/nxmu to libnx/nxmu (2013-12-29).
 

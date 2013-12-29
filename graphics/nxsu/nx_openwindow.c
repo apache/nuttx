@@ -80,7 +80,7 @@
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
+ *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
  * Return:

@@ -83,10 +83,10 @@
  *   inheritance:  The caller's window structure may include extensions that
  *   are not visible to NX.
  *
- *   NOTE:  hwnd must have been allocated using kmalloc() (or related allocators)
- *   Once provided to nx_constructwindow() that memory is owned and managed
- *   by NX.  On certain error conditions or when the window is closed, NX will
- *   free the window.
+ *   NOTE:  hwnd must have been allocated using a user-space allocator that
+ *   permits user access to the window.  Once provided to nx_constructwindow()
+ *   that memory is owned and managed by NX.  On certain error conditions or
+ *   when the window is closed, NX will free the window.
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect

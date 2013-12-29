@@ -99,7 +99,7 @@ struct nx_callback_s
   /**************************************************************************
    * Name: redraw
    *
-   * Descripton:
+   * Description:
    *   NX requests that the client re-draw the portion of the window within
    *   with rectangle.
    *
@@ -122,7 +122,7 @@ struct nx_callback_s
   /**************************************************************************
    * Name: position
    *
-   * Descripton:
+   * Description:
    *   The size or position of the window has changed (or the window was
    *   just created with zero size.
    *
@@ -149,7 +149,7 @@ struct nx_callback_s
   /**************************************************************************
    * Name: mousein
    *
-   * Descripton:
+   * Description:
    *   New mouse data is available for the window.
    *
    * Input Parameters:
@@ -172,7 +172,7 @@ struct nx_callback_s
   /**************************************************************************
    * Name: kbdin
    *
-   * Descripton:
+   * Description:
    *   New keyboard/keypad data is available for the window
    *
    * Input Parameters:
@@ -194,7 +194,7 @@ struct nx_callback_s
   /**************************************************************************
    * Name: blocked
    *
-   * Descripton:
+   * Description:
    *   This callback is the response from nx_block (or nxtk_block). Those
    *   blocking interfaces are used to assure that no further messages are
    *   directed to the window. Receipt of the blocked callback signifies
@@ -332,7 +332,7 @@ NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev);
  *
  * Description:
  *   Disconnect a client from the NX server and/or free resources reserved
- *   by nx_connect/nx_connectinstance. nx_disconnect is muliti-user equivalent
+ *   by nx_connect/nx_connectinstance. nx_disconnect is multi-user equivalent
  *   of nx_close.
  *
  *   Multiple user mode only!
@@ -382,7 +382,7 @@ void nx_close(NXHANDLE handle);
  *   caution in the looping to assure that it does not eat up all of
  *   the CPU bandwidth calling nx_eventhandler repeatedly.  nx_eventnotify
  *   may be called to get a signal event whenever a new incoming server
- *   event is avaiable.
+ *   event is available.
  *
  * Input Parameters:
  *   handle - the handle returned by nx_connect
@@ -511,7 +511,7 @@ int nx_block(NXWINDOW hwnd, FAR void *arg);
  *   background window in the following conditions:
  *
  *   - If you want to implement a windowless solution.  The single screen
- *     can be used to creat a truly simple graphic environment.  In this
+ *     can be used to create a truly simple graphic environment.  In this
  *     case, you should probably also de-select CONFIG_NX_MULTIUSER as well.
  *   - When you want more on the background than a solid color.  For
  *     example, if you want an image in the background, or animations in the
@@ -930,10 +930,10 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect);
  *   inheritance:  The caller's window structure may include extensions that
  *   are not visible to NX.
  *
- *   NOTE:  wnd must have been allocated using kmalloc() (or related allocators)
- *   Once provided to nx_constructwindow() that memory is owned and managed
- *   by NX.  On certain error conditions or when the window is closed, NX will
- *   free the window.
+ *   NOTE:  hwnd must have been allocated using a user-space allocator that
+ *   permits user access to the window.  Once provided to nx_constructwindow()
+ *   that memory is owned and managed by NX.  On certain error conditions or
+ *   when the window is closed, NX will free the window.
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect

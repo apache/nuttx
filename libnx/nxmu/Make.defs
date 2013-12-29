@@ -41,7 +41,7 @@ ifeq ($(CONFIG_NX),y)
 ifeq ($(CONFIG_NX_MULTIUSER),y)
 
 CSRCS += nxmu_sendserver.c nx_connect.c nx_disconnect.c
-CSRCS += nxmu_semtake.c nx_block.c
+CSRCS += nx_eventhandler.c nx_eventnotify.c nxmu_semtake.c nx_block.c
 CSRCS += nx_kbdchin.c nx_kbdin.c nx_mousein.c
 CSRCS += nx_releasebkgd.c nx_requestbkgd.c nx_setbgcolor.c
 
