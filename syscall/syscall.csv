@@ -30,7 +30,7 @@
 "mkdir","sys/stat.h","CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)","int","FAR const char*","mode_t"
 "mkfifo","sys/stat.h","CONFIG_NFILE_DESCRIPTORS > 0","int","FAR const char*","mode_t"
 "mmap","sys/mman.h","CONFIG_NFILE_DESCRIPTORS > 0","FAR void*","FAR void*","size_t","int","int","int","off_t"
-"mount","sys/mount.h","CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT)","int","const char*","const char*","const char*","unsigned long","const void*"
+"mount","sys/mount.h","CONFIG_NFILE_DESCRIPTORS > 0 && !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_READABLE)","int","const char*","const char*","const char*","unsigned long","const void*"
 "mq_close","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","int","mqd_t"
 "mq_notify","mqueue.h","!defined(CONFIG_DISABLE_SIGNALS) && !defined(CONFIG_DISABLE_MQUEUE)","int","mqd_t","const struct sigevent*"
 "mq_open","mqueue.h","!defined(CONFIG_DISABLE_MQUEUE)","mqd_t","const char*","int","..."

@@ -937,7 +937,7 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect);
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
- *   wnd    - The pre-allocated window structure.
+ *   hwnd   - The pre-allocated window structure.
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
@@ -947,8 +947,7 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect);
  *
  ****************************************************************************/
 
-struct nxbe_window_s; /* Forward reference */
-int nx_constructwindow(NXHANDLE handle, FAR struct nxbe_window_s *wnd,
+int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd,
                        FAR const struct nx_callback_s *cb, FAR void *arg);
 
 #undef EXTERN

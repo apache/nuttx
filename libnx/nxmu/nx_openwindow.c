@@ -80,7 +80,7 @@
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
- *   cb     - Callbacks used to process windo events
+ *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
  * Return:
@@ -114,7 +114,7 @@ NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
 
   /* Then let nx_constructwindow do the rest */
 
-  ret = nx_constructwindow(handle, wnd, cb, arg);
+  ret = nx_constructwindow(handle, (NXWINDOW)wnd, cb, arg);
   if (ret < 0)
     {
       /* An error occurred, the window has been freed */

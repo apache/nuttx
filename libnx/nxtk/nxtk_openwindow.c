@@ -146,7 +146,7 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
 
   /* Then let nx_constructwindow do the rest */
 
-  ret = nx_constructwindow(handle, &fwnd->wnd, &g_nxtkcb, NULL);
+  ret = nx_constructwindow(handle, (NXWINDOW)&fwnd->wnd, &g_nxtkcb, NULL);
   if (ret < 0)
     {
       /* An error occurred, the window has been freed */
@@ -158,4 +158,3 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
 
   return (NXTKWINDOW)fwnd;
 }
-

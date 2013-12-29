@@ -84,14 +84,14 @@
  *   inheritance:  The caller's window structure may include extensions that
  *   are not visible to NX.
  *
- *   NOTE:  wnd must have been allocated using kmalloc() (or related allocators)
- *   Once provided to nx_constructwindow() that memory is owned and managed
- *   by NX.  On certain error conditions or when the window is closed, NX will
- *   free the window.
+ *   NOTE:  hwnd must have been allocated using a user-space allocator that
+ *   permits user access to the window.  Once provided to nx_constructwindow()
+ *   that memory is owned and managed by NX.  On certain error conditions or
+ *   when the window is closed, NX will free the window.
  *
  * Input Parameters:
  *   handle - The handle returned by nx_connect
- *   wnd    - The pre-allocated window structure.
+ *   hwnd   - The pre-allocated window structure.
  *   cb     - Callbacks used to process window events
  *   arg    - User provided value that will be returned with NX callbacks.
  *
@@ -101,10 +101,11 @@
  *
  ****************************************************************************/
 
-int nx_constructwindow(NXHANDLE handle, FAR struct nxbe_window_s *wnd,
+int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd,
                        FAR const struct nx_callback_s *cb, FAR void *arg)
 {
   FAR struct nxfe_conn_s *conn = (FAR struct nxfe_conn_s *)handle;
+  FAR struct nxbe_window_s *wnd = (FAR struct nxbe_window_s *)hwnd;
   struct nxsvrmsg_openwindow_s outmsg;
 
 #ifdef CONFIG_DEBUG

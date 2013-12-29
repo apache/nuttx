@@ -59,8 +59,8 @@
 
 /* Server state structure ***************************************************/
 
-/* This the server 'front-end' state structure.  It is really the same
- * as the back-end state, but we wrap the back-end state so that we can add
+/* This the 'front-end' state structure.  It is really the same as the
+ * the back-end state, but we wrap the back-end state so that we can add
  * things to the structure in the future
  */
 
