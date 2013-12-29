@@ -1,8 +1,7 @@
 /****************************************************************************************************
  * configs/stm3240g_eval/src/stm3240g_internal.h
- * arch/arm/src/board/stm3240g_internal.n
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,8 +69,8 @@
 
 /* You can't use CAN1 with FSMC:
  *
- *   PD0   = FSMC_D2 & CAN1_RX   
- *   PD1   = FSMC_D3 & CAN1_TX  
+ *   PD0   = FSMC_D2 & CAN1_RX
+ *   PD1   = FSMC_D3 & CAN1_TX
  */
 
 #if defined(CONFIG_STM32_CAN1) && defined(CONFIG_STM32_FSMC)
@@ -127,7 +126,7 @@
 #  endif
 #endif
 
-/* USB OTG FS 
+/* USB OTG FS
  *
  * PA9  VBUS_FS
  * PH5  OTG_FS_PowerSwitchOn
@@ -145,7 +144,7 @@
 
 /* The STM3240G-EVAL has two STMPE811QTR I/O expanders on board both connected
  * to the STM32 via I2C1.  They share a common interrupt line: PI2.
- * 
+ *
  * STMPE811 U24, I2C address 0x41 (7-bit)
  * ------ ---- ---------------- --------------------------------------------
  * STPE11 PIN  BOARD SIGNAL     BOARD CONNECTION
@@ -158,7 +157,7 @@
  *   IN2       EXP_IO10
  *   IN1       EXP_IO11
  *   IN0       EXP_IO12
- * 
+ *
  * STMPE811 U29, I2C address 0x44 (7-bit)
  * ------ ---- ---------------- --------------------------------------------
  * STPE11 PIN  BOARD SIGNAL     BOARD CONNECTION
@@ -307,7 +306,7 @@ void stm32_disablefsmc(void);
  * Name: stm32_selectsram
  *
  * Description:
- *   Initialize to access external SRAM.  SRAM will be visible at the FSMC Bank 
+ *   Initialize to access external SRAM.  SRAM will be visible at the FSMC Bank
  *   NOR/SRAM2 base address (0x64000000)
  *
  *   General transaction rules.  The requested AHB transaction data size can be 8-,
@@ -367,6 +366,25 @@ void stm32_selectlcd(void);
 
 #ifdef CONFIG_STM32_FSMC
 void stm32_deselectlcd(void);
+#endif
+
+/****************************************************************************
+ * Name: nsh_archinitialize
+ *
+ * Description:
+ *   Perform architecture specific initialization for NSH.
+ *
+ *   CONFIG_NSH_ARCHINIT=y :
+ *     Called from the NSH library
+ *
+ *   CONFIG_BOARD_INITIALIZE=y, CONFIG_NSH_LIBRARY=y, &&
+ *   CONFIG_NSH_ARCHINIT=n :
+ *     Called from board_initialize().
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NSH_LIBRARY
+int nsh_archinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

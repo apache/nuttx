@@ -6334,4 +6334,12 @@
 	* Move more files from graphics/nxmu to libnx/nxmu (2013-12-29).
 	* graphics/nxmu/nx_start.c: NX server start-up wrapper function to
 	  simplify starting the NX server from within the RTOS (2013-12-29).
+	* configs/stm3240g-eval/kernel and configs/stm3240g-eval/scripts:  Port
+	  kernel build logic from the STM32F4Discovery to the STM3240G-EVAL.
+	  This will eventually support testing of the kernel mode NX server
+	  (2013-12-29).
+	* configs/stm3240g-eval/nxwm:  Converted to use the kconfig-frontend
+	  tools (2013-12-29).
+	* configs/stm3240g-eval/knxwm:  Add a kernel mode NxWM build
+	  configuration (not yet verified) (2013-12-29).
 

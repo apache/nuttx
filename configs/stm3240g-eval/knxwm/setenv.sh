@@ -1,7 +1,7 @@
-############################################################################
-# configs/stm3240g-eval/nxwm/appconfig
+#!/bin/bash
+# configs/stm3240g-eval/knxwm/setenv.sh
 #
-#   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,23 +31,37 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-############################################################################
 
-# The NSH Library -- NOTE:  The NxWM unit test must be installed at
-# apps/external in order to build this example.  See
-# NxWidgets/UnitTests/README.txt for additional information
+if [ "$_" = "$0" ] ; then
+  echo "You must source this script, not run it!" 1>&2
+  exit 1
+fi
 
-CONFIGURED_APPS += system/readline
-CONFIGURED_APPS += nshlib
+WD=`pwd`
+if [ ! -x "setenv.sh" ]; then
+  echo "This script must be executed from the top-level NuttX build directory"
+  exit 1
+fi
 
-# Networking libraries.
+if [ -z "${PATH_ORIG}" ]; then
+  export PATH_ORIG="${PATH}"
+fi
 
-ifeq ($(CONFIG_NET),y)
-CONFIGURED_APPS += netutils/uiplib
-CONFIGURED_APPS += netutils/resolv
-CONFIGURED_APPS += netutils/webclient
-CONFIGURED_APPS += netutils/tftpc
-ifeq ($(CONFIG_NSH_TELNET),y)
-CONFIGURED_APPS += netutils/telnetd
-endif
-endif
+# This is the Cygwin path to the location where I installed the RIDE
+# toolchain under windows.  You will also have to edit this if you install
+# the RIDE toolchain in any other location
+#export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/Raisonance/Ride/arm-gcc/bin"
+
+# This is the Cygwin path to the location where I installed the CodeSourcery
+# toolchain under windows.  You will also have to edit this if you install
+# the CodeSourcery toolchain in any other location
+export TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/CodeSourcery/Sourcery G++ Lite/bin"
+
+# This is the Cygwin path to the location where I build the buildroot
+# toolchain.
+#export TOOLCHAIN_BIN="${WD}/../misc/buildroot/build_arm_nofpu/staging_dir/bin"
+
+# Add the path to the toolchain to the PATH varialble
+export PATH="${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+
+echo "PATH : ${PATH}"

@@ -242,7 +242,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -887,14 +887,14 @@ STM3240G-EVAL-specific Configuration Options
   STM32 USB OTG FS Host Driver Support
 
   Pre-requisites
- 
+
    CONFIG_USBHOST         - Enable USB host support
    CONFIG_STM32_OTGFS     - Enable the STM32 USB OTG FS block
    CONFIG_STM32_SYSCFG    - Needed
    CONFIG_SCHED_WORKQUEUE - Worker thread support is required
- 
+
   Options:
- 
+
    CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
      Default 128 (512 bytes)
    CONFIG_STM32_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
@@ -954,6 +954,99 @@ Where <subdir> is one of the following:
     NOTE:  This configuration uses to the kconfig-mconf configuration tool to
     control the configuration.  See the section entitled "NuttX Configuration
     Tool" in the top-level README.txt file.
+
+  knxwm:
+  -----
+    [WARNING:  This is a work in progress].
+
+    This is identical to the nxwm configuration below except that NuttX
+    is built as a kernel-mode, monolithic module and the user applications
+    are built separately.  Is is recommended to use a special make command;
+    not just 'make' but make with the following two arguments:
+
+        make pass1 pass2
+
+    In the normal case (just 'make'), make will attempt to build both user-
+    and kernel-mode blobs more or less interleaved.  This actual works!
+    However, for me it is very confusing so I prefer the above make command:
+    Make the user-space binaries first (pass1), then make the kernel-space
+    binaries (pass2)
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. This is the default platform/toolchain in the configuration:
+
+       CONFIG_HOST_WINDOWS=y                   : Windows
+       CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
+
+       This is easily changed by modifying the configuration.
+
+    3. At the end of the build, there will be several files in the top-level
+       NuttX build directory:
+
+       PASS1:
+         nuttx_user.elf    - The pass1 user-space ELF file
+         nuttx_user.hex    - The pass1 Intel HEX format file (selected in defconfig)
+         User.map          - Symbols in the user-space ELF file
+
+       PASS2:
+         nuttx             - The pass2 kernel-space ELF file
+         nuttx.hex         - The pass2 Intel HEX file (selected in defconfig)
+         System.map        - Symbols in the kernel-space ELF file
+
+    4. Combining .hex files.  If you plan to use the STM32 ST-Link Utility to
+       load the .hex files into FLASH, then you need to combine the two hex
+       files into a single .hex file.  Here is how you can do that.
+
+       a. The 'tail' of the nuttx.hex file should look something like this
+          (with my comments added):
+
+            $ tail nuttx.hex
+            # 00, data records
+            ...
+            :10 9DC0 00 01000000000800006400020100001F0004
+            :10 9DD0 00 3B005A0078009700B500D400F300110151
+            :08 9DE0 00 30014E016D0100008D
+            # 05, Start Linear Address Record
+            :04 0000 05 0800 0419 D2
+            # 01, End Of File record
+            :00 0000 01 FF
+
+          Use an editor such as vi to remove the 05 and 01 records.
+
+       b. The 'head' of the nuttx_user.hex file should look something like
+          this (again with my comments added):
+
+            $ head nuttx_user.hex
+            # 04, Extended Linear Address Record
+            :02 0000 04 0801 F1
+            # 00, data records
+            :10 8000 00 BD89 01084C800108C8110208D01102087E
+            :10 8010 00 0010 00201C1000201C1000203C16002026
+            :10 8020 00 4D80 01085D80010869800108ED83010829
+            ...
+
+          Nothing needs to be done here.  The nuttx_user.hex file should
+          be fine.
+
+       c. Combine the edited nuttx.hex and un-edited nuttx_user.hex
+          file to produce a single combined hex file:
+
+          $ cat nuttx.hex nuttx_user.hex >combined.hex
+
+       Then use the combined.hex file with the STM32 ST-Link tool.  If
+       you do this a lot, you will probably want to invest a little time
+       to develop a tool to automate these steps.
 
   nettest:
   -------
@@ -1097,7 +1190,7 @@ Where <subdir> is one of the following:
        CONFIG_MM_REGIONS=3                  : When FSMC is enabled, so is the on-board SRAM memory region
 
     8. USB OTG FS Device or Host Support
- 
+
        CONFIG_USBDEV          - Enable USB device support, OR
        CONFIG_USBHOST         - Enable USB host support
        CONFIG_STM32_OTGFS     - Enable the STM32 USB OTG FS block
@@ -1168,7 +1261,7 @@ Where <subdir> is one of the following:
 
         -CONFIG_STM32_RNG=y
         +CONFIG_STM32_RNG=n
- 
+
         -CONFIG_DEV_RANDOM=y
         +CONFIG_DEV_RANDOM=n
 
