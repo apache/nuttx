@@ -168,7 +168,7 @@ config NXTK_BORDERCOLOR3
 		NXTK_BORDERCOLOR2 is the shadow side color and so is normally darker.
 		NXTK_BORDERCOLOR3 is the shiny side color and so is normally brighter.
 
-endif
+endif # !NXTK_DEFAULT_BORDERCOLORS
 endmenu
 
 config NXTK_AUTORAISE
@@ -413,7 +413,7 @@ config NXCONSOLE_NPOLLWAITERS
 		The number of threads that can be waiting for read data available.
 		Default: 4
 
-endif
+endif # NXCONSOLE
 
 comment "NX Multi-user only options"
 
@@ -450,5 +450,57 @@ config NX_MXCLIENTMSGS
 		flooding of the client or server with too many messages (PREALLOC_MQ_MSGS
 		controls how many messages are pre-allocated).
 
-endif
-endif
+config NX_NXSTART
+	bool "nx_start()"
+	default n
+	---help---
+		If this option is selected, then the nx_start() interface will be
+		built.  The nx_start() interface provides a single call to initialize
+		and start the NX server.
+
+if NX_NXSTART
+
+config NXSTART_EXTERNINIT
+	bool "External display Initialization"
+	default n
+	---help---
+		Define to support external display initialization by platform-
+		specific code.  This this option is defined, then nx_start() will
+		call up_nxdrvinit(CONFIG_NXSTART_DEVNO) to initialize the graphics
+		device.  This option is necessary if display is used that cannot be
+		initialized using the standard LCD or framebuffer interfaces.
+
+config NXSTART_SERVERPRIO
+	int "NX Server priority"
+	default 110
+	---help---
+		Priority of the NX server.  This applies only if NX is configured in
+		multi-user mode (NX_MULTIUSER=y).  Default: 110.
+
+		NOTE:  NXSTART_SERVERPRIO should have a relatively high priority to
+		avoid data overrun race conditions.
+
+config NXSTART_SERVERSTACK
+	int "NX Server Stack Size"
+	default 2048
+	---help---
+		NX server thread stack size (in multi-user mode).  Default 2048
+
+config NXSTART_DEVNO
+	int "LCD Device Number"
+	default 0
+	depends on NX_LCDDRIVER || NXSTART_EXTERNINIT
+	---help---
+		LCD device number (in case there are more than one LCDs connected).
+		Default: 0
+
+config NXSTART_VPLANE
+	int "Plane Number"
+	default 0
+	depends on !NX_LCDDRIVER && !NXSTART_EXTERNINIT
+	---help---
+		Only a single video plane is supported. Default: 0
+
+endif # NX_NXSTART
+endif # NX_MULTIUSER
+endif # NX

@@ -270,6 +270,35 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
 #endif
 
 /****************************************************************************
+ * Name: nx_start
+ *
+ * Description:
+ *   nx_start() provides a wrapper function to simplify and standardize the
+ *   starting of the NX server.
+ *
+ *   NOTE:  Currently, many applications include logic to start the NX
+ *   server from application initialization logic.  That, of course, cannot
+ *   work in the NuttX kernel build because the resources required by the
+ *   NX server are private to the kernel mode logic.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  This indicates that the NX server
+ *   has been successfully started, is running, and waiting to accept
+ *   connections from NX clients.
+ *
+ *   A negated errno value is returned on failure.  The errno value indicates
+ *   the nature of the failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_NX_MULTIUSER) && defined(CONFIG_NX_START)
+int nx_start(void);
+#endif
+
+/****************************************************************************
  * Name:nx_connectinstance (and nx_connect macro)
  *
  * Description:
