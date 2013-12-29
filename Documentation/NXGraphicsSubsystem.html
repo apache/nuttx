@@ -3170,7 +3170,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       It contains most of the important window management logic:  clipping, window controls,
       window drawing, etc.
 
-    <dt><code>graphics/nxsu</code>
+    <dt><code>graphics/nxsu</code><sup>1</sup>
       <dd>This is the NX single user <i>front end</i>.
       When combined with the generic <i>back-end</i> (<code>nxbe</code>), it implements a
       single threaded, single user windowing system.
@@ -3178,11 +3178,6 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       <code>include/nuttx/nx/nx.h</code>.
       The single user front-end is selected when <code>CONFIG_NX_MULTIUSER</code> is not
       defined in the NuttX configuration file.
-
-      <blockquote>
-        NOTE:  There is no nxsu sub-directory in nuttx/libnx.
-        That is because this separation of interfaces is only required in the kernel build mode and only the multi-user interfaces can be used with the kernel build.
-      </blockquote>
 
     <dt><code>graphics/nxmu</code> and <code>libnx/nxmu</code>
       <dd>This is the NX multi user <i>front end</i>.
@@ -3213,6 +3208,10 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       <dd>The NxConsole driver is built on top of NX and works with either the single-user or multi-user NX version.
       See <code>include/nuttx/nx/nxconsole.h</code>.
   </dl>
+  <p><small>
+    <sup>1<up>There is no nxsu sub-directory in nuttx/libnx.
+    That is because this separation of interfaces is only required in the kernel build mode and only the multi-user interfaces can be used with the kernel build.
+  </small></p>
 </ul>
 
 <table width ="100%">
