@@ -1,8 +1,7 @@
 /************************************************************************************
  * configs/stm3240g-eval/src/up_boot.c
- * arch/arm/src/board/up_boot.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,11 +88,11 @@ void stm32_boardinitialize(void)
 #endif
 
   /* Initialize USB if the 1) OTG FS controller is in the configuration and 2)
-   * disabled, and 3) the weak function stm32_usbinitialize() has been brought 
+   * disabled, and 3) the weak function stm32_usbinitialize() has been brought
    * the weak function stm32_usbinitialize() has been brought into the build.
    * Presumeably either CONFIG_USBDEV or CONFIG_USBHOST is also selected.
    */
- 
+
 #ifdef CONFIG_STM32_OTGFS
   if (stm32_usbinitialize)
     {
@@ -107,3 +106,30 @@ void stm32_boardinitialize(void)
   up_ledinit();
 #endif
 }
+/****************************************************************************
+ * Name: board_initialize
+ *
+ * Description:
+ *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
+ *   initialization call will be performed in the boot-up sequence to a
+ *   function called board_initialize().  board_initialize() will be
+ *   called immediately after up_intiialize() is called and just before the
+ *   initial application is started.  This additional initialization phase
+ *   may be used, for example, to initialize board-specific device drivers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARD_INITIALIZE
+void board_initialize(void)
+{
+  /* Perform NSH initialization here instead of from the NSH.  This
+   * alternative NSH initialization is necessary when NSH is ran in user-space
+   * but the initialization function must run in kernel space.
+   */
+
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+  (void)nsh_archinitialize();
+#endif
+}
+#endif
+

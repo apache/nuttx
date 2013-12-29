@@ -15,7 +15,7 @@ memory and 128kbytes. The board features:
   - Easy access to most MCU pins.
 
 Refer to http://www.st.com/internet/evalboard/product/252419.jsp for
-further information about this board. 
+further information about this board.
 
 Contents
 ========
@@ -53,7 +53,7 @@ GNU Toolchain Options
   toolchain options.
 
   1. The CodeSourcery GNU toolchain,
-  2. The Atollic Toolchain, 
+  2. The Atollic Toolchain,
   3. The devkitARM GNU toolchain,
   4. Raisonance GNU toolchain, or
   5. The NuttX buildroot Toolchain (see below).
@@ -132,7 +132,7 @@ GNU Toolchain Options
   In order to compile successfully.  Otherwise, you will get errors like:
 
     "C++ Compiler only available in TrueSTUDIO Professional"
-  
+
   The make may then fail in some of the post link processing because of some of
   the other missing tools.  The Make.defs file replaces the ar and nm with
   the default system x86 tool versions and these seem to work okay.  Disable all
@@ -154,7 +154,7 @@ IDEs
 
   NuttX is built using command-line make.  It can be used with an IDE, but some
   effort will be required to create the project.
-  
+
   Makefile Build
   --------------
   Under Eclipse, it is pretty easy to set up an "empty makefile project" and
@@ -251,7 +251,7 @@ NXFLAT Toolchain
   tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
   be downloaded from the NuttX SourceForge download site
   (https://sourceforge.net/projects/nuttx/files/).
- 
+
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
@@ -353,10 +353,10 @@ USART6
    with care (See table 5 in the STM32F4Discovery User Guide).  The rest are
    free I/O pins.
 ** Port G pins are not supported by the MCU
- 
+
 Default USART/UART Configuration
 --------------------------------
- 
+
 USART2 is enabled in all configurations (see */defconfig).  RX and TX are
 configured on pins PA3 and PA2, respectively (see include/board.h).
 
@@ -417,7 +417,7 @@ Quadrature Encode Timer Inputs
 ------------------------------
 
 If enabled (by setting CONFIG_QENCODER=y), then quadrature encoder will
-use either TIM2 or TIM8 (see nsh/defconfig).  If TIM2 is selected, the input 
+use either TIM2 or TIM8 (see nsh/defconfig).  If TIM2 is selected, the input
 pins PA15 and PA1 for CH1 and CH2, respectively).  If TIM8 is selected, then
 PC6 and PI5 will be used for CH1 and CH2  (see include board.h for pin
 definitions).
@@ -479,7 +479,7 @@ the following lines in each Make.defs file:
 If you are using a toolchain other than the Atollic toolchain, then to use the FPU
 you will also have to modify the CFLAGS to enable compiler support for the ARMv7-M
 FPU.  As of this writing, there are not many GCC toolchains that will support the
-ARMv7-M FPU.  
+ARMv7-M FPU.
 
 As a minimum you will need to add CFLAG options to (1) enable hardware floating point
 code generation, and to (2) select the FPU implementation.  You might try the same
@@ -543,7 +543,7 @@ present in the NuttX configuration file:
   CONFIG_HEAP2_SIZE          : The size of the SRAM in the FSMC
                                address space
   CONFIG_MM_REGIONS          : Must be set to a large enough value to
-                               include the FSMC SRAM 
+                               include the FSMC SRAM
 
 SRAM Configurations
 -------------------
@@ -773,7 +773,7 @@ STM32F4Discovery-specific Configuration Options
        configuration features.
 
        CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG=n
- 
+
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
@@ -923,7 +923,7 @@ STM32F4Discovery-specific Configuration Options
   configuration settings:
 
     CONFIG_STM32_TIMx_CHANNEL - Specifies the timer output channel {1,..,4}
- 
+
   NOTE: The STM32 timers are each capable of generating different signals on
   each of the four channels with different duty cycles.  That capability is
   not supported by this driver:  Only one output channel per timer.
@@ -980,7 +980,7 @@ STM32F4Discovery-specific Configuration Options
     CONFIG_SDIO_DMA - Support DMA data transfers.  Requires CONFIG_STM32_SDIO
       and CONFIG_STM32_DMA2.
     CONFIG_SDIO_PRI - Select SDIO interrupt prority.  Default: 128
-    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority. 
+    CONFIG_SDIO_DMAPRIO - Select SDIO DMA interrupt priority.
       Default:  Medium
     CONFIG_SDIO_WIDTH_D1_ONLY - Select 1-bit transfer mode.  Default:
       4-bit transfer mode.
@@ -988,15 +988,15 @@ STM32F4Discovery-specific Configuration Options
   STM32 USB OTG FS Host Driver Support
 
   Pre-requisites
- 
+
    CONFIG_USBDEV          - Enable USB device support
    CONFIG_USBHOST         - Enable USB host support
    CONFIG_STM32_OTGFS     - Enable the STM32 USB OTG FS block
    CONFIG_STM32_SYSCFG    - Needed
    CONFIG_SCHED_WORKQUEUE - Worker thread support is required
- 
+
   Options:
- 
+
    CONFIG_STM32_OTGFS_RXFIFO_SIZE - Size of the RX FIFO in 32-bit words.
      Default 128 (512 bytes)
    CONFIG_STM32_OTGFS_NPTXFIFO_SIZE - Size of the non-periodic Tx FIFO
@@ -1083,7 +1083,7 @@ Where <subdir> is one of the following:
      vterminate.o that you removed from libsupc++, you can do that with:
 
        arm-none-eabi-ar.exe rcs libsupc++.a vterminate.o
-        
+
   4. Exceptions are enabled and workking (CONFIG_UCLIBCXX_EXCEPTIONS=y)
 
   elf:
@@ -1094,7 +1094,7 @@ Where <subdir> is one of the following:
     loader.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -1112,7 +1112,7 @@ Where <subdir> is one of the following:
 
     3. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
- 
+
     4. It appears that you cannot excute from CCM RAM.  This is why the
        following definition appears in the defconfig file:
 
@@ -1138,7 +1138,7 @@ Where <subdir> is one of the following:
     binaries (pass2)
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -1221,7 +1221,7 @@ Where <subdir> is one of the following:
     builtin applications are selected (see NOTES below).
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -1338,7 +1338,7 @@ Where <subdir> is one of the following:
           you can still use certain kinds of debug output (see include/debug.h, all
           of the interfaces based on lowsyslog will work in this configuration).
 
-        - But don't enable USB debug output!  Since USB is console is used for 
+        - But don't enable USB debug output!  Since USB is console is used for
           USB debug output and you are using a USB console, there will be
           infinite loops and deadlocks:  Debug output generates USB debug
           output which generatates USB debug output, etc.  If you want USB
@@ -1486,7 +1486,7 @@ Where <subdir> is one of the following:
     apps/examples/ostest.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -1502,7 +1502,7 @@ Where <subdir> is one of the following:
 
     3. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
- 
+
     4. If you use the Atollic toolchain, then the FPU test can be enabled in the
       examples/ostest by adding the following your NuttX configuration file:
 
@@ -1530,7 +1530,7 @@ Where <subdir> is one of the following:
       bytes (see arch/arm/include/armv7-m/irq_lazyfpu.h):
 
       -CONFIG_EXAMPLES_OSTEST_FPUSIZE=(4*33)
- 
+
   pm:
   --
     This is a configuration that is used to test STM32 power management, i.e.,
@@ -1550,7 +1550,7 @@ Where <subdir> is one of the following:
     CONFIG_PM_CUSTOMINIT moves the PM initialization from arch/arm/src/stm32/stm32_pminitialiaze.c
     to configs/stm3210-eval/src/up_pm.c.  This allows us to support board-
     specific PM initialization.
-    
+
       CONFIG_IDLE_CUSTOM=y
 
     The bulk of the PM activities occur in the IDLE loop.  The IDLE loop is
@@ -1565,7 +1565,7 @@ Where <subdir> is one of the following:
     Here are some additional things to note in the configuration:
 
       CONFIG_PM_BUTTONS=y
-    
+
     CONFIG_PM_BUTTONS enables button support for PM testing.  Buttons can drive
     EXTI interrupts and EXTI interrrupts can be used to wakeup for certain reduced
     power modes (STOP mode).  The use of the buttons here is for PM testing purposes
@@ -1584,7 +1584,7 @@ Where <subdir> is one of the following:
     interface using apps/examples/posix_spawn.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
@@ -1602,7 +1602,7 @@ Where <subdir> is one of the following:
 
     3. By default, this project assumes that you are *NOT* using the DFU
        bootloader.
- 
+
   usbnsh:
   -------
 
@@ -1612,7 +1612,7 @@ Where <subdir> is one of the following:
     builtin RS-232 drivers.
 
     NOTES:
- 
+
     1. This configuration uses the mconf-based configuration tool.  To
        change this configuration using that tool, you should:
 
