@@ -88,10 +88,6 @@
 
 int work_usrstart(void)
 {
-  int errcode;
-
-  DEBUGASSERT(g_usrwork[USRWORK] == NULL);
-
   /* Start a user-mode worker thread for use by applications. */
 
   svdbg("Starting user-mode worker thread\n");
@@ -102,10 +98,12 @@ int work_usrstart(void)
                                        (main_t)work_usrthread,
                                        (FAR char * const *)NULL);
 
-  errcode = errno;
-  ASSERT(g_usrwork[USRWORK].pid > 0);
+  DEBUGASSERT(g_usrwork[USRWORK].pid > 0);
   if (g_usrwork[USRWORK].pid < 0)
     {
+      int errcode = errno;
+      DEBUGASSERT(errcode > 0);
+
       sdbg("task_create failed: %d\n", errcode);
       return -errcode;
     }

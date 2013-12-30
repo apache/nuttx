@@ -294,7 +294,7 @@ int nx_runinstance(FAR const char *mqname, FAR NX_DRIVERTYPE *dev);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_NX_MULTIUSER) && defined(CONFIG_NX_START)
+#if defined(CONFIG_NX_MULTIUSER) && defined(CONFIG_NX_NXSTART)
 int nx_start(void);
 #endif
 

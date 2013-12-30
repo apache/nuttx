@@ -40,6 +40,7 @@
 #include <nuttx/config.h>
 
 #include <errno.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/nx/nx.h>
@@ -94,13 +95,7 @@ void nx_redrawreq(NXWINDOW hwnd, FAR const struct nxgl_rect_s *rect)
   struct nxsvrmsg_redrawreq_s outmsg;
   int ret;
 
-#ifdef CONFIG_DEBUG
-  if (!wnd || !rect)
-    {
-      set_errno(EINVAL);
-      return ERROR;
-    }
-#endif
+  DEBUGASSERT(wnd && rect);
 
   /* Inform the server of the changed position */
 
