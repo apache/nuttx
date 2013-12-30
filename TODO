@@ -12,7 +12,7 @@ nuttx/
   (1)  Memory Managment (mm/)
   (3)  Signals (sched/, arch/)
   (2)  pthreads (sched/)
-  (8)  Kernel Build
+ (11)  Kernel Build
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
  (16)  Network (net/, drivers/net)
@@ -354,33 +354,65 @@ o pthreads (sched/)
 o Kernel Build
   ^^^^^^^^^^^^
 
-  Title:       KERNEL BUILD MODE ISSUES - GRAPHICS/NSH PARTITIONING.
-  Description: In the kernel build mode (where NuttX is built as a monlithic
+  Title:       GRAPHICS PARTITIONING.
+  Description: In the kernel build mode (where NuttX is built as a monolithic
                kernel and user code must trap into the protected kernel via
                syscalls), the single user mode cannot be supported.  In this
                built configuration, only the multiple user mode can be supported
-               with the NX server residing inside of the kernel space.  In
-               this case, most of the user end functions in graphics/nxmu
-               must be moved to libc/nx and those functions must be built into
-               libuser.a to be linked with the user-space code.
-               A similar issue exists in NSH that uses some internal OS
-               interfaces that would not be available in a kernel build
-               (such as foreach_task, foreach_mountpoint, etc.).
+               with the NX server residing inside of the kernel space.
+  Status:      Closed.  This is not a bug, this is just the things are.
+  Priority:    N/A.
+
+  Title:       NSH PARTITIONING.
+  Description: There are issues with several NSH commands in the NuttX kernel
+               build mode (where NuttX is built as a monolithic kernel and
+               user code must trap into the protected kernel via syscalls).
+               The current NSH implementation has several commands that call
+               directly into kernel internel functions for whicht there is
+               no syscall available.  The commands cause link failures in
+               the kernel build mode and must currently be disabled.
+               Here are known problems that must be fixed:
+
+               COMMAND  KERNEL INTERFACE(s)
+               -------- ----------------------------------------------
+               loset    losetup(), loteardown()
+               mkfatfs  mkfatfs
+               mkrd     ramdisk_register()
+               dd       bchlib_setup(), bchlib_read(), bchlib_write(),
+                        bchlib_teardown()
+               ps       sched_foreach()
+               ifup     netdev_foreach()
+               ifdown   netdev_foreach()
+               ifconfig netdev_foreach(), uip_stat()
+               ping     uip_ping()
+
   Status:      Open
-  Priority:    Low -- the kernel build configuration is not fully fielded
+  Priority:    Medium/High -- the kernel build configuration is not fully fielded
                yet.
 
-  Title:       NSH ps AND mount COMMANDS DISABLED
-  Description: NSH's ps and mount command (with not arguments) cannot currently
-               be supported in the kernel build.  That is because these commands
-               depend on kernel internal, non-standard interfaces that are not
-               accessible in user-space.  These are both critical NSH commands
-               and need to be supported.
-
-               In addition, the NSH 'free' command only shows memory usage in
-               the user headp, not useage in the kernel heap.
+  Title:       NSH free COMMAND LIMITATION
+  Description: The NSH 'free' command only shows memory usage in the user
+               heap only, not usage in the kernel heap.  I am thinking that
+               kernel heap memory usage should be available in /proc/memory.
   Status:      Open
-  Priority:    High.  I really like these commands!
+  Priority:    Medium/High
+
+  Title:       TELNETD PARTITIONING.
+  Description: Telnetd is implemented as a driver that resides in the apps/
+               directory.  In the kernel build, mode, the driver logic must
+               be moved into the kernel part of the build (nuttx/, although
+               the application level interfaces must stay in apps/).
+  Status:      Open
+  Priority:    Medium
+
+  Title:       NxCONSOLE PARTITIONING.
+  Description: NxConsole is implemented (correctly) as a driver that resides
+               in the nuttx/ directory.  However, the user interfaces must be
+               moved into a NuttX library or into apps/.  Currently
+               applications calls to the NxConsole user interfaces are
+               undefined.
+  Status:      Open
+  Priority:    Medium
 
   Title:       LOAD-ABLE MODULE SUPPORT UNVERIFIED
   Description: It has not been verified if NXFLAT and ELF modules work correctly
@@ -393,7 +425,7 @@ o Kernel Build
   Description: When a C++ ELF module is loaded, its C++ constructors are called
                via sched/task_starthook.c logic.  This logic runs in kernel mode.
                The is a security hole because the user code runs with kernel-
-               priviledges when the constuctor executes.
+               privileges when the constructor executes.
 
                Destructors likely have the opposite problem.  The probably try to
                execute some kernel logic in user mode?  Obviously this needs to

@@ -991,7 +991,22 @@ Where <subdir> is one of the following:
 
        This is easily changed by modifying the configuration.
 
-    3. At the end of the build, there will be several files in the top-level
+    3. In addition to the the kernel mode build, this NxWM configuration
+       differences from the nxwm configuration in that:
+
+       a. Networking is disabled.  There are issues with some of the network-
+          related NSH commands and with Telnet in the kernel build (see the
+          top-level TODO file).  Without these NSH commands, there is no use
+          for networking in this configuration.
+
+       b. The NxConsole windows are disabled. There are also issues with the
+          NxConsole build now (see the top-level TODO file).
+
+       c. The initialization sequence is quite different:  NX and the
+          touchscreen are initialized in kernel mode by logic in this src/
+          directory before the NxWM application is started.
+
+    4. At the end of the build, there will be several files in the top-level
        NuttX build directory:
 
        PASS1:
@@ -1004,7 +1019,7 @@ Where <subdir> is one of the following:
          nuttx.hex         - The pass2 Intel HEX file (selected in defconfig)
          System.map        - Symbols in the kernel-space ELF file
 
-    4. Combining .hex files.  If you plan to use the STM32 ST-Link Utility to
+    5. Combining .hex files.  If you plan to use the STM32 ST-Link Utility to
        load the .hex files into FLASH, then you need to combine the two hex
        files into a single .hex file.  Here is how you can do that.
 
