@@ -45,6 +45,7 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/kthread.h>
 #include <nuttx/nx/nx.h>
 
 #include "nxfe.h"
@@ -72,11 +73,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nx_servertask
+ * Name: nx_server
  *
  * Description:
- *   NX server thread.  This is the entry point into the server thread that
- *   serializes the multi-threaded accesses to the display.
+ *   NX server thread.  This is the entry point into the server kernel
+ *   thread that serializes the multi-threaded accesses to the display.
  *
  * Input Parameters:
  *   Standard task start-up parameters (none of which are used)
@@ -87,7 +88,7 @@
  *
  ****************************************************************************/
 
-int nx_servertask(int argc, char *argv[])
+int nx_server(int argc, char *argv[])
 {
   FAR NX_DRIVERTYPE *dev;
   int ret;
@@ -144,7 +145,7 @@ int nx_servertask(int argc, char *argv[])
 
 #endif /* CONFIG_NX_LCDDRIVER */
 
-  /* Then start the server (nx_run does not normally retun) */
+  /* Then start the server (nx_run does not normally return) */
 
   ret = nx_run(dev);
   gvdbg("nx_run returned: %d\n", errno);
@@ -184,24 +185,27 @@ int nx_start(void)
 {
   pid_t server;
 
-  /* Start the server task */
+  /* Start the server kernel thread */
 
   gvdbg("Starting server task\n");
-  server = TASK_CREATE("NX Server", CONFIG_NXSTART_SERVERPRIO,
-                       CONFIG_NXSTART_SERVERSTACK, nx_servertask,
-                       (FAR char * const *)0);
+  server = KERNEL_THREAD("NX Server", CONFIG_NXSTART_SERVERPRIO,
+                         CONFIG_NXSTART_SERVERSTACK, nx_server,
+                         (FAR char * const *)0);
   if (server < 0)
     {
       int errcode = errno;
       DEBUGASSERT(errcode > 0);
 
-      gdbg("ERROR: Failed to create nx_servertask task: %d\n", errcode);
+      gdbg("ERROR: Failed to create nx_server kernel thread: %d\n", errcode);
       return -errcode;
     }
 
-  /* Wait a bit to let the server get started */
+#if 0 /* Can't do this on the IDLE thread */
+  /* Wait a bit to make sure that the server get started */
 
   usleep(50*1000);
+#endif
+
   return OK;
 }
 

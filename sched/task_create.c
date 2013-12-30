@@ -46,6 +46,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/kthread.h>
 
 #include "os_internal.h"
 #include "group_internal.h"

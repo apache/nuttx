@@ -50,6 +50,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/init.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/kthread.h>
 #include <nuttx/userspace.h>
 
 #include "os_internal.h"

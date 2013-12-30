@@ -69,18 +69,6 @@
 #define MAX_TASKS_MASK      (CONFIG_MAX_TASKS-1)
 #define PIDHASH(pid)        ((pid) & MAX_TASKS_MASK)
 
-/* One processor family supported by NuttX has a single, fixed hardware stack.
- * That is the 8051 family.  So for that family only, there is a variant form
- * of kernel_thread() that does not take a stack size parameter.  The following
- * helper macro is provided to work around the ugliness of that exception.
- */
-
-#ifndef CONFIG_CUSTOM_STACK
-#  define KERNEL_THREAD(n,p,s,e,a)   kernel_thread(n,p,s,e,a)
-#else
-#  define KERNEL_THREAD(n,p,s,e,a)   kernel_thread(n,p,e,a)
-#endif
-
 /* A more efficient ways to access the errno */
 
 #define SET_ERRNO(e) \
@@ -238,14 +226,6 @@ int  task_exit(void);
 int  task_terminate(pid_t pid, bool nonblocking);
 void task_exithook(FAR struct tcb_s *tcb, int status, bool nonblocking);
 void task_recover(FAR struct tcb_s *tcb);
-
-#ifndef CONFIG_CUSTOM_STACK
-int  kernel_thread(FAR const char *name, int priority, int stack_size,
-                   main_t entry, FAR char * const argv[]);
-#else
-int  kernel_thread(FAR const char *name, int priority, main_t entry,
-                   FAR char * const argv[]);
-#endif
 bool sched_addreadytorun(FAR struct tcb_s *rtrtcb);
 bool sched_removereadytorun(FAR struct tcb_s *rtrtcb);
 bool sched_addprioritized(FAR struct tcb_s *newTcb, DSEG dq_queue_t *list);
