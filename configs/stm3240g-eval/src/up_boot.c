@@ -47,8 +47,60 @@
 #include "stm3240g-internal.h"
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
+/* Configuration ********************************************************************/
+/* Should we initialize the NX server?  This is done for NxWidgets (CONFIG_NXWIDGETS=y)
+ * if nx_start() is available (CONFIG_NX_NXSTART=y) and if the NxWidget::CNxServer
+ * class expects the RTOS to do the NX initialization (CONFIG_NXWIDGET_SERVERINIT=n).
+ * This combination of settings is normally only used in the kernel build mode
+ * (CONFIG_NUTTX_KERNEL) when NxWidgets is unable to initialize NX from user-space.
+ */
+
+#undef HAVE_NXSTART
+
+#if !defined(CONFIG_NX_MULTIUSER)
+#  undef CONFIG_NX_START
+#endif
+
+#if defined(CONFIG_NXWIDGETS)
+#  if defined(CONFIG_NX_NXSTART)
+#    if !defined(CONFIG_NXWIDGET_SERVERINIT)
+#      define HAVE_NXSTART
+#      include <nuttx/nx/nx.h>
+#    endif
+#  else
+#    if !defined(CONFIG_NXWIDGET_SERVERINIT) && defined(CONFIG_NUTTX_KERNEL)
+#      error CONFIG_NX_NXSTART=y is needed
+#    endif
+#  endif
+#endif
+
+/* Should we initialize the touchscreen for the NxWM (CONFIG_NXWM=y)?  This
+ * is done if we have a touchscreen (CONFIG_INPUT_STMPE811=y), NxWM uses the
+ * touchscreen (CONFIG_NXWM_TOUCHSCREEN=y), and if we were asked to
+ * initialize the touchscreen for NxWM (NXWM_TOUCHSCREEN_DEVINIT=n). This
+ * combination of settings is normally only used in the kernel build mode
+ * (CONFIG_NUTTX_KERNEL) when NxWidgets is unable to initialize NX from
+ * user-space.
+ */
+
+#undef HAVE_TCINIT
+
+#if defined(CONFIG_NXWM_TOUCHSCREEN)
+#  if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVNO)
+#    error CONFIG_NXWM_TOUCHSCREEN_DEVNO is not defined
+#  elif defined(CONFIG_INPUT_STMPE811)
+#    if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVINIT)
+#      define HAVE_TCINIT
+#      include <nuttx/input/touchscreen.h>
+#    endif
+#  else
+#    if !defined(CONFIG_NXWM_TOUCHSCREEN_DEVINIT) && defined(CONFIG_NUTTX_KERNEL)
+#      error CONFIG_INPUT_STMPE811=y is needed
+#    endif
+#  endif
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -122,14 +174,39 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
+  int ret;
+
   /* Perform NSH initialization here instead of from the NSH.  This
    * alternative NSH initialization is necessary when NSH is ran in user-space
    * but the initialization function must run in kernel space.
    */
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
-  (void)nsh_archinitialize();
+  ret = nsh_archinitialize();
+  if (ret < 0)
+    {
+      gdbg("ERROR: nsh_archinitialize failed: %d\n", ret);
+    }
+#endif
+
+  /* Initialize the NX server */
+
+#ifdef HAVE_NXSTART
+  ret = nx_start();
+  if (ret < 0)
+    {
+      gdbg("ERROR: nx_start failed: %d\n", ret);
+    }
+#endif
+
+  /* Initialize the touchscreen */
+
+#ifdef HAVE_TCINIT
+  ret = arch_tcinitialize(CONFIG_NXWM_TOUCHSCREEN_DEVNO);
+  if (ret < 0)
+    {
+      gdbg("ERROR: arch_tcinitialize failed: %d\n", ret);
+    }
 #endif
 }
 #endif
-
