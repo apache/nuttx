@@ -36,8 +36,8 @@ conditions where mmap() can be supported:
 2. If CONFIG_FS_RAMMAP is defined in the configuration, then mmap() will
    support simulation of memory mapped files by copying files whole
    into RAM.  These copied files have some of the properties of
-   standard memory mapped files.  There are many, many exceptions
-   exceptions, however.  Some of these include:
+   standard memory mapped files.  There are many, many exceptions,
+   however.  Some of these include:
 
    a. The goal is to have a single region of memory that represents a single
       file and can be shared by many threads.  That is, given a filename a

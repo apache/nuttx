@@ -44,7 +44,7 @@
  * where the code expects to begin execution by jumping to the entry point in
  * the 0x0800:0000 address range.
  *
- * For MPU support, the kernel-mode NuttX section is assumed to be 128Kb of
+ * For MPU support, the kernel-mode NuttX section is assumed to be 256Kb of
  * FLASH and 4Kb of SRAM.  That is an excessive amount for the kernel which
  * should fit into 64KB and, of course, can be optimized as needed (See
  * also configs/stm3240g-eval/scripts/kernel-space.ld).  Allowing the
@@ -88,13 +88,13 @@ MEMORY
 {
     /* 1024Kb FLASH */
 
-    kflash (rx)      : ORIGIN = 0x08000000, LENGTH = 128K
-    uflash (rx)      : ORIGIN = 0x08020000, LENGTH = 128K
-    xflash (rx)      : ORIGIN = 0x08040000, LENGTH = 768K
+    kflash (rx)      : ORIGIN = 0x08000000, LENGTH = 256K
+    uflash (rx)      : ORIGIN = 0x08040000, LENGTH = 256K
+    xflash (rx)      : ORIGIN = 0x08080000, LENGTH = 512K
 
     /* 112Kb of contiguous SRAM */
 
     ksram (rwx)      : ORIGIN = 0x20000000, LENGTH = 4K
     usram (rwx)      : ORIGIN = 0x20001000, LENGTH = 4K
-    xsram (rwx)      : ORIGIN = 0x20001000, LENGTH = 104K
+    xsram (rwx)      : ORIGIN = 0x20002000, LENGTH = 104K
 }

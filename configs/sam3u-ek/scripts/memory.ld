@@ -89,7 +89,7 @@ MEMORY
 
     ksram1 (rwx) : ORIGIN = 0x20000000, LENGTH = 4K
     usram1 (rwx) : ORIGIN = 0x20001000, LENGTH = 4K
-    xsram1 (rwx) : ORIGIN = 0x20001000, LENGTH = 24K
+    xsram1 (rwx) : ORIGIN = 0x20002000, LENGTH = 24K
 
     /* 16Kb SRAM */
 
