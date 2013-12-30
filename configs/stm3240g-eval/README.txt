@@ -49,7 +49,7 @@ GNU Toolchain Options
 
   Most testing has been conducted using the CodeSourcery toolchain for Windows and
   that is the default toolchain in most configurations (FPU-related testing has
-  been performed with the Atolloc toolchain for windows.  To use the Atollic,
+  been performed with the Atollic toolchain for windows.  To use the Atollic,
   devkitARM, Raisonance GNU, or NuttX buildroot toolchain, you simply need to
   add one of the following configuration options to your .config (or defconfig)
   file:
@@ -115,7 +115,7 @@ GNU Toolchain Options
   The Atollic "Lite" Toolchain
   ----------------------------
   The free, "Lite" version of the Atollic toolchain does not support C++ nor
-  does it support ar, nm, objdump, or objdcopy. If you use the Atollic "Lite"
+  does it support ar, nm, objdump, or objcopy. If you use the Atollic "Lite"
   toolchain, you will have to set:
 
     CONFIG_HAVE_CXX=n
@@ -162,7 +162,7 @@ IDEs
   2) Start the NuttX build at least one time from the Cygwin command line
      before trying to create your project.  This is necessary to create
      certain auto-generated files and directories that will be needed.
-  3) Set up include pathes:  You will need include/, arch/arm/src/stm32,
+  3) Set up include paths:  You will need include/, arch/arm/src/stm32,
      arch/arm/src/common, arch/arm/src/armv7-m, and sched/.
   4) All assembly files need to have the definition option -D __ASSEMBLY__
      on the command line.
@@ -304,7 +304,7 @@ events as follows:
   * If LED1, LED2, LED3 are statically on, then NuttX probably failed to boot
     and these LEDs will give you some indication of where the failure was
  ** The normal state is LED3 ON and LED1 faintly glowing.  This faint glow
-    is because of timer interupts that result in the LED being illuminated
+    is because of timer interrupts that result in the LED being illuminated
     on a small proportion of the time.
 *** LED2 may also flicker normally if signals are processed.
 
@@ -331,7 +331,7 @@ the LCD).
 
   ACCESS:
 
-    Daughterboard Extension Connector, CN3, pin 32
+    Daughter board Extension Connector, CN3, pin 32
     Ground is available on CN3, pin1
 
   NOTE: TIM4 hardware will not support pulse counting.
@@ -670,7 +670,7 @@ STM3240G-EVAL-specific Configuration Options
 
     CONFIG_ARCH_CALIBRATION - Enables some build in instrumentation that
        cause a 100 second delay during boot-up.  This 100 second delay
-       serves no purpose other than it allows you to calibratre
+       serves no purpose other than it allows you to calibrate
        CONFIG_ARCH_LOOPSPERMSEC.  You simply use a stop watch to measure
        the 100 second delay then adjust CONFIG_ARCH_LOOPSPERMSEC until
        the delay actually is 100 seconds.
@@ -805,7 +805,7 @@ STM3240G-EVAL-specific Configuration Options
     CONFIG_STM32_MII_MCO1 - Use MCO1 to clock the MII interface
     CONFIG_STM32_MII_MCO2 - Use MCO2 to clock the MII interface
     CONFIG_STM32_RMII - Support Ethernet RMII interface
-    CONFIG_STM32_AUTONEG - Use PHY autonegotion to determine speed and mode
+    CONFIG_STM32_AUTONEG - Use PHY autonegotiation to determine speed and mode
     CONFIG_STM32_ETHFD - If CONFIG_STM32_AUTONEG is not defined, then this
       may be defined to select full duplex mode. Default: half-duplex
     CONFIG_STM32_ETH100MBPS - If CONFIG_STM32_AUTONEG is not defined, then this
@@ -1067,7 +1067,7 @@ Where <subdir> is one of the following:
   -------
 
     This configuration directory may be used to verify networking performance
-    using the STM32's Ethernet controller. It uses apps/examples/nettest to excercise the
+    using the STM32's Ethernet controller. It uses apps/examples/nettest to exercise the
     TCP/IP network.
 
     CONFIG_EXAMPLES_NETTEST_SERVER=n                       : Target is configured as the client
@@ -1409,7 +1409,7 @@ Where <subdir> is one of the following:
     Here is the quick summary of the build steps (Assuming that all of
     the required packages are available in a directory ~/nuttx-code):
 
-    1. Intall the nxwm configuration
+    1. Install the nxwm configuration
 
        $ cd ~/nuttx-code/nuttx/tools
        $ ./configure.sh stm3240g-eval/nxwm

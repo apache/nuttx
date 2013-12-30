@@ -105,7 +105,7 @@ NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
 
   /* Pre-allocate the window structure */
 
-  wnd = (FAR struct nxbe_window_s *)lib_zalloc(sizeof(struct nxbe_window_s));
+  wnd = (FAR struct nxbe_window_s *)lib_uzalloc(sizeof(struct nxbe_window_s));
   if (!wnd)
     {
       set_errno(ENOMEM);

@@ -195,9 +195,11 @@ NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev)
     }
 #endif
 
-  /* Allocate the NX state structure */
+  /* Allocate the NX state structure.  The user-space allocator is used
+   * (if available) for compatibility with the multi-user implementation.
+   */
 
-  fe = (FAR struct nxfe_state_s *)kzalloc(sizeof(struct nxfe_state_s));
+  fe = (FAR struct nxfe_state_s *)umm_zalloc(sizeof(struct nxfe_state_s));
   if (!fe)
     {
       errno = ENOMEM;

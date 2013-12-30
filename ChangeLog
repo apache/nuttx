@@ -6345,5 +6345,7 @@
 	* Moved configs/stm3240g-eval/src/up_cxxinitialize.c to
 	  apps/platform/stm3240g-eval/up_cxxinitialize.c:  Now it is available
 	  in user-space in the kernel mode build (2013-12-29).
-
-
+	* graphics/nxbe, nxsu, libnx/nxmu, and nxtk:  Need to be consistent with
+	  which allocator is used in the different configurations.  Always uses
+	  the user-space allocator because that one is required in certain
+	  configurations (2013-12-30).

@@ -117,7 +117,7 @@ int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd,
 
   if (!conn || !cb)
     {
-      lib_free(wnd);
+      lib_ufree(wnd);
       set_errno(EINVAL);
       return ERROR;
     }

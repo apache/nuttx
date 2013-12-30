@@ -39,11 +39,12 @@
 
 #include <nuttx/config.h>
 
-#include <stdlib.h>
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/nx/nxglib.h>
+
 #include "nxbe.h"
 
 /****************************************************************************
@@ -77,7 +78,8 @@
  *   Close an existing window
  *
  * Input Parameters:
- *   wnd  - The window to be closed (and deallocated)
+ *   wnd  - The window to be closed (and deallocated using the user-space
+ *          allocator)
  *
  * Return:
  *   None
@@ -131,7 +133,9 @@ void nxbe_closewindow(struct nxbe_window_s *wnd)
 
   nxbe_redrawbelow(be, wnd->below, &wnd->bounds);
 
-  /* Then discard the window structure */
+  /* Then discard the window structure.  Here we assume that the user-space
+   * allocator was used.
+   */
 
-  free(wnd);
+  umm_free(wnd);
 }

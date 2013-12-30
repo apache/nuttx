@@ -132,7 +132,7 @@ NXHANDLE nx_connectinstance(FAR const char *svrmqname)
 
   /* Allocate the NX client structure */
 
-  conn = (FAR struct nxfe_conn_s *)lib_zalloc(sizeof(struct nxfe_conn_s));
+  conn = (FAR struct nxfe_conn_s *)lib_uzalloc(sizeof(struct nxfe_conn_s));
   if (!conn)
     {
       set_errno(ENOMEM);
@@ -215,7 +215,7 @@ errout_with_wmq:
 errout_with_rmq:
   mq_close(conn->crdmq);
 errout_with_conn:
-  lib_free(conn);
+  lib_ufree(conn);
 errout:
   return NULL;
 }

@@ -99,7 +99,7 @@ static inline void nx_disconnected(FAR struct nxfe_conn_s *conn)
 
   /* And free the client structure */
 
-  lib_free(conn);
+  lib_ufree(conn);
 }
 
 /****************************************************************************

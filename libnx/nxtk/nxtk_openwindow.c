@@ -131,7 +131,7 @@ NXTKWINDOW nxtk_openwindow(NXHANDLE handle,
   /* Pre-allocate the window structure */
 
   fwnd = (FAR struct nxtk_framedwindow_s *)
-    lib_zalloc(sizeof(struct nxtk_framedwindow_s));
+    lib_uzalloc(sizeof(struct nxtk_framedwindow_s));
 
   if (!fwnd)
     {

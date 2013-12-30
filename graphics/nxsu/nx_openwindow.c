@@ -103,9 +103,11 @@ NXWINDOW nx_openwindow(NXHANDLE handle, FAR const struct nx_callback_s *cb,
     }
 #endif
 
-  /* Pre-allocate the window structure */
+  /* Pre-allocate the window structure.  The user-space allocator is used (if
+   * available) for compatibility with the multi-user implementation.
+   */
 
-  wnd = (FAR struct nxbe_window_s *)kzalloc(sizeof(struct nxbe_window_s));
+  wnd = (FAR struct nxbe_window_s *)umm_zalloc(sizeof(struct nxbe_window_s));
   if (!wnd)
     {
       errno = ENOMEM;
