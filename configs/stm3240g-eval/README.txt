@@ -987,9 +987,19 @@ Where <subdir> is one of the following:
 
        CONFIG_HOST_WINDOWS=y                   : Windows
        CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
-       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
+       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y     : NuttX EABI buildroot toolchain
+       CONFIG_CXX_NEWLONG=y                    : size_t is long (maybe?)
 
        This is easily changed by modifying the configuration.
+
+       NOTE:  When I used a recent CodeSourcery toolchain, then toolchain
+       generated an illegal blx to an even address when calling into one
+       of the EABI math libraries.  I don't know why this happened or if
+       the probably is repeatable with other CodeSourcery versions.  You
+       can try for yourself setting:
+
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
+       CONFIG_CXX_NEWLONG=n                    : size_t is unsigned int (maybe?)
 
     3. In addition to the the kernel mode build, this NxWM configuration
        differences from the nxwm configuration in that:

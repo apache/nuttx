@@ -144,7 +144,7 @@ int up_hardfault(int irq, FAR void *context)
 
   /* Dump some hard fault info */
 
-  hfdbg("\nHard Fault:\n");
+  hfdbg("Hard Fault:\n");
   hfdbg("  IRQ: %d regs: %p\n", irq, regs);
   hfdbg("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
         getbasepri(), getprimask(), getipsr(), getcontrol());
