@@ -189,8 +189,7 @@ int nx_start(void)
 
   gvdbg("Starting server task\n");
   server = KERNEL_THREAD("NX Server", CONFIG_NXSTART_SERVERPRIO,
-                         CONFIG_NXSTART_SERVERSTACK, nx_server,
-                         (FAR char * const *)0);
+                         CONFIG_NXSTART_SERVERSTACK, nx_server, NULL);
   if (server < 0)
     {
       int errcode = errno;
@@ -200,12 +199,11 @@ int nx_start(void)
       return -errcode;
     }
 
-#if 0 /* Can't do this on the IDLE thread */
-  /* Wait a bit to make sure that the server get started */
+  /* Wait a bit to make sure that the server get started.  NOTE that this
+   * operation cannot be done from the IDLE thread!
+   */
 
   usleep(50*1000);
-#endif
-
   return OK;
 }
 

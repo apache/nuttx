@@ -41,9 +41,6 @@
 
 #include <debug.h>
 
-#include <arch/board/board.h>
-
-#include "up_arch.h"
 #include "stm3240g-internal.h"
 
 /************************************************************************************
@@ -102,9 +99,96 @@
 #  endif
 #endif
 
+/* Check if we will need to support the initialization kernel thread */
+
+#undef HAVE_INITTHREAD
+
+#ifdef CONFIG_BOARD_INITIALIZE
+#  if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+#    define HAVE_INITTHREAD 1
+#  elif defined(HAVE_NXSTART)
+#    define HAVE_INITTHREAD 1
+#  elif defined(HAVE_TCINIT)
+#    define HAVE_INITTHREAD 1
+#  endif
+#endif
+
+#ifdef HAVE_INITTHREAD
+#  include <stdlib.h>
+#  include <assert.h>
+#  include <nuttx/kthread.h>
+#  ifndef CONFIG_STM3240G_BOARDINIT_PRIO
+#    define CONFIG_STM3240G_BOARDINIT_PRIO 196
+#  endif
+#  ifndef CONFIG_STM3240G_BOARDINIT_STACK
+#    define CONFIG_STM3240G_BOARDINIT_STACK 2048
+#  endif
+#endif
+
 /************************************************************************************
  * Private Functions
  ************************************************************************************/
+
+/************************************************************************************
+ * Name: board_initthread
+ *
+ * Description:
+ *   Board initialization kernel thread.  This thread exists to support
+ *   initialization when CONFIG_BOARD_INITIALIZE is defined.  It is started by
+ *   board_initialize() which runs on the IDLE thread.
+ *
+ *   This function thread exists because some initialization steps may require
+ *   waiting for events.  Such waiting is not possible on the IDLE thread.
+ *
+ * Input Parameters:
+ *   Standard task start-up parameters (none of which are used)
+ *
+ * Returned Value:
+ *   Always returns EXIT_SUCCESS.
+ *
+ ************************************************************************************/
+
+#ifdef HAVE_INITTHREAD
+static int board_initthread(int argc, char *argv[])
+{
+  int ret;
+
+  /* Perform NSH initialization here instead of from the NSH.  This
+   * alternative NSH initialization is necessary when NSH is ran in user-space
+   * but the initialization function must run in kernel space.
+   */
+
+#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
+  ret = nsh_archinitialize();
+  if (ret < 0)
+    {
+      gdbg("ERROR: nsh_archinitialize failed: %d\n", ret);
+    }
+#endif
+
+  /* Initialize the NX server */
+
+#ifdef HAVE_NXSTART
+  ret = nx_start();
+  if (ret < 0)
+    {
+      gdbg("ERROR: nx_start failed: %d\n", ret);
+    }
+#endif
+
+  /* Initialize the touchscreen */
+
+#ifdef HAVE_TCINIT
+  ret = arch_tcinitialize(CONFIG_NXWM_TOUCHSCREEN_DEVNO);
+  if (ret < 0)
+    {
+      gdbg("ERROR: arch_tcinitialize failed: %d\n", ret);
+    }
+#endif
+
+  return EXIT_SUCCESS;
+}
+#endif
 
 /************************************************************************************
  * Public Functions
@@ -115,7 +199,7 @@
  *
  * Description:
  *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
@@ -158,6 +242,7 @@ void stm32_boardinitialize(void)
   up_ledinit();
 #endif
 }
+
 /****************************************************************************
  * Name: board_initialize
  *
@@ -174,39 +259,15 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_INITIALIZE
 void board_initialize(void)
 {
-  int ret;
+#ifdef HAVE_INITTHREAD
+  pid_t server;
 
-  /* Perform NSH initialization here instead of from the NSH.  This
-   * alternative NSH initialization is necessary when NSH is ran in user-space
-   * but the initialization function must run in kernel space.
-   */
+  /* Start the board initialization kernel thread */
 
-#if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
-  ret = nsh_archinitialize();
-  if (ret < 0)
-    {
-      gdbg("ERROR: nsh_archinitialize failed: %d\n", ret);
-    }
-#endif
-
-  /* Initialize the NX server */
-
-#ifdef HAVE_NXSTART
-  ret = nx_start();
-  if (ret < 0)
-    {
-      gdbg("ERROR: nx_start failed: %d\n", ret);
-    }
-#endif
-
-  /* Initialize the touchscreen */
-
-#ifdef HAVE_TCINIT
-  ret = arch_tcinitialize(CONFIG_NXWM_TOUCHSCREEN_DEVNO);
-  if (ret < 0)
-    {
-      gdbg("ERROR: arch_tcinitialize failed: %d\n", ret);
-    }
+  server = KERNEL_THREAD("Board Init", CONFIG_STM3240G_BOARDINIT_PRIO,
+                         CONFIG_STM3240G_BOARDINIT_STACK, board_initthread,
+                         NULL);
+  ASSERT(server > 0);
 #endif
 }
 #endif
