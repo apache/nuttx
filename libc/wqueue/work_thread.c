@@ -231,7 +231,7 @@ static void work_process(FAR struct wqueue_s *wqueue)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_HPWORK
+#if defined(CONFIG_SCHED_HPWORK)
 
 int work_hpthread(int argc, char *argv[])
 {
@@ -290,7 +290,7 @@ int work_lpthread(int argc, char *argv[])
 #endif /* CONFIG_SCHED_LPWORK */
 #endif /* CONFIG_SCHED_HPWORK */
 
-#ifdef CONFIG_SCHED_USRWORK
+#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
 
 int work_usrthread(int argc, char *argv[])
 {

@@ -96,15 +96,19 @@
    */
 
 #  ifndef __KERNEL__
+
 #    undef CONFIG_SCHED_HPWORK
 #    undef CONFIG_SCHED_LPWORK
 
+#    ifndef CONFIG_SCHED_USRWORK
+#      undef CONFIG_SCHED_WORKQUEUE
+#    endif
+
   /* User-space worker threads are not built in a kernel build when we are
-   * building the kernel-space libraries.
+   * building the kernel-space libraries (but we still need to know that it
+   * is configured).
    */
 
-#  else
-#    undef CONFIG_SCHED_USRWORK
 #  endif
 
   /* User-space worker threads are not built in a flat build
@@ -136,17 +140,11 @@
 #  undef CONFIG_SCHED_LPWORK
 #endif
 
-/* We might not be building any work queue support in this context */
-
-#if !defined(CONFIG_SCHED_HPWORK) && !defined(CONFIG_SCHED_LPWORK) && !defined(CONFIG_SCHED_USRWORK)
-#  undef CONFIG_SCHED_WORKQUEUE
-#endif
-
 #ifdef CONFIG_SCHED_WORKQUEUE
 
 /* We are building work queues... Work queues need signal support */
 
-#if defined(CONFIG_SCHED_WORKQUEUE) && defined(CONFIG_DISABLE_SIGNALS)
+#ifdef CONFIG_DISABLE_SIGNALS
 #  warning "Worker thread support requires signals"
 #endif
 
@@ -377,7 +375,7 @@ int work_hpthread(int argc, char *argv[]);
 int work_lpthread(int argc, char *argv[]);
 #endif
 
-#ifdef CONFIG_SCHED_USRWORK
+#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
 int work_usrthread(int argc, char *argv[]);
 #endif
 
@@ -396,7 +394,7 @@ int work_usrthread(int argc, char *argv[]);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_USRWORK
+#if defined(CONFIG_SCHED_USRWORK) && !defined(__KERNEL__)
 int work_usrstart(void);
 #endif
 
