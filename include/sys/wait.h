@@ -56,9 +56,9 @@
  *   Other values - Not implemented
  */
 
-#define WEXITSTATUS(s)  (((s) >> 8) & 0xff)/* Return exit status */
-
+#define WEXITSTATUS(s)  (((s) >> 8) & 0xff) /* Return exit status */
 #define WIFEXITED(s)    (((s) & 0xff) == 0) /* True: Child exited normally */
+
 #define WIFCONTINUED(s) (false)  /* True: Child has been continued */
 #define WIFSIGNALED(s)  (false)  /* True: Child exited due to uncaught signal */
 #define WIFSTOPPED(s)   (false)  /* True: Child is currently stopped */
@@ -70,13 +70,11 @@
  */
 
 #define WCONTINUED      (1 << 0) /* Status for child that has been continued (1)(2) */
-#define WNOHANG         (1 << 1) /* Do not wait if status not available (1) */
+#define WNOHANG         (1 << 1) /* Do not wait if status not available (1) (2) */
 #define WUNTRACED       (1 << 2) /* Report status of stopped child process (1) */
-
 #define WEXITED         (1 << 3) /* Wait for processes that have exited (2) */
 #define WSTOPPED        (1 << 4) /* Status for child stopped on signal (2) */
-#define WNOHANG         (1 << 5) /* Return immediately if there are no children (2) */
-#define WNOWAIT         (1 << 6) /* Keep the process in a waitable state (2) */
+#define WNOWAIT         (1 << 5) /* Keep the process in a waitable state (2) */
 
 /****************************************************************************
  * Public Type Definitions

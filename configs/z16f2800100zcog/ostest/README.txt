@@ -7,11 +7,11 @@ OSTEST Project
 ostest.zfpproj is a simple ZDS II - ZNEO 5.0.1 project that will allow you
   to use the ZDS-II debugger.  Before using, copy the following files from
   the toplevel directory:
-  
+
     nuttx.hex, nuttx.map, nuttx.lod
-  
+
   to this directory as:
-  
+
     ostest.hex, ostest.map, ostest.lod
 
 ostest.zdzbak is a project file for an older ZDS-II 4.0 version (There is no

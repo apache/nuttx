@@ -6354,4 +6354,6 @@
 	  well (2013-12-30).
 	* configs/sim/mount/defconfig:  Converted to use kconfig-frontends
 	  tools (2013-21-31).
+	* configs/z16f2800100zcog/nsh:  Add a Z16F NSH configuration.  Does not
+	  yet work (2014-1-1).
 

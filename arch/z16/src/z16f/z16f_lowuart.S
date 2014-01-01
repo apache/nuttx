@@ -89,7 +89,7 @@ _z16f_lowuartinit:
 #endif
 	ld	r0, r3			/* r0 = baud */
 	sll	r0, #3			/* r0 = baud * 8 */
-	add	r0, #_SYS_CLK_FREQ	/* r3 = freq + baud * 8*/
+	add	r0, #_SYS_CLK_FREQ	/* r3 = freq + baud * 8 */
 	sll	r3, #4			/* r3 = baud * 16 */
 	udiv	r0, r3			/* BRG = (freq + baud * 8)/(baud * 16) */
 
@@ -143,7 +143,7 @@ _z16f_lowuartinit:
 _up_lowputc:
 	/* Check if the character to output is a linefeed */
 
-	ext.ub	r0, r1			/* r0=Character masked to 8-bits */ 
+	ext.ub	r0, r1			/* r0=Character masked to 8-bits */
 	cp	r0, #10			/* Is it a linefeed ('\n') */
 	jp	ne, _z16f_xmitc		/* No? Jump to _z16f_xmitc with character in r1 */
 

@@ -78,16 +78,14 @@ extern _Erom unsigned long SYS_CLK_FREQ;
 
 struct z16f_uart_s
 {
-  uint32_t     uartbase;	/* Base address of UART
-							 * registers */
-  uint32_t     baud;		/* Configured baud */
-  bool         rxenabled;	/* RX interrupt enabled */
-  bool         txenabled;	/* TX interrupt enabled */
-  uint8_t      rxirq;		/* RX IRQ associated with this UART */
-  uint8_t      txirq;		/* RX IRQ associated with this UART */
-  uint8_t      parity;		/* 0=none, 1=odd, 2=even */
-  bool         stopbits2;	/* true: Configure with 2
-							 * stop bits instead of 1 */
+  uint32_t     uartbase;    /* Base address of UART registers */
+  uint32_t     baud;        /* Configured baud */
+  bool         rxenabled;   /* RX interrupt enabled */
+  bool         txenabled;   /* TX interrupt enabled */
+  uint8_t      rxirq;       /* RX IRQ associated with this UART */
+  uint8_t      txirq;       /* RX IRQ associated with this UART */
+  uint8_t      parity;      /* 0=none, 1=odd, 2=even */
+  bool         stopbits2;   /* true: Configure with 2 stop bits instead of 1 */
 };
 
 /****************************************************************************
@@ -291,6 +289,7 @@ static void z16f_consoleput(uint8_t ch)
           break;
         }
     }
+
   putreg8(ch,  priv->uartbase + Z16F_UART_TXD);
 }
 
@@ -320,7 +319,9 @@ static int z16f_setup(struct uart_dev_s *dev)
 
   /* Configure STOP bits */
 
-  ctl0 = ctl1 = 0;
+  ctl0 = 0;
+  ctl1 = 0;
+
   if (priv->stopbits2)
     {
       ctl0 |= Z16F_UARTCTL0_STOP;
@@ -345,6 +346,7 @@ static int z16f_setup(struct uart_dev_s *dev)
   ctl0 |= (Z16F_UARTCTL0_TEN|Z16F_UARTCTL0_REN);
   putreg8(ctl0, priv->uartbase + Z16F_UART_CTL0);
 #endif
+
   return OK;
 }
 
@@ -352,8 +354,7 @@ static int z16f_setup(struct uart_dev_s *dev)
  * Name: z16f_shutdown
  *
  * Description:
- *   Disable the UART.  This method is called when the serial
- *   port is closed
+ *   Disable the UART.  This method is called when the serial port is closed
  *
  ****************************************************************************/
 
@@ -664,14 +665,16 @@ static bool z16f_txempty(struct uart_dev_s *dev)
  * Name: up_earlyserialinit
  *
  * Description:
- *   Performs the low level UART initialization early in 
- *   debug so that the serial console will be available
- *   during bootup.  This must be called before z16f_serialinit.
+ *   Performs the low level UART initialization early in debug so that the
+ *   serial console will be available during bootup.  This must be called
+ *   before z16f_serialinit.
  *
  ****************************************************************************/
 
 void up_earlyserialinit(void)
 {
+  /* REVISIT:  UART GPIO AFL register is not initialized */
+
   (void)z16f_disableuartirq(&TTYS0_DEV);
   (void)z16f_disableuartirq(&TTYS1_DEV);
 
@@ -683,8 +686,8 @@ void up_earlyserialinit(void)
  * Name: up_serialinit
  *
  * Description:
- *   Register serial console and serial ports.  This assumes
- *   that up_earlyserialinit was called previously.
+ *   Register serial console and serial ports.  This assumes that
+ *   up_earlyserialinit was called previously.
  *
  ****************************************************************************/
 
@@ -699,8 +702,7 @@ void up_serialinit(void)
  * Name: up_putc
  *
  * Description:
- *   Provide priority, low-level access to support OS debug
- *   writes
+ *   Provide priority, low-level access to support OS debug writes
  *
  ****************************************************************************/
 
@@ -709,7 +711,7 @@ int up_putc(int ch)
   uint8_t  state;
 
   /* Keep interrupts disabled so that we do not interfere with normal
-   * driver operation 
+   * driver operation
    */
 
   state = z16f_disableuartirq(&CONSOLE_DEV);
