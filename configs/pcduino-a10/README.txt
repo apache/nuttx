@@ -101,6 +101,7 @@ Contents
   - Serial Console
   - LEDs
   - Buttons
+  - JTAG
   - Booting NuttX from an SD card
 
 pcDuino v1 Connectors
@@ -249,6 +250,35 @@ Buttons
     SW3 Key_Back  LCD1_D17/ATAD13/KP_IN7/SMC_VCCEN/EINT17/CSI1_D17/PH17
     SW4 Key_Home  LCD1_D18/ATAD14/KP_OUT0/SMC_SLK/EINT18/CSI1_D18/PH18
     SW5 Key_Menu  LCD1_D19/ATAD15/KP_OUT1/SMC_SDA/EINT19/CSI1_D19/PH19
+
+JTAG
+====
+
+  A. I didn't get success testing J-Link with pcDuino, it is reading TDI
+     always as 1.
+
+     I think the main problem is because pcDuino JTAG doesn't have RESET
+     (no trst or srst). I tried to connect the JTAG reset to Power_Reset
+     of pcDuino, but it didn't work.
+
+  B. Notice that the OlinuxIno JTAG does have a reset line called RESET_N.
+     But it is nothing special.  It just connects to the RESET# pin C14 on
+     the A10.  The pcDuino also brings out the RESET# on several connectors.
+
+     So it seems like you could get the reset line if you need it, just not
+     from the set of JTAG pads.
+
+  A. I discovered the issue in the JTAG, it was not working because
+     JTAG_SEL was not tied to GND.
+
+    I compared the Olimex schematic with pcDuino and noticed there is a
+    R64 resister that is not placed in the board.
+
+    It was a little bit difficult to find this resistor, because it is
+    "hidden" among the capacitors in the bottom of the board.
+
+    After short circuiting the resistor PADs the JTAG started to work,
+    well, JLinkExe now recognize it, but OpenOCD is not working yet.
 
 Booting NuttX from an SD card
 =============================
