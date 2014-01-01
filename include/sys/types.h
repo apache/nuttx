@@ -223,7 +223,7 @@ typedef int32_t      suseconds_t;
 
 /* Task entry point */
 
-typedef int (*main_t)(int argc, char *argv[]);
+typedef CODE int (*main_t)(int argc, char *argv[]);
 
 #endif
 
