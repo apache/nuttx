@@ -44,7 +44,7 @@ Version 5.0.1
   to modify the versioning in Make.defs and setenv.sh; if you want to build
   on a different platform, you will need to change the path in the ZDS binaries
   in those same files.
-  
+
 Other Versions
 
   If you use any version of ZDS-II other than 5.0.1 or if you install ZDS-II
@@ -62,7 +62,7 @@ mentioned here because it causes a failure to compile Nuttx:
 
   Description: The file drivers/mmcsd/mmcsd_sdio.c generates an internal compiler
                error like:
- 
+
                mmcsd\mmcsd_sdio.c
                Internal Error(0503) On line 2524 of "MMCSD\MMCSD_SDIO.C"
                    File <c3>, Args(562,46)
@@ -94,11 +94,13 @@ Where <sub-directory> is the specific board configuration that you
 wish to build.  The following board-specific configurations are
 available:
 
-ostest
-------
-
-    This builds the examples/ostest application for execution from FLASH.
-    See examples/README.txt for information about ostest.
+nsh
+---
+  nsh:
+    This configuration directory will built the NuttShell (NSH).  See
+    the NSH user manual in the documents directory (or online at nuttx.org).
+    See also the README.txt file in the ostest sub-directory for information
+    about using ZDS-II.
 
     NOTES:
 
@@ -125,7 +127,49 @@ ostest
         CONFIG_APPS_DIR="..\apps"
 
       NOTES:
-      
+
+      a. If you need to change the toolchain path used in Make.defs, you
+         will need to use the short 8.3 filenames to avoid spaces.  On my
+         PC, C:\PROGRA~1\ is is C:\Program Files\ and C:\PROGRA~2\ is
+         C:\Program Files (x86)\
+      b. I have not tried to use this configuration with the native
+         Windows build, but I would expect the same issues as is listed
+         for the ostest configuration..
+
+ostest
+------
+
+    This builds the examples/ostest application for execution from FLASH.
+    See the README.txt file in the ostest sub-directory for information
+    about using ZDS-II.  See also apps/examples/README.txt for information
+    about ostest.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. By default, this configuration assumes that you are using the
+       Cygwin environment on Windows.  An option is to use the native
+       CMD.exe window build as described in the top-level README.txt
+       file.  To set up that configuration:
+
+       -CONFIG_WINDOWS_CYGWIN=y
+       +CONFIG_WINDOWS_NATIVE=y
+
+       And after configuring, make sure that CONFIG_APPS_DIR uses
+       the back slash character.  For example:
+
+        CONFIG_APPS_DIR="..\apps"
+
+      NOTES:
+
       a. If you need to change the toolchain path used in Make.defs, you
          will need to use the short 8.3 filenames to avoid spaces.  On my
          PC, C:\PROGRA~1\ is is C:\Program Files\ and C:\PROGRA~2\ is
@@ -139,9 +183,6 @@ ostest
          the end of the lines after a line continuation (\ ^M).  If these
          trailing bad characters are manually eliminated, then the build
          will succeed on the next try.
-      d. Hmmm... when last tested, there some missing .obj files in arch/z16/src.
-         A little additional TLC might be needed to get a reliable Windows
-         native build.
 
 pashello
 --------
