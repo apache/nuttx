@@ -6352,3 +6352,6 @@
 	* include/nuttx/kthread.h:  Move kernel thread definitions out of
 	  os_internal.h so that the rest of the OS can start kernel threads as
 	  well (2013-12-30).
+	* configs/sim/mount/defconfig:  Converted to use kconfig-frontends
+	  tools (2013-21-31).
+

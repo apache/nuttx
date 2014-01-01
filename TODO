@@ -486,7 +486,7 @@ o Kernel Build
   Status:      Open
   Priority:    Low (unless performance becomes an issue).
 
-  Title:       MEMORY MANAGER SECURITY ISSUE
+  Title:       SECURITY ISSUES
   Description: In the current designed, the kernel code calls into the user-space
                allocators to allocate user-space memory.  It is a security risk to
                call into user-space in kernel-mode because that could be exploited
@@ -495,6 +495,10 @@ o Kernel Build
                allocators would then need to trap in order to return (this is
                already done to return from signal handlers; that logic could be
                renamed more generally and just used for a generic return trap).
+
+               Another place where the system calls into the user code in kernel
+               mode is work_usrstart() to start the user work queue.  That is
+               another security hole that should be plugged.
   Status:      Open
   Priority:    Low (unless security becomes an issue).
 
