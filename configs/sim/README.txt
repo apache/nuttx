@@ -248,6 +248,18 @@ mount
     cd <nuttx-directory>/tools
     ./configure.sh sim/mount
 
+  NOTES
+  -----
+
+  1. This configuration uses the mconf-based configuration tool.  To
+     change this configuration using that tool, you should:
+
+     a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+        and misc/tools/
+
+     b. Execute 'make menuconfig' in nuttx/ in order to start the
+        reconfiguration process.
+
 mtdpart
 
   This is the apps/examples/mtdpart test using a MTD RAM driver to
@@ -267,6 +279,12 @@ nettest
   NOTES:
   - The NuttX network is not, however, functional on the Linux TAP
     device yet.
+
+    UPDATE:  The TAP device does apparently work according to a NuttX
+    user (provided that it is not used with NSH: NSH waits on readline()
+    for console input.  When it calls readline(), the whole system blocks
+    waiting from input from the host OS).  My failure to get the TAP
+    device working appears to have been a cockpit error.
 
   - As of NuttX-5.18, when built on Windows, this test does not try
     to use the TAP device (which is not available on Cygwin anyway), 
