@@ -6356,4 +6356,6 @@
 	  tools (2013-21-31).
 	* configs/z16f2800100zcog/nsh:  Add a Z16F NSH configuration.  Does not
 	  yet work (2014-1-1).
+	* arch/arm/src/stm32/stm32_serial.c: Single-wire UART support from
+	  Thomas Grubler (2014-1-2).
 
