@@ -2265,7 +2265,7 @@ o z16 (arch/z16)
                reliable Windows native build.  As of this writing, the Cygwin
                based build has not been re-verified.
   Status:      Open
-  Priority:    Low -- I don't think anyone uses the Z16 port.
+  Priority:    Low -- I don't think anyone uses the Z16 port with the native build.
 
 o mc68hc1x (arch/hc)
   ^^^^^^^^^^^^^^^^^^
