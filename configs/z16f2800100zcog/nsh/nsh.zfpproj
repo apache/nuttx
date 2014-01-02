@@ -233,13 +233,6 @@
 
 <!-- breakpoint information -->
 <breakpoints>
-<breakpoint temporary="false" enabled="true" >
-<line-number>0</line-number>
-<pathname></pathname>
-<address>37442</address>
-<command></command>
-<preserve-type>1</preserve-type>
-</breakpoint>
 </breakpoints>
 
 </project>

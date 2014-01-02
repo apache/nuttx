@@ -42,7 +42,7 @@ nuttx/
   (1)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
  (11)  z80/z8/ez80/z180 (arch/z80/)
-  (9)  z16 (arch/z16/)
+  (8)  z16 (arch/z16/)
   (1)  mc68hc1x (arch/hc)
 
 apps/
@@ -2163,16 +2163,6 @@ o z16 (arch/z16)
   Status:      Open
   Priority:    Low, thought to be cosmetic.  I think this is a consequence of
                replacing vs. inserting the library.
-
-  Title:       SERIAL DRIVER HANGS
-  Description: When the interrupt-driven serial driver is used, the system
-               hangs.  This is because of TX ready (TRDE) interrupts that
-               get lost while interrupts are disabled.  The existing
-               serial driver appears to be limited to hardware with a
-               latching, level-sensitive TX ready interrupt.
-  Status:      Open
-  Priority:    Medium. A polled, write-only serial driver is used in the
-               interim for system testing.
 
   Title:       SYSTEM DELAYS
   Description: The system delays do not appear to be correct with the
