@@ -91,7 +91,7 @@
  * Name: vsyslog
  ****************************************************************************/
 
-int vsyslog(const char *fmt, va_list ap)
+int vsyslog(FAR const char *fmt, va_list ap)
 {
 #if defined(CONFIG_SYSLOG)
 
@@ -135,7 +135,7 @@ int vsyslog(const char *fmt, va_list ap)
  * Name: syslog
  ****************************************************************************/
 
-int syslog(const char *fmt, ...)
+int syslog(FAR const char *fmt, ...)
 {
   va_list ap;
   int     ret;

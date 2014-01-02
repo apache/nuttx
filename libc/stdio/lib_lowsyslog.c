@@ -90,7 +90,7 @@
 
 #if defined(CONFIG_ARCH_LOWPUTC) || defined(CONFIG_SYSLOG)
 
-int lowvsyslog(const char *fmt, va_list ap)
+int lowvsyslog(FAR const char *fmt, va_list ap)
 {
   struct lib_outstream_s stream;
 
@@ -108,7 +108,7 @@ int lowvsyslog(const char *fmt, va_list ap)
  * Name: lowsyslog
  ****************************************************************************/
 
-int lowsyslog(const char *fmt, ...)
+int lowsyslog(FAR const char *fmt, ...)
 {
   va_list ap;
   int     ret;
