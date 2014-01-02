@@ -53,31 +53,6 @@ Other Versions
   configs/z16f2800100zcog/*/Make.defs.  Simply edit these two files, changing
   5.0.1 to whatever.
 
-Issues
-======
-
-There are several, important open issues with the ZNEO port (9 as of this writing).
-See the TODO file in the top-level NuttX directory.  One of these should be
-mentioned here because it causes a failure to compile with older versions of
-Nuttx:
-
-  Description: The file drivers/mmcsd/mmcsd_sdio.c generates an internal compiler
-               error like:
-
-               mmcsd\mmcsd_sdio.c
-               Internal Error(0503) On line 2524 of "MMCSD\MMCSD_SDIO.C"
-                   File <c3>, Args(562,46)
-
-  Status:     Open.  Recommended workaround: remove mmcsd_sdio.c from
-              drivers/mmcsd/Make.defs.  There is no SDIO support for the Z16
-              anyway
-  Priority:   Low
-
-This is bug in ZDS-II.  It was discovered in version 4.11.0 and still exists
-in version 4.11.1.  I don't know about 5.0.1.  It is not a problem with recent
-versions of NuttX using any version because the file mmcsd_sdio.c is no longer
-built unconditionally.
-
 Selecting Configurations
 ========================
 
