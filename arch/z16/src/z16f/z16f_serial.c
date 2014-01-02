@@ -507,6 +507,7 @@ static int z16f_txinterrupt(int irq, void *context)
 
       uart_xmitchars(dev);
     }
+
   return OK;
 }
 
@@ -619,6 +620,12 @@ static void z16f_txint(struct uart_dev_s *dev, bool enable)
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       up_enable_irq(priv->txirq);
 #endif
+
+      /* Fake a TX interrupt here by just calling uart_xmitchars() with
+       * interrupts disabled (note this may recurse).
+       */
+
+      uart_xmitchars(dev);
     }
   else
     {
