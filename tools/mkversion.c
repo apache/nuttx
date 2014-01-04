@@ -53,7 +53,7 @@
  * Private Functions
  ****************************************************************************/
 
- static inline char *getfilepath(const char *name)
+static inline char *getfilepath(const char *name)
 {
   snprintf(line, PATH_MAX, "%s/" DEFCONFIG, name);
   line[PATH_MAX] = '\0';

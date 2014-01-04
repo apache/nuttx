@@ -120,6 +120,108 @@ nsh
          Windows build, but I would expect the same issues as is listed
          for the ostest configuration..
 
+   STATUS:
+      Currently, NSH failes nsh_consoleoutput().  Here is an example.
+      This echo command causes the system to hang:
+
+        nsh> echo abc
+
+      Below is some annotated output from the debugger.  Here is the 30,000 ft view:
+
+        - cmd_echo loops for each argv[i], 1 >=i > argc.
+
+        - It calls:
+
+            vtbl->output(vtbl, "%s ", argv[i])
+
+          where the prototype for output is:
+
+            int (*output)(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...);
+
+        - vtbl->output maps to nsh_consoleoutput() in this case.
+
+        - cmd_echo passes all of the arguments to output in registers.
+
+        - nsh_consoleoutput expects all of the parameters on the stack.
+
+        - nsh_console calls vfprintf() using bad values from the stack.
+
+        - vfprintf crashes and never returns.
+
+      Looks like a compiler bug to me.
+
+      # int cmd_echo(FAR struct nsh_vtbl_s *vtbl, int argc, char **argv)
+      #
+      # All input parameters are in registers
+      #
+      #   R1=00802DA0                              # vtbl
+      #   R2=00000002                              # argc
+      #   R3=00802D15                              # argv
+      #                                            # argv[0]=00802DD7
+      #                                            # argv[1]=00802DDC
+      #                                            # 00802DD7="echo\0abc\0"
+      #   SP=00802CDD
+
+      0001024C 05F0 PUSHMHI <R8-R11>               # SP=00802CCD
+      0001024E 4418 LD   R8,R1                     # R8=00802DA0  vtbl
+      00010250 442A LD   R10,R2                    # R10=00000002 argc
+      00010252 443B LD   R11,R3                    # R11=00802D15 argv
+      00010254 3901 LD   R9,#%1                    # R9=00000001  arg index
+      00010256 C00C JP   %10270
+
+      00010270 A5A9 CP   R9,R10                    # Bottom of loop
+      00010272 E1F2 JP   lt,%10258
+
+      00010258 48840010 LD   R4,%10(R8)            # R4=00011156 adddress of output() method
+      0001025C 4490 LD   R0,R9                     # R0=00000001 Index of argv[1]
+      0001025E BC20 SLL  R0,#%2                    # R0=00000004 Offset to argv[1]
+      00010260 A0B0 ADD  R0,R11                    # R0=00802D19 Address of argv[1]
+      00010262 4481 LD   R1,R8                     # R1=00802DA0 vtbl address
+      00010264 452200008ADB LD   R2,#%8ADB         # R2=00008ADB = "%s "
+      0001026A 1203 LD   R3,(R0)                   # R3=00802DDC Value of argv[1]
+      0001026C F214 CALL (R4)                      # Call vtbl->output(vtbl, "%s ", argv[i]);
+                                                   # vtbl->output is nsh_consoleoutput
+
+      # static int nsh_consoleoutput(FAR struct nsh_vtbl_s *vtbl, const char *fmt, ...)
+      #
+      # All parameters are in registers:
+      #
+      #   R1=00802DA0 vtbl address
+      #   R2=00008ADB "%s "
+      #   R3=00802DDC Value of argv[1]
+
+      # First is a check if the output file is open
+      #
+      #  if (nsh_openifnotopen(pstate) != 0)
+      #   {
+      #     return ERROR;
+      #   }
+
+      00011156 0800 LINK #%0                       # SP=00802CC9, R14=00802CC9
+      00011158 5C81 LD   R1,%8(FP)                 # R1=0000017F Should be value file FILE * for output
+      0001115A DF96 CALL %11088                    # Call nsh_openifnotopen(), returns R0=00000000
+      0001115C 9000 CP   R0,#%0
+      0001115E E602 JP   z,%11164                  # Skip over error return
+
+      00011160 30FF LD   R0,#-%1
+      00011162 C007 JP   %11172
+
+      # Then the failing call to vfprintf:
+      #
+      #   va_start(ap, fmt);
+      #   ret = vfprintf(pstate->cn_outstream, fmt, ap);
+      #   va_end(ap);
+      #
+      #   return ret;
+
+      00011164 4D03 LEA  R3,%10(FP)                # R3=00802CD5 ap=GARBAGE
+      00011166 5C80 LD   R0,%8(FP)                 # R0=0000017F Should be value of pstate
+      00011168 48010033 LD   R1,%33(R0)            # R1=01000000 pstate->cn_outstream.  Looks suspicious
+      0001116C 5CC2 LD   R2,%C(FP)                 # R2=00802DA0
+      0001116E F10003FB CALL %11968                # Call vfprintf(01000000, 00802DA0, 00802CD5)
+                                                   # All arguments are bad
+                                                   # Does not survive call to vfprintf
+
 ostest
 ------
 
