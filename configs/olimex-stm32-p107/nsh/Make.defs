@@ -43,6 +43,16 @@ else
   LDSCRIPT = ld.script
 endif
 
+ifeq ($(CONFIG_WINDOWS_NATIVE),y)
+  # Windows-native toolchains
+  DIRLINK = $(TOPDIR)\tools\copydir.bat
+  DIRUNLINK = $(TOPDIR)\tools\unlink.bat
+  MKDEP = $(TOPDIR)\tools\mkdeps.exe
+  ARCHINCLUDES = -I. -isystem $(TOPDIR)\include
+  ARCHXXINCLUDES = -I. -isystem $(TOPDIR)\include -isystem $(TOPDIR)\include\cxx
+  ARCHSCRIPT = -T$(TOPDIR)\configs\$(CONFIG_ARCH_BOARD)\scripts\$(LDSCRIPT)
+  DELIM := $(strip /)
+else
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
   DIRLINK = $(TOPDIR)/tools/copydir.sh
@@ -53,11 +63,12 @@ ifeq ($(WINTOOL),y)
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)}"
   MAXOPTIMIZATION = -O2
 else
-  # Linux/Cygwin-native toolchain 
+  # Linux/Cygwin-native toolchain
   MKDEP = $(TOPDIR)/tools/mkdeps.sh
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
   ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)
+endif
 endif
 
 CC = $(CROSSDEV)gcc

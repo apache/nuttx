@@ -6360,4 +6360,6 @@
 	  Thomas Grubler (2014-1-2).
 	* tools/configure.c and mkdeps.c:  Fixes for Windows build issues
 	  from Max Holtzberg (2014-1-4).
+	* configs/olimex-stm32-p107/nsh/Make.defs:  Add native Windoes build
+	  support for the Olimex STM32 P107.  From Max Holtzberg (2014-1-4).
 
