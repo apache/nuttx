@@ -54,6 +54,10 @@
 
 #define MAX_BUFFER  (4096)
 
+#ifdef WIN32
+#  define NAME_MAX FILENAME_MAX
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -171,7 +175,7 @@ static void append(char **base, char *str)
   oldbase = *base;
   if (!oldbase)
     {
-      newbase = strdup(str);      
+      newbase = strdup(str);
       if (!newbase)
         {
           fprintf(stderr, "ERROR: Failed to strdup %s\n", str);
@@ -187,7 +191,7 @@ static void append(char **base, char *str)
           fprintf(stderr, "ERROR: Failed to allocate %d bytes\n", alloclen);
           exit(EXIT_FAILURE);
         }
- 
+
       snprintf(newbase, alloclen, "%s %s\n", oldbase, str);
       free(oldbase);
    }
@@ -277,7 +281,7 @@ static void parse_args(int argc, char **argv)
             }
           else
             {
-              append(&g_altpath, argv[argidx]);              
+              append(&g_altpath, argv[argidx]);
             }
         }
       else if (strcmp(argv[argidx], "--obj-path") == 0)
@@ -359,7 +363,7 @@ static void parse_args(int argc, char **argv)
         {
           fprintf(stderr, "  OBJDIR         : (None)\n");
         }
-      
+
 #ifdef HAVE_WINPATH
       fprintf(stderr, "  Windows Paths  : [%s]\n", g_winpath ? "TRUE" : "FALSE");
       if (g_winpath)
@@ -544,7 +548,7 @@ static void do_dependency(const char *file, char separator)
                   totallen, MAX_BUFFER);
           exit(EXIT_FAILURE);
          }
-        
+
        strcat(g_command, file);
 
       /* Check that a file actually exists at this path */
@@ -573,7 +577,7 @@ static void do_dependency(const char *file, char separator)
        * compiler, system() will return -1;  Otherwise, the returned value
        * from the compiler is in WEXITSTATUS(ret).
        */
- 
+
       ret = system(g_command);
 #ifdef WEXITSTATUS
       if (ret < 0 || WEXITSTATUS(ret) != 0)
@@ -598,9 +602,9 @@ static void do_dependency(const char *file, char separator)
           exit(EXIT_FAILURE);
         }
 #endif
- 
+
       /* We don't really know that the command succeeded... Let's assume that it did */
- 
+
       free(alloc);
       return;
     }
@@ -632,7 +636,7 @@ static char *cywin2windows(const char *str, const char *append, enum slashmode_e
   if (append)
     {
       char *tmp;
- 
+
       alloclen = sizeof(str) + sizeof(append) + 1;
       allocpath = (char *)malloc(alloclen);
       if (!allocpath)

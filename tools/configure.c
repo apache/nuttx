@@ -58,6 +58,10 @@
 
 #define BUFFER_SIZE 1024
 
+#ifdef WIN32
+#  define strndup(x, y) strdup(x)
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -630,7 +634,7 @@ static void check_configuration(void)
     }
 
   g_srcdefconfig = strdup(g_buffer);
-  
+
   snprintf(g_buffer, BUFFER_SIZE, "%s%cMake.defs", g_configpath, g_delim);
   debug("check_configuration: Checking %s\n", g_buffer);
   if (!verify_file(g_buffer))
@@ -789,7 +793,7 @@ static void configure(void)
       debug("configure: Copying from %s to %s\n", g_srcsetenvsh, g_buffer);
       copy_file(g_srcsetenvsh, g_buffer, 0755);
     }
-  
+
   /* Copy the setenv.bat file if have one and need one */
 
   if (g_srcsetenvbat)
@@ -841,7 +845,7 @@ static void configure(void)
         }
 
       /* Open the file for appending */
- 
+
       stream = fopen(destconfig, "a");
       if (!stream)
         {
