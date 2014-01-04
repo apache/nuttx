@@ -338,11 +338,16 @@ tools\mkversion$(HOSTEXEEXT):
 	$(Q) $(MAKE) -C tools -f Makefile.host TOPDIR="$(TOPDIR)"  mkversion$(HOSTEXEEXT)
 
 $(TOPDIR)\.version:
-	$(Q) if [ ! -f .version ]; then \
-		echo "No .version file found, creating one"; \
-		tools\version.sh -v 0.0 -b 0 .version; \
-		chmod 755 .version; \
-	fi
+	$(Q) echo CONFIG_VERSION_STRING="0" > .version
+	$(Q) echo CONFIG_VERSION_MAJOR=0 >> .version
+	$(Q) echo CONFIG_VERSION_MINOR=0 >> .version
+	$(Q) echo CONFIG_VERSION_BUILD="0" >> .version
+
+# $(Q) if [ ! -f .version ]; then \
+# 	echo "No .version file found, creating one"; \
+# 	tools\version.sh -v 0.0 -b 0 .version; \
+# 	chmod 755 .version; \
+# fi
 
 include\nuttx\version.h: $(TOPDIR)\.version tools\mkversion$(HOSTEXEEXT)
 	$(Q) tools\mkversion$(HOSTEXEEXT) $(TOPDIR) > include\nuttx\version.h
@@ -717,17 +722,14 @@ pass2dep: context tools\mkdeps$(HOSTEXEEXT)
 # location: http://ymorin.is-a-geek.org/projects/kconfig-frontends.  See
 # misc\tools\README.txt for additional information.
 
-configenv:
-	$(Q) set APPSDIR=${CONFIG_APPS_DIR}
+config:
+	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf Kconfig
 
-config: configenv
-	$(Q) kconfig-conf Kconfig
-
-oldconfig: configenv
-	$(Q) kconfig-conf --oldconfig Kconfig
+oldconfig:
+	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-conf --oldconfig Kconfig
 
 menuconfig: configenv
-	$(Q) kconfig-mconf Kconfig
+	$(Q) set APPSDIR=$(patsubst "%",%,${CONFIG_APPS_DIR})& kconfig-mconf Kconfig
 
 # export
 #
