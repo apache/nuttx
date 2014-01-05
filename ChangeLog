@@ -6366,4 +6366,6 @@
 	  a .version file if one does not exist.  Make sure that the APPDIR
 	  environment variable is set before configuring.  From Max Holtzberg
 	  (2014-1-4).
+	* configs/viewtool-stm32f107/src/stm32_ssd1289.c:  Add support for
+	  Viewtool SSD1289-based LCD (untested on initial checkin)  (2013-1-5).
 

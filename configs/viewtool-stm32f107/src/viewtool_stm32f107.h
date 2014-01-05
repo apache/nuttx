@@ -1,8 +1,8 @@
 /******************************************************************************
  * configs/viewtool-stm32f107/src/viewtool_stm32f107.h
  *
- *   Copyright (C) 2013 Max Holtzberg. All rights reserved.
- *   Author: Max Holtzberg <mholtzberg@uvc-ingenieure.de>
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
+ *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,6 +32,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
+
 #ifndef __CONFIGS_VIEWTOOL_STM32F107_SRC_INTERNAL_H
 #define __CONFIGS_VIEWTOOL_STM32F107_SRC_INTERNAL_H
 
@@ -159,7 +160,8 @@
  */
 
 #ifdef CONFIG_ARCH_CHIP_STM32F103VCT6
-#  define GPIO_SD_CD      (GPIO_INPUT|GPIO_CNF_INFLOAT|GPIO_EXTI|GPIO_PORTA|GPIO_PIN8)
+#  define GPIO_SD_CD      (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_EXTI| \
+                           GPIO_PORTA | GPIO_PIN8)
 #endif
 
 /* USB
@@ -192,9 +194,87 @@
  */
 
 #ifdef CONFIG_ARCH_CHIP_STM32F103VCT6
-#  define GPIO_USB_PULLUP (GPIO_OUTPUT|GPIO_CNF_OUTOD|GPIO_MODE_50MHz|\
-                           GPIO_OUTPUT_SET|GPIO_PORTE|GPIO_PIN11)
+#  define GPIO_USB_PULLUP (GPIO_OUTPUT | GPIO_CNF_OUTOD | GPIO_MODE_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTE | GPIO_PIN11)
 #endif
+
+/* LCD
+ *
+ * An LCD may be connected via J11.  Only the the STM32F103 supports the FSMC signals
+ * needed to drive the LCD.
+ *
+ * The LCD features an (1) HY32D module with built-in SSD1289 LCD controller, and (a)
+ * a XPT2046 touch screen controller.
+ *
+ * LCD Connector
+ * -------------
+ *
+ *   ----------------------------- ------------------------ --------------------------------
+ *          Connector J11           GPIO CONFIGURATION(s)
+ *   PIN SIGNAL        LEGEND          (F103 only)                   LCD Module
+ *   --- ------------- ----------- ------------------------ --------------------------------
+ *   1   VDD_5         NC          N/A                      5V      ---
+ *   2   GND           GND         N/A                      GND     ---
+ *   3   PD14          DATA0       GPIO_NPS_D0              D0      HY32D
+ *   4   PD15          DATA1       GPIO_NPS_D1              D1      HY32D
+ *   5   PD0           DATA2       GPIO_NPS_D2              D2      HY32D
+ *   6   PD1           DATA3       GPIO_NPS_D3              D3      HY32D
+ *   7   PE7           DATA4       GPIO_NPS_D4              D4      HY32D
+ *   8   PE8           DATA5       GPIO_NPS_D5              D5      HY32D
+ *   9   PE9           DATA6       GPIO_NPS_D6              D6      HY32D
+ *   10  PE10          DATA7       GPIO_NPS_D7              D7      HY32D
+ *   11  PE11          DATA8       GPIO_NPS_D8              D8      HY32D
+ *   12  PE12          DATA9       GPIO_NPS_D9              D9      HY32D
+ *   13  PE13          DATA10      GPIO_NPS_D10             D10     HY32D
+ *   14  PE14          DATA11      GPIO_NPS_D11             D11     HY32D
+ *   15  PE15          DATA12      GPIO_NPS_D12             D12     HY32D
+ *   16  PD8           DATA13      GPIO_NPS_D13             D13     HY32D
+ *   17  PD9           DATA14      GPIO_NPS_D14             D14     HY32D
+ *   18  PD10          DATA15      GPIO_NPS_D15             D15     HY32D
+ *   19  (3)           LCD_CS      GPIO_NPS_NE1             CS      HY32D
+ *   20  PD11          LCD_RS      GPIO_NPS_A16             RS      HY32D
+ *   21  PD5           LCD_R/W     GPIO_NPS_NWE             WR      HY32D
+ *   22  PD4           LCD_RD      GPIO_NPS_NOE             RD      HY32D
+ *   23  PB1           LCD_RESET   (GPIO)                   RESET   HY32D
+ *   24  N/C           NC          N/A                      TE      (unused?)
+ *   25  VDD_3.3       BL_VCC      N/A                      BLVDD   CA6219 (Drives LCD backlight)
+ *   26  GND           BL_GND      N/A                      BLGND   CA6219
+ *   27  PB0           BL_PWM      GPIO_TIM3_CH3OUT(2)      BL_CNT  CA6219
+ *   28  PC5           LCDTP_IRQ   (GPIO)                   TP_IRQ  XPT2046
+ *   29  PC4           LCDTP_CS    (GPIO)                   TP_CS   XPT2046
+ *   30  PB13          LCDTP_CLK   GPIO_SPI2_SCK            TP_SCK  XPT2046
+ *   31  PB15          LCDTP_DIN   GPIO_SPI2_MOSI           TP_SI   XPT2046
+ *   32  PB14          LCDTP_DOUT  GPIO_SPI2_MISO           TP_SO   XPT2046
+ *   33  VDD_3.3       VDD_3.3     N/A                      3.3V    ---
+ *   34  GND           GND         N/A                      GND     ---
+ *   --- ------------- ----------- ------------------------ --------------------------------
+ *
+ *   NOTES:
+ *   1) Only the F103 version of the board supports the FSMC
+ *   2) No remap
+ *   3) LCD_CS is controlled by J13 JUMPER4 (under the LCD unfortunately):
+ *
+ *      1->2 : PD7 (GPIO_NPS_NE1) enables the multiplexor  : 1E\ enable input (active LOW)
+ *      3->4 : PD13 provides 1A0 input (1A1 is grounded).  : 1A0 address input
+ *             So will chip enable to either LCD_CS or
+ *             Flash_CS.
+ *      5->6 : 1Y0 output to LCD_CS                        : 1Y0 address output
+ *      7->8 : 1Y1 output to Flash_CE                      : 1Y1 address output
+ *
+ *      Truth Table:
+ *      1E\ 1A0 1A1 1Y0 1Y1
+ *      --- --- --- --- ---
+ *      HI  N/A N/A HI  HI
+ *      LO  LO  LO  LO  HI
+ *      LO  HI  LO  HI  LO
+ */
+
+#define GPIO_LCD_RESET    (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTB| GPIO_PIN1)
+#define GPIO_LCDTP_IRQ    (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT | \
+                           GPIO_EXTI | GPIO_PORTC | GPIO_PIN5)
+#define GPIO_LCDTP_CS     (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
+                           GPIO_OUTPUT_SET | GPIO_PORTC | GPIO_PIN4)
 
 /************************************************************************************
  * Public Functions
