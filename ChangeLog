@@ -6368,4 +6368,6 @@
 	  (2014-1-4).
 	* configs/viewtool-stm32f107/src/stm32_ssd1289.c:  Add support for
 	  Viewtool SSD1289-based LCD (untested on initial checkin)  (2013-1-5).
+	* arch/arm/include/syscall.h and armv7-a/syscall.h:  Add the syscall.h
+	  header file needed for the Cortex-A architecture (2014-1-5).
 
