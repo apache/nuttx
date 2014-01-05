@@ -79,11 +79,11 @@
  * Name: arm_syscall
  *
  * Description:
- *   SWI interrupts will vection here with insn=the SWI instruction and
+ *   SVC interrupts will vector here with insn=the SVC instruction and
  *   xcp=the interrupt context
  *
- *   The handler may get the SWI number be de-referencing the return
- *   address saved in the xcp and decoding the SWI instruction
+ *   The handler may get the SVC number be de-referencing the return
+ *   address saved in the xcp and decoding the SVC instruction
  *
  ****************************************************************************/
 

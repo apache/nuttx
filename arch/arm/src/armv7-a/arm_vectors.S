@@ -168,17 +168,17 @@ arm_vectorirq:
 	.align	5
 
 /************************************************************************************
- * Function: arm_vectorswi
+ * Function: arm_vectorsvc
  *
  * Description:
- *   SWI interrupt. We enter the SWI in SVC mode.
+ *   SVC interrupt. We enter the SVC in SVC mode.
  *
  ************************************************************************************/
 
-	.globl	arm_vectorswi
-	.type	arm_vectorswi, %function
+	.globl	arm_vectorsvc
+	.type	arm_vectorsvc, %function
 
-arm_vectorswi:
+arm_vectorsvc:
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
@@ -191,14 +191,14 @@ arm_vectorswi:
 	 * and CPSR in r1-r4 */
 
 	add		r1, sp, #XCPTCONTEXT_SIZE
-	mov		r2, r14					/* R14 is altered on return from SWI */
+	mov		r2, r14					/* R14 is altered on return from SVC */
 	mov		r3, r14					/* Save r14 as the PC as well */
 	mrs		r4, spsr				/* Get the saved CPSR */
 
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
 
-	/* Then call the SWI handler with interrupts disabled.
+	/* Then call the SVC handler with interrupts disabled.
 	 * void arm_syscall(struct xcptcontext *xcp)
 	 */
 
@@ -220,7 +220,7 @@ arm_vectorswi:
 	ldr		r1, [r0, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr		spsr, r1
 	ldmia	r0, {r0-r15}^			/* Return */
-	.size	arm_vectorswi, . - arm_vectorswi
+	.size	arm_vectorsvc, . - arm_vectorsvc
 
 	.align	5
 
