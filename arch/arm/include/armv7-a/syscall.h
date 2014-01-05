@@ -66,7 +66,7 @@
 
 #ifndef __ASSEMBLY__
 
-/* SWI with SYS_ call number and no parameters */
+/* SVC with SYS_ call number and no parameters */
 
 static inline uintptr_t sys_call0(unsigned int nbr)
 {
@@ -74,7 +74,7 @@ static inline uintptr_t sys_call0(unsigned int nbr)
 
   __asm__ __volatile__
   (
-    "swi %1"
+    "svc %1"
     : "=r"(reg0)
     : "i"(SYS_syscall), "r"(reg0)
     : "memory"
@@ -83,7 +83,7 @@ static inline uintptr_t sys_call0(unsigned int nbr)
   return reg0;
 }
 
-/* SWI with SYS_ call number and one parameter */
+/* SVC with SYS_ call number and one parameter */
 
 static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
 {
@@ -92,7 +92,7 @@ static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
 
   __asm__ __volatile__
   (
-    "swi %1"
+    "svc %1"
     : "=r"(reg0)
     : "i"(SYS_syscall), "r"(reg0), "r"(reg1)
     : "memory"
@@ -101,7 +101,7 @@ static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
   return reg0;
 }
 
-/* SWI with SYS_ call number and two parameters */
+/* SVC with SYS_ call number and two parameters */
 
 static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm2)
@@ -112,7 +112,7 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
 
   __asm__ __volatile__
   (
-    "swi %1"
+    "svc %1"
     : "=r"(reg0)
     : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2)
     : "memory"
@@ -121,7 +121,7 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
   return reg0;
 }
 
-/* SWI with SYS_ call number and three parameters */
+/* SVC with SYS_ call number and three parameters */
 
 static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm2, uintptr_t parm3)
@@ -133,7 +133,7 @@ static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
 
   __asm__ __volatile__
   (
-    "swi %1"
+    "svc %1"
     : "=r"(reg0)
     : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2), "r"(reg3)
     : "memory"
@@ -142,7 +142,7 @@ static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
   return reg0;
 }
 
-/* SWI with SYS_ call number and four parameters */
+/* SVC with SYS_ call number and four parameters */
 
 static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm2, uintptr_t parm3,
@@ -156,7 +156,7 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
 
   __asm__ __volatile__
   (
-    "swi %1"
+    "svc %1"
     : "=r"(reg0)
     : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
       "r"(reg3), "r"(reg4)
@@ -166,7 +166,7 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
   return reg0;
 }
 
-/* SWI with SYS_ call number and five parameters */
+/* SVC with SYS_ call number and five parameters */
 
 static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm2, uintptr_t parm3,
@@ -181,7 +181,7 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
 
   __asm__ __volatile__
   (
-    "swi %1"
+    "svc %1"
     : "=r"(reg0)
     : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
       "r"(reg3), "r"(reg4), "r"(reg5)
@@ -191,7 +191,7 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
   return reg0;
 }
 
-/* SWI with SYS_ call number and six parameters */
+/* SVC with SYS_ call number and six parameters */
 
 static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
                                   uintptr_t parm2, uintptr_t parm3,
@@ -208,7 +208,7 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
   __asm__ __volatile__
   (
-    "swi %1"
+    "svc %1"
     : "=r"(reg0)
     : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
       "r"(reg3), "r"(reg4), "r"(reg5), "r"(reg6)
