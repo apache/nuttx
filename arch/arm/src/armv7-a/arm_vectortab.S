@@ -71,7 +71,7 @@
 _vector_start:
 	ldr		pc, .Lresethandler			/* 0x00: Reset */
 	ldr		pc, .Lundefinedhandler		/* 0x04: Undefined instruction */
-	ldr		pc, .Lswihandler			/* 0x08: Software interrupt */
+	ldr		pc, .Lsvchandler			/* 0x08: Software interrupt */
 	ldr		pc, .Lprefetchaborthandler	/* 0x0c: Prefetch abort */
 	ldr		pc, .Ldataaborthandler		/* 0x10: Data abort */
 	ldr		pc, .Laddrexcptnhandler		/* 0x14: Address exception (reserved) */
@@ -80,7 +80,7 @@ _vector_start:
 
 	.globl   __start
 	.globl	arm_vectorundefinsn
-	.globl	arm_vectorswi
+	.globl	arm_vectorsvc
 	.globl	arm_vectorprefetch
 	.globl	arm_vectordata
 	.globl	arm_vectoraddrexcptn
@@ -91,8 +91,8 @@ _vector_start:
 	.long	__start
 .Lundefinedhandler:
 	.long	arm_vectorundefinsn
-.Lswihandler:
-	.long	arm_vectorswi
+.Lsvchandler:
+	.long	arm_vectorsvc
 .Lprefetchaborthandler:
 	.long	arm_vectorprefetch
 .Ldataaborthandler:
