@@ -6370,4 +6370,7 @@
 	  Viewtool SSD1289-based LCD (untested on initial checkin)  (2013-1-5).
 	* arch/arm/include/syscall.h and armv7-a/syscall.h:  Add the syscall.h
 	  header file needed for the Cortex-A architecture (2014-1-5).
-
+	* arch/arm/src/a1x/a1x_serial.c:  Remove bad flow control logic.  Add
+	  missing interrupt handling logic for UART4-7 (2014-1-6).
+	* nuttx/tools/mkconfig.c: Cast size to unsigned in calculation of
+	  CONFIG_RAM_END to avoid complains about integer overflow (2013-1-6).
