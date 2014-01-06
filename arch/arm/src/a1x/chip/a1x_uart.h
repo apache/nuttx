@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_A1X_CHIP_A1X_INTC_H
-#define __ARCH_ARM_SRC_A1X_CHIP_A1X_INTC_H
+#ifndef __ARCH_ARM_SRC_A1X_CHIP_A1X_UART_H
+#define __ARCH_ARM_SRC_A1X_CHIP_A1X_UART_H
 
 /************************************************************************************
  * Included Files
@@ -357,4 +357,4 @@
 #define UART_HALT_SIR_TX_INVERT   (1 << 4)  /* Bit 4:  SIR Transmit Pulse Polarity Invert */
 #define UART_HALT_SIR_RX_INVERT   (1 << 5)  /* Bit 5:  SIR Receiver Pulse Polarity Invert */
 
-#endif /* __ARCH_ARM_SRC_A1X_CHIP_A1X_INTC_H */
+#endif /* __ARCH_ARM_SRC_A1X_CHIP_A1X_UART_H */

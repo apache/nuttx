@@ -91,6 +91,7 @@ struct up_dev_s
   uint32_t uartbase;  /* Base address of UART registers */
   uint32_t baud;      /* Configured baud */
   uint32_t ier;       /* Saved IER value */
+  xcpt_t   handler;   /* UART interrupt handler */
   uint8_t  irq;       /* IRQ associated with this UART */
   uint8_t  parity;    /* 0=none, 1=odd, 2=even */
   uint8_t  bits;      /* Number of bits (7 or 8) */
@@ -105,7 +106,31 @@ static int  up_setup(struct uart_dev_s *dev);
 static void up_shutdown(struct uart_dev_s *dev);
 static int  up_attach(struct uart_dev_s *dev);
 static void up_detach(struct uart_dev_s *dev);
-static int  up_interrupt(int irq, void *context);
+static int  uart_interrupt(struct uart_dev_s *dev);
+#ifdef CONFIG_A1X_UART0
+static int  uart0_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_A1X_UART1
+static int  uart1_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_A1X_UART2
+static int  uart2_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_A1X_UART3
+static int  uart3_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_A1X_UART4
+static int  uart4_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_A1X_UART5
+static int  uart5_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_A1X_UART6
+static int  uart6_interrupt(int irq, void *context);
+#endif
+#ifdef CONFIG_A1X_UART7
+static int  uart7_interrupt(int irq, void *context);
+#endif
 static int  up_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  up_receive(struct uart_dev_s *dev, uint32_t *status);
 static void up_rxint(struct uart_dev_s *dev, bool enable);
@@ -184,6 +209,7 @@ static struct up_dev_s g_uart0priv =
 {
   .uartbase       = A1X_UART0_VADDR,
   .baud           = CONFIG_UART0_BAUD,
+  .handler        = uart0_interrupt,
   .irq            = A1X_IRQ_UART0,
   .parity         = CONFIG_UART0_PARITY,
   .bits           = CONFIG_UART0_BITS,
@@ -212,8 +238,9 @@ static uart_dev_t g_uart0port =
 #ifdef CONFIG_A1X_UART1
 static struct up_dev_s g_uart1priv =
 {
-  .uartbase       = A1X_UART1_BASE,
+  .uartbase       = A1X_UART1_VADDR,
   .baud           = CONFIG_UART1_BAUD,
+  .handler        = uart1_interrupt,
   .irq            = A1X_IRQ_UART1,
   .parity         = CONFIG_UART1_PARITY,
   .bits           = CONFIG_UART1_BITS,
@@ -242,8 +269,9 @@ static uart_dev_t g_uart1port =
 #ifdef CONFIG_A1X_UART2
 static struct up_dev_s g_uart2priv =
 {
-  .uartbase       = A1X_UART2_BASE,
+  .uartbase       = A1X_UART2_VADDR,
   .baud           = CONFIG_UART2_BAUD,
+  .handler        = uart2_interrupt,
   .irq            = A1X_IRQ_UART2,
   .parity         = CONFIG_UART2_PARITY,
   .bits           = CONFIG_UART2_BITS,
@@ -272,8 +300,9 @@ static uart_dev_t g_uart2port =
 #ifdef CONFIG_A1X_UART3
 static struct up_dev_s g_uart3priv =
 {
-  .uartbase       = A1X_UART3_BASE,
+  .uartbase       = A1X_UART3_VADDR,
   .baud           = CONFIG_UART3_BAUD,
+  .handler        = uart3_interrupt,
   .irq            = A1X_IRQ_UART3,
   .parity         = CONFIG_UART3_PARITY,
   .bits           = CONFIG_UART3_BITS,
@@ -302,8 +331,9 @@ static uart_dev_t g_uart3port =
 #ifdef CONFIG_A1X_UART4
 static struct up_dev_s g_uart4priv =
 {
-  .uartbase       = A1X_UART4_BASE,
+  .uartbase       = A1X_UART4_VADDR,
   .baud           = CONFIG_UART4_BAUD,
+  .handler        = uart4_interrupt,
   .irq            = A1X_IRQ_UART4,
   .parity         = CONFIG_UART4_PARITY,
   .bits           = CONFIG_UART4_BITS,
@@ -332,8 +362,9 @@ static uart_dev_t g_uart4port =
 #ifdef CONFIG_A1X_UART5
 static struct up_dev_s g_uart5priv =
 {
-  .uartbase       = A1X_UART5_BASE,
+  .uartbase       = A1X_UART5_VADDR,
   .baud           = CONFIG_UART5_BAUD,
+  .handler        = uart5_interrupt,
   .irq            = A1X_IRQ_UART5,
   .parity         = CONFIG_UART5_PARITY,
   .bits           = CONFIG_UART5_BITS,
@@ -362,8 +393,9 @@ static uart_dev_t g_uart5port =
 #ifdef CONFIG_A1X_UART6
 static struct up_dev_s g_uart6priv =
 {
-  .uartbase       = A1X_UART6_BASE,
+  .uartbase       = A1X_UART6_VADDR,
   .baud           = CONFIG_UART6_BAUD,
+  .handler        = uart6_interrupt,
   .irq            = A1X_IRQ_UART6,
   .parity         = CONFIG_UART6_PARITY,
   .bits           = CONFIG_UART6_BITS,
@@ -392,8 +424,9 @@ static uart_dev_t g_uart6port =
 #ifdef CONFIG_A1X_UART7
 static struct up_dev_s g_uart7priv =
 {
-  .uartbase       = A1X_UART7_BASE,
+  .uartbase       = A1X_UART7_VADDR,
   .baud           = CONFIG_UART7_BAUD,
+  .handler        = uart7_interrupt,
   .irq            = A1X_IRQ_UART7,
   .parity         = CONFIG_UART7_PARITY,
   .bits           = CONFIG_UART7_BITS,
@@ -969,7 +1002,7 @@ static int up_setup(struct uart_dev_s *dev)
     }
   else if (priv->parity == 2)
     {
-      lcr |= (UART_LCR_PEN|UART_LCR_EPS);
+      lcr |= (UART_LCR_PEN | UART_LCR_EPS);
     }
 
   /* Enter DLAB=1 */
@@ -991,19 +1024,10 @@ static int up_setup(struct uart_dev_s *dev)
   up_serialout(priv, A1X_UART_FCR_OFFSET,
                (UART_FCR_RT_HALF|UART_FCR_XFIFOR|UART_FCR_RFIFOR|UART_FCR_FIFOE));
 
-  /* Enable Auto-RTS and Auto-CS Flow Control in the Modem Control Register */
-  
-#if defined(CONFIG_UART1_IFLOWCONTROL) || defined(CONFIG_UART1_OFLOWCONTROL)
-  if (priv->uartbase == A1X_UART1_BASE)
-    {
-#if defined(CONFIG_UART1_IFLOWCONTROL) && defined(CONFIG_UART1_OFLOWCONTROL)
-      up_serialout(priv, A1X_UART_MCR_OFFSET, (UART_MCR_RTSEN|UART_MCR_CTSEN));
-#elif defined(CONFIG_UART1_IFLOWCONTROL)
-      up_serialout(priv, A1X_UART_MCR_OFFSET, UART_MCR_RTSEN);
-#else
-      up_serialout(priv, A1X_UART_MCR_OFFSET, UART_MCR_CTSEN);
-#endif
-    }
+  /* Enable Auto-Flow Control in the Modem Control Register */
+
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) || defined(CONFIG_SERIAL_OFLOWCONTROL)
+#  warning Missing logic
 #endif
 
 #endif
@@ -1046,7 +1070,7 @@ static int up_attach(struct uart_dev_s *dev)
 
   /* Attach and enable the IRQ */
 
-  ret = irq_attach(priv->irq, up_interrupt);
+  ret = irq_attach(priv->irq, priv->handler);
   if (ret == OK)
     {
        /* Enable the interrupt (RX and TX interrupts are still disabled
@@ -1077,7 +1101,7 @@ static void up_detach(struct uart_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: up_interrupt
+ * Name: uartN_interrupt and uart_interrupt
  *
  * Description:
  *   This is the UART interrupt handler.  It will be invoked when an
@@ -1088,44 +1112,12 @@ static void up_detach(struct uart_dev_s *dev)
  *
  ****************************************************************************/
 
-static int up_interrupt(int irq, void *context)
+static int uart_interrupt(struct uart_dev_s *dev)
 {
-  struct uart_dev_s *dev = NULL;
-  struct up_dev_s   *priv;
-  uint32_t           status;
-  int                passes;
+  struct up_dev_s *priv;
+  uint32_t         status;
+  int              passes;
 
-#ifdef CONFIG_A1X_UART0
-  if (g_uart0priv.irq == irq)
-    {
-      dev = &g_uart0port;
-    }
-  else
-#endif
-#ifdef CONFIG_A1X_UART1
-  if (g_uart1priv.irq == irq)
-    {
-      dev = &g_uart1port;
-    }
-  else
-#endif
-#ifdef CONFIG_A1X_UART2
-  if (g_uart2priv.irq == irq)
-    {
-      dev = &g_uart2port;
-    }
-  else
-#endif
-#ifdef CONFIG_A1X_UART3
-  if (g_uart3priv.irq == irq)
-    {
-      dev = &g_uart3port;
-    }
-  else
-#endif
-    {
-      PANIC();
-    }
   priv = (struct up_dev_s*)dev->priv;
 
   /* Loop until there are no characters to be transferred or,
@@ -1194,6 +1186,62 @@ static int up_interrupt(int irq, void *context)
 
   return OK;
 }
+
+#ifdef CONFIG_A1X_UART0
+static int uart0_interrupt(int irq, void *context)
+{
+  return uart_interrupt(&g_uart0port);
+}
+#endif
+
+#ifdef CONFIG_A1X_UART1
+static int uart1_interrupt(int irq, void *context)
+{
+  return uart_interrupt(&g_uart1port);
+}
+#endif
+
+#ifdef CONFIG_A1X_UART2
+static int uart2_interrupt(int irq, void *context)
+{
+  return uart_interrupt(&g_uart2port);
+}
+#endif
+
+#ifdef CONFIG_A1X_UART3
+static int uart3_interrupt(int irq, void *context)
+{
+  return uart_interrupt(&g_uart3port);
+}
+#endif
+
+#ifdef CONFIG_A1X_UART4
+static int uart4_interrupt(int irq, void *context)
+{
+  return uart_interrupt(&g_uart4port);
+}
+#endif
+
+#ifdef CONFIG_A1X_UART5
+static int uart5_interrupt(int irq, void *context)
+{
+  return uart_interrupt(&g_uart5port);
+}
+#endif
+
+#ifdef CONFIG_A1X_UART6
+static int uart6_interrupt(int irq, void *context)
+{
+  return uart_interrupt(&g_uart6port);
+}
+#endif
+
+#ifdef CONFIG_A1X_UART7
+static int uart7_interrupt(int irq, void *context)
+{
+  return uart_interrupt(&g_uart7port);
+}
+#endif
 
 /****************************************************************************
  * Name: up_ioctl
