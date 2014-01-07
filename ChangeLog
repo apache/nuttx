@@ -6378,4 +6378,7 @@
 	  problems for assembly language.  How to prevent the integer over-
 	  flow warnings? (2014-1-6).
 	* arch/arm/src/a1x/a1x_serial.c: Handle BUSY interrupt (2014-1-6).
+	* arch/arm/src/armv7-a/arm_head.S and arm_pghead.S:  Add more nop's
+	  after enabling the MMU.  The cortex-a8 seems to need these
+	  (2014-1-7).
 
