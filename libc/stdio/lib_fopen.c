@@ -44,6 +44,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 
 #include "lib_internal.h"
@@ -52,20 +53,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Open mode flags */
+
+#define MODE_R    (1 << 0) /* Bit 0: "r{b|x|+}" open for reading */
+#define MODE_W    (1 << 1) /* Bit 1: "w{b|x|+}" open for writing, truncating,
+                            * or creating file */
+#define MODE_A    (1 << 2) /* Bit 2: "a{b|x|+}" open for writing, appending
+                            * the to file */
+#define MODE_PLUS (1 << 3) /* Bit 3: "{r|w|a|b|x}+" open for update (reading
+                            * and writing) */
+#define MODE_B    (1 << 4) /* Bit 4: "{r|w|a|x|+}b" Binary mode */
+#define MODE_X    (1 << 5) /* Bit 5: "{r|w|a|b|+}x" Open exclusive mode */
+
+#define MODE_NONE 0        /* No access mode determined */
+#define MODE_MASK (MODE_R | MODE_W | MODE_A)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
-
-enum open_mode_e
-{
-  MODE_NONE = 0, /* No access mode determined */
-  MODE_R,        /* "r" or "rb" open for reading */
-  MODE_W,        /* "w" or "wb" open for writing, truncating or creating file */
-  MODE_A,        /* "a" or "ab" open for writing, appending to file */
-  MODE_RPLUS,    /* "r+", "rb+", or "r+b" open for update (reading and writing) */
-  MODE_WPLUS,    /* "w+", "wb+", or "w+b"  open for update, truncating or creating file */
-  MODE_APLUS     /* "a+", "ab+", or "a+b" open for update, appending to file */
-};
 
 /****************************************************************************
  * Private Functions
@@ -77,15 +82,12 @@ enum open_mode_e
 
 static int lib_mode2oflags(FAR const char *mode)
 {
-  enum open_mode_e state;
+  unsigned int state;
   int oflags;
 
-  /* Verify that a mode string was provided.  No error is  */
+  /* Verify that a mode string was provided.  */
 
-  if (!mode)
-    {
-      goto errout;
-    }
+  DEBUGASSERT(mode);
 
   /* Parse the mode string to determine the corresponding open flags */
 
@@ -96,7 +98,7 @@ static int lib_mode2oflags(FAR const char *mode)
     {
       switch (*mode)
         {
-          /* Open for read access ("r", "r[+]", "r[b]",  "r[b+]", or "r[+b]") */
+          /* Open for read access ("r{b|x|+}") */
 
           case 'r' :
             if (state == MODE_NONE)
@@ -112,14 +114,14 @@ static int lib_mode2oflags(FAR const char *mode)
               }
             break;
 
-          /* Open for write access ("w", "w[+]", "w[b]",  "w[b+]", or "w[+b]") */
+          /* Open for write access ("w{b|x|+}") */
 
           case 'w' :
             if (state == MODE_NONE)
               {
                 /* Open for write access, truncating any existing file */
 
-                oflags = O_WROK|O_CREAT|O_TRUNC;
+                oflags = (O_WROK | O_CREAT | O_TRUNC);
                 state  = MODE_W;
               }
             else
@@ -128,7 +130,7 @@ static int lib_mode2oflags(FAR const char *mode)
               }
             break;
 
-          /* Open for write/append access ("a", "a[+]", "a[b]", "a[b+]", or "a[+b]") */
+          /* Open for write/append access ("a{b|x|+}") */
 
           case 'a' :
             if (state == MODE_NONE)
@@ -144,49 +146,47 @@ static int lib_mode2oflags(FAR const char *mode)
               }
             break;
 
-          /* Open for update access ("[r]+", "[rb]+]", "[r]+[b]", "[w]+",
-           * "[wb]+]", "[w]+[b]", "[a]+", "[ab]+]",  "[a]+[b]")
-           */
+          /* Open for update access ("{r|w|a|b|x}+") */
 
           case '+' :
-            switch (state)
+            switch (state & MODE_MASK)
               {
                 case MODE_R:
                   {
-                    /* Retain any binary mode selection */
+                    /* Retain any binary and exclusive mode selections */
 
-                    oflags &= O_BINARY;
+                    oflags &= (O_BINARY | O_EXCL);
 
                     /* Open for read/write access */
 
                     oflags |= O_RDWR;
-                    state   = MODE_RPLUS;
+                    state  |= MODE_PLUS;
                  }
                  break;
 
                 case MODE_W:
                   {
-                    /* Retain any binary mode selection */
+                    /* Retain any binary and exclusive mode selections */
 
-                    oflags &= O_BINARY;
+                    oflags &= (O_BINARY | O_EXCL);
 
                     /* Open for write read/access, truncating any existing file */
 
-                    oflags |= O_RDWR|O_CREAT|O_TRUNC;
-                    state   = MODE_WPLUS;
+                    oflags |= (O_RDWR | O_CREAT | O_TRUNC);
+                    state  |= MODE_PLUS;
                   }
                   break;
 
                 case MODE_A:
                   {
-                    /* Retain any binary mode selection */
+                    /* Retain any binary and exclusive mode selections */
 
-                    oflags &= O_BINARY;
+                    oflags &= (O_BINARY | O_EXCL);
 
                     /* Read from the beginning of the file; write to the end */
 
-                    oflags |= O_RDWR|O_CREAT|O_APPEND;
-                    state   = MODE_APLUS;
+                    oflags |= (O_RDWR | O_CREAT | O_APPEND);
+                    state  |= MODE_PLUS;
                   }
                   break;
 
@@ -196,16 +196,31 @@ static int lib_mode2oflags(FAR const char *mode)
               }
             break;
 
-          /* Open for binary access ("[r]b", "[r]b[+]", "[r+]b", "[w]b",
-           * "[w]b[+]", "[w+]b", "[a]b", "[a]b[+]",  "[a+]b")
-           */
+          /* Open for binary access ("{r|w|a|x|+}b") */
 
           case 'b' :
-            if (state != MODE_NONE)
+            if ((state & MODE_MASK) != MODE_NONE)
               {
                 /* The file is opened in binary mode */
 
                 oflags |= O_BINARY;
+                state  |= MODE_B;
+              }
+            else
+              {
+                goto errout;
+              }
+            break;
+
+          /* Open for exclusive access ("{r|w|a|b|+}x") */
+
+          case 'X' :
+            if ((state & MODE_MASK) != MODE_NONE)
+              {
+                /* The file is opened in exclusive mode */
+
+                oflags |= O_EXCL;
+                state  |= MODE_X;
               }
             else
               {

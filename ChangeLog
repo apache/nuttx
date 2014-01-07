@@ -6386,4 +6386,6 @@
 	* include/sys/types.h:  Add a bogus rsize_t type (2014-1-7).
 	* libc/stdio/lib_gets_s.c:  Add a quick'n'dirty implementation of
 	  gets_s() which replaces gets() in C11 (2014-1-7).
+	* libc/stdio/lib_fopen.c:  Add support for new C11 exclusive open
+	  ("x") (2014-1-7)
 
