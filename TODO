@@ -472,7 +472,10 @@ o Kernel Build
                 sched/sched_removereadytorun.c. That would eliminate 59% of the syscalls."
   Status:      Open
   Priority:    Low-Medium.  Right now, I do not know if these syscalls are a
-               real performance issue or not.
+               real performance issue or not.  The above statistics were collected
+               from a an atypical application (the OS test), and does an excessive
+               amount of console output.  There is probably no issue with more typical
+               embedded applications.
 
   Title:       ARMv6/7-M SYSCALL PERFORMANCE IMPROVEMENT
   Description: Currently the code issues an SVCall to go from user- to kernel-mode

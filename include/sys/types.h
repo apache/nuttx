@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/sys/types.h
  *
- *   Copyright (C) 2007-2009, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -132,12 +132,30 @@ typedef unsigned int mode_t;
  */
 
 #ifdef CONFIG_SMALL_MEMORY
+
+#define SIZE_MAX     UINT16_MAX
 typedef uint16_t     size_t;
+
+#define SSIZE_MAX    INT16_MAX
+#define SSIZE_MIN    INT16_MIN
 typedef int16_t      ssize_t;
-#else
+
+#define RSIZE_MAX    UINT16_MAX
+typedef uint16_t     rsize_t;
+
+#else /* CONFIG_SMALL_MEMORY */
+
+#define SIZE_MAX     UINT32_MAX
 typedef uint32_t     size_t;
+
+#define SSIZE_MAX    INT32_MAX
+#define SSIZE_MIN    INT32_MIN
 typedef int32_t      ssize_t;
-#endif
+
+#define RSIZE_MAX    UINT32_MAX
+typedef uint32_t     rsize_t;
+
+#endif /* CONFIG_SMALL_MEMORY */
 
 /* uid_t is used for user IDs
  * gid_t is used for group IDs.
