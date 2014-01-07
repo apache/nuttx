@@ -505,14 +505,9 @@ __start:
 	/* Then write the configured control register */
 
 	mcr		CP15_SCTLR(r0)			/* Write control reg */
-
-	/* Read the Main ID register.  This will be available in R1 after
-	 * MMU trampoline (not currently used)
-	 */
-
-	mrc		CP15_MIDR(r1)			/* Read main id reg */
-	mov		r1, r1					/* Null-avoiding nop */
-	mov		r1, r1					/* Null-avoiding nop */
+	.rept	12						/* Cortex A8 wants lots of NOPs here */
+	nop
+	.endr
 
 	/* And "jump" to .Lvstart in the newly mapped virtual address space */
 
