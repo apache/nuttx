@@ -37,40 +37,15 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdio.h>
-#include <limits.h>
-#include <string.h>
+#include <stdint.h>
+
+#include "lib_internal.h"
 
 /****************************************************************************
- * Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Private Type Declarations
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Global Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Global Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Global Variables
- ****************************************************************************/
-
-/****************************************************************************
- * Private Constant Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Variables
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -88,9 +63,10 @@
  *   gets() reads a line from stdin into the buffer pointed to by s until
  *   either a terminating newline or EOF, which it replaces with '\0'.  Reads
  *   at most n-1 characters from stdin into the array pointed to by str until
- *   new-line character, end-of-file condition, or read error. A null
- *   character is written immediately after the last character read into the
- *   array, or to str[0] if no characters were read.
+ *   new-line character, end-of-file condition, or read error.   The newline
+ *   character, if encountered, is not saved in the arraay.  A NUL character
+ *   is written immediately after the last character read into the array, or
+ *   to str[0] if no characters were read.
  *
  *   If n is zero or is greater than RSIZE_MAX, a null character is written
  *   to str[0] but the function reads and discards characters from stdin
@@ -99,30 +75,22 @@
  *
  *   If n-1 characters have been read, continues reading and discarding the
  *   characters from stdin until new-line character, end-of-file condition,
- *   or read error (not implemented).
+ *   or read error.
  *
  **************************************************************************/
 
 FAR char *gets_s(FAR char *s, rsize_t n)
 {
-  /* gets is equivalent to fgets using stdin.  So let fgets do most of the
-   * work.
-   */
+  /* Handle the case where n is out of range as required */
 
-  FAR char *ret = fgets(s, n, stdin);
-  if (ret)
+  if (n < 1 || n > RSIZE_MAX)
     {
-      /* A subtle difference from fgets is that gets_s replaces end-of-line
-       * markers with null terminators.  We will do that as a second step
-       * (with some loss in performance).
-       */
+      /* Set n=1, i.e., room only for the NUL terminator */
 
-      int len = strlen(ret);
-      if (len > 0 && ret[len-1] == '\n')
-        {
-           ret[len-1] = '\0';
-        }
+      n = 1;
     }
 
-  return ret;
+  /* Then let lib_fgets() do the heavy lifting */
+
+  return lib_fgets(s, n, stdin, false, true);
 }

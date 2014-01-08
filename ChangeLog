@@ -6390,4 +6390,7 @@
 	  ("x") (2014-1-7)
 	* include/threads.h:  First crude cut at a C11 threads.h header
 	  file (just maps to pthreads) (2014-1-7).
+	* libc/stdio/lib_libfgets.c:  Common implementation supports all
+	  of the slightly different requirements of gets(), gets_s(), and
+	  fgets() (2014-1-7).
 

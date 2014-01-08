@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/lib_internal.h
  *
- *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -183,6 +183,11 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream);
 /* Defined in lib_libfread.c */
 
 ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream);
+
+/* Defined in lib_libfgets.c */
+
+FAR char *lib_fgets(FAR char *buf, int buflen, FILE *stream,
+                    bool keepnl, bool consume);
 
 /* Defined in lib_libfflush.c */
 
