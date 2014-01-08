@@ -6388,4 +6388,6 @@
 	  gets_s() which replaces gets() in C11 (2014-1-7).
 	* libc/stdio/lib_fopen.c:  Add support for new C11 exclusive open
 	  ("x") (2014-1-7)
+	* include/threads.h:  First crude cut at a C11 threads.h header
+	  file (just maps to pthreads) (2014-1-7).
 
