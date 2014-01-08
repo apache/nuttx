@@ -6398,4 +6398,10 @@
 	  (2014-1-7).
 	* graphics/nxsu/Make.defs:  Typo that crept into build in recent
 	  NX reorganization.  Found by Steve Redler IV (2014-1-7).
+	* graphics/nxsu/:  Another typo from the
+	  recent NX reorganization from Steve Redler IV (2014-1-7).
+	* graphics/nxbe/nxbe_closewindow.c, nx_close.c, nx_constructwindow.c,
+	  nx_open.c, and nx_openwindow.c:  Needs to use kuzalloc and kufree,
+	  not umm_zalloc and umm_free.  Additional typo in nx_constructwindow.c
+	  (wnd should be hwnd). Also noted by Steve Redler IV (2014-1-7).
 

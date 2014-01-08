@@ -100,7 +100,7 @@
  *
  ****************************************************************************/
 
-int nx_constructwindow(NXHANDLE handle, NXWINDOW wnd,
+int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd,
                        FAR const struct nx_callback_s *cb, FAR void *arg)
 {
   FAR struct nxfe_state_s *fe = (FAR struct nxfe_state_s *)handle;
@@ -116,7 +116,7 @@ int nx_constructwindow(NXHANDLE handle, NXWINDOW wnd,
 
   if (!fe || !cb)
     {
-      umm_free(wnd);
+      kufree(wnd);
       errno = EINVAL;
       return ERROR;
     }

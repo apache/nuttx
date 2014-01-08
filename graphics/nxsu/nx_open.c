@@ -199,7 +199,7 @@ NXHANDLE nx_open(FAR NX_DRIVERTYPE *dev)
    * (if available) for compatibility with the multi-user implementation.
    */
 
-  fe = (FAR struct nxfe_state_s *)umm_zalloc(sizeof(struct nxfe_state_s));
+  fe = (FAR struct nxfe_state_s *)kuzalloc(sizeof(struct nxfe_state_s));
   if (!fe)
     {
       errno = ENOMEM;
