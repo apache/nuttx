@@ -139,7 +139,7 @@ static void consume_eol(FILE *stream, bool consume)
  *
  **************************************************************************/
 
-FAR char *lib_fgets(FAR char *buf, int buflen, FILE *stream,
+FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
                     bool keepnl, bool consume)
 {
   int nch = 0;

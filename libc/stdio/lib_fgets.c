@@ -69,7 +69,17 @@
 
 char *fgets(FAR char *buf, int buflen, FILE *stream)
 {
+  /* Handle negative buffer size */
+
+  if (buflen < 0)
+    {
+      return NULL;
+    }
+
   /* Let lib_fgets() do the heavy lifting */
 
-  return lib_fgets(buf, buflen, stream, true, false);
+  else
+    {
+      return lib_fgets(buf, (size_t)buflen, stream, true, false);
+    }
 }

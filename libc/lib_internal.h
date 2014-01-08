@@ -186,7 +186,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream);
 
 /* Defined in lib_libfgets.c */
 
-FAR char *lib_fgets(FAR char *buf, int buflen, FILE *stream,
+FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
                     bool keepnl, bool consume);
 
 /* Defined in lib_libfflush.c */

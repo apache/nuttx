@@ -92,5 +92,5 @@ FAR char *gets_s(FAR char *s, rsize_t n)
 
   /* Then let lib_fgets() do the heavy lifting */
 
-  return lib_fgets(s, n, stdin, false, true);
+  return lib_fgets(s, (size_t)n, stdin, false, true);
 }

@@ -73,5 +73,5 @@ FAR char *gets(FAR char *s)
 {
   /* Let lib_fgets() do the heavy lifting */
 
-  return lib_fgets(s, RSIZE_MAX, stdin, false, false);
+  return lib_fgets(s, (size_t)INT_MAX, stdin, false, false);
 }
