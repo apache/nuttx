@@ -133,26 +133,14 @@ typedef unsigned int mode_t;
 
 #ifdef CONFIG_SMALL_MEMORY
 
-#define SIZE_MAX     UINT16_MAX
 typedef uint16_t     size_t;
-
-#define SSIZE_MAX    INT16_MAX
-#define SSIZE_MIN    INT16_MIN
 typedef int16_t      ssize_t;
-
-#define RSIZE_MAX    UINT16_MAX
 typedef uint16_t     rsize_t;
 
 #else /* CONFIG_SMALL_MEMORY */
 
-#define SIZE_MAX     UINT32_MAX
 typedef uint32_t     size_t;
-
-#define SSIZE_MAX    INT32_MAX
-#define SSIZE_MIN    INT32_MIN
 typedef int32_t      ssize_t;
-
-#define RSIZE_MAX    UINT32_MAX
 typedef uint32_t     rsize_t;
 
 #endif /* CONFIG_SMALL_MEMORY */

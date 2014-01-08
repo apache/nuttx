@@ -123,11 +123,22 @@
 #define _POSIX_OPEN_MAX       CONFIG_NFILE_DESCRIPTORS
 #define _POSIX_PATH_MAX       CONFIG_PATH_MAX
 #define _POSIX_PIPE_BUF       512
-#define _POSIX_SSIZE_MAX      INT_MAX
 #define _POSIX_STREAM_MAX     CONFIG_NFILE_STREAMS
 #define _POSIX_TZNAME_MAX     3
 
-/* Requred for sigqueue */
+#ifdef CONFIG_SMALL_MEMORY
+
+#define _POSIX_SSIZE_MAX      32767       /* See sys/types.h */
+#define _POSIX_SSIZE_MIN      -32768
+
+#else /* CONFIG_SMALL_MEMORY */
+
+#define _POSIX_SSIZE_MAX      2147483647  /* See sys/types.h */
+#define _POSIX_SSIZE_MIN      -2147483648
+
+#endif /* CONFIG_SMALL_MEMORY */
+
+/* Required for sigqueue */
 
 #define _POSIX_RTSIG_MAX      31
 #define _POSIX_SIGQUEUE_MAX   32
@@ -184,6 +195,7 @@
 #define PATH_MAX       _POSIX_PATH_MAX
 #define PIPE_BUF       _POSIX_PIPE_BUF
 #define SSIZE_MAX      _POSIX_SSIZE_MAX
+#define SSIZE_MIN      _POSIX_SSIZE_MIN
 #define STREAM_MAX     _POSIX_STREAM_MAX
 #define TZNAME_MAX     _POSIX_TZNAME_MAX
 

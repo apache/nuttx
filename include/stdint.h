@@ -185,10 +185,16 @@
 #endif
 
 #ifdef CONFIG_SMALL_MEMORY
-#  define SIZE_MAX 0xffff
-#else
-#  define SIZE_MAX 0xffffffff
-#endif
+
+#define SIZE_MAX     UINT16_MAX  /* See sys/types.h */
+#define RSIZE_MAX    UINT16_MAX
+
+#else /* CONFIG_SMALL_MEMORY */
+
+#define SIZE_MAX     UINT32_MAX  /* See sys/types.h */
+#define RSIZE_MAX    UINT32_MAX
+
+#endif /* CONFIG_SMALL_MEMORY */
 
 #if 0
 #  define WCHAR_MIN
