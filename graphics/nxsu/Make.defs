@@ -40,5 +40,5 @@ NX_CSRCS += nx_filltrapezoid.c nx_getposition.c nx_getrectangle.c nx_kbdchin.c
 NX_CSRCS += nx_kbdin.c nx_lower.c nx_mousein.c nx_move.c nx_open.c
 NX_CSRCS += nx_openwindow.c nx_raise.c nx_redrawreq.c nx_releasebkgd.c
 NX_CSRCS += nx_requestbkgd.c nx_setpixel.c nx_setsize.c nx_setbgcolor.c
-NX_CSRCS += nx_setposition.c nxsu_constructwindow.c nxsu_redrawreq.c
+NX_CSRCS += nx_setposition.c nx_constructwindow.c nxsu_redrawreq.c
 NX_CSRCS += nxsu_reportposition.c

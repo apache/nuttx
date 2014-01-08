@@ -683,7 +683,7 @@
 #  define STM32_NGTIM                    4   /* 16-bit generall timers TIM2,3,4,5 with DMA */
 #  define STM32_NBTIM                    0   /* No basic timers */
 #  define STM32_NDMA                     2   /* DMA1-2 */
-#  define STM32_NSPI                     2   /* SPI1-2 */
+#  define STM32_NSPI                     3   /* SPI1-3 */
 #  define STM32_NI2S                     0   /* No I2S (?) */
 #  define STM32_NUSART                   3   /* USART1-3 */
 #  define STM32_NI2C                     2   /* I2C1-2 */

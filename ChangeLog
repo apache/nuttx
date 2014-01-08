@@ -6393,4 +6393,9 @@
 	* libc/stdio/lib_libfgets.c:  Common implementation supports all
 	  of the slightly different requirements of gets(), gets_s(), and
 	  fgets() (2014-1-7).
+	* arch/arm/include/stm32/chip.h and chip/stm32f103ze_pinmap.h:
+	  various fixes for STM32F103ZE SPI3.  From Steve Redler IV
+	  (2014-1-7).
+	* graphics/nxsu/Make.defs:  Typo that crept into build in recent
+	  NX reorganization.  Found by Steve Redler IV (2014-1-7).
 
