@@ -28,7 +28,7 @@ Contents
   o USB Interface
   o microSD Card Interface
   o ViewTool DP83848 Ethernet Module
-  o LCD Interface
+  o LCD/Touchscreen Interface
   o Toolchains
     - NOTE about Windows native toolchains
   o Configurations
@@ -397,8 +397,8 @@ ViewTool DP83848 Ethernet Module
       (also FTP, TFTP, WGET, NFS, etc. if you also have a mass storage
       device).
 
-LCD Interface
-=============
+LCD/Touchscreen Interface
+=========================
 
   An LCD may be connected via J11.  Only the the STM32F103 supports the FSMC signals
   needed to drive the LCD.
@@ -649,6 +649,53 @@ Configurations
 
     4. USB support is disabled by default.  See the section above entitled,
        "USB Interface"
+
+    5. This configuration has been used for verifying the touchscreen on
+       on the Viewtool LCD module.  NOTE:  The LCD module can really only
+       be used on the STM32F103 version of the board.  The LCD requires
+       FSMC support (the touchscreen, however, does not but the touchscreen
+       is not very meaningful with no LCD).
+
+         CONFIG_ARCH_CHIP_STM32F103VCT6=y      : Select STM32F103VCT6
+
+       With the following modifications, you can include the touchscreen
+       test program at apps/examples/touchscreen as an NSH built-in
+       application.  You can enable the touchscreen and test by modifying
+       the default configuration in the following ways:
+
+          Device Drivers
+            CONFIG_SPI=y                       : Enable SPI support
+            CONFIG_SPI_EXCHANGE=y              : The exchange() method is supported
+            CONFIG_SPI_OWNBUS=y                : Smaller code if this is the only SPI device
+
+            CONFIG_INPUT=y                     : Enable support for input devices
+            CONFIG_INPUT_ADS7843E=y            : Enable support for the XPT2046
+            CONFIG_ADS7843E_SPIDEV=2           : Use SPI2 for communication
+            CONFIG_ADS7843E_SPIMODE=0          : Use SPI mode 0
+            CONFIG_ADS7843E_FREQUENCY=1000000  : SPI BAUD 1MHz
+            CONFIG_ADS7843E_SWAPXY=y           : If landscape orientation
+            CONFIG_ADS7843E_THRESHX=51         : These will probably need to be tuned
+            CONFIG_ADS7843E_THRESHY=39
+
+          System Type -> Peripherals:
+            CONFIG_STM32_SPI2=y                : Enable support for SPI2
+
+          RTOS Features:
+            CONFIG_DISABLE_SIGNALS=n           : Signals are required
+
+          Library Support:
+            CONFIG_SCHED_WORKQUEUE=y           : Work queue support required
+
+          Applicaton Configuration:
+            CONFIG_EXAMPLES_TOUCHSCREEN=y      : Enable the touchscreen built-int test
+
+          Defaults should be okay for related touchscreen settings.  Touchscreen
+          debug output on USART1 can be enabled with:
+
+          Build Setup:
+            CONFIG_DEBUG=y                     : Enable debug features
+            CONFIG_DEBUG_VERBOSE=y             : Enable verbose debug output
+            CONFIG_DEBUG_INPUT=y               : Enable debug output from input devices
 
   highpri:
 

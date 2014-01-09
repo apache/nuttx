@@ -6404,4 +6404,8 @@
 	  nx_open.c, and nx_openwindow.c:  Needs to use kuzalloc and kufree,
 	  not umm_zalloc and umm_free.  Additional typo in nx_constructwindow.c
 	  (wnd should be hwnd). Also noted by Steve Redler IV (2014-1-7).
+	* configs/viewtool-stm32f107/src/stm32_touchscreen.c (and other
+	  files):  Add support for the XPT2046 touchscreen controller on
+	  the Viewtool LCD module connected to the Viewtool STM32F103
+	  board (2014-1-9).
 
