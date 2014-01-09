@@ -650,13 +650,62 @@ Configurations
     4. USB support is disabled by default.  See the section above entitled,
        "USB Interface"
 
-    5. This configuration has been used for verifying the touchscreen on
+    3. This configured can be re-configured to use either the Viewtool LCD
+       module. NOTE:  The LCD module can only be used on the STM32F103 version
+       of the board.  The LCD requires FSMC support.
+
+          System Type -> STM32 Chip Selection:
+            CONFIG_ARCH_CHIP_STM32F103VCT6=y      : Select STM32F103VCT6
+
+          System Type -> Peripherals:
+            CONFIG_STM32_FSMC=y                   : Enable FSMC LCD interface
+
+          Device Drivers -> LCD Driver Support
+            CONFIG_LCD=y                          : Enable LCD support
+            CONFIG_NX_LCDDRIVER=y                 : LCD graphics device
+            CONFIG_LCD_MAXCONTRAST=1
+            CONFIG_LCD_MAXPOWER=255
+            CONFIG_LCD_LANDSCAPE=y                : Landscape orientation
+            CONFIG_LCD_SSD1289=y                  : Select the SSD1289
+            CONFIG_SSD1289_PROFILE1=y
+
+          Graphics Support
+            CONFIG_NX=y
+
+          Graphics Support -> Supported Pixel Depths
+            CONFIG_NX_DISABLE_1BPP=y              : Only 16BPP supported
+            CONFIG_NX_DISABLE_2BPP=y
+            CONFIG_NX_DISABLE_4BPP=y
+            CONFIG_NX_DISABLE_8BPP=y
+            CONFIG_NX_DISABLE_24BPP=y
+            CONFIG_NX_DISABLE_32BPP=y
+
+          Graphics Support -> Font Selections
+            CONFIG_NXFONTS_CHARBITS=7
+            CONFIG_NXFONT_SANS22X29B=y
+            CONFIG_NXFONT_SANS23X27=y
+
+          Application Configuration -> Examples
+            CONFIG_EXAMPLES_NXLINES=y
+            CONFIG_EXAMPLES_NXLINES_BGCOLOR=0x0320
+            CONFIG_EXAMPLES_NXLINES_LINEWIDTH=16
+            CONFIG_EXAMPLES_NXLINES_LINECOLOR=0xffe0
+            CONFIG_EXAMPLES_NXLINES_BORDERWIDTH=4
+            CONFIG_EXAMPLES_NXLINES_BORDERCOLOR=0xffe0
+            CONFIG_EXAMPLES_NXLINES_CIRCLECOLOR=0xf7bb
+            CONFIG_EXAMPLES_NXLINES_BPP=16
+
+       STATUS: Now working; reads 0x8999 as device ID.  This may perhaps
+               be due to incorrect jumper settings
+
+    6. This configuration has been used for verifying the touchscreen on
        on the Viewtool LCD module.  NOTE:  The LCD module can really only
        be used on the STM32F103 version of the board.  The LCD requires
        FSMC support (the touchscreen, however, does not but the touchscreen
        is not very meaningful with no LCD).
 
-         CONFIG_ARCH_CHIP_STM32F103VCT6=y      : Select STM32F103VCT6
+          System Type -> STM32 Chip Selection:
+           CONFIG_ARCH_CHIP_STM32F103VCT6=y    : Select STM32F103VCT6
 
        With the following modifications, you can include the touchscreen
        test program at apps/examples/touchscreen as an NSH built-in
@@ -696,6 +745,8 @@ Configurations
             CONFIG_DEBUG=y                     : Enable debug features
             CONFIG_DEBUG_VERBOSE=y             : Enable verbose debug output
             CONFIG_DEBUG_INPUT=y               : Enable debug output from input devices
+
+       STATUS: Working
 
   highpri:
 

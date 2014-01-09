@@ -92,7 +92,13 @@
 #  define LCD_YRES       320
 #endif
 
-#define LCD_BL_TIMER_PERIOD   8999
+#define LCD_BL_TIMER_PERIOD 8999
+
+/* LCD is connected to the FSMC_Bank1_NOR/SRAM1 and NE1 is used as chip select signal */
+/* RS <==> A16 */
+
+#define LCD_INDEX        0x60000000  /* RS = 0 */
+#define LCD_DATA         0x60020000  /* RS = 1 */
 
 /* Debug ******************************************************************************/
 
@@ -103,12 +109,6 @@
 #  define lcddbg(x...)
 #  define lcdvdbg(x...)
 #endif
-
-/* LCD is connected to the FSMC_Bank1_NOR/SRAM1 and NE1 is used as chip select signal */
-/* RS <==> A16 */
-
-#define LCD_INDEX     0x60000000  /* RS = 0 */
-#define LCD_DATA      0x60020000  /* RS = 1 */
 
 /**************************************************************************************
  * Private Type Definition
@@ -207,25 +207,21 @@ static void stm32_enablefsmc(void);
 
 const uint16_t fsmc_gpios[] =
 {
-  /* A16... A24 */
+  /* A16... A23.  REVIST: only A16 is used by the LCD */
 
   GPIO_NPS_A16, GPIO_NPS_A17, GPIO_NPS_A18, GPIO_NPS_A19, GPIO_NPS_A20,
   GPIO_NPS_A21, GPIO_NPS_A22, GPIO_NPS_A23,
 
   /* D0... D15 */
 
-  GPIO_NPS_D0, GPIO_NPS_D1, GPIO_NPS_D2, GPIO_NPS_D3, GPIO_NPS_D4,
-  GPIO_NPS_D5, GPIO_NPS_D6, GPIO_NPS_D7, GPIO_NPS_D8, GPIO_NPS_D9,
+  GPIO_NPS_D0,  GPIO_NPS_D1,  GPIO_NPS_D2,  GPIO_NPS_D3,  GPIO_NPS_D4,
+  GPIO_NPS_D5,  GPIO_NPS_D6,  GPIO_NPS_D7,  GPIO_NPS_D8,  GPIO_NPS_D9,
   GPIO_NPS_D10, GPIO_NPS_D11, GPIO_NPS_D12, GPIO_NPS_D13, GPIO_NPS_D14,
   GPIO_NPS_D15,
 
-  /* NOE, NWE */
+  /* NOE, NWE, and NE1 */
 
-  GPIO_NPS_NOE, GPIO_NPS_NWE,
-
-  /* NE1 */
-
-  GPIO_NPS_NE1
+  GPIO_NPS_NOE, GPIO_NPS_NWE, GPIO_NPS_NE1
 };
 
 #define NGPIOS (sizeof(fsmc_gpios)/sizeof(uint16_t))
@@ -486,6 +482,10 @@ static void stm32_selectlcd(void)
 
   putreg32(FSMC_BCR_MBKEN | FSMC_BCR_SRAM | FSMC_BCR_MWID16 | FSMC_BCR_WREN,
       STM32_FSMC_BCR1);
+
+  /* Configure the LCD RESET\ pin.  Initial value will take the LCD out of reset */
+
+  stm32_configgpio(GPIO_LCD_RESET);
 }
 
 /************************************************************************************
@@ -548,6 +548,8 @@ int up_lcdinitialize(void)
   if (!g_ssd1289drvr)
     {
       lcdvdbg("Initializing\n");
+
+      /* Initialize the backlight */
 
       init_lcd_backlight();
 

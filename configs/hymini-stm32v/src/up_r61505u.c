@@ -79,17 +79,17 @@
 #  define LCD_YRES       320
 #endif
 
-#define LCD_BL_TIMER_PERIOD   8999
+#define LCD_BL_TIMER_PERIOD 8999
 
 /* LCD is connected to the FSMC_Bank1_NOR/SRAM1 and NE1 is used as ship select signal */
 /* RS <==> A16 */
 
-#define LCD_REG              (*((volatile unsigned short *) 0x60000000)) /* RS = 0 */
-#define LCD_RAM              (*((volatile unsigned short *) 0x60020000)) /* RS = 1 */
+#define LCD_REG          (*((volatile unsigned short *) 0x60000000)) /* RS = 0 */
+#define LCD_RAM          (*((volatile unsigned short *) 0x60020000)) /* RS = 1 */
 
 /* LCD IDs */
 
-#define LCD_ID 0x1505
+#define LCD_ID           0x1505
 
 /* Debug ******************************************************************************/
 
