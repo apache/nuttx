@@ -6408,4 +6408,4 @@
 	  files):  Add support for the XPT2046 touchscreen controller on
 	  the Viewtool LCD module connected to the Viewtool STM32F103
 	  board (2014-1-9).
-
+	* libc/strings/lib_stpcpy.c:  Add stpcpy() (2014-1-9).
