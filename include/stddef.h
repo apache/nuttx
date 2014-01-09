@@ -43,7 +43,56 @@
 #include <sys/types.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* The <stddef.h> header shall define the following macros:
+ *
+ * NULL
+ *   The Null pointer constant.
+ *
+ *   NOTE: Currently the definition of NULL is in sys/types.h but should be
+ *   moved here sometime.
+ *
+ * offsetof(type, member-designator)
+ *   Integer constant expression of type size_t, the value of which is the
+ *   offset in bytes to the structure member (member-designator), from the
+ *   beginning of its structure (type).
+ *
+ * Reference: Opengroup.org
+ */
+
+#define offsetof(a,b) ((size_t)(&(((a *)(0))->b)))
+
+/****************************************************************************
  * Type Definitions
  ****************************************************************************/
+/* The <stddef.h> header shall define the following types:
+ *
+ * ptrdiff_t
+ *   Signed integer type of the result of subtracting two pointers.
+ *
+ * wchar_t
+ *   Integer type whose range of values can represent distinct wide-character
+ *   codes for all members of the largest character set specified among the
+ *   locales supported by the compilation environment: the null character has
+ *   the code value 0 and each member of the portable character set has a
+ *   code value equal to its value when used as the lone character in an\
+ *   integer character constant.
+ *
+ * size_t
+ *   Unsigned integer type of the result of the sizeof operator.
+ *
+ *   NOTE: Currently the type definitions of both wchar_t and size_t are in
+ *   sys/types.h but should be moved here sometime.
+ *
+ * The implementation shall support one or more programming environments in
+ * which the widths of ptrdiff_t, size_t, and wchar_t are no greater than the
+ * width of type long. The names of these programming environments can be
+ * obtained using the confstr() function or the getconf utility.
+ *
+ * Reference: Opengroup.org
+ */
+
+typedef ssize_t ptrdiff_t;
 
 #endif /* __INCLUDE_STDDEF_H */
