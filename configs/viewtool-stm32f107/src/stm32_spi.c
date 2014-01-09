@@ -87,7 +87,8 @@
  * Name: stm32_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the Viewtools stm32f103/107 board.
+ *   Called to configure SPI chip select GPIO pins for the Viewtool stm32f103/107
+ *   board.
  *
  ************************************************************************************/
 
@@ -98,6 +99,12 @@ void weak_function stm32_spiinitialize(void)
    *       Here, we only initialize chip select pins unique to the board
    *       architecture.
    */
+
+#if defined(CONFIG_STM32_SPI2) && defined(CONFIG_INPUT_ADS7843E)
+  /* Configure the XPT2046 SPI2 CS pin as an output */
+
+  (void)stm32_configgpio(GPIO_LCDTP_CS);
+#endif
 }
 
 /****************************************************************************
@@ -141,6 +148,15 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
+
+#ifdef CONFIG_INPUT_ADS7843E
+  /* Select/de-select the touchscreen */
+
+  if (devid == SPIDEV_TOUCHSCREEN)
+    {
+      stm32_gpiowrite(GPIO_LCDTP_CS, !selected);
+    }
+#endif
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
@@ -149,13 +165,13 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 }
 #endif
 
-#ifdef CONFIG_STM32_SPI2
-void stm32_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
+#ifdef CONFIG_STM32_SPI3
+void stm32_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool selected)
 {
   spidbg("devid: %d CS: %s\n", (int)devid, selected ? "assert" : "de-assert");
 }
 
-uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   return 0;
 }

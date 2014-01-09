@@ -62,6 +62,10 @@ CSRCS += stm32_usbdev.c
 endif
 endif
 
+ifeq ($(CONFIG_INPUT_ADS7843E),y) # F103
+CSRCS += stm32_touchscreen.c
+endif
+
 ifeq ($(CONFIG_LCD_SSD1289),y) # F103
 CSRCS += stm32_ssd1289.c
 endif
