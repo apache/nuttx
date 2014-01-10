@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: December 5, 2013</p>
+      <p>Last Updated: January 10, 2014</p>
     </td>
   </tr>
 </table>
@@ -541,6 +541,11 @@ nsh&gt;
   Where <code>&lt;niceness&gt;</code> is any value between -20 and 19 where lower
   (more negative values) correspond to higher priorities.
   The default niceness is 10.
+</p>
+
+<p>
+  <b>Multiple commands per line</b>.
+  NSH will accept multiple commands per command line with each command separated with the semi-colon character (;).
 </p>
 
 <table width ="100%">
@@ -2650,6 +2655,13 @@ nsh>
       Default: 80
     </td>
   </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NSH_DISABLE_SEMICOLON</code></b></td>
+    <td>
+      By default, you can enter multiple NSH commands on a line with each command separated by a semicolon.
+      You can disable this feature to save a little memory on FLASH challenged platforms.
+      Default: n
+    </td>
   </tr>
   <tr>
     <td valign="top"><b><code>CONFIG_NSH_NESTDEPTH</code></b></td>
