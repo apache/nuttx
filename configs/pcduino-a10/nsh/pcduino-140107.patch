@@ -91,16 +91,3 @@ index f82490c..5c16e48 100644
  }
  #endif
  
-diff --git a/nuttx/arch/arm/src/common/up_internal.h b/nuttx/arch/arm/src/common/up_internal.h
-index eb3ca89..8310d8a 100644
---- a/nuttx/arch/arm/src/common/up_internal.h
-+++ b/nuttx/arch/arm/src/common/up_internal.h
-@@ -60,7 +60,7 @@
- #undef  CONFIG_SUPPRESS_INTERRUPTS    /* DEFINED: Do not enable interrupts */
- #undef  CONFIG_SUPPRESS_TIMER_INTS    /* DEFINED: No timer */
- #undef  CONFIG_SUPPRESS_SERIAL_INTS   /* DEFINED: Console will poll */
--#undef  CONFIG_SUPPRESS_UART_CONFIG   /* DEFINED: Do not reconfig UART */
-+#define  CONFIG_SUPPRESS_UART_CONFIG  1 /* DEFINED: Do not reconfig UART */
- #undef  CONFIG_DUMP_ON_EXIT           /* DEFINED: Dump task state on exit */
- 
- /* Determine which (if any) console driver to use.  If a console is enabled

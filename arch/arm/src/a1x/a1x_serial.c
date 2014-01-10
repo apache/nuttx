@@ -77,10 +77,13 @@
 
 #if defined(USE_SERIALDRIVER) && defined(HAVE_UART_DEVICE)
 
-/* SCLK is the UART input clock */
+/* SCLK is the UART input clock.
+ *
+ * Through experimentation, it has been found that the serial clock is
+ * OSC24M
+ */
 
-#define A1X_SCLK 0
-#warning What is the correct value of SCLK
+#define A1X_SCLK 24000000
 
 /****************************************************************************
  * Private Types

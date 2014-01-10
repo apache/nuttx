@@ -6409,3 +6409,6 @@
 	  the Viewtool LCD module connected to the Viewtool STM32F103
 	  board (2014-1-9).
 	* libc/strings/lib_stpcpy.c:  Add stpcpy() (2014-1-9).
+	* arch/arm/src/a1x/a1x_lowputc.c and a1x_serial.c:  Mystery
+	  finally solved:  The A10 serial clock is the OSC24M clock.
+	  Thanks to Alan Carvalho de Assis (2014-1-10)

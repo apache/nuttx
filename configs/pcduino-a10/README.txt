@@ -404,8 +404,3 @@ Configurations
          the pcDuino, we are executing out of SDRAM so when the TLBs for the SDRAM
          region are invalidated that cause a crash.  That has not been proven,
          however.
-
-      d) nuttx/arch/arm/src/common/up_internal.h:  One of the values need for UART
-         baud calculation is missing (the frequency of SCLK, the UART input clock).
-         As a result, UART configuration is currently suppressed by a setting in
-         this file.

@@ -150,10 +150,13 @@
 #define CONSOLE_FCR_VALUE (UART_FCR_RT_HALF | UART_FCR_XFIFOR |\
                            UART_FCR_RFIFOR | UART_FCR_FIFOE)
 
-/* SCLK is the UART input clock */
+/* SCLK is the UART input clock.
+ *
+ * Through experimentation, it has been found that the serial clock is
+ * OSC24M
+ */
 
-#define A1X_SCLK 0
-#warning What is the correct value of SCLK
+#define A1X_SCLK 24000000
 
 /* The output baud rate is equal to the serial clock (SCLK) frequency divided
  * by sixteen times the value of the baud rate divisor, as follows:
