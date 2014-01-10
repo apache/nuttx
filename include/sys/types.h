@@ -56,6 +56,7 @@
 #ifndef TRUE
 #  define TRUE  1
 #endif
+
 #ifndef FALSE
 #  define FALSE 0
 #endif
@@ -129,6 +130,8 @@ typedef unsigned int mode_t;
 
 /* size_t is used for sizes of memory objects.
  * ssize_t is used for a count of bytes or an error indication.
+ *
+ * REVISIT: size_t belongs in stddef.h
  */
 
 #ifdef CONFIG_SMALL_MEMORY
@@ -179,6 +182,8 @@ typedef intptr_t     ptrdiff_t;
 /* Wide, 16-bit character types.  wchar_t is a built-in type in C++ and
  * its declaration here may cause compilation errors on some compilers
  * if -DCONFIG_WCHAR_BUILTIN is not included in the CXXFLAGS.
+ *
+ * REVISIT: wchar_t belongs in stddef.h
  */
 
 #ifndef CONFIG_WCHAR_BUILTIN

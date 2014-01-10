@@ -48,15 +48,19 @@
 /* The <stddef.h> header shall define the following macros:
  *
  * NULL
- *   The Null pointer constant.
+ *   The null pointer constant.
  *
- *   NOTE: Currently the definition of NULL is in sys/types.h but should be
- *   moved here sometime.
+ *     NOTE: Currently the definition of NULL is in sys/types.h but should
+ *     be moved here sometime.
  *
  * offsetof(type, member-designator)
  *   Integer constant expression of type size_t, the value of which is the
  *   offset in bytes to the structure member (member-designator), from the
  *   beginning of its structure (type).
+ *
+ *     NOTE: This version of offsetof() depends on behaviors that could be
+ *     undefined for some compilers.  It would be better to use a builtin
+ *     function if one exists.
  *
  * Reference: Opengroup.org
  */
@@ -71,6 +75,9 @@
  * ptrdiff_t
  *   Signed integer type of the result of subtracting two pointers.
  *
+ *     NOTE: This type assumes that ssize_t will cover the largest address
+ *     difference.  This might not be true of CONFIG_MM_SMALL is defined.
+ *
  * wchar_t
  *   Integer type whose range of values can represent distinct wide-character
  *   codes for all members of the largest character set specified among the
@@ -82,8 +89,8 @@
  * size_t
  *   Unsigned integer type of the result of the sizeof operator.
  *
- *   NOTE: Currently the type definitions of both wchar_t and size_t are in
- *   sys/types.h but should be moved here sometime.
+ *     NOTE: Currently the type definitions of both wchar_t and size_t are
+ *     in sys/types.h but should be moved here sometime.
  *
  * The implementation shall support one or more programming environments in
  * which the widths of ptrdiff_t, size_t, and wchar_t are no greater than the
