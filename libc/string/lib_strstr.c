@@ -45,11 +45,11 @@
  * Global Functions
  ****************************************************************************/
 
-char *strstr(const char *str, const char *substr)
+FAR char *strstr(FAR const char *str, FAR const char *substr)
 {
-  const char *candidate;  /* Candidate in str with matching start character */
-  char         ch;        /* First character of the substring */
-  int          len;       /* The length of the substring */
+  FAR const char *candidate; /* Candidate in str with matching start character */
+  char ch;                   /* First character of the substring */
+  int len;                   /* The length of the substring */
 
   /* Special case the empty substring */
 
