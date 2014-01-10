@@ -427,7 +427,7 @@ static inline void up_configbaud(struct up_dev_s *priv)
 
 static int up_setup(struct uart_dev_s *dev)
 {
-#ifndef CONFIG_SUPPRESS_LPC214X_UART_CONFIG
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   uint8_t lcr;
 

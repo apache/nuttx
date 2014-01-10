@@ -71,7 +71,7 @@
       * initialization suppressed?
       */
 
-#    if defined(USE_EARLYSERIALINIT) || defined(CONFIG_SUPPRESS_LPC31_UART_CONFIG)
+#    if defined(USE_EARLYSERIALINIT) || defined(CONFIG_SUPPRESS_UART_CONFIG)
 #      undef NEED_LOWSETUP
 #    else
 #      define NEED_LOWSETUP 1
