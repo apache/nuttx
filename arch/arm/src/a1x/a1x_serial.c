@@ -950,7 +950,7 @@ static inline uint32_t a1x_uartdl(uint32_t baud)
 
 static int up_setup(struct uart_dev_s *dev)
 {
-#ifndef CONFIG_SUPPRESS_A1X_UART_CONFIG
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct up_dev_s *priv = (struct up_dev_s*)dev->priv;
   uint16_t dl;
   uint32_t lcr;

@@ -446,7 +446,7 @@ static void up_rxto_enable(struct nuc_dev_s *priv)
 
 static int up_setup(struct uart_dev_s *dev)
 {
-#ifndef CONFIG_SUPPRESS_NUC_UART_CONFIG
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct nuc_dev_s *priv = (struct nuc_dev_s*)dev->priv;
   uint32_t regval;
 
@@ -526,7 +526,7 @@ static int up_setup(struct uart_dev_s *dev)
   /* Enable Flow Control in the Modem Control Register */
   /* Not implemented */
 
-#endif /* CONFIG_SUPPRESS_NUC_UART_CONFIG */
+#endif /* CONFIG_SUPPRESS_UART_CONFIG */
   return OK;
 }
 
