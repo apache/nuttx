@@ -6412,3 +6412,5 @@
 	* arch/arm/src/a1x/a1x_lowputc.c and a1x_serial.c:  Mystery
 	  finally solved:  The A10 serial clock is the OSC24M clock.
 	  Thanks to Alan Carvalho de Assis (2014-1-10)
+	* binfmt/binfmt_loadmodule.c: Fix a memory leak (2013-1-11).
+

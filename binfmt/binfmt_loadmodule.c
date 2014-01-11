@@ -1,7 +1,7 @@
 /****************************************************************************
  * binfmt/binfmt_loadmodule.c
  *
- *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -231,6 +231,10 @@ int load_module(FAR struct binary_s *bin)
                       break;
                     }
                 }
+
+              /* Release the traversal handle */
+
+              exepath_release(handle);
             }
 
           /* Restore the relative path.  This is not needed for anything
