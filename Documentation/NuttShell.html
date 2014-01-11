@@ -548,6 +548,37 @@ nsh&gt;
   NSH will accept multiple commands per command line with each command separated with the semi-colon character (;).
 </p>
 
+<p>
+   <b>Optional Syntax Extensions</b>
+   Because these features commit significant resources, it is disabled by default.
+</p>
+<ul>
+<li>
+  <b><code>CONFIG_NSH_CMDPARMS</code></b>.
+   If selected, then the output from commands, from file applications, and from NSH built-in commands can be used as arguments to other commands.
+   The entity to be executed is identified by enclosing the command line in back quotes.
+   For example,
+<p>
+<ul><pre>
+set FOO `myprogram $BAR`
+</pre></ul>
+<p>
+   Will execute the program named <code>myprogram</code> passing it the value of the environment variable <code>BAR</code>.
+   The value of the environment variable <code>FOO</code> is then set output of <code>myprogram</code> on <code>stdout</code>.
+</li>
+<li>
+  <b><code>CONFIG_NSH_ARGCAT</code></b>.
+  Support concatenation of strings with environment variables or command output.  For example:
+  <ul><pre>
+set FOO XYZ
+set BAR 123
+set FOOBAR ABC_${FOO}_${BAR}
+</pre></ul>
+  would set the environment variable <code>FOO</code> to <code>XYZ</code>, <code>BAR</code> to <code>123</code> and <code>FOOBAR</code> to <code>ABC_XYZ_123</code>.
+  If <code>CONFIG_NSH_ARGCAT</code> is not selected, then a slightly small FLASH footprint results but then also only simple environment variables like <code>$FOO</code> can be used on the command line.
+</li>
+</ul>
+
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
@@ -2661,6 +2692,49 @@ nsh>
       By default, you can enter multiple NSH commands on a line with each command separated by a semicolon.
       You can disable this feature to save a little memory on FLASH challenged platforms.
       Default: n
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NSH_CMDPARMS</code></b></td>
+    <td>
+     If selected, then the output from commands, from file applications, and from NSH built-in commands can be used as arguments to other commands.
+     The entity to be executed is identified by enclosing the command line in back quotes.
+     For example,
+     <ul><pre>
+set FOO `myprogram $BAR
+</pre></ul>
+     will execute the program named  <code>myprogram </code> passing it the value of the environment variable <code>BAR</code>.
+     The value of the environment variable <code>FOO</code> is then set output of <code>myprogram</code> on <code>stdout</code>.  Because this feature commits significant resources, it is disabled by default.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NSH_TMPDIR</code></b></td>
+    <td>
+     If <code>CONFIG_NSH_CMDPARMS</code> is selected, then function output will be retained
+     in a temporary file.  In that case, this string must be provided to
+     specify the full path to a directory where temporary files can be
+     created.  This would be a good application of RAM disk: To provide
+     temporary storage for function output.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NSH_MAXARGUMENTS</code></b></td>
+    <td>
+     The maximum number of NSH command arguments. Default: 6
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NSH_ARGCAT</code></b></td>
+    <td>
+     Support concatenation of strings with environment variables or command output.
+     For example:
+     <ul><pre>
+set FOO XYZ
+set BAR 123
+set FOOBAR ABC_${FOO}_${BAR}
+</pre></ul>
+     would set the environment variable <code>FOO</code> to <code>XYZ</code>, <code>BAR</code> to <code>123</code> and <code>FOOBAR</code> to <code>ABC_XYZ_123</code>.
+     If <code>CONFIG_NSH_ARGCAT</code> is not selected, then a slightly small FLASH footprint results but then also only simple environment variables like <code>$FOO</code> can be used on the command line.
     </td>
   </tr>
   <tr>
