@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: December 7, 2013</p>
+      <p>Last Updated: January 12, 2014</p>
     </td>
   </tr>
 </table>
@@ -1197,7 +1197,7 @@
       <li><a href="#arm926ejs">ARM926EJS</a> (4) </li>
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (1) </li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (2)</li>
-      <li><a href="#armcortexm3">ARM Cortex-M3</a> (24)</li>
+      <li><a href="#armcortexm3">ARM Cortex-M3</a> (25)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (10)</li>
     </ul>
   <li>Atmel AVR
@@ -2137,12 +2137,31 @@ nsh>
   <td>
     <p>
       <a name="stm32f100x"><b>STMicro STM32F100x (STM32 F1 &quot;Value Line&quot;Family)</b>.</a>
-      Chip support for these STM32 &quot;Value Line&quot; family was contributed by Mike Smith and users have reported that they have successful brought up NuttX on there proprietary boards using this logic.
-      This logic was extended to support the <i>high density</i> STM32F100RC chips by Freddie Chopin
-      However, there is <i>no</i> specific board support for this chip families in the NuttX source tree.
-      There is, however, <i>generic</i> support for STM32F100RC boards.
-      Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/stm32f100rc_generic/README.txt">README</a> file for further information.
     </p>
+      <ul>
+        <li>
+          <p>
+            <b>Proprietary Boards</b>
+            Chip support for these STM32 &quot;Value Line&quot; family was contributed by Mike Smith and users have reported that they have successful brought up NuttX on their proprietary boards using this logic.
+          </p>
+        </li>
+        <li>
+          <p>
+            <b>Generic Board Support</b>
+            This logic was extended to support the <i>high density</i> STM32F100RC chips by Freddie Chopin
+            There is <i>generic</i> support for STM32F100RC boards.
+            Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/stm32f100rc_generic/README.txt">README</a> file for further information.
+          </p>
+       </li>
+       <li>
+          <p>
+            <b>STM32VL-Discovery</b>.
+            In NuttX-6.33, support for the STMicro STM32VL-Discovery board was contributed by Alan Carvalho de Assis.
+            The STM32VL-Discovery board features an STM32F100RB MCU.
+            Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/stm32vldiscovery/README.txt">README</a> file for further information.
+          </p>
+       </li>
+    </ul>
 </tr>
 <tr>
   <td><br></td>
