@@ -373,6 +373,7 @@ ViewTool DP83848 Ethernet Module
 
       CONFIG_NET_BUFSIZE=650                 : Maximum packet size
       CONFIG_NET_RECEIVE_WINDOW=650
+      CONFIG_NET_TCP_READAHEAD=y             : Enable read-ahead buffering
       CONFIG_NET_TCP_READAHEAD_BUFSIZE=650
 
       CONFIG_NET_TCP=y                       : TCP support
