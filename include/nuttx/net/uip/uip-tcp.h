@@ -6,7 +6,7 @@
  * of C macros that are used by uIP programs as well as internal uIP
  * structures, TCP/IP header structures and function declarations.
  *
- *   Copyright (C) 2007, 2009-2010, 2012-2013 Gregory Nutt. All rights
+ *   Copyright (C) 2007, 2009-2010, 2012-2014 Gregory Nutt. All rights
  *      reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
@@ -170,7 +170,7 @@ struct uip_conn
    *   where the TCP/IP read-ahead data is retained.
    */
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
   sq_queue_t readahead;   /* Read-ahead buffering */
 #endif
 
@@ -234,7 +234,7 @@ struct uip_conn
  * buffers so that no data is lost.
  */
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
 struct uip_readahead_s
 {
   sq_entry_t rh_node;      /* Supports a singly linked list */
@@ -401,10 +401,10 @@ extern int uip_unlisten(struct uip_conn *conn);
 
 /* Access to TCP read-ahead buffers */
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
 extern struct uip_readahead_s *uip_tcpreadaheadalloc(void);
 extern void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
-#endif /* CONFIG_NET_NTCP_READAHEAD_BUFFERS */
+#endif /* CONFIG_NET_TCP_READAHEAD */
 
 /* Backlog support */
 

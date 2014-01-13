@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpreadahead.c
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
  ****************************************************************************/
 
 #include <nuttx/net/uip/uipopt.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && (CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0)
+#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_READAHEAD)
 
 #include <queue.h>
 #include <debug.h>
@@ -127,4 +127,4 @@ void uip_tcpreadaheadrelease(struct uip_readahead_s *buf)
   sq_addfirst(&buf->rh_node, &g_freebuffers);
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_TCP && CONFIG_NET_NTCP_READAHEAD_BUFFERS*/
+#endif /* CONFIG_NET && CONFIG_NET_TCP && CONFIG_NET_TCP_READAHEAD */

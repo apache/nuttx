@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_vfcntl.c
  *
- *   Copyright (C) 2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -127,9 +127,9 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
 
           ret = O_RDWR | O_SYNC | O_RSYNC;
 
+#ifdef CONFIG_NET_TCP_READAHEAD
           /* TCP/IP sockets may also be non-blocking if read-ahead is enabled */
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
           if (psock->s_type == SOCK_STREAM && _SS_ISNONBLOCK(psock->s_flags))
             {
               ret |= O_NONBLOCK;
@@ -148,11 +148,11 @@ int net_vfcntl(int sockfd, int cmd, va_list ap)
          */
 
         {
+#ifdef CONFIG_NET_TCP_READAHEAD
            /* Non-blocking is the only configurable option.  And it applies only to
             * read operations on TCP/IP sockets when read-ahead is enabled.
             */
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
           int mode =  va_arg(ap, int);
           if (psock->s_type == SOCK_STREAM)
             {

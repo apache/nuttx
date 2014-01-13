@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_initialize.c
  *
- *   Copyright (C) 2007-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -134,7 +134,7 @@ void uip_initialize(void)
 
   /* Initialize the TCP/IP read-ahead buffering */
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
   uip_tcpreadaheadinit();
 #endif
 #endif /* CONFIG_NET_TCP */

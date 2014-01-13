@@ -115,6 +115,12 @@ config NET_MAX_LISTENPORTS
 	---help---
 		Maximum number of listening TCP/IP ports (all tasks).  Default: 20
 
+config NET_TCP_READAHEAD
+	bool "Enabled TCP/IP read-ahead buffering"
+	default y
+
+if NET_TCP_READAHEAD
+
 config NET_TCP_READAHEAD_BUFSIZE
 	int "TCP/IP read-ahead buffer size"
 	default 562
@@ -139,6 +145,8 @@ config NET_NTCP_READAHEAD_BUFFERS
 		You might want to disable TCP/IP read-ahead buffering on a highly
 		memory constained system that does not have any TCP/IP packet rate
 		issues.
+
+endif # NET_TCP_READAHEAD
 
 config NET_TCP_RECVDELAY
 	int "TCP Rx delay"

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/net_poll.c
  *
- *   Copyright (C) 2008-2009, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +68,7 @@
  */
 
 #if !defined(CONFIG_DISABLE_POLL) && CONFIG_NSOCKET_DESCRIPTORS > 0 && \
-    defined(CONFIG_NET_TCP) && CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+    defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_READAHEAD)
 #  define HAVE_NETPOLL 1
 #else
 #  undef HAVE_NETPOLL

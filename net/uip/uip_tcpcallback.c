@@ -70,7 +70,7 @@
  *
  ****************************************************************************/
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
 static int uip_readahead(struct uip_readahead_s *readahead, uint8_t *buf,
                          int len)
 {
@@ -131,7 +131,7 @@ uip_dataevent(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
 
   if (dev->d_len > 0)
     {
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
       uint8_t *buffer = dev->d_appdata;
       int      buflen = dev->d_len;
       uint16_t recvlen;
@@ -139,7 +139,7 @@ uip_dataevent(FAR struct uip_driver_s *dev, FAR struct uip_conn *conn,
 
       nllvdbg("No listener on connection\n");
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
       /* Save as much data as possible in the read-ahead buffers */
 
       recvlen = uip_datahandler(conn, buffer, buflen);
@@ -276,7 +276,7 @@ uint16_t uip_tcpcallback(struct uip_driver_s *dev, struct uip_conn *conn,
  *
  ****************************************************************************/
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
 uint16_t uip_datahandler(FAR struct uip_conn *conn, FAR uint8_t *buffer,
                          uint16_t buflen)
 {
@@ -332,6 +332,6 @@ uint16_t uip_datahandler(FAR struct uip_conn *conn, FAR uint8_t *buffer,
   nllvdbg("Buffered %d bytes (of %d)\n", recvlen, buflen);
   return recvlen;
 }
-#endif /* CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0 */
+#endif /* CONFIG_NET_TCP_READAHEAD */
 
 #endif /* CONFIG_NET && CONFIG_NET_TCP */

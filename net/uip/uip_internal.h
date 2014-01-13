@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_internal.h
  *
- *   Copyright (C) 2007-2009, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:
@@ -156,18 +156,18 @@ void uip_tcpinput(struct uip_driver_s *dev);
 
 uint16_t uip_tcpcallback(FAR struct uip_driver_s *dev,
                          FAR struct uip_conn *conn, uint16_t flags);
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
 uint16_t uip_datahandler(FAR struct uip_conn *conn,
                          FAR uint8_t *buffer, uint16_t nbytes);
 #endif
 
 /* Defined in uip_tcpreadahead.c ********************************************/
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
 void uip_tcpreadaheadinit(void);
 struct uip_readahead_s *uip_tcpreadaheadalloc(void);
 void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
-#endif /* CONFIG_NET_NTCP_READAHEAD_BUFFERS */
+#endif /* CONFIG_NET_TCP_READAHEAD */
 
 #endif /* CONFIG_NET_TCP */
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpconn.c
  *
- *   Copyright (C) 2007-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Large parts of this file were leveraged from uIP logic:
@@ -305,8 +305,7 @@ void uip_tcpfree(struct uip_conn *conn)
 {
   FAR struct uip_callback_s *cb;
   FAR struct uip_callback_s *next;
-
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
   struct uip_readahead_s *readahead;
 #endif
   uip_lock_t flags;
@@ -342,7 +341,7 @@ void uip_tcpfree(struct uip_conn *conn)
 
   /* Release any read-ahead buffers attached to the connection */
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
   while ((readahead = (struct uip_readahead_s *)sq_remfirst(&conn->readahead)) != NULL)
     {
       uip_tcpreadaheadrelease(readahead);
@@ -511,7 +510,7 @@ struct uip_conn *uip_tcpaccept(struct uip_tcpip_hdr *buf)
 
       /* Initialize the list of TCP read-ahead buffers */
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
       sq_init(&conn->readahead);
 #endif
 
@@ -654,7 +653,7 @@ int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr)
 
   /* Initialize the list of TCP read-ahead buffers */
 
-#if CONFIG_NET_NTCP_READAHEAD_BUFFERS > 0
+#ifdef CONFIG_NET_TCP_READAHEAD
   sq_init(&conn->readahead);
 #endif
 
