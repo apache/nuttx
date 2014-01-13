@@ -1,7 +1,7 @@
 ############################################################################
 # net/Makefile
 #
-#   Copyright (C) 2007, 2008, 2011-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,13 +41,19 @@ ifeq ($(CONFIG_NET),y)
 
 SOCK_ASRCS  =
 SOCK_CSRCS  = bind.c connect.c getsockname.c recv.c recvfrom.c socket.c
-SOCK_CSRCS += sendto.c net_sockets.c net_close.c net_dup.c net_dup2.c 
+SOCK_CSRCS += sendto.c net_sockets.c net_close.c net_dup.c net_dup2.c
 SOCK_CSRCS += net_clone.c net_vfcntl.c
 
 # TCP/IP support
 
 ifeq ($(CONFIG_NET_TCP),y)
 SOCK_CSRCS += send.c listen.c accept.c net_monitor.c
+
+ifeq ($(CONFIG_NET_TCP_WRBUFFER),y)
+SOCK_CSRCS += net_send_buffered.c
+else
+SOCK_CSRCS += net_send_unbuffered.c
+endif
 endif
 
 # Socket options

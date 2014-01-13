@@ -144,15 +144,9 @@ struct uip_conn
 {
   dq_entry_t node;        /* Implements a doubly linked list */
   uip_ipaddr_t ripaddr;   /* The IP address of the remote host */
-  uint16_t lport;         /* The local TCP port, in network byte order */
-  uint16_t rport;         /* The remoteTCP port, in network byte order */
   uint8_t  rcvseq[4];     /* The sequence number that we expect to
                            * receive next */
   uint8_t  sndseq[4];     /* The sequence number that was last sent by us */
-  uint16_t unacked;       /* Number bytes sent but not yet ACKed */
-  uint16_t mss;           /* Current maximum segment size for the
-                           * connection */
-  uint16_t winsize;       /* Current window size of the connection */
   uint8_t  crefs;         /* Reference counts on this instance */
   uint8_t  sa;            /* Retransmission time-out calculation state
                            * variable */
@@ -163,6 +157,16 @@ struct uip_conn
   uint8_t  timer;         /* The retransmission timer (units: half-seconds) */
   uint8_t  nrtx;          /* The number of retransmissions for the last
                            * segment sent */
+  uint16_t lport;         /* The local TCP port, in network byte order */
+  uint16_t rport;         /* The remoteTCP port, in network byte order */
+  uint16_t mss;           /* Current maximum segment size for the
+                           * connection */
+  uint16_t winsize;       /* Current window size of the connection */
+#ifdef CONFIG_NET_TCP_WRBUFFER
+  uint32_t unacked;       /* Number bytes sent but not yet ACKed */
+#else
+  uint16_t unacked;       /* Number bytes sent but not yet ACKed */
+#endif
 
   /* Read-ahead buffering.
    *
@@ -172,6 +176,17 @@ struct uip_conn
 
 #ifdef CONFIG_NET_TCP_READAHEAD
   sq_queue_t readahead;   /* Read-ahead buffering */
+#endif
+
+  /* Write buffering */
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  sq_queue_t write_q;     /* Write buffering for segments */
+  sq_queue_t unacked_q;   /* Write buffering for un-ACKed segments */
+  size_t     expired;     /* Number segments retransmitted but not yet ACKed,
+                           * it can only be updated at UIP_ESTABLISHED state */
+  size_t     sent;        /* The number of bytes sent  */
+  uint32_t   isn;         /* Initial sequence number */
 #endif
 
   /* Listen backlog support
@@ -238,8 +253,22 @@ struct uip_conn
 struct uip_readahead_s
 {
   sq_entry_t rh_node;      /* Supports a singly linked list */
-  uint16_t rh_nbytes;      /* Number of bytes available in this buffer */
-  uint8_t  rh_buffer[CONFIG_NET_TCP_READAHEAD_BUFSIZE];
+  uint16_t   rh_nbytes;    /* Number of bytes available in this buffer */
+  uint8_t    rh_buffer[CONFIG_NET_TCP_READAHEAD_BUFSIZE];
+};
+#endif
+
+/* This structure supports TCP write buffering */
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+struct uip_wrbuffer_s
+{
+  sq_entry_t wb_node;      /* Supports a singly linked list */
+  uint32_t   wb_seqno;     /* Sequence number of the write segment */
+  uint16_t   wb_nbytes;    /* Number of bytes available in this buffer */
+  uint8_t    wb_nrtx;      /* The number of retransmissions for the last
+                            * segment sent */
+  uint8_t    wb_buffer[CONFIG_NET_TCP_WRITE_BUFSIZE];
 };
 #endif
 
@@ -350,7 +379,7 @@ struct uip_tcpip_hdr
  * normally something done by the implementation of the socket() API
  */
 
-extern struct uip_conn *uip_tcpalloc(void);
+struct uip_conn *uip_tcpalloc(void);
 
 /* Allocate a new TCP data callback */
 
@@ -361,14 +390,14 @@ extern struct uip_conn *uip_tcpalloc(void);
  * be done by the implementation of close()
  */
 
-extern void uip_tcpfree(struct uip_conn *conn);
+void uip_tcpfree(struct uip_conn *conn);
 
 /* Bind a TCP connection to a local address */
 
 #ifdef CONFIG_NET_IPv6
-extern int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in6 *addr);
+int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in6 *addr);
 #else
-extern int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr);
+int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr);
 #endif
 
 /* This function implements the UIP specific parts of the standard
@@ -386,44 +415,51 @@ extern int uip_tcpbind(struct uip_conn *conn, const struct sockaddr_in *addr);
  */
 
 #ifdef CONFIG_NET_IPv6
-extern int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in6 *addr);
+int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in6 *addr);
 #else
-extern int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr);
+int uip_tcpconnect(struct uip_conn *conn, const struct sockaddr_in *addr);
 #endif
 
 /* Start listening to the port bound to the specified TCP connection */
 
-extern int uip_listen(struct uip_conn *conn);
+int uip_listen(struct uip_conn *conn);
 
 /* Stop listening to the port bound to the specified TCP connection */
 
-extern int uip_unlisten(struct uip_conn *conn);
+int uip_unlisten(struct uip_conn *conn);
 
 /* Access to TCP read-ahead buffers */
 
 #ifdef CONFIG_NET_TCP_READAHEAD
-extern struct uip_readahead_s *uip_tcpreadaheadalloc(void);
-extern void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
+struct uip_readahead_s *uip_tcpreadaheadalloc(void);
+void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
 #endif /* CONFIG_NET_TCP_READAHEAD */
+
+/* Access to TCP write buffers */
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+FAR struct uip_wrbuffer_s *uip_tcpwrbuffer_alloc(FAR const struct timespec *abstime);
+void uip_tcpwrbuffer_release(FAR struct uip_wrbuffer_s *buf);
+#endif /* CONFIG_NET_NTCP_READAHEAD_BUFFERS */
 
 /* Backlog support */
 
 #ifdef CONFIG_NET_TCPBACKLOG
 /* APIs to create and terminate TCP backlog support */
 
-extern int uip_backlogcreate(FAR struct uip_conn *conn, int nblg);
-extern int uip_backlogdestroy(FAR struct uip_conn *conn);
+int uip_backlogcreate(FAR struct uip_conn *conn, int nblg);
+int uip_backlogdestroy(FAR struct uip_conn *conn);
 
 /* APIs to manage individual backlog actions */
 
-extern int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
+int uip_backlogadd(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
 #ifndef CONFIG_DISABLE_POLL
-extern bool uip_backlogavailable(FAR struct uip_conn *conn);
+bool uip_backlogavailable(FAR struct uip_conn *conn);
 #else
 #  define uip_backlogavailable(conn)   (false);
 #endif
-extern FAR struct uip_conn *uip_backlogremove(FAR struct uip_conn *conn);
-extern int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
+FAR struct uip_conn *uip_backlogremove(FAR struct uip_conn *conn);
+int uip_backlogdelete(FAR struct uip_conn *conn, FAR struct uip_conn *blconn);
 
 #else
 #  define uip_backlogcreate(conn,nblg) (-ENOSYS)

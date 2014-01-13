@@ -16,7 +16,7 @@
  * Note: Most of the configuration options in the uipopt.h should not
  * be changed, but rather the per-project defconfig file.
  *
- *   Copyright (C) 2007, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * This logic was leveraged from uIP which also has a BSD-style license:

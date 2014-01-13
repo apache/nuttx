@@ -139,6 +139,12 @@ void uip_initialize(void)
 #endif
 #endif /* CONFIG_NET_TCP */
 
+  /* Initialize the TCP/IP write buffering */
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  uip_tcpwrbuffer_init();
+#endif
+
   /* Initialize the UDP connection structures */
 
 #ifdef CONFIG_NET_UDP
@@ -152,4 +158,3 @@ void uip_initialize(void)
 #endif
 }
 #endif /* CONFIG_NET */
-

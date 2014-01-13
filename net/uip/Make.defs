@@ -1,7 +1,7 @@
 ############################################################################
-# Make.defs
+# net/uip/Make.defs
 #
-#   Copyright (C) 2007, 2009-20010 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2009-2010, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,8 @@ ifeq ($(CONFIG_NET),y)
 
 # Common IP source files
 
-UIP_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c \
-	     uip_poll.c uip_chksum.c uip_callback.c
+UIP_CSRCS += uip_initialize.c uip_setipid.c uip_input.c uip_send.c
+UIP_CSRCS += uip_poll.c uip_chksum.c uip_callback.c
 
 # Non-interrupt level support required?
 
@@ -65,18 +65,28 @@ endif
 
 ifeq ($(CONFIG_NET_TCP),y)
 
-UIP_CSRCS += uip_tcpconn.c uip_tcpseqno.c uip_tcppoll.c uip_tcptimer.c uip_tcpsend.c \
-	     uip_tcpinput.c uip_tcpappsend.c uip_listen.c uip_tcpcallback.c \
-	     uip_tcpreadahead.c uip_tcpbacklog.c
+UIP_CSRCS += uip_tcpconn.c uip_tcpseqno.c uip_tcppoll.c uip_tcptimer.c
+UIP_CSRCS += uip_tcpsend.c uip_tcpinput.c uip_tcpappsend.c uip_listen.c
+UIP_CSRCS += uip_tcpcallback.c uip_tcpbacklog.c
 
+endif
+
+# Buffering
+
+ifeq ($(CONFIG_NET_TCP_READAHEAD),y)
+UIP_CSRCS += uip_tcpreadahead.c
+endif
+
+ifeq ($(CONFIG_NET_TCP_WRBUFFER),y)
+UIP_CSRCS += uip_tcpwrbuffer.c
 endif
 
 # UDP source files
 
 ifeq ($(CONFIG_NET_UDP),y)
 
-UIP_CSRCS += uip_udpconn.c uip_udppoll.c uip_udpsend.c uip_udpinput.c \
-	     uip_udpcallback.c
+UIP_CSRCS += uip_udpconn.c uip_udppoll.c uip_udpsend.c uip_udpinput.c
+UIP_CSRCS += uip_udpcallback.c
 
 endif
 
@@ -95,12 +105,10 @@ endif
 # IGMP source files
 
 ifeq ($(CONFIG_NET_IGMP),y)
-UIP_CSRCS += uip_igmpgroup.c uip_igmpinit.c uip_igmpinput.c uip_igmpjoin.c \
-	     uip_igmpleave.c uip_igmpmsg.c uip_igmpsend.c uip_igmptimer.c \
-	     uip_mcastmac.c
+UIP_CSRCS += uip_igmpgroup.c uip_igmpinit.c uip_igmpinput.c uip_igmpjoin.c
+UIP_CSRCS += uip_igmpleave.c uip_igmpmsg.c uip_igmpsend.c uip_igmptimer.c
+UIP_CSRCS += uip_mcastmac.c
 endif
 
 endif
 endif
-
-

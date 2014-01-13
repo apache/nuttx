@@ -51,7 +51,7 @@
 #include <nuttx/net/uip/uip.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Socket descriptors are the index into the TCB sockets list, offset by the
@@ -101,6 +101,12 @@ struct socket
 #endif
 #endif
   FAR void     *s_conn;      /* Connection: struct uip_conn or uip_udp_conn */
+
+#ifdef CONFIG_NET_TCP_WRBUFFER
+  /* Callback instance for TCP send */
+
+  FAR struct uip_callback_s *s_sndcb;
+#endif
 };
 
 /* This defines a list of sockets indexed by the socket descriptor */
@@ -108,7 +114,7 @@ struct socket
 #if CONFIG_NSOCKET_DESCRIPTORS > 0
 struct socketlist
 {
-  sem_t   sl_sem;            /* Manage access to the socket list */
+  sem_t         sl_sem;      /* Manage access to the socket list */
   struct socket sl_sockets[CONFIG_NSOCKET_DESCRIPTORS];
 };
 #endif

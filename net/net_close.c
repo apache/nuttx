@@ -196,8 +196,7 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
         }
     }
 
-#ifdef CONFIG_NET_SOLINGER
-#ifndef CONFIG_DISABLE_CLOCK
+#if defined(CONFIG_NET_SOLINGER) && !defined(CONFIG_DISABLE_CLOCK)
   /* Check for a timeout. */
 
   else if (pstate && close_timeout(pstate))
@@ -208,8 +207,10 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
       pstate->cl_result = -ETIMEDOUT;
       goto end_wait;
     }
-#endif /* CONFIG_DISABLE_CLOCK */
 
+#endif /* CONFIG_NET_SOLINGER && !CONFIG_DISABLE_CLOCK */
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Check if all outstanding bytes have been ACKed */
 
   else if (pstate && conn->unacked != 0)
@@ -222,7 +223,7 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
       flags = (flags & ~UIP_NEWDATA);     
     }
 
-#endif /* CONFIG_NET_SOLINGER */
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
   else
     {

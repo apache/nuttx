@@ -1,8 +1,9 @@
 /****************************************************************************
- * net/send.c
+ * net/uip/uip_tcpwrbuffer.c
  *
- *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
+ *           Jason Jiang  <jasonj@live.cn>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -37,21 +38,43 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP)
+#include <nuttx/net/uip/uipopt.h>
+#if defined(CONFIG_NET) && defined(CONFIG_NET_TCP) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
 
-#include <sys/types.h>
-#include <sys/socket.h>
+#include <queue.h>
+#include <semaphore.h>
+#include <debug.h>
 
-#include "net_internal.h"
-
-/****************************************************************************
- * Definitions
- ****************************************************************************/
+#include "uip_internal.h"
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+/* Package all globals used by this logic into a structure */
+
+struct wrbuffer_s
+{
+  /* The semaphore to protect the buffers */
+
+  sem_t sem;
+
+  /* This is the list of available write buffers */
+
+  sq_queue_t freebuffers;
+
+  /* These are the pre-allocated write buffers */
+
+  struct uip_wrbuffer_s buffers[CONFIG_NET_NTCP_WRITE_BUFFERS];
+};
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* This is the state of the global write buffer resource */
+
+static struct wrbuffer_s g_wrbuffer;
 
 /****************************************************************************
  * Private Functions
@@ -62,72 +85,81 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Function: send
+ * Function: uip_tcpwrbuffer_init
  *
  * Description:
- *   The send() call may be used only when the socket is in a connected state
- *   (so that the intended recipient is known). The only difference between
- *   send() and write() is the presence of flags. With zero flags parameter,
- *   send() is equivalent to write(). Also, send(sockfd,buf,len,flags) is
- *   equivalent to sendto(sockfd,buf,len,flags,NULL,0).
- *
- * Parameters:
- *   sockfd   Socket descriptor of socket
- *   buf      Data to send
- *   len      Length of data to send
- *   flags    Send flags
- *
- * Returned Value:
- *   On success, returns the number of characters sent.  On  error,
- *   -1 is returned, and errno is set appropriately:
- *
- *   EAGAIN or EWOULDBLOCK
- *     The socket is marked non-blocking and the requested operation
- *     would block.
- *   EBADF
- *     An invalid descriptor was specified.
- *   ECONNRESET
- *     Connection reset by peer.
- *   EDESTADDRREQ
- *     The socket is not connection-mode, and no peer address is set.
- *   EFAULT
- *      An invalid user space address was specified for a parameter.
- *   EINTR
- *      A signal occurred before any data was transmitted.
- *   EINVAL
- *      Invalid argument passed.
- *   EISCONN
- *     The connection-mode socket was connected already but a recipient
- *     was specified. (Now either this error is returned, or the recipient
- *     specification is ignored.)
- *   EMSGSIZE
- *     The socket type requires that message be sent atomically, and the
- *     size of the message to be sent made this impossible.
- *   ENOBUFS
- *     The output queue for a network interface was full. This generally
- *     indicates that the interface has stopped sending, but may be
- *     caused by transient congestion.
- *   ENOMEM
- *     No memory available.
- *   ENOTCONN
- *     The socket is not connected, and no target has been given.
- *   ENOTSOCK
- *     The argument s is not a socket.
- *   EOPNOTSUPP
- *     Some bit in the flags argument is inappropriate for the socket
- *     type.
- *   EPIPE
- *     The local end has been shut down on a connection oriented socket.
- *     In this case the process will also receive a SIGPIPE unless
- *     MSG_NOSIGNAL is set.
+ *   Initialize the list of free write buffers
  *
  * Assumptions:
+ *   Called once early initialization.
  *
  ****************************************************************************/
 
-ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags)
+void uip_tcpwrbuffer_init(void)
 {
-  return psock_send(sockfd_socket(sockfd), buf, len, flags);
+  int i;
+
+  sq_init(&g_wrbuffer.freebuffers);
+
+  for (i = 0; i < CONFIG_NET_NTCP_WRITE_BUFFERS; i++)
+    {
+      sq_addfirst(&g_wrbuffer.buffers[i].wb_node, &g_wrbuffer.freebuffers);
+    }
+
+  sem_init(&g_wrbuffer.sem, 0, CONFIG_NET_NTCP_WRITE_BUFFERS);
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_TCP */
+/****************************************************************************
+ * Function: uip_tcpwrbuffer_alloc
+ *
+ * Description:
+ *   Allocate a TCP write buffer by taking a pre-allocated buffer from
+ *   the free list.  This function is called from TCP logic when a buffer
+ *   of TCP data is about to sent
+ *
+ * Assumptions:
+ *   Called from user logic with interrupts enabled.
+ *
+ ****************************************************************************/
+
+FAR struct uip_wrbuffer_s *uip_tcpwrbuffer_alloc(FAR const struct timespec *abstime)
+{
+  int ret;
+
+  if (abstime)
+    {
+      ret = sem_timedwait(&g_wrbuffer.sem, abstime);
+    }
+  else
+    {
+      ret = sem_wait(&g_wrbuffer.sem);
+    }
+
+  if (ret != 0)
+    {
+      return NULL;
+    }
+
+  return (FAR struct uip_wrbuffer_s*)sq_remfirst(&g_wrbuffer.freebuffers);
+}
+
+/****************************************************************************
+ * Function: uip_tcpwrbuffer_release
+ *
+ * Description:
+ *   Release a TCP write buffer by returning the buffer to the free list.
+ *   This function is called from user logic after it is consumed the buffered
+ *   data.
+ *
+ * Assumptions:
+ *   Called from interrupt level with interrupts disabled.
+ *
+ ****************************************************************************/
+
+void uip_tcpwrbuffer_release(FAR struct uip_wrbuffer_s *wrbuffer)
+{
+  sq_addlast(&wrbuffer->wb_node, &g_wrbuffer.freebuffers);
+  sem_post(&g_wrbuffer.sem);
+}
+
+#endif /* CONFIG_NET && CONFIG_NET_TCP && CONFIG_NET_NTCP_WRITE_BUFFERS*/

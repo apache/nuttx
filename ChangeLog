@@ -6422,3 +6422,9 @@
 	  the changes does not seem to do any harm (2014-1-13).
 	* net/connect.c and net/uip/uip_callback.c: prevent tcp_connect
 	  callback from being double freed.  From Max Holtzberg (2014-1-13).
+	* net/Kconfig and include/nuttx/net/uip/uipopt.h: Add configuration
+	  support for forthcoming TCP write buffering (2014-1-13).
+	* net/net_send_buffered.c, net_send_unbuffered.c, and
+	  uip/uip_tcpwrbuffer.c:  First set of changes to bring in Jason
+	  Jiang's TCP write buffering logic.  Still not complete but
+	  apparently harmless if not selected. (2014-1-13).
