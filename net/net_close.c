@@ -91,7 +91,7 @@ struct tcp_close_s
  *   Check for a timeout on a lingering close.
  *
  * Parameters:
- *   pstate   send state structure
+ *   pstate - close state structure
  *
  * Returned Value:
  *   TRUE:timeout FALSE:no timeout
@@ -310,7 +310,7 @@ static inline int netclose_disconnect(FAR struct socket *psock)
            * enabled.
            */
 
-          state.cl_cb->priv  = (void*)&state;
+          state.cl_cb->priv  = (FAR void *)&state;
 
           /* Set up for the lingering wait */
 

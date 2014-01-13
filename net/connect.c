@@ -138,6 +138,8 @@ static inline void tcp_teardown_callbacks(struct tcp_connect_s *pstate,
 
   uip_tcpcallbackfree(conn, pstate->tc_cb);
 
+  pstate->tc_cb = NULL;
+
   /* If we successfully connected, we will continue to monitor the connection
    * state via callbacks.
    */

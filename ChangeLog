@@ -6420,3 +6420,5 @@
 	  Extended from logic provided by Jason Jiang.  Enabled with
 	  CONFIG_NET_SOLINGER.  At this point, it has only been verified that
 	  the changes does not seem to do any harm (2014-1-13).
+	* net/connect.c and net/uip/uip_callback.c: prevent tcp_connect
+	  callback from being double freed.  From Max Holtzberg (2014-1-13).

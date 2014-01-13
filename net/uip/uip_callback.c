@@ -161,9 +161,22 @@ void uip_callbackfree(FAR struct uip_callback_s *cb, FAR struct uip_callback_s *
 
   if (cb)
     {
+      save = uip_lock();
+
+#ifdef CONFIG_DEBUG
+      /* Check for double freed callbacks */
+
+      curr = g_cbfreelist;
+
+      while (curr != NULL)
+        {
+          DEBUGASSERT(cb != curr);
+          curr = curr->flink;
+        }
+#endif
+
       /* Find the callback structure in the connection's list */
 
-      save = uip_lock();
       if (list)
         {
           for (prev = NULL, curr = *list;
