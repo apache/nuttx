@@ -6415,3 +6415,8 @@
 	* binfmt/binfmt_loadmodule.c: Fix a memory leak (2013-1-11).
 	* configs/stm3vldiscovery: Support for the STM32VL-Discovery board.
 	  Contributed by Alan Carvalho de Assis (2014-1-12).
+	* net/net_close.c, net/Kconfig, include/nuttx/net/net.h, and
+	  include/sys/socket.h: Add support for the SO_LINGER socket option.
+	  Extended from logic provided by Jason Jiang.  Enabled with
+	  CONFIG_NET_SOLINGER.  At this point, it has only been verified that
+	  the changes does not seem to do any harm (2014-1-13).

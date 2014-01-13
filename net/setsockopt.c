@@ -1,7 +1,8 @@
 /****************************************************************************
  * net/setsockopt.c
  *
- *   Copyright (C) 2007, 2008, 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011-2012, 2014 Gregory Nutt. All rights
+ *     reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -112,9 +113,10 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
     }
 
   /* Process the option */
+
   switch (option)
     {
-      /* The following options take a point to an integer boolean value.
+      /* The following options take a pointer to an integer boolean value.
        * We will blindly set the bit here although the implementation
        * is outside of the scope of setsockopt.
        */
@@ -159,15 +161,16 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
             {
               _SO_CLROPT(psock->s_options, option);
             }
+
           uip_unlock(flags);
         }
         break;
 
       /* The following are valid only if the OS CLOCK feature is enabled */
 
+#ifndef CONFIG_DISABLE_CLOCK
       case SO_RCVTIMEO:
       case SO_SNDTIMEO:
-#ifndef CONFIG_DISABLE_CLOCK
         {
           socktimeo_t timeo;
 
@@ -208,9 +211,48 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
         break;
 #endif
 
+#ifdef CONFIG_NET_SOLINGER
+      case SO_LINGER:
+        {
+          FAR struct linger *setting;
+
+          /* Verify that option is at least the size of an 'struct linger'. */
+
+          if (value_len < sizeof(FAR struct linger))
+            {
+              err = EINVAL;
+              goto errout;
+            }
+
+          /* Get the value.  Is the option being set or cleared? */
+
+          setting = (FAR struct linger *)value;
+
+          /* Disable interrupts so that there is no conflict with interrupt
+           * level access to options.
+           */
+
+           flags = uip_lock();
+
+          /* Set or clear the linger option bit and linger time (in deciseconds) */
+
+          if (setting->l_onoff)
+            {
+              _SO_SETOPT(psock->s_options, option);
+              psock->s_linger = 10 * setting->l_linger;
+            }
+          else
+            {
+              _SO_CLROPT(psock->s_options, option);
+              psock->s_linger = 0;
+            }
+
+          uip_unlock(flags);
+        }
+        break;
+#endif
       /* The following are not yet implemented */
 
-      case SO_LINGER:
       case SO_SNDBUF:     /* Sets send buffer size */
       case SO_RCVBUF:     /* Sets receive buffer size */
       case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */

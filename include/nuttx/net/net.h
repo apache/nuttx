@@ -1,7 +1,7 @@
 /****************************************************************************
  * include/nuttx/net/net.h
  *
- *   Copyright (C) 2007, 2009-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,6 +95,9 @@ struct socket
 #ifndef CONFIG_DISABLE_CLOCK
   socktimeo_t   s_rcvtimeo;  /* Receive timeout value (in deciseconds) */
   socktimeo_t   s_sndtimeo;  /* Send timeout value (in deciseconds) */
+#endif
+#ifdef CONFIG_NET_SOLINGER
+  socktimeo_t   s_linger;    /* Linger timeout value (in deciseconds) */
 #endif
 #endif
   FAR void     *s_conn;      /* Connection: struct uip_conn or uip_udp_conn */

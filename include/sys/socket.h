@@ -191,6 +191,14 @@ struct sockaddr
   char        sa_data[14];     /* 14-bytes of address data */
 };
 
+/* Used with the SO_LINGER socket option */
+
+struct linger
+{
+  int  l_onoff;   /* Indicates whether linger option is enabled. */
+  int  l_linger;  /* Linger time, in seconds. */
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -198,33 +206,34 @@ struct sockaddr
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
 
-EXTERN int socket(int domain, int type, int protocol);
-EXTERN int bind(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
-EXTERN int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
+int socket(int domain, int type, int protocol);
+int bind(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
+int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
 
-EXTERN int listen(int sockfd, int backlog);
-EXTERN int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+int listen(int sockfd, int backlog);
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
 
-EXTERN ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags);
-EXTERN ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
-                      FAR const struct sockaddr *to, socklen_t tolen);
+ssize_t send(int sockfd, FAR const void *buf, size_t len, int flags);
+ssize_t sendto(int sockfd, FAR const void *buf, size_t len, int flags,
+               FAR const struct sockaddr *to, socklen_t tolen);
 
-EXTERN ssize_t recv(int sockfd, FAR void *buf, size_t len, int flags);
-EXTERN ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
-                        FAR struct sockaddr *from, FAR socklen_t *fromlen);
+ssize_t recv(int sockfd, FAR void *buf, size_t len, int flags);
+ssize_t recvfrom(int sockfd, FAR void *buf, size_t len, int flags,
+                 FAR struct sockaddr *from, FAR socklen_t *fromlen);
 
-EXTERN int setsockopt(int sockfd, int level, int option,
-                      FAR const void *value, socklen_t value_len);
-EXTERN int getsockopt(int sockfd, int level, int option,
-                      FAR void *value, FAR socklen_t *value_len);
+int setsockopt(int sockfd, int level, int option,
+               FAR const void *value, socklen_t value_len);
+int getsockopt(int sockfd, int level, int option,
+               FAR void *value, FAR socklen_t *value_len);
 
-EXTERN int getsockname(int sockfd, FAR struct sockaddr *addr,
-                       FAR socklen_t *addrlen);
+int getsockname(int sockfd, FAR struct sockaddr *addr,
+                FAR socklen_t *addrlen);
 
 #undef EXTERN
 #if defined(__cplusplus)

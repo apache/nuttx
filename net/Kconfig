@@ -72,6 +72,13 @@ config NET_SOCKOPTS
 	---help---
 		Enable or disable support for socket options
 
+config NET_SOLINGER
+	bool "SO_LINGER socket option"
+	default n
+	depends on NET_SOCKOPTS && !DISABLE_CLOCK
+	---help---
+		Enable or disable support for the SO_LINGER socket option.
+
 config NET_BUFSIZE
 	int "Network packet size"
 	default 562 if !NET_SLIP
