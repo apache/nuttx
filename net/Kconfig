@@ -103,6 +103,7 @@ config NET_TCP
 		TCP support on or off
 
 if NET_TCP
+
 config NET_TCP_CONNS
 	int "Number of TCP/IP connections"
 	default 8
@@ -118,6 +119,14 @@ config NET_MAX_LISTENPORTS
 config NET_TCP_READAHEAD
 	bool "Enabled TCP/IP read-ahead buffering"
 	default y
+	---help---
+		Read-ahead buffers allows buffering of TCP/IP packets when there is no
+		receive in place to catch the TCP packet.  In that case, the packet
+		will be retained in the NuttX read-ahead buffers.
+
+		You might want to disable TCP/IP read-ahead buffering on a highly
+		memory constrained system that does not have any TCP/IP packet rate
+		issues.
 
 if NET_TCP_READAHEAD
 
@@ -140,13 +149,42 @@ config NET_NTCP_READAHEAD_BUFFERS
 		receive in place to catch the TCP packet.  In that case, the packet
 		will be retained in the NuttX read-ahead buffers.
 
-		This setting specifies the number of TCP/IP read-ahead buffers  This
-		value can be set to zero to disable all TCP/IP read-ahead buffering.
-		You might want to disable TCP/IP read-ahead buffering on a highly
-		memory constained system that does not have any TCP/IP packet rate
-		issues.
+		This setting specifies the number of TCP/IP read-ahead buffers.
 
 endif # NET_TCP_READAHEAD
+
+config NET_TCP_WRITE_BUFFERS
+	bool "Enabled TCP/IP write buffering"
+	default n
+	---help---
+		Write buffers allows buffering of ongoing TCP/IP packets, providing
+		for higher performance, streamed output.
+
+		You might want to disable TCP/IP write buffering on a highly memory
+		memory constrained system where there are no performance issues.
+
+if NET_TCP_WRITE_BUFFERS
+
+config NET_TCP_WRITE_BUFSIZE
+	int "TCP/IP write buffer size"
+	default 562
+	---help---
+		Write buffers allows buffering of ongoing TCP/IP packets, providing
+		for higher performance, streamed output.
+
+		This setting specifies the size of one TCP/IP write buffer. This
+		should best be a equal to the maximum packet size (NET_BUFSIZE).
+
+config NET_NTCP_WRITE_BUFFERS
+	int "Number of TCP/IP write buffers"
+	default 8
+	---help---
+		Write buffers allows buffering of ongoing TCP/IP packets, providing
+		for higher performance, streamed output.
+
+		This setting specifies the number of TCP/IP write buffers.
+
+endif # NET_TCP_WRITE_BUFFERS
 
 config NET_TCP_RECVDELAY
 	int "TCP Rx delay"
