@@ -1,7 +1,7 @@
 /****************************************************************************
  * net/uip/uip_tcpappsend.c
  *
- *   Copyright (C) 2007-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -131,6 +131,9 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
 
   else
     {
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      DEBUGASSERT(dev->d_sndlen >= 0 && dev->d_sndlen <= conn->mss);
+#else
       /* If d_sndlen > 0, the application has data to be sent. */
 
       if (dev->d_sndlen > 0)
@@ -138,7 +141,7 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
           /* Remember how much data we send out now so that we know
            * when everything has been acknowledged.  Just increment the amount
            * of data sent.  This will be needed in sequence number calculations
-           * and we know that this is not a re-tranmission.  Retransmissions
+           * and we know that this is not a re-transmission.  Retransmissions
            * do not go through this path.
            */
 
@@ -151,9 +154,10 @@ void uip_tcpappsend(struct uip_driver_s *dev, struct uip_conn *conn,
           DEBUGASSERT(dev->d_sndlen <= conn->mss);
         }
 
+      conn->nrtx = 0;
+#endif
       /* Then handle the rest of the operation just as for the rexmit case */
 
-      conn->nrtx = 0;
       uip_tcprexmit(dev, conn, result);
     }
 }
@@ -189,7 +193,11 @@ void uip_tcprexmit(struct uip_driver_s *dev, struct uip_conn *conn,
    * new data in it, we must send out a packet.
    */
 
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  if (dev->d_sndlen > 0)
+#else
   if (dev->d_sndlen > 0 && conn->unacked > 0)
+#endif
     {
       /* We always set the ACK flag in response packets adding the length of
        * the IP and TCP headers.

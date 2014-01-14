@@ -115,11 +115,12 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
    * out.
    */
 
-  if (conn->tcpstateflags == UIP_TIME_WAIT || conn->tcpstateflags == UIP_FIN_WAIT_2)
+  if (conn->tcpstateflags == UIP_TIME_WAIT ||
+      conn->tcpstateflags == UIP_FIN_WAIT_2)
     {
       /* Increment the connection timer */
 
-      (conn->timer) += hsec;
+      conn->timer += hsec;
       if (conn->timer >= UIP_TIME_WAIT_TIMEOUT)
         {
           conn->tcpstateflags = UIP_CLOSED;
@@ -133,7 +134,8 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
        * retransmit.
        */
 
-      if (conn->unacked > 0)
+      if (conn->unacked > 0 &&
+         (conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED)
         {
           /* The connection has outstanding data */
 
@@ -151,10 +153,16 @@ void uip_tcptimer(struct uip_driver_s *dev, struct uip_conn *conn, int hsec)
 
               /* Should we close the connection? */
 
-              if (conn->nrtx == UIP_MAXRTX ||
+              if (
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+                  conn->expired > 0 ||
+#else
+                  conn->nrtx == UIP_MAXRTX ||
+#endif
                   ((conn->tcpstateflags == UIP_SYN_SENT ||
                     conn->tcpstateflags == UIP_SYN_RCVD) &&
-                    conn->nrtx == UIP_MAXSYNRTX))
+                    conn->nrtx == UIP_MAXSYNRTX)
+                 )
                 {
                   conn->tcpstateflags = UIP_CLOSED;
                   nllvdbg("TCP state: UIP_CLOSED\n");

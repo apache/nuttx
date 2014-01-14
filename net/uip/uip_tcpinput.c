@@ -2,7 +2,7 @@
  * net/uip/uip_tcpinput.c
  * Handling incoming TCP input
  *
- *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Adapted for NuttX from logic in uIP which also has a BSD-like license:
@@ -358,7 +358,11 @@ found:
        * data (unacked).
        */
 
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      unackseq = conn->isn + conn->sent;
+#else
       unackseq = uip_tcpaddsequence(conn->sndseq, conn->unacked);
+#endif
 
       /* Get the sequence number of that has just been acknowledged by this
        * incoming packet.
@@ -383,12 +387,16 @@ found:
         {
           /* What would it mean if ackseq > unackseq?  The peer has ACKed
            * more bytes than we think we have sent?  Someone has lost it.
-           * Complain and reset the number of outstanding, unackowledged
+           * Complain and reset the number of outstanding, unacknowledged
            * bytes
            */
 
-          nlldbg("ERROR: ackseq[%08x] > unackseq[%08x]\n", ackseq, unackseq);
-          conn->unacked = 0;
+          if ((conn->tcpstateflags & UIP_TS_MASK) == UIP_ESTABLISHED)
+            {
+              nlldbg("ERROR: conn->sndseq %d, conn->unacked %d\n",
+                     uip_tcpgetsequence(conn->sndseq), conn->unacked);
+              goto reset;
+            }
         }
 
       /* Update sequence number to the unacknowledge sequence number.  If
@@ -450,10 +458,15 @@ found:
         if ((flags & UIP_ACKDATA) != 0)
           {
             conn->tcpstateflags = UIP_ESTABLISHED;
-            conn->unacked       = 0;
-            nllvdbg("TCP state: UIP_ESTABLISHED\n");
 
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+            conn->isn           = uip_tcpgetsequence(pbuf->ackno);
+            uip_tcpsetsequence(conn->sndseq, conn->isn);
+            conn->sent          = 0;
+#endif
+            conn->unacked       = 0;
             flags               = UIP_CONNECTED;
+            nllvdbg("TCP state: UIP_ESTABLISHED\n");
 
             if (dev->d_len > 0)
               {
@@ -539,12 +552,18 @@ found:
 
             conn->tcpstateflags = UIP_ESTABLISHED;
             memcpy(conn->rcvseq, pbuf->seqno, 4);
-            nllvdbg("TCP state: UIP_ESTABLISHED\n");
 
             uip_incr32(conn->rcvseq, 1);
             conn->unacked       = 0;
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+            conn->isn           = uip_tcpgetsequence(pbuf->ackno);
+            uip_tcpsetsequence(conn->sndseq, conn->isn);
+#endif
             dev->d_len          = 0;
             dev->d_sndlen       = 0;
+
+            nllvdbg("TCP state: UIP_ESTABLISHED\n");
             result = uip_tcpcallback(dev, conn, UIP_CONNECTED | UIP_NEWDATA);
             uip_tcpappsend(dev, conn, result);
             return;
@@ -726,8 +745,8 @@ found:
 
       case UIP_FIN_WAIT_1:
         /* The application has closed the connection, but the remote host
-         * hasn't closed its end yet. Thus we do nothing but wait for a
-         * FIN from the other side.
+         * hasn't closed its end yet.  Thus we stay in the FIN_WAIT_1 state
+         * until we receive a FIN from the remote.
          */
 
         if (dev->d_len > 0)
@@ -768,6 +787,7 @@ found:
             uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;
           }
+
         goto drop;
 
       case UIP_FIN_WAIT_2:
@@ -793,6 +813,7 @@ found:
             uip_tcpsend(dev, conn, TCP_ACK, UIP_IPTCPH_LEN);
             return;
           }
+
         goto drop;
 
       case UIP_TIME_WAIT:

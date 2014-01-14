@@ -278,7 +278,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 #endif
         {
           FAR struct uip_write_s *segment;
-          FAR void *sndbuff;
+          FAR void *sndbuf;
           size_tsndlen;
 
           /* Get the amount of data that we can send in the next packet */
@@ -286,8 +286,8 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
           segment = (FAR struct uip_write_s*)sq_peek(&conn->write_q);
           if (segment)
             {
-              sndbuff = segment->wb_buffer;
-              sndlen  = segment->wb_nbytes;
+              sndbuf = segment->wb_buffer;
+              sndlen = segment->wb_nbytes;
 
               DEBUGASSERT(sndlen <= uip_mss(conn));
 
@@ -318,7 +318,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                    * actually happen until the polling cycle completes).
                    */
 
-                  uip_send(dev, sndbuff, sndlen);
+                  uip_send(dev, sndbuf, sndlen);
 
                   /* Remember how much data we send out now so that we know
                    * when everything has been acknowledged.  Just increment
@@ -332,7 +332,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                     {
                       conn->unacked += sndlen;
                       conn->sent    += sndlen;
-                   }
+                    }
 
                   /* Increment the retransmission counter before expiration.
                    * NOTE we will not calculate the retransmission timer
@@ -493,7 +493,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
               segment->wb_seqno = (unsigned)-1;
               segment->wb_nrtx  = 0;
 
-              if (len-completed > CONFIG_NET_TCP_WRITE_BUFSIZE)
+              if (len - completed > CONFIG_NET_TCP_WRITE_BUFSIZE)
                 {
                   cnt = CONFIG_NET_TCP_WRITE_BUFSIZE;
                 }
@@ -503,7 +503,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
                 }
 
               segment->wb_nbytes = cnt;
-              memcpy(segment->wb_buffer, (char*)buf+completed, cnt);
+              memcpy(segment->wb_buffer, (char*)buf + completed, cnt);
               completed += cnt;
 
               /* send_interrupt() will refer to all the write buffer by
