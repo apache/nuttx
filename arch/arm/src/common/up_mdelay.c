@@ -1,7 +1,7 @@
 /****************************************************************************
  *  arch/arm/src/common/up_mdelay.c
  *
- *   Copyright (C) 2007, 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,13 +78,13 @@
 
 void up_mdelay(unsigned int milliseconds)
 {
-  volatile int i;
-  volatile int j;
+  volatile unsigned int i;
+  volatile unsigned int j;
 
   for (i = 0; i < milliseconds; i++)
     {
-        for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
-          {
-          }
+      for (j = 0; j < CONFIG_BOARD_LOOPSPERMSEC; j++)
+        {
+        }
     }
 }

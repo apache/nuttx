@@ -1324,11 +1324,11 @@ static void stm32_epin_request(FAR struct stm32_usbdev_s *priv,
        */
 
       regval = stm32_getreg(regaddr);
-      if ((regval & OTGFS_DTXFSTS_MASK) < nwords)
+      if ((int)(regval & OTGFS_DTXFSTS_MASK) < nwords)
         {
           usbtrace(TRACE_INTDECODE(STM32_TRACEINTID_EPIN_EMPWAIT), (uint16_t)regval);
 
-          /* There is insufficent space in the TxFIFO.  Wait for a TxFIFO
+          /* There is insufficient space in the TxFIFO.  Wait for a TxFIFO
            * empty interrupt and try again.
            */
 
