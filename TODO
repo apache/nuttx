@@ -1,4 +1,4 @@
-NuttX TODO List (Last updated January 2, 2014)
+NuttX TODO List (Last updated January 14, 2014)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file summarizes known NuttX bugs, limitations, inconsistencies with
@@ -18,7 +18,7 @@ nuttx/
  (16)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (11)  Libraries (libc/, )
- (11)  File system/Generic drivers (fs/, drivers/)
+ (12)  File system/Generic drivers (fs/, drivers/)
   (5)  Graphics subystem (graphics/)
   (1)  Pascal add-on (pcode/)
   (1)  Documentation (Documentation/)
@@ -42,7 +42,7 @@ nuttx/
   (1)  Hitachi/Renesas SH-1 (arch/sh/src/sh1)
   (4)  Renesas M16C/26 (arch/sh/src/m16c)
  (11)  z80/z8/ez80/z180 (arch/z80/)
-  (8)  z16 (arch/z16/)
+  (9)  z16 (arch/z16/)
   (1)  mc68hc1x (arch/hc)
 
 apps/
@@ -119,7 +119,7 @@ o Task/Scheduler (sched/)
   Description: get_environ_ptr() (sched/sched_getenvironptr.c) is not implemented.
                The representation of the environment strings selected for
                NutX is not compatible with the operation.  Some significant
-               re-design would be required to implement this funcion and that
+               re-design would be required to implement this function and that
                effort is thought to be not worth the result.
   Status:      Open.  No change is planned.
   Priority:    Low -- There is no plan to implement this.
@@ -534,7 +534,7 @@ o C++ Support
                will define the operators with argument of type unsigned long;
                Setting CONFIG_CXX_NEWLONG=n will define the operators with argument
                of type unsigned int.  But this is pretty ugly!  A better solution
-               would be to get ahold of the compilers definition of size_t.
+               would be to get a hold of the compilers definition of size_t.
   Priority:    Low.
 
   Title:       STATIC CONSTRUCTORS
@@ -689,7 +689,7 @@ o Binary loaders (binfmt/)
   Title:       GOT-RELATIVE FUNCTION POINTERS
   Description: If the function pointer to a statically defined function is
                taken, then GCC generates a relocation that cannot be handled
-               by NXFLAT.  There is a solution described in Documentataion/NuttXNxFlat.html,
+               by NXFLAT.  There is a solution described in Documentation/NuttXNxFlat.html,
                by that would require a compiler change (which we want to avoid).
                The simple workaround is to make such functions global in scope.
   Status:      Open
@@ -777,7 +777,7 @@ o Network (net/, drivers/net)
   Title:       MULTIPLE NETWORK INTERFACE SUPPORT
   Description: uIP polling issues / Multiple network interface support:
 
-               (1) Current logic will not support multiple ethernet drivers.
+               (1) Current logic will not support multiple Ethernet drivers.
                   Each driver should poll on TCP connections connect on the
                   network supported by the driver; UDP polling should respond
                   with TX data only if the UDP packet is intended for the
@@ -870,7 +870,7 @@ o Network (net/, drivers/net)
   Description: poll()/select() only works for availability of buffered TCP
                read data (when read-ahead is enabled).  The way writing is
                handled in uIP, all sockets must wait when send and cannot
-               be notifiied when they can send without waiting.
+               be notified when they can send without waiting.
   Status:      Open, probably will not be fixed.
   Priority:    Medium... this does effect porting of applications that expect
                different behavior from poll()/select()
@@ -895,7 +895,7 @@ o Network (net/, drivers/net)
                There are most likely errors that need to be fixed at least in the
                receipt of multicast packets.
 
-               In addition, an ethernet driver that needs to work with the IGMP logic
+               In addition, an Ethernet driver that needs to work with the IGMP logic
                will have to include additional support for multicast MAC address tables.
   Status:      Open
   Priority:    Low unless you need it.
@@ -1007,7 +1007,7 @@ o USB (drivers/usbdev, drivers/usbhost)
   Status:      Open
   Priority:    High for class drivers that need EP0 data.  For example, the
                CDC/ACM serial driver might need the line coding data (that
-               data is not used currenly, but it might be).
+               data is not used currently, but it might be).
 
   Title:       USB HUB SUPPORT
   Description: Add support for USB hubs
@@ -1193,18 +1193,18 @@ o File system / Generic drivers (fs/, drivers/)
 
   Title:       CONFIG_RAMLOG_CONSOLE DOES NOT WORK
   Description: When I enable CONFIG_RAMLOG_CONSOLE, the system does not come up
-               propertly (using configuration stm3240g-eval/nsh2).  The problem
-               may be an assertion that is occuring before we have a console.
+               properly (using configuration stm3240g-eval/nsh2).  The problem
+               may be an assertion that is occurring before we have a console.
   Status:      Open
   Priority:    Medium
 
-  Title :      USE VTF TO MANAGE NAMED MESSAGE QUEUES AND NAMED SEMAPHORES
+  Title :      USE VFS TO MANAGE NAMED MESSAGE QUEUES AND NAMED SEMAPHORES
   Description: Currently redundant namespace management logic is use for named
-               message queues and semaphores.  Namesphore management should
+               message queues and semaphores.  Named semaphore management should
                be consolidated in the VFS.  Perhaps in /ipc/mqueue and /ipc/sem.
   Status:      Open
   Priority:    Low.  Nothing is broken.  This is an enhancement that would
-               improve the OS design and possible reduce some FLASH usage
+               improve the OS design and possibly reduce some FLASH usage
 
   Title:       UNIFIED DESCRIPTOR REPRESENTATION
   Descripton:  There are two separate ranges of descriptors for file and
@@ -1218,6 +1218,14 @@ o File system / Generic drivers (fs/, drivers/)
                socket structures.  There really should be one array that
                is a union of file and socket descriptors.  Then socket and
                file decriptors could lie in the same range.
+  Status:      Open
+  Priority:    Low
+
+  Title:       DUPLICATE FAT FILE NAMES
+  Description: "The NSH and POSIX API interpretations about sensitivity or
+               insensitivity to upper/lowercase file names seem to be not
+               consistent in our usage - which can result in creating two
+               directories with the same name..."
   Status:      Open
   Priority:    Low
 
@@ -1257,7 +1265,7 @@ o Graphics subystem (graphics/)
                   queue.
                - The logic that receives the messages performs the auto-raise.
                  But it can do stupid things after the first auto-raise as
-                 it opperates on the stale data in the message queue.
+                 it operates on the stale data in the message queue.
                I am thinking that auto-raise ought to be removed from NuttX
                and moved out into a graphics layer (like NxWM) that knows
                more about the appropriate context to do the autoraise.
@@ -1325,7 +1333,7 @@ o Build system
 
   Title:       WINDOWS DEPENDENCY GENERATION
   Description: Dependency generation is currently disabled when a Windows native
-               toolchain is used in a POSIX-like enviornment (like Cygwin).  The
+               toolchain is used in a POSIX-like environment (like Cygwin).  The
                issue is that the Windows tool generates dependencies use Windows
                path formatting and this fails with the dependency file (Make.dep)
                is include).  Perhaps the only issue is that all of the Windows
@@ -1354,7 +1362,7 @@ o Build system
                  +if [ "$_" = "$0" ] ; then
   Status:      Open
   Priority:    Low.  Use of setenv.sh is optional and most platforms do not have
-               this problem.  Scripts will be fixed one-at-a-time as is appropropriate.
+               this problem.  Scripts will be fixed one-at-a-time as is appropriate.
 
   Title:       MAKE EXPORT LIMITATIONS
   Description: The top-level Makefile 'export' target that will bundle up all of the
@@ -1380,11 +1388,11 @@ o Build system
                here: http://tech.groups.yahoo.com/group/nuttx/message/2900.
                The build was successfully completed using:  MinGW-GCC, MSYS,
                additional Windows libraries, and additional MSYS libraries
-               (MSYS is a variant of Cygwin so, presumeably, Cygwin could
+               (MSYS is a variant of Cygwin so, presumably, Cygwin could
                have been used as well).  However, on final testing, it was
                found that there are problems with text and numeric entry:
                http://tech.groups.yahoo.com/group/nuttx/message/2953.  This
-               was considered a show stopper and the changs were not checked
+               was considered a show stopper and the changes were not checked
                in.
 
                Options:  (1) Use kconfigs-conf (not kconfig-mconf).  confis the text-only
@@ -1422,7 +1430,7 @@ o Linux/Cywgin simulation (arch/sim)
   Description: Since the simulation is not pre-emptible, you can't use round-robin
                scheduling (no time slicing).  Currently, the timer interrupts are
                "faked" during IDLE loop processing and, as a result, there is no
-               task pre-emption because there are no asynchrous events.  This could
+               task pre-emption because there are no asynchronous events.  This could
                probably be fixed if the "timer interrupt" were driver by Linux
                signals. NOTE:  You would also have to implement irqsave() and
                irqrestore() to block and (conditionally) unblock the signal.
@@ -1467,7 +1475,7 @@ o ARM (arch/arm/)
   Priority:    Low.
 
   Title:       IMPROVED ARM INTERRUPT HANDLING
-  Description: The ARM and Cortex-M3 interrupt handlers restores all regisers
+  Description: The ARM and Cortex-M3 interrupt handlers restores all registers
                upon return. This could be improved as well:  If there is no
                context switch, then the static registers need not be restored
                because they will not be modified by the called C code.
@@ -1495,7 +1503,7 @@ o ARM (arch/arm/)
                  ldr pc, [sp], #4
 
                Under conditions of excessively high interrupt conditions, many
-               nested interrupts can oocur just after the 'msr cpsr' instruction.
+               nested interrupts can occur just after the 'msr cpsr' instruction.
                At that time, there are 4 bytes on the stack and, with each
                interrupt, the stack pointer may increment and possibly overflow.
 
@@ -1512,13 +1520,13 @@ o ARM (arch/arm/)
                UPDATE:  Other ARM architectures have a similer issue.
 
   Status:      Open
-  Priority:    Low.  The conditions of continous interrupts is really the problem.
-               If your design needs continous interrupts like this, please try
+  Priority:    Low.  The conditions of continuous interrupts is really the problem.
+               If your design needs continuous interrupts like this, please try
                the above change and, please, submit a patch with the working fix.
 
   Title:       STACK ALIGNMENT IN INTERRUPT HANDLERS
   Description: The EABI standard requires that the stack always have a 32-byte
-               alignment.  There is no guaratee at present that the stack will be
+               alignment.  There is no guarantee at present that the stack will be
                so aligned in an interrupt handler.  Therefore, I would expect some
                issues if, for example, floating point or perhaps long long operations
                were performed in an interrupt handler.
@@ -1530,7 +1538,7 @@ o ARM (arch/arm/)
                arround each call into C code from assembly:
 
                  mov  r4, sp     /* Save the SP in a preserved register */
-                 bic  sp, sp, #7 /* Force 8-byte alignement */
+                 bic  sp, sp, #7 /* Force 8-byte alignment */
                  bl   cfunction  /* Call the C function */
                  mov  sp, r4     /* Restore the possibly unaligned stack pointer */
 
@@ -1574,7 +1582,7 @@ o ARM/DM320 (arch/arm/src/dm320/)
 
   Title:       VIDEO ENCODER DRIVER
   Description: In order to use the framebuffer "driver" additional video encoder
-               logic is required to setupt composite video output or to interface
+               logic is required to setup composite video output or to interface
                with an LCD.
   Status:      Open
   Priority:    Medium (high if you need to use the framebuffer driver)
@@ -1583,7 +1591,7 @@ o ARM/i.MX (arch/arm/src/imx/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Title:       PORT IS INCOMPLETE
-  Description: The basic port of the i.MX1 architecuture was never finished.  The port
+  Description: The basic port of the i.MX1 architecture was never finished.  The port
                is incomplete (as of this writing, is still lacks a timer, interrupt
                decoding, USB, network) and untested.
   Status:      Open
@@ -1659,7 +1667,7 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
   Description: At present the SPI driver is polled -AND- there is a rather large, arbitrary,
                delay in one of the block access routines.  The purpose of the delay is to
                avoid a race conditions.  This begs for a re-design -OR- at a minimum, some
-               optimiation of the delay time.
+               optimization of the delay time.
   Status:      Open
   Priority:    Medium
 
@@ -1668,7 +1676,7 @@ o ARM/LPC214x (arch/arm/src/lpc214x/)
                the mcu123 board.  The card fails to accept CMD0.  Doesn't seem like a software
                issue, but if anyone else sees the problem, I'd like to know.
                Related:  Fixes were recently made for the SDIO-based MMC/SD driver to
-               support 2Gb cards -- the blocksize was forced to 512 in all cases.  The SPI-
+               support 2Gb cards -- the block size was forced to 512 in all cases.  The SPI-
                based driver may also have this problem (but I don't think this would have
                anything to do with CMD0).
   Status:      Open
@@ -1820,7 +1828,7 @@ o ARM/STM32 (arch/arm/src/stm32/)
                write DMAs from FSMC memory (i.e., from FSMC memory to SDIO).
                Read transfers work fine (SDIO to FSMC memory).  The failure is
                a data underrun error with zero bytes of data transferred.  The
-               workaround for now is to use DMA buffers allocted from internal
+               workaround for now is to use DMA buffers allocated from internal
                SRAM.
   Status:      Open
   Priority:    Low
@@ -1913,7 +1921,7 @@ o 8051 / MCS51 (arch/8051/)
   Priority:    Low -- only because there as so many other issues with 8051
 
   Title:       8051 BUILD BROKEN
-  Description: The last time I tried to build the pjrc-8051 configurtion using
+  Description: The last time I tried to build the pjrc-8051 configuration using
                the SDCC 3.2.1 toolchain (for Windows).  I got compilation
                errors in sched/os_bringup.c.  It complained about type
                mis-matches.  What I gather from Googling, this is a problem
@@ -1952,11 +1960,11 @@ o MIPS/PIC32(arch/mips)
 
                UPDATE:  This bug was recorded using the PIC32 Ethernet
                Starter kit with a RAM disk (that board has no SD card slot).
-               Howevever, using the USB mass storage device with the
+               However, using the USB mass storage device with the
                Mikroelektronika using a real SD card, there is no such
                problem -- the mass storage device seems quite stable.
 
-               UPDATE:  Hmmm.. retesting with the Mikroelectronka board
+               UPDATE:  Hmmm.. retesting with the Mikroelektronika board
                shows problems again.  I think that there are some subtle
                timing bugs whose effects can very from innocuous to severe.
   Status:      Open
@@ -2126,7 +2134,7 @@ o z80/z8/ez80/z180 (arch/z80)
                rule removes .asm files.  This works because there are no .asm
                files except in sub-directories that are provided from 'make clean' --
                except for XTRS:  It has a .asm file in its src/ directory that
-               gets removed everytime clean is performd.
+               gets removed every time clean is performd.
   Status:      Open
   Priority:    High if you happen to be working with XTRS.
 
@@ -2150,7 +2158,7 @@ o z80/z8/ez80/z180 (arch/z80)
   Priority:    Med
 
   Title:       UNFINISHED Z180 LOGIC NEEDED BY THE P112 BOARD
-  Description: 1) Need to revist the start-up logic.  Looking at the P112 Bios
+  Description: 1) Need to revisit the start-up logic.  Looking at the P112 Bios
                   (Bios.mcd), I see that quite of bit of register setup is done
                   there.
                2) Finish ESCC driver logic.
@@ -2204,7 +2212,7 @@ o z16 (arch/z16)
                __uwcase is passed a pointer to a structure containing jump
                information.  The cause of the failure appears to be that
                the referenced switch data is bad.
-               This is submited as ZiLOG support incident 81459.
+               This is submitted as ZiLOG support incident 81459.
 
                Summary of ZiLOG analysis: "This is a ZNEO run time library problem.
                One workaround is to replace the line 58 in uwcase.asm
@@ -2255,10 +2263,29 @@ o z16 (arch/z16)
   Title:       NATIVE BUILD PROBLEMS
   Description: When last tested (ca.12/12), there were some missing .obj files in
                arch/z16/src. A little additional TLC will be needed to get a
-               reliable Windows native build.  As of this writing, the Cygwin
-               based build has not been re-verified.
+               reliable Windows native build.
   Status:      Open
   Priority:    Low -- I don't think anyone uses the Z16 port with the native build.
+
+  Title:       COMPILER BUG
+  Description: There is a bug in the ZDS II 5.0.1 compiler.  It generates incorrect
+               code when calling through a function pointer if (1) the function
+               pointer is a field in a structure, and (2) the function pointer has
+               a variable number of arguments.
+
+               The exact name of the bug is this:  Normally, when a function is
+               called, parameters are passed in registers.  When calling a
+               function with a variable number of arguments, parameters must
+               instead be passed on the stack.  In this failure case3, parameters
+               are erroneously passed in registers while the receive function
+               expects the parameters on the stack.  This usually results in a
+               crash.
+
+               Unfortunately, NSH does have this exact kind of function call and
+               because of this compiler bug, NSH cannot be used with the ZNEO
+  Status:      The bug has been reported to ZiLOG and they have reproduced the
+               problem.  There is, however, no schedule for correction of the bug.
+  Priority:    High if you are using ZNEO
 
 o mc68hc1x (arch/hc)
   ^^^^^^^^^^^^^^^^^^
