@@ -211,7 +211,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
        * so it can be sent as soon as possible.
        */
 
-      while ((entry=sq_remlast(&conn->unacked_q)))
+      while ((entry = sq_remlast(&conn->unacked_q)))
         {
           struct uip_wrbuffer_s *segment = (struct uip_wrbuffer_s*)entry;
 
@@ -231,7 +231,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                * field expired can only be updated at UIP_ESTABLISHED state
                */
 
-              conn->expired ++;
+              conn->expired++;
               continue;
             }
 
@@ -338,7 +338,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                * second interval before expiration.
                */
 
-              segment->wb_nrtx ++;
+              segment->wb_nrtx++;
 
               /* The segment is waiting for ACK again */
 
@@ -481,7 +481,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
       while (completed < len)
         {
-          struct uip_wrbuffer_s *segment = uip_tcpwrbuffer_alloc(NULL);
+          FAR struct uip_wrbuffer_s *segment = uip_tcpwrbuffer_alloc(NULL);
           if (segment)
             {
               size_t cnt;

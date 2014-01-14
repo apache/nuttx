@@ -162,4 +162,4 @@ void uip_tcpwrbuffer_release(FAR struct uip_wrbuffer_s *wrbuffer)
   sem_post(&g_wrbuffer.sem);
 }
 
-#endif /* CONFIG_NET && CONFIG_NET_TCP && CONFIG_NET_NTCP_WRITE_BUFFERS */
+#endif /* CONFIG_NET && CONFIG_NET_TCP && CONFIG_NET_TCP_WRITE_BUFFERS */

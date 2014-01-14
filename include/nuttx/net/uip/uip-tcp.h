@@ -162,7 +162,7 @@ struct uip_conn
   uint16_t mss;           /* Current maximum segment size for the
                            * connection */
   uint16_t winsize;       /* Current window size of the connection */
-#ifdef CONFIG_NET_NTCP_WRITE_BUFFERS
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   uint32_t unacked;       /* Number bytes sent but not yet ACKed */
 #else
   uint16_t unacked;       /* Number bytes sent but not yet ACKed */

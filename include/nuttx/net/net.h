@@ -106,7 +106,7 @@ struct socket
 
   FAR void     *s_conn;      /* Connection: struct uip_conn or uip_udp_conn */
 
-#ifdef CONFIG_NET_NTCP_WRITE_BUFFERS
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Callback instance for TCP send */
 
   FAR struct uip_callback_s *s_sndcb;

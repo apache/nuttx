@@ -194,7 +194,7 @@ config NET_TCP_RECVDELAY
 	int "TCP Rx delay"
 	default 0
 	---help---
-		If NET_NTCP_READAHEAD_BUFFERS is zero, then there will be no buffering
+		If NET_TCP_READAHEAD_BUFFERS is undefined, then there will be no buffering
 		of TCP/IP packets:  Any TCP/IP packet received will be ACKed, but its contents
 		will be dropped in the bit-bucket.
 

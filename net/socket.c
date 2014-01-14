@@ -158,9 +158,6 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
               DEBUGASSERT(conn->crefs == 0);
               psock->s_conn  = conn;
               conn->crefs    = 1;
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-              psock->s_sndcb = NULL;
-#endif
             }
         }
         break;
@@ -193,7 +190,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
         break;
     }
 
-  /* Did we succesfully allocate some kind of connection structure? */
+  /* Did we successfully allocate some kind of connection structure? */
 
   if (!psock->s_conn)
     {
@@ -205,7 +202,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
   return OK;
 
 errout:
-  errno = err;
+  set_errno(err);
   return ERROR;
 }
 

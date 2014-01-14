@@ -6436,4 +6436,6 @@
 	  in the PX4 GIT repository.
 	* fs/fat/fs_fat32.c: A correction to FAT cluster allocation from
 	  Tridge via Lorenz Meier (2014-1-14).
+	* net/net_clone.c:  Need to clone fields for TCP write buffering
+	  as well (2014-1-14).
 

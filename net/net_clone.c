@@ -78,9 +78,16 @@ int net_clone(FAR struct socket *psock1, FAR struct socket *psock2)
 #ifndef CONFIG_DISABLE_CLOCK
   psock2->s_rcvtimeo = psock1->s_rcvtimeo;  /* Receive timeout value (in deciseconds) */
   psock2->s_sndtimeo = psock1->s_sndtimeo;  /* Send timeout value (in deciseconds) */
+#ifdef CONFIG_NET_SOLINGER
+  psock2->s_linger   = psock1->s_linger;    /* Linger timeout value (in deciseconds) */
+#endif
 #endif
 #endif
   psock2->s_conn     = psock1->s_conn;      /* UDP or TCP connection structure */
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  psock2->s_sndcb    = NULL;                /* Force allocation of new callback
+                                             * instance for TCP send */
+#endif
 
   /* Increment the reference count on the connection */
 
