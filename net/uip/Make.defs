@@ -69,16 +69,16 @@ UIP_CSRCS += uip_tcpconn.c uip_tcpseqno.c uip_tcppoll.c uip_tcptimer.c
 UIP_CSRCS += uip_tcpsend.c uip_tcpinput.c uip_tcpappsend.c uip_listen.c
 UIP_CSRCS += uip_tcpcallback.c uip_tcpbacklog.c
 
-endif
-
-# Buffering
+# TCP Buffering
 
 ifeq ($(CONFIG_NET_TCP_READAHEAD),y)
 UIP_CSRCS += uip_tcpreadahead.c
 endif
 
-ifeq ($(CONFIG_NET_TCP_WRBUFFER),y)
+ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
 UIP_CSRCS += uip_tcpwrbuffer.c
+endif
+
 endif
 
 # UDP source files

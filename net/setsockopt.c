@@ -239,12 +239,16 @@ int psock_setsockopt(FAR struct socket *psock, int level, int option,
           if (setting->l_onoff)
             {
               _SO_SETOPT(psock->s_options, option);
+#ifndef CONFIG_DISABLE_CLOCK
               psock->s_linger = 10 * setting->l_linger;
+#endif
             }
           else
             {
               _SO_CLROPT(psock->s_options, option);
+#ifndef CONFIG_DISABLE_CLOCK
               psock->s_linger = 0;
+#endif
             }
 
           uip_unlock(flags);

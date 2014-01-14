@@ -324,7 +324,7 @@ static inline void recvfrom_readahead(struct recvfrom_s *pstate)
             }
           else
             {
-              uip_tcpreadaheadrelease(readahead);
+              uip_tcpreadahead_release(readahead);
             }
         }
     }

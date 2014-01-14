@@ -164,10 +164,23 @@ uint16_t uip_datahandler(FAR struct uip_conn *conn,
 /* Defined in uip_tcpreadahead.c ********************************************/
 
 #ifdef CONFIG_NET_TCP_READAHEAD
-void uip_tcpreadaheadinit(void);
-struct uip_readahead_s *uip_tcpreadaheadalloc(void);
-void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
+void uip_tcpreadahead_init(void);
+
+struct uip_readahead_s;
+FAR struct uip_readahead_s *uip_tcpreadahead_alloc(void);
+void uip_tcpreadahead_release(FAR struct uip_readahead_s *readahead);
 #endif /* CONFIG_NET_TCP_READAHEAD */
+
+/* Defined in uip_tcpwrbuffer.c *********************************************/
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+void uip_tcpwrbuffer_init(void);
+
+struct uip_wrbuffer_s;
+struct timespec;
+FAR struct uip_wrbuffer_s *uip_tcpwrbuffer_alloc(FAR const struct timespec *abstime);
+void uip_tcpwrbuffer_release(FAR struct uip_wrbuffer_s *wrbuffer);
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 #endif /* CONFIG_NET_TCP */
 

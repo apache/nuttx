@@ -175,6 +175,8 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
 
       if (pstate)
         {
+          /* Wake up the waiting thread with a successful result */
+
           pstate->cl_result = OK;
           goto end_wait;
         }
@@ -201,7 +203,7 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
 
   else if (pstate && close_timeout(pstate))
     {
-      /* Yes.. report the timeout */
+      /* Yes.. Wake up the waiting thread and report the timeout */
 
       nlldbg("CLOSE timeout\n");
       pstate->cl_result = -ETIMEDOUT;
@@ -213,7 +215,7 @@ static uint16_t netclose_interrupt(FAR struct uip_driver_s *dev,
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   /* Check if all outstanding bytes have been ACKed */
 
-  else if (pstate && conn->unacked != 0)
+  else if (conn->unacked != 0)
     {
       /* No... we are still waiting for ACKs.  Drop any received data, but
        * do not yet report UIP_CLOSE in the response.

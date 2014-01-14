@@ -162,7 +162,7 @@ struct uip_conn
   uint16_t mss;           /* Current maximum segment size for the
                            * connection */
   uint16_t winsize;       /* Current window size of the connection */
-#ifdef CONFIG_NET_TCP_WRBUFFER
+#ifdef CONFIG_NET_NTCP_WRITE_BUFFERS
   uint32_t unacked;       /* Number bytes sent but not yet ACKed */
 #else
   uint16_t unacked;       /* Number bytes sent but not yet ACKed */
@@ -431,16 +431,17 @@ int uip_unlisten(struct uip_conn *conn);
 /* Access to TCP read-ahead buffers */
 
 #ifdef CONFIG_NET_TCP_READAHEAD
-struct uip_readahead_s *uip_tcpreadaheadalloc(void);
-void uip_tcpreadaheadrelease(struct uip_readahead_s *buf);
+FAR struct uip_readahead_s *uip_tcpreadahead_alloc(void);
+void uip_tcpreadahead_release(FAR struct uip_readahead_s *readahead);
 #endif /* CONFIG_NET_TCP_READAHEAD */
 
 /* Access to TCP write buffers */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+struct timespec;
 FAR struct uip_wrbuffer_s *uip_tcpwrbuffer_alloc(FAR const struct timespec *abstime);
-void uip_tcpwrbuffer_release(FAR struct uip_wrbuffer_s *buf);
-#endif /* CONFIG_NET_NTCP_READAHEAD_BUFFERS */
+void uip_tcpwrbuffer_release(FAR struct uip_wrbuffer_s *wrbuffer);
+#endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /* Backlog support */
 

@@ -135,7 +135,7 @@ void uip_initialize(void)
   /* Initialize the TCP/IP read-ahead buffering */
 
 #ifdef CONFIG_NET_TCP_READAHEAD
-  uip_tcpreadaheadinit();
+  uip_tcpreadahead_init();
 #endif
 #endif /* CONFIG_NET_TCP */
 

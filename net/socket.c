@@ -128,7 +128,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
 
   psock->s_type = type;
   psock->s_conn = NULL;
-#ifdef CONFIG_NET_TCP_WRBUFFER
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   psock->s_sndcb = NULL;
 #endif
 
@@ -158,7 +158,7 @@ int psock_socket(int domain, int type, int protocol, FAR struct socket *psock)
               DEBUGASSERT(conn->crefs == 0);
               psock->s_conn  = conn;
               conn->crefs    = 1;
-#ifdef CONFIG_NET_TCP_WRBUFFER
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
               psock->s_sndcb = NULL;
 #endif
             }

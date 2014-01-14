@@ -347,7 +347,7 @@ void uip_tcpfree(struct uip_conn *conn)
 
   while ((readahead = (struct uip_readahead_s *)sq_remfirst(&conn->readahead)) != NULL)
     {
-      uip_tcpreadaheadrelease(readahead);
+      uip_tcpreadahead_release(readahead);
     }
 #endif
 

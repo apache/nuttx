@@ -49,7 +49,7 @@ SOCK_CSRCS += net_clone.c net_vfcntl.c
 ifeq ($(CONFIG_NET_TCP),y)
 SOCK_CSRCS += send.c listen.c accept.c net_monitor.c
 
-ifeq ($(CONFIG_NET_TCP_WRBUFFER),y)
+ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
 SOCK_CSRCS += net_send_buffered.c
 else
 SOCK_CSRCS += net_send_unbuffered.c

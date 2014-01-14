@@ -297,7 +297,7 @@ uint16_t uip_datahandler(FAR struct uip_conn *conn, FAR uint8_t *buffer,
   readahead1 = (FAR struct uip_readahead_s*)conn->readahead.tail;
   if ((readahead1 &&
       (CONFIG_NET_TCP_READAHEAD_BUFSIZE - readahead1->rh_nbytes) > buflen) ||
-      (readahead2 = uip_tcpreadaheadalloc()) != NULL)
+      (readahead2 = uip_tcpreadahead_alloc()) != NULL)
     {
       /* We have buffer space.  Now try to append add as much data as possible
        * to the last readahead buffer attached to this connection.

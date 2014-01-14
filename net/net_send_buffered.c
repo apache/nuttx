@@ -84,21 +84,22 @@
  * Function: send_insert_seqment
  *
  * Description:
- *   Inserted a new segment in a write buffer, keep the segment queue in
- *   ascending order of seqno
+ *   Insert a new segment in a write buffer queue, keep the segment queue in
+ *   ascending order of sequence number.
  *
  * Parameters:
- *   pstate   send state structure
+ *   segment   The segment to be inserted
+ *   q         The write buffer queue in which to insert the segment
  *
  * Returned Value:
- *   TRUE:timeout FALSE:no timeout
+ *   None
  *
  * Assumptions:
  *   Running at the interrupt level
  *
  ****************************************************************************/
 
-static void send_insert_seqment(FAR struct uip_write_s *segment,
+static void send_insert_seqment(FAR struct uip_wrbuffer_s *segment,
                                 FAR sq_queue_t *q)
 {
   sq_entry_t *entry = (sq_entry_t*)segment;
@@ -107,7 +108,7 @@ static void send_insert_seqment(FAR struct uip_write_s *segment,
   sq_entry_t *itr;
   for (itr = sq_peek(q); itr; itr = sq_next(itr))
     {
-      FAR struct uip_write_s *segment0 = (FAR struct uip_write_s*)itr;
+      FAR struct uip_wrbuffer_s *segment0 = (FAR struct uip_wrbuffer_s*)itr;
       if (segment0->wb_seqno < segment->wb_seqno)
         {
           insert = itr;
@@ -152,7 +153,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
                                FAR void *pvpriv, uint16_t flags)
 {
   FAR struct uip_conn *conn = (FAR struct uip_conn*)pvconn;
-  FAR struct send_s *pstate = (FAR struct send_s *)pvpriv;
+  FAR struct socket *psock = (FAR struct socket *)pvpriv;
 
   nllvdbg("flags: %04x\n", flags);
 
@@ -163,14 +164,14 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
   if ((flags & UIP_ACKDATA) != 0)
     {
       FAR sq_entry_t *entry, *next;
-      FAR struct uip_write_s *segment;
+      FAR struct uip_wrbuffer_s *segment;
       uint32_t ackno;
 
       ackno = uip_tcpgetsequence(TCPBUF->ackno);
       for (entry = sq_peek(&conn->unacked_q); entry; entry = next)
         {
           next    = sq_next(entry);
-          segment = (FAR struct uip_write_s*)entry;
+          segment = (FAR struct uip_wrbuffer_s*)entry;
 
           if (segment->wb_seqno < ackno)
             {
@@ -183,7 +184,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
               /* Return the write buffer to the pool of free buffers */
 
-              uip_tcpwritebuffrelease(segment);
+              uip_tcpwrbuffer_release(segment);
             }
         }
     }
@@ -212,7 +213,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
       while ((entry=sq_remlast(&conn->unacked_q)))
         {
-          struct uip_write_s *segment = (struct uip_write_s*)entry;
+          struct uip_wrbuffer_s *segment = (struct uip_wrbuffer_s*)entry;
 
           if (segment->wb_nrtx >= UIP_MAXRTX)
             {
@@ -220,7 +221,7 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
               /* Return the write buffer */
 
-              uip_tcpwritebuffrelease(segment);
+              uip_tcpwrbuffer_release(segment);
 
               /* NOTE expired is different from un-ACKed, it is designed to
                * represent the number of segments that have been sent,
@@ -277,13 +278,13 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
       if (uip_arp_find(conn->ripaddr) != NULL)
 #endif
         {
-          FAR struct uip_write_s *segment;
+          FAR struct uip_wrbuffer_s *segment;
           FAR void *sndbuf;
-          size_tsndlen;
+          size_t sndlen;
 
           /* Get the amount of data that we can send in the next packet */
 
-          segment = (FAR struct uip_write_s*)sq_peek(&conn->write_q);
+          segment = (FAR struct uip_wrbuffer_s *)sq_remfirst(&conn->write_q);
           if (segment)
             {
               sndbuf = segment->wb_buffer;
@@ -291,68 +292,63 @@ static uint16_t send_interrupt(FAR struct uip_driver_s *dev, FAR void *pvconn,
 
               DEBUGASSERT(sndlen <= uip_mss(conn));
 
-              /* Check if we have "space" in the window */
+              /* REVISIT:  There should be a check here to assure that we do
+               * not excced the window (conn->winsize).
+               */
 
-              if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->winsize)
+              /* Set the sequence number for this segment.  NOTE: uIP
+               * updates sndseq on receipt of ACK *before* this function
+               * is called. In that case sndseq will point to the next
+               * unacknowledged byte (which might have already been
+               * sent). We will overwrite the value of sndseq here
+               * before the packet is sent.
+               */
+
+              if (segment->wb_nrtx == 0 && segment->wb_seqno == (unsigned)-1)
                 {
-                  /* We are committed.. remove the segment from the queue. */
-
-                  (void)sq_remfirst(&conn->write_q);
-
-                  /* Set the sequence number for this segment.  NOTE: uIP
-                   * updates sndseq on receipt of ACK *before* this function
-                   * is called. In that case sndseq will point to the next
-                   * unacknowledged byte (which might have already been
-                   * sent). We will overwrite the value of sndseq here
-                   * before the packet is sent.
-                   */
-
-                  if (segment->wb_nrtx == 0 && segment->wb_seqno == (unsigned)-1)
-                    {
-                      segment->wb_seqno = conn->isn + conn->sent;
-                    }
-
-                  uip_tcpsetsequence(conn->sndseq, segment->wb_seqno);
-
-                  /* Then set-up to send that amount of data. (this won't
-                   * actually happen until the polling cycle completes).
-                   */
-
-                  uip_send(dev, sndbuf, sndlen);
-
-                  /* Remember how much data we send out now so that we know
-                   * when everything has been acknowledged.  Just increment
-                   * the amount of data sent. This will be needed in
-                   * sequence* number calculations and we know that this is
-                   * not a re-transmission. Re-transmissions do not go through
-                   * this path.
-                   */
-
-                  if (segment->wb_nrtx == 0)
-                    {
-                      conn->unacked += sndlen;
-                      conn->sent    += sndlen;
-                    }
-
-                  /* Increment the retransmission counter before expiration.
-                   * NOTE we will not calculate the retransmission timer
-                   * (RTT) to save cpu cycles, each send_insert_seqment
-                   * segment will be retransmitted UIP_MAXRTX times in halt-
-                   * second interval before expiration.
-                   */
-
-                  segment->wb_nrtx ++;
-
-                  /* The segment is waiting for ACK again */
-
-                  send_insert_seqment(segment, &conn->unacked_q);
-
-                  /* Only one data can be sent by low level driver at once,
-                   * tell the caller stop polling the other connection.
-                   */
-
-                  flags &= ~UIP_POLL;
+                  segment->wb_seqno = conn->isn + conn->sent;
                 }
+
+              uip_tcpsetsequence(conn->sndseq, segment->wb_seqno);
+
+              /* Then set-up to send that amount of data. (this won't
+               * actually happen until the polling cycle completes).
+               */
+
+              uip_send(dev, sndbuf, sndlen);
+
+              /* Remember how much data we send out now so that we know
+               * when everything has been acknowledged.  Just increment
+               * the amount of data sent. This will be needed in
+               * sequence* number calculations and we know that this is
+               * not a re-transmission. Re-transmissions do not go through
+               * this path.
+               */
+
+              if (segment->wb_nrtx == 0)
+                {
+                  conn->unacked += sndlen;
+                  conn->sent    += sndlen;
+                }
+
+              /* Increment the retransmission counter before expiration.
+               * NOTE we will not calculate the retransmission timer
+               * (RTT) to save cpu cycles, each send_insert_seqment
+               * segment will be retransmitted UIP_MAXRTX times in halt-
+               * second interval before expiration.
+               */
+
+              segment->wb_nrtx ++;
+
+              /* The segment is waiting for ACK again */
+
+              send_insert_seqment(segment, &conn->unacked_q);
+
+              /* Only one data can be sent by low level driver at once,
+               * tell the caller stop polling the other connection.
+               */
+
+              flags &= ~UIP_POLL;
             }
         }
     }
@@ -485,7 +481,7 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
       while (completed < len)
         {
-          struct uip_write_s *segment = uip_tcpwritebuffalloc(NULL);
+          struct uip_wrbuffer_s *segment = uip_tcpwrbuffer_alloc(NULL);
           if (segment)
             {
               size_t cnt;
@@ -512,9 +508,9 @@ ssize_t psock_send(FAR struct socket *psock, FAR const void *buf, size_t len,
 
               sq_addlast(&segment->wb_node, &conn->write_q);
 
-              /* Notify the device driver of the availaibilty of TX data */
+              /* Notify the device driver of the availability of TX data */
 
-              netdev_txnotify(&conn->ripaddr);
+              netdev_txnotify(conn->ripaddr);
             }
         }
     }
