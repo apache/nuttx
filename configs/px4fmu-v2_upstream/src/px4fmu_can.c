@@ -1,4 +1,5 @@
 /****************************************************************************
+ * configs/px4fmu-v2_upstream/src/px4fmu_can.c
  *
  *   Copyright (C) 2012 PX4 Development Team. All rights reserved.
  *
@@ -30,12 +31,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  ****************************************************************************/
-
-/**
- * @file px4fmu_can.c
- *
- * Board-specific CAN functions.
- */
 
 /************************************************************************************
  * Included Files
@@ -108,37 +103,40 @@
 
 int can_devinit(void)
 {
-	static bool initialized = false;
-	struct can_dev_s *can;
-	int ret;
+  static bool initialized = false;
+  struct can_dev_s *can;
+  int ret;
 
-	/* Check if we have already initialized */
+  /* Check if we have already initialized */
 
-	if (!initialized) {
-		/* Call stm32_caninitialize() to get an instance of the CAN interface */
+  if (!initialized)
+    {
+      /* Call stm32_caninitialize() to get an instance of the CAN interface */
 
-		can = stm32_caninitialize(CAN_PORT);
+      can = stm32_caninitialize(CAN_PORT);
 
-		if (can == NULL) {
-			candbg("ERROR:  Failed to get CAN interface\n");
-			return -ENODEV;
-		}
+      if (can == NULL)
+        {
+          candbg("ERROR:  Failed to get CAN interface\n");
+          return -ENODEV;
+        }
 
-		/* Register the CAN driver at "/dev/can0" */
+      /* Register the CAN driver at "/dev/can0" */
 
-		ret = can_register("/dev/can0", can);
+      ret = can_register("/dev/can0", can);
 
-		if (ret < 0) {
-			candbg("ERROR: can_register failed: %d\n", ret);
-			return ret;
-		}
+      if (ret < 0)
+        {
+          candbg("ERROR: can_register failed: %d\n", ret);
+          return ret;
+        }
 
-		/* Now we are initialized */
+      /* Now we are initialized */
 
-		initialized = true;
-	}
+      initialized = true;
+    }
 
-	return OK;
+  return OK;
 }
 
 #endif
