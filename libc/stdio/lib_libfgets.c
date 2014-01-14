@@ -47,6 +47,8 @@
 #include <assert.h>
 #include <debug.h>
 
+#include "lib_internal.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -142,7 +144,7 @@ static void consume_eol(FILE *stream, bool consume)
 FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
                     bool keepnl, bool consume)
 {
-  int nch = 0;
+  size_t nch = 0;
 
   /* Sanity checks */
 

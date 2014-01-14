@@ -1,7 +1,7 @@
 ############################################################################
 # sched/Makefile
 #
-#   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,8 +38,12 @@
 ASRCS =
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-MISC_SRCS  = os_start.c os_bringup.c errno_getptr.c errno_get.c errno_set.c
-MISC_SRCS += sched_garbage.c sched_getfiles.c sched_getsockets.c sched_getstreams.c
+MISC_SRCS  = os_start.c os_bringup.c errno_getptr.c sched_garbage.c
+MISC_SRCS += sched_getfiles.c sched_getsockets.c sched_getstreams.c
+
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+MISC_SRCS += errno_get.c errno_set.c
+endif
 
 TSK_SRCS  = prctl.c exit.c getpid.c
 TSK_SRCS += task_create.c task_init.c task_setup.c task_activate.c task_start.c

@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/misc/lib_dumpbuffer.c
  *
- *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,9 @@
 
 void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer, unsigned int buflen)
 {
-  int i, j, k;
+  unsigned int i;
+  unsigned int j;
+  unsigned int k;
 
   message("%s (%p):\n", msg, buffer);
   for (i = 0; i < buflen; i += 32)
@@ -124,6 +126,7 @@ void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer, unsigned int
                 }
             }
         }
+
       message("\n");
    }
 }

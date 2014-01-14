@@ -6428,3 +6428,9 @@
 	  uip/uip_tcpwrbuffer.c:  First set of changes to bring in Jason
 	  Jiang's TCP write buffering logic.  Still not complete but
 	  apparently harmless if not selected. (2014-1-13).
+	* All of Jason Jiang's TCP write buffering logic is checked in.
+	  Unfortunately, it does not yet work (2013-1-14).
+	* configs/px4fmu-v2_upstream:  Configuration for testing simple
+	  configurations on the the PX4FMU v2.  This version is incomplete
+	  for the PX4 appliation and is not a replacement for the version
+	  in the PX4 GIT repository.

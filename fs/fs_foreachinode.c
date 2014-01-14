@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_foreachinode.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,7 @@ struct inode_path_s
  *
  ****************************************************************************/
 
-int foreach_inodelevel(FAR struct inode *node, struct inode_path_s *info)
+static int foreach_inodelevel(FAR struct inode *node, struct inode_path_s *info)
 {
   int ret = OK;
 

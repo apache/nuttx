@@ -153,8 +153,8 @@ static int poll_fdsetup(int fd, FAR struct pollfd *fds, bool setup)
 #if CONFIG_NFILE_DESCRIPTORS > 0
 static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 {
+  unsigned int i;
   int ret;
-  int i;
 
   /* Process each descriptor in the list */
 
@@ -203,9 +203,9 @@ static inline int poll_setup(FAR struct pollfd *fds, nfds_t nfds, sem_t *sem)
 #if CONFIG_NFILE_DESCRIPTORS > 0
 static inline int poll_teardown(FAR struct pollfd *fds, nfds_t nfds, int *count)
 {
+  unsigned int i;
   int status;
   int ret = OK;
-  int i;
 
   /* Process each descriptor in the list */
 

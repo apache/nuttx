@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/pthread_barrierwait.c
  *
- *   Copyright (C) 2007, 2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -136,7 +136,7 @@ int pthread_barrier_wait(FAR pthread_barrier_t *barrier)
 
   /* If the number of waiters would be equal to the count, then we are done */
 
-  if (1 - semcount >= barrier->count)
+  if ((1 - semcount) >= (int)barrier->count)
     {
       /* Free all of the waiting threads */
 

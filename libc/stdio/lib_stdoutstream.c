@@ -83,7 +83,7 @@ static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
  ****************************************************************************/
 
 #if defined(CONFIG_STDIO_LINEBUFFER) && CONFIG_STDIO_BUFFER_SIZE > 0
-int stdoutstream_flush(FAR struct lib_outstream_s *this)
+static int stdoutstream_flush(FAR struct lib_outstream_s *this)
 {
   FAR struct lib_stdoutstream_s *sthis = (FAR struct lib_stdoutstream_s *)this;
   return lib_fflush(sthis->stream, true);

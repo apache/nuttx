@@ -204,7 +204,7 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
 
                       /* Were all of the requested bytes read? */
 
-                      if (bytes_read < count)
+                      if ((size_t)bytes_read < count)
                         {
                           /* No.  We must be at the end of file. */
 

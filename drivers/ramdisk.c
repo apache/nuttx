@@ -338,5 +338,6 @@ int romdisk_register(int minor, uint8_t *buffer, uint32_t nsectors,
           kfree(dev);
         }
     }
+
   return ret;
 }

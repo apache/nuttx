@@ -1,4 +1,11 @@
 /****************************************************************************
+ * configs/px4fmu-v2_upstream/src/px4fmu_init.c
+ *
+ * PX4FMU-specific early startup code.  This file implements the
+ * nsh_archinitialize() function that is called early by nsh during startup.
+ *
+ * Code here is run before the rcS script is invoked; it should start
+ * required subsystems and perform board-specific initialisation.
  *
  *   Copyright (C) 2012 PX4 Development Team. All rights reserved.
  *
@@ -31,16 +38,6 @@
  *
  ****************************************************************************/
 
-/**
- * @file px4fmu_init.c
- *
- * PX4FMU-specific early startup code.  This file implements the
- * nsh_archinitialize() function that is called early by nsh during startup.
- *
- * Code here is run before the rcS script is invoked; it should start required
- * subsystems and perform board-specific initialisation.
- */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -49,6 +46,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <math.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -72,6 +70,19 @@
 
 /* Configuration ************************************************************/
 
+#ifdef CONFIG_FAT_DMAMEMORY
+# if !defined(CONFIG_GRAN) || !defined(CONFIG_FAT_DMAMEMORY)
+#  error microSD DMA support requires CONFIG_GRAN
+# endif
+#endif
+
+/* PX4 LED colour codes */
+
+#define LED_AMBER      1
+#define LED_RED        1  /* Some boards have red rather than amber */
+#define LED_BLUE       0
+#define LED_SAFETY     2
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_CPP_HAVE_VARARGS
@@ -88,74 +99,68 @@
 #  endif
 #endif
 
-/* PX4 LED colour codes */
-#define LED_AMBER		1
-#define LED_RED			1	/* some boards have red rather than amber */
-#define LED_BLUE		0
-#define LED_SAFETY		2
-
 /****************************************************************************
- * Protected Functions
+ * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_FAT_DMAMEMORY)
-# if !defined(CONFIG_GRAN) || !defined(CONFIG_FAT_DMAMEMORY)
-#  error microSD DMA support requires CONFIG_GRAN
-# endif
-
+#ifdef CONFIG_FAT_DMAMEMORY
 static GRAN_HANDLE dma_allocator;
 
-/* 
- * The DMA heap size constrains the total number of things that can be 
+/* The DMA heap size constrains the total number of things that can be
  * ready to do DMA at a time.
  *
  * For example, FAT DMA depends on one sector-sized buffer per filesystem plus
- * one sector-sized buffer per file. 
+ * one sector-sized buffer per file.
  *
  * We use a fundamental alignment / granule size of 64B; this is sufficient
  * to guarantee alignment for the largest STM32 DMA burst (16 beats x 32bits).
  */
-static uint8_t g_dma_heap[8192] __attribute__((aligned(64)));
 
-static void
-dma_alloc_init(void)
+static uint8_t g_dma_heap[8192] __attribute__((aligned(64)));
+#endif
+
+static struct spi_dev_s *spi1;
+static struct spi_dev_s *spi2;
+static struct sdio_dev_s *sdio;
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+#ifdef CONFIG_FAT_DMAMEMORY
+static void dma_alloc_init(void)
 {
-	dma_allocator = gran_initialize(g_dma_heap,
-					sizeof(g_dma_heap),
-					7,  /* 128B granule - must be > alignment (XXX bug?) */
-					6); /* 64B alignment */
-	if (dma_allocator == NULL) {
-		message("[boot] DMA allocator setup FAILED");
-	}
+  dma_allocator =
+    gran_initialize(g_dma_heap,
+                    sizeof(g_dma_heap),
+                    7,  /* 128B granule - must be > alignment (XXX bug?) */
+                    6); /* 64B alignment */
+
+  if (dma_allocator == NULL)
+    {
+      message("[boot] DMA allocator setup FAILED");
+    }
 }
+#else
+# define dma_alloc_init()
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/*
- * DMA-aware allocator stubs for the FAT filesystem.
- */
+#ifdef CONFIG_FAT_DMAMEMORY
+/* DMA-aware allocator stubs for the FAT filesystem. */
 
-__EXPORT void *fat_dma_alloc(size_t size);
-__EXPORT void fat_dma_free(FAR void *memory, size_t size);
-
-void *
-fat_dma_alloc(size_t size)
+void *fat_dma_alloc(size_t size)
 {
-	perf_count(g_dma_perf);
-	return gran_alloc(dma_allocator, size);
+  return gran_alloc(dma_allocator, size);
 }
 
-void
-fat_dma_free(FAR void *memory, size_t size)
+void fat_dma_free(FAR void *memory, size_t size)
 {
-	gran_free(dma_allocator, memory, size);
+  gran_free(dma_allocator, memory, size);
 }
-
-#else
-
-# define dma_alloc_init()
 
 #endif
 
@@ -164,19 +169,20 @@ fat_dma_free(FAR void *memory, size_t size)
  *
  * Description:
  *   All STM32 architectures must provide the following entry point.  This entry point
- *   is called early in the intitialization -- after all memory has been configured
+ *   is called early in the initialization -- after all memory has been configured
  *   and mapped but before any devices have been initialized.
  *
  ************************************************************************************/
 
-void
-stm32_boardinitialize(void)
+void stm32_boardinitialize(void)
 {
-	/* configure SPI interfaces */
-	stm32_spiinitialize();
+  /* Configure SPI interfaces */
 
-	/* configure LEDs */
-	up_ledinit();
+  stm32_spiinitialize();
+
+  /* Configure LEDs */
+
+  up_ledinit();
 }
 
 /****************************************************************************
@@ -187,125 +193,119 @@ stm32_boardinitialize(void)
  *
  ****************************************************************************/
 
-static struct spi_dev_s *spi1;
-static struct spi_dev_s *spi2;
-static struct sdio_dev_s *sdio;
-
-#include <math.h>
-
-#ifdef __cplusplus
-int matherr(struct __exception *e)
-{
-	return 1;
-}
-#else
-int matherr(struct exception *e)
-{
-	return 1;
-}
-#endif
-
 int nsh_archinitialize(void)
 {
-	/* configure ADC pins */
-	stm32_configgpio(GPIO_ADC1_IN2);	/* BATT_VOLTAGE_SENS */
-	stm32_configgpio(GPIO_ADC1_IN3);	/* BATT_CURRENT_SENS */
-	stm32_configgpio(GPIO_ADC1_IN4);	/* VDD_5V_SENS */
-	// stm32_configgpio(GPIO_ADC1_IN10);	/* used by VBUS valid */
-	// stm32_configgpio(GPIO_ADC1_IN11);	/* unused */
-	// stm32_configgpio(GPIO_ADC1_IN12);	/* used by MPU6000 CS */
-	stm32_configgpio(GPIO_ADC1_IN13);	/* FMU_AUX_ADC_1 */
-	stm32_configgpio(GPIO_ADC1_IN14);	/* FMU_AUX_ADC_2 */
-	stm32_configgpio(GPIO_ADC1_IN15);	/* PRESSURE_SENS */
+  int ret;
 
-	/* configure power supply control/sense pins */
-	stm32_configgpio(GPIO_VDD_5V_PERIPH_EN);
-	stm32_configgpio(GPIO_VDD_3V3_SENSORS_EN);
-	stm32_configgpio(GPIO_VDD_BRICK_VALID);
-	stm32_configgpio(GPIO_VDD_SERVO_VALID);
-	stm32_configgpio(GPIO_VDD_5V_HIPOWER_OC);
-	stm32_configgpio(GPIO_VDD_5V_PERIPH_OC);
+  /* Configure ADC pins */
 
-	/* configure the high-resolution time/callout interface */
-	hrt_init();
+  stm32_configgpio(GPIO_ADC1_IN2);   /* BATT_VOLTAGE_SENS */
+  stm32_configgpio(GPIO_ADC1_IN3);   /* BATT_CURRENT_SENS */
+  stm32_configgpio(GPIO_ADC1_IN4);   /* VDD_5V_SENS */
+//stm32_configgpio(GPIO_ADC1_IN10);  /* used by VBUS valid */
+//stm32_configgpio(GPIO_ADC1_IN11);  /* unused */
+//stm32_configgpio(GPIO_ADC1_IN12);  /* used by MPU6000 CS */
+  stm32_configgpio(GPIO_ADC1_IN13);  /* FMU_AUX_ADC_1 */
+  stm32_configgpio(GPIO_ADC1_IN14);  /* FMU_AUX_ADC_2 */
+  stm32_configgpio(GPIO_ADC1_IN15);  /* PRESSURE_SENS */
 
-	/* configure the DMA allocator */
-	dma_alloc_init();
+  /* Configure power supply control/sense pins */
 
-	/* configure CPU load estimation */
+  stm32_configgpio(GPIO_VDD_5V_PERIPH_EN);
+  stm32_configgpio(GPIO_VDD_3V3_SENSORS_EN);
+  stm32_configgpio(GPIO_VDD_BRICK_VALID);
+  stm32_configgpio(GPIO_VDD_SERVO_VALID);
+  stm32_configgpio(GPIO_VDD_5V_HIPOWER_OC);
+  stm32_configgpio(GPIO_VDD_5V_PERIPH_OC);
+
+  /* Configure the DMA allocator */
+
+  dma_alloc_init();
+
+  /* Configure CPU load estimation */
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION
-	cpuload_initialize_once();
+  cpuload_initialize_once();
 #endif
 
-	/* initial LED state */
-	drv_led_start();
-	led_off(LED_AMBER);
+  /* Initial LED state */
 
-	/* Configure SPI-based devices */
+  led_off(LED_AMBER);
 
-	spi1 = up_spiinitialize(1);
+  /* Configure SPI-based devices */
 
-	if (!spi1) {
-		message("[boot] FAILED to initialize SPI port 1\n");
-		up_ledon(LED_AMBER);
-		return -ENODEV;
-	}
+  spi1 = up_spiinitialize(1);
+  if (!spi1)
+    {
+      message("[boot] FAILED to initialize SPI port 1\n");
+      up_ledon(LED_AMBER);
+      return -ENODEV;
+    }
 
-	/* Default SPI1 to 1MHz and de-assert the known chip selects. */
-	SPI_SETFREQUENCY(spi1, 10000000);
-	SPI_SETBITS(spi1, 8);
-	SPI_SETMODE(spi1, SPIDEV_MODE3);
-	SPI_SELECT(spi1, PX4_SPIDEV_GYRO, false);
-	SPI_SELECT(spi1, PX4_SPIDEV_ACCEL_MAG, false);
-	SPI_SELECT(spi1, PX4_SPIDEV_BARO, false);
-	SPI_SELECT(spi1, PX4_SPIDEV_MPU, false);
-	up_udelay(20);
+  /* Default SPI1 to 1MHz and de-assert the known chip selects. */
 
-	message("[boot] Initialized SPI port 1 (SENSORS)\n");
+  SPI_SETFREQUENCY(spi1, 10000000);
+  SPI_SETBITS(spi1, 8);
+  SPI_SETMODE(spi1, SPIDEV_MODE3);
+  SPI_SELECT(spi1, PX4_SPIDEV_GYRO, false);
+  SPI_SELECT(spi1, PX4_SPIDEV_ACCEL_MAG, false);
+  SPI_SELECT(spi1, PX4_SPIDEV_BARO, false);
+  SPI_SELECT(spi1, PX4_SPIDEV_MPU, false);
+  up_udelay(20);
 
-	/* Get the SPI port for the FRAM */
+  message("[boot] Initialized SPI port 1 (SENSORS)\n");
 
-	spi2 = up_spiinitialize(2);
+  /* Get the SPI port for the FRAM */
 
-	if (!spi2) {
-		message("[boot] FAILED to initialize SPI port 2\n");
-		up_ledon(LED_AMBER);
-		return -ENODEV;
-	}
+  spi2 = up_spiinitialize(2);
+  if (!spi2)
+    {
+      message("[boot] FAILED to initialize SPI port 2\n");
+      up_ledon(LED_AMBER);
+      return -ENODEV;
+    }
 
-	/* Default SPI2 to 37.5 MHz (40 MHz rounded to nearest valid divider, F4 max)
-	 * and de-assert the known chip selects. */
+  /* Default SPI2 to 37.5 MHz (40 MHz rounded to nearest valid divider, F4 max)
+   * and de-assert the known chip selects.
+   */
 
-	// XXX start with 10.4 MHz in FRAM usage and go up to 37.5 once validated
-	SPI_SETFREQUENCY(spi2, 12 * 1000 * 1000);
-	SPI_SETBITS(spi2, 8);
-	SPI_SETMODE(spi2, SPIDEV_MODE3);
-	SPI_SELECT(spi2, SPIDEV_FLASH, false);
+  // XXX start with 10.4 MHz in FRAM usage and go up to 37.5 once validated
 
-	message("[boot] Initialized SPI port 2 (RAMTRON FRAM)\n");
+  SPI_SETFREQUENCY(spi2, 12 * 1000 * 1000);
+  SPI_SETBITS(spi2, 8);
+  SPI_SETMODE(spi2, SPIDEV_MODE3);
+  SPI_SELECT(spi2, SPIDEV_FLASH, false);
 
-	#ifdef CONFIG_MMCSD
-	/* First, get an instance of the SDIO interface */
+  message("[boot] Initialized SPI port 2 (RAMTRON FRAM)\n");
 
-	sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
-	if (!sdio) {
-		message("[boot] Failed to initialize SDIO slot %d\n",
-			CONFIG_NSH_MMCSDSLOTNO);
-		return -ENODEV;
-	}
+#ifdef CONFIG_MMCSD
+  /* First, get an instance of the SDIO interface */
 
-	/* Now bind the SDIO interface to the MMC/SD driver */
-	int ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
-	if (ret != OK) {
-		message("[boot] Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
-		return ret;
-	}
+  sdio = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
+  if (!sdio)
+    {
+      message("[boot] Failed to initialize SDIO slot %d\n",
+              CONFIG_NSH_MMCSDSLOTNO);
+      return -ENODEV;
+    }
 
-	/* Then let's guess and say that there is a card in the slot. There is no card detect GPIO. */
-	sdio_mediachange(sdio, true);
+  /* Now bind the SDIO interface to the MMC/SD driver */
 
-	message("[boot] Initialized SDIO\n");
-	#endif
+  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, sdio);
+  if (ret != OK)
+    {
+      message("[boot] Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      return ret;
+    }
 
-	return OK;
+  /* Then let's guess and say that there is a card in the slot. There is no
+   * card detect GPIO.
+   */
+
+  sdio_mediachange(sdio, true);
+
+  message("[boot] Initialized SDIO\n");
+#endif
+
+  return OK;
 }

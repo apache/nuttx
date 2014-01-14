@@ -1,7 +1,7 @@
 /********************************************************************************
  * sched/timer_settime.c
  *
- *   Copyright (C) 2007-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,8 @@
  * Private Function Prototypes
  ********************************************************************************/
 
-static void inline timer_sigqueue(FAR struct posix_timer_s *timer);
-static void inline timer_restart(FAR struct posix_timer_s *timer, uint32_t itimer);
+static inline void timer_sigqueue(FAR struct posix_timer_s *timer);
+static inline void timer_restart(FAR struct posix_timer_s *timer, uint32_t itimer);
 static void timer_timeout(int argc, uint32_t itimer);
 
 /********************************************************************************
@@ -93,7 +93,7 @@ static void timer_timeout(int argc, uint32_t itimer);
  *
  ********************************************************************************/
 
-static void inline timer_sigqueue(FAR struct posix_timer_s *timer)
+static inline void timer_sigqueue(FAR struct posix_timer_s *timer)
 {
   siginfo_t info;
 
@@ -133,7 +133,7 @@ static void inline timer_sigqueue(FAR struct posix_timer_s *timer)
  *
  ********************************************************************************/
 
-static void inline timer_restart(FAR struct posix_timer_s *timer, uint32_t itimer)
+static inline void timer_restart(FAR struct posix_timer_s *timer, uint32_t itimer)
 {
   /* If this is a repetitive timer, then restart the watchdog */
 

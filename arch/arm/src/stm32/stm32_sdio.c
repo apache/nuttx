@@ -1023,7 +1023,7 @@ static void stm32_sendfifo(struct stm32_dev_s *priv)
            int i;
 
            data.w = 0;
-           for (i = 0; i < priv->remaining; i++)
+           for (i = 0; i < (int)priv->remaining; i++)
              {
                 data.b[i] = *ptr++;
              }
@@ -1085,7 +1085,7 @@ static void stm32_recvfifo(struct stm32_dev_s *priv)
           uint8_t *ptr = (uint8_t*)priv->buffer;
           int i;
 
-          for (i = 0; i < priv->remaining; i++)
+          for (i = 0; i < (int)priv->remaining; i++)
             {
                *ptr++ = data.b[i];
             }

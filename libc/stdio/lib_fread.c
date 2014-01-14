@@ -97,5 +97,3 @@ size_t fread(FAR void *ptr, size_t size, size_t n_items, FAR FILE *stream)
     }
   return items_read;
 }
-
-

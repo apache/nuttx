@@ -1,4 +1,5 @@
 /****************************************************************************
+ * configs/px4fmu-v2_upstream/include/romfsimg.h
  *
  *   Copyright (C) 2013 PX4 Development Team. All rights reserved.
  *
@@ -31,12 +32,14 @@
  *
  ****************************************************************************/
 
-/**
- * nsh_romfsetc.h
- *
- * This file is a stub for 'make export' purposes; the actual ROMFS
- * must be supplied by the library client.
- */
+#ifndef __CONFIGS_PX4FMU_V2_UPSTREAM_INCLUDE_ROMFSIMG_H
+#define __CONFIGS_PX4FMU_V2_UPSTREAM_INCLUDE_ROMFSIMG_H
+
+/****************************************************************************
+ * Public Variables
+ ****************************************************************************/
 
 extern unsigned char romfs_img[];
 extern unsigned int romfs_img_len;
+
+#endif /* __CONFIGS_PX4FMU_V2_UPSTREAM_INCLUDE_ROMFSIMG_H */

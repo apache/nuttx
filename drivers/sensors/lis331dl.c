@@ -112,7 +112,9 @@ struct lis331dl_dev_s {
  * \param length when >0 it denotes read access, when <0 it denotes write access of -length
  * \return OK on success or errno is set.
  **/
-int lis331dl_access(struct lis331dl_dev_s * dev, uint8_t subaddr, uint8_t *buf, int length)
+
+static int lis331dl_access(struct lis331dl_dev_s * dev, uint8_t subaddr,
+                           uint8_t *buf, int length)
 {
     uint16_t flags = 0;
     int      retval;
@@ -170,7 +172,7 @@ int lis331dl_access(struct lis331dl_dev_s * dev, uint8_t subaddr, uint8_t *buf, 
 }
 
 
-int lis331dl_readregs(struct lis331dl_dev_s * dev)
+static int lis331dl_readregs(struct lis331dl_dev_s * dev)
 {
     if (lis331dl_access(dev, ST_LIS331DL_CTRL_REG1, &dev->cr1, 3) != 3) return ERROR;
     return OK;

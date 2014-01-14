@@ -44,7 +44,7 @@
 #include <nuttx/config.h>
 
 /************************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
@@ -232,7 +232,8 @@ enum output_state
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -250,7 +251,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void lpc17_boardinitialize(void);
+void lpc17_boardinitialize(void);
 
 /************************************************************************************
  * Name: lpc17_led1 and 2
@@ -261,8 +262,8 @@ EXTERN void lpc17_boardinitialize(void);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-EXTERN void lpc17_led1(enum lpc17_ledstate_e state);
-EXTERN void lpc17_led2(enum lpc17_ledstate_e state);
+void lpc17_led1(enum lpc17_ledstate_e state);
+void lpc17_led2(enum lpc17_ledstate_e state);
 #endif
 
 /************************************************************************************
@@ -275,10 +276,10 @@ EXTERN void lpc17_led2(enum lpc17_ledstate_e state);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_BOARD_NUCLEUS2G_BMS
-EXTERN void nucleus_bms_relay1(enum output_state state);
-EXTERN void nucleus_bms_relay2(enum output_state state);
-EXTERN void nucleus_bms_relay3(enum output_state state);
-EXTERN void nucleus_bms_relay4(enum output_state state);
+void nucleus_bms_relay1(enum output_state state);
+void nucleus_bms_relay2(enum output_state state);
+void nucleus_bms_relay3(enum output_state state);
+void nucleus_bms_relay4(enum output_state state);
 #endif
 
 #undef EXTERN

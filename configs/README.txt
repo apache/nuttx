@@ -439,6 +439,12 @@ configs/pjrc-8051
   8051 Microcontroller.  This port uses the PJRC 87C52 development system
   and the SDCC toolchain.   This port is not quite ready for prime time.
 
+config/px4fmu-v2_upstream
+  This is a minimal configuration that supports low-level test of the
+  PX4FMU v2 in the NuttX source tree.  If you are using PX4, you probably
+  don't want this configuration.  You probably want the latest supported
+  configuration available from the PX4 GIT repositories.
+
 configs/qemu-i486
   Port of NuttX to QEMU in i486 mode.  This port will also run on real i486
   hardwared (Google the Bifferboard).
