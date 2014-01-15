@@ -66,6 +66,13 @@
    NVIC_SYSH_PRIORITY_DEFAULT << 8  |\
    NVIC_SYSH_PRIORITY_DEFAULT)
 
+/* Given the address of a NVIC ENABLE register, this is the offset to
+ * the corresponding CLEAR ENABLE register.
+ */
+
+#define NVIC_ENA_OFFSET    (0)
+#define NVIC_CLRENA_OFFSET (NVIC_IRQ0_31_CLEAR - NVIC_IRQ0_31_ENABLE)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -214,7 +221,8 @@ static inline void lpc17_prioritize_syscall(int priority)
  *
  ****************************************************************************/
 
-static int lpc17_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
+static int lpc17_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
+                         uintptr_t offset)
 {
   DEBUGASSERT(irq >= LPC17_IRQ_NMI && irq < NR_IRQS);
 
@@ -224,12 +232,12 @@ static int lpc17_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
     {
       if (irq < (LPC17_IRQ_EXTINT+32))
         {
-           *regaddr = NVIC_IRQ0_31_ENABLE;
+           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << (irq - LPC17_IRQ_EXTINT);
         }
       else if (irq < LPC17_IRQ_NIRQS)
         {
-           *regaddr = NVIC_IRQ32_63_ENABLE;
+           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
            *bit     = 1 << (irq - LPC17_IRQ_EXTINT - 32);
         }
       else
@@ -383,16 +391,33 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-  uint32_t regaddr;
+  uintptr_t regaddr;
   uint32_t regval;
   uint32_t bit;
 
   if (lpc17_irqinfo(irq, &regaddr, &bit) == 0)
     {
-      /* Clear the appropriate bit in the register to enable the interrupt */
+      /* Modify the appropriate bit in the register to disable the interrupt */
 
       regval  = getreg32(regaddr);
-      regval &= ~bit;
+
+      /* This is awkward... For normal interrupts, we need to set the bit
+       * in the associated Interrupt Clear Enable register.  For other
+       * exceptions, we need to clear the bit in the System Handler Control
+       * and State Register.
+       */
+
+      if (irq >= LPC17_IRQ_EXTINT)
+        {
+          regval |= bit;
+        }
+      else
+        {
+          regval &= ~bit;
+        }
+
+      /* Save the appropriately modified register */
+
       putreg32(regval, regaddr);
     }
 #ifdef CONFIG_GPIO_IRQ
@@ -417,11 +442,11 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-  uint32_t regaddr;
+  uintptr_t regaddr;
   uint32_t regval;
   uint32_t bit;
 
-  if (lpc17_irqinfo(irq, &regaddr, &bit) == 0)
+  if (lpc17_irqinfo(irq, &regaddr, &bit, NVIC_ENA_OFFSET) == 0)
     {
       /* Set the appropriate bit in the register to enable the interrupt */
 
