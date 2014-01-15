@@ -285,9 +285,21 @@ static inline int netclose_disconnect(FAR struct socket *psock)
   flags = uip_lock();
   conn = (struct uip_conn*)psock->s_conn;
 
-  /* There shouldn't be any callbacks registered */
+  /* If we have a semi-permanent write buffer callback in place, then
+   * release it now.
+   */
 
-  DEBUGASSERT(conn->list == NULL);
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  if (psock->s_sndcb)
+    {
+      uip_tcpcallbackfree(conn, psock->s_sndcb);
+      psock->s_sndcb = NULL;
+    }
+#endif
+
+  /* There shouldn't be any callbacks registered. */
+
+  DEBUGASSERT(conn && conn->list == NULL);
 
   /* Check for the case where the host beat us and disconnected first */
 

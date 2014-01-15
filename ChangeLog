@@ -6436,6 +6436,9 @@
 	  in the PX4 GIT repository.
 	* fs/fat/fs_fat32.c: A correction to FAT cluster allocation from
 	  Tridge via Lorenz Meier (2014-1-14).
-	* net/net_clone.c:  Need to clone fields for TCP write buffering
-	  as well (2014-1-14).
-
+	* net/net_clone.c:  If CONFIG_NET_TCP_WRITE_BUFFERS is selected,
+	  then the socket-related write buffering information must copied
+	  with the other cloned socket data (2014-1-14).
+	* net/net_close.c:  If CONFIG_NET_TCP_WRITE_BUFFERS is selected,
+	  then it is necessary to free the write buffere callback structure
+	  when the socket is closed (2014-1-14).
