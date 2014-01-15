@@ -1,8 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc43/lpc43_irq.c
- * arch/arm/src/chip/lpc43_irq.c
  *
- *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -442,6 +441,7 @@ void up_disable_irq(int irq)
       lpc43_gpioint_disable(irq);
     }
 #endif
+
   lpc43_dumpnvic("disable", irq);
 }
 
@@ -475,21 +475,20 @@ void up_enable_irq(int irq)
       lpc43_gpioint_enable(irq);
     }
 #endif
+
   lpc43_dumpnvic("enable", irq);
 }
 
 /****************************************************************************
- * Name: up_maskack_irq
+ * Name: up_ack_irq
  *
  * Description:
- *   Mask the IRQ and acknowledge it
+ *   Acknowledge the IRQ
  *
  ****************************************************************************/
 
-void up_maskack_irq(int irq)
+void up_ack_irq(int irq)
 {
-  up_disable_irq(irq);
-
 #if 0 /* Does not appear to be necessary in most cases */
   lpc43_clrpend(irq);
 #endif

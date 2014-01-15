@@ -1,8 +1,7 @@
 /****************************************************************************
  * arch/arm/src/stm32/kl_irq.c
- * arch/arm/src/chip/kl_irq.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -258,11 +257,6 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-  /* This will be called on each interrupt (via up_maskack_irq()) whether
-   * the interrupt can be disabled or not.  So this assertion is necessarily
-   * lame.
-   */
-
   DEBUGASSERT((unsigned)irq < NR_IRQS);
 
   /* Check for an external interrupt */
@@ -297,7 +291,7 @@ void up_disable_irq(int irq)
 void up_enable_irq(int irq)
 {
   /* This will be called on each interrupt exit whether the interrupt can be
-   * enambled or not.  So this assertion is necessarily lame.
+   * enabled or not.  So this assertion is necessarily lame.
    */
 
   DEBUGASSERT((unsigned)irq < NR_IRQS);
@@ -324,15 +318,14 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_maskack_irq
+ * Name: up_ack_irq
  *
  * Description:
- *   Mask the IRQ and acknowledge it
+ *   Acknowledge the IRQ
  *
  ****************************************************************************/
 
-void up_maskack_irq(int irq)
+void up_ack_irq(int irq)
 {
-  up_disable_irq(irq);
   kl_clrpend(irq);
 }

@@ -6432,7 +6432,7 @@
 	  Unfortunately, it does not yet work (2013-1-14).
 	* configs/px4fmu-v2_upstream:  Configuration for testing simple
 	  configurations on the the PX4FMU v2.  This version is incomplete
-	  for the PX4 appliation and is not a replacement for the version
+	  for the PX4 application and is not a replacement for the version
 	  in the PX4 GIT repository.
 	* fs/fat/fs_fat32.c: A correction to FAT cluster allocation from
 	  Tridge via Lorenz Meier (2014-1-14).
@@ -6446,4 +6446,10 @@
 	  conditionally done only for FAT 32.  Apparently this needs to
 	  done for all FAT types.  From Tridge via Lorenz Meier
 	  (2014-1-14).
-
+	* arch/arm/src/armv6-m/up_doirq.c and armv7-m/up_doirq.c and all
+	  implementations of up_mask_acq() for all Cortex-M architectures:  Do
+	  not disable and enable the IRQ on each interrupt.  Because (1)
+	  interrupts are already disabled on interrupt entry, (2) this
+	  interferes with controlling the IRQ interrrupt setting from interrupt
+	  handlers, and (3) up_disable_irq() does not work anyway so that this
+	  has never done anything (2014-1-15).
