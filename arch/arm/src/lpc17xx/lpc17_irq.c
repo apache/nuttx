@@ -1,8 +1,7 @@
 /****************************************************************************
  * arch/arm/src/lpc17/lpc17_irq.c
- * arch/arm/src/chip/lpc17_irq.c
  *
- *   Copyright (C) 2010-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -404,6 +403,7 @@ void up_disable_irq(int irq)
       lpc17_gpioirqdisable(irq);
     }
 #endif
+
   lpc17_dumpnvic("disable", irq);
 }
 
@@ -437,21 +437,20 @@ void up_enable_irq(int irq)
       lpc17_gpioirqenable(irq);
     }
 #endif
+
   lpc17_dumpnvic("enable", irq);
 }
 
 /****************************************************************************
- * Name: up_maskack_irq
+ * Name: up_ack_irq
  *
  * Description:
- *   Mask the IRQ and acknowledge it
+ *   Acknowledge the IRQ
  *
  ****************************************************************************/
 
-void up_maskack_irq(int irq)
+void up_ack_irq(int irq)
 {
-  up_disable_irq(irq);
-
 #if 0 /* Does not appear to be necessary in most cases */
   lpc17_clrpend(irq);
 #endif

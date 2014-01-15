@@ -1,7 +1,7 @@
 /****************************************************************************
  * common/up_internal.h
  *
- *   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -313,15 +313,15 @@ void up_systemreset(void) noreturn_function;
 /* Interrupt handling *******************************************************/
 
 void up_irqinitialize(void);
-void up_maskack_irq(int irq);
 
 /* Exception handling logic unique to the Cortex-M family */
 
 #if defined(CONFIG_ARCH_CORTEXM0) || defined(CONFIG_ARCH_CORTEXM3) || \
     defined(CONFIG_ARCH_CORTEXM4)
 
-/* Interrupt dispatch */
+/* Interrupt acknowledge and dispatch */
 
+void up_ack_irq(int irq);
 uint32_t *up_doirq(int irq, uint32_t *regs);
 
 /* Exception Handlers */
@@ -341,8 +341,9 @@ int  up_memfault(int irq, FAR void *context);
 
 #elif defined(CONFIG_ARCH_CORTEXA5) || defined(CONFIG_ARCH_CORTEXA8)
 
-/* Interrupt dispatch */
+/* Interrupt acknowledge and dispatch */
 
+void up_maskack_irq(int irq);
 uint32_t *arm_doirq(int irq, uint32_t *regs);
 
 /* Paging support */
@@ -365,8 +366,9 @@ uint32_t *arm_undefinedinsn(uint32_t *regs);
 
 #else /* ARM7 | ARM9 */
 
-/* Interrupt dispatch */
+/* Interrupt acknowledge and dispatch */
 
+void up_maskack_irq(int irq);
 void up_doirq(int irq, uint32_t *regs);
 
 /* Paging support (and exception handlers) */

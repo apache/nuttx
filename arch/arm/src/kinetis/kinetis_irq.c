@@ -1,6 +1,5 @@
 /****************************************************************************
  * arch/arm/src/lpc17/kinetis_irq.c
- * arch/arm/src/chip/kinetis_irq.c
  *
  *   Copyright (C) 2011, 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -478,17 +477,15 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_maskack_irq
+ * Name: up_ack_irq
  *
  * Description:
- *   Mask the IRQ and acknowledge it
+ *  Acknowledge the IRQ
  *
  ****************************************************************************/
 
-void up_maskack_irq(int irq)
+void up_ack_irq(int irq)
 {
-  up_disable_irq(irq);
-
 #if 0 /* Does not appear to be necessary in most cases */
   kinetis_clrpend(irq);
 #endif
