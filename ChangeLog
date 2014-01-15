@@ -6463,5 +6463,6 @@
 	  is not really important because up_disable_irq() is not really used
 	  for that purpose.  But some spurions STM32 ADC interrupts have been
 	  reported to me and this turned out to be the cause in that case.  My
-	  concern not that up_disable_irq() works is that there may now be
-	  unmasked bugs that leave devices in the disabled state? (2014-1-15).
+	  concern now that up_disable_irq() works is that there may now be
+	  unmasked bugs that leave devices in the disabled state?  Thanks to
+	  Manuel Stühn for the tip(2014-1-15).

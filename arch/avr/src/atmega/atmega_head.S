@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr32/src/atmega/atmega_head.S
+ * arch/avr/src/atmega/atmega_head.S
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

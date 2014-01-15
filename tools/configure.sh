@@ -193,14 +193,14 @@ fi
 
 # Okay... Everything looks good.  Setup the configuration
 
-install "${src_makedefs}" "${dest_makedefs}" || \
+install --mode=644 "${src_makedefs}" "${dest_makedefs}" || \
   { echo "Failed to copy \"${src_makedefs}\"" ; exit 7 ; }
 if [ "X${have_setenv}" = "Xy" ]; then
   install "${src_setenv}" "${dest_setenv}" || \
     { echo "Failed to copy ${src_setenv}" ; exit 8 ; }
   chmod 755 "${dest_setenv}"
 fi
-install "${src_config}" "${dest_config}" || \
+install --mode=644 "${src_config}" "${dest_config}" || \
   { echo "Failed to copy \"${src_config}\"" ; exit 9 ; }
 
 # If we did not use the CONFIG_APPS_DIR that was in the defconfig config file,
@@ -227,7 +227,7 @@ if [ ! -z "${appdir}" -a "X${newconfig}" != "Xy" ]; then
   if [ ! -r "${configpath}/appconfig" ]; then
     echo "NOTE: No readable appconfig file found in ${configpath}"
   else
-    install "${configpath}/appconfig" "${TOPDIR}/${posappdir}/.config" || \
+    install --mode=644 "${configpath}/appconfig" "${TOPDIR}/${posappdir}/.config" || \
       { echo "Failed to copy ${configpath}/appconfig" ; exit 10 ; }
   fi
 fi
