@@ -6447,9 +6447,21 @@
 	  done for all FAT types.  From Tridge via Lorenz Meier
 	  (2014-1-14).
 	* arch/arm/src/armv6-m/up_doirq.c and armv7-m/up_doirq.c and all
-	  implementations of up_mask_acq() for all Cortex-M architectures:  Do
+	  implementations of up_maskack_irq() for all Cortex-M architectures:  Do
 	  not disable and enable the IRQ on each interrupt.  Because (1)
 	  interrupts are already disabled on interrupt entry, (2) this
 	  interferes with controlling the IRQ interrrupt setting from interrupt
 	  handlers, and (3) up_disable_irq() does not work anyway so that this
 	  has never done anything (2014-1-15).
+	* All implementations of up_disable_irq() for all Cortex-M3 and M4
+	  architectures:  To enable an interrupt on the Cortex-M3/4 CPU, you
+	  need to set a bit in the ISER register.  To disable the interrupt, you
+	  need to set a bit in the ICER register.  Existing logic was trying to
+	  disable interrupts by clearing the bit in the ISER register.  That will
+	  not work; writing a '0' to the ISER register has no effect.  That
+	  means that up_disable_irq() was doing nothing!  It turns out that that
+	  is not really important because up_disable_irq() is not really used
+	  for that purpose.  But some spurions STM32 ADC interrupts have been
+	  reported to me and this turned out to be the cause in that case.  My
+	  concern not that up_disable_irq() works is that there may now be
+	  unmasked bugs that leave devices in the disabled state? (2014-1-15).

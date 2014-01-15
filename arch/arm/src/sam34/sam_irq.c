@@ -68,6 +68,13 @@
    NVIC_SYSH_PRIORITY_DEFAULT << 8  |\
    NVIC_SYSH_PRIORITY_DEFAULT)
 
+/* Given the address of a NVIC ENABLE register, this is the offset to
+ * the corresponding CLEAR ENABLE register.
+ */
+
+#define NVIC_ENA_OFFSET    (0)
+#define NVIC_CLRENA_OFFSET (NVIC_IRQ0_31_CLEAR - NVIC_IRQ0_31_ENABLE)
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -215,7 +222,8 @@ static inline void sam_prioritize_syscall(int priority)
  *
  ****************************************************************************/
 
-static int sam_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
+static int sam_irqinfo(int irq, uintptr_t *regaddr, uint32_t *bit,
+                       uintptr_t offset)
 {
   unsigned int extint = irq - SAM_IRQ_EXTINT;
 
@@ -228,36 +236,36 @@ static int sam_irqinfo(int irq, uint32_t *regaddr, uint32_t *bit)
 #if SAM_IRQ_NEXTINT <= 32
       if (extint < SAM_IRQ_NEXTINT)
         {
-           *regaddr = NVIC_IRQ0_31_ENABLE;
+           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << extint;
         }
       else
 #elif SAM_IRQ_NEXTINT <= 64
       if (extint < 32)
         {
-           *regaddr = NVIC_IRQ0_31_ENABLE;
+           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << extint;
         }
       else if (extint < SAM_IRQ_NEXTINT)
         {
-           *regaddr = NVIC_IRQ32_63_ENABLE;
+           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
            *bit     = 1 << (extint - 32);
         }
       else
 #elif SAM_IRQ_NEXTINT <= 96
       if (extint < 32)
         {
-           *regaddr = NVIC_IRQ0_31_ENABLE;
+           *regaddr = (NVIC_IRQ0_31_ENABLE + offset);
            *bit     = 1 << extint;
         }
       else if (extint < 64)
         {
-           *regaddr = NVIC_IRQ32_63_ENABLE;
+           *regaddr = (NVIC_IRQ32_63_ENABLE + offset);
            *bit     = 1 << (extint - 32);
         }
       else if (extint < SAM_IRQ_NEXTINT)
         {
-           *regaddr = NVIC_IRQ64_95_ENABLE;
+           *regaddr = (NVIC_IRQ64_95_ENABLE + offset);
            *bit     = 1 << (extint - 64);
         }
       else
@@ -450,16 +458,33 @@ void up_irqinitialize(void)
 
 void up_disable_irq(int irq)
 {
-  uint32_t regaddr;
+  uintptr_t regaddr;
   uint32_t regval;
   uint32_t bit;
 
-  if (sam_irqinfo(irq, &regaddr, &bit) == 0)
+  if (sam_irqinfo(irq, &regaddr, &bit, NVIC_CLRENA_OFFSET) == 0)
     {
-      /* Clear the appropriate bit in the register to enable the interrupt */
+      /* Modify the appropriate bit in the register to disable the interrupt */
 
       regval  = getreg32(regaddr);
-      regval &= ~bit;
+
+      /* This is awkward... For normal interrupts, we need to set the bit
+       * in the associated Interrupt Clear Enable register.  For other
+       * exceptions, we need to clear the bit in the System Handler Control
+       * and State Register.
+       */
+
+      if (irq >= SAM_IRQ_EXTINT)
+        {
+          regval |= bit;
+        }
+      else
+        {
+          regval &= ~bit;
+        }
+
+      /* Save the appropriately modified register */
+
       putreg32(regval, regaddr);
     }
 #ifdef CONFIG_GPIO_IRQ
@@ -483,11 +508,11 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-  uint32_t regaddr;
+  uintptr_t regaddr;
   uint32_t regval;
   uint32_t bit;
 
-  if (sam_irqinfo(irq, &regaddr, &bit) == 0)
+  if (sam_irqinfo(irq, &regaddr, &bit, NVIC_ENA_OFFSET) == 0)
     {
       /* Set the appropriate bit in the register to enable the interrupt */
 
