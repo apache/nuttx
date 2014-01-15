@@ -159,7 +159,6 @@ endif # NET_TCP_READAHEAD
 config NET_TCP_WRITE_BUFFERS
 	bool "Enabled TCP/IP write buffering"
 	default n
-	depends on EXPERIMENTAL
 	---help---
 		Write buffers allows buffering of ongoing TCP/IP packets, providing
 		for higher performance, streamed output.

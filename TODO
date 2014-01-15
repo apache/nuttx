@@ -15,7 +15,7 @@ nuttx/
  (11)  Kernel Build
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
- (16)  Network (net/, drivers/net)
+ (17)  Network (net/, drivers/net)
   (4)  USB (drivers/usbdev, drivers/usbhost)
  (11)  Libraries (libc/, )
  (12)  File system/Generic drivers (fs/, drivers/)
@@ -828,14 +828,24 @@ o Network (net/, drivers/net)
                RX interrupts when throttled and re-anable on each poll time.
                recvfrom would, of course, have to un-throttle.
   Status:      Open.  This is just a thought experiment.  No changes are planned.
-  Priority:    Medium
+  Priority:    Low.  This is not a bug but an enhancement idea.
+
+  Title:       COMMON TCP BUFFERING
+  Description: TCP read-ahead logic and TCP write buffering logic use a
+               separate set of packet buffers.  It seems like more efficient
+               use of the buffering would be had if a common pool of packet
+               buffers were used for both read-ahead and write buffering.
+               This would probably depend on having READ-AHEAD THROTTLING to
+               prevent run-awary read-ahead logic from consuming all buffers.
+  Status:      Open.  This is just a thought experiment.  No changes are planned.
+  Priority:    Low.  This is not a bug but an enhancement idea.
 
   Title:       STANDARDIZE ETHERNET DRIVER STATISTICS
   Description: Need to standardize collection of statistics from network
                drivers.  apps/nshlib ifconfig command should present
                statistics.
   Status:      Open
-  Priority:    Low
+  Priority:    Low.  This is not a bug but an enhancement idea.
 
   Title:       CONCURRENT TCP SEND OPERATIONS
   Description: At present, there cannot be two concurrent active TCP send
