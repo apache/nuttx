@@ -404,28 +404,22 @@ void up_disable_irq(int irq)
 
   if (lm_irqinfo(irq, &regaddr, &bit, NVIC_CLRENA_OFFSET) == 0)
     {
-      /* Modify the appropriate bit in the register to disable the interrupt */
-
-      regval  = getreg32(regaddr);
-
-      /* This is awkward... For normal interrupts, we need to set the bit
-       * in the associated Interrupt Clear Enable register.  For other
-       * exceptions, we need to clear the bit in the System Handler Control
-       * and State Register.
+      /* Modify the appropriate bit in the register to disable the interrupt.
+       * For normal interrupts, we need to set the bit in the associated
+       * Interrupt Clear Enable register.  For other exceptions, we need to
+       * clear the bit in the System Handler Control and State Register.
        */
 
       if (irq >= LM_IRQ_INTERRUPTS)
         {
-          regval |= bit;
+          putreg32(bit, regaddr);
         }
       else
         {
+          regval  = getreg32(regaddr);
           regval &= ~bit;
+          putreg32(regval, regaddr);
         }
-
-      /* Save the appropriately modified register */
-
-      putreg32(regval, regaddr);
     }
 
   lm_dumpnvic("disable", irq);
@@ -447,11 +441,22 @@ void up_enable_irq(int irq)
 
   if (lm_irqinfo(irq, &regaddr, &bit, NVIC_ENA_OFFSET) == 0)
     {
-      /* Set the appropriate bit in the register to enable the interrupt */
+      /* Modify the appropriate bit in the register to enable the interrupt.
+       * For normal interrupts, we need to set the bit in the associated
+       * Interrupt Set Enable register.  For other exceptions, we need to
+       * set the bit in the System Handler Control and State Register.
+       */
 
-      regval  = getreg32(regaddr);
-      regval |= bit;
-      putreg32(regval, regaddr);
+      if (irq >= LM_IRQ_INTERRUPTS)
+        {
+          putreg32(bit, regaddr);
+        }
+      else
+        {
+          regval  = getreg32(regaddr);
+          regval |= bit;
+          putreg32(regval, regaddr);
+        }
     }
 
   lm_dumpnvic("enable", irq);
