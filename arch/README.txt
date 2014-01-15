@@ -234,7 +234,7 @@ arch/avr
     MCU families.  STATUS:  Under development.
 
     arch/avr/include/avr and arch/avr/src/avr
-      Common support for all 8-bit VR MCUs
+      Common support for all 8-bit AVR MCUs
 
     arch/avr/include/atmega and arch/avr/src/atmega
       Support specifically for the AVR ATMega family (specifically only for
