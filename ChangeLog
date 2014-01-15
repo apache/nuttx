@@ -6442,3 +6442,8 @@
 	* net/net_close.c:  If CONFIG_NET_TCP_WRITE_BUFFERS is selected,
 	  then it is necessary to free the write buffere callback structure
 	  when the socket is closed (2014-1-14).
+	* fs/fat/fs_fat32.c:  Fix some root directory logic that was
+	  conditionally done only for FAT 32.  Apparently this needs to
+	  done for all FAT types.  From Tridge via Lorenz Meier
+	  (2014-1-14).
+
