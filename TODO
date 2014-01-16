@@ -1236,6 +1236,20 @@ o File system / Generic drivers (fs/, drivers/)
                insensitivity to upper/lowercase file names seem to be not
                consistent in our usage - which can result in creating two
                directories with the same name..."
+
+               Example using NSH:
+
+                 nsh> echo "Test1" >/tmp/AtEsT.tXt
+                 nsh> echo "Test2" >/tmp/aTeSt.TxT
+                 nsh> ls /tmp
+                 /tmp:
+                  AtEsT.tXt
+                  aTeSt.TxT
+                 nsh> cat /tmp/aTeSt.TxT
+                 Test2 
+                 nsh> cat /tmp/AtEsT.tXt
+                 Test1 
+
   Status:      Open
   Priority:    Low
 
