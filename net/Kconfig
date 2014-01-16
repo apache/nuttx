@@ -84,10 +84,20 @@ endif # NET_SOCKOPTS
 
 config NET_BUFSIZE
 	int "Network packet size"
-	default 562 if !NET_SLIP
-	default 296 if NET_SLIP
+	default 1294 if !NET_SLIP && NET_IPv6
+	default 590 if !NET_SLIP && !NET_IPv6
+	default 296 if NET_SLIP && !NET_IPv6
 	---help---
-		uIP buffer size.  Default: 562
+		uIP buffer size.  This size includes the size of TCP/UDP header,
+		the IP header, and the Ethernet header (assuming that the Ethernet
+		transport is used.
+
+		IPv4 hosts are required to be able to handle an MSS of at least
+		536 octets, resulting in a minimum buffer size of 536+20+20+14 =
+		590 (For SLIP 256+20+20 = 296).
+
+		IPv6 hosts are required to be able to handle an MSS of 1220 octets,
+		resulting in a minimum buffer size of of 1220+20+40+14 = 1294
 
 config NET_TCPURGDATA
 	bool "Urgent data"
@@ -135,14 +145,23 @@ if NET_TCP_READAHEAD
 
 config NET_TCP_READAHEAD_BUFSIZE
 	int "TCP/IP read-ahead buffer size"
-	default 562
+	default 1220 if !NET_SLIP && NET_IPv6
+	default 536 if !NET_SLIP && !NET_IPv6
+	default 256 if NET_SLIP && !NET_IPv6
 	---help---
 		Read-ahead buffers allows buffering of TCP/IP packets when there is no
 		receive in place to catch the TCP packet.  In that case, the packet
 		will be retained in the NuttX read-ahead buffers.
 
 		This setting specifies the size of one TCP/IP read-ahead buffer.
-		This should best be a equal to the maximum packet size (NET_BUFSIZE).
+		This should best be a equal to the maximum packet payload size (MSS).
+
+		Optimally, the size of the read-ahead buffer will should the maximum
+		size of an incoming TCP packet payload (MSS).  This MSS value is
+		determined by NET_BUFSIZE minus the size of TCP, IP, and Ethernet
+		headers (assuming you are using the Ethernet transport).  IPv4 hosts
+		are required to be able to handle an MSS of 536 octets and IPv6 hosts
+		are required to be able to handle an MSS of 1220 octets.
 
 config NET_NTCP_READAHEAD_BUFFERS
 	int "Number of TCP/IP read-ahead buffers"
@@ -170,10 +189,20 @@ if NET_TCP_WRITE_BUFFERS
 
 config NET_TCP_WRITE_BUFSIZE
 	int "TCP/IP write buffer size"
-	default 562
+	default 1220 if !NET_SLIP && NET_IPv6
+	default 536 if !NET_SLIP && !NET_IPv6
+	default 256 if NET_SLIP && !NET_IPv6
 	---help---
 		Write buffers allows buffering of ongoing TCP/IP packets, providing
 		for higher performance, streamed output.
+
+		The size of the write buffer will determine the maximum size of an
+		outgoing TCP packet payload (MSS).  This value should NOT exceed the
+		maximum MSS which is determined by NET_BUFSIZE minus the size of
+		TCP, IP, and Ethernet headers (assuming you are using the Ethernet
+		transport).   IPv4 hosts are required to be able to handle an MSS
+		of 536 octets and IPv6 hosts are required to be able to handle an
+		MSS of 1220 octets.
 
 		This setting specifies the size of one TCP/IP write buffer. This
 		should best be a equal to the maximum packet size (NET_BUFSIZE).
@@ -258,6 +287,7 @@ config NET_UDP
 		Enable or disable UDP networking support.
 
 if NET_UDP
+
 config NET_UDP_CHECKSUMS
 	bool "UDP checksums"
 	default n
@@ -292,7 +322,7 @@ config NET_RXAVAIL
 		NOTE:  If this option is enabled, the driver must support the
 		rxavail() method in the uip_driver_s structure.
 
-endif
+endif # NET_UDP
 endmenu
 
 config NET_ICMP
@@ -304,6 +334,7 @@ config NET_ICMP
 		for sending replies to received ECHO (ping) requests.
 
 if NET_ICMP
+
 config NET_ICMP_PING
 	bool "ICMP ping interfaces"
 	default n
@@ -317,7 +348,7 @@ config NET_PINGADDRCONF
 	---help---
 		Use "ping" packet for setting IP address
 
-endif
+endif # NET_ICMP
 
 config NET_IGMP
 	bool "IGMPv2 clientsupport"
@@ -327,6 +358,7 @@ config NET_IGMP
 		Enable IGMPv2 client support.
 
 if NET_IGMP
+
 config PREALLOC_IGMPGROUPS
 	int "Number of pre-allocated IGMP groups"
 	default 4
@@ -334,9 +366,7 @@ config PREALLOC_IGMPGROUPS
 		Pre-allocated IGMP groups are used only if needed from interrupt
 		level group created (by the IGMP server). Default: 4.
 
-endif
-
-if NET
+endif # NET_IGMP
 
 config NET_STATISTICS
 	bool "Collect network statistics"
@@ -346,12 +376,14 @@ config NET_STATISTICS
 
 config NET_RECEIVE_WINDOW
 	int "Receive window size"
-	default 562
+	default 1220 if !NET_SLIP && NET_IPv6
+	default 536 if !NET_SLIP && !NET_IPv6
+	default 256 if NET_SLIP && !NET_IPv6
 	---help---
 		The size of the advertised receiver's window.   Should be set low
-		(i.e., to the size of the NET_BUFSIZE) if the application is slow
-		to process incoming data, or high (32768 bytes) if the application
-		processes data quickly.
+		(i.e., to the size of the MSS) if the application is slow to process
+		incoming data, or high (32768 bytes) if the application processes
+		data quickly.
 
 config NET_ARPTAB_SIZE
 	int "ARP table size"
@@ -402,16 +434,15 @@ config NET_SLIP
 		defined in the NuttX configuration file, then SLIP will be supported.
 		The basic differences between the SLIP and Ethernet configurations is
 		that when SLIP is selected:
-		
-		* The link level header (that comes before the IP header) is omitted.
-		* All MAC address processing is suppressed.
-		* ARP is disabled.
-		
+
+			* The link level header (that comes before the IP header) is omitted.
+			* All MAC address processing is suppressed.
+			* ARP is disabled.
+
 		If NET_SLIP is not selected, then Ethernet will be used (there is
 		no need to define anything special in the configuration file to use
 		Ethernet -- it is the default).
 
-endif
 if NET_SLIP
 
 config SLIP_NINTERFACES
@@ -434,5 +465,5 @@ config SLIP_DEFPRIO
 	---help---
 		The priority of the SLIP RX and TX tasks. Default: 128
 
-endif
-endif
+endif # NET_SLIP
+endif # NET
