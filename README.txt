@@ -1248,6 +1248,8 @@ apps
  |   |  `- README.txt
  |   |- i2c
  |   |  `- README.txt
+ |   |- inifile
+ |   |  `- README.txt
  |   |- install
  |   |  `- README.txt
  |   |- nxplayer
