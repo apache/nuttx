@@ -870,6 +870,7 @@ config ARCH_BOARD_CUSTOM_DIR
 		"~/projects/myboard").
 
 config ARCH_BOARD
+	string
 	default "amber"               if ARCH_BOARD_AMBER
 	default "arduino-due"         if ARCH_BOARD_ARDUINO_DUE
 	default "avr32dev1"           if ARCH_BOARD_AVR32DEV1

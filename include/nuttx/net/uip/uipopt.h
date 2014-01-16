@@ -318,6 +318,12 @@
 #    define CONFIG_NET_TCP_WRITE_BUFSIZE UIP_TCP_MSS
 #  endif
 
+  /* The size of the write buffer should not exceed the maximum TCP MSS */
+
+#  if CONFIG_NET_TCP_WRITE_BUFSIZE > UIP_TCP_MSS
+#    error CONFIG_NET_TCP_WRITE_BUFSIZE must not exceed UIP_TCP_MSS
+#  endif
+
 #else
 #  undef CONFIG_NET_TCP_WRITE_BUFSIZE
 #  undef CONFIG_NET_NTCP_WRITE_BUFFERS
