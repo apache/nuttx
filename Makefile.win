@@ -56,7 +56,12 @@ KDEFINE = ${shell $(TOPDIR)\tools\define.bat "$(CC)" __KERNEL__}
 ARCH_DIR = arch\$(CONFIG_ARCH)
 ARCH_SRC = $(ARCH_DIR)\src
 ARCH_INC = $(ARCH_DIR)\include
-BOARD_DIR = configs\$(CONFIG_ARCH_BOARD)
+
+ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
+  BOARD_DIR = $(CONFIG_ARCH_BOARD_CUSTOM_DIR)
+else
+  BOARD_DIR = configs/$(CONFIG_ARCH_BOARD)
+endif
 
 # Add-on directories.  These may or may not be in place in the
 # NuttX source tree (they must be specifically installed)

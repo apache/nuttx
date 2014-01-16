@@ -6476,4 +6476,7 @@
 	  (1) it has a bad side effect in that the sub-directory setting
 	  no longer tracks the board setting, and (2) you still can't
 	  source the Kconfig file from the custom board directory (2014-1-16).
-
+	* Makefile.unix, Makefile.win, and configs/Kconfig:  After thinking a
+	  little harder, I re-implemented the backed-out custom configuration
+	  feature.  The new version does not have bad side-effect (1) (but stil
+	  has bad side-effect (2)) (2014-1-16).
