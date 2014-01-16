@@ -6468,3 +6468,8 @@
 	  Manuel Stühn for the tip(2014-1-15).
 	* libc: Move strtol(), strtoll, strtoul(), strtoull(), and strtod() from
 	  libc/string to libc/stdlib where they belong (2014-1-16).
+	* configs/Kconfig:  Board configuration sub-directory can now be
+	  specified.  The default need not be used.  This is really only
+	  useful when CONFIG_ARCH_BOARD_CUSTOM is selected and there is no
+	  meaningful default sub-directory (2014-1-16).
+
