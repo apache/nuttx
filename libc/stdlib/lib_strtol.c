@@ -1,7 +1,7 @@
 /****************************************************************************
- * /libc/string/lib_strtoull.c
+ * libc/stdlib/lib_strtol.c
  *
- *   Copyright (C) 2009, 2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 #include "lib_internal.h"
-
-#ifdef CONFIG_HAVE_LONG_LONG
 
 /****************************************************************************
  * Private Functions
@@ -55,19 +53,21 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: strtoull
+ * Name: strtol
  *
  * Description:
  *   The  strtol() function  converts  the initial part of the string in
- *   nptr to a long unsigned integer value according to the given base, which
- *   must be between 2 and 36 inclusive, or be the special value 0.
+ *   nptr to a long integer value according to the given base, which must be
+ *   between 2 and 36 inclusive, or be the special value 0.
+ *
+ * Warning: does not check for integer overflow!
  *
  ****************************************************************************/
  
-unsigned long long strtoull(const char *nptr, char **endptr, int base)
+long strtol(const char *nptr, char **endptr, int base)
 {
-  unsigned long long accum = 0;
-  int value;
+  unsigned long accum = 0;
+  bool negate = false;
 
   if (nptr)
     {
@@ -75,26 +75,30 @@ unsigned long long strtoull(const char *nptr, char **endptr, int base)
 
       lib_skipspace(&nptr);
 
-      /* Check for unspecified base */
+      /* Check for leading + or - */
 
-      base = lib_checkbase(base, &nptr);
-
-      /* Accumulate each "digit" */
-
-      while (lib_isbasedigit(*nptr, base, &value))
+      if (*nptr == '-')
         {
-            accum = accum*base + value;
-            nptr++;
+          negate = true;
+          nptr++;
+        }
+      else if (*nptr == '+')
+        {
+          nptr++;
         }
 
-      /* Return the final pointer to the unused value */
+      /* Get the unsigned value */
 
-      if (endptr)
+      accum = strtoul(nptr, endptr, base);
+
+      /* Correct the sign of the result */
+
+      if (negate)
         {
-          *endptr = (char *)nptr;
+          return -(long)accum;
         }
     }
-   return accum;
+
+  return (long)accum;
 }
-#endif
 

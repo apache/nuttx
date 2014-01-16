@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/string/lib_strtol.c
+ * libc/stdlib/lib_checkbase.c
  *
  *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -39,8 +39,8 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 #include "lib_internal.h"
 
@@ -53,51 +53,63 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: strtol
+ * Name: lib_checkbase
  *
  * Description:
- *   The  strtol() function  converts  the initial part of the string in
- *   nptr to a long integer value according to the given base, which must be
- *   between 2 and 36 inclusive, or be the special value 0.
+ *   This is part of the strol() family implementation.  This function checks
+ *   the initial part of a string to see if it can determine the numeric
+ *   base that is represented.
  *
- * Warning: does not check for integer overflow!
+ * Assumptions:
+ *   *ptr points to the first, non-whitespace character in the string.
  *
  ****************************************************************************/
  
-long strtol(const char *nptr, char **endptr, int base)
+int lib_checkbase(int base, FAR const char **pptr)
 {
-  unsigned long accum = 0;
-  bool negate = false;
+   const char *ptr = *pptr;
 
-  if (nptr)
+  /* Check for unspecified base */
+
+  if (!base)
     {
-      /* Skip leading spaces */
+      /* Assume base 10 */
 
-      lib_skipspace(&nptr);
+      base = 10;
 
-      /* Check for leading + or - */
+      /* Check for leading '0' - that would signify octal or hex (or binary) */
 
-      if (*nptr == '-')
+      if (*ptr == '0')
         {
-          negate = true;
-          nptr++;
-        }
-      else if (*nptr == '+')
-        {
-          nptr++;
-        }
+          /* Assume octal */
 
-      /* Get the unsigned value */
+          base = 8;
+          ptr++;
 
-      accum = strtoul(nptr, endptr, base);
+          /* Check for hexadecimal */
 
-      /* Correct the sign of the result */
-
-      if (negate)
-        {
-          return -(long)accum;
+          if ((*ptr == 'X' || *ptr == 'x') && 
+              lib_isbasedigit(ptr[1], 16, NULL))
+            {
+              base = 16;
+              ptr++;
+            }
         }
     }
-  return (long)accum;
+
+  /* If it a hexadecimal representation, than discard any leading "0X" or "0x" */
+
+  else if (base == 16)
+    {
+      if (ptr[0] == '0' && (ptr[1] == 'X' || ptr[1] == 'x'))
+        {
+          ptr += 2;
+        }
+    }
+
+  /* Return the updated pointer and base */
+
+  *pptr = ptr;
+  return base;
 }
 

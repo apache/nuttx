@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/string/lib_strtod.c
+ * libc/stdlib/lib_strtod.c
  * Convert string to double
  *
  *   Copyright (C) 2002 Michael Ringgaard. All rights reserved.

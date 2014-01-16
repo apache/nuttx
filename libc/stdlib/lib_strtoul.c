@@ -1,5 +1,5 @@
 /****************************************************************************
- * /libc/string/lib_strtoul.c
+ * /libc/stdlib/lib_strtoul.c
  *
  *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -94,6 +94,6 @@ unsigned long strtoul(const char *nptr, char **endptr, int base)
         }
     }
 
-   return accum;
+  return accum;
 }
 

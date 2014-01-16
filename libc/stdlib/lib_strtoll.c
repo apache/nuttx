@@ -1,5 +1,5 @@
 /****************************************************************************
- * libc/string/lib_strtoll.c
+ * libc/stdlib/lib_strtoll.c
  *
  *   Copyright (C) 2009, 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -100,6 +100,7 @@ long long strtoll(const char *nptr, char **endptr, int base)
           return -(long long)accum;
         }
     }
+
   return (long long)accum;
 }
 

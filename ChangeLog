@@ -6466,3 +6466,5 @@
 	  concern now that up_disable_irq() works is that there may now be
 	  unmasked bugs that leave devices in the disabled state?  Thanks to
 	  Manuel Stühn for the tip(2014-1-15).
+	* libc: Move strtol(), strtoll, strtoul(), strtoull(), and strtod() from
+	  libc/string to libc/stdlib where they belong (2014-1-16).

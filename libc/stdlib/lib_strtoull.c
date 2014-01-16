@@ -1,7 +1,7 @@
 /****************************************************************************
- * libc/string/lib_checkbase.c
+ * /libc/stdlib/lib_strtoull.c
  *
- *   Copyright (C) 2007, 2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009, 2010 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,11 +38,13 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-#include <string.h>
-#include <ctype.h>
+#include <stdlib.h>
 
 #include "lib_internal.h"
+
+#ifdef CONFIG_HAVE_LONG_LONG
 
 /****************************************************************************
  * Private Functions
@@ -53,63 +55,46 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_checkbase
+ * Name: strtoull
  *
  * Description:
- *   This is part of the strol() family implementation.  This function checks
- *   the initial part of a string to see if it can determine the numeric
- *   base that is represented.
- *
- * Assumptions:
- *   *ptr points to the first, non-whitespace character in the string.
+ *   The  strtol() function  converts  the initial part of the string in
+ *   nptr to a long unsigned integer value according to the given base, which
+ *   must be between 2 and 36 inclusive, or be the special value 0.
  *
  ****************************************************************************/
  
-int lib_checkbase(int base, const char **pptr)
+unsigned long long strtoull(const char *nptr, char **endptr, int base)
 {
-   const char *ptr = *pptr;
+  unsigned long long accum = 0;
+  int value;
 
-  /* Check for unspecified base */
-
-  if (!base)
+  if (nptr)
     {
-      /* Assume base 10 */
+      /* Skip leading spaces */
 
-      base = 10;
+      lib_skipspace(&nptr);
 
-      /* Check for leading '0' - that would signify octal or hex (or binary) */
+      /* Check for unspecified base */
 
-      if (*ptr == '0')
+      base = lib_checkbase(base, &nptr);
+
+      /* Accumulate each "digit" */
+
+      while (lib_isbasedigit(*nptr, base, &value))
         {
-          /* Assume octal */
+            accum = accum*base + value;
+            nptr++;
+        }
 
-          base = 8;
-          ptr++;
+      /* Return the final pointer to the unused value */
 
-          /* Check for hexidecimal */
-
-          if ((*ptr == 'X' || *ptr == 'x') && 
-              lib_isbasedigit(ptr[1], 16, NULL))
-            {
-              base = 16;
-              ptr++;
-            }
+      if (endptr)
+        {
+          *endptr = (char *)nptr;
         }
     }
-
-  /* If it a hexidecimal representation, than discard any leading "0X" or "0x" */
-
-  else if (base == 16)
-    {
-      if (ptr[0] == '0' && (ptr[1] == 'X' || ptr[1] == 'x'))
-        {
-          ptr += 2;
-        }
-    }
-
-  /* Return the updated pointer and base */
-
-  *pptr = ptr;
-  return base;
+   return accum;
 }
+#endif
 
