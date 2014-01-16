@@ -859,7 +859,7 @@ config ARCH_BOARD_CUSTOM
 endchoice
 
 config ARCH_BOARD
-	string
+	string "Board configuration sub-directory"
 	default "amber"               if ARCH_BOARD_AMBER
 	default "arduino-due"         if ARCH_BOARD_ARDUINO_DUE
 	default "avr32dev1"           if ARCH_BOARD_AVR32DEV1
@@ -947,6 +947,12 @@ config ARCH_BOARD
 	default "zkit-arm-1769"       if ARCH_BOARD_ZKITARM
 	default "sim"                 if ARCH_BOARD_SIM
 	default ""                    if ARCH_BOARD_CUSTOM
+	---help---
+		Select the board sub-directory name where the board logic resides under
+		the configs/ directory.  Normally, the default is the correct location
+		and you probably not want to change that.  However, if you have selected
+		ARCH_BOARD_CUSTOM, then you will need to tell the build system when
+		the board logic resides.
 
 comment "Common Board Options"
 
