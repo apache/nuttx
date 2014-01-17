@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: January 10, 2014</p>
+      <p>Last Updated: January 17, 2014</p>
     </td>
   </tr>
 </table>
@@ -52,25 +52,31 @@
 <tr>
   <td><br></td>
   <td>
-    <a href="#builtinvars">1.4 Built-In Variables</a>
+    <a href="#looping">1.4 Looping</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#currentwd">1.5 Current Working Directory</a>
+    <a href="#builtinvars">1.5 Built-In Variables</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#environvars">1.6 Environment Variables</a>
+    <a href="#currentwd">1.6 Current Working Directory</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <a href="#startupscript">1.7 NSH Start-Up Script</a>
+    <a href="#environvars">1.7 Environment Variables</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <a href="#startupscript">1.8 NSH Start-Up Script</a>
   </td>
 </tr>
 
@@ -605,7 +611,28 @@ fi
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="builtinvars"><h2>1.4 Built-In Variables</h2></a>
+    <a name="looping"><h2>1.4 Looping</h2></a>
+  </td>
+  </tr>
+</table>
+
+<p>
+  <code>while-do-done</code> and <code>until-do-done</code> looping constructs are also supported.
+  These works from the command line but are primarily intended for use within NSH scripts
+  (see the <a href="#cmdsh"><code>sh</code></a> command).
+  The syntax is as follows:
+</p>
+<ul><dl>
+  <dt><code>while &lt;test-cmd&gt;; do &lt;cmd-sequence&gt;; done</code></dt>
+  <dd>Execute <code>&lt;cmd-sequence&gt;</code> as long as <code>&lt;test-cmd&gt;</code> has an exit status of zero.</dd>
+  <dt><code>until &lt;test-cmd&gt;; do &lt;cmd-sequence&gt;; done</code></dt>
+  <dd>Execute <code>&lt;cmd-sequence&gt;</code> as long as <code>&lt;test-cmd&gt;</code> has a non-zero exit status.</dd>
+</dl></ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+  <td>
+    <a name="builtinvars"><h2>1.5 Built-In Variables</h2></a>
   </td>
   </tr>
 </table>
@@ -623,7 +650,7 @@ fi
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="currentwd"><h2>1.5 Current Working Directory</h2></a>
+    <a name="currentwd"><h2>1.6 Current Working Directory</h2></a>
   </td>
   </tr>
 </table>
@@ -641,7 +668,7 @@ fi
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="environvars"><h2>1.6 Environment Variables</h2></a>
+    <a name="environvars"><h2>1.7 Environment Variables</h2></a>
   </td>
   </tr>
 </table>
@@ -661,7 +688,7 @@ fi
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
-    <a name="startupscript"><h2>1.7 NSH Start-Up Script</h2></a>
+    <a name="startupscript"><h2>1.8 NSH Start-Up Script</h2></a>
   </td>
   </tr>
 </table>
