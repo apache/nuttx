@@ -84,14 +84,16 @@ config NET_SOLINGER
 endif # NET_SOCKOPTS
 
 config NET_BUFSIZE
-	int "Network packet buffer size"
+	int "Network packet buffer size (MTU)"
 	default 1294 if !NET_SLIP && NET_IPv6
 	default 590 if !NET_SLIP && !NET_IPv6
 	default 296 if NET_SLIP && !NET_IPv6
 	---help---
-		uIP buffer size.  This size includes the size of TCP/UDP header,
-		the IP header, and the Ethernet header (assuming that the Ethernet
-		transport is used.
+		Packet buffer size.  This size includes the TCP/UDP payload plus the
+		size of TCP/UDP header, the IP header, and the Ethernet header
+		(assuming that the Ethernet transport is used).  This value is
+		normally referred to as the MTU (Maximum Transmission Unit); the
+		payload is the MSS (Maximum Segment Size).
 
 		IPv4 hosts are required to be able to handle an MSS of at least
 		536 octets, resulting in a minimum buffer size of 536+20+20+14 =
