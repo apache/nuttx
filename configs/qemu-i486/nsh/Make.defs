@@ -1,7 +1,7 @@
 ############################################################################
 # configs/qemu-i486/nsh/Make.defs
 #
-#   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -69,11 +69,10 @@ ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow
 ARCHDEFINES =
 
-ifeq ($(HOSTOS),FreeBSD)
-  HOST_ARCH     = ${shell uname -m 2>/dev/null || echo "Other"}
-  ifeq ($(HOST_ARCH),amd64)
-    ARCHCPUFLAGS += -m32
-  endif
+# Check if building a 32-bit target with a 64-bit toolchain
+
+ifeq ($(ARCH_X86_M32),y)
+ARCHCPUFLAGS += -m32
 endif
 
 # We have to use a cross-development toolchain under Cygwin because the native
@@ -104,7 +103,6 @@ EXEEXT = .elf
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
-
 
 MKDEP = $(TOPDIR)/tools/mkdeps.sh
 

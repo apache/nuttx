@@ -6480,3 +6480,7 @@
 	  little harder, I re-implemented the backed-out custom configuration
 	  feature.  The new version does not have bad side-effect (1) (but stil
 	  has bad side-effect (2)) (2014-1-16).
+	* arch/x86/Kconfig and configs/qemu-i486/nsh/Make.defs and
+	  ostest/Make.defs:  Add a configuration option to select the -m32
+	  compiler option when building for a 32-bit target on a native 64-bit
+	  compiler (2014-1-18).
