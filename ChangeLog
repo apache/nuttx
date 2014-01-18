@@ -6484,3 +6484,5 @@
 	  ostest/Make.defs:  Add a configuration option to select the -m32
 	  compiler option when building for a 32-bit target on a native 64-bit
 	  compiler (2014-1-18).
+	* include/ctype.h: Typo in macro name: iscntrol, not iscontrol (2104-1-17)
+
