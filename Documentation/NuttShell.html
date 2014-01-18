@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: January 17, 2014</p>
+      <p>Last Updated: January 18, 2014</p>
     </td>
   </tr>
 </table>
@@ -616,7 +616,7 @@ fi
   </tr>
 </table>
 
-<p>
+<p><b>Looping Constructs</b>.
   <code>while-do-done</code> and <code>until-do-done</code> looping constructs are also supported.
   These work from the command line but are primarily intended for use within NSH scripts
   (see the <a href="#cmdsh"><code>sh</code></a> command).
@@ -646,7 +646,13 @@ done
 </pre></ul>
     </p>
   </li>
-</dl></ul>
+</ul>
+
+<p><b>The <code>break</code> Command</b>.
+  A <code>break</code> command is also supported.
+  The <code>break</code> command is only valid within the body of the a while or until loop, between the <code>do</code> and <code>done</code> tokens.
+  If the <code>break</code> command is executed within the body of a loop, the loop will immediately terminate and execution will continue with the next command immediately following the <code>done</code> token.
+<p>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -2800,6 +2806,20 @@ set FOOBAR ABC_${FOO}_${BAR}
     </td>
   </tr>
   <tr>
+    <td valign="top"><b><code>CONFIG_NSH_DISABLE_ITEF</code></b></td>
+    <td>
+      If scripting is enabled, then then this option can be selected to suppress support for <code>if-then-else-fi</code> sequences in scripts.
+      This would only be set on systems where some minimal scripting is required but <code>if-then-else-fi</code> is not.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top"><b><code>CONFIG_NSH_DISABLE_LOOPS</code></b></td>
+    <td>
+     If scripting is enabled, then then this option can be selected suppress support <code>for while-do-done</code> and <code>until-do-done</code> sequences in scripts.
+     This would only be set on systems where some minimal scripting is required but looping is not.
+    </td>
+  </tr>
+  <tr>
     <td valign="top"><b><code>CONFIG_NSH_DISABLEBG</code></b></td>
     <td>
       This can be set to <i>y</i> to suppress support for background
@@ -3979,7 +3999,7 @@ mount -t vfat /dev/ram1 /tmp
 </table>
 
 <table width="100%">
-<tr><td width="50%">
+<tr><td width="33%" valign="top">
 <ul>
   <li><a href="#builtinvars"><code>$?</code></a></li>
   <li><a href="#cmdtest"><code>[</code></a></li>
@@ -3991,6 +4011,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmdoverview">Background commands</a></li>
   <li><a href="#cmdoverview">Background command priority</a></li>
   <li><a href="#custapps"><code>binfs</code></a></li>
+  <li><a href="#looping"><code>break</code></a></li>
   <li><a href="#custapps">Built-In applications</a></li>
   <li><a href="#custapps">Built-In application start-up <code>main()</code></a></li>
   <li><a href="#builtinvars">Built-in variables</a></li>
@@ -4011,12 +4032,17 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#custinit"><code>CONFIG_NFILE_DESCRIPTORS</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ARCHINIT</code></a></li>
   <li><a href="#custinit"><code>CONFIG_NSH_ARCHROMFS</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_ARGCAT</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_BUILTIN_APPS</code></a></li>
   <li><a href="#custapps"><code>CONFIG_NSH_BUILTIN_APPS</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_CMDPARMS</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_CONSOLE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_DHCPC</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_DISABLEBG</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_DISABLE_ITEF</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_DISABLE_LOOPS</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_DISABLESCRIPT</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_DISABLE_SEMICOLON</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_DRIPADDR</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_FATDEVNO</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_FATMOUNTPT</code></a></li>
@@ -4031,6 +4057,9 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_NESTDEPTH</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_NETMASK</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_NOMAC</code></a></li>
+</ul></td>
+<td width="33%" valign="top">
+<ul>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSDEVNO</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSETC</code></a></li>
   <li><a href="#custinit"><code>CONFIG_NSH_ROMFSETC</code></a></li>
@@ -4039,6 +4068,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSSECTSIZE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_STRERROR</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_TELNET</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_TMPDIR</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_USBCONDEV</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_USBCONSOLE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_UBSDEV_MINOR</code></a></li>
@@ -4060,10 +4090,10 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmddd"><code>dd</code></a></li>
   <li><a href="#cmdaddroute"><code>delroute</code></a></li>
   <li><a href="#cmddf"><code>df</code></a></li>
+  <li><a href="#looping"><code>do</code></a></li>
+  <li><a href="#looping"><code>done</code></a></li>
   <li><a href="#cmdecho"><code>echo</code></a></li>
   <li><a href="#environvars">Environment Variables</a></li>
-</ul></td>
-<td></ul>
   <li><a href="#startupscript"><code>/etc/init.d/rcS</code></a>
   <li><a href="#cmdexec"><code>exec</code></a></li>
   <li><a href="#custapps"><code>exec_builtin()</code></a></li>
@@ -4086,6 +4116,9 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmdmbhw"><code>mb</code></a></li>
   <li><a href="#cmdmd5">md5</a></li>
   <li><a href="#cmdmbhw"><code>mh</code></a></li>
+</ul></td>
+<td width="34%" valign="top">
+<ul>
   <li><a href="#cmdmbhw"><code>mw</code></a></li>
   <li><a href="#cmdmkdir"><code>mkdir</code></a></li>
   <li><a href="#cmdmkfatfs"><code>mkfatfs</code></a></li>
@@ -4130,15 +4163,17 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#custinit">Start-up script</a></li>
   <li><a href="#custapps">Synchronous built-in applications</a></li>
   <li><a href="#cmdtest"><code>test</code></a></li>
+  <li><a href="#custonshlib"><code>up_cxxinitialize()</code></a></li>
   <li><a href="#cmdunmount"><code>umount</code></a></li>
   <li><a href="#cmdunset"><code>unset</code></a></li>
-  <li><a href="#custonshlib"><code>up_cxxinitialize()</code></a></li>
+  <li><a href="#looping"><code>until</code></a></li>
   <li><a href="#custinit"><code>up_nsh.c</code></a></li>
   <li><a href="#cmdurldec"><code>urldecode</code></a></li>
   <li><a href="#cmdurlencode"><code>urlencode</code></a></li>
   <li><a href="#cmdusleep"><code>usleep</code></a></li>
   <li><a href="#custapps"><code>waitpid()</code></a></li>
   <li><a href="#cmdwget"><code>wget</code></a></li>
+  <li><a href="#looping"><code>while</code></a></li>
   <li><a href="#cmdxd"><code>xd</code></a></li>
   <li><a href="#custinit"><code>xxd</code></a></li>
 </ul></td>
