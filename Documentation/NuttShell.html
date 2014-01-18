@@ -618,15 +618,34 @@ fi
 
 <p>
   <code>while-do-done</code> and <code>until-do-done</code> looping constructs are also supported.
-  These works from the command line but are primarily intended for use within NSH scripts
+  These work from the command line but are primarily intended for use within NSH scripts
   (see the <a href="#cmdsh"><code>sh</code></a> command).
-  The syntax is as follows:
 </p>
-<ul><dl>
-  <dt><code>while &lt;test-cmd&gt;; do &lt;cmd-sequence&gt;; done</code></dt>
-  <dd>Execute <code>&lt;cmd-sequence&gt;</code> as long as <code>&lt;test-cmd&gt;</code> has an exit status of zero.</dd>
-  <dt><code>until &lt;test-cmd&gt;; do &lt;cmd-sequence&gt;; done</code></dt>
-  <dd>Execute <code>&lt;cmd-sequence&gt;</code> as long as <code>&lt;test-cmd&gt;</code> has a non-zero exit status.</dd>
+<ul>
+  <li>
+    <p><b><code>while-do-done</code></b>.
+    Execute <code>[sequence of &lt;cmd&gt;]</code> as long as <code>&lt;cmd&gt;</code> has an exit status of zero.
+    The syntax is as follows:
+    <ul><pre>
+while &lt;cmd&gt;
+do
+  [sequence of &lt;cmd&gt;]
+done
+</pre></ul>
+    </p>
+  </li>
+  <li>
+    <p><b><code>until-do-done</code></b>
+    Execute <code>[sequence of &lt;cmd&gt;]</code> as long as <code>&lt;cmd&gt;</code> has a non-zero exit status.
+    The syntax is as follows:
+    <ul><pre>
+while &lt;cmd&gt;
+do
+  [sequence of &lt;cmd&gt;]
+done
+</pre></ul>
+    </p>
+  </li>
 </dl></ul>
 
 <table width ="100%">
