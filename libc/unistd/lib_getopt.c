@@ -264,6 +264,10 @@ int getopt(int argc, FAR char *const argv[], FAR const char *optstring)
         return noarg_ret;
     }
 
+  /* Restore the initial, uninitialized state */
+
   g_binitialized = false;
+  optind = 1;
+  optopt = '?';
   return ERROR;
 }
