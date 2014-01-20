@@ -182,6 +182,17 @@
 #define VT52_IDENT           {ASCII_ESC, 'Z'}                 /* Identify what the terminal is */
 #define VT52_IDENTRESP       {ASCII_ESC, '/', 'Z'}            /* Correct response to ident */
 
+/* Format strings for VT100 sequences that require numeric arguments */
+
+#define VT100_FMT_SETWIN     "\033[%d;%dr"                    /* Set top and bottom line#s of a window */
+#define VT100_FMT_CURSORUP   "\033[%dA"                       /* Move cursor up n lines */
+#define VT100_FMT_CURSORDN   "\033[%dB"                       /* Move cursor down n lines */
+#define VT100_FMT_CURSORRT   "\033[%dC"                       /* Move cursor right n lines */
+#define VT100_FMT_CURSORLF   "\033[%dD"                       /* Move cursor left n lines */
+#define VT100_FMT_CURSORPOS  "\033[%d;%dH"                    /* Move cursor to screen location v,h */
+#define VT100_FMT_HVPOS      "\033[%d;%df"                    /* Move cursor to screen location v,h */
+#define VT52_FMT_CURSORPOS   "\033%d%d"                       /* Move cursor to v,h location */
+
 /* VT100 Special Key Codes
  *
  * These are sent from the terminal back to the computer when the particular
@@ -195,7 +206,6 @@
 #define VT100_PF2            {ASCII_ESC, 'O', 'Q'}
 #define VT100_PF3            {ASCII_ESC, 'O', 'R'}
 #define VT100_PF4            {ASCII_ESC, 'O', 'S'}
-
 
 /* Arrow keys */
 
