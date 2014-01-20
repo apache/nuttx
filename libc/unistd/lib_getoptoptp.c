@@ -70,4 +70,3 @@ int *getoptoptp(void)
 {
   return &optopt;
 }
-

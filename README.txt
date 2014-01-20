@@ -43,7 +43,7 @@ Installing Cygwin
   for you.
 
      NOTE: NuttX can also be installed and built on a native Windows
-     system, but with some loss of tool functionality (see the
+     system, but with some potential tool-related issues (see the
      discussion "Native Windows Build" below).
 
   Some Cygwin installation tips:
@@ -765,9 +765,7 @@ Native Windows Build
   This capability should still be considered a work in progress because:
 
   (1) It has not been verfied on all targets and tools, and
-  (2) it still lacks some of the creature-comforts of the more mature environments
-      (like 'make menuconfig' support.  See the section "NuttX Configuration Tool
-      under DOS" above).
+  (2) it still lacks some of the creature-comforts of the more mature environments.
 
    There is an alternative to the setenv.sh script available for the Windows
    native environment: tools/configure.bat.  See tools/README.txt for additional
