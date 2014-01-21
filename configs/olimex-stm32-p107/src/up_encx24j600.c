@@ -79,6 +79,10 @@
 # error "Need CONFIG_STM32_SPI3 in the configuration"
 #endif
 
+#ifndef CONFIG_STM32_SPI3_REMAP
+# error "SPI should be remapped for UEXT use"
+#endif
+
 /* SPI Assumptions **********************************************************/
 
 #define ENCX24J600_SPI_PORTNO 3   /* On SPI1 */
