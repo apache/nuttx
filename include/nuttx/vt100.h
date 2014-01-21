@@ -86,15 +86,24 @@
 #define VT100_SETSS3         {ASCII_ESC, 'O'}                 /* Set single shift 3 */
 
 #define VT100_MODESOFF       {ASCII_ESC, '[', 'm'}            /* Turn off character attributes */
-#define VT100_MODESOFF_      {ASCII_ESC, '[', '0', 'm'}       /* Turn off character attributes */
+#define VT100_MODESOFF2      {ASCII_ESC, '[', '0', 'm'}       /* Turn off character attributes */
 #define VT100_BOLD           {ASCII_ESC, '[', '1', 'm'}       /* Turn bold mode on */
 #define VT100_LOWINT         {ASCII_ESC, '[', '2', 'm'}       /* Turn low intensity mode on */
 #define VT100_UNDERLINE      {ASCII_ESC, '[', '4', 'm'}       /* Turn underline mode on */
 #define VT100_BLINK          {ASCII_ESC, '[', '5', 'm'}       /* Turn blinking mode on */
 #define VT100_REVERSE        {ASCII_ESC, '[', '7', 'm'}       /* Turn reverse video on */
 #define VT100_INVISIBLE      {ASCII_ESC, '[', '8', 'm'}       /* Turn invisible text mode on */
+#define VT100_BOLDOFF        {ASCII_ESC, '[', '2', '2', 'm'}  /* Turn bold off */
+#define VT100_UNDERLINEOFF   {ASCII_ESC, '[', '2', '4', 'm'}  /* Turn underline off */
+#define VT100_BLINKOFF       {ASCII_ESC, '[', '2', '5', 'm'}  /* Turn blink off */
+#define VT100_REVERSEOFF     {ASCII_ESC, '[', '2', '7', 'm'}  /* Turn reverse video off */
 
 #define VT100_SETWIN(t,b)    {ASCII_ESC, '[', (t), ';', (b), 'r'} /* Set top and bottom line#s of a window */
+
+#define VT100_CURSOROFF      {ASCII_ESC, '[', '?', '2', '5', 'l'} /* Cursor OFF */
+#define VT100_CURSORON       {ASCII_ESC, '[', '?', '2', '5', 'h'} /* Cursor ON */
+#define VT100_CURSOROFF2     {ASCII_ESC, '[', '?', '5', '0', 'l'} /* Cursor OFF */
+#define VT100_CURSORON2      {ASCII_ESC, '[', '?', '5', '0', 'h'} /* Cursor ON */
 
 #define VT100_CURSORUP(n)    {ASCII_ESC, '[', (n), 'A'}       /* Move cursor up n lines */
 #define VT100_CURSORDN(n)    {ASCII_ESC, '[', (n), 'B'}       /* Move cursor down n lines */
