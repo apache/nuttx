@@ -150,7 +150,7 @@ static void ioctl_ifup(FAR struct uip_driver_s *dev)
     {
       /* Is the interface already up? */
 
-      if ((dev->d_flags & IFF_RUNNING) == 0)
+      if ((dev->d_flags & IFF_UP) == 0)
         {
           /* No, bring the interface up now */
 
@@ -158,7 +158,7 @@ static void ioctl_ifup(FAR struct uip_driver_s *dev)
             {
               /* Mark the interface as up */
 
-              dev->d_flags |= IFF_RUNNING;
+              dev->d_flags |= IFF_UP;
             }
         }
     }
@@ -172,7 +172,7 @@ static void ioctl_ifdown(FAR struct uip_driver_s *dev)
     {
       /* Is the interface already down? */
 
-      if ((dev->d_flags & IFF_RUNNING) != 0)
+      if ((dev->d_flags & IFF_UP) != 0)
         {
           /* No, take the interface down now */
 
@@ -180,7 +180,7 @@ static void ioctl_ifdown(FAR struct uip_driver_s *dev)
             {
               /* Mark the interface as down */
 
-              dev->d_flags &= ~IFF_RUNNING;
+              dev->d_flags &= ~IFF_UP;
             }
         }
     }
@@ -326,7 +326,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifrdev(req);
           if (dev)
             {
-              if (req->ifr_flags & IF_FLAG_IFUP)
+              if (req->ifr_flags & IFF_UP)
                 {
                   /* Yes.. bring the interface up */
 
@@ -335,7 +335,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
 
               /* Is this a request to take the interface down? */
 
-              else if (req->ifr_flags & IF_FLAG_IFDOWN)
+              else if (req->ifr_flags & IFF_DOWN)
                 {
                   /* Yes.. take the interface down */
 
@@ -352,22 +352,7 @@ static int netdev_ifrioctl(FAR struct socket *psock, int cmd,
           dev = netdev_ifrdev(req);
           if (dev)
             {
-              req->ifr_flags = 0;
-
-              /* Is the interface running? */
-
-              if (dev->d_flags & IFF_RUNNING)
-                {
-                  /* Yes.. report interface up */
-
-                  req->ifr_flags |= IF_FLAG_IFUP;
-                }
-              else
-                {
-                  /* No.. report interface down */
-
-                  req->ifr_flags |= IF_FLAG_IFDOWN;
-                }
+              req->ifr_flags = dev->d_flags;
             }
 
           ret = OK;

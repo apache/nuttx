@@ -252,7 +252,7 @@ struct uip_driver_s
  *       }
  */
 
-extern int uip_input(struct uip_driver_s *dev);
+int uip_input(struct uip_driver_s *dev);
 
 /* Polling of connections
  *
@@ -305,8 +305,19 @@ extern int uip_input(struct uip_driver_s *dev);
  */
 
 typedef int (*uip_poll_callback_t)(struct uip_driver_s *dev);
-extern int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback);
-extern int uip_timer(struct uip_driver_s *dev, uip_poll_callback_t callback, int hsec);
+int uip_poll(struct uip_driver_s *dev, uip_poll_callback_t callback);
+int uip_timer(struct uip_driver_s *dev, uip_poll_callback_t callback, int hsec);
+
+/* Carrier detection
+ * Call netdev_carrier_on when the carrier has become available and the device
+ * is ready to receive/transmit packets.
+ *
+ * Call detdev_carrier_off when the carrier disappeared and the device has moved
+ * into non operational state.
+ */
+
+int netdev_carrier_on(FAR struct uip_driver_s *dev);
+int netdev_carrier_off(FAR struct uip_driver_s *dev);
 
 /* By defining UIP_ARCH_CHKSUM, the architecture can replace up_incr32
  * with hardware assisted solutions.
@@ -321,7 +332,7 @@ extern int uip_timer(struct uip_driver_s *dev, uip_poll_callback_t callback, int
  * op16 - A 16-bit integer in host byte order.
  */
 
-extern void uip_incr32(uint8_t *op32, uint16_t op16);
+void uip_incr32(uint8_t *op32, uint16_t op16);
 
 /* Calculate the Internet checksum over a buffer.
  *
@@ -342,7 +353,7 @@ extern void uip_incr32(uint8_t *op32, uint16_t op16);
  * Return:  The Internet checksum of the buffer.
  */
 
-extern uint16_t uip_chksum(uint16_t *buf, uint16_t len);
+uint16_t uip_chksum(uint16_t *buf, uint16_t len);
 
 /* Calculate the IP header checksum of the packet header in d_buf.
  *
@@ -353,7 +364,7 @@ extern uint16_t uip_chksum(uint16_t *buf, uint16_t len);
  * buffer.
  */
 
-extern uint16_t uip_ipchksum(struct uip_driver_s *dev);
+uint16_t uip_ipchksum(struct uip_driver_s *dev);
 
 /* Calculate the TCP checksum of the packet in d_buf and d_appdata.
  *
@@ -368,10 +379,10 @@ extern uint16_t uip_ipchksum(struct uip_driver_s *dev);
  * to by d_appdata.
  */
 
-extern uint16_t uip_tcpchksum(struct uip_driver_s *dev);
+uint16_t uip_tcpchksum(struct uip_driver_s *dev);
 
-extern uint16_t uip_udpchksum(struct uip_driver_s *dev);
-extern uint16_t uip_icmpchksum(struct uip_driver_s *dev, int len);
+uint16_t uip_udpchksum(struct uip_driver_s *dev);
+uint16_t uip_icmpchksum(struct uip_driver_s *dev, int len);
 
 #endif /* __INCLUDE_NUTTX_NET_UIP_UIP_ARCH_H */
 

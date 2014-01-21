@@ -52,9 +52,10 @@
 #define IF_NAMESIZE     6   /* Newer naming standard */
 #define IFHWADDRLEN     6
 
-#define IFF_RUNNING     (1 << 0)
-#define IF_FLAG_IFUP    (1 << 0)
-#define IF_FLAG_IFDOWN  (2 << 0)
+#define IFF_DOWN        (1 << 0)
+#define IFF_UP          (1 << 1)
+#define IFF_RUNNING     (1 << 2)
+
 
 /*******************************************************************************************
  * Public Type Definitions

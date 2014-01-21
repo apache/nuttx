@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/net/encx24j600.c
  *
- *   Copyright (C) 2013 UVC Ingenieure. All rights reserved.
+ *   Copyright (C) 2013-1014 UVC Ingenieure. All rights reserved.
  *   Author: Max Holtzberg <mh@uvc.de>
  *
  * References:
@@ -208,7 +208,8 @@ enum enc_state_e
 {
   ENCSTATE_UNINIT = 0,                 /* The interface is in an uninitialized state */
   ENCSTATE_DOWN,                       /* The interface is down */
-  ENCSTATE_UP                          /* The interface is up */
+  ENCSTATE_UP,                         /* The interface is up */
+  ENCSTATE_RUNNING                     /* The interface is has a cable plugged in and is ready to use */
 };
 
 struct enc_descr_s
@@ -1241,8 +1242,6 @@ static void enc_linkstatus(FAR struct enc_driver_s *priv)
 {
   uint16_t regval;
 
-  nllvdbg("link status changed\n");
-
   /* Before transmitting the first packet after link establishment or
    * auto-negotiation, the MAC duplex configuration must be manually set to
    * match the duplex configuration of the PHY. To do this, configure
@@ -1251,19 +1250,30 @@ static void enc_linkstatus(FAR struct enc_driver_s *priv)
 
   regval = enc_rdreg(priv, ENC_ESTAT);
 
-  if (regval & ESTAT_PHYDPX)
+  if (regval & ESTAT_PHYLNK)
     {
-      /* Configure full-duplex */
+      if (regval & ESTAT_PHYDPX)
+        {
+          /* Configure full-duplex */
 
-      enc_wrreg(priv, ENC_MABBIPG, 0x15);
-      enc_bfs(priv, ENC_MACON2, MACON2_FULDPX);
+          enc_wrreg(priv, ENC_MABBIPG, 0x15);
+          enc_bfs(priv, ENC_MACON2, MACON2_FULDPX);
+        }
+      else
+        {
+          /* Configure half-duplex */
+
+          enc_wrreg(priv, ENC_MABBIPG, 0x12);
+          enc_bfc(priv, ENC_MACON2, MACON2_FULDPX);
+        }
+
+      netdev_carrier_on(&priv->dev);
+      priv->ifstate = ENCSTATE_RUNNING;
     }
   else
     {
-      /* Configure half-duplex */
-
-      enc_wrreg(priv, ENC_MABBIPG, 0x12);
-      enc_bfc(priv, ENC_MACON2, MACON2_FULDPX);
+      netdev_carrier_off(&priv->dev);
+      priv->ifstate = ENCSTATE_UP;
     }
 }
 
@@ -2175,10 +2185,7 @@ static int enc_ifup(struct uip_driver_s *dev)
   ret = enc_reset(priv);
   if (ret == OK)
     {
-
       enc_setmacaddr(priv);
-      /* enc_pwrfull(priv); */
-
 
       /* Enable interrupts at the ENCX24J600.  Interrupts are still disabled
        * at the interrupt controller.
@@ -2302,7 +2309,7 @@ static int enc_txavail(struct uip_driver_s *dev)
   /* Ignore the notification if the interface is not yet up */
 
   flags = irqsave();
-  if (priv->ifstate == ENCSTATE_UP)
+  if (priv->ifstate == ENCSTATE_RUNNING)
     {
       /* Check if the hardware is ready to send another packet.  The driver
        * starts a transmission process by setting ECON1.TXRTS. When the packet is
@@ -2735,11 +2742,19 @@ static int enc_reset(FAR struct enc_driver_s *priv)
   enc_wrreg(priv, ENC_MAMXFL, CONFIG_NET_BUFSIZE + 4);
 
   ret = enc_waitreg(priv, ENC_ESTAT, ESTAT_PHYLNK, ESTAT_PHYLNK);
+
+  if (ret == OK)
+    {
+      enc_linkstatus(priv);
+    }
+
+#if 0
   if (ret != OK)
     {
       nlldbg("ERROR: encx24j600 failed to establish link\n");
       return -ENODEV;
     }
+#endif
 
   return OK;
 }

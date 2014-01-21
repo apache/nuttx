@@ -6489,4 +6489,7 @@
 	  getopt() make like the optind variable in an undefined state (2014-1-20).
 	* configs/olimex-stm32-p107:  Failes to build is SPI3 for UEXT is not
 	  remapped.  From Max Holtzberg (2014-1-21).
+	* Several network related files:  Changes from Max Holtzberg to improve
+	  how network status is reported.  New controls to manage carrier
+	  detect.  (2014-1-21).
 
