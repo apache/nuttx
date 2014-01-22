@@ -6492,4 +6492,8 @@
 	* Several network related files:  Changes from Max Holtzberg to improve
 	  how network status is reported.  New controls to manage carrier
 	  detect.  (2014-1-21).
+	* configs/16z:  Add basic support for the 16z board. The 16z board is
+	  based on the ZiLOG ZNEOZ16F2811AL20EG part.  See
+	  https://github.com/toyaga/16z (2014-1-22)
 
+for further information.

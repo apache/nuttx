@@ -1,73 +1,202 @@
 README.txt
 ==========
 
-This is the README file for the NuttX port to the ZiLog ZNEO MCU.
+This is the README file for the NuttX port to the 16z board. The 16z board
+is based on the ZiLOG ZNEOZ16F2811AL20EG part.  See https://github.com/toyaga/16z
+for further information.
+
+Contents
+========
+
+  - GPIO Configuration
+  - ZDS-II Compiler Versions
+  - Serial Console
+  - LEDs
+  - RAM
+  - Selecting Configurations
+  - Configuration Sub-directories
+
+GPIO Configuration
+==================
+
+  --------------------------- ------ --------------------------------------------
+  GPIO                        SIGNAL On-Board Connections
+  --------------------------- ------ --------------------------------------------
+  PA0/T0IN/T0OUT/DMA0REQ      GP8    PS/2 / GPIO, Expansion slots
+  PA1/T0OUT/DMA0ACK           GP9    PS/2 / GPIO, Expansion slots
+  PA2/DE0/FAULTY              ~INTI  Power section, RF transceiver (1)
+  PA3/CTS0/FAULT0             ~INTX  Expansion slots
+  PA4/RXD0/CS1                RXD    MAX3232D RS-232
+  PA5/TXD0/CS2                TXD    MAX3232D RS-232
+  PA6/SCL/CS3                 SCL    RTC / UID, Expansion slots
+  PA7/SDA/CS4                 SDA    RTC / UID, Expansion slots
+  --------------------------- ------ --------------------------------------------
+  PB0/ANA0/T0IN0              GP0    Expansion slots
+  PB1/ANA1/T0IN1              GP1    Expansion slots
+  PB2/ANA2/T0IN2              GP2    Expansion slots
+  PB3/ANA3/OPOUT              GP3    Expansion slots
+  PB4/ANA4                    GP4    Expansion slots
+  PB5/ANA5                    GP5    Expansion slots
+  PB6/ANA6/OPINP/CINN         GP6    Expansion slots
+  PB7/ANA7/OPINN              GP7    Expansion slots
+  --------------------------- ------ --------------------------------------------
+  PC0/T1IN/T1OUT/DMA1REQ/CINN GP10   PS/2 / GPIO, Expansion slots
+  PC1/T1OUT/DMA1ACK/COMPOUT   GP11   PS/2 / GPIO, Expansion slots
+  PC2/SS/CS4                  ~EXP   Expansion slots
+  PC3/SCK/DMA2REQ             SCK    FT800Q, Serial memory (1), RF Transceiver (1),
+                                     Expansion slots, SD0, 1, and 2
+  PC4/MOSI/DMA2ACK            MOSI   FT800Q, Serial memory (1), RF Transceiver (1),
+                                     Expansion slots, SD0, 1, and 2
+  PC5/MISO/CS5                MISO   FT800Q, Serial memory (1), RF Transceiver (1),
+                                     Expansion slots, SD0, 1, and 2
+  PC6/T2IN/T2OUT/PWMH0        ~CTS   MAX3232D RS-232
+  PC7/T2OUT/PWML0             ~RTS   MAX3232D RS-232, Power section (?)
+  --------------------------- ------ --------------------------------------------
+  PD0/PWMH1/ADR20             A20    RAM, Expansion slots
+  PD1/PWML1/ADR21             A21    RAM, Expansion slots
+  PD2/PWMH2/ADR22             A22    RAM, Expansion slots
+  PD3/DE1/ADR16               A16    RAM, Expansion slots
+  PD4/RXD1/ADR18              A18    RAM, Expansion slots
+  PD5/TXD1/ADR19              A19    RAM, Expansion slots
+  PD6/CTS1/ADR17              A17    RAM, Expansion slots
+  PD7/PWML2/ADR23             A23    Expansion slots
+  --------------------------- ------ --------------------------------------------
+  PE0/DATA0                   D0     RAM, Expansion slots
+  PE1/DATA1                   D1     RAM, Expansion slots
+  PE2/DATA2                   D2     RAM, Expansion slots
+  PE3/DATA3                   D3     RAM, Expansion slots
+  PE4/DATA4                   D4     RAM, Expansion slots
+  PE5/DATA5                   D5     RAM, Expansion slots
+  PE6/DATA6                   D6     RAM, Expansion slots
+  PE7/DATA7                   D7     RAM, Expansion slots
+  --------------------------- ------ --------------------------------------------
+  PF0/ADR0                    A0     Expansion slots
+  PF1/ADR1                    A1     RAM, Expansion slots
+  PF2/ADR2                    A2     RAM, Expansion slots
+  PF3/ADR3                    A3     RAM, Expansion slots
+  PF4/ADR4                    A4     RAM, Expansion slots
+  PF5/ADR5                    A5     RAM, Expansion slots
+  PF6/ADR6                    A6     RAM, Expansion slots
+  PF7/ADR7                    A7     RAM, Expansion slots
+  --------------------------- ------ --------------------------------------------
+  PG0/ADR0                    A8     RAM, Expansion slots
+  PG1/ADR0                    A9     RAM, Expansion slots
+  PG2/ADR0                    A10    RAM, Expansion slots
+  PG3/ADR0                    A11    RAM, Expansion slots
+  PG4/ADR0                    A12    RAM, Expansion slots
+  PG5/ADR0                    A13    RAM, Expansion slots
+  PG6/ADR0                    A14    RAM, Expansion slots
+  PG7/ADR0                    A15    RAM, Expansion slots
+  --------------------------- ------ --------------------------------------------
+  PH0/ANA8/WR                 ~WR    RAM, Expansion slots
+  PH1/ANA9/RD                 ~RD    RAM, Expansion slots
+  PH2/ANA10/CS0               ~RF    LED3, RF transceiver, X2 (1)
+  PH3/ANA11/CINP/WAIT         ~SXM   LED4, Chip select for the serial memory, U4 (1)
+  --------------------------- ------ --------------------------------------------
+  PJ0/DATA8                   ~SD1   LED5, Chip select for the SD card 1, X11.
+  PJ1/DATA9                   ~DT1   Card detect for SD card 1
+  PJ2/DATA10                  WP1    Write protect for SD card 1
+  PJ3/DATA11                  EVE    EVE chip select
+  PJ4/DATA12                  ~SD2   LED6, Chip select for the SD card 2, X10.
+  PJ5/DATA13                  ~DT2   Card detect for SD card 2
+  PJ6/DATA14                  WP2    Write protect for SD card 2
+  PJ7/DATA15                  ~SD0   LED7, Chip select for the microSD 0, X12.
+  --------------------------- ------ --------------------------------------------
+  PK0/BHEN                    ~BHE   RAM, Expansion slots
+  PK1/BLEN                    ~BLE   RAM, Expansion slots
+  PK2/CS0                     ~0000  Bottom RAM bank, Expansion slots
+  PK3/CS1                     ~8000  Top RAM bank, Expansion slots
+  PK4/CS2                     ~F000  Expansion slots
+  PK5/CS3                     ~FFC8  Expansion slots
+  PK6/CS4                     ~FFD0  Expansion slots
+  PK7/CS5                     ~FFD8  Expansion slots
+  --------------------------- ------ --------------------------------------------
+
+  Note 1:  Not populated on my board
 
 ZDS-II Compiler Versions
 ========================
 
-Version 4.10.2
-
-  The ZDS-II version 4.10.2 will not compile NuttX.  It reports "internal
-  errors" on some of the files.  Upgrades to ZDS-II are available for
-  download from the Zilog website: http://www.zilog.com/software/zds2.asp
-
-Version 4.11.0
-
-  NuttX compiles correctly with the newer 4.11.0 version of the ZDS-II
-  toolchain.  However, I have found a few issues:
-
-  - The code will not run without the -reduceopt option.  There is,
-    apparently, some optimization related issue.  This issue has not
-    been analyzed as of this writing.
-
-  - Not all NuttX logic will not run with the -regvars option.  There is
-    at least one failure that has been reported to ZiLOG as incident 81400.
-
-  - The Pascal add-on interpreter includes a large switch statement and
-    exposes another compiler problem.  This is reported as incident 81459.
-
-Version 4.11.1
-
-  As of this writing (30 September 2010), the latest release of ZDS-II for the
-  ZNEO is 4.11.1.  It is unknown if this release includes fixes for incidents
-  81400 and 81459 or not.  It is unknown if the code will run without -reduceopt
-  either. (Basically, it compiles with 4.11.1, but is untested with that version).
-
 Version 5.0.1
 
-  On November 29, 2012, all of the z16f configurations were converted to use 5.0.1,
-  but have not been verified on a running target.
-
-  Paths were also updated that are specific to a 32-bit toolchain running on
-  a 64 bit windows platform.  Change to a different toolchain, you will need
-  to modify the versioning in Make.defs and setenv.sh; if you want to build
-  on a different platform, you will need to change the path in the ZDS binaries
-  in those same files.
+  All testing has been performed with ZSD II verion 5.0.1 for the ZNEO.
 
 Other Versions
 
   If you use any version of ZDS-II other than 5.0.1 or if you install ZDS-II
   at any location other than the default location, you will have to modify
-  two files:  (1) configs/z16f2800100zcog/*/setenv.sh and (2)
-  configs/z16f2800100zcog/*/Make.defs.  Simply edit these two files, changing
-  5.0.1 to whatever.
+  two files:  (1) configs/16z/*/setenv.sh and (2) configs/16z/*/Make.defs. 
+  Simply edit these two files, changing 5.0.1 to whatever.
+
+Serial Console
+==============
+
+The 16z supports a single UART, UART0, that will be used to support the
+NuttX serial console.
+
+LEDs
+====
+
+The 16z board has 7 LEDs, five of which are controllable via software:
+
+  ----- ------ ------ ------------------------------------
+  LED   Color  Signal Description
+  ----- ------ ------ ------------------------------------
+  LED1  Red     3V3   Indicates the presence of +3.3V
+  LED2  Red     5V    Indicates the presence of +5V
+
+  LED3  Blue    ~RF   Controlled via PH2.  Notes: 1, 2
+  LED4  Green   ~SXM  Controlled via PH3.  Notes: 1, 3
+  LED5  Green   ~SD1  Controlled via PJ0.  Notes: 1, 4
+  LED6  Yellow  ~SD2  Controlled via PJ4.  Notes: 1, 5
+  LED7  Yellow  ~SD0  Controlled via PJ7.  Notes: 1, 6
+  ----- ------ ------ ------------------------------------
+
+  Note 1:  Pulled high so a low output illuminates the LED.
+  Note 2:  PH2/~RF is also used by the RF transceiver, X2.  That part is not
+           populated on my board.
+  Note 3:  ~SXM is the chip select for the serial memory, U4.  That part is
+           not populated on my board.
+  Note 4:  ~SD1 is the chip select for the SD card 1, X11.
+  Note 5:  ~SD2 is the chip select for the SD card 2, X10.
+  Note 6:  ~SD0 is the chip select for the microSD 0, X12.
+
+In conclusion:  None of the LEDs are available to indicate software status
+without potentially sacrificing board functionality.  If the RF transceiver
+is not installed (CONFIG_16Z_RFTRANSCEIVER=n) and if LED support is
+requested (CONFIG_ARCH_LEDS), then LED3 will be used to indicate status:  A
+solid color means that the board has boot successfully; flashing at a rate
+of approximately 2Hz indicates a software failure.
+
+RAM
+===
+
+The 16z has two IS66WVE4M16BLL 64Mb (4M x 16b) "Pseudo" SRAM parts on board.
+This provides a total of 16MiB of SRAM from program usage.
 
 Selecting Configurations
 ========================
 
-Variations on the basic z8f162800100zcog configuration are maintained
-in subdirectories.  To configure any specific configuration, do the
-following steps:
+Variations on the basic 16z configuration are maintained in subdirectories.
+To configure any specific configuration, do the following steps:
 
    cd <nuttx-top-directory>/tools
-   ./configure.sh z16f2800100zcog/<sub-directory>
+   ./configure.sh 16z/<sub-directory>
    cd <nuttx-top-directory>
    make
 
-Where <sub-directory> is the specific board configuration that you
-wish to build.  The following board-specific configurations are
-available.
+Where <sub-directory> is the specific board configuration that you wish to
+build.  The following board-specific configurations are available.
+
+Before entering the make command, make certain that the path to the ZNEO
+compiler is in you PATH variable.  You make modify and use the setenv.sh
+script to set that PATH if you like.  You can simply source setenv.sh
+before making like:
+
+  ...
+  . ./setenv.sh
+  make
+
 
 Configuration Sub-directories
 =============================
@@ -75,8 +204,7 @@ Configuration Sub-directories
 source/ and include/
 --------------------
 
-  These directories contain common logic for all z16f2800100zcog
-  configurations.
+  These directories contain common logic for all 16z configurations.
 
 nsh
 ---

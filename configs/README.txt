@@ -169,6 +169,11 @@ http://nuttx.org/Documentation/NuttXConfigVariables.html.
 Supported Boards
 ^^^^^^^^^^^^^^^^
 
+configs/16z
+  This is the port of NuttX port to the 16z board. The 16z board is based on
+  the ZiLOG ZNEO Z16F2811AL20EG part.  See https://github.com/toyaga/16z for
+  further information.
+
 configs/amber
   This is placeholder for the SoC Robotics Amber Web Server that is based
   on the Atmel AVR ATMega128 MCU.  There is not much there yet and what is
