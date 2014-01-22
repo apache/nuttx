@@ -44,6 +44,14 @@
  * Definitions
  ****************************************************************************/
 
+/* The 16Z board has a 19.6608MHz crystal.  The ZNEO clocking will be
+ * configured to use this crystal frequency directly as the clock source
+ */
+
+#define BOARD_XTAL_FREQUENCY   19660800 /* 19.6608MHz */
+#define BOARD_CLKSRC           1        /* Clock source = external crystal */
+#define BOARD_SYSTEM_FREQUENCY BOARD_XTAL_FREQUENCY
+
 /* LEDs
  *
  * The 16z board has 7 LEDs, five of which are controllable via software:

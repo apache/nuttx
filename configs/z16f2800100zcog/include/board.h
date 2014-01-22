@@ -1,7 +1,7 @@
 /****************************************************************************
  * board/board.h
  *
- *   Copyright (C) 2008 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,14 @@
 /****************************************************************************
  * Definitions
  ****************************************************************************/
+/* The 16Z board has a 20MHz crystal.  The ZNEO clocking will be configured
+ * to use this crystal frequency directly as the clock source
+ */
+
+#define BOARD_XTAL_FREQUENCY   20000000 /* 20MHz */
+#define BOARD_CLKSRC           1        /* Clock source = external crystal */
+#define BOARD_SYSTEM_FREQUENCY BOARD_XTAL_FREQUENCY
+
 
 /* LED pattern definitions
  *

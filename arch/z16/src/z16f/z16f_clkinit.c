@@ -98,72 +98,95 @@ Z16F_FLOPTION3 = (Z16F_FLOPTION3_RESVD|Z16F_FLOPTION3_NORMAL);
  *
  ***************************************************************************/
 
-static void z16f_sysclkinit(void)
+static void z16f_sysclkinit(int clockid, uint32_t frequency)
 {
   int count;
   int temp_oscdiv;
 
   /* _DEFSRC (SCKSEL Bits 1,0) is passed to program view the .linkcmd file */
 
-  if ((getreg8(Z16F_OSC_CTL) & 0x03) != _DEFSRC)
+  if ((getreg8(Z16F_OSC_CTL) & 0x03) != clockid)
     {
-      if (_DEFSRC == 0)
+      switch (clockid)
         {
-          /* Enable 5.6 MHz clock RESET DEFAULT*/
+          /* 0: Internal precision oscillator functions as system clock at 5.6 MHz */
 
-          putreg8(0xe7, Z16F_OSC_CTL);
-          putreg8(0x18, Z16F_OSC_CTL);
-          putreg8(0xa0, Z16F_OSC_CTL);
+          case 0:
+            {
+              /* Enable 5.6 MHz clock RESET DEFAULT*/
 
-          /* Wait for oscillator to stabilize */
+              putreg8(0xe7, Z16F_OSC_CTL); /* Unlock the crystal oscillator */
+              putreg8(0x18, Z16F_OSC_CTL);
+              putreg8(0xa0, Z16F_OSC_CTL);
 
-          for (count = 0; count < 10000; count++);
+              /* Wait for oscillator to stabilize */
 
-          /* Select 5.6 MHz clock (SCKSEL=0) */
+              for (count = 0; count < 10000; count++);
 
-          putreg8(0xe7, Z16F_OSC_CTL);
-          putreg8(0x18, Z16F_OSC_CTL);
-          putreg8(0xa0, Z16F_OSC_CTL);
-        }
-      else if (_DEFSRC == 1)
-        {
-          /* Enable (reserved) clock */
-        }
-      else if (_DEFSRC == 2 )
-        {
-          /* Enable external oscillator */
+              /* Select 5.6 MHz clock (SCKSEL=0) */
 
-          putreg8(0xe7, Z16F_OSC_CTL);
-          putreg8(0x18, Z16F_OSC_CTL);
-          putreg8(0xe0, Z16F_OSC_CTL);
+              putreg8(0xe7, Z16F_OSC_CTL); /* Unlock the crystal oscillator */
+              putreg8(0x18, Z16F_OSC_CTL);
+              putreg8(0xa0, Z16F_OSC_CTL);
+            }
+            break;
 
-          /* Wait for oscillator to stabilize */
+          /* 1: Crystal oscillator or external clock driver functions as system clock */
 
-          for (count = 0; count < 10000; count++);
+          case 1:
+            {
+              /* No divider for the oscillator */
 
-          /* select external oscillator (SCKSEL=2) */
+              putreg8(0x00, Z16F_OSC_DIV);
 
-          putreg8(0xe7, Z16F_OSC_CTL);
-          putreg8(0x18, Z16F_OSC_CTL);
-          putreg8(0xe0 | 2, Z16F_OSC_CTL);
-        }
-      else if (_DEFSRC == 3)
-        {
-          /* Enable watchdog timer clock */
+              /* Enable external oscillator */
 
-          putreg8(0xe7, Z16F_OSC_CTL);
-          putreg8(0x18, Z16F_OSC_CTL);
-          putreg8(0xb0, Z16F_OSC_CTL);
+              putreg8(0xe7, Z16F_OSC_CTL); /* Unlock the crystal oscillator */
+              putreg8(0x18, Z16F_OSC_CTL);
+              putreg8(0xe0, Z16F_OSC_CTL); /* INTEN+XTLEN+WDTEN */
 
-          /* Wait for oscillator to stabilize */
+              /* Wait for oscillator to stabilize */
 
-          for (count = 0; count < 10000; count++);
+              for (count = 0; count < 10000; count++);
 
-          /* Select watch dog timer clock (SKCSEL=3) */
+              /* select external oscillator (SCKSEL=2) */
 
-          putreg8(0xe7, Z16F_OSC_CTL);
-          putreg8(0x18, Z16F_OSC_CTL);
-          putreg8(0xb0 | 3, Z16F_OSC_CTL);
+              putreg8(0xe7, Z16F_OSC_CTL); /* Unlock the crystal oscillator */
+              putreg8(0x18, Z16F_OSC_CTL);
+              putreg8(0xe0 | 1, Z16F_OSC_CTL);
+            }
+            break;
+
+          /* 2: Reserved */
+
+          default:
+          case 2:
+            {
+              /* Reserved */
+            }
+            break;
+
+          /* Watchdog Timer oscillator functions as system clock. */
+
+          case 3:
+            {
+              /* Enable watchdog timer clock */
+
+              putreg8(0xe7, Z16F_OSC_CTL); /* Unlock the crystal oscillator */
+              putreg8(0x18, Z16F_OSC_CTL);
+              putreg8(0xb0, Z16F_OSC_CTL);
+
+              /* Wait for oscillator to stabilize */
+
+              for (count = 0; count < 10000; count++);
+
+              /* Select watch dog timer clock (SKCSEL=3) */
+
+              putreg8(0xe7, Z16F_OSC_CTL); /* Unlock the crystal oscillator */
+              putreg8(0x18, Z16F_OSC_CTL);
+              putreg8(0xb0 | 3, Z16F_OSC_CTL);
+            }
+            break;
         }
     }
 
@@ -171,22 +194,22 @@ static void z16f_sysclkinit(void)
    * divide the clock if the user has selected the OTHER option for frequency.
    */
 
-  if (((_DEFSRC == 0) && (_DEFCLK < 3000000ul)) ||
-      ((_DEFSRC == 2) && (_DEFCLK <= 10000000ul)))
+  if (((clockid == 0) && (frequency < 3000000ul)) ||
+      ((clockid == 1) && (frequency <= 10000000ul)))
     {
-      if ( _DEFSRC == 0 )
+      if ( clockid == 0 )
         {
-            temp_oscdiv = ( 5526000ul / (_DEFCLK +1) );
+            temp_oscdiv = (5526000ul / (frequency + 1));
             /* Example @ 32 KHz:  0xAC (172 decimal)*/
         }
       else
         {
-            temp_oscdiv = (( 20000000ul / (_DEFCLK +1) ) + 1 );
+            temp_oscdiv = ((20000000ul / (frequency +1)) + 1);
         }
 
       /* Unlock and Set the Oscillator Division Register (Z16F_OSC_DIV) */
 
-      putreg8(0xE7, Z16F_OSC_CTL);
+      putreg8(0xe7, Z16F_OSC_CTL); /* Unlock the crystal oscillator */
       putreg8(0x18, Z16F_OSC_CTL);
       putreg8(temp_oscdiv, Z16F_OSC_DIV);
     }
@@ -206,32 +229,35 @@ static void z16f_sysclkinit(void)
  * stabilize.
  ***************************************************************************/
 
-static void z16f_sysclkinit(void)
+static void z16f_sysclkinit(int clockid, uint32_t frequency)
 {
   int count;
 
-  /*
-   *    _DEFSRC (SCKSEL Bits 1,0) is passed to program from Target Settings Dialog.
-   *    I.E.          extern _Erom unsigned long SYS_CLK_SRC;
+  /* In this configuration, we support only the external oscillator/clock
+   * the the source of the system clock (__DEFCLK is ignored).
    */
 
-  if ((getreg8(Z16F_OSC_CTL) & 0x03) != _DEFSRC)
+  if ((getreg8(Z16F_OSC_CTL) & 0x03) != 1)
     {
+       /* No divider for the oscillator */
+
+       putreg8(0x00, Z16F_OSC_DIV);
+
        /* Enable external oscillator */
 
-       putreg8(0xe7, Z16F_OSC_CTL);
+       putreg8(0xe7, Z16F_OSC_CTL); /* Unlock the crystal oscillator */
        putreg8(0x18, Z16F_OSC_CTL);
-       putreg8(0xe0, Z16F_OSC_CTL);
+       putreg8(0xe0, Z16F_OSC_CTL); /* INTEN+XTLEN+WDTEN */
 
        /* Wait for oscillator to stabilize */
 
        for (count = 0; count < 10000; count++);
 
-       /* Select external oscillator (SCLKSEL=2) */
+       /* Select external oscillator (SCLKSEL=1) */
 
-       putreg8(0xe7, Z16F_OSC_CTL);
+       putreg8(0xe7, Z16F_OSC_CTL); /* Unlock the crystal oscillator */
        putreg8(0x18, Z16F_OSC_CTL);
-       putreg8(0xe0 | 2, Z16F_OSC_CTL);
+       putreg8(0xe0 | 1, Z16F_OSC_CTL); /* Use the external osc/clock as system clock */
     }
 }
 #endif /* CONFIG_DEBUG */
@@ -246,6 +272,7 @@ static void z16f_sysclkinit(void)
 
 void z16f_clkinit(void)
 {
-    z16f_sysclkinit();
-}
+  /* _DEFSRC (SCKSEL Bits 1,0) is passed to program view the .linkcmd file */
 
+  z16f_sysclkinit(_DEFSRC, _DEFCLK);
+}
