@@ -2,7 +2,7 @@
  * arch/z16/src/z16f/z16f_lowuart.asm
  * Z16F UART management
  *
- *   Copyright (C) 2008, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
