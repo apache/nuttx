@@ -398,29 +398,4 @@ ostest
          trailing bad characters are manually eliminated, then the build
          will succeed on the next try.
 
-pashello
---------
-
-    Configures to use examples/pashello for execution from FLASH
-    See examples/README.txt for information about pashello.
-
-    NOTES:
-
-    1. This configuration uses the mconf-based configuration tool.  To
-       change this configuration using that tool, you should:
-
-       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
-          and misc/tools/
-
-       b. Execute 'make menuconfig' in nuttx/ in order to start the
-          reconfiguration process.
-
-    2. The last time I tried building this configuration, there were
-       a few undefined symbols from the PCODE logic.  It might require
-       a little TLC to get this all working again.
-
-    3. The native windows build has not been tried with this configuration
-       but should, in principle, work (see notes for the ostest configuration
-       above).
-
 Check out any README.txt files in these <sub-directory>s.

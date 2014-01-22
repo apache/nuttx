@@ -69,7 +69,7 @@ define _near_stack         = highaddr of RAM
 define _near_heapbot       = top of RAM
 define _far_heapbot        = top of ERAM
 
-define _SYS_CLK_SRC        = 2
+define _SYS_CLK_SRC        = 1
 define _SYS_CLK_FREQ       = 20000000
 
 define __EXTCT_INIT_PARAM  = $80
