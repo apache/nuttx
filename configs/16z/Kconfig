@@ -1,0 +1,20 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if CONFIG_ARCH_BOARD_16Z
+
+config 16Z_RFTRANSCEIVER
+	bool "RF Transceiver installed"
+	default n
+	---help---
+		Select this option if the on-board RF transceiver is installed
+
+config 16Z_SERIAL_MEMORY
+	bool "Serial memory"
+	default n
+	---help---
+		Select this option if the on-board serial memory is installed
+
+endif # CONFIG_ARCH_BOARD_16Z

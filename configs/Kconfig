@@ -12,6 +12,15 @@ choice
 		be available for selection.  Use ARCH_BOARD_CUSTOM to create a new
 		board configuration.
 
+config ARCH_BOARD_16Z
+	bool "16z Board"
+	depends on ARCH_CHIP_Z16F2811
+	select ARCH_HAVE_LEDS
+	---help---
+		This selection enables the port of NuttX port to the 16z board. The
+		16z board is based on the ZiLOG ZNEO Z16F2811AL20EG part.  See
+		https://github.com/toyaga/16z for further information.
+
 config ARCH_BOARD_AMBER
 	bool "Amber Web Server"
 	depends on ARCH_CHIP_ATMEGA128
@@ -871,6 +880,7 @@ config ARCH_BOARD_CUSTOM_DIR
 
 config ARCH_BOARD
 	string
+	default "16z"                 if ARCH_BOARD_16Z
 	default "amber"               if ARCH_BOARD_AMBER
 	default "arduino-due"         if ARCH_BOARD_ARDUINO_DUE
 	default "avr32dev1"           if ARCH_BOARD_AVR32DEV1
@@ -1013,6 +1023,9 @@ config NSH_MMCSDSPIPORTNO
 
 comment "Board-Specific Options"
 
+if ARCH_BOARD_16Z
+source "configs/16z/Kconfig"
+endif
 if ARCH_BOARD_AMBER
 source "configs/amber/Kconfig"
 endif
