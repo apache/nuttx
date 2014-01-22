@@ -226,6 +226,22 @@
 #define Z16F_SYSEXCP_PRIOSC    Z16F_SYSEXCPL_PRIOSC
 #define Z16F_SYSEXCP_WDT       Z16F_SYSEXCPL_WDT
 
+/* External memory interface ********************************************************/
+
+#define Z16F_EXTCT             _HX32(ffffe070) /* External Interface Control */
+#define Z16F_EXTCS0H           _HX32(ffffe072) /* Chip Select 0 Control High */
+#define Z16F_EXTCS0L           _HX32(ffffe073) /* Chip Select 0 Control Low */
+#define Z16F_EXTCS1H           _HX32(ffffe074) /* Chip Select 1 Control High */
+#define Z16F_EXTCS1L           _HX32(ffffe075) /* Chip Select 1 Control Low */
+#define Z16F_EXTCS2H           _HX32(ffffe076) /* Chip Select 2 Control High */
+#define Z16F_EXTCS2L           _HX32(ffffe077) /* Chip Select 2 Control Low */
+#define Z16F_EXTCS3H           _HX32(ffffe078) /* Chip Select 3 Control High */
+#define Z16F_EXTCS3L           _HX32(ffffe079) /* Chip Select 3 Control Low */
+#define Z16F_EXTCS4H           _HX32(ffffe07a) /* Chip Select 4 Control High  */
+#define Z16F_EXTCS4L           _HX32(ffffe07b) /* Chip Select 4 Control Low */
+#define Z16F_EXTCS5H           _HX32(ffffe07c) /* Chip Select 5 Control High */
+#define Z16F_EXTCS5L           _HX32(ffffe07d) /* Chip Select 5 Control Low */
+
 /* Oscillator control registers *****************************************************/
 
 #define Z16F_OSC_CTL            _HX32(ffffe0A0) /*  8-bit: Oscillator Control */

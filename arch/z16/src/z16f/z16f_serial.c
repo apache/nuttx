@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/z16/src/z16f/z16f_serial.c
  *
- *   Copyright (C) 2008-2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -129,12 +129,18 @@ static const struct uart_ops_s g_uart_ops =
 
 /* I/O buffers */
 
+#ifdef CONFIG_Z16F_UART0
 static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
+#endif
+
+#ifdef CONFIG_Z16F_UART1
 static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
+#endif
 
-/* This describes the state of the DM320 uart0 port. */
+#ifdef CONFIG_Z16F_UART0
+/* This describes the state of the ZNEO uart0 port. */
 
 static struct z16f_uart_s g_uart0priv =
 {
@@ -178,8 +184,10 @@ static uart_dev_t g_uart0port =
   &g_uart_ops,              /* ops */
   &g_uart0priv,             /* priv */
 };
+#endif
 
-/* This describes the state of the DM320 uart1 port. */
+#ifdef CONFIG_Z16F_UART1
+/* This describes the state of the ZNEO uart1 port. */
 
 static struct z16f_uart_s g_uart1priv =
 {
@@ -223,17 +231,47 @@ static uart_dev_t g_uart1port =
   &g_uart_ops,              /* ops */
   &g_uart1priv,             /* priv */
 };
+#endif
 
 /* Now, which one with be tty0/console and which tty1? */
 
-#ifdef CONFIG_UART1_SERIAL_CONSOLE
-# define CONSOLE_DEV     g_uart1port
-# define TTYS0_DEV       g_uart1port
-# define TTYS1_DEV       g_uart0port
+#ifndef CONFIG_Z16F_UART0
+#  undef CONFIG_UART0_SERIAL_CONSOLE
+#endif
+
+#ifndef CONFIG_Z16F_UART1
+#  undef CONFIG_UART1_SERIAL_CONSOLE
+#endif
+
+/* First pick the console and ttys0.  This could be either of UART0-1 */
+
+#if defined(CONFIG_UART0_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart0port /* UART0 is console */
+#    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+#    define UART0_ASSIGNED      1
+#elif defined(CONFIG_UART1_SERIAL_CONSOLE)
+#    define CONSOLE_DEV         g_uart1port /* UART1 is console */
+#    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#    define UART1_ASSIGNED      1
 #else
-# define CONSOLE_DEV     g_uart0port
-# define TTYS0_DEV       g_uart0port
-# define TTYS1_DEV       g_uart1port
+#  undef CONSOLE_DEV                        /* No console */
+#  if defined(CONFIG_KINETIS_UART0)
+#    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
+#    define UART0_ASSIGNED      1
+#  elif defined(CONFIG_KINETIS_UART1)
+#    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
+#    define UART1_ASSIGNED      1
+#  endif
+#endif
+
+/* Pick ttys1.  This could be either of UART0-1 excluding the console UART. */
+
+#if defined(CONFIG_KINETIS_UART0) && !defined(UART0_ASSIGNED)
+#  define TTYS1_DEV           g_uart0port /* UART0 is ttyS1 */
+#  define UART0_ASSIGNED      1
+#elif defined(CONFIG_KINETIS_UART1) && !defined(UART1_ASSIGNED)
+#  define TTYS1_DEV           g_uart1port /* UART1 is ttyS1 */
+#  define UART1_ASSIGNED      1
 #endif
 
 /****************************************************************************
@@ -277,6 +315,7 @@ static void z16f_restoreuartirq(struct uart_dev_s *dev, uint8_t state)
  * Name: z16f_consoleput
  ****************************************************************************/
 
+#ifdef CONSOLE_DEV
 static void z16f_consoleput(uint8_t ch)
 {
   struct z16f_uart_s *priv = (struct z16f_uart_s*)CONSOLE_DEV.priv;
@@ -292,6 +331,7 @@ static void z16f_consoleput(uint8_t ch)
 
   putreg8(ch,  priv->uartbase + Z16F_UART_TXD);
 }
+#endif
 
 /****************************************************************************
  * Name: z16f_setup
@@ -434,14 +474,19 @@ static int z16f_rxinterrupt(int irq, void *context)
   struct z16f_uart_s *priv;
   uint8_t            status;
 
+#ifdef CONFIG_Z16F_UART1
   if (g_uart1priv.rxirq == irq)
     {
       dev = &g_uart1port;
     }
-  else if (g_uart0priv.rxirq == irq)
+  else
+#endif
+#ifdef CONFIG_Z16F_UART0
+  if (g_uart0priv.rxirq == irq)
     {
       dev = &g_uart0port;
     }
+#endif
   else
     {
       PANIC();
@@ -483,14 +528,19 @@ static int z16f_txinterrupt(int irq, void *context)
   struct z16f_uart_s *priv;
   uint8_t            status;
 
+#ifdef CONFIG_Z16F_UART1
   if (g_uart1priv.txirq == irq)
     {
       dev = &g_uart1port;
     }
-  else if (g_uart0priv.txirq == irq)
+  else
+#endif
+#ifdef CONFIG_Z16F_UART0
+  if (g_uart0priv.txirq == irq)
     {
       dev = &g_uart0port;
     }
+#endif
   else
     {
       PANIC();
@@ -682,11 +732,17 @@ void up_earlyserialinit(void)
 {
   /* REVISIT:  UART GPIO AFL register is not initialized */
 
+#ifdef TTYS0_DEV
   (void)z16f_disableuartirq(&TTYS0_DEV);
+#endif
+#ifdef TTYS1_DEV
   (void)z16f_disableuartirq(&TTYS1_DEV);
+#endif
 
+#ifdef CONSOLE_DEV
   CONSOLE_DEV.isconsole = true;
   z16f_setup(&CONSOLE_DEV);
+#endif
 }
 
 /****************************************************************************
@@ -700,9 +756,15 @@ void up_earlyserialinit(void)
 
 void up_serialinit(void)
 {
+#ifdef CONSOLE_DEV
   (void)uart_register("/dev/console", &CONSOLE_DEV);
+#endif
+#ifdef TTYS0_DEV
   (void)uart_register("/dev/ttyS0", &TTYS0_DEV);
+#endif
+#ifdef TTYS1_DEV
   (void)uart_register("/dev/ttyS1", &TTYS1_DEV);
+#endif
 }
 
 /****************************************************************************
@@ -713,6 +775,7 @@ void up_serialinit(void)
  *
  ****************************************************************************/
 
+#ifdef CONSOLE_DEV
 int up_putc(int ch)
 {
   uint8_t  state;
@@ -744,6 +807,7 @@ int up_putc(int ch)
   z16f_restoreuartirq(&CONSOLE_DEV, state);
   return ch;
 }
+#endif
 
 #else /* USE_SERIALDRIVER */
 
