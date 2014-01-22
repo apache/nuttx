@@ -283,6 +283,10 @@ int sigtimedwait(FAR const sigset_t *set, FAR struct siginfo *info,
               wd_delete(rtcb->waitdog);
               rtcb->waitdog = NULL;
             }
+
+          /* REVISIT: And do what if there are no watchdog timers?  The wait
+           * will fail and we will return something bogus.
+           */
         }
 
       /* No timeout, just wait */
