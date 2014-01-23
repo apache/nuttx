@@ -1,5 +1,5 @@
 /****************************************************************************
- * board/board.h
+ * configs/16z/include/board.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,8 +33,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __CONFIGS_16Z_INCLUDE_BOARD_H
+#define __CONFIGS_16Z_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -44,13 +44,53 @@
  * Definitions
  ****************************************************************************/
 
-/* The 16Z board has a 19.6608MHz crystal.  The ZNEO clocking will be
+/* The 16Z board has a 18.432MHz crystal.  The ZNEO clocking will be
  * configured to use this crystal frequency directly as the clock source
  */
 
-#define BOARD_XTAL_FREQUENCY   19660800 /* 19.6608MHz */
+#define BOARD_XTAL_FREQUENCY   18432000 /* 18.432MHz */
 #define BOARD_CLKSRC           1        /* Clock source = external crystal */
 #define BOARD_SYSTEM_FREQUENCY BOARD_XTAL_FREQUENCY
+
+/* Flash option bits
+ *
+ * "Each time the option bits are programmed or erased, the device must be
+ *  Reset for the change to take place. During any reset operation .., the
+ *  option bits are automatically read from the Program memory and written
+ *  to Option Configuration registers. ... Option Bit Control Register are
+ *  loaded before the device exits Reset and the ZNEO CPU begins code
+ *  execution. The Option Configuration registers are not part of the
+ *  Register file and are not accessible for read or write access."
+ *
+ * "The FLASH3 value of 0x7f is very important because it enables the
+ *  J-port, otherwise used for 16-bit data.
+ *
+ * "... in 16z there are some unusual hardware connections. ZNEO
+ *  communicates with 16-bit memory via 8-bit bus and using the 16-bit
+ *  control signals BHE and BLE."
+ */
+
+#ifndef __ASSEMBLY__
+#  define BOARD_FLOPTION0 (Z16F_FLOPTION0_MAXPWR | Z16F_FLOPTION0_WDTRES | \
+                           Z16F_FLOPTION0_WDTA0 | Z16F_FLOPTION0_VBOA0 | \
+                           Z16F_FLOPTION0_DBGUART | Z16F_FLOPTION0_FWP | \
+                           Z16F_FLOPTION0_RP)
+
+#  define BOARD_FLOPTION1 (Z16F_FLOPTION1_RESVD | Z16F_FLOPTION1_MCEN | \
+                           Z16F_FLOPTION1_OFFH | Z16F_FLOPTION1_OFFL)
+
+#  define BOARD_FLOPTION2 Z16F_FLOPTION2_RESVD
+
+#  define BOARD_FLOPTION3 (Z16F_FLOPTION3_RESVD | Z16F_FLOPTION3_NORMAL)
+
+/* The same settings, pre-digested for assembly language */
+
+#else
+#  define BOARD_FLOPTION0 %ff
+#  define BOARD_FLOPTION1 %ff
+#  define BOARD_FLOPTION2 %ff
+#  define BOARD_FLOPTION3 %7f
+#endif
 
 /* LEDs
  *
@@ -134,4 +174,4 @@ extern "C" {
 }
 #endif
 
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __CONFIGS_16Z_INCLUDE_BOARD_H */

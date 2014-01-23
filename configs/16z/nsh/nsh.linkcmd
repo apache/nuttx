@@ -41,7 +41,7 @@ RANGE ROM    $000000 : $007FFF
 RANGE RAM    $FFB000 : $FFBFFF
 RANGE IODATA $FFC000 : $FFFFFF
 RANGE EROM   $008000 : $01FFFF
-RANGE ERAM   $800000 : $FFFFFF
+RANGE ERAM   $020000 : $EFFFFF
 
 CHANGE NEAR_TEXT=NEAR_DATA
 CHANGE FAR_TEXT=FAR_DATA
@@ -70,7 +70,7 @@ define _near_heapbot       = top of RAM
 define _far_heapbot        = top of ERAM
 
 define _SYS_CLK_SRC        = 1
-define _SYS_CLK_FREQ       = 19660800
+define _SYS_CLK_FREQ       = 18432000
 
 define __EXTCT_INIT_PARAM  = $40
 define __EXTCS0_INIT_PARAM = $9001
