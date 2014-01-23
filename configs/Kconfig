@@ -135,6 +135,13 @@ config ARCH_BOARD_EAGLE100
 		an ARM Cortex-M3 MCU, the Luminary LM3S6918. This OS is built with the
 		arm-nuttx-elf toolchain*.  STATUS:  This port is complete and mature.
 
+config ARCH_BOARD_EFM32LG_DK3650
+	bool "EFM32 Leopard Gecko Development Kit"
+	depends on ARCH_CHIP_EFM32
+	---help---
+		This is Energy Micro's development kit for the Leopard
+		Gecko MCU, which is an ARM Cortex-M3 device.
+
 config ARCH_BOARD_EKKLM3S9B96
 	bool "TI/Stellaris EKK-LM3S9B96"
 	depends on ARCH_CHIP_LM3S9B96
@@ -892,6 +899,7 @@ config ARCH_BOARD
 	default "ea3131"              if ARCH_BOARD_EA3131
 	default "ea3152"              if ARCH_BOARD_EA3152
 	default "eagle100"            if ARCH_BOARD_EAGLE100
+	default "efm32-dk3650"        if ARCH_BOARD_EFM32LG_DK3650
 	default "ekk-lm3s9b96"        if ARCH_BOARD_EKKLM3S9B96
 	default "ez80f910200kitg"     if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"      if ARCH_BOARD_EZ80F910200ZCO
@@ -1058,6 +1066,9 @@ source "configs/ea3152/Kconfig"
 endif
 if ARCH_BOARD_EAGLE100
 source "configs/eagle100/Kconfig"
+endif
+if ARCH_BOARD_EFM32LG_DK3650
+source "configs/efm32-dk3650/Kconfig"
 endif
 if ARCH_BOARD_EKKLM3S9B96
 source "configs/ekk-lm3s9b96/Kconfig"
