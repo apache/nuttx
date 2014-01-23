@@ -57,19 +57,45 @@
 
 static void z16f_extcsinit(void)
 {
-  putreg8(0x40, Z16F_EXTCT);    /* 8-bit External Bus Interface is enabled (Port E). */
-  putreg8(0x90, Z16F_EXTCS0H);  /* CS0 enabled, Data [0:7] */
-  putreg8(0x01, Z16F_EXTCS0L);  /* Post Read: No wait states; Chip select: 1 wait state */
-  putreg8(0x90, Z16F_EXTCS1H);  /* CS1 enabled, Data [0:7] */
-  putreg8(0x01, Z16F_EXTCS1L);  /* Post Read: No wait states; Chip select: 1 wait state */
-  putreg8(0x90, Z16F_EXTCS2H);  /* CS2 enabled, Data [0:7] */
-  putreg8(0x11, Z16F_EXTCS2L);  /* Post Read: 1 wait state; Chip select: 1 wait state */
-  putreg8(0x90, Z16F_EXTCS3H);  /* CS3 enabled, Data [0:7] */
-  putreg8(0x15, Z16F_EXTCS3L);  /* Post Read: 1 wait state; Chip select: 5 wait states */
-  putreg8(0x90, Z16F_EXTCS4H);  /* CS4 enabled, Data [0:7] */
-  putreg8(0x15, Z16F_EXTCS4L);  /* Post Read: 1 wait state; Chip select: 5 wait states */
-  putreg8(0x90, Z16F_EXTCS5H);  /* CS5 enabled, Data [0:7] */
-  putreg8(0x15, Z16F_EXTCS5L);  /* Post Read: 1 wait state; Chip select: 5 wait states */
+  /* CS0 enabled, Data [0:7]
+   * Post Read: No wait states; Chip select: 1 wait state
+   */
+
+  putreg16(0x9001, Z16F_EXTCS0H);
+
+  /* CS1 enabled, Data [0:7]
+   * Post Read: No wait states; Chip select: 1 wait state
+   */
+
+  putreg16(0x9001, Z16F_EXTCS1);
+
+  /* CS2 enabled, Data [0:7]
+   * Post Read: 1 wait state; Chip select: 1 wait state
+   */
+
+  putreg16(0x9011, Z16F_EXTCS2);
+
+  /* CS3 enabled, Data [0:7]
+   * Post Read: 1 wait state; Chip select: 5 wait states
+   */
+
+  putreg16(0x9015, Z16F_EXTCS3);
+
+  /* CS4 enabled, Data [0:7]
+   * Post Read: 1 wait state; Chip select: 5 wait states
+   */
+
+  putreg16(0x9015, Z16F_EXTCS4);
+
+  /* CS5 enabled, Data [0:7]
+   * Post Read: 1 wait state; Chip select: 5 wait states
+   */
+
+  putreg16(0x9015, Z16F_EXTCS5);
+
+  /* Enable the 8-bit external bus interface */
+
+  putreg8(0x40, Z16F_EXTCT);
 }
 
 /***************************************************************************

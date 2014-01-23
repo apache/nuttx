@@ -1,8 +1,7 @@
 /************************************************************************************
  * arch/z16/src/z16f/chip.h
- * include/arch/chip/chip.h
  *
- *   Copyright (C) 2008-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __Z16F_CHIP_H
-#define __Z16F_CHIP_H
+#ifndef __ARCH_Z16_SRC_Z16F_CHIP_H
+#define __ARCH_Z16_SRC_Z16F_CHIP_H
 
 /************************************************************************************
  * Included Files
@@ -187,24 +186,24 @@
 /* Interrupt controller registers ***************************************************/
 
 #define Z16F_SYSEXCP            _HX32(ffffe020) /* 16-bit: System Exception Status */
-#define Z16F_SYSEXCPH           _HX32(ffffe020) /*  8-bit: System Exception Status High */
-#define Z16F_SYSEXCPL           _HX32(ffffe021) /*  8-bit: System Exception Status Low */
+#  define Z16F_SYSEXCPH         _HX32(ffffe020) /*  8-bit: System Exception Status High */
+#  define Z16F_SYSEXCPL         _HX32(ffffe021) /*  8-bit: System Exception Status Low */
 #define Z16F_LASTIRQ            _HX32(ffffe023) /*  8-bit: Last IRQ Register */
 #define Z16F_IRQ0               _HX32(ffffe030) /*  8-bit: Interrupt Request 0 */
 #define Z16F_IRQ0_SET           _HX32(ffffe031) /*  8-bit: Interrupt Request 0 Set */
 #define Z16F_IRQ0_EN            _HX32(ffffe032) /* 16-bit: IRQ0 Enable */
-#define Z16F_IRQ0_ENH           _HX32(ffffe032) /*  8-bit: IRQ0 Enable High Bit */
-#define Z16F_IRQ0_ENL           _HX32(ffffe033) /*  8-bit: IRQ0 Enable Low Bit */
+#  define Z16F_IRQ0_ENH         _HX32(ffffe032) /*  8-bit: IRQ0 Enable High Bit */
+#  define Z16F_IRQ0_ENL         _HX32(ffffe033) /*  8-bit: IRQ0 Enable Low Bit */
 #define Z16F_IRQ1               _HX32(ffffe034) /*  8-bit: Interrupt Request 1 */
 #define Z16F_IRQ1_SET           _HX32(ffffe035) /*  8-bit: Interrupt Request 1 Set */
 #define Z16F_IRQ1_EN            _HX32(ffffe036) /* 16-bit: IRQ1 Enable */
-#define Z16F_IRQ1_ENH           _HX32(ffffe036) /*  8-bit: IRQ1 Enable High Bit */
-#define Z16F_IRQ1_ENL           _HX32(ffffe037) /*  8-bit: IRQ1 Enable Low Bit */
+#  define Z16F_IRQ1_ENH         _HX32(ffffe036) /*  8-bit: IRQ1 Enable High Bit */
+#  define Z16F_IRQ1_ENL         _HX32(ffffe037) /*  8-bit: IRQ1 Enable Low Bit */
 #define Z16F_IRQ2               _HX32(ffffe038) /*  8-bit: Interrupt Request 2 */
 #define Z16F_IRQ2_SET           _HX32(ffffe039) /*  8-bit  Interrupt Request 2 Set */
 #define Z16F_IRQ2_EN            _HX32(ffffe03a) /* 16-bit: IRQ2 Enable */
-#define Z16F_IRQ2_ENH           _HX32(ffffe03a) /*  8-bit: IRQ2 Enable High Bit */
-#define Z16F_IRQ2_ENL           _HX32(ffffe03c) /*  8-bit: IRQ2 Enable Low Bit */
+#  define Z16F_IRQ2_ENH         _HX32(ffffe03a) /*  8-bit: IRQ2 Enable High Bit */
+#  define Z16F_IRQ2_ENL         _HX32(ffffe03c) /*  8-bit: IRQ2 Enable Low Bit */
 
 /* System exception status register bit definitions *********************************/
 
@@ -231,18 +230,24 @@
 /* External memory interface ********************************************************/
 
 #define Z16F_EXTCT             _HX32(ffffe070) /* External Interface Control */
-#define Z16F_EXTCS0H           _HX32(ffffe072) /* Chip Select 0 Control High */
-#define Z16F_EXTCS0L           _HX32(ffffe073) /* Chip Select 0 Control Low */
-#define Z16F_EXTCS1H           _HX32(ffffe074) /* Chip Select 1 Control High */
-#define Z16F_EXTCS1L           _HX32(ffffe075) /* Chip Select 1 Control Low */
-#define Z16F_EXTCS2H           _HX32(ffffe076) /* Chip Select 2 Control High */
-#define Z16F_EXTCS2L           _HX32(ffffe077) /* Chip Select 2 Control Low */
-#define Z16F_EXTCS3H           _HX32(ffffe078) /* Chip Select 3 Control High */
-#define Z16F_EXTCS3L           _HX32(ffffe079) /* Chip Select 3 Control Low */
-#define Z16F_EXTCS4H           _HX32(ffffe07a) /* Chip Select 4 Control High  */
-#define Z16F_EXTCS4L           _HX32(ffffe07b) /* Chip Select 4 Control Low */
-#define Z16F_EXTCS5H           _HX32(ffffe07c) /* Chip Select 5 Control High */
-#define Z16F_EXTCS5L           _HX32(ffffe07d) /* Chip Select 5 Control Low */
+#define Z16F_EXTCS0            _HX32(ffffe072) /* Chip Select 0 Control */
+#  define Z16F_EXTCS0H         _HX32(ffffe072) /* Chip Select 0 Control High */
+#  define Z16F_EXTCS0L         _HX32(ffffe073) /* Chip Select 0 Control Low */
+#define Z16F_EXTCS1            _HX32(ffffe074) /* Chip Select 1 Control */
+#  define Z16F_EXTCS1H         _HX32(ffffe074) /* Chip Select 1 Control High */
+#  define Z16F_EXTCS1L         _HX32(ffffe075) /* Chip Select 1 Control Low */
+#define Z16F_EXTCS2            _HX32(ffffe076) /* Chip Select 2 Control */
+#  define Z16F_EXTCS2H         _HX32(ffffe076) /* Chip Select 2 Control High */
+#  define Z16F_EXTCS2L         _HX32(ffffe077) /* Chip Select 2 Control Low */
+#define Z16F_EXTCS3            _HX32(ffffe078) /* Chip Select 3 Control */
+#  define Z16F_EXTCS3H         _HX32(ffffe078) /* Chip Select 3 Control High */
+#  define Z16F_EXTCS3L         _HX32(ffffe079) /* Chip Select 3 Control Low */
+#define Z16F_EXTCS4            _HX32(ffffe07a) /* Chip Select 4 Control  */
+#  define Z16F_EXTCS4H         _HX32(ffffe07a) /* Chip Select 4 Control High  */
+#  define Z16F_EXTCS4L         _HX32(ffffe07b) /* Chip Select 4 Control Low */
+#define Z16F_EXTCS5            _HX32(ffffe07c) /* Chip Select 5 Control */
+#  define Z16F_EXTCS5H         _HX32(ffffe07c) /* Chip Select 5 Control High */
+#  define Z16F_EXTCS5L         _HX32(ffffe07d) /* Chip Select 5 Control Low */
 
 /* Oscillator control registers *****************************************************/
 
@@ -268,8 +273,8 @@
 #define Z16F_GPIOA_DD           _HX32(ffffe102) /*  8-bits: Port A Data Direction */
 #define Z16F_GPIOA_HDE          _HX32(ffffe103) /*  8-bits: Port A High Drive Enable */
 #define Z16F_GPIOA_AF           _HX32(ffffe104) /* 16-bits: Port A Alternate Function */
-#define Z16F_GPIOA_AFH          _HX32(ffffe104) /*  8-bits: Port A Alternate Function High */
-#define Z16F_GPIOA_AFL          _HX32(ffffe105) /*  8-bits: Port A Alternate Function Low */
+#  define Z16F_GPIOA_AFH        _HX32(ffffe104) /*  8-bits: Port A Alternate Function High */
+#  define Z16F_GPIOA_AFL        _HX32(ffffe105) /*  8-bits: Port A Alternate Function Low */
 #define Z16F_GPIOA_OC           _HX32(ffffe106) /*  8-bits: Port A Output Control */
 #define Z16F_GPIOA_PUE          _HX32(ffffe107) /*  8-bits: Port A Pull-Up Enable */
 #define Z16F_GPIOA_SMRE         _HX32(ffffe108) /*  8-bits: Port A Stop Mode Recovery En */
@@ -291,8 +296,8 @@
 #define Z16F_GPIOC_DD           _HX32(ffffe122) /*  8-bits: Port C Data Direction */
 #define Z16F_GPIOC_HDE          _HX32(ffffe123) /*  8-bits: Port C High Drive Enable */
 #define Z16F_GPIOC_AF           _HX32(ffffe124) /* 16-bits: Port C Alternate Function */
-#define Z16F_GPIOC_AFH          _HX32(ffffe124) /*  8-bits: Port C Alternate Function High */
-#define Z16F_GPIOC_AFL          _HX32(ffffe125) /*  8-bits: Port C Alternate Function Low */
+#  define Z16F_GPIOC_AFH        _HX32(ffffe124) /*  8-bits: Port C Alternate Function High */
+#  define Z16F_GPIOC_AFL        _HX32(ffffe125) /*  8-bits: Port C Alternate Function Low */
 #define Z16F_GPIOC_OC           _HX32(ffffe126) /*  8-bits: Port C Output Control */
 #define Z16F_GPIOC_PUE          _HX32(ffffe127) /*  8-bits: Port C Pull-Up Enable */
 #define Z16F_GPIOC_SMRE         _HX32(ffffe128) /*  8-bits: Port C Stop Mode Recovery En */
@@ -303,8 +308,8 @@
 #define Z16F_GPIOD_DD           _HX32(ffffe132) /*  8-bits: Port D Data Direction */
 #define Z16F_GPIOD_HDE          _HX32(ffffe133) /*  8-bits: Port D High Drive Enable */
 #define Z16F_GPIOD_AF           _HX32(ffffe134) /* 16-bits: Port D Alternate Function */
-#define Z16F_GPIOD_AFH          _HX32(ffffe134) /*  8-bits: Port D Alternate Function High */
-#define Z16F_GPIOD_AFL          _HX32(ffffe135) /*  8-bits: Port D Alternate Function Low */
+#  define Z16F_GPIOD_AFH        _HX32(ffffe134) /*  8-bits: Port D Alternate Function High */
+#  define Z16F_GPIOD_AFL        _HX32(ffffe135) /*  8-bits: Port D Alternate Function Low */
 #define Z16F_GPIOD_OC           _HX32(ffffe136) /*  8-bits: Port D Output Control */
 #define Z16F_GPIOD_PUE          _HX32(ffffe137) /*  8-bits: Port D Pull-Up Enable */
 #define Z16F_GPIOD_SMRE         _HX32(ffffe138) /*  8-bits: Port D Stop Mode Recovery En */
@@ -340,8 +345,8 @@
 #define Z16F_GPIOH_DD           _HX32(ffffe172) /*  8-bits: Port H Data Direction */
 #define Z16F_GPIOH_HDE          _HX32(ffffe173) /*  8-bits: Port H High Drive Enable */
 #define Z16F_GPIOH_AF           _HX32(ffffe174) /* 16-bits: Port H Alternate Function */
-#define Z16F_GPIOH_AFH          _HX32(ffffe174) /*  8-bits: Port H Alternate Function High */
-#define Z16F_GPIOH_AFL          _HX32(ffffe175) /*  8-bits: Port H Alternate Function LOw */
+#  define Z16F_GPIOH_AFH        _HX32(ffffe174) /*  8-bits: Port H Alternate Function High */
+#  define Z16F_GPIOH_AFL        _HX32(ffffe175) /*  8-bits: Port H Alternate Function LOw */
 #define Z16F_GPIOH_OC           _HX32(ffffe176) /*  8-bits: Port H Output Control */
 #define Z16F_GPIOH_PUE          _HX32(ffffe177) /*  8-bits: Port H Pull-Up Enable */
 #define Z16F_GPIOH_SMRE         _HX32(ffffe178) /*  8-bits: Port H Stop Mode Recovery En */
@@ -373,13 +378,13 @@
 #define Z16F_UART_RXD           _HX8(00)        /*  8-bits: UART Receive Data */
 #define Z16F_UART_STAT0         _HX8(01)        /*  8-bits: UART Status 0 */
 #define Z16F_UART_CTL           _HX8(02)        /* 16-bits: UART Control */
-#define Z16F_UART_CTL0          _HX8(02)        /*  8-bits: UART Control 0 */
-#define Z16F_UART_CTL1          _HX8(03)        /*  8-bits: UART COntrol 1 */
+#  define Z16F_UART_CTL0        _HX8(02)        /*  8-bits: UART Control 0 */
+#  define Z16F_UART_CTL1        _HX8(03)        /*  8-bits: UART COntrol 1 */
 #define Z16F_UART_MDSTAT        _HX8(04)        /*  8-bits: UART Mode Select & Status */
 #define Z16F_UART_ADDR          _HX8(05)        /*  8-bits: UART Address Compare */
 #define Z16F_UART_BR            _HX8(06)        /* 16-bits: UART Baud Rate */
-#define Z16F_UART_BRH           _HX8(06)        /*  8-bits: UART Baud Rate High Byte */
-#define Z16F_UART_BRL           _HX8(07)        /*  8-bits: UART Baud Rate Low Byte */
+#  define Z16F_UART_BRH         _HX8(06)        /*  8-bits: UART Baud Rate High Byte */
+#  define Z16F_UART_BRL         _HX8(07)        /*  8-bits: UART Baud Rate Low Byte */
 
 #define Z16F_UART0_BASE         _HX32(ffffe200) /* UART0 Register Base Address */
 #define Z16F_UART1_BASE         _HX32(ffffe210) /* UART1 Register Base Address */
@@ -390,25 +395,25 @@
 #define Z16F_UART0_RXD          _HX32(ffffe200) /*  8-bits: UART0 Receive Data */
 #define Z16F_UART0_STAT0        _HX32(ffffe201) /*  8-bits: UART0 Status 0 */
 #define Z16F_UART0_CTL          _HX32(ffffe202) /* 16-bits: UART0 Control */
-#define Z16F_UART0_CTL0         _HX32(ffffe202) /*  8-bits: UART0 Control 0 */
-#define Z16F_UART0_CTL1         _HX32(ffffe203) /*  8-bits: UART0 COntrol 1 */
+#  define Z16F_UART0_CTL0       _HX32(ffffe202) /*  8-bits: UART0 Control 0 */
+#  define Z16F_UART0_CTL1       _HX32(ffffe203) /*  8-bits: UART0 COntrol 1 */
 #define Z16F_UART0_MDSTAT       _HX32(ffffe204) /*  8-bits: UART0 Mode Select & Status */
 #define Z16F_UART0_ADDR         _HX32(ffffe205) /*  8-bits: UART0 Address Compare */
 #define Z16F_UART0_BR           _HX32(ffffe206) /* 16-bits: UART0 Baud Rate */
-#define Z16F_UART0_BRH          _HX32(ffffe206) /*  8-bits: UART0 Baud Rate High Byte */
-#define Z16F_UART0_BRL          _HX32(ffffe207) /*  8-bits: UART0 Baud Rate Low Byte */
+#  define Z16F_UART0_BRH        _HX32(ffffe206) /*  8-bits: UART0 Baud Rate High Byte */
+#  define Z16F_UART0_BRL        _HX32(ffffe207) /*  8-bits: UART0 Baud Rate Low Byte */
 
 #define Z16F_UART1_TXD          _HX32(ffffe210) /*  8-bits: UART1 Transmit Data */
 #define Z16F_UART1_RXD          _HX32(ffffe210) /*  8-bits: UART1 Receive Data */
 #define Z16F_UART1_STAT0        _HX32(ffffe211) /*  8-bits: UART1 Status 0 */
 #define Z16F_UART1_CTL          _HX32(ffffe212) /* 16-bits: UART1 Control */
-#define Z16F_UART1_CTL0         _HX32(ffffe212) /*  8-bits: UART1 Control 0 */
-#define Z16F_UART1_CTL1         _HX32(ffffe213) /*  8-bits: UART1 COntrol 1 */
+#  define Z16F_UART1_CTL0       _HX32(ffffe212) /*  8-bits: UART1 Control 0 */
+#  define Z16F_UART1_CTL1       _HX32(ffffe213) /*  8-bits: UART1 COntrol 1 */
 #define Z16F_UART1_MDSTAT       _HX32(ffffe214) /*  8-bits: UART1 Mode Select & Status */
 #define Z16F_UART1_ADDR         _HX32(ffffe215) /*  8-bits: UART1 Address Compare */
 #define Z16F_UART1_BR           _HX32(ffffe216) /* 16-bits: UART1 Baud Rate */
-#define Z16F_UART1_BRH          _HX32(ffffe216) /*  8-bits: UART1 Baud Rate High Byte */
-#define Z16F_UART1_BRL          _HX32(ffffe217) /*  8-bits: UART1 Baud Rate Low Byte */
+#  define Z16F_UART1_BRH        _HX32(ffffe216) /*  8-bits: UART1 Baud Rate High Byte */
+#  define Z16F_UART1_BRL        _HX32(ffffe217) /*  8-bits: UART1 Baud Rate Low Byte */
 
 /* UART0/1 Status 0 Register Bit Definitions ****************************************/
 
@@ -452,43 +457,43 @@
 /* Timer0/1/2 registers *************************************************************/
 
 #define Z16F_TIMER0_HL          _HX32(ffffe300) /* 16-bit: Timer 0 */
-#define Z16F_TIMER0_H           _HX32(ffffe300) /*  8-bit: Timer 0 High Byte */
-#define Z16F_TIMER0_L           _HX32(ffffe301) /*  8-bit: Timer 0 Low Byte */
+#  define Z16F_TIMER0_H         _HX32(ffffe300) /*  8-bit: Timer 0 High Byte */
+#  define Z16F_TIMER0_L         _HX32(ffffe301) /*  8-bit: Timer 0 Low Byte */
 #define Z16F_TIMER0_R           _HX32(ffffe302) /* 16-bit: Timer 0 Reload */
-#define Z16F_TIMER0_RH          _HX32(ffffe302) /*  8-bit: Timer 0 Reload High Byte */
-#define Z16F_TIMER0_RL          _HX32(ffffe303) /*  8-bit: Timer 0 Reload Low Byte */
+#  define Z16F_TIMER0_RH        _HX32(ffffe302) /*  8-bit: Timer 0 Reload High Byte */
+# define Z16F_TIMER0_RL         _HX32(ffffe303) /*  8-bit: Timer 0 Reload Low Byte */
 #define Z16F_TIMER0_PWM         _HX32(ffffe304) /* 16-bit: Timer 0 PWM */
-#define Z16F_TIMER0_PWMH        _HX32(ffffe304) /*  8-bit: Timer 0 PWM High Byte */
-#define Z16F_TIMER0_PWML        _HX32(ffffe305) /*  8-bit: Timer 0 PWM Low Byte */
+#  define Z16F_TIMER0_PWMH      _HX32(ffffe304) /*  8-bit: Timer 0 PWM High Byte */
+#  define Z16F_TIMER0_PWML      _HX32(ffffe305) /*  8-bit: Timer 0 PWM Low Byte */
 #define Z16F_TIMER0_CTL         _HX32(ffffe306) /* 16-bit: Timer 0 Control */
-#define Z16F_TIMER0_CTL0        _HX32(ffffe306) /*  8-bit: Timer 0 Control 0 */
-#define Z16F_TIMER0_CTL1        _HX32(ffffe307) /*  8-bit: Timer 0 Control 1 */
+#  define Z16F_TIMER0_CTL0      _HX32(ffffe306) /*  8-bit: Timer 0 Control 0 */
+#  define Z16F_TIMER0_CTL1      _HX32(ffffe307) /*  8-bit: Timer 0 Control 1 */
 
 #define Z16F_TIMER1_HL          _HX32(ffffe310) /* 16-bit: Timer 1 */
-#define Z16F_TIMER1_H           _HX32(ffffe310) /*  8-bit: Timer 1 High Byte */
-#define Z16F_TIMER1_L           _HX32(ffffe311) /*  8-bit: Timer 1 Low Byte */
+#  define Z16F_TIMER1_H         _HX32(ffffe310) /*  8-bit: Timer 1 High Byte */
+#  define Z16F_TIMER1_L         _HX32(ffffe311) /*  8-bit: Timer 1 Low Byte */
 #define Z16F_TIMER1_R           _HX32(ffffe312) /* 16-bit: Timer 1 Reload */
-#define Z16F_TIMER1_RH          _HX32(ffffe312) /*  8-bit: Timer 1 Reload High Byte */
-#define Z16F_TIMER1_RL          _HX32(ffffe313) /*  8-bit: Timer 1 Reload Low Byte */
+#  define Z16F_TIMER1_RH        _HX32(ffffe312) /*  8-bit: Timer 1 Reload High Byte */
+#  define Z16F_TIMER1_RL        _HX32(ffffe313) /*  8-bit: Timer 1 Reload Low Byte */
 #define Z16F_TIMER1_PWM         _HX32(ffffe314) /* 16-bit: Timer 1 PWM */
-#define Z16F_TIMER1_PWMH        _HX32(ffffe314) /*  8-bit: Timer 1 PWM High Byte */
-#define Z16F_TIMER1_PWML        _HX32(ffffe315) /*  8-bit: Timer 1 PWM Low Byte */
+#  define Z16F_TIMER1_PWMH      _HX32(ffffe314) /*  8-bit: Timer 1 PWM High Byte */
+#  define Z16F_TIMER1_PWML      _HX32(ffffe315) /*  8-bit: Timer 1 PWM Low Byte */
 #define Z16F_TIMER1_CTL         _HX32(ffffe316) /* 16-bit: Timer 1 Control */
-#define Z16F_TIMER1_CTL0        _HX32(ffffe316) /*  8-bit: Timer 1 Control 0 */
-#define Z16F_TIMER1_CTL1        _HX32(ffffe317) /*  8-bit: Timer 1 Control 1 */
+#  define Z16F_TIMER1_CTL0      _HX32(ffffe316) /*  8-bit: Timer 1 Control 0 */
+#  define Z16F_TIMER1_CTL1      _HX32(ffffe317) /*  8-bit: Timer 1 Control 1 */
 
 #define Z16F_TIMER2_HL          _HX32(ffffe320) /* 16-bit: Timer 2 */
-#define Z16F_TIMER2_H           _HX32(ffffe320) /*  8-bit: Timer 2 High Byte */
-#define Z16F_TIMER2_L           _HX32(ffffe321) /*  8-bit: Timer 2 Low Byte */
+#  define Z16F_TIMER2_H         _HX32(ffffe320) /*  8-bit: Timer 2 High Byte */
+#  define Z16F_TIMER2_L         _HX32(ffffe321) /*  8-bit: Timer 2 Low Byte */
 #define Z16F_TIMER2_R           _HX32(ffffe322) /* 16-bit: Timer 2 Reload */
-#define Z16F_TIMER2_RH          _HX32(ffffe322) /*  8-bit: Timer 2 Reload High Byte */
-#define Z16F_TIMER2_RL          _HX32(ffffe323) /*  8-bit: Timer 2 Reload Low Byte */
+#  define Z16F_TIMER2_RH        _HX32(ffffe322) /*  8-bit: Timer 2 Reload High Byte */
+#  define Z16F_TIMER2_RL        _HX32(ffffe323) /*  8-bit: Timer 2 Reload Low Byte */
 #define Z16F_TIMER2_PWM         _HX32(ffffe324) /* 16-bit: Timer 2 PWM */
-#define Z16F_TIMER2_PWMH        _HX32(ffffe324) /*  8-bit: Timer 2 PWM High Byte */
-#define Z16F_TIMER2_PWML        _HX32(ffffe325) /*  8-bit: Timer 2 PWM Low Byte */
+#  define Z16F_TIMER2_PWMH      _HX32(ffffe324) /*  8-bit: Timer 2 PWM High Byte */
+#  define Z16F_TIMER2_PWML      _HX32(ffffe325) /*  8-bit: Timer 2 PWM Low Byte */
 #define Z16F_TIMER2_CTL         _HX32(ffffe326) /* 16-bit: Timer 2 Control */
-#define Z16F_TIMER2_CTL0        _HX32(ffffe326) /*  8-bit: Timer 2 Control 0 */
-#define Z16F_TIMER2_CTL1        _HX32(ffffe327) /*  8-bit: Timer 2 Control 1 */
+#  define Z16F_TIMER2_CTL0      _HX32(ffffe326) /*  8-bit: Timer 2 Control 0 */
+#  define Z16F_TIMER2_CTL1      _HX32(ffffe327) /*  8-bit: Timer 2 Control 1 */
 
 /* Common timer0/1/2 register bit definitions ***************************************/
 
@@ -554,7 +559,8 @@
 #ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -564,18 +570,18 @@ extern "C" {
  * debugging support for up_lowputc (or getc) is enabled.
  */
 
-EXTERN void z16f_lowinit(void);
+void z16f_lowinit(void);
 #if defined(CONFIG_Z16_LOWPUTC) || defined(CONFIG_Z16_LOWGETC)
-EXTERN void z16f_lowuartinit(void);
+void z16f_lowuartinit(void);
 #endif
 
 /* This function handles Z16F system execeptions */
 
-EXTERN void z16f_sysexec(FAR chipreg_t *regs);
+void z16f_sysexec(FAR chipreg_t *regs);
 
 /* Entry point to reset the processor */
 
-EXTERN void z16f_reset(void);
+void z16f_reset(void);
 
 #undef EXTERN
 #ifdef __cplusplus
@@ -583,4 +589,4 @@ EXTERN void z16f_reset(void);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif  /* __Z16F_CHIP_H */
+#endif  /* __ARCH_Z16_SRC_Z16F_CHIP_H */
