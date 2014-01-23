@@ -6494,6 +6494,7 @@
 	  detect.  (2014-1-21).
 	* configs/16z:  Add basic support for the 16z board. The 16z board is
 	  based on the ZiLOG ZNEOZ16F2811AL20EG part.  See
-	  https://github.com/toyaga/16z (2014-1-22)
-
-for further information.
+	  https://github.com/toyaga/16z for further information (2014-1-22),
+	* tools/Config.mk: 'cypath' must be called if we are using a Windows
+	  native toolchain with the Cygwin 'make' to convert paths to proper
+	  Windows paths.  From Richard Cochran (2014-1-23).
