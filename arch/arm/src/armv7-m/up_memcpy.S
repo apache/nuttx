@@ -152,7 +152,7 @@ memcpy:
 	/* Quickly check for very short copies */
 
 	cmp		r2, #4
-	blt		MEM_DataCopyBytes
+	blt.n	MEM_DataCopyBytes
 
 	and		r14, r0, #3		 		/* Get destination alignment bits */
 	bfi		r14, r1, #2, #2	 		/* Get source alignment bits */
@@ -199,7 +199,7 @@ MEM_DataCopy0:
 	/* Check for short word-aligned copy */
 
 	cmp		r2, #0x28
-	blt		MEM_DataCopy0_2
+	blt.n	MEM_DataCopy0_2
 
 	/* Bulk copy loop */
 
@@ -208,7 +208,7 @@ MEM_DataCopy0_1:
 	stmia	r0!, {r3-r12}
 	sub		r2, r2, #0x28
 	cmp		r2, #0x28
-	bge		MEM_DataCopy0_1
+	bge.n	MEM_DataCopy0_1
 
 	/* Copy remaining long words */
 
@@ -224,28 +224,28 @@ MEM_DataCopy0_2:
 MEM_LongCopyJump:
 	ldr.w	r3, [r1], #0x04		/* 4 bytes remain */
 	str.w	r3, [r0], #0x04
-	b		MEM_LongCopyEnd
+	b.n		MEM_LongCopyEnd
 	ldmia.w	r1!, {r3-r4}		/* 8 bytes remain */
 	stmia.w	r0!, {r3-r4}
-	b		MEM_LongCopyEnd
+	b.n		MEM_LongCopyEnd
 	ldmia.w	r1!, {r3-r5}		/* 12 bytes remain */
 	stmia.w	r0!, {r3-r5}
-	b		MEM_LongCopyEnd
+	b.n		MEM_LongCopyEnd
 	ldmia.w	r1!, {r3-r6}		/* 16 bytes remain */
 	stmia.w	r0!, {r3-r6}
-	b		MEM_LongCopyEnd
+	b.n		MEM_LongCopyEnd
 	ldmia.w	r1!, {r3-r7}		/* 20 bytes remain */
 	stmia.w	r0!, {r3-r7}
-	b		MEM_LongCopyEnd
+	b.n		MEM_LongCopyEnd
 	ldmia.w	r1!, {r3-r8}		/* 24 bytes remain */
 	stmia.w	r0!, {r3-r8}
-	b		MEM_LongCopyEnd
+	b.n		MEM_LongCopyEnd
 	ldmia.w	r1!, {r3-r9}		/* 28 bytes remain */
 	stmia.w	r0!, {r3-r9}
-	b		MEM_LongCopyEnd
+	b.n		MEM_LongCopyEnd
 	ldmia.w	r1!, {r3-r10}		/* 32 bytes remain */
 	stmia.w	r0!, {r3-r10}
-	b		MEM_LongCopyEnd
+	b.n		MEM_LongCopyEnd
 	ldmia.w	r1!, {r3-r11}		/* 36 bytes remain */
 	stmia.w	r0!, {r3-r11}
 
@@ -308,7 +308,7 @@ MEM_DataCopy13:
 
 MEM_DataCopy2:
 	cmp		r2, #0x28
-	blt		MEM_DataCopy2_1
+	blt.n	MEM_DataCopy2_1
 
 	/* Save regs */
 
@@ -345,18 +345,18 @@ MEM_DataCopy2_2:
 
 	sub		r2, r2, #0x28
 	cmp		r2, #0x28
-	bge		MEM_DataCopy2_2
+	bge.n	MEM_DataCopy2_2
 	pop		{r4-r12}
 
 MEM_DataCopy2_1: /* Read longs and write 2 x half words */
 	cmp		r2, #4
-	blt		MEM_DataCopyBytes
+	blt.n	MEM_DataCopyBytes
 	ldr		r3, [r1], #0x04
 	strh	r3, [r0], #0x02
 	lsr		r3, r3, #0x10
 	strh	r3, [r0], #0x02
 	sub		r2, r2, #0x04
-	b		MEM_DataCopy2
+	b.n		MEM_DataCopy2
 
 /* Bits:  Src=01, Dst=00 - Byte before half word to long
  * Bits:  Src=01, Dst=10 - Byte before half word to half word
@@ -410,7 +410,7 @@ MEM_DataCopy3:
 	lsr		r3, r3, #0x10
 	strb	r3, [r0], #0x01
 	sub		r2, r2, #0x04
-	b		MEM_DataCopy3
+	b.n		MEM_DataCopy3
 
 	.size	memcpy, .-memcpy
 	.end
