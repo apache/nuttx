@@ -40,6 +40,7 @@
 
 #include <nuttx/config.h>
 #include <arch/irq.h>
+#include <arch/board/board.h>
 #include "common/up_internal.h"
 
 /**************************************************************************
@@ -85,10 +86,10 @@
 
 	define FOPTIONSEG, SPACE=ROM, ORG=0
 	segment FOPTIONSEG
-	db %FF
-	db %FF
-	db %FF
-	db %FF
+	db BOARD_FLOPTION0
+	db BOARD_FLOPTION1
+	db BOARD_FLOPTION2
+	db BOARD_FLOPTION3
 
 /**************************************************************************
  * vectors

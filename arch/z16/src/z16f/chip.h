@@ -95,26 +95,28 @@
 #define Z16F_FLOPTION2          rom char _flash_option2 _At 0x2
 #define Z16F_FLOPTION3          rom char _flash_option3 _At 0x3
 
-#define Z16F_FLOPTION0_EXTRNRC  _HX8(00) /* Bits 6-7: OSC_SEL */
-#define Z16F_FLOPTION0_LOWFREQ  _HX8(40)
-#define Z16F_FLOPTION0_MEDFREQ  _HX8(80)
-#define Z16F_FLOPTION0_MAXPWR   _HX8(c0)
-#define Z16F_FLOPTION0_WDTRES   _HX8(20) /* Bit 5 */
-#define Z16F_FLOPTION0_WDTA0    _HX8(10) /* Bit 4 */
-#define Z16F_FLOPTION0_VBOA0    _HX8(08) /* Bit 3 */
-#define Z16F_FLOPTION0_DBGUART  _HX8(04) /* Bit 2 */
-#define Z16F_FLOPTION0_FWP      _HX8(02) /* Bit 1 */
-#define Z16F_FLOPTION0_RP       _HX8(01) /* Bit 0 */
+#define Z16F_FLOPTION0_OSCSEL   _HX8(c0) /* Bits 6-7: OSC_SEL */
+#define Z16F_FLOPTION0_EXTRNRC  _HX8(00) /* 00: On-chip oscillator with ext RC networks */
+#define Z16F_FLOPTION0_LOWFREQ  _HX8(40) /* 01: Min. power with very low frequency crystals */
+#define Z16F_FLOPTION0_MEDFREQ  _HX8(80) /* 10: Medium power with medium frequency crystals */
+#define Z16F_FLOPTION0_MAXPWR   _HX8(c0) /* 11: Maximum power with high frequency crystals */
+#define Z16F_FLOPTION0_WDTRES   _HX8(20) /* Bit 5: WDT Reset */
+#define Z16F_FLOPTION0_WDTA0    _HX8(10) /* Bit 4: WDT Always On */
+#define Z16F_FLOPTION0_VBOA0    _HX8(08) /* Bit 3: Voltage Brown-Out Protection Always On */
+#define Z16F_FLOPTION0_DBGUART  _HX8(04) /* Bit 2: Debug UART Enable */
+#define Z16F_FLOPTION0_FWP      _HX8(02) /* Bit 1: Flash Write Protect */
+#define Z16F_FLOPTION0_RP       _HX8(01) /* Bit 0: Read Protect */
 
-#define Z16F_FLOPTION1_RESVD    _HX8(f8) /* Bits 3-7: reserved */
+#define Z16F_FLOPTION1_RESVD    _HX8(f8) /* Bits 3-7: Reserved */
 #define Z16F_FLOPTION1_MCEN     _HX8(04) /* Bit 2: Motor control pins enable */
-#define Z16F_FLOPTION1_OFFH     _HX8(02) /* High side OFF */
-#define Z16F_FLOPTION1_OFFL     _HX8(01) /* Low side OFF */
+#define Z16F_FLOPTION1_OFFH     _HX8(02) /* Bit 1: High side OFF */
+#define Z16F_FLOPTION1_OFFL     _HX8(01) /* Bit 0: Low side OFF */
 
 #define Z16F_FLOPTION2_RESVD    _HX8(ff) /* Bits 0-7: reserved */
 
-#define Z16F_FLOPTION3_RESVD    _HX8(bf) /* Bits 0-5,7: reserved */
+#define Z16F_FLOPTION3_ROMLESS  _HX8(80) /* Bit 7: ROMLESS 16 Select */
 #define Z16F_FLOPTION3_NORMAL   _HX8(40) /* Bit 6: 1:Normal 0:Low power mode */
+#define Z16F_FLOPTION3_RESVD    _HX8(3f) /* Bits 0-5: Reserved */
 
 /* Memory areas *******************************************************************
  *
