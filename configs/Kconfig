@@ -142,6 +142,10 @@ config ARCH_BOARD_EFM32LG_DK3650
 		This is Energy Micro's development kit for the Leopard
 		Gecko MCU, which is an ARM Cortex-M3 device.
 
+		This port is uses the Energy Micro headers and peripheral drivers
+		as out of tree sources. In order to compile this, you need to set
+		ARCH_CHIP_EFM32_EMLIB_PATH to point to the external sources.
+
 config ARCH_BOARD_EKKLM3S9B96
 	bool "TI/Stellaris EKK-LM3S9B96"
 	depends on ARCH_CHIP_LM3S9B96

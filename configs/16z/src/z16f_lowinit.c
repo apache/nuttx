@@ -51,6 +51,10 @@
  * Private Functions
  ***************************************************************************/
 
+/***************************************************************************
+ * Name: z16f_extcsinit
+ ***************************************************************************/
+
 static void z16f_extcsinit(void)
 {
   putreg8(0x40, Z16F_EXTCT);    /* 8-bit External Bus Interface is enabled (Port E). */
@@ -67,6 +71,10 @@ static void z16f_extcsinit(void)
   putreg8(0x90, Z16F_EXTCS5H);  /* CS5 enabled, Data [0:7] */
   putreg8(0x15, Z16F_EXTCS5L);  /* Post Read: 1 wait state; Chip select: 5 wait states */
 }
+
+/***************************************************************************
+ * Name: z16f_gpioinit
+ ***************************************************************************/
 
 static void z16f_gpioinit(void)
 {
@@ -249,8 +257,12 @@ static void z16f_gpioinit(void)
  * Public Functions
  ***************************************************************************/
 
+/***************************************************************************
+ * Name: z16f_lowinit
+ ***************************************************************************/
+
 void z16f_lowinit(void)
 {
-  z16f_extcsinit();
-  z16f_gpioinit();
+  z16f_extcsinit();  /* Configure external memory */
+  z16f_gpioinit();   /* Configure board GPIOs */
 }

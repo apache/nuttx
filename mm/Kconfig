@@ -79,20 +79,23 @@ config MM_REGIONS
 
 config ARCH_HAVE_HEAP2
 	bool
+	default n
+
+if ARCH_HAVE_HEAP2
 
 config HEAP2_BASE
 	hex "Start address of second user heap region"
 	default 0x00000000
-	depends on ARCH_HAVE_HEAP2
 	---help---
 		The base address of the second heap region.
 
 config HEAP2_SIZE
 	int "Size of the second user heap region"
 	default 0
-	depends on ARCH_HAVE_HEAP2
 	---help---
 		The size of the second heap region.
+
+endif # ARCH_HAVE_HEAP2
 
 config GRAN
 	bool "Enable Granule Allocator"
