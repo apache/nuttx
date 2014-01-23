@@ -42,6 +42,13 @@ config ARCH_CHIP_DM320
 	---help---
 		TI DMS320 DM320 (ARM926EJS)
 
+config ARCH_CHIP_EFM32
+	bool "Energy Micro"
+	select ARCH_HAVE_CMNVECTOR
+	select ARMV7M_CMNVECTOR
+	---help---
+		Energy Micro EFM32 microcontrollers (ARM Cortex-M).
+
 config ARCH_CHIP_IMX
 	bool "Freescale iMX"
 	select ARCH_ARM920T
@@ -210,6 +217,7 @@ config ARCH_CHIP
 	default "c5471"		if ARCH_CHIP_C5471
 	default "calypso"	if ARCH_CHIP_CALYPSO
 	default "dm320"		if ARCH_CHIP_DM320
+	default "efm32"		if ARCH_CHIP_EFM32
 	default "imx"		if ARCH_CHIP_IMX
 	default "kinetis"	if ARCH_CHIP_KINETIS
 	default "kl"		if ARCH_CHIP_KL
@@ -345,6 +353,9 @@ source arch/arm/src/calypso/Kconfig
 endif
 if ARCH_CHIP_DM320
 source arch/arm/src/dm320/Kconfig
+endif
+if ARCH_CHIP_EFM32
+source arch/arm/src/efm32/Kconfig
 endif
 if ARCH_CHIP_IMX
 source arch/arm/src/imx/Kconfig
