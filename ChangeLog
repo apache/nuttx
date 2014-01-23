@@ -6505,3 +6505,7 @@
 	* configs/efm32-dk3650:  This is Energy Micro's development kit for
 	  the Leopard Gecko MCU, which is an ARM Cortex-M3 device.  From Richard
 	  Cochran (2014-1-23).
+	* arch/arm/src/armv7-m/up_memcpy.S: Assembler changes with the gcc-47
+	  distribution from ARM mean that we need to be explicit about branch
+	  sizes; one or more of the wide branch opcodes results in bad table
+	  branching.  From Mike Smith (2014-1-23).
