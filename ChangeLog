@@ -6498,5 +6498,10 @@
 	* tools/Config.mk: 'cypath' must be called if we are using a Windows
 	  native toolchain with the Cygwin 'make' to convert paths to proper
 	  Windows paths.  From Richard Cochran (2014-1-23).
-	* /arch/arm/src/Makefile: dependency directory list is not computed
+	* /arch/arm/src/Makefile: dependency directory list is now computed
 	  from the VPATH.  From Richard Cochran (2014-1-23).
+	* arch/arm/src/efm32 and include/efm32:  Basic support for the EFM3
+	  processor family from Richarc Cochran (2014-1-23).
+	* configs/efm32-dk3650:  This is Energy Micro's development kit for
+	  the Leopard Gecko MCU, which is an ARM Cortex-M3 device.  From Richard
+	  Cochran (2014-1-23).

@@ -111,9 +111,9 @@ endef
 #
 #   CC - The command to invoke the C compiler
 #   CFLAGS - Options to pass to the C compiler
-#   WINTOOL - Set to "y" if this is a Windows cygwin build using a
+#   WINTOOL - Set to "y" if this is a Windows Cygwin build using a
 #     Windows native toolchain.  In that case, paths created by the
-#     Cygwin makeifle must be converted to Windows paths for the tool.
+#     Cygwin makefile must be converted to Windows paths for the tool.
 
 ifeq ($(WINTOOL),y)
 define COMPILE
