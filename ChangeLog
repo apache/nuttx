@@ -6484,7 +6484,7 @@
 	  ostest/Make.defs:  Add a configuration option to select the -m32
 	  compiler option when building for a 32-bit target on a native 64-bit
 	  compiler (2014-1-18).
-	* include/ctype.h: Typo in macro name: iscntrol, not iscontrol (2104-1-17)
+	* include/ctype.h: Typo in macro name: iscntrl, not iscontrol (2104-1-17)
 	* libc/unistd/lib_getopt.c:  If there are no arguments (argc == 1), then
 	  getopt() make like the optind variable in an undefined state (2014-1-20).
 	* configs/olimex-stm32-p107:  Failes to build is SPI3 for UEXT is not
@@ -6498,3 +6498,5 @@
 	* tools/Config.mk: 'cypath' must be called if we are using a Windows
 	  native toolchain with the Cygwin 'make' to convert paths to proper
 	  Windows paths.  From Richard Cochran (2014-1-23).
+	* /arch/arm/src/Makefile: dependency directory list is not computed
+	  from the VPATH.  From Richard Cochran (2014-1-23).
