@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/ea3131/src/up_leds.c
  *
- *   Copyright (C) 2009-2010 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,9 @@
 
 #include <stdint.h>
 
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
+
 #include "ea3131_internal.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
@@ -63,10 +65,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_buttoninit
+ * Name: board_button_initialize
  ****************************************************************************/
 
-void up_buttoninit(void)
+void board_button_initialize(void)
 {
 }
 

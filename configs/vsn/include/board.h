@@ -225,15 +225,6 @@ EXTERN void stm32_boardinitialize(void);
 EXTERN void stm32_board_clockconfig(void);
 #endif
 
-/************************************************************************************
- * Button support. (TODO: button is not yet supported)
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_BUTTONS
-EXTERN void up_buttoninit(void);
-EXTERN uint8_t up_buttons(void);
-#endif
-
 #undef EXTERN
 #if defined(__cplusplus)
 }

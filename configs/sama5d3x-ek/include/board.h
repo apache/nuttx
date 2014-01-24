@@ -364,48 +364,6 @@ void sam_setled(int led, bool ledon);
 void sam_setleds(uint8_t ledset);
 #endif
 
-/************************************************************************************
- * Name: up_buttoninit
- *
- * Description:
- *   up_buttoninit() must be called to initialize button resources.  After that,
- *   up_buttons() may be called to collect the current state of all buttons or
- *   up_irqbutton() may be called to register button interrupt handlers.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_BUTTONS
-void up_buttoninit(void);
-
-/************************************************************************************
- * Name: up_buttons
- *
- * Description:
- *   After up_buttoninit() has been called, up_buttons() may be called to collect
- *   the state of all buttons.  up_buttons() returns an 8-bit bit set with each bit
- *   associated with a button.  See the BUTTON* definitions above for the meaning of
- *   each bit in the returned value.
- *
- ************************************************************************************/
-
-uint8_t up_buttons(void);
-
-/************************************************************************************
- * Name: up_irqbutton
- *
- * Description:
- *   This function may be called to register an interrupt handler that will be
- *   called when a button is depressed or released.  The ID value is one of the
- *   BUTTON* definitions provided above. The previous interrupt handler address is
- *   returned (so that it may restored, if so desired).
- *
- ************************************************************************************/
-
-#ifdef CONFIG_SAMA5_PIOE_IRQ
-xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
-#endif
-#endif /* CONFIG_ARCH_BUTTONS */
-
 #undef EXTERN
 #if defined(__cplusplus)
 }

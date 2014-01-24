@@ -72,11 +72,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_buttoninit
+ * Name: board_button_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-void up_buttoninit(void)
+void board_button_initialize(void)
 {
   uint16_t reg16;
 

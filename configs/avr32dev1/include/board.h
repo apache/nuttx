@@ -1,8 +1,7 @@
 /************************************************************************************
  * configs/avr32dev1/include/board.h
- * include/arch/board/board.h
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_BOARD_BOARD_H
-#define __ARCH_BOARD_BOARD_H
+#ifndef __CONFIGS_AVR32DEV1_INCLUDE_BOARD_H
+#define __CONFIGS_AVR32DEV1_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -174,7 +173,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -192,60 +192,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void avr32_boardinitialize(void);
-
-/************************************************************************************
- * Name: up_buttoninit
- *
- * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
- *   handlers.
- *
- * NOTE: Nothing in the "base" NuttX code calls up_buttoninit().  If you want button
- * support in an application, your application startup code must call up_buttoninit()
- * prior to calling any of the other button interfaces.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_BUTTONS
-EXTERN void up_buttoninit(void);
-
-/************************************************************************************
- * Name: up_buttons
- *
- * Description:
- *   After up_buttoninit() has been called, up_buttons() may be called to collect
- *   the state of all buttons.  up_buttons() returns an 8-bit bit set with each bit
- *   associated with a button.  See the BUTTON* definitions above for the meaning of
- *   each bit in the returned value.
- *
- ************************************************************************************/
-
-EXTERN uint8_t up_buttons(void);
-
-/************************************************************************************
- * Name: up_irqbutton
- *
- * Description:
- *   This function may be called to register an interrupt handler that will be
- *   called when a button is depressed or released.  The ID value is one of the
- *   BUTTON* definitions provided above. The previous interrupt handler address is
- *   returned (so that it may restored, if so desired).
- *
- * Configuration Notes:
- *   Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the overall GPIO
- *   IRQ feature and CONFIG_AVR32_GPIOIRQSETA and/or CONFIG_AVR32_GPIOIRQSETB must
- *   be enabled to select GPIOs to support interrupts on.  For button support, bits
- *   2 and 3 must be set in CONFIG_AVR32_GPIOIRQSETB (PB2 and PB3).
- *
- ************************************************************************************/
-
-#ifdef CONFIG_AVR32_GPIOIRQ
-EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
-#endif
-#endif /* CONFIG_ARCH_BUTTONS */
+void avr32_boardinitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -253,5 +200,5 @@ EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __ARCH_BOARD_BOARD_H */
+#endif  /* __CONFIGS_AVR32DEV1_INCLUDE_BOARD_H */
 
