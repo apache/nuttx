@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/skp16c26/src/up_buttons.c
+ * configs/skp16c26/src/board_buttons.c
  *
  *   Copyright (C) 2009 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -83,10 +83,10 @@ void board_button_initialize(void)
 }
 
 /****************************************************************************
- * Name: up_buttons
+ * Name: board_buttons
  ****************************************************************************/
 
-uint8_t up_buttons(void)
+uint8_t board_buttons(void)
 {
   uint8_t swset  = 0;
   uint8_t regval = getreg8(M16C_P8);
