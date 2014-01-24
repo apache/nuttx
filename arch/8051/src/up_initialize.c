@@ -139,6 +139,6 @@ void up_initialize(void)
   up_timerinit();
 #endif
 
-  up_ledon(LED_IRQSENABLED);
+  board_led_on(LED_IRQSENABLED);
 }
 

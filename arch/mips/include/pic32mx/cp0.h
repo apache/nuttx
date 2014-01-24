@@ -120,7 +120,7 @@
  *
  *   See arch/mips/include/mips32/cp0.h
  *   NOTES:
- *   1. The following are reserved bits in the PIC32: 
+ *   1. The following are reserved bits in the PIC32:
  *      CP0_STATUS_UX   Bit 5: Enables 64-bit user address space (Not MIPS32)
  *      CP0_STATUS_SX   Bit 6: Enables 64-bit supervisor address space (Not MIPS32)
  *      CP0_STATUS_KX   Bit 7: Enables 64-bit kernel address space (Not MIPS32)
@@ -192,30 +192,30 @@
 /* Register Number: 12 Sel: 3 Name: SRSMap */
 
 #define CP0_SRSMAP_SSV0_SHIFT       (0)       /* Bits 0-3: Shadow set vector 0 */
-#define CP0_SRSMAP_SSV0_MASK        (15 << CP0_SRSMAP_SSV0_SHIFT) 
+#define CP0_SRSMAP_SSV0_MASK        (15 << CP0_SRSMAP_SSV0_SHIFT)
 #define CP0_SRSMAP_SSV1_SHIFT       (4)       /* Bits 4-7: Shadow set vector 1 */
-#define CP0_SRSMAP_SSV1_MASK        (15 << CP0_SRSMAP_SSV1_SHIFT) 
+#define CP0_SRSMAP_SSV1_MASK        (15 << CP0_SRSMAP_SSV1_SHIFT)
 #define CP0_SRSMAP_SSV2_SHIFT       (8)       /* Bits 8-11: Shadow set vector 2 */
-#define CP0_SRSMAP_SSV2_MASK        (15 << CP0_SRSMAP_SSV2_SHIFT) 
+#define CP0_SRSMAP_SSV2_MASK        (15 << CP0_SRSMAP_SSV2_SHIFT)
 #define CP0_SRSMAP_SSV3_SHIFT       (12)      /* Bits 12-15: Shadow set vector 3 */
-#define CP0_SRSMAP_SSV3_MASK        (15 << CP0_SRSMAP_SSV3_SHIFT) 
+#define CP0_SRSMAP_SSV3_MASK        (15 << CP0_SRSMAP_SSV3_SHIFT)
 #define CP0_SRSMAP_SSV4_SHIFT       (16)      /* Bits 16-19: Shadow set vector 4 */
-#define CP0_SRSMAP_SSV4_MASK        (15 << CP0_SRSMAP_SSV4_SHIFT) 
+#define CP0_SRSMAP_SSV4_MASK        (15 << CP0_SRSMAP_SSV4_SHIFT)
 #define CP0_SRSMAP_SSV5_SHIFT       (20)      /* Bits 20-23: Shadow set vector 5 */
-#define CP0_SRSMAP_SSV5_MASK        (15 << CP0_SRSMAP_SSV5_SHIFT) 
+#define CP0_SRSMAP_SSV5_MASK        (15 << CP0_SRSMAP_SSV5_SHIFT)
 #define CP0_SRSMAP_SSV6_SHIFT       (24)      /* Bits 24-27: Shadow set vector 6 */
-#define CP0_SRSMAP_SSV6_MASK        (15 << CP0_SRSMAP_SSV6_SHIFT) 
+#define CP0_SRSMAP_SSV6_MASK        (15 << CP0_SRSMAP_SSV6_SHIFT)
 #define CP0_SRSMAP_SSV7_SHIFT       (28)      /* Bits 28-31: Shadow set vector 7 */
-#define CP0_SRSMAP_SSV7_MASK        (15 << CP0_SRSMAP_SSV7_SHIFT) 
+#define CP0_SRSMAP_SSV7_MASK        (15 << CP0_SRSMAP_SSV7_SHIFT)
 
 /* Register Number: 13 Sel: 0 Name: Cause
  * Function: Cause of last general exception
  * Compliance Level: Required.
  *
  *   See arch/mips/include/mips32/cp0.h
- *   NOTES: The following bits are added in the PIC32: 
+ *   NOTES: The following bits are added in the PIC32:
  */
- 
+
 #define CP0_CAUSE_R                 (1 << 26) /* Bit 26: R bit */
 #define CP0_CAUSE_DC                (1 << 27) /* Bit 27: Disable count */
 #define CP0_CAUSE_TI                (1 << 30) /* Bit 30: Timer interrupt bit *.

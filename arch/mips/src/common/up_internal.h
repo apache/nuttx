@@ -290,12 +290,12 @@ extern void up_usbuninitialize(void);
 /* LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
-extern void up_ledon(int led);
-extern void up_ledoff(int led);
+extern void board_led_on(int led);
+extern void board_led_off(int led);
 #else
-# define up_ledinit()
-# define up_ledon(led)
-# define up_ledoff(led)
+# define board_led_initialize()
+# define board_led_on(led)
+# define board_led_off(led)
 #endif
 
 #endif /* __ASSEMBLY__ */

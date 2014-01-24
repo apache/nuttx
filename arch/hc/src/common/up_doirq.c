@@ -72,7 +72,7 @@
 
 uint8_t *up_doirq(int irq, uint8_t *regs)
 {
-  up_ledon(LED_INIRQ);
+  board_led_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
@@ -112,6 +112,6 @@ uint8_t *up_doirq(int irq, uint8_t *regs)
 
   current_regs = savestate;
 #endif
-  up_ledoff(LED_INIRQ);
+  board_led_off(LED_INIRQ);
   return regs;
 }

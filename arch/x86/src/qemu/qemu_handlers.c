@@ -89,7 +89,7 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
 {
   uint32_t *savestate;
 
-  up_ledon(LED_INIRQ);
+  board_led_on(LED_INIRQ);
 
   /* Nested interrupts are not supported in this implementation.  If you want
    * implemented nested interrupts, you would have to (1) change the way that
@@ -141,7 +141,7 @@ static uint32_t *common_handler(int irq, uint32_t *regs)
 uint32_t *isr_handler(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  up_ledon(LED_INIRQ);
+  board_led_on(LED_INIRQ);
   PANIC(); /* Doesn't return */
   return regs;               /* To keep the compiler happy */
 #else
@@ -149,9 +149,9 @@ uint32_t *isr_handler(uint32_t *regs)
 
   /* Dispatch the interrupt */
 
-  up_ledon(LED_INIRQ);
+  board_led_on(LED_INIRQ);
   ret = common_handler((int)regs[REG_IRQNO], regs);
-  up_ledoff(LED_INIRQ);
+  board_led_off(LED_INIRQ);
   return ret;
 #endif
 }
@@ -167,14 +167,14 @@ uint32_t *isr_handler(uint32_t *regs)
 uint32_t *irq_handler(uint32_t *regs)
 {
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
-  up_ledon(LED_INIRQ);
+  board_led_on(LED_INIRQ);
   PANIC(); /* Doesn't return */
   return regs;               /* To keep the compiler happy */
 #else
   uint32_t *ret;
   int irq;
 
-  up_ledon(LED_INIRQ);
+  board_led_on(LED_INIRQ);
 
   /* Get the IRQ number */
 
@@ -198,7 +198,7 @@ uint32_t *irq_handler(uint32_t *regs)
   /* Dispatch the interrupt */
 
   ret = common_handler(irq, regs);
-  up_ledoff(LED_INIRQ);
+  board_led_off(LED_INIRQ);
   return ret;
 #endif
 }

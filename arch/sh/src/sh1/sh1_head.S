@@ -65,7 +65,7 @@
 	.globl	_up_earlyconsoleinit	/* Early initialization of console driver */
 #endif
 #ifdef CONFIG_ARCH_LEDS
-	.globl	_up_ledinit		/* Boot LED setup */
+	.globl	_board_led_initialize	/* Boot LED setup */
 #endif
 #ifdef CONFIG_DEBUG
 	.globl	_up_lowputc		/* Low-level debug output */
@@ -445,7 +445,7 @@ __start0:
 	/* Initialize onboard LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
-	mov.l   .Lledinit, r0		/* Address of up_ledinit */
+	mov.l   .Lledinit, r0		/* Address of board_led_initialize */
 	jsr     @r0			/* Call it */
 	or      r0, r0			/* Delay slot */
 #endif
@@ -492,7 +492,7 @@ __start0:
 	.long	_up_lowputc
 #endif
 .Lledinit:
-	.long	_up_ledinit
+	.long	_board_led_initialize
 .Losstart:
 	.long   _os_start
 .Lsvect:

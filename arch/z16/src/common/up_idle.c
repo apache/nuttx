@@ -87,11 +87,11 @@ void up_idle(void)
   g_ledtoggle++;
   if (g_ledtoggle == 0x80)
     {
-      up_ledon(LED_IDLE);
+      board_led_on(LED_IDLE);
     }
   else if (g_ledtoggle == 0x00)
     {
-      up_ledoff(LED_IDLE);
+      board_led_off(LED_IDLE);
     }
 #endif
 

@@ -82,7 +82,7 @@ FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs)
 {
   FAR chipreg_t *ret = regs;
  
-  up_ledon(LED_INIRQ);
+  board_led_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
@@ -130,7 +130,7 @@ FAR chipreg_t *up_doirq(int irq, FAR chipreg_t *regs)
       up_enable_irq(irq);
     }
 
-  up_ledoff(LED_INIRQ);
+  board_led_off(LED_INIRQ);
 #endif
 
   return ret;

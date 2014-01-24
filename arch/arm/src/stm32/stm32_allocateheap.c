@@ -474,7 +474,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   /* Return the user-space heap settings */
 
-  up_ledon(LED_HEAPALLOCATE);
+  board_led_on(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)ubase;
   *heap_size  = usize;
 
@@ -489,7 +489,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   /* Return the heap settings */
 
-  up_ledon(LED_HEAPALLOCATE);
+  board_led_on(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_idle_topstack;
   *heap_size  = SRAM1_END - g_idle_topstack;
 

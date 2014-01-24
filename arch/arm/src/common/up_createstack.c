@@ -226,7 +226,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
 #endif
 
-      up_ledon(LED_STACKCREATED);
+      board_led_on(LED_STACKCREATED);
       return OK;
     }
 

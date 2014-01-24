@@ -139,13 +139,13 @@ extern void up_dumpframe(FAR struct xcptcontext *context);
 /* Defined in board/up_leds.c */
 
 #ifdef CONFIG_ARCH_LEDS
-extern void up_ledinit(void);
-extern void up_ledon(uint8_t led);
-extern void up_ledoff(uint8_t led);
+extern void board_led_initialize(void);
+extern void board_led_on(uint8_t led);
+extern void board_led_off(uint8_t led);
 #else
-# define up_ledinit()
-# define up_ledon(led)
-# define up_ledoff(led)
+# define board_led_initialize()
+# define board_led_on(led)
+# define board_led_off(led)
 #endif
 
 #endif /* __ASSEMBLY */
