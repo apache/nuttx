@@ -96,6 +96,10 @@ endif
 #                   reliable code generation.
 #
 
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+endif
+
 # Atollic toolchain under Windows
 
 ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),ATOLLIC)
