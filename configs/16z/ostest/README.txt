@@ -14,10 +14,6 @@ ostest.zfpproj is a simple ZDS II - ZNEO 5.0.1 project that will allow you
 
     ostest.hex, ostest.map, ostest.lod
 
-ostest.zdzbak is a project file for an older ZDS-II 4.0 version (There is no
-  difference in the files other than for some versioning information at the
-  top).
-
 Loading and Executing Code
 --------------------------
 
