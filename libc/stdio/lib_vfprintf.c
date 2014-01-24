@@ -98,5 +98,6 @@ int vfprintf(FAR FILE *stream, FAR const char *fmt, va_list ap)
       n = lib_vsprintf(&stdoutstream.public, fmt, ap);
       lib_give_semaphore(stream);
     }
+
   return n;
 }

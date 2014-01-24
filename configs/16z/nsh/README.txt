@@ -39,11 +39,12 @@ Interaction with NSH is via the serial console at 57600 8N1 baud.
 
 STATUS
 ------
-1. This configuration does not run correctly.  There is a problem with the
-   serial driver.  When started, some garbled characters appear on the
-   console.  I suspect (a) the UART is not being configured correctly, and
-   (2) UART interrupts are not be set up correctly.
+1. Note that you must apply the ZNEO patch if you are using ZDS-II 5.0.1.
+   See the README.txt file in the parent directory for more information.
 
-2. I bet that this code, like ostest, will not run if started by a hardware
+2. This configuration does not run correctly.  There is currently a problem
+   with the SRAM accesses.
+
+3. I bet that this code, like ostest, will not run if started by a hardware
    reset.  It may only run when started via the debugger.
 

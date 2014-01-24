@@ -1,5 +1,6 @@
-#!/bin/bash
-# configs/z16f2800100zcog/nsh/setenv.sh
+#!/bin/sh
+############################################################################
+# configs/16z/tools/dopatch.sh
 #
 #   Copyright (C) 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -31,40 +32,28 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-# Check how we were executed
-#
+############################################################################
 
-if [ "$_" = "$0" ] ; then
-  echo "You must source this script, not run it!" 1>&2
-  exit 1
-fi
-
+USAGE="${0} \$PWD"
 WD=`pwd`
-if [ ! -x "setenv.sh" ]; then
-  echo "This script must be executed from the top-level NuttX build directory"
+TOOLDIR=${WD}/configs/16z/tools
+ME=${TOOLDIR}/dopatch.sh
+PATCH=${TOOLDIR}/zneo-zdsii-5_0_1-variadic-func-fix.patch
+
+if [ ! -x ${ME} ]; then
+  echo "ERROR:  This script must be executed from the top-level NuttX directory"
+  echo ${USAGE}
   exit 1
 fi
 
-if [ -z "${PATH_ORIG}" ]; then
-  export PATH_ORIG="${PATH}"
+if [ ! -r ${PATCH} ]; then
+  echo "ERROR: Readable patch not found at ${PATCH}"
+  echo ${USAGE}
+  exit 1
 fi
 
-#
-# This is the Cygwin path to location where the ZDS-II tools were installed
-#
-TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/ZiLOG/ZDSII_ZNEO_5.0.1/bin"
+cd .. || \
+  { echo "ERROR: failed to CD to the parent directory"; exit 1; }
 
-#
-# This is the path to the z16f2800100zcog tool directory
-#
-TOOL_DIR="${WD}/configs/z16f2800100zcog/tools"
-
-#
-# Add the path to the toolchain and tool directory to the PATH variable.  NOTE
-# that /bin and /usr/bin preceded the toolchain bin directory.  This is because
-# the ZDSII bin directory includes binaries like make.exe that will interfere
-# with the normal build process if we do not give priority to the versions at
-# /bin and /usr/bin.
-#
-export PATH="/bin:/usr/bin:${TOOLCHAIN_BIN}:${TOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
-echo "PATH : ${PATH}"
+cat ${PATCH} | patch -p1 || \
+  { echo "ERROR: patch failed" ; exit 1; }

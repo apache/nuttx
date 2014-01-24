@@ -50,15 +50,21 @@ if [ -z "${PATH_ORIG}" ]; then
 fi
 
 #
-# This is the Cygwin path to location where the XDS-II tools were installed
+# This is the Cygwin path to location where the ZDS-II tools were installed
 #
 TOOLCHAIN_BIN="/cygdrive/c/Program Files (x86)/ZiLOG/ZDSII_ZNEO_5.0.1/bin"
 
 #
-# Add the path to the toolchain to the PATH variable.  NOTE that /bin and /usr/bin
-# preceded the toolchain bin directory.  This is because the ZDSII bin directory
-# includes binaries like make.exe that will interfere with the normal build process
-# if we do not give priority to the versions at /bin and /usr/bin.
+# This is the path to the 16z tool directory
 #
-export PATH="/bin:/usr/bin:${TOOLCHAIN_BIN}:/sbin:/usr/sbin:${PATH_ORIG}"
+TOOL_DIR="${WD}/configs/16z/tools"
+
+#
+# Add the path to the toolchain and tool directory to the PATH variable.  NOTE
+# that /bin and /usr/bin preceded the toolchain bin directory.  This is because
+# the ZDSII bin directory includes binaries like make.exe that will interfere
+# with the normal build process if we do not give priority to the versions at
+# /bin and /usr/bin.
+#
+export PATH="/bin:/usr/bin:${TOOLCHAIN_BIN}:${TOOL_DIR}:/sbin:/usr/sbin:${PATH_ORIG}"
 echo "PATH : ${PATH}"
