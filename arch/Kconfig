@@ -18,6 +18,7 @@ config ARCH_ARM
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_VFORK
 	select ARCH_HAVE_STACKCHECK
+	select ARCH_HAVE_CUSTOMOPT
 	---help---
 		The ARM architectures
 
@@ -25,6 +26,7 @@ config ARCH_AVR
 	bool "AVR"
 	select ARCH_NOINTC
 	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
 	---help---
 		Atmel 8-bit bit AVR and 32-bit AVR32 architectures
 
@@ -38,6 +40,7 @@ config ARCH_HC
 config ARCH_MIPS
 	bool "MIPS"
 	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
 	---help---
 		MIPS architectures (PIC32)
 

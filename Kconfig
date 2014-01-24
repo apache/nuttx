@@ -574,6 +574,10 @@ config DEBUG_SYMBOLS
 
 endmenu # Debug Options
 
+config ARCH_HAVE_CUSTOMOPT
+	bool
+	default n
+
 choice
 	prompt "Optimization Level"
 	default DEBUG_NOOPT if DEBUG_SYMBOLS
@@ -586,6 +590,7 @@ config DEBUG_NOOPT
 
 config DEBUG_CUSTOMOPT
 	bool "Custom Optimization"
+	depends on ARCH_HAVE_CUSTOMOPT
 	---help---
 		Select a custom debug level.  This is often helpful if you suspect an
 		optimization level error and want to lower the level of optimization.
