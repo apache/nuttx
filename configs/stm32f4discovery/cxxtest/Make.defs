@@ -64,7 +64,6 @@ ifeq ($(WINTOOL),y)
     -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}" \
     -isystem "${shell cygpath -w $(TOPDIR)/include/uClibc++}"
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)}"
-  MAXOPTIMIZATION = -O2
 else
   # Linux/Cygwin-native toolchain 
   MKDEP = $(TOPDIR)/tools/mkdeps.sh

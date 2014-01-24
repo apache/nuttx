@@ -51,7 +51,6 @@ ifeq ($(WINTOOL),y)
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)}"
-  MAXOPTIMIZATION = -O2
 else
   # Linux/Cygwin-native toolchain 
   MKDEP = $(TOPDIR)/tools/mkdeps.sh

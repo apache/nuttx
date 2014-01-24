@@ -46,7 +46,6 @@ ifeq ($(WINTOOL),y)
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include}" -isystem "${shell cygpath -w $(TOPDIR)$(DELIM)include$(DELIM)cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)memory.ld}"
   ARCHSCRIPT += -T "${shell cygpath -w $(TOPDIR)$(DELIM)configs$(DELIM)$(CONFIG_ARCH_BOARD)$(DELIM)scripts$(DELIM)kernel-space.ld}"
-  MAXOPTIMIZATION = -O2
 else
   # Linux/Cygwin-native toolchain 
   MKDEP = $(TOPDIR)$(DELIM)tools$(DELIM)mkdeps.sh
