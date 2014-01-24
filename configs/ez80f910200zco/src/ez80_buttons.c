@@ -164,10 +164,10 @@ void board_button_initialize(void)
 }
 
 /****************************************************************************
- * Name: up_buttons
+ * Name: board_buttons
  ****************************************************************************/
 
-uint8_t up_buttons(void)
+uint8_t board_buttons(void)
 {
   return inp(EZ80_PB_DDR) & 7;
 }

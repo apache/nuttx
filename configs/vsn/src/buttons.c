@@ -82,7 +82,7 @@ void board_button_initialize(void)
 }
 
 
-uint8_t up_buttons(void)
+uint8_t board_buttons(void)
 {
   return stm32_gpioread(GPIO_PUSHBUTTON);
 }

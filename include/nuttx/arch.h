@@ -1019,7 +1019,7 @@ ssize_t up_check_stack_remain(void);
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
- *   After that, up_buttons() may be called to collect the current state of
+ *   After that, board_buttons() may be called to collect the current state of
  *   all buttons or up_irqbutton() may be called to register button interrupt
  *   handlers.
  *
@@ -1034,11 +1034,11 @@ void board_button_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: up_buttons
+ * Name: board_buttons
  *
  * Description:
- *   After board_button_initialize() has been called, up_buttons() may be
- *   called to collect the state of all buttons.  up_buttons() returns an
+ *   After board_button_initialize() has been called, board_buttons() may be
+ *   called to collect the state of all buttons.  board_buttons() returns an
  *   8-bit bit set with each bit associated with a button.  A bit set to
  *   "1" means that the button is depressed; a bit set to "0" means that
  *   the button is released.  The correspondence of the each button bit
@@ -1051,7 +1051,7 @@ void board_button_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-uint8_t up_buttons(void);
+uint8_t board_buttons(void);
 #endif
 
 /****************************************************************************

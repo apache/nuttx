@@ -6512,4 +6512,6 @@
 	* Many files: renamed up_buttoninit() to board_button_initialize to
 	  better conform to the naming standard.  Now ONLY prototypes in
 	  include/nuttx/arch.h (2014-1024).
+	* Rename up_buttons() to board_buttons() for the same reason (2014-
+	  1-14).
 

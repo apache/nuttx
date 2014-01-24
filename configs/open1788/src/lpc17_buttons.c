@@ -119,7 +119,7 @@ static uint8_t g_buttonirq[BOARD_NUM_BUTTONS] =
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
+ *   that, board_buttons() may be called to collect the current state of all
  *   buttons or up_irqbutton() may be called to register button interrupt
  *   handlers.
  *
@@ -138,14 +138,14 @@ void board_button_initialize(void)
 }
 
 /****************************************************************************
- * Name: up_buttons
+ * Name: board_buttons
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
+ *   that, board_buttons() may be called to collect the current state of all
  *   buttons.
  *
- *   up_buttons() may be called at any time to harvest the state of every
+ *   board_buttons() may be called at any time to harvest the state of every
  *   button.  The state of the buttons is returned as a bitset with one
  *   bit corresponding to each button:  If the bit is set, then the button
  *   is pressed.  See the BOARD_BUTTON_*_BIT and BOARD_JOYSTICK_*_BIT
@@ -153,7 +153,7 @@ void board_button_initialize(void)
  *
  ****************************************************************************/
 
-uint8_t up_buttons(void)
+uint8_t board_buttons(void)
 {
   uint8_t ret = 0;
   int i;

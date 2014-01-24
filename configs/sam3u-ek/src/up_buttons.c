@@ -116,7 +116,7 @@ static xcpt_t up_irqbuttonx(int irq, xcpt_t irqhandler, xcpt_t *store)
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
+ *   that, board_buttons() may be called to collect the current state of all
  *   buttons or up_irqbutton() may be called to register button interrupt
  *   handlers.
  *
@@ -129,17 +129,17 @@ void board_button_initialize(void)
 }
 
 /************************************************************************************
- * Name: up_buttons
+ * Name: board_buttons
  *
  * Description:
- *   After board_button_initialize() has been called, up_buttons() may be called to collect
- *   the state of all buttons.  up_buttons() returns an 8-bit bit set with each bit
+ *   After board_button_initialize() has been called, board_buttons() may be called to collect
+ *   the state of all buttons.  board_buttons() returns an 8-bit bit set with each bit
  *   associated with a button.  See the BUTTON* definitions above for the meaning of
  *   each bit in the returned value.
  *
  ************************************************************************************/
 
-uint8_t up_buttons(void)
+uint8_t board_buttons(void)
 {
   uint8_t retval;
 

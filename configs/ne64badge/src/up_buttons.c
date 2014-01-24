@@ -1,5 +1,5 @@
 /****************************************************************************
- * configs/ne64badge/src/up_buttons.c
+ * configs/ne64badge/src/board_buttons.c
  *
  *   Copyright (C) 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -109,10 +109,10 @@ void board_button_initialize(void)
 }
 
 /****************************************************************************
- * Name: up_buttons
+ * Name: board_buttons
  ****************************************************************************/
 
-uint8_t up_buttons(void)
+uint8_t board_buttons(void)
 {
   uint8_t ret    = 0;
 
