@@ -59,11 +59,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   /* Configure Port A, Bit 2 as an output, initial value=1 */
 
@@ -71,10 +71,10 @@ void up_ledinit(void)
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
   switch (led)
     {
@@ -96,10 +96,10 @@ void up_ledon(int led)
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   imxgpio_clroutput(GPIOA, 2);  /* Port A, Bit 2 = 0 */
 }

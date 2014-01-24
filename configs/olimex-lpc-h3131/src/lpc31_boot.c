@@ -113,5 +113,5 @@ void lpc31_boardinitialize(void)
 
   /* Configure on-board LEDs in all cases */
 
-  up_ledinit();
+  board_led_initialize();
 }

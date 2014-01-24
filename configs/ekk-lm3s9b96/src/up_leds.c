@@ -91,27 +91,27 @@
 static uint8_t g_nest;
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   leddbg("Initializing\n");
 
   /* Configure Port D, Bit 0 as an output, initial value=OFF */
 
-  led_dumpgpio("up_ledinit before lm_configgpio()");
+  led_dumpgpio("board_led_initialize before lm_configgpio()");
   lm_configgpio(LED_GPIO);
-  led_dumpgpio("up_ledinit after lm_configgpio()");
+  led_dumpgpio("board_led_initialize after lm_configgpio()");
   g_nest = 0;
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
   switch (led)
     {
@@ -127,18 +127,18 @@ void up_ledon(int led)
         g_nest++;
       case LED_IRQSENABLED:
       case LED_STACKCREATED:
-        led_dumpgpio("up_ledon: before lm_gpiowrite()");
+        led_dumpgpio("board_led_on: before lm_gpiowrite()");
         lm_gpiowrite(LED_GPIO, false);
-        led_dumpgpio("up_ledon: after lm_gpiowrite()");
+        led_dumpgpio("board_led_on: after lm_gpiowrite()");
         break;
     }
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   switch (led)
     {
@@ -155,9 +155,9 @@ void up_ledoff(int led)
       case LED_PANIC:
         if (--g_nest <= 0)
           {
-            led_dumpgpio("up_ledoff: before lm_gpiowrite()");
+            led_dumpgpio("board_led_off: before lm_gpiowrite()");
             lm_gpiowrite(LED_GPIO, true);
-            led_dumpgpio("up_ledoff: after lm_gpiowrite()");
+            led_dumpgpio("board_led_off: after lm_gpiowrite()");
           }
         break;
     }

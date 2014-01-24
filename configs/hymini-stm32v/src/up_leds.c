@@ -207,11 +207,11 @@ static void led_setonoff(unsigned int bits)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   /* Configure LED1 & LED2 GPIOs for output */
   stm32_configgpio(GPIO_LED1);
@@ -219,19 +219,19 @@ void up_ledinit(void)
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
   led_setonoff(ON_BITS(g_ledbits[led]));
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   led_setonoff(OFF_BITS(g_ledbits[led]));
 }

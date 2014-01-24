@@ -99,23 +99,23 @@ static bool g_uninitialized = true;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lpc17_ledinit/up_ledinit
+ * Name: lpc17_ledinit/board_led_initialize
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
 void lpc17_ledinit(void) /* Name when invoked externally */
 #else
-void up_ledinit(void)    /* Name when invoked via up_boot.c */
+void board_led_initialize(void)    /* Name when invoked via up_boot.c */
 #endif
 {
   /* Configure all LED GPIO lines */
 
-  led_dumpgpio("up_ledinit() Entry)");
+  led_dumpgpio("board_led_initialize() Entry)");
 
   lpc17_configgpio(LPC1766STK_LED1);
   lpc17_configgpio(LPC1766STK_LED2);
 
-  led_dumpgpio("up_ledinit() Exit");
+  led_dumpgpio("board_led_initialize() Exit");
 }
 
 /****************************************************************************
@@ -149,11 +149,11 @@ void lpc17_setleds(uint8_t ledset)
 #endif
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledon(int led)
+void board_led_on(int led)
 {
   switch (led)
     {
@@ -181,11 +181,11 @@ void up_ledon(int led)
 #endif
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   switch (led)
     {

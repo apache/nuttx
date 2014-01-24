@@ -234,7 +234,7 @@ void up_ledpminitialize(void)
   int ret = pm_register(&g_ledscb);
   if (ret != OK)
   {
-      up_ledon(LED_ASSERTION);
+      board_led_on(LED_ASSERTION);
     }
 }
 #endif /* CONFIG_PM */

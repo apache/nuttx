@@ -206,14 +206,14 @@ int lpc31_mmcsd_initialize(int slot, int minor)
 #endif
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  *
  * Description:
  *   Configure LEDs.  LEDs are left in the OFF state.
  *
  ****************************************************************************/
 
-void up_ledinit(void);
+void board_led_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __CONFIGS_OLIMEX_LPC_H3131_SRC_LPC_H3131_H */

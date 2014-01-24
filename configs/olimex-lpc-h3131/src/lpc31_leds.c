@@ -81,14 +81,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  *
  * Description:
  *   Configure LEDs.  LEDs are left in the OFF state.
  *
  ****************************************************************************/
 
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   /* Turn off both LEDs */
 
@@ -97,7 +97,7 @@ void up_ledinit(void)
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  *
  * Description:
  *   Select the "logical" ON state:
@@ -118,7 +118,7 @@ void up_ledinit(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledon(int led)
+void board_led_on(int led)
 {
   switch (led)
     {
@@ -143,7 +143,7 @@ void up_ledon(int led)
 #endif
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  *
  * Description:
  *   Select the "logical" OFF state:
@@ -164,7 +164,7 @@ void up_ledon(int led)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   switch (led)
     {

@@ -89,10 +89,10 @@ static uint32_t g_ledcfg[BOARD_NLEDS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
-void up_ledinit(void)
+void board_led_initialize(void)
 {
    /* Configure LED1-4 GPIOs for output */
 

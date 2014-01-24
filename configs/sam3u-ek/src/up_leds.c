@@ -162,10 +162,10 @@ static void up_setleds(uint8_t state)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   (void)sam_configgpio(GPIO_LED0);
   (void)sam_configgpio(GPIO_LED1);
@@ -173,19 +173,19 @@ void up_ledinit(void)
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
   up_setleds(g_ledon[led & 7]);
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   up_setleds(g_ledoff[led & 7]);
 }

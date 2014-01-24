@@ -79,6 +79,6 @@ void up_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  up_ledinitialize();
+  board_led_initializeialize();
 #endif
 }

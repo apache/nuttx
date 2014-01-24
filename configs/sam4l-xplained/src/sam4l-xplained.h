@@ -359,11 +359,11 @@ int sam_slcd_initialize(void);
 #endif
 
 /************************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void);
+void board_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
