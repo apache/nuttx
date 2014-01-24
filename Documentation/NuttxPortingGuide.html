@@ -2679,13 +2679,13 @@ else
 /* Defined in board/up_leds.c */
 
 #ifdef CONFIG_ARCH_LEDS
-extern void up_ledinit(void);
-extern void up_ledon(int led);
-extern void up_ledoff(int led);
+extern void board_led_initialize(void);
+extern void board_led_on(int led);
+extern void board_led_off(int led);
 #else
-# define up_ledinit()
-# define up_ledon(led)
-# define up_ledoff(led)
+# define board_led_initialize()
+# define board_led_on(led)
+# define board_led_off(led)
 #endif
 </pre></ul>
 <p>
@@ -2693,14 +2693,14 @@ extern void up_ledoff(int led);
 <p>
 <ul>
   <li>
-    <code>void up_ledinit(void)</code> is called early in power-up initialization to initialize the LED hardware.
+    <code>void board_led_initialize(void)</code> is called early in power-up initialization to initialize the LED hardware.
   </li>
   <li>
-    <code>up_ledon(int led)</code> is called to instantiate the LED presentation of the event.
+    <code>board_led_on(int led)</code> is called to instantiate the LED presentation of the event.
     The <code>led</code> argument is one of the definitions provided in <code><i>&lt;board-name&gt;</i>/include/board.h</code>.
   </li>
   <li>
-    <code>up_ledoff(int led</code>is called to terminate the LED presentation of the event.
+    <code>board_led_off(int led</code>is called to terminate the LED presentation of the event.
     The <code>led</code> argument is one of the definitions provided in <code><i>&lt;board-name&gt;</i>/include/board.h</code>.
     Note that only <code>LED_INIRQ</code>, <code>LED_SIGNAL</code>, <code>LED_ASSERTION</code>, and <code>LED_PANIC</code>
     indications are terminated.
