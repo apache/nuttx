@@ -67,6 +67,7 @@ static const char *dequote_list[] =
   "CONFIG_EXECFUNCS_SYMTAB",           /* Symbol table used by exec[l|v] */
   "CONFIG_PASS1_BUILDIR",              /* Pass1 build directory */
   "CONFIG_PASS1_TARGET",               /* Pass1 build target */
+  "CONFIG_DEBUG_OPTLEVEL",             /* Custom debug level */
 
   /* NxWidgets/NxWM */
 

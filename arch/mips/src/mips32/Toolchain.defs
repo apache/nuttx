@@ -99,12 +99,16 @@ endif
 #                   reliable code generation.
 #
 
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+endif
+
 # Generic GNU mip32 toolchain on OS X or Linux
 # including Pinguino mips-elf toolchain
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),GNU_ELF)
   CROSSDEV ?= mips-elf-
-  MAXOPTIMIZATION = -O2
+  MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=24kc -EL
   ARCHPICFLAGS = -fpic -membedded-pic
   LDFLAGS += -nostartfiles -nodefaultlibs
@@ -116,7 +120,7 @@ endif
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL)
   CROSSDEV ?= pic32-
   # CROSSDEV ?= xc32-
-  MAXOPTIMIZATION = -O2
+  MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=elf32pic32mx -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
   LDFLAGS += -nostartfiles -nodefaultlibs
@@ -131,7 +135,7 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW)
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif
-  MAXOPTIMIZATION = -O2
+  MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=elf32pic32mx -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
   LDFLAGS += -nostartfiles -nodefaultlibs
@@ -143,7 +147,7 @@ endif
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPL_LITE)
   CROSSDEV ?= pic32-
   # CROSSDEV ?= xc32-
-  # MAXOPTIMIZATION = -O2
+  # MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=elf32pic32mx -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
   LDFLAGS += -nostartfiles -nodefaultlibs
@@ -158,7 +162,7 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPW_LITE)
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif
-  # MAXOPTIMIZATION = -O2
+  # MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=elf32pic32mx -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
   LDFLAGS += -nostartfiles -nodefaultlibs
@@ -169,7 +173,7 @@ endif
 
 ifeq ($(CONFIG_MIPS32_TOOLCHAIN),MICROCHIPOPENL)
   CROSSDEV ?= mypic32-
-  # MAXOPTIMIZATION = -O2
+  # MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mprocessor=elf32pic32mx -mno-float -mlong32 -membedded-data
   ARCHPICFLAGS = -fpic -membedded-pic
   LDFLAGS += -nostartfiles -nodefaultlibs
@@ -183,7 +187,7 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),PINGUINOW)
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif
-  MAXOPTIMIZATION = -O2
+  MAXOPTIMIZATION ?= -O2
   ARCHCPUFLAGS = -mlong32 -membedded-data -msoft-float -march=24kc -EL
   ARCHPICFLAGS = -fpic -membedded-pic
   LDFLAGS += -nostartfiles -nodefaultlibs

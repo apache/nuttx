@@ -128,7 +128,7 @@
 /* Most chip variants support external memory */
 
 #ifdef Z16F_HAVE_EXTMEM
-#  define Z16F_EXTMEMCS0_BASE   _HX32(00020000) /* External memory at CS0 */
+#  define Z16F_EXTMEMCS0_BASE   _HX32(00000000) /* External memory at CS0 */
 #  define Z16F_EXTMEMCS0_SIZE   _HX32(007e0000) /*   (actual depends on board) */
 #  define Z16F_EXTMEMCS1_BASE   _HX32(ff800000) /* External memory at CS1 */
 #  define Z16F_EXTMEMCS1_SIZE   _HX32(00700000) /*   (actual depends on board) */
@@ -260,10 +260,10 @@
 #define Z16F_OSCCTL_XTLEN       _HX8(40)        /* Bit 6: Crystal oscillator enabled */
 #define Z16F_OSCCTL_WDTEN       _HX8(20)        /* Bit 5: Watchdog timer enabled */
 #define Z16F_OSCCTL_POFEN       _HX8(10)        /* Bit 4: Failure detection enabled */
-#define Z16F_OSCCTL_WDFEN       _HX8(08)        /* Bit 3: WD Failuare detection enabled*/
+#define Z16F_OSCCTL_WDFEN       _HX8(08)        /* Bit 3: WD Failure detection enabled*/
 #define Z16F_OSCCTL_FLPEN       _HX8(04)        /* Bit 2: Flash low power enabled */
-#define Z16F_OSCCTL_INT56       _HX8(00)        /* Bits 0-1=0: Intenal 5.6 MHz */
-#define Z16F_OSCCTL_EXTCLK      _HX8(02)        /* Bits 0-1=2: Extenal clock */
+#define Z16F_OSCCTL_INT56       _HX8(00)        /* Bits 0-1=0: Internal 5.6 MHz */
+#define Z16F_OSCCTL_EXTCLK      _HX8(02)        /* Bits 0-1=2: External clock */
 #define Z16F_OSCCTL_WDT10KHZ    _HX8(03)        /* Bits 0-1=3: WD Timer 10 KHz*/
 
 /* GPIO Port A-K ********************************************************************/

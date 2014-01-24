@@ -17,6 +17,7 @@ config NUTTX_NEWCONFIG
 	default y
 
 menu "Build Setup"
+
 config EXPERIMENTAL
 	bool "Prompt for development and/or incomplete code/drivers"
 
@@ -148,6 +149,7 @@ config BUILD_2PASS
 		go anywhere.
 
 if BUILD_2PASS
+
 config PASS1_TARGET
 	string "Pass one target"
 	default "all"
@@ -191,8 +193,8 @@ config NUTTX_USERSPACE
 		address where the user-space blob is loaded into memory.  NuttX will
 		expect to find and instance of struct userspace_s at this location.
 
-endif
-endmenu
+endif # Build 2-pass
+endmenu # Build Setup
 
 menu "Binary Output Formats"
 
@@ -226,7 +228,8 @@ config RAW_BINARY
 		Create the nuttx.bin in the raw binary format that is used with many
 		different loaders using the GNU objcopy program.  This option
 		should not be selected if you are not using the GNU toolchain.
-endmenu
+
+endmenu # Binary Output Formats
 
 menu "Customize Header Files"
 
@@ -298,7 +301,7 @@ config ARCH_STDARG_H
 		ARCH_STDARG_H=y and providing. If ARCH_STDARG_H, is not defined, then
 		the stdarg.h header file will stay out-of-the-way in include/nuttx/.
 
-endmenu
+endmenu # Customize Header Files
 
 menu "Debug Options"
 
@@ -321,6 +324,7 @@ config ARCH_HAVE_HEAPCHECK
 	default n
 
 if DEBUG
+
 config DEBUG_VERBOSE
 	bool "Enable Debug Verbose Output"
 	default n
@@ -560,7 +564,7 @@ config DEBUG_AUDIO
 		device drivers. (disabled by default).  Support for this debug option
 		is architecture-specific and may not be available for some MCUs.
 
-endif
+endif # DEBUG
 
 config DEBUG_SYMBOLS
 	bool "Generate Debug Symbols"
@@ -568,15 +572,40 @@ config DEBUG_SYMBOLS
 	---help---
 		Build with debug symbols (needed for use with a debugger).
 
+endmenu # Debug Options
+
+choice
+	prompt "Optimization Level"
+	default DEBUG_NOOPT if DEBUG_SYMBOLS
+	default DEBUG_FULLOPT if !DEBUG_SYMBOLS
+
 config DEBUG_NOOPT
-	bool "Suppress optimization"
-	default y if DEBUG_SYMBOLS
-	default n if !DEBUG_SYMBOLS
+	bool "Suppress Optimization"
 	---help---
 		Build without optimization.  This is often helpful when debugging code.
 
-endmenu
-endmenu
+config DEBUG_CUSTOMOPT
+	bool "Custom Optimization"
+	---help---
+		Select a custom debug level.  This is often helpful if you suspect an
+		optimization level error and want to lower the level of optimization.
+
+config DEBUG_FULLOPT
+	bool "Normal, Full optimization"
+	---help---
+		Build full optimization.  This is the normal case for production
+		firmware.
+
+endchoice # Optimization Level
+
+config DEBUG_OPTLEVEL
+	string "Custom Optimization Level"
+	default "-O2"
+	depends on DEBUG_CUSTOMOPT
+	---help---
+		This string represents the custom optimization level that will be used if DEBUG_CUSTOMOPT.
+
+endmenu # Build Setup
 
 menu "System Type"
 source "arch/Kconfig"

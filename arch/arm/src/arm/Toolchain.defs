@@ -109,6 +109,10 @@ endif
 #                   reliable code generation.
 #
 
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+endif
+
 # NuttX buildroot under Linux or Cygwin
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN),BUILDROOT)
@@ -119,7 +123,7 @@ else
   CROSSDEV ?= arm-nuttx-eabi-
   ARCROSSDEV ?= arm-nuttx-eabi-
 endif
-  MAXOPTIMIZATION = -Os
+  MAXOPTIMIZATION ?= -Os
 endif
 
 # CodeSourcery under Linux
@@ -127,7 +131,7 @@ endif
 ifeq ($(CONFIG_ARM_TOOLCHAIN),CODESOURCERYL)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION = -O2
+  MAXOPTIMIZATION ?= -O2
 endif
 
 # CodeSourcery under Windows
@@ -135,7 +139,7 @@ endif
 ifeq ($(CONFIG_ARM_TOOLCHAIN),CODESOURCERYW)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION = -O2
+  MAXOPTIMIZATION ?= -O2
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif
@@ -156,7 +160,7 @@ endif
 ifeq ($(CONFIG_ARM_TOOLCHAIN),GNU_EABIL)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION = -Os
+  MAXOPTIMIZATION ?= -Os
 endif
 
 # Generic GNU EABI toolchain under Windows
@@ -164,7 +168,7 @@ endif
 ifeq ($(CONFIG_ARM_TOOLCHAIN),GNU_EABIW)
   CROSSDEV ?= arm-none-eabi-
   ARCROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION = -Os
+  MAXOPTIMIZATION ?= -Os
   ifneq ($(CONFIG_WINDOWS_NATIVE),y)
     WINTOOL = y
   endif

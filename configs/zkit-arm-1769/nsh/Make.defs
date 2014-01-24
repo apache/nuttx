@@ -50,7 +50,6 @@ ifeq ($(WINTOOL),y)
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/ld.script}"
-  MAXOPTIMIZATION = -O2
   NXFLATLDSCRIPT = -T "${shell cygpath -w $(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld}"
 else
   # Linux/Cygwin-native toolchain
