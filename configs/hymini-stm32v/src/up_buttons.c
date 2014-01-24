@@ -62,7 +62,7 @@
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
  *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or up_irqbutton() may be called to register button interrupt
+ *   all buttons or board_button_irq() may be called to register button interrupt
  *   handlers.
  *
  ****************************************************************************/
@@ -108,7 +108,7 @@ uint8_t board_buttons(void)
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
  *   After that, board_buttons() may be called to collect the current state of
- *   all buttons or up_irqbutton() may be called to register button interrupt
+ *   all buttons or board_button_irq() may be called to register button interrupt
  *   handlers.
  *
  *   After board_button_initialize() has been called, board_buttons() may be
@@ -117,7 +117,7 @@ uint8_t board_buttons(void)
  *   BUTTON_*_BIT and JOYSTICK_*_BIT definitions in board.h for the meaning
  *  of each bit.
  *
- *   up_irqbutton() may be called to register an interrupt handler that will
+ *   board_button_irq() may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See
  *   the BUTTON_* definitions in board.h for the meaning of enumeration
@@ -127,7 +127,7 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler)
   {
     xcpt_t oldhandler = NULL;
     uint32_t pinset = GPIO_BTN_KEYA;

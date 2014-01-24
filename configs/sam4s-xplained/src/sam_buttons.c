@@ -76,7 +76,7 @@ static xcpt_t g_irqbp2;
  * Description:
  *   board_button_initialize() must be called to initialize button resources.  After
  *   that, board_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
+ *   buttons or board_button_irq() may be called to register button interrupt
  *   handlers.
  *
  ****************************************************************************/
@@ -103,7 +103,7 @@ uint8_t board_buttons(void)
 }
 
 /****************************************************************************
- * Name: up_irqbutton
+ * Name: board_button_irq
  *
  * Description:
  *   This function may be called to register an interrupt handler that will
@@ -121,7 +121,7 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
   xcpt_t oldhandler = NULL;
 

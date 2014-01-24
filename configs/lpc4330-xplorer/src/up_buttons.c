@@ -98,7 +98,7 @@ static uint8_t g_buttonirq[BOARD_NUM_BUTTONS] =
  * Description:
  *   board_button_initialize() must be called to initialize button resources.  After
  *   that, board_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
+ *   buttons or board_button_irq() may be called to register button interrupt
  *   handlers.
  *
  ****************************************************************************/
@@ -160,24 +160,24 @@ uint8_t board_buttons(void)
  *
  * Description:
  *   board_button_initialize() must be called to initialize button resources.  After
- *   that, up_irqbutton() may be called to register button interrupt handlers.
+ *   that, board_button_irq() may be called to register button interrupt handlers.
  *
- *   up_irqbutton() may be called to register an interrupt handler that will
+ *   board_button_irq() may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is a
  *   button enumeration value that uniquely identifies a button resource. See the
  *   BOARD_BUTTON_* and BOARD_JOYSTICK_* definitions in board.h for the meaning
  *   of enumeration values.  The previous interrupt handler address is returned
  *   (so that it may restored, if so desired).
  *
- *   Note that up_irqbutton() also enables button interrupts.  Button
+ *   Note that board_button_irq() also enables button interrupts.  Button
  *   interrupts will remain enabled after the interrupt handler is attached.
- *   Interrupts may be disabled (and detached) by calling up_irqbutton with
+ *   Interrupts may be disabled (and detached) by calling board_button_irq with
  *   irqhandler equal to NULL.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_ARCH_IRQBUTTONS) && defined(CONFIG_GPIO_IRQ)
-xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
   xcpt_t oldhandler = NULL;
   irqstate_t flags;

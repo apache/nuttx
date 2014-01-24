@@ -135,7 +135,7 @@ void up_pmbuttons(void)
   board_button_initialize();
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
-      xcpt_t oldhandler = up_irqbutton(0, button_handler);
+      xcpt_t oldhandler = board_button_irq(0, button_handler);
 
       if (oldhandler != NULL)
         {

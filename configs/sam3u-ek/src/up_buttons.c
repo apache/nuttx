@@ -70,15 +70,15 @@ static xcpt_t g_irqbutton2;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqbuttonx
+ * Name: board_button_irqx
  *
  * Description:
- *   This function implements the core of the up_irqbutton() logic.
+ *   This function implements the core of the board_button_irq() logic.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-static xcpt_t up_irqbuttonx(int irq, xcpt_t irqhandler, xcpt_t *store)
+static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler, xcpt_t *store)
 {
   xcpt_t oldhandler;
   irqstate_t flags;
@@ -117,7 +117,7 @@ static xcpt_t up_irqbuttonx(int irq, xcpt_t irqhandler, xcpt_t *store)
  * Description:
  *   board_button_initialize() must be called to initialize button resources.  After
  *   that, board_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
+ *   buttons or board_button_irq() may be called to register button interrupt
  *   handlers.
  *
  ****************************************************************************/
@@ -150,7 +150,7 @@ uint8_t board_buttons(void)
 }
 
 /****************************************************************************
- * Name: up_irqbutton
+ * Name: board_button_irq
  *
  * Description:
  *   This function may be called to register an interrupt handler that will
@@ -168,15 +168,15 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
   if (id == BUTTON1)
     {
-      return up_irqbuttonx(IRQ_BUTTON1, irqhandler, &g_irqbutton1);
+      return board_button_irqx(IRQ_BUTTON1, irqhandler, &g_irqbutton1);
     }
   else if (id == BUTTON2)
     {
-      return up_irqbuttonx(IRQ_BUTTON2, irqhandler, &g_irqbutton2);
+      return board_button_irqx(IRQ_BUTTON2, irqhandler, &g_irqbutton2);
     }
   else
     {

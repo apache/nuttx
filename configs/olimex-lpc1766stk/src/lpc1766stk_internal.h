@@ -144,7 +144,7 @@
  * NOTES:
  * 1. Pull-ups are not required because the pins are already pulled-up by
  *    through resistors on the board.
- * 2. All buttons are capable of supporting interrupts if up_irqbutton() is
+ * 2. All buttons are capable of supporting interrupts if board_button_irq() is
  *    called to attach an interrupt handler.  Interrupts are configured to
  *    occur on both edges.
  */
@@ -170,7 +170,7 @@
  * NOTES:
  * 1. Pull-ups are not required because the pins are already pulled-up by
  *    through resistors on the board.
- * 2. All buttons are capable of supporting interrupts if up_irqbutton() is
+ * 2. All buttons are capable of supporting interrupts if board_button_irq() is
  *    called to attach an interrupt handler.  Interrupts are configured to
  *    occur on both edges.
  */

@@ -67,16 +67,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_irqbuttonx
+ * Name: board_button_irqx
  *
  * Description:
- *   This function implements the core of the up_irqbutton() logic.
+ *   This function implements the core of the board_button_irq() logic.
  *
  ****************************************************************************/
 
 #if defined(CONFIG_AVR32_GPIOIRQ) && defined(CONFIG_ARCH_IRQBUTTONS) && \
    (defined(CONFIG_AVR32DEV_BUTTON1_IRQ) || defined(CONFIG_AVR32DEV_BUTTON2_IRQ))
-static xcpt_t up_irqbuttonx(int irq, xcpt_t irqhandler)
+static xcpt_t board_button_irqx(int irq, xcpt_t irqhandler)
 {
   xcpt_t oldhandler;
   
@@ -111,7 +111,7 @@ static xcpt_t up_irqbuttonx(int irq, xcpt_t irqhandler)
  * Description:
  *   board_button_initialize() must be called to initialize button resources.
  *   After  that, board_buttons() may be called to collect the current state of
- *   all  buttons or up_irqbutton() may be called to register button interrupt
+ *   all  buttons or board_button_irq() may be called to register button interrupt
  *   handlers.
  *
  ****************************************************************************/
@@ -145,7 +145,7 @@ uint8_t board_buttons(void)
 }
 
 /****************************************************************************
- * Name: up_irqbutton
+ * Name: board_button_irq
  *
  * Description:
  *   This function may be called to register an interrupt handler that will
@@ -163,19 +163,19 @@ uint8_t board_buttons(void)
  ****************************************************************************/
 
 #if defined(CONFIG_AVR32_GPIOIRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
-xcpt_t up_irqbutton(int id, xcpt_t irqhandler)
+xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
 #ifdef CONFIG_AVR32DEV_BUTTON1_IRQ
   if (id == BUTTON1)
     {
-      return up_irqbuttonx(GPIO_BUTTON1_IRQ, irqhandler);
+      return board_button_irqx(GPIO_BUTTON1_IRQ, irqhandler);
     }
   else
 #endif
 #ifdef CONFIG_AVR32DEV_BUTTON2_IRQ
   if (id == BUTTON2)
     {
-      return up_irqbuttonx(GPIO_BUTTON2_IRQ, irqhandler);
+      return board_button_irqx(GPIO_BUTTON2_IRQ, irqhandler);
     }
   else
 #endif
