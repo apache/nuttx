@@ -6514,4 +6514,5 @@
 	  include/nuttx/arch.h (2014-1024).
 	* Rename up_buttons() to board_buttons() for the same reason (2014-
 	  1-14).
+	* Rename up_irqbutton() to board_button_irq() (2014-1-24).
 

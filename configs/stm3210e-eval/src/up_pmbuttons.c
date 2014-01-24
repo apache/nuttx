@@ -304,7 +304,7 @@ void up_pmbuttons(void)
   int i;
   for (i = CONFIG_PM_IRQBUTTONS_MIN; i <= CONFIG_PM_IRQBUTTONS_MAX; i++)
     {
-      xcpt_t oldhandler = up_irqbutton(i, g_buttonhandlers[BUTTON_INDEX(i)]);
+      xcpt_t oldhandler = board_button_irq(i, g_buttonhandlers[BUTTON_INDEX(i)]);
 
       if (oldhandler != NULL)
         {
