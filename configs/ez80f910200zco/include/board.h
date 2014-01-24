@@ -80,11 +80,6 @@ extern "C" {
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_ARCH_BUTTONS
-EXTERN void up_buttoninit(void);
-EXTERN uint8_t up_buttons(void);
-#endif
-
 #undef EXTERN
 #if defined(__cplusplus)
 }

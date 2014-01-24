@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam4s-xplained/src/sam_buttons.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
 #include <arch/irq.h>
@@ -70,17 +71,17 @@ static xcpt_t g_irqbp2;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_buttoninit
+ * Name: board_button_initialize
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
+ *   board_button_initialize() must be called to initialize button resources.  After
  *   that, up_buttons() may be called to collect the current state of all
  *   buttons or up_irqbutton() may be called to register button interrupt
  *   handlers.
  *
  ****************************************************************************/
 
-void up_buttoninit(void)
+void board_button_initialize(void)
 {
   (void)sam_configgpio(GPIO_BP2);
 }
@@ -89,7 +90,7 @@ void up_buttoninit(void)
  * Name: up_buttons
  *
  * Description:
- *   After up_buttoninit() has been called, up_buttons() may be called to collect
+ *   After board_button_initialize() has been called, up_buttons() may be called to collect
  *   the state of all buttons.  up_buttons() returns an 8-bit bit set with each bit
  *   associated with a button.  See the BUTTON* definitions above for the meaning of
  *   each bit in the returned value.

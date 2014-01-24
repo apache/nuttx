@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/viewtool-stm32f107/src/stm32_highpri.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -157,10 +157,7 @@ void tim6_handler(void)
  * Name: highpri_main
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
- *   handlers.
+ *   Main entry point in into the high priority interrupt test.
  *
  ****************************************************************************/
 

@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/cloudctrl/src/up_buttons.c
  *
- *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *           Darcy Gong <darcy.gong@gmail.com>
  *
@@ -42,7 +42,9 @@
 
 #include <stdint.h>
 
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
+
 #include "cloudctrl-internal.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
@@ -72,17 +74,17 @@ static const uint16_t g_buttons[NUM_BUTTONS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_buttoninit
+ * Name: board_button_initialize
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After  that, up_buttons() may be called to collect the current state of
+ *   all buttons or up_irqbutton() may be called to register button interrupt
  *   handlers.
  *
  ****************************************************************************/
 
-void up_buttoninit(void)
+void board_button_initialize(void)
 {
   int i;
 
@@ -130,28 +132,30 @@ uint8_t up_buttons(void)
   return ret;
 }
 
-/************************************************************************************
+/****************************************************************************
  * Button support.
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After  that, up_buttons() may be called to collect the current state of
+ *   all buttons or up_irqbutton() may be called to register button interrupt
  *   handlers.
  *
- *   After up_buttoninit() has been called, up_buttons() may be called to
- *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON_*_BIT and JOYSTICK_*_BIT
- *   definitions in board.h for the meaning of each bit.
+ *   After board_button_initialize() has been called, up_buttons() may be
+ *   called to  collect the state of all buttons.  up_buttons() returns an
+ *   8-bit bit set with each bit associated with a button.  See the
+ *   BUTTON_*_BIT and JOYSTICK_*_BIT definitions in board.h for the meaning
+ *   of each bit.
  *
  *   up_irqbutton() may be called to register an interrupt handler that will
  *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
+ *   button enumeration value that uniquely identifies a button resource. See
+ *   the
+ *   BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of
+ *   enumeration  value.  The previous interrupt handler address is returned
+ *   (so that it may restored, if so desired).
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t up_irqbutton(int id, xcpt_t irqhandler)

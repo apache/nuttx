@@ -1,7 +1,7 @@
 /****************************************************************************
  * configs/sam3u-ek/src/up_leds.c
  *
- *   Copyright (C) 2010-2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2010-2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
 #include <arch/irq.h>
@@ -87,12 +88,12 @@ static xcpt_t up_irqbuttonx(int irq, xcpt_t irqhandler)
 
   if (irqhandler)
     {
-	  gpio_irqenable(irq);
-	}
+      gpio_irqenable(irq);
+    }
   else
     {
-	  gpio_irqdisable(irq);
-	}
+      gpio_irqdisable(irq);
+    }
 
   /* Return the old button handler (so that it can be restored) */
 
@@ -105,17 +106,17 @@ static xcpt_t up_irqbuttonx(int irq, xcpt_t irqhandler)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_buttoninit
+ * Name: board_button_initialize
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After  that, up_buttons() may be called to collect the current state of
+ *   all  buttons or up_irqbutton() may be called to register button interrupt
  *   handlers.
  *
  ****************************************************************************/
 
-void up_buttoninit(void)
+void board_button_initialize(void)
 {
   (void)at32uc3_configgpio(PINMUX_GPIO_BUTTON1);
   (void)at32uc3_configgpio(PINMUX_GPIO_BUTTON2);
@@ -125,10 +126,11 @@ void up_buttoninit(void)
  * Name: up_buttons
  *
  * Description:
- *   After up_buttoninit() has been called, up_buttons() may be called to
- *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON* definitions
- *   above for the meaning of each bit in the returned value.
+ *   After board_button_initialize() has been called, up_buttons() may be
+ *   called to collect the state of all buttons.  up_buttons() returns an
+ *   8-bit bit set with each bit associated with a button.  See the BUTTON*
+ *   definitions in the board.h header file for the meaning of each bit in
+ *   the returned value.
  *
  ****************************************************************************/
 

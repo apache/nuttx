@@ -40,7 +40,10 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
+
 #include "olimex-stm32-p207.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
@@ -77,17 +80,17 @@ static const uint16_t g_buttons[NUM_BUTTONS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_buttoninit
+ * Name: board_button_initialize
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
+ *   board_button_initialize() must be called to initialize button resources.  After
  *   that, up_buttons() may be called to collect the current state of all
  *   buttons or up_irqbutton() may be called to register button interrupt
  *   handlers.
  *
  ****************************************************************************/
 
-void up_buttoninit(void)
+void board_button_initialize(void)
 {
   int i;
 
@@ -153,12 +156,12 @@ uint8_t up_buttons(void)
  * Button support.
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
+ *   board_button_initialize() must be called to initialize button resources.  After
  *   that, up_buttons() may be called to collect the current state of all
  *   buttons or up_irqbutton() may be called to register button interrupt
  *   handlers.
  *
- *   After up_buttoninit() has been called, up_buttons() may be called to
+ *   After board_button_initialize() has been called, up_buttons() may be called to
  *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
  *   with each bit associated with a button.  See the BUTTON_*_BIT
  *   definitions in board.h for the meaning of each bit.

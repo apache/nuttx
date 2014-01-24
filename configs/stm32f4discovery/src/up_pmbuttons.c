@@ -132,7 +132,7 @@ void up_pmbuttons(void)
 {
   /* Initialize the button GPIOs */
 
-  up_buttoninit();
+  board_button_initialize();
 
 #ifdef CONFIG_ARCH_IRQBUTTONS
       xcpt_t oldhandler = up_irqbutton(0, button_handler);

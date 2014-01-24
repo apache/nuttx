@@ -6509,3 +6509,7 @@
 	  distribution from ARM mean that we need to be explicit about branch
 	  sizes; one or more of the wide branch opcodes results in bad table
 	  branching.  From Mike Smith (2014-1-23).
+	* Many files: renamed up_buttoninit() to board_button_initialize to
+	  better conform to the naming standard.  Now ONLY prototypes in
+	  include/nuttx/arch.h (2014-1024).
+

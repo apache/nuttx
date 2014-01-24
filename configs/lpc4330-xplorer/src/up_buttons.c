@@ -93,17 +93,17 @@ static uint8_t g_buttonirq[BOARD_NUM_BUTTONS] =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_buttoninit
+ * Name: board_button_initialize
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
+ *   board_button_initialize() must be called to initialize button resources.  After
  *   that, up_buttons() may be called to collect the current state of all
  *   buttons or up_irqbutton() may be called to register button interrupt
  *   handlers.
  *
  ****************************************************************************/
 
-void up_buttoninit(void)
+void board_button_initialize(void)
 {
   int i;
 
@@ -119,7 +119,7 @@ void up_buttoninit(void)
  * Name: up_buttons
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
+ *   board_button_initialize() must be called to initialize button resources.  After
  *   that, up_buttons() may be called to collect the current state of all
  *   buttons.
  *
@@ -159,7 +159,7 @@ uint8_t up_buttons(void)
  * Button support.
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
+ *   board_button_initialize() must be called to initialize button resources.  After
  *   that, up_irqbutton() may be called to register button interrupt handlers.
  *
  *   up_irqbutton() may be called to register an interrupt handler that will

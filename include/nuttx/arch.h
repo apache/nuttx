@@ -1015,12 +1015,12 @@ ssize_t up_check_stack_remain(void);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_buttoninit
+ * Name: board_button_initialize
  *
  * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
+ *   board_button_initialize() must be called to initialize button resources.
+ *   After that, up_buttons() may be called to collect the current state of
+ *   all buttons or up_irqbutton() may be called to register button interrupt
  *   handlers.
  *
  *   NOTE: This interface may or may not be supported by board-specific
@@ -1030,23 +1030,23 @@ ssize_t up_check_stack_remain(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-void up_buttoninit(void);
+void board_button_initialize(void);
 #endif
 
 /****************************************************************************
  * Name: up_buttons
  *
  * Description:
- *   After up_buttoninit() has been called, up_buttons() may be called to
- *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  A bit set to "1" means that the
- *   button is depressed; a bit set to "0" means that the button is released.
- *   The correspondence of the each button bit and physical buttons is board-
- *   specific.
+ *   After board_button_initialize() has been called, up_buttons() may be
+ *   called to collect the state of all buttons.  up_buttons() returns an
+ *   8-bit bit set with each bit associated with a button.  A bit set to
+ *   "1" means that the button is depressed; a bit set to "0" means that
+ *   the button is released.  The correspondence of the each button bit
+ *   and physical buttons is board-specific.
  *
  *   NOTE: This interface may or may not be supported by board-specific
- *   logic.  If the board supports button interfaces, then CONFIG_ARCH_BUTTONS
- *   will be defined
+ *   logic.  If the board supports button interfaces, then
+ *   CONFIG_ARCH_BUTTONS will be defined
  *
  ****************************************************************************/
 

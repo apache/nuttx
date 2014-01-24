@@ -117,22 +117,7 @@ extern "C" {
  *
  ************************************************************************************/
 
-EXTERN void hcs12_boardinitialize(void);
-
-/************************************************************************************
- * Button support.
- *
- * Description:
- *   up_buttoninit() must be called to initialize button resources.  After that,
- *   up_buttons() may be called to collect the state of all buttons.  up_buttons()
- *   returns an bit set with bits corresponding to the state of each button.
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_BUTTONS
-EXTERN void up_buttoninit(void);
-EXTERN uint8_t up_buttons(void);
-#endif
+void hcs12_boardinitialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

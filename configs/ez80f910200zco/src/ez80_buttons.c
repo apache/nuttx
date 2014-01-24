@@ -113,11 +113,11 @@ void up_pb2interrupt(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_buttoninit
+ * Name: board_button_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_BUTTONS
-void up_buttoninit(void)
+void board_button_initialize(void)
 {
   uint8_t regval;
 

@@ -323,37 +323,6 @@ extern "C" {
 void stm32_boardinitialize(void);
 
 /************************************************************************************
- * Button support.
- *
- * Description:
- *   up_buttoninit() must be called to initialize button resources.  After
- *   that, up_buttons() may be called to collect the current state of all
- *   buttons or up_irqbutton() may be called to register button interrupt
- *   handlers.
- *
- *   After up_buttoninit() has been called, up_buttons() may be called to
- *   collect the state of all buttons.  up_buttons() returns an 8-bit bit set
- *   with each bit associated with a button.  See the BUTTON_*_BIT and JOYSTICK_*_BIT
- *   definitions in board.h for the meaning of each bit.
- *
- *   up_irqbutton() may be called to register an interrupt handler that will
- *   be called when a button is depressed or released.  The ID value is a
- *   button enumeration value that uniquely identifies a button resource. See the
- *   BUTTON_* and JOYSTICK_* definitions in board.h for the meaning of enumeration
- *   value.  The previous interrupt handler address is returned (so that it may
- *   restored, if so desired).
- *
- ************************************************************************************/
-
-#ifdef CONFIG_ARCH_BUTTONS
-EXTERN void up_buttoninit(void);
-EXTERN uint8_t up_buttons(void);
-#ifdef CONFIG_ARCH_IRQBUTTONS
-EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
-#endif
-#endif
-
-/************************************************************************************
  * Name:  stm32_ledinit, stm32_setled, and stm32_setleds
  *
  * Description:
@@ -364,9 +333,9 @@ EXTERN xcpt_t up_irqbutton(int id, xcpt_t irqhandler);
  ************************************************************************************/
 
 #ifndef CONFIG_ARCH_LEDS
-EXTERN void stm32_ledinit(void);
-EXTERN void stm32_setled(int led, bool ledon);
-EXTERN void stm32_setleds(uint8_t ledset);
+void stm32_ledinit(void);
+void stm32_setled(int led, bool ledon);
+void stm32_setleds(uint8_t ledset);
 #endif
 
 /************************************************************************************
@@ -380,7 +349,7 @@ EXTERN void stm32_setleds(uint8_t ledset);
  *
  ************************************************************************************/
 
-EXTERN void stm32_lcdclear(uint16_t color);
+void stm32_lcdclear(uint16_t color);
 
 /************************************************************************************
  * Relay control functions
@@ -393,17 +362,17 @@ EXTERN void stm32_lcdclear(uint16_t color);
  ************************************************************************************/
 
 #ifdef CONFIG_ARCH_RELAYS
-EXTERN void up_relaysinit(void);
-EXTERN void relays_setstat(int relays, bool stat);
-EXTERN bool relays_getstat(int relays);
-EXTERN void relays_setstats(uint32_t relays_stat);
-EXTERN uint32_t relays_getstats(void);
-EXTERN void relays_onoff(int relays, uint32_t mdelay);
-EXTERN void relays_onoffs(uint32_t relays_stat, uint32_t mdelay);
-EXTERN void relays_resetmode(int relays);
-EXTERN void relays_powermode(int relays);
-EXTERN void relays_resetmodes(uint32_t relays_stat);
-EXTERN void relays_powermodes(uint32_t relays_stat);
+void up_relaysinit(void);
+void relays_setstat(int relays, bool stat);
+bool relays_getstat(int relays);
+void relays_setstats(uint32_t relays_stat);
+uint32_t relays_getstats(void);
+void relays_onoff(int relays, uint32_t mdelay);
+void relays_onoffs(uint32_t relays_stat, uint32_t mdelay);
+void relays_resetmode(int relays);
+void relays_powermode(int relays);
+void relays_resetmodes(uint32_t relays_stat);
+void relays_powermodes(uint32_t relays_stat);
 #endif
 
 /************************************************************************************
@@ -414,8 +383,8 @@ EXTERN void relays_powermodes(uint32_t relays_stat);
  *
  ************************************************************************************/
 
-EXTERN const char *stm32_getchipid(void);
-EXTERN const char *stm32_getchipid_string(void);
+const char *stm32_getchipid(void);
+const char *stm32_getchipid_string(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
