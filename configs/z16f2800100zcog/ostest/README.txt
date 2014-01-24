@@ -31,3 +31,9 @@ Console Output
 --------------
 
 OS test results will be provided on the serial console at 57600 8N1 baud.
+
+STATUS
+------
+
+This exemple works fine when started from ZDS-II.  But I have seen problems
+when starting from a hardware reset.

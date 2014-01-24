@@ -31,3 +31,9 @@ Console Output
 --------------
 
 OS test results will be provided on the serial console at 57600 8N1 baud.
+
+STATUS
+------
+
+1. This configuration does not run correctly.  There is currently a problem
+   with the SRAM accesses.
