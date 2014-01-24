@@ -354,11 +354,11 @@ static int led_pm_prepare(struct pm_callback_s *cb , enum pm_state_e pmstate)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void board_led_initialize(void)
 {
    /* Configure LED1-4 GPIOs for output */
 
@@ -369,19 +369,19 @@ void up_ledinit(void)
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
   led_setonoff(ON_BITS(g_ledbits[led]));
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   led_setonoff(OFF_BITS(g_ledbits[led]));
 }
@@ -398,7 +398,7 @@ void up_ledpminitialize(void)
   int ret = pm_register(&g_ledscb);
   if (ret != OK)
   {
-      up_ledon(LED_ASSERTION);
+      board_led_on(LED_ASSERTION);
     }
 }
 #endif /* CONFIG_PM */

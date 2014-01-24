@@ -137,7 +137,7 @@ start:
 	mov	sp, #(STACK_BASE-1)
 
 #ifdef CONFIG_ARCH_LEDS
-	lcall	_up_ledinit
+	lcall	_board_led_initialize
 #endif
 
 	ljmp	_os_start
@@ -251,7 +251,7 @@ _up_timer0join:
 
 #ifdef CONFIG_ARCH_LEDS
 	mov	dpl, #LED_INIRQ
-	lcall	_up_ledon
+	lcall	_board_led_on
 #endif
 
 	/* Save the IRQ number in r2 */
@@ -443,7 +443,7 @@ _up_timer0join:
 	push	dpl
 	push	dph
 	mov	dpl, #LED_INIRQ
-	lcall	_up_ledoff
+	lcall	_board_led_off
 	pop	dph
 	pop	dpl
 #endif

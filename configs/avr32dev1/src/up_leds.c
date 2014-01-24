@@ -62,30 +62,30 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinitialize
+ * Name: board_led_initializeialize
  ****************************************************************************/
 
-void up_ledinitialize(void)
+void board_led_initializeialize(void)
 {
   at32uc3_configgpio(PINMUX_GPIO_LED1);
   at32uc3_configgpio(PINMUX_GPIO_LED2);
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
   at32uc3_gpiowrite(PINMUX_GPIO_LED1, (led != 0));
   at32uc3_gpiowrite(PINMUX_GPIO_LED2, (led == 2));
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   at32uc3_gpiowrite(PINMUX_GPIO_LED1, (led == 2));
   at32uc3_gpiowrite(PINMUX_GPIO_LED2, false);

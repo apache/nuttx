@@ -230,11 +230,11 @@ void pic32mx_setleds(uint8_t ledset)
 #endif
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledon(int led)
+void board_led_on(int led)
 {
   if ((unsigned)led < LED_NVALUES)
     {
@@ -244,11 +244,11 @@ void up_ledon(int led)
 #endif
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   if ((unsigned)led < LED_NVALUES)
     {

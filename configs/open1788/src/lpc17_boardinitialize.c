@@ -104,7 +104,7 @@ void lpc17_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
+  board_led_initialize();
 #endif
 
   /* Configure the LCD GPIOs if LCD support has been selected. */

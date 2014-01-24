@@ -74,7 +74,7 @@ void stm32_boardinitialize(void)
   /* Configure on-board LEDs if LED support has been selected. */
 
 #ifdef CONFIG_ARCH_LEDS
-  up_ledinit();
+  board_led_initialize();
 #endif
 
 #ifdef CONFIG_ARCH_HAVE_BUTTONS

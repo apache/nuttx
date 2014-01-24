@@ -251,23 +251,23 @@ void up_dumpframe(FAR struct xcptcontext *context)
 }
 
 /************************************************************************
- * Name: up_ledinit, up_ledon, up_ledoff
+ * Name: board_led_initialize, board_led_on, board_led_off
  *
  * Description:
  *   "Fake" LED routines if needed
  *
  ************************************************************************/
 
-void up_ledinit(void)
+void board_led_initialize(void)
 {
 }
 
-void up_ledon(uint8_t led)
+void board_led_on(uint8_t led)
 {
   led;
 }
 
-void up_ledoff(uint8_t led)
+void board_led_off(uint8_t led)
 {
   led;
 }

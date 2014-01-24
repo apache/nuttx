@@ -93,7 +93,7 @@ void up_sigdeliver(void)
 
   int saved_errno = rtcb->pterrno;
 
-  up_ledon(LED_SIGNAL);
+  board_led_on(LED_SIGNAL);
 
   sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
@@ -135,7 +135,7 @@ void up_sigdeliver(void)
    * execution.
    */
 
-  up_ledoff(LED_SIGNAL);
+  board_led_off(LED_SIGNAL);
   up_fullcontextrestore(regs);
 
   /* up_fullcontextrestore() should not return but could if the software

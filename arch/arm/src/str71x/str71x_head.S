@@ -65,7 +65,7 @@
 	.globl	up_earlyserialinit	/* Early initialization of serial driver */
 #endif
 #ifdef CONFIG_ARCH_LEDS
-	.globl	up_ledinit		/* Boot LED setup */
+	.globl	board_led_initialize	/* Boot LED setup */
 #endif
 #ifdef CONFIG_DEBUG
 	.globl	up_lowputc		/* Low-level debug output */
@@ -570,7 +570,7 @@ ctor_end:
 	/* Initialize onboard LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
-	bl	up_ledinit
+	bl	board_led_initialize
 #endif
 
 	/* Then jump to OS entry */

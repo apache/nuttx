@@ -93,20 +93,20 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   /* All GPIO initialization is done in up_lowinit() */
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
 #if defined(HAVE_16Z_LED3) || defined(HAVE_16Z_LED4)
   /* The following operations must be atomic */
@@ -138,10 +138,10 @@ void up_ledon(int led)
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
 #if defined(HAVE_16Z_LED3) || defined(HAVE_16Z_LED4)
   /* The following operations must be atomic */

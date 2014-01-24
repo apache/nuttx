@@ -212,11 +212,11 @@ static int8_t  g_intcount         = 0;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   g_currglyph  = g_chspace;
   g_prevglyph  = g_chspace;
@@ -225,10 +225,10 @@ void up_ledinit(void)
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
   FAR const uint8_t *tmp = g_currglyph;
   switch (led)
@@ -277,10 +277,10 @@ void up_ledon(int led)
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   if (led == LED_INIRQ)
     {

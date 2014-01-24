@@ -118,14 +118,14 @@ static int  g_nestcount;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   /* Configure all LED GPIO lines */
 
-  led_dumpgpio("up_ledinit() Entry)");
+  led_dumpgpio("board_led_initialize() Entry)");
 
   lpc17_configgpio(NUCLEUS2G_LED1_A);
   lpc17_configgpio(NUCLEUS2G_LED1_B);
@@ -134,14 +134,14 @@ void up_ledinit(void)
   lpc17_configgpio(NUCLEUS2G_HEARTBEAT);
   lpc17_configgpio(NUCLEUS2G_EXTRA_LED);
 
-  led_dumpgpio("up_ledinit() Exit");
+  led_dumpgpio("board_led_initialize() Exit");
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
   /* We will control LED1 and LED2 not yet completed the boot sequence. */
 
@@ -185,10 +185,10 @@ void up_ledon(int led)
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   /* In all states, OFF can only mean turning off the HB LED */
 

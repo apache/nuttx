@@ -260,8 +260,8 @@ __start:
 /* Initialize onboard LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
-	.globl	_up_ledinit		/* Boot LED setup */
-	jsr.a	_up_ledinit		/* Call it */
+	.globl	_board_led_initialize	/* Boot LED setup */
+	jsr.a	_board_led_initialize	/* Call it */
 #endif
 	showprogress '\n'
 

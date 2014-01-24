@@ -175,5 +175,5 @@ void up_initialize(void)
   /* Initialize the netwok */
 
   up_netinitialize();
-  up_ledon(LED_IRQSENABLED);
+  board_led_on(LED_IRQSENABLED);
 }

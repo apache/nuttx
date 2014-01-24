@@ -89,30 +89,30 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  *
  * Description:
  *   Configure and initialize on-board LEDs
  *
  ****************************************************************************/
 
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   /* Configure all LED GPIO lines */
 
-  led_dumpgpio("up_ledinit() Entry)");
+  led_dumpgpio("board_led_initialize() Entry)");
 
   hcs12_configgpio(NE64BADGE_LED1);
   hcs12_configgpio(NE64BADGE_LED2);
 
-  led_dumpgpio("up_ledinit() Exit");
+  led_dumpgpio("board_led_initialize() Exit");
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
   switch (led)
     {
@@ -134,10 +134,10 @@ void up_ledon(int led)
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   switch (led)
     {

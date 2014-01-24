@@ -119,11 +119,11 @@ static void _up_putnl(void) __naked
  ************************************************************************/
 
 /************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   /* Set all ports as outputs */
 
@@ -138,10 +138,10 @@ void up_ledinit(void)
 }
 
 /************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ************************************************************************/
 
-void up_ledon(uint8_t led)
+void board_led_on(uint8_t led)
 {
   /* This may be called from an interrupt handler */
 
@@ -172,10 +172,10 @@ void up_ledon(uint8_t led)
 }
 
 /************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ************************************************************************/
 
-void up_ledoff(uint8_t led)
+void board_led_off(uint8_t led)
 {
   /* This may be called from an interrupt handler */
 

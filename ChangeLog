@@ -6515,4 +6515,7 @@
 	* Rename up_buttons() to board_buttons() for the same reason (2014-
 	  1-14).
 	* Rename up_irqbutton() to board_button_irq() (2014-1-24).
+	* Rename up_ledinit() to board_led_intialize() (2014-1-24).
+	* Rename up_ledon() to board_led_on() and up_ledoff() to board_led_off()
+	  (2014-1-24).
 

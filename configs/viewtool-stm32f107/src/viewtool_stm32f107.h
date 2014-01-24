@@ -317,7 +317,7 @@ void weak_function stm32_usbdev_initialize(void);
 int stm32_sdinitialize(int minor);
 
 /************************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  *
  * Description:
  *   Configure LEDs.  LEDs are left in the OFF state.

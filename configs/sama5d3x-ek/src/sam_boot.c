@@ -118,7 +118,7 @@ void sam_boardinitialize(void)
 #ifdef CONFIG_ARCH_LEDS
   /* Configure on-board LEDs if LED support has been selected. */
 
-  up_ledinit();
+  board_led_initialize();
 #endif
 }
 

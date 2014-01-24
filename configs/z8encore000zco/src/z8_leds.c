@@ -195,11 +195,11 @@ static void z8_putarray(FAR const struct z8_ledarray_s *array)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   putreg8(0x00, PEAF);          /* PE Alt func = Port */
   putreg8(0x00, PGAF);          /* PG Alt func = Port */
@@ -218,10 +218,10 @@ void up_ledinit(void)
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
   if ((unsigned)led <= 8)
     {
@@ -230,14 +230,14 @@ void up_ledon(int led)
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   if (led >= 1)
     {
-      up_ledon(led-1);
+      board_led_on(led-1);
     }
 }
 #endif /* CONFIG_ARCH_LEDS */

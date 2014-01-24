@@ -58,11 +58,11 @@
  ************************************************************************/
 
 /************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   GIO_OUTPUT(GIO_LED_GREEN);
   GIO_OUTPUT(GIO_LED_RED);
@@ -71,10 +71,10 @@ void up_ledinit(void)
 }
 
 /************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
   if (led == GIO_LED_GREEN)
     {
@@ -87,10 +87,10 @@ void up_ledon(int led)
 }
 
 /************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   if (led == GIO_LED_GREEN)
     {

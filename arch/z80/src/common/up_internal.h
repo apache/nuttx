@@ -187,13 +187,13 @@ void up_timerinit(void);
 /* Defined in board/up_leds.c */
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void);
-void up_ledon(int led);
-void up_ledoff(int led);
+void board_led_initialize(void);
+void board_led_on(int led);
+void board_led_off(int led);
 #else
-# define up_ledinit()
-# define up_ledon(led)
-# define up_ledoff(led)
+# define board_led_initialize()
+# define board_led_on(led)
+# define board_led_off(led)
 #endif
 
 /* Architecture specific hook into the timer interrupt handler */

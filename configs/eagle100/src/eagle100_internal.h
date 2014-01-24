@@ -91,7 +91,7 @@
 extern void weak_function lm_ssiinitialize(void);
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  *
  * Description:
  *   Initialize on-board LEDs.
@@ -99,7 +99,7 @@ extern void weak_function lm_ssiinitialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-extern void up_ledinit(void);
+extern void board_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -592,7 +592,7 @@ __start:
 	/* Initialize onboard LEDs */
 
 #ifdef CONFIG_ARCH_LEDS
-	bl	up_ledinit
+	bl	board_led_initialize
 #endif
 
 	/* Then jump to OS entry */

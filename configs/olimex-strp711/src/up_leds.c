@@ -97,11 +97,11 @@ static void up_setleds(uint16_t setbits, uint16_t clearbits)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_ledinit
+ * Name: board_led_initialize
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_LEDS
-void up_ledinit(void)
+void board_led_initialize(void)
 {
   uint16_t reg16;
 
@@ -127,10 +127,10 @@ void up_ledinit(void)
 }
 
 /****************************************************************************
- * Name: up_ledon
+ * Name: board_led_on
  ****************************************************************************/
 
-void up_ledon(int led)
+void board_led_on(int led)
 {
   /* The Olimex board has only two LEDs, so following states are faked as
    * follows
@@ -174,10 +174,10 @@ void up_ledon(int led)
 }
 
 /****************************************************************************
- * Name: up_ledoff
+ * Name: board_led_off
  ****************************************************************************/
 
-void up_ledoff(int led)
+void board_led_off(int led)
 {
   /* The Olimex board has only two LEDs, so following states are faked as
    * follows

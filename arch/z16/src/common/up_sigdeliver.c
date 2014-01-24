@@ -93,7 +93,7 @@ void up_sigdeliver(void)
 
   int saved_errno = rtcb->pterrno;
 
-  up_ledon(LED_SIGNAL);
+  board_led_on(LED_SIGNAL);
 
   sdbg("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
@@ -136,7 +136,7 @@ void up_sigdeliver(void)
 
   /* Then restore the correct state for this thread of execution. */
 
-  up_ledoff(LED_SIGNAL);
+  board_led_off(LED_SIGNAL);
   SIGNAL_RETURN(regs);
 #endif
 }
