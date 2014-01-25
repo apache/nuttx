@@ -12,7 +12,7 @@
       <h1><big><font color="#3c34ec">
         <i>NuttX RTOS Porting Guide</i>
       </font></big></h1>
-      <p>Last Updated: September 28, 2013</p>
+      <p>Last Updated: January 25, 2013</p>
     </td>
   </tr>
 </table>
@@ -72,44 +72,45 @@
   </ul>
   <a href="#ArchAPIs">4.0 Architecture APIs</a>
   <ul>
-    <a href="#imports">4.1 APIs Exported by Architecture-Specific Logic to NuttX</a>
+    <a href="#naming">4.1 Naming and Header File Conventions</a><br>
+    <a href="#imports">4.2 APIs Exported by Architecture-Specific Logic to NuttX</a>
     <ul>
-      <a href="#upinitialize">4.1.1 <code>up_initialize()</code></a><br>
-      <a href="#upidle">4.1.2 <code>up_idle()</code></a><br>
-      <a href="#upinitialstate">4.1.3 <code>up_initial_state()</code></a><br>
-      <a href="#upcreatestack">4.1.4 <code>up_create_stack()</code></a><br>
-      <a href="#upusestack">4.1.5 <code>up_use_stack()</code></a><br>
-      <a href="#upstackframe">4.1.6 <code>up_stack_frame()</code></a><br>
-      <a href="#upreleasestack">4.1.7 <code>up_release_stack()</code></a><br>
-      <a href="#upunblocktask">4.1.8 <code>up_unblock_task()</code></a><br>
-      <a href="#upblocktask">4.1.9 <code>up_block_task()</code></a><br>
-      <a href="#upreleasepending">4.1.10 <code>up_release_pending()</code></a><br>
-      <a href="#upreprioritizertr">4.1.11 <code>up_reprioritize_rtr()</code></a><br>
-      <a href="#_exit">4.1.12 <code>_exit()</code></a><br>
-      <a href="#upassert">4.1.13 <code>up_assert()</code></a><br>
-      <a href="#upschedulesigaction">4.1.14 <code>up_schedule_sigaction()</code></a><br>
-      <a href="#upallocateheap">4.1.15 <code>up_allocate_heap()</code></a><br>
-      <a href="#upinterruptcontext">4.1.16 <code>up_interrupt_context()</code></a><br>
-      <a href="#updisableirq">4.1.17 <code>up_disable_irq()</code></a><br>
-      <a href="#upenableirq">4.1.18 <code>up_enable_irq()</code></a><br>
-      <a href="#upprioritizeirq">4.1.19 <code>up_prioritize_irq()</code></a></br>
-      <a href="#upputc">4.1.20 <code>up_putc()</code></a></br>
-      <a href="#systemtime">4.1.21 System Time and Clock</a><br>
-      <a href="#addrenv">4.1.22 Address Environments</a>
+      <a href="#upinitialize">4.2.1 <code>up_initialize()</code></a><br>
+      <a href="#upidle">4.2.2 <code>up_idle()</code></a><br>
+      <a href="#upinitialstate">4.2.3 <code>up_initial_state()</code></a><br>
+      <a href="#upcreatestack">4.2.4 <code>up_create_stack()</code></a><br>
+      <a href="#upusestack">4.2.5 <code>up_use_stack()</code></a><br>
+      <a href="#upstackframe">4.2.6 <code>up_stack_frame()</code></a><br>
+      <a href="#upreleasestack">4.2.7 <code>up_release_stack()</code></a><br>
+      <a href="#upunblocktask">4.2.8 <code>up_unblock_task()</code></a><br>
+      <a href="#upblocktask">4.2.9 <code>up_block_task()</code></a><br>
+      <a href="#upreleasepending">4.2.10 <code>up_release_pending()</code></a><br>
+      <a href="#upreprioritizertr">4.2.11 <code>up_reprioritize_rtr()</code></a><br>
+      <a href="#_exit">4.2.12 <code>_exit()</code></a><br>
+      <a href="#upassert">4.2.13 <code>up_assert()</code></a><br>
+      <a href="#upschedulesigaction">4.2.14 <code>up_schedule_sigaction()</code></a><br>
+      <a href="#upallocateheap">4.2.15 <code>up_allocate_heap()</code></a><br>
+      <a href="#upinterruptcontext">4.2.16 <code>up_interrupt_context()</code></a><br>
+      <a href="#updisableirq">4.2.17 <code>up_disable_irq()</code></a><br>
+      <a href="#upenableirq">4.2.18 <code>up_enable_irq()</code></a><br>
+      <a href="#upprioritizeirq">4.2.19 <code>up_prioritize_irq()</code></a></br>
+      <a href="#upputc">4.2.20 <code>up_putc()</code></a></br>
+      <a href="#systemtime">4.2.21 System Time and Clock</a><br>
+      <a href="#addrenv">4.2.22 Address Environments</a>
     </ul>
-    <a href="#exports">4.2 APIs Exported by NuttX to Architecture-Specific Logic</a>
+    <a href="#exports">4.3 APIs Exported by NuttX to Architecture-Specific Logic</a>
     <ul>
-      <a href="#osstart">4.2.1 <code>os_start()</code></a><br>
-      <a href="#listmgmt">4.2.2 OS List Management APIs</a><br>
-      <a href="#schedprocesstimer">4.2.3 <code>sched_process_timer()</code></a><br>
-      <a href="#irqdispatch">4.2.4 <code>irq_dispatch()</code></a>
+      <a href="#osstart">4.3.1 <code>os_start()</code></a><br>
+      <a href="#listmgmt">4.3.2 OS List Management APIs</a><br>
+      <a href="#schedprocesstimer">4.3.3 <code>sched_process_timer()</code></a><br>
+      <a href="#irqdispatch">4.3.4 <code>irq_dispatch()</code></a>
     </ul>
-    <a href="#demandpaging">4.3 On-Demand Paging</a><br>
-    <a href="#ledsupport">4.4 LED Support</a>
+    <a href="#demandpaging">4.4 On-Demand Paging</a><br>
+    <a href="#ledsupport">4.5 LED Support</a>
     <ul>
-      <a href="#ledheaders">4.3.1 Header Files</a><br>
-      <a href="#leddefinitions">4.3.2 LED Definitions</a><br>
-      <a href="#ledapis">4.3.3 Common LED interfaces</a>
+      <a href="#ledheaders">4.5.1 Header Files</a><br>
+      <a href="#leddefinitions">4.5.2 LED Definitions</a><br>
+      <a href="#ledapis">4.5.3 Common LED interfaces</a>
     </ul>
   </ul>
   <a href="#NxFileSystem">5.0 NuttX File System</a><br>
@@ -1631,8 +1632,52 @@ The system can be re-made subsequently by just typing <code>make</code>.
   other header files.
 </p>
 
-<h2><a name="imports">4.1 APIs Exported by Architecture-Specific Logic to NuttX</a></h2>
-<h3><a name="upinitialize">4.1.1 <code>up_initialize()</code></a></h3>
+<h2><a name="naming">4.1 Naming and Header File Conventions</a></h2>
+
+<ul>
+  <li>
+    <p>
+      <b>Common Microprocessor Interfaces</b>.
+      Any interface that is common to all microprocessors should be prefixed with <code>up_</code> and prototyped in <code>include/nuttx/arch.h</code>.
+      The definitions in that header file provide the common interface between NuttX and the architecture-specific implementation in <code>arch/</code>.
+    </p>
+    <blockquote><small>
+      <code>up_</code> is supposed to stand for microprocessor; the <code>u</code> is like the Greek letter micron: <i>µ</i>.    So it would be <code>µP</code> which is a common shortening of the word microprocessor.  I don't like that name very much.  I wish I would have used a more obvious prefix like <code>arch_</code> instead -- then I would not have to answer this question so often.
+    </small></blockquote>
+  </li>
+  <li>
+    <p>
+      <b>Microprocessor-Specific Interfaces</b>.
+      An interface which is unique to a certain microprocessor should be prefixed with the name of the microprocessor, for example <code>stm32_</code>, and be prototyped in some header file in the <code>arch/</code> directories.
+    </p>
+    <p>
+      There is also a <code>arch/<architecture>/include/<chip>/chip.h</code> header file that can be used to communicate other microprocessor-specific information between the board logic and even application logic.
+      Application logic may, for example, need to know specific capabilities of the chip.
+      Prototypes in that <code>chip.h</code> header file should follow the microprocessor-specific naming convention. 
+    </p>
+  </li>
+  <li>
+    <p>
+      <b>Common Board Interfaces</b>.
+      Any interface that is common to all boards should be prefixed with <code>board_</code> and should also be prototyped in <code>include/nuttx/arch.h</code>.
+      These <code>board_</code> definitions provide the interface between the board-level logic and the architecture-specific logic.
+    </p>
+    <p>
+      There is also a <code>configs/<board>/include/board.h</code> header file that can be used to communicate other board-specific information between the architecture logic and even application logic.
+      Any definitions which are common between a single architecture and several boards should go in this <code>board.h</code> header file;
+      <code>include/nuttx/arch.h</code>is reserved for board-related definitions common to all architectures.
+    </p>
+  <li>
+    <p>
+      <b>Board-Specific Interfaces</b>.
+      Any interface which is unique to a board should be prefixed with the board name, for example <code>stm32f4discovery_</code>.
+      Sometimes the board name is too long so <code>stm32_</code> would be okay too.
+      These should be prototyped in <code>configs/<board>/src/<board>.h</code> and should not be used outside of that directory since board-specific definitions have no meaning outside of the board directory.
+  </li>
+</ul>
+
+<h2><a name="imports">4.2 APIs Exported by Architecture-Specific Logic to NuttX</a></h2>
+<h3><a name="upinitialize">4.2.1 <code>up_initialize()</code></a></h3>
 
 <p><b>Prototype</b>: <code>void up_initialize(void);</code></p>
 
@@ -1653,7 +1698,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   services are available.
 </p>
 
-<h3><a name="upidle">4.1.2 <code>up_idle()</code></a></h3>
+<h3><a name="upidle">4.2.2 <code>up_idle()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_idle(void);</code></p>
 
 <p><b>Description</b>.
@@ -1667,7 +1712,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   this is where power management operations might be performed.
 </p>
 
-<h3><a name="upinitialstate">4.1.3 <code>up_initial_state()</code></a></h3>
+<h3><a name="upinitialstate">4.2.3 <code>up_initial_state()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_initial_state(FAR struct tcb_s *tcb);</code></p>
 
 <p><b>Description</b>.
@@ -1690,7 +1735,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   then all threads should have kernel-mode privileges.
 </p>
 
-<h3><a name="upcreatestack">4.1.4 <code>up_create_stack()</code></a></h3>
+<h3><a name="upcreatestack">4.2.4 <code>up_create_stack()</code></a></h3>
 <p><b>Prototype</b>: <code>STATUS up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype);</code></p>
 
 <p><b>Description</b>.
@@ -1742,7 +1787,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
-<h3><a name="upusestack">4.1.5 <code>up_use_stack()</code></a></h3>
+<h3><a name="upusestack">4.2.5 <code>up_use_stack()</code></a></h3>
 <p><b>Prototype</b>:
   <code>STATUS up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size);</code>
 </p>
@@ -1781,7 +1826,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
 </p>
 
 
-<h3><a name="upstackframe">4.1.6 <code>up_stack_frame()</code></a></h3>
+<h3><a name="upstackframe">4.2.6 <code>up_stack_frame()</code></a></h3>
 <p><b>Prototype</b>: <code>FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size);</code></p>
 
 <p>
@@ -1831,7 +1876,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
    The alignment of the returned value is the same as the alignment of the stack itself
 </p>
 
-<h3><a name="upreleasestack">4.1.7 <code>up_release_stack()</code></a></h3>
+<h3><a name="upreleasestack">4.2.7 <code>up_release_stack()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_release_stack(FAR struct tcb_s *dtcb);</code></p>
 
 <p><b>Description</b>.
@@ -1870,7 +1915,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
-<h3><a name="upunblocktask">4.1.8 <code>up_unblock_task()</code></a></h3>
+<h3><a name="upunblocktask">4.2.8 <code>up_unblock_task()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_unblock_task(FAR struct tcb_s *tcb);</code></p>
 
 <p><b>Description</b>.
@@ -1893,7 +1938,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
-<h3><a name="upblocktask">4.1.9 <code>up_block_task()</code></a></h3>
+<h3><a name="upblocktask">4.2.9 <code>up_block_task()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_block_task(FAR struct tcb_s *tcb, tstate_t task_state);</code></p>
 
 <p><b>Description</b>.
@@ -1919,7 +1964,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
-<h3><a name="upreleasepending">4.1.10 <code>up_release_pending()</code></a></h3>
+<h3><a name="upreleasepending">4.2.10 <code>up_release_pending()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_release_pending(void);</code></p>
 
 <p><b>Description</b>.
@@ -1936,7 +1981,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   function is called.
 </p>
 
-<h3><a name="upreprioritizertr">4.1.11 <code>up_reprioritize_rtr()</code></a></h3>
+<h3><a name="upreprioritizertr">4.2.11 <code>up_reprioritize_rtr()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);</code></p>
 
 <p><b>Description</b>.
@@ -1971,7 +2016,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   </li>
 </ul>
 
-<h3><a name="_exit">4.1.12 <code>_exit()</code></a></h3>
+<h3><a name="_exit">4.2.12 <code>_exit()</code></a></h3>
 <p><b>Prototype</b>: <code>void _exit(int status) noreturn_function;</code></p>
 
 <p><b>Description</b>.
@@ -1985,7 +2030,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   before performing scheduling operations.
 </p>
 
-<h3><a name="upassert">4.1.13 <code>up_assert()</code></a></h3>
+<h3><a name="upassert">4.2.13 <code>up_assert()</code></a></h3>
 <p><b>Prototype</b>:<br>
   <code>void up_assert(FAR const uint8_t *filename, int linenum);</code>
 </p>
@@ -1994,7 +2039,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   Assertions may be handled in an architecture-specific way.
 </p>
 
-<h3><a name="upschedulesigaction">4.1.14 <code>up_schedule_sigaction()</code></a></h3>
+<h3><a name="upschedulesigaction">4.2.14 <code>up_schedule_sigaction()</code></a></h3>
 <p><b>Prototype</b>:
   <code>void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver);</code>
 </p>
@@ -2041,7 +2086,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   is defined.
 </p>
 
-<h3><a name="upallocateheap">4.1.15 <code>up_allocate_heap()</code></a></h3>
+<h3><a name="upallocateheap">4.2.15 <code>up_allocate_heap()</code></a></h3>
 <p><b>Prototype</b>: <code>void up_allocate_heap(FAR void **heap_start, size_t *heap_size);</code></p>
 
 <p><b>Description</b>.
@@ -2052,14 +2097,14 @@ The system can be re-made subsequently by just typing <code>make</code>.
   If a protected kernel-space heap is provided, the kernel heap must be allocated (and protected) by an analogous <code>up_allocate_kheap()</code>.
 </p>
 
-<h3><a name="upinterruptcontext">4.1.16 <code>up_interrupt_context()</code></a></h3>
+<h3><a name="upinterruptcontext">4.2.16 <code>up_interrupt_context()</code></a></h3>
 <p><b>Prototype</b>: <code>bool up_interrupt_context(void)</code></p>
 
 <p><b>Description</b>.
   Return true if we are currently executing in the interrupt handler context.
 </p>
 
-<h3><a name="updisableirq">4.1.17 <code>up_disable_irq()</code></a></h3>
+<h3><a name="updisableirq">4.2.17 <code>up_disable_irq()</code></a></h3>
 <p><b>Prototype</b>:</p>
 <ul><pre>
 #ifndef CONFIG_ARCH_NOINTC
@@ -2086,7 +2131,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   avoided in common implementations where possible.
 </p>
 
-<h3><a name="upenableirq">4.1.18 <code>up_enable_irq()</code></a></h3>
+<h3><a name="upenableirq">4.2.18 <code>up_enable_irq()</code></a></h3>
 <p><b>Prototype</b>:</p>
 <ul><pre>
 #ifndef CONFIG_ARCH_NOINTC
@@ -2107,7 +2152,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   avoided in common implementations where possible.
 </p>
 
-<h3><a name="upprioritizeirq">4.1.19 <code>up_prioritize_irq()</code></a></h3>
+<h3><a name="upprioritizeirq">4.2.19 <code>up_prioritize_irq()</code></a></h3>
 <p><b>Prototype</b>:</p>
 <ul><pre>
 #ifdef CONFIG_ARCH_IRQPRIO
@@ -2124,7 +2169,7 @@ The system can be re-made subsequently by just typing <code>make</code>.
   avoided in common implementations where possible.
 </p>
 
-<h3><a name="upputc">4.1.20 <code>up_putc()</code></a></h3>
+<h3><a name="upputc">4.2.20 <code>up_putc()</code></a></h3>
 
 <p><b>Prototype</b>: <code>int up_putc(int ch);</code></p>
 <p><b>Description</b>.
@@ -2132,9 +2177,9 @@ The system can be re-made subsequently by just typing <code>make</code>.
   Output one character on the console
 </p>
 
-<h3><a name="systemtime">4.1.21 System Time and Clock</a></h3>
+<h3><a name="systemtime">4.2.21 System Time and Clock</a></h3>
 
-<h4>4.1.21.1 Basic System Timer</h4>
+<h4>4.2.21.1 Basic System Timer</h4>
 
 <p><b>System Timer</b>
   In most implementations, system time is provided by a timer interrupt.
@@ -2217,7 +2262,7 @@ else
   In this way, the timer interval is controlled from interrupt-to-interrupt to produce an average frequency of exactly 100Hz.
 </p>
 
-<h4>4.1.21.2 Hardware</h4>
+<h4>4.2.21.2 Hardware</h4>
 <p>
   To enable hardware module use the following configuration options:
 <p>
@@ -2272,7 +2317,7 @@ else
   </li>
 </ul>
 
-<h4>4.1.21.3 System Tick and Time</h4>
+<h4>4.2.21.3 System Tick and Time</h4>
 <p>
   The system tick is represented by::
 </p>
@@ -2295,7 +2340,7 @@ else
   To retrieve that variable use:
 </p>
 
-<h3><a name="addrenv">4.1.22 Address Environments</a></h3>
+<h3><a name="addrenv">4.2.22 Address Environments</a></h3>
 
 <p>
   CPUs that support memory management units (MMUs) may provide <i>address environments</i> within which tasks and their child threads execute.
@@ -2319,27 +2364,27 @@ else
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_create">4.1.22.1 <code>up_addrenv_create()</code></a>:
+        <a href="#up_addrenv_create">4.2.22.1 <code>up_addrenv_create()</code></a>:
         Create an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_vaddr">4.1.22.2 <code>up_addrenv_vaddr()</code></a>:
+        <a href="#up_addrenv_vaddr">4.2.22.2 <code>up_addrenv_vaddr()</code></a>:
         Returns the virtual base address of the address environment.
       </li>
       <li>
-        <a href="#up_addrenv_select">4.1.22.3 <code>up_addrenv_select()</code></a>:
+        <a href="#up_addrenv_select">4.2.22.3 <code>up_addrenv_select()</code></a>:
         Instantiate an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_restore">4.1.22.4 <code>up_addrenv_restore()</code></a>:
+        <a href="#up_addrenv_restore">4.2.22.4 <code>up_addrenv_restore()</code></a>:
         Restore an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_destroy">4.1.22.5 <code>up_addrenv_destroy()</code></a>:
+        <a href="#up_addrenv_destroy">4.2.22.5 <code>up_addrenv_destroy()</code></a>:
         Destroy an address environment.
       </li>
       <li>
-        <a href="#up_addrenv_assign">4.1.22.6 <code>up_addrenv_assign()</code></a>:
+        <a href="#up_addrenv_assign">4.2.22.6 <code>up_addrenv_assign()</code></a>:
         Assign an address environment to a TCB.
       </li>
     </ul>
@@ -2352,12 +2397,12 @@ else
     </p>
     <ul>
       <li>
-        <a href="#up_addrenv_share">4.1.22.7 <code>up_addrenv_share()</code></a>:
+        <a href="#up_addrenv_share">4.2.22.7 <code>up_addrenv_share()</code></a>:
         Clone the address environment assigned to one TCB to another.
         This operation is done when a pthread is created that share's the same address environment.
       </li>
       <li>
-        <a href="#up_addrenv_release">4.1.22.8 <code>up_addrenv_release()</code></a>:
+        <a href="#up_addrenv_release">4.2.22.8 <code>up_addrenv_release()</code></a>:
         Release the TCB's reference to an address environment when a task/thread exits.
       </li>
     </ul>
@@ -2365,7 +2410,7 @@ else
 </ol>
 
 
-<h4><a name="up_addrenv_create">4.1.22.1 <code>up_addrenv_create()</code></a></h4>
+<h4><a name="up_addrenv_create">4.2.22.1 <code>up_addrenv_create()</code></a></h4>
 <p><b>Prototype</b>:</p>
 <ul>
   <code>int up_addrenv_create(size_t envsize, FAR task_addrenv_t *addrenv);</code>
@@ -2385,7 +2430,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_vaddr">4.1.22.2 <code>up_addrenv_vaddr()</code></a></h4>
+<h4><a name="up_addrenv_vaddr">4.2.22.2 <code>up_addrenv_vaddr()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_vaddr(FAR task_addrenv_t addrenv, FAR void **vaddr);</code>
@@ -2405,7 +2450,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_select">4.1.22.3 <code>up_addrenv_select()</code></a></h4>
+<h4><a name="up_addrenv_select">4.2.22.3 <code>up_addrenv_select()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_select(task_addrenv_t addrenv, hw_addrenv_t *oldenv);</code>
@@ -2429,7 +2474,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_restore">4.1.22.4 <code>up_addrenv_restore()</code></a></h4>
+<h4><a name="up_addrenv_restore">4.2.22.4 <code>up_addrenv_restore()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_restore(hw_addrenv_t oldenv);</code>
@@ -2448,7 +2493,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_destroy">4.1.22.5 <code>up_addrenv_destroy()</code></a></h4>
+<h4><a name="up_addrenv_destroy">4.2.22.5 <code>up_addrenv_destroy()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_destroy(task_addrenv_t addrenv);</code>
@@ -2466,7 +2511,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_assign">4.1.22.6 <code>up_addrenv_assign()</code></a></h4>
+<h4><a name="up_addrenv_assign">4.2.22.6 <code>up_addrenv_assign()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_assign(task_addrenv_t addrenv, FAR struct tcb_s *tcb);</code>
@@ -2485,7 +2530,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_share">4.1.22.7 <code>up_addrenv_share()</code></a></h4>
+<h4><a name="up_addrenv_share">4.2.22.7 <code>up_addrenv_share()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_share(FAR const struct tcb_s *ptcb, FAR struct tcb_s *ctcb);</code>
@@ -2505,7 +2550,7 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h4><a name="up_addrenv_release">4.1.22.8 <code>up_addrenv_release()</code></a></h4>
+<h4><a name="up_addrenv_release">4.2.22.8 <code>up_addrenv_release()</code></a></h4>
 <p><b>Prototype</b>:<p>
 <ul>
   <code>int up_addrenv_release(FAR struct tcb_s *tcb);</code>
@@ -2525,23 +2570,23 @@ else
   Zero (<code>OK</code>) on success; a negated <code>errno</code> value on failure.
 </ul>
 
-<h2><a name="exports">4.2 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
+<h2><a name="exports">4.3 APIs Exported by NuttX to Architecture-Specific Logic</a></h2>
 <p>
   These are standard interfaces that are exported by the OS
   for use by the architecture specific logic.
 </p>
 
-<h3><a name="osstart">4.2.1 <code>os_start()</code></a></h3>
+<h3><a name="osstart">4.3.1 <code>os_start()</code></a></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
 
-<h3><a name="listmgmt">4.2.2 OS List Management APIs</a></h3></h3>
+<h3><a name="listmgmt">4.3.2 OS List Management APIs</a></h3></h3>
 <p>
   <b><i>To be provided</i></b>
 </p>
 
-<h3><a name="schedprocesstimer">4.2.3 <code>sched_process_timer()</code></a></h3>
+<h3><a name="schedprocesstimer">4.3.3 <code>sched_process_timer()</code></a></h3>
 <p><b>Prototype</b>: <code>void sched_process_timer(void);</code></p>
 
 <p><b>Description</b>.
@@ -2552,7 +2597,7 @@ else
   <code>MSEC_PER_TICK</code>.
 </p>
 
-<h3><a name="irqdispatch">4.2.4 <code>irq_dispatch()</code></a></h3>
+<h3><a name="irqdispatch">4.3.4 <code>irq_dispatch()</code></a></h3>
 <p><b>Prototype</b>: <code>void irq_dispatch(int irq, FAR void *context);</code></p>
 
 <p><b>Description</b>.
@@ -2561,7 +2606,7 @@ else
   the appropriate, registered handling logic.
 </p>
 
-<h2><a name="demandpaging">4.3 On-Demand Paging</a></h2>
+<h2><a name="demandpaging">4.4 On-Demand Paging</a></h2>
 
 <p>
   The NuttX On-Demand Paging feature permits embedded MCUs with some limited RAM space to execute large programs from some non-random access media.
@@ -2571,7 +2616,7 @@ else
   Please see the <a href="NuttXDemandPaging.html">NuttX Demand Paging</a> design document for further information.
 </p>
 
-<h2><a name="ledsupport">4.4 LED Support</a></h2>
+<h2><a name="ledsupport">4.5 LED Support</a></h2>
 
 <p>
   A board architecture may or may not have LEDs.
@@ -2581,7 +2626,7 @@ else
   However, the support provided by each architecture is sufficiently similar that it can be documented here.
 </p>
 
-<h3><a name="ledheaders">4.3.1 Header Files</a></h3>
+<h3><a name="ledheaders">4.5.1 Header Files</a></h3>
 
 <p>
   LED-related definitions are provided in two header files:
@@ -2605,7 +2650,7 @@ else
   </ul>
 </p>
 
-<h3><a name="leddefinitions">4.3.2 LED Definitions</a></h3>
+<h3><a name="leddefinitions">4.5.2 LED Definitions</a></h3>
 
 <p>
    The implementation of LED support is very specific to a board architecture.
@@ -2669,7 +2714,7 @@ else
   </li>
 </ul>
 
-<h3><a name="ledapis">4.3.3 Common LED interfaces</a></h3>
+<h3><a name="ledapis">4.5.3 Common LED interfaces</a></h3>
 
 <p>
   The <code><i>&lt;arch-name&gt;</i>/src/common/up_internal.h</code> probably has definitions
@@ -2679,9 +2724,9 @@ else
 /* Defined in board/up_leds.c */
 
 #ifdef CONFIG_ARCH_LEDS
-extern void board_led_initialize(void);
-extern void board_led_on(int led);
-extern void board_led_off(int led);
+void board_led_initialize(void);
+void board_led_on(int led);
+void board_led_off(int led);
 #else
 # define board_led_initialize()
 # define board_led_on(led)
