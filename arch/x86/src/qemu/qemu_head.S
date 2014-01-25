@@ -141,7 +141,7 @@ hang:
 
 	.type	idle_stack, @object
 	.comm   idle_stack, CONFIG_IDLETHREAD_STACKSIZE, 32
-	.size	idle_stack, . - idle_stack
+	.size	idle_stack, CONFIG_IDLETHREAD_STACKSIZE
 
 /****************************************************************************
  * .rodata
