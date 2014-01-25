@@ -6518,4 +6518,7 @@
 	* Rename up_ledinit() to board_led_intialize() (2014-1-24).
 	* Rename up_ledon() to board_led_on() and up_ledoff() to board_led_off()
 	  (2014-1-24).
+	* arch/x86/src/qemu-i486/gemu_head.S:  Patch from Matt Campbell
+	  to fix 'Error: .size expression for idle_stack does not evaluate to
+	  a constant" (2014-1-25).
 
