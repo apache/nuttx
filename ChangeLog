@@ -6521,4 +6521,6 @@
 	* arch/x86/src/qemu-i486/gemu_head.S:  Patch from Matt Campbell
 	  to fix 'Error: .size expression for idle_stack does not evaluate to
 	  a constant" (2014-1-25).
+	* arch/arm/include/efm32, arch/arm/src/efm32, and configs/efm32-dk360:
+	  Removed all EFM32 support.  Not yet readyto be fielded (2014-1-17).
 
