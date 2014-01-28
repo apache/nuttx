@@ -3120,6 +3120,9 @@ To-Do List
    Perhaps there are some issues with SDRAM when uses as the primary
    heap?
 
+   UPDATE:  If I turn memory management debug on, the crash does not
+   occur.  This needs some further investigation and a little TLC.
+
 5) HSCMI TX DMA support is currently commented out.
 
 6) I believe that there is an issue when the internal AT25 FLASH is

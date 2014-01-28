@@ -6522,5 +6522,10 @@
 	  to fix 'Error: .size expression for idle_stack does not evaluate to
 	  a constant" (2014-1-25).
 	* arch/arm/include/efm32, arch/arm/src/efm32, and configs/efm32-dk360:
-	  Removed all EFM32 support.  Not yet readyto be fielded (2014-1-17).
+	  Removed all EFM32 support.  Not yet readyto be fielded (2014-1-27).
+	* arch/arm/src/armv7-a/arm_head.S, sama5/sam_boot.c, and several other
+	  files:  Not supports execution from NOR FLASH with .data and .bss in
+	  SDRAM.  This was not possible prior to this because .bss and .data
+	  were initialized before SDRAM was configured.  This logic is still
+	  kind buggy. (2014-1-28).
 
