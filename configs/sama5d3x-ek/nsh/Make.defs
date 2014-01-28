@@ -1,7 +1,7 @@
 ############################################################################
 # configs/sama5d3x-ek/nsh/Make.defs
 #
-#   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,11 @@ ifeq ($(CONFIG_SAMA5_BOOT_SDRAM),y)
   LDSCRIPT = ddram.ld
 endif
 ifeq ($(CONFIG_SAMA5_BOOT_CS0FLASH),y)
-  LDSCRIPT = norflash.ld
+ifeq ($(CONFIG_BOOT_SDRAM_DATA),y)
+  LDSCRIPT = nor-ddram.ld
+else
+  LDSCRIPT = nor-isram.ld
+endif
 endif
 ifeq ($(CONFIG_SAMA5_BOOT_CS1FLASH),y)
 #  LDSCRIPT = cs1flash.ld

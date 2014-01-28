@@ -85,11 +85,6 @@ config MTD_CONFIG_ERASEDVALUE
 
 comment "MTD Device Drivers"
 
-
-config ARCH_NAND_HWECC
-	bool
-	default n
-
 menuconfig MTD_NAND
 	bool "MTD NAND support"
 	default n

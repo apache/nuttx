@@ -139,6 +139,11 @@ config ARCH_HAVE_VFORK
 
 config ARCH_HAVE_MMU
 	bool
+	default n
+
+config ARCH_NAND_HWECC
+	bool
+	default n
 
 config ARCH_IRQPRIO
 	bool "Prioritized interrupt support"
@@ -428,4 +433,19 @@ config FLASH_SIZE
 		refers to the FLASH that you link program code into.
 
 endif # BOOT_RUNFROMFLASH && ARCH_HAVE_MMU
+
+config ARCH_HAVE_SDRAM
+	bool
+	default n
+
+config BOOT_SDRAM_DATA
+	bool "Data in SDRAM"
+	default n
+	depends on ARCH_HAVE_SDRAM
+	---help---
+		This selection should be set if data lies in SDRAM (vs. SRAM).  In
+		that case, the initialization sequence is a little different:  SDRAM
+		must be configured before before the .data and .bss sections can be
+		initialized.
+
 endmenu # Boot Memory Configuration

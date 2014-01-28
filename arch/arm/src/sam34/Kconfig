@@ -720,6 +720,7 @@ config SAM34_EXTDRAM
 	bool "Configure external DRAM"
 	default n
 	depends on ARCH_HAVE_EXTDRAM
+	select ARCH_HAVE_SDRAM
 	---help---
 		Configure external DRAM memory and, if applicable, map then external
 		DRAM into the memory map.
