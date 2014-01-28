@@ -3121,7 +3121,26 @@ To-Do List
    heap?
 
    UPDATE:  If I turn memory management debug on, the crash does not
-   occur.  This needs some further investigation and a little TLC.
+   occur:
+
+     CONFIG_DEBUG=y
+     # CONFIG_DEBUG_VERBOSE is not set
+     CONFIG_DEBUG_MM=y
+     # ...(No other debug output enabled)...
+     CONFIG_DEBUG_FULLOPT=y
+
+   Results in:
+
+     mm_initialize: Heap: start=20001228 size=268430808
+     mm_addregion: Region 1: base=20001228 size=268430800
+
+     NuttShell (NSH)
+     nsh> free
+                  total       used       free    largest
+     Mem:     268430800       6864  268423936  268423936
+     nsh>
+
+   This needs some further investigation and a little TLC.
 
 5) HSCMI TX DMA support is currently commented out.
 
