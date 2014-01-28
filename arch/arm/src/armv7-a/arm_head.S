@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/armv7-a/arm_head.S
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,8 +70,6 @@
  */
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
-#  define DO_SDRAM_INIT 1
-
   /* Check for the identity mapping:  For this configuration, this would be
    * the case where the virtual beginning of FLASH is the same as the physical
    * beginning of FLASH.
@@ -98,7 +96,6 @@
 
 #elif defined(CONFIG_BOOT_COPYTORAM)
 #  error "configuration not implemented
-#  define DO_SDRAM_INIT 1
 
   /* Check for the identity mapping:  For this configuration, this would be
    * the case where the virtual beginning of FLASH is the same as the physical
@@ -192,18 +189,6 @@ __start:
 
 	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
 	msr		cpsr_c, r0
-
-	/* Initialize DRAM using a macro provided by board-specific logic.
-	 *
-	 * This must be done in two cases:
-	 * 1. CONFIG_BOOT_RUNFROMFLASH.  The system is running from FLASH
-	 * 2. CONFIG_BOOT_COPYTORAM.  The system booted from FLASH but
-	 *    will copy itself to SDRAM.
-	 */
-
-#ifdef DO_SDRAM_INIT
-	config_sdram
-#endif
 
 	/* Clear the 16K level 1 page table */
 
@@ -626,19 +611,70 @@ __start:
 	str		r3, [r5, r3, lsr #18]	/* identity mapping */
 #endif /* !CONFIG_ARCH_ROMPGTABLE && !CONFIG_IDENTITY_TEXTMAP */
 
-	/* Zero BSS and set up the stack pointer */
+	/* Set up the stack pointer and clear the frame pointer */
+
+	ldr		sp, .Lstackpointer
+	mov     fp, #0
+
+	/* Initialize .bss and .data ONLY if .bss and .data lie in SRAM that is
+	 * ready to use.  Other memory, such as SDRAM, must be initialized before
+	 * it can be used.  up_boot() will perform that memory initialization and
+	 * .bss and .data can be initialized after up_boot() returns.
+	 */
+
+#ifndef CONFIG_BOOT_SDRAM_DATA
+	bl		arm_data_initialize
+#endif
+
+	/* Perform early C-level, platform-specific initialization.  Logic
+	 * within up_boot() must configure SDRAM and call arm_ram_initailize.
+	 */
+
+	bl		up_boot
+
+#ifdef CONFIG_DEBUG_STACK
+	/* Write a known value to the IDLE thread stack to support stack
+	 * monitoring logic
+	 */
+
+	adr		r3, .Lstkinit
+	ldmia	r3, {r0, r1, r2}	/* R0 = start of IDLE stack; R1 = Size of tack; R2 = coloration */
+
+1:								/* Top of the loop */
+	sub		r1, r1, #1			/* R1 = Number of words remaining */
+	cmp		r1, #0				/* Check (nwords == 0) */
+	str		r2, [r0], #4		/* Save stack color word, increment stack address */
+	bne		1b					/* Bottom of the loop */
+#endif
+
+	/* Finally branch to the OS entry point */
+
+	mov		lr, #0				/* LR = return address (none) */
+	b		os_start			/* Branch to os_start */
+	.size	.Lvstart, .-.Lvstart
+
+/***************************************************************************
+ * Name: arm_data_initialize
+ ***************************************************************************/
+
+	.global	arm_data_initialize
+	.type	arm_data_initialize, #function
+
+arm_data_initialize:
+
+	/* zero BSS and set up the stack pointer */
 
 	adr		r0, .Linitparms
-	ldmia	r0, {r0, r1, sp}
+	ldmia	r0, {r0, r1}
 
 	/* Clear the frame pointer and .bss */
 
 	mov     fp, #0
 
-.Lbssinit:	
+1:
 	cmp		r0, r1				/* Clear up to _bss_end_ */
 	strcc	fp, [r0],#4
-	bcc		.Lbssinit
+	bcc		1b
 
 	/* If the .data section is in a separate, uninitialized address space,
 	 * then we will also need to copy the initial values of of the .data
@@ -653,45 +689,34 @@ __start:
 	adr		r3, .Ldatainit
 	ldmia	r3, {r0, r1, r2}
 
-1:	ldmia	r0!, {r3 - r10}
+2:
+	ldmia	r0!, {r3 - r10}
 	stmia	r1!, {r3 - r10}
 	cmp		r1, r2
-	blt		1b
+	blt		2b
 #endif
 
-	/* Perform early C-level, platform-specific initialization */
+	/* And return to the caller */
 
-	bl		up_boot
+	bx		lr
+	.size	arm_data_initialize, . - arm_data_initialize
 
-#ifdef CONFIG_DEBUG_STACK
-	/* Write a known value to the IDLE thread stack to support stack
-	 * monitoring logic
-	 */
-
-	adr		r3, .Lstkinit
-	ldmia	r3, {r0, r1, r2}	/* R0 = start of IDLE stack; R1 = Size of tack; R2 = coloration */
-
-2:								/* Top of the loop */
-	sub		r1, r1, #1			/* R1 = Number of words remaining */
-	cmp		r1, #0				/* Check (nwords == 0) */
-	str		r2, [r0], #4		/* Save stack color word, increment stack address */
-	bne		2b					/* Bottom of the loop */
-
-#endif
-
-	/* Finally branch to the OS entry point */
-
-	mov		lr, #0				/* LR = return address (none) */
-	b		os_start			/* Branch to os_start */
+/***************************************************************************
+ * Text-section constants
+ ***************************************************************************/
 
 	/* Text-section constants:
 	 *
 	 *   _sbss is the start of the BSS region (see ld.script)
-	 *   _ebss is the end of the BSS regsion (see ld.script)
+	 *   _ebss is the end of the BSS region (see ld.script)
 	 *
-	 * The idle task stack starts at the end of BSS and is of size
+	 * The idle task stack usually starts at the end of BSS and is of size
 	 * CONFIG_IDLETHREAD_STACKSIZE.  The heap continues from there until the
 	 * end of memory.  See g_idle_topstack below.
+	 *
+	 * In the case where CONFIG_BOOT_SDRAM_DATA is defined, the IDLE stack is
+	 * in ISRAM, but the heap is in SDRAM beginning at _ebss and extending
+	 * to the end of SDRAM.
 	 */
 
 #ifndef CONFIG_ARCH_ROMPGTABLE
@@ -708,8 +733,15 @@ __start:
 .Linitparms:
 	.long	_sbss
 	.long	_ebss
-	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
 	.size	.Linitparms, . -.Linitparms
+
+.Lstackpointer:
+#ifdef CONFIG_BOOT_SDRAM_DATA
+	.long	IDLE_STACK_VBASE+CONFIG_IDLETHREAD_STACKSIZE-4
+#else
+	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE-4
+#endif
+	.size	.Lstackpointer, . -.Lstackpointer
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
 	.type	.Ldatainit, %object
@@ -723,14 +755,19 @@ __start:
 #ifdef CONFIG_DEBUG_STACK
 	.type	.Lstkinit, %object
 .Lstkinit:
+#ifdef CONFIG_BOOT_SDRAM_DATA
+	.long	IDLE_STACK_VBASE		/* Beginning of the IDLE stack, then words of IDLE stack */
+#else
 	.long	_ebss					/* Beginning of the IDLE stack, then words of IDLE stack */
+#endif
 	.long	(CONFIG_IDLETHREAD_STACKSIZE >> 2)
 	.long	STACK_COLOR				/* Stack coloration word */
 	.size	.Lstkinit, . -.Lstkinit
 #endif
-	.size	.Lvstart, .-.Lvstart
 
-	 /* Data section variables */
+/***************************************************************************
+ * Data section variables
+ ***************************************************************************/
 
 	/* This global variable is unsigned long g_idle_topstack and is
 	 * exported from here only because of its coupling to .Linitparms
@@ -741,7 +778,13 @@ __start:
 	.align	4
 	.globl	g_idle_topstack
 	.type	g_idle_topstack, object
+
 g_idle_topstack:
+
+#ifdef CONFIG_BOOT_SDRAM_DATA
+	.long	IDLE_STACK_VBASE+CONFIG_IDLETHREAD_STACKSIZE
+#else
 	.long	_ebss+CONFIG_IDLETHREAD_STACKSIZE
+#endif
 	.size	g_idle_topstack, .-g_idle_topstack
 	.end

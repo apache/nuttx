@@ -2969,6 +2969,7 @@ config SAMA5_DDRCS
 	bool "External DDR-SDRAM Memory"
 	default n
 	depends on SAMA5_MPDDRC
+	select ARCH_HAVE_SDRAM
 	---help---
 		Build in support for DDR-SDRAM memory resources.
 

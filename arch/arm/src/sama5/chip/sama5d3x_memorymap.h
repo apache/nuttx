@@ -616,6 +616,10 @@
 #    endif
 #    define PGTABLE_IN_HIGHSRAM   1
 
+#    ifdef CONFIG_BOOT_SDRAM_DATA
+#      error CONFIG_BOOT_SDRAM_DATA not suupported in this configuration
+#    endif
+
 #  else /* CONFIG_BOOT_RUNFROMISRAM && CONFIG_ARCH_LOWVECTORS */
 
   /* Otherwise, the vectors lie at another location (perhaps in NOR FLASH, perhaps
@@ -629,6 +633,11 @@
 #    endif
 #    define PGTABLE_IN_LOWSRAM    1
 
+#    ifdef CONFIG_BOOT_SDRAM_DATA
+#      define IDLE_STACK_PBASE    (PGTABLE_BASE_PADDR + PGTABLE_SIZE)
+#      define IDLE_STACK_VBASE    (PGTABLE_BASE_VADDR + PGTABLE_SIZE)
+#    endif
+
 #  endif /* CONFIG_BOOT_RUNFROMISRAM && CONFIG_ARCH_LOWVECTORS */
 
   /* In either case, the page table lies in ISRAM.  If ISRAM is not the
@@ -639,6 +648,21 @@
 #  if NUTTX_RAM_PADDR != SAM_ISRAM_PSECTION
 #    define ARMV7A_PGTABLE_MAPPING 1
 #  endif
+
+#else /* !PGTABLE_BASE_PADDR || !PGTABLE_BASE_VADDR */
+
+  /* Sanity check.. if one is defined, both should be defined */
+
+#  if !defined(PGTABLE_BASE_PADDR) || !defined(PGTABLE_BASE_VADDR)
+#    error "One of PGTABLE_BASE_PADDR or PGTABLE_BASE_VADDR is undefined"
+#  endif
+
+  /* If data is in SDRAM, then the IDLE stack at the beginning of ISRAM */
+
+#    ifdef CONFIG_BOOT_SDRAM_DATA
+#      define IDLE_STACK_PBASE    (SAM_ISRAM0_PADDR + PGTABLE_SIZE)
+#      define IDLE_STACK_VBASE    (SAM_ISRAM0_VADDR + PGTABLE_SIZE)
+#    endif
 
 #endif /* !PGTABLE_BASE_PADDR || !PGTABLE_BASE_VADDR */
 
