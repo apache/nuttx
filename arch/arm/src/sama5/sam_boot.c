@@ -633,6 +633,35 @@ void up_boot(void)
   arm_fpuconfig();
 #endif
 
+  /* Perform board-specific initialization,  This must include:
+   *
+   * - Initialization of board-specific memory resources (e.g., SDRAM)
+   * - Configuration of board specific resources (PIOs, LEDs, etc).
+   *
+   * NOTE: We must use caution prior to this point to make sure that
+   * the logic does not access any global variables that might lie
+   * in SDRAM.
+   */
+
+  sam_boardinitialize();
+
+  /* SDRAM was configured in a temporary state to support low-level
+   * initialization.  Now that the SDRAM has been fully initialized,
+   * we can reconfigure the SDRAM in its final, fully cache-able state.
+   */
+
+#ifdef NEED_SDRAM_REMAPPING
+  sam_remap();
+#endif
+
+  /* If .data and .bss reside in SDRAM, then initialize the data sections
+   * now after SDRAM has been initialized.
+   */
+
+#ifdef CONFIG_BOOT_SDRAM_DATA
+  arm_data_initialize();
+#endif
+
   /* Perform common, low-level chip initialization (might do nothing) */
 
   sam_lowsetup();
@@ -653,22 +682,5 @@ void up_boot(void)
 
 #ifdef CONFIG_NUTTX_KERNEL
   sam_userspace();
-#endif
-
-  /* Perform board-specific initialization,  This must include:
-   *
-   * - Initialization of board-specific memory resources (e.g., SDRAM)
-   * - Configuration of board specific resources (PIOs, LEDs, etc).
-   */
-
-  sam_boardinitialize();
-
-  /* SDRAM was configured in a temporary state to support low-level
-   * ininitialization.  Now that the SDRAM has been fully initialized,
-   * we can reconfigure the SDRAM in its final, fully cache-able state.
-   */
-
-#ifdef NEED_SDRAM_REMAPPING
-  sam_remap();
 #endif
 }

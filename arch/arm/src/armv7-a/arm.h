@@ -111,6 +111,22 @@ extern "C" {
 #define EXTERN extern
 #endif
 
+/****************************************************************************
+ * Name: arm_data_initialize
+ *
+ * Description:
+ *   Clear all of .bss to zero; set .data to the correct initial values
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void arm_data_initialize(void);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

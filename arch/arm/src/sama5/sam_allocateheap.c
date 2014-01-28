@@ -72,7 +72,7 @@
  * start would exclude, for example, any memory at the bottom of the RAM
  * region used for the 16KB page table.  If we are also executing from this
  * same RAM region then CONFIG_RAM_START is not used.  Instead, the value of
- * g_idle_stack is the used; this variable holds the first avaiable byte of
+ * g_idle_stack is the used; this variable holds the first available byte of
  * memory after the .text, .data, .bss, and IDLE stack allocations.
  *
  * CONFIG_RAM_VEND is defined in the configuration it is the usable top of
@@ -94,7 +94,8 @@
 #  undef CONFIG_SAMA5_ISRAM_HEAP
 #endif
 
-#if !defined(CONFIG_SAMA5_DDRCS) || defined(CONFIG_SAMA5_BOOT_SDRAM)
+#if !defined(CONFIG_SAMA5_DDRCS) || defined(CONFIG_SAMA5_BOOT_SDRAM) || \
+    defined(CONFIG_BOOT_SDRAM_DATA)
 #  undef CONFIG_SAMA5_DDRCS_HEAP
 #endif
 
@@ -216,9 +217,20 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
   board_led_on(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)ubase;
   *heap_size  = usize;
-#else
 
-  /* Return the heap settings */
+#elif defined(CONFIG_BOOT_SDRAM_DATA)
+  /* In this case, the IDLE stack is in ISRAM, but data is in SDRAM.  The
+   * heap is at the end of BSS through the configured end of SDRAM.
+   */
+
+  board_led_on(LED_HEAPALLOCATE);
+  *heap_start = (FAR void*)&_ebss;
+  *heap_size  = CONFIG_RAM_VEND - (size_t)&_ebss;
+
+#else
+  /* Both data and the heap are in ISRAM.  The heap is then from the end of
+   * IDLE stack through the configured end of ISRAM.
+   */
 
   board_led_on(LED_HEAPALLOCATE);
   *heap_start = (FAR void*)g_idle_topstack;
