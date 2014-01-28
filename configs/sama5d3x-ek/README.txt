@@ -1284,8 +1284,8 @@ NOR FLASH Support
 SDRAM Support
 =============
 
-  Configuration
-  -------------
+  SRAM Heap Configuration
+  -----------------------
 
   In these configurations, .data and .bss are retained in ISRAM.  SDRAM can
   be initialized and included in the heap.  Relevant configuration settings:
@@ -1349,6 +1349,40 @@ SDRAM Support
     RAMTest: Pattern test: 20000000 268435456 66666666 99999999
     RAMTest: Pattern test: 20000000 268435456 33333333 cccccccc
     RAMTest: Address-in-address test: 20000000 268435456
+
+  SDRAM Data Configuration
+  ------------------------
+ 
+  In these configurations, .data and .bss are retained in ISRAM by default.
+  .data and .bss can also be retained in SDRAM using these slightly
+  different configuration settings.  In this configuration, ISRAM is
+  used only for the Cortex-A5 page table for the IDLE thread stack.
+
+    System Type->ATSAMA5 Peripheral Support
+      CONFIG_SAMA5_MPDDRC=y                 : Enable the DDR controller
+
+    System Type->External Memory Configuration
+      CONFIG_SAMA5_DDRCS=y                  : Tell the system that DRAM is at the DDR CS
+      CONFIG_SAMA5_DDRCS_SIZE=268435456     : 2Gb DRAM -> 256GB
+      CONFIG_SAMA5_DDRCS_LPDDR2=y           : Its DDR2
+      CONFIG_SAMA5_MT47H128M16RT=y          : This is the type of DDR2
+
+    System Type->Heap Configuration
+      CONFIG_SAMA5_ISRAM_HEAP=n              : These do not apply in this case
+      CONFIG_SAMA5_DCRS_HEAP=n
+
+    System Type->Boot Memory Configuration
+      CONFIG_RAM_START=0x20000000           : Physical address of SDRAM
+      CONFIG_RAM_VSTART=0x20000000          : Virtual address of SDRAM
+      CONFIG_RAM_SIZE=268435456             : Size of SDRAM
+      CONFIG_BOOT_SDRAM_DATA=y              : Data is in SDRAM
+
+      Care must be used applied these RAM locations; the graphics
+      configurations use SDRAM in an incompatible way to set aside
+      LCD framebuffers.
+
+    Memory Management
+      CONFIG_MM_REGIONS=1                   : One heap memory region:  ISDRAM
 
 NAND Support
 ============
@@ -2676,38 +2710,41 @@ Configurations
        be loaded via SAM-BA.  The are the relevant configuration options
        are provided above in the section entitled "NOR FLASH Support".
 
+    4. Data resides in ISRAM, but can be moved to SDRAM as described above
+       under "SDRAM Data Configuration."
+
     The following features are pre-enabled in the demo configuration, but not
     in the nsh configuration:
 
-    4. SDRAM is supported.  .data and .bss is still retained in ISRAM, but
+    5. SDRAM is supported.  .data and .bss is still retained in ISRAM, but
        SDRAM is initializeed and the SDRAM memory is included in the heap.
        Relevant configuration settings are provided in the paragraph entitled
        "SDRAM Support" above.
 
-    5. The Real Time Clock/Calendar RTC) is enabled.  See the sectino entitled
+    6. The Real Time Clock/Calendar RTC) is enabled.  See the sectino entitled
        "RTC" above.
 
-    6. The Embest or Ronetix CPU module includes an Atmel AT25DF321A,
+    7. The Embest or Ronetix CPU module includes an Atmel AT25DF321A,
        32-megabit, 2.7-volt SPI serial flash.  Support for that serial
        FLASH can is enabled in this configuration.  See the paragraph
        entitle "AT25 Serial FLASH" for detailed configuration settings.
 
-    7. Support for HSMCI car slots. The SAMA5D3x-EK provides a two SD memory
+    8. Support for HSMCI car slots. The SAMA5D3x-EK provides a two SD memory
        card slots:  (1) a full size SD card slot (J7 labelled MCI0), and (2)
        a microSD memory card slot (J6 labelled MCI1).  The full size SD card
        slot connects via HSMCI0; the microSD connects vi HSMCI1.  Relevant
        configuration settings can be found in the section entitle "HSMCI
        Card Slots" above.
 
-    8. Support the USB high-speed device (UDPHS) driver is enabled.  See the
+    9. Support the USB high-speed device (UDPHS) driver is enabled.  See the
        section above entitled "USB High-Speed Device" for relevant NuttX
        configuration settings.
 
-    9. The USB high-speed EHCI and the low-/full- OHCI host drivers are supported
-       in this configuration.  See the section above entitle "USB High-Speed Host"
-       for relevant configuration information.
+    10. The USB high-speed EHCI and the low-/full- OHCI host drivers are supported
+        in this configuration.  See the section above entitle "USB High-Speed Host"
+        for relevant configuration information.
 
-    10. Support SAMA5D3 TRNG peripheral is enabled so that it provides
+    11. Support SAMA5D3 TRNG peripheral is enabled so that it provides
         /dev/random.  See the section entitled "TRNG and /dev/random"
         above for detailed configuration information.
 
@@ -2812,63 +2849,66 @@ Configurations
     4. This configuration has support for NSH built-in applications enabled.
        However, no built-in applications are selected in the base configuration.
 
-    5. This configuration has support for the FAT file system built in.  However,
+    5. Data resides in ISRAM, but can be moved to SDRAM as described above
+       under "SDRAM Data Configuration."
+
+    6. This configuration has support for the FAT file system built in.  However,
        by default, there are no block drivers initialized.  The FAT file system can
        still be used to create RAM disks.
 
-    6. SDRAM support can be enabled by modifying your NuttX configuration as
+    7. SDRAM support can be enabled by modifying your NuttX configuration as
        described above in the paragraph entitle "SDRAM Support"
 
-    7. The Embest or Ronetix CPU module includes an Atmel AT25DF321A,
+    8. The Embest or Ronetix CPU module includes an Atmel AT25DF321A,
        32-megabit, 2.7-volt SPI serial flash.  Support for that serial
        FLASH can be enabled by modifying the NuttX configuration as
        described above in the paragraph entitled "AT25 Serial FLASH".
 
-    8. Enabling HSMCI support. The SAMA5D3x-EK provides a two SD memory card
+    9. Enabling HSMCI support. The SAMA5D3x-EK provides a two SD memory card
        slots:  (1) a full size SD card slot (J7 labeled MCI0), and (2) a
        microSD memory card slot (J6 labeled MCI1).  The full size SD card
        slot connects via HSMCI0; the microSD connects vi HSMCI1.  Support
        for both SD slots can be enabled with the settings provided in the
        paragraph entitled "HSMCI Card Slots" above.
 
-    9. Support the USB low-, high- and full-speed OHCI host driver can be enabled
-       by changing the NuttX configuration file as described in the section
-       entitled "USB High-Speed Host" above.
+    10. Support the USB low-, high- and full-speed OHCI host driver can be enabled
+        by changing the NuttX configuration file as described in the section
+        entitled "USB High-Speed Host" above.
 
-    10. Support the USB high-speed USB device driver (UDPHS) can be enabled
+    11. Support the USB high-speed USB device driver (UDPHS) can be enabled
         by changing the NuttX configuration file as described above in the
         section entitled "USB High-Speed Device."
 
-    11. AT24 Serial EEPROM. A AT24C512 Serial EEPPROM was used for tested
+    12. AT24 Serial EEPROM. A AT24C512 Serial EEPPROM was used for tested
         I2C.  There is, however, no AT24 EEPROM on board the SAMA5D3x-EK:
         The  serial EEPROM was mounted on an external adaptor board and
         connected to the SAMA5D3x-EK thusly.  See the section above entitle
         "AT24 Serial EEPROM" for further information.
 
-    12. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
+    13. I2C Tool. NuttX supports an I2C tool at apps/system/i2c that can be
         used to peek and poke I2C devices.  See the discussion above under
         "I2C Tool" for detailed configuration settings.
 
-    13. Networking support via the can be added to NSH by modifying the
+    14. Networking support via the can be added to NSH by modifying the
         configuration.  See the "Networking" section above for detailed
         configuration settings.
 
-    14. You can enable the touchscreen and a touchscreen by following the
+    15. You can enable the touchscreen and a touchscreen by following the
         configuration instrcutions in the section entitled "Touchscreen
         Testing" above.
 
-    15. The Real Time Clock/Calendar RTC) may be enabled by reconfiguring NuttX.
+    16. The Real Time Clock/Calendar RTC) may be enabled by reconfiguring NuttX.
         See the section entitled "RTC" above for detailed configuration settings.
 
-    16. This example can be configured to exercise the watchdog timer test
+    17. This example can be configured to exercise the watchdog timer test
         (apps/examples/watchdog).  See the detailed configuration settings in
         the section entitled "Watchdog Timer" above.
 
-    17. This example can be configured to enable the SAMA5 TRNG peripheral so
+    18. This example can be configured to enable the SAMA5 TRNG peripheral so
         that it provides /dev/random.  See the section entitled "TRNG and
         /dev/random" above for detailed configuration information.
 
-    18. See also the sections above for additional configuration options:
+    19. See also the sections above for additional configuration options:
         "AT24 Serial EEPROM", "CAN Usage", "SAMA5 ADC Support", "SAMA5 PWM
         Support", "OV2640 Camera Interface", "I2S Audio Support"
 
@@ -3047,6 +3087,9 @@ Configurations
        NOTE:  In order to boot in this configuration, you need to close the
        BMS jumper.
 
+    4. Data resides in ISRAM, but can be moved to SDRAM as described above
+       under "SDRAM Data Configuration."
+
     STATUS:
        See the To-Do list below
 
@@ -3069,17 +3112,13 @@ To-Do List
    have been using the norboot configuration to start the program in NOR
    FLASH (see just above).  See "Creating and Using NORBOOT" above.
 
-3) Currently, these configurations keep all .bss and .data in internal SRAM.
-   The SDRAM is available for heap, but not for static data.  This is
-   because the SDRAM does not get configured until after the system has
-   booted; until after .bss and .data have been initialized.  To change
-   this, the solution would be to port the Bareboard assembly language
-   setup into the NuttX assembly language startup and execute it BEFORE
-   initializing .bss and .data.
-
-4) Neither USB OHCI nor EHCI support Isochronous endpoints.  Interrupt
+3) Neither USB OHCI nor EHCI support Isochronous endpoints.  Interrupt
    endpoint support in the EHCI driver is untested (but works in similar
    EHCI drivers).
+
+4) The logic in "SDRAM Data Configuration" has generated some crashes.
+   Perhaps there are some issues with SDRAM when uses as the primary
+   heap?
 
 5) HSCMI TX DMA support is currently commented out.
 
