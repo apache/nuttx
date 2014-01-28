@@ -16,6 +16,7 @@ config ARCH_CHIP_A1X
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_MMU
 	select ARCH_HAVE_LOWVECTORS
+	select ARCH_HAVE_SDRAM
 	select BOOT_RUNFROMSDRAM
 	---help---
 		Allwinner A1X family: A10, A10S (A12), A13 (ARM Cortex-A8)
