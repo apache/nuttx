@@ -243,6 +243,7 @@ __start:
 	adr		r0, .LCtextinfo			/* Address of text info */
 	ldmia	r0, {r1, r2, r3, r4}	/* Load the text description */
 
+#ifndef CONFIG_IDENTITY_TEXTMAP
 	/* Create identity mapping for first MB of the .text section to support
 	 * this start-up logic executing out of the physical address space.  This
 	 * identity mapping will be removed by .Lvstart (see below).  Of course,
@@ -250,7 +251,6 @@ __start:
 	 * the identity mapping.
 	 */
 
-#ifndef CONFIG_IDENTITY_TEXTMAP
 	orr		r0, r1, r3				/* OR MMU flags into physical address */
 	str		r0, [r5, r1, lsr #18]	/* Identity mapping */
 #endif
@@ -429,52 +429,53 @@ __start:
 	orr		r0, r0, #(SCTLR_Z)
 #endif
 
+#ifndef CONFIG_ARCH_LOWVECTORS
 	/* Position vectors to 0xffff0000 if so configured.
 	 *
 	 *   SCTLR_V    Bit 13: High vectors
 	 */
 
-#ifndef CONFIG_ARCH_LOWVECTORS
 	orr		r0, r0, #(SCTLR_V)
 #endif
 
+#if defined(CPU_CACHE_ROUND_ROBIN) && !defined(CONFIG_ARCH_CORTEXA5)
 	/* Round Robin cache replacement
 	 *
 	 *   SCTLR_RR   Bit 14: The Cortex-A5 processor only supports a fixed random
 	 *                      replacement strategy.
 	 */
 
-#if defined(CPU_CACHE_ROUND_ROBIN) && !defined(CONFIG_ARCH_CORTEXA5)
 	orr		r0, r0, #(SCTLR_RR)
 #endif
 
+#ifndef CPU_DCACHE_DISABLE
 	/* Dcache enable
 	 *
 	 *   SCTLR_C    Bit 2:  DCache enable
 	 */
 
-#ifndef CPU_DCACHE_DISABLE
 	orr		r0, r0, #(SCTLR_C)
 #endif
 
+#ifndef CPU_ICACHE_DISABLE
 	/* Icache enable
 	 *
 	 *   SCTLR_I    Bit 12: ICache enable
 	 */
 
-#ifndef CPU_ICACHE_DISABLE
 	orr		r0, r0, #(SCTLR_I)
 #endif
 
+#ifdef ALIGNMENT_TRAP
 	/* Alignment abort enable
 	 *
 	 *   SCTLR_A    Bit 1:  Strict alignment enabled
 	 */
 
-#ifdef ALIGNMENT_TRAP
 	orr		r0, r0, #(SCTLR_A)
 #endif
 
+#ifdef CONFIG_AFE_ENABLE
 	/* AP[0:2] Permissions model
 	 *
 	 *   SCTLR_AFE  Bit 29: Full, legacy access permissions behavior (reset value).
@@ -483,7 +484,6 @@ __start:
 	 * control.  When AFE=0, AP[2:0] control access permissions.
 	 */
 
-#ifdef CONFIG_AFE_ENABLE
 	orr		r0, r0, #(SCTLR_AFE)
 #endif
 
@@ -599,12 +599,12 @@ __start:
 
 .Lvstart:
 
+#if !defined(CONFIG_ARCH_ROMPGTABLE) && !defined(CONFIG_IDENTITY_TEXTMAP)
 	/* Remove the temporary mapping (if one was made).  The following assumes
 	 * that the total RAM size is > 1Mb and extends that initial mapping to
 	 * cover additional RAM sections.
 	 */
 
-#if !defined(CONFIG_ARCH_ROMPGTABLE) && !defined(CONFIG_IDENTITY_TEXTMAP)
 	ldr		r5, .LCvpgtable			/* r5=Virtual page table base address */
 	ldr		r3, .LCptextbase		/* r0=Physical base address of .text section */
 	mov		r0, #0					/* flags + base = 0 */
@@ -616,13 +616,13 @@ __start:
 	ldr		sp, .Lstackpointer
 	mov     fp, #0
 
+#ifndef CONFIG_BOOT_SDRAM_DATA
 	/* Initialize .bss and .data ONLY if .bss and .data lie in SRAM that is
 	 * ready to use.  Other memory, such as SDRAM, must be initialized before
 	 * it can be used.  up_boot() will perform that memory initialization and
 	 * .bss and .data can be initialized after up_boot() returns.
 	 */
 
-#ifndef CONFIG_BOOT_SDRAM_DATA
 	bl		arm_data_initialize
 #endif
 
@@ -676,6 +676,7 @@ arm_data_initialize:
 	strcc	fp, [r0],#4
 	bcc		1b
 
+#ifdef CONFIG_BOOT_RUNFROMFLASH
 	/* If the .data section is in a separate, uninitialized address space,
 	 * then we will also need to copy the initial values of of the .data
 	 * section from the .text region into that .data region.  This would
@@ -685,7 +686,6 @@ arm_data_initialize:
 	 * address region.
 	 */
 
-#if defined(CONFIG_BOOT_RUNFROMFLASH)
 	adr		r3, .Ldatainit
 	ldmia	r3, {r0, r1, r2}
 
