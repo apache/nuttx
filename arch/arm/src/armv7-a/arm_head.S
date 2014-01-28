@@ -278,21 +278,12 @@ __start:
 	add		r1, r1, #(1024*1024)	/* R1: Increment the physical address */
 	bne		.Lpgtextloop			/* Loop while R4 is non-zero */
 
-#ifdef CONFIG_BOOT_RUNFROMFLASH
+#if defined(CONFIG_BOOT_RUNFROMFLASH) && !defined(CONFIG_BOOT_SDRAM_DATA)
 	/* If we are executing from FLASH, then we will need additional mappings for
 	 * the primary RAM region that holds the .data, .bss, stack, and heap memory.
 	 *
 	 *   Here we expect to have:
 	 *   r5 = Address of the base of the L1 table
-	 *
-	 *   REVISIT: We might need this second mapping under certain conditions
-	 *   when executing from RAM too.  When the RAM region is larger than 1MB
-	 *   and the page table is in the high end of RAM, then the single mapping
-	 *   above will not be sufficient.
-	 *
-	 *   REVISIT: If the page table is not located in the primary RAM regions,
-	 *   then we will also need an additional map the page table if the page
-	 *   table resides in internal SRAM.
 	 *
 	 * Load information needed to map the .text region.  After the ldmia, we
 	 * will have:
@@ -319,7 +310,7 @@ __start:
 	add		r1, r1, #(1024*1024)	/* R1: Increment the physical address */
 	bne		.Lpgramloop				/* Loop while R4 is non-zero */
 
-#endif /* CONFIG_BOOT_RUNFROMFLASH */
+#endif /* CONFIG_BOOT_RUNFROMFLASH && !CONFIG_BOOT_SDRAM_DATA */
 #endif /* CONFIG_ARCH_ROMPGTABLE */
 
 	/* The following logic will set up the ARMv7-A for normal operation.
