@@ -653,18 +653,15 @@ __start:
 
 arm_data_initialize:
 
-	/* zero BSS and set up the stack pointer */
+	/* Zero BSS */
 
 	adr		r0, .Linitparms
 	ldmia	r0, {r0, r1}
 
-	/* Clear the frame pointer and .bss */
-
-	mov     fp, #0
-
+	mov     r2, #0
 1:
 	cmp		r0, r1				/* Clear up to _bss_end_ */
-	strcc	fp, [r0],#4
+	strcc	r2, [r0], #4
 	bcc		1b
 
 #ifdef CONFIG_BOOT_RUNFROMFLASH
@@ -681,8 +678,8 @@ arm_data_initialize:
 	ldmia	r3, {r0, r1, r2}
 
 2:
-	ldmia	r0!, {r3 - r10}
-	stmia	r1!, {r3 - r10}
+	ldr		r3, [r0], #4
+	str		r3, [r1], #4
 	cmp		r1, r2
 	blt		2b
 #endif
