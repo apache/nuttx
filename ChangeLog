@@ -6524,8 +6524,12 @@
 	* arch/arm/include/efm32, arch/arm/src/efm32, and configs/efm32-dk360:
 	  Removed all EFM32 support.  Not yet readyto be fielded (2014-1-27).
 	* arch/arm/src/armv7-a/arm_head.S, sama5/sam_boot.c, and several other
-	  files:  Not supports execution from NOR FLASH with .data and .bss in
+	  files:  Now supports execution from NOR FLASH with .data and .bss in
 	  SDRAM.  This was not possible prior to this because .bss and .data
 	  were initialized before SDRAM was configured.  This logic is still
 	  kind buggy. (2014-1-28).
-
+	* arch/arm/src/armv7-a/arm_head.S and arm_pghead.S:  Back off to a
+	  somewhat less efficient loop for initializing .data and .bss.  The
+	  original, efficient logic violated the ARM C ABI.  It was okay when
+	  called from boot logic, but not when called from C logic.  This fixes
+	  bugginess reported on 2014-1-28. (2014-1-29).
