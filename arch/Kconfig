@@ -441,11 +441,17 @@ config ARCH_HAVE_SDRAM
 config BOOT_SDRAM_DATA
 	bool "Data in SDRAM"
 	default n
-	depends on ARCH_HAVE_SDRAM
+	depends on ARCH_HAVE_SDRAM && !BOOT_RUNFROMSDRAM
 	---help---
-		This selection should be set if data lies in SDRAM (vs. SRAM).  In
-		that case, the initialization sequence is a little different:  SDRAM
-		must be configured before before the .data and .bss sections can be
-		initialized.
+		This selection should be set if data lies in SDRAM (vs. SRAM) and if
+		SDRAM was not previously initialized by a loader.  Obviously, this
+		does not apply if we booting from SDRAM because SDRAM must have been
+		initialized priority to loading NuttX into SDRAM.
+
+		In the case where SDRAM must be initialized by NuttX, the
+		initialization sequence is a little different: Normally, .data and
+		.bss must be initialized before starting the system.  But in this
+		case SDRAM must be configured by board-specific logic before the
+		.data and .bss sections can be initialized.
 
 endmenu # Boot Memory Configuration
