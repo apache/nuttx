@@ -34,6 +34,7 @@ nuttx/
   (0)  ARM/LPC43x (arch/arm/src/lpc43xx/)
   (3)  ARM/STR71x (arch/arm/src/str71x/)
   (3)  ARM/LM3S6918 (arch/arm/src/lm/)
+  (x)  ARM/SAMA5D3 ((arch/arm/src/sama5/)
   (5)  ARM/STM32 (arch/arm/src/stm32/)
   (3)  AVR (arch/avr)
   (0)  Intel x86 (arch/x86)
@@ -1791,6 +1792,11 @@ o ARM/LM3S6918 (arch/arm/src/lm/)
                from 1024 to 2048 (on the LM3S) eliminates the problem.  So the most
                likely cause is probably a stack overflow, not a hard sofware bug.
   Priority:    Probably Low
+
+o ARM/SAMA5D3 ((arch/arm/src/sama5/)
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  Issues related to the SAMA5D3 port are in configs/sama5d3x-ek/README.txt.
 
 o ARM/STM32 (arch/arm/src/stm32/)
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

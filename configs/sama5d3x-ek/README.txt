@@ -3140,7 +3140,10 @@ To-Do List
      Mem:     268430800       6864  268423936  268423936
      nsh>
 
-   This needs some further investigation and a little TLC.
+   Disabling debug and forcing either of the two debug outputs above also
+   eliminates the problem.  Replacing the debug output with a delay does
+   not solve the problem.  This needs some further investigation and a
+   little TLC.
 
 5) HSCMI TX DMA support is currently commented out.
 
