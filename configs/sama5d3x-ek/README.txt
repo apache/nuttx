@@ -3116,60 +3116,31 @@ To-Do List
    endpoint support in the EHCI driver is untested (but works in similar
    EHCI drivers).
 
-4) The logic in "SDRAM Data Configuration" has generated some crashes.
-   Perhaps there are some issues with SDRAM when uses as the primary
-   heap?
+4) HSCMI TX DMA support is currently commented out.
 
-   UPDATE:  If I turn memory management debug on, the crash does not
-   occur:
-
-     CONFIG_DEBUG=y
-     # CONFIG_DEBUG_VERBOSE is not set
-     CONFIG_DEBUG_MM=y
-     # ...(No other debug output enabled)...
-     CONFIG_DEBUG_FULLOPT=y
-
-   Results in:
-
-     mm_initialize: Heap: start=20001228 size=268430808
-     mm_addregion: Region 1: base=20001228 size=268430800
-
-     NuttShell (NSH)
-     nsh> free
-                  total       used       free    largest
-     Mem:     268430800       6864  268423936  268423936
-     nsh>
-
-   Disabling debug and forcing either of the two debug outputs above also
-   eliminates the problem.  Replacing the debug output with a delay does
-   not solve the problem.  This needs some further investigation and a
-   little TLC.
-
-5) HSCMI TX DMA support is currently commented out.
-
-6) I believe that there is an issue when the internal AT25 FLASH is
+5) I believe that there is an issue when the internal AT25 FLASH is
    formatted by NuttX.  That format works fine with Linux, but does not
    appear to work with Windows.  Reformatting on Windows can resolve this.
    NOTE:  This is not a SAMA5Dx issue.
 
-7) CAN testing has not yet been performed due to issues with cabling.  I
+6) CAN testing has not yet been performed due to issues with cabling.  I
    just do not have a good test bed (or sufficient CAN knowledge) for
    good CAN testing.
 
-8) The NxWM example does not work well.  This example was designed to work
+7) The NxWM example does not work well.  This example was designed to work
    with much smaller displays and does not look good or work well with the
    SAMA5Dx-EKs 800x480 display.  See above for details.
 
-9) There are lots of LCDC hardware features that are not tested with NuttX.
+8) There are lots of LCDC hardware features that are not tested with NuttX.
    The simple NuttX graphics system does not have support for all of the
    layers and other features of the LCDC.
 
-10) I have a Camera, but there is still no ISI driver.  I am not sure what to
-    do with the camera.  NuttX needs something like V4L to provide the
-    definition for what a camera driver is supposed to do.
+9) I have a Camera, but there is still no ISI driver.  I am not sure what to
+   do with the camera.  NuttX needs something like V4L to provide the
+   definition for what a camera driver is supposed to do.
 
-    I will probably develop a test harness for ISI, but it is of only
-    minimal value with no OS infrastructure to deal with images and video.
+   I will probably develop a test harness for ISI, but it is of only
+   minimal value with no OS infrastructure to deal with images and video.
 
-11) GMAC has only been tested on a 10/100Base-T network.  I don't have a
+10) GMAC has only been tested on a 10/100Base-T network.  I don't have a
     1000Base-T network to support additional testing.
