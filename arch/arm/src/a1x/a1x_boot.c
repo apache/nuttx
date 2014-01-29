@@ -328,31 +328,41 @@ void up_boot(void)
 
   a1x_copyvectorblock();
 
+#ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
 
-#ifdef CONFIG_ARCH_FPU
   arm_fpuconfig();
+#endif
+
+#ifdef CONFIG_BOOT_SDRAM_DATA
+  /* This setting is inappropriate for the A1x because the code is *always*
+   * executing from SDRAM.  If CONFIG_BOOT_SDRAM_DATA happens to be set,
+   * let's try to do the right thing and initialize the .data and .bss
+   * sections.
+   */
+
+  arm_data_initialize();
 #endif
 
   /* Perform common, low-level chip initialization (might do nothing) */
 
   a1x_lowsetup();
 
+#ifdef USE_EARLYSERIALINIT
   /* Perform early serial initialization if we are going to use the serial
    * driver.
    */
 
-#ifdef USE_EARLYSERIALINIT
   up_earlyserialinit();
 #endif
 
+#ifdef CONFIG_NUTTX_KERNEL
   /* For the case of the separate user-/kernel-space build, perform whatever
    * platform specific initialization of the user memory is required.
    * Normally this just means initializing the user space .data and .bss
    * segments.
    */
 
-#ifdef CONFIG_NUTTX_KERNEL
   a1x_userspace();
 #endif
 
