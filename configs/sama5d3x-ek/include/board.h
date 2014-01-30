@@ -58,7 +58,7 @@
  * In this configuration, UPLL is the source of the UHPHS clock (if enabled).
  */
 
-#  include <arch/board/board_396MHz.h>
+#  include <arch/board/board_396mhz.h>
 
 #else
 /* OHCI Only.  This is an alternative slower configuration that will produce a 48MHz
@@ -67,7 +67,7 @@
  * results in a CPU clock of 384MHz.
  */
 
-#  include <arch/board/board_384MHz.h>
+#  include <arch/board/board_384mhz.h>
 
 #endif
 
