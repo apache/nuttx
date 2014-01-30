@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: January 12, 2014</p>
+      <p>Last Updated: January 30, 2014</p>
     </td>
   </tr>
 </table>
@@ -1130,13 +1130,13 @@
 <h2>Released Versions</h2>
 <p>
   In addition to the ever-changing GIT repository, there are frozen released versions of NuttX available.
-  The current release is NuttX 6.32.
-  NuttX 6.32 is the 99<sup>th</sup> release of NuttX.
-  It was released on December 7, 2013, and is available for download from the
+  The current release is NuttX 6.33.
+  NuttX 6.33 is the 100<sup>th</sup> release of NuttX.
+  It was released on January 30, 2014, and is available for download from the
   <a href="http://sourceforge.net/projects/nuttx/files/">SourceForge</a> website.
-  Note that the release consists of two tarballs:  <code>nuttx-6.32.tar.gz</code> and <code>apps-6.32.tar.gz</code>.
+  Note that the release consists of two tarballs:  <code>nuttx-6.33.tar.gz</code> and <code>apps-6.33.tar.gz</code>.
   Both may be needed (see the top-level <code>nuttx/README.txt</code> file for build information).
-  Release notes for NuttX 6.32 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-6.32/">here</a>.
+  Release notes for NuttX 6.33 are available <a href="http://sourceforge.net/projects/nuttx/files/nuttx/nuttx-6.33/">here</a>.
   The change log associated with the release is available <a href="ChangeLog.txt">here</a>.
   Unreleased changes after this release are available in GIT (see below).
 </p>
@@ -1171,7 +1171,6 @@
   </li></ul>
 </ul>
 
-
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
   <td>
@@ -1196,6 +1195,7 @@
       <li><a href="#arm920t">ARM920T</a> (1) </li>
       <li><a href="#arm926ejs">ARM926EJS</a> (4) </li>
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (1) </li>
+      <li><a href="#armcortexa8">ARM Cortex-A8</a> (1) </li>
       <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (2)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (25)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (10)</li>
@@ -1224,17 +1224,17 @@
       <li><a href="#pic32mips">PIC32MX</a> (MIPS) (4)</li>
     </ul>
   </li>
-  </td>
-  <td bgcolor="#e4e4e4" valign="top" width="33%">
   <li>Renesas/Hitachi:
     <ul>
         <li><a href="#superh">Renesas/Hitachi SuperH</a> (1/2)</li>
         <li><a href="#m16c">Renesas M16C/26</a> (1/2)</li>
     </ul>
   </li>
+  </td>
+  <td bgcolor="#e4e4e4" valign="top" width="33%">
   <li>ZiLOG
     <ul>
-        <li><a href="#zilogz16f">ZiLOG Z16F</a> (1)</li>
+        <li><a href="#zilogz16f">ZiLOG ZNEO Z16F</a> (2)</li>
         <li><a href="#zilogez80acclaim">ZiLOG eZ80 Acclaim!</a> (1)</li>
         <li><a href="#zilogz8encore">ZiLOG Z8Encore!</a> (2)</li>
         <li><a href="#zilogz180">ZiLOG Z180</a> (1)</li>
@@ -1254,6 +1254,11 @@
 <ul>
   <tr>
   <td bgcolor="#e4e4e4" valign="top" width="34%">
+  <li>Allwinner
+    <ul>
+      <li><a href="#allwinnera10">A10</a> <small>(Cortex-A8)</small></li>
+    </ul>
+  </li>
   <li>Atmel
     <ul>
       <li><a href="#avratmega128">AVR ATMega128</a> <small>(8-bit AVR)</small></li>
@@ -1351,7 +1356,7 @@
   </li>
   <li>ZiLOG
     <ul>
-      <li><a href="#zilogz16f">ZiLOG Z16F</a></li>
+      <li><a href="#zilogz16f">ZiLOG ZNEO Z16F</a></li>
       <li><a href="#zilogez80acclaim">ZiLOG eZ80 Acclaim!</a></li>
       <li><a href="#zilogz8encore">ZiLOG Z8Encore!</a></li>
       <li><a href="#zilogz180">ZiLOG Z180</a></li>
@@ -1835,6 +1840,42 @@
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
+    <a name="armcortexa8"><b>ARM Cortex-A8</b>.</a>
+  </td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="allwinnera10"><b>Allwinner A10</b>.</a>
+      These following boards are based on the Allwinner A10 have are supported by NuttX:
+    </p>
+    <ul>
+      <li>
+        <p>
+          <b>pcDuino v1</b>.
+          A port of NuttX to the pcDuino v1 board was first released in NuttX-6.33.
+          See http://www.pcduino.com/ for information about pcDuino Lite, v1, and v2 boards.
+          These boards are based around the Allwinner A10 Cortex-A8 CPU.
+          This port was developed on the v1 board, but the others may be compatible:
+        </p>
+        <p>
+          Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/pcduino-a10/README.txt">README</a> file for further information.
+        </p>
+        <p>
+          <b>STATUS</b>.
+          This port was an experiment was was not completely developed.
+          This configuration builds and runs an NuttShell (NSH), but only if a patch to work around some issues is applied.
+          While not ready for &quot;prime time&quot;, the pcDuino port is functional and could the basis for a more extensive development.
+          There is, at present, no work in progress to extend this port, however.
+        </p>
+      </li>
+    </ul>
+  </td>
+</tr>
+<tr>
+  <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
+  <td bgcolor="#5eaee1">
     <a name="armcortexm0"><b>ARM Cortex-M0</b>.</a>
   </td>
 </tr>
@@ -2248,7 +2289,7 @@ nsh>
             see the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/spark/README.txt">README</a> file for further information about the NuttX port.
          <p>
          </p>
-            Intially Spark support was introduced in NuttX 6.31 and completed in NuttX 6.32.
+            Initially Spark support was introduced in NuttX 6.31 and completed in NuttX 6.32.
             Most of this work is the result of the effort of David Sidrane.
          </p>
       </li>
@@ -2335,43 +2376,60 @@ nsh>
       Chip support for the STM32 F1 &quot;Connectivity Line&quot; family has been present in NuttX for some time and users have reported that they have successful brought up NuttX on there proprietary boards using this logic.
     </p>
     <ul>
-    <li><p>
-      <b>Olimex STM32-P107</b>
-      Support for the <a href="https://www.olimex.com/dev/stm32-p107.html">Olimex STM32-P107</a> was contributed by Max Holtzberg and first appeared in NuttX-6.21.  That port features the STMicro STM32F107VC MCU.
-      <ul>
+    <li>
+      <p>
+        <b>Olimex STM32-P107</b>
+        Support for the <a href="https://www.olimex.com/dev/stm32-p107.html">Olimex STM32-P107</a> was contributed by Max Holtzberg and first appeared in NuttX-6.21.  That port features the STMicro STM32F107VC MCU.
+      </p>
+      <p>
         <b>STATUS:</b>
         Configurations for the basic OS test and NSH are available and verified.
         Networking is functional.
         Support for an external ENCX24J600 network was added in NuttX 6.30.
-      </ul>
-    </p></li>
-    <li><p>
-      <b>Shenzhou IV</b>
-      A port of NuttX to the Shenzhou IV development board (See <a href="http://www.armjishu.com">www.armjishu.com</a>) featuring the STMicro STM32F107VCT MCU was added in NuttX-6.22.
-      <ul>
-        <p>
-          <b>STATUS:</b>
-          In progress.
-          The following have been verified:
-          (1) Basic Cortex-M3 port,
-          (2) Ethernet,
-          (3) On-board LEDs.
-          Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/shenzhou/README.txt">README</a> file for further information.
-        </p>
-      </ul>
-    </p></li>
-    <li><p>
-      <b>ViewTool STM32F103/F107</b>
-      Support for the <a href="https://http://www.viewtool.com/">Viewtool STM32F103/F107</a> board was added in NuttX-6.32.  That port features the STMicro STM32F107VCT6 MCU.
-      <ul>
-        <p>
-          <b>STATUS:</b>
-          A basic NuttShell (NSH) configuration is available.
-          Because of commonality with other STM32 F107 boards, this basic configuration could easily to extended to support things like USB or networking.
-          Refer to the SViewtool STM32F103/F107 <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/viewtool-stm32f107/README.txt">README</a> file for further information.
-        </p>
-      </ul>
-    </p></li>
+      </p>
+    </li>
+    <li>
+      <p>
+        <b>Shenzhou IV</b>
+        A port of NuttX to the Shenzhou IV development board (See <a href="http://www.armjishu.com">www.armjishu.com</a>) featuring the STMicro STM32F107VCT MCU was added in NuttX-6.22.
+      </p>
+      <p>
+        <b>STATUS:</b>
+        In progress.
+        The following have been verified:
+        (1) Basic Cortex-M3 port,
+        (2) Ethernet,
+        (3) On-board LEDs.
+        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/shenzhou/README.txt">README</a> file for further information.
+      </p>
+    </li>
+    <li>
+      <p>
+        <b>ViewTool STM32F103/F107</b>
+        Support for the <a href="https://http://www.viewtool.com/">Viewtool STM32F103/F107</a> board was added in NuttX-6.32.  That board features the STMicro STM32F107VCT6 MCU.
+        Networking, LCD, and touchscreen support were added in NuttX-6.33.
+      </p>
+      <p>
+        Three configurations are available:
+      </p>
+      <ol>
+        <li>
+          A standard NuttShell (NSH) configuration that will work with either the STM32F103 or STM32F107 part.
+        </li>
+        <li>
+          A network-enabled NuttShell (NSH) configuration that will work only with the STM32F107 part.
+        </li>
+        <li>
+          The configuration that was used to verify the Nuttx <a href="http://www.nuttx.org/doku.php?id=wiki:nxinternal:highperfints">high-priority, nested interrupt feature</a>.
+        </li>
+      </ol>
+      <p>
+        <b>STATUS:</b>
+        Networking and touchscreen support are well test.
+        But, at present, neither USB nor LCD functionality have been verified.
+        Refer to the SViewtool STM32F103/F107 <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/viewtool-stm32f107/README.txt">README</a> file for further information.
+      </p>
+    </li>
   </td>
 </tr>
 <tr>
@@ -3585,25 +3643,41 @@ BFD_ASSERT (*plt_offset != (bfd_vma) -1);
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <a name="zilogz16f"><b>Zilog Z16F</b>.</a>
+    <a name="zilogz16f"><b>Zilog ZNEO Z16F</b>.</a>
   </td>
 </tr>
 <tr>
   <td><br></td>
   <td>
-    <p>
-      <b>Zilog z16f Microcontroller</b>.
-      This port use the Zilog z16f2800100zcog development kit and the Zilog
-      ZDS-II Windows command line tools.
-      The development environment is either Windows native or Cygwin under Windows.
-    </p>
-    <ul>
+  <ul>
+    <li>
+      <p>
+        <b>Zilog z16f2800100zcog development kit</b>.
+        This port use the Zilog z16f2800100zcog development kit and the Zilog
+        ZDS-II Windows command line tools.
+        The development environment is either Windows native or Cygwin under Windows.
+      </p>
       <p>
         <b>STATUS:</b>
         The initial release of support for the z16f was made available in NuttX version 0.3.7.
+        A working NuttShell (NSH) configuration as added in NuttX-6.33 (although a patch is required to work around an issue with a ZDS-II 5.0.1 tool problem).
         Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/z16f2800100zcog/README.txt">README</a> file for further information.
       </p>
-    </ul>
+    </li>
+    <li>
+      <p>
+        <b>Toyaga 16z</b>.
+        This port if for the <a href="https://github.com/toyaga/16z">Toyaga 16z</a> board that also use the Zilog ZNEOZ16F2811AL20EG microntroller with the Zilog ZDS-II Windows command line tools.
+        The development environment is either Windows native or Cygwin under Windows.
+      </p>
+      <p>
+        <b>STATUS:</b>
+        The initial release of support for the 16z board was made available in NuttX version 6.33.
+        Both the 16z board and the NuttX port are works in progress and are not ready for usage as of NuttX-6.33.
+        Refer to the NuttX board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/16z/README.txt">README</a> file for further information.
+      </p>
+    </li>
+  </ul>
   </td>
 </tr>
 <tr>
