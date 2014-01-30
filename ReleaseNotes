@@ -1,10 +1,10 @@
 NuttX Release Notes
 ===================
 
-This file contaions are the release notes for the NuttX (and apps) packages
+This file contains are the release notes for the NuttX (and apps) packages
 for every release.  The text is just as was written at the time of release
 (with perhaps some corrected typos).  Over the course of time, NuttX has
-used several different repositiories:  CVS, two SVN repositories, and
+used several different repositories:  CVS, two SVN repositories, and
 currently a GIT repository.  Therefore, revision information specific to an
 older repository may not be meaningful today.
 
@@ -5520,7 +5520,7 @@ Bugfixes (see the ChangeLog for details).  Some of these are very important:
       - apps/system/composite/composite_main.c:  The wrong handle was getting
         nullified.  From David Sidrane.
 
-NuttX-6.32
+NuttX-6.33
 ----------
 
 The 100th release of NuttX, Version 6.33, was made on January 30, 2014,
@@ -5539,7 +5539,7 @@ Additional new features and extended functionality:
 
     * File Systems
 
-      - procfs restructure by Ken Pettit.  Added files for MTD status.
+      - procfs restructured by Ken Pettit.  Added files for MTD status.
       - procfs extended to show uptime and task group status.
       - procfs now shows stack information.
 
@@ -5569,7 +5569,7 @@ Additional new features and extended functionality:
 
     * Allwinner A10:
 
-      - Basic support for the Allwinner (A10 Cortex-A8) is in place.
+      - Basic support for the Allwinner A10 (Cortex-A8) is in place.
 
     * Allwinner A10 boards
 
@@ -5643,8 +5643,9 @@ Additional new features and extended functionality:
 
       - Pattern matching logic extended to handle set of characters and
         ranges of character values.  From Ken Pettit.
-      - sleep() and usleep() move library.  These are not longer core OS
-        interfaces; they are simple wrappers for the nanosleep().
+      - sleep() and usleep() moved intot the C library.  These are not
+        longer core OS interfaces; they are simple wrappers for the
+        nanosleep().
       - Add an implementation of gets_s().
       - Extend fopen() to include support for C11 exclusive open ("x")
         open mode.
