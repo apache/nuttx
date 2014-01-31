@@ -111,21 +111,11 @@ endef
 #
 #   CC - The command to invoke the C compiler
 #   CFLAGS - Options to pass to the C compiler
-#   WINTOOL - Set to "y" if this is a Windows Cygwin build using a
-#     Windows native toolchain.  In that case, paths created by the
-#     Cygwin makefile must be converted to Windows paths for the tool.
 
-ifeq ($(WINTOOL),y)
-define COMPILE
-	@echo "CC: $1"
-	$(Q) $(CC) -c $(CFLAGS) "${shell cygpath -w $1}" -o $2
-endef
-else
 define COMPILE
 	@echo "CC: $1"
 	$(Q) $(CC) -c $(CFLAGS) $1 -o $2
 endef
-endif
 
 # COMPILEXX - Default macro to compile one C++ file
 # Example: $(call COMPILEXX, in-file, out-file)
@@ -251,4 +241,3 @@ define CLEAN
 	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp
 endef
 endif
- 
