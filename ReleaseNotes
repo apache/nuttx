@@ -5533,7 +5533,7 @@ Additional new features and extended functionality:
 
     * Core OS Interfaces
 
-      - nanosleep() added.  sleep() and usleep() are not longer core OS
+      - nanosleep() added.  sleep() and usleep() are no longer core OS
         interfaces.  These have been moved into the library and re-implemented
         as simple wrappers around nanosleep().
 
@@ -5706,7 +5706,7 @@ Additional new features and extended functionality:
 
       - system/inifile:  A simple .INI file parser.
       - system/vi:  Add support for a tiny, VI work-alike editor.  This is
-        a minimal full screen editor that words with a terminal emulator
+        a minimal full screen editor that works with a terminal emulator
         that using VT100 commands.
 
 Efforts In Progress.  The following are features that are partially
