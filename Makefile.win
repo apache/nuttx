@@ -101,7 +101,7 @@ endif
 # USERDIRS - When NuttX is build is a monolithic kernel, this provides the
 #   list of directories that must be built
 # OTHERDIRS - These are directories that are not built but probably should
-#   be cleaned to prevent garbarge from collecting in them when changing
+#   be cleaned to prevent garbage from collecting in them when changing
 #   configurations.
 
 NONFSDIRS = sched $(ARCH_SRC) $(NUTTX_ADDONS)
@@ -181,7 +181,7 @@ CLEANDIRS += net
 #
 # Pass 1 1ncremental (relative) link objects should be put into the
 # processor-specific source directory (where other link objects will
-# be created).  If the pass1 obect is an archive, it could go anywhere.
+# be created).  If the pass1 object is an archive, it could go anywhere.
 
 ifeq ($(CONFIG_BUILD_2PASS),y)
 EXTRA_OBJS += $(CONFIG_PASS1_OBJECT)
@@ -312,7 +312,7 @@ endif
 
 # The float.h header file defines the properties of your floating point
 # implementation.  It would always be best to use your toolchain's float.h
-# header file but if none is avaiable, a default float.h header file will
+# header file but if none is available, a default float.h header file will
 # provided if this option is selected.  However there is no assurance that
 # the settings in this float.h are actually correct for your platform!
 
@@ -490,7 +490,7 @@ check_context:
 	$(Q) if not exist $(TOPDIR)\.config echo "$(TOPDIR)\.config does not exist"
 	$(Q) if not exist $(TOPDIR)\Make.defs echo "$(TOPDIR)\Make.defs does not exist"
 
-# Archive targets.  The target build sequency will first create a series of
+# Archive targets.  The target build sequence will first create a series of
 # libraries, one per configured source file directory.  The final NuttX
 # execution will then be built from those libraries.  The following targets
 # build those libraries.
@@ -649,7 +649,7 @@ lib\libarch$(LIBEXT): $(ARCH_SRC)\libarch$(LIBEXT)
 # incremental (relative) link object, but could be a static library (archive);
 # some modification to this Makefile would be required if CONFIG_PASS1_OBJECT
 # is an archive.  Exactly what is performed during pass1 or what it generates
-# is unknown to this makefule unless CONFIG_PASS1_OBJECT is defined.
+# is unknown to this makefile unless CONFIG_PASS1_OBJECT is defined.
 
 pass1deps: pass1dep $(USERLIBS)
 
@@ -696,7 +696,7 @@ endif
 # Create the final NuttX executable in a two pass build process.  In the
 # normal case, all pass1 and pass2 dependencies are created then pass1
 # and pass2 targets are built.  However, in some cases, you may need to build
-# pass1 depenencies and pass1 first, then build pass2 dependencies and pass2.
+# pass1 dependencies and pass1 first, then build pass2 dependencies and pass2.
 # in that case, execute 'make pass1 pass2' from the command line.
 
 $(BIN): pass1deps pass2deps pass1 pass2
@@ -801,7 +801,7 @@ endif
 # apps_distclean: Perform the distclean operation only in the user application
 #                 directory.  Note that the apps\.config file (inf any) is
 #                 preserved so that this is not a "full" distclean but more of a
-#                 configuration "reset." (There willnot be an apps\.config
+#                 configuration "reset." (There will not be an apps\.config
 #                 file if the configuration was generated via make menuconfig).
 
 apps_clean:
@@ -816,4 +816,3 @@ ifneq ($(APPDIR),)
 	$(Q) $(MAKE) -C "$(TOPDIR)\$(APPDIR)" TOPDIR="$(TOPDIR)" distclean
 	$(Q) if exist _SAVED_APPS_config ( mv _SAVED_APPS_config "$(TOPDIR)\$(APPDIR)\.config" )
 endif
-
