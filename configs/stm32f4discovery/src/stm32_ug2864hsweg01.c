@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/stm32f4discovery/src/up_ug2864ambag01.c
- * arch/arm/src/board/up_ug2864ambag01.c
+ * config/stm32f4discovery/src/stm32_ug2864hsweg01.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -44,12 +43,12 @@
 
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
-#include <nuttx/lcd/ug-2864ambag01.h>
+#include <nuttx/lcd/ssd1306.h>
 
 #include "stm32_gpio.h"
-#include "stm32f4discovery-internal.h"
+#include "stm32f4discovery.h"
 
-#ifdef CONFIG_LCD_UG2864AMBAG01
+#ifdef CONFIG_LCD_UG2864HSWEG01
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -66,7 +65,7 @@
 #endif
 
 /* Pin Configuration ********************************************************/
-/* UG-2864AMBAG01 OLED Display (SPI 4-wire):
+/* UG-2864HSWEG01 OLED Display (SPI 4-wire):
  *
  * --------------------------+----------------------------------------------
  * Connector CON10 J1:      | STM32F4Discovery
@@ -76,7 +75,7 @@
  * 1  3v3        | 3,4 3v3   | P2 3V
  * 3  /RESET     | 8 /RESET  | P2 PB6 (Arbitrary selection)
  * 5  /CS        | 7 /CS     | P2 PB7 (Arbitrary selection)(2)
- * 7  A0         | 9 A0      | P2 PB8 (Arbitrary selection)(2)
+ * 7  D/C        | 9 D/C     | P2 PB8 (Arbitrary selection)(2)
  * 9  LED+ (N/C) | -----     | -----
  * 2  5V Vcc     | 1,2 Vcc   | P2 5V
  * 4  DI         | 18 D1/SI  | P1 PA7 (GPIO_SPI1_MOSI == GPIO_SPI1_MOSI_1 (1))
@@ -85,11 +84,11 @@
  * 10 GND        | 20 GND    | P2 GND
  * --------------+-----------+----------------------------------------------
  * (1) Required because of on-board MEMS
- * (2) Note that the OLED CS and A0 are managed in the up_spi.c file.
+ * (2) Note that the OLED CS and D/C are managed in the stm32_spi.c file.
  * -------------------------------------------------------------------------
  */
 
-/* Definitions in stm32f4discovery-internal.h */
+/* Definitions in stm32f4discovery.h */
 
 /* Debug ********************************************************************/
 
@@ -140,7 +139,7 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
     {
       /* Bind the SPI port to the OLED */
 
-      dev = ug2864ambag01_initialize(spi, devno);
+      dev = ssd1306_initialize(spi, devno);
       if (!dev)
         {
           lcddbg("Failed to bind SPI port 1 to OLED %d: %d\n", devno);

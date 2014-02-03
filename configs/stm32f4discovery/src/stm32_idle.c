@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/stm32f4discovery/src/up_idle.c
- * arch/arm/src/board/up_idle.c
+ * configs/stm32f4discovery/src/stm32_idle.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -56,7 +55,7 @@
 #include "stm32_rcc.h"
 #include "stm32_exti.h"
 
-#include "stm32f4discovery-internal.h"
+#include "stm32f4discovery.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -97,7 +96,7 @@ static void up_alarmcb(void);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idlepm
+ * Name: stm32_idlepm
  *
  * Description:
  *   Perform IDLE state power management.
@@ -105,7 +104,7 @@ static void up_alarmcb(void);
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static void up_idlepm(void)
+static void stm32_idlepm(void)
 {
 #ifdef CONFIG_RTC_ALARM
   struct timespec alarmtime;
@@ -218,7 +217,7 @@ errout:
     }
 }
 #else
-#  define up_idlepm()
+#  define stm32_idlepm()
 #endif
 
 /************************************************************************************
@@ -270,7 +269,7 @@ void up_idle(void)
   /* Perform IDLE mode power management */
 
   BEGIN_IDLE();
-  up_idlepm();
+  stm32_idlepm();
   END_IDLE();
 #endif
 }

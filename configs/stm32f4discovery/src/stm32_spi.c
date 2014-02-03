@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm32f4discovery/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/stm32f4discovery/src/stm32_spi.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +50,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
-#include "stm32f4discovery-internal.h"
+#include "stm32f4discovery.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
 

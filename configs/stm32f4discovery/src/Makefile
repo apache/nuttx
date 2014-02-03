@@ -40,68 +40,68 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS = 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = up_boot.c up_spi.c
+CSRCS = stm32_boot.c stm32_spi.c
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += up_cxxinitialize.c
+CSRCS += stm32_cxxinitialize.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += up_autoleds.c
+CSRCS += stm32_autoleds.c
 else
-CSRCS += up_userleds.c
+CSRCS += stm32_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS +=  up_buttons.c
+CSRCS +=  stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_STM32_OTGFS),y)
-CSRCS += up_usb.c
+CSRCS += stm32_usb.c
 endif
 
 ifeq ($(CONFIG_PWM),y)
-CSRCS += up_pwm.c
+CSRCS += stm32_psm.c
 endif
 
 ifeq ($(CONFIG_QENCODER),y)
-CSRCS += up_qencoder.c
+CSRCS += stm32_qencoder.c
 endif
 
 ifeq ($(CONFIG_WATCHDOG),y)
-CSRCS += up_watchdog.c
+CSRCS += stm32_watchdog.c
 endif
 
 ifeq ($(CONFIG_NSH_LIBRARY),y)
-CSRCS += up_nsh.c
+CSRCS += stm32_nsh.c
 endif
 
 ifeq ($(CONFIG_PM_CUSTOMINIT),y)
-CSRCS += up_pm.c
+CSRCS += stm32_pm.c
 endif
 
 ifeq ($(CONFIG_PM_BUTTONS),y)
-CSRCS += up_pmbuttons.c 
+CSRCS += stm32_pm_buttons.c 
 endif
 
 ifeq ($(CONFIG_IDLE_CUSTOM),y)
-CSRCS += up_idle.c
+CSRCS += stm32_idle.c
 endif
 
 ifeq ($(CONFIG_STM32_FSMC),y)
-CSRCS += up_extmem.c
+CSRCS += stm32_extmem.c
 
 ifeq ($(CONFIG_LCD_SSD1289),y)
-CSRCS += up_ssd1289.c
+CSRCS += stm32_ssd1289.c
 endif
 endif
 
 ifeq ($(CONFIG_LCD_UG2864AMBAG01),y)
-CSRCS += up_ug2864ambag01.c
+CSRCS += stm32_ug2864ambag01.c
 endif
 
 ifeq ($(CONFIG_LCD_UG2864HSWEG01),y)
-CSRCS += up_ug2864hsweg01.c
+CSRCS += stm32_ug2864hsweg01.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

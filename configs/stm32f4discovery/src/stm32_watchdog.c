@@ -1,8 +1,7 @@
 /************************************************************************************
- * configs/stm32f4discovery/src/up_pwm.c
- * arch/arm/src/board/up_pwm.c
+ * configs/stm32f4discovery/src/stm32_watchdog.c
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,48 +42,62 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/pwm.h>
+#include <nuttx/watchdog.h>
 #include <arch/board/board.h>
 
-#include "chip.h"
-#include "up_arch.h"
-#include "stm32_pwm.h"
-#include "stm32f4discovery-internal.h"
+#include "stm32_wdg.h"
+
+#ifdef CONFIG_WATCHDOG
 
 /************************************************************************************
  * Definitions
  ************************************************************************************/
 /* Configuration *******************************************************************/
-/* PWM
- *
- * The stm32f4discovery has no real on-board PWM devices, but the board can be configured to output
- * a pulse train using TIM4 CH2.  This pin is used by FSMC is connect to CN5 just for this
- * purpose:
- *
- * PD13 FSMC_A18 / MC_TIM4_CH2OUT pin 33 (EnB)
- *
- * FSMC must be disabled in this case!
- */
+/* Wathdog hardware should be enabled */
 
-#define HAVE_PWM 1
-
-#ifndef CONFIG_PWM
-#  undef HAVE_PWM
+#if !defined(CONFIG_STM32_WWDG) && !defined(CONFIG_STM32_IWDG)
+#  warning "One of CONFIG_STM32_WWDG or CONFIG_STM32_IWDG must be defined"
 #endif
 
-#ifndef CONFIG_STM32_TIM4
-#  undef HAVE_PWM
+/* Select the path to the registered watchdog timer device */
+
+#ifndef CONFIG_STM32_WDG_DEVPATH
+#  ifdef CONFIG_EXAMPLES_WATCHDOG_DEVPATH
+#    define CONFIG_STM32_WDG_DEVPATH CONFIG_EXAMPLES_WATCHDOG_DEVPATH
+#  else
+#    define CONFIG_STM32_WDG_DEVPATH "/dev/watchdog0"
+#  endif
 #endif
 
-#ifndef CONFIG_STM32_TIM4_PWM
-#  undef HAVE_PWM
+/* Use the un-calibrated LSI frequency if we have nothing better */
+
+#if defined(CONFIG_STM32_IWDG) && !defined(CONFIG_STM32_LSIFREQ)
+#  define CONFIG_STM32_LSIFREQ STM32_LSI_FREQUENCY
 #endif
 
-#if CONFIG_STM32_TIM4_CHANNEL != STM32F4DISCOVERY_PWMCHANNEL
-#  undef HAVE_PWM
+/* Debug ***************************************************************************/
+/* Non-standard debug that may be enabled just for testing the watchdog timer */
+
+#ifndef CONFIG_DEBUG
+#  undef CONFIG_DEBUG_WATCHDOG
 #endif
 
-#ifdef HAVE_PWM
+#ifdef CONFIG_DEBUG_WATCHDOG
+#  define wdgdbg                 dbg
+#  define wdglldbg               lldbg
+#  ifdef CONFIG_DEBUG_VERBOSE
+#    define wdgvdbg              vdbg
+#    define wdgllvdbg            llvdbg
+#  else
+#    define wdgvdbg(x...)
+#    define wdgllvdbg(x...)
+#  endif
+#else
+#  define wdgdbg(x...)
+#  define wdglldbg(x...)
+#  define wdgvdbg(x...)
+#  define wdgllvdbg(x...)
+#endif
 
 /************************************************************************************
  * Private Functions
@@ -94,49 +107,29 @@
  * Public Functions
  ************************************************************************************/
 
-/************************************************************************************
- * Name: pwm_devinit
+/****************************************************************************
+ * Name: up_wdginitialize()
  *
  * Description:
- *   All STM32 architectures must provide the following interface to work with
- *   examples/pwm.
+ *   Perform architecuture-specific initialization of the Watchdog hardware.
+ *   This interface must be provided by all configurations using
+ *   apps/examples/watchdog
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-int pwm_devinit(void)
+int up_wdginitialize(void)
 {
-  static bool initialized = false;
-  struct pwm_lowerhalf_s *pwm;
-  int ret;
+  /* Initialize tha register the watchdog timer device */
 
-  /* Have we already initialized? */
-
-  if (!initialized)
-    {
-      /* Call stm32_pwminitialize() to get an instance of the PWM interface */
-
-      pwm = stm32_pwminitialize(STM32F4DISCOVERY_PWMTIMER);
-      if (!pwm)
-        {
-          dbg("Failed to get the STM32 PWM lower half\n");
-          return -ENODEV;
-        }
-
-      /* Register the PWM driver at "/dev/pwm0" */
-
-      ret = pwm_register("/dev/pwm0", pwm);
-      if (ret < 0)
-        {
-          adbg("pwm_register failed: %d\n", ret);
-          return ret;
-        }
-
-      /* Now we are initialized */
-
-      initialized = true;
-    }
-
+#if defined(CONFIG_STM32_WWDG)
+  stm32_wwdginitialize(CONFIG_STM32_WDG_DEVPATH);
   return OK;
+#elif defined(CONFIG_STM32_IWDG)
+  stm32_iwdginitialize(CONFIG_STM32_WDG_DEVPATH, CONFIG_STM32_LSIFREQ);
+  return OK;
+#else
+  return -ENODEV;
+#endif
 }
 
-#endif /* HAVE_PWM */
+#endif /* CONFIG_WATCHDOG */

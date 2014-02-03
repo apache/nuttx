@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm32f4disovery/src/up_extmem.c
- * arch/arm/src/board/up_extmem.c
+ * configs/stm32f4disovery/src/stm32_extmem.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -52,7 +51,7 @@
 #include "stm32_fsmc.h"
 #include "stm32_gpio.h"
 #include "stm32.h"
-#include "stm32f4discovery-internal.h"
+#include "stm32f4discovery.h"
 
 /************************************************************************************
  * Pre-processor Definitions

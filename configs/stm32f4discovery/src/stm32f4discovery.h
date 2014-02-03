@@ -1,6 +1,5 @@
 /****************************************************************************************************
- * configs/stm32f4discovery/src/stm32f4discovery-internal.h
- * arch/arm/src/board/stm32f4discovery-internal.n
+ * configs/stm32f4discovery/src/stm32f4discovery.h
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __CONFIGS_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_INTERNAL_H
-#define __CONFIGS_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_INTERNAL_H
+#ifndef __CONFIGS_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_H
+#define __CONFIGS_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_H
 
 /****************************************************************************************************
  * Included Files
@@ -256,7 +255,7 @@ void stm32_disablefsmc(void);
 #endif
 
 /****************************************************************************************************
- * Name: up_ledpminitialize
+ * Name: stm32_led_pminitialize
  *
  * Description:
  *   Enable logic to use the LEDs on the STM32F4Discovery to support power management testing
@@ -264,11 +263,11 @@ void stm32_disablefsmc(void);
  ****************************************************************************************************/
 
 #ifdef CONFIG_PM
-void up_ledpminitialize(void);
+void stm32_led_pminitialize(void);
 #endif
 
 /****************************************************************************************************
- * Name: up_pmbuttons
+ * Name: stm32_pm_buttons
  *
  * Description:
  *   Configure the user button of the STM32f4discovery board as EXTI,
@@ -277,7 +276,7 @@ void up_ledpminitialize(void);
  ****************************************************************************************************/
 
 #if defined(CONFIG_PM) && defined(CONFIG_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
-void up_pmbuttons(void);
+void stm32_pm_buttons(void);
 #endif
 
 /****************************************************************************
@@ -300,5 +299,5 @@ int nsh_archinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_INTERNAL_H */
+#endif /* __CONFIGS_STM32F4DISCOVERY_SRC_STM32F4DISCOVERY_H */
 

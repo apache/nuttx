@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm32f4discovery/src/up_qencoder.c
- * arch/arm/src/board/up_qencoder.c
+ * configs/stm32f4discovery/src/stm32_qencoder.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,7 +48,7 @@
 #include "chip.h"
 #include "up_arch.h"
 #include "stm32_qencoder.h"
-#include "stm32f4discovery-internal.h"
+#include "stm32f4discovery.h"
 
 /************************************************************************************
  * Definitions

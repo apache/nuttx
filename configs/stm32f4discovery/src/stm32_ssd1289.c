@@ -1,6 +1,5 @@
 /**************************************************************************************
- * configs/stm32fdiscover/src/up_ssd1289.c
- * arch/arm/src/board/up_ssd1289.c
+ * configs/stm32fdiscover/src/stm32_ssd1289.c
  *
  * This logic supports the connection of an SSD1289-based LCD to the STM32F4Discovery
  * board.
@@ -59,7 +58,7 @@
 
 #include "up_arch.h"
 #include "stm32.h"
-#include "stm32f4discovery-internal.h"
+#include "stm32f4discovery.h"
 
 #ifdef CONFIG_LCD_SSD1289
 

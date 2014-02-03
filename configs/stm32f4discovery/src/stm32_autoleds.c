@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/stm32f4discovery/src/up_autoleds.c
- * arch/arm/src/board/up_autoleds.c
+ * configs/stm32f4discovery/src/stm32_autoleds.c
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
-#include "stm32f4discovery-internal.h"
+#include "stm32f4discovery.h"
 
 #ifdef CONFIG_ARCH_LEDS
 
