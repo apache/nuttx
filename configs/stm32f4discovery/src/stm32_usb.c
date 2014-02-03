@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm32f4discovery/src/up_usbdev.c
- * arch/arm/src/board/up_boot.c
+ * configs/stm32f4discovery/src/stm32_usb.c
  *
  *   Copyright (C) 2012-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,7 +53,7 @@
 #include "up_arch.h"
 #include "stm32.h"
 #include "stm32_otgfs.h"
-#include "stm32f4discovery-internal.h"
+#include "stm32f4discovery.h"
 
 #ifdef CONFIG_STM32_OTGFS
 

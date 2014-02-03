@@ -6538,4 +6538,6 @@
 
 	* arch/arm/src/lm/lm_serial.c:  Fix cut'n'paste error that prevented
 	  UARTS2-7 from being used with the LM4F120 Launchpad (2014-02-03).
+	* configs/stm32f4discovery/src: Almost everything renamed to confgorm
+	  to the ever-evolving naming standard (2014-02-03).
 

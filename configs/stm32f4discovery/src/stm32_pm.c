@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/stm32f4discovery/src/up_pmbuttons.c
- * arch/arm/src/board/up_pmbuttons.c
+ * configs/stm32f4discovery/src/stm32_pm.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
@@ -39,53 +38,26 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/board/board.h>
 #include <nuttx/config.h>
 
 #include <nuttx/power/pm.h>
-#include <arch/irq.h>
-#include <stdbool.h>
-#include <debug.h>
 
-#include "up_arch.h"
-#include "nvic.h"
-#include "stm32_pwr.h"
+#include "up_internal.h"
 #include "stm32_pm.h"
-#include "stm32f4discovery-internal.h"
+#include "stm32f4discovery.h"
 
-#if defined(CONFIG_PM) && defined(CONFIG_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
+#ifdef CONFIG_PM
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_ARCH_BUTTONS
-#  error "CONFIG_ARCH_BUTTONS is not defined in the configuration"
-#endif
-
-#ifndef CONFIG_ARCH_IRQBUTTONS
-#  warning "CONFIG_ARCH_IRQBUTTONS is not defined in the configuration"
-#endif
-
-#ifndef CONFIG_PM_BUTTON_ACTIVITY
-#  define CONFIG_PM_BUTTON_ACTIVITY 10
-#endif
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_IRQBUTTONS
-static int button_handler(int irq, FAR void *context);
-#endif /* CONFIG_ARCH_IRQBUTTONS */
 
 /****************************************************************************
  * Private Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
  ****************************************************************************/
 
 /****************************************************************************
@@ -93,57 +65,42 @@ static int button_handler(int irq, FAR void *context);
  ****************************************************************************/
 
 /****************************************************************************
- * Name: button_handler
- *
- * Description:
- *   Handle a button wake-up interrupt
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ARCH_IRQBUTTONS
-static int button_handler(int irq, FAR void *context)
-{
-  /* At this point the MCU should have already awakened.  The state
-   * change will be handled in the IDLE loop when the system is re-awakened
-   * The button interrupt handler should be totally ignorant of the PM
-   * activities and should report button activity as if nothing
-   * special happened.
-   */
-
-  pm_activity(CONFIG_PM_BUTTON_ACTIVITY);
-  return OK;
-}
-#endif /* CONFIG_ARCH_IRQBUTTONS */
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_pmbuttons
+ * Name: stm32_pminitialize
  *
  * Description:
- *   Configure the user button of the STM32f4discovery board as EXTI,
- *   so it is able to wakeup the MCU from the PM_STANDBY mode
+ *   This function is called by MCU-specific logic at power-on reset in
+ *   order to provide one-time initialization the power management subystem.
+ *   This function must be called *very* early in the initializeation sequence
+ *   *before* any other device drivers are initialized (since they may
+ *   attempt to register with the power management subsystem).
+ *
+ * Input parameters:
+ *   None.
+ *
+ * Returned value:
+ *    None.
  *
  ****************************************************************************/
 
-void up_pmbuttons(void)
+void stm32_pminitialize(void)
 {
-  /* Initialize the button GPIOs */
+  /* Then initialize the NuttX power management subsystem proper */
 
-  board_button_initialize();
+  pm_initialize();
 
-#ifdef CONFIG_ARCH_IRQBUTTONS
-      xcpt_t oldhandler = board_button_irq(0, button_handler);
+#if defined(CONFIG_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
+  /* Initialize the buttons to wake up the system from low power modes */
 
-      if (oldhandler != NULL)
-        {
-          lowsyslog("WARNING: oldhandler:%p is not NULL!  "
-                        "Button events may be lost or aliased!\n",
-                        oldhandler);
-        }
+  stm32_pm_buttons();
 #endif
+
+  /* Initialize the LED PM */
+
+  stm32_led_pminitialize();
 }
 
-#endif /* CONFIG_PM && CONFIG_IDLE_CUSTOM && CONFIG_PM_BUTTONS)*/
+#endif /* CONFIG_PM */

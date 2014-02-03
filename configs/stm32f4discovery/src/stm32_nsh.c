@@ -1,6 +1,5 @@
 /****************************************************************************
- * config/stm32f4discovery/src/up_nsh.c
- * arch/arm/src/board/up_nsh.c
+ * config/stm32f4discovery/src/stm32_nsh.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -59,7 +58,7 @@
 #endif
 
 #include "stm32.h"
-#include "stm32f4discovery-internal.h"
+#include "stm32f4discovery.h"
 
 /****************************************************************************
  * Pre-Processor Definitions

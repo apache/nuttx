@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm32f4discovery/src/up_boot.c
- * arch/arm/src/board/up_boot.c
+ * configs/stm32f4discovery/src/stm32_boot.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -45,7 +44,7 @@
 #include <arch/board/board.h>
 
 #include "up_arch.h"
-#include "stm32f4discovery-internal.h"
+#include "stm32f4discovery.h"
 
 /************************************************************************************
  * Definitions
@@ -109,7 +108,7 @@ void stm32_boardinitialize(void)
  *   If CONFIG_BOARD_INITIALIZE is selected, then an additional
  *   initialization call will be performed in the boot-up sequence to a
  *   function called board_initialize().  board_initialize() will be
- *   called immediately after up_intiialize() is called and just before the
+ *   called immediately after up_initialize() is called and just before the
  *   initial application is started.  This additional initialization phase
  *   may be used, for example, to initialize board-specific device drivers.
  *
