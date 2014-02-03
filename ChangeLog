@@ -6535,3 +6535,7 @@
 	  bugginess reported on 2014-1-28. (2014-1-29).
 
 6.34 2014-xx-xx Gregory Nutt <gnutt@nuttx.org>
+
+	* arch/arm/src/lm/lm_serial.c:  Fix cut'n'paste error that prevented
+	  UARTS2-7 from being used with the LM4F120 Launchpad (2014-02-03).
+
