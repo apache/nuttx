@@ -6540,4 +6540,6 @@
 	  UARTS2-7 from being used with the LM4F120 Launchpad (2014-02-03).
 	* configs/stm32f4discovery/src: Almost everything renamed to confgorm
 	  to the ever-evolving naming standard (2014-02-03).
+	* arch/arm/src/a1x/a1x_serial.c:  Had the same cut'n'paster error
+	  that the LM4f120 Launchpad had (2013-02-03).
 

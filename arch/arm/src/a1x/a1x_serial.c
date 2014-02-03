@@ -1,7 +1,7 @@
 /****************************************************************************
  * arch/arm/src/a1x/a1x_serial.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -493,28 +493,28 @@ static uart_dev_t g_uart7port =
 #    define UART7_ASSIGNED      1
 #else
 #  undef CONSOLE_DEV                        /* No console */
-#  if defined(CONFIG_KINETIS_UART0)
+#  if defined(CONFIG_A1X_UART0)
 #    define TTYS0_DEV           g_uart0port /* UART0 is ttyS0 */
 #    define UART0_ASSIGNED      1
-#  elif defined(CONFIG_KINETIS_UART1)
+#  elif defined(CONFIG_A1X_UART1)
 #    define TTYS0_DEV           g_uart1port /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
-#  elif defined(CONFIG_KINETIS_UART2)
+#  elif defined(CONFIG_A1X_UART2)
 #    define TTYS0_DEV           g_uart2port /* UART2 is ttyS0 */
 #    define UART2_ASSIGNED      1
-#  elif defined(CONFIG_KINETIS_UART3)
+#  elif defined(CONFIG_A1X_UART3)
 #    define TTYS0_DEV           g_uart3port /* UART3 is ttyS0 */
 #    define UART3_ASSIGNED      1
-#  elif defined(CONFIG_KINETIS_UART4)
+#  elif defined(CONFIG_A1X_UART4)
 #    define TTYS0_DEV           g_uart4port /* UART4 is ttyS0 */
 #    define UART4_ASSIGNED      1
-#  elif defined(CONFIG_KINETIS_UART5)
+#  elif defined(CONFIG_A1X_UART5)
 #    define TTYS0_DEV           g_uart5port /* UART5 is ttyS0 */
 #    define UART5_ASSIGNED      1
-#  elif defined(CONFIG_KINETIS_UART6)
+#  elif defined(CONFIG_A1X_UART6)
 #    define TTYS0_DEV           g_uart6port /* UART6 is ttyS0 */
 #    define UART6_ASSIGNED      1
-#  elif defined(CONFIG_KINETIS_UART7)
+#  elif defined(CONFIG_A1X_UART7)
 #    define TTYS0_DEV           g_uart7port /* UART7 is ttyS0 */
 #    define UART7_ASSIGNED      1
 #  endif
@@ -522,28 +522,28 @@ static uart_dev_t g_uart7port =
 
 /* Pick ttys1.  This could be any of UART0-7 excluding the console UART. */
 
-#if defined(CONFIG_KINETIS_UART0) && !defined(UART0_ASSIGNED)
+#if defined(CONFIG_A1X_UART0) && !defined(UART0_ASSIGNED)
 #  define TTYS1_DEV           g_uart0port /* UART0 is ttyS1 */
 #  define UART0_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART1) && !defined(UART1_ASSIGNED)
+#elif defined(CONFIG_A1X_UART1) && !defined(UART1_ASSIGNED)
 #  define TTYS1_DEV           g_uart1port /* UART1 is ttyS1 */
 #  define UART1_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART2) && !defined(UART2_ASSIGNED)
+#elif defined(CONFIG_A1X_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS1_DEV           g_uart2port /* UART2 is ttyS1 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
+#elif defined(CONFIG_A1X_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS1_DEV           g_uart3port /* UART3 is ttyS1 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#elif defined(CONFIG_A1X_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS1_DEV           g_uart4port /* UART4 is ttyS1 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#elif defined(CONFIG_A1X_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS1_DEV           g_uart5port /* UART5 is ttyS1 */
 #  define UART5_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#elif defined(CONFIG_A1X_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS1_DEV           g_uart6port /* UART6 is ttyS1 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_A1X_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS1_DEV           g_uart7port /* UART7 is ttyS1 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -553,25 +553,25 @@ static uart_dev_t g_uart7port =
  * console.
  */
 
-#if defined(CONFIG_KINETIS_UART1) && !defined(UART1_ASSIGNED)
+#if defined(CONFIG_A1X_UART1) && !defined(UART1_ASSIGNED)
 #  define TTYS2_DEV           g_uart1port /* UART1 is ttyS2 */
 #  define UART1_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART2) && !defined(UART2_ASSIGNED)
+#elif defined(CONFIG_A1X_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS2_DEV           g_uart2port /* UART2 is ttyS2 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
+#elif defined(CONFIG_A1X_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS2_DEV           g_uart3port /* UART3 is ttyS2 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#elif defined(CONFIG_A1X_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS2_DEV           g_uart4port /* UART4 is ttyS2 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#elif defined(CONFIG_A1X_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS2_DEV           g_uart5port /* UART5 is ttyS2 */
 #  define UART5_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#elif defined(CONFIG_A1X_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS2_DEV           g_uart6port /* UART6 is ttyS2 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_A1X_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS2_DEV           g_uart7port /* UART7 is ttyS2 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -581,22 +581,22 @@ static uart_dev_t g_uart7port =
  * UART 2-7 could also be the console.
  */
 
-#if defined(CONFIG_KINETIS_UART2) && !defined(UART2_ASSIGNED)
+#if defined(CONFIG_A1X_UART2) && !defined(UART2_ASSIGNED)
 #  define TTYS3_DEV           g_uart2port /* UART2 is ttyS3 */
 #  define UART2_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
+#elif defined(CONFIG_A1X_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS3_DEV           g_uart3port /* UART3 is ttyS3 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#elif defined(CONFIG_A1X_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS3_DEV           g_uart4port /* UART4 is ttyS3 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#elif defined(CONFIG_A1X_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS3_DEV           g_uart5port /* UART5 is ttyS3 */
 #  define UART5_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#elif defined(CONFIG_A1X_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS3_DEV           g_uart6port /* UART6 is ttyS3 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_A1X_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS3_DEV           g_uart7port /* UART7 is ttyS3 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -606,19 +606,19 @@ static uart_dev_t g_uart7port =
  * UART 3-7 could also be the console.
  */
 
-#if defined(CONFIG_KINETIS_UART3) && !defined(UART3_ASSIGNED)
+#if defined(CONFIG_A1X_UART3) && !defined(UART3_ASSIGNED)
 #  define TTYS4_DEV           g_uart3port /* UART3 is ttyS4 */
 #  define UART3_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#elif defined(CONFIG_A1X_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS4_DEV           g_uart4port /* UART4 is ttyS4 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#elif defined(CONFIG_A1X_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS4_DEV           g_uart5port /* UART5 is ttyS4 */
 #  define UART5_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#elif defined(CONFIG_A1X_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS4_DEV           g_uart6port /* UART6 is ttyS4 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_A1X_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS4_DEV           g_uart7port /* UART7 is ttyS4 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -628,16 +628,16 @@ static uart_dev_t g_uart7port =
  * UART 4-7 could also be the console.
  */
 
-#if defined(CONFIG_KINETIS_UART4) && !defined(UART4_ASSIGNED)
+#if defined(CONFIG_A1X_UART4) && !defined(UART4_ASSIGNED)
 #  define TTYS5_DEV           g_uart4port /* UART4 is ttyS5 */
 #  define UART4_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#elif defined(CONFIG_A1X_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS5_DEV           g_uart5port /* UART5 is ttyS5 */
 #  define UART5_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#elif defined(CONFIG_A1X_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS5_DEV           g_uart6port /* UART6 is ttyS5 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_A1X_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS5_DEV           g_uart7port /* UART7 is ttyS5 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -647,13 +647,13 @@ static uart_dev_t g_uart7port =
  * UART 5-7 could also be the console.
  */
 
-#if defined(CONFIG_KINETIS_UART5) && !defined(UART5_ASSIGNED)
+#if defined(CONFIG_A1X_UART5) && !defined(UART5_ASSIGNED)
 #  define TTYS6_DEV           g_uart5port /* UART5 is ttyS6 */
 #  define UART5_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#elif defined(CONFIG_A1X_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS6_DEV           g_uart6port /* UART6 is ttyS6 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_A1X_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS6_DEV           g_uart7port /* UART7 is ttyS6 */
 #  define UART7_ASSIGNED      1
 #endif
@@ -663,10 +663,10 @@ static uart_dev_t g_uart7port =
  * UART 6-7 could also be the console.
  */
 
-#if defined(CONFIG_KINETIS_UART6) && !defined(UART6_ASSIGNED)
+#if defined(CONFIG_A1X_UART6) && !defined(UART6_ASSIGNED)
 #  define TTYS7_DEV           g_uart6port /* UART6 is ttyS7 */
 #  define UART6_ASSIGNED      1
-#elif defined(CONFIG_KINETIS_UART7) && !defined(UART7_ASSIGNED)
+#elif defined(CONFIG_A1X_UART7) && !defined(UART7_ASSIGNED)
 #  define TTYS7_DEV           g_uart7port /* UART7 is ttyS7 */
 #  define UART7_ASSIGNED      1
 #endif
