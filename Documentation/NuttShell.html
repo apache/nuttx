@@ -459,10 +459,11 @@
 </table>
 
 <p>
+  <a name="nshlibrary"><b>The NSH Library</b></a>.
   The <code>apps/nshlib</code> sub-directory contains the NuttShell (NSH)
   library.
-  This library can easily to linked to produce a NSH application (See as an example <code>apps/nshlib</code>).
-  NSH is a simple shell application for NuttX.
+  This library can easily to linked to produce a NSH application (See as an example <code>apps/examples/nsh</code>).
+  The NSH Library provides a simple shell application for NuttX.
 </p>
 
 <table width ="100%">
@@ -474,17 +475,104 @@
 </table>
 
 <p>
-  Using settings in the configuration file, NSH may be configured to
-  use either the serial stdin/out or a telnet connection as the console
-  or BOTH.  When NSH is started, you will see the following welcome on
-  either console:
+  <a name="nshconsoles"><b>NSH Consoles</b></a>.
+  Using settings in the configuration file, NSH may be configured to use
+  (1) the serial stdin/out,
+  (2) a USB serial device (such as CDC/ACM), or
+  (3) a telnet connection as the console.
+  Or, perhaps even all at once since or BOTH.
+  An indefinite number of telnet sessions are supported.
+</p>
+<p>
+  <a name="nshprompt"><b>Start-Up prompt</b></a>.
+  When NSH is started, you will see the a welcome message such the following on the selected console:
   <ul><pre>
 NuttShell (NSH)
 nsh&gt;
 </pre></ul>
-  <code>nsh&gt;</code> is the NSH prompt and indicates that you may enter a command
-   from the console.
+  The greating may also include NuttX versioning information if you are using a versioned copy of NuttX.
+  <code>nsh&gt;</code> is the NSH prompt and indicates that you may enter a command from the console.
 </p>
+<p>
+  <a name="cle"><b>Extended Command Line Editing</b></a>.
+  By default, NuttX uses a simple command line editor that allows command entry after the <code>nsh&gt;</code> and supports only the <i>backspace</i> key for editing.
+  However, a more complete command line editor can be selected by setting <code>CONFIG_NSH_CLE=y</code> in the NuttX configuration file.
+  When that option is selected, the following EMACS-like line editing commands are supported:
+</p>
+<center><table width="60%" border="5" bgcolor="f8f8f8" bordercolor="lightgray">
+<tr>
+  <td align="center" bgcolor="#e4e4e4">
+    <b>Key Binding</b>
+  </td>
+  <td align="center" bgcolor="#e4e4e4">
+    <b>Editor Action</b>
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+    <code>^A</code>
+  </td>
+  <td align="left" valign="top">
+     Move cursor to start of the line
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+    <code>^B</code>
+  </td>
+  <td align="left" valign="top">
+    Move left one character
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+    <code>^D</code> or <i>Del</i>
+  </td>
+  <td align="left" valign="top">
+    Delete a single character at the cursor position
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+    <code>^E</code>
+  </td>
+  <td align="left" valign="top">
+    Move cursor to end of current line
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+    <code>^F</code>
+  </td>
+  <td align="left" valign="top">
+    Move right one character
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+    <code>^H</code> or <i>Backspace</i>
+  </td>
+  <td align="left" valign="top">
+    Delete character, left (backspace)
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+    <code>^K</code>
+  </td>
+  <td align="left" valign="top">
+    Delete to the end of the line
+  </td>
+</tr>
+<tr>
+  <td align="left" valign="top">
+    <code>^U</code>
+  </td>
+  <td align="left" valign="top">
+    Delete the entire line
+  </td>
+</tr>
+</table></center>
 
 <table width ="100%">
   <tr bgcolor="#e4e4e4">
@@ -2737,6 +2825,25 @@ nsh>
     <th align="left">Description</th>
   </tr>
   <tr>
+    <td valign="top"><b><code>CONFIG_NSH_READLINE</code></b></td>
+    <td>
+      Selects the minimal implementation of <code>readline()</code>.
+      This minimal implementation provides on backspace for command line editing.
+      It expects some minimal VT100 command support from the terminal.
+    </td>
+  </tr>
+
+  <tr>
+    <td valign="top"><b><code>CONFIG_NSH_CLE</code></b></td>
+    <td>
+      Selects the more extensive, EMACS-like command line editor.
+      Select this option only if
+      (1) you don't mind a modest increase in the FLASH footprint, and
+      (2) you work with a terminal that supports extensive VT100 editing commands.
+       Selecting this option will add probably 1.5-2KB to the FLASH footprint.
+    </td>
+  </tr>
+  <tr>
     <td valign="top"><b><code>CONFIG_NSH_BUILTIN_APPS</code></b></td>
     <td>
       Support external registered, &quot;builtin&quot; applications that can be
@@ -4054,6 +4161,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmdcat"><code>cat</code></a></li>
   <li><a href="#cmdcd"><code>cd</code></a></li>
   <li><a href="#cmdcmp"><code>cmp</code></a></li>
+  <li><a href="#cle">Command Line Editing</a></li>
   <li><a href="#commands">Command summaries</a></li>
   <li><a href="#custoncmds">Command table</a></li>
   <li><a href="#conditional">Conditional command execution</a></li>
@@ -4065,6 +4173,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ARGCAT</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_BUILTIN_APPS</code></a></li>
   <li><a href="#custapps"><code>CONFIG_NSH_BUILTIN_APPS</code></a></li>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_CLE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_CMDPARMS</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_CONSOLE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_DHCPC</code></a></li>
@@ -4090,6 +4199,7 @@ mount -t vfat /dev/ram1 /tmp
 </ul></td>
 <td width="33%" valign="top">
 <ul>
+  <li><a href="#nshconfiguration"><code>CONFIG_NSH_READLINE</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSDEVNO</code></a></li>
   <li><a href="#nshconfiguration"><code>CONFIG_NSH_ROMFSETC</code></a></li>
   <li><a href="#custinit"><code>CONFIG_NSH_ROMFSETC</code></a></li>
@@ -4112,6 +4222,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#configuration">Configuration settings</a></li>
   <li><a href="#cmddependencies">Configuration settings, command dependencies</a></li>
   <li><a href="#nshconfiguration">Configuration settings, NSH-specific</a></li>
+  <li><a href="#nshconsoles">consoles</a></li>
   <li><a href="#cmdcp"><code>cp</code></a></li>
   <li><a href="#currentwd">Current working directory</a></li>
   <li><a href="#customizingnsh">Customizing NSH</a></li>
@@ -4132,7 +4243,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#custoncmds"><code>g_cmdmap</code></a></li>
   <li><a href="#custinit"><code>genromfs</code></a></li>
   <li><a href="#cmdget"><code>get</code></a></li>
-  <li><a href="#frontend">Greeting</a></li>
+  <li><a href="#nshprompt">Greeting</a></li>
   <li><a href="#cmdhelp"><code>help</code></a></li>
   <li><a href="#cmdhexdump"><code>hexdump</code></a></li>
   <li><a href="#conditional"><code>if-then[-else]-fi</code></a></li>
@@ -4160,6 +4271,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#cmdnfsmount"><code>nfsmount</code></a></li>
   <li><a href="#cmdoverview"><code>nice</code></a></li>
   <li><a href="#custonshlib">NSH library (<code>nshlib</code>)</a></li>
+  <li><a href="#nshlibrary">NSH library (<code>nshlib</code>)</a></li>
   <li><a href="#custonshlib"><code>nsh_archinitialize()</code></a></li>
   <li><a href="#custonshlib"><code>nsh_consolemain()</code></a></li>  
   <li><a href="#custonshlib"><code>nsh_initialize()</code></a></li>
@@ -4173,7 +4285,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#environvars"><code>OLDPWD</code></a></li>
   <li><a href="#overview">Overview</a></li>
   <li><a href="#cmdping"><code>ping</code></a></li>
-  <li><a href="#frontend">Prompt</a></li>
+  <li><a href="#nshprompt">Prompt</a></li>
   <li><a href="#cmdps"><code>ps</code></a></li>
   <li><a href="#cmdput"><code>put</code></a></li>
   <li><a href="#cmdpwd"><code>pwd</code></a></li>

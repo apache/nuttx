@@ -214,26 +214,6 @@ libc/math
   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 
-Documents/rss.gif
-^^^^^^^^^^^^^^^^^
-
-  Licensed under Creative Commons Attribution-Share Alike 2.5 Generic
-  license:
-
-  You are free:
-
-  * to share – to copy, distribute and transmit the work
-  * to remix – to adapt the work
-
-  Under the following conditions:
-
-  * attribution – You must attribute the work in the manner specified
-    by the author or licensor (but not in any way that suggests that
-    they endorse you or your use of the work).
-  * share alike – If you alter, transform, or build upon this work,
-    you may distribute the resulting work only under the same or
-    similar license to this one.
-
 drivers/video/ov2640
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -243,4 +223,3 @@ drivers/video/ov2640
   content of those tables and still retain this BSD license.  I am guessing
   so, but I am not a copyright attorney so you should use this driver in
   products at your own risk.
- 
