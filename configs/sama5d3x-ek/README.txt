@@ -2617,7 +2617,7 @@ Configurations
      Here are the relevant current settings:
 
      Build Setup:
-       CONFIG_HOST_WINDOS=y                : Microsoft Windows
+       CONFIG_HOST_WINDOWS=y               : Microsoft Windows
        CONFIG_WINDOWS_CYGWIN=y             : Using Cygwin or other POSIX environment
 
      System Type -> Toolchain:
@@ -2635,6 +2635,14 @@ Configurations
 
      See also the "NOTE about Windows native toolchains" in the section call
      "GNU Toolchain Options" above.
+
+     !!!WARNING!!! The first time that you type 'make', the system will
+     configure itself based on the settings in the .config file.  One of
+     these settings can cause a lot of confusion if you configure the build
+     in the wrong state:  If you are running on Linux, make *certain* that
+     you have CONFIG_HOST_LINUX=y *before* the first make or you will
+     create a very corrupt configuration that may not be easy to recover
+     from.
 
   Configuration Sub-directories
   -----------------------------
@@ -2706,6 +2714,12 @@ Configurations
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
        CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
 
+       If you are running on Linux, make *certain* that you have
+       CONFIG_HOST_LINUX=y *before* the first make or you will create a
+       corrupt configuration that may not be easy to recover from. See
+       the warning in the section "Information Common to All Configurations"
+       for further information.
+
     3. This configuration executes out of CS0 NOR flash and can only
        be loaded via SAM-BA.  The are the relevant configuration options
        are provided above in the section entitled "NOR FLASH Support".
@@ -2721,7 +2735,7 @@ Configurations
        Relevant configuration settings are provided in the paragraph entitled
        "SDRAM Support" above.
 
-    6. The Real Time Clock/Calendar RTC) is enabled.  See the sectino entitled
+    6. The Real Time Clock/Calendar RTC) is enabled.  See the section entitled
        "RTC" above.
 
     7. The Embest or Ronetix CPU module includes an Atmel AT25DF321A,
@@ -2774,6 +2788,12 @@ Configurations
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
        CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+       If you are running on Linux, make *certain* that you have
+       CONFIG_HOST_LINUX=y *before* the first make or you will create a
+       corrupt configuration that may not be easy to recover from. See
+       the warning in the section "Information Common to All Configurations"
+       for further information.
 
     3. This configuration executes out of internal SRAM and can only
        be loaded via JTAG.
@@ -2841,6 +2861,12 @@ Configurations
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
        CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+       If you are running on Linux, make *certain* that you have
+       CONFIG_HOST_LINUX=y *before* the first make or you will create a
+       corrupt configuration that may not be easy to recover from. See
+       the warning in the section "Information Common to All Configurations"
+       for further information.
 
     3. This configuration executes out of CS0 NOR flash and can only
        be loaded via SAM-BA.  The are the relevant configuration options
@@ -3064,6 +3090,12 @@ Configurations
        CONFIG_HOST_WINDOWS=y                   : Windows operating system
        CONFIG_WINDOWS_CYGWIN=y                 : POSIX environment under windows
        CONFIG_ARMV7A_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery for Windows
+
+       If you are running on Linux, make *certain* that you have
+       CONFIG_HOST_LINUX=y *before* the first make or you will create a
+       corrupt configuration that may not be easy to recover from. See
+       the warning in the section "Information Common to All Configurations"
+       for further information.
 
     3. This configuration executes out of CS0 NOR flash and can only
        be loaded via SAM-BA.  These are the relevant configuration options
