@@ -6542,4 +6542,6 @@
 	  to the ever-evolving naming standard (2014-02-03).
 	* arch/arm/src/a1x/a1x_serial.c:  Had the same cut'n'paster error
 	  that the LM4f120 Launchpad had (2013-02-03).
+	* Documentation/NuttXCCodingStandard.html:  Add a coding standards
+	  document.  Very boring stuff (2014-2-6).
 

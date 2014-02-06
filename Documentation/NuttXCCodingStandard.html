@@ -1,0 +1,2564 @@
+<html>
+<head>
+<title>NuttX C Coding Standard</title>
+<meta name="author" content="Gregory Nutt">
+</head>
+
+<body background="backgd.gif">
+<hr><hr>
+<table width ="100%">
+  <tr align="center" bgcolor="#e4e4e4">
+    <td>
+      <h1><big><font color="#3c34ec">
+        <i>NuttX C Coding Standard</i>
+      </font></big></h1>
+      <p>Last Updated: February 6, 2014</p>
+    </td>
+  </tr>
+</table>
+<hr><hr>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+  <h1>Table of Contents</h1>
+    </td>
+  </tr>
+</table>
+
+<ul>
+  <b>1.0 <a href="#general">General Conventions</a></b>
+  <ul>
+    1.1 <a href="#fileorganization">File Organization</a></br>
+    1.2 <a href="#lines">Lines</a><br>
+    1.3 <a href="#comments">Comments</a><br>
+    1.4 <a href="#braces">Braces</a><br>
+    1.5 <a href="#indentation">Indentation</b><br>
+    1.6 <a href="#parentheses">Parentheses</a><br>
+  </ul>
+  <b>2.0 <a href="#datatypes">Data and Type Definitions</a></b>
+  <ul>
+    2.1 <a href="#onedatperline">One Definition/Declaration Per Line</a><br>
+    2.2 <a href="#globalvariable">Global Variables</a><br>
+    2.3 <a href="#localvariable">Parameters and Local Variables</a><br>
+    2.4 <a href="#typedefinitions">Type Definitions</a><br>
+    2.5 <a href="#structures">Structures</a><br>
+    2.6 <a href="#unions">Unions</a><br>
+    2.7 <a href="#enumerations">Enumerations</a><br>
+    2.8 <a href="#macros">C Pre-processor Macros</a><br>
+    2.9 <a href="#pointers">Pointer Variables</a><br>
+    2.10 <a href="#initializers">Initializers</a>
+  </ul>
+  <b>3.0 <a href="#functions">Functions</a></b>
+  <ul>
+    3.1 <a href="#funcheaders">Function Headers</a><br>
+    3.2 <a href="#funcname">Function Names</a><br>
+    3.3 <a href="#parmlists">Parameter Lists</a><br>
+    3.4 <a href="#funcbody">Function Body</a><br>
+    3.5 <a href="#retvalues">Returned Values</a>
+  </ul>
+  <b>4.0 <a href="#statements">Statements</a></b>
+  <ul>
+    4.1 <a href="#onestatement">One Statement Per Line</a><br>
+    4.2 <a href="#casts">Casts</a><br>
+    4.3 <a href="#operators">Operators</a><br>
+    4.4 <a href="#ifthenelse"><code>if then else</code> Statement</a><br>
+    4.5 <a href="#switch"><code>switch</code> Statement</a><br>
+    4.6 <a href="#while"><code>while</code> Statement</a><br>
+    4.7 <a href="#dowhile"><code>do while</code> Statement</a><br>
+    4.8 <a href="#goto">Use of <code>goto</code></a>
+  </ul>
+  <b><a href="#appndxa">Appendix A</a></b>
+  <ul>
+    <a href="#cfilestructure">A.1 C Source File Structure</a><br>
+    <a href="#hfilestructure">A.2 C Header File Structure</a>
+  </ul>
+</ul>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1>1.0 <a name="general">General Organization</a></h1>
+    </td>
+  </tr>
+</table>
+
+<h2>1.1 <a name="fileorganization">File Organization</a></h2>
+
+<p>
+  <b>File Extensions</b>
+  Use the <code>.h</code> extension for C header files and <code>.c </code> for C source files.
+<p>
+<p>
+  <b>File header</b>.
+  Every C, C++, make file, or script begins with a file header.
+  That file header is enclosed with a <i>block comment</i> (see below).
+  Within the block comment, the following must appear:
+</p>
+<ul>
+  <li>
+    The relative path to the file from the top-level directory.
+  </li>
+  <li>
+    An optional, one-line description of the file contents.
+  </li>
+  <li>
+    A blank line
+  </li>
+  <li>
+    A copyright notice indented two additional spaces
+  </li>
+  <li>
+    A line identifying the author and contact information with the same indentation as the copyright notice.
+  </li>
+  <li>
+    A blank line</li>
+  <li>
+    Standard (modified) BSD licensing information.
+  </li>
+</ul>
+<p>
+  <b>Sample File Headers</b>.
+  Sample file headers are provided in an <a href="#appndxa">Appendix</a> to this document.
+  No software may be included in the NuttX source tree that does not have licensing information included in the file.
+  No software may be included in the NuttX source tree that does not have a (modified) BSD license or compatible license (such as the MIT license).
+  If the file does not following BSD licensing, then the appropriate license information should be provided in the header rather than the (modified) BSD licensing information and a NOTE should be included in the top-level <code>COPYING</code> file to indicate any variations from (modified) BSD licensing.
+</p>
+<p>
+  <b>Grouping</b>.
+  All like components in a C source or header file are grouped together.
+  Definitions do not appear arbitrarily through the file, rather, like definitions are grouped together and preceded by a <i>block comment</i> identifying the grouping.
+</p>
+<p>
+  <b>Block Comments</b>.
+  Each grouping in the file is separated with a <i>block comment</i>.
+  The block comment consists of:
+</p>
+<ul>
+  <li>
+    A line that consists of the opening C comment (<code>/*</code>) followed by a series of asterisks extending to the length of the line (usually to column 78). 
+  </li>
+  <li>
+    The name of the grouping, starting at column 4.
+    An asterisk preceives the name of the grouping in column 1.
+  </li>
+  <li>
+    A line that consists of the closing C comment (<code>*/</code>) at the end of the line (usually column 78) preceded by a series of asterisks extending to column 1.
+  </li>
+</ul>
+<p>
+  <b>Examples of Block Comments</b>.
+  See <a href="#appndxa">Appendix A</a> for examples of block comments.
+</p>
+<p>
+  <b>Order of Groupings</b>.
+  The following groupings should appear in all C source files in the following order:
+</p>
+<ol>
+  <li>
+    Included Files
+  </li>
+  <li>
+    Pre-processor Definitions
+  </li>
+  <li>
+    Private Types
+  </li>
+  <li>
+    Private Function Prototypes
+  </li>
+  <li>
+    Private Data (definitions)
+  </li>
+  <li>
+    Public Data (definitions)
+  </li>
+  <li>
+    Private Functions (definitions)
+  </li>
+  <li>
+    Public Functions (definitions)
+  </li>
+</ol>
+<p>
+  The following groupings should appear in all C header files in the following order:
+</p>
+<ol>
+  <li>
+    Included Files
+  </li>
+  <li>
+    Pre-processor Definitions
+  </li>
+  <li>
+    Public Types
+  </li>
+  <li>
+    Public Data (declarations)
+  </li>
+  <li>
+    Inline Functions (definitions)
+  </li>
+  <li>
+    Public Function Prototypes (declarations)
+  </li>
+</ol>
+<p>
+  <b>Large vs. Small Files</b>.
+  In larger files, block comments should be included for all groupings, even if they are empty;
+  the empty grouping provides important information in itself.
+  Smaller files may omit some of the block comments;
+  it is awkard if the block comments are larger than the file content!
+</p>
+<p>
+  <a name="idempotence"><b>Header File Idempotence</b></a>.
+  C header file must protect against multipleinclusion through the use of macros that &quot;guard&quot; against multiple definitions if the header file is included multiple times.
+</p>
+<ul>
+  <li>
+    <p>
+      Each header file must contain the following pre-processor commands near the beginning of the header file:  Between the file header and the &quot;Included Files&quot; block comment.
+      For example,
+    </p>
+    <ul><pre>
+#ifndef __INCLUDE_NUTTX_ARCH_H
+#define __INCLUDE_NUTTX_ARCH_H
+</pre></ul>
+  <p>
+    Notice that the definitions within of the header do not follow the usually rules:
+    The presence of the conditional test at the top of the file does not cause the
+    remaining definitions within the file to be indented.
+  </p>
+  </li>
+  <li>
+    <p>
+      Then conditional compilation is closed at the fine line of the header file with:
+    </p>
+    <ul><pre>
+#endif /* __INCLUDE_NUTTX_ARCH_H */
+</pre></ul>
+  </li>
+</ul>
+<p>
+  <b>Forming Guard Names</b>.
+  Then pre-processor macro name used in the guard is formed from the full, relative path to the header for from the top-level, controlled directory.
+  That pat is preceded by <code>__</code> and <code>_</code> replaces each character that would otherwise be invalid in a macro name.
+  So, for example, __INCLUDE_NUTTX_ARCH_H corresponds to the header file <code>include/nuttx/arch.h</code>
+</p>
+
+<p>
+  <b>Deoxygen Information</b>.
+  NuttX does not use Deoxygen for documentation and no file should contain Doxygen tags.
+</p>
+
+<p>
+  <b>Sample File Formats</b>.
+  C source and header file templates are provided in an <a href="#appndxa">Appendix</a> to this document.
+</p>
+
+<h2>1.2 <a name="lines">Lines</a></h2>
+<p>
+  <b>Line Endings</b>.
+  Files should be formatted with <code>\n</code> as the line ending (Unix line endings), not <code>\r\n</code> (Windows line endings).
+  There should be no extra whitespace at the end of the line.
+  In addition, all text files should end in a single newline (<code>\n</code>). This avoids the <i>"No newline at end of file"</i> warning generated by certain tools.
+</p>
+
+<p>
+  <b>Line Width</b>.
+  Text should not extend past column 78 in the typical C source or header file.
+  Sometimes the nature of the content of a file may require that the lines exceed this limit.
+  This often occurs in header files with naturally long definitions.
+  If the line width must extend 78 lines, then some wider line width may be used in the file provided that it is used consistently.
+</p>
+
+<p>
+  <b>Line Wrapping</b>.
+</p>
+<center><table width="100%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+  struct some_long_struct_name_s
+  {
+    struct some_long_struct_name_s *flink;  /* The forward link to the next instance of struct some_long_struct_name_s in a singly linked list */
+    int short_name1;   /* Short comment 1 */
+    int short_name2;   /* This is a very long comment describing subtle aspects of the short_name2 field */
+  };
+
+  struct some_medium_name_s *ptr = (struct some_medium_name_s *)malloc(sizeof(some_medium_name_s);
+
+  struct some_long_struct_name_s *ptr = (struct some_long_struct_name_s *)malloc(sizeof(some_long_struct_name_s);
+
+  ret = some_function_with_many parameters(long_parameter_name_1, long_parameter_name_2, long_parameter_name_3, long_parameter_name_4, long_parameter_name_5, long_parameter_name_6, long_parameter_name_7, long_parameter_name_8);
+
+  ret = some_function_with_many parameters(long_parameter_name_1,
+    long_parameter_name_2,
+    long_parameter_name_3
+    long_parameter_name_4,
+    long_parameter_name_5,
+    long_parameter_name_6,
+    long_parameter_name_7,
+    long_parameter_name_8);
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+  struct some_long_struct_name_s
+  {
+    /*  The forward link to the next instance of struct
+     * some_long_struct_name_s in a singly linked list
+     */
+  
+    struct some_long_struct_name_s *flink;
+    int short_name1;   /* Short comment 1 */
+    int short_name2;   /* This is a very long comment describing subtle
+                        * aspects of the short_name2 field */
+  };
+
+  FAR struct some_medium_name_s *ptr = (FAR struct some_medium_name_s *)
+    malloc(sizeof(some_medium_name_s);
+
+  FAR struct some_medium_name_s *ptr =
+    (FAR struct some_medium_name_s *)malloc(sizeof(some_medium_name_s);
+
+  FAR struct some_long_struct_name_s *ptr =
+    (FAR struct some_long_struct_name_s *)
+      malloc(sizeof(some_long_struct_name_s);
+
+  ret = some_function_with_many parameters(long_parameter_name_1,
+                                           long_parameter_name_2,
+                                           long_parameter_name_3,
+                                           long_parameter_name_4,
+                                           long_parameter_name_5,
+                                           long_parameter_name_6,
+                                           long_parameter_name_7,
+                                           long_parameter_name_8);
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>NOTE</b>:
+  See the discussion of <a href="#farnear">pointers</a> for information about the <code>FAR</code> qualifier used above.
+</p>
+
+<p>
+  <b>Double Spacing</b>.
+  A single blank line may be use to separate logical groupings as the designer feels fit.
+  Single blank lines are also required in certain contexts as defined in this standard.
+  Additional blanks lines (two or more) are prohibited.
+</p>
+
+<p>
+  <b>Columnar Organization</b>.
+  Similar things should be aligned on the same column unless doing so would cause the line width to be exceeded.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="blue"><b>Acceptable</b></p>
+<ul><pre>
+  dog = cat;
+  monkey = oxen;
+  aardvark = macaque;
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Preferred</b></p>
+<ul><pre>
+  dog      = cat;
+  monkey   = oxen;
+  aardvark = macaque;
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>Block Comments</b>
+  The final asterisk (<code>*</code>) should occur at column 78 (or the line width of files with longer lines).
+  Note that the final comment delimiter of the block comment is an exception an lies at column 79.
+</p>
+
+<h2><a name="comments">1.3 Comments</a></h2>
+
+<p>
+  <b>Line Spacing</b>
+  A single blank line should precede and follow each comment.
+  The only exception is for the file header block comment that begins on line one;
+  there is no preceding blank line in that case.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+  /* Set a equal to b */
+  a = b;
+  /* Set b equal to c */
+  b = c;
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+
+  /* Set a equal to b */
+
+  a = b;
+
+  /* Set b equal to c */
+
+  b = c;
+
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>Indentation</b>
+  Comments should, typically, be placed before the code section to which they apply.
+  The comment identation should be the same as the follow identation rules as the following code (if applicable).
+</p>
+
+<p>
+  <b>Short, Single line comments</b>.
+  Short comments must lie on a single line.
+  The comment delimiters must lie on the same line.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+  /*
+   * This is a single line comment
+   */
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+  /* This is a single line comment */
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>Multi-line comments</b>.
+  If the comment is too long to fit on a single, it must be broken into a multi-line comment.
+  The comment must be begin on the first line of the multi-line comment with the opening comment delimiter (<code>/*</code>).
+  The following lines of the multi-line comment must be with an asterisk (<code>*</code>) aligned in the same column as the asterisk in the preceding line.
+  The closing comment delimiter must lie on a separate line with the asterisk (<code>*</code>) aligned in the same column as the asterisk in the preceding line.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+  /*
+     This is the first line of a multi-line comment.
+     This is the second line of a multi-line comment.
+     This is the third line of a multi-line comment. */
+
+  /* This is the first line of another multi-line comment.  */
+  /* This is the second line of another multi-line comment. */
+  /* This is the third line of another multi-line comment.  */
+
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+  /* This is the first line of a multi-line comment.
+   * This is the second line of a multi-line comment.
+   * This is the third line of a multi-line comment.
+   */
+
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>Comments to the Right of Statements</b>.
+  Comments to the right of statements in C source files are discouraged
+  If such comments are used, they should at least be aligned so that the comment begins in the same comment on each line.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+  dog = cat; /* Make the dog be a cat */
+  monkey = oxen; /* Make the monkey be an oxen */
+  aardvark = macaque; /* Make the aardvark be a macaque */
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="blue"><b>Acceptable</b></p>
+<ul><pre>
+  dog      = cat;     /* Make the dog be a cat */
+  monkey   = oxen;    /* Make the monkey be an oxen */
+  aardvark = macaque; /* Make the aardvark be a macaque */
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Preferred</b></p>
+<ul><pre>
+  /* Make the dog be a cat */
+
+  dog      = cat;
+
+  /* Make the monkey be an oxen */
+
+  monkey   = oxen;
+
+  /* Make the aardvark be a macaque */
+
+  aardvark = macaque;
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>Comments to the Right of Data Definitions</b>.
+  Comments to the right of a declaration with an enumeration or structure, on the other hand, are encourage.
+  Columnar alignment of comments is very desireable (but often cannot be achieved without violating the line width).
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+struct animals_s
+{
+  int dog; /* This is a dog */
+  int cat; /* This is a cat */
+  double monkey; /* This is a monkey */
+  double oxen; /* This is an oxen */
+  bool aardvark; /* This is an aardvark */
+  bool macaque; /* This is a macaque */
+};
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="blue"><b>Acceptable</b></p>
+<ul><pre>
+struct animals_s
+{
+  int dog;       /* This is a dog */
+  int cat;       /* This is a cat */
+  double monkey; /* This is a monkey */
+  double oxen;   /* This is an oxen */
+  bool aardvark; /* This is an aardvark */
+  bool macaque;  /* This is a macaque */
+};
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Preferred</b></p>
+<ul><pre>
+struct animals_s
+{
+  int    dog;      /* This is a dog */
+  int    cat;      /* This is a cat */
+  double monkey;   /* This is a monkey */
+  double oxen;     /* This is an oxen */
+  bool   aardvark; /* This is an aardvark */
+  bool   macaque;  /* This is a macaque */
+};
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>Block comments</b>.
+  Block comments are only used to delimit groupings with the overall <a href="#fileorganization">file organization</a> and should not be used unless the usage is consistent with delimiting logical groupings in the program.
+</p>
+
+<p>
+  <b>C Style Comments</b>.
+  C99/C11/C++ style comments (beginning wih <code>//</code>) should not be used with NuttX.
+  NuttX generally follows C89 and all code outside of architecture specific directories must be compatible with C89.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+// This is a structure of animals
+struct animals_s
+{
+  int    dog;      // This is a dog
+  int    cat;      // This is a cat
+  double monkey;   // This is a monkey
+  double oxen;     // This is an oxen
+  bool   aardvark; // This is an aardvark
+  bool   macaque;  // This is a macaque
+};
+</ul></pre></font>
+</td></td>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+/* This is a structure of animals */
+
+struct animals_s
+{
+  int    dog;      /* This is a dog */
+  int    cat;      /* This is a cat */
+  double monkey;   /* This is a monkey */
+  double oxen;     /* This is an oxen */
+  bool   aardvark; /* This is an aardvark */
+  bool   macaque;  /* This is a macaque */
+};
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>&quot;Commenting Out&quot; Large Code Blocks</b>.
+  Do not use C or C++ comments to disable compilation of large blocks of code.
+  Instead, use <code>#if 0</code> to do that.
+  Make sure there is a comment before the <code>#if 0</code> to explain why the code is not compiled.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+void some_function(void)
+{
+  ... compiled code ...
+
+  /*
+  ... disabled code ..
+   */
+
+  ... compiled code ...
+}
+
+void some_function(void)
+{
+  ... compiled code ...
+
+  //
+  // ... disabled code ..
+  //
+
+  ... compiled code ...
+}
+</ul></pre></font>
+</td></td>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+void some_function(void)
+{
+  ... compiled code ...
+
+  /* The following code is disabled because it is no longer needed */
+
+#if 0
+  ... disabled code ..
+#endif
+
+  ... compiled code ...
+}
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>1.4 <a name="braces">Braces</a></h2>
+
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Always on Separate Lines</b>.
+    Braces always appear on a separate line containing nothing else other that white space.
+  </li>
+  <li>
+    <b>Never Comments on Braces</b>.
+    Do not put comments on the same line as braces.
+  </li>
+  <li>
+    <b>Special Indentation Rules</b>.
+    Special <a href="#indentation">indentation rules</a> apply to braces.
+  </li>
+</ul>
+
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+while (true)
+  {
+    if (valid)
+      {
+      ...
+      } /* if valid */
+    else
+      {
+      ...
+      } /* not valid */
+  } /* end forever */
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+while (true)
+  {
+    if (valid)
+      {
+      ...
+      }
+    else
+      {
+      ...
+      }
+  }
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>Exceptions</b>.
+  The exception is braces that following structure, enumeration, union, and function declarations.
+  There is no additional indentation for those braces;
+  those braces align with the beginning of the definition
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+enum kinds_of_dogs_e
+  {
+  ...
+  };
+
+struct dogs_s {
+  ...
+  union {
+  ...
+  } u;
+  ...
+};
+
+struct cats_s
+  {
+  ...
+    union
+     {
+     ...
+     } u;
+  ...
+  };
+
+int animals(int animal)
+  {
+  ...
+  }
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+enum kinds_of_dogs_e
+{
+  ...
+};
+
+struct dogs_s
+{
+  ...
+  union
+  {
+  ...
+  } u;
+  ...
+};
+
+struct cats_s
+{
+  ...
+  union
+  {
+  ...
+  } u;
+  ...
+};
+
+int animals(int animal)
+{
+  ...
+}
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>1.5 <a name="indentation">Indentation</b></h2>
+
+<p>
+  <b>Indentation Unit</b>
+  Indentation is in units of two spaces; Each indentation level is twos spaces further to the right than the preceding identation levels.
+  The use of TAB characters for indentation is prohibited in C source and header files (they may be appropriate in make files and some scripts, however).
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+	if (x == y) {
+		dosomething(x);
+	}
+
+    if (x == y) {
+        dosomething(x);
+    }
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+  if (x == y)
+    {
+      dosomething(x);
+    }
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>Alignment of Braces</b>.
+  Note that since braces must be on a separate line (see above), this indentation by two spaces has an interesting property:
+  All C statements (and case selectors) like on lines that are odd multiples of 2 spaces: 2, 6, 10, ... (2*n + 1).
+  A braces lie on a separate line indented by an even multple of 2 spaces: 4, 8, 12, ... 2*n.
+</p>
+
+<p>
+  <b>Indentation of Pre-Processor Lines</b>.
+  C Pre-processor commands following any conditional computation are also indented following basically the indentation same rules, differing in that the <code>#</code> always remains in column 1.
+</p>
+
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+#ifdef CONFIG_ABC
+#define ABC_THING1 1
+#define ABC_THING2 2
+#define ABC_THING3 3
+#endif
+
+#ifdef CONFIG_ABC
+  #define ABC_THING1 1
+  #define ABC_THING2 2
+  #define ABC_THING3 3
+#endif
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+#ifdef CONFIG_ABC
+#  define ABC_THING1 1
+#  define ABC_THING2 2
+#  define ABC_THING3 3
+#endif
+
+#ifdef CONFIG_ABC
+#  define ABC_THING1 1
+#  define ABC_THING2 2
+#  define ABC_THING3 3
+#endif
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>Exception</b>.
+  Each header file includes <a href="#idempotence">idempotence definitions</a> at the beginning of the header file.
+  This conditional compilation does <i>not</i> cause any change to the indentation.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+#ifndef __INCLUDE_SOMEHEADER_H
+#  define __INCLUDE_SOMEHEADER_H
+...
+#  define THING1 1
+#  define THING2 2
+#  define THING3 3
+...
+#endif /* __INCLUDE_SOMEHEADER_H */
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+#ifndef __INCLUDE_SOMEHEADER_H
+#define __INCLUDE_SOMEHEADER_H
+...
+#define THING1 1
+#define THING2 2
+#define THING3 3
+...
+#endif /* __INCLUDE_SOMEHEADER_H */
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>1.6 <a name="parentheses"></a>Parentheses</a></h2>
+
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Space after key words</b>.
+    Do not put a left parenthesis (<code>(</code>) immediately after any C keywords (<code>for</code>, <code>switch</code>, <code>while</code>, <code>do</code>, <code>return</code>, etc.).
+    Put a space before the left parenthesis in these cases.
+  </li>
+  <li>
+    <b>Otherwise, no space before left parentheses</b>.
+    Otherwise, there should be no space before the left parentheses
+  </li>
+  <li>
+    <b>No space betwen function name and argument list</b>.
+    There should be no space between a function name and an argument list.
+  </li>
+  <li>
+    <b>Never space before the right parentheses</b>.
+    There should never be space before a right parenthesis (<code>)</code>).
+  </li>
+  <li>
+    <b>No parentheses around returned values</b>.
+    Returned values should never be enclosed in parentheses unless the parentheses are required to force the correct order of operations in a computed return value.
+  </li>
+</ul>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+int do_foobar ( void )
+{
+  int ret = 0;
+  int i;
+
+  for( i = 0; ( ( i &lt; 5 ) || ( ret &lt; 10 ) ); i++ )
+    {
+      ret = foobar ( i );
+    }
+
+  return ( ret );
+}
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+int do_foobar(void)
+{
+  int ret = 0;
+  int i;
+
+  for (i = 0; i &lt; 5 || ret &lt; 10; i++)
+    {
+      ret = foobar(i);
+    }
+
+  return ret;
+}
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>NOTE:</b>
+  Many people do not trust their understanding of the precedence of operators and so use lots of parentheses in expressions to force the order of evaluation even though the parentheses may have no effect.
+  This will certainly avoid errors due to an unexpected order of evaluation, but can also make the code ugly and overly complex (as in the above example).
+  In general, NuttX does not use unnecessary parentheses to force order of operations.
+  There is no particular policy in this regard.
+  However, you are are advised to check your C Programming Language book if necessary and avoid unnecessary parenthesis when possible.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1>2.0 <a name="datatypes">Data and Type Definitions</a></h1>
+    </td>
+  </tr>
+</table>
+
+<h2>2.1 <a name="onedatperline">One Definition/Declaration Per Line</a></h2>
+
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+  extern long time, money;
+  char **ach, *bch;
+  int i, j, k;
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+  extern long time;
+  extern long money;
+  FAR char **ach;
+  FAR char *bch;
+  int i;
+  int j;
+  int k;
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>NOTE</b>:
+  See the discussion of <a href="#farnear">pointers</a> for information about the <code>FAR</code> qualifier used above.
+</p>
+
+<h2>2.2 <a name="globalvariable">Global Variables</a></h2>
+
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Short global variable names</b>.
+    Names should be terse, but generally descriptive of what the variable is for.
+    Try to say something with the variable name, but don't try to say too much.
+    For example, the variable name of <code>g_filelen</code> is preferable to something like <code>g_lengthoffile</code>.
+  </li>
+  <li>
+    <b>Global variable prefix</b>.
+    All global variables begin with the prefix <code>g_</code> to indicate the scope of variable.
+  </li>
+  <li>
+    <b>Module name prefix</b>
+    If a global variable belongs in a <i>module</i> with a name of, say <code>xyz</code>, then that module should be included as part of the prefix like: <code>g_xyz_</code>.
+  </li>
+  <li>
+    <b>Lowercase</b>,
+    Use all lower case letters.
+  </li>
+  <li>
+    <b>Minimal use of <code>'_'</code></b>.
+    Preferably there are no <code>'_'</code> separators within the name.
+    Long variable names might require some delimitation using <code>'_'</code>.
+    Long variable names, however, are discouraged.
+  </li>
+  <li>
+    <b>Use structures</b>.
+    If possible, wrap all global variables within a structure to minimize the liklihood of name collisions.
+  </li>
+  <li>
+    <b>Avoid global variables when possible</b>.
+    Use of global variables, in general, is discourage unless there is no other reasonable solution.
+  </li>
+</ul>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+extern int someint;
+uint32_t dwA32BitInt;
+uint32_t gAGlobalVariable;
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="blue"><b>Acceptable</b></p>
+<ul><pre>
+extern int g_someint;
+uint32_t g_a32bitint;
+uint32_t g_aglobal;
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Preferred</b></p>
+<ul><pre>
+struct my_variables_s
+{
+  uint32_t a32bitint;
+  uint32_t aglobal;
+};
+
+extern int g_someint;
+struct my_variables_s g_myvariables;
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>2.3 <a name="localvariable">Parameters and Local Variables</a></h2>
+
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Common naming standard</b>.
+    Naming for function parameters and local variables is the same.
+  </li>
+  <li>
+    <b>Short variable names</b>.
+    Names should be terse, but generally descriptive of what the variable is for.
+    Try to say something with the variable name, but don't try to say too much.
+    For example, the variable name of <code>len</code> is preferable to something like <code>lengthofiobuffer</code>.
+  </li>
+  <li>
+    <b>No special ornamentation</b>.
+    There is no special ornamentation of the name to indication that the variable is a local variable.
+    The prefix <code>p</code> or <code>pp</code> may be used on names of pointers (or pointer to pointers) if it helps to distinguish the variable from some other local variable with a similar name.
+    Even this convention is discouraged when not necessary.
+  </li>
+  <li>
+    <b>Lowercase</b>
+    Use all lower case letters.
+  </li>
+  <li>
+    <b>Minimal use of single character variable names</b>.
+    Short variable names are preferred.
+    However, single character variable names should be avoided.
+    Exceptions to this include <code>i</code>, <code>j</code>, and <code>k</code> which are reserved only for use as loop indices
+    (part of our Fortran legacy).
+  </li>
+  <li>
+    <b>Minimal use of <code>'_'</code></b>.
+    Preferably there are no <code>'_'</code> separators within the name.
+    Long variable names might require some delimitation using <code>'_'</code>.
+    Long variable names, however, are discouraged.
+  </li>
+</ul>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+uint32_t somefunction(int a, uint32_t dwBValue)
+{
+  uint32_t this_is_a_long_variable_name = 1;
+  int i;
+
+  for (i = 0; i &lt; a; i++)
+    {
+      this_is_a_long_variable_name *= dwBValue--;
+    }
+
+  return this_is_a_long_variable_name;
+}
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+uint32_t somefunction(int limit, uint32_t value)
+{
+  uint32_t ret = 1;
+  int i;
+
+  for (i = 0; i &lt; limit; i++)
+    {
+      ret *= value--;
+    }
+
+  return ret;
+}
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>NOTE:</b>
+  You will see the local variable named <code>ret</code> is frequently used in the code base for the name of a local variable whose value will be returned or to received the returned value from a called function.
+</p>
+
+<h2>2.4 <a name="typedefinitions"> Type Definitions</a></h2>
+
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Short type names</b>.
+    Type names should be terse, but generally descriptive of what the type is for.
+    Try to say something with the type name, but don't try to say too much.
+    For example, the type name of <code>fhandle_t</code> is preferable to something like <code>openfilehandle_t</code>.
+  </li>
+  <li>
+    <b>Type name suffix</b>.
+    All <code>typedef</code>'ed names end with the suffix <code>_t</code>.
+  </li>
+  <li>
+    <b>Module name prefix</b>
+    If a type belongs in a <i>module</i> with a name of, say <code>xyz</code>, then that module should be included as a prefix to the type name like: <code>xyz_</code>.
+  </li>
+  <li>
+    <b>Lowercase</b>.
+    Use all lower case letters.
+  </li>
+  <li>
+    <b>Minimal use of <code>'_'</code></b>.
+    Preferably there are few <code>'_'</code> separators within the type name.
+    Long type names might require some delimitation using <code>'_'</code>.
+    Long type names, however, are discouraged.
+  </li>
+</ul>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+typedef void *myhandle;
+typedef int myInteger;
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+typedef FAR void *myhandle_t;
+typedef int myinteger_t;
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>NOTE</b>:
+  See the discussion of <a href="#farnear">pointers</a> for information about the <code>FAR</code> qualifier used above.
+</p>
+
+<h2>2.5 <a name="structures">Structures</a></h2>
+
+<p><b>Structure Naming</b></p>
+<ul>
+  <li>
+    <b>No un-named structures</b>.
+    All structures must be named, even if they are part of a type definition.
+    The exception to this rule is for structures that are defined within another union or structure.  In those cases, the structure name should always be omitted.
+  </li>
+  <li>
+    <b>No structure definitions within Type Definition</b>.
+    The practice of defining a structure within a type definition is discouraged.
+    It is preferred that the structure definition and the type definition be separate definitions.
+    In general, the NuttX coding style discourages any <code>typdef</code>-ing of structures;
+    normally the full structure name is used as types throughout the code.
+  </li>
+  <li>
+    <b>Short structure names</b>.
+    Structure names should be terse, but generally descriptive of what the structure contains.
+    Try to say something with the structure name, but don't try to say too much.
+    For example, the structure name of <code>xyz_info_s</code> is preferable to something like <code>xyz_datainputstatusinformation_s</code>.
+  </li>
+  <li>
+    <b>Structure name suffix</b>.
+    All structure names end with the suffix <code>_s</code>.
+  </li>
+  <li>
+    <b>Module name prefix</b>
+    If a structure belongs to a <i>module</i> with a name of, say <code>xyz</code>, then that module should be included as a prefix to the structure name like: <code>xyz_</code>.
+  </li>
+  <li>
+    <b>Lowercase</b>.
+    Use all lower case letters.
+  </li>
+  <li>
+    <b>Minimal use of <code>'_'</code></b>.
+    Preferably there are few <code>'_'</code> separators within the structure name.
+    Long variable names might require some delimitation using <code>'_'</code>.
+    Long variable names, however, are discouraged.
+  </li>
+</ul>
+
+<p><b>Structure Field Naming</b></p>
+<ul>
+  <li>
+    <b>Common variable naming</b>.
+    Structure field naming is generally the same as for local variables.
+  </li>
+  <li>
+    <b>One definition per line</b>.
+    The <a href="#onedatperline">one definition per line</a> rule applies to structure fields,
+    including bit field definitions.
+  </li>
+  <li>
+    <b>Each field should be commented</b>.
+    Each structure field should be commented.
+    Commenting should follow the <a href="#comments">standard conventions</a>.
+  </li>
+  <li>
+    <b>Optional structure field prefix</b>.
+    It make be helpful to add a two-letter prefix to each field name so that is is clear which structure the field belongs to.
+    Although a good practice, that convention has not been used consistently in NuttX.
+  </li>
+  <li>
+    <b>Lowercase</b>.
+    Use all lower case letters.
+  </li>
+  <li>
+    <b>Minimal use of <code>'_'</code></b>.
+    Preferably there are few <code>'_'</code> separators within the field name.
+    Long variable names might require some delimitation using <code>'_'</code>.
+    Long variable names, however, are discouraged.
+  </li>
+</ul>
+<p>
+  <b>Other Applicable Coding Standards</b>.
+  See sections related to <a href="#lines">line formatting</a>, <a href="#braces">use of braces</a>, <a href="#indentation">indentation</a>, and <a href="#comments">comments</a>.
+</p>
+<p>
+  <b>Size Optimizations</b>.
+  When declaring fields in structures, order the declarations in such a way as to minimize memory waste due of data alignment.
+  This essentially means that that fields should be organized by data size, not by functionality:
+  Put all pointers togeter, all <code>uint8_t</code>'s together, all <code>uint32_t</code>'s together.
+  Data types withi well known like <code>uint8_t</code> and <code>uint32_t</code> should also be place in either ascending or descending size order.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+typedef struct
+{
+  ...
+  int val1, val2, val3; /* Values 1-3 */
+  ...
+} xzy_info_t;
+
+struct xyz_information
+{
+  ...
+  uint8_t bita : 1,  /* Bit A */
+          bitb : 1,  /* Bit B */
+          bitc : 1;  /* Bit C */
+  ...
+};
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+struct xyz_info_s
+{
+  ...
+  int val1; /* Value 1 */
+  int val2; /* Value 2 */
+  int val3; /* Value 3 */
+  ...
+};
+</pre>
+<font color="blue"><pre>
+typdef struct xyz_info_s xzy_info_t;
+</pre>
+<p>(The use of typedef'ed structures is acceptable but discouraged)</p></font>
+<pre>
+struct xyz_info_s
+{
+  ...
+  uint8_t bita : 1,  /* Bit A */
+  uint8_t bitb : 1,  /* Bit B */
+  uint8_t bitc : 1,  /* Bit C */
+  ...
+};
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>2.6 <a name="unions">Unions</a></h2>
+<p>
+  <b>Union and Field Names</b>.
+  Naming of unions and fields within unions follow the same naming rules as for <a href="#structures">structures and structure fields</a>.
+  The only difference is that the suffix <code>_u</code> is used to identify unions.
+</p>
+<p>
+  <b>Other Applicable Coding Standards</b>.
+  See sections related to <a href="#lines">line formatting</a>, <a href="#braces">use of braces</a>, <a href="#indentation">indentation</a>, and <a href="#comments">comments</a>.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Example</b></p>
+<ul><pre>
+union xyz_union_u
+{
+  uint8_t  b[4]; /* Byte values */
+  uint16_t h[2]; /* Half word values */
+  uint32_t w;    /* Word Value */
+};
+
+struct xyz_info_s
+{
+  ...
+  union
+  {
+    uint8_t  b[4]; /* Byte values */
+    uint16_t h[2]; /* Half word values */
+    uint32_t w;    /* Word Value */
+  } u;
+  ...
+};
+</ul></pre></font>
+</td></tr>
+</table></center>
+<p>
+  <b>NOTE:</b>
+  Note that the union name <code>u</code> is used often.
+  This is another exception to the prohibition against using single character variable and field names.
+  The short field name <code>u</code> clearly identifies a union field and prevents the full name to the union value from being excessively long.
+</p>
+
+<h2>2.7 <a name="enumerations">Enumerations</a></h2>
+<p>
+  <b>Enumeration Naming</b>.
+  Naming of enumeratinos follow the same naming rules as for <a href="#structures">structure</a> and <a href=#unions">union</a> naming.
+  The only difference is that the suffix <code>_e</code> is used to identify an enumeration.
+</p>
+<p>
+  <b>Enumeration Value Naming</b>.
+  Enumeration values, however, following a naming convention more similar to <a href="#macros">macros</a>.
+</p>
+<ul>
+  <li>
+    <b>Uppercase</b>.
+    Enumeration values are always in upper case.
+  </li>
+  <li>
+    <b>Use of <code>'_'</code> encouraged</b>.
+    Unlike other naming, use of the underscore character <code>_</code> to break up enumeration names is encouraged.
+  </li>
+  <li>
+    <b>Prefix</b>.
+    Each value in the enumeration should begin with an upper-case prefix that identifies the value as a member of the enumeration.
+    This prefix should, ideally, derive from the name of the enumeration.
+  </li>
+  <li>
+    <b>No dangling commas</b>.
+    There should be no dangling comma on the final value of the enumeration.
+    The most commonly used tool chain are tolerant of such dangling commas, but others will not.
+  </li>
+</ul>
+<p>
+  <b>Other Applicable Coding Standards</b>.
+  See sections related to <a href="#lines">line formatting</a>, <a href="#braces">use of braces</a>, <a href="#indentation">indentation</a>, and <a href="#comments">comments</a>.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Example</b></p>
+<ul><pre>
+enum xyz_state_e
+{
+  XYZ_STATE_UNINITIALIZED = 0, /* Uninitialized state */
+  XYZ_STATE_WAITING,           /* Waiting for input state */
+  XYZ_STATE_BUSY,              /* Busy processing input state */
+  XYZ_STATE_ERROR,             /* Halted due to an error */
+  XYZ_STATE_TERMINATING,       /* Terminating stated */
+  XYZ_STATE_TERMINATED         /* Terminating stated */
+};
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>2.8 <a name="macros">C Pre-processor Macros</h2>
+
+<p><b>Coding Standard:</b></p>
+
+<p>
+  <b>Macro Naming</b>.
+  Macro naming following a naming convention similar to the naming of <a href="#enumerations">enumeration values</a>.
+</p>
+<ul>
+  <li>
+    <b>Uppercase</b>.
+    Macro names are always in upper case.
+  </li>
+  <li>
+    <b>Lowercase Exceptions</b>.
+    There are3 a few lower case values in NuttX macro names.  Such as a lower-case <code>p</code> for a period or decimal point (such as <code>VOLTAGE_3p3V</code>).
+    I have also used lower-case <code>v</code> for a version number (such as <code>CONFIG_NET_IPv6</code>).
+    However, these are exceptions to the rule rather than illustrating a rule.
+  </li>
+  <li>
+    <b>Macros that could be functions</b>.
+    Lower-case macro names are also acceptable if the macro is a substitute for a function name that might be used in some other context.
+    In that case, normal function naming applies.
+  </li>
+  <li>
+    <b>Use of <code>'_'</code> encouraged</b>.
+    Unlike other naming, use of the underscore character <code>_</code> to break up macro names is encouraged.
+  </li>
+  <li>
+    <b>Prefix</b>.
+    Each related macro value should begin with an upper-case prefix that identifies the value as part of a set of values (and also to mimimize the likelihood of naming collisions).
+  </li>
+  <li>
+    <b>Single space after <code>#define</code></b>.
+    A single space character should separate the <code>#define</code> from the macro name.
+    Tabs are never used.
+  </li>
+  <li>
+    <b>Normal commenting rules</b>.
+    Normal commenting rules apply.
+  </li>
+  <li>
+    <b>Line continuations</b>.
+    Macro definitions may be continued on the next line by terminating the line with the <code>\</code> character just before the newline character.
+    There should be a single space before the <code>\</code> character.
+    Aligned <code>\</code> characters on multiple line continuations are discouraged because they are a maintenance problem.
+  </li>
+  <li>
+    <b>Parentheses around macro argument expansions</b>.
+    Macros may have argument lists.
+    In the macros expansion, each argument should be enclosed in parentheses.
+  </li>
+  <li>
+    <b>Real statements</b>.
+    If a macro functions as a statement, then the macro expansion should be wrapped in <code>do { ... } while (0)</code> to assume that the macros is, indeed, a statement.
+  </li>
+  <li>
+    <b><i>Magic numbers</i> are prohibited in code</b>.
+    Any numeric value is not intuitively obvious, must be properly named and provided as either a pre-processor macro or an enumeration value.
+  </li>
+  <li>
+     <b>Side effects</b>.
+     Be careful of side effects.
+  </li>
+</ul>
+<p>
+  <b>Other Applicable Coding Standards</b>.
+  See sections related to <a href="#lines">line formatting</a>, <a href="#indentation">indentation</a>, and <a href="#comments">comments</a>.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+#define max(a,b) a > b ? a : b
+
+#define ADD(x,y) x + y
+
+#ifdef HAVE_SOMEFUNCTION
+int somefunction(struct somestruct_s* psomething);
+#else
+#define SOMEFUNCTION() (0)
+#endif
+
+#	define	IS_A_CAT(c)		((c) == A_CAT)
+
+#define LONG_MACRO(a,b)                                  \
+  {                                                      \
+    int value;                                           \
+    value = b-1;                                         \
+    a = b*value;                                         \
+  }
+
+#define DO_ASSIGN(a,b) a = b
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+#define MAX(a,b) (((a) > (b)) ? (a) : (b))
+
+#define ADD(x,y) ((x) + (y))
+
+#ifdef HAVE_SOMEFUNCTION
+int somefunction(struct somestruct_s* psomething);
+#else
+#  define somefunction(p) (0)
+#endif
+
+# define IS_A_CAT(c)  ((c) == A_CAT)
+
+#define LONG_MACRO(a,b) \
+  { \
+    int value; \
+    value = (b)-1; \
+    (a) = (b)*value; \
+  }
+
+#define DO_ASSIGN(a,b) do { (a) = (b); } while (0)
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>2.9 <a name=pointers>Pointer Variables</a></h2>
+<p>
+  <b>Pointer Naming</b>.
+  Pointers following same naming conventions as for other variable types.
+  A pointer (or pointer-to-a-pointer) variable may be prefaced with <code>p</code> (or <code>pp</code>) with no intervening underscore character <code>_</code> in order to identify that variable is a pointer.
+  That convention is not encouraged, however, and is only appropriate if there is some reason to be concerned that there might otherwise be confusion with another variable that differs only in not being a pointer.
+<p>
+  <b>White Space</b>.
+  The asterisk used in the declaration of a pointer variable or to dereference a pointer variable should be placed immediately before the variable name with no intervening spaces.
+  A space should precede the asterisk in a cast to a pointer type.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+int somefunction(struct somestruct_s* psomething);
+
+ptr = (struct somestruct_s*)value;
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+int somefunction(FAR struct somestruct_s *something);
+
+ptr = (FAR struct somestruct_s *)value;
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p><a name="farnear">
+  <b><code>FAR</code>, <code>NEAR</code>, <code>DSEG</code> and <code>CODE</code> pointers</b></a>.
+  Some architectures require a qualifier on pointers to identify the address space into which the pointer refers.
+  The macros <code>FAR</code>, <code>NEAR</code>, <code>DSEG</code> and <code>CODE</code> are defined in <code>include/nuttx/compiler.h</code> to provide meaning for this qualifiers when needed.
+  For portability, the general rule is that pointers to data that may lie in the stack, heap, <code>.bss</code>, or <code>.data</code> should be prefaced by the qualifier <code>FAR</code>; pointers to functions probably lie in a code address space and should have the qualifier <code>CODE</code>.
+  The typical effect of these macros on architectures where they have meaning to determine the size of the pointer (size in the sense of the width of the pointer value in bits).
+</p>
+
+<h2>2.10 <a name="initializers">Initializers</a></h2>
+<p>
+  <b>Applicable Coding Standards</b>.
+  See the section related to <a href="#parentheses">parentheses</a>.
+</p>
+<p>
+  <b>C89 Compatibility</b>.
+  All common NuttX code must conform to ANSII C89 requirements.
+  Newer C standards permit more flexible initialization with named initializers and array initializers.
+  However, these are not backward compatible with C89 and cannot be used in common code.
+  Newer C99 features may be included in architecture-specific sub-directories where there is no possibility of the use of such older toolchains.
+  C11 is included in NuttX, but has not been verified and, hence, it not encourage anywhere.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1>3.0 <a name="functions">Functions</a></h1>
+    </td>
+  </tr>
+</table>
+
+<h2>3.1 <a name="funcheaders">Function Headers</a></h2>
+
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Function headers</b>.
+    Each function is preceded by a function header.  The function header is a <i>block comment</i> that provides information about the function.
+    The block comment consists of the following:
+    <p><ul>
+      <li>
+        The block comment begins with a line that consists of the opening C comment in column 1 (<code>/*</code>) followed by a series of asterisks extending to the length of the line (usually to column 78).
+      </li>
+      <li>
+        The block comment ends with a line that consists of series of asterisks beginning at column 2 and extending to the near the end line (usually to column 77) followed by the closing C comment in (usually at column 78 for a total length of 79 characters).
+      </li>
+      <li>
+        Information about the function is included in lines between the first and final lines.
+        Each of these begin with a space in column 1, an sterisk (<code>*</code>) in column 2, and a space in column 3.
+      </li>
+    </ul></p>
+  </li>
+  <li>
+    <b>Function header preceded by one blank line</b>.
+    Exactly one blank line precedes each function header.
+  </li>
+  <li>
+    <b>Function header followed by one blank line</b>.
+    Exactly one blank line is placed after function header and before the function definition.
+  </li>
+  <li>
+    <b>Function header sections</b>.
+    Within the function header, the following data sections must be provided:
+    <p><ul>
+      <li>
+        <b><code> * Name: </code></b> followed by the name of the function on the same line.
+      </li>
+      <li>
+        <b><code> * Description:</code></b> followed by a description of the function beginning on the second line.
+        Each line of the function description is indented by two additional spaces.
+      </li>
+      <li>
+        <b><code> * Input Parameters:</code></b> followed by a description of the of each input parameter beginning on the second line.
+        Each input parameter begins on a separator line indented by two additional spaces.
+        The description needs to include (1) the name of the input paramters, and (2) a short description of the input parameter.
+      </li>
+      <li>
+        <b><code> * Returned Value:</code></b> followed by a description of the of returned value(s) beginning on the second line.
+        The description of the returned value should identify all error values returned by the function.
+      </li>
+      <li>
+        <b><code> * Assumptions/Limitations:</code></b> followed by a any additional information that is needed to use the function correctly.
+        This section is optional and may be omitted with there is no such special information required for use of the function.
+      </li>
+    </ul></p>
+    Each of these data sections is separated by a single line like &quot;<code> * </code>&quot;.
+  </li>
+</ul>
+<p>
+  <b>Function header template</b>.
+  Refer to <a href="#cfilestructure">Appendix A</a> for the template for a function header.
+</p>
+
+<h2>3.2 <a name="funcname">Function Naming</a></h2>
+
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Short function names</b>.
+    Function names should be terse, but generally descriptive of what the function is for.
+    Try to say something with the function name, but don't try to say too much.
+    For example, the variable name of <code>xyz_putvalue</code> is preferable to something like <code>xyz_savethenewvalueinthebuffer</code>.
+  </li>
+  <li>
+    <b>Lowercase</b>.
+    Use all lower case letters.
+  </li>
+  <li>
+    <b>Module prefix</b>.
+    All functions in the same <i>module</i>, or <i>sub-system</i>, or within the same file should have a name beginning with a common prefix separated from the remainder of the function name with the underscore, <code>'_'</code>, character.
+    For example, for a module called <i>xyz</i>, all of the functions should begin with <code>xyz_</code>.
+  </li>
+  <li>
+    <b>Extended prefix</b>.
+    Other larger functional grouping should have another level in the naming convention.
+    For example, if module <i>xyz</i> contains a set of functions that manage a set of I/O buffers (IOB), then those functions all should get naming beginning with a common prefix like <code>xyz_iob_</code>.
+  </li>
+  <li>
+    <b>Use of <code>'_'</code> discouraged</b>.
+    Further use of the <code>'_'</code> separators is discouraged in function naming.
+    Long function names might require some additional elimitation using <code>'_'</code>.
+    Long function names, however, are also discouraged.
+  </li>
+  <li>
+    <b>Verbs and Objects</b>.
+    The remainder of the function name should be either in the form of <i>verb-object</i> or <i>object-verb</i>.
+    It does not matter which as long as the usage is consistent within the <i>module</i>.
+    Common verbs include <i>get</i> and <i>set</i> (or <i>put</i>) for operations that retrieve or store data, respectively.
+    The verb <i>is</i> is reserved for functions that perform some test and return a boolean value to indicate the result of the test.
+    In this case, the <i>object</i> should indicate what is testing and the return value of <code>true</code> should be consistent with result of the test being true.
+  </li>
+</ul>
+
+<h2>3.3 <a name="parmlists">Parameter Lists</a></h2>
+
+<p>
+  <b>Coding Standards</b>.
+  See general rules for <a href="#localvariable">parameter naming</a>.
+  See also the sections related to the use of <a href="#parentheses">parentheses</a>.
+</p>
+<p>
+  <b>Use of <code>const</code> Parameters</b>.
+  Use of the <code>const</code> storage class is encouraged.
+  This is appropriate to indicate that the function will not modify the object.
+</p>
+
+<h2>3.4 <a name="funcbody">Function Body</a></h2>
+
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Single compound statement</b>.
+    The function body consists of a single compound statement.
+  </li>
+  <li>
+    <b>Braces in column 1</b>
+    The opening and close braces of the compound statement mst be placed in column one.
+  </li>
+  <li>
+    <b>First definition or statement in column 3</b>.
+    The first data definitions or statements in the function body are idented by two spaces.
+    Standards for statements are covered in the <a href="#statements">following paragaraph</a>
+  </li>
+  <li>
+    <b>Long functions are discouraged</b>.
+    As a rule of thumb, the length of a function should be limited so that it would fit on a single page (if you were to print the source code).
+  </li>
+</ul>
+
+<h2><a name="retvalues">Returned Values</a></h2>
+
+<p>
+  <b>OS Internal Functions</b>.
+  In general, OS internal functions return a type <code>int</code> to indicate success or failure conditions.
+  Non-negative values indicate success.
+  The return value of zero is the typical success return value, but other successful return can be represented with other positive values.
+  Errors are always reported with negative values.
+  These negative values must be a well-defined <code>errno</code> as defined in the file <code>nuttx/include/errno.h</code>.
+</p>
+
+<p>
+  <b>Application/OS Interface</b>.
+  All but a few OS interfaces conform to documented standards that have precedence over the coding standards of this document.
+</p>
+
+<p>
+  <b>Checking Return Values</b>.
+  Callers of internal OS functions should always check return values for an error.
+  At a minimum, a debug statement should indicate that an error has occurred.
+  The calling logic intentionally ignores the returned value, then the function return value should be explicitly cast to <code>(void)</code> to indicate that the return value is intentionally ignored.
+  An exception of for standard functions for which  people have historically ignored the returned values, such as <code>printf()</code> or <code>close</code>.
+  All calls to <code>malloc</code> or <code>realloc</code> must be checked for failures to allocate memory.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1>4.0 <a name="statements">Statements</a></h1>
+    </td>
+  </tr>
+</table>
+
+<h3>4.1 <a name="onestatement">One Statement Per Line</a></h3>
+
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>One statement per line</b>.
+    There should never be more than one statement on a line.
+  </li>
+  <li>
+    <b>No more than one assignment per statement</b>.
+    Related to this, there should never be multiple assignments in the same statement.
+  </li>
+  <li>
+    <b>Statements should never be on the same line as any keyword</b>.
+    Statements should never be on the same line as case selectors or any C keyword.
+  </li>
+</ul>
+<p>
+  <b>Other Applicable Coding Standards</b>.
+  See the section related to the use of <a href="#braces">braces</a>.
+</p>
+
+<center><table width="60%" border="1">
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+  if (var1 &lt; var2) var1 = var2;
+
+  case 5: var1 = var2; break;
+
+  var1 = 5; var2 = 6; var3 = 7;
+
+  var1 = var2 = var3 = 0;
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+  if (var1 &lt; var2)
+    {
+      var1 = var2;
+    }
+
+  case 5:
+    {
+      var1 = var2;
+    }
+    break;
+
+  var1 = 5;
+  var2 = 6;
+  var3 = 7;
+
+  var1 = 0;
+  var2 = 0;
+  var3 = 0;
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>4.2 <a name="casts">Casts</a></h2>
+
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>No space in cast</b>.
+    There should be no space between a cast and the value being cast.
+  </li>
+</ul>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+struct something_s *x = (struct something_s*) y;
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+struct something_s *x = (struct something_s *)y;
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>4.3 <a name="operators">Operators</a></h2>
+<p>
+  <b>Spaces before and after binary operators</b>.
+  All binary operators (operators that come between two values), such as <code>+</code>, <code>-</code>, <code>=</code>, <code>!=</code>, <code>==</code>, <code>&gt;</code>, etc. should have a space before and after the operator, for readability. As examples:
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+for=bar;
+if(a==b)
+for(i=0;i&gt;5;i++)
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+for = bar;
+if (a == b)
+for (i = 0; i &gt; 5; i++)
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>No space separating unary operators</b>.
+  Unary operators (operators that operate on only one value), such as <code>++</code>, should <i>not</i> have a space between the operator and the variable or number they are operating on.
+</p>
+<center><table width="60%" border=1>
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+x ++;
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+x++;
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+<h2>4.4 <a name="ifthenelse"></a><code>if then else</code> Statement</h2>
+
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Keywords on separate lines</b>.
+    <code>if &lt;condition&gt;</code> and <code>else</code> must lie on separate lines with nothing else present on the line.
+  </li>
+  <li>
+    <b>Indentation and parentheses</b>.
+    <code>if &lt;condition&gt;</code> follows the standard indentation and parentheses rules.
+  </li>
+  <li>
+    <b>Alignment</b>.
+    The <code>if</code> in the <code>if &lt;condition&gt;</code> line and the <code>else</code> must be aligned at the same column.
+  </li>
+  <li>
+    <b>Statement(s) always enclosed in braces</b>.
+    Statement(s) following the <code>if &lt;condition&gt;</code> and <code>else</code> lines must always be enclosed in braces.
+    Braces must follow the <code>if &lt;condition&gt;</code> and <code>else</code> lines even in the case where these is no contained statement!
+  </li>
+  <li>
+    <b>Braces and indentation</b>.
+    The placement of braces and statements must follow the standard rules for braces and indentation.
+  </li>
+  <li>
+    <b>Followed by a single blank line</b>.
+    The final right brace must be followed by a blank line.
+  </li>
+</ul>
+<p>
+  <b>Other Applicable Coding Standards</b>.
+  See sections related to <a href="#braces">use of braces</a> and <a href="#indentation">indentation</a>.
+</p>
+
+<center><table width="60%" border="1">
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+  if(var1 &lt var2) var1 = var2;
+
+  if(var &gt 0)
+    var--;
+  else
+    var = 0;
+
+  if (var1 &gt; 0) {
+    var1--;
+  } else {
+    var1 = 0;
+  }
+  var2 = var1;
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+  if (var1 &lt var2
+    {
+      var1 = var2;
+    }
+
+  if (var &gt 0)
+    {
+      var--;
+    }
+  else
+    {
+      var = 0;
+    }
+
+  if (var1 &gt; 0)
+    {
+      var1--;
+    }
+  else
+    {
+      var1 = 0;
+    }
+
+  var2 = var1;
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<p>
+  <b>&lt;condition&gt; <code>?</code> &lt;then&gt; <code>:</code> &lt;else&gt;</b>
+</p>
+<ul>
+  <li>
+    <b>Only if the expression is short</b>.
+    Use of this form is only appropriate if the entire sequence is short and fits neatly on the line.
+  </li>
+  <li>
+    <b>Multiple lines forbidden</b>.
+    This form is forbidden if it extends to more than one line.
+  </li>
+  <li>
+    <b>Use of parentheses</b>.
+    The condition and the entire sequence are often enclosed in parentheses.
+    These are, however, not required if the expressions evaluate properly without them.
+  </li>
+</ul>
+<p>
+  <b>Other Applicable Coding Standards</b>.
+  See sections related to <a href="#parentheses">parentheses</a>.
+</p>
+<center><table width="60%" border="1">
+<tr><td bgcolor="white">
+<p><font color="green"><b>Example</b></p>
+<ul><pre>
+  int arg1 = arg2 &gt; arg3 ? arg2 : arg3;
+  int arg1 = ((arg2 &gt; arg3) ? arg2 : arg3);
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>4.5 <a name="switch"><code>switch</code> Statement</a></h2>
+
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Falling through</b>.
+    Falling through a case statement into the next case statement is be permitted as long as a comment is included.
+  </li>
+  <li>
+    <b><code>default</code> case</b>.
+    The <code>default</code> case should always be present and trigger an error if it is reached when it should not be.
+  </li>
+  <li>
+    <b>Case logic in braces</b>.
+    It is preferable that all case logic (except for the <code>break</code>) be enclosed in braces.
+    If you need to instantiate local variables in case logic, then that logic must be surrounded with braces.
+  </li>
+  <li>
+    <b><code>break</code> outside of braces</b>.
+    <code>break</code> statements are normally indented by two spaces.
+    When used conditionally with case logic, the placement of the break statement follows normal indentation rules.
+  </li>
+</ul>
+<p>
+  <b>Other Applicable Coding Standards</b>.
+  See sections related to <a href="#braces">use of braces</a>, <a href="#indentation">indentation</a>, and <a href="#comments">comments</a>.
+</p>
+<center><table width="60%" border="1">
+<tr><td bgcolor="white">
+<p><font color="green"><b>Example</b></p>
+<ul><pre>
+  switch (...)
+    {
+      case 1:  /* Example of a comment following a case selector */
+      ...
+
+      /* Example of a comment preceding a case selector */
+
+      case 2:
+        {
+          /* Example of comment following the case selector */
+
+          int value;
+          ...
+        }
+        break;
+
+      default:
+        break;
+    }
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>4.6 <a name="while"><code>while</code> Statement</a></h2>
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Keywords on separate lines</b>.
+    <code>while &lt;condition&gt;</code> must lie on a separate line with nothing else present on the line.
+  </li>
+  <li>
+    <b>Indentation and parentheses</b>.
+    <code>while &lt;condition&gt;</code> follows the standard indentation and parentheses rules.
+  </li>
+  <li>
+    <b>Statements enclosed in braces</b>
+    Statement(s) following the <code>while &lt;condition&gt;</code> must always be enclosed in braces, even if only a single statement follows.
+  </li>
+  <li>
+    <b>No braces on null statements</b>.
+    No braces are required if no statements follow the <code>while &lt;condition&gt;</code>.
+    The single semicolon (null statement) is sufficient;
+  </li>
+  <li>
+    <b>Braces and indentation</b>.
+    The placement of braces and statements must follow the standard rules for braces and indentation.
+  </li>
+  <li>
+    <b>Followed by a single blank line</b>.
+    The final right brace must be followed by a blank line.
+  </li>
+</ul>
+<p>
+  <b>Other Applicable Coding Standards</b>.
+  See sections related to <a href="#braces">use of braces</a>, <a href="#indentation">indentation</a>, and <a href="#comments">comments</a>.
+</p>
+<center><table width="60%" border="1">
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+  while( notready() )
+    {
+    }
+  ready = true;
+
+  while (*ptr != '\0') ptr++;
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+  while (notready());
+
+  ready = true;
+
+  while (*ptr != '\0')
+    {
+      ptr++;
+    }
+ 
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>4.7 <a name="dowhile"><code>do while</code> Statement</a></h2>
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Keywords on separate lines</b>.
+    <code>do</code> and <code>while &lt;condition&gt;</code> must lie on separate lines with nothing else present on the line.
+  </li>
+  <li>
+    <b>Indentation and parentheses</b>.
+    <code>do .. while &lt;condition&gt;</code> follows the standard indentation and parentheses rules.
+  </li>
+  <li>
+    <b>Statements enclosed in braces</b>
+    Statement(s) following the <code>do</code> must always be enclosed in braces, even if only a single statement follows.
+  </li>
+  <li>
+    <b>Braces and indentation</b>.
+    The placement of braces and statements must follow the standard rules for braces and indentation.
+  </li>
+  <li>
+    <b>Followed by a single blank line</b>.
+    The final right brace must be followed by a blank line.
+  </li>
+</ul>
+<p>
+  <b>Other Applicable Coding Standards</b>.
+  See sections related to <a href="#braces">use of braces</a>, <a href="#indentation">indentation</a>, and <a href="#comments">comments</a>.
+</p>
+<center><table width="60%" border="1">
+<tr><td bgcolor="white">
+<p><font color="red"><b>Incorrect</b></p>
+<ul><pre>
+  do {
+    ready = !notready();
+  } while (!ready);
+  senddata();
+
+  do ptr++; while (*ptr != '\0');
+</ul></pre></font>
+</td></tr>
+<tr><td bgcolor="white">
+<p><font color="green"><b>Correct</b></p>
+<ul><pre>
+  do
+    {
+      ready = !notready();
+    }
+  while (!ready);
+
+  senddata();
+
+  do
+    {
+      ptr++;
+    }
+  while (*ptr != '\0');
+</ul></pre></font>
+</td></tr>
+</table></center>
+
+<h2>4.8 <a name="goto">Use of <code>goto</code></a></h2>
+<p><b>Coding Standard:</b></p>
+<ul>
+  <li>
+    <b>Limited Usage of <code>goto</code></b>.
+    All use of the <code>goto</code> statement is prohibited except for one usage:
+    for handling error conditions in complex, nested logic.
+    A simple <code>goto</code> in those conditions can greatly improve the readability and complexity of the code.
+  </li>
+  <li>
+    <b>Label Naming</b>.
+    Labels must all lower case.
+    The underscore character <code>_</code> is permitted to break up long labels.
+  </li>
+  <li>
+    <b>Error Exit Labels</b>.
+    The error exit label is normally called <code>errout</code>.
+    Multiple error labels are often to required to <i>unwind</i> to recover resources committe in logic prior to the error to otherwise <i>undo</i> preceding operations.
+    Naming for these other labels would be some like <code>errout_with_allocation</code>, <code>errout_with_openfile</code>, etc.
+  </li>
+  <li>
+    <b>Label Positioning</b>.
+    Labels are never indented.
+    Labels must always begin in column 1.
+  </li>
+</ul>
+<center><table width="60%" border="1">
+<tr><td bgcolor="white">
+<p><font color="green"><b>Example</b></p>
+<ul><pre>
+   FAR struct some_struct_s *ptr;
+   int fd;
+   int ret;
+   ...
+
+   if (arg == NULL)
+     {
+       ret = -EINVAL;
+       goto errout;
+     }
+   ...
+   ptr = (FAR struct some_struct_s *)malloc(sizeof(struct some_struct_s));
+   if (!ptr)
+     {
+       ret = -ENOMEM;
+       goto errout;
+     }
+   ...
+   fd = open(filename, O_RDONLY);
+   if (fd &lt; 0)
+     {
+       errcode = -errno;
+       DEBUGASSERT(errcode > 0);
+       goto errotout_with_alloc;
+     }
+   ...
+   ret = readfile(fd);
+   if (ret &lt; 0)
+     {
+       goto errout_with_openfile;
+     }
+   ...
+errout_with_openfile:
+  close(fd);
+
+errout_with_alloc:
+  free(ptr);
+
+error:
+  return ret;
+</ul></pre></font>
+</td></tr>
+</table></center>
+<p>
+  <b>NOTE</b>:
+  See the discussion of <a href="#farnear">pointers</a> for information about the <code>FAR</code> qualifier used above.
+</p>
+
+<table width ="100%">
+  <tr bgcolor="#e4e4e4">
+    <td>
+      <h1><a name="appndxa">Appendix A</a></h1>
+    </td>
+  </tr>
+</table>
+
+<h2><a name="cfilestructure">A.1 C Source File Structure</a></h2>
+<pre>
+/****************************************************************************
+ * <i>&lt;Relative path to the file&gt;</i>
+ * <i>&lt;Optional one line file description&gt;</i>
+ *
+ *   Copyright (C) <i>&lt;Year&gt;</i> <i>&lt;Copyright holder's name&gt;</i>. All rights reserved.
+ *   Author: <i>&lt;Author's name&gt;</i> <i>&lt;Contact e-mail&gt;</i>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+</pre>
+<p><i>All header files are included here.</i></p>
+<pre>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+</pre>
+<p><i>All C pre-processor macros are defined here.</i></p>
+<pre>
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+</pre>
+<p><i>Any types, enumerations, structures or unions used by the file are defined here.</i></p>
+<pre>
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+</pre>
+<p><i>Prototypes of all static functions in the file are provided here.</i></p>
+<pre>
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+</pre>
+<p><i>All static data definitions appear here.</i></p>
+<pre>
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+</pre>
+<p><i>All data definitions with global scope appear here.</i></p>
+<pre>
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: <i>&lt;Static function name&gt;</i>
+ *
+ * Description:
+ *   <i>Description of the operation of the static function.</i>
+ *
+ * Input Parameters:
+ *   <i>A list of input parameters, one-per-line, appears here along with a</i>
+ *   <i>description of each input parameter.</i>
+ *
+ * Returned Value:
+ *   <i>Description of the value returned by this function (if any),</i>
+ *   <i>including an enumeration of all possible error values.</i>
+ *
+ * Assumptions/Limitations:
+ *   <i>Anything else that one might need to know to use this function.</i>
+ *
+ ****************************************************************************/
+</pre>
+<p><i>All static functions in the file are defined in this grouping.
+Each is preceded by a function header similar to the above.</i></p>
+<pre>
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: <i>&lt;Global function name&gt;</i>
+ *
+ * Description:
+ *   <i>Description of the operation of the function.</i>
+ *
+ * Input Parameters:
+ *   <i>A list of input parameters, one-per-line, appears here along with a</i>
+ *   <i>description of each input parameter.</i>
+ *
+ * Returned Value:
+ *   <i>Description of the value returned by this function (if any),</i>
+ *   <i>including an enumeration of all possible error values.</i>
+ *
+ * Assumptions/Limitations:
+ *   <i>Anything else that one might need to know to use this function.</i>
+ *
+ ****************************************************************************/
+</pre>
+<p><i>All global functions in the file are defined here.</i></p>
+
+<h2><a name="hfilestructure">A.2 C Header File Structure</a></h2>
+
+<pre>
+/****************************************************************************
+ * <i>&lt;Relative path to the file&gt;</i>
+ * <i>&lt;Optional one line file description&gt;</i>
+ *
+ *   Copyright (C) <i>&lt;Year&gt;</i> <i>&lt;Copyright holder's name&gt;</i>. All rights reserved.
+ *   Author: <i>&lt;Author's name&gt;</i> <i>&lt;Contact e-mail&gt;</i>
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ * 3. Neither the name NuttX nor the names of its contributors may be
+ *    used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ ****************************************************************************/
+</pre>
+<p><i>Header file <a href="#idempotence">idempotence</a> definitions go here</i></p>
+<pre>
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+</pre>
+<p><i>All header files are included here.</i></p>
+<pre>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+</pre>
+<p><i>All C pre-processor macros are defined here.</i></p>
+<pre>
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+</pre>
+<p><i>Any types, enumerations, structures or unions are defined here.</i></p>
+<pre>
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+</pre>
+<p><i>All data declarations with global scope appear here, preceded by the definition <code>EXTERN</code>.</i></p>
+<pre>
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: <i>&lt;Inline function name&gt;</i>
+ *
+ * Description:
+ *   <i>Description of the operation of the inline function.</i>
+ *
+ * Input Parameters:
+ *   <i>A list of input parameters, one-per-line, appears here along with a</i>
+ *   <i>description of each input parameter.</i>
+ *
+ * Returned Value:
+ *   <i>Description of the value returned by this function (if any),</i>
+ *   <i>including an enumeration of all possible error values.</i>
+ *
+ * Assumptions/Limitations:
+ *   <i>Anything else that one might need to know to use this function.</i>
+ *
+ ****************************************************************************/
+</pre>
+<p><i>Any static inline functions may be defined in this grouping.
+Each is preceded by a function header similar to the above.</i></p>
+<pre>
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: <i>&lt;Global function name&gt;</i>
+ *
+ * Description:
+ *   <i>Description of the operation of the function.</i>
+ *
+ * Input Parameters:
+ *   <i>A list of input parameters, one-per-line, appears here along with a</i>
+ *   <i>description of each input parameter.</i>
+ *
+ * Returned Value:
+ *   <i>Description of the value returned by this function (if any),</i>
+ *   <i>including an enumeration of all possible error values.</i>
+ *
+ * Assumptions/Limitations:
+ *   <i>Anything else that one might need to know to use this function.</i>
+ *
+ ****************************************************************************/
+</pre>
+<p><i>All global functions in the file are prototyped here.  The keyword <code>extern</code> or the definition <code>EXTERN</code> are never used with function prototypes.</i></p>
+<pre>
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __INCLUDE_ASSERT_H */
+</pre>
+<p><i>Ending with the header file <a href="#idempotence">idempotence</a> <code>#endif</code>.</i></p>
+
+</body>
+</html>
