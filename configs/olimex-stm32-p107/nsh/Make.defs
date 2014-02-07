@@ -51,7 +51,6 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ARCHINCLUDES = -I. -isystem $(TOPDIR)\include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)\include -isystem $(TOPDIR)\include\cxx
   ARCHSCRIPT = -T$(TOPDIR)\configs\$(CONFIG_ARCH_BOARD)\scripts\$(LDSCRIPT)
-  DELIM := $(strip /)
 else
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains

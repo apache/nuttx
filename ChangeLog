@@ -6544,4 +6544,5 @@
 	  that the LM4f120 Launchpad had (2013-02-03).
 	* Documentation/NuttXCCodingStandard.html:  Add a coding standards
 	  document.  Very boring stuff (2014-2-6).
+	* Several changes to restore the native Windows build (2014-2-7).
 

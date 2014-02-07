@@ -1,7 +1,7 @@
 ############################################################################
 # libc/Makefile
 #
-#   Copyright (C) 2007-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -75,6 +75,8 @@ include wqueue/Make.defs
 include misc/Make.defs
 include audio/Make.defs
 
+# REVISIT: Backslash causes problems in $(COBJS) target
+DELIM := $(strip /)
 BINDIR ?= bin
 
 AOBJS = $(patsubst %.S, $(BINDIR)$(DELIM)%$(OBJEXT), $(ASRCS))
