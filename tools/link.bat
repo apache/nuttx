@@ -2,7 +2,7 @@
 
 rem tools/link.bat
 rem
-rem   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+rem   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
 rem   Author: Gregory Nutt <gnutt@nuttx.org>
 rem
 rem Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,12 @@ rem LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 rem ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 rem POSSIBILITY OF SUCH DAMAGE.
 rem
+
+set usemklink=
+if "%1"=="-m" (
+set usemklink="y"
+shift
+)
 
 set src=%1
 set link=%2
@@ -77,7 +83,13 @@ rem Copy the directory
 
 :MkLink
 
+if "%usemklink%"=="y" (
 /user:administrator mklink /d %src% %link%
+goto :End
+)
+
+xcopy %src% %link% /c /q /s /e /y /i
+echo FAKELNK > include\apps\.fakelnk
 goto :End
 
 :ShowUsage

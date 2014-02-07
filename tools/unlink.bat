@@ -2,7 +2,7 @@
 
 rem tools/unlink.bat
 rem
-rem   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+rem   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
 rem   Author: Gregory Nutt <gnutt@nuttx.org>
 rem
 rem Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,11 @@ rem Check if something already exists at the link path
 
 if exist "%link%" goto :LinkExists
 
-echo %link% does not exist
-goto :ShowUsage
+rem It is not an error if the link does not exist
+rem echo %link% does not exist
+rem goto :ShowUsage
+
+goto :End
 
 rem %link% make be a symbolic link or it may be a copied director (with
 rem a .fakelnk file in it).  It really does not matter which:  We do the
