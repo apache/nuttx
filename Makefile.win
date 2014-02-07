@@ -60,7 +60,7 @@ ARCH_INC = $(ARCH_DIR)\include
 ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
   BOARD_DIR = $(CONFIG_ARCH_BOARD_CUSTOM_DIR)
 else
-  BOARD_DIR = configs/$(CONFIG_ARCH_BOARD)
+  BOARD_DIR = configs$(DELIM)$(CONFIG_ARCH_BOARD)
 endif
 
 # Add-on directories.  These may or may not be in place in the
