@@ -723,7 +723,7 @@ int execv(FAR const char *path, FAR char *const argv[]);
 <p>
    Note the inefficiency when <code>execv()</code> or <code>execl()</code> is called in the normal, two-step process:
    (1) first call <code>vfork()</code> to create a new thread, then (2) call <code>execv()</code> or <code>execl()</code> to replace the new thread with a program from the file system.
-   Since the new thread will be terminated by the <code>execv()</code> or <code>execl()</code> call, it really served no purpose other than to support Unix compatility.
+   Since the new thread will be terminated by the <code>execv()</code> or <code>execl()</code> call, it really served no purpose other than to support Unix compatibility.
 </p>
 <p>
    The non-standard binfmt function <code>exec()</code> needs to have (1) a symbol table that provides the list of symbols exported by the base code, and (2) the number of symbols in that table.
@@ -1000,7 +1000,7 @@ int posix_spawn_file_actions_destroy(FAR posix_spawn_file_actions_t *file_action
 </pre></ul>
 <p>
   <b>Description:</b>
-  The <code>posix_spawn_file_actions_destroy()</code> function destroys the object referenced by <code>file_actions</code> which was previously initializeed by <code>posix_spawn_file_actions_init()</code>, returning any resources obtained at the time of initialization to the system for subsequent reuse.
+  The <code>posix_spawn_file_actions_destroy()</code> function destroys the object referenced by <code>file_actions</code> which was previously initialized by <code>posix_spawn_file_actions_init()</code>, returning any resources obtained at the time of initialization to the system for subsequent reuse.
   A <code>posix_spawn_file_actions_t</code> may be reinitialized after having been destroyed, but must not be reused after destruction, unless it has been reinitialized.
 </p>
 <p>
@@ -1931,8 +1931,8 @@ interface of the same name.
 
 <p>
   <b>Description:</b>
-  <code>sched_rr_get_interval()</code>  writes  the timeslice interval
-  for task identified by <code>pid</code> into  the timespec structure
+  <code>sched_rr_get_interval()</code>  writes the timeslice interval
+  for task identified by <code>pid</code> into the timespec structure
   pointed to by <code>interval</code>.  If pid is zero, the timeslice
   for the calling process is written into 'interval.  The
   identified process should be running under the SCHED_RR
