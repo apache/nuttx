@@ -94,7 +94,7 @@ config APPS_DIR
 		Identifies the directory that builds the
 		application to link with NuttX.  Default: ../apps This symbol must be assigned
 		to the path to the application build directory *relative* to
-		the NuttX top build direcory. If you had an application
+		the NuttX top build directory. If you had an application
 		directory and the NuttX directory each in separate directory
 		trees like this:
 
@@ -118,7 +118,7 @@ config APPS_DIR
 		2)clean. Do whatever is appropriate to clean the application
 		directories for a fresh build.
 		
-		3)distclean. Clean everthing -- auto-generated files, symbolic
+		3)distclean. Clean everything -- auto-generated files, symbolic
 		links etc. -- so that the directory contents are the same as
 		the contents in your configuration management system.
 		This is only done when you change the NuttX configuration.
@@ -145,7 +145,7 @@ config BUILD_2PASS
 		library (archive) (some modification to this Makefile would be required if
 		PASS1_TARGET generates an archive). Pass 1 1ncremental (relative) link
 		objects should be put into the processor-specific source directory (where other
-		link objects will be created).  If the pass1 obect is an archive, it could
+		link objects will be created).  If the pass1 object is an archive, it could
 		go anywhere.
 
 if BUILD_2PASS
@@ -277,7 +277,7 @@ config ARCH_FLOAT_H
 	---help---
 		The float.h header file defines the properties of your floating
 		point implementation.  It would always be best to use your
-		toolchain's float.h header file but if none is avaiable, a default
+		toolchain's float.h header file but if none is available, a default
 		float.h header file will provided if this option is selected.  However
 		there is no assurance that the settings in this float.h are actually
 		correct for your platform!
@@ -329,7 +329,7 @@ config DEBUG_VERBOSE
 	bool "Enable Debug Verbose Output"
 	default n
 	---help---
-		Enables verbose debug output (assuming debug featurses are enabled).
+		Enables verbose debug output (assuming debug features are enabled).
 		As a general rule, when DEBUG is enabled only errors will be
 		reported in the debug SYSLOG output.  But if you also enable
 		DEBUG_VERBOSE, then very chatty (and often annoying) output will be

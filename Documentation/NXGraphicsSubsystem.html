@@ -356,14 +356,14 @@
 
 <p>
   <sup>1</sup><small>NXMU and NXSU are interchangeable other than (1) certain start-up
-  and initializeation APIs (as described below), and (2) timing.  With NXSU, NX APIs
+  and initialization APIs (as described below), and (2) timing.  With NXSU, NX APIs
   execute immediately; with NXMU, NX APIs defer and serialize the operations and, hence,
   introduce different timing and potential race conditions that you would not experience
   with NXSU.</small>
 </p>
 
 <p><b>NXNULL?</b>
-  At one time, I also envisoned a <i>NULL</i> front-end that did not support windowing
+  At one time, I also envisioned a <i>NULL</i> front-end that did not support windowing
   at all but, rather, simply provided the entire framebuffer or LCD memory as one dumb window.
   This has the advantage that the same NX APIs can be used on the one dumb window as
   for the other NX windows.
@@ -765,7 +765,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector, FAR struct nxgl_trapezoid_s
 <p>
   <b>Description:</b>
   In the general case, a line with width can be represented as a parallelogram with a triangle at the top and bottom.
-  Triangles and parallelograms are both degenerate versions of a trapeziod.
+  Triangles and parallelograms are both degenerate versions of a trapezoid.
   This function breaks a wide line into triangles and trapezoids. 
   This function also detects other degenerate cases:
 </p>
@@ -777,7 +777,7 @@ int nxgl_splitline(FAR struct nxgl_vector_s *vector, FAR struct nxgl_trapezoid_s
     If <code>x1 == x2</code> then the line is vertical and also better represented as a rectangle.
   </li>
   <li>
-    If the width of the line is 1, then there are no triangles at the top and bottome
+    If the width of the line is 1, then there are no triangles at the top and bottom
     (this may also be the case if the width is narrow and the line is near vertical).
   </li>
   <li>
@@ -1321,7 +1321,7 @@ int nx_eventnotify(NXHANDLE handle, int signo);
   the client must observe the rules for using <code>mq_notifiy()</code>:
   <ul>
     <li>
-      Only one event is signaled.  Upon receipt of the signal, if the client
+      Only one event is signalled.  Upon receipt of the signal, if the client
       wishes further notifications, it must call <code>nx_eventnotify()</code> again.
     </li>
     <li>
@@ -1425,7 +1425,7 @@ int nx_requestbkgd(NXHANDLE handle,
 <ul>
   <li>
     If you want to implement a windowless solution.  The single screen
-    can be used to creat a truly simple graphic environment.  In this
+    can be used to create a truly simple graphic environment.  In this
     case, you should probably also de-select <code>CONFIG_NX_MULTIUSER</code> as well.
   </li>
   <li>
@@ -3430,7 +3430,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
       That interface may be driven by window callback functions so that keyboard input <i>only</i> goes to the top window.
     <dt><code>CONFIG__NXCONSOLE_KBDBUFSIZE</code>:
       <dd>If <code>CONFIG_NXCONSOLE_NXKBDIN</code> is enabled, then this value may be used to
-      define the size of the per-window keyboar input buffer.  Default: 16
+      define the size of the per-window keyboard input buffer.  Default: 16
     <dt><code>CONFIG_NXCONSOLE_NPOLLWAITERS</code>:
       <dd>The number of threads that can be waiting for read data available.
       Default: 4
@@ -3473,7 +3473,7 @@ int nxf_convert_32bpp(FAR uint32_t *dest, uint16_t height,
   <li>
     <p>
       Use the <i>bdf-converter</i> program to convert the BDF font to the NuttX font format.
-      This will result in a C header file containing defintions.
+      This will result in a C header file containing definitions.
       That header file should be installed at, for example, <code>graphics/nxfonts/nxfonts_myfont.h</code>.
     </p>
   </li>
