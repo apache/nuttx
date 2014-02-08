@@ -154,7 +154,7 @@ config ARCH_IRQPRIO
 
 		NOTE: The use of interrupt priorities implies that you also have
 		support for nested interrupts.  Most architectures do not support
-		nesting of interupts or, if they do, they only supported nested
+		nesting of interrupts or, if they do, they only supported nested
 		interrupts with certain configuration options.  So this selection
 		should be used with caution.
 
@@ -212,7 +212,7 @@ config ARCH_CALIBRATION
 	---help---
 		Enables some built in instrumentation that causes a 100 second delay
 		during boot-up.  This 100 second delay serves no purpose other than it
-		allows you to calibratre BOARD_LOOPSPERMSEC.  You simply use a stop
+		allows you to calibrate BOARD_LOOPSPERMSEC.  You simply use a stop
 		watch to measure the actual delay then adjust BOARD_LOOPSPERMSEC until
 		the actual delay is 100 seconds.
 
@@ -387,7 +387,7 @@ config RAM_START
 	help
 		The physical start address of primary installed RAM.  "Primary" RAM
 		refers to the RAM that you link program code into.  If program code
-		does not excecute out of RAM but from FLASH, then you may designate
+		does not execute out of RAM but from FLASH, then you may designate
 		any block of RAM as "primary."
 
 config RAM_VSTART
@@ -397,7 +397,7 @@ config RAM_VSTART
 	help
 		The virtual start address of installed primary RAM. "Primary" RAM
 		refers to the RAM that you link program code into.  If program code
-		does not excecute out of RAM but from FLASH, then you may designate
+		does not execute out of RAM but from FLASH, then you may designate
 		any block of RAM as "primary."
 
 config RAM_SIZE
@@ -406,7 +406,7 @@ config RAM_SIZE
 	help
 		The size in bytes of the installed primary RAM. "Primary" RAM
 		refers to the RAM that you link program code into.  If program code
-		does not excecute out of RAM but from FLASH, then you may designate
+		does not execute out of RAM but from FLASH, then you may designate
 		any block of RAM as "primary."
 
 if BOOT_RUNFROMFLASH && ARCH_HAVE_MMU
