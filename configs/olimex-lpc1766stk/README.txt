@@ -958,9 +958,9 @@ Where <subdir> is one of the following:
        CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
 
-    3. The mouse is really useless with no display and not cursor.  So this
-       configuration is only suited for testing.  It is also awkward to use.
-       Here are the steps:
+    3. The mouse is really useless with no display and no cursor.  So this
+       configuration is only suited for low-level testing.  It is also awkward
+       to use.  Here are the steps:
 
        - Remove the USB HID mouse and reset the board.
        - When the NSH prompt comes up type 'tc'.  That will fail, but it
