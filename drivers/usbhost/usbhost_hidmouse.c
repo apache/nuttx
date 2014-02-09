@@ -228,8 +228,8 @@ struct usbhost_state_s
   sem_t                   exclsem;      /* Used to maintain mutual exclusive access */
   sem_t                   waitsem;      /* Used to wait for mouse data */
   FAR uint8_t            *tbuffer;      /* The allocated transfer buffer */
-  b16_t                   xpos;         /* Current integrated X position */
-  b16_t                   ypos;         /* Current integrated Y position */
+  b16_t                   xaccum;       /* Current integrated X position */
+  b16_t                   yaccum;       /* Current integrated Y position */
   b16_t                   xlast;        /* Last reported X position */
   b16_t                   ylast;        /* Last reported Y position */
   size_t                  tbuflen;      /* Size of the allocated transfer buffer */
@@ -753,53 +753,67 @@ static int usbhost_mouse_poll(int argc, char *argv[])
            */
 
 #ifdef CONFIG_HIDMOUSE_SWAPXY
+          xdisp = rpt->ydisp;
+          if ((rpt->ydisp & 0x80) != 0)
+            {
+              xdisp |= 0xffffff00;
+            }
+#else
           xdisp = rpt->xdisp;
           if ((rpt->xdisp & 0x80) != 0)
             {
               xdisp |= 0xffffff00;
             }
-#else
-          xdisp = rpt->ydisp;
-          if ((rpt->ydisp & 0x80) != 0)
-            {
-              ydisp |= 0xffffff00;
-            }
 #endif
 
           /* Scale the X displacement and determine the new X position */
 
-          xpos = priv->xpos + CONFIG_HIDMOUSE_XSCALE * xdisp;
+          xpos = priv->xaccum + CONFIG_HIDMOUSE_XSCALE * xdisp;
 
-          /* Make sure that the scaled X position does not exceed the
-           * maximum.
+          /* Make sure that the scaled X position does not become negative
+           * or exceed the maximum.
            */
 
           if (xpos > HIDMOUSE_XMAX_B16)
             {
               xpos = HIDMOUSE_XMAX_B16;
             }
+          else if (xpos < 0)
+            {
+              xpos = 0;
+            }
+
+          /* Save the updated X position */
+
+          priv->xaccum = xpos;
 
           /* Do the same for the Y position */
 
 #ifdef CONFIG_HIDMOUSE_SWAPXY
+          ydisp = rpt->xdisp;
+          if ((rpt->xdisp & 0x80) != 0)
+            {
+              ydisp |= 0xffffff00;
+            }
+#else
           ydisp = rpt->ydisp;
           if ((rpt->ydisp & 0x80) != 0)
             {
               ydisp |= 0xffffff00;
             }
-#else
-          ydisp = rpt->xdisp;
-          if ((rpt->xdisp & 0x80) != 0)
-            {
-              xdisp |= 0xffffff00;
-            }
 #endif
-          ypos = priv->ypos + CONFIG_HIDMOUSE_YSCALE * ydisp;
+          ypos = priv->yaccum + CONFIG_HIDMOUSE_YSCALE * ydisp;
 
           if (ypos > HIDMOUSE_YMAX_B16)
             {
               ypos = HIDMOUSE_YMAX_B16;
             }
+          else if (ypos < 0)
+            {
+              ypos = 0;
+            }
+
+          priv->yaccum = ypos;
 
           /* Check if the left button is pressed */
 
@@ -841,9 +855,9 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 
           else if (priv->sample.event == BUTTON_RELEASED)
             {
-              /* If we have not yet processed the last pen up event, then we
-               * cannot handle this pen down event. We will have to discard
-               * it and wait for the next sample data.
+              /* If we have not yet processed the button release event, then
+               * we cannot handle this button press event. We will have to
+               * discard the data and wait for the next sample.
                */
 
               goto ignored;
@@ -1891,8 +1905,8 @@ static int usbhost_open(FAR struct file *filep)
 
           /* Set the reported position to the center of the range */
 
-          priv->xpos = (CONFIG_HIDMOUSE_XMAX >> 1);
-          priv->ypos = (CONFIG_HIDMOUSE_YMAX >> 1);
+          priv->xaccum = (HIDMOUSE_XMAX_B16 >> 1);
+          priv->yaccum = (HIDMOUSE_YMAX_B16 >> 1);
         }
 
       /* Otherwise, just increment the reference count on the driver */

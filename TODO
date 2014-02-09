@@ -16,7 +16,7 @@ nuttx/
   (4)  C++ Support
   (6)  Binary loaders (binfmt/)
  (17)  Network (net/, drivers/net)
-  (4)  USB (drivers/usbdev, drivers/usbhost)
+  (5)  USB (drivers/usbdev, drivers/usbhost)
  (11)  Libraries (libc/, )
  (12)  File system/Generic drivers (fs/, drivers/)
   (5)  Graphics subystem (graphics/)
@@ -1024,6 +1024,26 @@ o USB (drivers/usbdev, drivers/usbhost)
   Description: Add support for USB hubs
   Status:      Open
   Priority:    Low/Unknown.  This is a feature enhancement.
+
+  Title:       USB HID MOUSE LOGIC INCOMPLETE
+  Description: There is a working USB HID mouse driver at drivers/usbhost/usbhost_hidmouse.c.
+               Although the driver works, it is not useful.  Currently it
+               emulates a touchscreen and uses the touchscreen interface.
+               The problems are:
+
+                 - With no hardware cursor, a mouse is not usable because
+                   you cannot tell where the mouse is positioned.
+                 - Since it uses the touchscreen interface, there is no way
+                   to report left or center button activity or to report
+                   the wheel position.
+                 - And, for the same reason, positional data is not reported
+                   when the left button is not pressed (i.e., like touching
+                   the screen).  Data would have to be reported when no
+                   buttons are pressed in order to driver a hardware cursor.
+
+               There is a test configuration at configs/olimex-lpc1766stk/hidmouse.
+  Status:      Open
+  Priority:    Low, unless you need a usable HID mouse now.
 
 o Libraries (libc/)
   ^^^^^^^^^^^^^^^^^

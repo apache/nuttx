@@ -6553,4 +6553,8 @@
 	  completely untested on initial check-in (2014-2-9).
 	* configs/olimex-lpc1766stk/src/lpc17_hidmouse.c and hidmouse: Add
 	  support of a test of the USB HID mouse (2014-2-9).
-
+	* drivers/usbhost/usbhost_hidmouse.c: The driver appears to be
+	  functional.  But there are usability issues:  How do you use the
+	  mouse with no cursor?  The HID mouse currently emulates a touchscreen
+	  driver.  That would work in the long run for several reasons (see the
+	  top-level TODO list for details) (2014-2-9).

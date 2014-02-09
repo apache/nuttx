@@ -157,6 +157,7 @@ config HIDMOUSE_SWAPXY
 	default n
 	---help---
 		Reverse the meaning of X and Y to handle different display orientations.
+		NOTE:  All of the following settings apply AFTER X and Y have been swapped.
 
 config HIDMOUSE_XMAX
 	int "Maximum X position"
@@ -178,11 +179,14 @@ config HIDMOUSE_XSCALE
 	hex "X scaling factor"
 	default 0x00010000
 	---help---
-		Mouse positions are accumumated from X/Y displacements reported by
+		Mouse positions are accumulated from X/Y displacements reported by
 		the mouse device. This setting provides a scaling value for the X
 		displacement.  This is a fixed precision floating point number with
 		16 bits of fraction.  So a value of 0x00010000 is 1.0, 0x00018000
 		is 1.5, 0x00024000 is 2.25, etc.
+
+		NOTE that a negative value of HIDMOUSE_XSCALE such as 0xffff0000
+		(-1.0) can be used to change the direction of movement.
 
 		Default: 0x00010000 (1.0)
 
@@ -190,11 +194,14 @@ config HIDMOUSE_YSCALE
 	hex "Y scaling factor"
 	default 0x00010000
 	---help---
-		Mouse positions are accumumated from X/Y displacements reported by
+		Mouse positions are accumulated from X/Y displacements reported by
 		the mouse device. This setting provides a scaling value for the Y
 		displacement.  This is a fixed precision floating point number with
 		16 bits of fraction.  So a value of 0x00010000 is 1.0, 0x00018000
 		is 1.5, 0x00024000 is 2.25, etc.
+
+		NOTE that a negative value of HIDMOUSE_YSCALE such as 0xffff0000
+		(-1.0) can be used to change the direction of movement.
 
 		Default: 0x00010000 (1.0)
 
