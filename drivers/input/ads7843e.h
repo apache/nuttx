@@ -108,7 +108,7 @@
 
 /* This describes the state of one contact */
 
-enum ads7843e_contact_3
+enum ads7843e_contact_e
 {
   CONTACT_NONE = 0,                    /* No contact */
   CONTACT_DOWN,                        /* First contact */

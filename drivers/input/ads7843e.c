@@ -79,7 +79,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* This is a value for the threshold that guantees a big difference on the
+/* This is a value for the threshold that guarantees a big difference on the
  * first pendown (but can't overflow).
  */
 
