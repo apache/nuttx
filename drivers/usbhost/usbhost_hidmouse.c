@@ -73,14 +73,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 /* Configuration ************************************************************/
-/* This determines how often the USB mouse will be polled in units of
- * of microseconds.  The default is 100MS.
- */
-
-#ifndef CONFIG_HIDMOUSE_POLLUSEC
-#  define CONFIG_HIDMOUSE_POLLUSEC (100*1000)
-#endif
-
 /* Worker thread is needed, unfortunately, to handle some cornercase failure
  * conditions.  This is kind of wasteful and begs for a re-design.
  */
@@ -228,10 +220,8 @@ struct usbhost_state_s
   volatile bool           disconnected; /* TRUE: Device has been disconnected */
   volatile bool           polling;      /* TRUE: Poll thread is running */
   volatile bool           open;         /* TRUE: The mouse device is open */
-  volatile bool           waiting;      /* TRUE: waiting for mouse data */
   volatile bool           valid;        /* TRUE: New sample data is available */
   uint8_t                 devno;        /* Minor number in the /dev/mouse[n] device */
-  uint8_t                 ifno;         /* Interface number */
   uint8_t                 nwaiters;     /* Number of threads waiting for mouse data */
   uint8_t                 id;           /* Current "touch" point ID */
   int16_t                 crefs;        /* Reference count on the driver instance */
@@ -245,7 +235,7 @@ struct usbhost_state_s
   size_t                  tbuflen;      /* Size of the allocated transfer buffer */
   pid_t                   pollpid;      /* PID of the poll task */
   struct work_s           work;         /* For cornercase error handling by the worker thread */
-  struct mouse_sample_s   sample;      /* Last sampled mouse data */
+  struct mouse_sample_s   sample;       /* Last sampled mouse data */
   usbhost_ep_t            epin;         /* Interrupt IN endpoint */
 
   /* The following is a list if poll structures of threads waiting for
@@ -674,7 +664,6 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
 static int usbhost_mouse_poll(int argc, char *argv[])
 {
   FAR struct usbhost_state_s *priv;
-  FAR struct usb_ctrlreq_s   *ctrlreq;
   int32_t                     xdisp;
   int32_t                     ydisp;
   b16_t                       xpos;
@@ -712,35 +701,12 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 
   while (!priv->disconnected)
     {
-      /* Make sure that we have exclusive access to the private data
-       * structure. There may now be other tasks with the character driver
-       * open and actively trying to interact with the class driver.
+      /* Read the next mouse report.  We will stall here until the mouse
+       * sends data.
        */
 
-      usbhost_takesem(&priv->exclsem);
-
-      /* Format the HID report request:
-       *
-       *   bmRequestType 10100001
-       *   bRequest      GET_REPORT (0x01)
-       *   wValue        Report Type and Report Index
-       *   wIndex        Interface Number
-       *   wLength       Descriptor Length
-       *   Data          Descriptor Data
-       */
-
-      ctrlreq       = (struct usb_ctrlreq_s *)priv->tbuffer;
-      ctrlreq->type = USB_REQ_DIR_IN|USB_REQ_TYPE_CLASS|USB_REQ_RECIPIENT_INTERFACE;
-      ctrlreq->req  = USBHID_REQUEST_GETREPORT;
-
-      usbhost_putle16(ctrlreq->value, (USBHID_REPORTTYPE_INPUT << 8));
-      usbhost_putle16(ctrlreq->index, priv->ifno);
-      usbhost_putle16(ctrlreq->len,   sizeof(struct usbhid_mousereport_s));
-
-      /* Send HID report request */
-
-      ret = DRVR_CTRLIN(priv->drvr, ctrlreq, priv->tbuffer);
-      usbhost_givesem(&priv->exclsem);
+      ret = DRVR_TRANSFER(priv->drvr, priv->epin,
+                          priv->tbuffer, priv->tbuflen);
 
       /* Check for errors -- Bail if an excessive number of errors
        * are encountered.
@@ -749,7 +715,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
       if (ret != OK)
         {
           nerrors++;
-          udbg("ERROR: GETREPORT/INPUT, DRVR_CTRLIN returned: %d/%d\n",
+          udbg("ERROR: DRVR_TRANSFER returned: %d/%d\n",
                ret, nerrors);
 
           if (nerrors > 200)
@@ -993,12 +959,6 @@ ignored:
           udbg("Still polling: %d\n", npolls);
         }
 #endif
-      /* Wait for the required amount (or until a signal is received).  We
-       * will wake up when either the delay elapses or we are signalled that
-       * the device has been disconnected.
-       */
-
-      usleep(CONFIG_HIDMOUSE_POLLUSEC);
     }
 
   /* We get here when the driver is removed.. or when too many errors have
@@ -1268,8 +1228,6 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
 
         case USB_DESC_TYPE_INTERFACE:
           {
-            FAR struct usb_ifdesc_s *ifdesc = (FAR struct usb_ifdesc_s *)configdesc;
-
             uvdbg("Interface descriptor\n");
             DEBUGASSERT(remaining >= USB_SIZEOF_IFDESC);
 
@@ -1285,12 +1243,9 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
               }
             else
               {
-                /* Otherwise, save the interface number and discard any
-                 * endpoints previously found
-                 */
+                /* Otherwise, discard any endpoints previously found */
 
-                priv->ifno = ifdesc->ifno;
-                found      = USBHOST_IFFOUND;
+                found = USBHOST_IFFOUND;
               }
           }
           break;
@@ -1338,7 +1293,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
                     /* Save the interrupt IN endpoint information */
 
                     epindesc.addr         = epdesc->addr & USB_EP_ADDR_NUMBER_MASK;
-                    epindesc.in           = 1;
+                    epindesc.in           = true;
                     epindesc.funcaddr     = funcaddr;
                     epindesc.xfrtype      = USB_EP_ATTR_XFER_INT;
                     epindesc.interval     = epdesc->interval;
@@ -1383,9 +1338,7 @@ static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
       return -EINVAL;
     }
 
-  /* We are good... Allocate the endpoints.  First, the required interrupt
-   * IN endpoint.
-   */
+  /* We are good... Allocate the interrupt IN endpoint. */
 
   ret = DRVR_EPALLOC(priv->drvr, &epindesc, &priv->epin);
   if (ret != OK)
@@ -1825,6 +1778,7 @@ static int usbhost_connect(FAR struct usbhost_class_s *class,
 static int usbhost_disconnected(struct usbhost_class_s *class)
 {
   FAR struct usbhost_state_s *priv = (FAR struct usbhost_state_s *)class;
+  int i;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1835,14 +1789,13 @@ static int usbhost_disconnected(struct usbhost_class_s *class)
   priv->disconnected = true;
   ullvdbg("Disconnected\n");
 
-  /* Is there a thread waiting for mouse data that will never come? */
+  /* Are there a thread(s) waiting for mouse data that will never come? */
 
-  if (priv->waiting)
+  for (i = 0; i < priv->nwaiters; i++)
     {
-      /* Yes.. wake it up */
+      /* Yes.. wake them up */
 
       usbhost_givesem(&priv->waitsem);
-      priv->waiting = false;
     }
 
   /* Possibilities:

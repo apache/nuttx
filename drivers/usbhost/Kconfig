@@ -126,12 +126,6 @@ config USBHOST_HIDMOUSE
 
 if  USBHOST_HIDMOUSE
 
-config HIDMOUSE_POLLUSEC
-	int "Mouse Poll Rate (MSEC)"
-	default 100000
-	---help---
-		Device poll rate in microseconds. Default: 100,000 microseconds.
-
 config HIDMOUSE_DEFPRIO
 	int "Polling Thread Priority"
 	default 50
