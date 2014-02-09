@@ -119,6 +119,7 @@ config USBHOST_HIDMOUSE
 	bool "HID Mouse Class Support"
 	default n
 	depends on !INT_DISABLE
+	select INPUT
 	---help---
 		Enable support for the mouse class driver.  This also depends on
 		SCHED_WORKQUEUE && !DISABLE_SIGNALS
