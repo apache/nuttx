@@ -1603,7 +1603,7 @@ static int lpc17_wait(FAR struct usbhost_connection_s *conn,
 static int lpc17_enumerate(FAR struct usbhost_connection_s *conn, int rphndx)
 {
   struct lpc17_usbhost_s *priv = (struct lpc17_usbhost_s *)&g_usbhost;
-  DEBUGASSERT(priv && rhpndx == 0);
+  DEBUGASSERT(priv && rphndx == 0);
 
   /* Are we connected to a device?  The caller should have called the wait()
    * method first to be assured that a device is connected.
