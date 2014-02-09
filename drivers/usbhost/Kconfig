@@ -47,6 +47,7 @@ config USBHOST_HIDKBD
 		SCHED_WORKQUEUE && !DISABLE_SIGNALS
 
 if  USBHOST_HIDKBD
+
 config HIDKBD_POLLUSEC
 	int "Keyboard Poll Rate (MSEC)"
 	default 100000
@@ -109,8 +110,114 @@ config HIDKBD_NODEBOUNCE
 	bool "Disable Debounce"
 	default n
 	---help---
-		If set to y normal debouncing is disabled.  Default: 
+		If set to y normal debouncing is disabled.  Default:
 		Debounce enabled (No repeat keys).
+
+endif
+
+config USBHOST_HIDMOUSE
+	bool "HID Mouse Class Support"
+	default n
+	depends on !INT_DISABLE
+	---help---
+		Enable support for the mouse class driver.  This also depends on
+		SCHED_WORKQUEUE && !DISABLE_SIGNALS
+
+if  USBHOST_HIDMOUSE
+
+config HIDMOUSE_POLLUSEC
+	int "Mouse Poll Rate (MSEC)"
+	default 100000
+	---help---
+		Device poll rate in microseconds. Default: 100,000 microseconds.
+
+config HIDMOUSE_DEFPRIO
+	int "Polling Thread Priority"
+	default 50
+	---help---
+		Priority of the polling thread.  Default: 50.
+
+config HIDMOUSE_STACKSIZE
+	int "Polling thread stack size"
+	default 1024
+	---help---
+		Stack size for polling thread.  Default: 1024
+
+config HIDMOUSE_BUFSIZE
+	int "Scancode Buffer Size"
+	default 64
+	---help---
+		Scancode buffer size.  Default: 64.
+
+config HIDMOUSE_NPOLLWAITERS
+	int "Max Number of Waiters for Poll Event"
+	default 2
+	depends on !DISABLE_POLL
+	---help---
+		If the poll() method is enabled, this defines the maximum number
+		of threads that can be waiting for mouse events.  Default: 2.
+
+config HIDMOUSE_SWAPXY
+	bool "Swap X/Y"
+	default n
+	---help---
+		Reverse the meaning of X and Y to handle different display orientations.
+
+config HIDMOUSE_XMAX
+	int "Maximum X position"
+	default 320
+	range 0 32767
+	---help---
+		This is the maximum value of the X position that will be reported.
+		Default: 320
+
+config HIDMOUSE_YMAX
+	int "Maximum Y position"
+	default 240
+	range 0 32767
+	---help---
+		This is the maximum value of the Y position that will be reported.
+		Default: 240
+
+config HIDMOUSE_XSCALE
+	hex "X scaling factor"
+	default 0x00010000
+	---help---
+		Mouse positions are accumumated from X/Y displacements reported by
+		the mouse device. This setting provides a scaling value for the X
+		displacement.  This is a fixed precision floating point number with
+		16 bits of fraction.  So a value of 0x00010000 is 1.0, 0x00018000
+		is 1.5, 0x00024000 is 2.25, etc.
+
+		Default: 0x00010000 (1.0)
+
+config HIDMOUSE_YSCALE
+	hex "Y scaling factor"
+	default 0x00010000
+	---help---
+		Mouse positions are accumumated from X/Y displacements reported by
+		the mouse device. This setting provides a scaling value for the Y
+		displacement.  This is a fixed precision floating point number with
+		16 bits of fraction.  So a value of 0x00010000 is 1.0, 0x00018000
+		is 1.5, 0x00024000 is 2.25, etc.
+
+		Default: 0x00010000 (1.0)
+
+config HIDMOUSE_XTHRESH
+	int "X threshold"
+	default 12
+	---help---
+		New mouse positions will only be reported when the X or Y data changes by these
+		thresholds. This trades reduces data rate for some loss in dragging accuracy.
+		Default: 12
+
+config HIDMOUSE_THRESHY
+	int "Y threshold"
+	default 12
+	---help---
+		New touch positions will only be reported when the X or Y data changes by these
+		thresholds. This trades reduces data rate for some loss in dragging accuracy.
+		Default: 12
 
 endif
 

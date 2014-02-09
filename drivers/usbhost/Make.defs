@@ -1,7 +1,7 @@
 ############################################################################
 # drivers/usbhost/Make.defs
 #
-#   Copyright (C) 2010-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2010-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,15 @@ ifeq ($(CONFIG_USBHOST),y)
 # Include built-in USB host driver logic
 
 CSRCS += usbhost_registry.c usbhost_registerclass.c usbhost_findclass.c
-CSRCS += usbhost_enumerate.c usbhost_storage.c usbhost_hidkbd.c
-CSRCS += usbhost_devaddr.c
+CSRCS += usbhost_enumerate.c usbhost_storage.c usbhost_devaddr.c
+
+ifeq ($(CONFIG_USBHOST_HIDKBD),y)
+CSRCS += usbhost_hidkbd.c
+endif
+
+ifeq ($(CONFIG_USBHOST_HIDMOUSE),y)
+CSRCS += usbhost_hidmouse.c
+endif
 
 # HCD debug/trace logic
 

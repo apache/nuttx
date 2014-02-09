@@ -837,6 +837,25 @@ int usbhost_storageinit(void);
 int usbhost_kbdinit(void);
 
 /****************************************************************************
+ * Name: usbhost_mouse_init
+ *
+ * Description:
+ *   Initialize the USB storage HID mouse class driver.  This function
+ *   should be called be platform-specific code in order to initialize and
+ *   register support for the USB host HID mouse class device.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Values:
+ *   On success this function will return zero (OK);  A negated errno value
+ *   will be returned on failure.
+ *
+ ****************************************************************************/
+
+int usbhost_mouse_init(void);
+
+/****************************************************************************
  * Name: usbhost_wlaninit
  *
  * Description:
