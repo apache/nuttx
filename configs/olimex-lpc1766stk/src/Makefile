@@ -38,30 +38,34 @@
 CFLAGS		+= -I$(TOPDIR)/sched
 
 ASRCS		= 
-CSRCS		= up_boot.c up_leds.c up_ssp.c
+CSRCS		= lpc17_boot.c lpc17_leds.c lpc17_ssp.c
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= up_nsh.c
+CSRCS		+= lpc17_nsh.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)
-CSRCS		+= up_usbmsc.c
+CSRCS		+= lpc17_usbmsc.c
 endif
 
 ifeq ($(CONFIG_NX_LCDDRIVER),y)
-CSRCS		+= up_lcd.c
+CSRCS		+= lpc17_lcd.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS		+= up_buttons.c
+CSRCS		+= lpc17_buttons.c
 endif
 
 ifeq ($(CONFIG_CAN),y)
-CSRCS		+= up_can.c
+CSRCS		+= lpc17_can.c
 endif
 
-ifeq ($(CONFIG_EXAMPLES_HIDKBD),y)
-CSRCS		+= up_hidkbd.c
+ifeq ($(CONFIG_USBHOST_HIDKBD),y)
+CSRCS		+= lpc17_hidkbd.c
+endif
+
+ifeq ($(CONFIG_USBHOST_HIDMOUSE),y)
+CSRCS           += lpc17_hidmouse.c
 endif
 
 AOBJS		= $(ASRCS:.S=$(OBJEXT))

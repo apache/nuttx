@@ -6551,5 +6551,6 @@
 	* drivers/usbhost/usbhost_hidmouse.c and other files:  Add support
 	  for a HID boot mouse device.  It compiles but is otherwise
 	  completely untested on initial check-in (2014-2-9).
+	* configs/olimex-lpc1766stk/src/lpc17_hidmouse.c and hidmouse: Add
+	  support of a test of the USB HID mouse (2014-2-9).
 
-`

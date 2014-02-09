@@ -834,7 +834,7 @@ Olimex LPC1766-STK Configuration Options
 USB Host Configuration
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The NuttShell (NSH) Nucleus 2G can be modified in order to support
+The NuttShell (NSH) configuration can be modified in order to support
 USB host operations.  To make these modifications, do the following:
 
 1. First configure to build the NSH configuration from the top-level
@@ -935,7 +935,40 @@ Where <subdir> is one of the following:
        CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
        CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
 
-   nettest:
+  hidmouse:
+    This configuration directory supports a variant of an NSH configution.
+    It is set up to perform the touchscreen test at apps/examples/touchscreen
+    using a USB HIB mouse instead a touchsceen device.
+
+    NOTES:
+
+    1. This configuration uses the mconf-based configuration tool.  To
+       change this configuration using that tool, you should:
+
+       a. Build and install the kconfig-mconf tool.  See nuttx/README.txt
+          and misc/tools/
+
+       b. Execute 'make menuconfig' in nuttx/ in order to start the
+          reconfiguration process.
+
+    2. Default platform/toolchain: This is how the build is configured by
+       be default.  These options can easily be re-confured, however.
+
+       CONFIG_HOST_WINDOWS=y                   : Windows
+       CONFIG_WINDOWS_CYGWIN=y                 : Cygwin environment on Windows
+       CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y : CodeSourcery under Windows
+
+    3. The mouse is really useless with no display and not cursor.  So this
+       configuration is only suited for testing.  It is also awkward to use.
+       Here are the steps:
+
+       - Remove the USB HID mouse and reset the board.
+       - When the NSH prompt comes up type 'tc'.  That will fail, but it
+         will register the USB HID mouse class driver.
+       - Now, insert the USB HID mouse.  The next time that you enter the
+         'tc' command, the mouse device at /dev/mouse0 should be found.
+
+  nettest:
     This configuration directory may be used to enable networking using the
     LPC17xx's Ethernet controller. It uses apps/examples/nettest to excercise the
     TCP/IP network.
