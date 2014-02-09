@@ -6545,4 +6545,7 @@
 	* Documentation/NuttXCCodingStandard.html:  Add a coding standards
 	  document.  Very boring stuff (2014-2-6).
 	* Several changes to restore the native Windows build (2014-2-7).
+	* arch/arm/src/lpc17xx/lpc17_usbhost.c: Fix an compilation error
+	  that crept intot he LPC17xx USB host driver.  What happened here?
+	  (2014-2-8).
 
