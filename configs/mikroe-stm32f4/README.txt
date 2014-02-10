@@ -404,15 +404,21 @@ There are two version of the FPU support built into the STM32 port.
    +ENTRY(__start)         /* Treat __start as the anchor for dead code stripping */
    +EXTERN(_vectors)       /* Force the vectors to be included in the output */
 
-MIO283QT-2
-==========
+MIO283QT-2/MIO283QT-9A
+======================
 
-The Mikroe-SMT32F4 board as an on-board MIO283QT-2 TFT LCD that can be
-configured and used.  This is a 320x240 resolution display with color
+The original Mikroe-SMT32F4 board as an on-board MIO283QT-2 TFT LCD that can
+be configured and used.  This is a 320x240 resolution display with color
 capability to 262K colors, though the mio283qt-2 driver in NuttX only
 supports 16-bit color depth, or 65K colors.  Changes to both the
 mio283qt-2 driver and the driver interface layer would need to be made
 to support 24 BPP mode.
+
+UPDATE:  New boards now support a MIO283QT-9A TFT LCD that is not compatible
+with the MIO283QT-2.  It uses a different LCD controller.  The default in
+all of these configurations is the MIO283QT-2.  But MIO283QT-9A is also
+supported and you can switch from the MIO283QT-2 to the MIO283QT-9A by simply
+modifying the NuttX configuration
 
 CFLAGS
 ------
@@ -872,7 +878,12 @@ Where <subdir> is one of the following:
     input.
 
       CONFIG_LCD_LANDSCAPE=y        : 320x240 landscape orientation
-      CONFIG_LCD_MIO283QT2
+      CONFIG_LCD_MIO283QT2=y        : MIO283QT-2 is the default
+
+    You can the newer  MIO283QT-9A by enabling it in the configuration.
+
+      CONFIG_LCD_MIO283QT2=n         : Disable the MIO283QT-2
+      CONFIG_LCD_MIO283QT9A=y        : Enable the MIO283QT-9A
 
   nxlines:
   ------
@@ -881,7 +892,12 @@ Where <subdir> is one of the following:
     on-board TFT LCD.
 
       CONFIG_LCD_LANDSCAPE=y        : 320x240 landscape orientation
-      CONFIG_LCD_MIO283QT2
+      CONFIG_LCD_MIO283QT2=y        : MIO283QT-2 is the default
+
+    You can the newer  MIO283QT-9A by enabling it in the configuration.
+
+      CONFIG_LCD_MIO283QT2=n         : Disable the MIO283QT-2
+      CONFIG_LCD_MIO283QT9A=y        : Enable the MIO283QT-9A
 
   nxtext:
   ------
