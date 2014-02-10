@@ -94,6 +94,10 @@ ifeq ($(CONFIG_LCD_MIO283QT2),y)
 CSRCS += up_mio283qt2.c
 endif
 
+ifeq ($(CONFIG_LCD_MIO283QT9A),y)
+CSRCS += up_mio283qt9a.c
+endif
+
 ifeq ($(CONFIG_VS1053),y)
 CSRCS += up_vs1053.c
 endif

@@ -250,7 +250,7 @@ void weak_function stm32_usbinitialize(void);
  *
  ****************************************************************************************************/
 
-#ifdef CONFIG_LCD_MIO283QT2
+#if defined(CONFIG_LCD_MIO283QT2) || defined(CONFIG_LCD_MIO283QT9A)
 void stm32_lcdinitialize(void);
 #endif
 
@@ -263,7 +263,7 @@ void stm32_lcdinitialize(void);
  *
  ****************************************************************************************************/
 
-#ifdef CONFIG_LCD_MIO283QT2
+#if defined(CONFIG_LCD_MIO283QT2) || defined(CONFIG_LCD_MIO283QT9A)
 int up_lcdinitialize(void);
 #endif
 
