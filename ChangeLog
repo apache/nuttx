@@ -6558,3 +6558,9 @@
 	  mouse with no cursor?  The HID mouse currently emulates a touchscreen
 	  driver.  That would work in the long run for several reasons (see the
 	  top-level TODO list for details) (2014-2-9).
+	* include/nuttx/input/mouse.h and drivers/usbhost/usbhost_hidmouse.c:
+	  Defined a mouse interface that is very similar to a touchscreen
+	  interface, but allows reporting of all mouse buttons.  Also, unlike
+	  touchscreen drivers, mouse drivers need to report positional data
+	  with no button is pressed so that the mouse position can drive a
+	  cursor (2014-2-10).

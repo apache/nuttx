@@ -64,7 +64,7 @@
 #define TSIOC_SETFREQUENCY   _TSIOC(0x0003)  /* arg: Pointer to uint32_t frequency value */
 #define TSIOC_GETFREQUENCY   _TSIOC(0x0004)  /* arg: Pointer to uint32_t frequency value */
 
-/* Specific touchscreen drivers may support additional, device specific ioctal
+/* Specific touchscreen drivers may support additional, device specific ioctl
  * commands, beginning with this value:
  */
 

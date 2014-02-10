@@ -288,6 +288,7 @@
 #define USBHID_MOUSEIN_BUTTON1            (1 << 0)
 #define USBHID_MOUSEIN_BUTTON2            (1 << 1)
 #define USBHID_MOUSEIN_BUTTON3            (1 << 2)
+#define USBHID_MOUSEIN_BUTTON_MASK        (7)
 
 /* Joystick input report (4 bytes) (HID D.1) */
 

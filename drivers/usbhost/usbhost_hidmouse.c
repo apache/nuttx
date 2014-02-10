@@ -63,7 +63,11 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/hid.h>
 
-#include <nuttx/input/touchscreen.h>
+#ifdef CONFIG_HIDMOUSE_TSCIF
+#  include <nuttx/input/touchscreen.h>
+#else
+#  include <nuttx/input/mouse.h>
+#endif
 
 /* Don't compile if prerequisites are not met */
 
@@ -146,8 +150,13 @@
  * defined here so that it will be used consistently in all places.
  */
 
-#define DEV_FORMAT          "/dev/mouse%d"
-#define DEV_NAMELEN         13
+#ifdef CONFIG_HIDMOUSE_TSCIF
+#  define DEV_FORMAT        "/dev/input%d"
+#  define DEV_NAMELEN       13
+#else
+#  define DEV_FORMAT        "/dev/mouse%d"
+#  define DEV_NAMELEN       13
+#endif
 
 /* Used in usbhost_cfgdesc() */
 
@@ -178,6 +187,7 @@
  * Private Types
  ****************************************************************************/
 
+#ifdef CONFIG_HIDMOUSE_TSCIF
 /* This describes the state of one event */
 
 enum mouse_button_e
@@ -201,6 +211,17 @@ struct mouse_sample_s
   uint16_t y;                           /* Measured Y position */
 };
 
+#else
+/* This structure summarizes the mouse report */
+
+struct mouse_sample_s
+{
+  uint8_t  buttons;                     /* Button state (see MOUSE_BUTTON_* definitions) */
+  uint16_t x;                           /* Measured X position */
+  uint16_t y;                           /* Measured Y position */
+};
+#endif
+
 /* This structure contains the internal, private state of the USB host
  * mouse storage class.
  */
@@ -223,7 +244,11 @@ struct usbhost_state_s
   volatile bool           valid;        /* TRUE: New sample data is available */
   uint8_t                 devno;        /* Minor number in the /dev/mouse[n] device */
   uint8_t                 nwaiters;     /* Number of threads waiting for mouse data */
+#ifdef CONFIG_HIDMOUSE_TSCIF
   uint8_t                 id;           /* Current "touch" point ID */
+#else
+  uint8_t                 buttons;      /* Current state of the mouse buttons */
+#endif
   int16_t                 crefs;        /* Reference count on the driver instance */
   sem_t                   exclsem;      /* Used to maintain mutual exclusive access */
   sem_t                   waitsem;      /* Used to wait for mouse data */
@@ -280,6 +305,14 @@ static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *dev
 
 static void usbhost_destroy(FAR void *arg);
 static void usbhost_notify(FAR struct usbhost_state_s *priv);
+static void usbhost_position(FAR struct usbhost_state_s *priv,
+                             FAR struct usbhid_mousereport_s *rpt);
+#ifdef CONFIG_HIDMOUSE_TSCIF
+static bool usbhost_touchscreen(FAR struct usbhost_state_s *priv,
+                                FAR struct usbhid_mousereport_s *rpt);
+#endif
+static bool usbhost_threshold(FAR struct usbhost_state_s *priv,
+                              b16_t xpos, b16_t ypos);
 static int usbhost_mouse_poll(int argc, char *argv[]);
 static int usbhost_sample(FAR struct usbhost_state_s *priv,
                           FAR struct mouse_sample_s *sample);
@@ -648,6 +681,275 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
 }
 
 /****************************************************************************
+ * Name: usbhost_position
+ *
+ * Description:
+ *   Integrate the current mouse displacement to get the updated mouse
+ *   position.
+ *
+ * Input Parameters:
+ *   priv  - A reference to the mouse state structure.
+ *   rpt   - The new mouse report data.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void usbhost_position(FAR struct usbhost_state_s *priv,
+                             FAR struct usbhid_mousereport_s *rpt)
+{
+  int32_t xdisp;
+  int32_t ydisp;
+  b16_t xpos;
+  b16_t ypos;
+
+  /* The following logic performs an constant integration of the mouse X/Y
+   * displacement data in order to keep the X/Y positional data current.
+   */
+
+  /* Sign extend the mouse X position.  We do this manually because some
+   * architectures do not support signed character types and some compilers
+   * may be configured to treat all characters as unsigned.
+   */
+
+#ifdef CONFIG_HIDMOUSE_SWAPXY
+  xdisp = rpt->ydisp;
+  if ((rpt->ydisp & 0x80) != 0)
+    {
+      xdisp |= 0xffffff00;
+    }
+#else
+  xdisp = rpt->xdisp;
+  if ((rpt->xdisp & 0x80) != 0)
+    {
+      xdisp |= 0xffffff00;
+    }
+#endif
+
+  /* Scale the X displacement and determine the new X position */
+
+  xpos = priv->xaccum + CONFIG_HIDMOUSE_XSCALE * xdisp;
+
+  /* Make sure that the scaled X position does not become negative or exceed
+   * the maximum.
+   */
+
+  if (xpos > HIDMOUSE_XMAX_B16)
+    {
+      xpos = HIDMOUSE_XMAX_B16;
+    }
+  else if (xpos < 0)
+    {
+      xpos = 0;
+    }
+
+  /* Save the updated X position */
+
+  priv->xaccum = xpos;
+
+  /* Do the same for the Y position */
+
+#ifdef CONFIG_HIDMOUSE_SWAPXY
+  ydisp = rpt->xdisp;
+  if ((rpt->xdisp & 0x80) != 0)
+    {
+      ydisp |= 0xffffff00;
+    }
+#else
+  ydisp = rpt->ydisp;
+  if ((rpt->ydisp & 0x80) != 0)
+    {
+      ydisp |= 0xffffff00;
+    }
+#endif
+
+  ypos = priv->yaccum + CONFIG_HIDMOUSE_YSCALE * ydisp;
+
+  if (ypos > HIDMOUSE_YMAX_B16)
+    {
+      ypos = HIDMOUSE_YMAX_B16;
+    }
+  else if (ypos < 0)
+    {
+      ypos = 0;
+    }
+
+  priv->yaccum = ypos;
+}
+
+/****************************************************************************
+ * Name: usbhost_touchscreen
+ *
+ * Description:
+ *   Execute the (emulated) touchscreen press/drag/release state machine.
+ *
+ * Input Parameters:
+ *   priv  - A reference to the mouse state structure.
+ *   rpt   - The new mouse report data.
+ *
+ * Returned Value:
+ *   False if the mouse data should not be reported.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_HIDMOUSE_TSCIF
+static bool usbhost_touchscreen(FAR struct usbhost_state_s *priv,
+                                FAR struct usbhid_mousereport_s *rpt)
+{
+  /* Check if the left button is pressed */
+
+  if ((rpt->buttons & USBHID_MOUSEIN_BUTTON1) == 0)
+    {
+      /* The left button is not pressed.. reset thresholding variables. */
+
+      priv->xlast = INVALID_POSITION_B16;
+      priv->ylast = INVALID_POSITION_B16;
+
+      /* Ignore the report if the button was not pressed last time
+       * (BUTTON_NONE == button released and already reported;
+       * BUTTON_RELEASED == button released, but not yet reported)
+       */
+
+      if (priv->sample.event == BUTTON_NONE ||
+          priv->sample.event == BUTTON_RELEASED)
+        {
+          return false;
+        }
+
+      /* The left button has just been released.  NOTE: We know from a
+       * previous test, that this is a button release condition. This will
+       * be changed to BUTTON_NONE after the button release has been
+       * reported.
+       */
+
+      priv->sample.event = BUTTON_RELEASED;
+    }
+
+  /* It is a left button press event.  If the last button release event has
+   * not been processed yet, then we have to ignore the button press event
+   * (or else it will look like a drag event)
+   */
+
+  else if (priv->sample.event == BUTTON_RELEASED)
+    {
+      /* If we have not yet processed the button release event, then we
+       * cannot handle this button press event. We will have to discard the
+       * data and wait for the next sample.
+       */
+
+      return false;
+    }
+
+  /* Handle left-button down events */
+
+  else
+    {
+      /* If this is the first left button press report, then report that
+       * event.  If event == BUTTON_PRESSED, it will be  set to set to
+       * BUTTON_MOVE after the button press is first sampled.
+       */
+
+      if (priv->sample.event != BUTTON_MOVE)
+        {
+          /* First button press */
+
+          priv->sample.event = BUTTON_PRESSED;
+        }
+
+      /* Otherwise, perform a thresholding operation so that the results
+       * will be more stable.  If the difference from the last sample is
+       * small, then ignore the event.
+       */
+
+      else if (!usbhost_threshold(priv, priv->xaccum, priv->yaccum))
+        {
+          return false;
+        }
+    }
+
+  /* We get here:
+   *
+   * (1) When the left button is just release,
+   * (2) When the left button is first pressed, or
+   * (3) When the left button is held and some significant 'dragging'
+   *     has occurred.
+   */
+
+  return true;
+}
+#endif
+
+/****************************************************************************
+ * Name: usbhost_threshold
+ *
+ * Description:
+ *   Check if the current mouse position differs from the previous mouse
+ *   position by a threshold amount.
+ *
+ * Input Parameters:
+ *   priv - A reference to the mouse state structure.
+ *   xpos - The current mouse X position
+ *   ypos - The current mouse Y position
+ *
+ * Returned Value:
+ *   True if the mouse position is significantly different from the last
+ *   reported mouse position.
+ *
+ ****************************************************************************/
+
+static bool usbhost_threshold(FAR struct usbhost_state_s *priv,
+                              b16_t xpos, b16_t ypos)
+{
+#if CONFIG_HIDMOUSE_XTHRESH > 0 && CONFIG_HIDMOUSE_YTHRESH > 0
+  b16_t                       xdiff;
+  b16_t                       ydiff;
+
+  /* Get the difference in the X position from the last report */
+
+  if (xpos > priv->xlast)
+    {
+      xdiff = xpos - priv->xlast;
+    }
+  else
+   {
+      xdiff = priv->xlast - xpos;
+   }
+
+  /* Check if the X difference exceeds the report threshold */
+
+  if (xdiff >= HIDMOUSE_XTHRESH_B16)
+    {
+      return true;
+    }
+
+  /* Little or no change in the X direction, check the Y direction.  */
+
+  if (ypos > priv->ylast)
+    {
+      ydiff = ypos - priv->ylast;
+    }
+  else
+    {
+      ydiff = priv->ylast - ypos;
+    }
+
+  if (ydiff >= HIDMOUSE_YTHRESH_B16)
+    {
+      return true;
+    }
+
+  /* Little or no change in either direction... don't report anything. */
+
+  return false;
+#else
+  /* No thresholding */
+
+  return true;
+#endif
+}
+
+/****************************************************************************
  * Name: usbhost_mouse_poll
  *
  * Description:
@@ -664,17 +966,15 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
 static int usbhost_mouse_poll(int argc, char *argv[])
 {
   FAR struct usbhost_state_s *priv;
-  int32_t                     xdisp;
-  int32_t                     ydisp;
-  b16_t                       xpos;
-  b16_t                       ypos;
-  b16_t                       xdiff;
-  b16_t                       ydiff;
-#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
-  unsigned int                npolls = 0;
+  FAR struct usbhid_mousereport_s *rpt;
+#ifndef CONFIG_HIDMOUSE_TSCIF
+  uint8_t buttons;
 #endif
-  unsigned int                nerrors = 0;
-  int                         ret;
+#if defined(CONFIG_DEBUG_USB) && defined(CONFIG_DEBUG_VERBOSE)
+  unsigned int npolls = 0;
+#endif
+  unsigned int nerrors = 0;
+  int ret;
 
   uvdbg("Started\n");
 
@@ -731,233 +1031,73 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 
       else if (priv->open)
         {
-          FAR struct usbhid_mousereport_s *rpt;
-
           /* Get exclusive access to the mouse state data */
 
           usbhost_takesem(&priv->exclsem);
 
           /* Get the HID mouse report */
 
-          rpt = (struct usbhid_mousereport_s *)priv->tbuffer;
+          rpt = (FAR struct usbhid_mousereport_s *)priv->tbuffer;
 
-          /* The following logic performs an constant integration of the
-           * mouse X/Y displacement data in order to keep the X/Y positional
-           * data current.
-           */
+          /* Get the updated mouse position */
 
-          /* Sign extend the mouse X position.  We do this manually because
-           * some architectures do not support signed character types and
-           * some compilers may  be configured to treat all characters as
-           * unsigned.
-           */
+          usbhost_position(priv, rpt);
 
-#ifdef CONFIG_HIDMOUSE_SWAPXY
-          xdisp = rpt->ydisp;
-          if ((rpt->ydisp & 0x80) != 0)
-            {
-              xdisp |= 0xffffff00;
-            }
+#ifdef CONFIG_HIDMOUSE_TSCIF
+          /* Execute the touchscreen state machine */
+
+          if (usbhost_touchscreen(priv, rpt))
 #else
-          xdisp = rpt->xdisp;
-          if ((rpt->xdisp & 0x80) != 0)
-            {
-              xdisp |= 0xffffff00;
-            }
-#endif
-
-          /* Scale the X displacement and determine the new X position */
-
-          xpos = priv->xaccum + CONFIG_HIDMOUSE_XSCALE * xdisp;
-
-          /* Make sure that the scaled X position does not become negative
-           * or exceed the maximum.
+          /* Check if any buttons have changed.  If so, then report the
+           * new mouse data.
+           *
+           * If not, then perform a thresholding operation so that the
+           * results will be more stable.  If the difference from the
+           * last sample is small, then ignore the event.
            */
 
-          if (xpos > HIDMOUSE_XMAX_B16)
-            {
-              xpos = HIDMOUSE_XMAX_B16;
-            }
-          else if (xpos < 0)
-            {
-              xpos = 0;
-            }
-
-          /* Save the updated X position */
-
-          priv->xaccum = xpos;
-
-          /* Do the same for the Y position */
-
-#ifdef CONFIG_HIDMOUSE_SWAPXY
-          ydisp = rpt->xdisp;
-          if ((rpt->xdisp & 0x80) != 0)
-            {
-              ydisp |= 0xffffff00;
-            }
-#else
-          ydisp = rpt->ydisp;
-          if ((rpt->ydisp & 0x80) != 0)
-            {
-              ydisp |= 0xffffff00;
-            }
+          buttons = rpt->buttons & USBHID_MOUSEIN_BUTTON_MASK;
+          if (buttons != priv->buttons ||
+              usbhost_threshold(priv, priv->xaccum, priv->yaccum))
 #endif
-          ypos = priv->yaccum + CONFIG_HIDMOUSE_YSCALE * ydisp;
-
-          if (ypos > HIDMOUSE_YMAX_B16)
             {
-              ypos = HIDMOUSE_YMAX_B16;
-            }
-          else if (ypos < 0)
-            {
-              ypos = 0;
-            }
-
-          priv->yaccum = ypos;
-
-          /* Check if the left button is pressed */
-
-          if ((rpt->buttons & USBHID_MOUSEIN_BUTTON1) == 0)
-            {
-              /* The left button is not pressed.. reset thresholding
-               * variables.
-               */
-
-              priv->xlast = INVALID_POSITION_B16;
-              priv->ylast = INVALID_POSITION_B16;
-
-              /* Ignore the report if the button was not pressed last
-               * time (BUTTON_NONE == button released and already
-               * reported; BUTTON_RELEASED == button released, but not
-               * yet reported)
-               */
-
-              if (priv->sample.event == BUTTON_NONE ||
-                  priv->sample.event == BUTTON_RELEASED)
-
-                {
-                  goto ignored;
-                }
-
-              /* The left button has just been released.  NOTE: We know from
-               * a previous test, that this is a button release condition.
-               * This will be changed to BUTTON_NONE after the button release
-               * has been reported.
-               */
-
-              priv->sample.event = BUTTON_RELEASED;
-            }
-
-          /* It is a left button press event.  If the last button release
-           * event has not been processed yet, then we have to ignore the
-           * button press event (or else it will look like a drag event)
-           */
-
-          else if (priv->sample.event == BUTTON_RELEASED)
-            {
-              /* If we have not yet processed the button release event, then
-               * we cannot handle this button press event. We will have to
-               * discard the data and wait for the next sample.
-               */
-
-              goto ignored;
-            }
-
-          /* Handle left-button down events */
-
-          else
-            {
-              /* If this is the first left button press report, then
-               * report that event.  If event == BUTTON_PRESSED, it will
-               * be  set to set to BUTTON_MOVE after the button press is
-               * first sampled.
-               */
-
-              if (priv->sample.event != BUTTON_MOVE)
-                {
-                  /* First button press */
-
-                  priv->sample.event = BUTTON_PRESSED;
-                }
-
-              /* Otherwise, perform a thresholding operation so that the
-               * results will be more stable.  If the difference from the
-               * last sample is small, then ignore the event.
-               */
-
-             else
-               {
-                  if (xpos > priv->xlast)
-                    {
-                      xdiff = xpos - priv->xlast;
-                    }
-                  else
-                    {
-                      xdiff = priv->xlast - xpos;
-                    }
-
-                  if (xdiff < HIDMOUSE_XTHRESH_B16)
-                    {
-                      /* Little or no change in the X diretion, check the
-                       * Y direction.
-                       */
-
-                      if (ypos > priv->ylast)
-                        {
-                          ydiff = ypos - priv->ylast;
-                        }
-                      else
-                        {
-                          ydiff = priv->ylast - ypos;
-                        }
-
-                      if (ydiff < HIDMOUSE_YTHRESH_B16)
-                        {
-                          /* Little or no change in either direction... don't
-                           * report anything.
-                           */
-
-                          goto ignored;
-                        }
-                    }
-                }
-
-              /* We get here when the left button is first pressed, or when
-               * it has been held and dragged for a distance exceeding a
-               * threshold.
+              /* We get here when either there is a meaning button change
+               * and/or a significant movement of the mouse.  We are going
+               * to report the mouse event. 
                *
-               * Snap to the new x/y position for subsequent thresholding */
+               * Snap to the new x/y position for subsequent thresholding
+               */
 
-              priv->xlast = xpos;
-              priv->ylast = ypos;
+              priv->xlast = priv->xaccum;
+              priv->ylast = priv->yaccum;
+
+              /* Update the sample X/Y positions */
+
+              priv->sample.x = b16toi(priv->xaccum);
+              priv->sample.y = b16toi(priv->yaccum);
+
+#ifdef CONFIG_HIDMOUSE_TSCIF
+              /* The X/Y positional data is now valid */
+
+              priv->sample.valid = true;
+
+              /* Indicate the availability of new sample data for this ID */
+
+              priv->sample.id = priv->id;
+#else
+              /* Report and remember the new button state */
+
+              priv->sample.buttons = buttons;
+              priv->buttons = buttons;
+#endif
+              priv->valid = true;
+
+              /* Notify any waiters that new HIDMOUSE data is available */
+
+              usbhost_notify(priv);
             }
-
-          /* We get here when either the left button is released, pressed
-           * or dragged.  We are going to report the mouse event. Update the
-           * sample X/Y positions (the sample event state was set by the
-           * above logic.
-           */
-
-          priv->sample.x = b16toi(xpos);
-          priv->sample.y = b16toi(ypos);
-
-          /* The X/Y positional data is now valid */
-
-          priv->sample.valid = true;
-
-          /* Indicate the availability of new sample data for this ID */
-
-          priv->sample.id = priv->id;
-          priv->valid = true;
-
-          /* Notify any waiters that new HIDMOUSE data is available */
-
-          usbhost_notify(priv);
         }
 
-      /* This mouse event will not be reported */
-
-ignored:
       /* Release our lock on the state structure */
 
       usbhost_givesem(&priv->exclsem);
@@ -1038,6 +1178,7 @@ static int usbhost_sample(FAR struct usbhost_state_s *priv,
 
       memcpy(sample, &priv->sample, sizeof(struct mouse_sample_s ));
 
+#ifdef CONFIG_HIDMOUSE_TSCIF
       /* Now manage state transitions */
 
       if (sample->event == BUTTON_RELEASED)
@@ -1047,8 +1188,8 @@ static int usbhost_sample(FAR struct usbhost_state_s *priv,
            */
 
           priv->sample.event = BUTTON_NONE;
-          priv->sample.valid = false;
           priv->id++;
+          priv->sample.valid = false;
         }
       else if (sample->event == BUTTON_PRESSED)
        {
@@ -1056,6 +1197,9 @@ static int usbhost_sample(FAR struct usbhost_state_s *priv,
 
          priv->sample.event = BUTTON_MOVE;
        }
+#endif
+
+      /* The sample has been reported and is no longer valid */
 
       priv->valid = false;
       ret = OK;
@@ -1999,7 +2143,11 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
 {
   FAR struct inode           *inode;
   FAR struct usbhost_state_s *priv;
+#ifdef CONFIG_HIDMOUSE_TSCIF
   FAR struct touch_sample_s  *report;
+#else
+  FAR struct mouse_report_s  *report;
+#endif
   struct mouse_sample_s       sample;
   int                         ret;
 
@@ -2060,6 +2208,7 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
 
   /* We now have sampled HIDMOUSE data that we can report to the caller.  */
 
+#ifdef CONFIG_HIDMOUSE_TSCIF
   report = (FAR struct touch_sample_s *)buffer;
   memset(report, 0, SIZEOF_TOUCH_SAMPLE_S(1));
 
@@ -2105,6 +2254,16 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
   ivdbg("  y:       %d\n", report->point[0].y);
 
   ret = SIZEOF_TOUCH_SAMPLE_S(1);
+#else
+  report = (FAR struct mouse_report_s *)buffer;
+  memset(report, 0, sizeof(struct mouse_report_s));
+
+  report->buttons = sample.buttons;
+  report->x       = sample.x;
+  report->y       = sample.y;
+
+  ret = sizeof(struct mouse_report_s);
+#endif
 
 errout:
   usbhost_givesem(&priv->exclsem);

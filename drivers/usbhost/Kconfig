@@ -126,6 +126,22 @@ config USBHOST_HIDMOUSE
 
 if  USBHOST_HIDMOUSE
 
+config HIDMOUSE_TSCIF
+	bool "Touchscreen Emulation"
+	default n
+	---help---
+		Normally, the HID mouse driver uses the mouse report structure
+		defined in include/nuttx/input/mouse.h.  The mouse driver can,
+		however, be configured to use the touchscreen interface defined in
+		include/nuttx/input/touchcreen.h.  If the touch screen interface is
+		used, only support for the left button will be provided.
+
+		NOTE:  Unlike touchscreen drivers, mouse drivers will report
+		position data even when the "pen is up", i.e., when no buttons are
+		pressed.  This behavior is necessary to provide the positional data
+		would would be needed to drive a cursor.  Without a cursor of some
+		kind, the mouse is not very useful.  So this option may not be useful.
+
 config HIDMOUSE_DEFPRIO
 	int "Polling Thread Priority"
 	default 50
@@ -211,6 +227,8 @@ config HIDMOUSE_XTHRESH
 	---help---
 		New mouse positions will only be reported when the X or Y data changes by these
 		thresholds. This trades reduces data rate for some loss in dragging accuracy.
+		Both X and Y axis thresholding can be disabled by setting this value to zero.
+
 		Default: 12
 
 config HIDMOUSE_THRESHY
@@ -219,6 +237,8 @@ config HIDMOUSE_THRESHY
 	---help---
 		New touch positions will only be reported when the X or Y data changes by these
 		thresholds. This trades reduces data rate for some loss in dragging accuracy.
+		Both X and Y axis thresholding can be disabled by setting this value to zero.
+
 		Default: 12
 
 endif
