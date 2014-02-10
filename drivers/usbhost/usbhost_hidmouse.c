@@ -42,12 +42,9 @@
 #include <sys/types.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
 #include <poll.h>
 #include <semaphore.h>
-#include <time.h>
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
@@ -56,7 +53,6 @@
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/arch.h>
 #include <nuttx/wqueue.h>
 
 #include <nuttx/usb/usb.h>
