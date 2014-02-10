@@ -6566,3 +6566,7 @@
 	  cursor (2014-2-10).
 	* drivers/usbhost/usbhost_hidmouse.c, include/nuttx/input/mouse.h, and
 	  include/nuttx/usb/hid.h:  Add support for a mouse wheel (2014-2-10).
+	* drivers/lcd/mio283qt9a.c and include/nuttx/lcd/mio283qt9a.h:  Support
+	  for the MIO283QT9A LCD.  From Toby Duckworth (2014-2-10).
+	* configs/mikroe-stm32f4/src/up_mio283qt9a.c: The Mikroe STM32F4 can
+	  now support the newer MIO283QT9A LCD. From Toby Duckworth (2014-2-10).

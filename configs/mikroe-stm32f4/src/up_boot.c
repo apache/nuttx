@@ -79,7 +79,7 @@ void stm32_boardinitialize(void)
 
   /* Configure GPIOs for controlling the LCD */
 
-#ifdef CONFIG_LCD_MIO283QT2
+#if defined(CONFIG_LCD_MIO283QT2) || defined(CONFIG_LCD_MIO283QT9A)
   stm32_lcdinitialize();
 #endif
 

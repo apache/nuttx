@@ -67,6 +67,10 @@ ifeq ($(CONFIG_LCD_MIO283QT2),y)
   CSRCS += mio283qt2.c
 endif
 
+ifeq ($(CONFIG_LCD_MIO283QT9A),y)
+  CSRCS += mio283qt9a.c
+endif
+
 ifeq ($(CONFIG_LCD_ST7567),y)
   CSRCS += st7567.c
 endif
