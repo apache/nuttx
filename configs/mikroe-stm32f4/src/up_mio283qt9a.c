@@ -8,6 +8,7 @@
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *
  *   Modified: 2013-2014 by Ken Pettit to support Mikroe-STM32F4 board.
+ *   Adapted by Tobias Duckworth <toby@orogenic.net> for the MI0283QT-9A
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

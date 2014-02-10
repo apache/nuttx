@@ -6,6 +6,7 @@
  *
  *   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
+ *            Tobias Duckworth <toby@orogenic.net>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
