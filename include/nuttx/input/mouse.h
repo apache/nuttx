@@ -59,8 +59,8 @@
  */
 
 #define MOUSE_BUTTON_1       (1 << 0) /* True: Left mouse button pressed */
-#define MOUSE_BUTTON_2       (1 << 1) /* True: Middle mouse button pressed */
-#define MOUSE_BUTTON_3       (1 << 2) /* True: Right mouse button pressed */
+#define MOUSE_BUTTON_2       (1 << 1) /* True: Right mouse button pressed */
+#define MOUSE_BUTTON_3       (1 << 2) /* True: Middle mouse button pressed */
 
 /************************************************************************************
  * Public Types
@@ -76,6 +76,9 @@ struct mouse_report_s
   uint8_t  buttons;  /* See TOUCH_* definitions above */
   int16_t  x;        /* X coordinate of the mouse position */
   int16_t  y;        /* Y coordinate of the mouse position */
+#ifdef CONFIG_MOUSE_WHEEL
+  int16_t  wheel;    /* Mouse wheel position */
+#endif
 };
 
 /************************************************************************************

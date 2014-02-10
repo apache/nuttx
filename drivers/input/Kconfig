@@ -3,6 +3,23 @@
 # see misc/tools/kconfig-language.txt.
 #
 
+config MOUSE
+	bool "Enable mouse support"
+	default n
+	---help---
+		Enable support for mouse devices.
+
+if MOUSE
+
+config MOUSE_WHEEL
+	bool "Enable mouse wheel support"
+	default n
+	---help---
+		Enable support for a 4-button mouse report that includes a while
+		position.
+
+endif # MOUSE
+
 config INPUT_TSC2007
 	bool "TI TSC2007 touchscreen controller"
 	default n

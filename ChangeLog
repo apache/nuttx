@@ -6564,3 +6564,5 @@
 	  touchscreen drivers, mouse drivers need to report positional data
 	  with no button is pressed so that the mouse position can drive a
 	  cursor (2014-2-10).
+	* drivers/usbhost/usbhost_hidmouse.c, include/nuttx/input/mouse.h, and
+	  include/nuttx/usb/hid.h:  Add support for a mouse wheel (2014-2-10).

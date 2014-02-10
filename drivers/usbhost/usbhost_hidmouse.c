@@ -127,6 +127,30 @@
 
 #define HIDMOUSE_YTHRESH_B16 (CONFIG_HIDMOUSE_YTHRESH << 16)
 
+#ifdef CONFIG_HIDMOUSE_TSCIF
+#  undef CONFIG_MOUSE_WHEEL
+#endif
+
+#ifdef CONFIG_MOUSE_WHEEL
+
+#  ifndef CONFIG_HIDMOUSE_WMAX
+#    define CONFIG_HIDMOUSE_WMAX 100
+#  endif
+
+#  define HIDMOUSE_WMAX_B16 (CONFIG_HIDMOUSE_WMAX << 16)
+
+#  ifndef CONFIG_HIDMOUSE_WSCALE
+#    define CONFIG_HIDMOUSE_WSCALE 0x00010000
+#  endif
+
+#  ifndef CONFIG_HIDMOUSE_WTHRESH
+#    define CONFIG_HIDMOUSE_WTHRESH 1
+#  endif
+
+#  define HIDMOUSE_WTHRESH_B16 (CONFIG_HIDMOUSE_WTHRESH << 16)
+
+#endif /* CONFIG_MOUSE_WHEEL */
+
 #ifndef CONFIG_HIDMOUSE_DEFPRIO
 #  define CONFIG_HIDMOUSE_DEFPRIO 50
 #endif
@@ -217,8 +241,11 @@ struct mouse_sample_s
 struct mouse_sample_s
 {
   uint8_t  buttons;                     /* Button state (see MOUSE_BUTTON_* definitions) */
-  uint16_t x;                           /* Measured X position */
-  uint16_t y;                           /* Measured Y position */
+  uint16_t x;                           /* Accumulated X position */
+  uint16_t y;                           /* Accumulated Y position */
+#ifdef CONFIG_MOUSE_WHEEL
+  uint16_t wheel;                       /* Reported wheel position */
+#endif
 };
 #endif
 
@@ -257,6 +284,10 @@ struct usbhost_state_s
   b16_t                   yaccum;       /* Current integrated Y position */
   b16_t                   xlast;        /* Last reported X position */
   b16_t                   ylast;        /* Last reported Y position */
+#ifdef CONFIG_MOUSE_WHEEL
+  b16_t                   waccum;       /* Current integrated while position */
+  b16_t                   wlast;        /* Last reported wheel position */
+#endif
   size_t                  tbuflen;      /* Size of the allocated transfer buffer */
   pid_t                   pollpid;      /* PID of the poll task */
   struct work_s           work;         /* For cornercase error handling by the worker thread */
@@ -299,7 +330,8 @@ static inline void usbhost_freeclass(FAR struct usbhost_state_s *class);
 
 static int usbhost_allocdevno(FAR struct usbhost_state_s *priv);
 static void usbhost_freedevno(FAR struct usbhost_state_s *priv);
-static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname);
+static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
+                                     FAR char *devname);
 
 /* Mouse polling thread */
 
@@ -311,8 +343,7 @@ static void usbhost_position(FAR struct usbhost_state_s *priv,
 static bool usbhost_touchscreen(FAR struct usbhost_state_s *priv,
                                 FAR struct usbhid_mousereport_s *rpt);
 #endif
-static bool usbhost_threshold(FAR struct usbhost_state_s *priv,
-                              b16_t xpos, b16_t ypos);
+static bool usbhost_threshold(FAR struct usbhost_state_s *priv);
 static int usbhost_mouse_poll(int argc, char *argv[]);
 static int usbhost_sample(FAR struct usbhost_state_s *priv,
                           FAR struct mouse_sample_s *sample);
@@ -322,8 +353,8 @@ static int usbhost_waitsample(FAR struct usbhost_state_s *priv,
 /* Helpers for usbhost_connect() */
 
 static inline int usbhost_cfgdesc(FAR struct usbhost_state_s *priv,
-                                  FAR const uint8_t *configdesc, int desclen,
-                                  uint8_t funcaddr);
+                                  FAR const uint8_t *configdesc,
+                                  int desclen, uint8_t funcaddr);
 static inline int usbhost_devinit(FAR struct usbhost_state_s *priv);
 
 /* (Little Endian) Data helpers */
@@ -563,7 +594,8 @@ static void usbhost_freedevno(FAR struct usbhost_state_s *priv)
     }
 }
 
-static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv, char *devname)
+static inline void usbhost_mkdevname(FAR struct usbhost_state_s *priv,
+                                     FAR char *devname)
 {
   (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->devno);
 }
@@ -699,10 +731,8 @@ static void usbhost_notify(FAR struct usbhost_state_s *priv)
 static void usbhost_position(FAR struct usbhost_state_s *priv,
                              FAR struct usbhid_mousereport_s *rpt)
 {
-  int32_t xdisp;
-  int32_t ydisp;
-  b16_t xpos;
-  b16_t ypos;
+  int32_t disp;
+  b16_t pos;
 
   /* The following logic performs an constant integration of the mouse X/Y
    * displacement data in order to keep the X/Y positional data current.
@@ -714,68 +744,91 @@ static void usbhost_position(FAR struct usbhost_state_s *priv,
    */
 
 #ifdef CONFIG_HIDMOUSE_SWAPXY
-  xdisp = rpt->ydisp;
+  disp = rpt->ydisp;
   if ((rpt->ydisp & 0x80) != 0)
     {
-      xdisp |= 0xffffff00;
+      disp |= 0xffffff00;
     }
 #else
-  xdisp = rpt->xdisp;
+  disp = rpt->xdisp;
   if ((rpt->xdisp & 0x80) != 0)
     {
-      xdisp |= 0xffffff00;
+      disp |= 0xffffff00;
     }
 #endif
 
   /* Scale the X displacement and determine the new X position */
 
-  xpos = priv->xaccum + CONFIG_HIDMOUSE_XSCALE * xdisp;
+  pos = priv->xaccum + CONFIG_HIDMOUSE_XSCALE * disp;
 
   /* Make sure that the scaled X position does not become negative or exceed
    * the maximum.
    */
 
-  if (xpos > HIDMOUSE_XMAX_B16)
+  if (pos > HIDMOUSE_XMAX_B16)
     {
-      xpos = HIDMOUSE_XMAX_B16;
+      pos = HIDMOUSE_XMAX_B16;
     }
-  else if (xpos < 0)
+  else if (pos < 0)
     {
-      xpos = 0;
+      pos = 0;
     }
 
   /* Save the updated X position */
 
-  priv->xaccum = xpos;
+  priv->xaccum = pos;
 
   /* Do the same for the Y position */
 
 #ifdef CONFIG_HIDMOUSE_SWAPXY
-  ydisp = rpt->xdisp;
+  disp = rpt->xdisp;
   if ((rpt->xdisp & 0x80) != 0)
     {
-      ydisp |= 0xffffff00;
+      disp |= 0xffffff00;
     }
 #else
-  ydisp = rpt->ydisp;
+  disp = rpt->ydisp;
   if ((rpt->ydisp & 0x80) != 0)
     {
-      ydisp |= 0xffffff00;
+      disp |= 0xffffff00;
     }
 #endif
 
-  ypos = priv->yaccum + CONFIG_HIDMOUSE_YSCALE * ydisp;
+  pos = priv->yaccum + CONFIG_HIDMOUSE_YSCALE * disp;
 
-  if (ypos > HIDMOUSE_YMAX_B16)
+  if (pos > HIDMOUSE_YMAX_B16)
     {
-      ypos = HIDMOUSE_YMAX_B16;
+      pos = HIDMOUSE_YMAX_B16;
     }
-  else if (ypos < 0)
+  else if (pos < 0)
     {
-      ypos = 0;
+      pos = 0;
     }
 
-  priv->yaccum = ypos;
+  priv->yaccum = pos;
+
+#ifdef CONFIG_MOUSE_WHEEL
+  /* Do the same for the wheel position */
+
+  disp = rpt->wdisp;
+  if ((rpt->wdisp & 0x80) != 0)
+    {
+      disp |= 0xffffff00;
+    }
+
+  pos = priv->waccum + CONFIG_HIDMOUSE_WSCALE * disp;
+
+  if (pos > HIDMOUSE_WMAX_B16)
+    {
+      pos = HIDMOUSE_WMAX_B16;
+    }
+  else if (pos < 0)
+    {
+      pos = 0;
+    }
+
+  priv->waccum = pos;
+#endif
 }
 
 /****************************************************************************
@@ -862,7 +915,7 @@ static bool usbhost_touchscreen(FAR struct usbhost_state_s *priv,
        * small, then ignore the event.
        */
 
-      else if (!usbhost_threshold(priv, priv->xaccum, priv->yaccum))
+      else if (!usbhost_xythreshold(priv))
         {
           return false;
         }
@@ -889,8 +942,6 @@ static bool usbhost_touchscreen(FAR struct usbhost_state_s *priv,
  *
  * Input Parameters:
  *   priv - A reference to the mouse state structure.
- *   xpos - The current mouse X position
- *   ypos - The current mouse Y position
  *
  * Returned Value:
  *   True if the mouse position is significantly different from the last
@@ -898,46 +949,68 @@ static bool usbhost_touchscreen(FAR struct usbhost_state_s *priv,
  *
  ****************************************************************************/
 
-static bool usbhost_threshold(FAR struct usbhost_state_s *priv,
-                              b16_t xpos, b16_t ypos)
+static bool usbhost_threshold(FAR struct usbhost_state_s *priv)
 {
 #if CONFIG_HIDMOUSE_XTHRESH > 0 && CONFIG_HIDMOUSE_YTHRESH > 0
-  b16_t                       xdiff;
-  b16_t                       ydiff;
+  b16_t pos;
+  b16_t diff;
 
   /* Get the difference in the X position from the last report */
 
-  if (xpos > priv->xlast)
+  pos = priv->xaccum;
+  if (pos > priv->xlast)
     {
-      xdiff = xpos - priv->xlast;
+      diff = pos - priv->xlast;
     }
   else
    {
-      xdiff = priv->xlast - xpos;
+      diff = priv->xlast - pos;
    }
 
   /* Check if the X difference exceeds the report threshold */
 
-  if (xdiff >= HIDMOUSE_XTHRESH_B16)
+  if (diff >= HIDMOUSE_XTHRESH_B16)
     {
       return true;
     }
 
   /* Little or no change in the X direction, check the Y direction.  */
 
-  if (ypos > priv->ylast)
+  pos = priv->yaccum;
+  if (pos > priv->ylast)
     {
-      ydiff = ypos - priv->ylast;
+      diff = pos - priv->ylast;
     }
   else
     {
-      ydiff = priv->ylast - ypos;
+      diff = priv->ylast - pos;
     }
 
-  if (ydiff >= HIDMOUSE_YTHRESH_B16)
+  if (diff >= HIDMOUSE_YTHRESH_B16)
     {
       return true;
     }
+
+#ifdef CONFIG_MOUSE_WHEEL
+  /* Get the difference in the wheel position from the last report */
+
+  pos = priv->waccum;
+  if (pos > priv->wlast)
+    {
+      diff = pos - priv->wlast;
+    }
+  else
+   {
+      diff = priv->wlast - pos;
+   }
+
+  /* Check if the X difference exceeds the report threshold */
+
+  if (diff >= HIDMOUSE_WTHRESH_B16)
+    {
+      return true;
+    }
+#endif
 
   /* Little or no change in either direction... don't report anything. */
 
@@ -1057,8 +1130,7 @@ static int usbhost_mouse_poll(int argc, char *argv[])
            */
 
           buttons = rpt->buttons & USBHID_MOUSEIN_BUTTON_MASK;
-          if (buttons != priv->buttons ||
-              usbhost_threshold(priv, priv->xaccum, priv->yaccum))
+          if (buttons != priv->buttons || usbhost_threshold(priv))
 #endif
             {
               /* We get here when either there is a meaning button change
@@ -1070,11 +1142,16 @@ static int usbhost_mouse_poll(int argc, char *argv[])
 
               priv->xlast = priv->xaccum;
               priv->ylast = priv->yaccum;
-
+#ifdef CONFIG_MOUSE_WHEEL
+              priv->wlast = priv->waccum;
+#endif
               /* Update the sample X/Y positions */
 
               priv->sample.x = b16toi(priv->xaccum);
               priv->sample.y = b16toi(priv->yaccum);
+#ifdef CONFIG_MOUSE_WHEEL
+              priv->sample.wheel = b16toi(priv->waccum);
+#endif
 
 #ifdef CONFIG_HIDMOUSE_TSCIF
               /* The X/Y positional data is now valid */
@@ -2046,7 +2123,9 @@ static int usbhost_open(FAR struct file *filep)
 
           priv->xlast = INVALID_POSITION_B16;
           priv->ylast = INVALID_POSITION_B16;
-
+#ifdef CONFIG_MOUSE_WHEEL
+          priv->wlast = INVALID_POSITION_B16;
+#endif
           /* Set the reported position to the center of the range */
 
           priv->xaccum = (HIDMOUSE_XMAX_B16 >> 1);
@@ -2261,6 +2340,9 @@ static ssize_t usbhost_read(FAR struct file *filep, FAR char *buffer, size_t len
   report->buttons = sample.buttons;
   report->x       = sample.x;
   report->y       = sample.y;
+#ifdef CONFIG_MOUSE_WHEEL
+  report->wheel   = sample.wheel;
+#endif
 
   ret = sizeof(struct mouse_report_s);
 #endif

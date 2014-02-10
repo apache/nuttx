@@ -120,11 +120,16 @@ config USBHOST_HIDMOUSE
 	default n
 	depends on !INT_DISABLE
 	select INPUT
+	select MOUSE
 	---help---
 		Enable support for the mouse class driver.  This also depends on
 		SCHED_WORKQUEUE && !DISABLE_SIGNALS
 
-if  USBHOST_HIDMOUSE
+		NOTE:  This driver checks out on a Labtec and an AOpen mouse, but
+		does not work correctly on a Microsoft mouse.  A little more work
+		would be needed to support the Microsoft mouse.
+
+if USBHOST_HIDMOUSE
 
 config HIDMOUSE_TSCIF
 	bool "Touchscreen Emulation"
@@ -226,7 +231,7 @@ config HIDMOUSE_XTHRESH
 	default 12
 	---help---
 		New mouse positions will only be reported when the X or Y data changes by these
-		thresholds. This trades reduces data rate for some loss in dragging accuracy.
+		thresholds. This tradeoff reduces data rate for some loss in dragging accuracy.
 		Both X and Y axis thresholding can be disabled by setting this value to zero.
 
 		Default: 12
@@ -236,12 +241,48 @@ config HIDMOUSE_THRESHY
 	default 12
 	---help---
 		New touch positions will only be reported when the X or Y data changes by these
-		thresholds. This trades reduces data rate for some loss in dragging accuracy.
+		thresholds. This tradeoff reduces data rate for some loss in dragging accuracy.
 		Both X and Y axis thresholding can be disabled by setting this value to zero.
 
 		Default: 12
 
-endif
+if MOUSE_WHEEL
+
+config HIDMOUSE_WMAX
+	int "Maximum wheel position"
+	default 320
+	range 0 32767
+	---help---
+		This is the maximum value of the wheel position that will be
+		reported. Default: 320
+
+config HIDMOUSE_WSCALE
+	hex "Wheel scaling factor"
+	default 0x00010000
+	---help---
+		Mouse wheel position are accumulated from wheel displacements
+		reported by the mouse device. This setting provides a scaling
+		value for the wheel displacement.  This is a fixed precision
+		floating point number with 16 bits of fraction.  So a value of
+		0x00010000 is 1.0, 0x00018000 is 1.5, 0x00024000 is 2.25, etc.
+
+		NOTE that a negative value of HIDMOUSE_XSCALE such as 0xffff0000
+		(-1.0) can be used to change the direction of wheel output.
+
+		Default: 0x00010000 (1.0)
+
+config HIDMOUSE_WTHRESH
+	int "Wheel threshold"
+	default 1
+	---help---
+		New wheel positions will only be reported when the wheel position
+		changes by these thresholds. This tradeoff reduces data rate for some
+		loss in wheel responsiveness.
+
+		Default: 1
+
+endif # MOUSE_WHEEL
+endif # USBHOST_HIDMOUSE
 
 config USBHOST_TRACE
 	bool "Enable USB HCD tracing for debug"
