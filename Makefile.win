@@ -806,13 +806,13 @@ endif
 
 apps_clean:
 ifneq ($(APPDIR),)
-	$(Q) $(MAKE) -C "$(TOPDIR)\$(APPDIR)" TOPDIR="$(TOPDIR)" clean
+	$(Q) $(MAKE) -C "$(APPDIR)" TOPDIR="$(TOPDIR)" clean
 endif
 
 apps_distclean:
 ifneq ($(APPDIR),)
 	$(call DELFILE, _SAVED_APPS_config
-	$(Q) if exist "$(TOPDIR)\$(APPDIR)\.config" ( cp "$(TOPDIR)\$(APPDIR)\.config" _SAVED_APPS_config )
-	$(Q) $(MAKE) -C "$(TOPDIR)\$(APPDIR)" TOPDIR="$(TOPDIR)" distclean
-	$(Q) if exist _SAVED_APPS_config ( mv _SAVED_APPS_config "$(TOPDIR)\$(APPDIR)\.config" )
+	$(Q) if exist "$(APPDIR)\.config" ( cp "$(APPDIR)\.config" _SAVED_APPS_config )
+	$(Q) $(MAKE) -C "$(APPDIR)" TOPDIR="$(TOPDIR)" distclean
+	$(Q) if exist _SAVED_APPS_config ( mv _SAVED_APPS_config "$(APPDIR)\.config" )
 endif
