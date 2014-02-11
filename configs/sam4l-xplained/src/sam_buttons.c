@@ -147,6 +147,7 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
       sam_gpioirq(IRQ_SW0);
       (void)irq_attach(IRQ_SW0, irqhandler);
       sam_gpioirqenable(IRQ_SW0);
+      irqrestore(flags);
     }
 
   /* Return the old button handler (so that it can be restored) */

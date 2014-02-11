@@ -81,7 +81,7 @@ void imx_boardinitialize(void)
             (IMX_CSCR_USBDIV << PLL_CSCR_USBDIV_SHIFT) |    /* USB divider */
             CSCR_SDCNT_4thEDGE |                            /* Shutdown on 4th edge */
             (IMX_CSCR_BCLKDIV << PLL_CSCR_BCLKDIV_SHIFT) |  /* Bclock divider */
-	    PLL_CSCR_SPEN | PLL_CSCR_MPEN);                /* Enable MUC and System PLL */
+             PLL_CSCR_SPEN | PLL_CSCR_MPEN);                /* Enable MUC and System PLL */
   putreg32(regval, IMX_PLL_CSCR);
 
   /* Use these new frequencies now */
