@@ -958,6 +958,7 @@ int audio_register(FAR const char *name, FAR struct audio_lowerhalf_s *dev)
     {
       strcat(path, "/");
     }
+
   strcat(path, name);
 
 #endif /* CONFIG_AUDIO_DEV_PATH=="/dev" */
