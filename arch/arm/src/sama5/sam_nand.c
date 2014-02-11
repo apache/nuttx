@@ -2518,7 +2518,7 @@ errout:
 static inline int nand_tryeraseblock(struct sam_nandcs_s *priv, off_t block)
 {
   uint32_t rowaddr;
-  int ret = OK;
+  int ret;
 
   /* Calculate address used for erase */
 
