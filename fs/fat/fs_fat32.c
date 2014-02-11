@@ -391,7 +391,7 @@ static int fat_close(FAR struct file *filep)
   struct inode         *inode;
   struct fat_file_s    *ff;
   struct fat_mountpt_s *fs;
-  int                   ret = OK;
+  int                   ret;
 
   /* Sanity checks */
 
@@ -1505,7 +1505,7 @@ static int fat_opendir(struct inode *mountpt, const char *relpath, struct fs_dir
 
 errout_with_semaphore:
   fat_semgive(fs);
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************
@@ -1523,7 +1523,7 @@ static int fat_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   uint8_t               ch;
   uint8_t               attribute;
   bool                  found;
-  int                   ret = OK;
+  int                   ret;
 
   /* Sanity checks */
 

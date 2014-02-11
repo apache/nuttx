@@ -83,6 +83,6 @@
 
 int clock_isleapyear(int year)
 {
-  return year % 400 ? (year % 100 ? (year % 4 ? 0 : 1) : 0) : 1;
+  return (year % 400) ? ((year % 100) ? ((year % 4) ? 0 : 1) : 0) : 1;
 }
 

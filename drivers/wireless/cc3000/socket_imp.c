@@ -135,9 +135,9 @@ int HostFlowControlConsumeBuff(int sd)
 
       if (tSLInformation.slTransmitDataError != 0)
         {
-          errno = tSLInformation.slTransmitDataError;
+          set_errno(tSLInformation.slTransmitDataError);
           tSLInformation.slTransmitDataError = 0;
-          return errno;
+          return tSLInformation.slTransmitDataError;
         }
 
       if (SOCKET_STATUS_ACTIVE != get_socket_active_status(sd))
@@ -165,9 +165,9 @@ int HostFlowControlConsumeBuff(int sd)
 
   if (tSLInformation.slTransmitDataError != 0)
     {
-      errno = tSLInformation.slTransmitDataError;
+      set_errno(tSLInformation.slTransmitDataError);
       tSLInformation.slTransmitDataError = 0;
-      return errno;
+      return tSLInformation.slTransmitDataError;
     }
 
   if (SOCKET_STATUS_ACTIVE != get_socket_active_status(sd))
@@ -240,10 +240,8 @@ int cc3000_socket_impl(long domain, long type, long protocol)
 
   /* Process the event */
 
-  errno = ret;
-
+  set_errno(ret);
   set_socket_active_status(ret, SOCKET_STATUS_ACTIVE);
-
   return ret;
 }
 
@@ -282,7 +280,7 @@ long cc3000_closesocket_impl(long sd)
   /* Since we are in blocking state - wait for event complete */
 
   SimpleLinkWaitEvent(HCI_CMND_CLOSE_SOCKET, &ret);
-  errno = ret;
+  set_errno(ret);
 
   /* Since 'close' call may result in either OK (and then it closed) or error
    * mark this socket as invalid
@@ -344,7 +342,6 @@ long cc3000_accept_impl(long sd, struct sockaddr *addr, socklen_t *addrlen)
   uint8_t *ptr, *args;
   tBsdReturnParams tAcceptReturnArguments;
 
-  ret = EFAIL;
   ptr = tSLInformation.pucTxCommandBuffer;
   args = (ptr + HEADERS_SIZE_CMD);
 
@@ -366,8 +363,8 @@ long cc3000_accept_impl(long sd, struct sockaddr *addr, socklen_t *addrlen)
 
   memcpy(addr, &tAcceptReturnArguments.tSocketAddress, CC3000_ASIC_ADDR_LEN);
   *addrlen = CC3000_ASIC_ADDR_LEN;
-  errno = tAcceptReturnArguments.iStatus;
-  ret = errno;
+  set_errno(tAcceptReturnArguments.iStatus);
+  ret = tAcceptReturnArguments.iStatus;
 
   /* if succeeded, iStatus = new socket descriptor. otherwise - error number */
 
@@ -433,8 +430,7 @@ long cc3000_bind_impl(long sd, const struct sockaddr *addr, socklen_t addrlen)
 
   SimpleLinkWaitEvent(HCI_CMND_BIND, &ret);
 
-  errno = ret;
-
+  set_errno(ret);
   return ret;
 }
 
@@ -484,8 +480,8 @@ long cc3000_listen_impl(long sd, long backlog)
   /* Since we are in blocking state - wait for event complete */
 
   SimpleLinkWaitEvent(HCI_CMND_LISTEN, &ret);
-  errno = ret;
 
+  set_errno(ret);
   return ret;
 }
 
@@ -518,11 +514,11 @@ int cc3000_gethostbyname_impl(char * hostname, uint16_t usNameLen, unsigned long
   tBsdGethostbynameParams ret;
   uint8_t *ptr, *args;
 
-  errno = EFAIL;
+  set_errno(EFAIL);
 
   if (usNameLen > CC3000_HOSTNAME_MAX_LENGTH)
     {
-      return errno;
+      return get_errno();
     }
 
   ptr = tSLInformation.pucTxCommandBuffer;
@@ -543,11 +539,11 @@ int cc3000_gethostbyname_impl(char * hostname, uint16_t usNameLen, unsigned long
 
   SimpleLinkWaitEvent(HCI_EVNT_BSD_GETHOSTBYNAME, &ret);
 
-  errno = ret.retVal;
+  set_errno(ret.retVal);
 
   (*((long*)out_ip_addr)) = ret.outputAddress;
 
-  return errno;
+  return ret.retVal;
 }
 #endif
 
@@ -607,8 +603,7 @@ long cc3000_connect_impl(long sd, const struct sockaddr *addr, socklen_t addrlen
 
   SimpleLinkWaitEvent(HCI_CMND_CONNECT, &ret);
 
-  errno = ret;
-
+  set_errno(ret);
   return (long)ret;
 }
 
@@ -727,7 +722,7 @@ int cc3000_select_impl(long nfds, TICC3000fd_set *readsds, TICC3000fd_set *write
     }
   else
     {
-      errno = tParams.iStatus;
+      set_errno(tParams.iStatus);
       return -1;
     }
 }
@@ -813,7 +808,7 @@ int cc3000_setsockopt_impl(long sd, long level, long optname, const void *optval
     }
   else
     {
-      errno = ret;
+      set_errno(ret);
       return ret;
     }
 }
@@ -898,8 +893,8 @@ int cc3000_getsockopt_impl(long sd, long level, long optname, void *optval, sock
     }
   else
     {
-      errno = tRetParams.iStatus;
-      return errno;
+      set_errno(tRetParams.iStatus);
+      return tRetParams.iStatus;
     }
 }
 
@@ -961,8 +956,7 @@ int simple_link_recv(long sd, void *buf, long len, long flags, struct sockaddr *
       SimpleLinkWaitData((uint8_t *)buf, (uint8_t *)from, (uint8_t *)fromlen);
     }
 
-  errno = tSocketReadEvent.iNumberOfBytes;
-
+  set_errno(tSocketReadEvent.iNumberOfBytes);
   return tSocketReadEvent.iNumberOfBytes;
 }
 

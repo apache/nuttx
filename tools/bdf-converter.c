@@ -33,12 +33,12 @@
  *
  ****************************************************************************/
 
-/* 
+/*
  * Based one the "Glyph Bitmap Distribution Format (BDF) Specification",
  * Version 2.2, by Adobe Systems Incorporated.
  *
  */
- 
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -58,7 +58,7 @@
 #define VERBOSE
 #define DBG
 */
- 
+
 // BDF Specification Version 2.2:
 // This version lifts the restriction on line length. In this version, the new
 // maximum length of a value of the type string is 65535 characters, and hence
@@ -126,6 +126,7 @@ typedef struct nx_fontmetric_s
  *   line  - The line to trim
  *
  ****************************************************************************/
+
 static void trimLine(char *line)
 {
   char *str;
@@ -157,15 +158,16 @@ static void trimLine(char *line)
  *                info[3] = -2
  *
  ****************************************************************************/
+
 static void bdf_parseintline(char *line, unsigned int count, int *info)
 {
   char *str, *token, *saveptr1;
   str = line;
-  
+
   /* Ignore the key */
-  
+
   token = (char *)strtok_r(str, " ", &saveptr1);
-  
+
   while ((token = (char *)strtok_r(NULL, " ", &saveptr1)) && count--)
     {
       *(info++) = atoi(token);
@@ -182,6 +184,7 @@ static void bdf_parseintline(char *line, unsigned int count, int *info)
  *   ginfo  - A glyphinfo_t struct with the glyph's information.
  *
  ****************************************************************************/
+
 #ifdef DBG
 static void bdf_printglyphinfo(const glyphinfo_t *ginfo)
 {
@@ -212,6 +215,7 @@ static void bdf_printglyphinfo(const glyphinfo_t *ginfo)
  *   info  - A nx_fontmetric_t struct with the glyph's information.
  *
  ****************************************************************************/
+
 #ifdef DBG
 static void bdf_printnxmetricinfo(const nx_fontmetric_t *info)
 {
@@ -240,49 +244,50 @@ static void bdf_printnxmetricinfo(const nx_fontmetric_t *info)
  *
  * Input Parameters:
  *   file  - The input file stream pointing to the first line of the
- *           glyph's information (right after STARTCHAR). 
+ *           glyph's information (right after STARTCHAR).
  *   ginfo - A glyphinfo_t struct to fill with the glyph's information.
  *
  ****************************************************************************/
+
 static void bdf_getglyphinfo(FILE *file, glyphinfo_t *ginfo)
 {
   char line[BDF_MAX_LINE_LENGTH];
   char lineCopy[BDF_MAX_LINE_LENGTH];
   char *str, *token, *saveptr1;
   bool done;
-  
+
   done = false;
-  
-  while(fgets(line, BDF_MAX_LINE_LENGTH, file) != NULL && !done)
+
+  while (fgets(line, BDF_MAX_LINE_LENGTH, file) != NULL && !done)
     {
       trimLine(line);
       strcpy(lineCopy, line);
       str = line;
-      
+
       while ((token = (char *)strtok_r(str, " ", &saveptr1)))
         {
 
           /* ENCODING information */
-          
-          if(strcmp(token, "ENCODING") == 0)
+
+          if (strcmp(token, "ENCODING") == 0)
             {
               token = (char *)strtok_r(NULL, " ", &saveptr1);
               ginfo->encoding = atoi(token);
             }
-            
+
           /* DWIDTH information */
-          
-          if(strcmp(token, "DWIDTH") == 0)
+
+          if (strcmp(token, "DWIDTH") == 0)
             {
               token = (char *)strtok_r(NULL, " ", &saveptr1);
               ginfo->dw_x0 = atoi(token);
               token = (char *)strtok_r(NULL, " ", &saveptr1);
               ginfo->dw_y0 = atoi(token);
             }
-            
+
           /* BBX information */
-          
-          else if(strcmp(token, "BBX") == 0)
+
+          else if (strcmp(token, "BBX") == 0)
             {
               int bbxinfo[4];
               bdf_parseintline(lineCopy, 4, bbxinfo);
@@ -290,15 +295,14 @@ static void bdf_getglyphinfo(FILE *file, glyphinfo_t *ginfo)
               ginfo->bb_h     = bbxinfo[1];
               ginfo->bb_x_off = bbxinfo[2];
               ginfo->bb_y_off = bbxinfo[3];
-              
+
               /* This is the last BDF property of interest*/
-              
+
               done = true;
             }
 
           str = NULL;
         }
-      
     }
 }
 
@@ -310,44 +314,43 @@ static void bdf_getglyphinfo(FILE *file, glyphinfo_t *ginfo)
  *
  * Input Parameters:
  *   file  - The input file stream pointing to the first line of the
- *           glyph's bitmap (right after BITMAP). 
+ *           glyph's bitmap (right after BITMAP).
  *   ginfo - A glyphinfo_t struct to fill with the glyph's bitmap.
  *
  ****************************************************************************/
+
 static void bdf_getglyphbitmap(FILE *file, glyphinfo_t *ginfo)
 {
   char line[BDF_MAX_LINE_LENGTH];
   uint64_t *bitmap;
   bool readingbitmap;
-  
+
   bitmap = ginfo->bitmap;
   readingbitmap = true;
-  
+
   while (readingbitmap)
     {
       if (fgets(line, BDF_MAX_LINE_LENGTH, file) != NULL)
-      {
-        trimLine(line);
-      
-        if(strcmp(line, "ENDCHAR") == 0)
-          {
-            readingbitmap = false;
-          }
-        else
-          {
-            char *endptr;
-            *bitmap = strtoul(line, &endptr, 16);
-            bitmap++;
-          }
-          
-      }
+        {
+          trimLine(line);
+
+          if (strcmp(line, "ENDCHAR") == 0)
+            {
+              readingbitmap = false;
+            }
+          else
+            {
+              char *endptr;
+              *bitmap = strtoul(line, &endptr, 16);
+              bitmap++;
+            }
+        }
       else
-      {
-        /* error condition */
-        
-        readingbitmap = false;
-      }
-       
+        {
+          /* error condition */
+
+          readingbitmap = false;
+        }
     }
 }
 
@@ -382,21 +385,20 @@ static void bdf_getstride(glyphinfo_t *ginfo, uint32_t *stride)
  *   nxmetric  - A nx_fontmetric_t struct with the glyph's information.
  *
  ****************************************************************************/
-static void bdf_printoutput(FILE *out, 
+static void bdf_printoutput(FILE *out,
                             glyphinfo_t *ginfo,
                             nx_fontmetric_t *nxmetric)
 {
 
   /* Only interested in the 7 and 8 bit ranges */
-  
+
   if ((ginfo->encoding >= NXFONT_MIN7BIT  &&
        ginfo->encoding <= NXFONT_MAX7BIT) ||
       (ginfo->encoding >= NXFONT_MIN8BIT  &&
        ginfo->encoding <= NXFONT_MAX8BIT))
     {
-      
       /* Glyph general info */
-      
+
       if (ginfo->bb_x_off < 0)
         {
           fprintf(out,
@@ -409,9 +411,9 @@ static void bdf_printoutput(FILE *out,
         {
           fprintf(out, "/* %s (%d) */\n", ginfo->name, ginfo->encoding);
         }
-      
+
       /* Glyph metrics */
-      
+
       fprintf(out,
               "#define NXFONT_METRICS_%d {%d, %d, %d, %d, %d, 0}\n",
               ginfo->encoding,
@@ -420,9 +422,9 @@ static void bdf_printoutput(FILE *out,
               nxmetric->height,
               nxmetric->xoffset,
               nxmetric->yoffset);
-              
+
       /* Glyph bitmap */
-      
+
       fprintf(out, "#define NXFONT_BITMAP_%d {", ginfo->encoding);
       int i, j;
       for (i = 0; i < ginfo->bb_h - 1; i++)
@@ -432,28 +434,28 @@ static void bdf_printoutput(FILE *out,
               int nxbyteoffset;
               uint8_t  nxbyte = 0;
               uint64_t tempbitmap = ginfo->bitmap[i];
-              
+
               /* Get the next byte */
-              
+
               nxbyteoffset = (nxmetric->stride - j) * 8;
               nxbyte = (uint8_t)(tempbitmap >> nxbyteoffset);
               fprintf(out, "0x%x, ", nxbyte);
             }
         }
-      
+
       /* Different behavior for the last bitmap */
-      
+
       for (j = 1; j <= nxmetric->stride; j++)
         {
           int nxbyteoffset;
           uint8_t  nxbyte = 0;
           uint64_t tempbitmap = ginfo->bitmap[i];
-          
+
           /* Get the next byte */
-          
+
           nxbyteoffset = (nxmetric->stride - j) * 8;
           nxbyte = (uint8_t)(tempbitmap >> nxbyteoffset);
-          
+
           if (j == nxmetric->stride)
             {
               fprintf(out, "0x%x}\n", nxbyte);
@@ -462,11 +464,10 @@ static void bdf_printoutput(FILE *out,
             {
               fprintf(out, "0x%x, ", nxbyte);
             }
-        }      
-      
+        }
+
       fprintf(out, "\n");
     }
-
 }
 
 /****************************************************************************
@@ -480,26 +481,26 @@ int main(int argc, char **argv)
   char lineCopy[BDF_MAX_LINE_LENGTH];
   char *str, *token, *saveptr1;
   char *input, *output;
-  
+
   /* FONTBOUNDINGBOX properties*/
-  
+
   int fbb_x     = 0;
   int fbb_y     = 0;
-  int fbb_x_off = 0;
+//int fbb_x_off = 0;
   int fbb_y_off = 0;
-  
+
   /* Input BDF file */
-  
+
   input = argv[1];
-  
+
   if (input == NULL)
     {
       printf("%s: no input file\n", argv[0]);
       exit(0);
     }
-    
+
   file = fopen(input, "r");
-  
+
   if (file == NULL)
     {
       printf("%s: error opening file %s\n", argv[0], input);
@@ -511,8 +512,9 @@ int main(int argc, char **argv)
       printf("Opening \"%s\"\n", input);
 #endif /* VERBOSE */
     }
-  
+
   /* Output file */
+
   if (argv[2])
     {
       output = argv[2];
@@ -521,9 +523,9 @@ int main(int argc, char **argv)
     {
       output = "nxfonts_myfont.h";
     }
-  
+
   out  = fopen(output, "w");
-  
+
   if (out == NULL)
     {
       printf("%s: error opening file %s\n", argv[0], output);
@@ -534,61 +536,62 @@ int main(int argc, char **argv)
     {
       while (fgets(line, BDF_MAX_LINE_LENGTH, file) != NULL)
         {
-        
+
 #ifdef DBG
           printf("--\n");
 #endif /* DBG */
-          
+
           // Save a copy of the line
-          
+
           strcpy(lineCopy,line);
-          
+
           // Clean it
-          
+
           trimLine(line);
           str = line;
 
           while ((token = (char *)strtok_r(str, " ", &saveptr1)))
             {
-            
+
               /* FONTBOUNDINGBOX - Global font information */
-            
+
               if (strcmp(token, "FONTBOUNDINGBOX") == 0)
                 {
                   int fbbinfo[4];
                   bdf_parseintline(lineCopy, 4, fbbinfo);
                   fbb_x     = fbbinfo[0];
                   fbb_y     = fbbinfo[1];
-                  fbb_x_off = fbbinfo[2];
+                //fbb_x_off = fbbinfo[2];
                   fbb_y_off = fbbinfo[3];
-                  
+
                   /* Print FONTBOUNDINGBOX information */
-                  
+
                   fprintf(out, "/* Maximum height and width of any");
                   fprintf(out, " glyph in the set */\n\n");
                   fprintf(out, "#define NXFONT_MAXHEIGHT  %d\n", fbb_y);
                   fprintf(out, "#define NXFONT_MAXWIDTH   %d\n\n", fbb_x);
                 }
-                
+
               /* STARTCHAR - Individual glyph information */
-                
+
               if (strcmp(token, "STARTCHAR") == 0)
                 {
                   glyphinfo_t ginfo;
-                  
+
                   /* Glyph name */
-                  
+
                   ginfo.name = (char *)strtok_r(NULL, " ", &saveptr1);
 
 #ifdef VERBOSE
                   printf("Processing glyph: %s\n", ginfo.name);
 #endif /* VERBOSE */
-                  
+
                   /* Glyph information:
                   *    ENCODING
                   *    DWIDTH
                   *    BBX
                   */
+
                   ginfo.encoding = 0;
                   ginfo.dw_x0    = 0;
                   ginfo.dw_y0    = 0;
@@ -597,18 +600,18 @@ int main(int argc, char **argv)
                   ginfo.bb_x_off = 0;
                   ginfo.bb_y_off = 0;
                   bdf_getglyphinfo(file, &ginfo);
-                  
+
                   /* Glyph bitmap */
-                  
+
                   ginfo.bitmap = malloc(sizeof(uint64_t) * ginfo.bb_h);
                   bdf_getglyphbitmap(file, &ginfo);
-                  
+
 #ifdef DBG
                   bdf_printglyphinfo(&ginfo);
 #endif /* DBG */
-                  
+
                   /* Convert to nxfonts */
-                  
+
                   nx_fontmetric_t nxmetric;
                   uint32_t stride;
                   bdf_getstride(&ginfo, &stride);
@@ -618,7 +621,7 @@ int main(int argc, char **argv)
 
                   /* The NuttX font format does not support
                    * negative X offsets. */
-                  
+
                   if (ginfo.bb_x_off < 0)
                     {
                       nxmetric.xoffset = 0;
@@ -632,12 +635,11 @@ int main(int argc, char **argv)
                     {
                       nxmetric.xoffset = ginfo.bb_x_off;
                     }
-                    
+
                   nxmetric.yoffset = fbb_y + fbb_y_off -
                                      ginfo.bb_y_off - ginfo.bb_h;
-                                     
-                  
-#ifdef DBG                  
+
+#ifdef DBG
                   bdf_printnxmetricinfo(&nxmetric);
 #endif /* DBG */
 
@@ -652,25 +654,26 @@ int main(int argc, char **argv)
                     {
                       bdf_printoutput(out, &ginfo, &nxmetric);
                     }
-                  
+
                   /* Free memory */
-                  
+
                   free(ginfo.bitmap);
-                  
+
                 }
-              
+
               str = NULL;
             }
-          
+
         }
+
       fclose(file);
       fclose(out);
-      
+
       /* The End */
-      
+
       printf("Generated \"%s\"\n", output);
-      
+
     }
-    
+
   return EXIT_SUCCESS;
 }

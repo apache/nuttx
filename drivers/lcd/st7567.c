@@ -455,12 +455,11 @@ static int st7567_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *buff
   FAR struct st7567_dev_s *priv = &g_st7567dev;
   FAR uint8_t *fbptr;
   FAR uint8_t *ptr;
-  uint8_t devcol;
   uint8_t fbmask;
   uint8_t page;
   uint8_t usrmask;
   uint8_t i;
-  int     pixlen;
+  int pixlen;
 
   gvdbg("row: %d col: %d npixels: %d\n", row, col, npixels);
   DEBUGASSERT(buffer);

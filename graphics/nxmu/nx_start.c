@@ -148,7 +148,7 @@ int nx_server(int argc, char *argv[])
   /* Then start the server (nx_run does not normally return) */
 
   ret = nx_run(dev);
-  gvdbg("nx_run returned: %d\n", errno);
+  gvdbg("nx_run returned: %d\n", ret);
   return EXIT_FAILURE;
 }
 

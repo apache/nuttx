@@ -692,11 +692,10 @@ int ramlog_register(FAR const char *devpath, FAR char *buffer, size_t buflen)
 int ramlog_consoleinit(void)
 {
   FAR struct ramlog_dev_s *priv = &g_sysdev;
-  int ret;
 
   /* Register the console character driver */
 
-  ret = register_driver("/dev/console", &g_ramlogfops, 0666, priv);
+  return register_driver("/dev/console", &g_ramlogfops, 0666, priv);
 }
 #endif
 
@@ -738,11 +737,11 @@ int ramlog_sysloginit(void)
 int syslog_putc(int ch)
 {
   FAR struct ramlog_dev_s *priv = &g_sysdev;
+#ifdef CONFIG_RAMLOG_CRLF
   int ret;
 
   /* Ignore carriage returns */
 
-#ifdef CONFIG_RAMLOG_CRLF
   if (ch == '\r')
     {
       return ch;

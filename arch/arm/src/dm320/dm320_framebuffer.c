@@ -1254,7 +1254,7 @@ static int dm320_getcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_cursora
   attrib->size.w = getreg16(DM320_OSD_CURXL);
   attrib->size.h = getreg16(DM320_OSD_CURYL);
 #endif
-  irqrestore();
+  irqrestore(flags);
 
   attrib->mxsize.w = MAX_XRES;
   attrib->mxsize.h = MAX_YRES;
@@ -1325,10 +1325,8 @@ static int dm320_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcurs
           settings->size.h = MAX_YRES;
        }
 
-     flags = irqsave();
      putreg16(settings->size.w, DM320_OSD_CURXL);
      putreg16(settings->size.h, DM320_OSD_CURYL);
-     restore_flags(flags);
    }
 #endif
 
@@ -1342,7 +1340,7 @@ static int dm320_setcursor(FAR struct fb_vtable_s *vtable, FAR struct fb_setcurs
       regval &= ~1;
     }
   putreg16(regval, DM320_OSD_RECTCUR);
-  restore_flags(flags);
+  irqrestore(flags);
 
   gvdbg("DM320_OSD_CURXP:       %04x\n", getreg16(DM320_OSD_CURXP));
   gvdbg("DM320_OSD_CURYP:       %04x\n", getreg16(DM320_OSD_CURYP));

@@ -1080,10 +1080,10 @@ static int ads7843e_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int ads7843e_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
-  FAR struct inode         *inode;
+  FAR struct inode *inode;
   FAR struct ads7843e_dev_s *priv;
-  int                       ret = OK;
-  int                       i;
+  int ret;
+  int i;
 
   ivdbg("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);

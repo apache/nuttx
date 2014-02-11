@@ -100,7 +100,9 @@ extern void _vectors(void);
 
 void __start(void)
 {
+#ifdef CONFIG_BOOT_RUNFROMFLASH
   const uint32_t *src;
+#endif
   uint32_t *dest;
 
   /* Configure the uart so that we can get debug output as soon as possible */

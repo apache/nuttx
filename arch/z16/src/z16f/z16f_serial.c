@@ -302,8 +302,7 @@ static uint8_t z16f_disableuartirq(struct uart_dev_s *dev)
 
 static void z16f_restoreuartirq(struct uart_dev_s *dev, uint8_t state)
 {
-  struct z16f_uart_s *priv  = (struct z16f_uart_s*)dev->priv;
-  irqstate_t          flags = irqsave();
+  irqstate_t flags = irqsave();
 
   z16f_txint(dev, (state & STATE_TXENABLED) ? true : false);
   z16f_rxint(dev, (state & STATE_RXENABLED) ? true : false);
@@ -400,7 +399,6 @@ static int z16f_setup(struct uart_dev_s *dev)
 
 static void z16f_shutdown(struct uart_dev_s *dev)
 {
-  struct z16f_uart_s *priv = (struct z16f_uart_s*)dev->priv;
   (void)z16f_disableuartirq(dev);
 }
 

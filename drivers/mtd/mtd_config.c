@@ -905,7 +905,7 @@ static int  mtdconfig_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct mtdconfig_struct_s *dev = inode->i_private;
-  int        ret = OK;
+  int ret;
 
   /* Get exclusive access to the device */
 

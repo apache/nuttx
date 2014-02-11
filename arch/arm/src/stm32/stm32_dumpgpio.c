@@ -109,12 +109,10 @@ int stm32_dumpgpio(uint32_t pinset, const char *msg)
   irqstate_t   flags;
   uint32_t     base;
   unsigned int port;
-  unsigned int pin;
 
   /* Get the base address associated with the GPIO port */
 
   port = (pinset & GPIO_PORT_MASK) >> GPIO_PORT_SHIFT;
-  pin  = (pinset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
   base = g_gpiobase[port];
 
   /* The following requires exclusive access to the GPIO registers */

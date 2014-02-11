@@ -195,7 +195,9 @@ void stm32_boardinitialize(void)
 
 int nsh_archinitialize(void)
 {
+#ifdef CONFIG_MMCSD
   int ret;
+#endif
 
   /* Configure ADC pins */
 

@@ -362,9 +362,9 @@ static ssize_t adc_write(FAR struct file *filep, FAR const char *buffer, size_t 
 
 static int adc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode     *inode = filep->f_inode;
-  FAR struct adc_dev_s *dev   = inode->i_private;
-  int               ret   = OK;
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct adc_dev_s *dev = inode->i_private;
+  int ret;
 
   ret = dev->ad_ops->ao_ioctl(dev, cmd, arg);
   return ret;

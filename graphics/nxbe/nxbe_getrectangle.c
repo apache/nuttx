@@ -104,7 +104,7 @@ void nxbe_getrectangle(FAR struct nxbe_window_s *wnd,
   struct nxgl_rect_s remaining;
 
 #ifdef CONFIG_DEBUG
-  if (!wnd || !rect || ! rect || plane >= wnd->be->vinfo.nplanes)
+  if (!wnd || !rect || !dest || plane >= wnd->be->vinfo.nplanes)
     {
       gvdbg("Invalid parameters\n");
       return;

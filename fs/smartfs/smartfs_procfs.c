@@ -435,14 +435,11 @@ static int smartfs_rewinddir(struct fs_dirent_s *dir)
 
 static int smartfs_stat(const char *relpath, struct stat *buf)
 {
-  int ret = -ENOENT;
-
   /* TODO:  Decide if the relpath is valid and if it is a file
    *        or a directory and set it's permissions.
    */
 
   buf->st_mode = S_IFDIR|S_IROTH|S_IRGRP|S_IRUSR;
-  ret = OK;
 
   /* File/directory size, access block size */
 
@@ -450,7 +447,7 @@ static int smartfs_stat(const char *relpath, struct stat *buf)
   buf->st_blksize = 0;
   buf->st_blocks  = 0;
   
-  return ret;
+  return OK;
 }
 
 /****************************************************************************

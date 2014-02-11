@@ -2101,7 +2101,6 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
   const char *paranum;
   char *menuname;
   char *token = NULL;
-  char *ptr;
 
   /* Get the menu information */
 
@@ -2114,7 +2113,7 @@ static inline char *process_menu(FILE *stream, const char *kconfigdir)
 
   /* Process each line in the choice */
 
-  while ((ptr = kconfig_line(stream)) != NULL)
+  while (kconfig_line(stream) != NULL)
     {
       /* Process the first token on the Kconfig file line */
 
@@ -2228,11 +2227,10 @@ static char *parse_kconfigfile(FILE *stream, const char *kconfigdir)
 {
   enum token_type_e tokid;
   char *token = NULL;
-  char *ptr;
 
   /* Process each line in the Kconfig file */
 
-  while ((ptr = kconfig_line(stream)) != NULL)
+  while (kconfig_line(stream) != NULL)
     {
       /* Process the first token on the Kconfig file line */
 
@@ -2475,7 +2473,7 @@ int main(int argc, char **argv, char **envp)
             error("Missing option argument, option: %c\n", optopt);
             show_usage(argv[0], ERROR_MISSING_OPTION_ARGUMENT);
 
-           break;
+          default:
             error("Unexpected option: %c\n", ch);
             show_usage(argv[0], ERROR_UNEXPECTED_OPTION);
         }

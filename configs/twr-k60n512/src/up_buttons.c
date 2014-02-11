@@ -135,7 +135,7 @@ uint8_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
-  xcpt_t oldhandler = NULL;
+  xcpt_t oldhandler;
   uint32_t pinset;
 
   /* Map the button id to the GPIO bit set. */

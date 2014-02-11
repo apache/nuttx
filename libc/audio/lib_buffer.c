@@ -138,7 +138,7 @@ int apb_alloc(FAR struct audio_buf_desc_s *bufdesc)
     {
       /* Populate the buffer contents */
 
-      memset(pBuf, bufsize, 0);
+      memset(pBuf, 0, bufsize);
       pBuf->i.channels = 1;
       pBuf->crefs = 1;
       pBuf->nmaxbytes = bufdesc->numbytes;

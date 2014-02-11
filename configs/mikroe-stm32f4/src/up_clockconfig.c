@@ -109,7 +109,7 @@ void stm32_board_clockconfig(void)
   regval |= STM32_RCC_CFGR_PPRE1;
   putreg32(regval, STM32_RCC_CFGR);
 
-  /* Set the PLL dividers and multiplers to configure the main PLL */
+  /* Set the PLL dividers and multipliers to configure the main PLL */
 
   regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN |STM32_PLLCFG_PLLP |
             RCC_PLLCFG_PLLSRC_HSI | STM32_PLLCFG_PLLQ);

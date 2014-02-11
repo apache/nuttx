@@ -272,7 +272,6 @@ int nxcon_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
   FAR struct inode *inode = filep->f_inode;
   FAR struct nxcon_state_s *priv;
   pollevent_t eventset;
-  int ndx;
   int ret;
   int i;
 

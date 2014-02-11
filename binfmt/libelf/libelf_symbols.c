@@ -110,12 +110,13 @@ static int elf_symname(FAR struct elf_loadinfo_s *loadinfo,
       readlen = loadinfo->buflen - bytesread;
       if (offset + readlen > loadinfo->filelen)
         {
-          readlen = loadinfo->filelen - offset;
-          if (readlen <= 0)
+          if (loadinfo->filelen <= offset)
             {
               bdbg("At end of file\n");
               return -EINVAL;
             }
+
+          readlen = loadinfo->filelen - offset;
         }
 
       /* Read that number of bytes into the array */

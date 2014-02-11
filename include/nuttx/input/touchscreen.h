@@ -128,7 +128,8 @@ struct touch_sample_s
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -151,7 +152,7 @@ extern "C" {
  *
  ****************************************************************************/
 
-EXTERN int arch_tcinitialize(int minor);
+int arch_tcinitialize(int minor);
 
 /****************************************************************************
  * Name: arch_tcuninitialize
@@ -169,7 +170,7 @@ EXTERN int arch_tcinitialize(int minor);
  *
  ****************************************************************************/
 
-EXTERN void arch_tcuninitialize(void);
+void arch_tcuninitialize(void);
 
 #undef EXTERN
 #ifdef __cplusplus

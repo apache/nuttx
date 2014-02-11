@@ -192,7 +192,7 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
   sf = (struct smartfs_ofile_s *) kmalloc(sizeof *sf);
   if (sf == NULL)
     {
-      ret = ENOMEM;
+      ret = -ENOMEM;
       goto errout_with_semaphore;
     }
 
@@ -213,7 +213,7 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
         {
           /* Can't open a dir as a file! */
 
-          ret = EISDIR;
+          ret = -EISDIR;
           goto errout_with_buffer;
         }
 

@@ -1132,7 +1132,7 @@ int nxffs_close(FAR struct file *filep)
 {
   FAR struct nxffs_volume_s *volume;
   FAR struct nxffs_ofile_s *ofile;
-  int ret = -ENOSYS;
+  int ret;
 
   fvdbg("Closing\n");
 

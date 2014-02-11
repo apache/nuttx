@@ -1292,7 +1292,7 @@ static int cc3000_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   FAR struct inode *inode;
   FAR struct cc3000_dev_s *priv;
-  int ret = OK;
+  int ret;
   int i;
 
   nllvdbg("setup: %d\n", (int)setup);

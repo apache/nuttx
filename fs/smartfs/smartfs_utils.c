@@ -854,11 +854,10 @@ int smartfs_createentry(struct smartfs_mountpt_s *fs,
           goto errout;
         }
 
-      nextsector = ret;
+      nextsector = (uint16_t) ret;
 
       /* Set the newly allocated sector's type (file or dir) */
 
-      nextsector = (uint16_t) ret;
       if ((type & SMARTFS_DIRENT_TYPE) == SMARTFS_DIRENT_TYPE_DIR)
         {
           chainheader->type = SMARTFS_SECTOR_TYPE_DIR;

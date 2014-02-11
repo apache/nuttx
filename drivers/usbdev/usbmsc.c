@@ -1384,7 +1384,7 @@ int usbmsc_bindlun(FAR void *handle, FAR const char *drvrpath,
   int ret;
 
 #ifdef CONFIG_DEBUG
-  if (!alloc || !drvrpath || startsector < 0 || nsectors < 0)
+  if (!alloc || !drvrpath || startsector < 0)
     {
       usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_BINLUNINVALIDARGS1), 0);
       return -EINVAL;
@@ -1722,11 +1722,9 @@ void usbmsc_uninitialize(FAR void *handle)
   FAR struct usbmsc_alloc_s *alloc = (FAR struct usbmsc_alloc_s *)handle;
   FAR struct usbmsc_dev_s *priv;
   irqstate_t flags;
-#ifdef SDCC
-  pthread_addr_t result1, result2;
-  pthread_attr_t attr;
-#endif
+#if 0
   void *value;
+#endif
   int i;
 
 #ifdef CONFIG_DEBUG

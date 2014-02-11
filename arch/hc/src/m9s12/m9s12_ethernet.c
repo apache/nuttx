@@ -291,7 +291,7 @@ static void emac_receive(FAR struct emac_driver_s *priv)
             }
         }
     }
-  while (); /* While there are more packets to be processed */
+  while (true); /* While there are more packets to be processed */
 }
 
 /****************************************************************************

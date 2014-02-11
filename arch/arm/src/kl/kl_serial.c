@@ -709,7 +709,7 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
     }
   else
     {
-      priv->ie |= UART_C2_RIE;
+      priv->ie &= ~UART_C2_RIE;
       up_setuartint(priv);
     }
 

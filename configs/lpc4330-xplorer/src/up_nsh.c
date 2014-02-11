@@ -103,7 +103,7 @@ static int nsh_spifi_initialize(void)
       return ret;
     }
 #else
-  /* Initialize to provide NXFFS on the MTD interface */1G
+  /* Initialize to provide NXFFS on the MTD interface */
 
   ret = nxffs_initialize(mtd);
   if (ret < 0)

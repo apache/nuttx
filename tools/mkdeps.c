@@ -635,8 +635,6 @@ static char *cywin2windows(const char *str, const char *append, enum slashmode_e
 
   if (append)
     {
-      char *tmp;
-
       alloclen = sizeof(str) + sizeof(append) + 1;
       allocpath = (char *)malloc(alloclen);
       if (!allocpath)

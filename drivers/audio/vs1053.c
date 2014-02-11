@@ -1255,9 +1255,12 @@ static void *vs1053_workerthread(pthread_addr_t pvarg)
 {
   FAR struct vs1053_struct_s *dev = (struct vs1053_struct_s *) pvarg;
   struct audio_msg_s      msg;
-  FAR struct ap_buffer_s  *pBuf;
-  int                     size, prio;
+  FAR struct ap_buffer_s *pBuf;
+  int                     size;
+  int                     prio;
+#ifndef CONFIG_AUDIO_EXCLUDE_STOP
   uint16_t                reg;
+#endif
   uint8_t                 timeout;
 
   auddbg("Entry\n");
@@ -1454,7 +1457,7 @@ static int vs1053_start(FAR struct audio_lowerhalf_s *lower)
 
   /* Pop the first enqueued buffer */
 
-  if ((ret = (sem_wait(&dev->apbq_sem)) == OK))
+  if ((ret = sem_wait(&dev->apbq_sem)) == OK)
     {
       dev->pBuf = (FAR struct ap_buffer_s *) dq_remfirst(&dev->apbq);
       apb_reference(dev->pBuf);               /* Add our buffer reference */

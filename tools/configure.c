@@ -200,7 +200,7 @@ static void parse_args(int argc, char **argv)
             fprintf(stderr, "ERROR: Missing option argument, option: %c\n", optopt);
             show_usage(argv[0], EXIT_FAILURE);
 
-           break;
+          default:
             fprintf(stderr, "ERROR: Unexpected option: %c\n", ch);
             show_usage(argv[0], EXIT_FAILURE);
         }

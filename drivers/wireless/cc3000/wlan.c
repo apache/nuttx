@@ -396,7 +396,7 @@ long wlan_connect(unsigned long ulSecType, char *ssid, long ssid_len,
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_CONNECT, &ret);
-  errno = ret;
+  set_errno(ret);
   cc3000_lib_unlock();
   return ret;
 }
@@ -436,7 +436,7 @@ long wlan_connect(char *ssid, long ssid_len)
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_CONNECT, &ret);
-  errno = ret;
+  set_errno(ret);
 
   cc3000_lib_unlock();
 
@@ -473,7 +473,7 @@ long wlan_disconnect(void)
   /* Wait for command complete event */
 
   SimpleLinkWaitEvent(HCI_CMND_WLAN_DISCONNECT, &ret);
-  errno = ret;
+  set_errno(ret);
 
   cc3000_lib_unlock();
 
@@ -1055,7 +1055,6 @@ long wlan_smart_config_start(unsigned long algoEncryptedFlag)
   /* Fill in HCI packet structure */
 
   args = UINT32_TO_STREAM(args, algoEncryptedFlag);
-  ret  = EFAIL;
 
   hci_command_send(HCI_CMND_WLAN_IOCTL_SIMPLE_CONFIG_START, ptr,
                    WLAN_SMART_CONFIG_START_PARAMS_LEN);

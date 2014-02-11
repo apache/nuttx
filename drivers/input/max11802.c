@@ -1061,12 +1061,10 @@ static int max11802_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 static int max11802_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
-  FAR struct inode         *inode;
+  FAR struct inode *inode;
   FAR struct max11802_dev_s *priv;
-  pollevent_t               eventset;
-  int                       ndx;
-  int                       ret = OK;
-  int                       i;
+  int ret;
+  int i;
 
   ivdbg("setup: %d\n", (int)setup);
   DEBUGASSERT(filep && fds);

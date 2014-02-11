@@ -381,7 +381,7 @@ int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig,
     {
       /* Enable interrupts for this GPIO */
 
-      regval &= ~GPIO_PIN(pin);
+      regval |= GPIO_PIN(pin);
     }
   else
     {
@@ -389,6 +389,7 @@ int stmpe811_gpioattach(STMPE811_HANDLE handle, uint8_t pinconfig,
 
       regval &= ~GPIO_PIN(pin);
     }
+
   stmpe811_putreg8(priv, STMPE811_GPIO_EN, regval);
 
   sem_post(&priv->exclsem);

@@ -152,7 +152,7 @@ static int bat_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct battery_dev_s *dev  = inode->i_private;
-  int ret   = -EINVAL;
+  int ret;
 
   /* Inforce mutually exclusive access to the battery driver */
 

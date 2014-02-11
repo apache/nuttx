@@ -908,7 +908,7 @@ static void dm9x_receive(struct dm9x_driver_s *dm9x)
       mdrah = getreg(DM9X_MDRAH);
       mdral = getreg(DM9X_MDRAL);
 
-      getreg(DM9X_MRCMDX);       /* Dummy read */
+      getreg(DM9X_MRCMDX);         /* Dummy read */
       rxbyte = (uint8_t)DM9X_DATA; /* Get the most up-to-date data */
 
       /* Packet ready for receive check */

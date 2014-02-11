@@ -1365,9 +1365,6 @@ int arch_tcinitialize(int minor)
 {
   FAR struct tc_dev_s *priv;
   char devname[DEV_NAMELEN];
-#ifdef CONFIG_TOUCHSCREEN_MULTIPLE
-  irqstate_t flags;
-#endif
   int ret;
 
   ivdbg("minor: %d\n", minor);

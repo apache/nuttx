@@ -360,7 +360,7 @@ int16_t usbmsc_mkcfgdesc(uint8_t *buf)
 {
 #ifdef CONFIG_USBDEV_DUALSPEED
   FAR const struct usb_epdesc_s *epdesc;
-  bool hispeed = (speed == USB_SPEED_HIGH);
+  bool hispeed;
 #endif
 
   /* Configuration descriptor.  If the USB mass storage device is

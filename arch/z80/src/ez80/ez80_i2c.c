@@ -393,7 +393,6 @@ static void i2c_stop(void)
 static int i2c_sendaddr(struct ez80_i2cdev_s *priv, uint8_t readbit)
 {
   uint8_t sr;
-  int ret = OK;
 
   /* Wait for the IFLG bit to transition to 1.  At this point, we should
    * have status == 8 meaning that the start bit was sent successfully.

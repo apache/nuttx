@@ -769,7 +769,7 @@ static void stmpe811_timeout(int argc, uint32_t arg1, ...)
 
   /* Are we still stuck in the pen down state? */
 
-  if (priv->sample.contact == CONTACT_MOVE ||
+  if (priv->sample.contact == CONTACT_DOWN ||
       priv->sample.contact == CONTACT_MOVE)
     {
       /* Yes... is the worker thread available?   If not, then apparently
@@ -1127,7 +1127,7 @@ void stmpe811_tscworker(FAR struct stmpe811_dev_s *priv, uint8_t intsta)
    */
 
 ignored:
-  if (priv->sample.contact == CONTACT_MOVE ||
+  if (priv->sample.contact == CONTACT_DOWN ||
       priv->sample.contact == CONTACT_MOVE)
     {
       (void)wd_start(priv->wdog, STMPE811_PENUP_TICKS, stmpe811_timeout,

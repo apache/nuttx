@@ -6570,3 +6570,6 @@
 	  for the MIO283QT9A LCD.  From Toby Duckworth (2014-2-10).
 	* configs/mikroe-stm32f4/src/up_mio283qt9a.c: The Mikroe STM32F4 can
 	  now support the newer MIO283QT9A LCD. From Toby Duckworth (2014-2-10).
+	* MANY files changes based on complaints from the tool CppCheck.  Several
+	  latent bugs were fixed (and most likely some new typos were introducted)
+	  (2014-2-10).

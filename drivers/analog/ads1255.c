@@ -107,14 +107,14 @@
 
 struct up_dev_s
 {
-    uint8_t channel;
-    uint32_t sps;
-    uint8_t pga;
-    uint8_t buf;
-    const uint8_t *mux;
-    int irq;
-    int devno;
-    FAR struct spi_dev_s  *spi;      /* Cached SPI device reference */
+  uint8_t channel;
+  uint32_t sps;
+  uint8_t pga;
+  uint8_t buf;
+  const uint8_t *mux;
+  int irq;
+  int devno;
+  FAR struct spi_dev_s *spi;      /* Cached SPI device reference */
 };
 
 /****************************************************************************
@@ -136,28 +136,28 @@ static int  adc_interrupt(int irq, void *context);
 
 static const struct adc_ops_s g_adcops =
 {
-    .ao_reset = adc_reset,     /* ao_reset */
-    .ao_setup = adc_setup,     /* ao_setup */
-    .ao_shutdown = adc_shutdown,  /* ao_shutdown */
-    .ao_rxint = adc_rxint,     /* ao_rxint */
-    .ao_ioctl = adc_ioctl      /* ao_read */
+  .ao_reset = adc_reset,        /* ao_reset */
+  .ao_setup = adc_setup,        /* ao_setup */
+  .ao_shutdown = adc_shutdown,  /* ao_shutdown */
+  .ao_rxint = adc_rxint,        /* ao_rxint */
+  .ao_ioctl = adc_ioctl         /* ao_read */
 };
 
 static struct up_dev_s g_adcpriv =
 {
-    .mux  = (const uint8_t [])
-    {
-        CONFIG_ADS1255_MUX,0
-    },
-    .sps  = CONFIG_ADS1255_SPS,
-    .channel = 0,
-    .irq  = CONFIG_ADS1255_IRQ,
+  .mux  = (const uint8_t [])
+  {
+    CONFIG_ADS1255_MUX,0
+  },
+  .sps  = CONFIG_ADS1255_SPS,
+  .channel = 0,
+  .irq  = CONFIG_ADS1255_IRQ,
 };
 
 static struct adc_dev_s g_adcdev =
 {
-    .ad_ops = &g_adcops,
-    .ad_priv= &g_adcpriv,
+  .ad_ops = &g_adcops,
+  .ad_priv= &g_adcpriv,
 };
 
 /****************************************************************************
@@ -166,141 +166,155 @@ static struct adc_dev_s g_adcdev =
 
 static uint8_t getspsreg(uint16_t sps)
 {
-    static const unsigned short sps_tab[]=
+  static const unsigned short sps_tab[]=
+  {
+    3,7,12,20,27,40,55,80,300,750,1500,3000,5000,10000,20000,65535,
+  };
+  static const unsigned char sps_reg[]=
+  {
+    0x03,0x13,0x23,0x33,0x43,0x53,0x63,0x72,0x82,0x92,0xa1,0xb0,0xc0,0xd0,0xe0,0xf0,
+  };
+  int i;
+
+  for (i=0; i<16; i++)
     {
-        3,7,12,20,27,40,55,80,300,750,1500,3000,5000,10000,20000,65535,
-    };
-    static const unsigned char sps_reg[]=
-    {
-        0x03,0x13,0x23,0x33,0x43,0x53,0x63,0x72,0x82,0x92,0xa1,0xb0,0xc0,0xd0,0xe0,0xf0,
-    };
-    int i;
-    for (i=0; i<16; i++)
-    {
-        if (sps<sps_tab[i])
-            break;
+      if (sps<sps_tab[i])
+        {
+          break;
+        }
     }
-    return sps_reg[i];
+
+  return sps_reg[i];
 }
 
 /****************************************************************************
  * ad_private Functions
  ****************************************************************************/
 /* Reset the ADC device.  Called early to initialize the hardware. This
-* is called, before ao_setup() and on error conditions.
-*/
+ * is called, before ao_setup() and on error conditions.
+ */
 
 static void adc_reset(FAR struct adc_dev_s *dev)
 {
-    FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-    FAR struct spi_dev_s *spi = priv->spi;
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  FAR struct spi_dev_s *spi = priv->spi;
 
-    SPI_SETMODE(spi, SPIDEV_MODE1);
-    SPI_SETBITS(spi, 8);
-    SPI_SETFREQUENCY(spi, CONFIG_ADS1255_FREQUENCY);
-    usleep(1000);
-    SPI_SELECT(spi, priv->devno, true);
-    SPI_SEND(spi,ADS125X_WREG+0x03);    //WRITE SPS REG
-    SPI_SEND(spi,0x00);                 //count=1
-    SPI_SEND(spi,0x63);
-    SPI_SELECT(spi, priv->devno, false);
+  SPI_SETMODE(spi, SPIDEV_MODE1);
+  SPI_SETBITS(spi, 8);
+  SPI_SETFREQUENCY(spi, CONFIG_ADS1255_FREQUENCY);
+  usleep(1000);
+  SPI_SELECT(spi, priv->devno, true);
+  SPI_SEND(spi,ADS125X_WREG+0x03);    /* WRITE SPS REG */
+  SPI_SEND(spi,0x00);                 /* count=1 */
+  SPI_SEND(spi,0x63);
+  SPI_SELECT(spi, priv->devno, false);
 }
 
 /* Configure the ADC. This method is called the first time that the ADC
-* device is opened.  This will occur when the port is first opened.
-* This setup includes configuring and attaching ADC interrupts.  Interrupts
-* are all disabled upon return.
-*/
+ * device is opened.  This will occur when the port is first opened.
+ * This setup includes configuring and attaching ADC interrupts.  Interrupts
+ * are all disabled upon return.
+ */
 
 static int  adc_setup(FAR struct adc_dev_s *dev)
 {
-    FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-    FAR struct spi_dev_s *spi = priv->spi;
-    int ret = irq_attach(priv->irq, adc_interrupt);
-    if (ret == OK)
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  FAR struct spi_dev_s *spi = priv->spi;
+  int ret = irq_attach(priv->irq, adc_interrupt);
+
+  if (ret == OK)
     {
-        SPI_SELECT(spi, priv->devno, true);
-        SPI_SEND(spi,ADS125X_WREG);         //WRITE REG from 0
-        SPI_SEND(spi,0x03);                 //count=4+1
-        if (priv->buf)
-            SPI_SEND(spi,ADS125X_BUFON);    //REG0 STATUS BUFFER ON
-        else
-            SPI_SEND(spi,ADS125X_BUFOFF);
-        SPI_SEND(spi,priv->mux[0]);
-        SPI_SEND(spi,priv->pga);            //REG2 ADCON PGA=2
-        SPI_SEND(spi,getspsreg(priv->sps));
-        usleep(1000);
-        SPI_SEND(spi,ADS125X_SELFCAL);
-        SPI_SELECT(spi, priv->devno, false);
-        up_enable_irq(priv->irq);
+      SPI_SELECT(spi, priv->devno, true);
+      SPI_SEND(spi,ADS125X_WREG);         /* WRITE REG from 0 */
+      SPI_SEND(spi,0x03);                 /* count=4+1 */
+      if (priv->buf)
+        {
+          SPI_SEND(spi,ADS125X_BUFON);    /* REG0 STATUS BUFFER ON */
+        }
+      else
+        {
+          SPI_SEND(spi,ADS125X_BUFOFF);
+        }
+
+      SPI_SEND(spi,priv->mux[0]);
+      SPI_SEND(spi,priv->pga);            /* REG2 ADCON PGA=2 */
+      SPI_SEND(spi,getspsreg(priv->sps));
+      usleep(1000);
+      SPI_SEND(spi,ADS125X_SELFCAL);
+      SPI_SELECT(spi, priv->devno, false);
+      up_enable_irq(priv->irq);
     }
-    return ret;
+
+  return ret;
 }
 
 /* Disable the ADC.  This method is called when the ADC device is closed.
-* This method reverses the operation the setup method.
-*/
+ * This method reverses the operation the setup method.
+ */
 
 static void adc_shutdown(FAR struct adc_dev_s *dev)
 {
-    FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-    up_disable_irq(priv->irq);
-    irq_detach(priv->irq);
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  up_disable_irq(priv->irq);
+  irq_detach(priv->irq);
 }
 
 /* Call to enable or disable RX interrupts */
 
 static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 {
-    FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
-    if (enable)
-        up_enable_irq(priv->irq);
-    else
-        up_disable_irq(priv->irq);
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
+  if (enable)
+    {
+      up_enable_irq(priv->irq);
+    }
+  else
+    {
+      up_disable_irq(priv->irq);
+    }
 }
 
 /* All ioctl calls will be routed through this method */
 
 static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
-    dbg("Fix me:Not Implemented\n");
-    return 0;
+  dbg("Fix me:Not Implemented\n");
+  return 0;
 }
 
 static int adc_interrupt(int irq, void *context)
 {
-    uint32_t regval;
-    FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
-    FAR struct spi_dev_s *spi = priv->spi;
-    unsigned char buf[4];
-    unsigned char ch;
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
+  FAR struct spi_dev_s *spi = priv->spi;
+  unsigned char buf[4];
+  unsigned char ch;
 
-    SPI_SELECT(spi, priv->devno, true);
-    SPI_SEND(spi,ADS125X_RDATA);
-    up_udelay(10);
-    buf[3]=SPI_SEND(spi,0xff);
-    buf[2]=SPI_SEND(spi,0xff);
-    buf[1]=SPI_SEND(spi,0xff);
-    buf[0]=0;
+  SPI_SELECT(spi, priv->devno, true);
+  SPI_SEND(spi,ADS125X_RDATA);
+  up_udelay(10);
+  buf[3]=SPI_SEND(spi,0xff);
+  buf[2]=SPI_SEND(spi,0xff);
+  buf[1]=SPI_SEND(spi,0xff);
+  buf[0]=0;
 
-    priv->channel++;
-    ch = priv->mux[priv->channel];
-    if ( ch == 0 )
+  priv->channel++;
+  ch = priv->mux[priv->channel];
+  if ( ch == 0 )
     {
-        priv->channel=0;
-        ch = priv->mux[0];
+      priv->channel=0;
+      ch = priv->mux[0];
     }
 
-    SPI_SEND(spi,ADS125X_WREG+0x01);
-    SPI_SEND(spi,0x00);
-    SPI_SEND(spi,ch);
-    SPI_SEND(spi,ADS125X_SYNC);
-    up_udelay(2);
-    SPI_SEND(spi,ADS125X_WAKEUP);
-    SPI_SELECT(spi, priv->devno, false);
+  SPI_SEND(spi,ADS125X_WREG+0x01);
+  SPI_SEND(spi,0x00);
+  SPI_SEND(spi,ch);
+  SPI_SEND(spi,ADS125X_SYNC);
+  up_udelay(2);
+  SPI_SEND(spi,ADS125X_WAKEUP);
+  SPI_SELECT(spi, priv->devno, false);
 
-    adc_receive(&g_adcdev,priv->channel,*(int32_t *)buf);
-    return OK;
+  adc_receive(&g_adcdev,priv->channel,*(int32_t *)buf);
+  return OK;
 }
 
 /****************************************************************************
@@ -323,13 +337,13 @@ static int adc_interrupt(int irq, void *context)
 
 FAR struct adc_dev_s *up_ads1255initialize(FAR struct spi_dev_s *spi, unsigned int devno)
 {
-    FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
+  FAR struct up_dev_s *priv = (FAR struct up_dev_s *)g_adcdev.ad_priv;
 
-    /* Driver state data */
+  /* Driver state data */
 
-    priv->spi      = spi;
-    priv->devno    = devno;
-    return &g_adcdev;
+  priv->spi      = spi;
+  priv->devno    = devno;
+  return &g_adcdev;
 }
 #endif
 

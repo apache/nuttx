@@ -745,7 +745,7 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
 errout_with_semaphore:
   romfs_semgive(rm);
-  return ERROR;
+  return ret;
 }
 
 /****************************************************************************

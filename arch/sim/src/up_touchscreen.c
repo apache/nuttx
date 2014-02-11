@@ -534,7 +534,7 @@ static int up_poll(FAR struct file *filep, FAR struct pollfd *fds,
 {
   FAR struct inode    *inode;
   FAR struct up_dev_s *priv;
-  int                  ret = OK;
+  int                  ret;
   int                  i;
 
   ivdbg("setup: %d\n", (int)setup);

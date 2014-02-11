@@ -133,7 +133,7 @@ static FAR sq_queue_t g_freelist;
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  uip_grpalloc
+ * Name:  uip_grpheapalloc
  *
  * Description:
  *   Allocate a new group from heap memory.
@@ -169,6 +169,7 @@ static inline FAR struct igmp_group_s *uip_grpprealloc(void)
       memset(group, 0, sizeof(struct igmp_group_s));
       group->flags = IGMP_PREALLOCATED;
     }
+
   return group;
 }
 #endif
@@ -237,9 +238,10 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
       grplldbg("Allocate from the heap\n");
       group = uip_grpheapalloc();
     }
+
   grplldbg("group: %p\n", group);
 
-  /* Check if we succesfully allocated a group structure */
+  /* Check if we successfully allocated a group structure */
 
   if (group)
     {
@@ -262,6 +264,7 @@ FAR struct igmp_group_s *uip_grpalloc(FAR struct uip_driver_s *dev,
       sq_addfirst((FAR sq_entry_t*)group, &dev->grplist);
       uip_unlock(flags);
     }
+
   return group;
 }
 
@@ -300,6 +303,7 @@ FAR struct igmp_group_s *uip_grpfind(FAR struct uip_driver_s *dev,
           break;
         }
     }
+
   uip_unlock(flags);
   return group;
 }
@@ -326,6 +330,7 @@ FAR struct igmp_group_s *uip_grpallocfind(FAR struct uip_driver_s *dev,
     {
       group = uip_grpalloc(dev, addr);
     }
+
   grplldbg("group: %p\n", group);
   return group;
 }

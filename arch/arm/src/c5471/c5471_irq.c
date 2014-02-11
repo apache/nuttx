@@ -228,7 +228,7 @@ void up_enable_irq(int irq)
 
 void up_maskack_irq(int irq)
 {
-  uint32_t reg = getreg32(INT_CTRL_REG);
+  uint32_t reg;
 
   /* Mask the interrupt */
 

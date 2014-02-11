@@ -92,7 +92,7 @@ int psock_bind(FAR struct socket *psock, const struct sockaddr *addr,
 #endif
 
   int err;
-  int ret;
+  int ret = OK;
 
   /* Verify that the psock corresponds to valid, allocated socket */
 
