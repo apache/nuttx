@@ -82,7 +82,10 @@ size_t up_check_tcbstack(FAR struct tcb_s *tcb)
 {
   FAR uint8_t *ptr;
   size_t mark;
-  int i, j;
+#if 0
+  int i;
+  int j;
+#endif
 
   /* The AVR uses a push-down stack:  the stack grows toward lower addresses
    * in memory.  We need to start at the lowest address in the stack memory
@@ -121,8 +124,10 @@ size_t up_check_tcbstack(FAR struct tcb_s *tcb)
                 {
                   ch = 'X';
                 }
+
               up_putc(ch);
              }
+
           up_putc('\n');
         }
      }

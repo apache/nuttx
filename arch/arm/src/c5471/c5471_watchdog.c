@@ -261,7 +261,7 @@ static ssize_t wdt_read(struct file *filep, char *buffer, size_t buflen)
   dbg("buflen=%d\n", buflen);
   if (buflen >= 18)
     {
-      sprintf(buffer, "#08x %08x\n", c5471_wdt_cntl, c5471_wdt_count);
+      sprintf(buffer, "%08x %08x\n", c5471_wdt_cntl, c5471_wdt_count);
       return 18;
     }
   return 0;

@@ -112,7 +112,6 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
   size_t    usize = CONFIG_RAM_END - ubase;
-  int       log2;
 
   DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
 
@@ -151,9 +150,6 @@ void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
    */
 
   uintptr_t ubase = (uintptr_t)USERSPACE->us_bssend + CONFIG_MM_KERNEL_HEAPSIZE;
-  size_t    usize = CONFIG_RAM_END - ubase;
-  int       log2;
-
   DEBUGASSERT(ubase < (uintptr_t)CONFIG_RAM_END);
 
   /* Return the kernel heap settings (i.e., the part of the heap region

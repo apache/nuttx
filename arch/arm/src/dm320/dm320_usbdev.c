@@ -1761,7 +1761,7 @@ static inline void dm320_epinitialize(struct dm320_usbdev_s *priv)
 
           /* FIFO address, max packet size, dual/single buffered */
 
-          dm320_putreg8(addrhi, DM320_USB_TXFIFO1);
+          dm320_putreg8(addrlo, DM320_USB_TXFIFO1);
           dm320_putreg8(addrhi|g_epinfo[i].fifo, DM320_USB_TXFIFO2);
 
           /* TX endpoint max packet size */

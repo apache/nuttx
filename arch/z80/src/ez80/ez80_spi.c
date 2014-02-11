@@ -284,7 +284,7 @@ static uint8_t spi_waitspif(void)
  * Name: spi_transfer
  *
  * Description:
- *   Send one byte on SPI, return th response
+ *   Send one byte on SPI, return the response
  *
  * Input Parameters:
  *   ch - the byte to send
@@ -361,7 +361,7 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
   FAR const uint8_t *ptr = (FAR const uint8_t*)buffer;
   uint8_t response;
 
-  /* Loop while thre are bytes remaining to be sent */
+  /* Loop while there are bytes remaining to be sent */
 
   while (buflen-- > 0)
     {
@@ -392,7 +392,6 @@ static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
 static void spi_recvblock(FAR struct spi_dev_s *dev, FAR void *buffer, size_t buflen)
 {
   FAR uint8_t *ptr = (FAR uint8_t*)buffer;
-  uint8_t response;
 
   /* Loop while thre are bytes remaining to be sent */
 

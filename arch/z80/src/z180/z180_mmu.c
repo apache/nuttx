@@ -438,7 +438,6 @@ int up_addrenv_destroy(task_addrenv_t addrenv)
 int up_addrenv_assign(task_addrenv_t addrenv, FAR struct tcb_s *tcb)
 {
   FAR struct z180_cbr_s *cbr = (FAR struct z180_cbr_s *)addrenv;
-  int ret;
 
   /* Make sure that there is no address environment in place on this TCB */
 

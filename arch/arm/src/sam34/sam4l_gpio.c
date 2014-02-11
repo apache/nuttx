@@ -214,7 +214,7 @@ static inline int sam_configinterrupt(uintptr_t base, uint32_t pin,
        *   11 Reserved
        */
 
-      gpio_pinset_t edges = cfgset & GPIO_INT_MASK;
+      gpio_pinset_t edges = (cfgset & GPIO_INT_MASK);
 
       if (edges == GPIO_INT_RISING)
         {
@@ -398,16 +398,16 @@ static inline int sam_configperiph(uintptr_t base, uint32_t pin,
    *   11 Reserved
    */
 
-  edges = cfgset & GPIO_INT_MASK;
+  edges = (cfgset & GPIO_INT_MASK);
   if (edges == GPIO_INT_RISING)
     {
-      /* Rising only.. disable interrrupts on the falling edge */
+      /* Rising only.. disable interrupts on the falling edge */
 
       putreg32(pin, base + SAM_GPIO_IMR0S_OFFSET);
     }
   else if (edges == GPIO_INT_FALLING)
     {
-      /* Falling only.. disable interrrupts on the rising edge */
+      /* Falling only.. disable interrupts on the rising edge */
 
       putreg32(pin, base + SAM_GPIO_IMR1S_OFFSET);
     }

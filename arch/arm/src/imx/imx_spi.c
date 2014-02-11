@@ -500,10 +500,10 @@ static int spi_transfer(struct imx_spidev_s *priv, const void *txbuffer,
 {
 #ifndef CONFIG_SPI_POLLWAIT
   irqstate_t flags;
-#endif
   uint32_t regval;
-  int ntxd;
   int ret;
+#endif
+  int ntxd;
 
   /* Set up to perform the transfer */
 
