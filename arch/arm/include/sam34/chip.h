@@ -91,12 +91,12 @@
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                1            /* One USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                0            /* No USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                1            /* One USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                0            /* No USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM3U2E)
 
@@ -111,12 +111,12 @@
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                1            /* One USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                0            /* No USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                1            /* One USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                0            /* No USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM3U1E)
 
@@ -131,12 +131,12 @@
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                1            /* One USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                0            /* No USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                1            /* One USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                0            /* No USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM3U4C)
 
@@ -151,12 +151,12 @@
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                1            /* One USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                0            /* No USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                1            /* One USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                0            /* No USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM3U2C)
 
@@ -171,12 +171,12 @@
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                1            /* One USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                0            /* No USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                1            /* One USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                0            /* No USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM3U1C)
 
@@ -191,12 +191,12 @@
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                1            /* One USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                0            /* No USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                1            /* One USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                0            /* No USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 /* AT91SAM3X/3A Families ************************************************************/
 /* FEATURE      SAM3X8E  SAM3X8C  SAM3X4E  SAM3X4C  SAM3A8C  SAM3A4C
@@ -236,12 +236,12 @@
 
 #  define SAM34_NDMACHAN              6            /* 6 DMA Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                1            /* One USB high speed device */
-#  define SAM32_NUHPHS                1            /* One USB high speed embedded host */
-#  define SAM32_NUDPFS                0            /* No USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                1            /* One USB high speed device */
+#  define SAM34_NUHPHS                1            /* One USB high speed embedded host */
+#  define SAM34_NUDPFS                0            /* No USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM3X8C)
 
@@ -256,12 +256,12 @@
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                1            /* One USB high speed device */
-#  define SAM32_NUHPHS                1            /* One USB high speed embedded host */
-#  define SAM32_NUDPFS                0            /* No USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                1            /* One USB high speed device */
+#  define SAM34_NUHPHS                1            /* One USB high speed embedded host */
+#  define SAM34_NUDPFS                0            /* No USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM3X4E)
 
@@ -276,12 +276,12 @@
 
 #  define SAM34_NDMACHAN              6            /* 4 DMA Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                1            /* One USB high speed device */
-#  define SAM32_NUHPHS                1            /* One USB high speed embedded host */
-#  define SAM32_NUDPFS                0            /* No USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                1            /* One USB high speed device */
+#  define SAM34_NUHPHS                1            /* One USB high speed embedded host */
+#  define SAM34_NUDPFS                0            /* No USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM3X4C)
 
@@ -296,12 +296,12 @@
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                1            /* One USB high speed device */
-#  define SAM32_NUHPHS                1            /* One USB high speed embedded host */
-#  define SAM32_NUDPFS                0            /* No USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                1            /* One USB high speed device */
+#  define SAM34_NUHPHS                1            /* One USB high speed embedded host */
+#  define SAM34_NUDPFS                0            /* No USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM3A8C)
 
@@ -316,12 +316,12 @@
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                1            /* One USB high speed device */
-#  define SAM32_NUHPHS                1            /* One USB high speed embedded host */
-#  define SAM32_NUDPFS                0            /* No USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                1            /* One USB high speed device */
+#  define SAM34_NUHPHS                1            /* One USB high speed embedded host */
+#  define SAM34_NUDPFS                0            /* No USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM3A4C)
 
@@ -336,12 +336,12 @@
 
 #  define SAM34_NDMACHAN              4            /* 4 DMA Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                1            /* One USB high speed device */
-#  define SAM32_NUHPHS                1            /* One USB high speed embedded host */
-#  define SAM32_NUDPFS                0            /* No USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                1            /* One USB high speed device */
+#  define SAM34_NUHPHS                1            /* One USB high speed embedded host */
+#  define SAM34_NUDPFS                0            /* No USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 /* AT91SAM4L Family *****************************************************************/
 /* Sub-family differences:
@@ -406,12 +406,12 @@
 
 #  define SAM34_NDMACHAN              16           /* 16 Peripheral DMA Channels */
 #  define SAM34_NMCI2                 0            /* No memory card interface */
-#  define SAM32_NSLCD                 1            /* 1 segment LCD interface */
-#  define SAM32_NAESA                 1            /* 1 advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                1            /* 1 USB full speed embedded host */
+#  define SAM34_NSLCD                 1            /* 1 segment LCD interface */
+#  define SAM34_NAESA                 1            /* 1 advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                1            /* 1 USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4LC4C) || defined (CONFIG_ARCH_CHIP_ATSAM4LC4B) || \
       defined(CONFIG_ARCH_CHIP_ATSAM4LC4A)
@@ -427,12 +427,12 @@
 
 #  define SAM34_NDMACHAN              16           /* 16 Peripheral DMA Channels */
 #  define SAM34_NMCI2                 0            /* No memory card interface */
-#  define SAM32_NSLCD                 1            /* 1 segment LCD interface */
-#  define SAM32_NAESA                 1            /* 1 advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                1            /* 1 USB full speed embedded host */
+#  define SAM34_NSLCD                 1            /* 1 segment LCD interface */
+#  define SAM34_NAESA                 1            /* 1 advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                1            /* 1 USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4LS2C) || defined (CONFIG_ARCH_CHIP_ATSAM4LS2B) || \
       defined(CONFIG_ARCH_CHIP_ATSAM4LS2A)
@@ -448,12 +448,12 @@
 
 #  define SAM34_NDMACHAN              16           /* 16 Peripheral DMA Channels */
 #  define SAM34_NMCI2                 0            /* No memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4LS4C) || defined (CONFIG_ARCH_CHIP_ATSAM4LS4B) || \
       defined(CONFIG_ARCH_CHIP_ATSAM4LS4A)
@@ -469,12 +469,12 @@
 
 #  define SAM34_NDMACHAN              16           /* 16 Peripheral DMA Channels */
 #  define SAM34_NMCI2                 0            /* No memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 /* AT91SAM4S Family *****************************************************************/
 /*
@@ -507,12 +507,12 @@
 
 #  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4SD32B)
 /* Internal memory */
@@ -526,12 +526,12 @@
 
 #  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4SD16C)
 /* Internal memory */
@@ -545,12 +545,12 @@
 
 #  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4SD16B)
 /* Internal memory */
@@ -564,12 +564,12 @@
 
 #  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4SA16C)
 /* Internal memory */
@@ -583,12 +583,12 @@
 
 #  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4SA16B)
 /* Internal memory */
@@ -602,12 +602,12 @@
 
 #  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4S16C)
 /* Internal memory */
@@ -621,12 +621,12 @@
 
 #  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4S16B)
 /* Internal memory */
@@ -640,12 +640,12 @@
 
 #  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4S8C)
 /* Internal memory */
@@ -659,12 +659,12 @@
 
 #  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4S8B)
 /* Internal memory */
@@ -678,12 +678,12 @@
 
 #  define SAM34_NDMACHAN              22           /* 22 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 /* AT91SAM4E Family *****************************************************************/
 /* FEATURE     SAM4E16E  SAM4E8E  SAM4E16C SAM4E8C
@@ -727,12 +727,12 @@
 
 #  define SAM34_NDMACHAN              24           /* 24 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4E8E)
 /* Internal memory */
@@ -746,12 +746,12 @@
 
 #  define SAM34_NDMACHAN              24           /* 24 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4E16C)
 /* Internal memory */
@@ -765,12 +765,12 @@
 
 #  define SAM34_NDMACHAN              21           /* 21 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #elif defined(CONFIG_ARCH_CHIP_ATSAM4E8C)
 /* Internal memory */
@@ -784,12 +784,12 @@
 
 #  define SAM34_NDMACHAN              21           /* 21 PDC Channels */
 #  define SAM34_NMCI2                 1            /* 1 memory card interface */
-#  define SAM32_NSLCD                 0            /* No segment LCD interface */
-#  define SAM32_NAESA                 0            /* No advanced encryption standard */
-#  define SAM32_NUDPHS                0            /* No USB high speed device */
-#  define SAM32_NUHPHS                0            /* No USB high speed embedded host */
-#  define SAM32_NUDPFS                1            /* 1 USB full speed device */
-#  define SAM32_NUHPFS                0            /* No USB full speed embedded host */
+#  define SAM34_NSLCD                 0            /* No segment LCD interface */
+#  define SAM34_NAESA                 0            /* No advanced encryption standard */
+#  define SAM34_NUDPHS                0            /* No USB high speed device */
+#  define SAM34_NUHPHS                0            /* No USB high speed embedded host */
+#  define SAM34_NUDPFS                1            /* 1 USB full speed device */
+#  define SAM34_NUHPFS                0            /* No USB full speed embedded host */
 
 #else
 #  error "Unknown SAM3/4 chip type"
