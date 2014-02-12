@@ -1,0 +1,350 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+comment "Atmel SAMD Configuration Options"
+
+choice
+	prompt "Atmel SAMD Chip Selection"
+	default ARCH_CHIP_SAMD20J18
+	depends on ARCH_CHIP_SAMD
+
+config ARCH_CHIP_SAMD20E14
+	bool "SAMD20E14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20E
+	---help---
+		Flash 16KB SRAM 2KB
+
+config ARCH_CHIP_SAMD20E15
+	bool "SAMD20E14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20E
+	---help---
+		Flash 32KB SRAM 4KB
+
+config ARCH_CHIP_SAMD20E16
+	bool "SAMD20E14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20E
+	---help---
+		Flash 64KB SRAM 8KB
+
+config ARCH_CHIP_SAMD20E17
+	bool "SAMD20E14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20E
+	---help---
+		Flash 128KB SRAM 16KB
+
+config ARCH_CHIP_SAMD20E18
+	bool "SAMD20E14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20E
+	---help---
+		Flash 256KB SRAM 32KB
+
+config ARCH_CHIP_SAMD20G14
+	bool "SAMD20G14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20G
+	---help---
+		Flash 16KB SRAM 2KB
+
+config ARCH_CHIP_SAMD20G15
+	bool "SAMD20G14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20G
+	---help---
+		Flash 32KB SRAM 4KB
+
+config ARCH_CHIP_SAMD20G16
+	bool "SAMD20G14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20G
+	---help---
+		Flash 64KB SRAM 8KB
+
+config ARCH_CHIP_SAMD20G17
+	bool "SAMD20G14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20G
+	---help---
+		Flash 128KB SRAM 16KB
+
+config ARCH_CHIP_SAMD20G18
+	bool "SAMD20G14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20G
+	---help---
+		Flash 256KB SRAM 32KB
+
+config ARCH_CHIP_SAMD20J14
+	bool "SAMD20J14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20J
+	---help---
+		Flash 16KB SRAM 2KB
+
+config ARCH_CHIP_SAMD20J15
+	bool "SAMD20J14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20J
+	---help---
+		Flash 32KB SRAM 4KB
+
+config ARCH_CHIP_SAMD20J16
+	bool "SAMD20J14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20J
+	---help---
+		Flash 64KB SRAM 8KB
+
+config ARCH_CHIP_SAMD20J17
+	bool "SAMD20J14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20J
+	---help---
+		Flash 128KB SRAM 16KB
+
+config ARCH_CHIP_SAMD20J18
+	bool "SAMD20J14"
+	select ARCH_FAMILY_SAMD20
+	select ARCH_FAMILY_SAMD20J
+	---help---
+		Flash 256KB SRAM 32KB
+
+endchoice
+
+config ARCH_FAMILY_SAMD20
+	bool
+	default n
+
+config ARCH_FAMILY_SAMD20E
+	bool
+	default n
+
+config ARCH_FAMILY_SAMD20G
+	bool
+	default n
+	select SAMD_HAVE_SERCOM4
+	select SAMD_HAVE_SERCOM5
+
+config ARCH_FAMILY_SAMD20J
+	bool
+	default n
+	select SAMD_HAVE_SERCOM4
+	select SAMD_HAVE_SERCOM5
+	select SAMD_HAVE_TC6
+	select SAMD_HAVE_TC7
+
+menu "SAMD Peripheral Support"
+
+config SAMD_WDT
+	bool "Watchdog Timer"
+	default n
+
+config SAMD_RTC
+	bool "Real Time Counter"
+	default n
+
+config SAMD_NVMCTRL
+	bool "Non-Volatile Memory Controller"
+	default n
+
+config SAMD_EVSYS
+	bool "Event System"
+	default n
+
+config SAMD_SERCOM0
+	bool "Serial Communication Interface 0"
+	default n
+
+config SAMD_SERCOM1
+	bool "Serial Communication Interface 1"
+	default n
+
+config SAMD_SERCOM2
+	bool "Serial Communication Interface 2"
+	default n
+
+config SAMD_SERCOM3
+	bool "Serial Communication Interface 3"
+	default n
+
+config SAMD_SERCOM4
+	bool "Serial Communication Interface 4"
+	default n
+	depends on SAMD_HAVE_SERCOM4
+
+config SAMD_SERCOM5
+	bool "Serial Communication Interface 5"
+	default n
+	depends on SAMD_HAVE_SERCOM5
+
+config SAMD_TC0
+	bool "Timer/Counter 0"
+	default n
+
+config SAMD_TC1
+	bool "Timer/Counter 1"
+	default n
+
+config SAMD_TC2
+	bool "Timer/Counter 2"
+	default n
+
+config SAMD_TC3
+	bool "Timer/Counter 3"
+	default n
+
+config SAMD_TC4
+	bool "Timer/Counter 4"
+	default n
+
+config SAMD_TC5
+	bool "Timer/Counter 5"
+	default n
+
+config SAMD_TC6
+	bool "Timer/Counter 6"
+	default n
+	depends on SAMD_HAVE_TC6
+
+config SAMD_TC7
+	bool "Timer/Counter 7"
+	default n
+	depends on SAMD_HAVE_TC7
+
+config SAMD_ADC
+	bool "Analog-to-Digital Converter"
+	default n
+
+config SAMD_AC
+	bool "Analog Comparator"
+	default n
+
+config SAMD_DAC
+	bool "Digital-to-Analog Converter"
+	default n
+
+config SAMD_PTC
+	bool "Peripheral Touch Controller"
+	default n
+
+endmenu
+
+choice
+	prompt "SERCOM0 mode"
+	default SAM_SERCOM0_UART
+	depends on SAMD_SERCOM0
+
+config SAM_SERCOM0_I2C
+bool "I2C"
+select I2C
+
+config SAM_SERCOM0_SPI
+bool "SPI"
+select SPI
+
+config SAM_SERCOM0_UART
+bool "UART"
+select ARCH_HAVE_UART0
+
+endchoice
+
+choice
+	prompt "SERCOM1 mode"
+	default SAM_SERCOM1_UART
+	depends on SAMD_SERCOM1
+
+config SAM_SERCOM1_I2C
+bool "I2C"
+select I2C
+
+config SAM_SERCOM1_SPI
+bool "SPI"
+select SPI
+
+config SAM_SERCOM1_UART
+bool "UART"
+select ARCH_HAVE_UART1
+
+endchoice
+
+choice
+	prompt "SERCOM2 mode"
+	default SAM_SERCOM2_UART
+	depends on SAMD_SERCOM2
+
+config SAM_SERCOM2_I2C
+bool "I2C"
+select I2C
+
+config SAM_SERCOM2_SPI
+bool "SPI"
+select SPI
+
+config SAM_SERCOM2_UART
+bool "UART"
+select ARCH_HAVE_UART2
+
+endchoice
+
+choice
+	prompt "SERCOM3 mode"
+	default SAM_SERCOM3_UART
+	depends on SAMD_SERCOM3
+
+config SAM_SERCOM3_I2C
+bool "I2C"
+select I2C
+
+config SAM_SERCOM3_SPI
+bool "SPI"
+select SPI
+
+config SAM_SERCOM3_UART
+bool "UART"
+select ARCH_HAVE_UART3
+
+endchoice
+
+choice
+	prompt "SERCOM4 mode"
+	default SAM_SERCOM4_UART
+	depends on SAMD_SERCOM4
+
+config SAM_SERCOM4_I2C
+bool "I2C"
+select I2C
+
+config SAM_SERCOM4_SPI
+bool "SPI"
+select SPI
+
+config SAM_SERCOM4_UART
+bool "UART"
+select ARCH_HAVE_UART4
+
+endchoice
+
+choice
+	prompt "SERCOM5 mode"
+	default SAM_SERCOM5_UART
+	depends on SAMD_SERCOM5
+
+config SAM_SERCOM5_I2C
+bool "I2C"
+select I2C
+
+config SAM_SERCOM5_SPI
+bool "SPI"
+select SPI
+
+config SAM_SERCOM5_UART
+bool "UART"
+select ARCH_HAVE_UART5
+
+endchoice

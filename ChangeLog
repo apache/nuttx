@@ -6573,3 +6573,6 @@
 	* MANY files changes based on complaints from the tool CppCheck.  Several
 	  latent bugs were fixed (and most likely some new typos were introduced)
 	  (2014-2-10).
+	* arch/arm/include/samd and src/samd:  Basic framework to support Atmel
+	  SAMD20 Cortex-M0+ chips.  Initial check-in is incomplete; this is a
+	  work in progress (2014-2-12).

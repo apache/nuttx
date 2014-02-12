@@ -121,19 +121,26 @@ config ARCH_CHIP_NUC1XX
 		NPX LPC43XX architectures (ARM Cortex-M4).
 
 config ARCH_CHIP_SAMA5
-	bool "Atmel AT91SAMA5"
+	bool "Atmel SAMA5"
 	select ARCH_CORTEXA5
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_LOWVECTORS
 	---help---
-		Atmel AT91SAMA5 (ARM Cortex-A5)
+		Atmel SAMA5 (ARM Cortex-A5)
+
+config ARCH_CHIP_SAMD
+	bool "Atmel SAMD"
+	select ARCH_CORTEXM0
+	select ARCH_HAVE_CMNVECTOR
+	---help---
+		Atmel SAMD (ARM Cortex-M0+)
 
 config ARCH_CHIP_SAM34
-	bool "Atmel AT91SAM3/SAM4"
+	bool "Atmel SAM3/SAM4"
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RAMFUNCS
 	---help---
-		Atmel AT91SAM3 (ARM Cortex-M3) and SAM4 (ARM Cortex-M4) architectures
+		Atmel SAM3 (ARM Cortex-M3) and SAM4 (ARM Cortex-M4) architectures
 
 config ARCH_CHIP_STM32
 	bool "STMicro STM32"
@@ -222,6 +229,7 @@ config ARCH_CHIP
 	default "lpc43xx"	if ARCH_CHIP_LPC43XX
 	default "nuc1xx"	if ARCH_CHIP_NUC1XX
 	default "sama5"		if ARCH_CHIP_SAMA5
+	default "samd"		if ARCH_CHIP_SAMD
 	default "sam34"		if ARCH_CHIP_SAM34
 	default "stm32"		if ARCH_CHIP_STM32
 	default "str71x"	if ARCH_CHIP_STR71X
@@ -379,6 +387,9 @@ source arch/arm/src/nuc1xx/Kconfig
 endif
 if ARCH_CHIP_SAMA5
 source arch/arm/src/sama5/Kconfig
+endif
+if ARCH_CHIP_SAMD
+source arch/arm/src/samd/Kconfig
 endif
 if ARCH_CHIP_SAM34
 source arch/arm/src/sam34/Kconfig
