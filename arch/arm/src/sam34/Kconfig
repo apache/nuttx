@@ -575,7 +575,7 @@ endmenu # AT91SAM3/4 Peripheral Support
 if ARCH_CHIP_SAM4L
 menu "AT91SAM3/4 Clock Configuration"
 
-config SAM32_RESET_PERIPHCLKS
+config SAM34_RESET_PERIPHCLKS
 	bool "Enable all peripheral clocks on reset"
 	default n
 	---help---

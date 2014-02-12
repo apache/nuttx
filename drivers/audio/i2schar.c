@@ -300,7 +300,7 @@ errout_with_reference:
 }
 
 /****************************************************************************
- * Name: i2schar_read
+ * Name: i2schar_write
  *
  * Description:
  *   Standard character driver write method

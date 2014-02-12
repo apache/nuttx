@@ -105,7 +105,7 @@ static inline void sam_init_cpumask(void)
 
   /* OR in the user selected peripherals */
 
-#ifdef CONFIG_SAM32_RESET_PERIPHCLKS
+#ifdef CONFIG_SAM34_RESET_PERIPHCLKS
 #ifdef CONFIG_SAM34_OCD
   mask |= PM_CPUMASK_OCD;             /* On-Chip Debug */
 #endif
@@ -136,7 +136,7 @@ static inline void sam_init_hsbmask(void)
 
   /* OR in the user selected peripherals */
 
-#ifdef CONFIG_SAM32_RESET_PERIPHCLKS
+#ifdef CONFIG_SAM34_RESET_PERIPHCLKS
 #ifdef CONFIG_SAM34_PDCA
   mask |= PM_HSBMASK_PDCA;            /* PDCA */
 #endif
@@ -182,7 +182,7 @@ static inline void sam_init_pbamask(void)
 
   /* OR in the user selected peripherals */
 
-#ifdef CONFIG_SAM32_RESET_PERIPHCLKS
+#ifdef CONFIG_SAM34_RESET_PERIPHCLKS
 #ifdef CONFIG_SAM34_IISC
   mask    |= PM_PBAMASK_IISC;         /* IISC */
 #endif
@@ -290,7 +290,7 @@ static inline void sam_init_pbbmask(void)
 
   /* OR in the user selected peripherals */
 
-#ifdef CONFIG_SAM32_RESET_PERIPHCLKS
+#ifdef CONFIG_SAM34_RESET_PERIPHCLKS
 #ifdef CONFIG_SAM34_HRAMC1
   mask |= PM_PBBMASK_HRAMC1;          /* HRAMC1 */
 #endif
@@ -335,7 +335,7 @@ static inline void sam_init_pbcmask(void)
 
   /* OR in the user selected peripherals */
 
-#ifdef CONFIG_SAM32_RESET_PERIPHCLKS
+#ifdef CONFIG_SAM34_RESET_PERIPHCLKS
 #ifdef CONFIG_SAM34_CHIPID
   mask |= PM_PBCMASK_CHIPID;          /* CHIPID */
 #endif
@@ -368,7 +368,7 @@ static inline void sam_init_pbdmask(void)
 
   /* OR in the user selected peripherals */
 
-#ifdef CONFIG_SAM32_RESET_PERIPHCLKS
+#ifdef CONFIG_SAM34_RESET_PERIPHCLKS
 #ifdef CONFIG_SAM34_AST
   mask |= PM_PBDMASK_AST;             /* AST */
 #endif
