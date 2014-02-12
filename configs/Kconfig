@@ -552,6 +552,15 @@ config ARCH_BOARD_SAMA5D3X_EK
 	---help---
 		The port of NuttX to the Atmel SAMA5D3x-EK development board (where x=1,3,4, or 5).
 
+config ARCH_BOARD_SAMD20_XPLAINED
+	bool "Atmel SAMD20-Xplained Pro development board"
+	depends on ARCH_CHIP_SAMD20J18
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		The port of NuttX to the Atmel SAMD20-Xplained Pro development board
+
 config ARCH_BOARD_SAM3UEK
 	bool "Atmel SAM3U-EK development board"
 	depends on ARCH_CHIP_ATSAM3U4E
@@ -935,6 +944,7 @@ config ARCH_BOARD
 	default "qemu-i486"           if ARCH_BOARD_QEMU_I486
 	default "rgmp"                if ARCH_BOARD_RGMP
 	default "sama5d3x-ek"         if ARCH_BOARD_SAMA5D3X_EK
+	default "samd20-xplained"     if ARCH_BOARD_SAMD20_XPLAINED
 	default "sam3u-ek"            if ARCH_BOARD_SAM3UEK
 	default "sam4l-xplained"      if ARCH_BOARD_SAM4L_XPLAINED
 	default "sam4s-xplained"      if ARCH_BOARD_SAM4S_XPLAINED
@@ -1184,6 +1194,9 @@ source "configs/rgmp/Kconfig"
 endif
 if ARCH_BOARD_SAMA5D3X_EK
 source "configs/sama5d3x-ek/Kconfig"
+endif
+if ARCH_BOARD_SAMD20_XPLAINED
+source "configs/samd20-xplained/Kconfig"
 endif
 if ARCH_BOARD_SAM3UEK
 source "configs/sam3u-ek/Kconfig"

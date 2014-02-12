@@ -18,28 +18,28 @@ config ARCH_CHIP_SAMD20E14
 		Flash 16KB SRAM 2KB
 
 config ARCH_CHIP_SAMD20E15
-	bool "SAMD20E14"
+	bool "SAMD20E15"
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20E
 	---help---
 		Flash 32KB SRAM 4KB
 
 config ARCH_CHIP_SAMD20E16
-	bool "SAMD20E14"
+	bool "SAMD20E16"
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20E
 	---help---
 		Flash 64KB SRAM 8KB
 
 config ARCH_CHIP_SAMD20E17
-	bool "SAMD20E14"
+	bool "SAMD20E17"
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20E
 	---help---
 		Flash 128KB SRAM 16KB
 
 config ARCH_CHIP_SAMD20E18
-	bool "SAMD20E14"
+	bool "SAMD20E18"
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20E
 	---help---
@@ -53,28 +53,28 @@ config ARCH_CHIP_SAMD20G14
 		Flash 16KB SRAM 2KB
 
 config ARCH_CHIP_SAMD20G15
-	bool "SAMD20G14"
+	bool "SAMD20G15"
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20G
 	---help---
 		Flash 32KB SRAM 4KB
 
 config ARCH_CHIP_SAMD20G16
-	bool "SAMD20G14"
+	bool "SAMD20G16"
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20G
 	---help---
 		Flash 64KB SRAM 8KB
 
 config ARCH_CHIP_SAMD20G17
-	bool "SAMD20G14"
+	bool "SAMD20G17"
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20G
 	---help---
 		Flash 128KB SRAM 16KB
 
 config ARCH_CHIP_SAMD20G18
-	bool "SAMD20G14"
+	bool "SAMD20G18"
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20G
 	---help---
@@ -88,28 +88,28 @@ config ARCH_CHIP_SAMD20J14
 		Flash 16KB SRAM 2KB
 
 config ARCH_CHIP_SAMD20J15
-	bool "SAMD20J14"
+	bool "SAMD20J15"
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20J
 	---help---
 		Flash 32KB SRAM 4KB
 
 config ARCH_CHIP_SAMD20J16
-	bool "SAMD20J14"
+	bool "SAMD20J16"
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20J
 	---help---
 		Flash 64KB SRAM 8KB
 
 config ARCH_CHIP_SAMD20J17
-	bool "SAMD20J14"
+	bool "SAMD20J17"
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20J
 	---help---
 		Flash 128KB SRAM 16KB
 
 config ARCH_CHIP_SAMD20J18
-	bool "SAMD20J14"
+	bool "SAMD20J18"
 	select ARCH_FAMILY_SAMD20
 	select ARCH_FAMILY_SAMD20J
 	---help---
@@ -138,6 +138,22 @@ config ARCH_FAMILY_SAMD20J
 	select SAMD_HAVE_SERCOM5
 	select SAMD_HAVE_TC6
 	select SAMD_HAVE_TC7
+
+config SAMD_HAVE_SERCOM4
+	bool
+	default n
+
+config SAMD_HAVE_SERCOM5
+	bool
+	default n
+
+config SAMD_HAVE_TC6
+	bool
+	default n
+
+config SAMD_HAVE_TC7
+	bool
+	default n
 
 menu "SAMD Peripheral Support"
 
@@ -237,18 +253,18 @@ endmenu
 
 choice
 	prompt "SERCOM0 mode"
-	default SAM_SERCOM0_UART
+	default SAMD_SERCOM0_ISUART
 	depends on SAMD_SERCOM0
 
-config SAM_SERCOM0_I2C
+config SAMD_SERCOM0_ISI2C
 bool "I2C"
 select I2C
 
-config SAM_SERCOM0_SPI
+config SAMD_SERCOM0_ISSPI
 bool "SPI"
 select SPI
 
-config SAM_SERCOM0_UART
+config SAMD_SERCOM0_ISUART
 bool "UART"
 select ARCH_HAVE_UART0
 
@@ -256,18 +272,18 @@ endchoice
 
 choice
 	prompt "SERCOM1 mode"
-	default SAM_SERCOM1_UART
+	default SAMD_SERCOM1_ISUART
 	depends on SAMD_SERCOM1
 
-config SAM_SERCOM1_I2C
+config SAMD_SERCOM1_ISI2C
 bool "I2C"
 select I2C
 
-config SAM_SERCOM1_SPI
+config SAMD_SERCOM1_ISSPI
 bool "SPI"
 select SPI
 
-config SAM_SERCOM1_UART
+config SAMD_SERCOM1_ISUART
 bool "UART"
 select ARCH_HAVE_UART1
 
@@ -275,18 +291,18 @@ endchoice
 
 choice
 	prompt "SERCOM2 mode"
-	default SAM_SERCOM2_UART
+	default SAMD_SERCOM2_ISUART
 	depends on SAMD_SERCOM2
 
-config SAM_SERCOM2_I2C
+config SAMD_SERCOM2_ISI2C
 bool "I2C"
 select I2C
 
-config SAM_SERCOM2_SPI
+config SAMD_SERCOM2_ISSPI
 bool "SPI"
 select SPI
 
-config SAM_SERCOM2_UART
+config SAMD_SERCOM2_ISUART
 bool "UART"
 select ARCH_HAVE_UART2
 
@@ -294,18 +310,18 @@ endchoice
 
 choice
 	prompt "SERCOM3 mode"
-	default SAM_SERCOM3_UART
+	default SAMD_SERCOM3_ISUART
 	depends on SAMD_SERCOM3
 
-config SAM_SERCOM3_I2C
+config SAMD_SERCOM3_ISI2C
 bool "I2C"
 select I2C
 
-config SAM_SERCOM3_SPI
+config SAMD_SERCOM3_ISSPI
 bool "SPI"
 select SPI
 
-config SAM_SERCOM3_UART
+config SAMD_SERCOM3_ISUART
 bool "UART"
 select ARCH_HAVE_UART3
 
@@ -313,18 +329,18 @@ endchoice
 
 choice
 	prompt "SERCOM4 mode"
-	default SAM_SERCOM4_UART
+	default SAMD_SERCOM4_ISUART
 	depends on SAMD_SERCOM4
 
-config SAM_SERCOM4_I2C
+config SAMD_SERCOM4_ISI2C
 bool "I2C"
 select I2C
 
-config SAM_SERCOM4_SPI
+config SAMD_SERCOM4_ISSPI
 bool "SPI"
 select SPI
 
-config SAM_SERCOM4_UART
+config SAMD_SERCOM4_ISUART
 bool "UART"
 select ARCH_HAVE_UART4
 
@@ -332,18 +348,18 @@ endchoice
 
 choice
 	prompt "SERCOM5 mode"
-	default SAM_SERCOM5_UART
+	default SAMD_SERCOM5_ISUART
 	depends on SAMD_SERCOM5
 
-config SAM_SERCOM5_I2C
+config SAMD_SERCOM5_ISI2C
 bool "I2C"
 select I2C
 
-config SAM_SERCOM5_SPI
+config SAMD_SERCOM5_ISSPI
 bool "SPI"
 select SPI
 
-config SAM_SERCOM5_UART
+config SAMD_SERCOM5_ISUART
 bool "UART"
 select ARCH_HAVE_UART5
 

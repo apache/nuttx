@@ -482,6 +482,9 @@ configs/sama5d3x-ek
   There is also the SAMA5D3FAE-EK bundle includes everything:  The base
   board, all four CPU modules, and the LCD.
 
+configs/samd20-xplained
+  The port of NuttX to the Atmel SAMD20-Xplained development board.
+
 configs/sam3u-ek
   The port of NuttX to the Atmel SAM3U-EK development board.
 

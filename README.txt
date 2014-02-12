@@ -1109,6 +1109,8 @@ nuttx
  |   |   `- README.txt
  |   |- sama5d3x-ek/
  |   |   `- README.txt
+ |   |- samd20-xplained/
+ |   |   `- README.txt
  |   |- sam3u-ek/
  |   |   `- README.txt
  |   |- sam4l-xplained/
