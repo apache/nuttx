@@ -2,17 +2,15 @@ README
 ^^^^^^
 
 This README discusses issues unique to NuttX configurations for the
-Atmel SAM4L Xplained Pro development board.  This board features the
-ATSAM4LC4C MCU.
+Atmel SAMD20 Xplained Pro development board.  This board features the
+ATSAMD20J18A MCU.
 
-The SAM4L Xplained Pro Starter Kit is bundled with four modules:
+The SAMD20 Xplained Pro Starter Kit may be bundled with three modules:
 
 1) I/O1   - An MMC/SD card slot, PWM LED control, ADC light sensor, UART
             loopback, TWI AT30TSE758 Temperature sensor.
 2) OLED1  - An OLED plus 3 additional switches and 3 additional LEDs
-3) SLCD1  - A segment LCD that connects directly to the "EXT5 SEGMENT LCD"
-           connector
-4) PROTO1 - A prototyping board with logic on board (other than power-related
+3) PROTO1 - A prototyping board with logic on board (other than power-related
             logic).
 
 Contents
@@ -23,16 +21,14 @@ Contents
   - GNU Toolchain Options
   - IDEs
   - NuttX EABI "buildroot" Toolchain
-  - NuttX OABI "buildroot" Toolchain
-  - NXFLAT Toolchain
   - LEDs
   - Serial Consoles
-  - SAM4L Xplained Pro-specific Configuration Options
+  - SAMD20 Xplained Pro-specific Configuration Options
   - Configurations
 
 Modules
 ^^^^^^^
-  The SAM4L Xplained Pro Starter Kit is bundled with four modules:
+  The SAMD20 Xplained Pro Starter Kit is bundled with four modules:
 
   I/O1
   ----
@@ -45,33 +41,64 @@ Modules
     - UART loopback
     - TWI AT30TSE758 Temperature sensor with EEPROM
 
-    SPI is available on two of the SAM4L Xplained connectors, EXT1 and EXT2.
+    SPI is available on two of the SAMD20 Xplained connectors, EXT1 and EXT2.
     They mate with the I/O1 connector as indicated in this table.
 
-    I/O1 Connector
-    --------------
-    I/O1              EXT1                 EXT2                 Other use of either pin
-    ----------------- -------------------- -------------------- ------------------------------------
-    1  ID             1                    1
-    2  GND            2       GND          2
-    3  LIGHTSENSOR    3  PA04 ADCIFE/AD0   3  PA07 ADCIFE/AD2
-    4  LP_OUT         4  PA05 ADCIFE/AD1   4  PB02 ADCIFE/AD3
-    5  GPIO1          5  PB12 GPIO         5  PC08 GPIO         PB12 and PC8 on EXT5
-    6  GPIO2          6  PC02 GPIO         6  PB10 GPIO         PB10 on EXT5
-    7  LED            7  PC00 TC/1/A0      7  PC04 TC/1/A2
-    8  LP_IN          8  PC01 TC/1/B0      8  PC05 TC/1/B2      PC05 on EXT5
-    9  TEMP_ALERT     9  PC25 EIC/EXTINT2  9  PC06 EIC/EXTINT8  PC25 on EXT5
-    10 microSD_DETECT 10 PB13 SPI/NPCS1    10 PC09 GPIO         PB13 on EXT5
-    11 TWI SDA        11 PA23 TWIMS/0/TWD  11 PB14 TWIMS/3/TWD  PB14 on EXT3&4, PA23 and PB14 on EXT5
-    12 TWI SCL        12 PA24 TWIMS/0/TWCK 12 PB15 TWIMS/3/TWCK PB15 on EXT3&4, PA24 and PB15 on EXT5
-    13 UART RX        13 PB00 USART/0/RXD  13 PC26 USART/1/RXD  PB00 on EXT4, PC26 on EXT3&5
-    14 UART TX        14 PB01 USART/0/TXD  14 PC27 USART/1/TXD  PB01 on EXT4, PC27 on EXT3&5
-    15 microSD_SS     15 PC03 SPI/NPCS0    15 PB11 SPI/NPCS2    PB11 on EXT5
-    16 SPI_MOSI       16 PA22 SPI/MOSI     16 PA22 SPI/MOSI     PA22 on EXT5
-    17 SPI_MISO       17 PA21 SPI/MISO     17 PA21 SPI/MISO     PA21 on EXT5
-    18 SPI_SCK        18 PC30 SPI/SCK      18 PC30 SPI/SCK      PC30 on EXT5
-    19 GND            19      GND             GND
-    20 VCC            20      VCC             VCC
+    I/O1 CONNECTOR
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    I/O1              EXT1                   EXT2                   Other use of either pin
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    1  ID             1                      1                      Communication line to ID chip on
+                                                                    extension board.
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    2  GND            2       GND            2  GND
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    3  LIGHTSENSOR    3  PB00 AIN[8]         3  PA10 AIN[18]
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    4  LP_OUT         4  PB01 AIN[9]         4  PA11 AIN[19]
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    5  GPIO1          5  PB06 GPIO           5  PA20 GPIO
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    6  GPIO2          6  PB07 GPIO           6  PA21 GPIO
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    7  LED            7  PB02 TC6/WO[0]      7  PA22 TC4/WO[0]
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    8  LP_IN          8  PB03 TC6/WO[1]      8  PA23 TC4/WO[1]
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    9  TEMP_ALERT     9  PB04 EXTINT[4]      9  PB14 EXTINT[14]
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    10 microSD_DETECT 10 PB05 GPIO           10 PB15 GPIO
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    11 TWI SDA        11 PA08 SERCOM2 PAD[0] 11 PA08 SERCOM2 PAD[0] EXT1, EXT2, EXT3 and EDBG
+                              I²C SDA                I²C SDA
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    12 TWI SCL        12 PA09 SERCOM2 PAD[1] 12 PA09 SERCOM2 PAD[1] EXT2, EXT3 and EDBG
+                              I²C SCL                I²C SCL
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    13 UART RX        13 PB09 SERCOM4 PAD[1] 13 PB13 SERCOM4 PAD[1] The SERCOM4 module is shared between
+                              UART RX                UART RX        EXT1, 2 and 3 UART's, but uses
+                                                                    different pins
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    14 UART TX        14 PB08 SERCOM4 PAD[0] 14 PB12 SERCOM4 PAD[0] The SERCOM4 module is shared between
+                              UART TX                UART TX        EXT1, 2 and 3 UART's, but uses
+                                                                    different pins
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    15 microSD_SS     15 PA05 SERCOM0 PAD[1] 15 PA17 SERCOM1 PAD[1]
+                              SPI SS                 SPI SS
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    16 SPI_MOSI       16 PA06 SERCOM0 PAD[2] 16 PA18 SERCOM1 PAD[2]
+                              SPI MOSI               SPI MOSI
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    17 SPI_MISO       17 PA04 SERCOM0 PAD[0] 17 PA16 SERCOM1 PAD[0]
+                              SPI MISO               SPI MISO
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    18 SPI_SCK        18 PA07 SERCOM0 PAD[3] 18 PA19 SERCOM1 PAD[3]
+                              SPI SCK                SPI SCK 
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    19 GND            19      GND               GND
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    20 VCC            20      VCC               VCC
+    ----------------- ---------------------- ---------------------- ------------------------------------
 
     The mapping between the I/O1 pins and the SD connector are shown in the
     following table.
@@ -102,19 +129,22 @@ Modules
     -----
     So all that is required to connect the SD is configure the SPI
 
-    PIN EXT1           EXT2            Description
-    --- -------------- --------------- -------------------------------------
-    15  PC03 SPI/NPCS0 PB11 SPI/NPCS2  Active low chip select OUTPUT, pulled
-                                       high on board.
-    10  PB13 SPI/NPCS1 10 PC09 GPIO    Active low card detect INPUT, must
-                                       use internal pull-up.
+    --- ------------------ ---------------------- -------------------------------------
+    PIN EXT1               EXT2                   Description
+    --- ------------------ ---------------------- -------------------------------------
+    15 PA05 SERCOM0 PAD[1] 15 PA17 SERCOM1 PAD[1]  Active low chip select OUTPUT, pulled
+            SPI SS                 SPI SS          high on board.
+    --- ------------------ ---------------------- -------------------------------------
+    10 PB05 GPIO           10 PB15 GPIO            Active low card detect INPUT, must
+                                                   use internal pull-up.
+    --- ------------------ ---------------------- -------------------------------------
 
     Configuration Options:
     ----------------------
-      CONFIG_SAM4L_XPLAINED_IOMODULE=y      : Informs the system that the
+      CONFIG_SAMD20_XPLAINED_IOMODULE=y      : Informs the system that the
                                               I/O1 module is installed
-      CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1=y : The module is installed in EXT1
-      CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2=y : The mdoule is installed in EXT2
+      CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1=y : The module is installed in EXT1
+      CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2=y : The mdoule is installed in EXT2
 
     See the set-up in the discussion of the nsh configuration below for other
     required configuration options.
@@ -127,50 +157,68 @@ Modules
     This module provides an OLED plus 3 additional switches and 3 additional
     LEDs.
 
-    OLED1 Connector
-    --------------
-    OLED1             EXT1                 EXT2                 Other use of either pin
-    ----------------- -------------------- -------------------- ------------------------------------
-    1  ID             1                    1
-    2  GND            2       GND          2
-    3  BUTTON2        3  PA04 ADCIFE/AD0   3  PA07 ADCIFE/AD2
-    4  BUTTON3        4  PA05 ADCIFE/AD1   4  PB02 ADCIFE/AD3
-    5  DATA_CMD_SEL   5  PB12 GPIO         5  PC08 GPIO         PB12 and PC8 on EXT5
-    6  LED3           6  PC02 GPIO         6  PB10 GPIO         PB10 on EXT5
-    7  LED1           7  PC00 TC/1/A0      7  PC04 TC/1/A2
-    8  LED2           8  PC01 TC/1/B0      8  PC05 TC/1/B2      PC05 on EXT5
-    9  BUTTON1        9  PC25 EIC/EXTINT2  9  PC06 EIC/EXTINT8  PC25 on EXT5
-    10 DISPLAY_RESET  10 PB13 SPI/NPCS1    10 PC09 GPIO         PB13 on EXT5
-    11 N/C            11 PA23 TWIMS/0/TWD  11 PB14 TWIMS/3/TWD  PB14 on EXT3&4, PA23 and PB14 on EXT5
-    12 N/C            12 PA24 TWIMS/0/TWCK 12 PB15 TWIMS/3/TWCK PB15 on EXT3&4, PA24 and PB15 on EXT5
-    13 N/C            13 PB00 USART/0/RXD  13 PC26 USART/1/RXD  PB00 on EXT4, PC26 on EXT3&5
-    14 N/C            14 PB01 USART/0/TXD  14 PC27 USART/1/TXD  PB01 on EXT4, PC27 on EXT3&5
-    15 DISPLAY_SS     15 PC03 SPI/NPCS0    15 PB11 SPI/NPCS2    PB11 on EXT5
-    16 SPI_MOSI       16 PA22 SPI/MOSI     16 PA22 SPI/MOSI     PA22 on EXT5
-    17 N/C            17 PA21 SPI/MISO     17 PA21 SPI/MISO     PA21 on EXT5
-    18 SPI_SCK        18 PC30 SPI/SCK      18 PC30 SPI/SCK      PC30 on EXT5
-    19 GND            19      GND             GND
-    20 VCC            20      VCC             VCC
+    OLED1 CONNECTOR
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    OLED1             EXT1                   EXT2                   Other use of either pin
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    1  ID             1                      1                      Communication line to ID chip on
+                                                                    extension board.
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    2  GND            2       GND            2  GND
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    3  BUTTON2        3  PB00 AIN[8]         3  PA10 AIN[18]
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    4  BUTTON3        4  PB01 AIN[9]         4  PA11 AIN[19]
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    5  DATA_CMD_SEL   5  PB06 GPIO           5  PA20 GPIO
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    6  LED3           6  PB07 GPIO           6  PA21 GPIO
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    7  LED1           7  PB02 TC6/WO[0]      7  PA22 TC4/WO[0]
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    8  LED2           8  PB03 TC6/WO[1]      8  PA23 TC4/WO[1]
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    9  BUTTON1        9  PB04 EXTINT[4]      9  PB14 EXTINT[14]
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    10 DISPLAY_RESET  10 PB05 GPIO           10 PB15 GPIO
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    11 N/C            11 PA08 SERCOM2 PAD[0] 11 PA08 SERCOM2 PAD[0] EXT1, EXT2, EXT3 and EDBG
+                              I²C SDA                I²C SDA
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    12 N/C            12 PA09 SERCOM2 PAD[1] 12 PA09 SERCOM2 PAD[1] EXT2, EXT3 and EDBG
+                              I²C SCL                I²C SCL
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    13 N/C            13 PB09 SERCOM4 PAD[1] 13 PB13 SERCOM4 PAD[1] The SERCOM4 module is shared between
+                              UART RX                UART RX        EXT1, 2 and 3 UART's, but uses
+                                                                    different pins
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    14 N/C            14 PB08 SERCOM4 PAD[0] 14 PB12 SERCOM4 PAD[0] The SERCOM4 module is shared between
+                              UART TX                UART TX        EXT1, 2 and 3 UART's, but uses
+                                                                    different pins
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    15 DISPLAY_SS     15 PA05 SERCOM0 PAD[1] 15 PA17 SERCOM1 PAD[1]
+                              SPI SS                 SPI SS
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    16 SPI_MOSI       16 PA06 SERCOM0 PAD[2] 16 PA18 SERCOM1 PAD[2]
+                              SPI MOSI               SPI MOSI
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    17 N/C            17 PA04 SERCOM0 PAD[0] 17 PA16 SERCOM1 PAD[0]
+                              SPI MISO               SPI MISO
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    18 SPI_SCK        18 PA07 SERCOM0 PAD[3] 18 PA19 SERCOM1 PAD[3]
+                              SPI SCK                SPI SCK 
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    19 GND            19      GND               GND
+    ----------------- ---------------------- ---------------------- ------------------------------------
+    20 VCC            20      VCC               VCC
+    ----------------- ---------------------- ---------------------- ------------------------------------
 
     Configuration Options:
     ----------------------
-      CONFIG_SAM4L_XPLAINED_OLED1MODULE=y      : Informs the system that the
+      CONFIG_SAMD20_XPLAINED_OLED1MODULE=y      : Informs the system that the
                                                  I/O1 module is installed
-      CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT1=y : The module is installed in EXT1
-      CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT2=y : The mdoule is installed in EXT2
-
-    See the set-up in the discussion of the nsh configuration below for other
-    required configuration options.
-
-  SLCD1
-  -----
-    This module provides a A segment LCD that connects directly to the "EXT5
-    SEGMENT LCD" connector
-
-    Configuration Options:
-    ----------------------
-      CONFIG_SAM4L_XPLAINED_SLCD1MODULE=y   : Informs the system that the
-                                              I/O1 module is installed
+      CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT1=y : The module is installed in EXT1
+      CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2=y : The mdoule is installed in EXT2
 
     See the set-up in the discussion of the nsh configuration below for other
     required configuration options.
@@ -203,15 +251,15 @@ GNU Toolchain Options
   add one of the following configuration options to your .config (or defconfig)
   file:
 
-    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
-    CONFIG_ARMV7M_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windos
-    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
-    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y      : Generic GCC ARM EABI toolchain for Windows
+    CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYW=y  : CodeSourcery under Windows
+    CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYL=y  : CodeSourcery under Linux
+    CONFIG_ARMV6M_TOOLCHAIN_ATOLLIC=y        : Atollic toolchain for Windos
+    CONFIG_ARMV6M_TOOLCHAIN_DEVKITARM=y      : devkitARM under Windows
+    CONFIG_ARMV6M_TOOLCHAIN_BUILDROOT=y      : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV6M_TOOLCHAIN_GNU_EABIL=y      : Generic GCC ARM EABI toolchain for Linux
+    CONFIG_ARMV6M_TOOLCHAIN_GNU_EABIW=y      : Generic GCC ARM EABI toolchain for Windows
 
-  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also
+  If you are not using CONFIG_ARMV6M_TOOLCHAIN_BUILDROOT, then you may also
   have to modify the PATH in the setenv.h file if your make cannot find the tools.
 
   NOTE about Windows native toolchains
@@ -291,17 +339,17 @@ NuttX EABI "buildroot" Toolchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   A GNU GCC-based toolchain is assumed.  The files */setenv.sh should
-  be modified to point to the correct path to the Cortex-M3 GCC toolchain (if
+  be modified to point to the correct path to the Cortex-M0 GCC toolchain (if
   different from the default in your PATH variable).
 
-  If you have no Cortex-M3 toolchain, one can be downloaded from the NuttX
+  If you have no Cortex-M0 toolchain, one can be downloaded from the NuttX
   SourceForge download site (https://sourceforge.net/projects/nuttx/files/buildroot/).
   This GNU toolchain builds and executes in the Linux or Cygwin environment.
 
   1. You must have already configured Nuttx in <some-dir>/nuttx.
 
      cd tools
-     ./configure.sh sam4l-xplained/<sub-dir>
+     ./configure.sh samd20-xplained/<sub-dir>
 
   2. Download the latest buildroot package into <some-dir>
 
@@ -311,7 +359,7 @@ NuttX EABI "buildroot" Toolchain
 
   4. cd <some-dir>/buildroot
 
-  5. cp configs/cortexm3-eabi-defconfig-4.6.3 .config
+  5. cp configs/cortexm0-eabi-defconfig-4.6.3 .config
 
   6. make oldconfig
 
@@ -322,78 +370,16 @@ NuttX EABI "buildroot" Toolchain
 
   See the file configs/README.txt in the buildroot source tree.  That has more
   details PLUS some special instructions that you will need to follow if you are
-  building a Cortex-M3 toolchain for Cygwin under Windows.
-
-  NOTE:  Unfortunately, the 4.6.3 EABI toolchain is not compatible with the
-  the NXFLAT tools.  See the top-level TODO file (under "Binary loaders") for
-  more information about this problem. If you plan to use NXFLAT, please do not
-  use the GCC 4.6.3 EABI toochain; instead use the GCC 4.3.3 OABI toolchain.
-  See instructions below.
-
-NuttX OABI "buildroot" Toolchain
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  The older, OABI buildroot toolchain is also available.  To use the OABI
-  toolchain:
-
-  1. When building the buildroot toolchain, either (1) modify the cortexm3-eabi-defconfig-4.6.3
-     configuration to use EABI (using 'make menuconfig'), or (2) use an exising OABI
-     configuration such as cortexm3-defconfig-4.3.3
-
-  2. Modify the Make.defs file to use the OABI conventions:
-
-    +CROSSDEV = arm-nuttx-elf-
-    +ARCHCPUFLAGS = -mtune=cortex-m3 -march=armv7-m -mfloat-abi=soft
-    +NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld -no-check-sections
-    -CROSSDEV = arm-nuttx-eabi-
-    -ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
-    -NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
-
-NXFLAT Toolchain
-^^^^^^^^^^^^^^^^
-
-  If you are *not* using the NuttX buildroot toolchain and you want to use
-  the NXFLAT tools, then you will still have to build a portion of the buildroot
-  tools -- just the NXFLAT tools.  The buildroot with the NXFLAT tools can
-  be downloaded from the NuttX SourceForge download site
-  (https://sourceforge.net/projects/nuttx/files/).
-
-  This GNU toolchain builds and executes in the Linux or Cygwin environment.
-
-  1. You must have already configured Nuttx in <some-dir>/nuttx.
-
-     cd tools
-     ./configure.sh lpcxpresso-lpc1768/<sub-dir>
-
-  2. Download the latest buildroot package into <some-dir>
-
-  3. unpack the buildroot tarball.  The resulting directory may
-     have versioning information on it like buildroot-x.y.z.  If so,
-     rename <some-dir>/buildroot-x.y.z to <some-dir>/buildroot.
-
-  4. cd <some-dir>/buildroot
-
-  5. cp configs/cortexm3-defconfig-nxflat .config
-
-  6. make oldconfig
-
-  7. make
-
-  8. Edit setenv.h, if necessary, so that the PATH variable includes
-     the path to the newly builtNXFLAT binaries.
+  building a Cortex-M0 toolchain for Cygwin under Windows.
 
 LEDs
 ^^^^
-  There are three LEDs on board the SAM4L Xplained Pro board:  The EDBG
-  controls two of the LEDs, a power LED and a status LED.  There is only
-  one user controllable LED, a yellow LED labeled LED0 near the SAM4L USB
-  connector.
-
-  This LED is controlled by PC07 and LED0 can be activated by driving the
-  PC07 to GND.
+  There is one yellow LED available on the SAM D20 Xplained Pro board that
+  can be turned on and off. The LED can be activated by driving the connected
+  PA14 I/O line to GND.
 
   When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
-  control LED0 as follows:
+  control the LED as follows:
 
     SYMBOL              Meaning                 LED0
     ------------------- ----------------------- ------
@@ -406,41 +392,41 @@ LEDs
     LED_ASSERTION       An assertion failed     N/C
     LED_PANIC           The system has crashed  FLASH
 
-  Thus is LED0 is statically on, NuttX has successfully  booted and is,
-  apparently, running normmally.  If LED0 is flashing at approximately
+  Thus is LED is statically on, NuttX has successfully  booted and is,
+  apparently, running normally.  If LED is flashing at approximately
   2Hz, then a fatal error has been detected and the system has halted.
 
 Serial Consoles
 ^^^^^^^^^^^^^^^
 
-  USART0
+  SERCOM4
   ------
 
-  USART0 is available on connectors EXT1 and EXT4
+  SERCOM4 is available on connectors EXT1 and EXT3
 
-    EXT1  EXT4  GPIO  Function
+    PIN   EXT1  EXT3  GPIO  Function
     ----  ---- ------ -----------
-     13    13   PB00  USART0_RXD
-     14    14   PB01  USART0_TXD
-     19    19         GND
-     20    20         VCC
+     13   PB09   PB13 SERCOM4 / UART RX
+     14   PB08   PB12 SERCOM4 / UART TX
+     19   19          GND
+     20   20          VCC
 
-  If you have a TTL to RS-232 convertor then this is the most convenient
+  If you have a TTL to RS-232 converter then this is the most convenient
   serial console to use.  It is the default in all of these configurations.
   An option is to use the virtual COM port.
 
   Virtual COM Port
   ----------------
 
-  The SAM4L Xplained Pro contains an Embedded Debugger (EDBG) that can be
-  used to program and debug the ATSAM4LC4C using Serial Wire Debug (SWD).
+  The SAMD20 Xplained Pro contains an Embedded Debugger (EDBG) that can be
+  used to program and debug the ATSAMD20J18A using Serial Wire Debug (SWD).
   The Embedded debugger also include a Virtual Com port interface over
-  USART1.  Virtual COM port connections:
+  SERCOM3.  Virtual COM port connections:
 
-    PC26 USART1 RXD
-    PC27 USART1 TXD
+    PA24 SERCOM3 / UART TXD
+    PA25 SERCOM3 / UART RXD
 
-SAM4L Xplained Pro-specific Configuration Options
+SAMD20 Xplained Pro-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
     CONFIG_ARCH - Identifies the arch/ subdirectory.  This should
@@ -454,27 +440,27 @@ SAM4L Xplained Pro-specific Configuration Options
 
     CONFIG_ARCH_architecture - For use in C code:
 
-       CONFIG_ARCH_CORTEXM4=y
+       CONFIG_ARCH_CORTEXM0=y
 
     CONFIG_ARCH_CHIP - Identifies the arch/*/chip subdirectory
 
-       CONFIG_ARCH_CHIP="sam34"
+       CONFIG_ARCH_CHIP="samd"
 
     CONFIG_ARCH_CHIP_name - For use in C code to identify the exact
        chip:
 
-       CONFIG_ARCH_CHIP_SAM34
-       CONFIG_ARCH_CHIP_SAM4L
-       CONFIG_ARCH_CHIP_ATSAM4LC4C
+       CONFIG_ARCH_CHIP_SAMD
+       CONFIG_ARCH_CHIP_SAMD20
+       CONFIG_ARCH_CHIP_ATSAMD20J18
 
     CONFIG_ARCH_BOARD - Identifies the configs subdirectory and
        hence, the board that supports the particular chip or SoC.
 
-       CONFIG_ARCH_BOARD=sam4l-xplained (for the SAM4L Xplained Pro development board)
+       CONFIG_ARCH_BOARD=samd20-xplained (for the SAMD20 Xplained Pro development board)
 
     CONFIG_ARCH_BOARD_name - For use in C code
 
-       CONFIG_ARCH_BOARD_SAM4L_XPLAINED=y
+       CONFIG_ARCH_BOARD_SAMD20_XPLAINED=y
 
     CONFIG_ARCH_LOOPSPERMSEC - Must be calibrated for correct operation
        of delay loops
@@ -484,13 +470,13 @@ SAM4L Xplained Pro-specific Configuration Options
 
     CONFIG_RAM_SIZE - Describes the installed DRAM (SRAM in this case):
 
-       CONFIG_RAM_SIZE=0x00008000 (32Kb)
+       CONFIG_RAM_SIZE=0x00010000 (64KB)
 
     CONFIG_RAM_START - The start address of installed DRAM
 
        CONFIG_RAM_START=0x20000000
 
-    CONFIG_ARCH_IRQPRIO - The SAM4L supports interrupt prioritization
+    CONFIG_ARCH_IRQPRIO - The SAMD20 supports interrupt prioritization
 
        CONFIG_ARCH_IRQPRIO=y
 
@@ -515,94 +501,60 @@ SAM4L Xplained Pro-specific Configuration Options
 
   Individual subsystems can be enabled:
 
-    CPU
-    ---
-    CONFIG_SAM34_OCD
-
-    HSB
-    ---
-    CONFIG_SAM34_APBA
-    CONFIG_SAM34_AESA
-
-    PBA
-    ---
-    CONFIG_SAM34_IISC
-    CONFIG_SAM34_SPI0
-    CONFIG_SAM34_TC0
-    CONFIG_SAM34_TC1
-    CONFIG_SAM34_TWIM0
-    CONFIG_SAM34_TWIS0
-    CONFIG_SAM34_TWIM1
-    CONFIG_SAM34_TWIS1
-    CONFIG_SAM34_USART0
-    CONFIG_SAM34_USART1
-    CONFIG_SAM34_USART2
-    CONFIG_SAM34_USART3
-    CONFIG_SAM34_ADC12B
-    CONFIG_SAM34_DACC
-    CONFIG_SAM34_ACC
-    CONFIG_SAM34_GLOC
-    CONFIG_SAM34_ABDACB
-    CONFIG_SAM34_TRNG
-    CONFIG_SAM34_PARC
-    CONFIG_SAM34_CATB
-    CONFIG_SAM34_TWIM2
-    CONFIG_SAM34_TWIM3
-    CONFIG_SAM34_LCDCA
-
-    PBB
-    ---
-    CONFIG_SAM34_HRAMC1
-    CONFIG_SAM34_HMATRIX
-    CONFIG_SAM34_PDCA
-    CONFIG_SAM34_CRCCU
-    CONFIG_SAM34_USBC
-    CONFIG_SAM34_PEVC
-
-    PBC
-    ---
-    CONFIG_SAM34_CHIPID
-    CONFIG_SAM34_FREQM
-
-    PBD
-    ---
-    CONFIG_SAM34_AST
-    CONFIG_SAM34_WDT
-    CONFIG_SAM34_EIC
-    CONFIG_SAM34_PICOUART
+    CONFIG_SAMD_WDT     - Watchdog Timer"
+    CONFIG_SAMD_RTC     - Real Time Counter"
+    CONFIG_SAMD_NVMCTRL - Non-Volatile Memory Controller"
+    CONFIG_SAMD_EVSYS   - Event System"
+    CONFIG_SAMD_SERCOM0 - Serial Communication Interface 0"
+    CONFIG_SAMD_SERCOM1 - Serial Communication Interface 1"
+    CONFIG_SAMD_SERCOM2 - Serial Communication Interface 2"
+    CONFIG_SAMD_SERCOM3 - Serial Communication Interface 3"
+    CONFIG_SAMD_SERCOM4 - Serial Communication Interface 4"
+    CONFIG_SAMD_SERCOM5 - Serial Communication Interface 5"
+    CONFIG_SAMD_TC0     - Timer/Counter 0"
+    CONFIG_SAMD_TC1     - Timer/Counter 1"
+    CONFIG_SAMD_TC2     - Timer/Counter 2"
+    CONFIG_SAMD_TC3     - Timer/Counter 3"
+    CONFIG_SAMD_TC4     - Timer/Counter 4"
+    CONFIG_SAMD_TC5     - Timer/Counter 5"
+    CONFIG_SAMD_TC6     - Timer/Counter 6"
+    CONFIG_SAMD_TC7     - Timer/Counter 6"
+    CONFIG_SAMD_ADC     - Analog-to-Digital Converter"
+    CONFIG_SAMD_AC      - Analog Comparator"
+    CONFIG_SAMD_DAC     - Digital-to-Analog Converter"
+    CONFIG_SAMD_PTC     - Peripheral Touch Controller"
 
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.
 
-    CONFIG_GPIOA_IRQ
-    CONFIG_GPIOB_IRQ
-    CONFIG_GPIOC_IRQ
-    CONFIG_USART0_ISUART
-    CONFIG_USART1_ISUART
-    CONFIG_USART2_ISUART
-    CONFIG_USART3_ISUART
+    CONFIG_SAM_SERCOM0_I2C, CONFIG_SAM_SERCOM0_SPI, or CONFIG_SAM_SERCOM0_UART
+    CONFIG_SAM_SERCOM1_I2C, CONFIG_SAM_SERCOM1_SPI, or CONFIG_SAM_SERCOM1_UART
+    CONFIG_SAM_SERCOM2_I2C, CONFIG_SAM_SERCOM2_SPI, or CONFIG_SAM_SERCOM2_UART
+    CONFIG_SAM_SERCOM3_I2C, CONFIG_SAM_SERCOM3_SPI, or CONFIG_SAM_SERCOM3_UART
+    CONFIG_SAM_SERCOM4_I2C, CONFIG_SAM_SERCOM4_SPI, or CONFIG_SAM_SERCOM4_UART
+    CONFIG_SAM_SERCOM5_I2C, CONFIG_SAM_SERCOM5_SPI, or CONFIG_SAM_SERCOM5_UART
 
-  ST91SAM4L specific device driver settings
+  SAT91SAMD20 specific device driver settings
 
-    CONFIG_U[S]ARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,3) or UART
-           m (m=4,5) for the console and ttys0 (default is the USART1).
-    CONFIG_U[S]ARTn_RXBUFSIZE - Characters are buffered as received.
+    CONFIG_UARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,..5) for the
+      console and ttys0 (default is the UART4).
+    CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
        This specific the size of the receive buffer
-    CONFIG_U[S]ARTn_TXBUFSIZE - Characters are buffered before
+    CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
        being sent.  This specific the size of the transmit buffer
-    CONFIG_U[S]ARTn_BAUD - The configure BAUD of the UART.  Must be
-    CONFIG_U[S]ARTn_BITS - The number of bits.  Must be either 7 or 8.
-    CONFIG_U[S]ARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-    CONFIG_U[S]ARTn_2STOP - Two stop bits
+    CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
+    CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
+    CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+    CONFIG_UARTn_2STOP - Two stop bits
 
 Configurations
 ^^^^^^^^^^^^^^
 
-  Each SAM4L Xplained Pro configuration is maintained in a sub-directory and
+  Each SAMD20 Xplained Pro configuration is maintained in a sub-directory and
   can be selected as follow:
 
     cd tools
-    ./configure.sh sam4l-xplained/<subdir>
+    ./configure.sh samd20-xplained/<subdir>
     cd -
     . ./setenv.sh
 
@@ -639,50 +591,40 @@ Configurations
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output of on USART0 which is available on EXT1 or EXT4 (see the
+     output of on SERCOM4 which is available on EXT1 or EXT3 (see the
      section "Serial Consoles" above).  The virtual COM port could
-     be used, instead, by reconfiguring to use USART1 instead of
-     USART0:
+     be used, instead, by reconfiguring to use SERCOM3 instead of
+     SERCOM4:
 
-       System Type -> AT91SAM3/4 Peripheral Support
-         CONFIG_SAM_USART0=y
-         CONFIG_SAM_USART1=n
+       System Type -> SAMD Peripheral Support
+         CONFIG_SAM_SERCOM3=y
+         CONFIG_SAM_SERCOM4=n
 
        Device Drivers -> Serial Driver Support -> Serial Console
-         CONFIG_USART0_SERIAL_CONSOLE=y
+         CONFIG_SERCOM3_SERIAL_CONSOLE=y
 
-       Device Drivers -> Serial Driver Support -> USART0 Configuration
-         CONFIG_USART0_2STOP=0
-         CONFIG_USART0_BAUD=115200
-         CONFIG_USART0_BITS=8
-         CONFIG_USART0_PARITY=0
-         CONFIG_USART0_RXBUFSIZE=256
-         CONFIG_USART0_TXBUFSIZE=256
+       Device Drivers -> Serial Driver Support -> SERCOM4 Configuration
+         CONFIG_UART3_2STOP=0
+         CONFIG_UART3_BAUD=115200
+         CONFIG_UART3_BITS=8
+         CONFIG_UART3_PARITY=0
+         CONFIG_UART3_RXBUFSIZE=256
+         CONFIG_UART3_TXBUFSIZE=256
 
   3. Unless otherwise stated, the configurations are setup for
-     Linux (or any other POSIX environment like Cygwin under Windows):
+     Cygwin under Windows:
 
      Build Setup:
-       CONFIG_HOST_LINUX=y   : Linux or other POSIX environment
+       CONFIG_HOST_WINDOWS=y   : Windows Host
+       CONFIG_WINDOWS_CYGWIN=y : Cygwin environment on windoes
 
-  4. These configurations use the older, OABI, buildroot toolchain.  But
+  4. These configurations use the CodeSourcery toolchain.  But
      that is easily reconfigured:
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y : Buildroot toolchain
-       CONFIG_ARMV7M_OABI_TOOLCHAIN=y      : Older, OABI toolchain
+       CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYW=y 
 
-     If you want to use the Atmel GCC toolchain, here are the steps to
-     do so:
-
-     Build Setup:
-       CONFIG_HOST_WINDOWS=y   : Windows
-       CONFIG_HOST_CYGWIN=y    : Using Cygwin or other POSIX environment
-
-     System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : General GCC EABI toolchain under windows
-
-     This re-configuration should be done before making NuttX or else the
+     Any re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building
      NuttX then you will have to 1) 'make distclean' to remove the old
      configuration, 2) 'cd tools; ./configure.sh sam3u-ek/ksnh' to start
@@ -701,12 +643,6 @@ Configurations
 Configuration sub-directories
 -----------------------------
 
-  ostest:
-    This configuration directory performs a simple OS test using
-    examples/ostest.  See NOTES above.
-
-    NOTES:
-
   nsh:
     This configuration directory will built the NuttShell.  See NOTES above
     and below:
@@ -723,7 +659,7 @@ Configuration sub-directories
        an 'unsigned long int'.  If this error occurs, then you may need to
        toggle the value of CONFIG_CXX_NEWLONG.
 
-    2. If the I/O1 module is connected to the SAM4L Xplained Pro, then
+    2. If the I/O1 module is connected to the SAMD20 Xplained Pro, then
        support for the SD card slot can be enabled by making the following
        changes to the configuration:
 
@@ -738,7 +674,7 @@ Configuration sub-directories
          details.
 
        System Type -> Peripherals:
-         CONFIG_SAM34_SPI0=y                : Enable the SAM4L SPI peripheral
+         To be provided                    : Enable the SAMD20 SPI peripheral
 
        Device Drivers
          CONFIG_SPI=y                      : Enable SPI support
@@ -758,24 +694,24 @@ Configuration sub-directories
          CONFIG_NSH_MMCSDSPIPORTNO=0       : Use CS=0 if the I/O1 is in EXT1, OR
          CONFIG_NSH_MMCSDSPIPORTNO=2       : Use CS=2 if the I/O1 is in EXT2
 
-       Board Selection -> SAM4L Xplained Pro Modules
-         CONFIG_SAM4L_XPLAINED_IOMODULE=y      : I/O1 module is connected
-         CONFIG_SAM4L_XPLAINED_IOMODULE_EXT1=y : In EXT1, or EXT2
-         CONFIG_SAM4L_XPLAINED_IOMODULE_EXT2=y
+       Board Selection -> SAMD20 Xplained Pro Modules
+         CONFIG_SAMD20_XPLAINED_IOMODULE=y      : I/O1 module is connected
+         CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1=y : In EXT1, or EXT2
+         CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2=y
 
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
 
-       NOTE: If you enable the I/O1 this configuration with USART0 as the
+       NOTE: If you enable the I/O1 this configuration with SERCOM4 as the
        console and with the I/O1 module in EXT1, you *must* remove UART
-       jumper.  Otherwise, you have lookpack on USART0 and NSH will *not*
+       jumper.  Otherwise, you have lookpack on SERCOM4 and NSH will *not*
        behave very well (since its outgoing prompts also appear as incoming
        commands).
 
        STATUS:  As of 2013-6-18, this configuration appears completely
        functional.  Testing, however, has been very light.  Example:
 
-         NuttShell (NSH) NuttX-6.28
+         NuttShell (NSH) NuttX-6.34
          nsh> mount -t vfat /dev/mmcsd0 /mnt/stuff
          nsh> ls /mnt/stuff
          /mnt/stuff:
@@ -787,12 +723,12 @@ Configuration sub-directories
          This is a test
          nsh>
 
-    3. If the OLED1 module is connected to the SAM4L Xplained Pro, then
+    3. If the OLED1 module is connected to the SAMD20 Xplained Pro, then
        support for the OLED display can be enabled by making the following
        changes to the configuration:
 
        System Type -> Peripherals:
-         CONFIG_SAM34_SPI0=y                 : Enable the SAM4L SPI peripheral
+         To be provided                     : Enable the SAMD20 SPI peripheral
 
        Device Drivers -> SPI
          CONFIG_SPI=y                       : Enable SPI support
@@ -808,10 +744,10 @@ Configuration sub-directories
          CONFIG_LCD_SSD1306_SPIMODE=0       : SPI Mode 0
          CONFIG_LCD_SSD1306_SPIMODE=3500000 : Pick an SPI frequency
 
-       Board Selection -> SAM4L Xplained Pro Modules
-         CONFIG_SAM4L_XPLAINED_OLED1MODULE=y      : OLED1 module is connected
-         CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT1=y : In EXT1, or EXT2
-         CONFIG_SAM4L_XPLAINED_OLED1MODULE_EXT2=y
+       Board Selection -> SAMD20 Xplained Pro Modules
+         CONFIG_SAMD20_XPLAINED_OLED1MODULE=y      : OLED1 module is connected
+         CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT1=y : In EXT1, or EXT2
+         CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2=y
 
        The NX graphics subsystem also needs to be configured:
 
@@ -862,36 +798,3 @@ Configuration sub-directories
        This is clearly some issue with initializing, un-initializing, and
        then re-initializing. If you want to fix this, patches are quite
        welcome.
-
-    4. If the LCD1 module is connected to the SAM4L Xplained Pro, then
-       support for the SLCDt can be enabled by making the following
-       changes to the configuration:
-
-       System Type -> AT91SAM3/4 Peripheral Support
-         CONFIG_SAM34_LCDCA=y
-
-       System Type -> AT91SAM3/4 Clock Configuration
-         CONFIG_SAM34_OSC32K=y
-
-       Board Selection -> Board-Specific Options -> SAM4L Xplained Pro Modules
-         CONFIG_SAM4L_XPLAINED_SLCD1MODULE=y
-
-       Device Drivers
-         CONFIG_LCD=y
-         CONFIG_LCD_MAXCONTRAST=63
-
-       Library Routines -> Non-standard Library Support
-         CONFIG_LIB_SLCDCODEC=y
-
-       The SLCD example can be enabled to verify the SLCD:
-
-       Application Configuration -> Examples
-         CONFIG_EXAMPLES_SLCD=y
-         CONFIG_EXAMPLES_SLCD_DEVNAME="/dev/slcd"
-         CONFIG_EXAMPLES_SLCD_BUFSIZE=64
-
-       Application Configuration -> NSH Library
-         CONFIG_NSH_ARCHINIT=y
-
-       NOTE:  In order to use the segment LCD you *must* open the VLCD_A and
-       VLCD_BC jumpers or the SLD will not be powered!

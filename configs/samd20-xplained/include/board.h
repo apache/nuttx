@@ -1,7 +1,7 @@
 /************************************************************************************
- * configs/sam4l-xplained/include/board.h
+ * configs/samd20-xplained/include/board.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
  *
  ************************************************************************************/
 
-#ifndef __CONFIGS_SAM4L_XPLAINED_INCLUDE_BOARD_H
-#define __CONFIGS_SAM4L_XPLAINED_INCLUDE_BOARD_H
+#ifndef __CONFIGS_SAMD20_XPLAINED_INCLUDE_BOARD_H
+#define __CONFIGS_SAMD20_XPLAINED_INCLUDE_BOARD_H
 
 /************************************************************************************
  * Included Files
@@ -84,7 +84,7 @@
 #define BOARD_RCFAST12M_FREQUENCY  12000000 /* Nominal frequency of RCFAST12M (Hz) */
 #define BOARD_RC1M_FREQUENCY       1000000  /* Nominal frequency of RC1M (Hz) */
 
-/* The SAM4L Xplained Pro has two on-board crystals:
+/* The SAMD20 Xplained Pro has two on-board crystals:
  *   XC100 12MHz     OSC0
  *   XC101 32.768KHz OSC32
  */
@@ -194,98 +194,56 @@
 #define BOARD_USBC_GCLK_DIV        1 /* Fusb = Fdfll / 1 = 48MHz */
 
 /* LED definitions ******************************************************************/
-/* There are three LEDs on board the SAM4L Xplained Pro board:  The EDBG
+/* There are three LEDs on board the SAMD20 Xplained Pro board:  The EDBG
  * controls two of the LEDs, a power LED and a status LED.  There is only
- * one user controllable LED, a yellow LED labelled LED0 near the SAM4L USB
+ * one user controllable LED, a yellow LED labelled STATUS near the SAMD20 USB
  * connector.
  *
- * This LED is controlled by PC07 and LED0 can be activated by driving the
- * PC07 to GND.
+ * This LED is controlled by PC07 and the LED can be activated by driving the
+ * PA14 to GND.
  */
 
 /* LED index values for use with sam_setled() */
 
-#define BOARD_LED0        0
-#define BOARD_NLEDS       1
+#define BOARD_STATUS_LED     0
+#define BOARD_NLEDS          1
 
 /* LED bits for use with sam_setleds() */
 
-#define BOARD_LED0_BIT    (1 << BOARD_LED0)
+#define BOARD_STATUS LED_BIT (1 << BOARD_STATUS_LED)
 
 /* When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
- * control LED0 as defined below.  Thus if LED0 is statically on, NuttX has
- * successfully booted and is, apparently, running normally.  If LED0 is
+ * control the LED as defined below.  Thus if the LED is statically on, NuttX has
+ * successfully booted and is, apparently, running normally.  If the LED is
  * flashing at approximately 2Hz, then a fatal error has been detected and the
  * system has halted.
  */
 
-#define LED_STARTED       0 /* LED0=OFF */
-#define LED_HEAPALLOCATE  0 /* LED0=OFF */
-#define LED_IRQSENABLED   0 /* LED0=OFF */
-#define LED_STACKCREATED  1 /* LED0=ON */
-#define LED_INIRQ         2 /* LED0=no change */
-#define LED_SIGNAL        2 /* LED0=no change */
-#define LED_ASSERTION     2 /* LED0=no change */
-#define LED_PANIC         3 /* LED0=flashing */
+#define LED_STARTED       0 /* STATUS LED=OFF */
+#define LED_HEAPALLOCATE  0 /* STATUS LED=OFF */
+#define LED_IRQSENABLED   0 /* STATUS LED=OFF */
+#define LED_STACKCREATED  1 /* STATUS LED=ON */
+#define LED_INIRQ         2 /* STATUS LED=no change */
+#define LED_SIGNAL        2 /* STATUS LED=no change */
+#define LED_ASSERTION     2 /* STATUS LED=no change */
+#define LED_PANIC         3 /* STATUS LED=flashing */
 
 /* Button definitions ***************************************************************/
-/* QTouch button: The SAM4L Xplained Pro kit has one QTouch button.  The connection
- * to the SAM4L is:
- *
- *   PC13 CATB_SENSE15
- *   PC14 CATB_DIS
- */
-
 /* Mechanical buttons:
  *
- * The SAM4L Xplained Pro contains two mechanical buttons. One button is the
- * RESET button connected to the SAM4L reset line and the other is a generic user
+ * The SAMD20 Xplained Pro contains two mechanical buttons. One button is the
+ * RESET button connected to the SAMD20 reset line and the other is a generic user
  * configurable button. When a button is pressed it will drive the I/O line to GND.
  *
- *   PC24 SW0
+ *   PA15 SW0
  */
 
-/* The SAM4l Xplained Pro supports one button: */
+/* The SAMD20 Xplained Pro supports one button: */
 
 #define BUTTON_SW0         0
 #define NUM_BUTTONS        1
 
 #define BUTTON_SW0_BIT     (1 << BUTTON_SW0)
-
-/* Alternate Function Disambiguation ************************************************/
-/* USART0 is also available on connectors EXT1 and EXT4:
- *
- * EXT1  TXT4  GPIO  Function
- * ----  ---- ------ -----------
- *  13    13   PB00  USART0_RXD
- *  14    14   PB01  USART0_TXD
- */
-
-#define GPIO_USART0_RXD    GPIO_USART0_RXD_4
-#define GPIO_USART0_TXD    GPIO_USART0_TXD_4
-
-/* The SAM4L Xplained Pro contains an Embedded Debugger (EDBG) that can be used to
- * program and debug the ATSAM4LC4C using Serial Wire Debug (SWD).  The Embedded
- * debugger also include a Virtual Com port interface over USART1.  Virtual COM
- * port connections:
- *
- *   PC26 USART1 RXD
- *   PC27 USART1 TXD
- */
-
-#define GPIO_USART1_RXD    GPIO_USART1_RXD_2
-#define GPIO_USART1_TXD    GPIO_USART1_TXD_2
-
-/* SPI pins are brought out on EXT1 and EXT2 as:
- *
- *   PA22 SPI/MOSI
- *   PA21 SPI/MISO
- *   PC30 SPI/SCK
- */
-
-#define GPIO_SPI0_MISO     GPIO_SPI0_MISO_1
-#define GPIO_SPI0_MOSI     GPIO_SPI0_MOSI_1
-#define GPIO_SPI0_SPCK     GPIO_SPI0_SPCK_4
 
 /************************************************************************************
  * Public Data
@@ -296,7 +254,8 @@
 #undef EXTERN
 #if defined(__cplusplus)
 #define EXTERN extern "C"
-extern "C" {
+extern "C"
+{
 #else
 #define EXTERN extern
 #endif
@@ -338,4 +297,4 @@ void sam_setleds(uint8_t ledset);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif  /* __CONFIGS_SAM4L_XPLAINED_INCLUDE_BOARD_H */
+#endif  /* __CONFIGS_SAMD20_XPLAINED_INCLUDE_BOARD_H */

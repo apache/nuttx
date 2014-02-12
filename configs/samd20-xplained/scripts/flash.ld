@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/sam4l-xplained/scripts/ld.script
+ * configs/samd30-xplained/scripts/flash.ld
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,14 @@
  *
  ****************************************************************************/
 
-/* The ATSAM4LC4C has 256KB of FLASH beginning at address 0x0000:0000 and
- * 32KB of SRAM beginning at address 0x2000:0000
+/* The ATSAMD20J18A has 256KB of FLASH beginning at address 0x0000:0000 and
+ * 64KB of SRAM beginning at address 0x2000:0000
  */
 
 MEMORY
 {
     flash (rx)  : ORIGIN = 0x00000000, LENGTH = 256K
-    sram  (rwx) : ORIGIN = 0x20000000, LENGTH = 32K
+    sram  (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
 }
 
 OUTPUT_ARCH(arm)

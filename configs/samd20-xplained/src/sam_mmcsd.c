@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/sam4l-xplained/src/sam_mmcsd.c
+ * config/samd20-xplained/src/sam_mmcsd.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
-#include "sam4l-xplained.h"
+#include "samd20-xplained.h"
 
 #ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
 
@@ -59,15 +59,15 @@
 #  error Mountpoints are disabled (CONFIG_DISABLE_MOUNTPOINT=y)
 #endif
 
-#ifndef CONFIG_SAM34_SPI0
-#  error SPI support is required (CONFIG_SAM34_SPI0)
+#ifndef CONFIG_SAMD_SPI0 /* REVISIT */
+#  error SPI support is required (CONFIG_SAMD_SPI0)
 #endif
 
 #ifndef CONFIG_MMCSD
 #  error MMC/SD support is required (CONFIG_MMCSD)
 #endif
 
-#define SAM34_MMCSDSLOTNO    0 /* There is only one slot */
+#define SAMD_MMCSDSLOTNO    0 /* There is only one slot */
 
 /****************************************************************************
  * Public Functions
@@ -81,7 +81,7 @@
  *   - CONFIG_SAM4L_XPLAINED_IOMODULE=y,
  *   - CONFIG_DISABLE_MOUNTPOINT=n,
  *   - CONFIG_MMCSD=y, and
- *   - CONFIG_SAM34_SPI0=y
+ *   - CONFIG_SAMD_SPI0=y
  *
  *****************************************************************************/
 
@@ -106,18 +106,18 @@ int sam_sdinitialize(int minor)
   /* Bind the SPI device for the chip select to the slot */
 
   fvdbg("Binding SPI chip select %d to MMC/SD slot %d\n",
-          SD_CSNO, SAM34_MMCSDSLOTNO);
+          SD_CSNO, SAMD_MMCSDSLOTNO);
 
-  ret = mmcsd_spislotinitialize(minor, SAM34_MMCSDSLOTNO, spi);
+  ret = mmcsd_spislotinitialize(minor, SAMD_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
       fdbg("Failed to bind SPI chip select %d to MMC/SD slot %d: %d\n",
-            SD_CSNO, SAM34_MMCSDSLOTNO, ret);
+            SD_CSNO, SAMD_MMCSDSLOTNO, ret);
       return ret;
     }
 
   fvdbg("Successfuly bound SPI chip select %d to MMC/SD slot %d\n",
-        SD_CSNO, SAM34_MMCSDSLOTNO);
+        SD_CSNO, SAMD_MMCSDSLOTNO);
 
   return OK;
 }

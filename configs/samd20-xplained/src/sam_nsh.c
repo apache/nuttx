@@ -1,7 +1,7 @@
 /****************************************************************************
- * config/sam4l-xplained/src/sam_mmcsd.c
+ * config/samd20-xplained/src/sam_nsh.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,85 +41,77 @@
 
 #include <stdio.h>
 #include <debug.h>
-#include <errno.h>
 
-#include <nuttx/spi/spi.h>
-#include <nuttx/mmcsd.h>
-
-#include "sam4l-xplained.h"
-
-#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+#include "samd20-xplained.h"
 
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
-/* Configuration ************************************************************/
 
-#ifdef CONFIG_DISABLE_MOUNTPOINT
-#  error Mountpoints are disabled (CONFIG_DISABLE_MOUNTPOINT=y)
+#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+/* Support for the SD card slot on the I/O1 module */
+/* Verify NSH PORT and SLOT settings */
+
+#  define SAMD_MMCSDSLOTNO    0 /* There is only one slot */
+
+#  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != SAMD_MMCSDSLOTNO
+#    error Only one MMC/SD slot:  Slot 0 (CONFIG_NSH_MMCSDSLOTNO)
+#  endif
+
+#  if defined(CONFIG_NSH_MMCSDSPIPORTNO) && CONFIG_NSH_MMCSDSPIPORTNO != SD_CSNO
+#    error CONFIG_NSH_MMCSDSPIPORTNO must have the same value as SD_CSNO
+#  endif
+
+/* Default MMC/SD minor number */
+
+#  ifndef CONFIG_NSH_MMCSDMINOR
+#    define CONFIG_NSH_MMCSDMINOR 0
+#  endif
 #endif
 
-#ifndef CONFIG_SAM34_SPI0
-#  error SPI support is required (CONFIG_SAM34_SPI0)
-#endif
+/* Debug ********************************************************************/
 
-#ifndef CONFIG_MMCSD
-#  error MMC/SD support is required (CONFIG_MMCSD)
+#ifdef CONFIG_CPP_HAVE_VARARGS
+#  ifdef CONFIG_DEBUG
+#    define message(...) lowsyslog(__VA_ARGS__)
+#  else
+#    define message(...) printf(__VA_ARGS__)
+#  endif
+#else
+#  ifdef CONFIG_DEBUG
+#    define message lowsyslog
+#  else
+#    define message printf
+#  endif
 #endif
-
-#define SAM34_MMCSDSLOTNO    0 /* There is only one slot */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_sdinitialize
+ * Name: nsh_archinitialize
  *
  * Description:
- *   Initialize the SPI-based SD card.  Requires
- *   - CONFIG_SAM4L_XPLAINED_IOMODULE=y,
- *   - CONFIG_DISABLE_MOUNTPOINT=n,
- *   - CONFIG_MMCSD=y, and
- *   - CONFIG_SAM34_SPI0=y
+ *   Perform architecture specific initialization
  *
- *****************************************************************************/
+ ****************************************************************************/
 
-int sam_sdinitialize(int minor)
+int nsh_archinitialize(void)
 {
-  FAR struct spi_dev_s *spi;
-  int ret;
+#if defined(CONFIG_SAMD_SPI0) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
+  /* Initialize the SPI-based MMC/SD slot */
 
-  /* Get the SPI driver instance for the SD chip select */
-
-  fvdbg("Initializing SPI chip select %d\n", SD_CSNO);
-
-  spi = up_spiinitialize(SD_CSNO);
-  if (!spi)
-    {
-      fdbg("Failed to initialize SPI chip select %d\n", SD_CSNO);
-      return -ENODEV;
-    }
-
-  fvdbg("Successfully initialized SPI chip select %d\n", SD_CSNO);
-
-  /* Bind the SPI device for the chip select to the slot */
-
-  fvdbg("Binding SPI chip select %d to MMC/SD slot %d\n",
-          SD_CSNO, SAM34_MMCSDSLOTNO);
-
-  ret = mmcsd_spislotinitialize(minor, SAM34_MMCSDSLOTNO, spi);
-  if (ret < 0)
-    {
-      fdbg("Failed to bind SPI chip select %d to MMC/SD slot %d: %d\n",
-            SD_CSNO, SAM34_MMCSDSLOTNO, ret);
-      return ret;
-    }
-
-  fvdbg("Successfuly bound SPI chip select %d to MMC/SD slot %d\n",
-        SD_CSNO, SAM34_MMCSDSLOTNO);
+  {
+    int ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);
+    if (ret < 0)
+      {
+        message("nsh_archinitialize: Failed to initialize MMC/SD slot: %d\n",
+                ret);
+       return ret;
+      }
+  }
+#endif
 
   return OK;
 }
-
-#endif /* CONFIG_SAM4L_XPLAINED_IOMODULE */
