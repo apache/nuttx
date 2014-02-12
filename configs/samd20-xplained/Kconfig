@@ -1,0 +1,55 @@
+#
+# For a description of the syntax of this configuration file,
+# see misc/tools/kconfig-language.txt.
+#
+
+if ARCH_BOARD_SAMD20_XPLAINED
+
+menu "SAMD20 Xplained Pro Modules"
+
+config SAMD20_XPLAINED_IOMODULE
+	bool "I/O1 Module"
+	default n
+	---help---
+		The I/O 1 module is attached.  This module provides an MMC/SD card
+		slot.
+
+if SAMD20_XPLAINED_IOMODULE
+
+choice
+	prompt "I/O1 Module Location"
+	default SAMD20_XPLAINED_IOMODULE_EXT1
+
+config SAMD20_XPLAINED_IOMODULE_EXT1
+	bool "EXT1"
+
+config SAMD20_XPLAINED_IOMODULE_EXT2
+	bool "EXT2"
+
+endchoice
+endif
+
+config SAMD20_XPLAINED_OLED1MODULE
+	bool "OLED1 Module"
+	default n
+	---help---
+		The OLED 1 module is attached.  This module provides an OLED plus 3
+		additional switches and 3 additional LEDs.
+
+if SAMD20_XPLAINED_OLED1MODULE
+
+choice
+	prompt "OLED1 Module Location"
+	default SAMD20_XPLAINED_OLED1MODULE_EXT1
+
+config SAMD20_XPLAINED_OLED1MODULE_EXT1
+	bool "EXT1"
+
+config SAMD20_XPLAINED_OLED1MODULE_EXT2
+	bool "EXT2"
+
+endchoice
+endif
+
+endmenu
+endif
