@@ -1,7 +1,7 @@
 /****************************************************************************
- * arch/arm/src/nuc1xx/nuc_irq.c
+ * arch/arm/src/samd/sam_irq.c
  *
- *   Copyright (C) 2009-2014 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,7 @@
 #include "os_internal.h"
 #include "up_internal.h"
 
-#include "nuc_irq.h"
+#include "sam_irq.h"
 
 /****************************************************************************
  * Definitions
@@ -78,7 +78,7 @@ volatile uint32_t *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: nuc_dumpnvic
+ * Name: sam_dumpnvic
  *
  * Description:
  *   Dump some interesting NVIC registers
@@ -86,7 +86,7 @@ volatile uint32_t *current_regs;
  ****************************************************************************/
 
 #if defined(CONFIG_DEBUG_IRQ)
-static void nuc_dumpnvic(const char *msg, int irq)
+static void sam_dumpnvic(const char *msg, int irq)
 {
   irqstate_t flags;
 
@@ -118,12 +118,12 @@ static void nuc_dumpnvic(const char *msg, int irq)
 }
 
 #else
-#  define nuc_dumpnvic(msg, irq)
+#  define sam_dumpnvic(msg, irq)
 #endif
 
 /****************************************************************************
- * Name: nuc_nmi, nuc_busfault, nuc_usagefault, nuc_pendsv,
- *       nuc_dbgmonitor, nuc_pendsv, nuc_reserved
+ * Name: sam_nmi, sam_busfault, sam_usagefault, sam_pendsv,
+ *       sam_dbgmonitor, sam_pendsv, sam_reserved
  *
  * Description:
  *   Handlers for various execptions.  None are handled and all are fatal
@@ -133,7 +133,7 @@ static void nuc_dumpnvic(const char *msg, int irq)
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG
-static int nuc_nmi(int irq, FAR void *context)
+static int sam_nmi(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! NMI received\n");
@@ -141,7 +141,7 @@ static int nuc_nmi(int irq, FAR void *context)
   return 0;
 }
 
-static int nuc_pendsv(int irq, FAR void *context)
+static int sam_pendsv(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! PendSV received\n");
@@ -149,7 +149,7 @@ static int nuc_pendsv(int irq, FAR void *context)
   return 0;
 }
 
-static int nuc_reserved(int irq, FAR void *context)
+static int sam_reserved(int irq, FAR void *context)
 {
   (void)irqsave();
   dbg("PANIC!!! Reserved interrupt\n");
@@ -159,14 +159,14 @@ static int nuc_reserved(int irq, FAR void *context)
 #endif
 
 /****************************************************************************
- * Name: nuc_clrpend
+ * Name: sam_clrpend
  *
  * Description:
  *   Clear a pending interrupt at the NVIC.
  *
  ****************************************************************************/
 
-static inline void nuc_clrpend(int irq)
+static inline void sam_clrpend(int irq)
 {
   /* This will be called on each interrupt exit whether the interrupt can be
    * enambled or not.  So this assertion is necessarily lame.
@@ -176,13 +176,13 @@ static inline void nuc_clrpend(int irq)
 
   /* Check for an external interrupt */
 
-  if (irq >= NUC_IRQ_INTERRUPT && irq < NUC_IRQ_INTERRUPT + 32)
+  if (irq >= SAM_IRQ_INTERRUPT && irq < SAM_IRQ_INTERRUPT + SAM_IRQ_NINTS)
     {
       /* Set the appropriate bit in the ISER register to enable the
        * interrupt
        */
 
-      putreg32((1 << (irq - NUC_IRQ_INTERRUPT)), ARMV6M_NVIC_ICPR);
+      putreg32((1 << (irq - SAM_IRQ_INTERRUPT)), ARMV6M_NVIC_ICPR);
     }
 }
 
@@ -226,18 +226,18 @@ void up_irqinitialize(void)
    * under certain conditions.
    */
 
-  irq_attach(NUC_IRQ_SVCALL, up_svcall);
-  irq_attach(NUC_IRQ_HARDFAULT, up_hardfault);
+  irq_attach(SAM_IRQ_SVCALL, up_svcall);
+  irq_attach(SAM_IRQ_HARDFAULT, up_hardfault);
 
   /* Attach all other processor exceptions (except reset and sys tick) */
 
 #ifdef CONFIG_DEBUG
-  irq_attach(NUC_IRQ_NMI, nuc_nmi);
-  irq_attach(NUC_IRQ_PENDSV, nuc_pendsv);
-  irq_attach(NUC_IRQ_RESERVED, nuc_reserved);
+  irq_attach(SAM_IRQ_NMI, sam_nmi);
+  irq_attach(SAM_IRQ_PENDSV, sam_pendsv);
+  irq_attach(SAM_IRQ_RESERVED, sam_reserved);
 #endif
 
-  nuc_dumpnvic("initial", NR_IRQS);
+  sam_dumpnvic("initial", NR_IRQS);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
@@ -261,23 +261,23 @@ void up_disable_irq(int irq)
 
   /* Check for an external interrupt */
 
-  if (irq >= NUC_IRQ_INTERRUPT && irq < NUC_IRQ_INTERRUPT + 32)
+  if (irq >= SAM_IRQ_INTERRUPT && irq < SAM_IRQ_INTERRUPT + SAM_IRQ_NINTS)
     {
       /* Set the appropriate bit in the ICER register to disable the
        * interrupt
        */
 
-      putreg32((1 << (irq - NUC_IRQ_INTERRUPT)), ARMV6M_NVIC_ICER);
+      putreg32((1 << (irq - SAM_IRQ_INTERRUPT)), ARMV6M_NVIC_ICER);
     }
 
   /* Handle processor exceptions.  Only SysTick can be disabled */
 
-  else if (irq == NUC_IRQ_SYSTICK)
+  else if (irq == SAM_IRQ_SYSTICK)
     {
       modifyreg32(ARMV6M_SYSTICK_CSR, SYSTICK_CSR_ENABLE, 0);
     }
 
-  nuc_dumpnvic("disable", irq);
+  sam_dumpnvic("disable", irq);
 }
 
 /****************************************************************************
@@ -298,23 +298,23 @@ void up_enable_irq(int irq)
 
   /* Check for external interrupt */
 
-  if (irq >= NUC_IRQ_INTERRUPT && irq < NUC_IRQ_INTERRUPT + 32)
+  if (irq >= SAM_IRQ_INTERRUPT && irq < SAM_IRQ_INTERRUPT + SAM_IRQ_NINTS)
     {
       /* Set the appropriate bit in the ISER register to enable the
        * interrupt
        */
 
-      putreg32((1 << (irq - NUC_IRQ_INTERRUPT)), ARMV6M_NVIC_ISER);
+      putreg32((1 << (irq - SAM_IRQ_INTERRUPT)), ARMV6M_NVIC_ISER);
     }
 
   /* Handle processor exceptions.  Only SysTick can be disabled */
 
-  else if (irq == NUC_IRQ_SYSTICK)
+  else if (irq == SAM_IRQ_SYSTICK)
     {
       modifyreg32(ARMV6M_SYSTICK_CSR, 0, SYSTICK_CSR_ENABLE);
     }
 
-  nuc_dumpnvic("enable", irq);
+  sam_dumpnvic("enable", irq);
 }
 
 /****************************************************************************
@@ -327,7 +327,7 @@ void up_enable_irq(int irq)
 
 void up_ack_irq(int irq)
 {
-  nuc_clrpend(irq);
+  sam_clrpend(irq);
 }
 
 /****************************************************************************
@@ -348,16 +348,16 @@ int up_prioritize_irq(int irq, int priority)
   uint32_t regval;
   int shift;
 
-  DEBUGASSERT(irq == NUC_IRQ_SVCALL ||
-              irq == NUC_IRQ_PENDSV ||
-              irq == NUC_IRQ_SYSTICK ||
-             (irq >= NUC_IRQ_INTERRUPT && irq < NR_IRQS));
+  DEBUGASSERT(irq == SAM_IRQ_SVCALL ||
+              irq == SAM_IRQ_PENDSV ||
+              irq == SAM_IRQ_SYSTICK ||
+             (irq >= SAM_IRQ_INTERRUPT && irq < NR_IRQS));
   DEBUGASSERT(priority >= NVIC_SYSH_DISABLE_PRIORITY &&
               priority <= NVIC_SYSH_PRIORITY_MIN);
 
   /* Check for external interrupt */
 
-  if (irq >= NUC_IRQ_INTERRUPT && irq < NUC_IRQ_INTERRUPT + 32)
+  if (irq >= SAM_IRQ_INTERRUPT && irq < SAM_IRQ_INTERRUPT + SAM_IRQ_NINTS)
     {
       /* ARMV6M_NVIC_IPR() maps register IPR0-IPR7 with four settings per
        * register.
@@ -372,12 +372,12 @@ int up_prioritize_irq(int irq, int priority)
    * this function.
    */
 
-  else if (irq == NUC_IRQ_PENDSV)
+  else if (irq == SAM_IRQ_PENDSV)
     {
       regaddr = ARMV6M_SYSCON_SHPR2;
       shift   = SYSCON_SHPR3_PRI_14_SHIFT;
     }
-  else if (irq == NUC_IRQ_SYSTICK)
+  else if (irq == SAM_IRQ_SYSTICK)
     {
       regaddr = ARMV6M_SYSCON_SHPR2;
       shift   = SYSCON_SHPR3_PRI_15_SHIFT;
@@ -394,7 +394,7 @@ int up_prioritize_irq(int irq, int priority)
   regval |= ((uint32_t)priority << shift);
   putreg32(regval, regaddr);
 
-  nuc_dumpnvic("prioritize", irq);
+  sam_dumpnvic("prioritize", irq);
   return OK;
 }
 #endif

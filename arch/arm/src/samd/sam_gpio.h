@@ -1,7 +1,7 @@
 /****************************************************************************
- *  arch/arm/src/nuc1xx/nuc_idle.c
+ * arch/arm/src/samd/sam_gpio.h
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,155 +33,114 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_SAMD_SAM_GPIO_H
+#define __ARCH_ARM_SRC_SAMD_SAM_GPIO_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <arch/board/board.h>
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-#include <nuttx/power/pm.h>
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#  include <stdbool.h>
+#endif
 
-#include <arch/irq.h>
+#include <nuttx/irq.h>
 
 #include "chip.h"
-#include "up_internal.h"
+#include "chip/sam_gpio.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Pre-processor Declarations
  ****************************************************************************/
 
-/* Does the board support an IDLE LED to indicate that the board is in the
- * IDLE state?
- */
+/* Bit-encoded input to sam_configgpio() */
+#warning Missing logic
 
-#if defined(CONFIG_ARCH_LEDS) && defined(LED_IDLE)
-#  define BEGIN_IDLE() board_led_on(LED_IDLE)
-#  define END_IDLE()   board_led_off(LED_IDLE)
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+typedef uint16_t gpio_cfgset_t;
+#warning REVISIT
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
 #else
-#  define BEGIN_IDLE()
-#  define END_IDLE()
+#define EXTERN extern
 #endif
 
 /****************************************************************************
- * Private Data
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_idlepm
+ * Name: sam_configgpio
  *
  * Description:
- *   Perform IDLE state power management.
+ *   Configure a GPIO pin based on bit-encoded description of the pin.
+ *   Once it is configured as Alternative (GPIO_ALT|GPIO_CNF_AFPP|...)
+ *   function, it must be unconfigured with sam_unconfiggpio() with
+ *   the same cfgset first before it can be set to non-alternative function.
+ *
+ * Returns:
+ *   OK on success
+ *   ERROR on invalid port, or when pin is locked as ALT function.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PM
-static void up_idlepm(void)
-{
-  static enum pm_state_e oldstate = PM_NORMAL;
-  enum pm_state_e newstate;
-  irqstate_t flags;
-  int ret;
-  
-  /* Decide, which power saving level can be obtained */
-
-  newstate = pm_checkstate();
-
-  /* Check for state changes */
-
-  if (newstate != oldstate)
-    {
-      flags = irqsave();
-
-      /* Perform board-specific, state-dependent logic here */
-
-      llvdbg("newstate= %d oldstate=%d\n", newstate, oldstate);
-
-      /* Then force the global state change */
-
-      ret = pm_changestate(newstate);
-      if (ret < 0)
-        {
-          /* The new state change failed, revert to the preceding state */
-
-          (void)pm_changestate(oldstate);
-        }
-      else
-        {
-          /* Save the new state */
-
-          oldstate = newstate;
-        }
-
-      /* MCU-specific power management logic */
-
-      switch (newstate)
-        {
-        case PM_NORMAL:
-          break;
-
-        case PM_IDLE:
-          break;
-
-        case PM_STANDBY:
-          nuc_pmstop(true);
-          break;
-
-        case PM_SLEEP:
-          (void)nuc_pmstandby();
-          break;
-
-        default:
-          break;
-        }
-
-      irqrestore(flags);
-    }
-}
-#else
-#  define up_idlepm()
-#endif
+int sam_configgpio(gpio_cfgset_t cfgset);
 
 /****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: up_idle
+ * Name: sam_gpiowrite
  *
  * Description:
- *   up_idle() is the logic that will be executed when their is no other
- *   ready-to-run task.  This is processor idle time and will continue until
- *   some interrupt occurs to cause a context switch from the idle task.
- *
- *   Processing in this state may be processor-specific. e.g., this is where
- *   power management operations might be performed.
+ *   Write one or zero to the selected GPIO pin
  *
  ****************************************************************************/
 
-void up_idle(void)
-{
-#if defined(CONFIG_SUPPRESS_INTERRUPTS) || defined(CONFIG_SUPPRESS_TIMER_INTS)
-  /* If the system is idle and there are no timer interrupts, then process
-   * "fake" timer interrupts. Hopefully, something will wake up.
-   */
+void sam_gpiowrite(gpio_cfgset_t pinset, bool value);
 
-  sched_process_timer();
+/****************************************************************************
+ * Name: sam_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin
+ *
+ ****************************************************************************/
+
+bool sam_gpioread(gpio_cfgset_t pinset);
+
+/****************************************************************************
+ * Function:  sam_dumpgpio
+ *
+ * Description:
+ *   Dump all GPIO registers associated with the provided pin description
+ *   along with a descriptive message.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG
+void sam_dumpgpio(gpio_cfgset_t pinset, const char *msg);
 #else
-
-  /* Perform IDLE mode power management */
-
-  up_idlepm();
-
-  /* Sleep until an interrupt occurs to save power. */
-
-  BEGIN_IDLE();
-  asm("WFI");
-  END_IDLE();
+#  define sam_dumpgpio(p,m)
 #endif
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_ARM_SRC_SAMD_SAM_GPIO_H */

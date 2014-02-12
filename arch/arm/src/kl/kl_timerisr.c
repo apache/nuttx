@@ -79,7 +79,7 @@
  *                  = 119,999
  *                  = 0x1d4bf
  *
- * Which fits within the maximum 14-bit reload value.
+ * Which fits within the maximum 24-bit reload value.
  */
 
 #define SYSTICK_RELOAD ((SYSTICK_CLOCK / CLK_TCK) - 1)

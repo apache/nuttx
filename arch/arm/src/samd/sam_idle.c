@@ -1,7 +1,7 @@
 /****************************************************************************
- *  arch/arm/src/nuc1xx/nuc_idle.c
+ *  arch/arm/src/samd/sam_idle.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -129,11 +129,11 @@ static void up_idlepm(void)
           break;
 
         case PM_STANDBY:
-          nuc_pmstop(true);
+          sam_pmstop(true);
           break;
 
         case PM_SLEEP:
-          (void)nuc_pmstandby();
+          (void)sam_pmstandby();
           break;
 
         default:
