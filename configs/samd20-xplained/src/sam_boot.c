@@ -41,6 +41,7 @@
 
 #include <debug.h>
 
+#include "sam_config.h"
 #include "samd20-xplained.h"
 
 /************************************************************************************
@@ -71,7 +72,7 @@ void sam_boardinitialize(void)
    * sam_spiinitialize() has been brought into the link.
    */
 
-#ifdef CONFIG_SAMD_SPI0
+#ifdef SAMD_HAVE_SPI0
   if (sam_spiinitialize)
     {
       sam_spiinitialize();

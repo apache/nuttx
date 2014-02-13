@@ -45,11 +45,12 @@
 
 #include <nuttx/spi/spi.h>
 
+#include "sam_config.h"
 #include "sam_gpio.h"
 #include "sam_spi.h"
 #include "samd20-xplained.h"
 
-#ifdef CONFIG_SAMD_SPI0 /* REVISIT */
+#ifdef SAMD_HAVE_SPI0
 
 /************************************************************************************
  * Definitions
@@ -236,7 +237,7 @@ uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
   return ret;
 }
 
-#endif /* CONFIG_SAMD_SPI0 */
+#endif /* SAMD_HAVE_SPI0 */
 
 /****************************************************************************
  * Name: sam_spicmddata
