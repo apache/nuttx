@@ -304,6 +304,17 @@
 #  define SAMD_WDT                                /* Have watchdog timer */
 #endif
 
+/* NVIC priority levels *************************************************************/
+/* Each priority field holds a priority value, 0-3. The lower the value, the greater
+ * the priority of the corresponding interrupt. The processor implements only
+ * bits[7:6] of each field, bits[5:0] read as zero and ignore writes.
+ */
+
+#define NVIC_SYSH_PRIORITY_MIN     0xc0 /* All bits[7:3] set is minimum priority */
+#define NVIC_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
+#define NVIC_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */
+#define NVIC_SYSH_PRIORITY_STEP    0x40 /* Five bits of interrupt priority used */
+
 /************************************************************************************
  * Public Types
  ************************************************************************************/

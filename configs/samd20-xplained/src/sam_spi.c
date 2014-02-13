@@ -46,7 +46,7 @@
 #include <nuttx/spi/spi.h>
 
 #include "sam_config.h"
-#include "sam_gpio.h"
+#include "sam_port.h"
 #include "sam_spi.h"
 #include "samd20-xplained.h"
 
@@ -92,7 +92,7 @@
  * Name: sam_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the SAM3U10E-EVAL board.
+ *   Called to configure SPI chip select PORT pins for the SAM3U10E-EVAL board.
  *
  ************************************************************************************/
 
@@ -105,13 +105,13 @@ void weak_function sam_spiinitialize(void)
 #ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
   /* TODO: enable interrupt on card detect */
 
-   sam_configgpio(GPIO_SD_CD);     /* Card detect input */
-   sam_configgpio(GPIO_SD_CS);     /* Chip select output */
+   sam_configport(PORT_SD_CD);     /* Card detect input */
+   sam_configport(PORT_SD_CS);     /* Chip select output */
 #endif
 
 #ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
-   sam_configgpio(GPIO_OLED_DATA); /* Command/data */
-   sam_configgpio(GPIO_OLED_CS);   /* Card detect input */
+   sam_configport(PORT_OLED_DATA); /* Command/data */
+   sam_configport(PORT_OLED_CS);   /* Card detect input */
 #endif
 }
 
@@ -134,10 +134,10 @@ void weak_function sam_spiinitialize(void)
  *      pins.
  *   2. Provide sam_spiselect() and sam_spistatus() functions in your board-
  *      specific logic.  These functions will perform chip selection and
- *      status operations using GPIOs in the way your board is configured.
+ *      status operations using PORTs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
  *      sam_spicmddata() functions in your board-specific logic.  This
- *      function will perform cmd/data selection operations using GPIOs in
+ *      function will perform cmd/data selection operations using PORTs in
  *      the way your board is configured.
  *   3. Add a call to up_spiinitialize() in your low level application
  *      initialization logic
@@ -159,9 +159,9 @@ void weak_function sam_spiinitialize(void)
  *   a stub.
  *
  *   An alternative way to program the PIO chip select pins is as a normal
- *   GPIO output.  In that case, the automatic control of the CS pins is
+ *   PORT output.  In that case, the automatic control of the CS pins is
  *   bypassed and this function must provide control of the chip select.
- *   NOTE:  In this case, the GPIO output pin does *not* have to be the
+ *   NOTE:  In this case, the PORT output pin does *not* have to be the
  *   same as the NPCS pin normal associated with the chip select number.
  *
  * Input Parameters:
@@ -182,7 +182,7 @@ void sam_spiselect(enum spi_dev_e devid, bool selected)
     {
       /* Active low */
 
-      sam_gpiowrite(GPIO_SD_CS, !selected);
+      sam_portwrite(PORT_SD_CS, !selected);
     }
 
 #ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
@@ -197,7 +197,7 @@ void sam_spiselect(enum spi_dev_e devid, bool selected)
     {
       /* Active low */
 
-      sam_gpiowrite(GPIO_OLED_CS, !selected);
+      sam_portwrite(PORT_OLED_CS, !selected);
     }
 #endif
 }
@@ -227,7 +227,7 @@ uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
     {
       /* Active low */
 
-      if (!sam_gpioread(GPIO_SD_CD))
+      if (!sam_portread(PORT_SD_CD))
         {
           ret |= SPI_STATUS_PRESENT;
         }
@@ -251,7 +251,7 @@ uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  *   may be configured to use 9-bit data transfers with the 9th bit
  *   indicating command or data.  That same hardware may be configurable,
  *   instead, to use 8-bit data but to require an additional, board-
- *   specific GPIO control to distinguish command and data.  This function
+ *   specific PORT control to distinguish command and data.  This function
  *   would be needed in that latter case.
  *
  * Input Parameters:
@@ -276,7 +276,7 @@ int sam_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
        * Low:  the inputs are transferred to the command registers.
        */
 
-      (void)sam_gpiowrite(GPIO_OLED_DATA, !cmd);
+      (void)sam_portwrite(PORT_OLED_DATA, !cmd);
     }
 #endif
       return OK;

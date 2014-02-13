@@ -47,9 +47,9 @@
  *  ----------------- ---------------------- ----------------------
  *  4  BUTTON3        4  PB01 AIN[9]         4  PA11 AIN[19]
  *  ----------------- ---------------------- ----------------------
- *  5  DATA_CMD_SEL   5  PB06 GPIO           5  PA20 GPIO
+ *  5  DATA_CMD_SEL   5  PB06 PORT           5  PA20 PORT
  *  ----------------- ---------------------- ----------------------
- *  6  LED3           6  PB07 GPIO           6  PA21 GPIO
+ *  6  LED3           6  PB07 PORT           6  PA21 PORT
  *  ----------------- ---------------------- ----------------------
  *  7  LED1           7  PB02 TC6/WO[0]      7  PA22 TC4/WO[0]
  *  ----------------- ---------------------- ----------------------
@@ -57,7 +57,7 @@
  *  ----------------- ---------------------- ----------------------
  *  9  BUTTON1        9  PB04 EXTINT[4]      9  PB14 EXTINT[14]
  *  ----------------- ---------------------- ----------------------
- *  10 DISPLAY_RESET  10 PB05 GPIO           10 PB15 GPIO
+ *  10 DISPLAY_RESET  10 PB05 PORT           10 PB15 PORT
  *  ----------------- ---------------------- ----------------------
  *  11 N/C            11 PA08 SERCOM2 PAD[0] 11 PA08 SERCOM2 PAD[0]
  *                            I²C SDA                I²C SDA
@@ -114,7 +114,7 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/ssd1306.h>
 
-#include "sam_gpio.h"
+#include "sam_port.h"
 #include "samd20-xplained.h"
 
 #ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
@@ -168,16 +168,16 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
   FAR struct spi_dev_s *spi;
   FAR struct lcd_dev_s *dev;
 
-  /* Configure the OLED GPIOs. This initial configuration is RESET low,
+  /* Configure the OLED PORTs. This initial configuration is RESET low,
    * putting the OLED into reset state.
    */
  
-  (void)sam_configgpio(GPIO_OLED_RST);
+  (void)sam_configport(PORT_OLED_RST);
 
   /* Wait a bit then release the OLED from the reset state */
 
   up_mdelay(20);
-  sam_gpiowrite(GPIO_OLED_RST, true);
+  sam_portwrite(PORT_OLED_RST, true);
 
   /* Get the SPI1 port interface */
 

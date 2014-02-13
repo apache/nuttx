@@ -47,7 +47,7 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "sam_gpio.h"
+#include "sam_port.h"
 #include "samd20-xplained.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
@@ -60,7 +60,7 @@
  * Private Data
  ****************************************************************************/
 
-#if defined(CONFIG_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+#if defined(CONFIG_PORTA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 static xcpt_t g_irqsw0;
 #endif
 
@@ -85,7 +85,7 @@ static xcpt_t g_irqsw0;
 
 void board_button_initialize(void)
 {
-  (void)sam_configgpio(GPIO_SW0);
+  (void)sam_configport(PORT_SW0);
 }
 
 /************************************************************************************
@@ -101,7 +101,7 @@ void board_button_initialize(void)
 
 uint8_t board_buttons(void)
 {
-  return sam_gpioread(GPIO_SW0) ? 0 : BUTTON_SW0_BIT;
+  return sam_portread(PORT_SW0) ? 0 : BUTTON_SW0_BIT;
 }
 
 /****************************************************************************
@@ -114,15 +114,15 @@ uint8_t board_buttons(void)
  *   handler address isreturned (so that it may restored, if so desired).
  *
  * Configuration Notes:
- *   Configuration CONFIG_AVR32_GPIOIRQ must be selected to enable the
- *   overall GPIO IRQ feature and CONFIG_AVR32_GPIOIRQSETA and/or
- *   CONFIG_AVR32_GPIOIRQSETB must be enabled to select GPIOs to support
+ *   Configuration CONFIG_AVR32_PORTIRQ must be selected to enable the
+ *   overall PORT IRQ feature and CONFIG_AVR32_PORTIRQSETA and/or
+ *   CONFIG_AVR32_PORTIRQSETB must be enabled to select PORTs to support
  *   interrupts on.  For button support, bits 2 and 3 must be set in
- *   CONFIG_AVR32_GPIOIRQSETB (PB2 and PB3).
+ *   CONFIG_AVR32_PORTIRQSETB (PB2 and PB3).
  *
  ****************************************************************************/
 
-#if defined(CONFIG_GPIOA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
+#if defined(CONFIG_PORTA_IRQ) && defined(CONFIG_ARCH_IRQBUTTONS)
 xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 {
   xcpt_t oldhandler = NULL;
@@ -144,9 +144,9 @@ xcpt_t board_button_irq(int id, xcpt_t irqhandler)
 
       /* Configure the interrupt */
 
-      sam_gpioirq(IRQ_SW0);
+      sam_portirq(IRQ_SW0);
       (void)irq_attach(IRQ_SW0, irqhandler);
-      sam_gpioirqenable(IRQ_SW0);
+      sam_portirqenable(IRQ_SW0);
       irqrestore(flags);
     }
 

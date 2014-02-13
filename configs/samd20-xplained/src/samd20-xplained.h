@@ -81,8 +81,8 @@
  * 2Hz, then a fatal error has been detected and the system has halted.
  */
 
-#define GPIO_STATUS_LED (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
-                         GPIO_PORTA | GPIO_PIN14)
+#define PORT_STATUS_LED (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
+                         PORT_PORTA | PORT_PIN14)
 
 /* Mechanical buttons:
  *
@@ -93,14 +93,13 @@
  *   PA15 SW0
  */
 
-#define GPIO_SW0      (GPIO_INTERRUPT | GPIO_PULL_UP | GPIO_GLITCH_FILTER | \
-                       GPIO_PORTA | GPIO_PIN15)
+#define PORT_SW0      (PORT_INTERRUPT | PORT_PULL_UP | PORT_PORTA | PORT_PIN15)
 #define IRQ_SW0       SAM_IRQ_PA15
 
 /* I/O1
  *
  * Support for the microSD card slot on the I/O1 module.  The I/O1 requires
- * SPI support and two GPIOs.    These the GPIOs will vary if the I/O1
+ * SPI support and two PORTs.    These the PORTs will vary if the I/O1
  * is installed on the EXT1 or EXT2 connector:
  *
  *   --- ------------------ ---------------------- -------------------------------
@@ -109,7 +108,7 @@
  *   15 PA05 SERCOM0 PAD[1] 15 PA17 SERCOM1 PAD[1]  Active low chip select OUTPUT,
  *           SPI SS                 SPI SS          pulled high on board.
  *   --- ------------------ ---------------------- -------------------------------
- *   10 PB05 GPIO           10 PB15 GPIO            Active low card detect INPUT,
+ *   10 PB05 PORT           10 PB15 PORT            Active low card detect INPUT,
  *                                                  must use internal pull-up.
  *   --- ------------------ ---------------------- -------------------------------
  */
@@ -127,12 +126,12 @@
 #      error I/O1 and OLED1 modules cannot both reside in EXT1
 #    endif
 
-#    define GPIO_SD_CD (GPIO_INTERRUPT | GPIO_INT_CHANGE | GPIO_PULL_UP | \
-                        GPIO_GLITCH_FILTER | GPIO_PORTF | GPIO_PIN5)
+#    define PORT_SD_CD (PORT_INTERRUPT | PORT_INT_CHANGE | PORT_PULL_UP | \
+                        PORT_PORTF | PORT_PIN5)
 #    define IRQ_SD_CD   SAM_IRQ_PB5
 
-#    define GPIO_SD_CS (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
-                        GPIO_PORTA | GPIO_PIN5)
+#    define PORT_SD_CS (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
+                        PORT_PORTA | PORT_PIN5)
 #    define SD_CSNO    0
 
 #  elif defined(CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2)
@@ -142,12 +141,12 @@
 #      error I/O1 and OLED1 modules cannot both reside in EXT2
 #    endif
 
-#    define GPIO_CD   (GPIO_INTERRUPT | GPIO_INT_CHANGE | GPIO_PULL_UP | \
-                       GPIO_GLITCH_FILTER | GPIO_PORTB | GPIO_PIN15)
+#    define PORT_CD   (PORT_INTERRUPT | PORT_INT_CHANGE | PORT_PULL_UP | \
+                       PORT_PORTB | PORT_PIN15)
 #    define IRQ_CD     SAM_IRQ_PB15
 
-#    define GPIO_SD_CS (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
-                        GPIO_PORTA | GPIO_PIN17)
+#    define PORT_SD_CS (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
+                        PORT_PORTA | PORT_PIN17)
 #    define SD_CSNO    2
 
 #  else
@@ -158,14 +157,14 @@
 /* OLED1
  *
  * Support for the microSD card slot on the I/O1 module.  The I/O1 requires
- * SPI support and three output GPIOs.  These the GPIOs will vary if the OLED1
+ * SPI support and three output PORTs.  These the PORTs will vary if the OLED1
  * is installed on the EXT1 or EXT2 connector:
  *
  *
  *   PIN EXT1                EXT2                 Description
  *   --- ------------------- -------------------- -------------------------------------
- *   5   PB06 GPIO           PA20 GPIO            DATA_CMD_SEL
- *   10  PB05 GPIO           PB15 GPIO            DISPLAY_RESET. Active low.
+ *   5   PB06 PORT           PA20 PORT            DATA_CMD_SEL
+ *   10  PB05 PORT           PB15 PORT            DISPLAY_RESET. Active low.
  *   15  PA05 SERCOM0 PAD[1] PA17 SERCOM1 PAD[1]  DISPLAY_SS.  Active low.
  *            SPI SS              SPI SS
  */
@@ -195,12 +194,12 @@
 #      error OLED1 and I/O1 modules cannot both reside in EXT1
 #    endif
 
-#    define GPIO_OLED_DATA (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_CLEAR | \
-                            GPIO_PORTB | GPIO_PIN6)
-#    define GPIO_OLED_RST  (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_CLEAR | \
-                            GPIO_PORTB | GPIO_PIN5)
-#    define GPIO_OLED_CS   (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
-                            GPIO_PORTA | GPIO_PIN5)
+#    define PORT_OLED_DATA (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_CLEAR | \
+                            PORT_PORTB | PORT_PIN6)
+#    define PORT_OLED_RST  (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_CLEAR | \
+                            PORT_PORTB | PORT_PIN5)
+#    define PORT_OLED_CS   (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
+                            PORT_PORTA | PORT_PIN5)
 #    define OLED_CSNO       0
 
 #  elif defined(CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2)
@@ -210,12 +209,12 @@
 #      error OLED1 and I/O1 modules cannot both reside in EXT2
 #    endif
 
-#    define GPIO_OLED_DATA (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_CLEAR | \
-                            GPIO_PORTA | GPIO_PIN20)
-#    define GPIO_OLED_RST  (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_CLEAR | \
-                            GPIO_PORTB | GPIO_PIN15)
-#    define GPIO_OLED_CS   (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
-                            GPIO_PORTA | GPIO_PIN17)
+#    define PORT_OLED_DATA (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_CLEAR | \
+                            PORT_PORTA | PORT_PIN20)
+#    define PORT_OLED_RST  (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_CLEAR | \
+                            PORT_PORTB | PORT_PIN15)
+#    define PORT_OLED_CS   (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
+                            PORT_PORTA | PORT_PIN17)
 #    define OLED_CSNO      2
 
 #  else
@@ -224,8 +223,8 @@
 #endif
 
 #if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
-#    define GPIO_SD_CS (GPIO_OUTPUT | GPIO_PULL_NONE | GPIO_OUTPUT_SET | \
-                        GPIO_PORTB | GPIO_PIN11) /* REVISIT */
+#    define PORT_SD_CS (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
+                        PORT_PORTB | PORT_PIN11) /* REVISIT */
 #endif
 
 /************************************************************************************
@@ -246,7 +245,7 @@
  * Name: sam_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the SAM3U-EK board.
+ *   Called to configure SPI chip select PORT pins for the SAM3U-EK board.
  *
  ************************************************************************************/
 
