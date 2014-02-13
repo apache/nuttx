@@ -42,6 +42,7 @@
 #include <stdio.h>
 #include <debug.h>
 
+#include "sam_config.h"
 #include "samd20-xplained.h"
 
 /****************************************************************************

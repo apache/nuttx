@@ -57,7 +57,7 @@
 
 #include <arch/board/board.h>
 
-#include "sam_gpio.h"
+#include "sam_port.h"
 #include "samd20-xplained.h"
 
 #ifndef CONFIG_ARCH_LEDS
@@ -102,7 +102,7 @@
 
 void sam_ledinit(void)
 {
-  (void)sam_configgpio(GPIO_STATUS_LED);
+  (void)sam_configport(PORT_STATUS_LED);
 }
 
 /****************************************************************************
@@ -119,7 +119,7 @@ void sam_setled(int led, bool ledon)
 {
   if (led == BOARD_STATUS_LED)
     {
-      sam_gpiowrite(GPIO_STATUS_LED, !ledon);
+      sam_portwrite(PORT_STATUS_LED, !ledon);
     }
 }
 

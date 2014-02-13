@@ -71,7 +71,7 @@
 
 #include <arch/board/board.h>
 
-#include "sam_gpio.h"
+#include "sam_port.h"
 #include "samd20-xplained.h"
 
 #ifdef CONFIG_ARCH_LEDS
@@ -110,7 +110,7 @@
 
 void board_led_initialize(void)
 {
-  (void)sam_configgpio(GPIO_STATUS_LED);
+  (void)sam_configport(PORT_STATUS_LED);
 }
 
 /****************************************************************************
@@ -140,7 +140,7 @@ void board_led_on(int led)
       break;
     }
 
-  sam_gpiowrite(GPIO_STATUS_LED, ledstate);
+  sam_portwrite(PORT_STATUS_LED, ledstate);
 }
 
 /****************************************************************************
@@ -169,7 +169,7 @@ void board_led_off(int led)
     /* Turn STATUS LED off set driving the output high */
 
     case 3:                   /* LED_PANIC:        The system has crashed  STATUS LED=FLASH */
-      sam_gpiowrite(GPIO_STATUS_LED, true);
+      sam_portwrite(PORT_STATUS_LED, true);
       break;
     }
 }
