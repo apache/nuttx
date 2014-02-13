@@ -253,10 +253,10 @@
  *   Peripheral:  .... .... .... .... ..P. ....
  */
 
-#define PORT_PORT_SHIFT            (5)         /* Bit 5:  Port number */
-#define PORT_PORT_MASK             (1 << PORT_PORT_SHIFT)
-#  define PORT_PORTA               (0 << PORT_PORT_SHIFT)
-#  define PORT_PORTB               (1 << PORT_PORT_SHIFT)
+#define PORT_SHIFT                 (5)         /* Bit 5:  Port number */
+#define PORT_MASK                  (1 << PORT_SHIFT)
+#  define PORTA                    (0 << PORT_SHIFT)
+#  define PORTB                    (1 << PORT_SHIFT)
 
 /* This identifies the bit in the port:
  *
@@ -309,8 +309,7 @@
  * Public Types
  ****************************************************************************/
 
-typedef uint16_t port_cfgset_t;
-#warning REVISIT
+typedef uint32_t port_cfgset_t;
 
 /****************************************************************************
  * Public Data

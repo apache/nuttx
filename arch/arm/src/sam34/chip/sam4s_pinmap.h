@@ -60,7 +60,7 @@
  *
  * #define GPIO_PCK0 GPIO_PCK0_1
  *
- * The driver will then automatically configre PA6 as the PCK0 pin.
+ * The driver will then automatically configure PA6 as the PCK0 pin.
  */
 
 /* WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!! WARNING!!!
@@ -69,7 +69,7 @@
  * pins in this file.
  */
 
-/* 12-bit Analog-to-Digital Conververt (ADC) */
+/* 12-bit Analog-to-Digital Converter (ADC) */
 
 #define GPIO_ADC0_AD0     (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_PORT_PIOA | GPIO_PIN17)
 #define GPIO_ADC0_AD1     (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_PORT_PIOA | GPIO_PIN18)

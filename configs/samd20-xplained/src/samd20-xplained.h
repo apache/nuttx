@@ -82,7 +82,7 @@
  */
 
 #define PORT_STATUS_LED (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
-                         PORT_PORTA | PORT_PIN14)
+                         PORTA | PORT_PIN14)
 
 /* Mechanical buttons:
  *
@@ -93,7 +93,7 @@
  *   PA15 SW0
  */
 
-#define PORT_SW0      (PORT_INTERRUPT | PORT_PULL_UP | PORT_PORTA | PORT_PIN15)
+#define PORT_SW0      (PORT_INTERRUPT | PORT_PULL_UP | PORTA | PORT_PIN15)
 #define IRQ_SW0       SAM_IRQ_PA15
 
 /* I/O1
@@ -127,11 +127,11 @@
 #    endif
 
 #    define PORT_SD_CD (PORT_INTERRUPT | PORT_INT_CHANGE | PORT_PULL_UP | \
-                        PORT_PORTF | PORT_PIN5)
+                        PORTF | PORT_PIN5)
 #    define IRQ_SD_CD   SAM_IRQ_PB5
 
 #    define PORT_SD_CS (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
-                        PORT_PORTA | PORT_PIN5)
+                        PORTA | PORT_PIN5)
 #    define SD_CSNO    0
 
 #  elif defined(CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2)
@@ -142,11 +142,11 @@
 #    endif
 
 #    define PORT_CD   (PORT_INTERRUPT | PORT_INT_CHANGE | PORT_PULL_UP | \
-                       PORT_PORTB | PORT_PIN15)
+                       PORTB | PORT_PIN15)
 #    define IRQ_CD     SAM_IRQ_PB15
 
 #    define PORT_SD_CS (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
-                        PORT_PORTA | PORT_PIN17)
+                        PORTA | PORT_PIN17)
 #    define SD_CSNO    2
 
 #  else
@@ -195,11 +195,11 @@
 #    endif
 
 #    define PORT_OLED_DATA (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_CLEAR | \
-                            PORT_PORTB | PORT_PIN6)
+                            PORTB | PORT_PIN6)
 #    define PORT_OLED_RST  (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_CLEAR | \
-                            PORT_PORTB | PORT_PIN5)
+                            PORTB | PORT_PIN5)
 #    define PORT_OLED_CS   (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
-                            PORT_PORTA | PORT_PIN5)
+                            PORTA | PORT_PIN5)
 #    define OLED_CSNO       0
 
 #  elif defined(CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2)
@@ -210,11 +210,11 @@
 #    endif
 
 #    define PORT_OLED_DATA (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_CLEAR | \
-                            PORT_PORTA | PORT_PIN20)
+                            PORTA | PORT_PIN20)
 #    define PORT_OLED_RST  (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_CLEAR | \
-                            PORT_PORTB | PORT_PIN15)
+                            PORTB | PORT_PIN15)
 #    define PORT_OLED_CS   (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
-                            PORT_PORTA | PORT_PIN17)
+                            PORTA | PORT_PIN17)
 #    define OLED_CSNO      2
 
 #  else
@@ -224,7 +224,7 @@
 
 #if defined(CONFIG_LCD_UG2864AMBAG01) || defined(CONFIG_LCD_UG2864HSWEG01)
 #    define PORT_SD_CS (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
-                        PORT_PORTB | PORT_PIN11) /* REVISIT */
+                        PORTB | PORT_PIN11) /* REVISIT */
 #endif
 
 /************************************************************************************
