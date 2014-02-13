@@ -46,7 +46,7 @@
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
-/* How many SERCOM peripherals are configured as peripherals */
+/* How many SERCOM peripherals are configured as UART peripherals? */
 
 #define SAMD_HAVE_UART0 1
 #define SAMD_HAVE_UART1 1
@@ -55,54 +55,54 @@
 #define SAMD_HAVE_UART4 1
 #define SAMD_HAVE_UART5 1
 
-#if !defined(CONFIG_SAMD_SERCOM0) || !defined(CONFIG_SAMD_SERCOM0_UART)
+#if !defined(CONFIG_SAMD_SERCOM0) || !defined(CONFIG_SAMD_SERCOM0_ISUART)
 #  undef SAMD_HAVE_UART0
-#  undef CONFIG_SAMD_SERCOM0_UART
+#  undef CONFIG_SAMD_SERCOM0_ISUART
 #  undef CONFIG_UART0_SERIAL_CONSOLE
 #  undef CONFIG_UART0_FLOW_CONTROL
 #  undef CONFIG_UART0_IRDAMODE
 #  undef CONFIG_UART0_RS485MODE
 #endif
 
-#if !defined(CONFIG_SAMD_SERCOM1) || !defined(CONFIG_SAMD_SERCOM1_UART)
+#if !defined(CONFIG_SAMD_SERCOM1) || !defined(CONFIG_SAMD_SERCOM1_ISUART)
 #  undef SAMD_HAVE_UART1
-#  undef CONFIG_SAMD_SERCOM1_UART
+#  undef CONFIG_SAMD_SERCOM1_ISUART
 #  undef CONFIG_UART1_SERIAL_CONSOLE
 #  undef CONFIG_UART1_FLOW_CONTROL
 #  undef CONFIG_UART1_IRDAMODE
 #  undef CONFIG_UART1_RS485MODE
 #endif
 
-#if !defined(CONFIG_SAMD_SERCOM2) || !defined(CONFIG_SAMD_SERCOM2_UART)
+#if !defined(CONFIG_SAMD_SERCOM2) || !defined(CONFIG_SAMD_SERCOM2_ISUART)
 #  undef SAMD_HAVE_UART2
-#  undef CONFIG_SAMD_SERCOM2_UART
+#  undef CONFIG_SAMD_SERCOM2_ISUART
 #  undef CONFIG_UART2_SERIAL_CONSOLE
 #  undef CONFIG_UART2_FLOW_CONTROL
 #  undef CONFIG_UART2_IRDAMODE
 #  undef CONFIG_UART2_RS485MODE
 #endif
 
-#if !defined(CONFIG_SAMD_SERCOM3) || !defined(CONFIG_SAMD_SERCOM3_UART)
+#if !defined(CONFIG_SAMD_SERCOM3) || !defined(CONFIG_SAMD_SERCOM3_ISUART)
 #  undef SAMD_HAVE_UART3
-#  undef CONFIG_SAMD_SERCOM3_UART
+#  undef CONFIG_SAMD_SERCOM3_ISUART
 #  undef CONFIG_UART3_SERIAL_CONSOLE
 #  undef CONFIG_UART3_FLOW_CONTROL
 #  undef CONFIG_UART3_IRDAMODE
 #  undef CONFIG_UART3_RS485MODE
 #endif
 
-#if !defined(CONFIG_SAMD_SERCOM4) || !defined(CONFIG_SAMD_SERCOM4_UART)
+#if !defined(CONFIG_SAMD_SERCOM4) || !defined(CONFIG_SAMD_SERCOM4_ISUART)
 #  undef SAMD_HAVE_UART4
-#  undef CONFIG_SAMD_SERCOM4_UART
+#  undef CONFIG_SAMD_SERCOM4_ISUART
 #  undef CONFIG_UART4_SERIAL_CONSOLE
 #  undef CONFIG_UART4_FLOW_CONTROL
 #  undef CONFIG_UART4_IRDAMODE
 #  undef CONFIG_UART4_RS485MODE
 #endif
 
-#if !defined(CONFIG_SAMD_SERCOM5) || !defined(CONFIG_SAMD_SERCOM5_UART)
+#if !defined(CONFIG_SAMD_SERCOM5) || !defined(CONFIG_SAMD_SERCOM5_ISUART)
 #  undef SAMD_HAVE_UART5
-#  undef CONFIG_SAMD_SERCOM5_UART
+#  undef CONFIG_SAMD_SERCOM5_ISUART
 #  undef CONFIG_UART5_SERIAL_CONSOLE
 #  undef CONFIG_UART5_FLOW_CONTROL
 #  undef CONFIG_UART5_IRDAMODE
@@ -172,6 +172,84 @@
 #  undef CONFIG_UART4_SERIAL_CONSOLE
 #  undef CONFIG_UART5_SERIAL_CONSOLE
 #  undef HAVE_SERIAL_CONSOLE
+#endif
+
+/* Are any SERCOM peripherals are configured as SPI peripherals? */
+
+#define SAMD_HAVE_SPI0 1
+#define SAMD_HAVE_SPI1 1
+#define SAMD_HAVE_SPI2 1
+#define SAMD_HAVE_SPI3 1
+#define SAMD_HAVE_SPI4 1
+#define SAMD_HAVE_SPI5 1
+
+#if !defined(CONFIG_SAMD_SERCOM0) || !defined(CONFIG_SAMD_SERCOM0_ISSPI)
+#  undef SAMD_HAVE_SPI0
+#  undef CONFIG_SAMD_SERCOM0_ISSPI
+#endif
+
+#if !defined(CONFIG_SAMD_SERCOM1) || !defined(CONFIG_SAMD_SERCOM1_ISSPI)
+#  undef SAMD_HAVE_SPI1
+#  undef CONFIG_SAMD_SERCOM1_ISSPI
+#endif
+
+#if !defined(CONFIG_SAMD_SERCOM2) || !defined(CONFIG_SAMD_SERCOM2_ISSPI)
+#  undef SAMD_HAVE_SPI2
+#  undef CONFIG_SAMD_SERCOM2_ISSPI
+#endif
+
+#if !defined(CONFIG_SAMD_SERCOM3) || !defined(CONFIG_SAMD_SERCOM3_ISSPI)
+#  undef SAMD_HAVE_SPI3
+#  undef CONFIG_SAMD_SERCOM3_ISSPI
+#endif
+
+#if !defined(CONFIG_SAMD_SERCOM4) || !defined(CONFIG_SAMD_SERCOM4_ISSPI)
+#  undef SAMD_HAVE_SPI4
+#  undef CONFIG_SAMD_SERCOM4_ISSPI
+#endif
+
+#if !defined(CONFIG_SAMD_SERCOM5) || !defined(CONFIG_SAMD_SERCOM5_ISSPI)
+#  undef SAMD_HAVE_SPI5
+#  undef CONFIG_SAMD_SERCOM5_ISSPI
+#endif
+
+/* Are any SERCOM peripherals are configured as I2C peripherals? */
+
+#define SAMD_HAVE_I2C0 1
+#define SAMD_HAVE_I2C1 1
+#define SAMD_HAVE_I2C2 1
+#define SAMD_HAVE_I2C3 1
+#define SAMD_HAVE_I2C4 1
+#define SAMD_HAVE_I2C5 1
+
+#if !defined(CONFIG_SAMD_SERCOM0) || !defined(CONFIG_SAMD_SERCOM0_ISI2C)
+#  undef SAMD_HAVE_I2C0
+#  undef CONFIG_SAMD_SERCOM0_ISI2C
+#endif
+
+#if !defined(CONFIG_SAMD_SERCOM1) || !defined(CONFIG_SAMD_SERCOM1_ISI2C)
+#  undef SAMD_HAVE_I2C1
+#  undef CONFIG_SAMD_SERCOM1_ISI2C
+#endif
+
+#if !defined(CONFIG_SAMD_SERCOM2) || !defined(CONFIG_SAMD_SERCOM2_ISI2C)
+#  undef SAMD_HAVE_I2C2
+#  undef CONFIG_SAMD_SERCOM2_ISI2C
+#endif
+
+#if !defined(CONFIG_SAMD_SERCOM3) || !defined(CONFIG_SAMD_SERCOM3_ISI2C)
+#  undef SAMD_HAVE_I2C3
+#  undef CONFIG_SAMD_SERCOM3_ISI2C
+#endif
+
+#if !defined(CONFIG_SAMD_SERCOM4) || !defined(CONFIG_SAMD_SERCOM4_ISI2C)
+#  undef SAMD_HAVE_I2C4
+#  undef CONFIG_SAMD_SERCOM4_ISI2C
+#endif
+
+#if !defined(CONFIG_SAMD_SERCOM5) || !defined(CONFIG_SAMD_SERCOM5_ISI2C)
+#  undef SAMD_HAVE_I2C5
+#  undef CONFIG_SAMD_SERCOM5_ISI2C
 #endif
 
 /************************************************************************************

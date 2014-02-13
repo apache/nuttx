@@ -46,6 +46,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mmcsd.h>
 
+#include "sam_config.h"
 #include "samd20-xplained.h"
 
 #ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
@@ -59,8 +60,8 @@
 #  error Mountpoints are disabled (CONFIG_DISABLE_MOUNTPOINT=y)
 #endif
 
-#ifndef CONFIG_SAMD_SPI0 /* REVISIT */
-#  error SPI support is required (CONFIG_SAMD_SPI0)
+#ifndef SAMD_HAVE_SPI0
+#  error SERCOM0 SPI support is required
 #endif
 
 #ifndef CONFIG_MMCSD
@@ -81,7 +82,7 @@
  *   - CONFIG_SAM4L_XPLAINED_IOMODULE=y,
  *   - CONFIG_DISABLE_MOUNTPOINT=n,
  *   - CONFIG_MMCSD=y, and
- *   - CONFIG_SAMD_SPI0=y
+ *   - SAMD_HAVE_SPI0=y (CONFIG_SAMD_SERCOM0 && CONFIG_SAMD_SERCOM0_ISSPI)
  *
  *****************************************************************************/
 

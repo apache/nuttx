@@ -99,7 +99,7 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(CONFIG_SAMD_SPI0) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
+#if defined(SAMD_HAVE_SPI0) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
   /* Initialize the SPI-based MMC/SD slot */
 
   {

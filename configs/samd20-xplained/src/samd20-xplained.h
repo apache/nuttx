@@ -48,6 +48,7 @@
 #include <arch/irq.h>
 #include <nuttx/irq.h>
 
+#include "sam_config.h"
 #include "chip/sam_pinmap.h"
 
 /************************************************************************************
@@ -115,8 +116,8 @@
 
 #ifdef CONFIG_SAMD20_XPLAINED_IOMODULE
 
-#  ifndef CONFIG_SAMD_SPI0
-#    error CONFIG_SAMD_SPI0 is required to use the I/O1 module
+#  ifndef SAMD_HAVE_SPI0
+#    error SAMD_HAVE_SPI0 is required to use the I/O1 module
 #  endif
 
 #  if defined(CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1)
@@ -171,8 +172,8 @@
 
 #ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE
 
-#  ifndef CONFIG_SAMD_SPI0 /* REVISIT */
-#    error CONFIG_SAMD_SPI0 is required to use the OLED1 module
+#  ifndef SAMD_HAVE_SPI0
+#    error SAMD_HAVE_SPI0 is required to use the OLED1 module
 #  endif
 
 #  ifndef CONFIG_SPI_CMDDATA
@@ -256,11 +257,11 @@ void weak_function sam_spiinitialize(void);
  *
  * Description:
  *   Initialize the SPI-based SD card.  Requires CONFIG_SAMD20_XPLAINED_IOMODULE=y,
- *   CONFIG_DISABLE_MOUNTPOINT=n, CONFIG_MMCSD=y, and CONFIG_SAMD_SPI0=y
+ *   CONFIG_DISABLE_MOUNTPOINT=n, CONFIG_MMCSD=y, and SAMD_HAVE_SPI0
  *
  ************************************************************************************/
 
-#if defined(CONFIG_SAMD_SPI0) && defined(CONFIG_SAMD20_XPLAINED_IOMODULE)
+#if defined(SAMD_HAVE_SPI0) && defined(CONFIG_SAMD20_XPLAINED_IOMODULE)
 int sam_sdinitialize(int minor);
 #endif
 
