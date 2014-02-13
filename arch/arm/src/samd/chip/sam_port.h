@@ -49,6 +49,10 @@
  ********************************************************************************************/
 /* PORT register offsets ********************************************************************/
 
+#define SAM_PORTA                 (0)
+#define SAM_PORTB                 (1)
+
+#define SAM_PORTN_OFFSET(n)       (0x0000 + ((n) << 7))
 #define SAM_PORTA_OFFSET          0x0000 /* Port A register offset */
 #define SAM_PORTB_OFFSET          0x0080 /* Port B register offset */
 
@@ -118,6 +122,7 @@
 
 /* PORT register addresses ******************************************************************/
 
+#define SAM_PORTN_BASE(n)         (SAM_PORT_BASE+SAM_PORTN_OFFSET(n))
 #define SAM_PORTA_BASE            (SAM_PORT_BASE+SAM_PORTA_OFFSET)
 #define SAM_PORTB_BASE            (SAM_PORT_BASE+SAM_PORTB_OFFSET)
 
