@@ -68,7 +68,7 @@ CMN_CSRCS += up_dumpnvic.c
 endif
 
 CHIP_ASRCS  = 
-CHIP_CSRCS  = sam_idle.c sam_irq.c sam_start.c sam_timerisr.c
+CHIP_CSRCS  = sam_idle.c sam_irq.c sam_port.c sam_start.c sam_timerisr.c
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += sam_userspace.c

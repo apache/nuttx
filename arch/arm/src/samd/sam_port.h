@@ -67,11 +67,11 @@
  *                2222 1111 1111 1100 0000 0000
  *                3210 9876 5432 1098 7654 3210
  *   ------------ -----------------------------
- *   PORT Input:  MMRR .... .SB. II.. ..PB BBBB
+ *   PORT Input:  MMRR .... .S.. .... ..PB BBBB
  *   PORT Output: MM.. .... D..V .... ..PB BBBB
  *   Peripheral:  MM.. FFF. .... II.. ..PB BBBB
  *   ------------ -----------------------------
- *                MMRR FFF. DSBV II.. ..PB BBBB
+ *                MMRR FFF. DS.V II.. ..PB BBBB
  */
 
 /* Input/output/peripheral mode:
@@ -101,7 +101,7 @@
  *                3210 9876 5432 1098 7654 3210
  *   ------------ -----------------------------
  *   PORT Input:  ..RR .... .... .... .... ....
- *   PORT Output: .... .... .... .... .... ....
+ *   PORT Output: ..RR .... .... .... .... ....
  *   Peripheral:  .... .... .... .... .... ....
  */
 
@@ -189,23 +189,6 @@
 #  define PORT_SYNCHRONIZER_OFF    (0 << PORT_SYNCHRONIZER_SHIFT)
 #  define PORT_SYNCHRONIZER_ON     (1 << PORT_SYNCHRONIZER_SHIFT)
 
-/* Input buffering
- *
- *   MODE         BITFIELDS
- *   ------------ -----------------------------
- *                2222 1111 1111 1100 0000 0000
- *                3210 9876 5432 1098 7654 3210
- *   ------------ -----------------------------
- *   PORT Input:  .... .... ..B. .... .... ....
- *   PORT Output: .... .... .... .... .... ....
- *   Peripheral:  .... .... .... .... .... ....
- */
-
-#define PORT_INBUFFER_SHIFT      (13)       /* Bit 13: Input buffer enable */
-#define PORT_INBUFFER_MASK       (1 << PORT_SYNCHRONIZER_SHIFT)
-#  define PORT_INBUFFER_OFF      (0 << PORT_SYNCHRONIZER_SHIFT)
-#  define PORT_INBUFFER_ON       (1 << PORT_SYNCHRONIZER_SHIFT)
-
 /* If the pin is an PORT output, then this identifies the initial output value:
  *
  *   MODE         BITFIELDS
@@ -223,14 +206,14 @@
 #  define PORT_OUTPUT_CLEAR      (0 << PORT_SYNCHRONIZER_SHIFT)
 #  define PORT_OUTPUT_SET        (1 << PORT_SYNCHRONIZER_SHIFT)
 
-/* Selections for an interrupting input and peripheral events:
+/* Selections for external interrupts:
  *
  *   MODE         BITFIELDS
  *   ------------ -----------------------------
  *                2222 1111 1111 1100 0000 0000
  *                3210 9876 5432 1098 7654 3210
  *   ------------ -----------------------------
- *   PORT Input:  .... .... .... II.. .... ....
+ *   PORT Input:  .... .... .... .... .... ....
  *   PORT Output: .... .... .... .... .... ....
  *   Peripheral:  .... .... .... II.. .... ....
  */
@@ -255,8 +238,8 @@
 
 #define PORT_SHIFT                 (5)         /* Bit 5:  Port number */
 #define PORT_MASK                  (1 << PORT_SHIFT)
-#  define PORTA                    (0 << PORT_SHIFT)
-#  define PORTB                    (1 << PORT_SHIFT)
+#  define PORTA                    (SAM_PORTA << PORT_SHIFT)
+#  define PORTB                    (SAM_PORTB << PORT_SHIFT)
 
 /* This identifies the bit in the port:
  *
@@ -309,7 +292,7 @@
  * Public Types
  ****************************************************************************/
 
-typedef uint32_t port_cfgset_t;
+typedef uint32_t port_pinset_t;
 
 /****************************************************************************
  * Public Data
@@ -335,17 +318,13 @@ extern "C"
  *
  * Description:
  *   Configure a PORT pin based on bit-encoded description of the pin.
- *   Once it is configured as Alternative (PORT_ALT|PORT_CNF_AFPP|...)
- *   function, it must be unconfigured with sam_unconfigport() with
- *   the same cfgset first before it can be set to non-alternative function.
  *
  * Returns:
- *   OK on success
- *   ERROR on invalid port, or when pin is locked as ALT function.
+ *   OK (always)
  *
  ****************************************************************************/
 
-int sam_configport(port_cfgset_t cfgset);
+int sam_configport(port_pinset_t pinset);
 
 /****************************************************************************
  * Name: sam_portwrite
@@ -355,7 +334,7 @@ int sam_configport(port_cfgset_t cfgset);
  *
  ****************************************************************************/
 
-void sam_portwrite(port_cfgset_t pinset, bool value);
+void sam_portwrite(port_pinset_t pinset, bool value);
 
 /****************************************************************************
  * Name: sam_portread
@@ -365,7 +344,7 @@ void sam_portwrite(port_cfgset_t pinset, bool value);
  *
  ****************************************************************************/
 
-bool sam_portread(port_cfgset_t pinset);
+bool sam_portread(port_pinset_t pinset);
 
 /****************************************************************************
  * Function:  sam_dumpport
@@ -377,7 +356,7 @@ bool sam_portread(port_cfgset_t pinset);
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG
-void sam_dumpport(port_cfgset_t pinset, const char *msg);
+void sam_dumpport(port_pinset_t pinset, const char *msg);
 #else
 #  define sam_dumpport(p,m)
 #endif
