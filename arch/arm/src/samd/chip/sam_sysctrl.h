@@ -102,6 +102,8 @@
 #define SYSCTRL_INT_BOD33DET          (1 << 10) /* Bit 10: BOD33 detection interrupt */
 #define SYSCTRL_INT_B33SRDY           (1 << 11) /* Bit 11: BOD33 synchronization ready interrupt */
 
+#define SYSCTRL_INT_ALL               (0x00000fff)
+
 /* External multi-purpose crystal oscillator control register */
 
 #define SYSCTRL_XOSC_ENABLE           (1 << 1)  /* Bit 1:  Oscillator enable */

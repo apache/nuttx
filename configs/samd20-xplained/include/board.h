@@ -136,6 +136,10 @@
 #define BOARD_PBC_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBC_SHIFT)
 #define BOARD_PBD_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBD_SHIFT)
 
+/* FLASH wait states */
+
+#define BOARD_FLASH_WAITSTATES     0
+
 /* LED definitions ******************************************************************/
 /* There are three LEDs on board the SAMD20 Xplained Pro board:  The EDBG
  * controls two of the LEDs, a power LED and a status LED.  There is only
