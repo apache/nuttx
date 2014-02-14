@@ -58,6 +58,7 @@
 
 /* Calibration and Auxiliary Space */
 
+#define SAM_LOCKBIT_BASE 0x00802000 /* LOCKBIT Base Address */
 #define SAM_AUX0_BASE    0x00804000 /* AUX0 offset address */
 #define SAM_AUX1_BASE    0x00806000 /* AUX1 offset address */
 #  define SAM_AUX1_AREA1 0x00806000 /* Area 1 offset address (reserved, 64 bits) */
