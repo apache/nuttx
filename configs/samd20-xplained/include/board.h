@@ -60,7 +60,6 @@
  * may vary with temperature changes.
  */
 
-#define BOARD_OSC32K_FREQUENCY     32768    /* 32.768kHz internal oscillator */
 #define BOARD_OSCULP32K_FREQUENCY  32000    /* 32kHz ultra-low-power internal oscillator */
 #define BOARD_OSC8M_FREQUENCY      8000000  /* 8MHz high-accuracy internal oscillator */
 #define BOARD_DFLL48M_FREQUENCY    48000000 /* 48MHz Digital Frequency Locked Loop */
@@ -70,14 +69,77 @@
  *   XC101 32.768KHz XOSC32
  */
 
-/* XOSC Configuration -- Not available */
+/* XOSC Configuration -- Not available
+ *
+ *   BOARD_XOSC_ENABLE          - Boolean (defined / not defined)
+ *   BOARD_XOSC_FREQUENCY       - In Hz
+ *   BOARD_XOSC_STARTUPTIME     - See SYSCTRL_XOSC_STARTUP_* definitions
+ *   BOARD_XOSC_ISCRYSTAL       - Boolean (defined / not defined)
+ *   BOARD_XOSC_AMPGC           - Boolean (defined / not defined)
+ *   BOARD_XOSC_ONDEMAND        - Boolean (defined / not defined)
+ *   BOARD_XOSC_RUNINSTANDBY    - Boolean (defined / not defined)
+ */
 
-#undef BOARD_XOSC_FREQUENCY
+#undef  BOARD_XOSC_ENABLE
+#define BOARD_XOSC_FREQUENCY       12000000UL
+#define BOARD_XOSC_STARTUPTIME     SYSCTRL_XOSC_STARTUP_1S
+#define BOARD_XOSC_ISCRYSTAL       1
+#define BOARD_XOSC_AMPGC           1
+#define BOARD_XOSC_ONDEMAND        1
+#undef  BOARD_XOSC_RUNINSTANDBY
 
-/* XOSC32 Configuration */
+/* XOSC32 Configuration -- Not used
+ *
+ *   BOARD_XOSC32K_ENABLE       - Boolean (defined / not defined)
+ *   BOARD_XOSC32K_FREQUENCY    - In Hz
+ *   BOARD_XOSC32K_STARTUPTIME  - See SYSCTRL_XOSC32K_STARTUP_* definitions
+ *   BOARD_XOSC32K_ISCRYSTAL    - Boolean (defined / not defined)
+ *   BOARD_XOSC32K_AAMPEN       - Boolean (defined / not defined)
+ *   BOARD_XOSC32K_EN1KHZ       - Boolean (defined / not defined)
+ *   BOARD_XOSC32K_EN32KHZ      - Boolean (defined / not defined)
+ *   BOARD_XOSC32K_ONDEMAND     - Boolean (defined / not defined)
+ *   BOARD_XOSC32K_RUNINSTANDBY - Boolean (defined / not defined)
+ */
 
-#define BOARD_XOSC32_FREQUENCY     32768    /* 32.768KHz XTAL */
-#define BOARD_XOSC32_STARTUP_US    6100
+#undef  BOARD_XOSC32K_ENABLE
+#define BOARD_XOSC32K_FREQUENCY    32768    /* 32.768KHz XTAL */
+#define BOARD_XOSC32K_STARTUPTIME  SYSCTRL_XOSC32K_STARTUP_2S
+#define BOARD_XOSC32K_ISCRYSTAL    1
+#define BOARD_XOSC32K_AAMPEN       1
+#undef  BOARD_XOSC32K_EN1KHZ
+#define BOARD_XOSC32K_EN32KHZ      1
+#define BOARD_XOSC32K_ONDEMAND     1
+#undef  BOARD_XOSC32K_RUNINSTANDBY
+
+/* OSC32 Configuration -- not used
+ *
+ *   BOARD_OSC32K_ENABLE        - Boolean (defined / not defined)
+ *   BOARD_OSC32K_FREQUENCY     - In Hz
+ *   BOARD_OSC32K_STARTUPTIME   - See SYSCTRL_OSC32K_STARTUP_* definitions
+ *   BOARD_OSC32K_EN1KHZ        - Boolean (defined / not defined)
+ *   BOARD_OSC32K_EN32KHZ       - Boolean (defined / not defined)
+ *   BOARD_OSC32K_ONDEMAND      - Boolean (defined / not defined)
+ *   BOARD_OSC32K_RUNINSTANDBY  - Boolean (defined / not defined)
+ */
+
+#undef  BOARD_OSC32K_ENABLE
+#define BOARD_OSC32K_FREQUENCY     32768    /* 32.768kHz internal oscillator */
+#define BOARD_OSC32K_STARTUPTIME   SYSCTRL_OSC32K_STARTUP_4MS
+#define BOARD_OSC32K_EN1KHZ        1
+#define BOARD_OSC32K_EN32KHZ       1
+#define BOARD_OSC32K_ONDEMAND      1
+#undef  BOARD_OSC32K_RUNINSTANDBY
+
+/* OSC8M Configuration -- always enabled
+ *
+ *   BOARD_OSC8M_PRESCALER      - See SYSCTRL_OSC8M_PRESC_DIV* definitions
+ *   BOARD_OSC8M_ONDEMAND       - Boolean (defined / not defined)
+ *   BOARD_OSC8M_RUNINSTANDBY   - Boolean (defined / not defined)
+ */
+
+#define BOARD_OSC8M_PRESCALER      SYSCTRL_OSC8M_PRESC_DIV1
+#define BOARD_OSC8M_ONDEMAND       1
+#undef BOARD_OSC8M_RUNINSTANDBY
 
 /* The source of the main clock is always GLCK_MAIN.  Also called GCLKGEN[0], this is
  * the clock feeding the Power Manager. The Power Manager, in turn, generates main
@@ -119,22 +181,33 @@
 #define BOARD_DFLL48M_MUL          (BOARD_DFLL0_TARGET / BOARD_GCK_MAIN_FREQUENCY)
 #define BOARD_DFLL48M_FREQUENCY    (BOARD_DFLL48M_MUL * BOARD_GCK_MAIN_FREQUENCY)
 
-/* System clock dividers: Fbus = Fmck >> BUSshift */
+/* Main clock dividers
+ *
+ *    BOARD_CPU_DIVIDER   - See PM_CPUSEL_CPUDIV_* definitions
+ *    BOARD_CPU_FRQUENCY  - In Hz
+ *    BOARD_CPU_FAILDECT  - Boolean (defined / not defined)
+ *    BOARD_APBA_DIVIDER  - See M_APBASEL_APBADIV_* definitions
+ *    BOARD_APBA_FRQUENCY - In Hz
+ *    BOARD_APBB_DIVIDER  - See M_APBBSEL_APBBDIV_* definitions
+ *    BOARD_APBB_FRQUENCY - In Hz
+ *    BOARD_APBC_DIVIDER  - See M_APBCSEL_APBCDIV_* definitions
+ *    BOARD_APBC_FRQUENCY - In Hz
+ */
 
-#define BOARD_CPU_SHIFT            0 /* Fcpu = Fmck = 48MHz */
-#define BOARD_PBA_SHIFT            0 /* Fpba = Fmck = 48MHz */
-#define BOARD_PBB_SHIFT            0 /* Fpbb = Fmck = 48MHz */
-#define BOARD_PBC_SHIFT            0 /* Fpbc = Fmck = 48MHz */
-#define BOARD_PBD_SHIFT            0 /* Fpbd = Fmck = 48MHz */
+#define BOARD_CPU_FAILDECT         1
+#define BOARD_CPU_DIVIDER          PM_CPUSEL_CPUDIV_1
+#define BOARD_APBA_DIVIDER         PM_APBASEL_APBADIV_1
+#define BOARD_APBB_DIVIDER         PM_APBBSEL_APBBDIV_1
+#define BOARD_APBC_DIVIDER         PM_APBCSEL_APBCDIV_1
 
 /* Resulting frequencies */
 
 #define BOARD_MCK_FREQUENCY        (BOARD_GLCK_MAIN_FREQUENCY)
-#define BOARD_CPU_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_CPU_SHIFT)
-#define BOARD_PBA_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBA_SHIFT)
-#define BOARD_PBB_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBB_SHIFT)
-#define BOARD_PBC_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBC_SHIFT)
-#define BOARD_PBD_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBD_SHIFT)
+#define BOARD_CPU_FREQUENCY        (BOARD_MCK_FREQUENCY / 1)
+#define BOARD_PBA_FREQUENCY        (BOARD_MCK_FREQUENCY / 1)
+#define BOARD_PBB_FREQUENCY        (BOARD_MCK_FREQUENCY / 1)
+#define BOARD_PBC_FREQUENCY        (BOARD_MCK_FREQUENCY / 1)
+#define BOARD_PBD_FREQUENCY        (BOARD_MCK_FREQUENCY / 1)
 
 /* FLASH wait states */
 
