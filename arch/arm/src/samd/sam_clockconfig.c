@@ -367,7 +367,19 @@ static inline void sam_osc8m_config(void)
  *   Configure the DFLL based on settings in the board.h header file.
  *   Depends on:
  *
- *     
+ *   BOARD_DFLL_OPENLOOP            - Boolean (defined / not defined)
+ *   BOARD_DFLL_TRACKAFTERFINELOCK  - Boolean (defined / not defined)
+ *   BOARD_DFLL_KEEPLOCKONWAKEUP    - Boolean (defined / not defined)
+ *   BOARD_DFLL_ENABLECHILLCYCLE    - Boolean (defined / not defined)
+ *   BOARD_DFLL_QUICKLOCK           - Boolean (defined / not defined)
+ *   BOARD_DFLL_ONDEMAND            - Boolean (defined / not defined)
+ *   BOARD_DFLL_COARSEVALUE         - Value
+ *   BOARD_DFLL_FINEVALUE           - Value
+ *
+ * Closed Loop mode only:
+ *   BOARD_DFLL_MAXCOARSESTEP       - Value
+ *   BOARD_DFLL_MAXFINESTEP         - Value
+ *   BOARD_DFLL_MULTIPLIER          - Value
  *
  * Input Parameters:
  *   None
@@ -380,7 +392,64 @@ static inline void sam_osc8m_config(void)
 #if defined(CONFIG_SAMD_DFLL) || defined(BOARD_DFLL_ENABLE)
 static inline void sam_dfll_config(void)
 {
-#warning Missing logic
+  uint16_t control;
+  uint32_t regval;
+
+  /* Set up the DFLL control register */
+
+  control  = SYSCTRL_DFLLCTRL_ENABLE;   /* Enable the DFLL */
+
+#ifndef BOARD_DFLL_OPENLOOP
+  control |= SYSCTRL_DFLLCTRL_MODE;     /* Closed loop mode */
+#endif
+
+#ifndef BOARD_DFLL_TRACKAFTERFINELOCK
+  control |= SYSCTRL_DFLLCTRL_STABLE;   /* FINE calibration fixed after a fine lock */
+#endif
+
+#ifndef BOARD_DFLL_KEEPLOCKONWAKEUP
+  control |= SYSCTRL_DFLLCTRL_LLAW;     /* Lose lock after wake */
+#endif
+
+#ifndef BOARD_DFLL_ENABLECHILLCYCLE
+  control |= SYSCTRL_DFLLCTRL_CCDIS;    /* Chill cycle disable */
+#endif
+
+#ifndef BOARD_DFLL_QUICKLOCK
+  control |= SYSCTRL_DFLLCTRL_QLDIS; /* Quick lock disable */
+#endif
+
+  /* Then enable the DFLL (with ONDEMAND set to zero). */
+
+  putreg16(control, SAM_SYSCTRL_DFLLCTRL);
+
+  /* Wait for the DFLL to synchronize */
+
+  while ((getreg32(SAM_SYSCTRL_PCLKSR) & SYSCTRL_INT_DFLLRDY) == 0);
+
+  /* Set up the open loop mode multiplier register */
+
+#ifndef BOARD_DFLL_OPENLOOP
+  regval = SYSCTRL_DFLLMUL_CSTEP(BOARD_DFLL_MAXCOARSESTEP) |
+           SYSCTRL_DFLLMUL_FSTEP(BOARD_DFLL_MAXFINESTEP) |
+            SYSCTRL_DFLLMUL_MUL(BOARD_DFLL_MULTIPLIER);
+  putreg32(regval, SAM_SYSCTRL_DFLLMUL);
+#else
+  putreg32(0, SAM_SYSCTRL_DFLLMUL);
+#endif
+
+  /* Set up the DFLL value register */
+
+  regval = SYSCTRL_DFLLVAL_COARSE(BOARD_DFLL_COARSEVALUE) |
+          SYSCTRL_DFLLVAL_FINE(BOARD_DFLL_FINEVALUE);
+  putreg32(regval, SAM_SYSCTRL_DFLLMUL);
+
+  /* Finally, set the state of the ONDEMAND bit if necessary */
+
+#ifdef BOARD_DFLL_ONDEMAND
+  control |= SYSCTRL_DFLLCTRL_ONDEMAND; /* On demand control */
+  putreg16(control, SAM_SYSCTRL_DFLLCTRL);
+#endif
 }
 #else
 #  define sam_dfll_config()

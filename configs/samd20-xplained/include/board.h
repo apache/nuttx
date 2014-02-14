@@ -60,9 +60,7 @@
  * may vary with temperature changes.
  */
 
-#define BOARD_OSCULP32K_FREQUENCY  32000    /* 32kHz ultra-low-power internal oscillator */
-#define BOARD_OSC8M_FREQUENCY      8000000  /* 8MHz high-accuracy internal oscillator */
-#define BOARD_DFLL48M_FREQUENCY    48000000 /* 48MHz Digital Frequency Locked Loop */
+#define BOARD_OSCULP32K_FREQUENCY    32000    /* 32kHz ultra-low-power internal oscillator */
 
 /* The SAMD20 Xplained Pro has one on-board crystal:
  *
@@ -81,11 +79,11 @@
  */
 
 #undef  BOARD_XOSC_ENABLE
-#define BOARD_XOSC_FREQUENCY       12000000UL
-#define BOARD_XOSC_STARTUPTIME     SYSCTRL_XOSC_STARTUP_1S
-#define BOARD_XOSC_ISCRYSTAL       1
-#define BOARD_XOSC_AMPGC           1
-#define BOARD_XOSC_ONDEMAND        1
+#define BOARD_XOSC_FREQUENCY         12000000UL
+#define BOARD_XOSC_STARTUPTIME       SYSCTRL_XOSC_STARTUP_1S
+#define BOARD_XOSC_ISCRYSTAL         1
+#define BOARD_XOSC_AMPGC             1
+#define BOARD_XOSC_ONDEMAND          1
 #undef  BOARD_XOSC_RUNINSTANDBY
 
 /* XOSC32 Configuration -- Not used
@@ -102,13 +100,13 @@
  */
 
 #undef  BOARD_XOSC32K_ENABLE
-#define BOARD_XOSC32K_FREQUENCY    32768    /* 32.768KHz XTAL */
-#define BOARD_XOSC32K_STARTUPTIME  SYSCTRL_XOSC32K_STARTUP_2S
-#define BOARD_XOSC32K_ISCRYSTAL    1
-#define BOARD_XOSC32K_AAMPEN       1
+#define BOARD_XOSC32K_FREQUENCY      32768    /* 32.768KHz XTAL */
+#define BOARD_XOSC32K_STARTUPTIME    SYSCTRL_XOSC32K_STARTUP_2S
+#define BOARD_XOSC32K_ISCRYSTAL      1
+#define BOARD_XOSC32K_AAMPEN         1
 #undef  BOARD_XOSC32K_EN1KHZ
-#define BOARD_XOSC32K_EN32KHZ      1
-#define BOARD_XOSC32K_ONDEMAND     1
+#define BOARD_XOSC32K_EN32KHZ        1
+#define BOARD_XOSC32K_ONDEMAND       1
 #undef  BOARD_XOSC32K_RUNINSTANDBY
 
 /* OSC32 Configuration -- not used
@@ -123,11 +121,11 @@
  */
 
 #undef  BOARD_OSC32K_ENABLE
-#define BOARD_OSC32K_FREQUENCY     32768    /* 32.768kHz internal oscillator */
-#define BOARD_OSC32K_STARTUPTIME   SYSCTRL_OSC32K_STARTUP_4MS
-#define BOARD_OSC32K_EN1KHZ        1
-#define BOARD_OSC32K_EN32KHZ       1
-#define BOARD_OSC32K_ONDEMAND      1
+#define BOARD_OSC32K_FREQUENCY       32768    /* 32.768kHz internal oscillator */
+#define BOARD_OSC32K_STARTUPTIME     SYSCTRL_OSC32K_STARTUP_4MS
+#define BOARD_OSC32K_EN1KHZ          1
+#define BOARD_OSC32K_EN32KHZ         1
+#define BOARD_OSC32K_ONDEMAND        1
 #undef  BOARD_OSC32K_RUNINSTANDBY
 
 /* OSC8M Configuration -- always enabled
@@ -137,9 +135,62 @@
  *   BOARD_OSC8M_RUNINSTANDBY   - Boolean (defined / not defined)
  */
 
-#define BOARD_OSC8M_PRESCALER      SYSCTRL_OSC8M_PRESC_DIV1
-#define BOARD_OSC8M_ONDEMAND       1
+#define BOARD_OSC8M_PRESCALER        SYSCTRL_OSC8M_PRESC_DIV1
+#define BOARD_OSC8M_ONDEMAND         1
 #undef BOARD_OSC8M_RUNINSTANDBY
+
+#define BOARD_OSC8M_FREQUENCY        8000000  /* 8MHz high-accuracy internal oscillator */
+
+/* Digital Frequency Locked Loop configuration.  In closed-loop mode, the
+ * DFLL output frequency (Fdfll) is given by:
+ *
+ *  Fdfll = DFLLmul * Frefclk
+ *        = (48000000/32768) * 32768 = 48MHz
+ *
+ * Where the reference clock is always the Generic Clock Channel 0 output.
+ *
+ * When operating in open-loop mode, the output frequency of the DFLL will
+ * be determined by the values written to the DFLL Coarse Value bit group
+ * and the DFLL Fine Value bit group in the DFLL Value register.
+ *
+ *   BOARD_DFLL_OPENLOOP            - Boolean (defined / not defined)
+ *   BOARD_DFLL_TRACKAFTERFINELOCK  - Boolean (defined / not defined)
+ *   BOARD_DFLL_KEEPLOCKONWAKEUP    - Boolean (defined / not defined)
+ *   BOARD_DFLL_ENABLECHILLCYCLE    - Boolean (defined / not defined)
+ *   BOARD_DFLL_QUICKLOCK           - Boolean (defined / not defined)
+ *   BOARD_DFLL_ONDEMAND            - Boolean (defined / not defined)
+ *   BOARD_DFLL_COARSEVALUE         - Value
+ *   BOARD_DFLL_FINEVALUE           - Value
+ *
+ * Open Loop mode only:
+ *   BOARD_DFLL_MAXCOARSESTEP       - Value
+ *   BOARD_DFLL_MAXFINESTEP         - Value
+ *   BOARD_DFLL_MULTIPLIER          - Value
+ *
+ *   BOARD_DFLL_FREQUENCY           - The resulting frequency
+ */
+
+#define BOARD_DFLL_OPENLOOP          1
+#undef  BOARD_DFLL_ONDEMAND
+#undef  BOARD_DFLL_RUNINSTANDBY
+
+/* DFLL open loop mode configuration */
+
+#define BOARD_DFLL_COARSEVALUE       (0x1f / 4)
+#define BOARD_DFLL_FINEVALUE         (0xff / 4)
+
+/* DFLL closed loop mode configuration */
+
+#define BOARD_DFLL_SRCGCLKGEN         1  /* GCLK generator channel 1 */
+#define BOARD_DFLL_MULTIPLIER         6
+#define BOARD_DFLL_QUICKLOCK          1
+#define BOARD_DFLL_TRACKAFTERFINELOCK 1
+#define BOARD_DFLL_KEEPLOCKONWAKEUP   1
+#define BOARD_DFLL_ENABLECHILLCYCLE   1
+#define BOARD_DFLL_MAXCOARSESTEP      (0x1f / 4)
+#define BOARD_DFLL_MAXFINESTEP        (0xff / 4)
+
+#define BOARD_DFLL_FREQUENCY          (48000000)
 
 /* The source of the main clock is always GLCK_MAIN.  Also called GCLKGEN[0], this is
  * the clock feeding the Power Manager. The Power Manager, in turn, generates main
@@ -162,24 +213,9 @@
  * Fglckmain = Frefclk / Divider
  */
 
-#define BOARD_GLCK_MAIN_SRC_OSC8M  1
-#define BOARD_GLCK_MAIN_DIVIDER    1
-#define BOARD_GLCK_MAIN_FREQUENCY  (BOARD_OSC8M_FREQUENCY / BOARD_GLCK_MAIN_DIVIDER)
-
-/* Digital Frequency Locked Loop configuration.  In closed-loop mode, the
- * DFLL output frequency (Fdfll) is given by:
- *
- *  Fdfll = DFLLmul * Frefclk
- *        = (48000000/32768) * 32768 = 48MHz
- *
- * Where the reference clock is always the Generic Clock Channel 0 output.
- *
- * NOTE: Nothing must be defined if the DFPLL is not used
- */
-
-#define BOARD_DFLL48M_TARGET       48000000
-#define BOARD_DFLL48M_MUL          (BOARD_DFLL0_TARGET / BOARD_GCK_MAIN_FREQUENCY)
-#define BOARD_DFLL48M_FREQUENCY    (BOARD_DFLL48M_MUL * BOARD_GCK_MAIN_FREQUENCY)
+#define BOARD_GLCK_MAIN_SRC_OSC8M    1
+#define BOARD_GLCK_MAIN_DIVIDER      1
+#define BOARD_GLCK_MAIN_FREQUENCY    (BOARD_OSC8M_FREQUENCY / BOARD_GLCK_MAIN_DIVIDER)
 
 /* Main clock dividers
  *
@@ -194,24 +230,24 @@
  *    BOARD_APBC_FRQUENCY - In Hz
  */
 
-#define BOARD_CPU_FAILDECT         1
-#define BOARD_CPU_DIVIDER          PM_CPUSEL_CPUDIV_1
-#define BOARD_APBA_DIVIDER         PM_APBASEL_APBADIV_1
-#define BOARD_APBB_DIVIDER         PM_APBBSEL_APBBDIV_1
-#define BOARD_APBC_DIVIDER         PM_APBCSEL_APBCDIV_1
+#define BOARD_CPU_FAILDECT           1
+#define BOARD_CPU_DIVIDER            PM_CPUSEL_CPUDIV_1
+#define BOARD_APBA_DIVIDER           PM_APBASEL_APBADIV_1
+#define BOARD_APBB_DIVIDER           PM_APBBSEL_APBBDIV_1
+#define BOARD_APBC_DIVIDER           PM_APBCSEL_APBCDIV_1
 
 /* Resulting frequencies */
 
-#define BOARD_MCK_FREQUENCY        (BOARD_GLCK_MAIN_FREQUENCY)
-#define BOARD_CPU_FREQUENCY        (BOARD_MCK_FREQUENCY)
-#define BOARD_PBA_FREQUENCY        (BOARD_MCK_FREQUENCY)
-#define BOARD_PBB_FREQUENCY        (BOARD_MCK_FREQUENCY)
-#define BOARD_PBC_FREQUENCY        (BOARD_MCK_FREQUENCY)
-#define BOARD_PBD_FREQUENCY        (BOARD_MCK_FREQUENCY)
+#define BOARD_MCK_FREQUENCY          (BOARD_GLCK_MAIN_FREQUENCY)
+#define BOARD_CPU_FREQUENCY          (BOARD_MCK_FREQUENCY)
+#define BOARD_PBA_FREQUENCY          (BOARD_MCK_FREQUENCY)
+#define BOARD_PBB_FREQUENCY          (BOARD_MCK_FREQUENCY)
+#define BOARD_PBC_FREQUENCY          (BOARD_MCK_FREQUENCY)
+#define BOARD_PBD_FREQUENCY          (BOARD_MCK_FREQUENCY)
 
 /* FLASH wait states */
 
-#define BOARD_FLASH_WAITSTATES     0
+#define BOARD_FLASH_WAITSTATES       0
 
 /* LED definitions ******************************************************************/
 /* There are three LEDs on board the SAMD20 Xplained Pro board:  The EDBG
@@ -225,12 +261,12 @@
 
 /* LED index values for use with sam_setled() */
 
-#define BOARD_STATUS_LED     0
-#define BOARD_NLEDS          1
+#define BOARD_STATUS_LED             0
+#define BOARD_NLEDS                  1
 
 /* LED bits for use with sam_setleds() */
 
-#define BOARD_STATUS LED_BIT (1 << BOARD_STATUS_LED)
+#define BOARD_STATUS LED_BIT         (1 << BOARD_STATUS_LED)
 
 /* When CONFIG_ARCH_LEDS is defined in the NuttX configuration, NuttX will
  * control the LED as defined below.  Thus if the LED is statically on, NuttX has
@@ -239,14 +275,14 @@
  * system has halted.
  */
 
-#define LED_STARTED       0 /* STATUS LED=OFF */
-#define LED_HEAPALLOCATE  0 /* STATUS LED=OFF */
-#define LED_IRQSENABLED   0 /* STATUS LED=OFF */
-#define LED_STACKCREATED  1 /* STATUS LED=ON */
-#define LED_INIRQ         2 /* STATUS LED=no change */
-#define LED_SIGNAL        2 /* STATUS LED=no change */
-#define LED_ASSERTION     2 /* STATUS LED=no change */
-#define LED_PANIC         3 /* STATUS LED=flashing */
+#define LED_STARTED                  0 /* STATUS LED=OFF */
+#define LED_HEAPALLOCATE             0 /* STATUS LED=OFF */
+#define LED_IRQSENABLED              0 /* STATUS LED=OFF */
+#define LED_STACKCREATED             1 /* STATUS LED=ON */
+#define LED_INIRQ                    2 /* STATUS LED=no change */
+#define LED_SIGNAL                   2 /* STATUS LED=no change */
+#define LED_ASSERTION                2 /* STATUS LED=no change */
+#define LED_PANIC                    3 /* STATUS LED=flashing */
 
 /* Button definitions ***************************************************************/
 /* Mechanical buttons:
@@ -260,10 +296,10 @@
 
 /* The SAMD20 Xplained Pro supports one button: */
 
-#define BUTTON_SW0         0
-#define NUM_BUTTONS        1
+#define BUTTON_SW0                   0
+#define NUM_BUTTONS                  1
 
-#define BUTTON_SW0_BIT     (1 << BUTTON_SW0)
+#define BUTTON_SW0_BIT               (1 << BUTTON_SW0)
 
 /************************************************************************************
  * Public Data
