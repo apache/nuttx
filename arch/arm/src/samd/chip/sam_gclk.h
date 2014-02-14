@@ -76,10 +76,10 @@
 /* Generic clock control register */
 
 #define GCLK_CLKCTRL_ID_SHIFT   (0)       /* Bits 0-5: Generic Clock Selection ID */
-#define GCLK_CLKCTRL_ID_SHIFT   (0x3f << GCLK_CLKCTRL_ID_SHIFT)
+#define GCLK_CLKCTRL_ID_MASK    (0x3f << GCLK_CLKCTRL_ID_SHIFT)
 #  define GCLK_CLKCTRL_ID(n)    ((n) << GCLK_CLKCTRL_ID_SHIFT)
 #define GCLK_CLKCTRL_GEN_SHIFT  (8)       /* Bits 8-11: Generic Clock Generator */
-#define GCLK_CLKCTRL_GEN_SHIFT  (15 << GCLK_CLKCTRL_GEN_SHIFT)
+#define GCLK_CLKCTRL_GEN_MASK   (15 << GCLK_CLKCTRL_GEN_SHIFT)
 #  define GCLK_CLKCTRL_GEN(n)   ((n) << GCLK_CLKCTRL_GEN_SHIFT) /* Generic clock generator n */
 #  define GCLK_CLKCTRL_GEN0     (0 << GCLK_CLKCTRL_GEN_SHIFT)   /* Generic clock generator 0 */
 #  define GCLK_CLKCTRL_GEN1     (1 << GCLK_CLKCTRL_GEN_SHIFT)   /* Generic clock generator 1 */
