@@ -4,6 +4,10 @@
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
+ * References:
+ *   "Atmel SAM D20J / SAM D20G / SAM D20E ARM-Based Microcontroller
+ *   Datasheet", 42129J–SAM–12/2013
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
