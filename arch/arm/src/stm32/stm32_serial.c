@@ -519,10 +519,10 @@ static struct up_dev_s g_usart1priv =
   .usartbase     = STM32_USART1_BASE,
   .tx_gpio       = GPIO_USART1_TX,
   .rx_gpio       = GPIO_USART1_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONROL) && defined(CONFIG_USART1_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART1_OFLOWCONTROL)
   .cts_gpio      = GPIO_USART1_CTS,
 #endif
-#if defined(CONFIG_SERIAL_IFLOWCONROL) && defined(CONFIG_USART1_IFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART1_IFLOWCONTROL)
   .rts_gpio      = GPIO_USART1_RTS,
 #endif
 #ifdef CONFIG_USART1_RXDMA
@@ -585,10 +585,10 @@ static struct up_dev_s g_usart2priv =
   .usartbase     = STM32_USART2_BASE,
   .tx_gpio       = GPIO_USART2_TX,
   .rx_gpio       = GPIO_USART2_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONROL) && defined(CONFIG_USART2_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART2_OFLOWCONTROL)
   .cts_gpio      = GPIO_USART2_CTS,
 #endif
-#if defined(CONFIG_SERIAL_IFLOWCONROL) && defined(CONFIG_USART2_IFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART2_IFLOWCONTROL)
   .rts_gpio      = GPIO_USART2_RTS,
 #endif
 #ifdef CONFIG_USART2_RXDMA
@@ -651,10 +651,10 @@ static struct up_dev_s g_usart3priv =
   .usartbase     = STM32_USART3_BASE,
   .tx_gpio       = GPIO_USART3_TX,
   .rx_gpio       = GPIO_USART3_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONROL) && defined(CONFIG_USART3_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART3_OFLOWCONTROL)
   .cts_gpio      = GPIO_USART3_CTS,
 #endif
-#if defined(CONFIG_SERIAL_IFLOWCONROL) && defined(CONFIG_USART3_IFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART3_IFLOWCONTROL)
   .rts_gpio      = GPIO_USART3_RTS,
 #endif
 #ifdef CONFIG_USART3_RXDMA
@@ -717,10 +717,10 @@ static struct up_dev_s g_uart4priv =
   .usartbase     = STM32_UART4_BASE,
   .tx_gpio       = GPIO_UART4_TX,
   .rx_gpio       = GPIO_UART4_RX,
-#ifdef CONFIG_SERIAL_OFLOWCONROL
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
   .cts_gpio      = 0,
 #endif
-#ifdef CONFIG_SERIAL_IFLOWCONROL
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rts_gpio      = 0,
 #endif
 #ifdef CONFIG_UART4_RXDMA
@@ -783,10 +783,10 @@ static struct up_dev_s g_uart5priv =
   .usartbase      = STM32_UART5_BASE,
   .tx_gpio        = GPIO_UART5_TX,
   .rx_gpio        = GPIO_UART5_RX,
-#ifdef CONFIG_SERIAL_OFLOWCONROL
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
   .cts_gpio      = 0,
 #endif
-#ifdef CONFIG_SERIAL_IFLOWCONROL
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
   .rts_gpio      = 0,
 #endif
 #ifdef CONFIG_UART5_RXDMA
@@ -849,10 +849,10 @@ static struct up_dev_s g_usart6priv =
   .usartbase      = STM32_USART6_BASE,
   .tx_gpio        = GPIO_USART6_TX,
   .rx_gpio        = GPIO_USART6_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONROL) && defined(CONFIG_USART6_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART6_OFLOWCONTROL)
   .cts_gpio       = GPIO_USART6_CTS,
 #endif
-#if defined(CONFIG_SERIAL_IFLOWCONROL) && defined(CONFIG_USART6_IFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART6_IFLOWCONTROL)
   .rts_gpio       = GPIO_USART6_RTS,
 #endif
 #ifdef CONFIG_USART6_RXDMA
@@ -909,10 +909,10 @@ static struct up_dev_s g_uart7priv =
   .usartbase      = STM32_UART7_BASE,
   .tx_gpio        = GPIO_UART7_TX,
   .rx_gpio        = GPIO_UART7_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONROL) && defined(CONFIG_USART7_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART7_OFLOWCONTROL)
   .cts_gpio       = GPIO_UART7_CTS,
 #endif
-#if defined(CONFIG_SERIAL_IFLOWCONROL) && defined(CONFIG_USART7_IFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART7_IFLOWCONTROL)
   .rts_gpio       = GPIO_UART7_RTS,
 #endif
 #ifdef CONFIG_UART7_RXDMA
@@ -969,10 +969,10 @@ static struct up_dev_s g_uart8priv =
   .usartbase      = STM32_UART8_BASE,
   .tx_gpio        = GPIO_UART8_TX,
   .rx_gpio        = GPIO_UART8_RX,
-#if defined(CONFIG_SERIAL_OFLOWCONROL) && defined(CONFIG_USART8_OFLOWCONTROL)
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_USART8_OFLOWCONTROL)
   .cts_gpio       = GPIO_UART8_CTS,
 #endif
-#if defined(CONFIG_SERIAL_IFLOWCONROL) && defined(CONFIG_USART8_IFLOWCONTROL)
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_USART8_IFLOWCONTROL)
   .rts_gpio       = GPIO_UART8_RTS,
 #endif
 #ifdef CONFIG_UART8_RXDMA
@@ -1329,14 +1329,14 @@ static int up_setup(struct uart_dev_s *dev)
   stm32_configgpio(priv->tx_gpio);
   stm32_configgpio(priv->rx_gpio);
 
-#ifdef CONFIG_SERIAL_OFLOWCONROL
+#ifdef CONFIG_SERIAL_OFLOWCONTROL
   if (priv->cts_gpio != 0)
     {
       stm32_configgpio(priv->cts_gpio);
     }
 #endif
 
-#ifdef CONFIG_SERIAL_IFLOWCONROL
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
   if (priv->rts_gpio != 0)
     {
       stm32_configgpio(priv->rts_gpio);
@@ -1819,10 +1819,10 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
         /* Perform some sanity checks before accepting any changes */
 
         if (((termiosp->c_cflag & CSIZE) != CS8)
-#ifdef CONFIG_SERIAL_IFLOWCONROL
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
             || ((termiosp->c_cflag & CCTS_OFLOW) && (priv->cts_gpio == 0))
 #endif
-#ifdef CONFIG_SERIAL_IFLOWCONROL
+#ifdef CONFIG_SERIAL_IFLOWCONTROL
             || ((termiosp->c_cflag & CRTS_IFLOW) && (priv->rts_gpio == 0))
 #endif
            )

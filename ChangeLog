@@ -6579,4 +6579,6 @@
 	* configs/samd20-xplained:  Framework to support the Amtel SAMD20
 	  Xplained Pro.  Initial check is just an unverified, rough port of
 	  the SAM4L Xplained Pro configuration (2014-2-12).
+	* arch/arm/src/stm32/stm32_serial.c:  Fix cloned type:  FLOWCONTROL
+	  vs FLOWCONROL (2014-2-14).
 
