@@ -34,13 +34,13 @@
  ****************************************************************************/
 
 /* The ATSAMD20J18A has 256KB of FLASH beginning at address 0x0000:0000 and
- * 64KB of SRAM beginning at address 0x2000:0000
+ * 32KB of SRAM beginning at address 0x2000:0000
  */
 
 MEMORY
 {
     flash (rx)  : ORIGIN = 0x00000000, LENGTH = 256K
-    sram  (rwx) : ORIGIN = 0x20000000, LENGTH = 64K
+    sram  (rwx) : ORIGIN = 0x20000000, LENGTH = 32K
 }
 
 OUTPUT_ARCH(arm)
