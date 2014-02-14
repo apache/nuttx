@@ -55,99 +55,69 @@
 
 /* Clocking *************************************************************************/
 
-/* Select the DFLL as the source of the system clock.
- *
- * Options (define one):
- *   BOARD_SYSCLK_SOURCE_RCSYS     - System RC oscillator
- *   BOARD_SYSCLK_SOURCE_OSC0      - Oscillator 0
- *   BOARD_SYSCLK_SOURCE_PLL0      - Phase Locked Loop 0
- *   BOARD_SYSCLK_SOURCE_DFLL0     - Digital Frequency Locked Loop
- *   BOARD_SYSCLK_SOURCE_RC80M     - 80 MHz RC oscillator
- *   BOARD_SYSCLK_SOURCE_FCFAST12M - 12 MHz RC oscillator
- *   BOARD_SYSCLK_SOURCE_FCFAST8M  - 8 MHz RC oscillator
- *   BOARD_SYSCLK_SOURCE_FCFAST4M  - 4 MHz RC oscillator
- *   BOARD_SYSCLK_SOURCE_RC1M      - 1 MHz RC oscillator
- */
-
-#define BOARD_SYSCLK_SOURCE_DFLL0  1
-
-/* Nominal frequencies in on-chip RC oscillators.  These are *not* configurable
- * but appear here for use in frequency calculations.  NOTE: These may frequencies
+/* Nominal frequencies of on-chip RC oscillators.  These are *not* configurable
+ * but appear here for use in frequency calculations.  NOTE: These frequencies
  * may vary with temperature changes.
  */
 
-#define BOARD_RCSYS_FREQUENCY      115000   /* Nominal frequency of RCSYS (Hz) */
-#define BOARD_RC32K_FREQUENCY      32768    /* Nominal frequency of RC32K (Hz) */
-#define BOARD_RC80M_FREQUENCY      80000000 /* Nominal frequency of RC80M (Hz) */
-#define BOARD_RCFAST4M_FREQUENCY   4000000  /* Nominal frequency of RCFAST4M (Hz) */
-#define BOARD_RCFAST8M_FREQUENCY   8000000  /* Nominal frequency of RCFAST8M (Hz) */
-#define BOARD_RCFAST12M_FREQUENCY  12000000 /* Nominal frequency of RCFAST12M (Hz) */
-#define BOARD_RC1M_FREQUENCY       1000000  /* Nominal frequency of RC1M (Hz) */
+#define BOARD_OSC32K_FREQUENCY     32768    /* 32.768kHz internal oscillator */
+#define BOARD_OSCULP32K_FREQUENCY  32000    /* 32kHz ultra-low-power internal oscillator */
+#define BOARD_OSC8M_FREQUENCY      8000000  /* 8MHz high-accuracy internal oscillator */
+#define BOARD_DFLL48M_FREQUENCY    48000000 /* 48MHz Digital Frequency Locked Loop */
 
-/* The SAMD20 Xplained Pro has two on-board crystals:
- *   XC100 12MHz     OSC0
- *   XC101 32.768KHz OSC32
+/* The SAMD20 Xplained Pro has one on-board crystal:
+ *
+ *   XC101 32.768KHz XOSC32
  */
 
-/* OSC0 Configuration */
+/* XOSC Configuration -- Not available */
 
-#define BOARD_OSC0_FREQUENCY       12000000 /* 12MHz XTAL */
+#undef BOARD_XOSC_FREQUENCY
 
-/* OSC32 Configuration */
+/* XOSC32 Configuration */
 
-#define BOARD_OSC32_FREQUENCY      32768    /* 32.768KHz XTAL */
-#define BOARD_OSC32_STARTUP_US     6100
-#define BOARD_OSC32_SELCURR        BSCIF_OSCCTRL32_SELCURR_300
-#define BOARD_OSC32_ISXTAL         1        /* OSC32 is a crystal */
+#define BOARD_XOSC32_FREQUENCY     32768    /* 32.768KHz XTAL */
+#define BOARD_XOSC32_STARTUP_US    6100
 
-/* Digital Frequency Locked Loop configuration
- *  Fdfll = (Fclk * DFLLmul) / DFLLdiv
- *        = 32768 * (48000000/32768) / 1 = 48MHz
+/* The source of the main clock is always GLCK_MAIN.  Also called GCLKGEN[0], this is
+ * the clock feeding the Power Manager. The Power Manager, in turn, generates main
+ * clock which is divided down to produce the CPU, AHB, and APB clocks.
  *
- * The actual frequency is 47.97MHz due to truncation of the multiplier.
- * The 48MHz target value is treated as "not-to-exceed" value).  Use OSC0
- * if you need more accuracy (12MHz with a multiplier of 4).
+ * The main clock is initially OSC8M divided by 8.  But will be reconfigured here to
+ * be DFLL48M.
  *
- * DFLL0 source options (select one):
- *   BOARD_DFLL0_SOURCE_RCSYS      - System RC oscillator
- *   BOARD_DFLL0_SOURCE_OSC32K     - 32.768KHz oscillator
- *   BOARD_DFLL0_SOURCE_OSC0       - Oscillator 0
- *   BOARD_DFLL0_SOURCE_RC80M      - 80 MHz RC oscillator
- *   BOARD_DFLL0_SOURCE_RC32K      - 32 kHz RC oscillator
+ * Select the OSC8M as the source of the GLCK_MAIN. Options (define one):
+ *
+ *   BOARD_GLCK_MAIN_SRC_XOSC      - XOSC oscillator output
+ *   BOARD_GLCK_MAIN_SRC_GCLKIN    - Generator input pad
+ *   BOARD_GLCK_MAIN_SRC_GCLKGEN1  - Generic clock generator 1 output
+ *   BOARD_GLCK_MAIN_SRC_OSCULP32K - OSCULP32K oscillator output
+ *   BOARD_GLCK_MAIN_SRC_OSC32K    - OSC32K oscillator output
+ *   BOARD_GLCK_MAIN_SRC_XOSC32K   - XOSC32K oscillator output
+ *   BOARD_GLCK_MAIN_SRC_OSC8M     - OSC8M oscillator output
+ *   BOARD_GLCK_MAIN_SRC_DFLL48M   - DFLL48M output
+ *
+ * Fglckmain = Frefclk / Divider
+ */
+
+#define BOARD_GLCK_MAIN_SRC_OSC8M  1
+#define BOARD_GLCK_MAIN_DIVIDER    1
+#define BOARD_GLCK_MAIN_FREQUENCY  (BOARD_OSC8M_FREQUENCY / BOARD_GLCK_MAIN_DIVIDER)
+
+/* Digital Frequency Locked Loop configuration.  In closed-loop mode, the
+ * DFLL output frequency (Fdfll) is given by:
+ *
+ *  Fdfll = DFLLmul * Frefclk
+ *        = (48000000/32768) * 32768 = 48MHz
+ *
+ * Where the reference clock is always the Generic Clock Channel 0 output.
  *
  * NOTE: Nothing must be defined if the DFPLL is not used
  */
 
-#define BOARD_DFLL0_SOURCE_OSC32K  1
-#define BOARD_DFLL0_TARGET         48000000
-#define BOARD_DFLL0_MUL            (BOARD_DFLL0_TARGET / BOARD_OSC32_FREQUENCY)
-#define BOARD_DFLL0_DIV            1
-#define BOARD_DFLL0_FREQUENCY      (BOARD_OSC32_FREQUENCY * BOARD_DFLL0_MUL / BOARD_DFLL0_DIV)
-
-/* Phase Locked Loop configuration
- *  Fdfll = (Fclk * PLLmul) / PLLdiv
- *
- * PLL0 source options (select one):
- *   BOARD_PLL0_SOURCE_OSC0        - Oscillator 0
- *   BOARD_PLL0_SOURCE_GCLK9       - General clock 9
- *
- *   BOARD_GLCK9_SOURCE_RCSYS      - System RC oscillator
- *   BOARD_GLCK9_SOURCE_OSC32K     - Output from OSC32K
- *   BOARD_GLCK9_SOURCE_DFLL0      - Output from DFLL0
- *   BOARD_GLCK9_SOURCE_OSC0       - Output from Oscillator0
- *   BOARD_GLCK9_SOURCE_RC80M      - Output from 80MHz RCOSC
- *   BOARD_GLCK9_SOURCE_RCFAST     - Output from 4,8,12MHz RCFAST
- *   BOARD_GLCK9_SOURCE_RC1M       - Output from 1MHz RC1M
- *   BOARD_GLCK9_SOURCE_CPUCLK     - The CPU clock
- *   BOARD_GLCK9_SOURCE_HSBCLK     - High Speed Bus clock
- *   BOARD_GLCK9_SOURCE_PBACLK     - Peripheral Bus A clock
- *   BOARD_GLCK9_SOURCE_PBBCLK     - Peripheral Bus B clock
- *   BOARD_GLCK9_SOURCE_PBCCLK     - Peripheral Bus C clock
- *   BOARD_GLCK9_SOURCE_PBDCLK     - Peripheral Bus D clock
- *   BOARD_GLCK9_SOURCE_RC32K      - Output from 32kHz RCOSC
- *
- * NOTE: Nothing must be defined if the PLL0 is not used
- */
+#define BOARD_DFLL48M_TARGET       48000000
+#define BOARD_DFLL48M_MUL          (BOARD_DFLL0_TARGET / BOARD_GCK_MAIN_FREQUENCY)
+#define BOARD_DFLL48M_FREQUENCY    (BOARD_DFLL48M_MUL * BOARD_GCK_MAIN_FREQUENCY)
 
 /* System clock dividers: Fbus = Fmck >> BUSshift */
 
@@ -159,39 +129,12 @@
 
 /* Resulting frequencies */
 
-#define BOARD_MCK_FREQUENCY        (BOARD_DFLL0_FREQUENCY)
+#define BOARD_MCK_FREQUENCY        (BOARD_GLCK_MAIN_FREQUENCY)
 #define BOARD_CPU_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_CPU_SHIFT)
 #define BOARD_PBA_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBA_SHIFT)
 #define BOARD_PBB_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBB_SHIFT)
 #define BOARD_PBC_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBC_SHIFT)
 #define BOARD_PBD_FREQUENCY        (BOARD_MCK_FREQUENCY >> BOARD_PBD_SHIFT)
-
-/* USBC.
- *
- * "The USBC has two bus clocks connected: One High Speed Bus clock
- *  (CLK_USBC_AHB) and one Peripheral Bus clock (CLK_USBC_APB). These clocks
- *  are generated by the Power Manager.  Both clocks are enabled at reset
- *  and can be disabled by the Power Manager. It is recommended to disable
- *  the USBC before disabling the clocks, to avoid freezing the USBC in
- *  an undefined state.
- *
- * "To follow the usb data rate at 12Mbit/s in full-speed mode, the
- *  CLK_USBC_AHB clock should be at minimum 12MHz.
- *
- * "The 48MHz USB clock is generated by a dedicated generic clock from
- *  the SCIF module. Before using the USB, the user must ensure that the
- *  USB generic clock (GCLK_USBC) is enabled at 48MHz in the SCIF module."
- *
- * USB Generic Clock 7 (GCLK_USBC) source selection (one only)
- *
- *   BOARD_USBC_SRC_OSC0
- *   BOARD_USBC_SRC_PLL0
- *   BOARD_USBC_SRC_DFLL
- *   BOARD_USBC_SRC_GCLKIN0
- */
-
-#define BOARD_USBC_SRC_DFLL        1 /* Source DFLL0 at 48MHz */
-#define BOARD_USBC_GCLK_DIV        1 /* Fusb = Fdfll / 1 = 48MHz */
 
 /* LED definitions ******************************************************************/
 /* There are three LEDs on board the SAMD20 Xplained Pro board:  The EDBG
