@@ -343,11 +343,14 @@
 
 /* EDBG/CDC USART on SERCOM3 */
 
+#define BOARD_SERCOM3_SRCGCLKGEN   GCLK_CLKCTRL_GEN0
 #define BOARD_SERCOM3_MUXCONFIG    (USART_CTRLA_RXPAD3 | USART_CTRLA_TXPAD2)
 #define BOARD_SERCOM3_PINMAP_PAD0  0
 #define BOARD_SERCOM3_PINMAP_PAD1  0
 #define BOARD_SERCOM3_PINMAP_PAD2  PORT_SERCOM3_PAD2_1
 #define BOARD_SERCOM3_PINMAP_PAD3  PORT_SERCOM3_PAD3_1
+
+#define BOARD_SERCOM3_FREQUENCY    BOARD_GCLK0_FREQUENCY
 
 /* LED definitions ******************************************************************/
 /* There are three LEDs on board the SAMD20 Xplained Pro board:  The EDBG
