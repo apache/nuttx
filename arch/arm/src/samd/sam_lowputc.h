@@ -81,16 +81,18 @@ extern "C"
 void sam_lowsetup(void);
 
 /****************************************************************************
- * Name: sam_usartconfig
+ * Name: sam_usart_initialize
  *
  * Description:
  *   Set the configuration of a SERCOM for provided USART configuration.
+ *   This configures the SERCOM as a USART, but does not configure USART
+ *   interrupts or enable the USART.
  *
  *****************************************************************************/
 
 #ifdef HAVE_USART
 struct sam_usart_config_s;
-void sam_usartconfig(const struct sam_usart_config_s *config);
+int sam_usart_initialize(const struct sam_usart_config_s * const config);
 #endif
 
 /****************************************************************************

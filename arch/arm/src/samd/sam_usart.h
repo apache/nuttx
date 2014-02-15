@@ -91,6 +91,7 @@ struct sam_usart_config_s
   port_pinset_t pad2; /* Pin configuration for PAD2 */
   port_pinset_t pad3; /* Pin configuration for PAD3 */
   uint32_t muxconfig; /* Pad multiplexing configuration */
+  uint32_t frequency; /* Source clock frequency */
   uintptr_t base;     /* SERCOM base address */
 };
 
