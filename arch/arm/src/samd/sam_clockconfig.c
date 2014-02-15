@@ -49,6 +49,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <assert.h>
 
 #include "up_arch.h"
@@ -68,8 +69,166 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This structure describes the configuration of on GCLK */
+
+#ifdef BOARD_GCLK_ENABLE
+struct sam_gclkconfig_s
+{
+  uint8_t  gclk;        /* Clock generator */
+  bool     runstandby;  /* Run clock in standby */
+  bool     output;      /* Output enable */
+  uint8_t  clksrc;      /* Encoded clock source */
+  uint16_t prescaler;   /* Prescaler value */
+};
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
+/* This structure describes the configuration of every enabled GCLK */
+
+#ifdef BOARD_GCLK_ENABLE
+static const struct sam_gclkconfig_s g_gclkconfig[] =
+{
+  /* GCLK generator 0 (Main Clock) */
+
+  {
+    .gclk       = 0,
+#ifdef BOARD_GCLK0_RUN_IN_STANDBY
+    .runstandby = true,
+#endif
+#ifdef BOARD_GCLK0_OUTPUT_ENABLE
+    .output     = true,
+#endif
+    .prescaler  = BOARD_GCLK0_PRESCALER,
+    .clksrc     = (uint8_t)(BOARD_GCLK0_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+  }
+
+  /* GCLK generator 1 */
+
+#ifdef BOARD_GCLK1_ENABLE
+  ,
+  {
+    .gclk       = 1,
+#ifdef BOARD_GCLK1_RUN_IN_STANDBY
+    .runstandby = true;
+#endif
+#ifdef BOARD_GCLK1_OUTPUT_ENABLE
+    .output     = true;
+#endif
+    .prescaler  = BOARD_GCLK1_PRESCALER,
+    .clksrc     = (uint8_t)(BOARD_GCLK1_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+  }
+#endif
+
+  /* GCLK generator 2 (RTC) */
+
+#ifdef BOARD_GCLK2_ENABLE
+  ,
+  {
+    .gclk       = 2,
+#ifdef BOARD_GCLK2_RUN_IN_STANDBY
+    .runstandby = true;
+#endif
+#ifdef BOARD_GCLK2_OUTPUT_ENABLE
+    .output     = true;
+#endif
+    .prescaler  = BOARD_GCLK2_PRESCALER,
+    .clksrc     = (uint8_t)(BOARD_GCLK2_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+  }
+#endif
+
+  /* GCLK generator 3 */
+
+#ifdef BOARD_GCLK3_ENABLE
+  ,
+  {
+    .gclk       = 3,
+#ifdef BOARD_GCLK3_RUN_IN_STANDBY
+    .runstandby = true;
+#endif
+#ifdef BOARD_GCLK3_OUTPUT_ENABLE
+    .output     = true;
+#endif
+    .prescaler  = BOARD_GCLK3_PRESCALER,
+    .clksrc     = (uint8_t)(BOARD_GCLK3_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+  }
+#endif
+
+  /* GCLK generator 4 */
+
+#ifdef BOARD_GCLK4_ENABLE
+  ,
+  {
+    .gclk       = 4,
+#ifdef BOARD_GCLK4_RUN_IN_STANDBY
+    .runstandby = true;
+#endif
+#ifdef BOARD_GCLK4_OUTPUT_ENABLE
+    .output     = true;
+#endif
+    .prescaler  = BOARD_GCLK4_PRESCALER,
+    .clksrc     = (uint8_t)(BOARD_GCLK4_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+  }
+#endif
+
+  /* GCLK generator 5 */
+
+#ifdef BOARD_GCLK5_ENABLE
+  ,
+  {
+    .gclk       = 5,
+#ifdef BOARD_GCLK5_RUN_IN_STANDBY
+    .runstandby = true;
+#endif
+#ifdef BOARD_GCLK5_OUTPUT_ENABLE
+    .output     = true;
+#endif
+    .prescaler  = BOARD_GCLK5_PRESCALER,
+    .clksrc     = (uint8_t)(BOARD_GCLK5_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+  }
+#endif
+
+  /* GCLK generator 6 */
+
+#ifdef BOARD_GCLK6_ENABLE
+  ,
+  {
+    .gclk       = 6,
+#ifdef BOARD_GCLK6_RUN_IN_STANDBY
+    .runstandby = true;
+#endif
+#ifdef BOARD_GCLK6_OUTPUT_ENABLE
+    .output     = true;
+#endif
+    .prescaler  = BOARD_GCLK6_PRESCALER,
+    .clksrc     = (uint8_t)(BOARD_GCLK6_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+  }
+#endif
+
+  /* GCLK generator 7 */
+
+#ifdef BOARD_GCLK7_ENABLE
+  ,
+  {
+    .gclk       = 7,
+#ifdef BOARD_GCLK7_RUN_IN_STANDBY
+    .runstandby = true;
+#endif
+#ifdef BOARD_GCLK7_OUTPUT_ENABLE
+    .output     = true;
+#endif
+    .prescaler  = BOARD_GCLK7_PRESCALER,
+    .clksrc     = (uint8_t)(BOARD_GCLK7_CLOCK_SOURCE >> GCLK_GENCTRL_SRC_SHIFT),
+  }
+#endif
+};
+
+#define NGCLKS_ENABLED (sizeof(g_gclkconfig) / sizeof(struct sam_gclkconfig_s))
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -125,7 +284,7 @@ static inline void sam_flash_waitstates(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMD_XOSC) || defined(BOARD_XOSC_ENABLE)
+#ifdef BOARD_XOSC_ENABLE
 static inline void sam_xosc_config(void)
 {
   uint16_t regval;
@@ -207,7 +366,7 @@ static inline void sam_xosc_config(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMD_XOSC32K) || defined(BOARD_XOSC32K_ENABLE)
+#ifdef BOARD_XOSC32K_ENABLE
 static inline void sam_xosc32k_config(void)
 {
   uint16_t regval;
@@ -274,7 +433,7 @@ static inline void sam_xosc32k_config(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMD_OSC32K) || defined(BOARD_OSC32K_ENABLE)
+#ifdef BOARD_OSC32K_ENABLE
 static inline void sam_osc32k_config(void)
 {
   uint32_t regval;
@@ -376,10 +535,15 @@ static inline void sam_osc8m_config(void)
  *   BOARD_DFLL_COARSEVALUE         - Value
  *   BOARD_DFLL_FINEVALUE           - Value
  *
- * Closed Loop mode only:
+ * Open Loop mode only:
+ *   BOARD_DFLL_COARSEVALUE         - Value
+ *   BOARD_DFLL_FINEVALUE           - Value
+ *
+ * Closed loop mode only:
+ *   BOARD_DFLL_SRCGCLKGEN          - See GCLK_CLKCTRL_GEN* definitions
+ *   BOARD_DFLL_MULTIPLIER          - Value
  *   BOARD_DFLL_MAXCOARSESTEP       - Value
  *   BOARD_DFLL_MAXFINESTEP         - Value
- *   BOARD_DFLL_MULTIPLIER          - Value
  *
  * Input Parameters:
  *   None
@@ -389,7 +553,7 @@ static inline void sam_osc8m_config(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMD_DFLL) || defined(BOARD_DFLL_ENABLE)
+#ifdef BOARD_DFLL_ENABLE
 static inline void sam_dfll_config(void)
 {
   uint16_t control;
@@ -456,13 +620,13 @@ static inline void sam_dfll_config(void)
 #endif
 
 /****************************************************************************
- * Name: sam_gclk_config
+ * Name: sam_dfll_reference
  *
  * Description:
- *   Configure GCLK(s) based on settings in the board.h header file.
+ *   Enable DFLL reference clock if in closed loop mode.
  *   Depends on:
  *
- *     
+ *   BOARD_DFLL_SRCGCLKGEN - See GCLK_CLKCTRL_GEN* definitions
  *
  * Input Parameters:
  *   None
@@ -472,13 +636,233 @@ static inline void sam_dfll_config(void)
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMD_GCLK) || defined(BOARD_GCLK_ENABLE)
-static inline void sam_gclk_config(void)
+#if defined(BOARD_GCLK_ENABLE) && defined(BOARD_DFLL_ENABLE) && \
+   !defined(BOARD_DFLL_OPENLOOP)
+static inline void sam_dfll_reference(void)
 {
-#warning Missing logic
+  uint16_t regval;
+
+  /* Disabled the generic clock */
+
+  regval = GCLK_CLKCTRL_GEN0;
+  putreg16(regval, SAM_GCLK_CLKCTRL);
+
+  /* Wait for the clock to become disabled */
+
+  while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
+
+  /* Select the configured clock generator and configure the GCLK output
+   * (always Generic clock generator 0)
+   *
+   * NOTE: We could enable write lock here to prevent further modification
+   */
+
+  regval = (GCLK_CLKCTRL_GEN0 | BOARD_DFLL_SRCGCLKGEN);
+  putreg16(regval, SAM_GCLK_CLKCTRL);
+
+  /* Enable the generic clock */
+
+  regval |= GCLK_CLKCTRL_CLKEN;
+  putreg16(regval, SAM_GCLK_CLKCTRL);
 }
 #else
-#  define sam_gclk_config()
+#  define sam_dfll_reference()
+#endif
+
+/****************************************************************************
+ * Name: sam_config_gclks
+ *
+ * Description:
+ *   Configure a single GCLK(s) based on settings in the board.h header file.
+ *   Depends on:
+ *
+ *     BOARD_GCLKn_RUN_IN_STANDBY   - Boolean (defined / not defined)
+ *     BOARD_GCLKn_CLOCK_SOURCE     - See GCLK_GENCTRL_SRC_* definitions
+ *     BOARD_GCLKn_PRESCALER        - Value
+ *     BOARD_GCLKn_OUTPUT_ENABLE    - Boolean (defined / not defined)
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef BOARD_GCLK_ENABLE
+static inline void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
+{
+  uint32_t genctrl;
+  uint32_t gendiv;
+
+  /* Select the requested source clock for the generator */
+
+  genctrl = ((uint32_t)config->gclk << GCLK_GENCTRL_ID_SHIFT) |
+            ((uint32_t)config->clksrc << GCLK_GENCTRL_SRC_SHIFT);
+  gendiv  = ((uint32_t)config->gclk << GCLK_GENDIV_ID_SHIFT);
+
+#if 0 /* Not yet supported */
+  /* Configure the clock to be either high or low when disabled */
+
+  if (config->level)
+    {
+      genctrl |= GCLK_GENCTRL_OOV;
+    }
+#endif
+
+  /* Configure if the clock output to I/O pin should be enabled */
+
+  if (config->output)
+    {
+      genctrl |= GCLK_GENCTRL_OE;
+    }
+
+  /* Set the prescaler division factor */
+
+  if (config->prescaler > 1)
+    {
+      /* Check if division is a power of two */
+
+      if (((config->prescaler & (config->prescaler - 1)) == 0))
+        {
+          /* Determine the index of the highest bit set to get the
+           * division factor that must be loaded into the division
+           * register.
+           */
+
+          uint32_t count = 0;
+          uint32_t mask;
+
+          for (mask = 2; mask < (uint32_t)config->prescaler; mask <<= 1)
+            {
+              count++;
+            }
+
+          /* Set binary divider power of 2 division factor */
+
+          gendiv  |= count << GCLK_GENDIV_DIV_SHIFT;
+          genctrl |= GCLK_GENCTRL_DIVSEL;
+        }
+      else
+        {
+          /* Set integer division factor */
+
+          gendiv  |= GCLK_GENDIV_DIV((uint32_t)config->prescaler);
+
+          /* Enable non-binary division with increased duty cycle accuracy */
+
+          genctrl |= GCLK_GENCTRL_IDC;
+        }
+    }
+
+  /* Enable or disable the clock in standby mode */
+
+  if (config->runstandby)
+    {
+      genctrl |= GCLK_GENCTRL_RUNSTDBY;
+    }
+
+  /* Wait for synchronization */
+
+  while ((getreg8(SAM_GCLK_STATUS) & GCLK_STATUS_SYNCBUSY) != 0);
+    
+  /* Select the generator */
+
+  putreg32(((uint32_t)config->gclk << GCLK_GENDIV_ID_SHIFT),
+           SAM_GCLK_GENDIV);
+
+  /* Wait for synchronization */
+
+  while ((getreg8(SAM_GCLK_STATUS) & GCLK_STATUS_SYNCBUSY) != 0);
+
+  /* Write the new generator configuration */
+
+  putreg32(gendiv, SAM_GCLK_GENDIV);
+
+  /* Wait for synchronization */
+
+  while ((getreg8(SAM_GCLK_STATUS) & GCLK_STATUS_SYNCBUSY) != 0);
+
+  /* Enable the clock generator */
+
+  genctrl |= GCLK_GENCTRL_GENEN;
+  putreg16(genctrl, SAM_GCLK_GENCTRL);
+
+  /* Wait for synchronization */
+
+  while ((getreg8(SAM_GCLK_STATUS) & GCLK_STATUS_SYNCBUSY) != 0);
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_config_gclks
+ *
+ * Description:
+ *   Configure GCLK(s) based on settings in the board.h header file.
+ *   Depends on:
+ *
+ *   Global enable/disable.
+ *
+ *     BOARD_GCLK_ENABLE            - Boolean (defined / not defined)
+ *
+ *   For n=1-7:
+ *     BOARD_GCLKn_ENABLE           - Boolean (defined / not defined)
+ *
+ *   For n=0-8:
+ *     BOARD_GCLKn_RUN_IN_STANDBY   - Boolean (defined / not defined)
+ *     BOARD_GCLKn_CLOCK_SOURCE     - See GCLK_GENCTRL_SRC_* definitions
+ *     BOARD_GCLKn_PRESCALER        - Value
+ *     BOARD_GCLKn_OUTPUT_ENABLE    - Boolean (defined / not defined)
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef BOARD_GCLK_ENABLE
+static inline void sam_config_gclks(void)
+{
+  uint32_t regval;
+  int i;
+
+  /* Turn on the GCLK interface clock */
+
+  regval  = getreg32(SAM_PM_APBAMASK);
+  regval |= PM_APBAMASK_GCLK;
+  putreg32(regval, SAM_PM_APBAMASK);
+
+  /* Reset the GCLK module */
+
+  putreg8(GCLK_CTRL_SWRST, SAM_GCLK_CTRL);
+
+  /* Wait for the reset to complete */
+
+  while ((getreg8(SAM_GCLK_CTRL) & GCLK_CTRL_SWRST) != 0);
+  
+  /* Configure all GCLK generators, skipping GLCK_MAIN which is configured
+   * below.
+   */
+
+  for (i = 1; i < NGCLKS_ENABLED; i++)
+    {
+      sam_gclk_config(&g_gclkconfig[i]);
+    }
+
+  /* Enable DFLL reference clock if the DFLL is enabled in closed loop mode */
+
+  sam_dfll_reference();
+
+  /* Configure the GCLK_MAIN last as it may depend on the DFLL or other
+   * generators
+   */
+
+  sam_gclk_config(&g_gclkconfig[0]);
+}
+#else
+#  define sam_config_gclks()
 #endif
 
 /****************************************************************************
@@ -579,7 +963,7 @@ void sam_clockconfig(void)
 
   /* Configure GCLK(s) */
 
-  sam_gclk_config();
+  sam_config_gclks();
 
   /* Set CPU and BUS clock dividers */
 
