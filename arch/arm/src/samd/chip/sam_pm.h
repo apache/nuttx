@@ -181,11 +181,12 @@
 
 #define PM_APBCMASK_PAC2          (1 << 0)  /* Bit 0:  PAC2 */
 #define PM_APBCMASK_EVSYS         (1 << 1)  /* Bit 1:  EVSYS */
-#define PM_APBCMASK_SERCOM0       (1 << 2)  /* Bit 2:  SERCOM0 */
-#define PM_APBCMASK_SERCOM1       (1 << 3)  /* Bit 3:  SERCOM1 */
-#define PM_APBCMASK_SERCOM2       (1 << 4)  /* Bit 4:  SERCOM2 */
-#define PM_APBCMASK_SERCOM3       (1 << 5)  /* Bit 5:  SERCOM3 */
-#define PM_APBCMASK_SERCOM4       (1 << 6)  /* Bit 6:  SERCOM4 */
+#define PM_APBCMASK_SERCOM(n)     (1 << ((n)+2))
+#  define PM_APBCMASK_SERCOM0     (1 << 2)  /* Bit 2:  SERCOM0 */
+#  define PM_APBCMASK_SERCOM1     (1 << 3)  /* Bit 3:  SERCOM1 */
+#  define PM_APBCMASK_SERCOM2     (1 << 4)  /* Bit 4:  SERCOM2 */
+#  define PM_APBCMASK_SERCOM3     (1 << 5)  /* Bit 5:  SERCOM3 */
+#  define PM_APBCMASK_SERCOM4     (1 << 6)  /* Bit 6:  SERCOM4 */
 #define PM_APBCMASK_SERCOM5       (1 << 7)  /* Bit 7:  SERCOM5 */
 #define PM_APBCMASK_TC0           (1 << 8)  /* Bit 8:  TC0 */
 #define PM_APBCMASK_TC1           (1 << 9)  /* Bit 9:  TC1 */
