@@ -58,7 +58,7 @@
  * Event channels      8                  8                  8
  * Timer/counters      8                  6                  6
  * TC output channels  2                  2                  2
- * SERCOMM             6                  6                  4
+ * SERCOM              6                  6                  4
  * ADC channels        20                 14                 10
  * Comparators         2                  2                  2
  * DAC channels        1                  1                  1
@@ -261,7 +261,7 @@
 #  define SAMD_NEVENTS              8             /* 8 event channels */
 #  define SAMD_NTC                  6             /* 6 Timer/counters */
 #  define SAMD_NTCOUT               2             /* 2 TC output channels */
-#  define SAMD_NSERCOMM             4             /* 4 SERCOMM */
+#  define SAMD_NSERCOM              4             /* 4 SERCOM */
 #  define SAMD_NADC                 10            /* 10 ADC channels */
 #  define SAMD_NCMP                 2             /* 2 Comparators */
 #  define SAMD_NDAC                 1             /* 1 DAC channel */
@@ -272,11 +272,11 @@
 #  define SAMD_NPTCX                10            /* PTC X */
 #  define SAMD_NPTCY                6             /* PTC Y */
 #  define SAMD_WDT                                /* Have watchdog timer */
-#elseif defined(SAMD20G)
+#elif defined(SAMD20G)
 #  define SAMD_NEVENTS              8             /* 8 event channels */
 #  define SAMD_NTC                  6             /* 6 Timer/counters */
 #  define SAMD_NTCOUT               2             /* 2 TC output channels */
-#  define SAMD_NSERCOMM             6             /* 6 SERCOMM */
+#  define SAMD_NSERCOM              6             /* 6 SERCOM */
 #  define SAMD_NADC                 15            /* 14 ADC channels */
 #  define SAMD_NCMP                 2             /* 2 Comparators */
 #  define SAMD_NDAC                 1             /* 1 DAC channel */
@@ -287,11 +287,11 @@
 #  define SAMD_NPTCX                12            /* PTC X */
 #  define SAMD_NPTCY                10            /* PTC Y */
 #  define SAMD_WDT                                /* Have watchdog timer */
-#elseif defined(SAMD20J)
+#elif defined(SAMD20J)
 #  define SAMD_NEVENTS              8             /* 8 event channels */
 #  define SAMD_NTC                  8             /* 8 Timer/counters */
 #  define SAMD_NTCOUT               2             /* 2 TC output channels */
-#  define SAMD_NSERCOMM             6             /* 6 SERCOMM */
+#  define SAMD_NSERCOM              6             /* 6 SERCOM */
 #  define SAMD_NADC                 20            /* 20 ADC channels */
 #  define SAMD_NCMP                 2             /* 2 Comparators */
 #  define SAMD_NDAC                 1             /* 1 DAC channel */
