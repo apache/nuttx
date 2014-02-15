@@ -6581,4 +6581,7 @@
 	  the SAM4L Xplained Pro configuration (2014-2-12).
 	* arch/arm/src/stm32/stm32_serial.c:  Fix cloned type:  FLOWCONTROL
 	  vs FLOWCONROL (2014-2-14).
+	* net/uip/uip_tcptimer.c: Back out a small part of the 6.33 write
+	  buffering changed.  David G says that this causes problems in
+	  connecting to a server (2014-2-15).
 
