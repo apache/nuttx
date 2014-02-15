@@ -54,17 +54,23 @@
  ************************************************************************************/
 
 /* Clocking *************************************************************************/
-
-/* Nominal frequencies of on-chip RC oscillators.  These are *not* configurable
- * but appear here for use in frequency calculations.  NOTE: These frequencies
- * may vary with temperature changes.
- */
-
-#define BOARD_OSCULP32K_FREQUENCY    32000    /* 32kHz ultra-low-power internal oscillator */
-
-/* The SAMD20 Xplained Pro has one on-board crystal:
+/* Overview
+ *
+ * OSC8M             Output = 8MHz
+ *  `- GCLK1         Input  = 8MHz  Prescaler    = 1 output         = 8MHz
+ *      `- DFLL      Input  = 8MHz  Multiplier   = 6 output         = 48MHz
+ *          `- PM    Input  = 48Mhz CPU divider  = 1 CPU frequency  = 48MHz
+ *                                  APBA divider = 1 APBA frequency = 48MHz
+ *                                  APBB divider = 1 APBB frequency = 48MHz
+ *                                  APBC divider = 1 APBC frequency = 48MHz
+ *
+ * The SAMD20 Xplained Pro has one on-board crystal:
  *
  *   XC101 32.768KHz XOSC32
+ *
+ * REVISIT: Not currently used, may want to use as GCLK1 source with
+ * DFLL multiplier of ((48000000+16384)/32768) = 1465 which would yield
+ * a clock of 48,005,120 MHz.
  */
 
 /* XOSC Configuration -- Not available
@@ -137,17 +143,22 @@
 
 #define BOARD_OSC8M_PRESCALER        SYSCTRL_OSC8M_PRESC_DIV1
 #define BOARD_OSC8M_ONDEMAND         1
-#undef BOARD_OSC8M_RUNINSTANDBY
+#undef  BOARD_OSC8M_RUNINSTANDBY
 
 #define BOARD_OSC8M_FREQUENCY        8000000  /* 8MHz high-accuracy internal oscillator */
+
+/* OSCULP32K Configuration -- not used. */
+
+#define BOARD_OSCULP32K_FREQUENCY    32000    /* 32kHz ultra-low-power internal oscillator */
 
 /* Digital Frequency Locked Loop configuration.  In closed-loop mode, the
  * DFLL output frequency (Fdfll) is given by:
  *
  *  Fdfll = DFLLmul * Frefclk
- *        = (48000000/32768) * 32768 = 48MHz
+ *        = 6 * 8000000 = 48MHz
  *
- * Where the reference clock is always the Generic Clock Channel 0 output.
+ * Where the reference clock is Generic Clock Channel 0 output of GLCK1.
+ * GCLCK1 provides OSC8M, undivided.
  *
  * When operating in open-loop mode, the output frequency of the DFLL will
  * be determined by the values written to the DFLL Coarse Value bit group
@@ -163,14 +174,20 @@
  *   BOARD_DFLL_FINEVALUE           - Value
  *
  * Open Loop mode only:
+ *   BOARD_DFLL_COARSEVALUE         - Value
+ *   BOARD_DFLL_FINEVALUE           - Value
+ *
+ * Closed loop mode only:
+ *   BOARD_DFLL_SRCGCLKGEN          - See GCLK_CLKCTRL_GEN* definitions
+ *   BOARD_DFLL_MULTIPLIER          - Value
  *   BOARD_DFLL_MAXCOARSESTEP       - Value
  *   BOARD_DFLL_MAXFINESTEP         - Value
- *   BOARD_DFLL_MULTIPLIER          - Value
  *
  *   BOARD_DFLL_FREQUENCY           - The resulting frequency
  */
 
-#define BOARD_DFLL_OPENLOOP          1
+#define BOARD_DFLL_ENABLE            1
+#undef  BOARD_DFLL_OPENLOOP
 #undef  BOARD_DFLL_ONDEMAND
 #undef  BOARD_DFLL_RUNINSTANDBY
 
@@ -181,7 +198,7 @@
 
 /* DFLL closed loop mode configuration */
 
-#define BOARD_DFLL_SRCGCLKGEN         1  /* GCLK generator channel 1 */
+#define BOARD_DFLL_SRCGCLKGEN         GCLK_CLKCTRL_GEN1
 #define BOARD_DFLL_MULTIPLIER         6
 #define BOARD_DFLL_QUICKLOCK          1
 #define BOARD_DFLL_TRACKAFTERFINELOCK 1
@@ -192,30 +209,103 @@
 
 #define BOARD_DFLL_FREQUENCY          (48000000)
 
-/* The source of the main clock is always GLCK_MAIN.  Also called GCLKGEN[0], this is
+/* GCLK Configuration
+ *
+ * Global enable/disable.
+ *
+ *   BOARD_GCLK_ENABLE            - Boolean (defined / not defined)
+ *
+ * For n=1-7:
+ *   BOARD_GCLKn_ENABLE           - Boolean (defined / not defined)
+ *
+ * For n=0-8:
+ *   BOARD_GCLKn_RUN_IN_STANDBY   - Boolean (defined / not defined)
+ *   BOARD_GCLKn_CLOCK_SOURCE     - See GCLK_GENCTRL_SRC_* definitions
+ *   BOARD_GCLKn_PRESCALER        - Value
+ *   BOARD_GCLKn_OUTPUT_ENABLE    - Boolean (defined / not defined)
+ */
+
+#define BOARD_GCLK_ENABLE             1
+
+/* GCLK generator 0 (Main Clock) - Source is the DFLL */
+
+#undef  BOARD_GCLK0_RUN_IN_STANDBY
+#define BOARD_GCLK0_CLOCK_SOURCE      GCLK_GENCTRL_SRC_DFLL48M
+#define BOARD_GCLK0_PRESCALER         1
+#undef  BOARD_GCLK0_OUTPUT_ENABLE
+#define BOARD_GCLK0_FREQUENCY         (BOARD_DFLL_FREQUENCY / BOARD_GCLK0_PRESCALER)
+
+/* Configure GCLK generator 1 - Drives the DFLL */
+
+#define BOARD_GCLK1_ENABLE            1
+#undef  BOARD_GCLK1_RUN_IN_STANDBY
+#define BOARD_GCLK1_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC8M
+#define BOARD_GCLK1_PRESCALER         1
+#undef  BOARD_GCLK1_OUTPUT_ENABLE
+#define BOARD_GCLK1_FREQUENCY         (BOARD_OSC8M_FREQUENCY / BOARD_GCLK1_PRESCALER)
+
+/* Configure GCLK generator 2 (RTC) */
+
+#undef  BOARD_GCLK2_ENABLE
+#undef  BOARD_GCLK2_RUN_IN_STANDBY
+#define BOARD_GCLK2_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC32K
+#define BOARD_GCLK2_PRESCALER         32
+#undef  BOARD_GCLK2_OUTPUT_ENABLE
+#define BOARD_GCLK2_FREQUENCY         (BOARD_OSC8M_FREQUENCY / BOARD_GCLK2_PRESCALER)
+
+/* Configure GCLK generator 3 */
+
+#undef  BOARD_GCLK3_ENABLE
+#undef  BOARD_GCLK3_RUN_IN_STANDBY
+#define BOARD_GCLK3_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC8M
+#define BOARD_GCLK3_PRESCALER         1
+#undef  BOARD_GCLK3_OUTPUT_ENABLE
+#define BOARD_GCLK3_FREQUENCY         (BOARD_OSC8M_FREQUENCY / BOARD_GCLK3_PRESCALER)
+
+/* Configure GCLK generator 4 */
+
+#undef  BOARD_GCLK4_ENABLE
+#undef  BOARD_GCLK4_RUN_IN_STANDBY
+#define BOARD_GCLK4_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC8M
+#define BOARD_GCLK4_PRESCALER         1
+#undef  BOARD_GCLK4_OUTPUT_ENABLE
+#define BOARD_GCLK4_FREQUENCY         (BOARD_OSC8M_FREQUENCY / BOARD_GCLK4_PRESCALER)
+
+/* Configure GCLK generator 5 */
+
+#undef  BOARD_GCLK5_ENABLE
+#undef  BOARD_GCLK5_RUN_IN_STANDBY
+#define BOARD_GCLK5_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC8M
+#define BOARD_GCLK5_PRESCALER         1
+#undef  BOARD_GCLK5_OUTPUT_ENABLE
+#define BOARD_GCLK5_FREQUENCY         (BOARD_OSC8M_FREQUENCY / BOARD_GCLK5_PRESCALER)
+
+/* Configure GCLK generator 6 */
+
+#undef  BOARD_GCLK6_ENABLE
+#undef  BOARD_GCLK6_RUN_IN_STANDBY
+#define BOARD_GCLK6_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC8M
+#define BOARD_GCLK6_PRESCALER         1
+#undef  BOARD_GCLK6_OUTPUT_ENABLE
+#define BOARD_GCLK6_FREQUENCY         (BOARD_OSC8M_FREQUENCY / BOARD_GCLK6_PRESCALER)
+
+/* Configure GCLK generator 7 */
+
+#undef  BOARD_GCLK7_ENABLE
+#undef  BOARD_GCLK7_RUN_IN_STANDBY
+#define BOARD_GCLK7_CLOCK_SOURCE      GCLK_GENCTRL_SRC_OSC8M
+#define BOARD_GCLK7_PRESCALER         1
+#undef  BOARD_GCLK7_OUTPUT_ENABLE
+#define BOARD_GCLK7_FREQUENCY         (BOARD_OSC8M_FREQUENCY / BOARD_GCLK7_PRESCALER)
+
+/* The source of the main clock is always GCLK_MAIN.  Also called GCLKGEN[0], this is
  * the clock feeding the Power Manager. The Power Manager, in turn, generates main
  * clock which is divided down to produce the CPU, AHB, and APB clocks.
  *
- * The main clock is initially OSC8M divided by 8.  But will be reconfigured here to
- * be DFLL48M.
- *
- * Select the OSC8M as the source of the GLCK_MAIN. Options (define one):
- *
- *   BOARD_GLCK_MAIN_SRC_XOSC      - XOSC oscillator output
- *   BOARD_GLCK_MAIN_SRC_GCLKIN    - Generator input pad
- *   BOARD_GLCK_MAIN_SRC_GCLKGEN1  - Generic clock generator 1 output
- *   BOARD_GLCK_MAIN_SRC_OSCULP32K - OSCULP32K oscillator output
- *   BOARD_GLCK_MAIN_SRC_OSC32K    - OSC32K oscillator output
- *   BOARD_GLCK_MAIN_SRC_XOSC32K   - XOSC32K oscillator output
- *   BOARD_GLCK_MAIN_SRC_OSC8M     - OSC8M oscillator output
- *   BOARD_GLCK_MAIN_SRC_DFLL48M   - DFLL48M output
- *
- * Fglckmain = Frefclk / Divider
+ * The main clock is initially OSC8M divided by 8.
  */
 
-#define BOARD_GLCK_MAIN_SRC_OSC8M    1
-#define BOARD_GLCK_MAIN_DIVIDER      1
-#define BOARD_GLCK_MAIN_FREQUENCY    (BOARD_OSC8M_FREQUENCY / BOARD_GLCK_MAIN_DIVIDER)
+#define BOARD_GCLK_MAIN_FREQUENCY     BOARD_GCLK0_FREQUENCY
 
 /* Main clock dividers
  *
@@ -238,7 +328,7 @@
 
 /* Resulting frequencies */
 
-#define BOARD_MCK_FREQUENCY          (BOARD_GLCK_MAIN_FREQUENCY)
+#define BOARD_MCK_FREQUENCY          (BOARD_GCLK_MAIN_FREQUENCY)
 #define BOARD_CPU_FREQUENCY          (BOARD_MCK_FREQUENCY)
 #define BOARD_PBA_FREQUENCY          (BOARD_MCK_FREQUENCY)
 #define BOARD_PBB_FREQUENCY          (BOARD_MCK_FREQUENCY)
