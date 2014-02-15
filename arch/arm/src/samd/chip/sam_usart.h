@@ -153,8 +153,8 @@
 #  define USART_CTRLA_ASYNCH         (0)
 #  define USART_CTRLA_SYNCH          USART_CTRLA_CMODE
 #define USART_CTRLA_CPOL             (1 << 29)  /* Bit 29: Clock polarity */
-#  define USART_CTRLA_RISING         (0)              /* Rising XCK edge Falling XCK edge */
-#  define USART_CTRLA_FALLING        USART_CTRLA_CPOL /* Falling XCK edge Rising XCK edge */
+#  define USART_CTRLA_CPOL_NORMAL    (0)              /* Rising XCK edge Falling XCK edge */
+#  define USART_CTRLA_CPOL_INVERTED  USART_CTRLA_CPOL /* Falling XCK edge Rising XCK edge */
 #define USART_CTRLA_DORD             (1 << 30)  /* Bit 30: Data order */
 #  define USART_CTRLA_MSBFIRST       (0)
 #  define USART_CTRLA_LSBFIRST       USART_CTRLA_DORD

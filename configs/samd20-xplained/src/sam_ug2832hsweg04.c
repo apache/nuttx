@@ -66,10 +66,10 @@
  *                            I²C SCL                I²C SCL
  *  ----------------- ---------------------- ----------------------
  *  13 N/C            13 PB09 SERCOM4 PAD[1] 13 PB13 SERCOM4 PAD[1]
- *                            UART RX                UART RX
+ *                            USART RX               USART RX
  *  ----------------- ---------------------- ----------------------
  *  14 N/C            14 PB08 SERCOM4 PAD[0] 14 PB12 SERCOM4 PAD[0]
- *                            UART TX                UART TX
+ *                            USART TX               USART TX
  *  ----------------- ---------------------- ----------------------
  *  15 DISPLAY_SS     15 PA05 SERCOM0 PAD[1] 15 PA17 SERCOM1 PAD[1]
  *                            SPI SS                 SPI SS
