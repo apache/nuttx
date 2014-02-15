@@ -73,6 +73,7 @@ const struct sam_usart_config_s g_usart0config =
   .pad2      = BOARD_SERCOM0_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM0_PINMAP_PAD3,
   .muxconfig = BOARD_SERCOM0_MUXCONFIG,
+  .frequency = BOARD_SERCOM0_FREQUENCY,
   .base      = SAM_SERCOM0_BASE,
 };
 #endif
@@ -92,6 +93,7 @@ const struct sam_usart_config_s g_usart1config =
   .pad2      = BOARD_SERCOM1_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM1_PINMAP_PAD3,
   .muxconfig = BOARD_SERCOM1_MUXCONFIG,   
+  .frequency = BOARD_SERCOM1_FREQUENCY,
   .base      = SAM_SERCOM1_BASE,
 };
 #endif
@@ -111,6 +113,7 @@ const struct sam_usart_config_s g_usart2config =
   .pad2      = BOARD_SERCOM2_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM2_PINMAP_PAD3,
   .muxconfig = BOARD_SERCOM2_MUXCONFIG,
+  .frequency = BOARD_SERCOM2_FREQUENCY,
   .base      = SAM_SERCOM2_BASE,
 };
 #endif
@@ -130,6 +133,7 @@ const struct sam_usart_config_s g_usart3config =
   .pad2      = BOARD_SERCOM3_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM3_PINMAP_PAD3,
   .muxconfig = BOARD_SERCOM3_MUXCONFIG,
+  .frequency = BOARD_SERCOM3_FREQUENCY,
   .base      = SAM_SERCOM3_BASE,
 };
 #endif
@@ -149,6 +153,7 @@ const struct sam_usart_config_s g_usart4config =
   .pad2      = BOARD_SERCOM4_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM4_PINMAP_PAD3,
   .muxconfig = BOARD_SERCOM4_MUXCONFIG,
+  .frequency = BOARD_SERCOM4_FREQUENCY,
   .base      = SAM_SERCOM4_BASE,
 };
 #endif
@@ -168,6 +173,7 @@ const struct sam_usart_config_s g_usart5config =
   .pad2      = BOARD_SERCOM5_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM5_PINMAP_PAD3,
   .muxconfig = BOARD_SERCOM5_MUXCONFIG,
+  .frequency = BOARD_SERCOM5_FREQUENCY,
   .base      = SAM_SERCOM5_BASE,
 };
 #endif
