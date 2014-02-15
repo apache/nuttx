@@ -7,7 +7,7 @@ ATSAMD20J18A MCU.
 
 The SAMD20 Xplained Pro Starter Kit may be bundled with three modules:
 
-1) I/O1   - An MMC/SD card slot, PWM LED control, ADC light sensor, UART
+1) I/O1   - An MMC/SD card slot, PWM LED control, ADC light sensor, USART
             loopback, TWI AT30TSE758 Temperature sensor.
 2) OLED1  - An OLED plus 3 additional switches and 3 additional LEDs
 3) PROTO1 - A prototyping board with logic on board (other than power-related
@@ -38,7 +38,7 @@ Modules
     - microSD card connector (SPI interface)
     - PWM (LED control)
     - ADC (light sensor)
-    - UART loopback
+    - USART loopback
     - TWI AT30TSE758 Temperature sensor with EEPROM
 
     SPI is available on two of the SAMD20 Xplained connectors, EXT1 and EXT2.
@@ -75,12 +75,12 @@ Modules
     12 TWI SCL        12 PA09 SERCOM2 PAD[1] 12 PA09 SERCOM2 PAD[1] EXT2, EXT3 and EDBG
                               I²C SCL                I²C SCL
     ----------------- ---------------------- ---------------------- ------------------------------------
-    13 UART RX        13 PB09 SERCOM4 PAD[1] 13 PB13 SERCOM4 PAD[1] The SERCOM4 module is shared between
-                              UART RX                UART RX        EXT1, 2 and 3 UART's, but uses
+    13 USART RX       13 PB09 SERCOM4 PAD[1] 13 PB13 SERCOM4 PAD[1] The SERCOM4 module is shared between
+                              USART RX               USART RX       EXT1, 2 and 3 USART's, but uses
                                                                     different pins
     ----------------- ---------------------- ---------------------- ------------------------------------
-    14 UART TX        14 PB08 SERCOM4 PAD[0] 14 PB12 SERCOM4 PAD[0] The SERCOM4 module is shared between
-                              UART TX                UART TX        EXT1, 2 and 3 UART's, but uses
+    14 USART TX       14 PB08 SERCOM4 PAD[0] 14 PB12 SERCOM4 PAD[0] The SERCOM4 module is shared between
+                              USART TX               USART TX       EXT1, 2 and 3 USART's, but uses
                                                                     different pins
     ----------------- ---------------------- ---------------------- ------------------------------------
     15 microSD_SS     15 PA05 SERCOM0 PAD[1] 15 PA17 SERCOM1 PAD[1]
@@ -189,11 +189,11 @@ Modules
                               I²C SCL                I²C SCL
     ----------------- ---------------------- ---------------------- ------------------------------------
     13 N/C            13 PB09 SERCOM4 PAD[1] 13 PB13 SERCOM4 PAD[1] The SERCOM4 module is shared between
-                              UART RX                UART RX        EXT1, 2 and 3 UART's, but uses
+                              USART RX               USART RX       EXT1, 2 and 3 USART's, but uses
                                                                     different pins
     ----------------- ---------------------- ---------------------- ------------------------------------
     14 N/C            14 PB08 SERCOM4 PAD[0] 14 PB12 SERCOM4 PAD[0] The SERCOM4 module is shared between
-                              UART TX                UART TX        EXT1, 2 and 3 UART's, but uses
+                              USART TX               USART TX       EXT1, 2 and 3 USART's, but uses
                                                                     different pins
     ----------------- ---------------------- ---------------------- ------------------------------------
     15 DISPLAY_SS     15 PA05 SERCOM0 PAD[1] 15 PA17 SERCOM1 PAD[1]
@@ -406,8 +406,8 @@ Serial Consoles
 
     PIN   EXT1  EXT3  GPIO  Function
     ----  ---- ------ -----------
-     13   PB09   PB13 SERCOM4 / UART RX
-     14   PB08   PB12 SERCOM4 / UART TX
+     13   PB09   PB13 SERCOM4 / USART RX
+     14   PB08   PB12 SERCOM4 / USART TX
      19   19          GND
      20   20          VCC
 
@@ -423,8 +423,8 @@ Serial Consoles
   The Embedded debugger also include a Virtual Com port interface over
   SERCOM3.  Virtual COM port connections:
 
-    PA24 SERCOM3 / UART TXD
-    PA25 SERCOM3 / UART RXD
+    PA24 SERCOM3 / USART TXD
+    PA25 SERCOM3 / USART RXD
 
 SAMD20 Xplained Pro-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -527,25 +527,25 @@ SAMD20 Xplained Pro-specific Configuration Options
   Some subsystems can be configured to operate in different ways. The drivers
   need to know how to configure the subsystem.
 
-    CONFIG_SAMD_SERCOM0_ISI2C, CONFIG_SAMD_SERCOM0_ISSPI, or CONFIG_SAMD_SERCOM0_ISUART
-    CONFIG_SAMD_SERCOM1_ISI2C, CONFIG_SAMD_SERCOM1_ISSPI, or CONFIG_SAMD_SERCOM1_ISUART
-    CONFIG_SAMD_SERCOM2_ISI2C, CONFIG_SAMD_SERCOM2_ISSPI, or CONFIG_SAMD_SERCOM2_ISUART
-    CONFIG_SAMD_SERCOM3_ISI2C, CONFIG_SAMD_SERCOM3_ISSPI, or CONFIG_SAMD_SERCOM3_ISUART
-    CONFIG_SAMD_SERCOM4_ISI2C, CONFIG_SAMD_SERCOM4_ISSPI, or CONFIG_SAMD_SERCOM4_ISUART
-    CONFIG_SAMD_SERCOM5_ISI2C, CONFIG_SAMD_SERCOM5_ISSPI, or CONFIG_SAMD_SERCOM5_ISUART
+    CONFIG_SAMD_SERCOM0_ISI2C, CONFIG_SAMD_SERCOM0_ISSPI, or CONFIG_SAMD_SERCOM0_ISUSART
+    CONFIG_SAMD_SERCOM1_ISI2C, CONFIG_SAMD_SERCOM1_ISSPI, or CONFIG_SAMD_SERCOM1_ISUSART
+    CONFIG_SAMD_SERCOM2_ISI2C, CONFIG_SAMD_SERCOM2_ISSPI, or CONFIG_SAMD_SERCOM2_ISUSART
+    CONFIG_SAMD_SERCOM3_ISI2C, CONFIG_SAMD_SERCOM3_ISSPI, or CONFIG_SAMD_SERCOM3_ISUSART
+    CONFIG_SAMD_SERCOM4_ISI2C, CONFIG_SAMD_SERCOM4_ISSPI, or CONFIG_SAMD_SERCOM4_ISUSART
+    CONFIG_SAMD_SERCOM5_ISI2C, CONFIG_SAMD_SERCOM5_ISSPI, or CONFIG_SAMD_SERCOM5_ISUSART
 
   SAT91SAMD20 specific device driver settings
 
-    CONFIG_UARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,..5) for the
-      console and ttys0 (default is the UART4).
-    CONFIG_UARTn_RXBUFSIZE - Characters are buffered as received.
+    CONFIG_USARTn_SERIAL_CONSOLE - selects the USARTn (n=0,1,2,..5) for the
+      console and ttys0 (default is the USART4).
+    CONFIG_USARTn_RXBUFSIZE - Characters are buffered as received.
        This specific the size of the receive buffer
-    CONFIG_UARTn_TXBUFSIZE - Characters are buffered before
+    CONFIG_USARTn_TXBUFSIZE - Characters are buffered before
        being sent.  This specific the size of the transmit buffer
-    CONFIG_UARTn_BAUD - The configure BAUD of the UART.  Must be
-    CONFIG_UARTn_BITS - The number of bits.  Must be either 7 or 8.
-    CONFIG_UARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
-    CONFIG_UARTn_2STOP - Two stop bits
+    CONFIG_USARTn_BAUD - The configure BAUD of the USART.  Must be
+    CONFIG_USARTn_BITS - The number of bits.  Must be either 7 or 8.
+    CONFIG_USARTn_PARTIY - 0=no parity, 1=odd parity, 2=even parity
+    CONFIG_USARTn_2STOP - Two stop bits
 
 Configurations
 ^^^^^^^^^^^^^^
@@ -601,15 +601,15 @@ Configurations
          CONFIG_SAMD_SERCOM4=n
 
        Device Drivers -> Serial Driver Support -> Serial Console
-         CONFIG_UART3_SERIAL_CONSOLE=y
+         CONFIG_USART3_SERIAL_CONSOLE=y
 
        Device Drivers -> Serial Driver Support -> SERCOM4 Configuration
-         CONFIG_UART3_2STOP=0
-         CONFIG_UART3_BAUD=115200
-         CONFIG_UART3_BITS=8
-         CONFIG_UART3_PARITY=0
-         CONFIG_UART3_RXBUFSIZE=256
-         CONFIG_UART3_TXBUFSIZE=256
+         CONFIG_USART3_2STOP=0
+         CONFIG_USART3_BAUD=115200
+         CONFIG_USART3_BITS=8
+         CONFIG_USART3_PARITY=0
+         CONFIG_USART3_RXBUFSIZE=256
+         CONFIG_USART3_TXBUFSIZE=256
 
   3. Unless otherwise stated, the configurations are setup for
      Cygwin under Windows:
@@ -703,7 +703,7 @@ Configuration sub-directories
          CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
 
        NOTE: If you enable the I/O1 this configuration with SERCOM4 as the
-       console and with the I/O1 module in EXT1, you *must* remove UART
+       console and with the I/O1 module in EXT1, you *must* remove USART
        jumper.  Otherwise, you have lookpack on SERCOM4 and NSH will *not*
        behave very well (since its outgoing prompts also appear as incoming
        commands).
