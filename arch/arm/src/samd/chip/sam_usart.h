@@ -130,6 +130,7 @@
 
 /* Control A register */
 
+#define USART_CTRLA_SWRST            (1 << 0)  /* Bit 0:  Software reset */
 #define USART_CTRLA_ENABLE           (1 << 1)  /* Bit 1:  Enable */
 #define USART_CTRLA_MODE_SHIFT       (2)       /* Bits 2-4: Operating Mode */
 #define USART_CTRLA_MODE_MASK        (7 << USART_CTRLA_MODE_SHIFT)

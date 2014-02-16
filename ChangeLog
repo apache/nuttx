@@ -6584,4 +6584,6 @@
 	* net/uip/uip_tcptimer.c: Back out a small part of the 6.33 write
 	  buffering changed.  David G says that this causes problems in
 	  connecting to a server (2014-2-15).
+	* The basic SAMD20 Xplained Pro port is complete but still untested
+	  (2014-2-16).
 

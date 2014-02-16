@@ -43,7 +43,6 @@
 #include <nuttx/config.h>
 
 #include "sam_config.h"
-#include "chip/sam_sercom.h"
 
 /************************************************************************************
  * Pre-processor Definitions
