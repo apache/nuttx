@@ -55,14 +55,14 @@
 /* USART register offsets *******************************************************************/
 
 #define SAM_USART_CTRLA_OFFSET       0x0000  /* Control A register */
-#define SAM_USART_CTRLB_OFFSET       0x0000  /* Control B register */
-#define SAM_USART_DBGCTRL_OFFSET     0x0000  /* Debug control register */
-#define SAM_USART_BAUD_OFFSET        0x0000  /* Baud register */
-#define SAM_USART_INTENCLR_OFFSET    0x0000  /* Interrupt enable clear register */
-#define SAM_USART_INTENSET_OFFSET    0x0000  /* Interrupt enable set register */
-#define SAM_USART_INTFLAG_OFFSET     0x0000  /* Interrupt flag and status clear register */
-#define SAM_USART_STATUS_OFFSET      0x0000  /* Status register */
-#define SAM_USART_DATA_OFFSET        0x0000  /* Data register */
+#define SAM_USART_CTRLB_OFFSET       0x0004  /* Control B register */
+#define SAM_USART_DBGCTRL_OFFSET     0x0008  /* Debug control register */
+#define SAM_USART_BAUD_OFFSET        0x000a  /* Baud register */
+#define SAM_USART_INTENCLR_OFFSET    0x000c  /* Interrupt enable clear register */
+#define SAM_USART_INTENSET_OFFSET    0x000d  /* Interrupt enable set register */
+#define SAM_USART_INTFLAG_OFFSET     0x000e  /* Interrupt flag and status clear register */
+#define SAM_USART_STATUS_OFFSET      0x0010  /* Status register */
+#define SAM_USART_DATA_OFFSET        0x0018  /* Data register */
 
 /* USART register addresses *****************************************************************/
 
@@ -137,7 +137,7 @@
 #  define USART_CTRLA_MODE_EXTUSART  (0 << USART_CTRLA_MODE_SHIFT) /* USART with external clock */
 #  define USART_CTRLA_MODE_INTUSART  (1 << USART_CTRLA_MODE_SHIFT) /* USART with internal clock */
 #define USART_CTRLA_RUNSTDBY         (1 << 7)  /* Bit 7:  Run in standby */
-#define USART_CTRLA_IBON             (1 << 8)  /* Bit 8:  Immediate buffer overflow notification */
+#define USART_CTRLA_IBON             (1 << 8)  /* Bit 8:  Immediate BUFOVF notification */
 #define USART_CTRLA_TXPO             (1 << 16) /* Bit 16: Transmit data pinout */
 #  define USART_CTRLA_TXPAD0         (0)
 #  define USART_CTRLA_TXPAD2         USART_CTRLA_TXPO
@@ -170,15 +170,15 @@
 #  define USART_CTRLB_CHSIZE_5BITS   (5 << USART_CTRLB_CHSIZE_SHIFT) /* 5 bits */
 #  define USART_CTRLB_CHSIZE_6BITS   (6 << USART_CTRLB_CHSIZE_SHIFT) /* 6 bits */
 #  define USART_CTRLB_CHSIZE_7BITS   (7 << USART_CTRLB_CHSIZE_SHIFT) /* 7 bits */
-#define USART_CTRLB_SBMODE           (1 << 6)  /* Bit 6: Stop bit mode */
+#define USART_CTRLB_SBMODE           (1 << 6)  /* Bit 6:  Stop bit mode */
 #  define USART_CTRLB_SBMODE_1       (0)
 #  define USART_CTRLB_SBMODE_2       USART_CTRLB_SBMODE
-#define USART_CTRLB_SFDE             (1 << 9)  /* Bit 9: Start of frame detection enable */
-#define USART_CTRLB_PMODE            (1 << 13)  /* Bit 13: Parity mode */
+#define USART_CTRLB_SFDE             (1 << 9)  /* Bit 9:  Start of frame detection enable */
+#define USART_CTRLB_PMODE            (1 << 13) /* Bit 13: Parity mode */
 #  define USART_CTRLB_PEVEN          (0)
 #  define USART_CTRLB_PODD           USART_CTRLB_PMODE
-#define USART_CTRLB_TXEN             (1 << 16)  /* Bit 16: Transmitter enable */
-#define USART_CTRLB_RXEN             (1 << 17)  /* Bit 17: Receiver enable */
+#define USART_CTRLB_TXEN             (1 << 16) /* Bit 16: Transmitter enable */
+#define USART_CTRLB_RXEN             (1 << 17) /* Bit 17: Receiver enable */
 
 /* Debug control register */
 
