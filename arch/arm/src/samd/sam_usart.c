@@ -92,7 +92,7 @@ const struct sam_usart_config_s g_usart1config =
   .pad1      = BOARD_SERCOM1_PINMAP_PAD1,
   .pad2      = BOARD_SERCOM1_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM1_PINMAP_PAD3,
-  .muxconfig = BOARD_SERCOM1_MUXCONFIG,   
+  .muxconfig = BOARD_SERCOM1_MUXCONFIG,
   .frequency = BOARD_SERCOM1_FREQUENCY,
   .base      = SAM_SERCOM1_BASE,
 };
