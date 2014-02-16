@@ -209,7 +209,7 @@
 #  define SPI_ADDR(n)              ((uint32_t)(n) << SPI_ADDR_SHIFT)
 #define SPI_ADDRMASK_SHIFT         (16)      /* Bits 16-23: Address Mask */
 #define SPI_ADDRMASK_MASK          (0xff << SPI_ADDRMASK_SHIFT)
-#  define SPI_ADDRMASK(n)          (uint32_t)(n) << SPI_ADDRMASK_SHIFT)
+#  define SPI_ADDRMASK(n)          ((uint32_t)(n) << SPI_ADDRMASK_SHIFT)
 
 /* Data register */
 
