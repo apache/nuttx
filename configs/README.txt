@@ -288,11 +288,6 @@ configs/lpc4330-xplorer
   NuttX port to the LPC4330-Xplorer board from NGX Technologies featuring
   the NXP LPC4330FET100 MCU
 
-configs/m68322evb
-  This is a work in progress for the venerable m68322evb board from
-  Motorola. This OS is also built with the arm-nuttx-elf toolchain*.  STATUS:
-  This port was never completed.
-
 configs/maple
   NuttX support for the LeafLab's Maple and Maple Mini boards. These boards
   are based on the STM32F103RBT6 chip for the standard version and on the

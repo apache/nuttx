@@ -250,14 +250,6 @@ config ARCH_BOARD_LPC4330_XPLORER
 		NXG Technologoies LPC4330 Xplorer board.  This board is based on the
 		LPC4330FET100.  The Code Red toolchain is used by default.
 
-config ARCH_BOARD_M68332EVB
-	bool "Motoroloa M68332EVB"
-	depends on ARCH_M68332
-	---help---
-		This is a work in progress for the venerable m68322evb board from
-		Motorola. This OS is also built with the arm-nuttx-elf toolchain.  STATUS:
-		This port was never completed.
-
 config ARCH_BOARD_MBED
 	bool "mbed LCP1768"
 	depends on ARCH_CHIP_LPC1768
@@ -915,7 +907,6 @@ config ARCH_BOARD
 	default "lm4f120-launchpad"   if ARCH_BOARD_LM4F120_LAUNCHPAD
 	default "lpc4330-xplorer"     if ARCH_BOARD_LPC4330_XPLORER
 	default "lpcxpresso-lpc1768"  if ARCH_BOARD_LPCXPRESSO
-	default "m68322evb"           if ARCH_BOARD_M68332EVB
 	default "maple"               if ARCH_BOARD_MAPLE
 	default "mbed"                if ARCH_BOARD_MBED
 	default "mcu123-lpc214x"      if ARCH_BOARD_MCU123
@@ -1107,9 +1098,6 @@ source "configs/lpc4330-xplorer/Kconfig"
 endif
 if ARCH_BOARD_LPCXPRESSO
 source "configs/lpcxpresso-lpc1768/Kconfig"
-endif
-if ARCH_BOARD_M68332EVB
-source "configs/m68332evb/Kconfig"
 endif
 if ARCH_BOARD_MAPLE
 source "configs/maple/Kconfig"
