@@ -259,10 +259,6 @@ arch/hc
       the port was "code-complete" as nuttx-5.18.  However, the final
       verification effort has been stalled because of higher priority tasks.
 
-arch/m68322
-    A work in progress.
-    STATUS:  Stalled for the time being.
-
 arch/mips
     This directory is dedicated to ports to the MIPS family.
 
