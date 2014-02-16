@@ -1,5 +1,5 @@
 /********************************************************************************************
- * arch/arm/src/samd/chip/sam_usart.h
+ * arch/arm/src/samd/chip/sam_i2c_master.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -37,8 +37,8 @@
  *
  ********************************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD_CHIP_SAM_I2C_H
-#define __ARCH_ARM_SRC_SAMD_CHIP_SAM_I2C_H
+#ifndef __ARCH_ARM_SRC_SAMD_CHIP_SAM_I2C_MASTER_H
+#define __ARCH_ARM_SRC_SAMD_CHIP_SAM_I2C_MASTER_H
 
 /********************************************************************************************
  * Included Files
@@ -114,7 +114,7 @@
 #define SAM_I2C4_CTRLA             (SAM_SERCOM4_BASE+SAM_I2C_CTRLA_OFFSET)
 #define SAM_I2C4_CTRLB             (SAM_SERCOM4_BASE+SAM_I2C_CTRLB_OFFSET)
 #define SAM_I2C4_BAUD              (SAM_SERCOM4_BASE+SAM_I2C_BAUD_OFFSET)
-#define SAM_I2C4_DBGCTRL              (SAM_SERCOM4_BASE+SAM_I2C_DBGCTRL_OFFSET)
+#define SAM_I2C4_DBGCTRL           (SAM_SERCOM4_BASE+SAM_I2C_DBGCTRL_OFFSET)
 #define SAM_I2C4_INTENCLR          (SAM_SERCOM4_BASE+SAM_I2C_INTENCLR_OFFSET)
 #define SAM_I2C4_INTENSET          (SAM_SERCOM4_BASE+SAM_I2C_INTENSET_OFFSET)
 #define SAM_I2C4_INTFLAG           (SAM_SERCOM4_BASE+SAM_I2C_INTFLAG_OFFSET)
@@ -125,7 +125,7 @@
 #define SAM_I2C5_CTRLA             (SAM_SERCOM5_BASE+SAM_I2C_CTRLA_OFFSET)
 #define SAM_I2C5_CTRLB             (SAM_SERCOM5_BASE+SAM_I2C_CTRLB_OFFSET)
 #define SAM_I2C5_BAUD              (SAM_SERCOM5_BASE+SAM_I2C_BAUD_OFFSET)
-#define SAM_I2C5_DBGCTRL              (SAM_SERCOM5_BASE+SAM_I2C_DBGCTRL_OFFSET)
+#define SAM_I2C5_DBGCTRL           (SAM_SERCOM5_BASE+SAM_I2C_DBGCTRL_OFFSET)
 #define SAM_I2C5_INTENCLR          (SAM_SERCOM5_BASE+SAM_I2C_INTENCLR_OFFSET)
 #define SAM_I2C5_INTENSET          (SAM_SERCOM5_BASE+SAM_I2C_INTENSET_OFFSET)
 #define SAM_I2C5_INTFLAG           (SAM_SERCOM5_BASE+SAM_I2C_INTFLAG_OFFSET)
@@ -158,7 +158,6 @@
 #  define I2C_CTRLA_INACTOUT_55US  (1 << I2C_CTRLA_INACTOUT_SHIFT) /* 5-6 SCL cycle time-out (50-60µs) */ 
 #  define I2C_CTRLA_INACTOUT_105US (2 << I2C_CTRLA_INACTOUT_SHIFT) /* 10-11 SCL cycle time-out (100-110µs) */ 
 #  define I2C_CTRLA_INACTOUT_205US (3 << I2C_CTRLA_INACTOUT_SHIFT) /* 20-21 SCL cycle time-out (200-210µs) */ 
-Value Name
 #define I2C_CTRLA_LOWTOUT          (1 << 30)  /* Bit 30: SCL Low Time-Out */
 
 /* Control B register */
@@ -170,7 +169,7 @@ Value Name
 #  define I2C_CTRLB_CMD_NOACTION   (0 << I2C_CTRLB_CMD_SHIFT) /* No action */
 #  define I2C_CTRLB_CMD_ACKREP     (1 << I2C_CTRLB_CMD_SHIFT) /* ACK followed by repeated START */
 #  define I2C_CTRLB_CMD_ACKREAD    (2 << I2C_CTRLB_CMD_SHIFT) /* ACK followed by read operation */
-#  define I2C_CTRLB_CMD_ACKSTOP    (3 << I2C_CTRLB_CMD_SHIFT) /* ACK follwed by STOP */
+#  define I2C_CTRLB_CMD_ACKSTOP    (3 << I2C_CTRLB_CMD_SHIFT) /* ACK followed by STOP */
 #define I2C_CTRLB_ACKACT           (1 << 18) /* Bit 18: Acknowledge Action */
 #  define I2C_CTRLB_ACK            (0)              /* Send ACK */
 #  define I2C_CTRLB_NCK            I2C_CTRLB_ACKACT /* Send NACK */
@@ -192,8 +191,8 @@ Value Name
  * status clear registers.
  */
 
-#define I2C_INT_MB                 (1 << 0)  /* Bit 0:  Master on Bus Interrupt Enable */
-#define I2C_INT_SB                 (1 << 1)  /* Bit 1:  Slave on Bus Interrupt Enable */
+#define I2C_INT_MB                 (1 << 0)  /* Bit 0:  Master on bus interrupt */
+#define I2C_INT_SB                 (1 << 1)  /* Bit 1:  Slave on bus interrupt */
 
 #define I2C_INT_ALL                (0x03)
 
@@ -232,4 +231,4 @@ Value Name
  * Public Functions
  ********************************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMD_CHIP_SAM_I2C_H */
+#endif /* __ARCH_ARM_SRC_SAMD_CHIP_SAM_I2C_MASTER_H */
