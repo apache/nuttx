@@ -101,6 +101,15 @@ sam_wait_synchronization(const struct sam_usart_config_s * const config)
  * Description:
  *   Configure the SERCOM USART source clock.
  *
+ *   Two generic clocks are used by the SERCOM: GCLK_SERCOMx_CORE and
+ *   GCLK_SERCOMx_SLOW.  The core clock (GCLK_SERCOMx_CORE) is required to
+ *   clock the SERCOM while operating as a master, while the slow clock
+ *   (GCLK_SERCOM_SLOW) is only required for certain functions.  SERCOM
+ *   modules must share the same slow GCLK channel ID.
+ *
+ *   The baud-rate generator runs off the GCLK_SERCOMx_CORE clock (or,
+ *   optionally, external clock).
+ *
  ****************************************************************************/
 
 #ifdef HAVE_USART

@@ -144,9 +144,9 @@
 #define USART_CTRLA_RXPO_SHIFT       (20)      /* Bits 20-21: Receive data pinout */
 #define USART_CTRLA_RXPO_MASK        (3 << USART_CTRLA_RXPO_SHIFT)
 #  define USART_CTRLA_RXPAD0         (0 << USART_CTRLA_RXPO_SHIFT) /* SERCOM PAD[0] for RxD */
-#  define USART_CTRLA_RXPAD1         (1 << USART_CTRLA_RXPO_SHIFT) /* SERCOM PAD[1] for RxD */ 
-#  define USART_CTRLA_RXPAD2         (2 << USART_CTRLA_RXPO_SHIFT) /* SERCOM PAD[2] for RxD */ 
-#  define USART_CTRLA_RXPAD3         (3 << USART_CTRLA_RXPO_SHIFT) /* SERCOM PAD[3] for RxD */ 
+#  define USART_CTRLA_RXPAD1         (1 << USART_CTRLA_RXPO_SHIFT) /* SERCOM PAD[1] for RxD */
+#  define USART_CTRLA_RXPAD2         (2 << USART_CTRLA_RXPO_SHIFT) /* SERCOM PAD[2] for RxD */
+#  define USART_CTRLA_RXPAD3         (3 << USART_CTRLA_RXPO_SHIFT) /* SERCOM PAD[3] for RxD */
 #define USART_CTRLA_FORM_SHIFT       (24)      /* Bits 24-27: Frame format */
 #define USART_CTRLA_FORM_MASK        (7 << USART_CTRLA_FORM_SHIFT)
 #  define USART_CTRLA_FORM_NOPARITY  (0 << USART_CTRLA_FORM_SHIFT) /* USART frame (no parity) */
