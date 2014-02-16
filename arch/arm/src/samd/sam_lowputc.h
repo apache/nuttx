@@ -96,6 +96,20 @@ int sam_usart_initialize(const struct sam_usart_config_s * const config);
 #endif
 
 /****************************************************************************
+ * Name: sam_usart_reset
+ *
+ * Description:
+ *   Reset the USART SERCOM.  This restores all SERCOM register to the
+ *   initial state and disables the SERCOM.
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_USART
+struct sam_usart_config_s;
+void sam_usart_reset(const struct sam_usart_config_s * const config);
+#endif
+
+/****************************************************************************
  * Name: sam_lowputc
  *
  * Description:

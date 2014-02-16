@@ -61,6 +61,7 @@
 #include "chip/sam_usart.h"
 
 #include "sam_usart.h"
+#include "sam_lowputc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -455,14 +456,48 @@ int sam_usart_initialize(const struct sam_usart_config_s * const config)
   irqstate_t flags;
   int ret;
 
+  /* Reset the SERCOM so that we know that it is in its initial state */
+
+  flags = irqsave();
+  sam_usart_reset(config);
+
   /* Just invoke the internal implementation, but with interrupts disabled
    * so that the operation is atomic.
    */
 
-  flags = irqsave();
   ret = sam_usart_internal(config);
   irqrestore(flags);
   return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_usart_reset
+ *
+ * Description:
+ *   Reset the USART SERCOM.  This restores all SERCOM register to the
+ *   initial state and disables the SERCOM.
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_USART
+void sam_usart_reset(const struct sam_usart_config_s * const config)
+{
+  uintptr_t regaddr = config->base + SAM_USART_CTRLA_OFFSET;
+  uint32_t regval;
+
+  /* Reset the SERCOM by setting the SWRST bit in the CTRLA register.  When
+   * the reset completes, the SERCOM will registers will be restored to there
+   * initial state and the SERCOM will be disabled.
+   */
+
+  regval = getreg32(regaddr);
+  regval |= USART_CTRLA_SWRST;
+  putreg32(regval, regaddr);
+
+  /* Wait for the reset to complete */
+
+  while ((getreg32(regaddr) & USART_CTRLA_SWRST) != 0);
 }
 #endif
 
