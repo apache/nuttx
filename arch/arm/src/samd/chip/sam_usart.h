@@ -47,11 +47,12 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
+#include "chip/sam_sercom.h"
 
 /********************************************************************************************
  * Pre-processor Definitions
  ********************************************************************************************/
-/* USART register offsets ********************************************************************/
+/* USART register offsets *******************************************************************/
 
 #define SAM_USART_CTRLA_OFFSET       0x0000  /* Control A register */
 #define SAM_USART_CTRLB_OFFSET       0x0000  /* Control B register */
@@ -63,7 +64,7 @@
 #define SAM_USART_STATUS_OFFSET      0x0000  /* Status register */
 #define SAM_USART_DATA_OFFSET        0x0000  /* Data register */
 
-/* USART register addresses ******************************************************************/
+/* USART register addresses *****************************************************************/
 
 #define SAM_USART0_CTRLA             (SAM_SERCOM0_BASE+SAM_USART_CTRLA_OFFSET)
 #define SAM_USART0_CTRLB             (SAM_SERCOM0_BASE+SAM_USART_CTRLB_OFFSET)
@@ -125,7 +126,7 @@
 #define SAM_USART5_STATUS            (SAM_SERCOM5_BASE+SAM_USART_STATUS_OFFSET)
 #define SAM_USART5_DATA              (SAM_SERCOM5_BASE+SAM_USART_DATA_OFFSET)
 
-/* USART register bit definitions ************************************************************/
+/* USART register bit definitions ***********************************************************/
 
 /* Control A register */
 
@@ -192,6 +193,8 @@
 #define USART_INT_TXC                (1 << 1)  /* Bit 1:  Transmit complete interrupt */
 #define USART_INT_RXC                (1 << 2)  /* Bit 2:  Receive complete interrupt */
 #define USART_INT_RXS                (1 << 3)  /* Bit 3:  Receive start interrupt */
+
+#define USART_INT_ALL                (0x0f)
 
 /* Status register */
 

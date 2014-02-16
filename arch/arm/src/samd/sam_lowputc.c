@@ -55,8 +55,11 @@
 #include "up_arch.h"
 
 #include "sam_config.h"
+
 #include "chip/sam_pm.h"
+#include "chip/sam_gclk.h"
 #include "chip/sam_usart.h"
+
 #include "sam_usart.h"
 
 /****************************************************************************
@@ -100,11 +103,80 @@ sam_wait_synchronization(const struct sam_usart_config_s * const config)
  ****************************************************************************/
 
 #ifdef HAVE_USART
-static inline int
+static inline void
 sam_gclk_configure(const struct sam_usart_config_s * const config)
 {
-#warning Missing logic
-  return -ENOSYS;
+  uint8_t  regval;
+  uint8_t glckcore;
+
+  /* Set up the SERCOMn_GCLK_ID_CORE clock */
+
+  glckcore = (uint8_t)SERCOM_GCLK_ID_CORE(config->sercom);
+  regval   = (glckcore << GCLK_CLKCTRL_ID_SHIFT);
+
+  /* Select and disable generic clock channel */
+
+  putreg8(regval, SAM_GCLK_CLKCTRL);
+
+  /* Wait for clock to become disabled */
+
+  while ((getreg8(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
+
+  /* Select the SERCOMn_GCLK_ID_CORE clock generator */
+
+  regval |= config->gclkgen << GCLK_CLKCTRL_GEN_SHIFT;
+
+#if 0 /* Not yet supported */
+  /* Enable write lock if requested to prevent further modification */
+
+  if (config->wrlock)
+    {
+      regval |= GCLK_CLKCTRL_WRTLOCK;
+    }
+#endif
+
+  /* Write the new configuration */
+
+  putreg8(regval, SAM_GCLK_CLKCTRL);
+
+  /* Enable the GCLK */
+
+  regval |= GCLK_CLKCTRL_CLKEN;
+  putreg8(regval, SAM_GCLK_CLKCTRL);
+
+  /* Set up the SERCOM_GCLK_ID_SLOW clock */
+
+  regval = (SERCOM_GCLK_ID_SLOW << GCLK_CLKCTRL_ID_SHIFT);
+
+  /* Select and disable generic clock channel */
+
+  putreg8(regval, SAM_GCLK_CLKCTRL);
+
+  /* Wait for clock to become disabled */
+
+  while ((getreg8(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
+
+  /* Select the SERCOM_GCLK_ID_SLOW clock generator */
+
+  regval |= config->gclkgen << GCLK_CLKCTRL_GEN_SHIFT;
+
+#if 0 /* Not yet supported */
+  /* Enable write lock if requested to prevent further modification */
+
+  if (config->wrlock)
+    {
+      regval |= GCLK_CLKCTRL_WRTLOCK;
+    }
+#endif
+
+  /* Write the new configuration */
+
+  putreg8(regval, SAM_GCLK_CLKCTRL);
+
+  /* Enable the GCLK */
+
+  regval |= GCLK_CLKCTRL_CLKEN;
+  putreg8(regval, SAM_GCLK_CLKCTRL);
 }
 #endif
 
@@ -142,11 +214,15 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
       return -ERANGE;
     }
 
+  /* Disable all USART interrupts */
+
+  putreg8(USART_INT_ALL, config->base + SAM_USART_INTENCLR_OFFSET);
+
   /* Wait until synchronization is complete */
 
   sam_wait_synchronization(config);
 
-  /* Set baud val */
+  /* Set baud divisor */
 
   putreg16((uint16_t)baud, config->base + SAM_USART_BAUD_OFFSET);
 
@@ -223,7 +299,7 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
 
   /* Write configuration to CTRLB */
 
-  putreg32(ctrlb, SAM_USART5_CTRLB);
+  putreg32(ctrlb, config->base + SAM_USART_CTRLB_OFFSET);
 
   /* Wait until synchronization is complete */
 
@@ -231,7 +307,7 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
 
   /* Write configuration to CTRLA */
 
-  putreg32(ctrlb, SAM_USART5_CTRLA);
+  putreg32(ctrlb, config->base + SAM_USART_CTRLA_OFFSET);
   return OK;
 }
 #endif
@@ -245,11 +321,98 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
  ****************************************************************************/
 
 #ifdef HAVE_USART
-static inline int
+static inline void
 sam_pad_configure(const struct sam_usart_config_s * const config)
 {
-#warning Missing logic
-  return -ENOSYS;
+  /* Configure SERCOM pads */
+
+  if (config->pad0 != 0)
+    {
+      sam_configport(config->pad0);
+    }
+
+  if (config->pad1 != 0)
+    {
+      sam_configport(config->pad1);
+    }
+
+  if (config->pad2 != 0)
+    {
+      sam_configport(config->pad2);
+    }
+
+  if (config->pad3 != 0)
+    {
+      sam_configport(config->pad3);
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_usart_internal
+ *
+ * Description:
+ *   Set the configuration of a SERCOM for provided USART configuration.
+ *   This configures the SERCOM as a USART, but does not configure USART
+ *   interrupts or enable the USART.
+ *
+ *****************************************************************************/
+
+#ifdef HAVE_USART
+int sam_usart_internal(const struct sam_usart_config_s * const config)
+{
+  uint32_t regval;
+  int ret;
+
+  /* Enable clocking to the SERCOM module in PM */
+
+  regval  = getreg32(SAM_PM_APBCMASK);
+  regval |= PM_APBCMASK_SERCOM(config->sercom);
+  putreg32(regval, SAM_PM_APBCMASK);
+
+  /* Configure the GCCLK for the SERCOM module */
+
+  sam_gclk_configure(config);
+
+  /* Set configuration according to the board configuration */
+
+  ret = sam_usart_configure(config);
+  if (ret == OK)
+    {
+      /* Configure USART pins */
+
+      sam_pad_configure(config);
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: sam_usart_enable
+ *
+ * Description:
+ *   Enable the SERCOM USART (without enabling interrupts).
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_USART
+static inline void
+sam_usart_enable(const struct sam_usart_config_s * const config)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+
+  /* Wait until synchronization is complete */
+
+  sam_wait_synchronization(config);
+
+  /* Enable USART module */
+
+  regaddr = config->base + SAM_USART_CTRLA_OFFSET;
+  regval = getreg32(regaddr);
+  regval |= USART_CTRLA_ENABLE;
+  putreg32(regval, regaddr);
 }
 #endif
 
@@ -268,7 +431,12 @@ sam_pad_configure(const struct sam_usart_config_s * const config)
 
 void sam_lowsetup(void)
 {
-#warning Missing logic
+#ifdef HAVE_SERIAL_CONSOLE
+  /* Configure and enable the console USART */
+
+  VERIFY(sam_usart_internal(&g_consoleconfig));
+  sam_usart_enable(&g_consoleconfig);
+#endif
 }
 
 /****************************************************************************
@@ -284,34 +452,17 @@ void sam_lowsetup(void)
 #ifdef HAVE_USART
 int sam_usart_initialize(const struct sam_usart_config_s * const config)
 {
-  uint32_t regval;
+  irqstate_t flags;
   int ret;
 
-  /* Enable clocking to the SERCOM module in PM */
+  /* Just invoke the internal implementation, but with interrupts disabled
+   * so that the operation is atomic.
+   */
 
-  regval  = getreg32(SAM_PM_APBCMASK);
-  regval |= PM_APBCMASK_SERCOM(config->sercom);
-  putreg32(regval, SAM_PM_APBCMASK);
-
-  /* Configure the GCCLK for the SERCOM module */
-
-  ret = sam_gclk_configure(config);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Set configuration according to the board configuration */
-
-  ret = sam_usart_configure(config);
-  if(ret < 0)
-    {
-      return ret;
-    }
-
-  /* Configure USART pins */
-
-  return sam_pad_configure(config);
+  flags = irqsave();
+  ret = sam_usart_internal(config);
+  irqrestore(flags);
+  return ret;
 }
 #endif
 
@@ -326,6 +477,23 @@ int sam_usart_initialize(const struct sam_usart_config_s * const config)
 #ifdef HAVE_SERIAL_CONSOLE
 void sam_lowputc(uint32_t ch)
 {
-#warning Missing logic
+  uintptr_t base    = g_consoleconfig.base;
+  uintptr_t intflag = base + SAM_USART_INTFLAG_OFFSET;
+
+  /* Wait for the USART to be ready for new TX data */
+
+  while ((getreg8(intflag) & USART_INT_DRE) == 0);
+
+  /* Wait until synchronization is complete */
+
+  sam_wait_synchronization(&g_consoleconfig);
+
+  /* Write data to USART module */
+
+  putreg16((uint16_t)ch, base + SAM_USART_DATA_OFFSET);
+
+  /* Wait until data is sent */
+
+  while ((getreg8(intflag) & USART_INT_TXC) == 0);
 }
 #endif
