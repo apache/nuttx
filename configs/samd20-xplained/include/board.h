@@ -198,7 +198,7 @@
 
 /* DFLL closed loop mode configuration */
 
-#define BOARD_DFLL_GCLKGEN         GCLK_CLKCTRL_GEN1
+#define BOARD_DFLL_SRCGCLKGEN         GCLK_CLKCTRL_GEN1
 #define BOARD_DFLL_MULTIPLIER         6
 #define BOARD_DFLL_QUICKLOCK          1
 #define BOARD_DFLL_TRACKAFTERFINELOCK 1
@@ -340,17 +340,54 @@
 #define BOARD_FLASH_WAITSTATES       0
 
 /* SERCOM definitions ***************************************************************/
+/* SERCOM4 is available on connectors EXT1 and EXT3
+ *
+ *   PIN   EXT1  EXT3  GPIO  Function
+ *   ----  ---- ------ -----------
+ *    13   PB09   PB13 SERCOM4 / USART RX
+ *    14   PB08   PB12 SERCOM4 / USART TX
+ *    19   19          GND
+ *    20   20          VCC
+ *
+ * If you have a TTL to RS-232 converter then this is the most convenient
+ * serial console to use.  It is the default in all of these configurations.
+ */
 
-/* EDBG/CDC USART on SERCOM3 */
+#define BOARD_SERCOM4_GCLKGEN        GCLK_CLKCTRL_GEN0
 
-#define BOARD_SERCOM3_GCLKGEN      GCLK_CLKCTRL_GEN0
-#define BOARD_SERCOM3_MUXCONFIG    (USART_CTRLA_RXPAD3 | USART_CTRLA_TXPAD2)
-#define BOARD_SERCOM3_PINMAP_PAD0  0
-#define BOARD_SERCOM3_PINMAP_PAD1  0
-#define BOARD_SERCOM3_PINMAP_PAD2  PORT_SERCOM3_PAD2_1
-#define BOARD_SERCOM3_PINMAP_PAD3  PORT_SERCOM3_PAD3_1
+#if defined(CONFIG_SAMD20_XPLAINED_USART4_EXT1)
+#  define BOARD_SERCOM4_MUXCONFIG    (USART_CTRLA_RXPAD1 | USART_CTRLA_TXPAD0)
+#  define BOARD_SERCOM4_PINMAP_PAD0  PORT_SERCOM4_PAD0_3
+#  define BOARD_SERCOM4_PINMAP_PAD1  PORT_SERCOM4_PAD1_3
+#  define BOARD_SERCOM4_PINMAP_PAD2  0
+#  define BOARD_SERCOM4_PINMAP_PAD3  0
+#else /* if defined(CONFIG_SAMD20_XPLAINED_USART4_EXT3) */
+#  define BOARD_SERCOM4_MUXCONFIG    (USART_CTRLA_RXPAD1 | USART_CTRLA_TXPAD0)
+#  define BOARD_SERCOM4_PINMAP_PAD0  PORT_SERCOM4_PAD0_1
+#  define BOARD_SERCOM4_PINMAP_PAD1  PORT_SERCOM4_PAD1_1
+#  define BOARD_SERCOM4_PINMAP_PAD2  0
+#  define BOARD_SERCOM4_PINMAP_PAD3  0
+#endif
 
-#define BOARD_SERCOM3_FREQUENCY    BOARD_GCLK0_FREQUENCY
+#define BOARD_SERCOM4_FREQUENCY      BOARD_GCLK0_FREQUENCY
+
+/* The SAMD20 Xplained Pro contains an Embedded Debugger (EDBG) that can be
+ * used to program and debug the ATSAMD20J18A using Serial Wire Debug (SWD).
+ * The Embedded debugger also include a Virtual Com port interface over
+ * SERCOM3.  Virtual COM port connections:
+ *
+ *   PA24 SERCOM3 / USART TXD
+ *   PA25 SERCOM3 / USART RXD
+ */
+
+#define BOARD_SERCOM3_GCLKGEN        GCLK_CLKCTRL_GEN0
+#define BOARD_SERCOM3_MUXCONFIG      (USART_CTRLA_RXPAD3 | USART_CTRLA_TXPAD2)
+#define BOARD_SERCOM3_PINMAP_PAD0    0
+#define BOARD_SERCOM3_PINMAP_PAD1    0
+#define BOARD_SERCOM3_PINMAP_PAD2    PORT_SERCOM3_PAD2_1
+#define BOARD_SERCOM3_PINMAP_PAD3    PORT_SERCOM3_PAD3_1
+
+#define BOARD_SERCOM3_FREQUENCY      BOARD_GCLK0_FREQUENCY
 
 /* LED definitions ******************************************************************/
 /* There are three LEDs on board the SAMD20 Xplained Pro board:  The EDBG
