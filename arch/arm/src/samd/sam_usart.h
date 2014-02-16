@@ -56,19 +56,19 @@
 /* Pick the console USART configuration */
 
 #if defined(CONFIG_USART0_SERIAL_CONSOLE)
-#  define g_consoleconfig (&g_usart0config)
+#  define g_consoleconfig (g_usart0config)
 #elif defined(CONFIG_USART1_SERIAL_CONSOLE)
-#  define g_consoleconfig (&g_usart1config)
+#  define g_consoleconfig (g_usart1config)
 #elif defined(CONFIG_USART2_SERIAL_CONSOLE)
-#  define g_consoleconfig (&g_usart2config)
+#  define g_consoleconfig (g_usart2config)
 #elif defined(CONFIG_USART3_SERIAL_CONSOLE)
-#  define g_consoleconfig (&g_usart3config)
+#  define g_consoleconfig (g_usart3config)
 #elif defined(CONFIG_USART4_SERIAL_CONSOLE)
-#  define g_consoleconfig (&g_usart4config)
+#  define g_consoleconfig (g_usart4config)
 #elif defined(CONFIG_USART5_SERIAL_CONSOLE)
-#  define g_consoleconfig (&g_usart5config)
+#  define g_consoleconfig (g_usart5config)
 #else
-#  undef g_consoleconfig
+#  undef  g_consoleconfig
 #endif
 
 /************************************************************************************
@@ -82,7 +82,7 @@ struct sam_usart_config_s
   uint8_t parity;     /* 0=none, 1=odd, 2=even */
   uint8_t bits;       /* Number of bits (5-9) */
   uint8_t irq;        /* SERCOM IRQ number */
-  uint8_t gclk;       /* Source GCLK generator */
+  uint8_t gclkgen;    /* Source GCLK generator */
   bool isconsole;     /* True: The USART is the console device */
   bool stopbits2;     /* True: Configure with 2 stop bits instead of 1 */
   uint32_t baud;      /* Configured baud */
