@@ -51,5 +51,26 @@ config SAMD20_XPLAINED_OLED1MODULE_EXT2
 endchoice
 endif
 
+if USART4_SERIAL_CONSOLE
+choice
+	prompt "USART 4 Connection"
+	default SAMD20_XPLAINED_USART4_EXT3
+
+config SAMD20_XPLAINED_USART4_EXT1
+	bool "EXT1"
+	depends on !SAMD20_XPLAINED_OLED1MODULE_EXT1 && !SAMD20_XPLAINED_IOMODULE_EXT1
+	---help---
+		Select this option if the serial console is on SERCOM4 connected via
+		EXT1.  The RX will be on PB9 and TX signal will be on PB8.
+
+config SAMD20_XPLAINED_USART4_EXT3
+	bool "EXT3"
+	---help---
+		Select this option if the serial console is on SERCOM4 connect via
+		EXT3.  The RX will be on PB13 and TX signal will be on PB12.
+
+endchoice
+endif
+
 endmenu
 endif
