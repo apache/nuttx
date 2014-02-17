@@ -56,13 +56,14 @@
 /* Clocking *************************************************************************/
 /* Overview
  *
- * OSC8M             Output = 8MHz
- *  `- GCLK1         Input  = 8MHz  Prescaler    = 1 output         = 8MHz
- *      `- DFLL      Input  = 8MHz  Multiplier   = 6 output         = 48MHz
- *          `- PM    Input  = 48Mhz CPU divider  = 1 CPU frequency  = 48MHz
- *                                  APBA divider = 1 APBA frequency = 48MHz
- *                                  APBB divider = 1 APBB frequency = 48MHz
- *                                  APBC divider = 1 APBC frequency = 48MHz
+ * OSC8M              Output = 8MHz
+ *  `- GCLK1          Input  = 8MHz  Prescaler    = 1 output         = 8MHz
+ *      `- DFLL       Input  = 8MHz  Multiplier   = 6 output         = 48MHz
+ *          `- GCLK0  Input  = 48MHz Prescaler    = 1 output         = 48MHz
+ *              `- PM Input  = 48Mhz CPU divider  = 1 CPU frequency  = 48MHz
+ *                                   APBA divider = 1 APBA frequency = 48MHz
+ *                                   APBB divider = 1 APBB frequency = 48MHz
+ *                                   APBC divider = 1 APBC frequency = 48MHz
  *
  * The SAMD20 Xplained Pro has one on-board crystal:
  *

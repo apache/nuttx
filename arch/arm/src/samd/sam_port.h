@@ -106,10 +106,10 @@
  */
 
 #define PORT_PULL_SHIFT            (20)       /* Bits 20-21: Pull-up/down resistor control */
-#define PORT_PULL_MASK             (3 << PORT_FUNC_SHIFT)
-#  define PORT_PULL_NONE           (0 << PORT_FUNC_SHIFT)
-#  define PORT_PULL_UP             (1 << PORT_FUNC_SHIFT)
-#  define PORT_PULL_DOWN           (2 << PORT_FUNC_SHIFT)
+#define PORT_PULL_MASK             (3 << PORT_PULL_SHIFT)
+#  define PORT_PULL_NONE           (0 << PORT_PULL_SHIFT)
+#  define PORT_PULL_UP             (1 << PORT_PULL_SHIFT)
+#  define PORT_PULL_DOWN           (2 << PORT_PULL_SHIFT)
 
 /* Peripheral Function
  *
