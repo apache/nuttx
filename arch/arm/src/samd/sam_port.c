@@ -146,7 +146,7 @@ static inline void sam_configinput(uintptr_t base, port_pinset_t pinset)
     {
        /* Select the upper half word and adjust the bit setting */
 
-       regval  = PORT_WRCONFIG_HWSEL;
+       regval |= PORT_WRCONFIG_HWSEL;
        pin    -= 16;
     }
 
@@ -243,7 +243,7 @@ static inline void sam_configoutput(uintptr_t base, port_pinset_t pinset)
     {
        /* Select the upper half word and adjust the bit setting */
 
-       regval  = PORT_WRCONFIG_HWSEL;
+       regval |= PORT_WRCONFIG_HWSEL;
        pin    -= 16;
     }
 
@@ -320,7 +320,7 @@ static inline void sam_configperiph(uintptr_t base, port_pinset_t pinset)
     {
        /* Select the upper half word and adjust the bit setting */
 
-       regval  = PORT_WRCONFIG_HWSEL;
+       regval |= PORT_WRCONFIG_HWSEL;
        pin    -= 16;
     }
 
@@ -328,8 +328,8 @@ static inline void sam_configperiph(uintptr_t base, port_pinset_t pinset)
 
   /* Set the pin function */
 
-  func   = (pinset & PORT_FUNC_MASK) >> PORT_FUNC_SHIFT;
-  regval = (func << PORT_WRCONFIG_PMUX_SHIFT);
+  func    = (pinset & PORT_FUNC_MASK) >> PORT_FUNC_SHIFT;
+  regval |= (func << PORT_WRCONFIG_PMUX_SHIFT);
 
   /* Check for pull-up/down selection */
 
@@ -386,7 +386,7 @@ static inline void sam_configreset(uintptr_t base, port_pinset_t pinset)
 
   /* Disable the I/O synchronizer */
 
-  regval = getreg32(base + SAM_PORT_CTRL_OFFSET);
+  regval  = getreg32(base + SAM_PORT_CTRL_OFFSET);
   regval &= ~bit;
   putreg32(regval, base + SAM_PORT_CTRL_OFFSET);
 
@@ -401,7 +401,7 @@ static inline void sam_configreset(uintptr_t base, port_pinset_t pinset)
     {
        /* Select the upper half word and adjust the bit setting */
 
-       regval  = PORT_WRCONFIG_HWSEL;
+       regval |= PORT_WRCONFIG_HWSEL;
        pin    -= 16;
     }
 

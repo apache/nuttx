@@ -116,21 +116,21 @@ sam_wait_synchronization(const struct sam_usart_config_s * const config)
 static inline void
 sam_gclk_configure(const struct sam_usart_config_s * const config)
 {
-  uint8_t  regval;
+  uint16_t regval;
   uint8_t glckcore;
 
   /* Set up the SERCOMn_GCLK_ID_CORE clock */
 
   glckcore = (uint8_t)SERCOM_GCLK_ID_CORE(config->sercom);
-  regval   = (glckcore << GCLK_CLKCTRL_ID_SHIFT);
+  regval   = ((uint16_t)glckcore << GCLK_CLKCTRL_ID_SHIFT);
 
   /* Select and disable generic clock channel */
 
-  putreg8(regval, SAM_GCLK_CLKCTRL);
+  putreg16(regval, SAM_GCLK_CLKCTRL);
 
   /* Wait for clock to become disabled */
 
-  while ((getreg8(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
+  while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
 
   /* Select the SERCOMn_GCLK_ID_CORE clock generator */
 
@@ -147,12 +147,12 @@ sam_gclk_configure(const struct sam_usart_config_s * const config)
 
   /* Write the new configuration */
 
-  putreg8(regval, SAM_GCLK_CLKCTRL);
+  putreg16(regval, SAM_GCLK_CLKCTRL);
 
   /* Enable the GCLK */
 
   regval |= GCLK_CLKCTRL_CLKEN;
-  putreg8(regval, SAM_GCLK_CLKCTRL);
+  putreg16(regval, SAM_GCLK_CLKCTRL);
 
   /* Set up the SERCOM_GCLK_ID_SLOW clock */
 
@@ -160,11 +160,11 @@ sam_gclk_configure(const struct sam_usart_config_s * const config)
 
   /* Select and disable generic clock channel */
 
-  putreg8(regval, SAM_GCLK_CLKCTRL);
+  putreg16(regval, SAM_GCLK_CLKCTRL);
 
   /* Wait for clock to become disabled */
 
-  while ((getreg8(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
+  while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
 
   /* Select the SERCOM_GCLK_ID_SLOW clock generator */
 
@@ -181,12 +181,12 @@ sam_gclk_configure(const struct sam_usart_config_s * const config)
 
   /* Write the new configuration */
 
-  putreg8(regval, SAM_GCLK_CLKCTRL);
+  putreg16(regval, SAM_GCLK_CLKCTRL);
 
   /* Enable the GCLK */
 
   regval |= GCLK_CLKCTRL_CLKEN;
-  putreg8(regval, SAM_GCLK_CLKCTRL);
+  putreg16(regval, SAM_GCLK_CLKCTRL);
 }
 #endif
 
@@ -317,7 +317,7 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
 
   /* Write configuration to CTRLA */
 
-  putreg32(ctrlb, config->base + SAM_USART_CTRLA_OFFSET);
+  putreg32(ctrla, config->base + SAM_USART_CTRLA_OFFSET);
   return OK;
 }
 #endif

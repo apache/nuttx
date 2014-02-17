@@ -660,15 +660,21 @@ static int  sam_usart5_interrupt(int irq, void *context)
 
 static int sam_setup(struct uart_dev_s *dev)
 {
+  int ret = 0;
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
   struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
 
-  /* Configure the SERCOM as a USART */
+  /* Configure the SERCOM as a USART.  Don't reconfigure the console UART;
+   * that was already done in sam_lowputc.c.
+   */
 
-  return sam_usart_initialize(priv->config);
-#else
-  return OK;
+  if (!dev->isconsole)
+    {
+      ret = sam_usart_initialize(priv->config);
+    }
 #endif
+
+  return ret;
 }
 
 /****************************************************************************
@@ -676,7 +682,7 @@ static int sam_setup(struct uart_dev_s *dev)
  *
  * Description:
  *   Disable the USART.  This method is called when the serial port is
- *   closed
+ *   closed.  The exception is the serial console which is never shutdown.
  *
  ****************************************************************************/
 
@@ -685,10 +691,14 @@ static void sam_shutdown(struct uart_dev_s *dev)
   struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
 
   /* Resetting the SERCOM restores all registers to the reget state and
-   * disables the SERCOM.
+   * disables the SERCOM.  Ignore any requests to shutown the console
+   * device (shouldn't happen).
    */
 
-  sam_usart_reset(priv->config);
+  if (!dev->isconsole)
+    {
+      sam_usart_reset(priv->config);
+    }
 }
 
 /****************************************************************************
@@ -743,7 +753,13 @@ static void sam_detach(struct uart_dev_s *dev)
   struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;
   const struct sam_usart_config_s * const config = priv->config;
 
+  /* Disable interrupts at the SERCOM device and at the NVIC */
+
+  sam_disableallints(priv);
   up_disable_irq(config->irq);
+
+  /* Detach the interrupt handler */
+
   irq_detach(config->irq);
 }
 
@@ -933,6 +949,10 @@ static bool sam_txempty(struct uart_dev_s *dev)
  *   serial console will be available during bootup.  This must be called
  *   before sam_serialinit.
  *
+ *   NOTE: On this platform up_earlyserialinit() does not really do
+ *   anything of consequence and probably could be eliminated with little
+ *   effort.
+ *
  ****************************************************************************/
 
 void up_earlyserialinit(void)
@@ -956,11 +976,10 @@ void up_earlyserialinit(void)
   sam_disableallints(TTYS5_DEV.priv);
 #endif
 
-  /* Configuration whichever one is the console */
+  /* Mark the serial console (if any) */
 
 #ifdef HAVE_SERIAL_CONSOLE
   CONSOLE_DEV.isconsole = true;
-  sam_setup(&CONSOLE_DEV);
 #endif
 }
 
