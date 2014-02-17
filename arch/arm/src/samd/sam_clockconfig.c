@@ -487,6 +487,26 @@ static inline void sam_osc32k_config(void)
  *     BOARD_OSC8M_ONDEMAND      - Boolean (defined / not defined)
  *     BOARD_OSC8M_RUNINSTANDBY  - Boolean (defined / not defined)
  *
+ *   On any reset the synchronous clocks start to their initial state:
+ *
+ *     OSC8M is enabled and divided by 8
+ *     GCLK_MAIN uses OSC8M as source
+ *     CPU and BUS clocks are undivided
+ *
+ *   The reset state of the OSC8M register is:
+ *
+ *     FFxx CCCC CCCC CCCC xxxx xxPP ORxx xxEx
+ *     xx00 xxxx xxxx xxxx 0000 0011 1000 0010
+ *
+ *     FRANGE   FF      Loaded from FLASH calibration at startup
+ *     CALIB    CCC...C Loaded from FLASH calibration at startup
+ *     PRESC    PP      3 = Divide by 8
+ *     ONDEMAND O       1
+ *     RUNSTBY  R       0
+ *     ENABLE   1       1
+ *
+ *   NOTE that since we are running from OSC8M, it cannot be disable!
+ *
  * Input Parameters:
  *   None
  *
@@ -501,21 +521,28 @@ static inline void sam_osc8m_config(void)
 
   /* Configure OSC8M */
 
-  regval = BOARD_OSC8M_PRESCALER;
+  regval  = getreg32(SAM_SYSCTRL_OSC8M);
+  regval &= ~(SYSCTRL_OSC8M_PRESC_MASK | SYSCTRL_OSC8M_ONDEMAND |
+              SYSCTRL_OSC8M_RUNSTDBY);
+
+  /* Select the prescaler */
+
+  regval |= (BOARD_OSC8M_PRESCALER | SYSCTRL_OSC8M_ENABLE);
 
 #ifdef BOARD_OSC8M_ONDEMAND
+  /* Select on-demand oscillator controls */
+
   regval |= SYSCTRL_OSC8M_ONDEMAND;
 #endif
 
 #ifdef BOARD_OSC8M_RUNINSTANDBY
+  /* The oscillator continues to run in standby sleep mode  */
+
   regval |= SYSCTRL_OSC8M_RUNSTDBY;
 #endif
 
-  putreg32(regval, SAM_SYSCTRL_OSC8M);
+  /* Set the OSC8M configuration */
 
-  /* Then enable OSC8M */
-
-  regval |= SYSCTRL_OSC8M_ENABLE;
   putreg32(regval, SAM_SYSCTRL_OSC8M);
 }
 
@@ -596,7 +623,7 @@ static inline void sam_dfll_config(void)
 #ifndef BOARD_DFLL_OPENLOOP
   regval = SYSCTRL_DFLLMUL_CSTEP(BOARD_DFLL_MAXCOARSESTEP) |
            SYSCTRL_DFLLMUL_FSTEP(BOARD_DFLL_MAXFINESTEP) |
-            SYSCTRL_DFLLMUL_MUL(BOARD_DFLL_MULTIPLIER);
+           SYSCTRL_DFLLMUL_MUL(BOARD_DFLL_MULTIPLIER);
   putreg32(regval, SAM_SYSCTRL_DFLLMUL);
 #else
   putreg32(0, SAM_SYSCTRL_DFLLMUL);
@@ -605,8 +632,8 @@ static inline void sam_dfll_config(void)
   /* Set up the DFLL value register */
 
   regval = SYSCTRL_DFLLVAL_COARSE(BOARD_DFLL_COARSEVALUE) |
-          SYSCTRL_DFLLVAL_FINE(BOARD_DFLL_FINEVALUE);
-  putreg32(regval, SAM_SYSCTRL_DFLLMUL);
+           SYSCTRL_DFLLVAL_FINE(BOARD_DFLL_FINEVALUE);
+  putreg32(regval, SAM_SYSCTRL_DFLLVAL);
 
   /* Finally, set the state of the ONDEMAND bit if necessary */
 
@@ -642,25 +669,25 @@ static inline void sam_dfll_reference(void)
 {
   uint16_t regval;
 
-  /* Disabled the generic clock */
+  /* Disabled the DFLL reference clock */
 
-  regval = GCLK_CLKCTRL_GEN0;
+  regval = GCLK_CLKCTRL_ID_DFLL48M;
   putreg16(regval, SAM_GCLK_CLKCTRL);
 
   /* Wait for the clock to become disabled */
 
   while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
 
-  /* Select the configured clock generator and configure the GCLK output
-   * (always Generic clock generator 0)
+  /* Select the configured clock generator as the source for the DFLL
+   * reference clock.
    *
    * NOTE: We could enable write lock here to prevent further modification
    */
 
-  regval = (GCLK_CLKCTRL_GEN0 | BOARD_DFLL_SRCGCLKGEN);
+  regval = (BOARD_DFLL_SRCGCLKGEN | GCLK_CLKCTRL_ID_DFLL48M);
   putreg16(regval, SAM_GCLK_CLKCTRL);
 
-  /* Enable the generic clock */
+  /* Enable the DFLL reference clock */
 
   regval |= GCLK_CLKCTRL_CLKEN;
   putreg16(regval, SAM_GCLK_CLKCTRL);
@@ -786,7 +813,7 @@ static inline void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
   /* Enable the clock generator */
 
   genctrl |= GCLK_GENCTRL_GENEN;
-  putreg16(genctrl, SAM_GCLK_GENCTRL);
+  putreg32(genctrl, SAM_GCLK_GENCTRL);
 
   /* Wait for synchronization */
 
