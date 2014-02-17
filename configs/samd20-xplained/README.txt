@@ -403,18 +403,23 @@ Serial Consoles
   SERCOM4
   ------
 
-  SERCOM4 is available on connectors EXT1 and EXT3
+  SERCOM4 is available on connectors EXT1, EXT2, and EXT3, but using
+  different PORT pins:
 
-    PIN   EXT1 EXT3 GPIO Function
-    ----  ---- ---- ------------------
-     13   PB09 PB13 SERCOM4 / USART RX
-     14   PB08 PB12 SERCOM4 / USART TX
-     19   19        GND
-     20   20        VCC
+    PIN   EXT1 EXT2 EXT3 GPIO Function
+    ----  ---- ---- ---- ------------------
+     13   PB09 PB13 PB11 SERCOM4 / USART RX
+     14   PB08 PB12 PB12 SERCOM4 / USART TX
+     19   GND  GND  GND  N/A
+     20   VCC  VCC  VCC  N/A
+
+  There are options available in the NuttX configuration to select which
+  connector SERCOM4 is on:  SAMD20_XPLAINED_USART4_EXTn, where n=1, 2, or 3.
 
   If you have a TTL to RS-232 converter then this is the most convenient
-  serial console to use.  It is the default in all of these configurations.
-  An option is to use the virtual COM port.
+  serial console to use (because you don't lose the console device each time
+  you lose the USB connection).  It is the default in all of these
+  configurations.  An option is to use the virtual COM port.
 
   Virtual COM Port
   ----------------
