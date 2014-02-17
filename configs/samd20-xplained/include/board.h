@@ -335,9 +335,19 @@
 #define BOARD_PBC_FREQUENCY          (BOARD_MCK_FREQUENCY)
 #define BOARD_PBD_FREQUENCY          (BOARD_MCK_FREQUENCY)
 
-/* FLASH wait states */
+/* FLASH wait states
+ *
+ * Vdd Range     Wait states    Maximum Operating Frequency
+ * ------------- -------------- ---------------------------
+ * 1.62V to 2.7V  0             14 MHz
+ *                1             28 MHz
+ *                2             42 MHz
+ *                3             48 MHz
+ * 2.7V to 3.63V  0             24 MHz
+ *                1             48 MHz
+ */
 
-#define BOARD_FLASH_WAITSTATES       0
+#define BOARD_FLASH_WAITSTATES       1
 
 /* SERCOM definitions ***************************************************************/
 /* SERCOM4 is available on connectors EXT1 and EXT3

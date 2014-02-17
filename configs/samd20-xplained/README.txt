@@ -23,6 +23,7 @@ Contents
   - NuttX EABI "buildroot" Toolchain
   - LEDs
   - Serial Consoles
+  - Atmel Studio 6.1
   - SAMD20 Xplained Pro-specific Configuration Options
   - Configurations
 
@@ -425,6 +426,27 @@ Serial Consoles
 
     PA24 SERCOM3 / USART TXD
     PA25 SERCOM3 / USART RXD
+
+Atmel Studio 6.1
+^^^^^^^^^^^^^^^^
+
+  Loading Code into FLASH:
+  -----------------------
+  Tools menus:  Tool -> Device Programming.
+
+  Debugging the NuttX Object File
+  -------------------------------
+  1) Rename object file from nutt to nuttx.elf.  That is an extension that
+     will be recognized by the file menu.
+
+  2) File menu: File -> Open -> Open object file for debugging
+     - Select nuttx.elf object file
+     - Select AT91SAMD20J18
+     - Select files for symbols as desired
+     - Select debugger
+
+  3) Debug menu: Debug -> Start debugging and break
+     - This will reload the nuttx.elf file into FLASH
 
 SAMD20 Xplained Pro-specific Configuration Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
