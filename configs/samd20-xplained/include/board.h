@@ -373,7 +373,7 @@
 
 /* The SAMD20 Xplained Pro contains an Embedded Debugger (EDBG) that can be
  * used to program and debug the ATSAMD20J18A using Serial Wire Debug (SWD).
- * The Embedded debugger also include a Virtual Com port interface over
+ * The Embedded debugger also include a Virtual COM port interface over
  * SERCOM3.  Virtual COM port connections:
  *
  *   PA24 SERCOM3 / USART TXD
