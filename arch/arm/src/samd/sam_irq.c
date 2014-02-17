@@ -78,50 +78,6 @@ volatile uint32_t *current_regs;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_dumpnvic
- *
- * Description:
- *   Dump some interesting NVIC registers
- *
- ****************************************************************************/
-
-#if defined(CONFIG_DEBUG_IRQ)
-static void sam_dumpnvic(const char *msg, int irq)
-{
-  irqstate_t flags;
-
-  flags = irqsave();
-
-  lldbg("NVIC (%s, irq=%d):\n", msg, irq);
-  lldbg("  ISER:       %08x ICER:   %08x\n",
-        getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER));
-  lldbg("  ISPR:       %08x ICPR:   %08x\n",
-        getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
-  lldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
-        getreg32(ARMV6M_NVIC_IPR0), getreg32(ARMV6M_NVIC_IPR1),
-        getreg32(ARMV6M_NVIC_IPR2), getreg32(ARMV6M_NVIC_IPR3));
-  lldbg("              %08x %08x %08x %08x\n",
-        getreg32(ARMV6M_NVIC_IPR4), getreg32(ARMV6M_NVIC_IPR5),
-        getreg32(ARMV6M_NVIC_IPR6), getreg32(ARMV6M_NVIC_IPR7));
-
-  lldbg("SYSCON:\n");
-  lldbg("  CPUID:      %08x\n",
-        getreg32(ARMV6M_SYSCON_CPUID));
-  lldbg("  ICSR:       %08x AIRCR:  %08x\n",
-        getreg32(ARMV6M_SYSCON_ICSR), getreg32(ARMV6M_SYSCON_AIRCR));
-  lldbg("  SCR:        %08x CCR:    %08x\n",
-        getreg32(ARMV6M_SYSCON_SCR), getreg32(ARMV6M_SYSCON_CCR));
-  lldbg("  SHPR2:      %08x SHPR3:  %08x\n",
-        getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
-
-  irqrestore(flags);
-}
-
-#else
-#  define sam_dumpnvic(msg, irq)
-#endif
-
-/****************************************************************************
  * Name: sam_nmi, sam_busfault, sam_usagefault, sam_pendsv,
  *       sam_dbgmonitor, sam_pendsv, sam_reserved
  *
@@ -331,70 +287,46 @@ void up_ack_irq(int irq)
 }
 
 /****************************************************************************
- * Name: up_prioritize_irq
+ * Name: sam_dumpnvic
  *
  * Description:
- *   Set the priority of an IRQ.
- *
- *   Since this API is not supported on all architectures, it should be
- *   avoided in common implementations where possible.
+ *   Dump some interesting NVIC registers
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_IRQPRIO
-int up_prioritize_irq(int irq, int priority)
+#ifdef CONFIG_DEBUG_IRQ
+void sam_dumpnvic(const char *msg, int irq)
 {
-  uint32_t regaddr;
-  uint32_t regval;
-  int shift;
+  irqstate_t flags;
 
-  DEBUGASSERT(irq == SAM_IRQ_SVCALL ||
-              irq == SAM_IRQ_PENDSV ||
-              irq == SAM_IRQ_SYSTICK ||
-             (irq >= SAM_IRQ_INTERRUPT && irq < NR_IRQS));
-  DEBUGASSERT(priority >= NVIC_SYSH_DISABLE_PRIORITY &&
-              priority <= NVIC_SYSH_PRIORITY_MIN);
+  flags = irqsave();
 
-  /* Check for external interrupt */
+  lldbg("NVIC (%s, irq=%d):\n", msg, irq);
+  lldbg("  ISER:       %08x ICER:   %08x\n",
+        getreg32(ARMV6M_NVIC_ISER), getreg32(ARMV6M_NVIC_ICER));
+  lldbg("  ISPR:       %08x ICPR:   %08x\n",
+        getreg32(ARMV6M_NVIC_ISPR), getreg32(ARMV6M_NVIC_ICPR));
+  lldbg("  IRQ PRIO:   %08x %08x %08x %08x\n",
+        getreg32(ARMV6M_NVIC_IPR0), getreg32(ARMV6M_NVIC_IPR1),
+        getreg32(ARMV6M_NVIC_IPR2), getreg32(ARMV6M_NVIC_IPR3));
+  lldbg("              %08x %08x %08x %08x\n",
+        getreg32(ARMV6M_NVIC_IPR4), getreg32(ARMV6M_NVIC_IPR5),
+        getreg32(ARMV6M_NVIC_IPR6), getreg32(ARMV6M_NVIC_IPR7));
 
-  if (irq >= SAM_IRQ_INTERRUPT && irq < SAM_IRQ_INTERRUPT + SAM_IRQ_NINTS)
-    {
-      /* ARMV6M_NVIC_IPR() maps register IPR0-IPR7 with four settings per
-       * register.
-       */
+  lldbg("SYSCON:\n");
+  lldbg("  CPUID:      %08x\n",
+        getreg32(ARMV6M_SYSCON_CPUID));
+  lldbg("  ICSR:       %08x AIRCR:  %08x\n",
+        getreg32(ARMV6M_SYSCON_ICSR), getreg32(ARMV6M_SYSCON_AIRCR));
+  lldbg("  SCR:        %08x CCR:    %08x\n",
+        getreg32(ARMV6M_SYSCON_SCR), getreg32(ARMV6M_SYSCON_CCR));
+  lldbg("  SHPR2:      %08x SHPR3:  %08x\n",
+        getreg32(ARMV6M_SYSCON_SHPR2), getreg32(ARMV6M_SYSCON_SHPR3));
 
-      regaddr = ARMV6M_NVIC_IPR(irq >> 2);
-      shift   = (irq & 3) << 3;
-    }
-
-  /* Handle processor exceptions.  Only SVCall, PendSV, and SysTick can be
-   * reprioritized.  And we will not permit modification of SVCall through
-   * this function.
-   */
-
-  else if (irq == SAM_IRQ_PENDSV)
-    {
-      regaddr = ARMV6M_SYSCON_SHPR2;
-      shift   = SYSCON_SHPR3_PRI_14_SHIFT;
-    }
-  else if (irq == SAM_IRQ_SYSTICK)
-    {
-      regaddr = ARMV6M_SYSCON_SHPR2;
-      shift   = SYSCON_SHPR3_PRI_15_SHIFT;
-    }
-  else
-    {
-      return ERROR;
-    }
-
-  /* Set the priority */
-
-  regval  = getreg32(regaddr);
-  regval &= ~((uint32_t)0xff << shift);
-  regval |= ((uint32_t)priority << shift);
-  putreg32(regval, regaddr);
-
-  sam_dumpnvic("prioritize", irq);
-  return OK;
+  irqrestore(flags);
 }
+
+#else
+#  define sam_dumpnvic(msg, irq)
 #endif
+

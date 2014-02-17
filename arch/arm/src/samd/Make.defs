@@ -74,3 +74,7 @@ CHIP_CSRCS += sam_port.c sam_serial.c sam_start.c sam_timerisr.c sam_usart.c
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
 CHIP_CSRCS += sam_userspace.c
 endif
+
+ifeq ($(CONFIG_NUTTX_KERNEL),y)
+CHIP_CSRCS += sam_irqprio.c
+endif

@@ -352,7 +352,7 @@ int up_prioritize_irq(int irq, int priority)
               irq == NUC_IRQ_PENDSV ||
               irq == NUC_IRQ_SYSTICK ||
              (irq >= NUC_IRQ_INTERRUPT && irq < NR_IRQS));
-  DEBUGASSERT(priority >= NVIC_SYSH_DISABLE_PRIORITY &&
+  DEBUGASSERT(priority >= NVIC_SYSH_PRIORITY_MAX &&
               priority <= NVIC_SYSH_PRIORITY_MIN);
 
   /* Check for external interrupt */

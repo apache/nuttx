@@ -62,4 +62,18 @@
  * Public Functions
  ************************************************************************************/
 
+/****************************************************************************
+ * Name: sam_dumpnvic
+ *
+ * Description:
+ *   Dump some interesting NVIC registers
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_IRQ
+void sam_dumpnvic(const char *msg, int irq);
+#else
+#  define sam_dumpnvic(msg, irq)
+#endif
+
 #endif /* __ARCH_ARM_SRC_SAMD_SAM_IRQ_H */
