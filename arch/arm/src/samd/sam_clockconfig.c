@@ -691,10 +691,39 @@ static inline void sam_dfll_reference(void)
 
   regval |= GCLK_CLKCTRL_CLKEN;
   putreg16(regval, SAM_GCLK_CLKCTRL);
+
+  /* The CLKCTRL.CLKEN bit must be synchronized to the generic clock domain.
+   * CLKCTRL.CLKEN will continue to read as its previous state until the
+   * synchronization is complete.
+   */
+
+  while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) == 0);
 }
 #else
 #  define sam_dfll_reference()
 #endif
+
+/****************************************************************************
+ * Name: sam_gclck_waitsyncbusy
+ *
+ * Description:
+ *   What until the SYNCBUSY bit is cleared.  This bit is cleared when the
+ *   synchronization of registers between the clock domains is complete.
+ *   This bit is set when the synchronization of registers between clock
+ *   domains is started.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void sam_gclck_waitsyncbusy(void)
+{
+  while ((getreg8(SAM_GCLK_STATUS) & GCLK_STATUS_SYNCBUSY) != 0);
+}
 
 /****************************************************************************
  * Name: sam_config_gclks
@@ -791,7 +820,7 @@ static inline void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   /* Wait for synchronization */
 
-  while ((getreg8(SAM_GCLK_STATUS) & GCLK_STATUS_SYNCBUSY) != 0);
+  sam_gclck_waitsyncbusy();
     
   /* Select the generator */
 
@@ -800,7 +829,7 @@ static inline void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   /* Wait for synchronization */
 
-  while ((getreg8(SAM_GCLK_STATUS) & GCLK_STATUS_SYNCBUSY) != 0);
+  sam_gclck_waitsyncbusy();
 
   /* Write the new generator configuration */
 
@@ -808,7 +837,7 @@ static inline void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   /* Wait for synchronization */
 
-  while ((getreg8(SAM_GCLK_STATUS) & GCLK_STATUS_SYNCBUSY) != 0);
+  sam_gclck_waitsyncbusy();
 
   /* Enable the clock generator */
 
@@ -817,7 +846,7 @@ static inline void sam_gclk_config(FAR const struct sam_gclkconfig_s *config)
 
   /* Wait for synchronization */
 
-  while ((getreg8(SAM_GCLK_STATUS) & GCLK_STATUS_SYNCBUSY) != 0);
+  sam_gclck_waitsyncbusy();
 }
 #endif
 
