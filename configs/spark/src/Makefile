@@ -36,59 +36,63 @@
 
 -include $(TOPDIR)/Make.defs
 
-CFLAGS		+= -I$(TOPDIR)/sched
+CFLAGS += -I$(TOPDIR)/sched
 
-ASRCS		=
-AOBJS		= $(ASRCS:.S=$(OBJEXT))
+ASRCS =
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS		= up_boot.c up_spi.c
+CSRCS = up_boot.c up_spi.c
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS 		+= up_cxxinitialize.c
+CSRCS += up_cxxinitialize.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS 		+= up_autoleds.c
+CSRCS += up_autoleds.c
 else
-CSRCS 		+= up_userleds.c
+CSRCS += up_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS 		+=  up_buttons.c
+CSRCS +=  up_buttons.c
 endif
 
 ifeq ($(CONFIG_NSH_ARCHINIT),y)
-CSRCS		+= up_nsh.c
+CSRCS += up_nsh.c
 endif
 
 ifeq ($(CONFIG_USBDEV),y)
-CSRCS		+= up_usbdev.c
+CSRCS += up_usbdev.c
 endif
 
 ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
-CSRCS		+= up_composite.c
+CSRCS += up_composite.c
 endif
 
 ifeq ($(CONFIG_WL_CC3000),y)
-CSRCS		+= up_wireless.c
+CSRCS += up_wireless.c
 endif
 
 ifeq ($(CONFIG_WATCHDOG),y)
-	CSRCS	+= up_watchdog.c
+CSRCS += up_watchdog.c
 endif
 
-COBJS		= $(CSRCS:.c=$(OBJEXT))
+ifeq ($(CONFIG_CC3000_PROBES),)
+CSRCS += up_io.c
+endif
 
-SRCS		= $(ASRCS) $(CSRCS)
-OBJS		= $(AOBJS) $(COBJS)
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-ARCH_SRCDIR	= $(TOPDIR)/arch/$(CONFIG_ARCH)/src
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
+
+ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
 ifeq ($(WINTOOL),y)
-	CFLAGS	+= -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
-		   -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
-		   -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
-	else
-	CFLAGS	+= -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
+CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}" \
+          -I "${shell cygpath -w $(ARCH_SRCDIR)/common}" \
+          -I "${shell cygpath -w $(ARCH_SRCDIR)/armv7-m}"
+else
+CFLAGS += -I$(ARCH_SRCDIR)/chip -I$(ARCH_SRCDIR)/common -I$(ARCH_SRCDIR)/armv7-m
 endif
 
 all: libboard$(LIBEXT)

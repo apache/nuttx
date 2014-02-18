@@ -125,7 +125,7 @@ void board_initialize(void)
 
 #if defined(CONFIG_NSH_LIBRARY) && !defined(CONFIG_NSH_ARCHINIT)
 	  nsh_archinitialize();
-	  wireless_archinitialize();
+	  wireless_archinitialize(0);
 
 #endif
 

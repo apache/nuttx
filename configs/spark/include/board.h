@@ -158,9 +158,9 @@
 #define BOARD_NLEDS          4
 
 #define BOARD_USR_LED_BLUE   BOARD_LED1
-#define BOARD_RGB_LED_RED    BOARD_LED2
+#define BOARD_RGB_LED_RED    BOARD_LED3
 #define BOARD_RGB_LED_GREEN  BOARD_LED4
-#define BOARD_RGB_LED_BLUE   BOARD_LED3
+#define BOARD_RGB_LED_BLUE   BOARD_LED2
 
 /* LED bits for use with stm32_setleds() */
 
