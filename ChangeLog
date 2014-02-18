@@ -6588,4 +6588,7 @@
 	  (2014-2-16).
 	* sched/task_terminate.c:  Always returns an error because the
 	  return value was not being set correctly.  From Gosha (2014-2-18).
-
+	* stm32f429i-disco/ostest-fpu:  OS test for FPU-enabled system from
+	  David Alessio (2014-2-18).
+	* Other misc changes to support FPU on STM32F429 Discovery from
+	  David Alession (2014-2-18)

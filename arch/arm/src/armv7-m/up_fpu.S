@@ -35,7 +35,7 @@
 /*
  * When this file is assembled, it will require the following GCC options:
  *
- * -mcpu=cortex-m3 -mfloat-abi=hard -mfpu=vfp -meabi=5
+ * -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=vfp -meabi=5 -mthumb
  */
 
 /************************************************************************************
