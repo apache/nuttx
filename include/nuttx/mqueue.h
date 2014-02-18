@@ -73,7 +73,11 @@ struct msgq_s
   int16_t      nconnect;      /* Number of connections to message queue */
   int16_t      nwaitnotfull;  /* Number tasks waiting for not full */
   int16_t      nwaitnotempty; /* Number tasks waiting for not empty */
+#if CONFIG_MQ_MAXMSGSIZE < 256
   uint8_t      maxmsgsize;    /* Max size of message in message queue */
+#else
+  uint16_t     maxmsgsize;    /* Max size of message in message queue */
+#endif
   bool         unlinked;      /* true if the msg queue has been unlinked */
 #ifndef CONFIG_DISABLE_SIGNALS
   FAR struct mq_des *ntmqdes; /* Notification: Owning mqdes (NULL if none) */
