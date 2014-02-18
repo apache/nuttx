@@ -1110,7 +1110,9 @@ static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
           return;
         }
 
+        spi_modifycr1(priv, 0, SPI_CR1_SPE);
         spi_modifycr1(priv, setbits, clrbits);
+        spi_modifycr1(priv, SPI_CR1_SPE, 0);
 
         /* Save the mode so that subsequent re-configurations will be faster */
 
