@@ -551,7 +551,9 @@ config ARCH_BOARD_SAMD20_XPLAINED
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		The port of NuttX to the Atmel SAMD20-Xplained Pro development board
+		The port of NuttX to the Atmel SAMD20-Xplained Pro development board.
+		This board features the ATSAMD20J18A MCU (Cortex-M0+ with 256KB of FLASH
+		and 32KB of SRAM).
 
 config ARCH_BOARD_SAM3UEK
 	bool "Atmel SAM3U-EK development board"
