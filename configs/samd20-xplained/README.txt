@@ -94,7 +94,7 @@ Modules
                               SPI MISO               SPI MISO
     ----------------- ---------------------- ---------------------- ------------------------------------
     18 SPI_SCK        18 PA07 SERCOM0 PAD[3] 18 PA19 SERCOM1 PAD[3]
-                              SPI SCK                SPI SCK 
+                              SPI SCK                SPI SCK
     ----------------- ---------------------- ---------------------- ------------------------------------
     19 GND            19      GND               GND
     ----------------- ---------------------- ---------------------- ------------------------------------
@@ -207,7 +207,7 @@ Modules
                               SPI MISO               SPI MISO
     ----------------- ---------------------- ---------------------- ------------------------------------
     18 SPI_SCK        18 PA07 SERCOM0 PAD[3] 18 PA19 SERCOM1 PAD[3]
-                              SPI SCK                SPI SCK 
+                              SPI SCK                SPI SCK
     ----------------- ---------------------- ---------------------- ------------------------------------
     19 GND            19      GND               GND
     ----------------- ---------------------- ---------------------- ------------------------------------
@@ -624,19 +624,33 @@ Configurations
      SERCOM4:
 
        System Type -> SAMD Peripheral Support
-         CONFIG_SAMD_SERCOM3=y
+         CONFIG_SAMD_SERCOM3=y           : Enable one or both
          CONFIG_SAMD_SERCOM4=n
 
        Device Drivers -> Serial Driver Support -> Serial Console
-         CONFIG_USART3_SERIAL_CONSOLE=y
+         CONFIG_USART4_SERIAL_CONSOLE=y  : Select only one for the console
+         CONFIG_USART4_SERIAL_CONSOLE=n
 
-       Device Drivers -> Serial Driver Support -> SERCOM4 Configuration
+       Device Drivers -> Serial Driver Support -> SERCOM3 Configuration
          CONFIG_USART3_2STOP=0
          CONFIG_USART3_BAUD=115200
          CONFIG_USART3_BITS=8
          CONFIG_USART3_PARITY=0
          CONFIG_USART3_RXBUFSIZE=256
          CONFIG_USART3_TXBUFSIZE=256
+
+       Device Drivers -> Serial Driver Support -> SERCOM4 Configuration
+         CONFIG_USART4_2STOP=0
+         CONFIG_USART4_BAUD=115200
+         CONFIG_USART4_BITS=8
+         CONFIG_USART4_PARITY=0
+         CONFIG_USART4_RXBUFSIZE=256
+         CONFIG_USART4_TXBUFSIZE=256
+
+       Board Selection -> USART4 Connection
+         CONFIG_SAMD20_XPLAINED_USART4_EXT1=n : Pick on if USART4 used
+         CONFIG_SAMD20_XPLAINED_USART4_EXT2=n
+         CONFIG_SAMD20_XPLAINED_USART4_EXT3=y
 
   3. Unless otherwise stated, the configurations are setup for
      Cygwin under Windows:
@@ -649,7 +663,7 @@ Configurations
      that is easily reconfigured:
 
      System Type -> Toolchain:
-       CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYW=y 
+       CONFIG_ARMV6M_TOOLCHAIN_CODESOURCERYW=y
 
      Any re-configuration should be done before making NuttX or else the
      subsequent 'make' will fail.  If you have already attempted building
@@ -676,7 +690,17 @@ Configuration sub-directories
 
     NOTES:
 
-    1. NOTE: If you get a compilation error like:
+    1. This configuration is set up to build on Windows using the Cygwin
+       environment using the CodeSourcery toolchain.  This can be easily
+       changed as described above under "Configurations."
+
+    2. By default, this configuration provides a serial console on SERCOM4
+       via EXT3.  If you would prefer to use the EDBG serial COM port or
+       would prefer to use SERCOM4 on EXT1 or EXT2, you will need to
+       reconfigure the SERCOM as described under "Configurations".  See
+       also the section entitle "Serial Consoles" above.
+
+    3. NOTE: If you get a compilation error like:
 
          libxx_new.cxx:74:40: error: 'operator new' takes type 'size_t'
                               ('unsigned int') as first parameter [-fper
@@ -686,7 +710,7 @@ Configuration sub-directories
        an 'unsigned long int'.  If this error occurs, then you may need to
        toggle the value of CONFIG_CXX_NEWLONG.
 
-    2. If the I/O1 module is connected to the SAMD20 Xplained Pro, then
+    4. If the I/O1 module is connected to the SAMD20 Xplained Pro, then
        support for the SD card slot can be enabled by making the following
        changes to the configuration:
 
@@ -750,7 +774,7 @@ Configuration sub-directories
          This is a test
          nsh>
 
-    3. If the OLED1 module is connected to the SAMD20 Xplained Pro, then
+    5. If the OLED1 module is connected to the SAMD20 Xplained Pro, then
        support for the OLED display can be enabled by making the following
        changes to the configuration:
 
@@ -825,3 +849,22 @@ Configuration sub-directories
        This is clearly some issue with initializing, un-initializing, and
        then re-initializing. If you want to fix this, patches are quite
        welcome.
+
+    STATUS/ISSUES:
+
+    1. The FLASH waistates is set to 2 (see include/board.h).  According to
+       the data sheet, it should work at 1 but I sometimes see crashes when
+       the waitstates are set to one (about half of the time) (2014-2-18).
+
+    2. Garbage appears on the display sometimes after a reset (maybe 20% of
+       the time) or after a power cycle (less after a power cycle).  I don't
+       understand the cause of of this but most of this can be eliminated by
+       simply holding the the reset button longer and releasing it cleanly
+       (then it fails maybe 5-10% of the time, mabe because of button
+       chatter?) (2014-2-18).
+
+       - The garbage is not random:  It is always the same.
+       - This is not effected by BAUD rate.  Curiously, the same garbage
+         appears at different BAUD settings implying that this may not even
+         be clock related???
+       - The program seems to be running normally, just producing bad output.

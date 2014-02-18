@@ -348,7 +348,11 @@
  *                1             48 MHz
  */
 
-#define BOARD_FLASH_WAITSTATES       1
+#if 0 /* REVISIT -- should not be necessary */
+#  define BOARD_FLASH_WAITSTATES     1
+#else
+#  define BOARD_FLASH_WAITSTATES     2
+#endif
 
 /* SERCOM definitions ***************************************************************/
 /* SERCOM4 is available on connectors EXT1, EXT2, and EXT3

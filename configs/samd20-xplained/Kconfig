@@ -50,6 +50,7 @@ config SAMD20_XPLAINED_OLED1MODULE_EXT2
 
 endchoice
 endif
+endmenu
 
 if USART4_SERIAL_CONSOLE
 choice
@@ -78,6 +79,4 @@ config SAMD20_XPLAINED_USART4_EXT3
 
 endchoice
 endif
-
-endmenu
 endif
