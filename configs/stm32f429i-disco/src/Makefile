@@ -40,40 +40,40 @@ CFLAGS += -I$(TOPDIR)/sched
 ASRCS = 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS = up_boot.c up_spi.c
+CSRCS = stm32_boot.c stm32_spi.c
 
 ifeq ($(CONFIG_HAVE_CXX),y)
-CSRCS += up_cxxinitialize.c
+CSRCS += stm32_cxxinitialize.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += up_autoleds.c
+CSRCS += stm32_autoleds.c
 else
-CSRCS += up_userleds.c
+CSRCS += stm32_userleds.c
 endif
 
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
-CSRCS +=  up_buttons.c
+CSRCS +=  stm32_buttons.c
 endif
 
 ifeq ($(CONFIG_NSH_LIBRARY),y)
-CSRCS += up_nsh.c
+CSRCS += stm32_nsh.c
 endif
 
 ifeq ($(CONFIG_IDLE_CUSTOM),y)
-CSRCS += up_idle.c
+CSRCS += stm32_idle.c
 endif
 
 ifeq ($(CONFIG_STM32_FSMC),y)
-CSRCS += up_extmem.c
+CSRCS += stm32_extmem.c
 endif
 
 ifeq ($(CONFIG_STM32_OTGFS2),y)
-CSRCS += up_usb.c
+CSRCS += stm32_usb.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
-CSRCS += up_ostest.c
+CSRCS += stm32_ostest.c
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

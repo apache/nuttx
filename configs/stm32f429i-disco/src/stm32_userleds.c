@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/stm32f429i-disco/src/up_leds.c
- * arch/arm/src/board/up_leds.c
+ * configs/stm32f429i-disco/src/stm32_userleds.c
  *
  *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +50,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
-#include "stm32f429i-disco-internal.h"
+#include "stm32f429i-disco.h"
 
 #ifndef CONFIG_ARCH_LEDS
 
@@ -223,11 +222,11 @@ void stm32_setleds(uint8_t ledset)
 }
 
 /****************************************************************************
- * Name: up_ledpminitialize
+ * Name: stm32_ledpminitialize
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-void up_ledpminitialize(void)
+void stm32_ledpminitialize(void)
 {
   /* Register to receive power management callbacks */
 

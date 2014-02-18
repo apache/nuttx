@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm32f429i-disco/src/up_cxxinitialize.c
- * arch/arm/src/board/up_cxxinitialize.c
+ * configs/stm32f429i-disco/src/stm32_cxxinitialize.c
  *
  *   Copyright (C) 2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

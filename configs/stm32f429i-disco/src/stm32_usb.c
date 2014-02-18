@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm32f429i-disco/src/up_usbdev.c
- * arch/arm/src/board/up_boot.c
+ * configs/stm32f429i-disco/src/stm32_usbdev.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,7 +53,7 @@
 #include "up_arch.h"
 #include "stm32.h"
 #include "stm32_otgfs.h"
-#include "stm32f429i-disco-internal.h"
+#include "stm32f429i-disco.h"
 
 #ifdef CONFIG_STM32_OTGFS2
 

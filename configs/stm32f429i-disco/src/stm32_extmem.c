@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm32f429i-disco/src/up_extmem.c
- * arch/arm/src/board/up_extmem.c
+ * configs/stm32f429i-disco/src/stm32_extmem.c
  *
  *   Copyright (C) 2013 Ken Pettit. All rights reserved.
  *   Author: Ken Pettit <pettitkd@gmail.com>
@@ -52,7 +51,7 @@
 #include "stm32_fsmc.h"
 #include "stm32_gpio.h"
 #include "stm32.h"
-#include "stm32f429i-disco-internal.h"
+#include "stm32f429i-disco.h"
 
 /************************************************************************************
  * Pre-processor Definitions

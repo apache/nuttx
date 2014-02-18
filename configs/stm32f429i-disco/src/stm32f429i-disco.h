@@ -1,6 +1,5 @@
 /****************************************************************************************************
- * configs/stm32f429i-disco/src/stm32f429i-disco-internal.h
- * arch/arm/src/board/stm32f429i-disco-internal.n
+ * configs/stm32f429i-disco/src/stm32f429i-disco.h
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -34,8 +33,8 @@
  *
  ****************************************************************************************************/
 
-#ifndef __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO_INTERNAL_H
-#define __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO_INTERNAL_H
+#ifndef __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO__H
+#define __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO__H
 
 /****************************************************************************************************
  * Included Files
@@ -192,7 +191,7 @@ void stm32_disablefsmc(void);
 #endif
 
 /****************************************************************************************************
- * Name: up_ledpminitialize
+ * Name: stm32_ledpminitialize
  *
  * Description:
  *   Enable logic to use the LEDs on the STM32F429Discovery to support power management testing
@@ -200,11 +199,11 @@ void stm32_disablefsmc(void);
  ****************************************************************************************************/
 
 #ifdef CONFIG_PM
-void up_ledpminitialize(void);
+void stm32_ledpminitialize(void);
 #endif
 
 /****************************************************************************************************
- * Name: up_pmbuttons
+ * Name: stm32_pmbuttons
  *
  * Description:
  *   Configure the user button of the STM32F429I-DISCO board as EXTI,
@@ -213,7 +212,7 @@ void up_ledpminitialize(void);
  ****************************************************************************************************/
 
 #if defined(CONFIG_PM) && defined(CONFIG_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
-void up_pmbuttons(void);
+void stm32_pmbuttons(void);
 #endif
 
 /****************************************************************************
@@ -236,5 +235,5 @@ int nsh_archinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO_INTERNAL_H */
+#endif /* __CONFIGS_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H */
 
