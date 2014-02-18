@@ -77,13 +77,9 @@
  * configuration settings:
  *
  * CONFIG_KL_TPMx_CHANNEL - Specifies the timer output channel {1,..,4}
- * PWM_TPMx_CHn - One of the values defined in chip/stm32*_pinmap.h.  In the case
+ * PWM_TPMx_CHn - One of the values defined in chip/kl*_pinmap.h.  In the case
  *   where there are multiple pin selections, the correct setting must be provided
  *   in the arch/board/board.h file.
- *
- * NOTE: The STM32 timers are each capable of generating different signals on
- * each of the four channels with different duty cycles.  That capability is
- * not supported by this driver:  Only one output channel per timer.
  */
 
 #ifdef CONFIG_KL_TPM0_PWM
@@ -175,12 +171,10 @@ extern "C" {
  *   Initialize one timer for use with the upper_level PWM driver.
  *
  * Input Parameters:
- *   timer - A number identifying the timer use.  The number of valid timer
- *     IDs varies with the STM32 MCU and MCU family but is somewhere in
- *     the range of {1,..,14}.
+ *   timer - A number identifying the timer use.
  *
  * Returned Value:
- *   On success, a pointer to the STM32 lower half PWM driver is returned.
+ *   On success, a pointer to the KL lower half PWM driver is returned.
  *   NULL is returned on any failure.
  *
  ************************************************************************************/

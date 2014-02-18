@@ -1,5 +1,5 @@
 /****************************************************************************
- *  arch/arm/src/stm32/kl_idle.c
+ *  arch/arm/src/kl/kl_idle.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

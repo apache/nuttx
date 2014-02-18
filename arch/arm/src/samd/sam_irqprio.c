@@ -1,6 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/kl_irqprio.c
- * arch/arm/src/chip/kl_irqprio.c
+ * arch/arm/src/samd/sam_irqprio.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>

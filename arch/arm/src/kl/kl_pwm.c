@@ -693,12 +693,10 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd, unsigned long arg
  *   Initialize one timer for use with the upper_level PWM driver.
  *
  * Input Parameters:
- *   timer - A number identifying the timer use.  The number of valid timer
- *     IDs varies with the STM32 MCU and MCU family but is somewhere in
- *     the range of {1,..,14}.
+ *   timer - A number identifying the timer use.
  *
  * Returned Value:
- *   On success, a pointer to the STM32 lower half PWM driver is returned.
+ *   On success, a pointer to the KL lower half PWM driver is returned.
  *   NULL is returned on any failure.
  *
  ****************************************************************************/
