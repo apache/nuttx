@@ -40,13 +40,13 @@ GNU Toolchain Options
   the CodeSourcery or devkitARM toolchain, you simply need add one of the
   following configuration options to your .config (or defconfig) file:
 
-    CONFIG_LPC17_CODESOURCERYW=y   : CodeSourcery under Windows
-    CONFIG_LPC17_CODESOURCERYL=y   : CodeSourcery under Linux
-    CONFIG_LPC17_DEVKITARM=y       : devkitARM under Windows
-    CONFIG_LPC17_BUILDROOT=y       : NuttX buildroot under Linux or Cygwin (default)
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYW=y   : CodeSourcery under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_CODESOURCERYL=y   : CodeSourcery under Linux
+    CONFIG_ARMV7M_TOOLCHAIN_DEVKITARM=y       : devkitARM under Windows
+    CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT=y       : NuttX buildroot under Linux or Cygwin (default)
 
-  If you are not using CONFIG_LPC17_BUILDROOT, then you may also have to modify
-  the PATH in the setenv.h file if your make cannot find the tools.
+  If you are not using CONFIG_ARMV7M_TOOLCHAIN_BUILDROOT, then you may also
+  have to modify the PATH in the setenv.h file if your make cannot find the tools.
 
   NOTE: the CodeSourcery (for Windows)and devkitARM are Windows native toolchains.
   The CodeSourcey (for Linux) and NuttX buildroot toolchains are Cygwin and/or
@@ -423,11 +423,18 @@ USB Host Configuration
      cd ..
 
   2. Then edit the top-level .config file to enable USB host.  Make the
-     following changes:
+     following changes using 'make menuconfig':
 
-     CONFIG_LPC17_USBHOST=y
-     CONFIG_USBHOST=y
-     CONFIG_SCHED_WORKQUEUE=y
+     System Type -> LPC17xx Peripheral Support
+       CONFIG_LPC17_USBHOST=y        : USB host controller driver support
+
+     Device Drivers -> USB Host Driver Support
+       CONFIG_USBHOST=y              : USB host support
+       CONFIG_USBHOST_ISCO_DISABLE=y : Not needed
+       CONFIG_USBHOST_MSC=y          : Mass storage class support
+
+     Library Routines
+       CONFIG_SCHED_WORKQUEUE=y      : Enable worker thread
 
   When this change is made, NSH should be extended to support USB flash
   devices.  When a FLASH device is inserted, you should see a device
@@ -446,6 +453,7 @@ Configurations
 
   General
   -------
+
   Each mbed configuration is maintained in a sub-directory and can be selected
   as follow:
 
