@@ -84,6 +84,10 @@
 #  define CC3000_DEVMINOR 0
 #endif
 
+#ifndef CONFIG_CC3000_RX_BUFFER_SIZE
+#define CONFIG_CC3000_RX_BUFFER_SIZE 132
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -142,7 +146,7 @@ static struct stm32_config_s g_cc3000_info =
 {
   .dev.spi_frequency    = CONFIG_CC3000_SPI_FREQUENCY,
   .dev.spi_mode         = CONFIG_CC3000_SPI_MODE,
-
+  .dev.max_rx_size      = 0,
   .dev.irq_attach       = wl_attach_irq,
   .dev.irq_enable       = wl_enable_irq,
   .dev.irq_clear        = wl_clear_irq,
@@ -271,7 +275,7 @@ static bool probe(FAR struct cc3000_config_s *state,int n, bool s)
  *
  ****************************************************************************/
 
-int wireless_archinitialize(void)
+int wireless_archinitialize(size_t max_rx_size)
 {
   FAR struct spi_dev_s *spi;
 
@@ -297,7 +301,7 @@ int wireless_archinitialize(void)
     }
 
   /* Initialize and register the SPI CC3000 device */
-
+  g_cc3000_info.dev.max_rx_size = max_rx_size ? max_rx_size : CONFIG_CC3000_RX_BUFFER_SIZE;
   int ret = cc3000_register(spi, &g_cc3000_info.dev, CONFIG_CC3000_DEVMINOR);
   if (ret < 0)
     {
@@ -347,10 +351,12 @@ int wireless_archinitialize(void)
  *
  ****************************************************************************/
 
-void cc3000_wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches, tDriverPatches
+void cc3000_wlan_init(size_t max_tx_len,
+                      tWlanCB sWlanCB,
+                      tFWPatches sFWPatches, tDriverPatches
                       sDriverPatches,  tBootLoaderPatches sBootLoaderPatches)
 {
-  wlan_init(sWlanCB, sFWPatches, sDriverPatches, sBootLoaderPatches);
+  wlan_init(max_tx_len, sWlanCB, sFWPatches, sDriverPatches, sBootLoaderPatches);
 }
 
 #endif /* CONFIG_WL_CC3000 */
