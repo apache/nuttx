@@ -1,6 +1,5 @@
 /************************************************************************************
- * configs/stm32f429i-disco/src/up_spi.c
- * arch/arm/src/board/up_spi.c
+ * configs/stm32f429i-disco/src/stm32_spi.c
  *
  *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -51,7 +50,7 @@
 #include "up_arch.h"
 #include "chip.h"
 #include "stm32.h"
-#include "stm32f429i-disco-internal.h"
+#include "stm32f429i-disco.h"
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3) ||\
 	defined(CONFIG_STM32_SPI4) || defined(CONFIG_STM32_SPI5)

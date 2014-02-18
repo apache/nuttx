@@ -1,7 +1,7 @@
 /****************************************************************************
- * configs/stm32f429i-disco/src/board_buttons.c
+ * configs/stm32f429i-disco/src/stm32_buttons.c
  *
- *   Copyright (C) 2011-2012, 2-14 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2011-2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "stm32f429i-disco-internal.h"
+#include "stm32f429i-disco.h"
 
 #ifdef CONFIG_ARCH_BUTTONS
 

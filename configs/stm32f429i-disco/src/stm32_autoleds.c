@@ -1,6 +1,5 @@
 /****************************************************************************
- * configs/stm32f429i-disco/src/up_autoleds.c
- * arch/arm/src/board/up_autoleds.c
+ * configs/stm32f429i-disco/src/stm32_autoleds.c
  *
  *   Copyright (C) 2011-2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -50,7 +49,7 @@
 #include "up_arch.h"
 #include "up_internal.h"
 #include "stm32.h"
-#include "stm32f429i-disco-internal.h"
+#include "stm32f429i-disco.h"
 
 #ifdef CONFIG_ARCH_LEDS
 

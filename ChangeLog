@@ -6592,3 +6592,6 @@
 	  David Alessio (2014-2-18).
 	* Other misc changes to support FPU on STM32F429 Discovery from
 	  David Alession (2014-2-18)
+	* stm32f429i-disco/src:  Files renamed to make more consistent
+	  with current board file naming conventions (2014-2-18).
+

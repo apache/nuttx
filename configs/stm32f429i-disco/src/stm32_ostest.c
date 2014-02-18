@@ -1,5 +1,5 @@
 /************************************************************************************
- * configs/stm32f429i-disco/src/up_ostest.c
+ * configs/stm32f429i-disco/src/stm32_ostest.c
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -49,7 +49,7 @@
 
 #include "up_arch.h"
 #include "up_internal.h"
-#include "stm32f429i-disco-internal.h"
+#include "stm32f429i-disco.h"
 
 /************************************************************************************
  * Definitions
