@@ -485,8 +485,10 @@ static int stm32_tim_setmode(FAR struct stm32_tim_dev_s *dev, stm32_tim_mode_t m
 static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel,
                                 stm32_tim_channel_t mode)
 {
-  uint16_t ccmr_val = 0;
-  uint16_t ccer_val = stm32_getreg16(dev, STM32_GTIM_CCER_OFFSET);
+  uint16_t ccmr_orig   = 0;
+  uint16_t ccmr_val    = 0;
+  uint16_t ccmr_mask   = 0xff;
+  uint16_t ccer_val    = stm32_getreg16(dev, STM32_GTIM_CCER_OFFSET);
   uint8_t  ccmr_offset = STM32_GTIM_CCMR1_OFFSET;
 
   ASSERT(dev);
@@ -543,7 +545,8 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
 
   if (channel & 1)
     {
-      ccmr_val <<= 8;
+      ccmr_val  <<= 8;
+      ccmr_mask <<= 8;
     }
 
   if (channel > 1)
@@ -551,7 +554,10 @@ static int stm32_tim_setchannel(FAR struct stm32_tim_dev_s *dev, uint8_t channel
       ccmr_offset = STM32_GTIM_CCMR2_OFFSET;
     }
 
-  stm32_putreg16(dev, ccmr_offset, ccmr_val);
+  ccmr_orig  = stm32_getreg16(dev, ccmr_offset);
+  ccmr_orig &= ~ccmr_mask;
+  ccmr_orig |= ccmr_val;
+  stm32_putreg16(dev, ccmr_offset, ccmr_orig);
   stm32_putreg16(dev, STM32_GTIM_CCER_OFFSET, ccer_val);
 
   /* set GPIO */
