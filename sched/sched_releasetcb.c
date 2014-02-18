@@ -198,4 +198,3 @@ int sched_releasetcb(FAR struct tcb_s *tcb, uint8_t ttype)
 
   return ret;
 }
-

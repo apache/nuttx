@@ -6586,4 +6586,6 @@
 	  connecting to a server (2014-2-15).
 	* The basic SAMD20 Xplained Pro port is complete but still untested
 	  (2014-2-16).
+	* sched/task_terminate.c:  Always returns an error because the
+	  return value was not being set correctly.  From Gosha (2014-2-18).
 

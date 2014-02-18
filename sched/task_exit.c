@@ -1,7 +1,7 @@
 /****************************************************************************
  * sched/task_exit.c
  *
- *   Copyright (C) 2008-2009, 2012-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2008-2009, 2012-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -105,6 +105,7 @@ int task_exit(void)
 {
   FAR struct tcb_s *dtcb = (FAR struct tcb_s*)g_readytorun.head;
   FAR struct tcb_s *rtcb;
+  int ret;
 
   /* Remove the TCB of the current task from the ready-to-run list.  A context
    * switch will definitely be necessary -- that must be done by the
@@ -136,7 +137,7 @@ int task_exit(void)
    */
 
   sched_addblocked(dtcb, TSTATE_TASK_INACTIVE);
-  task_terminate(dtcb->pid, true);
+  ret = task_terminate(dtcb->pid, true);
   rtcb->task_state = TSTATE_TASK_RUNNING;
 
   /* If there are any pending tasks, then add them to the ready-to-run
@@ -157,5 +158,5 @@ int task_exit(void)
    */
 
   rtcb->lockcount--;
-  return OK;
+  return ret;
 }
