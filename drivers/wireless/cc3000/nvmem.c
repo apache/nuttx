@@ -113,7 +113,7 @@ signed long nvmem_read(unsigned long ulFileId, unsigned long ulLength,
    * big enough to store also parameters of nvmem
    */
 
-  SimpleLinkWaitData(buff, 0, 0);
+  SimpleLinkWaitData(buff, 0, &ucStatus);
 
   cc3000_lib_unlock();
 

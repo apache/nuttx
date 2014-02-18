@@ -149,7 +149,10 @@ int HostFlowControlConsumeBuff(int sd)
        * the buffers
        */
 
-      usleep(100000);
+      if (0 == tSLInformation.usNumberOfFreeBuffers)
+        {
+          usleep(100000);
+        }
     }
   while (0 == tSLInformation.usNumberOfFreeBuffers);
 

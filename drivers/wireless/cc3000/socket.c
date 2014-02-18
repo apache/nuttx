@@ -61,6 +61,8 @@
 #  define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 #endif
 
+#define waitlldbg(x,...) // lldbg
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -187,11 +189,14 @@ int cc3000_closesocket(int sockfd)
 {
   int ret;
 
-  cc3000_lib_lock();
-  ret = cc3000_closesocket_impl(sockfd);
 #ifdef CONFIG_CC3000_MT
+  waitlldbg("remove\n");
   cc3000_remove_socket(sockfd);
 #endif
+  cc3000_lib_lock();
+  waitlldbg("Call closesocketl\n");
+  ret = cc3000_closesocket_impl(sockfd);
+  waitlldbg("return closesocket\n");
   cc3000_lib_unlock();
   return ret;
 }
@@ -587,7 +592,9 @@ ssize_t cc3000_recv(int sockfd, FAR void *buf, size_t len, int flags)
   ssize_t ret;
 
 #ifdef CONFIG_CC3000_MT
+  waitlldbg("wait\n");
   ret = cc3000_wait_data(sockfd);
+  waitlldbg("wait %d\n", ret);
   if (ret != OK )
     {
       return -1;
@@ -595,7 +602,9 @@ ssize_t cc3000_recv(int sockfd, FAR void *buf, size_t len, int flags)
 #endif
 
   cc3000_lib_lock();
+  waitlldbg("recv\n");
   ret = cc3000_recv_impl(sockfd, buf, len, flags);
+  waitlldbg("recv %d\n", ret);
   cc3000_lib_unlock();
   return ret;
 }

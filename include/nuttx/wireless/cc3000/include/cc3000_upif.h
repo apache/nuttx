@@ -109,15 +109,16 @@ struct cc3000_config_s
 {
   /* Device characterization */
 
-  uint32_t spi_frequency;  /* SPI frequency */
-  uint32_t spi_mode;     /* SPI mode */
+  uint32_t spi_frequency; /* SPI frequency */
+  uint32_t spi_mode;      /* SPI mode */
+  size_t   max_rx_size;   /* Size allocated by driver for rx buffer */
 
   /* If multiple CC3000 devices are supported, then an IRQ number must
    * be provided for each so that their interrupts can be distinguished.
    */
 
 #ifndef CONFIG_CC3000_MULTIPLE
-  int      irq;        /* IRQ number received by interrupt handler. */
+  int      irq;           /* IRQ number received by interrupt handler. */
 #endif
 
   /* IRQ/GPIO access callbacks.  These operations all hidden behind

@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers//wireless/cc3000.h
  *
- *   Copyright (C) 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David Sidrane <david_s5@nscdg.com>
  *
@@ -97,7 +97,7 @@ extern pthread_mutex_t g_cc3000_mut;
 
 typedef struct cc3000_socket_ent
 {
-  int sd;
+  volatile int sd;
   long status;
   sem_t semwait;
 } cc3000_socket_ent;
@@ -142,11 +142,8 @@ struct cc3000_dev_s
   FAR struct spi_dev_s *spi;            /* Saved SPI driver instance */
   mqd_t queue;                          /* For unsolicited data delivery */
   eDeviceStates state;                  /* The device state */
-  uint8_t rx_buffer[CC3000_RX_BUFFER_SIZE];
-  ssize_t rx_buffer_len;
-
-  uint8_t tx_buffer[CC3000_TX_BUFFER_SIZE];
-  ssize_t tx_buffer_len;
+  cc3000_buffer_desc rx_buffer;
+  ssize_t rx_buffer_max_len;
 
   /* The following is a list if socket structures of threads waiting
    * long operations to finish;

@@ -110,7 +110,8 @@ extern "C" {
  *
  *****************************************************************************/
 
-void wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches,
+void wlan_init(size_t max_tx_len,
+               tWlanCB sWlanCB, tFWPatches sFWPatches,
                tDriverPatches sDriverPatches,
                tBootLoaderPatches sBootLoaderPatches);
 

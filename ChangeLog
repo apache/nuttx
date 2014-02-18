@@ -6594,4 +6594,13 @@
 	  David Alession (2014-2-18)
 	* stm32f429i-disco/src:  Files renamed to make more consistent
 	  with current board file naming conventions (2014-2-18).
+	* stm32 SPI: Disable SPI before changing CR1 register.  From David
+	  Sidrane (2014-2-18).
+	* stm32 TIM: Set CCMR when selecting timer channerl.  From David
+	  Sidrane (2014-2-18).
+	* configs/spark: Board configuration updated by David Sidrane
+	  (2014-2-19).
+	* libc/stdio/lib_sscanf.c:  Bug fixes from David Sidrane (2014-2-18).
+	* nuttx/drivers/wireless/cc3000 and nuttx/include/nuttx/wireless/cc3000:
+	  Numerous updates to the CC3000 driver from David Sidrane (2014-2-18).
 

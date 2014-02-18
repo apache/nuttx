@@ -519,6 +519,11 @@ uint8_t *hci_event_handler(void *pRetParams, uint8_t *from, uint8_t *fromlen)
               memcpy(pRetParams, pucReceivedParams + HCI_DATA_HEADER_SIZE + ucArgsize,
                      usLength - ucArgsize);
 
+              if (fromlen)
+                {
+                  *fromlen =  usLength - ucArgsize;
+                }
+
               tSLInformation.usRxDataPending = 0;
             }
 

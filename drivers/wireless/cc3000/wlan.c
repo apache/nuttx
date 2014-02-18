@@ -60,6 +60,11 @@
 #define SMART_CONFIG_PROFILE_SIZE        67   /* 67 = 32 (max ssid) + 32 (max key) +
                                                * 1 (SSID length) + 1 (security type) +
                                                * 1 (key length) */
+
+/* SOCKET_SELECT_PARAMS_LEN + SPI_HEADER_SIZE++SIMPLE_LINK_HCI_DATA_HEADER_SIZ */
+
+#define MAX_HCI_CMD_LENGTH              (44+SIMPLE_LINK_HCI_DATA_HEADER_SIZE+SPI_HEADER_SIZE)
+
 /* Patches type */
 
 #define PATCHES_HOST_TYPE_WLAN_DRIVER    0x01
@@ -96,8 +101,6 @@
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
-
-static uint8_t wlan_tx_buffer[CC3000_TX_BUFFER_SIZE];
 
 /*****************************************************************************
  * Public Data
@@ -187,7 +190,9 @@ static void SimpleLink_Init_Start(uint16_t usPatchesAvailableAtHost)
  *
  *****************************************************************************/
 
-void wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches,
+void wlan_init(size_t max_tx_len,
+               tWlanCB sWlanCB,
+               tFWPatches sFWPatches,
                tDriverPatches sDriverPatches,
                tBootLoaderPatches sBootLoaderPatches)
 {
@@ -195,6 +200,13 @@ void wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches,
   tSLInformation.sFWPatches = sFWPatches;
   tSLInformation.sDriverPatches = sDriverPatches;
   tSLInformation.sBootLoaderPatches = sBootLoaderPatches;
+
+  /* Allocate the memory for the RX/TX data transactions */
+
+  tSLInformation.pucTxCommandBuffer = malloc(max_tx_len);
+  tSLInformation.usrBuffer.pbuffer = &tSLInformation.pucTxCommandBuffer[MAX_HCI_CMD_LENGTH];
+  tSLInformation.usrBuffer.len = max_tx_len - MAX_HCI_CMD_LENGTH;
+
 
   /* Init I/O callback */
   /* Init asynchronous events callback */
@@ -276,10 +288,6 @@ void wlan_start(uint16_t usPatchesAvailableAtHost)
   tSLInformation.usEventOrDataReceived = 0;
   tSLInformation.pucReceivedData = 0;
 
-  /* Allocate the memory for the RX/TX data transactions */
-
-  tSLInformation.pucTxCommandBuffer = (uint8_t *)wlan_tx_buffer;
-
   /* Init spi */
 
   cc3000_open(SpiReceiveHandler);
@@ -291,6 +299,22 @@ void wlan_start(uint16_t usPatchesAvailableAtHost)
   hci_command_send(HCI_CMND_READ_BUFFER_SIZE, tSLInformation.pucTxCommandBuffer, 0);
   SimpleLinkWaitEvent(HCI_CMND_READ_BUFFER_SIZE, 0);
   cc3000_lib_unlock();
+}
+
+/*****************************************************************************
+ * Name: wlan_get_buffer
+ *
+ * Input Parameters:
+ *   pdes - Location to return the buffer pointer.
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+void wlan_get_buffer(wlan_buffer_desc *pdes)
+{
+  *pdes = tSLInformation.usrBuffer;
 }
 
 /*****************************************************************************

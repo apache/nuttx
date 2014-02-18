@@ -143,9 +143,9 @@
  */
   
 #ifndef CC3000_TINY_DRIVER
-#  define CC3000_RX_BUFFER_SIZE   (CC3000_MINIMAL_RX_SIZE)
-#  define CC3000_TX_BUFFER_SIZE   (CC3000_MINIMAL_TX_SIZE)
-  
+#  define CC3000_RX_BUFFER_SIZE   (CC3000_MAXIMAL_RX_SIZE)
+#  define CC3000_TX_BUFFER_SIZE   (CC3000_MAXIMAL_TX_SIZE)
+
 /* if defined TINY DRIVER we use smaller RX and TX buffer in order to minimize
  * RAM consumption
  */
@@ -203,6 +203,12 @@
  * Public Types
  *****************************************************************************/
 
+typedef struct wlan_buffer_desc_s
+{
+  uint8_t *pbuffer;
+  ssize_t len;
+} wlan_buffer_desc;
+
 typedef char *(*tFWPatches)(unsigned long *usLength);
 
 typedef char *(*tDriverPatches)(unsigned long *usLength);
@@ -225,6 +231,7 @@ typedef struct
   uint16_t              usEventOrDataReceived;
   uint8_t              *pucReceivedData;
   uint8_t              *pucTxCommandBuffer;
+  wlan_buffer_desc      usrBuffer;
 
   tFWPatches            sFWPatches;
   tDriverPatches        sDriverPatches;
@@ -257,6 +264,19 @@ extern volatile sSimplLinkInformation tSLInformation;
 /*****************************************************************************
  * Public Function Prototypes
  *****************************************************************************/
+
+/*****************************************************************************
+ * Name: wlan_get_buffer
+ *
+ * Input Parameters:
+ *   pdes - Location to return the buffer pointer.
+ *
+ * Returned Value:
+ *   None
+ *
+ *****************************************************************************/
+
+void wlan_get_buffer(wlan_buffer_desc *pdes);
 
 /*****************************************************************************
  * Name: SimpleLinkWaitEvent

@@ -288,8 +288,8 @@ int connect(int sockfd, FAR const struct sockaddr *addr, socklen_t addrlen);
  *
  *****************************************************************************/
 
-int select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds,
-           struct timeval *timeout);
+int cc3000_select(int nfds, fd_set *readfds, fd_set *writefds,fd_set *exceptfds,
+                  struct timeval *timeout);
 
 #ifndef CC3000_TINY_DRIVER
 /*****************************************************************************

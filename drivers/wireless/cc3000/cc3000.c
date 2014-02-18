@@ -1,7 +1,7 @@
 /****************************************************************************
  * drivers/wireless/cc3000.c
  *
- *   Copyright (C) 2011-2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Authors: Gregory Nutt <gnutt@nuttx.org>
  *            David_s5 <david_s5@nscdg.com>
  *
@@ -80,10 +80,12 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#if CC3000_RX_BUFFER_SIZE > CONFIG_MQ_MAXMSGSIZE
-#error "CONFIG_MQ_MAXMSGSIZE needs to be >= CC3000_RX_BUFFER_SIZE"
+#ifndef CCASSERT
+#define CCASSERT(predicate) _x_CCASSERT_LINE(predicate, __LINE__)
+#define _x_CCASSERT_LINE(predicate, line) typedef char constraint_violated_on_line_##line[2*((predicate)!=0)-1];
 #endif
+
+CCASSERT(sizeof(cc3000_buffer_desc) <= CONFIG_MQ_MAXMSGSIZE);
 
 #ifndef CONFIG_CC3000_WORKER_THREAD_PRIORITY
 #  define CONFIG_CC3000_WORKER_THREAD_PRIORITY (SCHED_PRIORITY_MAX)
@@ -94,7 +96,7 @@
 #endif
 
 #ifndef CONFIG_CC3000_SELECT_THREAD_PRIORITY
-#  define CONFIG_CC3000_SELECT_THREAD_PRIORITY (SCHED_PRIORITY_DEFAULT+10)
+#  define CONFIG_CC3000_SELECT_THREAD_PRIORITY (SCHED_PRIORITY_DEFAULT-1)
 #endif
 
 #ifndef CONFIG_CC3000_SELECT_STACKSIZE
@@ -107,6 +109,7 @@
 #define NUMBER_OF_MSGS 1
 
 #define FREE_SLOT -1
+#define CLOSE_SLOT -2
 
 #if defined(CONFIG_CC3000_PROBES)
 #  define CC3000_GUARD (0xc35aa53c)
@@ -118,6 +121,8 @@
 #  define CHECK_GUARD(p)
 #  define PROBE(pin,state)
 #endif
+
+#define waitlldbg(x,...)
 
 /****************************************************************************
  * Private Types
@@ -265,7 +270,7 @@ static void usdelay(long ustimeout)
 
 static inline void cc3000_configspi(FAR struct spi_dev_s *spi)
 {
-  idbg("Mode: %d Bits: 8 Frequency: %d\n",
+  ndbg("Mode: %d Bits: 8 Frequency: %d\n",
        CONFIG_CC3000_SPIMODE, CONFIG_CC3000_SPI_FREQUENCY);
 
   SPI_SETMODE(spi, CONFIG_CC3000_SPIMODE);
@@ -498,7 +503,7 @@ static void * select_thread_func(FAR void *arg)
 
   memset(&timeout, 0, sizeof(struct timeval));
   timeout.tv_sec  = 0;
-  timeout.tv_usec = (100);  /* .1 msecs */
+  timeout.tv_usec = (500000);  /* 500 msecs */
 
   while (1)
     {
@@ -518,6 +523,27 @@ static void * select_thread_func(FAR void *arg)
         {
           if (priv->sockets[s].sd != FREE_SLOT)
             {
+              if (priv->sockets[s].sd == CLOSE_SLOT)
+                {
+                  priv->sockets[s].sd = FREE_SLOT;
+                  waitlldbg("Close\n");
+                  int count;
+                  do
+                    {
+                      sem_getvalue(&priv->sockets[s].semwait, &count);
+                      if (count < 0)
+                        {
+                          /* Release the waiting threads */
+
+                          waitlldbg("Closed Signaled %d\n",count);
+                          sem_post(&priv->sockets[s].semwait);
+                        }
+                    }
+                  while (count < 0);
+
+                  continue;
+                }
+
               CC3000_FD_SET(priv->sockets[s].sd, &readsds);
               if (maxFD <= priv->sockets[s].sd)
                 {
@@ -542,10 +568,12 @@ static void * select_thread_func(FAR void *arg)
         {
           for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
             {
-              if (priv->sockets[s].sd != FREE_SLOT &&                        /* Check that the socket is valid */
-                  priv->sockets[s].sd  != priv->accepting_socket.acc.sd  &&  /* Verify this is not an accept socket */
-                  CC3000_FD_ISSET(priv->sockets[s].sd, &readsds))            /* and has pending data */
+              if ((priv->sockets[s].sd != FREE_SLOT ||
+                   priv->sockets[s].sd != CLOSE_SLOT) &&                      /* Check that the socket is valid */
+                   priv->sockets[s].sd  != priv->accepting_socket.acc.sd  &&  /* Verify this is not an accept socket */
+                   CC3000_FD_ISSET(priv->sockets[s].sd, &readsds))            /* and has pending data */
                 {
+                  waitlldbg("Signaled %d\n",priv->sockets[s].sd);
                   sem_post(&priv->sockets[s].semwait);                       /* release the waiting thread */
                 }
             }
@@ -553,9 +581,16 @@ static void * select_thread_func(FAR void *arg)
 
       if (priv->accepting_socket.acc.sd != FREE_SLOT)                        /* If accept polling in needed */
         {
-          ret = cc3000_do_accept(priv->accepting_socket.acc.sd,              /* Send the select command on non blocking */
-                                &priv->accepting_socket.addr,                /* Set up in ioctl */
-                                &priv->accepting_socket.addrlen);
+          if (priv->accepting_socket.acc.sd == CLOSE_SLOT)
+            {
+              ret = CC3000_SOC_ERROR;
+            }
+            else
+            {
+              ret = cc3000_do_accept(priv->accepting_socket.acc.sd,              /* Send the select command on non blocking */
+                                     &priv->accepting_socket.addr,               /* Set up in ioctl */
+                                     &priv->accepting_socket.addrlen);
+            }
 
           if (ret != CC3000_SOC_IN_PROGRESS)                                 /* Not waiting => error or accepted */
             {
@@ -607,12 +642,14 @@ static void * cc3000_worker(FAR void *arg)
             {
             case eSPI_STATE_POWERUP:
               /* Signal the device has interrupted after power up */
+
               priv->state = eSPI_STATE_INITIALIZED;
               sem_post(&priv->readysem);
               break;
 
             case eSPI_STATE_WRITE_WAIT_IRQ:
               /* Signal the device has interrupted after Chip Select During a write operation */
+
               priv->state = eSPI_STATE_WRITE_PROCEED;
               sem_post(&priv->readysem);
               break;
@@ -627,11 +664,11 @@ static void * cc3000_worker(FAR void *arg)
 
                 cc3000_lock_and_select(priv->spi); /* Assert CS */
                 priv->state = eSPI_STATE_READ_PROCEED;
-                SPI_EXCHANGE(priv->spi,spi_readCommand,priv->rx_buffer, ARRAY_SIZE(spi_readCommand));
+                SPI_EXCHANGE(priv->spi,spi_readCommand,priv->rx_buffer.pbuffer, ARRAY_SIZE(spi_readCommand));
 
                /* Extract Length bytes from Rx Buffer */
 
-               uint16_t *pnetlen = (uint16_t *) &priv->rx_buffer[READ_OFFSET_TO_LENGTH];
+               uint16_t *pnetlen = (uint16_t *) &priv->rx_buffer.pbuffer[READ_OFFSET_TO_LENGTH];
                data_to_recv = ntohs(*pnetlen);
 
                if (data_to_recv)
@@ -649,8 +686,11 @@ static void * cc3000_worker(FAR void *arg)
                      * Will it fit?
                      */
 
-                    DEBUGASSERT(data_to_recv < ARRAY_SIZE(priv->rx_buffer));
-                    SPI_RECVBLOCK(priv->spi, priv->rx_buffer, data_to_recv);
+                    if (data_to_recv >= priv->rx_buffer_max_len){
+                        lowsyslog("data_to_recv %d",data_to_recv);
+                    }
+                    DEBUGASSERT(data_to_recv < priv->rx_buffer_max_len);
+                    SPI_RECVBLOCK(priv->spi, priv->rx_buffer.pbuffer, data_to_recv);
                   }
 
                 cc3000_deselect_and_unlock(priv->spi); /* De assert CS */
@@ -662,9 +702,9 @@ static void * cc3000_worker(FAR void *arg)
                     int count;
 
                     priv->state = eSPI_STATE_READ_READY;
-                    priv->rx_buffer_len = data_to_recv;
+                    priv->rx_buffer.len = data_to_recv;
 
-                    ret = mq_send(priv->queue, priv->rx_buffer, data_to_recv, 1);
+                    ret = mq_send(priv->queue, &priv->rx_buffer, sizeof(priv->rx_buffer), 1);
                     DEBUGASSERT(ret>=0);
 
                     /* Notify any waiters that new CC3000 data is available */
@@ -793,7 +833,7 @@ static int cc3000_open(FAR struct file *filep)
       priv->config->power_enable(priv->config, false);
 
       attr.mq_maxmsg  = NUMBER_OF_MSGS;
-      attr.mq_msgsize = CC3000_RX_BUFFER_SIZE;
+      attr.mq_msgsize = sizeof(cc3000_buffer_desc);
       attr.mq_flags   = 0;
 
       /* Set the flags for the open of the queue.
@@ -844,6 +884,17 @@ static int cc3000_open(FAR struct file *filep)
           pthread_cancel(workertid);
           mq_close(priv->queue);
           priv->queue = 0;
+          ret = -errno;
+          goto errout_with_sem;
+        }
+
+      /* Do late allocation with hopes of realloc not fragmenting */
+
+      priv->rx_buffer.pbuffer =  kmalloc(priv->rx_buffer_max_len);
+      DEBUGASSERT(priv->rx_buffer.pbuffer);
+      if (!priv->rx_buffer.pbuffer)
+        {
+          priv->crefs--;
           ret = -errno;
           goto errout_with_sem;
         }
@@ -927,6 +978,10 @@ static int cc3000_close(FAR struct file *filep)
 
       mq_close(priv->queue);
       priv->queue = 0;
+
+      kfree(priv->rx_buffer.pbuffer);
+      priv->rx_buffer.pbuffer = 0;
+
     }
 
   cc3000_devgive(priv);
@@ -953,17 +1008,6 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   CHECK_GUARD(priv);
 
-  /* Verify that the caller has provided a buffer large enough to receive
-   * the maximum data.
-   */
-
-  if (len < CC3000_RX_BUFFER_SIZE)
-    {
-      idbg("Unsupported read size: %d\n", len);
-      nread = -ENOSYS;
-      goto errout_without_sem;
-    }
-
   /* Get exclusive access to the driver data structure */
 
   ret = cc3000_devtake(priv);
@@ -974,7 +1018,19 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
       goto errout_without_sem;
     }
 
-  for (nread = priv->rx_buffer_len; nread == 0; nread = priv->rx_buffer_len)
+  /* Verify that the caller has provided a buffer large enough to receive
+   * the maximum data.
+   */
+
+  if (len < priv->rx_buffer_max_len)
+    {
+      ndbg("Unsupported read size: %d\n", len);
+      nread = -ENOSYS;
+      goto errout_with_sem;
+    }
+
+
+  for (nread = priv->rx_buffer.len; nread == 0; nread = priv->rx_buffer.len)
     {
       if (nread > 0)
         {
@@ -1055,10 +1111,11 @@ static ssize_t cc3000_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   if (nread > 0)
     {
-      memcpy(buffer,priv->rx_buffer,priv->rx_buffer_len);
-      priv->rx_buffer_len = 0;
+      memcpy(buffer,priv->rx_buffer.pbuffer,priv->rx_buffer.len);
+      priv->rx_buffer.len = 0;
      }
 
+errout_with_sem:
   cc3000_devgive(priv);
 
 errout_without_sem:
@@ -1082,12 +1139,13 @@ errout_without_sem:
  *
  ****************************************************************************/
 
-static ssize_t cc3000_write(FAR struct file *filep, FAR const char *buffer, size_t len)
+static ssize_t cc3000_write(FAR struct file *filep, FAR const char *usrbuffer, size_t len)
 {
   FAR struct inode *inode;
   FAR struct cc3000_dev_s *priv;
-  int ret;
+  FAR char *buffer = (FAR char *) usrbuffer;
   ssize_t nwritten = 0;
+  int ret;
 
   /* Set the padding if count(buffer) is even ( as it will be come odd with header) */
 
@@ -1110,20 +1168,18 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *buffer, size
     {
       /* This should only happen if the wait was canceled by an signal */
 
-      idbg("sem_wait: %d\n", errno);
+      ndbg("sem_wait: %d\n", errno);
       nwritten = -errno;
       goto errout_without_sem;
     }
 
   /* Figure out the total length of the packet in order to figure out if there is padding or not */
 
-  priv->tx_buffer[0] = WRITE;
-  priv->tx_buffer[1] = HI(tx_len);
-  priv->tx_buffer[2] = LO(tx_len);
-  priv->tx_buffer[3] = 0;
-  priv->tx_buffer[4] = 0;
-  memcpy(&priv->tx_buffer[SPI_HEADER_SIZE],&buffer[SPI_HEADER_SIZE],tx_len);
-
+  buffer[0] = WRITE;
+  buffer[1] = HI(tx_len);
+  buffer[2] = LO(tx_len);
+  buffer[3] = 0;
+  buffer[4] = 0;
   tx_len += SPI_HEADER_SIZE;
 
   /* The first write transaction to occur after release of the shutdown has
@@ -1162,9 +1218,9 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *buffer, size
     {
       cc3000_lock_and_select(priv->spi); /* Assert CS */
       usdelay(55);
-      SPI_SNDBLOCK(priv->spi, priv->tx_buffer, 4);
+      SPI_SNDBLOCK(priv->spi, buffer, 4);
       usdelay(55);
-      SPI_SNDBLOCK(priv->spi, priv->tx_buffer+4, tx_len-4);
+      SPI_SNDBLOCK(priv->spi, buffer+4, tx_len-4);
     }
   else
     {
@@ -1185,7 +1241,7 @@ static ssize_t cc3000_write(FAR struct file *filep, FAR const char *buffer, size
           goto errout_without_sem;
         }
 
-      SPI_SNDBLOCK(priv->spi, priv->tx_buffer, tx_len);
+      SPI_SNDBLOCK(priv->spi, buffer, tx_len);
     }
 
   priv->state  = eSPI_STATE_WRITE_DONE;
@@ -1270,6 +1326,23 @@ static int cc3000_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR cc3000_acceptcfg *pcfg = (FAR cc3000_acceptcfg *)(arg);
           DEBUGASSERT(pcfg != NULL);
           pcfg->sockfd = cc3000_accept_socket(priv, pcfg->sockfd, pcfg->addr, pcfg->addrlen);
+          break;
+        }
+
+      case CC3000IOC_SETRX_SIZE:
+        {
+          irqstate_t flags;
+          FAR int *psize = (FAR int *)(arg);
+          int rv;
+
+          DEBUGASSERT(psize != NULL);
+          rv = priv->rx_buffer_max_len;
+          flags = irqsave();
+          priv->rx_buffer_max_len = *psize;
+          priv->rx_buffer.pbuffer = krealloc(priv->rx_buffer.pbuffer,*psize);
+          irqrestore(flags);
+          DEBUGASSERT(priv->rx_buffer.pbuffer);
+          *psize = rv;
           break;
         }
 
@@ -1427,7 +1500,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   priv = (FAR struct cc3000_dev_s *)kmalloc(sizeof(struct cc3000_dev_s));
   if (!priv)
     {
-      idbg("kmalloc(%d) failed\n", sizeof(struct cc3000_dev_s));
+      ndbg("kmalloc(%d) failed\n", sizeof(struct cc3000_dev_s));
       return -ENOMEM;
     }
 #endif
@@ -1439,6 +1512,8 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   priv->minor  = minor;              /* Save the minor number */
   priv->spi    = spi;                /* Save the SPI device handle */
   priv->config = config;             /* Save the board configuration */
+
+  priv->rx_buffer_max_len = config->max_rx_size;
 
   sem_init(&priv->devsem,  0, 1);    /* Initialize device structure semaphore */
   sem_init(&priv->waitsem, 0, 0);    /* Initialize  event wait semaphore */
@@ -1469,7 +1544,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   ret = config->irq_attach(config, cc3000_interrupt);
   if (ret < 0)
     {
-      idbg("Failed to attach interrupt\n");
+      ndbg("Failed to attach interrupt\n");
       goto errout_with_priv;
     }
 
@@ -1481,7 +1556,7 @@ int cc3000_register(FAR struct spi_dev_s *spi,
   ret = register_driver(drvname, &cc3000_fops, 0666, priv);
   if (ret < 0)
     {
-      idbg("register_driver() failed: %d\n", ret);
+      ndbg("register_driver() failed: %d\n", ret);
       goto errout_with_priv;
     }
 
@@ -1555,7 +1630,7 @@ static int cc3000_wait_data(FAR struct cc3000_dev_s *priv, int sockfd)
           sem_wait(&priv->selectsem);           /* Sleep select thread */
           cc3000_devtake(priv);
           sched_unlock();
-          break;
+          return priv->sockets[s].sd == sockfd ? OK : -1;
         }
     }
 
@@ -1663,28 +1738,41 @@ static int cc3000_remove_socket(FAR struct cc3000_dev_s *priv, int sd)
 {
   irqstate_t flags;
   int s;
+  sem_t *ps = 0;
 
   if (sd < 0)
     {
       return sd;
     }
 
- flags = irqsave();
- if (priv->accepting_socket.acc.sd == sd)
-   {
-     priv->accepting_socket.acc.sd = FREE_SLOT;
-     priv->accepting_socket.addrlen = 0;
-   }
+  flags = irqsave();
+  if (priv->accepting_socket.acc.sd == sd)
+    {
+      priv->accepting_socket.acc.sd = CLOSE_SLOT;
+      ps = &priv->accepting_socket.acc.semwait;
+    }
 
   for (s = 0; s < CONFIG_WL_MAX_SOCKETS; s++)
     {
       if (priv->sockets[s].sd == sd)
         {
-          priv->sockets[s].sd = FREE_SLOT;
+          priv->sockets[s].sd = CLOSE_SLOT;
+          ps = &priv->sockets[s].semwait;
           break;
         }
     }
 
   irqrestore(flags);
+  if (ps)
+    {
+      sched_lock();
+      cc3000_devgive(priv);
+      sem_post(&priv->selectsem);                    /* Wake select thread if need be */
+      sem_wait(ps);
+      sem_wait(&priv->selectsem);                    /* Sleep the Thread */
+      cc3000_devtake(priv);
+      sched_unlock();
+    }
+
   return s >= CONFIG_WL_MAX_SOCKETS ? -1 : OK;
 }

@@ -49,6 +49,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
 #include <nuttx/wireless/wireless.h>
 
 /****************************************************************************
@@ -71,6 +72,7 @@
 #define CC3000IOC_REMOVESOCKET _WLIOC_USER(0x0003) /* arg: Address of int for result*/
 #define CC3000IOC_SELECTDATA   _WLIOC_USER(0x0004) /* arg: Address of int for result*/
 #define CC3000IOC_SELECTACCEPT _WLIOC_USER(0x0005) /* arg: Address of struct cc3000_acceptcfg_s */
+#define CC3000IOC_SETRX_SIZE   _WLIOC_USER(0x0006) /* arg: Address of int for new size */
 
 /****************************************************************************
  * Public Types
@@ -80,6 +82,12 @@ typedef char *(*tFWPatches)(unsigned long *usLength);
 typedef char *(*tDriverPatches)(unsigned long *usLength);
 typedef char *(*tBootLoaderPatches)(unsigned long *usLength);
 typedef void (*tWlanCB)(long event_type, char * data, unsigned char length);
+
+typedef struct cc3000_buffer_desc_s
+{
+  uint8_t *pbuffer;
+  ssize_t len;
+} cc3000_buffer_desc;
 
 typedef struct cc3000_acceptcfg_s
 {
@@ -139,11 +147,14 @@ extern "C"
  *
  *****************************************************************************/
 
-void wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches,
+void wlan_init(size_t max_tx_len,
+               tWlanCB sWlanCB, tFWPatches sFWPatches,
                tDriverPatches sDriverPatches,
                tBootLoaderPatches sBootLoaderPatches);
 
-void cc3000_wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches,
+void cc3000_wlan_init(size_t max_tx_len,
+                      tWlanCB sWlanCB,
+                      tFWPatches sFWPatches,
                       tDriverPatches sDriverPatches,
                       tBootLoaderPatches sBootLoaderPatches);
 
@@ -155,7 +166,7 @@ void cc3000_wlan_init(tWlanCB sWlanCB, tFWPatches sFWPatches,
  *
  ************************************************************************************/
 
-int wireless_archinitialize(void);
+int wireless_archinitialize(size_t max_rx_size);
 
 #undef EXTERN
 #ifdef __cplusplus
