@@ -124,7 +124,7 @@ sam_gclk_configure(const struct sam_usart_config_s * const config)
   glckcore = (uint8_t)SERCOM_GCLK_ID_CORE(config->sercom);
   regval   = ((uint16_t)glckcore << GCLK_CLKCTRL_ID_SHIFT);
 
-  /* Select and disable generic clock channel */
+  /* Select and disable the SERCOMn_GCLK_ID_CORE generic clock */
 
   putreg16(regval, SAM_GCLK_CLKCTRL);
 
@@ -132,9 +132,9 @@ sam_gclk_configure(const struct sam_usart_config_s * const config)
 
   while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
 
-  /* Select the SERCOMn_GCLK_ID_CORE clock generator */
+  /* Select the SERCOMn_GCLK_ID_CORE source clock generator */
 
-  regval |= config->gclkgen << GCLK_CLKCTRL_GEN_SHIFT;
+  regval |= (uint16_t)config->gclkgen << GCLK_CLKCTRL_GEN_SHIFT;
 
 #if 0 /* Not yet supported */
   /* Enable write lock if requested to prevent further modification */
@@ -149,7 +149,7 @@ sam_gclk_configure(const struct sam_usart_config_s * const config)
 
   putreg16(regval, SAM_GCLK_CLKCTRL);
 
-  /* Enable the GCLK */
+  /* Enable the SERCOMn_GCLK_ID_CORE generic clock */
 
   regval |= GCLK_CLKCTRL_CLKEN;
   putreg16(regval, SAM_GCLK_CLKCTRL);
@@ -158,7 +158,7 @@ sam_gclk_configure(const struct sam_usart_config_s * const config)
 
   regval = (SERCOM_GCLK_ID_SLOW << GCLK_CLKCTRL_ID_SHIFT);
 
-  /* Select and disable generic clock channel */
+  /* Select and disable the SERCOM_GCLK_ID_SLOW generic clock */
 
   putreg16(regval, SAM_GCLK_CLKCTRL);
 
@@ -166,9 +166,9 @@ sam_gclk_configure(const struct sam_usart_config_s * const config)
 
   while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
 
-  /* Select the SERCOM_GCLK_ID_SLOW clock generator */
+  /* Select the SERCOM_GCLK_ID_SLOW clock source generator */
 
-  regval |= config->gclkgen << GCLK_CLKCTRL_GEN_SHIFT;
+  regval |= (uint16_t)config->gclkgen << GCLK_CLKCTRL_GEN_SHIFT;
 
 #if 0 /* Not yet supported */
   /* Enable write lock if requested to prevent further modification */
@@ -183,7 +183,7 @@ sam_gclk_configure(const struct sam_usart_config_s * const config)
 
   putreg16(regval, SAM_GCLK_CLKCTRL);
 
-  /* Enable the GCLK */
+  /* Enable the SERCOM_GCLK_ID_SLOW generic clock */
 
   regval |= GCLK_CLKCTRL_CLKEN;
   putreg16(regval, SAM_GCLK_CLKCTRL);
@@ -204,25 +204,41 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
 {
   uint32_t ctrla;
   uint32_t ctrlb;
-  uint32_t baud;
+  uint16_t baud;
+  uint64_t tmp;
 
-  /* Check if baud is within the valid range. */
+  /* Calculate BAUD divider from the source clock frequency and desired.
+   * baud.  For asynchronous mode, the formula for the baud generation is
+   *
+   *   Fbaud = (Frefclk / 16) * (1 - (BAUD / 65,536))
+   *
+   * Or,
+   *
+   *   BAUD  = 65,536 * (1 - 16 * (Fbaud / Fref))
+   *         = 65,536 - 16 * 65,536 * Fbaud / Fref
+   *
+   * Example: Fref = 48MHz and Fbaud = 9600
+   *
+   *   BAUD  = 65,326
+   *   Fbaud = 9600
+   *
+   * Example: Fref = 48MHz and Fbaud = 115,200
+   *
+   *   BAUD  = 63,019
+   *   Fbaud = 115,219
+   */
 
-  if (config->baud > (config->frequency >> 1))
-    {
-      return -ERANGE;
-    }
-
-  /* Calculate BAUD divider from the source clock frequency and desired baud */
-
-  baud = (config->frequency / (2 * config->baud)) - 1;
+  tmp = (uint64_t)config->baud << 20;
+  tmp = (tmp + (config->frequency >> 1)) / config->frequency;
 
   /* Verify that the calculated result is within range */
 
-  if (baud > UINT16_MAX)
+  if (tmp < 1 || tmp > UINT16_MAX)
     {
       return -ERANGE;
     }
+
+  baud = 65536 - (uint16_t)tmp;
 
   /* Disable all USART interrupts */
 
