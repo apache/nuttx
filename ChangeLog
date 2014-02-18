@@ -6603,4 +6603,6 @@
 	* libc/stdio/lib_sscanf.c:  Bug fixes from David Sidrane (2014-2-18).
 	* nuttx/drivers/wireless/cc3000 and nuttx/include/nuttx/wireless/cc3000:
 	  Numerous updates to the CC3000 driver from David Sidrane (2014-2-18).
+	* nuttx/configs/stm3240g-eval/webserver: Converted to use the
+	  kconfig-frontends tools by Alan Carvalho de Assis (2014-2-18).
 
