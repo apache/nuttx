@@ -6605,4 +6605,6 @@
 	  Numerous updates to the CC3000 driver from David Sidrane (2014-2-18).
 	* nuttx/configs/stm3240g-eval/webserver: Converted to use the
 	  kconfig-frontends tools by Alan Carvalho de Assis (2014-2-18).
+	* configs/mbed:  All mbed configurations have been converted to use
+	  the kconfig-frontends tools (unverified) (2014-2-18).
 
