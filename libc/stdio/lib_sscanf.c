@@ -51,10 +51,18 @@
 #include <debug.h>
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 #define MAXLN 128
+
+#ifndef MIN
+#  define MIN(a,b) (a < b ? a : b)
+#endif
+
+#ifndef MAX
+#  define MAX(a,b) (a > b ? a : b)
+#endif
 
 /****************************************************************************
  * Private Type Declarations
@@ -287,14 +295,19 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                     {
                       /* No... Guess a field width using some heuristics */
 
-                      width = findwidth(buf, fmt);
+                      int tmpwidth = findwidth(buf, fmt);
+                      width = MIN(sizeof(tmp) - 1, tmpwidth);
                     }
 
                   /* Copy the string (if we are making an assignment) */
 
                   if (!noassign)
                     {
-                      strncpy(tv, buf, width);
+                      if (width > 0)
+                        {
+                          strncpy(tv, buf, width);
+                        }
+
                       tv[width] = '\0';
                     }
 
@@ -425,7 +438,8 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                     {
                       /* No... Guess a field width using some heuristics */
 
-                      width = findwidth(buf, fmt);
+                      int tmpwidth = findwidth(buf, fmt)
+                      width = MIN(sizeof(tmp) - 1, tmpwidth);
                     }
 
                   /* Copy the numeric string into a temporary working
