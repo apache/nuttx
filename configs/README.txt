@@ -478,7 +478,9 @@ configs/sama5d3x-ek
   board, all four CPU modules, and the LCD.
 
 configs/samd20-xplained
-  The port of NuttX to the Atmel SAMD20-Xplained development board.
+  The port of NuttX to the Atmel SAMD20-Xplained Pro development board.  This
+  board features the ATSAMD20J18A MCU (Cortex-M0+ with 256KB of FLASH and
+  32KB of SRAM).
 
 configs/sam3u-ek
   The port of NuttX to the Atmel SAM3U-EK development board.

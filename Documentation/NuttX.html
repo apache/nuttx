@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttX RTOS</i></font></big></h1>
-      <p>Last Updated: February 10, 2014</p>
+      <p>Last Updated: February 28, 2014</p>
     </td>
   </tr>
 </table>
@@ -1202,7 +1202,7 @@
       <li><a href="#arm926ejs">ARM926EJS</a> (4) </li>
       <li><a href="#armcortexa5">ARM Cortex-A5</a> (1) </li>
       <li><a href="#armcortexa8">ARM Cortex-A8</a> (1) </li>
-      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (2)</li>
+      <li><a href="#armcortexm0">ARM Cortex-M0/M0+</a> (3)</li>
       <li><a href="#armcortexm3">ARM Cortex-M3</a> (25)</li>
       <li><a href="#armcortexm4">ARM Cortex-M4</a> (10)</li>
     </ul>
@@ -1270,6 +1270,7 @@
       <li><a href="#avratmega128">AVR ATMega128</a> <small>(8-bit AVR)</small></li>
       <li><a href="#avrat90usbxxx">AVR AT90USB64x and AT90USB6128x</a> <small>(8-bit AVR)</small></li>
       <li><a href="#at32uc3bxxx">AVR32 AT32UC3BXXX</a> <small>(32-bit AVR32)</small></li>
+      <li><a href="#at91samd20">Atmel SAMD20</a> <small>(ARM Cortex-M0+)</small></li>
       <li><a href="#at91sam3u">Atmel SAM3U</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#at91sam3x">Atmel SAM3X</a> <small>(ARM Cortex-M3)</small></li>
       <li><a href="#at91sam4l">Atmel SAM4L</a> <small>(ARM Cortex-M4)</small></li>
@@ -1882,7 +1883,7 @@
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
-    <a name="armcortexm0"><b>ARM Cortex-M0</b>.</a>
+    <a name="armcortexm0"><b>ARM Cortex-M0/M0+</b>.</a>
   </td>
 </tr>
 <tr>
@@ -1965,6 +1966,30 @@ nsh>
     </ul>
   </td>
 </tr>
+<tr>
+  <td><br></td>
+  <td><hr></td>
+</tr>
+<tr>
+  <td><br></td>
+  <td>
+    <p>
+      <a name="at91samd20"><b>Atmel SAMD20</b>.</a>
+      The port of NuttX to the Atmel SAMD20-Xplained Pro development board.
+      This board features the ATSAMD20J18A MCU (Cortex-M0+ with 256KB of FLASH and 32KB of SRAM).
+    </p>
+    <ul>
+      <p>
+        This is a work-in-progress.
+        As of this writing (2014-2-18), there is a functional NuttShell (NSH) configuration.
+        An SPI driver to support the the added on OLED1 and I/O1 modules is in-work.
+        <b>STATUS</b>.
+        Refer to the SAMD20 Explained Pro board <a href="http://sourceforge.net/p/nuttx/git/ci/master/tree/nuttx/configs/samd20-xplained/README.txt">README</a> file for further information.
+      </p>
+    </ul>
+  </td>
+</tr>
+
 <tr>
   <td valign="top"><img height="20" width="20" src="favicon.ico"></td>
   <td bgcolor="#5eaee1">
