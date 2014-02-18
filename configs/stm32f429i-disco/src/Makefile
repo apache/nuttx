@@ -72,6 +72,10 @@ ifeq ($(CONFIG_STM32_OTGFS2),y)
 CSRCS += up_usb.c
 endif
 
+ifeq ($(CONFIG_ARCH_FPU),y)
+CSRCS += up_ostest.c
+endif
+
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS)
