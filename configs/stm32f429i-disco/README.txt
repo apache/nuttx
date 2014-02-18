@@ -891,6 +891,12 @@ Where <subdir> is one of the following:
 
       -CONFIG_EXAMPLES_OSTEST_FPUSIZE=(4*33)
 
+  ostest-fpu
+  ----------
+
+    This is essentially the same as the as the ostest configuration but
+    additionally enables the FPU.  Contributed by David Alessio.
+
   usbnsh:
   ------
 
