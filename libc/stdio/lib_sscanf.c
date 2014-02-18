@@ -1,7 +1,7 @@
 /****************************************************************************
  * libc/stdio/lib_sscanf.c
  *
- *   Copyright (C) 2007, 2008, 2011-2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2008, 2011-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,11 +57,11 @@
 #define MAXLN 128
 
 #ifndef MIN
-#  define MIN(a,b) (a < b ? a : b)
+#  define MIN(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifndef MAX
-#  define MAX(a,b) (a > b ? a : b)
+#  define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 
 /****************************************************************************
@@ -438,7 +438,7 @@ int vsscanf(FAR const char *buf, FAR const char *fmt, va_list ap)
                     {
                       /* No... Guess a field width using some heuristics */
 
-                      int tmpwidth = findwidth(buf, fmt)
+                      int tmpwidth = findwidth(buf, fmt);
                       width = MIN(sizeof(tmp) - 1, tmpwidth);
                     }
 
