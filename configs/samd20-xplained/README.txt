@@ -852,7 +852,7 @@ Configuration sub-directories
 
     STATUS/ISSUES:
 
-    1. The FLASH waistates is set to 2 (see include/board.h).  According to
+    1. The FLASH waitstates is set to 2 (see include/board.h).  According to
        the data sheet, it should work at 1 but I sometimes see crashes when
        the waitstates are set to one (about half of the time) (2014-2-18).
 
@@ -860,7 +860,7 @@ Configuration sub-directories
        the time) or after a power cycle (less after a power cycle).  I don't
        understand the cause of of this but most of this can be eliminated by
        simply holding the the reset button longer and releasing it cleanly
-       (then it fails maybe 5-10% of the time, mabe because of button
+       (then it fails maybe 5-10% of the time, maybe because of button
        chatter?) (2014-2-18).
 
        - The garbage is not random:  It is always the same.
