@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32/kl_irq.c
+ * arch/arm/src/kl/kl_irq.c
  *
  *   Copyright (C) 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
