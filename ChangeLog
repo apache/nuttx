@@ -6607,4 +6607,7 @@
 	  kconfig-frontends tools by Alan Carvalho de Assis (2014-2-18).
 	* configs/mbed:  All mbed configurations have been converted to use
 	  the kconfig-frontends tools (unverified) (2014-2-18).
+	* fs/fs_opendir.c, fs_readdir.c, et al: Modified so that errors
+	  will not be reported if you attempt to list a empty pseudo-directory
+	  (2014-2-18).
 

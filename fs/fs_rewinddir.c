@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_rewinddir.c
  *
- *   Copyright (C) 2007-2009, 2011 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2011, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,7 +109,12 @@ void rewinddir(FAR DIR *dirp)
   struct inode *inode;
 #endif
 
-  /* Sanity checks */
+  /* Verify that we were provided with a valid directory structure,
+   * A special case is when we enumerate an "empty", unused inode (fd_root
+   * == 0).  That is an inode in the pseudo-filesystem that has no
+   * operations and no children.  This is a "dangling" directory entry that
+   * has lost its children.
+   */
 
   if (!idir || !idir->fd_root)
     {

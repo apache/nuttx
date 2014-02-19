@@ -84,11 +84,11 @@ static inline int readpseudodir(struct fs_dirent_s *idir)
   if (idir->u.pseudo.fd_next->u.i_ops)
     {
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-      if (INODE_IS_BLOCK(idir->u.pseudo.fd_next)) 
+      if (INODE_IS_BLOCK(idir->u.pseudo.fd_next))
         {
            idir->fd_dir.d_type |= DTYPE_BLK;
         }
-      if (INODE_IS_MOUNTPT(idir->u.pseudo.fd_next)) 
+      if (INODE_IS_MOUNTPT(idir->u.pseudo.fd_next))
         {
            idir->fd_dir.d_type |= DTYPE_DIRECTORY;
         }
@@ -99,8 +99,9 @@ static inline int readpseudodir(struct fs_dirent_s *idir)
         }
     }
 
-  /* If the node has child node(s), then we will say that it
-   * is a directory.  NOTE: that the node can be both!
+  /* If the node has child node(s) or no operations, then we will say that
+   * it is a directory rather than a special file.  NOTE: that the node can
+   * be both!
    */
 
   if (idir->u.pseudo.fd_next->i_child || !idir->u.pseudo.fd_next->u.i_ops)
@@ -160,16 +161,30 @@ static inline int readpseudodir(struct fs_dirent_s *idir)
 FAR struct dirent *readdir(DIR *dirp)
 {
   FAR struct fs_dirent_s *idir = (struct fs_dirent_s *)dirp;
-#ifndef CONFIG_DISABLE_MOUNTPOINT
   struct inode *inode;
-#endif
   int ret;
 
-  /* Sanity checks */
+  /* Verify that we were provided with a valid directory structure */
 
-  if (!idir || !idir->fd_root)
+  if (!idir)
     {
       ret = EBADF;
+      goto errout;
+    }
+
+  /* A special case is when we enumerate an "empty", unused inode.  That is
+   * an inode in the pseudo-filesystem that has no operations and no children.
+   * This is a "dangling" directory entry that has lost its children.
+   */
+
+  inode = idir->fd_root;
+  if (!inode)
+    {
+      /* End of file and error conditions are not distinguishable
+       * with readdir.  We return NULL to signal either case.
+       */
+
+      ret = OK;
       goto errout;
     }
 
@@ -178,7 +193,6 @@ FAR struct dirent *readdir(DIR *dirp)
    */
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-  inode = idir->fd_root;
   if (INODE_IS_MOUNTPT(inode) && !DIRENT_ISPSEUDONODE(idir->fd_flags))
     {
       /* The node is a file system mointpoint. Verify that the mountpoint
@@ -188,7 +202,7 @@ FAR struct dirent *readdir(DIR *dirp)
       if (!inode->u.i_mops || !inode->u.i_mops->readdir)
         {
           ret = EACCES;
-           goto errout;
+          goto errout;
         }
 
       /* Perform the readdir() operation */
@@ -205,7 +219,7 @@ FAR struct dirent *readdir(DIR *dirp)
 
   /* ret < 0 is an error.  Special case: ret = -ENOENT is end of file */
 
-  if ( ret < 0)
+  if (ret < 0)
     {
       if (ret == -ENOENT)
         {
@@ -215,6 +229,7 @@ FAR struct dirent *readdir(DIR *dirp)
         {
           ret = -ret;
         }
+
       goto errout;
     }
 
