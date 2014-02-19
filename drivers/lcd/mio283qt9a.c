@@ -448,7 +448,6 @@ static int mio283qt9a_putrun(fb_coord_t row, fb_coord_t col, FAR const uint8_t *
   mio283qt9a_setarea(lcd, col, row, col + npixels - 1, row);
   mio283qt9a_gramselect(lcd);
 
-  src++;
   for (i = 0; i < npixels; i++)
     {
       mio283qt9a_gramwrite(lcd, *src);

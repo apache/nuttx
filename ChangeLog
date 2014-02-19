@@ -6615,3 +6615,5 @@
 	  file system (2014-2-19).
 	* fs/fs_mkdir.c: mkdir can now be used to create empty directories in
 	  the pseudo-filesystem (2014-2-19).
+	* drivers/lcd/mio283qt9a.c: Bug fix from Toby Duckwork (2014-2-19).
+
