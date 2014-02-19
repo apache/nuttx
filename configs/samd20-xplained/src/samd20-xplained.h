@@ -128,11 +128,9 @@
 
 #    define PORT_SD_CD (PORT_INTERRUPT | PORT_INT_CHANGE | PORT_PULL_UP | \
                         PORTF | PORT_PIN5)
-#    define IRQ_SD_CD   SAM_IRQ_PB5
 
 #    define PORT_SD_CS (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
                         PORTA | PORT_PIN5)
-#    define SD_CSNO    0
 
 #  elif defined(CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2)
 
@@ -143,11 +141,9 @@
 
 #    define PORT_CD   (PORT_INTERRUPT | PORT_INT_CHANGE | PORT_PULL_UP | \
                        PORTB | PORT_PIN15)
-#    define IRQ_CD     SAM_IRQ_PB15
 
 #    define PORT_SD_CS (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
                         PORTA | PORT_PIN17)
-#    define SD_CSNO    2
 
 #  else
 #    error Which connector is the I/O1 module installed in?
@@ -200,7 +196,6 @@
                             PORTB | PORT_PIN5)
 #    define PORT_OLED_CS   (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
                             PORTA | PORT_PIN5)
-#    define OLED_CSNO       0
 
 #  elif defined(CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2)
 
@@ -215,7 +210,6 @@
                             PORTB | PORT_PIN15)
 #    define PORT_OLED_CS   (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
                             PORTA | PORT_PIN17)
-#    define OLED_CSNO      2
 
 #  else
 #    error Which connector is the OLED1 module installed in?
