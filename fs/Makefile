@@ -1,7 +1,7 @@
 ############################################################################
 # fs/Makefile
 #
-#   Copyright (C) 2007, 2008, 2011-2013 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2007, 2008, 2011-2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -35,10 +35,10 @@
 
 -include $(TOPDIR)/Make.defs
 
-ASRCS	= 
-AOBJS	= $(ASRCS:.S=$(OBJEXT))
+ASRCS =
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 
-CSRCS	=
+CSRCS =
 
 # If there are no file descriptors configured, then a small part of the
 # logic in this directory may still apply to socket descriptors
@@ -48,29 +48,30 @@ ifneq ($(CONFIG_NSOCKET_DESCRIPTORS),0)
 
 # Socket descriptor support
 
-CSRCS	+= fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_poll.c fs_select.c
+CSRCS += fs_close.c fs_read.c fs_write.c fs_ioctl.c fs_poll.c fs_select.c
 endif
 
 # Support for network access using streams
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)
-CSRCS	+= fs_fdopen.c 
+CSRCS += fs_fdopen.c
 endif
 
 else
 
 # Common file/socket descriptor support
 
-CSRCS	+= fs_close.c fs_closedir.c fs_dup.c fs_dup2.c fs_fcntl.c \
-		   fs_filedup.c fs_filedup2.c fs_ioctl.c fs_lseek.c fs_open.c \
-		   fs_opendir.c fs_poll.c fs_read.c fs_readdir.c fs_rewinddir.c \
-		   fs_seekdir.c fs_stat.c fs_statfs.c fs_select.c fs_write.c
-CSRCS	+= fs_files.c fs_foreachinode.c fs_inode.c fs_inodeaddref.c \
-		   fs_inodefind.c fs_inoderelease.c fs_inoderemove.c \
-		   fs_inodereserve.c
-CSRCS	+= fs_registerdriver.c fs_unregisterdriver.c
-CSRCS	+= fs_registerblockdriver.c fs_unregisterblockdriver.c \
-		   fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
+CSRCS += fs_close.c fs_closedir.c fs_dup.c fs_dup2.c fs_fcntl.c
+CSRCS += fs_filedup.c fs_filedup2.c fs_ioctl.c fs_lseek.c fs_open.c
+CSRCS += fs_opendir.c fs_poll.c fs_read.c fs_readdir.c fs_rewinddir.c
+CSRCS += fs_rmdir.c fs_seekdir.c fs_stat.c fs_statfs.c fs_select.c
+CSRCS += fs_write.c
+CSRCS += fs_files.c fs_foreachinode.c fs_inode.c fs_inodeaddref.c
+CSRCS += fs_inodefind.c fs_inoderelease.c fs_inoderemove.c
+CSRCS += fs_inodereserve.c
+CSRCS += fs_registerdriver.c fs_unregisterdriver.c
+CSRCS += fs_registerblockdriver.c fs_unregisterblockdriver.c
+CSRCS += fs_findblockdriver.c fs_openblockdriver.c fs_closeblockdriver.c
 
 DEPPATH =
 VPATH = .
@@ -80,7 +81,7 @@ include mmap/Make.defs
 # Stream support
 
 ifneq ($(CONFIG_NFILE_STREAMS),0)
-CSRCS	+= fs_fdopen.c 
+CSRCS += fs_fdopen.c
 endif
 
 # Support for sendfile()
@@ -93,7 +94,7 @@ endif
 
 ifeq ($(CONFIG_SYSLOG),y)
 ifeq ($(CONFIG_SYSLOG_CHAR),y)
-CSRCS	+= fs_syslog.c 
+CSRCS += fs_syslog.c
 endif
 endif
 
@@ -101,9 +102,9 @@ endif
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 
-CSRCS	+= fs_fsync.c fs_mkdir.c fs_mount.c fs_rename.c fs_rmdir.c \
-		   fs_umount.c fs_unlink.c
-CSRCS	+= fs_foreachmountpoint.c 
+CSRCS += fs_fsync.c fs_mkdir.c fs_mount.c fs_rename.c fs_umount.c
+CSRCS += fs_unlink.c
+CSRCS += fs_foreachmountpoint.c
 
 include fat/Make.defs
 include romfs/Make.defs
@@ -116,16 +117,16 @@ include procfs/Make.defs
 endif
 endif
 
-COBJS	= $(CSRCS:.c=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS	= $(ASRCS) $(CSRCS)
-OBJS	= $(AOBJS) $(COBJS)
+SRCS = $(ASRCS) $(CSRCS)
+OBJS = $(AOBJS) $(COBJS)
 
-BIN		= libfs$(LIBEXT)
+BIN = libfs$(LIBEXT)
 
-SUBDIRS	= mmap fat romfs nxffs nfs binfs procfs
+SUBDIRS = mmap fat romfs nxffs nfs binfs procfs
 
-all:	$(BIN)
+all: $(BIN)
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)

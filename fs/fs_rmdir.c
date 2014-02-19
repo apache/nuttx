@@ -76,43 +76,85 @@ int rmdir(FAR const char *pathname)
 {
   FAR struct inode *inode;
   const char       *relpath = NULL;
-  int               ret;
+  int               errcode;
 
-  /* Get an inode for this file */
+  /* Get an inode for this file.  inode_find() automatically increments the
+   * reference count on the inode if one is found.
+   */
 
   inode = inode_find(pathname, &relpath);
   if (!inode)
     {
-      /* There is no mountpoint that includes in this path */
+      /* There is no inode that includes in this path */
 
-      ret = ENOENT;
+      errcode = ENOENT;
       goto errout;
     }
 
-  /* Verify that the inode is a valid mountpoint. */
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  /* Check if the inode is a valid mountpoint. */
 
-  if (!INODE_IS_MOUNTPT(inode) || !inode->u.i_mops)
+  if (INODE_IS_MOUNTPT(inode) && inode->u.i_mops)
     {
-      ret = ENXIO;
-      goto errout_with_inode;
-    }
+      /* Perform the rmdir operation using the relative path
+       * from the mountpoint.
+       */
 
-  /* Perform the rmdir operation using the relative path
-   * at the mountpoint.
+      if (inode->u.i_mops->rmdir)
+        {
+          int ret = inode->u.i_mops->rmdir(inode, relpath);
+          if (ret < 0)
+            {
+              errcode = -ret;
+              goto errout_with_inode;
+            }
+        }
+      else
+        {
+          errcode = ENOSYS;
+          goto errout_with_inode;
+        }
+    }
+  else
+#endif
+
+  /* If this is a "dangling" pseudo-file node (i.e., it has no operations)
+   * then rmdir should remove the node.
    */
 
-  if (inode->u.i_mops->rmdir)
+  if (!inode->u.i_ops)
     {
-      ret = inode->u.i_mops->rmdir(inode, relpath);
-      if (ret < 0)
+      int ret;
+
+      /* If the directory inode has children, however, then it cannot be
+       * removed.
+       */
+
+      if (inode->i_child)
         {
-          ret = -ret;
+          errcode = ENOTEMPTY;
+          goto errout_with_inode;
+        }
+
+      /* Remove the inode.  NOTE: Because we hold a reference count on the
+       * inode, it will not be deleted now.  But probably when inode_release()
+       * is called below.  inode_remove should return -EBUSY to indicate that
+       * the inode was not deleted now.
+       */
+
+      inode_semtake();
+      ret = inode_remove(pathname);
+      inode_semgive();
+
+      if (ret < 0 && ret != -EBUSY)
+        {
+          errcode = -ret;
           goto errout_with_inode;
         }
     }
   else
     {
-      ret = ENOSYS;
+      errcode = ENXIO;
       goto errout_with_inode;
     }
 
@@ -121,10 +163,10 @@ int rmdir(FAR const char *pathname)
   inode_release(inode);
   return OK;
 
- errout_with_inode:
+errout_with_inode:
   inode_release(inode);
- errout:
-  set_errno(ret);
+errout:
+  set_errno(errcode);
   return ERROR;
 }
 
