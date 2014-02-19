@@ -96,101 +96,6 @@ sam_wait_synchronization(const struct sam_usart_config_s * const config)
 #endif
 
 /****************************************************************************
- * Name: sam_gclk_configure
- *
- * Description:
- *   Configure the SERCOM USART source clock.
- *
- *   Two generic clocks are used by the SERCOM: GCLK_SERCOMx_CORE and
- *   GCLK_SERCOMx_SLOW.  The core clock (GCLK_SERCOMx_CORE) is required to
- *   clock the SERCOM while operating as a master, while the slow clock
- *   (GCLK_SERCOM_SLOW) is only required for certain functions.  SERCOM
- *   modules must share the same slow GCLK channel ID.
- *
- *   The baud-rate generator runs off the GCLK_SERCOMx_CORE clock (or,
- *   optionally, external clock).
- *
- ****************************************************************************/
-
-#ifdef HAVE_USART
-static inline void
-sam_gclk_configure(const struct sam_usart_config_s * const config)
-{
-  uint16_t regval;
-  uint8_t glckcore;
-
-  /* Set up the SERCOMn_GCLK_ID_CORE clock */
-
-  glckcore = (uint8_t)SERCOM_GCLK_ID_CORE(config->sercom);
-  regval   = ((uint16_t)glckcore << GCLK_CLKCTRL_ID_SHIFT);
-
-  /* Select and disable the SERCOMn_GCLK_ID_CORE generic clock */
-
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-
-  /* Wait for clock to become disabled */
-
-  while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
-
-  /* Select the SERCOMn_GCLK_ID_CORE source clock generator */
-
-  regval |= (uint16_t)config->gclkgen << GCLK_CLKCTRL_GEN_SHIFT;
-
-#if 0 /* Not yet supported */
-  /* Enable write lock if requested to prevent further modification */
-
-  if (config->wrlock)
-    {
-      regval |= GCLK_CLKCTRL_WRTLOCK;
-    }
-#endif
-
-  /* Write the new configuration */
-
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-
-  /* Enable the SERCOMn_GCLK_ID_CORE generic clock */
-
-  regval |= GCLK_CLKCTRL_CLKEN;
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-
-  /* Set up the SERCOM_GCLK_ID_SLOW clock */
-
-  regval = (SERCOM_GCLK_ID_SLOW << GCLK_CLKCTRL_ID_SHIFT);
-
-  /* Select and disable the SERCOM_GCLK_ID_SLOW generic clock */
-
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-
-  /* Wait for clock to become disabled */
-
-  while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
-
-  /* Select the SERCOM_GCLK_ID_SLOW clock source generator */
-
-  regval |= (uint16_t)config->gclkgen << GCLK_CLKCTRL_GEN_SHIFT;
-
-#if 0 /* Not yet supported */
-  /* Enable write lock if requested to prevent further modification */
-
-  if (config->wrlock)
-    {
-      regval |= GCLK_CLKCTRL_WRTLOCK;
-    }
-#endif
-
-  /* Write the new configuration */
-
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-
-  /* Enable the SERCOM_GCLK_ID_SLOW generic clock */
-
-  regval |= GCLK_CLKCTRL_CLKEN;
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-}
-#endif
-
-/****************************************************************************
  * Name: sam_usart_configure
  *
  * Description:
@@ -396,11 +301,12 @@ int sam_usart_internal(const struct sam_usart_config_s * const config)
   regval |= PM_APBCMASK_SERCOM(config->sercom);
   putreg32(regval, SAM_PM_APBCMASK);
 
-  /* Configure the GCCLK for the SERCOM module */
+  /* Configure the GCLKs for the SERCOM module */
 
-  sam_gclk_configure(config);
+  sercom_coreclk_configure(config->sercom, config->gclkgen, false);
+  sercom_slowclk_configure(config->gclkgen);
 
-  /* Set configuration according to the board configuration */
+  /* Set USART configuration according to the board configuration */
 
   ret = sam_usart_configure(config);
   if (ret == OK)

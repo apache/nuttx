@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samd/sam_lowputc.h
+ * arch/arm/src/samd/sam_sercom.h
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -33,14 +33,17 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD_SAM_LOWPUTC_H
-#define __ARCH_ARM_SRC_SAMD_SAM_LOWPUTC_H
+#ifndef __ARCH_ARM_SRC_SAMD_SAM_SERCOM_H
+#define __ARCH_ARM_SRC_SAMD_SAM_SERCOM_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdbool.h>
+
 #include "sam_config.h"
 
 /****************************************************************************
@@ -69,62 +72,44 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
 /****************************************************************************
- * Name: sam_lowsetup
+ * Name: sercom_coreclk_configure
  *
  * Description:
- *   Called at the very beginning of _start.  Performs low level
- *   initialization.
+ *   Configure the SERCOM core source clock.
+ *
+ *   Two generic clocks are used by the SERCOM: GCLK_SERCOMx_CORE and
+ *   GCLK_SERCOMx_SLOW.  The core clock (GCLK_SERCOMx_CORE) is required to
+ *   clock the SERCOM while operating as a master, while the slow clock
+ *   (GCLK_SERCOM_SLOW) is only required for certain functions.  SERCOM
+ *   modules must share the same slow GCLK channel ID.
+ *
+ *   The baud-rate generator runs off the GCLK_SERCOMx_CORE clock (or,
+ *   optionally, external clock).
  *
  ****************************************************************************/
 
-void sam_lowsetup(void);
+void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock);
 
 /****************************************************************************
- * Name: sam_usart_initialize
+ * Name: sercom_slowclk_configure
  *
  * Description:
- *   Set the configuration of a SERCOM for provided USART configuration.
- *   This configures the SERCOM as a USART, but does not configure USART
- *   interrupts or enable the USART.
+ *   Configure the SERCOM slow source clock.
+ *
+ *   Two generic clocks are used by the SERCOM: GCLK_SERCOMx_CORE and
+ *   GCLK_SERCOMx_SLOW.  The core clock (GCLK_SERCOMx_CORE) is required to
+ *   clock the SERCOM while operating as a master, while the slow clock
+ *   (GCLK_SERCOM_SLOW) is only required for certain functions.  SERCOM
+ *   modules must share the same slow GCLK channel ID.
  *
  ****************************************************************************/
 
-#ifdef HAVE_USART
-struct sam_usart_config_s;
-int sam_usart_initialize(const struct sam_usart_config_s * const config);
-#endif
-
-/****************************************************************************
- * Name: sam_usart_reset
- *
- * Description:
- *   Reset the USART SERCOM.  This restores all SERCOM register to the
- *   initial state and disables the SERCOM.
- *
- ****************************************************************************/
-
-#ifdef HAVE_USART
-struct sam_usart_config_s;
-void sam_usart_reset(const struct sam_usart_config_s * const config);
-#endif
-
-/****************************************************************************
- * Name: sam_lowputc
- *
- * Description:
- *   Output one character to the USART using a simple polling method.
- *
- ****************************************************************************/
-
-#ifdef HAVE_SERIAL_CONSOLE
-void sam_lowputc(uint32_t ch);
-#endif
+void sercom_slowclk_configure(int gclkgen);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMD_SAM_LOWPUTC_H */
+#endif /* __ARCH_ARM_SRC_SAMD_SAM_SERCOM_H */
