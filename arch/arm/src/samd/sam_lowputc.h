@@ -91,7 +91,7 @@ void sam_lowsetup(void);
  *
  ****************************************************************************/
 
-#ifdef HAVE_USART
+#ifdef SAMD_HAVE_USART
 struct sam_usart_config_s;
 int sam_usart_initialize(const struct sam_usart_config_s * const config);
 #endif
@@ -105,7 +105,7 @@ int sam_usart_initialize(const struct sam_usart_config_s * const config);
  *
  ****************************************************************************/
 
-#ifdef HAVE_USART
+#ifdef SAMD_HAVE_USART
 struct sam_usart_config_s;
 void sam_usart_reset(const struct sam_usart_config_s * const config);
 #endif

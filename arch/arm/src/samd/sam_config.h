@@ -117,11 +117,11 @@
 
 /* Are any USARTs enabled? */
 
-#undef HAVE_USART
+#undef SAMD_HAVE_USART
 #if defined(SAMD_HAVE_USART0) || defined(SAMD_HAVE_USART1) || \
     defined(SAMD_HAVE_USART2) || defined(SAMD_HAVE_USART3) || \
     defined(SAMD_HAVE_USART4) || defined(SAMD_HAVE_USART5)
-#  define HAVE_USART 1
+#  define SAMD_HAVE_USART 1
 #endif
 
 /* Is there a serial console? There should be at most one defined.  It could be on
@@ -219,6 +219,15 @@
 #  undef CONFIG_SAMD_SERCOM5_ISSPI
 #endif
 
+/* Are any SERCOMs configured for SPI? */
+
+#undef SAMD_HAVE_SPI
+#if defined(SAMD_HAVE_SPI0) || defined(SAMD_HAVE_SPI1) || \
+    defined(SAMD_HAVE_SPI2) || defined(SAMD_HAVE_SPI3) || \
+    defined(SAMD_HAVE_SPI4) || defined(SAMD_HAVE_SPI5)
+#  define SAMD_HAVE_SPI 1
+#endif
+
 /* Are any SERCOM peripherals are configured as I2C peripherals? */
 
 #define SAMD_HAVE_I2C0 1
@@ -256,6 +265,15 @@
 #if !defined(CONFIG_SAMD_SERCOM5) || !defined(CONFIG_SAMD_SERCOM5_ISI2C)
 #  undef SAMD_HAVE_I2C5
 #  undef CONFIG_SAMD_SERCOM5_ISI2C
+#endif
+
+/* Are any SERCOMs configured for I2C? */
+
+#undef SAMD_HAVE_I2C
+#if defined(SAMD_HAVE_I2C0) || defined(SAMD_HAVE_I2C1) || \
+    defined(SAMD_HAVE_I2C2) || defined(SAMD_HAVE_I2C3) || \
+    defined(SAMD_HAVE_I2C4) || defined(SAMD_HAVE_I2C5)
+#  define SAMD_HAVE_I2C 1
 #endif
 
 /************************************************************************************
