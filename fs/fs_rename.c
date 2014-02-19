@@ -223,6 +223,6 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
  errout_with_oldinode:
   inode_release(oldinode);
  errout:
-  set_errno(ret);
+  set_errno(errcode);
   return ERROR;
 }

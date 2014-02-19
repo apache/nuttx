@@ -6618,3 +6618,7 @@
 	* drivers/lcd/mio283qt9a.c: Bug fix from Toby Duckwork (2014-2-19).
 	* fs/fs_rename.c: 'rename' can now be used to rename nodes in the
 	  pseudo-filesystem (2014-2-19).
+	* arch/arm/src/samd/sam_sercom.c:  Move some common SERCOM logic
+	  from the USART-specific files to a share-able file where it can
+	  also be used by SPI and I2C drivers (2014-2-19).
+

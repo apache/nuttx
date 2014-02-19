@@ -279,6 +279,7 @@ int sam_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
       (void)sam_portwrite(PORT_OLED_DATA, !cmd);
     }
 #endif
-      return OK;
+
+  return OK;
 }
 #endif
