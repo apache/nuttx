@@ -66,7 +66,7 @@
 #include "sam_lowputc.h"
 #include "sam_serial.h"
 
-#ifdef HAVE_USART
+#ifdef SAMD_HAVE_USART
 
 /****************************************************************************
  * Definitions
@@ -1082,5 +1082,5 @@ int up_putc(int ch)
 }
 
 #endif /* USE_SERIALDRIVER */
-#endif /* HAVE_USART */
+#endif /* SAMD_HAVE_USART */
 

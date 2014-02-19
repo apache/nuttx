@@ -6621,4 +6621,7 @@
 	* arch/arm/src/samd/sam_sercom.c:  Move some common SERCOM logic
 	  from the USART-specific files to a share-able file where it can
 	  also be used by SPI and I2C drivers (2014-2-19).
+	* arch/arm/src/samd/sam_spi.c:  Add framework for a SAMD SPI driver.
+	  The initial check-in is a crude port of the SAMA5 SPI driver with
+	  a lot of missing logic (2014-2-19).
 

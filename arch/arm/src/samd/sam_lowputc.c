@@ -87,7 +87,7 @@
  *
  ****************************************************************************/
 
-#ifdef HAVE_USART
+#ifdef SAMD_HAVE_USART
 static void
 sam_wait_synchronization(const struct sam_usart_config_s * const config)
 {
@@ -103,7 +103,7 @@ sam_wait_synchronization(const struct sam_usart_config_s * const config)
  *
  ****************************************************************************/
 
-#ifdef HAVE_USART
+#ifdef SAMD_HAVE_USART
 static inline int
 sam_usart_configure(const struct sam_usart_config_s * const config)
 {
@@ -251,7 +251,7 @@ sam_usart_configure(const struct sam_usart_config_s * const config)
  *
  ****************************************************************************/
 
-#ifdef HAVE_USART
+#ifdef SAMD_HAVE_USART
 static inline void
 sam_pad_configure(const struct sam_usart_config_s * const config)
 {
@@ -289,7 +289,7 @@ sam_pad_configure(const struct sam_usart_config_s * const config)
  *
  *****************************************************************************/
 
-#ifdef HAVE_USART
+#ifdef SAMD_HAVE_USART
 int sam_usart_internal(const struct sam_usart_config_s * const config)
 {
   uint32_t regval;
@@ -328,7 +328,7 @@ int sam_usart_internal(const struct sam_usart_config_s * const config)
  *
  ****************************************************************************/
 
-#ifdef HAVE_USART
+#ifdef SAMD_HAVE_USART
 static inline void
 sam_usart_enable(const struct sam_usart_config_s * const config)
 {
@@ -381,7 +381,7 @@ void sam_lowsetup(void)
  *
  *****************************************************************************/
 
-#ifdef HAVE_USART
+#ifdef SAMD_HAVE_USART
 int sam_usart_initialize(const struct sam_usart_config_s * const config)
 {
   irqstate_t flags;
@@ -411,7 +411,7 @@ int sam_usart_initialize(const struct sam_usart_config_s * const config)
  *
  *****************************************************************************/
 
-#ifdef HAVE_USART
+#ifdef SAMD_HAVE_USART
 void sam_usart_reset(const struct sam_usart_config_s * const config)
 {
   uintptr_t regaddr = config->base + SAM_USART_CTRLA_OFFSET;
