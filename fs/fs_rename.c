@@ -80,7 +80,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
   const char       *newrelpath = NULL;
   int               ret;
 
-  /* Get an inode for the old relpath */
+  /* Get an inode that includes the oldpath */
 
   oldinode = inode_find(oldpath, &oldrelpath);
   if (!oldinode)
@@ -99,7 +99,9 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
       goto errout_with_oldinode;
     }
 
-  /* Get an inode for the new relpath -- it should like on the same mountpoint */
+  /* Get an inode for the new relpath -- it should like on the same
+   * mountpoint
+   */
 
   newinode = inode_find(newpath, &newrelpath);
   if (!newinode)
@@ -110,7 +112,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
       goto errout_with_oldinode;
     }
 
-  /* Verify that the two pathes lie on the same mountpt inode */
+  /* Verify that the two paths lie on the same mountpoint inode */
 
   if (oldinode != newinode)
     {
@@ -118,7 +120,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
       goto errout_with_newinode;
     }
 
-  /* Perform the rename operation using the relative pathes
+  /* Perform the rename operation using the relative paths
    * at the common mountpoint.
    */
 
