@@ -961,9 +961,52 @@ static int up_interrupt(int irq, void *context)
     }
   else
 #endif
+#ifdef CONFIG_LM_UART2
+  if (g_uart2priv.irq == irq)
+    {
+      dev = &g_uart2port;
+    }
+  else
+#endif
+#ifdef CONFIG_LM_UART3
+  if (g_uart3priv.irq == irq)
+    {
+      dev = &g_uart3port;
+    }
+  else
+#endif
+#ifdef CONFIG_LM_UART4
+  if (g_uart4priv.irq == irq)
+    {
+      dev = &g_uart4port;
+    }
+  else
+#endif
+#ifdef CONFIG_LM_UART5
+  if (g_uart5priv.irq == irq)
+    {
+      dev = &g_uart5port;
+    }
+  else
+#endif
+#ifdef CONFIG_LM_UART6
+  if (g_uart6priv.irq == irq)
+    {
+      dev = &g_uart6port;
+    }
+  else
+#endif
+#ifdef CONFIG_LM_UART7
+  if (g_uart7priv.irq == irq)
+    {
+      dev = &g_uart7port;
+    }
+  else
+#endif
     {
       PANIC();
     }
+
   priv = (struct up_dev_s*)dev->priv;
 
   /* Loop until there are no characters to be transferred or,
