@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * configs/samd20-xplained/src/sam_spi.c
  *
  *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
@@ -31,11 +31,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 
@@ -48,14 +48,15 @@
 #include "sam_config.h"
 #include "sam_port.h"
 #include "sam_spi.h"
+
 #include "samd20-xplained.h"
 
-#ifdef SAMD_HAVE_SPI0
+#ifdef SAMD_HAVE_SPI
 
-/************************************************************************************
- * Definitions
- ************************************************************************************/
-/* Configuration ********************************************************************/
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+/* Configuration ************************************************************/
 
 #if defined(CONFIG_SAM4L_XPLAINED_IOMODULE) && \
     defined(CONFIG_SAM4L_XPLAINED_OLED1MODULE) && defined(CONFIG_SPI_OWNBUS)
@@ -80,21 +81,22 @@
 #  define spivdbg(x...)
 #endif
 
-/************************************************************************************
+/****************************************************************************
  * Private Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Public Functions
- ************************************************************************************/
+ ****************************************************************************/
 
-/************************************************************************************
+/****************************************************************************
  * Name: sam_spiinitialize
  *
  * Description:
- *   Called to configure SPI chip select PORT pins for the SAM3U10E-EVAL board.
+ *   Called to configure SPI chip select PORT pins for the SAMD20 Xplained
+ *   Pro board.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 void weak_function sam_spiinitialize(void)
 {
@@ -116,40 +118,43 @@ void weak_function sam_spiinitialize(void)
 }
 
 /****************************************************************************
- * Name:  sam_spiselect, sam_spistatus, and sam_spicmddata
+ * Name:  sam_spi[n]select, sam_spi[n]status, and sam_spi[n]cmddata
  *
  * Description:
  *   These external functions must be provided by board-specific logic.  They
  *   include:
  *
- *   o sam_spiselect is a functions tomanage the board-specific chip selects
- *   o sam_spistatus and sam_spicmddata:  Implementations of the status
+ *   o sam_spi[n]select is a functions to manage the board-specific chip
+ *     selects
+ *   o sam_spi[n]status and sam_spi[n]cmddata:  Implementations of the status
  *     and cmddata methods of the SPI interface defined by struct spi_ops_
  *     (see include/nuttx/spi/spi.h). All other methods including
- *     up_spiinitialize()) are provided by common SAM3/4 logic.
+ *     up_spiinitialize()) are provided by common SAMD logic.
  *
- *  To use this common SPI logic on your board:
+ *   Where [n] is the SERCOM number for the SPI module.
+ *
+ *   To use this common SPI logic on your board:
  *
  *   1. Provide logic in sam_boardinitialize() to configure SPI chip select
  *      pins.
- *   2. Provide sam_spiselect() and sam_spistatus() functions in your board-
- *      specific logic.  These functions will perform chip selection and
- *      status operations using PORTs in the way your board is configured.
+ *   2. Provide sam_spi[n]select() and sam_spi[n]status() functions in your
+ *      board-specific logic.  These functions will perform chip selection
+ *      and status operations using GPIOs in the way your board is configured.
  *   2. If CONFIG_SPI_CMDDATA is defined in the NuttX configuration, provide
- *      sam_spicmddata() functions in your board-specific logic.  This
- *      function will perform cmd/data selection operations using PORTs in
+ *      sam_spi[n]cmddata() functions in your board-specific logic.  This
+ *      function will perform cmd/data selection operations using GPIOs in
  *      the way your board is configured.
  *   3. Add a call to up_spiinitialize() in your low level application
  *      initialization logic
- *   4. The handle returned by up_spiinitialize() may then be used to bind the
- *      SPI driver to higher level logic (e.g., calling
+ *   4. The handle returned by up_spiinitialize() may then be used to bind
+ *      the  SPI driver to higher level logic (e.g., calling
  *      mmcsd_spislotinitialize(), for example, will bind the SPI driver to
  *      the SPI MMC/SD driver).
  *
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_spiselect
+ * Name: sam_spi[n]select
  *
  * Description:
  *   PIO chip select pins may be programmed by the board specific logic in
@@ -159,12 +164,13 @@ void weak_function sam_spiinitialize(void)
  *   a stub.
  *
  *   An alternative way to program the PIO chip select pins is as a normal
- *   PORT output.  In that case, the automatic control of the CS pins is
+ *   GPIO output.  In that case, the automatic control of the CS pins is
  *   bypassed and this function must provide control of the chip select.
- *   NOTE:  In this case, the PORT output pin does *not* have to be the
+ *   NOTE:  In this case, the GPIO output pin does *not* have to be the
  *   same as the NPCS pin normal associated with the chip select number.
  *
  * Input Parameters:
+ *   dev - SPI device info
  *   devid - Identifies the (logical) device
  *   selected - TRUE:Select the device, FALSE:De-select the device
  *
@@ -173,9 +179,10 @@ void weak_function sam_spiinitialize(void)
  *
  ****************************************************************************/
 
-void sam_spiselect(enum spi_dev_e devid, bool selected)
+#ifdef SAMD_HAVE_SPI0
+void sam_spi0select(enum spi_dev_e devid, bool selected)
 {
-#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1
   /* Select/de-select the SD card */
 
   if (devid == SPIDEV_MMCSD)
@@ -184,13 +191,9 @@ void sam_spiselect(enum spi_dev_e devid, bool selected)
 
       sam_portwrite(PORT_SD_CS, !selected);
     }
-
-#ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
-  else
-#endif
 #endif
 
-#ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
+#ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT1
   /* Select/de-select the OLED */
 
   if (devid == SPIDEV_DISPLAY)
@@ -201,14 +204,67 @@ void sam_spiselect(enum spi_dev_e devid, bool selected)
     }
 #endif
 }
+#endif
+
+#ifdef SAMD_HAVE_SPI1
+void sam_spi1select(enum spi_dev_e devid, bool selected)
+{
+#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2
+  /* Select/de-select the SD card */
+
+  if (devid == SPIDEV_MMCSD)
+    {
+      /* Active low */
+
+      sam_portwrite(PORT_SD_CS, !selected);
+    }
+#endif
+
+#ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2
+  /* Select/de-select the OLED */
+
+  if (devid == SPIDEV_DISPLAY)
+    {
+      /* Active low */
+
+      sam_portwrite(PORT_OLED_CS, !selected);
+    }
+#endif
+}
+#endif
+
+#ifdef SAMD_HAVE_SPI2
+void sam_spi2select(enum spi_dev_e devid, bool selected)
+{
+}
+#endif
+
+#ifdef SAMD_HAVE_SPI3
+void sam_spi3select(enum spi_dev_e devid, bool selected)
+{
+}
+#endif
+
+#ifdef SAMD_HAVE_SPI4
+void sam_spi4select(enum spi_dev_e devid, bool selected)
+{
+}
+#endif
+
+#ifdef SAMD_HAVE_SPI5
+void sam_spi5select(enum spi_dev_e devid, bool selected)
+{
+}
+#endif
 
 /****************************************************************************
- * Name: sam_spistatus
+ * Name: sam_spi[n]status
  *
  * Description:
  *   Return status information associated with the SPI device.
  *
  * Input Parameters:
+ *   dev - SPI device info
  *   devid - Identifies the (logical) device
  *
  * Returned Values:
@@ -216,11 +272,12 @@ void sam_spiselect(enum spi_dev_e devid, bool selected)
  *
  ****************************************************************************/
 
-uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+#ifdef SAMD_HAVE_SPI0
+uint8_t sam_spi0status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 {
   uint8_t ret = 0;
 
-#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1
   /* Check if an SD card is present in the microSD slot */
 
   if (devid == SPIDEV_MMCSD)
@@ -236,11 +293,62 @@ uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
 
   return ret;
 }
+#endif
 
-#endif /* SAMD_HAVE_SPI0 */
+#ifdef SAMD_HAVE_SPI1
+uint8_t sam_spi1status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  uint8_t ret = 0;
+
+#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2
+  /* Check if an SD card is present in the microSD slot */
+
+  if (devid == SPIDEV_MMCSD)
+    {
+      /* Active low */
+
+      if (!sam_portread(PORT_SD_CD))
+        {
+          ret |= SPI_STATUS_PRESENT;
+        }
+    }
+#endif
+
+  return ret;
+}
+#endif
+
+#ifdef SAMD_HAVE_SPI2
+uint8_t sam_spi2status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  return 0;
+}
+#endif
+
+#ifdef SAMD_HAVE_SPI3
+uint8_t sam_spi3status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  return 0;
+}
+#endif
+
+#ifdef SAMD_HAVE_SPI4
+uint8_t sam_spi4status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  return 0;
+}
+#endif
+
+#ifdef SAMD_HAVE_SPI5
+uint8_t sam_spi5status(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
+{
+  uint8_t ret = 0;
+  return ret;
+}
+#endif
 
 /****************************************************************************
- * Name: sam_spicmddata
+ * Name: sam_spi[n]cmddata
  *
  * Description:
  *   Some SPI devices require an additional control to determine if the SPI
@@ -251,7 +359,7 @@ uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  *   may be configured to use 9-bit data transfers with the 9th bit
  *   indicating command or data.  That same hardware may be configurable,
  *   instead, to use 8-bit data but to require an additional, board-
- *   specific PORT control to distinguish command and data.  This function
+ *   specific GPIO control to distinguish command and data.  This function
  *   would be needed in that latter case.
  *
  * Input Parameters:
@@ -264,9 +372,10 @@ uint8_t sam_spistatus(FAR struct spi_dev_s *dev, enum spi_dev_e devid)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-int sam_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+#ifdef SAMD_HAVE_SPI0
+int sam_spi0cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
 {
-#ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
+#ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT1
   if (devid == SPIDEV_DISPLAY)
     {
       /* This is the Data/Command control pad which determines whether the
@@ -283,3 +392,55 @@ int sam_spicmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
   return OK;
 }
 #endif
+
+#ifdef SAMD_HAVE_SPI1
+int sam_spi1cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+#ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2
+  if (devid == SPIDEV_DISPLAY)
+    {
+      /* This is the Data/Command control pad which determines whether the
+       * data bits are data or a command.
+       *
+       * High: the inputs are treated as display data.
+       * Low:  the inputs are transferred to the command registers.
+       */
+
+      (void)sam_portwrite(PORT_OLED_DATA, !cmd);
+    }
+#endif
+
+  return OK;
+}
+#endif
+
+#ifdef SAMD_HAVE_SPI2
+int sam_spi2cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+  return OK;
+}
+#endif
+
+#ifdef SAMD_HAVE_SPI3
+int sam_spi3cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+  return OK;
+}
+#endif
+
+#ifdef SAMD_HAVE_SPI4
+int sam_spi4cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+  return OK;
+}
+#endif
+
+#ifdef SAMD_HAVE_SPI5
+int sam_spi5cmddata(FAR struct spi_dev_s *dev, enum spi_dev_e devid, bool cmd)
+{
+  return OK;
+}
+#endif
+
+#endif /* CONFIG_SPI_CMDDATA */
+#endif /* SAMD_HAVE_SPI */
