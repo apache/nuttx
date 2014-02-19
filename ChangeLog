@@ -6610,7 +6610,8 @@
 	* fs/fs_opendir.c, fs_readdir.c, et al: Modified so that errors
 	  will not be reported if you attempt to list a empty pseudo-directory
 	  (2014-2-19).
-	* fs/fs_rmdir.c: rmdir can be used to removed empty directories in
+	* fs/fs_rmdir.c: rmdir can now be used to remove empty directories in
 	  the pseudo-filesystem such as might be left after umounting a
 	  file system (2014-2-19).
-
+	* fs/fs_mkdir.c: mkdir can now be used to create empty directories in
+	  the pseudo-filesystem (2014-2-19).
