@@ -165,7 +165,7 @@ static void inode_insert(FAR struct inode *node,
 
 int inode_reserve(FAR const char *path, FAR struct inode **inode)
 {
-  const char       *name = path;
+  FAR const char   *name = path;
   FAR struct inode *left;
   FAR struct inode *parent;
 

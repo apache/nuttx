@@ -408,15 +408,15 @@ void inode_free(FAR struct inode *node)
  * Name: inode_nextname
  *
  * Description:
- *   Given a path with node names separated by '/', return the next node
- *   name.
+ *   Given a path with node names separated by '/', return the next path
+ *   segment name.
  *
  ****************************************************************************/
 
 FAR const char *inode_nextname(FAR const char *name)
 {
   /* Search for the '/' delimiter or the NUL terminator at the end of the
-   * string.
+   * path segment.
    */
 
    while (*name && *name != '/')
@@ -435,4 +435,3 @@ FAR const char *inode_nextname(FAR const char *name)
 
    return name;
 }
-

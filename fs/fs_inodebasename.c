@@ -1,7 +1,7 @@
 /****************************************************************************
- * fs/fs_inoderemove.c
+ * fs/fs_basename.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,15 +39,10 @@
 
 #include <nuttx/config.h>
 
-#include <errno.h>
-
-#include <nuttx/kmalloc.h>
-#include <nuttx/fs/fs.h>
-
 #include "fs_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
@@ -67,115 +62,35 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: inode_unlink
+ * Name: inode_nextname
  *
  * Description:
- *   Given a path, remove a the node from the in-memory, inode tree that the
- *   path refers to.  This is normally done in preparation to removing or
- *   moving an inode.
- *
- * Assumptions/Limitations:
- *   The caller must hold the inode semaphore
+ *   Given a path with node names separated by '/', return the next node
+ *   name.
  *
  ****************************************************************************/
 
-FAR struct inode *inode_unlink(FAR const char *path)
+FAR const char *inode_basename(FAR const char *name)
 {
-  const char       *name = path;
-  FAR struct inode *node;
-  FAR struct inode *peer;
-  FAR struct inode *parent;
+  FAR const char *basename = NULL;
 
-  /* Verify parameters.  Ignore null paths and relative paths */
-
-  if (!path || *path == '\0' || path[0] != '/')
+  for (;;)
     {
-      return NULL;
-    }
+      /* Get the name for the next path segment */
 
-  /* Find the node to unlink */
+      name = inode_nextname(name);
 
-  node = inode_search(&name, &peer, &parent, (const char **)NULL);
-  if (node)
-    {
-      /* If peer is non-null, then remove the node from the right of
-       * of that peer node.
+      /* When the final segment is terminated by the NUL character, then
+       * previous name that we saved is the basename.
        */
 
-      if (peer)
+      if (*name == '\0')
         {
-          peer->i_peer = node->i_peer;
-        }
-
-      /* If parent is non-null, then remove the node from head of
-       * of the list of children.
-       */
-
-      else if (parent)
-        {
-          parent->i_child = node->i_peer;
-        }
-
-      /* Otherwise, we must be removing the root inode. */
-
-      else
-        {
-           root_inode = node->i_peer;
-        }
-
-      node->i_peer = NULL;
-    }
-
-  return node;
-}
-
-/****************************************************************************
- * Name: inode_remove
- *
- * Description:
- *   Given a path, remove a the node from the in-memory, inode tree that the
- *   path refers to and free all resources related to the inode.  If the
- *   inode is in-use, then it will be unlinked, but will not be freed until
- *   the last reference to the inode is released.
- *
- * Assumptions/Limitations:
- *   The caller must hold the inode semaphore
- *
- ****************************************************************************/
-
-int inode_remove(FAR const char *path)
-{
-  FAR struct inode *node;
-
-  /* Find the inode and unlink it from the in-memory inode tree */
-
-  node = inode_unlink(path);
-  if (node)
-    {
-      /* Found it! But we cannot delete the inode if there are references
-       * to it
-       */
-
-      if (node->i_crefs)
-        {
-          /* In that case, we will mark it deleted, when the filesystem
-           * releases the inode, we will then, finally delete the subtree
-           */
-
-           node->i_flags |= FSNODEFLAG_DELETED;
-           return -EBUSY;
-        }
-      else
-        {
-          /* And delete it now -- recursively to delete all of its children */
-
-          inode_free(node->i_child);
-          kfree(node);
-          return OK;
+          return basename;
         }
     }
 
-  /* The node does not exist */
+  /* We won't get here */
 
-  return -ENOENT;
+  return NULL;
 }

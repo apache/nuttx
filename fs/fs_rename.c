@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_rename.c
  *
- *   Copyright (C) 2007-2009 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007-2009, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -75,78 +75,151 @@
 int rename(FAR const char *oldpath, FAR const char *newpath)
 {
   FAR struct inode *oldinode;
-  FAR struct inode *newinode;
   const char       *oldrelpath = NULL;
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+  FAR struct inode *newinode;
   const char       *newrelpath = NULL;
+#endif
+  int               errcode;
   int               ret;
+
+  /* Ignore paths that are interpreted as the root directory which has no name
+   * and cannot be moved
+   */
+
+  if (!oldpath || *oldpath == '\0' || oldpath[0] != '/' ||
+      !newpath || *newpath == '\0' || newpath[0] != '/')
+    {
+      return -EINVAL;
+    }
 
   /* Get an inode that includes the oldpath */
 
   oldinode = inode_find(oldpath, &oldrelpath);
   if (!oldinode)
     {
-      /* There is no mountpoint that includes in this path */
+      /* There is no inode that includes in this path */
 
-      ret = ENOENT;
+      errcode = ENOENT;
       goto errout;
     }
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   /* Verify that the old inode is a valid mountpoint. */
 
-  if (!INODE_IS_MOUNTPT(oldinode) || !oldinode->u.i_mops)
+  if (INODE_IS_MOUNTPT(oldinode) && oldinode->u.i_mops)
     {
-      ret = ENXIO;
-      goto errout_with_oldinode;
-    }
+      /* Get an inode for the new relpath -- it should like on the same
+       * mountpoint
+       */
 
-  /* Get an inode for the new relpath -- it should like on the same
-   * mountpoint
-   */
-
-  newinode = inode_find(newpath, &newrelpath);
-  if (!newinode)
-    {
-      /* There is no mountpoint that includes in this path */
-
-      ret = ENOENT;
-      goto errout_with_oldinode;
-    }
-
-  /* Verify that the two paths lie on the same mountpoint inode */
-
-  if (oldinode != newinode)
-    {
-      ret = EXDEV;
-      goto errout_with_newinode;
-    }
-
-  /* Perform the rename operation using the relative paths
-   * at the common mountpoint.
-   */
-
-  if (oldinode->u.i_mops->rename)
-    {
-      ret = oldinode->u.i_mops->rename(oldinode, oldrelpath, newrelpath);
-      if (ret < 0)
+      newinode = inode_find(newpath, &newrelpath);
+      if (!newinode)
         {
-          ret = -ret;
+          /* There is no mountpoint that includes in this path */
+
+          errcode = ENOENT;
+          goto errout_with_oldinode;
+        }
+
+      /* Verify that the two paths lie on the same mountpoint inode */
+
+      if (oldinode != newinode)
+        {
+          errcode = EXDEV;
           goto errout_with_newinode;
         }
+
+      /* Perform the rename operation using the relative paths
+       * at the common mountpoint.
+       */
+
+      if (oldinode->u.i_mops->rename)
+        {
+          ret = oldinode->u.i_mops->rename(oldinode, oldrelpath, newrelpath);
+          if (ret < 0)
+            {
+              errcode = -ret;
+              goto errout_with_newinode;
+            }
+        }
+      else
+        { 
+          errcode = ENOSYS;
+          goto errout_with_newinode;
+        }
+
+      /* Successfully renamed */
+
+      inode_release(newinode);
     }
   else
-    { 
-      ret = ENOSYS;
-      goto errout_with_newinode;
+#endif
+    {
+      /* Create a new, empty inode at the destination location */
+
+      inode_semtake();
+      ret = inode_reserve(newpath, &newinode);
+      if (ret < 0)
+        {
+          /* It is an error if a node at newpath already exists in the tree
+           * OR if we fail to allocate memory for the new inode (and possibly
+           * any new intermediate path segments).
+           */
+
+          inode_semgive();
+          errcode = EEXIST;
+          goto errout_with_oldinode;
+        }
+
+      /* Copy the inode state from the old inode to the newly allocated inode */
+
+      newinode->i_child   = oldinode->i_child;   /* Link to lower level inode */
+      newinode->i_flags   = oldinode->i_flags;   /* Flags for inode */
+      newinode->u.i_ops   = oldinode->u.i_ops;   /* Inode operations */
+#ifdef CONFIG_FILE_MODE
+      newinode->i_mode    = oldinode->i_mode;    /* Access mode flags */
+#endif
+      newinode->i_private = oldinode->i_private; /* Per inode driver private data */
+
+      /* We now have two copies of the inode.  One with a reference count of
+       * zero (the new one), and one that may have multiple references
+       * including one by this logic (the old one)
+       *
+       * Remove the old inode.  Because we hold a reference count on the
+       * inode, it will not be deleted now.  It will be deleted when all of
+       * the references to to the inode have been released (perhaps when
+       * inode_release() is called below).  inode_remove() should return
+       * -EBUSY to indicate that the inode was not deleted now.
+       */
+
+      ret = inode_remove(oldpath);
+      if (ret < 0 && ret != -EBUSY)
+        {
+          /* Remove the new node we just recreated */
+
+          (void)inode_remove(newpath);
+          inode_semgive();
+
+          errcode = -ret;
+          goto errout_with_oldinode;
+        }
+
+      /* Remove all of the children from the unlinked inode */
+
+      oldinode->i_child = NULL;
+      inode_semgive();
     }
 
   /* Successfully renamed */
 
   inode_release(oldinode);
-  inode_release(newinode);
   return OK;
 
+#ifndef CONFIG_DISABLE_MOUNTPOINT
  errout_with_newinode:
   inode_release(newinode);
+#endif
  errout_with_oldinode:
   inode_release(oldinode);
  errout:

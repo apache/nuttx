@@ -68,8 +68,8 @@ CSRCS += fs_rewinddir.c fs_rmdir.c fs_seekdir.c fs_stat.c fs_statfs.c
 CSRCS += fs_select.c fs_write.c
 
 CSRCS += fs_files.c fs_foreachinode.c fs_inode.c fs_inodeaddref.c
-CSRCS += fs_inodefind.c fs_inoderelease.c fs_inoderemove.c
-CSRCS += fs_inodereserve.c
+CSRCS += fs_inodebasename.c fs_inodefind.c fs_inoderelease.c
+CSRCS += fs_inoderemove.c fs_inodereserve.c
 
 CSRCS += fs_registerdriver.c fs_unregisterdriver.c
 CSRCS += fs_registerblockdriver.c fs_unregisterblockdriver.c

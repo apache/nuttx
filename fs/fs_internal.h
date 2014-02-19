@@ -1,7 +1,7 @@
 /****************************************************************************
  * fs/fs_internal.h
  *
- *   Copyright (C) 2007, 2009, 2012 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2007, 2009, 2012, 2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -196,12 +196,31 @@ int inode_reserve(FAR const char *path, FAR struct inode **inode);
 
 /* fs_inoderemove.c *********************************************************/
 /****************************************************************************
+ * Name: inode_unlink
+ *
+ * Description:
+ *   Given a path, remove a the node from the in-memory, inode tree that the
+ *   path refers to.  This is normally done in preparation to removing or
+ *   moving an inode.
+ *
+ * Assumptions/Limitations:
+ *   The caller must hold the inode semaphore
+ *
+ ****************************************************************************/
+
+FAR struct inode *inode_unlink(FAR const char *path);
+
+/****************************************************************************
  * Name: inode_remove
  *
  * Description:
- *   Remove a node from the in-memory, inode tree
+ *   Given a path, remove a the node from the in-memory, inode tree that the
+ *   path refers to and free all resources related to the inode.  If the
+ *   inode is in-use, then it will be unlinked, but will not be freed until
+ *   the last reference to the inode is released.
  *
- *   NOTE: Caller must hold the inode semaphore
+ * Assumptions/Limitations:
+ *   The caller must hold the inode semaphore
  *
  ****************************************************************************/
 
