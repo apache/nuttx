@@ -56,6 +56,8 @@
 
 #include "sam_config.h"
 
+#include <arch/board/board.h>
+
 #include "chip/sam_pm.h"
 #include "chip/sam_gclk.h"
 #include "chip/sam_usart.h"
@@ -301,7 +303,7 @@ int sam_usart_internal(const struct sam_usart_config_s * const config)
   /* Configure the GCLKs for the SERCOM module */
 
   sercom_coreclk_configure(config->sercom, config->gclkgen, false);
-  sercom_slowclk_configure(config->gclkgen);
+  sercom_slowclk_configure(BOARD_SERCOM_SLOW_GCLKGEN);
 
   /* Set USART configuration according to the board configuration */
 

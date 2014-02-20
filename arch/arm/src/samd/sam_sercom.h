@@ -44,7 +44,9 @@
 
 #include <stdbool.h>
 
+#include "up_arch.h"
 #include "sam_config.h"
+#include "chip/sam_pm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -85,7 +87,7 @@ extern "C"
  *
  ****************************************************************************/
 
-static inline int sercom_enable(int sercom)
+static inline void sercom_enable(int sercom)
 {
   uint32_t regval;
 
