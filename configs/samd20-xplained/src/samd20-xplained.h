@@ -127,7 +127,7 @@
 #    endif
 
 #    define PORT_SD_CD (PORT_INTERRUPT | PORT_INT_CHANGE | PORT_PULL_UP | \
-                        PORTF | PORT_PIN5)
+                        PORTB | PORT_PIN5)
 
 #    define PORT_SD_CS (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
                         PORTA | PORT_PIN5)
@@ -139,8 +139,8 @@
 #      error I/O1 and OLED1 modules cannot both reside in EXT2
 #    endif
 
-#    define PORT_CD   (PORT_INTERRUPT | PORT_INT_CHANGE | PORT_PULL_UP | \
-                       PORTB | PORT_PIN15)
+#    define PORT_SD_CD (PORT_INTERRUPT | PORT_INT_CHANGE | PORT_PULL_UP | \
+                        PORTB | PORT_PIN15)
 
 #    define PORT_SD_CS (PORT_OUTPUT | PORT_PULL_NONE | PORT_OUTPUT_SET | \
                         PORTA | PORT_PIN17)
@@ -250,12 +250,13 @@ void weak_function sam_spiinitialize(void);
  *
  * Description:
  *   Initialize the SPI-based SD card.  Requires CONFIG_SAMD20_XPLAINED_IOMODULE=y,
- *   CONFIG_DISABLE_MOUNTPOINT=n, CONFIG_MMCSD=y, and SAMD_HAVE_SPI0
+ *   CONFIG_DISABLE_MOUNTPOINT=n, CONFIG_MMCSD=y, and the appropriate SERCOM SPI
+ *   port enabled.
  *
  ************************************************************************************/
 
-#if defined(SAMD_HAVE_SPI0) && defined(CONFIG_SAMD20_XPLAINED_IOMODULE)
-int sam_sdinitialize(int minor);
+#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE
+int sam_sdinitialize(int port, int minor);
 #endif
 
 /************************************************************************************

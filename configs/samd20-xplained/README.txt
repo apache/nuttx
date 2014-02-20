@@ -712,7 +712,14 @@ Configuration sub-directories
 
     4. If the I/O1 module is connected to the SAMD20 Xplained Pro, then
        support for the SD card slot can be enabled by making the following
-       changes to the configuration:
+       changes to the configuration.  These changes assume that the I/O1
+       modules is connected in EXT1.  Most of the modifications necessary
+       to work with the I/O1 in a different connector are obvious.. except
+       for the selection of SERCOM SPI support:
+
+         EXT1: SPI is provided through SERCOM0
+         EXT2: SPI is provided through SERCOM1
+         EXT3: SPI is provided through SERCOM5
 
        File Systems:
          CONFIG_FS_FAT=y                   : Enable the FAT file system
@@ -725,7 +732,8 @@ Configuration sub-directories
          details.
 
        System Type -> Peripherals:
-         To be provided                    : Enable the SAMD20 SPI peripheral
+         CONFIG_SAMD_SERCOM0=y             : Use SERCOM0 if the I/O is in EXT1
+         CONFIG_SAMD_SERCOM0_ISSPI=y       : Configure SERCOM0 as an SPI master
 
        Device Drivers
          CONFIG_SPI=y                      : Enable SPI support
@@ -735,6 +743,7 @@ Configuration sub-directories
          CONFIG_MMCSD=y                    : Enable MMC/SD support
          CONFIG_MMCSD_NSLOTS=1             : Only one MMC/SD card slot
          CONFIG_MMCSD_MULTIBLOCK_DISABLE=n : Should not need to disable multi-block transfers
+         CONFIG_MMCSD_MMCSUPPORT=n         : May interfere with some SD cards
          CONFIG_MMCSD_HAVECARDDETECT=y     : I/O1 module as a card detect GPIO
          CONFIG_MMCSD_SPI=y                : Use the SPI interface to the MMC/SD card
          CONFIG_MMCSD_SPICLOCK=20000000    : This is a guess for the optimal MMC/SD frequency
@@ -742,13 +751,11 @@ Configuration sub-directories
 
        Board Selection -> Common Board Options
          CONFIG_NSH_MMCSDSLOTNO=0          : Only one MMC/SD slot, slot 0
-         CONFIG_NSH_MMCSDSPIPORTNO=0       : Use CS=0 if the I/O1 is in EXT1, OR
-         CONFIG_NSH_MMCSDSPIPORTNO=2       : Use CS=2 if the I/O1 is in EXT2
+         CONFIG_NSH_MMCSDSPIPORTNO=0       : Use port=0 -> SERCOM0 if the I/O1 is in EXT1
 
        Board Selection -> SAMD20 Xplained Pro Modules
          CONFIG_SAMD20_XPLAINED_IOMODULE=y      : I/O1 module is connected
-         CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1=y : In EXT1, or EXT2
-         CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2=y
+         CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1=y : I/O1 modules is in EXT1
 
        Application Configuration -> NSH Library
          CONFIG_NSH_ARCHINIT=y             : Board has architecture-specific initialization
@@ -776,10 +783,18 @@ Configuration sub-directories
 
     5. If the OLED1 module is connected to the SAMD20 Xplained Pro, then
        support for the OLED display can be enabled by making the following
-       changes to the configuration:
+       changes to the configuration.  These changes assume that the I/O1
+       modules is connected in EXT1.  Most of the modifications necessary
+       to work with the I/O1 in a different connector are obvious.. except
+       for the selection of SERCOM SPI support:
+
+         EXT1: SPI is provided through SERCOM0
+         EXT2: SPI is provided through SERCOM1
+         EXT3: SPI is provided through SERCOM5
 
        System Type -> Peripherals:
-         To be provided                     : Enable the SAMD20 SPI peripheral
+         CONFIG_SAMD_SERCOM1=y             : Use SERCOM1 if the I/O is in EXT2
+         CONFIG_SAMD_SERCOM1_ISSPI=y       : Configure SERCOM1 as an SPI master
 
        Device Drivers -> SPI
          CONFIG_SPI=y                       : Enable SPI support
@@ -797,8 +812,7 @@ Configuration sub-directories
 
        Board Selection -> SAMD20 Xplained Pro Modules
          CONFIG_SAMD20_XPLAINED_OLED1MODULE=y      : OLED1 module is connected
-         CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT1=y : In EXT1, or EXT2
-         CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2=y
+         CONFIG_SAMD20_XPLAINED_OLED1MODULE_EXT2=y : OLED1 modules is in EXT2
 
        The NX graphics subsystem also needs to be configured:
 
@@ -868,3 +882,9 @@ Configuration sub-directories
          appears at different BAUD settings implying that this may not even
          be clock related???
        - The program seems to be running normally, just producing bad output.
+
+    3. The configuration suggests CONFIG_MMCSD_HAVECARDDETECT=y, but as of
+       this writing, there is no support for EIC pin interrupts.
+
+    4. OLED1 module is untested.  These intructions were just ported from
+       the SAM4L Xplained Pro README.txt file.

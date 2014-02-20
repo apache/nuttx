@@ -58,8 +58,8 @@
  ****************************************************************************/
 /* Configuration ************************************************************/
 
-#if defined(CONFIG_SAM4L_XPLAINED_IOMODULE) && \
-    defined(CONFIG_SAM4L_XPLAINED_OLED1MODULE) && defined(CONFIG_SPI_OWNBUS)
+#if defined(CONFIG_SAMD20_XPLAINED_IOMODULE) && \
+    defined(CONFIG_SAMD20_XPLAINED_OLED1MODULE) && defined(CONFIG_SPI_OWNBUS)
 #  error CONFIG_SPI_OWNBUS must not defined if using both I/O1 and OLED1 modules
 #endif
 
@@ -104,14 +104,14 @@ void weak_function sam_spiinitialize(void)
    * it is installed, it may be in connector EXT1 or EXT2.
    */
 
-#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE
   /* TODO: enable interrupt on card detect */
 
    sam_configport(PORT_SD_CD);     /* Card detect input */
    sam_configport(PORT_SD_CS);     /* Chip select output */
 #endif
 
-#ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
+#ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE
    sam_configport(PORT_OLED_DATA); /* Command/data */
    sam_configport(PORT_OLED_CS);   /* Card detect input */
 #endif
@@ -180,7 +180,8 @@ void weak_function sam_spiinitialize(void)
  ****************************************************************************/
 
 #ifdef SAMD_HAVE_SPI0
-void sam_spi0select(enum spi_dev_e devid, bool selected)
+void sam_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                    bool selected)
 {
 #ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1
   /* Select/de-select the SD card */
@@ -207,7 +208,8 @@ void sam_spi0select(enum spi_dev_e devid, bool selected)
 #endif
 
 #ifdef SAMD_HAVE_SPI1
-void sam_spi1select(enum spi_dev_e devid, bool selected)
+void sam_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                    bool selected)
 {
 #ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2
   /* Select/de-select the SD card */
@@ -234,25 +236,29 @@ void sam_spi1select(enum spi_dev_e devid, bool selected)
 #endif
 
 #ifdef SAMD_HAVE_SPI2
-void sam_spi2select(enum spi_dev_e devid, bool selected)
+void sam_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                    bool selected)
 {
 }
 #endif
 
 #ifdef SAMD_HAVE_SPI3
-void sam_spi3select(enum spi_dev_e devid, bool selected)
+void sam_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                    bool selected)
 {
 }
 #endif
 
 #ifdef SAMD_HAVE_SPI4
-void sam_spi4select(enum spi_dev_e devid, bool selected)
+void sam_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                    bool selected)
 {
 }
 #endif
 
 #ifdef SAMD_HAVE_SPI5
-void sam_spi5select(enum spi_dev_e devid, bool selected)
+void sam_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                    bool selected)
 {
 }
 #endif
