@@ -6627,5 +6627,5 @@
 	* arch/arm/src/lm/lm_lowputc.c and lm_serial.c:  Several errors
 	  are unmasked with UARTs > UART2 are enabled.  From gosha (2014-2-19).
 	* arch/arm/src/samd/sam_spi.c:  The SPI driver is code complete,
-	  but untested (2014-2-19).
+	  but untested (2014-2-20).
 

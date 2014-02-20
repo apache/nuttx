@@ -49,7 +49,7 @@
 #include "sam_config.h"
 #include "samd20-xplained.h"
 
-#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -79,48 +79,47 @@
  *
  * Description:
  *   Initialize the SPI-based SD card.  Requires
- *   - CONFIG_SAM4L_XPLAINED_IOMODULE=y,
+ *   - CONFIG_SAMD20_XPLAINED_IOMODULE=y,
  *   - CONFIG_DISABLE_MOUNTPOINT=n,
  *   - CONFIG_MMCSD=y, and
  *   - SAMD_HAVE_SPI0=y (CONFIG_SAMD_SERCOM0 && CONFIG_SAMD_SERCOM0_ISSPI)
  *
  *****************************************************************************/
 
-int sam_sdinitialize(int minor)
+int sam_sdinitialize(int port, int minor)
 {
   FAR struct spi_dev_s *spi;
   int ret;
 
   /* Get the SPI driver instance for the SD chip select */
 
-  fvdbg("Initializing SPI chip select %d\n", SD_CSNO);
+  fvdbg("Initializing SERCOM SPI%d\n", port);
 
-  spi = up_spiinitialize(SD_CSNO);
+  spi = up_spiinitialize(port);
   if (!spi)
     {
-      fdbg("Failed to initialize SPI chip select %d\n", SD_CSNO);
+      fdbg("Failed to initialize SPI%d\n", port);
       return -ENODEV;
     }
 
-  fvdbg("Successfully initialized SPI chip select %d\n", SD_CSNO);
+  fvdbg("Successfully initialized SPI%d\n", port);
 
   /* Bind the SPI device for the chip select to the slot */
 
-  fvdbg("Binding SPI chip select %d to MMC/SD slot %d\n",
-          SD_CSNO, SAMD_MMCSDSLOTNO);
+  fvdbg("Binding SPI%d to MMC/SD slot %d\n", port, SAMD_MMCSDSLOTNO);
 
   ret = mmcsd_spislotinitialize(minor, SAMD_MMCSDSLOTNO, spi);
   if (ret < 0)
     {
-      fdbg("Failed to bind SPI chip select %d to MMC/SD slot %d: %d\n",
-            SD_CSNO, SAMD_MMCSDSLOTNO, ret);
+      fdbg("Failed to bind SPI%d to MMC/SD slot %d: %d\n",
+            port, SAMD_MMCSDSLOTNO, ret);
       return ret;
     }
 
-  fvdbg("Successfuly bound SPI chip select %d to MMC/SD slot %d\n",
-        SD_CSNO, SAMD_MMCSDSLOTNO);
+  fvdbg("Successfuly bound SPI%d to MMC/SD slot %d\n",
+        port, SAMD_MMCSDSLOTNO);
 
   return OK;
 }
 
-#endif /* CONFIG_SAM4L_XPLAINED_IOMODULE */
+#endif /* CONFIG_SAMD20_XPLAINED_IOMODULE */

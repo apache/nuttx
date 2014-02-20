@@ -54,7 +54,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <arch/board/board.h>
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/spi/spi.h>
@@ -65,8 +64,12 @@
 #include "chip.h"
 #include "chip/sam_port.h"
 #include "chip/sam_pinmap.h"
+#include "chip/sam_gclk.h"
 #include "chip/sam_spi.h"
 
+#include <arch/board/board.h>
+
+#include "sam_port.h"
 #include "sam_sercom.h"
 #include "sam_spi.h"
 
@@ -135,9 +138,9 @@ struct sam_spidev_s
   sem_t spilock;               /* Used to managed exclusive access to the bus */
   uint32_t frequency;          /* Requested clock frequency */
   uint32_t actual;             /* Actual clock frequency */
-  uint8_t nbits;               /* Width of word in bits (8 to 16) */
   uint8_t mode;                /* Mode 0,1,2,3 */
 #endif
+  uint8_t nbits;               /* Width of word in bits (8 to 16) */
 
   /* Debug stuff */
 
@@ -162,8 +165,10 @@ static bool     spi_checkreg(struct sam_spidev_s *priv, bool wr,
 # define        spi_checkreg(priv,wr,regval,regaddr) (false)
 #endif
 
+#if 0 /* Not used */
 static uint8_t  spi_getreg8(struct sam_spidev_s *priv,
                   unsigned int offset);
+#endif
 static void     spi_putreg8(struct sam_spidev_s *priv, uint8_t regval,
                   unsigned int offset);
 static uint16_t spi_getreg16(struct sam_spidev_s *priv,
@@ -186,22 +191,22 @@ static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 #if 0 /* Not used */
 static int  spi_interrupt(struct sam_spidev_s *dev);
 
-#ifdef SAMD_HAVE_USART0
+#ifdef SAMD_HAVE_SPI0
 static int  spi0_interrupt(int irq, void *context);
 #endif
-#ifdef SAMD_HAVE_USART1
+#ifdef SAMD_HAVE_SPI1
 static int  spi1_interrupt(int irq, void *context);
 #endif
-#ifdef SAMD_HAVE_USART2
+#ifdef SAMD_HAVE_SPI2
 static int  spi2_interrupt(int irq, void *context);
 #endif
-#ifdef SAMD_HAVE_USART3
+#ifdef SAMD_HAVE_SPI3
 static int  spi3_interrupt(int irq, void *context);
 #endif
-#ifdef SAMD_HAVE_USART4
+#ifdef SAMD_HAVE_SPI4
 static int  spi4_interrupt(int irq, void *context);
 #endif
-#ifdef SAMD_HAVE_USART5
+#ifdef SAMD_HAVE_SPI5
 static int  spi5_interrupt(int irq, void *context);
 #endif
 #endif
@@ -614,6 +619,7 @@ static bool spi_checkreg(struct sam_spidev_s *priv, bool wr, uint32_t regval,
  *
  ****************************************************************************/
 
+#if 0 /* Not used */
 static uint8_t spi_getreg8(struct sam_spidev_s *priv, unsigned int offset)
 {
   uintptr_t regaddr = priv->base + offset;
@@ -628,6 +634,7 @@ static uint8_t spi_getreg8(struct sam_spidev_s *priv, unsigned int offset)
 
   return regval;
 }
+#endif
 
 /****************************************************************************
  * Name: spi_putreg8
@@ -781,11 +788,10 @@ static void spi_dumpregs(struct sam_spidev_s *priv, const char *msg)
  * Name: spi_interrupt
  *
  * Description:
- *   This is the USART interrupt handler.  It will be invoked when an
- *   interrupt received on the 'irq'  It should call uart_transmitchars or
- *   uart_receivechar to perform the appropriate data transfers.  The
- *   interrupt handling logic must be able to map the 'irq' number into the
- *   approprite sam_spidev_s structure in order to call these functions.
+ *   This is the SPI interrupt handler.  It will be invoked when an
+ *   interrupt received on the 'irq' indicating either that the DATA
+ *   register is available for the next transmission (DRE) or that the
+ *   DATA register holds a new incoming work.
  *
  ****************************************************************************/
 
@@ -801,8 +807,8 @@ static int spi_interrupt(struct sam_spidev_s *dev)
   * unmasked interrupts).
   */
 
-  intflag = sam_serialin8(priv, SAM_USART_INTFLAG_OFFSET);
-  inten   = sam_serialin8(priv, SAM_USART_INTENCLR_OFFSET);
+  intflag = sam_serialin8(priv, SAM_SPI_INTFLAG_OFFSET);
+  inten   = sam_serialin8(priv, SAM_SPI_INTENCLR_OFFSET);
   pending  = intflag & inten;
 
   /* Handle an incoming, receive byte.  The RXC flag is set when there is
@@ -810,7 +816,7 @@ static int spi_interrupt(struct sam_spidev_s *dev)
    * register (or by disabling the receiver).
    */
 
-  if ((pending & USART_INT_RXC) != 0)
+  if ((pending & SPI_INT_RXC) != 0)
     {
       /* Received data ready... process incoming SPI ata */
 #warning Missing logic
@@ -823,7 +829,7 @@ static int spi_interrupt(struct sam_spidev_s *dev)
    * further interrupts until TX interrupts are re-enabled.
    */
 
-  if ((pending & USART_INT_DRE) != 0)
+  if ((pending & SPI_INT_DRE) != 0)
     {
        /* Transmit data register empty ... process outgoing bytes */
 #warning Missing logic
@@ -837,48 +843,48 @@ static int spi_interrupt(struct sam_spidev_s *dev)
  * Name: spiN_interrupt
  *
  * Description:
- *   Handle each SERCOM USART interrupt by calling the common interrupt
- *   handling logic with the USART-specific state.
+ *   Handle each SERCOM SPI interrupt by calling the common interrupt
+ *   handling logic with the SPI-specific state.
  *
  ****************************************************************************/
 
 #if 0 /* Not used */
-#ifdef SAMD_HAVE_USART0
+#ifdef SAMD_HAVE_SPI0
 static int  spi0_interrupt(int irq, void *context)
 {
   return spi_interrupt(&g_spi0dev);
 }
 #endif
 
-#ifdef SAMD_HAVE_USART1
+#ifdef SAMD_HAVE_SPI1
 static int  spi1_interrupt(int irq, void *context)
 {
   return spi_interrupt(&g_spi1dev);
 }
 #endif
 
-#ifdef SAMD_HAVE_USART2
+#ifdef SAMD_HAVE_SPI2
 static int  spi2_interrupt(int irq, void *context)
 {
   return spi_interrupt(&g_spi2dev);
 }
 #endif
 
-#ifdef SAMD_HAVE_USART3
+#ifdef SAMD_HAVE_SPI3
 static int  spi3_interrupt(int irq, void *context)
 {
   return spi_interrupt(&g_spi3dev);
 }
 #endif
 
-#ifdef SAMD_HAVE_USART4
+#ifdef SAMD_HAVE_SPI4
 static int  spi4_interrupt(int irq, void *context)
 {
   return spi_interrupt(&g_spi4dev);
 }
 #endif
 
-#ifdef SAMD_HAVE_USART5
+#ifdef SAMD_HAVE_SPI5
 static int  spi5_interrupt(int irq, void *context)
 {
   return spi_interrupt(&g_spi5dev);
@@ -1050,7 +1056,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
     {
       /* Yes... Set the mode appropriately */
 
-      regval = spi_regetreg(SAM_SPI_CTRLA_OFFSET);
+      regval = spi_getreg32(priv, SAM_SPI_CTRLA_OFFSET);
       regval &= ~(SPI_CTRLA_CPOL | SPI_CTRLA_CPHA);
 
       switch (mode)
@@ -1075,7 +1081,7 @@ static void spi_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
           return;
         }
 
-      spi_putreg32(priv, regval, offset);
+      spi_putreg32(priv, regval, SAM_SPI_CTRLA_OFFSET);
 
       /* Save the mode so that subsequent re-configurations will be faster */
 
@@ -1104,16 +1110,13 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 {
   struct sam_spidev_s *priv = (struct sam_spidev_s *)dev;
   uint32_t regval;
-  unsigned int offset;
 
   spivdbg("sercom=%d nbits=%d\n", priv->sercom, nbits);
   DEBUGASSERT(priv && nbits > 7 && nbits < 10);
 
   /* Has the number of bits changed? */
 
-#ifndef CONFIG_SPI_OWNBUS
   if (nbits != priv->nbits)
-#endif
     {
       /* Yes... Set number of bits appropriately */
 
@@ -1129,9 +1132,7 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
 
       /* Save the selection so the subsequence re-configurations will be faster */
 
-#ifndef CONFIG_SPI_OWNBUS
       priv->nbits = nbits;
-#endif
     }
 }
 
@@ -1194,19 +1195,20 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
               void *rxbuffer, size_t nwords)
 {
   struct sam_spidev_s *priv = (struct sam_spidev_s *)dev;
-  const uint16_t *ptx16 = NULL;
-  const uint8_t *ptx8 = NULL;
-  uint16_t *prx16 = NULL;
-  uint8_t *prx8 = NULL;
+  const uint16_t *ptx16;
+  const uint8_t *ptx8;
+  uint16_t *prx16;
+  uint8_t *prx8;
   uint16_t data;
 
   spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
 
   /* Set up data receive and transmit pointers */
 
-  wide = ;
   if (priv->nbits > 8)
     {
+      ptx8  = NULL;
+      prx8  = NULL;
       ptx16 = (const uint16_t *)txbuffer;
       prx16 = (uint16_t *)rxbuffer;
     }
@@ -1214,6 +1216,8 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       ptx8  = (const uint8_t *)txbuffer;
       prx8  = (uint8_t *)rxbuffer;
+      ptx16 = NULL;
+      prx16 = NULL;
     }
 
   /* Loop, sending each word in the user-provided data buffer.
@@ -1282,13 +1286,13 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
        */
 
       data = spi_getreg16(priv, SAM_SPI_STATUS_OFFSET);
-      if (data & SPI_STATUS_BUFOVF) != 0)
+      if ((data & SPI_STATUS_BUFOVF) != 0)
         {
           spidbg("ERROR: Buffer overflow!\n");
 
           /* Clear the buffer overflow flag */
 
-          spi_putreg(priv, data, SAM_SPI_STATUS_OFFSET);
+          spi_putreg16(priv, data, SAM_SPI_STATUS_OFFSET);
         }
 
       /* Read the received data from the SPI DATA Register..
@@ -1373,7 +1377,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
 
 static void spi_wait_synchronization(struct sam_spidev_s *priv)
 {
-  while ((getreg16(priv->base + SAM_USART_STATUS_OFFSET) & USART_STATUS_SYNCBUSY) != 0);
+  while ((getreg16(priv->base + SAM_SPI_STATUS_OFFSET) & SPI_STATUS_SYNCBUSY) != 0);
 }
 
 /****************************************************************************
@@ -1432,8 +1436,9 @@ struct spi_dev_s *up_spiinitialize(int port)
   struct sam_spidev_s *priv;
   irqstate_t flags;
   uint32_t regval;
-  uint32_t baud;
+#if 0 /* Not used */
   int ret;
+#endif
 
   /* Get the port state structure */
 
@@ -1519,20 +1524,18 @@ struct spi_dev_s *up_spiinitialize(int port)
   (void)spi_setfrequency((struct spi_dev_s *)priv, 400000);
 
   /* Set MSB first data order and the configured pad mux setting, 
-   * Note that SPI mode 0 are assumed initially.
+   * Note that SPI mode 0 is assumed initially (CPOL=0 and CPHA=0).
    */
 
-  regval = (SPI_DATA_ORDER_MSB | priv->muxconfig);
+  regval = (SPI_CTRLA_MSBFIRST | priv->muxconfig);
   spi_putreg8(priv, regval, SAM_SPI_CTRLA_OFFSET);
 
   /* Enable the receiver.  Note that 8-bit data width is assumed initially */
 
-  regval = SPI_CTRLB_RXEN;
+  regval = (SPI_CTRLB_RXEN | SPI_CTRLB_CHSIZE_8BITS);
   spi_putreg8(priv, regval, SAM_SPI_CTRLB_OFFSET);
 
-#ifndef CONFIG_SPI_OWNBUS
-  priv->nbits = nbits;
-#endif
+  priv->nbits = 8;
 
   /* Wait until the synchronization is complete */
 

@@ -48,8 +48,25 @@
 /****************************************************************************
  * Pre-Processor Definitions
  ****************************************************************************/
+/* Some configuration checks */
 
-#ifdef CONFIG_SAM4L_XPLAINED_IOMODULE
+#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT1
+#  ifndef SAMD_HAVE_SPI0
+#    error I/O1 module on EXT1 requires SERCOM SPI0
+#    undef CONFIG_SAMD20_XPLAINED_IOMODULE
+#  endif
+#  define SPI_PORTNO 0
+#endif
+
+#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE_EXT2
+#  ifndef SAMD_HAVE_SPI1
+#    error I/O1 module on EXT2 requires SERCOM SPI1
+#    undef CONFIG_SAMD20_XPLAINED_IOMODULE
+#  endif
+#  define SPI_PORTNO 1
+#endif
+
+#ifdef CONFIG_SAMD20_XPLAINED_IOMODULE
 /* Support for the SD card slot on the I/O1 module */
 /* Verify NSH PORT and SLOT settings */
 
@@ -57,10 +74,14 @@
 
 #  if defined(CONFIG_NSH_MMCSDSLOTNO) && CONFIG_NSH_MMCSDSLOTNO != SAMD_MMCSDSLOTNO
 #    error Only one MMC/SD slot:  Slot 0 (CONFIG_NSH_MMCSDSLOTNO)
+#    undef CONFIG_NSH_MMCSDSLOTNO
+#    define CONFIG_NSH_MMCSDSLOTNO SAMD_MMCSDSLOTNO
 #  endif
 
-#  if defined(CONFIG_NSH_MMCSDSPIPORTNO) && CONFIG_NSH_MMCSDSPIPORTNO != SD_CSNO
-#    error CONFIG_NSH_MMCSDSPIPORTNO must have the same value as SD_CSNO
+#  if defined(CONFIG_NSH_MMCSDSPIPORTNO) && CONFIG_NSH_MMCSDSPIPORTNO != SPI_PORTNO
+#    error CONFIG_NSH_MMCSDSPIPORTNO must have the same value as SPI_PORTNO
+#    undef CONFIG_NSH_MMCSDSPIPORTNO
+#    define CONFIG_NSH_MMCSDSPIPORTNO SPI_PORTNO
 #  endif
 
 /* Default MMC/SD minor number */
@@ -100,11 +121,11 @@
 
 int nsh_archinitialize(void)
 {
-#if defined(SAMD_HAVE_SPI0) && defined(CONFIG_SAM4L_XPLAINED_IOMODULE)
+#if defined(SAMD_HAVE_SPI0) && defined(CONFIG_SAMD20_XPLAINED_IOMODULE)
   /* Initialize the SPI-based MMC/SD slot */
 
   {
-    int ret = sam_sdinitialize(CONFIG_NSH_MMCSDMINOR);
+    int ret = sam_sdinitialize(SPI_PORTNO, CONFIG_NSH_MMCSDMINOR);
     if (ret < 0)
       {
         message("nsh_archinitialize: Failed to initialize MMC/SD slot: %d\n",

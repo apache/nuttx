@@ -177,11 +177,11 @@
 #  define SPI_CTRLB_CHSIZE_8BITS   (0 << SPI_CTRLB_CHSIZE_SHIFT) /* 8 bits */
 #  define SPI_CTRLB_CHSIZE_9BITS   (1 << SPI_CTRLB_CHSIZE_SHIFT) /* 9 bits */
 #define SPI_CTRLB_PLOADEN          (1 << 6)  /* Bit 6:  Slave Data Preload Enable */
-#define SPI_CRLB_AMODE_SHIFT       (14)      /* Bits 14-15: Address Mode */
-#define SPI_CRLB_AMODE_MASK        (3 << SPI_CRLB_AMODE_SHIFT)
-#  define SPI_CRLB_AMODE_MASK      (0 << SPI_CRLB_AMODE_SHIFT) /* ADDRMASK used to mask ADDR */
-#  define SPI_CRLB_AMODE_2ADDRS    (1 << SPI_CRLB_AMODE_SHIFT) /* Slave 2 addresses: ADDR & ADDRMASK */
-#  define SPI_CRLB_AMODE_RANGE     (2 << SPI_CRLB_AMODE_SHIFT) /* Slave range of addresses: ADDRMASK-ADDR */
+#define SPI_CTRLB_AMODE_SHIFT      (14)      /* Bits 14-15: Address Mode */
+#define SPI_CTRLB_AMODE_MASK       (3 << SPI_CTRLB_AMODE_SHIFT)
+#  define SPI_CTRLB_AMODE_ADDRMASK (0 << SPI_CTRLB_AMODE_SHIFT) /* ADDRMASK used to mask ADDR */
+#  define SPI_CTRLB_AMODE_2ADDRS   (1 << SPI_CTRLB_AMODE_SHIFT) /* Slave 2 addresses: ADDR & ADDRMASK */
+#  define SPI_CTRLB_AMODE_RANGE    (2 << SPI_CTRLB_AMODE_SHIFT) /* Slave range of addresses: ADDRMASK-ADDR */
 #define SPI_CTRLB_RXEN             (1 << 17)  /* Bit 17: Receiver enable */
 
 /* Debug control register */

@@ -117,7 +117,7 @@
 #include "sam_port.h"
 #include "samd20-xplained.h"
 
-#ifdef CONFIG_SAM4L_XPLAINED_OLED1MODULE
+#ifdef CONFIG_SAMD20_XPLAINED_OLED1MODULE
 
 /****************************************************************************
  * Pre-Processor Definitions
@@ -208,4 +208,4 @@ FAR struct lcd_dev_s *up_nxdrvinit(unsigned int devno)
 
   return NULL;
 }
-#endif /* CONFIG_SAM4L_XPLAINED_OLED1MODULE */
+#endif /* CONFIG_SAMD20_XPLAINED_OLED1MODULE */

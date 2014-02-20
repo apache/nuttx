@@ -146,27 +146,33 @@ enum spi_dev_e;
  ****************************************************************************/
 
 #ifdef SAMD_HAVE_SPI0
-void sam_spi0select(enum spi_dev_e devid, bool selected);
+void sam_spi0select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                    bool selected);
 #endif
 
 #ifdef SAMD_HAVE_SPI1
-void sam_spi1select(enum spi_dev_e devid, bool selected);
+void sam_spi1select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                    bool selected);
 #endif
 
 #ifdef SAMD_HAVE_SPI2
-void sam_spi2select(enum spi_dev_e devid, bool selected);
+void sam_spi2select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                    bool selected);
 #endif
 
 #ifdef SAMD_HAVE_SPI3
-void sam_spi3select(enum spi_dev_e devid, bool selected);
+void sam_spi3select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                    bool selected);
 #endif
 
 #ifdef SAMD_HAVE_SPI4
-void sam_spi4select(enum spi_dev_e devid, bool selected);
+void sam_spi4select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                    bool selected);
 #endif
 
 #ifdef SAMD_HAVE_SPI5
-void sam_spi5select(enum spi_dev_e devid, bool selected);
+void sam_spi5select(FAR struct spi_dev_s *dev, enum spi_dev_e devid,
+                    bool selected);
 #endif
 
 /****************************************************************************
