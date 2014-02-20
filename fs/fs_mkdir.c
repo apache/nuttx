@@ -124,7 +124,7 @@ int mkdir(const char *pathname, mode_t mode)
 #else
       /* But mountpoints are not supported in this configuration */
 
-      errocode = EEXIST;
+      errcode = EEXIST;
       goto errout_with_inode;     
 #endif
     }
