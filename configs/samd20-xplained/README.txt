@@ -618,8 +618,8 @@ Configurations
        reconfiguration process.
 
   2. Unless stated otherwise, all configurations generate console
-     output of on SERCOM4 which is available on EXT1 or EXT3 (see the
-     section "Serial Consoles" above).  The virtual COM port could
+     output of on SERCOM4 which is available on EXT1, EXT2, or EXT3 (see
+     the section "Serial Consoles" above).  The virtual COM port could
      be used, instead, by reconfiguring to use SERCOM3 instead of
      SERCOM4:
 
@@ -678,8 +678,8 @@ Configurations
      use to set or PATH variable.  The path in the that file may not,
      however, be correct for your installation.
 
-     See also the "NOTE about Windows native toolchains" in the section call
-     "GNU Toolchain Options" above.
+     See also the "NOTE about Windows native toolchains" in the section
+     called "GNU Toolchain Options" above.
 
 Configuration sub-directories
 -----------------------------
@@ -883,8 +883,11 @@ Configuration sub-directories
          be clock related???
        - The program seems to be running normally, just producing bad output.
 
-    3. The configuration suggests CONFIG_MMCSD_HAVECARDDETECT=y, but as of
+    3. SPI current hangs so no much progress has been made tested the I/O1
+       module.
+
+       The configuration suggests CONFIG_MMCSD_HAVECARDDETECT=y, but as of
        this writing, there is no support for EIC pin interrupts.
 
-    4. OLED1 module is untested.  These intructions were just ported from
+    4. OLED1 module is untested.  These instructions were just lifted from
        the SAM4L Xplained Pro README.txt file.
