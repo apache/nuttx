@@ -257,16 +257,16 @@ choice
 	depends on SAMD_SERCOM0
 
 config SAMD_SERCOM0_ISI2C
-bool "I2C"
-select I2C
+	bool "I2C"
+	select I2C
 
 config SAMD_SERCOM0_ISSPI
-bool "SPI"
-select SPI
+	bool "SPI"
+	select SAMD_HAVE_SPI
 
 config SAMD_SERCOM0_ISUSART
-bool "USART"
-select ARCH_HAVE_USART0
+	bool "USART"
+	select ARCH_HAVE_USART0
 
 endchoice
 
@@ -276,16 +276,16 @@ choice
 	depends on SAMD_SERCOM1
 
 config SAMD_SERCOM1_ISI2C
-bool "I2C"
-select I2C
+	bool "I2C"
+	select I2C
 
 config SAMD_SERCOM1_ISSPI
-bool "SPI"
-select SPI
+	bool "SPI"
+	select SAMD_HAVE_SPI
 
 config SAMD_SERCOM1_ISUSART
-bool "USART"
-select ARCH_HAVE_USART1
+	bool "USART"
+	select ARCH_HAVE_USART1
 
 endchoice
 
@@ -295,16 +295,16 @@ choice
 	depends on SAMD_SERCOM2
 
 config SAMD_SERCOM2_ISI2C
-bool "I2C"
-select I2C
+	bool "I2C"
+	select I2C
 
 config SAMD_SERCOM2_ISSPI
-bool "SPI"
-select SPI
+	bool "SPI"
+	select SAMD_HAVE_SPI
 
 config SAMD_SERCOM2_ISUSART
-bool "USART"
-select ARCH_HAVE_USART2
+	bool "USART"
+	select ARCH_HAVE_USART2
 
 endchoice
 
@@ -314,16 +314,16 @@ choice
 	depends on SAMD_SERCOM3
 
 config SAMD_SERCOM3_ISI2C
-bool "I2C"
-select I2C
+	bool "I2C"
+	select I2C
 
 config SAMD_SERCOM3_ISSPI
-bool "SPI"
-select SPI
+	bool "SPI"
+	select SAMD_HAVE_SPI
 
 config SAMD_SERCOM3_ISUSART
-bool "USART"
-select ARCH_HAVE_USART3
+	bool "USART"
+	select ARCH_HAVE_USART3
 
 endchoice
 
@@ -333,16 +333,16 @@ choice
 	depends on SAMD_SERCOM4
 
 config SAMD_SERCOM4_ISI2C
-bool "I2C"
-select I2C
+	bool "I2C"
+	select I2C
 
 config SAMD_SERCOM4_ISSPI
-bool "SPI"
-select SPI
+	bool "SPI"
+	select SAMD_HAVE_SPI
 
 config SAMD_SERCOM4_ISUSART
-bool "USART"
-select ARCH_HAVE_USART4
+	bool "USART"
+	select ARCH_HAVE_USART4
 
 endchoice
 
@@ -352,15 +352,30 @@ choice
 	depends on SAMD_SERCOM5
 
 config SAMD_SERCOM5_ISI2C
-bool "I2C"
-select I2C
+	bool "I2C"
+	select I2C
 
 config SAMD_SERCOM5_ISSPI
-bool "SPI"
-select SPI
+	bool "SPI"
+	select SAMD_HAVE_SPI
 
 config SAMD_SERCOM5_ISUSART
-bool "USART"
-select ARCH_HAVE_USART5
+	bool "USART"
+	select ARCH_HAVE_USART5
 
 endchoice
+
+config SAMD_HAVE_SPI
+	bool
+	select SPI
+
+if SAMD_HAVE_SPI
+
+config SAMA5_SPI_REGDEBUG
+	bool "SPI egister-Level Debug"
+	default n
+	depends on DEBUG_SPI
+	---help---
+		Enable very low-level register access debug.  Depends on DEBUG_SPI.
+
+endif # SAMD_HAVE_SPI
