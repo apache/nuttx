@@ -202,6 +202,8 @@
 #define SPI_STATUS_BUFOVF          (1 << 2)  /* Bit 2:  Buffer overflow */
 #define SPI_STATUS_SYNCBUSY        (1 << 15) /* Bit 15: Synchronization busy */
 
+#define SPI_STATUS_CLRALL          SPI_STATUS_BUFOVF
+
 /* Address register */
 
 #define SPI_ADDR_SHIFT             (0)       /* Bits 0-7: Address */

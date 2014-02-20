@@ -292,14 +292,11 @@ sam_pad_configure(const struct sam_usart_config_s * const config)
 #ifdef SAMD_HAVE_USART
 int sam_usart_internal(const struct sam_usart_config_s * const config)
 {
-  uint32_t regval;
   int ret;
 
   /* Enable clocking to the SERCOM module in PM */
 
-  regval  = getreg32(SAM_PM_APBCMASK);
-  regval |= PM_APBCMASK_SERCOM(config->sercom);
-  putreg32(regval, SAM_PM_APBCMASK);
+  sercom_enable(config->sercom);
 
   /* Configure the GCLKs for the SERCOM module */
 
