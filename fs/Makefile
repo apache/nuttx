@@ -64,8 +64,8 @@ else
 CSRCS += fs_close.c fs_closedir.c fs_dup.c fs_dup2.c fs_fcntl.c
 CSRCS += fs_filedup.c fs_filedup2.c fs_ioctl.c fs_lseek.c fs_mkdir.c
 CSRCS += fs_open.c fs_opendir.c fs_poll.c fs_read.c fs_readdir.c
-CSRCS += fs_rewinddir.c fs_rmdir.c fs_seekdir.c fs_stat.c fs_statfs.c
-CSRCS += fs_select.c fs_write.c
+CSRCS += fs_rename.c fs_rewinddir.c fs_rmdir.c fs_seekdir.c fs_stat.c
+CSRCS += fs_statfs.c fs_select.c fs_write.c
 
 CSRCS += fs_files.c fs_foreachinode.c fs_inode.c fs_inodeaddref.c
 CSRCS += fs_inodebasename.c fs_inodefind.c fs_inoderelease.c
@@ -104,8 +104,7 @@ endif
 
 ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
 
-CSRCS += fs_fsync.c fs_mount.c fs_rename.c fs_umount.c
-CSRCS += fs_unlink.c
+CSRCS += fs_fsync.c fs_mount.c fs_umount.c fs_unlink.c
 CSRCS += fs_foreachmountpoint.c
 
 include fat/Make.defs
