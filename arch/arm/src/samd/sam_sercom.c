@@ -79,7 +79,7 @@
  *   Configure the SERCOM core source clock.
  *
  *   Two generic clocks are used by the SERCOM: GCLK_SERCOMx_CORE and
- *   GCLK_SERCOMx_SLOW.  The core clock (GCLK_SERCOMx_CORE) is required to
+ *   GCLK_SERCOM_SLOW.  The core clock (GCLK_SERCOMx_CORE) is required to
  *   clock the SERCOM while operating as a master, while the slow clock
  *   (GCLK_SERCOM_SLOW) is only required for certain functions.  SERCOM
  *   modules must share the same slow GCLK channel ID.
@@ -136,7 +136,7 @@ void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
  *   Configure the SERCOM slow source clock.
  *
  *   Two generic clocks are used by the SERCOM: GCLK_SERCOMx_CORE and
- *   GCLK_SERCOMx_SLOW.  The core clock (GCLK_SERCOMx_CORE) is required to
+ *   GCLK_SERCOM_SLOW.  The core clock (GCLK_SERCOMx_CORE) is required to
  *   clock the SERCOM while operating as a master, while the slow clock
  *   (GCLK_SERCOM_SLOW) is only required for certain functions.  SERCOM
  *   modules must share the same slow GCLK channel ID.
@@ -145,38 +145,50 @@ void sercom_coreclk_configure(int sercom, int gclkgen, bool wrlock)
 
 void sercom_slowclk_configure(int gclkgen)
 {
+  static bool configured = false;
   uint16_t regval;
 
-  /* Set up the SERCOM_GCLK_ID_SLOW clock */
-
-  regval = (SERCOM_GCLK_ID_SLOW << GCLK_CLKCTRL_ID_SHIFT);
-
-  /* Select and disable the SERCOM_GCLK_ID_SLOW generic clock */
-
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-
-  /* Wait for clock to become disabled */
-
-  while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
-
-  /* Select the SERCOM_GCLK_ID_SLOW clock source generator */
-
-  regval |= (uint16_t)gclkgen << GCLK_CLKCTRL_GEN_SHIFT;
-
-  /* Write the new configuration */
-
-  putreg16(regval, SAM_GCLK_CLKCTRL);
-
-  /* Enable the GCLK_SERCOM_SLOW generic clock and lock further
-   * writes to this GCLK.  When this bit is written, it will lock
-   * further writes to the generic clock pointed by the CLKCTRL.ID. The
-   * generic clock generator pointed by CLKCTRL.GEN and the GENDIV.DIV
-   * will also be locked.
-   *
-   * We lock the SERCOM slow clock because it is common to all SERCOM modules
-   * and, once set, should not be changed again.
+  /* Since GCLK_SERCOM_SLOW is shard amongst all SERCOM modules, it should
+   * only be configured one time.
    */
 
-  regval |= (GCLK_CLKCTRL_WRTLOCK | GCLK_CLKCTRL_CLKEN);
-  putreg16(regval, SAM_GCLK_CLKCTRL);
+  if (!configured)
+    {
+      /* Set up the SERCOM_GCLK_ID_SLOW clock */
+
+      regval = (SERCOM_GCLK_ID_SLOW << GCLK_CLKCTRL_ID_SHIFT);
+
+      /* Select and disable the SERCOM_GCLK_ID_SLOW generic clock */
+
+      putreg16(regval, SAM_GCLK_CLKCTRL);
+
+      /* Wait for clock to become disabled */
+
+      while ((getreg16(SAM_GCLK_CLKCTRL) & GCLK_CLKCTRL_CLKEN) != 0);
+
+      /* Select the SERCOM_GCLK_ID_SLOW clock source generator */
+
+      regval |= (uint16_t)gclkgen << GCLK_CLKCTRL_GEN_SHIFT;
+
+      /* Write the new configuration */
+
+      putreg16(regval, SAM_GCLK_CLKCTRL);
+
+      /* Enable the GCLK_SERCOM_SLOW generic clock and lock further
+       * writes to this GCLK.  When this bit is written, it will lock
+       * further writes to the generic clock pointed by the CLKCTRL.ID. The
+       * generic clock generator pointed by CLKCTRL.GEN and the GENDIV.DIV
+       * will also be locked.
+       *
+       * We lock the SERCOM slow clock because it is common to all SERCOM modules
+       * and, once set, should not be changed again.
+       */
+
+      regval |= (/* GCLK_CLKCTRL_WRTLOCK | */ GCLK_CLKCTRL_CLKEN);
+      putreg16(regval, SAM_GCLK_CLKCTRL);
+
+      /* Now we are configured */
+
+      configured = true;
+    }
 }
