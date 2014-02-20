@@ -6628,4 +6628,6 @@
 	  are unmasked with UARTs > UART2 are enabled.  From gosha (2014-2-19).
 	* arch/arm/src/samd/sam_spi.c:  The SPI driver is code complete,
 	  but untested (2014-2-20).
+	* configs/olimex-lpc1766stck/ftpc:  Configuration convert to use
+	  the kconfig-frontends tools by Alan Carvalho de Assis (2014-2-20).
 
