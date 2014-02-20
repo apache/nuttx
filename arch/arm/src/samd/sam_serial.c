@@ -561,7 +561,7 @@ static int sam_interrupt(struct uart_dev_s *dev)
   uint8_t intflag;
   uint8_t inten;
 
- /* Get the set of pending USART usarts (we are only interested in the
+ /* Get the set of pending USART interrupts (we are only interested in the
   * unmasked interrupts).
   */
 

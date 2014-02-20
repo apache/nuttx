@@ -114,7 +114,9 @@ struct sam_spidev_s
   /* Fixed configuration */
 
   uint8_t sercom;              /* Identifies the SERCOM peripheral */
+#if 0 /* Not used */
   uint8_t irq;                 /* SERCOM IRQ number */
+#endif
   uint8_t gclkgen;             /* Source GCLK generator */
   port_pinset_t pad0;          /* Pin configuration for PAD0 */
   port_pinset_t pad1;          /* Pin configuration for PAD1 */
@@ -123,6 +125,9 @@ struct sam_spidev_s
   uint32_t muxconfig;          /* Pad multiplexing configuration */
   uint32_t srcfreq;            /* Source clock frequency */
   uintptr_t base;              /* SERCOM base address */
+#if 0 /* Not used */
+  xcpt_t handler;              /* SERCOM interrupt handler */
+#endif
 
   /* Dynamic configuration */
 
@@ -151,29 +156,54 @@ struct sam_spidev_s
 /* Helpers */
 
 #ifdef CONFIG_SAMD_SPI_REGDEBUG
-static bool     spi_checkreg(struct sam_spidev_s *spi, bool wr,
+static bool     spi_checkreg(struct sam_spidev_s *priv, bool wr,
                   uint32_t regval, uint32_t regaddr);
 #else
-# define        spi_checkreg(spi,wr,regval,regaddr) (false)
+# define        spi_checkreg(priv,wr,regval,regaddr) (false)
 #endif
 
-static uint8_t  spi_getreg8(struct sam_spidev_s *spi,
+static uint8_t  spi_getreg8(struct sam_spidev_s *priv,
                   unsigned int offset);
-static void     spi_putreg8(struct sam_spidev_s *spi, uint8_t regval,
+static void     spi_putreg8(struct sam_spidev_s *priv, uint8_t regval,
                   unsigned int offset);
-static uint16_t spi_getreg16(struct sam_spidev_s *spi,
+static uint16_t spi_getreg16(struct sam_spidev_s *priv,
                   unsigned int offset);
-static void     spi_putreg16(struct sam_spidev_s *spi, uint16_t regval,
+static void     spi_putreg16(struct sam_spidev_s *priv, uint16_t regval,
                   unsigned int offset);
-static uint32_t spi_getreg32(struct sam_spidev_s *spi,
+static uint32_t spi_getreg32(struct sam_spidev_s *priv,
                   unsigned int offset);
-static void     spi_putreg32(struct sam_spidev_s *spi, uint32_t regval,
+static void     spi_putreg32(struct sam_spidev_s *priv, uint32_t regval,
                   unsigned int offset);
 
 #if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
-static void     spi_dumpregs(struct sam_spidev_s *spi, const char *msg);
+static void     spi_dumpregs(struct sam_spidev_s *priv, const char *msg);
 #else
-# define        spi_dumpregs(spi,msg)
+# define        spi_dumpregs(priv,msg)
+#endif
+
+/* Interrupt handling */
+
+#if 0 /* Not used */
+static int  spi_interrupt(struct sam_spidev_s *dev);
+
+#ifdef SAMD_HAVE_USART0
+static int  spi0_interrupt(int irq, void *context);
+#endif
+#ifdef SAMD_HAVE_USART1
+static int  spi1_interrupt(int irq, void *context);
+#endif
+#ifdef SAMD_HAVE_USART2
+static int  spi2_interrupt(int irq, void *context);
+#endif
+#ifdef SAMD_HAVE_USART3
+static int  spi3_interrupt(int irq, void *context);
+#endif
+#ifdef SAMD_HAVE_USART4
+static int  spi4_interrupt(int irq, void *context);
+#endif
+#ifdef SAMD_HAVE_USART5
+static int  spi5_interrupt(int irq, void *context);
+#endif
 #endif
 
 /* SPI methods */
@@ -234,7 +264,9 @@ static struct sam_spidev_s g_spi0dev =
 {
   .ops       = &g_spi0ops,
   .sercom    = 0,
+#if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM0,
+#endif
   .gclkgen   = (BOARD_SERCOM0_GCLKGEN >> GCLK_CLKCTRL_GEN_SHIFT),
   .pad0      = BOARD_SERCOM0_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM0_PINMAP_PAD1,
@@ -243,6 +275,9 @@ static struct sam_spidev_s g_spi0dev =
   .muxconfig = BOARD_SERCOM0_MUXCONFIG,
   .srcfreq   = BOARD_SERCOM0_FREQUENCY,
   .base      = SAM_SERCOM0_BASE,
+#if 0 /* Not used */
+  .handler   = spi0_interrupt,
+#endif
 #ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
 #endif
@@ -281,7 +316,9 @@ static struct sam_spidev_s g_spi1dev =
 {
   .ops       = &g_spi1ops,
   .sercom    = 1,
+#if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM1,
+#endif
   .gclkgen   = (BOARD_SERCOM1_GCLKGEN >> GCLK_CLKCTRL_GEN_SHIFT),
   .pad0      = BOARD_SERCOM1_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM1_PINMAP_PAD1,
@@ -290,6 +327,9 @@ static struct sam_spidev_s g_spi1dev =
   .muxconfig = BOARD_SERCOM1_MUXCONFIG,
   .srcfreq   = BOARD_SERCOM1_FREQUENCY,
   .base      = SAM_SERCOM1_BASE,
+#if 0 /* Not used */
+  .handler   = spi1_interrupt,
+#endif
 #ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
 #endif
@@ -328,7 +368,9 @@ static struct sam_spidev_s g_spi2dev =
 {
   .ops       = &g_spi1ops,
   .sercom    = 2,
+#if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM2,
+#endif
   .gclkgen   = (BOARD_SERCOM2_GCLKGEN >> GCLK_CLKCTRL_GEN_SHIFT),
   .pad0      = BOARD_SERCOM2_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM2_PINMAP_PAD1,
@@ -337,6 +379,9 @@ static struct sam_spidev_s g_spi2dev =
   .muxconfig = BOARD_SERCOM2_MUXCONFIG,
   .srcfreq   = BOARD_SERCOM2_FREQUENCY,
   .base      = SAM_SERCOM2_BASE,
+#if 0 /* Not used */
+  .handler   = spi2_interrupt,
+#endif
 #ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
 #endif
@@ -375,7 +420,9 @@ static struct sam_spidev_s g_spi3dev =
 {
   .ops       = &g_spi3ops,
   .sercom    = 3,
+#if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM3,
+#endif
   .gclkgen   = (BOARD_SERCOM3_GCLKGEN >> GCLK_CLKCTRL_GEN_SHIFT),
   .pad0      = BOARD_SERCOM3_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM3_PINMAP_PAD1,
@@ -384,6 +431,9 @@ static struct sam_spidev_s g_spi3dev =
   .muxconfig = BOARD_SERCOM3_MUXCONFIG,
   .srcfreq   = BOARD_SERCOM3_FREQUENCY,
   .base      = SAM_SERCOM3_BASE,
+#if 0 /* Not used */
+  .handler   = spi3_interrupt,
+#endif
 #ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
 #endif
@@ -422,7 +472,9 @@ static struct sam_spidev_s g_spi4dev =
 {
   .ops       = &g_spi4ops,
   .sercom    = 4,
+#if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM4,
+#endif
   .gclkgen   = (BOARD_SERCOM4_GCLKGEN >> GCLK_CLKCTRL_GEN_SHIFT),
   .pad0      = BOARD_SERCOM4_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM4_PINMAP_PAD1,
@@ -431,6 +483,9 @@ static struct sam_spidev_s g_spi4dev =
   .muxconfig = BOARD_SERCOM4_MUXCONFIG,
   .srcfreq   = BOARD_SERCOM4_FREQUENCY,
   .base      = SAM_SERCOM4_BASE,
+#if 0 /* Not used */
+  .handler   = spi4_interrupt,
+#endif
 #ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
 #endif
@@ -469,7 +524,9 @@ static struct sam_spidev_s g_spi5dev =
 {
   .ops       = &g_spi5ops,
   .sercom    = 5,
+#if 0 /* Not used */
   .irq       = SAM_IRQ_SERCOM5,
+#endif
   .gclkgen   = (BOARD_SERCOM5_GCLKGEN >> GCLK_CLKCTRL_GEN_SHIFT),
   .pad0      = BOARD_SERCOM5_PINMAP_PAD0,
   .pad1      = BOARD_SERCOM5_PINMAP_PAD1,
@@ -478,6 +535,9 @@ static struct sam_spidev_s g_spi5dev =
   .muxconfig = BOARD_SERCOM5_MUXCONFIG,
   .srcfreq   = BOARD_SERCOM5_FREQUENCY,
   .base      = SAM_SERCOM5_BASE,
+#if 0 /* Not used */
+  .handler   = spi5_interrupt,
+#endif
 #ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
 #endif
@@ -718,6 +778,115 @@ static void spi_dumpregs(struct sam_spidev_s *priv, const char *msg)
 #endif
 
 /****************************************************************************
+ * Name: spi_interrupt
+ *
+ * Description:
+ *   This is the USART interrupt handler.  It will be invoked when an
+ *   interrupt received on the 'irq'  It should call uart_transmitchars or
+ *   uart_receivechar to perform the appropriate data transfers.  The
+ *   interrupt handling logic must be able to map the 'irq' number into the
+ *   approprite sam_spidev_s structure in order to call these functions.
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+static int spi_interrupt(struct sam_spidev_s *dev)
+{
+  struct sam_dev_s *priv = (struct sam_dev_s*)dev->priv;;
+  uint8_t pending;
+  uint8_t intflag;
+  uint8_t inten;
+
+ /* Get the set of pending SPI interrupts (we are only interested in the
+  * unmasked interrupts).
+  */
+
+  intflag = sam_serialin8(priv, SAM_USART_INTFLAG_OFFSET);
+  inten   = sam_serialin8(priv, SAM_USART_INTENCLR_OFFSET);
+  pending  = intflag & inten;
+
+  /* Handle an incoming, receive byte.  The RXC flag is set when there is
+   * unread data in DATA register.  This flag is cleared by reading the DATA
+   * register (or by disabling the receiver).
+   */
+
+  if ((pending & USART_INT_RXC) != 0)
+    {
+      /* Received data ready... process incoming SPI ata */
+#warning Missing logic
+    }
+
+  /* Handle outgoing, transmit bytes. The DRE flag is set when the DATA
+   * register is empty and ready to be written.  This flag is cleared by
+   * writing new data to the DATA register.  If there is no further data to
+   * be transmitted,  the serial driver will disable TX interrupts, prohibit
+   * further interrupts until TX interrupts are re-enabled.
+   */
+
+  if ((pending & USART_INT_DRE) != 0)
+    {
+       /* Transmit data register empty ... process outgoing bytes */
+#warning Missing logic
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: spiN_interrupt
+ *
+ * Description:
+ *   Handle each SERCOM USART interrupt by calling the common interrupt
+ *   handling logic with the USART-specific state.
+ *
+ ****************************************************************************/
+
+#if 0 /* Not used */
+#ifdef SAMD_HAVE_USART0
+static int  spi0_interrupt(int irq, void *context)
+{
+  return spi_interrupt(&g_spi0dev);
+}
+#endif
+
+#ifdef SAMD_HAVE_USART1
+static int  spi1_interrupt(int irq, void *context)
+{
+  return spi_interrupt(&g_spi1dev);
+}
+#endif
+
+#ifdef SAMD_HAVE_USART2
+static int  spi2_interrupt(int irq, void *context)
+{
+  return spi_interrupt(&g_spi2dev);
+}
+#endif
+
+#ifdef SAMD_HAVE_USART3
+static int  spi3_interrupt(int irq, void *context)
+{
+  return spi_interrupt(&g_spi3dev);
+}
+#endif
+
+#ifdef SAMD_HAVE_USART4
+static int  spi4_interrupt(int irq, void *context)
+{
+  return spi_interrupt(&g_spi4dev);
+}
+#endif
+
+#ifdef SAMD_HAVE_USART5
+static int  spi5_interrupt(int irq, void *context)
+{
+  return spi_interrupt(&g_spi5dev);
+}
+#endif
+#endif
+
+/****************************************************************************
  * Name: spi_lock
  *
  * Description:
@@ -784,9 +953,22 @@ static int spi_lock(struct spi_dev_s *dev, bool lock)
 static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
 {
   struct sam_spidev_s *priv =(struct sam_spidev_s *)dev;
+  uint32_t maxfreq;
   uint32_t actual;
+  uint32_t baud;
 
   spivdbg("sercom=%d frequency=%d\n", priv->sercom, frequency);
+
+  /* Check if the configured BAUD is within the valid range */
+
+  maxfreq = (priv->srcfreq >> 1);
+  if (frequency > maxfreq)
+    {
+      /* Set the frequency to the maximum */
+
+      spidbg("ERROR: Cannot realize frequency: %ld\n", (long)frequency);
+      frequency = maxfreq;
+    }
 
   /* Check if the requested frequency is the same as the frequency selection */
 
@@ -799,15 +981,33 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
     }
 #endif
 
-  /* Configure SPI to a frequency as close as possible to the requested
-   * frequency.
+  /* For synchronous mode, the BAUAD rate (Fbaud) is generated from the
+   * source clock frequency (Fref) as follows:
+   *
+   *   Fbaud = Fref / (2 * (BAUD + 1))
+   *
+   * Or
+   *
+   *   BAUD = (Fref / (2 * Fbaud)) - 1
+   *
+   * Where BAUD <= 255
    */
-#warning Missing logic
+
+  baud = ((priv->srcfreq + frequency) / (frequency << 1)) - 1;
+
+  /* Verify that the resulting if BAUD divisor is within range */
+
+  if (baud > 255)
+    {
+      spidbg("ERROR: BAUD is out of range: %ld\n", (long)baud);
+      baud = 255;
+    }
+
+  spi_putreg8(priv, (uint8_t)baud, SAM_SPI_BAUD_OFFSET);
 
   /* Calculate the new actual frequency */
-#warning Missing logic
 
-  spivdbg("actual=%d\n", offset, regval, actual);
+  actual = priv->srcfreq / ((baud + 1) << 1);
 
   /* Save the frequency setting */
 
@@ -816,7 +1016,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   priv->actual    = actual;
 #endif
 
-  spidbg("Frequency %d->%d\n", frequency, actual);
+  spivdbg("Frequency %d->%d\n", frequency, actual);
   return actual;
 }
 
@@ -909,13 +1109,6 @@ static void spi_setbits(struct spi_dev_s *dev, int nbits)
   spivdbg("sercom=%d nbits=%d\n", priv->sercom, nbits);
   DEBUGASSERT(priv && nbits > 7 && nbits < 10);
 
-  /* NOTE:  The logic in spi_send and in spi_exchange only handles 8-bit
-   * data at the present time.  So the following extra assertion is a
-   * reminder that we have to fix that someday.
-   */
-
-  DEBUGASSERT(nbits == 8); /* Temporary -- FIX ME */
-
   /* Has the number of bits changed? */
 
 #ifndef CONFIG_SPI_OWNBUS
@@ -1001,11 +1194,27 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
               void *rxbuffer, size_t nwords)
 {
   struct sam_spidev_s *priv = (struct sam_spidev_s *)dev;
-  cont uint8_t *txptr = (const uint8_t *)txbuffer;
-  uint8_t *rxptr = (uint8_t *)rxbuffer;
+  const uint16_t *ptx16 = NULL;
+  const uint8_t *ptx8 = NULL;
+  uint16_t *prx16 = NULL;
+  uint8_t *prx8 = NULL;
   uint16_t data;
 
   spivdbg("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+
+  /* Set up data receive and transmit pointers */
+
+  wide = ;
+  if (priv->nbits > 8)
+    {
+      ptx16 = (const uint16_t *)txbuffer;
+      prx16 = (uint16_t *)rxbuffer;
+    }
+  else
+    {
+      ptx8  = (const uint8_t *)txbuffer;
+      prx8  = (uint8_t *)rxbuffer;
+    }
 
   /* Loop, sending each word in the user-provided data buffer.
    *
@@ -1040,13 +1249,17 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
     {
       /* Get the data to send (0xff if there is no data source) */
 
-      if (txptr)
+      if (ptx8)
         {
-          data = (uint32_t)*txptr++;
+          data = (uint16_t)*ptx8++;
+        }
+      else if (ptx16)
+        {
+          data = *ptx16++;
         }
       else
         {
-          data = 0xffff;
+          data = 0x01ff;
         }
 
       /* Wait for any previous data written to the DATA register to be
@@ -1063,14 +1276,33 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
 
       while ((spi_getreg32(priv, SAM_SPI_INTFLAG_OFFSET) & SPI_INT_RXC) == 0);
 
+      /* Check for data overflow.  The BUFOVF bit provides the status of the
+       * next DATA to be read.  On buffer overflow, the corresponding DATA
+       * will be 0.
+       */
+
+      data = spi_getreg16(priv, SAM_SPI_STATUS_OFFSET);
+      if (data & SPI_STATUS_BUFOVF) != 0)
+        {
+          spidbg("ERROR: Buffer overflow!\n");
+
+          /* Clear the buffer overflow flag */
+
+          spi_putreg(priv, data, SAM_SPI_STATUS_OFFSET);
+        }
+
       /* Read the received data from the SPI DATA Register..
        * TODO: The following only works if nbits <= 8.
        */
 
       data = spi_getreg16(priv, SAM_SPI_DATA_OFFSET);
-      if (rxptr)
+      if (prx8)
         {
-          *rxptr++ = (uint8_t)data;
+          *prx8++ = (uint8_t)data;
+        }
+      else if (prx16)
+        {
+          *prx16++ = (uint16_t)data;
         }
     }
 }
@@ -1132,6 +1364,19 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
 #endif
 
 /****************************************************************************
+ * Name: spi_wait_synchronization
+ *
+ * Description:
+ *   Wait until the SERCOM SPI reports that it is synchronized.
+ *
+ ****************************************************************************/
+
+static void spi_wait_synchronization(struct sam_spidev_s *priv)
+{
+  while ((getreg16(priv->base + SAM_USART_STATUS_OFFSET) & USART_STATUS_SYNCBUSY) != 0);
+}
+
+/****************************************************************************
  * Name: spi_pad_configure
  *
  * Description:
@@ -1186,10 +1431,9 @@ struct spi_dev_s *up_spiinitialize(int port)
 {
   struct sam_spidev_s *priv;
   irqstate_t flags;
-#ifndef CONFIG_SPI_OWNBUS
   uint32_t regval;
-  unsigned int offset;
-#endif
+  uint32_t baud;
+  int ret;
 
   /* Get the port state structure */
 
@@ -1247,36 +1491,84 @@ struct spi_dev_s *up_spiinitialize(int port)
       return NULL;
     }
 
-  /* Enable clocking to the SPI SERCOM */
+  /* Enable clocking to the SERCOM module in PM */
 
-      flags = irqsave();
-#warning Missing logic
+  flags = irqsave();
+  sercom_enable(priv->sercom);
 
-  /* Configure multiplexed pins as connected on the board. */
-#warning Missing logic
+  /* Configure the GCLKs for the SERCOM module */
 
-  /* Execute a software reset of the SPI SERCOM */
-#warning Missing logic
+  sercom_coreclk_configure(priv->sercom, priv->gclkgen, false);
+  sercom_slowclk_configure(BOARD_SERCOM_SLOW_GCLKGEN);
 
-  /* Configure the SPI SERCOM */
-#warning Missing logic
+  /* Set the SERCOM in SPI master mode */
 
- /* And enable the SPI */
-#warning Missing logic
+  regval  = spi_getreg32(priv, SAM_SPI_CTRLA_OFFSET);
+  regval &= ~SPI_CTRLA_MODE_MASK;
+  regval |= SPI_CTRLA_MODE_MASTER;
+  spi_putreg32(priv, regval, SAM_SPI_CTRLA_OFFSET);
 
-  spi_dumpregs(priv, "After initialization");
+  /* Configure pads */
 
-#ifndef CONFIG_SPI_OWNBUS
-  /* Set to mode=0 and nbits=8 and some initial frequency.  It is only
-   * critical to do this if CONFIG_SPI_OWNBUS is not defined because in
-   * that case, the SPI will only be reconfigured if there is a change.
+  spi_pad_configure(priv);
+
+  /* Set an initial baud value.  This will be changed by the upper-half
+   * driver as soon as it starts.
    */
 
-  spi_setmode((struct spi_dev_s *)priv, SPIDEV_MODE0);
-  spi_setfrequency((struct spi_dev_s *)priv, 400000);
-  spi_setbits((struct spi_dev_s *)priv, 8);
+  (void)spi_setfrequency((struct spi_dev_s *)priv, 400000);
+
+  /* Set MSB first data order and the configured pad mux setting, 
+   * Note that SPI mode 0 are assumed initially.
+   */
+
+  regval = (SPI_DATA_ORDER_MSB | priv->muxconfig);
+  spi_putreg8(priv, regval, SAM_SPI_CTRLA_OFFSET);
+
+  /* Enable the receiver.  Note that 8-bit data width is assumed initially */
+
+  regval = SPI_CTRLB_RXEN;
+  spi_putreg8(priv, regval, SAM_SPI_CTRLB_OFFSET);
+
+#ifndef CONFIG_SPI_OWNBUS
+  priv->nbits = nbits;
 #endif
 
+  /* Wait until the synchronization is complete */
+
+  spi_wait_synchronization(priv);
+
+  /* Enable SPI */
+
+  regval = spi_getreg32(priv, SAM_SPI_CTRLA_OFFSET);
+  regval |= SPI_CTRLA_ENABLE;
+  spi_putreg32(priv, regval, SAM_SPI_CTRLA_OFFSET);
+
+  /* Disable all interrupts at the SPI source and clear all pending
+   * status that we can.
+   */
+
+  spi_putreg8(priv, SPI_INT_ALL, SAM_SPI_INTENCLR_OFFSET);
+  spi_putreg8(priv, SPI_INT_ALL, SAM_SPI_INTFLAG_OFFSET);
+  spi_putreg16(priv, SPI_STATUS_CLRALL, SAM_SPI_STATUS_OFFSET);
+
+#if 0 /* Not used */
+  /* Attach and enable the SERCOM interrupt handler */
+
+  ret = irq_attach(priv->irq, priv->handler);
+  if (ret < 0)
+    {
+      spidbg("ERROR: Failed to attach interrupt: %d\n", irq);
+      return NULL;
+    }
+
+  /* Enable SERCOM interrupts at the NVIC */
+
+  up_enable_irq(priv->irq);
+#endif
+
+  spi_dumpregs(priv, "After initialization");
+  irqrestore(flags);
   return (struct spi_dev_s *)priv;
 }
 

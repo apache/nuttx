@@ -145,15 +145,18 @@
 #  define SPI_CTRLA_MODE_MASTER    (3 << SPI_CTRLA_MODE_SHIFT) /* SPI master operation */
 #define SPI_CTRLA_RUNSTDBY         (1 << 7)  /* Bit 7:  Run in standby */
 #define SPI_CTRLA_IBON             (1 << 8)  /* Bit 8:  Immediate BUFOVF notification */
-#define SPI_CTRLA_DOPO             (1 << 16) /* Bit 16: Data out pinout */
-#  define SPI_CTRLA_DOPAD0         (0)
-#  define SPI_CTRLA_DOPAD2         SPI_CTRLA_DOPO
+#define SPI_CTRLA_DOPO_SHIFT       (16)      /* Bit 16-17: Data out pinout */
+#define SPI_CTRLA_DOPO_MASK        (3 << SPI_CTRLA_DOPO_SHIFT) /* Bit 16-17: Data out pinout */
+#  define SPI_CTRLA_DOPO_DOPAD012  (0 << SPI_CTRLA_DOPO_SHIFT) /* D0=PAD0 SCK=PAD1 SS=PAD2 */
+#  define SPI_CTRLA_DOPO_DOPAD231  (1 << SPI_CTRLA_DOPO_SHIFT) /* D0=PAD2 SCK=PAD3 SS=PAD1 */
+#  define SPI_CTRLA_DOPO_DOPAD312  (2 << SPI_CTRLA_DOPO_SHIFT) /* D0=PAD3 SCK=PAD1 SS=PAD2 */
+#  define SPI_CTRLA_DOPO_DOPAD031  (3 << SPI_CTRLA_DOPO_SHIFT) /* D0=PAD0 SCK=PAD3 SS=PAD1 */
 #define SPI_CTRLA_DIPO_SHIFT       (20)      /* Bits 20-21: Data in pinout */
 #define SPI_CTRLA_DIPO_MASK        (3 << SPI_CTRLA_DIPO_SHIFT)
-#  define SPI_CTRLA_DIPAD0         (0 << SPI_CTRLA_DIPO_SHIFT) /* SERCOM PAD[0] for DI */
-#  define SPI_CTRLA_DIPAD1         (1 << SPI_CTRLA_DIPO_SHIFT) /* SERCOM PAD[1] for DI */
-#  define SPI_CTRLA_DIPAD2         (2 << SPI_CTRLA_DIPO_SHIFT) /* SERCOM PAD[2] for DI */
-#  define SPI_CTRLA_DIPAD3         (3 << SPI_CTRLA_DIPO_SHIFT) /* SERCOM PAD[3] for DI */
+#  define SPI_CTRLA_DIPAD0         (0 << SPI_CTRLA_DIPO_SHIFT) /* SERCOM PAD0 for DI */
+#  define SPI_CTRLA_DIPAD1         (1 << SPI_CTRLA_DIPO_SHIFT) /* SERCOM PAD1 for DI */
+#  define SPI_CTRLA_DIPAD2         (2 << SPI_CTRLA_DIPO_SHIFT) /* SERCOM PAD2 for DI */
+#  define SPI_CTRLA_DIPAD3         (3 << SPI_CTRLA_DIPO_SHIFT) /* SERCOM PAD3 for DI */
 #define SPI_CTRLA_FORM_SHIFT       (24)      /* Bits 24-27: Frame format */
 #define SPI_CTRLA_FORM_MASK        (7 << SPI_CTRLA_FORM_SHIFT)
 #  define SPI_CTRLA_FORM_SPI       (0 << SPI_CTRLA_FORM_SHIFT) /* SPI frame (no address) */
