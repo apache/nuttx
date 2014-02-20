@@ -145,9 +145,9 @@ struct sam_spidev_s
   /* Debug stuff */
 
 #ifdef CONFIG_SAMD_SPI_REGDEBUG
-   bool     wrlast;            /* Last was a write */
-   uint32_t addresslast;       /* Last address */
-   uint32_t valuelast;         /* Last value */
+   bool     wr;                /* Last was a write */
+   uint32_t regaddr;           /* Last address */
+   uint32_t regval;            /* Last value */
    int      ntimes;            /* Number of times */
 #endif
 };
@@ -165,10 +165,8 @@ static bool     spi_checkreg(struct sam_spidev_s *priv, bool wr,
 # define        spi_checkreg(priv,wr,regval,regaddr) (false)
 #endif
 
-#if 0 /* Not used */
 static uint8_t  spi_getreg8(struct sam_spidev_s *priv,
                   unsigned int offset);
-#endif
 static void     spi_putreg8(struct sam_spidev_s *priv, uint8_t regval,
                   unsigned int offset);
 static uint16_t spi_getreg16(struct sam_spidev_s *priv,
@@ -231,6 +229,7 @@ static void     spi_recvblock(struct spi_dev_s *dev, void *buffer,
 
 /* Initialization */
 
+static void     spi_wait_synchronization(struct sam_spidev_s *priv);
 static void     spi_pad_configure(struct sam_spidev_s *priv);
 
 /****************************************************************************
@@ -577,9 +576,9 @@ static struct sam_spidev_s g_spi5dev =
 static bool spi_checkreg(struct sam_spidev_s *priv, bool wr, uint32_t regval,
                          uint32_t regaddr)
 {
-  if (wr      == priv->wrlast &&     /* Same kind of access? */
-      regval  == priv->valuelast &&  /* Same value? */
-      regaddr == priv->addresslast)  /* Same address? */
+  if (wr      == priv->wr &&      /* Same kind of access? */
+      regval  == priv->regval &&  /* Same value? */
+      regaddr == priv->regaddr)   /* Same address? */
     {
       /* Yes, then just keep a count of the number of times we did this. */
 
@@ -599,10 +598,10 @@ static bool spi_checkreg(struct sam_spidev_s *priv, bool wr, uint32_t regval,
 
       /* Save information about the new access */
 
-      priv->wrlast      = wr;
-      priv->valuelast   = regval;
-      priv->addresslast = regaddr;
-      priv->ntimes      = 0;
+      priv->wr      = wr;
+      priv->regval  = regval;
+      priv->regaddr = regaddr;
+      priv->ntimes  = 0;
     }
 
   /* Return true if this is the first time that we have done this operation */
@@ -619,11 +618,10 @@ static bool spi_checkreg(struct sam_spidev_s *priv, bool wr, uint32_t regval,
  *
  ****************************************************************************/
 
-#if 0 /* Not used */
 static uint8_t spi_getreg8(struct sam_spidev_s *priv, unsigned int offset)
 {
   uintptr_t regaddr = priv->base + offset;
-  uint8_t regval = getreg8(regaddr);
+  uint8_t regval    = getreg8(regaddr);
 
 #ifdef CONFIG_SAMD_SPI_REGDEBUG
   if (spi_checkreg(priv, false, (uint32_t)regval, regaddr))
@@ -634,7 +632,6 @@ static uint8_t spi_getreg8(struct sam_spidev_s *priv, unsigned int offset)
 
   return regval;
 }
-#endif
 
 /****************************************************************************
  * Name: spi_putreg8
@@ -670,7 +667,7 @@ static void spi_putreg8(struct sam_spidev_s *priv, uint8_t regval,
 static uint16_t spi_getreg16(struct sam_spidev_s *priv, unsigned int offset)
 {
   uintptr_t regaddr = priv->base + offset;
-  uint16_t regval = getreg16(regaddr);
+  uint16_t regval   = getreg16(regaddr);
 
 #ifdef CONFIG_SAMD_SPI_REGDEBUG
   if (spi_checkreg(priv, false, (uint32_t)regval, regaddr))
@@ -770,16 +767,16 @@ static void spi_putreg32(struct sam_spidev_s *priv, uint32_t regval,
 static void spi_dumpregs(struct sam_spidev_s *priv, const char *msg)
 {
   spivdbg("%s:\n", msg);
-  spivdbg("   CTRLA:%08x CTRLB:%08x DBGCTRL:%08x\n",
+  spivdbg("   CTRLA:%08x CTRLB:%08x DBGCTRL:%02x\n",
           getreg32(priv->base + SAM_SPI_CTRLA_OFFSET),
           getreg32(priv->base + SAM_SPI_CTRLB_OFFSET),
-          getreg32(priv->base + SAM_SPI_DBGCTRL_OFFSET));
-  spivdbg("    BAUD:%08x INTEN:%08x INTFLAG:%08x\n",
-          getreg32(priv->base + SAM_SPI_BAUD_OFFSET),
-          getreg32(priv->base + SAM_SPI_INTENCLR_OFFSET),
-          getreg32(priv->base + SAM_SPI_INTFLAG_OFFSET));
-  spivdbg("  STATUS:%08x  ADDR:%08x\n",
-          getreg32(priv->base + SAM_SPI_STATUS_OFFSET),
+          getreg8(priv->base + SAM_SPI_DBGCTRL_OFFSET));
+  spivdbg("    BAUD:%02x       INTEN:%02x       INTFLAG:%02x\n",
+          getreg8(priv->base + SAM_SPI_BAUD_OFFSET),
+          getreg8(priv->base + SAM_SPI_INTENCLR_OFFSET),
+          getreg8(priv->base + SAM_SPI_INTFLAG_OFFSET));
+  spivdbg("  STATUS:%04x      ADDR:%08x\n",
+          getreg16(priv->base + SAM_SPI_STATUS_OFFSET),
           getreg32(priv->base + SAM_SPI_ADDR_OFFSET));
 }
 #endif
@@ -807,8 +804,8 @@ static int spi_interrupt(struct sam_spidev_s *dev)
   * unmasked interrupts).
   */
 
-  intflag = sam_serialin8(priv, SAM_SPI_INTFLAG_OFFSET);
-  inten   = sam_serialin8(priv, SAM_SPI_INTENCLR_OFFSET);
+  intflag = sam_getreg8(priv, SAM_SPI_INTFLAG_OFFSET);
+  inten   = sam_getreg8(priv, SAM_SPI_INTENCLR_OFFSET);
   pending  = intflag & inten;
 
   /* Handle an incoming, receive byte.  The RXC flag is set when there is
@@ -962,6 +959,7 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
   uint32_t maxfreq;
   uint32_t actual;
   uint32_t baud;
+  uint32_t ctrla;
 
   spivdbg("sercom=%d frequency=%d\n", priv->sercom, frequency);
 
@@ -1009,7 +1007,33 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
       baud = 255;
     }
 
-  spi_putreg8(priv, (uint8_t)baud, SAM_SPI_BAUD_OFFSET);
+  /* Momentarily disable SPI while we apply the new BAUD setting (if it was
+   * previously enabled)
+   */
+
+  ctrla = spi_getreg32(priv, SAM_SPI_CTRLA_OFFSET);
+  if ((ctrla & SPI_CTRLA_ENABLE) != 0)
+    {
+      /* Disable SPI.. waiting for synchronization */
+
+      spi_putreg32(priv, ctrla & ~SPI_CTRLA_ENABLE, SAM_SPI_CTRLA_OFFSET);
+      spi_wait_synchronization(priv);
+
+      /* Set the new BAUD value */
+
+      spi_putreg8(priv, (uint8_t)baud, SAM_SPI_BAUD_OFFSET);
+
+      /* Re-enable SPI.. waiting for synchronization */
+
+      spi_putreg32(priv, ctrla, SAM_SPI_CTRLA_OFFSET);
+      spi_wait_synchronization(priv);
+    }
+  else
+    {
+      /* Set the new BAUD when the SPI is already disabled */
+
+      spi_putreg8(priv, (uint8_t)baud, SAM_SPI_BAUD_OFFSET);
+    }
 
   /* Calculate the new actual frequency */
 
@@ -1189,6 +1213,9 @@ static uint16_t spi_send(struct spi_dev_s *dev, uint16_t wd)
  * Returned Value:
  *   None
  *
+ * Assumptions/Limitations:
+ *   Data must be 16-bit aligned in 9-bit data transfer mode.
+ *
  ****************************************************************************/
 
 static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
@@ -1270,15 +1297,15 @@ static void spi_exchange(struct spi_dev_s *dev, const void *txbuffer,
        * transferred to the serializer.
        */
 
-      while ((spi_getreg32(priv, SAM_SPI_INTFLAG_OFFSET) & SPI_INT_DRE) == 0);
+      while ((spi_getreg8(priv, SAM_SPI_INTFLAG_OFFSET) & SPI_INT_DRE) == 0);
 
       /* Write the data to transmitted to the DATA Register (TDR) */
 
-      spi_putreg32(priv, data, SAM_SPI_DATA_OFFSET);
+      spi_putreg16(priv, data, SAM_SPI_DATA_OFFSET);
 
       /* Wait for the read data to be available in the DATA register. */
 
-      while ((spi_getreg32(priv, SAM_SPI_INTFLAG_OFFSET) & SPI_INT_RXC) == 0);
+      while ((spi_getreg8(priv, SAM_SPI_INTFLAG_OFFSET) & SPI_INT_RXC) == 0);
 
       /* Check for data overflow.  The BUFOVF bit provides the status of the
        * next DATA to be read.  On buffer overflow, the corresponding DATA
@@ -1377,7 +1404,7 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
 
 static void spi_wait_synchronization(struct sam_spidev_s *priv)
 {
-  while ((getreg16(priv->base + SAM_SPI_STATUS_OFFSET) & SPI_STATUS_SYNCBUSY) != 0);
+  while ((spi_getreg16(priv, SAM_SPI_STATUS_OFFSET) & SPI_STATUS_SYNCBUSY) != 0);
 }
 
 /****************************************************************************
@@ -1506,11 +1533,11 @@ struct spi_dev_s *up_spiinitialize(int port)
   sercom_coreclk_configure(priv->sercom, priv->gclkgen, false);
   sercom_slowclk_configure(BOARD_SERCOM_SLOW_GCLKGEN);
 
-  /* Set the SERCOM in SPI master mode */
+  /* Set the SERCOM in SPI master mode (no address) */
 
   regval  = spi_getreg32(priv, SAM_SPI_CTRLA_OFFSET);
   regval &= ~SPI_CTRLA_MODE_MASK;
-  regval |= SPI_CTRLA_MODE_MASTER;
+  regval |= (SPI_CTRLA_MODE_MASTER | SPI_CTRLA_FORM_SPI);
   spi_putreg32(priv, regval, SAM_SPI_CTRLA_OFFSET);
 
   /* Configure pads */
@@ -1528,24 +1555,22 @@ struct spi_dev_s *up_spiinitialize(int port)
    */
 
   regval = (SPI_CTRLA_MSBFIRST | priv->muxconfig);
-  spi_putreg8(priv, regval, SAM_SPI_CTRLA_OFFSET);
+  spi_putreg32(priv, regval, SAM_SPI_CTRLA_OFFSET);
 
   /* Enable the receiver.  Note that 8-bit data width is assumed initially */
 
   regval = (SPI_CTRLB_RXEN | SPI_CTRLB_CHSIZE_8BITS);
-  spi_putreg8(priv, regval, SAM_SPI_CTRLB_OFFSET);
+  spi_putreg32(priv, regval, SAM_SPI_CTRLB_OFFSET);
+  spi_wait_synchronization(priv);
 
   priv->nbits = 8;
 
-  /* Wait until the synchronization is complete */
-
-  spi_wait_synchronization(priv);
-
   /* Enable SPI */
 
-  regval = spi_getreg32(priv, SAM_SPI_CTRLA_OFFSET);
+  regval  = spi_getreg32(priv, SAM_SPI_CTRLA_OFFSET);
   regval |= SPI_CTRLA_ENABLE;
   spi_putreg32(priv, regval, SAM_SPI_CTRLA_OFFSET);
+  spi_wait_synchronization(priv);
 
   /* Disable all interrupts at the SPI source and clear all pending
    * status that we can.

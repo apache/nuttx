@@ -161,9 +161,6 @@
 #define SPI_CTRLA_FORM_MASK        (7 << SPI_CTRLA_FORM_SHIFT)
 #  define SPI_CTRLA_FORM_SPI       (0 << SPI_CTRLA_FORM_SHIFT) /* SPI frame (no address) */
 #  define SPI_CTRLA_FORM_ADDR      (2 << SPI_CTRLA_FORM_SHIFT) /* SPI frame (w/address) */
-#define SPI_CTRLA_CMODE            (1 << 28)  /* Bit 28: Communication mode */
-#  define SPI_CTRLA_ASYNCH         (0)
-#  define SPI_CTRLA_SYNCH          SPI_CTRLA_CMODE
 #define SPI_CTRLA_CPHA             (1 << 28)  /* Bit 28: Clock phase */
 #define SPI_CTRLA_CPOL             (1 << 29)  /* Bit 29: Clock polarity */
 #define SPI_CTRLA_DORD             (1 << 30)  /* Bit 30: Data order */

@@ -371,8 +371,8 @@ config SAMD_HAVE_SPI
 
 if SAMD_HAVE_SPI
 
-config SAMA5_SPI_REGDEBUG
-	bool "SPI egister-Level Debug"
+config SAMD_SPI_REGDEBUG
+	bool "SPI register-Level Debug"
 	default n
 	depends on DEBUG_SPI
 	---help---
