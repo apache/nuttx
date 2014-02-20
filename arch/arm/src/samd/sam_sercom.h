@@ -72,6 +72,33 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sercom_enable
+ *
+ * Description:
+ *   Enable clocking to a SERCOM module in PM
+ *
+ * Assumptions/Limitation:
+ *   This operation is global and non-atomic.  The caller should disable
+ *   interrupts prior to calling this function.
+ *
+ ****************************************************************************/
+
+static inline int sercom_enable(int sercom)
+{
+  uint32_t regval;
+
+  /* Enable clocking to the SERCOM module in PM */
+
+  regval  = getreg32(SAM_PM_APBCMASK);
+  regval |= PM_APBCMASK_SERCOM(sercom);
+  putreg32(regval, SAM_PM_APBCMASK);
+}
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 /****************************************************************************
  * Name: sercom_coreclk_configure
  *

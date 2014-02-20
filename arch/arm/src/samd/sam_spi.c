@@ -121,7 +121,7 @@ struct sam_spidev_s
   port_pinset_t pad2;          /* Pin configuration for PAD2 */
   port_pinset_t pad3;          /* Pin configuration for PAD3 */
   uint32_t muxconfig;          /* Pad multiplexing configuration */
-  uint32_t frequency;          /* Source clock frequency */
+  uint32_t srcfreq;            /* Source clock frequency */
   uintptr_t base;              /* SERCOM base address */
 
   /* Dynamic configuration */
@@ -157,17 +157,17 @@ static bool     spi_checkreg(struct sam_spidev_s *spi, bool wr,
 # define        spi_checkreg(spi,wr,regval,regaddr) (false)
 #endif
 
-static inline uint8_t spi_getreg8(struct sam_spidev_s *spi,
+static uint8_t  spi_getreg8(struct sam_spidev_s *spi,
                   unsigned int offset);
-static inline void spi_putreg8(struct sam_spidev_s *spi, uint8_t regval,
+static void     spi_putreg8(struct sam_spidev_s *spi, uint8_t regval,
                   unsigned int offset);
-static inline uint16_t spi_getreg16(struct sam_spidev_s *spi,
+static uint16_t spi_getreg16(struct sam_spidev_s *spi,
                   unsigned int offset);
-static inline void spi_putreg16(struct sam_spidev_s *spi, uint16_t regval,
+static void     spi_putreg16(struct sam_spidev_s *spi, uint16_t regval,
                   unsigned int offset);
-static inline uint32_t spi_getreg32(struct sam_spidev_s *spi,
+static uint32_t spi_getreg32(struct sam_spidev_s *spi,
                   unsigned int offset);
-static inline void spi_putreg32(struct sam_spidev_s *spi, uint32_t regval,
+static void     spi_putreg32(struct sam_spidev_s *spi, uint32_t regval,
                   unsigned int offset);
 
 #if defined(CONFIG_DEBUG_SPI) && defined(CONFIG_DEBUG_VERBOSE)
@@ -193,6 +193,10 @@ static void     spi_sndblock(struct spi_dev_s *dev,
 static void     spi_recvblock(struct spi_dev_s *dev, void *buffer,
                    size_t nwords);
 #endif
+
+/* Initialization */
+
+static void     spi_pad_configure(struct sam_spidev_s *priv);
 
 /****************************************************************************
  * Private Data
@@ -237,7 +241,7 @@ static struct sam_spidev_s g_spi0dev =
   .pad2      = BOARD_SERCOM0_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM0_PINMAP_PAD3,
   .muxconfig = BOARD_SERCOM0_MUXCONFIG,
-  .frequency = BOARD_SERCOM0_FREQUENCY,
+  .srcfreq   = BOARD_SERCOM0_FREQUENCY,
   .base      = SAM_SERCOM0_BASE,
 #ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
@@ -284,7 +288,7 @@ static struct sam_spidev_s g_spi1dev =
   .pad2      = BOARD_SERCOM1_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM1_PINMAP_PAD3,
   .muxconfig = BOARD_SERCOM1_MUXCONFIG,
-  .frequency = BOARD_SERCOM1_FREQUENCY,
+  .srcfreq   = BOARD_SERCOM1_FREQUENCY,
   .base      = SAM_SERCOM1_BASE,
 #ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
@@ -331,7 +335,7 @@ static struct sam_spidev_s g_spi2dev =
   .pad2      = BOARD_SERCOM2_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM2_PINMAP_PAD3,
   .muxconfig = BOARD_SERCOM2_MUXCONFIG,
-  .frequency = BOARD_SERCOM2_FREQUENCY,
+  .srcfreq   = BOARD_SERCOM2_FREQUENCY,
   .base      = SAM_SERCOM2_BASE,
 #ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
@@ -378,7 +382,7 @@ static struct sam_spidev_s g_spi3dev =
   .pad2      = BOARD_SERCOM3_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM3_PINMAP_PAD3,
   .muxconfig = BOARD_SERCOM3_MUXCONFIG,
-  .frequency = BOARD_SERCOM3_FREQUENCY,
+  .srcfreq   = BOARD_SERCOM3_FREQUENCY,
   .base      = SAM_SERCOM3_BASE,
 #ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
@@ -425,7 +429,7 @@ static struct sam_spidev_s g_spi4dev =
   .pad2      = BOARD_SERCOM4_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM4_PINMAP_PAD3,
   .muxconfig = BOARD_SERCOM4_MUXCONFIG,
-  .frequency = BOARD_SERCOM4_FREQUENCY,
+  .srcfreq   = BOARD_SERCOM4_FREQUENCY,
   .base      = SAM_SERCOM4_BASE,
 #ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
@@ -472,7 +476,7 @@ static struct sam_spidev_s g_spi5dev =
   .pad2      = BOARD_SERCOM5_PINMAP_PAD2,
   .pad3      = BOARD_SERCOM5_PINMAP_PAD3,
   .muxconfig = BOARD_SERCOM5_MUXCONFIG,
-  .frequency = BOARD_SERCOM5_FREQUENCY,
+  .srcfreq   = BOARD_SERCOM5_FREQUENCY,
   .base      = SAM_SERCOM5_BASE,
 #ifndef CONFIG_SPI_OWNBUS
   .spilock   = SEM_INITIALIZER(1),
@@ -550,8 +554,7 @@ static bool spi_checkreg(struct sam_spidev_s *priv, bool wr, uint32_t regval,
  *
  ****************************************************************************/
 
-static inline uint8_t spi_getreg8(struct sam_spidev_s *priv,
-                                   unsigned int offset)
+static uint8_t spi_getreg8(struct sam_spidev_s *priv, unsigned int offset)
 {
   uintptr_t regaddr = priv->base + offset;
   uint8_t regval = getreg8(regaddr);
@@ -574,8 +577,8 @@ static inline uint8_t spi_getreg8(struct sam_spidev_s *priv,
  *
  ****************************************************************************/
 
-static inline void spi_putreg8(struct sam_spidev_s *priv, uint8_t regval,
-                               unsigned int offset)
+static void spi_putreg8(struct sam_spidev_s *priv, uint8_t regval,
+                        unsigned int offset)
 {
   uintptr_t regaddr = priv->base + offset;
 
@@ -597,8 +600,7 @@ static inline void spi_putreg8(struct sam_spidev_s *priv, uint8_t regval,
  *
  ****************************************************************************/
 
-static inline uint16_t spi_getreg16(struct sam_spidev_s *priv,
-                                    unsigned int offset)
+static uint16_t spi_getreg16(struct sam_spidev_s *priv, unsigned int offset)
 {
   uintptr_t regaddr = priv->base + offset;
   uint16_t regval = getreg16(regaddr);
@@ -621,8 +623,8 @@ static inline uint16_t spi_getreg16(struct sam_spidev_s *priv,
  *
  ****************************************************************************/
 
-static inline void spi_putreg16(struct sam_spidev_s *priv, uint16_t regval,
-                                unsigned int offset)
+static void spi_putreg16(struct sam_spidev_s *priv, uint16_t regval,
+                         unsigned int offset)
 {
   uintptr_t regaddr = priv->base + offset;
 
@@ -644,8 +646,7 @@ static inline void spi_putreg16(struct sam_spidev_s *priv, uint16_t regval,
  *
  ****************************************************************************/
 
-static inline uint32_t spi_getreg32(struct sam_spidev_s *priv,
-                                    unsigned int offset)
+static uint32_t spi_getreg32(struct sam_spidev_s *priv, unsigned int offset)
 {
   uintptr_t regaddr = priv->base + offset;
   uint32_t regval = getreg32(regaddr);
@@ -668,8 +669,8 @@ static inline uint32_t spi_getreg32(struct sam_spidev_s *priv,
  *
  ****************************************************************************/
 
-static inline void spi_putreg32(struct sam_spidev_s *priv, uint32_t regval,
-                                unsigned int offset)
+static void spi_putreg32(struct sam_spidev_s *priv, uint32_t regval,
+                         unsigned int offset)
 {
   uintptr_t regaddr = priv->base + offset;
 
@@ -1129,6 +1130,39 @@ static void spi_recvblock(struct spi_dev_s *dev, void *buffer, size_t nwords)
   spi_exchange(dev, NULL, buffer, nwords);
 }
 #endif
+
+/****************************************************************************
+ * Name: spi_pad_configure
+ *
+ * Description:
+ *   Configure the SERCOM SPI pads.
+ *
+ ****************************************************************************/
+
+static void spi_pad_configure(struct sam_spidev_s *priv)
+{
+  /* Configure SERCOM pads */
+
+  if (priv->pad0 != 0)
+    {
+      sam_configport(priv->pad0);
+    }
+
+  if (priv->pad1 != 0)
+    {
+      sam_configport(priv->pad1);
+    }
+
+  if (priv->pad2 != 0)
+    {
+      sam_configport(priv->pad2);
+    }
+
+  if (priv->pad3 != 0)
+    {
+      sam_configport(priv->pad3);
+    }
+}
 
 /****************************************************************************
  * Public Functions
