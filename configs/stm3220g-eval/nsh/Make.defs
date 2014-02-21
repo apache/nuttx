@@ -1,7 +1,7 @@
 ############################################################################
 # configs/stm3220g-eval/nsh/Make.defs
 #
-#   Copyright (C) 2012 Gregory Nutt. All rights reserved.
+#   Copyright (C) 2012, 2014 Gregory Nutt. All rights reserved.
 #   Author: Gregory Nutt <gnutt@nuttx.org>
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,15 +41,11 @@ LDSCRIPT = ld.script
 
 ifeq ($(WINTOOL),y)
   # Windows-native toolchains
-  DIRLINK = $(TOPDIR)/tools/copydir.sh
-  DIRUNLINK = $(TOPDIR)/tools/unlink.sh
-  MKDEP = $(TOPDIR)/tools/mknulldeps.sh
   ARCHINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}"
   ARCHXXINCLUDES = -I. -isystem "${shell cygpath -w $(TOPDIR)/include}" -isystem "${shell cygpath -w $(TOPDIR)/include/cxx}"
   ARCHSCRIPT = -T "${shell cygpath -w $(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)}"
 else
-  # Linux/Cygwin-native toolchain 
-  MKDEP = $(TOPDIR)/tools/mkdeps.sh
+  # Linux/Cygwin-native toolchain
   ARCHINCLUDES = -I. -isystem $(TOPDIR)/include
   ARCHXXINCLUDES = -I. -isystem $(TOPDIR)/include -isystem $(TOPDIR)/include/cxx
   ARCHSCRIPT = -T$(TOPDIR)/configs/$(CONFIG_ARCH_BOARD)/scripts/$(LDSCRIPT)
@@ -104,9 +100,24 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
 
-
 HOSTCC = gcc
 HOSTINCLUDES = -I.
 HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -g -pipe
 HOSTLDFLAGS =
+
+ifeq ($(CONFIG_HOST_WINDOWS),y)
+  HOSTEXEEXT = .exe
+else
+  HOSTEXEEXT =
+endif
+
+ifeq ($(WINTOOL),y)
+  # Windows-native host tools
+  DIRLINK = $(TOPDIR)/tools/copydir.sh
+  DIRUNLINK = $(TOPDIR)/tools/unlink.sh
+  MKDEP = $(TOPDIR)/tools/mknulldeps.sh
+else
+  # Linux/Cygwin-native host tools
+  MKDEP = $(TOPDIR)/tools/mkdeps$(HOSTEXEEXT)
+endif
 
