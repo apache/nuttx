@@ -302,7 +302,7 @@ This is a test
 # sudo mkdir /export
 </pre></ul>
 <p>
-  It is important that <code>/export</code> directory allow access to everyone (777 permissions) as we will be accessing the NFS share from the client with no authentication. 
+  It is important that <code>/export</code> directory allow access to everyone (777 permissions) as we will be accessing the NFS share from the client with no authentication.
 </p>
 <ul><pre>
 # sudo chmod 777 /export
@@ -327,7 +327,7 @@ directory machine1(option11,option12)
   In our case we are using all the default options except for the <code>ro</code> that we replaced with <code>rw</code>  so that our client will have read and write access to the directory that we are exporting.
 </p>
 </p>
-  After we do all the require configurations, we are ready to start the server with the next command: 
+  After we do all the require configurations, we are ready to start the server with the next command:
 </p>
 <ul><pre>
 # sudo /etc/init.d/nfs-kernel-server start
@@ -337,7 +337,7 @@ directory machine1(option11,option12)
 or run command exportfs.
 </p>
 <ul><pre>
-# sudo /etc/init.d/nfs-kernel-server start 
+# sudo /etc/init.d/nfs-kernel-server start
 </pre></ul>
 <p>Or</p>
 <ul><pre>

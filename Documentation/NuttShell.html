@@ -8,7 +8,7 @@
   <tr align="center" bgcolor="#e4e4e4">
     <td>
       <h1><big><font color="#3c34ec"><i>NuttShell (NSH)</i></font></big></h1>
-      <p>Last Updated: February 19, 2014</p>
+      <p>Last Updated: February 20, 2014</p>
     </td>
   </tr>
 </table>
@@ -1301,7 +1301,7 @@ nsh> df
   Size   Blocks     Used Available Mounted on
     64        6        6         0 /etc
    512      985        2       983 /tmp
-nsh> 
+nsh>
 </pre></ul>
 <p>
   If <code>CONFIG_NSH_CMDOPT_DF_H</code> is defined in the NuttX configuration, then the <code>df</code> will also support an option <code>-h</code> which may be used to show the volume information in <i>human readable</i> format.
@@ -1653,7 +1653,7 @@ losetup [-o <offset>] [-r] &lt;dev-path&gt; &lt;file-path&gt;
   <b>Synopsis</b>.
    Setup the loop device at &lt;dev-path&gt; to access the file at &lt;file-path&gt; as a block device.
    In the following example a 256K file is created (<code>dd</code>) and <code>losetup</code> is
-   used to make the file accessible as a block device. 
+   used to make the file accessible as a block device.
    A FAT file system is created (<code>mkfatfs</code>) and mounted (<code>mount</code>).
    Files can then be managed on the loop-mounted file.
 <ul><pre>
@@ -2488,7 +2488,7 @@ nsh>
 
 <p>
   The availability of the above commands depends upon features that
-  may or may not be enabled in the NuttX configuration file.  The 
+  may or may not be enabled in the NuttX configuration file.  The
   following <a href="#cmddependencies">table</a> indicates the dependency of each command on NuttX
   configuration settings.  General configuration settings are discussed
   in the <a href="NuttxPortingGuide.html">NuttX Porting Guide.</a>
@@ -2664,7 +2664,7 @@ nsh>
   </tr>
   <tr>
     <td><b><code>mkdir</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
+    <td>(((!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_WRITABLE</code>) || !<code>CONFIG_DISABLE_PSEUDOFS_OPERATIONS</code>) &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0)<sup>4</sup></td>
     <td><code>CONFIG_NSH_DISABLE_MKDIR</code></td>
   </tr>
   <tr>
@@ -2689,7 +2689,7 @@ nsh>
   </tr>
   <tr>
     <td><b><code>mv</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>3</sup></td>
+    <td>(((!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_WRITABLE</code>) || !<code>CONFIG_DISABLE_PSEUDOFS_OPERATIONS</code>) &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0)<sup>4</sup></td>
     <td><code>CONFIG_NSH_DISABLE_MV</code></td>
   </tr>
   <tr>
@@ -2722,12 +2722,12 @@ nsh>
   </tr>
   <tr>
     <td><b><code>rm</code></b></td>
-    <td>!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0 &amp;&amp; <code>CONFIG_FS_WRITABLE</code><sup>4</sup></td>
+    <td>(((!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_WRITABLE</code>) || !<code>CONFIG_DISABLE_PSEUDOFS_OPERATIONS</code>) &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0)<sup>4</sup></td>
     <td><code>CONFIG_NSH_DISABLE_RM</code></td>
   </tr>
   <tr>
     <td><b><code>rmdir</code></b></td>
-    <td><code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0</td>
+    <td>(((!<code>CONFIG_DISABLE_MOUNTPOINT</code> &amp;&amp; <code>CONFIG_FS_WRITABLE</code>) || !<code>CONFIG_DISABLE_PSEUDOFS_OPERATIONS</code>) &amp;&amp; <code>CONFIG_NFILE_DESCRIPTORS</code> &gt; 0)<sup>4</sup></td>
     <td><code>CONFIG_NSH_DISABLE_RMDIR</code></td>
   </tr>
   <tr>
@@ -3007,7 +3007,7 @@ set FOOBAR ABC_${FOO}_${BAR}
         <li>
           <code>CONFIG_NSH_USBCONSOLE</code>.
           If defined, then the an arbitrary USB device may be used to as the NSH console.
-          In this case, <code>CONFIG_NSH_CONDEV</code> must be defined to indicate which USB device to use as the console. 
+          In this case, <code>CONFIG_NSH_CONDEV</code> must be defined to indicate which USB device to use as the console.
           The advantage of using a device other that /dev/console is that normal debug output can not use /dev/console while NSH uses <code>CONFIG_NSH_USBCONDEV</code>.
           <p>
           <code>CONFIG_NSH_USBCONDEV</code>.
@@ -3365,7 +3365,7 @@ set FOOBAR ABC_${FOO}_${BAR}
 <h3>4.1.1 NSH Initialization sequence</h3>
 
 <p>
-  The NSH start-up sequence is very simple. 
+  The NSH start-up sequence is very simple.
   As an example, the code at <code>apps/examples/nsh/nsh_main.c</code> illustrates how to start NSH.
   It simple does the following:
 </p>
@@ -3469,7 +3469,7 @@ mount -t vfat /dev/ram1 /tmp
       </p>
     <li>
       <p>
-        Mount the  FAT filesystem at a configured mountpoint, <code>/tmp</code>. 
+        Mount the  FAT filesystem at a configured mountpoint, <code>/tmp</code>.
       </p>
     </ul>
     <p>
@@ -3502,7 +3502,7 @@ mount -t vfat /dev/ram1 /tmp
   <b>Overview.</b>
   NSH supports a variety of commands as part of the NSH program.
   All of the NSH commands are listed in the NSH documentation <a href="#cmdoverview">above</a>.
-  Not all of these commands may be available at any time, however. 
+  Not all of these commands may be available at any time, however.
   Many commands depend upon certain NuttX configuration options.
   You can enter the help command at the NSH prompt to see the commands actual available:
 </p>
@@ -3619,7 +3619,7 @@ struct cmdmap_s
 <p>
   <b>Overview.</b>
   In addition to these commands that are a part of NSH, external programs can also be executed as NSH commands.
-  These external programs are called &quot;Built-In&quot; Applications for historic reasons. 
+  These external programs are called &quot;Built-In&quot; Applications for historic reasons.
   That terminology is somewhat confusing because the actual NSH commands as described above are truly &quot;built-into&quot; NSH whereas these applications are really external to NuttX.
 </p>
 <p>
@@ -3716,7 +3716,7 @@ Builtin Apps:
   The NuttX build occurs in several phases as different build targets are executed:
   (1) <i>context</i> when the configuration is established,
   (2) <i>depend </i>when target dependencies are generated, and
-  (3) <i>default</i> (<code>all</code>) when the normal compilation and link operations are performed.  
+  (3) <i>default</i> (<code>all</code>) when the normal compilation and link operations are performed.
   Built-in application information is collected during the make <i>context</i> build phase.
 </p>
 
@@ -3912,7 +3912,7 @@ CONFIGURED_APPS += examples/hello
   <li>
     <p>
       You replace the sample code at <code>apps/examples/nsh/nsh_main.c</code> with whatever start-up logic that you want.
-      NSH is a library at <code>apps/nshlib</code>. 
+      NSH is a library at <code>apps/nshlib</code>.
       <code>apps.examplex/nsh</code> is just a tiny, example start-up function (<code>CONFIG_USER_ENTRYPOINT</code>()) that that runs immediately and illustrates how to start NSH
       If you want something else to run immediately then you can write your write your own custom <code>CONFIG_USER_ENTRYPOINT</code>() function and then start other tasks from your custom <code>CONFIG_USER_ENTRYPOINT</code>().
     </p>
@@ -3938,7 +3938,7 @@ CONFIGURED_APPS += examples/hello
   NSH supports options to provide a start up script for NSH.
   The start-up script contains any command support by NSH (i.e., that you see when you enter 'nsh&gt; help').
   In general this capability is enabled with <code>CONFIG_NSH_ROMFSETC=y</code>, but has several other related configuration options as described with the <a href="#nshconfiguration">NSH-specific configuration settings</a> paragraph.
-  This capability also depends on: 
+  This capability also depends on:
 </p>
 
 <ul>
@@ -3962,26 +3962,26 @@ CONFIGURED_APPS += examples/hello
 <p>
   <b>Default Start-Up Behavior</b>.
   The implementation that is provided is intended to provide great flexibility for the use of Start-Up files.
-  This paragraph will discuss the general behavior when all of the configuration options are set to the default values. 
+  This paragraph will discuss the general behavior when all of the configuration options are set to the default values.
 </p>
 <p>
- In this default case, enabling <code>CONFIG_NSH_ROMFSETC</code> will cause NSH to behave as follows at NSH start-up time: 
+ In this default case, enabling <code>CONFIG_NSH_ROMFSETC</code> will cause NSH to behave as follows at NSH start-up time:
 </p>
 <ul>
   <li>
     <p>
-      NSH will create a read-only RAM disk (a ROM disk), containing a tiny ROMFS filesystem containing the following: 
+      NSH will create a read-only RAM disk (a ROM disk), containing a tiny ROMFS filesystem containing the following:
     </p>
 <ul><pre>
 `--init.d/
     `-- rcS
 </pre></ul>
     <p>
-      Where <code>rcS</code> is the NSH start-up script. 
+      Where <code>rcS</code> is the NSH start-up script.
     </p>
   <li>
     <p>
-      NSH will then mount the ROMFS filesystem at <code>/etc</code>, resulting in: 
+      NSH will then mount the ROMFS filesystem at <code>/etc</code>, resulting in:
     </p>
 <ul><pre>
 |--dev/
@@ -3992,7 +3992,7 @@ CONFIGURED_APPS += examples/hello
 </pre></ul>
   <li>
     <p>
-      By default, the contents of <code>rcS</code> script are: 
+      By default, the contents of <code>rcS</code> script are:
     </p>
 <ul><pre>
 # Create a RAMDISK and mount it at /tmp
@@ -4004,7 +4004,7 @@ mount -t vfat /dev/ram1 /tmp
   <li>
     <p>
       NSH will execute the script at <code>/etc/init.d/rcS</code> at start-up (before the first NSH prompt).
-      After execution of the script, the root FS will look like: 
+      After execution of the script, the root FS will look like:
     </p>
 <ul><pre>
 |--dev/
@@ -4048,7 +4048,7 @@ mount -t vfat /dev/ram1 /tmp
 <p>
   <b>Modifying the ROMFS Image</b>.
   The contents of the <code>/etc</code> directory are retained in the file <code>apps/nshlib/nsh_romfsimg.h</code> OR, if <code>CONFIG_NSH_ARCHROMFS</code> is defined, <code>include/arch/board/rcs.template</code>.
-  In order to modify the start-up behavior, there are three things to study: 
+  In order to modify the start-up behavior, there are three things to study:
 </p>
 
 <ol>
@@ -4062,15 +4062,15 @@ mount -t vfat /dev/ram1 /tmp
       <b><code>tools/mkromfsimg.sh</code> Script</b>.
       The script <code>tools/mkromfsimg.sh</code> creates <code>nsh_romfsimg.h</code>.
       It is not automatically executed.
-      If you want to change the configuration settings associated with creating and mounting the <code>/tmp</code> directory, then it will be necessary to re-generate this header file using the <code>tools/mkromfsimg.sh</code> script. 
+      If you want to change the configuration settings associated with creating and mounting the <code>/tmp</code> directory, then it will be necessary to re-generate this header file using the <code>tools/mkromfsimg.sh</code> script.
     </p>
     <p>
-      The behavior of this script depends upon several things: 
+      The behavior of this script depends upon several things:
     </p>
     <ol>
       <li>
         <p>
-          The configuration  settings then installed configuration. 
+          The configuration  settings then installed configuration.
         </p>
       <li>
         <p>
@@ -4089,7 +4089,7 @@ mount -t vfat /dev/ram1 /tmp
   <li>
     <p>
       <code><b>rcS.template</b></code>.
-      The file <code>apps/nshlib/rcS.template</code> contains the general form of the <code>rcS</code> file; configured values are plugged into this template file to produce the final <code>rcS</code> file. 
+      The file <code>apps/nshlib/rcS.template</code> contains the general form of the <code>rcS</code> file; configured values are plugged into this template file to produce the final <code>rcS</code> file.
     </p>
 </ol>
 
@@ -4273,7 +4273,7 @@ mount -t vfat /dev/ram1 /tmp
   <li><a href="#custonshlib">NSH library (<code>nshlib</code>)</a></li>
   <li><a href="#nshlibrary">NSH library (<code>nshlib</code>)</a></li>
   <li><a href="#custonshlib"><code>nsh_archinitialize()</code></a></li>
-  <li><a href="#custonshlib"><code>nsh_consolemain()</code></a></li>  
+  <li><a href="#custonshlib"><code>nsh_consolemain()</code></a></li>
   <li><a href="#custonshlib"><code>nsh_initialize()</code></a></li>
   <li><a href="#custonshlib"><code>nsh_main()</code></a></li>
   <li><a href="#custinit"><code>nsh_main.c</code></a></li>
