@@ -6641,4 +6641,6 @@
 	  fs/Kconfig and in apps/.  It turns out this this is not very useful
 	  if you are modifying existing configurations because then the
 	  defaults do not apply (2014-2-20).
+	* arch/arm/src/sam34/chip/sam4e_vectors.h:  Add vector definitions
+	  for the SAM4E (2014-2-21).
 

@@ -1,7 +1,7 @@
 /************************************************************************************************
  * arch/arm/src/sam34/sam_vectors.S
  *
- *   Copyright (C) 2009-2010, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2010, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -166,6 +166,8 @@ _vectors:
 #  include "chip/sam3u_vectors.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
 #  include "chip/sam3x_vectors.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4E)
+#  include "chip/sam4e_vectors.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_vectors.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)
@@ -205,6 +207,8 @@ handlers:
 #  include "chip/sam3u_vectors.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
 #  include "chip/sam3x_vectors.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4E)
+#  include "chip/sam4e_vectors.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "chip/sam4l_vectors.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)

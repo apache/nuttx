@@ -883,8 +883,14 @@ Configuration sub-directories
          be clock related???
        - The program seems to be running normally, just producing bad output.
 
-    3. SPI current hangs so no much progress has been made tested the I/O1
-       module.
+    3. SPI current hangs so not much progress has been made testing the I/O1
+       module.  The hang occurs because the SPI is waiting for SYNCBUSY to
+       be cleared after enabling the SPI.  This even does not happen and so
+       causes the hang.
+
+       Another note:  Enabling the SPI on SERCOM0 also seems to interfere
+       with the USART output on SERCOM4.  Both symptoms imply some clock-
+       related issue.
 
        The configuration suggests CONFIG_MMCSD_HAVECARDDETECT=y, but as of
        this writing, there is no support for EIC pin interrupts.
