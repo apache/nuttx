@@ -21,6 +21,19 @@ menu "Build Setup"
 config EXPERIMENTAL
 	bool "Prompt for development and/or incomplete code/drivers"
 
+config DEFAULT_SMALL
+	bool "Default to smallest size"
+	default n
+	---help---
+		When options are present, the default value for certain options will
+		be the one the results in the smallest size (at a loss of featurs).
+		The default is a fuller feature set at a larger size.
+
+		NOTE: This option does not prevent you from overriding the default
+		to select another alternative.  Nor does it affect the settings that
+		have already been selected in your configuration file.  This applies
+		only to new settings that require a default value.
+
 choice
 	prompt "Build Host Platform"
 	default HOST_LINUX

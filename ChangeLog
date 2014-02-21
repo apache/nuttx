@@ -6635,4 +6635,10 @@
 	  CONFIG_DISABLE_PSEUDOFS_OPERATIONS that effectively can be set
 	  back out these recent changes in rmdir, mkdir, unlink, and rename
 	  for operations on the pseudo-filesystem (2014-2-20).
+	* Kconfig:  Add an option to select default values for configuration
+	  variables based upon whether you want a smaller footprint or more
+	  features.  CONFIG_DEFAULT_SMALL is used in sched/Kconfig and
+	  fs/Kconfig and in apps/.  It turns out this this is not very useful
+	  if you are modifying existing configurations because then the
+	  defaults do not apply (2014-2-20).
 

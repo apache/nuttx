@@ -181,7 +181,7 @@ config JULIAN_TIME
 
 config START_YEAR
 	int "Start year"
-	default 2013
+	default 2014
 
 config START_MONTH
 	int "Start month"
@@ -353,7 +353,8 @@ config DISABLE_CLOCK
 config DISABLE_POSIX_TIMERS
 	bool "Disable POSIX timers"
 	depends on DISABLE_OS_API
-	default n
+	default y if DEFAULT_SMALL
+	default n if !DEFAULT_SMALL
 
 config DISABLE_PTHREAD
 	bool "Disable pthread support"
@@ -373,7 +374,8 @@ config DISABLE_MQUEUE
 config DISABLE_ENVIRON
 	bool "Disable environment variable support"
 	depends on DISABLE_OS_API
-	default n
+	default y if DEFAULT_SMALL
+	default n if !DEFAULT_SMALL
 
 if !DISABLE_SIGNALS
 comment "Signal Numbers"

@@ -10,8 +10,9 @@ config DISABLE_MOUNTPOINT
 	default n
 
 config DISABLE_PSEUDOFS_OPERATIONS
-	bool "Disable pseudo-filesytem operations"
-	default n
+	bool "Disable pseudo-filesystem operations"
+	default y if DEFAULT_SMALL
+	default n if !DEFAULT_SMALL
 	---help---
 		Disable certain operations on pseudo-file systems include mkdir,
 		rmdir, unlink, and rename.  These are necessary for the logical
