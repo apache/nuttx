@@ -6089,7 +6089,7 @@
 	* arch/arm/src/lpc31xx/lpc31_ehci.c:  Add USB host trace support
 	  (2013-11-19).
 	* configs/olimex-lpc-h3131/include/board.h, src/lpc31_boot.c,
-	  lpc31_leds.c, lpc31_usbhost.c, and lpc_h3131.h:  Add GPIO 
+	  lpc31_leds.c, lpc31_usbhost.c, and lpc_h3131.h:  Add GPIO
 	  support for LED1/2 and for USB power enable and overcurrent
 	  detection (2013-11-19).
 	* configs/olimex-lpc-h3131/nsh/defconfig:  Drop loops-per-msec
@@ -6267,7 +6267,7 @@
 	  README.txt, and src/stm32_highpri.c:  This is the initial framework
 	  for a test of the high priority, nested interrupt logic.  Still
 	  incomplete and does not yet run (2013-12-22).
-	* arch/arm/src/armv7-m/ram_vectors.h and up_ramvec_initialize.c: 
+	* arch/arm/src/armv7-m/ram_vectors.h and up_ramvec_initialize.c:
 	  Correct alignment of the RAM vector table (2013-12-22).
 	* Kconfig: Support configuration of interrupt controller debug output
 	  (2013-12-22).
@@ -6630,4 +6630,9 @@
 	  but untested (2014-2-20).
 	* configs/olimex-lpc1766stck/ftpc:  Configuration convert to use
 	  the kconfig-frontends tools by Alan Carvalho de Assis (2014-2-20).
+	* fs/fs_mkdir.c: 'unlink' can now be used to remove things from the
+	  pseudo-filesystem.  A new configuration option as been added:
+	  CONFIG_DISABLE_PSEUDOFS_OPERATIONS that effectively can be set
+	  back out these recent changes in rmdir, mkdir, unlink, and rename
+	  for operations on the pseudo-filesystem (2014-2-20).
 

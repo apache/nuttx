@@ -49,6 +49,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#undef FS_HAVE_WRITABLE_MOUNTPOINT
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_WRITABLE) && \
+    CONFIG_NFILE_STREAMS > 0
+#  define FS_HAVE_WRITABLE_MOUNTPOINT 1
+#endif
+
+#undef FS_HAVE_PSEUDOFS_OPERATIONS
+#if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && CONFIG_NFILE_STREAMS > 0
+#  define FS_HAVE_PSEUDOFS_OPERATIONS 1
+#endif
+
+#undef FS_HAVE_RENAME
+#if defined(FS_HAVE_WRITABLE_MOUNTPOINT) || defined(FS_HAVE_PSEUDOFS_OPERATIONS)
+#  define FS_HAVE_RENAME 1
+#endif
+
+#ifdef FS_HAVE_RENAME
+
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
@@ -75,9 +93,9 @@
 int rename(FAR const char *oldpath, FAR const char *newpath)
 {
   FAR struct inode *oldinode;
+  FAR struct inode *newinode;
   const char       *oldrelpath = NULL;
 #ifndef CONFIG_DISABLE_MOUNTPOINT
-  FAR struct inode *newinode;
   const char       *newrelpath = NULL;
 #endif
   int               errcode;
@@ -144,7 +162,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
             }
         }
       else
-        { 
+        {
           errcode = ENOSYS;
           goto errout_with_newinode;
         }
@@ -155,6 +173,7 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
     }
   else
 #endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
     {
       /* Create a new, empty inode at the destination location */
 
@@ -210,6 +229,12 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
       oldinode->i_child = NULL;
       inode_semgive();
     }
+#else
+    {
+      errcode = ENXIO;
+      goto errout;
+    }
+#endif
 
   /* Successfully renamed */
 
@@ -226,3 +251,5 @@ int rename(FAR const char *oldpath, FAR const char *newpath)
   set_errno(errcode);
   return ERROR;
 }
+
+#endif /* FS_HAVE_RENAME */

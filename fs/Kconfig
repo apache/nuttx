@@ -9,6 +9,16 @@ config DISABLE_MOUNTPOINT
 	bool "Disable support for mount points"
 	default n
 
+config DISABLE_PSEUDOFS_OPERATIONS
+	bool "Disable pseudo-filesytem operations"
+	default n
+	---help---
+		Disable certain operations on pseudo-file systems include mkdir,
+		rmdir, unlink, and rename.  These are necessary for the logical
+		completeness of the illusion created by the pseudo-filesystem.
+		However, in practical embedded system, they are seldom needed and
+		you can save a little FLASH space by disabling the capability.
+
 config FS_READABLE
 	bool
 	default n

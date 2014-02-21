@@ -46,8 +46,26 @@
 #include "fs_internal.h"
 
 /****************************************************************************
- * Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#undef FS_HAVE_WRITABLE_MOUNTPOINT
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_WRITABLE) && \
+    CONFIG_NFILE_STREAMS > 0
+#  define FS_HAVE_WRITABLE_MOUNTPOINT 1
+#endif
+
+#undef FS_HAVE_PSEUDOFS_OPERATIONS
+#if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && CONFIG_NFILE_STREAMS > 0
+#  define FS_HAVE_PSEUDOFS_OPERATIONS 1
+#endif
+
+#undef FS_HAVE_MKDIR
+#if defined(FS_HAVE_WRITABLE_MOUNTPOINT) || defined(FS_HAVE_PSEUDOFS_OPERATIONS)
+#  define FS_HAVE_MKDIR 1
+#endif
+
+#ifdef FS_HAVE_MKDIR
 
 /****************************************************************************
  * Private Variables
@@ -113,7 +131,7 @@ int mkdir(const char *pathname, mode_t mode)
             }
         }
       else
-        { 
+        {
           errcode = ENOSYS;
           goto errout_with_inode;
         }
@@ -125,10 +143,11 @@ int mkdir(const char *pathname, mode_t mode)
       /* But mountpoints are not supported in this configuration */
 
       errcode = EEXIST;
-      goto errout_with_inode;     
+      goto errout_with_inode;
 #endif
     }
 
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   /* No inode exists that contains this path.  Create a new inode in the
    * pseudo-filesystem at this location.
    */
@@ -147,6 +166,13 @@ int mkdir(const char *pathname, mode_t mode)
           goto errout;
         }
     }
+#else
+  else
+    {
+      errcode = ENXIO;
+      goto errout;
+    }
+#endif
 
   /* Directory successfully created */
 
@@ -158,3 +184,5 @@ int mkdir(const char *pathname, mode_t mode)
   set_errno(errcode);
   return ERROR;
 }
+
+#endif /* FS_HAVE_MKDIR */

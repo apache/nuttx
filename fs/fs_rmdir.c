@@ -49,6 +49,24 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#undef FS_HAVE_WRITABLE_MOUNTPOINT
+#if !defined(CONFIG_DISABLE_MOUNTPOINT) && defined(CONFIG_FS_WRITABLE) && \
+    CONFIG_NFILE_STREAMS > 0
+#  define FS_HAVE_WRITABLE_MOUNTPOINT 1
+#endif
+
+#undef FS_HAVE_PSEUDOFS_OPERATIONS
+#if !defined(CONFIG_DISABLE_PSEUDOFS_OPERATIONS) && CONFIG_NFILE_STREAMS > 0
+#  define FS_HAVE_PSEUDOFS_OPERATIONS 1
+#endif
+
+#undef FS_HAVE_RMDIR
+#if defined(FS_HAVE_WRITABLE_MOUNTPOINT) || defined(FS_HAVE_PSEUDOFS_OPERATIONS)
+#  define FS_HAVE_RMDIR 1
+#endif
+
+#ifdef FS_HAVE_RMDIR
+
 /****************************************************************************
  * Private Variables
  ****************************************************************************/
@@ -118,7 +136,8 @@ int rmdir(FAR const char *pathname)
   else
 #endif
 
-  /* If this is a "dangling" pseudo-file node (i.e., it has no operations)
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  /* If this is a "dangling" pseudo-directory node (i.e., it has no operations)
    * then rmdir should remove the node.
    */
 
@@ -154,9 +173,15 @@ int rmdir(FAR const char *pathname)
     }
   else
     {
+      errcode = ENOTDIR;
+      goto errout_with_inode;
+    }
+#else
+    {
       errcode = ENXIO;
       goto errout_with_inode;
     }
+#endif
 
   /* Successfully removed the directory */
 
@@ -170,3 +195,4 @@ errout:
   return ERROR;
 }
 
+#endif /* FS_HAVE_RMDIR */
