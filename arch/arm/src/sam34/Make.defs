@@ -85,7 +85,7 @@ CHIP_CSRCS += sam_serial.c sam_start.c sam_timerisr.c
 ifeq ($(CONFIG_ARCH_CHIP_SAM4L),y)
 CHIP_CSRCS += sam4l_clockconfig.c sam4l_periphclks.c sam4l_gpio.c
 else
-CHIP_CSRCS += sam3u_clockconfig.c sam3u_gpio.c
+CHIP_CSRCS += sam_clockconfig.c sam_gpio.c
 endif
 
 ifeq ($(CONFIG_NUTTX_KERNEL),y)
