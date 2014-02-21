@@ -51,6 +51,7 @@
 #define GPIO_HAVE_PULLDOWN         1
 #define GPIO_HAVE_PERIPHCD         1
 #define GPIO_HAVE_SCHMITT          1
+#undef  GPIO_HAVE_DELAYR
 
 /* Bit-encoded input to sam_configgpio() ********************************************/
 

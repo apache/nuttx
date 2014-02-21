@@ -1,7 +1,7 @@
 /************************************************************************************
  * arch/arm/src/sam34/sam_gpio.h
  *
- *   Copyright (C) 2009-2011, 2013 Gregory Nutt. All rights reserved.
+ *   Copyright (C) 2009-2011, 2013-2014 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,8 @@
 #  include "sam3u_gpio.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM3X) || defined(CONFIG_ARCH_CHIP_SAM3A)
 #  include "sam3x_gpio.h"
+#elif defined(CONFIG_ARCH_CHIP_SAM4E)
+#  include "sam4e_gpio.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4L)
 #  include "sam4l_gpio.h"
 #elif defined(CONFIG_ARCH_CHIP_SAM4S)
