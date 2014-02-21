@@ -116,7 +116,7 @@ CONFIG_ARCH_BOARD_RGMP=y
 #   desciptors by task_create() when a new task is started. If
 #   set, all sockets will appear to be closed in the new task.
 #
-#CONFIG_APPS_DIR=
+## CONFIG_APPS_DIR=
 CONFIG_DEBUG=y
 CONFIG_DEBUG_VERBOSE=y
 CONFIG_DEBUG_SYMBOLS=y

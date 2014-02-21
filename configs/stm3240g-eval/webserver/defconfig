@@ -1084,4 +1084,4 @@ CONFIG_READLINE_ECHO=y
 
 # Application configuration
 
-CONFIG_APPS_DIR="../apps"
+# CONFIG_APPS_DIR="../apps"

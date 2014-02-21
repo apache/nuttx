@@ -12,7 +12,7 @@ CONFIG_NUTTX_NEWCONFIG=y
 #
 # Build Configuration
 #
-CONFIG_APPS_DIR="../apps"
+# CONFIG_APPS_DIR="../apps"
 # CONFIG_BUILD_2PASS is not set
 
 #

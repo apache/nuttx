@@ -647,4 +647,4 @@ CONFIG_PTHREAD_STACK_DEFAULT=2048
 
 # Application configuration
 
-CONFIG_APPS_DIR="../apps"
+# CONFIG_APPS_DIR="../apps"
